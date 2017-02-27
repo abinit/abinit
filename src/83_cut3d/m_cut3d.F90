@@ -39,8 +39,11 @@ MODULE m_cut3d
  use m_io_tools,         only : get_unit, iomode_from_fname, open_file, file_exists, read_string
  use m_numeric_tools,    only : interpol3d
  use m_fstrings,         only : int2char10, sjoin, itoa
+ use m_special_funcs,    only : jlspline_t, jlspline_new, jlspline_free, jlspline_integral
  use m_pptools,          only : print_fofr_ri, print_fofr_xyzri , print_fofr_cube
  use m_mpinfo,           only : destroy_mpi_enreg
+ use m_cgtools,          only : cg_getspin
+ use m_epjdos,           only : recip_ylm, dens_in_sph
  use m_dens,             only : dens_hirsh
 
  implicit none
@@ -79,15 +82,13 @@ CONTAINS  !===========================================================
 !! OUTPUT
 !!  write the Hirshfeld charge decomposition
 !!
-!! SIDE EFFECTS
-!!
 !! PARENTS
 !!      cut3d
 !!
 !! CHILDREN
-!!      dens_in_sph,destroy_distribfft,destroy_mpi_enreg,fourwf,getkpgnorm
-!!      getph,getspin_1state,init_bess_spl,init_distribfft_seq,initmpi_seq
-!!      initylmg,int2char10,kpgio,metric,ph1d3d,print_fofr_cube,print_fofr_ri
+!!      cg_getspin,dens_in_sph,destroy_distribfft,destroy_mpi_enreg,fourwf
+!!      getkpgnorm,getph,init_distribfft_seq,initmpi_seq,initylmg,int2char10
+!!      jlspline_free,kpgio,metric,ph1d3d,print_fofr_cube,print_fofr_ri
 !!      print_fofr_xyzri,recip_ylm,sort_dp,sphereboundary,splint,wfk_close
 !!      wfk_open_read,wfk_read_band_block,xcart2xred
 !!
@@ -122,7 +123,7 @@ subroutine cut3d_hirsh(grid_den,natom,nrx,nry,nrz,ntypat,rprimd,xcart,typat,zion
  character(len=fnlen) :: file_allelectron
  character(len=500) :: msg
 !arrays
- integer,allocatable :: npoint(:) 
+ integer,allocatable :: npoint(:)
  real(dp),allocatable :: aeden(:,:),hcharge(:),hden(:),hweight(:),radii(:,:)
 
 ! *********************************************************************
@@ -170,7 +171,7 @@ subroutine cut3d_hirsh(grid_den,natom,nrx,nry,nrz,ntypat,rprimd,xcart,typat,zion
  ABI_MALLOC(hcharge,(natom))
  ABI_MALLOC(hweight,(natom))
 
- call dens_hirsh(mpoint,radii,aeden,npoint,minimal_den,grid_den, & 
+ call dens_hirsh(mpoint,radii,aeden,npoint,minimal_den,grid_den, &
   natom,nrx,nry,nrz,ntypat,rprimd,xcart,typat,zion,znucl,prtcharge1,hcharge,hden,hweight)
 
  ABI_FREE(hweight)
@@ -208,9 +209,9 @@ end subroutine cut3d_hirsh
 !!      cut3d
 !!
 !! CHILDREN
-!!      dens_in_sph,destroy_distribfft,destroy_mpi_enreg,fourwf,getkpgnorm
-!!      getph,getspin_1state,init_bess_spl,init_distribfft_seq,initmpi_seq
-!!      initylmg,int2char10,kpgio,metric,ph1d3d,print_fofr_cube,print_fofr_ri
+!!      cg_getspin,dens_in_sph,destroy_distribfft,destroy_mpi_enreg,fourwf
+!!      getkpgnorm,getph,init_distribfft_seq,initmpi_seq,initylmg,int2char10
+!!      jlspline_free,kpgio,metric,ph1d3d,print_fofr_cube,print_fofr_ri
 !!      print_fofr_xyzri,recip_ylm,sort_dp,sphereboundary,splint,wfk_close
 !!      wfk_open_read,wfk_read_band_block,xcart2xred
 !!
@@ -416,9 +417,9 @@ end subroutine cut3d_lineint
 !!      m_cut3d
 !!
 !! CHILDREN
-!!      dens_in_sph,destroy_distribfft,destroy_mpi_enreg,fourwf,getkpgnorm
-!!      getph,getspin_1state,init_bess_spl,init_distribfft_seq,initmpi_seq
-!!      initylmg,int2char10,kpgio,metric,ph1d3d,print_fofr_cube,print_fofr_ri
+!!      cg_getspin,dens_in_sph,destroy_distribfft,destroy_mpi_enreg,fourwf
+!!      getkpgnorm,getph,init_distribfft_seq,initmpi_seq,initylmg,int2char10
+!!      jlspline_free,kpgio,metric,ph1d3d,print_fofr_cube,print_fofr_ri
 !!      print_fofr_xyzri,recip_ylm,sort_dp,sphereboundary,splint,wfk_close
 !!      wfk_open_read,wfk_read_band_block,xcart2xred
 !!
@@ -486,9 +487,9 @@ end subroutine normalize
 !!      cut3d
 !!
 !! CHILDREN
-!!      dens_in_sph,destroy_distribfft,destroy_mpi_enreg,fourwf,getkpgnorm
-!!      getph,getspin_1state,init_bess_spl,init_distribfft_seq,initmpi_seq
-!!      initylmg,int2char10,kpgio,metric,ph1d3d,print_fofr_cube,print_fofr_ri
+!!      cg_getspin,dens_in_sph,destroy_distribfft,destroy_mpi_enreg,fourwf
+!!      getkpgnorm,getph,init_distribfft_seq,initmpi_seq,initylmg,int2char10
+!!      jlspline_free,kpgio,metric,ph1d3d,print_fofr_cube,print_fofr_ri
 !!      print_fofr_xyzri,recip_ylm,sort_dp,sphereboundary,splint,wfk_close
 !!      wfk_open_read,wfk_read_band_block,xcart2xred
 !!
@@ -860,9 +861,9 @@ subroutine cut3d_planeint(gridtt,gridux,griddy,gridmz,natom,nr1,nr2,nr3,nspden,r
 !!      cut3d
 !!
 !! CHILDREN
-!!      dens_in_sph,destroy_distribfft,destroy_mpi_enreg,fourwf,getkpgnorm
-!!      getph,getspin_1state,init_bess_spl,init_distribfft_seq,initmpi_seq
-!!      initylmg,int2char10,kpgio,metric,ph1d3d,print_fofr_cube,print_fofr_ri
+!!      cg_getspin,dens_in_sph,destroy_distribfft,destroy_mpi_enreg,fourwf
+!!      getkpgnorm,getph,init_distribfft_seq,initmpi_seq,initylmg,int2char10
+!!      jlspline_free,kpgio,metric,ph1d3d,print_fofr_cube,print_fofr_ri
 !!      print_fofr_xyzri,recip_ylm,sort_dp,sphereboundary,splint,wfk_close
 !!      wfk_open_read,wfk_read_band_block,xcart2xred
 !!
@@ -982,9 +983,9 @@ end subroutine cut3d_pointint
 !!      m_cut3d
 !!
 !! CHILDREN
-!!      dens_in_sph,destroy_distribfft,destroy_mpi_enreg,fourwf,getkpgnorm
-!!      getph,getspin_1state,init_bess_spl,init_distribfft_seq,initmpi_seq
-!!      initylmg,int2char10,kpgio,metric,ph1d3d,print_fofr_cube,print_fofr_ri
+!!      cg_getspin,dens_in_sph,destroy_distribfft,destroy_mpi_enreg,fourwf
+!!      getkpgnorm,getph,init_distribfft_seq,initmpi_seq,initylmg,int2char10
+!!      jlspline_free,kpgio,metric,ph1d3d,print_fofr_cube,print_fofr_ri
 !!      print_fofr_xyzri,recip_ylm,sort_dp,sphereboundary,splint,wfk_close
 !!      wfk_open_read,wfk_read_band_block,xcart2xred
 !!
@@ -1047,9 +1048,9 @@ end subroutine reduce
 !!      cut3d
 !!
 !! CHILDREN
-!!      dens_in_sph,destroy_distribfft,destroy_mpi_enreg,fourwf,getkpgnorm
-!!      getph,getspin_1state,init_bess_spl,init_distribfft_seq,initmpi_seq
-!!      initylmg,int2char10,kpgio,metric,ph1d3d,print_fofr_cube,print_fofr_ri
+!!      cg_getspin,dens_in_sph,destroy_distribfft,destroy_mpi_enreg,fourwf
+!!      getkpgnorm,getph,init_distribfft_seq,initmpi_seq,initylmg,int2char10
+!!      jlspline_free,kpgio,metric,ph1d3d,print_fofr_cube,print_fofr_ri
 !!      print_fofr_xyzri,recip_ylm,sort_dp,sphereboundary,splint,wfk_close
 !!      wfk_open_read,wfk_read_band_block,xcart2xred
 !!
@@ -1137,9 +1138,9 @@ end subroutine cut3d_rrho
 !!      m_cut3d
 !!
 !! CHILDREN
-!!      dens_in_sph,destroy_distribfft,destroy_mpi_enreg,fourwf,getkpgnorm
-!!      getph,getspin_1state,init_bess_spl,init_distribfft_seq,initmpi_seq
-!!      initylmg,int2char10,kpgio,metric,ph1d3d,print_fofr_cube,print_fofr_ri
+!!      cg_getspin,dens_in_sph,destroy_distribfft,destroy_mpi_enreg,fourwf
+!!      getkpgnorm,getph,init_distribfft_seq,initmpi_seq,initylmg,int2char10
+!!      jlspline_free,kpgio,metric,ph1d3d,print_fofr_cube,print_fofr_ri
 !!      print_fofr_xyzri,recip_ylm,sort_dp,sphereboundary,splint,wfk_close
 !!      wfk_open_read,wfk_read_band_block,xcart2xred
 !!
@@ -1199,9 +1200,9 @@ end subroutine vdot
 !!      cut3d
 !!
 !! CHILDREN
-!!      dens_in_sph,destroy_distribfft,destroy_mpi_enreg,fourwf,getkpgnorm
-!!      getph,getspin_1state,init_bess_spl,init_distribfft_seq,initmpi_seq
-!!      initylmg,int2char10,kpgio,metric,ph1d3d,print_fofr_cube,print_fofr_ri
+!!      cg_getspin,dens_in_sph,destroy_distribfft,destroy_mpi_enreg,fourwf
+!!      getkpgnorm,getph,init_distribfft_seq,initmpi_seq,initylmg,int2char10
+!!      jlspline_free,kpgio,metric,ph1d3d,print_fofr_cube,print_fofr_ri
 !!      print_fofr_xyzri,recip_ylm,sort_dp,sphereboundary,splint,wfk_close
 !!      wfk_open_read,wfk_read_band_block,xcart2xred
 !!
@@ -1735,7 +1736,7 @@ subroutine cut3d_volumeint(gridtt,gridux,griddy,gridmz,natom,nr1,nr2,nr3,nspden,
  end do
 
  close(unt)
- 
+
  ABI_DEALLOCATE(rhomacutt)
  ABI_DEALLOCATE(rhomacuux)
  ABI_DEALLOCATE(rhomacudy)
@@ -1783,9 +1784,9 @@ end subroutine cut3d_volumeint
 !!      cut3d
 !!
 !! CHILDREN
-!!      dens_in_sph,destroy_distribfft,destroy_mpi_enreg,fourwf,getkpgnorm
-!!      getph,getspin_1state,init_bess_spl,init_distribfft_seq,initmpi_seq
-!!      initylmg,int2char10,kpgio,metric,ph1d3d,print_fofr_cube,print_fofr_ri
+!!      cg_getspin,dens_in_sph,destroy_distribfft,destroy_mpi_enreg,fourwf
+!!      getkpgnorm,getph,init_distribfft_seq,initmpi_seq,initylmg,int2char10
+!!      jlspline_free,kpgio,metric,ph1d3d,print_fofr_cube,print_fofr_ri
 !!      print_fofr_xyzri,recip_ylm,sort_dp,sphereboundary,splint,wfk_close
 !!      wfk_open_read,wfk_read_band_block,xcart2xred
 !!
@@ -1804,8 +1805,6 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
  use interfaces_52_fft_mpi_noabirule
  use interfaces_53_ffts
  use interfaces_56_recipspace
- use interfaces_61_occeig
- use interfaces_67_common
 !End of the abilint section
 
  implicit none
@@ -1826,13 +1825,13 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
  integer,parameter :: tim_fourwf0=0,tim_rwwf0=0,ndat1=1,formeig0=0
  integer :: cband,cgshift,ckpt,cplex,cspinor,csppol,gridshift1
  integer :: gridshift2,gridshift3,ia,iatom,iband,ichoice,ifile,iomode
- integer :: ii1,ii2,ii3,ikpt,ilang,ioffkg,iout,iprompt,ipw !,iomode,ierr,
+ integer :: ii1,ii2,ii3,ikpt,ilang,ioffkg,iout,iprompt,ipw,itypat
  integer :: ir1,ir2,ir3,ivect,ixint,mband,mbess,mcg,mgfft
  integer :: mkmem,mlang,mpw,n4,n5,n6,nfit,npw_k
  integer :: nradintmax,oldcband,oldckpt,oldcspinor,oldcsppol
- integer :: prtsphere,select_exit,unout,iunt
+ integer :: prtsphere,select_exit,unout,iunt,rc_ylm
  integer :: ikpt_qps,nkpt_qps,nband_qps,iscf_qps
- real(dp) :: arg,bessargmax,bessint_delta,kpgmax,ratsph,tmpi,tmpr,ucvol,weight,eig_k_qps
+ real(dp) :: arg,bessargmax,bessint_delta,kpgmax,ratsph,tmpi,tmpr,ucvol,weight,eig_k_qps,intg
  character(len=*), parameter :: INPUTfile='cut.in'
  character(len=1) :: outputchar
  character(len=10) :: string
@@ -1841,8 +1840,9 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
  character(len=fnlen) :: output,output1
  type(MPI_type) :: mpi_enreg
  type(wfk_t) :: Wfk
+ type(jlspline_t) :: jlspl
 !arrays
- integer :: atindx(natom),iatsph(natom),ngfft(18),nradint(natom)
+ integer :: atindx(natom),iatsph(natom),ngfft(18),nradint(natom),mlang_type(ntypat)
  integer,allocatable :: gbound(:,:),iindex(:),kg(:,:),kg_dum(:,:),kg_k(:,:)
  integer,allocatable :: npwarr1(:),npwarrk1(:),npwtot1(:)
  real(dp) :: cmax(natom),gmet(3,3),gprimd(3,3)
@@ -1850,12 +1850,12 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
  real(dp) :: tau2(3,natom),xred(3,natom),kpt_qps(3)
  real(dp) :: znucl_atom(natom)
  integer  :: znucl_atom_int(natom)
- real(dp),allocatable :: bess_fit(:,:,:),bess_spl(:,:),bess_spl_der(:,:)
+ real(dp),allocatable :: bess_fit(:,:,:)
  real(dp),allocatable :: cg_k(:,:),cgcband(:,:),denpot(:,:,:),eig_k(:)
  real(dp),allocatable :: fofgout(:,:),fofr(:,:,:,:),k1(:,:)
  real(dp),allocatable :: kpgnorm(:),occ_k(:),ph1d(:,:),ph3d(:,:,:),rint(:)
  real(dp),allocatable :: sum_1atom_1ll(:,:),sum_1atom_1lm(:,:)
- real(dp),allocatable :: x_bess(:),xfit(:),yfit(:),ylm_k(:,:)
+ real(dp),allocatable :: xfit(:),yfit(:),ylm_k(:,:)
  real(dp),allocatable :: ylmgr_dum(:,:,:)
  character(len=fnlen) :: fileqps
  character(len=fnlen),allocatable :: filename(:)
@@ -1868,6 +1868,7 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
  mband=maxval(nband)
  ABI_ALLOCATE(mpi_enreg%proc_distrb,(nkpt,mband,nsppol))
  mpi_enreg%proc_distrb=0
+ mpi_enreg%me_g0 = 1
  oldckpt=0
  oldcband=0
  oldcsppol=0
@@ -1977,7 +1978,7 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
      ABI_ALLOCATE(eig_k,((2*mband)**formeig0*mband))
      ABI_ALLOCATE(occ_k,(mband))
 
-!    FIXME 
+!    FIXME
 !    nband depends on (kpt,spin)
      iomode = iomode_from_fname(wfk_fname)
      call wfk_open_read(Wfk,wfk_fname,formeig0,iomode,get_unit(),xmpi_comm_self)
@@ -2035,15 +2036,15 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
      ABI_ALLOCATE(kg_k,(3,npw_k))
      kg_k(:,1:npw_k)=kg(:,1+ioffkg:npw_k+ioffkg)
 
-     ABI_ALLOCATE(ylm_k,(mpw,mlang*mlang))
-     ABI_ALLOCATE(ylmgr_dum,(mpw,3,mlang*mlang))
+     ABI_ALLOCATE(ylm_k,(npw_k,mlang*mlang))
+     ABI_ALLOCATE(ylmgr_dum,(npw_k,3,mlang*mlang))
 
 !    call for only the kpoint we are interested in !
      ABI_ALLOCATE(k1,(3,1))
      k1(:,1)=kpt(:,ckpt)
      ABI_ALLOCATE(npwarrk1,(1))
      npwarrk1 = (/npw_k/)
-     call initylmg(gprimd,kg_k,k1,1,mpi_enreg,mlang,mpw,nband,1,&
+     call initylmg(gprimd,kg_k,k1,1,mpi_enreg,mlang,npw_k,nband,1,&
 &     npwarrk1,nsppol,0,rprimd,ylm_k,ylmgr_dum)
      ABI_DEALLOCATE(ylmgr_dum)
      ABI_DEALLOCATE(k1)
@@ -2080,13 +2081,13 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
 
        if (open_file(fileqps, msg, newunit=iunt, status='old',form='formatted') /= 0) then
          MSG_ERROR(msg)
-       end if 
+       end if
 
        read(iunt,*) iscf_qps
        read(iunt,*) nkpt_qps
        read(iunt,*) nband_qps
        read(iunt,*) ikpt_qps
-       
+
        ABI_ALLOCATE(ccoeff,(nband_qps,nband_qps))
        do ikpt=1,ckpt ! nkpt_qps
          read(iunt,*) kpt_qps(:)
@@ -2122,10 +2123,10 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
          cgshift=(cband-1)*npw_k*nspinor
          ABI_ALLOCATE(cgcband,(2,npw_k*nspinor))
          cgcband(:,1:nspinor*npw_k)=cg_k(:,cgshift+1:cgshift+nspinor*npw_k)
-         call getspin_1state(cgcband, npw_k, spinvec)
+         call cg_getspin(cgcband, npw_k, spinvec)
          write(std_out,'(a,6E20.10)' ) ' spin vector for this state = ', (spinvec)
          ABI_DEALLOCATE(cgcband)
-       end if 
+       end if
 
 !      The shift is to get the good band values
        cgshift=(cband-1)*npw_k*nspinor + (cspinor-1)*npw_k
@@ -2161,8 +2162,7 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
 
        write(std_out,'(3a)' ) ch10,' Atomic sphere analysis ',ch10
 
-!      Init bessel function integral for recip_ylm
-!      max ang mom + 1
+!      Init bessel function integral for recip_ylm: max ang mom + 1
        mlang = 5
        bessint_delta = 0.1_dp
        kpgmax = sqrt(ecut)
@@ -2176,14 +2176,10 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
 
        write(std_out,'(a,2es16.6,i6)')' wffile : kpgmax, bessargmax, nradint = ', kpgmax, bessargmax,nradintmax
 
-!      Initialize general Bessel function array on uniform grid x_bess, from 0 to (2 \pi |k+G|_{max} |r_{max}|)
-       ABI_ALLOCATE(bess_spl,(mbess,mlang))
-       ABI_ALLOCATE(bess_spl_der,(mbess,mlang))
-       ABI_ALLOCATE(x_bess,(nradintmax))
+!      Initialize general Bessel function array on uniform grid xx, from 0 to (2 \pi |k+G|_{max} |r_{max}|)
        ABI_ALLOCATE(rint,(nradintmax))
 
-!      call init_bess_spl(mbess,bessargmax,bessint_delta,mlang,
-       call init_bess_spl(mbess,bessint_delta,mlang,bess_spl,bess_spl_der,x_bess)
+       jlspl = jlspline_new(mbess, bessint_delta, mlang)
 
        ABI_ALLOCATE(bess_fit,(mpw,nradintmax,mlang))
        ABI_ALLOCATE(xfit,(npw_k))
@@ -2200,7 +2196,7 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
          end do
          call sort_dp (npw_k,xfit,iindex,tol14)
          do ilang=1,mlang
-           call splint(mbess,x_bess,bess_spl(:,ilang),bess_spl_der(:,ilang),nfit,xfit,yfit)
+           call splint(mbess,jlspl%xx,jlspl%bess_spl(:,ilang),jlspl%bess_spl_der(:,ilang),nfit,xfit,yfit)
 !          Re-order results for different G vectors
            do ipw=1,npw_k
              bess_fit(iindex(ipw),ixint,ilang) = yfit(ipw)
@@ -2208,9 +2204,7 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
          end do ! ipw
        end do ! ixint
 
-!      Construct phases ph3d for all G vectors in present sphere
-!      make phkred for all atoms
-
+!      Construct phases ph3d for all G vectors in present sphere make phkred for all atoms
        do ia=1,natom
          iatom=atindx(ia)
          arg=two_pi*( kpt(1,ckpt)*xred(1,ia) + kpt(2,ckpt)*xred(2,ia) + kpt(3,ckpt)*xred(3,ia))
@@ -2222,14 +2216,16 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
 !      Get full phases exp (2 pi i (k+G).x_tau) in ph3d
        call ph1d3d(1,natom,kg_k,natom,natom,npw_k,nr1,nr2,nr3,phkxred,ph1d,ph3d)
 
-
        ABI_ALLOCATE(sum_1atom_1ll,(mlang,natom))
        ABI_ALLOCATE(sum_1atom_1lm,(mlang**2,natom))
        prtsphere=1
        ratsph_arr(:)=ratsph
-       call recip_ylm (bess_fit,cgcband,istwfk(ckpt),&
-&       nradint,nradintmax,mlang,mpi_enreg,mpw,natom,npw_k,ph3d,prtsphere,rint,&
-&       ratsph_arr,sum_1atom_1ll,sum_1atom_1lm,ucvol,ylm_k,znucl_atom)
+
+       rc_ylm = 1 ! Real or Complex spherical harmonics.
+       mlang_type = 5
+       call recip_ylm (bess_fit,cgcband,xmpi_comm_self,istwfk(ckpt),&
+&       nradint,nradintmax,1,mlang,mpw,natom,typat,mlang_type,npw_k,ph3d,prtsphere,rint,&
+&       ratsph_arr,rc_ylm,sum_1atom_1ll,sum_1atom_1lm,ucvol,ylm_k,znucl_atom)
 
        call dens_in_sph(cmax,cgcband,gmet,istwfk(ckpt),&
 &       kg_k,natom,ngfft,mpi_enreg,npw_k,paral_kgb,ph1d,ratsph_arr,ucvol)
@@ -2246,9 +2242,7 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
        ABI_DEALLOCATE(yfit)
        ABI_DEALLOCATE(xfit)
        ABI_DEALLOCATE(bess_fit)
-       ABI_DEALLOCATE(bess_spl)
-       ABI_DEALLOCATE(bess_spl_der)
-       ABI_DEALLOCATE(x_bess)
+       call jlspline_free(jlspl)
        ABI_DEALLOCATE(rint)
      end if ! ratsph < 0     = end if for atomic sphere analysis
 
@@ -2340,7 +2334,7 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
        write(std_out,*)
        if (open_file(output, msg, newunit=unout, status='replace',form='formatted') /= 0) then
          MSG_ERROR(msg)
-       end if 
+       end if
        call print_fofr_ri("RI",nr1,nr2,nr3,n4,n5,n6,fofr,unit=unout)
        close(unout)
        exit
@@ -2352,7 +2346,7 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
        write(std_out,*)
        if (open_file(output, msg, newunit=unout, status='replace',form='formatted') /= 0) then
          MSG_ERROR(msg)
-       end if 
+       end if
        call print_fofr_ri("R",nr1,nr2,nr3,n4,n5,n6,fofr,unit=unout)
        close(unout)
        exit
@@ -2364,7 +2358,7 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
        write(std_out,*)
        if (open_file(output, msg, newunit=unout, status='replace',form='formatted') /= 0) then
          MSG_ERROR(msg)
-       end if 
+       end if
        call print_fofr_ri("I",nr1,nr2,nr3,n4,n5,n6,fofr,unit=unout)
        close(unout)
        exit
@@ -2378,7 +2372,7 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
        write(std_out,*)
        if (open_file(output, msg, newunit=unout, status='replace',form='formatted') /= 0) then
          MSG_ERROR(msg)
-       end if 
+       end if
        call print_fofr_xyzri("RI",nr1,nr2,nr3,n4,n5,n6,fofr,rprimd,conv_fact=Bohr_Ang,unit=unout)
        close(unout)
        exit
@@ -2391,7 +2385,7 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
        write(std_out,*)
        if (open_file(output, msg, newunit=unout, status='replace',form='formatted') /= 0) then
          MSG_ERROR(msg)
-       end if 
+       end if
        call print_fofr_xyzri("R",nr1,nr2,nr3,n4,n5,n6,fofr,rprimd,conv_fact=Bohr_Ang,unit=unout)
        close(unout)
        exit
@@ -2404,7 +2398,7 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
        write(std_out,*)
        if (open_file(output, msg, newunit=unout, status='replace',form='formatted') /= 0) then
          MSG_ERROR(msg)
-       end if 
+       end if
        call print_fofr_xyzri("I",nr1,nr2,nr3,n4,n5,n6,fofr,rprimd,conv_fact=Bohr_Ang,unit=unout)
        close(unout)
        exit
@@ -2426,7 +2420,7 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
        do ifile=1,2
          if (open_file(filename(ifile), msg, newunit=unout, status='replace',form='formatted') /= 0) then
            MSG_ERROR(msg)
-         end if 
+         end if
          rewind(unout)
          write(unout,*)'# band,  eig_kvalues   and   occupations'
          do iband=1,nband(ckpt)
@@ -2478,7 +2472,7 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
 
        if (open_file(filename(1), msg, newunit=unout, status='replace',form='formatted') /= 0) then
          MSG_ERROR(msg)
-       end if 
+       end if
        rewind(unout)
        write(unout,*)'# band,  eig_kvalues   and   occupations'
        do iband=1,nband(ckpt)
@@ -2529,7 +2523,7 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
 
        if (open_file(filename(1), msg, newunit=unout, status='replace',form='formatted') /= 0) then
          MSG_ERROR(msg)
-       end if 
+       end if
        rewind(unout)
        write(unout,*)'# band,  eig_kvalues   and   occupations'
        do iband=1,nband(ckpt)
@@ -2584,7 +2578,7 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
        do ifile=1,2
          if (open_file(filename(ifile), msg, newunit=unout, status='replace',form='formatted') /= 0) then
            MSG_ERROR(msg)
-         end if 
+         end if
          rewind(unout)
          do iband=1,nband(ckpt)
            write(unout,'(a,2f20.16)')'#', eig_k(iband),occ_k(iband)
@@ -2619,9 +2613,9 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
          close(unit=unout)
        end do
        ABI_DEALLOCATE(filename)
-!        
+!
 !        write LATTICE_VEC.dx file
-!        
+!
        ABI_ALLOCATE(filename,(3))
        filename(1)=trim(output1)//'_LATTICE_VEC.dx'
        filename(2)=trim(output1)//'_ATOM_POS.dx'
@@ -2630,7 +2624,7 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
        write(std_out,*)'Give the lattice file, ', trim(filename(1))
        if (open_file(filename(1), msg, newunit=unout, status='replace',form='formatted') /= 0) then
          MSG_ERROR(msg)
-       end if 
+       end if
 
        write(unout,'("#",/,"#",/,"#    LATTICE VECTOR INFO:",/,"#",/,"#")')
        write(unout,'(a)') 'object "lattices" class array type float rank 1 shape 3 items 3 data follows'
@@ -2645,14 +2639,14 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
        write(unout,'(a)') 'component "data" value "lattices"'
        write(unout,'(a)') 'component "positions" value "lattices_location"'
        close(unout)
-!        
+!
 !        write ATOM_POS.dx file
-!        
+!
        write(std_out,*)'Give the atoms positions file, ', trim(filename(2))
 
        if (open_file(filename(2), msg, newunit=unout, status='replace',form='formatted') /= 0) then
          MSG_ERROR(msg)
-       end if 
+       end if
 
        write(unout,'("#",/,"#",/,"#    BALL AND STICK INFO:",/,"#",/,"#")')
        write(unout,'(a,i5,a)') 'object "atomcoord" array type float rank 1 shape 3 items ',natom,' data follows'
@@ -2669,13 +2663,13 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
        write(unout,'(a)') 'component "data" value "colorcode"'
        close(unout)
 
-!        
+!
 !        write UCELL_FRAME.dx file
-!        
+!
        write(std_out,*)'Give the enveloppe of the cell file, ',trim(filename(3))
        if (open_file(filename(3), msg, newunit=unout, status='replace',form='formatted') /= 0) then
          MSG_ERROR(msg)
-       end if 
+       end if
 
        write(unout,'("#",/,"#",/,"#    UNIT CELL FRAME INFO:",/,"#",/,"#")')
        write(unout,'(a)')'object 3 class array type int rank 1 shape 2 items 12 data follows'
@@ -2736,7 +2730,7 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
 
        if (open_file(filename(1), msg, newunit=unout, status='replace',form='formatted') /= 0) then
          MSG_ERROR(msg)
-       end if 
+       end if
        rewind(unout)
        do iband=1,nband(ckpt)
          write(unout,'(a,2f20.16)')'#', eig_k(iband),occ_k(iband)
@@ -2754,9 +2748,9 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
        end do
        write(unout,'(1X,A)') 'PRIMCOORD'
        write(unout,*) natom, ' 1'
-!        
+!
 !        generate translated coordinates to match density shift
-!        
+!
        do iatom = 1,natom
          tau2 (:,iatom) = xcart(:,iatom) - shift_tau(:)
        end do
@@ -2900,7 +2894,7 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
 
        if (open_file(filename(1), msg, newunit=unout, status='unknown',form='formatted') /= 0) then
          MSG_ERROR(msg)
-       end if 
+       end if
        rewind(unout)
 
        do iband=1,nband(ckpt)
@@ -2919,9 +2913,9 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
        end do
        write(unout,'(1X,A)') 'PRIMCOORD'
        write(unout,*) natom, ' 1'
-!        
+!
 !        generate translated coordinates to match density shift
-!        
+!
        do iatom = 1,natom
          tau2 (:,iatom) = xcart(:,iatom) - shift_tau(:)
        end do
@@ -2951,11 +2945,11 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
        end do
 
        do ir3=1,nr3+1
-         ii3=mod(ir3-1,nr3) + 1
+         ii3=mod(ir3-1+gridshift3, nr3) + 1
          do ir2=1,nr2+1
-           ii2=mod(ir2-1,nr2) + 1
+           ii2=mod(ir2-1+gridshift2, nr2) + 1
            do ir1=1,nr1+1
-             ii1=mod(ir1-1,nr1) + 1
+             ii1=mod(ir1-1+gridshift1, nr1) + 1
              write(unout,'(ES17.10)') fofr(1,ii1,ii2,ii3)
            end do
          end do
@@ -2978,7 +2972,7 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
 
        if (open_file(output, msg, newunit=unout, status='replace',form='formatted') /= 0) then
          MSG_ERROR(msg)
-       end if 
+       end if
        call print_fofr_cube(nr1,nr2,nr3,n4,n5,n6,fofr,rprimd,natom,znucl_atom_int,xcart,unit=unout)
        close(unout)
        exit

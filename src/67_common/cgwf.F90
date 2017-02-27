@@ -26,7 +26,7 @@
 !!  filnam_ds1=name of input file (used for exit checking)
 !!  gs_hamk <type(gs_hamiltonian_type)>=all data for the Hamiltonian at k
 !!  icg=shift to be applied on the location of data in the array cg
-!!  igsc=shift to be applied on the location of data in the array cg
+!!  igsc=shift to be applied on the location of data in the array gsc
 !!  ikpt=number of the k-point
 !!  inonsc=index of non self-consistent loop
 !!  isppol=spin polarization currently treated

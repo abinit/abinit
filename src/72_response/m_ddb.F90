@@ -4,7 +4,7 @@
 !!  m_ddb
 !!
 !! FUNCTION
-!!  This module contains the declaration of data types and methods 
+!!  This module contains the declaration of data types and methods
 !!  used to handle the blocks of data in DDB files:
 !!  blkval, nrm, qpt, flg, and associated dimensions
 !!  Main entry point for client code that needs to read the DDB data.
@@ -32,17 +32,18 @@ MODULE m_ddb
  use m_errors
  use m_xmpi
 
- use m_fstrings,       only : sjoin, itoa
+ use m_fstrings,       only : sjoin, itoa, ktoa
  use m_numeric_tools,  only : mkherm
  use m_io_tools,       only : open_file, get_unit
  use m_copy,           only : alloc_copy
+ use m_geometry,       only : phdispl_cart2red
  use m_crystal,        only : crystal_t, crystal_init
  use m_pawtab,         only : pawtab_type,pawtab_nullify,pawtab_free
- use m_dynmat,         only : cart29, d2sym3, cart39, d3sym, chneu9, asria_calc, asria_corr, asrprs
+ use m_dynmat,         only : cart29, d2sym3, cart39, d3sym, chneu9, asria_calc, asria_corr, asrprs, dfpt_phfrq
 
  implicit none
 
- private 
+ private
 
  public :: ddb_getdims      ! Open a DDB file and read basic dimensions and variables.
  public :: gtblk9           ! Finds the block containing the derivatives of the total energy.
@@ -53,7 +54,7 @@ MODULE m_ddb
  public :: nlopt            ! Output of all quantities related to third-order derivatives of the energy.
  public :: chkin9
  public :: carttransf       ! Transform a second-derivative matrix (EIG2D) from reduced
-                            ! coordinates to cartesian coordinates. 
+                            ! coordinates to cartesian coordinates.
 
  integer,public,parameter :: DDB_VERSION=100401
  ! DDB Version number.
@@ -75,12 +76,6 @@ MODULE m_ddb
 
  type,public :: ddb_type
 
-  !integer :: ifcflag
-  ! 1 if IFC are calculated, 0 otherwise
-
-  !type(crystal_t) :: crystal
-  ! Crystal structure.
-
   integer :: msize
   ! Maximum size of dynamical matrices and other perturbations (ddk, dde...)
 
@@ -98,7 +93,7 @@ MODULE m_ddb
 
   integer :: occopt
   ! Occupation option.
-                      
+
   integer :: prtvol
   ! Verbosity level.
 
@@ -107,11 +102,11 @@ MODULE m_ddb
   real(dp) :: gprim(3,3)
   real(dp) :: acell(3)
 
-  integer,allocatable :: flg(:,:) 
+  integer,allocatable :: flg(:,:)
   ! flg(msize,nblok)
   ! flag to indicate presence of a given block
- 
-  integer,allocatable :: typ(:) 
+
+  integer,allocatable :: typ(:)
   ! typ(nblok)
   ! type of each block - ddk, dde, phonon etc...
 
@@ -119,41 +114,55 @@ MODULE m_ddb
   ! amu(ntypat)
   ! mass of the atoms (atomic mass unit)
 
-  real(dp),allocatable :: nrm(:,:) 
+  real(dp),allocatable :: nrm(:,:)
   ! nrm(3,nblok)
   ! norm of the q-points for each block - can be 0 to indicate a direction of approach to gamma
 
-  real(dp),allocatable :: qpt(:,:) 
+  real(dp),allocatable :: qpt(:,:)
   ! qpt(9,nblok)
   ! q-point vector in reciprocal space (reduced lattice coordinates) for each block
 
-  real(dp),allocatable :: val(:,:,:) 
+  real(dp),allocatable :: val(:,:,:)
   ! val(2,msize,nblok)
   ! values of the second energy derivatives in each block
 
  end type ddb_type
- 
+
  public :: ddb_from_file            ! Construct the object from the DDB file.
  public :: ddb_free                 ! Free dynamic memory.
  public :: ddb_malloc               ! Allocate dynamic memory
- public :: ddb_bcast                ! Broadcast the object. 
+ public :: ddb_bcast                ! Broadcast the object.
  public :: ddb_copy                 ! Copy the object.
  public :: ddb_get_etotal           ! Read the GS total energy.
  public :: ddb_get_dielt_zeff       ! Reads the Dielectric Tensor and the Effective Charges
  public :: ddb_get_dchidet          ! Reads the non-linear optical susceptibility tensor and the
                                     ! first-order change in the linear dielectric susceptibility
- public :: ddb_make_asrq0corr
+ public :: ddb_diagoq               ! Compute the phonon frequencies at the specified q-point by performing
+                                    ! a direct diagonalizatin of the dynamical matrix.
+ public :: ddb_get_asrq0            ! Return object used to enforce the acoustic sum rule
+                                    ! from the Dynamical matrix at Gamma. Used in ddb_diagoq.
+
+ ! TODO: Add option to change amu.
+ !public :: ddb_change_amu
+ !public :: ddb_print
 !!***
 
 !!****t* m_ddb/asr_t
 !! NAME
-!!  asr_t 
+!!  asr_t
 !!
 !! FUNCTION
+!!  Object used to enforce the acoustic sum rule from the Dynamical matrix at Gamma.
+!!  Wraps several approaches that can be activated via the `asr` option.
 !!
 !! SOURCE
 
- type,public :: asrq0corr_t
+ type,public :: asrq0_t
+
+   integer :: iblok = 0
+    ! Index of the Gamma block in the DDB.
+    ! Set to 0 if no block was found. Client code can use this flag to understand
+    ! if ASR can be enforced.
 
    integer :: asr
    ! Option for the application of the ASR (input variable).
@@ -166,7 +175,7 @@ MODULE m_ddb
    ! In case the interatomic forces are not calculated, the
    ! ASR-correction (d2asr) has to be determined here from the Dynamical matrix at Gamma.
 
-   ! singular, uinvers and vtinvers are allocated and used only if asr in [3,4] 
+   ! singular, uinvers and vtinvers are allocated and used only if asr in [3,4]
    ! i.e. Rotational invariance for 1D and 0D systems. dims=3*natom*(3*natom-1)/2
    real(dp),allocatable :: singular(:)
    ! singular,(1:dims))
@@ -177,10 +186,10 @@ MODULE m_ddb
    real(dp),allocatable :: vtinvers(:,:)
    ! vtinvers,(1:dims,1:dims))
 
- end type asrq0corr_t
+ end type asrq0_t
 
- !public :: asrq0corr_apply
- public :: asrq0corr_free
+ public :: asrq0_apply      ! Impose the acoustic sum rule based on the q=0 block found in the DDB file.
+ public :: asrq0_free       ! Free memory
 !!***
 
  ! TODO: We should use this constants instead of magic numbers!
@@ -208,7 +217,8 @@ CONTAINS  !===========================================================
 !!  Clean and deallocate types for the ddb_type structure
 !!
 !! PARENTS
-!!      anaddb,dfpt_looppert,dfptnl_doutput,eph,gstate,mblktyp1,mblktyp5,thmeig
+!!      anaddb,dfpt_looppert,dfptnl_doutput,eph,gstate
+!!      m_effective_potential_file,mblktyp1,mblktyp5,thmeig
 !!
 !! CHILDREN
 !!
@@ -510,8 +520,8 @@ subroutine inprep8 (dimekb,filnam,lmnmax,mband,mblktyp,msym,natom,nblok,nkpt,&
  character(len=*),intent(in) :: filnam
 
 !Local variables -------------------------
-!Set routine version number here:
 !scalars
+!Set routine version number here:
  integer,parameter :: vrsio8=100401,vrsio8_old=010929,vrsio8_old_old=990527
  integer :: bantot,basis_size0,blktyp,ddbvrs,iband,iblok,iekb,ii,ikpt,iline,im,ios,iproj
  integer :: itypat,itypat0,jekb,lmn_size0,mproj,mpsang,nekb,nelmts,nsppol
@@ -530,14 +540,14 @@ subroutine inprep8 (dimekb,filnam,lmnmax,mband,mblktyp,msym,natom,nblok,nkpt,&
 
 !Check inprep8 version number (vrsio8) against mkddb version number (vrsddb)
  if (vrsio8/=vrsddb) then
-   write(message, '(a,i10,a,a,i10,a)' )&
-&   'The input/output DDB version number=',vrsio8,ch10,&
-&   'is not equal to the DDB version number=',vrsddb,'.'
+   write(message, '(a,i0,2a,i0)' )&
+&   'The input/output DDB version number= ',vrsio8,ch10,&
+&   'is not equal to the DDB version number= ',vrsddb
    MSG_BUG(message)
  end if
 
 !Open the input derivative database.
- write(std_out,'(a,a)') ' inprep8 : open file ',trim(filnam)
+ call wrtout(std_out, sjoin(" Opening DDB file:", filnam), 'COLL')
  if (open_file(filnam,message,unit=unddb,form="formatted",status="old",action="read") /= 0) then
    MSG_ERROR(message)
  end if
@@ -737,10 +747,12 @@ subroutine inprep8 (dimekb,filnam,lmnmax,mband,mblktyp,msym,natom,nblok,nkpt,&
      read (unddb,*)
    end do
  else
-   write(std_out,*)' inprep8 : nband(1)=',nband(1)
+   write(message,*)' inprep8 : nband(1)=',nband(1)
+   call wrtout(std_out,message,'COLL')
    do iline=1,(nband(1)+2)/3
      read (unddb,'(a80)')rdstring
-     write(std_out,*)trim(rdstring)
+     write(message,*)trim(rdstring)
+     call wrtout(std_out,message,'COLL')
    end do
  end if
 !23. rprim
@@ -856,7 +868,7 @@ subroutine inprep8 (dimekb,filnam,lmnmax,mband,mblktyp,msym,natom,nblok,nkpt,&
    end if
 
  else if(string==' Description')then
-   if (usepaw==1) then 
+   if (usepaw==1) then
      MSG_BUG('old DDB pspformat not compatible with PAW 1')
    end if
 
@@ -991,7 +1003,7 @@ end subroutine inprep8
 !! comm=MPI communicator.
 !!
 !! PARENTS
-!!      anaddb,m_ddb,mblktyp1,mblktyp5,mrgddb
+!!      anaddb,m_ddb,m_effective_potential_file,mblktyp1,mblktyp5,mrgddb
 !!
 !! CHILDREN
 !!
@@ -1017,7 +1029,7 @@ subroutine ddb_getdims(dimekb,filnam,lmnmax,mband,mblktyp,msym,natom,nblok,nkpt,
 !Local variables-------------------------------
 !scalars
  integer,parameter :: master=0
- integer :: ierr 
+ integer :: ierr
  !integer :: mpert,msize
 
 ! *********************************************************************
@@ -1068,12 +1080,12 @@ end subroutine ddb_getdims
 !!      1 => the element is in the data blok.
 !!   nrm(3,nblok)=normalization factors for the three allowed wavevectors
 !!   qpt(3,nblok)=wavevector of the perturbation(s). The elements
-!!   typ(nblok)=type of the block. 
+!!   typ(nblok)=type of the block.
 !!      (1=> non-stationary block),
-!!      (2=> stationary block), 
+!!      (2=> stationary block),
 !!      (3=> third order derivative).
 !! qphon(3,3)=wavevectors for the three possible phonons
-!!  (note : only one should be used in case of second derivative of total energy, 
+!!  (note : only one should be used in case of second derivative of total energy,
 !!  because we know that the second is the opposite of this value)
 !! qphnrm(3) =normalisation factors for the three possible phonons
 !! rfphon(4) = 1=> response to phonons (for the four possible derivatives. Two should be used for a second derivative of total energy)
@@ -1090,7 +1102,7 @@ end subroutine ddb_getdims
 !! iblok= number of the block that corresponds to the specifications
 !!
 !! PARENTS
-!!      anaddb,m_ddb,m_phonons,thmeig
+!!      anaddb,m_ddb,m_effective_potential_file,m_phonons,thmeig
 !!
 !! CHILDREN
 !!
@@ -1132,10 +1144,6 @@ subroutine gtblk9(ddb,iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,rftyp)
 
  mpert = ddb%mpert
  natom = ddb%natom
-
- if (ddb%prtvol > 1) then
-   call wrtout(std_out,'gtblk9: enter gtblk9 ','COLL')
- end if
 
 !Get the number of derivative
  if(rftyp==1.or.rftyp==2)then
@@ -1331,8 +1339,8 @@ subroutine gtblk9(ddb,iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,rftyp)
    end if
  end if
 
- if(ok==1 .and. ddb%prtvol > 1)then
-   write(message,'(a,i0,a,a)')'gtblk9: found block number ',iblok,' agree with',' specifications '
+ if (ok==1 .and. ddb%prtvol > 1) then
+   write(message,'(a,i0,a,a)')' gtblk9: found block number ',iblok,' agree with',' specifications '
    call wrtout(std_out,message,'COLL')
  end if
 
@@ -1478,7 +1486,7 @@ subroutine read_blok8(ddb,iblok,mband,mpert,msize,nkpt,nunit,&
  character(len=500) :: message
 
 ! *********************************************************************
- 
+
 !Zero every flag
  ddb%flg(1:msize, iblok)=0
  if(present(blkval2))blkval2(:,:,:,:)=zero
@@ -1515,7 +1523,7 @@ subroutine read_blok8(ddb,iblok,mband,mpert,msize,nkpt,nunit,&
    if(msize<(3*mpert*3*mpert))then
      write(message,'(a,a,a,i10,a,i10,a,a,a)')&
 &     'There is not enough space to read a second-derivative block.',ch10,&
-&     'The size provided is only ',msize,' although ',3*mpert*3*mpert,' is needed.',ch10,&
+
 &     'Action: increase msize and recompile.'
      MSG_ERROR(message)
    end if
@@ -2202,7 +2210,8 @@ subroutine ioddb8_in(filnam,matom,mband,mkpt,msym,mtypat,unddb,vrsddb,&
  end if
 
 !Open the input derivative database.
- write(std_out,'(a,a)')' About to open file ',TRIM(filnam)
+ write(message,'(a,a)')' About to open file ',TRIM(filnam)
+ call wrtout(std_out,message,'COLL')
  if (open_file(filnam,message,unit=unddb,form="formatted",status="old",action="read") /= 0) then
    MSG_ERROR(message)
  end if
@@ -2830,7 +2839,7 @@ subroutine rdddb9(acell,atifc,amu,ddb,&
 !mtyplo=maximum number of type, locally
 !scalars
  integer,parameter :: msppol=2,mtyplo=6
- integer :: mtypat,mkpt,matom 
+ integer :: mtypat,mkpt,matom
  integer :: choice,fullinit,iblok,intxc,iscf,isym,ixc
  integer :: nsize,nspden,nspinor,nsppol,nunit,timrev,useylm,vrsddb
  real(dp),parameter :: tolsym8=tol8
@@ -2882,11 +2891,6 @@ subroutine rdddb9(acell,atifc,amu,ddb,&
 & pawecutdg,rprim,dfpt_sciss,spinat,symafm,symrel,tnons,tolwfr,tphysel,tsmear,&
 & typat,usepaw,wtk,xred,zion,znucl)
 
- !if (nsym /= msym) then
- !  write(message,"(2(a,i0))")"mismatch: msym: ",msym,", nsym: ",nsym
- !  MSG_WARNING(message)
- !end if
-
 !Compute different matrices in real and reciprocal space, also
 !checks whether ucvol is positive.
  call mkrdim(acell,rprim,rprimd)
@@ -2918,12 +2922,9 @@ subroutine rdddb9(acell,atifc,amu,ddb,&
  call chkin9(atifc,natifc,natom)
 
 !Read the blocks from the input database, and close it.
- write(message, '(a,a,a,i5,a)' )ch10,ch10,&
-& ' rdddb9 : read ',ddb%nblok,' blocks from the input DDB '
+ write(message, '(3a,i0,a)' )ch10,ch10,' rdddb9: read ',ddb%nblok,' blocks from the input DDB '
  call wrtout(std_out,message,'COLL')
  nunit=ddbun
-
- !ddb%prtvol = prtvol
 
  do iblok=1,ddb%nblok
    call read_blok8(ddb,iblok,mband,mpert,msize,nkpt,nunit)
@@ -3290,17 +3291,17 @@ end subroutine nlopt
 !!    has to be done for atom ia; otherwise 0.
 !!
 !! TODO
-!!   Sorry for the presence of natom, natifc and atifc. 
+!!   Sorry for the presence of natom, natifc and atifc.
 !!   They are needed for legacy code!
 !!
 !! PARENTS
-!!      anaddb,dfpt_looppert,eph
+!!      anaddb,dfpt_looppert,eph,m_effective_potential_file
 !!
 !! CHILDREN
 !!
 !! SOURCE
 
-subroutine ddb_from_file(ddb,filename,brav,natom,natifc,atifc,Crystal,comm,prtvol)
+subroutine ddb_from_file(ddb,filename,brav,natom,natifc,atifc,crystal,comm,prtvol)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -3325,7 +3326,7 @@ subroutine ddb_from_file(ddb,filename,brav,natom,natifc,atifc,Crystal,comm,prtvo
 !Local variables-------------------------------
 !scalars
  integer,parameter :: master=0
- integer :: ierr,ii,msym,dimekb,lmnmax,mband,nkpt,ntypat,nsym,usepaw 
+ integer :: ierr,ii,msym,dimekb,lmnmax,mband,nkpt,ntypat,nsym,usepaw
  integer :: mtyp,mpert,msize,ddb_natom,nblok,occopt,timrev,space_group,npsp,ddbun
  real(dp) :: factor,ucvol
  logical :: use_antiferro
@@ -3333,7 +3334,7 @@ subroutine ddb_from_file(ddb,filename,brav,natom,natifc,atifc,Crystal,comm,prtvo
  integer,allocatable :: symrec(:,:,:),symrel(:,:,:),symafm(:),indsym(:,:,:),typat(:)
  real(dp) :: acell(3),gmet(3,3),gprim(3,3),rmet(3,3),rprim(3,3),rprimd(3,3)
  real(dp),allocatable :: amu(:),xcart(:),xred(:,:),zion(:),znucl(:),tnons(:,:)
- character(len=132),allocatable :: title(:)  
+ character(len=132),allocatable :: title(:)
  character(len=500) :: message
 
 ! ************************************************************************
@@ -3349,7 +3350,7 @@ subroutine ddb_from_file(ddb,filename,brav,natom,natifc,atifc,Crystal,comm,prtvo
  mpert=natom+6
  msize=3*mpert*3*mpert; if (mtyp==3) msize=msize*3*mpert
 
- ! Allocate arrays depending on msym 
+ ! Allocate arrays depending on msym
  ! (which is actually fixed to nsym inside inprep8)
  ABI_MALLOC(symrel,(3,3,msym))
  ABI_MALLOC(symafm,(msym))
@@ -3409,7 +3410,7 @@ subroutine ddb_from_file(ddb,filename,brav,natom,natifc,atifc,Crystal,comm,prtvo
 
    ! Other useful quantities.
    ! 2 is to preserve the old behaviour
-   ddb%prtvol = 2; if (present(prtvol)) ddb%prtvol = prtvol 
+   ddb%prtvol = 2; if (present(prtvol)) ddb%prtvol = prtvol
    ddb%occopt = occopt
    ddb%amu = amu
    ABI_FREE(amu)
@@ -3442,7 +3443,7 @@ subroutine ddb_from_file(ddb,filename,brav,natom,natifc,atifc,Crystal,comm,prtvo
 !Initialize crystal_t object.
  call mkrdim(acell,rprim,rprimd)
 
-!FIXME: These variables are hardcoded 
+!FIXME: These variables are hardcoded
  npsp = ntypat; space_group = 0; timrev = 2
  use_antiferro=.FALSE. !;  use_antiferro=(nspden==2.and.nsppol==1)
  ABI_MALLOC(title, (ntypat))
@@ -3452,9 +3453,9 @@ subroutine ddb_from_file(ddb,filename,brav,natom,natifc,atifc,Crystal,comm,prtvo
  end do
 
 !Warning znucl is dimension with ntypat = nspsp hence alchemy is not supported here
- call crystal_init(Crystal,space_group,natom,npsp,ntypat,nsym,rprimd,typat,xred,&
+ call crystal_init(ddb%amu,Crystal,space_group,natom,npsp,ntypat,nsym,rprimd,typat,xred,&
 &  zion,znucl,timrev,use_antiferro,.FALSE.,title,&
-&  symrel=symrel,tnons=tnons,symafm=symafm) 
+&  symrel=symrel,tnons=tnons,symafm=symafm)
 
  ABI_FREE(title)
  ABI_FREE(symrel)
@@ -3478,8 +3479,8 @@ end subroutine ddb_from_file
 !!
 !! FUNCTION
 !! Transform a second-derivative matrix (EIG2D) from reduced
-!! coordinates to cartesian coordinates. 
-!! 
+!! coordinates to cartesian coordinates.
+!!
 !! INPUTS
 !!  blkflg(msize,nblok)=
 !!   ( 1 if the element of the dynamical matrix has been calculated ;
@@ -3532,6 +3533,7 @@ subroutine carttransf(blkflg,blkval2,carflg,gprimd,iqpt,mband,&
  integer,intent(out) :: carflg(3,mpert,3,mpert)
  real(dp),intent(in) :: gprimd(3,3),rprimd(3,3)
  real(dp),intent(inout) :: blkval2(2,msize,mband,nkpt)
+
 !Local variables-------------------------------
 !scalars
 integer :: iatom1,iatom2,iband,idir1,idir2,ikpt
@@ -3550,7 +3552,7 @@ real(dp),allocatable :: d2cart(:,:,:,:,:)
 
 !Begin by formating the arrays to be compatible with cart29
 !Then call cart29 to transform the arrays in cartesian coordinates
-!Finally reformat the cartesian arrays in old format 
+!Finally reformat the cartesian arrays in old format
  do ikpt=1,nkpt
    do iband=1,mband
 
@@ -3596,7 +3598,6 @@ end subroutine carttransf
 !!****f* m_ddb/carteig2d
 !! NAME
 !! carteig2d
-!!
 !!
 !! FUNCTION
 !! Transform a second-derivative matrix (EIG2D) from reduced
@@ -3746,6 +3747,7 @@ subroutine dtech9(blkval,dielt,iblok,mpert,natom,nblok,zeff)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dtech9'
+ use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -3760,6 +3762,7 @@ subroutine dtech9(blkval,dielt,iblok,mpert,natom,nblok,zeff)
 !Local variables -------------------------
 !scalars
  integer :: depl,elec,elec1,elec2,iatom
+ character(len=1000) :: message
 
 ! *********************************************************************
 
@@ -3781,18 +3784,23 @@ subroutine dtech9(blkval,dielt,iblok,mpert,natom,nblok,zeff)
    end do
  end do
 
- write(std_out,'(/,a,/,3es16.6,/,3es16.6,/,3es16.6)' )&
+ write(message,'(a,3es16.6,3es16.6,3es16.6)' )&
 & ' Dielectric Tensor ',&
 & dielt(1,1),dielt(1,2),dielt(1,3),&
 & dielt(2,1),dielt(2,2),dielt(2,3),&
 & dielt(3,1),dielt(3,2),dielt(3,3)
 
- write(std_out,'(/,a)' ) ' Effectives Charges '
+
+ call wrtout(std_out,message,'COLL')
+
+ write(message,'(a)' ) ' Effectives Charges '
+ call wrtout(std_out,message,'COLL')
  do iatom=1,natom
-   write(std_out,'(a,i4,3es16.6,/,3es16.6,/,3es16.6)' )' atom ',iatom,&
+   write(message,'(a,i4,3es16.6,3es16.6,3es16.6)' )' atom ',iatom,&
 &   zeff(1,1,iatom),zeff(1,2,iatom),zeff(1,3,iatom),&
 &   zeff(2,1,iatom),zeff(2,2,iatom),zeff(2,3,iatom),&
 &   zeff(3,1,iatom),zeff(3,2,iatom),zeff(3,3,iatom)
+    call wrtout(std_out,message,'COLL')
  end do
 
 end subroutine dtech9
@@ -3818,7 +3826,6 @@ end subroutine dtech9
 !! ramansr= if /= 0, impose sum rule on first-order derivatives
 !!                   of the electronic susceptibility with respect
 !!                   to atomic displacements
-!!
 !!
 !! OUTPUT
 !! dchide(3,3,3) = non-linear optical coefficients
@@ -3853,6 +3860,7 @@ subroutine dtchi(blkval,dchide,dchidt,mpert,natom,ramansr)
 !Local variables -------------------------
 !scalars
  integer :: depl,elfd1,elfd2,elfd3,iatom,ivoigt
+ logical :: iwrite
  real(dp) :: wttot
 !arrays
  integer :: voigtindex(6,2)
@@ -3898,13 +3906,13 @@ subroutine dtchi(blkval,dchide,dchidt,mpert,natom,ramansr)
    end do
  end do
 
- wghtat(:) = 0._dp
+ wghtat(:) = zero
  if (ramansr == 1) then
-   wghtat(:) = 1._dp/dble(natom)
+   wghtat(:) = one/dble(natom)
 
  else if (ramansr == 2) then
 
-   wttot = 0._dp
+   wttot = zero
    do iatom = 1, natom
      do depl = 1,3
        do elfd1 = 1,3
@@ -3919,20 +3927,26 @@ subroutine dtchi(blkval,dchide,dchidt,mpert,natom,ramansr)
    wghtat(:) = wghtat(:)/wttot
  end if
 
- write(ab_out,*)ch10
- write(ab_out,*)'Non-linear optical coefficients d (pm/V)'
- write(ab_out,'(6f12.6)')dvoigt(1,:)
- write(ab_out,'(6f12.6)')dvoigt(2,:)
- write(ab_out,'(6f12.6)')dvoigt(3,:)
+ iwrite = ab_out > 0
+
+ if (iwrite) then
+   write(ab_out,*)ch10
+   write(ab_out,*)'Non-linear optical coefficients d (pm/V)'
+   write(ab_out,'(6f12.6)')dvoigt(1,:)
+   write(ab_out,'(6f12.6)')dvoigt(2,:)
+   write(ab_out,'(6f12.6)')dvoigt(3,:)
+ end if
 
  if (ramansr /= 0) then
-   write(ab_out,*)ch10
-   write(ab_out,*)'The violation of the Raman sum rule'
-   write(ab_out,*)'by the first-order electronic dielectric tensors ','is as follows'
-   write(ab_out,*)'    atom'
-   write(ab_out,*)' displacement'
+   if (iwrite) then
+     write(ab_out,*)ch10
+     write(ab_out,*)'The violation of the Raman sum rule'
+     write(ab_out,*)'by the first-order electronic dielectric tensors ','is as follows'
+     write(ab_out,*)'    atom'
+     write(ab_out,*)' displacement'
+   end if
 
-   sumrule(:,:,:) = 0._dp
+   sumrule(:,:,:) = zero
    do elfd2 = 1,3
      do elfd1 = 1,3
        do depl = 1,3
@@ -3948,32 +3962,36 @@ subroutine dtchi(blkval,dchide,dchidt,mpert,natom,ramansr)
      end do
    end do
 
-   do depl = 1,3
-     write(ab_out,'(6x,i2,3(3x,f16.9))') depl,sumrule(depl,1,1:3)
-     write(ab_out,'(8x,3(3x,f16.9))') sumrule(depl,2,1:3)
-     write(ab_out,'(8x,3(3x,f16.9))') sumrule(depl,3,1:3)
-     write(ab_out,*)
-   end do
+   if (iwrite) then
+     do depl = 1,3
+       write(ab_out,'(6x,i2,3(3x,f16.9))') depl,sumrule(depl,1,1:3)
+       write(ab_out,'(8x,3(3x,f16.9))') sumrule(depl,2,1:3)
+       write(ab_out,'(8x,3(3x,f16.9))') sumrule(depl,3,1:3)
+       write(ab_out,*)
+     end do
+    end if
  end if    ! ramansr
 
- write(ab_out,*)ch10
- write(ab_out,*)' First-order change in the electronic dielectric '
- write(ab_out,*)' susceptibility tensor (Bohr^-1)'
- write(ab_out,*)' induced by an atomic displacement'
- if (ramansr /= 0) then
-   write(ab_out,*)' (after imposing the sum over all atoms to vanish)'
- end if
- write(ab_out,*)'  atom  displacement'
+ if (iwrite) then
+   write(ab_out,*)ch10
+   write(ab_out,*)' First-order change in the electronic dielectric '
+   write(ab_out,*)' susceptibility tensor (Bohr^-1)'
+   write(ab_out,*)' induced by an atomic displacement'
+   if (ramansr /= 0) then
+     write(ab_out,*)' (after imposing the sum over all atoms to vanish)'
+   end if
+   write(ab_out,*)'  atom  displacement'
 
- do iatom = 1,natom
-   do depl = 1,3
-     write(ab_out,'(1x,i4,9x,i2,3(3x,f16.9))')iatom,depl,dchidt(iatom,depl,1,:)
-     write(ab_out,'(16x,3(3x,f16.9))')dchidt(iatom,depl,2,:)
-     write(ab_out,'(16x,3(3x,f16.9))')dchidt(iatom,depl,3,:)
+   do iatom = 1,natom
+     do depl = 1,3
+       write(ab_out,'(1x,i4,9x,i2,3(3x,f16.9))')iatom,depl,dchidt(iatom,depl,1,:)
+       write(ab_out,'(16x,3(3x,f16.9))')dchidt(iatom,depl,2,:)
+       write(ab_out,'(16x,3(3x,f16.9))')dchidt(iatom,depl,3,:)
+     end do
+
+     write(ab_out,*)
    end do
-
-   write(ab_out,*)
- end do
+ end if
 
 !DEBUG
 !sumrule(:,:,:) = 0._dp
@@ -4078,7 +4096,9 @@ end function ddb_get_etotal
 !!
 !! INPUTS
 !!  Crystal<type(crystal_t)>=Crystal structure parameters
-!!  rftyp
+!!  rftyp  = 1 if non-stationary block
+!!           2 if stationary block
+!!           3 if third order derivatives
 !!  chneut=(0 => no ASR, 1 => equal repartition,2 => weighted repartition )
 !!  selectz=selection of some parts of the effective charge tensor attached to one atom.
 !!    (0=> no selection, 1=> trace only, 2=> symmetric part only)                       !!
@@ -4090,7 +4110,7 @@ end function ddb_get_etotal
 !! OUTPUT
 !!  dielt(3,3) = Macroscopic dielectric tensor
 !!  zeff(3,3,natom)=effective charge on each atom, versus electric field and atomic displacement
-!!  iblok=Index of the block containing the data. 0 if block is not found. 
+!!  iblok=Index of the block containing the data. 0 if block is not found.
 !!
 !! NOTES
 !!  dielt and zeff are initialized to one_3D and zero if the derivatives are not available in the DDB file.
@@ -4189,7 +4209,7 @@ end function ddb_get_dielt_zeff
 !! dchide(3,3,3) = non-linear optical coefficients
 !! dchidt(natom,3,3,3) = first-order change of the electronic dielectric
 !!   tensor induced by an individual atomic displacement
-!! iblok=Index of the block containing the data. 0 if block is not found. 
+!! iblok=Index of the block containing the data. 0 if block is not found.
 !!   The caller should check the returned value.
 !!
 !! PARENTS
@@ -4246,28 +4266,30 @@ end function ddb_get_dchidet
 
 !----------------------------------------------------------------------
 
-!!****f* m_ddb/ddb_make_asrq0corr
+!!****f* m_ddb/ddb_get_asrq0
 !! NAME
-!!  ddb_make_asrq0corr
+!!  ddb_get_asrq0
 !!
 !! FUNCTION
 !!  In case the interatomic forces are not calculated, the
 !!  ASR-correction has to be determined here from the Dynamical matrix at Gamma.
 !!  In case the DDB does not contain this information, the subroutine returns iblok=0
-!!  and no result is computed and stored in acorr%
+!!  %d2asr is initialized and set to zero to preserve the old behaviour.
 !!
 !! INPUTS
 !!  asr=Input variable selecting the method for the ASR
-!!  rftyp
+!!  rftyp  = 1 if non-stationary block
+!!           2 if stationary block
+!!           3 if third order derivatives
 !!  xcart(3,ddb%atom)=Cartesian coordinates of the atoms.
 !!
 !! SIDE EFFECTS
-!!  Ddb<type(ddb_type)>= Database with the derivates. The routine does not change it
-!!  except when asr is in [3,4].
+!!  ddb<type(ddb_type)>= Database with the derivates. The routine does not change it
+!!  except when asr is in [3,4]. TODO This should not happen.
 !!
 !! OUTPUT
-!! acorr<asrq0corr_t>
-!! iblok= number of the block that corresponds to the specifications
+!! asrq0<asrq0_t>
+!!   iblok= is set to 0 if the Gamma block is not found
 !!
 !! PARENTS
 !!
@@ -4275,13 +4297,13 @@ end function ddb_get_dchidet
 !!
 !! SOURCE
 
-subroutine ddb_make_asrq0corr(ddb,asr,rftyp,xcart,acorr,iblok)
+type(asrq0_t) function ddb_get_asrq0(ddb, asr, rftyp, xcart) result(asrq0)
 
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'ddb_make_asrq0corr'
+#define ABI_FUNC 'ddb_get_asrq0'
 !End of the abilint section
 
  implicit none
@@ -4289,16 +4311,14 @@ subroutine ddb_make_asrq0corr(ddb,asr,rftyp,xcart,acorr,iblok)
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: asr,rftyp
- integer,intent(out) :: iblok
  type(ddb_type),intent(inout) :: ddb
- type(asrq0corr_t),intent(out) :: acorr
 !arrays
  real(dp),intent(in) :: xcart(3,ddb%natom)
 
 !Local variables-------------------------------
-!scalars 
- integer :: dims
- character(len=500) :: message
+!scalars
+ integer :: dims,iblok
+ !character(len=500) :: msg
 !arrays
  integer :: rfelfd(4),rfphon(4),rfstrs(4)
  real(dp) :: qphnrm(3),qphon(3,3)
@@ -4306,74 +4326,101 @@ subroutine ddb_make_asrq0corr(ddb,asr,rftyp,xcart,acorr,iblok)
 
 ! ************************************************************************
 
+ asrq0%asr = asr; asrq0%natom = ddb%natom
+
  ! Find the Gamma block in the DDB (no need for E-field entries)
  qphon(:,1)=zero
  qphnrm(1)=zero
  rfphon(1:2)=1
  rfelfd(:)=0
  rfstrs(:)=0
- !rftyp=inp%rfmeth
 
- call gtblk9(ddb,iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,rftyp)
+ call gtblk9(ddb,asrq0%iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,rftyp)
+ ! this is to maintain the old behaviour in which the arrays where allocated and set to zero in anaddb.
+ ABI_MALLOC(asrq0%d2asr, (2,3,ddb%natom,3,ddb%natom))
+ asrq0%d2asr = zero
 
- if (iblok /=0) return
+ ! TODO: Tests with asr = 3,4  [v5][t83] and [v5][t84]
+ ! fail if I don't allocated these arrays because the code
+ ! is accessing the data without checking if the correction has been computed....
+ dims = 3*ddb%natom*(3*ddb%natom-1) / 2
+ ABI_CALLOC(asrq0%uinvers, (dims, dims))
+ ABI_CALLOC(asrq0%vtinvers,(dims, dims))
+ ABI_CALLOC(asrq0%singular, (dims))
 
- ABI_MALLOC(acorr%d2asr, (2,3,ddb%natom,3,ddb%natom))
- acorr%d2asr = zero
+ if (asrq0%iblok == 0) return
+ iblok = asrq0%iblok
 
  select case (asr)
  case (0)
-   continue 
+   continue
 
  case (1,2)
-   call asria_calc(asr,acorr%d2asr,ddb%val(:,:,iblok),ddb%mpert,ddb%natom)
+   call asria_calc(asr,asrq0%d2asr,ddb%val(:,:,iblok),ddb%mpert,ddb%natom)
 
  case (3,4)
    ! Rotational invariance for 1D and 0D systems
+   ! Compute uinvers, vtinvers and singular matrices.
+   !dims = 3*ddb%natom*(3*ddb%natom-1) / 2
+   !ABI_CALLOC(asrq0%uinvers, (dims, dims))
+   !ABI_CALLOC(asrq0%vtinvers,(dims, dims))
+   !ABI_CALLOC(asrq0%singular, (dims))
 
-   dims=3*ddb%natom*(3*ddb%natom-1)/2
-   ABI_CALLOC(acorr%uinvers,(1:dims,1:dims))
-   ABI_CALLOC(acorr%vtinvers,(1:dims,1:dims))
-   ABI_CALLOC(acorr%singular,(1:dims))
-
-   call asrprs(asr,1,3,acorr%uinvers,acorr%vtinvers,acorr%singular,&
-&    ddb%val(:,:,iblok),ddb%mpert,ddb%natom,xcart)
+   call asrprs(asr,1,3,asrq0%uinvers,asrq0%vtinvers,asrq0%singular,&
+     ddb%val(:,:,iblok),ddb%mpert,ddb%natom,xcart)
 
  case (5)
    ! d2cart is a temp variable here
    ABI_MALLOC(d2cart,(2,ddb%msize))
    d2cart = ddb%val(:,:,iblok)
    ! calculate diagonal correction
-   call asria_calc(2,acorr%d2asr,d2cart,ddb%mpert,ddb%natom)
+   call asria_calc(2,asrq0%d2asr,d2cart,ddb%mpert,ddb%natom)
    ! apply diagonal correction
-   call asria_corr(2,acorr%d2asr,d2cart,ddb%mpert,ddb%natom)
+   call asria_corr(2,asrq0%d2asr,d2cart,ddb%mpert,ddb%natom)
    ! hermitianize
    call mkherm(d2cart,3*ddb%mpert)
    ! remove remaining ASR rupture due to Hermitianization
    ABI_MALLOC(d2asr_res,(2,3,ddb%natom,3,ddb%natom))
    call asria_calc(asr,d2asr_res,d2cart,ddb%mpert,ddb%natom)
    ! full correction is sum of both
-   acorr%d2asr = acorr%d2asr + d2asr_res
+   asrq0%d2asr = asrq0%d2asr + d2asr_res
 
    ABI_FREE(d2cart)
    ABI_FREE(d2asr_res)
 
  case default
-   write(message,'(a,i0)')"Wrong value for asr: ",asr
-   MSG_ERROR(message)
+   MSG_ERROR(sjoin("Wrong value for asr:", itoa(asr)))
  end select
 
-end subroutine ddb_make_asrq0corr
+end function ddb_get_asrq0
 !!***
 
 !----------------------------------------------------------------------
 
-!!****f* m_ddb/asrq0corr_free
+!!****f* m_ddb/ddb_diagoq
 !! NAME
-!! asrq0corr_free
+!!  ddb_diagoq
 !!
 !! FUNCTION
-!!   Free dynamic memory
+!!  Compute the phonon frequencies at the specified q-point by performing
+!!  a direct diagonalization of the dynamical matrix. The q-point **MUST** be
+!!  one the points stored in the DDB file.
+!!
+!! INPUTS
+!!  ddb<type(ddb_type)>=Object storing the DDB results.
+!!  crystal<type(crystal_t)> = Information on the crystalline structure.
+!!  asrq0<asrq0_t>=Object for the treatment of the ASR based on the q=0 block found in the DDB file.
+!!  symdynmat=If equal to 1, the dynamical matrix is symmetrized in dfpt_phfrq before the diagonalization.
+!!  rftyp  = 1 if non-stationary block
+!!           2 if stationary block
+!!           3 if third order derivatives
+!!  qpt(3)=q-point in reduced coordinates.
+!!
+!! OUTPUT
+!!  phfrq(3*crystal%natom)=Phonon frequencies in Hartree
+!!  displ_cart(2,3*%natom,3*%natom)=Phonon displacement in Cartesian coordinates
+!!  [out_eigvec(2*3*natom*3*natom) = The igenvectors of the dynamical matrix.
+!!  [out_displ_red(2*3*natom*3*natom) = The displacement in reduced coordinates.
 !!
 !! PARENTS
 !!
@@ -4381,45 +4428,201 @@ end subroutine ddb_make_asrq0corr
 !!
 !! SOURCE
 
-subroutine asrq0corr_free(acorr)
+subroutine ddb_diagoq(ddb, crystal, qpt, asrq0, symdynmat, rftyp, phfrq, displ_cart, &
+                      out_eigvec,out_displ_red)   ! Optional [out]
 
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'asrq0corr_free'
+#define ABI_FUNC 'ddb_diagoq'
 !End of the abilint section
 
  implicit none
 
 !Arguments ------------------------------------
- type(asrq0corr_t),intent(inout) :: acorr
+!scalars
+ integer,intent(in) :: rftyp,symdynmat
+ type(ddb_type),intent(in) :: ddb
+ type(asrq0_t),intent(inout) :: asrq0
+ type(crystal_t),intent(in) :: crystal
+!arrays
+ real(dp),intent(in) :: qpt(3)
+ real(dp),intent(out) :: displ_cart(2,3,crystal%natom,3,crystal%natom)
+ real(dp),intent(out) :: phfrq(3*crystal%natom)
+ !real(dp),optional,intent(out) :: out_d2cart(2,3*crystal%natom,3*crystal%natom)
+ real(dp),optional,intent(out) :: out_eigvec(2,3,crystal%natom,3*crystal%natom)
+ real(dp),optional,intent(out) :: out_displ_red(2,3,crystal%natom,3*crystal%natom)
+
+!Local variables-------------------------------
+ integer :: iblok,natom
+!arrays
+ integer :: rfphon(4),rfelfd(4),rfstrs(4)
+ real(dp) :: qphnrm(3), qphon_padded(3,3),d2cart(2,ddb%msize),my_qpt(3)
+ real(dp) :: eigvec(2,3,crystal%natom,3*crystal%natom),eigval(3*crystal%natom)
+
+! ************************************************************************
+
+ ! Use my_qpt because dfpt_phfrq can change the q-point (very bad design)
+ qphnrm = one; my_qpt = qpt
+
+ ! Look for the information in the DDB (no interpolation here!)
+ rfphon(1:2)=1
+ rfelfd(1:2)=0
+ rfstrs(1:2)=0
+ qphon_padded = zero
+ qphon_padded(:,1) = qpt
+ natom = crystal%natom
+
+ call gtblk9(ddb,iblok,qphon_padded,qphnrm,rfphon,rfelfd,rfstrs,rftyp)
+ if (iblok == 0) then
+   MSG_ERROR(sjoin("Cannot find q-point ", ktoa(qpt)," in DDB file"))
+ end if
+
+ ! Copy the dynamical matrix in d2cart
+ d2cart(:,1:ddb%msize) = ddb%val(:,:,iblok)
+
+ ! Eventually impose the acoustic sum rule based on previously calculated d2asr
+ call asrq0_apply(asrq0, natom, ddb%mpert, ddb%msize, crystal%xcart, d2cart)
+
+ ! Calculation of the eigenvectors and eigenvalues of the dynamical matrix
+ call dfpt_phfrq(ddb%amu,displ_cart,d2cart,eigval,eigvec,crystal%indsym,&
+&  ddb%mpert,crystal%nsym,natom,crystal%nsym,crystal%ntypat,phfrq,qphnrm(1),my_qpt,&
+&  crystal%rprimd,symdynmat,crystal%symrel,crystal%symafm,crystal%typat,crystal%ucvol)
+
+ ! Return the dynamical matrix and the eigenvector for this q-point
+ !if (present(out_d2cart)) out_d2cart = d2cart(:,:3*natom,:3*natom)
+ if (present(out_eigvec)) out_eigvec = eigvec
+
+ ! Return phonon displacement in reduced coordinates.
+ if (present(out_displ_red)) call phdispl_cart2red(natom, crystal%gprimd, displ_cart, out_displ_red)
+
+end subroutine ddb_diagoq
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_ddb/asrq0_apply
+!! NAME
+!! asrq0_apply
+!!
+!! FUNCTION
+!!  Impose the acoustic sum rule based on the q=0 block found in the DDB file.
+!!
+!! INPUTS
+!!  asrq0<asrq0_t>=Object for the treatment of the ASR based on the q=0 block found in the DDB file.
+!!  natom=Number of atoms per unit cell.
+!!  mpert=Maximum number of perturbation (reported in ddb%mpert)
+!!  msize=Maximum size of array ddb%val
+!!  xcart(3,natom)=Atomic positions in Cartesian coordinates
+!!
+!! SIDE EFFECTS
+!!   d2cart=matrix of second derivatives of total energy, in cartesian coordinates
+!!   Input: Values stored in ddb%
+!!   Output: Changed to enforce ASR.
+!!
+!! PARENTS
+!!      anaddb,m_ddb,m_phonons
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine asrq0_apply(asrq0, natom, mpert, msize, xcart, d2cart)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'asrq0_apply'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: natom, msize, mpert
+ type(asrq0_t),intent(inout) :: asrq0
+!arrays
+ real(dp),intent(in) :: xcart(3,natom)
+ real(dp),intent(inout) :: d2cart(2,msize)
+
+! ************************************************************************
+
+ if (asrq0%asr /= 0 .and. asrq0%iblok == 0) then
+   MSG_WARNING("asr != 0 but DDB file does not contain q=Gamma. D(q) cannot be corrected")
+   return
+ end if
+
+ select case (asrq0%asr)
+ case (0)
+   return
+ case (1,2,5)
+   call asria_corr(asrq0%asr, asrq0%d2asr, d2cart, mpert, natom)
+ case (3,4)
+   ! Impose acoustic sum rule plus rotational symmetry for 0D and 1D systems
+   call asrprs(asrq0%asr,2,3,asrq0%uinvers,asrq0%vtinvers,asrq0%singular,d2cart,mpert,natom,xcart)
+ case default
+   MSG_ERROR(sjoin("Wrong value for asr:", itoa(asrq0%asr)))
+ end select
+
+end subroutine asrq0_apply
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_ddb/asrq0_free
+!! NAME
+!! asrq0_free
+!!
+!! FUNCTION
+!!   Free dynamic memory
+!!
+!! PARENTS
+!!      anaddb,m_effective_potential,m_effective_potential_file
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine asrq0_free(asrq0)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'asrq0_free'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+ type(asrq0_t),intent(inout) :: asrq0
 
 ! ************************************************************************
 
  ! real
- if (allocated(acorr%d2asr)) then
-   ABI_FREE(acorr%d2asr)
+ if (allocated(asrq0%d2asr)) then
+   ABI_FREE(asrq0%d2asr)
  end if
 
- if (allocated(acorr%singular)) then
-   ABI_FREE(acorr%singular)
+ if (allocated(asrq0%singular)) then
+   ABI_FREE(asrq0%singular)
  end if
 
- if (allocated(acorr%uinvers)) then
-   ABI_FREE(acorr%uinvers)
+ if (allocated(asrq0%uinvers)) then
+   ABI_FREE(asrq0%uinvers)
  end if
 
- if (allocated(acorr%vtinvers)) then
-   ABI_FREE(acorr%vtinvers)
+ if (allocated(asrq0%vtinvers)) then
+   ABI_FREE(asrq0%vtinvers)
  end if
 
-end subroutine asrq0corr_free
+end subroutine asrq0_free
 !!***
 
-
 !!****f* m_ddb/ddb_chkname
-!! NAME ddb_chkname
+!! NAME
 !! ddb_chkname
 !!
 !! FUNCTION

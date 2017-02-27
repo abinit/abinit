@@ -19,9 +19,12 @@
 !! blkval(2,3,mpert,3,mpert,nblok)=
 !!   second derivatives of total energy with respect to electric fields
 !!   atom displacements,strain,...... all in cartesian coordinates
+!! crystal<crystal_t>=Crystalline structure info.
+!! asrq0<asrq0_t>=Object for the treatment of the ASR based on the q=0 block found in the DDB file.
 !! iblok= bolk number in DDB file
 !! iout=out file number
 !! mpert=maximum number of ipert
+!! msize=Maximum size of dynamical matrices and other perturbations (ddk, dde...)
 !! natom=number of atoms in unit cell
 !! nblok=number of total bloks in DDB file
 !!
@@ -34,7 +37,7 @@
 !! sum rule is applied on the internal strain tensor
 !!
 !! PARENTS
-!!      anaddb
+!!      anaddb,m_effective_potential_file
 !!
 !! CHILDREN
 !!      asria_corr,wrtout,zhpev
@@ -48,12 +51,15 @@
 #include "abi_common.h"
 
 
-subroutine ddb_internalstr(asr,blkval,d2asr,iblok,instrain,iout,mpert,natom,nblok)
+subroutine ddb_internalstr(asr,crystal,blkval,asrq0,d2asr,iblok,instrain,iout,mpert,msize,natom,nblok)
 
  use defs_basis
  use m_profiling_abi
  use m_errors
+ use m_crystal
+ use m_ddb
 
+ use m_fstrings,     only : itoa, sjoin
  use m_dynmat,       only : asria_corr
 
 !This section has been created automatically by the script Abilint (TD).
@@ -67,7 +73,9 @@ subroutine ddb_internalstr(asr,blkval,d2asr,iblok,instrain,iout,mpert,natom,nblo
 
 !Arguments----------------------------------------------
 !scalars
- integer,intent(in) :: asr,iblok,iout,mpert,natom,nblok
+ integer,intent(in) :: asr,iblok,iout,mpert,msize,natom,nblok
+ type(crystal_t),intent(in) :: crystal
+ type(asrq0_t),intent(inout) :: asrq0
 !arrays
  real(dp),intent(in) :: d2asr(2,3,natom,3,natom)
  real(dp),intent(in) :: blkval(2,3,mpert,3,mpert,nblok)
@@ -106,9 +114,7 @@ subroutine ddb_internalstr(asr,blkval,d2asr,iblok,instrain,iout,mpert,natom,nblo
 !        for the shear modulus
        end if
        instrain(ivarA,ivarB)=(-1.0_dp)*blkval(1,idirA,ipertA,idirB,ipertB,iblok)
-!      DEBUG
 !      write(std_out,'(es16.6)')blkval(1,idirA,ipertA,idirB,ipertB,iblok)
-!      ENDDEBUG
      end do
    end do
  end do
@@ -150,8 +156,11 @@ subroutine ddb_internalstr(asr,blkval,d2asr,iblok,instrain,iout,mpert,natom,nblo
  write(message,'(a,a,a,a)')ch10,&
 & ' Force-response internal strain tensor','(Unit:Hartree/bohr)',ch10
  call wrtout(std_out,message,'COLL')
- write(std_out,'(a5,a4,a11,a12,a12,a12,a12,a12)')' Atom',' dir','strainxx',&
+ call wrtout(iout,message,'COLL')
+
+ write(message,'(a5,a4,a11,a12,a12,a12,a12,a12)')' Atom',' dir','strainxx',&
 & 'strainyy','strainzz','strainyz','strainxz','strainxy'
+ call wrtout(std_out,message,'COLL')
  do ii1=1,3*natom
    if(mod(ii1,3)==1)then
      direction='x'
@@ -160,15 +169,16 @@ subroutine ddb_internalstr(asr,blkval,d2asr,iblok,instrain,iout,mpert,natom,nblo
    elseif(mod(ii1,3)==0)then
      direction='z'
    end if
-   write(std_out,'(a1,i2,a2,a3,6f12.7)')' ',int((ii1-1)/3)+1,'  ',direction,&
+   write(message,'(a1,i2,a2,a3,6f12.7)')' ',int((ii1-1)/3)+1,'  ',direction,&
 &   instrain(ii1,1),instrain(ii1,2),instrain(ii1,3),&
 &   instrain(ii1,4),instrain(ii1,5),instrain(ii1,6)
+   call wrtout(std_out,message,'COLL')
  end do
 
 !now write into the ddb output file
- call wrtout(iout,message,'COLL')
- write(iout,'(a5,a4,a11,a12,a12,a12,a12,a12)')' Atom',' dir','strainxx',&
+ write(message,'(a5,a4,a11,a12,a12,a12,a12,a12)')' Atom',' dir','strainxx',&
 & 'strainyy','strainzz','strainyz','strainxz','strainxy'
+ call wrtout(iout,message,'COLL')
  do ii1=1,3*natom
    if(mod(ii1,3)==1)then
      direction='x'
@@ -177,16 +187,12 @@ subroutine ddb_internalstr(asr,blkval,d2asr,iblok,instrain,iout,mpert,natom,nblo
    elseif(mod(ii1,3)==0)then
      direction='z'
    end if
-   write(iout,'(a1,i2,a2,a3,6f12.7)')' ',int((ii1-1)/3)+1,'  ',direction,&
+   write(message,'(a1,i2,a2,a3,6f12.7)')' ',int((ii1-1)/3)+1,'  ',direction,&
 &   instrain(ii1,1),&
 &   instrain(ii1,2),instrain(ii1,3),&
 &   instrain(ii1,4),instrain(ii1,5),instrain(ii1,6)
+   call wrtout(iout,message,'COLL')
  end do
-
-!DEBUG
-!write(std_out,'(/,a,/)')'debug the block number'
-!write(std_out,'(i6)')iblok
-!ENDDEBUG
 
 !try to get the displacement response internal strain tensor
 !first need the inverse of force constant matrix
@@ -206,6 +212,7 @@ subroutine ddb_internalstr(asr,blkval,d2asr,iblok,instrain,iout,mpert,natom,nblo
 !Eventually impose the acoustic sum rule
 !FIXME: this might depend on ifcflag: impose that it is 0 or generalize
  call asria_corr(asr,d2asr,d2cart,natom,natom)
+ !call asrq0_apply(asrq0, natom, mpert, msize, crystal%xcart, d2cart)
  kmatrix = d2cart(1,:,:)
  Apmatr(:,:)=kmatrix(:,:)
 
@@ -218,7 +225,7 @@ subroutine ddb_internalstr(asr,blkval,d2asr,iblok,instrain,iout,mpert,natom,nblo
 !end do
 !end do
 !ENDDEBUG
- 
+
  Nmatr(:,:)=0.0_dp
  do ivarA=1,3*natom
    do ivarB=1,3*natom
@@ -253,9 +260,11 @@ subroutine ddb_internalstr(asr,blkval,d2asr,iblok,instrain,iout,mpert,natom,nblo
      ii1=ii1+1
    end do
  end do
+
 !Bpmatr(2,:) is the imaginary part of the force matrix
 !then call the subroutines CHPEV and ZHPEV to get the eigenvectors
  call ZHPEV ('V','U',3*natom,Bpmatr,eigvalp,eigvecp,3*natom,zhpev1p,zhpev2p,ier)
+ ABI_CHECK(ier == 0, sjoin("ZHPEV returned:", itoa(ier)))
 
 !DEBUG
 !the eigenval and eigenvec
@@ -342,6 +351,7 @@ subroutine ddb_internalstr(asr,blkval,d2asr,iblok,instrain,iout,mpert,natom,nblo
 
 !Call the subroutines CHPEV and ZHPEV to get the eigenvectors and the eigenvalues
  call ZHPEV ('V','U',3*natom-3,Bmatr,eigval,eigvec,3*natom-3,zhpev1,zhpev2,ier)
+ ABI_CHECK(ier == 0, sjoin("ZHPEV returned:", itoa(ier)))
 
 !Check the unstable phonon modes, if the first is negative then print
 !warning message
@@ -440,26 +450,11 @@ subroutine ddb_internalstr(asr,blkval,d2asr,iblok,instrain,iout,mpert,natom,nblo
  write(message,'(a,a,a,a)')ch10,&
 & ' Displacement-response internal strain ', 'tensor (Unit:Bohr)',ch10
  call wrtout(std_out,message,'COLL')
- write(std_out,'(a5,a4,a11,a12,a12,a12,a12,a12)')' Atom',' dir','strainxx',&
-& 'strainyy','strainzz','strainyz','strainxz','strainxy'
-
- do ivarA=1,3*natom
-   if(mod(ivarA,3)==1)then
-     direction='x'
-   elseif(mod(ivarA,3)==2)then
-     direction='y'
-   elseif(mod(ivarA,3)==0)then
-     direction='z'
-   end if
-   write(std_out,'(a1,i2,a2,a3,6f12.7)')' ',int((ivarA-1)/3)+1,'  ',direction,&
-&   instrain_dis(1,ivarA),instrain_dis(2,ivarA),&
-&   instrain_dis(3,ivarA),instrain_dis(4,ivarA),instrain_dis(5,ivarA),&
-&   instrain_dis(6,ivarA)
- end do
-
  call wrtout(iout,message,'COLL')
- write(iout,'(a5,a4,a11,a12,a12,a12,a12,a12)')' Atom',' dir','strainxx',&
+ write(message,'(a5,a4,a11,a12,a12,a12,a12,a12)')' Atom',' dir','strainxx',&
 & 'strainyy','strainzz','strainyz','strainxz','strainxy'
+ call wrtout(std_out,message,'COLL')
+ call wrtout(iout,message,'COLL')
  do ivarA=1,3*natom
    if(mod(ivarA,3)==1)then
      direction='x'
@@ -468,10 +463,12 @@ subroutine ddb_internalstr(asr,blkval,d2asr,iblok,instrain,iout,mpert,natom,nblo
    elseif(mod(ivarA,3)==0)then
      direction='z'
    end if
-   write(iout,'(a1,i2,a2,a3,6f12.7)')' ',int((ivarA-1)/3)+1,'  ',direction,&
+   write(message,'(a1,i2,a2,a3,6f12.7)')' ',int((ivarA-1)/3)+1,'  ',direction,&
 &   instrain_dis(1,ivarA),instrain_dis(2,ivarA),&
 &   instrain_dis(3,ivarA),instrain_dis(4,ivarA),instrain_dis(5,ivarA),&
 &   instrain_dis(6,ivarA)
+   call wrtout(std_out,message,'COLL')
+   call wrtout(iout,message,'COLL')
  end do
 
 end subroutine ddb_internalstr

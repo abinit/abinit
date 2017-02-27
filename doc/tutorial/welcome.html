@@ -19,45 +19,6 @@ on the network traffic.</p>
 at most two hours of student work.  Lessons 1-4 cover the basics, other
 lectures are more specialized.</p>
 
-<h5>Copyright (C) 2000-2016 ABINIT group (XG,RC)
-<br> This file is distributed under the terms of the GNU General Public License, see
-~abinit/COPYING or <a href="http://www.gnu.org/copyleft/gpl.txt">
-http://www.gnu.org/copyleft/gpl.txt </a>.
-<br> For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
-</h5>
-
-<script type="text/javascript" src="list_internal_links.js"> </script>
-
-<p>Before following the tutorials, you should have read the <a
-href="../users/new_user_guide.html"> "new user's guide"</a>, as well as
-the pages 1045-1058 of the paper "<cite>Iterative minimization
-techniques for ab initio total-energy calculations: molecular dynamics
-and conjugate gradients</cite>", by <cite>M.C. Payne, M.P. Teter, D.C.
-Allan, T.A. Arias and J.D. Joannopoulos, Rev. Mod. Phys. 64, 1045
-(1992)</cite> or, if you have more time, you should browse through the
-Chaps. 1 to 13 , and appendices L and M of the book <cite>Electronic
-Structure. Basic Theory and Practical Methods. R. M. Martin.  Cambridge
-University Press (2004) ISBN 0 521 78285 6.</cite> The latter reference
-is a must if you have not yet used another electronic structure code or
-a Quantum Chemistry package.</p>
-
-<p>After the tutorial, you might find it useful to learn about the test
-cases contained in the subdirectories of ~abinit/tests/, e.g. the
-directories fast, v1, v2, ... v6, that provide many example input files.
-You should have a look at the README files of these directories.</p>
-
-<p>Additional information can be found in the ~abinit/doc directory,
-including the description of the ABINIT project, guide lines for
-developpers, more on the use of the code (tuning) ...</p>
-
-
-<p>Some lessons depends on other lessons. The following schema should
-help you to understand these dependencies. In blue, one has the basic lessons. The blocks in red
-represents additional lessons related to ground-state features of ABINIT. Response-function
-features of ABINIT are explained in the lessons in the green blocks. Finally,
-the Many-Body Perturbation Theory capabilities are demonstrated in the lessons belonging to the violet blocks.
-The right-hand side blocks gather the lessons related to the parallelism inside ABINIT.
-</p>
 <center>
 <map id="map1" name="map1"> 
 <area shape="rect" coords="144  ,39 ,264 ,110 " href="lesson_base1.html" /> <!--2,3,4-->
@@ -77,7 +38,7 @@ The right-hand side blocks gather the lessons related to the parallelism inside 
 
 <area shape="rect" coords="56  ,387 ,127 ,413 " href="lesson_ldau.html" />
 <area shape="rect" coords="56  ,387 ,192 ,413 " href="lesson_dmft.html" />
-<area shape="rect" coords="56  ,414 ,192 ,439 " href="lesson_udet.html" />
+<area shape="rect" coords="56  ,414 ,192 ,439 " href="lesson_ucalc_crpa.html" />
 
 <area shape="rect" coords="56  ,453 ,192 ,477 " href="lesson_tddft.html" />
 
@@ -112,6 +73,38 @@ The right-hand side blocks gather the lessons related to the parallelism inside 
 
 <!-- previous size img style="height: 550px; width: 900px;" alt="Schema 1" src="tutorial_flowchart_v2.png"/-->
 
+<script type="text/javascript" src="list_internal_links.js"> </script>
+
+<p>Before following the tutorials, you should have read the <a
+href="../users/new_user_guide.html"> "new user's guide"</a>, as well as
+the pages 1045-1058 of the paper "<cite>Iterative minimization
+techniques for ab initio total-energy calculations: molecular dynamics
+and conjugate gradients</cite>", by <cite>M.C. Payne, M.P. Teter, D.C.
+Allan, T.A. Arias and J.D. Joannopoulos, Rev. Mod. Phys. 64, 1045
+(1992)</cite> or, if you have more time, you should browse through the
+Chaps. 1 to 13 , and appendices L and M of the book <cite>Electronic
+Structure. Basic Theory and Practical Methods. R. M. Martin.  Cambridge
+University Press (2004) ISBN 0 521 78285 6.</cite> The latter reference
+is a must if you have not yet used another electronic structure code or
+a Quantum Chemistry package.</p>
+
+<p>After the tutorial, you might find it useful to learn about the test
+cases contained in the subdirectories of ~abinit/tests/, e.g. the
+directories fast, v1, v2, ... v6, that provide many example input files.
+You should have a look at the README files of these directories.</p>
+
+<p>Additional information can be found in the ~abinit/doc directory,
+including the description of the ABINIT project, guide lines for
+developpers, more on the use of the code (tuning) ...</p>
+
+
+<p>Some lessons depends on other lessons. The following schema should
+help you to understand these dependencies. In blue, one has the basic lessons. The blocks in red
+represents additional lessons related to ground-state features of ABINIT. Response-function
+features of ABINIT are explained in the lessons in the green blocks. Finally,
+the Many-Body Perturbation Theory capabilities are demonstrated in the lessons belonging to the violet blocks.
+The right-hand side blocks gather the lessons related to the parallelism inside ABINIT.
+</p>
 <hr>
 
 <h3>Brief description of each lesson's content</h3>
@@ -170,7 +163,8 @@ entity: you should not skip any of these.</b></p>
   how to perform a DFT+U calculation using ABINIT, and will lead to
   compute the projected DOS of NiO. Prerequisite : PAW1.</li>
   <li><a href="lesson_dmft.html">The lesson on DFT+DMFT</a> shows
-  how to perform a DFT+DMFT calculation on SrVO3 using projected Wannier functions. Prerequisite : DFT+U, Wannier90.</li>
+  how to perform a DFT+DMFT calculation on SrVO3 using projected Wannier functions. Prerequisite : DFT+U.</li>
+  <li><a href="lesson_ucalc_crpa.html">The lesson on the calculation of effective interactions U and J by the cRPA method</a> shows how to determine the U value with the constrained Random Phase Approximation using projected Wannier orbitals.  Prerequisite : DFT+U.</li>
   <li><a href="lesson_udet.html">The lesson on the determination of U
   for DFT+U</a> shows how to determine the U value with the linear response method, to be used in the
   DFT+U approach. Prerequisite : DFT+U.</li>
@@ -290,6 +284,13 @@ tutorials. For a complete feature list, please see the
 ~abinit/doc/features/ directory. For examples on how to use these
 features, please see the ~abinit/tests/* directories and their
 accompanying README files.</p>
+
+<h5>Copyright (C) 2000-2016 ABINIT group (XG,RC)
+<br> This file is distributed under the terms of the GNU General Public License, see
+~abinit/COPYING or <a href="http://www.gnu.org/copyleft/gpl.txt">
+http://www.gnu.org/copyleft/gpl.txt </a>.
+<br> For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
+</h5>
 
 <script type="text/javascript" src="list_internal_links.js"> </script>
 

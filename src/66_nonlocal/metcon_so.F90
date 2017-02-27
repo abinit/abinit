@@ -313,7 +313,7 @@ subroutine metcon_so(rank,gmet,amet,aa,bb)
  end function cona_metso
 
 
- function con_metso(ii,i1,i2,i3)
+   function con_metso(ii,i1,i2,i3)
 
 
 !This section has been created automatically by the script Abilint (TD).

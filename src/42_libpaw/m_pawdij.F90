@@ -2187,7 +2187,7 @@ subroutine pawdijhat(cplex,cplex_dij,dijhat,gprimd,iatom,ipert,&
    end if
  end if
 
-!Eventually compute exp(-i.q.r) factors for the current atom (if not already done)
+!Eventually compute exp(i.q.r) factors for the current atom (if not already done)
  if ((ipert==iatom).and.qne0.and.(pawfgrtab%expiqr_allocated==0)) then
    if (allocated(pawfgrtab%expiqr))  then
      LIBPAW_DEALLOCATE(pawfgrtab%expiqr)

@@ -3055,13 +3055,17 @@ procedure.
 </p>
 <p>
  1) When the primitive vectors of the lattice do NOT form
-a FCC or a BCC lattice, the usual (shifted) Monkhorst-Pack
+a FCC or a BCC lattice, the default (shifted) Monkhorst-Pack
 grids are formed by using
 <a href="varbas.html#nshiftk">nshiftk</a>=1 and <b>shiftk</b> 0.5 0.5 0.5 .
-This is often the preferred k point sampling.
+This is often the preferred k point sampling, as the shift improves the sampling efficiency.
+However, it can also break symmetry, if the 111 direction is not an axis of rotation,
+e.g. in tetragonal or hexagonal systems. Abinit will complain about this breaking, and you
+should adapt <b>shiftk</b>.
 For a non-shifted Monkhorst-Pack grid, use
 <a href="varbas.html#nshiftk">nshiftk</a>=1 and <b>shiftk</b> 0.0 0.0 0.0 ,
-but there is little reason to do that.
+which will be compatible with all symmetries, and is necessary for some features such as k-point
+interpolation.
 </p>
 <p>
  2) When the primitive vectors of the lattice form a FCC lattice,
@@ -3478,7 +3482,6 @@ they are seen as a unique input variable at reading. Hence, it is forbidden that
 have non-zero values for the same dataset, or generically (for all datasets).
 However, a non-zero value for one such variable for one dataset will have precedence on the non-zero value for another
 input variable defined generically.
-
 </font>
 
 <br><br><br><br><a href=#top>Go to the top</a>
@@ -3745,7 +3748,7 @@ are given by:
   R_cartesian = xred1*rprimd1+xred2*rprimd2+xred3*rprimd3
  </tele>
  <br />
- where (t1,t2,t3) are the "reduced coordinates" given in
+ where (xred1,xred2,xred3) are the "reduced coordinates" given in
 columns of "<b>xred</b>", (rprimd1,rprimd2,rprimd3) are the columns of
 primitive vectors array "<a href="varbas.html#rprimd">rprimd</a>" in Bohr.
  <br />

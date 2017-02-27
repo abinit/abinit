@@ -117,16 +117,13 @@ subroutine ddb_compare (acell,acell8,amu,amu8,dimekb,ecut,ecut8,ekb,ekb8,&
 !Local variables -------------------------
 !scalars
  integer :: bantot,ii,ij,isym,itypat
- real(dp) :: ekbcm8,ekbcmp 
+ real(dp) :: ekbcm8,ekbcmp
  real(dp),parameter :: tol=2.0d-14
  character(len=500) :: msg
 
 ! *********************************************************************
 
-!DEBUG
-!write(std_out,*)' ddb_compare : rprim=',rprim
-!write(std_out,*)' ddb_compare : rprim8=',rprim8
-!ENDDEBUG
+!write(std_out,*)' ddb_compare : rprim=',rprim, "rprim8=",rprim8
 
 !Compare all the preliminary information
 !1. natom
@@ -189,27 +186,6 @@ subroutine ddb_compare (acell,acell8,amu,amu8,dimekb,ecut,ecut8,ekb,ekb8,&
    call chkr8(amu(ii),amu8(ii),'   amu',tol)
  end do
 !9. date
-!Compare the two dates, and put in the variable date the most
-!recent one.
-!(the selection on the year is valid up to 2090 only ....)
-!yynow=1991
-!yy=date-100*((date-yynow)/100)
-!yy8=date8-100*((date8-yynow)/100)
-!if(yy<yy8)then
-!date=date8
-!else if(yy==yy8)then
-!mm=date/10000
-!mm8=date8/10000
-!if(mm<mm8)then
-!date=date8
-!else if(mm==mm8)then
-!dd=date/100-100*(date/10000)
-!dd8=date8/100-100*(date8/10000)
-!if(dd<dd8)then
-!date=date8
-!end if
-!end if
-!end if
 !10. ecut
  call chkr8(ecut,ecut8,'  ecut',tol)
 !10b. pawecutdg (PAW only)
@@ -244,8 +220,7 @@ subroutine ddb_compare (acell,acell8,amu,amu8,dimekb,ecut,ecut8,ekb,ekb8,&
      do ii=1,3
 !      Compares the input and transfer values only if the input
 !      has not been initialized by a ground state input file
-       call chkr8(kpt(ii,ij)/kptnrm,&
-&       kpt8(ii,ij)/kptnr8,'   kpt',tol)
+       call chkr8(kpt(ii,ij)/kptnrm,kpt8(ii,ij)/kptnr8,'   kpt',tol)
      end do
    end do
  end if
@@ -253,12 +228,12 @@ subroutine ddb_compare (acell,acell8,amu,amu8,dimekb,ecut,ecut8,ekb,ekb8,&
 !MT dec 2013: deactivate the stop on ngfft to allow for
 ! (nfft-converged) DFPT calculations with GS WFK obtained with a different ngfft
  do ii=1,3
+   if (ngfft(ii) == ngfft8(ii)) cycle
    write(msg,'(3a,i10,3a,i10,a)') &
 &   'Comparing integers for variable ngfft.',ch10,&
 &   'Value from input DDB is',ngfft(ii),' and',ch10,&
 &   'from transfer DDB is',ngfft8(ii),'.'
    MSG_WARNING(msg)
-!  call chki8(ngfft(ii),ngfft8(ii),' ngfft')
  end do
 !17. occ
 !Compares the input and transfer values only if the input has not
@@ -404,7 +379,7 @@ subroutine ddb_compare (acell,acell8,amu,amu8,dimekb,ecut,ecut8,ekb,ekb8,&
    end if
  end if
 
- contains 
+ contains
 !!***
 
 !!****f* ABINIT/chkr8

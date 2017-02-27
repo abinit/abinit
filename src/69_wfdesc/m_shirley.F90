@@ -4,7 +4,7 @@
 !!  m_shirley
 !!
 !! FUNCTION
-!!  Procedures and objects for the interpolation of 
+!!  Procedures and objects for the interpolation of
 !!  KS eigenvalues and eigenvectors with Shirley's method.
 !!
 !! COPYRIGHT
@@ -72,7 +72,7 @@ MODULE m_shirley
 
  private
 
- public :: wfd_bloch_to_shirley ! Produce new wavefunction descriptor with the optical basis set from a set of KS states, 
+ public :: wfd_bloch_to_shirley ! Produce new wavefunction descriptor with the optical basis set from a set of KS states,
  public :: shirley_interp       ! Interpolate the KS Hamiltonian in the Shirley basis set.
  public :: shirley_hks          ! Compute <i|H_ks|j> in the Shirley basis set for a single k-point and spin
  public :: shirley_window       ! Find an optimal basis set for the interpolation of the KS states in a energy window,
@@ -87,17 +87,17 @@ MODULE m_shirley
 !!  shparams_t
 !!
 !! FUNCTION
-!!  Store the parameters controlling the algorith for the 
+!!  Store the parameters controlling the algorith for the
 !!  Shirley interpolation of the KS band energies and wavefunctions.
 !!
 !! SOURCE
 
  type,public :: shparams_t
-   
+
    integer :: ndivsm=20
      ! Number of division for the smallest segment of the k-path.
      ! Used for the interpolation of band structures
-    
+
      ! Options used for the generazion of the K-mesh if sampling == "mesh"
      ! See abinit documentation
    integer :: kptopt = 3
@@ -465,7 +465,7 @@ end subroutine ovlp_free
 !!  Calculates the upper triangle of the overlap matrix <u_i|u_j> for a given spin and for
 !!  all the possible combinations (k,b|k',b') with k and k' in the full Brillouin zone.
 !!  The u functions are the periodic part of the Bloch wavefunctions hence there is
-!!  no selection rule in k-space for the matrix elements when k != k' 
+!!  no selection rule in k-space for the matrix elements when k != k'
 !!  The diagonal matrix elements equals one provided that the input wavefunctions are correctly normalized.
 !!
 !! INPUTS
@@ -529,12 +529,12 @@ subroutine ovlp_init(O,ewin,use_sym,ov_ngfft,Wfd,Cryst,Kmesh,Bands,Psps,Pawtab,P
 !scalars
  integer,parameter :: dim_rtwg1=1,option_lob0=0
  integer :: ik1_bz,ik2_bz,ik1_ibz,ik2_ibz,ierr,rhoxsp_method,nqpt,iqpt,rk
- integer :: band1,band2,nband_k,nband_k2,nband_k1,npw_k1,npw_k2,spin 
- integer :: with_sym,without_sym 
+ integer :: band1,band2,nband_k,nband_k2,nband_k1,npw_k1,npw_k2,spin
+ integer :: with_sym,without_sym
  integer(i8b) :: row,col,ovlp_size,os_size
 !MPI
  integer(i8b) :: tot_nels,oidx,my_hsize,bsize_my_block
- integer(i8b) :: my_cols(2),my_rows(2) 
+ integer(i8b) :: my_cols(2),my_rows(2)
  integer(i8b),allocatable :: t_start(:),t_stop(:),hsize_of(:)
 !ENDMPI
  integer :: k1_sym,k2_sym,k1_tim,k2_tim,inv_k2_sym,inv_k1_sym
@@ -580,7 +580,7 @@ subroutine ovlp_init(O,ewin,use_sym,ov_ngfft,Wfd,Cryst,Kmesh,Bands,Psps,Pawtab,P
    write(msg,'(a,3(i0,1x),a)')" Real space FFT mesh ",Wfd%ngfft(1:3)," is not symmetric. Cannot symmetrize in real space"
    MSG_ERROR(msg)
  end if
- 
+
  nsppol = Wfd%nsppol; nspinor = Wfd%nspinor
  mband = Wfd%mband
 
@@ -707,7 +707,7 @@ subroutine ovlp_init(O,ewin,use_sym,ov_ngfft,Wfd,Cryst,Kmesh,Bands,Psps,Pawtab,P
  do spin=1,nsppol
    if (.not. wfd_itreat_spin(Wfd,spin,comm_spin,rank_spin,nproc_spin)) cycle
 
-   ! Compute table (b,k) --> indx and indx --> (b,k) where (b,k) is 
+   ! Compute table (b,k) --> indx and indx --> (b,k) where (b,k) is
    ! the set of bands and kpoints included in the calculation of the overlap.
    O(spin)%mband   = mband
    O(spin)%nkpt    = nkpt
@@ -755,7 +755,7 @@ subroutine ovlp_init(O,ewin,use_sym,ov_ngfft,Wfd,Cryst,Kmesh,Bands,Psps,Pawtab,P
 
    ! Distribute the calculation of the matrix elements among the nodes.
    ! * tstart and t_stop give the initial and final transition index treated by each node.
-   ! * my_hsize is the number of transitions treated by this processor 
+   ! * my_hsize is the number of transitions treated by this processor
    ! * my_cols(1:2) gives the initial and final column treated by this node.
    !
    ! Distribution of the matrix elements among the nodes.
@@ -765,7 +765,7 @@ subroutine ovlp_init(O,ewin,use_sym,ov_ngfft,Wfd,Cryst,Kmesh,Bands,Psps,Pawtab,P
    !t_start = 1; t_stop = tot_nels
    !my_rows = [1_i8b,os_size]; my_cols = [1_i8b,os_size]
 
-   call xmpi_split_work2_i8b(tot_nels,nproc_spin,t_start,t_stop,msg,ierr) 
+   call xmpi_split_work2_i8b(tot_nels,nproc_spin,t_start,t_stop,msg,ierr)
    if (ierr==2) MSG_WARNING(msg)
 
    ABI_MALLOC(hsize_of,(0:nproc_spin-1))
@@ -787,10 +787,10 @@ subroutine ovlp_init(O,ewin,use_sym,ov_ngfft,Wfd,Cryst,Kmesh,Bands,Psps,Pawtab,P
    ABI_FREE(hsize_of)
 
    my_cols=0
-   do col=1,os_size 
-     do row=1,col 
+   do col=1,os_size
+     do row=1,col
        oidx = row + col*(col-1_i8b)/2
-       if (oidx==t_start(rank_spin)) then 
+       if (oidx==t_start(rank_spin)) then
          my_rows(1) = row
          my_cols(1) = col
        end if
@@ -817,11 +817,11 @@ subroutine ovlp_init(O,ewin,use_sym,ov_ngfft,Wfd,Cryst,Kmesh,Bands,Psps,Pawtab,P
        call get_BZ_item(Kmesh,ik2_bz,kk2,ik2_ibz,k2_sym,k2_tim,k2_eimkt,k2_umklp,k2_isirred)
        nband_k2 = Wfd%nband(ik2_ibz,spin)
        npw_k2   = Wfd%npwarr(ik2_ibz)
-       
+
        do band2=1,nband_k2
          col = O(spin)%bk2idx(band2,ik2_bz)
 
-         ! Check is this col is treated by me. 
+         ! Check is this col is treated by me.
          if (my_cols(2)<col .or. my_cols(1)>col) cycle
 
          ug2 => Wfd%Wave(band2,ik2_ibz,spin)%ug
@@ -845,7 +845,7 @@ subroutine ovlp_init(O,ewin,use_sym,ov_ngfft,Wfd,Cryst,Kmesh,Bands,Psps,Pawtab,P
            do band1=1,band1_stop
              row = O(spin)%bk2idx(band1,ik1_bz)
 
-             ! Check if this element is treated by me. 
+             ! Check if this element is treated by me.
              oidx = row + col*(col-1)/2
              if (oidx<t_start(rank_spin) .or. oidx>t_stop(rank_spin)) cycle
 
@@ -859,7 +859,7 @@ subroutine ovlp_init(O,ewin,use_sym,ov_ngfft,Wfd,Cryst,Kmesh,Bands,Psps,Pawtab,P
 
              if (ik2_bz==ik1_bz .and. k1_isirred) then
                ! Save the overlap here and skip the symmetrization.
-               blk_ovlp = wfd_xdotc(Wfd,Cryst,Pawtab,band1,band2,ik1_ibz,spin) 
+               blk_ovlp = wfd_xdotc(Wfd,Cryst,Pawtab,band1,band2,ik1_ibz,spin)
                cycle
              end if
 
@@ -899,7 +899,7 @@ subroutine ovlp_init(O,ewin,use_sym,ov_ngfft,Wfd,Cryst,Kmesh,Bands,Psps,Pawtab,P
        end do
      end do
 
-   CASE (.TRUE.)  
+   CASE (.TRUE.)
      ! FIXME does not work yet. Problems with umklapp symmorphic operations and symmetry tables somewhere.
 
      call wrtout(std_out," Version with symmetries","COLL")
@@ -1090,7 +1090,7 @@ end subroutine ovlp_init
 !! ovlp_diago_and_prune
 !!
 !! FUNCTION
-!!  Diagonalize the overlap matrix for a single spin, and selected the optimal 
+!!  Diagonalize the overlap matrix for a single spin, and selected the optimal
 !!  basis set according the value of sh_coverage.
 !!
 !! INPUTS
@@ -1099,7 +1099,7 @@ end subroutine ovlp_init
 !! OUTPUT
 !!  sh_size=Size of the optimal basis set
 !!  base=Index of the first eigenvector that is excluded from the optimal basis set.
-!! 
+!!
 !! SIDE EFFECTS
 !!  O <type(ovlp_t)>= Compute the eigenvalues and store the results in O%eigene
 !!
@@ -1134,7 +1134,7 @@ subroutine ovlp_diago_and_prune(O,sh_coverage,sh_size,base)
 
 !Local variables ------------------------------
 !scalars
- integer :: ii 
+ integer :: ii
  real(dp) :: sum_eige,trace,cpu,wall,gflops
  character(len=500) :: msg
 
@@ -1296,18 +1296,18 @@ end subroutine ovlp_diff
 !! Pawrad<Pawrad_type>=For PAW, RADial mesh discretization and related data
 !! min_bsize=Minimum number of states in the optimal basis set. < 0 if no constraint should be enforced.
 !! sh_coverage=Parameter defining the coverage of the optimal basis set:
-!! ewin(2,nsppol)=Energy window for the spin channels. Use ewin(1,:)=smallest_real and ewin(2,:)=greatest_real 
+!! ewin(2,nsppol)=Energy window for the spin channels. Use ewin(1,:)=smallest_real and ewin(2,:)=greatest_real
 !! to disable the use of the energy window
 !!
 !! OUTPUT
 !!  oWsh<wfd_t>=New wavefunction descriptor with the optimal basis set.
 !!    Note that Wfs contains a single k-point, i.e. gamma
-!!    oWsh contains N vectors where N is the first elements for which we have: 
-!!   
+!!    oWsh contains N vectors where N is the first elements for which we have:
+!!
 !!    \sum_i^N e_i >= sh_coverage * M
-!! 
+!!
 !!    with e_i being the eigenvalues of the overlap matrix ordered in descending order.
-!!    M indicates the dimension of the overlap (related to the number of k-points in the BZ and 
+!!    M indicates the dimension of the overlap (related to the number of k-points in the BZ and
 !!    the number of bands in the input Wfd descriptor.
 !!
 !! TODO
@@ -1395,7 +1395,7 @@ subroutine wfd_bloch_to_shirley(Wfd,Cryst,Kmesh,Bands,Psps,Pawtab,Pawang,Pawrad,
  if (Wfd%usepaw==1) MSG_WARNING("Shirley with PAW is still under testing")
 
  ABI_UNUSED(Pawrad(1)%mesh_size)
- 
+
  nsppol  = Wfd%nsppol; nspinor = Wfd%nspinor
  natom   = Wfd%natom
  !
@@ -1411,7 +1411,7 @@ subroutine wfd_bloch_to_shirley(Wfd,Cryst,Kmesh,Bands,Psps,Pawtab,Pawang,Pawrad,
    istwf_k = Wfd%istwfk(ik_ibz)
    ABI_CHECK(istwf_k==1,"istwf_k/=1 not coded")
    npw_k = Wfd%npwarr(ik_ibz)
-   trial_ngfft(7:) = Wfd%ngfft(7:) 
+   trial_ngfft(7:) = Wfd%ngfft(7:)
 
    !kg_k => Wfd%Kdata(ik_ibz)%kg_k
    call setmesh(Cryst%gmet,Wfd%Kdata(ik_ibz)%kg_k ,trial_ngfft,npw_k,1,npw_k,tmp_nfft,&
@@ -1425,17 +1425,17 @@ subroutine wfd_bloch_to_shirley(Wfd,Cryst,Kmesh,Bands,Psps,Pawtab,Pawang,Pawrad,
  !ov_ngfft(6)=   ov_ngfft(3)
 
 !THIS WAS THE CAUSE OF THE BUG in shirley_window!!!!!!!!!!!!!!!
- ov_ngfft(:) = Wfd%ngfft(:) 
+ ov_ngfft(:) = Wfd%ngfft(:)
 
- ! TODO 
- ! 1) Be careful here in parallel, 
- ! 2) One should always include all the degenerated states in the calculation of the 
- !    overlap so that the optimal basis set will preserve the degeneracies of the 
+ ! TODO
+ ! 1) Be careful here in parallel,
+ ! 2) One should always include all the degenerated states in the calculation of the
+ !    overlap so that the optimal basis set will preserve the degeneracies of the
  !    interpolated eigenvalues.
  use_sym =.FALSE.
  call ovlp_init(O,ewin,use_sym,ov_ngfft,Wfd,Cryst,Kmesh,Bands,Psps,Pawtab,Pawang,Pawrad)
 
- if (.FALSE.) then  
+ if (.FALSE.) then
    ! TODO Work in progress
    use_sym =.TRUE.
    call ovlp_init(Osym,ewin,use_sym,ov_ngfft,Wfd,Cryst,Kmesh,Bands,Psps,Pawtab,Pawang,Pawrad)
@@ -1453,7 +1453,7 @@ subroutine wfd_bloch_to_shirley(Wfd,Cryst,Kmesh,Bands,Psps,Pawtab,Pawang,Pawrad,
  do spin=1,nsppol
 
    if (.not. wfd_itreat_spin(Wfd,spin,comm_spin,rank_spin,nproc_spin)) cycle
-   call ovlp_diago_and_prune(O(spin),sh_coverage,sh_size(spin),base_spin(spin)) 
+   call ovlp_diago_and_prune(O(spin),sh_coverage,sh_size(spin),base_spin(spin))
    !
    ! Make sure we have enough states.
    if (sh_size(spin)<min_bsize) then
@@ -1499,7 +1499,7 @@ subroutine wfd_bloch_to_shirley(Wfd,Cryst,Kmesh,Bands,Psps,Pawtab,Pawang,Pawrad,
  call wfd_init(oWsh,Cryst,Pawtab,Psps,sh_keep_ur,Wfd%paral_kgb,npw_gamma,sh_mband,sh_nband,sh_nkibz,nsppol,&
 &  sh_bks_mask,Wfd%nspden,nspinor,Wfd%ecutsm,Wfd%dilatmx,sh_istwfk,sh_kibz,Wfd%ngfft,kg_gamma,Wfd%nloalg,&
 &  Wfd%prtvol,Wfd%pawprtvol,Wfd%comm)
- 
+
  if (oWsh%prtvol > 0) then
    call wfd_print(oWsh,header="Shirley wavefunction descriptor")
  end if
@@ -1535,7 +1535,7 @@ subroutine wfd_bloch_to_shirley(Wfd,Cryst,Kmesh,Bands,Psps,Pawtab,Pawang,Pawrad,
    sh_ur = czero
 
    ! MPI loop over the index of the overlap operator.
-   call xmpi_split_work(O(spin)%size,comm_spin,my_start,my_stop,msg,ierr) 
+   call xmpi_split_work(O(spin)%size,comm_spin,my_start,my_stop,msg,ierr)
 
    do midx=my_start,my_stop
      ! Retrieve the k-point index in the BZ and the band
@@ -1546,7 +1546,7 @@ subroutine wfd_bloch_to_shirley(Wfd,Cryst,Kmesh,Bands,Psps,Pawtab,Pawang,Pawrad,
      call wfd_sym_ur(Wfd,Cryst,Kmesh,band1,ik1_bz,spin,ur1)
 
      ! Construct the new optimal basis set.
-     do sh=1,sh_size(spin) 
+     do sh=1,sh_size(spin)
        sh_ur(:,sh) = sh_ur(:,sh) + O(spin)%mat(midx,base_spin(spin)+sh) * ur1
      end do
    end do
@@ -1565,7 +1565,7 @@ subroutine wfd_bloch_to_shirley(Wfd,Cryst,Kmesh,Bands,Psps,Pawtab,Pawang,Pawrad,
    ! Construct new optimal basis set in G-space and save results in oWsh.
    ABI_MALLOC(sh_ug,(npw_gamma*nspinor))
 
-   do sh=1,sh_size(spin) 
+   do sh=1,sh_size(spin)
      ! Transform sh_u(r) from the FFT mesh to the G-sphere.
      ! Don't try to update u(r) and PAW cpcrj since they are not used here.
 
@@ -1648,7 +1648,7 @@ end subroutine wfd_bloch_to_shirley
 !!
 !! FUNCTION
 !!  Compute <i|H_ks|j> in the Shirley basis set for a single k-point and spin
-!!  This routine is called by a single MPI node who has the entire set 
+!!  This routine is called by a single MPI node who has the entire set
 !!  of Shirley wavefunctions in memory. MPI parallelization is done in the caller
 !!  at the level of k-points and spins.
 !!
@@ -1666,7 +1666,7 @@ end subroutine wfd_bloch_to_shirley
 !! vloc_ij(sh_size,sh_size)=Matrix element of the local part in the Shirley basis set.
 !!
 !! OUTPUT
-!!  hk_ij(sh_size,sh_size)= <i|H_ks|j> 
+!!  hk_ij(sh_size,sh_size)= <i|H_ks|j>
 !!  sk_ij(sh_size,sh_size*Psps%usepaw)=PAW matrix.
 !!
 !! PARENTS
@@ -1753,7 +1753,7 @@ subroutine shirley_hks(Wsh,kpt,spin,Ham_k,Cryst,Psps,Pawtab,Pawang,Paw_ij,sh_siz
  call wrap2_pmhalf(kpt(:),k4intp(:),shifts(:))
 
  ! Continue to prepare the GS Hamiltonian.
- call load_spin_hamiltonian(Ham_k,spin,paw_ij=Paw_ij)
+ call load_spin_hamiltonian(Ham_k,spin,with_nonlocal=.true.)
 
  call kdata_init(Kdata,Cryst,Psps,k4intp,istwf_k,Wsh%ngfft,Wsh%MPI_enreg,kg_k=kg_k)
 
@@ -1845,7 +1845,7 @@ subroutine shirley_hks(Wsh,kpt,spin,Ham_k,Cryst,Psps,Pawtab,Pawang,Paw_ij,sh_siz
  ABI_FREE(ylm_k)
  !
  ! Load k-dependent part in the Hamiltonian datastructure
- matblk=NLO_MINCAT ; if (nloalg(1)>0) matblk=natom
+ matblk=min(NLO_MINCAT,maxval(Ham_k%nattyp)) ; if (nloalg(2)>0) matblk=natom
  ABI_MALLOC(ph3d,(2,npw_k,matblk))
  call load_k_hamiltonian(Ham_k,kpt_k=k4intp,npw_k=npw_k,istwf_k=istwf_k,kg_k=kg_k,&
 &                        kpg_k=kpg_k,ffnl_k=ffnl,ph3d_k=ph3d,compute_ph3d=(Wsh%paral_kgb/=1))
@@ -1862,7 +1862,7 @@ subroutine shirley_hks(Wsh,kpt,spin,Ham_k,Cryst,Psps,Pawtab,Pawang,Paw_ij,sh_siz
    if (Psps%usepaw==1) cs_psi = DCMPLX(s_psi(1,:),s_psi(2,:))
 
    ! Upper triangle of the hk_ij matrix
-   do blc1=1,blc2 
+   do blc1=1,blc2
      ug1 => Wsh%Wave(blc1,k1,1)%ug
 
      ! Treat the matrix elements of the Vnl operator.
@@ -1926,7 +1926,7 @@ end subroutine shirley_hks
 !! shirley_interp
 !!
 !! FUNCTION
-!!  Compute interpolated KS eigenvalues and optionally KS eigenvectors by direct 
+!!  Compute interpolated KS eigenvalues and optionally KS eigenvectors by direct
 !!  diagonalization of the KS Hamiltonian in the Shirley basis set.
 !!  Main entry point for client code.
 !!
@@ -1945,7 +1945,7 @@ end subroutine shirley_hks
 !! ngfftf(18)=Information about the dense 3D FFT used for vtrial.
 !! nfftf=Number of points in the FFT grid in vtrial. Might differ from the FFT mesh used for the wavefunctions.
 !! vtrial(nfftf,nspden)= Trial potential (Hartree)
-!! intp_nband(intp_nk,Wsh%nsppol)=Number of interpolated bands 
+!! intp_nband(intp_nk,Wsh%nsppol)=Number of interpolated bands
 !! intp_mband=Max number of interpolated bands (used for dimensioning arrays)
 !! intp_nk=Number of interpolated k-points.
 !! intp_kpt(3,intp_nk)=Reduced coordinates of the interpolated k-points.
@@ -2015,7 +2015,7 @@ subroutine shirley_interp(Wsh,jobz,Dtset,Cryst,Psps,Pawtab,Pawfgr,Pawang,Pawrad,
  integer :: sh1,sh2,ldz,prtvol,pawprtvol,istwf_k
  integer :: mgfftc,nfftc,onband_diago,usepaw,spin
  integer :: comm_spin,nproc_spin,rank_spin,root
- integer :: npw_k,nspinor,nsppol,nspden,sh_size,intp_bantot 
+ integer :: npw_k,nspinor,nsppol,nspden,sh_size,intp_bantot
  integer :: my_shstart,my_shstop,my_kstart,my_kstop
  real(dp) :: fft_fact,ene_fact,cpu,wall,gflops
  !logical,parameter :: debug_with_diago=.TRUE.
@@ -2033,7 +2033,7 @@ subroutine shirley_interp(Wsh,jobz,Dtset,Cryst,Psps,Pawtab,Pawfgr,Pawang,Pawrad,
  integer :: nloalg(3),intp_npwarr(intp_nk),intp_istwfk(intp_nk)
  integer,allocatable :: nlmn_sort(:)
  real(dp) :: intp_ene(intp_mband,intp_nk,Wsh%nsppol)
- real(dp) :: intp_wtk(intp_nk),kpoint(3) 
+ real(dp) :: intp_wtk(intp_nk),kpoint(3)
  real(dp),pointer :: diag_ene(:),diag_vec(:,:,:)
  real(dp),allocatable :: enek_ij(:),vnl_psi(:,:),opaw_psi(:,:)
  real(dp),allocatable :: copy_vtrial(:,:)
@@ -2044,7 +2044,7 @@ subroutine shirley_interp(Wsh,jobz,Dtset,Cryst,Psps,Pawtab,Pawfgr,Pawang,Pawrad,
  type(pawcprj_type),pointer :: diag_Cprj(:,:)
 !BEGIN For the output wfd.
  integer :: sh_npw
- logical,allocatable :: keep_ur(:,:,:),bks_mask(:,:,:) 
+ logical,allocatable :: keep_ur(:,:,:),bks_mask(:,:,:)
  complex(gwpc),allocatable :: ug(:)
 !END For the output wfd.
 #ifdef HAVE_NETCDF
@@ -2067,7 +2067,7 @@ subroutine shirley_interp(Wsh,jobz,Dtset,Cryst,Psps,Pawtab,Pawfgr,Pawang,Pawrad,
  if (maxval(intp_nband) > maxval(Wsh%npwarr)) then
     write(msg,'(a,i0,2a,i0)')&
 &    "The number of bands to be interpolated: ",maxval(intp_nband),ch10,&
-&    "cannot be greater than the size of the Shirley basis: ",maxval(Wsh%npwarr)   
+&    "cannot be greater than the size of the Shirley basis: ",maxval(Wsh%npwarr)
     MSG_ERROR(msg)
  end if
 
@@ -2150,11 +2150,11 @@ subroutine shirley_interp(Wsh,jobz,Dtset,Cryst,Psps,Pawtab,Pawfgr,Pawang,Pawrad,
 
    ! Split the k-points inside comm_spin
    !my_kstart=1; my_kstop=intp_nk
-   call xmpi_split_work(intp_nk,comm_spin,my_kstart,my_kstop,msg,ierr) 
+   call xmpi_split_work(intp_nk,comm_spin,my_kstart,my_kstop,msg,ierr)
    if (ierr==2) MSG_WARNING(msg)
    write(std_out,*)"Will treat from my_kstart ",my_kstart,"to my_kstop ",my_kstop
    !
-   ! Compute the upper triangle of the <sh2|vloc|sh1> matrix. 
+   ! Compute the upper triangle of the <sh2|vloc|sh1> matrix.
    ! All MPI(spin) processors participate
    ! Be careful here as |\tpsi> is not normalized.
    ABI_MALLOC(vloc_psi,(Wsh%nfft*nspinor))
@@ -2164,9 +2164,9 @@ subroutine shirley_interp(Wsh,jobz,Dtset,Cryst,Psps,Pawtab,Pawfgr,Pawang,Pawrad,
    vloc_ij = czero
 
    !my_shstart=1; my_shstop=sh_size
-   call xmpi_split_work(sh_size,comm_spin,my_shstart,my_shstop,msg,ierr) 
+   call xmpi_split_work(sh_size,comm_spin,my_shstart,my_shstop,msg,ierr)
    if (ierr==2) MSG_WARNING(msg)
-   
+
    do sh2=my_shstart,my_shstop
      call wfd_get_ur(Wsh,sh2,k1,spin,ur2)
      if (nspinor==1) then
@@ -2193,7 +2193,7 @@ subroutine shirley_interp(Wsh,jobz,Dtset,Cryst,Psps,Pawtab,Pawfgr,Pawang,Pawrad,
    ! ==== Loop over the interpolated k-points ====
    ! =============================================
 
-   call init_hamiltonian(Ham_k,Psps,Pawtab,nspinor,nspden,natom,&
+   call init_hamiltonian(Ham_k,Psps,Pawtab,nspinor,nsppol,nspden,natom,&
 &    Cryst%typat,Cryst%xred,Wsh%nfft,Wsh%mgfft,Wsh%ngfft,Cryst%rprimd,nloalg)
 
    ABI_MALLOC(hk_ij, (sh_size,sh_size))
@@ -2225,7 +2225,7 @@ subroutine shirley_interp(Wsh,jobz,Dtset,Cryst,Psps,Pawtab,Pawfgr,Pawang,Pawrad,
      !do_full_diago = .True.
      !write(std_out,*)"full diago",do_full_diago
 
-     if (usepaw==0) then  
+     if (usepaw==0) then
        ! Solve H*v = e*v
        if (do_full_diago) then
          call xheev(jobz,"Upper",sh_size,hk_ij,enek_ij)
@@ -2233,7 +2233,7 @@ subroutine shirley_interp(Wsh,jobz,Dtset,Cryst,Psps,Pawtab,Pawfgr,Pawang,Pawrad,
          call xheevx(jobz,"Irange","Upper",sh_size,hk_ij,zero,zero,1,nband_k,-tol8,nefound,enek_ij,eig_vec,ldz)
          if (want_eigenvectors) hk_ij(:,1:ldz) = eig_vec
        end if
-     else                     
+     else
        ! Solve H*v = e*S*v
        if (do_full_diago) then
          call xhegv(1,jobz,"Upper",sh_size,hk_ij,sk_ij,enek_ij)
@@ -2262,7 +2262,7 @@ subroutine shirley_interp(Wsh,jobz,Dtset,Cryst,Psps,Pawtab,Pawfgr,Pawang,Pawrad,
        ABI_FREE(eig_vec)
      end if
 
-     if (prtvol>0) then 
+     if (prtvol>0) then
        ! Write interpolated energies.
        ene_fact=Ha_eV; frmt1='(i4,4x,9(1x,f7.4))'; frmt2='(8x,9(1x,f7.4))'
        write(msg,'(a,3es16.8,2a)')' Eigenvalues in eV for kpt= ( ',kpoint," ), spin ",spin_name(spin)
@@ -2324,7 +2324,7 @@ subroutine shirley_interp(Wsh,jobz,Dtset,Cryst,Psps,Pawtab,Pawfgr,Pawang,Pawrad,
          end if
        end if
 
-       ! Compute statistical parameters 
+       ! Compute statistical parameters
        Stats = stats_eval(ABS(diag_ene(1:nband_k-2) - enek_ij(1:nband_k-2))*Ha_eV*1000)
 
        write(std_out,'(a,f7.2,a,i0,a,i0)')&
@@ -2395,7 +2395,7 @@ subroutine shirley_interp(Wsh,jobz,Dtset,Cryst,Psps,Pawtab,Pawfgr,Pawang,Pawrad,
  ABI_FREE(ugly_ene)
  ABI_FREE(intp_occ)
 
- if (present(oWfd)) then 
+ if (present(oWfd)) then
    ABI_MALLOC(bks_mask, (oWfd%mband,oWfd%nkibz,oWfd%nsppol))
    ! TODO
    ! Collect all the wavefunctions on each MPI node.
@@ -2408,7 +2408,7 @@ subroutine shirley_interp(Wsh,jobz,Dtset,Cryst,Psps,Pawtab,Pawfgr,Pawang,Pawrad,
      end do
    end do
    ! Set the MPI communicators in the output wavefunction descriptor.
-   ! Master nodes in the spin communicator must communicate the bks_table 
+   ! Master nodes in the spin communicator must communicate the bks_table
    ! and broadcast the updated values to the nodes in the spin communicator.
    if (oWfd%nsppol == 2) MSG_ERROR("Not implemented error")
    call wfd_set_mpicomm(oWfd)
@@ -2420,7 +2420,7 @@ subroutine shirley_interp(Wsh,jobz,Dtset,Cryst,Psps,Pawtab,Pawfgr,Pawang,Pawrad,
  call flush_unit(std_out)
 
  ! Write netcdf file with results.
- ! FIXME: k-point info are wrong. This trick is needed so that 
+ ! FIXME: k-point info are wrong. This trick is needed so that
  ! abipy will detect a path instead of a BZ mesh.
 #ifdef HAVE_NETCDF
  if (Wsh%my_rank == 0 .and. len_trim(sh_fname)>0) then
@@ -2466,20 +2466,20 @@ end subroutine shirley_interp
 !! vtrial(nfftf,nspden)= Trial potential (Hartree)
 !! intp_mband=Number of bands to intepolate.
 !! sh_coverage=Parameter defining the coverage of the optimal basis set:
-!!   Wsh contains N vectors where N is the first elements for which we have: 
-!!   
+!!   Wsh contains N vectors where N is the first elements for which we have:
+!!
 !!   \sum_i^N e_i >= sh_coverage * M
-!! 
+!!
 !!   with e_i being the eigenvalues of the overlap matrix ordered in descending order.
-!!   M indicates the dimension of the overlap (related to the number of k-points in the BZ and 
+!!   M indicates the dimension of the overlap (related to the number of k-points in the BZ and
 !!   the number of bands in the input iWfd descriptor.
-!! ewin(2,nsppol)=Energy window for the spin channels. Use ewin(1,:)=smallest_real and ewin(2,:)=greatest_real 
+!! ewin(2,nsppol)=Energy window for the spin channels. Use ewin(1,:)=smallest_real and ewin(2,:)=greatest_real
 !! to disable the use of the energy window
 !! min_bsize=Minimum number of states in the optimal basis set.
 !! sh_fname=String with the filename of the netcdf file to be produced. No file is created if empty string.
 !! kpts(3,nk)=List of k-points for the interpolation.
 !! kweights(nk)=K-point weights (stored in oBands)
-!! 
+!!
 !! OUTPUT
 !!  oWsh<wfd_t>=New wavefunction descriptor with the optimal basis set.
 !!  Note that Wfs contains a single (fake) k-point.
@@ -2522,7 +2522,7 @@ subroutine shirley_bands(iWfd,Dtset,Cryst,iKmesh,iBands,Psps,Pawtab,Pawang,Pawra
  type(dataset_type),intent(in) :: Dtset
  type(Pawfgr_type),intent(in) :: Pawfgr
  type(wfd_t),intent(out) :: oWsh
- type(ebands_t),intent(out) :: oBands 
+ type(ebands_t),intent(out) :: oBands
 !arrays
  integer,intent(in) :: ngfftf(18),ngfftc(18)
  real(dp),intent(in) :: vtrial(nfftf,iWfd%nspden),kpts(:,:),kweights(:)
@@ -2535,7 +2535,7 @@ subroutine shirley_bands(iWfd,Dtset,Cryst,iKmesh,iBands,Psps,Pawtab,Pawang,Pawra
 !Local variables ------------------------------
 !scalars
  integer :: min_bsize,npts
-!arrays 
+!arrays
  integer,allocatable :: intp_nband(:,:)
 
 !************************************************************************
@@ -2570,10 +2570,10 @@ end subroutine shirley_bands
 !!  shirley_window
 !!
 !! FUNCTION
-!!  Find an optimal basis set for the interpolation of the KS states in a energy window, e.g states around Ef. 
+!!  Find an optimal basis set for the interpolation of the KS states in a energy window, e.g states around Ef.
 !!  The algorithm starts with a relatively coarse k-mesh and an initial energy window (sufficiently large so that
 !!  the initial basis set has enough flexibility). Constructs the initial Shirley set and uses it to interpolate
-!!  the KS states on a denser mesh. The energy window is progressively reduced so that the states far from Ef 
+!!  the KS states on a denser mesh. The energy window is progressively reduced so that the states far from Ef
 !!  are progressively filtered out (this trick allows one to reduced the size of the overlap matrix and therefore the CPU time
 !!  needed for its diagonalization. The iterative algorithm stops when the DOS is converged within a given tolerance.
 !!  Returns a new wavefunction descriptor with the Shirley basis set.
@@ -2598,17 +2598,17 @@ end subroutine shirley_bands
 !! nfftf=Number of points in the FFT grid in vtrial. Might differ from the FFT mesh used for the wavefunctions.
 !! vtrial(nfftf,nspden)= Trial potential (Hartree)
 !! sh_coverage=Parameter defining the coverage of the optimal basis set:
-!!   Wsh contains N vectors where N is the first elements for which we have: 
-!!   
+!!   Wsh contains N vectors where N is the first elements for which we have:
+!!
 !!   \sum_i^N e_i >= sh_coverage * M
-!! 
+!!
 !!   with e_i being the eigenvalues of the overlap matrix ordered in descending order.
-!!   M indicates the dimension of the overlap (related to the number of k-points in the BZ and 
+!!   M indicates the dimension of the overlap (related to the number of k-points in the BZ and
 !!   the number of bands in the input iWfd descriptor.
-!! ewin(2,nsppol)=Energy window for the spin channels. Use ewin(1,:)=smallest_real and ewin(2,:)=greatest_real 
+!! ewin(2,nsppol)=Energy window for the spin channels. Use ewin(1,:)=smallest_real and ewin(2,:)=greatest_real
 !! to disable the use of the energy window
 !! min_bsize=Minimum number of states in the optimal basis set.
-!! 
+!!
 !! SIDE EFFECTS
 !!  ewin(2,nsppol)
 !!
@@ -2642,7 +2642,7 @@ subroutine shirley_window(iWfd,Dtset,Cryst,iKmesh,iBands,Psps,Pawtab,Pawang,Pawr
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: nfftf 
+ integer,intent(in) :: nfftf
  real(dp),intent(in) :: sh_coverage
  type(crystal_t),intent(in) :: Cryst
  type(Pawang_type),intent(in) :: Pawang
@@ -2655,7 +2655,7 @@ subroutine shirley_window(iWfd,Dtset,Cryst,iKmesh,iBands,Psps,Pawtab,Pawang,Pawr
  type(wfd_t),intent(out) :: oWsh
 !arrays
  integer,intent(in) :: ngfftf(18),ngfftc(18)
- real(dp),intent(in) :: vtrial(nfftf,iWfd%nspden) 
+ real(dp),intent(in) :: vtrial(nfftf,iWfd%nspden)
  real(dp),intent(inout) :: ewin(2,iWfd%nsppol)
  type(Pawtab_type),intent(in) :: Pawtab(Cryst%ntypat*iWfd%usepaw)
  type(Pawrad_type),intent(in) :: Pawrad(Cryst%ntypat*iWfd%usepaw)
@@ -2673,7 +2673,7 @@ subroutine shirley_window(iWfd,Dtset,Cryst,iKmesh,iBands,Psps,Pawtab,Pawang,Pawr
  !type(edos_t),target :: Doses(2)
  type(kmesh_t) :: oKmesh ! <<<<
  type(ebands_t) :: oBands ! <<<<
-!arrays 
+!arrays
  integer :: kptrlatt(3,3)
  integer,allocatable :: intp_nband(:,:)
 
@@ -2736,7 +2736,7 @@ subroutine shirley_window(iWfd,Dtset,Cryst,iKmesh,iBands,Psps,Pawtab,Pawang,Pawr
    ABI_FREE(intp_nband)
 
    converged = .False.
-   ! Compute DOS and DOS(e0) and compare wrt previous one. Use same mesh as oldEdos 
+   ! Compute DOS and DOS(e0) and compare wrt previous one. Use same mesh as oldEdos
    ! Decrease the energy window if not converged and iterate
    !call edos_init(newEdos,oBands,oKmesh,method,step,broad,ierr,mesh=oldEdos%mesh)
    !ws = bisect(newEdos%mesh, ene_min)
@@ -3096,7 +3096,7 @@ subroutine wfd_shirley_to_eh(Wsh,Cryst,Psps,Pawtab,Pawang,Pawrad,min_bsize,eh_co
    ABI_FREE(dpc_tmp)
 #else
    ! FIXME does not work anymore.
-     ! TODO Check with the new version 
+     ! TODO Check with the new version
    gbound_k => Weh%Kdata(k1)%gbound
    call fft_ur(npw_gamma,Wsh%nfft,nspinor,ndat1,Wsh%mgfft,Wsh%ngfft,istwf1,kg_gamma,gbound_k,gwpc_tmp,ehg)
 #endif

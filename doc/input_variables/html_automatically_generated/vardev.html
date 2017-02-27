@@ -43,6 +43,7 @@ main input file of the abinit code.
  <a href="#dmft_rslf">dmft_rslf</a>&nbsp;&nbsp;
  <a href="#dmft_solv">dmft_solv</a>&nbsp;&nbsp;
  <a href="#dmft_t2g">dmft_t2g</a>&nbsp;&nbsp;
+ <a href="#dmft_tolfreq">dmft_tolfreq</a>&nbsp;&nbsp;
  <a href="#dmft_tollc">dmft_tollc</a>&nbsp;&nbsp;
  <a href="#dmftbandf">dmftbandf</a>&nbsp;&nbsp;
  <a href="#dmftbandi">dmftbandi</a>&nbsp;&nbsp;
@@ -56,6 +57,7 @@ main input file of the abinit code.
  <a href="#dmftctqmc_mov">dmftctqmc_mov</a>&nbsp;&nbsp;
  <a href="#dmftctqmc_mrka">dmftctqmc_mrka</a>&nbsp;&nbsp;
  <a href="#dmftctqmc_order">dmftctqmc_order</a>&nbsp;&nbsp;
+ <a href="#dmftctqmc_triqs_nleg">dmftctqmc_triqs_nleg</a>&nbsp;&nbsp;
  <a href="#dmftqmc_l">dmftqmc_l</a>&nbsp;&nbsp;
  <a href="#dmftqmc_n">dmftqmc_n</a>&nbsp;&nbsp;
  <a href="#dmftqmc_seed">dmftqmc_seed</a>&nbsp;&nbsp;
@@ -213,8 +215,8 @@ main input file of the abinit code.
 <p>
 <p>
 When <b>builtintest</b> is non-zero, the input file is a special one, that runs very quickly,
-and that is accompanied by a specific analysis by ABINIT, at the end of the run, against 
-a hard-coded value of total energy (and possibly stresses, forces ...). 
+and that is accompanied by a specific analysis by ABINIT, at the end of the run, against
+a hard-coded value of total energy (and possibly stresses, forces ...).
 The echo of the analysis is done in the STATUS file.
 In particular, such built-in tests can be used to check quickly
 whether ABINIT fallbacks have been connected or not (bigdft, etsf_io, libxc, wannier90).
@@ -253,8 +255,8 @@ exact exchange contribution only for the initial guess (not for the gradient dir
 <br><font id="definition">Mnemonics: DENSity and FORces PREDictor</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#develop">DEVELOP</a></font>
 <br><font id="vartype">Variable type: integer</font>
-<br><font id="default">Default is 6 if <a href="varpar.html#paral_kgb">paral_kgb</a>==1,
-3 if <a href="varrlx.html#ionmov">ionmov</a>==4 and <a href="varbas.html#iscf">iscf</a>==5,
+<br><font id="default">Default is 3 if <a href="varrlx.html#ionmov">ionmov</a>==4 and <a href="varbas.html#iscf">iscf</a>==5,
+6 if <a href="varpar.html#paral_kgb">paral_kgb</a>==1,
 2 otherwise.
 </font>
 <br><br><font id="requires">
@@ -628,7 +630,7 @@ CTQMC calculations are much more time consuming that Hubbard I calculations. Nev
     instructions at https://triqs.ipht.cnrs.fr/1.3/applications/cthyb/install.html.
     The current interface is valid for TRIQS 1.3 and TRIQS/CTHYB 1.3.
  <br />
- See the usefull variables for CT-QMC solver :
+ See the useful variables for CT-QMC solver :
 <a href="vardev.html#dmftctqmc_basis">dmftctqmc_basis</a>,
 <a href="vardev.html#dmftctqmc_check">dmftctqmc_check</a>,
 <a href="vardev.html#dmftctqmc_correl">dmftctqmc_correl</a>,
@@ -638,6 +640,7 @@ CTQMC calculations are much more time consuming that Hubbard I calculations. Nev
 <a href="vardev.html#dmftctqmc_mrka">dmftctqmc_mrka</a>,
 <a href="vardev.html#dmftctqmc_mov">dmftctqmc_mov</a>,
 <a href="vardev.html#dmftctqmc_order">dmftctqmc_order</a>,
+<a href="vardev.html#dmftctqmc_triqs_nleg">dmftctqmc_triqs_nleg</a>,
 <a href="vardev.html#dmftqmc_l">dmftqmc_l</a>,
 <a href="vardev.html#dmftqmc_n">dmftqmc_n</a>,
 <a href="vardev.html#dmftqmc_seed">dmftqmc_seed</a>,
@@ -659,6 +662,25 @@ CTQMC calculations are much more time consuming that Hubbard I calculations. Nev
 <p>
  <br />
  Can be set to 1 only if in cubic symmetry. It enables one to carry a DFT+DMFT calculations only on t2g orbitals.
+</p>
+</font>
+
+<br><br><br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="dmft_tolfreq">dmft_tolfreq</a></font>
+<br><font id="definition">Mnemonics: Dynamical Mean Fied Theory: Tolerance on LDA correlated electron occupation matrix for the definition of the frequency grid</font>
+<br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#develop">DEVELOP</a></font>
+<br><font id="vartype">Variable type: real</font>
+<br><font id="default">Default is 0.0001</font>
+<br><font id="text">
+<p>
+<p>
+ <br />
+ The LDA occupation matrix for correlated electrons can be computed directly. It can be compared to the calculation of the same quantity using LDA Green's function, a sum over Matsubara frequencies and
+ a projection over correlated orbitals.
+ Because the Matsubara grid is finite, the two quantities differ. If this difference is larger than dmft_tolfreq, then the code stops and an error message is given.
 </p>
 </font>
 
@@ -989,6 +1011,29 @@ The result is written in the "Perturbation.dat" file.
 <B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
 
 
+<br><font id="title"><a name="dmftctqmc_triqs_nleg">dmftctqmc_triqs_nleg</a></font>
+<br><font id="definition">Mnemonics: Dynamical Mean Fied Theory: Continuous Time Quantum Monte Carlo perturbation of TRIQS, Number of LEGendre polynomials</font>
+<br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#develop">DEVELOP</a></font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 30</font>
+<br><br><font id="requires">
+Only relevant if <a href="vardev.html#dmft_solv">dmft_solv</a>==6 or 7
+</font>
+<br><font id="text">
+<p>
+<p>
+ <br />
+ Specify the number of Legendre polynomials used for the calculation of Green's function in CTQMC code from the library TRIQS.
+ Default is 30. The value of coefficients are given in file whose name ending is "Legendre_coefficient.dat".
+ (see also <a href="http://journals.aps.org/prb/abstract/10.1103/PhysRevB.84.075145"> Phys. Rev. B 84, 075145 (2010))
+ </a>
+</p>
+</font>
+
+<br><br><br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
+
+
 <br><font id="title"><a name="dmftqmc_l">dmftqmc_l</a></font>
 <br><font id="definition">Mnemonics: Dynamical Mean Fied Theory: Quantum Monte Carlo time sLices</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#develop">DEVELOP</a></font>
@@ -1206,8 +1251,8 @@ ABINIT 7.10: this option is <b>under development</b> and might give wrong result
 <br><font id="definition">Mnemonics: Fast Fourier Transform ALGorithm</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#develop">DEVELOP</a></font>
 <br><font id="vartype">Variable type: integer</font>
-<br><font id="default">Default is 401 if <a href="varpar.html#paral_kgb">paral_kgb</a>==1,
-312 if <a href="specials.html#FFTW3">FFTW3</a> and <a href="vardev.html#usedmft">usedmft</a>==0,
+<br><font id="default">Default is 312 if <a href="specials.html#FFTW3">FFTW3</a> and <a href="vardev.html#usedmft">usedmft</a>==0,
+401 if <a href="varpar.html#paral_kgb">paral_kgb</a>==1,
 112 otherwise.
 </font>
 <br><font id="text">
@@ -1427,7 +1472,6 @@ previous ground state calculation (see the
 <b>
  This variable is experimental. In development.
 </b>
-
 </font>
 
 <br><br><br><br><a href=#top>Go to the top</a>
@@ -1483,8 +1527,8 @@ do not follow this historical choice for your production runs.
 <br><font id="text">
 <p>
 <p>
-This option selects the format used to produce the output wavefunction files and the files containing 
-densities and potentials. It mainly affects the creation of the output files since several parts 
+This option selects the format used to produce the output wavefunction files and the files containing
+densities and potentials. It mainly affects the creation of the output files since several parts
 of Abinit are able to read data from files independently of their format (either binary files or netcdf files).
 The possible values are:
 </p>
@@ -1497,34 +1541,34 @@ The possible values are:
   1 =&gt; Use MPI/IO routines (ok both for sequential and large parallel runs)
  </li>
  <li>
-  3 =&gt; Use NetCDF library to produce files according to the ETSF specification 
+  3 =&gt; Use NetCDF library to produce files according to the ETSF specification
  (ok for sequential, requires netcdf4 + hdf5 + MPI-IO support for large parallel runs)
  </li>
 </ul>
 <br />
 
 <p>
-By default, Abinit produces Fortran files and uses parallel MPI-IO under the hood when these 
+By default, Abinit produces Fortran files and uses parallel MPI-IO under the hood when these
 operations cannot be implemented in terms of simple Fortran write/read statements.
 For example, <a href="varpar.html#paral_kgb">paral_kgb</a>=1 uses the MPI-IO API provided by your MPI library.
 </p>
 
 <p>
-In a nutshell, use the default value and make sure that your MPI library supports MPI-IO 
+In a nutshell, use the default value and make sure that your MPI library supports MPI-IO
 before embarking yourself in large parallel runs (HAVE_MPI_IO should be set to 1 in ~abinit/config.h).
 Many MPI libraries, nowadays, support the MPI-2 standard so it's very likely that your MPI supports
-parallel IO. If you encounter problems, please ask your sysadmin to install a MPI library 
+parallel IO. If you encounter problems, please ask your sysadmin to install a MPI library
 with MPI-IO capabilities.
 </p>
 <p>
 There are cases, however, in which you would like to change the default behaviour.
-For example, you may want to generate WFK or DEN files in etsf-io format because you need 
+For example, you may want to generate WFK or DEN files in etsf-io format because you need
 data in this format.
 In this case, you have to use iomode==3 in the input file to override the default behaviour.
 Note however that you still need parallel IO capabilities enabled in the netcdf library
 if you want to produce netcdf files in parallel with <a href="varpar.html#paral_kgb">paral_kgb</a>=1 (i.e. netcdf4 + hdf5 + MPI-IO).
-At present, the internal fallbacks provided by Abinit do not support netcdf4 so you 
-have to link against an external netcdf library that supports hdf5+MPI-IO and 
+At present, the internal fallbacks provided by Abinit do not support netcdf4 so you
+have to link against an external netcdf library that supports hdf5+MPI-IO and
 is compatible with the mpif90 used to compile Abinit.
 See ~abinit/doc/build/config-examples/ubu_gnu_4.9_mpich.ac for a typical configuration file.
 </p>
@@ -1534,7 +1578,7 @@ References:
 <ul>
  <li>
  "Specification of an extensible and portable file format for electronic structure and crystallographic data",
-X. Gonze, C.-O. Almbladh, A. Cucca, D. Caliste, C. Freysoldt, M. Marques, V. Olevano, Y. Pouillon, 
+X. Gonze, C.-O. Almbladh, A. Cucca, D. Caliste, C. Freysoldt, M. Marques, V. Olevano, Y. Pouillon,
 M.J. Verstraete, Comput. Mat. Science 43, 1056 (2008)
   </li>
   <li>
@@ -1653,7 +1697,6 @@ Supported values:
   1 =&gt; read vdW-DF variables
  </li>
 </ul>
-
 </font>
 
 <br><br><br><br><a href=#top>Go to the top</a>
@@ -1730,7 +1773,6 @@ previous ground state calculation (see the
 <b>
  This variable is experimental. In development.
 </b>
-
 </font>
 
 <br><br><br><br><a href=#top>Go to the top</a>
@@ -2949,7 +2991,6 @@ with PHON, PHONOPY, etc...
 Print out a NetCDF file containing a vdW-DF kernel.
 <!-- See the associated script in
 ~abinit/extras/post_processing/vdw_check_kernel for further details. -->
-
 </font>
 
 <br><br><br><br><a href=#top>Go to the top</a>
@@ -3156,7 +3197,7 @@ to the IBZ. In order to prepare <a href="../../users/abinit_help.html#gw">GW</a>
 <br><font id="default">Default is 0</font>
 <br><font id="text">
 <p>
- <ul>
+<ul>
   <li>
    <b>tfkinfunc</b>=1 : <span style="text-decoration: underline;">Thomas-Fermi</span>
 kinetic functional (explicit functional of the density) is used instead of Kohn-Sham kinetic
@@ -3221,7 +3262,6 @@ This input variable has the same definition as <a href="varbas.html#toldfe">told
 It sets a tolerance for absolute differences of total energy that, reached TWICE successively, will cause the
 initialization steps (without gradient correction) to stop and the gradient correction to be added.<br/>
 Can be specified in Ha (the default), Ry, eV or Kelvin, since it has the 'ENERGY' characteristics.
-
 </font>
 
 <br><br><br><br><a href=#top>Go to the top</a>
@@ -3272,7 +3312,6 @@ ratio, for historical reasons.
 <p>
  The performance depends crucially on having a good BLAS installed. Provided the BLAS supports OpenMP, this option also yields very good scaling for the nonlocal operator.
 </p>
-
 </font>
 
 <br><br><br><br><a href=#top>Go to the top</a>
@@ -3292,7 +3331,6 @@ ratio, for historical reasons.
 <p>
  Caveat: Note that very tight convergence of ground state and phonon calculations is necessary to get good GKK matrix elements! <a href="varbas.html#tolwfr">tolwfr</a> = 1.e-24 or so is recommended everywhere. There may be problems using use_nonscf_gkk = 1 with non-symmorphic symmetries - please check (at least) that lifetimes for phonons go to 0 for acoustic modes at Gamma.
 </p>
-
 </font>
 
 <br><br><br><br><a href=#top>Go to the top</a>
@@ -3314,6 +3352,7 @@ ratio, for historical reasons.
 <a href="vardev.html#dmft_nwli">dmft_nwli</a>,
 <a href="vardev.html#dmft_nwlo">dmft_nwlo</a>,
 <a href="vardev.html#dmft_tollc">dmft_tollc</a>,
+<a href="vardev.html#dmft_tolfreq">dmft_tolfreq</a>,
 and <a href="vardev.html#dmft_iter">dmft_iter</a>.
 </p>
 <p>
@@ -3620,7 +3659,6 @@ Only relevant if <a href="vardev.html#vdw_xc">vdw_xc</a>>0
 Used when <a href="vardev.html#vdw_xc">vdw_xc</a>&gt;0,
 to build angular meshes for the vdW-DF kernel.
 <br />
-
 </font>
 
 <br><br><br><br><a href=#top>Go to the top</a>
@@ -3641,7 +3679,6 @@ Only relevant if <a href="vardev.html#vdw_xc">vdw_xc</a>>0
 Used when <a href="vardev.html#vdw_xc">vdw_xc</a>&gt;0,
 to build angular meshes for the vdW-DF kernel.
 <br />
-
 </font>
 
 <br><br><br><br><a href=#top>Go to the top</a>
@@ -3661,7 +3698,6 @@ Only relevant if <a href="vardev.html#vdw_xc">vdw_xc</a>>0
 Used when <a href="vardev.html#vdw_xc">vdw_xc</a>&gt;0,
 to build angular meshes for the vdW-DF kernel.
 <br />
-
 </font>
 
 <br><br><br><br><a href=#top>Go to the top</a>
@@ -3681,7 +3717,6 @@ Only relevant if <a href="vardev.html#vdw_xc">vdw_xc</a>>0
 Used when <a href="vardev.html#vdw_xc">vdw_xc</a>&gt;0,
 to build angular meshes for the vdW-DF kernel.
 <br />
-
 </font>
 
 <br><br><br><br><a href=#top>Go to the top</a>
@@ -3701,7 +3736,6 @@ Only relevant if <a href="vardev.html#vdw_xc">vdw_xc</a>>0
 Used when <a href="vardev.html#vdw_xc">vdw_xc</a>&gt;0,
 to build the vdW-DF kernel.
 <br />
-
 </font>
 
 <br><br><br><br><a href=#top>Go to the top</a>
@@ -3722,7 +3756,6 @@ Only relevant if <a href="vardev.html#vdw_xc">vdw_xc</a>>0
 Used when <a href="vardev.html#vdw_xc">vdw_xc</a>&gt;0,
 to build the vdW-DF kernel.
 <br />
-
 </font>
 
 <br><br><br><br><a href=#top>Go to the top</a>
@@ -3742,7 +3775,6 @@ Only relevant if <a href="vardev.html#vdw_xc">vdw_xc</a>>0
 Used when <a href="vardev.html#vdw_xc">vdw_xc</a>&gt;0,
 to build the vdW-DF kernel.
 <br />
-
 </font>
 
 <br><br><br><br><a href=#top>Go to the top</a>
@@ -3762,7 +3794,6 @@ Only relevant if <a href="vardev.html#vdw_xc">vdw_xc</a>>0
 Used when <a href="vardev.html#vdw_xc">vdw_xc</a>&gt;0,
 to filter the vdW-DF kernel in reciprocal space.
 <br />
-
 </font>
 
 <br><br><br><br><a href=#top>Go to the top</a>
@@ -3782,7 +3813,6 @@ Only relevant if <a href="vardev.html#vdw_xc">vdw_xc</a>>0
 Used when <a href="vardev.html#vdw_xc">vdw_xc</a>&gt;0,
 to build the vdW-DF kernel.
 <br />
-
 </font>
 
 <br><br><br><br><a href=#top>Go to the top</a>
@@ -3802,7 +3832,6 @@ Only relevant if <a href="vardev.html#vdw_xc">vdw_xc</a>>0
 Used when <a href="vardev.html#vdw_xc">vdw_xc</a>&gt;0,
 to build the vdW-DF kernel.
 <br />
-
 </font>
 
 <br><br><br><br><a href=#top>Go to the top</a>
@@ -3822,7 +3851,6 @@ Only relevant if <a href="vardev.html#vdw_xc">vdw_xc</a>>0
 Used when <a href="vardev.html#vdw_xc">vdw_xc</a>&gt;0,
 to build the vdW-DF kernel.
 <br />
-
 </font>
 
 <br><br><br><br><a href=#top>Go to the top</a>
@@ -3842,7 +3870,6 @@ Only relevant if <a href="vardev.html#vdw_xc">vdw_xc</a>>0
 Used when <a href="vardev.html#vdw_xc">vdw_xc</a>&gt;0,
 to define the sampling of the vdW-DF-kernel in real-space.
 <br />
-
 </font>
 
 <br><br><br><br><a href=#top>Go to the top</a>
@@ -3862,7 +3889,6 @@ Only relevant if <a href="vardev.html#vdw_xc">vdw_xc</a>>0
 Used when <a href="vardev.html#vdw_xc">vdw_xc</a>&gt;0,
 to exponentially smoothen q near q0.
 <br />
-
 </font>
 
 <br><br><br><br><a href=#top>Go to the top</a>
@@ -3882,7 +3908,6 @@ Only relevant if <a href="vardev.html#vdw_xc">vdw_xc</a>>0
 Used when <a href="vardev.html#vdw_xc">vdw_xc</a>&gt;0,
 to build the vdW-DF kernel.
 <br />
-
 </font>
 
 <br><br><br><br><a href=#top>Go to the top</a>
@@ -3902,7 +3927,6 @@ Only relevant if <a href="vardev.html#vdw_xc">vdw_xc</a>>0
 Used when <a href="vardev.html#vdw_xc">vdw_xc</a>&gt;0,
 to build the vdW-DF kernel.
 <br />
-
 </font>
 
 <br><br><br><br><a href=#top>Go to the top</a>
@@ -3923,7 +3947,6 @@ Only relevant if <a href="vardev.html#vdw_xc">vdw_xc</a>>0
 Used when <a href="vardev.html#vdw_xc">vdw_xc</a>&gt;0,
 .
 <br />
-
 </font>
 
 <br><br><br><br><a href=#top>Go to the top</a>
@@ -3943,7 +3966,6 @@ Only relevant if <a href="vardev.html#vdw_xc">vdw_xc</a>>0
 Used when <a href="vardev.html#vdw_xc">vdw_xc</a>&gt;0,
 to define the vdW-DF kernel cut-off radius.
 <br />
-
 </font>
 
 <br><br><br><br><a href=#top>Go to the top</a>
@@ -3963,7 +3985,6 @@ Only relevant if <a href="vardev.html#vdw_xc">vdw_xc</a>>0
 Used when <a href="vardev.html#vdw_xc">vdw_xc</a>&gt;0,
 to build the vdW-DF kernel.
 <br />
-
 </font>
 
 <br><br><br><br><a href=#top>Go to the top</a>
@@ -3988,7 +4009,6 @@ Adjust it to a big value (e.g. 1e12) to enable it all along the SCF
 calculation. Too small values, as well as negative values, will result
 in the vdW-DF energy contributions never being calculated.
 </p>
-
 </font>
 
 <br><br><br><br><a href=#top>Go to the top</a>
@@ -4008,7 +4028,6 @@ Only relevant if <a href="vardev.html#vdw_xc">vdw_xc</a>>0
 Used when <a href="vardev.html#vdw_xc">vdw_xc</a>&gt;0,
 to build the vdW-DF kernel.
 <br />
-
 </font>
 
 <br><br><br><br><a href=#top>Go to the top</a>
@@ -4034,7 +4053,6 @@ to build the vdW-DF kernel.
  </i>
 </b>
 <br />
-
 </font>
 
 <br><br><br><br><a href=#top>Go to the top</a>
@@ -4058,7 +4076,6 @@ as introduced in
 </a>
 .
 <br />
-
 </font>
 
 <br><br><br><br><a href=#top>Go to the top</a>

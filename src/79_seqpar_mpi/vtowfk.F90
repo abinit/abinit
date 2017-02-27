@@ -201,6 +201,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  end if
 
 
+
 !=========================================================================
 !============= INITIALIZATIONS AND ALLOCATIONS ===========================
 !=========================================================================
@@ -485,13 +486,12 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 
 !Allocation of memory space for one WF
  ABI_ALLOCATE(cwavef,(2,npw_k*my_nspinor*blocksize))
- if (gs_hamk%usepaw==1.and.iscf>0) then
+ if (gs_hamk%usepaw==1.and.(iscf>0.or.gs_hamk%usecprj==1)) then
    iorder_cprj=0
    nband_k_cprj=nband_k*(mband_cprj/dtset%mband)
    bandpp_cprj=1;if (mpi_enreg%paral_kgb==1) bandpp_cprj=mpi_enreg%bandpp
    ABI_DATATYPE_ALLOCATE(cwaveprj,(natom,my_nspinor*bandpp_cprj))
-   ncpgr=0
-   if((dtset%usefock==1).and.(cpopt==1)) ncpgr=cprj(1,1)%ncpgr
+   ncpgr=0;if (cpopt==1) ncpgr=cprj(1,1)%ncpgr
    call pawcprj_alloc(cwaveprj,ncpgr,gs_hamk%dimcprj)
  else
    ABI_DATATYPE_ALLOCATE(cwaveprj,(0,0))
@@ -708,10 +708,12 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
          ABI_DEALLOCATE(cwavefb)
        end if
      end if
+   end if ! End of SCF calculation
 
 !    Call to nonlocal operator:
 !    - Compute nonlocal forces from most recent wfs
-!    - PAW: compute contribution to augmentation occ. (rhoij)
+!    - PAW: compute projections of WF onto NL projectors (cprj)
+   if(iscf>0.or.gs_hamk%usecprj==1)then
      if (gs_hamk%usepaw==1.or.optforces/=0) then
 !      Treat all wavefunctions in case of varying occupation numbers or PAW
 !      Only treat occupied bands in case of fixed occupation numbers and NCPP
@@ -741,6 +743,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
          if(gs_hamk%usepaw==1) then
            call timab(554,2,tsec)
          end if
+!        Acccumulate forces
          if (optforces>0) then
            iband=(iblock-1)*blocksize
            do iblocksize=1,blocksize
@@ -750,6 +753,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
              grnl_k(1:nnlout,iband)=enlout(ibs+1:ibs+nnlout)
            end do
          end if
+!        Store cprj (<Pnl|Psi>)
          if (gs_hamk%usepaw==1.and.gs_hamk%usecprj==1) then
            iband=1+(iblock-1)*bandpp_cprj
            call pawcprj_put(gs_hamk%atindx,cwaveprj,cprj,natom,iband,ibg,ikpt,iorder_cprj,isppol,&
@@ -757,15 +761,15 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 &           dtset%nsppol,dtfil%unpaw,mpicomm=mpi_enreg%comm_kpt,proc_distrb=mpi_enreg%proc_distrb)
          end if
        end if
-     end if
+     end if ! PAW or forces
+   end if ! iscf>0 or iscf=-3
 
-   end if ! End of SCF calculation
  end do !  End of loop on blocks
 
  ABI_DEALLOCATE(cwavef)
  ABI_DEALLOCATE(enlout)
 
- if (gs_hamk%usepaw==1.and.iscf>0) then
+ if (gs_hamk%usepaw==1.and.(iscf>0.or.gs_hamk%usecprj==1)) then
    call pawcprj_free(cwaveprj)
  end if
  ABI_DATATYPE_DEALLOCATE(cwaveprj)

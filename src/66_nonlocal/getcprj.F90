@@ -67,6 +67,7 @@
 !!
 !! PARENTS
 !!      cgwf,ctocprj,debug_tools,dfpt_accrho,dfpt_nstpaw,ks_ddiago,m_wfd
+!!      rf2_init
 !!
 !! CHILDREN
 !!      mkkpg,opernla_ylm,ph1d3d
@@ -198,20 +199,21 @@
    kpg_ => kpg
  end if
 
+!Some other dims
+ mincat=min(NLO_MINCAT,maxval(nattyp))
+ cplex=2;if (istwf_k>1) cplex=1
+ choice_=choice;if (cpopt==1) choice_=-choice
+ signs=1;if (idir>0) signs=2
+
 !Eventually allocate temporary array for ph3d
  if (nloalg(2)<=0) then
-   matblk=NLO_MINCAT
+   matblk=mincat
    ABI_ALLOCATE(ph3d_,(2,npw_k,matblk))
  else
    matblk=size(ph3d,3)
    ph3d_ => ph3d
  end if
 
-!Some other dims
- mincat=min(NLO_MINCAT,maxval(nattyp))
- cplex=2;if (istwf_k>1) cplex=1
- choice_=choice;if (cpopt==1) choice_=-choice
- signs=1;if (idir>0) signs=2
 !Loop over atom types
  ia1=1;iatm=0
  do itypat=1,ntypat

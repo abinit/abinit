@@ -282,7 +282,7 @@ subroutine distrb2(mband,nband,nkpt,nproc,nsppol,mpi_enreg)
 !    ind=ind + 1
 !    end do;end do
 !    XG060807 : END OF OLD CODING
-     
+
    end if ! mpi_enreg%paralbd
 
  end if ! has_file

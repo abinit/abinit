@@ -175,15 +175,16 @@ subroutine dfpt_dyxc1(atindx,blkflgfrx1,dyfrx1,gmet,gsqcut,ixc,kxc,mgfft,mpert,m
 !    Compute the corresponding potential
      option=0
      ABI_ALLOCATE(rhor1,(cplex*nfft,nspden))
+     rhor1=zero
 !FR EB Non-collinear magnetism
      if (nspden==4.and.present(rhor)) then
-      optnc=1
-      optxc=1
+       optnc=1
+       optxc=1
        call dfpt_mkvxc_noncoll(1,ixc,kxc,mpi_enreg,nfft,ngfft,dum_nhat,0,dum_nhat,0,nkxc,&
 &       nkxc,nspden,n3xccc,optnc,option,optxc,paral_kgb,qphon,rhor,rhor1,rprimd,0,vxc10,xcccwk1) 
      else
        call dfpt_mkvxc(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,dum_nhat,0,dum_nhat,0,nkxc,&
-&     nspden,n3xccc,option,paral_kgb,qphon,rhor1,rprimd,0,vxc10,xcccwk1)
+&       nspden,n3xccc,option,paral_kgb,qphon,rhor1,rprimd,0,vxc10,xcccwk1)
      end if
      ABI_DEALLOCATE(rhor1)
      ABI_DEALLOCATE(xcccwk1)

@@ -90,7 +90,7 @@ subroutine freeze_displ_allmodes(displ, freeze_displ, natom, outfile_radix, phfr
 ! *************************************************************************
 
 !determine supercell needed to freeze phonon
- call init_supercell(natom, qphon, rprimd, xcart, scell)
+ call init_supercell(natom, 1, qphon, rprimd, typat, xcart ,scell)
 
  do jmode = 1, 3*natom
 !  displace atoms according to phonon jmode

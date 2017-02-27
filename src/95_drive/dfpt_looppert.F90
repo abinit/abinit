@@ -108,7 +108,7 @@
 !!      pawrhoij_free,pawrhoij_nullify,prteigrs,psddb8,read_rhor,rf2_getidirs
 !!      rotate_rho,set_pert_comm,set_pert_paw,setsym,setsymrhoij,status,symkpt
 !!      timab,transgrid,unset_pert_comm,unset_pert_paw,vlocalstr,wffclose
-!!      wffopen,wfk_open_read,wfk_read_eigenvalues,wrtout,xmpi_sum
+!!      wfk_open_read,wfk_read_eigenvalues,wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -126,7 +126,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 &  mkmem,mkqmem,mk1mem,mpert,mpi_enreg,my_natom,nattyp,&
 &  nfftf,nhat,nkpt,nkxc,nspden,nsym,occ,&
 &  paw_an,paw_ij,pawang,pawfgr,pawfgrtab,pawrad,pawrhoij,pawtab,&
-&  pertsy,prtbbb,psps,rfpert,rhog,rhor,symq,symrec,timrev,&
+&  pertsy,prtbbb,psps,rfpert,rf2_dirs_from_rfpert_nl,rhog,rhor,symq,symrec,timrev,&
 &  usecprj,usevdw,vtrial,vxc,vxcavg,xred,clflg,occ_rbz_pert,eigen0_pert,eigenq_pert,&
 &  eigen1_pert,nkpt_rbz,eigenq_fine,hdr_fine,hdr0)
 
@@ -138,8 +138,8 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
  use m_profiling_abi
  use m_xmpi
  use m_errors
- use m_wffile
  use m_wfk
+ use m_wffile
  use m_io_redirect
  use m_paral_pert
  use m_abi_etsf
@@ -214,7 +214,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
  type(pseudopotential_type), intent(inout) :: psps
  integer, intent(in) :: atindx(dtset%natom),indsym(4,nsym,dtset%natom)
  integer, intent(in) :: nattyp(dtset%ntypat),pertsy(3,dtset%natom+6)
- integer, intent(in) :: rfpert(mpert),symq(4,2,nsym),symrec(3,3,nsym)
+ integer, intent(in) :: rfpert(mpert),rf2_dirs_from_rfpert_nl(3,3),symq(4,2,nsym),symrec(3,3,nsym)
  integer, intent(out) :: ddkfil(3)
  integer, intent(inout) :: blkflg(3,mpert,3,mpert)
  integer, intent(out) :: clflg(3,mpert)
@@ -257,13 +257,13 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
  integer,parameter :: level=11,response=1,formeig1=1,master=0,fake_unit=-666
  integer :: ask_accurate,band_index,bantot,bantot_rbz,bdeigrf,bdtot1_index,nsppol,nspinor,band2tot_index
  integer :: bdtot_index,choice,cplex,cplex_rhoij,dim_eig2rf,formeig
- integer :: fullinit,gscase,iband,iblok,icase,icase_eq,idir,idir0,idir1,idir2,idir_eq,ierr,ii,ikpt,ikpt1,jband
- integer :: initialized,iorder_cprj,ipert,ipert_cnt,ipert_eq,ipert_me,ireadwf0
+ integer :: fullinit,gscase,iband,iblok,icase,icase_eq,idir,idir0,idir1,idir2,idir_eq,idir_dkdk,ierr
+ integer :: ii,ikpt,ikpt1,jband,initialized,iorder_cprj,ipert,ipert_cnt,ipert_eq,ipert_me,ireadwf0
  integer :: iscf_mod,iscf_mod_save,isppol,istr,isym,mcg,mcgq,mcg1,mcprj,mcprjq,mband
  integer :: maxidir,me,mgfftf,mkmem_rbz,mk1mem_rbz,mkqmem_rbz,mpw,mpw1,my_nkpt_rbz
  integer :: n3xccc,nband_k,nblok,ncpgr,ndir,nkpt_eff,nkpt_max,nline_save,nmatel,npert_io,npert_me,nspden_rhoij
- integer :: nstep_save,nsym1,ntypat,nwffile,nylmgr,old_comm_atom,openexit,option,optorth,optthm,pertcase,rdwr,ncid
- integer :: rdwrpaw,spaceComm,smdelta,timrev_pert,to_compute_this_pert
+ integer :: nstep_save,nsym1,ntypat,nwffile,nylmgr,nylmgr1,old_comm_atom,openexit,option,optorth,optthm,pertcase
+ integer :: rdwr,ncid,rdwrpaw,spaceComm,smdelta,timrev_pert,to_compute_this_pert
  integer :: unitout,useylmgr,useylmgr1,vrsddb,dfpt_scfcv_retcode,optn2
  real(dp) :: boxcut,dosdeltae,eberry,ecore,ecut_eff,ecutf,edocc,eei,eeig0,eew,efrhar,efrkin,efrloc
  real(dp) :: efrnl,efrx1,efrx2,ehart,ehart01,ehart1,eii,ek,ek0,ek1,ek2,eloc0
@@ -281,7 +281,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
  type(gkk_t)     :: gkk2d
  type(hdr_type) :: hdr,hdr_den
  type(pawang_type) :: pawang1
- type(wffile_type) :: wff1,wffddk(4),wffgs,wffkq,wffnow,wfftgs,wfftkq
+ type(wffile_type) :: wff1,wffgs,wffkq,wffnow,wfftgs,wfftkq
  type(wfk_t) :: ddk_f(4)
  type(wvl_data) :: wvl
 !arrays
@@ -431,18 +431,33 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 !Initialize rf2dir :
  rf2_dir1(1:3)=dtset%rf2_pert1_dir(1:3)
  rf2_dir2(1:3)=dtset%rf2_pert2_dir(1:3)
-!Diagonal terms :
- rf2dir(1) = rf2_dir1(1)*rf2_dir2(1)
- rf2dir(2) = rf2_dir1(2)*rf2_dir2(2)
- rf2dir(3) = rf2_dir1(3)*rf2_dir2(3)
-!Upper triangular terms :
- rf2dir(4) = rf2_dir1(2)*rf2_dir2(3)
- rf2dir(5) = rf2_dir1(1)*rf2_dir2(3)
- rf2dir(6) = rf2_dir1(1)*rf2_dir2(2)
-!Lower triangular terms :
- rf2dir(7) = rf2_dir1(3)*rf2_dir2(2)
- rf2dir(8) = rf2_dir1(3)*rf2_dir2(1)
- rf2dir(9) = rf2_dir1(2)*rf2_dir2(1)
+ if (sum(rf2_dir1)==3.and.sum(rf2_dir2)==3.and.dtset%prepanl==1) then
+!  Diagonal terms :
+   rf2dir(1) = rf2_dirs_from_rfpert_nl(1,1)
+   rf2dir(2) = rf2_dirs_from_rfpert_nl(2,2)
+   rf2dir(3) = rf2_dirs_from_rfpert_nl(3,3)
+!  Upper triangular terms :
+   rf2dir(4) = rf2_dirs_from_rfpert_nl(2,3)
+   rf2dir(5) = rf2_dirs_from_rfpert_nl(1,3)
+   rf2dir(6) = rf2_dirs_from_rfpert_nl(1,2)
+!  Lower triangular terms :
+   rf2dir(7) = rf2_dirs_from_rfpert_nl(3,2)
+   rf2dir(8) = rf2_dirs_from_rfpert_nl(3,1)
+   rf2dir(9) = rf2_dirs_from_rfpert_nl(2,1)
+ else
+!  Diagonal terms :
+   rf2dir(1) = rf2_dir1(1)*rf2_dir2(1)
+   rf2dir(2) = rf2_dir1(2)*rf2_dir2(2)
+   rf2dir(3) = rf2_dir1(3)*rf2_dir2(3)
+!  Upper triangular terms :
+   rf2dir(4) = rf2_dir1(2)*rf2_dir2(3)
+   rf2dir(5) = rf2_dir1(1)*rf2_dir2(3)
+   rf2dir(6) = rf2_dir1(1)*rf2_dir2(2)
+!  Lower triangular terms :
+   rf2dir(7) = rf2_dir1(3)*rf2_dir2(2)
+   rf2dir(8) = rf2_dir1(3)*rf2_dir2(1)
+   rf2dir(9) = rf2_dir1(2)*rf2_dir2(1)
+ end if
 
 !Determine existence of pertubations and of pertubation symmetries
 !Create array with pertubations which have to be calculated
@@ -458,25 +473,12 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
      rfdir(1:9) = rf2dir(:)
    end if
    do idir=1,maxidir
-     if( rfpert(ipert)==1 .and. rfdir(idir) == 1 )then
-       to_compute_this_pert = 0
-       if (ipert>=dtset%natom+10) then
+     to_compute_this_pert = 0
+     if(ipert<dtset%natom+10 .and. rfpert(ipert)==1 .and. rfdir(idir) == 1 ) then
+       if ((pertsy(idir,ipert)==1).or.&
+&       ((dtset%prepanl == 1).and.(ipert == dtset%natom+2)).or.&
+&       ((dtset%prepgkk == 1).and.(ipert <= dtset%natom))  ) then
          to_compute_this_pert = 1
-       else if ((pertsy(idir,ipert)==1).or.&
-&         ((dtset%prepanl == 1).and.(ipert == dtset%natom+2)).or.&
-&         ((dtset%prepgkk == 1).and.(ipert <= dtset%natom))  ) then
-         to_compute_this_pert = 1
-       end if
-       if (to_compute_this_pert /= 0) then
-         ipert_cnt = ipert_cnt+1;
-         pert_tmp(1,ipert_cnt) = ipert
-         pert_tmp(2,ipert_cnt) = idir
-!        Store "pertcase" in pert_tmp(3,ipert_cnt)
-         if (ipert<dtset%natom+10) then
-           pert_tmp(3,ipert_cnt) = idir + (ipert-1)*3
-         else
-           pert_tmp(3,ipert_cnt) = idir + (ipert-dtset%natom-10)*9 + (dtset%natom+6)*3
-         end if
        else
          write(message, '(a,a,i4,a,i4,a,a,a,a,a,a)' )ch10,&
 &         ' The perturbation idir=',idir,'  ipert=',ipert,' is',ch10,&
@@ -485,9 +487,68 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
          call wrtout(std_out,message,'COLL')
          call wrtout(ab_out,message,'COLL')
        end if ! Test of existence of symmetry of perturbation
-     end if ! Test of existence of perturbation
-   end do
- end do
+     else if (ipert==dtset%natom+11 .and. rfpert(ipert)==1 .and. rfdir(idir) == 1 ) then
+       to_compute_this_pert = 1
+     else if (ipert==dtset%natom+10 .and. rfpert(ipert)==1 .and. idir <= 6) then
+       if (idir<=3) then
+         if (rfdir(idir) == 1) to_compute_this_pert = 1
+       else
+         if (rfdir(idir) == 1 .or. rfdir(idir+3) == 1) to_compute_this_pert = 1
+       end if
+     end if
+     if (to_compute_this_pert /= 0) then
+       ipert_cnt = ipert_cnt+1;
+       pert_tmp(1,ipert_cnt) = ipert
+       pert_tmp(2,ipert_cnt) = idir
+!      Store "pertcase" in pert_tmp(3,ipert_cnt)
+       if (ipert<dtset%natom+10) then
+         pert_tmp(3,ipert_cnt) = idir + (ipert-1)*3
+       else
+         pert_tmp(3,ipert_cnt) = idir + (ipert-dtset%natom-10)*9 + (dtset%natom+6)*3
+       end if
+     end if
+   end do ! idir
+ end do !ipert
+! do ipert=1,mpert
+!   if (ipert<dtset%natom+10) then
+!     maxidir = 3
+!     rfdir(1:3) = dtset%rfdir(:)
+!     rfdir(4:9) = 0
+!   else
+!     maxidir = 9
+!     rfdir(1:9) = rf2dir(:)
+!   end if
+!   do idir=1,maxidir
+!     if( rfpert(ipert)==1 .and. rfdir(idir) == 1 )then
+!       to_compute_this_pert = 0
+!       if (ipert>=dtset%natom+10) then
+!         to_compute_this_pert = 1
+!       else if ((pertsy(idir,ipert)==1).or.&
+!&         ((dtset%prepanl == 1).and.(ipert == dtset%natom+2)).or.&
+!&         ((dtset%prepgkk == 1).and.(ipert <= dtset%natom))  ) then
+!         to_compute_this_pert = 1
+!       end if
+!       if (to_compute_this_pert /= 0) then
+!         ipert_cnt = ipert_cnt+1;
+!         pert_tmp(1,ipert_cnt) = ipert
+!         pert_tmp(2,ipert_cnt) = idir
+!!        Store "pertcase" in pert_tmp(3,ipert_cnt)
+!         if (ipert<dtset%natom+10) then
+!           pert_tmp(3,ipert_cnt) = idir + (ipert-1)*3
+!         else
+!           pert_tmp(3,ipert_cnt) = idir + (ipert-dtset%natom-10)*9 + (dtset%natom+6)*3
+!         end if
+!       else
+!         write(message, '(a,a,i4,a,i4,a,a,a,a,a,a)' )ch10,&
+!&         ' The perturbation idir=',idir,'  ipert=',ipert,' is',ch10,&
+!&         ' symmetric of a previously calculated perturbation.',ch10,&
+!&         ' So, its SCF calculation is not needed.',ch10
+!         call wrtout(std_out,message,'COLL')
+!         call wrtout(ab_out,message,'COLL')
+!       end if ! Test of existence of symmetry of perturbation
+!     end if ! Test of existence of perturbation
+!   end do
+! end do
  ABI_ALLOCATE(pert_calc,(3,ipert_cnt))
  do icase=1,ipert_cnt
    pert_calc(:,icase)=pert_tmp(:,icase)
@@ -934,8 +995,18 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 !  Initialize GS wavefunctions at k
    ireadwf0=1; formeig=0 ; ask_accurate=1 ; optorth=0
    mcg=mpw*dtset%nspinor*dtset%mband*mkmem_rbz*dtset%nsppol
+   if (one*mpw*dtset%nspinor*dtset%mband*mkmem_rbz*dtset%nsppol > huge(1)) then
+     write (message,'(4a, 5(a,i0), 2a)')&
+&     "Default integer is not wide enough to store the size of the GS wavefunction array (WF0, mcg).",ch10,&
+&     "Action: increase the number of processors. Consider also OpenMP threads.",ch10,&
+&     "nspinor: ",dtset%nspinor, "mpw: ",mpw, "mband: ",dtset%mband, "mkmem_rbz: ",&
+&     mkmem_rbz, "nsppol: ",dtset%nsppol,ch10,&
+&     'Note: Compiling with large int (int64) requires a full software stack (MPI/FFTW/BLAS/LAPACK...) compiled in int64 mode'
+     MSG_ERROR(message)
+   end if
    ABI_STAT_ALLOCATE(cg,(2,mcg), ierr)
    ABI_CHECK(ierr==0, "out-of-memory in cg")
+
    ABI_ALLOCATE(eigen0,(dtset%mband*nkpt_rbz*dtset%nsppol))
    call timab(144,1,tsec)
    call status(0,dtfil%filstat,iexit,level,'call inwffil-k')
@@ -981,8 +1052,8 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
        call ctocprj(atindx,cg,choice,cprj,gmet,gprimd,-1,idir0,iorder_cprj,istwfk_rbz,&
 &       kg,kpt_rbz,dtset%mband,mcg,mcprj,dtset%mgfft,mkmem_rbz,mpi_enreg,psps%mpsang,mpw,&
 &       dtset%natom,nattyp,nband_rbz,dtset%natom,dtset%ngfft,nkpt_rbz,dtset%nloalg,&
-&       npwarr,dtset%nspinor,dtset%nsppol,ntypat,nylmgr,dtset%paral_kgb,ph1d,psps,&
-&       rmet,dtset%typat,ucvol,dtfil%unpaw,useylmgr,xred,ylm,ylmgr)
+&       npwarr,dtset%nspinor,dtset%nsppol,ntypat,dtset%paral_kgb,ph1d,psps,&
+&       rmet,dtset%typat,ucvol,dtfil%unpaw,xred,ylm,ylmgr)
      end if
    end if
 
@@ -1006,16 +1077,16 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
    call timab(142,2,tsec)
 
 !  Set up the spherical harmonics (Ylm) at k+q
-   useylmgr1=0; option=0
+   useylmgr1=0; option=0 ; ; nylmgr1=0
    if (psps%useylm==1.and. &
 &   (ipert==dtset%natom+1.or.ipert==dtset%natom+3.or.ipert==dtset%natom+4.or. &
 &   (psps%usepaw==1.and.ipert==dtset%natom+2))) then
-     useylmgr1=1; option=1
+     useylmgr1=1; option=1 ;  ; nylmgr1=3
    else if (psps%useylm==1.and.(ipert==dtset%natom+10.or.ipert==dtset%natom+11)) then
-     useylmgr1=1; option=2
+     useylmgr1=1; option=2 ;  ; nylmgr1=9
    end if
    ABI_ALLOCATE(ylm1,(mpw1*mk1mem_rbz,psps%mpsang*psps%mpsang*psps%useylm))
-   ABI_ALLOCATE(ylmgr1,(mpw1*mk1mem_rbz,nylmgr,psps%mpsang*psps%mpsang*psps%useylm*useylmgr1))
+   ABI_ALLOCATE(ylmgr1,(mpw1*mk1mem_rbz,nylmgr1,psps%mpsang*psps%mpsang*psps%useylm*useylmgr1))
    if (psps%useylm==1) then
      call initylmg(gprimd,kg1,kpq_rbz,mk1mem_rbz,mpi_enreg,psps%mpsang,mpw1,nband_rbz,nkpt_rbz,&
 &     npwar1,dtset%nsppol,option,rprimd,ylm1,ylmgr1)
@@ -1045,12 +1116,22 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 !  MG: Here it is possible to avoid the extra reading if the same k mesh can be used.
    ireadwf0=1 ; formeig=0 ; ask_accurate=1 ; optorth=0
    mcgq=mpw1*dtset%nspinor*dtset%mband*mkqmem_rbz*dtset%nsppol
+   if (one*mpw1*dtset%nspinor*dtset%mband*mkqmem_rbz*dtset%nsppol > huge(1)) then
+     write (message,'(4a, 5(a,i0), 2a)')&
+&     "Default integer is not wide enough to store the size of the GS wavefunction array (WFKQ, mcgq).",ch10,&
+&     "Action: increase the number of processors. Consider also OpenMP threads.",ch10,&
+&     "nspinor: ",dtset%nspinor, "mpw1: ",mpw1, "mband: ",dtset%mband, "mkqmem_rbz: ",&
+&     mkqmem_rbz, "nsppol: ",dtset%nsppol,ch10,&
+&     'Note: Compiling with large int (int64) requires a full software stack (MPI/FFTW/BLAS/LAPACK...) compiled in int64 mode'
+     MSG_ERROR(message)
+   end if
+
    ABI_STAT_ALLOCATE(cgq,(2,mcgq), ierr)
    ABI_CHECK(ierr==0, "out-of-memory in cgq")
    ABI_ALLOCATE(eigenq,(dtset%mband*nkpt_rbz*dtset%nsppol))
 
    !if (sum(dtset%qptn(1:3)**2)>=1.d-14) then ! non-zero q
-   if (dtfil%fnamewffq == dtfil%fnamewffk .and. sum(dtset%qptn(1:3)**2) < 1.d-14) then 
+   if (dtfil%fnamewffq == dtfil%fnamewffk .and. sum(dtset%qptn(1:3)**2) < 1.d-14) then
      call wrtout(std_out, "qpt is Gamma, psi_k+q initialized from psi_k in memory")
      cgq = cg
      eigenq = eigen0
@@ -1085,8 +1166,8 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
          call ctocprj(atindx,cgq,choice,cprjq,gmet,gprimd,-1,idir0,0,istwfk_rbz,&
 &         kg1,kpq_rbz,dtset%mband,mcgq,mcprjq,dtset%mgfft,mkqmem_rbz,mpi_enreg,psps%mpsang,mpw1,&
 &         dtset%natom,nattyp,nband_rbz,dtset%natom,dtset%ngfft,nkpt_rbz,dtset%nloalg,&
-&         npwar1,dtset%nspinor,dtset%nsppol,ntypat,nylmgr,dtset%paral_kgb,ph1d,&
-&         psps,rmet,dtset%typat,ucvol,dtfil%unpawq,useylmgr1,xred,ylm1,ylmgr1)
+&         npwar1,dtset%nspinor,dtset%nsppol,ntypat,dtset%paral_kgb,ph1d,&
+&         psps,rmet,dtset%typat,ucvol,dtfil%unpawq,xred,ylm1,ylmgr1)
        else if (mcprjq>0) then
          call pawcprj_copy(cprj,cprjq)
        end if
@@ -1165,7 +1246,8 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
    if (psps%usepaw==1) then
      ABI_DATATYPE_ALLOCATE(pawrhoij1,(my_natom))
      call pawrhoij_nullify(pawrhoij1)
-     cplex_rhoij=max(cplex,dtset%pawcpxocc);nspden_rhoij=dtset%nspden
+     cplex_rhoij=max(cplex,dtset%pawcpxocc)
+     nspden_rhoij=dtset%nspden;if (dtset%pawspnorb>0.and.dtset%nspinor==2) nspden_rhoij=4
      call pawrhoij_alloc(pawrhoij1,cplex_rhoij,nspden_rhoij,dtset%nspinor,dtset%nsppol,&
 &     dtset%typat,pawtab=pawtab,comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
      if (cplex_rhoij/=hdr%pawrhoij(1)%cplex) then
@@ -1186,8 +1268,18 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
      dim_eig2rf=1
    end if
    mcg1=mpw1*dtset%nspinor*dtset%mband*mk1mem_rbz*dtset%nsppol
+   if (one*mpw1*dtset%nspinor*dtset%mband*mk1mem_rbz*dtset%nsppol > huge(1)) then
+     write (message,'(4a, 5(a,i0), 2a)')&
+&     "Default integer is not wide enough to store the size of the GS wavefunction array (WFK1, mcg1).",ch10,&
+&     "Action: increase the number of processors. Consider also OpenMP threads.",ch10,&
+&     "nspinor: ",dtset%nspinor, "mpw1: ",mpw1, "mband: ",dtset%mband, "mk1mem_rbz: ",&
+&     mk1mem_rbz, "nsppol: ",dtset%nsppol,ch10,&
+&     'Note: Compiling with large int (int64) requires a full software stack (MPI/FFTW/BLAS/LAPACK...) compiled in int64 mode'
+     MSG_ERROR(message)
+   end if
    ABI_STAT_ALLOCATE(cg1,(2,mcg1), ierr)
    ABI_CHECK(ierr==0, "out of memory in cg1")
+
    ABI_ALLOCATE(cg1_active,(2,mpw1*dtset%nspinor*dtset%mband*mk1mem_rbz*dtset%nsppol*dim_eig2rf))
    ABI_ALLOCATE(gh1c_set,(2,mpw1*dtset%nspinor*dtset%mband*mk1mem_rbz*dtset%nsppol*dim_eig2rf))
    ABI_ALLOCATE(gh0c1_set,(2,mpw1*dtset%nspinor*dtset%mband*mk1mem_rbz*dtset%nsppol*dim_eig2rf))
@@ -1248,7 +1340,9 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
      else if (ipert==dtset%natom+11) then
        ! 2nd order (k,E)
        nwffile=3 ! dk, dE and dkdk
-       file_index(1)=idir +(dtset%natom+6)*3 ! dkdk
+       idir_dkdk = idir
+       if(idir_dkdk>6) idir_dkdk = idir_dkdk - 3
+       file_index(1)=idir_dkdk +(dtset%natom+6)*3 ! dkdk
        file_index(2)=idir2+(dtset%natom+1)*3 ! defld file (dir2)
        file_index(3)=idir1+dtset%natom*3     ! ddk file (dir1)
        fnamewff(1)=dtfil%fnamewffdkdk
@@ -1277,12 +1371,8 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
        write(message,'(2a)')'-dfpt_looppert : read the wavefunctions from file: ',trim(fiwfddk)
        call wrtout(std_out,message,'COLL')
        call wrtout(ab_out,message,'COLL')
-#ifdef DEV_MG_WFK
 !      Note that the unit number for these files is 50,51,52 or 53 (dtfil%unddk=50)
        call wfk_open_read(ddk_f(ii),fiwfddk,formeig1,dtset%iomode,dtfil%unddk+(ii-1),spaceComm)
-#else
-       call WffOpen(dtset%iomode,spaceComm,fiwfddk,ierr,wffddk(ii),master,me,dtfil%unddk+(ii-1))
-#endif
      end do
    end if
 
@@ -1449,8 +1539,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
      end if
 
    else  ! rhor1 not being forced to 0.0
-     if(iscf_mod>0 .and. ipert/=dtset%natom+11) then
-!      For ipert==natom+11, we want to read the 1st order density from a previous calculation
+     if(iscf_mod>0) then
 !      cplex=2 gets the complex density, =1 only real part
        if (psps%usepaw==1) then
 !        Be careful: in PAW, rho does not include the 1st-order compensation
@@ -1473,7 +1562,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 &         wtk_rbz)
        end if
 
-     else if (.not. found_eq_gkk .or. ipert==dtset%natom+11) then 
+     else if (.not. found_eq_gkk) then
        ! negative iscf_mod and no symmetric rotation of rhor1
        ! Read rho1(r) from a disk file and broadcast data.
        rdwr=1;rdwrpaw=psps%usepaw;if(dtfil%ireadwf/=0) rdwrpaw=0
@@ -1523,7 +1612,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 &     pertcase,phnons1,ph1d,ph1df,prtbbb,psps,&
 &     dtset%qptn,resid,residm,rhog,rhog1,&
 &     rhor,rhor1,rprimd,symaf1,symrc1,symrl1,&
-&     usecprj,useylmgr,useylmgr1,wffddk,ddk_f,vpsp1,vtrial,vxc,&
+&     usecprj,useylmgr,useylmgr1,ddk_f,vpsp1,vtrial,vxc,&
 &     wtk_rbz,xccc3d1,xred,ylm,ylm1,ylmgr,ylmgr1,zeff,dfpt_scfcv_retcode)
 
      _IBM6("after dfpt_scfcv")
@@ -1605,11 +1694,6 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
    call wrtout(ab_out,message,'COLL')
    call wrtout(std_out,  message,'COLL')
 
-!  Update the content of the header (evolving variables)
-   call hdr_update(hdr,bantot_rbz,etotal,fermie,&
-&   residm,rprimd,occ_rbz,pawrhoij1,xred,dtset%amu_orig(:,1),&
-&   comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab )
-
 !  Print _gkk file for this perturbation
    if (dtset%prtgkk == 1) then
      call appdig(3*(ipert-1)+idir,dtfil%fnameabo_gkk,gkkfilnam)
@@ -1626,7 +1710,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
      ! Reshape eigen1 into gkk for netCDF output
      ABI_STAT_ALLOCATE(gkk,(2*dtset%mband*dtset%nsppol,dtset%nkpt,1,1,dtset%mband), ierr)
      ABI_CHECK(ierr==0, "out-of-memory in gkk")
-     gkk(:,:,:,:,:) = zero 
+     gkk(:,:,:,:,:) = zero
      mband = dtset%mband
      band_index = 0
      band2tot_index = 0
@@ -1648,12 +1732,14 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
      end do !isppol
 
      ! Initialize Crystal to write in the GKK.nc file
-     call crystal_init(Crystal,dtset%spgroup,dtset%natom,dtset%npsp,psps%ntypat, &
+     call crystal_init(dtset%amu_orig(:,1),Crystal,dtset%spgroup,dtset%natom,dtset%npsp,psps%ntypat, &
 &     dtset%nsym,rprimd,dtset%typat,xred,dtset%ziontypat,dtset%znucl,1,&
 &     dtset%nspden==2.and.dtset%nsppol==1,remove_inv,hdr0%title,&
 &     dtset%symrel,dtset%tnons,dtset%symafm)
 
      ! Initialize Bands to write in the GKK.nc file
+     ! MG FIXME: Here there's a bug because eigen0 is dimensioned with nkpt_rbz i.e. IBZ(q)
+     ! but the ebands_t object is constructed with dimensions taken from hdr0 i.e. the IBZ(q=0).
      bantot= dtset%mband*dtset%nkpt*dtset%nsppol
      call ebands_init(bantot,Bands,dtset%nelect,doccde,eigen0,hdr0%istwfk,hdr0%kptns,&
 &     hdr0%nband, hdr0%nkpt,hdr0%npwarr,hdr0%nsppol,hdr0%nspinor,&
@@ -1965,8 +2051,8 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
          remove_inv=.false.
          if(dtset%nspden==4 .and. dtset%usedmft==1) remove_inv=.true.
 
-         call crystal_init(Crystal,dtset%spgroup,dtset%natom,dtset%npsp,psps%ntypat, &
-&         dtset%nsym,rprimd,dtset%typat,xred,dtset%ziontypat,dtset%znucl,1,&
+         call crystal_init(dtset%amu_orig(:,1),Crystal,dtset%spgroup,dtset%natom,dtset%npsp,&
+&         psps%ntypat, dtset%nsym,rprimd,dtset%typat,xred,dtset%ziontypat,dtset%znucl,1,&
 &         dtset%nspden==2.and.dtset%nsppol==1,remove_inv,hdr0%title,&
 &         dtset%symrel,dtset%tnons,dtset%symafm)
 

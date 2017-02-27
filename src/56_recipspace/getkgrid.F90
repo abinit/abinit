@@ -17,8 +17,9 @@
 !! INPUTS
 !! chksymbreak= if 1, will check whether the k point grid is symmetric (for kptopt=1,2 and 4), and stop if not.
 !! iout=unit number for echoed output . 0 if no output is wished.
-!! iscf= ( <= 0 =>non-SCF), >0 => SCF)  MG: FIXME I don't understand why we have to pass the value iscf. 
+!! iscf= ( <= 0 =>non-SCF), >0 => SCF)  MG: FIXME I don't understand why we have to pass the value iscf.
 !! kptopt=option for the generation of k points
+!!   (defines whether spatical symmetries and/or time-reversal can be used)
 !! msym=default maximal number of symmetries
 !! nkpt=number of k points (might be zero, see output description)
 !! nsym=number of symmetries
@@ -33,7 +34,7 @@
 !! If nkpt/=0  the following are also output :
 !!   kpt(3,nkpt)=reduced coordinates of k points.
 !!   wtk(nkpt)=weight assigned to each k point.
-!! [fullbz(3,nkpt_fullbz)]=k-points generated in the full Brillouin zone. 
+!! [fullbz(3,nkpt_fullbz)]=k-points generated in the full Brillouin zone.
 !!   In output: allocated array with the list of k-points in the BZ.
 !!
 !! NOTES
@@ -46,8 +47,8 @@
 !! shiftk(3,210)=shift vectors for k point generation
 !!
 !! PARENTS
-!!      ep_setupqpt,getshell,inkpts,inqpt,m_ab7_kpoints,m_bz_mesh,m_dvdb
-!!      m_ebands,m_phgamma,nonlinear,testkgrid,thmeig
+!!      ep_setupqpt,getshell,inkpts,inqpt,m_ab7_kpoints,m_bz_mesh,m_kpts
+!!      nonlinear,testkgrid,thmeig
 !!
 !! CHILDREN
 !!      mati3inv,matr3inv,metric,smallprim,smpbz,symkpt
@@ -122,8 +123,9 @@ subroutine getkgrid(chksymbreak,iout,iscf,kpt,kptopt,kptrlatt,kptrlen,&
 
  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
 
- if (kptopt==1.or.kptopt==4) then ! Cannot use antiferromagnetic symmetry operations to decrease the number of k points
-   nsym_used=0 
+ if (kptopt==1.or.kptopt==4) then
+   ! Cannot use antiferromagnetic symmetry operations to decrease the number of k points
+   nsym_used=0
    do isym=1,nsym
      if(symafm(isym)==1)nsym_used=nsym_used+1
    end do
@@ -135,7 +137,8 @@ subroutine getkgrid(chksymbreak,iout,iscf,kpt,kptopt,kptrlatt,kptrlen,&
        call mati3inv(symrel(:,:,isym),symrec(:,:,nsym_used))
      end if
    end do
- else if (kptopt==2) then !Use only the time-reversal
+ else if (kptopt==2) then
+   !Use only the time-reversal
    nsym_used=1
    ABI_ALLOCATE(symrec,(3,3,1))
    symrec(1:3,1:3,1)=0
@@ -186,10 +189,12 @@ subroutine getkgrid(chksymbreak,iout,iscf,kpt,kptopt,kptrlatt,kptrlen,&
      do ishiftk=1,nshiftk2
        if(repetition_factor(ishiftk)==0 .or. repetition_factor(ishiftk)==1)generator(ishiftk)=0
      end do
-     
-!    Try different shifts as generators, by order of increasing repetition factor, provided they are equal or bigger than 2
+
+!    Try different shifts as generators, by order of increasing repetition factor,
+!    provided they are equal or bigger than 2
      do iprime=1,max_number_of_prime
-       do ishiftk=2,nshiftk2 ! Note that ishiftk=1 is never a generator. It is the reference starting point.
+       do ishiftk=2,nshiftk2
+         ! Note that ishiftk=1 is never a generator. It is the reference starting point.
          if(generator(ishiftk)==1 .and. repetition_factor(ishiftk)==prime_factor(iprime))then
 !          Test the generator : is it indeed closed ?
            if(prime_factor(iprime)/=2)then
@@ -230,7 +235,7 @@ subroutine getkgrid(chksymbreak,iout,iscf,kpt,kptopt,kptrlatt,kptrlen,&
                  end if
                end do
                if(found==0)then
-                 generator(ishiftk)=0 
+                 generator(ishiftk)=0
                  exit
                end if
              end do
@@ -248,7 +253,8 @@ subroutine getkgrid(chksymbreak,iout,iscf,kpt,kptopt,kptrlatt,kptrlen,&
          if(generator(ishiftk)==0)cycle
 
 !        For the generator based on ishiftk, all the k points have been found to belong to one chain.
-!        All the initializing k points in the different chains have belong_chain(:)=1 . They must be kept, and the others thrown away.
+!        All the initializing k points in the different chains have belong_chain(:)=1 .
+!        They must be kept, and the others thrown away.
          ktransf(:,:)=0.0_dp
          ktransf(1,1)=1.0_dp
          ktransf(2,2)=1.0_dp
@@ -364,9 +370,10 @@ subroutine getkgrid(chksymbreak,iout,iscf,kpt,kptopt,kptrlatt,kptrlen,&
 
  !write(message,'(a,es16.6)' )' getkgrid : length of smallest supercell vector (bohr)=',kptrlen
  !call wrtout(std_out,message,'COLL')
-!If the number of shifts has been decreased, determine the set of kptrlatt2 vectors with minimal length (without using fact_vacuum)
-!It is worth to determine the minimal set of vectors so that the kptrlatt that is output does not seem screwy,
-!although correct but surprising.
+! If the number of shifts has been decreased, determine the set of kptrlatt2 vectors
+! with minimal length (without using fact_vacuum)
+! It is worth to determine the minimal set of vectors so that the kptrlatt that is output
+! does not seem screwy, although correct but surprising.
  if(nshiftk/=nshiftk2)then
    do ii=1,3
      rprimd_super(:,ii)=rprimd(:,1)*kptrlatt2(1,ii)+rprimd(:,2)*kptrlatt2(2,ii)+rprimd(:,3)*kptrlatt2(3,ii)

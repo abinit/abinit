@@ -1,5 +1,5 @@
 #
-# ABINIT package : Boltztrap phonon file. Remove this header before feeding to BT
+# ABINIT package : Boltztrap phonon file. With old BT versions remove this header before feeding to BT
 #    for compatibility with PHON output the freq are in Ry (before the square)
 #
 #    nq, nband  

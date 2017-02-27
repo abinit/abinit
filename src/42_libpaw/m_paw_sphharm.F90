@@ -242,7 +242,7 @@ end function ylmc
 !!  Case l>3 not implemented.
 !!
 !! PARENTS
-!!      m_commutator_vkbr
+!!      m_vkbr
 !!
 !! CHILDREN
 !!      wrtout
@@ -767,7 +767,7 @@ end subroutine initylmr
 !! used througout abinit. <Yl'm'|Slm> is their overlap.
 !!
 !! PARENTS
-!!      m_paw_sphharm
+!!      m_epjdos,m_paw_sphharm
 !!
 !! CHILDREN
 !!      wrtout

@@ -2,6 +2,7 @@
 
 !Flags
  ifcflag   1     ! Interatomic force constant flag
+ ifcout    0
  thmflag   1     ! Thermodynamical properties flag
 
 !Wavevector grid number 1 (coarse grid, from DDB)
@@ -39,7 +40,7 @@
 #%% files_to_test = 
 #%%   trf2_7.out, tolnlines=  0, tolabs=  0.000e+00, tolrel=  0.000e+00, fld_options=-easy
 #%% [paral_info]
-#%% max_nprocs = 1
+#%% max_nprocs = 4
 #%% [extra_info]
 #%% authors = Unknown
 #%% keywords = 

@@ -5,19 +5,21 @@ Issue `make check` to run a subset of tests (fast tests)
 Use the script `runtests.py` located in ~abinit/tests to validate the build 
 (requires python 2.7 or python >= 3.4)
 
-To get help, cd to ~abint/tests and issue:
+To get help, cd to ~abinit/tests and issue:
     
     $ ./runtests.py --help
 
-To run the new test suite inside a build directory 
-(e.g. ~abinit/build/tests), use:
+To run the new test suite inside a build directory (e.g. ~abinit/build/tests), use:
 
     $ ../../tests/runtests.py
 
 This will create a directory build/tests/Test_suite with the results of the tests.
 
-Useful option when using manually the test suite: "-t0"
-(which disable the timeout routine)
+Useful option when using manually the test suite:
+
+    $ ../../tests/runtests.py -t0
+
+which disables the timeout routine
 
 To add a new test, see:
 

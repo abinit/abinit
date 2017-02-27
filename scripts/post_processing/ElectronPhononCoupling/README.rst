@@ -43,8 +43,5 @@ in serial or in parallel with e.g.:
 
     mpirun -n 4 python my_script.py
 
-See the examples in ElectronPhononCoupling/data/inputs_for_tests/
-for how to use this module.
-The generation of the data with Abinit is explained in the
-input file located in ElectronPhononCoupling/data/data_LiF/.
+See the examples in the Examples directory for how to use this module.
 

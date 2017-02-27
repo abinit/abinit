@@ -147,6 +147,13 @@ subroutine xchybrid_ncpp_cc(dtset,enxc,mpi_enreg,nfft,ngfft,n3xccc,rhor,rprimd,s
    call rhohxc(dtset,enxc,zero,izero,kxc_dum,mpi_enreg,nfft,ngfft,nhat,ndim,nhatgr,ndim,nkxc,nkxc,&
 &   dtset%nspden,n3xccc_null,option,rhog_dum,rhor,rprimd,strsxc,usexcnhat,vhartr_dum,vxc,vxcavg,xccc3d_null)
 
+!Initialize GGA functional
+ dtLocal%ixc=ixc_gga
+ if (dtLocal%ixc<0) then
+   call libxc_functionals_end()
+   call libxc_functionals_init(dtLocal%ixc,dtLocal%nspden)
+ end if
+
 !  Initialize GGA functional
    dtLocal%ixc=ixc_gga
    if (dtLocal%ixc<0) then

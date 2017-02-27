@@ -675,14 +675,13 @@ NVCC_CFLAGS="-O3 -arch=sm_13 -Xptxas=-v --use_fast_math --compiler-options -O3,-
 # Transferable I/O (TRIO) connector                                            #
 # ---------------------------------------------------------------------------- #
 
-# Flavor of transferable I/O library to support (default is netcdf+etsf_io)
+# Flavor of transferable I/O library to support (default is netcdf)
 #
 # By transferable I/O (TRIO), we mean that the files produced by Abinit
 # will be transferable seamlessly to other computers and codes
 #
 # Supported libraries:
 #
-#   * etsf_io  : ETSF_IO file format (requires netcdf)
 #   * psml     : XML pseudopotential format io library
 #   * netcdf   : NetCDF file format
 #   * yaml     : YAML output
@@ -690,17 +689,7 @@ NVCC_CFLAGS="-O3 -arch=sm_13 -Xptxas=-v --use_fast_math --compiler-options -O3,-
 #
 # You may specify any combination, using '+' as a separator
 #
-with_trio_flavor="netcdf+etsf_io"
-
-                       # ------------------------------ #
-
-# Include flags for the ETSF_IO library (default is unset)
-#
-with_etsf_io_incs="-I/usr/local/fallbacks/gnu/4.7/mpi/include"
-
-# Link flags for the ETSF_IO library (default is unset)
-#
-with_etsf_io_libs="-L/usr/local/fallbacks/gnu/4.7/mpi/lib -letsf_io_low_level -letsf_io_utils -letsf_io"
+with_trio_flavor="netcdf"
 
                        # ------------------------------ #
 
@@ -971,6 +960,14 @@ with_dft_flavor="none"
 # Flag to force wannier90 v1.x (autodetected by default, but may not work)
 #
 #enable_wannier90_v1="no"
+
+# ---------------------------------------------------------------------------- #
+# LIBXML support
+# ---------------------------------------------------------------------------- #
+
+# Flag to enable LIBXML library
+#
+#enable_xml=no
 
 # ---------------------------------------------------------------------------- #
 # DMFT library connector                                                        #

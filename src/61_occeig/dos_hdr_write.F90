@@ -5,10 +5,7 @@
 !! dos_hdr_write
 !!
 !! FUNCTION
-!! Write the header of the DOS files, for both
-!! smearing and tetrahedron methods. Also compute the
-!! minimum, maximum energies, the energy increment
-!! and the number of points for the DOS.
+!! Write the header of the DOS files, for both smearing and tetrahedron methods.
 !!
 !! COPYRIGHT
 !! Copyright (C) 1998-2016 ABINIT group (XG, AF)
@@ -18,6 +15,10 @@
 !! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! INPUTS
+!! deltaene=increment of DOS energy arguments
+!! enemax=maximal value of the DOS energy argument
+!! enemin=minimal value of the DOS energy argument
+!! nene=number of DOS energy argument
 !! buffer=approximative buffer energy for the output of the DOS
 !!  (beyond the max and min energy values).
 !! dosdeltae=DOS delta of Energy (if zero, take default values)
@@ -34,15 +35,10 @@
 !! unitdos=unit number of output of the DOS.
 !!
 !! OUTPUT
-!! deltaene=increment of DOS energy arguments
-!! enemax=maximal value of the DOS energy argument
-!! enemin=minimal value of the DOS energy argument
-!! nene=number of DOS energy argument
-!!
-!! NOTES
+!!   Only writing.
 !!
 !! PARENTS
-!!      gaus_dos,getnel,tetrahedron
+!!      getnel,m_epjdos
 !!
 !! CHILDREN
 !!      wrtout
@@ -74,116 +70,83 @@ subroutine dos_hdr_write(buffer,deltaene,dosdeltae,&
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: mband,nkpt,nsppol,occopt,prtdos,unitdos
- integer,intent(out) :: nene
+ integer,intent(in) :: mband,nkpt,nsppol,occopt,prtdos,unitdos,nene
  real(dp),intent(in) :: buffer,dosdeltae,fermie,tphysel,tsmear
- real(dp),intent(out) :: deltaene,enemax,enemin
+ real(dp),intent(in) :: deltaene,enemax,enemin
 !arrays
  integer,intent(in) :: nband(nkpt*nsppol)
  real(dp),intent(in) :: eigen(mband*nkpt*nsppol)
 
 !Local variables-------------------------------
 !scalars
- integer :: bantot
- character(len=500) :: message
+ character(len=500) :: msg
 
 ! *************************************************************************
 
-!DEBUG
-!write(std_out,*) ' dos_hdr_write : enter '
-!stop
-!ENDDEBUG
-
- bantot=sum(nband(:))
-
-!Choose the lower and upper energies
- enemax=maxval(eigen(1:bantot))+buffer
- enemin=minval(eigen(1:bantot))-buffer
-
-!Extend the range to a nicer value
- enemax=0.1_dp*ceiling(enemax*10._dp)
- enemin=0.1_dp*floor(enemin*10._dp)
-
-!Choose the energy increment
- if(abs(dosdeltae)<tol10)then
-   deltaene=0.001_dp
-   if(prtdos>=2)deltaene=0.0005_dp ! Higher resolution possible (and wanted) for tetrahedron
- else
-   deltaene=dosdeltae
- end if
- nene=nint((enemax-enemin)/deltaene)+1
-
 !Write the DOS file
- write(message, '(7a,i2,a,i5,a,i4)' ) "#",ch10, &
+ write(msg, '(7a,i2,a,i5,a,i4)' ) "#",ch10, &
 & '# ABINIT package : DOS file  ',ch10,"#",ch10,&
 & '# nsppol =',nsppol,', nkpt =',nkpt,', nband(1)=',nband(1)
- call wrtout(unitdos,message,'COLL')
+ call wrtout(unitdos,msg,'COLL')
 
- if(prtdos==1.or.prtdos==4)then
-   write(message, '(a,i2,a,f6.3,a,f6.3,a)' )  &
+ if (any(prtdos== [1,4])) then
+   write(msg, '(a,i2,a,f6.3,a,f6.3,a)' )  &
 &   '# Smearing technique, occopt =',occopt,', tsmear=',tsmear,' Hartree, tphysel=',tphysel,' Hartree'
  else
-   write(message, '(a)' ) &
-&   '# Tetrahedron method '
+   write(msg, '(a)' ) '# Tetrahedron method '
  end if
- call wrtout(unitdos,message,'COLL')
+ call wrtout(unitdos,msg,'COLL')
 
- if(mband*nkpt*nsppol>=3) then
-   write(message, '(a,3f8.3,2a)' ) &
-&   '# For identification : eigen(1:3)=',eigen(1:3),ch10,"#"
+ if (mband*nkpt*nsppol>=3) then
+   write(msg, '(a,3f8.3,2a)' )'# For identification : eigen(1:3)=',eigen(1:3),ch10,"#"
  else
-   write(message, '(a,3f8.3)' ) &
-&   '# For identification : eigen=',eigen
-   write(message, '(3a)')trim(message),ch10,"#"
+   write(msg, '(a,3f8.3)' ) '# For identification : eigen=',eigen
+   write(msg, '(3a)')trim(msg),ch10,"#"
  end if
- call wrtout(unitdos,message,'COLL')
+ call wrtout(unitdos,msg,'COLL')
 
- write(message, '(a,f16.8)' ) &
-& '# Fermi energy : ', fermie
- call wrtout(unitdos,message,'COLL')
+ write(msg, '(a,f16.8)' ) '# Fermi energy : ', fermie
+ call wrtout(unitdos,msg,'COLL')
 
- if(prtdos==1)then
-   write(message, '(5a)' ) "#",ch10,&
+ if (prtdos==1) then
+   write(msg, '(5a)' ) "#",ch10,&
 &   '# The DOS (in electrons/Hartree/cell) and integrated DOS (in electrons/cell),',&
 &   ch10,'# as well as the DOS with tsmear halved and doubled, are computed,'
- else if(prtdos==2)then
-   write(message, '(3a)' ) "#",ch10,&
+
+ else if (prtdos==2)then
+   write(msg, '(3a)' ) "#",ch10,&
 &   '# The DOS (in electrons/Hartree/cell) and integrated DOS (in electrons/cell) are computed,'
- else if(prtdos==3.or.prtdos==4)then
-   write(message, '(5a)' ) "#",ch10,&
+
+ else if (any(prtdos == [3, 4])) then
+   write(msg, '(5a)' ) "#",ch10,&
 &   '# The local DOS (in electrons/Hartree for one atomic sphere)',ch10,&
 &   '# and integrated local DOS (in electrons for one atomic sphere) are computed.'
- else if(prtdos==5)then
-   write(message, '(9a)' ) "#",ch10,&
+
+ else if (prtdos==5)then
+   write(msg, '(9a)' ) "#",ch10,&
 &   '# The spin component DOS (in electrons/Hartree/cell)',ch10,&
 &   '# and integrated spin component DOS (in electrons/cell) are computed.',ch10,&
 &   '# Remember that the wf are eigenstates of S_z and S^2, not S_x and S_y',ch10,&
 &   '#   so the latter will not always sum to 0 for paired electronic states.'
  end if
- call wrtout(unitdos,message,'COLL')
+ call wrtout(unitdos,msg,'COLL')
 
- write(message, '(a,i5,a,a,a,f9.4,a,f9.4,a,f8.5,a,a,a)' )&
+ write(msg, '(a,i5,a,a,a,f9.4,a,f9.4,a,f8.5,a,a,a)' )&
 & '# at ',nene,' energies (in Hartree) covering the interval ',ch10,&
-& '# between ',enemin,' and ',enemax,' Hartree by steps of ',&
-& deltaene,' Hartree.',ch10,"#"
- call wrtout(unitdos,message,'COLL')
+& '# between ',enemin,' and ',enemax,' Hartree by steps of ',deltaene,' Hartree.',ch10,"#"
+ call wrtout(unitdos,msg,'COLL')
 
- if(prtdos==1)then
-   write(message, '(a,a)' )&
-&   '#       energy        DOS       Integr. DOS   ',&
-&   '     DOS           DOS    '
-   call wrtout(unitdos,message,'COLL')
+ if (prtdos==1) then
+   write(msg, '(a,a)' )&
+&   '#       energy        DOS       Integr. DOS   ','     DOS           DOS    '
+   call wrtout(unitdos,msg,'COLL')
 
-   write(message, '(a)' )&
+   write(msg, '(a)' )&
 &   '#                                              (tsmear/2)    (tsmear*2) '
-   call wrtout(unitdos,message,'COLL')
+   call wrtout(unitdos,msg,'COLL')
  else
-   write(message, '(a)' ) '#       energy        DOS '
+   write(msg, '(a)' ) '#       energy        DOS '
  end if
-
-!DEBUG
-!write(std_out,*) ' dos_hdr_write : exit '
-!ENDDEBUG
 
 end subroutine dos_hdr_write
 !!***

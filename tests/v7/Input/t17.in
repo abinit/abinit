@@ -6,6 +6,9 @@
  nspinor2   1
  nsppol2    2
 
+ prtdos1    5  # Spin-resolved DOS.
+ prtdos2    4  # DOS with gaussian method. FIXME: This part is buggy
+
 
 # Dataset 1: self-consistent ground state calculation
  kptopt   1
@@ -39,7 +42,9 @@ nshiftk   4
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   t17.out, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
+#%%   t17.out, tolnlines=0, tolabs=0.000e+00, tolrel=0.000e+00;
+#%%   t17o_DS1_DOS , tolnlines=50, tolabs=0.05, tolrel=0.01, fld_options=-ridiculous;
+#####%%   t17o_DS2_DOS_AT0001, tolnlines=50, tolabs=0.05, tolrel=0.01, fld_options=-ridiculous;
 #%% psp_files = Pt-sp_r.psp8
 #%% [paral_info]
 #%% max_nprocs = 4
@@ -49,7 +54,6 @@ nshiftk   4
 #%% description = 
 #%%   Test of the extension of the pspcod=8 input format to include
 #%%   spin-orbit coupling with multiple non-local projectors and pseudized valence charge density
-#%%   band structure of fcc Pt is computed at Gamma, X, and L.  
 #%%   The relativistic extension is documented in the code package.
 #%%   The Pt 5s and 5p semi-cores are treated as valence.
 #%%   A complete description of the input format is avaiable in  doc/psp_infos/psp8_info.txt.

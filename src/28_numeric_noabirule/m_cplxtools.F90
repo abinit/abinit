@@ -14,14 +14,14 @@
 !! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! NOTES
-!! 1) The convention about names of interfaced routine is: cplx_<name>, 
+!! 1) The convention about names of interfaced routine is: cplx_<name>,
 !!    where <name> is equal to the name of the standard BLAS routine
 !!
 #if defined HAVE_CONFIG_H
 #include "config.h"
 #endif
 
-#include "abi_common.h" 
+#include "abi_common.h"
 
 MODULE m_cplxtools
 
@@ -99,14 +99,14 @@ CONTAINS  !=====================================================================
 !!  cplx_fromreal
 !!
 !! FUNCTION
-!!  Convert a real array with (real,imag) part to a complex array 
+!!  Convert a real array with (real,imag) part to a complex array
 !!
 !! INPUTS
 !!  n = Specifies the number of elements in ocplx
 !!  ireal(2*n)=Input real array.
 !!
-!! OUTPUT 
-!!  ocplx(n)=Output complex array 
+!! OUTPUT
+!!  ocplx(n)=Output complex array
 !!
 !! PARENTS
 !!
@@ -116,7 +116,6 @@ CONTAINS  !=====================================================================
 
 subroutine cplx_fromreal(n,ireal,ocplx)
 
- use defs_basis
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -171,7 +170,6 @@ end subroutine cplx_fromreal
 
 subroutine cplx_filter(n, x, mask)
 
- use defs_basis
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -221,7 +219,6 @@ end subroutine cplx_filter
 
 function cplx_real_zdotc(n,x,y) result(res)
 
- use defs_basis
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -277,7 +274,6 @@ end function cplx_real_zdotc
 
 subroutine cplx_zaxpby(n,a,x,b,y)
 
- use defs_basis
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -336,7 +332,6 @@ end subroutine cplx_zaxpby
 
 subroutine cplx_zgemv(trans,nrows,ncols,mat,vec,matvec,alpha,beta)
 
- use defs_basis
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -362,13 +357,13 @@ subroutine cplx_zgemv(trans,nrows,ncols,mat,vec,matvec,alpha,beta)
  complex(dpc) :: my_alpha,my_beta
 
 ! *************************************************************************
- 
+
  lda = nrows
  mm  = nrows
  nn  = 1
  kk  = ncols
 
- if (toupper(trans) /= 'N') then 
+ if (toupper(trans) /= 'N') then
    mm = ncols
    kk = nrows
  end if
@@ -393,7 +388,7 @@ end subroutine cplx_zgemv
 !!  cplx_zgemm
 !!
 !! FUNCTION
-!!  The ?gemm routines perform a matrix-matrix operation with general matrices. 
+!!  The ?gemm routines perform a matrix-matrix operation with general matrices.
 !!  The operation is defined as C := alpha*op(A)*op(B) + beta*C,
 !!  where:
 !!
@@ -417,7 +412,6 @@ end subroutine cplx_zgemv
 
 subroutine cplx_zgemm(transa,transb,npws,ncola,ncolb,amat,bmat,cmat,alpha,beta)
 
- use defs_basis
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -443,7 +437,7 @@ subroutine cplx_zgemm(transa,transb,npws,ncola,ncolb,amat,bmat,cmat,alpha,beta)
  complex(dpc) :: my_alpha,my_beta
 
 ! *************************************************************************
- 
+
  lda = npws
  ldb = npws
 
@@ -451,7 +445,7 @@ subroutine cplx_zgemm(transa,transb,npws,ncola,ncolb,amat,bmat,cmat,alpha,beta)
  nn  = ncolb
  kk  = ncola
 
- if (toupper(transa) /= 'N') then 
+ if (toupper(transa) /= 'N') then
    mm = ncola
    kk = npws
  end if
@@ -479,7 +473,7 @@ end subroutine cplx_zgemm
 !! INPUTS
 !!  nx,ny,nz=physical dimension of the FFT box.
 !!  ldx,ldy,ldz=Logical dimensions of the arrays.
-!!  ndat=number of data in iarrbox 
+!!  ndat=number of data in iarrbox
 !!  npw_k=Number of planewaves in the G-sphere.
 !!  kg_k(3,npw_k)=Reduced coordinates of the G-vectoes.
 !!  iarrbox(ldx*ldy*ldz*ndat)=Complex Input arrays on the FFT box.
@@ -496,7 +490,6 @@ end subroutine cplx_zgemm
 
 subroutine cplx_box2gsph_spc(nx,ny,nz,ldx,ldy,ldz,ndat,npw_k,kg_k,iarrbox,oarrsph,rscal)
 
- use defs_basis
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -531,9 +524,9 @@ subroutine cplx_box2gsph_spc(nx,ny,nz,ldx,ldy,ldz,ndat,npw_k,kg_k,iarrbox,oarrsp
        iy=kg_k(2,ig); if (iy<0) iy=iy+ny; iy=iy+1
        iz=kg_k(3,ig); if (iz<0) iz=iz+nz; iz=iz+1
        ifft = ix + (iy-1)*ldx + (iz-1)*ldx*ldy
-       oarrsph(ig) = iarrbox(ifft) 
+       oarrsph(ig) = iarrbox(ifft)
      end do
-   else 
+   else
 !$OMP PARALLEL DO PRIVATE(pad_sph,pad_box,ix,iy,iz,ifft)
      do dat=1,ndat
        pad_sph = (dat-1)*npw_k
@@ -543,7 +536,7 @@ subroutine cplx_box2gsph_spc(nx,ny,nz,ldx,ldy,ldz,ndat,npw_k,kg_k,iarrbox,oarrsp
          iy=kg_k(2,ig); if (iy<0) iy=iy+ny; iy=iy+1
          iz=kg_k(3,ig); if (iz<0) iz=iz+nz; iz=iz+1
          ifft = ix + (iy-1)*ldx + (iz-1)*ldx*ldy
-         oarrsph(ig+pad_sph) = iarrbox(ifft+pad_box) 
+         oarrsph(ig+pad_sph) = iarrbox(ifft+pad_box)
        end do
      end do
    end if
@@ -558,7 +551,7 @@ subroutine cplx_box2gsph_spc(nx,ny,nz,ldx,ldy,ldz,ndat,npw_k,kg_k,iarrbox,oarrsp
        ifft = ix + (iy-1)*ldx + (iz-1)*ldx*ldy
        oarrsph(ig) = iarrbox(ifft) * rscal
      end do
-   else 
+   else
 !$OMP PARALLEL DO PRIVATE(pad_sph,pad_box,ix,iy,iz,ifft)
      do dat=1,ndat
        pad_sph = (dat-1)*npw_k
@@ -591,7 +584,7 @@ end subroutine cplx_box2gsph_spc
 !! INPUTS
 !!  nx,ny,nz=physical dimension of the FFT box.
 !!  ldx,ldy,ldz=Logical dimensions of the arrays.
-!!  ndat=number of data in iarrbox 
+!!  ndat=number of data in iarrbox
 !!  npw_k=Number of planewaves in the G-sphere.
 !!  kg_k(3,npw_k)=Reduced coordinates of the G-vectoes.
 !!  iarrbox(ldx*ldy*ldz*ndat)=Complex Input arrays on the FFT box.
@@ -608,7 +601,6 @@ end subroutine cplx_box2gsph_spc
 
 subroutine cplx_box2gsph_dpc(nx,ny,nz,ldx,ldy,ldz,ndat,npw_k,kg_k,iarrbox,oarrsph,rscal)
 
- use defs_basis
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -643,9 +635,9 @@ subroutine cplx_box2gsph_dpc(nx,ny,nz,ldx,ldy,ldz,ndat,npw_k,kg_k,iarrbox,oarrsp
        iy=kg_k(2,ig); if (iy<0) iy=iy+ny; iy=iy+1
        iz=kg_k(3,ig); if (iz<0) iz=iz+nz; iz=iz+1
        ifft = ix + (iy-1)*ldx + (iz-1)*ldx*ldy
-       oarrsph(ig) = iarrbox(ifft) 
+       oarrsph(ig) = iarrbox(ifft)
      end do
-   else 
+   else
 !$OMP PARALLEL DO PRIVATE(pad_sph,pad_box,ix,iy,iz,ifft)
      do dat=1,ndat
        pad_sph = (dat-1)*npw_k
@@ -655,7 +647,7 @@ subroutine cplx_box2gsph_dpc(nx,ny,nz,ldx,ldy,ldz,ndat,npw_k,kg_k,iarrbox,oarrsp
          iy=kg_k(2,ig); if (iy<0) iy=iy+ny; iy=iy+1
          iz=kg_k(3,ig); if (iz<0) iz=iz+nz; iz=iz+1
          ifft = ix + (iy-1)*ldx + (iz-1)*ldx*ldy
-         oarrsph(ig+pad_sph) = iarrbox(ifft+pad_box) 
+         oarrsph(ig+pad_sph) = iarrbox(ifft+pad_box)
        end do
      end do
    end if
@@ -670,7 +662,7 @@ subroutine cplx_box2gsph_dpc(nx,ny,nz,ldx,ldy,ldz,ndat,npw_k,kg_k,iarrbox,oarrsp
        ifft = ix + (iy-1)*ldx + (iz-1)*ldx*ldy
        oarrsph(ig) = iarrbox(ifft) * rscal
      end do
-   else 
+   else
 !$OMP PARALLEL DO PRIVATE(pad_sph,pad_box,ix,iy,iz,ifft)
      do dat=1,ndat
        pad_sph = (dat-1)*npw_k
@@ -726,7 +718,6 @@ end subroutine cplx_box2gsph_dpc
 
 subroutine cplx_gsph2box_spc(nx,ny,nz,ldx,ldy,ldz,ndat,npw,istwf_k,kg_k,iarrsph,oarrbox)
 
- use defs_basis
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -746,7 +737,7 @@ subroutine cplx_gsph2box_spc(nx,ny,nz,ldx,ldy,ldz,ndat,npw,istwf_k,kg_k,iarrsph,
 
 !Local variables-------------------------------
 !scalars
- integer,parameter :: me_g0=1 
+ integer,parameter :: me_g0=1
  integer :: ix,ixinv,iy,iyinv,iz,izinv,dat,ipw,npwmin,pad_box,pad_sph,ifft,ifft_inv,ldxyz
  !character(len=500) :: msg
 !arrays
@@ -800,7 +791,7 @@ subroutine cplx_gsph2box_spc(nx,ny,nz,ldx,ldy,ldz,ndat,npw,istwf_k,kg_k,iarrsph,
 
  if (istwf_k==1) then
 
-!$OMP PARALLEL DO PRIVATE(pad_sph,pad_box,ix,iy,iz,ifft) 
+!$OMP PARALLEL DO PRIVATE(pad_sph,pad_box,ix,iy,iz,ifft)
    do dat=1,ndat
      pad_sph = (dat-1)*npw
      pad_box = (dat-1)*ldxyz
@@ -811,7 +802,7 @@ subroutine cplx_gsph2box_spc(nx,ny,nz,ldx,ldy,ldz,ndat,npw,istwf_k,kg_k,iarrsph,
        iz=kg_k(3,ipw); if (iz<0) iz=iz+nz; iz=iz+1
        ifft = ix + (iy-1)*ldx + (iz-1)*ldx*ldy
 #if defined __INTEL_COMPILER && defined HAVE_OPENMP
-       if (ifft==0) then 
+       if (ifft==0) then
          MSG_ERROR("prevent ifort+OMP from miscompiling this section on cronos")
        end if
 #endif
@@ -845,7 +836,7 @@ subroutine cplx_gsph2box_spc(nx,ny,nz,ldx,ldy,ldz,ndat,npw,istwf_k,kg_k,iarrsph,
        ixinv=ixinver(ix); iyinv=iyinver(iy); izinv=izinver(iz)
        ifft_inv = ixinv + (iyinv-1)*ldx + (izinv-1)*ldx*ldy
 #if defined __INTEL_COMPILER && defined HAVE_OPENMP
-       if (ifft==0 .or. ifft_inv==0) then 
+       if (ifft==0 .or. ifft_inv==0) then
          MSG_ERROR("prevent ifort+OMP from miscompiling this section on cronos")
        end if
 #endif
@@ -904,7 +895,6 @@ end subroutine cplx_gsph2box_spc
 
 subroutine cplx_gsph2box_dpc(nx,ny,nz,ldx,ldy,ldz,ndat,npw,istwf_k,kg_k,iarrsph,oarrbox)
 
- use defs_basis
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -924,7 +914,7 @@ subroutine cplx_gsph2box_dpc(nx,ny,nz,ldx,ldy,ldz,ndat,npw,istwf_k,kg_k,iarrsph,
 
 !Local variables-------------------------------
 !scalars
- integer,parameter :: me_g0=1 
+ integer,parameter :: me_g0=1
  integer :: ix,ixinv,iy,iyinv,iz,izinv,dat,ipw,npwmin,pad_box,pad_sph,ifft,ifft_inv,ldxyz
  !character(len=500) :: msg
 !arrays
@@ -978,7 +968,7 @@ subroutine cplx_gsph2box_dpc(nx,ny,nz,ldx,ldy,ldz,ndat,npw,istwf_k,kg_k,iarrsph,
 
  if (istwf_k==1) then
 
-!$OMP PARALLEL DO PRIVATE(pad_sph,pad_box,ix,iy,iz,ifft) 
+!$OMP PARALLEL DO PRIVATE(pad_sph,pad_box,ix,iy,iz,ifft)
    do dat=1,ndat
      pad_sph = (dat-1)*npw
      pad_box = (dat-1)*ldxyz
@@ -989,7 +979,7 @@ subroutine cplx_gsph2box_dpc(nx,ny,nz,ldx,ldy,ldz,ndat,npw,istwf_k,kg_k,iarrsph,
        iz=kg_k(3,ipw); if (iz<0) iz=iz+nz; iz=iz+1
        ifft = ix + (iy-1)*ldx + (iz-1)*ldx*ldy
 #if defined __INTEL_COMPILER && defined HAVE_OPENMP
-       if (ifft==0) then 
+       if (ifft==0) then
          MSG_ERROR("prevent ifort+OMP from miscompiling this section on cronos")
        end if
 #endif
@@ -1023,7 +1013,7 @@ subroutine cplx_gsph2box_dpc(nx,ny,nz,ldx,ldy,ldz,ndat,npw,istwf_k,kg_k,iarrsph,
        ixinv=ixinver(ix); iyinv=iyinver(iy); izinv=izinver(iz)
        ifft_inv = ixinv + (iyinv-1)*ldx + (izinv-1)*ldx*ldy
 #if defined __INTEL_COMPILER && defined HAVE_OPENMP
-       if (ifft==0 .or. ifft_inv==0) then 
+       if (ifft==0 .or. ifft_inv==0) then
          MSG_ERROR("prevent ifort+OMP from miscompiling this section on cronos")
        end if
 #endif
@@ -1055,7 +1045,7 @@ end subroutine cplx_gsph2box_dpc
 !!  Set to zero all elements of the array that are not in the FFT box.
 !!
 !! INPUTS
-!! nx,ny,nz=physical dimensions of the FFT box 
+!! nx,ny,nz=physical dimensions of the FFT box
 !! ldx,ldy,ldx=memory dimension of arr
 !! ndat=number of FFTs
 !!
@@ -1071,7 +1061,6 @@ end subroutine cplx_gsph2box_dpc
 
 subroutine cplx_setaug_zero_spc(nx,ny,nz,ldx,ldy,ldz,ndat,arr)
 
- use defs_basis
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -1128,7 +1117,7 @@ end subroutine cplx_setaug_zero_spc
 !!  Set to zero all elements of the array that are not in the FFT box.
 !!
 !! INPUTS
-!! nx,ny,nz=physical dimensions of the FFT box 
+!! nx,ny,nz=physical dimensions of the FFT box
 !! ldx,ldy,ldx=memory dimension of arr
 !! ndat=number of FFTs
 !!
@@ -1144,7 +1133,6 @@ end subroutine cplx_setaug_zero_spc
 
 subroutine cplx_setaug_zero_dpc(nx,ny,nz,ldx,ldy,ldz,ndat,arr)
 
- use defs_basis
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -1208,7 +1196,7 @@ end subroutine cplx_setaug_zero_dpc
 !!  weight_r=weight used for the accumulation of the density in real space
 !!  ur(ldx,ldy,ldz*ndat)=wavefunctions in real space
 !!
-!! SIDE EFFECTS 
+!! SIDE EFFECTS
 !!  rho(ldx,ldy,ldz) = contains the input density at input,
 !!                     modified in input with the contribution gived by ur.
 !!
@@ -1220,7 +1208,6 @@ end subroutine cplx_setaug_zero_dpc
 
 subroutine cplx_addtorho_dpc(nx,ny,nz,ldx,ldy,ldz,ndat,weight_r,ur,rho)
 
- use defs_basis
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -1232,7 +1219,7 @@ subroutine cplx_addtorho_dpc(nx,ny,nz,ldx,ldy,ldz,ndat,weight_r,ur,rho)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: nx,ny,nz,ldx,ldy,ldz,ndat 
+ integer,intent(in) :: nx,ny,nz,ldx,ldy,ldz,ndat
  real(dp),intent(in) :: weight_r
 !arrays
  complex(dpc),intent(in) :: ur(ldx*ldy*ldz*ndat)
@@ -1251,15 +1238,15 @@ subroutine cplx_addtorho_dpc(nx,ny,nz,ldx,ldy,ldz,ndat,weight_r,ur,rho)
    do iz=1,nz
      padz = (iz-1)*ldx*ldy
      do iy=1,ny
-       pady = (iy-1)*ldx 
+       pady = (iy-1)*ldx
        do ix=1,nx
-         ifft = ix + pady + padz 
+         ifft = ix + pady + padz
          rho(ifft) = rho(ifft) + weight_r * (REAL(ur(ifft))**2 + AIMAG(ur(ifft))**2)
        end do
      end do
    end do
 
- else 
+ else
 ! It would be nice to use $OMP PARALLEL DO REDUCTION(+:rho)
 ! but it's risky as the private rho is allocated on the stack of the thread.
 !$OMP PARALLEL PRIVATE(pad_box, padz, pady, ifft)
@@ -1269,9 +1256,9 @@ subroutine cplx_addtorho_dpc(nx,ny,nz,ldx,ldy,ldz,ndat,weight_r,ur,rho)
      do iz=1,nz
        padz = (iz-1)*ldx*ldy
        do iy=1,ny
-         pady = (iy-1)*ldx 
+         pady = (iy-1)*ldx
          do ix=1,nx
-           ifft = ix + pady + padz 
+           ifft = ix + pady + padz
            rho(ifft) = rho(ifft) + weight_r * (REAL(ur(ifft+pad_box)**2 + AIMAG(ur(ifft+pad_box))**2))
          end do
        end do

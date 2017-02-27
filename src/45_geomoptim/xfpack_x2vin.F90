@@ -41,7 +41,8 @@
 !! xred(3,natom)=reduced dimensionless atomic coordinates
 !!
 !! PARENTS
-!!      pred_bfgs,pred_delocint,pred_verlet,xfh_recover_deloc,xfh_recover_new
+!!      pred_bfgs,pred_delocint,pred_lbfgs,pred_verlet,xfh_recover_deloc
+!!      xfh_recover_new
 !!
 !! CHILDREN
 !!      matr3inv,metric,mkrdim,strainsym

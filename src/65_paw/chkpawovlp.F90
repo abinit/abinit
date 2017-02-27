@@ -207,7 +207,7 @@ subroutine chkpawovlp(natom,ntypat,pawovlp,pawtab,rmet,typat,xred)
 
  contains
 
-    function sqnrm_pawovlp(u1,u2,u3)
+   function sqnrm_pawovlp(u1,u2,u3)
 !squared norm of a vector
 
 !This section has been created automatically by the script Abilint (TD).

@@ -25,7 +25,7 @@
 
 # Initialize Autoconf
 AC_PREREQ(2.59)
-AC_INIT([ABINIT],[8.1.6],[https://bugs.launchpad.net/abinit/],[abinit])
+AC_INIT([ABINIT],[8.3.1],[https://bugs.launchpad.net/abinit/],[abinit])
 AC_REVISION([Autotools support for ABINIT 7])
 AC_CONFIG_AUX_DIR([config/gnu])
 AC_CONFIG_MACRO_DIR([config/m4])
