@@ -17,7 +17,7 @@
 # please, restart from the previous version, and if yes, do it by hand !
 # developers/maintainers/change_year.sh */*/*.py */*/*/*.py 
 #
-# In the previous list, files without an extension are not treated (except the Makefile and README files), 
+# In the previous list, files without an extension are not treated (except the Makefile and README files - warning some README are only links ...), 
 # and */*/*.sh are not treated (except tests/*/*.sh), because of conflict with the present script file extension !!
 # Also config/scripts/abilint cannot be treated automatically ...
 #
@@ -26,7 +26,7 @@
 # developers/maintainers/change_year.sh developers/bzr_helpers/abinit-forge-branch developers/bzr_helpers/bzr-make-patch 
 # developers/maintainers/change_year.sh developers/maintainers/change2.sh developers/maintainers/change.sh developers/various/change_perl.sh developers/various/fixed_to_free tests/cpu/Refs/changeref 
 # developers/maintainers/change_year.sh developers/various/*.sh developers/various/fixed_to_free doc/config/scripts/make* doc/manpages/abinit.1 fallbacks/config/scripts/make* INSTALL 
-# developers/maintainers/change_year.sh README tests/config/scripts/make-makefiles-tests tests/cpu/Refs/changeref scripts/configure/upgrade-build-config packages/debian/copyright 
+# developers/maintainers/change_year.sh tests/config/scripts/make-makefiles-tests tests/cpu/Refs/changeref scripts/configure/upgrade-build-config packages/debian/copyright 
 # 
 # Moreover, one should complement the present script with a search 
 # grep 'past_year ABINIT' * */* */*/* */*/*/* */*/*/*/*
