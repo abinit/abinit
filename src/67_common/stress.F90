@@ -433,10 +433,10 @@
 !In cartesian coordinates (symmetric storage) 
 
  strten(:)=kinstr(:)+ewestr(:)+corstr(:)+strsxc(:)+harstr(:)+lpsstr(:)+nlstr(:)
-
  if (usefock==1 .and. associated(fock).and.fock%optstr) then
    strten(:)=strten(:)+fock%stress(:)
  end if
+
 !Add contributions for constant E or D calculation.
  if ( efield_flag ) then
    strten(:)=strten(:)+Maxstr(:)

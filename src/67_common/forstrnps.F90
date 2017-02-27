@@ -201,7 +201,7 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass,eigen,electronpositron,fock,&
 !TESTDFPT
 
 !*************************************************************************
-write(80,*) "coucou"
+
  call timab(920,1,tsec)
  call timab(921,1,tsec)
 
@@ -241,8 +241,8 @@ write(80,*) "coucou"
  if (stress_needed==1) then
    kinstr(:)=zero;npsstr(:)=zero
    if (usefock_loc) then
-!     fock%optstr=.TRUE.
-     fock%optstr=.false.
+     fock%optstr=.TRUE.
+ !    fock%optstr=.false.
      fock%stress=zero
      compute_gbound=.true.
    end if
@@ -264,7 +264,7 @@ write(80,*) "coucou"
      compute_gbound=.true.
    end if
  end if
-
+!write(80,*) fock%optstr
 !Initialize Hamiltonian (k-independent terms)
 
 
@@ -642,7 +642,7 @@ write(80,*) "coucou"
      occblock=zero;weight=zero;enlout(:)=zero
      if (usefock_loc) then
        if (fock%optstr) then
-         ABI_ALLOCATE(fock%stress_ikpt,(6,1))
+         ABI_ALLOCATE(fock%stress_ikpt,(6,nband_k))
          fock%stress_ikpt=zero
        end if
      end if
@@ -786,7 +786,10 @@ write(80,*) "coucou"
                call fock_getghc(cwavef(:,1+(iblocksize-1)*npw_k*my_nspinor:iblocksize*npw_k*my_nspinor),cwaveprj_idat,&
 &               ghc_dum,gs_hamk,mpi_enreg)
                if (fock%optstr) then
+!write(80,*)fock%ieigen
                  fock%stress(:)=fock%stress(:)+weight(iblocksize)*fock%stress_ikpt(:,fock%ieigen)
+!                 fock%stress(:)=fock%stress(:)+weight(iblocksize)*fock%stress_ikpt(:,1)
+!write(80,*) "forstrnps", weight(iblocksize)
                end if
                if (fock%optfor) then
                  fock%forces(:,:)=fock%forces(:,:)+weight(iblocksize)*fock%forces_ikpt(:,:,fock%ieigen)

@@ -381,7 +381,9 @@ subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,e
 !==========================================================================
  if (stress_needed==1) then
    if (dtset%usefock==1 .and. associated(fock).and.fock%optstr) then
+!write(80,*)fock%stress
      fock%stress(1:3)=fock%stress(1:3)-energies%e_fock/ucvol
+!write(80,*) "forstr",-energies%e_fock/ucvol, energies%e_fock
    end if
    call stress(atindx1,dtset%berryopt,dtefield,energies%e_localpsp,dtset%efield,&
 &   energies%e_hartree,energies%e_corepsp,fock,gsqcut,dtset%ixc,kinstr,mgfftf,&

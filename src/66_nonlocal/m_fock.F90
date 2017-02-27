@@ -2325,7 +2325,9 @@ subroutine bare_vqg(qphon,gsqcut,gmet,izero,hybrid_mixing,hybrid_mixing_sr,hybri
 !Treatment of the divergence at q+g=zero
 !For the time being, only Spencer-Alavi scheme...
  rcut= (three*nkpt_bz*ucvol/four_pi)**(one/three)
+! rcut=4.72d0
  divgq0= two_pi*rcut**two
+!divgq0=zero
 !Initialize a few quantities
  n1=ngfft(1); n2=ngfft(2); n3=ngfft(3)
  cutoff=gsqcut*tolfix
@@ -2520,7 +2522,7 @@ subroutine strfock(efock,gprimd,gsqcut,fockstr,hybrid_mixing,hybrid_mixing_sr,hy
 !scalars
  integer,parameter :: im=2,re=1
  integer :: i1,i2,i3,id1,id2,id3,ierr,ig1,ig2,ig3,ii,irho2,me_fft,n1,n2,n3,nproc_fft
- real(dp) :: arg,cutoff,gsquar,rcut,rhogsq,tolfix=1.000000001_dp,tot
+ real(dp) :: arg,cutoff,gsquar,rcut,rhogsq,tolfix=1.000000001_dp,tot,tot1,divgq0
  character(len=100) :: msg
 !arrays
  real(dp) :: gcart(3),tsec(2)
@@ -2539,8 +2541,10 @@ subroutine strfock(efock,gprimd,gsqcut,fockstr,hybrid_mixing,hybrid_mixing_sr,hy
  fockstr(:)=zero
 !ehtest=0.0_dp (used for testing)
  rcut= (three*nkpt_bz*ucvol/four_pi)**(one/three)
+!rcut=4.72d0
  irho2=0;if (present(rhog2)) irho2=1
-
+! divgq0=four_pi/three*rcut**2
+divgq0=zero
 !Conduct looping over all fft grid points to find G vecs inside gsqcut
 !Include G**2 on surface of cutoff sphere as well as inside:
  cutoff=gsqcut*tolfix
@@ -2562,7 +2566,7 @@ subroutine strfock(efock,gprimd,gsqcut,fockstr,hybrid_mixing,hybrid_mixing_sr,hy
      ig2=i2-(i2/id2)*n2-1
      if (fftn2_distrib(i2)==me_fft) then
        do i1=1,n1
-         tot=zero
+         tot=zero; tot1=zero
          ig1=i1-(i1/id1)*n1-1
 !        ii=ii+1
          ii=i1+n1*(ffti2_local(i2)-1+(n2/nproc_fft)*(i3-1))
@@ -2576,7 +2580,15 @@ subroutine strfock(efock,gprimd,gsqcut,fockstr,hybrid_mixing,hybrid_mixing_sr,hy
          gcart(3)=gprimd(3,1)*(dble(ig1)+qphon(1))+gprimd(3,2)*(dble(ig2)+qphon(2))+gprimd(3,3)*(dble(ig3)+qphon(3))
 !        Compute |G+q|^2
          gsquar=gcart(1)**2+gcart(2)**2+gcart(3)**2
-         if(gsquar<tol10) cycle 
+         if(gsquar<tol10) then 
+           if (abs(hybrid_mixing_sr)>tol8) cycle
+           if (abs(hybrid_mixing)>tol8) then
+             fockstr(1)=divgq0
+             fockstr(2)=divgq0
+             fockstr(3)=divgq0
+             cycle
+           end if
+         end if
 !        take |rho(G)|^2 for complex rhog
          if (irho2==0) then
            rhogsq=rhog(re,ii)**2+rhog(im,ii)**2
@@ -2586,20 +2598,21 @@ subroutine strfock(efock,gprimd,gsqcut,fockstr,hybrid_mixing,hybrid_mixing_sr,hy
 !        Spencer-Alavi screening
          if (abs(hybrid_mixing)>tol8) then
            arg=two_pi*rcut*sqrt(gsquar)
-           tot=tot+hybrid_mixing*rhogsq*(1-cos(arg)-arg*sin(arg)/two)/(gsquar**2)
+           tot=tot+hybrid_mixing*rhogsq*piinv/(gsquar**2)*(1-cos(arg)-arg*sin(arg)/two)
+!           tot1=tot1+hybrid_mixing*rhogsq/three*rcut*sin(arg)/sqrt(gsquar)
          end if 
 !        Erfc screening
          if (abs(hybrid_mixing_sr)>tol8) then
            arg=-gsquar*pi**2/(hybrid_range**2)
-           tot=tot+hybrid_mixing_sr*rhogsq/(gsquar**2)*(1.d0-exp(arg)*(1-arg))
+           tot=tot+hybrid_mixing_sr*rhogsq*piinv/(gsquar**2)*(1.d0-exp(arg)*(1-arg))
          end if
-         fockstr(1)=fockstr(1)+tot*gcart(1)*gcart(1)
-         fockstr(2)=fockstr(2)+tot*gcart(2)*gcart(2)
-         fockstr(3)=fockstr(3)+tot*gcart(3)*gcart(3)
+         fockstr(1)=fockstr(1)+tot*gcart(1)*gcart(1)+tot1
+         fockstr(2)=fockstr(2)+tot*gcart(2)*gcart(2)+tot1
+         fockstr(3)=fockstr(3)+tot*gcart(3)*gcart(3)+tot1
          fockstr(4)=fockstr(4)+tot*gcart(3)*gcart(2)
          fockstr(5)=fockstr(5)+tot*gcart(3)*gcart(1) 
          fockstr(6)=fockstr(6)+tot*gcart(2)*gcart(1)
-
+!write (80,*) gcart(1)*gcart(1),gcart(2)*gcart(2),gcart(3)*gcart(3)
        end do
      end if
    end do
@@ -2625,14 +2638,14 @@ subroutine strfock(efock,gprimd,gsqcut,fockstr,hybrid_mixing,hybrid_mixing_sr,hy
 
 !Normalize and add term -efock/ucvol on diagonal
 !efock has been set to zero because it is not yet known. It will be added later.
- fockstr(1)=fockstr(1)/pi-efock/ucvol
- fockstr(2)=fockstr(2)/pi-efock/ucvol
- fockstr(3)=fockstr(3)/pi-efock/ucvol
- fockstr(4)=fockstr(4)/pi
- fockstr(5)=fockstr(5)/pi
- fockstr(6)=fockstr(6)/pi
-
-
+ fockstr(1)=-fockstr(1)-efock/ucvol
+ fockstr(2)=-fockstr(2)-efock/ucvol
+ fockstr(3)=-fockstr(3)-efock/ucvol
+ fockstr(4)=-fockstr(4)
+ fockstr(5)=-fockstr(5)
+ fockstr(6)=-fockstr(6)
+!write(80,*)hybrid_mixing,hybrid_mixing_sr,divgq0,rcut
+!write(80,*) "strfock", fockstr
  call timab(568,2,tsec)
 
 end subroutine strfock

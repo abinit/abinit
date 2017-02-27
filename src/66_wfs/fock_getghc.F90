@@ -115,7 +115,7 @@ type(pseudopotential_type) :: psps
  type(pawrhoij_type),allocatable  ::  pawrhoij(:)
  logical :: testtrue
 ! *************************************************************************
-
+!return
  call timab(1504,1,tsec)
  call timab(1505,1,tsec)
 
@@ -372,11 +372,12 @@ type(pseudopotential_type) :: psps
     !Perform an FFT using fourwf to get rhog_munu = FFT^-1(rhor_munu)
      call fourdp(cplex_fock,rhog_munu,rhor_munu,-1,mpi_enreg,nfftf,ngfftf,mpi_enreg%paral_kgb,tim_fourdp0)
      call timab(1509,2,tsec)
-!     if(fock%optstr.and.(fock%ieigen/=0)) then
-     if(fock%optstr) then
+     if(fock%optstr.and.(fock%ieigen/=0)) then
+!     if(fock%optstr) then
        call strfock(efock,gs_ham%gprimd,fock%gsqcut,fockstr,fock%hybrid_mixing,fock%hybrid_mixing_sr,&
 &       fock%hybrid_range,mpi_enreg,nfftf,ngfftf,fock%nkpt_bz,rhog_munu,gs_ham%ucvol,qvec_j)
-       fock%stress_ikpt(:,1)=fock%stress_ikpt(:,1)-fockstr(:)*occ*wtk
+       fock%stress_ikpt(:,fock%ieigen)=fock%stress_ikpt(:,fock%ieigen)+fockstr(:)*occ*wtk
+!write(80,*) "fock-getghc",occ*wtk,fock%ieigen
        if (fock%usepaw==0.and.(.not.need_ghc)) cycle
      end if
 
