@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Copyright (C) 1998-2016 ABINIT group (XG)
+# Copyright (C) 1998-2017 ABINIT group (XG)
 # 
 # The purpose of this script is to change the copyright year
 # in nearly all files in the ABINIT package. 
@@ -33,7 +33,7 @@
 # and treat by hand the remaining files ...
 #
 #XG 100118 Still other problems with copyrights might be detected by using the following command (replace 2016 by the present year !):
-# grep -i opyright * */* */*/* */*/*/* */*/*/*/* | grep -v 2016 | grep -v '!! COPYRIGHT' | grep -v 'Oldenburg' | grep -v 'Stefan Goedecker' | grep -v 'doc/rel' | grep -v 'Remove' | grep -v 'tests/' | grep -v 'EXC group' | grep -v 'PWSCF group' | grep -v 'Makefile' | grep -v 'abinit.d' | grep -v 'fallbacks' | grep -v 'doc/features/features' | grep -v 'doc/install_notes/install' | grep -v 'COPYING' | grep -v 'gui'
+# grep -i opyright * */* */*/* */*/*/* */*/*/*/* | grep -v 2017 | grep -v '!! COPYRIGHT' | grep -v 'Oldenburg' | grep -v 'Stefan Goedecker' | grep -v 'doc/rel' | grep -v 'Remove' | grep -v 'tests/' | grep -v 'EXC group' | grep -v 'PWSCF group' | grep -v 'Makefile' | grep -v 'abinit.d' | grep -v 'fallbacks' | grep -v 'doc/features/features' | grep -v 'doc/install_notes/install' | grep -v 'COPYING' | grep -v 'gui'
 
 for file in "$@"
 do
