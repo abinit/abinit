@@ -519,13 +519,19 @@ subroutine tetra_write(tetra, nkibz, kibz, path)
 !Local variables-------------------------------
  integer,parameter :: version=1
  integer :: ik,it,unt
+#ifdef HAVE_LIBTETRA_ABINIT
  character(len=500) :: msg
+#endif
 
 ! *********************************************************************
 
+#ifdef HAVE_LIBTETRA_ABINIT
  if (open_file(file=trim(path),iomsg=msg,newunit=unt,form="formatted",status="unknown",action="write")/=0) then
-   MSG_ERROR(msg)
+   TETRA_ERROR(msg)
  end if
+#else
+ open(file=trim(path),newunit=unt,form="formatted",status="unknown",action="write")
+#endif
 
  write(unt,*)version, " # version number"
 
