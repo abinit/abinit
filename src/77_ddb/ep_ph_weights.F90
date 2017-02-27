@@ -11,7 +11,7 @@
 !!    0) Tetrahedron method
 !!
 !! COPYRIGHT
-!! Copyright (C) 2010-2016 ABINIT group (MVer,BXu)
+!! Copyright (C) 2010-2017 ABINIT group (MVer,BXu)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

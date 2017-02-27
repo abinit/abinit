@@ -9,7 +9,7 @@
 !!  then F, then U then delocalized internals.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2003-2016 ABINIT group (MVer)
+!! Copyright (C) 2003-2017 ABINIT group (MVer)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -149,7 +149,7 @@ end subroutine xcart2deloc
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2016 ABINIT group (MJV).
+!! Copyright (C) 2008-2017 ABINIT group (MJV).
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

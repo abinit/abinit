@@ -9,7 +9,7 @@
 !!  - POSABIN : values of coordinates and velocities for the next time step
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (FLambert,MT)
+!! Copyright (C) 1998-2017 ABINIT group (FLambert,MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

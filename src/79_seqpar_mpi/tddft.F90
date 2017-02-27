@@ -9,7 +9,7 @@
 !! from input wavefunctions, eigenenergies, and band occupations.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2016 ABINIT group (XG, JYR, MB, MBELAND, SHAMEL)
+!! Copyright (C) 1999-2017 ABINIT group (XG, JYR, MB, MBELAND, SHAMEL)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

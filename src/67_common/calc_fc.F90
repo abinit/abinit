@@ -7,7 +7,7 @@
 !! calculation and output of Fermi-contact term at each atomic site
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2016 ABINIT group (JWZ,MT)
+!! Copyright (C) 2009-2017 ABINIT group (JWZ,MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~ABINIT/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

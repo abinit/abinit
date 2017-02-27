@@ -9,7 +9,7 @@
 !!  call mean_fftr to deal with the averaging over several MPI OMP processors
 !!
 !! COPYRIGHT
-!! Copyright (C) 2003-2016 ABINIT group (MJV, XG)
+!! Copyright (C) 2003-2017 ABINIT group (MJV, XG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -177,7 +177,7 @@ end subroutine multipoles_fftr
 !!  Namely, the electrical dipole, quadrupole, etc... of the electron density
 !!
 !! COPYRIGHT
-!! Copyright (C) 2010-2016 ABINIT group (MJV)
+!! Copyright (C) 2010-2017 ABINIT group (MJV)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

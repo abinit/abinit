@@ -9,7 +9,7 @@
 !!  2: should be able to choose certain atoms or atom types, slabs of space...
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (MVer,MB,MG)
+!! Copyright (C) 1998-2017 ABINIT group (MVer,MB,MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

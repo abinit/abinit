@@ -7,7 +7,7 @@
 !!  PAW I/O related operations
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2012-2016 ABINIT group (MT, TR)
+!!  Copyright (C) 2012-2017 ABINIT group (MT, TR)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
