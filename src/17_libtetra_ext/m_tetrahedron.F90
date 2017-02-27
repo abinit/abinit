@@ -27,9 +27,10 @@
 
 module m_tetrahedron
 
- use m_kptrank
  USE_MEMORY_PROFILING
  USE_MSG_HANDLING
+ use m_kptrank
+ use m_io_tools, only : open_file
 #if defined HAVE_MPI2
  use mpi
 #endif
@@ -518,10 +519,13 @@ subroutine tetra_write(tetra, nkibz, kibz, path)
 !Local variables-------------------------------
  integer,parameter :: version=1
  integer :: ik,it,unt
+ character(len=500) :: msg
 
 ! *********************************************************************
 
- open(file=trim(path), newunit=unt, form="formatted", status="unknown", action="write")
+ if (open_file(file=trim(path),iomsg=msg,newunit=unt,form="formatted",status="unknown",action="write")/=0) then
+   MSG_ERROR(msg)
+ end if
 
  write(unt,*)version, " # version number"
 
