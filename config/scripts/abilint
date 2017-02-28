@@ -3805,8 +3805,9 @@ if __name__ == "__main__":
         #Add description files of the libraries
         abinit.add(OLD,pat_dir=["abilint","abilint/*"],\
                    pat_file=["_*_"],read_only=True)
-    #Build dictionary of macros for libPAW
+    #Build dictionary of macros for libPAW/libTetra
     abinit.add_cpp_macros_naive('./src/42_libpaw','libpaw.h','HAVE_LIBPAW_ABINIT')
+    abinit.add_cpp_macros_naive('./src/17_libtetra_ext','libtetra.h','HAVE_LIBTETRA_ABINIT')
     abinit.message.write("(%d directories, %d files)" \
             % (len(abinit.dirs),len(abinit.files)),verbose=-10)
     abinit.message.done()

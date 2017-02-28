@@ -1247,7 +1247,7 @@ end subroutine mvrecord
 !!
 !! SOURCE
 
-function open_file(file,iomsg,unit,newunit,form,status,action) result(iostat)
+function open_file(file,iomsg,unit,newunit,access,form,status,action,recl) result(iostat)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -1261,18 +1261,19 @@ function open_file(file,iomsg,unit,newunit,form,status,action) result(iostat)
 !Arguments ------------------------------------
 !scalars
  character(len=*),intent(in) :: file
- character(len=*),optional,intent(in) :: form,status,action
+ character(len=*),optional,intent(in) :: access,form,status,action
  character(len=*),intent(out) :: iomsg
- integer,optional,intent(in) :: unit
+ integer,optional,intent(in) :: recl,unit
  integer,optional,intent(out) :: newunit
  integer :: iostat
 
 !Local variables-------------------------------
 !scalars
- character(len=500) :: my_form,my_status,my_action,msg
+ character(len=500) :: my_access,my_form,my_status,my_action,msg
 
 ! *************************************************************************
 
+ my_access = "sequential"; if (present(access)) my_access = access
  my_form = "formatted"; if (present(form)) my_form = form
  my_status = "unknown"; if (present(status)) my_status = status
  my_action = "readwrite"; if (present(action)) my_action = action ! default is system dependent. Enforce RW mode
@@ -1280,13 +1281,21 @@ function open_file(file,iomsg,unit,newunit,form,status,action) result(iostat)
  iomsg = ""  ! iomsg is not changed if open succeeds
 
  if (present(unit)) then
-   open(file=trim(file),unit=unit,form=my_form,status=my_status,access="sequential",iostat=iostat, iomsg=iomsg)
+   if (present(recl)) then
+     open(file=trim(file),unit=unit,form=my_form,status=my_status,access=my_access,iostat=iostat,recl=recl, iomsg=iomsg)
+   else
+     open(file=trim(file),unit=unit,form=my_form,status=my_status,access=my_access,iostat=iostat, iomsg=iomsg)
+   end if
    if (present(newunit)) iostat = -666 ! wrong call
 
  else if (present(newunit)) then
    ! Get free unit (emulate newunit of F2008)
    newunit = get_unit()
-   open(file=trim(file),unit=newunit,form=my_form,status=my_status,access="sequential",iostat=iostat, iomsg=iomsg)
+   if (present(recl)) then
+     open(file=trim(file),unit=newunit,form=my_form,status=my_status,access=my_access,iostat=iostat,recl=recl, iomsg=iomsg)
+   else
+     open(file=trim(file),unit=newunit,form=my_form,status=my_status,access=my_access,iostat=iostat, iomsg=iomsg)
+   end if
    if (present(unit)) iostat = -666  ! wrong call
 
  else 
