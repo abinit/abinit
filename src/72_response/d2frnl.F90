@@ -8,7 +8,7 @@
 !! (strain and/or phonon)
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (DCA, XG, GM, AR, MB, MT, AM)
+!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GM, AR, MB, MT, AM)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnuC.org/copyleft/gpl.txt .

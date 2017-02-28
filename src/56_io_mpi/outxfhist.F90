@@ -7,7 +7,7 @@
 !!  read/write xfhist
 !!
 !! COPYRIGHT
-!! Copyright (C) 2003-2016 ABINIT group (MB)
+!! Copyright (C) 2003-2017 ABINIT group (MB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

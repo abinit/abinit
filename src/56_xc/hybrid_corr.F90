@@ -8,7 +8,7 @@
 !! energy due to the hybridation
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2015-2016 ABINIT group (FA)
+!!  Copyright (C) 2015-2017 ABINIT group (FA)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .

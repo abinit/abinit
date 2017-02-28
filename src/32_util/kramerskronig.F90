@@ -9,7 +9,7 @@
 !!  \int_0^\infty d\omega' frac{\omega'}{\omega'^2 - \omega^2} Im \epsilon(\omega') 
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2007-2016 ABINIT group (Valerio Olevano, Lucia Reining, Francesco Sottile, MG)
+!!  Copyright (C) 2007-2017 ABINIT group (Valerio Olevano, Lucia Reining, Francesco Sottile, MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .

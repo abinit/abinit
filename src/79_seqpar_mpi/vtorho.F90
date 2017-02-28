@@ -9,7 +9,7 @@
 !! The main part of it is a wf update over all k points.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (DCA, XG, GMR, MF, AR, MM, MT, FJ, MB, MT)
+!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR, MF, AR, MM, MT, FJ, MB, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1682,7 +1682,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 !!  See also "wvl_nscf_loop_bigdft.F9P"
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2012-2016 ABINIT group (T. Rangel)
+!!  Copyright (C) 2012-2017 ABINIT group (T. Rangel)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1813,7 +1813,7 @@ subroutine wvl_nscf_loop()
 !!  See also "wvl_nscf_loop.F9P"
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2012-2016 ABINIT group (T. Rangel, D. Caliste)
+!!  Copyright (C) 2012-2017 ABINIT group (T. Rangel, D. Caliste)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1914,7 +1914,7 @@ subroutine wvl_nscf_loop_bigdft()
 !!  Computes eigenvalues energy from eigen, occ, kpt, wtk
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2016 ABINIT group (T. Rangel)
+!!  Copyright (C) 2013-2017 ABINIT group (T. Rangel)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1998,7 +1998,7 @@ subroutine e_eigen(eigen,e_eigenvalues,mband,nband,nkpt,nsppol,occ,wtk)
 !!  Computes occupations for the wavelet case
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2016 ABINIT group (T. Rangel)
+!!  Copyright (C) 2013-2017 ABINIT group (T. Rangel)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -2069,7 +2069,7 @@ subroutine wvl_occ()
 !!  Using BigDFT routines
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2016 ABINIT group (D.Caliste, T. Rangel)
+!!  Copyright (C) 2013-2017 ABINIT group (D.Caliste, T. Rangel)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -2138,7 +2138,7 @@ subroutine wvl_occ_bigdft()
 !!  Using BigDFT routines
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2016 ABINIT group (D.Caliste, T. Rangel)
+!!  Copyright (C) 2013-2017 ABINIT group (D.Caliste, T. Rangel)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .

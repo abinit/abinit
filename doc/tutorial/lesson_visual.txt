@@ -1,7 +1,7 @@
 ABINIT, tutorial :
 indications for the visualisation of different graphical data.
 
-Copyright (C) 2000-2016 ABINIT group (XG,MM)
+Copyright (C) 2000-2017 ABINIT group (XG,MM)
 This file is distributed under the terms of the
 GNU General Public License, see ~abinit/COPYING
 or http://www.gnu.org/copyleft/gpl.txt .

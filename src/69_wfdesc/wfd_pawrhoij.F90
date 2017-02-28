@@ -8,7 +8,7 @@
 !! Remember:for each atom, rho_ij=Sum_{n,k} {occ(n,k)*<Cnk|p_i><p_j|Cnk>}
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (MG)
+!! Copyright (C) 1998-2017 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

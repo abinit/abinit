@@ -8,7 +8,7 @@
 !! (some are initialized earlier, see indefo1 routine)
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2016 ABINIT group (XG,MM,FF)
+!! Copyright (C) 1999-2017 ABINIT group (XG,MM,FF)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

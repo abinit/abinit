@@ -11,7 +11,7 @@
 !! Remember: Vnl=Sum_ij[|p_i>Dij<p_j|]
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (FJ, MT, AM)
+!! Copyright (C) 1998-2017 ABINIT group (FJ, MT, AM)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

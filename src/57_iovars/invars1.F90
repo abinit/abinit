@@ -10,7 +10,7 @@
 !! Perform some preliminary checks and echo these dimensions.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (DCA, XG, GMR, AR, MKV)
+!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR, AR, MKV)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

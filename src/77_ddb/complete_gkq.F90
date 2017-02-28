@@ -11,7 +11,7 @@
 !! samples homogeneously the entire Brillouin zone. Copied from complete_gamma
 !!
 !! COPYRIGHT
-!! Copyright (C) 2013-2016 ABINIT group (BXu)
+!! Copyright (C) 2013-2017 ABINIT group (BXu)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

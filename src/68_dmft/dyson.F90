@@ -7,7 +7,7 @@
 !! Use the Dyson Equation to compute self-energy from green function 
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2016 ABINIT group (BAmadon)
+!! Copyright (C) 1999-2017 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

@@ -7,7 +7,7 @@
 !!  Apply the delta part of the completeness correction to chi0
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2016 ABINIT group (FB, MG)
+!! Copyright (C) 1999-2017 ABINIT group (FB, MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
