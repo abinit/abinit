@@ -3,11 +3,23 @@
 
 ndtset 2
 
+#Test the following chemical potential : in the relevant zone, the potential in linear,
+# pulling the Li towards -z, and pushing the H towards +z.
+chempot   -0.2 -0.01 0.05  #This is for the Li atom, defines the chemical potential at zred=-0.2
+           0.2  0.01 0.05  #This is for the Li atom, defines the chemical potential at zred= 0.2
+
+          -0.2  0.01 -0.05  #This is for the H atom, defines the chemical potential at zred=-0.2
+           0.2 -0.01 -0.05  #This is for the H atom, defines the chemical potential at zred= 0.2
+
 #For the first dataset, no chemical potential
-#For the second data set, turn on the chemical potential. Start with molecule aligned with z.
-nzchempot 2
+nzchempot1 0
+
+#For the second data set, turn on the chemical potential. Start with molecule aligned with z,
+# the molecule is slightly stretched.
+nzchempot2 2
 xcart2   0.0 0.0  1.5
          0.0 0.0 -1.5
+
 #Third data set, chemical potential present. Start with molecule not aligned with z.
 xcart3  -1.5 0.0  0.1
          1.5 0.0 -0.1
@@ -58,7 +70,7 @@ nstep 10
 #%% keywords = PAW
 #%% description = 
 #%%    LiH molecule
-#%%    test the use of spatial chemical potential. THe molecule starts aligned along the x direction,
-#%%    while the Li chemical potential pushes the Li nucleus toward +z, and the H chemical potential 
-#%%    pushes the H nucleus toward -z. See whether the optimization runs properly.
+#%%    test the use of spatial chemical potential. The molecule starts aligned along the x direction,
+#%%    while the Li chemical potential pulls the Li nucleus toward -z, and the H chemical potential 
+#%%    pushes the H nucleus toward +z. See whether the optimization runs properly.
 #%%<END TEST_INFO>

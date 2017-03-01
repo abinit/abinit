@@ -433,7 +433,7 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'charge','DPR',0)
 
 !chempot 
- narr=3*mxvals%nzchem*mxvals%ntypat ! default size for all datasets
+ narr=3*mxvals%nzchempot*mxvals%ntypat ! default size for all datasets
  if(narr/=0)then
    do idtset=0,ndtset_alloc       ! specific size for each dataset
      if(idtset/=0)then

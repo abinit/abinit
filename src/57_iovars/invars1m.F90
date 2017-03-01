@@ -47,6 +47,7 @@
 !!  mxnspinor=maximal value of input nspinor for all the datasets
 !!  mxnsppol=maximal value of input nsppol for all the datasets
 !!  mxnsym=maximum number of symmetries
+!!  mxntypat=maximum number of types of atoms
 !!  mxnzchempot=maximal value of input nzchempot for all the datasets
 !!
 !! SIDE EFFECTS
@@ -69,9 +70,10 @@
 #include "abi_common.h"
 
 subroutine invars1m(dmatpuflag,dtsets,iout,lenstr,mband_upper_,&
-& msym,mxga_n_rules,mxgw_nqlwl,mxlpawu,mxmband_upper,mxnatom,mxnatpawu,mxnatsph,mxnatsph_extra,mxnatvshift,mxnconeq,&
-& mxnimage,mxn_efmas_dirs,mxnkpt,mxnkptgw,mxnnos,mxnqptdm,mxnspinor,
-mxnsppol,mxnsym,mxntypat,mxnimfrqs,mxnfreqsp,mxnzchempot,&
+& msym,mxga_n_rules,mxgw_nqlwl,mxlpawu,mxmband_upper,mxnatom,&
+& mxnatpawu,mxnatsph,mxnatsph_extra,mxnatvshift,mxnconeq,&
+& mxnimage,mxn_efmas_dirs,mxnkpt,mxnkptgw,mxnnos,mxnqptdm,mxnspinor, &
+& mxnsppol,mxnsym,mxntypat,mxnimfrqs,mxnfreqsp,mxnzchempot,&
 & mxn_projection_frequencies,ndtset,ndtset_alloc,string,npsp,zionpsp)
 
  use defs_basis
@@ -94,7 +96,8 @@ mxnsppol,mxnsym,mxntypat,mxnimfrqs,mxnfreqsp,mxnzchempot,&
  integer,intent(out) :: dmatpuflag,mxga_n_rules,mxgw_nqlwl,mxlpawu,mxmband_upper,mxnatpawu
  integer,intent(out) :: mxnatsph, mxnatsph_extra
  integer,intent(out) :: mxnatvshift,mxnconeq,mxn_efmas_dirs,mxnkpt,mxnkptgw,mxnnos
- integer,intent(out) :: mxnqptdm,mxnspinor,mxnsppol,mxnsym,mxnimfrqs,mxnfreqsp,mxnzchempot,mxn_projection_frequencies
+ integer,intent(out) :: mxnqptdm,mxnspinor,mxnsppol,mxnsym,mxntypat
+ integer,intent(out) :: mxnimfrqs,mxnfreqsp,mxnzchempot,mxn_projection_frequencies
  character(len=*),intent(inout) :: string
 !arrays
  integer,intent(out) :: mband_upper_(0:ndtset_alloc)
@@ -184,6 +187,7 @@ mxnsppol,mxnsym,mxntypat,mxnimfrqs,mxnfreqsp,mxnzchempot,&
  mxnqptdm=dtsets(1)%nqptdm
  mxnspinor=dtsets(1)%nspinor
  mxnsppol=dtsets(1)%nsppol
+ mxntypat=dtsets(1)%ntypat
  mxnzchempot=dtsets(1)%nzchempot
 
 !Get MAX dimension over datasets
@@ -203,6 +207,7 @@ mxnsppol,mxnsym,mxntypat,mxnimfrqs,mxnfreqsp,mxnzchempot,&
    mxnqptdm=max(dtsets(ii)%nqptdm,mxnqptdm)
    mxnspinor=max(dtsets(ii)%nspinor,mxnspinor)
    mxnsppol=max(dtsets(ii)%nsppol,mxnsppol)
+   mxntypat=max(dtsets(ii)%ntypat,mxntypat)
    mxnzchempot=max(dtsets(ii)%nzchempot,mxnzchempot)
    if (dtsets(ii)%usepawu>0) then
      if (dtsets(ii)%usedmatpu/=0) dmatpuflag=1
