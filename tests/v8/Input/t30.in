@@ -1,9 +1,11 @@
 # LiH molecule. Use spatial chemical potential to orient the molecule.
 #
 
-ndtset 1
+ndtset 2
+
 #For the first dataset, no chemical potential
 #For the second data set, turn on the chemical potential. Start with molecule aligned with z.
+nzchempot 2
 xcart2   0.0 0.0  1.5
          0.0 0.0 -1.5
 #Third data set, chemical potential present. Start with molecule not aligned with z.
@@ -19,7 +21,7 @@ xcart4  -1.5 0.0  0.0
 # Common data
 nband   2
 
-acell  15 10 10
+acell  10 10 10
 
 ecut      10.0 
 pawecutdg 15.0 

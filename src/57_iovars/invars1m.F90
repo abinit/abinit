@@ -70,7 +70,8 @@
 
 subroutine invars1m(dmatpuflag,dtsets,iout,lenstr,mband_upper_,&
 & msym,mxga_n_rules,mxgw_nqlwl,mxlpawu,mxmband_upper,mxnatom,mxnatpawu,mxnatsph,mxnatsph_extra,mxnatvshift,mxnconeq,&
-& mxnimage,mxn_efmas_dirs,mxnkpt,mxnkptgw,mxnnos,mxnqptdm,mxnspinor,mxnsppol,mxnsym,mxnimfrqs,mxnfreqsp,mxnzchempot,&
+& mxnimage,mxn_efmas_dirs,mxnkpt,mxnkptgw,mxnnos,mxnqptdm,mxnspinor,
+mxnsppol,mxnsym,mxntypat,mxnimfrqs,mxnfreqsp,mxnzchempot,&
 & mxn_projection_frequencies,ndtset,ndtset_alloc,string,npsp,zionpsp)
 
  use defs_basis
@@ -230,6 +231,7 @@ subroutine invars1m(dmatpuflag,dtsets,iout,lenstr,mband_upper_,&
    ABI_ALLOCATE(dtsets(idtset)%bs_loband,(mxnsppol))
    ABI_ALLOCATE(dtsets(idtset)%bdgw,(2,mxnkptgw,mxnsppol))
    ABI_ALLOCATE(dtsets(idtset)%cd_imfrqs,(mxnimfrqs))
+   ABI_ALLOCATE(dtsets(idtset)%chempot,(3,mxnzchempot,mxntypat))
    nsp=max(mxnsppol,mxnspinor);nat=mxnatpawu*dmatpuflag
    ABI_ALLOCATE(dtsets(idtset)%dmatpawu,(2*mxlpawu+1,2*mxlpawu+1,nsp,nat,mxnimage))
    ABI_ALLOCATE(dtsets(idtset)%efmas_bands,(2,mxnkpt))

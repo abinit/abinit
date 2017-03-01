@@ -735,7 +735,7 @@ end subroutine ab7_invars_new_from_file
    & token%mxnatvshift,&
    & token%mxnconeq,token%mxnimage,token%mxn_efmas_dirs,token%mxnkpt,token%mxnkptgw,token%mxnnos,&
    & token%mxnqptdm,&
-   & token%mxnspinor,token%mxnsppol,token%mxnsym,token%mxnimfrqs,&
+   & token%mxnspinor,token%mxnsppol,token%mxnsym,token%mxntypat,token%mxnimfrqs,&
    & token%mxnfreqsp,token%mxnzchempot,token%mxn_projection_frequencies,ndtset,&
    & ndtset_alloc,string,npsp,zionpsp)
 

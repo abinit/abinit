@@ -804,6 +804,7 @@ type dataset_type
  real(dp), allocatable :: amu_orig(:,:)     !SET2NULL  ! amu(ntypat,nimage)
  real(dp), allocatable :: atvshift(:,:,:)   !SET2NULL  ! atvshift(16,nsppol,natom)
  real(dp), allocatable :: cd_imfrqs(:)      !SET2NULL  ! cd_imfrqs(cd_customnimfrqs)
+ real(dp), allocatable :: chempot(:,:,:)    !SET2NULL  ! chempot(3,nzchempot,ntypat)
  real(dp), allocatable :: corecs(:)         !SET2NULL  ! corecs(ntypat)
  real(dp), allocatable :: densty(:,:)       !SET2NULL  ! densty(ntypat,4)
  real(dp), allocatable :: dmatpawu(:,:,:,:,:) !SET2NULL  ! dmatpawu(2*lpawu+1,2*lpawu+1,nsppol*nspinor,natpu,nimage)

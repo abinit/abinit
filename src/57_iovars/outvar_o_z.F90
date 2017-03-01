@@ -40,6 +40,7 @@
 !!         nsppol     =maximal value of input nsppol for all the datasets
 !!         nsym       =maximum number of symmetries
 !!         ntypat     =maximum number of type of atoms
+!!         nzchempot  =maximal value of input nzchempot for all the datasets
 !!  ncid= NetCDF handler
 !!  ndtset=number of datasets
 !!  ndtset_alloc=number of datasets, corrected for allocation of at least

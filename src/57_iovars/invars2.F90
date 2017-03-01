@@ -2562,9 +2562,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
 
 !Initialize chempot
  if(dtset%nzchempot>0)then
-!   call intagm(dprarr,intarr,jdtset,marr,3*dtset%nzchempot*ntypat,string(1:lenstr),'chempot',tread,'DPR')
-!   if(tread==1) dtset%chempot(1:3,1:dtset%nzchempot,1:ntypat)=&
-!&   reshape(dprarr(3*dtset%nzchempot*ntypat),(/3,dtset%nzchempot,ntypat/))
+   call intagm(dprarr,intarr,jdtset,marr,3*dtset%nzchempot*ntypat,string(1:lenstr),'chempot',tread,'DPR')
+   if(tread==1) dtset%chempot(1:3,1:dtset%nzchempot,1:ntypat)=&
+&   reshape(dprarr(3*dtset%nzchempot*ntypat),(/3,dtset%nzchempot,ntypat/))
  end if
 
 !Initialize the list of k points, as well as wtk and istwfk
