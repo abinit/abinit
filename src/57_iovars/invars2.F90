@@ -165,7 +165,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
 & nimage,&
 & 3*dtset%nqptdm,&
 & 3*dtset%natsph_extra,&
-& dtset%natvshift*nsppol*natom,
+& dtset%natvshift*nsppol*natom,&
 & 3*dtset%nzchempot*ntypat)
  ABI_ALLOCATE(intarr,(marr))
  ABI_ALLOCATE(dprarr,(marr))
