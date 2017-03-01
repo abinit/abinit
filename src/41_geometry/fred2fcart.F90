@@ -8,7 +8,7 @@
 !! Convert reduced forces into cartesian forces
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (DCA, XG, GMR, FJ, MT)
+!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR, FJ, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

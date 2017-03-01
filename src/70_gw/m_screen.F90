@@ -7,7 +7,7 @@
 !!   Screening object used in the BSE code.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2016 ABINIT group (MG)
+!!  Copyright (C) 2014-2017 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -30,7 +30,6 @@ MODULE m_screen
  use m_blas
  use m_errors
  use m_splines
- use m_lebedev
  use m_profiling_abi
  use m_kxc
  use m_screening
@@ -51,9 +50,9 @@ MODULE m_screen
 
  implicit none
 
- private 
+ private
 
- ! Flags defining the content of the %mat buffer in the fgg_t type. 
+ ! Flags defining the content of the %mat buffer in the fgg_t type.
  integer,public,parameter :: MAT_NOTYPE         = 0
  integer,public,parameter :: MAT_CHI0           = 1
  integer,public,parameter :: MAT_CHI            = 2
@@ -70,7 +69,7 @@ MODULE m_screen
  !
  ! Test charge or test particle.
  integer,public,parameter :: VTX_TEST_CHARGE   = 0
- integer,public,parameter :: VTX_TEST_PARTICLE = 1   
+ integer,public,parameter :: VTX_TEST_PARTICLE = 1
  !
  ! Named constants for the frequency mesh.
  integer,private,parameter :: WMESH_LINEAR    = 1
@@ -89,7 +88,7 @@ MODULE m_screen
  !
  ! Flags giving the status of the local buffers defined in fgg_t.
  integer,private,parameter :: MAT_NODATA    = 0
- integer,private,parameter :: MAT_ALLOCATED = 1 
+ integer,private,parameter :: MAT_ALLOCATED = 1
  integer,private,parameter :: MAT_STORED    = 2
  !
  ! Flags giving the status of the local buffers defined in fgg_t.
@@ -104,18 +103,18 @@ MODULE m_screen
 !! screen_info_t
 !!
 !! FUNCTION
-!!  Container storing the parameters used to initialize a screen_t datatype or to 
+!!  Container storing the parameters used to initialize a screen_t datatype or to
 !!  calculate a new SCR file from the SUSC file containing the independent-particle
 !!  polarizability.
 !!
 !! NOTES
 !!  The list of parameters passed to screening_init is copied in W%Info.
-!!  At present there is no need to provide a copy method since the structure does 
-!!  not contain pointers but such a method must be defined and used if the 
+!!  At present there is no need to provide a copy method since the structure does
+!!  not contain pointers but such a method must be defined and used if the
 !!  dynamic entities are added to the datatype.
 !!
 !! SOURCE
-                          
+
 type,public :: screen_info_t
 
   integer :: mat_type = MAT_NOTYPE
@@ -144,13 +143,13 @@ type,public :: screen_info_t
 
   integer :: wint_method = WINT_NONE
   ! Defines the frequency integration technique. See WIN_ flags.
-  ! NOTE that this flag can be changed at run time. For example 
-  ! one can switch from the CD to the PPm if the ppmodel parameters are in memory 
+  ! NOTE that this flag can be changed at run time. For example
+  ! one can switch from the CD to the PPm if the ppmodel parameters are in memory
 
   real(dp) :: ada_kappa = 2.1_dp
   ! Inverse smearing length used for ADA.
 
-  real(dp) :: eps_inf = 12.0_dp           
+  real(dp) :: eps_inf = 12.0_dp
   ! Dielectric constant used for the model dielectric function.
 
   real(dp) :: drude_plsmf = zero
@@ -177,7 +176,7 @@ end type screen_info_t
   integer :: nomega
   ! Number of frequencies.
 
-  integer :: npw       
+  integer :: npw
   ! Number of G vectors.
 
   integer :: nqlwl
@@ -185,7 +184,7 @@ end type screen_info_t
 
   integer :: has_mat = MAT_NODATA
   ! Flag giving the status of mat.
-                                    
+
   !arrays
   complex(gwpc),allocatable :: mat(:,:,:)
   ! mat(npw,npw,nomega)
@@ -193,16 +192,16 @@ end type screen_info_t
 
   !complex(dpc),allocatable :: head(:,:,:)
   ! head(3,3,nomega)
-                                            
-  !complex(dpc),allocatable :: lwing(:,:,:) 
+
+  !complex(dpc),allocatable :: lwing(:,:,:)
   ! lwing(3,npwe,nomega)
   ! Lower wings
-                                            
+
   !complex(dpc),allocatable :: uwing(:,:,:)
   ! uwing(3,npwe,nomega)
   ! Upper wings.
 
- end type fgg_t   
+ end type fgg_t
 
  public :: fgg_init   ! Creation method.
  public :: fgg_free   ! Free memory.
@@ -238,8 +237,8 @@ end type screen_info_t
   integer :: nomega_r             ! Number of real frequencies used.
   integer :: npw                  ! Number of G vectors.
   integer :: prtvol               ! Verbosity level.
-  integer :: has_ppmodel          ! 1 if PPmodel tables are stored. 
-  integer :: has_fgg              ! 1 if Fgg tables are stored. 
+  integer :: has_ppmodel          ! 1 if PPmodel tables are stored.
+  integer :: has_fgg              ! 1 if Fgg tables are stored.
   !%integer :: wmesh_type
   !%real(dp) :: ecut
   integer :: nfftf_tot
@@ -262,7 +261,7 @@ end type screen_info_t
   !type(kmesh_t) :: Qmesh
   ! Info the q-point sampling.
 
-  real(dp),allocatable :: qlwl(:,:) 
+  real(dp),allocatable :: qlwl(:,:)
   ! qlwl(3,nqlwl)
   ! q-points used for the long wave-length limit treatment.
 
@@ -270,7 +269,7 @@ end type screen_info_t
   ! omega(nomega)
   ! List of frequencies. Real frequencies are packed first.
 
-  integer,allocatable :: gvec(:,:) 
+  integer,allocatable :: gvec(:,:)
   ! gvec(3,npw)
   ! G-vectors used to describe the two-point function (r.l.u.).
 
@@ -308,11 +307,11 @@ end type screen_info_t
 
  public :: screen_nullify       ! Nullify all pointers before use.
  public :: screen_init          ! Creation method.
- !public :: screen_print         ! Print info 
+ !public :: screen_print         ! Print info
  public :: screen_free          ! Free all associated pointers.
  public :: screen_symmetrizer   ! Prepare the object for applying W_qbz.
  public :: screen_w0gemv        ! Matrix vector multiplication \sum_{G'} F_{G,G') |u(G')>.
- public :: screen_times_ket     ! Compute \Sigma_c(\omega)|\phi> in reciprocal space. 
+ public :: screen_times_ket     ! Compute \Sigma_c(\omega)|\phi> in reciprocal space.
 !!***
 
 CONTAINS  !========================================================================================
@@ -334,7 +333,7 @@ CONTAINS  !=====================================================================
 !!  [header]=String to be printed as header for additional info.
 !!
 !! OUTPUT
-!!  Only printing 
+!!  Only printing
 !!
 !! PARENTS
 !!      m_screen
@@ -344,7 +343,7 @@ CONTAINS  !=====================================================================
 !!
 !! SOURCE
 
-subroutine screen_info_print(W_info,header,unit,mode_paral,prtvol) 
+subroutine screen_info_print(W_info,header,unit,mode_paral,prtvol)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -359,19 +358,19 @@ subroutine screen_info_print(W_info,header,unit,mode_paral,prtvol)
 !Arguments ------------------------------------
 !scalars
  integer,optional,intent(in) :: unit,prtvol
- character(len=4),optional,intent(in) :: mode_paral 
+ character(len=4),optional,intent(in) :: mode_paral
  character(len=*),optional,intent(in) :: header
  type(screen_info_t),intent(in) :: W_info
 
 !Local variables-------------------------------
  integer :: my_unt,my_prtvol
  character(len=4) :: my_mode
- character(len=500) :: msg      
-! ********************************************************************* 
+ character(len=500) :: msg
+! *********************************************************************
 
  !@screen_info_t
  my_unt   =std_out; if (PRESENT(unit      )) my_unt   =unit
- my_prtvol=0      ; if (PRESENT(prtvol    )) my_prtvol=prtvol 
+ my_prtvol=0      ; if (PRESENT(prtvol    )) my_prtvol=prtvol
  my_mode  ='COLL' ; if (PRESENT(mode_paral)) my_mode  =mode_paral
 
  msg=' ==== Info on the screen_info_t% object ==== '
@@ -511,7 +510,7 @@ end subroutine fgg_free_1D
 !! Initialize the structure allocating the memory and initializing the internal variables.
 !!
 !! INPUT
-!!  npw 
+!!  npw
 !!  nqlwl
 !!
 !! SIDE EFFECTS
@@ -567,7 +566,7 @@ end subroutine fgg_init
 !!  screen_fgg_qbz_set
 !!
 !! FUNCTION
-!!  Helper function used to perform the setup W%Fgg_qbz setting also the internal 
+!!  Helper function used to perform the setup W%Fgg_qbz setting also the internal
 !!  flag that defines its status.
 !!
 !! INPUTS
@@ -588,7 +587,7 @@ end subroutine fgg_init
 !!
 !! SOURCE
 
-subroutine screen_fgg_qbz_set(W,iq_bz,nqlwl,how) 
+subroutine screen_fgg_qbz_set(W,iq_bz,nqlwl,how)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -613,7 +612,7 @@ subroutine screen_fgg_qbz_set(W,iq_bz,nqlwl,how)
 
  W%fgg_qbz_idx = iq_bz ! Save the index of the q-point in the BZ.
 
- if (firstchar(how,(/"P"/)) ) then 
+ if (firstchar(how,(/"P"/)) ) then
    ! We want a pointer.
    select case (W%fgg_qbz_stat)
    case (FGG_QBZ_ISALLOCATED)
@@ -624,22 +623,22 @@ subroutine screen_fgg_qbz_set(W,iq_bz,nqlwl,how)
 
    case (FGG_QBZ_ISPOINTER)
      ! Set it to null().
-     nullify(W%Fgg_qbz) 
+     nullify(W%Fgg_qbz)
 
    case default
      MSG_ERROR(sjoin("Wrong status:", itoa(W%fgg_qbz_stat)))
    end select
 
- else if (firstchar(how,(/"A"/)) ) then 
+ else if (firstchar(how,(/"A"/)) ) then
    ! We want an allocatable array.
 
    select case (W%fgg_qbz_stat)
-   case (FGG_QBZ_ISPOINTER) 
+   case (FGG_QBZ_ISPOINTER)
      ! Allocate memory
      nullify(W%Fgg_qbz)
      ABI_DT_MALLOC(W%Fgg_qbz,)
-     
-     call fgg_init(W%Fgg_qbz,W%npw,W%nomega,nqlwl) 
+
+     call fgg_init(W%Fgg_qbz,W%npw,W%nomega,nqlwl)
      W%fgg_qbz_stat = FGG_QBZ_ISALLOCATED
 
    case (FGG_QBZ_ISALLOCATED)
@@ -649,12 +648,12 @@ subroutine screen_fgg_qbz_set(W,iq_bz,nqlwl,how)
      MSG_ERROR(sjoin("Wrong status:", itoa(W%fgg_qbz_stat)))
    end select
 
- else 
+ else
    MSG_BUG(sjoin("Wrong how:", how))
  end if
 
 end subroutine screen_fgg_qbz_set
-!!***                                                                                                
+!!***
 
 !----------------------------------------------------------------------
 
@@ -670,7 +669,7 @@ end subroutine screen_fgg_qbz_set
 !!  iq_ibz=k-point index
 !!  [how]=string defining which status is checked. By default the function returns
 !!     .TRUE. if the wave is either MAT_ALLOCATED or MAT_STORED.
-!!     Possible mutually exclusive values: "Allocated", "Stored". 
+!!     Possible mutually exclusive values: "Allocated", "Stored".
 !!     Only the first character is checked (no case-sensitive)
 !!
 !! NOTES
@@ -682,7 +681,7 @@ end subroutine screen_fgg_qbz_set
 !!
 !! SOURCE
 
-pure function screen_ihave_fgg(W,iq_ibz,how) 
+pure function screen_ihave_fgg(W,iq_ibz,how)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -704,7 +703,7 @@ pure function screen_ihave_fgg(W,iq_ibz,how)
 !scalars
  integer :: ii
 !arrays
- integer :: check(2) 
+ integer :: check(2)
 
 !************************************************************************
 
@@ -717,7 +716,7 @@ pure function screen_ihave_fgg(W,iq_ibz,how)
  if (iq_ibz>0) then
    screen_ihave_fgg = (W%Fgg(iq_ibz)%has_mat==check(1) .or.&
                        W%Fgg(iq_ibz)%has_mat==check(2) )
- else 
+ else
    ! check the status of the full set of q-tables.
    screen_ihave_fgg=.TRUE.
    do ii=1,W%nqibz
@@ -728,7 +727,7 @@ pure function screen_ihave_fgg(W,iq_ibz,how)
  end if
 
 end function screen_ihave_fgg
-!!***                                                                                                
+!!***
 
 !----------------------------------------------------------------------
 
@@ -866,7 +865,7 @@ subroutine screen_free(W)
  end select
  !
  ! Free the Fgg matrices.
- if (associated(W%Fgg)) then 
+ if (associated(W%Fgg)) then
    call fgg_free(W%Fgg)
    ABI_DT_FREE(W%Fgg)
  end if
@@ -896,10 +895,10 @@ end subroutine screen_free
 !!  ifname=The name of the external file used to read the matrix.
 !!  id_required=Identifier used to specify the type of two-point function that is wanted.
 !!  iomode=Option defining the file format of the external file.
-!!  mqmem=0 for out-of-core solution, /=0 if entire matrix has to be stored in memory. 
+!!  mqmem=0 for out-of-core solution, /=0 if entire matrix has to be stored in memory.
 !!  npw_asked=Number of G-vector to be used in the calculation, if <=0 use Max allowed number.
 !!  ngfftf(18)=Info on the (fine) mesh used for the density.
-!!  nfftf_tot=Total number of point in the FFT mesh for ae_rhor 
+!!  nfftf_tot=Total number of point in the FFT mesh for ae_rhor
 !!  nsppol=Numer of independent spin polarizations.
 !!  nspden=Number of spin density components in ae_rhor
 !!  ae_rhor(nfftf_tot,nspden)
@@ -950,12 +949,12 @@ subroutine screen_init(W,W_Info,Cryst,Qmesh,Gsph,Vcp,ifname,mqmem,npw_asked,&
  integer,parameter :: master=0
  integer :: option_test,approx_type,ixc_required,id_required !,nkxc
  integer :: fform,my_rank,mat_type_read
- integer :: nqibz,nomega,iq_ibz,npw,nqlwl 
+ integer :: nqibz,nomega,iq_ibz,npw,nqlwl
  integer :: nI,nJ,iq_bz,mdf_type,ppmodel,ierr
  integer :: iw,qsort,ii
  real(dp) :: eps_inf,drude_plsmf
  logical :: deallocate_Fgg,found,from_file,is_qeq0,remove_dgg !only_one_kpt,
- character(len=500) :: msg                   
+ character(len=500) :: msg
  character(len=fnlen) :: sus_fname,scr_fname
  character(len=nctk_slen) :: varname
  type(hscr_t) :: Hscr
@@ -977,14 +976,14 @@ subroutine screen_init(W,W_Info,Cryst,Qmesh,Gsph,Vcp,ifname,mqmem,npw_asked,&
  !
  ! Initialize basic parameters ----------------------------------------
  !
- !@screen_info_t  
+ !@screen_info_t
  W%Info = W_info ! Copy basic parameters.
  call screen_info_print(W%Info,header="W info",unit=std_out)
 
  id_required  = W_Info%mat_type
  approx_type  = W_Info%vtx_family
  option_test  = W_Info%vtx_test
- ixc_required = W_Info%ixc 
+ ixc_required = W_Info%ixc
  varname = ncname_from_id(id_required)
 
  !if (ALL(id_required /= (/MAT_W_M1, MAT_W/)) ) then
@@ -993,7 +992,7 @@ subroutine screen_init(W,W_Info,Cryst,Qmesh,Gsph,Vcp,ifname,mqmem,npw_asked,&
  end if
 
  ! This part must be rationalized.
- remove_dgg = (id_required==MAT_W_M1) 
+ remove_dgg = (id_required==MAT_W_M1)
 
  if (W%Info%use_mdf == MDL_NONE) W%fname = ifname
  W%nI = 1; W%nJ = 1
@@ -1005,11 +1004,11 @@ subroutine screen_init(W,W_Info,Cryst,Qmesh,Gsph,Vcp,ifname,mqmem,npw_asked,&
 
  W%mqmem=mqmem!;  W%mqmem = 0
  if (W%mqmem/=0) W%mqmem=W%nqibz
-                                                       
+
  ABI_MALLOC(W%keep_q,(W%nqibz))
  W%keep_q=.TRUE.; if (W%mqmem == 0) W%keep_q = .False.
 
- if (W%mqmem/=0 .and. W%mqmem<W%nqibz) then  
+ if (W%mqmem/=0 .and. W%mqmem<W%nqibz) then
    ! Keep in memory the most representative q-points.
    W%keep_q=.FALSE.
    wt_list = Qmesh%wt; iperm = (/(ii,ii=1,Qmesh%nibz)/)
@@ -1033,13 +1032,13 @@ subroutine screen_init(W,W_Info,Cryst,Qmesh,Gsph,Vcp,ifname,mqmem,npw_asked,&
 
  ABI_MALLOC(W%ae_rhor,(nfftf_tot,nspden))
  W%ae_rhor = ae_rhor
- 
+
  deallocate_Fgg=.FALSE.
-                                                                             
+
  W%has_fgg=0; if ( ANY(W%Info%wint_method == (/WINT_CONTOUR, WINT_AC/)) ) W%has_fgg=1
-                                                                             
+
  if (W%has_fgg>0 .and. W%has_ppmodel>0) then
-   MSG_WARNING("Both PPmodel tables and F_(GG')(q,w) are stored in memory") 
+   MSG_WARNING("Both PPmodel tables and F_(GG')(q,w) are stored in memory")
  end if
 
  ! G-sphere for W and Sigma_c is initialized from the SCR file.
@@ -1055,7 +1054,7 @@ subroutine screen_init(W,W_Info,Cryst,Qmesh,Gsph,Vcp,ifname,mqmem,npw_asked,&
  ! Model dielectric function does not require any external file.
  from_file = (W%Info%use_mdf==MDL_NONE)
 
- if (from_file) then 
+ if (from_file) then
    ! Open file and check its content.
    if (endswith(W%fname, ".nc")) W%iomode = IO_MODE_ETSF
 
@@ -1088,7 +1087,7 @@ subroutine screen_init(W,W_Info,Cryst,Qmesh,Gsph,Vcp,ifname,mqmem,npw_asked,&
         'The number of G-vectors saved on file is less than the value required = ',npw_asked,ch10,&
         'Calculation will proceed with the Max available npw = ',Hscr%npwe
        MSG_WARNING(msg)
-     else  
+     else
        W%npw=npw_asked ! Redefine the no. of G"s for W.
        write(msg,'(a,i8,2a,i8)')&
         'The Number of G-vectors saved on file is larger than the value required = ',npw_asked,ch10,&
@@ -1120,16 +1119,16 @@ subroutine screen_init(W,W_Info,Cryst,Qmesh,Gsph,Vcp,ifname,mqmem,npw_asked,&
  W%nomega_r=1; W%nomega_i=0
  if (W%nomega==2) then
    W%nomega_r=1; W%nomega_i=1
- else 
+ else
    ! Real frequencies are packed in the first locations.
    W%nomega_r=1
    do iw=1,W%nomega
      if (DBLE(W%omega(iw))>0.001*Ha_eV) W%nomega_r=iw
    end do
    W%nomega_i=W%nomega-W%nomega_r
- end if     
+ end if
  !
- ! ------------------------------ Initialization completed -------------------------------- 
+ ! ------------------------------ Initialization completed --------------------------------
  !
  ! Just to keep the code readable.
  npw    = W%npw
@@ -1139,8 +1138,8 @@ subroutine screen_init(W,W_Info,Cryst,Qmesh,Gsph,Vcp,ifname,mqmem,npw_asked,&
  nJ     = W%nj
  ABI_DT_MALLOC(W%Fgg,(nqibz))
 
- if (from_file) then  
-  
+ if (from_file) then
+
    ! Read the ab-initio em1 from file.
    select case (mat_type_read)
    case (MAT_INV_EPSILON)
@@ -1160,7 +1159,7 @@ subroutine screen_init(W,W_Info,Cryst,Qmesh,Gsph,Vcp,ifname,mqmem,npw_asked,&
    do iq_ibz=1,nqibz
      if (.not.W%keep_q(iq_ibz)) then
         call wrtout(std_out,strcat("Skipping iq_ibz: ",itoa(iq_ibz)),"COLL")
-        CYCLE 
+        CYCLE
      end if
      !
      nqlwl=0; is_qeq0=(normv(W%qibz(:,iq_ibz),Cryst%gmet,'G')<GW_TOLQ0)
@@ -1180,7 +1179,7 @@ subroutine screen_init(W,W_Info,Cryst,Qmesh,Gsph,Vcp,ifname,mqmem,npw_asked,&
      ! W contains Em1 and is ready to use.
    end do
 
- else  
+ else
    !
    ! Model dielectric function. Only epsm-1 is supported here.
    call wrtout(std_out," Calculating model dielectric function... ","COLL")
@@ -1227,7 +1226,7 @@ subroutine screen_init(W,W_Info,Cryst,Qmesh,Gsph,Vcp,ifname,mqmem,npw_asked,&
  ! Init plasmon-pole parameters.
  if (W%has_ppmodel>0) then
    MSG_WARNING("Calculating PPmodel parameters")
-   ppmodel = W%Info%use_ppm; drude_plsmf = W%Info%drude_plsmf 
+   ppmodel = W%Info%use_ppm; drude_plsmf = W%Info%drude_plsmf
    call ppm_init(W%PPm,W%mqmem,W%nqibz,W%npw,ppmodel,drude_plsmf,W%Info%invalid_freq)
 
    do iq_ibz=1,nqibz
@@ -1260,7 +1259,7 @@ end subroutine screen_init
 !!
 !! FUNCTION
 !!  Modify the status of the object so that the symmetrized component F(q_bz)_GG' is calculated
-!!  (if needed) and is made available in the internal buffer. This routine must be called before 
+!!  (if needed) and is made available in the internal buffer. This routine must be called before
 !!  performing any operation that involves the symmetrized component of the two-point function.
 !!
 !! INPUTS
@@ -1268,7 +1267,7 @@ end subroutine screen_init
 !!  Cryst<crystal_t>=Info on the crystal structure.
 !!  Gsph<gsphere_t>=data related to the G-sphere
 !!  Qmesh<kmesh_t>=Structure defining the q-mesh used for sample the BZ.
-!!  iq_bz=Index of the q-point in the BZ where F(q_bz)_GG' is wanted. 
+!!  iq_bz=Index of the q-point in the BZ where F(q_bz)_GG' is wanted.
 !!
 !! OUTPUT
 !!
@@ -1277,11 +1276,11 @@ end subroutine screen_init
 !!   W%Fgg_qbz
 !!
 !! NOTES
-!!  In the present implementation we are not considering a possible umklapp vector G0 in the 
-!!  expression Sq = q+G0. Treating this case would require some changes in the G-sphere 
-!!  since we have to consider G-G0. The code however stops in sigma if a nonzero G0 is required 
+!!  In the present implementation we are not considering a possible umklapp vector G0 in the
+!!  expression Sq = q+G0. Treating this case would require some changes in the G-sphere
+!!  since we have to consider G-G0. The code however stops in sigma if a nonzero G0 is required
 !!  to reconstruct the BZ.
-!! 
+!!
 !! PARENTS
 !!      exc_build_block
 !!
@@ -1290,7 +1289,7 @@ end subroutine screen_init
 !!
 !! SOURCE
 
-subroutine screen_symmetrizer(W,iq_bz,Cryst,Gsph,Qmesh,Vcp) 
+subroutine screen_symmetrizer(W,iq_bz,Cryst,Gsph,Qmesh,Vcp)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -1335,18 +1334,18 @@ subroutine screen_symmetrizer(W,iq_bz,Cryst,Gsph,Qmesh,Vcp)
  if (screen_ihave_fgg(W,iq_ibz,how="Stored")) then
 
    if (q_isirred) then ! Symmetrization is not needed. Point the data in memory.
-     call screen_fgg_qbz_set(W,iq_bz,nqlwl0,"Pointer") 
-     W%Fgg_qbz => W%Fgg(iq_ibz)  
-   else 
+     call screen_fgg_qbz_set(W,iq_bz,nqlwl0,"Pointer")
+     W%Fgg_qbz => W%Fgg(iq_ibz)
+   else
      ! Allocate space. ! TODO Wings are not symmetrized but oh well
      call screen_fgg_qbz_set(W,iq_bz,nqlwl0,"Allocate")  ! Dimensions should not be changed.
-     
+
      ! Out-of-place symmetrization.
-     !em1_qibz => W%Fgg(iq_ibz)%mat; em1_qbz  => W%Fgg_qbz%mat  
-     call em1_symmetrize_op(iq_bz,npw,nomega,Gsph,Qmesh,W%Fgg(iq_ibz)%mat,W%Fgg_qbz%mat) 
+     !em1_qibz => W%Fgg(iq_ibz)%mat; em1_qbz  => W%Fgg_qbz%mat
+     call em1_symmetrize_op(iq_bz,npw,nomega,Gsph,Qmesh,W%Fgg(iq_ibz)%mat,W%Fgg_qbz%mat)
    end if
 
-   if (W%has_ppmodel>0) then 
+   if (W%has_ppmodel>0) then
      ! Symmetrize the ppmodel tables: em1_qibz => W%Fgg(iq_ibz)%mat
      call ppm_symmetrizer(W%PPm,iq_bz,Cryst,Qmesh,Gsph,npw,nomega,W%omega,W%Fgg(iq_ibz)%mat,&
 &      W%nfftf_tot,W%ngfftf,W%ae_rhor(:,1))
@@ -1355,12 +1354,12 @@ subroutine screen_symmetrizer(W,iq_bz,Cryst,Gsph,Qmesh,Vcp)
  else if (screen_ihave_fgg(W,iq_ibz,how="Allocated")) then
    MSG_ERROR("Fgg_iqibz is allocated but not initialized!")
 
- else  
+ else
    if (W%fgg_qbz_idx /= iq_bz) then
-     ! Must compute em1_qbz here. em1_qbz => W%Fgg_qbz%mat 
+     ! Must compute em1_qbz here. em1_qbz => W%Fgg_qbz%mat
 
      ! Allocate the BZ buffer.
-     call screen_fgg_qbz_set(W,iq_bz,nqlwl0,"Allocate") 
+     call screen_fgg_qbz_set(W,iq_bz,nqlwl0,"Allocate")
 
      if (W%Info%use_mdf /= MDL_NONE) then
        ! Compute the model-dielectric function at qbz on-the fly and in sequential
@@ -1375,7 +1374,7 @@ subroutine screen_symmetrizer(W,iq_bz,Cryst,Gsph,Qmesh,Vcp)
 
        ! In-place symmetrization to get the q-point in the BZ.
        if (.not.q_isirred) then
-         call em1_symmetrize_ip(iq_bz,npw,nomega,Gsph,Qmesh,W%Fgg_qbz%mat) 
+         call em1_symmetrize_ip(iq_bz,npw,nomega,Gsph,Qmesh,W%Fgg_qbz%mat)
        end if
      end if
 
@@ -1401,7 +1400,7 @@ subroutine screen_symmetrizer(W,iq_bz,Cryst,Gsph,Qmesh,Vcp)
  !call wrtout(std_out," Calculating model dielectric function... ","COLL")
  !ABI_CHECK(W%nomega==1,"Cannot use nomega>1 in model dielectric function")
 
- ! W%Fgg_qbz%mat 
+ ! W%Fgg_qbz%mat
 
  !%  call screen_mdielf(iq_bz,npw,nomega,mdf_type,eps_inf,Cryst,Qmesh,Vcp,Gsph,&
  !% &  W%nspden,W%nfftf_tot,W%ngfftf,W%ae_rhor,"EM1",em1_qbz,xmpi_comm_self)
@@ -1427,7 +1426,7 @@ end subroutine screen_symmetrizer
 !!  W<screen_t>=
 !!  in_npw=Number of G vectors in in_ket
 !!  nspinor=Number of spinorial components.
-!!  in_ket(in_npw)= |\phi> in reciprocal space. 
+!!  in_ket(in_npw)= |\phi> in reciprocal space.
 !!  trans= On entry, TRANS specifies the operation to be performed as follows:
 !!  TRANS = 'N' or 'n'   y := alpha*A*x + beta*y.
 !!  TRANS = 'T' or 't'   y := alpha*A**T*x + beta*y.
@@ -1488,7 +1487,7 @@ subroutine screen_w0gemv(W,trans,in_npw,nspinor,only_diago,alpha,beta,in_ket,out
    !out_ket = MATMUL(TRANSPOSE(CONJG(em1_qbz(1:in_npw,1:in_npw)),in_ket)
    call xgemv(trans,in_npw,in_npw,alpha,em1_qbz,lda,in_ket,1,beta,out_ket,1)
 
- else 
+ else
    if (beta /= czero_gw) then
      !
      if ( firstchar(trans,(/"C"/)) ) then
@@ -1499,21 +1498,21 @@ subroutine screen_w0gemv(W,trans,in_npw,nspinor,only_diago,alpha,beta,in_ket,out
        do ig=1,in_npw
          out_ket(ig) = alpha * em1_qbz(ig,ig) * in_ket(ig) + beta * out_ket(ig)
        end do
-     else 
+     else
        MSG_ERROR(sjoin("Wrong trans:", trans))
      end if
 
-   else  
+   else
      ! beta==0
      if ( firstchar(trans,(/"C"/)) ) then
        do ig=1,in_npw
-         out_ket(ig) = alpha * CONJG(em1_qbz(ig,ig)) * in_ket(ig) 
+         out_ket(ig) = alpha * CONJG(em1_qbz(ig,ig)) * in_ket(ig)
        end do
      else if ( firstchar(trans,(/"N","T"/)) ) then
        do ig=1,in_npw
-         out_ket(ig) = alpha * em1_qbz(ig,ig) * in_ket(ig) 
+         out_ket(ig) = alpha * em1_qbz(ig,ig) * in_ket(ig)
        end do
-     else 
+     else
        MSG_ERROR(sjoin("Wrong trans:", trans))
      end if
 
@@ -1530,7 +1529,7 @@ end subroutine screen_w0gemv
 !! screen_times_ket
 !!
 !! FUNCTION
-!!   Compute \Sigma_c(\omega)|\phi> in reciprocal space. 
+!!   Compute \Sigma_c(\omega)|\phi> in reciprocal space.
 !!
 !! INPUTS
 !!  W<screen_t>=Data structure describing the two-point function in reciprocal space. See also SIDE EFFECTS.
@@ -1538,20 +1537,20 @@ end subroutine screen_w0gemv
 !!  npwc=Number of G vectors for the correlation part.
 !!  npwx=Number of G vectors in rhotwgp for each spinorial component.
 !!  nspinor=Number of spinorial components.
-!!  theta_mu_minus_e0i=1 if e0i is occupied, 0 otherwise. Fractional occupancy in case of metals. 
+!!  theta_mu_minus_e0i=1 if e0i is occupied, 0 otherwise. Fractional occupancy in case of metals.
 !!  omegame0i(nomega)=Contains $\omega-\epsilon_{k-q,b1,\sigma}$
 !!  zcut=Small imaginary part to avoid the divergence in the ppmodel. (see related input variable)
 !!  rhotwgp(npwx*nspinor)=Matrix elements: $<k-q,b1,\sigma|e^{-i(q+G)r} |k,b2,\sigma>*vc_sqrt$
 !!
 !! OUTPUT
-!! ket(npwc,nomega)=Contains \Sigma_c(\omega)|\phi> in reciprocal space. 
+!! ket(npwc,nomega)=Contains \Sigma_c(\omega)|\phi> in reciprocal space.
 !!
 !! SIDE EFFECTS
 !! npoles_missing=Incremented with the number of poles whose contribution has not been taken into account due to
 !!  limited frequency mesh used for W.
 !!
 !! OUTPUT
-!!   ket(npwc,nomega)=Contains \Sigma_c(\omega)|\phi> in reciprocal space. 
+!!   ket(npwc,nomega)=Contains \Sigma_c(\omega)|\phi> in reciprocal space.
 !!   sigcme(nomega) (to be described), only relevant if ppm3 or ppm4
 !!
 !! PARENTS
@@ -1582,7 +1581,7 @@ subroutine screen_times_ket(W,npwc,npwx,nspinor,nomega,rhotwgp,omegame0i,zcut,&
  type(screen_t),intent(in) :: W
 !arrays
  real(dp),intent(in) :: omegame0i(nomega)
- !complex(gwpc),intent(in) :: epsm1q(npwc,npwc,nomegae) 
+ !complex(gwpc),intent(in) :: epsm1q(npwc,npwc,nomegae)
  complex(gwpc),intent(in) :: rhotwgp(npwx*nspinor)
  complex(gwpc),intent(inout) :: ket(nspinor*npwc,nomega)
  complex(gwpc),intent(out) :: sigcme(nomega)
@@ -1603,11 +1602,11 @@ subroutine screen_times_ket(W,npwc,npwx,nspinor,nomega,rhotwgp,omegame0i,zcut,&
  ! Mesh for W
  nomegae  = W%nomega; nomegaei = W%nomega_i; nomegaer = W%nomega_r
 
- select case (W%Info%wint_method) 
+ select case (W%Info%wint_method)
  case (WINT_CONTOUR) ! Contour deformation method.
    !
    ! Pass the symmetrized matrix.
-   epsm1_qbz => W%Fgg_qbz%mat(1:npwc,1:npwc,1:nomegae) 
+   epsm1_qbz => W%Fgg_qbz%mat(1:npwc,1:npwc,1:nomegae)
    !
    call calc_sigc_cd(npwc,npwx,nspinor,nomega,nomegae,nomegaer,nomegaei,rhotwgp,&
      W%omega,epsm1_qbz,omegame0i,theta_mu_minus_e0i,ket,one,npoles_missing)
@@ -1628,7 +1627,7 @@ subroutine screen_times_ket(W,npwc,npwx,nspinor,nomega,rhotwgp,omegame0i,zcut,&
 
  CASE DEFAULT
    MSG_ERROR(sjoin("Wrong wint_method: ",itoa(W%Info%wint_method)))
- END SELECT 
+ END SELECT
 
 end subroutine screen_times_ket
 !!***
@@ -1640,30 +1639,30 @@ end subroutine screen_times_ket
 !!  em1_symmetrize_ip
 !!
 !! FUNCTION
-!!  Symmetrizes the two-point function in G-space. Symmetrization is done 
-!!  inplace thorugh an auxiliary work array of dimension (npwc,npwc) 
+!!  Symmetrizes the two-point function in G-space. Symmetrization is done
+!!  inplace thorugh an auxiliary work array of dimension (npwc,npwc)
 !!
 !! INPUTS
 !!  nomega=All frequencies from 1 up to nomega are symmetrized.
 !!  npwc=Number of G vectors in the symmetrized matrix.
 !!  Gsph<gsphere_t>=data related to the G-sphere
 !!  Qmesh<kmesh_t>=Structure defining the q-mesh used for Er.
-!!  iq_bz=Index of the q-point in the BZ where epsilon^-1 is required. 
+!!  iq_bz=Index of the q-point in the BZ where epsilon^-1 is required.
 !!
-!! SIDE EFFECTS 
-!!  epsm1(npwc,npwc,nomega) 
+!! SIDE EFFECTS
+!!  epsm1(npwc,npwc,nomega)
 !!   input:  filled with the matrix at the q-point that has to be symmetrized.
 !!   output: symmetrised matrix.
 !!
 !! NOTES
-!!  In the present implementation we are not considering a possible umklapp vector G0 in the 
-!!  expression Sq = q+G0. Treating this case would require some changes in the G-sphere 
-!!  since we have to consider G-G0. The code however stops in sigma if a nonzero G0 is required 
+!!  In the present implementation we are not considering a possible umklapp vector G0 in the
+!!  expression Sq = q+G0. Treating this case would require some changes in the G-sphere
+!!  since we have to consider G-G0. The code however stops in sigma if a nonzero G0 is required
 !!  to reconstruct the BZ.
-!! 
+!!
 !!  * Remember the symmetry properties of E
 !!    If q_bz=Sq_ibz+G0:
-!! 
+!!
 !!    $ E_{SG1-G0,SG2-G0}(q_bz) = e^{+iS(G2-G1).\tau} E_{G1,G2)}(q)
 !!
 !!    The invariance under exchange of the real space position E(1,2) = E(2,1) leads to:
@@ -1677,7 +1676,7 @@ end subroutine screen_times_ket
 !!
 !! SOURCE
 
-subroutine em1_symmetrize_ip(iq_bz,npwc,nomega,Gsph,Qmesh,epsm1) 
+subroutine em1_symmetrize_ip(iq_bz,npwc,nomega,Gsph,Qmesh,epsm1)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -1725,7 +1724,7 @@ subroutine em1_symmetrize_ip(iq_bz,npwc,nomega,Gsph,Qmesh,epsm1)
      do g1=1,npwc
        isg1 = Gsph%rottb(g1,itim_q,isym_q)
        phmsg1t = Gsph%phmSGt(g1,isym_q)
-       work(isg1,isg2) = epsm1(g1,g2,iw) * phmsg1t  * phmsg2t_star 
+       work(isg1,isg2) = epsm1(g1,g2,iw) * phmsg1t  * phmsg2t_star
      end do
    end do
    epsm1(:,:,iw) = work
@@ -1758,21 +1757,21 @@ end subroutine em1_symmetrize_ip
 !!  npwc=Number of G vectors in the symmetrized matrix.
 !!  Gsph<gsphere_t>=data related to the G-sphere
 !!  Qmesh<kmesh_t>=Structure defining the q-mesh used for Er.
-!!  iq_bz=Index of the q-point in the BZ where epsilon^-1 is required. 
-!!  in_epsm1(npwc,npwc,nomega) 
+!!  iq_bz=Index of the q-point in the BZ where epsilon^-1 is required.
+!!  in_epsm1(npwc,npwc,nomega)
 !!
 !! OUTPUT
-!!  out_epsm1(npwc,npwc,nomega) 
+!!  out_epsm1(npwc,npwc,nomega)
 !!
 !! NOTES
-!!  In the present implementation we are not considering a possible umklapp vector G0 in the 
-!!  expression Sq = q+G0. Treating this case would require some changes in the G-sphere 
-!!  since we have to consider G-G0. The code however stops in sigma if a nonzero G0 is required 
+!!  In the present implementation we are not considering a possible umklapp vector G0 in the
+!!  expression Sq = q+G0. Treating this case would require some changes in the G-sphere
+!!  since we have to consider G-G0. The code however stops in sigma if a nonzero G0 is required
 !!  to reconstruct the BZ.
-!! 
+!!
 !!  * Remember the symmetry properties of E
 !!    If q_bz=Sq_ibz+G0:
-!! 
+!!
 !!    $ E_{SG1-G0,SG2-G0}(q_bz) = e^{+iS(G2-G1).\tau} E_{G1,G2)}(q)
 !!
 !!    The invariance under exchange of the real space position E(1,2) = E(2,1) leads to:
@@ -1786,7 +1785,7 @@ end subroutine em1_symmetrize_ip
 !!
 !! SOURCE
 
-subroutine em1_symmetrize_op(iq_bz,npwc,nomega,Gsph,Qmesh,in_epsm1,out_epsm1) 
+subroutine em1_symmetrize_op(iq_bz,npwc,nomega,Gsph,Qmesh,in_epsm1,out_epsm1)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -1808,7 +1807,7 @@ subroutine em1_symmetrize_op(iq_bz,npwc,nomega,Gsph,Qmesh,in_epsm1,out_epsm1)
 
 !Local variables-------------------------------
 !scalars
- integer :: iw,g1,g2,isg1,isg2,iq_ibz,itim_q,isym_q 
+ integer :: iw,g1,g2,isg1,isg2,iq_ibz,itim_q,isym_q
  logical :: q_isirred
  complex(gwpc) :: phmsg1t,phmsg2t_star
 !arrays

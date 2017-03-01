@@ -11,7 +11,7 @@
 !! further split)
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (TD)
+!! Copyright (C) 1998-2017 ABINIT group (TD)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -45,7 +45,6 @@
 !! dfpt_nsteltwf.F90
 !! dfpt_nstpaw.F90
 !! dfpt_nstwf.F90
-!! dfpt_phfrq.F90
 !! dfpt_prtene.F90
 !! dfpt_prtph.F90
 !! dfpt_rhofermi.F90
@@ -79,12 +78,14 @@
 !! inpgkk.F90
 !! interfaces_72_response.F90
 !! kptfine_av.F90
-!! m_rf2.F90
 !! m_ddb.F90
+!! m_ddk.F90
 !! m_dvdb.F90
 !! m_efmas.F90
 !! m_eig2d.F90
 !! m_paral_pert.F90
+!! m_rf2.F90
+!! m_strain.F90
 !! newfermie1.F90
 !! outbsd.F90
 !! outddbnc.F90

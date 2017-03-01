@@ -6,7 +6,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 2006-2016 ABINIT group (BAmadon)
+!! Copyright (C) 2006-2017 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -572,9 +572,15 @@ subroutine init_dmft(dmatpawu, dtset, fermie_lda, fnametmp_app, nspinor, paw_dmf
 ! *********************************************************************
 
  nsppol = dtset%nsppol
+ if(dtset%ucrpa==0) then
  write(message,'(6a)') ch10,' ====================================', &
 &                      ch10,' =====  Start of DMFT calculation', &
 &                      ch10,' ===================================='
+ else if(dtset%ucrpa>0) then
+ write(message,'(6a)') ch10,' ============================================================', &
+&                      ch10,' =====  Initialize construction of Wannier in DMFT routines',&
+&                      ch10,' ============================================================'
+ endif
  call wrtout(std_out,message,'COLL')
 
  unit_e=2_dp
@@ -750,7 +756,7 @@ subroutine init_dmft(dmatpawu, dtset, fermie_lda, fnametmp_app, nspinor, paw_dmf
 ! Imaginary frequencies
 !=======================
 ! Set up log frequencies
- call construct_nwlo_dmft(paw_dmft)
+ if(dtset%ucrpa==0) call construct_nwlo_dmft(paw_dmft)
 
 
 !=========================================================

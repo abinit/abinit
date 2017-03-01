@@ -322,6 +322,22 @@ CPP="icc -E"
 #
 #FCFLAGS="-O2"
 
+# Fortran flags for fixed-form source files
+#
+#FCFLAGS_FIXEDFORM="-ffixed-form"
+
+# Fortran flags for free-form source files
+#
+#FCFLAGS_FREEFORM="-ffree-form"
+
+# Fortran compiler flags to use a module directory
+#
+#FCFLAGS_MODDIR=="-J$(abinit_moddir)"
+
+# Tricky Fortran compiler flags
+#
+#FCFLAGS_HINTS="-ffree-line-length-none"
+
 # Fortran linker custom debug flags (when enable_debug=yes)
 #
 #FC_LDFLAGS_DEBUG="-Wl,-debug"
@@ -675,14 +691,13 @@ with_mpi_prefix="/usr/local/mpich3.1.2_ifort14"
 # Transferable I/O (TRIO) connector                                            #
 # ---------------------------------------------------------------------------- #
 
-# Flavor of transferable I/O library to support (default is netcdf+etsf_io)
+# Flavor of transferable I/O library to support (default is netcdf)
 #
 # By transferable I/O (TRIO), we mean that the files produced by Abinit
 # will be transferable seamlessly to other computers and codes
 #
 # Supported libraries:
 #
-#   * etsf_io  : ETSF_IO file format (requires netcdf)
 #   * psml     : XML pseudopotential format io library
 #   * netcdf   : NetCDF file format
 #   * yaml     : YAML output
@@ -690,17 +705,7 @@ with_mpi_prefix="/usr/local/mpich3.1.2_ifort14"
 #
 # You may specify any combination, using '+' as a separator
 #
-with_trio_flavor="netcdf+etsf_io"
-
-                       # ------------------------------ #
-
-# Include flags for the ETSF_IO library (default is unset)
-#
-with_etsf_io_incs="-I/usr/local/fallbacks/intel/14.0/mpi/include"
-
-# Link flags for the ETSF_IO library (default is unset)
-#
-with_etsf_io_libs="-L/usr/local/fallbacks/intel/14.0/mpi/lib -letsf_io_low_level -letsf_io_utils -letsf_io"
+with_trio_flavor="netcdf"
 
                        # ------------------------------ #
 
@@ -716,11 +721,11 @@ with_etsf_io_libs="-L/usr/local/fallbacks/intel/14.0/mpi/lib -letsf_io_low_level
 
 # Include flags for the NetCDF library (default is unset)
 #
-with_netcdf_incs="-I/usr/local/fallbacks/intel/14.0/mpi/include"
+with_netcdf_incs="-I${FALLBACKS_PATH}/netcdf/include"
 
 # Link flags for the NetCDF library (default is unset)
 #
-with_netcdf_libs="-L/usr/local/fallbacks/intel/14.0/mpi/lib -lnetcdf"
+with_netcdf_libs="-L${FALLBACKS_PATH}/netcdf/lib -lnetcdf"
 #
 #
 # Enable Netcdf mode in Abinit (use netcdf as default IO library,
@@ -948,11 +953,11 @@ with_dft_flavor="libxc"
 
 # Include flags for the LibXC library (default is unset)
 #
-with_libxc_incs="-I/usr/local/fallbacks/intel/14.0/mpi/include"
+with_libxc_incs="-I${FALLBACKS_PATH}/libxc/include"
 
 # Link flags for the LibXC library (default is unset)
 #
-with_libxc_libs="-L/usr/local/fallbacks/intel/14.0/mpi/lib -lxcf90 -lxc"
+with_libxc_libs="-L${FALLBACKS_PATH}/libxc/lib -lxcf90 -lxc"
 
                        # ------------------------------ #
 

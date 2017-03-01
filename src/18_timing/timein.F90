@@ -8,7 +8,7 @@
 !!  For wall clock time, call the F90 intrinsic date_and_time .
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2016 ABINIT group (DCA, XG, GMR, LSI, MM, MT)
+!!  Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR, LSI, MM, MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -25,6 +25,9 @@
 !! NOTES
 !!  For CPU time, contains machine-dependent code (choice will be selected
 !!  by C preprocessor, see abi_cpu_time).
+!!
+!! TODO
+!!  Should be replaced by cwtime
 !!
 !! PARENTS
 !!      abinit,aim,aim_follow,anaddb,bsepostproc,conducti,cpdrv,cut3d,drvaim

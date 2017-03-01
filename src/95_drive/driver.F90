@@ -13,7 +13,7 @@
 !! selected big arrays are allocated, then the gstate, respfn, ...  subroutines are called.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2016 ABINIT group (XG,MKV,MM,MT,FJ)
+!! Copyright (C) 1999-2017 ABINIT group (XG,MKV,MM,MT,FJ)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -40,7 +40,7 @@
 !!   needed for outvars, including evolving variables
 !!   Default values are set up in the calling routine
 !! dtsets(0:ndtset_alloc)=<type datasets_type>
-!!   intput: all input variables initialized from the input file.
+!!   input: all input variables initialized from the input file.
 !!   output: the effective set of variables used in the different datasets.
 !!           Some variables, indeed, might have been redefined in one of the children.
 !!           of this routine.

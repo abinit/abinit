@@ -7,7 +7,7 @@
 !! This program merges DFPT potentials for different q-vectors and perturbations.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2004-2016 ABINIT group (MG)
+!! Copyright (C) 2004-2017 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -65,10 +65,10 @@ program mrgdv
 
 !Local variables-------------------------------
 !scalars
- integer :: ii,nargs,nfiles,comm,prtvol,nfft,my_rank
+ integer :: ii,nargs,nfiles,comm,prtvol,nfft,my_rank,ierr
  character(len=24) :: codename
- character(len=500) :: command,arg !msg,
- character(len=fnlen) :: db_path
+ character(len=500) :: command,arg, msg
+ character(len=fnlen) :: db_path,dump_file
  type(dvdb_t) :: db
 !arrays
  integer :: ngfft(18),ngqpt(3)
@@ -127,10 +127,10 @@ program mrgdv
        write(std_out,*)"-h, --help                 Show this help and exit."
        write(std_out,*)" "
        write(std_out,*)"Options for developers:"
-       write(std_out,*)"test_v1complete            Test symmetrization of DFPT potentials."
+       write(std_out,*)"test_v1complete [file]     Test symmetrization of DFPT potentials."
        write(std_out,*)"                           Assume DVDB with all 3*natom perturbations for each q (prep_gkk)."
        write(std_out,*)"test_v1rsym                Test symmetries of DFPT potentials in real space."
-       write(std_out,*)"test_ftinterp              Test Fourier interpolation of DFPT potentials."
+       write(std_out,*)"test_ftinterp [n1,n2,n3]   Test Fourier interpolation of DFPT potentials."
        goto 100
      end if
    end do
@@ -167,9 +167,10 @@ program mrgdv
      call dvdb_free(db)
 
    case ("test_v1comp", "test_v1complete")
-     call wrtout(std_out," Testing symmetries (assuming overcomplete DVDB)")
+     call wrtout(std_out," Testing symmetries (assuming overcomplete DVDB, pass extra argument to dump v1(r)) to file")
      call get_command_argument(2, db_path)
-     call dvdb_test_v1complete(db_path, comm)
+     dump_file = ""; if (nargs > 2) call get_command_argument(3, dump_file)
+     call dvdb_test_v1complete(db_path, dump_file, comm)
 
    case ("test_v1rsym")
      call wrtout(std_out," Testing symmetries of V1(r) in real space.")
@@ -178,17 +179,14 @@ program mrgdv
 
    case ("test_ftinterp")
      call get_command_argument(2, db_path)
-     if (nargs >= 3) then
+     ngqpt = [2,2,2]
+     if (nargs > 2) then
        call get_command_argument(3, arg)
-       !arg = replace_char(arg, ",", " ")
-       !read(arg,"(3(i0,a))")ngqpt
-     else
-       ngqpt = [2,2,2]
-       !ngqpt = [4,4,4]
-       !ngqpt = [8,8,8]
+       read(arg, *, iostat=ierr, iomsg=msg)ngqpt
+       ABI_CHECK(ierr == 0, msg)
      end if
 
-     write(std_out,"(a)")sjoin("Testing Fourier interpolation with ngqpt:", ltoa(ngqpt))
+     write(std_out,"(a)")sjoin("Testing Fourier interpolation of V1(r) with ngqpt:", ltoa(ngqpt))
      call dvdb_test_ftinterp(db_path, ngqpt, comm)
 
    case default

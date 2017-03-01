@@ -7,7 +7,7 @@
 !! This routine updates E field variables 
 !!
 !! COPYRIGHT
-!! Copyright (C) 2003-2016 ABINIT  group 
+!! Copyright (C) 2003-2017 ABINIT  group 
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -158,7 +158,7 @@ subroutine update_e_field_vars(atindx,atindx1,cg,dimcprj,dtefield,dtfil,dtset,&
 !scalars
  character(len=500) :: message
  integer :: ctocprj_choice,iatom,ii,iorder_cprj,mcprj,my_nspinor,ncpgr
- integer :: optberry,usecprj,useylmgr
+ integer :: optberry,usecprj
  logical :: calc_epaw3_force, calc_epaw3_stress, efield
 !arrays
  real(dp) :: efield_test_cart(3),red_efield1(3)
@@ -187,15 +187,12 @@ subroutine update_e_field_vars(atindx,atindx1,cg,dimcprj,dtefield,dtfil,dtset,&
  if ( efield .and. psps%usepaw == 1) then
    ABI_DATATYPE_ALLOCATE(cprj,(dtset%natom,mcprj))
 !  finite electric field may need gradients for forces, stress
-   useylmgr = 0
    if (calc_epaw3_force .and. .not. calc_epaw3_stress) then
      ncpgr = 3; ctocprj_choice = 2 ! derivs w.r.t. position
    else if (.not. calc_epaw3_force .and. calc_epaw3_stress) then
      ncpgr = 6; ctocprj_choice = 3 ! derivs w.r.t strain
-     useylmgr = 1
    else if (calc_epaw3_force .and. calc_epaw3_stress) then
      ncpgr = 9; ctocprj_choice = 23 ! derivs w.r.t. position and strain
-     useylmgr = 1
    end if
    call pawcprj_alloc(cprj,ncpgr,dimcprj)
    iatom=0 ; iorder_cprj=1 ! retain ordering of input list
@@ -206,8 +203,8 @@ subroutine update_e_field_vars(atindx,atindx1,cg,dimcprj,dtefield,dtfil,dtset,&
 &   dtset%istwfk,kg,dtset%kptns,dtset%mband,mcg,mcprj,dtset%mgfft,dtset%mkmem,&
 &   mpi_enreg,psps%mpsang,dtset%mpw,dtset%natom,nattyp,dtset%nband,&
 &   dtset%natom,ngfft,dtset%nkpt,dtset%nloalg,npwarr,dtset%nspinor,&
-&   dtset%nsppol,dtset%ntypat,3,dtset%paral_kgb,ph1d,psps,rmet,&
-&   dtset%typat,ucvol,dtfil%unpaw,useylmgr,xred,ylm,ylmgr)
+&   dtset%nsppol,dtset%ntypat,dtset%paral_kgb,ph1d,psps,rmet,&
+&   dtset%typat,ucvol,dtfil%unpaw,xred,ylm,ylmgr)
    ABI_DEALLOCATE(ph1d)
  else 
    ABI_DATATYPE_ALLOCATE(cprj,(0,0))

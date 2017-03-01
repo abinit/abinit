@@ -8,7 +8,7 @@
 !!  this file was typically created in a DFT run with usedmft=1 and nbandkss -1
 !! 
 !! COPYRIGHT
-!! Copyright (C) 2006-2016 ABINIT group (BAmadon)
+!! Copyright (C) 2006-2017 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

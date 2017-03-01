@@ -1261,345 +1261,147 @@ No meaning for RF calculations.
 Choice of algorithm to control the displacements of ions, and eventually (see <a href="varrlx.html#optcell">optcell</a>)
 changes of cell shape and size.
  <ul>
+  <li> 0=&gt; Do not move ions; <br /> <br /> </li>
   <li>
-   0=&gt; do not move ions;
-   <br />
-   <br />
-  </li>
-  <li>
-   1=&gt; move atoms using molecular dynamics with
+   1=&gt; Move atoms using molecular dynamics with
 optional viscous damping (friction linearly proportional
 to velocity). The viscous damping is controlled by the
-parameter "<a href="varrlx.html#vis">vis</a>".
-If actual undamped molecular dynamics is desired,
-set <a href="varrlx.html#vis">vis</a> to 0. The implemented algorithm
-is the generalisation
+parameter "<a href="varrlx.html#vis">vis</a>".  If actual undamped molecular dynamics is desired,
+set <a href="varrlx.html#vis">vis</a> to 0. The implemented algorithm is the generalisation
 of the Numerov technique (6th order), but is NOT invariant
 upon time-reversal, so that the energy is not conserved.
 The value <b>ionmov</b>=6 will usually be preferred, although the
-algorithm that is implemented is lower-order.
-The time step is governed by
-<a href="varrlx.html#dtion">dtion</a>.
-   <br />
-   <b>
-    Purpose:
-   </b>
-   Molecular dynamics (if <a href="varrlx.html#vis">vis</a>=0),
-Structural optimization (if <a href="varrlx.html#vis">vis</a>&gt;0)
-   <br />
-   <b>
-    Cell optimization:
-   </b>
-   No (Use <a href="varrlx.html#optcell">optcell</a>=0 only)
-   <br />
-   <b>
-    Variables related:
-   </b>
-   Viscous parameter <a href="varrlx.html#vis">vis</a>,
-time step <a href="varrlx.html#dtion">dtion</a>,
-index of atoms fixed <a href="varrlx.html#iatfix">iatfix</a>
-   <br />
-   <br />
+algorithm that is implemented is lower-order. The time step is governed by <a href="varrlx.html#dtion">dtion</a>.  <br />
+   <b> Purpose: </b>
+   Molecular dynamics (if <a href="varrlx.html#vis">vis</a>=0), Structural optimization (if <a href="varrlx.html#vis">vis</a>&gt;0) <br />
+   <b> Cell optimization: </b>
+   No (Use <a href="varrlx.html#optcell">optcell</a>=0 only) <br />
+   <b> Related variables: </b>
+   Viscous parameter <a href="varrlx.html#vis">vis</a>, time step <a href="varrlx.html#dtion">dtion</a>, index of atoms fixed <a href="varrlx.html#iatfix">iatfix</a> <br /> <br /> </li>
+  <li>
+   2=&gt; Conduct structural optimization using the Broyden-Fletcher-Goldfarb-Shanno minimization (BFGS).
+This is much more efficient for structural optimization than viscous damping, when there are less than
+about 10 degrees of freedom to optimize.  <br />
+   <b> Purpose: </b>
+   Structural optimization <br />
+   <b> Cell optimization: </b>
+   Yes (if <a href="varrlx.html#optcell">optcell</a>/=0) <br />
+   <b> Related variables: </b> <br /> <br />
   </li>
   <li>
-   2=&gt; conduct structural optimization using the
-Broyden-Fletcher-Goldfarb-Shanno minimization (BFGS).
-This is much more efficient for structural optimization
-than viscous damping, when there are less than
-about 10 degrees of freedom to optimize.
-   <br />
-   <b>
-    Purpose:
-   </b>
-   Structural optimization
-   <br />
-   <b>
-    Cell optimization:
-   </b>
-   Yes (if <a href="varrlx.html#optcell">optcell</a>/=0)
-   <br />
-   <b>
-    Variables related:
-   </b>
-   <br />
-   <br />
-  </li>
-  <li>
-   3=&gt; conduct structural optimization using the
-Broyden-Fletcher-Goldfarb-Shanno minimization (BFGS),
-modified to take into account the total energy as well as
-the gradients (as in usual BFGS).
-   <br />
-   See the paper by
-[Schlegel, J. Comp. Chem. 3, 214 (1982)].
+   3=&gt; Conduct structural optimization using the Broyden-Fletcher-Goldfarb-Shanno minimization (BFGS),
+modified to take into account the total energy as well as the gradients (as in usual BFGS).  <br />
+   See the paper by [Schlegel, J. Comp. Chem. 3, 214 (1982)].
 Might be better than <b>ionmov</b>=2 for few degrees of freedom
-(less than 3 or 4). Can be very unstable - use with caution!
-   <br />
-   <b>
-    Purpose:
-   </b>
-   Structural optimization
-   <br />
-   <b>
-    Cell optimization:
-   </b>
-   Yes (if <a href="varrlx.html#optcell">optcell</a>/=0)
-   <br />
-   <b>
-    Variables related:
-   </b>
-   <br />
-   <br />
+(less than 3 or 4). Can be very unstable - use with caution! <br />
+   <b> Purpose: </b>
+   Structural optimization <br />
+   <b> Cell optimization: </b>
+   Yes (if <a href="varrlx.html#optcell">optcell</a>/=0) <br />
+   <b> Related variables: </b> <br /> <br />
   </li>
   <li>
-   4=&gt; conjugate gradient algorithm for simultaneous
-optimization of potential and ionic degrees of freedom.
-It can be used with <a href="varbas.html#iscf">iscf</a>=2 and
-<a href="varbas.html#iscf">iscf</a>  =5 or 6
-(WARNING : this is under development, and does not work very well in
-many
-cases).
-   <br />
-   <b>
-    Purpose:
-   </b>
-   Structural optimization
-   <br />
-   <b>
-    Cell optimization:
-   </b>
-   No (Use <a href="varrlx.html#optcell">optcell</a>=0 only)
-   <br />
-   <b>
-    Variables related:
-   </b>
-   <br />
-   <br />
+   4=&gt; Conjugate gradient algorithm for simultaneous optimization of potential and ionic degrees of freedom.
+It can be used with <a href="varbas.html#iscf">iscf</a>=2 and <a href="varbas.html#iscf">iscf</a>  =5 or 6 (WARNING : this is under development, and does not work very well in many cases).  <br />
+   <b> Purpose: </b>
+   Structural optimization <br />
+   <b> Cell optimization: </b>
+   No (Use <a href="varrlx.html#optcell">optcell</a>=0 only) <br />
+   <b> Related variables: </b> <br /> <br />
   </li>
   <li>
-   5=&gt; Simple relaxation of ionic positions according
-to (converged) forces. Equivalent to <b>ionmov</b>=1 with
-zero masses, albeit the relaxation coefficient is not
-<a href="varrlx.html#vis">vis</a>,
-but <a href="vardev.html#iprcfc">iprcfc</a>.
-   <br />
-   <b>
-    Purpose:
-   </b>
-   Structural optimization
-   <br />
-   <b>
-    Cell optimization:
-   </b>
-   No (Use <a href="varrlx.html#optcell">optcell</a>=0 only)
-   <br />
-   <b>
-    Variables related:
-   </b>
-   <br />
-   <br />
+   5=&gt; Simple relaxation of ionic positions according to (converged) forces. Equivalent to <b>ionmov</b>=1 with
+zero masses, albeit the relaxation coefficient is not <a href="varrlx.html#vis">vis</a>, but <a href="vardev.html#iprcfc">iprcfc</a>.  <br />
+   <b> Purpose: </b>
+   Structural optimization <br />
+   <b> Cell optimization: </b>
+   No (Use <a href="varrlx.html#optcell">optcell</a>=0 only) <br />
+   <b> Related variables: </b> <br /> <br />
   </li>
   <li>
-   6=&gt; Molecular dynamics using the Verlet algorithm, see
-[Allen &amp; Tildesley "Computer simulation of liquids" 1987, p 81].
-The only related parameter is the time step
-(<a href="varrlx.html#dtion">dtion</a>).
-   <br />
-   <b>
-    Purpose:
-   </b>
-   Molecular dynamics
-   <br />
-   <b>
-    Cell optimization:
-   </b>
-   No (Use <a href="varrlx.html#optcell">optcell</a>=0 only)
-   <br />
-   <b>
-    Variables related:
-   </b>
-   time step <a href="varrlx.html#dtion">dtion</a>,
-index of atoms fixed <a href="varrlx.html#iatfix">iatfix</a>
-   <br />
-   <br />
+   6=&gt; Molecular dynamics using the Verlet algorithm, see [Allen &amp; Tildesley "Computer simulation of liquids" 1987, p 81].
+The only related parameter is the time step (<a href="varrlx.html#dtion">dtion</a>).  <br />
+   <b> Purpose: </b>
+   Molecular dynamics <br />
+   <b> Cell optimization: </b>
+   No (Use <a href="varrlx.html#optcell">optcell</a>=0 only) <br />
+   <b> Related variables: </b>
+   time step <a href="varrlx.html#dtion">dtion</a>, index of atoms fixed <a href="varrlx.html#iatfix">iatfix</a> <br /> <br />
   </li>
   <li>
-   7=&gt; Quenched Molecular dynamics using the Verlet
-algorithm, and stopping each atom for which the scalar product
-of velocity and force is negative.
-The only related parameter is the time step
-(<a href="varrlx.html#dtion">dtion</a>).
-The goal is not
-to produce a realistic dynamics, but to go as fast as possible
-to the minimum. For this purpose, it is advised to set
-all the masses to the same value (for example, use the Carbon mass,
-i.e. set <a href="varrlx.html#amu">amu</a> to 12 for all type of
-atoms).
-   <br />
-   <b>
-    Purpose:
-   </b>
-   Structural optimization
-   <br />
-   <b>
-    Cell optimization:
-   </b>
-   No (Use <a href="varrlx.html#optcell">optcell</a>=0 only)
-   <br />
-   <b>
-    Variables related:
-   </b>
-   time step <a href="varrlx.html#dtion">dtion</a>,
-index of atoms fixed <a href="varrlx.html#iatfix">iatfix</a>
-   <br />
-   <br />
+   7=&gt; Quenched Molecular dynamics using the Verlet algorithm, and stopping each atom for which the scalar product
+of velocity and force is negative.  The only related parameter is the time step (<a href="varrlx.html#dtion">dtion</a>).  The goal is not
+to produce a realistic dynamics, but to go as fast as possible to the minimum. For this purpose, it is advised to set
+all the masses to the same value (for example, use the Carbon mass, i.e. set <a href="varrlx.html#amu">amu</a> to 12 for all type of atoms).  <br />
+   <b> Purpose: </b>
+   Structural optimization <br />
+   <b> Cell optimization: </b>
+   No (Use <a href="varrlx.html#optcell">optcell</a>=0 only) <br />
+   <b> Related variables: </b>
+   time step <a href="varrlx.html#dtion">dtion</a>, index of atoms fixed <a href="varrlx.html#iatfix">iatfix</a> <br /> <br />
   </li>
   <li>
-   8=&gt; Molecular dynamics with Nose-Hoover thermostat,
-using the Verlet algorithm.
-   <br />
-   <b>
-    Purpose:
-   </b>
-   Molecular dynamics
-   <br />
-   <b>
-    Cell optimization:
-   </b>
-   No (Use <a href="varrlx.html#optcell">optcell</a>=0 only)
-   <br />
-   <b>
-    Variables related:
-   </b>
-   time step (<a href="varrlx.html#dtion">dtion</a>),
-Temperatures (<a href="varrlx.html#mdtemp">mdtemp</a>),
-and thermostat mass (<a href="varrlx.html#noseinert">noseinert</a>).
-   <br />
-   <br />
+   8=&gt; Molecular dynamics with Nose-Hoover thermostat, using the Verlet algorithm.  <br />
+   <b> Purpose: </b>
+   Molecular dynamics <br />
+   <b> Cell optimization: </b>
+   No (Use <a href="varrlx.html#optcell">optcell</a>=0 only) <br />
+   <b> Related variables: </b>
+   time step (<a href="varrlx.html#dtion">dtion</a>), Temperatures (<a href="varrlx.html#mdtemp">mdtemp</a>), and thermostat mass (<a href="varrlx.html#noseinert">noseinert</a>).  <br /> <br />
   </li>
   <li>
-   9=&gt; Langevin molecular dynamics.
-   <br />
-   <b>
-    Purpose:
-   </b>
-   Molecular dynamics
-   <br />
-   <b>
-    Cell optimization:
-   </b>
-   No (Use <a href="varrlx.html#optcell">optcell</a>=0 only)
-   <br />
-   <b>
-    Variables related:
-   </b>
-   time step (<a href="varrlx.html#dtion">dtion</a>),
-temperatures (<a href="varrlx.html#mdtemp">mdtemp</a>),
-and friction coefficient (<a href="varrlx.html#friction">friction</a>).
-   <br />
-   <br />
+   9=&gt; Langevin molecular dynamics.  <br />
+   <b> Purpose: </b>
+   Molecular dynamics <br />
+   <b> Cell optimization: </b>
+   No (Use <a href="varrlx.html#optcell">optcell</a>=0 only) <br />
+   <b> Related variables: </b>
+   time step (<a href="varrlx.html#dtion">dtion</a>), temperatures (<a href="varrlx.html#mdtemp">mdtemp</a>) and friction coefficient (<a href="varrlx.html#friction">friction</a>).  <br /> <br />
   </li>
   <li>
-   10=&gt; Delocalized internal coordinates. with BFGS simple
-   <br />
-   <b>
-    Purpose:
-   </b>
-   Structural optimization
-   <br />
-   <b>
-    Cell optimization:
-   </b>
-   No (Use <a href="varrlx.html#optcell">optcell</a>=0 only)
-   <br />
-   <b>
-    Variables related:
-   </b>
-   <br />
-   <br />
+   10=&gt; Delocalized internal coordinates. with BFGS simple <br />
+   <b> Purpose: </b>
+   Structural optimization <br />
+   <b> Cell optimization: </b>
+   No (Use <a href="varrlx.html#optcell">optcell</a>=0 only) <br />
+   <b> Related variables: </b> <br /> <br />
   </li>
   <li>
-   11=&gt; Delocalized internal coordinates. with BFGS using total energy
-   <br />
-   <b>
-    Purpose:
-   </b>
-   Structural optimization
-   <br />
-   <b>
-    Cell optimization:
-   </b>
-   No (Use <a href="varrlx.html#optcell">optcell</a>=0 only)
-   <br />
-   <b>
-    Variables related:
-   </b>
-   <br />
-   <br />
+   11=&gt; Delocalized internal coordinates. with BFGS using total energy <br />
+   <b> Purpose: </b>
+   Structural optimization <br />
+   <b> Cell optimization: </b>
+   No (Use <a href="varrlx.html#optcell">optcell</a>=0 only) <br />
+   <b> Related variables: </b> <br /> <br />
   </li>
   <li>
-   12=&gt; Isokinetic ensemble molecular dynamics.
-The equation of motion of the ions in contact with a thermostat
-are solved with the algorithm proposed by Zhang [J. Chem. Phys. 106,
-6102 (1997)],
-as worked out by Minary et al [J. Chem. Phys. 188, 2510 (2003)].
-The conservation of the kinetic energy is obtained within machine
-precision,
-at each step.
-   <br />
-   <s>
-    Related parameters : the time step (<a href="varrlx.html#dtion">dtion</a>),
-the temperatures (<a href="varrlx.html#mdtemp">mdtemp</a>),
-and the friction coefficient (<a href="varrlx.html#friction">friction</a>).
-   </s>
-   <br />
-   <b>
-    Purpose:
-   </b>
-   Molecular dynamics
-   <br />
-   <b>
-    Cell optimization:
-   </b>
-   No (Use <a href="varrlx.html#optcell">optcell</a>=0 only)
-   <br />
-   <b>
-    Variables related:
-   </b>
-   <br />
-   <br />
+   12=&gt; Isokinetic ensemble molecular dynamics.  The equation of motion of the ions in contact with a thermostat
+are solved with the algorithm proposed by Zhang [J. Chem. Phys. 106, 6102 (1997)],
+as worked out by Minary et al [J. Chem. Phys. 188, 2510 (2003)].  The conservation of the kinetic energy is obtained within machine
+precision, at each step.  <br />
+   <s> Related parameters : the time step (<a href="varrlx.html#dtion">dtion</a>), the temperatures (<a href="varrlx.html#mdtemp">mdtemp</a>), and the friction coefficient (<a href="varrlx.html#friction">friction</a>).
+   </s> <br />
+   <b> Purpose: </b>
+   Molecular dynamics <br />
+   <b> Cell optimization: </b>
+   No (Use <a href="varrlx.html#optcell">optcell</a>=0 only) <br />
+   <b> Related variables: </b> <br /> <br />
   </li>
   <li>
    13=&gt; Isothermal/isenthalpic ensemble.
 The equation of motion of the ions in contact with a thermostat
 and a barostat are solved with the algorithm proposed by Martyna,
-Tuckermann Tobias and Klein [Mol. Phys., 1996, p. 1117].
-   <br />
-   If optcell=1 or 2, the mass of the barostat (<a href="varrlx.html#bmass">bmass</a>)
-must be given in addition.
-   <br />
-   <b>
-    Purpose:
-   </b>
-   Molecular dynamics
-   <br />
-   <b>
-    Cell optimization:
-   </b>
-   Yes (if <a href="varrlx.html#optcell">optcell</a>/=0)
-   <br />
-   <b>
-    Variables related:
-   </b>
-   The time step (<a href="varrlx.html#dtion">dtion</a>),
-the temperatures (<a href="varrlx.html#mdtemp">mdtemp</a>),
-the number of thermostats (<a href="varrlx.html#nnos">nnos</a>),
-and the masses of thermostats (<a href="varrlx.html#qmass">qmass</a>).
-   <br />
-   <br />
+Tuckermann Tobias and Klein [Mol. Phys., 1996, p. 1117].  <br />
+   If optcell=1 or 2, the mass of the barostat (<a href="varrlx.html#bmass">bmass</a>) must be given in addition.  <br />
+   <b> Purpose: </b>
+   Molecular dynamics <br />
+   <b> Cell optimization: </b>
+   Yes (if <a href="varrlx.html#optcell">optcell</a>/=0) <br />
+   <b> Related variables: </b>
+   The time step (<a href="varrlx.html#dtion">dtion</a>), the temperatures (<a href="varrlx.html#mdtemp">mdtemp</a>), the number of thermostats (<a href="varrlx.html#nnos">nnos</a>), and the masses of thermostats (<a href="varrlx.html#qmass">qmass</a>).  <br /> <br />
   </li>
   <li>
-   14=&gt; simple molecular dynamics with a symplectic algorithm proposed
+   14=&gt; Simple molecular dynamics with a symplectic algorithm proposed
 by S.Blanes and P.C.Moans [called SRKNa14 in Practical symplectic partitioned
 Runge--Kutta and Runge--Kutta--Nystr&ouml;m methods, Journal of Computational
 and Applied Mathematics archive, volume 142,  issue 2  (May 2002), pages 313 - 330]
@@ -1607,126 +1409,75 @@ of the kind first published by H. Yoshida [Construction of higher order symplect
 integrators, Physics Letters A, volume 150, number 5 to 7, pages 262 - 268].
 This algorithm requires at least 14 evaluation of the forces (actually 15 are done
 within Abinit) per time step. At this cost it usually gives much better
-energy conservation than the verlet algorithm (ionmov 6) for a 30 times bigger
-value of <a href="varrlx.html#dtion">dtion</a>. Notice that the potential
-energy of the initial atomic configuration is never evaluated using this
-algorithm.
-   <br />
-   <b>
-    Purpose:
-   </b>
-   Molecular dynamics
-   <br />
-   <b>
-    Cell optimization:
-   </b>
-   No (Use <a href="varrlx.html#optcell">optcell</a>=0 only)
-   <br />
-   <b>
-    Variables related:
-   </b>
-   <br />
-   <br />
+energy conservation than the verlet algorithm (<b>ionmov</b> 6) for a 30 times bigger
+value of <a href="varrlx.html#dtion">dtion</a>. Notice that the potential energy of the initial atomic configuration is never evaluated using this algorithm.  <br />
+   <b> Purpose: </b>
+   Molecular dynamics <br />
+   <b> Cell optimization: </b>
+   No (Use <a href="varrlx.html#optcell">optcell</a>=0 only) <br />
+   <b> Related variables: </b> <br /> <br />
   </li>
   <li>
    20=&gt; Direct inversion of the iterative subspace.
-Given a starting point xred that is a vector of length 3*natom
-(reduced nuclei coordinates), and unit cell parameters (rprimd)
+Given a starting point <a href="varbas.html#xred">xred</a> that is a vector of length 3*<a href="varbas.html#natom">natom</a>
+(reduced nuclei coordinates), and unit cell parameters (<a href="varbas.html#rprimd">rprimd</a>)
 this routine uses the DIIS (direct inversion of the iterative
 subspace) to minimize the gradient (forces) on atoms. The preconditioning
-used to compute errors from gradients is using an inverse hessian
-matrix obtained by a BFGS algorithm.
+used to compute errors from gradients is using an inverse hessian matrix obtained by a BFGS algorithm.
 This method is known to converge to the nearest point where gradients
-vanish. This is efficient to refine positions around a saddle point
-for instance.
-   <br />
-   <b>
-    Purpose:
-   </b>
-   Structural optimization
-   <br />
-   <b>
-    Cell optimization:
-   </b>
-   No (Use <a href="varrlx.html#optcell">optcell</a>=0 only)
-   <br />
-   <b>
-    Variables related:
-   </b>
-   DIIS memory <a href="varrlx.html#diismemory">diismemory</a>
-   <br />
-   <br />
+vanish. This is efficient to refine positions around a saddle point for instance.  <br />
+   <b> Purpose: </b>
+   Structural optimization <br />
+   <b> Cell optimization: </b>
+   No (Use <a href="varrlx.html#optcell">optcell</a>=0 only) <br />
+   <b> Related variables: </b>
+   DIIS memory <a href="varrlx.html#diismemory">diismemory</a> <br /> <br />
+  </li>
+  <li>
+  22=&gt; Conduct structural optimization using the Limited-memory Broyden-Fletcher-Goldfarb-Shanno minimization (L-BFGS).
+The working routines were based on the original implementation of J. Nocera available on netlib.org.
+This algorithm can be much better than the native implementation of BFGS in ABINIT (<b>ionmov</b>=2)
+when one approaches convergence, perhaps because of better treatment of numerical details.<br />
+   <b> Purpose: </b>
+   Structural optimization <br />
+   <b> Cell optimization: </b>
+   Yes (if <a href="varrlx.html#optcell">optcell</a>/=0) <br />
+   <b> Related variables: </b> <br /> <br />
   </li>
   <li>
    23=&gt; Use of Learn on The Fly method (LOTF) for Molecular Dynamics.
 In the framework of isokinetic MD, the atomic forces and positions are computed
-by using LOTF interpolation.
-A SCF computation is performed only any <a href="vardev.html#lotf_nitex">lotf_nitex</a>
+by using LOTF interpolation.  A SCF computation is performed only any <a href="vardev.html#lotf_nitex">lotf_nitex</a>
 steps. The results of the SCF are used to compute the parameters of a
 short range classical potential (for the moment only the glue potential for gold is implemented).
 Then these parameters are continuously tuned to compute atomic trajectories.
-LOTF has to be enabled at configure time. If LOTF is not enabled and ionmov=23,
-abinit will set automatically ionmov=12.
-   <br />
-   The LOTF cycle is divided in the following steps:
-   <br />
-   a) Initialization (SFC at t=0) and computation of potential parameters.
-   <br />
+LOTF has to be enabled at configure time. If LOTF is not enabled and <b>ionmov</b>=23,
+abinit will set automatically <b>ionmov</b>=12.  <br />
+   The LOTF cycle is divided in the following steps: <br />
+   a) Initialization (SFC at t=0) and computation of potential parameters.  <br />
    b) Extrapolation of the atomic forces and positions for <a href="vardev.html#lotf_nitex">lotf_nitex</a> time step.
-To perform this extrapolation, the potential computed in a) is used (Verlet algorithm).
-   <br />
-   c) SFC at t=<a href="vardev.html#lotf_nitex">lotf_nitex</a>. Computation of the potential parameters.
-   <br />
+To perform this extrapolation, the potential computed in a) is used (Verlet algorithm).  <br />
+   c) SFC at t=<a href="vardev.html#lotf_nitex">lotf_nitex</a>. Computation of the potential parameters.  <br />
    d) LOTF interpolation, linear interpolation of the potential parameters and computation of the atomic
-forces and positions between t=0 and t=lotf_nitex.
-   <br />
-   <br />
-   <b>
-    Purpose:
-   </b>
-   Molecular Dynamics
-   <br />
-   <b>
-    Cell optimization:
-   </b>
-   No (Use <a href="varrlx.html#optcell">optcell</a>=0 only)
-   <br />
-   <b>
-    Variables related:
-   </b>
-   <b>
-    Variables related:
-   </b>
-   <a href="varrlx.html#dtion">dtion</a>,
-<a href="vardev.html#lotf_classic">lotf_classic</a>,
-<a href="vardev.html#lotf_nitex">lotf_nitex</a>,
-<a href="vardev.html#lotf_nneigx">lotf_nneigx</a>,
-<a href="vardev.html#lotf_version">lotf_version</a>.
-   <br />
-   <br />
+forces and positions between t=0 and t=lotf_nitex.  <br /> <br />
+   <b> Purpose: </b>
+   Molecular Dynamics <br />
+   <b> Cell optimization: </b>
+   No (Use <a href="varrlx.html#optcell">optcell</a>=0 only) <br />
+   <b> Related variables: </b>
+   <a href="varrlx.html#dtion">dtion</a>, <a href="vardev.html#lotf_classic">lotf_classic</a>, <a href="vardev.html#lotf_nitex">lotf_nitex</a>, <a href="vardev.html#lotf_nneigx">lotf_nneigx</a>, <a href="vardev.html#lotf_version">lotf_version</a>.  <br /> <br />
   </li>
   <li>
    30=&gt; Using a supercell, calculate a self consistent phonon structure
 as in PRL 100 095901 (2008). The initial phonon eigenvectors and
 eigenvalues are read in, and then atoms are displaced according
 to the normal modes populated at a given temperature until
-convergence of the vibrational free energy (or so I hope)
-   <br />
-   <b>
-    Purpose:
-   </b>
-   Phonon structure
-   <br />
-   <b>
-    Cell optimization:
-   </b>
-   No (Use <a href="varrlx.html#optcell">optcell</a>=0 only)
-   <br />
-   <b>
-    Variables related:
-   </b>
-   <br />
-   <br />
+convergence of the vibrational free energy (or so I hope) <br />
+   <b> Purpose: </b>
+   Phonon structure <br />
+   <b> Cell optimization: </b>
+   No (Use <a href="varrlx.html#optcell">optcell</a>=0 only) <br />
+   <b> Related variables: </b> <br /> <br />
   </li>
  </ul>
  <ul>
@@ -2322,12 +2073,9 @@ than those of the second image.
 <br><font id="text">
 <p>
 <p>
- Gives the number of thermostats in the Martyna et al. chain of oscillators thermostats. The thermostat chains can be used either to perform Molecular Dynamics (MD) (<a href="varrlx.html#ionmov">ionmov</a>=13) or to perform Path Integral Molecular Dynamics (PIMD) (<a href="varrlx.html#imgmov">imgmov</a>=13).
- <br />
- The mass of these thermostats is given by
-  <a href="varrlx.html#qmass">qmass</a>
- .
- <br />
+ Gives the number of thermostats in the Martyna et al. chain of oscillators thermostats.
+ The thermostat chains can be used either to perform Molecular Dynamics (MD) (<a href="varrlx.html#ionmov">ionmov</a>=13) or to perform Path Integral Molecular Dynamics (PIMD) (<a href="varrlx.html#imgmov">imgmov</a>=13). <br />
+ The mass of these thermostats is given by <a href="varrlx.html#qmass">qmass</a>.  <br />
 </p>
 </font>
 

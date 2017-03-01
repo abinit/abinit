@@ -11,7 +11,7 @@
 !! Updates positions, velocities and forces
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (DCA, XG, GMR, SE)
+!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR, SE)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -402,7 +402,7 @@ end subroutine pred_moldyn
 !! of forces, velocity and viscosity
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (DCA, XG, GMR, SE)
+!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR, SE)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

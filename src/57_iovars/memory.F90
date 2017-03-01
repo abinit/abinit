@@ -10,7 +10,7 @@
 !! might estimate the available memory.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (XG)
+!! Copyright (C) 1998-2017 ABINIT group (XG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -764,7 +764,7 @@ subroutine memory(n1xccc,extrapwf,getcell,idtset,icoulomb,intxc,ionmov,iout,dens
 !ffnl
  cmpw(74)=2*ntypat*lmnmax      ; dttyp(74)=8
 !ph3d
- matblk=NLO_MINCAT
+ matblk=min(NLO_MINCAT,maxval(nattyp))
  if(nloalg(2)<=0)matblk=natom
  cmpw(75)=2*matblk             ; dttyp(75)=8
 !gsc(if PAW)

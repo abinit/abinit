@@ -7,7 +7,7 @@
 !! Calculate the matrix elements of the self-energy operator.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2016 ABINIT group (GMR, VO, LR, RWG, MT, MG, RShaltaf)
+!! Copyright (C) 1999-2017 ABINIT group (GMR, VO, LR, RWG, MT, MG, RShaltaf)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -117,7 +117,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  use m_crystal,       only : crystal_free, crystal_t
  use m_crystal_io,    only : crystal_ncwrite
  use m_ebands,        only : ebands_update_occ, ebands_copy, ebands_report_gap, get_valence_idx, get_bandenergy, &
-&                            ebands_free, ebands_init, ebands_ncwrite
+&                            ebands_free, ebands_init, ebands_ncwrite, ebands_interpolate_kpath
  use m_energies,      only : energies_type, energies_init
  use m_bz_mesh,       only : kmesh_t, kmesh_free, littlegroup_t, littlegroup_init, littlegroup_free
  use m_gsphere,       only : gsphere_t, gsph_free
@@ -205,7 +205,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  real(dp) :: gwc_gsq,gwx_gsq,gw_gsq
  real(dp):: eff,mempercpu_mb,max_wfsmem_mb,nonscal_mem,ug_mem,ur_mem,cprj_mem
  complex(dpc) :: max_degw,cdummy
- logical :: use_paw_aeur,pawden_exists,dbg_mode,pole_screening,call_pawinit
+ logical :: use_paw_aeur,dbg_mode,pole_screening,call_pawinit
  character(len=500) :: msg
  character(len=fnlen) :: wfk_fname,pawden_fname,fname
  type(kmesh_t) :: Kmesh,Qmesh
@@ -1869,10 +1869,10 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
        call pawrhoij_free(tmp_pawrhoij)
        ABI_DT_FREE(tmp_pawrhoij)
      end if ! Dtset%usepaw==1
-     
+
      id_required=4; ikxc=7; dim_kxcg=0
-     
-     if (dtset%gwgamma>-5) then 
+
+     if (dtset%gwgamma>-5) then
        approx_type=4  ! full fxc(G,G')
      else if (dtset%gwgamma>-7) then
        approx_type=5  ! fxc(0,0) one-shot
@@ -1940,9 +1940,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
      ! Check if input density file is available, otherwise compute
      pawden_fname = strcat(Dtfil%filnam_ds(3), '_PAWDEN')
      call wrtout(std_out,sjoin('Checking for existence of:',pawden_fname))
-     pawden_exists = file_exists(pawden_fname)
-
-     if (pawden_exists) then
+     if (file_exists(pawden_fname)) then
        ! Read density from file
        ABI_DT_MALLOC(tmp_pawrhoij,(cryst%natom*wfd%usepaw))
 
@@ -2298,6 +2296,11 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
      !
      ! * Report the QP gaps (Fundamental and Optical)
      call ebands_report_gap(QP_BSt,header='QP Band Gaps',unit=ab_out)
+
+     ! Band structure interpolation from QP energies computed on the k-mesh.
+     if (nint(dtset%einterp(1)) /= 0 .and. all(sigp%minbdgw == sigp%minbnd) .and. all(sigp%maxbdgw == sigp%maxbnd)) then
+       call ebands_interpolate_kpath(QP_BSt, dtset, cryst, [sigp%minbdgw, sigp%maxbdgw], dtfil%filnam_ds(4), comm)
+     end if
    end if ! Sigp%nkptgw==Kmesh%nibz
    !
    ! === Write SCF data in case of self-consistent calculation ===

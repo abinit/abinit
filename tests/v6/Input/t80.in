@@ -49,7 +49,7 @@
 #%% files_to_test = 
 #%%   t80.out, tolnlines = 10, tolabs = 2.e-4, tolrel = 1.e-6, fld_options =  
 #%% [paral_info]
-#%% max_nprocs = 1
+#%% max_nprocs = 4
 #%% [extra_info]
 #%% authors = Unknown
 #%% keywords = 

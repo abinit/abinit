@@ -10,7 +10,7 @@
 !! Use algorithm proposed by T. A.  Arias et al. in PRB 45, 1538 (1992)
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (MT,FJ)
+!! Copyright (C) 1998-2017 ABINIT group (MT,FJ)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -157,8 +157,8 @@ subroutine extrapwf(atindx,atindx1,cg,dtset,istep,kg,mcg,mgfft,mpi_enreg,&
 &     iatom,0,iorder_cprj,dtset%istwfk,kg,dtset%kptns,dtset%mband,mcg,scf_history%mcprj,&
 &     dtset%mgfft,dtset%mkmem,mpi_enreg,psps%mpsang,dtset%mpw,&
 &     dtset%natom,nattyp,dtset%nband,dtset%natom,ngfft,dtset%nkpt,&
-&     dtset%nloalg,npwarr,dtset%nspinor,dtset%nsppol,dtset%ntypat,3,&
-&     dtset%paral_kgb,ph1d,psps,rmet,dtset%typat,ucvol,0,0,&
+&     dtset%nloalg,npwarr,dtset%nspinor,dtset%nsppol,dtset%ntypat,&
+&     dtset%paral_kgb,ph1d,psps,rmet,dtset%typat,ucvol,0,&
 &     xred_old,ylm,ylmgr_k)
      ABI_DEALLOCATE(ylmgr_k)
 !    call pawcprj_set_zero(scf_history%cprj(:,:,ind2))
@@ -205,8 +205,8 @@ subroutine extrapwf(atindx,atindx1,cg,dtset,istep,kg,mcg,mgfft,mpi_enreg,&
 &     dtset%istwfk,kg,dtset%kptns,dtset%mband,mcg,scf_history%mcprj,dtset%mgfft,&
 &     dtset%mkmem,mpi_enreg,psps%mpsang,dtset%mpw,dtset%natom,&
 &     nattyp,dtset%nband,dtset%natom,ngfft,dtset%nkpt,dtset%nloalg,&
-&     npwarr,dtset%nspinor,dtset%nsppol,dtset%ntypat,3,dtset%paral_kgb,&
-&     ph1d,psps,rmet,dtset%typat,ucvol,0,0,xred_old,&
+&     npwarr,dtset%nspinor,dtset%nsppol,dtset%ntypat,dtset%paral_kgb,&
+&     ph1d,psps,rmet,dtset%typat,ucvol,0,xred_old,&
 &     ylm,ylmgr_k)
      ABI_DEALLOCATE(ylmgr_k)
    end if  ! end usepaw=1

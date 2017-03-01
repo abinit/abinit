@@ -12,7 +12,7 @@
 !! If required, <G|S^(2)|C> is returned in gs2c (S=overlap - PAW only)
 !!
 !! COPYRIGHT
-!! Copyright (C) 2015-2016 ABINIT group (MT,JLJ)
+!! Copyright (C) 2015-2017 ABINIT group (MT,JLJ)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -143,7 +143,7 @@ subroutine getgh2c(cwavef,cwaveprj,gh2c,gs2c,gs_hamkq,gvnl2,idir,ipert,lambda,&
    MSG_BUG(msg)
  end if
  if(ipert==natom+11.and.gs_hamkq%usepaw==1) then
-   if (optnl>=1.and.((.not.allocated(rf_hamkq%e1kbfr)).or.(.not.allocated(rf_hamkq%e1kbsc)))) then
+   if (optnl>=1.and.((.not.associated(rf_hamkq%e1kbfr)).or.(.not.associated(rf_hamkq%e1kbsc)))) then
      msg='ekb derivatives must be allocated for ipert=natom+11 !'
      MSG_BUG(msg)
    end if

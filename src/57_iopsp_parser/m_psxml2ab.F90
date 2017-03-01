@@ -8,7 +8,7 @@
 !!  convert to abinit internal datastructures for pspheader.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2016 ABINIT group (MJV).
+!! Copyright (C) 2005-2017 ABINIT group (MJV).
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -35,6 +35,8 @@
 #include "abi_common.h"
 
 module m_psxml2ab
+
+ use m_fstrings,     only : yesno
 
 implicit none
 
@@ -304,15 +306,15 @@ subroutine psxml2abheader(psxmlfile, psphead, iwrite)
      call wrtout(std_out,  message,'COLL')
    end do
 
-   write(message,'(a,l3)') &
+   write(message,'(2a)') &
 &   ' psxml2ab: Relativistically generated pseudopotential (not necessarily SOC!):   ', &
-&   ps_Relativity(psxml)
+&   trim(ps_Relativity(psxml))
    call wrtout(ab_out,  message,'COLL')
    call wrtout(std_out,  message,'COLL')
 
-   write(message,'(a,l3)') &
+   write(message,'(2a)') &
 &   ' psxml2ab: Spin-polarized pseudopotential:     ', &
-&   ps_IsSpinPolarized(psxml)
+&   yesno(ps_IsSpinPolarized(psxml))
    call wrtout(ab_out,  message,'COLL')
    call wrtout(std_out,  message,'COLL')
 
@@ -355,7 +357,7 @@ end subroutine psxml2abheader
 !!  
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2016 ABINIT group (MJV).
+!! Copyright (C) 2005-2017 ABINIT group (MJV).
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -388,7 +390,7 @@ end module m_psxml2ab
 !!  allows calling software to decide how fatal the PSML die call actually is.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2016 ABINIT group (MJV).
+!! Copyright (C) 2005-2017 ABINIT group (MJV).
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

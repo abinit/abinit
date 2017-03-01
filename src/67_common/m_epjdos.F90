@@ -7,7 +7,7 @@
 !!  Tools for the computiation of electronic PJDOSes
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2016 ABINIT group (MVer, XG, SM, MT, BAmadon, MG)
+!!  Copyright (C) 2008-2017 ABINIT group (MVer, XG, SM, MT, BAmadon, MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -391,7 +391,6 @@ subroutine dos_calcnwrite(dos,dtset,crystal,ebands,fildata,comm)
 !arrays
  integer,allocatable :: unt_atsph(:)
  real(dp) :: list_dp(3)
- real(dp),allocatable :: dtweightde(:,:),tweight(:,:)
  real(dp),allocatable :: tmp_eigen(:),total_dos(:,:,:),eig_dos(:,:)
  real(dp),allocatable :: dos_m(:,:,:),dos_paw1(:,:,:),dos_pawt1(:,:,:)
  real(dp),allocatable :: wdt(:,:)
@@ -517,8 +516,6 @@ subroutine dos_calcnwrite(dos,dtset,crystal,ebands,fildata,comm)
  end if
 
  ! Tetra weights
- ABI_MALLOC(tweight,(nene, nkpt))
- ABI_MALLOC(dtweightde,(nene, nkpt))
  ABI_MALLOC(wdt, (nene, 2))
 
  ! Allocate arrays to store DOSes and fill with zeros.
@@ -729,8 +726,6 @@ subroutine dos_calcnwrite(dos,dtset,crystal,ebands,fildata,comm)
 
  ABI_FREE(tmp_eigen)
  ABI_FREE(total_dos)
- ABI_FREE(tweight)
- ABI_FREE(dtweightde)
  ABI_FREE(wdt)
  ABI_FREE(eig_dos)
 

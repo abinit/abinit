@@ -9,7 +9,7 @@
 !! Container type is defined, and destruction, print subroutines
 !!
 !! COPYRIGHT
-!! Copyright (C) 2010-2015 ABINIT group (AM)
+!! Copyright (C) 2010-2017 ABINIT group (AM)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1431,7 +1431,7 @@ end subroutine effective_potential_setCoeffs
 !! elastics = 3d order of elastics constant
 !!
 !! OUTPUT
-!! anharmonics = set the coefficient from the fited polynome 
+!! anharmonics = set the coefficient from the fited polynome
 !!
 !!
 !! PARENTS
@@ -1441,7 +1441,7 @@ end subroutine effective_potential_setCoeffs
 !!      asrq0_free,effective_potential_effpot2ddb,invars9,mkphbs
 !!
 !! SOURCE
- 
+
 subroutine effective_potential_setElastic3rd(eff_pot,elastics)
 
  use m_polynomial_coeff
@@ -1480,7 +1480,7 @@ end subroutine effective_potential_setElastic3rd
 !! elastics = 3d order of elastics constant
 !!
 !! OUTPUT
-!! anharmonics = set the coefficient from the fited polynome 
+!! anharmonics = set the coefficient from the fited polynome
 !!
 !!
 !! PARENTS
@@ -1489,7 +1489,7 @@ end subroutine effective_potential_setElastic3rd
 !!      asrq0_free,effective_potential_effpot2ddb,invars9,mkphbs
 !!
 !! SOURCE
- 
+
 subroutine effective_potential_setElastic4rd(eff_pot,elastics)
 
  use m_polynomial_coeff
@@ -1522,13 +1522,13 @@ end subroutine effective_potential_setElastic4rd
 !! effective_potential_setStrainPhononCoupling
 !!
 !! FUNCTION
-!! Set the strain phonon coupling of  the effective_potential 
+!! Set the strain phonon coupling of  the effective_potential
 !!
 !! INPUTS
 !! natom  = number of atoms
 !! ncoeff = number of coefficient
-!! nrpt   = number of rpt 
-!! strain_phonon = (size 6) array of type ifc   
+!! nrpt   = number of rpt
+!! strain_phonon = (size 6) array of type ifc
 !!
 !! OUTPUT
 !! eff_pot = effective potential structure
@@ -1540,7 +1540,7 @@ end subroutine effective_potential_setElastic4rd
 !!      asrq0_free,effective_potential_effpot2ddb,invars9,mkphbs
 !!
 !! SOURCE
- 
+
 subroutine effective_potential_setStrainPhononCoupling(eff_pot,natom,nrpt,phonon_strain)
 
  use m_polynomial_coeff
@@ -1576,7 +1576,7 @@ end subroutine effective_potential_setStrainPhononCoupling
 !! effective_potential_setElasticDispCoupling
 !!
 !! FUNCTION
-!! Set the elastic constant displacement coupling of  the effective_potential 
+!! Set the elastic constant displacement coupling of  the effective_potential
 !!
 !! INPUTS
 !! natom  = number of atoms
@@ -1592,7 +1592,7 @@ end subroutine effective_potential_setStrainPhononCoupling
 !!      asrq0_free,effective_potential_effpot2ddb,invars9,mkphbs
 !!
 !! SOURCE
- 
+
 subroutine effective_potential_setElasticDispCoupling(eff_pot,natom,elastic_displacement)
 
  use m_polynomial_coeff
@@ -1610,7 +1610,7 @@ subroutine effective_potential_setElasticDispCoupling(eff_pot,natom,elastic_disp
   integer, intent(in) :: natom
 !array
   real(dp) :: elastic_displacement(6,6,3,natom)
-  type(effective_potential_type),intent(inout) :: eff_pot 
+  type(effective_potential_type),intent(inout) :: eff_pot
 !Local variables-------------------------------
 !scalar
 !array
@@ -1919,7 +1919,7 @@ end subroutine effective_potential_printSupercell
 !! Several options are available
 !!
 !! COPYRIGHT
-!! Copyright (C) 2000-2015 ABINIT group (AM)
+!! Copyright (C) 2000-2017 ABINIT group (AM)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1929,7 +1929,7 @@ end subroutine effective_potential_printSupercell
 !! filename = the name of output file
 !! eff_pot  = structure contains the effective potential
 !! option   = option for the format of the xml file
-!!           -1 print both system.xml and coefficients from fitted polynomial 
+!!           -1 print both system.xml and coefficients from fitted polynomial
 !!            1 print the xml for a system
 !!            2 print the coefficients from the fitted polynomial
 !!
@@ -2150,7 +2150,7 @@ subroutine effective_potential_writeXML(eff_pot,option,filename)
      WRITE(unit_xml,'("    </strain>")')
      WRITE(unit_xml,'("    <correction_force units=""hartree/bohrradius"">")')
      do ia=1,eff_pot%crystal%natom
-       do mu=1,3     
+       do mu=1,3
          WRITE(unit_xml,'(e22.14)', advance="no")&
 &             (eff_pot%harmonics_terms%internal_strain(ii,mu,ia))
        end do
@@ -2227,7 +2227,7 @@ end subroutine effective_potential_writeXML
 !! Several options are available
 !!
 !! COPYRIGHT
-!! Copyright (C) 2000-2015 ABINIT group (AM)
+!! Copyright (C) 2000-2017 ABINIT group (AM)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2450,7 +2450,7 @@ end subroutine effective_potential_writeNETCDF
 !! to be able to reproduce the DDB
 !!
 !! COPYRIGHT
-!! Copyright (C) 2000-2015 ABINIT group (AM)
+!! Copyright (C) 2000-2017 ABINIT group (AM)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2855,7 +2855,7 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
       strain_tmp(ii) = eff_pot%strain%strain(ii,ii)
     end do
     strain_tmp(4) = strain%strain(2,3) + strain%strain(3,2)
-    strain_tmp(5) = strain%strain(3,1) + strain%strain(1,3) 
+    strain_tmp(5) = strain%strain(3,1) + strain%strain(1,3)
     strain_tmp(6) = strain%strain(2,1) + strain%strain(1,2)
     has_strain = .TRUE.
 ! Try to find the strain from argument
@@ -2874,13 +2874,13 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
         strain_tmp(ii) = strain%strain(ii,ii)
       end do
       strain_tmp(4) = strain%strain(2,3) + strain%strain(3,2)
-      strain_tmp(5) = strain%strain(3,1) + strain%strain(1,3) 
+      strain_tmp(5) = strain%strain(3,1) + strain%strain(1,3)
       strain_tmp(6) = strain%strain(2,1) + strain%strain(1,2)
     else
       strain_tmp(:) = zero
     end if
   end if
-  
+
   if (present(displacement)) then
     disp_tmp(:,:) = displacement(:,:)
   else
@@ -2914,7 +2914,7 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
 !------------------------------------
 
   energy = eff_pot%energy * ncell
-                                             
+
   write(message, '(a,a,1ES24.16,a)' ) ch10,' Energy of the reference strucure          :',&
 &                                          energy,' Hartree'
   call wrtout(ab_out,message,'COLL')
@@ -2930,7 +2930,7 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
   call ifc_contribution(eff_pot,disp_tmp,energy_part,fcart_part,&
 &                       eff_pot%my_cells,eff_pot%my_ncell,eff_pot%my_index_cells,&
 &                       eff_pot%comm_supercell)
-                                      
+
   write(message, '(a,1ES24.16,a)' ) ' Energy of the ifc part                    :',&
 &                                     energy_part,' Hartree'
   call wrtout(ab_out,message,'COLL')
@@ -2968,7 +2968,7 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
   call elastic_contribution(eff_pot,disp_tmp,energy_part,fcart_part,&
 &                           ncell,strten_part,strain_tmp)
 
-  if(has_strain)then                                      
+  if(has_strain)then
     write(message, '(a,1ES24.16,a)' ) ' Energy of the elastic part                :',&
 &                                       energy_part,' Hartree'
     call wrtout(ab_out,message,'COLL')
@@ -3037,7 +3037,7 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
 
       energy = energy +  energy_part
       strten(:) = strten(:) + strten_part(:)
-      fcart(:,:)= fcart(:,:)+ fcart_part(:,:) 
+      fcart(:,:)= fcart(:,:)+ fcart_part(:,:)
 
       write(message, '(a,1ES24.16,a)' ) ' Energy of the 3rd (elastics-disp coupling):',&
 &                                         energy_part,' Hartree'
@@ -3177,7 +3177,7 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
 
   call wrtout(ab_out,message,'COLL')
   call wrtout(std_out,  message,'COLL')
-  
+
   write(message, '(a,1p,e16.8,a,1p,e16.8)' ) &
 &   '- sigma(1 1)=',strten(1)*HaBohr3_GPa,&
 &   '  sigma(3 2)=',strten(4)*HaBohr3_GPa
@@ -3333,7 +3333,7 @@ end subroutine ifc_contribution
 !!  ncell   = total number of cell to treat
 !!  cells(ncell) = number of the cells into the supercell (1,2,3,4,5)
 !!  index_cells(3,ncell) = indexes of the cells into  supercell (-1 -1 -1 ,...,1 1 1)
-!!  comm=MPI communicator 
+!!  comm=MPI communicator
 !!
 !! OUTPUT
 !!   energy = contribution of the ifc to the energy
@@ -3553,7 +3553,7 @@ end subroutine  elastic_contribution
 !!  cells(ncell) = number of the cells into the supercell (1,2,3,4,5)
 !!  index_cells(3,ncell) = indexes of the cells into  supercell (-1 -1 -1 ,...,1 1 1)
 !!  comm=MPI communicator
-!! 
+!!
 !! OUTPUT
 !!   energy = contribution of the ifc to the energy
 !!   fcart(3,natom) = contribution of the ifc to the forces
@@ -4270,7 +4270,6 @@ subroutine effective_potential_printPDOS(eff_pot,filename,n_cell,nph1l,option,qp
 !Local variables-------------------------------
 !scalar
  integer :: lenstr
- real(dp) :: tcpui,twalli
  character(len=strlen) :: string
 !array
  type(crystal_t) :: Crystal
@@ -4302,8 +4301,7 @@ subroutine effective_potential_printPDOS(eff_pot,filename,n_cell,nph1l,option,qp
    end if
 
   !MG: Note that I'm passing xmpi_comm_self here.
-  call mkphbs(eff_pot%harmonics_terms%ifcs,Crystal,inp,ddb,asrq0,filename,&
-&  tcpui,twalli,eff_pot%harmonics_terms%zeff, xmpi_comm_self)
+  call mkphbs(eff_pot%harmonics_terms%ifcs,Crystal,inp,ddb,asrq0,filename,xmpi_comm_self)
 
   call asrq0_free(asrq0)
 

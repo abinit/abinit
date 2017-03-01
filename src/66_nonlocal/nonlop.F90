@@ -18,7 +18,7 @@
 !!   - using GPUs (N-conserving or PAW)
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (MT)
+!! Copyright (C) 1998-2017 ABINIT group (MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -327,11 +327,12 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
  integer,pointer :: kgin(:,:),kgout(:,:)
  integer, ABI_CONTIGUOUS pointer :: atindx1_(:),indlmn_(:,:,:),nattyp_(:)
  real(dp) :: tsec(2)
+ real(dp),pointer :: enl_ptr(:,:,:)
  real(dp),pointer :: ffnlin(:,:,:,:),ffnlin_(:,:,:,:),ffnlout(:,:,:,:),ffnlout_(:,:,:,:)
  real(dp),pointer :: kpgin(:,:),kpgout(:,:),kptin(:),kptout(:)
  real(dp),pointer :: ph3din(:,:,:),ph3din_(:,:,:),ph3dout(:,:,:),ph3dout_(:,:,:)
  real(dp),pointer :: phkxredin(:,:),phkxredin_(:,:),phkxredout(:,:),phkxredout_(:,:)
- real(dp), ABI_CONTIGUOUS pointer :: enl_(:,:,:),enl_ptr(:,:,:),ph1d_(:,:),sij_(:,:)
+ real(dp), ABI_CONTIGUOUS pointer :: enl_(:,:,:),ph1d_(:,:),sij_(:,:)
  real(dp), ABI_CONTIGUOUS pointer :: vectin_idat(:,:), vectout_idat(:,:)
  real(dp), ABI_CONTIGUOUS pointer :: svectout_idat(:,:), enlout_idat(:)
  type(pawcprj_type),pointer :: cprjin_(:,:),cprjin_idat(:,:)
@@ -455,6 +456,7 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
    istwf_k=hamk%istwf_kp
  end if
 
+ if (npwin==0.or.npwout==0) return
  dimffnlin=size(ffnlin,2);dimffnlout=size(ffnlout,2)
  kpgin_allocated=(.not.associated(kpgin))
  if (kpgin_allocated) then

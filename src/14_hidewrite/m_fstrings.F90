@@ -7,7 +7,7 @@
 !!  This module contains basic tools to operate on Fortran strings.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2016 ABINIT group (MG, XG, MT, DC)
+!! Copyright (C) 2008-2017 ABINIT group (MG, XG, MT, DC)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -41,8 +41,10 @@ MODULE m_fstrings
  public :: removesp        ! Removes spaces, tabs, and control characters in string str
  public :: replace_ch0     ! Replace final '\0' with whitespaces
  public :: lstrip          ! Remove leading spaces from string
+ public :: replace         ! Replace chars in string.
  public :: ljust           ! Return a left-justified string of length width.
  public :: lpad            ! Pad a string adding repeat characters fillchar on the left side.
+ public :: round_brackets  ! Return a new string enclosed in parentheses if not already present.
  public :: quote           ! Return a new string enclosed by quotation marks.
  public :: rmquotes        ! Remove quotation marks from a string. Return new string
  public :: write_num       ! Writes a number to a string using format fmt
@@ -67,6 +69,7 @@ MODULE m_fstrings
  public :: int2char10      ! Convert a positive integer number (zero included) to a character(len=10)
                            ! with trailing blanks
  public :: char_count      ! Count the occurrences of a character in a string.
+ public :: next_token      ! Tokenize a string made of whitespace-separated tokens.
 
  !TODO method to center a string
 
@@ -431,6 +434,49 @@ elemental subroutine replace_ch0(string)
 end subroutine replace_ch0
 !!***
 
+!!****m* m_fstrings/replace
+!! NAME
+!!  replace
+!!
+!! FUNCTION
+!!  Replace `text` with `rep` in string `s`. Return new string.
+!!
+!! NOTES:
+!!  The length of the output string is increased by 500 but this could not be enough
+!!  if len_trim(text) > len_trim(re) and there are several occurrences of `text` in s.
+!!
+!! SOURCE
+
+function replace(s, text, rep)  result(outs)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'replace'
+!End of the abilint section
+
+ character(len=*),intent(in) :: s,text,rep
+ character(len(s)+500) :: outs     ! provide outs with extra 500 char len
+
+!Local variables-------------------------------
+ integer :: i, j, nt, nr, last
+! *********************************************************************
+
+ outs = s; nt = len_trim(text); nr = len_trim(rep); last = 1
+ do
+   i = index(outs(last:), text(1:nt)); if (i == 0) exit
+   j = last + i - 1; last = j + nr
+   if (j - 1 < 1) then
+     outs = rep(:nr) // outs(j+nt:)
+   else
+     outs = outs(:j-1) // rep(:nr) // outs(j+nt:)
+   end if
+ end do
+
+end function replace
+!!***
+
 !----------------------------------------------------------------------
 
 !!****f* m_fstrings/lstrip
@@ -560,6 +606,61 @@ pure function lpad(istr, repeat, fillchar) result(ostr)
  end do
 
 end function lpad
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_fstrings/round_brackets
+!! NAME
+!!  round_brackets
+!!
+!! FUNCTION
+!!  Return a new string enclosed in parentheses if not already present.
+!!
+!! SOURCE
+
+pure function round_brackets(istr) result(ostr)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'round_brackets'
+!End of the abilint section
+
+ character(len=*),intent(in) :: istr
+ character(len=LEN_TRIM(istr)+2) :: ostr
+
+!Local variables-------------------------------
+ integer :: ii
+ character(len=1) :: qq
+ character(len=LEN(istr)+2) :: tmp
+
+! *********************************************************************
+
+ do ii=1,LEN(istr)
+   if (istr(ii:ii)/=BLANK) EXIT
+ end do
+
+ qq = istr(ii:ii)
+
+ if (qq == "(") then
+   ! Don't add quotation marks if they already present.
+   tmp = istr
+   ii = LEN_TRIM(tmp)
+   ! If the string is not closed, fix it.
+   if (tmp(ii:ii) /= ")") tmp(ii+1:ii+1) = ")"
+   ostr = TRIM(tmp)
+
+ else
+   qq = '('
+   ostr(1:1) = qq
+   ostr(2:) = TRIM(istr)
+   ii = LEN_TRIM(ostr)+1
+   ostr(ii:ii) = ")"
+ end if
+
+end function round_brackets
 !!***
 
 !----------------------------------------------------------------------
@@ -1300,7 +1401,7 @@ pure function ftoa(value,fmt)
 ! *********************************************************************
 
  if (present(fmt)) then
-   write(ftoa,quote(fmt))value
+   write(ftoa,round_brackets(fmt))value
  else
    write(ftoa,"(es16.6)")value
  end if
@@ -1339,7 +1440,7 @@ pure function ktoa(kpt,fmt)
 ! *********************************************************************
 
  if (present(fmt)) then
-   write(ktoa,quote(fmt))kpt
+   write(ktoa,fmt)kpt
  else
    write(ktoa,"(a,3(es11.4,a))")"[",kpt(1),", ",kpt(2),", ",kpt(3),"]"
  end if
@@ -1397,7 +1498,7 @@ pure function ltoa_int(list) result(str)
    if (ii == 1) then
      write(temp, "(a,i0,a)")"[",list(1),","
    else if (ii == sz) then
-     write(temp, "(i0,a)")list(1),"]"
+     write(temp, "(i0,a)")list(ii),"]"
    else
      write(temp, "(i0,a)")list(ii),","
    end if
@@ -1465,7 +1566,7 @@ pure function ltoa_dp(list, fmt) result(str)
    if (ii == 1) then
      write(temp, sjoin("(a,",myfmt,",a)")) "[",list(1),","
    else if (ii == sz) then
-     write(temp, fa)list(1),"]"
+     write(temp, fa)list(ii),"]"
    else
      write(temp, fa) list(ii),","
    end if
@@ -2030,8 +2131,72 @@ integer pure function char_count(string, char)
  end do
 
 end function char_count
+!!***
 
 !----------------------------------------------------------------------
 
-END MODULE m_fstrings
+!!****f* m_fstrings/next_token
+!! NAME
+!! next_token
+!!
+!! FUNCTION
+!!  Assume a string with whitespace-separated tokens.
+!!  Find the next token starting from `start`, return it in `ostr` and update `start`
+!!  so that one can call the function inside a loop.
+!!  Return exit status.
+!!
+!! PARENTS
+!!
+!! SOURCE
+
+integer function next_token(string, start, ostr) result(ierr)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'next_token'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ character(len=*),intent(in) :: string
+ character(len=*),intent(out) :: ostr
+ integer,intent(inout) :: start
+
+!Local variables-------------------------------
+ integer :: ii,beg,stp
+
+! *************************************************************************
+
+ ierr = 1; beg = 0
+ ! Find first non-empty char.
+ do ii=start,len_trim(string)
+   if (string(ii:ii) /= " ") then
+     beg = ii; exit
+   end if
+ end do
+ if (beg == 0) return
+
+ ! Find end of token.
+ start = 0
+ do ii=beg,len_trim(string)
+   if (string(ii:ii) == " ") then
+     start = ii; exit
+   end if
+ end do
+ ! Handle end of string.
+ if (start == 0) start = len_trim(string) + 1
+
+ ierr = 0
+ ostr = string(beg:start-1)
+
+end function next_token
+!!***
+
+!----------------------------------------------------------------------
+
+end module m_fstrings
 !!***

@@ -8,7 +8,7 @@
 !!  for sharing the jobs on k-points, spins and bands.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2000-2016 ABINIT group (AR,XG,MB)
+!!  Copyright (C) 2000-2017 ABINIT group (AR,XG,MB)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -282,7 +282,7 @@ subroutine distrb2(mband,nband,nkpt,nproc,nsppol,mpi_enreg)
 !    ind=ind + 1
 !    end do;end do
 !    XG060807 : END OF OLD CODING
-     
+
    end if ! mpi_enreg%paralbd
 
  end if ! has_file

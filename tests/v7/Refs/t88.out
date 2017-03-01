@@ -2,7 +2,7 @@
 .Version 8.1.1 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
 
-.Copyright (C) 1998-2016 ABINIT group . 
+.Copyright (C) 1998-2017 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -190,10 +190,18 @@ P           mkmem          29
        prtbltztrp1          1
        prtbltztrp2          0
        prtbltztrp3          0
+        prtebands1          1
+        prtebands2          2
+        prtebands3          1
          prtfsurf1          1
          prtfsurf2          0
          prtfsurf3          0
-        prtphsurf           1
+       prtphbands1          1
+       prtphbands2          2
+       prtphbands3          1
+        prtphsurf1          1
+        prtphsurf2          0
+        prtphsurf3          0
             rprim      0.0000000000E+00  5.0000000000E-01  5.0000000000E-01
                        5.0000000000E-01  0.0000000000E+00  5.0000000000E-01
                        5.0000000000E-01  5.0000000000E-01  0.0000000000E+00
@@ -343,9 +351,10 @@ Values initialized with zeros
  64)  -2.50000000E-01 -2.50000000E-01 -2.50000000E-01
 
  The interatomic forces have been obtained
-- Writing phonon dos to file: t88o_DS1_PHDOS
+- Writing phonon DOS to file: t88o_DS1_PHDOS
 
  Will write phonon FREQS in BoltzTrap format to file t88o_DS1_BTRAP
+- Writing phonon frequencies in Xcrysden format to file: t88o_DS1_PH.bxsf
 qpoint: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] is present in the DVDB file
  The list of irreducible perturbations for this q vector is:
     1)  idir= 1, ipert=   1, type=independent, found=Yes
@@ -1116,10 +1125,18 @@ P           mkmem          29
        prtbltztrp1          1
        prtbltztrp2          0
        prtbltztrp3          0
+        prtebands1          1
+        prtebands2          2
+        prtebands3          1
          prtfsurf1          1
          prtfsurf2          0
          prtfsurf3          0
-        prtphsurf           1
+       prtphbands1          1
+       prtphbands2          2
+       prtphbands3          1
+        prtphsurf1          1
+        prtphsurf2          0
+        prtphsurf3          0
             rprim      0.0000000000E+00  5.0000000000E-01  5.0000000000E-01
                        5.0000000000E-01  0.0000000000E+00  5.0000000000E-01
                        5.0000000000E-01  5.0000000000E-01  0.0000000000E+00

@@ -9,7 +9,7 @@
 !!  inside a sphere or to count them.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2016 ABINIT group (SG, XG, AR, MG, MT)
+!!  Copyright (C) 2014-2017 ABINIT group (SG, XG, AR, MG, MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -3720,6 +3720,7 @@ subroutine kpgsph(ecut,exchn2n3d,gmet,ikg,ikpt,istwf_k,kg,kpt,mkmem,mpi_enreg,mp
  end if
 
  ABI_DEALLOCATE(array_ipw)
+
 !Take care of the me_g0 flag
  if(mpi_enreg%paral_kgb==1.and.mpi_enreg%nproc_band>0) then
    if(mpi_enreg%me_band==0.and.mpi_enreg%me_g0==1) then
@@ -3730,6 +3731,16 @@ subroutine kpgsph(ecut,exchn2n3d,gmet,ikg,ikpt,istwf_k,kg,kpt,mkmem,mpi_enreg,mp
      mpi_enreg%me_g0=0
    end if
  end if
+
+!Check that npw is not zero
+ if(mpi_enreg%paral_kgb==1.and.npw==0) then
+   write(message,'(5a)' )&
+&   'Please decrease the number of npband*npfft MPI processes!',ch10,&
+&   'One of the MPI process has no plane-wave to handle.',ch10,&
+&   'Action: decrease npband and/or npfft.'
+   MSG_ERROR(message)
+ endif
+
  call timab(23,2,tsec)
 
  DBG_EXIT("COLL")

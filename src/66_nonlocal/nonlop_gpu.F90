@@ -8,7 +8,7 @@
 !!  This routine is an interface to Cuda Kernel gpu_nonlop.cu
 !!
 !! COPYRIGHT
-!! Copyright (C) 2011-2016 ABINIT group (FDahm, MT)
+!! Copyright (C) 2011-2017 ABINIT group (FDahm, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

@@ -7,7 +7,7 @@
 !! Output routine for the scfcv.F90 routine
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2016 ABINIT group (XG)
+!! Copyright (C) 2005-2017 ABINIT group (XG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -281,7 +281,6 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  type(ebands_t) :: ebands
  type(epjdos_t) :: dos
  type(plowannier_type) :: wan
- !type(skw_t) :: skw
 
 ! *************************************************************************
 
@@ -1119,8 +1118,17 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
    call timab(967,2,tsec)
  end if
 
+ ! Output electron bands.
+ if (me == master .and. dtset%tfkinfunc==0) then
+   if (size(dtset%kptbounds, dim=2) > 0) then
+     call ebands_write(ebands, dtset%prtebands, dtfil%filnam_ds(4), kptbounds=dtset%kptbounds)
+   else
+     call ebands_write(ebands, dtset%prtebands, dtfil%filnam_ds(4))
+   end if
+ end if
+
 !Optionally provide Xcrysden output for the Fermi surface (Only master writes)
- if (dtset%prtfsurf==1.and.me==master) then
+ if (me == master .and. dtset%prtfsurf == 1) then
    if (ebands_write_bxsf(ebands,crystal,dtfil%fnameabo_app_bxsf) /= 0) then
      message = "Cannot produce BXSF file with Fermi surface, see log file for more info"
      MSG_WARNING(message)
@@ -1151,6 +1159,11 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  ! BoltzTraP output files in GENEric format
  if (dtset%prtbltztrp == 1 .and. me==master) then
    call ebands_prtbltztrp(ebands, crystal, dtfil%filnam_ds(4))
+ end if
+
+ ! Band structure interpolation from eigenvalues computed on the k-mesh.
+ if (nint(dtset%einterp(1)) /= 0) then
+   call ebands_interpolate_kpath(ebands, dtset, crystal, [0,0], dtfil%filnam_ds(4), spacecomm)
  end if
 
  call crystal_free(crystal)

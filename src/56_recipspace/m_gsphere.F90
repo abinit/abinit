@@ -12,7 +12,7 @@
 !!   one need the knowledge of several quantities at G-G0.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2016 ABINIT group (MG, GMR, VO, LR, RWG, MT)
+!! Copyright (C) 1999-2017 ABINIT group (MG, GMR, VO, LR, RWG, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -36,11 +36,12 @@ MODULE m_gsphere
  use m_sort
 
  use defs_abitypes,   only : MPI_type
+ use m_fstrings,      only : sjoin, itoa
  use m_numeric_tools, only : bisect
  use m_geometry,      only : normv
  use m_crystal,       only : crystal_t
  use m_fftcore,       only : kpgsph
- use m_mpinfo,        only : destroy_mpi_enreg 
+ use m_mpinfo,        only : destroy_mpi_enreg
 
  implicit none
 
@@ -52,7 +53,7 @@ MODULE m_gsphere
  public :: get_irredg          ! Given a set of G vectors, find the set of G"s generating the others by symmetry.
  public :: merge_kgirr         ! Merge a list of irreducible G vectors (see routine for more info)
  public :: setshells           ! Set consistently the number of shells, the number of plane-waves,  and the energy cut-off
- public :: kg_map              !  Compute the mapping between two lists of g-vectors.
+ public :: kg_map              ! Compute the mapping between two lists of g-vectors.
  public :: make_istwfk_table
 !!***
 
@@ -122,7 +123,7 @@ MODULE m_gsphere
   ! g2sh(ng)
   ! For each G, it gives the index of the shell to which it belongs.
 
-  integer,allocatable :: gvec(:,:)  
+  integer,allocatable :: gvec(:,:)
   ! gvec(3,ng)
   ! Reduced coordinates of G vectors.
 
@@ -139,16 +140,16 @@ MODULE m_gsphere
   ! rottb(ng,timrev,nsym)
   ! rottbm1(G,I,S) is the index of IS{^-1} G in the array gvec
 
-  integer,allocatable :: shlim(:) 
+  integer,allocatable :: shlim(:)
   ! shlim(nsh+1)
   ! Index of the first G vector in each shell, =ng+1 for nsh+1
 
-  real(dp),allocatable :: shlen(:) 
+  real(dp),allocatable :: shlen(:)
   ! shlen(nsh)
   ! Radius of each shell.
 
   !TODO switch to dpc
-  complex(gwpc),allocatable :: phmGt(:,:) 
+  complex(gwpc),allocatable :: phmGt(:,:)
   ! phmGt(ng,nsym)
   ! Phase factor e^{-i2\pi(G.\tau)} where $\tau$ is the fractional translation associated to isym.
 
@@ -166,8 +167,8 @@ MODULE m_gsphere
  public :: gsph_g_idx         ! Returns the index of G from its reduced coordinates.
  public :: gsph_gmg_idx       ! Returns the index of G1-G2 from their indeces
  public :: gsph_gmg_fftidx    ! Returns the index of G1-G2 in the FFT mesh defined by ngfft.
- public :: gsph_extend        ! Construct a new gsphere_t with a larger cutoff energy 
-!!*** 
+ public :: gsph_extend        ! Construct a new gsphere_t with a larger cutoff energy
+!!***
 
 CONTAINS  !=========================================================================================================================
 !!***
@@ -428,8 +429,7 @@ subroutine gsph_init(Gsph,Cryst,ng,gvec,ecut)
    norm=two_pi*SQRT(DOT_PRODUCT(Gsph%gvec(:,ig),MATMUL(Cryst%gmet,Gsph%gvec(:,ig))))
    eps=norm*tol8
    if (ABS(norm-norm_old)>eps) then
-     norm_old=norm
-     nsh=nsh+1
+     norm_old = norm; nsh = nsh + 1
      shlim(nsh)=ig
      shlen(nsh)=norm
    end if
@@ -453,7 +453,7 @@ subroutine gsph_init(Gsph,Cryst,ng,gvec,ecut)
  call setup_G_rotation(nsym,symrec,timrev,Gsph%ng,Gsph%gvec,&
 &  Gsph%g2sh,Gsph%nsh,Gsph%shlim,Gsph%rottb,Gsph%rottbm1)
 
- ! Store Mapping G --> -G 
+ ! Store Mapping G --> -G
  ! (we use a specialized table instead of rootb since rottb assumes time-reversal symmetry.
  ABI_MALLOC(gsph%g2mg, (gsph%ng))
 
@@ -1287,7 +1287,7 @@ subroutine merge_and_sort_kg(nkpt,kptns,ecut,nsym2,pinv,symrel2,gprimd,gbig,prtv
    ABI_MALLOC(gcurr,(3,npw_k))
    call kpgsph(ecut,exchn2n3d,gmet,ikg,0,istwf_k,gcurr,kpoint,mkmem_,MPI_enreg_seq,npw_k,onpw_k)
 
-   if (ANY(gcurr(:,1)/=0)) then 
+   if (ANY(gcurr(:,1)/=0)) then
      MSG_BUG("gcurr(:,1)/=0")
    end if
    !
@@ -1460,7 +1460,7 @@ end subroutine merge_and_sort_kg
 !!  symrec(3,3,nsym)=symmetry operation in reciprocal space
 !!  nbase=number of irreducible G vectors
 !!  gbase(3,nbase)=irreducible G-vectors
-!!  cnorm(nbase)=norm of the irreducible G vectors (supposed not yet sorted) 
+!!  cnorm(nbase)=norm of the irreducible G vectors (supposed not yet sorted)
 !!
 !! OUTPUT
 !!  maxpw=Number of G vectors found
@@ -1471,7 +1471,7 @@ end subroutine merge_and_sort_kg
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!  cnorm is a bit redundant since it can be calculated from gbase. However this procedure 
+!!  cnorm is a bit redundant since it can be calculated from gbase. However this procedure
 !!  is called by outkss in which cnorm is already calculated and we dont want to do it twice
 !!
 !! PARENTS
@@ -1513,7 +1513,7 @@ subroutine getfullg(nbase,nsym,pinv,sizepw,gbase,symrec,cnorm,maxpw,gbig,shlim,i
  integer,allocatable :: gshell(:,:),insort(:),nshell(:)
 
 ! *************************************************************************
- 
+
  if (pinv/=1.and.pinv/=-1) then
    write(msg,'(a,i6)')&
 &   ' The argument pinv should be -1 or 1, however, pinv =',pinv
@@ -1537,17 +1537,17 @@ subroutine getfullg(nbase,nsym,pinv,sizepw,gbase,symrec,cnorm,maxpw,gbig,shlim,i
  ! === Start with zero number of G vectors found ===
  maxpw=0 ; ierr=0
  do ibase=1,nbase
-   !  
+   !
    ! === Loop over all different modules of G ===
    ! * Start with zero G vectors found in this star
    nshell(ibase)=0
    gcur(:)=gbase(:,insort(ibase))
-   !  
+   !
    !  === Loop over symmetries ===
    do isym=1,nsym
      do itim=pinv,1,2
        geq(:)=itim*MATMUL(symrec(:,:,isym),gcur)
-       !      
+       !
        ! * Search for symetric of g and eventually add it:
        found=.FALSE. ; ish=1
        do while ((.not.found).and. (ish<=nshell(ibase)))
@@ -1560,16 +1560,16 @@ subroutine getfullg(nbase,nsym,pinv,sizepw,gbase,symrec,cnorm,maxpw,gbig,shlim,i
        end if
      end do
    end do
-   !  
+   !
    ! * Was sizepw large enough?
    if ((maxpw+nshell(ibase))>sizepw) then
      write(msg,'(a,i6,2a)')&
 &     ' Number of G in sphere exceeds maximum allowed value =',sizepw,ch10,&
-&     ' check the value of sizepw in calling routine ' 
+&     ' check the value of sizepw in calling routine '
      MSG_WARNING(msg)
      ierr=1; RETURN
    end if
-   !  
+   !
    ! === Store this shell of Gs in a big array (gbig) ===
    do ig=1,nshell(ibase)
      gbig(:,ig+maxpw)=gshell(:,ig)
@@ -1594,7 +1594,7 @@ subroutine getfullg(nbase,nsym,pinv,sizepw,gbase,symrec,cnorm,maxpw,gbig,shlim,i
    write(msg,'(12x,i4,17x,i6,12x,f8.3)')ibase,shlim(ibase),two*pi**2*cnorm(ibase)
    call wrtout(std_out,msg,'COLL')
  end do
- write(msg,'(a)')ch10 
+ write(msg,'(a)')ch10
  call wrtout(std_out,msg,'COLL')
  ABI_FREE(gshell)
  ABI_FREE(insort)
@@ -1615,15 +1615,18 @@ end subroutine getfullg
 !! INPUTS
 !!  nsym=number of symmetry operations
 !!  pinv=-1 if time-reversal can be used, 1 otherwise
-!!  npw_k=number of G vectors (for this k-point, as the set of G is k-centered)   
+!!  npw_k=number of G vectors (for this k-point, as the set of G is k-centered)
 !!  gcurr(3,npw_k)=the list of G vectors
 !!  gprimd(3,3)=dimensional primitive translations for reciprocal space ($\textrm{bohr}^{-1}$)
 !!  symrec(3,3,nsym)=symmetry operations in terms of reciprocal space primitive translations.
 !!
 !! OUTPUT
-!!  nbasek=number of irreducible G vectors found 
+!!  nbasek=number of irreducible G vectors found
 !!  cnormk(npw_k)=first nbasek elements are the norm of each irreducible G-vector
 !!  gbasek(3,npw_k)=first nbasek elements are the irreducible G vectors
+!!
+!! NOTES
+!!  The search can be optimized by looping over shells. See m_skw for a faster algo
 !!
 !! PARENTS
 !!      m_gsphere
@@ -1659,7 +1662,6 @@ subroutine get_irredg(npw_k,nsym,pinv,gprimd,symrec,gcurr,nbasek,gbasek,cnormk)
  integer :: ig,irr,isym,jj
  real(dp) :: eps,norm
  logical :: found
- character(len=500) :: msg
 !arrays
  integer :: gbas(3),gcur(3),geq(3)
  real(dp) :: gcar(3)
@@ -1669,38 +1671,33 @@ subroutine get_irredg(npw_k,nsym,pinv,gprimd,symrec,gcurr,nbasek,gbasek,cnormk)
  DBG_ENTER("COLL")
 
  if (pinv/=1.and.pinv/=-1) then
-   write(msg,'(a,i6)')&
-&   'The argument pinv should be -1 or 1, however, pinv =',pinv
-   MSG_BUG(msg)
+   MSG_BUG(sjoin('pinv should be -1 or 1, however, pinv =', itoa(pinv)))
  end if
- !
- ! === zero irred G vectors found, zeroing output arrays ===
- nbasek=0 ; cnormk(:)=zero ; gbasek(:,:)=0
+
+ ! Zero irred G vectors found, zeroing output arrays.
+ nbasek = 0; cnormk(:) = zero; gbasek(:,:) = 0
 
  do ig=1,npw_k
-   gcur(:)=gcurr(:,ig) ; norm=zero
+   gcur(:) = gcurr(:,ig); norm = zero
    do jj=1,3
      gcar(jj)=gcur(1)*gprimd(jj,1)+gcur(2)*gprimd(jj,2)+gcur(3)*gprimd(jj,3)
      norm=norm+gcar(jj)**2
    end do
-   eps=tol8*norm ; found=.FALSE. ; irr=1
-   do while ((.not.found).and.(irr<=nbasek))
-     if (ABS(norm-cnormk(irr))<=eps) then
-       gbas(:)=gbasek(:,irr)
-       isym=1
-       do while ((.not.found).and.(isym<=nsym))
-         geq(:)=MATMUL(symrec(:,:,isym),gcur)
-         found=ALL(geq(:)==gbas(:))
-         if (pinv==-1) found=(found.or.ALL(geq==-gbas)) ! For time-reversal
-         isym=isym+1
+   eps = tol8 * norm; found = .False.; irr = 1
+   do while (.not.found .and. irr <= nbasek)  ! This loop can be optimized by looping inside the shell.
+     if (abs(norm - cnormk(irr)) <= eps) then
+       gbas(:) = gbasek(:,irr); isym = 1
+       do while (.not.found .and. isym <= nsym)
+         geq(:) = matmul(symrec(:,:,isym),gcur)
+         found = all(geq(:) == gbas(:))
+         if (pinv == -1) found = (found .or. all(geq == -gbas)) ! For time-reversal
+         isym = isym + 1
        end do
      end if
-     irr=irr+1
+     irr = irr + 1
    end do
-   if (.not.found) then
-     nbasek=nbasek+1
-     cnormk(nbasek)=norm
-     gbasek(:,nbasek)=gcur(:)
+   if (.not. found) then
+     nbasek = nbasek + 1; cnormk(nbasek) = norm; gbasek(:,nbasek) = gcur(:)
    end if
  end do
 
@@ -1716,8 +1713,8 @@ end subroutine get_irredg
 !! merge_kgirr
 !!
 !! FUNCTION
-!!  Given a list of irreducible reciprocal vectors associated to different k-centered spheres, 
-!!  this subroutine finds the minimal set of G vectors needed to reconstruct the union of the spheres 
+!!  Given a list of irreducible reciprocal vectors associated to different k-centered spheres,
+!!  this subroutine finds the minimal set of G vectors needed to reconstruct the union of the spheres
 !!  through symmetry operations.
 !!
 !! INPUTS
@@ -1831,13 +1828,12 @@ end subroutine merge_kgirr
 !! setshells
 !!
 !! FUNCTION
-!! Set consistently the number of shells, the number of plane-waves,
-!! and the energy cut-off
+!! Set consistently the number of shells, the number of plane-waves, and the energy cut-off
 !!
 !! INPUTS
 !!  nsym=number of symmetry operations
 !!  gmet(3,3)=metric tensor in reciprocal space
-!!  gprimd(3,3)=dimensional primitive vectors in reciprocal space  
+!!  gprimd(3,3)=dimensional primitive vectors in reciprocal space
 !!  symrel(3,3,nsym)=symmetry operations in real space
 !!  tag=suffix to account for the different possibilities for these variables (npw, ecut or nsh ..)
 !!  ucvol=unit cell volume
@@ -1866,7 +1862,6 @@ subroutine setshells(ecut,npw,nsh,nsym,gmet,gprimd,symrel,tag,ucvol)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'setshells'
- use interfaces_14_hidewrite
  use interfaces_51_manage_mpi
 !End of the abilint section
 
@@ -1905,36 +1900,36 @@ subroutine setshells(ecut,npw,nsh,nsym,gmet,gprimd,symrel,tag,ucvol)
 !1-> one at least should be non-null
  if (npw==0.and.nsh==0.and.ecut<=tol6) then
    write(msg,'(8a)')&
-&   ' One of the three variables ecut',TRIM(tag),', npw',TRIM(tag),', or nsh',TRIM(tag),ch10,&
-&   ' must be non-null. Returning.'
+&   'One of the three variables ecut',TRIM(tag),', npw',TRIM(tag),', or nsh',TRIM(tag),ch10,&
+&   'must be non-null. Returning.'
    MSG_COMMENT(msg)
    RETURN
  end if
 !2-> one and only one should be non-null
  if (npw/=0.and.nsh/=0) then
    write(msg,'(6a)')&
-&   ' Only one of the two variables npw',TRIM(tag),' and nsh',TRIM(tag),ch10,&
-&   ' can be non-null. Modify the value of one of these in input file.'
+&   'Only one of the two variables npw',TRIM(tag),' and nsh',TRIM(tag),ch10,&
+&   'can be non-null. Modify the value of one of these in input file.'
    MSG_ERROR(msg)
  end if
  if (ecut>tol6.and.npw/=0) then
    write(msg,'(6a)')&
-&   ' Only one of the two variables ecut',TRIM(tag),' and npw',TRIM(tag),ch10,&
-&   ' can be non-null. Modify the value of one of these in input file.'
+&   'Only one of the two variables ecut',TRIM(tag),' and npw',TRIM(tag),ch10,&
+&   'can be non-null. Modify the value of one of these in input file.'
    MSG_ERROR(msg)
  end if
  if (ecut>tol6.and.nsh/=0) then
    write(msg,'(6a)')&
-&   ' Only one of the two variables ecut',TRIM(tag),' and nsh',TRIM(tag),ch10,&
-&   ' can be non-null Action : modify the value of one of these in input file.'
+&   'Only one of the two variables ecut',TRIM(tag),' and nsh',TRIM(tag),ch10,&
+&   'can be non-null Action : modify the value of one of these in input file.'
    MSG_ERROR(msg)
  end if
 !
 !=== Calculates an upper bound for npw ===
 !* gctr is center of the g-vector sphere
- gctr(:)=(/zero,zero,zero/)
+ gctr(:)= [zero,zero,zero]
  if (ecut>tol6) then
-!  The average number of plane-waves in the cutoff sphere is given by: 
+!  The average number of plane-waves in the cutoff sphere is given by:
 !  npwave = (2*ecut)**(3/2)*ucvol/(6*pi**2)
 !  The upper bound is calculated as npwwrk=int(scale * npwave) + pad
    npwave=NINT(ucvol*(two*ecut)**1.5_dp/(six*pi**2))
@@ -1955,9 +1950,8 @@ subroutine setshells(ecut,npw,nsh,nsym,gmet,gprimd,symrel,tag,ucvol)
  ABI_MALLOC(gvec,(3,npwwrk))
  ifound=0
  do while(ifound==0)
-   write(msg,'(a,f8.2)')' setshells : ecut_trial = ',ecut_trial
-
-   call wrtout(std_out,msg,'COLL')
+   !write(msg,'(a,f8.2)')' setshells : ecut_trial = ',ecut_trial
+   !call wrtout(std_out,msg,'COLL')
    exchn2n3d=0 ! For the time being, no exchange of n2 and n3
 
    call kpgsph(ecut_trial,exchn2n3d,gmet,0,1,1,gvec,gctr,1,MPI_enreg_seq,npwwrk,npw_found)
@@ -2022,9 +2016,9 @@ subroutine setshells(ecut,npw,nsh,nsym,gmet,gprimd,symrel,tag,ucvol)
 !    ecut is given in the input
      if (ecut_found<ecut-0.1) then
        write(msg,'(3a,e14.6,9a,e14.6,3a)')&
-&       ' The value ecut',TRIM(tag),'=',ecut,' given in the input file leads to',ch10,&
-&       ' the same values for nsh',TRIM(tag),' and npw',TRIM(tag),' as ecut',TRIM(tag),'=',ecut_found,ch10,&
-&       ' This value will be adopted for the calculation.',ch10
+&       'The value ecut',TRIM(tag),'=',ecut,' given in the input file leads to',ch10,&
+&       'the same values for nsh',TRIM(tag),' and npw',TRIM(tag),' as ecut',TRIM(tag),'=',ecut_found,ch10,&
+&       'This value will be adopted for the calculation.',ch10
        MSG_WARNING(msg)
      end if
      ifound=1
@@ -2050,9 +2044,9 @@ subroutine setshells(ecut,npw,nsh,nsym,gmet,gprimd,symrel,tag,ucvol)
            nsh_found=nsh_found-1
          end do
          write(msg,'(3a,i6,5a,i6,3a)')&
-&         ' The value npw',TRIM(tag),'=',npw,' given in the input file does not close the shell',ch10,&
-&         ' The lower closed-shell is obtained for a value npw',TRIM(tag),'=',npw_found,ch10,&
-&         ' This value will be adopted for the calculation.',ch10
+&         'The value npw',TRIM(tag),'=',npw,' given in the input file does not close the shell',ch10,&
+&         'The lower closed-shell is obtained for a value npw',TRIM(tag),'=',npw_found,ch10,&
+&         'This value will be adopted for the calculation.',ch10
          MSG_WARNING(msg)
        end if
        ecut_found=two*pi**2*gnorm(npw_found)
@@ -2076,9 +2070,9 @@ subroutine setshells(ecut,npw,nsh,nsym,gmet,gprimd,symrel,tag,ucvol)
            npw_found=npw_found+npw_sh(nsh_found)
          end do
          write(msg,'(3a,i6,5a,i6,3a)')&
-&         ' The value nsh',TRIM(tag),'=',nsh,' given in the input file corresponds to the same',ch10,&
-&         ' cut-off energy as for closed-shell upto nsh',TRIM(tag),'=',nsh_found,ch10,&
-&         ' This value will be adopted for the calculation.',ch10
+&         'The value nsh',TRIM(tag),'=',nsh,' given in the input file corresponds to the same',ch10,&
+&         'cut-off energy as for closed-shell upto nsh',TRIM(tag),'=',nsh_found,ch10,&
+&         'This value will be adopted for the calculation.',ch10
          MSG_WARNING(msg)
        end if
        ecut_found=two*pi**2*gnorm(npw_found)
@@ -2111,7 +2105,7 @@ subroutine setshells(ecut,npw,nsh,nsym,gmet,gprimd,symrel,tag,ucvol)
  ABI_FREE(npw_sh)
 
  DBG_EXIT("COLL")
- 
+
 end subroutine setshells
 !!***
 
@@ -2397,8 +2391,8 @@ end subroutine table_gbig2kg
 !!  gsph_extend
 !!
 !! FUNCTION
-!!  Construct a new gsphere_t with a larger cutoff energy 
-!!  while preserving the ordering of the first G-vectors stored in in_Gsph 
+!!  Construct a new gsphere_t with a larger cutoff energy
+!!  while preserving the ordering of the first G-vectors stored in in_Gsph
 !!
 !! INPUTS
 !!
@@ -2433,7 +2427,7 @@ subroutine gsph_extend(in_Gsph,Cryst,new_ecut,new_Gsph)
 
 !Local variables-------------------------------
 !scalars
- integer :: new_ng,in_ng,ig,ierr,sh 
+ integer :: new_ng,in_ng,ig,ierr,sh
 !arrays
  integer,allocatable :: new_gvec(:,:)
 
@@ -2443,8 +2437,8 @@ subroutine gsph_extend(in_Gsph,Cryst,new_ecut,new_Gsph)
 
  if (new_Gsph%ng > in_Gsph%ng) then
 
-   new_ng = new_Gsph%ng 
-   in_ng  = in_Gsph%ng 
+   new_ng = new_Gsph%ng
+   in_ng  = in_Gsph%ng
 
    ierr = 0
    do ig=1,in_ng
@@ -2458,7 +2452,7 @@ subroutine gsph_extend(in_Gsph,Cryst,new_ecut,new_Gsph)
 
    ierr = 0
    do sh=1,in_Gsph%nsh
-     if ( new_Gsph%shlim(sh) /= in_Gsph%shlim(sh) .or. & 
+     if ( new_Gsph%shlim(sh) /= in_Gsph%shlim(sh) .or. &
 &         ABS(new_Gsph%shlen(sh)-in_Gsph%shlen(sh)) > tol12 ) then
        ierr = ierr + 1
        write(std_out,*)"new_shlim, in_shlim",sh,new_Gsph%shlim(sh),in_Gsph%shlim(sh)

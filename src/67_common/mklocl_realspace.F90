@@ -14,7 +14,7 @@
 !!  option=2 : contribution of local ionic potential to E gradient wrt xred
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (DCA, XG, GMR,TRangel)
+!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR,TRangel)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -951,7 +951,7 @@ real(kind=8) :: raux1(1),rr1(1)
 !! useful for small values of x
 !!
 !! COPYRIGHT
-!! Copyright (C) 2013-2016 ABINIT group (TRangel)
+!! Copyright (C) 2013-2017 ABINIT group (TRangel)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1018,7 +1018,7 @@ subroutine interpol_vloc(xx,rloc,charge,yy)
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 2013-2016 ABINIT group (TRangel)
+!! Copyright (C) 2013-2017 ABINIT group (TRangel)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
