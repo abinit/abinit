@@ -708,6 +708,7 @@ subroutine dtset_copy(dtout, dtin)
  dtout%ntypat             = dtin%ntypat
  dtout%ntyppure           = dtin%ntyppure
  dtout%nwfshist           = dtin%nwfshist
+ dtout%nzchempot          = dtin%nzchempot
  dtout%occopt             = dtin%occopt
  dtout%optcell            = dtin%optcell
  dtout%optdriver          = dtin%optdriver

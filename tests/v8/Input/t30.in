@@ -1,7 +1,23 @@
 # LiH molecule. Use spatial chemical potential to orient the molecule.
 #
 
-nband   1
+ndtset 1
+#For the first dataset, no chemical potential
+#For the second data set, turn on the chemical potential. Start with molecule aligned with z.
+xcart2   0.0 0.0  1.5
+         0.0 0.0 -1.5
+#Third data set, chemical potential present. Start with molecule not aligned with z.
+xcart3  -1.5 0.0  0.1
+         1.5 0.0 -0.1
+#Fourth data set, chemical potential present. Start with molecule aligned with x, check that ABINIT
+#takes into account the chemical potential in the determination of the spatial symmetry group.
+xcart4  -1.5 0.0  0.0
+         1.5 0.0  0.0
+#Other data sets : should check differently varying chemical potentials.
+
+
+# Common data
+nband   2
 
 acell  15 10 10
 
@@ -14,12 +30,13 @@ ntypat    2
 typat     1 2
 
 ngkpt     1 1 1
-xcart -1.0 0.0 0.0
-       1.0 0.0 0.0
+xcart -1.5 0.0 0.0
+       1.5 0.0 0.0
 
 ionmov  2
 ntime   5
 tolmxf  5.d-5
+tolrff  1.d-2
 
 diemac    1.0    diemix 0.5d0
 nstep 10

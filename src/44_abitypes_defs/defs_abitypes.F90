@@ -188,6 +188,7 @@ type dataset_type
  integer :: cineb_start
  integer :: cgtyphf
  integer :: delayperm
+ integer :: diismemory
  integer :: dmatpuopt
  integer :: dmatudiag
  integer :: dmft_dc
@@ -364,6 +365,7 @@ type dataset_type
  integer :: natsph
  integer :: natsph_extra
  integer :: natvshift
+ integer :: nbandhf
  integer :: nbandkss
  integer :: nbdblock
  integer :: nbdbuf
@@ -379,11 +381,9 @@ type dataset_type
  integer :: nfreqim
  integer :: nfreqre
  integer :: nfreqsp
- integer :: diismemory
  integer :: nimage
- integer :: nbandhf
- integer :: nkptgw
  integer :: nkpt
+ integer :: nkptgw
  integer :: nkpthf
  integer :: nline
  integer :: nnsclo
@@ -423,6 +423,7 @@ type dataset_type
  integer :: ntypat
  integer :: ntyppure
  integer :: nwfshist
+ integer :: nzchempot
  integer :: occopt
  integer :: optcell
  integer :: optdriver
@@ -1740,6 +1741,7 @@ type dataset_type
     integer :: nsym
     integer :: ntypalch
     integer :: ntypat
+    integer :: nzchempot
 
  end type ab_dimensions
 !!***

@@ -35,7 +35,7 @@
 !!   The list of records of dtset initialized in the present routine is:
 !!   acell_orig,densty,iatfix,kptopt,kptrlatt,
 !!   mkmem,mkqmem,mk1mem,natsph,natvshift,nconeq,nkptgw,nkpt,
-!!   nshiftk,nqptdm,nucdipmom,optdriver,
+!!   nqptdm,nshiftk,nucdipmom,nzchempot,optdriver,
 !!   rprim_orig,rprimd_orig,shiftk,
 !!   spgroup,spinat,typat,vel_orig,vel_cell_orig,xred_orig
 !!  bravais(11)=characteristics of Bravais lattice (see symlatt.F90)
@@ -632,6 +632,9 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
 &   'Action: check the input file.'
    MSG_ERROR(message)
  end if
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nzchempot',tread,'INT')
+ if(tread==1) dtset%nzchempot=intarr(1)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'cd_customnimfrqs',tread,'INT')
  if(tread==1) dtset%cd_customnimfrqs=intarr(1)

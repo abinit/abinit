@@ -58,7 +58,8 @@ module m_ab7_invars
      type(pspheader_type), pointer :: pspheads(:)=>null()   !vz_z
      integer :: mxga_n_rules, mxgw_nqlwl, mxnatom, mxntypat, mxlpawu, mxmband_upper, mxnatpawu, &
          & mxnatsph, mxnatsph_extra, mxnconeq, mxn_efmas_dirs, mxnimage, mxnkptgw, mxnatvshift, mxnimfrqs, mxnfreqsp, &
-         & mxn_projection_frequencies, mxnkpt,  mxnnos, mxnqptdm, mxnsppol, mxnsym, mxnspinor, mxmband, mxnbandhf, mxnkpthf
+         & mxn_projection_frequencies, mxnkpt,  mxnnos, mxnqptdm, mxnsppol, mxnsym, mxnspinor, mxmband, mxnbandhf, mxnkpthf, &
+         & mxnzchempot
      integer :: istatr, istatshft, dmatpuflag, papiopt, timopt
   end type dtsets_list
 
@@ -226,6 +227,7 @@ end subroutine ab7_invars_set_flags
     mxvals%nsppol      = token%mxnsppol
     mxvals%nsym        = token%mxnsym
     mxvals%ntypat      = token%mxntypat
+    mxvals%nzchempot   = token%mxnzchempot
 
     mxvals%nberry      = 20   ! This is presently a fixed value. Should be changed.
 
@@ -734,7 +736,7 @@ end subroutine ab7_invars_new_from_file
    & token%mxnconeq,token%mxnimage,token%mxn_efmas_dirs,token%mxnkpt,token%mxnkptgw,token%mxnnos,&
    & token%mxnqptdm,&
    & token%mxnspinor,token%mxnsppol,token%mxnsym,token%mxnimfrqs,&
-   & token%mxnfreqsp,token%mxn_projection_frequencies,ndtset,&
+   & token%mxnfreqsp,token%mxnzchempot,token%mxn_projection_frequencies,ndtset,&
    & ndtset_alloc,string,npsp,zionpsp)
 
  ABI_DEALLOCATE(zionpsp)
