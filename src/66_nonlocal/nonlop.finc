@@ -18,7 +18,7 @@
 !!   - using GPUs (N-conserving or PAW)
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (MT)
+!! Copyright (C) 1998-2017 ABINIT group (MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -272,6 +272,12 @@
 !!
 !! SOURCE
 
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
 
 subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnlout,&
 &                 paw_opt,signs,svectout,tim_nonlop,vectin,vectout,&
@@ -320,15 +326,23 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
  integer,pointer :: kgin(:,:),kgout(:,:)
  integer, ABI_CONTIGUOUS pointer :: atindx1_(:),indlmn_(:,:,:),nattyp_(:)
  real(dp) :: tsec(2)
+ real(dp),pointer :: enl_ptr(:,:,:)
  real(dp),pointer :: ffnlin(:,:,:,:),ffnlin_(:,:,:,:),ffnlout(:,:,:,:),ffnlout_(:,:,:,:)
  real(dp),pointer :: kpgin(:,:),kpgout(:,:)
  real(dp) :: kptin(3),kptout(3)
  real(dp),pointer :: ph3din(:,:,:),ph3din_(:,:,:),ph3dout(:,:,:),ph3dout_(:,:,:)
  real(dp),pointer :: phkxredin(:,:),phkxredin_(:,:),phkxredout(:,:),phkxredout_(:,:)
+<<<<<<< HEAD:src/66_nonlocal/nonlop.finc
  real(dp), ABI_CONTIGUOUS pointer :: enl_(:,:,:),enl_ptr(:,:,:),ph1d_(:,:),sij_(:,:)
  type(pawcprj_type),pointer :: cprjin_(:,:)
   integer :: useylm
   integer :: b0,b1,b2,b3,b4,e0,e1,e2,e3,e4
+=======
+ real(dp), ABI_CONTIGUOUS pointer :: enl_(:,:,:),ph1d_(:,:),sij_(:,:)
+ real(dp), ABI_CONTIGUOUS pointer :: vectin_idat(:,:), vectout_idat(:,:)
+ real(dp), ABI_CONTIGUOUS pointer :: svectout_idat(:,:), enlout_idat(:)
+ type(pawcprj_type),pointer :: cprjin_(:,:),cprjin_idat(:,:)
+>>>>>>> trunk/develop:src/66_nonlocal/nonlop.F90
 
 ! **********************************************************************
 
@@ -450,6 +464,7 @@ useylm = hamk%useylm
    istwf_k=hamk%istwf_kp
  end if
 
+ if (npwin==0.or.npwout==0) return
  dimffnlin=size(ffnlin,2);dimffnlout=size(ffnlout,2)
  kpgin_allocated=(.not.associated(kpgin))
  if (kpgin_allocated) then

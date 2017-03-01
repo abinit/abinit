@@ -8,7 +8,7 @@
 !! divide by ucvol and write the result to an output file
 !!
 !! COPYRIGHT
-!! Copyright (C) 2000-2016 ABINIT  group (MVeithen)
+!! Copyright (C) 2000-2017 ABINIT  group (MVeithen)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -65,7 +65,7 @@
 
 #include "abi_common.h"
 
-subroutine polcart(red_ptot,pel,pel_cart,pelev,pion,pion_cart,polunit,& 
+subroutine polcart(red_ptot,pel,pel_cart,pelev,pion,pion_cart,polunit,&
 &  ptot_cart,rprimd,ucvol,unit_out,usepaw)
 
  use defs_basis
@@ -85,7 +85,7 @@ subroutine polcart(red_ptot,pel,pel_cart,pelev,pion,pion_cart,polunit,&
  integer,intent(in) :: polunit,unit_out,usepaw
  real(dp),intent(in) :: ucvol
 !arrays
- real(dp),intent(in) :: red_ptot(3) !!REC                             
+ real(dp),intent(in) :: red_ptot(3) !!REC
  real(dp),intent(in) :: pel(3),pelev(3),pion(3),rprimd(3,3)
  real(dp),intent(out) :: pel_cart(3),pion_cart(3),ptot_cart(3)
 
@@ -97,19 +97,17 @@ subroutine polcart(red_ptot,pel,pel_cart,pelev,pion,pion_cart,polunit,&
  real(dp) :: pel_mks(3),pelev_mks(3),pion_mks(3),ptot(3),ptot_mks(3)
 
 ! ***********************************************************************
-!!REC Note ptot has already been folded and kept onto same branch      
-!unless ptot=0d0, in which case ptot has not been computed yet    
- if( sum(abs(red_ptot(:))) < tol8 )then 
-   ptot(:) = pel(:) + pion(:)                                       
+!!REC Note ptot has already been folded and kept onto same branch
+!unless ptot=0d0, in which case ptot has not been computed yet
+ if( sum(abs(red_ptot(:))) < tol8 )then
+   ptot(:) = pel(:) + pion(:)
 !  Fold ptot into [-1, 1]
    do idir = 1, 3
      ptot(idir) = ptot(idir) - 2_dp*nint(ptot(idir)/2_dp)
    end do
  else !!REC
    ptot=red_ptot !!REC
- end if !!REC                                    
-
-
+ end if !!REC
 
 !Transform pel, pion and ptot to cartesian coordinates
  pel_cart(:) = zero ; pion_cart(:) = zero ; ptot_cart(:) = zero

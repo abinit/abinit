@@ -10,7 +10,7 @@
 !!   from projected scalars to reciprocal space.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (MT)
+!! Copyright (C) 1998-2017 ABINIT group (MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -218,7 +218,7 @@ subroutine opernlb_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_fac,&
 
 !    Loop on atoms (blocking)
      do ia=1,nincat
-       iaph3d=ia;if (nloalg(1)>0) iaph3d=ia+ia3-1
+       iaph3d=ia;if (nloalg(2)>0) iaph3d=ia+ia3-1
 
 !      Scale gxfac with 4pi/sqr(omega).(-i)^l
        if (paw_opt/=3) then
@@ -628,7 +628,7 @@ subroutine opernlb_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_fac,&
 
 !    Loop on atoms (blocking)
      do ia=1,nincat
-       iaph3d=ia;if (nloalg(1)>0) iaph3d=ia+ia3-1
+       iaph3d=ia;if (nloalg(2)>0) iaph3d=ia+ia3-1
 
 !      Scale gxfac with 4pi/sqr(omega).(-i)^l
        if (paw_opt/=3) then

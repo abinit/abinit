@@ -8,7 +8,7 @@
 !! for the ABINIT code.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (DCA, XG, GMR, MM)
+!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR, MM)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -492,6 +492,9 @@
  intarr(1,:)=dtsets(:)%prtdosm
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'prtdosm','INT',0)
 
+ intarr(1,:)=dtsets(:)%prtebands
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'prtebands','INT',0)
+
  intarr(1,:)=dtsets(:)%prtefg
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'prtefg','INT',0)
 
@@ -527,6 +530,10 @@
 
  intarr(1,:)=dtsets(:)%prtnabla
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'prtnabla','INT',0)
+
+
+ intarr(1,:)=dtsets(:)%prtphbands
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'prtphbands','INT',0)
 
  intarr(1,:)=dtsets(:)%prtphdos
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'prtphdos','INT',0)
@@ -765,7 +772,7 @@
 
  intarr(1,:)=dtsets(:)%rf2_dkde
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'rf2_dkde','INT',0)
- 
+
  intarr(1,:)=dtsets(:)%rf2_pert1_dir(1)
  intarr(2,:)=dtsets(:)%rf2_pert1_dir(2)
  intarr(3,:)=dtsets(:)%rf2_pert1_dir(3)

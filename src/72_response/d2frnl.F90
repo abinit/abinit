@@ -8,7 +8,7 @@
 !! (strain and/or phonon)
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (DCA, XG, GM, AR, MB, MT, AM)
+!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GM, AR, MB, MT, AM)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnuC.org/copyleft/gpl.txt .
@@ -359,8 +359,9 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
  end if
 
 !Initialize Hamiltonian (k-independent terms)
- call init_hamiltonian(gs_ham,psps,pawtab,dtset%nspinor,dtset%nspden,natom,&
+ call init_hamiltonian(gs_ham,psps,pawtab,dtset%nspinor,dtset%nsppol,dtset%nspden,natom,&
 & dtset%typat,xred,dtset%nfft,dtset%mgfft,dtset%ngfft,rprimd,dtset%nloalg,&
+& paw_ij=paw_ij,comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,mpi_spintab=mpi_enreg%my_isppoltab,&
 & usecprj=usecprj,ph1d=ph1d,nucdipmom=dtset%nucdipmom)
 
 !===== PAW specific section
@@ -385,7 +386,7 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
 !  For each atom and for electric field direction k:
 !  becij(k)=<Phi_i|r_k-R_k|Phi_j>-<tPhi_i|r_k-R_k|tPhi_j> + sij.R_k
    if (need_becfr.or.need_piezofr) then
-     ABI_ALLOCATE(becij,(gs_ham%dimekb1,gs_ham%dimekb1,dtset%nspinor**2,3))
+     ABI_ALLOCATE(becij,(gs_ham%dimekb1,gs_ham%dimekb2,dtset%nspinor**2,3))
      becij=zero
      ABI_DATATYPE_ALLOCATE(paw_ij_tmp,(my_natom))
      ABI_DATATYPE_ALLOCATE(pawfgrtab_tmp,(my_natom))
@@ -404,7 +405,7 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
 &       (/zero,zero,zero/),rprimd,ucvol,vtrial,vtrial,vxc,xred,&
 &       comm_atom=my_comm_atom, mpi_atmtab=my_atmtab ) ! vtrial not used here
        do isppol=1,dtset%nspinor**2
-         call pawdij2e1kb(paw_ij_tmp(:),nsp,my_atmtab,my_comm_atom,e1kbfr=becij(:,:,:,ii))
+         call pawdij2e1kb(paw_ij_tmp(:),nsp,my_comm_atom,e1kbfr=becij(:,:,:,ii),mpi_atmtab=my_atmtab)
        end do
      end do
      call paw_ij_free(paw_ij_tmp)
@@ -455,8 +456,7 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
  do isppol=1,dtset%nsppol
 
 !  Continue to initialize the Hamiltonian (PAW DIJ coefficients)
-   call load_spin_hamiltonian(gs_ham,isppol,paw_ij=paw_ij,&
-&   comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
+   call load_spin_hamiltonian(gs_ham,isppol,with_nonlocal=.true.)
 
 !  Rewind (k+G) data if needed
    ikg=0

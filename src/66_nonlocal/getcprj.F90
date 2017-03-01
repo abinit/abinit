@@ -9,7 +9,7 @@
 !!  |Proj_i> are non-local projectors (for each atom and each l,m,n)
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (MT)
+!! Copyright (C) 1998-2017 ABINIT group (MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~ABINIT/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -200,20 +200,20 @@
    kpg_ => kpg
  end if
 
-!Eventually allocate temporary array for ph3d
- if (nloalg(2)<=0) then
-   matblk=NLO_MINCAT
-   ABI_ALLOCATE(ph3d_,(2,npw_k,matblk))
- else
-   matblk=size(ph3d,3)
-   ph3d_ => ph3d
- end if
-
 !Some other dims
  mincat=min(NLO_MINCAT,maxval(nattyp))
  cplex=2;if (istwf_k>1) cplex=1
  choice_=choice;if (cpopt==1) choice_=-choice
  signs=1;if (idir>0) signs=2
+
+!Eventually allocate temporary array for ph3d
+ if (nloalg(2)<=0) then
+   matblk=mincat
+   ABI_ALLOCATE(ph3d_,(2,npw_k,matblk))
+ else
+   matblk=size(ph3d,3)
+   ph3d_ => ph3d
+ end if
 
 !Loop over atom types
  ia1=1;iatm=0

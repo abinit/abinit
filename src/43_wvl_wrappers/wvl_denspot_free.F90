@@ -7,7 +7,7 @@
 !!  FIXME: add description.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2012-2016 ABINIT group (FIXME: add author)
+!!  Copyright (C) 2012-2017 ABINIT group (FIXME: add author)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .

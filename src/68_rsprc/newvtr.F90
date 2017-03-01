@@ -10,7 +10,7 @@
 !! then update vtrial.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (DCA, XG, MT)
+!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

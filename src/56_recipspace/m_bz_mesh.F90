@@ -12,7 +12,7 @@
 !!  of the point group that preserve the external q-point.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2016 ABINIT group (MG, GMR, VO, LR, RWG, MT)
+!! Copyright (C) 2008-2017 ABINIT group (MG, GMR, VO, LR, RWG, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -52,7 +52,7 @@ MODULE m_bz_mesh
  use m_profiling_abi
  use m_sort
 
- use m_fstrings,       only : ltoa, itoa, sjoin
+ use m_fstrings,       only : ltoa, itoa, sjoin, ktoa
  use m_numeric_tools,  only : is_zero, isinteger, imin_loc, imax_loc, bisect, wrap2_pmhalf
  use m_geometry,       only : normv
  use m_crystal,        only : crystal_t
@@ -209,23 +209,28 @@ MODULE m_bz_mesh
 
 type,public :: kpath_t
 
-  integer :: nbounds
+  integer :: nbounds=0
     ! Number of extrema defining the path.
 
-  integer :: ndiv_small
-    ! ndiv_small=Number of divisions used to sample the smallest segment.
+  integer :: ndivsm=0
+    ! Number of divisions used to sample the smallest segment.
 
-  integer :: npts
-    ! Number of points in the path
+  integer :: npts=0
+    ! Total number of points in the path.
 
   real(dp) :: gprimd(3,3)
    ! Reciprocal lattice vectors.
 
   real(dp) :: gmet(3,3)
-   ! gmet(3,3)=Metric matrix in G space.
+   ! Metric matrix in G space.
 
   integer,allocatable :: ndivs(:)
-  ! ndivs(nbounds-1)=Number of division for each segment.
+   ! ndivs(nbounds-1)
+   ! Number of division for each segment.
+
+  integer,allocatable :: bounds2kpt(:)
+   ! bounds2kpt(nbounds)
+   ! bounds2kpt(i): Index of the i-th extrema in the pts(:) array.
 
   real(dp),allocatable :: bounds(:,:)
     ! bounds(3,nbounds)
@@ -233,13 +238,18 @@ type,public :: kpath_t
 
   real(dp),allocatable :: points(:,:)
     ! points(3,npts)
-    ! The points in reduced coordinates.
+    ! The points of the path in reduced coordinates.
+
+  real(dp),allocatable :: dl(:)
+    ! dl(npts)
+    ! dl(i) = Distance between the (i-1)-th and the i-th k-point. dl(1) = zero
 
  end type kpath_t
 
- public :: kpath_init   ! Construct the path
- public :: kpath_free   ! Free memory
- public :: make_path    ! Construct a normalized path.
+ public :: kpath_new        ! Construct a new path
+ public :: kpath_free       ! Free memory
+ public :: make_path        ! Construct a normalized path. TODO: Remove
+ public :: kpath_print      ! Print the path.
 !!***
 
 !----------------------------------------------------------------------
@@ -2003,14 +2013,15 @@ end subroutine getkptnorm_bycomponent
 !! make_path
 !!
 !! FUNCTION
-!!  Create a normalized path given the extrema.
+!!  Generate a normalized path given the extrema.
+!!  See also kpath_t and kpath_new (recommended API).
 !!
 !! INPUTS
 !!  nbounds=Number of extrema defining the path.
 !!  bounds(3,nbounds)=The points defining the path in reduced coordinates.
 !!  met(3,3)=Metric matrix.
 !!  space='R' for real space, G for reciprocal space.
-!!  ndiv_small=Number of divisions to be used for the smallest segment.
+!!  ndivsm=Number of divisions to be used for the smallest segment.
 !!  [unit]=Fortran unit for formatted output. Default: dev_null
 !!
 !! OUTPUT
@@ -2020,13 +2031,13 @@ end subroutine getkptnorm_bycomponent
 !!    contain the path in reduced coordinates.
 !!
 !! PARENTS
-!!      m_bz_mesh,m_nesting,m_phgamma,m_phonons,mkph_linwid
+!!      m_bz_mesh,m_nesting,m_phonons,mkph_linwid
 !!
 !! CHILDREN
 !!
 !! SOURCE
 
-subroutine make_path(nbounds,bounds,met,space,ndiv_small,ndivs,npts,path,unit)
+subroutine make_path(nbounds,bounds,met,space,ndivsm,ndivs,npts,path,unit)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -2040,7 +2051,7 @@ subroutine make_path(nbounds,bounds,met,space,ndiv_small,ndivs,npts,path,unit)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: nbounds,ndiv_small
+ integer,intent(in) :: nbounds,ndivsm
  integer,optional,intent(in) :: unit
  integer,intent(out) :: npts
  character(len=1),intent(in) :: space
@@ -2051,6 +2062,7 @@ subroutine make_path(nbounds,bounds,met,space,ndiv_small,ndivs,npts,path,unit)
 
 !Local variables-------------------------------
 !scalars
+ integer,parameter :: prtvol=0
  integer :: idx,ii,jp,ount
  real(dp) :: nfact
  character(len=500) :: msg
@@ -2059,7 +2071,7 @@ subroutine make_path(nbounds,bounds,met,space,ndiv_small,ndivs,npts,path,unit)
 
 ! *************************************************************************
 
- ABI_CHECK(ndiv_small>0,'ndiv_small <=0')
+ ABI_CHECK(ndivsm > 0, sjoin('ndivsm', itoa(ndivsm)))
 
  ount = dev_null; if (present(unit)) ount = unit
 
@@ -2077,7 +2089,7 @@ subroutine make_path(nbounds,bounds,met,space,ndiv_small,ndivs,npts,path,unit)
    MSG_ERROR(msg)
  end if
 
- nfact=nfact/ndiv_small
+ nfact=nfact/ndivsm
  ndivs(:)=NINT(lng(:)/nfact)
  npts=SUM(ndivs)+1 !1 for the first point
 
@@ -2095,21 +2107,24 @@ subroutine make_path(nbounds,bounds,met,space,ndiv_small,ndivs,npts,path,unit)
  ! Allocate and construct the path.
  ABI_MALLOC(path,(3,npts))
 
- call wrtout(ount,' Normalized Path: ','COLL')
+ if (prtvol > 0) call wrtout(ount,' Normalized Path: ','COLL')
  idx=0
  do ii=1,nbounds-1
    do jp=1,ndivs(ii)
      idx=idx+1
      path(:,idx)=bounds(:,ii)+(jp-1)*(bounds(:,ii+1)-bounds(:,ii))/ndivs(ii)
-     write(msg,'(i4,4x,3(f8.5,1x))')idx,path(:,idx)
-     call wrtout(ount,msg,'COLL')
+     if (prtvol > 0) then
+       write(msg,'(i4,4x,3(f8.5,1x))')idx,path(:,idx)
+       call wrtout(ount,msg,'COLL')
+     end if
    end do
  end do
-
  path(:,npts)=bounds(:,nbounds)
 
- write(msg,'(i4,4x,3(f8.5,1x))')npts,path(:,npts)
- call wrtout(ount,msg,'COLL')
+ if (prtvol > 0) then
+   write(msg,'(i0,4x,3(f8.5,1x))')npts,path(:,npts)
+   call wrtout(ount,msg,'COLL')
+ end if
 
 end subroutine make_path
 !!***
@@ -3241,9 +3256,9 @@ end function box_len
 
 !----------------------------------------------------------------------
 
-!!****f* m_bz_mesh/kpath_init
+!!****f* m_bz_mesh/kpath_new
 !! NAME
-!! kpath_init
+!! kpath_new
 !!
 !! FUNCTION
 !!  Create a normalized path given the extrema.
@@ -3251,7 +3266,7 @@ end function box_len
 !! INPUTS
 !!  bounds(3,nbounds)=The points defining the path in reduced coordinates.
 !!  gprimd(3,3)=Reciprocal lattice vectors
-!!  ndiv_small=Number of divisions to be used for the smallest segment.
+!!  ndivsm=Number of divisions to be used for the smallest segment.
 !!
 !! OUTPUT
 !!  Kpath<type(kpath_t)>=Object with the normalized path.
@@ -3263,41 +3278,41 @@ end function box_len
 !!
 !! SOURCE
 
-subroutine kpath_init(Kpath,bounds,gprimd,ndiv_small)
+type(kpath_t) function kpath_new(bounds, gprimd, ndivsm) result(kpath)
 
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'kpath_init'
+#define ABI_FUNC 'kpath_new'
 !End of the abilint section
 
  implicit none
 
 !Arguments ------------------------------------
 !scalars
- type(kpath_t),intent(out) :: Kpath
- integer,intent(in) :: ndiv_small
+ integer,intent(in) :: ndivsm
 !!arrays
  real(dp),intent(in) :: bounds(:,:),gprimd(3,3)
 
 !Local variables-------------------------------
+ integer :: ii
 !arrays
+ real(dp) :: dk(3)
  real(dp),allocatable :: pts(:,:)
 
 ! *************************************************************************
 
  ABI_CHECK(size(bounds, dim=1) == 3, "Wrong dim1 in bounds")
+ ABI_CHECK(ndivsm > 0, sjoin("ndivsm:", itoa(ndivsm)))
  Kpath%nbounds = size(bounds, dim=2)
- Kpath%ndiv_small = ndiv_small
+ Kpath%ndivsm = ndivsm
 
-!Compute reciprocal space metric.
- Kpath%gprimd = gprimd
- Kpath%gmet = MATMUL(TRANSPOSE(gprimd),gprimd)
+ ! Compute reciprocal space metric.
+ Kpath%gprimd = gprimd; Kpath%gmet = matmul(transpose(gprimd), gprimd)
 
  ABI_MALLOC(Kpath%ndivs, (Kpath%nbounds-1))
-
- call make_path(Kpath%nbounds,bounds,Kpath%gmet,"G",ndiv_small,Kpath%ndivs,Kpath%npts,pts,unit=dev_null)
+ call make_path(Kpath%nbounds,bounds,Kpath%gmet,"G",ndivsm,Kpath%ndivs,Kpath%npts,pts,unit=dev_null)
 
  ABI_MALLOC(Kpath%bounds, (3,Kpath%nbounds))
  Kpath%bounds = bounds
@@ -3306,7 +3321,21 @@ subroutine kpath_init(Kpath,bounds,gprimd,ndiv_small)
  Kpath%points = pts
  ABI_FREE(pts)
 
-end subroutine kpath_init
+ ! Compute distance between point i-1 and i
+ ABI_CALLOC(kpath%dl, (kpath%npts))
+ do ii=2,kpath%npts
+   dk = kpath%points(:, ii-1) - kpath%points(:,ii)
+   kpath%dl(ii) = normv(dk, kpath%gmet, "G")
+ end do
+
+ ! Mapping bounds --> points
+ ABI_MALLOC(kpath%bounds2kpt, (kpath%nbounds))
+ kpath%bounds2kpt(1) = 1
+ do ii=1,kpath%nbounds-1
+   kpath%bounds2kpt(ii+1) = sum(kpath%ndivs(:ii)) + 1
+ end do
+
+end function kpath_new
 !!***
 
 !----------------------------------------------------------------------
@@ -3346,6 +3375,10 @@ subroutine kpath_free(Kpath)
    ABI_FREE(Kpath%ndivs)
  end if
 
+ if (allocated(Kpath%bounds2kpt)) then
+   ABI_FREE(Kpath%bounds2kpt)
+ end if
+
  if (allocated(Kpath%bounds)) then
    ABI_FREE(Kpath%bounds)
  end if
@@ -3354,7 +3387,80 @@ subroutine kpath_free(Kpath)
    ABI_FREE(Kpath%points)
  end if
 
+ if (allocated(Kpath%dl)) then
+   ABI_FREE(Kpath%dl)
+ end if
+
 end subroutine kpath_free
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_bz_mesh/kpath_print
+!! NAME
+!! kpath_print
+!!
+!! FUNCTION
+!!  Print info on the path.
+!!
+!! INPUTS
+!!  [unit]=Unit number for output. Defaults to std_out
+!!  [prtvol]=Verbosity level.
+!!  [header]=String to be printed as header for additional info.
+!!  [pre]=Optional string prepended to output e.g. #. Default: " "
+!!
+!! OUTPUT
+!!  Only printing
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine kpath_print(kpath, header, unit, prtvol, pre)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'kpath_print'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,optional,intent(in) :: unit,prtvol
+ character(len=*),optional,intent(in) :: header,pre
+ type(kpath_t),intent(in) :: kpath
+
+!Local variables-------------------------------
+ integer :: unt,my_prtvol,ii
+ character(len=500) :: msg,my_pre
+
+! *************************************************************************
+
+ unt = std_out; if (present(unit)) unt = unit
+ my_prtvol = 0; if (present(prtvol)) my_prtvol = prtvol
+ my_pre = " "; if (present(pre)) my_pre = pre
+ if (unt <= 0) return
+
+ if (present(header)) write(unt,"(a)") sjoin(my_pre, '==== '//trim(adjustl(header))//' ==== ')
+ write(unt, "(a)") sjoin(my_pre, "Number of points:", itoa(kpath%npts), ", ndivsmall:", itoa(kpath%ndivsm))
+ write(unt, "(a)") sjoin(my_pre, "Boundaries and corresponding index in the k-points array:")
+ do ii=1,kpath%nbounds
+   write(unt, "(a)") sjoin(my_pre, itoa(kpath%bounds2kpt(ii)), ktoa(kpath%bounds(:,ii)))
+ end do
+ write(unt, "(a)") sjoin(my_pre, " ")
+
+ if (my_prtvol > 10) then
+   do ii=1,kpath%npts
+     write(unt, "(a)") sjoin(my_pre, ktoa(kpath%points(:,ii)))
+   end do
+ end if
+
+end subroutine kpath_print
 !!***
 
 !----------------------------------------------------------------------

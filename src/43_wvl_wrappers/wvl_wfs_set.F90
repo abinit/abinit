@@ -13,7 +13,7 @@
 !! to deallocate all stuff (descriptors and arrays).
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (DC)
+!! Copyright (C) 1998-2017 ABINIT group (DC)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -229,7 +229,7 @@ end subroutine wvl_wfs_set
 !! Some wrappers for BigDFT which uses different names for the same routines.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (DC)
+!! Copyright (C) 1998-2017 ABINIT group (DC)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -281,7 +281,7 @@ end subroutine derfcf
 !! Some wrappers for BigDFT which uses different names for the same routines.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (DC)
+!! Copyright (C) 1998-2017 ABINIT group (DC)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

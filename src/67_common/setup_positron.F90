@@ -7,7 +7,7 @@
 !! Do various initializations for the positron lifetime calculation
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (GJ,MT)
+!! Copyright (C) 1998-2017 ABINIT group (GJ,MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

@@ -7,7 +7,7 @@
 !! Calculate a pseudo-density from an original density on a radial grid (regular or logarithmic)
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (GJ,FJ,MT)
+!! Copyright (C) 1998-2017 ABINIT group (GJ,FJ,MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

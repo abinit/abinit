@@ -12,7 +12,7 @@
 !! displacement field boundary conditions.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2016 ABINIT group (XW)
+!! Copyright (C) 1999-2017 ABINIT group (XW)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -62,6 +62,7 @@ subroutine ddb_piezo(anaddb_dtset,blkval,dielt_rlx,elast,iblok,instrain,iout,mpe
  use m_profiling_abi
  use m_errors
 
+ use m_fstrings,       only : sjoin, itoa
  use m_anaddb_dataset, only : anaddb_dataset_type
 
 !This section has been created automatically by the script Abilint (TD).
@@ -88,6 +89,7 @@ subroutine ddb_piezo(anaddb_dtset,blkval,dielt_rlx,elast,iblok,instrain,iout,mpe
 !scalars
  integer :: idir1,idir2,ier,ii1,ii2,ipert1,ipert2,ivarA,ivarB
  character(len=500) :: message
+ logical :: iwrite
 !arrays
  real(dp) :: Amatr(3*natom-3,3*natom-3),Apmatr(3*natom,3*natom)
  real(dp) :: Bmatr(2,((3*natom-3)*(3*natom-2))/2)
@@ -106,6 +108,7 @@ subroutine ddb_piezo(anaddb_dtset,blkval,dielt_rlx,elast,iblok,instrain,iout,mpe
 !****************************************************************
 
 !extraction of the clamped ion piezoelectric constants from blkvals
+ iwrite = iout > 0
 
 !the six strain perturbations
  do ivarA=1,6
@@ -128,9 +131,7 @@ subroutine ddb_piezo(anaddb_dtset,blkval,dielt_rlx,elast,iblok,instrain,iout,mpe
  end do
 
 !consider the volume and the -Qe before the piezo
-!according to the (30) in notes, the units are tranformed from
-!atomic units to the SI units
-
+!according to the (30) in notes, the units are tranformed from atomic units to the SI units
  do ivarA=1,6
    do ivarB=1,3
      piezo(ivarA,ivarB)=piezo(ivarA,ivarB)*AmuBohr2_Cm2
@@ -140,15 +141,13 @@ subroutine ddb_piezo(anaddb_dtset,blkval,dielt_rlx,elast,iblok,instrain,iout,mpe
 
 !give the values of d2cart_relaxed as the same as blkval
 !and also give the initial values of piezo_clamped and piezo_relaxed
-
  d2cart_relaxed(:,:,:,:,:,:)=blkval(:,:,:,:,:,:)
  piezo_clamped(:,:)=piezo(:,:)
 
 !********************************************************************
 !print the main results of the piezoelectric constants
  if(anaddb_dtset%piezoflag==1.or.anaddb_dtset%piezoflag==3 .or. anaddb_dtset%piezoflag==7)then
-   write(message,'(3a)')ch10,&
-&   ' Proper piezoelectric constants (clamped ion) (unit:c/m^2)',ch10
+   write(message,'(3a)')ch10,' Proper piezoelectric constants (clamped ion) (unit:c/m^2)',ch10
    call wrtout(std_out,message,'COLL')
 
    do ivarA=1,6
@@ -156,9 +155,11 @@ subroutine ddb_piezo(anaddb_dtset,blkval,dielt_rlx,elast,iblok,instrain,iout,mpe
    end do
 
    call wrtout(iout,message,'COLL')
-   do ivarA=1,6
-     write(iout,'(3f16.8)')piezo_clamped(ivarA,1),piezo_clamped(ivarA,2),piezo_clamped(ivarA,3)
-   end do
+   if (iwrite) then
+    do ivarA=1,6
+      write(iout,'(3f16.8)')piezo_clamped(ivarA,1),piezo_clamped(ivarA,2),piezo_clamped(ivarA,3)
+    end do
+   end if
  end if
 
 !the next is the calculation of the relaxed ion piezoelectric constants
@@ -195,15 +196,9 @@ subroutine ddb_piezo(anaddb_dtset,blkval,dielt_rlx,elast,iblok,instrain,iout,mpe
 
  do ivarA=1,3*natom
    do ivarB=1,3*natom
-     if (mod(ivarA,3)==0 .and. mod(ivarB,3)==0)then
-       Nmatr(ivarA,ivarB)=one
-     end if
-     if (mod(ivarA,3)==1 .and. mod(ivarB,3)==1)then
-       Nmatr(ivarA,ivarB)=one
-     end if
-     if (mod(ivarA,3)==2 .and. mod(ivarB,3)==2)then
-       Nmatr(ivarA,ivarB)=one
-     end if
+     if (mod(ivarA,3)==0 .and. mod(ivarB,3)==0) Nmatr(ivarA,ivarB)=one
+     if (mod(ivarA,3)==1 .and. mod(ivarB,3)==1) Nmatr(ivarA,ivarB)=one
+     if (mod(ivarA,3)==2 .and. mod(ivarB,3)==2) Nmatr(ivarA,ivarB)=one
    end do
  end do
 
@@ -227,9 +222,10 @@ subroutine ddb_piezo(anaddb_dtset,blkval,dielt_rlx,elast,iblok,instrain,iout,mpe
  end do
 
 !the imaginary part of the force matrix
- Bpmatr(2,:)=0.0_dp
+ Bpmatr(2,:)=zero
 !then call the subroutines CHPEV and ZHPEV to get the eigenvectors
  call ZHPEV ('V','U',3*natom,Bpmatr,eigvalp,eigvecp,3*natom,zhpev1p,zhpev2p,ier)
+ ABI_CHECK(ier == 0, sjoin("ZHPEV returned:", itoa(ier)))
 
 !DEBUG
 !the eigenval and eigenvec
@@ -249,7 +245,7 @@ subroutine ddb_piezo(anaddb_dtset,blkval,dielt_rlx,elast,iblok,instrain,iout,mpe
 !then do the muplication to get the reduced matrix,in two steps
 !After this the force constant matrix is decouple in two bloks,
 !accoustic and optical ones
- Cpmatr(:,:)=0.0_dp
+ Cpmatr(:,:)=zero
  do ivarA=1,3*natom
    do ivarB=1,3*natom
      do ii1=1,3*natom
@@ -259,7 +255,7 @@ subroutine ddb_piezo(anaddb_dtset,blkval,dielt_rlx,elast,iblok,instrain,iout,mpe
    end do
  end do
 
- Apmatr(:,:)=0.0_dp
+ Apmatr(:,:)=zero
  do ivarA=1,3*natom
    do ivarB=1,3*natom
      do ii1=1,3*natom
@@ -283,9 +279,7 @@ subroutine ddb_piezo(anaddb_dtset,blkval,dielt_rlx,elast,iblok,instrain,iout,mpe
 !check the last three eigenvalues whether too large or not
  ivarB=0
  do ivarA=3*natom-2,3*natom
-   if (ABS(Apmatr(ivarA,ivarA))>tol6)then
-     ivarB=1
-   end if
+   if (ABS(Apmatr(ivarA,ivarA))>tol6) ivarB=1
  end do
  if(ivarB==1)then
    write(message,'(a,a,a,a,a,a,a,a,a,a,3es16.6)')ch10,&
@@ -313,11 +307,11 @@ subroutine ddb_piezo(anaddb_dtset,blkval,dielt_rlx,elast,iblok,instrain,iout,mpe
      ii1=ii1+1
    end do
  end do
- Bmatr(2,:)=0.0_dp
+ Bmatr(2,:)=zero
 
-!call the subroutines CHPEV and ZHPEV to get the eigenvectors and the
-!eigenvalues
+!call the subroutines CHPEV and ZHPEV to get the eigenvectors and the eigenvalues
  call ZHPEV ('V','U',3*natom-3,Bmatr,eigval,eigvec,3*natom-3,zhpev1,zhpev2,ier)
+ ABI_CHECK(ier == 0, sjoin("ZHPEV returned:", itoa(ier)))
 
 !check the unstable phonon modes, if the first is negative then print warning message
  if(eigval(1)<-1.0*tol8)then
@@ -330,10 +324,10 @@ subroutine ddb_piezo(anaddb_dtset,blkval,dielt_rlx,elast,iblok,instrain,iout,mpe
  end if
 
 !do the matrix multiplication to get pseudoinverse inverse matrix
- Cmatr(:,:)=0.0_dp
- Amatr(:,:)=0.0_dp
+ Cmatr(:,:)=zero
+ Amatr(:,:)=zero
  do ivarA=1,3*natom-3
-   Cmatr(ivarA,ivarA)=1.0_dp/eigval(ivarA)
+   Cmatr(ivarA,ivarA)=one/eigval(ivarA)
  end do
 
  do ivarA=1,3*natom-3
@@ -346,7 +340,7 @@ subroutine ddb_piezo(anaddb_dtset,blkval,dielt_rlx,elast,iblok,instrain,iout,mpe
  end do
 
 !the second mulplication
- Cmatr(:,:)=0.0_dp
+ Cmatr(:,:)=zero
  do ivarA=1,3*natom-3
    do ivarB=1,3*natom-3
      do ii1=1,3*natom-3
@@ -368,8 +362,8 @@ subroutine ddb_piezo(anaddb_dtset,blkval,dielt_rlx,elast,iblok,instrain,iout,mpe
 
 !so now the inverse of the reduced matrix is in the matrixC
 !now do another mulplication to get the pseudoinverse of the original
- Cpmatr(:,:)=0.0_dp
- Apmatr(:,:)=0.0_dp
+ Cpmatr(:,:)=zero
+ Apmatr(:,:)=zero
  do ivarA=1,3*natom-3
    do ivarB=1,3*natom-3
      Cpmatr(ivarA,ivarB)=Cmatr(ivarA,ivarB)
@@ -385,7 +379,7 @@ subroutine ddb_piezo(anaddb_dtset,blkval,dielt_rlx,elast,iblok,instrain,iout,mpe
    end do
  end do
 
- Cpmatr(:,:)=0.0_dp
+ Cpmatr(:,:)=zero
  do ivarA=1,3*natom
    do ivarB=1,3*natom
      do ii1=1,3*natom
@@ -436,7 +430,7 @@ subroutine ddb_piezo(anaddb_dtset,blkval,dielt_rlx,elast,iblok,instrain,iout,mpe
 !the the matrix I need for the multiplication is in kmatrix and zstar2
 
 !the first matrix mulplication
- new1(:,:)=0.0_dp
+ new1(:,:)=zero
  do ii1=1,6
    do ii2=1,3*natom
      do ivarA=1,3*natom
@@ -447,7 +441,7 @@ subroutine ddb_piezo(anaddb_dtset,blkval,dielt_rlx,elast,iblok,instrain,iout,mpe
  end do
 
 !do the second matrix mulplication
- piezo_correction(:,:)=0.0_dp
+ piezo_correction(:,:)=zero
  do ii1=1,6
    do ii2=1,3
      do ivarA=1,3*natom
@@ -460,18 +454,15 @@ subroutine ddb_piezo(anaddb_dtset,blkval,dielt_rlx,elast,iblok,instrain,iout,mpe
 !then consider the volume and the change the unit form atomic to SI
  do ii1=1,6
    do ii2=1,3
-     piezo_correction(ii1,ii2)= (piezo_correction(ii1,ii2)&
-&     /ucvol)*AmuBohr2_Cm2
-     piezo_relaxed(ii1,ii2)=piezo_clamped(ii1,ii2)+&
-&     piezo_correction(ii1,ii2)
+     piezo_correction(ii1,ii2)= (piezo_correction(ii1,ii2) / ucvol)*AmuBohr2_Cm2
+     piezo_relaxed(ii1,ii2)=piezo_clamped(ii1,ii2)+ piezo_correction(ii1,ii2)
    end do
  end do
 !end the calculation of piezoelectric constants
 
 !then print out the relaxed ion piezoelectric constants
 
- if(anaddb_dtset%piezoflag==2.or.anaddb_dtset%piezoflag==3&
-& .or. anaddb_dtset%piezoflag==7)then
+ if(anaddb_dtset%piezoflag==2.or.anaddb_dtset%piezoflag==3 .or. anaddb_dtset%piezoflag==7)then
    if(anaddb_dtset%instrflag==0)then
      write(message,'(a,a,a,a,a,a,a,a)' )ch10,&
 &     ' WARNING: in order to get the piezoelectric tensor (relaxed ion), ',ch10,&
@@ -481,19 +472,18 @@ subroutine ddb_piezo(anaddb_dtset,blkval,dielt_rlx,elast,iblok,instrain,iout,mpe
      call wrtout(std_out,message,'COLL')
      call wrtout(iout,message,'COLL')
    end if
-   write(message,'(3a)')ch10,&
-&   ' Proper piezoelectric constants (relaxed ion) (unit:c/m^2)',ch10
+   write(message,'(3a)')ch10,' Proper piezoelectric constants (relaxed ion) (unit:c/m^2)',ch10
    call wrtout(std_out,message,'COLL')
    do ivarA=1,6
-     write(std_out,'(3f16.8)')piezo_relaxed(ivarA,1),piezo_relaxed(ivarA,2),&
-&     piezo_relaxed(ivarA,3)
+     write(std_out,'(3f16.8)')piezo_relaxed(ivarA,1),piezo_relaxed(ivarA,2),piezo_relaxed(ivarA,3)
    end do
 
    call wrtout(iout,message,'COLL')
-   do ivarA=1,6
-     write(iout,'(3f16.8)')piezo_relaxed(ivarA,1),piezo_relaxed(ivarA,2),&
-&     piezo_relaxed(ivarA,3)
-   end do
+   if (iwrite) then
+     do ivarA=1,6
+       write(iout,'(3f16.8)')piezo_relaxed(ivarA,1),piezo_relaxed(ivarA,2),piezo_relaxed(ivarA,3)
+     end do
+   end if
  end if
 
 !DEBUG
@@ -544,8 +534,7 @@ subroutine ddb_piezo(anaddb_dtset,blkval,dielt_rlx,elast,iblok,instrain,iout,mpe
 
 !then print out the results of d tensor in log and output files
  if(anaddb_dtset%piezoflag==4 .or. anaddb_dtset%piezoflag==7)then
-   if(anaddb_dtset%instrflag==0 .or. anaddb_dtset%elaflag==0&
-&   .or. anaddb_dtset%elaflag==1)then
+   if(anaddb_dtset%instrflag==0 .or. anaddb_dtset%elaflag==0 .or. anaddb_dtset%elaflag==1)then
      write(message,'(12a)' )ch10,&
 &     ' WARNING:in order to get the piezoelectric d tensor(relaxed ion),', ch10,&
 &     ' one needs the elastic tensor(relaxed ion) and piezoelectric e tensor',ch10,&
@@ -556,16 +545,17 @@ subroutine ddb_piezo(anaddb_dtset,blkval,dielt_rlx,elast,iblok,instrain,iout,mpe
      call wrtout(std_out,message,'COLL')
      call wrtout(iout,message,'COLL')
    end if
-   write(message,'(3a)')ch10,&
-&   ' Piezoelectric d tensor (relaxed ion) (unit:pc/N)',ch10
+   write(message,'(3a)')ch10,' Piezoelectric d tensor (relaxed ion) (unit:pc/N)',ch10
    call wrtout(std_out,message,'COLL')
    do ivarA=1,6
      write(std_out,'(3f16.8)')d_tensor(ivarA,1),d_tensor(ivarA,2),d_tensor(ivarA,3)
    end do
    call wrtout(iout,message,'COLL')
-   do ivarA=1,6
-     write(iout,'(3f16.8)')d_tensor(ivarA,1),d_tensor(ivarA,2),d_tensor(ivarA,3)
-   end do
+   if (iwrite) then
+     do ivarA=1,6
+       write(iout,'(3f16.8)')d_tensor(ivarA,1),d_tensor(ivarA,2),d_tensor(ivarA,3)
+     end do
+   end if
  end if
 !end the part of piezoelectric d tensor (relaxed ion only).
 
@@ -608,9 +598,6 @@ subroutine ddb_piezo(anaddb_dtset,blkval,dielt_rlx,elast,iblok,instrain,iout,mpe
 !  then get the g tensor
    beta_tensor(:,:)=0
    beta_tensor(:,:)=dielt_stress(:,:)
-!  DEBUG
-!  write(std_out,*)' call matrginv 2 '
-!  ENDDEBUG
 
    call matrginv(beta_tensor,3,3)
    do ivarA=1,3
@@ -643,16 +630,17 @@ subroutine ddb_piezo(anaddb_dtset,blkval,dielt_rlx,elast,iblok,instrain,iout,mpe
      call wrtout(iout,message,'COLL')
    end if
 
-   write(message,'(3a)')ch10,&
-&   ' Piezoelectric g tensor (relaxed ion) (unit:m^2/c)',ch10
+   write(message,'(3a)')ch10,' Piezoelectric g tensor (relaxed ion) (unit:m^2/c)',ch10
    call wrtout(std_out,message,'COLL')
    do ivarA=1,6
      write(std_out,'(3f16.8)')g_tensor(1,ivarA),g_tensor(2,ivarA),g_tensor(3,ivarA)
    end do
    call wrtout(iout,message,'COLL')
-   do ivarA=1,6
-     write(iout,'(3f16.8)')g_tensor(1,ivarA),g_tensor(2,ivarA),g_tensor(3,ivarA)
-   end do
+   if (iwrite) then
+     do ivarA=1,6
+       write(iout,'(3f16.8)')g_tensor(1,ivarA),g_tensor(2,ivarA),g_tensor(3,ivarA)
+     end do
+   end if
  end if
 !end the part of piezoelectric g tensor (relaxed ion only).
 
@@ -662,9 +650,7 @@ subroutine ddb_piezo(anaddb_dtset,blkval,dielt_rlx,elast,iblok,instrain,iout,mpe
  if(anaddb_dtset%dieflag>0)then
    beta_tensor(:,:)=0
    beta_tensor(:,:)=dielt_rlx(:,:)
-!  DEBUG
 !  write(std_out,*)' call matrginv 3, dielt_rlx(:,:)= ',dielt_rlx(:,:)
-!  ENDDEBUG
 
    call matrginv(beta_tensor,3,3)
    do ivarA=1,3
@@ -695,16 +681,17 @@ subroutine ddb_piezo(anaddb_dtset,blkval,dielt_rlx,elast,iblok,instrain,iout,mpe
      call wrtout(std_out,message,'COLL')
      call wrtout(iout,message,'COLL')
    end if
-   write(message,'(3a)')ch10,&
-&   ' Piezoelectric h tensor (relaxed ion) (unit:GN/c)',ch10
+   write(message,'(3a)')ch10,' Piezoelectric h tensor (relaxed ion) (unit:GN/c)',ch10
    call wrtout(std_out,message,'COLL')
    do ivarA=1,6
      write(std_out,'(3f16.8)')h_tensor(1,ivarA),h_tensor(2,ivarA),h_tensor(3,ivarA)
    end do
    call wrtout(iout,message,'COLL')
-   do ivarA=1,6
-     write(iout,'(3f16.8)')h_tensor(1,ivarA),h_tensor(2,ivarA),h_tensor(3,ivarA)
-   end do
+   if (iwrite) then
+     do ivarA=1,6
+       write(iout,'(3f16.8)')h_tensor(1,ivarA),h_tensor(2,ivarA),h_tensor(3,ivarA)
+     end do
+   end if
  end if
 !end the part of piezoelectric h tensor (relaxed ion only).
 
@@ -713,8 +700,7 @@ subroutine ddb_piezo(anaddb_dtset,blkval,dielt_rlx,elast,iblok,instrain,iout,mpe
    write(message, '(a,a)')ch10,'************************************************'
    call wrtout(std_out,message,'COLL')
    call wrtout(iout,message,'COLL')
-   if(anaddb_dtset%instrflag==0 .or. anaddb_dtset%elaflag==0 .or. &
-&   anaddb_dtset%elaflag==1)then
+   if(anaddb_dtset%instrflag==0 .or. anaddb_dtset%elaflag==0 .or. anaddb_dtset%elaflag==1)then
      write(message,'(a,a,a,a,a,a,a,a)' )ch10,&
 &     ' WARNING: in order to get the free stress dielectric tensor,',ch10,&
 &     ' one needs internal strain and elastic (relaxed ion)', ch10,&
@@ -723,18 +709,17 @@ subroutine ddb_piezo(anaddb_dtset,blkval,dielt_rlx,elast,iblok,instrain,iout,mpe
      call wrtout(std_out,message,'COLL')
      call wrtout(iout,message,'COLL')
    end if
-   write(message,'(a,a,a)')ch10,&
-&   ' Free stress dielectric tensor (dimensionless)',ch10
+   write(message,'(a,a,a)')ch10,' Free stress dielectric tensor (dimensionless)',ch10
    call wrtout(std_out,message,'COLL')
    do ivarA=1,3
-     write(std_out,'(3f16.8)')dielt_stress(ivarA,1),dielt_stress(ivarA,2),&
-&     dielt_stress(ivarA,3)
+     write(std_out,'(3f16.8)')dielt_stress(ivarA,1),dielt_stress(ivarA,2),dielt_stress(ivarA,3)
    end do
    call wrtout(iout,message,'COLL')
-   do ivarA=1,3
-     write(iout,'(3f16.8)')dielt_stress(ivarA,1),dielt_stress(ivarA,2),&
-&     dielt_stress(ivarA,3)
-   end do
+   if (iwrite) then
+     do ivarA=1,3
+       write(iout,'(3f16.8)')dielt_stress(ivarA,1),dielt_stress(ivarA,2),dielt_stress(ivarA,3)
+     end do
+   end if
  end if
 !end the part of printing out the free stress dielectric tensor
 
@@ -751,8 +736,7 @@ subroutine ddb_piezo(anaddb_dtset,blkval,dielt_rlx,elast,iblok,instrain,iout,mpe
      call wrtout(iout,message,'COLL')
    end if
 
-!Then begin the computation of the fixed displacement
-!elastic and compliance tensor(relaxed ion)
+!Then begin the computation of the fixed displacement elastic and compliance tensor(relaxed ion)
    do ivarA=1,6
      do ivarB=1,6
        elast_dis(ivarA,ivarB)=zero
@@ -765,8 +749,7 @@ subroutine ddb_piezo(anaddb_dtset,blkval,dielt_rlx,elast,iblok,instrain,iout,mpe
 !Then should add the relaxed ion fixed E-field values
    do ivarA=1,6
      do ivarB=1,6
-       elast_dis(ivarA,ivarB)=elast_dis(ivarA,ivarB)+&
-&       elast(ivarA,ivarB)
+       elast_dis(ivarA,ivarB)=elast_dis(ivarA,ivarB)+elast(ivarA,ivarB)
      end do
    end do
 
@@ -783,17 +766,16 @@ subroutine ddb_piezo(anaddb_dtset,blkval,dielt_rlx,elast,iblok,instrain,iout,mpe
 &     elast_dis(ivarA,5)/100.00_dp,elast_dis(ivarA,6)/100.00_dp
    end do
    call wrtout(iout,message,'COLL')
-   do ivarA=1,6
-     write(iout,'(6f12.7)')elast_dis(ivarA,1)/100.00_dp,elast_dis(ivarA,2)/100.00_dp,&
-&     elast_dis(ivarA,3)/100.00_dp,elast_dis(ivarA,4)/100.00_dp,&
-&     elast_dis(ivarA,5)/100.00_dp,elast_dis(ivarA,6)/100.00_dp
-   end do
+   if (iwrite) then
+     do ivarA=1,6
+       write(iout,'(6f12.7)')elast_dis(ivarA,1)/100.00_dp,elast_dis(ivarA,2)/100.00_dp,&
+&       elast_dis(ivarA,3)/100.00_dp,elast_dis(ivarA,4)/100.00_dp,&
+&       elast_dis(ivarA,5)/100.00_dp,elast_dis(ivarA,6)/100.00_dp
+     end do
+   end if
 !  then invert the above to get the corresponding compliance tensor
    compliance_dis(:,:)=0
    compliance_dis(:,:)=elast_dis(:,:)
-!  DEBUG
-!  write(std_out,*)' call matrginv 4 '
-!  ENDDEBUG
 
    call matrginv(compliance_dis,6,6)
 !  then print out the compliance tensor at fixed displacement field
@@ -810,13 +792,15 @@ subroutine ddb_piezo(anaddb_dtset,blkval,dielt_rlx,elast,iblok,instrain,iout,mpe
    end do
    call wrtout(iout,message,'COLL')
 
-   do ivarB=1,6
-     write(iout,'(6f12.7)')compliance_dis(ivarB,1)*100.00,&
-&     compliance_dis(ivarB,2)*100.00_dp,&
-&     compliance_dis(ivarB,3)*100.00_dp,compliance_dis(ivarB,4)*100.00_dp,&
-&     compliance_dis(ivarB,5)*100.00_dp,&
-&     compliance_dis(ivarB,6)*100.00_dp
-   end do
+   if (iwrite) then
+     do ivarB=1,6
+       write(iout,'(6f12.7)')compliance_dis(ivarB,1)*100.00,&
+&       compliance_dis(ivarB,2)*100.00_dp,&
+&       compliance_dis(ivarB,3)*100.00_dp,compliance_dis(ivarB,4)*100.00_dp,&
+&       compliance_dis(ivarB,5)*100.00_dp,&
+&       compliance_dis(ivarB,6)*100.00_dp
+     end do
+   end if
  end if
 !end if the elaflag==4 for the fixed didplacement field elastic tensor
 !end the part for computation of elastic at fixed displacement field

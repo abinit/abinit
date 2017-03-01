@@ -49,7 +49,7 @@
 #%% files_to_test = 
 #%%   t28.out, tolnlines = 10, tolabs = 2.000e-04, tolrel = 5.000e-08
 #%% [paral_info]
-#%% max_nprocs = 1
+#%% max_nprocs = 4
 #%% [extra_info]
 #%% keywords = 
 #%% authors = Unknown

@@ -12,7 +12,7 @@
 !! If eivec==4, generate output files for band2eps (drawing tool for the phonon band structure
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2016 ABINIT group (XG)
+!! Copyright (C) 1999-2017 ABINIT group (XG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -85,7 +85,7 @@ subroutine dfpt_prtph(displ,eivec,enunit,iout,natom,phfrq,qphnrm,qphon)
  character(len=500) :: message
 !arrays
  real(dp) :: vecti(3),vectr(3)
- character(len=1),allocatable :: metacharacter(:)
+ character(len=1) :: metacharacter(3*natom)
 
 ! *********************************************************************
 
@@ -128,7 +128,7 @@ subroutine dfpt_prtph(displ,eivec,enunit,iout,natom,phfrq,qphnrm,qphon)
 &     '  direction (cartesian coordinates)',qphon(1:3)+tol10
    end if
    call wrtout(iout,message,'COLL')
-   
+
 !  Write it, in different units.
    if(enunit/=1)then
      write(iout, '(a)' )' Phonon energies in Hartree :'
@@ -201,7 +201,6 @@ subroutine dfpt_prtph(displ,eivec,enunit,iout,natom,phfrq,qphnrm,qphon)
 
 !  Examine the degeneracy of each mode. The portability of the echo of the eigendisplacements
 !  is very hard to obtain, and has not been attempted.
-   ABI_ALLOCATE(metacharacter,(3*natom))
    do imode=1,3*natom
 !    The degenerate modes are not portable
      t_degenerate=.false.
@@ -211,8 +210,7 @@ subroutine dfpt_prtph(displ,eivec,enunit,iout,natom,phfrq,qphnrm,qphon)
      if(imode<3*natom)then
        if(phfrq(imode+1)-phfrq(imode)<tol6)t_degenerate=.true.
      end if
-     metacharacter(imode)=';'
-     if(t_degenerate)metacharacter(imode)='-'
+     metacharacter(imode)=';'; if(t_degenerate)metacharacter(imode)='-'
    end do
 
    do imode=1,3*natom
@@ -249,8 +247,6 @@ subroutine dfpt_prtph(displ,eivec,enunit,iout,natom,phfrq,qphnrm,qphon)
        end if
      end do
    end do
-
-   ABI_DEALLOCATE(metacharacter)
  end if
 
 end subroutine dfpt_prtph

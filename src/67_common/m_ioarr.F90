@@ -11,7 +11,7 @@
 !!  MPI-IO primitives are used when the FFT arrays are MPI distributed.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (DCA, XG, GMR, MVer, MT, MG)
+!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR, MVer, MT, MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -742,9 +742,7 @@ subroutine fftdatar_write(varname,path,iomode,hdr,crystal,ngfft,cplex,nfft,nspde
  if (my_iomode /= IO_MODE_ETSF .and. nproc_fft == 1) my_iomode = IO_MODE_FORTRAN
  if (nproc_fft > 1 .and. my_iomode == IO_MODE_FORTRAN) my_iomode = IO_MODE_MPI
 
- call wrtout(std_out, &
-   sjoin("fftdatar_write: about to write data to:", path, "with iomode", iomode2str(my_iomode)) ,'COLL')
-
+ call wrtout(std_out, sjoin(" fftdatar_write: About to write data to:", path, "with iomode", iomode2str(my_iomode)))
  call cwtime(cputime, walltime, gflops, "start")
 
  ! Get MPI-FFT tables from input ngfft
@@ -1079,6 +1077,7 @@ subroutine read_rhor(fname, cplex, nspden, nfft, ngfft, pawread, mpi_enreg, orho
      end if
 
      call hdr_fort_read(ohdr, unt, fform)
+     ABI_CHECK(fform /= 0, sjoin("fform == 0 while reading:", my_fname))
      call validate_hdr_den()
 
      ! Read PAW Rhoij

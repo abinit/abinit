@@ -1,6 +1,6 @@
 /** - C source file -
  *
- * Copyright (C) 2009-2016 ABINIT Group (Damien Caliste)
+ * Copyright (C) 2009-2017 ABINIT Group (Damien Caliste)
  *
  * This file is part of the ABINIT software package. For license information,
  * please see the COPYING file in the top-level directory of the ABINIT source

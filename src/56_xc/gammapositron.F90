@@ -8,7 +8,7 @@
 !! Input is positronic rhop(r) and electronic rhoe(r) at a given set of points.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (MT,GJ)
+!! Copyright (C) 1998-2017 ABINIT group (MT,GJ)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

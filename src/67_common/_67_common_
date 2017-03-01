@@ -11,7 +11,7 @@
 !! further split)
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group
+!! Copyright (C) 1998-2017 ABINIT group
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -30,7 +30,6 @@
 !! conducti_paw.F90
 !! conducti_paw_core.F90
 !! constrf.F90
-!! dens_in_sph.F90
 !! dielmt.F90
 !! dieltcel.F90
 !! emispec_paw.F90
@@ -60,6 +59,7 @@
 !! jellium.F90
 !! ks_ddiago.F90
 !! linemin.F90
+!! m_epjdos.F90
 !! m_ioarr.F90
 !! m_iowf.F90
 !! m_plowannier.F90
@@ -96,6 +96,7 @@
 !! odamix.F90
 !! optics_vloc.F90
 !! partial_dos_fractions.F90
+!! partial_dos_fractions_paw.F90
 !! posdoppler.F90
 !! poslifetime.F90
 !! posratecore.F90

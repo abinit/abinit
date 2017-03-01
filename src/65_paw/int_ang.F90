@@ -7,7 +7,7 @@
 !! Evaluate angular part for <phi_i|nabla|phi_j> and <tphi_i|nabla|tphi_j>
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2016 ABINIT group (VR,FJ,MT)
+!! Copyright (C) 2005-2017 ABINIT group (VR,FJ,MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~ABINIT/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

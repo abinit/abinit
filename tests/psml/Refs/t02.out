@@ -2,7 +2,7 @@
 .Version 8.0.3 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
 
-.Copyright (C) 1998-2016 ABINIT group . 
+.Copyright (C) 1998-2017 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -43,9 +43,9 @@
  psxml2ab: Pseudopotential flavor:             Hamann's oncvpsp
  psxml2ab: Exchange-correlation functional    1 :    XC_GGA_X_PBE
  psxml2ab: Exchange-correlation functional    2 :    XC_GGA_C_PBE
- psxml2ab: Relativistically generated pseudopotential (not necessarily SOC!):     T
- psxml2ab: Spin-polarized pseudopotential:       F
-
+ psxml2ab: Relativistically generated pseudopotential (not necessarily SOC!):   scalar
+ psxml2ab: Spin-polarized pseudopotential:     no
+ 
  DATASET    1 : space group Im -3 m (#229); Bravais cI (body-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  1.
@@ -84,7 +84,7 @@ _ WF disk file :      0.352 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 --------------------------------------------------------------------------------
 -
 - outvars: echo of selected default values                                      
--   accesswff0 =  0 , fftalg0 =312 , wfoptalg0 =  0
+-   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
 -
 - outvars: echo of global parameters not present in the input file              
 -  max_nthreads =    0
@@ -296,8 +296,8 @@ P           mkmem          14
  psxml2ab: Pseudopotential flavor:             Hamann's oncvpsp
  psxml2ab: Exchange-correlation functional    1 :    XC_GGA_X_PBE
  psxml2ab: Exchange-correlation functional    2 :    XC_GGA_C_PBE
- psxml2ab: Relativistically generated pseudopotential (not necessarily SOC!):     T
- psxml2ab: Spin-polarized pseudopotential:       F
+ psxml2ab: Relativistically generated pseudopotential (not necessarily SOC!):   scalar
+ psxml2ab: Spin-polarized pseudopotential:     no
   psp9in : irelt =            0
  pspatm: epsatm=   14.92870077
          --- l  ekb(1:nproj) -->

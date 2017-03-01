@@ -7,7 +7,7 @@
 !! to treat the GW approximation.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (TD)
+!! Copyright (C) 1998-2017 ABINIT group (TD)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -53,7 +53,6 @@
 !! interfaces_70_gw.F90
 !! m_chi0.F90
 !! m_dyson_solver.F90
-!! m_eet.F90
 !! m_fft_prof.F90
 !! m_model_screening.F90
 !! m_ppmodel.F90

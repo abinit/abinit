@@ -2,7 +2,7 @@
 .Version 8.0.3 of ANADDB 
 .(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
 
-.Copyright (C) 1998-2016 ABINIT group . 
+.Copyright (C) 1998-2017 ABINIT group . 
  ANADDB comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -43,8 +43,6 @@
 ================================================================================
 
  read the DDB information and perform some checks
-
--begin at tcpu      0.015  and twall      0.015 sec
 
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  3.3517340  3.3517340  G(1)= -0.1491765  0.1491765  0.1491765

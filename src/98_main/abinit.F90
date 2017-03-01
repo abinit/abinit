@@ -7,7 +7,7 @@
 !! Main routine for conducting Density-Functional Theory calculations or Many-Body Perturbation Theory calculations.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (DCA, XG, GMR, MKV, MT)
+!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR, MKV, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -198,7 +198,7 @@ program abinit
 #if defined HAVE_MPI
  real(dp) :: tsec_s(2)
 #endif
- 
+
 
 !******************************************************************
 
@@ -222,8 +222,8 @@ program abinit
 !if a full memocc.prc report is desired, set the argument of abimem_init to "2" instead of "0"
 !note that memocc.prc files can easily be multiple GB in size so don't use this option normally
 #ifdef HAVE_MEM_PROFILING
- call abimem_init(0)
-!call abimem_init(2)
+ call abimem_init(args%abimem_level)
+ !call abimem_init(2)
 #endif
 
 !------------------------------------------------------------------------------
@@ -603,7 +603,7 @@ program abinit
    if (nexit/=0) write(message,'(3a)') trim(message),ch10,' Note : exit requested by the user.'
    call wrtout(std_out,message,'COLL')
  end if
- 
+
  if (me==0) then
 !  Write YAML document with the final summary.
 !  We use this doc to test whether the calculation is completed.

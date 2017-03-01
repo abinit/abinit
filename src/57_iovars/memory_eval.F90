@@ -9,7 +9,7 @@
 !! - compute the memory needs for this data set.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2016 ABINIT group ()
+!! Copyright (C) 1999-2017 ABINIT group ()
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

@@ -11,7 +11,7 @@
 !! Copied from integrate_gamma
 !!
 !! COPYRIGHT
-!! Copyright (C) 2004-2016 ABINIT group (JPC,MJV)
+!! Copyright (C) 2004-2017 ABINIT group (JPC,MJV)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

@@ -8,7 +8,7 @@
 !!  KS eigenvalues and eigenvectors with Shirley's method.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2016 ABINIT group (MG)
+!! Copyright (C) 1999-2017 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1753,7 +1753,7 @@ subroutine shirley_hks(Wsh,kpt,spin,Ham_k,Cryst,Psps,Pawtab,Pawang,Paw_ij,sh_siz
  call wrap2_pmhalf(kpt(:),k4intp(:),shifts(:))
 
  ! Continue to prepare the GS Hamiltonian.
- call load_spin_hamiltonian(Ham_k,spin,paw_ij=Paw_ij)
+ call load_spin_hamiltonian(Ham_k,spin,with_nonlocal=.true.)
 
  call kdata_init(Kdata,Cryst,Psps,k4intp,istwf_k,Wsh%ngfft,Wsh%MPI_enreg,kg_k=kg_k)
 
@@ -1845,7 +1845,7 @@ subroutine shirley_hks(Wsh,kpt,spin,Ham_k,Cryst,Psps,Pawtab,Pawang,Paw_ij,sh_siz
  ABI_FREE(ylm_k)
  !
  ! Load k-dependent part in the Hamiltonian datastructure
- matblk=NLO_MINCAT ; if (nloalg(1)>0) matblk=natom
+ matblk=min(NLO_MINCAT,maxval(Ham_k%nattyp)) ; if (nloalg(2)>0) matblk=natom
  ABI_MALLOC(ph3d,(2,npw_k,matblk))
  call load_k_hamiltonian(Ham_k,kpt_k=k4intp,npw_k=npw_k,istwf_k=istwf_k,kg_k=kg_k,&
 &                        kpg_k=kpg_k,ffnl_k=ffnl,ph3d_k=ph3d,compute_ph3d=(Wsh%paral_kgb/=1))
@@ -2193,7 +2193,7 @@ subroutine shirley_interp(Wsh,jobz,Dtset,Cryst,Psps,Pawtab,Pawfgr,Pawang,Pawrad,
    ! ==== Loop over the interpolated k-points ====
    ! =============================================
 
-   call init_hamiltonian(Ham_k,Psps,Pawtab,nspinor,nspden,natom,&
+   call init_hamiltonian(Ham_k,Psps,Pawtab,nspinor,nsppol,nspden,natom,&
 &    Cryst%typat,Cryst%xred,Wsh%nfft,Wsh%mgfft,Wsh%ngfft,Cryst%rprimd,nloalg)
 
    ABI_MALLOC(hk_ij, (sh_size,sh_size))

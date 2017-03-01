@@ -7,7 +7,7 @@
 !! Calculate the charge density on the fine FFT grid in real space.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2016 ABINIT group (MG,GMR, VO, LR, RWG, RShaltaf)
+!! Copyright (C) 1999-2017 ABINIT group (MG,GMR, VO, LR, RWG, RShaltaf)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
