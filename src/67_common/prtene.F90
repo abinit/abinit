@@ -202,9 +202,9 @@ subroutine prtene(dtset,energies,iout,usepaw)
 &       '    Vd Waals DFT-D = ',energies%e_vdw_dftd
        call wrtout(iout,message,'COLL')
      end if
-     if ((dtset%nzchempot>=1) then
+     if (dtset%nzchempot>=1) then
        write(message, '(a,es21.14)' ) &
-&       ' Chemical potential = ',energies%e_chempot
+&       '    Chem. potential = ',energies%e_chempot
        call wrtout(iout,message,'COLL')
      end if
      if(dtset%occopt>=3.and.dtset%occopt<=8.and.ipositron==0) then
@@ -288,9 +288,9 @@ subroutine prtene(dtset,energies,iout,usepaw)
 &     '    Vd Waals DFT-D = ',energies%e_vdw_dftd
      call wrtout(iout,message,'COLL')
    end if
-   if ((dtset%nzchempot>=1) then
+   if (dtset%nzchempot>=1) then
      write(message, '(a,es21.14)' ) &
-&     ' Chemical potential = ',energies%e_chempot
+&     '    Chem. potential = ',energies%e_chempot
      call wrtout(iout,message,'COLL')
    end if
    if(dtset%occopt>=3.and.dtset%occopt<=8.and.ipositron==0) then

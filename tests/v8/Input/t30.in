@@ -9,16 +9,24 @@ nzchempot  2
 chempot   -0.2 -0.01 0.05  #This is for the Li atom, defines the chemical potential at zred=-0.2
            0.2  0.01 0.05  #This is for the Li atom, defines the chemical potential at zred= 0.2
 
-          -0.2  0.01 -0.05  #This is for the H atom, defines the chemical potential at zred=-0.2
-           0.2 -0.01 -0.05  #This is for the H atom, defines the chemical potential at zred= 0.2
+#         -0.2  0.01 -0.05  #This is for the H atom, defines the chemical potential at zred=-0.2
+#          0.2 -0.01 -0.05  #This is for the H atom, defines the chemical potential at zred= 0.2
 
-#For the first dataset, no chemical potential
+          *0.0
+
+
+#For the first dataset, no chemical potential. Consider the molecule aligned with x.
 nzchempot1 0
+xcart1  -1.5 0.0 0.0
+         1.5 0.0 0.0
 
 #For the second data set, turn on the chemical potential. Start with molecule aligned with z,
 # the molecule is slightly stretched.
-xcart2   0.0 0.0  1.5
-         0.0 0.0 -1.5
+#xcart2   0.0 0.0  1.5
+#         0.0 0.0 -1.5
+
+xcart2  -1.5 0.0 0.0
+         1.5 0.0 0.0
 
 #Third data set, chemical potential present. Start with molecule not aligned with z.
 xcart3  -1.5 0.0  0.1
@@ -45,10 +53,9 @@ ntypat    2
 typat     1 2
 
 ngkpt     1 1 1
-xcart -1.5 0.0 0.0
-       1.5 0.0 0.0
 
-ionmov  2
+#ionmov  2
+ionmov  0
 ntime   5
 tolmxf  5.d-5
 tolrff  1.d-2

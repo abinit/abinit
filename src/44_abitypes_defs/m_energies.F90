@@ -603,7 +603,7 @@ subroutine energies_ncwrite(enes,ncid)
 &  "e_fock", "e_fockdc", "e_hartree", "e_kinetic",&
 &  "e_localpsp", "e_magfield", "e_monopole", "e_nonlocalpsp", &
 &  "e_paw", "e_pawdc", "e_sicdc", "e_vdw_dftd",&
-&  "e_xc", "e_xcdc", "e_xc_vdw"&
+&  "e_xc", "e_xcdc", "e_xc_vdw",&
 &  "h0"],&
 !
 &  [enes%e_chempot, enes%e_corepsp, enes%e_corepspdc, enes%e_eigenvalues, enes%e_elecfield, &
