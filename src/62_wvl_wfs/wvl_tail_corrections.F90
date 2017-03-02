@@ -95,7 +95,7 @@ subroutine wvl_tail_corrections(dtset, energies, etotal, mpi_enreg, psps, wvl, x
 !Write a message with the total energy before tail corrections.
  etotal = energies%e_kinetic + energies%e_localpsp + energies%e_nonlocalpsp + &
 & energies%e_hartree + energies%e_xc  + &
-& energies%e_ewald + energies%e_vdw_dftd + energies%e_corepsp
+& energies%e_ewald + energies%e_chempot + energies%e_vdw_dftd + energies%e_corepsp
  write(message,'(a,2x,e19.12)') ' Total energy before tail correction', etotal
  call wrtout(std_out, message, 'COLL')
 
@@ -152,7 +152,7 @@ subroutine wvl_tail_corrections(dtset, energies, etotal, mpi_enreg, psps, wvl, x
 #endif
  etotal = energies%e_kinetic + energies%e_localpsp + energies%e_nonlocalpsp + &
 & energies%e_hartree + energies%e_xc  + &
-& energies%e_ewald + energies%e_vdw_dftd + energies%e_corepsp
+& energies%e_ewald + energies%e_chempot + energies%e_vdw_dftd + energies%e_corepsp
 
  write(message,'(a,3(1x,e18.11))') ' ekin_sum,epot_sum,eproj_sum',  &
  ekin_sum,epot_sum,eproj_sum

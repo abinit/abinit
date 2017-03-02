@@ -257,6 +257,8 @@ subroutine out_resultsgs_XML(dtset, level, results_gs, usepaw)
  else
    write(ab_xml_out, "(A,A,A)", advance = "NO") ' ion-ion="', trim(value) ,'"'
  end if
+ write(value, "(es20.8)") results_gs%energies%e_chempot
+ write(ab_xml_out, "(A,A,A)", advance = "NO") ' chempot="', trim(value) ,'"'
  write(value, "(es20.8)") results_gs%energies%e_hartree
  write(ab_xml_out, "(A,A,A)", advance = "NO") ' hartree="', trim(value) ,'"'
  write(value, "(es20.8)") results_gs%energies%e_corepsp

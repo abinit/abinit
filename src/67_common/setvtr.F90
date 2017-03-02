@@ -272,7 +272,7 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grewtn,grvdw,gsqcut,&
    if (dtset%nzchempot>0) then
 !    call spatialchempot(energies%e_chempot,chempot,grchempottn,dtset%natom,ntypat,dtset%nzchempot,dtset%typat,xred)
      ABI_ALLOCATE(grchempottn_dum,(3,dtset%natom))
-     call spatialchempot(e_chempot,dtset%chempot,grchempottn_dum,dtset%natom,ntypat,dtset%nzchempot,dtset%typat,xred)
+     call spatialchempot(energies%e_chempot,dtset%chempot,grchempottn_dum,dtset%natom,ntypat,dtset%nzchempot,dtset%typat,xred)
      ABI_DEALLOCATE(grchempottn_dum)
    endif
    if (dtset%vdw_xc==5.and.ngrvdw==dtset%natom) then
@@ -286,6 +286,7 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grewtn,grvdw,gsqcut,&
    end if
  else
    energies%e_ewald=zero
+   energies%e_chempot=zero
    grewtn=zero
    energies%e_vdw_dftd=zero
    if (ngrvdw>0) grvdw=zero

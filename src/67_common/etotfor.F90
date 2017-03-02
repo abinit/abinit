@@ -98,6 +98,7 @@
 !!   | entropy(IN)=entropy due to the occupation number smearing (if metal)
 !!   | e_localpsp(IN)=local psp energy (hartree)
 !!   | e_eigenvalues(IN)=Sum of the eigenvalues - Band energy (Hartree)
+!!   | e_chempot(IN)=energy from spatially varying chemical potential (hartree)
 !!   | e_ewald(IN)=Ewald energy (hartree)
 !!   | e_vdw_dftd(IN)=VdW DFT-D energy
 !!   | e_hartree(IN)=Hartree part of total energy (hartree units)
@@ -341,7 +342,7 @@ subroutine etotfor(atindx1,deltae,diffor,dtefield,dtset,&
      etotal = energies%e_kinetic + energies%e_hartree + energies%e_xc + &
 &     energies%e_localpsp + energies%e_corepsp + energies%e_fock+&
 &     energies%e_entropy + energies%e_elecfield + energies%e_magfield
-     etotal = etotal + energies%e_ewald + energies%e_vdw_dftd
+     etotal = etotal + energies%e_ewald + energies%e_chempot + energies%e_vdw_dftd
      if (usepaw==0) etotal = etotal + energies%e_nonlocalpsp
      if (usepaw/=0) etotal = etotal + energies%e_paw
    end if
@@ -351,7 +352,7 @@ subroutine etotfor(atindx1,deltae,diffor,dtefield,dtset,&
      etotal = energies%e_eigenvalues - energies%e_hartree + energies%e_xc &
 &     - energies%e_xcdc + energies%e_corepsp - energies%e_corepspdc+ energies%e_fock- energies%e_fockdc &
 &     + energies%e_entropy + energies%e_elecfield + energies%e_magfield
-     etotal = etotal + energies%e_ewald + energies%e_vdw_dftd
+     etotal = etotal + energies%e_ewald + energies%e_chempot + energies%e_vdw_dftd
      if (usepaw/=0) etotal = etotal + energies%e_pawdc
    end if
 
