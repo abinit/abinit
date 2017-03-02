@@ -29,6 +29,7 @@
 !!         else 0
 !! nptsym=number of point symmetries of the Bravais lattice
 !! nucdipmom(3,natom) (optional) array of nuclear dipole moments
+!! nzchempot=if non-zero, means that a z-spatially varying chemical potential is added 
 !! ptsymrel(3,3,1:msym)= nptsym point-symmetry operations
 !!   of the Bravais lattice in real space in terms
 !!   of primitive translations.
@@ -61,8 +62,8 @@
 #include "abi_common.h"
 
  subroutine symfind(berryopt,efield,gprimd,jellslab,msym,natom,noncoll,nptsym,nsym,&
-&           ptsymrel,spinat,symafm,symrel,tnons,tolsym,typat,use_inversion,xred,&
-&           nucdipmom)
+&  nzchempot,ptsymrel,spinat,symafm,symrel,tnons,tolsym,typat,use_inversion,xred,&
+&  nucdipmom)
 
  use defs_basis
  use m_errors
@@ -78,7 +79,7 @@
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: berryopt,jellslab,msym,natom,noncoll,nptsym,use_inversion
+ integer,intent(in) :: berryopt,jellslab,msym,natom,noncoll,nptsym,nzchempot,use_inversion
  integer,intent(out) :: nsym
  real(dp),intent(in) :: tolsym
 !arrays
@@ -269,8 +270,9 @@
      if(det==-1) cycle
    end if
 
-!  jellium slab case:
-   if (jellslab/=0) then
+!  jellium slab and spatially varying chemical potential cases:
+!  (actually, an inversion symmetry/mirror plane perpendicular to z symmetry operation might still be allowed... TO BE DONE !)
+   if (jellslab/=0 .or. nzchempot/=0) then
 !    check whether symmetry operation produce a rotation only in the xy plane
      if( ptsymrel(1,3,isym)/=0 .or. ptsymrel(2,3,isym)/=0 .or. &
 &     ptsymrel(3,1,isym)/=0 .or. ptsymrel(3,2,isym)/=0 ) cycle

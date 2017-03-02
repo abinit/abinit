@@ -44,6 +44,8 @@ module m_ab7_symmetry
      real(dp) :: field(3)
 
      logical :: withJellium
+ 
+     integer :: nzchempot
 
      integer :: withSpin
      real(dp), pointer :: spinAt(:,:)
@@ -264,6 +266,7 @@ contains
     sym%nBravSym = -1
     sym%withField   = .false.
     sym%withJellium = .false.
+    sym%nzchempot = 0
     sym%withSpin = 1
     sym%withSpinOrbit = .false.
     sym%multiplicity = -1
@@ -660,6 +663,39 @@ contains
     end if
   end subroutine symmetry_set_jellium
 
+
+  subroutine symmetry_set_nzchempot(id, nzchempot, errno)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'symmetry_set_jellium'
+!End of the abilint section
+
+    integer, intent(in) :: id
+    logical, intent(in) :: nzchempot
+    integer, intent(out) :: errno
+
+    type(symmetry_list), pointer :: token
+
+    if (AB_DBG) write(std_err,*) "AB symmetry: call set nzchempot."
+
+    errno = AB7_NO_ERROR
+    call get_item(token, id)
+    if (.not. associated(token)) then
+       errno = AB7_ERROR_OBJ
+       return
+    end if
+
+    token%data%nzchempot = nzchempot
+
+    ! We unset only the symmetries
+    if (token%data%auto) then
+       token%data%nSym  = 0
+    end if
+  end subroutine symmetry_set_nzchempot
+
   subroutine symmetry_set_periodicity(id, periodic, errno)
 
 
@@ -803,7 +839,7 @@ contains
     type(symmetry_type), intent(inout) :: sym
     integer, intent(out) :: errno
 
-    integer :: berryopt, jellslab, noncol
+    integer :: berryopt, jellslab, noncol, nzchempot
     integer :: use_inversion
     real(dp), pointer :: spinAt_(:,:)
     integer  :: sym_(3, 3, AB7_MAX_SYMMETRIES)
@@ -847,7 +883,7 @@ contains
     if (sym%nsym == 0) then
        if (AB_DBG) write(std_err,*) "AB symmetry: call ABINIT symfind."
        call symfind(berryopt, sym%field, sym%gprimd, jellslab, AB7_MAX_SYMMETRIES, &
-            & sym%nAtoms, noncol, sym%nBravSym, sym%nSym, sym%bravSym, spinAt_, &
+            & sym%nAtoms, noncol, sym%nBravSym, sym%nSym, sym%nzchempot, sym%bravSym, spinAt_, &
             & symAfm_, sym_, transNon_, sym%tolsym, sym%typeAt, &
             & use_inversion, sym%xRed)
        if (AB_DBG) write(std_err,*) "AB symmetry: call ABINIT OK."

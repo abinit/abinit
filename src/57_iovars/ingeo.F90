@@ -579,6 +579,14 @@ subroutine ingeo (acell,amu,dtset,bravais,&
        MSG_ERROR(message)
      end if
 
+     if(dtset%nzchempot/=0 .and. nsym/=1 .and. spgroup/=1)then
+       write(message, '(5a)' )&
+&       'For the time being, a spatially-varying chemical potential can only be used',ch10,&
+&       'either with the symmetry finder (nsym=0) or with the space group 1 (nsym=1)',ch10,&
+&       'Action: change one of the input variables nzchempot or nsym or spgroup in your input file.'
+       MSG_ERROR(message)
+     end if
+
      typat(1:natrd)=typat_read(1:natrd)
 
      if(spgroup/=0 .and. nsym/=0)then
@@ -809,7 +817,7 @@ subroutine ingeo (acell,amu,dtset,bravais,&
 
 
        call symfind(dtset%berryopt,field_xred,gprimd,jellslab,msym,natom,noncoll,nptsym,nsym,&
-&       ptsymrel,spinat,symafm,symrel,tnons,tolsym,typat,use_inversion,xred,nucdipmom)
+&       dtset%nzchempot,ptsymrel,spinat,symafm,symrel,tnons,tolsym,typat,use_inversion,xred,nucdipmom)
 
 !      If the tolerance on symmetries is bigger than 1.e-8, symmetrize the atomic positions
        if(tolsym>1.00001e-8)then
