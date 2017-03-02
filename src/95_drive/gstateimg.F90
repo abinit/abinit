@@ -216,7 +216,7 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
  integer :: ntimimage,ntimimage_stored,ntimimage_max,similar
  logical :: check_conv,compute_all_images,compute_static_images
  logical :: isVused,isARused,is_master,is_mep,is_pimd
- logical :: use_hist,use_hist_prev
+ logical :: call_predictor,use_hist,use_hist_prev
  real(dp) :: delta_energy,dtion
  character(len=500) :: hist_filename,msg
  type(args_gs_type) :: args_gs
@@ -310,7 +310,7 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
    end if
    !Initialize a variable to write the history
    ABI_DATATYPE_ALLOCATE(hist,(nimage))
-   call abihist_init(hist,dtset%natom,1,isVused,isARused)
+   call abihist_init(hist,dtset%natom,ntimimage,isVused,isARused)
  end if ! imgmov/=0
 
 !Allocations
@@ -398,6 +398,7 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
  do itimimage=1,ntimimage
 
    res_img => results_img_timimage(:,itimimage_eff)
+   call_predictor=(ntimimage>1)
 
 !  If history is activated and if curent image is inside it: do not compute anything
    if (use_hist_prev) then
@@ -419,6 +420,7 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
 &                        hist_prev(iimage)%rprimd(:,:,ih),dtset%natom)
          hist_prev(iimage)%ihist=hist_prev(iimage)%ihist+1
        end do
+       !call_predictor=.false.
        goto 110 ! This is temporary
      end if
    end if
@@ -541,7 +543,7 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
 
 !    Store results in hist datastructure
      if (use_hist) then
-       ih=1
+       ih=hist(iimage)%ihist
        call mkrdim(res_img(iimage)%acell(:),res_img(iimage)%rprim(:,:),rprimd)
        call var2hist(res_img(iimage)%acell(:),hist(iimage),dtset%natom,&
 &                    rprimd,res_img(iimage)%xred(:,:),.FALSE.)
@@ -633,19 +635,24 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
 !Temporary statement
 110 continue
 
-!  Stop at the maximal value of itimimage
-   if ((.not.is_pimd).and.(itimimage==ntimimage_max)) exit
+!  Dont call the predictor at last time step
+   if (itimimage>=ntimimage_max) call_predictor=(call_predictor.and.is_pimd)
 
 !  Predict the next value of the images
-   if (ntimimage>1) then
+   if (call_predictor) then
      call predictimg(delta_energy,imagealgo_str(dtset%imgmov),dtset%imgmov,itimimage,&
 &     itimimage_eff,list_dynimage,ga_param,mep_param,mpi_enreg,dtset%natom,ndynimage,&
 &     nimage,dtset%nimage,ntimimage_stored,pimd_param,dtset%prtvolimg,results_img_timimage)
    end if
 
-   if ((is_pimd).and.(itimimage==ntimimage_max)) exit
-   itimimage_eff=itimimage_eff+1
-   if (itimimage_eff>ntimimage_stored) itimimage_eff=1
+!  Increment indexes
+   if (itimimage>=ntimimage_max) exit
+   itimimage_eff=itimimage_eff+1;if (itimimage_eff>ntimimage_stored) itimimage_eff=1
+   if (use_hist) then
+     do iimage=1,nimage
+       hist(iimage)%ihist=hist(iimage)%ihist+1
+     end do
+   end if
 
    call timab(707,2,tsec)
 

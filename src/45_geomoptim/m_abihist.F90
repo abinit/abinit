@@ -1401,6 +1401,7 @@ subroutine write_md_hist_img(hist,filename,ifirst,natom,ntypat,&
 !    Get the IDs
      call get_varid_hist(ncid,xcart_id,xred_id,fcart_id,fred_id,vel_id,vel_cell_id,&
 &         rprimd_id,acell_id,strten_id,etotal_id,ekin_id,entropy_id,mdtime_id)
+
 !    Write
      do iimage=1,my_nimage
        iimg=my_imgtab(iimage)
