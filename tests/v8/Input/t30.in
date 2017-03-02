@@ -5,7 +5,7 @@ ndtset 2
 
 #Test the following chemical potential : in the relevant zone, the potential in linear,
 # pulling the Li towards -z, and pushing the H towards +z.
-nzchempot 2
+nzchempot  2
 chempot   -0.2 -0.01 0.05  #This is for the Li atom, defines the chemical potential at zred=-0.2
            0.2  0.01 0.05  #This is for the Li atom, defines the chemical potential at zred= 0.2
 

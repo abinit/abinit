@@ -87,11 +87,11 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
  logical :: wvlbigdft=.false.
  integer :: ttoldfe,ttoldff,ttolrff,ttolvrs,ttolwfr
  integer :: bantot,ia,iatom,ib,iband,idtset,ierr,iexit,ii,iimage,ikpt,ilang,intimage,ierrgrp
- integer :: ipsp,isppol,isym,itypat,jdtset,jj,kk,maxiatsph,maxidyn,minplowan_iatom,maxplowan_iatom
+ integer :: ipsp,isppol,isym,itypat,iz,jdtset,jj,kk,maxiatsph,maxidyn,minplowan_iatom,maxplowan_iatom
  integer :: mband,mgga,miniatsph,minidyn,mod10,mpierr
  integer :: mu,natom,nfft,nfftdg,nkpt,nloc_mem,nlpawu,nproc,nspden,nspinor,nsppol,optdriver,response,usepaw,usewvl
  integer :: fftalg !,fftalga,fftalgc,
- real(dp) :: delta,sumalch,sumocc,ucvol,wvl_hgrid,zatom
+ real(dp) :: delta,dz,sumalch,sumocc,ucvol,wvl_hgrid,zatom
  character(len=1000) :: message,msg
  type(dataset_type) :: dt
 !arrays
@@ -1777,13 +1777,13 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
            MSG_ERROR_NOSTOP(message,ierr)
          endif
        enddo
-       dz=dt%chempot(1,nzchempot,itypat)-dt%chempot(1,1,itypat)
+       dz=dt%chempot(1,dt%nzchempot,itypat)-dt%chempot(1,1,itypat)
        if(dz>one)then
          write(message, '(a,2i6,a,a,d16.10,a,a, a,d16.10,a,a, a,a,a)' )&
-&          ' For izchempot,itypat=',iz,itypat,ch10,&
+&          ' For nzchempot,itypat=',dt%nzchempot,itypat,ch10,&
 &          ' chempot(1,1,itypat) = ',dt%chempot(1,1,itypat),' and', ch10,&
-&          ' chempot(1,nzchempot  ,itypat) = ',dt%chempot(1,dt%nzchempot,itypat),',',ch10,&
-&          ' while the latter should at most be one more than the former =>stop',ch10,&
+&          ' chempot(1,nzchempot  ,itypat) = ',dt%chempot(1,dt%nzchempot,itypat),'.',ch10,&
+&          ' However, the latter should, at most, be one more than the former =>stop',ch10,&
 &          'Action: correct chempot(1,nzchempot,itypat) in input file.'
          MSG_ERROR_NOSTOP(message,ierr)
        endif

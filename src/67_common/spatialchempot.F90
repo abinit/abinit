@@ -66,7 +66,7 @@
 
 !Local variables-------------------------------
 !scalars
- integer :: itypat,iz
+ integer :: iatom,itypat,iz
  real(dp) :: a_2,a_3,cp0,cp1,dcp0,dcp1,ddz,deltaz,deltaziz
  real(dp) :: dqz,dz1,qz,zred,z0
 !character(len=500) :: message
@@ -117,7 +117,7 @@
 
 !  Compute value and gradient of the chemical potential, at ddz wrt to lower delimiting plane
    e_chempot=e_chempot+(a_3*ddz**3 + a_2*ddz**2 + dcp0*ddz + cp0)
-   grchempot(3,iatom)=three*a_3*ddz**2 + two*a_2*ddz + dcp0
+   grchempottn(3,iatom)=three*a_3*ddz**2 + two*a_2*ddz + dcp0
 
  enddo
 

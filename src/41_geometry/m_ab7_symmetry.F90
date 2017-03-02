@@ -670,7 +670,7 @@ contains
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'symmetry_set_jellium'
+#define ABI_FUNC 'symmetry_set_nzchempot'
 !End of the abilint section
 
     integer, intent(in) :: id

@@ -201,7 +201,7 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grewtn,grvdw,gsqcut,&
  integer :: mpi_comm_sphgrid,nk3xc
  integer :: iatom,ifft,ipositron,ispden,n1,n2,n3,nfftot
  integer :: optatm,optdyfr,opteltfr,optgr,option,optn,optn2,optstr,optv
- real(dp) :: doti,e_xcdc_vxctau,ebb,ebn,evxc,ucvol_local,rpnrm
+ real(dp) :: doti,e_chempot,e_xcdc_vxctau,ebb,ebn,evxc,ucvol_local,rpnrm
  logical :: add_tfw_,is_hybrid_ncpp,with_vxctau,wvlbigdft=.false.
  real(dp), allocatable :: xcart(:,:)
  character(len=500) :: message
@@ -214,6 +214,7 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grewtn,grvdw,gsqcut,&
  real(dp) :: strn_dummy6(6), strv_dummy6(6)
  real(dp) :: vzeeman(4)
  real(dp),allocatable :: grtn(:,:),dyfr_dum(:,:,:),gr_dum(:,:)
+ real(dp),allocatable :: grchempottn_dum(:,:)
  real(dp),allocatable :: rhojellg(:,:),rhojellr(:),rhowk(:,:),vjell(:)
  real(dp),allocatable :: Vmagconstr(:,:),rhog_dum(:,:)
 
@@ -269,7 +270,10 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grewtn,grvdw,gsqcut,&
 &     wvl%descr, wvl%den, xred)
    end if
    if (dtset%nzchempot>0) then
-     call spatialchempot(energies%e_chempot,chempot,grchempottn,dtset%natom,ntypat,nzchempot,dtset%typat,xred)
+!    call spatialchempot(energies%e_chempot,chempot,grchempottn,dtset%natom,ntypat,dtset%nzchempot,dtset%typat,xred)
+     ABI_ALLOCATE(grchempottn_dum,(3,dtset%natom))
+     call spatialchempot(e_chempot,dtset%chempot,grchempottn_dum,dtset%natom,ntypat,dtset%nzchempot,dtset%typat,xred)
+     ABI_DEALLOCATE(grchempottn_dum)
    endif
    if (dtset%vdw_xc==5.and.ngrvdw==dtset%natom) then
      call vdw_dftd2(energies%e_vdw_dftd,dtset%ixc,dtset%natom,ntypat,1,dtset%typat,rprimd,&
