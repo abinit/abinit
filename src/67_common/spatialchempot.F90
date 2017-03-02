@@ -4,7 +4,7 @@
 !!  spatialchempot
 !!
 !! FUNCTION
-    Treat spatially varying chemical potential.
+!!  Treat spatially varying chemical potential.
 !!  Compute energy and derivative with respect to dimensionless reduced atom coordinates of the
 !!  spatially varying chemical potential. No contribution to stresses.
 !!
@@ -43,8 +43,9 @@
 
 #include "abi_common.h"
 
-subroutine ewald(e_chempot,chempot,grchempottn,natom,ntypat,nzchempot,typat,xred)
+ subroutine spatialchempot(e_chempot,chempot,grchempottn,natom,ntypat,nzchempot,typat,xred)
 
+ use defs_basis
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -120,5 +121,5 @@ subroutine ewald(e_chempot,chempot,grchempottn,natom,ntypat,nzchempot,typat,xred
 
  enddo
 
-end spatialchempot
+end subroutine spatialchempot
 !!***
