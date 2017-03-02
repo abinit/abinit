@@ -244,8 +244,8 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grewtn,grvdw,gsqcut,&
 !Test addition of Weiszacker gradient correction to Thomas-Fermi kin energy
  add_tfw_=.false.;if (present(add_tfw)) add_tfw_=add_tfw
 
-!Get Ewald energy and Ewald forces
-!--------------------------------------------------------------
+!Get Ewald energy and Ewald forces, as well as vdW-DFTD energy and forces, and chemical potential energy and forces.
+!-------------------------------------------------------------------------------------------------------------------
  call timab(5,1,tsec)
  if (ipositron/=1) then
    if (dtset%icoulomb == 0 .or. (dtset%usewvl == 0 .and. dtset%icoulomb == 2)) then
@@ -268,6 +268,9 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grewtn,grvdw,gsqcut,&
      call ionion_surface(dtset, energies%e_ewald, grewtn, mpi_enreg%me_wvl, mpi_enreg%nproc_wvl, rprimd, &
 &     wvl%descr, wvl%den, xred)
    end if
+   if (dtset%nzchempot>0) then
+     call spatialchempot(energies%e_chempot,chempot,grchempottn,dtset%natom,ntypat,nzchempot,dtset%typat,xred)
+   endif
    if (dtset%vdw_xc==5.and.ngrvdw==dtset%natom) then
      call vdw_dftd2(energies%e_vdw_dftd,dtset%ixc,dtset%natom,ntypat,1,dtset%typat,rprimd,&
 &     dtset%vdw_tol,xred,psps%znucltypat,fred_vdw_dftd2=grvdw)

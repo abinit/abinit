@@ -5,6 +5,7 @@ ndtset 2
 
 #Test the following chemical potential : in the relevant zone, the potential in linear,
 # pulling the Li towards -z, and pushing the H towards +z.
+nzchempot 2
 chempot   -0.2 -0.01 0.05  #This is for the Li atom, defines the chemical potential at zred=-0.2
            0.2  0.01 0.05  #This is for the Li atom, defines the chemical potential at zred= 0.2
 
@@ -16,13 +17,13 @@ nzchempot1 0
 
 #For the second data set, turn on the chemical potential. Start with molecule aligned with z,
 # the molecule is slightly stretched.
-nzchempot2 2
 xcart2   0.0 0.0  1.5
          0.0 0.0 -1.5
 
 #Third data set, chemical potential present. Start with molecule not aligned with z.
 xcart3  -1.5 0.0  0.1
          1.5 0.0 -0.1
+
 #Fourth data set, chemical potential present. Start with molecule aligned with x, check that ABINIT
 #takes into account the chemical potential in the determination of the spatial symmetry group.
 xcart4  -1.5 0.0  0.0
