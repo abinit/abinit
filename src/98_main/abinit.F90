@@ -223,7 +223,7 @@ program abinit
 !note that memocc.prc files can easily be multiple GB in size so don't use this option normally
 #ifdef HAVE_MEM_PROFILING
  call abimem_init(args%abimem_level)
- !call abimem_init(2)
+!call abimem_init(2)
 #endif
 
 !------------------------------------------------------------------------------

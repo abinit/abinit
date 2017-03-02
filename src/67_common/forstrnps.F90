@@ -162,7 +162,7 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass,eigen,electronpositron,fock,&
 !Local variables-------------------------------
 !scalars
  integer,parameter :: tim_rwwf=7
- integer :: bandpp,bdtot_index,choice,cpopt,dimffnl,iband,iband_last,ibg,icg,ider
+ integer :: bandpp,bdtot_index,choice,cpopt,dimffnl,iband,iband_cprj,iband_last,ibg,icg,ider
  integer :: idir,ierr,ii,ikg,ikpt,ilm,ipositron,ipw,ishift,isppol,istwf_k
  integer :: mband_cprj,me_distrb,my_ikpt,my_nspinor,nband_k,nband_cprj_k,ndat,nkpg
  integer :: nnlout,npw_k,paw_opt,signs,spaceComm
@@ -277,11 +277,12 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass,eigen,electronpositron,fock,&
 
  call timab(921,2,tsec)
 
-
 !need to reorder cprj=<p_lmn|Cnk> (from unsorted to atom-sorted)
-! if (psps%usepaw==1.and.usecprj_local==1) then
-!   call pawcprj_reorder(cprj,gs_hamk%atindx)
-! end if
+ if (psps%usepaw==1.and.usecprj_local==1) then
+   call pawcprj_reorder(cprj,gs_hamk%atindx)
+ end if
+
+
 !Common data for "nonlop" routine
  signs=1 ; idir=0  ; ishift=0 ; tim_nonlop=4 ; tim_nonlop_prep=12
  choice=2*optfor;if (stress_needed==1) choice=10*choice+3
@@ -291,6 +292,7 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass,eigen,electronpositron,fock,&
    paw_opt=0 ; cpopt=-1
  else
    paw_opt=2 ; cpopt=-1+3*usecprj_local
+!  paw_opt=2 ; cpopt=-1
  end if
 
 
@@ -466,6 +468,7 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass,eigen,electronpositron,fock,&
      if (psps%usepaw==1.and.usecprj_local==1) then
        ABI_DATATYPE_ALLOCATE(cwaveprj,(natom,my_nspinor*bandpp))
        call pawcprj_alloc(cwaveprj,0,gs_hamk%dimcprj)
+!       call pawcprj_alloc(cwaveprj,cprj(1,1)%ncpgr,gs_hamk%dimcprj)
      else
        ABI_DATATYPE_ALLOCATE(cwaveprj,(0,0))
      end if
@@ -654,6 +657,7 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass,eigen,electronpositron,fock,&
      do iblock=1,nblockbd
 
        iband=(iblock-1)*blocksize+1;iband_last=min(iband+blocksize-1,nband_k)
+       iband_cprj=(iblock-1)*bandpp+1
        if(proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,iband,iband_last,isppol,me_distrb)) cycle
 
 !      Select occupied bandsddk
@@ -666,7 +670,7 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass,eigen,electronpositron,fock,&
          cwavef(:,1:npw_k*my_nspinor*blocksize)=&
 &         cg(:,1+(iblock-1)*npw_k*my_nspinor*blocksize+icg:iblock*npw_k*my_nspinor*blocksize+icg)
          if (psps%usepaw==1.and.usecprj_local==1) then
-           call pawcprj_get(gs_hamk%atindx1,cwaveprj,cprj,natom,iband,ibg,ikpt,0,isppol,&
+           call pawcprj_get(gs_hamk%atindx1,cwaveprj,cprj,natom,iband_cprj,ibg,ikpt,0,isppol,&
 &           mband_cprj,mkmem,natom,bandpp,nband_cprj_k,my_nspinor,nsppol,0,&
 &           mpicomm=mpi_enreg%comm_kpt,proc_distrb=mpi_enreg%proc_distrb)
          end if
