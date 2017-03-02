@@ -272,10 +272,10 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
  compute_static_images=(dtset%istatimg>0)
 
 !Prepare the calculation, by computing flags and dimensions
- ntimimage=dtset%ntimimage
- ntimimage_stored=ntimimage;if(is_pimd)ntimimage_stored=2
  is_pimd=(dtset%imgmov==9.or.dtset%imgmov==10.or.dtset%imgmov==13)
  is_mep =(dtset%imgmov==1.or.dtset%imgmov== 2.or.dtset%imgmov== 5)
+ ntimimage=dtset%ntimimage
+ ntimimage_stored=ntimimage;if(is_pimd)ntimimage_stored=2
  nocc=dtset%mband*dtset%nkpt*dtset%nsppol
  is_master=(mpi_enreg%me_cell==0.and.mpi_enreg%me_img==0)
 
@@ -419,7 +419,7 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
 &                        hist_prev(iimage)%rprimd(:,:,ih),dtset%natom)
          hist_prev(iimage)%ihist=hist_prev(iimage)%ihist+1
        end do
-       goto 110
+       goto 110 ! This is temporary
      end if
    end if
 
@@ -630,10 +630,10 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
      end if
    end if
 
-!TEST
+!Temporary statement
 110 continue
 
-!  In any case, stop at the maximal value of itimimage
+!  Stop at the maximal value of itimimage
    if ((.not.is_pimd).and.(itimimage==ntimimage_max)) exit
 
 !  Predict the next value of the images
@@ -643,6 +643,7 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
 &     nimage,dtset%nimage,ntimimage_stored,pimd_param,dtset%prtvolimg,results_img_timimage)
    end if
 
+   if ((is_pimd).and.(itimimage==ntimimage_max)) exit
    itimimage_eff=itimimage_eff+1
    if (itimimage_eff>ntimimage_stored) itimimage_eff=1
 
