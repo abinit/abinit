@@ -390,6 +390,9 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'ntypalch',tread,'INT')
  if(tread==1) dtset%ntypalch=intarr(1)
 
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nzchempot',tread,'INT')
+ if(tread==1) dtset%nzchempot=intarr(1)
+
  ntypalch=dtset%ntypalch
  if(ntypalch>ntypat)then
    write(message, '(3a,i0,a,i0,a,a)' )&
@@ -474,7 +477,8 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
    call ingeo(acell,amu,dtset,bravais,dtset%genafm(1:3),iatfix,&
 &   dtset%icoulomb,iimage,iout,jdtset,dtset%jellslab,lenstr,mixalch,&
 &   msym,natom,dtset%nimage,dtset%npsp,npspalch,dtset%nspden,dtset%nsppol,&
-&   dtset%nsym,ntypalch,dtset%ntypat,nucdipmom,dtset%pawspnorb,dtset%ptgroupma,ratsph,&
+&   dtset%nsym,ntypalch,dtset%ntypat,nucdipmom,dtset%nzchempot,&
+&   dtset%pawspnorb,dtset%ptgroupma,ratsph,&
 &   rprim,dtset%slabzbeg,dtset%slabzend,dtset%spgroup,spinat,&
 &   string,symafm,dtset%symmorphi,symrel,tnons,dtset%tolsym,typat,vel,vel_cell,xred,znucl)
    dtset%iatfix(1:3,1:natom)=iatfix(1:3,1:natom)

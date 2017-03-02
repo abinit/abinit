@@ -107,21 +107,21 @@
 !**************************************************************************
 
 !DEBUG
-!write(std_out,*)' symfind : enter'
-!call flush(6)
-!write(std_out,*)' symfind : jellslab = ',jellslab
-!write(std_out,*)'   ptsymrel matrices are :'
-!do isym=1,nptsym
-!write(std_out,'(i4,4x,9i4)' )isym,ptsymrel(:,:,isym)
-!end do
-!write(std_out,*)' symfind : natom=',natom
-!do iatom=1,natom
-!write(std_out,*)'  atom number',iatom
-!write(std_out,*)'   typat   =',typat(iatom)
-!write(std_out,*)'   spinat  =',spinat(:,iatom)
-!write(std_out,*)'   xred    =',xred(:,iatom)
-!end do
-!call flush(6)
+ write(std_out,*)' symfind : enter'
+ call flush(6)
+ write(std_out,*)' symfind : nzchempot= ',nzchempot
+ write(std_out,*)'   ptsymrel matrices are :'
+ do isym=1,nptsym
+ write(std_out,'(i4,4x,9i4)' )isym,ptsymrel(:,:,isym)
+ end do
+ write(std_out,*)' symfind : natom=',natom
+ do iatom=1,natom
+ write(std_out,*)'  atom number',iatom
+ write(std_out,*)'   typat   =',typat(iatom)
+ write(std_out,*)'   spinat  =',spinat(:,iatom)
+ write(std_out,*)'   xred    =',xred(:,iatom)
+ end do
+ call flush(6)
 !ENDDEBUG
 
 !Find the number of classes of atoms (type and spinat must be identical,
@@ -415,11 +415,11 @@
  end if
 
 !DEBUG
-!write(std_out,*)' symfind : exit, nsym=',nsym
-!write(std_out,*)'   symrel matrices, symafm and tnons are :'
-!do isym=1,nsym
-!write(std_out,'(i4,4x,3i4,2x,3i4,2x,3i4,4x,i4,4x,3f8.4)' )isym,symrel(:,:,isym),symafm(isym),tnons(:,isym)
-!end do
+ write(std_out,*)' symfind : exit, nsym=',nsym
+ write(std_out,*)'   symrel matrices, symafm and tnons are :'
+ do isym=1,nsym
+ write(std_out,'(i4,4x,3i4,2x,3i4,2x,3i4,4x,i4,4x,3f8.4)' )isym,symrel(:,:,isym),symafm(isym),tnons(:,isym)
+ end do
 !stop
 !ENDDEBUG
 

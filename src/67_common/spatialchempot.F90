@@ -73,6 +73,13 @@
 
 ! *************************************************************************
 
+!DEBUG
+!write(std_out,'(a)')' spatialchempot : enter '
+!write(std_out,'(a,2i6)')' nzchempot,ntypat',nzchempot,ntypat
+!write(std_out,'(a,6es13.3)') ' chempot(1:3,1:2,1)=',chempot(1:3,1:2,1)
+!write(std_out,'(a,6es13.3)') ' chempot(1:3,1:2,2)=',chempot(1:3,1:2,2)
+!ENDDEBUG
+
  e_chempot=zero
  grchempottn(:,:)=zero
 
@@ -103,23 +110,46 @@
    if(iz/=nzchempot+1)then
      dz1=chempot(1,iz,itypat)-chempot(1,iz-1,itypat) ; cp1=chempot(2,iz,itypat) ; dcp1=chempot(3,iz,itypat)
    else
-     dz1=one ; cp1=chempot(2,1,itypat) ; dcp1=chempot(3,1,itypat)
+     dz1=(chempot(1,1,itypat)+one)-chempot(1,nzchempot,itypat) ; cp1=chempot(2,1,itypat) ; dcp1=chempot(3,1,itypat)
    endif
    ddz=deltaz-z0
+
+!DEBUG
+!  write(std_out,'(a,2i5)')' Delimiting planes, iz-1 and iz=',iz-1,iz
+!  write(std_out,'(a,2es13.3)')' z0,  dz1= :',z0,dz1
+!  write(std_out,'(a,2es13.3)')' cp0, cp1= :',cp0,cp1
+!  write(std_out,'(a,2es13.3)')' dcp0, dcp1= :',dcp0,dcp1
+!  write(std_out,'(a,2es13.3)')' deltaz,ddz=',deltaz,ddz
+!ENDDEBUG
 
 !  Determine the coefficient of the third-order polynomial taking z0 as origin
 !  P(dz=z-z0)= a_3*dz**3 + a_2*dz**2 + a_1*dz + a_0 ; obviously a_0=cp0 and a_1=dcp0
 !  Define qz=a_3*dz + a_2 and dqz=3*a_3*dz + 2*a_2
    qz=((cp1-cp0)-dcp0*dz1)/dz1**2
    dqz=(dcp1-dcp0)/dz1
-   a_3=dqz-two*qz
+   a_3=(dqz-two*qz)/dz1
    a_2=three*qz-dqz
 
 !  Compute value and gradient of the chemical potential, at ddz wrt to lower delimiting plane
    e_chempot=e_chempot+(a_3*ddz**3 + a_2*ddz**2 + dcp0*ddz + cp0)
    grchempottn(3,iatom)=three*a_3*ddz**2 + two*a_2*ddz + dcp0
 
+!DEBUG
+!  write(std_out,'(a,4es16.6)')' qz,dqz=',qz,dqz
+!  write(std_out,'(a,4es16.6)')' cp0,dcp0,a_2,a_3=',cp0,dcp0,a_2,a_3
+!  write(std_out,'(a,2es13.3)')' dcp0*ddz + cp0=',dcp0*ddz + cp0
+!  write(std_out,'(a,2es13.3)')' a_2*ddz**2=',a_2*ddz**2
+!  write(std_out,'(a,2es13.3)')' a_3*ddz**3=',a_3*ddz**3
+!  write(std_out,'(a,2es13.3)')' contrib=',a_3*ddz**3 + a_2*ddz**2 + dcp0*ddz + cp0
+!  write(std_out,'(a,2es13.3)')' e_chempot=',e_chempot
+!ENDDEBUG
+
  enddo
+
+!DEBUG
+!write(std_out,'(a)')' spatialchempot : exit '
+!write(std_out,'(a,es16.6)') ' e_chempot=',e_chempot
+!ENDDEBUG
 
 end subroutine spatialchempot
 !!***
