@@ -113,7 +113,9 @@ real(dp), ABI_CONTIGUOUS pointer :: fcart(:,:),vel(:,:)
 !### 01. Copy from the history to the variables
  call hist2var(acell,hist,ab_mover%natom,rprimd,xred,zDEBUG)
 
- do jj=1,3;rprim(jj,1:3)=rprimd(jj,1:3)/acell(1:3);end do
+ do jj=1,3
+   rprim(jj,1:3)=rprimd(jj,1:3)/acell(1:3)
+ end do
 
  call xred2xcart(ab_mover%natom,rprimd,xcart,xred)
  strten(:)=hist%strten(:,hist%ihist)

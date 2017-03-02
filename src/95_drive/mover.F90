@@ -646,7 +646,9 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
          end do
        end if
        if (ncycle<10.and.ab_mover%restartxf>=0) then
-         do ii=1,3;rprim(ii,1:3)=rprimd(ii,1:3)/acell(1:3);end do
+         do ii=1,3
+           rprim(ii,1:3)=rprimd(ii,1:3)/acell(1:3)
+         end do
          call xfh_update(ab_xfh,acell,fred_corrected,ab_mover%natom,rprim,&
 &                        hist%strten(:,hist%ihist),xred)
        end if

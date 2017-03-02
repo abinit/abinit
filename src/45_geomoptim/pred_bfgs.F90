@@ -224,7 +224,9 @@ real(dp) :: xred(3,ab_mover%natom),strten(6)
 !### 04. Obtain the present values from the history
 
  call hist2var(acell,hist,ab_mover%natom,rprimd,xred,zDEBUG)
- do ii=1,3;rprim(ii,1:3)=rprimd(ii,1:3)/acell(1:3);end do
+ do ii=1,3
+   rprim(ii,1:3)=rprimd(ii,1:3)/acell(1:3)
+ end do
 
  strten(:)=hist%strten(:,hist%ihist)
  etotal   =hist%etot(hist%ihist)

@@ -202,7 +202,9 @@ subroutine pred_langevin(ab_mover,hist,icycle,itime,ncycle,ntime,zDEBUG,iexit,sk
  etotal    =hist%etot(hist%ihist)
 
  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
- do ii=1,3;rprim(ii,1:3)=rprimd(ii,1:3)/acell(1:3);end do
+ do ii=1,3
+   rprim(ii,1:3)=rprimd(ii,1:3)/acell(1:3)
+ end do
  call xred2xcart(ab_mover%natom,rprimd,xcart,xred)
 
 !Get rid of mean force on whole unit cell, but only if no

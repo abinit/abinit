@@ -177,7 +177,9 @@ subroutine pred_isothermal(ab_mover,hist,itime,mttk_vars,ntime,zDEBUG,iexit)
  vel(:,:)  =hist%vel(:,:,hist%ihist)
  etotal    =hist%etot(hist%ihist)
 
- do ii=1,3;rprim(ii,1:3)=rprimd(ii,1:3)/acell(1:3);end do
+ do ii=1,3
+   rprim(ii,1:3)=rprimd(ii,1:3)/acell(1:3)
+ end do
  call xred2xcart(ab_mover%natom,rprimd,xcart,xred)
 
  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
