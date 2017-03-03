@@ -67,7 +67,7 @@ prtwf 0  prtden 0
 #%% exclude_builders =
 #%% [files]
 #%% files_to_test =
-#%%   t05.out, tolnlines = 100, tolabs = 1.e-5, tolrel = 5.e-2
+#%%   t05.out, tolnlines = 140, tolabs = 2.e-5, tolrel = 5.e-2
 #%% extra_inputs = t05o_HIST.nc
 #%% psp_files = H.LDA-PW-paw.abinit
 #%% [paral_info]
