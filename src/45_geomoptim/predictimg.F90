@@ -111,10 +111,13 @@ subroutine predictimg(deltae,imagealgo_str,imgmov,itimimage,itimimage_eff,list_d
 !Local variables-------------------------------
 !scalars
  integer,save :: idum=5
+ logical :: is_pimd
  character(len=500) :: msg
 !arrays
 
 ! *************************************************************************
+
+ is_pimd=(imgmov==9.or.imgmov==10.or.imgmov==13)
 
 !Write convergence info
  write(msg,'(3a)') ch10,&
@@ -134,12 +137,17 @@ subroutine predictimg(deltae,imagealgo_str,imgmov,itimimage,itimimage_eff,list_d
 &     ' Fourth-order Runge-Kutta algorithm - intermediate step ',mod(itimimage,4),ch10
      write(msg,'(2a)') trim(msg),' Computing new intermediate positions...'
    end if
+ else if (is_pimd) then
+
+!  PIMD
+   write(msg,'(2a)') trim(msg),' Moving images of the cell...'
  else
 
 !  Other cases
    if (itimimage>1) write(msg,'(2a,es11.3,2a)') trim(msg),&
 &   ' Average[Abs(Etotal(t)-Etotal(t-dt))]=',deltae,' Hartree',ch10
    write(msg,'(2a)') trim(msg),' Moving images of the cell...'
+
  end if
 
  call wrtout(ab_out ,msg,'COLL')

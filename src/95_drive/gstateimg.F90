@@ -278,6 +278,7 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
  ntimimage_stored=ntimimage;if(is_pimd)ntimimage_stored=2
  nocc=dtset%mband*dtset%nkpt*dtset%nsppol
  is_master=(mpi_enreg%me_cell==0.and.mpi_enreg%me_img==0)
+ delta_energy=zero
 
 !Management of dynamics/relaxation history (positions, forces, stresses, ...)
  use_hist=(dtset%imgmov/=0.and.nimage>0) ; use_hist_prev=.false.
