@@ -49,7 +49,7 @@
 #include "abi_common.h"
 
 
-subroutine pred_velverlet(ab_mover,hist,itime,ntime,zDEBUG,iexit)
+subroutine pred_velverlet(ab_mover,hist,itime,ntime,zDEBUG,iexit,hmcflag,icycle,ncycle)
     
  use defs_basis
  use m_errors
@@ -73,6 +73,9 @@ subroutine pred_velverlet(ab_mover,hist,itime,ntime,zDEBUG,iexit)
  integer,intent(in) :: ntime
  integer,intent(in) :: iexit
  logical,intent(in) :: zDEBUG
+ integer,intent(in),optional :: hmcflag
+ integer,intent(in),optional :: icycle
+ integer,intent(in),optional :: ncycle
 
 !Local variables-------------------------------
 
@@ -84,10 +87,14 @@ subroutine pred_velverlet(ab_mover,hist,itime,ntime,zDEBUG,iexit)
  real(dp) :: fcart(3,ab_mover%natom),fred(3,ab_mover%natom)                     ! forces, Cartesian and reduced coordinates
  real(dp) :: fred_corrected(3,ab_mover%natom),fcart_corrected(3,ab_mover%natom)
  real(dp) :: factor                                                             ! factor, indicating change of time step at last iteration
+ integer :: hmcflag_
+ integer :: icycle_
+ integer :: ncycle_
 
  real(dp) :: acell(3)                                                           ! lattice parameters
  real(dp) :: rprimd(3,3),rprim(3,3)                                             ! lattice vectors
  real(dp),allocatable,save :: vel_prev(:,:)                                     ! velocities at the end of each time step (half time step ahead of coordinates)
+
 ! *************************************************************************
 
  DBG_ENTER("COLL")
@@ -108,6 +115,12 @@ subroutine pred_velverlet(ab_mover,hist,itime,ntime,zDEBUG,iexit)
 
  DBG_EXIT("COLL")
 
+
+hmcflag_=0;if (present(hmcflag)) hmcflag_=hmcflag
+icycle_ =0;if (present(icycle)) icycle_=icycle
+ncycle_ =0;if (present(ncycle)) ncycle_=icycle
+
+
 if(iexit/=0)then
    if (allocated(vel_prev))  then
      ABI_DEALLOCATE(vel_prev)
@@ -115,7 +128,7 @@ if(iexit/=0)then
    return
 end if
 
-if(itime==1)then
+if((hmcflag_==0.and.itime==1).or.(hmcflag_==1.and.icycle_==1))then
    if (allocated(vel_prev))  then
      ABI_DEALLOCATE(vel_prev)
    end if
@@ -155,7 +168,7 @@ endif
  end if
 
 
- if(itime==1)then
+ if((hmcflag_==0.and.itime==1).or.(hmcflag_==1.and.icycle_==1))then
 
 
   !the following breakdown of single time step in two halfs is needed for initialization.
@@ -172,8 +185,8 @@ endif
        vel(jj,ii) = vel_prev(jj,ii) + 0.5_dp * ab_mover%dtion*fcart(jj,ii)/ab_mover%amass(ii)
      enddo
   enddo
-  ! use half-step behind velocity values!!!! 
-  do ii=1,ab_mover%natom ! propagate coordinates one time step forward
+  ! use half-step behind velocity values to propagate coordinates one time step forward!!!! 
+  do ii=1,ab_mover%natom
     do jj=1,3
       xcart(jj,ii) = xcart(jj,ii) + ab_mover%dtion*vel_prev(jj,ii)
     enddo
@@ -181,15 +194,15 @@ endif
   ! now, at this 1st iteration, "vel_prev" correspond to a time instance half-step behind
   ! that of "xcart"
  
-  write(239,*) 'end of the 1 vv iteration, vel_prev:'
+  write(239,*) 'end of the 1 vv iteration, cycle ',icycle_,', vel_prev:'
   write(239,*) vel_prev(1,:)
   write(239,*) vel_prev(2,:)
   write(239,*) vel_prev(3,:)
   write(239,*) ''
 
- else !i.e. itime/=1
+ else !i.e. basically, not the very first step (itime/=1 in case of simple simulation and icycle/=1 in case of hmc call)
 
-  write(239,*) 'beg of the ',itime,' vv iteration, vel_prev:'
+  write(239,*) 'beg of the ',itime,' vv iteration, cycle ',icycle_,', vel_prev:'
   write(239,*) vel_prev(1,:)
   write(239,*) vel_prev(2,:)
   write(239,*) vel_prev(3,:)
@@ -205,7 +218,7 @@ endif
   enddo
   !now, the "vel_prev" velocities are half of a time step ahead and can be used to propagate xcart
 
-  if(itime==ntime-1)then
+  if((hmcflag_==0.and.itime==ntime-1).or.(hmcflag_==1.and.icycle_==ncycle_-1))then
     factor=0.5_dp
   else
     factor=one
@@ -236,9 +249,9 @@ endif
         ekin_tmp=ekin_tmp+0.5_dp*ab_mover%amass(ii)*vel_prev(jj,ii)**2
       end do
    end do
-  write(238,*) itime,ekin_tmp,ekin,epot,factor 
+  write(238,*) itime,icycle,ekin_tmp,ekin,epot,factor 
 
-  write(239,*) 'end of the ',itime,' vv iteration, vel_prev:'
+  write(239,*) 'end of the ',itime,' vv iteration, cycle ',icycle_,', vel_prev:'
   write(239,*) vel_prev(1,:)
   write(239,*) vel_prev(2,:)
   write(239,*) vel_prev(3,:)
