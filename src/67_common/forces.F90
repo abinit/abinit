@@ -11,7 +11,7 @@
 !!     fcart(i,iat) = d(Etot)/(d(r(i,iat)))
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (DCA, XG, GMR, FJ, MT)
+!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR, FJ, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -133,6 +133,7 @@ subroutine forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,forold,fred,gres
  use m_fock,             only : fock_type
  use m_pawtab,           only : pawtab_type
  use m_electronpositron, only : electronpositron_type,electronpositron_calctype
+ use libxc_functionals,  only : libxc_functionals_is_hybrid
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -182,6 +183,7 @@ subroutine forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,forold,fred,gres
  integer :: optatm,optdyfr,opteltfr,optgr,option,optn,optn2,optstr,optv
  real(dp) :: eei_dum,ucvol,vol_element
  logical :: calc_epaw3_forces, efield_flag
+ logical :: is_hybrid_ncpp,wvlbigdft=.false.
 !arrays
  integer :: qprtrb_dum(3)
  real(dp) :: dummy6(6),ep3(3),fioncart(3),gmet(3,3),gprimd(3,3) 
@@ -204,6 +206,9 @@ subroutine forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,forold,fred,gres
 !Compute different geometric tensor, as well as ucvol, from rprimd
  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
 
+!Check if we're in hybrid norm conserving pseudopotential
+ is_hybrid_ncpp=(psps%usepaw==0 .and. &
+& (dtset%ixc==41.or.dtset%ixc==42.or.libxc_functionals_is_hybrid()))
 !=======================================================================
 !========= Local pseudopotential and core charge contributions =========
 !=======================================================================
@@ -217,6 +222,9 @@ subroutine forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,forold,fred,gres
    call timab(550,1,tsec)
    optatm=0;optdyfr=0;optgr=1;optstr=0;optv=1;optn=n3xccc/nfft;optn2=1;opteltfr=0
 
+ if (psps%nc_xccc_gspace==1.and.psps%usepaw==0.and.is_hybrid_ncpp) then
+   MSG_BUG(' Not yet implemented !')
+ end if
    if (n3xccc>0) then
      ABI_ALLOCATE(v_dum,(nfft))
      ABI_ALLOCATE(vxctotg,(2,nfft))
@@ -288,11 +296,16 @@ subroutine forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,forold,fred,gres
 
    if (n3xccc>0) then
      call timab(53,1,tsec)
-     ABI_ALLOCATE(dyfrx2_dum,(3,3,dtset%natom))
      ABI_ALLOCATE(xccc3d_dum,(n3xccc))
-     call mkcore(dummy6,dyfrx2_dum,grxc,mpi_enreg,dtset%natom,nfft,dtset%nspden,ntypat,ngfft(1),n1xccc,ngfft(2),&
-&     ngfft(3),option,rprimd,dtset%typat,ucvol,vxc,psps%xcccrc,psps%xccc1d,xccc3d_dum,xred)
-     ABI_DEALLOCATE(dyfrx2_dum)
+     if (is_hybrid_ncpp) then
+       call xchybrid_ncpp_cc(dtset,eei_dum,mpi_enreg,nfft,ngfft,n3xccc,rhor,rprimd,&
+&       dummy6,eei_dum,xccc3d_dum,grxc=grxc,xcccrc=psps%xcccrc,xccc1d=psps%xccc1d,xred=xred,n1xccc=n1xccc)
+     else
+       ABI_ALLOCATE(dyfrx2_dum,(3,3,dtset%natom))
+       call mkcore(dummy6,dyfrx2_dum,grxc,mpi_enreg,dtset%natom,nfft,dtset%nspden,ntypat,ngfft(1),n1xccc,ngfft(2),&
+&       ngfft(3),option,rprimd,dtset%typat,ucvol,vxc,psps%xcccrc,psps%xccc1d,xccc3d_dum,xred)
+       ABI_DEALLOCATE(dyfrx2_dum)
+     end if
      ABI_DEALLOCATE(xccc3d_dum)
      call timab(53,2,tsec)
    else
@@ -406,6 +419,7 @@ subroutine forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,forold,fred,gres
 !This gives non-symmetrized Hellman-Feynman reduced gradients
  ABI_ALLOCATE(grtn,(3,dtset%natom))
  grtn(:,:)=grl(:,:)+grewtn(:,:)+synlgr(:,:)+grxc(:,:)
+
  if (usefock==1 .and. associated(fock).and.fock%optfor) then
    grtn(:,:)=grtn(:,:)+fock%forces(:,:)
  end if

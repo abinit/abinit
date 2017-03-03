@@ -27,7 +27,7 @@
 !!     wfc(i)- cmplx(cg(1,i),cg(2,i)) - wavefunction
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2016 ABINIT group (CMorari)
+!! Copyright (C) 2005-2017 ABINIT group (CMorari)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

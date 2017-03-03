@@ -10,7 +10,7 @@
 !! in the vector valf of direction idir
 !!
 !! COPYRIGHT
-!! Copyright (C) 2002-2016 ABINIT group (PCasek,FF,XG)
+!! Copyright (C) 2002-2017 ABINIT group (PCasek,FF,XG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

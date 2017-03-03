@@ -8,7 +8,7 @@
 !! the trial (local) potential and the residual potential.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (XG, GMR, MT, EB)
+!! Copyright (C) 1998-2017 ABINIT group (XG, GMR, MT, EB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -214,6 +214,8 @@ subroutine rhotov(dtset,energies,gprimd,gsqcut,istep,kxc,mpi_enreg,nfft,ngfft,&
    if (dtset%icoulomb == 0 .and. dtset%usewvl == 0) then
 !    Use the periodic solver to compute Hxc.
      nk3xc=1
+!write(80,*) "rhotov"
+!xccc3d=zero
      call timab(941,1,tsec)
      if (ipositron==0) then
        call rhohxc(dtset,energies%e_xc,gsqcut,usepaw,kxc,mpi_enreg,nfft,ngfft,&
@@ -227,9 +229,10 @@ subroutine rhotov(dtset,energies,gprimd,gsqcut,istep,kxc,mpi_enreg,nfft,ngfft,&
 &       taug=taug,taur=taur,vxctau=vxctau,add_tfw=add_tfw_,&
 &       electronpositron=electronpositron)
      end if
+!write(80,*) vxc
      if (is_hybrid_ncpp) then
        call xchybrid_ncpp_cc(dtset,energies%e_xc,mpi_enreg,nfft,ngfft,n3xccc,rhor,rprimd,&
-&       strsxc,vxc,vxcavg,xccc3d)
+&       strsxc,vxcavg,xccc3d,vxc=vxc)
      end if
      call timab(941,2,tsec)
 

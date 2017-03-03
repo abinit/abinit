@@ -7,7 +7,7 @@
 !! rotate density in real and reciprocal space 
 !!
 !! COPYRIGHT
-!! Copyright (C) 2013-2016 ABINIT group (MVerst)
+!! Copyright (C) 2013-2017 ABINIT group (MVerst)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

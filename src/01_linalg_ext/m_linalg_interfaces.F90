@@ -7,7 +7,7 @@
 !!  Interfaces for the BLAS and LAPACK linear algebra routines.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2011-2016 ABINIT group (Yann Pouillon)
+!!  Copyright (C) 2011-2017 ABINIT group (Yann Pouillon)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .

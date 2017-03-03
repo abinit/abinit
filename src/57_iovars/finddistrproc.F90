@@ -11,7 +11,7 @@
 !!   (use_slk, np_slk, gpu_linalg_limit)
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2016 ABINIT group (FJ,MT,FD)
+!! Copyright (C) 1999-2017 ABINIT group (FJ,MT,FD)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

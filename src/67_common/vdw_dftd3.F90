@@ -16,7 +16,7 @@
 !!  is also activable using vdw_xc=7
 !!
 !! COPYRIGHT
-!! Copyright (C) 2015-2016 ABINIT group (BVT)
+!! Copyright (C) 2015-2017 ABINIT group (BVT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

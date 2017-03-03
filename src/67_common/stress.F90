@@ -13,7 +13,7 @@
 !! point r to r(i) -> r(i) + Sum(j) [eps(i,j)*r(j)].
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (DCA, XG, GMR, FJ, MT)
+!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR, FJ, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -433,10 +433,10 @@
 !In cartesian coordinates (symmetric storage) 
 
  strten(:)=kinstr(:)+ewestr(:)+corstr(:)+strsxc(:)+harstr(:)+lpsstr(:)+nlstr(:)
-
  if (usefock==1 .and. associated(fock).and.fock%optstr) then
    strten(:)=strten(:)+fock%stress(:)
  end if
+
 !Add contributions for constant E or D calculation.
  if ( efield_flag ) then
    strten(:)=strten(:)+Maxstr(:)
