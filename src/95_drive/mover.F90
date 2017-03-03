@@ -186,7 +186,7 @@ type(abimover) :: ab_mover
 type(abimover_specs) :: specs
 type(abiforstr) :: preconforstr ! Preconditioned forces and stress
 type(mttk_type) :: mttk_vars
-integer :: itime,icycle,iexit,ifirst,timelimit_exit,ncycle,ncycletot,kk,jj,me
+integer :: itime,icycle,iexit=0,ifirst,timelimit_exit,ncycle,ncycletot,kk,jj,me
 integer :: nloop,ntime,option,comm
 integer :: nerr_dilatmx,my_quit,ierr,quitsum_request
 integer ABI_ASYNC :: quitsum_async
@@ -195,7 +195,7 @@ character(len=500) :: dilatmx_errmsg
 character(len=8) :: stat4xml
 character(len=35) :: fmt
 character(len=fnlen) :: filename
-real(dp) :: ucvol,favg
+real(dp) :: favg
 logical :: DEBUG=.FALSE.
 logical :: need_scfcv_cycle = .TRUE.
 logical :: change,useprtxfase
