@@ -862,25 +862,21 @@ call xmpi_barrier(mpi_enreg%comm_band)
        shift_band1=(jband-1)*size_wf
        rhs_j => rf2%RHS_Stern(:,1+shift_band1:size_wf+shift_band1)
        cwave_j => cg(:,1+shift_band1+icg:size_wf+shift_band1+icg)
-       call dotprod_g(dotr,doti,gs_hamkq%istwf_k,size_wf,2,rhs_j,cwave_j,mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
-!       write(msg,'(2(a,es22.13E3))') 'RF2 TEST FINAL :       dot =',dotr,',',doti
-!       call wrtout(std_out,msg)
-!       write(msg,'(2(a,es22.13E3))') 'RF2 TEST FINAL : lambda_jj =',rf2%lambda_mn(1,jband+(jband-1)*nband_k),&
-!                                                           ',',rf2%lambda_mn(2,jband+(jband-1)*nband_k)
-!       call wrtout(std_out,msg)
-       dotr = dotr -   rf2%lambda_mn(1,jband+(jband-1)*nband_k)
-       doti = doti - (-rf2%lambda_mn(2,jband+(jband-1)*nband_k)) ! be careful : complex conjugate of lambda_mn
-!      NOTE :
-!      If lambda_nn^(2) can be comlex (possible for ipert==natom+11, as H^(1) and H^(2) are not hermitian),
-!      the test works if we take the conjugate here.
-!      For real systems, lambda_nn^(2) is always real (empirical assumption...).
-       dotr = sqrt(dotr**2+doti**2)
-       if (dotr > tol_final) then
+       call dotprod_g(dotr,doti,gs_hamkq%istwf_k,size_wf,2,cwave_j,rhs_j,mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
+       dot2r = dotr - rf2%lambda_mn(1,jband+(jband-1)*nband_k)
+       dot2i = doti - rf2%lambda_mn(2,jband+(jband-1)*nband_k)
+       dot2r = sqrt(dot2r**2+dot2i**2)
+       if (dot2r > tol_final) then
          write(msg,'(a,i2,a,es22.13E3)') 'RF2 TEST FINAL iband = ',jband,' : NOT PASSED dotr = ',dotr
+         call wrtout(std_out,msg)
+         write(msg,'(2(a,es22.13E3))') ' < cwave_j | rhs_j > =',dotr,',',doti
+         call wrtout(std_out,msg)
+         write(msg,'(2(a,es22.13E3))') '           lambda_jj =',&
+&          rf2%lambda_mn(1,jband+(jband-1)*nband_k),',',rf2%lambda_mn(2,jband+(jband-1)*nband_k)
          call wrtout(std_out,msg)
        else
          write(msg,'(a,i2,a,es22.13E3,a,es7.1E2)') &
-         'RF2 TEST FINAL iband = ',jband,' : OK. |test| = ',dotr,' < ',tol_final
+         'RF2 TEST FINAL iband = ',jband,' : OK. |test| = ',dot2r,' < ',tol_final
          call wrtout(std_out,msg)
        end if
      end if

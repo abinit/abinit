@@ -127,7 +127,7 @@ CONTAINS  !=====================================================================
 !! rf2_getidir
 !!
 !! FUNCTION
-!!  Get the direction of the 1st and 2nd perturbations according to inputs idir1 and idir2
+!!  Get the direction of the 2nd order perturbation according to inputs idir1 and idir2
 !!
 !! INPUTS
 !!  idir1 : index of the 1st direction (1<=idir1<=3)
@@ -450,7 +450,7 @@ end subroutine rf2_accumulate_bands
 !                                 print_info,prtvol,rf_hamk_idir)
 subroutine rf2_apply_hamiltonian(cg_jband,cprj_jband,cwave,cwaveprj,h_cwave,s_cwave,eig0,eig1_k_jband,&
 &                                jband,gs_hamkq,gvnl1,idir,ipert,ikpt,isppol,mkmem,mpi_enreg,nband_k,nsppol,&
-                                 print_info,prtvol,rf_hamk_idir,size_cprj,size_wf)
+                                 print_info,prtvol,rf_hamk_idir,size_cprj,size_wf,conj)
 
  use defs_basis
  use defs_abitypes
@@ -472,6 +472,7 @@ subroutine rf2_apply_hamiltonian(cg_jband,cprj_jband,cwave,cwaveprj,h_cwave,s_cw
 
 !Arguments ---------------------------------------------
 !scalars
+ logical,intent(in),optional :: conj
  integer,intent(in) :: idir,ipert,ikpt,isppol,jband,mkmem,nband_k,nsppol,print_info,prtvol,size_wf,size_cprj
  type(gs_hamiltonian_type),intent(inout) :: gs_hamkq
 ! type(rf2_t),intent(in) :: rf2
@@ -489,7 +490,7 @@ subroutine rf2_apply_hamiltonian(cg_jband,cprj_jband,cwave,cwaveprj,h_cwave,s_cw
 !scalars
  integer,parameter :: berryopt=0,optlocal=1,optnl=2,tim_getghc=1,tim_getgh1c=1,tim_getgh2c=1 ! to change
  integer :: cpopt,iband,natom,sij_opt,opt_gvnl1,usevnl
- logical :: has_cprj_jband,has_cwaveprj
+ logical :: compute_conjugate,has_cprj_jband,has_cwaveprj
  real(dp) :: dotr,doti,dotr2,doti2,tol_test
  character(len=500) :: msg
 
@@ -500,6 +501,9 @@ subroutine rf2_apply_hamiltonian(cg_jband,cprj_jband,cwave,cwaveprj,h_cwave,s_cw
  type(pawcprj_type),target :: cprj_empty(0,0)
  type(pawcprj_type),pointer :: cprj_j(:,:)
 ! *********************************************************************
+
+ compute_conjugate = .false.
+ if(present(conj)) compute_conjugate = conj
 
 !Check sizes
  if (size(cprj_jband)/=0) then
@@ -587,7 +591,7 @@ subroutine rf2_apply_hamiltonian(cg_jband,cprj_jband,cwave,cwaveprj,h_cwave,s_cw
      if (has_cprj_jband) cprj_j => cprj_jband(:,1+(jband-1)*size_cprj:jband*size_cprj)
      iddk(:,:) = zero;if (ipert==natom+2) iddk(:,:)=cg_jband(:,1+(jband-1)*size_wf:jband*size_wf,2)
      call getgh1c(berryopt,cwave_j,cprj_j,h_cwave,cwave_empty,s_cwave,gs_hamkq,iddk,idir,ipert,zero,&
-                  mpi_enreg,optlocal,optnl,opt_gvnl1,rf_hamk_idir,sij_opt,tim_getgh1c,usevnl)
+                  mpi_enreg,optlocal,optnl,opt_gvnl1,rf_hamk_idir,sij_opt,tim_getgh1c,usevnl,conj=compute_conjugate)
      do iband=1,nband_k
        cwave_i => cg_jband(:,1+(iband-1)*size_wf:iband*size_wf,1)
        call dotprod_g(dotr,doti,gs_hamkq%istwf_k,size_wf,2,cwave_i,h_cwave,mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
@@ -609,7 +613,7 @@ subroutine rf2_apply_hamiltonian(cg_jband,cprj_jband,cwave,cwaveprj,h_cwave,s_cw
    end if ! end tests
 
    call getgh1c(berryopt,cwave,cwaveprj,h_cwave,cwave_empty,s_cwave,gs_hamkq,gvnl1,idir,ipert,zero,&
-                mpi_enreg,optlocal,optnl,opt_gvnl1,rf_hamk_idir,sij_opt,tim_getgh1c,usevnl)
+                mpi_enreg,optlocal,optnl,opt_gvnl1,rf_hamk_idir,sij_opt,tim_getgh1c,usevnl,conj=compute_conjugate)
 
 ! *******************************************************************************************
 ! apply H^(2)
@@ -617,7 +621,7 @@ subroutine rf2_apply_hamiltonian(cg_jband,cprj_jband,cwave,cwaveprj,h_cwave,s_cw
  else if (ipert==natom+10.or.ipert==natom+11) then
 
    call getgh2c(cwave,cwaveprj,h_cwave,s_cwave,gs_hamkq,gvnl1,idir,ipert,zero,&
-                mpi_enreg,optlocal,optnl,opt_gvnl1,rf_hamk_idir,sij_opt,tim_getgh2c,usevnl)
+                mpi_enreg,optlocal,optnl,opt_gvnl1,rf_hamk_idir,sij_opt,tim_getgh2c,usevnl,conj=compute_conjugate)
 
  else
 

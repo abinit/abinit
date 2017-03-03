@@ -78,7 +78,7 @@
 
 subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
 &          gvnl1,idir,ipert,lambda,mpi_enreg,optlocal,optnl,opt_gvnl1,&
-&          rf_hamkq,sij_opt,tim_getgh1c,usevnl)
+&          rf_hamkq,sij_opt,tim_getgh1c,usevnl,conj)
 
  use defs_basis
  use defs_abitypes
@@ -101,6 +101,7 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
 
 !Arguments ------------------------------------
 !scalars
+ logical,intent(in),optional :: conj
  integer,intent(in) :: berryopt,idir,ipert,optlocal,optnl,opt_gvnl1,sij_opt,tim_getgh1c,usevnl
  real(dp),intent(in) :: lambda
  type(MPI_type),intent(in) :: mpi_enreg
@@ -120,7 +121,7 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
  integer :: choice,cplex1,cpopt,ipw,ipws,ispinor,istr,i1,i2,i3
  integer :: my_nspinor,natom,ncpgr,nnlout=1,npw,npw1,paw_opt,signs
  integer :: tim_fourwf,tim_nonlop,usecprj
- logical :: has_kin,usevnl2
+ logical :: compute_conjugate,has_kin,usevnl2
  real(dp) :: weight
  character(len=500) :: msg
 !arrays
@@ -234,6 +235,9 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
  if (tim_getgh1c==1.and.ipert> natom) tim_nonlop=8
  if (tim_getgh1c==2.and.ipert> natom) tim_nonlop=5
  if (tim_getgh1c==3                 ) tim_nonlop=0
+
+ compute_conjugate = .false.
+ if(present(conj)) compute_conjugate = conj
 
 !======================================================================
 !== Apply the 1st-order local potential to the wavefunction
@@ -502,12 +506,19 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
        call nonlop(choice,cpopt,cwaveprj_ptr,enlout,gs_hamkq,idir,(/lambda/),mpi_enreg,1,nnlout,&
 &       paw_opt,signs,nonlop_out,tim_nonlop,cwave,vectout_dum)
 
-!      Note the multiplication by i
+       if(compute_conjugate) then
 !$OMP PARALLEL DO
-       do ipw=1,npw1*my_nspinor
-         gvnl1_(1,ipw)=gvnl1_(1,ipw)-nonlop_out(2,ipw)
-         gvnl1_(2,ipw)=gvnl1_(2,ipw)+nonlop_out(1,ipw)
-       end do
+         do ipw=1,npw1*my_nspinor ! Note the multiplication by -i
+           gvnl1_(1,ipw)=gvnl1_(1,ipw)+nonlop_out(2,ipw)
+           gvnl1_(2,ipw)=gvnl1_(2,ipw)-nonlop_out(1,ipw)
+         end do
+       else
+!$OMP PARALLEL DO
+         do ipw=1,npw1*my_nspinor ! Note the multiplication by i
+           gvnl1_(1,ipw)=gvnl1_(1,ipw)-nonlop_out(2,ipw)
+           gvnl1_(2,ipw)=gvnl1_(2,ipw)+nonlop_out(1,ipw)
+         end do
+       end if
 
 !      PAW: Compute part of H^(1) due to derivative of electric field part of Dij
        cpopt=2 ; choice=1 ; paw_opt=1 ; signs=2

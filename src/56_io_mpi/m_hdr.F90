@@ -4073,8 +4073,14 @@ subroutine hdr_check(fform,fform0,hdr,hdr0,mode_paral,restart,restartpaw)
 !    generate a format specifier
      bndfmt(5:5) = number(mu)
      bndfmt(21:21) = number(mu)
-     write(msg,fmt=bndfmt) hdr%nband(istart:istop),'|',hdr0%nband(istart:istop)
-     call wrtout(std_out,msg,mode_paral)
+     if (istart<=100) then
+       write(msg,fmt=bndfmt) hdr%nband(istart:istop),'|',hdr0%nband(istart:istop)
+       call wrtout(std_out,msg,mode_paral)
+       if (istop>100) then
+         write(msg,'(a)') '=> stop printing nband after 100 values'
+         call wrtout(std_out,msg,mode_paral)
+       end if
+     end if
    end do
 
    do isppol=1,nsppol
@@ -4198,8 +4204,14 @@ subroutine hdr_check(fform,fform0,hdr,hdr0,mode_paral,restart,restartpaw)
      istop=min(istart+11,nkpt)
      nelm = istop - istart + 1
      call mk_hdr_check_fmt(nelm,typfmt)
-     write(msg,fmt=typfmt) hdr%istwfk(istart:istop),'|',hdr0%istwfk(istart:istop)
-     call wrtout(std_out,msg,mode_paral)
+     if (istart<=100) then
+       write(msg,fmt=typfmt) hdr%istwfk(istart:istop),'|',hdr0%istwfk(istart:istop)
+       call wrtout(std_out,msg,mode_paral)
+       if (istop>100) then
+         write(msg,'(a)') '=> stop printing istwfk after 100 values'
+         call wrtout(std_out,msg,mode_paral)
+       end if
+     end if
    end do
    do ii=1,nkpt
      if (hdr%istwfk(ii)/=hdr0%istwfk(ii)) then

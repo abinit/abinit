@@ -71,7 +71,7 @@
 #include "abi_common.h"
 
 subroutine getgh2c(cwavef,cwaveprj,gh2c,gs2c,gs_hamkq,gvnl2,idir,ipert,lambda,&
-&                  mpi_enreg,optlocal,optnl,opt_gvnl2,rf_hamkq,sij_opt,tim_getgh2c,usevnl,enl)
+&                  mpi_enreg,optlocal,optnl,opt_gvnl2,rf_hamkq,sij_opt,tim_getgh2c,usevnl,conj,enl)
 
  use defs_basis
  use defs_abitypes
@@ -92,6 +92,7 @@ subroutine getgh2c(cwavef,cwaveprj,gh2c,gs2c,gs_hamkq,gvnl2,idir,ipert,lambda,&
 
 !Arguments ------------------------------------
 !scalars
+ logical,intent(in),optional :: conj
  integer,intent(in) :: idir,ipert,optlocal,optnl,opt_gvnl2,sij_opt,tim_getgh2c,usevnl
  real(dp),intent(in) :: lambda
  type(MPI_type),intent(in) :: mpi_enreg
@@ -108,7 +109,7 @@ subroutine getgh2c(cwavef,cwaveprj,gh2c,gs2c,gs_hamkq,gvnl2,idir,ipert,lambda,&
 !scalars
  integer :: choice,cpopt,iatm,idir1,idir2,idirc,ipw,ipws,ispinor,my_nspinor
  integer :: natom,ncpgr,nnlout=1,npw,npw1,paw_opt,signs,tim_nonlop,usecprj
- logical :: has_kin,has_vnl,pert_phon_elfd
+ logical :: compute_conjugate,has_kin,has_vnl,pert_phon_elfd
  real(dp) :: enlout_dum(1)
  character(len=500) :: msg
 !arrays
@@ -220,6 +221,9 @@ subroutine getgh2c(cwavef,cwaveprj,gh2c,gs2c,gs_hamkq,gvnl2,idir,ipert,lambda,&
 
  idir1=alpha(idir);idir2=beta(idir)
 
+ compute_conjugate = .false.
+ if(present(conj)) compute_conjugate = conj
+
 !======================================================================
 !== Apply the 2nd-order local potential to the wavefunction
 !======================================================================
@@ -327,11 +331,19 @@ subroutine getgh2c(cwavef,cwaveprj,gh2c,gs2c,gs_hamkq,gvnl2,idir,ipert,lambda,&
      call nonlop(choice,cpopt,cwaveprj_ptr,enlout_dum,gs_hamkq,idirc,(/lambda/),mpi_enreg,1,nnlout,&
 &     paw_opt,signs,nonlop_out,tim_nonlop,cwavef,vectout_dum)
 
+     if(compute_conjugate) then
 !$OMP PARALLEL DO
-     do ipw=1,npw1*my_nspinor ! Note the multiplication by i
-       gvnl2_(1,ipw)=gvnl2_(1,ipw)-nonlop_out(2,ipw)
-       gvnl2_(2,ipw)=gvnl2_(2,ipw)+nonlop_out(1,ipw)
-     end do
+       do ipw=1,npw1*my_nspinor ! Note the multiplication by -i
+         gvnl2_(1,ipw)=gvnl2_(1,ipw)+nonlop_out(2,ipw)
+         gvnl2_(2,ipw)=gvnl2_(2,ipw)-nonlop_out(1,ipw)
+       end do
+     else
+!$OMP PARALLEL DO
+       do ipw=1,npw1*my_nspinor ! Note the multiplication by i
+         gvnl2_(1,ipw)=gvnl2_(1,ipw)-nonlop_out(2,ipw)
+         gvnl2_(2,ipw)=gvnl2_(2,ipw)+nonlop_out(1,ipw)
+       end do
+     end if
 
      ABI_DEALLOCATE(nonlop_out)
      if (sij_opt==1) gs2c=zero
@@ -393,11 +405,19 @@ subroutine getgh2c(cwavef,cwaveprj,gh2c,gs2c,gs_hamkq,gvnl2,idir,ipert,lambda,&
      call nonlop(choice,cpopt,cwaveprj_ptr,enlout_dum,gs_hamkq,idirc,(/lambda/),mpi_enreg,1,nnlout,&
 &     paw_opt,signs,nonlop_out,tim_nonlop,cwavef,vectout_dum,iatom_only=iatm)
 
+     if(compute_conjugate) then
 !$OMP PARALLEL DO
-     do ipw=1,npw1*my_nspinor ! Note the multiplication by i
-       gvnl2_(1,ipw)=gvnl2_(1,ipw)-nonlop_out(2,ipw)
-       gvnl2_(2,ipw)=gvnl2_(2,ipw)+nonlop_out(1,ipw)
-     end do
+       do ipw=1,npw1*my_nspinor ! Note the multiplication by -i
+         gvnl2_(1,ipw)=gvnl2_(1,ipw)+nonlop_out(2,ipw)
+         gvnl2_(2,ipw)=gvnl2_(2,ipw)-nonlop_out(1,ipw)
+       end do
+     else
+!$OMP PARALLEL DO
+       do ipw=1,npw1*my_nspinor ! Note the multiplication by i
+         gvnl2_(1,ipw)=gvnl2_(1,ipw)-nonlop_out(2,ipw)
+         gvnl2_(2,ipw)=gvnl2_(2,ipw)+nonlop_out(1,ipw)
+       end do
+     end if
 
      ABI_DEALLOCATE(nonlop_out)
      if (sij_opt==1) gs2c=zero

@@ -190,7 +190,7 @@ subroutine dfptnl_loop(atindx,atindx1,blkflg,cg,cgindex,dtfil,dtset,d3etot,eigen
  integer :: rdwrpaw,second_idir,timrev,usexcnhat
  real(dp) :: dummy_real,ecut_eff
  character(len=500) :: message
- character(len=fnlen) :: fiden1i,fiwf1i,fiwf3i,fiwfddk,fnamewff(5)
+ character(len=fnlen) :: fiden1i,fiwf1i,fiwf2i,fiwf3i,fiwfddk,fnamewff(5)
  type(gs_hamiltonian_type) :: gs_hamkq
  type(wffile_type) :: wff1,wff2,wff3,wfft1,wfft2,wfft3
  type(wfk_t) :: ddk_f(5)
@@ -440,7 +440,6 @@ subroutine dfptnl_loop(atindx,atindx1,blkflg,cg,cgindex,dtfil,dtset,d3etot,eigen
 
                  if (rfpert(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)==1) then
 
-                   pert2case = i2dir + (i2pert-1)*3
                    blkflg(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert) = 1
 
                    npert_phon = 0
@@ -450,6 +449,10 @@ subroutine dfptnl_loop(atindx,atindx1,blkflg,cg,cgindex,dtfil,dtset,d3etot,eigen
                    if (npert_phon>1) then
                      MSG_ERROR("dfptnl_loop is available with at most one phonon perturbation. Change your input!")
                    end if
+
+                   pert2case = i2dir + (i2pert-1)*3
+                   counter = 100*pert2case + pert2case
+                   call appdig(pert2case,dtfil%fnamewff1,fiwf2i)
 
                    call status(counter,dtfil%filstat,iexit,level,'call inwffil  ')
                    call inwffil(ask_accurate,cg2,dtset,dtset%ecut,ecut_eff,eigen2,dtset%exchn2n3d,&
@@ -461,7 +464,7 @@ subroutine dfptnl_loop(atindx,atindx1,blkflg,cg,cgindex,dtfil,dtset,d3etot,eigen
 &                   occ,optorth,rprimd,&
 &                   dtset%symafm,dtset%symrel,dtset%tnons,&
 &                   dtfil%unkg1,wff2,wfft2,dtfil%unwff2,&
-&                   fiwf3i,wvl)
+&                   fiwf2i,wvl)
                    if (ireadwf==1) then
                      call WffClose (wff2,ierr)
                    end if

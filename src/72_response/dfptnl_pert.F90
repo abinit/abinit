@@ -655,7 +655,7 @@ subroutine dfptnl_pert(atindx,atindx1,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,ei
          cwavef1(:,:) = cg1(:,1+offset_cgj:size_wf+offset_cgj)
          cwavef3(:,:) = cg3(:,1+offset_cgj:size_wf+offset_cgj)
 
-         if (i2pert==natom+2) then
+         if (i2pert==natom+2) then ! Note the multiplication by i
            iddk(1,:) = -dudkde(2,1+(jband-1)*size_wf:jband*size_wf)
            iddk(2,:) =  dudkde(1,1+(jband-1)*size_wf:jband*size_wf)
          else
@@ -673,7 +673,8 @@ subroutine dfptnl_pert(atindx,atindx1,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,ei
   !           or : < u^(ip3) | ( H^(ip2) - eps^(0) S^(ip2) ) | u^(ip1) >
          call rf2_apply_hamiltonian(cg_jband,cprj_jband,cwave_right,cprj_empty,h_cwave,s_cwave,eig0_k,eig1_k_tmp,&
   &                                jband,gs_hamkq,iddk,i2dir,i2pert,ikpt,isppol,mkmem,mpi_enreg,nband_k,nsppol,&
-                                   print_info,dtset%prtvol,rf_hamkq_i2pert,size_cprj,size_wf)
+                                   print_info,dtset%prtvol,rf_hamkq_i2pert,size_cprj,size_wf,conj=compute_conjugate)
+!                                   print_info,dtset%prtvol,rf_hamkq_i2pert,size_cprj,size_wf)
          call dotprod_g(dotr,doti,gs_hamkq%istwf_k,size_wf,2,cwave_left,h_cwave,mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
 
          if (usepaw==1.and.i2pert/=natom+2) then ! S^(1) is zero for ipert=natom+2
