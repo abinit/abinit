@@ -3285,6 +3285,7 @@ subroutine indfftrisc(gbound,indpw_k,kg_k,mgfft,ngb,ngfft,npw_k)
    end if
    igb=igb+2
  end do
+
  if(gbound(1)<=-1)then ! g2min
    do g2=gbound(1)+n2,n2-1
      do g1=0,gbound(igb+1)

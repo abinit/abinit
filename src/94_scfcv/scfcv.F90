@@ -1055,7 +1055,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
        ! Initialize data_type fock for the calculation
        cplex_hf=cplex
        if (psps%usepaw==1) cplex_hf=dtset%pawcpxocc
-       call fock_init(cplex_hf,dtset,fock,gsqcut,indsym,kg,mpi_enreg,nattyp,npwarr,pawang,pawfgr,pawtab,rprimd)
+       call fock_init(atindx,cplex_hf,dtset,fock,gsqcut,indsym,kg,mpi_enreg,nattyp,npwarr,pawang,pawfgr,pawtab,rprimd)
        if (fock%usepaw==1) then
          optcut_hf = 0 ! use rpaw to construct local_pawfgrtab
          optgr0_hf = 0; optgr1_hf = 0; optgr2_hf = 0 ! dont need gY terms locally
@@ -1071,12 +1071,13 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
 &         xred,ylm,ylmgr)
        end if
      end if
+
      if (fock%optfor) then
        fock%forces=zero
      end if
      hybrid_mixing=fock%hybrid_mixing ; hybrid_mixing_sr=fock%hybrid_mixing_sr
      ! Update data relative to the occupied states in fock
-     call fock_updatecwaveocc(cg,cprj,dtset,fock,energies%e_exactX,indsym,istep,mcg,mcprj,mpi_enreg,npwarr,occ,ucvol)
+     call fock_updatecwaveocc(cg,cprj,dtset,fock,energies%e_exactX,indsym,istep,mcg,mcprj,mpi_enreg,nattyp,npwarr,occ,ucvol)
    end if ! usefock
 
 !  Initialize/update data in the electron-positron case
@@ -1441,7 +1442,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
 
 !    Add the Fock contribution to E_xc and E_xcdc if required
      if (usefock==1) then
-       call fock_update_exc(energies%e_exactX,energies%e_fock,energies%e_fockdc)
+       energies%e_fockdc=two*energies%e_fock
      end if
 
 !    if the mixing is the ODA mixing, compute energy and new density here
@@ -1615,12 +1616,15 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
      end if
 
 !    Compute new potential from the trial density
+
      optene=2*optres;if(psps%usepaw==1) optene=2
+
      call rhotov(dtset,energies,gprimd,gsqcut,istep,kxc,mpi_enreg,nfftf,ngfftf, &
 &     nhat,nhatgr,nhatgrdim,nkxc,nvresid,n3xccc,optene,optres,optxc,&
 &     rhog,rhor,rprimd,strsxc,ucvol_local,psps%usepaw,usexcnhat,&
 &     vhartr,vnew_mean,vpsp,vres_mean,res2,vtrial,vxcavg,vxc,wvl,xccc3d,xred,&
 &     electronpositron=electronpositron,taug=taug,taur=taur,vxctau=vxctau,add_tfw=tfw_activated)
+
    end if
 
    call timab(243,2,tsec)
@@ -1647,14 +1651,14 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
 &       psps%ntypat,dtset%nucdipmom,nzlmopt,option,paw_an,paw_an,&
 &       paw_ij,pawang,dtset%pawprtvol,pawrad,pawrhoij,dtset%pawspnorb,&
 &       pawtab,dtset%pawxcdev,dtset%spnorbscl,dtset%xclevel,dtset%xc_denpos,ucvol,psps%znuclpsp,&
-&       comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,&
+&       hyb_mixing=hybrid_mixing,hyb_mixing_sr=hybrid_mixing_sr,comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,&
 &       electronpositron=electronpositron)
 
      end if
 
 !    Add the Fock contribution to E_xc and E_xcdc if required
      if (usefock==1) then
-       call fock_update_exc(energies%e_exactX,energies%e_fock,energies%e_fockdc)
+       energies%e_fockdc=two*energies%e_fock
      end if
 
      call etotfor(atindx1,deltae,diffor,dtefield,dtset,&
@@ -1665,6 +1669,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
 &     n3xccc,0,computed_forces,optres,pawang,pawfgrtab,pawrhoij,&
 &     pawtab,ph1df,red_ptot,psps,rhog,rhor,rprimd,symrec,synlgr,&
 &     psps%usepaw,vhartr,vpsp,vxc,wvl%descr,wvl%den,xccc3d,xred)
+
    end if
    call timab(60,2,tsec)
 
@@ -1730,6 +1735,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
 &     vhartr,vnew_mean,vpsp,nvresid,vtrial,vxc,xred,&
 &     nfftf,&
 &     pawtab,rhog,wvl)
+
    end if   ! iscf<10
 
 !  ######################################################################
@@ -1854,7 +1860,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
 !need to reorder them (from atom-sorted to unsorted)
  if (psps%usepaw==1.and.usecprj==1) then
    iorder_cprj=1
-   call pawcprj_reorder(cprj,atindx1)
+!   call pawcprj_reorder(cprj,atindx1)
    if (dtset%positron/=0) then
      if (electronpositron%dimcprj>0) then
        call pawcprj_reorder(electronpositron%cprj_ep,atindx1)

@@ -183,6 +183,7 @@ subroutine opernlc_ylm(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cplex_fa
 !  === Diagonal term(s) (up-up, down-down)
 !  1-Enl is real
    if (cplex_enl==1) then
+
 !$OMP PARALLEL &
 !$OMP PRIVATE(ispinor,ispinor_index,ia,index_enl), &
 !$OMP PRIVATE(jlmn,j0lmn,jjlmn,enl_,gxj,ilmn,ijlmn,gxi)
@@ -225,10 +226,12 @@ subroutine opernlc_ylm(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cplex_fa
      end do
 !$OMP END DO 
 !$OMP END PARALLEL
+
 !    2-Enl is complex
    else
      ABI_CHECK(cplex_fac==cplex_enl,"BUG: invalid cplex_fac/=cplex_enl!")
      if (nspinortot==1) then    !===== when nspinor=1, D_ij=D_ji except in hermdij case
+
 !$OMP PARALLEL &
 !$OMP PRIVATE(ia,index_enl,jlmn,j0lmn,jjlmn,enl_,gxj,ilmn,ijlmn,gxi)
        do ia=1,nincat

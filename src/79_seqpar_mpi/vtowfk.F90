@@ -740,7 +740,6 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
            call nonlop(choice,cpopt,cwaveprj,enlout,gs_hamk,idir,(/lambda_k/),mpi_enreg,1,nnlout,&
 &           paw_opt,signs,nonlop_dum,tim_nonlop,cwavef,cwavef)
          end if
-
          if(gs_hamk%usepaw==1) then
            call timab(554,2,tsec)
          end if

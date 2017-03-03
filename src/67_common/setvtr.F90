@@ -452,6 +452,8 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grewtn,grvdw,gsqcut,&
      if (dtset%icoulomb == 0 .and. dtset%usewvl == 0) then
 !      Use the periodic solver to compute Hxc
        nk3xc=1
+!write(80,*)"setvtr"
+!xccc3d=zero
        if (ipositron==0) then
          call rhohxc(dtset,energies%e_xc,gsqcut,psps%usepaw,kxc,mpi_enreg,nfft,ngfft,&
 &         nhat,psps%usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,dtset%nspden,n3xccc,&
@@ -466,9 +468,8 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grewtn,grvdw,gsqcut,&
        end if
        if (is_hybrid_ncpp) then
          call xchybrid_ncpp_cc(dtset,energies%e_xc,mpi_enreg,nfft,ngfft,n3xccc,rhor,rprimd,&
-&         strsxc,vxc,vxcavg,xccc3d)
+&         strsxc,vxcavg,xccc3d,vxc=vxc)
        end if
-
      elseif(.not. wvlbigdft) then
 !      Use the free boundary solver
        call psolver_rhohxc(energies%e_hartree, energies%e_xc, evxc, &
@@ -522,7 +523,7 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grewtn,grvdw,gsqcut,&
        end do
      end if
    end if
-   
+
 !  Adds the local part of the potential
    if ((moved_atm_inside==0).or.(dtset%densfor_pred/=3)) then
      do ispden=1,min(2,dtset%nspden)

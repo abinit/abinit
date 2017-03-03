@@ -1717,7 +1717,9 @@ subroutine abinit_doctor(prefix, print_mem_report)
 &    '- MEMORY CONSUMPTION REPORT :',ch10, &
 &    '- Memory profiling is activated but not yet usable when bigdft is used'
  end if
-
+ if (my_rank == master) then
+   call wrtout(ab_out, msg)
+ end if
  ! Test whether all logical units have been closed.
  ! If you wonder why I'm doing this, remember that there's a per-user
  ! limit on the maximum number of open file descriptors. Hence descriptors
