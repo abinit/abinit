@@ -576,8 +576,6 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
          else
            call dotprod_g(eval,doti,istwf_k,npw*nspinor,1,cwavef,ghcws,me_g0,mpi_enreg%comm_spinorfft)
            if (gen_eigenpb) then
-write(87,*) "cgwf2",chc
-write(87,*)  ghcws(1,1),scwavef(1,1)
 !$OMP PARALLEL DO
              do ipw=1,npw*nspinor
                vresid(1,ipw)=ghcws(1,ipw)-eval*scwavef(1,ipw)

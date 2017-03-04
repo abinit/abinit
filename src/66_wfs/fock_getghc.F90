@@ -456,7 +456,7 @@ type(pseudopotential_type) :: psps
            call pawgrnl(gs_ham%atindx1,0,dummy,1,dummy,grnl,fock%gsqcut,mgfftf,natom,natom,&
 &            gs_ham%nattyp,nfftf,ngfftf,nhat_dum,dummy,1,0,fock%ntypat,optgr,optgr2,optstr,optstr2,&
 &            fock%pawang,fock%pawfgrtab,pawrhoij,fock%pawtab,gs_ham%ph1d,psps,qphon,rprimd,dumint,&
-&            gs_ham%typat,vtrial,vxc,gs_ham%xred)
+&            gs_ham%typat,gs_ham%ucvol,vtrial,vxc,gs_ham%xred)
            ABI_DEALLOCATE(vxc)
            ABI_DEALLOCATE(vtrial)
            ABI_DEALLOCATE(grnl)
