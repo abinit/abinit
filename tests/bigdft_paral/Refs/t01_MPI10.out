@@ -1,5 +1,5 @@
 
-.Version 8.0.3 of ABINIT 
+.Version 8.1.6 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
 
 .Copyright (C) 1998-2017 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see http://www.abinit.org .
 
-.Starting date : Mon  4 Apr 2016.
-- ( at 10h45 )
+.Starting date : Thu 20 Oct 2016.
+- ( at 16h36 )
   
 - input  file    -> t01.in
 - output file    -> t01_MPI10.out
@@ -47,7 +47,7 @@
 --------------------------------------------------------------------------------
 -
 - outvars: echo of selected default values                                      
--   accesswff0 =  0 , fftalg0 =312 , wfoptalg0 =  0
+-   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
 -
 - outvars: echo of global parameters not present in the input file              
 -  max_nthreads =    0
@@ -56,7 +56,7 @@
             acell      1.6800000000E+01  1.4400000000E+01  1.4400000000E+01 Bohr
               amu      1.00000000E+00
       chksymbreak           0
-           diemix      4.00000000E-01
+           diemix      7.00000000E-01
 -          fftalg         312
          icoulomb           1
              iscf1         17
@@ -70,23 +70,24 @@
             ngfft           2       2       2
              nkpt           1
             nline           2
+           nnsclo           3
         nscforder          14
-            nstep          10
+            nstep          20
              nsym           1
            ntypat           1
          nwfshist           2
               occ      2.000000  2.000000  2.000000  2.000000  2.000000  1.000000
                        1.000000
            occopt           0
-        optforces           0
         optstress           0
            prtden           0
            prteig           0
             prtwf           0
           spgroup           1
-           tolvrs      1.00000000E-03
+           tolvrs      1.00000000E-06
             typat      1  1
            usewvl           1
+  wvl_bigdft_comp           0
        wvl_crmult      3.00000000E+00
        wvl_frmult      1.00000000E+00
         wvl_hgrid      4.00000000E-01
@@ -122,8 +123,8 @@
  Angles (23,13,12)=  9.00000000E+01  9.00000000E+01  9.00000000E+01 degrees
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gonze/ABINIT/ABINITv8.0.3/gonze/8.0.3-private/tests/Psps_for_tests/08o.pspgth
-- pspatm: opening atomic psp file    /home/gonze/ABINIT/ABINITv8.0.3/gonze/8.0.3-private/tests/Psps_for_tests/08o.pspgth
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_wvl-paw-forces/tests/Psps_for_tests/08o.pspgth
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_wvl-paw-forces/tests/Psps_for_tests/08o.pspgth
 -   O SG LDA PSP
 -  8.00000   6.00000    960531                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -155,15 +156,16 @@
 ================================================================================
 
      iter   Etot(hartree)      deltaE(h)  grdnorm    nres2
- ETOT  1  -31.257881226367    -3.126E+01 1.976E-01 5.586E+00
- ETOT  2  -31.273732452041    -1.585E-02 2.440E-02 2.714E+00
- ETOT  3  -31.261063374001     1.267E-02 1.625E-02 1.165E-01
- ETOT  4  -31.261935839128    -8.725E-04 3.628E-03 4.628E-02
- ETOT  5  -31.261931223995     4.615E-06 2.784E-03 6.240E-03
- ETOT  6  -31.261945702959    -1.448E-05 1.193E-03 1.097E-03
- ETOT  7  -31.261946482053    -7.791E-07 5.556E-04 3.426E-04
+ ETOT  1  -31.317081981874    -3.132E+01 5.702E-02 7.873E+00
+ ETOT  2  -31.263920009481     5.316E-02 1.142E-02 7.477E-01
+ ETOT  3  -31.265370833349    -1.451E-03 6.963E-03 9.009E-01
+ ETOT  4  -31.262688863921     2.682E-03 4.935E-03 1.902E-01
+ ETOT  5  -31.261991914455     6.969E-04 9.154E-04 1.693E-03
+ ETOT  6  -31.261990053755     1.861E-06 2.850E-04 1.108E-04
+ ETOT  7  -31.261990004826     4.893E-08 9.059E-05 7.085E-06
+ ETOT  8  -31.261989996898     7.928E-09 3.376E-05 6.839E-07
 
- At SCF step    7       nres2   =  3.43E-04 < tolvrs=  1.00E-03 =>converged.
+ At SCF step    8       nres2   =  6.84E-07 < tolvrs=  1.00E-06 =>converged.
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -172,38 +174,48 @@
  reduced coordinates (array xred) for    2 atoms
        0.370081328364      0.500000000000      0.500000000000
        0.629918671636      0.500000000000      0.500000000000
- rms dE/dt=  0.0000E+00; max dE/dt=  0.0000E+00; dE/dt below (all hartree)
-    1       0.000000000000      0.000000000000      0.000000000000
-    2       0.000000000000      0.000000000000      0.000000000000
+ rms dE/dt=  3.5818E-01; max dE/dt=  3.2873E-01; dE/dt below (all hartree)
+    1       0.173993968021      0.307059443152      0.307059443610
+    2      -0.578620573482      0.328728819356      0.328728819240
 
  cartesian coordinates (angstrom) at end:
     1      1.72337971779379     1.79920250920600     1.79920250920600
     2      2.93337971779822     1.79920250920600     1.79920250920600
+
+ cartesian forces (hartree/bohr) at end:
+    1     -0.04276218985813     0.00159333648555     0.00159333644340
+    2      0.04276218985813    -0.00159333648555    -0.00159333644340
+ frms,max,avg= 2.4723014E-02 4.2762190E-02   2.299E-02 -4.675E-02 -4.675E-02 h/b
+
+ cartesian forces (eV/Angstrom) at end:
+    1     -2.19892002912244     0.08193264944667     0.08193264727889
+    2      2.19892002912244    -0.08193264944667    -0.08193264727889
+ frms,max,avg= 1.2713084E+00 2.1989200E+00   1.182E+00 -2.404E+00 -2.404E+00 e/A
  length scales=  8.800000000000  6.800000000000  6.800000000000 bohr
               =  4.656759435592  3.598405018412  3.598405018412 angstroms
- Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=  -0.02643
+ Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=  -0.02638
  Eigenvalues (hartree) for nkpt=   1  k points:
  kpt#   1, nband=  7, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
-  -1.10739   -0.62652   -0.40278   -0.40276   -0.36411   -0.14423   -0.14416
+  -1.10798   -0.62651   -0.40309   -0.40307   -0.36404   -0.14444   -0.14437
 
 --------------------------------------------------------------------------------
  Components of total free energy (in Hartree) :
 
-    Kinetic energy  =  2.37067065650536E+01
-    Hartree energy  =  4.30002788420235E+01
-    XC energy       = -6.70872329783519E+00
+    Kinetic energy  =  2.37092493227957E+01
+    Hartree energy  =  4.29974734941012E+01
+    XC energy       = -6.70850885029616E+00
     Ion-ion energy  =  1.57441152968349E+01
     PspCore energy  =  0.00000000000000E+00
-    Loc. psp. energy= -1.09824302963133E+02
-    NL   psp  energy=  2.82036573059519E+00
-    >>>>>>>>> Etotal= -3.12615598264612E+01
+    Loc. psp. energy= -1.09824356335700E+02
+    NL   psp  energy=  2.82003559817684E+00
+    >>>>>>>>> Etotal= -3.12619914740870E+01
 
  "Double-counting" decomposition of free energy:
-    Band energy     = -6.09540976696085E+00
+    Band energy     = -6.09818710181487E+00
     Ion-ion energy  =  1.57441152968349E+01
     PspCore energy  =  0.00000000000000E+00
-    Dble-C XC-energy= -4.09106520119272E+01
-    >>>> Etotal (DC)= -3.12619464820532E+01
+    Dble-C XC-energy= -4.09079181919184E+01
+    >>>> Etotal (DC)= -3.12619899968984E+01
 --------------------------------------------------------------------------------
 
 ================================================================================
@@ -228,15 +240,21 @@
 ================================================================================
 
      iter   Etot(hartree)      deltaE(h)  grdnorm    vres2
- ETOT  1  -30.891372487573    -3.089E+01 1.976E-01 1.682E+02
- ETOT  2  -31.035351241663    -1.440E-01 2.435E-02 3.897E+01
- ETOT  3  -31.164349986836    -1.290E-01 1.573E-02 9.773E-01
- ETOT  4  -31.282105265341    -1.178E-01 3.721E-03 2.996E-01
- ETOT  5  -31.274334232513     7.771E-03 2.406E-03 1.426E-02
- ETOT  6  -31.259509197097     1.483E-02 1.102E-03 6.889E-03
- ETOT  7  -31.260762835386    -1.254E-03 5.040E-04 9.788E-04
+ ETOT  1  -31.098388916635    -3.110E+01 5.702E-02 1.863E+02
+ ETOT  2  -31.222237112710    -1.238E-01 1.144E-02 1.586E+01
+ ETOT  3  -31.278879184098    -5.664E-02 6.265E-03 3.655E+01
+ ETOT  4  -31.260051239684     1.883E-02 2.623E-03 2.245E-01
+ ETOT  5  -31.260757611414    -7.064E-04 7.615E-04 5.933E-03
+ ETOT  6  -31.261847030617    -1.089E-03 2.829E-04 2.422E-03
+ ETOT  7  -31.262031718777    -1.847E-04 5.962E-05 1.974E-04
+ ETOT  8  -31.261948592162     8.313E-05 2.721E-05 8.002E-05
+ ETOT  9  -31.262006315974    -5.772E-05 1.113E-05 5.080E-05
+ ETOT 10  -31.261984223383     2.209E-05 4.474E-06 3.044E-05
+ ETOT 11  -31.261991126603    -6.903E-06 2.069E-06 1.283E-05
+ ETOT 12  -31.261989567094     1.560E-06 1.349E-06 5.086E-06
+ ETOT 13  -31.261989827638    -2.605E-07 7.387E-07 2.517E-07
 
- At SCF step    7       vres2   =  9.79E-04 < tolvrs=  1.00E-03 =>converged.
+ At SCF step   13       vres2   =  2.52E-07 < tolvrs=  1.00E-06 =>converged.
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -245,34 +263,48 @@
  reduced coordinates (array xred) for    2 atoms
        0.370081328364      0.500000000000      0.500000000000
        0.629918671636      0.500000000000      0.500000000000
- rms dE/dt=  0.0000E+00; max dE/dt=  0.0000E+00; dE/dt below (all hartree)
-    1       0.000000000000      0.000000000000      0.000000000000
-    2       0.000000000000      0.000000000000      0.000000000000
+ rms dE/dt=  3.5830E-01; max dE/dt=  3.2872E-01; dE/dt below (all hartree)
+    1       0.174498902591      0.307055573613      0.307141388092
+    2      -0.578912921656      0.328718833687      0.328637297790
 
  cartesian coordinates (angstrom) at end:
     1      1.72337971779379     1.79920250920600     1.79920250920600
     2      2.93337971779822     1.79920250920600     1.79920250920600
+
+ cartesian forces (hartree/bohr) at end:
+    1     -0.04280749001400     0.00159288677020     0.00158058159542
+    2      0.04280749001400    -0.00159288677020    -0.00158058159542
+ frms,max,avg= 2.4748850E-02 4.2807490E-02   2.298E-02 -4.675E-02 -4.675E-02 h/b
+
+ cartesian forces (eV/Angstrom) at end:
+    1     -2.20124945660023     0.08190952415552     0.08127676668015
+    2      2.20124945660023    -0.08190952415552    -0.08127676668015
+ frms,max,avg= 1.2726369E+00 2.2012495E+00   1.182E+00 -2.404E+00 -2.404E+00 e/A
  length scales=  8.800000000000  6.800000000000  6.800000000000 bohr
               =  4.656759435592  3.598405018412  3.598405018412 angstroms
  Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=  -0.02638
  Eigenvalues (hartree) for nkpt=   1  k points:
  kpt#   1, nband=  7, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
-  -1.10808   -0.62645   -0.40315   -0.40309   -0.36400   -0.14442   -0.14434
+  -1.10797   -0.62651   -0.40309   -0.40307   -0.36404   -0.14443   -0.14436
 
 --------------------------------------------------------------------------------
  Components of total free energy (in Hartree) :
 
-    Kinetic energy  =  2.37085947290718E+01
-    Hartree energy  =  4.29978383901176E+01
-    XC energy       = -6.70846255739760E+00
+    Kinetic energy  =  2.37092637334545E+01
+    Hartree energy  =  4.29975036936824E+01
+    XC energy       = -6.70851030156945E+00
     Ion-ion energy  =  1.57441152968349E+01
     PspCore energy  =  0.00000000000000E+00
-    Loc. psp. energy= -1.09824840665777E+02
-    NL   psp  energy=  2.82059904913396E+00
-    >>>>>>>>> Etotal= -3.12621557580161E+01
+    Loc. psp. energy= -1.09824387276194E+02
+    NL   psp  energy=  2.82002502615285E+00
+    >>>>>>>>> Etotal= -3.12619898276383E+01
 
- Other information on the energy :
-    Total energy(eV)= -8.50686520622485E+02 ; Band energy (Ha)=   2.7000509352E+00
+ "Double-counting" decomposition of free energy:
+    Band energy     = -6.09815785344776E+00
+    Ion-ion energy  =  1.57441152968349E+01
+    PspCore energy  =  0.00000000000000E+00
+    Dble-C XC-energy= -4.09079479633200E+01
+    >>>> Etotal (DC)= -3.12619905199328E+01
 --------------------------------------------------------------------------------
 
 == END DATASET(S) ==============================================================
@@ -282,13 +314,13 @@
             acell      8.8000000000E+00  6.8000000000E+00  6.8000000000E+00 Bohr
               amu      1.00000000E+00
       chksymbreak           0
-           diemix      4.00000000E-01
-           etotal1    -3.1261946482E+01
-           etotal2    -3.1260762835E+01
-            fcart1     9.9999999999E+99  9.9999999999E+99  9.9999999999E+99
-                       9.9999999999E+99  9.9999999999E+99  9.9999999999E+99
-            fcart2     9.9999999999E+99  9.9999999999E+99  9.9999999999E+99
-                       9.9999999999E+99  9.9999999999E+99  9.9999999999E+99
+           diemix      7.00000000E-01
+           etotal1    -3.1261989997E+01
+           etotal2    -3.1261989828E+01
+            fcart1    -4.2762189858E-02  1.5933364856E-03  1.5933364434E-03
+                       4.2762189858E-02 -1.5933364856E-03 -1.5933364434E-03
+            fcart2    -4.2807490014E-02  1.5928867702E-03  1.5805815954E-03
+                       4.2807490014E-02 -1.5928867702E-03 -1.5805815954E-03
 -          fftalg         312
          icoulomb           1
              iscf1         17
@@ -302,15 +334,15 @@
             ngfft           2       2       2
              nkpt           1
             nline           2
+           nnsclo           3
         nscforder          14
-            nstep          10
+            nstep          20
              nsym           1
            ntypat           1
          nwfshist           2
               occ      2.000000  2.000000  2.000000  2.000000  2.000000  1.000000
                        1.000000
            occopt           0
-        optforces           0
         optstress           0
            prtden           0
            prteig           0
@@ -320,9 +352,10 @@
                        9.9999999999E+99  9.9999999999E+99  9.9999999999E+99
            strten2     9.9999999999E+99  9.9999999999E+99  9.9999999999E+99
                        9.9999999999E+99  9.9999999999E+99  9.9999999999E+99
-           tolvrs      1.00000000E-03
+           tolvrs      1.00000000E-06
             typat      1  1
            usewvl           1
+  wvl_bigdft_comp           0
        wvl_crmult      3.00000000E+00
        wvl_frmult      1.00000000E+00
         wvl_hgrid      4.00000000E-01
@@ -362,23 +395,40 @@
 - J. Chem. Phys. 129, 014109 (2008).
 - Comment : to be cited in case BigDFT project is used, i.e. usewvl=1.
 -
-- [2] ABINIT : First-principles approach of materials and nanosystem properties.
+- [2] Recent developments in the ABINIT software package.
+- Computer Phys. Comm. 205, 106 (2016).
+- X.Gonze, F.Jollet, F.Abreu Araujo, D.Adams, B.Amadon, T.Applencourt,
+- C.Audouze, J.-M.Beuken, J.Bieder, A.Bokhanchuk, E.Bousquet, F.Bruneval
+- D.Caliste, M.Cote, F.Dahm, F.Da Pieve, M.Delaveau, M.Di Gennaro,
+- B.Dorado, C.Espejo, G.Geneste, L.Genovese, A.Gerossier, M.Giantomassi,
+- Y.Gillet, D.R.Hamann, L.He, G.Jomard, J.Laflamme Janssen, S.Le Roux,
+- A.Levitt, A.Lherbier, F.Liu, I.Lukacevic, A.Martin, C.Martins,
+- M.J.T.Oliveira, S.Ponce, Y.Pouillon, T.Rangel, G.-M.Rignanese,
+- A.H.Romero, B.Rousseau, O.Rubel, A.A.Shukri, M.Stankovski, M.Torrent,
+- M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
+- B.Xue, A.Zhou, J.W.Zwanziger.
+- Comment : the fourth generic paper describing the ABINIT project.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- is available at http://www.abinit.org/about/ABINIT16.pdf .
+- The licence allows the authors to put it on the Web.
+-
+- [3] ABINIT : First-principles approach of materials and nanosystem properties.
+- Computer Phys. Comm. 180, 2582-2615 (2009).
 - X. Gonze, B. Amadon, P.-M. Anglade, J.-M. Beuken, F. Bottin, P. Boulanger, F. Bruneval,
 - D. Caliste, R. Caracas, M. Cote, T. Deutsch, L. Genovese, Ph. Ghosez, M. Giantomassi
 - S. Goedecker, D.R. Hamann, P. Hermet, F. Jollet, G. Jomard, S. Leroux, M. Mancini, S. Mazevet,
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
-- Computer Phys. Comm. 180, 2582-2615 (2009).
 - Comment : the third generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at http://www.abinit.org/about/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
 -
-- [3] A brief introduction to the ABINIT software package.
+- [4] A brief introduction to the ABINIT software package.
+- Z. Kristallogr. 220, 558-562 (2005).
 - X. Gonze, G.-M. Rignanese, M. Verstraete, J.-M. Beuken, Y. Pouillon, R. Caracas, F. Jollet,
 - M. Torrent, G. Zerah, M. Mikami, Ph. Ghosez, M. Veithen, J.-Y. Raty, V. Olevano, F. Bruneval,
 - L. Reining, R. Godby, G. Onida, D.R. Hamann, and D.C. Allan.
-- Z. Kristallogr. 220, 558-562 (2005).
 - Comment : the second generic paper describing the ABINIT project. Note that this paper
 - should be cited especially if you are using the GW part of ABINIT, as several authors
 - of this part are not in the list of authors of the first or third paper.
@@ -388,20 +438,16 @@
 -
 - And optionally:
 -
-- [4] First-principles computation of material properties : the ABINIT software project. 
+- [5] First-principles computation of material properties : the ABINIT software project. 
 - X. Gonze, J.-M. Beuken, R. Caracas, F. Detraux, M. Fuchs, G.-M. Rignanese, L. Sindic,
 - M. Verstraete, G. Zerah, F. Jollet, M. Torrent, A. Roy, M. Mikami, Ph. Ghosez, J.-Y. Raty, D.C. Allan.
 - Computational Materials Science 25, 478-492 (2002). http://dx.doi.org/10.1016/S0927-0256(02)00325-7
 - Comment : the original paper describing the ABINIT project.
 -
-- [5] Fast radix 2, 3, 4 and 5 kernels for Fast Fourier Transformations
-- on computers with overlapping multiply-add instructions.
-- S. Goedecker, SIAM J. on Scientific Computing 18, 1605 (1997).
--
-- Proc.   0 individual time (sec): cpu=         15.0  wall=          4.5
+- Proc.   0 individual time (sec): cpu=          2.3  wall=          2.5
 
 ================================================================================
 
  Calculation completed.
 .Delivered   0 WARNINGs and   1 COMMENTs to log file.
-+Overall time at end (sec) : cpu=        150.9  wall=         42.8
++Overall time at end (sec) : cpu=         23.7  wall=         24.4

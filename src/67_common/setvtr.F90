@@ -198,11 +198,11 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grewtn,grvdw,gsqcut,&
 
 !Local variables-------------------------------
 !scalars
- integer :: mpi_comm_sphgrid,nk3xc
- integer :: iatom,ifft,ipositron,ispden,n1,n2,n3,nfftot
- integer :: optatm,optdyfr,opteltfr,optgr,option,optn,optn2,optstr,optv
+ integer :: coredens_method,mpi_comm_sphgrid,nk3xc
+ integer :: iatom,ifft,ipositron,ispden,nfftot
+ integer :: optatm,optdyfr,opteltfr,optgr,option,optn,optn2,optstr,optv,vloc_method
  real(dp) :: doti,e_xcdc_vxctau,ebb,ebn,evxc,ucvol_local,rpnrm
- logical :: add_tfw_,is_hybrid_ncpp,with_vxctau,wvlbigdft=.false.
+ logical :: add_tfw_,is_hybrid_ncpp,with_vxctau,wvlbigdft
  real(dp), allocatable :: xcart(:,:)
  character(len=500) :: message
 !arrays
@@ -229,7 +229,7 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grewtn,grvdw,gsqcut,&
 & (dtset%ixc==41.or.dtset%ixc==42.or.libxc_functionals_is_hybrid()))
 
 !If usewvl: wvlbigdft indicates that the BigDFT workflow will be followed
- if(dtset%usewvl==1 .and. dtset%wvl_bigdft_comp==1) wvlbigdft=.true.
+ wvlbigdft=(dtset%usewvl==1.and.dtset%wvl_bigdft_comp==1)
 
 !Get size of FFT grid
  nfftot=PRODUCT(ngfft(1:3))
@@ -289,84 +289,93 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grewtn,grvdw,gsqcut,&
 !--------------------------------------------------------------
  if (dtset%usewvl == 0) then
    ucvol_local = ucvol
+#if defined HAVE_BIGDFT
  else
 !  We need to tune the volume when wavelets are used because, not all FFT points are used.
 !  ucvol_local = (half * dtset%wvl_hgrid) ** 3 * ngfft(1)*ngfft(2)*ngfft(3)
-#if defined HAVE_BIGDFT
    ucvol_local = product(wvl%den%denspot%dpbox%hgrids) * real(product(wvl%den%denspot%dpbox%ndims), dp)
 #endif
  end if
 
-!PAW + plane waves: compute Vloc and core charge together in reciprocal space
-!--------------------------------------------------------------
- if ((psps%usepaw==1 .or. psps%nc_xccc_gspace==1) .and. psps%usewvl==0 .and. dtset%icoulomb==0) then
+!Determine by which method the local ionic potential and/or the pseudo core charge density
+! have to be computed
+!Local ionic potential:
+! Method 1: PAW
+! Method 2: Norm-conserving PP, icoulomb>0, wavelets
+ vloc_method=1;if (psps%usepaw==0) vloc_method=2
+ if (dtset%icoulomb>0) vloc_method=2
+ if (psps%usewvl==1) vloc_method=2
+!Pseudo core charge density:
+! Method 1: PAW, nc_xccc_gspace
+! Method 2: Norm-conserving PP, wavelets
+ coredens_method=1;if (psps%usepaw==0) coredens_method=2
+ if (psps%nc_xccc_gspace==1) coredens_method=1
+ if (psps%nc_xccc_gspace==0) coredens_method=2
+ if (psps%usewvl==1) coredens_method=2
 
+!Local ionic potential and/or pseudo core charge by method 1
+ if (vloc_method==1.or.coredens_method==1) then
    call timab(552,1,tsec)
-
-   optatm=1;optdyfr=0;opteltfr=0;optgr=0;optstr=0;optv=1;optn=n3xccc/nfft;optn2=1
+   optv=0;if (vloc_method==1) optv=1
+   optn=0;if (coredens_method==1) optn=n3xccc/nfft
+   optatm=1;optdyfr=0;opteltfr=0;optgr=0;optstr=0;optn2=1
    call atm2fft(atindx1,xccc3d,vpsp,dummy_out1,dummy_out2,dummy_out3,dummy_in,&
 &   gmet,gprimd,dummy_out4,dummy_out5,gsqcut,mgfft,psps%mqgrid_vl,dtset%natom,nattyp,nfft,ngfft,ntypat,&
 &   optatm,optdyfr,opteltfr,optgr,optn,optn2,optstr,optv,psps,pawtab,ph1d,psps%qgrid_vl,dtset%qprtrb,&
 &   dummy_in,strn_dummy6,strv_dummy6,ucvol,psps%usepaw,dummy_in,dummy_in,dummy_in,dtset%vprtrb,psps%vlspl,&
 &   comm_fft=mpi_enreg%comm_fft,me_g0=mpi_enreg%me_g0,&
 &   paral_kgb=mpi_enreg%paral_kgb,distribfft=mpi_enreg%distribfft)
-
    call timab(552,2,tsec)
- else
-   
+ end if
 
-!  Norm-conserving: compute Vloc in reciprocal space
-!  and core charge in real space
-!  Wavelets or PAW+icoulomb/=0: compute Vloc and core charge in real space
-!  --------------------------------------------------------------
-
-!  Compute local ionic pseudopotential vpsp
+!Local ionic potential by method 2
+ if (vloc_method==2) then
    option=1
-   ABI_ALLOCATE(dyfr_dum,(3,3,dtset%natom))
    ABI_ALLOCATE(gr_dum,(3,dtset%natom))
-   ABI_ALLOCATE(rhog_dum, (2,nfft))
-
+   ABI_ALLOCATE(dyfr_dum,(3,3,dtset%natom))
+   ABI_ALLOCATE(rhog_dum,(2,nfft))
    call mklocl(dtset,dyfr_dum,energies%e_localpsp,gmet,gprimd,&
 &   gr_dum,gsqcut,dummy6,mgfft,mpi_enreg,dtset%natom,nattyp,&
 &   nfft,ngfft,dtset%nspden,ntypat,option,pawtab,ph1d,psps,&
 &   dtset%qprtrb,rhog_dum,rhor,rprimd,ucvol,dtset%vprtrb,vpsp,wvl%descr,wvl%den,xred)
-
-   ABI_FREE(rhog_dum)
-
-!  Compute 3D core electron density xccc3d
-   if (n1xccc/=0) then
-     call timab(91,2,tsec)
-     call timab(92,1,tsec)
-     if(psps%usewvl==0) then
-       n1=ngfft(1) ; n2=ngfft(2) ; n3=ngfft(3)
-       if(psps%usepaw==0) then
-         call mkcore(dummy6,dyfr_dum,gr_dum,mpi_enreg,dtset%natom,nfft,dtset%nspden,ntypat,&
-&         n1,n1xccc,n2,n3,option,rprimd,dtset%typat,ucvol,vxc,psps%xcccrc,psps%xccc1d,xccc3d,xred)
-       else
-         call mkcore_paw(atindx1,dummy6,dyfr_dum,gr_dum,dtset%icoulomb,&
-&         dtset%natom,mpi_enreg,nattyp,nfft,ngfft,dtset%nspden,ntypat,&
-&         n3xccc,option,pawrad,pawtab,psps%gth_params%psppar,rprimd,ucvol,vxc,&
-&         xccc3d,xred)
-       end if
-     else if(psps%usewvl==1 .and. psps%usepaw==1) then
-#if defined HAVE_BIGDFT
-       call mkcore_wvl(atindx1,dummy6,dyfr_dum,wvl%descr%atoms%astruct%geocode,gr_dum,&
-&       wvl%descr%h,dtset%natom,&
-&       nattyp,nfft,wvl%den%denspot%dpbox%nscatterarr(mpi_enreg%me_wvl,:),&
-&       dtset%nspden,ntypat,wvl%descr%Glr%d%n1,wvl%descr%Glr%d%n1i,&
-&       wvl%descr%Glr%d%n2,wvl%descr%Glr%d%n2i,wvl%descr%Glr%d%n3,&
-&       wvl%den%denspot%dpbox%n3pi,n3xccc,&
-&       option,pawrad,pawtab,psps%gth_params%psppar,rprimd,&
-&       ucvol_local,vxc,xccc3d,xred,mpi_comm_wvl=mpi_enreg%comm_wvl)
-#endif
-     end if
-     call timab(92,2,tsec)
-     call timab(91,1,tsec)
-   end if
-   ABI_DEALLOCATE(dyfr_dum)
    ABI_DEALLOCATE(gr_dum)
+   ABI_DEALLOCATE(dyfr_dum)
+   ABI_DEALLOCATE(rhog_dum)
+ end if
 
- end if  ! PAW or NC
+!3D pseudo core electron density xccc3d by method 2
+ if (coredens_method==2.and.n1xccc/=0) then
+   call timab(91,2,tsec)
+   call timab(92,1,tsec)
+   option=1
+   ABI_ALLOCATE(gr_dum,(3,dtset%natom))
+   ABI_ALLOCATE(dyfr_dum,(3,3,dtset%natom))
+   if (psps%usewvl==0.and.psps%usepaw==0.and.dtset%icoulomb==0) then
+     call mkcore(dummy6,dyfr_dum,gr_dum,mpi_enreg,dtset%natom,nfft,dtset%nspden,ntypat,&
+&                ngfft(1),n1xccc,ngfft(2),ngfft(3),option,rprimd,dtset%typat,ucvol,&
+&                vxc,psps%xcccrc,psps%xccc1d,xccc3d,xred)
+   else if (psps%usewvl==0.and.(psps%usepaw==1.or.dtset%icoulomb==1)) then
+     call mkcore_alt(atindx1,dummy6,dyfr_dum,gr_dum,dtset%icoulomb,mpi_enreg,dtset%natom,&
+&         nfft,dtset%nspden,nattyp,ntypat,ngfft(1),n1xccc,ngfft(2),ngfft(3),option,rprimd,&
+&         ucvol,vxc,psps%xcccrc,psps%xccc1d,xccc3d,xred,pawrad,pawtab,psps%usepaw)
+   else if (psps%usewvl==1.and.psps%usepaw==1) then
+#if defined HAVE_BIGDFT
+!      call mkcore_wvl_old(atindx1,dummy6,dyfr_dum,wvl%descr%atoms%astruct%geocode,gr_dum,wvl%descr%h,&
+! &         dtset%natom,nattyp,nfft,wvl%den%denspot%dpbox%nscatterarr(mpi_enreg%me_wvl,:),&
+! &         dtset%nspden,ntypat,wvl%descr%Glr%d%n1,wvl%descr%Glr%d%n1i,wvl%descr%Glr%d%n2,&
+! &         wvl%descr%Glr%d%n2i,wvl%descr%Glr%d%n3,wvl%den%denspot%dpbox%n3pi,n3xccc,option,&
+! &         pawrad,pawtab,psps%gth_params%psppar,rprimd,ucvol_local,vxc,xccc3d,xred,&
+! &         mpi_comm_wvl=mpi_enreg%comm_wvl)
+    call mkcore_wvl(atindx1,dummy6,gr_dum,dtset%natom,nattyp,nfft,dtset%nspden,ntypat,&
+&                   n1xccc,n3xccc,option,pawrad,pawtab,rprimd,vxc,psps%xccc1d,xccc3d,&
+&                   psps%xcccrc,xred,wvl%den,wvl%descr,mpi_comm_wvl=mpi_enreg%comm_wvl)
+#endif
+   end if
+   ABI_DEALLOCATE(gr_dum)
+   ABI_DEALLOCATE(dyfr_dum)
+   call timab(92,2,tsec)
+   call timab(91,1,tsec)
+ end if
 
 !Adds the jellium potential to the local part of ionic potential
  if (dtset%jellslab/=0) then
@@ -541,22 +550,20 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grewtn,grvdw,gsqcut,&
 
 !  Compute with covering comms the different part of the potential.
 #if defined HAVE_BIGDFT
-   if(wvlbigdft) then
-!    Copy e_ewald.
-     wvl%e%energs%eion = energies%e_ewald
-!    Setup the mixing, if necessary
-     call denspot_set_history(wvl%den%denspot,dtset%iscf,dtset%nsppol, &
+!  Copy e_ewald.
+   wvl%e%energs%eion = energies%e_ewald
+!  Setup the mixing, if necessary
+   call denspot_set_history(wvl%den%denspot,dtset%iscf,dtset%nsppol, &
 &     wvl%den%denspot%dpbox%ndims(1),wvl%den%denspot%dpbox%ndims(2))
-   end if
 #endif
    ABI_ALLOCATE(xcart,(3, dtset%natom))
    call xred2xcart(dtset%natom, rprimd, xcart, xred)
    call wvl_psitohpsi(dtset%diemix,energies%e_exactX, energies%e_xc, energies%e_hartree, &
 &   energies%e_kinetic, energies%e_localpsp, energies%e_nonlocalpsp, energies%e_sicdc, &
-&   1, istep, dtset%iscf, mpi_enreg%me_wvl, dtset%natom, dtset%nfft, mpi_enreg%nproc_wvl, dtset%nspden, &
+&   istep, 1, dtset%iscf, mpi_enreg%me_wvl, dtset%natom, dtset%nfft, mpi_enreg%nproc_wvl, dtset%nspden, &
 &   rpnrm, .true.,evxc, wvl,.true., xcart, strsxc,&
 &   vtrial, vxc)
-!  energies%e_localpsp = energies%e_localpsp - real(2, dp) * energies%e_hartree
+   if (optene==3.or.optene==4) energies%e_xcdc=evxc
    ABI_DEALLOCATE(xcart)
 
  end if
@@ -602,7 +609,7 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grewtn,grvdw,gsqcut,&
        vtrial(ifft,2) = vtrial(ifft,2) + Vmagconstr(ifft,2)
      end do !ifft
    end if
-   ABI_DEALLOCATE(Vmagconstr) 
+   ABI_DEALLOCATE(Vmagconstr)
  end if
 
 !Compute parts of total energy depending on potentials
@@ -622,7 +629,7 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grewtn,grvdw,gsqcut,&
      if (ipositron==2) energies%e_hartree = half * (energies%e_hartree-electronpositron%e_hartree)
    else
      energies%e_hartree=zero
-   end if     
+   end if
  end if
 
  if (optene==2.or.optene==4 .and. .not. wvlbigdft) then

@@ -447,6 +447,7 @@ end subroutine energies_to_array
 !!   | occopt
 !!   | positron=option for electron-positron calculation
 !!  usepaw= 0 for non paw calculation; =1 for paw calculation
+!!  usewvl= 0 for PW calculation; =1 for WVL calculation
 !!
 !!
 !! OUTPUT
@@ -498,7 +499,7 @@ end subroutine energies_to_array
 ! *************************************************************************
 
 !If usewvl: wvlbigdft indicates that the BigDFT workflow will be followed
- if(dtset%usewvl==1 .and. dtset%wvl_bigdft_comp==1) wvlbigdft=.true.
+ wvlbigdft=(dtset%usewvl==1.and.dtset%wvl_bigdft_comp==1)
 
  optdc=-1;ipositron=0
  if (dtset%positron==0) then
@@ -516,6 +517,7 @@ end subroutine energies_to_array
 
  eint  = zero
  eintdc = zero
+
 !============= Evaluate some parts of the energy ===========
 
  if (optdc==0.or.optdc==2) then

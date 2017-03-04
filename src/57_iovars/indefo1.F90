@@ -54,7 +54,7 @@ subroutine indefo1(dtset)
 !Arguments ------------------------------------
 !scalars
 !arrays
- type(dataset_type),intent(inout) :: dtset !vz_i
+ type(dataset_type),intent(inout) :: dtset
 
 !Local variables -------------------------------
 !scalars
@@ -182,6 +182,7 @@ subroutine indefo1(dtset)
  if (dtset%usepaw==0) dtset%wfoptalg=0
  if (dtset%usepaw/=0) dtset%wfoptalg=10
  if (dtset%optdriver==RUNL_GSTATE.and.dtset%paral_kgb>0) dtset%wfoptalg=14
+ dtset%wvl_bigdft_comp=1
 
 !X
  dtset%xred_orig(:,:,:)=zero
