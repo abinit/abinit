@@ -26,8 +26,11 @@
 !!  hist     =  history of ionic positions, forces, 
 !!  itime    =  index of current time step
 !!  ntime    =  total number of time steps
-!!  iexit    =  flag indicating finilization of mover loop
 !!  zDEBUG   =  flag indicating whether to print debug info 
+!!  iexit    =  flag indicating finilization of mover loop
+!!  hmcflag  =  optional argument indicating whether the predictor is called from the Hybrid Monte Carlo (HMC) routine
+!!  icycle   =  if hmcflag==1, then icycle providing information about number of HMC cycle is needed
+!!  ncycle   =  if hmcflag==1, then ncycle provides the total number of cycles within one HMC iteration  
 !!
 !! OUTPUT
 !!  hist =  history of ionic positions, forces etc. is updated
@@ -35,10 +38,18 @@
 !! SIDE EFFECTS
 !!
 !! NOTES
+!! 
+!! This routine can be used either to simulate NVE molecular dynamics (ionmov = 24) or
+!! is called from pred_hmc routine (ionmov = 25) to perform updates of ionic positions
+!! in Hybrid Monte Carlo iterations. 
 !!
 !! PARENTS
 !!
+!! mover, pred_hmc
+!!
 !! CHILDREN
+!! 
+!! hist2var, xcart2xred, var2hist 
 !!
 !! SOURCE
 
@@ -95,7 +106,9 @@ subroutine pred_velverlet(ab_mover,hist,itime,ntime,zDEBUG,iexit,hmcflag,icycle,
  real(dp) :: rprimd(3,3),rprim(3,3)                                             ! lattice vectors
  real(dp),allocatable,save :: vel_prev(:,:)                                     ! velocities at the end of each time step (half time step ahead of coordinates)
 
-! *************************************************************************
+!***************************************************************************
+!Beginning of executable session
+!***************************************************************************
 
  DBG_ENTER("COLL")
  
@@ -116,24 +129,35 @@ subroutine pred_velverlet(ab_mover,hist,itime,ntime,zDEBUG,iexit,hmcflag,icycle,
  DBG_EXIT("COLL")
 
 
-hmcflag_=0;if (present(hmcflag)) hmcflag_=hmcflag
-icycle_ =0;if (present(icycle)) icycle_=icycle
-ncycle_ =0;if (present(ncycle)) ncycle_=icycle
+ hmcflag_=0
+ if(present(hmcflag))then
+   hmcflag_=hmcflag
+ endif
+
+ icycle_ =0
+ if(present(icycle))then
+   icycle_=icycle
+ endif
+
+ ncycle_ =0
+ if(present(ncycle))then
+   ncycle_=ncycle
+ endif
 
 
-if(iexit/=0)then
+ if(iexit/=0)then
    if (allocated(vel_prev))  then
      ABI_DEALLOCATE(vel_prev)
    end if
    return
-end if
+ end if
 
-if((hmcflag_==0.and.itime==1).or.(hmcflag_==1.and.icycle_==1))then
+ if((hmcflag_==0.and.itime==1).or.(hmcflag_==1.and.icycle_==1))then
    if (allocated(vel_prev))  then
      ABI_DEALLOCATE(vel_prev)
    end if
    ABI_ALLOCATE(vel_prev,(3,ab_mover%natom))
-endif
+ endif
 
 
 
@@ -169,100 +193,82 @@ endif
 
 
  if((hmcflag_==0.and.itime==1).or.(hmcflag_==1.and.icycle_==1))then
-
-
-  !the following breakdown of single time step in two halfs is needed for initialization.
-  !half step velocities "vel_prev" are saved to be used in the next iteration
-  !the velocities "vel" are only used to estimate kinetic energy at correct time instances
-
-  do ii=1,ab_mover%natom ! propagate velocities half time step forward
+  
+   !the following breakdown of single time step in two halfs is needed for initialization.
+   !half step velocities "vel_prev" are saved to be used in the next iteration
+   !the velocities "vel" are only used to estimate kinetic energy at correct time instances
+   do ii=1,ab_mover%natom ! propagate velocities half time step forward
      do jj=1,3
        vel_prev(jj,ii) = vel(jj,ii) + 0.5_dp * ab_mover%dtion*fcart(jj,ii)/ab_mover%amass(ii)
      enddo
-  enddo
-  do ii=1,ab_mover%natom ! propagate velocities half time step forward
+   enddo
+
+   ! propagate velocities half time step forward
+   do ii=1,ab_mover%natom
      do jj=1,3
        vel(jj,ii) = vel_prev(jj,ii) + 0.5_dp * ab_mover%dtion*fcart(jj,ii)/ab_mover%amass(ii)
      enddo
-  enddo
-  ! use half-step behind velocity values to propagate coordinates one time step forward!!!! 
-  do ii=1,ab_mover%natom
-    do jj=1,3
-      xcart(jj,ii) = xcart(jj,ii) + ab_mover%dtion*vel_prev(jj,ii)
-    enddo
-  enddo
-  ! now, at this 1st iteration, "vel_prev" correspond to a time instance half-step behind
-  ! that of "xcart"
- 
-  write(239,*) 'end of the 1 vv iteration, cycle ',icycle_,', vel_prev:'
-  write(239,*) vel_prev(1,:)
-  write(239,*) vel_prev(2,:)
-  write(239,*) vel_prev(3,:)
-  write(239,*) ''
+   enddo
+   ! use half-step behind velocity values to propagate coordinates one time step forward!!!! 
+   do ii=1,ab_mover%natom
+     do jj=1,3
+       xcart(jj,ii) = xcart(jj,ii) + ab_mover%dtion*vel_prev(jj,ii)
+     enddo
+   enddo
+   ! now, at this 1st iteration, "vel_prev" correspond to a time instance half-step behind
+   ! that of "xcart"
 
- else !i.e. basically, not the very first step (itime/=1 in case of simple simulation and icycle/=1 in case of hmc call)
+ else 
 
-  write(239,*) 'beg of the ',itime,' vv iteration, cycle ',icycle_,', vel_prev:'
-  write(239,*) vel_prev(1,:)
-  write(239,*) vel_prev(2,:)
-  write(239,*) vel_prev(3,:)
-
-
-  !at this moment "vel_prev" is behind "xcart" by half of a time step 
-  !(saved from the previous iteration) and these are the velocity values to be propagated
-  !using forces that are evaluated at the same time instance as xcart
-  do ii=1,ab_mover%natom ! propagate velocities one time step forward
+   !at this moment "vel_prev" is behind "xcart" by half of a time step 
+   !(saved from the previous iteration) and these are the velocity values to be propagated
+   !using forces that are evaluated at the same time instance as xcart
+   do ii=1,ab_mover%natom ! propagate velocities one time step forward
      do jj=1,3
        vel_prev(jj,ii) = vel_prev(jj,ii) + ab_mover%dtion*fcart(jj,ii)/ab_mover%amass(ii)
      enddo
-  enddo
-  !now, the "vel_prev" velocities are half of a time step ahead and can be used to propagate xcart
+   enddo
+   !now, the "vel_prev" velocities are half of a time step ahead and can be used to propagate xcart
 
-  if((hmcflag_==0.and.itime==ntime-1).or.(hmcflag_==1.and.icycle_==ncycle_-1))then
-    factor=0.5_dp
-  else
-    factor=one
-  endif
+   if((hmcflag_==0.and.itime==ntime-1).or.(hmcflag_==1.and.icycle_==ncycle_-1))then
+     factor=0.5_dp
+   else
+     factor=one
+   endif
 
-  do ii=1,ab_mover%natom ! propagate coordinates 
-    do jj=1,3
-      xcart(jj,ii) = xcart(jj,ii) + factor*ab_mover%dtion*vel_prev(jj,ii)
-    enddo
-  enddo
-  !to estimate kinetic energy at the same time instance as the potential (electronic sub-system) energy
-  !propagate "vel" another half-time forward (these values are not to be used in the next time-step)
-  do ii=1,ab_mover%natom ! propagate velocities half time step forward
+   do ii=1,ab_mover%natom ! propagate coordinates 
+     do jj=1,3
+       xcart(jj,ii) = xcart(jj,ii) + factor*ab_mover%dtion*vel_prev(jj,ii)
+     enddo
+   enddo
+   !to estimate kinetic energy at the same time instance as the potential (electronic sub-system) energy
+   !propagate "vel" another half-time forward (these values are not to be used in the next time-step)
+   do ii=1,ab_mover%natom ! propagate velocities half time step forward
      do jj=1,3
        vel(jj,ii) = vel_prev(jj,ii) + (factor-0.5_dp) * ab_mover%dtion*fcart(jj,ii)/ab_mover%amass(ii)
      enddo
-  enddo
+   enddo
 
-  ekin=0.0
+   ekin=0.0
    do ii=1,ab_mover%natom
-      do jj=1,3
-        ekin=ekin+0.5_dp*ab_mover%amass(ii)*vel(jj,ii)**2
-      end do
+     do jj=1,3
+       ekin=ekin+0.5_dp*ab_mover%amass(ii)*vel(jj,ii)**2
+     end do
    end do 
-  ekin_tmp=0.0
+   ekin_tmp=0.0
    do ii=1,ab_mover%natom
-      do jj=1,3
-        ekin_tmp=ekin_tmp+0.5_dp*ab_mover%amass(ii)*vel_prev(jj,ii)**2
-      end do
+     do jj=1,3
+       ekin_tmp=ekin_tmp+0.5_dp*ab_mover%amass(ii)*vel_prev(jj,ii)**2
+     end do
    end do
-  write(238,*) itime,icycle,ekin_tmp,ekin,epot,factor 
-
-  write(239,*) 'end of the ',itime,' vv iteration, cycle ',icycle_,', vel_prev:'
-  write(239,*) vel_prev(1,:)
-  write(239,*) vel_prev(2,:)
-  write(239,*) vel_prev(3,:)
-  write(239,*) ''
+   !write(238,*) itime,icycle,ekin_tmp,ekin,epot,factor 
 
  endif
 
-!Convert new xcart to xred to set correct output values 
-!Update the history with the new coordinates, velocities, etc.
+ !Convert new xcart to xred to set correct output values 
+ !Update the history with the new coordinates, velocities, etc.
 
-!Increase indexes
+ !Increase indexes
  hist%ihist=hist%ihist+1
 
  call xcart2xred(ab_mover%natom,rprimd,xcart,xred)
