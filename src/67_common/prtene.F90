@@ -79,14 +79,10 @@ subroutine prtene(dtset,energies,iout,usepaw)
  real(dp) :: eent,enevalue,etotal,etotaldc
  character(len=22) :: eneName
  character(len=500) :: message
- !logical :: wvlbigdft=.false.
 !arrays
  character(len=10) :: EPName(1:2)=(/"Positronic","Electronic"/)
 
 ! *************************************************************************
-
-!If usewvl: wvlbigdft indicates that the BigDFT workflow will be followed
- !if(dtset%usewvl==1 .and. dtset%wvl_bigdft_comp==1) wvlbigdft=.true.
 
  optdc=-1;ipositron=0
  if (dtset%positron==0) then

@@ -1333,18 +1333,18 @@
 & 'outvars : Printing only first ',nkpt_max,' k-points.'
 
 !WVL - wavelets variables
-!integer
-! intarr(1,:)=dtsets(:)%wvl_bigdft_comp
-! call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'wvl_bigdft_comp','INT',0)
-!real(dp)
- dprarr(1,:)=dtsets(:)%wvl_crmult
- call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'wvl_crmult','DPR',0)
- dprarr(1,:)=dtsets(:)%wvl_frmult
- call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'wvl_frmult','DPR',0)
- dprarr(1,:)=dtsets(:)%wvl_hgrid
- call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'wvl_hgrid','DPR',0)
- intarr(1,:)=dtsets(:)%wvl_nprccg
- call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'wvl_nprccg','INT',0)
+ if (any(dtsets(:)%usewvl==1)) then
+   intarr(1,:)=dtsets(:)%wvl_bigdft_comp
+   call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'wvl_bigdft_comp','INT',0)
+   dprarr(1,:)=dtsets(:)%wvl_crmult
+   call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'wvl_crmult','DPR',0)
+   dprarr(1,:)=dtsets(:)%wvl_frmult
+   call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'wvl_frmult','DPR',0)
+   dprarr(1,:)=dtsets(:)%wvl_hgrid
+   call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'wvl_hgrid','DPR',0)
+   intarr(1,:)=dtsets(:)%wvl_nprccg
+   call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'wvl_nprccg','INT',0)
+ end if
 
 !Wannier90 interface related variables
  if(sum(dtsets(1:ndtset_alloc)%prtwant) >1)then

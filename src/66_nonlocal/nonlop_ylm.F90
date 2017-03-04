@@ -645,7 +645,9 @@
 
 !      Prepare the phase factors if they were not already computed
        if (nloalg(2)<=0) then
+!write(87,*) "coucou0",ia3,ia4
          call ph1d3d(ia3,ia4,kgin,matblk,natom,npwin,n1,n2,n3,phkxredin,ph1d,ph3din)
+!write(87,*) "ph3din",ph3din(1,487,:)
        end if
 
 !      Allocate memory for projected scalars
@@ -705,7 +707,8 @@
        if (cpopt==4.and.ndgxdt>0) then
          ndgxdt_stored = cprjin(1,1)%ncpgr
          ishift=0
-         if (choice==2.and.ndgxdt_stored>ndgxdt) ishift=ndgxdt_stored-ndgxdt
+         if ((choice==2).and.(ndgxdt_stored>ndgxdt).and.(signs==2)) ishift=idir-ndgxdt
+         if (choice==2.and.(ndgxdt_stored>ndgxdt).and.(signs==1)) ishift=ndgxdt_stored-ndgxdt
          if(cplex == 2) then
            do ispinor=1,nspinor
              do ia=1,nincat

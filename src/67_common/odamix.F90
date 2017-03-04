@@ -207,7 +207,7 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
  integer :: jrhoij,klmn,klmn1,kmix,nfftot,nhatgrdim,nselect,nzlmopt,nk3xc,option,optxc
  logical :: with_vxctau
  real(dp) :: alphaopt,compch_fft,compch_sph,doti,e1t10,e_ksnm1,e_xcdc_vxctau
- real(dp) :: eenth,enonlocal,fp0,gammp1,ro_dlt,ucvol_local
+ real(dp) :: eenth,fp0,gammp1,ro_dlt,ucvol_local
  character(len=500) :: message
 !arrays
  real(dp) :: A(3,3),A1(3,3),A_new(3,3),efield_new(3)
@@ -483,10 +483,9 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
  else
    etotal = etotal + energies%e_paw
  end if
+
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!!!!!!!!!!!! now, compute mixed densities
-
-
 
  gammp1=etotal-e_ksnm1-fp0
  if (fp0>0.d0) then
@@ -500,16 +499,11 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
  if (abs(energies%h0)<=tol10) alphaopt=one
  write(std_out,*) " alphaopt",alphaopt
 
- if (usepaw==0) then
-   enonlocal =energies%e_nonlocalpsp
- else
-   enonlocal = zero
- end if
+ energies%h0=(one-alphaopt)*energies%h0 + alphaopt*(energies%e_kinetic+energies%e_localpsp)
+ if (usepaw==0) energies%h0=energies%h0 + alphaopt*energies%e_nonlocalpsp
 
- energies%h0=(one-alphaopt)*energies%h0+alphaopt*(energies%e_kinetic+energies%e_localpsp+enonlocal)
  rhor= rhor+(alphaopt-one)*nvresid
  call fourdp(1,rhog,rhor(:,1),-1,mpi_enreg,nfft,ngfft,dtset%paral_kgb,0)
-
 
  if (usepaw==1) then
    do iatom=1,my_natom

@@ -447,7 +447,11 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%nbdblock=1
    dtsets(idtset)%nbdbuf=0
    dtsets(idtset)%nberry=1
-   dtsets(idtset)%nc_xccc_gspace=0
+   if (dtsets(idtset)%usepaw==0) then
+     dtsets(idtset)%nc_xccc_gspace=0
+   else
+     dtsets(idtset)%nc_xccc_gspace=1
+   end if
    dtsets(idtset)%nbandkss=0
    dtsets(idtset)%nctime=0
    dtsets(idtset)%ndtset = -1

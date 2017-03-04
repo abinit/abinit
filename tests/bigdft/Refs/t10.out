@@ -421,8 +421,12 @@
     NL   psp  energy=  0.00000000000000E+00
     >>>>>>>>> Etotal= -1.13753223817299E+00
 
- Other information on the energy :
-    Total energy(eV)= -3.09538263860502E+01 ; Band energy (Ha)=  -7.4461378366E-01
+ "Double-counting" decomposition of free energy:
+    Band energy     = -7.44613783660291E-01
+    Ion-ion energy  =  6.88425933524716E-01
+    PspCore energy  =  0.00000000000000E+00
+    Dble-C XC-energy= -1.08136042793054E+00
+    >>>> Etotal (DC)= -1.13754827806611E+00
 --------------------------------------------------------------------------------
  rms coord change=  6.9806E-03   atom, delta coord (reduced):
      1       -0.012090780710      0.000000014707      0.000000014707

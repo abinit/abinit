@@ -103,6 +103,10 @@ MODULE m_pawtab
 
   type(wvlpaw_rholoc_type) :: rholoc
    ! local density
+   !   d(:,1): local rho
+   !   d(:,2): local rho 2nd-derivative
+   !   d(:,3): local pot
+   !   d(:,4): local pot 2nd-derivative
 
  end type wvlpaw_type
 

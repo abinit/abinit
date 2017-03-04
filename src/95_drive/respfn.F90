@@ -190,7 +190,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  integer,parameter :: formeig=0,level=10
  integer,parameter :: response=1,syuse=0,master=0,cplex1=1
  integer :: nk3xc
- integer :: analyt,ask_accurate,band_index,bantot,bdeigrf,choice,cplex
+ integer :: analyt,ask_accurate,band_index,bantot,bdeigrf,choice,coredens_method,cplex
  integer :: dim_eig2nkq,dim_eigbrd,dyfr_cplex,dyfr_nondiag,fullinit,gnt_option
  integer :: gscase,has_dijnd,has_kxc,iatom,iatom_tot,iband,idir,ider,ierr,ifft,ii,ikpt,indx
  integer :: i1dir,i1pert,i2dir,i2pert,i3dir,i3pert
@@ -202,7 +202,8 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  integer :: optatm,optdyfr,opteltfr,optgr,optn,optn2,optstr,optv
  integer :: outd2,pawbec,pawpiezo,prtbbb,psp_gencond,qzero,rdwr,rdwrpaw
  integer :: req_cplex_dij,rfasr,rfddk,rfelfd,rfphon,rfstrs,rfuser,rf2_dkdk,rf2_dkde
- integer :: spaceworld,sumg0,sz1,sz2,tim_mkrho,timrev,usecprj,usevdw,usexcnhat,use_sym
+ integer :: spaceworld,sumg0,sz1,sz2,tim_mkrho,timrev,usecprj,usevdw
+ integer :: usexcnhat,use_sym,vloc_method
  logical :: has_full_piezo,has_allddk,paral_atom,qeq0,use_nhat_gga,call_pawinit
  real(dp) :: boxcut,compch_fft,compch_sph,cpus,ecore,ecut_eff,ecutdg_eff,ecutf
  real(dp) :: eei,eew,ehart,eii,ek,enl,entropy,enxc
@@ -776,17 +777,32 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  ABI_ALLOCATE(xccc3d,(n3xccc))
  ABI_ALLOCATE(vpsp,(nfftf))
 
- if (psps%usepaw==1 .or. psps%nc_xccc_gspace==1) then
-!  PAW or NC with nc_xccc_gspace: compute Vloc and core charge together in reciprocal space
+!Determine by which method the local ionic potential and/or
+! the pseudo core charge density have to be computed
+!Local ionic potential:
+! Method 1: PAW ; Method 2: Norm-conserving PP
+ vloc_method=1;if (psps%usepaw==0) vloc_method=2
+!Pseudo core charge density:
+! Method 1: PAW, nc_xccc_gspace ; Method 2: Norm-conserving PP
+ coredens_method=1;if (psps%usepaw==0) coredens_method=2
+ if (psps%nc_xccc_gspace==1) coredens_method=1
+ if (psps%nc_xccc_gspace==0) coredens_method=2
+
+!Local ionic potential and/or pseudo core charge by method 1
+ if (vloc_method==1.or.coredens_method==1) then
    call timab(562,1,tsec)
-   optatm=1;optdyfr=0;opteltfr=0;optgr=0;optstr=0;optv=1;optn=n3xccc/nfftf;optn2=1
+   optv=0;if (vloc_method==1) optv=1
+   optn=0;if (coredens_method==1) optn=n3xccc/nfftf
+   optatm=1;optdyfr=0;opteltfr=0;optgr=0;optstr=0;optn2=1
    call atm2fft(atindx1,xccc3d,vpsp,dum_dyfrn,dum_dyfrv,dum_eltfrxc,dum_gauss,gmet,gprimd,&
 &   dum_grn,dum_grv,gsqcut,mgfftf,psps%mqgrid_vl,natom,nattyp,nfftf,ngfftf,&
 &   ntypat,optatm,optdyfr,opteltfr,optgr,optn,optn2,optstr,optv,psps,pawtab,ph1df,psps%qgrid_vl,&
 &   dtset%qprtrb,dum_rhog,strn_dummy6,strv_dummy6,ucvol,psps%usepaw,dum_vg,dum_vg,dum_vg,dtset%vprtrb,psps%vlspl)
    call timab(562,2,tsec)
- else
-!  Norm-cons.: compute Vloc in reciprocal space and core charge in real space
+ end if
+
+!Local ionic potential by method 2
+ if (vloc_method==2) then
    option=1
    ABI_ALLOCATE(dyfrlo_indx,(3,3,natom))
    ABI_ALLOCATE(grtn_indx,(3,natom))
@@ -796,15 +812,18 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 &   dtset%qprtrb,rhog,rhor,rprimd,ucvol,dtset%vprtrb,vpsp,wvl%descr,wvl%den,xred)
    ABI_DEALLOCATE(dyfrlo_indx)
    ABI_DEALLOCATE(grtn_indx)
-   if (psps%n1xccc/=0) then
-     ABI_ALLOCATE(dyfrx2,(3,3,natom))
-     ABI_ALLOCATE(vxc,(0,0)) ! dummy
-     call mkcore(dummy6,dyfrx2,grxc,mpi_enreg,natom,nfftf,dtset%nspden,ntypat,&
+ end if
+
+!Pseudo core electron density by method 2
+ if (coredens_method==2.and.psps%n1xccc/=0) then
+   option=1
+   ABI_ALLOCATE(dyfrx2,(3,3,natom))
+   ABI_ALLOCATE(vxc,(0,0)) ! dummy
+   call mkcore(dummy6,dyfrx2,grxc,mpi_enreg,natom,nfftf,dtset%nspden,ntypat,&
 &     ngfftf(1),psps%n1xccc,ngfftf(2),ngfftf(3),option,rprimd,dtset%typat,ucvol,vxc,&
 &     psps%xcccrc,psps%xccc1d,xccc3d,xred)
-     ABI_DEALLOCATE(dyfrx2)
-     ABI_DEALLOCATE(vxc) ! dummy
-   end if
+   ABI_DEALLOCATE(dyfrx2)
+   ABI_DEALLOCATE(vxc) ! dummy
  end if
 
 !Set up hartree and xc potential. Compute kxc here.

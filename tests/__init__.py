@@ -139,7 +139,7 @@ _tsuite_dirs = [
     #"abirules",
     "atompaw",
     "bigdft",
-    #"bigdft_paral",
+    "bigdft_paral",
     #"buildsys",
     "built-in",
     #"cpu",      This directory is disabled
