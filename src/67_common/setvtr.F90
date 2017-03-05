@@ -193,7 +193,8 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grewtn,grvdw,gsqcut,&
  real(dp),intent(out),optional :: vxctau(nfft,dtset%nspden,4*dtset%usekden)
  real(dp),intent(inout) :: xccc3d(n3xccc)
  real(dp),intent(in) :: xred(3,dtset%natom)
- real(dp),intent(out) :: grchempottn(3,dtset%natom),grewtn(3,dtset%natom),grvdw(3,ngrvdw),kxc(nfft,nkxc),strsxc(6)
+ real(dp),allocatable :: grchempottn(:,:)
+ real(dp),intent(out) :: grewtn(3,dtset%natom),grvdw(3,ngrvdw),kxc(nfft,nkxc),strsxc(6)
  type(pawtab_type),intent(in) :: pawtab(ntypat*dtset%usepaw)
  type(pawrad_type),intent(in) :: pawrad(ntypat*dtset%usepaw)
 
@@ -215,7 +216,6 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grewtn,grvdw,gsqcut,&
  real(dp) :: strn_dummy6(6), strv_dummy6(6)
  real(dp) :: vzeeman(4)
  real(dp),allocatable :: grtn(:,:),dyfr_dum(:,:,:),gr_dum(:,:)
-!real(dp),allocatable :: grchempottn_dum(:,:)
  real(dp),allocatable :: rhojellg(:,:),rhojellr(:),rhowk(:,:),vjell(:)
  real(dp),allocatable :: Vmagconstr(:,:),rhog_dum(:,:)
 
@@ -271,10 +271,9 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grewtn,grvdw,gsqcut,&
 &     wvl%descr, wvl%den, xred)
    end if
    if (dtset%nzchempot>0) then
+     ABI_ALLOCATE(grchempottn,(3,dtset%natom))
      call spatialchempot(energies%e_chempot,dtset%chempot,grchempottn,dtset%natom,ntypat,dtset%nzchempot,dtset%typat,xred)
-!    ABI_ALLOCATE(grchempottn_dum,(3,dtset%natom))
-!    call spatialchempot(energies%e_chempot,dtset%chempot,grchempottn_dum,dtset%natom,ntypat,dtset%nzchempot,dtset%typat,xred)
-!    ABI_DEALLOCATE(grchempottn_dum)
+     ABI_DEALLOCATE(grchempottn)
    endif
    if (dtset%vdw_xc==5.and.ngrvdw==dtset%natom) then
      call vdw_dftd2(energies%e_vdw_dftd,dtset%ixc,dtset%natom,ntypat,1,dtset%typat,rprimd,&
