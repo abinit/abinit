@@ -311,11 +311,11 @@ subroutine forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,forold,fred,gres
      call timab(53,1,tsec)
      option=2
      ABI_ALLOCATE(dyfrx2_dum,(3,3,dtset%natom))
+     ABI_ALLOCATE(xccc3d_dum,(n3xccc))
      if (is_hybrid_ncpp) then
        call xchybrid_ncpp_cc(dtset,eei_dum,mpi_enreg,nfft,ngfft,n3xccc,rhor,rprimd,&
 &       dummy6,eei_dum,xccc3d_dum,grxc=grxc,xcccrc=psps%xcccrc,xccc1d=psps%xccc1d,xred=xred,n1xccc=n1xccc)
      else
-       ABI_ALLOCATE(xccc3d_dum,(n3xccc))
        if (psps%usewvl==0.and.psps%usepaw==0.and.dtset%icoulomb==0) then
          call mkcore(dummy6,dyfrx2_dum,grxc,mpi_enreg,dtset%natom,nfft,dtset%nspden,ntypat,&
 &             ngfft(1),n1xccc, ngfft(2),ngfft(3),option,rprimd,dtset%typat,ucvol,vxc,&
@@ -338,8 +338,8 @@ subroutine forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,forold,fred,gres
 &                      psps%xcccrc,xred,wvl_den,wvl,mpi_comm_wvl=mpi_enreg%comm_wvl)
 #endif
        end if
-       ABI_DEALLOCATE(xccc3d_dum)
      end if
+     ABI_DEALLOCATE(xccc3d_dum)
      ABI_DEALLOCATE(dyfrx2_dum)
      call timab(53,2,tsec)
    else
