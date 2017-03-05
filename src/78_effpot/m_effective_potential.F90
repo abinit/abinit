@@ -2678,10 +2678,11 @@ subroutine effective_potential_getForces(eff_pot,fcart,fred,natom,rprimd,xcart,d
 !scalar
   integer,parameter :: master=0
   integer :: ii
-!array
-  real(dp):: disp_tmp1(3,natom),dummy
-  integer :: cell_number(3)
+  real(dp):: dummy
   character(500) :: msg
+!array
+  integer :: cell_number(3)
+  real(dp):: disp_tmp1(3,natom)
 
 ! *************************************************************************
 
@@ -2755,7 +2756,7 @@ end subroutine effective_potential_getForces
 !! SOURCE
 
 subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,rprimd,&
-&                                       xcart,displacement,strain_in,external_stress)
+&                                       xred,displacement,strain_in,external_stress)
 
   use m_strain
 
@@ -2774,7 +2775,7 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
   integer, intent(in) :: natom
 !array
   type(effective_potential_type),intent(in) :: eff_pot
-  real(dp),intent(inout) :: rprimd(3,3),xcart(3,natom)
+  real(dp),intent(inout) :: rprimd(3,3),xred(3,natom)
   real(dp),intent(out) :: energy
   real(dp),intent(out) :: fcart(3,eff_pot%supercell%natom_supercell)
   real(dp),intent(out) :: fred(3,eff_pot%supercell%natom_supercell)
@@ -2800,8 +2801,8 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
   real(dp) :: fcart_part(3,eff_pot%supercell%natom_supercell)
   real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3)
   real(dp) :: strain_tmp(6),strten_part(6)
+  real(dp) :: xcart(3,natom),xcart_tmp(3,eff_pot%supercell%natom_supercell)
   real(dp) :: xred_tmp(3,eff_pot%supercell%natom_supercell)
-  real(dp) :: xcart_tmp(3,eff_pot%supercell%natom_supercell)
 
 ! *************************************************************************
 
@@ -2883,6 +2884,7 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
   if (present(displacement)) then
     disp_tmp(:,:) = displacement(:,:)
   else
+    call xred2xcart(natom, rprimd, xcart, xred)
     if(has_strain) then
       call xcart2xred(natom,eff_pot%supercell%rprimd_supercell,&
 &                     eff_pot%supercell%xcart_supercell,xred_tmp)

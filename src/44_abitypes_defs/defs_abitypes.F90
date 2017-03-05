@@ -457,6 +457,7 @@ type dataset_type
  integer :: macro_uj
  integer :: pawujat
  integer :: pawxcdev
+ integer :: pimd_constraint
  integer :: pitransform
  integer :: plowan_bandi
  integer :: plowan_bandf

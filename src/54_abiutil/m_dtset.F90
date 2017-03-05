@@ -743,6 +743,7 @@ subroutine dtset_copy(dtout, dtin)
  dtout%pawujrad           = dtin%pawujrad
  dtout%pawujv             = dtin%pawujv
  dtout%pawxcdev           = dtin%pawxcdev
+ dtout%pimd_constraint    = dtin%pimd_constraint
  dtout%pitransform        = dtin%pitransform
  dtout%plowan_compute     = dtin%plowan_compute
  dtout%plowan_bandi       = dtin%plowan_bandi

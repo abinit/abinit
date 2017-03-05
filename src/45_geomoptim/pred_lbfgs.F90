@@ -115,7 +115,7 @@ real(dp) :: gprimd(3,3)
 real(dp) :: gmet(3,3)
 real(dp) :: rmet(3,3)
 real(dp) :: residual(3,ab_mover%natom),residual_corrected(3,ab_mover%natom)
-real(dp) :: xred(3,ab_mover%natom),xcart(3,ab_mover%natom)
+real(dp) :: xred(3,ab_mover%natom)
 real(dp) :: strten(6)
 
 !***************************************************************************
@@ -220,15 +220,18 @@ real(dp) :: strten(6)
 !##########################################################
 !### 04. Obtain the present values from the history
 
- call hist2var(acell,hist,ab_mover%natom,rprim,rprimd,xcart,xred,zDEBUG)
+ call hist2var(acell,hist,ab_mover%natom,rprimd,xred,zDEBUG)
+ do ii=1,3
+   rprim(ii,1:3)=rprimd(ii,1:3)/acell(1:3)
+ end do
 
- strten(:)=hist%histS(:,hist%ihist)
- etotal   =hist%histE(hist%ihist)
+ strten(:)=hist%strten(:,hist%ihist)
+ etotal   =hist%etot(hist%ihist)
 
 !Fill the residual with forces (No preconditioning)
 !Or the preconditioned forces
  if (ab_mover%goprecon==0)then
-   residual(:,:)= hist%histXF(:,:,4,hist%ihist)
+   call fcart2fred(hist%fcart(:,:,hist%ihist),residual,rprimd,ab_mover%natom)
  else
    residual(:,:)= forstr%fred(:,:)
  end if
@@ -260,15 +263,14 @@ real(dp) :: strten(6)
 
 !Get rid of mean force on whole unit cell, but only if no
 !generalized constraints are in effect
+ residual_corrected(:,:)=residual(:,:)
  if(ab_mover%nconeq==0)then
    do ii=1,3
-     favg=sum(residual(ii,:))/dble(ab_mover%natom)
-     residual_corrected(ii,:)=residual(ii,:)-favg
-     if(ab_mover%jellslab/=0.and.ii==3)&
-&     residual_corrected(ii,:)=residual(ii,:)
+     if (ii/=3.or.ab_mover%jellslab==0) then
+       favg=sum(residual_corrected(ii,:))/dble(ab_mover%natom)
+       residual_corrected(ii,:)=residual_corrected(ii,:)-favg
+     end if
    end do
- else
-   residual_corrected(:,:)=residual(:,:)
  end if
 
 !write(std_out,*) 'bfgs 05'
@@ -356,13 +358,11 @@ real(dp) :: strten(6)
 !##########################################################
 !### 07. Compute the next values
 
-
  vin_prev(:) = vin
  vout_prev(:) = vout
  info = lbfgs_execute(vin,etotal,vout)
 
-
-!zDEBUG (vin,vout and hessin after prediction)
+!zDEBUG (vin,vout after prediction)
  if(zDEBUG)then
    write(std_out,*) 'Vectors vin and vout [after prediction]'
    write(std_out,*) 'vin_prev:'
@@ -422,12 +422,10 @@ real(dp) :: strten(6)
    call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
  end if
 
-!Compute xcart from xred, and rprimd
- call xred2xcart(ab_mover%natom,rprimd,xcart,xred)
-
 !Fill the history with the variables
 !xcart, xred, acell, rprimd
- call var2hist(acell,hist,ab_mover%natom,rprim,rprimd,xcart,xred,zDEBUG)
+ call var2hist(acell,hist,ab_mover%natom,rprimd,xred,zDEBUG)
+ hist%vel(:,:,hist%ihist)=hist%vel(:,:,hist%ihist-1)
 
  if(zDEBUG)then
    write (std_out,*) 'residual:'
@@ -439,8 +437,6 @@ real(dp) :: strten(6)
    write (std_out,*) 'etotal:'
    write (std_out,*) etotal
  end if
-
- hist%histV(:,:,hist%ihist)=hist%histV(:,:,hist%ihist-1)
 
 end subroutine pred_lbfgs
 !!***

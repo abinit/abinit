@@ -21,12 +21,13 @@
 !!
 !! INPUTS
 !! imgmov=gives the algorithm to be used for prediction of new set of images
-!! itimimage=number of the current time for image propagation (itimimage+1 is to be predicted here)
+!! itimimage=time index for image propagation (itimimage+1 is to be predicted here)
+!! itimimage_eff=time index in the history
 !! mpi_enreg=MPI-parallelisation information
 !! natom=dimension of vel_timimage and xred_timimage
 !! nimage=number of images (treated by current proc)
 !! nimage_tot=total number of images
-!! ntimimage=dimension of several arrays
+!! ntimimage_stored=number of time steps stored in the history
 !! results_gs_timimage(ntimimage,nimage)=datastructure that hold all the history of previous computations.
 !! pimd_param=datastructure that contains all the parameters necessary to Path-Integral MD
 !! prtvolimg=printing volume
@@ -34,23 +35,23 @@
 !! OUTPUT
 !!
 !! SIDE EFFECTS
-!! results_img(ntimimage,nimage)=datastructure that hold all the history of previous computations.
+!! results_img(ntimimage_stored,nimage)=datastructure that holds the history of previous computations.
 !!   results_img(:,:)%acell(3)
-!!    at input, history of the values of acell for all images, up to itimimage
+!!    at input, history of the values of acell for all images
 !!    at output, the predicted values of acell for all images
 !!   results_img(:,:)%results_gs
-!!    at input, history of the values of energies and forces for all images, up to itimimage
+!!    at input, history of the values of energies and forces for all images
 !!   results_img(:,:)%rprim(3,3)
-!!    at input, history of the values of rprim for all images, up to itimimage
+!!    at input, history of the values of rprim for all images
 !!    at output, the predicted values of rprim for all images
 !!   results_img(:,:)%vel(3,natom)
-!!    at input, history of the values of vel for all images, up to itimimage
+!!    at input, history of the values of vel for all images
 !!    at output, the predicted values of vel for all images
 !!   results_img(:,:)%vel_cell(3,3)
-!!    at input, history of the values of vel_cell for all images, up to itimimage
+!!    at input, history of the values of vel_cell for all images
 !!    at output, the predicted values of vel_cell for all images
 !!   results_img(:,:)%xred(3,natom)
-!!    at input, history of the values of xred for all images, up to itimimage
+!!    at input, history of the values of xred for all images
 !!    at output, the predicted values of xred for all images
 !!
 !! PARENTS
@@ -69,8 +70,8 @@
 
 #include "abi_common.h"
 
-subroutine predict_pimd(imgmov,itimimage,mpi_enreg,natom,nimage,nimage_tot,&
-&                       ntimimage,pimd_param,prtvolimg,results_img)
+subroutine predict_pimd(imgmov,itimimage,itimimage_eff,mpi_enreg,natom,nimage,nimage_tot,&
+&                       ntimimage_stored,pimd_param,prtvolimg,results_img)
 
  use defs_basis
  use defs_abitypes
@@ -91,15 +92,16 @@ subroutine predict_pimd(imgmov,itimimage,mpi_enreg,natom,nimage,nimage_tot,&
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: imgmov,itimimage,natom,nimage,nimage_tot,ntimimage,prtvolimg
+ integer,intent(in) :: imgmov,itimimage,itimimage_eff,natom
+ integer,intent(in) :: nimage,nimage_tot,ntimimage_stored,prtvolimg
  type(MPI_type),intent(in) :: mpi_enreg
  type(pimd_type),intent(inout) :: pimd_param
 !arrays
- type(results_img_type) :: results_img(nimage,ntimimage)
+ type(results_img_type) :: results_img(nimage,ntimimage_stored)
 
 !Local variables-------------------------------
 !scalars
- integer :: ierr,ii
+ integer :: ierr,ii,itime,itime_next,itime_prev
  real(dp) :: volume
 !arrays
  real(dp) :: rprimd(3,3),rprimd_next(3,3),rprimd_prev(3,3),vel_cell(3,3)
@@ -113,6 +115,9 @@ subroutine predict_pimd(imgmov,itimimage,mpi_enreg,natom,nimage,nimage_tot,&
 
 !Parallelism over image: only one process per image of the cell
  if (mpi_enreg%me_cell==0) then
+
+   itime=itimimage_eff
+   itime_prev=itime-1;if (itime_prev<1) itime_prev=ntimimage_stored
 
    if (mpi_enreg%paral_img==0.or.mpi_enreg%me_img==0) then
      ABI_ALLOCATE(xred,(3,natom,nimage_tot))
@@ -128,11 +133,11 @@ subroutine predict_pimd(imgmov,itimimage,mpi_enreg,natom,nimage,nimage_tot,&
    if (mpi_enreg%paral_img==1) then
      ABI_ALLOCATE(mpibuffer,(12,natom+1,nimage))
      do ii=1,nimage
-       mpibuffer(1:3  ,1:natom,ii)=results_img(ii,1)%xred(1:3,1:natom)
-       mpibuffer(4:6  ,1:natom,ii)=results_img(ii,2)%xred(1:3,1:natom)
-       mpibuffer(7:9  ,1:natom,ii)=results_img(ii,1)%results_gs%fcart(1:3,1:natom)
-       mpibuffer(10:12,1:natom,ii)=results_img(ii,1)%vel(1:3,1:natom)
-       mpibuffer(1:6  ,natom+1,ii)=results_img(ii,1)%results_gs%strten(1:6)
+       mpibuffer(1:3  ,1:natom,ii)=results_img(ii,itime)%xred(1:3,1:natom)
+       mpibuffer(4:6  ,1:natom,ii)=results_img(ii,itime_prev)%xred(1:3,1:natom)
+       mpibuffer(7:9  ,1:natom,ii)=results_img(ii,itime)%results_gs%fcart(1:3,1:natom)
+       mpibuffer(10:12,1:natom,ii)=results_img(ii,itime)%vel(1:3,1:natom)
+       mpibuffer(1:6  ,natom+1,ii)=results_img(ii,itime)%results_gs%strten(1:6)
        mpibuffer(7:12 ,natom+1,ii)=zero
      end do
      if (mpi_enreg%me_img==0)  then
@@ -163,7 +168,7 @@ subroutine predict_pimd(imgmov,itimimage,mpi_enreg,natom,nimage,nimage_tot,&
        ABI_ALLOCATE(etotal,(0))
      end if
      do ii=1,nimage
-       mpibuf(ii)=results_img(ii,1)%results_gs%etotal
+       mpibuf(ii)=results_img(ii,itime)%results_gs%etotal
      end do
      call xmpi_gather(mpibuf,nimage,etotal,nimage,0,mpi_enreg%comm_img,ierr)
      ABI_DEALLOCATE(mpibuf)
@@ -174,17 +179,17 @@ subroutine predict_pimd(imgmov,itimimage,mpi_enreg,natom,nimage,nimage_tot,&
 !    No parallelism: simply copy positions/forces/velocities/stresses/energy
    else
      do ii=1,nimage
-       xred     (:,:,ii)=results_img(ii,1)%xred(:,:)
-       xred_prev(:,:,ii)=results_img(ii,2)%xred(:,:)
-       forces   (:,:,ii)=results_img(ii,1)%results_gs%fcart(:,:)
-       vel      (:,:,ii)=results_img(ii,1)%vel(:,:)
-       etotal   (    ii)=results_img(ii,1)%results_gs%etotal
-       stressin (1,1,ii)=results_img(ii,1)%results_gs%strten(1)
-       stressin (2,2,ii)=results_img(ii,1)%results_gs%strten(2)
-       stressin (3,3,ii)=results_img(ii,1)%results_gs%strten(3)
-       stressin (3,2,ii)=results_img(ii,1)%results_gs%strten(4)
-       stressin (3,1,ii)=results_img(ii,1)%results_gs%strten(5)
-       stressin (2,1,ii)=results_img(ii,1)%results_gs%strten(6)
+       xred     (:,:,ii)=results_img(ii,itime)%xred(:,:)
+       xred_prev(:,:,ii)=results_img(ii,itime_prev)%xred(:,:)
+       forces   (:,:,ii)=results_img(ii,itime)%results_gs%fcart(:,:)
+       vel      (:,:,ii)=results_img(ii,itime)%vel(:,:)
+       etotal   (    ii)=results_img(ii,itime)%results_gs%etotal
+       stressin (1,1,ii)=results_img(ii,itime)%results_gs%strten(1)
+       stressin (2,2,ii)=results_img(ii,itime)%results_gs%strten(2)
+       stressin (3,3,ii)=results_img(ii,itime)%results_gs%strten(3)
+       stressin (3,2,ii)=results_img(ii,itime)%results_gs%strten(4)
+       stressin (3,1,ii)=results_img(ii,itime)%results_gs%strten(5)
+       stressin (2,1,ii)=results_img(ii,itime)%results_gs%strten(6)
        stressin (2,3,ii)=stressin (3,2,ii)
        stressin (1,3,ii)=stressin (3,1,ii)
        stressin (1,2,ii)=stressin (2,1,ii)
@@ -198,15 +203,15 @@ subroutine predict_pimd(imgmov,itimimage,mpi_enreg,natom,nimage,nimage_tot,&
 
 !    Some useful quantities about the cells (common to all images)
 !    Take acell and rprim from 1st image
-     call mkrdim(results_img(1,1)%acell,results_img(1,1)%rprim,rprimd)
-     call mkrdim(results_img(1,2)%acell,results_img(1,2)%rprim,rprimd_prev)
+     call mkrdim(results_img(1,itime)%acell,results_img(1,itime)%rprim,rprimd)
+     call mkrdim(results_img(1,itime_prev)%acell,results_img(1,itime_prev)%rprim,rprimd_prev)
      rprimd_next(:,:)=rprimd_prev(:,:)
      vel_cell(:,:)=results_img(1,1)%vel_cell(:,:)
 
 !    Compute the volume of the supercell
      volume=rprimd(1,1)*(rprimd(2,2)*rprimd(3,3)-rprimd(3,2)*rprimd(2,3))+&
-&     rprimd(2,1)*(rprimd(3,2)*rprimd(1,3)-rprimd(1,2)*rprimd(3,3))+&
-&     rprimd(3,1)*(rprimd(1,2)*rprimd(2,3)-rprimd(2,2)*rprimd(1,3))
+&           rprimd(2,1)*(rprimd(3,2)*rprimd(1,3)-rprimd(1,2)*rprimd(3,3))+&
+&           rprimd(3,1)*(rprimd(1,2)*rprimd(2,3)-rprimd(2,2)*rprimd(1,3))
      volume=abs(volume)
 
      select case(imgmov)
@@ -297,27 +302,28 @@ subroutine predict_pimd(imgmov,itimimage,mpi_enreg,natom,nimage,nimage_tot,&
  call xmpi_bcast(mpibuffer,0,mpi_enreg%comm_cell,ierr)
 
 !Store results in final place
+ itime=itimimage_eff
+ itime_prev=itime-1;if (itime_prev<1) itime_prev=ntimimage_stored
+ itime_next=itime+1;if (itime_next>ntimimage_stored) itime_next=1
  do ii=1,nimage
-   results_img(ii,1)%xred(1:3,1:natom)=mpibuffer(1:3,1:natom,ii)
-   results_img(ii,2)%xred(1:3,1:natom)=mpibuffer(4:6,1:natom,ii)
-   results_img(ii,1)%vel (1:3,1:natom)=mpibuffer(7:9,1:natom,ii)
+   results_img(ii,itime_next)%xred(1:3,1:natom)=mpibuffer(1:3,1:natom,ii)
+   results_img(ii,itime)%xred(1:3,1:natom)=mpibuffer(4:6,1:natom,ii)
+   results_img(ii,itime_next)%vel(1:3,1:natom)=mpibuffer(7:9,1:natom,ii)
  end do
  if (pimd_param%optcell/=0) then
    do ii=1,nimage
-     results_img(ii,2)%acell(1:3)=results_img(ii,1)%acell(1:3)
-     results_img(ii,2)%rprim(1:3,1:3)=results_img(ii,1)%rprim(1:3,1:3)
+     results_img(ii,itime)%acell(1:3)=results_img(ii,itime_prev)%acell(1:3)
+     results_img(ii,itime)%rprim(1:3,1:3)=results_img(ii,itime_prev)%rprim(1:3,1:3)
      rprimd(1:3,1)=mpibuffer(1:3,natom+1,ii)
      rprimd(1:3,2)=mpibuffer(4:6,natom+1,ii)
      rprimd(1:3,3)=mpibuffer(7:9,natom+1,ii)
-     results_img(ii,1)%vel_cell(1:3,1)=mpibuffer(1:3,natom+2,ii)
-     results_img(ii,1)%vel_cell(1:3,2)=mpibuffer(4:6,natom+2,ii)
-     results_img(ii,1)%vel_cell(1:3,3)=mpibuffer(7:9,natom+2,ii)
-     call mkradim(results_img(ii,1)%acell,results_img(ii,1)%rprim,rprimd)
+     results_img(ii,itime_next)%vel_cell(1:3,1)=mpibuffer(1:3,natom+2,ii)
+     results_img(ii,itime_next)%vel_cell(1:3,2)=mpibuffer(4:6,natom+2,ii)
+     results_img(ii,itime_next)%vel_cell(1:3,3)=mpibuffer(7:9,natom+2,ii)
+     call mkradim(results_img(ii,itime_next)%acell,results_img(ii,itime_next)%rprim,rprimd)
    end do
  end if
  ABI_DEALLOCATE(mpibuffer)
 
 end subroutine predict_pimd
 !!***
-
-

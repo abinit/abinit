@@ -235,7 +235,7 @@ program multibinit
      call wrtout(std_out,message,'COLL') 
      call wrtout(ab_out,message,'COLL') 
      if(filnam(5)/=''.or.filnam(5)/='no')then
-       call read_md_hist(filnam(5),hist)
+       call read_md_hist(filnam(5),hist,.FALSE.,.FALSE.)
      else
        write(message, '(3a)' )&
 &       'There is no MD file to fit the coefficients ',ch10,&
@@ -307,7 +307,7 @@ program multibinit
 !**************************************************************************************** 
  call effective_potential_free(reference_effective_potential)
  call multibinit_dtset_free(inp)
- call abihist_fin(hist)
+ call abihist_free(hist)
 !****************************************************************************************
 
  write(message,'(a,a,a,(80a))') ch10,('=',ii=1,80),ch10
