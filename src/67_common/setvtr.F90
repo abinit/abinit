@@ -249,6 +249,7 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grewtn,grvdw,gsqcut,&
 !Get Ewald energy and Ewald forces, as well as vdW-DFTD energy and forces, and chemical potential energy and forces.
 !-------------------------------------------------------------------------------------------------------------------
  call timab(5,1,tsec)
+ ABI_ALLOCATE(grchempottn,(3,dtset%natom))
  if (ipositron/=1) then
    if (dtset%icoulomb == 0 .or. (dtset%usewvl == 0 .and. dtset%icoulomb == 2)) then
 !    Periodic system, need to compute energy and forces due to replica and
@@ -271,9 +272,7 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grewtn,grvdw,gsqcut,&
 &     wvl%descr, wvl%den, xred)
    end if
    if (dtset%nzchempot>0) then
-     ABI_ALLOCATE(grchempottn,(3,dtset%natom))
      call spatialchempot(energies%e_chempot,dtset%chempot,grchempottn,dtset%natom,ntypat,dtset%nzchempot,dtset%typat,xred)
-     ABI_DEALLOCATE(grchempottn)
    endif
    if (dtset%vdw_xc==5.and.ngrvdw==dtset%natom) then
      call vdw_dftd2(energies%e_vdw_dftd,dtset%ixc,dtset%natom,ntypat,1,dtset%typat,rprimd,&
@@ -292,6 +291,7 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grewtn,grvdw,gsqcut,&
    energies%e_vdw_dftd=zero
    if (ngrvdw>0) grvdw=zero
  end if
+ ABI_DEALLOCATE(grchempottn)
  call timab(5,2,tsec)
 
 !Compute parts of total energy depending on potentials
