@@ -2677,7 +2677,10 @@
     commentdims: null
     defaultval: 0.0
     definition: spatially varying CHEMical POTential
-    dimensions: (3,[[nzchempot]],[[ntype]])
+    dimensions: 
+    - 3
+    - [[nzchempot]]
+    - [[ntype]]
     excludes: null
     requires: '[[nzchempot]]/=0'
     section: vargeo
@@ -2694,7 +2697,7 @@
 
         In the present input array, reduced positions, energies and derivatives of energies are mixed. Hence, although the chemical potential is an energy, one cannot use the usual energy definitions (i.e. the chemical potential is always to be input in Hartree atomic units).
     varname: chempot
-    vartype: null
+    vartype: real
 - !variable
     characteristics: null
     commentdefault: null
