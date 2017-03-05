@@ -30,29 +30,25 @@ MODULE m_io_kss
  use defs_basis
  use defs_datatypes
  use defs_abitypes
- use defs_wvltypes
  use m_profiling_abi
- use m_wffile
  use m_xmpi
  use m_errors
- use m_abi_etsf
  use m_nctk
-#ifdef HAVE_ETSF_IO
- use etsf_io
+#ifdef HAVE_NETCDF
+ use netcdf
 #endif
  use m_hdr
+ use m_wfk
  use m_pawcprj
 
  use m_io_tools,         only : open_file
+ use m_fstrings,         only : sjoin, itoa
  use m_dtset,            only : dtset_copy, dtset_free
- use m_blas,             only : xdotc
  use m_mpinfo,           only : destroy_mpi_enreg
  use m_fftcore,          only : get_kg, sphere
  use m_crystal ,         only : crystal_t
  use m_crystal_io,       only : crystal_ncwrite
  use m_gsphere,          only : table_gbig2kg, merge_and_sort_kg
- use m_wfd,              only : wfd_t, wfd_ihave_ug, wfd_mybands, wfd_update_bkstab, &
-&                               WFD_STORED, WFD_ALLOCATED, wfd_set_mpicomm
 
  implicit none
 
@@ -152,9 +148,9 @@ subroutine testkss(filkss,iomode,nsym_out,nbnds_kss,ng_kss,mpsang,gvec_p,energie
 
  if (iomode==IO_MODE_ETSF) then
    write(msg,'(3a)')&
-&   ' when iomode==3, support for the ETSF I/O library ',ch10,&
-&   ' must be compiled. Use --enable-etsf-io when configuring '
-#if !defined HAVE_ETSF_IO
+&   ' when iomode==3, support for the netcdf library ',ch10,&
+&   ' must be compiled. Use --enable-netcdf when configuring '
+#ifndef HAVE_NETCDF
    MSG_ERROR(msg)
 #endif
  end if
@@ -253,7 +249,7 @@ subroutine testkss(filkss,iomode,nsym_out,nbnds_kss,ng_kss,mpsang,gvec_p,energie
 
    if (iomode==IO_MODE_FORTRAN) close(kss_unt)
    if (iomode==IO_MODE_ETSF) then
-#ifdef HAVE_ETSF_IO
+#ifdef HAVE_NETCDF
      NCF_CHECK(nf90_close(kss_unt))
 #endif
    end if
@@ -362,14 +358,11 @@ subroutine write_kss_header(filekss,kss_npw,ishm,nbandksseff,mband,nsym2,symrel2
  character(len=500) :: msg
  type(hdr_type) :: my_Hdr
  type(dataset_type) :: Dtset_cpy
-#ifdef HAVE_ETSF_IO
- logical :: ok
- type(etsf_gwdata) :: GW_data
- type(wvl_wf_type) :: Dummy_wfs
- type(etsf_io_low_error) :: error
+#ifdef HAVE_NETCDF
+ integer :: ncerr
 #endif
 !arrays
- integer,allocatable,target :: vkbsign_int(:,:)
+ integer,allocatable :: vkbsign_int(:,:,:)
  real(dp),allocatable :: vkbsign(:,:)
 
 ! *********************************************************************
@@ -442,7 +435,7 @@ subroutine write_kss_header(filekss,kss_npw,ishm,nbandksseff,mband,nsym2,symrel2
 
    if (open_file(filekss, msg, newunit=kss_unt, form="unformatted") /= 0) then
      MSG_ERROR(msg)
-   end if 
+   end if
 
    call hdr_fort_write(my_hdr, kss_unt, fform, ierr)
    ABI_CHECK(ierr == 0, "hdr_Fort_write returned ierr != 0")
@@ -457,7 +450,7 @@ subroutine write_kss_header(filekss,kss_npw,ishm,nbandksseff,mband,nsym2,symrel2
    write(kss_unt) (shlim(in),in=1,ishm)
 
    ! Write vkbsign for NC pseudos.
-   ! FIXME : only one projector in each angular is treated.
+   ! FIXME: only one projector in each angular is treated.
    ! Moreover the allocation is done in the wrong order for dimensions...
    if (Psps%usepaw==0) then
      ABI_ALLOCATE(vkbsign,(Psps%ntypat,Psps%mpsang))
@@ -477,21 +470,51 @@ subroutine write_kss_header(filekss,kss_npw,ishm,nbandksseff,mband,nsym2,symrel2
      ABI_DEALLOCATE(vkbsign)
    end if
 
-#ifdef HAVE_ETSF_IO
+#ifdef HAVE_NETCDF
  CASE (IO_MODE_ETSF)
-!  We currently use the dataset symmetries, as defined in the Hdr structure instead of the symmetries recomputed in outkss.
-   call abi_etsf_init(Dtset_cpy, filekss, 4, .false., my_Hdr%lmn_size, Psps, Dummy_wfs)
 
-   ! Open again for further additions
-   NCF_CHECK(nctk_open_modify(kss_unt, nctk_ncify(filekss), xmpi_comm_self))
-   NCF_CHECK(crystal_ncwrite(crystal, kss_unt))
+   ! Create file.
+   NCF_CHECK(nctk_open_create(kss_unt, nctk_ncify(filekss), xmpi_comm_self))
 
    ! Add additional info from abinit header.
    NCF_CHECK(hdr_ncwrite(my_hdr, kss_unt, fform, nc_define=.True.))
 
-   ! If NC pseudos, write vkbsign. Here ordering of dimensions is OK but multi-projectors not supported.
+   ! Add info on crystalline structure
+   ! FIXME: Check symmorphi trick and crystal%symrel!
+   ! We currently use the dataset symmetries, as defined in the Hdr structure
+   ! instead of the symmetries recomputed in outkss.
+   NCF_CHECK(crystal_ncwrite(crystal, kss_unt))
+
+   ! Defined G-vectors and wavefunctions.
+   call wfk_ncdef_dims_vars(kss_unt, my_hdr, fform)  ! TODO: kdep
+
+   ! Define dims and variables needed for KB matrix elements.
+   ncerr = nctk_def_dims(kss_unt, [ &
+     nctkdim_t("max_number_of_angular_momenta", psps%mpsang), &
+     nctkdim_t("max_number_of_projectors", psps%mproj) &
+   ])
+   NCF_CHECK(ncerr)
+
+   ncerr = nctk_def_arrays(kss_unt, [ &
+     nctkarr_t("kb_formfactor_sign", "int", &
+&"max_number_of_projectors, max_number_of_angular_momenta, number_of_atom_species"), &
+     nctkarr_t("kb_formfactors", "dp", &
+&"max_number_of_coefficients, number_of_kpoints, max_number_of_projectors,&
+&max_number_of_angular_momenta, number_of_atom_species"), &
+     nctkarr_t("kb_formfactor_derivative", "dp", &
+&"max_number_of_coefficients, number_of_kpoints, max_number_of_projectors,&
+&max_number_of_angular_momenta, number_of_atom_species") &
+   ])
+   NCF_CHECK(ncerr)
+
+   !NCF_CHECK(nf90_put_var(kss_unt, nctk_idname(kss_unt, "eigenvalues", eigens)))
+   !NCF_CHECK(nf90_put_var(kss_unt, nctk_idname(kss_unt, "occupations"), occ, count=[mband, dtset%nkpt, dtset%nsppol]))
+
+   ! If NC pseudos, write vkbsign.
+   ! TODO: Here ordering of dimensions is OK but multi-projectors not supported.
+   ! FIXME: multiple projectors?
    if (Psps%usepaw==0) then
-     ABI_ALLOCATE(vkbsign_int,(Psps%mpsang,Psps%ntypat))
+     ABI_ALLOCATE(vkbsign_int,(psps%mproj, Psps%mpsang,Psps%ntypat))
      vkbsign_int=0
      do itypat=1,Psps%ntypat
        il0=0
@@ -500,22 +523,23 @@ subroutine write_kss_header(filekss,kss_npw,ishm,nbandksseff,mband,nsym2,symrel2
          in=Psps%indlmn(3,ilmn,itypat)
          if ((il/=il0).and.(in==1)) then
            il0=il
-           vkbsign_int(il,itypat)=NINT(DSIGN(one,Psps%ekb(ilmn,itypat)))
+           vkbsign_int(in,il,itypat)=NINT(DSIGN(one,Psps%ekb(ilmn,itypat)))
          end if
        end do
      end do
-     ! Write it now to be able to deallocate quickly.
-     GW_data%kb_formfactor_sign%data2D => vkbsign_int
-     call etsf_io_gwdata_put(kss_unt, GW_data, ok, error)
-     ETSF_CHECK_ERROR(ok,error)
-     nullify(GW_data%kb_formfactor_sign%data2D)
+
+     NCF_CHECK(nctk_set_datamode(kss_unt))
+
+     ! Write KS sign here
+     NCF_CHECK(nf90_put_var(kss_unt, nctk_idname(kss_unt, "kb_formfactor_sign"), vkbsign_int))
+
+     !call abi_etsf_init(Dtset_cpy, filekss, 4, .false., my_Hdr%lmn_size, Psps, Dummy_wfs)
      ABI_DEALLOCATE(vkbsign_int)
    end if
 #endif
 
  CASE DEFAULT
-   write(msg,'(a,i0)')" Unsupported value for iomode: ",iomode
-   MSG_ERROR(msg)
+   MSG_ERROR(sjoin("Unsupported value for iomode:", itoa(iomode)))
  END SELECT
 
  call dtset_free(Dtset_cpy)
@@ -603,11 +627,11 @@ subroutine read_kss_header(kss_unt,filkss,iomode,prtvol,nsym_out,nbnds_kss,ng_ks
 
  DBG_ENTER("COLL")
 
-#if !defined HAVE_ETSF_IO
+#ifndef HAVE_NETCDF
  if (iomode==IO_MODE_ETSF) then
    write(msg,'(3a)')&
-&   ' When iomode==3, support for the ETSF I/O library ',ch10,&
-&   ' must be compiled. Use --enable-etsf-io when configuring '
+&   'When iomode==3, support for the ETSF I/O library ',ch10,&
+&   'must be compiled. Use --enable-etsf-io when configuring '
    MSG_ERROR(msg)
  end if
 #endif
@@ -630,7 +654,7 @@ subroutine read_kss_header(kss_unt,filkss,iomode,prtvol,nsym_out,nbnds_kss,ng_ks
 
  CASE (IO_MODE_ETSF) ! * NETCDF-ETSF file format
 
-#ifdef HAVE_ETSF_IO
+#ifdef HAVE_NETCDF
    write(msg,'(2a)')' read_kss_header : reading NETCDF-ETSF Kohn-Sham structure file ',TRIM(filkss)
    call wrtout(std_out,msg,'COLL')
 
@@ -643,8 +667,7 @@ subroutine read_kss_header(kss_unt,filkss,iomode,prtvol,nsym_out,nbnds_kss,ng_ks
 #endif
 
  CASE DEFAULT
-   write(msg,'(a,i4)')'Wrong value for iomode = ',iomode
-   MSG_ERROR(msg)
+   MSG_ERROR(sjoin('Wrong value for iomode:',itoa(iomode)))
  END SELECT
 
  if (fform==602) then ! * fform must be 502.
@@ -658,8 +681,7 @@ subroutine read_kss_header(kss_unt,filkss,iomode,prtvol,nsym_out,nbnds_kss,ng_ks
    MSG_ERROR(msg)
  end if
  if (fform/=502) then
-   write(msg,'(a,i4)')' Found unknown file format; fform= ',fform
-   MSG_ERROR(msg)
+   MSG_ERROR(sjoin('Found unknown file format; fform:', itoa(fform)))
  end if
  !
  ! === Output the header of the GS wavefunction file ===
@@ -825,11 +847,9 @@ subroutine write_vkb(kss_unt,ikpt,kpoint,kss_npw,gbig,trsl,rprimd,Psps,iomode)
 !array
  real(dp),allocatable :: vkb(:,:,:),vkbd(:,:,:)
  real(dp),allocatable :: dum_vkbsign(:,:)
-#ifdef HAVE_ETSF_IO
- logical :: ok
- real(dp),allocatable,target :: vkb_tgt(:,:,:), vkbd_tgt(:,:,:)
- type(etsf_io_low_error) :: error
- type(etsf_gwdata) :: GW_data
+#ifdef HAVE_NETCDF
+ integer :: ncerr,varid
+ real(dp),allocatable,target :: vkb_tgt(:,:,:,:), vkbd_tgt(:,:,:,:)
 #endif
 
 ! *********************************************************************
@@ -856,37 +876,40 @@ subroutine write_vkb(kss_unt,ikpt,kpoint,kss_npw,gbig,trsl,rprimd,Psps,iomode)
     end do
   end do
 
-#ifdef HAVE_ETSF_IO
+#ifdef HAVE_NETCDF
  CASE (IO_MODE_ETSF)
-   ABI_ALLOCATE(vkb_tgt ,(kss_npw,mpsang,ntypat))
-   ABI_ALLOCATE(vkbd_tgt,(kss_npw,mpsang,ntypat))
+   ABI_ALLOCATE(vkb_tgt ,(kss_npw,1,mpsang,ntypat))
+   ABI_ALLOCATE(vkbd_tgt,(kss_npw,1,mpsang,ntypat))
    do itypat=1,ntypat
      do il=1,mpsang
        do ig=1,kss_npw
-         !vkb_tgt (ig,il,itypat)=vkb (trsl(ig),itypat,il)
-         !vkbd_tgt(ig,il,itypat)=vkbd(trsl(ig),itypat,il)
-         vkb_tgt (ig,il,itypat)=vkb (ig,itypat,il)
-         vkbd_tgt(ig,il,itypat)=vkbd(ig,itypat,il)
+         !vkb_tgt (ig,1,il,itypat)=vkb (trsl(ig),itypat,il)
+         !vkbd_tgt(ig,1,il,itypat)=vkbd(trsl(ig),itypat,il)
+         vkb_tgt (ig,1,il,itypat)=vkb (ig,itypat,il)
+         vkbd_tgt(ig,1,il,itypat)=vkbd(ig,itypat,il)
        end do
      end do
    end do
-   GW_data%kb_coeff__kpoint_access         = ikpt
-   GW_data%kb_coeff_der__kpoint_access     = ikpt
-   GW_data%kb_formfactors%data3D           => vkb_tgt
-   GW_data%kb_formfactor_derivative%data3D => vkbd_tgt
 
-   call etsf_io_gwdata_put(kss_unt, GW_data, ok, error)
-   ETSF_CHECK_ERROR(ok,error)
+   ! FIXME: Multiple projectors
+   ! The shape of the variable on disk is (Fortran API):
+   !  (max_number_of_coefficients, number_of_kpoints, max_number_of_projectors,
+   !   max_number_of_angular_momenta, number_of_atom_species)
 
-   nullify(GW_data%kb_formfactors%data3D          ) ! Avoid dangling pointers
-   nullify(GW_data%kb_formfactor_derivative%data3D)
+   varid = nctk_idname(kss_unt, "kb_formfactors")
+   ncerr = nf90_put_var(kss_unt, varid, vkb_tgt, start=[1,ikpt,1,1,1], count=[kss_npw, 1, 1, mpsang, ntypat])
+   NCF_CHECK(ncerr)
+
+   varid = nctk_idname(kss_unt, "kb_formfactor_derivative")
+   ncerr = nf90_put_var(kss_unt, varid, vkbd_tgt, start=[1,ikpt,1,1,1], count=[kss_npw, 1, 1, mpsang, ntypat])
+   NCF_CHECK(ncerr)
+
    ABI_DEALLOCATE(vkb_tgt)
    ABI_DEALLOCATE(vkbd_tgt)
 #endif
 
  CASE DEFAULT
-   write(msg,'(a,i0)')" Unsupported value for iomode: ",iomode
-   MSG_ERROR(msg)
+   MSG_ERROR(sjoin("Unsupported value for iomode:", itoa(iomode)))
  END SELECT
 
  ABI_DEALLOCATE(vkb)
@@ -969,8 +992,9 @@ subroutine write_kss_wfgk(kss_unt,ikpt,isppol,kpoint,nspinor,kss_npw,npw_k,kg_k,
  integer :: ib,ibsp,ig,ispinor,iatom,ii,master,my_rank,ierr
  type(MPI_type) :: MPI_enreg_seq
  character(len=500) :: msg
-#ifdef HAVE_ETSF_IO
- type(wffile_type) :: Wff
+#ifdef HAVE_NETCDF
+ integer :: kg_varid,eig_varid,occ_varid,cg_varid,ncerr
+ character(len=nctk_slen) :: kdep
 #endif
 !arrays
  integer,allocatable :: trsl(:)
@@ -1015,26 +1039,41 @@ subroutine write_kss_wfgk(kss_unt,ikpt,isppol,kpoint,nspinor,kss_npw,npw_k,kg_k,
      end if
    end do
 
-#ifdef HAVE_ETSF_IO
- CASE (IO_MODE_ETSF) ! When ETSF, use the rwwf routine (should always be done like that)
+#ifdef HAVE_NETCDF
+ CASE (IO_MODE_ETSF)
    if (Psps%usepaw==1) then
      MSG_WARNING("PAW output with ETSF-IO: cprj won't be written")
    end if
-   Wff%master   =master
-   Wff%me       =my_rank
-   Wff%unwff    =kss_unt
-   Wff%iomode=IO_MODE_ETSF
-!  MG Tue Oct 23 occ_k is passed to writewf instead of occ to treat correctly metals
-!  MG FIXME The RESHAPE below is ugly. Some compiler will likely create a buffer on the stack and then BOOM!
-  ! call writewf(RESHAPE(wfg(:, 1:kss_npw, :),(/2,nbandksseff*kss_npw /)),ene_k,0,&
-   call writewf(wfg(1,1,1),ene_k,0,&
-&   0,ikpt,isppol,gbig(:,1:kss_npw),nbandksseff,nbandksseff*kss_npw,MPI_enreg_seq,&
-&   nbandksseff,nbandksseff,kss_npw,nspinor,occ_k(1:nbandksseff),2,1,Wff)
+
+!FIXME
+!   call writewf(wfg(1,1,1),ene_k,0,&
+!&   0,ikpt,isppol,gbig(:,1:kss_npw),nbandksseff,nbandksseff*kss_npw,MPI_enreg_seq,&
+!&   nbandksseff,nbandksseff,kss_npw,nspinor,occ_k(1:nbandksseff),2,1,Wff)
+
+   ! Write G-vectors
+   NCF_CHECK(nf90_inq_varid(kss_unt, "reduced_coordinates_of_plane_waves", kg_varid))
+   NCF_CHECK(nf90_get_att(kss_unt, kg_varid, "k_dependent", kdep))
+   if (kdep == "no") then
+     ncerr = nf90_put_var(kss_unt, kg_varid, kg_k, start=[1,1], count=[3,kss_npw])
+   else
+     ncerr = nf90_put_var(kss_unt, kg_varid, kg_k, start=[1,1,ikpt], count=[3,kss_npw,1])
+   end if
+   NCF_CHECK_MSG(ncerr, "putting kg_k")
+
+   ! Write wavefunctions
+   ! The coefficients_of_wavefunctions on file have shape [cplex, mpw, nspinor, mband, nkpt, nsppol]
+   NCF_CHECK(nf90_inq_varid(kss_unt, "coefficients_of_wavefunctions", cg_varid))
+   ncerr = nf90_put_var(kss_unt, cg_varid, wfg, start=[1,1,1,1,ikpt,isppol], &
+     count=[2,kss_npw,nspinor,nbandksseff,1,1])
+   NCF_CHECK_MSG(ncerr, "putting cg_k")
+
+   ! Write eigenvalues and occupations
+   NCF_CHECK(nf90_put_var(kss_unt, nctk_idname(kss_unt, "eigenvalues"), ene_k, start=[1,ikpt,isppol]))
+   NCF_CHECK(nf90_put_var(kss_unt, nctk_idname(kss_unt, "occupations"), occ_k, start=[1,ikpt,isppol]))
 #endif
 
  CASE DEFAULT
-   write(msg,'(a,i0)')" Unsupported iomode: ",iomode
-   MSG_ERROR(msg)
+   MSG_ERROR(sjoin("Unsupported iomode:", itoa(iomode)))
  END SELECT
 
  call destroy_mpi_enreg(MPI_enreg_seq)
@@ -1523,12 +1562,6 @@ end subroutine make_gvec_kss
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
 subroutine gshgg_mkncwrite(istep, dtset, dtfil, psps, hdr, pawtab, pawfgr, paw_ij, mpi_enreg, &
   rprimd, xred, eigen, npwarr, kg, ylm, ngfftc, nfftc, ngfftf, nfftf, vtrial,&
   electronpositron) ! Optional arguments
@@ -1540,8 +1573,6 @@ subroutine gshgg_mkncwrite(istep, dtset, dtfil, psps, hdr, pawtab, pawfgr, paw_i
  use m_xmpi
  use m_errors
  use m_hamiltonian
- use m_nctk
- use m_wfk
 #ifdef HAVE_NETCDF
  use netcdf
 #endif
@@ -1637,7 +1668,7 @@ subroutine gshgg_mkncwrite(istep, dtset, dtfil, psps, hdr, pawtab, pawfgr, paw_i
  end if
 
  path = strcat(dtfil%filnam_ds(4), "_HGG.nc")
-#ifdef HAVE_ETSF_IO
+#ifdef HAVE_NETCDF
  if (istep == 1) then
    ! Open netcdf file, define dims and variables.
    NCF_CHECK(nctk_open_create(ncid, path, comm))
@@ -1838,10 +1869,10 @@ subroutine gshgg_mkncwrite(istep, dtset, dtfil, psps, hdr, pawtab, pawfgr, paw_i
 
      ! Loop over the |beta,G''> component.
      ! Get <:|H|beta,G''> and <:|T_{PAW}|beta,G''>
-     do igsp2=1,npw_k*nspinor 
+     do igsp2=1,npw_k*nspinor
        ghc = zero
        pwave = zero
-       pwave(1,igsp2)=one     
+       pwave(1,igsp2)=one
 
        call getghc(cpopt,pwave,cwaveprj,ghc,gsc,gs_hamk,gvnlc,lambda,mpi_enreg,ndat,&
 &                  dtset%prtvol,sij_opt,tim_getghc,type_calc)
@@ -1864,7 +1895,7 @@ subroutine gshgg_mkncwrite(istep, dtset, dtfil, psps, hdr, pawtab, pawfgr, paw_i
      if (psps%usepaw==1.and.cpopt==0) call pawcprj_free(cwaveprj)
      ABI_DT_FREE(cwaveprj)
 
-     if (dtset%prtvol > 0) then 
+     if (dtset%prtvol > 0) then
        !===========================================
        !=== Diagonalization of <G|H|G''> matrix ===
        !===========================================
@@ -1903,7 +1934,7 @@ subroutine gshgg_mkncwrite(istep, dtset, dtfil, psps, hdr, pawtab, pawfgr, paw_i
          end do
        end if
 
-#ifdef HAVE_ETSF_IO
+#ifdef HAVE_NETCDF
        ncerr = nf90_put_var(ncid, eigdiago_varid, eig_ene, start=[1,ikpt,isppol,istep], count=[nband_k,1,1,1])
        NCF_CHECK(ncerr)
 #endif
@@ -1912,7 +1943,7 @@ subroutine gshgg_mkncwrite(istep, dtset, dtfil, psps, hdr, pawtab, pawfgr, paw_i
        ABI_FREE(eig_vec)
      end if
 
-#ifdef HAVE_ETSF_IO
+#ifdef HAVE_NETCDF
      !write(std_out,*)"Writing H_GG slice for ikpt",ikpt
      if (isppol == 1) then
        ncerr = nf90_put_var(ncid, kg_varid, kg_k, start=[1,1,ikpt], count=[3,npw_k,1])
@@ -1954,7 +1985,7 @@ subroutine gshgg_mkncwrite(istep, dtset, dtfil, psps, hdr, pawtab, pawfgr, paw_i
 
  call destroy_hamiltonian(gs_hamk)
 
-#ifdef HAVE_ETSF_IO
+#ifdef HAVE_NETCDF
  NCF_CHECK(nf90_close(ncid))
 #endif
 
@@ -1970,7 +2001,7 @@ end subroutine gshgg_mkncwrite
 !!  kss_calc_vkb
 !!
 !! FUNCTION
-!!  This routine calculates the Kleynman-Bylander form factors and its derivatives 
+!!  This routine calculates the Kleynman-Bylander form factors and its derivatives
 !!  needed for the evaluation of the matrix elements of the dipole operator <phi1|r|phi2>.
 !!
 !! INPUTS
@@ -2050,7 +2081,7 @@ subroutine kss_calc_vkb(Psps,kpoint,npw_k,kg_k,rprimd,vkbsign,vkb,vkbd)
  ! === Save KB dyadic sign (integer-valued) ===
  vkbsign=zero
  do itypat=1,Psps%ntypat
-   il0=0 
+   il0=0
    do ilmn=1,Psps%lmnmax
      il=1+Psps%indlmn(1,ilmn,itypat)
      in=Psps%indlmn(3,ilmn,itypat)
@@ -2063,7 +2094,7 @@ subroutine kss_calc_vkb(Psps,kpoint,npw_k,kg_k,rprimd,vkbsign,vkb,vkbd)
 
  ! === Allocate KB form factor and derivative wrt k+G ===
  ! * Here we do not use correct ordering for dimensions
- 
+
  ider=1; dimffnl=2 ! To retrieve the first derivative.
  idir=0; nkpg=0
  !
@@ -2076,7 +2107,7 @@ subroutine kss_calc_vkb(Psps,kpoint,npw_k,kg_k,rprimd,vkbsign,vkb,vkbd)
  ABI_MALLOC(ffnl,(npw_k,dimffnl,Psps%lmnmax,Psps%ntypat))
 
  call mkffnl(Psps%dimekb,dimffnl,Psps%ekb,ffnl,Psps%ffspl,gmet,gprimd,ider,idir,Psps%indlmn,&
-   kg_k,kpg_dum,kpoint,Psps%lmnmax,Psps%lnmax,Psps%mpsang,Psps%mqgrid_ff,nkpg,npw_k,& 
+   kg_k,kpg_dum,kpoint,Psps%lmnmax,Psps%lnmax,Psps%mpsang,Psps%mqgrid_ff,nkpg,npw_k,&
    Psps%ntypat,Psps%pspso,Psps%qgrid_ff,rmet,Psps%usepaw,Psps%useylm,ylm_k,ylm_gr)
 
  ABI_FREE(kpg_dum)

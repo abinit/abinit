@@ -1325,6 +1325,7 @@ integer function nctk_def_basedims(ncid, defmode) result(ncerr)
    nctkdim_t("complex", 2), nctkdim_t("symbol_length", 2), nctkdim_t("character_string_length", etsfio_charlen),&
    nctkdim_t("number_of_cartesian_directions", 3), nctkdim_t("number_of_reduced_dimensions", 3),&
    nctkdim_t("number_of_vectors", 3)])
+ NCF_CHECK(ncerr)
 
  ! Useful integers.
  ncerr = nctk_def_dims(ncid, [&
