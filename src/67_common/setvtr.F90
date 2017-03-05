@@ -201,7 +201,7 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grewtn,grvdw,gsqcut,&
  integer :: coredens_method,mpi_comm_sphgrid,nk3xc
  integer :: iatom,ifft,ipositron,ispden,nfftot
  integer :: optatm,optdyfr,opteltfr,optgr,option,optn,optn2,optstr,optv,vloc_method
- real(dp) :: doti,e_xcdc_vxctau,ebb,ebn,evxc,ucvol_local,rpnrm
+ real(dp) :: doti,e_chempot,e_xcdc_vxctau,ebb,ebn,evxc,ucvol_local,rpnrm
  logical :: add_tfw_,is_hybrid_ncpp,with_vxctau,wvlbigdft
  real(dp), allocatable :: xcart(:,:)
  character(len=500) :: message
@@ -214,6 +214,7 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grewtn,grvdw,gsqcut,&
  real(dp) :: strn_dummy6(6), strv_dummy6(6)
  real(dp) :: vzeeman(4)
  real(dp),allocatable :: grtn(:,:),dyfr_dum(:,:,:),gr_dum(:,:)
+ real(dp),allocatable :: grchempottn_dum(:,:)
  real(dp),allocatable :: rhojellg(:,:),rhojellr(:),rhowk(:,:),vjell(:)
  real(dp),allocatable :: Vmagconstr(:,:),rhog_dum(:,:)
 
@@ -244,8 +245,8 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grewtn,grvdw,gsqcut,&
 !Test addition of Weiszacker gradient correction to Thomas-Fermi kin energy
  add_tfw_=.false.;if (present(add_tfw)) add_tfw_=add_tfw
 
-!Get Ewald energy and Ewald forces
-!--------------------------------------------------------------
+!Get Ewald energy and Ewald forces, as well as vdW-DFTD energy and forces, and chemical potential energy and forces.
+!-------------------------------------------------------------------------------------------------------------------
  call timab(5,1,tsec)
  if (ipositron/=1) then
    if (dtset%icoulomb == 0 .or. (dtset%usewvl == 0 .and. dtset%icoulomb == 2)) then
@@ -268,6 +269,12 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grewtn,grvdw,gsqcut,&
      call ionion_surface(dtset, energies%e_ewald, grewtn, mpi_enreg%me_wvl, mpi_enreg%nproc_wvl, rprimd, &
 &     wvl%descr, wvl%den, xred)
    end if
+   if (dtset%nzchempot>0) then
+!    call spatialchempot(energies%e_chempot,chempot,grchempottn,dtset%natom,ntypat,dtset%nzchempot,dtset%typat,xred)
+     ABI_ALLOCATE(grchempottn_dum,(3,dtset%natom))
+     call spatialchempot(energies%e_chempot,dtset%chempot,grchempottn_dum,dtset%natom,ntypat,dtset%nzchempot,dtset%typat,xred)
+     ABI_DEALLOCATE(grchempottn_dum)
+   endif
    if (dtset%vdw_xc==5.and.ngrvdw==dtset%natom) then
      call vdw_dftd2(energies%e_vdw_dftd,dtset%ixc,dtset%natom,ntypat,1,dtset%typat,rprimd,&
 &     dtset%vdw_tol,xred,psps%znucltypat,fred_vdw_dftd2=grvdw)
@@ -279,6 +286,7 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grewtn,grvdw,gsqcut,&
    end if
  else
    energies%e_ewald=zero
+   energies%e_chempot=zero
    grewtn=zero
    energies%e_vdw_dftd=zero
    if (ngrvdw>0) grvdw=zero

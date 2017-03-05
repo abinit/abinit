@@ -128,7 +128,7 @@ subroutine prtene(dtset,energies,iout,usepaw)
 !   if (usepaw==1) etotal = etotal + energies%e_paw
 !   if (dtset%berryopt==4 .or. dtset%berryopt==6 .or. dtset%berryopt==7 .or.  &
 !&   dtset%berryopt==14 .or. dtset%berryopt==16 .or. dtset%berryopt==17) etotal=etotal+energies%e_elecfield    !!HONG
-!   etotal = etotal + energies%e_ewald + energies%e_vdw_dftd
+!   etotal = etotal + energies%e_ewald + energies%e_chempot + energies%e_vdw_dftd
 !   if (ipositron/=0) etotal=etotal+energies%e0_electronpositron+energies%e_electronpositron
 ! end if
 ! if (optdc>=1) then
@@ -137,7 +137,7 @@ subroutine prtene(dtset,energies,iout,usepaw)
 !   if (usepaw==1) etotaldc = etotaldc + energies%e_pawdc
 !   if (dtset%berryopt==4 .or. dtset%berryopt==6 .or. dtset%berryopt==7 .or.  &
 !&   dtset%berryopt==14 .or. dtset%berryopt==16 .or. dtset%berryopt==17) etotaldc = etotaldc + energies%e_elecfield
-!   etotaldc = etotaldc + energies%e_ewald + energies%e_vdw_dftd
+!   etotaldc = etotaldc + energies%e_ewald + energies%e_chempot + energies%e_vdw_dftd
 !   if (ipositron/=0) etotaldc=etotaldc-energies%edc_electronpositron &
 !&   +energies%e0_electronpositron+energies%e_electronpositron
 ! end if
@@ -196,6 +196,11 @@ subroutine prtene(dtset,energies,iout,usepaw)
      if ((dtset%vdw_xc>=5.and.dtset%vdw_xc<=7).and.ipositron/=1) then
        write(message, '(a,es21.14)' ) &
 &       '    Vd Waals DFT-D = ',energies%e_vdw_dftd
+       call wrtout(iout,message,'COLL')
+     end if
+     if (dtset%nzchempot>=1) then
+       write(message, '(a,es21.14)' ) &
+&       '    Chem. potential = ',energies%e_chempot
        call wrtout(iout,message,'COLL')
      end if
      if(dtset%occopt>=3.and.dtset%occopt<=8.and.ipositron==0) then
@@ -277,6 +282,11 @@ subroutine prtene(dtset,energies,iout,usepaw)
    if ((dtset%vdw_xc>=5.and.dtset%vdw_xc<=7).and.ipositron/=1) then
      write(message, '(a,es21.14)' ) &
 &     '    Vd Waals DFT-D = ',energies%e_vdw_dftd
+     call wrtout(iout,message,'COLL')
+   end if
+   if (dtset%nzchempot>=1) then
+     write(message, '(a,es21.14)' ) &
+&     '    Chem. potential = ',energies%e_chempot
      call wrtout(iout,message,'COLL')
    end if
    if(dtset%occopt>=3.and.dtset%occopt<=8.and.ipositron==0) then

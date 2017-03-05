@@ -93,6 +93,7 @@
 !!  electronpositron <type(electronpositron_type)>=quantities for the electron-positron annihilation (optional argument)
 !!  energies <type(energies_type)>=all part of total energy.
 !!   | entropy(IN)=entropy due to the occupation number smearing (if metal)
+!!   | e_chempot(IN)=energy from spatially varying chemical potential (hartree)
 !!   | e_ewald(IN)=Ewald energy (hartree)
 !!   | e_vdw_dftd(IN)=VdW DFT-D energy
 !!   | e_corepsp(IN)=psp core-core energy
@@ -783,7 +784,7 @@ subroutine energy(cg,compch_fft,dtset,electronpositron,&
 &           energies%e_xcdc + energies%e_corepsp - energies%e_corepspdc
    if (psps%usepaw==1) etotal=etotal + energies%e_pawdc
  end if
- etotal = etotal + energies%e_ewald + energies%e_vdw_dftd
+ etotal = etotal + energies%e_ewald + energies%e_chempot + energies%e_vdw_dftd
  if(dtset%occopt>=3 .and. dtset%occopt<=8) etotal=etotal-dtset%tsmear*energies%entropy
 
 !Additional stuff for electron-positron

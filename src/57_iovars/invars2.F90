@@ -165,7 +165,8 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
 & nimage,&
 & 3*dtset%nqptdm,&
 & 3*dtset%natsph_extra,&
-& dtset%natvshift*nsppol*natom)
+& dtset%natvshift*nsppol*natom,&
+& 3*dtset%nzchempot*ntypat)
  ABI_ALLOCATE(intarr,(marr))
  ABI_ALLOCATE(dprarr,(marr))
 
@@ -2566,6 +2567,13 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
 
    ABI_DEALLOCATE(iatcon)
    ABI_DEALLOCATE(natcon)
+ end if
+
+!Initialize chempot
+ if(dtset%nzchempot>0)then
+   call intagm(dprarr,intarr,jdtset,marr,3*dtset%nzchempot*ntypat,string(1:lenstr),'chempot',tread,'DPR')
+   if(tread==1) dtset%chempot(1:3,1:dtset%nzchempot,1:ntypat)=&
+&   reshape(dprarr(1:3*dtset%nzchempot*ntypat),(/3,dtset%nzchempot,ntypat/))
  end if
 
 !Initialize the list of k points, as well as wtk and istwfk

@@ -40,6 +40,7 @@
 !!         nsppol     =maximal value of input nsppol for all the datasets
 !!         nsym       =maximum number of symmetries
 !!         ntypat     =maximum number of type of atoms
+!!         nzchempot  =maximal value of input nzchempot for all the datasets
 !!  ncid= NetCDF handler
 !!  ndtset=number of datasets
 !!  ndtset_alloc=number of datasets, corrected for allocation of at least
@@ -211,6 +212,9 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
  call prttagm_images(dprarr_images,iout,jdtset_,1,marr,narrm,ncid,ndtset_alloc,'amu','DPR',&
 & mxvals%nimage,nimagem,ndtset,prtimg,strimg,forceprint=2)
 
+ intarr(1,:)=dtsets(:)%asr
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'asr','INT',0)
+
 !atvshift
  if(mxvals%natpawu>0)then
    narr=dtsets(1)%natvshift*dtsets(1)%nsppol*mxvals%natom ! default size for all datasets
@@ -235,9 +239,6 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
 &   narrm,ncid,ndtset_alloc,'atvshift','DPR',&
 &   multivals%natvshift+multivals%nsppol+multivals%natom)
  end if
-
- intarr(1,:)=dtsets(:)%asr
- call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'asr','INT',0)
 
  intarr(1,:)=dtsets(:)%autoparal
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'autoparal','INT',0)
@@ -431,6 +432,29 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
  dprarr(1,:)=dtsets(:)%charge
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'charge','DPR',0)
 
+!chempot 
+ narr=3*mxvals%nzchempot*mxvals%ntypat ! default size for all datasets
+ if(narr/=0)then
+   do idtset=0,ndtset_alloc       ! specific size for each dataset
+     if(idtset/=0)then
+       narrm(idtset)=3*dtsets(idtset)%nzchempot*dtsets(idtset)%ntypat
+       if(narrm(idtset)/=0)&
+&       dprarr(1:narrm(idtset),idtset)=&
+&        reshape(dtsets(idtset)%chempot(1:3,1:dtsets(idtset)%nzchempot,&
+&        1:dtsets(idtset)%ntypat),&
+&        (/ narrm(idtset) /) )
+     else
+       narrm(idtset)=3*mxvals%nzchempot*mxvals%ntypat
+       if(narrm(idtset)/=0)&
+&       dprarr(1:narrm(idtset),idtset)=&
+&       reshape(dtsets(idtset)%chempot(1:3,1:mxvals%nzchempot,1:mxvals%ntypat),&
+&       (/ narrm(idtset) /) )
+     end if
+   end do
+   call prttagm(dprarr,intarr,iout,jdtset_,1,marr,narr,&
+&   narrm,ncid,ndtset_alloc,'chempot','DPR',1) 
+ endif
+ 
  intarr(1,:)=dtsets(:)%chkexit
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'chkexit','INT',0)
 
