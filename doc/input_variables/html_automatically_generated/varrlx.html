@@ -2230,6 +2230,33 @@ in performing Path Integral Molecular Dynamics (PIMD), they are different from t
 <B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
 
 
+<br><font id="title"><a name="pimd_constraint">pimd_constraint</a></font>
+<br><font id="definition">Mnemonics: Path-Integral Molecular Dynamics: CONSTRAINT to be applied on a reaction coordinate</font>
+<br><font id="characteristic">Characteristic: scalar</font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><font id="text">
+<p>
+<p>
+Only relevant for Path-Integral Molecular Dynamics.<br/>
+Selects a constraint to be applied during the PIMD trajectory. The constraint is holonomic (it is a relation between the position variables).In practice, the total forces applied to the atomic positions are modified so as to respect the constraint.<br/>
+To date, the available constraints are:<br/>
+<ul>
+<li><b>0</b>: no constraint</li>
+<li><b>1</b>: <i>"Blue Moon Ensemble" method</i>.<br/>
+The constraint is a linear combination of the positions of atomic centroids (this linear combination is kept constant during the simulation). <br/>
+Sum[W_i * X_i]=constant<br/>
+The X_i are the coordinates of the atomic centroids. The weights W_i have to be specified with the [[wtatcon]](3,[[natcon]],[[nconeq]]), [[iatcon]]([[natcon]]) and [[natcon]] input parameters (where [[nconeq]] is fixed to 1).<br/>
+More details on the implementation in: <a href="http://doi.org/10.1273/cbij.7.12">Y. Komeiji,Chem-Bio Informatics Journal 7, 12-23 (2007)</a>.
+</li>
+</ul>
+</p>
+</font>
+
+<br><br><br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
+
+
 <br><font id="title"><a name="pitransform">pitransform</a></font>
 <br><font id="definition">Mnemonics: Path Integral coordinate TRANSFORMation</font>
 <br><font id="characteristic">Characteristic: </font>

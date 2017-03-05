@@ -674,7 +674,7 @@ contains
 !End of the abilint section
 
     integer, intent(in) :: id
-    logical, intent(in) :: nzchempot
+    integer, intent(in) :: nzchempot
     integer, intent(out) :: errno
 
     type(symmetry_list), pointer :: token

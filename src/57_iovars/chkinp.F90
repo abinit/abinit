@@ -2140,11 +2140,24 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
      end do
    end if
 
+!  pimd_constraint
+   call chkint_eq(0,0,cond_string,cond_values,ierr,'pimd_constraint',dt%pimd_constraint,2,(/0,1/),iout)
+   if(dt%pimd_constraint==1.and.dt%nconeq>1 )then
+     cond_string(1)='pimd_constraint' ; cond_values(1)=dt%pimd_constraint
+!    Make sure that nconeq=1
+     call chkint_eq(1,1,cond_string,cond_values,ierr,'nconeq',dt%nconeq,1,(/1/),iout)
+   end if
+
 !  pitransform
    call chkint_eq(0,0,cond_string,cond_values,ierr,'pitransform',dt%pitransform,3,(/0,1,2/),iout)
 !  When imgmov is not one of 9 or 13, pitransform must be 0
    if(dt%imgmov/=9 .and. dt%imgmov/=13 )then
      cond_string(1)='imgmov' ; cond_values(1)=dt%imgmov
+!    Make sure that pitransform=0
+     call chkint_eq(1,1,cond_string,cond_values,ierr,'pitransform',dt%pitransform,1,(/0/),iout)
+   end if
+   if(dt%pimd_constraint/=0 )then
+     cond_string(1)='pimd_constraint' ; cond_values(1)=dt%pimd_constraint
 !    Make sure that pitransform=0
      call chkint_eq(1,1,cond_string,cond_values,ierr,'pitransform',dt%pitransform,1,(/0/),iout)
    end if

@@ -1,5 +1,5 @@
 
-.Version 8.0.3 of ABINIT 
+.Version 8.1.5 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
 
 .Copyright (C) 1998-2017 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see http://www.abinit.org .
 
-.Starting date : Mon  4 Apr 2016.
-- ( at 11h57 )
+.Starting date : Wed  7 Dec 2016.
+- ( at 20h15 )
   
 - input  file    -> t87.in
 - output file    -> t87.out
@@ -78,7 +78,7 @@ _ WF disk file :      0.010 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 --------------------------------------------------------------------------------
 -
 - outvars: echo of selected default values                                      
--   accesswff0 =  0 , fftalg0 =312 , wfoptalg0 =  0
+-   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
 -
 - outvars: echo of global parameters not present in the input file              
 -  max_nthreads =    0
@@ -174,8 +174,8 @@ P           mkmem           1
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/32ge_lda.fhi
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/32ge_lda.fhi
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/32ge_lda.fhi
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/32ge_lda.fhi
 - Germanium, fhi98PP : Troullier Martins-type, LDA  PW+x, l=1 local
 - 32.00000   4.00000    140700                znucl, zion, pspdat
     6    7    1    1       529   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -353,8 +353,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     179.000     179.000
   2.95740860245597E-01  8.27437591178030E-05 -6.41287790747033E-05
  -2.95740860245597E-01 -8.27437591178030E-05  6.41287790747033E-05
  Reduced forces (fred)
- -2.36587800573407E+00 -6.61675284239760E-04  5.13112971349318E-04
-  2.36597575819548E+00  6.62224861645088E-04 -5.12947493845935E-04
+ -2.36592688196478E+00 -6.61950072942424E-04  5.13030232597627E-04
+  2.36592688196478E+00  6.61950072942424E-04 -5.13030232597627E-04
  Cartesian velocities (vel) [bohr*Ha/hbar]; max,rms= 0.00000E+00 0.00000E+00 (free atoms)
   0.00000000000000E+00  0.00000000000000E+00  0.00000000000000E+00
   0.00000000000000E+00  0.00000000000000E+00  0.00000000000000E+00
@@ -403,8 +403,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     179.000     179.000
   2.11544500469848E-01  9.01265537656378E-03  2.42841050456591E-03
  -2.11544500469848E-01 -9.01265537656378E-03 -2.42841050456591E-03
  Reduced forces (fred)
- -1.69230690024696E+00 -7.21006026168969E-02 -1.94281184266966E-02
-  1.69240510727061E+00  7.21018834081237E-02  1.94264496463579E-02
+ -1.69235600375879E+00 -7.21012430125103E-02 -1.94272840365273E-02
+  1.69235600375879E+00  7.21012430125103E-02  1.94272840365273E-02
  Cartesian velocities (vel) [bohr*Ha/hbar]; max,rms= 5.90870E-04 3.54292E-04 (free atoms)
   5.90869715876059E-04  2.45685979763323E-04  1.89583763091186E-05
  -5.42354460612964E-04 -1.97606066081831E-04 -1.00469723955007E-04
@@ -456,8 +456,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     179.000     179.000
   5.88942304927791E-02  1.45129725711857E-02  3.88236586586887E-03
  -5.88942304927791E-02 -1.45129725711857E-02 -3.88236586586887E-03
  Reduced forces (fred)
- -4.71173163241413E-01 -1.16103587649895E-01 -3.10598932385532E-02
-  4.71134524643053E-01  1.16103973489076E-01  3.10579606153486E-02
+ -4.71153843942233E-01 -1.16103780569486E-01 -3.10589269269509E-02
+  4.71153843942233E-01  1.16103780569486E-01  3.10589269269509E-02
  Cartesian velocities (vel) [bohr*Ha/hbar]; max,rms= 9.34137E-04 5.42710E-04 (free atoms)
   9.34136677697779E-04  2.41445008991890E-04  1.98416722442002E-05
  -8.87766731419469E-04 -1.95491153809919E-04 -9.77486479143386E-05
@@ -511,8 +511,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     179.000     179.000
  -1.21940383745938E-01  2.30327198837433E-02  6.14996216058320E-03
   1.21940383745938E-01 -2.30327198837433E-02 -6.14996216058320E-03
  Reduced forces (fred)
-  9.75538513177591E-01 -1.84261003868652E-01 -4.92017319391723E-02
- -9.75507626757413E-01  1.84262514271240E-01  4.91976626301590E-02
+  9.75523069967502E-01 -1.84261759069946E-01 -4.91996972846656E-02
+ -9.75523069967502E-01  1.84261759069946E-01  4.91996972846656E-02
  Cartesian velocities (vel) [bohr*Ha/hbar]; max,rms= 1.01640E-03 5.89080E-04 (free atoms)
   1.01639572336761E-03  2.30417183914198E-04  2.19833341419398E-05
  -9.75289552398044E-04 -1.89679870644882E-04 -9.10465468184809E-05
@@ -564,8 +564,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     179.000     179.000
  -3.35667335946343E-01  4.14633164665532E-02  1.11209687708135E-02
   3.35667335946343E-01 -4.14633164665532E-02 -1.11209687708135E-02
  Reduced forces (fred)
-  2.68539221795827E+00 -3.31707438187803E-01 -8.89745063460807E-02
- -2.68528515718322E+00  3.31705625277048E-01  8.89609939869351E-02
+  2.68533868757074E+00 -3.31706531732425E-01 -8.89677501665079E-02
+ -2.68533868757074E+00  3.31706531732425E-01  8.89677501665079E-02
  Cartesian velocities (vel) [bohr*Ha/hbar]; max,rms= 7.82976E-04 4.58119E-04 (free atoms)
   7.82975970191542E-04  2.12279263627872E-04  2.45803204694195E-05
  -7.49599359572781E-04 -1.79202151102576E-04 -8.06569606238172E-05
@@ -618,8 +618,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     179.000     179.000
  -5.25191627096452E-01  6.90064992596958E-02  1.85545352446774E-02
   5.25191627096452E-01 -6.90064992596958E-02 -1.85545352446774E-02
  Reduced forces (fred)
-  4.20149741496817E+00 -5.52056877371105E-01 -1.48446572143208E-01
- -4.20156861857505E+00  5.52047110784028E-01  1.48425991771630E-01
+  4.20153301677161E+00 -5.52051994077566E-01 -1.48436281957419E-01
+ -4.20153301677161E+00  5.52051994077566E-01  1.48436281957419E-01
  Cartesian velocities (vel) [bohr*Ha/hbar]; max,rms= 2.95769E-04 2.00401E-04 (free atoms)
   2.95768676498383E-04  2.04825516755120E-04  3.01967529826729E-05
  -2.70266892155502E-04 -1.79552567385265E-04 -7.30427567373789E-05
@@ -671,8 +671,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     179.000     179.000
  -5.10781786001847E-01  7.96826129462511E-02  2.14043451811823E-02
   5.10781786001847E-01 -7.96826129462511E-02 -2.14043451811823E-02
  Reduced forces (fred)
-  4.08622282310614E+00 -6.37467001026023E-01 -1.71244636825536E-01
- -4.08628575292340E+00  6.37454806113995E-01  1.71224886073380E-01
+  4.08625428801477E+00 -6.37460903570009E-01 -1.71234761449458E-01
+ -4.08625428801477E+00  6.37460903570009E-01  1.71234761449458E-01
  Cartesian velocities (vel) [bohr*Ha/hbar]; max,rms= 3.64876E-04 2.42739E-04 (free atoms)
  -3.45853144477993E-04  2.25481600408787E-04  4.20527067430257E-05
   3.64876008482610E-04 -2.06629434129195E-04 -7.40133606176073E-05
@@ -724,8 +724,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     179.000     179.000
  -2.83411428180549E-01  6.21341528265752E-02  1.63593854850871E-02
   2.83411428180549E-01 -6.21341528265752E-02 -1.63593854850871E-02
  Reduced forces (fred)
-  2.26735818165602E+00 -4.97074764224562E-01 -1.30880404449540E-01
- -2.26722466923277E+00  4.97071681000641E-01  1.30869763311853E-01
+  2.26729142544439E+00 -4.97073222612602E-01 -1.30875083880697E-01
+ -2.26729142544439E+00  4.97073222612602E-01  1.30875083880697E-01
  Cartesian velocities (vel) [bohr*Ha/hbar]; max,rms= 9.30749E-04 5.54359E-04 (free atoms)
  -9.16962798555037E-04  2.59046873464311E-04  5.61774951834744E-05
   9.30749283029770E-04 -2.45384099148855E-04 -7.93404142022554E-05
@@ -776,8 +776,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     179.000     179.000
  -5.33309216688234E-02  3.55290012113966E-02  7.92757515682411E-03
   5.33309216688234E-02 -3.55290012113966E-02 -7.92757515682411E-03
  Reduced forces (fred)
-  4.26617346477076E-01 -2.84232306823805E-01 -6.34244187036532E-02
- -4.26677400224099E-01  2.84231712558541E-01  6.34167838055326E-02
+  4.26647373350587E-01 -2.84232009691173E-01 -6.34206012545929E-02
+ -4.26647373350587E-01  2.84232009691173E-01  6.34206012545929E-02
  Cartesian velocities (vel) [bohr*Ha/hbar]; max,rms= 1.11105E-03 6.56900E-04 (free atoms)
  -1.10181559695260E-03  2.60605692540825E-04  6.08173182149987E-05
   1.11105278303446E-03 -2.51451394432579E-04 -7.63368796788240E-05
@@ -828,8 +828,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     179.000     179.000
   9.98781538390065E-02  4.02438615125580E-02  8.56471538339575E-03
  -9.98781538390065E-02 -4.02438615125580E-02 -8.56471538339575E-03
  Reduced forces (fred)
- -7.99012231105416E-01 -3.21951190791883E-01 -6.85223583615024E-02
-  7.99038230318688E-01  3.21950593409045E-01  6.85130877728297E-02
+ -7.99025230712052E-01 -3.21950892100464E-01 -6.85177230671660E-02
+  7.99025230712052E-01  3.21950892100464E-01  6.85177230671660E-02
  Cartesian velocities (vel) [bohr*Ha/hbar]; max,rms= 8.63119E-04 5.12414E-04 (free atoms)
  -8.57590603070682E-04  2.13441415369699E-04  5.06905591897332E-05
   8.63119117703825E-04 -2.07962509716067E-04 -5.99791154548434E-05
@@ -849,7 +849,6 @@ _setup2: Arith. and geom. avg. npw (full set) are     179.000     179.000
  ----iterations are completed or convergence reached----
 
  Mean square residual over all n,k,spin=   7.4487E-10; max=  2.0102E-09
-- nxfh > 0 in outwf is deprecated and will be removed in ABINIT8
  reduced coordinates (array xred) for    2 atoms
        0.272775621335      0.553180704752      0.507843594661
        0.807597373041      0.453382859557      0.481028994094
@@ -984,8 +983,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     179.000     179.000
   2.95740860245597E-01  8.27437591178030E-05 -6.41287790747033E-05
  -2.95740860245597E-01 -8.27437591178030E-05  6.41287790747033E-05
  Reduced forces (fred)
- -2.36587800573407E+00 -6.61675284239760E-04  5.13112971349318E-04
-  2.36597575819548E+00  6.62224861645088E-04 -5.12947493845935E-04
+ -2.36592688196478E+00 -6.61950072942424E-04  5.13030232597627E-04
+  2.36592688196478E+00  6.61950072942424E-04 -5.13030232597627E-04
  Cartesian velocities (vel) [bohr*Ha/hbar]; max,rms= 0.00000E+00 0.00000E+00 (free atoms)
   0.00000000000000E+00  0.00000000000000E+00  0.00000000000000E+00
   0.00000000000000E+00  0.00000000000000E+00  0.00000000000000E+00
@@ -1035,8 +1034,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     179.000     179.000
   2.20790685228137E-01  5.98866291580516E-03 -2.09288101461206E-03
  -2.20790685228137E-01 -5.98866291580516E-03  2.09288101461206E-03
  Reduced forces (fred)
- -1.76626151796814E+00 -4.79091337281610E-02  1.67458677720376E-02
-  1.76638944568204E+00  4.79094729247216E-02 -1.67402284617553E-02
+ -1.76632548182509E+00 -4.79093033264413E-02  1.67430481168965E-02
+  1.76632548182509E+00  4.79093033264413E-02 -1.67430481168965E-02
  Cartesian velocities (vel) [bohr*Ha/hbar]; max,rms= 5.90169E-04 3.35443E-04 (free atoms)
   5.90168715374664E-04  2.01758331054271E-04  3.08363620562836E-05
  -4.85527681265424E-04 -1.29053092212449E-04  1.81058019628811E-04
@@ -1087,8 +1086,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     179.000     179.000
   1.03922176709543E-01  1.08099348704317E-02 -3.14521406479114E-03
  -1.03922176709543E-01 -1.08099348704317E-02  3.14521406479114E-03
  Reduced forces (fred)
- -8.31372921665313E-01 -8.64801438916018E-02  2.51643100292356E-02
-  8.31381905687383E-01  8.64788140353062E-02 -2.51591150074225E-02
+ -8.31377413676348E-01 -8.64794789634540E-02  2.51617125183291E-02
+  8.31377413676348E-01  8.64794789634540E-02 -2.51617125183291E-02
  Cartesian velocities (vel) [bohr*Ha/hbar]; max,rms= 8.53392E-04 4.82973E-04 (free atoms)
   7.67046994514516E-04  2.38050800106200E-04 -1.69441110647378E-05
  -8.53391780056768E-04 -1.27890287615644E-04  9.81293552943640E-05
@@ -1140,8 +1139,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     179.000     179.000
  -3.14655680672572E-02  1.46750378963718E-02 -5.86049931909241E-03
   3.14655680672572E-02 -1.46750378963718E-02  5.86049931909241E-03
  Reduced forces (fred)
-  2.51695093030109E-01 -1.17399395233689E-01  4.68861410408268E-02
- -2.51753996046007E-01  1.17401211108261E-01 -4.68818480646519E-02
+  2.51724544538058E-01 -1.17400303170975E-01  4.68839945527393E-02
+ -2.51724544538058E-01  1.17400303170975E-01 -4.68839945527393E-02
  Cartesian velocities (vel) [bohr*Ha/hbar]; max,rms= 9.17306E-04 4.85201E-04 (free atoms)
   7.12104962272146E-04  2.32481042099970E-04 -6.55412825345295E-05
  -9.17305779642607E-04 -6.09817661579877E-05  4.37587310349138E-05
@@ -1194,8 +1193,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     179.000     179.000
  -1.44364277876871E-01  2.11622086271817E-02 -7.59102959632803E-03
   1.44364277876871E-01 -2.11622086271817E-02  7.59102959632803E-03
  Reduced forces (fred)
-  1.15493713214271E+00 -1.69295869347038E-01  6.07311543768608E-02
- -1.15489131388723E+00  1.69299468687869E-01 -6.07253191643876E-02
+  1.15491422301497E+00 -1.69297669017454E-01  6.07282367706242E-02
+ -1.15491422301497E+00  1.69297669017454E-01 -6.07282367706242E-02
  Cartesian velocities (vel) [bohr*Ha/hbar]; max,rms= 6.62275E-04 3.59680E-04 (free atoms)
   5.13705053671017E-04  2.46169203573449E-04 -4.37855994211283E-05
  -6.62274505617741E-04  6.83822876029162E-05  8.07814225484323E-05
@@ -1248,8 +1247,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     179.000     179.000
  -2.18729893780689E-01  2.80860730667413E-02 -1.05542446881590E-02
   2.18729893780689E-01 -2.80860730667413E-02  1.05542446881590E-02
  Reduced forces (fred)
-  1.74987957784503E+00 -2.24686985219943E-01  8.44394509152052E-02
- -1.74979872264600E+00  2.24690183847917E-01 -8.44284640953392E-02
+  1.74983915024551E+00 -2.24688584533930E-01  8.44339575052722E-02
+ -1.74983915024551E+00  2.24688584533930E-01 -8.44339575052722E-02
  Cartesian velocities (vel) [bohr*Ha/hbar]; max,rms= 2.21025E-04 1.46420E-04 (free atoms)
   1.92852966350109E-04  2.21024978986543E-04  6.28198575899735E-05
  -1.57045127515272E-04  3.83616546295867E-05  1.11835234810826E-04
@@ -1300,8 +1299,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     179.000     179.000
  -2.08332821544719E-01  3.22990139759304E-02 -1.30862163759648E-02
   2.08332821544719E-01 -3.22990139759304E-02  1.30862163759648E-02
  Reduced forces (fred)
-  1.66670043684094E+00 -2.58389188663895E-01  1.04693515581777E-01
- -1.66662470787457E+00  2.58395034950992E-01 -1.04685946433661E-01
+  1.66666257235775E+00 -2.58392111807444E-01  1.04689731007719E-01
+ -1.66666257235775E+00  2.58392111807444E-01 -1.04689731007719E-01
  Cartesian velocities (vel) [bohr*Ha/hbar]; max,rms= 2.98979E-04 1.90542E-04 (free atoms)
  -2.28532096512501E-04  2.03446181798363E-04  3.58145914053610E-05
   2.98979079219237E-04 -9.13669659599858E-05  1.58749152562851E-04
@@ -1352,8 +1351,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     179.000     179.000
  -1.35905746265257E-01  3.51932901192387E-02 -1.23327332922717E-02
   1.35905746265257E-01 -3.51932901192387E-02  1.23327332922717E-02
  Reduced forces (fred)
-  1.08726927404543E+00 -2.81548311035908E-01  9.86660806106552E-02
- -1.08722266619867E+00  2.81544330871911E-01 -9.86576520656917E-02
+  1.08724597012205E+00 -2.81546320953910E-01  9.86618663381735E-02
+ -1.08724597012205E+00  2.81546320953910E-01 -9.86618663381735E-02
  Cartesian velocities (vel) [bohr*Ha/hbar]; max,rms= 6.01031E-04 3.67239E-04 (free atoms)
  -5.03498393552870E-04  3.23366444242404E-04 -6.78865750977296E-05
   6.01031251496323E-04 -2.60793252140460E-04  1.31333440091024E-04
@@ -1404,8 +1403,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     179.000     179.000
  -3.27521066361507E-02  3.18810079779269E-02 -1.00345814165562E-02
   3.27521066361507E-02 -3.18810079779269E-02  1.00345814165562E-02
  Reduced forces (fred)
-  2.61984300718394E-01 -2.55050188424951E-01  8.02806090652242E-02
- -2.62049405460018E-01  2.55045939221879E-01 -8.02726935996747E-02
+  2.62016853089206E-01 -2.55048063823415E-01  8.02766513324494E-02
+ -2.62016853089206E-01  2.55048063823415E-01 -8.02766513324494E-02
  Cartesian velocities (vel) [bohr*Ha/hbar]; max,rms= 7.13218E-04 4.37626E-04 (free atoms)
  -6.00068199042201E-04  3.89295218026384E-04 -8.92097220541902E-05
   7.13218270851053E-04 -3.46504322753393E-04  2.76350581039097E-05
@@ -1456,8 +1455,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     179.000     179.000
   5.07212649865590E-02  3.47283633802993E-02 -9.02267776587128E-03
  -5.07212649865590E-02 -3.47283633802993E-02  9.02267776587128E-03
  Reduced forces (fred)
- -4.05799451556349E-01 -2.77828749830718E-01  7.21865487857256E-02
-  4.05740788228595E-01  2.77825064254070E-01 -7.21762954682150E-02
+ -4.05770119892472E-01 -2.77826907042394E-01  7.21814221269703E-02
+  4.05770119892472E-01  2.77826907042394E-01 -7.21814221269703E-02
  Cartesian velocities (vel) [bohr*Ha/hbar]; max,rms= 6.08829E-04 3.88016E-04 (free atoms)
  -5.73826710306819E-04  2.87856159072410E-04 -1.11531620166576E-04
   6.08828770332504E-04 -3.22990659467974E-04 -6.13712592727599E-05
@@ -1477,7 +1476,6 @@ _setup2: Arith. and geom. avg. npw (full set) are     179.000     179.000
  ----iterations are completed or convergence reached----
 
  Mean square residual over all n,k,spin=   3.4838E-10; max=  9.6704E-10
-- nxfh > 0 in outwf is deprecated and will be removed in ABINIT8
  reduced coordinates (array xred) for    2 atoms
        0.280844308446      0.554555611508      0.496125479632
        0.798191325026      0.470626506832      0.521729669871
@@ -1656,28 +1654,45 @@ P           mkmem           1
  of the ABINIT implementation.
  For information on why they are suggested, see also http://www.abinit.org/about/?text=acknowledgments.
 -
-- [1] Ab initio pseudopotentials for electronic structure calculations of poly-atomic systems, 
+- [1] Recent developments in the ABINIT software package.
+- Computer Phys. Comm. 205, 106 (2016).
+- X.Gonze, F.Jollet, F.Abreu Araujo, D.Adams, B.Amadon, T.Applencourt,
+- C.Audouze, J.-M.Beuken, J.Bieder, A.Bokhanchuk, E.Bousquet, F.Bruneval
+- D.Caliste, M.Cote, F.Dahm, F.Da Pieve, M.Delaveau, M.Di Gennaro,
+- B.Dorado, C.Espejo, G.Geneste, L.Genovese, A.Gerossier, M.Giantomassi,
+- Y.Gillet, D.R.Hamann, L.He, G.Jomard, J.Laflamme Janssen, S.Le Roux,
+- A.Levitt, A.Lherbier, F.Liu, I.Lukacevic, A.Martin, C.Martins,
+- M.J.T.Oliveira, S.Ponce, Y.Pouillon, T.Rangel, G.-M.Rignanese,
+- A.H.Romero, B.Rousseau, O.Rubel, A.A.Shukri, M.Stankovski, M.Torrent,
+- M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
+- B.Xue, A.Zhou, J.W.Zwanziger.
+- Comment : the fourth generic paper describing the ABINIT project.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- is available at http://www.abinit.org/about/ABINIT16.pdf .
+- The licence allows the authors to put it on the Web.
+-
+- [2] Ab initio pseudopotentials for electronic structure calculations of poly-atomic systems, 
 - using density-functional theory.
 - M. Fuchs, M. Scheffler, Comput. Phys. Commun. 119, 67 (1999).
 - Comment : Some pseudopotential generated using the FHI code were used.
 -
-- [2] ABINIT : First-principles approach of materials and nanosystem properties.
+- [3] ABINIT : First-principles approach of materials and nanosystem properties.
+- Computer Phys. Comm. 180, 2582-2615 (2009).
 - X. Gonze, B. Amadon, P.-M. Anglade, J.-M. Beuken, F. Bottin, P. Boulanger, F. Bruneval,
 - D. Caliste, R. Caracas, M. Cote, T. Deutsch, L. Genovese, Ph. Ghosez, M. Giantomassi
 - S. Goedecker, D.R. Hamann, P. Hermet, F. Jollet, G. Jomard, S. Leroux, M. Mancini, S. Mazevet,
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
-- Computer Phys. Comm. 180, 2582-2615 (2009).
 - Comment : the third generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at http://www.abinit.org/about/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
 -
-- [3] A brief introduction to the ABINIT software package.
+- [4] A brief introduction to the ABINIT software package.
+- Z. Kristallogr. 220, 558-562 (2005).
 - X. Gonze, G.-M. Rignanese, M. Verstraete, J.-M. Beuken, Y. Pouillon, R. Caracas, F. Jollet,
 - M. Torrent, G. Zerah, M. Mikami, Ph. Ghosez, M. Veithen, J.-Y. Raty, V. Olevano, F. Bruneval,
 - L. Reining, R. Godby, G. Onida, D.R. Hamann, and D.C. Allan.
-- Z. Kristallogr. 220, 558-562 (2005).
 - Comment : the second generic paper describing the ABINIT project. Note that this paper
 - should be cited especially if you are using the GW part of ABINIT, as several authors
 - of this part are not in the list of authors of the first or third paper.
@@ -1687,20 +1702,16 @@ P           mkmem           1
 -
 - And optionally:
 -
-- [4] First-principles computation of material properties : the ABINIT software project. 
+- [5] First-principles computation of material properties : the ABINIT software project. 
 - X. Gonze, J.-M. Beuken, R. Caracas, F. Detraux, M. Fuchs, G.-M. Rignanese, L. Sindic,
 - M. Verstraete, G. Zerah, F. Jollet, M. Torrent, A. Roy, M. Mikami, Ph. Ghosez, J.-Y. Raty, D.C. Allan.
 - Computational Materials Science 25, 478-492 (2002). http://dx.doi.org/10.1016/S0927-0256(02)00325-7
 - Comment : the original paper describing the ABINIT project.
 -
-- [5] Fast radix 2, 3, 4 and 5 kernels for Fast Fourier Transformations
-- on computers with overlapping multiply-add instructions.
-- S. Goedecker, SIAM J. on Scientific Computing 18, 1605 (1997).
--
-- Proc.   0 individual time (sec): cpu=          2.5  wall=          2.6
+- Proc.   0 individual time (sec): cpu=          2.8  wall=          4.4
 
 ================================================================================
 
  Calculation completed.
-.Delivered   8 WARNINGs and  34 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          2.5  wall=          2.6
+.Delivered   8 WARNINGs and  33 COMMENTs to log file.
++Overall time at end (sec) : cpu=          2.8  wall=          4.4
