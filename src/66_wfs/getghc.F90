@@ -96,7 +96,6 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlc,lambda,mpi_enreg,nd
  use m_bandfft_kpt, only : bandfft_kpt,bandfft_kpt_get_ikpt
  use m_hamiltonian, only : gs_hamiltonian_type,KPRIME_H_K,K_H_KPRIME,K_H_K,KPRIME_H_KPRIME
  use m_fock,        only : fock_type,fock_get_getghc_call
- use m_nonlop
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -105,6 +104,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlc,lambda,mpi_enreg,nd
  use interfaces_14_hidewrite
  use interfaces_18_timing
  use interfaces_53_ffts
+ use interfaces_66_nonlocal
  use interfaces_66_wfs, except_this_one => getghc
 !End of the abilint section
 

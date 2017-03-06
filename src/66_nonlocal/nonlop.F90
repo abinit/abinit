@@ -296,6 +296,7 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
 #undef ABI_FUNC
 #define ABI_FUNC 'nonlop'
  use interfaces_18_timing
+ use interfaces_66_nonlocal, except_this_one => nonlop
 !End of the abilint section
 
  implicit none
@@ -351,8 +352,7 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
  force_recompute_ph3d=.false.
 
 !Error(s) on incorrect input
-useylm = hamk%useylm
- if (useylm==0) then
+ if (hamk%useylm==0) then
    if (paw_opt>0) then
      msg = 'When paw_opt>0 you must use ylm version of nonlop! Set useylm 1.'
      MSG_BUG(msg)
@@ -568,7 +568,7 @@ useylm = hamk%useylm
        end do
      end do
    end if
-   ABI_ALLOCATE(enl_,(dimenl1,1,hamk%nspinor**2))
+   ABI_ALLOCATE(enl_,(size(enl_ptr,1),1,hamk%nspinor**2))
    do ispden=1,hamk%nspinor**2
      if (dimenl2==hamk%natom .and. hamk%usepaw==1) then
        enl_(:,1,ispden)=enl_ptr(:,iatom_only_,ispden)
@@ -620,7 +620,7 @@ useylm = hamk%useylm
 !But there are several restrictions
  use_gemm_nonlop= ( gemm_nonlop_use_gemm .and. &
 & signs == 2 .and. paw_opt /= 2 .and. hamk%nspinor == 1 .and. &
-& cpopt < 3 .and. useylm /= 0 .and. &
+& cpopt < 3 .and. hamk%useylm /= 0 .and. &
 & (choice < 2 .or. choice == 7) )
  if(use_gemm_nonlop) then
    call gemm_nonlop(atindx1_,choice,cpopt,cprjin_,dimenl1,dimenl2_,&
@@ -650,7 +650,6 @@ useylm = hamk%useylm
       b1 = lbound(vectout,dim=2)
       e1 = ubound(vectout,dim=2)
      end if
-
      if (choice/=0.and.signs==2.and.paw_opt>=3) then
        !svectout_idat => svectout(:,1+npwout*my_nspinor*(idat-1):npwout*my_nspinor*idat)
       b2 = 1+npwout*my_nspinor*(idat-1)

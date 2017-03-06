@@ -40,7 +40,6 @@ module m_lobpcgwf
  use m_time
  use m_xomp
  use m_fstrings
- use m_nonlop
 
  use m_hamiltonian, only : gs_hamiltonian_type
  use m_pawcprj,     only : pawcprj_type
@@ -81,6 +80,7 @@ subroutine lobpcgwf2(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
 #undef ABI_FUNC
 #define ABI_FUNC 'lobpcgwf2'
  use interfaces_18_timing
+ use interfaces_66_nonlocal
  use interfaces_66_wfs
 !End of the abilint section
 

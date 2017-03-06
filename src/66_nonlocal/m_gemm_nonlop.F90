@@ -354,12 +354,12 @@ contains
   use m_xmpi
   use m_pawcprj, only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_axpby
   use m_time,          only : cwtime
-  use m_opernl_ylm, only : opernlc_ylm
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'gemm_nonlop'
+ use interfaces_66_nonlocal
 !End of the abilint section
 
   implicit none

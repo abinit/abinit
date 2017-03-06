@@ -124,7 +124,6 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  use m_pawcprj,     only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_put,pawcprj_copy
  use m_paw_dmft,    only : paw_dmft_type
  use gwls_hamiltonian, only : build_H
- use m_nonlop
  use m_lobpcgwf,    only : lobpcgwf2
 
 !This section has been created automatically by the script Abilint (TD).
@@ -135,6 +134,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  use interfaces_18_timing
  use interfaces_53_ffts
  use interfaces_53_spacepar
+ use interfaces_66_nonlocal
  use interfaces_66_wfs
  use interfaces_67_common
  use interfaces_79_seqpar_mpi, except_this_one => vtowfk

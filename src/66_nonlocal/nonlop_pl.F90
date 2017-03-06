@@ -152,7 +152,6 @@ subroutine nonlop_pl(choice,dimekb1,dimekb2,dimffnlin,dimffnlout,ekb,enlout,&
  use m_errors
  use m_profiling_abi
  use m_xmpi
- use m_opernl
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -161,7 +160,7 @@ subroutine nonlop_pl(choice,dimekb1,dimekb2,dimffnlin,dimffnlout,ekb,enlout,&
  use interfaces_41_geometry
  use interfaces_42_nlstrain
  use interfaces_56_recipspace
- use interfaces_66_nonlocal
+ use interfaces_66_nonlocal, except_this_one => nonlop_pl
 !End of the abilint section
 
  implicit none
@@ -374,7 +373,7 @@ subroutine nonlop_pl(choice,dimekb1,dimekb2,dimffnlin,dimffnlout,ekb,enlout,&
    isft = npwin;if (mpi_enreg%nproc_spinor>1) isft=0
 
 !  Initialize it
-!!$OMP PARALLEL DO 
+!$OMP PARALLEL DO 
    do ig=1,npwin
      vectin_s(1,ig)=vectin(1,ig+isft)
      vectin_s(2,ig)=vectin(2,ig+isft)

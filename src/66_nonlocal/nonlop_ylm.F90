@@ -296,7 +296,6 @@
  use m_errors
 
  use m_pawcprj, only : pawcprj_type
- use m_opernl_ylm, only : opernla_ylm, opernlb_ylm, opernlc_ylm, opernld_ylm
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -304,7 +303,7 @@
 #define ABI_FUNC 'nonlop_ylm'
  use interfaces_41_geometry
  use interfaces_56_recipspace
- use interfaces_66_nonlocal
+ use interfaces_66_nonlocal, except_this_one => nonlop_ylm
 !End of the abilint section
 
  implicit none
@@ -366,7 +365,6 @@
 !Check consistency of arguments
 !==============================================================
 
- ABI_UNUSED(mgfft)
  hermdij_=.FALSE.; if(present(hermdij)) hermdij_=hermdij
 
 !signs=1, almost all choices
@@ -647,7 +645,9 @@
 
 !      Prepare the phase factors if they were not already computed
        if (nloalg(2)<=0) then
+!write(87,*) "coucou0",ia3,ia4
          call ph1d3d(ia3,ia4,kgin,matblk,natom,npwin,n1,n2,n3,phkxredin,ph1d,ph3din)
+!write(87,*) "ph3din",ph3din(1,487,:)
        end if
 
 !      Allocate memory for projected scalars
@@ -707,7 +707,8 @@
        if (cpopt==4.and.ndgxdt>0) then
          ndgxdt_stored = cprjin(1,1)%ncpgr
          ishift=0
-         if (choice==2.and.ndgxdt_stored>ndgxdt) ishift=ndgxdt_stored-ndgxdt
+         if ((choice==2).and.(ndgxdt_stored>ndgxdt).and.(signs==2)) ishift=idir-ndgxdt
+         if (choice==2.and.(ndgxdt_stored>ndgxdt).and.(signs==1)) ishift=ndgxdt_stored-ndgxdt
          if(cplex == 2) then
            do ispinor=1,nspinor
              do ia=1,nincat

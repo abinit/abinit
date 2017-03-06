@@ -91,7 +91,6 @@
  use m_errors
 
  use m_pawcprj, only : pawcprj_type
- use m_opernl_ylm, only : opernla_ylm
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -230,7 +229,6 @@
 !  Loop on blocks of atoms inside type
    do ia3=ia1,ia2,mincat
      ia4=min(ia2,ia3+mincat-1);nincat=ia4-ia3+1
-
 !     Prepare the phase factors if they were not already computed
      if (nloalg(2)<=0) then
        call ph1d3d(ia3,ia4,kg_k,matblk,natom,npw_k,ngfft(1),ngfft(2),ngfft(3),&
