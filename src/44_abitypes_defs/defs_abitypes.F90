@@ -30,7 +30,7 @@
 !! * macro_uj_type : TO BE COMPLETED
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2016 ABINIT group (XG)
+!! Copyright (C) 2001-2017 ABINIT group (XG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -188,6 +188,7 @@ type dataset_type
  integer :: cineb_start
  integer :: cgtyphf
  integer :: delayperm
+ integer :: diismemory
  integer :: dmatpuopt
  integer :: dmatudiag
  integer :: dmft_dc
@@ -364,6 +365,7 @@ type dataset_type
  integer :: natsph
  integer :: natsph_extra
  integer :: natvshift
+ integer :: nbandhf
  integer :: nbandkss
  integer :: nbdblock
  integer :: nbdbuf
@@ -379,11 +381,9 @@ type dataset_type
  integer :: nfreqim
  integer :: nfreqre
  integer :: nfreqsp
- integer :: diismemory
  integer :: nimage
- integer :: nbandhf
- integer :: nkptgw
  integer :: nkpt
+ integer :: nkptgw
  integer :: nkpthf
  integer :: nline
  integer :: nnsclo
@@ -423,6 +423,7 @@ type dataset_type
  integer :: ntypat
  integer :: ntyppure
  integer :: nwfshist
+ integer :: nzchempot
  integer :: occopt
  integer :: optcell
  integer :: optdriver
@@ -457,6 +458,7 @@ type dataset_type
  integer :: macro_uj
  integer :: pawujat
  integer :: pawxcdev
+ integer :: pimd_constraint
  integer :: pitransform
  integer :: plowan_bandi
  integer :: plowan_bandf
@@ -803,6 +805,7 @@ type dataset_type
  real(dp), allocatable :: amu_orig(:,:)     !SET2NULL  ! amu(ntypat,nimage)
  real(dp), allocatable :: atvshift(:,:,:)   !SET2NULL  ! atvshift(16,nsppol,natom)
  real(dp), allocatable :: cd_imfrqs(:)      !SET2NULL  ! cd_imfrqs(cd_customnimfrqs)
+ real(dp), allocatable :: chempot(:,:,:)    !SET2NULL  ! chempot(3,nzchempot,ntypat)
  real(dp), allocatable :: corecs(:)         !SET2NULL  ! corecs(ntypat)
  real(dp), allocatable :: densty(:,:)       !SET2NULL  ! densty(ntypat,4)
  real(dp), allocatable :: dmatpawu(:,:,:,:,:) !SET2NULL  ! dmatpawu(2*lpawu+1,2*lpawu+1,nsppol*nspinor,natpu,nimage)
@@ -1740,6 +1743,7 @@ type dataset_type
     integer :: nsym
     integer :: ntypalch
     integer :: ntypat
+    integer :: nzchempot
 
  end type ab_dimensions
 !!***

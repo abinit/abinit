@@ -13,7 +13,7 @@
 !!     Yet the code is not already written. 
 !!
 !! COPYRIGHT
-!! Copyright (C) 2000-2016 ABINIT group (XG, AR)
+!! Copyright (C) 2000-2017 ABINIT group (XG, AR)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

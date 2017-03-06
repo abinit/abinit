@@ -8,7 +8,7 @@
 !! space at given k point wrt a single cartesian strain component
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2016 ABINIT group (DRH, XG)
+!! Copyright (C) 1999-2017 ABINIT group (DRH, XG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

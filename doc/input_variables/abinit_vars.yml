@@ -2675,6 +2675,33 @@
     characteristics: null
     commentdefault: null
     commentdims: null
+    defaultval: 0.0
+    definition: spatially varying CHEMical POTential
+    dimensions: 
+    - 3
+    - [[nzchempot]]
+    - [[ntype]]
+    excludes: null
+    requires: '[[nzchempot]]/=0'
+    section: vargeo
+    text: |-
+        For each type of atoms, from 1 to [[ntypat]], specifies the spatially varying chemical potential, through the specification of [[nzchempot]] triplets of real numbers. They give data for [[nzchempot]] delimiting planes, all parallel to each other, each determined by its z reduced coordinate.
+
+        The first real number is the z reduced coordinate of the delimiting plane. The second real number is the value of the chemical potential for this type of atom on this plane. The third real number is the derivative of the chemical potential fior this type of atom with respect to the z reduced coordinate, evaluated on this plane.
+
+        In the space between delimiting planes, a piecewise cubic polynomial interpolation is determined : the cubic polynomial between two delimiting planes will have the imposed chemical potentials and derivatives on the two delimiting planes.
+
+        The z reduced coordinates must be ordered in increasing values, and cannot span more than 1.0 . There is an automatic periodic boundary condition imposed. Specifying two identical z reduced coordinates is allowed, and means that the first one applies to the adjacent space with lower values of z, while the second applies to the adjacent space with higher values of z.
+
+        When the spatial chemical potential is defined only for one type of atom (and no chemical potential is present for the other atoms), simply set the related values to *0.0 in the [[chempot]] array.
+
+        In the present input array, reduced positions, energies and derivatives of energies are mixed. Hence, although the chemical potential is an energy, one cannot use the usual energy definitions (i.e. the chemical potential is always to be input in Hartree atomic units).
+    varname: chempot
+    vartype: real
+- !variable
+    characteristics: null
+    commentdefault: null
+    commentdims: null
     defaultval: 0
     definition: CHecK whether the user want to EXIT
     dimensions: scalar
@@ -5640,32 +5667,6 @@
     varname: eph_ngqpt_fine
     vartype: integer
 - !variable
-    characteristics:
-    - '[[DEVELOP]]'
-    commentdefault: null
-    commentdims: null
-    defaultval: 1
-    definition: 'Electron-PHonon: Task'
-    dimensions: scalar
-    excludes: null
-    requires: null
-    section: varrf
-    text: |-
-        When [[optdriver]]==7, select the task to be performed.
-        The choice is among:
-
-        <ul>
-          <li> 1: phonon linewidth </li>
-          <li> 2: electron-phonon coupling elements </li>
-        </ul>
-
-        The special value eph_task 0 corresponds to a fake task in which
-        the code returns after the initial pre-processing of the input data.
-        This option could be useful if you want to access the post-processing tools in the EPH code
-        (Fermi surface, Phonon DOS ...) without running any task.
-    varname: eph_task
-    vartype: integer
-- !variable
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -5679,8 +5680,30 @@
         NB - this does not work yet.
         This variable can be used to turn on the calculation of transport
         quantities in the eph module of abinit. Value of 1 corresponds to
-        elastic LOVA as in the PRB by Savrasov and Savrasov.
+        elastic LOVA as in the PRB by Savrasov and Savrasov 
     varname: eph_transport
+    vartype: integer
+- !variable
+    characteristics:
+    - '[[DEVELOP]]'
+    commentdefault: null
+    commentdims: null
+    defaultval: 1
+    definition: 'Electron-PHonon: Task'
+    dimensions: scalar
+    excludes: null
+    requires: null
+    section: varrf
+    text: |-
+        <p>
+        When [[optdriver]]==7, select the task to be performed.
+         The choice is among :
+         <br />
+         [[eph_task]]=1 : phonon linewidth
+         <br />
+         [[eph_task]]=2 : electron-phonon coupling elements
+        </p>
+    varname: eph_task
     vartype: integer
 - !variable
     characteristics:
@@ -9365,49 +9388,73 @@
     requires: null
     section: varrlx
     text: |-
-        Control the collective changes of images (see [[nimage]], [[npimage]], [[dynimage]], [[ntimimage]], [[tolimg]], [[istatimg]], [[prtvolimg]]).
-        Similar to [[ionmov]] in spirit, although here, a population of self-consistent calculations for different geometries is managed, while with [[ionmov]], only one geometry for self-consistent calculation is managed.
+        <p> Control the collective changes of images (see [[nimage]],[[npimage]], [[dynimage]], 
+        [[ntimimage]], [[tolimg]], [[istatimg]], [[prtvolimg]]).
+        <br> Similar to [[ionmov]] in spirit, although here, a population 
+        of self-consistent calculations for different geometries is managed, while with [[ionmov]],
+        only one geometry for self-consistent calculation is managed.
+        <br> In this respect the maximal number of time step for image propagation is [[ntimimage]],
+        corresponding to the input variable [[ntime]] of the single geometry case.
+        Also, the stopping criterion is governed by [[tolimg]], corresponding to the 
+        input variable [[toldfe]] of the single geometry case.
+        The stopping  condition is crude: the image propagation is stopped when the mean value (over dynamic images)
+        of the absolute difference of total energy (previous and current time step) is less than [[tolimg]].
 
-        In this respect the maximal number of time step for image propagation is [[ntimimage]], corresponding to the input variable [[ntime]] of the single geometry case. Also, the stopping criterion is governed by [[tolimg]], corresponding to the input variable [[toldfe]] of the single geometry case.
-
-        The stopping  condition is crude: the image propagation is stopped when the mean value (over dynamic images) of the absolute difference of total energy (previous and current time step) is less than [[tolimg]]. Actually, there might be combinations of [[ionmov]] and [[imgmov]] in which the two mechanisms are at work. Usually, however, only one mechanism will be activated (so, usually, either [[ntimimage]] is bigger than one OR [[ntime]] is bigger than one).
-
-        In order for the user to acquire a mental representation of the interplay between [[ionmov]] and [[imgmov]], here is a F90 pseudo-code presenting the interplay between the different above-mentioned input variables, as well as with the parallelism (see input variable [[npimage]]).
-
+        <p>Actually, there might be combinations of [[ionmov]] and [[imgmov]] 
+        in which the two mechanisms are at work.
+        Usually, however, only one mechanism will be activated 
+        (so, usually, either [[ntimimage]] is bigger than one OR [[ntime]] is bigger than one).
+        In order for the user to acquire a mental representation of the interplay between [[ionmov]] and [[imgmov]],
+        here is a F90 pseudo-code presenting the interplay between the different above-mentioned input variables, 
+        as well as with the parallelism (see input variable [[npimage]]).
+        </p>
         <p><pre>
         do itimimage=1,ntimimage
           do iimage=1,nimage
-             (possibly, parallelisation over images)
-             do itime=1,ntime
-                Compute the forces and stresses for image(iimage)
-                Examine whether the stopping criterion defined by tolmxf is fulfilled
-                Predict the next geometry for image(iimage) using ionmov
-              enddo
-           enddo
-
-           Examine whether the stopping criterion defined by tolimg is fulfilled
-           Predict the next geometries for all images using imgmov
+            (possibly, parallelisation over images)
+            do itime=1,ntime
+              Compute the forces and stresses for image(iimage)
+              Examine whether the stopping criterion defined by tolmxf is fulfilled
+              Predict the next geometry for image(iimage) using ionmov
+            enddo
+          enddo
+          Examine whether the stopping criterion defined by tolimg is fulfilled
+          Predict the next geometries for all images using imgmov
         enddo
-        </pre></p>
-
+        </pre></p>        
         <ul>
-        <li> 0  => simply <b> copy </b> images from previous timimage step.</li>
-
-        <li> 1  => move images according to <b> Steepest Descent </b> following the (scaled) forces,
-          the scaling factor being [[fxcartfactor]]. </li>
-
-        <li> 2  => <b> String Method </b> for finding Minimal Energy Path (MEP) connecting to minima (see PRB 66, 052301 (2002)); the algorithm variant can be selected with the [[string_algo]] keyword (Simplified String Method by default). The solver for the Ordinary Differential Equation (ODE) can be selected with [[mep_solver]] (steepest-descent by default). See also [[mep_mxstep]] keyword.</li>
-
-        <li> 3  => (tentatively, not yet coded) <b> Metadynamics </b>.</li>
-
-        <li> 4  => (tentatively, not yet coded) <b> Genetic Algorithm</b>.</li>
-
-        <li> 5  => <b> Nudged Elastic Band (NEB) </b> for finding Minimal Energy Path (MEP) connecting two minima; the algorithm variant can be selected with the [[neb_algo]] keyword (NEB+improved tangent by default). The solver for the Ordinary Differential Equation (ODE) can be selected with [[mep_solver]] (steepest-descent by default). The spring constant connecting images along the path is defined by [[neb_spring]]. See also [[mep_mxstep]] keyword.</li>
-
-        <li> 9 or 13  => <b> Path-Integral Molecular Dynamics </b> (see e.g. [D. Marx and M. Parrinello, J. Chem. Phys. 104, 4077 (1996)]). Will use 9 for <b>  Langevin thermostat </b> (associated friction coefficient given by [[vis]]) and 13 for <b>  Nose-Hoover thermostat chains </b> (associated input variables are the number of thermostats in the chains, [[nnos]], and the masses of these thermostats [[qmass]]). [[nimage]] is the Trotter number (no use of [[dynimage]]); possible transformations of coordinates are defined by [[pitransform]]; Fictitious masses of the atoms (possibly different from the true masses given by [[amu]]) can be specified by [[pimass]]. At present, it is only possible to perform calculations in the (N,V,T) ensemble ([[optcell]]=0).</li>
-        </ul>
-
-        No meaning for RF calculations.
+          <li>    = 0  => simply <b> copy </b> images from previous timimage step.</li>
+          <li>    = 1  => move images according to <b> Steepest Descent </b> 
+                         following the (scaled) forces, the scaling factor being [[fxcartfactor]]. </li>
+          <li>    = 2  => <b> String Method </b> for finding Minimal Energy Path (MEP) 
+               connecting to minima (see PRB 66, 052301 (2002));
+               the algorithm variant can be selected with the [[string_algo]] keyword
+               (Simplified String Method by default).
+               The solver for the Ordinary Differential Equation (ODE) can be selected with [[mep_solver]]
+               (steepest-descent by default). See also [[mep_mxstep]] keyword.</li>
+          <li>    = 3  => (tentatively, not yet coded) <b> Metadynamics </b>.</li>
+          <li>    = 4  => (tentatively, not yet coded) <b> Genetic Algorithm</b>.</li>
+          <li>    = 5  => <b> Nudged Elastic Band (NEB) </b> for finding Minimal Energy Path (MEP) 
+               connecting two minima;
+               the algorithm variant can be selected with the [[neb_algo]] keyword 
+               (NEB+improved tangent by default).
+               The solver for the Ordinary Differential Equation (ODE) can be selected with [[mep_solver]]
+               (steepest-descent by default). 
+               The spring constant connecting images along the path is defined by [[neb_spring]].
+               See also [[mep_mxstep]] keyword.</li>
+          <li>    = 9 or 13  => <b> Path-Integral Molecular Dynamics </b>
+               (see e.g. [D. Marx and M. Parrinello, J. Chem. Phys. 104, 4077 (1996)]).
+               Will use 9 for <b>  Langevin thermostat </b> (associated friction coefficient given by [[vis]])
+               and 13 for <b>  Nose-Hoover thermostat chains </b>
+               (associated input variables are the number of thermostats in the chains, [[nnos]],
+               and the masses of these thermostats [[qmass]]). 
+               [[nimage]] is the Trotter number (no use of [[dynimage]]);
+               possible transformations of coordinates are defined by [[pitransform]];
+               Fictitious masses of the atoms (possibly different from the true masses given by [[amu]])
+               can be specified by [[pimass]]. 
+               At present, it is only possible to perform calculations in the (N,V,T) ensemble ([[optcell]]=0).</li>
+          </ul>
+          No meaning for RF calculations.
         </p>
     varname: imgmov
     vartype: integer
@@ -14618,20 +14665,24 @@
 - !variable
     characteristics:
     - '[[DEVELOP]]'
-    commentdefault: null
+    commentdefault: 0 when [[usepaw]]=0, 1 when [[usepaw]]=1
     commentdims: null
-    defaultval: 0
-    definition: Norm-Conserving, use XC Core-Correction in G-space
+    defaultval: !valuewithconditions
+        '[[usepaw]]==0': 0
+        '[[usepaw]]==1': 1
+        defaultval: 0
+    definition: use XC Core-Correction in G-space
     dimensions: scalar
     excludes: null
     requires: null
     section: vardev
     text: |-
-        This variable is relevant only for norm-conserving calculations. Historically, Abinit treats the model core charge used for the non-linear core
+        Historically, Abinit treats the model core charge used for the non-linear core
         correction in real space. Alternatively, it is possible to instruct the code to compute the core charge in G-space following the same approach used in
         the PAW code. The G-space formalism is more accurate than the interpolation in real space, especially when derivatives of the model core charge are
-        needed, e.g. DFPT. Preliminary tests showed that the violation of the acoustic sum rule is reduced when nc_xccc_gspace==1 , especially for LDA. It's
-        worth stressing, however, that nc_xccc_gspace==1 should be used only in conjunction with NC pseudos whose model core charge that decays quickly in
+        needed, e.g. DFPT. Preliminary tests showed that the violation of the acoustic sum rule is reduced when [[nc_xccc_gspace]]==1 , especially for LDA.
+        It is worth stressing, however, that [[nc_xccc_gspace]]==1
+        should be used only in conjunction with NC pseudos whose model core charge that decays quickly in
         G-space. Several NC pseudos available in the Abinit table are not optimized for the G-space formalism and users are strongly invited to perform
         convergence studies with respect to ecut before using this option.
     varname: nc_xccc_gspace
@@ -15700,10 +15751,14 @@
         the number of non-self-consistent loops is determined
         by [[nstep]].
          <br />
-         The Default value of 0 correspond to make
+         The Default value of 0 -- for standard plane-wave calculations -- corresponds to make
         the two first fixed potential determinations
         of wavefunctions have 2 non-self consistent loops,
         and the next ones to have only 1 non-self consistent loop.
+         <br />
+         The Default value of 0 -- for wavelets calculations ([[usewvl]]=1) -- corresponds to make
+        2 steps with 3 non-self consistent loops , 2 steps with 2 non-self consistent loops,
+        then the next ones with 1 non-self consistent loop.
         </p>
     varname: nnsclo
     vartype: integer
@@ -16908,6 +16963,20 @@
         are stored during the electronic minimisation.
         </p>
     varname: nwfshist
+    vartype: integer
+- !variable
+    characteristics: null
+    commentdefault: null
+    commentdims: null
+    defaultval: null
+    definition: Number of Z reduced coordinates that define the spatial CHEMical POTential
+    dimensions: null
+    excludes: null
+    requires: null
+    section: vargeo
+    text: |-
+        Defines the number of z reduced coordinates that defines the spatially varying chemical potential. See the input variable [[chempot]], of which [[nzchempot]] is the second dimension.
+    varname: nzchempot
     vartype: integer
 - !variable
     characteristics:
@@ -18983,8 +19052,8 @@
     text: |-
         This variable defines the number of shifts in the q-mesh used
         for the phonon DOS and for the Eliashberg functions (see [[ph_ngqpt]]).
-        If not given, the code assumes a Gamma-centered mesh.
-        The shifts are specified by [[ph_qshift]].
+        If not given, the code assumes a Gamma-centered mesh. The shifts
+        are specified by [[ph_qshift]]. 
     varname: ph_nqshift
     vartype: integer
 - !variable
@@ -19036,8 +19105,8 @@
     requires: '[[ph_intmeth]]==1'
     section: vareph
     text: |-
-        The gaussian broadening used for the integration of the phononDOS and the Eliashberg function.
-        See also [[ph_intmeth]] and [[ph_ngqpt]].
+        The gaussian broadening used for the integration of the phonon
+        DOS and the Eliashberg function. See also [[ph_intmeth]] and [[ph_ngqpt]]. 
     varname: ph_smear
     vartype: real
 - !variable
@@ -19065,7 +19134,7 @@
     dimensions:
     - '[[ntypat]]'
     excludes: null
-    requires: null
+    requires: '[[imgmov]]=9 or 13'
     section: varrlx
     text: |-
         <p>
@@ -19084,6 +19153,32 @@
         </p>
     varname: pimass
     vartype: real
+- !variable
+    characteristics: null
+    commentdefault: null
+    commentdims: null
+    defaultval: 0
+    definition: 'Path-Integral Molecular Dynamics: CONSTRAINT to be applied
+        on a reaction coordinate'
+    dimensions: scalar
+    excludes: null
+    requires: '[[imgmov]]=9 or 13'
+    section: varrlx
+    text: |-
+        Only relevant for Path-Integral Molecular Dynamics.<br/>
+        Selects a constraint to be applied during the PIMD trajectory. The constraint is holonomic (it is a relation between the position variables).In practice, the total forces applied to the atomic positions are modified so as to respect the constraint.<br/>
+        To date, the available constraints are:<br/>
+        <ul>
+        <li><b>0</b>: no constraint</li>
+        <li><b>1</b>: <i>"Blue Moon Ensemble" method</i>.<br/>
+        The constraint is a linear combination of the positions of atomic centroids (this linear combination is kept constant during the simulation). <br/>
+        Sum[W_i * X_i]=constant<br/>
+        The X_i are the coordinates of the atomic centroids. The weights W_i have to be specified with the [[wtatcon]](3,[[natcon]],[[nconeq]]), [[iatcon]]([[natcon]]) and [[natcon]] input parameters (where [[nconeq]] is fixed to 1).<br/>
+        More details on the implementation in: <a href="http://doi.org/10.1273/cbij.7.12">Y. Komeiji,Chem-Bio Informatics Journal 7, 12-23 (2007)</a>.
+        </li>
+        </ul>
+    varname: pimd_constraint
+    vartype: integer
 - !variable
     characteristics: null
     commentdefault: null

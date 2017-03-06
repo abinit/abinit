@@ -12,7 +12,7 @@
 !! Note that left and right k points can be different, i.e. ghc=<k^prime+G|H|C_k>.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (DCA, XG, GMR, LSI, MT)
+!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR, LSI, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -568,10 +568,8 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlc,lambda,mpi_enreg,nd
 
      if (gs_ham%usepaw==0) gsc_ptr => nonlop_dum
      if (gs_ham%usepaw==1) gsc_ptr => gsc
-
      call nonlop(choice,cpopt_here,cwaveprj_nonlop,enlout,gs_ham,idir,lambda_ndat,mpi_enreg,ndat,&
 &     nnlout,paw_opt,signs,gsc_ptr,tim_nonlop,cwavef,gvnlc,select_k=select_k_)
-
    end if ! end type_calc 0 or 2 for nonlop application
 
 
@@ -601,6 +599,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlc,lambda,mpi_enreg,nd
              end if
            end do ! ig
          end do ! ispinor
+
        else
 !      !$OMP PARALLEL DO PRIVATE(igspinor) COLLAPSE(2)
          do ispinor=1,my_nspinor
@@ -714,7 +713,7 @@ end subroutine getghc
 !! Compute metaGGA contribution to <G|H|C> for input vector |C> expressed in reciprocal space.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (DCA, XG, GMR, LSI, MT)
+!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR, LSI, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

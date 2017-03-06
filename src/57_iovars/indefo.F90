@@ -8,7 +8,7 @@
 !! (some are initialized earlier, see indefo1 routine)
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2016 ABINIT group (XG,MM,FF)
+!! Copyright (C) 1999-2017 ABINIT group (XG,MM,FF)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -168,6 +168,7 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%cd_frqim_method=1
    dtsets(idtset)%cd_full_grid=0
    dtsets(idtset)%charge=zero
+   dtsets(idtset)%chempot(:,:,:)=zero
    dtsets(idtset)%chkexit=0
    dtsets(idtset)%chksymbreak=1
    dtsets(idtset)%cineb_start=7
@@ -446,7 +447,11 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%nbdblock=1
    dtsets(idtset)%nbdbuf=0
    dtsets(idtset)%nberry=1
-   dtsets(idtset)%nc_xccc_gspace=0
+   if (dtsets(idtset)%usepaw==0) then
+     dtsets(idtset)%nc_xccc_gspace=0
+   else
+     dtsets(idtset)%nc_xccc_gspace=1
+   end if
    dtsets(idtset)%nbandkss=0
    dtsets(idtset)%nctime=0
    dtsets(idtset)%ndtset = -1
@@ -554,6 +559,7 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%pawujv=0.1_dp/Ha_eV
    dtsets(idtset)%pawusecp=1
    dtsets(idtset)%pawxcdev=1
+   dtsets(idtset)%pimd_constraint=0
    dtsets(idtset)%pitransform=0
    dtsets(idtset)%ptcharge(:) = zero
    dtsets(idtset)%plowan_bandi=0

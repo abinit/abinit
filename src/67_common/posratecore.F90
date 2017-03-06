@@ -7,7 +7,7 @@
 !! Calculate the annihilataion rate of a given core state
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (JW,GJ,MT)
+!! Copyright (C) 1998-2017 ABINIT group (JW,GJ,MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

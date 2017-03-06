@@ -13,7 +13,7 @@
 !! point r to r(i) -> r(i) + Sum(j) [eps(i,j)*r(j)].
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (DCA, XG, GMR, FJ, MT)
+!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR, FJ, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -51,6 +51,7 @@
 !!  nsym=number of symmetries in space group
 !!  ntypat=number of types of atoms
 !!  psps <type(pseudopotential_type)>=variables related to pseudopotentials
+!!  pawrad(ntypat*usepaw) <type(pawrad_type)>=paw radial mesh and related data
 !!  pawtab(ntypat*usepaw) <type(pawtab_type)>=paw tabulated starting data
 !!  ph1d(2,3*(2*mgfft+1)*natom)=1-dim phase (structure factor) array
 !!  prtvol=integer controlling volume of printed output
@@ -123,7 +124,7 @@
 
  subroutine stress(atindx1,berryopt,dtefield,eei,efield,ehart,eii,fock,gsqcut,ixc,kinstr,&
 &                  mgfft,mpi_enreg,mqgrid,n1xccc,n3xccc,natom,nattyp,&
-&                  nfft,ngfft,nlstr,nspden,nsym,ntypat,paral_kgb,psps,pawtab,ph1d,&
+&                  nfft,ngfft,nlstr,nspden,nsym,ntypat,paral_kgb,psps,pawrad,pawtab,ph1d,&
 &                  prtvol,qgrid,red_efieldbar,rhog,rprimd,strten,strsxc,symrec,&
 &                  typat,usefock,usepaw,vdw_tol,vdw_tol_3bt,vdw_xc,&
 &                  vlspl,vxc,xccc1d,xccc3d,xcccrc,xred,zion,znucl,qvpotzero,&
@@ -138,6 +139,7 @@
  use m_fock,             only : fock_type
  use m_ewald,            only : ewald2
  use defs_datatypes,     only : pseudopotential_type
+ use m_pawrad,           only : pawrad_type
  use m_pawtab,           only : pawtab_type
  use m_electronpositron, only : electronpositron_type,electronpositron_calctype
 
@@ -177,12 +179,13 @@
  real(dp),intent(in) :: xred(3,natom),zion(ntypat),znucl(ntypat)
  real(dp),intent(inout) :: xccc3d(n3xccc)
  real(dp),intent(out) :: strten(6)
+ type(pawrad_type),intent(in) :: pawrad(ntypat*usepaw)
  type(pawtab_type),intent(in) :: pawtab(ntypat*usepaw)
 
 !Local variables-------------------------------
 !scalars
- integer :: iatom,idir,ii,ipositron,mu,optatm,optdyfr,opteltfr,optgr,option
- integer :: optn,optn2,optstr,optv,sdir
+ integer :: coredens_method,iatom,icoulomb,idir,ii,ipositron,mu,optatm,optdyfr
+ integer :: opteltfr,optgr,option,optn,optn2,optstr,optv,sdir,vloc_method
  real(dp),parameter :: tol=1.0d-15
  real(dp) :: e_dum,strsii,ucvol,vol_element
  character(len=500) :: message
@@ -211,11 +214,28 @@
 !========= Local pseudopotential and core charge contributions =========
 !=======================================================================
 
- if (usepaw==1 .or. psps%nc_xccc_gspace==1) then
+!Determine by which method the local ionic potential and/or the pseudo core charge density
+! contributions have to be computed
+!Local ionic potential:
+! Method 1: PAW
+! Method 2: Norm-conserving PP, icoulomb>0, wavelets
+ vloc_method=1;if (usepaw==0) vloc_method=2
+ if (psps%usewvl==1) vloc_method=2
+!Pseudo core charge density:
+! Method 1: PAW, nc_xccc_gspace
+! Method 2: Norm-conserving PP, wavelets
+ coredens_method=1;if (usepaw==0) coredens_method=2
+ if (psps%nc_xccc_gspace==1) coredens_method=1
+ if (psps%nc_xccc_gspace==0) coredens_method=2
+ if (psps%usewvl==1) coredens_method=2
 
-!  PAW or NC with nc_xccc_gspace: compute local psp and core charge contribs together in reciprocal space
+!Local ionic potential and/or pseudo core charge by method 1
+ if (vloc_method==1.or.coredens_method==1) then
    call timab(551,1,tsec)
-   if (n3xccc>0) then
+   optv=0;if (vloc_method==1) optv=1
+   optn=0;if (coredens_method==1) optn=n3xccc/nfft
+   optatm=0;optdyfr=0;opteltfr=0;optgr=0;optstr=1;optn2=1
+   if (coredens_method==1.and.n3xccc>0) then
      ABI_ALLOCATE(v_dum,(nfft))
      ABI_ALLOCATE(vxctotg,(2,nfft))
      v_dum(:)=vxc(:,1);if (nspden>=2) v_dum(:)=0.5_dp*(v_dum(:)+vxc(:,2))
@@ -226,26 +246,19 @@
    else
      ABI_ALLOCATE(vxctotg,(0,0))
    end if
-
-   optatm=0;optdyfr=0;opteltfr=0;optgr=0;optstr=1;optv=1;optn=n3xccc/nfft;optn2=1;
-
    call atm2fft(atindx1,dummy_out1,dummy_out2,dummy_out3,dummy_out4,&
 &   dummy_out5,dummy_in,gmet,gprimd,dummy_out6,dummy_out7,gsqcut,&
 &   mgfft,mqgrid,natom,nattyp,nfft,ngfft,ntypat,optatm,optdyfr,opteltfr,optgr,optn,optn2,optstr,optv,&
 &   psps,pawtab,ph1d,qgrid,qprtrb_dum,rhog,corstr,lpsstr,ucvol,usepaw,vxctotg,vxctotg,vxctotg,vprtrb_dum,vlspl,&
 &   comm_fft=mpi_enreg%comm_fft,me_g0=mpi_enreg%me_g0,&
 &   paral_kgb=mpi_enreg%paral_kgb,distribfft=mpi_enreg%distribfft)
-
-   !if (n3xccc>0)  then
    ABI_DEALLOCATE(vxctotg)
-   !end if
-   if (n3xccc==0) corstr=zero
+   if (n3xccc==0.and.coredens_method==1) corstr=zero
    call timab(551,2,tsec)
+ end if
 
- else
-
-!  Norm-conserving: compute local psp contribution in reciprocal space
-!  and core charge contribution in real space
+!Local ionic potential by method 2
+ if (vloc_method==2) then
    option=3
    ABI_ALLOCATE(dyfr_dum,(3,3,natom))
    ABI_ALLOCATE(gr_dum,(3,natom))
@@ -253,18 +266,36 @@
    call mklocl_recipspace(dyfr_dum,eei,gmet,gprimd,gr_dum,gsqcut,lpsstr,mgfft,&
 &   mpi_enreg,mqgrid,natom,nattyp,nfft,ngfft,ntypat,option,paral_kgb,ph1d,qgrid,&
 &   qprtrb_dum,rhog,ucvol,vlspl,vprtrb_dum,v_dum)
-   if (n3xccc>0) then
+   ABI_DEALLOCATE(dyfr_dum)
+   ABI_DEALLOCATE(gr_dum)
+   ABI_DEALLOCATE(v_dum)
+ end if
+
+!Pseudo core electron density by method 2
+ if (coredens_method==2) then
+   if (n1xccc/=0) then
      call timab(55,1,tsec)
-     call mkcore(corstr,dyfr_dum,gr_dum,mpi_enreg,natom,nfft,nspden,ntypat,ngfft(1),&
-&     n1xccc,ngfft(2),ngfft(3),option,rprimd,typat,ucvol,vxc,&
-&     xcccrc,xccc1d,xccc3d,xred)
+     option=3
+     ABI_ALLOCATE(dyfr_dum,(3,3,natom))
+     ABI_ALLOCATE(gr_dum,(3,natom))
+     ABI_ALLOCATE(v_dum,(nfft))
+     icoulomb=0 ! not yet compatible with icoulomb
+     if (psps%usewvl==0.and.usepaw==0.and.icoulomb==0) then
+       call mkcore(corstr,dyfr_dum,gr_dum,mpi_enreg,natom,nfft,nspden,ntypat,ngfft(1),&
+&       n1xccc,ngfft(2),ngfft(3),option,rprimd,typat,ucvol,vxc,&
+&       xcccrc,xccc1d,xccc3d,xred)
+     else if (psps%usewvl==0.and.(usepaw==1.or.icoulomb==1)) then
+       call mkcore_alt(atindx1,corstr,dyfr_dum,gr_dum,icoulomb,mpi_enreg,natom,nfft,&
+&           nspden,nattyp,ntypat,ngfft(1),n1xccc,ngfft(2),ngfft(3),option,rprimd,&
+&           ucvol,vxc,xcccrc,xccc1d,xccc3d,xred,pawrad,pawtab,usepaw)
+     end if
+     ABI_DEALLOCATE(dyfr_dum)
+     ABI_DEALLOCATE(gr_dum)
+     ABI_DEALLOCATE(v_dum)
      call timab(55,2,tsec)
    else
      corstr(:)=zero
    end if
-   ABI_DEALLOCATE(dyfr_dum)
-   ABI_DEALLOCATE(gr_dum)
-   ABI_DEALLOCATE(v_dum)
  end if
 
 !=======================================================================
@@ -433,10 +464,10 @@
 !In cartesian coordinates (symmetric storage) 
 
  strten(:)=kinstr(:)+ewestr(:)+corstr(:)+strsxc(:)+harstr(:)+lpsstr(:)+nlstr(:)
-
  if (usefock==1 .and. associated(fock).and.fock%optstr) then
    strten(:)=strten(:)+fock%stress(:)
  end if
+
 !Add contributions for constant E or D calculation.
  if ( efield_flag ) then
    strten(:)=strten(:)+Maxstr(:)

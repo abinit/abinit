@@ -7,7 +7,7 @@
 !! Old option=1, transfer xred, acell, and rprim to vin
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (XG,MJV)
+!! Copyright (C) 1998-2017 ABINIT group (XG,MJV)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

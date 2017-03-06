@@ -9,7 +9,7 @@ should be updated ...
 
 The person who has the most contributed to this list is Mikami-san.
 
-Copyright (C) 1998-2016 ABINIT group (MM,XG,DCA,AOganov)
+Copyright (C) 1998-2017 ABINIT group (MM,XG,DCA,AOganov)
 This file is distributed under the terms of the
 GNU General Public License, see ~ABINIT/COPYING
 or http://www.gnu.org/copyleft/gpl.txt .

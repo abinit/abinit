@@ -7,7 +7,7 @@
 !! this routine is driver for using mover with effective potential
 !! 
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (AM)
+!! Copyright (C) 1998-2017 ABINIT group (AM)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -205,7 +205,7 @@ implicit none
  ABI_DEALLOCATE(xred)
  ABI_DEALLOCATE(xcart)
 
-! call effective_potential_printSupercell(effective_potential)
+ call effective_potential_printSupercell(effective_potential)
 
  if(inp%dynamics==12.or.inp%dynamics==13) then
 !***************************************************************

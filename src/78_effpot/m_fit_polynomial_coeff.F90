@@ -7,7 +7,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 2010-2015 ABINIT group (AM)
+!! Copyright (C) 2010-2017 ABINIT group (AM)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1438,11 +1438,11 @@ subroutine fit_polynomial_printSystemFiles(eff_pot,hist)
 
  write(unit_ref,'("Energy (Hartree)")')
  write(unit_ref,'("================")')
- write(unit_ref,'(F23.14)') (hist%histE(1))
+ write(unit_ref,'(F23.14)') (hist%etot(1))
  write(unit_ref,'("")')
  write(unit_ref,'("Cell vectors")')
  write(unit_ref,'("============")')
- write(unit_ref,'(3(F23.14))') (hist%histR(:,:,1))
+ write(unit_ref,'(3(F23.14))') (hist%rprimd(:,:,1))
  write(unit_ref,'("")')
  write(unit_ref,'("Atomic positions (Bohr radius)")')
  write(unit_ref,'("==============================")')
@@ -1458,7 +1458,7 @@ subroutine fit_polynomial_printSystemFiles(eff_pot,hist)
 !        In the carlos script the atom must be in the order 11111 222222 33333 ..
 !        and the order of the atom can not be change in the fit script,
 !        we transform into the format of the script
-         write(unit_ref,'(3(F23.14))')  hist%histXF(:,ia,1,1)
+         write(unit_ref,'(3(F23.14))')  hist%xred(:,ia,1)
 !       end do
 !     end if
    end do
@@ -1526,8 +1526,8 @@ subroutine fit_polynomial_printSystemFiles(eff_pot,hist)
  end if
  do ii=1,nstep
    write(unit_md,'(I5)') ii-1
-   write(unit_md,'(F22.14)') hist%histE(ii)
-   write(unit_md,'(3(F22.14))') (hist%histR(:,:,ii))
+   write(unit_md,'(F22.14)') hist%etot(ii)
+   write(unit_md,'(3(F22.14))') (hist%rprimd(:,:,ii))
 
 !   do jj=1,eff_pot%crystal%ntypat
 !     kk = A(jj)
@@ -1540,12 +1540,12 @@ subroutine fit_polynomial_printSystemFiles(eff_pot,hist)
 !           ia = kk
        ia=ll
 !          In the carlos script the atom must be in the order 11111 222222 33333 ..
-           write(unit_md,'(3(E22.14),3(E22.14))') hist%histXF(:,ia,1,ii),hist%histXF(:,ia,3,ii)
+           write(unit_md,'(3(E22.14),3(E22.14))') hist%xred(:,ia,ii),hist%fcart(:,ia,ii)
 !         end do
 !       end if
 !     end do
    end do
-   write(unit_md,'(6(E22.14))') hist%histS(:,ii)
+   write(unit_md,'(6(E22.14))') hist%strten(:,ii)
  end do
 
 !Close files

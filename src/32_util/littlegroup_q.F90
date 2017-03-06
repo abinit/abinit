@@ -8,7 +8,7 @@
 !! modulo a primitive reciprocal lattice vector, and the time-reversal symmetry.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2016 ABINIT group (GMR)
+!! Copyright (C) 1999-2017 ABINIT group (GMR)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

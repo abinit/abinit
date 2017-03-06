@@ -9,7 +9,7 @@
 !! Eventually compute xc kernel (if option=-2, 2, 3, 10 or 12).
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (DCA, XG, GMR, MF, GZ, DRH, MT)
+!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR, MF, GZ, DRH, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

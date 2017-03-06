@@ -7,7 +7,7 @@
 !! Get the type of axis for the symmetry.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2000-2016 ABINIT group (RC, XG)
+!! Copyright (C) 2000-2017 ABINIT group (RC, XG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

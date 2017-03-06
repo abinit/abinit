@@ -7,7 +7,7 @@
 !! Main routine MULTIBINIT.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2015 ABINIT group (AM)
+!! Copyright (C) 1999-2017 ABINIT group (AM)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -228,7 +228,7 @@ program multibinit
 !If needed, fit the anharmonic part
 !****************************************************************************************
 !TEST_AM_SECTION
- if(.true.)then
+ if(.false.)then
    if (inp%fit_coeff/=0) then
      if(iam_master) then
 !      Read the MD file
@@ -238,7 +238,7 @@ program multibinit
        call wrtout(std_out,message,'COLL') 
        call wrtout(ab_out,message,'COLL') 
        if(filnam(5)/=''.and.filnam(5)/='no')then
-         call read_md_hist(filnam(5),hist)
+       call read_md_hist(filnam(5),hist,.FALSE.,.FALSE.)
        else
          write(message, '(3a)' )&
 &         'There is no MD file to fit the coefficients ',ch10,&
@@ -338,7 +338,7 @@ program multibinit
 !**************************************************************************************** 
  call effective_potential_free(reference_effective_potential)
  call multibinit_dtset_free(inp)
- call abihist_fin(hist)
+ call abihist_free(hist)
 !****************************************************************************************
 
  write(message,'(a,a,a,(80a))') ch10,('=',ii=1,80),ch10

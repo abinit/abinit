@@ -8,7 +8,7 @@
 !! as well as kinetic energy contribution to stress tensor.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (DCA, XG, GMR, AF, AR, MB, MT)
+!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR, AF, AR, MB, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -162,7 +162,7 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass,eigen,electronpositron,fock,&
 !Local variables-------------------------------
 !scalars
  integer,parameter :: tim_rwwf=7
- integer :: bandpp,bdtot_index,choice,cpopt,dimffnl,iband,iband_last,ibg,icg,ider
+ integer :: bandpp,bdtot_index,choice,cpopt,dimffnl,iband,iband_cprj,iband_last,ibg,icg,ider
  integer :: idir,ierr,ii,ikg,ikpt,ilm,ipositron,ipw,ishift,isppol,istwf_k
  integer :: mband_cprj,me_distrb,my_ikpt,my_nspinor,nband_k,nband_cprj_k,ndat,nkpg
  integer :: nnlout,npw_k,paw_opt,signs,spaceComm
@@ -171,7 +171,7 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass,eigen,electronpositron,fock,&
  real(dp) :: ar,renorm_factor,dfsm,ecutsm_inv,fact_kin,fsm,htpisq,kgc1
  real(dp) :: kgc2,kgc3,kin,xx
  type(gs_hamiltonian_type) :: gs_hamk
- logical :: usefock_loc
+ logical :: compute_gbound,usefock_loc
  character(len=500) :: msg
 !arrays
  integer,allocatable :: kg_k(:,:)
@@ -229,24 +229,31 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass,eigen,electronpositron,fock,&
  htpisq=0.5_dp*(two_pi)**2
 
 !Check that fock is present if want to use fock option
+ compute_gbound=.false.
  usefock_loc = (usefock==1 .and. associated(fock))
 !Arrays initializations
  grnl(:)=zero
  !if (optfor==1) grnl(:)=zero
+ if (usefock_loc) then
+   fock%optfor=.false.
+   fock%optstr=.false.
+ end if
  if (stress_needed==1) then
    kinstr(:)=zero;npsstr(:)=zero
    if (usefock_loc) then
-!     fock%optstr=.TRUE.
-     fock%optstr=.false.
+     fock%optstr=.TRUE.
+ !    fock%optstr=.false.
      fock%stress=zero
+     compute_gbound=.true.
    end if
  end if
- usecprj_local=0
- if (usefock_loc) then
-   usecprj_local=usecprj
+! usecprj_local=0
+ usecprj_local=usecprj
+ if ((usefock_loc).and.(psps%usepaw==1)) then
+!   usecprj_local=usecprj
    if(optfor==1)then 
-!     fock%optfor=.true.
-     fock%optfor=.false.
+     fock%optfor=.true.
+!     fock%optfor=.false.
      if (.not.allocated(fock%forces_ikpt)) then
        ABI_ALLOCATE(fock%forces_ikpt,(3,natom,mband))
      end if
@@ -254,10 +261,10 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass,eigen,electronpositron,fock,&
        ABI_ALLOCATE(fock%forces,(3,natom))
      end if
      fock%forces=zero
-     fock%ieigen=1
+     compute_gbound=.true.
    end if
  end if
-
+!write(80,*) fock%optstr
 !Initialize Hamiltonian (k-independent terms)
 
 
@@ -270,11 +277,12 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass,eigen,electronpositron,fock,&
 
  call timab(921,2,tsec)
 
-
 !need to reorder cprj=<p_lmn|Cnk> (from unsorted to atom-sorted)
  if (psps%usepaw==1.and.usecprj_local==1) then
    call pawcprj_reorder(cprj,gs_hamk%atindx)
  end if
+
+
 !Common data for "nonlop" routine
  signs=1 ; idir=0  ; ishift=0 ; tim_nonlop=4 ; tim_nonlop_prep=12
  choice=2*optfor;if (stress_needed==1) choice=10*choice+3
@@ -284,6 +292,7 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass,eigen,electronpositron,fock,&
    paw_opt=0 ; cpopt=-1
  else
    paw_opt=2 ; cpopt=-1+3*usecprj_local
+!  paw_opt=2 ; cpopt=-1
  end if
 
 
@@ -459,6 +468,7 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass,eigen,electronpositron,fock,&
      if (psps%usepaw==1.and.usecprj_local==1) then
        ABI_DATATYPE_ALLOCATE(cwaveprj,(natom,my_nspinor*bandpp))
        call pawcprj_alloc(cwaveprj,0,gs_hamk%dimcprj)
+!       call pawcprj_alloc(cwaveprj,cprj(1,1)%ncpgr,gs_hamk%dimcprj)
      else
        ABI_DATATYPE_ALLOCATE(cwaveprj,(0,0))
      end if
@@ -608,9 +618,10 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass,eigen,electronpositron,fock,&
 !     - Compute 3D phase factors
 !     - Prepare various tabs in case of band-FFT parallelism
 !     - Load k-dependent quantities in the Hamiltonian
+
      ABI_ALLOCATE(ph3d,(2,npw_k,gs_hamk%matblk))
      call load_k_hamiltonian(gs_hamk,kpt_k=kpoint,istwf_k=istwf_k,npw_k=npw_k,&
-&     kg_k=kg_k,kpg_k=kpg_k,ffnl_k=ffnl,ph3d_k=ph3d,compute_ph3d=.true.)
+&     kg_k=kg_k,kpg_k=kpg_k,ffnl_k=ffnl,ph3d_k=ph3d,compute_gbound=compute_gbound,compute_ph3d=.true.)
 
 !    Load band-FFT tabs (transposed k-dependent arrays)
      if (mpi_enreg%paral_kgb==1) then
@@ -620,7 +631,7 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass,eigen,electronpositron,fock,&
 &       kg_k     =my_bandfft_kpt%kg_k_gather, &
 &       kpg_k    =my_bandfft_kpt%kpg_k_gather, &
        ffnl_k   =my_bandfft_kpt%ffnl_gather, &
-       ph3d_k   =my_bandfft_kpt%ph3d_gather)
+       ph3d_k   =my_bandfft_kpt%ph3d_gather,compute_gbound=compute_gbound)
      end if
 
      call timab(922,2,tsec)
@@ -632,20 +643,23 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass,eigen,electronpositron,fock,&
      ABI_ALLOCATE(weight,(blocksize))
      ABI_ALLOCATE(enlout,(nnlout*blocksize))
      occblock=zero;weight=zero;enlout(:)=zero
-
+     if (usefock_loc) then
+       if (fock%optstr) then
+         ABI_ALLOCATE(fock%stress_ikpt,(6,nband_k))
+         fock%stress_ikpt=zero
+       end if
+     end if
+     if ((usefock_loc).and.(psps%usepaw==1)) then
+       if (fock%optfor) then
+         fock%forces_ikpt=zero
+       end if
+     end if
      do iblock=1,nblockbd
 
        iband=(iblock-1)*blocksize+1;iband_last=min(iband+blocksize-1,nband_k)
+       iband_cprj=(iblock-1)*bandpp+1
        if(proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,iband,iband_last,isppol,me_distrb)) cycle
-       if (usefock_loc) then
-         if (fock%optstr) then
-           ABI_ALLOCATE(fock%stress_ikpt,(6,1))
-           fock%stress_ikpt=zero
-         end if
-         if (fock%optfor) then
-           fock%forces_ikpt=zero
-         end if
-       end if
+
 !      Select occupied bandsddk
        occblock(:)=occ(1+(iblock-1)*blocksize+bdtot_index:iblock*blocksize+bdtot_index)
        if( abs(maxval(occblock))>=tol8 ) then
@@ -656,7 +670,7 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass,eigen,electronpositron,fock,&
          cwavef(:,1:npw_k*my_nspinor*blocksize)=&
 &         cg(:,1+(iblock-1)*npw_k*my_nspinor*blocksize+icg:iblock*npw_k*my_nspinor*blocksize+icg)
          if (psps%usepaw==1.and.usecprj_local==1) then
-           call pawcprj_get(gs_hamk%atindx1,cwaveprj,cprj,natom,iband,ibg,ikpt,0,isppol,&
+           call pawcprj_get(gs_hamk%atindx1,cwaveprj,cprj,natom,iband_cprj,ibg,ikpt,0,isppol,&
 &           mband_cprj,mkmem,natom,bandpp,nband_cprj_k,my_nspinor,nsppol,0,&
 &           mpicomm=mpi_enreg%comm_kpt,proc_distrb=mpi_enreg%proc_distrb)
          end if
@@ -776,10 +790,13 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass,eigen,electronpositron,fock,&
                call fock_getghc(cwavef(:,1+(iblocksize-1)*npw_k*my_nspinor:iblocksize*npw_k*my_nspinor),cwaveprj_idat,&
 &               ghc_dum,gs_hamk,mpi_enreg)
                if (fock%optstr) then
-                 fock%stress(:)=fock%stress(:)+weight(iblocksize)*fock%stress_ikpt(:,1)
+!write(80,*)fock%ieigen
+                 fock%stress(:)=fock%stress(:)+weight(iblocksize)*fock%stress_ikpt(:,fock%ieigen)
+!                 fock%stress(:)=fock%stress(:)+weight(iblocksize)*fock%stress_ikpt(:,1)
+!write(80,*) "forstrnps", weight(iblocksize)
                end if
                if (fock%optfor) then
-                 fock%forces(:,:)=fock%forces(:,:)+weight(iblocksize)*fock%forces_ikpt(:,:,1)
+                 fock%forces(:,:)=fock%forces(:,:)+weight(iblocksize)*fock%forces_ikpt(:,:,fock%ieigen)
                end if
              end do 
              ABI_DEALLOCATE(ghc_dum)
@@ -790,13 +807,13 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass,eigen,electronpositron,fock,&
 !TESTDFPT
 !       if (ikpt==1.and.iband==nband_k.and.testdfpt) itest=itest+1
 !TESTDFPT
-       if (usefock_loc) then
-         if (fock%optstr) then
-           ABI_DEALLOCATE(fock%stress_ikpt)
-         end if
-       end if
-     end do ! End of loop on block of bands
 
+     end do ! End of loop on block of bands
+     if (usefock_loc) then
+       if (fock%optstr) then
+         ABI_DEALLOCATE(fock%stress_ikpt)
+       end if
+     end if
 !    Restore the bandfft tabs
      if (mpi_enreg%paral_kgb==1) then
        call bandfft_kpt_restoretabs(my_bandfft_kpt,ffnl=ffnl_sav,ph3d=ph3d_sav,kpg=kpg_k_sav)
@@ -867,6 +884,9 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass,eigen,electronpositron,fock,&
      call timab(65,1,tsec)
      call xmpi_sum(grnl,spaceComm,ierr)
      call timab(65,2,tsec)
+     if ((usefock_loc).and.(psps%usepaw==1)) then
+       call xmpi_sum(fock%forces,spaceComm,ierr)
+     end if
    end if
 !  Stresses
    if (stress_needed==1) then

@@ -322,6 +322,22 @@ FCFLAGS_EXTRA="-O2 -g -Wall -Wno-maybe-uninitialized -ffpe-trap=invalid,zero,ove
 #
 #FCFLAGS="-O2"
 
+# Fortran flags for fixed-form source files
+#
+#FCFLAGS_FIXEDFORM="-ffixed-form"
+
+# Fortran flags for free-form source files
+#
+#FCFLAGS_FREEFORM="-ffree-form"
+
+# Fortran compiler flags to use a module directory
+#
+#FCFLAGS_MODDIR=="-J$(abinit_moddir)"
+
+# Tricky Fortran compiler flags
+#
+#FCFLAGS_HINTS="-ffree-line-length-none"
+
 # Fortran linker custom debug flags (when enable_debug=yes)
 #
 #FC_LDFLAGS_DEBUG="-Wl,-debug"
@@ -927,11 +943,11 @@ with_atompaw_libs="-L${FALLBACKS_PATH}/atompaw/lib -latompaw"
 
 # Include flags for the BigDFT library (default is unset)
 #
-with_bigdft_incs="-I${FALLBACKS_PATH}/bigdft/include"
+with_bigdft_incs="-I${FALLBACKS_PATH}/bigdft/1.7.1.24/include"
 
 # Link flags for the BigDFT library (default is unset)
 #
-with_bigdft_libs="-L${FALLBACKS_PATH}/bigdft/lib -lbigdft-1 -labinit -lyaml -lrt"
+with_bigdft_libs="-L${FALLBACKS_PATH}/bigdft/1.7.1.24/lib -lbigdft-1 -labinit -lyaml -lrt"
 
                        # ------------------------------ #
 
