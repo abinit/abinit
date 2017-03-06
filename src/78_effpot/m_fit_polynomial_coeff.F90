@@ -452,10 +452,9 @@ subroutine fit_polynomial_coeff_getList(cell,cut_off,dist,eff_pot,list_symcoeff,
 !Found the ref cell
  irpt_ref = one 
  do irpt=1,nrpt
-   write(100,*)"tutu",irpt,'=>',cell(:,irpt)
    if(all(cell(:,irpt)==0))then
      irpt_ref = irpt
-!     exit
+     exit
    end if
  end do
 
@@ -697,7 +696,6 @@ subroutine fit_polynomial_coeff_getList(cell,cut_off,dist,eff_pot,list_symcoeff,
 &                               list_symcoeff_tmp(1,icoeff,isym),&
 &                               real(list_symcoeff_tmp(5,icoeff,isym),dp),ncoeff2)
      list_symcoeff(6,icoeff,isym) = icoeff2
-     write(100,*),"lala",icoeff,isym,"=>",list_symcoeff(:,icoeff,isym)
    end do
  end do
 
@@ -747,7 +745,6 @@ subroutine fit_polynomial_coeff_getList(cell,cut_off,dist,eff_pot,list_symcoeff,
    end do
  end do
 
-close(100)
 !Deallocation
  ABI_DEALLOCATE(blkval)
  ABI_DEALLOCATE(list)
