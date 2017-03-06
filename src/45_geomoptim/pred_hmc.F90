@@ -251,7 +251,7 @@ end if
      iacc=1
     endif
   endif
-  write(238,*) '  random number: ',rnd,' -de/kbtemp:',-de/kbtemp,' acceptance decision: ',iacc
+  !write(238,*) '  random number: ',rnd,' -de/kbtemp:',-de/kbtemp,' acceptance decision: ',iacc
   !write(std_out,*) '  de: ',de,' estart: ',etotal_hmc_prev,' efin:', etotal
 
   call hist2var(acell,hist,ab_mover%natom,rprimd,xred,zDEBUG)
