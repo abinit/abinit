@@ -178,6 +178,7 @@ MODULE m_nctk
 
  public :: nctk_idname              ! Return the nc identifier from the name of the variable.
  public :: nctk_ncify               ! Append ".nc" to ipath if ipath does not end with ".nc"
+ public :: nctk_string_from_occopt  ! Return human-readable string with the smearing scheme.
  public :: nctk_fort_or_ncfile      ! Test wheter a path exists (fortran or nc file) and
                                     ! select iomode depending on file extension.
  public :: nctk_try_fort_or_ncfile  ! Return fortran or netcdf filename depending on the existence of the file.
@@ -329,6 +330,50 @@ function nctk_ncify(ipath) result(opath)
  end if
 
 end function nctk_ncify
+!!***
+
+
+!----------------------------------------------------------------------
+
+!!****f* m_nctk/nctk_string_from_occopt
+!! NAME
+!!  nctk_string_from_occopt
+!!
+!! FUNCTION
+!!
+!! SOURCE
+
+pure function nctk_string_from_occopt(occopt) result(smearing)
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'nctk_string_from_occopt'
+!End of the abilint section
+
+ integer,intent(in) :: occopt
+ character(len=etsfio_charlen) :: smearing
+
+! *********************************************************************
+
+ select case (occopt)
+ case (3)
+   smearing = "Fermi-Dirac"
+ case (4)
+   smearing = "cold smearing of N. Marzari with minimization of the bump"
+ case (5)
+   smearing = "cold smearing of N. Marzari with monotonic function in the tail"
+ case (6)
+   smearing = "Methfessel and Paxton"
+ case (7)
+   smearing = "gaussian"
+ case (8)
+   smearing = "uniform"
+ case default
+   smearing = "none"
+ end select
+
+end function nctk_string_from_occopt
 !!***
 
 !----------------------------------------------------------------------

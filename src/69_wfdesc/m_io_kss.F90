@@ -54,10 +54,8 @@ MODULE m_io_kss
 
  private
 
- public :: testkss             ! Test a KSS file reporting basic quantities and dimensions.
  public :: write_kss_header    ! Writes the header of the KSS file.
- public :: read_kss_header     ! Read the head of the KSS file.
- public :: write_vkb           ! Writes the KB form factors and derivates on file for a single k-point.
+ !private :: write_vkb         ! Writes the KB form factors and derivates on file for a single k-point.
  public :: write_kss_wfgk      ! Write the Gamma-centered wavefunctions and energies on the KSS file for a single k-point.
  public :: k2gamma_centered    ! Convert a set of wavefunctions from the k-centered to the gamma-centered basis set.
  public :: make_gvec_kss       ! Build the list of G-vectors for the KSS file.
@@ -66,227 +64,12 @@ MODULE m_io_kss
 CONTAINS  !===========================================================
 !!***
 
-!!****f* m_io_kss/testkss
-!! NAME
-!! testkss
-!!
-!! FUNCTION
-!! Test the KSS type.
-!!
-!! INPUTS
-!!  iomode=Define the access mode (plain FORTRAN or NETCDF with ETSF-IO).
-!!  filkss=Name of the KSS file. ".nc" will be appended in case of ETSF-IO.
-!!  (TODO: remove this kind of a hack, using a module to store units and filenames
-!!  Comm=MPI Communicator.
-!!
-!! OUTPUT
-!!  mpsang=1+maximum angular momentum for nonlocal pseudopotential.
-!!  nbnds_kss=Number of bands contained in the KSS file
-!!  ng_kss=Number of plane waves in KSS file.
-!!  nsym_out=Number of symmetries reported in the KSS, warning might differ from the symmetries found by abinit.
-!!  Hdr<Hdr_type>=The abinit header.
-!!
-!! SIDE EFFECTS
-!!  gvec_p(3,ng_kss)=
-!!   In input : pointer to integers (not associated)
-!!   In output: allocated array containing the G vectors reported in the KSS file.
-!!  energies_p(nbnds_kss,Hdr%nkpt,Hdr%nsppol)=
-!!   In input : pointer to real (not associated)
-!!   In output: allocated array with the KS energies.
-!!
-!! NOTES
-!!  Starting version 5.6, KSS files in single precision are not supported anymore.
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      metric,mkffnl,mkkin
-!!
-!! SOURCE
-
-subroutine testkss(filkss,iomode,nsym_out,nbnds_kss,ng_kss,mpsang,gvec_p,energies_p,Hdr,comm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'testkss'
- use interfaces_14_hidewrite
-!End of the abilint section
-
- implicit none
-
-!Arguments ------------------------------------
-!scalars
- integer,intent(in) :: iomode,comm
- integer,intent(out) :: mpsang,nbnds_kss,ng_kss,nsym_out
- character(len=fnlen),intent(in) :: filkss
- type(Hdr_type),intent(inout) :: Hdr !vz_i
-!arrays
- integer,pointer :: gvec_p(:,:)
- real(dp),pointer :: energies_p(:,:,:)
-
-!Local variables-------------------------------
-#ifdef HAVE_ETSF_IO
- type(ETSF_io_low_error) :: error
- type(ETSF_electrons),target :: Electrons_folder
- logical :: ok
- real(dp),allocatable,target :: eigen(:)
-#endif
-!scalars
- integer :: iatom,iband,ierr,ikpt,il,ispinor,isppol,itypat,master
- integer :: my_rank,kss_unt,nprocs,my_prtvol
- real(dp) :: nelect
- character(len=500) :: msg
- character(len=fnlen) :: fname
-!arrays
- real(dp),allocatable :: tmp_enek(:)
-
-! *************************************************************************
-
- DBG_ENTER("COLL")
-
- if (iomode==IO_MODE_ETSF) then
-   write(msg,'(3a)')&
-&   ' when iomode==3, support for the netcdf library ',ch10,&
-&   ' must be compiled. Use --enable-netcdf when configuring '
-#ifndef HAVE_NETCDF
-   MSG_ERROR(msg)
-#endif
- end if
-
- ! === MPI info ===
- my_rank = xmpi_comm_rank(comm)
- nprocs  = xmpi_comm_size(comm)
- master=0
-
- if (my_rank==master) then
-!  === Read the header of the GS wavefunction file ===
-!  TODO: remove this kind of a hack, using a module to store units and filenames.
-   if (iomode==IO_MODE_FORTRAN) fname=filkss
-   if (iomode==IO_MODE_ETSF   ) fname=nctk_ncify(filkss)
-
-   my_prtvol=0
-   call read_kss_header(kss_unt,fname,iomode,my_prtvol,nsym_out,nbnds_kss,ng_kss,mpsang,nelect,gvec_p,Hdr)
-
-!  In case of parallelism over bands or Adler-Wiser with time reversal find the band
-!  index separating the occupied and partially occupied from the empty states (for each spin)
-!  Each processor will store in memory the occupied states while the conduction
-!  states will be shared between different processors
-
-!  TODO this part can be completely avoided if we read Hdr%occ.
-!  The only problem is that Hdr%occ has to be correctly calculated in outkss in case of NSCF run.
-
-   call wrtout(std_out,' testkss: reading occupation numbers ...','COLL')
-
-!  NOTE : In old version of the code, the number of bands defined in the header was different
-!  from the value reported in in the first section of a KSS file generated using kssform 3 (if nbandkss<nband).
-!  NOW the BUG has been fixed but we keep these tests.
-   ABI_CHECK(ALL(Hdr%nband==Hdr%nband(1)),'nband must be constant')
-   ABI_CHECK(ALL(Hdr%nband==nbnds_kss),'nband must be equal to nbnds_kss')
-
-   ABI_ALLOCATE(energies_p,(nbnds_kss,Hdr%nkpt,Hdr%nsppol))
-   energies_p(:,:,:)=zero
-   ABI_ALLOCATE(tmp_enek,(1:nbnds_kss))
-
-   if (iomode==IO_MODE_FORTRAN) then  !  Read eigenvalues from the KSS file in the FORTRAN format
-
-     do isppol=1,Hdr%nsppol
-       do ikpt=1,Hdr%nkpt
-
-         if (Hdr%usepaw==0) then
-           do itypat=1,Hdr%ntypat
-            do il=1,mpsang
-              read(kss_unt) !vkbdb(:,itypat,il)
-              read(kss_unt) !vkbdd(:,itypat,il)
-            end do
-           end do
-         end if
-
-         read(kss_unt) tmp_enek(1:nbnds_kss)
-         energies_p(1:nbnds_kss,ikpt,isppol)=tmp_enek(1:nbnds_kss)
-
-         do iband=1,nbnds_kss
-           read(kss_unt) !kss_ugd(kss_npw*nspinor)
-           if (Hdr%usepaw==1) then
-             do ispinor=1,Hdr%nspinor
-               do iatom=1,Hdr%natom
-                read(kss_unt) !(cprjnk_k(iatom,ibsp)%cp(:,1:cprjnk_k(iatom,ibsp)%nlmn))
-               end do
-             end do
-           end if
-         end do
-
-       end do !ikpt
-     end do !isppol
-
-#ifdef HAVE_ETSF_IO
-   else if (iomode==IO_MODE_ETSF) then
-     ABI_ALLOCATE(eigen,(nbnds_kss))
-     eigen(:)=zero
-!    allocate(occ_vec(nbnds_kss))
-     do isppol=1,Hdr%nsppol
-       do ikpt=1,Hdr%nkpt
-!        NOTE : occupation numbers have been read from Hdr, and are recalculated in fermi.
-         Electrons_folder%eigenvalues%data1D         => eigen
-         Electrons_folder%eigenvalues__kpoint_access =  ikpt
-         Electrons_folder%eigenvalues__spin_access   =  isppol
-         call etsf_io_electrons_get(kss_unt,Electrons_folder,ok,error)
-         ETSF_CHECK_ERROR(ok,error)
-
-         energies_p(1:nbnds_kss,ikpt,isppol)=eigen(1:nbnds_kss)
-         !write(std_out,*)isppol,ikpt,eigen(:)*Ha_eV
-       end do
-     end do
-     nullify(Electrons_folder%eigenvalues%data1D)
-     ABI_DEALLOCATE(eigen)
-!    nullify(Electrons_folder%occupations%data1D)
-!    deallocate(occ_vec)
-#endif
-   end if
-
-   ABI_DEALLOCATE(tmp_enek)
-
-   if (iomode==IO_MODE_FORTRAN) close(kss_unt)
-   if (iomode==IO_MODE_ETSF) then
-#ifdef HAVE_NETCDF
-     NCF_CHECK(nf90_close(kss_unt))
-#endif
-   end if
- end if ! (my_rank==master)
- !
- !==========================================
- !=== Cast data if KSS file is not local ===
- !==========================================
- if (nprocs>1) then
-   call xmpi_bcast(nsym_out, master,comm,ierr)
-   call xmpi_bcast(nbnds_kss,master,comm,ierr)
-   call xmpi_bcast(ng_kss,   master,comm,ierr)
-   call xmpi_bcast(mpsang,   master,comm,ierr)
-   call xmpi_bcast(nelect,   master,comm,ierr)
-   call hdr_bcast(Hdr,master,my_rank,comm)
-   if (my_rank/=master) then ! this proc did not read.
-     ABI_ALLOCATE(gvec_p,(3,ng_kss))
-     ABI_ALLOCATE(energies_p,(nbnds_kss,Hdr%nkpt,Hdr%nsppol))
-   end if
-   call xmpi_bcast(gvec_p,    master,comm,ierr)
-   call xmpi_bcast(energies_p,master,comm,ierr)
-   call xmpi_barrier(comm)
- end if
-
- DBG_EXIT("COLL")
-
-end subroutine testkss
-!!***
-
-!----------------------------------------------------------------------
-
 !!****f* m_io_kss/write_kss_header
 !! NAME
 !!  write_kss_header
 !!
 !! FUNCTION
-!!  Write the header of the KSS file either using plain Fortran-IO or ETSF-IO.
+!!  Write the header of the KSS file either using plain Fortran-IO or netcdf with ETSF-IO format.
 !!  Returns the unit number to be used for further writing.
 !!  It should be executed by master node only.
 !!
@@ -304,7 +87,7 @@ end subroutine testkss
 !!  Hdr<hdr_type>=The abinit header.
 !!  Dtset <dataset_type>=all input variables for this dataset
 !!  Psps<pseudopotential_type>=Structure gathering info on the pseudopotentials.
-!!  iomode=Input variables specifying the fileformat. (0-->Fortran,3-->ETSF-IO).
+!!  iomode=Input variables specifying the fileformat. (0-->Fortran,3-->netcdf with ETSF-IO format).
 !!  occ(mband*nkpt*nsppol)=The occupation factors.
 !!
 !! OUTPUT
@@ -449,9 +232,10 @@ subroutine write_kss_header(filekss,kss_npw,ishm,nbandksseff,mband,nsym2,symrel2
    write(kss_unt) ((gbig(ii,ig),ii=1,3),ig=1,kss_npw)
    write(kss_unt) (shlim(in),in=1,ishm)
 
-   ! Write vkbsign for NC pseudos.
-   ! FIXME: only one projector in each angular is treated.
+   ! Write vkbsign for NC pseudos with Fortran IO
+   ! MG FIXME: only one projector in each angular channel is treated.
    ! Moreover the allocation is done in the wrong order for dimensions...
+   ! but if I change this code, compatibility with external codes is broken.
    if (Psps%usepaw==0) then
      ABI_ALLOCATE(vkbsign,(Psps%ntypat,Psps%mpsang))
      vkbsign(:,:)=zero
@@ -486,56 +270,50 @@ subroutine write_kss_header(filekss,kss_npw,ishm,nbandksseff,mband,nsym2,symrel2
    NCF_CHECK(crystal_ncwrite(crystal, kss_unt))
 
    ! Defined G-vectors and wavefunctions.
-   call wfk_ncdef_dims_vars(kss_unt, my_hdr, fform)  ! TODO: kdep
-
-   ! Define dims and variables needed for KB matrix elements.
-   ncerr = nctk_def_dims(kss_unt, [ &
-     nctkdim_t("max_number_of_angular_momenta", psps%mpsang), &
-     nctkdim_t("max_number_of_projectors", psps%mproj) &
-   ])
-   NCF_CHECK(ncerr)
-
-   ncerr = nctk_def_arrays(kss_unt, [ &
-     nctkarr_t("kb_formfactor_sign", "int", &
-&"max_number_of_projectors, max_number_of_angular_momenta, number_of_atom_species"), &
-     nctkarr_t("kb_formfactors", "dp", &
-&"max_number_of_coefficients, number_of_kpoints, max_number_of_projectors,&
-&max_number_of_angular_momenta, number_of_atom_species"), &
-     nctkarr_t("kb_formfactor_derivative", "dp", &
-&"max_number_of_coefficients, number_of_kpoints, max_number_of_projectors,&
-&max_number_of_angular_momenta, number_of_atom_species") &
-   ])
-   NCF_CHECK(ncerr)
-
-   !NCF_CHECK(nf90_put_var(kss_unt, nctk_idname(kss_unt, "eigenvalues", eigens)))
-   !NCF_CHECK(nf90_put_var(kss_unt, nctk_idname(kss_unt, "occupations"), occ, count=[mband, dtset%nkpt, dtset%nsppol]))
+   call wfk_ncdef_dims_vars(kss_unt, my_hdr, fform, iskss=.True.)
+   !call abi_etsf_init(Dtset_cpy, filekss, 4, .false., my_Hdr%lmn_size, Psps, Dummy_wfs)
 
    ! If NC pseudos, write vkbsign.
-   ! TODO: Here ordering of dimensions is OK but multi-projectors not supported.
-   ! FIXME: multiple projectors?
-   if (Psps%usepaw==0) then
-     ABI_ALLOCATE(vkbsign_int,(psps%mproj, Psps%mpsang,Psps%ntypat))
+   ! Here multi-projectors are supported, array is dimensioned according to etsf-io standard.
+   if (psps%usepaw == 0) then
+
+     ! Define dims and variables needed for KB matrix elements.
+     ncerr = nctk_def_dims(kss_unt, [ &
+       nctkdim_t("max_number_of_angular_momenta", psps%mpsang), &
+       nctkdim_t("max_number_of_projectors", psps%mproj) &
+     ])
+     NCF_CHECK(ncerr)
+
+     ncerr = nctk_def_arrays(kss_unt, [ &
+       nctkarr_t("kb_formfactor_sign", "int", &
+&"max_number_of_projectors, max_number_of_angular_momenta, number_of_atom_species"), &
+       nctkarr_t("kb_formfactors", "dp", &
+&"max_number_of_coefficients, number_of_kpoints, max_number_of_projectors,&
+&max_number_of_angular_momenta, number_of_atom_species"), &
+       nctkarr_t("kb_formfactor_derivative", "dp", &
+&"max_number_of_coefficients, number_of_kpoints, max_number_of_projectors,&
+&max_number_of_angular_momenta, number_of_atom_species") &
+     ])
+     NCF_CHECK(ncerr)
+
+     ABI_ALLOCATE(vkbsign_int, (psps%mproj, Psps%mpsang, Psps%ntypat))
      vkbsign_int=0
      do itypat=1,Psps%ntypat
-       il0=0
        do ilmn=1,Psps%lmnmax
          il=1+Psps%indlmn(1,ilmn,itypat)
          in=Psps%indlmn(3,ilmn,itypat)
-         if ((il/=il0).and.(in==1)) then
-           il0=il
-           vkbsign_int(in,il,itypat)=NINT(DSIGN(one,Psps%ekb(ilmn,itypat)))
-         end if
+         vkbsign_int(in,il,itypat)=NINT(DSIGN(one,Psps%ekb(ilmn,itypat)))
        end do
      end do
 
      NCF_CHECK(nctk_set_datamode(kss_unt))
 
-     ! Write KS sign here
+     ! Write KB sign here
      NCF_CHECK(nf90_put_var(kss_unt, nctk_idname(kss_unt, "kb_formfactor_sign"), vkbsign_int))
-
-     !call abi_etsf_init(Dtset_cpy, filekss, 4, .false., my_Hdr%lmn_size, Psps, Dummy_wfs)
      ABI_DEALLOCATE(vkbsign_int)
    end if
+
+   NCF_CHECK(nctk_set_datamode(kss_unt))
 #endif
 
  CASE DEFAULT
@@ -552,248 +330,13 @@ end subroutine write_kss_header
 
 !----------------------------------------------------------------------
 
-!!****f* m_io_kss/read_kss_header
-!! NAME
-!!  read_kss_header
-!!
-!! FUNCTION
-!!  Read the header of the KSS file either using plain Fortran-IO or ETSF-IO.
-!!
-!! INPUTS
-!!  filkss(len=fnlen)=The name of the KSS file.
-!!  iomode=Input variables specifying the fileformat. (0-->Fortran,3-->ETSF-IO).
-!!  prtvol=Flag governing verbosity output.
-!!
-!! OUTPUT
-!!  kss_unt=The unit number of the opened file.
-!!  nsym_out=Number of symmetry operations read from the KSS file (not from the abinit header)
-!!  nbnds_kss=Number of bands stored.
-!!  ng_kss=Number of planewaves used for the wavefunctions in the KSS files.
-!!  mpsang=Max angular momentum + 1
-!!  nelect=Number of electrons (including a possible charge in the unit cell)
-!!  Hdr<hdr_type>=The abinit header.
-!!
-!! SIDE EFFECTS
-!!  gvec_p(3,ng_kss)=Input:  Pointer to null()
-!!                   Output: The set of G-vectors for the KSS wavefunctions (Gamma-centered)
-!!
-!! PARENTS
-!!      m_io_kss
-!!
-!! CHILDREN
-!!      metric,mkffnl,mkkin
-!!
-!! SOURCE
-
-subroutine read_kss_header(kss_unt,filkss,iomode,prtvol,nsym_out,nbnds_kss,ng_kss,mpsang,nelect,gvec_p,Hdr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'read_kss_header'
- use interfaces_14_hidewrite
-!End of the abilint section
-
- implicit none
-
-!Arguments ------------------------------------
-!scalars
- integer,intent(in) :: iomode,prtvol
- integer,intent(out) :: nsym_out,nbnds_kss,ng_kss,mpsang,kss_unt
- real(dp),intent(out) :: nelect
- character(len=fnlen),intent(in) :: filkss
- type(Hdr_type),intent(inout) :: Hdr !vz_i
-!arrays
- integer,pointer :: gvec_p(:,:)
-
-!Local variables-------------------------------
-!scalars
- integer :: nshells
- integer :: fform,ii,ig,nsym_kss
- character(len=80) :: title(2)
- character(len=500) :: msg
- logical :: ltest
-#ifdef HAVE_ETSF_IO
- logical :: ok
- type(etsf_io_low_error) :: error
- type(ETSF_dims) :: Dims
- type(ETSF_basisdata),target :: Wave_folder
-!arrays
- integer,allocatable,target :: kg_k(:,:)
-#endif
-
-! *************************************************************************
-
- DBG_ENTER("COLL")
-
-#ifndef HAVE_NETCDF
- if (iomode==IO_MODE_ETSF) then
-   write(msg,'(3a)')&
-&   'When iomode==3, support for the ETSF I/O library ',ch10,&
-&   'must be compiled. Use --enable-etsf-io when configuring '
-   MSG_ERROR(msg)
- end if
-#endif
-
- ! ===============================================
- ! ==== Read file according to the fileformat ====
- ! ===============================================
- SELECT CASE (iomode)
-
- CASE (IO_MODE_FORTRAN) ! * Formatted Fortran File
-   write(msg,'(2a)')' reading Fortran Kohn-Sham structure file ',TRIM(filkss)
-   call wrtout(std_out,msg,'COLL')
-
-   if (open_file(filkss, msg, newunit=kss_unt, form='unformatted', status='old') /= 0) then
-     MSG_ERROR(msg)
-   end if
-
-   call hdr_fort_read(hdr, kss_unt, fform)
-   ABI_CHECK(fform /= 0, "hdr_fort_read returned fform == 0")
-
- CASE (IO_MODE_ETSF) ! * NETCDF-ETSF file format
-
-#ifdef HAVE_NETCDF
-   write(msg,'(2a)')' read_kss_header : reading NETCDF-ETSF Kohn-Sham structure file ',TRIM(filkss)
-   call wrtout(std_out,msg,'COLL')
-
-   NCF_CHECK(nctk_open_read(kss_unt, filkss, xmpi_comm_self))
-   call hdr_ncread(Hdr, kss_unt, fform)
-
-   ABI_CHECK(fform /= 0, "hdr_ncread returned fform == 0")
-   ABI_CHECK(fform/=602,' Single precision KSS + ETSF-IO not implemented')
-   ABI_CHECK(Hdr%usepaw==0,'PAW+ETSF-IO not yet coded')
-#endif
-
- CASE DEFAULT
-   MSG_ERROR(sjoin('Wrong value for iomode:',itoa(iomode)))
- END SELECT
-
- if (fform==602) then ! * fform must be 502.
-   write(msg,'(3a)')&
-&   ' Starting v5.6, KSS files in single precision are not supported anymore,',ch10,&
-&   ' Please, use an older version of abinit.'
-   MSG_ERROR(msg)
- end if
- if (fform>=1.and.fform<=2) then
-   write(msg,'(a,i4)')' (STA|QPLDA) format are obsolete and not supported anymore; fform= ',fform
-   MSG_ERROR(msg)
- end if
- if (fform/=502) then
-   MSG_ERROR(sjoin('Found unknown file format; fform:', itoa(fform)))
- end if
- !
- ! === Output the header of the GS wavefunction file ===
- if (prtvol>0) call hdr_echo(hdr, fform, 4, unit=std_out)
-
- write(msg,'(1x,47a)')('-',ii=1,47)
- call wrtout(std_out,msg,'COLL')
- write(msg,'(3a,a6,a,i3)')&
-&  ' KSS abinit double precision form',ch10,&
-&  ' generated by ABINIT ',Hdr%codvsn,' header version ',Hdr%headform
- call wrtout(std_out,msg,'COLL')
-
-! === Test spin-orbit characteristic ===
- if (Hdr%headform<53) then  ! Format previous to version 5.5, now pspo is obsolete and has been substituted by so_psp.
-   ltest=ALL(Hdr%pspso(1:Hdr%ntypat)==1)
-   ABI_CHECK(ltest,'pspso/=1 value not programmed')
- else  ! New format containing so_psp
-   ltest=ALL(Hdr%so_psp(1:Hdr%npsp)==1)
-   ABI_CHECK(ltest,'so_psp/=1 value not programmed')
- end if
-
- ! There might be extra charge thus we use occ_out. factors to calculate nelect.
- ! Besides note that nelect is real
- !nelect = hdr_get_nelect_byocc(Hdr)
- nelect = Hdr%nelect
- !
- ! === Abinit Header successfully read ===
- ! * Now read basic dimensions.
- ! * Note that, in the case of Fortran file, nsym_out is read from the second record
- nsym_out=Hdr%nsym
-
- SELECT CASE (iomode)
-
- CASE (IO_MODE_FORTRAN)
-   read(kss_unt) title(1)
-   read(kss_unt) title(2)
-   write(msg,'(2a,1x,a79,a,1x,a79,a)')' title of file: ',ch10,title(1)(:79),ch10,title(2)(:79),ch10
-   call wrtout(std_out,msg,'COLL')
-   read(kss_unt) nsym_kss,nbnds_kss,ng_kss,nshells,mpsang
-   read(kss_unt) !(((symrel2(jj,ii,isym),ii=1,3),jj=1,3),isym=1,nsym_kss)
-   read(kss_unt) !((tnons(i,isym),i=1,3),isym=1,nsym_kss)
-
-   ABI_ALLOCATE(gvec_p,(3,ng_kss))
-   read(kss_unt)((gvec_p(ii,ig),ii=1,3),ig=1,ng_kss)
-   nsym_out=nsym_kss
-
-   read(kss_unt)                      !(shlim(i),i=1,nshells)
-   if (Hdr%usepaw==0) read(kss_unt)   !((vkbsignd(il,is),il=1,mpsang),is=1,Hdr%ntypat)
-
- CASE (IO_MODE_ETSF) ! TODO spin-orbit not treated, number of projectors not treated
-#ifdef HAVE_ETSF_IO
-   call etsf_io_dims_get(kss_unt,Dims,ok,error)
-   nsym_kss =Dims%number_of_symmetry_operations
-   nbnds_kss=Dims%max_number_of_states
-   ng_kss   =Dims%max_number_of_coefficients
-   mpsang   =Dims%max_number_of_angular_momenta
-
-   ABI_ALLOCATE(gvec_p,(3,ng_kss))
-   ABI_ALLOCATE(kg_k,(3,ng_kss))
-   Wave_folder%reduced_coordinates_of_plane_waves%data2D => kg_k(:,:)
-   call etsf_io_basisdata_get(kss_unt,Wave_folder,ok,error)
-   gvec_p(:,:)=kg_k(:,:)
-   ABI_DEALLOCATE(kg_k)
-   nshells=0 ! nshells is not defined in the ETSF spefications but it is not used
-#endif
-
- CASE DEFAULT
-   MSG_ERROR("Unsupported value for iomode")
- END SELECT
-
- ABI_CHECK(ALL(gvec_p(1:3,1)==0),'First G must be 0')
-
- if (prtvol>0) then ! Output important dimensions on the log file.
-   write(msg,'(a,f8.2)')' number of electrons                    ',nelect
-   call wrtout(std_out,msg,'COLL')
-   write(msg,'(a,i8)')' number of symmetries without inversion ',nsym_out
-   call wrtout(std_out,msg,'COLL')
-   write(msg,'(a,i8)')' number of bands                        ',nbnds_kss
-   call wrtout(std_out,msg,'COLL')
-   write(msg,'(a,i8)')' number of plane waves                  ',ng_kss
-   call wrtout(std_out,msg,'COLL')
-   write(msg,'(a,i8)')' number of shells                       ',nshells
-   call wrtout(std_out,msg,'COLL')
-   write(msg,'(a,i8,a)')' maximum angular momentum +1          ',mpsang,ch10
-   call wrtout(std_out,msg,'COLL')
-   write(msg,'(1x,47a)')('-',ii=1,47)
-   call wrtout(std_out,msg,'COLL')
- end if
- !
- ! === Check the value of some variables ===
- ! This is due to the awful treatment of symmetries done in outkss
- if (Hdr%nsym/=nsym_kss) then
-   write(msg,'(2a,2(a,i3))')&
-&    ' Code does not use the original set of symmetries.',ch10,&
-&    ' Hdr%nsym= ',Hdr%nsym,' /= nsym_kss= ',nsym_kss
-   MSG_COMMENT(msg)
- end if
-
- DBG_EXIT("COLL")
-
-end subroutine read_kss_header
-!!***
-
-!----------------------------------------------------------------------
-
 !!****f* m_io_kss/write_vkb
 !! NAME
 !!  write_vkb
 !!
 !! FUNCTION
 !!  Writes the KB form factors and derivates on file for a single k-point.
-!!  Supports plain Fortran IO and ETSF-IO.
+!!  Supports plain Fortran IO and netcdf with ETSF-IO format
 !!
 !! INPUTS
 !!  kss_unt=The unit number of the file
@@ -801,13 +344,10 @@ end subroutine read_kss_header
 !!  kpoint(3)=The k-point in reduced coordinates.
 !!  kss_npw=Number of planewaves used for the wavefunctions in the KSS files.
 !!  npw_k=Number of planewaves at this k-point in the k-centered basis set used in abinit (ecut).
-!!  trsl(kss_npw)=Mapping between the G-sphere used for the KSS wavefunctions and the
-!!   Abinit G-sphere (npw_k). As kss_npw>=npw_k, trsl=npw_k+1 is the "KSS" G-vector
-!!   is not contained in the abinit one.
 !!  ecut=cutoff energy used in abinit.
 !!  rprimd(3,3)=dimensional primitive translations for real space (bohr).
 !!  Psps<Pseudopotential_type>=Datatype gathering data on the Pseudopotentials.
-!!  iomode=Input variables specifying the fileformat. (0-->Fortran,3-->ETSF-IO).
+!!  iomode=Input variables specifying the fileformat. (0-->Fortran,3-->netcdf with ETSF-IO).
 !!  gbig(3,kss_npw)=Set of G-vectors used in the KSS file.
 !!
 !! OUTPUT
@@ -821,7 +361,7 @@ end subroutine read_kss_header
 !!
 !! SOURCE
 
-subroutine write_vkb(kss_unt,ikpt,kpoint,kss_npw,gbig,trsl,rprimd,Psps,iomode)
+subroutine write_vkb(kss_unt,ikpt,kpoint,kss_npw,gbig,rprimd,Psps,iomode)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -837,7 +377,7 @@ subroutine write_vkb(kss_unt,ikpt,kpoint,kss_npw,gbig,trsl,rprimd,Psps,iomode)
  integer,intent(in) :: ikpt,iomode,kss_npw,kss_unt
  type(Pseudopotential_type),intent(in) :: Psps
 !arrays
- integer,intent(in) :: trsl(kss_npw),gbig(3,kss_npw)
+ integer,intent(in) :: gbig(3,kss_npw)
  real(dp),intent(in) :: kpoint(3),rprimd(3,3)
 
 !Local variables-------------------------------
@@ -854,8 +394,7 @@ subroutine write_vkb(kss_unt,ikpt,kpoint,kss_npw,gbig,trsl,rprimd,Psps,iomode)
 
 ! *********************************************************************
 
- mpsang = Psps%mpsang
- ntypat = Psps%ntypat
+ mpsang = Psps%mpsang; ntypat = Psps%ntypat
 
  ABI_ALLOCATE(vkb ,(kss_npw,ntypat,mpsang))
  ABI_ALLOCATE(vkbd,(kss_npw,ntypat,mpsang))
@@ -869,8 +408,6 @@ subroutine write_vkb(kss_unt,ikpt,kpoint,kss_npw,gbig,trsl,rprimd,Psps,iomode)
  CASE (IO_MODE_FORTRAN)
   do itypat=1,ntypat
     do il=1,mpsang
-      !write(kss_unt) (vkb (trsl(ig),itypat,il),ig=1,kss_npw)
-      !write(kss_unt) (vkbd(trsl(ig),itypat,il),ig=1,kss_npw)
       write(kss_unt) (vkb (ig,itypat,il),ig=1,kss_npw)
       write(kss_unt) (vkbd(ig,itypat,il),ig=1,kss_npw)
     end do
@@ -883,8 +420,6 @@ subroutine write_vkb(kss_unt,ikpt,kpoint,kss_npw,gbig,trsl,rprimd,Psps,iomode)
    do itypat=1,ntypat
      do il=1,mpsang
        do ig=1,kss_npw
-         !vkb_tgt (ig,1,il,itypat)=vkb (trsl(ig),itypat,il)
-         !vkbd_tgt(ig,1,il,itypat)=vkbd(trsl(ig),itypat,il)
          vkb_tgt (ig,1,il,itypat)=vkb (ig,itypat,il)
          vkbd_tgt(ig,1,il,itypat)=vkbd(ig,itypat,il)
        end do
@@ -892,16 +427,23 @@ subroutine write_vkb(kss_unt,ikpt,kpoint,kss_npw,gbig,trsl,rprimd,Psps,iomode)
    end do
 
    ! FIXME: Multiple projectors
+   !ABI_MALLOC(vkbsign, (psps%lnmax, cryst%ntypat))
+   !ABI_MALLOC(vkb, (npw, psps%lnmax, cryst%ntypat))
+   !ABI_MALLOC(vkbd, (npw, psps%lnmax, cryst%ntypat))
+   !call calc_vkb(cryst,psps,kpoint,npw,gvec,vkbsign,vkb,vkbd)
+   !ABI_FREE(vkbsign)
+   !ABI_FREE(vkb)
+   !ABI_FREE(vkbd)
+
    ! The shape of the variable on disk is (Fortran API):
    !  (max_number_of_coefficients, number_of_kpoints, max_number_of_projectors,
    !   max_number_of_angular_momenta, number_of_atom_species)
-
    varid = nctk_idname(kss_unt, "kb_formfactors")
-   ncerr = nf90_put_var(kss_unt, varid, vkb_tgt, start=[1,ikpt,1,1,1], count=[kss_npw, 1, 1, mpsang, ntypat])
+   ncerr = nf90_put_var(kss_unt, varid, vkb_tgt, start=[1,ikpt,1,1,1], count=[kss_npw,1,1,mpsang,ntypat])
    NCF_CHECK(ncerr)
 
    varid = nctk_idname(kss_unt, "kb_formfactor_derivative")
-   ncerr = nf90_put_var(kss_unt, varid, vkbd_tgt, start=[1,ikpt,1,1,1], count=[kss_npw, 1, 1, mpsang, ntypat])
+   ncerr = nf90_put_var(kss_unt, varid, vkbd_tgt, start=[1,ikpt,1,1,1], count=[kss_npw,1,1,mpsang,ntypat])
    NCF_CHECK(ncerr)
 
    ABI_DEALLOCATE(vkb_tgt)
@@ -914,9 +456,6 @@ subroutine write_vkb(kss_unt,ikpt,kpoint,kss_npw,gbig,trsl,rprimd,Psps,iomode)
 
  ABI_DEALLOCATE(vkb)
  ABI_DEALLOCATE(vkbd)
-
- RETURN
- ABI_UNUSED(trsl(1)) ! just to keep trsl as an argument while in development
 
 end subroutine write_vkb
 !!***
@@ -948,7 +487,7 @@ end subroutine write_vkb
 !!  kg_k(3,npw_k)=The G-vectors in the k-centered basis set.
 !!  gbig(3,kss_npw)=The set of G-vectors for the KSS wavefunctions (Gamma-centered)
 !!  wfg(2,kss_npw*nspinor,nbandksseff)=The wavefunction Fourier coefficients.
-!!  iomode=Input variables specifying the fileformat. (0-->Fortran,3-->ETSF-IO).
+!!  iomode=Input variables specifying the fileformat. (0-->Fortran,3--> netcdf with ETSF-IO format).
 !!
 !! OUTPUT
 !!  Only writing.
@@ -970,7 +509,6 @@ subroutine write_kss_wfgk(kss_unt,ikpt,isppol,kpoint,nspinor,kss_npw,npw_k,kg_k,
 #undef ABI_FUNC
 #define ABI_FUNC 'write_kss_wfgk'
  use interfaces_51_manage_mpi
- use interfaces_56_io_mpi
 !End of the abilint section
 
  implicit none
@@ -989,32 +527,18 @@ subroutine write_kss_wfgk(kss_unt,ikpt,isppol,kpoint,nspinor,kss_npw,npw_k,kg_k,
 
 !Local variables-------------------------------
 !scalars
- integer :: ib,ibsp,ig,ispinor,iatom,ii,master,my_rank,ierr
- type(MPI_type) :: MPI_enreg_seq
+ integer :: ib,ibsp,ig,ispinor,iatom,ii !,ierr
  character(len=500) :: msg
 #ifdef HAVE_NETCDF
  integer :: kg_varid,eig_varid,occ_varid,cg_varid,ncerr
  character(len=nctk_slen) :: kdep
 #endif
-!arrays
- integer,allocatable :: trsl(:)
 
 ! *********************************************************************
 
-!* Fake MPI_type for the sequential part.
- call initmpi_seq(MPI_enreg_seq)
- master=0; my_rank=master
-
- if (Psps%usepaw==0) then ! Calculate and write KB form factors and derivative at this k-point.
-  ! The array trsl translates the index of gbig into the corresponding
-  ! index in array kg_k. If gbig(ig) does not exist in kg_k, trsl(ig) is set to npw_k+1.
-  ABI_ALLOCATE(trsl,(kss_npw))
-  call table_gbig2kg(npw_k,kg_k,kss_npw,gbig,trsl,ierr)
-  if (ierr/=0.and.(kss_npw>=npw_k)) then
-    MSG_ERROR(' The set of g vectors is inconsistent ! Check source.')
-  end if
-  call write_vkb(kss_unt,ikpt,kpoint,kss_npw,gbig,trsl,rprimd,Psps,iomode)
-  ABI_DEALLOCATE(trsl)
+ ! Calculate and write KB form factors and derivative at this k-point.
+ if (Psps%usepaw==0) then
+   call write_vkb(kss_unt,ikpt,kpoint,kss_npw,gbig,rprimd,Psps,iomode)
  end if
 
  ! ============================================================
@@ -1042,23 +566,18 @@ subroutine write_kss_wfgk(kss_unt,ikpt,isppol,kpoint,nspinor,kss_npw,npw_k,kg_k,
 #ifdef HAVE_NETCDF
  CASE (IO_MODE_ETSF)
    if (Psps%usepaw==1) then
-     MSG_WARNING("PAW output with ETSF-IO: cprj won't be written")
+     MSG_WARNING("PAW output with ETSF-IO netcdf: cprj won't be written")
    end if
 
-!FIXME
-!   call writewf(wfg(1,1,1),ene_k,0,&
-!&   0,ikpt,isppol,gbig(:,1:kss_npw),nbandksseff,nbandksseff*kss_npw,MPI_enreg_seq,&
-!&   nbandksseff,nbandksseff,kss_npw,nspinor,occ_k(1:nbandksseff),2,1,Wff)
-
-   ! Write G-vectors
+   ! Write G-vectors (gbig because it's not k-dependent)
    NCF_CHECK(nf90_inq_varid(kss_unt, "reduced_coordinates_of_plane_waves", kg_varid))
    NCF_CHECK(nf90_get_att(kss_unt, kg_varid, "k_dependent", kdep))
    if (kdep == "no") then
-     ncerr = nf90_put_var(kss_unt, kg_varid, kg_k, start=[1,1], count=[3,kss_npw])
+     ncerr = nf90_put_var(kss_unt, kg_varid, gbig, start=[1,1], count=[3,kss_npw])
    else
-     ncerr = nf90_put_var(kss_unt, kg_varid, kg_k, start=[1,1,ikpt], count=[3,kss_npw,1])
+     ncerr = nf90_put_var(kss_unt, kg_varid, gbig, start=[1,1,ikpt], count=[3,kss_npw,1])
    end if
-   NCF_CHECK_MSG(ncerr, "putting kg_k")
+   NCF_CHECK_MSG(ncerr, "putting gibg")
 
    ! Write wavefunctions
    ! The coefficients_of_wavefunctions on file have shape [cplex, mpw, nspinor, mband, nkpt, nsppol]
@@ -1075,8 +594,6 @@ subroutine write_kss_wfgk(kss_unt,ikpt,isppol,kpoint,nspinor,kss_npw,npw_k,kg_k,
  CASE DEFAULT
    MSG_ERROR(sjoin("Unsupported iomode:", itoa(iomode)))
  END SELECT
-
- call destroy_mpi_enreg(MPI_enreg_seq)
 
 end subroutine write_kss_wfgk
 !!***
@@ -1522,7 +1039,7 @@ subroutine make_gvec_kss(nkpt,kptns,ecut_eff,symmorphi,nsym,symrel,tnons,gprimd,
 end subroutine make_gvec_kss
 !!***
 
-!!****f* ABINIT/gshgg_mkncwrite
+!!****f* m_io_kss/gshgg_mkncwrite
 !! NAME
 !! gshgg_mkncwrite
 !!
@@ -1551,8 +1068,6 @@ end subroutine make_gvec_kss
 !!  eigen(mband,nkpt,nsppol)=array for holding eigenvalues (hartree)
 !!  ngfftc(18)=Info about 3D FFT for the coarse mesh, see ~abinit/doc/input_variables/vargs.htm#ngfft
 !!  [Electronpositron] <electronpositron_type>=quantities for the electron-positron annihilation.
-!!
-!! SIDE EFFECTS
 !!
 !! PARENTS
 !!      scfcv

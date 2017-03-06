@@ -2744,22 +2744,7 @@ integer function ebands_ncwrite(ebands,ncid) result(ncerr)
 
 ! *************************************************************************
 
- select case (ebands%occopt)
- case (3)
-   smearing = "Fermi-Dirac"
- case (4)
-   smearing = "cold smearing of N. Marzari with minimization of the bump"
- case (5)
-   smearing = "cold smearing of N. Marzari with monotonic function in the tail"
- case (6)
-   smearing = "Methfessel and Paxton"
- case (7)
-   smearing = "gaussian"
- case (8)
-   smearing = "uniform"
- case default
-   smearing = "none"
- end select
+ smearing = nctk_string_from_occopt(ebands%occopt)
 
  ! ==============================================
  ! === Write the dimensions specified by ETSF ===
