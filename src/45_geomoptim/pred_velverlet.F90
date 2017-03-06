@@ -162,13 +162,13 @@ subroutine pred_velverlet(ab_mover,hist,itime,ntime,zDEBUG,iexit,hmcflag,icycle,
 
 
  ! Start preparation for velocity verlet, get information about current ionic positions, forces, velocities, etc.
- call hist2var(acell,hist,ab_mover%natom,rprim,rprimd,xcart,xred,zDEBUG)
 
- fcart(:,:) = hist%histXF(:,:,3,hist%ihist)             ! forces in Cartesian coordinates
- fred(:,:)  = hist%histXF(:,:,4,hist%ihist)             ! forces in reduced coordinates
- vel(:,:)   = hist%histV(:,:,hist%ihist)                ! velocities of all ions, not needed in reality
- epot       = hist%histE(hist%ihist)                    ! electronic sub-system energy, not needed
- ekin       = hist%histEk(hist%ihist)                   ! kinetic energy, not needed
+ call hist2var(acell,hist,ab_mover%natom,rprimd,xred,zDEBUG)
+ call xred2xcart(ab_mover%natom,rprimd,xcart,xred)
+ fcart(:,:) = hist%fcart(:,:,hist%ihist)              ! forces in Cartesian coordinates
+ vel(:,:)   = hist%vel(:,:,hist%ihist)                ! velocities of all ions, not needed in reality
+ epot       = hist%etot(hist%ihist)                   ! electronic sub-system energy, not needed
+ ekin       = hist%ekin(hist%ihist)                   ! kinetic energy, not needed
 
 
  if(zDEBUG)then
@@ -261,7 +261,7 @@ subroutine pred_velverlet(ab_mover,hist,itime,ntime,zDEBUG,iexit,hmcflag,icycle,
        ekin_tmp=ekin_tmp+0.5_dp*ab_mover%amass(ii)*vel_prev(jj,ii)**2
      end do
    end do
-   !write(238,*) itime,icycle,ekin_tmp,ekin,epot,factor 
+   write(238,*) itime,icycle,ekin_tmp,ekin,epot,factor 
 
  endif
 
@@ -272,10 +272,10 @@ subroutine pred_velverlet(ab_mover,hist,itime,ntime,zDEBUG,iexit,hmcflag,icycle,
  hist%ihist=hist%ihist+1
 
  call xcart2xred(ab_mover%natom,rprimd,xcart,xred)
- call var2hist(acell,hist,ab_mover%natom,rprim,rprimd,xcart,xred,zDEBUG)
+ call var2hist(acell,hist,ab_mover%natom,rprimd,xred,zDEBUG)
 
- hist%histV(:,:,hist%ihist)=vel(:,:)
- hist%histT(hist%ihist)=itime*ab_mover%dtion
+ hist%vel(:,:,hist%ihist)=vel(:,:)
+ hist%time(hist%ihist)=real(itime,kind=dp)*ab_mover%dtion
 
 end subroutine pred_velverlet
 !!***

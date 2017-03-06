@@ -40,7 +40,7 @@
 !!
 !! CHILDREN
 !!
-!!  var2hist,hist2var,,pred_velverlet,
+!!  var2hist,hist2var,pred_velverlet,xred2xcart
 !!
 !! SOURCE
 
@@ -63,6 +63,7 @@ subroutine pred_hmc(ab_mover,hist,itime,icycle,ntime,ncycle,zDEBUG,iexit)
 #undef ABI_FUNC
 #define ABI_FUNC 'pred_hmc'
  use interfaces_28_numeric_noabirule
+ use interfaces_41_geometry
  use interfaces_45_geomoptim, except_this_one => pred_hmc
 !End of the abilint section
 
@@ -133,10 +134,11 @@ end if
 
 
  !get current values of ionic positions and cell geometry and set up the target temperature
- call hist2var(acell,hist,ab_mover%natom,rprim,rprimd,xcart,xred,zDEBUG)
- vel(:,:)   = hist%histV(:,:,hist%ihist)                ! velocities of all ions, not needed in reality
- epot       = hist%histE(hist%ihist)                    ! electronic sub-system energy, not needed
- ekin       = hist%histEk(hist%ihist)                   ! kinetic energy, not needed
+ call hist2var(acell,hist,ab_mover%natom,rprimd,xred,zDEBUG)
+
+ vel(:,:)   = hist%vel(:,:,hist%ihist)                ! velocities of all ions, not needed in reality
+ epot       = hist%etot(hist%ihist)                   ! electronic sub-system energy, not needed
+ ekin       = hist%ekin(hist%ihist)                   ! kinetic energy, not needed
 
 
  kbtemp=(ab_mover%mdtemp(1)*kb_HaK)  ! get target temperature in energy units
@@ -160,7 +162,6 @@ end if
 
  !generate new set of velocities and get rid of the possible overall momentum
   mtot=sum(ab_mover%amass(:))         ! total mass to eventually get rid of total center of mass (CoM) momentum
-  !write(239117,*) '  generating initial velocities'
 
   ! generate velocities from normal distribution with zero mean and correct standard deviation
   do ii=1,ab_mover%natom
@@ -192,21 +193,13 @@ end if
   factor = mv2tot/(dble(3*ab_mover%natom))
   factor = sqrt(kbtemp/factor)
   vel(:,:)=vel(:,:)*factor
-  hist%histV(:,:,hist%ihist)=vel(:,:)
-  !write(239117,*) '  factor: ',factor
-  !write(239117,*) '  vel_start:'
-  !write(239117,*) '  ',vel(1,:)
-  !write(239117,*) '  ',vel(2,:)
-  !write(239117,*) '  ',vel(3,:)
+  hist%vel(:,:,hist%ihist)=vel(:,:)
 
-  !write(239117,*) '  xcart_start:'
-  !write(239117,*) '  ',xcart(1,:)
-  !write(239117,*) '  ',xcart(2,:)
-  !write(239117,*) '  ',xcart(3,:)
 
 
   !save the starting values of ionic positions (before an update attempt is performed)
-  call hist2var(acell_hmc_prev,hist,ab_mover%natom,rprim_hmc_prev,rprimd_hmc_prev,xcart_hmc_prev,xred_hmc_prev,zDEBUG)
+  call hist2var(acell_hmc_prev,hist,ab_mover%natom,rprimd_hmc_prev,xred_hmc_prev,zDEBUG)
+  call xred2xcart(ab_mover%natom,rprimd_hmc_prev,xcart_hmc_prev,xred_hmc_prev)
 
   !also save the initial total energy
   ekin=0.0
@@ -215,68 +208,39 @@ end if
        ekin=ekin+half*ab_mover%amass(ii)*vel(jj,ii)**2
      end do
   end do
-  epot = hist%histE(hist%ihist)                    ! electronic sub-system energy
+  epot = hist%etot(hist%ihist)                     ! electronic sub-system energy
   etotal_hmc_prev = epot + ekin                    ! total energy before an attempt of variables update is performed
 
-  !write(239117,*) '  ekin_start : ', ekin
-  !write(239117,*) '  epot_start : ', epot       
 
-
-  !write(239117,*) '  calling velverlet predictor for the first time:'
-  !now everything is ready to make a prediction
   call pred_velverlet(ab_mover,hist,itime,ntime,zDEBUG,iexit,1,icycle,ncycle)
  
-  call hist2var(acell,hist,ab_mover%natom,rprim,rprimd,xcart,xred,zDEBUG)
-  !write(239117,*) '  xcart_after_update:'
-  !write(239117,*) '  ',xcart(1,:)
-  !write(239117,*) '  ',xcart(2,:)
-  !write(239117,*) '  ',xcart(3,:)
+  !call hist2var(acell,hist,ab_mover%natom,rprim,rprimd,xcart,xred,zDEBUG)
+  !write(std_out,*) '  xcart_after_update:'
+  !write(std_out,*) '  ',xcart(1,:)
+  !write(std_out,*) '  ',xcart(2,:)
+  !write(std_out,*) '  ',xcart(3,:)
 
 
 
  else if(icycle<ncycle)then
 
-  !write(239117,*) ' entering ',icycle,' cycle of HMC iteration ',itime
-  !write(239117,*) '   before:'
-  !write(239117,*) '   xcart:'
-  !write(239117,*) '   ',xcart(1,:)
-  !write(239117,*) '   ',xcart(2,:)
-  !write(239117,*) '   ',xcart(3,:)
-  !write(239117,*) '   vel:'
-  !write(239117,*) '   ',vel(1,:)
-  !write(239117,*) '   ',vel(2,:)
-  !write(239117,*) '   ',vel(3,:)
   call pred_velverlet(ab_mover,hist,itime,ntime,zDEBUG,iexit,1,icycle,ncycle)
-  call hist2var(acell,hist,ab_mover%natom,rprim,rprimd,xcart,xred,zDEBUG)
-  vel(:,:)   = hist%histV(:,:,hist%ihist)                ! velocities of all ions, not needed in reality
+  !call hist2var(acell,hist,ab_mover%natom,rprim,rprimd,xcart,xred,zDEBUG)
+  !vel(:,:)   = hist%vel(:,:,hist%ihist)                ! velocities of all ions, not needed in reality
 
-  !write(239117,*) '   after :'
-  !write(239117,*) '   xcart:'
-  !write(239117,*) '   ',xcart(1,:)
-  !write(239117,*) '   ',xcart(2,:)
-  !write(239117,*) '   ',xcart(3,:)
-  !write(239117,*) '   vel:'
-  !write(239117,*) '   ',vel(1,:)
-  !write(239117,*) '   ',vel(2,:)
-  !write(239117,*) '   ',vel(3,:)
+ else !icycle==ncycle 
 
- else !presumably icycle==ncycle 
-
-  !write(239117,*) ' entering last cycle of HMC iteration ',itime
   !the only thing left to do, is to compute the difference of the total energies and decide whether to accept the new state
-  vel(:,:)=hist%histV(:,:,hist%ihist)
+  vel(:,:)=hist%vel(:,:,hist%ihist)
   ekin=0.0
   do ii=1,ab_mover%natom
      do jj=1,3
        ekin=ekin+half*ab_mover%amass(ii)*vel(jj,ii)**2
      end do
   end do
-  epot = hist%histE(hist%ihist)      ! electronic sub-system energy
+  epot = hist%etot(hist%ihist)      ! electronic sub-system energy
   etotal = epot + ekin
   de = etotal - etotal_hmc_prev
-
-  !write(239117,*) '  ekin  : ', ekin
-  !write(239117,*) '  epot  : ', epot       
 
   iacc=0
   rnd=uniformrandom(seed)
@@ -287,26 +251,25 @@ end if
      iacc=1
     endif
   endif
-  !write(239117,*) '  random number: ',rnd,' -de/kbtemp:',-de/kbtemp,' acceptance decision: ',iacc
-  !write(239117,*) '  de: ',de,' estart: ',etotal_hmc_prev,' efin:', etotal
+  write(238,*) '  random number: ',rnd,' -de/kbtemp:',-de/kbtemp,' acceptance decision: ',iacc
+  !write(std_out,*) '  de: ',de,' estart: ',etotal_hmc_prev,' efin:', etotal
 
-  call hist2var(acell,hist,ab_mover%natom,rprim,rprimd,xcart,xred,zDEBUG)
+  call hist2var(acell,hist,ab_mover%natom,rprimd,xred,zDEBUG)
+  !call xred2xcart(ab_mover%natom,rprimd,xcart,xred)
+
   if(iacc==0)then  !in case the new state is not accepted, then roll back the coordinates
-    write(239117,*) '  the proposed state was not accepted, roll back the configuration'
-    xcart(:,:)=xcart_hmc_prev(:,:)
+    !write(std_out,*) '  the proposed state was not accepted, roll back the configuration'
+    !xcart(:,:)=xcart_hmc_prev(:,:)
+    !no need to roll back xcart any longer, everything is stored in xred now (v8.3.1)
     xred(:,:)=xred_hmc_prev(:,:)
   endif
-  !write(239117,*) '  xcart:'
-  !write(239117,*) '  ',xcart(1,:)
-  !write(239117,*) '  ',xcart(2,:)
-  !write(239117,*) '  ',xcart(3,:)
 
   hist%ihist=hist%ihist+1
-  call var2hist(acell,hist,ab_mover%natom,rprim,rprimd,xcart,xred,zDEBUG)
+  call var2hist(acell,hist,ab_mover%natom,rprimd,xred,zDEBUG)
 
  endif
 
-! add update of lattice vectors and parameters
+! note: add update of lattice vectors and parameters in case optcell/=0
 
 end subroutine pred_hmc
 !!***
