@@ -243,7 +243,6 @@ subroutine monte_carlo_step(ab_mover,eff_pot,hist,itime,ntime,zDEBUG,iexit)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'monte_carlo_step'
- use interfaces_41_geometry
 !End of the abilint section
 
  implicit none
@@ -260,16 +259,14 @@ subroutine monte_carlo_step(ab_mover,eff_pot,hist,itime,ntime,zDEBUG,iexit)
 !Local variables-------------------------------
 !scalars
  integer  ::  kk,ia,mu
- real(dp) ::  acc,delta,ucvol
+ real(dp) ::  acc,delta
  real(dp),parameter :: v2tol=tol8
  real(dp) :: de,etotal
 !arrays
  real(dp),allocatable,save :: displacement(:,:)
 
- real(dp) :: acell(3),rprim(3,3),rprimd(3,3)
- real(dp) :: gprimd(3,3),gmet(3,3),rmet(3,3),fcart(3,ab_mover%natom)
- real(dp) :: fred(3,ab_mover%natom)
- real(dp) :: xcart(3,ab_mover%natom)
+ real(dp) :: acell(3),rprimd(3,3)
+ real(dp) :: fcart(3,ab_mover%natom)
  real(dp) :: xred(3,ab_mover%natom)
  real(dp) :: vel(3,ab_mover%natom)
  real(dp) :: strten(6)
@@ -316,22 +313,17 @@ subroutine monte_carlo_step(ab_mover,eff_pot,hist,itime,ntime,zDEBUG,iexit)
 !##########################################################
 !### 03. Obtain the present values from the history
 
- call hist2var(acell,hist,ab_mover%natom,rprim,rprimd,xcart,xred,zDEBUG)
+ call hist2var(acell,hist,ab_mover%natom,rprimd,xred,zDEBUG)
 
- fcart(:,:) =hist%histXF(:,:,3,hist%ihist)
- fred(:,:)  =hist%histXF(:,:,4,hist%ihist)
- vel(:,:)   =hist%histV(:,:,hist%ihist)
- strten(:)  =hist%histS(:,hist%ihist)
- etotal     =hist%histE(hist%ihist)
+ fcart(:,:)=hist%fcart(:,:,hist%ihist)
+ strten(:) =hist%strten(:,hist%ihist)
+ vel(:,:)  =hist%vel(:,:,hist%ihist)
+ etotal    =hist%etot(hist%ihist)
 
  if(zDEBUG)then
    write (std_out,*) 'fcart:'
    do kk=1,ab_mover%natom
      write (std_out,*) fcart(:,kk)
-   end do
-   write (std_out,*) 'fred:'
-   do kk=1,ab_mover%natom
-     write (std_out,*) fred(:,kk)
    end do
    write (std_out,*) 'vel:'
    do kk=1,ab_mover%natom
@@ -342,8 +334,6 @@ subroutine monte_carlo_step(ab_mover,eff_pot,hist,itime,ntime,zDEBUG,iexit)
    write (std_out,*) 'etotal:'
    write (std_out,*) etotal
  end if
-
- call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
 
 !write(std_out,*) 'monte carlo 04'
 !##########################################################
@@ -377,21 +367,15 @@ subroutine monte_carlo_step(ab_mover,eff_pot,hist,itime,ntime,zDEBUG,iexit)
 !Increase indexes
  hist%ihist=hist%ihist+1
 
-!Compute xcart from xred, and rprimd
- call xred2xcart(ab_mover%natom,rprimd,xcart,xred)
-
 !Fill the history with the variables
-!xcart, xred, acell, rprimd
- call var2hist(acell,hist,ab_mover%natom,rprim,rprimd,xcart,xred,zDEBUG)
+!xcart, acell, rprimd, vel
+ call var2hist(acell,hist,ab_mover%natom,rprimd,xred,zDEBUG)
+ hist%vel(:,:,hist%ihist)=vel(:,:)
 
  if(zDEBUG)then
    write (std_out,*) 'fcart:'
    do kk=1,ab_mover%natom
      write (std_out,*) fcart(:,kk)
-   end do
-   write (std_out,*) 'fred:'
-   do kk=1,ab_mover%natom
-     write (std_out,*) fred(:,kk)
    end do
    write (std_out,*) 'vel:'
    do kk=1,ab_mover%natom
@@ -402,8 +386,6 @@ subroutine monte_carlo_step(ab_mover,eff_pot,hist,itime,ntime,zDEBUG,iexit)
    write (std_out,*) 'etotal:'
    write (std_out,*) etotal
  end if
-
- hist%histV(:,:,hist%ihist)=vel(:,:)
 
 end subroutine monte_carlo_step
 !!***

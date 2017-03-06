@@ -87,11 +87,11 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
  logical :: wvlbigdft=.false.
  integer :: ttoldfe,ttoldff,ttolrff,ttolvrs,ttolwfr
  integer :: bantot,ia,iatom,ib,iband,idtset,ierr,iexit,ii,iimage,ikpt,ilang,intimage,ierrgrp
- integer :: ipsp,isppol,isym,itypat,jdtset,jj,kk,maxiatsph,maxidyn,minplowan_iatom,maxplowan_iatom
+ integer :: ipsp,isppol,isym,itypat,iz,jdtset,jj,kk,maxiatsph,maxidyn,minplowan_iatom,maxplowan_iatom
  integer :: mband,mgga,miniatsph,minidyn,mod10,mpierr
  integer :: mu,natom,nfft,nfftdg,nkpt,nloc_mem,nlpawu,nproc,nspden,nspinor,nsppol,optdriver,response,usepaw,usewvl
  integer :: fftalg !,fftalga,fftalgc,
- real(dp) :: delta,sumalch,sumocc,ucvol,wvl_hgrid,zatom
+ real(dp) :: delta,dz,sumalch,sumocc,ucvol,wvl_hgrid,zatom
  character(len=1000) :: message,msg
  type(dataset_type) :: dt
 !arrays
@@ -1010,18 +1010,20 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
 &     'iscf',dt%iscf,18,(/-3,-2,-1,1,2,3,4,5,6,7,11,12,13,14,15,16,17,22/),iout)
    else
 !    If usewvl: wvlbigdft indicates that the BigDFT workflow will be followed
-     if(dt%usewvl==1 .and. dt%wvl_bigdft_comp==1) wvlbigdft=.true.
+     wvlbigdft=(dt%usewvl==1.and.dt%wvl_bigdft_comp==1)
+     cond_string(1)='wvl_bigdft_comp' ; cond_values(1)=dt%wvl_bigdft_comp
      if(wvlbigdft) then
-       call chkint_eq(0,0,cond_string,cond_values,ierr,&
+       call chkint_eq(1,1,cond_string,cond_values,ierr,&
 &       'iscf',dt%iscf,15,(/0,1,2,3,4,5,6,7,11,12,13,14,15,16,17/),iout)
      else
-       if(usepaw==1) then
-         call chkint_eq(0,0,cond_string,cond_values,ierr,&
-&         'iscf',dt%iscf,7,(/11,12,13,14,15,16,17/),iout)
-       else
-         call chkint_eq(0,0,cond_string,cond_values,ierr,&
-&         'iscf',dt%iscf,18,(/-3,-2,-1,1,2,3,4,5,6,7,11,12,13,14,15,16,17,22/),iout)
-       end if
+       call chkint_eq(1,1,cond_string,cond_values,ierr,&
+&       'iscf',dt%iscf,18,(/-3,-2,-1,1,2,3,4,5,6,7,11,12,13,14,15,16,17,22/),iout)
+     end if
+!    If wvl+metal, iscf cannot be 0
+     if (dt%occopt>2) then
+       cond_string(1)='occopt' ; cond_values(1)=dt%occopt
+       call chkint_eq(1,1,cond_string,cond_values,ierr,&
+&       'iscf',dt%iscf,18,(/-3,-2,-1,1,2,3,4,5,6,7,11,12,13,14,15,16,17,22/),iout)
      end if
    end if
 !  If ionmov==4, iscf must be 2, 12, 5 or 6.
@@ -1721,7 +1723,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
 
    if (any(abs(dt%nucdipmom)>0)) then
 
-!  nucdipmom requires PAW
+!    nucdipmom requires PAW
      if(usepaw/=1)then
        write(message, '(3a)' )&
 &       ' Nuclear dipole moments (variable nucdipmom) input as nonzero but PAW not activated => stop',ch10,&
@@ -1729,7 +1731,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
        MSG_ERROR_NOSTOP(message,ierr)
      end if
 
-!  nucdipmom requires complex rhoij
+!    nucdipmom requires complex rhoij
      if(dt%pawcpxocc/=2)then
        write(message, '(3a)' )&
 &       ' Nuclear dipole moments (variable nucdipmom) require complex rhoij => stop',ch10,&
@@ -1737,7 +1739,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
        MSG_ERROR_NOSTOP(message,ierr)
      end if
 
-!  nucdipmom requires no force or stress calculation
+!    nucdipmom requires no force or stress calculation
      if(dt%optforces/=0 .OR. dt%optstress/=0)then
        write(message, '(3a)' )&
 &       ' Nuclear dipole moments (variable nucdipmom) cannot be used with force or stress calculations => stop',ch10,&
@@ -1745,7 +1747,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
        MSG_ERROR_NOSTOP(message,ierr)
      end if
 
-!!  nucdipmom requires kptopt > 2
+!!    nucdipmom requires kptopt > 2
 !     if(dt%kptopt<=2) then
 !       write(message, '(a,i4,a,a,a)' )&
 !&       ' Nuclear dipole moments (variable nucdipmom) break time reveral symmetry but kptopt = ',dt%kptopt,&
@@ -1754,6 +1756,40 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
 !       MSG_ERROR_NOSTOP(message,ierr)
 !     end if
 
+   end if
+
+!  nzchempot
+   call chkint_ge(0,0,cond_string,cond_values,ierr,'nzchempot',dt%nzchempot,0,iout)
+!  Cannot be used with response functions at present
+   if (response==1) then
+     cond_string(1)='response' ; cond_values(1)=1
+     call chkint_eq(1,1,cond_string,cond_values,ierr,'nzchempot',dt%nzchempot,1,(/0/),iout)
+   end if
+   if(dt%nzchempot>0)then
+     do itypat=1,dt%ntypat
+       do iz=2,dt%nzchempot
+         dz=dt%chempot(1,iz,itypat)-dt%chempot(1,iz-1,itypat)
+         if(dz<-tol12)then
+           write(message, '(a,2i6,a,a,d16.10,a,a, a,d16.10,a,a, a,a,a)' )&
+&            ' For izchempot,itypat=',iz,itypat,ch10,&
+&            ' chempot(1,izchempot-1,itypat) = ',dt%chempot(1,iz-1,itypat),' and', ch10,&
+&            ' chempot(1,izchempot  ,itypat) = ',dt%chempot(1,iz  ,itypat),',',ch10,&
+&            ' while they should be ordered in increasing values =>stop',ch10,&
+&            'Action: correct chempot(1,*,itypat) in input file.'
+           MSG_ERROR_NOSTOP(message,ierr)
+         endif
+       enddo
+       dz=dt%chempot(1,dt%nzchempot,itypat)-dt%chempot(1,1,itypat)
+       if(dz>one)then
+         write(message, '(a,2i6,a,a,d16.10,a,a, a,d16.10,a,a, a,a,a)' )&
+&          ' For nzchempot,itypat=',dt%nzchempot,itypat,ch10,&
+&          ' chempot(1,1,itypat) = ',dt%chempot(1,1,itypat),' and', ch10,&
+&          ' chempot(1,nzchempot  ,itypat) = ',dt%chempot(1,dt%nzchempot,itypat),'.',ch10,&
+&          ' However, the latter should, at most, be one more than the former =>stop',ch10,&
+&          'Action: correct chempot(1,nzchempot,itypat) in input file.'
+         MSG_ERROR_NOSTOP(message,ierr)
+       endif
+     enddo
    end if
 
 !  occ
@@ -2104,11 +2140,24 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
      end do
    end if
 
+!  pimd_constraint
+   call chkint_eq(0,0,cond_string,cond_values,ierr,'pimd_constraint',dt%pimd_constraint,2,(/0,1/),iout)
+   if(dt%pimd_constraint==1.and.dt%nconeq>1 )then
+     cond_string(1)='pimd_constraint' ; cond_values(1)=dt%pimd_constraint
+!    Make sure that nconeq=1
+     call chkint_eq(1,1,cond_string,cond_values,ierr,'nconeq',dt%nconeq,1,(/1/),iout)
+   end if
+
 !  pitransform
    call chkint_eq(0,0,cond_string,cond_values,ierr,'pitransform',dt%pitransform,3,(/0,1,2/),iout)
 !  When imgmov is not one of 9 or 13, pitransform must be 0
    if(dt%imgmov/=9 .and. dt%imgmov/=13 )then
      cond_string(1)='imgmov' ; cond_values(1)=dt%imgmov
+!    Make sure that pitransform=0
+     call chkint_eq(1,1,cond_string,cond_values,ierr,'pitransform',dt%pitransform,1,(/0/),iout)
+   end if
+   if(dt%pimd_constraint/=0 )then
+     cond_string(1)='pimd_constraint' ; cond_values(1)=dt%pimd_constraint
 !    Make sure that pitransform=0
      call chkint_eq(1,1,cond_string,cond_values,ierr,'pitransform',dt%pitransform,1,(/0/),iout)
    end if

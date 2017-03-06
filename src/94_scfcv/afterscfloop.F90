@@ -70,6 +70,7 @@
 !!  pawang <type(pawang_type)>=paw angular mesh and related data
 !!  pawfgr <type(pawfgr_type)>=fine grid parameters and related data
 !!  pawfgrtab(my_natom*usepaw) <type(pawfgrtab_type)>=atomic data given on fine rectangular grid
+!!  pawrad(ntypat*usepaw) <type(pawrad_type)>=paw radial mesh and related data
 !!  pawrhoij(my_natom*usepaw) <type(pawrhoij_type)>= paw rhoij occupancies and related data
 !!  pawtab(dtset%ntypat) <type(pawtab_type)>=paw tabulated starting data
 !!  pel(3)=reduced coordinates of the electronic polarization (a. u.)
@@ -98,6 +99,7 @@
 !!  symrec(3,3,nsym)=symmetries in reciprocal space, reduced coordinates
 !!  tollist(12)=list of tolerances
 !!  usecprj=1 if cprj datastructure has been allocated
+!!  usexcnhat= -PAW only- flag controling use of compensation density in Vxc
 !!  vhartr(nfftf)=Hartree potential
 !!  vpsp(nfftf)=array for holding local psp
 !!  vxc(nfftf,nspden)=exchange-correlation potential (hartree) in real space
@@ -149,6 +151,7 @@
 !!   | entropy(IN)=entropy due to the occupation number smearing (if metal)
 !!   | e_localpsp(IN)=local psp energy (hartree)
 !!   | e_eigenvalues(IN)=Sum of the eigenvalues - Band energy (Hartree)
+!!   | e_chempot(IN)=energy from spatially varying chemical potential (hartree)
 !!   | e_ewald(IN)=Ewald energy (hartree)
 !!   | e_vdw_dftd(IN)=VdW DFT-D energy
 !!   | e_hartree(IN)=Hartree part of total energy (hartree units)
@@ -199,10 +202,10 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
 & grxc,gsqcut,hdr,indsym,irrzon,istep,kg,kxc,lrhor,maxfor,mcg,mcprj,mgfftf,&
 & moved_atm_inside,mpi_enreg,my_natom,n3xccc,nattyp,nfftf,ngfft,ngfftf,ngrvdw,nhat,&
 & nkxc,npwarr,nvresid,occ,optres,paw_an,paw_ij,pawang,pawfgr,&
-& pawfgrtab,pawrhoij,pawtab,pel,pel_cg,ph1d,ph1df,phnons,pion,prtfor,prtxml,&
+& pawfgrtab,pawrad,pawrhoij,pawtab,pel,pel_cg,ph1d,ph1df,phnons,pion,prtfor,prtxml,&
 & psps,pwind,pwind_alloc,pwnsfac,res2,resid,residm,results_gs,&
 & rhog,rhor,rprimd,stress_needed,strsxc,strten,symrec,synlgr,taug,&
-& taur,tollist,usecprj,vhartr,vpsp,vtrial,vxc,vxcavg,wvl,&
+& taur,tollist,usecprj,usexcnhat,vhartr,vpsp,vtrial,vxc,vxcavg,wvl,&
 & xccc3d,xred,ylm,ylmgr,qvpotzero,conv_retcode)
 
  use defs_basis
@@ -221,23 +224,24 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
  use m_results_gs ,      only : results_gs_type
  use m_electronpositron, only : electronpositron_type,electronpositron_calctype,exchange_electronpositron
  use m_dtset,            only : dtset_copy, dtset_free
- use m_abi2big,          only : wvl_eigen_abi2big,wvl_occ_abi2big,wvl_vtrial_abi2big
  use m_paw_dmft,         only : paw_dmft_type
  use m_pawang,           only : pawang_type
+ use m_pawrad,           only : pawrad_type
  use m_pawtab,           only : pawtab_type
  use m_pawrhoij,         only : pawrhoij_type
  use m_paw_an,           only : paw_an_type
  use m_paw_ij,           only : paw_ij_type
  use m_pawfgrtab,        only : pawfgrtab_type
- use m_pawcprj,          only : pawcprj_type
+ use m_pawcprj,          only : pawcprj_type,pawcprj_getdim
  use m_pawfgr,           only : pawfgr_type
  use m_fock,             only : fock_type
 
 #ifdef HAVE_BIGDFT
+ use m_abi2big
  use BigDFT_API, only : last_orthon, &
       & kswfn_free_scf_data, denspot_free_history,&
-      & write_energies, total_energies,&
-      & eigensystem_info
+      & write_energies, total_energies, XC_potential,&
+      & eigensystem_info, applyprojectorsonthefly
 #endif
 
 !This section has been created automatically by the script Abilint (TD).
@@ -260,7 +264,7 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: istep,mcg,mcprj,mgfftf,moved_atm_inside,my_natom,n3xccc,nfftf,ngrvdw,nkxc
- integer,intent(in) :: optres,prtfor,prtxml,pwind_alloc,stress_needed,usecprj
+ integer,intent(in) :: optres,prtfor,prtxml,pwind_alloc,stress_needed,usecprj,usexcnhat
  integer,intent(inout) :: computed_forces
  real(dp),intent(in) :: cpus,deltae,gsqcut,res2,residm
  real(dp),intent(in) :: qvpotzero
@@ -315,29 +319,37 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
  type(paw_ij_type),intent(inout) :: paw_ij(my_natom*psps%usepaw)
  type(pawfgrtab_type),intent(inout) :: pawfgrtab(my_natom*psps%usepaw)
  type(pawrhoij_type),intent(inout) :: pawrhoij(my_natom*psps%usepaw)
+ type(pawrad_type),intent(in) :: pawrad(dtset%ntypat*psps%usepaw)
  type(pawtab_type),intent(in) :: pawtab(dtset%ntypat*psps%usepaw)
 
 !Local variables-------------------------------
 !scalars
  integer,parameter :: response=0
- integer :: bantot,bufsz,choice,cplex,ierr,ifft,igrad,ishift,ispden,ngrad
- integer :: optcut,optfor,optgr0,optgr1,optgr2,optrad,quit
- integer :: spaceComm_fft,tim_mkrho,me,nproc,comm
+ integer :: bantot,bufsz,choice,cplex,ierr,ia,ifft,igrad,ii,ishift,ispden,nfftotf,ngrad
+ integer :: optcut,optfor,optgr0,optgr1,optgr2,optrad,quit,shft
+ integer :: spaceComm_fft,tim_mkrho
  logical :: test_gylmgr,test_nfgd,test_rfgd
- logical :: wvlbigdft=.false.
- real(dp) :: dtaur,dtaurzero,c_fermi,ucvol
+ logical :: wvlbigdft=.false.,compute_wvl_tail=.false.
+ real(dp) :: c_fermi,dtaur,dtaurzero
+ real(dp) :: eexctx,eh,ekin,eloc,enl,eproj,esicdc,evxc,exc
+ real(dp) :: ucvol,ucvol_local
  character(len=500) :: message
  type(paw_dmft_type) :: paw_dmft
 #if defined HAVE_BIGDFT
+ integer :: iwarn=0,mband_cprj
  logical :: do_last_ortho
- real(dp) :: eproj,raux
+ real(dp) :: doti,dum,exchat
+ character(len=1) :: datacode
 #endif
 !arrays
  real(dp) :: gmet(3,3),gprimd(3,3),pelev(3),rmet(3,3),tsec(2)
  real(dp) :: dmatdum(0,0,0,0)
- real(dp),allocatable :: grnl(:,:),mpibuf(:,:)
- real(dp),allocatable :: qphon(:),rhonow(:,:,:),sqnormgrhor(:,:)
- real(dp),allocatable :: xcart(:,:)
+ real(dp),allocatable :: mpibuf(:,:),qphon(:),rhonow(:,:,:),sqnormgrhor(:,:),xcart(:,:)
+#if defined HAVE_BIGDFT
+ integer,allocatable :: dimcprj_srt(:)
+ real(dp),allocatable :: hpsi_tmp(:),rhowk(:,:),vxc_tmp(:,:)
+ real(dp),pointer :: rhocore(:,:,:,:) => null()
+#endif
 
 ! *************************************************************************
 
@@ -348,6 +360,7 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
 
 !Compute different geometric tensor, as well as ucvol, from rprimd
  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
+ nfftotf=product(ngfftf(1:3))
 
 !MPI FFT communicator
  spaceComm_fft=mpi_enreg%comm_fft
@@ -367,85 +380,110 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
  if (dtset%usewvl == 1) then
 
 !  wvlbigdft indicates that the BigDFT workflow will be followed
-   if(dtset%wvl_bigdft_comp==1) wvlbigdft=.true.
+   wvlbigdft=(dtset%wvl_bigdft_comp==1)
 
 #if defined HAVE_BIGDFT
 !  Transform to KS orbitals
-   comm=mpi_enreg%comm_cell
-   me=xmpi_comm_rank(comm)
-   nproc=xmpi_comm_size(comm)
+
+!  Need xcart
+   ABI_ALLOCATE(xcart,(3, dtset%natom))
+   call xred2xcart(dtset%natom, rprimd, xcart, xred)
+   ucvol_local=product(wvl%den%denspot%dpbox%hgrids)*real(product(wvl%den%denspot%dpbox%ndims),dp)
+
 !  do_last_ortho in case of direct minimization, since
-!  we never diagonalized the hamiltonian and the eigenvalues are unknown.
-   if(wvlbigdft) then
-     do_last_ortho=dtset%iscf==0 !direct minimization scheme in case of wvlbigdft.
-   else
-     do_last_ortho=dtset%nnsclo==0 !direct minimization scheme.
-   end if
-   if ( do_last_ortho ) then
-     call total_energies(wvl%e%energs, istep, me)
+!  We never diagonalized the hamiltonian and the eigenvalues are unknown.
+   if (     wvlbigdft) do_last_ortho=(dtset%iscf==0)
+   if (.not.wvlbigdft) do_last_ortho=(.false.)
+   if (do_last_ortho) then
+     call total_energies(wvl%e%energs, istep, mpi_enreg%me_wvl)
      call write_energies(istep,0,wvl%e%energs,zero,zero,"FINAL")
-!    XG 121101 Suppressed, because wvl%energs%eKS was NaN on shiva distchk, for nearly all automatic tests...
-!    etotal = wvl%energs%eKS
-     if(.not. wvlbigdft) then
-!      Store xcart for each atom
-       ABI_ALLOCATE(xcart,(3, dtset%natom))
-       call xred2xcart(dtset%natom, rprimd, xcart, xred)
+     if(.not.wvlbigdft) then
 !      If ISCF>10, we exit scfcv at a place where bigdft objects
 !      do not contain the KS potential. Hence, we copy vtrial to wvl%den
-       if(dtset%iscf>=10) then
-         call wvl_vtrial_abi2big(1,vtrial,wvl%den)
+       if(dtset%iscf>=10) call wvl_vtrial_abi2big(1,vtrial,wvl%den)
+!      hpsi is lost in hpsitopsi, so we recalculate it (needed for last_orthon).
+       call wvl_psitohpsi(dtset%diemix,eexctx,exc,eh,ekin,eloc,enl,esicdc,&
+&                         istep,1,-1,mpi_enreg%me_wvl,dtset%natom,&
+&                         nfftf,mpi_enreg%nproc_wvl,dtset%nspden,&
+&                         dum,.false.,evxc,wvl,wvlbigdft,xcart,strsxc)
+       if (dtset%iscf==0) then
+         energies%e_kinetic=ekin    ; energies%e_hartree=eh
+         energies%e_xc=exc          ; energies%e_localpsp=eloc
+         energies%e_nonlocalpsp=enl ; energies%e_exactX=eexctx
+         energies%e_sicdc=esicdc    ; energies%e_xcdc=evxc
+         energies%e_eigenvalues = energies%e_kinetic + energies%e_localpsp &
+&             + energies%e_xcdc  + two*energies%e_hartree +energies%e_nonlocalpsp
        end if
-!      hpsi is lost in hpsitopsi,
-!      so we recalculate hpsi, last_orthon will be called afterwards.
-       call wvl_psitohpsi(dtset%diemix,energies%e_exactX,energies%e_xc,energies%e_hartree,&
-&       energies%e_kinetic, energies%e_localpsp, eproj, energies%e_sicdc,&
-&       istep,1, dtset%iscf, mpi_enreg%me_wvl,dtset%natom,&
-&       nfftf,mpi_enreg%nproc_wvl,dtset%nspden,&
-&       raux,.false.,energies%e_xcdc,wvl,wvlbigdft,xcart,strsxc)
-       ABI_DEALLOCATE(xcart)
      end if
-
-     call last_orthon(me, nproc, istep, wvl%wfs%ks, wvl%e%energs%evsum, .true.)
-     if (nproc == 1) nullify(wvl%wfs%ks%psit)
-
-     call eigensystem_info(me,nproc,0.d0,&
-     wvl%wfs%ks%Lzd%Glr%wfd%nvctr_c+7*wvl%wfs%ks%Lzd%Glr%wfd%nvctr_f,&
-     wvl%wfs%ks%orbs,wvl%wfs%ks%psi)
-
+     call last_orthon(mpi_enreg%me_wvl,mpi_enreg%nproc_wvl,istep,wvl%wfs%ks,wvl%e%energs%evsum,.true.)
+     if (mpi_enreg%nproc_wvl == 1) nullify(wvl%wfs%ks%psit)
+     call eigensystem_info(mpi_enreg%me_wvl,mpi_enreg%nproc_wvl,0.d0,&
+          wvl%wfs%ks%Lzd%Glr%wfd%nvctr_c+7*wvl%wfs%ks%Lzd%Glr%wfd%nvctr_f,&
+          wvl%wfs%ks%orbs,wvl%wfs%ks%psi)
 !    Copy eigenvalues from BigDFT object to "eigen"
      call wvl_eigen_abi2big(dtset%mband,dtset%nkpt,dtset%nsppol,eigen,2,wvl%wfs)
 !    Copy occupations from BigDFT objects to ABINIT
      call wvl_occ_abi2big(dtset%mband,dtset%nkpt,dtset%nsppol,occ,2,wvl%wfs)
-
-   end if
-
-!  Clean KSwfn parts only needed in the SCF loop.
-   call kswfn_free_scf_data(wvl%wfs%ks, (nproc > 1))
-!  Clean denspot parts only needed in the SCF loop.
-   call denspot_free_history(wvl%den%denspot)
-#else
-   BIGDFT_NOTENABLED_ERROR()
-#endif
+  end if
 
 !  Tail corrections, pending for wvlbigdft==.false.
 !  TODO put it at the end of gstate.
 !  WVL - maybe compute the tail corrections to energy
-   if (dtset%tl_radius > tol12 .and. wvlbigdft) then
-!    Store xcart for each atom
-     ABI_ALLOCATE(xcart,(3, dtset%natom))
-     call xred2xcart(dtset%natom, rprimd, xcart, xred)
-     comm=mpi_enreg%comm_cell
-     me=xmpi_comm_rank(comm)
-     nproc=xmpi_comm_size(comm)
+   compute_wvl_tail=(dtset%tl_radius>tol12.and.wvlbigdft)
+   if (compute_wvl_tail) then
 !    Use the tails to improve energy precision.
      call wvl_tail_corrections(dtset, energies, etotal, mpi_enreg, psps, wvl, xcart)
-     ABI_DEALLOCATE(xcart)
    end if
 
-   if(wvlbigdft) then
-!    Change the density according to the KS projection.
+!  Clean KSwfn parts only needed in the SCF loop.
+   call kswfn_free_scf_data(wvl%wfs%ks, (mpi_enreg%nproc_wvl > 1))
+!  Clean denspot parts only needed in the SCF loop.
+   call denspot_free_history(wvl%den%denspot)
+
+!  If WF have been modified, change the density according to the KS projection.
+   if ( do_last_ortho ) then
+
+!    Density from new orthogonalized WFs
      call wvl_mkrho(dtset, irrzon, mpi_enreg, phnons, rhor, wvl%wfs, wvl%den)
+
+!    PAW: has to update cprj, rhoij and compensation charge density
+     if (psps%usepaw==1) then
+!      1-Compute cprj
+       ABI_ALLOCATE(hpsi_tmp,(size(wvl%wfs%ks%hpsi)))
+       call applyprojectorsonthefly(mpi_enreg%me_wvl,wvl%wfs%ks%orbs,wvl%descr%atoms,wvl%descr%Glr,&
+&           xcart,wvl%descr%h(1),wvl%descr%h(2),wvl%descr%h(3),wvl%wfs%ks%lzd%Glr%wfd,&
+&           wvl%projectors%nlpsp,wvl%wfs%ks%psi,hpsi_tmp,eproj,&
+&           proj_G=wvl%projectors%G,paw=wvl%descr%paw)
+       ABI_DEALLOCATE(hpsi_tmp)
+       do ii=1,mcprj
+         do ia=1,dtset%natom
+           !Note that cprj should be allocated (i.e. usepcrj=1 imposed in scfcv)
+           cprj(ia,ii)%cp(:,:)= wvl%descr%paw%cprj(ia,ii)%cp(:,:)
+         end do
+       end do
+!      2-Compute rhoij
+       ABI_ALLOCATE(dimcprj_srt,(dtset%natom))
+       call pawcprj_getdim(dimcprj_srt,dtset%natom,nattyp,dtset%ntypat,dtset%typat,pawtab,'O')
+       mband_cprj=mcprj/(dtset%nspinor*dtset%mkmem*dtset%nsppol)
+       paw_dmft%use_sc_dmft=0 ; paw_dmft%use_dmft=0 ! dmft not used here
+       call pawmkrhoij(atindx,atindx1,cprj,dimcprj_srt,dtset%istwfk,dtset%kptopt,dtset%mband,mband_cprj,&
+&           mcprj,dtset%mkmem,mpi_enreg,dtset%natom,dtset%nband,dtset%nkpt,dtset%nspinor,dtset%nsppol,&
+&           occ,mpi_enreg%paral_kgb,paw_dmft,dtset%pawprtvol,pawrhoij,dtfil%unpaw,dtset%usewvl,dtset%wtk)
+       ABI_DEALLOCATE(dimcprj_srt)
+!      3-Symetrize rhoij, compute nhat and add it to rhor
+       call pawmkrho(dum,1,gprimd,0,indsym,0,mpi_enreg,my_natom,dtset%natom,dtset%nspden,dtset%nsym,&
+&           dtset%ntypat,mpi_enreg%paral_kgb,pawang,pawfgr,pawfgrtab,dtset%pawprtvol,pawrhoij,pawrhoij,&
+&           pawtab,(/zero,zero,zero/),rhog,rhor,rhor,rprimd,dtset%symafm,symrec,dtset%typat,ucvol_local,&
+&           dtset%usewvl,xred,pawnhat=nhat)
+       call wvl_rho_abi2big(1,rhor,wvl%den)
+     end if
    end if
+
+   ABI_DEALLOCATE(xcart)
+
+#else
+   BIGDFT_NOTENABLED_ERROR()
+#endif
  end if
 
  call timab(251,2,tsec)
@@ -461,7 +499,6 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
 &   npwarr,dtset%nsppol,psps%ntypat,pawrhoij,pawtab,pel,pel_cg,pelev,pion,&
 &   psps,pwind,pwind_alloc,pwnsfac,rprimd,ucvol,usecprj,xred)
  end if
-
 
  call timab(252,2,tsec)
  call timab(253,1,tsec)
@@ -805,45 +842,42 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
      test_rfgd  =any(pawfgrtab(:)%rfgd_allocated==0)
      test_gylmgr=any(pawfgrtab(:)%gylmgr_allocated==0)
      if (test_nfgd.or.&
-&     (test_gylmgr.and.dtset%pawstgylm==1).or.&
-&     (test_rfgd.and.stress_needed==1.and.dtset%pawstgylm==1).or.&
-     (test_rfgd.and.dtset%pawstgylm==0)) then
+&       (test_gylmgr.and.dtset%pawstgylm==1).or.&
+&       (test_rfgd.and.stress_needed==1.and.dtset%pawstgylm==1).or.&
+        (test_rfgd.and.dtset%pawstgylm==0)) then
        optcut=0;optgr0=0;optgr1=dtset%pawstgylm;optgr2=0
        optrad=1-dtset%pawstgylm;if (stress_needed==1) optrad=1
-       call nhatgrid(atindx1,gmet,my_natom,dtset%natom,nattyp,ngfftf,dtset%ntypat,&
-&       optcut,optgr0,optgr1,optgr2,optrad,pawfgrtab,pawtab,rprimd,dtset%typat,ucvol,xred,&
-&       comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,&
-&       comm_fft=spaceComm_fft,distribfft=mpi_enreg%distribfft)
+       if (dtset%usewvl==0) then
+         call nhatgrid(atindx1,gmet,my_natom,dtset%natom,nattyp,ngfftf,dtset%ntypat,&
+&         optcut,optgr0,optgr1,optgr2,optrad,pawfgrtab,pawtab,rprimd,dtset%typat,ucvol,xred,&
+&         comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,&
+&         comm_fft=spaceComm_fft,distribfft=mpi_enreg%distribfft)
+       else
+         shft=0
+#if defined HAVE_BIGDFT
+         shft=wvl%descr%Glr%d%n1i*wvl%descr%Glr%d%n2i*wvl%den%denspot%dpbox%nscatterarr(mpi_enreg%me_wvl,4)
+         call wvl_nhatgrid(atindx1,wvl%descr%atoms%astruct%geocode,&
+&         wvl%descr%h,wvl%den%denspot%dpbox%i3s,dtset%natom,dtset%natom,&
+&         nattyp,psps%ntypat,wvl%descr%Glr%d%n1,wvl%descr%Glr%d%n1i,&
+&         wvl%descr%Glr%d%n2,wvl%descr%Glr%d%n2i,wvl%descr%Glr%d%n3,&
+&         wvl%den%denspot%dpbox%n3pi,optcut,optgr0,optgr1,optgr2,optrad,&
+&         pawfgrtab,pawtab,psps%gth_params%psppar,rprimd,shft,xred)
+#endif
+       end if
      end if
    end if
 
-   if (dtset%usewvl == 0 .or. dtset%berryopt == 4 .or. dtset%berryopt == 6 .or. dtset%berryopt == 7 .or.  &
-&   dtset%berryopt == 14 .or. dtset%berryopt == 16 .or. dtset%berryopt == 17)  then
-
-     call forstr(atindx1,cg,cprj,diffor,dtefield,dtset,&
+   call forstr(atindx1,cg,cprj,diffor,dtefield,dtset,&
 &     eigen,electronpositron,energies,favg,fcart,fock,forold,fred,gresid,grewtn,&
 &     grhf,grvdw,grxc,gsqcut,indsym,&
 &     kg,kxc,maxfor,mcg,mcprj,mgfftf,mpi_enreg,my_natom,&
 &     n3xccc,nattyp,nfftf,ngfftf,ngrvdw,nhat,nkxc,&
 &     npwarr,dtset%ntypat,nvresid,occ,optfor,optres,&
-&     paw_ij,pawang,pawfgr,pawfgrtab,pawrhoij,pawtab,ph1d,ph1df,&
+&     paw_ij,pawang,pawfgr,pawfgrtab,pawrad,pawrhoij,pawtab,ph1d,ph1df,&
 &     psps,rhog,rhor,rprimd,stress_needed,strsxc,strten,symrec,synlgr,&
-&     ucvol,usecprj,vhartr,vpsp,vxc,wvl%descr,wvl%den,&
-&     xccc3d,xred,ylm,ylmgr,qvpotzero)
-   else
-     ABI_ALLOCATE(xcart,(3, dtset%natom))
-     call xred2xcart(dtset%natom, rprimd, xcart, xred)
-     ABI_ALLOCATE(grnl,(3, dtset%natom))
-     call wvl_nl_gradient(grnl, mpi_enreg, dtset%natom, rprimd, wvl, xcart)
-     ABI_DEALLOCATE(xcart)
-     call forces(atindx1, diffor, dtefield, dtset, favg, fcart,fock, forold, fred, gresid, grewtn,&
-&     grhf, grnl, grvdw, grxc, gsqcut, indsym, maxfor, mgfftf, mpi_enreg, &
-&     0, n3xccc, nattyp, dtset%nfft, dtset%ngfft, ngrvdw, &
-&     dtset%ntypat, pawtab, ph1d, psps, rhog, rhor, rprimd, symrec, &
-&     synlgr, dtset%usefock, nvresid, vxc, wvl%descr,wvl%den, xred)
-     ABI_DEALLOCATE(grnl)
-   end if
+&     ucvol,usecprj,vhartr,vpsp,vxc,wvl,xccc3d,xred,ylm,ylmgr,qvpotzero)
  end if
+
  if (optfor==1) computed_forces=1
  if (optfor==1) diffor=9.9999999999D99
  if (stress_needed==0) strten(:)=9.9999999999D99
@@ -973,5 +1007,6 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
 #if !defined HAVE_BIGDFT
  if (.false.) write(std_out,*) vtrial(1,1)
 #endif
+
 end subroutine afterscfloop
 !!***

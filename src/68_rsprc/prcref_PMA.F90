@@ -200,9 +200,9 @@
 
 !Local variables-------------------------------
 !scalars
- integer :: cplex,dielop,iatom,ier,ifft,ii,index,ipw1
+ integer :: coredens_method,cplex,dielop,iatom,ier,ifft,ii,index,ipw1
  integer :: ipw2,ispden,klmn,kmix,n1,n2,n3,n3xccc,nfftot,nk3xc,optatm
- integer :: optdyfr,opteltfr,optgr,option,optn,optn2,optstr,optv
+ integer :: optdyfr,opteltfr,optgr,option,optn,optn2,optstr,optv,vloc_method
  real(dp) :: ai,ar,diemix,diemixmag,eei,enxc
  real(dp) :: mixfac
  real(dp) :: mixfac_eff,mixfacmag,ucvol,vxcavg
@@ -528,9 +528,27 @@
    ABI_ALLOCATE(vpsp_wk,(nfft))
    vprtrb(1:2)=zero
 
-   if ((psps%usepaw==1 .or. psps%nc_xccc_gspace==1) .and. psps%usewvl==0 .and. dtset%icoulomb==0) then
-!    PAW or NC with nc_xccc_gspace: compute vpsp and xccc3d together in reciprocal space
-     optatm=1;optdyfr=0;opteltfr=0;optgr=0;optstr=0;optv=1;optn=n3xccc/nfft;optn2=1
+!  Determine by which method the local ionic potential and/or
+!  the pseudo core charge density have to be computed
+!  Local ionic potential:
+!   Method 1: PAW
+!   Method 2: Norm-conserving PP, icoulomb>0, wavelets
+   vloc_method=1;if (psps%usepaw==0) vloc_method=2
+   if (dtset%icoulomb>0) vloc_method=2
+   if (psps%usewvl==1) vloc_method=2
+!  Pseudo core charge density:
+!   Method 1: PAW, nc_xccc_gspace
+!   Method 2: Norm-conserving PP, wavelets
+   coredens_method=1;if (psps%usepaw==0) coredens_method=2
+   if (psps%nc_xccc_gspace==1) coredens_method=1
+   if (psps%nc_xccc_gspace==0) coredens_method=2
+   if (psps%usewvl==1) coredens_method=2
+
+!  Local ionic potential and/or pseudo core charge by method 1
+   if (vloc_method==1.or.coredens_method==1) then
+     optv=0;if (vloc_method==1) optv=1
+     optn=0;if (coredens_method==1) optn=n3xccc/nfft
+     optatm=1;optdyfr=0;opteltfr=0;optgr=0;optstr=0;optn2=1
 !    Note: atindx1 should be passed to atm2fft (instead of atindx) but it is unused...
      call atm2fft(atindx,xccc3d,vpsp,dummy_out1,dummy_out2,dummy_out3,dummy_in,gmet,&
 &     gprimd,dummy_out4,dummy_out5,gsqcut,mgfft,psps%mqgrid_vl,dtset%natom,nattyp,&
@@ -539,9 +557,11 @@
 &     psps%usepaw,dummy_in,dummy_in,dummy_in,vprtrb,psps%vlspl,&
 &     comm_fft=mpi_enreg%comm_fft,me_g0=mpi_enreg%me_g0,&
 &     paral_kgb=mpi_enreg%paral_kgb,distribfft=mpi_enreg%distribfft)
-   else
-!    Norm-conserving: compute vpsp in recip. space and xccc3d in real space
-     option = 1
+   end if
+
+!  Local ionic potential by method 2
+   if (vloc_method==2) then
+     option=1
      ABI_ALLOCATE(dyfrlo_indx,(3,3,dtset%natom))
      ABI_ALLOCATE(grtn_indx,(3,dtset%natom))
      call mklocl(dtset,dyfrlo_indx,eei,gmet,gprimd,grtn_indx,gsqcut,dummy6,&
@@ -550,15 +570,18 @@
 &     ucvol,vprtrb,vpsp_wk,wvl%descr,wvl%den,xred)
      ABI_DEALLOCATE(dyfrlo_indx)
      ABI_DEALLOCATE(grtn_indx)
-     if (n1xccc/=0) then
-       ABI_ALLOCATE(dyfrx2,(3,3,dtset%natom))
-       ABI_ALLOCATE(grxc_indx,(3,dtset%natom))
-       call mkcore(dummy6,dyfrx2,grxc_indx,mpi_enreg,dtset%natom,nfft,dtset%nspden,ntypat,&
+   end if
+
+!  Pseudo core electron density by method 2
+   if (coredens_method==2.and.n1xccc/=0) then
+     option=1
+     ABI_ALLOCATE(dyfrx2,(3,3,dtset%natom))
+     ABI_ALLOCATE(grxc_indx,(3,dtset%natom))
+     call mkcore(dummy6,dyfrx2,grxc_indx,mpi_enreg,dtset%natom,nfft,dtset%nspden,ntypat,&
 &       n1,n1xccc,n2,n3,option,rprimd,dtset%typat,ucvol,vxc,psps%xcccrc,&
 &       psps%xccc1d,xccc3d,xred_wk)
-       ABI_DEALLOCATE(dyfrx2)
-       ABI_DEALLOCATE(grxc_indx)
-     end if
+     ABI_DEALLOCATE(dyfrx2)
+     ABI_DEALLOCATE(grxc_indx)
    end if
 
 !  Compute Hartree+xc potentials

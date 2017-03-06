@@ -40,6 +40,7 @@
 !!         nsppol     =maximal value of input nsppol for all the datasets
 !!         nsym       =maximum number of symmetries
 !!         ntypat     =maximum number of type of atoms
+!!         nzchempot  =maximal value of input nzchempot for all the datasets
 !!  ncid= NetCDF handler
 !!  ndtset=number of datasets
 !!  ndtset_alloc=number of datasets, corrected for allocation of at least
@@ -345,6 +346,9 @@
  if (icount/=0) then
    call prttagm(dprarr,intarr,iout,jdtset_,1,marr,ntypat,narrm,ncid,ndtset_alloc,'pimass','DPR',0)
  end if
+
+ intarr(1,:)=dtsets(:)%pimd_constraint
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'pimd_constraint','INT',0)
 
  intarr(1,:)=dtsets(:)%pitransform
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'pitransform','INT',0)
@@ -1332,18 +1336,18 @@
 & 'outvars : Printing only first ',nkpt_max,' k-points.'
 
 !WVL - wavelets variables
-!integer
-! intarr(1,:)=dtsets(:)%wvl_bigdft_comp
-! call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'wvl_bigdft_comp','INT',0)
-!real(dp)
- dprarr(1,:)=dtsets(:)%wvl_crmult
- call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'wvl_crmult','DPR',0)
- dprarr(1,:)=dtsets(:)%wvl_frmult
- call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'wvl_frmult','DPR',0)
- dprarr(1,:)=dtsets(:)%wvl_hgrid
- call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'wvl_hgrid','DPR',0)
- intarr(1,:)=dtsets(:)%wvl_nprccg
- call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'wvl_nprccg','INT',0)
+ if (any(dtsets(:)%usewvl==1)) then
+   intarr(1,:)=dtsets(:)%wvl_bigdft_comp
+   call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'wvl_bigdft_comp','INT',0)
+   dprarr(1,:)=dtsets(:)%wvl_crmult
+   call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'wvl_crmult','DPR',0)
+   dprarr(1,:)=dtsets(:)%wvl_frmult
+   call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'wvl_frmult','DPR',0)
+   dprarr(1,:)=dtsets(:)%wvl_hgrid
+   call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'wvl_hgrid','DPR',0)
+   intarr(1,:)=dtsets(:)%wvl_nprccg
+   call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'wvl_nprccg','INT',0)
+ end if
 
 !Wannier90 interface related variables
  if(sum(dtsets(1:ndtset_alloc)%prtwant) >1)then

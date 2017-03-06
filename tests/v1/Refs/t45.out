@@ -1,5 +1,5 @@
 
-.Version 8.0.3 of ABINIT 
+.Version 8.1.5 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
 
 .Copyright (C) 1998-2017 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see http://www.abinit.org .
 
-.Starting date : Mon  4 Apr 2016.
-- ( at 06h20 )
+.Starting date : Wed  7 Dec 2016.
+- ( at 20h15 )
   
 - input  file    -> t45.in
 - output file    -> t45.out
@@ -59,7 +59,7 @@ _ WF disk file :      0.043 Mbytes ; DEN or POT disk file :      0.185 Mbytes.
 --------------------------------------------------------------------------------
 -
 - outvars: echo of selected default values                                      
--   accesswff0 =  0 , fftalg0 =312 , wfoptalg0 =  0
+-   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
 -
 - outvars: echo of global parameters not present in the input file              
 -  max_nthreads =    0
@@ -132,8 +132,8 @@ P           mkmem           1
          ecut(hartree)=      7.000   => boxcut(ratio)=   2.09906
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gonze/ABINIT/ABINITv8.0.3/gonze/8.0.3-private/tests/Psps_for_tests/14si.pspnc
-- pspatm: opening atomic psp file    /home/gonze/ABINIT/ABINITv8.0.3/gonze/8.0.3-private/tests/Psps_for_tests/14si.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/14si.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -515,8 +515,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     675.000     675.000
  -1.77488665747302E-02 -2.31900113757501E-06 -3.53916270472157E-06
   1.77488665747302E-02  2.31900113757501E-06  3.53916270472157E-06
  Reduced forces (fred)
-  2.12989322822796E-01  1.91085604258605E-05  3.00464094875499E-05
- -2.12983474970728E-01 -1.79954577753396E-05 -2.65801937879951E-05
+  2.12986398896762E-01  1.85520091006000E-05  2.83133016377725E-05
+ -2.12986398896762E-01 -1.85520091006000E-05 -2.83133016377725E-05
  Total energy (etotal) [Ha]= -8.67163154094171E+00
 
 --- Iteration: ( 2/10) Internal Cycle: (1/1)
@@ -962,8 +962,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     675.000     675.000
  -9.99922115983597E-06  7.52674091710289E-08  1.08730703431066E-07
   9.99922115983597E-06 -7.52674091710289E-08 -1.08730703431066E-07
  Reduced forces (fred)
-  1.19990924944359E-04 -5.98939581974749E-07 -8.64873591446068E-07
- -1.19990382891704E-04  6.05338964761713E-07  8.74817663450982E-07
+  1.19990653918032E-04 -6.02139273368231E-07 -8.69845627448525E-07
+ -1.19990653918032E-04  6.02139273368231E-07  8.69845627448525E-07
  Total energy (etotal) [Ha]= -8.67317545593129E+00
 
  Difference of energy with previous step (new-old):
@@ -1071,8 +1071,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     675.000     675.000
  -8.20755481274705E-06  7.09940788110833E-08  1.02495141069851E-07
   8.20755481274705E-06 -7.09940788110833E-08 -1.02495141069851E-07
  Reduced forces (fred)
-  9.84904067193739E-05 -5.67476795203644E-07 -8.19242662052057E-07
- -9.84909087865553E-05  5.68428465773690E-07  8.20679595065557E-07
+  9.84906577529646E-05 -5.67952630488667E-07 -8.19961128558807E-07
+ -9.84906577529646E-05  5.67952630488667E-07  8.19961128558807E-07
  Total energy (etotal) [Ha]= -8.67317545645151E+00
 
  Difference of energy with previous step (new-old):
@@ -1091,7 +1091,6 @@ _setup2: Arith. and geom. avg. npw (full set) are     675.000     675.000
   1.14E-12 7.97E-14 1.32E-12 1.20E-13 1.20E-13
    0.0000  0.0000  0.0000    2  1.96668E-12 kpt; spin; max resid(k); each band:
   1.76E-12 9.95E-14 1.97E-12
-- nxfh > 0 in outwf is deprecated and will be removed in ABINIT8
  reduced coordinates (array xred) for    2 atoms
       -0.184687532311     -0.000000223181     -0.000000322156
        0.184687532311      0.000000223181      0.000000322156
@@ -1279,23 +1278,40 @@ P           mkmem           1
  of the ABINIT implementation.
  For information on why they are suggested, see also http://www.abinit.org/about/?text=acknowledgments.
 -
-- [1] ABINIT : First-principles approach of materials and nanosystem properties.
+- [1] Recent developments in the ABINIT software package.
+- Computer Phys. Comm. 205, 106 (2016).
+- X.Gonze, F.Jollet, F.Abreu Araujo, D.Adams, B.Amadon, T.Applencourt,
+- C.Audouze, J.-M.Beuken, J.Bieder, A.Bokhanchuk, E.Bousquet, F.Bruneval
+- D.Caliste, M.Cote, F.Dahm, F.Da Pieve, M.Delaveau, M.Di Gennaro,
+- B.Dorado, C.Espejo, G.Geneste, L.Genovese, A.Gerossier, M.Giantomassi,
+- Y.Gillet, D.R.Hamann, L.He, G.Jomard, J.Laflamme Janssen, S.Le Roux,
+- A.Levitt, A.Lherbier, F.Liu, I.Lukacevic, A.Martin, C.Martins,
+- M.J.T.Oliveira, S.Ponce, Y.Pouillon, T.Rangel, G.-M.Rignanese,
+- A.H.Romero, B.Rousseau, O.Rubel, A.A.Shukri, M.Stankovski, M.Torrent,
+- M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
+- B.Xue, A.Zhou, J.W.Zwanziger.
+- Comment : the fourth generic paper describing the ABINIT project.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- is available at http://www.abinit.org/about/ABINIT16.pdf .
+- The licence allows the authors to put it on the Web.
+-
+- [2] ABINIT : First-principles approach of materials and nanosystem properties.
+- Computer Phys. Comm. 180, 2582-2615 (2009).
 - X. Gonze, B. Amadon, P.-M. Anglade, J.-M. Beuken, F. Bottin, P. Boulanger, F. Bruneval,
 - D. Caliste, R. Caracas, M. Cote, T. Deutsch, L. Genovese, Ph. Ghosez, M. Giantomassi
 - S. Goedecker, D.R. Hamann, P. Hermet, F. Jollet, G. Jomard, S. Leroux, M. Mancini, S. Mazevet,
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
-- Computer Phys. Comm. 180, 2582-2615 (2009).
 - Comment : the third generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at http://www.abinit.org/about/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
 -
-- [2] A brief introduction to the ABINIT software package.
+- [3] A brief introduction to the ABINIT software package.
+- Z. Kristallogr. 220, 558-562 (2005).
 - X. Gonze, G.-M. Rignanese, M. Verstraete, J.-M. Beuken, Y. Pouillon, R. Caracas, F. Jollet,
 - M. Torrent, G. Zerah, M. Mikami, Ph. Ghosez, M. Veithen, J.-Y. Raty, V. Olevano, F. Bruneval,
 - L. Reining, R. Godby, G. Onida, D.R. Hamann, and D.C. Allan.
-- Z. Kristallogr. 220, 558-562 (2005).
 - Comment : the second generic paper describing the ABINIT project. Note that this paper
 - should be cited especially if you are using the GW part of ABINIT, as several authors
 - of this part are not in the list of authors of the first or third paper.
@@ -1305,20 +1321,16 @@ P           mkmem           1
 -
 - And optionally:
 -
-- [3] First-principles computation of material properties : the ABINIT software project. 
+- [4] First-principles computation of material properties : the ABINIT software project. 
 - X. Gonze, J.-M. Beuken, R. Caracas, F. Detraux, M. Fuchs, G.-M. Rignanese, L. Sindic,
 - M. Verstraete, G. Zerah, F. Jollet, M. Torrent, A. Roy, M. Mikami, Ph. Ghosez, J.-Y. Raty, D.C. Allan.
 - Computational Materials Science 25, 478-492 (2002). http://dx.doi.org/10.1016/S0927-0256(02)00325-7
 - Comment : the original paper describing the ABINIT project.
 -
-- [4] Fast radix 2, 3, 4 and 5 kernels for Fast Fourier Transformations
-- on computers with overlapping multiply-add instructions.
-- S. Goedecker, SIAM J. on Scientific Computing 18, 1605 (1997).
--
-- Proc.   0 individual time (sec): cpu=          2.4  wall=          1.6
+- Proc.   0 individual time (sec): cpu=          1.8  wall=          2.0
 
 ================================================================================
 
  Calculation completed.
-.Delivered  10 WARNINGs and   3 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          2.4  wall=          1.6
+.Delivered  10 WARNINGs and   2 COMMENTs to log file.
++Overall time at end (sec) : cpu=          1.8  wall=          2.0
