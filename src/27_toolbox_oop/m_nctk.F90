@@ -345,6 +345,7 @@ end function nctk_ncify
 
 pure function nctk_string_from_occopt(occopt) result(smearing)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC

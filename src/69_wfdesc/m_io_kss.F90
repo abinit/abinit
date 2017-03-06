@@ -508,7 +508,6 @@ subroutine write_kss_wfgk(kss_unt,ikpt,isppol,kpoint,nspinor,kss_npw,npw_k,kg_k,
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'write_kss_wfgk'
- use interfaces_51_manage_mpi
 !End of the abilint section
 
  implicit none
