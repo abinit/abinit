@@ -266,7 +266,7 @@ implicit none
        dtset%nnos = 1
        ABI_ALLOCATE(dtset%qmass,(dtset%nnos))
        dtset%qmass(:)  = qmass
-       write(message,'(3a,F12.1,a)')&
+       write(message,'(3a,F20.1,a)')&
 &      ' WARNING: nnos is set to zero in the input',ch10,&
 &      '          value by default for qmass: ',dtset%qmass(:),ch10
        call wrtout(std_out,message,"COLL")
@@ -276,7 +276,7 @@ implicit none
      end if
      if (inp%bmass == zero) then
        dtset%bmass = bmass
-       write(message,'(3a,F12.1,a)')&
+       write(message,'(3a,F20.4,a)')&
 &      ' WARNING: bmass is set to zero in the input',ch10,&
 &       '          value by default for bmass: ',dtset%bmass,ch10
        call wrtout(std_out,message,"COLL")
@@ -330,9 +330,19 @@ implicit none
    ABI_ALLOCATE(rhor,(2,1))
    
 !  Initialize xf history (should be put in inwffil)
-   ab_xfh%nxfh=0
-   ab_xfh%mxfh=(ab_xfh%nxfh-dtset%restartxf+1)+dtset%ntime+5 
+!  Not yet implemented for ionmov 2 3 10 11 22 (memory problem...)
+!   ab_xfh%mxfh=(ab_xfh%nxfh-dtset%restartxf+1)+dtset%ntime+5 
+   ab_xfh%nxfh = 0
+
+   ab_xfh%mxfh = 1
    ABI_ALLOCATE(ab_xfh%xfhist,(3,dtset%natom+4,2,ab_xfh%mxfh))
+   if (any((/2,3,10,11,22/)==dtset%ionmov)) then
+     write(message, '(3a)' )&
+&   ' This dynamics can not be used with effective potential',ch10,&
+&   'Action: correct dynamics input'
+     MSG_BUG(message)
+   end if
+
 
 !***************************************************************
 !2  initialization of the structure for the dynamics

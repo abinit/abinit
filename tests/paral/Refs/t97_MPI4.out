@@ -22,7 +22,7 @@
 ================================================================================
 
  Read the information in the reference structure in 
--system.xml
+-t97_sys.xml
  to initialize the multibinit input
 
 ================================================================================
@@ -59,8 +59,8 @@
 
 ================================================================================
 
--Opening the file system.xml
--Reading the file system.xml with LibXML library
+-Opening the file t97_sys.xml
+-Reading the file t97_sys.xml with LibXML library
 
 ================================================================================
  Generation of new ifc
@@ -139,7 +139,7 @@
 
 ================================================================================
 
- Generation of the xml file for the reference structure in system.xml
+ Generation of the xml file for the reference structure in t97_MPI4_sys.xml
 
 ================================================================================
 

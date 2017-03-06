@@ -33,8 +33,8 @@ optcell = 2
 #%% [files]
 #%% files_to_test = 
 #%%   t06.out, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -medium;
-#%%   system.xml, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -medium;
-#%%   coeffs.xml, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -medium;
+#%%   t06_sys.xml, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -medium;
+#%%   t06_coeffs.xml, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -medium;
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]

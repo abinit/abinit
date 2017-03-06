@@ -20,25 +20,25 @@ ntime  = 50
 #%% nprocs_to_test = 1, 2, 4, 10
 #%% max_nprocs = 10
 #%% [NCPU_1]
-#%% system_xml = t97_sys.xml
+#%% system_xml = t98_sys.xml
 #%% files_to_test = 
 #%%   t98_MPI1.out, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -easy;
-#%%   system.xml, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -easy
+#%%   t98_MPI1_sys.xml, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -easy
 #%% [NCPU_2]
-#%% system_xml = t97_sys.xml
+#%% system_xml = t98_sys.xml
 #%% files_to_test = 
 #%%   t98_MPI2.out, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -easy;
-#%%   system.xml, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -easy
+#%%   t98_MPI2_sys.xml, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -easy
 #%% [NCPU_4]
-#%% system_xml = t97_sys.xml
+#%% system_xml = t98_sys.xml
 #%% files_to_test = 
 #%%   t98_MPI4.out, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -easy;
-#%%   system.xml, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -easy
+#%%   t98_MPI4_sys.xml, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -easy
 #%% [NCPU_10]
-#%% system_xml = t97_sys.xml
+#%% system_xml = t98_sys.xml
 #%% files_to_test = 
 #%%   t98_MPI10.out, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -easy;
-#%%   system.xml, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -easy
+#%%   t98_MPI10_sys.xml, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -easy
 #%% [extra_info]
 #%% authors = A. MARTIN
 #%% keywords = Effective potential, multibinit

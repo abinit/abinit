@@ -22,7 +22,7 @@
 ================================================================================
 
  Read the information in the reference structure in 
--system.xml
+-t98_sys.xml
  to initialize the multibinit input
 
 ================================================================================
@@ -59,8 +59,8 @@
 
 ================================================================================
 
--Opening the file system.xml
--Reading the file system.xml with LibXML library
+-Opening the file t98_sys.xml
+-Reading the file t98_sys.xml with LibXML library
 
 ================================================================================
 
@@ -130,7 +130,7 @@
 
 ================================================================================
 
- Generation of the xml file for the reference structure in system.xml
+ Generation of the xml file for the reference structure in t98_MPI1_sys.xml
 
 ================================================================================
 

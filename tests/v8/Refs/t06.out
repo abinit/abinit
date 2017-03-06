@@ -79,9 +79,9 @@
 
 ================================================================================
 
- Generation of the xml file for the reference structure in system.xml
+ Generation of the xml file for the reference structure in t06_sys.xml
 
- Generation of the xml file for the polynomial fitting in coeffs.xml
+ Generation of the xml file for the polynomial fitting in t06_coeffs.xml
 
 ================================================================================
 

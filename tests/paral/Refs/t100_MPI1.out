@@ -79,9 +79,9 @@
 
 ================================================================================
 
- Generation of the xml file for the reference structure in system.xml
+ Generation of the xml file for the reference structure in t100_MPI1_sys.xml
 
- Generation of the xml file for the polynomial fitting in coeffs.xml
+ Generation of the xml file for the polynomial fitting in t100_MPI1_coeffs.xml
 
 ================================================================================
 

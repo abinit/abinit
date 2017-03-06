@@ -1953,6 +1953,7 @@ subroutine effective_potential_writeXML(eff_pot,option,filename)
  use defs_basis
  use m_errors
  use m_profiling_abi
+ use m_fstrings,   only : replace
  use m_multibinit_dataset, only : multibinit_dataset_type
 
 !This section has been created automatically by the script Abilint (TD).
@@ -1998,7 +1999,8 @@ subroutine effective_potential_writeXML(eff_pot,option,filename)
 !  convert natom in character
    write (natom,'(I9)') eff_pot%crystal%natom
    if(present(filename)) then
-     namefile=trim(filename)
+     namefile=replace(trim(filename),".out","")
+     namefile=trim(namefile)//"_sys.xml"
    else
      namefile='system.xml'
    end if
@@ -2212,7 +2214,12 @@ subroutine effective_potential_writeXML(eff_pot,option,filename)
 
 !Print only the coefficients into XML file
  if (option==  -1 .or. option == 2) then
-   namefile='coeffs.xml'
+   if(present(filename)) then
+     namefile=replace(trim(filename),".out","")
+     namefile=trim(namefile)//"_coeffs.xml"
+   else
+     namefile='coeffs.xml'
+   end if
    if(eff_pot%anharmonics_terms%ncoeff > 0) then
      call polynomial_coeff_writeXML(eff_pot%anharmonics_terms%coefficients,&
 &                                 eff_pot%anharmonics_terms%ncoeff,namefile)
@@ -2832,9 +2839,9 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
     end if
   end if
   do ii=1,3
-    if(eff_pot%supercell%qphon(ii)<0.or.eff_pot%supercell%qphon(ii)>20)then
+    if(eff_pot%supercell%qphon(ii)<0.or.eff_pot%supercell%qphon(ii)>50)then
       write(message, '(a,i0,a,i2,a,a,a,i0,a)' )&
-&     'eff_pot%supercell%qphon(',ii,') is ',eff_pot%supercell%qphon(ii),&
+&     'eff_pot%supercell%qphon(',ii,') is ',int(eff_pot%supercell%qphon(ii)),&
 &     ', which is lower than 0 of superior than 10.',ch10,'Action: correct n_cell(',ii,').'
       MSG_ERROR(message)
     end if

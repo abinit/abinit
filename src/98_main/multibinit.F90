@@ -53,7 +53,7 @@ program multibinit
  use m_effective_potential_file
  use m_abihist
  use m_io_tools,   only : get_unit, flush_unit,open_file
- use m_fstrings,   only : int2char4
+ use m_fstrings,   only : int2char4,replace
  use m_time ,      only : asctime
 
 !This section has been created automatically by the script Abilint (TD).
@@ -289,14 +289,14 @@ program multibinit
 !Print the effective potential system + coefficients (only master CPU)
  if(iam_master.and.(inp%prt_effpot<=-1.or.inp%prt_effpot>=3)) then
    select case(inp%prt_effpot)
-   case (-1)  
-     name = "system.xml"
+   case (-1) 
+     name = replace(trim(filnam(2)),".out","")
      call effective_potential_writeXML(reference_effective_potential,-1,filename=name)
    case(-2)
-     name = "system.nc"
+     name = trim(filnam(2))//"_sys.nc"
      call effective_potential_writeNETCDF(reference_effective_potential,1,filename=name)
    case (3)  
-     name = "system.xml"
+     name = replace(trim(filnam(2)),".out","")
      call effective_potential_writeXML(reference_effective_potential,1,filename=name)
    end select
  end if
