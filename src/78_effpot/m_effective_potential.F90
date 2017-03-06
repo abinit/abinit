@@ -725,7 +725,7 @@ subroutine effective_potential_generateDipDip(eff_pot,n_cell,option,asr,comm)
 
 !0 Check the size of the cell
  do ia=1,3
-   if(n_cell(ia)<0.or.n_cell(ia)>20)then
+   if(n_cell(ia)<0.or.n_cell(ia)>50)then
      write(message, '(a,i0,a,i0,a,a,a,i0,a)' )&
 &     'n_cell(',ia,') is ',n_cell(ia),', which is lower than 0 of superior than 20.',&
 &     ch10,'Action: correct n_cell(',ia,').'
@@ -1238,7 +1238,7 @@ subroutine effective_potential_effpot2dynmat(dynmat,delta,eff_pot,natom,n_cell,o
  end if
 
  do ii=1,3
-   if(n_cell(ii)<0.or.n_cell(ii)>20)then
+   if(n_cell(ii)<0.or.n_cell(ii)>50)then
      write(msg, '(a,i0,a,i0,a,a,a,i0,a)' )&
 &     'n_cell(',ii,') is ',n_cell(ii),', which is lower than 0 of superior than 20.',&
 &     ch10,'Action: correct n_cell(',ii,').'
@@ -2665,7 +2665,6 @@ subroutine effective_potential_getForces(eff_pot,fcart,fred,natom,rprimd,xcart,d
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'effective_potential_getForces'
- use interfaces_41_geometry
 !End of the abilint section
 
   implicit none
@@ -2717,17 +2716,19 @@ subroutine effective_potential_getForces(eff_pot,fcart,fred,natom,rprimd,xcart,d
       disp_tmp1(:,ii) = xcart(:,ii) - eff_pot%supercell%xcart_supercell(:,ii)
     end do
   end if
-
+!AM
+!Need to be update...
+!AM
 ! ifc contribution of the forces
-  call ifc_contribution(eff_pot,disp_tmp1,dummy,fcart,eff_pot%my_cells,&
-&                       eff_pot%my_ncell,eff_pot%my_index_cells,eff_pot%comm_supercell)
+!  call ifc_contribution(eff_pot,disp_tmp1,dummy,fcart,eff_pot%my_cells,&
+!&                       eff_pot%my_ncell,eff_pot%my_index_cells,eff_pot%comm_supercell)
 
 ! Redistribute the residuale of the forces
-  call effective_potential_distributeResidualForces(eff_pot,fcart,eff_pot%supercell%natom_supercell)
+!  call effective_potential_distributeResidualForces(eff_pot,fcart,eff_pot%supercell%natom_supercell)
 
 ! convert forces into reduced coordinates and multiply by -1
-  fcart = -1 * fcart
-  call fcart2fred(fcart,fred,rprimd,natom)
+!  fcart = -1 * fcart
+!  call fcart2fred(fcart,fred,rprimd,natom)
 
 end subroutine effective_potential_getForces
 !!***
@@ -2759,7 +2760,7 @@ end subroutine effective_potential_getForces
 !! SOURCE
 
 subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,rprimd,&
-&                                       xcart,displacement,strain_in,external_stress)
+&                                       xcart,displacement,strain_in)
 
   use m_strain
 
@@ -2785,7 +2786,6 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
   real(dp),intent(out) :: strten(6)
   real(dp),intent(in),optional :: strain_in(6)
   real(dp),intent(in),optional :: displacement(3,eff_pot%supercell%natom_supercell)
-  real(dp),intent(in),optional :: external_stress(6)
 
 !Local variables-------------------------------
 !scalar
@@ -2838,7 +2838,6 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
       MSG_ERROR(message)
     end if
   end do
-
 
   write(message, '(a,a,a)' ) ch10,' enter get_energy : Calculation of the energy'
   call wrtout(std_out,message,'COLL')

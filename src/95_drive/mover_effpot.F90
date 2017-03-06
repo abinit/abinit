@@ -205,7 +205,7 @@ implicit none
  ABI_DEALLOCATE(xred)
  ABI_DEALLOCATE(xcart)
 
- call effective_potential_printSupercell(effective_potential)
+! call effective_potential_printSupercell(effective_potential)
 
  if(inp%dynamics==12.or.inp%dynamics==13) then
 !***************************************************************
@@ -259,8 +259,8 @@ implicit none
 !  Set the barostat and thermonstat if ionmov == 13
    if(dtset%ionmov == 13)then
 
-     qmass = (dtset%natom* kb_THzK * dtset%mdtemp(1)) / (0.1**2)
-     bmass = (dtset%natom* kb_THzK * dtset%mdtemp(1)) / (0.01**2)
+     qmass = (abs(1+product(inp%strtarget(1:3)/3))*dtset%natom* kb_THzK * dtset%mdtemp(1)) / (0.1**2)
+     bmass = (abs(1+product(inp%strtarget(1:3)/3))*dtset%natom* kb_THzK * dtset%mdtemp(1)) / (0.01**2)
 
      if(dtset%nnos==0) then
        dtset%nnos = 1
@@ -285,8 +285,7 @@ implicit none
      end if
    end if
    
-   dtset%strtarget(1:3) = 0.0/29421.033d0 ! STRess TARGET
-   dtset%strtarget(4:6) = 0.0 ! STRess TARGET
+   dtset%strtarget(1:6) = -1 * inp%strtarget(1:6) / 29421.033d0 ! STRess TARGET
    ABI_ALLOCATE(symrel,(3,3,dtset%nsym))
    symrel = one
    call alloc_copy(symrel,dtset%symrel)

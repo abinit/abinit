@@ -158,7 +158,6 @@ subroutine mover(scfcv_args,ab_xfh,acell,amass,dtfil,&
  use interfaces_56_recipspace
  use interfaces_59_ionetcdf
  use interfaces_67_common
- use interfaces_79_seqpar_mpi
  use interfaces_95_drive, except_this_one => mover
 !End of the abilint section
 

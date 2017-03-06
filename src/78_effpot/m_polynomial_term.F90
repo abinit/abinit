@@ -104,7 +104,7 @@ CONTAINS  !=====================================================================
 !!
 !! SOURCE
 
-subroutine polynomial_term_init(atindx,cell,direction,ndisp,polynomial_term,power,weight)
+subroutine polynomial_term_init(atindx,cell,direction,ndisp,polynomial_term,power,weight,check)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -119,6 +119,7 @@ subroutine polynomial_term_init(atindx,cell,direction,ndisp,polynomial_term,powe
 !scalars
  integer, intent(in) :: ndisp
  real(dp),intent(in) :: weight
+ logical,optional,intent(in)  :: check
 !arrays
  integer, intent(in) :: atindx(2,ndisp)
  integer, intent(in) :: cell(3,2,ndisp)
@@ -127,6 +128,7 @@ subroutine polynomial_term_init(atindx,cell,direction,ndisp,polynomial_term,powe
 !Local variables-------------------------------
 !scalar
  integer :: idisp1,idisp2,ndisp_tmp
+ logical :: check_in = .false.
 !arrays
  integer :: power_tmp(ndisp)
  character(500) :: msg
@@ -157,33 +159,40 @@ subroutine polynomial_term_init(atindx,cell,direction,ndisp,polynomial_term,powe
 !First free structure before init
  call polynomial_term_free(polynomial_term)
 
-!Check if displacement are identical, in this case
-!increase the power 
+!Copy the powers before check
  power_tmp(:) = power(:)
 
- do idisp1=1,ndisp
-   do idisp2=idisp1,ndisp
-     if (idisp1/=idisp2.and.&
+ if(present(check)) check_in = check
+
+ if(check_in)then
+!Check if displacement are identical, in this case
+!increase the power 
+   do idisp1=1,ndisp
+     do idisp2=idisp1,ndisp
+       if (idisp1/=idisp2.and.&
 &        atindx(1,idisp1)   == atindx(1,idisp2).and.&
 &        atindx(2,idisp1)   == atindx(2,idisp2).and.&
 &        direction(idisp1)  == direction(idisp2).and.&
 &         all(cell(:,1,idisp1)==cell(:,1,idisp2)).and.&
 &         all(cell(:,2,idisp1)==cell(:,2,idisp2)).and.&
 &        power_tmp(idisp2) > 0 )then
-       power_tmp(idisp1) = power_tmp(idisp1) + 1
-       power_tmp(idisp2) = 0
+         power_tmp(idisp1) = power_tmp(idisp1) + 1
+         power_tmp(idisp2) = 0
+       end if
+     end do
+   end do
+
+! Count the number of power avec the previous check
+! or just remove the power equal to zero
+   ndisp_tmp=zero
+   do idisp1=1,ndisp
+     if(power_tmp(idisp1) > zero) then
+       ndisp_tmp = ndisp_tmp + 1
      end if
    end do
- end do
-
-!Count the number of power avec the previous check
-!or just remove the power equal to zero
- ndisp_tmp=zero
- do idisp1=1,ndisp
-   if(power_tmp(idisp1) > zero) then
-     ndisp_tmp = ndisp_tmp + 1
-   end if
- end do
+ else
+   ndisp_tmp  = ndisp
+ end if!end check
 
 !init the values
  polynomial_term%ndisp  = ndisp_tmp

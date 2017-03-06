@@ -35,6 +35,7 @@ module m_polynomial_coeff
  public :: polynomial_coeff_dot
  public :: polynomial_coeff_free
  public :: polynomial_coeff_init
+ public :: polynomial_coeff_chksym
  public :: polynomial_coeff_getName
  public :: polynomial_coeff_setCoefficient
  public :: polynomial_coeff_writeXML
@@ -102,7 +103,7 @@ CONTAINS  !=====================================================================
 !!
 !! SOURCE
 
-subroutine polynomial_coeff_init(coefficient,nterm,polynomial_coeff,terms,name)
+subroutine polynomial_coeff_init(coefficient,nterm,polynomial_coeff,terms,name,check)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -117,6 +118,7 @@ subroutine polynomial_coeff_init(coefficient,nterm,polynomial_coeff,terms,name)
 !scalars
  integer, intent(in) :: nterm
  real(dp),intent(in) :: coefficient
+ logical,optional,intent(in) :: check
 !arrays
  character(len=100),optional,intent(in) :: name
  type(polynomial_term_type),intent(in) :: terms(nterm)
@@ -126,6 +128,7 @@ subroutine polynomial_coeff_init(coefficient,nterm,polynomial_coeff,terms,name)
  integer :: iterm1,iterm2
  integer :: ii,nterm_tmp
  real(dp):: coefficient_tmp
+ logical :: check_in = .false.
 !arrays
  real(dp) :: weights(nterm)
  character(len=100) :: name_tmp
@@ -134,36 +137,44 @@ subroutine polynomial_coeff_init(coefficient,nterm,polynomial_coeff,terms,name)
 !First free before initilisation
  call polynomial_coeff_free(polynomial_coeff)
 
-!Check if the list of term is available or contains identical terms
-!in this case, remove all the not needed terms
- nterm_tmp = 0
- weights(:) = one
- do iterm1=1,nterm
-   if(weights(iterm1)==0)cycle
-   weights(iterm1) = terms(iterm1)%weight
-   do iterm2=iterm1+1,nterm
-     if(weights(iterm2)==0)cycle     
-!    if the terms are identical we check the weight
-     if(terms(iterm1)==terms(iterm2))then
-       weights(iterm1) = weights(iterm1) + terms(iterm2)%weight
-       weights(iterm2) = 0
-     end if
+ if(present(check)) check_in = check
+ if(check_in)then
+!  Check if the list of term is available or contains identical terms
+!  in this case, remove all the not needed terms
+   nterm_tmp = 0
+   weights(:) = one
+   do iterm1=1,nterm
+     if(weights(iterm1)==0)cycle
+     weights(iterm1) = terms(iterm1)%weight
+     do iterm2=iterm1+1,nterm
+       if(weights(iterm2)==0)cycle     
+!      if the terms are identical we check the weight
+       if(terms(iterm1)==terms(iterm2))then
+         weights(iterm1) = weights(iterm1) + terms(iterm2)%weight
+         weights(iterm2) = 0
+       end if
+     end do
+     if(weights(iterm1)/=0) weights(iterm1)= anint(weights(iterm1)/weights(iterm1))
    end do
-   if(weights(iterm1)/=0) weights(iterm1)= anint(weights(iterm1)/weights(iterm1))
- end do
 
 !Count the number of terms
- nterm_tmp = 0
- do iterm1=1,nterm
-   if(weights(iterm1) /= 0) nterm_tmp = nterm_tmp + 1
- end do
+   nterm_tmp = 0
+   do iterm1=1,nterm
+     if(weights(iterm1) /= 0) nterm_tmp = nterm_tmp + 1
+   end do
  
- if (nterm_tmp ==0)then
-   coefficient_tmp = 0.0
+   if (nterm_tmp ==0)then
+     coefficient_tmp = 0.0
+   else
+     coefficient_tmp = coefficient
+   end if
+
  else
+   nterm_tmp = nterm
    coefficient_tmp = coefficient
- end if
- 
+   weights(:) = terms(:)%weight
+ end if!end Check
+
  if(present(name))then
    name_tmp = name
  else
@@ -612,6 +623,44 @@ subroutine polynomial_coeff_writeXML(coeffs,ncoeff,filename)
   end if
 
 end subroutine polynomial_coeff_writeXML
+!!***
+
+!!****f* m_polynomial_coeff/polynomial_coeff_chksym
+!! NAME
+!!  polynomial_coeff_chksym
+!!
+!! FUNCTION
+!!  return the multiplication of two coefficients
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SOURCE
+
+subroutine polynomial_coeff_chksym(coeffs,ncoeff)
+!Arguments ------------------------------------
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'polynomial_coeff_chksym'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalar
+ integer, intent(in) :: ncoeff
+!arrays
+ type(polynomial_coeff_type), intent(inout) :: coeffs
+!local variables------------------------------
+!scalar
+!arrays
+
+! *************************************************************************
+
+end subroutine polynomial_coeff_chksym
 !!***
 
 !!****f* m_polynomial_coeff/polynomial_coeff_dot

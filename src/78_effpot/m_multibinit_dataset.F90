@@ -109,6 +109,7 @@ module m_multibinit_dataset
 
   real(dp) :: acell(3)
   real(dp) :: strain(6)
+  real(dp) :: strtarget(6)
   real(dp) :: rprim(3,3)
   real(dp) :: q1shft(3,4)
 
@@ -491,9 +492,9 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
  call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'n_cell',tread,'INT')
  if(tread==1) multibinit_dtset%n_cell(1:3)=intarr(1:3)
  do ii=1,3
-   if(multibinit_dtset%n_cell(ii)<0.or.multibinit_dtset%n_cell(ii)>20)then
+   if(multibinit_dtset%n_cell(ii)<0.or.multibinit_dtset%n_cell(ii)>50)then
      write(message, '(a,i0,a,i0,a,a,a,i0,a)' )&
-&     'n_cell(',ii,') is ',multibinit_dtset%n_cell(ii),', which is lower than 0 of superior than 10.',&
+&     'n_cell(',ii,') is ',multibinit_dtset%n_cell(ii),', which is lower than 0 of superior than 50.',&
 &     ch10,'Action: correct n_cell(',ii,') in your input file.'
      MSG_ERROR(message)
    end if
@@ -720,6 +721,18 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
 &       'Action: change acell in your input file.'
       MSG_ERROR(message) 
  end if
+
+ if(6>marr)then
+   marr=6
+   ABI_DEALLOCATE(intarr)
+   ABI_DEALLOCATE(dprarr)
+   ABI_ALLOCATE(intarr,(marr))
+   ABI_ALLOCATE(dprarr,(marr))
+ end if
+ multibinit_dtset%strtarget(1:6) = zero
+ call intagm(dprarr,intarr,jdtset,marr,6,string(1:lenstr),'strtarget',tread,'DPR')
+ if(tread==1) multibinit_dtset%strtarget(1:6)=dprarr(1:6)
+
 
  ABI_ALLOCATE(multibinit_dtset%atifc,(natom))
  multibinit_dtset%atifc(:)=zero

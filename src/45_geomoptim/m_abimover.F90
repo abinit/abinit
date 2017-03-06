@@ -322,7 +322,7 @@ type, public :: ab_xfh_type
    ! mxfh = last dimension of the xfhist array
    ! nxfh = actual number of (x,f) history pairs, see xfhist array
 
- real(dp),pointer :: xfhist(:,:,:,:)
+ real(dp),allocatable :: xfhist(:,:,:,:)
    ! xfhist(3,natom+4,2,mxfh) = (x,f) history array, also including rprim and stress
 
 end type ab_xfh_type
