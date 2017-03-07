@@ -106,15 +106,15 @@ subroutine clnup2(n1xccc,fred,grchempottn,gresid,grewtn,grvdw,grxc,iscf,natom,ng
        call wrtout(ab_out,message,'COLL')
      end do
 
-     grchempot2=sum(grchempottn(:,:)**2)
-     if(grchempot2>tol16)then
-       write(message, '(a)' ) ' chemical potential contribution to reduced grads'
-       call wrtout(ab_out,message,'COLL')
-       do iatom=1,natom
-         write(message,format01020) iatom,(grchempottn(mu,iatom),mu=1,3)
-         call wrtout(ab_out,message,'COLL')
-       end do
-     endif
+!    grchempot2=sum(grchempottn(:,:)**2)
+!    if(grchempot2>tol16)then
+!      write(message, '(a)' ) ' chemical potential contribution to reduced grads'
+!      call wrtout(ab_out,message,'COLL')
+!      do iatom=1,natom
+!        write(message,format01020) iatom,(grchempottn(mu,iatom),mu=1,3)
+!        call wrtout(ab_out,message,'COLL')
+!      end do
+!    endif
 
      write(message, '(a)' ) ' nonlocal contribution to red. grads'
      call wrtout(ab_out,message,'COLL')
