@@ -18,6 +18,7 @@
 !!
 !! INPUTS
 !!  fred(3,natom)=d(E_total)/d(xred) derivatives (hartree)
+!!  grchempottn(3,natom)=d(E_chempot)/d(xred) derivatives (hartree)
 !!  grewtn(3,natom)=d(E_Ewald)/d(xred) derivatives (hartree)
 !!  grvdw(3,ngrvdw)=gradients of energy due to Van der Waals DFT-D2 dispersion (hartree)
 !!  grxc(3,natom)=d(Exc)/d(xred) derivatives (0 without core charges)
@@ -52,7 +53,7 @@
 #include "abi_common.h"
 
 
-subroutine clnup2(n1xccc,fred,gresid,grewtn,grvdw,grxc,iscf,natom,ngrvdw,&
+subroutine clnup2(n1xccc,fred,grchempottn,gresid,grewtn,grvdw,grxc,iscf,natom,ngrvdw,&
 &                 prtfor,prtstr,prtvol,start,strten,synlgr,xred)
 
  use defs_basis
@@ -71,7 +72,8 @@ subroutine clnup2(n1xccc,fred,gresid,grewtn,grvdw,grxc,iscf,natom,ngrvdw,&
 !scalars
  integer,intent(in) :: iscf,n1xccc,natom,ngrvdw,prtfor,prtstr,prtvol
 !arrays
- real(dp),intent(in) :: fred(3,natom),gresid(3,natom),grewtn(3,natom),grvdw(3,ngrvdw)
+ real(dp),intent(in) :: fred(3,natom),grchempottn(3,natom),gresid(3,natom)
+ real(dp),intent(in) :: grewtn(3,natom),grvdw(3,ngrvdw)
  real(dp),intent(in) :: grxc(3,natom),start(3,natom),strten(6),synlgr(3,natom)
  real(dp),intent(in) :: xred(3,natom)
 
@@ -79,7 +81,7 @@ subroutine clnup2(n1xccc,fred,gresid,grewtn,grvdw,grxc,iscf,natom,ngrvdw,&
  character(len=*), parameter :: format01020 ="(i5,1x,3f20.12)"
 !scalars
  integer :: iatom,mu
- real(dp) :: devsqr
+ real(dp) :: devsqr,grchempot2
  character(len=500) :: message
 
 ! *************************************************************************
@@ -103,6 +105,16 @@ subroutine clnup2(n1xccc,fred,gresid,grewtn,grvdw,grxc,iscf,natom,ngrvdw,&
        write(message,format01020) iatom,(grewtn(mu,iatom),mu=1,3)
        call wrtout(ab_out,message,'COLL')
      end do
+
+     grchempot2=sum(grchempottn(:,:)**2)
+     if(grchempot2>tol16)then
+       write(message, '(a)' ) ' chemical potential contribution to reduced grads'
+       call wrtout(ab_out,message,'COLL')
+       do iatom=1,natom
+         write(message,format01020) iatom,(grchempottn(mu,iatom),mu=1,3)
+         call wrtout(ab_out,message,'COLL')
+       end do
+     endif
 
      write(message, '(a)' ) ' nonlocal contribution to red. grads'
      call wrtout(ab_out,message,'COLL')
