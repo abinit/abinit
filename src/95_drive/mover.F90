@@ -649,8 +649,14 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
          do ii=1,3
            rprim(ii,1:3)=rprimd(ii,1:3)/acell(1:3)
          end do
-         call xfh_update(ab_xfh,acell,fred_corrected,ab_mover%natom,rprim,&
+
+!        AM(3/7/17):This function induces memory leak, I don't know why.
+!        Morever, the size of ab_xfh%xfhist is to big for very large supercell.
+!        Call it only for specific ionmov
+         if(any((/2,3,10,11,22/)==ab_mover%ionmov)) then
+           call xfh_update(ab_xfh,acell,fred_corrected,ab_mover%natom,rprim,&
 &                        hist%strten(:,hist%ihist),xred)
+         end if
        end if
        ABI_DEALLOCATE(fred_corrected)
      end if
