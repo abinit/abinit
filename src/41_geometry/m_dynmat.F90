@@ -3767,7 +3767,7 @@ subroutine wght9(brav,gprim,natom,ngqpt,nqpt,nqshft,nrpt,qshft,rcan,rpt,rprimd,r
      end do
    end do
  end do
-print *, "found r_inscribed_sphere ", r_inscribed_sphere, " bohr"
+ r_inscribed_sphere = sqrt(r_inscribed_sphere)
 
 
 !Begin the big loop on ia and ib
