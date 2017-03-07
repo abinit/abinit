@@ -51,7 +51,7 @@ nstep 10
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   t30.out, tolnlines=   16,   tolabs=  1.0e-01,      tolrel= 1.0e-01, fld_options = -easy
+#%%   t31.out, tolnlines=   0,   tolabs=  0.0e-01,      tolrel= 0.0e-01, fld_options = -easy
 #%% psp_files = Li.LDA-PW-paw.abinit, H.LDA-PW-paw.abinit
 #%% [paral_info]
 #%% max_nprocs = 1
