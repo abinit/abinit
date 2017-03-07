@@ -571,7 +571,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
 
 !Various allocations (potentials, gradients, ...)
  ABI_ALLOCATE(forold,(3,dtset%natom))
- ABI_ALLOCATE(grchempottn(3*dtset%natom))
+ ABI_ALLOCATE(grchempottn,(3*dtset%natom))
  ABI_ALLOCATE(gresid,(3,dtset%natom))
  ABI_ALLOCATE(grewtn,(3,dtset%natom))
  ABI_ALLOCATE(grnl,(3*dtset%natom))
