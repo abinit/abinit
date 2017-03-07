@@ -586,6 +586,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
  ABI_ALLOCATE(vxctau,(nfftf,dtset%nspden,4*dtset%usekden))
  ngrvdw=0;if (dtset%vdw_xc>=5.and.dtset%vdw_xc<=7) ngrvdw=dtset%natom
  ABI_ALLOCATE(grvdw,(3,ngrvdw))
+ grchempottn(:,:)=zero
  forold(:,:)=zero ; gresid(:,:)=zero ; pel(:)=zero
  vtrial(:,:)=zero; vxc(:,:)=zero
  n1xccc=0;if (psps%n1xccc/=0) n1xccc=psps%n1xccc
@@ -1147,7 +1148,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
        dummy_nhatgr = .True.
      end if
 
-     call setvtr(atindx1,dtset,energies,gmet,gprimd,grewtn,grvdw,gsqcut,&
+     call setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gsqcut,&
 &     istep,kxc,mgfftf,moved_atm_inside,moved_rhor,mpi_enreg,&
 &     nattyp,nfftf,ngfftf,ngrvdw,nhat,nhatgr,nhatgrdim,nkxc,psps%ntypat,&
 &     n1xccc,n3xccc,optene,pawrad,pawtab,ph1df,psps,rhog,rhor,rmet,rprimd,&

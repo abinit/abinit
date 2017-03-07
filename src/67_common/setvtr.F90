@@ -76,8 +76,8 @@
 !!   | e_xcdc=exchange-correlation double-counting energy (hartree)
 !!  ==== if dtset%vdw_xc == 5 or 6 or 7
 !!   | e_vdw_dftd=Dispersion energy from DFT-D Van der Waals correction (hartree)
-!!  grewtn(3,natom)=grads of Ewald energy (hartree)
 !!  grchempottn(3,natom)=grads of spatially-varying chemical energy (hartree)
+!!  grewtn(3,natom)=grads of Ewald energy (hartree)
 !!  grvdw(3,ngrvdw)=gradients of energy due to Van der Waals DFT-D2 dispersion (hartree)
 !!  kxc(nfft,nkxc)=exchange-correlation kernel, will be computed if nkxc/=0 .
 !!                 see routine rhohxc for a more complete description
@@ -121,7 +121,7 @@
 
 #include "abi_common.h"
 
-subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grewtn,grvdw,gsqcut,&
+subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gsqcut,&
 &  istep,kxc,mgfft,moved_atm_inside,moved_rhor,mpi_enreg,&
 &  nattyp,nfft,ngfft,ngrvdw,nhat,nhatgr,nhatgrdim,nkxc,ntypat,n1xccc,n3xccc,&
 &  optene,pawrad,pawtab,ph1d,psps,rhog,rhor,rmet,rprimd,strsxc,&
@@ -193,7 +193,7 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grewtn,grvdw,gsqcut,&
  real(dp),intent(out),optional :: vxctau(nfft,dtset%nspden,4*dtset%usekden)
  real(dp),intent(inout) :: xccc3d(n3xccc)
  real(dp),intent(in) :: xred(3,dtset%natom)
- real(dp),allocatable :: grchempottn(:,:)
+ real(dp),intent(out) :: grchempottn(3,dtset%natom)
  real(dp),intent(out) :: grewtn(3,dtset%natom),grvdw(3,ngrvdw),kxc(nfft,nkxc),strsxc(6)
  type(pawtab_type),intent(in) :: pawtab(ntypat*dtset%usepaw)
  type(pawrad_type),intent(in) :: pawrad(ntypat*dtset%usepaw)
@@ -249,7 +249,6 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grewtn,grvdw,gsqcut,&
 !Get Ewald energy and Ewald forces, as well as vdW-DFTD energy and forces, and chemical potential energy and forces.
 !-------------------------------------------------------------------------------------------------------------------
  call timab(5,1,tsec)
- ABI_ALLOCATE(grchempottn,(3,dtset%natom))
  if (ipositron/=1) then
    if (dtset%icoulomb == 0 .or. (dtset%usewvl == 0 .and. dtset%icoulomb == 2)) then
 !    Periodic system, need to compute energy and forces due to replica and
@@ -291,7 +290,6 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grewtn,grvdw,gsqcut,&
    energies%e_vdw_dftd=zero
    if (ngrvdw>0) grvdw=zero
  end if
- ABI_DEALLOCATE(grchempottn)
  call timab(5,2,tsec)
 
 !Compute parts of total energy depending on potentials

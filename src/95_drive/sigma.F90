@@ -233,7 +233,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  integer,allocatable :: tmp_kstab(:,:,:),ks_irreptab(:,:,:),qp_irreptab(:,:,:)
  real(dp),parameter ::  k0(3)=zero
  real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3),rprimd(3,3),strsxc(6),tsec(2)
- real(dp),allocatable :: grewtn(:,:),grvdw(:,:),qmax(:)
+ real(dp),allocatable :: grchempottn(:,:),grewtn(:,:),grvdw(:,:),qmax(:)
  real(dp),allocatable :: ks_nhat(:,:),ks_nhatgr(:,:,:),ks_rhog(:,:)
  real(dp),allocatable :: ks_rhor(:,:),ks_vhartr(:),ks_vtrial(:,:),ks_vxc(:,:)
  real(dp),allocatable :: ks_taug(:,:),ks_taur(:,:)
@@ -939,6 +939,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
 
  ngrvdw=0
  ABI_MALLOC(grvdw,(3,ngrvdw))
+ ABI_MALLOC(grchempottn,(3,Cryst%natom))
  ABI_MALLOC(grewtn,(3,Cryst%natom))
  nkxc=0
  if (Dtset%nspden==1) nkxc=2
@@ -959,7 +960,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
 
  optene=4; moved_atm_inside=0; moved_rhor=0; istep=1
 
- call setvtr(Cryst%atindx1,Dtset,KS_energies,gmet,gprimd,grewtn,grvdw,gsqcutf_eff,&
+ call setvtr(Cryst%atindx1,Dtset,KS_energies,gmet,gprimd,grchempottn,grewtn,grvdw,gsqcutf_eff,&
 & istep,kxc,mgfftf,moved_atm_inside,moved_rhor,MPI_enreg_seq,&
 & Cryst%nattyp,nfftf,ngfftf,ngrvdw,ks_nhat,ks_nhatgr,nhatgrdim,nkxc,Cryst%ntypat,Psps%n1xccc,n3xccc,&
 & optene,pawrad,Pawtab,ph1df,Psps,ks_rhog,ks_rhor,Cryst%rmet,Cryst%rprimd,strsxc,&
@@ -1335,7 +1336,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
 
    optene=4; moved_atm_inside=0; moved_rhor=0; istep=1
 
-   call setvtr(Cryst%atindx1,Dtset,QP_energies,gmet,gprimd,grewtn,grvdw,gsqcutf_eff,&
+   call setvtr(Cryst%atindx1,Dtset,QP_energies,gmet,gprimd,grchempottn,grewtn,grvdw,gsqcutf_eff,&
 &   istep,qp_kxc,mgfftf,moved_atm_inside,moved_rhor,MPI_enreg_seq,&
 &   Cryst%nattyp,nfftf,ngfftf,ngrvdw,qp_nhat,qp_nhatgr,nhatgrdim,nkxc,Cryst%ntypat,Psps%n1xccc,n3xccc,&
 &   optene,pawrad,Pawtab,ph1df,Psps,qp_rhog,qp_rhor,Cryst%rmet,Cryst%rprimd,strsxc,&
@@ -2386,6 +2387,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  ABI_FREE(vpsp)
  ABI_FREE(ks_vxc)
  ABI_FREE(xccc3d)
+ ABI_FREE(grchempottn)
  ABI_FREE(grewtn)
  ABI_FREE(grvdw)
  ABI_FREE(sigcme)
