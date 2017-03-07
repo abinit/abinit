@@ -497,8 +497,8 @@
 iatom,iwchan,igqpt2(i),gij error=   3 10     4     4     4   0.00000
  gij with channel width=      9 newly converged
 iatom,iwchan,igqpt2(i),gij error=   3  9     4     4     4   0.00000
- B matrix elements as a function of T
-    Angstrom^2, cartesian coordinates
+# B matrix elements as a function of T
+#    Angstrom^2, cartesian coordinates
   9  1  1.000E+02  3.0473E-03  3.0473E-03  3.0473E-03  1.0000E-10  1.0000E-10  1.0000E-10
   9  2  1.000E+02  3.0473E-03  3.0473E-03  3.0473E-03  1.0000E-10  1.0000E-10  1.0000E-10
   9  1  2.000E+02  4.5695E-03  4.5695E-03  4.5695E-03  1.0000E-10  1.0000E-10  1.0000E-10

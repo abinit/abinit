@@ -2556,7 +2556,10 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
  call fstab_print(fstab)
 
  ! now we can initialize the ddk velocities, on the FS grid only
- if (dtset%eph_transport > 0) call ddk_read_fsvelocities(ddk, fstab, comm)
+ if (dtset%eph_transport > 0) then
+   call ddk_read_fsvelocities(ddk, fstab, comm)
+   !call ddk_fs_average_veloc(ddk, fstab, comm)
+ end if
 
  ! TODO: Support nsig in phgamma_init
  eph_scalprod = 0
@@ -3112,10 +3115,10 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
  call a2fw_free(a2fw)
 
  ! Compute A2fw using Fourier interpolation and full BZ for debugging purposes.
- !call a2fw_init(a2fw,gams,cryst,ifc,dtset%ph_intmeth,dtset%ph_wstep,wminmax,dtset%ph_smear,&
- !  dtset%ph_ngqpt,dtset%ph_nqshift,dtset%ph_qshift,comm,qptopt=3)
- !if (my_rank == master) call a2fw_write(a2fw, strcat(dtfil%filnam_ds(4), "_A2FW_QPTOPT3"))
- !call a2fw_free(a2fw)
+ call a2fw_init(a2fw,gams,cryst,ifc,dtset%ph_intmeth,dtset%ph_wstep,wminmax,dtset%ph_smear,&
+   dtset%ph_ngqpt,dtset%ph_nqshift,dtset%ph_qshift,comm,qptopt=3)
+ if (my_rank == master) call a2fw_write(a2fw, strcat(dtfil%filnam_ds(4), "_A2FW_QPTOPT3"))
+ call a2fw_free(a2fw)
 
 #ifdef HAVE_NETCDF
  if (my_rank == master) then

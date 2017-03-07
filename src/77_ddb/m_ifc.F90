@@ -118,6 +118,9 @@ MODULE m_ifc
      ! Min and max frequency obtained on the initial ab-initio q-mesh (-+ 30 cmm1)
      ! Used to generate frequency meshes for DOSes.
 
+   real(dp) :: r_inscribed_sphere
+     ! radius of biggest sphere inscribed in the WS supercell
+
    real(dp),allocatable :: amu(:)
      ! amu(ntypat)
      ! mass of the atoms (atomic mass unit)
@@ -431,6 +434,7 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
  integer :: nprocs,my_rank,ierr
  real(dp),parameter :: qphnrm=one
  real(dp) :: xval,cpu,wall,gflops,rcut_min
+ real(dp) :: r_inscribed_sphere
  character(len=500) :: message
  type(ifc_type) :: ifc_tmp
 !arrays
@@ -610,7 +614,8 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
 ! MG FIXME: Why ngqpt is intent(inout)?
  ABI_MALLOC(ifc_tmp%wghatm,(natom,natom,ifc_tmp%nrpt))
  new_wght = 0
- call wght9(Ifc%brav,gprim,natom,ngqpt,nqbz,nqshft,ifc_tmp%nrpt,q1shft,rcan,ifc_tmp%rpt,rprimd,new_wght,ifc_tmp%wghatm)
+ call wght9(Ifc%brav,gprim,natom,ngqpt,nqbz,nqshft,ifc_tmp%nrpt,q1shft,rcan,&
+&     ifc_tmp%rpt,rprimd,r_inscribed_sphere,new_wght,ifc_tmp%wghatm)
 
 ! Fourier transformation of the dynamical matrices (q-->R)
  ABI_MALLOC(ifc_tmp%atmfrc,(2,3,natom,3,natom,ifc_tmp%nrpt))
@@ -658,6 +663,7 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
      Ifc%rpt(:,irpt_new) = ifc_tmp%rpt(:,irpt)
      Ifc%wghatm(:,:,irpt_new) = ifc_tmp%wghatm(:,:,irpt)
      Ifc%cell(:,irpt_new) = ifc_tmp%cell(:,irpt)
+     Ifc%r_inscribed_sphere = r_inscribed_sphere
      irpt_new = irpt_new + 1
    end if
  end do
@@ -1624,10 +1630,11 @@ subroutine ifc_write(Ifc,ifcana,atifc,ifcout,prt_ifc,ncid)
 
 !Local variables -------------------------
 !scalars
- integer :: ia,ii,ncerr,iatifc,ifcout1,mu,nu,iout, irpt
-! unit number to print out ifc information for dynamical matrix (AI2PS)
+ integer :: ia,ib,ii,ncerr,iatifc,ifcout1,mu,nu,iout, irpt
+! unit number to print out ifc information for dynamical matrix (AI2PS) 
  integer :: unit_ifc, unit_tdep
  real(dp) :: detdlt
+ real(dp) :: maxdist_tdep
  character(len=500) :: message
  character(len=4) :: str1, str2
 !arrays
@@ -1712,8 +1719,12 @@ subroutine ifc_write(Ifc,ifcana,atifc,ifcout,prt_ifc,ncid)
 &   ' constants in TDEP format. This is because prt_ifc==1. '
    ! Print necessary stuff for TDEP
    write(unit_tdep,"(1X,I10,15X,'How many atoms per unit cell')") Ifc%natom
-
-   write(unit_tdep,"(1X,F20.15,5X,'Realspace cutoff (A)')") maxval(dist)*Bohr_Ang+1E-5_dp
+ 
+   ! look at all pairs, find furthest one with weight 1
+!   do ia 
+!Ifc%wghatm(ia,ib,irpt)
+   maxdist_tdep = Ifc%r_inscribed_sphere !maxval(dist)*0.8_dp
+   write(unit_tdep,"(1X,F20.15,5X,'Realspace cutoff (A)')") maxdist_tdep*Bohr_Ang
  end if
 
 #ifdef HAVE_NETCDF
@@ -1794,18 +1805,22 @@ subroutine ifc_write(Ifc,ifcana,atifc,ifcout,prt_ifc,ncid)
        write(unit_tdep,"(1X,I10,15X,'How many neighbours does atom ',I3,' have')") ifcout1, ia
 
        do ii=1,ifcout1
+         ib = indngb(ii)
+         irpt = (list(ii)-1)/Ifc%natom+1
+         ! limit printing to maximum distance for tdep
+         if (wkdist(ii) > maxdist_tdep) cycle
+
          !TDEP
          call int2char4(ii, str1)
          call int2char4(ia, str2)
-         write(unit_tdep,"(1X,I10,15X,a,a,a,a)") indngb(ii), &
+         write(unit_tdep,"(1X,I10,15X,a,a,a,a)") ib, &
 &            'In the unit cell, what is the index of neighbour ', &
 &            trim(str1), " of atom ", trim(str2)
          ! The lattice vector needs to be in reduced coordinates?
          ! TODO: check whether this is correct for TDEP: might need just lattice
          ! vector part and not full vector, and could be in integers instead of
          ! cartesian vector...
-         irpt=(list(ii)-1)/Ifc%natom+1
-         write(unit_tdep,'(3es28.16)') matmul(Ifc%rpt(1:3,irpt),Ifc%gprim)
+         write (unit_tdep,'(3es28.16)') matmul(Ifc%rpt(1:3,irpt),Ifc%gprim) 
 
          !AI2PS
          write(unit_ifc,'(i6,i6)') ia,ii
@@ -1814,8 +1829,9 @@ subroutine ifc_write(Ifc,ifcana,atifc,ifcout,prt_ifc,ncid)
            !TDEp
            ! And the actual short ranged forceconstant: TODO: check if
            ! a transpose is needed or a swap between the nu and the mu
-           write(unit_tdep,'(3f28.16)') (sriaf(nu,mu,ii)*Ha_eV/amu_emass, mu=1, 3)
-
+           !write(unit_tdep,'(3f28.16)') (sriaf(nu,mu,ii)*Ha_eV/amu_emass, mu=1, 3)
+           write(unit_tdep,'(3f28.16)') (Ifc%short_atmfrc(1,mu,ia,nu,ib,irpt)*Ha_eV/amu_emass, mu=1, 3)
+           
            !AI2PS
            write(unit_ifc,'(3f28.16)')(rsiaf(nu,mu,ii),mu=1,3)
          end do
