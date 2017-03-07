@@ -454,7 +454,8 @@ subroutine forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,&
 !Collect grads of etot wrt reduced coordinates
 !This gives non-symmetrized Hellman-Feynman reduced gradients
  ABI_ALLOCATE(grtn,(3,dtset%natom))
- grtn(:,:)=grl(:,:)+grchempottn(:,:)+grewtn(:,:)+synlgr(:,:)+grxc(:,:)
+!grtn(:,:)=grl(:,:)+grchempottn(:,:)+grewtn(:,:)+synlgr(:,:)+grxc(:,:)
+ grtn(:,:)=grl(:,:)+grewtn(:,:)+synlgr(:,:)+grxc(:,:)
 
  if (usefock==1 .and. associated(fock).and.fock%optfor) then
    grtn(:,:)=grtn(:,:)+fock%forces(:,:)
@@ -490,7 +491,8 @@ subroutine forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,&
    end if
  end if
  if (abs(ipositron)==1) then
-   grtn(:,:)=grtn(:,:)-grxc(:,:)-grchempottn(:,:)-grewtn(:,:)-gresid(:,:)-two*grl(:,:)
+!  grtn(:,:)=grtn(:,:)-grxc(:,:)-grchempottn(:,:)-grewtn(:,:)-gresid(:,:)-two*grl(:,:)
+   grtn(:,:)=grtn(:,:)-grxc(:,:)-grewtn(:,:)-gresid(:,:)-two*grl(:,:)
    grl(:,:)=-grl(:,:);grxc(:,:)=zero;gresid(:,:)=zero
    if (ngrvdw==dtset%natom) grtn(:,:)=grtn(:,:)-grvdw(:,:)
    if ( dtset%berryopt== 4 .or. dtset%berryopt== 6 .or. dtset%berryopt== 7 .or. &
