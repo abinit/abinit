@@ -377,7 +377,7 @@ subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,e
      resid => nvresid
    end if
 
-   call forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,forold,fred,gresid,grewtn,&
+   call forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,forold,fred,grchempottn,gresid,grewtn,&
 &     grhf,grnl,grvdw,grxc,gsqcut,indsym,maxfor,mgfftf,&
 &     mpi_enreg,psps%n1xccc,n3xccc,nattyp,&
 &     nfftf,ngfftf,ngrvdw,ntypat,pawrad,pawtab,ph1df,psps,rhog,&

@@ -419,7 +419,7 @@ subroutine etotfor(atindx1,deltae,diffor,dtefield,dtset,&
    else
      resid => nvresid
    end if
-   call forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,forold,fred,gresid,grewtn,&
+   call forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,forold,fred,grchempottn,gresid,grewtn,&
 &     grhf,grnl,grvdw,grxc,gsqcut,indsym,maxfor,mgfft,mpi_enreg,&
 &     n1xccc,n3xccc,nattyp,nfft,ngfft,ngrvdw,ntypat,&
 &     pawrad,pawtab,ph1d,psps,rhog,rhor,rprimd,symrec,synlgr,dtset%usefock,resid,vxc,wvl,wvl_den,xred,&
