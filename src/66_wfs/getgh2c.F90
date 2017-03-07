@@ -142,7 +142,7 @@ subroutine getgh2c(cwavef,cwaveprj,gh2c,gs2c,gs_hamkq,gvnl2,idir,ipert,lambda,&
    MSG_BUG(msg)
  end if
  pert_phon_elfd = .false.
- if (ipert>=natom+11.and.ipert<=2*natom+11) pert_phon_elfd = .true.
+ if (ipert>natom+11.and.ipert<=2*natom+11) pert_phon_elfd = .true.
  if (mpi_enreg%paral_spinor==1) then
    msg='Not compatible with parallelization over spinorial components!'
    MSG_BUG(msg)
@@ -322,6 +322,13 @@ subroutine getgh2c(cwavef,cwaveprj,gh2c,gs2c,gs_hamkq,gvnl2,idir,ipert,lambda,&
          gvnl2_(:,ipw)=gvnl2_(:,ipw)+nonlop_out(:,ipw)
        end do
 
+     else
+
+!$OMP PARALLEL DO
+       do ipw=1,npw1*my_nspinor
+         gvnl2_(:,ipw)=zero
+       end do
+
      end if ! opt_gvnl2==1
 
 !    Compute derivatives due to projectors |d^2[p_i]/dk1dk2>,|d[p_i]/dk1>,|d[p_i]/dk2>
@@ -394,6 +401,13 @@ subroutine getgh2c(cwavef,cwaveprj,gh2c,gs2c,gs_hamkq,gvnl2,idir,ipert,lambda,&
 !$OMP PARALLEL DO
        do ipw=1,npw1*my_nspinor
          gvnl2_(:,ipw)=gvnl2_(:,ipw)+nonlop_out(:,ipw)
+       end do
+
+     else
+
+!$OMP PARALLEL DO
+       do ipw=1,npw1*my_nspinor
+         gvnl2_(:,ipw)=zero
        end do
 
      end if ! opt_gvnl2==1
