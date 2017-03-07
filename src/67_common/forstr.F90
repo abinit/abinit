@@ -59,6 +59,7 @@
 !!   | e_kinetic(IN)=kinetic energy part of total energy.
 !!  eigen(mband*nkpt*nsppol)=array for holding eigenvalues (hartree)
 !!  fock <type(fock_type)>= quantities to calculate Fock exact exchange
+!!  grchempottn(3,natom)=d(E_chemical potential)/d(xred) (hartree)
 !!  grewtn(3,natom)=d(Ewald)/d(xred) (hartree)
 !!  grvdw(3,ngrvdw)=gradients of energy due to Van der Waals DFT-D dispersion (hartree)
 !!  gsqcut=cutoff value on G**2 for (large) sphere inside FFT box.
@@ -169,7 +170,7 @@
 #include "abi_common.h"
 
 subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,energies,favg,fcart,fock,&
-&                 forold,fred,gresid,grewtn,grhf,grvdw,grxc,gsqcut,indsym,&
+&                 forold,fred,grchempottn,gresid,grewtn,grhf,grvdw,grxc,gsqcut,indsym,&
 &                 kg,kxc,maxfor,mcg,mcprj,mgfftf,mpi_enreg,my_natom,n3xccc,nattyp,&
 &                 nfftf,ngfftf,ngrvdw,nhat,nkxc,npwarr,&
 &                 ntypat,nvresid,occ,optfor,optres,paw_ij,pawang,pawfgr,&
@@ -233,7 +234,7 @@ subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,e
  integer,intent(in) :: npwarr(dtset%nkpt),symrec(3,3,dtset%nsym)
  real(dp),intent(in) :: cg(2,mcg)
  real(dp),intent(in) :: eigen(dtset%mband*dtset%nkpt*dtset%nsppol)
- real(dp),intent(in) :: grewtn(3,dtset%natom),grvdw(3,ngrvdw),kxc(dtset%nfft,nkxc)
+ real(dp),intent(in) :: grchempottn(3,dtset%natom),grewtn(3,dtset%natom),grvdw(3,ngrvdw),kxc(dtset%nfft,nkxc)
  real(dp),intent(in) :: occ(dtset%mband*dtset%nkpt*dtset%nsppol)
  real(dp),intent(in) :: ph1d(2,3*(2*dtset%mgfft+1)*dtset%natom)
  real(dp),intent(in) :: ph1df(2,3*(2*mgfftf+1)*dtset%natom)

@@ -343,7 +343,7 @@ type(fock_type),pointer, intent(inout) :: fock
        if (electronpositron%calctype==0) electronpositron%calctype=-100
        if (electronpositron%calctype==-1) n3xccc0=0  ! Note: if calctype=-1, previous calculation was positron
        call forstr(atindx1,cg,cprj,diffor_dum,dtefield,dtset,eigen,electronpositron,energies,&
-&       favg_dum,fcart_dum,fock,forold_dum,fred_tmp,gresid_dum,grewtn,grhf_dum,grvdw,grxc_dum,gsqcut,&
+&       favg_dum,fcart_dum,fock,forold_dum,fred_tmp,grchempottn,gresid_dum,grewtn,grhf_dum,grvdw,grxc_dum,gsqcut,&
 &       indsym,kg,kxc,maxfor_dum,mcg,mcprj,mgfft,mpi_enreg,my_natom,n3xccc0,nattyp,nfft,ngfft,&
 &       ngrvdw,nhat,nkxc,npwarr,dtset%ntypat,nvresid,occ,optfor,optres,paw_ij,pawang,pawfgr,&
 &       pawfgrtab,pawrad,pawrhoij,pawtab,ph1dc,ph1d,psps,rhog,rhor,rprimd,optstr,strsxc,str_tmp,symrec,&
