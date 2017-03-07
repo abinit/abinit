@@ -117,7 +117,7 @@
 
 #include "abi_common.h"
 
-subroutine forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,
+subroutine forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,&
 &                  forold,fred,grchempottn,gresid,grewtn,&
 &                  grhf,grnl,grvdw,grxc,gsqcut,indsym,&
 &                  maxfor,mgfft,mpi_enreg,n1xccc,n3xccc,&
