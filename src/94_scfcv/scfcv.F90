@@ -571,7 +571,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
 
 !Various allocations (potentials, gradients, ...)
  ABI_ALLOCATE(forold,(3,dtset%natom))
- ABI_ALLOCATE(grchempottn,(3*dtset%natom))
+ ABI_ALLOCATE(grchempottn,(3,dtset%natom))
  ABI_ALLOCATE(gresid,(3,dtset%natom))
  ABI_ALLOCATE(grewtn,(3,dtset%natom))
  ABI_ALLOCATE(grnl,(3*dtset%natom))
@@ -1913,7 +1913,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
 !SHOULD CLEAN THE ARGS OF THIS ROUTINE
  call afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
 & deltae,diffor,dtefield,dtfil,dtset,eigen,electronpositron,elfr,&
-& energies,etotal,favg,fcart,fock,forold,fred,grchempottn,
+& energies,etotal,favg,fcart,fock,forold,fred,grchempottn,&
 & gresid,grewtn,grhf,grhor,grvdw,&
 & grxc,gsqcut,hdr,indsym,irrzon,istep,kg,kxc,lrhor,maxfor,mcg,mcprj,mgfftf,&
 & moved_atm_inside,mpi_enreg,my_natom,n3xccc,nattyp,nfftf,ngfft,ngfftf,ngrvdw,nhat,&
