@@ -87,7 +87,7 @@ nstep 10
 #%%    The energy and force should be the same in datasets 11 to 15 (without chemical potentiel).
 #%%    One sees that this is not completely the case.
 #%%    The force along z vanishes in these cases, because the translational invariance is imposed by ABINIT.
-#%%    In datasets 21 to 23, the enrgy should increase linearly, and the force along z should be non-zero and constant.
+#%%    In datasets 21 to 23, the energy should increase linearly, and the force along z should be non-zero and constant.
 #%%    Small fluctuations are observed.
 #%%    Dataset 24 and 25 corresponds to the cubic part of the chemical potential.
 #%%    Dataset 26 places the molecule at a symmetric value of z. The total energy should be the same as with dataset 11, 16, or 21.
