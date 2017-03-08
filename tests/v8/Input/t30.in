@@ -40,6 +40,7 @@ xcart?5   -1.5 0.0 4.0
 
 xcart?6   -1.5 0.0 5.0
            1.5 0.0 5.0
+chksymbreak 0
 
 
 # Common data
@@ -71,7 +72,7 @@ nstep 10
 #%% [files]
 #%% files_to_test = 
 #%%   t30.out, tolnlines=   0,   tolabs=  0.0e-01,      tolrel= 0.0e-01, fld_options = -easy
-#%% psp_files = HGH/1h.1.hgh, HGH/3li.1.hgh
+#%% psp_files = HGH/3li.1.hgh, HGH/1h.1.hgh
 ## psp_files = Li.LDA-PW-paw.abinit, H.LDA-PW-paw.abinit
 #%% [paral_info]
 #%% max_nprocs = 1
