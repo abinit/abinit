@@ -1311,8 +1311,6 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 &   dtset%mband,mcg,dtset%mkmem,mpi_enreg,dtset%mpw,dtset%natom,&
 &   dtset%nband,dtset%nkpt,npwarr,dtset%nsppol,&
 &   occ,resid,response,dtfil%unwff2,wvl%wfs,wvl%descr)
-
-   !call prtmagvtk(dtset%nfft,ngfft,dtset%nspden,rhor,rprimd) 
  end if
 
  if (dtset%prtwf==2) then
