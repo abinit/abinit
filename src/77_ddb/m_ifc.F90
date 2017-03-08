@@ -1802,7 +1802,11 @@ subroutine ifc_write(Ifc,ifcana,atifc,ifcout,prt_ifc,ncid)
 
 
      if (prt_ifc == 1) then
-       write(unit_tdep,"(1X,I10,15X,'How many neighbours does atom ',I3,' have')") ifcout1, ia
+       do ii=1,ifcout1
+         if (wkdist(ii) > maxdist_tdep) exit
+       end do
+       ii = ii - 1
+       write(unit_tdep,"(1X,I10,15X,'How many neighbours does atom ',I3,' have')") ii, ia
 
        do ii=1,ifcout1
          ib = indngb(ii)
@@ -1830,7 +1834,7 @@ subroutine ifc_write(Ifc,ifcana,atifc,ifcout,prt_ifc,ncid)
            ! And the actual short ranged forceconstant: TODO: check if
            ! a transpose is needed or a swap between the nu and the mu
            !write(unit_tdep,'(3f28.16)') (sriaf(nu,mu,ii)*Ha_eV/amu_emass, mu=1, 3)
-           write(unit_tdep,'(3f28.16)') (Ifc%short_atmfrc(1,mu,ia,nu,ib,irpt)*Ha_eV/amu_emass, mu=1, 3)
+           write(unit_tdep,'(3f28.16)') (Ifc%short_atmfrc(1,mu,ia,nu,ib,irpt)*Ha_eV/Bohr_Ang**2, mu=1, 3)
            
            !AI2PS
            write(unit_ifc,'(3f28.16)')(rsiaf(nu,mu,ii),mu=1,3)

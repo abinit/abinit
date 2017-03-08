@@ -867,7 +867,7 @@ subroutine harmonic_thermo(Ifc,Crystal,amu,anaddb_dtset,iout,outfilename_radix,c
 
 
          ! keep this one !!!!!!!!!!!!!!!!!!
-         if (convth==1 .and. iwchan == 1) then
+         if (convth==1) then
            write(msg, '(a,a,a)' )&
 &           '# B matrix elements as a function of T, for each atom, and smallest omega channel width',ch10,&
 &           '#    Angstrom^2, cartesian coordinates'
