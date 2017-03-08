@@ -54,7 +54,7 @@ nstep 10
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   t31.out, tolnlines=   3,   tolabs=  1.1e-04,      tolrel= 2.0e-04, fld_options = -easy
+#%%   t31.out, tolnlines=   7,   tolabs=  1.1e-02,      tolrel= 5.0e-04, fld_options = -easy
 #%% psp_files = HGH/3li.1.hgh, HGH/1h.1.hgh
 #%% [paral_info]
 #%% max_nprocs = 1
