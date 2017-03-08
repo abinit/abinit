@@ -138,8 +138,8 @@ subroutine calcdensph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,nunit,ratsph
  do iatom=1,natom
 
    if (present(atgridpts)) then
-     npts(iatom)=0          !SOP: initialize the number of grid points within atomic sphere around atom i
-     ii=ii+1                !SOP: initialize running index for constructing an array of grid point indexes
+     npts(iatom)=0           !SPr: initialize the number of grid points within atomic sphere around atom i
+     ii=ii+1                 !SPr: initialize running index for constructing an array of grid point indexes
    end if                    !     within atomic spheres
 
 !  Define a "box" around the atom
@@ -184,7 +184,7 @@ subroutine calcdensph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,nunit,ratsph
 
            if(present(atgridpts)) then
              ii=ii+1                     
-             atgridpts(ii)=ifft_local    !SOP: save grid point index (dbg: to check whether ifft_local is a valid "global" index )
+             atgridpts(ii)=ifft_local    !SPr: save grid point index (dbg: to check whether ifft_local is a valid "global" index )
            end if
 
            if (nspden==1) then
@@ -218,7 +218,7 @@ subroutine calcdensph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,nunit,ratsph
      do is=1,iatom-1,1
        npts(iatom)=npts(iatom)-npts(is)-1
      end do
-     atgridpts(ii-npts(iatom))=npts(iatom)    !SOP: save number of grid points around atom i
+     atgridpts(ii-npts(iatom))=npts(iatom)    !SPr: save number of grid points around atom i
    end if
    
 

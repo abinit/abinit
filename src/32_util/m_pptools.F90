@@ -47,6 +47,7 @@ MODULE m_pptools
  public :: print_fofr_cube      ! Print ||fofr|| in CUBE format.
  public :: printbxsf            ! Print band structure energies in XCrysDen format.
  public :: printvtk             ! Print band structure energies and velocities in VTK format.
+ public :: printdenvtk          ! Print density components in VTK format (works differently for nspden=1||2||4).
 
 CONTAINS  !===========================================================
 !!***
@@ -1165,6 +1166,154 @@ subroutine printvtk(eigen,v_surf,ewind,fermie,gprimd,kptrlatt,mband,&
  ABI_DEALLOCATE(fulltoirred)
 
 end subroutine printvtk
+!!***
+
+!!****f* m_pptools/printdenvtk
+!! NAME
+!! printdenvtk
+!!
+!! FUNCTION
+!!  
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine printdenvtk(nspden,nfft,ngfft,rhor,rprimd)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'printdenvtk'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+!character(len=*),intent(in) :: fname
+ integer,intent(in)          :: nfft,nspden
+!arrays
+ integer,intent(in)          :: ngfft(18)
+ real(dp),intent(in)         :: rhor(nfft,nspden),rprimd(3,3)
+
+!Local variables-------------------------------
+!scalars
+ integer :: denvtk,nfields
+ integer :: nx,ny,nz,ii,jj,kk,ind
+ real    :: rx,ry,rz
+ real(dp):: den,magn(3)
+ character(len=500) :: msg
+!arrays
+!
+! *************************************************************************
+
+  if(nspden/=4)then
+    nfields=nspden
+  else
+    nfields=2
+  endif
+
+  if (open_file('DEN.vtk',msg,newunit=denvtk,status='unknown',form='formatted') /=0) then
+    MSG_WARNING(msg)
+    RETURN
+  end if
+
+
+!write header
+  write(denvtk,"(a)") '# vtk DataFile Version 2.0'
+  write(denvtk,"(a)") 'Electron density components'
+  write(denvtk,"(a)") 'ASCII'
+  write(denvtk,"(a)") 'DATASET STRUCTURED_GRID'
+  write(denvtk,"(a,3i6)") 'DIMENSIONS', nx,ny,nz
+  write(denvtk,"(a,i6,a)") 'POINTS',nfft,' float'
+
+  do ii=0,nx-1
+    do jj=0,ny-1
+      do kk=0,nz-1
+
+         rx=ii*rprimd(1,1)+jj*rprimd(2,1)+kk*rprimd(3,1)
+         ry=ii*rprimd(1,2)+jj*rprimd(2,2)+kk*rprimd(3,2)
+         rz=ii*rprimd(1,3)+jj*rprimd(2,3)+kk*rprimd(3,3)
+         write(denvtk,'(3es16.8)') rx,ry,rz
+
+      enddo
+    enddo
+  enddo
+
+  write(denvtk,"(a,i6)") 'POINT_DATA ',nfft
+  write(denvtk,"(a,i6)") 'FIELD Densities ',nfields 
+
+
+
+
+
+  if(nspden==1)then
+
+    write(denvtk,"(a,i6)") 'rho 1 ',nfft,' float'
+    do ii=0,nx-1
+      do jj=0,ny-1
+        do kk=0,nz-1
+          ind=1+ii+nx*(jj+ny*kk)
+          write(denvtk,'(es16.8)') rhor(ind,1)
+        enddo
+      enddo
+    enddo
+
+  else if(nspden==2)then
+
+    write(denvtk,"(a,i6)") 'rho_up 1 ',nfft,' float'
+    do ii=0,nx-1
+      do jj=0,ny-1
+        do kk=0,nz-1
+          ind=1+ii+nx*(jj+ny*kk)
+          write(denvtk,'(es16.8)') rhor(ind,1)
+        enddo
+      enddo
+    enddo
+    write(denvtk,"(a,i6)") 'rho_dwn 1 ',nfft,' float'
+    do ii=0,nx-1
+      do jj=0,ny-1
+        do kk=0,nz-1
+          ind=1+ii+nx*(jj+ny*kk)
+          write(denvtk,'(es16.8)') rhor(ind,2)
+        enddo
+      enddo
+    enddo
+
+  else
+
+    write(denvtk,"(a,i6)") 'rho0 1 ',nfft,' float'
+    do ii=0,nx-1
+      do jj=0,ny-1
+        do kk=0,nz-1
+          ind=1+ii+nx*(jj+ny*kk)
+          write(denvtk,'(es16.8)') rhor(ind,1)
+        enddo
+      enddo
+    enddo
+    write(denvtk,"(a,i6)") 'magnetization 3 ',nfft,' float'
+    do ii=0,nx-1
+      do jj=0,ny-1
+        do kk=0,nz-1
+          ind=1+ii+nx*(jj+ny*kk)
+          write(denvtk,'(3es16.8)') rhor(ind,2),rhor(ind,3),rhor(ind,4) 
+        enddo
+      enddo
+    enddo
+
+  endif
+
+ close (denvtk)
+
+end subroutine printdenvtk
 !!***
 
 END MODULE m_pptools
