@@ -1377,12 +1377,14 @@ subroutine fit_polynomial_printSystemFiles(eff_pot,hist)
  type(abihist),intent(in) :: hist
 !Local variables-------------------------------
 !scalar
- integer :: ia,ib,ii,jj,irpt,kk,ll,mu,nu,nstep,nshift
+ integer :: ia,iatom_uc,ib,ib1,ii,jj,irpt,kk,ll,mu,nu,nstep,nshift,count
+ integer :: natom_uc
  integer :: unit_born=22,unit_epsiloninf=23,unit_md=24
  integer :: unit_harmonic=25,unit_ref=26,unit_strain=27,unit_sym=28
 !arrays
+ integer,allocatable :: typat_order(:),typat_order_uc(:)
  integer, dimension(3)  :: A,ncell
- real(dp), allocatable :: xred(:,:)
+ real(dp), allocatable :: xcart(:,:),fcart(:,:)
  character(len=500) :: msg
  type(supercell_type) :: supercell
 ! *************************************************************************
@@ -1392,16 +1394,39 @@ subroutine fit_polynomial_printSystemFiles(eff_pot,hist)
  call init_supercell(eff_pot%crystal%natom, 0, real(ncell,dp), eff_pot%crystal%rprimd,&
 &                    eff_pot%crystal%typat,eff_pot%crystal%xcart, supercell)
 
-!Convert in reduced coordinates 
- ABI_ALLOCATE(xred,(3,supercell%natom_supercell))
- call xcart2xred(supercell%natom_supercell,supercell%rprimd_supercell,&
-&                supercell%xcart_supercell,xred)
+!allocation of array
+ ABI_ALLOCATE(xcart,(3,supercell%natom_supercell))
+ ABI_ALLOCATE(fcart,(3,supercell%natom_supercell))
+ ABI_ALLOCATE(typat_order,(supercell%natom_supercell))
+ ABI_ALLOCATE(typat_order_uc,(eff_pot%crystal%natom))
 
- A = (/ 3, 2, 1/)
+ A = (/ 2, 3, 1/)
+ 
  nshift = product(ncell) 
+ natom_uc = eff_pot%crystal%natom
+!Fill the typat_order array:
+!In the fit script the atom must be in the order 11111 222222 33333 ..
+!and the order of the atom can not be change in the fit script,
+!we transform into the format of the script
+ ib = 1
+ ib1= 1
+ do ii=1,eff_pot%crystal%ntypat
+   jj = A(ii)
+   do kk=1,natom_uc
+     if(supercell%typat_supercell(kk)==jj)then
+       typat_order_uc(ib1) = kk
+       ib1 = ib1 + 1 
+       do ll=1,nshift
+         ia = (ll-1)*natom_uc + kk
+         typat_order(ib) = ia
+         ib = ib + 1
+       end do
+     end if
+   end do
+ end do
 
 ! BORN CHARGES FILE
- if (open_file('Born_Charges',msg,unit=unit_born,form="formatted",&
+ if (open_file('system/Born_Charges',msg,unit=unit_born,form="formatted",&
 &    status="replace",action="write") /= 0) then
    MSG_ERROR(msg)
  end if
@@ -1418,7 +1443,7 @@ subroutine fit_polynomial_printSystemFiles(eff_pot,hist)
  end do
 
 !DIELECTRIC TENSOR FILE
- if (open_file('Dielectric_Tensor',msg,unit=unit_epsiloninf,form="formatted",&
+ if (open_file('system/Dielectric_Tensor',msg,unit=unit_epsiloninf,form="formatted",&
 &    status="replace",action="write") /= 0) then
    MSG_ERROR(msg)
  end if
@@ -1428,7 +1453,7 @@ subroutine fit_polynomial_printSystemFiles(eff_pot,hist)
 
 
 !REFERENCE STRUCTURE FILE
- if (open_file('Reference_structure',msg,unit=unit_ref,form="formatted",&
+ if (open_file('system/Reference_structure',msg,unit=unit_ref,form="formatted",&
 &    status="replace",action="write") /= 0) then
    MSG_ERROR(msg)
  end if
@@ -1444,25 +1469,15 @@ subroutine fit_polynomial_printSystemFiles(eff_pot,hist)
  write(unit_ref,'("Atomic positions (Bohr radius)")')
  write(unit_ref,'("==============================")')
 
-! do ii=1,eff_pot%crystal%ntypat
-!   jj = A(ii)
-   do kk=1,supercell%natom_supercell
-!   do kk=1,eff_pot%crystal%natom
-!     if(supercell%typat_supercell(kk)==jj)then
-!       do ishift=1,nshift
-!         ia = eff_pot%crystal%natom*(ishift-1)+kk
-         ia = kk
-!        In the carlos script the atom must be in the order 11111 222222 33333 ..
-!        and the order of the atom can not be change in the fit script,
-!        we transform into the format of the script
-         write(unit_ref,'(3(F23.14))')  hist%xred(:,ia,1)
-!       end do
-!     end if
-   end do
-! end do
+ call xred2xcart(supercell%natom_supercell,supercell%rprimd_supercell,&
+&                  xcart,hist%xred(:,:,1))
+
+ do ia=1,supercell%natom_supercell
+   write(unit_ref,'(3(F23.14))') xcart(:,typat_order(ia))
+ end do
 
 !Harmonic XML file
- if (open_file('harmonic.xml',msg,unit=unit_harmonic,form="formatted",&
+ if (open_file('system/harmonic.xml',msg,unit=unit_harmonic,form="formatted",&
 &     status="replace",action="write") /= 0) then
    MSG_ERROR(msg)
  end if
@@ -1470,6 +1485,7 @@ subroutine fit_polynomial_printSystemFiles(eff_pot,hist)
 !Write header
  write(unit_harmonic,'("<?xml version=""1.0"" ?>")')
  write(unit_harmonic,'("<name>")')
+
  do irpt=1,eff_pot%harmonics_terms%ifcs%nrpt
    if(any(abs(eff_pot%harmonics_terms%ifcs%short_atmfrc(1,:,:,:,:,irpt))>tol9)) then
      write(unit_harmonic,'("  <local_force_constant units=""hartree/bohrradius**2"">")')
@@ -1479,7 +1495,8 @@ subroutine fit_polynomial_printSystemFiles(eff_pot,hist)
          do ib=1,eff_pot%crystal%natom
            do  nu=1,3
              write(unit_harmonic,'(F22.14)', advance="no")&
-&                 (eff_pot%harmonics_terms%ifcs%short_atmfrc(1,mu,ia,nu,ib,irpt))
+&                 (eff_pot%harmonics_terms%ifcs%short_atmfrc(1,mu,typat_order_uc(ia),&
+&                                                              nu,typat_order_uc(ib),irpt))
            end do
          end do
          write(unit_harmonic,'(a)')''
@@ -1494,16 +1511,15 @@ subroutine fit_polynomial_printSystemFiles(eff_pot,hist)
  end do
  write(unit_harmonic,'("</name>")')
 
-
 !STRAIN FILE
- if (open_file('Strain_Tensor',msg,unit=unit_strain,form="formatted",&
+ if (open_file('system/Strain_Tensor',msg,unit=unit_strain,form="formatted",&
 &     status="replace",action="write") /= 0) then
    MSG_ERROR(msg)
  end if
  write(unit_strain,'(6(F23.14))') (eff_pot%harmonics_terms%elastic_constants)
 
 ! SYM FILE
- if (open_file('symmetry_operations',msg,unit=unit_sym,form="formatted",&
+ if (open_file('system/symmetry_operations',msg,unit=unit_sym,form="formatted",&
 &     status="replace",action="write") /= 0) then
    MSG_ERROR(msg)
  end if
@@ -1517,30 +1533,23 @@ subroutine fit_polynomial_printSystemFiles(eff_pot,hist)
 
 !MD file
  nstep = hist%mxhist
- if (open_file('Molecular_dynamic',msg,unit=unit_md,form="formatted",&
+ if (open_file('system/Molecular_dynamic',msg,unit=unit_md,form="formatted",&
 &     status="replace",action="write") /= 0) then
    MSG_ERROR(msg)
  end if
- do ii=1,nstep
-   write(unit_md,'(I5)') ii-1
+ do ii=2,nstep
+   write(unit_md,'(I5)') ii-2
    write(unit_md,'(F22.14)') hist%etot(ii)
    write(unit_md,'(3(F22.14))') (hist%rprimd(:,:,ii))
 
-!   do jj=1,eff_pot%crystal%ntypat
-!     kk = A(jj)
-     do ll=1,supercell%natom_supercell
-!     do ll=1,eff_pot%crystal%natom
-!       if(supercell%typat_supercell(ll)==kk)then
-!       if(eff_pot%crystal%typat(ll)==kk)then
-!         do ishift=1,nshift
-!           ia = ll+eff_pot%crystal%natom*(ishift-1)
-!           ia = kk
-       ia=ll
-!          In the carlos script the atom must be in the order 11111 222222 33333 ..
-           write(unit_md,'(3(E22.14),3(E22.14))') hist%xred(:,ia,ii),hist%fcart(:,ia,ii)
-!         end do
-!       end if
-!     end do
+!  Set xcart and fcart for this step
+   call xred2xcart(supercell%natom_supercell,supercell%rprimd_supercell,&
+&                  xcart,hist%xred(:,:,ii))
+
+   fcart(:,:) = hist%fcart(:,:,ii)
+
+   do ia=1,supercell%natom_supercell
+     write(unit_md,'(3(E22.14),3(E22.14))') xcart(:,typat_order(ia)),fcart(:,typat_order(ia))
    end do
    write(unit_md,'(6(E22.14))') hist%strten(:,ii)
  end do
@@ -1555,7 +1564,10 @@ subroutine fit_polynomial_printSystemFiles(eff_pot,hist)
  close(unit_sym)
 
 !Deallocation array 
- ABI_DEALLOCATE(xred)
+ ABI_DEALLOCATE(typat_order)
+ ABI_DEALLOCATE(typat_order_uc)
+ ABI_DEALLOCATE(xcart)
+ ABI_DEALLOCATE(fcart)
  call destroy_supercell(supercell)
 
 end subroutine fit_polynomial_printSystemFiles

@@ -228,31 +228,30 @@ program multibinit
 !If needed, fit the anharmonic part
 !****************************************************************************************
 !TEST_AM_SECTION
- if(.false.)then
-   if (inp%fit_coeff/=0) then
-     if(iam_master) then
+ if (inp%fit_coeff/=0) then
+   if(iam_master) then
 !      Read the MD file
-       write(message,'(a,(80a),7a)')ch10,('=',ii=1,80),ch10,ch10,&
+     write(message,'(a,(80a),7a)')ch10,('=',ii=1,80),ch10,ch10,&
 &       '-Reading the file ',trim(filnam(5)),ch10,&
 &       ' with NetCDF in order to fit the polynomial coefficients'
-       call wrtout(std_out,message,'COLL') 
-       call wrtout(ab_out,message,'COLL') 
-       if(filnam(5)/=''.and.filnam(5)/='no')then
+     call wrtout(std_out,message,'COLL') 
+     call wrtout(ab_out,message,'COLL') 
+     if(filnam(5)/=''.and.filnam(5)/='no')then
        call read_md_hist(filnam(5),hist,.FALSE.,.FALSE.)
-       else
-         write(message, '(3a)' )&
+     else
+       write(message, '(3a)' )&
 &         'There is no MD file to fit the coefficients ',ch10,&
 &         'Action: add MD file'
-         MSG_ERROR(message)
-       end if
+       MSG_ERROR(message)
      end if
+   end if
 
-     option=inp%fit_coeff
-!    MPI BROADCAST the history of the MD
-     call abihist_bcast(hist,master,comm)
+   option=inp%fit_coeff
+!  MPI BROADCAST the history of the MD
+   call abihist_bcast(hist,master,comm)
 
-     select case(option)
-     case (-1)
+   select case(option)
+   case (-1)
 !      option == -1
 !      Print the file in the specific format for the script of carlos
 !      Born_Charges  
@@ -261,27 +260,27 @@ program multibinit
 !      Reference_structure
 !      Strain_Tensor
 !      symmetry_operations (only cubic)
-       if (iam_master) then
-         if(hist%mxhist >0)then
-!           call fit_polynomial_printSystemFiles(reference_effective_potential,hist)
-         else
-           write(message, '(3a)' )&
-&          'There is no step in the MD file ',ch10,&
-&          'Action: add MD file'
-           MSG_ERROR(message)
-         end if
+     if (iam_master) then
+       if(hist%mxhist >0)then
+         call fit_polynomial_printSystemFiles(reference_effective_potential,hist)
+       else
+         write(message, '(3a)' )&
+&         'There is no step in the MD file ',ch10,&
+&         'Action: add MD file'
+         MSG_ERROR(message)
        end if
-     case (1)
-       if(iam_master)then
-         call fit_polynomial_coeff_get(inp%fit_cutoff,reference_effective_potential,1)
-       end if
-!        call polynomial_coeff_broacast(reference_effective_potential%anharmonics_terms%coefficients,&
-! &                                     master,comm)
-!       call fit_polynomial_coeff_init
-!       call fit_polynomial_coeff_init(reference_effective_potential%,filnam,inp,comm)
-     end select
-   end if
+     end if
+   case (1)
+     if(iam_master)then
+       call fit_polynomial_coeff_get(inp%fit_cutoff,reference_effective_potential,1)
+     end if
+!      call polynomial_coeff_broacast(reference_effective_potential%anharmonics_terms%coefficients,&
+! &                                    master,comm)
+!      call fit_polynomial_coeff_init
+!      call fit_polynomial_coeff_init(reference_effective_potential%,filnam,inp,comm)
+   end select
  end if
+
 !END_TEST_AM_SECTION
 !****************************************************************************************
 

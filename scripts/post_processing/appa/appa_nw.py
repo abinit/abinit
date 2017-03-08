@@ -22,8 +22,13 @@ import reading.input as Input
 #Utility
 import utility.write as Write
 import utility.analysis as Analysis
-import utility.canvas as Canvas
 import utility.complet as Completer
+
+try:
+    import utility.canvas as Canvas
+    canv = True
+except:
+    canv = False
 
 #Fortran code
 import fortran.math as Math
@@ -391,15 +396,22 @@ while i<size_input :
                     print " "
                     print "Choose format:"
                     print "1  => ASCII" 
-                    print "2  => PDF"
-                    print "3  => PDF+ASCII"
+                    if canv==True:
+                        print "2  => PDF"
+                        print "3  => PDF+ASCII"
+                    else:
+                        print "No canvas library to plot PDF"
                     print "4  => Return"
+
                     while True:        
                         try:
                             choiceformat = input("Choose your format: ")
                             if choiceformat == 4 :
                                 choiceQuantitie = 0
                             break
+                            if (canv==False and (choiceformat==3 or choiceformat==2)):
+                                choiceQuantitie = 0
+                                break
                         except :
                             pass; 
             else:
