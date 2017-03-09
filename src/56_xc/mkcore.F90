@@ -529,6 +529,7 @@ subroutine mkcore(corstr,dyfrx2,grxc,mpi_enreg,natom,nfft,nspden,ntypat,n1,n1xcc
 
    function cross_mkcore(xx,yy,zz,aa,bb,cc)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -1089,6 +1090,7 @@ subroutine mkcore_alt(atindx1,corstr,dyfrx2,grxc,icoulomb,mpi_enreg,natom,nfft,n
 !! SOURCE
 
    function cross_mkcore_alt(xx,yy,zz,aa,bb,cc)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
