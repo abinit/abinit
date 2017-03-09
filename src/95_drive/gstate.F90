@@ -347,6 +347,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 
  ecore=zero
  results_gs%pel(1:3)   =zero
+ results_gs%grchempottn(:,:)=zero
  results_gs%grewtn(:,:)=zero
 !MT Feb 2012: I dont know why but grvdw has to be allocated
 !when using BigDFT to ensure success on inca_gcc44_sdebug
@@ -1477,7 +1478,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  end if
 
  if (dtset%nstep>0 .and. dtset%prtstm==0 .and. dtset%positron/=1) then
-   call clnup2(psps%n1xccc,results_gs%fred,results_gs%gresid,&
+   call clnup2(psps%n1xccc,results_gs%fred,results_gs%grchempottn,results_gs%gresid,&
 &   results_gs%grewtn,results_gs%grvdw,results_gs%grxc,dtset%iscf,dtset%natom,&
 &   results_gs%ngrvdw,dtset%optforces,dtset%optstress,dtset%prtvol,start,&
 &   results_gs%strten,results_gs%synlgr,xred)

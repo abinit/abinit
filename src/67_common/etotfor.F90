@@ -37,6 +37,7 @@
 !!   | wtatcon(3,natom,nconeq)=weights for atomic constraints
 !!  gmet(3,3)=metric tensor for G vecs (in bohr**-2)
 !!  fock <type(fock_type)>= quantities to calculate Fock exact exchange
+!!  grchempottn(3,natom)=grads of spatially-varying chemical potential energy (hartree)
 !!  grewtn(3,natom)=grads of Ewald energy (hartree)
 !!  grvdw(3,ngrvdw)=gradients of energy due to Van der Waals DFT-D dispersion (hartree)
 !!  gsqcut=cutoff on (k+G)^2 (bohr^-2)
@@ -151,7 +152,7 @@
 
 subroutine etotfor(atindx1,deltae,diffor,dtefield,dtset,&
 &  elast,electronpositron,energies,&
-&  etotal,favg,fcart,fock,forold,fred,gmet,gresid,grewtn,grhf,grnl,grvdw,&
+&  etotal,favg,fcart,fock,forold,fred,gmet,grchempottn,gresid,grewtn,grhf,grnl,grvdw,&
 &  grxc,gsqcut,indsym,kxc,maxfor,mgfft,mpi_enreg,my_natom,nattyp,&
 &  nfft,ngfft,ngrvdw,nhat,nkxc,ntypat,nvresid,n1xccc,n3xccc,optene,optforces,optres,&
 &  pawang,pawfgrtab,pawrad,pawrhoij,pawtab,ph1d,red_ptot,psps,rhog,rhor,rmet,rprimd,&
@@ -203,7 +204,7 @@ subroutine etotfor(atindx1,deltae,diffor,dtefield,dtset,&
 !arrays
  integer,intent(in) :: atindx1(dtset%natom),indsym(4,dtset%nsym,dtset%natom)
  integer,intent(in) :: nattyp(ntypat),ngfft(18),symrec(3,3,dtset%nsym)
- real(dp),intent(in) :: gmet(3,3),grewtn(3,dtset%natom),grvdw(3,ngrvdw),kxc(nfft,nkxc)
+ real(dp),intent(in) :: gmet(3,3),grchempottn(3,dtset%natom),grewtn(3,dtset%natom),grvdw(3,ngrvdw),kxc(nfft,nkxc)
  real(dp),intent(in) :: ph1d(2,3*(2*mgfft+1)*dtset%natom),red_ptot(3)
  real(dp),intent(in) :: rhog(2,nfft),rhor(nfft,dtset%nspden),rmet(3,3),rprimd(3,3)
  real(dp),intent(in) :: vhartr(nfft),vpsp(nfft),vxc(nfft,dtset%nspden)
@@ -418,7 +419,7 @@ subroutine etotfor(atindx1,deltae,diffor,dtefield,dtset,&
    else
      resid => nvresid
    end if
-   call forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,forold,fred,gresid,grewtn,&
+   call forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,forold,fred,grchempottn,gresid,grewtn,&
 &     grhf,grnl,grvdw,grxc,gsqcut,indsym,maxfor,mgfft,mpi_enreg,&
 &     n1xccc,n3xccc,nattyp,nfft,ngfft,ngrvdw,ntypat,&
 &     pawrad,pawtab,ph1d,psps,rhog,rhor,rprimd,symrec,synlgr,dtset%usefock,resid,vxc,wvl,wvl_den,xred,&

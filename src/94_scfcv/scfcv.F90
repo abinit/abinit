@@ -350,7 +350,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
  real(dp),parameter :: k0(3)=(/zero,zero,zero/)
  real(dp),allocatable :: dielinv(:,:,:,:,:),dtn_pc(:,:)
  real(dp),allocatable :: fcart(:,:),forold(:,:),fred(:,:),gresid(:,:)
- real(dp),allocatable :: grewtn(:,:),grhf(:,:),grnl(:),grvdw(:,:),grxc(:,:)
+ real(dp),allocatable :: grchempottn(:,:),grewtn(:,:),grhf(:,:),grnl(:),grvdw(:,:),grxc(:,:)
  real(dp),allocatable :: kxc(:,:),nhat(:,:),nhatgr(:,:,:),nvresid(:,:)
  real(dp),allocatable :: ph1d(:,:),ph1ddiel(:,:),ph1df(:,:)
  real(dp),allocatable :: phnonsdiel(:,:,:),shiftvector(:)
@@ -571,9 +571,10 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
 
 !Various allocations (potentials, gradients, ...)
  ABI_ALLOCATE(forold,(3,dtset%natom))
- ABI_ALLOCATE(grnl,(3*dtset%natom))
+ ABI_ALLOCATE(grchempottn,(3,dtset%natom))
  ABI_ALLOCATE(gresid,(3,dtset%natom))
  ABI_ALLOCATE(grewtn,(3,dtset%natom))
+ ABI_ALLOCATE(grnl,(3*dtset%natom))
  ABI_ALLOCATE(grxc,(3,dtset%natom))
  ABI_ALLOCATE(synlgr,(3,dtset%natom))
  ABI_ALLOCATE(ph1d,(2,3*(2*dtset%mgfft+1)*dtset%natom))
@@ -585,6 +586,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
  ABI_ALLOCATE(vxctau,(nfftf,dtset%nspden,4*dtset%usekden))
  ngrvdw=0;if (dtset%vdw_xc>=5.and.dtset%vdw_xc<=7) ngrvdw=dtset%natom
  ABI_ALLOCATE(grvdw,(3,ngrvdw))
+ grchempottn(:,:)=zero
  forold(:,:)=zero ; gresid(:,:)=zero ; pel(:)=zero
  vtrial(:,:)=zero; vxc(:,:)=zero
  n1xccc=0;if (psps%n1xccc/=0) n1xccc=psps%n1xccc
@@ -1088,7 +1090,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
    if (dtset%positron<0.or.(dtset%positron>0.and.istep==1)) then
      call setup_positron(atindx,atindx1,cg,cprj,dtefield,dtfil,dtset,ecore,eigen,&
 &     etotal,electronpositron,energies,fock,forces_needed,fred,gmet,gprimd,&
-&     grewtn,grvdw,gsqcut,hdr,initialized0,indsym,istep,istep_mix,kg,&
+&     grchempottn,grewtn,grvdw,gsqcut,hdr,initialized0,indsym,istep,istep_mix,kg,&
 &     kxc,maxfor,mcg,mcprj,mgfftf,mpi_enreg,my_natom,n3xccc,nattyp,nfftf,ngfftf,ngrvdw,nhat,&
 &     nkxc,npwarr,nvresid,occ,optres,paw_ij,pawang,pawfgr,pawfgrtab,&
 &     pawrad,pawrhoij,pawtab,ph1df,ph1d,psps,rhog,rhor,rprimd,&
@@ -1146,7 +1148,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
        dummy_nhatgr = .True.
      end if
 
-     call setvtr(atindx1,dtset,energies,gmet,gprimd,grewtn,grvdw,gsqcut,&
+     call setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gsqcut,&
 &     istep,kxc,mgfftf,moved_atm_inside,moved_rhor,mpi_enreg,&
 &     nattyp,nfftf,ngfftf,ngrvdw,nhat,nhatgr,nhatgrdim,nkxc,psps%ntypat,&
 &     n1xccc,n3xccc,optene,pawrad,pawtab,ph1df,psps,rhog,rhor,rmet,rprimd,&
@@ -1455,7 +1457,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
 !    If the density mixing is required, compute the total energy here
      call etotfor(atindx1,deltae,diffor,dtefield,dtset,&
 &     elast,electronpositron,energies,&
-&     etotal,favg,fcart,fock,forold,fred,gmet,gresid,grewtn,grhf,grnl,grvdw,&
+&     etotal,favg,fcart,fock,forold,fred,gmet,grchempottn,gresid,grewtn,grhf,grnl,grvdw,&
 &     grxc,gsqcut,indsym,kxc,maxfor,mgfftf,mpi_enreg,my_natom,&
 &     nattyp,nfftf,ngfftf,ngrvdw,nhat,nkxc,psps%ntypat,nvresid,n1xccc,n3xccc,&
 &     optene,computed_forces,optres,pawang,pawfgrtab,pawrad,pawrhoij,pawtab,&
@@ -1656,7 +1658,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
      if (.not.wvlbigdft) then
        call etotfor(atindx1,deltae,diffor,dtefield,dtset,&
 &       elast,electronpositron,energies,&
-&       etotal,favg,fcart,fock,forold,fred,gmet,gresid,grewtn,grhf,grnl,grvdw,&
+&       etotal,favg,fcart,fock,forold,fred,gmet,grchempottn,gresid,grewtn,grhf,grnl,grvdw,&
 &       grxc,gsqcut,indsym,kxc,maxfor,mgfftf,mpi_enreg,my_natom,&
 &       nattyp,nfftf,ngfftf,ngrvdw,nhat,nkxc,dtset%ntypat,nvresid,n1xccc, &
 &       n3xccc,0,computed_forces,optres,pawang,pawfgrtab,pawrad,pawrhoij,&
@@ -1912,7 +1914,8 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
 !SHOULD CLEAN THE ARGS OF THIS ROUTINE
  call afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
 & deltae,diffor,dtefield,dtfil,dtset,eigen,electronpositron,elfr,&
-& energies,etotal,favg,fcart,fock,forold,fred,gresid,grewtn,grhf,grhor,grvdw,&
+& energies,etotal,favg,fcart,fock,forold,fred,grchempottn,&
+& gresid,grewtn,grhf,grhor,grvdw,&
 & grxc,gsqcut,hdr,indsym,irrzon,istep,kg,kxc,lrhor,maxfor,mcg,mcprj,mgfftf,&
 & moved_atm_inside,mpi_enreg,my_natom,n3xccc,nattyp,nfftf,ngfft,ngfftf,ngrvdw,nhat,&
 & nkxc,npwarr,nvresid,occ,optres,paw_an,paw_ij,pawang,pawfgr,&
@@ -1990,9 +1993,10 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
  ABI_DEALLOCATE(fcart)
  ABI_DEALLOCATE(fred)
  ABI_DEALLOCATE(forold)
- ABI_DEALLOCATE(grnl)
+ ABI_DEALLOCATE(grchempottn)
  ABI_DEALLOCATE(gresid)
  ABI_DEALLOCATE(grewtn)
+ ABI_DEALLOCATE(grnl)
  ABI_DEALLOCATE(grvdw)
  ABI_DEALLOCATE(grxc)
  ABI_DEALLOCATE(synlgr)

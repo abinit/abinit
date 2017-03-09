@@ -142,6 +142,7 @@
 !  write(std_out,'(a,2es13.3)')' a_3*ddz**3=',a_3*ddz**3
 !  write(std_out,'(a,2es13.3)')' contrib=',a_3*ddz**3 + a_2*ddz**2 + dcp0*ddz + cp0
 !  write(std_out,'(a,2es13.3)')' e_chempot=',e_chempot
+!  write(std_out,'(a,3es20.10)')' grchempottn=',grchempottn(:,iatom)
 !ENDDEBUG
 
  enddo

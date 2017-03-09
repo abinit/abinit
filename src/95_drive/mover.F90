@@ -386,9 +386,9 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
 !  forces will be compute with it
  if (present(effective_potential)) then
    need_scfcv_cycle = .FALSE.
-   write(message,'(a,a,i2,a,a,a,a,80a)')&
-&   ch10,'=== [ionmov=',ab_mover%ionmov,'] ',trim(specs%method),&
-&   ' with effective potential',ch10,('=',kk=1,80)
+   write(message,'(2a,i2,5a,80a)')&
+&   ch10,'=== [ionmov=',ab_mover%ionmov,'] ',trim(specs%method),' with effective potential',&
+&   ch10,('=',kk=1,80)
    call wrtout(ab_out,message,'COLL')
    call wrtout(std_out,message,'COLL')
  else
@@ -649,8 +649,14 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
          do ii=1,3
            rprim(ii,1:3)=rprimd(ii,1:3)/acell(1:3)
          end do
-         call xfh_update(ab_xfh,acell,fred_corrected,ab_mover%natom,rprim,&
+
+!        AM(3/7/17):This function induces memory leak, I don't know why.
+!        Morever, the size of ab_xfh%xfhist is to big for very large supercell.
+!        Call it only for specific ionmov
+         if(any((/2,3,10,11,22/)==ab_mover%ionmov)) then
+           call xfh_update(ab_xfh,acell,fred_corrected,ab_mover%natom,rprim,&
 &                        hist%strten(:,hist%ihist),xred)
+         end if
        end if
        ABI_DEALLOCATE(fred_corrected)
      end if
@@ -669,12 +675,12 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
 
 !    ###########################################################
 !    ### 14. Output after SCFCV
-
-     write(message,'(a,3a,a,72a)')&
-&     ch10,('-',kk=1,3),'OUTPUT',('-',kk=1,71)
-     call wrtout(ab_out,message,'COLL')
-     call wrtout(std_out,message,'COLL')
-
+     if(need_scfcv_cycle)then
+       write(message,'(a,3a,a,72a)')&
+&       ch10,('-',kk=1,3),'OUTPUT',('-',kk=1,71)
+       call wrtout(ab_out,message,'COLL')
+       call wrtout(std_out,message,'COLL')
+     end if
      if (useprtxfase) then
        call prtxfase(ab_mover,hist,ab_out,mover_AFTER)
        call prtxfase(ab_mover,hist,std_out,mover_AFTER)
