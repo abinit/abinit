@@ -76,8 +76,9 @@
 !!   | e_xcdc=exchange-correlation double-counting energy (hartree)
 !!  ==== if dtset%vdw_xc == 5 or 6 or 7
 !!   | e_vdw_dftd=Dispersion energy from DFT-D Van der Waals correction (hartree)
-!!   | grvdw(3,ngrvdw)=gradients of energy due to Van der Waals DFT-D2 dispersion (hartree)
+!!  grchempottn(3,natom)=grads of spatially-varying chemical energy (hartree)
 !!  grewtn(3,natom)=grads of Ewald energy (hartree)
+!!  grvdw(3,ngrvdw)=gradients of energy due to Van der Waals DFT-D2 dispersion (hartree)
 !!  kxc(nfft,nkxc)=exchange-correlation kernel, will be computed if nkxc/=0 .
 !!                 see routine rhohxc for a more complete description
 !!  strsxc(6)=xc contribution to stress tensor (hartree/bohr^3)
@@ -120,7 +121,7 @@
 
 #include "abi_common.h"
 
-subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grewtn,grvdw,gsqcut,&
+subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gsqcut,&
 &  istep,kxc,mgfft,moved_atm_inside,moved_rhor,mpi_enreg,&
 &  nattyp,nfft,ngfft,ngrvdw,nhat,nhatgr,nhatgrdim,nkxc,ntypat,n1xccc,n3xccc,&
 &  optene,pawrad,pawtab,ph1d,psps,rhog,rhor,rmet,rprimd,strsxc,&
@@ -192,6 +193,7 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grewtn,grvdw,gsqcut,&
  real(dp),intent(out),optional :: vxctau(nfft,dtset%nspden,4*dtset%usekden)
  real(dp),intent(inout) :: xccc3d(n3xccc)
  real(dp),intent(in) :: xred(3,dtset%natom)
+ real(dp),intent(out) :: grchempottn(3,dtset%natom)
  real(dp),intent(out) :: grewtn(3,dtset%natom),grvdw(3,ngrvdw),kxc(nfft,nkxc),strsxc(6)
  type(pawtab_type),intent(in) :: pawtab(ntypat*dtset%usepaw)
  type(pawrad_type),intent(in) :: pawrad(ntypat*dtset%usepaw)
@@ -214,7 +216,6 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grewtn,grvdw,gsqcut,&
  real(dp) :: strn_dummy6(6), strv_dummy6(6)
  real(dp) :: vzeeman(4)
  real(dp),allocatable :: grtn(:,:),dyfr_dum(:,:,:),gr_dum(:,:)
- real(dp),allocatable :: grchempottn_dum(:,:)
  real(dp),allocatable :: rhojellg(:,:),rhojellr(:),rhowk(:,:),vjell(:)
  real(dp),allocatable :: Vmagconstr(:,:),rhog_dum(:,:)
 
@@ -270,10 +271,7 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grewtn,grvdw,gsqcut,&
 &     wvl%descr, wvl%den, xred)
    end if
    if (dtset%nzchempot>0) then
-!    call spatialchempot(energies%e_chempot,chempot,grchempottn,dtset%natom,ntypat,dtset%nzchempot,dtset%typat,xred)
-     ABI_ALLOCATE(grchempottn_dum,(3,dtset%natom))
-     call spatialchempot(energies%e_chempot,dtset%chempot,grchempottn_dum,dtset%natom,ntypat,dtset%nzchempot,dtset%typat,xred)
-     ABI_DEALLOCATE(grchempottn_dum)
+     call spatialchempot(energies%e_chempot,dtset%chempot,grchempottn,dtset%natom,ntypat,dtset%nzchempot,dtset%typat,xred)
    endif
    if (dtset%vdw_xc==5.and.ngrvdw==dtset%natom) then
      call vdw_dftd2(energies%e_vdw_dftd,dtset%ixc,dtset%natom,ntypat,1,dtset%typat,rprimd,&
@@ -287,6 +285,7 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grewtn,grvdw,gsqcut,&
  else
    energies%e_ewald=zero
    energies%e_chempot=zero
+   grchempottn=zero
    grewtn=zero
    energies%e_vdw_dftd=zero
    if (ngrvdw>0) grvdw=zero
