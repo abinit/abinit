@@ -175,12 +175,12 @@ subroutine dfptnl_pert(atindx,atindx1,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,ei
 !arrays
  integer,allocatable :: kg_k(:,:),kg1_k(:,:)
 ! real(dp) :: buffer(2)
- real(dp) :: buffer(5),eHxc21_paw(2),eHxc21_nhat,exc3_paw(2),enlout(3),kpt(3),eig0_k(mband),dum_svectout(1,1),dum(1)
+ real(dp) :: buffer(5),eHxc21_paw(2),eHxc21_nhat(2),exc3_paw(2),enlout(3),kpt(3),eig0_k(mband),dum_svectout(1,1),dum(1)
  real(dp) :: enlout1(2),enlout2(2),enlout_11(2),enlout_12(2),enlout_21(2),enlout_22(2),enlout_31(2),enlout_32(2)
  real(dp) :: rmet(3,3),dum_grad_berry(1,1),wtk_k
  real(dp) :: ylmgr_dum(1,1,1)
  real(dp),allocatable :: cgi(:,:),cgj(:,:),cg_jband(:,:,:),cwavef1(:,:),cwavef2(:,:),cwavef3(:,:),dkinpw(:)
- real(dp),allocatable :: eig1_k_tmp(:),eig1_k_stored(:)
+ real(dp),allocatable :: eig1_k_i2pert(:),eig1_k_stored(:)
  real(dp),allocatable :: chi_ij(:,:,:),cwave_right(:,:),cwave_left(:,:),dudk(:,:),dudkde(:,:),dummy_array(:),dummy_array2(:,:)
  real(dp),allocatable :: ffnl1(:,:,:,:),ffnl1_idir_elfd(:,:,:,:),ffnlk(:,:,:,:),gh0(:,:),gh1(:,:),gvnl(:,:)
  real(dp),allocatable :: h_cwave(:,:),iddk(:,:),kinpw1(:),kpg_k(:,:),kpg1_k(:,:),nhat21(:,:),nhatfr21(:,:),occ_k(:)
@@ -189,7 +189,7 @@ subroutine dfptnl_pert(atindx,atindx1,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,ei
  real(dp),allocatable :: ylm(:,:),ylm1(:,:),ylmgr(:,:,:),ylmgr1(:,:,:)
  real(dp),allocatable :: ylm_k(:,:),ylm1_k(:,:),ylmgr1_k(:,:,:)
  real(dp),allocatable :: xc_tmp(:,:)
- type(pawcprj_type),allocatable :: cwaveprj(:,:)
+! type(pawcprj_type),allocatable :: cwaveprj(:,:)
  type(pawcprj_type),allocatable :: cwaveprj0(:,:),cwaveprj1(:,:)
  type(pawcprj_type),target :: cprj_empty(0,0)
  type(pawcprj_type),allocatable,target :: cprj_jband(:,:)
@@ -559,7 +559,7 @@ subroutine dfptnl_pert(atindx,atindx1,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,ei
 
      ABI_STAT_ALLOCATE(dudk,  (2,nband_k*size_wf), ierr)
      ABI_STAT_ALLOCATE(dudkde,(2,nband_k*size_wf), ierr)
-     ABI_STAT_ALLOCATE(eig1_k_tmp,(2*nband_k), ierr)
+     ABI_STAT_ALLOCATE(eig1_k_i2pert,(2*nband_k), ierr)
      ABI_ALLOCATE(eig1_k_stored,(2*nband_k**2))
      ABI_ALLOCATE(cgi,(2,size_wf))
      ABI_ALLOCATE(cwave_right,(2,size_wf))
@@ -572,13 +572,13 @@ subroutine dfptnl_pert(atindx,atindx1,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,ei
      do iband = 1,nband_k
 
 !      Read dude file
-       call wfk_read_bks(ddk_f(1), iband, ikpt, isppol, xmpio_single, cg_bks=cwave_right,eig1_bks=eig1_k_tmp)
-!      Copy eig1_k_tmp in "eig1_k_stored"
-       eig1_k_stored(1+(iband-1)*2*nband_k:2*nband_k+(iband-1)*2*nband_k)=eig1_k_tmp(:)
+       call wfk_read_bks(ddk_f(1), iband, ikpt, isppol, xmpio_single, cg_bks=cwave_right,eig1_bks=eig1_k_i2pert)
+!      Copy eig1_k_i2pert in "eig1_k_stored"
+       eig1_k_stored(1+(iband-1)*2*nband_k:2*nband_k+(iband-1)*2*nband_k)=eig1_k_i2pert(:)
 
        if (i2pert==natom+2) then
 !        Read dudk file
-         call wfk_read_bks(ddk_f(2), iband, ikpt, isppol, xmpio_single, cg_bks=cwave_right,eig1_bks=eig1_k_tmp)
+         call wfk_read_bks(ddk_f(2), iband, ikpt, isppol, xmpio_single, cg_bks=cwave_right,eig1_bks=eig1_k_i2pert)
          offset_cgi = (iband-1)*size_wf+icg0
          cgi(:,:) = cg(:,1+offset_cgi:size_wf+offset_cgi)
 !         if (usepaw==0) then
@@ -595,7 +595,7 @@ subroutine dfptnl_pert(atindx,atindx1,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,ei
          dudk(:,1+(iband-1)*size_wf:iband*size_wf)=cwave_right(:,:)
 
 !        Read dudkde file
-         call wfk_read_bks(ddk_f(3), iband, ikpt, isppol, xmpio_single, cg_bks=cwave_right,eig1_bks=eig1_k_tmp)
+         call wfk_read_bks(ddk_f(3), iband, ikpt, isppol, xmpio_single, cg_bks=cwave_right,eig1_bks=eig1_k_i2pert)
          offset_cgi = (iband-1)*size_wf+icg0
          cgi(:,:) = cg(:,1+offset_cgi:size_wf+offset_cgi)
 !         if (usepaw==0) then
@@ -653,7 +653,7 @@ subroutine dfptnl_pert(atindx,atindx1,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,ei
 !        Compute < u^(1) | ( H^(1) - eps^(0) S^(1) ) | u^(1) >
 ! **************************************************************************************************
 
-         eig1_k_tmp(:) = eig1_k_stored(1+(jband-1)*2*nband_k:jband*2*nband_k)
+         eig1_k_i2pert(:) = eig1_k_stored(1+(jband-1)*2*nband_k:jband*2*nband_k)
          cwavef1(:,:) = cg1(:,1+offset_cgj:size_wf+offset_cgj)
          cwavef3(:,:) = cg3(:,1+offset_cgj:size_wf+offset_cgj)
          if (i2pert==natom+2) then ! Note the multiplication by i
@@ -671,7 +671,7 @@ subroutine dfptnl_pert(atindx,atindx1,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,ei
 
   !      Compute : < u^(ip1) | ( H^(ip2) - eps^(0) S^(ip2) ) | u^(ip3) >
   !           or : < u^(ip3) | ( H^(ip2) - eps^(0) S^(ip2) ) | u^(ip1) >
-         call rf2_apply_hamiltonian(cg_jband,cprj_jband,cwave_right,cprj_empty,h_cwave,s_cwave,eig0_k,eig1_k_tmp,&
+         call rf2_apply_hamiltonian(cg_jband,cprj_jband,cwave_right,cprj_empty,h_cwave,s_cwave,eig0_k,eig1_k_i2pert,&
   &                                jband,gs_hamkq,iddk,i2dir,i2pert,ikpt,isppol,mkmem,mpi_enreg,nband_k,nsppol,&
 !                                   print_info,dtset%prtvol,rf_hamkq_i2pert,size_cprj,size_wf,conj=compute_conjugate)
                                    print_info,dtset%prtvol,rf_hamkq_i2pert,size_cprj,size_wf)
@@ -685,27 +685,31 @@ subroutine dfptnl_pert(atindx,atindx1,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,ei
          if (compute_conjugate) doti = -doti
 
 ! **************************************************************************************************
-!        Compute sum_i Lambda_ij^(1) < u_i^(1) | u_j^(1)>
+!        Compute sum_i Lambda_ij^(1) < u_j^(1) | u_i^(1)>
 ! **************************************************************************************************
 
-         eig1_k_tmp(:) = eig1_k_stored(1+(jband-1)*2*nband_k:jband*2*nband_k)
+!         eig1_k_i2pert(:) = eig1_k_stored(1+(jband-1)*2*nband_k:jband*2*nband_k)
          lagr = zero ; lagi = zero
 
          do iband = 1, nband_k
-           if(occ_k(jband)>tol10) then
+           if(occ_k(iband)>tol10) then
 
              offset_cgi = (iband-1)*size_wf+icg0
              cwavef3(:,:) = cg3(:,1+offset_cgi:size_wf+offset_cgi)
 
+             if(print_info/=0) then
+               eig1_k_i2pert(:) = eig1_k_stored(1+(jband-1)*2*nband_k:jband*2*nband_k)
+             end if
+
 !            Get Lambda_ij^(1) = < u_i^(0) | H^(1) - eps^(0) S^(1) | u_j^(0) > (see dfpt_cgwf.F90)
-             dot1r = eig1_k_tmp(2*iband-1)
-             dot1i = eig1_k_tmp(2*iband  )
+             dot1r = eig1_k_i2pert(2*iband-1)
+             dot1i = eig1_k_i2pert(2*iband  )
 
 !            Compute < u_j^(1) | S^(0) | u_i^(1) >
              if (usepaw==1) then
                ibg = 0
-               call getgsc(cwavef3,cwaveprj,gs_hamkq,s_cwave,ibg,0,0,ikpt,isppol,&
-&                    size_wf,nspinor,size_wf,mpi_enreg,natom,-1,npw_k,nspinor,select_k=KPRIME_H_KPRIME)
+               call getgsc(cwavef3,cprj_empty,gs_hamkq,s_cwave,ibg,0,0,ikpt,isppol,&
+&                    size_wf,size_cprj,size_wf,mpi_enreg,natom,-1,npw_k,nspinor,select_k=KPRIME_H_KPRIME)
              else
                s_cwave(:,:) = cwavef3(:,:)
              end if
@@ -713,21 +717,25 @@ subroutine dfptnl_pert(atindx,atindx1,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,ei
              lagr = lagr + dot1r*dot2r - dot1i*dot2i
              lagi = lagi + dot1r*dot2i + dot1i*dot2r
 
-             if (usepaw==1.and.i2pert/=natom+2) then ! S^(1) is zero for ipert=natom+2
+!            Compute < u_j^(0) | S^(1) | u_i^(1) >
+             if (usepaw==1.and.i1pert<=natom) then ! S^(1) is zero for ipert=natom+2
 
-!              Compute < u_j^(0) | S^(1) | u_i^(1) >
-               call rf2_apply_hamiltonian(cg_jband,cprj_jband,cwavef3,cprj_empty,h_cwave,s_cwave,eig0_k,eig1_k_tmp,&
-&                                    jband,gs_hamkq,iddk,i2dir,i2pert,ikpt,isppol,mkmem,mpi_enreg,nband_k,nsppol,&
-                                     print_info,dtset%prtvol,rf_hamkq_i2pert,size_cprj,size_wf)
+               cpopt=-1+5*gs_hamkq%usecprj ; choice=2 ; signs=2 ; paw_opt=3
+               call nonlop(choice,cpopt,cprj_empty,dummy_array,gs_hamkq,i1dir,(/zero/),mpi_enreg,1,nnlout,&
+          &     paw_opt,signs,s_cwave,tim_nonlop,cwavef3,dummy_array2,iatom_only=i1pert)
                call dotprod_g(dot2r,dot2i,gs_hamkq%istwf_k,size_wf,2,cgj,s_cwave,mpi_enreg%me_g0, mpi_enreg%comm_spinorfft)
                lagr = lagr + dot1r*dot2r - dot1i*dot2i
                lagi = lagi + dot1r*dot2i + dot1i*dot2r
 
-!              Compute < u_j^(1) | S^(1) | u_i^(0) >
+             end if
+
+!            Compute < u_j^(1) | S^(1) | u_i^(0) >
+             if (usepaw==1.and.i3pert<=natom) then ! S^(1) is zero for ipert=natom+2
+
                cgi(:,:) = cg(:,1+offset_cgi:size_wf+offset_cgi)
-               call rf2_apply_hamiltonian(cg_jband,cprj_jband,cgi,cprj_empty,h_cwave,s_cwave,eig0_k,eig1_k_tmp,&
-&                                    jband,gs_hamkq,iddk,i2dir,i2pert,ikpt,isppol,mkmem,mpi_enreg,nband_k,nsppol,&
-                                     print_info,dtset%prtvol,rf_hamkq_i2pert,size_cprj,size_wf)
+               cpopt=-1+5*gs_hamkq%usecprj ; choice=2 ; signs=2 ; paw_opt=3
+               call nonlop(choice,cpopt,cprj_empty,dummy_array,gs_hamkq,i3dir,(/zero/),mpi_enreg,1,nnlout,&
+          &     paw_opt,signs,s_cwave,tim_nonlop,cgi,dummy_array2,iatom_only=i3pert)
                call dotprod_g(dot2r,dot2i,gs_hamkq%istwf_k,size_wf,2,cwavef1,s_cwave,mpi_enreg%me_g0, mpi_enreg%comm_spinorfft)
                lagr = lagr + dot1r*dot2r - dot1i*dot2i
                lagi = lagi + dot1r*dot2i + dot1i*dot2r
@@ -775,7 +783,6 @@ subroutine dfptnl_pert(atindx,atindx1,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,ei
 
 !          Compute < psi^(0) | H_KV^(pert1pert3) | psi^(pert2) > + < psi^(pert2) | H_KV^(pert1pert3) | psi^(0) >
            cwavef2(:,:) = cg2(:,1+offset_cgj:size_wf+offset_cgj)
-
            sij_opt = 0
            usevnl = 1
            opt_gvnl1 = 1
@@ -841,7 +848,7 @@ subroutine dfptnl_pert(atindx,atindx1,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,ei
 
      ABI_DEALLOCATE(cwave_right)
      ABI_DEALLOCATE(cwave_left)
-     ABI_DEALLOCATE(eig1_k_tmp)
+     ABI_DEALLOCATE(eig1_k_i2pert)
      ABI_DEALLOCATE(eig1_k_stored)
 
      bandtot = bandtot + nband_k
@@ -1047,7 +1054,7 @@ subroutine dfptnl_pert(atindx,atindx1,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,ei
 !                   end if
 
  
- call dotprod_vn(1,rho1r1_tot,exc3,valuei,nfftf,nfftotf,nspden,1,xc_tmp,ucvol,mpi_comm_sphgrid=mpi_enreg%comm_fft)
+ call dotprod_vn(cplex,rho1r1_tot,exc3,valuei,nfftf,nfftotf,nspden,1,xc_tmp,ucvol,mpi_comm_sphgrid=mpi_enreg%comm_fft)
  ABI_DEALLOCATE(xc_tmp)
  ABI_DEALLOCATE(rho1r1_tot)
 
@@ -1073,6 +1080,9 @@ subroutine dfptnl_pert(atindx,atindx1,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,ei
      MSG_ERROR(msg)
    end if
    ABI_ALLOCATE(nhat21,(cplex*nfftf,nspden))
+   call pawnhatfr(0,idir_phon,ipert_phon,natom,dtset%natom,nspden,psps%ntypat,&
+&   pawang,pawfgrtab,pawrhoij11,pawtab,rprimd)
+
    call pawmkrho(0,arg,cplex,gs_hamkq%gprimd,idir_phon,indsy1,ipert_phon,mpi_enreg,&
 &   natom,natom,nspden,nsym1,psps%ntypat,dtset%paral_kgb,pawang,pawfgr,pawfgrtab,&
 &   dtset%pawprtvol,pawrhoij21,pawrhoij21_unsym,pawtab,dtset%qptn,dummy_array2,dummy_array2,&
@@ -1090,28 +1100,9 @@ subroutine dfptnl_pert(atindx,atindx1,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,ei
 !&   mpi_atmtab=my_atmtab,comm_atom=my_comm_atom
    sumi = sumi + half*eHxc21_paw(2)
 
-   call pawnhatfr(0,idir_phon,ipert_phon,natom,dtset%natom,nspden,psps%ntypat,&
-&   pawang,pawfgrtab,pawrhoij11,pawtab,rprimd)
-   ABI_ALLOCATE(nhatfr21,(cplex*nfftf,nspden))
-   nhatfr21 = zero
-   do ispden=1,nspden
-     if (cplex==1) then
-       do ic=1,pawfgrtab(ipert_phon)%nfgd
-         kc=pawfgrtab(ipert_phon)%ifftsph(ic)
-         nhatfr21(kc,ispden)=nhatfr21(kc,ispden)+pawfgrtab(ipert_phon)%nhatfr(ic,ispden)
-       end do
-     else
-       do ic=1,pawfgrtab(ipert_phon)%nfgd
-         jc=2*ic-1;kc=2*pawfgrtab(ipert_phon)%ifftsph(ic)-1
-         nhatfr21(kc:kc+1,ispden)=nhatfr21(kc:kc+1,ispden)+pawfgrtab(ipert_phon)%nhatfr(jc:jc+1,ispden)
-       end do
-     end if
-   end do
-   nhat21 = nhat21 + nhatfr21
-   call dotprod_vn(1,nhat21,eHxc21_nhat,valuei,nfftf,nfftotf,nspden,1,vtrial1_i2pert,ucvol,mpi_comm_sphgrid=mpi_enreg%comm_fft)
+   call dotprod_vn(cplex,nhat21,eHxc21_nhat(1),eHxc21_nhat(2),nfftf,nfftotf,nspden,2,vtrial1_i2pert,ucvol,mpi_comm_sphgrid=mpi_enreg%comm_fft)
 
    ABI_DEALLOCATE(nhat21)
-   ABI_DEALLOCATE(nhatfr21)
 
  end if
 
@@ -1120,7 +1111,7 @@ subroutine dfptnl_pert(atindx,atindx1,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,ei
 ! **************************************************************************************************
 
  e3tot =         sum_psi1H1psi1 + sum_lambda1psi1psi1 + sum_psi0H2psi1a + sum_psi0H2psi1b
- e3tot = e3tot + half * (eHxc21_paw(1)+eHxc21_nhat) + sixth * (exc3 + exc3_paw(1))
+ e3tot = e3tot + half * (eHxc21_paw(1)+eHxc21_nhat(1)) + sixth * (exc3 + exc3_paw(1))
  value_1 = sum_psi1H1psi1       ; if(abs(value_1)<tol7) value_1 = zero
  value_2 = sum_lambda1psi1psi1  ; if(abs(value_2)<tol7) value_2 = zero
  value_3 = sum_psi0H2psi1a      ; if(abs(value_3)<tol7) value_3 = zero
@@ -1128,7 +1119,7 @@ subroutine dfptnl_pert(atindx,atindx1,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,ei
  value_4 = sixth*exc3           ; if(abs(value_4)<tol7) value_4 = zero
  value_5 = sixth*exc3_paw(1)    ; if(abs(value_5)<tol7) value_5 = zero
  value_6 = half*eHxc21_paw(1)   ; if(abs(value_6)<tol7) value_6 = zero
- value_7 = half*eHxc21_nhat     ; if(abs(value_7)<tol7) value_7 = zero
+ value_7 = half*eHxc21_nhat(1)  ; if(abs(value_7)<tol7) value_7 = zero
  value_8 = e3tot                ; if(abs(value_8)<tol7) value_8 = zero
 ! if(print_info/=0) then
 !   write(msg,'(2a,3(a,i2,a,i1),8(2a,es16.7e3),a)') ch10,'NONLINEAR : ',&

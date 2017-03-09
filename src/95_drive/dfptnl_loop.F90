@@ -218,7 +218,7 @@ subroutine dfptnl_loop(atindx,atindx1,blkflg,cg,cgindex,dtfil,dtset,d3etot,eigen
 
  comm_cell = mpi_enreg%comm_cell
 
- timrev = 1
+ timrev = 1 ! as q=0
  cplex = 2 - timrev
  nspden = dtset%nspden
  ecut_eff = (dtset%ecut)*(dtset%dilatmx)**2

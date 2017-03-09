@@ -175,39 +175,40 @@
  compute_impart_cplex=((pawrhoij(1)%cplex==2).and.(cplex==2))
 !substract_diagonal=(ipert==natom+3)
 
-!Accumulate :   < Psi^(pert1) | p_i^(0) > < p_j^(0) | Psi^(pert2) >
-!             + < Psi^(pert2) | p_i^(0) > < p_j^(0) | Psi^(pert1) >
- if (nspinor==1) then
-   do iatom=1,my_natom
-     iatom1=iatom;if (paral_atom) iatom1=my_atmtab(iatom)
-     iatm=atindx(iatom1)
-     cplex_rhoij=pawrhoij(iatom)%cplex
-     do jlmn=1,pawrhoij(iatom)%lmn_size
-       j0lmn=jlmn*(jlmn-1)/2
-       cpj1(1:2,1)=cwaveprj1_pert12(iatm,1)%cp(1:2,jlmn)   ! < p_j^(0) | Psi^(pert1) >
-       cpj2(1:2,1)=cwaveprj1_pert21(iatm,1)%cp(1:2,jlmn)   ! < p_j^(0) | Psi^(pert2) >
-       do ilmn=1,jlmn
-         klmn=j0lmn+ilmn
-         klmn_re=cplex_rhoij*(klmn-1)+1
-         cpi1(1:2,1)=cwaveprj1_pert12(iatm,1)%cp(1:2,ilmn) ! < p_i^(0) | Psi^(pert1) >
-         cpi2(1:2,1)=cwaveprj1_pert21(iatm,1)%cp(1:2,ilmn) ! < p_i^(0) | Psi^(pert2) >
-         ro11_re=zero
-         do iplex=1,cplex
-           ro11_re=ro11_re+cpi1(iplex,1)*cpj2(iplex,1)+cpj1(iplex,1)*cpi2(iplex,1)
-         end do
-         pawrhoij(iatom)%rhoij_(klmn_re,isppol)=pawrhoij(iatom)%rhoij_(klmn_re,isppol)+weight*ro11_re
-         if (compute_impart_cplex) then
-           klmn_im=klmn_re+1
-           ro11_im=        cpi1(1,1)*cpj2(2,1)-cpi1(2,1)*cpj2(1,1)
-           ro11_im=ro11_im+cpj1(1,1)*cpi2(2,1)-cpj1(2,1)*cpi2(1,1)
-           pawrhoij(iatom)%rhoij_(klmn_im,isppol)=pawrhoij(iatom)%rhoij_(klmn_im,isppol)+weight*ro11_im
-         end if
-       end do
-     end do
-   end do
- else ! nspinor=2
-   MSG_BUG("paw_dfptnl_accrhoij is not implemented for nspinor=2")
- end if
+! NOT USED FOR PAWRHO21! => only for PAWRHO2
+!!Accumulate :   < Psi^(pert1) | p_i^(0) > < p_j^(0) | Psi^(pert2) >
+!!             + < Psi^(pert2) | p_i^(0) > < p_j^(0) | Psi^(pert1) >
+! if (nspinor==1) then
+!   do iatom=1,my_natom
+!     iatom1=iatom;if (paral_atom) iatom1=my_atmtab(iatom)
+!     iatm=atindx(iatom1)
+!     cplex_rhoij=pawrhoij(iatom)%cplex
+!     do jlmn=1,pawrhoij(iatom)%lmn_size
+!       j0lmn=jlmn*(jlmn-1)/2
+!       cpj1(1:2,1)=cwaveprj1_pert12(iatm,1)%cp(1:2,jlmn)   ! < p_j^(0) | Psi^(pert1) >
+!       cpj2(1:2,1)=cwaveprj1_pert21(iatm,1)%cp(1:2,jlmn)   ! < p_j^(0) | Psi^(pert2) >
+!       do ilmn=1,jlmn
+!         klmn=j0lmn+ilmn
+!         klmn_re=cplex_rhoij*(klmn-1)+1
+!         cpi1(1:2,1)=cwaveprj1_pert12(iatm,1)%cp(1:2,ilmn) ! < p_i^(0) | Psi^(pert1) >
+!         cpi2(1:2,1)=cwaveprj1_pert21(iatm,1)%cp(1:2,ilmn) ! < p_i^(0) | Psi^(pert2) >
+!         ro11_re=zero
+!         do iplex=1,cplex
+!           ro11_re=ro11_re+cpi1(iplex,1)*cpj2(iplex,1)+cpj1(iplex,1)*cpi2(iplex,1)
+!         end do
+!         pawrhoij(iatom)%rhoij_(klmn_re,isppol)=pawrhoij(iatom)%rhoij_(klmn_re,isppol)+weight*ro11_re
+!         if (compute_impart_cplex) then
+!           klmn_im=klmn_re+1
+!           ro11_im=        cpi1(1,1)*cpj2(2,1)-cpi1(2,1)*cpj2(1,1)
+!           ro11_im=ro11_im+cpj1(1,1)*cpi2(2,1)-cpj1(2,1)*cpi2(1,1)
+!           pawrhoij(iatom)%rhoij_(klmn_im,isppol)=pawrhoij(iatom)%rhoij_(klmn_im,isppol)+weight*ro11_im
+!         end if
+!       end do
+!     end do
+!   end do
+! else ! nspinor=2
+!   MSG_BUG("paw_dfptnl_accrhoij is not implemented for nspinor=2")
+! end if
 
 !Accumulate :   < Psi^(pert1) | p_i^(pert2) > < p_j^(0)     | Psi^(0)     >
 !             + < Psi^(pert1) | p_i^(0)     > < p_j^(pert2) | Psi^(0)     >
