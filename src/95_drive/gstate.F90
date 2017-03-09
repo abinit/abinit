@@ -1211,7 +1211,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 !    ========================================
 !    New structure for geometry optimization
 !    ========================================
-   else if (dtset%ionmov>50.or.dtset%ionmov<=23) then
+   else if (dtset%ionmov>50.or.dtset%ionmov<=25) then
 
      ! TODO: return conv_retcode
      call mover(scfcv_args,ab_xfh,acell,amass,dtfil,&
@@ -1231,7 +1231,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    else ! Not an allowed option
      write(message, '(a,i0,2a)' )&
 &     'Disallowed value for ionmov=',dtset%ionmov,ch10,&
-&     'Allowed values are: 1,2,3,4,5,6,7,8,9,10,11,12,13,14,20,21 and 30'
+&     'Allowed values are: 1,2,3,4,5,6,7,8,9,10,11,12,13,14,20,21,22,23,24 and 30'
      MSG_BUG(message)
    end if
 
