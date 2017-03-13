@@ -29,7 +29,6 @@
 !!  rprimd(3,3)=real space primitive translations
 !!  unpos=unit number for POSABIN file
 !!  vel(3,natom)=velocities of atoms
-!!  xcart(3,natom)=cartesian coordinates of atoms
 !!  xred(3,natom)=reduced coordinates of atoms
 !!
 !! OUTPUT
@@ -52,7 +51,7 @@
 #include "abi_common.h"
 
 subroutine wrt_moldyn_netcdf(amass,dtset,itime,option,moldyn_file,mpi_enreg,&
-&                            results_gs,rprimd,unpos,vel,xcart,xred)
+&                            results_gs,rprimd,unpos,vel,xred)
 
  use defs_basis
  use defs_abitypes
@@ -85,7 +84,7 @@ subroutine wrt_moldyn_netcdf(amass,dtset,itime,option,moldyn_file,mpi_enreg,&
 !arrays
  real(dp),intent(in) :: amass(dtset%natom),rprimd(3,3)
  real(dp),intent(in),target :: vel(3,dtset%natom)
- real(dp),intent(in) :: xcart(3,dtset%natom),xred(3,dtset%natom)
+ real(dp),intent(in) :: xred(3,dtset%natom)
 
 !Local variables-------------------------------
 !scalars
@@ -106,6 +105,7 @@ subroutine wrt_moldyn_netcdf(amass,dtset,itime,option,moldyn_file,mpi_enreg,&
 #if defined HAVE_NETCDF
  integer :: PrimVectId(3)
  real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3)
+ real(dp),allocatable ::  xcart(:,:)
  real(dp),pointer :: vcart(:,:),vred(:,:),vtmp(:,:)
 #endif
 
@@ -117,6 +117,12 @@ subroutine wrt_moldyn_netcdf(amass,dtset,itime,option,moldyn_file,mpi_enreg,&
 !  Netcdf file name
 #if defined HAVE_NETCDF
    ficname = trim(moldyn_file)//'.nc'
+#endif
+
+!  Xcart from Xred
+#if defined HAVE_NETCDF
+   ABI_ALLOCATE(xcart,(3,dtset%natom))
+   call xred2xcart(dtset%natom,rprimd,xcart,xred)
 #endif
 
 !  ==========================================================================
@@ -385,13 +391,17 @@ subroutine wrt_moldyn_netcdf(amass,dtset,itime,option,moldyn_file,mpi_enreg,&
      close(unpos)
    end if
 
+#if defined HAVE_NETCDF
+   ABI_DEALLOCATE(xcart)
+#endif
+
 !  ==========================================================================
 !  End if master proc
  end if
 
 !Fake lines
 #if !defined HAVE_NETCDF
- if (.false.) write(std_out,*) moldyn_file,results_gs%etotal,rprimd(1,1),xcart(1,1)
+ if (.false.) write(std_out,*) moldyn_file,results_gs%etotal,rprimd(1,1)
 #endif
 
 end subroutine wrt_moldyn_netcdf

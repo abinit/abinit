@@ -1,18 +1,6 @@
-  ABINIT 
-  
-  Give name for formatted input file: 
-/home/buildbot/ABINIT/testf_gcc47/rangel_7.5.1-training/tests/bigdft/Input/t33.in
-  Give name for formatted output file:
-t33_MPI1.out
-  Give root name for generic input files:
-t33_MPI1i
-  Give root name for generic output files:
-t33_MPI1o
-  Give root name for generic temporary files:
-t33_MPI1
 
-.Version 7.5.1 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu4.7 computer) 
+.Version 8.1.5 of ABINIT 
+.(MPI version, prepared for a x86_64_linux_gnu4.8 computer) 
 
 .Copyright (C) 1998-2017 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -26,296 +14,32 @@ t33_MPI1
  acknowledgments of the ABINIT effort.
  For more information, see http://www.abinit.org .
 
-.Starting date : Wed 31 Jul 2013.
-- ( at 09h12 )
+.Starting date : Thu 22 Sep 2016.
+- ( at 18h31 )
   
+- input  file    -> t33.in
+- output file    -> t33.out
+- root for input  files -> t33i
+- root for output files -> t33o
 
- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
- === Build Information === 
-  Version       : 7.5.1
-  Build target  : x86_64_linux_gnu4.7
-  Build date    : 20130731
-
- === Compiler Suite === 
-  C compiler       : gnu4.7
-  CFLAGS           :  -g -O2 -mtune=native -march=native
-  C++ compiler     : gnu4.7
-  CXXFLAGS         :  -g -O2 -mtune=native -march=native
-  Fortran compiler : gnu4.7
-  FCFLAGS          :  -g -ffree-line-length-none
-  FC_LDFLAGS       : 
-
- === Optimizations === 
-  Debug level        : basic
-  Optimization level : standard
-  Architecture       : intel_xeon
-
- === MPI === 
-  Parallel build : yes
-  Parallel I/O   : yes
-  Time tracing   : no
-  GPU support    : no
-
- === Connectors / Fallbacks === 
-  Connectors on : yes
-  Fallbacks on  : yes
-  DFT flavor    : libxc-fallback+atompaw-fallback+bigdft-fallback+wannier90-fallback
-  FFT flavor    : none
-  LINALG flavor : netlib-fallback
-  MATH flavor   : none
-  TIMER flavor  : abinit
-  TRIO flavor   : netcdf-fallback+etsf_io-fallback+fox-fallback
-
- === Experimental features === 
-  Bindings            : no
-  Exports             : no
-  GW double-precision : yes
-
- === Bazaar branch information === 
-  Branch ID : rangel-20130730141639-g4ne7cx92tp1fzzv
-  Revision  : 455
-  Committed : 0
-
- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-
- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
- Default optimizations:
-   -O2 -mtune=native -march=native
-
-
- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-
- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
- CPP options activated during the build:
-
-                    CC_GNU                   CXX_GNU                    FC_GNU
-
-           HAVE_BZR_BRANCH          HAVE_DFT_ATOMPAW           HAVE_DFT_BIGDFT
-
-            HAVE_DFT_LIBXC        HAVE_DFT_WANNIER90 HAVE_FC_ALLOCATABLE_DT...
-
-      HAVE_FC_COMMAND_LINE        HAVE_FC_CONTIGUOUS           HAVE_FC_CPUTIME
-
-              HAVE_FC_EXIT             HAVE_FC_FLUSH             HAVE_FC_GAMMA
-
-            HAVE_FC_GETENV          HAVE_FC_INT_QUAD             HAVE_FC_IOMSG
-
-     HAVE_FC_ISO_C_BINDING        HAVE_FC_LONG_LINES              HAVE_FC_NULL
-
-         HAVE_FC_STREAM_IO          HAVE_FORTRAN2003                  HAVE_MPI
-
-                 HAVE_MPI2               HAVE_MPI_IO HAVE_MPI_TYPE_CREATE_S...
-
-             HAVE_OS_LINUX                HAVE_TIMER         HAVE_TIMER_ABINIT
-
-            HAVE_TIMER_MPI         HAVE_TIMER_SERIAL         HAVE_TRIO_ETSF_IO
-
-             HAVE_TRIO_FOX          HAVE_TRIO_NETCDF
- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-- input  file    -> /home/buildbot/ABINIT/testf_gcc47/rangel_7.5.1-training/tests/bigdft/Input/t33.in
-- output file    -> t33_MPI1.out
-- root for input  files -> t33_MPI1i
-- root for output files -> t33_MPI1o
-
--instrng :    91 lines of input have been read from file /home/buildbot/ABINIT/testf_gcc47/rangel_7.5.1-training/tests/bigdft/Input/t33.in
-
-
- iofn2 : Please give name of formatted atomic psp file
- iofn2 : for atom type   1 , psp file is /home/buildbot/ABINIT/testf_gcc47/rangel_7.5.1-training/tests/Psps_for_tests/08o.pspgth
-  read the values zionpsp=  6.0 , pspcod=   2 , lmax=   0
-
- inpspheads : deduce mpsang  =   1, n1xccc  =   0.
-
- invars1m : enter jdtset=     1
- invars1 : treat image number     1
-
- symlatt : the Bravais lattice is tP (primitive tetragonal)
-  xcart  is defined in input file
- ingeo : takes atomic coordinates from input array xcart
- ingeo : WARNING -
- Because icoulomb is 1, the average center of coordinates of the system has been translated to (0.5,0.5,0.5)
-
- symlatt : the Bravais lattice is tP (primitive tetragonal)
-
- symlatt : the Bravais lattice is tP (primitive tetragonal)
-
- symbrav : COMMENT -
-  The Bravais lattice determined only from the primitive
-  vectors, bravais(1)=  4, is more symmetric
-  than the real one, iholohedry=  1, obtained by taking into
-  account the atomic positions. Start deforming the primitive vector set.
-
- symlatt : the Bravais lattice is mC (one-face-centered monoclinic)
-
- symbrav : COMMENT -
-  The Bravais lattice determined from modified primitive
-  vectors, bravais(1)=  2, has a lower symmetry than before,
-  but is still more symmetric than the real one, iholohedry=  1
-  obtained by taking into account the atomic positions.
-
- symlatt : the Bravais lattice is aP (primitive triclinic)
- symspgr : the symmetry operation no.   1 is the identity
- symspgr : spgroup=   1  P1   (=C1^1)
- inkpts: Sum of    1 k point weights is    1.000000
-
- invars1m : enter jdtset=     2
- invars1 : treat image number     1
-
- symlatt : the Bravais lattice is tP (primitive tetragonal)
-  xcart  is defined in input file
- ingeo : takes atomic coordinates from input array xcart
- ingeo : WARNING -
- Because icoulomb is 1, the average center of coordinates of the system has been translated to (0.5,0.5,0.5)
-
- symlatt : the Bravais lattice is tP (primitive tetragonal)
-
- symlatt : the Bravais lattice is tP (primitive tetragonal)
-
- symbrav : COMMENT -
-  The Bravais lattice determined only from the primitive
-  vectors, bravais(1)=  4, is more symmetric
-  than the real one, iholohedry=  1, obtained by taking into
-  account the atomic positions. Start deforming the primitive vector set.
-
- symlatt : the Bravais lattice is mC (one-face-centered monoclinic)
-
- symbrav : COMMENT -
-  The Bravais lattice determined from modified primitive
-  vectors, bravais(1)=  2, has a lower symmetry than before,
-  but is still more symmetric than the real one, iholohedry=  1
-  obtained by taking into account the atomic positions.
-
- symlatt : the Bravais lattice is aP (primitive triclinic)
- symspgr : the symmetry operation no.   1 is the identity
- symspgr : spgroup=   1  P1   (=C1^1)
- inkpts: Sum of    1 k point weights is    1.000000
- inkpts: Sum of    1 k point weights is    1.000000
-  dtset%nelect=   12.000000000000000     
- inkpts: Sum of    1 k point weights is    1.000000
-  dtset%nelect=   12.000000000000000     
-  mpi_setup : enter 
- mpi_setup1: mkmem  undefined in the input file. Use default mkmem  = nkpt
- mpi_setup1: With nkpt_me=    1 and mkmem  =     1, ground state wf handled in core.
- mpi_setup1: mkqmem undefined in the input file. Use default mkqmem = nkpt
- mpi_setup1: With nkpt_me=    1 and mkqmem =     1, ground state wf handled in core.
- mpi_setup1: mk1mem undefined in the input file. Use default mk1mem = nkpt
- mpi_setup1: With nkpt_me=    1 and mk1mem =     1, ground state wf handled in core.
- For input ecut= -1.000000E+00 best grid ngfft=       2       2       2
-       max ecut=  1.748442E-02
-
- ==== FFT mesh ====
-  FFT mesh divisions ........................     2    2    2
-  Augmented FFT divisions ...................     3    3    2
-  FFT algorithm .............................   112
-  FFT cache size ............................    16
- mpi_setup1: mkmem  undefined in the input file. Use default mkmem  = nkpt
- mpi_setup1: With nkpt_me=    1 and mkmem  =     1, ground state wf handled in core.
- mpi_setup1: mkqmem undefined in the input file. Use default mkqmem = nkpt
- mpi_setup1: With nkpt_me=    1 and mkqmem =     1, ground state wf handled in core.
- mpi_setup1: mk1mem undefined in the input file. Use default mk1mem = nkpt
- mpi_setup1: With nkpt_me=    1 and mk1mem =     1, ground state wf handled in core.
- For input ecut= -1.000000E+00 best grid ngfft=       2       2       2
-       max ecut=  1.748442E-02
-
- ==== FFT mesh ====
-  FFT mesh divisions ........................     2    2    2
-  Augmented FFT divisions ...................     3    3    2
-  FFT algorithm .............................   112
-  FFT cache size ............................    16
 
  DATASET    1 : space group P1 (#  1); Bravais aP (primitive triclinic)
-
- getdim_nloc : deduce lmnmax  =   1, lnmax  =   1,
-                      lmnmaxso=   1, lnmaxso=   1.
- setmqgrid : COMMENT -
-  The number of points "mqgrid" in reciprocal space used for the
-  description of the pseudopotentials has been set automatically
-  by abinit to :     3001.
-  wvl_memory : analysis of memory needs
 ================================================================================
  Values of the parameters that define the memory need for DATASET  1 (WVL).
   wvl_hgrid =  0.400   nwfshist =      2 wvl_crmult =  3.000 wvl_frmult =  1.000
   tl_radius =  0.000  tl_nprccg =     30
       natom =      2     ntypat =      1    nstates =      7     nsppol =      1
 ================================================================================
- Shifted atomic positions, Atomic Units:                   grid spacing units:
-     1 At. ty  3.45672E+00  3.60000E+00  3.60000E+00        8.642     9.000     9.000
-     2 At. ty  5.74328E+00  3.60000E+00  3.60000E+00       14.358     9.000     9.000
-    Shift of= -3.80000E+00 -3.60000E+00 -3.60000E+00 H grids=  0.4000  0.4000  0.4000
-   Box Sizes=  9.20000E+00  7.20000E+00  7.20000E+00           23        18        18
-       Extremes for the high resolution grid points:         9<14      9<9      9<9
- wavelet localization is ON
- ------------------------------------------------- Wavefunctions Descriptors Creation
- Coarse resolution grid: Number of segments=        281 points=      4592
-   Fine resolution grid: Number of segments=          2 points=         2
- ------------------------------------------------------------------ Memory Estimation
- Number of atoms=    2 Number of orbitals=     7 Sim. Box Dimensions=    23   18   18
- Estimation performed for 1 processors.
- Memory occupation for principal arrays:
-               Poisson Solver Kernel (K):     3 MB   119 KB
-              Poisson Solver Density (D):     2 MB  1015 KB
-     Single Wavefunction for one orbital:     0 MB    36 KB
-    All Wavefunctions for each processor:     0 MB   504 KB
-       Wavefunctions + DIIS per proc (W):     1 MB   488 KB
-     Nonlocal Pseudopotential Arrays (P):     0 MB     0 KB
-    Arrays of full uncompressed grid (U):     2 MB   653 KB
- Estimation of Memory requirements for principal code sections:
-  Kernel calculation | Density Construction | Poisson Solver | Hamiltonian application
-       ~11*K         |   W+~1*U+~18*D+K+P   |   ~8*D+K+W+P   |   W+~1*U+~18*D+K+P 
-        34MB         |        62MB          |       28MB     |            62MB
- The overall memory requirement needed for this calculation is thus: 62 MB
- By reducing the DIIS history and/or increasing the number of processors the amount of
-  memory can be reduced but for this system it will never be less than 8 MB
 ================================================================================
 
 
  DATASET    2 : space group P1 (#  1); Bravais aP (primitive triclinic)
-
- getdim_nloc : deduce lmnmax  =   1, lnmax  =   1,
-                      lmnmaxso=   1, lnmaxso=   1.
- setmqgrid : COMMENT -
-  The number of points "mqgrid" in reciprocal space used for the
-  description of the pseudopotentials has been set automatically
-  by abinit to :     3001.
-  wvl_memory : analysis of memory needs
 ================================================================================
  Values of the parameters that define the memory need for DATASET  2 (WVL).
   wvl_hgrid =  0.400   nwfshist =      2 wvl_crmult =  3.000 wvl_frmult =  1.000
   tl_radius =  0.000  tl_nprccg =     30
       natom =      2     ntypat =      1    nstates =      7     nsppol =      1
 ================================================================================
- Shifted atomic positions, Atomic Units:                   grid spacing units:
-     1 At. ty  3.45672E+00  3.60000E+00  3.60000E+00        8.642     9.000     9.000
-     2 At. ty  5.74328E+00  3.60000E+00  3.60000E+00       14.358     9.000     9.000
-    Shift of= -3.80000E+00 -3.60000E+00 -3.60000E+00 H grids=  0.4000  0.4000  0.4000
-   Box Sizes=  9.20000E+00  7.20000E+00  7.20000E+00           23        18        18
-       Extremes for the high resolution grid points:         9<14      9<9      9<9
- wavelet localization is ON
- ------------------------------------------------- Wavefunctions Descriptors Creation
- Coarse resolution grid: Number of segments=        281 points=      4592
-   Fine resolution grid: Number of segments=          2 points=         2
- ------------------------------------------------------------------ Memory Estimation
- Number of atoms=    2 Number of orbitals=     7 Sim. Box Dimensions=    23   18   18
- Estimation performed for 1 processors.
- Memory occupation for principal arrays:
-               Poisson Solver Kernel (K):     3 MB   119 KB
-              Poisson Solver Density (D):     2 MB  1015 KB
-     Single Wavefunction for one orbital:     0 MB    36 KB
-    All Wavefunctions for each processor:     0 MB   504 KB
-       Wavefunctions + DIIS per proc (W):     1 MB   488 KB
-     Nonlocal Pseudopotential Arrays (P):     0 MB     0 KB
-    Arrays of full uncompressed grid (U):     2 MB   653 KB
- Estimation of Memory requirements for principal code sections:
-  Kernel calculation | Density Construction | Poisson Solver | Hamiltonian application
-       ~11*K         |   W+~1*U+~18*D+K+P   |   ~8*D+K+W+P   |   W+~1*U+~18*D+K+P 
-        34MB         |        62MB          |       28MB     |            62MB
- The overall memory requirement needed for this calculation is thus: 62 MB
- By reducing the DIIS history and/or increasing the number of processors the amount of
-  memory can be reduced but for this system it will never be less than 8 MB
 ================================================================================
 
 --------------------------------------------------------------------------------
@@ -323,19 +47,17 @@ t33_MPI1
 --------------------------------------------------------------------------------
 -
 - outvars: echo of selected default values                                      
--   accesswff0 =  0 , fftalg0 =112 , wfoptalg0 =  0
+-   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
 -
 - outvars: echo of global parameters not present in the input file              
--  max_nthreads =    0
+-  max_nthreads =    1
 -
  -outvars: echo values of preprocessed input variables --------
- 
- These variables are accessible in NetCDF format (t33_MPI1o_OUT.nc)
-
             acell      1.6800000000E+01  1.4400000000E+01  1.4400000000E+01 Bohr
               amu      1.00000000E+00
       chksymbreak           0
            diemix      4.00000000E-01
+-          fftalg         312
          icoulomb           1
              iscf1         17
              iscf2          7
@@ -347,22 +69,25 @@ t33_MPI1
            ndtset           2
             ngfft           2       2       2
              nkpt           1
+            nline           2
+           nnsclo           4
         nscforder          14
-            nstep          10
+            nstep          20
              nsym           1
            ntypat           1
+         nwfshist           2
               occ      2.000000  2.000000  2.000000  2.000000  2.000000  1.000000
                        1.000000
            occopt           0
-        optforces           0
         optstress           0
            prtden           0
            prteig           0
             prtwf           0
           spgroup           1
-           tolvrs      1.00000000E-03
+           tolvrs      1.00000000E-08
             typat      1  1
            usewvl           1
+  wvl_bigdft_comp           0
        wvl_crmult      3.00000000E+00
        wvl_frmult      1.00000000E+00
         wvl_hgrid      4.00000000E-01
@@ -377,72 +102,29 @@ t33_MPI1
 
 ================================================================================
 
- chkinp: machine precision is   2.2204460492503131E-16
-
  chkinp: Checking input parameters for consistency, jdtset=   1.
 
  chkinp: Checking input parameters for consistency, jdtset=   2.
 
- chkinp.F90:2963:COMMENT
- 
- Comparison between wvl_hgrid and ecut
-  real-space mesh | eq. Ec around atoms | eq. Ec further from atoms
-      0.400 bohr  |           123.4 Ht  |             30.8 Ht
-
- chkinp.F90:2985:WARNING
-   Restart files from wavelets in non ETSF format does not follow
-  the ABINIT standards.
-  Put accesswff to 3 to use ETSF retart files.
- DATA TYPE INFORMATION: 
- REAL:      Data type name: REAL(DP) 
-            Kind value:      8
-            Precision:      15
-            Smallest nonnegligible quantity relative to 1:  0.22204460E-15
-            Smallest positive number:                       0.22250739-307
-            Largest representable number:                   0.17976931+309
- INTEGER:   Data type name: INTEGER(default) 
-            Kind value: 4
-            Bit size:   32
-            Largest representable number: 2147483647
- LOGICAL:   Data type name: LOGICAL 
-            Kind value: 4
- CHARACTER: Data type name: CHARACTER             Kind value: 1
- ==== OpenMP parallelism is OFF ====
- 
-  ==== Using MPI-2 specifications ==== 
-  MPI-IO support is ON
-  xmpi_tag_ub ................   2147483647
-  xmpi_bsize_ch ..............            1
-  xmpi_bsize_int .............            4
-  xmpi_bsize_sp ..............            4
-  xmpi_bsize_dp ..............            8
-  xmpi_bsize_spc .............            8
-  xmpi_bsize_dpc .............           16
-  xmpio_bsize_frm ............            4
-  xmpi_address_kind ..........            8
-  xmpi_offset_kind ...........            8
-  MPI_WTICK ..................    9.9999999999999995E-007
-
 ================================================================================
 == DATASET  1 ==================================================================
--   nproc =    1
+-   nproc =    1   -> not optimal: autoparal keyword recommended in input file
 
- setmqgrid : COMMENT -
-  The number of points "mqgrid" in reciprocal space used for the
-  description of the pseudopotentials has been set automatically
-  by abinit to :     3001.
-
- getdim_nloc : deduce lmnmax  =   1, lnmax  =   1,
-                      lmnmaxso=   1, lnmaxso=   1.
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
  Citation for XC functional:
   S. Goedecker, M. Teter, J. Huetter, PRB 54, 1703 (1996)
 
+ Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
+ R(1)= 16.8000000  0.0000000  0.0000000  G(1)=  0.0595238  0.0000000  0.0000000
+ R(2)=  0.0000000 14.4000000  0.0000000  G(2)=  0.0000000  0.0694444  0.0000000
+ R(3)=  0.0000000  0.0000000 14.4000000  G(3)=  0.0000000  0.0000000  0.0694444
  Unit cell volume ucvol=  3.4836480E+03 bohr^3
  Angles (23,13,12)=  9.00000000E+01  9.00000000E+01  9.00000000E+01 degrees
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/testf_gcc47/rangel_7.5.1-training/tests/Psps_for_tests/08o.pspgth
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/testf_gcc47/rangel_7.5.1-training/tests/Psps_for_tests/08o.pspgth
+
+--- Pseudopotential description ------------------------------------------------
+- pspini: atom type   1  psp file is /cea/dsku/u-basque/hal1/home/abinit/abinit/BZR/TORRENT/ABINIT-GIT/wvl-paw-forces/tests/Psps_for_tests/08o.pspgth
+- pspatm: opening atomic psp file    /cea/dsku/u-basque/hal1/home/abinit/abinit/BZR/TORRENT/ABINIT-GIT/wvl-paw-forces/tests/Psps_for_tests/08o.pspgth
 -   O SG LDA PSP
 -  8.00000   6.00000    960531                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -467,1035 +149,179 @@ t33_MPI1
  pspatm: atomic psp has been read  and splines computed
 
    1.66476825E+00                                ecore*ucvol(ha*bohr**3)
-
- wvl_setBoxGeometry : Changing the box for wavelets computation.
- Shifted atomic positions, Atomic Units:                   grid spacing units:
-     1      O  3.25672E+00  3.40000E+00  3.40000E+00        8.142     8.500     8.500
-     2      O  5.54328E+00  3.40000E+00  3.40000E+00       13.858     8.500     8.500
-    Shift of= -4.00000E+00 -3.80000E+00 -3.80000E+00 H grids=  0.4000  0.4000  0.4000
-   Box Sizes=  8.80000E+00  6.80000E+00  6.80000E+00           22        17        17
-       Extremes for the high resolution grid points:         8<14      8<9      8<9
- wavelet localization is ON
-  | acell is now:             8.800000    6.800000    6.800000
-  | nfl1, nfu1:               8   14
-  | nfl2, nfu2:               8    9
-  | nfl3, nfu3:               8    9
-  | box size for datas:             75          65          65
-  | box size for wavelets:          22          17          17
-
- wvl_denspot_set: Create wavelet type denspot.
-Psolver_kernel() : building kernel...
- | data dimensions:    75    65    65
- ------------------------------------------------------------ Poisson Kernel Creation
- Calculating Poisson solver kernel, free BC...done.
- Memory occ. per proc. (Bytes):  Density=2940000  Kernel=3064928
-                                 Full Grid Arrays=2535000
-
- wvl_setngfft : Changing the FFT grid definition.
-  | ngfft(1:3) is now:              75          65          65
-  | ngfft(4:6) is now:              75          65          65
-
- wvl_descr_atoms_set_sym: Create symmetries for the wvl%atoms object.
-
- wvl_wfs_set: Create access keys for wavefunctions.
- ------------------------------------------------- Wavefunctions Descriptors Creation
- Coarse resolution grid: Number of segments=        256 points=      3928
-   Fine resolution grid: Number of segments=          0 points=         0
-  | all orbitals have coarse segments, elements:     256    3928
-  | all orbitals have fine   segments, elements:       0       0
- ------------------------------------------------------------ PSP Projectors Creation
- Type    Name Number of atoms Number of projectors
-    1       O               2                    1
-                                            ------  On-the-fly projectors application
- Total number of projectors =                    2
- Total number of components =                 2424
- Percent of zero components =                    0
-
- wvl_projectors_set : allocate projectors data,
-  size of the compressed array: 2424
-
- wvl_wfsinp_scratch: wavefunction initialisation.
-
- mklocl_wavelets: Create local potential from ions.
- ----------------------------------------------------------- Ionic Potential Creation
- total ionic charge, leaked charge           -12.000000000003   0.000E+00
- Poisson Solver:
-   BC                                  : Isolated
-   Dimensions                          :  [  75,  65,  65 ]
-   MPI tasks                           :  1
- Total No. of Atomic Input Orbitals    :  8
- Atomic Input Orbital Generation:
- - Atom Type                           : O
-     Electronic configuration: {s: [ 2.00], p: [ 4/3,  4/3,  4/3]}
- Wavelet conversion succeeded          :  Yes
- Deviation from normalization          :  9.12E-03
- GPU acceleration                      :  No
- Total electronic charge               :  11.999997082583
- Poisson Solver:
-   BC                                  : Isolated
-   Dimensions                          :  [  75,  65,  65 ]
-   MPI tasks                           :  1
- found 2 warnings.
- Some projectors may be too rough.
- Consider the possibility of reducing hgrid for having a more accurate run.
- Expected kinetic energy               :  24.0573185664
- Energies: {Ekin:  2.42893936363E+01, Epot: -3.33429307260E+01, Enl:  3.10349901899E+00, 
-              EH:  4.28774010777E+01,  EXC: -6.66854794508E+00, EvXC: -8.74574204731E+00}
- EKS                                   : -4.67502450462266452E+01
- IG Overlap Matrices:
-   Calculated                          :  Yes
-   Diagonalized                        :  Yes
-  #----------------------------------------------- Kohn-Sham Eigenvalues and Occupation Numbers
- Orbitals: [
- {e: -1.072986761915E+00, f:  2.0000}, 
- {e: -6.352710226386E-01, f:  2.0000}, 
- {e: -3.633012082956E-01, f:  2.0000}, 
- {e: -3.630634808915E-01, f:  2.0000}, 
- {e: -3.363026528388E-01, f:  2.0000}, 
- {e: -1.357387132986E-01, f:  1.0000}, 
- {e: -1.357170722426E-01, f:  1.0000}, 
- {e:  4.416733043473E-01, f:  0.0000}]
- IG wavefunctions defined              :  Yes
- Accuracy estimation for this run:
-   Energy                              :  2.32E-01
-   Convergence Criterion               :  3.32E-02
-  | wavefunctions have been calculated.
+--------------------------------------------------------------------------------
 
  setup2: nwvl coarse and fine are    3928       0
- GPU acceleration                      :  No
- Total electronic charge               :  11.999997171688
-
- wvl_mkrho : but why are you copying me :..o(
 
 ================================================================================
 
- mklocl_wavelets: Create local potential from ions.
- ----------------------------------------------------------- Ionic Potential Creation
- total ionic charge, leaked charge           -12.000000000003   0.000E+00
- Poisson Solver:
-   BC                                  : Isolated
-   Dimensions                          :  [  75,  65,  65 ]
-   MPI tasks                           :  1
-psolver_rhohxc(): compute potentials (Vhartree and Vxc)...
- | dimension:    75    65    65
- Poisson Solver:
-   BC                                  : Isolated
-   Dimensions                          :  [  75,  65,  65 ]
-   MPI tasks                           :  1
+     iter   Etot(hartree)      deltaE(h)  grdnorm    nres2
+ ETOT  1  -31.318782597567    -3.132E+01 2.365E-02 8.846E+00
+ ETOT  2  -31.269945616288     4.884E-02 2.737E-03 1.900E+00
+ ETOT  3  -31.262573351317     7.372E-03 5.391E-03 2.261E-01
+ ETOT  4  -31.262130610164     4.427E-04 1.672E-03 6.019E-02
+ ETOT  5  -31.261992494077     1.381E-04 3.776E-04 4.050E-03
+ ETOT  6  -31.261990141630     2.352E-06 9.272E-05 1.283E-04
+ ETOT  7  -31.261989939752     2.019E-07 2.590E-05 5.255E-06
+ ETOT  8  -31.261990003838    -6.409E-08 9.934E-06 8.509E-07
+ ETOT  9  -31.261990000419     3.419E-09 3.008E-06 1.318E-08
+ ETOT 10  -31.261990000451    -3.195E-11 8.195E-07 4.766E-09
 
- ITER STEP NUMBER     1
- vtorho : nnsclo_now=  0, note that nnsclo,dbl_nnsclo,istep=  0 0  1
- found 2 warnings.
- Some projectors may be too rough.
- Consider the possibility of reducing hgrid for having a more accurate run.
- Hamiltonian Applied                   :  Yes
-
- wvl_hpsitopsi: compute the new wavefunction from the trial potential.
- Orthocostraint                        :  Yes
- Preconditioning                       :  Yes
- iter                                  :  1
- tr(H)                                 : -7.00426293065461980E+00
- gnrm                                  :  6.80E-01
- DIIS weights: [ 1.00E+00,  1.00E+00]
- Orthogonalization Method              :  0
- found 2 warnings.
- Some projectors may be too rough.
- Consider the possibility of reducing hgrid for having a more accurate run.
- Hamiltonian Applied                   :  Yes
-
- wvl_hpsitopsi: compute the new wavefunction from the trial potential.
- Orthocostraint                        :  Yes
- Preconditioning                       :  Yes
- iter                                  :  2
- tr(H)                                 : -7.48750474303724278E+00
- gnrm                                  :  1.98E-01
- DIIS weights: [ 1.22E-01,  8.78E-01, -7.04E-03]
- Orthogonalization Method              :  0
- GPU acceleration                      :  No
- Total electronic charge               :  11.999997562939
-
- wvl_mkrho : but why are you copying me :..o(
-
- vtorho : WARNING -
-  For k-point number    1,
-  The minimal occupation factor is  1.000.
-  An adequate monitoring of convergence requires it to be  at most 0.01_dp.
-  Action : increase slightly the number of bands.
-
- Total charge density [el/Bohr^3]
-,     Maximum=    1.1484E+00  at reduced coord.    0.5600    0.4462    0.4923
-,     Minimum=    1.0000E-20  at reduced coord.    0.0000    0.0000    0.0000
-,  Integrated=    1.2000E+01
- ETOT  1  -31.257317814015    -3.126E+01 1.976E-01 5.585E+00
- scprqt: <Vxc>= -2.9741790E-02 hartree
-
-Simple mixing update:
-  residual square of the potential :  0.89354299505320434
-psolver_rhohxc(): compute potentials (Vhartree and Vxc)...
- | dimension:    75    65    65
- Poisson Solver:
-   BC                                  : Isolated
-   Dimensions                          :  [  75,  65,  65 ]
-   MPI tasks                           :  1
-
- ITER STEP NUMBER     2
- vtorho : nnsclo_now=  0, note that nnsclo,dbl_nnsclo,istep=  0 0  2
- found 2 warnings.
- Some projectors may be too rough.
- Consider the possibility of reducing hgrid for having a more accurate run.
- Hamiltonian Applied                   :  Yes
-
- wvl_hpsitopsi: compute the new wavefunction from the trial potential.
- Orthocostraint                        :  Yes
- Preconditioning                       :  Yes
- iter                                  :  1
- tr(H)                                 : -6.77568625219072906E+00
- gnrm                                  :  5.24E-02
- DIIS weights: [ 1.00E+00,  1.00E+00]
- Orthogonalization Method              :  0
- found 2 warnings.
- Some projectors may be too rough.
- Consider the possibility of reducing hgrid for having a more accurate run.
- Hamiltonian Applied                   :  Yes
-
- wvl_hpsitopsi: compute the new wavefunction from the trial potential.
- Orthocostraint                        :  Yes
- Preconditioning                       :  Yes
- iter                                  :  2
- tr(H)                                 : -6.78487285965014131E+00
- gnrm                                  :  2.44E-02
- DIIS weights: [-4.20E-01,  1.42E+00, -6.44E-05]
- Orthogonalization Method              :  0
- GPU acceleration                      :  No
- Total electronic charge               :  11.999997656030
-
- wvl_mkrho : but why are you copying me :..o(
-
- vtorho : WARNING -
-  For k-point number    1,
-  The minimal occupation factor is  1.000.
-  An adequate monitoring of convergence requires it to be  at most 0.01_dp.
-  Action : increase slightly the number of bands.
-
- Total charge density [el/Bohr^3]
-,     Maximum=    1.1071E+00  at reduced coord.    0.5600    0.4462    0.4923
-,     Minimum=    1.0000E-20  at reduced coord.    0.0000    0.0000    0.0000
-,  Integrated=    1.2000E+01
- ETOT  2  -31.273195265909    -1.588E-02 2.442E-02 2.715E+00
- scprqt: <Vxc>= -2.8620796E-02 hartree
-
- Pulay update with  1 previous iterations:
- mixing of old trial potential : alpha(m:m-4)=   1.78     -0.780
-psolver_rhohxc(): compute potentials (Vhartree and Vxc)...
- | dimension:    75    65    65
- Poisson Solver:
-   BC                                  : Isolated
-   Dimensions                          :  [  75,  65,  65 ]
-   MPI tasks                           :  1
-
- ITER STEP NUMBER     3
- vtorho : nnsclo_now=  0, note that nnsclo,dbl_nnsclo,istep=  0 0  3
- found 2 warnings.
- Some projectors may be too rough.
- Consider the possibility of reducing hgrid for having a more accurate run.
- Hamiltonian Applied                   :  Yes
-
- wvl_hpsitopsi: compute the new wavefunction from the trial potential.
- Orthocostraint                        :  Yes
- Preconditioning                       :  Yes
- iter                                  :  1
- tr(H)                                 : -6.31257993011949381E+00
- gnrm                                  :  3.19E-02
- DIIS weights: [ 1.00E+00,  1.00E+00]
- Orthogonalization Method              :  0
- found 2 warnings.
- Some projectors may be too rough.
- Consider the possibility of reducing hgrid for having a more accurate run.
- Hamiltonian Applied                   :  Yes
-
- wvl_hpsitopsi: compute the new wavefunction from the trial potential.
- Orthocostraint                        :  Yes
- Preconditioning                       :  Yes
- iter                                  :  2
- tr(H)                                 : -6.31727550744591770E+00
- gnrm                                  :  1.62E-02
- DIIS weights: [-6.07E-01,  1.61E+00, -1.67E-05]
- Orthogonalization Method              :  0
- GPU acceleration                      :  No
- Total electronic charge               :  11.999997692124
-
- wvl_mkrho : but why are you copying me :..o(
-
- vtorho : WARNING -
-  For k-point number    1,
-  The minimal occupation factor is  1.000.
-  An adequate monitoring of convergence requires it to be  at most 0.01_dp.
-  Action : increase slightly the number of bands.
-
- Total charge density [el/Bohr^3]
-,     Maximum=    1.0958E+00  at reduced coord.    0.5600    0.4462    0.4923
-,     Minimum=    1.0000E-20  at reduced coord.    0.0000    0.0000    0.0000
-,  Integrated=    1.2000E+01
- ETOT  3  -31.260526979417     1.267E-02 1.625E-02 1.164E-01
- scprqt: <Vxc>= -2.7244767E-02 hartree
-
- Pulay update with  2 previous iterations:
- mixing of old trial potential : alpha(m:m-4)=   1.18     -0.496      0.318
-psolver_rhohxc(): compute potentials (Vhartree and Vxc)...
- | dimension:    75    65    65
- Poisson Solver:
-   BC                                  : Isolated
-   Dimensions                          :  [  75,  65,  65 ]
-   MPI tasks                           :  1
-
- ITER STEP NUMBER     4
- vtorho : nnsclo_now=  0, note that nnsclo,dbl_nnsclo,istep=  0 0  4
- found 2 warnings.
- Some projectors may be too rough.
- Consider the possibility of reducing hgrid for having a more accurate run.
- Hamiltonian Applied                   :  Yes
-
- wvl_hpsitopsi: compute the new wavefunction from the trial potential.
- Orthocostraint                        :  Yes
- Preconditioning                       :  Yes
- iter                                  :  1
- tr(H)                                 : -6.43080182329829508E+00
- gnrm                                  :  7.48E-03
- DIIS weights: [ 1.00E+00,  1.00E+00]
- Orthogonalization Method              :  0
- found 2 warnings.
- Some projectors may be too rough.
- Consider the possibility of reducing hgrid for having a more accurate run.
- Hamiltonian Applied                   :  Yes
-
- wvl_hpsitopsi: compute the new wavefunction from the trial potential.
- Orthocostraint                        :  Yes
- Preconditioning                       :  Yes
- iter                                  :  2
- tr(H)                                 : -6.43097352839213521E+00
- gnrm                                  :  3.63E-03
- DIIS weights: [-4.15E-01,  1.42E+00, -1.15E-06]
- Orthogonalization Method              :  0
- GPU acceleration                      :  No
- Total electronic charge               :  11.999997682149
-
- wvl_mkrho : but why are you copying me :..o(
-
- vtorho : WARNING -
-  For k-point number    1,
-  The minimal occupation factor is  1.000.
-  An adequate monitoring of convergence requires it to be  at most 0.01_dp.
-  Action : increase slightly the number of bands.
-
- Total charge density [el/Bohr^3]
-,     Maximum=    1.1007E+00  at reduced coord.    0.5600    0.4462    0.4923
-,     Minimum=    1.0000E-20  at reduced coord.    0.0000    0.0000    0.0000
-,  Integrated=    1.2000E+01
- ETOT  4  -31.261399304618    -8.723E-04 3.627E-03 4.626E-02
- scprqt: <Vxc>= -2.7148474E-02 hartree
-
- Pulay update with  3 previous iterations:
- mixing of old trial potential : alpha(m:m-4)=   2.07     -0.956      0.345E-01 -0.148
-psolver_rhohxc(): compute potentials (Vhartree and Vxc)...
- | dimension:    75    65    65
- Poisson Solver:
-   BC                                  : Isolated
-   Dimensions                          :  [  75,  65,  65 ]
-   MPI tasks                           :  1
-
- mkdenpos : WARNING -
-  Density went too small (lower than xc_denpos) at      2436 points
-  and was set to xc_denpos=  1.00E-14.  Lowest was  -0.97E-06.
-  Likely due to too low boxcut or too low ecut for pseudopotential core charge.
-
- ITER STEP NUMBER     5
- vtorho : nnsclo_now=  0, note that nnsclo,dbl_nnsclo,istep=  0 0  5
- found 2 warnings.
- Some projectors may be too rough.
- Consider the possibility of reducing hgrid for having a more accurate run.
- Hamiltonian Applied                   :  Yes
-
- wvl_hpsitopsi: compute the new wavefunction from the trial potential.
- Orthocostraint                        :  Yes
- Preconditioning                       :  Yes
- iter                                  :  1
- tr(H)                                 : -6.39082197741288827E+00
- gnrm                                  :  4.33E-03
- DIIS weights: [ 1.00E+00,  1.00E+00]
- Orthogonalization Method              :  0
- found 2 warnings.
- Some projectors may be too rough.
- Consider the possibility of reducing hgrid for having a more accurate run.
- Hamiltonian Applied                   :  Yes
-
- wvl_hpsitopsi: compute the new wavefunction from the trial potential.
- Orthocostraint                        :  Yes
- Preconditioning                       :  Yes
- iter                                  :  2
- tr(H)                                 : -6.39088454769991721E+00
- gnrm                                  :  2.78E-03
- DIIS weights: [-6.68E-01,  1.67E+00, -7.32E-07]
- Orthogonalization Method              :  0
- GPU acceleration                      :  No
- Total electronic charge               :  11.999997676423
-
- wvl_mkrho : but why are you copying me :..o(
-
- vtorho : WARNING -
-  For k-point number    1,
-  The minimal occupation factor is  1.000.
-  An adequate monitoring of convergence requires it to be  at most 0.01_dp.
-  Action : increase slightly the number of bands.
-
- Total charge density [el/Bohr^3]
-,     Maximum=    1.1031E+00  at reduced coord.    0.5600    0.4462    0.4923
-,     Minimum=    1.0000E-20  at reduced coord.    0.0000    0.0000    0.0000
-,  Integrated=    1.2000E+01
- ETOT  5  -31.261394811233     4.493E-06 2.783E-03 6.237E-03
- scprqt: <Vxc>= -2.6309142E-02 hartree
-
- Pulay update with  4 previous iterations:
- mixing of old trial potential : alpha(m:m-4)=   1.09     -0.275      0.107      0.105     -0.264E-01
-psolver_rhohxc(): compute potentials (Vhartree and Vxc)...
- | dimension:    75    65    65
- Poisson Solver:
-   BC                                  : Isolated
-   Dimensions                          :  [  75,  65,  65 ]
-   MPI tasks                           :  1
-
- ITER STEP NUMBER     6
- vtorho : nnsclo_now=  0, note that nnsclo,dbl_nnsclo,istep=  0 0  6
- found 2 warnings.
- Some projectors may be too rough.
- Consider the possibility of reducing hgrid for having a more accurate run.
- Hamiltonian Applied                   :  Yes
-
- wvl_hpsitopsi: compute the new wavefunction from the trial potential.
- Orthocostraint                        :  Yes
- Preconditioning                       :  Yes
- iter                                  :  1
- tr(H)                                 : -6.38315430651757332E+00
- gnrm                                  :  1.75E-03
- DIIS weights: [ 1.00E+00,  1.00E+00]
- Orthogonalization Method              :  0
- found 2 warnings.
- Some projectors may be too rough.
- Consider the possibility of reducing hgrid for having a more accurate run.
- Hamiltonian Applied                   :  Yes
-
- wvl_hpsitopsi: compute the new wavefunction from the trial potential.
- Orthocostraint                        :  Yes
- Preconditioning                       :  Yes
- iter                                  :  2
- tr(H)                                 : -6.38316212780814141E+00
- gnrm                                  :  1.19E-03
- DIIS weights: [-6.00E-01,  1.60E+00, -1.37E-07]
- Orthogonalization Method              :  0
- GPU acceleration                      :  No
- Total electronic charge               :  11.999997677749
-
- wvl_mkrho : but why are you copying me :..o(
- Total charge density [el/Bohr^3]
-,     Maximum=    1.1024E+00  at reduced coord.    0.5600    0.4462    0.4923
-,     Minimum=    1.0000E-20  at reduced coord.    0.0000    0.0000    0.0000
-,  Integrated=    1.2000E+01
- ETOT  6  -31.261409289955    -1.448E-05 1.193E-03 1.097E-03
- scprqt: <Vxc>= -2.6428703E-02 hartree
-
- Pulay update with  5 previous iterations:
- mixing of old trial potential : alpha(m:m-4)=  0.687      0.520     -0.415      0.135      0.767E-01
-psolver_rhohxc(): compute potentials (Vhartree and Vxc)...
- | dimension:    75    65    65
- Poisson Solver:
-   BC                                  : Isolated
-   Dimensions                          :  [  75,  65,  65 ]
-   MPI tasks                           :  1
-
- ITER STEP NUMBER     7
- vtorho : nnsclo_now=  0, note that nnsclo,dbl_nnsclo,istep=  0 0  7
- found 2 warnings.
- Some projectors may be too rough.
- Consider the possibility of reducing hgrid for having a more accurate run.
- Hamiltonian Applied                   :  Yes
-
- wvl_hpsitopsi: compute the new wavefunction from the trial potential.
- Orthocostraint                        :  Yes
- Preconditioning                       :  Yes
- iter                                  :  1
- tr(H)                                 : -6.38380274140454684E+00
- gnrm                                  :  8.15E-04
- DIIS weights: [ 1.00E+00,  1.00E+00]
- Orthogonalization Method              :  0
- found 2 warnings.
- Some projectors may be too rough.
- Consider the possibility of reducing hgrid for having a more accurate run.
- Hamiltonian Applied                   :  Yes
-
- wvl_hpsitopsi: compute the new wavefunction from the trial potential.
- Orthocostraint                        :  Yes
- Preconditioning                       :  Yes
- iter                                  :  2
- tr(H)                                 : -6.38380445106425842E+00
- gnrm                                  :  5.56E-04
- DIIS weights: [-7.86E-01,  1.79E+00, -2.69E-08]
- Orthogonalization Method              :  0
- GPU acceleration                      :  No
- Total electronic charge               :  11.999997678189
-
- wvl_mkrho : but why are you copying me :..o(
- Total charge density [el/Bohr^3]
-,     Maximum=    1.1021E+00  at reduced coord.    0.5600    0.4462    0.4923
-,     Minimum=    1.0000E-20  at reduced coord.    0.0000    0.0000    0.0000
-,  Integrated=    1.2000E+01
- ETOT  7  -31.261410073492    -7.835E-07 5.557E-04 3.430E-04
- scprqt: <Vxc>= -2.6425425E-02 hartree
-
- At SCF step    7       nres2   =  3.43E-04 < tolvrs=  1.00E-03 =>converged.
- iter                                  :  7
- EKS                                   : -4.70055253703272697E+01
-  #FINAL
- Energies: {Ekin:  2.37053208816E+01, Epot: -3.26210755386E+01, Enl:  2.82035407807E+00, 
-              EH:  4.29997148024E+01,  EXC: -6.70860938349E+00, EvXC: -8.79819939443E+00}
- SCF criterion                         :  0
- found 2 warnings.
- Some projectors may be too rough.
- Consider the possibility of reducing hgrid for having a more accurate run.
- Hamiltonian Applied                   :  Yes
-  #----------------------------------------------- Kohn-Sham Eigenvalues and Occupation Numbers
- Orbitals: [
- {e: -1.107425152653E+00, f:  2.0000}, 
- {e: -6.265689879933E-01, f:  2.0000}, 
- {e: -4.027492287673E-01, f:  2.0000}, 
- {e: -4.027304324272E-01, f:  2.0000}, 
- {e: -3.641267536759E-01, f:  2.0000}, 
- {e: -1.441853337178E-01, f:  1.0000}, 
- {e: -1.441169677083E-01, f:  1.0000}]
-   1
-   2
+ At SCF step   10       nres2   =  4.77E-09 < tolvrs=  1.00E-08 =>converged.
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
+ Mean square residual over all n,k,spin=   0.0000E+00; max=  0.0000E+00
+ reduced coordinates (array xred) for    2 atoms
+       0.370081328364      0.500000000000      0.500000000000
+       0.629918671636      0.500000000000      0.500000000000
+ rms dE/dt=  3.5834E-01; max dE/dt=  3.2871E-01; dE/dt below (all hartree)
+    1       0.174592891110      0.307045686785      0.307045687730
+    2      -0.579039045956      0.328712770440      0.328712772026
 
- === Gap info ===
-ReportGap: WARNING - not enough states to calculate the band gap.
-Psolver_kernel() : deallocating kernel...
+ cartesian coordinates (angstrom) at end:
+    1      1.72337971779379     1.79920250920600     1.79920250920600
+    2      2.93337971779822     1.79920250920600     1.79920250920600
+
+ cartesian forces (hartree/bohr) at end:
+    1     -0.04281999642420     0.00159316791582     0.00159316796300
+    2      0.04281999642420    -0.00159316791582    -0.00159316796300
+ frms,max,avg= 2.4756336E-02 4.2819996E-02   2.298E-02 -4.675E-02 -4.675E-02 h/b
+
+ cartesian forces (eV/Angstrom) at end:
+    1     -2.20189256201611     0.08192398124301     0.08192398366908
+    2      2.20189256201611    -0.08192398124301    -0.08192398366908
+ frms,max,avg= 1.2730219E+00 2.2018926E+00   1.182E+00 -2.404E+00 -2.404E+00 e/A
+ length scales=  8.800000000000  6.800000000000  6.800000000000 bohr
+              =  4.656759435592  3.598405018412  3.598405018412 angstroms
+ Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=  -0.02638
+ Eigenvalues (hartree) for nkpt=   1  k points:
+ kpt#   1, nband=  7, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
+  -1.10797   -0.62651   -0.40309   -0.40307   -0.36404   -0.14443   -0.14436
+
+--------------------------------------------------------------------------------
+ Components of total free energy (in Hartree) :
+
+    Kinetic energy  =  2.37092624579667E+01
+    Hartree energy  =  4.29975093429274E+01
+    XC energy       = -6.70851043467628E+00
+    Ion-ion energy  =  1.57441152968349E+01
+    PspCore energy  =  0.00000000000000E+00
+    Loc. psp. energy= -1.09824379796716E+02
+    NL   psp  energy=  2.82002520102030E+00
+    >>>>>>>>> Etotal= -3.12619779326431E+01
+
+ "Double-counting" decomposition of free energy:
+    Band energy     = -6.09815173180241E+00
+    Ion-ion energy  =  1.57441152968349E+01
+    PspCore energy  =  0.00000000000000E+00
+    Dble-C XC-energy= -4.09079535654837E+01
+    >>>> Etotal (DC)= -3.12619900004512E+01
+--------------------------------------------------------------------------------
 
 ================================================================================
 == DATASET  2 ==================================================================
--   nproc =    1
+-   nproc =    1   -> not optimal: autoparal keyword recommended in input file
 
- setmqgrid : COMMENT -
-  The number of points "mqgrid" in reciprocal space used for the
-  description of the pseudopotentials has been set automatically
-  by abinit to :     3001.
-
- getdim_nloc : deduce lmnmax  =   1, lnmax  =   1,
-                      lmnmaxso=   1, lnmaxso=   1.
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
  Citation for XC functional:
   S. Goedecker, M. Teter, J. Huetter, PRB 54, 1703 (1996)
 
+ Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
+ R(1)= 16.8000000  0.0000000  0.0000000  G(1)=  0.0595238  0.0000000  0.0000000
+ R(2)=  0.0000000 14.4000000  0.0000000  G(2)=  0.0000000  0.0694444  0.0000000
+ R(3)=  0.0000000  0.0000000 14.4000000  G(3)=  0.0000000  0.0000000  0.0694444
  Unit cell volume ucvol=  3.4836480E+03 bohr^3
  Angles (23,13,12)=  9.00000000E+01  9.00000000E+01  9.00000000E+01 degrees
-
- wvl_setBoxGeometry : Changing the box for wavelets computation.
- Shifted atomic positions, Atomic Units:                   grid spacing units:
-     1      O  3.25672E+00  3.40000E+00  3.40000E+00        8.142     8.500     8.500
-     2      O  5.54328E+00  3.40000E+00  3.40000E+00       13.858     8.500     8.500
-    Shift of= -4.00000E+00 -3.80000E+00 -3.80000E+00 H grids=  0.4000  0.4000  0.4000
-   Box Sizes=  8.80000E+00  6.80000E+00  6.80000E+00           22        17        17
-       Extremes for the high resolution grid points:         8<14      8<9      8<9
- wavelet localization is ON
-  | acell is now:             8.800000    6.800000    6.800000
-  | nfl1, nfu1:               8   14
-  | nfl2, nfu2:               8    9
-  | nfl3, nfu3:               8    9
-  | box size for datas:             75          65          65
-  | box size for wavelets:          22          17          17
-
- wvl_denspot_set: Create wavelet type denspot.
-Psolver_kernel() : building kernel...
- | data dimensions:    75    65    65
- ------------------------------------------------------------ Poisson Kernel Creation
- Calculating Poisson solver kernel, free BC...done.
- Memory occ. per proc. (Bytes):  Density=2940000  Kernel=3064928
-                                 Full Grid Arrays=2535000
-
- wvl_setngfft : Changing the FFT grid definition.
-  | ngfft(1:3) is now:              75          65          65
-  | ngfft(4:6) is now:              75          65          65
-
- wvl_descr_atoms_set_sym: Create symmetries for the wvl%atoms object.
-
- wvl_wfs_set: Create access keys for wavefunctions.
- ------------------------------------------------- Wavefunctions Descriptors Creation
- Coarse resolution grid: Number of segments=        256 points=      3928
-   Fine resolution grid: Number of segments=          0 points=         0
-  | all orbitals have coarse segments, elements:     256    3928
-  | all orbitals have fine   segments, elements:       0       0
- ------------------------------------------------------------ PSP Projectors Creation
- Type    Name Number of atoms Number of projectors
-    1       O               2                    1
-                                            ------  On-the-fly projectors application
- Total number of projectors =                    2
- Total number of components =                 2424
- Percent of zero components =                    0
-
- wvl_projectors_set : allocate projectors data,
-  size of the compressed array: 2424
-
- wvl_wfsinp_scratch: wavefunction initialisation.
-
- mklocl_wavelets: Create local potential from ions.
- ----------------------------------------------------------- Ionic Potential Creation
- total ionic charge, leaked charge           -12.000000000003   0.000E+00
- Poisson Solver:
-   BC                                  : Isolated
-   Dimensions                          :  [  75,  65,  65 ]
-   MPI tasks                           :  1
- Total No. of Atomic Input Orbitals    :  8
- Atomic Input Orbital Generation:
- - Atom Type                           : O
-     Electronic configuration: {s: [ 2.00], p: [ 4/3,  4/3,  4/3]}
- Wavelet conversion succeeded          :  Yes
- Deviation from normalization          :  9.12E-03
- GPU acceleration                      :  No
- Total electronic charge               :  11.999997082583
- Poisson Solver:
-   BC                                  : Isolated
-   Dimensions                          :  [  75,  65,  65 ]
-   MPI tasks                           :  1
- found 2 warnings.
- Some projectors may be too rough.
- Consider the possibility of reducing hgrid for having a more accurate run.
- Expected kinetic energy               :  24.0573185664
- Energies: {Ekin:  2.42893936363E+01, Epot: -3.33429307260E+01, Enl:  3.10349901899E+00, 
-              EH:  4.28774010777E+01,  EXC: -6.66854794508E+00, EvXC: -8.74574204731E+00}
- EKS                                   : -4.67502450462266452E+01
- IG Overlap Matrices:
-   Calculated                          :  Yes
-   Diagonalized                        :  Yes
-  #----------------------------------------------- Kohn-Sham Eigenvalues and Occupation Numbers
- Orbitals: [
- {e: -1.072986761915E+00, f:  2.0000}, 
- {e: -6.352710226386E-01, f:  2.0000}, 
- {e: -3.633012082956E-01, f:  2.0000}, 
- {e: -3.630634808915E-01, f:  2.0000}, 
- {e: -3.363026528388E-01, f:  2.0000}, 
- {e: -1.357387132986E-01, f:  1.0000}, 
- {e: -1.357170722426E-01, f:  1.0000}, 
- {e:  4.416733043473E-01, f:  0.0000}]
- IG wavefunctions defined              :  Yes
- Accuracy estimation for this run:
-   Energy                              :  2.32E-01
-   Convergence Criterion               :  3.32E-02
-  | wavefunctions have been calculated.
+--------------------------------------------------------------------------------
 
  setup2: nwvl coarse and fine are    3928       0
- GPU acceleration                      :  No
- Total electronic charge               :  11.999997171688
-
- wvl_mkrho : but why are you copying me :..o(
 
 ================================================================================
 
- mklocl_wavelets: Create local potential from ions.
- ----------------------------------------------------------- Ionic Potential Creation
- total ionic charge, leaked charge           -12.000000000003   0.000E+00
- Poisson Solver:
-   BC                                  : Isolated
-   Dimensions                          :  [  75,  65,  65 ]
-   MPI tasks                           :  1
-psolver_rhohxc(): compute potentials (Vhartree and Vxc)...
- | dimension:    75    65    65
- Poisson Solver:
-   BC                                  : Isolated
-   Dimensions                          :  [  75,  65,  65 ]
-   MPI tasks                           :  1
+     iter   Etot(hartree)      deltaE(h)  grdnorm    vres2
+ ETOT  1  -31.189302896327    -3.119E+01 2.365E-02 1.973E+02
+ ETOT  2  -31.252153924524    -6.285E-02 2.750E-03 3.336E+01
+ ETOT  3  -31.259905803135    -7.752E-03 5.015E-03 7.281E+00
+ ETOT  4  -31.262298568507    -2.393E-03 1.367E-03 8.379E-01
+ ETOT  5  -31.262720821855    -4.223E-04 2.527E-04 5.894E-02
+ ETOT  6  -31.261637278206     1.084E-03 1.150E-04 2.809E-03
+ ETOT  7  -31.261913698215    -2.764E-04 5.996E-05 3.476E-04
+ ETOT  8  -31.261995729267    -8.203E-05 7.276E-06 1.423E-05
+ ETOT  9  -31.261993057899     2.671E-06 4.980E-06 1.602E-07
+ ETOT 10  -31.261989500721     3.557E-06 1.167E-06 1.929E-08
+ ETOT 11  -31.261989913143    -4.124E-07 2.190E-07 1.539E-09
 
- ITER STEP NUMBER     1
- vtorho : nnsclo_now=  0, note that nnsclo,dbl_nnsclo,istep=  0 0  1
- found 2 warnings.
- Some projectors may be too rough.
- Consider the possibility of reducing hgrid for having a more accurate run.
- Hamiltonian Applied                   :  Yes
-
- wvl_hpsitopsi: compute the new wavefunction from the trial potential.
- Orthocostraint                        :  Yes
- Preconditioning                       :  Yes
- iter                                  :  1
- tr(H)                                 : -7.00426293065461980E+00
- gnrm                                  :  6.80E-01
- DIIS weights: [ 1.00E+00,  1.00E+00]
- Orthogonalization Method              :  0
- found 2 warnings.
- Some projectors may be too rough.
- Consider the possibility of reducing hgrid for having a more accurate run.
- Hamiltonian Applied                   :  Yes
-
- wvl_hpsitopsi: compute the new wavefunction from the trial potential.
- Orthocostraint                        :  Yes
- Preconditioning                       :  Yes
- iter                                  :  2
- tr(H)                                 : -7.48750474303724278E+00
- gnrm                                  :  1.98E-01
- DIIS weights: [ 1.22E-01,  8.78E-01, -7.04E-03]
- Orthogonalization Method              :  0
- GPU acceleration                      :  No
- Total electronic charge               :  11.999997562939
-
- wvl_mkrho : but why are you copying me :..o(
- Total charge density [el/Bohr^3]
-,     Maximum=    1.1484E+00  at reduced coord.    0.5600    0.4462    0.4923
-,     Minimum=    1.0000E-20  at reduced coord.    0.0000    0.0000    0.0000
-,  Integrated=    1.2000E+01
-psolver_rhohxc(): compute potentials (Vhartree and Vxc)...
- | dimension:    75    65    65
- Poisson Solver:
-   BC                                  : Isolated
-   Dimensions                          :  [  75,  65,  65 ]
-   MPI tasks                           :  1
- ETOT  1  -30.890236396381    -3.089E+01 1.976E-01 1.682E+02
- scprqt: <Vxc>= -2.5772952E-02 hartree
-
-Simple mixing update:
-  residual square of the potential :   26.904544234382463
-
- ITER STEP NUMBER     2
- vtorho : nnsclo_now=  0, note that nnsclo,dbl_nnsclo,istep=  0 0  2
- found 2 warnings.
- Some projectors may be too rough.
- Consider the possibility of reducing hgrid for having a more accurate run.
- Hamiltonian Applied                   :  Yes
-
- wvl_hpsitopsi: compute the new wavefunction from the trial potential.
- Orthocostraint                        :  Yes
- Preconditioning                       :  Yes
- iter                                  :  1
- tr(H)                                 : -6.71604424449970683E+00
- gnrm                                  :  5.23E-02
- DIIS weights: [ 1.00E+00,  1.00E+00]
- Orthogonalization Method              :  0
- found 2 warnings.
- Some projectors may be too rough.
- Consider the possibility of reducing hgrid for having a more accurate run.
- Hamiltonian Applied                   :  Yes
-
- wvl_hpsitopsi: compute the new wavefunction from the trial potential.
- Orthocostraint                        :  Yes
- Preconditioning                       :  Yes
- iter                                  :  2
- tr(H)                                 : -6.72516260925554565E+00
- gnrm                                  :  2.44E-02
- DIIS weights: [-4.25E-01,  1.42E+00, -6.32E-05]
- Orthogonalization Method              :  0
- GPU acceleration                      :  No
- Total electronic charge               :  11.999997655952
-
- wvl_mkrho : but why are you copying me :..o(
- Total charge density [el/Bohr^3]
-,     Maximum=    1.1072E+00  at reduced coord.    0.5600    0.4462    0.4923
-,     Minimum=    1.0000E-20  at reduced coord.    0.0000    0.0000    0.0000
-,  Integrated=    1.2000E+01
-psolver_rhohxc(): compute potentials (Vhartree and Vxc)...
- | dimension:    75    65    65
- Poisson Solver:
-   BC                                  : Isolated
-   Dimensions                          :  [  75,  65,  65 ]
-   MPI tasks                           :  1
- ETOT  2  -31.034622743498    -1.444E-01 2.437E-02 3.895E+01
- scprqt: <Vxc>= -2.6267344E-02 hartree
-
- Pulay update with  1 previous iterations:
- mixing of old trial potential : alpha(m:m-4)=   1.79     -0.787
-
- ITER STEP NUMBER     3
- vtorho : nnsclo_now=  0, note that nnsclo,dbl_nnsclo,istep=  0 0  3
- found 2 warnings.
- Some projectors may be too rough.
- Consider the possibility of reducing hgrid for having a more accurate run.
- Hamiltonian Applied                   :  Yes
-
- wvl_hpsitopsi: compute the new wavefunction from the trial potential.
- Orthocostraint                        :  Yes
- Preconditioning                       :  Yes
- iter                                  :  1
- tr(H)                                 : -6.29626625533128159E+00
- gnrm                                  :  3.19E-02
- DIIS weights: [ 1.00E+00,  1.00E+00]
- Orthogonalization Method              :  0
- found 2 warnings.
- Some projectors may be too rough.
- Consider the possibility of reducing hgrid for having a more accurate run.
- Hamiltonian Applied                   :  Yes
-
- wvl_hpsitopsi: compute the new wavefunction from the trial potential.
- Orthocostraint                        :  Yes
- Preconditioning                       :  Yes
- iter                                  :  2
- tr(H)                                 : -6.30097556428473204E+00
- gnrm                                  :  1.63E-02
- DIIS weights: [-6.05E-01,  1.60E+00, -1.70E-05]
- Orthogonalization Method              :  0
- GPU acceleration                      :  No
- Total electronic charge               :  11.999997692178
-
- wvl_mkrho : but why are you copying me :..o(
- Total charge density [el/Bohr^3]
-,     Maximum=    1.0959E+00  at reduced coord.    0.5600    0.4462    0.4923
-,     Minimum=    1.0000E-20  at reduced coord.    0.0000    0.0000    0.0000
-,  Integrated=    1.2000E+01
-psolver_rhohxc(): compute potentials (Vhartree and Vxc)...
- | dimension:    75    65    65
- Poisson Solver:
-   BC                                  : Isolated
-   Dimensions                          :  [  75,  65,  65 ]
-   MPI tasks                           :  1
- ETOT  3  -31.159498645877    -1.249E-01 1.627E-02 1.264E+00
- scprqt: <Vxc>= -2.6444426E-02 hartree
-
- Pulay update with  2 previous iterations:
- mixing of old trial potential : alpha(m:m-4)=  0.983     -0.195E-01  0.363E-01
-
- ITER STEP NUMBER     4
- vtorho : nnsclo_now=  0, note that nnsclo,dbl_nnsclo,istep=  0 0  4
- found 2 warnings.
- Some projectors may be too rough.
- Consider the possibility of reducing hgrid for having a more accurate run.
- Hamiltonian Applied                   :  Yes
-
- wvl_hpsitopsi: compute the new wavefunction from the trial potential.
- Orthocostraint                        :  Yes
- Preconditioning                       :  Yes
- iter                                  :  1
- tr(H)                                 : -6.38065807320959344E+00
- gnrm                                  :  6.96E-03
- DIIS weights: [ 1.00E+00,  1.00E+00]
- Orthogonalization Method              :  0
- found 2 warnings.
- Some projectors may be too rough.
- Consider the possibility of reducing hgrid for having a more accurate run.
- Hamiltonian Applied                   :  Yes
-
- wvl_hpsitopsi: compute the new wavefunction from the trial potential.
- Orthocostraint                        :  Yes
- Preconditioning                       :  Yes
- iter                                  :  2
- tr(H)                                 : -6.38076338724821301E+00
- gnrm                                  :  3.83E-03
- DIIS weights: [-3.94E-01,  1.39E+00, -1.43E-06]
- Orthogonalization Method              :  0
- GPU acceleration                      :  No
- Total electronic charge               :  11.999997685292
-
- wvl_mkrho : but why are you copying me :..o(
- Total charge density [el/Bohr^3]
-,     Maximum=    1.0996E+00  at reduced coord.    0.5600    0.4462    0.4923
-,     Minimum=    1.0000E-20  at reduced coord.    0.0000    0.0000    0.0000
-,  Integrated=    1.2000E+01
-psolver_rhohxc(): compute potentials (Vhartree and Vxc)...
- | dimension:    75    65    65
- Poisson Solver:
-   BC                                  : Isolated
-   Dimensions                          :  [  75,  65,  65 ]
-   MPI tasks                           :  1
- ETOT  4  -31.281912349574    -1.224E-01 3.831E-03 3.971E-01
- scprqt: <Vxc>= -2.6401589E-02 hartree
-
- Pulay update with  3 previous iterations:
- mixing of old trial potential : alpha(m:m-4)=   2.36      -1.40      0.171     -0.133
-
- ITER STEP NUMBER     5
- vtorho : nnsclo_now=  0, note that nnsclo,dbl_nnsclo,istep=  0 0  5
- found 2 warnings.
- Some projectors may be too rough.
- Consider the possibility of reducing hgrid for having a more accurate run.
- Hamiltonian Applied                   :  Yes
-
- wvl_hpsitopsi: compute the new wavefunction from the trial potential.
- Orthocostraint                        :  Yes
- Preconditioning                       :  Yes
- iter                                  :  1
- tr(H)                                 : -6.39452099578168731E+00
- gnrm                                  :  3.50E-03
- DIIS weights: [ 1.00E+00,  1.00E+00]
- Orthogonalization Method              :  0
- found 2 warnings.
- Some projectors may be too rough.
- Consider the possibility of reducing hgrid for having a more accurate run.
- Hamiltonian Applied                   :  Yes
-
- wvl_hpsitopsi: compute the new wavefunction from the trial potential.
- Orthocostraint                        :  Yes
- Preconditioning                       :  Yes
- iter                                  :  2
- tr(H)                                 : -6.39455715180052042E+00
- gnrm                                  :  2.31E-03
- DIIS weights: [-5.16E-01,  1.52E+00, -4.84E-07]
- Orthogonalization Method              :  0
- GPU acceleration                      :  No
- Total electronic charge               :  11.999997677394
-
- wvl_mkrho : but why are you copying me :..o(
- Total charge density [el/Bohr^3]
-,     Maximum=    1.1028E+00  at reduced coord.    0.5600    0.4462    0.4923
-,     Minimum=    1.0000E-20  at reduced coord.    0.0000    0.0000    0.0000
-,  Integrated=    1.2000E+01
-psolver_rhohxc(): compute potentials (Vhartree and Vxc)...
- | dimension:    75    65    65
- Poisson Solver:
-   BC                                  : Isolated
-   Dimensions                          :  [  75,  65,  65 ]
-   MPI tasks                           :  1
- ETOT  5  -31.277663632291     4.249E-03 2.308E-03 1.098E-02
- scprqt: <Vxc>= -2.6379332E-02 hartree
-
- Pulay update with  4 previous iterations:
- mixing of old trial potential : alpha(m:m-4)=   1.04     -0.700E-01 -0.113E-01  0.708E-01 -0.329E-01
-
- ITER STEP NUMBER     6
- vtorho : nnsclo_now=  0, note that nnsclo,dbl_nnsclo,istep=  0 0  6
- found 2 warnings.
- Some projectors may be too rough.
- Consider the possibility of reducing hgrid for having a more accurate run.
- Hamiltonian Applied                   :  Yes
-
- wvl_hpsitopsi: compute the new wavefunction from the trial potential.
- Orthocostraint                        :  Yes
- Preconditioning                       :  Yes
- iter                                  :  1
- tr(H)                                 : -6.38513410002921855E+00
- gnrm                                  :  1.36E-03
- DIIS weights: [ 1.00E+00,  1.00E+00]
- Orthogonalization Method              :  0
- found 2 warnings.
- Some projectors may be too rough.
- Consider the possibility of reducing hgrid for having a more accurate run.
- Hamiltonian Applied                   :  Yes
-
- wvl_hpsitopsi: compute the new wavefunction from the trial potential.
- Orthocostraint                        :  Yes
- Preconditioning                       :  Yes
- iter                                  :  2
- tr(H)                                 : -6.38513881323278376E+00
- gnrm                                  :  1.01E-03
- DIIS weights: [-7.34E-01,  1.73E+00, -1.01E-07]
- Orthogonalization Method              :  0
- GPU acceleration                      :  No
- Total electronic charge               :  11.999997677443
-
- wvl_mkrho : but why are you copying me :..o(
- Total charge density [el/Bohr^3]
-,     Maximum=    1.1025E+00  at reduced coord.    0.5600    0.4462    0.4923
-,     Minimum=    1.0000E-20  at reduced coord.    0.0000    0.0000    0.0000
-,  Integrated=    1.2000E+01
-psolver_rhohxc(): compute potentials (Vhartree and Vxc)...
- | dimension:    75    65    65
- Poisson Solver:
-   BC                                  : Isolated
-   Dimensions                          :  [  75,  65,  65 ]
-   MPI tasks                           :  1
- ETOT  6  -31.259238543804     1.843E-02 1.007E-03 6.298E-03
- scprqt: <Vxc>= -2.6384160E-02 hartree
-
- Pulay update with  5 previous iterations:
- mixing of old trial potential : alpha(m:m-4)=   1.60     -0.559     -0.279E-01 -0.310E-01  0.210E-01
-
- ITER STEP NUMBER     7
- vtorho : nnsclo_now=  0, note that nnsclo,dbl_nnsclo,istep=  0 0  7
- found 2 warnings.
- Some projectors may be too rough.
- Consider the possibility of reducing hgrid for having a more accurate run.
- Hamiltonian Applied                   :  Yes
-
- wvl_hpsitopsi: compute the new wavefunction from the trial potential.
- Orthocostraint                        :  Yes
- Preconditioning                       :  Yes
- iter                                  :  1
- tr(H)                                 : -6.38601934925295556E+00
- gnrm                                  :  8.05E-04
- DIIS weights: [ 1.00E+00,  1.00E+00]
- Orthogonalization Method              :  0
- found 2 warnings.
- Some projectors may be too rough.
- Consider the possibility of reducing hgrid for having a more accurate run.
- Hamiltonian Applied                   :  Yes
-
- wvl_hpsitopsi: compute the new wavefunction from the trial potential.
- Orthocostraint                        :  Yes
- Preconditioning                       :  Yes
- iter                                  :  2
- tr(H)                                 : -6.38602126385492763E+00
- gnrm                                  :  4.80E-04
- DIIS weights: [-6.58E-01,  1.66E+00, -1.82E-08]
- Orthogonalization Method              :  0
- GPU acceleration                      :  No
- Total electronic charge               :  11.999997677854
-
- wvl_mkrho : but why are you copying me :..o(
- Total charge density [el/Bohr^3]
-,     Maximum=    1.1022E+00  at reduced coord.    0.5600    0.4462    0.4923
-,     Minimum=    1.0000E-20  at reduced coord.    0.0000    0.0000    0.0000
-,  Integrated=    1.2000E+01
-psolver_rhohxc(): compute potentials (Vhartree and Vxc)...
- | dimension:    75    65    65
- Poisson Solver:
-   BC                                  : Isolated
-   Dimensions                          :  [  75,  65,  65 ]
-   MPI tasks                           :  1
- ETOT  7  -31.260386455570    -1.148E-03 4.798E-04 4.698E-05
- scprqt: <Vxc>= -2.6384823E-02 hartree
-
- At SCF step    7       vres2   =  4.70E-05 < tolvrs=  1.00E-03 =>converged.
- iter                                  :  7
- EKS                                   : -4.70046022297157933E+01
-  #FINAL
- Energies: {Ekin:  2.37074257054E+01, Epot: -3.26253704991E+01, Enl:  2.82060210800E+00, 
-              EH:  4.29967612269E+01,  EXC: -6.70834261801E+00, EvXC: -8.79784430089E+00}
- SCF criterion                         :  0
- found 2 warnings.
- Some projectors may be too rough.
- Consider the possibility of reducing hgrid for having a more accurate run.
- Hamiltonian Applied                   :  Yes
-  #----------------------------------------------- Kohn-Sham Eigenvalues and Occupation Numbers
- Orbitals: [
- {e: -1.107911288656E+00, f:  2.0000}, 
- {e: -6.265184927897E-01, f:  2.0000}, 
- {e: -4.029885422322E-01, f:  2.0000}, 
- {e: -4.029699695425E-01, f:  2.0000}, 
- {e: -3.640454173675E-01, f:  2.0000}, 
- {e: -1.443228094823E-01, f:  1.0000}, 
- {e: -1.442545467541E-01, f:  1.0000}]
-   1
-   2
+ At SCF step   11       vres2   =  1.54E-09 < tolvrs=  1.00E-08 =>converged.
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
+ Mean square residual over all n,k,spin=   0.0000E+00; max=  0.0000E+00
+ reduced coordinates (array xred) for    2 atoms
+       0.370081328364      0.500000000000      0.500000000000
+       0.629918671636      0.500000000000      0.500000000000
+ rms dE/dt=  3.5830E-01; max dE/dt=  3.2872E-01; dE/dt below (all hartree)
+    1       0.174501695392      0.307054510083      0.307054509866
+    2      -0.578915687165      0.328721129918      0.328721130156
 
- === Gap info ===
-ReportGap: WARNING - not enough states to calculate the band gap.
-Psolver_kernel() : deallocating kernel...
+ cartesian coordinates (angstrom) at end:
+    1      1.72337971779379     1.79920250920600     1.79920250920600
+    2      2.93337971779822     1.79920250920600     1.79920250920600
+
+ cartesian forces (hartree/bohr) at end:
+    1     -0.04280780582709     0.00159313381141     0.00159313384484
+    2      0.04280780582709    -0.00159313381141    -0.00159313384484
+ frms,max,avg= 2.4749306E-02 4.2807806E-02   2.298E-02 -4.675E-02 -4.675E-02 h/b
+
+ cartesian forces (eV/Angstrom) at end:
+    1     -2.20126569636110     0.08192222752408     0.08192222924321
+    2      2.20126569636110    -0.08192222752408    -0.08192222924321
+ frms,max,avg= 1.2726604E+00 2.2012657E+00   1.182E+00 -2.404E+00 -2.404E+00 e/A
+ length scales=  8.800000000000  6.800000000000  6.800000000000 bohr
+              =  4.656759435592  3.598405018412  3.598405018412 angstroms
+ Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=  -0.02638
+ Eigenvalues (hartree) for nkpt=   1  k points:
+ kpt#   1, nband=  7, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
+  -1.10797   -0.62651   -0.40309   -0.40307   -0.36404   -0.14443   -0.14436
+
+--------------------------------------------------------------------------------
+ Components of total free energy (in Hartree) :
+
+    Kinetic energy  =  2.37092658623761E+01
+    Hartree energy  =  4.29975049065271E+01
+    XC energy       = -6.70851054596861E+00
+    Ion-ion energy  =  1.57441152968349E+01
+    PspCore energy  =  0.00000000000000E+00
+    Loc. psp. energy= -1.09824390553804E+02
+    NL   psp  energy=  2.82002512089173E+00
+    >>>>>>>>> Etotal= -3.12619899131428E+01
+
+ "Double-counting" decomposition of free energy:
+    Band energy     = -6.09815838632590E+00
+    Ion-ion energy  =  1.57441152968349E+01
+    PspCore energy  =  0.00000000000000E+00
+    Dble-C XC-energy= -4.09079490973683E+01
+    >>>> Etotal (DC)= -3.12619921868593E+01
+--------------------------------------------------------------------------------
 
 == END DATASET(S) ==============================================================
 ================================================================================
   
  -outvars: echo values of variables after computation  --------
- 
- These variables are accessible in NetCDF format (t33_MPI1o_OUT.nc)
-
             acell      8.8000000000E+00  6.8000000000E+00  6.8000000000E+00 Bohr
               amu      1.00000000E+00
       chksymbreak           0
            diemix      4.00000000E-01
-           etotal1    -3.1261410073E+01
-           etotal2    -3.1260386456E+01
-            fcart1     9.9999999999E+99  9.9999999999E+99  9.9999999999E+99
-                       9.9999999999E+99  9.9999999999E+99  9.9999999999E+99
-            fcart2     9.9999999999E+99  9.9999999999E+99  9.9999999999E+99
-                       9.9999999999E+99  9.9999999999E+99  9.9999999999E+99
+           etotal1    -3.1261990000E+01
+           etotal2    -3.1261989913E+01
+            fcart1    -4.2819996424E-02  1.5931679158E-03  1.5931679630E-03
+                       4.2819996424E-02 -1.5931679158E-03 -1.5931679630E-03
+            fcart2    -4.2807805827E-02  1.5931338114E-03  1.5931338448E-03
+                       4.2807805827E-02 -1.5931338114E-03 -1.5931338448E-03
+-          fftalg         312
          icoulomb           1
              iscf1         17
              iscf2          7
@@ -1507,14 +333,16 @@ Psolver_kernel() : deallocating kernel...
            ndtset           2
             ngfft           2       2       2
              nkpt           1
+            nline           2
+           nnsclo           4
         nscforder          14
-            nstep          10
+            nstep          20
              nsym           1
            ntypat           1
+         nwfshist           2
               occ      2.000000  2.000000  2.000000  2.000000  2.000000  1.000000
                        1.000000
            occopt           0
-        optforces           0
         optstress           0
            prtden           0
            prteig           0
@@ -1524,9 +352,10 @@ Psolver_kernel() : deallocating kernel...
                        9.9999999999E+99  9.9999999999E+99  9.9999999999E+99
            strten2     9.9999999999E+99  9.9999999999E+99  9.9999999999E+99
                        9.9999999999E+99  9.9999999999E+99  9.9999999999E+99
-           tolvrs      1.00000000E-03
+           tolvrs      1.00000000E-08
             typat      1  1
            usewvl           1
+  wvl_bigdft_comp           0
        wvl_crmult      3.00000000E+00
        wvl_frmult      1.00000000E+00
         wvl_hgrid      4.00000000E-01
@@ -1540,7 +369,11 @@ Psolver_kernel() : deallocating kernel...
             znucl        8.00000
 
 ================================================================================
-  
+
+
+- Timing analysis has been suppressed with timopt=0
+
+
 
 ================================================================================
 
@@ -1562,23 +395,40 @@ Psolver_kernel() : deallocating kernel...
 - J. Chem. Phys. 129, 014109 (2008).
 - Comment : to be cited in case BigDFT project is used, i.e. usewvl=1.
 -
-- [2] ABINIT : First-principles approach of materials and nanosystem properties.
+- [2] Recent developments in the ABINIT software package.
+- Computer Phys. Comm. 205, 106 (2016).
+- X.Gonze, F.Jollet, F.Abreu Araujo, D.Adams, B.Amadon, T.Applencourt,
+- C.Audouze, J.-M.Beuken, J.Bieder, A.Bokhanchuk, E.Bousquet, F.Bruneval
+- D.Caliste, M.Cote, F.Dahm, F.Da Pieve, M.Delaveau, M.Di Gennaro,
+- B.Dorado, C.Espejo, G.Geneste, L.Genovese, A.Gerossier, M.Giantomassi,
+- Y.Gillet, D.R.Hamann, L.He, G.Jomard, J.Laflamme Janssen, S.Le Roux,
+- A.Levitt, A.Lherbier, F.Liu, I.Lukacevic, A.Martin, C.Martins,
+- M.J.T.Oliveira, S.Ponce, Y.Pouillon, T.Rangel, G.-M.Rignanese,
+- A.H.Romero, B.Rousseau, O.Rubel, A.A.Shukri, M.Stankovski, M.Torrent,
+- M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
+- B.Xue, A.Zhou, J.W.Zwanziger.
+- Comment : the fourth generic paper describing the ABINIT project.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- is available at http://www.abinit.org/about/ABINIT16.pdf .
+- The licence allows the authors to put it on the Web.
+-
+- [3] ABINIT : First-principles approach of materials and nanosystem properties.
+- Computer Phys. Comm. 180, 2582-2615 (2009).
 - X. Gonze, B. Amadon, P.-M. Anglade, J.-M. Beuken, F. Bottin, P. Boulanger, F. Bruneval,
 - D. Caliste, R. Caracas, M. Cote, T. Deutsch, L. Genovese, Ph. Ghosez, M. Giantomassi
 - S. Goedecker, D.R. Hamann, P. Hermet, F. Jollet, G. Jomard, S. Leroux, M. Mancini, S. Mazevet,
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
-- Computer Phys. Comm. 180, 2582-2615 (2009).
 - Comment : the third generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at http://www.abinit.org/about/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
 -
-- [3] A brief introduction to the ABINIT software package.
+- [4] A brief introduction to the ABINIT software package.
+- Z. Kristallogr. 220, 558-562 (2005).
 - X. Gonze, G.-M. Rignanese, M. Verstraete, J.-M. Beuken, Y. Pouillon, R. Caracas, F. Jollet,
 - M. Torrent, G. Zerah, M. Mikami, Ph. Ghosez, M. Veithen, J.-Y. Raty, V. Olevano, F. Bruneval,
 - L. Reining, R. Godby, G. Onida, D.R. Hamann, and D.C. Allan.
-- Z. Kristallogr. 220, 558-562 (2005).
 - Comment : the second generic paper describing the ABINIT project. Note that this paper
 - should be cited especially if you are using the GW part of ABINIT, as several authors
 - of this part are not in the list of authors of the first or third paper.
@@ -1586,19 +436,18 @@ Psolver_kernel() : deallocating kernel...
 - Note that it should not redistributed (Copyright by Oldenburg Wissenshaftverlag,
 - the licence allows the authors to put it on the Web).
 -
+- And optionally:
 -
-- And optionally :
--
-- [4] First-principles computation of material properties : the ABINIT software project. 
+- [5] First-principles computation of material properties : the ABINIT software project. 
 - X. Gonze, J.-M. Beuken, R. Caracas, F. Detraux, M. Fuchs, G.-M. Rignanese, L. Sindic,
 - M. Verstraete, G. Zerah, F. Jollet, M. Torrent, A. Roy, M. Mikami, Ph. Ghosez, J.-Y. Raty, D.C. Allan.
 - Computational Materials Science 25, 478-492 (2002). http://dx.doi.org/10.1016/S0927-0256(02)00325-7
 - Comment : the original paper describing the ABINIT project.
 -
-- [5] Fast radix 2, 3, 4 and 5 kernels for Fast Fourier Transformations
-- on computers with overlapping multiply-add instructions.
-- S. Goedecker, SIAM J. on Scientific Computing 18, 1605 (1997).
- Proc.   0 individual time (sec): cpu=          6.0  wall=          6.1
+- Proc.   0 individual time (sec): cpu=          4.5  wall=          4.5
+
+================================================================================
 
  Calculation completed.
-.Delivered   11 WARNINGs and  10 COMMENTs to log file.
+.Delivered  10 WARNINGs and   6 COMMENTs to log file.
++Overall time at end (sec) : cpu=          8.6  wall=          9.8

@@ -35,7 +35,9 @@
 !!   | tsmear=smearing energy or temperature (if metal)
 !!   | typat(natom)=type integer for each atom in cell
 !!   | wtatcon(3,natom,nconeq)=weights for atomic constraints
+!!  gmet(3,3)=metric tensor for G vecs (in bohr**-2)
 !!  fock <type(fock_type)>= quantities to calculate Fock exact exchange
+!!  grchempottn(3,natom)=grads of spatially-varying chemical potential energy (hartree)
 !!  grewtn(3,natom)=grads of Ewald energy (hartree)
 !!  grvdw(3,ngrvdw)=gradients of energy due to Van der Waals DFT-D dispersion (hartree)
 !!  gsqcut=cutoff on (k+G)^2 (bohr^-2)
@@ -61,6 +63,7 @@
 !!        =1 if residual array (nvresid) contains the density residual
 !!  pawang <type(pawang_type)>=paw angular mesh and related data
 !!  pawfgrtab(my_natom*usepaw) <type(pawfgrtab_type)>=atomic data given on fine rectangular grid
+!!  pawrad(ntypat*usepaw) <type(pawrad_type)>=paw radial mesh and related data
 !!  pawtab(ntypat*usepaw) <type(pawtab_type)>=paw tabulated starting data
 !!  ph1d(2,3*(2*mgfft+1)*natom)=1-dim phase (structure factor) information.
 !!  psps <type(pseudopotential_type)>=variables related to pseudopotentials
@@ -68,6 +71,7 @@
 !!  rhor(nfft,nspden)=array for electron density in electrons/bohr**3
 !!  rprimd(3,3)=dimensional primitive translations in real space (bohr)
 !!  symrec(3,3,nsym)=symmetry operations in reciprocal space
+!!  ucvol=unit cell volume
 !!  usepaw= 0 for non paw calculation; =1 for paw calculation
 !!  vhartr(nfft)=array for holding Hartree potential
 !!  vpsp(nfft)=array for holding local psp
@@ -98,6 +102,7 @@
 !!   | entropy(IN)=entropy due to the occupation number smearing (if metal)
 !!   | e_localpsp(IN)=local psp energy (hartree)
 !!   | e_eigenvalues(IN)=Sum of the eigenvalues - Band energy (Hartree)
+!!   | e_chempot(IN)=energy from spatially varying chemical potential (hartree)
 !!   | e_ewald(IN)=Ewald energy (hartree)
 !!   | e_vdw_dftd(IN)=VdW DFT-D energy
 !!   | e_hartree(IN)=Hartree part of total energy (hartree units)
@@ -147,11 +152,11 @@
 
 subroutine etotfor(atindx1,deltae,diffor,dtefield,dtset,&
 &  elast,electronpositron,energies,&
-&  etotal,favg,fcart,fock,forold,fred,gresid,grewtn,grhf,grnl,grvdw,&
+&  etotal,favg,fcart,fock,forold,fred,gmet,grchempottn,gresid,grewtn,grhf,grnl,grvdw,&
 &  grxc,gsqcut,indsym,kxc,maxfor,mgfft,mpi_enreg,my_natom,nattyp,&
 &  nfft,ngfft,ngrvdw,nhat,nkxc,ntypat,nvresid,n1xccc,n3xccc,optene,optforces,optres,&
-&  pawang,pawfgrtab,pawrhoij,pawtab,ph1d,red_ptot,psps,rhog,rhor,rprimd,symrec,synlgr,&
-&  usepaw,vhartr,vpsp,vxc,wvl,wvl_den,xccc3d,xred)
+&  pawang,pawfgrtab,pawrad,pawrhoij,pawtab,ph1d,red_ptot,psps,rhog,rhor,rmet,rprimd,&
+&  symrec,synlgr,ucvol,usepaw,vhartr,vpsp,vxc,wvl,wvl_den,xccc3d,xred)
 
  use defs_basis
  use defs_datatypes
@@ -161,6 +166,7 @@ subroutine etotfor(atindx1,deltae,diffor,dtefield,dtset,&
  use m_profiling_abi
  use m_fock,             only : fock_type
  use m_pawang,           only : pawang_type
+ use m_pawrad,           only : pawrad_type
  use m_pawtab,           only : pawtab_type
  use m_pawfgrtab,        only : pawfgrtab_type
  use m_pawrhoij,         only : pawrhoij_type
@@ -172,7 +178,6 @@ subroutine etotfor(atindx1,deltae,diffor,dtefield,dtset,&
 #undef ABI_FUNC
 #define ABI_FUNC 'etotfor'
  use interfaces_18_timing
- use interfaces_41_geometry
  use interfaces_65_paw
  use interfaces_67_common, except_this_one => etotfor
 !End of the abilint section
@@ -184,7 +189,7 @@ subroutine etotfor(atindx1,deltae,diffor,dtefield,dtset,&
  integer,intent(in) :: my_natom,mgfft,n1xccc,n3xccc,nfft,ngrvdw,nkxc,ntypat,optene,optforces
  integer,intent(in) :: optres,usepaw
  real(dp),intent(in) :: gsqcut
- real(dp),intent(inout) :: elast
+ real(dp),intent(inout) :: elast,ucvol
  real(dp),intent(out) :: deltae,diffor,etotal,maxfor
  type(MPI_type),intent(in) :: mpi_enreg
  type(efield_type),intent(in) :: dtefield
@@ -199,33 +204,36 @@ subroutine etotfor(atindx1,deltae,diffor,dtefield,dtset,&
 !arrays
  integer,intent(in) :: atindx1(dtset%natom),indsym(4,dtset%nsym,dtset%natom)
  integer,intent(in) :: nattyp(ntypat),ngfft(18),symrec(3,3,dtset%nsym)
- real(dp),intent(in) :: grewtn(3,dtset%natom),grvdw(3,ngrvdw),kxc(nfft,nkxc)
+ real(dp),intent(in) :: gmet(3,3),grchempottn(3,dtset%natom),grewtn(3,dtset%natom),grvdw(3,ngrvdw),kxc(nfft,nkxc)
  real(dp),intent(in) :: ph1d(2,3*(2*mgfft+1)*dtset%natom),red_ptot(3)
- real(dp),intent(in) :: rhog(2,nfft),rhor(nfft,dtset%nspden),rprimd(3,3)
+ real(dp),intent(in) :: rhog(2,nfft),rhor(nfft,dtset%nspden),rmet(3,3),rprimd(3,3)
  real(dp),intent(in) :: vhartr(nfft),vpsp(nfft),vxc(nfft,dtset%nspden)
  real(dp),intent(in) :: xccc3d(n3xccc)
  real(dp),intent(inout) :: forold(3,dtset%natom),grnl(3*dtset%natom)
  real(dp),intent(inout) :: nhat(nfft,dtset%nspden*psps%usepaw)
- real(dp),intent(inout) :: nvresid(nfft,dtset%nspden),xred(3,dtset%natom)
- real(dp),intent(out) :: favg(3),fred(3,dtset%natom) !vz_i
- real(dp),intent(inout) :: fcart(3,dtset%natom) !vz_i
+ real(dp),intent(inout),target :: nvresid(nfft,dtset%nspden)
+ real(dp),intent(inout) :: xred(3,dtset%natom)
+ real(dp),intent(out) :: favg(3),fred(3,dtset%natom)
+ real(dp),intent(inout) :: fcart(3,dtset%natom)
  real(dp),intent(out) :: gresid(3,dtset%natom),grhf(3,dtset%natom)
- real(dp),intent(inout) :: grxc(3,dtset%natom) !vz_i
- real(dp),intent(out) :: synlgr(3,dtset%natom) !vz_i
+ real(dp),intent(inout) :: grxc(3,dtset%natom)
+ real(dp),intent(out) :: synlgr(3,dtset%natom)
  type(pawfgrtab_type),intent(inout) :: pawfgrtab(my_natom*psps%usepaw)
  type(pawrhoij_type),intent(inout) :: pawrhoij(my_natom*psps%usepaw)
+ type(pawrad_type),intent(in) :: pawrad(ntypat*psps%usepaw)
  type(pawtab_type),intent(in) :: pawtab(ntypat*psps%usepaw)
 
 !Local variables-------------------------------
 !scalars
- integer :: dimnhat,ifft,ipositron,ispden,optgr,optgr2,option,optnc,optstr,optstr2,iir,jjr,kkr  !!HONG
- real(dp) :: eenth,ucvol_local  !!HONG
-! real(dp) :: emag
+ integer :: comm_grid,dimnhat,ifft,ipositron,ispden,optgr,optgr2,option,optnc,optstr,optstr2,iir,jjr,kkr
+ logical :: apply_residual
+ real(dp) :: eenth,ucvol_
 !arrays
  real(dp),parameter :: k0(3)=(/zero,zero,zero/)
- real(dp) :: tsec(2),gmet(3,3),gprimdlc(3,3),rmet(3,3),A(3,3),A1(3,3),A_new(3,3),efield_new(3)   !!HONG
+ real(dp) :: tsec(2),A(3,3),A1(3,3),A_new(3,3),efield_new(3)
  real(dp) :: dummy(0),nhat_dum(0,0)
- real(dp),allocatable :: work(:,:)
+ real(dp),allocatable :: vlocal(:,:)
+ real(dp), ABI_CONTIGUOUS pointer :: resid(:,:)
 
 ! *********************************************************************
 
@@ -249,66 +257,47 @@ subroutine etotfor(atindx1,deltae,diffor,dtefield,dtset,&
      energies%e_entropy = zero
    end if
 
-!  HONG  Turn it into an electric enthalpy, refer to Eq.(33) of Suppl. of Nat. Phys. paper (5,304,2009), the missing volume is added here
-   if ((dtset%berryopt == 4 .or. dtset%berryopt == 14 ) .and. ipositron/=1) then  !!HONG
-     energies%e_elecfield = zero
-     energies%e_elecfield = -dot_product(dtset%red_efieldbar,red_ptot) + energies%e_elecfield   !!HONG  ebar_i p_i
-     call metric(gmet,gprimdlc,-1,rmet,rprimd,ucvol_local)
-     eenth = zero
+!  Turn it into an electric enthalpy, refer to Eq.(33) of Suppl. of Nat. Phys. paper (5,304,2009),
+!    the missing volume is added here
+   energies%e_elecfield=zero
+   if ((dtset%berryopt==4.or.dtset%berryopt==14).and.ipositron/=1) then
+     energies%e_elecfield=-dot_product(dtset%red_efieldbar,red_ptot)  !!ebar_i p_i
+     eenth=zero
      do iir=1,3
        do jjr=1,3
-         eenth= eenth+gmet(iir,jjr)*dtset%red_efieldbar(iir)*dtset%red_efieldbar(jjr)         !! HONG g^{-1})_ij ebar_i ebar_j
+         eenth=eenth+gmet(iir,jjr)*dtset%red_efieldbar(iir)*dtset%red_efieldbar(jjr)  !!g^{-1})_ij ebar_i ebar_j
        end do
      end do
-     eenth=-1_dp*(ucvol_local/(8.0d0*pi))*eenth
-     energies%e_elecfield=energies%e_elecfield+eenth
-
-
+     energies%e_elecfield=energies%e_elecfield-eenth*ucvol/(8._dp*pi)
    end if
 
-
-!  Turn it into a magnetic enthalpy, by adding orbital electronic contribution
-   energies%e_magfield = zero
-!  if (dtset%berryopt == 5 .and. ipositron/=1) then
-!  emag = dot_product(mag_cart,dtset%bfield)
-!  energies%e_magfield = emag
-!  end if
-
-!  HONG  Turn it into an internal energy, refer to Eq.(36) of Suppl. of Nat. Phys. paper (5,304,2009), but a little different: U=E_ks + (vol/8*pi) *  g^{-1})_ij ebar_i ebar_j
-   if ((dtset%berryopt == 6 .or. dtset%berryopt == 16 ) .and. ipositron/=1) then
-     energies%e_elecfield = zero
-     call metric(gmet,gprimdlc,-1,rmet,rprimd,ucvol_local)
-     eenth = zero
+!  Turn it into an internal energy, refer to Eq.(36) of Suppl. of Nat. Phys. paper (5,304,2009),
+!    but a little different: U=E_ks + (vol/8*pi) *  g^{-1})_ij ebar_i ebar_j
+   if ((dtset%berryopt==6.or.dtset%berryopt==16).and.ipositron/=1) then
+     energies%e_elecfield=zero
+     eenth=zero
      do iir=1,3
        do jjr=1,3
-         eenth= eenth+gmet(iir,jjr)*dtset%red_efieldbar(iir)*dtset%red_efieldbar(jjr)         !! HONG g^{-1})_ij ebar_i ebar_j
+         eenth=eenth+gmet(iir,jjr)*dtset%red_efieldbar(iir)*dtset%red_efieldbar(jjr)  !! g^{-1})_ij ebar_i ebar_j
        end do
      end do
-     eenth= ucvol_local/(8.0d0*pi)*eenth
-     energies%e_elecfield=energies%e_elecfield+eenth
-
+     energies%e_elecfield=energies%e_elecfield+eenth*ucvol/(8._dp*pi)
    end if
 
-!  HONG  calculate internal energy and electric enthalpy for mixed BC case.
-   if ( dtset%berryopt == 17 .and. ipositron/=1) then
-     energies%e_elecfield = zero
-     call metric(gmet,gprimdlc,-1,rmet,rprimd,ucvol_local)
-     A(:,:)=(4*pi/ucvol_local)*rmet(:,:)
-     A1(:,:)=A(:,:)
-     A_new(:,:)=A(:,:)
+!  Calculate internal energy and electric enthalpy for mixed BC case.
+   if (dtset%berryopt==17.and.ipositron/=1) then
+     energies%e_elecfield=zero
+     A(:,:)=(four_pi/ucvol)*rmet(:,:)
+     A1(:,:)=A(:,:) ; A_new(:,:)=A(:,:)
      efield_new(:)=dtset%red_efield(:)
-     eenth = zero
-
+     eenth=zero
      do kkr=1,3
        if (dtset%jfielddir(kkr)==1) then    ! fixed ebar direction
 !        step 1 add -ebar*p
-         eenth=eenth - dtset%red_efieldbar(kkr)*red_ptot(kkr)
-
+         eenth=eenth-dtset%red_efieldbar(kkr)*red_ptot(kkr)
 !        step 2  chang to e_new (change e to ebar)
          efield_new(kkr)=dtset%red_efieldbar(kkr)
-
 !        step 3  chang matrix A to A1
-
          do iir=1,3
            do jjr=1,3
              if (iir==kkr .and. jjr==kkr) A1(iir,jjr)=-1.0/A(kkr,kkr)
@@ -317,31 +306,30 @@ subroutine etotfor(atindx1,deltae,diffor,dtefield,dtset,&
              if (iir/=kkr .and. jjr/=kkr) A1(iir,jjr)=A(iir,jjr)-A(iir,kkr)*A(kkr,jjr)/A(kkr,kkr)
            end do
          end do
-
-         A(:,:)=A1(:,:)
-         A_new(:,:)=A1(:,:)
+         A(:,:)=A1(:,:) ; A_new(:,:)=A1(:,:)
        end if
-
      end do  ! end fo kkr
-
-
      do iir=1,3
        do jjr=1,3
-         eenth= eenth+(1/2.0)*A_new(iir,jjr)*efield_new(iir)*efield_new(jjr)
+         eenth= eenth+half*A_new(iir,jjr)*efield_new(iir)*efield_new(jjr)
        end do
      end do
-
      energies%e_elecfield=energies%e_elecfield+eenth
-
    end if   ! berryopt==17
 
+!  Turn it into a magnetic enthalpy, by adding orbital electronic contribution
+   energies%e_magfield = zero
+!  if (dtset%berryopt == 5 .and. ipositron/=1) then
+!  emag = dot_product(mag_cart,dtset%bfield)
+!  energies%e_magfield = emag
+!  end if
 
 !  Compute total (free)- energy by direct scheme
    if (optene==0) then
      etotal = energies%e_kinetic + energies%e_hartree + energies%e_xc + &
 &     energies%e_localpsp + energies%e_corepsp + energies%e_fock+&
 &     energies%e_entropy + energies%e_elecfield + energies%e_magfield
-     etotal = etotal + energies%e_ewald + energies%e_vdw_dftd
+     etotal = etotal + energies%e_ewald + energies%e_chempot + energies%e_vdw_dftd
      if (usepaw==0) etotal = etotal + energies%e_nonlocalpsp
      if (usepaw/=0) etotal = etotal + energies%e_paw
    end if
@@ -351,7 +339,7 @@ subroutine etotfor(atindx1,deltae,diffor,dtefield,dtset,&
      etotal = energies%e_eigenvalues - energies%e_hartree + energies%e_xc &
 &     - energies%e_xcdc + energies%e_corepsp - energies%e_corepspdc+ energies%e_fock- energies%e_fockdc &
 &     + energies%e_entropy + energies%e_elecfield + energies%e_magfield
-     etotal = etotal + energies%e_ewald + energies%e_vdw_dftd
+     etotal = etotal + energies%e_ewald + energies%e_chempot + energies%e_vdw_dftd
      if (usepaw/=0) etotal = etotal + energies%e_pawdc
    end if
 
@@ -386,52 +374,58 @@ subroutine etotfor(atindx1,deltae,diffor,dtefield,dtset,&
 
 !  PAW: add gradients due to Dij derivatives to non-local term
    if (usepaw==1) then
-     ABI_ALLOCATE(work,(nfft,dtset%nspden))
+     ABI_ALLOCATE(vlocal,(nfft,dtset%nspden))
      do ispden=1,min(dtset%nspden,2)
-!$OMP PARALLEL DO PRIVATE(ifft) SHARED(ispden,nfft,vhartr,work,vpsp,vxc)
+!$OMP PARALLEL DO PRIVATE(ifft) SHARED(ispden,nfft,vhartr,vlocal,vpsp,vxc)
        do ifft=1,nfft
-         work(ifft,ispden)=vhartr(ifft)+vpsp(ifft)+vxc(ifft,ispden)
+         vlocal(ifft,ispden)=vhartr(ifft)+vpsp(ifft)+vxc(ifft,ispden)
        end do
      end do
+
      if(dtset%nspden==4)then
        do ispden=3,4
-!$OMP PARALLEL DO PRIVATE(ifft) SHARED(ispden,nfft,work,vxc)
+!$OMP PARALLEL DO PRIVATE(ifft) SHARED(ispden,nfft,vlocal,vxc)
          do ifft=1,nfft
-           work(ifft,ispden)=vxc(ifft,ispden)
+           vlocal(ifft,ispden)=vxc(ifft,ispden)
          end do
        end do
      end if
+     ucvol_=ucvol
+#    if defined HAVE_BIGDFT
+     if (dtset%usewvl==1) ucvol_=product(wvl_den%denspot%dpbox%hgrids)*real(product(wvl_den%denspot%dpbox%ndims),dp)
+#    endif
      dimnhat=0;optgr=1;optgr2=0;optstr=0;optstr2=0
+     comm_grid=mpi_enreg%comm_fft;if(dtset%usewvl==1) comm_grid=mpi_enreg%comm_wvl
      call pawgrnl(atindx1,dimnhat,dummy,1,dummy,grnl,gsqcut,mgfft,my_natom, &
 &     dtset%natom, nattyp,nfft,ngfft,nhat_dum,dummy,dtset%nspden,dtset%nsym,ntypat,optgr,optgr2,optstr,optstr2,&
-&     pawang,pawfgrtab,pawrhoij,pawtab,ph1d,psps,k0,rprimd,symrec,dtset%typat,work,vxc,xred, &
+&     pawang,pawfgrtab,pawrhoij,pawtab,ph1d,psps,k0,rprimd,symrec,dtset%typat,ucvol_,vlocal,vxc,xred, &
 &     mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom,mpi_comm_grid=mpi_enreg%comm_fft,&
 &     comm_fft=mpi_enreg%comm_fft,me_g0=mpi_enreg%me_g0,paral_kgb=mpi_enreg%paral_kgb)
-     ABI_DEALLOCATE(work)
+     ABI_DEALLOCATE(vlocal)
    end if
+
+   apply_residual=(optres==1 .and. dtset%usewvl==0.and.abs(dtset%densfor_pred)>=1 .and. &
+&                  abs(dtset%densfor_pred)<=6.and.abs(dtset%densfor_pred)/=5)
 
 !  If residual is a density residual (and forces from residual asked),
 !  has to convert it into a potential residualbefore calling forces routine
-   if (optres==1 .and. dtset%usewvl==0.and.abs(dtset%densfor_pred)>=1 .and. &
-&   abs(dtset%densfor_pred)<=6.and.abs(dtset%densfor_pred)/=5) then
+   if (apply_residual) then
+     ABI_ALLOCATE(resid,(nfft,dtset%nspden))
      option=0; if (dtset%densfor_pred<0) option=1
-     ABI_ALLOCATE(work,(nfft,dtset%nspden))
      optnc=1;if (dtset%nspden==4.and.(abs(dtset%densfor_pred)==4.or.abs(dtset%densfor_pred)==6)) optnc=2
      call nres2vres(dtset,gsqcut,usepaw,kxc,mpi_enreg,my_natom,nfft,ngfft,nhat,&
 &     nkxc,nvresid,n3xccc,optnc,option,pawang,pawfgrtab,pawrhoij,pawtab,&
-&     rhor,rprimd,usepaw,work,xccc3d,xred)
-     call forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,forold,fred,gresid,grewtn,&
-&     grhf,grnl,grvdw,grxc,gsqcut,indsym,maxfor,mgfft,mpi_enreg,&
-&     n1xccc,n3xccc,nattyp,nfft,ngfft,ngrvdw,ntypat,&
-&     pawtab,ph1d,psps,rhog,rhor,rprimd,symrec,synlgr,dtset%usefock,work,vxc,wvl,wvl_den,xred,&
-&     electronpositron=electronpositron)
-     ABI_DEALLOCATE(work)
+&     rhor,rprimd,usepaw,resid,xccc3d,xred)
    else
-     call forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,forold,fred,gresid,grewtn,&
+     resid => nvresid
+   end if
+   call forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,forold,fred,grchempottn,gresid,grewtn,&
 &     grhf,grnl,grvdw,grxc,gsqcut,indsym,maxfor,mgfft,mpi_enreg,&
 &     n1xccc,n3xccc,nattyp,nfft,ngfft,ngrvdw,ntypat,&
-&     pawtab,ph1d,psps,rhog,rhor,rprimd,symrec,synlgr,dtset%usefock,nvresid,vxc,wvl,wvl_den,xred,&
+&     pawrad,pawtab,ph1d,psps,rhog,rhor,rprimd,symrec,synlgr,dtset%usefock,resid,vxc,wvl,wvl_den,xred,&
 &     electronpositron=electronpositron)
+   if (apply_residual) then
+     ABI_DEALLOCATE(resid)
    end if
 
 !  Returned fred are full symmetrized gradients of Etotal

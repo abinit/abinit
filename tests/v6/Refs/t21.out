@@ -1,5 +1,5 @@
 
-.Version 8.0.3 of ABINIT 
+.Version 8.1.5 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
 
 .Copyright (C) 1998-2017 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see http://www.abinit.org .
 
-.Starting date : Mon  4 Apr 2016.
-- ( at 12h00 )
+.Starting date : Tue 22 Nov 2016.
+- ( at 19h12 )
   
 - input  file    -> t21.in
 - output file    -> t21.out
@@ -171,8 +171,8 @@ P           mkmem           2
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -530,8 +530,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
          ecut(hartree)=      3.125   => boxcut(ratio)=   1.94918
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -668,8 +668,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
          ecut(hartree)=      3.125   => boxcut(ratio)=   1.88826
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -805,8 +805,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
          ecut(hartree)=      3.125   => boxcut(ratio)=   1.83104
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -957,8 +957,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1313,8 +1313,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
          ecut(hartree)=      3.125   => boxcut(ratio)=   1.94918
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1451,8 +1451,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
          ecut(hartree)=      3.125   => boxcut(ratio)=   1.88826
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1590,8 +1590,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
          ecut(hartree)=      3.125   => boxcut(ratio)=   1.83104
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1745,8 +1745,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2101,8 +2101,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
          ecut(hartree)=      3.125   => boxcut(ratio)=   1.94918
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2238,8 +2238,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
          ecut(hartree)=      3.125   => boxcut(ratio)=   1.88826
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2375,8 +2375,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
          ecut(hartree)=      3.125   => boxcut(ratio)=   1.83104
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2530,8 +2530,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2884,8 +2884,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
          ecut(hartree)=      3.125   => boxcut(ratio)=   1.94918
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -3020,8 +3020,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
          ecut(hartree)=      3.125   => boxcut(ratio)=   1.88826
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -3155,8 +3155,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
          ecut(hartree)=      3.125   => boxcut(ratio)=   1.83104
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -3310,8 +3310,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -3664,8 +3664,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
          ecut(hartree)=      3.125   => boxcut(ratio)=   1.94918
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -3799,8 +3799,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
          ecut(hartree)=      3.125   => boxcut(ratio)=   1.88826
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -3933,8 +3933,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
          ecut(hartree)=      3.125   => boxcut(ratio)=   1.83104
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -4084,8 +4084,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -4437,8 +4437,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
          ecut(hartree)=      3.125   => boxcut(ratio)=   1.94918
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -4573,8 +4573,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
          ecut(hartree)=      3.125   => boxcut(ratio)=   1.88826
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -4707,8 +4707,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
          ecut(hartree)=      3.125   => boxcut(ratio)=   1.83104
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -4860,8 +4860,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -5213,8 +5213,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
          ecut(hartree)=      3.125   => boxcut(ratio)=   1.94918
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -5349,8 +5349,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
          ecut(hartree)=      3.125   => boxcut(ratio)=   1.88826
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -5483,8 +5483,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
          ecut(hartree)=      3.125   => boxcut(ratio)=   1.83104
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -5636,8 +5636,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -5989,8 +5989,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
          ecut(hartree)=      3.125   => boxcut(ratio)=   1.94918
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -6125,8 +6125,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
          ecut(hartree)=      3.125   => boxcut(ratio)=   1.88826
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -6259,8 +6259,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
          ecut(hartree)=      3.125   => boxcut(ratio)=   1.83104
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -6412,8 +6412,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -6765,8 +6765,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
          ecut(hartree)=      3.125   => boxcut(ratio)=   1.94918
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -6901,8 +6901,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
          ecut(hartree)=      3.125   => boxcut(ratio)=   1.88826
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -7035,8 +7035,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
          ecut(hartree)=      3.125   => boxcut(ratio)=   1.83104
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -7188,8 +7188,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -7541,8 +7541,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
          ecut(hartree)=      3.125   => boxcut(ratio)=   1.94918
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -7677,8 +7677,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
          ecut(hartree)=      3.125   => boxcut(ratio)=   1.88826
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -7811,8 +7811,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
          ecut(hartree)=      3.125   => boxcut(ratio)=   1.83104
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -7964,8 +7964,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -8315,8 +8315,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
          ecut(hartree)=      3.125   => boxcut(ratio)=   1.94918
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -8451,8 +8451,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
          ecut(hartree)=      3.125   => boxcut(ratio)=   1.88826
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -8585,8 +8585,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
          ecut(hartree)=      3.125   => boxcut(ratio)=   1.83104
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/83bi.psphgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -8726,24 +8726,24 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
               amu      2.08980370E+02
           dilatmx      1.25000000E+00
              ecut      2.00000000E+00 Hartree
-           etotal1    -1.0691852073E+01
-      etotal_2img1    -9.8477799344E+00
-      etotal_3img1    -9.4638193181E+00
-      etotal_4img1    -9.4409668817E+00
+           etotal1    -1.0691883768E+01
+      etotal_2img1    -9.8477801279E+00
+      etotal_3img1    -9.4638287029E+00
+      etotal_4img1    -9.4409668824E+00
       etotal_5img1    -9.4141663837E+00
-      etotal_6img1    -9.4038214616E+00
-            fcart1     1.4582553692E-20  9.2280400355E-21  1.3079233222E-03
-                      -1.4582553692E-20 -9.2280400355E-21 -1.3079233222E-03
-       fcart_2img1    -3.9891031459E-21 -2.5749334291E-20  1.1081444739E-04
-                       3.9891031459E-21  2.5749334291E-20 -1.1081444739E-04
-       fcart_3img1     1.1560937409E-19  1.4221939725E-19  1.7236022043E-03
-                      -1.1560937409E-19 -1.4221939725E-19 -1.7236022043E-03
-       fcart_4img1     1.0724880367E-22  5.3236537886E-24  1.0048550044E-05
-                      -1.0724880367E-22 -5.3236537886E-24 -1.0048550044E-05
-       fcart_5img1     1.3812917184E-31  4.1698790749E-31 -2.0156523395E-14
-                      -1.3812917184E-31 -4.1698790749E-31  2.0156523395E-14
-       fcart_6img1     5.0359245961E-22 -1.8589253115E-22  4.5862837259E-06
-                      -5.0359245961E-22  1.8589253115E-22 -4.5862837259E-06
+      etotal_6img1    -9.4038214619E+00
+            fcart1    -5.5829676721E-20 -9.8194662443E-20  1.1185977577E-03
+                       5.5829676721E-20  9.8194662443E-20 -1.1185977577E-03
+       fcart_2img1     1.7848927520E-21  6.1909975118E-21  6.3839093741E-05
+                      -1.7848927520E-21 -6.1909975118E-21 -6.3839093741E-05
+       fcart_3img1    -2.0755665058E-20  2.3043019582E-20 -1.1791976453E-03
+                       2.0755665058E-20 -2.3043019582E-20  1.1791976453E-03
+       fcart_4img1    -3.7527529794E-22  7.8736719790E-23 -3.6219763058E-06
+                       3.7527529794E-22 -7.8736719790E-23  3.6219763058E-06
+       fcart_5img1     3.6729737944E-33 -4.3580549532E-33  3.6364998934E-16
+                      -3.6729737944E-33  4.3580549532E-33 -3.6364998934E-16
+       fcart_6img1     2.4984147547E-23  6.9441307975E-23  1.4464937269E-06
+                      -2.4984147547E-23 -6.9441307975E-23 -1.4464937269E-06
 -          fftalg         312
      fxcartfactor      1.00000000E+01
            imgmov           1
@@ -8776,17 +8776,17 @@ P           mkmem           2
                       -2.7659402519E-01 -4.7907490470E-01  8.3305640920E-01
            shiftk      5.00000000E-01  5.00000000E-01  5.00000000E-01
           spgroup         166
-           strten1     6.2715690198E-04  6.2715690198E-04  1.1184375954E-03
+           strten1     6.2916954049E-04  6.2916954049E-04  1.1217532499E-03
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-      strten_2img1    -9.2382584417E-05 -9.2382584417E-05  1.3055618848E-03
+      strten_2img1    -9.2381234372E-05 -9.2381234372E-05  1.3055610742E-03
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-      strten_3img1     1.8578838205E-04  1.8578838205E-04  3.4325532373E-04
+      strten_3img1     1.8584471390E-04  1.8584471390E-04  3.4323959226E-04
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-      strten_4img1     2.4618062304E-04  2.4618062304E-04  4.1640763394E-04
+      strten_4img1     2.4618062543E-04  2.4618062543E-04  4.1640763447E-04
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
       strten_5img1     2.8269489167E-04  2.8269489167E-04  5.0157495092E-04
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-      strten_6img1     3.1147199757E-04  3.1147199757E-04  5.4094951859E-04
+      strten_6img1     3.1147199889E-04  3.1147199889E-04  5.4094951990E-04
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
            symrel      1  0  0   0  1  0   0  0  1      -1  0  0   0 -1  0   0  0 -1
                        0  1  0   1  0  0   0  0  1       0 -1  0  -1  0  0   0  0 -1
@@ -8799,42 +8799,42 @@ P           mkmem           2
            tsmear      2.00000000E-02 Hartree
             typat      1  1
               wtk        0.25000    0.75000
-           xangst1     1.1290481934E-16  5.5476130973E-17  2.9006549587E+00
-                      -1.1290481934E-16 -5.5476130973E-17 -2.9006549587E+00
-      xangst_2img1     2.5599782071E-17 -9.5334627010E-17  3.1395623014E+00
-                      -2.5599782071E-17  9.5334627010E-17 -3.1395623014E+00
-      xangst_3img1     1.8120296469E-16  2.3471363755E-17  3.3008426048E+00
-                      -1.8120296469E-16 -2.3471363755E-17 -3.3008426048E+00
-      xangst_4img1    -9.2468149263E-17 -1.3295978629E-16  3.4164279814E+00
-                       9.2468149263E-17  1.3295978629E-16 -3.4164279814E+00
-      xangst_5img1    -1.6957446944E-16 -2.7195103916E-16  3.5266756719E+00
-                       1.6957446944E-16  2.7195103916E-16 -3.5266756719E+00
-      xangst_6img1     9.1852026595E-17 -4.3184454314E-17  3.6368487600E+00
-                      -9.1852026595E-17  4.3184454314E-17 -3.6368487600E+00
-            xcart1     2.1335918764E-16  1.0483469445E-16  5.4814434780E+00
-                      -2.1335918764E-16 -1.0483469445E-16 -5.4814434780E+00
-       xcart_2img1     4.8376577176E-17 -1.8015633603E-16  5.9329129268E+00
-                      -4.8376577176E-17  1.8015633603E-16 -5.9329129268E+00
-       xcart_3img1     3.4242397774E-16  4.4354449463E-17  6.2376885308E+00
-                      -3.4242397774E-16 -4.4354449463E-17 -6.2376885308E+00
-       xcart_4img1    -1.7473947812E-16 -2.5125758277E-16  6.4561132376E+00
-                       1.7473947812E-16  2.5125758277E-16 -6.4561132376E+00
-       xcart_5img1    -3.2044930637E-16 -5.1391298556E-16  6.6644511794E+00
-                       3.2044930637E-16  5.1391298556E-16 -6.6644511794E+00
-       xcart_6img1     1.7357517502E-16 -8.1606791852E-17  6.8726481430E+00
-                      -1.7357517502E-16  8.1606791852E-17 -6.8726481430E+00
-             xred1     2.4370069406E-01  2.4370069406E-01  2.4370069406E-01
-                      -2.4370069406E-01 -2.4370069406E-01 -2.4370069406E-01
-        xred_2img1     2.4988990073E-01  2.4988990073E-01  2.4988990073E-01
-                      -2.4988990073E-01 -2.4988990073E-01 -2.4988990073E-01
-        xred_3img1     2.4959048239E-01  2.4959048239E-01  2.4959048239E-01
-                      -2.4959048239E-01 -2.4959048239E-01 -2.4959048239E-01
-        xred_4img1     2.4999713710E-01  2.4999713710E-01  2.4999713710E-01
-                      -2.4999713710E-01 -2.4999713710E-01 -2.4999713710E-01
+           xangst1     1.4450340938E-16  2.4175253566E-17  2.9075761908E+00
+                      -1.4450340938E-16 -2.4175253566E-17 -2.9075761908E+00
+      xangst_2img1    -2.0695639402E-17 -1.5543759123E-16  3.1401487062E+00
+                       2.0695639402E-17  1.5543759123E-16 -3.1401487062E+00
+      xangst_3img1     1.2564256868E-16  1.5865225869E-17  3.3099635148E+00
+                      -1.2564256868E-16 -1.5865225869E-17 -3.3099635148E+00
+      xangst_4img1    -1.2508598097E-16 -9.0475749828E-17  3.4164811561E+00
+                       1.2508598097E-16  9.0475749828E-17 -3.4164811561E+00
+      xangst_5img1    -1.7631419402E-16 -2.5952740199E-16  3.5266756719E+00
+                       1.7631419402E-16  2.5952740199E-16 -3.5266756719E+00
+      xangst_6img1     1.1643224716E-16  1.7340905536E-17  3.6368730295E+00
+                      -1.1643224716E-16 -1.7340905536E-17 -3.6368730295E+00
+            xcart1     2.7307186899E-16  4.5684608433E-17  5.4945227112E+00
+                      -2.7307186899E-16 -4.5684608433E-17 -5.4945227112E+00
+       xcart_2img1    -3.9109090615E-17 -2.9373447818E-16  5.9340210713E+00
+                       3.9109090615E-17  2.9373447818E-16 -5.9340210713E+00
+       xcart_3img1     2.3743004544E-16  2.9980931928E-17  6.2549245528E+00
+                      -2.3743004544E-16 -2.9980931928E-17 -6.2549245528E+00
+       xcart_4img1    -2.3637824709E-16 -1.7097438884E-16  6.4562137231E+00
+                       2.3637824709E-16  1.7097438884E-16 -6.4562137231E+00
+       xcart_5img1    -3.3318554005E-16 -4.9043571374E-16  6.6644511794E+00
+                       3.3318554005E-16  4.9043571374E-16 -6.6644511794E+00
+       xcart_6img1     2.2002506016E-16  3.2769562359E-17  6.8726940059E+00
+                      -2.2002506016E-16 -3.2769562359E-17 -6.8726940059E+00
+             xred1     2.4428218655E-01  2.4428218655E-01  2.4428218655E-01
+                      -2.4428218655E-01 -2.4428218655E-01 -2.4428218655E-01
+        xred_2img1     2.4993657495E-01  2.4993657495E-01  2.4993657495E-01
+                      -2.4993657495E-01 -2.4993657495E-01 -2.4993657495E-01
+        xred_3img1     2.5028015245E-01  2.5028015245E-01  2.5028015245E-01
+                      -2.5028015245E-01 -2.5028015245E-01 -2.5028015245E-01
+        xred_4img1     2.5000102815E-01  2.5000102815E-01  2.5000102815E-01
+                      -2.5000102815E-01 -2.5000102815E-01 -2.5000102815E-01
         xred_5img1     2.4999999647E-01  2.4999999647E-01  2.4999999647E-01
                       -2.4999999647E-01 -2.4999999647E-01 -2.4999999647E-01
-        xred_6img1     2.4999755436E-01  2.4999755436E-01  2.4999755436E-01
-                      -2.4999755436E-01 -2.4999755436E-01 -2.4999755436E-01
+        xred_6img1     2.4999922265E-01  2.4999922265E-01  2.4999922265E-01
+                      -2.4999922265E-01 -2.4999922265E-01 -2.4999922265E-01
             znucl       83.00000
 
 ================================================================================
@@ -8859,23 +8859,40 @@ P           mkmem           2
  of the ABINIT implementation.
  For information on why they are suggested, see also http://www.abinit.org/about/?text=acknowledgments.
 -
-- [1] ABINIT : First-principles approach of materials and nanosystem properties.
+- [1] Recent developments in the ABINIT software package.
+- Computer Phys. Comm. 205, 106 (2016).
+- X.Gonze, F.Jollet, F.Abreu Araujo, D.Adams, B.Amadon, T.Applencourt,
+- C.Audouze, J.-M.Beuken, J.Bieder, A.Bokhanchuk, E.Bousquet, F.Bruneval
+- D.Caliste, M.Cote, F.Dahm, F.Da Pieve, M.Delaveau, M.Di Gennaro,
+- B.Dorado, C.Espejo, G.Geneste, L.Genovese, A.Gerossier, M.Giantomassi,
+- Y.Gillet, D.R.Hamann, L.He, G.Jomard, J.Laflamme Janssen, S.Le Roux,
+- A.Levitt, A.Lherbier, F.Liu, I.Lukacevic, A.Martin, C.Martins,
+- M.J.T.Oliveira, S.Ponce, Y.Pouillon, T.Rangel, G.-M.Rignanese,
+- A.H.Romero, B.Rousseau, O.Rubel, A.A.Shukri, M.Stankovski, M.Torrent,
+- M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
+- B.Xue, A.Zhou, J.W.Zwanziger.
+- Comment : the fourth generic paper describing the ABINIT project.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- is available at http://www.abinit.org/about/ABINIT16.pdf .
+- The licence allows the authors to put it on the Web.
+-
+- [2] ABINIT : First-principles approach of materials and nanosystem properties.
+- Computer Phys. Comm. 180, 2582-2615 (2009).
 - X. Gonze, B. Amadon, P.-M. Anglade, J.-M. Beuken, F. Bottin, P. Boulanger, F. Bruneval,
 - D. Caliste, R. Caracas, M. Cote, T. Deutsch, L. Genovese, Ph. Ghosez, M. Giantomassi
 - S. Goedecker, D.R. Hamann, P. Hermet, F. Jollet, G. Jomard, S. Leroux, M. Mancini, S. Mazevet,
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
-- Computer Phys. Comm. 180, 2582-2615 (2009).
 - Comment : the third generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at http://www.abinit.org/about/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
 -
-- [2] A brief introduction to the ABINIT software package.
+- [3] A brief introduction to the ABINIT software package.
+- Z. Kristallogr. 220, 558-562 (2005).
 - X. Gonze, G.-M. Rignanese, M. Verstraete, J.-M. Beuken, Y. Pouillon, R. Caracas, F. Jollet,
 - M. Torrent, G. Zerah, M. Mikami, Ph. Ghosez, M. Veithen, J.-Y. Raty, V. Olevano, F. Bruneval,
 - L. Reining, R. Godby, G. Onida, D.R. Hamann, and D.C. Allan.
-- Z. Kristallogr. 220, 558-562 (2005).
 - Comment : the second generic paper describing the ABINIT project. Note that this paper
 - should be cited especially if you are using the GW part of ABINIT, as several authors
 - of this part are not in the list of authors of the first or third paper.
@@ -8885,20 +8902,16 @@ P           mkmem           2
 -
 - And optionally:
 -
-- [3] First-principles computation of material properties : the ABINIT software project. 
+- [4] First-principles computation of material properties : the ABINIT software project. 
 - X. Gonze, J.-M. Beuken, R. Caracas, F. Detraux, M. Fuchs, G.-M. Rignanese, L. Sindic,
 - M. Verstraete, G. Zerah, F. Jollet, M. Torrent, A. Roy, M. Mikami, Ph. Ghosez, J.-Y. Raty, D.C. Allan.
 - Computational Materials Science 25, 478-492 (2002). http://dx.doi.org/10.1016/S0927-0256(02)00325-7
 - Comment : the original paper describing the ABINIT project.
 -
-- [4] Fast radix 2, 3, 4 and 5 kernels for Fast Fourier Transformations
-- on computers with overlapping multiply-add instructions.
-- S. Goedecker, SIAM J. on Scientific Computing 18, 1605 (1997).
--
-- Proc.   0 individual time (sec): cpu=         10.5  wall=         11.1
+- Proc.   0 individual time (sec): cpu=         10.3  wall=         10.4
 
 ================================================================================
 
  Calculation completed.
-.Delivered   0 WARNINGs and 122 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         10.5  wall=         11.1
+.Delivered   0 WARNINGs and 121 COMMENTs to log file.
++Overall time at end (sec) : cpu=         10.3  wall=         10.4

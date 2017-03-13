@@ -85,17 +85,16 @@ subroutine pred_isokinetic(ab_mover,hist,itime,ntime,zDEBUG,iexit)
 !Local variables-------------------------------
 !scalars
  integer  :: ii,kk,iatom,idim,idum=5,nfirst,ifirst
- real(dp) :: ucvol,a,as,b,sqb,s,s1,s2,scdot,sigma2,vtest,v2gauss,amass_tot
+ real(dp) :: a,as,b,sqb,s,s1,s2,scdot,sigma2,vtest,v2gauss
  real(dp),parameter :: v2tol=tol8
  real(dp) :: etotal,rescale_vel
- real(dp) :: favg
  character(len=5000) :: message
 !arrays
  real(dp),allocatable,save :: fcart_m(:,:),vel_nexthalf(:,:)
 
- real(dp) :: acell(3),rprim(3,3),rprimd(3,3)
- real(dp) :: gprimd(3,3),gmet(3,3),rmet(3,3),fcart(3,ab_mover%natom)
- real(dp) :: fred(3,ab_mover%natom),fred_corrected(3,ab_mover%natom)
+ real(dp) :: acell(3),rprimd(3,3)
+ real(dp) :: fcart(3,ab_mover%natom)
+!real(dp) :: fred_corrected(3,ab_mover%natom)
  real(dp) :: xcart(3,ab_mover%natom),xcart_next(3,ab_mover%natom)
  real(dp) :: xred(3,ab_mover%natom),xred_next(3,ab_mover%natom)
  real(dp) :: vel(3,ab_mover%natom)
@@ -152,22 +151,19 @@ subroutine pred_isokinetic(ab_mover,hist,itime,ntime,zDEBUG,iexit)
 !##########################################################
 !### 03. Obtain the present values from the history
 
- call hist2var(acell,hist,ab_mover%natom,rprim,rprimd,xcart,xred,zDEBUG)
+ call hist2var(acell,hist,ab_mover%natom,rprimd,xred,zDEBUG)
 
- fcart(:,:) =hist%histXF(:,:,3,hist%ihist)
- fred(:,:)  =hist%histXF(:,:,4,hist%ihist)
- vel(:,:)   =hist%histV(:,:,hist%ihist)
- strten(:)  =hist%histS(:,hist%ihist)
- etotal     =hist%histE(hist%ihist)
+ fcart(:,:)=hist%fcart(:,:,hist%ihist)
+ strten(:) =hist%strten(:,hist%ihist)
+ vel(:,:)  =hist%vel(:,:,hist%ihist)
+ etotal    =hist%etot(hist%ihist)
+
+ call xred2xcart(ab_mover%natom,rprimd,xcart,xred)
 
  if(zDEBUG)then
    write (std_out,*) 'fcart:'
    do kk=1,ab_mover%natom
      write (std_out,*) fcart(:,kk)
-   end do
-   write (std_out,*) 'fred:'
-   do kk=1,ab_mover%natom
-     write (std_out,*) fred(:,kk)
    end do
    write (std_out,*) 'vel:'
    do kk=1,ab_mover%natom
@@ -179,23 +175,18 @@ subroutine pred_isokinetic(ab_mover,hist,itime,ntime,zDEBUG,iexit)
    write (std_out,*) etotal
  end if
 
- call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
-
 !Get rid of mean force on whole unit cell, but only if no
 !generalized constraints are in effect
- if(ab_mover%nconeq==0)then
-   amass_tot=sum(ab_mover%amass(:))
-   do ii=1,3
-     favg=sum(fred(ii,:))/dble(ab_mover%natom)
-!    Note that the masses are used, in order to weight the repartition of the average force.
-!    This procedure is adequate for dynamics, as pointed out by Hichem Dammak (2012 Jan 6)..
-     fred_corrected(ii,:)=fred(ii,:)-favg*ab_mover%amass(:)/amass_tot
-     if(ab_mover%jellslab/=0.and.ii==3)&
-&     fred_corrected(ii,:)=fred(ii,:)
-   end do
- else
-   fred_corrected(:,:)=fred(:,:)
- end if
+!  call fcart2fred(hist%fcart(:,:,hist%ihist),fred_corrected,rprimd,ab_mover%natom)
+!  if(ab_mover%nconeq==0)then
+!    amass_tot=sum(ab_mover%amass(:))
+!    do ii=1,3
+!      if (ii/=3.or.ab_mover%jellslab==0) then
+!        favg=sum(fred_corrected(ii,:))/dble(ab_mover%natom)
+!        fred_corrected(ii,:)=fred_corrected(ii,:)-favg*ab_mover%amass(:)/amass_tot
+!      end if
+!    end do
+!  end if
 
 !write(std_out,*) 'isokinetic 04'
 !##########################################################
@@ -429,21 +420,16 @@ subroutine pred_isokinetic(ab_mover,hist,itime,ntime,zDEBUG,iexit)
 !Increase indexes
  hist%ihist=hist%ihist+1
 
-!Compute xcart from xred, and rprimd
- call xred2xcart(ab_mover%natom,rprimd,xcart,xred)
-
 !Fill the history with the variables
-!xcart, xred, acell, rprimd
- call var2hist(acell,hist,ab_mover%natom,rprim,rprimd,xcart,xred,zDEBUG)
+!xred, acell, rprimd, vel
+ call var2hist(acell,hist,ab_mover%natom,rprimd,xred,zDEBUG)
+ hist%vel(:,:,hist%ihist)=vel(:,:)
+ hist%time(hist%ihist)=real(itime,kind=dp)*ab_mover%dtion
 
  if(zDEBUG)then
    write (std_out,*) 'fcart:'
    do kk=1,ab_mover%natom
      write (std_out,*) fcart(:,kk)
-   end do
-   write (std_out,*) 'fred:'
-   do kk=1,ab_mover%natom
-     write (std_out,*) fred(:,kk)
    end do
    write (std_out,*) 'vel:'
    do kk=1,ab_mover%natom
@@ -455,20 +441,7 @@ subroutine pred_isokinetic(ab_mover,hist,itime,ntime,zDEBUG,iexit)
    write (std_out,*) etotal
  end if
 
- hist%histV(:,:,hist%ihist)=vel(:,:)
- hist%histT(hist%ihist)=itime*ab_mover%dtion
-
-!write(std_out,*) 'isokinetic 07'
-!##########################################################
-!### 07. Deallocate in the last iteration
-!###     When itime==ntime the predictor will be no called
-
-!Temporarily deactivated (MT sept. 2011)
  if (.false.) write(std_out,*) ntime
-!if(itime==ntime-1)then
-!if (allocated(fcart_m))      deallocate(fcart_m)
-!if (allocated(vel_nexthalf)) deallocate(vel_nexthalf)
-!end if
 
 end subroutine pred_isokinetic
 !!***

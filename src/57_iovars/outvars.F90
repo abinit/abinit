@@ -37,6 +37,7 @@
 !!         nsppol     =maximal value of input nsppol for all the datasets
 !!         nsym       =maximum number of symmetries
 !!         ntypat     =maximum number of type of atoms
+!!         nzchempot  =maximal value of input nzchempot for all the datasets
 !!  ndtset=number of datasets
 !!  ndtset_alloc=number of datasets, corrected for allocation of at least
 !!   one data set. Use for most dimensioned arrays.
@@ -219,6 +220,7 @@ subroutine outvars(choice,dmatpuflag,dtsets,filnam4,iout,&
  multivals%nsym=0
  multivals%ntypat=0
  multivals%ntypalch=0
+ multivals%nzchempot=0
 
  if(ndtset_alloc>1)then
    do idtset=1,ndtset_alloc
@@ -246,6 +248,7 @@ subroutine outvars(choice,dmatpuflag,dtsets,filnam4,iout,&
      if(dtsets(1)%nsym     /=dtsets(idtset)%nsym     ) multivals%nsym     =1
      if(dtsets(1)%ntypat   /=dtsets(idtset)%ntypat   ) multivals%ntypat   =1
      if(dtsets(1)%ntypalch /=dtsets(idtset)%ntypalch ) multivals%ntypalch =1
+     if(dtsets(1)%nzchempot/=dtsets(idtset)%nzchempot) multivals%nzchempot=1
    end do
  end if
 
@@ -302,6 +305,7 @@ subroutine outvars(choice,dmatpuflag,dtsets,filnam4,iout,&
 & 3*mxvals%natom*mxvals%nconeq,&
 & mxvals%nnos,&
 & 3*mxvals%nqptdm,&
+& 3*mxvals%nzchempot*mxvals%ntypat,&
 & 3*mxvals%gw_nqlwl,&
 & (2*mxvals%lpawu+1)**2*max(mxvals%nsppol,mxvals%nspinor)*mxvals%natpawu*dmatpuflag,&
 & 30 ) ! used by ga_rules TODO : replace with mxvals% ga_n_rules

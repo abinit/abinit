@@ -31,19 +31,8 @@
 !! OUTPUT
 !!
 !! SIDE EFFECTS
-!! hist<type abihist>=Historical record of positions, forces
-!!      |                    acell, stresses, and energies,
-!!      |                    contains:
-!!      | mxhist:  Maximun number of records
-!!      | histA:   Historical record of acell(A) and rprimd(R)
-!!      | histE:   Historical record of energy(E)
-!!      | histEk:  Historical record of Ionic kinetic energy(Ek)
-!!      | histEnt: Historical record of Entropy
-!!      | histT:   Historical record of time(T) (For MD or iteration for GO)
-!!      | histR:   Historical record of rprimd(R)
-!!      | histS:   Historical record of strten(S)
-!!      | histV:   Historical record of velocity(V)
-!!      | histXF:  Historical record of positions(X) and forces(F)
+!! hist<type abihist>=Historical record of positions, forces,
+!!                               stresses, cell and energies,
 !!
 !! ncycle: Number of cycles of a particular time step
 !!
@@ -59,7 +48,7 @@
 !!   first positions of itime=1, for itime>1 they will contain
 !!   positions in 2 previous steps, those values are different
 !!   from the values store in the history, thats the reason why
-!!   we cannot simply use histXF to obtain those positions.
+!!   we cannot simply use hist%xred to obtain those positions.
 !!
 !! PARENTS
 !!      mover
@@ -95,7 +84,7 @@ implicit none
 !Arguments ------------------------------------
 !scalars
 type(abimover),intent(in)       :: ab_mover
-type(abihist),intent(inout) :: hist
+type(abihist),intent(inout),target :: hist
 integer,intent(in)    :: icycle
 integer,intent(inout) :: ncycle
 integer,intent(in)    :: itime
@@ -112,11 +101,13 @@ real(dp) :: xc
 real(dp) :: vel,vnow,xnow,vprev
 real(dp),save :: hh,time
 !arrays
-real(dp) :: acell(3)
-real(dp) :: rprimd(3,3),rprim(3,3)
-real(dp) :: xred(3,ab_mover%natom),xcart(3,ab_mover%natom)
+real(dp) :: acell(3),rprimd(3,3)
+real(dp) :: xred(3,ab_mover%natom)
+real(dp),allocatable :: xcart(:,:),xcart_prev(:,:)
 real(dp),save,allocatable :: vec_tmp1(:,:)
 real(dp),save,allocatable :: vec_tmp2(:,:)
+real(dp), ABI_CONTIGUOUS pointer :: vel_cur(:,:),vel_next(:,:)
+real(dp),pointer :: fcart_cur(:,:),fcart_prev(:,:),fcart_prev2(:,:)
 
 !***************************************************************************
 !Beginning of executable session
@@ -156,19 +147,37 @@ real(dp),save,allocatable :: vec_tmp2(:,:)
    ABI_ALLOCATE(vec_tmp2,(3,ab_mover%natom))
  end if
 
-!write(std_out,*) '01'
+!write(std_out,*) '00'
 !##########################################################
-!### 01. Copy from the history to the variables
- call hist2var(acell,hist,ab_mover%natom,rprim,rprimd,xcart,xred,zDEBUG)
+!### 00. Copy from the history to the variables
+
+ call hist2var(acell,hist,ab_mover%natom,rprimd,xred,zDEBUG)
+
+ ABI_ALLOCATE(xcart,(3,ab_mover%natom))
+ call xred2xcart(ab_mover%natom,rprimd,xcart,xred)
+
+ if (itime==1.or.itime==2)then
+   ABI_ALLOCATE(xcart_prev,(3,ab_mover%natom))
+   call xred2xcart(ab_mover%natom,rprimd,xcart_prev,hist%xred(:,:,1))
+ end if
+
+ fcart_cur => hist%fcart(:,:,hist%ihist)
+ if (itime==2.and.icycle<2) fcart_prev  => hist%fcart(:,:,1)
+ if (itime==3.and.icycle<3) fcart_prev2 => hist%fcart(:,:,1)
+ if (itime >2.or. icycle>=2)fcart_prev  => hist%fcart(:,:,hist%ihist-1)
+ if (itime >3.or. icycle>=3)fcart_prev2 => hist%fcart(:,:,hist%ihist-2)
+
+ vel_cur  => hist%vel(:,:,hist%ihist)
+ vel_next => hist%vel(:,:,hist%ihist+1)
 
 !write(std_out,*) '01'
 !##########################################################
-!### 02. Get or compute de time step dtion
+!### 01. Get or compute de time step dtion
 
  if (ab_mover%dtion>0)then
    hh = ab_mover%dtion
  else
-   hh=fdtion(ab_mover,hist,itime)
+   hh=fdtion(ab_mover,itime,xcart,fcart_cur,vel_cur)
  end if
 
 !write(std_out,*) '02'
@@ -181,29 +190,22 @@ real(dp),save,allocatable :: vec_tmp2(:,:)
 !    write(std_out,*) '03'
 !    ##########################################################
 !    ### 03. Filling other values from history (forces and vel)
-     fcart=hist%histXF(jj,kk,3,hist%ihist)
+     fcart=fcart_cur(jj,kk)
      xc=xcart(jj,kk)
-     vel=hist%histV(jj,kk,1)
-
-     if (itime==2)then
-       fprev=hist%histXF(jj,kk,3,1)
-       vprev=hist%histV(jj,kk,hist%ihist)
-       vec_tmp2(jj,kk)=hist%histXF(jj,kk,1,hist%ihist)
-       vec_tmp1(jj,kk)=hist%histXF(jj,kk,1,1)
-     end if
+     vel=hist%vel(jj,kk,1)
 
 !    Previous values only after first iteration
-     if (itime>2.or.icycle>=2) then
-       fprev=hist%histXF(jj,kk,3,hist%ihist-1)
-       vprev=hist%histV(jj,kk,hist%ihist)
+     if (itime>=2.or.icycle>=2) then
+       fprev=fcart_prev(jj,kk)
+       vprev=hist%vel(jj,kk,hist%ihist)
+     end if
+     if (itime>=3.or.icycle>=3) then
+       fprev2=fcart_prev2(jj,kk)
      end if
 
-     if (itime==3) then
-       fprev2=hist%histXF(jj,kk,3,1)
-     end if
-
-     if (itime>3.or.icycle>=3) then
-       fprev2=hist%histXF(jj,kk,3,hist%ihist-2)
+     if (itime==2)then
+       vec_tmp1(jj,kk)=xcart_prev(jj,kk)
+       vec_tmp2(jj,kk)=xcart(jj,kk)
      end if
 
 !    write(std_out,*) '04'
@@ -225,7 +227,7 @@ real(dp),save,allocatable :: vec_tmp2(:,:)
 !      ###     The variables vec_tmp2 and vec_tmp1 from previous
 !      ###     calls are used in the following ones.
        if(itime==1)then
-         x0=hist%histXF(jj,kk,1,1)
+         x0=xcart_prev(jj,kk)
 
 !        Prepare the second cycle
          if(icycle==1)then
@@ -350,7 +352,7 @@ real(dp),save,allocatable :: vec_tmp2(:,:)
 !    ### 08. Update history
 
      xcart(jj,kk)=xnow
-     hist%histV(jj,kk,hist%ihist+1)=vnow
+     vel_next(jj,kk)=vnow
 
 !    write(std_out,*) '09'
 !    ##########################################################
@@ -364,23 +366,11 @@ real(dp),save,allocatable :: vec_tmp2(:,:)
 
  hist%ihist=hist%ihist+1
 
-!Compute xred from xcart, and rprimd
  call xcart2xred(ab_mover%natom,rprimd,xcart,xred)
-
- call var2hist(acell,hist,ab_mover%natom,rprim,rprimd,xcart,xred,zDEBUG)
+ call var2hist(acell,hist,ab_mover%natom,rprimd,xred,zDEBUG)
 
 !Change ncycle for itime>1
- if (icycle==4)then
-   ncycle=1
- end if
-
-!The last prediction is in itime=ntime-1
-!Temporarily deactivated (MT sept. 2011)
- if (.false.) write(std_out,*) ntime
-!if (itime==ntime-1)then
-!if(itime==ntime-1)then
-!deallocate(vec_tmp1,vec_tmp2)
-!end if
+ if (icycle==4)  ncycle=1
 
  if (itime==1)then
    time=0.0_dp
@@ -389,7 +379,16 @@ real(dp),save,allocatable :: vec_tmp2(:,:)
    end if
  end if
  time=time+hh
- hist%histT(hist%ihist)=time
+ hist%time(hist%ihist)=time
+
+ if (allocated(xcart)) then
+   ABI_DEALLOCATE(xcart)
+ end if
+ if (allocated(xcart_prev)) then
+   ABI_DEALLOCATE(xcart_prev)
+ end if
+
+ if (.false.) write(std_out,*) ntime
 
 end subroutine pred_moldyn
 !!***
@@ -411,17 +410,6 @@ end subroutine pred_moldyn
 !! INPUTS (in)
 !! hist<type abihist>=Historical record of positions, forces
 !!      |                    acell, stresses, and energies,
-!!      |                    contains:
-!!      | mxhist:  Maximun number of records
-!!      | histA:   Historical record of acell(A) and rprimd(R)
-!!      | histE:   Historical record of energy(E)
-!!      | histEk:  Historical record of Ionic kinetic energy(Ek)
-!!      | histEnt: Historical record of Entropy
-!!      | histT:   Historical record of time(T) (For MD or iteration for GO)
-!!      | histR:   Historical record of rprimd(R)
-!!      | histS:   Historical record of strten(S)
-!!      | histV:   Historical record of velocity(V)
-!!      | histXF:  Historical record of positions(X) and forces(F)
 !! ab_mover<type abimover>=Subset of dtset only related with
 !!          |                 movement of ions and acell, contains:
 !!          | dtion:  Time step
@@ -430,6 +418,9 @@ end subroutine pred_moldyn
 !!          | iatfix: Index of atoms and directions fixed
 !!          | amass:  Mass of ions
 !! itime: Index of time iteration
+!! xcart(3,natom)= cartesian coordinates of atoms
+!! fcart(3,natom)= forces in cartesian coordinates
+!! vel(3,natom)= velocities
 !!
 !! OUTPUT (out)
 !! fdtion = time step computed
@@ -447,13 +438,11 @@ end subroutine pred_moldyn
 #include "config.h"
 #endif
 
-function fdtion(ab_mover,hist,itime)
+function fdtion(ab_mover,itime,xcart,fcart,vel)
 
 ! define dp,sixth,third,etc...
   use defs_basis
-! type(abimover), type(abihist)
   use m_abimover
- use m_abihist
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -466,15 +455,16 @@ function fdtion(ab_mover,hist,itime)
 !Arguments ---------------------------------------------
 !scalars
   type(abimover),intent(in) :: ab_mover
-  type(abihist),intent(in) :: hist
-  integer,intent(in)    :: itime
-  real(dp)      :: fdtion
+  integer,intent(in) :: itime
+  real(dp) :: fdtion
+!arrays
+  real(dp) :: xcart(:,:),fcart(:,:),vel(:,:)
 
 !Local variables ------------------------------
 !scalars
   integer  :: jj,kk
   real(dp) :: max,min,val
-  real(dp) :: fcart,xc,vel,em
+  real(dp) :: ff,xc,vv,em
 
 !************************************************************************
 
@@ -484,20 +474,20 @@ function fdtion(ab_mover,hist,itime)
  do kk=1,ab_mover%natom
    em=ab_mover%amass(kk)
    do jj=1,3
-     fcart=hist%histXF(jj,kk,3,hist%ihist)
-     xc   =hist%histXF(jj,kk,1,hist%ihist)
-     vel  =hist%histV(jj,kk,hist%ihist)
+     ff =fcart(jj,kk)
+     xc =xcart(jj,kk)
+     vv=vel(jj,kk)
 
-     if (vel>1e-8) then
-       val=abs(1.0_dp/vel)
+     if (vv>1e-8) then
+       val=abs(1.0_dp/vv)
        write(std_out,*) 'vel',kk,jj,val
        if (val>max) max=val
        if (val<min) min=val
      end if
 
-     if (fcart>1e-8) then
-       val=sqrt(abs(2*em/fcart))
-       write(std_out,*) 'forces',kk,jj,val,em,fcart
+     if (ff>1e-8) then
+       val=sqrt(abs(2*em/ff))
+       write(std_out,*) 'forces',kk,jj,val,em,ff
        if (val>max) max=val
        if (val<min) min=val
      end if
