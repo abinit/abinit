@@ -660,29 +660,29 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
       e2 = ubound(svectout,dim=2)
      end if
 
-     if (nnlout>0) then
-      b3 = (idat-1)*nnlout+1
-      e3 = (idat*nnlout)
-     else
-      !enlout_idat => enlout
-      b3 = lbound(enlout,dim=1)
-      e3 = ubound(enlout,dim=1)
-     end if
-
      if (cpopt>=0) then
        !cprjin_idat => cprjin_(:,my_nspinor*(idat-1)+1:my_nspinor*(idat))
-      b4 = my_nspinor*(idat-1)+1
-      e4 = my_nspinor*(idat)
+      b3 = my_nspinor*(idat-1)+1
+      e3 = my_nspinor*(idat)
      else
        !cprjin_idat => cprjin_
-      b4 = lbound(cprjin_,dim=2)
-      e4 = ubound(cprjin_,dim=2)
+      b3 = lbound(cprjin_,dim=2)
+      e3 = ubound(cprjin_,dim=2)
+     end if
+     if (nnlout>0) then
+      !enlout_idat => enlout((idat-1)*nnlout+1:(idat*nnlout))
+      b4 = (idat-1)*nnlout+1
+      e4 = (idat*nnlout)
+     else
+      !enlout_idat => enlout
+      b4 = lbound(enlout,dim=1)
+      e4 = ubound(enlout,dim=1)
      end if
 
 !    Legendre Polynomials version
      if (hamk%useylm==0) then
        call nonlop_pl(choice,dimenl1,dimenl2_,dimffnlin,dimffnlout,enl_,&
-&       enlout(b3:e3),ffnlin_,ffnlout_,hamk%gmet,hamk%gprimd,idir,indlmn_,istwf_k,&
+&       enlout(b4:e4),ffnlin_,ffnlout_,hamk%gmet,hamk%gprimd,idir,indlmn_,istwf_k,&
 &       kgin,kgout,kpgin,kpgout,kptin,kptout,hamk%lmnmax,matblk_,hamk%mgfft,&
 &       mpi_enreg,hamk%mpsang,hamk%mpssoang,natom_,nattyp_,hamk%ngfft,&
 &       nkpgin,nkpgout,nloalg_,nnlout,npwin,npwout,my_nspinor,hamk%nspinor,&
@@ -690,8 +690,8 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
 &       vectin(:,b0:e0),vectout(:,b1:e1))
 !    Spherical Harmonics version
      else if (hamk%use_gpu_cuda==0) then
-       call nonlop_ylm(atindx1_,choice,cpopt,cprjin_(:,b4:e4),dimenl1,dimenl2_,&
-&       dimffnlin,dimffnlout,enl_,enlout(b3:e3),ffnlin_,ffnlout_,hamk%gprimd,idir,&
+       call nonlop_ylm(atindx1_,choice,cpopt,cprjin_(:,b3:e3),dimenl1,dimenl2_,&
+&       dimffnlin,dimffnlout,enl_,enlout(b4:e4),ffnlin_,ffnlout_,hamk%gprimd,idir,&
 &       indlmn_,istwf_k,kgin,kgout,kpgin,kpgout,kptin,kptout,lambda(idat),&
 &       hamk%lmnmax,matblk_,hamk%mgfft,mpi_enreg,natom_,nattyp_,hamk%ngfft,&
 &       nkpgin,nkpgout,nloalg_,nnlout,npwin,npwout,my_nspinor,hamk%nspinor,&
@@ -699,8 +699,8 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
 &       svectout(:,b2:e2),hamk%ucvol,vectin(:,b0:e0),vectout(:,b1:e1),hermdij=hermdij)
 !    GPU version
      else
-       call nonlop_gpu(atindx1_,choice,cpopt,cprjin(:,b4:e4),dimenl1,dimenl2_,&
-&       dimffnlin,dimffnlout,enl_,enlout(b3:e3),ffnlin_,ffnlout_,hamk%gprimd,idir,&
+       call nonlop_gpu(atindx1_,choice,cpopt,cprjin(:,b3:e3),dimenl1,dimenl2_,&
+&       dimffnlin,dimffnlout,enl_,enlout(b4:e4),ffnlin_,ffnlout_,hamk%gprimd,idir,&
 &       indlmn_,istwf_k,kgin,kgout,kpgin,kpgout,kptin,kptout,lambda(idat),&
 &       hamk%lmnmax,matblk_,hamk%mgfft,mpi_enreg,natom_,nattyp_,hamk%ngfft,&
 &       nkpgin,nkpgout,nloalg_,nnlout,npwin,npwout,my_nspinor,hamk%nspinor,&
