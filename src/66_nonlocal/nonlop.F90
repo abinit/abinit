@@ -679,8 +679,8 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
       e4 = ubound(cprjin_,dim=2)
      end if
 
-     !Legendre Polynomials version
-     if (useylm==0) then
+!    Legendre Polynomials version
+     if (hamk%useylm==0) then
        call nonlop_pl(choice,dimenl1,dimenl2_,dimffnlin,dimffnlout,enl_,&
 &       enlout(b3:e3),ffnlin_,ffnlout_,hamk%gmet,hamk%gprimd,idir,indlmn_,istwf_k,&
 &       kgin,kgout,kpgin,kpgout,kptin,kptout,hamk%lmnmax,matblk_,hamk%mgfft,&
@@ -688,8 +688,8 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
 &       nkpgin,nkpgout,nloalg_,nnlout,npwin,npwout,my_nspinor,hamk%nspinor,&
 &       ntypat_,only_SO_,phkxredin_,phkxredout_,ph1d_,ph3din_,ph3dout_,signs,hamk%ucvol,&
 &       vectin(:,b0:e0),vectout(:,b1:e1))
-     !Spherical Harmonics version
-     else if (hamk%use_gpu_cuda==0 .and. useylm==1) then
+!    Spherical Harmonics version
+     else if (hamk%use_gpu_cuda==0) then
        call nonlop_ylm(atindx1_,choice,cpopt,cprjin_(:,b4:e4),dimenl1,dimenl2_,&
 &       dimffnlin,dimffnlout,enl_,enlout(b3:e3),ffnlin_,ffnlout_,hamk%gprimd,idir,&
 &       indlmn_,istwf_k,kgin,kgout,kpgin,kpgout,kptin,kptout,lambda(idat),&
