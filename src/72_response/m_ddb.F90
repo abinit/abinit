@@ -2977,24 +2977,26 @@ subroutine rdddb9(acell,atifc,amu,ddb,&
      tmpflg(:,:,:,:,:,:) = reshape(ddb%flg(1:nsize,iblok), shape = (/3,mpert,3,mpert,3,mpert/))
      tmpval(1,:,:,:,:,:,:) = reshape(ddb%val(1,1:nsize,iblok), shape = (/3,mpert,3,mpert,3,mpert/))
      tmpval(2,:,:,:,:,:,:) = reshape(ddb%val(2,1:nsize,iblok), shape = (/3,mpert,3,mpert,3,mpert/))
-     rfpert = 1
 
+!    Set the elements that are zero by symmetry for raman and 
+!    non-linear optical susceptibility tensors
+     rfpert = 0
+     rfpert(:,natom+2,:,natom+2,:,natom+2) = 1
+     rfpert(:,1:natom,:,natom+2,:,natom+2) = 1
+     rfpert(:,natom+2,:,1:natom,:,natom+2) = 1
+     rfpert(:,natom+2,:,natom+2,:,1:natom) = 1
      call sytens(indsym,mpert,natom,nsym,rfpert,symrec,symrel)
-
      do i1pert = 1,mpert
        do i2pert = 1,mpert
          do i3pert = 1,mpert
            do i1dir=1,3
              do i2dir=1,3
                do i3dir=1,3
-
-!                Set the elements that are zero by symmetry as if they were calculated.
                  if ((rfpert(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)==-2) .and. &
 &                  (tmpflg(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)/=1)) then
                    tmpval(:,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert) = zero
                    tmpflg(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)=1
                  end if
-
                end do
              end do
            end do
