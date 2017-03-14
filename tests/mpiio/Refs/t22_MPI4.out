@@ -518,7 +518,7 @@ P           mkmem9          1
            tsmear9     1.00000000E-02 Hartree
             typat      1  1
            useylm           1
-         wfoptalg          14
+         wfoptalg         114
               wtk1       1.00000
               wtk2       1.00000
               wtk3       0.37500    0.18750    0.18750    0.18750    0.06250
@@ -5548,7 +5548,7 @@ P           mkmem9          1
            tsmear9     1.00000000E-02 Hartree
             typat      1  1
            useylm           1
-         wfoptalg          14
+         wfoptalg         114
               wtk1       1.00000
               wtk2       1.00000
               wtk3       0.37500    0.18750    0.18750    0.18750    0.06250
