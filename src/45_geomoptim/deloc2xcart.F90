@@ -11,7 +11,7 @@
 !!  Older reference: Pulay and co. JACS 101 2550 (1979)
 !!
 !! COPYRIGHT
-!! Copyright (C) 2003-2016 ABINIT group (MVer)
+!! Copyright (C) 2003-2017 ABINIT group (MVer)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

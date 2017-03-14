@@ -13,7 +13,7 @@
 !! No change of acell and rprim at present.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2011-2016 ABINIT group (GG,MT)
+!! Copyright (C) 2011-2017 ABINIT group (GG,MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -103,7 +103,7 @@ subroutine pimd_nosehoover_nvt(etotal,forces,itimimage,natom,pimd_param,prtvolim
  real(dp) :: temperature1,temperature2,temp2_prev,thermtemp,tol
  character(len=500) :: msg
 !arrays
- real(dp) :: spring_prim(natom),stress_pimd(3,3,3),vel_cell(3,3)
+ real(dp) :: constraint_output(2),spring_prim(natom),stress_pimd(3,3,3),vel_cell(3,3)
  real(dp),allocatable :: forces_orig(:,:,:),forces_pimd(:,:,:)
  real(dp),allocatable :: inertmass(:),mass(:,:),qmass(:),quantummass(:),spring(:,:)
  real(dp),allocatable :: xcart(:,:,:),xcart_next(:,:,:),xcart_prev(:,:,:)
@@ -155,7 +155,7 @@ subroutine pimd_nosehoover_nvt(etotal,forces,itimimage,natom,pimd_param,prtvolim
 !Masses and spring constants (according to pitransform)
  select case(pitransform)
  case(0)
-   ABI_ALLOCATE(mass,(natom,1))   
+   ABI_ALLOCATE(mass,(natom,1))
    ABI_ALLOCATE(spring,(natom,1))
  case(1,2)
    ABI_ALLOCATE(mass,(natom,trotter))
@@ -181,7 +181,7 @@ subroutine pimd_nosehoover_nvt(etotal,forces,itimimage,natom,pimd_param,prtvolim
 !If this is a calculation from scratch,generate random distribution of velocities
  irestart=1;if (itimimage==1) irestart=pimd_is_restart(mass,vel)
  if (irestart==0) then
-   call pimd_initvel(idum,mass,natom,initemp,trotter,vel)
+   call pimd_initvel(idum,mass,natom,initemp,trotter,vel,pimd_param%constraint,pimd_param%wtatcon)
  end if
 
 !Compute temperature at t
@@ -194,6 +194,8 @@ subroutine pimd_nosehoover_nvt(etotal,forces,itimimage,natom,pimd_param,prtvolim
  call pimd_force_transform(forces,1,natom,pitransform,trotter) !compute staging forces
  call pimd_forces(forces,natom,spring,pitransform,trotter,xcart)
  call pimd_nosehoover_forces(dzeta,forces,forces_pimd,mass,natom,nnos,trotter,vel)
+ call pimd_apply_constraint(pimd_param%constraint,constraint_output,forces_pimd,&
+&                           mass,natom,trotter,pimd_param%wtatcon,xcart)
 
 !Compute atomic positions at t+dt
  if (itimimage<=1) then
@@ -235,6 +237,8 @@ subroutine pimd_nosehoover_nvt(etotal,forces,itimimage,natom,pimd_param,prtvolim
      temperature2=pimd_temperature(mass,vel)
 !    Reestimate the force
      call pimd_nosehoover_forces(dzeta,forces,forces_pimd,mass,natom,nnos,trotter,vel)
+     call pimd_apply_constraint(pimd_param%constraint,constraint_output,forces_pimd,&
+&                               mass,natom,trotter,pimd_param%wtatcon,xcart)
 !    Compute new positions
      call pimd_predict_verlet(dtion,forces_pimd,mass,natom,trotter,&
 &     xcart,xcart_next,xcart_prev)
@@ -264,7 +268,8 @@ subroutine pimd_nosehoover_nvt(etotal,forces,itimimage,natom,pimd_param,prtvolim
 
 !Print messages
  vel_cell=zero;prtstress=1;if (prtvolimg>=2) prtstress=0
- call pimd_print(eharm,eharm2,epot,forces_pimd,inertmass,irestart,&
+ call pimd_print(pimd_param%constraint,constraint_output,&
+& eharm,eharm2,epot,forces_pimd,inertmass,irestart,&
 & itimimage,kt,natom,pimd_param%optcell,prtstress,prtvolimg,rprimd,&
 & stress_pimd,temperature1,temperature2,&
 & pimd_param%traj_unit,trotter,vel,vel_cell,xcart,xred)

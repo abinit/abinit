@@ -10,7 +10,7 @@
 !! then maps them into the FS kpt states
 !!
 !! COPYRIGHT
-!! Copyright (C) 2002-2016 ABINIT group (JPCroc) based on conducti
+!! Copyright (C) 2002-2017 ABINIT group (JPCroc) based on conducti
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

@@ -18,7 +18,7 @@
 !! for instance.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (DCA, XG, GMR, JCC, SE)
+!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR, JCC, SE)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -79,27 +79,22 @@ implicit none
  integer,intent(in) :: iexit
  logical,intent(in) :: zDEBUG
  type(abimover),intent(in) :: ab_mover
- type(abihist),intent(inout) :: hist
+ type(abihist),intent(inout),target :: hist
 
 !Local variables-------------------------------
 !scalars
  integer  :: ndim,nhist,shift,diisSize
  integer  :: ii,jj,kk,info
- real(dp) :: ucvol
  real(dp) :: etotal
- real(dp) :: favg
  real(dp) :: suma
-
 !arrays
  real(dp) :: acell(3)
- real(dp) :: rprimd(3,3),rprim(3,3)
- real(dp) :: gprimd(3,3)
- real(dp) :: gmet(3,3)
- real(dp) :: rmet(3,3)
- real(dp) :: fred(3,ab_mover%natom),fred_corrected(3,ab_mover%natom)
- real(dp) :: xred(3,ab_mover%natom),xcart(3,ab_mover%natom)
+ real(dp) :: rprimd(3,3)
+!real(dp) :: fred_corrected(3,ab_mover%natom)
+ real(dp) :: xred(3,ab_mover%natom)
+ real(dp) :: xcart(3,ab_mover%natom)
  real(dp) :: strten(6)
- real(dp) ::  ident(3, 3)
+ real(dp) ::  ident(3,3)
  real(dp),allocatable,save :: hessin(:,:)
 ! DIISRELAX SPECIFIC
 ! error:          Store the supposed error
@@ -110,14 +105,16 @@ implicit none
 ! workArray:      Lapack work array.
 ! ipiv:           Lapack work array.
  integer,  allocatable :: ipiv(:)
+ real(dp) :: fcart_tmp(3*ab_mover%natom)
+ real(dp) :: error_tmp(3*ab_mover%natom)
+ real(dp) :: xcart_tmp(3*ab_mover%natom)
  real(dp), allocatable,save :: error(:, :, :)
+ real(dp), allocatable :: xcart_hist(:,:,:)
  real(dp), allocatable :: diisMatrix(:, :)
  real(dp), allocatable :: diisCoeff(:)
  real(dp), allocatable :: workArray(:)
  real(dp), allocatable :: workMatrix(:, :)
- real(dp)  :: fcart_tmp(3*ab_mover%natom)
- real(dp)  :: error_tmp(3*ab_mover%natom)
- real(dp)  :: xcart_tmp(3*ab_mover%natom)
+ real(dp),pointer :: fcart_hist(:,:,:)
 
 !***************************************************************************
 !Beginning of executable session
@@ -189,50 +186,13 @@ implicit none
    ident(1, 1) = -one
    ident(2, 2) = -one
    ident(3, 3) = -one
-   ucvol=zero
-   call hessinit(ab_mover,hessin,ident,ndim,ucvol)
+   call hessinit(ab_mover,hessin,ident,ndim,zero)
 
  end if
 
 !write(std_out,*) 'diisrelax 04'
 !##########################################################
-!### 04. Obtain the present values from the history
-
- call hist2var(acell,hist,ab_mover%natom,rprim,rprimd,xcart,xred,zDEBUG)
-
- fred(:,:)=hist%histXF(:,:,4,hist%ihist)
- strten(:)=hist%histS(:,hist%ihist)
- etotal   =hist%histE(hist%ihist)
-
- if(zDEBUG)then
-   write (std_out,*) 'fred:'
-   do kk=1,ab_mover%natom
-     write (std_out,*) fred(:,kk)
-   end do
-   write (std_out,*) 'strten:'
-   write (std_out,*) strten(1:3),ch10,strten(4:6)
-   write (std_out,*) 'etotal:'
-   write (std_out,*) etotal
- end if
-
- call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
-
-!Get rid of mean force on whole unit cell, but only if no
-!generalized constraints are in effect
- if(ab_mover%nconeq==0)then
-   do ii=1,3
-     favg=sum(fred(ii,:))/dble(ab_mover%natom)
-     fred_corrected(ii,:)=fred(ii,:)-favg
-     if(ab_mover%jellslab/=0.and.ii==3)&
-&     fred_corrected(ii,:)=fred(ii,:)
-   end do
- else
-   fred_corrected(:,:)=fred(:,:)
- end if
-
-!write(std_out,*) 'diisrelax 05'
-!##########################################################
-!### 05. Compute the shift in the history and the size
+!### 04. Compute the shift in the history and the size
 !###     of the diisMatrix
 
 !When itime > diismemory we need to shift the records
@@ -253,6 +213,45 @@ implicit none
  end if
 
 
+!write(std_out,*) 'diisrelax 05'
+!##########################################################
+!### 05. Obtain the present values from the history
+
+ call hist2var(acell,hist,ab_mover%natom,rprimd,xred,zDEBUG)
+
+ strten(:)=hist%strten(:,hist%ihist)
+ etotal   =hist%etot(hist%ihist)
+
+ if(zDEBUG)then
+   write (std_out,*) 'fcart:'
+   do kk=1,ab_mover%natom
+     write (std_out,*) hist%fcart(:,kk,hist%ihist)
+   end do
+   write (std_out,*) 'strten:'
+   write (std_out,*) strten(1:3),ch10,strten(4:6)
+   write (std_out,*) 'etotal:'
+   write (std_out,*) etotal
+ end if
+
+!Need also history in cartesian coordinates
+ ABI_ALLOCATE(xcart_hist,(3,ab_mover%natom,diisSize))
+ do ii=1,diisSize
+   call xred2xcart(ab_mover%natom,rprimd,xcart_hist(:,:,ii),hist%xred(:,:,ii+shift))
+ end do
+ fcart_hist => hist%fcart(:,:,1+shift:diisSize+shift)
+
+!Get rid of mean force on whole unit cell, but only if no
+!generalized constraints are in effect
+!  call fcart2fred(hist%fcart(:,:,hist%ihist),fred_corrected,rprimd,ab_mover%natom)
+!  if(ab_mover%nconeq==0)then
+!    do ii=1,3
+!      if (ii/=3.or.ab_mover%jellslab==0) then
+!        favg=sum(fred_corrected(ii,:))/dble(ab_mover%natom)
+!        fred_corrected(ii,:)=fred_corrected(ii,:)-favg
+!      end if
+!    end do
+!  end if
+
 !write(std_out,*) 'diisrelax 06'
 !##########################################################
 !### 06. Precondition the error using the hessian matrix.
@@ -267,20 +266,20 @@ implicit none
    do ii = 1, diisSize, 1
      write (std_out,*) 'ii,diisSize,shift',ii,diisSize,shift
      do kk=1,ab_mover%natom
-       write (std_out,*) hist%histXF(:,kk,1,ii+shift)
+       write (std_out,*) xcart_hist(:,kk,ii)
      end do
    end do
    write (std_out,*) 'Stored fcart'
    do ii = 1, diisSize, 1
      write (std_out,*) 'ii,diisSize,shift',ii,diisSize,shift
      do kk=1,ab_mover%natom
-       write (std_out,*) hist%histXF(:,kk,3,ii+shift)
+       write (std_out,*) fcart_hist(:,kk,ii)
      end do
    end do
  end if
 
  do ii=1,diisSize,1
-   fcart_tmp(:)=RESHAPE( hist%histXF(:,:,3,ii+shift), (/ ndim /) )
+   fcart_tmp(:)=RESHAPE( fcart_hist(:,:,ii), (/ ndim /) )
 !  *  BLAS ROUTINE LEVEL 2
 !  *  DGEMV  performs one of the matrix-vector operations
 !  *
@@ -291,7 +290,7 @@ implicit none
 
 !  Here we are computing:
 !  error(ndim) := 1*hessin(ndim x ndim)*fcart(ndim) + 0*error(ndim)
-!  
+!
    call DGEMV('N',ndim,ndim,one,hessin,&
 &   ndim,fcart_tmp,1,zero,error_tmp,1)
    error(:,:,ii)=RESHAPE( error_tmp, (/ 3, ab_mover%natom /) )
@@ -505,20 +504,20 @@ implicit none
  error(:, :, diisSize) = zero
  do ii = 1, diisSize, 1
    xcart(:, :) = xcart(:, :) +&
-&   hist%histXF(:, :,1, ii+shift) * diisCoeff(ii)
+&   xcart_hist(:, :, ii) * diisCoeff(ii)
    error(:, :, diisSize) = error(:, :, diisSize)+&
-&   hist%histXF(:, :,3, ii+shift) * diisCoeff(ii)
+&   fcart_hist(:, :, ii) * diisCoeff(ii)
 
    if(zDEBUG)then
      write (std_out,*) 'Building new coordinates (ii):',ii
      write (std_out,*) 'diisCoeff(ii)',diisCoeff(ii)
-     write (std_out,*) 'hist%histXF(:, :,1, ii+shift)'
+     write (std_out,*) 'xcart_hist(:, :, ii)'
      do kk=1,ab_mover%natom
-       write (std_out,*) hist%histXF(:,kk,1, ii+shift)
+       write (std_out,*) xcart_hist(:,kk,ii)
      end do
-     write (std_out,*) 'hist%histXF(:, :,3, ii+shift)'
+     write (std_out,*) 'fcart_hist(:, :, ii)'
      do kk=1,ab_mover%natom
-       write (std_out,*) hist%histXF(:,kk,3, ii+shift)
+       write (std_out,*) fcart_hist(:,kk,ii)
      end do
      write (std_out,*) 'xcart:'
      do kk=1,ab_mover%natom
@@ -556,11 +555,13 @@ implicit none
 !### 10. Update the hessian matrix using a BFGS algorithm.
  if (itime > 1) then
    call hessupdt(hessin, ab_mover%iatfix, ab_mover%natom, ndim, &
-&   reshape(hist%histXF(:, :,1, itime)  , (/ ndim /)), &
-&   reshape(hist%histXF(:, :,1, itime-1), (/ ndim /)), &
-&   reshape(hist%histXF(:, :,3, itime)  , (/ ndim /)), &
-&   reshape(hist%histXF(:, :,3, itime-1), (/ ndim /)))
+&   reshape(xcart_hist(:,:,diisSize)  , (/ ndim /)), &
+&   reshape(xcart_hist(:,:,diisSize-1), (/ ndim /)), &
+&   reshape(fcart_hist(:,:,diisSize)  , (/ ndim /)), &
+&   reshape(fcart_hist(:,:,diisSize-1), (/ ndim /)))
  end if
+
+ ABI_DEALLOCATE(xcart_hist)
 
 !write(std_out,*) 'diisrelax 11'
 !##########################################################
@@ -569,37 +570,15 @@ implicit none
 !Increase indexes
  hist%ihist=hist%ihist+1
 
- if(ab_mover%optcell/=0)then
-   call mkrdim(acell,rprim,rprimd)
-   call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
- end if
-
 !Compute xred from xcart and rprimd
  call xcart2xred(ab_mover%natom,rprimd,xcart,xred)
 
 !Fill the history with the variables
-!xcart, xred, acell, rprimd
- call var2hist(acell,hist,ab_mover%natom,rprim,rprimd,xcart,xred,zDEBUG)
+!xred, acell, rprimd, vel
+ call var2hist(acell,hist,ab_mover%natom,rprimd,xred,zDEBUG)
+ hist%vel(:,:,hist%ihist)=hist%vel(:,:,hist%ihist-1)
 
- if(zDEBUG)then
-   write (std_out,*) 'fred:'
-   do kk=1,ab_mover%natom
-     write (std_out,*) fred(:,kk)
-   end do
-   write (std_out,*) 'strten:'
-   write (std_out,*) strten(1:3),ch10,strten(4:6)
-   write (std_out,*) 'etotal:'
-   write (std_out,*) etotal
- end if
-
- hist%histV(:,:,hist%ihist)=hist%histV(:,:,hist%ihist-1)
-
-!Temporarily deactivated (MT sept. 2011)
  if (.false.) write(std_out,*) ntime
-!if (itime==ntime-1)then
-!if (allocated(error)) deallocate(error)
-!if (allocated(hessin)) deallocate(hessin)
-!end if
 
 end subroutine pred_diisrelax
 !!***

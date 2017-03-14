@@ -8,7 +8,7 @@
 !!  It also defines generic interfaces for single or double precision arrays.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2016 ABINIT group (MG, MM)
+!! Copyright (C) 2009-2017 ABINIT group (MG, MM)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

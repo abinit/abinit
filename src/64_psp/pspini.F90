@@ -10,7 +10,7 @@
 !! Also compute ecore=[Sum(i) zion(i)] * [Sum(i) epsatm(i)] by calling pspcor.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (DCA, XG, GMR, MT)
+!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -237,11 +237,12 @@ subroutine pspini(dtset,dtfil,ecore,gencond,gsqcut,gsqcutdg,level,pawrad,pawtab,
 & .or. pawxcdev_old /= dtset%pawxcdev      &
 & .or. positron_old /= dtset%positron      &
 & .or. usewvl_old /= dtset%usewvl          &
-& .or. mtypalch>0                          &
 & .or. paw_size_old /= paw_size            &
 & .or. usexcnhat_old/=dtset%usexcnhat_orig &
-& .or. sum(new_pspso(:))/=0                &
 & .or. any(paw_options_old(:)/=paw_options(:)) &
+& .or. sum(new_pspso(:))/=0                &
+& .or. mtypalch>0                          &
+& .or. (dtset%usewvl==1.and.psps%usepaw==1)&
 & ) gencond=1
 
  if (present(comm_mpi).and.psps%usepaw==1) then

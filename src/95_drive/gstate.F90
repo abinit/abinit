@@ -7,7 +7,7 @@
 !! Primary routine for conducting DFT calculations by CG minimization.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (DCA, XG, GMR, JYR, MKV, MT, FJ, MB)
+!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR, JYR, MKV, MT, FJ, MB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -159,7 +159,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 &                               electronpositron_calctype
  use m_scfcv,            only : scfcv_t,scfcv_init, scfcv_destroy, scfcv_run
  use m_iowf,             only : outwf
- use m_ioarr,            only : read_rhor
+ use m_ioarr,            only : ioarr,read_rhor
  use defs_wvltypes,      only : wvl_data,coulomb_operator,wvl_wf_type
 #if defined HAVE_BIGDFT
  use BigDFT_API,         only : wvl_timing => timing,xc_init,xc_end,XC_MIXED,XC_ABINIT,&
@@ -234,12 +234,13 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 #if defined HAVE_BIGDFT
  integer :: icoulomb
 #endif
- integer :: ask_accurate,bantot,choice,comm_psp,fullinit
+ integer :: accessfil,ask_accurate,bantot,choice,comm_psp,fform,fullinit
  integer :: gnt_option,gscase,iatom,idir,ierr,ii,indx,jj,kk,ios,itypat
  integer :: ixfh,izero,mcg,me,mgfftf,mpert,msize,mu,my_natom,my_nspinor
  integer :: nblok,nfftf,nfftot,npwmin
  integer :: openexit,option,optorth,psp_gencond,conv_retcode
  integer :: pwind_alloc,rdwrpaw,comm,tim_mkrho,use_sc_dmft
+ integer :: cnt,spin,band,ikpt
  real(dp) :: cpus,ecore,ecut_eff,ecutdg_eff,etot,fermie
  real(dp) :: gsqcut_eff,gsqcut_shp,gsqcutc_eff,hyb_range,residm,tolwfr,ucvol
  logical :: read_wf_or_den,has_to_init,call_pawinit,write_wfk
@@ -300,10 +301,10 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  if (dtset%usewvl == 1) then
 
 !  If usewvl: wvlbigdft indicates that the BigDFT workflow will be followed
-   if(dtset%wvl_bigdft_comp==1) wvlbigdft=.true.
+   wvlbigdft=(dtset%wvl_bigdft_comp==1)
 
 !  Default value, to be set-up elsewhere.
-   wvl%descr%h(:)                 = dtset%wvl_hgrid
+   wvl%descr%h(:) = dtset%wvl_hgrid
 
 #if defined HAVE_BIGDFT
    wvl%descr%paw%usepaw=psps%usepaw
@@ -346,6 +347,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 
  ecore=zero
  results_gs%pel(1:3)   =zero
+ results_gs%grchempottn(:,:)=zero
  results_gs%grewtn(:,:)=zero
 !MT Feb 2012: I dont know why but grvdw has to be allocated
 !when using BigDFT to ensure success on inca_gcc44_sdebug
@@ -605,14 +607,37 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 !###########################################################
 !### 05. Calls inwffil
 
+ ! if paral_kgb == 0, it may happen that some processors are idle (no entry in proc_distrb)
+ ! but mkmem == nkpt and this can cause integer overflow in mcg or allocation error.
+ ! Here we count the number of states treated by the proc. if cnt == 0, mcg is then set to 0.
+ cnt = 0
+ do spin=1,dtset%nsppol
+   do ikpt=1,dtset%nkpt
+     do band=1,dtset%nband(ikpt + (spin-1) * dtset%nkpt)
+       if (.not. proc_distrb_cycle(mpi_enreg%proc_distrb, ikpt, band, band, spin, mpi_enreg%me_kpt)) cnt = cnt + 1
+     end do
+   end do
+ end do
+
  my_nspinor=max(1,dtset%nspinor/mpi_enreg%nproc_spinor)
  mcg=dtset%mpw*my_nspinor*dtset%mband*dtset%mkmem*dtset%nsppol
+ if (cnt == 0) then
+   mcg = 0
+   write(message,"(2(a,i0))")"rank: ",mpi_enreg%me, "does not have wavefunctions to treat. Setting mcg to: ",mcg
+   MSG_WARNING(message)
+ end if
 
- if (dtset%usewvl == 0 .and. dtset%mpw > 0)then
+ if (dtset%usewvl == 0 .and. dtset%mpw > 0 .and. cnt /= 0)then
    if (my_nspinor*dtset%mband*dtset%mkmem*dtset%nsppol > floor(real(HUGE(0))/real(dtset%mpw) )) then
-     write (message,'(2a)') 'Error: overflow of mcg integer for size of the full wf.',&
-&     ' Recompile with large int or reduce system size'
-     MSG_BUG(message)
+     write (message,'(10a, 5(a,i0), 2a)')&
+&     "Default integer is not wide enough to store the size of the wavefunction array (mcg).",ch10,&
+&     "This usually happens when paral_kgb == 0 and there are not enough procs to distribute kpts and spins",ch10,&
+&     "Action: if paral_kgb == 0, use nprocs = nkpt * nsppol to reduce the memory per node.",ch10,&
+&     "If this does not solve the problem, use paral_kgb 1 with nprocs > nkpt * nsppol and use npfft/npband/npspinor",ch10,&
+&     "to decrease the memory requirements. Consider also OpenMP threads.",ch10,&
+&     "my_nspinor: ",my_nspinor, "mpw: ",dtset%mpw, "mband: ",dtset%mband, "mkmem: ",dtset%mkmem, "nsppol: ",dtset%nsppol,ch10,&
+&     'Note: Compiling with large int (int64) requires a full software stack (MPI/FFTW/BLAS/LAPACK...) compiled in int64 mode'
+     MSG_ERROR(message)
    end if
  end if
 
@@ -938,9 +963,17 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 
        ! Read density
        rdwrpaw=psps%usepaw; if(dtfil%ireadwf/=0) rdwrpaw=0
-       call read_rhor(dtfil%fildensin, cplex1, dtset%nspden, nfftf, ngfftf, rdwrpaw, &
-       mpi_enreg, rhor, hdr_den, pawrhoij, comm, check_hdr=hdr)
-       results_gs%etotal = hdr_den%etot; call hdr_free(hdr_den)
+       if (dtset%usewvl==0) then
+         call read_rhor(dtfil%fildensin, cplex1, dtset%nspden, nfftf, ngfftf, rdwrpaw, &
+         mpi_enreg, rhor, hdr_den, pawrhoij, comm, check_hdr=hdr)
+         results_gs%etotal = hdr_den%etot; call hdr_free(hdr_den)
+       else
+         fform=52 ; accessfil=0
+         if (dtset%iomode == IO_MODE_MPI ) accessfil=4
+         if (dtset%iomode == IO_MODE_ETSF) accessfil=3
+         call ioarr(accessfil,rhor,dtset,results_gs%etotal,fform,dtfil%fildensin,hdr,&
+&         mpi_enreg,ngfftf,cplex1,nfftf,pawrhoij,1,rdwrpaw,wvl%den)
+       end if
 
        if (rdwrpaw/=0) then
          call hdr_update(hdr,bantot,etot,fermie,residm,&
@@ -1178,7 +1211,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 !    ========================================
 !    New structure for geometry optimization
 !    ========================================
-   else if (dtset%ionmov>50.or.dtset%ionmov<=23) then
+   else if (dtset%ionmov>50.or.dtset%ionmov<=25) then
 
      ! TODO: return conv_retcode
      call mover(scfcv_args,ab_xfh,acell,amass,dtfil,&
@@ -1198,7 +1231,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    else ! Not an allowed option
      write(message, '(a,i0,2a)' )&
 &     'Disallowed value for ionmov=',dtset%ionmov,ch10,&
-&     'Allowed values are: 1,2,3,4,5,6,7,8,9,10,11,12,13,14,20,21 and 30'
+&     'Allowed values are: 1,2,3,4,5,6,7,8,9,10,11,12,13,14,20,21,22,23,24 and 30'
      MSG_BUG(message)
    end if
 
@@ -1445,7 +1478,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  end if
 
  if (dtset%nstep>0 .and. dtset%prtstm==0 .and. dtset%positron/=1) then
-   call clnup2(psps%n1xccc,results_gs%fred,results_gs%gresid,&
+   call clnup2(psps%n1xccc,results_gs%fred,results_gs%grchempottn,results_gs%gresid,&
 &   results_gs%grewtn,results_gs%grvdw,results_gs%grxc,dtset%iscf,dtset%natom,&
 &   results_gs%ngrvdw,dtset%optforces,dtset%optstress,dtset%prtvol,start,&
 &   results_gs%strten,results_gs%synlgr,xred)

@@ -7,7 +7,7 @@
 !!  This module provides low-level tools to operate on the dynamical matrix
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2016 ABINIT group (XG, JCC, MJV, NH, RC, MVeithen, MM, MG)
+!!  Copyright (C) 2014-2017 ABINIT group (XG, JCC, MJV, NH, RC, MVeithen, MM, MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .

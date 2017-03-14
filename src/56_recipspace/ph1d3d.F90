@@ -9,7 +9,7 @@
 !! and the atom positions, for all planewaves which fit in the fft box.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (XG,DR)
+!! Copyright (C) 1998-2017 ABINIT group (XG,DR)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -94,6 +94,7 @@ subroutine ph1d3d(iatom,jatom,kg_k,matblk,natom,npw_k,n1,n2,n3,phkxred,ph1d,ph3d
 
 !  iatblk runs from 1 to matblk
    iatblk=ia-iatom+1
+!write(87,*) iatblk
    shift1=1+n1+(ia-1)*(2*n1+1)
    shift2=1+n2+(ia-1)*(2*n2+1)+natom*(2*n1+1)
    shift3=1+n3+(ia-1)*(2*n3+1)+natom*(2*n1+1+2*n2+1)
@@ -120,12 +121,15 @@ subroutine ph1d3d(iatom,jatom,kg_k,matblk,natom,npw_k,n1,n2,n3,phkxred,ph1d,ph3d
      ph3i=ph1d(2,kg_k(3,ig)+shift3)
      ph12r=ph1r*ph2r-ph1i*ph2i
      ph12i=ph1r*ph2i+ph1i*ph2r
+!if(ig==487) then
+!write(87,*)iatblk,ph3d(1,ig,iatblk),ph12r,ph3r,ph12i,ph3i
+!endif
      ph3d(1,ig,iatblk)=ph12r*ph3r-ph12i*ph3i
      ph3d(2,ig,iatblk)=ph12r*ph3i+ph12i*ph3r
    end do
 !$OMP END PARALLEL DO
  end do
-
+!write(87,*)ph3d(1,487,8)
  ABI_DEALLOCATE(ph1kxred)
 
 end subroutine ph1d3d

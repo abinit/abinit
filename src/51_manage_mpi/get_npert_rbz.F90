@@ -7,7 +7,7 @@
 !! Get the number of effective pertubation done in looper3, nkpt_rbz, nband_rbz
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (FJ)
+!! Copyright (C) 1998-2017 ABINIT group (FJ)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

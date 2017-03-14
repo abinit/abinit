@@ -9,7 +9,7 @@
 !! but might also simply compute eigenvectors and eigenvalues at this k point
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (DCA, XG, GMR, MT)
+!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -740,7 +740,6 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
            call nonlop(choice,cpopt,cwaveprj,enlout,gs_hamk,idir,(/lambda_k/),mpi_enreg,1,nnlout,&
 &           paw_opt,signs,nonlop_dum,tim_nonlop,cwavef,cwavef)
          end if
-
          if(gs_hamk%usepaw==1) then
            call timab(554,2,tsec)
          end if

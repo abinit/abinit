@@ -7,7 +7,7 @@
 !! Compute VHartree(tild[n_Z+n_core]) from input ncore
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (GJ, FJ)
+!! Copyright (C) 1998-2017 ABINIT group (GJ, FJ)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

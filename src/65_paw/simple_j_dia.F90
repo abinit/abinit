@@ -7,7 +7,7 @@
 !! simple test current for H atoms
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2016 ABINIT group (JJ,MT)
+!! Copyright (C) 2005-2017 ABINIT group (JJ,MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~ABINIT/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

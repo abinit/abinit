@@ -1,6 +1,6 @@
 # -*- Python -*-
 #
-# Copyright (C) 2005-2016 ABINIT Group (Yann Pouillon)
+# Copyright (C) 2005-2017 ABINIT Group (Yann Pouillon)
 #
 # This file is part of the ABINIT software package. For license information,
 # please see the COPYING file in the top-level directory of the ABINIT source
@@ -111,6 +111,7 @@ sources = [
  "setup_positron.F90",
  "setup1.F90",
  "setvtr.F90",
+ "spatialchempot.F90",
  "spin_current.F90",
  "stress.F90",
  "strhar.F90",

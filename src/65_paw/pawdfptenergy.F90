@@ -26,7 +26,7 @@
 !!      -Int{ VHxc[tild_n1^(j1)+hat_n1^(j1);tild_n_c^(j1)].(tild_n1+hat_n1)[r,EFermi] }
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (MT)
+!! Copyright (C) 1998-2017 ABINIT group (MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

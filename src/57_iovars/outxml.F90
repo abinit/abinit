@@ -11,7 +11,7 @@
 !! only by one thread.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (DCA, XG, GMR)
+!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -89,7 +89,7 @@ end subroutine outxml_open
 !! only by one thread.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (DCA, XG, GMR)
+!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -162,7 +162,7 @@ end subroutine outxml_finalise
 !! only by one thread.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (DCA, XG, GMR)
+!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -257,6 +257,8 @@ subroutine out_resultsgs_XML(dtset, level, results_gs, usepaw)
  else
    write(ab_xml_out, "(A,A,A)", advance = "NO") ' ion-ion="', trim(value) ,'"'
  end if
+ write(value, "(es20.8)") results_gs%energies%e_chempot
+ write(ab_xml_out, "(A,A,A)", advance = "NO") ' chempot="', trim(value) ,'"'
  write(value, "(es20.8)") results_gs%energies%e_hartree
  write(ab_xml_out, "(A,A,A)", advance = "NO") ' hartree="', trim(value) ,'"'
  write(value, "(es20.8)") results_gs%energies%e_corepsp
@@ -296,7 +298,7 @@ end subroutine out_resultsgs_XML
 !! (see extras/post_processing/abinitRun.dtd)
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (DCA, XG, GMR)
+!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
