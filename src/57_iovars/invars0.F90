@@ -212,7 +212,7 @@ subroutine invars0(dtsets,istatr,istatshft,lenstr,&
  dtsets(:)%maxnsym=384
  dtsets(:)%useria=0
  dtsets(:)%userib=0
- dtsets(:)%useric=666999
+ dtsets(:)%useric=0
  dtsets(:)%userid=0
  dtsets(:)%userie=0
  dtsets(:)%userra=zero

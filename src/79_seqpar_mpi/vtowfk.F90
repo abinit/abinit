@@ -210,8 +210,8 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 
  nkpt_max=50; if(xmpi_paral==1)nkpt_max=-1
 
- wfoptalg=dtset%wfoptalg; wfopta10=mod(wfoptalg,10)
- newlobpcg = (wfoptalg == 14 .and. dtset%useric == 666999 .and. dtset%use_gpu_cuda == 0)
+ wfoptalg=mod(dtset%wfoptalg,100); wfopta10=mod(wfoptalg,10)
+ newlobpcg = (dtset%wfoptalg == 114 .and. dtset%use_gpu_cuda == 0)
  istwf_k=gs_hamk%istwf_k
  quit=0
 
