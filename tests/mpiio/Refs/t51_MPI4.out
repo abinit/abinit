@@ -333,7 +333,7 @@ P          mk1mem3         32
            tolwfr2     0.00000000E+00
            tolwfr3     0.00000000E+00
             typat      1  1
-         wfoptalg1         14
+         wfoptalg1        114
          wfoptalg2          0
          wfoptalg3          0
               wtk1       0.09375    0.09375    0.09375    0.18750    0.09375    0.09375
@@ -1254,7 +1254,7 @@ P          mk1mem3         32
            tolwfr2     0.00000000E+00
            tolwfr3     0.00000000E+00
             typat      1  1
-         wfoptalg1         14
+         wfoptalg1        114
          wfoptalg2          0
          wfoptalg3          0
               wtk1       0.09375    0.09375    0.09375    0.18750    0.09375    0.09375

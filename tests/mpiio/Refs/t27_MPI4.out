@@ -295,10 +295,10 @@ P           mkmem5          3
            tolwfr      1.00000000E-20
            tsmear      1.00000000E-03 Hartree
             typat      1  1
-         wfoptalg1         14
-         wfoptalg2         14
-         wfoptalg3         14
-         wfoptalg4         14
+         wfoptalg1        114
+         wfoptalg2        114
+         wfoptalg3        114
+         wfoptalg4        114
          wfoptalg5          0
               wtk        0.09375    0.09375    0.09375    0.18750    0.09375    0.09375
                          0.09375    0.18750    0.03125    0.03125
@@ -1136,10 +1136,10 @@ P           mkmem5          3
            tolwfr      1.00000000E-20
            tsmear      1.00000000E-03 Hartree
             typat      1  1
-         wfoptalg1         14
-         wfoptalg2         14
-         wfoptalg3         14
-         wfoptalg4         14
+         wfoptalg1        114
+         wfoptalg2        114
+         wfoptalg3        114
+         wfoptalg4        114
          wfoptalg5          0
               wtk        0.09375    0.09375    0.09375    0.18750    0.09375    0.09375
                          0.09375    0.18750    0.03125    0.03125
