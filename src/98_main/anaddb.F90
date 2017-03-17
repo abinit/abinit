@@ -374,7 +374,7 @@ program anaddb
 
  ! Compute non-linear optical susceptibilities and
  ! First-order change in the linear dielectric susceptibility induced by an atomic displacement
- if (inp%nlflag > 0) then
+ if (inp%nlflag > 0 .AND. inp%nlflag < 3) then
    ABI_ALLOCATE(dchide,(3,3,3))
    ABI_ALLOCATE(dchidt,(natom,3,3,3))
 
@@ -721,7 +721,7 @@ program anaddb
  ABI_DEALLOCATE(fact_oscstr)
  if (inp%nlflag ==3) then
    ABI_DEALLOCATE(dchide)
- else if (inp%nlflag > 0 .AND. inp%nlflag < 3)  then
+ else if (inp%nlflag > 0 .AND. inp%nlflag < 3) then
    ABI_DEALLOCATE(dchide)
    ABI_DEALLOCATE(rsus)
    ABI_DEALLOCATE(dchidt)
