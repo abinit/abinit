@@ -161,26 +161,11 @@ subroutine lobpcgwf2(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
    ! get the array data into the xgBlock
    space = SPACE_CR
    l_icplx = 2
-   ! Scale cg
-   cg = cg * sqrt2
-   if(l_mpi_enreg%me_g0 == 1) cg(:, 1:npw*nspinor*nband:npw) = cg(:, 1:npw*nspinor*nband:npw) * inv_sqrt2
 
  else ! complex
    space = SPACE_C
    l_icplx = 1
  end if
-
- !For preconditionning
- ABI_MALLOC(l_pcon,(1:l_icplx*npw))
- !$omp parallel do schedule(static), shared(l_pcon,kinpw)
- do ipw=1-1,l_icplx*npw-1
-   if(kinpw(ipw/l_icplx+1)>huge(0.0_dp)*1.d-11) then
-     l_pcon(ipw+1)=0.d0
-   else
-     l_pcon(ipw+1) = (27+kinpw(ipw/l_icplx+1)*(18+kinpw(ipw/l_icplx+1)*(12+8*kinpw(ipw/l_icplx+1)))) &
-&    / (27+kinpw(ipw/l_icplx+1)*(18+kinpw(ipw/l_icplx+1)*(12+8*kinpw(ipw/l_icplx+1))) + 16*kinpw(ipw/l_icplx+1)**4)
-   end if
- end do
 
  ! Memory info
  if ( prtvol >= 3 ) then
@@ -197,13 +182,28 @@ subroutine lobpcgwf2(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
    (lobpcgMem(2))/1e9, "GB"
  end if
 
-
-
- ABI_MALLOC(l_gvnlc,(2,l_npw*l_nspinor*blockdim))
+ !For preconditionning
+ ABI_MALLOC(l_pcon,(1:l_icplx*npw))
+ !$omp parallel do schedule(static), shared(l_pcon,kinpw)
+ do ipw=1-1,l_icplx*npw-1
+   if(kinpw(ipw/l_icplx+1)>huge(0.0_dp)*1.d-11) then
+     l_pcon(ipw+1)=0.d0
+   else
+     l_pcon(ipw+1) = (27+kinpw(ipw/l_icplx+1)*(18+kinpw(ipw/l_icplx+1)*(12+8*kinpw(ipw/l_icplx+1)))) &
+&    / (27+kinpw(ipw/l_icplx+1)*(18+kinpw(ipw/l_icplx+1)*(12+8*kinpw(ipw/l_icplx+1))) + 16*kinpw(ipw/l_icplx+1)**4)
+   end if
+ end do
 
  ! Local variables for lobpcg
  !call xg_init(xgx0,space,icplx*npw*nspinor,nband)
  call xgBlock_map(xgx0,cg,space,l_icplx*l_npw*l_nspinor,nband,l_mpi_enreg%comm_bandspinorfft)
+ if ( l_istwf == 2 ) then ! Real only
+   ! Scale cg
+   call xgBlock_scale(xgx0,sqrt2,1)
+   ! This is possible since the memory in cg and xgx0 is the same
+   ! Don't know yet how to deal with this with xgBlock
+   if(l_mpi_enreg%me_g0 == 1) cg(:, 1:npw*nspinor*nband:npw) = cg(:, 1:npw*nspinor*nband:npw) * inv_sqrt2
+ end if
 
  !call xg_init(xgeigen,SPACE_R,nband,1,l_mpi_enreg%comm_bandspinorfft)
  ! Trick the with C to change rank of arrays (:) to (:,:)
@@ -216,6 +216,8 @@ subroutine lobpcgwf2(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
  cptr = c_loc(resid)
  call c_f_pointer(cptr,resid_ptr,(/ nband,1 /))
  call xgBlock_map(xgresidu,resid_ptr,SPACE_R,nband,1)
+
+ ABI_MALLOC(l_gvnlc,(2,l_npw*l_nspinor*blockdim))
 
  call lobpcg_init(lobpcg,nband, l_icplx*l_npw*l_nspinor, blockdim,dtset%tolwfr,nline,space, l_mpi_enreg%comm_bandspinorfft)
 
@@ -231,7 +233,7 @@ subroutine lobpcgwf2(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
 
  ! Scale back
  if(l_istwf == 2) then
-   cg = cg * inv_sqrt2
+   call xgBlock_scale(xgx0,inv_sqrt2,1)
    if(l_mpi_enreg%me_g0 == 1) cg(:, 1:npw*nspinor*nband:npw) = cg(:, 1:npw*nspinor*nband:npw) * sqrt2
  end if
 

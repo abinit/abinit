@@ -82,6 +82,11 @@ module m_xg
     module procedure xgBlock_trsmC
   end interface
 
+  interface xgBlock_scale
+    module procedure xgBlock_scaleR
+    module procedure xgBlock_scaleC
+  end interface
+
   interface checkResize
     module procedure checkResizeI
     module procedure checkResizeR
@@ -94,8 +99,6 @@ module m_xg
   private :: getClocC
   private :: checkResize
 
-  public :: xgBlock_gemm
-  public :: xgBlock_trsm
   public :: xg_init
   public :: xg_set
   public :: xg_get
@@ -109,7 +112,10 @@ module m_xg
   public :: xgBlock_get
   public :: xgBlock_copy
   public :: xgBlock_pack
+  public :: xgBlock_getSize
+
   public :: xgBlock_potrf
+  public :: xgBlock_trsm
 
   public :: xgBlock_heev
   public :: xgBlock_heevd
@@ -125,16 +131,19 @@ module m_xg
   public :: xgBlock_hpgvx
   public :: xgBlock_hpgvd
 
+  public :: xgBlock_gemm
   public :: xgBlock_add
   public :: xgBlock_cshift
-  public :: xgBlock_getSize
   public :: xgBlock_colwiseNorm2
   public :: xgBlock_colwiseCaxmy
   public :: xgBlock_colwiseMul
-  public :: xgBlock_reshape
+  public :: xgBlock_scale
+
   public :: xgBlock_zero
   public :: xgBlock_one
   public :: xgBlock_diagonal
+
+  public :: xgBlock_reshape
   public :: xgBlock_print
   public :: xg_finalize
 
@@ -1983,6 +1992,79 @@ module m_xg
       min_elt = minloc(dot%vecR(1:xgBlock%cols,1),dim=1)
     end if
   end subroutine xgBlock_colwiseNorm2
+
+  subroutine xgBlock_scaleR(xgBlock, val, inc)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'xgBlock_scaleR'
+!End of the abilint section
+
+    type(xgBlock_t) , intent(inout) :: xgBlock
+    double precision, intent(in   ) :: val
+    integer         , intent(in   ) :: inc
+    integer :: i
+
+    if ( xgBlock%ldim .eq. xgBlock%rows ) then
+      select case(xgBlock%space)
+      case (SPACE_R,SPACE_CR)
+        call dscal(xgBlock%ldim*xgBlock%cols/inc,val,xgBlock%vecR,inc)
+      case (SPACE_C)
+        call zdscal(xgBlock%ldim*xgBlock%cols/inc,val,xgBlock%vecC,inc)
+      end select
+    else
+      select case(xgBlock%space)
+      case (SPACE_R,SPACE_CR)
+        !$omp parallel do
+        do i=1,xgBlock%cols
+          call dscal(xgBlock%rows/inc,val,xgBlock%vecR(:,i),inc)
+        end do
+      case (SPACE_C)
+        !$omp parallel do
+        do i=1,xgBlock%cols
+          call zdscal(xgBlock%rows/inc,val,xgBlock%vecC(:,i),inc)
+        end do
+      end select
+    end if
+
+  end subroutine xgBlock_scaleR
+
+  subroutine xgBlock_scaleC(xgBlock, val, inc)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'xgBlock_scaleC'
+!End of the abilint section
+
+    type(xgBlock_t), intent(inout) :: xgBlock
+    complex(kind=8), intent(in   ) :: val
+    integer         , intent(in   ) :: inc
+    integer :: i
+
+    if ( xgBlock%ldim .eq. xgBlock%rows ) then
+      select case(xgBlock%space)
+      case (SPACE_R,SPACE_CR)
+        MSG_ERROR("Scaling real vector with a complex not possible")
+      case (SPACE_C)
+        call zscal(xgBlock%ldim*xgBlock%cols/inc,val,xgBlock%vecC,inc)
+      end select
+    else
+      select case(xgBlock%space)
+      case (SPACE_R,SPACE_CR)
+        MSG_ERROR("Scaling real vector with a complex not possible")
+      case (SPACE_C)
+        !$omp parallel do
+        do i=1,xgBlock%cols
+          call zscal(xgBlock%rows/inc,val,xgBlock%vecC(:,i),inc)
+        end do
+      end select
+    end if
+
+  end subroutine xgBlock_scaleC
 
   subroutine xgBlock_getSize(xgBlock, rows, cols)
 
