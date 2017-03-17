@@ -3883,7 +3883,7 @@ subroutine dtchi(blkval,dchide,dchidt,mpert,natom,ramansr,nlflag)
 
 !Arguments -------------------------------
 !scalars
- integer,intent(in) :: mpert,natom,ramansr
+ integer,intent(in) :: mpert,natom,ramansr,nlflag
 !arrays
  real(dp),intent(in) :: blkval(2,3*mpert*3*mpert*3*mpert)
  real(dp),intent(out) :: dchide(3,3,3),dchidt(natom,3,3,3)
