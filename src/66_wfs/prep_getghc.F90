@@ -286,11 +286,14 @@ subroutine prep_getghc(cwavef,gs_hamk,gvnlc,gwavef,swavef,lambda,blocksize,&
 !  -------------------------------------------------------
 !  Sorting of the waves functions below bandpp
 !  -------------------------------------------------------
-!$OMP parallel do
+!$OMP parallel
+!$OMP do 
      do iomp=1,size(index_wavef_band)
        cwavef_alltoall2(:,iomp) = cwavef_alltoall1(:,index_wavef_band(iomp))
      end do
+!$OMP end do nowait
      call timab(632,2,tsec)
+!$OMP end parallel
    end if
 
 !  ----------------------
@@ -307,15 +310,17 @@ subroutine prep_getghc(cwavef,gs_hamk,gvnlc,gwavef,swavef,lambda,blocksize,&
    if(do_transpose) then
      call timab(634,3,tsec)
 !    cwavef_alltoall(:,index_wavef_band) = cwavef_alltoall(:,:)   ! NOT NEEDED
-!$OMP parallel do
+!$OMP parallel 
+!$OMP do 
      do iomp=1,size(index_wavef_band)
        gwavef_alltoall1(:,index_wavef_band(iomp)) = gwavef_alltoall2(:,iomp)
        if (sij_opt==1) swavef_alltoall1(:,index_wavef_band(iomp)) = swavef_alltoall2(:,iomp)
        gvnlc_alltoall1(:,index_wavef_band(iomp))  = gvnlc_alltoall2(:,iomp)
      end do
-
-     ABI_DEALLOCATE(index_wavef_band)
+!$OMP end do nowait
      call timab(634,2,tsec)
+!$OMP end parallel
+     ABI_DEALLOCATE(index_wavef_band)
    end if
 
 
@@ -334,7 +339,7 @@ subroutine prep_getghc(cwavef,gs_hamk,gvnlc,gwavef,swavef,lambda,blocksize,&
 !  -------------------------------------------------------
 !  Sorting the wave functions below bandpp
 !  -------------------------------------------------------
-!$OMP parallel do
+!$OMP parallel do 
      do iomp=1,size(index_wavef_band)
        cwavef_alltoall2(:,iomp) = cwavef_alltoall1(:,index_wavef_band(iomp))
      end do
@@ -442,14 +447,17 @@ subroutine prep_getghc(cwavef,gs_hamk,gvnlc,gwavef,swavef,lambda,blocksize,&
 !  -------------------------------------------------------
    if(do_transpose) then
 !    cwavef_alltoall(:,index_wavef_band) = cwavef_alltoall(:,:)   ! NOT NEEDED
-     if (sij_opt==1) swavef_alltoall1(:,index_wavef_band) = swavef_alltoall2(:,:)
-!$OMP parallel do
+!$OMP parallel 
+!$OMP do 
      do iomp = 1, size(index_wavef_band)
+       if (sij_opt==1) swavef_alltoall1(:,index_wavef_band(iomp)) = swavef_alltoall2(:,iomp)
        gwavef_alltoall1(:,index_wavef_band(iomp)) = gwavef_alltoall2(:,iomp)
        gvnlc_alltoall1(:,index_wavef_band(iomp))  = gvnlc_alltoall2(:,iomp)
      end do
-     ABI_DEALLOCATE(index_wavef_band)
+!$OMP end do nowait
      call timab(634,2,tsec)
+!$OMP end parallel
+     ABI_DEALLOCATE(index_wavef_band)
    end if
 
  end if
