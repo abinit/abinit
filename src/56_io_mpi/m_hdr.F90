@@ -171,7 +171,7 @@ MODULE m_hdr
  !    Moreover the files produced by the DFPT code do not have a well-defined extension and, as a consequence,
  !    they require a special treatment. In python I would use regexp but Fortran is not python!
 
- type(abifile_t),private,parameter :: all_abifiles(41) = [ &
+ type(abifile_t),private,parameter :: all_abifiles(44) = [ &
 
     ! Files with wavefunctions:
     abifile_t(varname="coefficients_of_wavefunctions", fform=2, ext="WFK", class="wf_planewave"), &
@@ -217,6 +217,10 @@ MODULE m_hdr
     abifile_t(varname="first_order_potential", fform=109, ext="POT(\d+)", class="potential"), &
     ! fform 111 contains an extra record with rhog1_q(G=0) after the DFPT potential(r).
     abifile_t(varname="first_order_potential", fform=111, ext="POT(\d+)", class="potential"), &
+
+    abifile_t(varname="first_order_vhartree", fform=112, ext="VHA(\d+)", class="potential"), &
+    abifile_t(varname="first_order_vpsp", fform=113, ext="VPSP(\d+)", class="potential"), &
+    abifile_t(varname="first_order_vxc", fform=114, ext="VXC(\d+)", class="potential"), &
 
    ! Data used in conducti
     abifile_t(varname="pawnabla", fform=610, ext="OPT1", class="data"), &
@@ -429,6 +433,30 @@ character(len=nctk_slen) function varname_from_fname(filename) result(varname)
    read(ext(4:), *, iostat=ierr) pertcase
    if (ierr == 0) then
       varname = "first_order_potential"; return
+   end if
+ end if
+
+ ! Handle VXC[pertcase]
+ if (startswith(ext, "VXC")) then
+   read(ext(4:), *, iostat=ierr) pertcase
+   if (ierr == 0) then
+      varname = "first_order_vxc"; return
+   end if
+ end if
+
+ ! Handle VHA[pertcase]
+ if (startswith(ext, "VHA")) then
+   read(ext(4:), *, iostat=ierr) pertcase
+   if (ierr == 0) then
+      varname = "first_order_vhartree"; return
+   end if
+ end if
+
+ ! Handle VPSP[pertcase]
+ if (startswith(ext, "VPSP")) then
+   read(ext(4:), *, iostat=ierr) pertcase
+   if (ierr == 0) then
+      varname = "first_order_vpsp"; return
    end if
  end if
 
