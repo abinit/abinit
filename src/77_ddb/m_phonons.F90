@@ -857,7 +857,7 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,dos_qsh
    if (nsmallq > tol10) then
      speedofsound = speedofsound/nsmallq
 
-     write (msg,'(a,E20.10,a,F16.4,2a)') ' Average speed of sound partial sums: ', third*sum(speedofsound), ' (at units) = ', &
+     write (msg,'(a,E20.10,a,F16.4,2a)') '- Average speed of sound partial sums: ', third*sum(speedofsound), ' (at units) = ', &
 &        third*sum(speedofsound) * Bohr_Ang * 1.d-10 / Time_Sec, ' (m/s)',ch10
      call wrtout (ab_out,msg,"COLL")
      call wrtout (std_out,msg,"COLL")
