@@ -1188,7 +1188,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
      ABI_ALLOCATE(vhartr1_tmp, (cplex*nfftf, dtset%nspden))
      vhartr1_tmp = zero
      vhartr1_tmp(:,1) = vhartr1(:) 
-     call appdig(pertcase,dtfil%fnameabo_app_vha,fi1o)
+     call appdig(pertcase,dtfil%fnameabo_vha,fi1o)
      ! TODO: should we write pawrhoij1 or pawrhoij. Note that ioarr writes hdr%pawrhoij
      call fftdatar_write_from_hdr("first_order_vhartree",fi1o,dtset%iomode,hdr,&
        ngfftf,cplex,nfftf,dtset%nspden,vhartr1_tmp,mpi_enreg)
@@ -1199,7 +1199,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 ! vpsp1 needs to be copied to a temp array - intent(inout) in fftdatar_write_from_hdr though I do not know why
 !   if (dtset%prtvpsp > 0) then
 !     rdwrpaw=0
-!     call appdig(pertcase,dtfil%fnameabo_app_vpsp,fi1o)
+!     call appdig(pertcase,dtfil%fnameabo_vpsp,fi1o)
 !     ! TODO: should we write pawrhoij1 or pawrhoij. Note that ioarr writes hdr%pawrhoij
 !     call fftdatar_write_from_hdr("first_order_vpsp",fi1o,dtset%iomode,hdr,&
 !       ngfftf,cplex,nfftf,1,vpsp1,mpi_enreg)
@@ -1207,7 +1207,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
    
    if (dtset%prtvxc > 0) then
      rdwrpaw=0
-     call appdig(pertcase,dtfil%fnameabo_app_vxc,fi1o)
+     call appdig(pertcase,dtfil%fnameabo_vxc,fi1o)
      ! TODO: should we write pawrhoij1 or pawrhoij. Note that ioarr writes hdr%pawrhoij
      call fftdatar_write_from_hdr("first_order_vxc",fi1o,dtset%iomode,hdr,&
        ngfftf,cplex,nfftf,dtset%nspden,vxc1,mpi_enreg)
