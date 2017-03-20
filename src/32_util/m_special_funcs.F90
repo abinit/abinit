@@ -1303,7 +1303,7 @@ function fermi_dirac(energy, mu, temperature)
    if(arg < -600._dp)then ! far below Ef
      fermi_dirac = one
    else if (arg < 600._dp)then ! around Ef
-     fermi_dirac = one / (exp(arg/temperature)  + one)
+     fermi_dirac = one / (exp(arg)  + one)
    end if
  else  ! T is too small - just step function
    if (mu-energy > tol12) fermi_dirac = one
