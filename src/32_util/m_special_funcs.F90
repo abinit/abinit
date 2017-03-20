@@ -1298,12 +1298,15 @@ function fermi_dirac(energy, mu, temperature)
 ! *************************************************************************
 
  fermi_dirac = zero
- arg = (energy-mu)/temperature
- if(abs(arg) < 600._dp)then
-   fermi_dirac = one / (exp(arg/temperature)  + one)
- else 
-   write(message,'(a)') 'No Fermi Dirac for energies too far from Efermi'
-   MSG_WARNING(message)
+ if (temperature > tol12) then
+   arg = (energy-mu)/temperature
+   if(arg < -600._dp)then ! far below Ef
+     fermi_dirac = one
+   else if (arg < 600._dp)then ! around Ef
+     fermi_dirac = one / (exp(arg/temperature)  + one)
+   end if
+ else  ! T is too small - just step function
+   if (mu-energy > tol12) fermi_dirac = one
  end if
 
 end function fermi_dirac
@@ -1351,11 +1354,16 @@ function bose_einstein(energy, temperature)
 ! *************************************************************************
 
  bose_einstein = zero
- arg = energy/temperature
- if(arg > tol12 .and. arg < 600._dp)then
-   bose_einstein = one / (exp(arg)  - one)
+ if (temperature > tol12) then
+   arg = energy/temperature
+   if(arg > tol12 .and. arg < 600._dp)then
+     bose_einstein = one / (exp(arg)  - one)
+   else if (arg < tol12) then
+     write(message,'(a)') 'No Bose Einstein for negative energies'
+     MSG_WARNING(message)
+   end if
  else if (arg < tol12) then
-   write(message,'(a)') 'No Bose Einstein for negative energies'
+   write(message,'(a)') 'No Bose Einstein for negative or 0 T'
    MSG_WARNING(message)
  end if
  
