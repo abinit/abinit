@@ -186,6 +186,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  use interfaces_52_manage_cuda
 #endif
  use interfaces_53_ffts
+ use interfaces_54_abiutil
  use interfaces_56_io_mpi
  use interfaces_56_recipspace
  use interfaces_57_iovars
@@ -1312,6 +1313,8 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 &   dtset%mband,mcg,dtset%mkmem,mpi_enreg,dtset%mpw,dtset%natom,&
 &   dtset%nband,dtset%nkpt,npwarr,dtset%nsppol,&
 &   occ,resid,response,dtfil%unwff2,wvl%wfs,wvl%descr)
+
+   call printmagvtk(mpi_enreg,dtset%nspden,nfftf,ngfftf,rhor,rprimd,'DEN.vtk')
  end if
 
  if (dtset%prtwf==2) then

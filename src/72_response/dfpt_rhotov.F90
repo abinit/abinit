@@ -137,10 +137,10 @@
  logical :: vhartr1_allocated,vxc1_allocated
  real(dp) :: doti,elpsp10
 !arrays
- integer,intent(in) :: ngfft(18)
- real(dp) :: tsec(20)
+ integer,intent(in)   :: ngfft(18)
+ real(dp)             :: tsec(20)
  real(dp),allocatable :: rhor1_nohat(:,:),vhartr01(:),vxc1val(:,:)
- real(dp),pointer :: rhor1_(:,:),vhartr1_(:),vxc1_(:,:)
+ real(dp),pointer     :: rhor1_(:,:),vhartr1_(:),vxc1_(:,:),v1zeeman(:,:)
 
 ! *********************************************************************
 
@@ -175,6 +175,30 @@
  else
    rhor1_ => rhor1
  end if
+
+ if(ipert==natom+5)then
+
+  ABI_ALLOCATE(v1zeeman,(cplex*nfft,nspden))
+  write(std_out,*) "SPr, Zeeman field perturbation along",idir," axis"
+
+  if(idir==3)then       ! Zeeman field along the 3rd axis    
+   v1zeeman(:,1)=-0.5d0
+   v1zeeman(:,2)=+0.5d0
+   v1zeeman(:,3)= 0.0d0
+   v1zeeman(:,4)= 0.0d0
+  else if(idir==2)then  ! Zeeman field along the 2nd axis
+   v1zeeman(:,1)= 0.0d0
+   v1zeeman(:,2)= 0.0d0
+   v1zeeman(:,3)= 0.0d0
+   v1zeeman(:,4)=+0.5d0   
+  else                  ! Zeeman field along the 1st axis
+   v1zeeman(:,1)= 0.0d0
+   v1zeeman(:,2)= 0.0d0
+   v1zeeman(:,3)=-0.5d0
+   v1zeeman(:,4)= 0.0d0
+  endif
+
+ endif
 
 !------ Compute 1st-order Hartree potential (and energy) ----------------------
 
@@ -217,6 +241,9 @@
      nkxc_cur=nkxc ! TODO: remove nkxc_cur?
      call dfpt_mkvxc_noncoll(1,ixc,kxc,mpi_enreg,nfft,ngfft,nhat1,usepaw,nhat1gr,nhat1grdim,nkxc,&
 &     nkxc_cur,nspden,n3xccc,optnc,option,optxc,paral_kgb,qphon,rhor,rhor1,rprimd,usexcnhat,vxc1_,xccc3d1)
+      if(ipert==natom+5)then
+        vxc1_(:,:) = vxc1_(:,:) + v1zeeman(:,:)
+      endif
    else
      call dfpt_mkvxc(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,nhat1,usepaw,nhat1gr,nhat1grdim,nkxc,&
 &     nspden,n3xccc,option,paral_kgb,qphon,rhor1,rprimd,usexcnhat,vxc1_,xccc3d1)
@@ -287,7 +314,6 @@
 
 !------ Produce residual vector and square of norm of it -------------
 !(only if requested ; if optres==0)
-
  if (optres==0) then
 !$OMP PARALLEL DO COLLAPSE(2)
    do ispden=1,min(nspden,2)
@@ -336,6 +362,10 @@
  if (.not.vxc1_allocated) then
    ABI_DEALLOCATE(vxc1_)
  end if
+
+ if(ipert==natom+5)then
+   ABI_DEALLOCATE(v1zeeman)
+ endif
 
  call timab(157,2,tsec)
 

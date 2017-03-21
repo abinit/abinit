@@ -250,6 +250,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
  use interfaces_32_util
  use interfaces_41_geometry
  use interfaces_53_ffts
+ use interfaces_54_abiutil
  use interfaces_56_recipspace
  use interfaces_65_paw
  use interfaces_67_common
@@ -351,6 +352,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
  real(dp) :: ucvol,vxcavg
  character(len=500) :: msg
  character(len=fnlen) :: fi1o
+ character(len=fnlen) :: fi1o_vtk
  type(ab7_mixing_object) :: mix
  type(efield_type) :: dtefield
 !arrays
@@ -678,6 +680,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 &     nkxc,nspden,n3xccc,optene,option,dtset%paral_kgb,dtset%qptn,&
 &     rhog,rhog1,rhor,rhor1,rprimd,ucvol,psps%usepaw,usexcnhat,vhartr1,vpsp1,&
 &     nvresid1,res2,vtrial1,vxc1,xccc3d1)
+
 !    For Q=0 and metallic occupation, initialize quantities needed to
 !    compute the first-order Fermi energy
 !    ----------------------------------------------------------------------
@@ -1162,6 +1165,12 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 !Warnings :
 !- core charge is excluded from the charge density;
 !- the potential is the INPUT vtrial.
+
+ if(ipert==dtset%natom+5)then
+  call appdig(pertcase,dtfil%fnameabo_den,fi1o_vtk)
+  call printmagvtk(mpi_enreg,nspden,nfftf,ngfftf,rhor1,rprimd,adjustl(adjustr(fi1o_vtk)//".vtk"))
+ endif
+
  if (iwrite_fftdatar(mpi_enreg)) then
    if (dtset%prtden>0) then
      rdwrpaw=0
