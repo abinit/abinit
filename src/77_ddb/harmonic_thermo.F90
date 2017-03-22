@@ -766,14 +766,14 @@ subroutine harmonic_thermo(Ifc,Crystal,amu,anaddb_dtset,iout,outfilename_radix,c
            do ichan=1,nchan2(iwchan)
 !
 !$wovert= \hbar*w / 2kT$, dimensionless
-             wovert=dosinc*(dble(ichan)-0.5_dp)/Ha_cmm1/(2.*kb_HaK*tmp)
-             expm2x=exp(-2.0_dp*wovert)
+             wovert=dosinc*(dble(ichan)-half)/Ha_cmm1/(two*kb_HaK*tmp)
+             expm2x=exp(-two*wovert)
              do iatom=1,natom
-               factor=Ha_cmm1/(2.*dosinc*(dble(ichan)-0.5))    &
-&               *(1.0_dp+expm2x)/(1.0_dp-expm2x) /amu(Crystal%typat(iatom))/amu_emass
+               factor=Ha_cmm1/(two*dosinc*(dble(ichan)-half))    &
+&               *(one+expm2x)/(one-expm2x) /amu(Crystal%typat(iatom))/amu_emass
 
-               factorv=(0.5*dosinc*(float(ichan)-0.5)/Ha_cmm1)    &
-&               *(1.0_dp+expm2x)/(1.0_dp-expm2x) /amu(Crystal%typat(iatom))/amu_emass
+               factorv=(half*dosinc*(float(ichan)-half)/Ha_cmm1)    &
+&               *(one+expm2x)/(one-expm2x) /amu(Crystal%typat(iatom))/amu_emass
 
                do ij=1,6
                  bbij(ij,iatom,itemper)=bbij(ij,iatom,itemper) + factor*gij(ij,iatom,ichan,iwchan)
