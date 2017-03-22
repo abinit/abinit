@@ -76,7 +76,8 @@ module libxc_functionals
  public :: libxc_functionals_is_hybrid          ! Return TRUE if the XC functional is hybrid (GGA or meta-GGA)
  public :: libxc_functionals_has_kxc            ! Return TRUE if Kxc (3rd der) is available for the XC functional
  public :: libxc_functionals_nspin              ! The number of spin components for the XC functionals
- public :: libxc_functionals_get_hybridcoef     ! Retrieve coefficients for hybrid functionals
+ public :: libxc_functionals_get_hybridparams   ! Retrieve parameter(s) for hybrid functionals
+ public :: libxc_functionals_set_hybridparams   ! Change parameter(s) for a hybrid functionals
  public :: libxc_functionals_gga_from_hybrid    ! Return the id of the XC-GGA used for the hybrid
 
 !Private functions
@@ -213,17 +214,17 @@ module libxc_functionals
  end interface
 !PBE0
  interface
-   subroutine xc_hyb_gga_xc_pbeh_set_params(xc_func, exx_alpha) bind(C)
+   subroutine xc_hyb_gga_xc_pbeh_set_params(xc_func, alpha) bind(C)
      use iso_c_binding, only : C_DOUBLE,C_PTR
-     real(C_DOUBLE),value :: exx_alpha
+     real(C_DOUBLE),value :: alpha
      type(C_PTR) :: xc_func
    end subroutine xc_hyb_gga_xc_pbeh_set_params
  end interface
 !HSE
  interface
-   subroutine xc_hyb_gga_xc_hse_set_params(xc_func, exx_alpha, exx_omega) bind(C)
+   subroutine xc_hyb_gga_xc_hse_set_params(xc_func, alpha, omega) bind(C)
      use iso_c_binding, only : C_DOUBLE,C_PTR
-     real(C_DOUBLE),value :: exx_alpha, exx_omega
+     real(C_DOUBLE),value :: alpha, omega
      type(C_PTR) :: xc_func
    end subroutine xc_hyb_gga_xc_hse_set_params
  end interface
@@ -483,8 +484,7 @@ contains
 !!
 !! SOURCE
 
-! subroutine libxc_functionals_init(ixc,nspden,xc_functionals)
-subroutine libxc_functionals_init(ixc,nspden,xc_functionals,exx_alpha,exx_omega)
+ subroutine libxc_functionals_init(ixc,nspden,xc_functionals)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -500,7 +500,6 @@ subroutine libxc_functionals_init(ixc,nspden,xc_functionals,exx_alpha,exx_omega)
  integer, intent(in) :: nspden
  integer, intent(in) :: ixc
  type(libxc_functional_type),intent(inout),optional,target :: xc_functionals(2)
- real(dp), intent(in), optional :: exx_alpha, exx_omega !WC
 !Local variables-------------------------------
  integer :: ii,nspden_eff
  character(len=500) :: msg
@@ -586,15 +585,6 @@ subroutine libxc_functionals_init(ixc,nspden,xc_functionals,exx_alpha,exx_omega)
    if (xc_func%id==libxc_functionals_getid('XC_LDA_C_XALPHA')) then
      alpha_c=real(zero,kind=C_DOUBLE)
      call xc_lda_c_xalpha_set_params(xc_func%conf,alpha_c);
-   end if
-
-!  Mixing parameter for PBE0 and HSE 
-   if (xc_func%id==libxc_functionals_getid('HYB_GGA_XC_PBEH')) then
-     call xc_hyb_gga_xc_pbeh_set_params(xc_func%conf, exx_alpha)
-   end if
-
-   if (xc_func%id==libxc_functionals_getid('HYB_GGA_XC_HSE06')) then
-     call xc_hyb_gga_xc_hse_set_params(xc_func%conf, exx_alpha, exx_omega)
    end if
 
 !  Get functional kind
@@ -1513,36 +1503,36 @@ end subroutine libxc_functionals_getvxc
 
 !----------------------------------------------------------------------
 
-!!****f* libxc_functionals/libxc_functionals_get_hybridcoef
+!!****f* libxc_functionals/libxc_functionals_get_hybridparams
 !! NAME
-!!  libxc_functionals_get_hybridcoef
+!!  libxc_functionals_get_hybridparams
 !!
 !! FUNCTION
-!!  Returns the mixing coefficients and the range separation for a hybrid functional
+!!  Returns the parameters of an hybrid functional (mixing coefficient(s) and range separation)
 !!
 !! INPUTS
 !! [xc_functionals(2)]=<type(libxc_functional_type)>, optional argument
 !!                     XC functionals to initialize
 !!
 !! OUTPUT
-!!  hyb_mixing   = mixing factor of Fock contribution
-!!  hyb_mixing_sr= mixing factor of short-range Fock contribution
-!!  hyb_range    = Range (for separation)
+!!  [hyb_mixing]  = mixing factor of Fock contribution
+!!  [hyb_mixing_sr]= mixing factor of short-range Fock contribution
+!!  [hyb_range]    = Range (for separation)
 !!
 !! PARENTS
-!!      m_fock
+!!      gstate,m_fock
 !!
 !! CHILDREN
 !!
 !! SOURCE
 
-subroutine libxc_functionals_get_hybridcoef(hyb_mixing,hyb_mixing_sr,hyb_range,xc_functionals)
+subroutine libxc_functionals_get_hybridparams(hyb_mixing,hyb_mixing_sr,hyb_range,xc_functionals)
 
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'libxc_functionals_get_hybridcoef'
+#define ABI_FUNC 'libxc_functionals_get_hybridparams'
 !End of the abilint section
 
  implicit none
@@ -1608,7 +1598,107 @@ subroutine libxc_functionals_get_hybridcoef(hyb_mixing,hyb_mixing_sr,hyb_range,x
 
  end do
 
-end subroutine libxc_functionals_get_hybridcoef
+end subroutine libxc_functionals_get_hybridparams
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* libxc_functionals/libxc_functionals_set_hybridparams
+!! NAME
+!!  libxc_functionals_set_hybridparams
+!!
+!! FUNCTION
+!!  Set the parameters of an hybrid functional (mixing coefficient(s) and range separation)
+!!
+!! INPUTS
+!! [hyb_mixing]       = mixing factor of Fock contribution
+!! [hyb_mixing_sr]    = mixing factor of short-range Fock contribution
+!! [hyb_range]        = Range (for separation)
+!! [xc_functionals(2)]=<type(libxc_functional_type)>, optional argument
+!!                     XC functionals to initialize
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!      calc_vhxc_me
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine libxc_functionals_set_hybridparams(hyb_mixing,hyb_mixing_sr,hyb_range,xc_functionals)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'libxc_functionals_set_hybridparams'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+ real(dp),intent(in),optional :: hyb_mixing,hyb_mixing_sr,hyb_range
+ type(libxc_functional_type),intent(in),optional,target :: xc_functionals(2)
+!Local variables -------------------------------
+ integer :: ii
+ logical :: is_pbe0,is_hse
+ character(len=500) :: msg
+#if defined HAVE_LIBXC && defined HAVE_FC_ISO_C_BINDING
+ real(C_DOUBLE) :: alpha_c,beta_c,omega_c
+#endif
+ type(libxc_functional_type),pointer :: xc_func
+
+! *************************************************************************
+
+ is_pbe0=.false.
+ is_hse =.false.
+
+ do ii = 1, 2
+
+!  Select XC functional
+   if (present(xc_functionals)) then
+     xc_func => xc_functionals(ii)
+   else
+     xc_func => xc_global(ii)
+   end if
+
+!  Doesnt work with all hybrid functionals
+   if (is_pbe0.or.is_hse) then
+     msg='Invalid XC functional: contains 2 hybrid exchange functionals!'
+     MSG_ERROR(msg)
+   end if
+   is_pbe0=(xc_func%id==libxc_functionals_getid('HYB_GGA_XC_PBEH'))
+   is_hse=((xc_func%id==libxc_functionals_getid('HYB_GGA_XC_HSE03')).or.&
+&          (xc_func%id==libxc_functionals_getid('HYB_GGA_XC_HSE06')))
+   if ((.not.is_pbe0).and.(.not.is_hse)) cycle
+
+!  First retrieve current values of parameters
+   call xc_hyb_cam_coef(xc_func%conf,omega_c,alpha_c,beta_c)
+
+!  New values for parameters
+   if (present(hyb_mixing)) alpha_c=real(hyb_mixing,kind=C_DOUBLE)
+   if (present(hyb_mixing_sr)) beta_c=real(hyb_mixing_sr,kind=C_DOUBLE)
+   if (present(hyb_range)) omega_c=real(hyb_range,kind=C_DOUBLE)
+
+!  PBE0: set parameters
+   if (is_pbe0) then
+       call xc_hyb_gga_xc_pbeh_set_params(xc_func%conf,alpha_c)
+   end if
+
+!  HSE: set parameters
+   if (is_hse) then
+     call xc_hyb_gga_xc_hse_set_params(xc_func%conf,beta_c,omega_c)
+   end if
+
+ end do
+
+ if ((.not.is_pbe0).and.(.not.is_hse)) then
+   msg='Invalid XC functional: not able to change parameters for this functional!'
+   MSG_WARNING(msg)
+ end if
+
+end subroutine libxc_functionals_set_hybridparams
 !!***
 
 !----------------------------------------------------------------------
