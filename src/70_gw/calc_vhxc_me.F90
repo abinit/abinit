@@ -296,7 +296,7 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,gsqcutf_eff,nfftf,ngfftf,&
      if (Dtset_dummy%ixc==-428) then !HSE06
        if (Dtset_dummy%rcut>tol8) then
          omega = one/Dtset_dummy%rcut
-         call libxc_functionals_set_hybridparams(hyb_range=omega)
+         call libxc_functionals_set_hybridparams(hyb_range=omega,hyb_mixing_sr=Dtset_dummy%gwfockmix)
        else
          call libxc_functionals_get_hybridparams(hyb_range=omega)
        end if
