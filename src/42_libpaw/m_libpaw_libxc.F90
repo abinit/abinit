@@ -1605,6 +1605,7 @@ subroutine libpaw_libxc_set_hybridparams(hyb_mixing,hyb_mixing_sr,hyb_range,xc_f
 &          (xc_func%id==libpaw_libxc_getid('HYB_GGA_XC_HSE06')))
    if ((.not.is_pbe0).and.(.not.is_hse)) cycle
 
+#ifdef LIBPAW_ISO_C_BINDING
 !  First retrieve current values of parameters
    call xc_hyb_cam_coef(xc_func%conf,omega_c,alpha_c,beta_c)
 
@@ -1622,6 +1623,7 @@ subroutine libpaw_libxc_set_hybridparams(hyb_mixing,hyb_mixing_sr,hyb_range,xc_f
    if (is_hse) then
      call xc_hyb_gga_xc_hse_set_params(xc_func%conf,beta_c,omega_c)
    end if
+#endif
 
  end do
 
