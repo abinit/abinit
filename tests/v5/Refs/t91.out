@@ -177,19 +177,25 @@ Gkk matrix elements on input grid of qpoints will be written to disk. File gkqfi
 
  Calculation of phonon density of states 
 
- Average speed of sound partial sums:    -0.5947310100E-03 (at units) =       -1301.0878 (m/s)
+ Average speed of sound partial sums:    -0.5947310100E-03 (at units)
+-                                   =       -1301.0878 (m/s)
 
- Debye frequency from partial sums:    -0.4906400322E-03 (Ha) =    -0.3228256331E+01 (THz)
+ Debye frequency from partial sums:    -0.4906400322E-03 (Ha)
+-                                 =    -0.3228256331E+01 (THz)
  Debye temperature from partial sums:    -0.1549316845E+03 (K)
 
- Average speed of sound:     0.6197677937E-04 (at units) =         135.5861 (m/s)
+ Average speed of sound:     0.6197677937E-04 (at units)
+-                      =         135.5861 (m/s)
 
- Debye frequency from DOS:     0.5112948294E-04 (Ha) =     0.3364158367E+00 (THz)
+ Debye frequency from DOS:     0.5112948294E-04 (Ha)
+-                        =     0.3364158367E+00 (THz)
  Debye temperature from DOS:     0.1614539458E+02 (K)
 
- Average speed of sound:     0.6197677937E-04 (at units) =         135.5861 (m/s)
+ Average speed of sound:     0.6197677937E-04 (at units)
+-                      =         135.5861 (m/s)
 
- Debye frequency from DOS:     0.5112948294E-04 (Ha) =     0.3364158367E+00 (THz)
+ Debye frequency from DOS:     0.5112948294E-04 (Ha)
+-                        =     0.3364158367E+00 (THz)
  Debye temperature from DOS:     0.1614539458E+02 (K)
 
 
