@@ -351,9 +351,11 @@ Values initialized with zeros
  64)  -2.50000000E-01 -2.50000000E-01 -2.50000000E-01
 
  The interatomic forces have been obtained
- Average speed of sound partial sums:     0.1164368178E-02 (at units) =        2547.2781 (m/s)
+ Average speed of sound partial sums:     0.1164368178E-02 (at units)
+-                                   =        2547.2781 (m/s)
 
- Debye frequency from partial sums:     0.9605781958E-03 (Ha) =     0.6320300909E+01 (THz)
+ Debye frequency from partial sums:     0.9605781958E-03 (Ha)
+-                                 =     0.6320300909E+01 (THz)
  Debye temperature from partial sums:     0.3033262436E+03 (K)
 
 - Writing phonon DOS to file: t88o_DS1_PHDOS
@@ -581,9 +583,11 @@ Values initialized with zeros
  64)  -2.50000000E-01 -2.50000000E-01 -2.50000000E-01
 
  The interatomic forces have been obtained
- Average speed of sound partial sums:     0.1164368178E-02 (at units) =        2547.2781 (m/s)
+ Average speed of sound partial sums:     0.1164368178E-02 (at units)
+-                                   =        2547.2781 (m/s)
 
- Debye frequency from partial sums:     0.9605781958E-03 (Ha) =     0.6320300909E+01 (THz)
+ Debye frequency from partial sums:     0.9605781958E-03 (Ha)
+-                                 =     0.6320300909E+01 (THz)
  Debye temperature from partial sums:     0.3033262436E+03 (K)
 
 - Writing phonon dos to file: t88o_DS2_PHDOS
@@ -790,9 +794,11 @@ Values initialized with zeros
  64)  -2.50000000E-01 -2.50000000E-01 -2.50000000E-01
 
  The interatomic forces have been obtained
- Average speed of sound partial sums:     0.1164368178E-02 (at units) =        2547.2781 (m/s)
+ Average speed of sound partial sums:     0.1164368178E-02 (at units)
+-                                   =        2547.2781 (m/s)
 
- Debye frequency from partial sums:     0.9605781958E-03 (Ha) =     0.6320300909E+01 (THz)
+ Debye frequency from partial sums:     0.9605781958E-03 (Ha)
+-                                 =     0.6320300909E+01 (THz)
  Debye temperature from partial sums:     0.3033262436E+03 (K)
 
 - Writing phonon dos to file: t88o_DS3_PHDOS
