@@ -1596,6 +1596,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, dtfil, comm) r
 
    NCF_CHECK(nf90_close(new%ncid))
  end if ! master
+#endif
 
  ! Now reopen the file in parallel.
  call xmpi_barrier(comm)
