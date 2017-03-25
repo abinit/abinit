@@ -820,8 +820,8 @@ subroutine fock_init(atindx,cplex,dtset,fock,gsqcut,indsym,kg,mpi_enreg,nattyp,n
      call wrtout(std_out,msg,'COLL')
    end if
    if (dtset%ixc<0) then
-     call libxc_functionals_get_hybridcoef(hyb_mixing=fock%hybrid_mixing,hyb_mixing_sr=fock%hybrid_mixing_sr,&
-&                                          hyb_range=fock%hybrid_range)
+     call libxc_functionals_get_hybridparams(hyb_mixing=fock%hybrid_mixing,hyb_mixing_sr=fock%hybrid_mixing_sr,&
+&                                            hyb_range=fock%hybrid_range)
      if (abs(fock%hybrid_mixing)>tol8.or.abs(fock%hybrid_mixing_sr)>tol8) then
        msg=' - This is a hybrid XC functional from LibXC. The mixing and range coeffs are set accordingly.'
        call wrtout(std_out,msg,'COLL')
