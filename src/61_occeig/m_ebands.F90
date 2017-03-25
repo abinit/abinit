@@ -1749,6 +1749,9 @@ subroutine enclose_degbands(ebands,ikibz,spin,ibmin,ibmax,changed,tol_enedif,deg
      if ( abs(ebands%eig(ib,ikibz,spin) - ebands%eig(ib-1,ikibz,spin) ) > tol_enedif) ndeg = ndeg + 1
    end do
    ! Build degblock table.
+   if (allocated(degblock)) then
+      ABI_FREE(degblock)
+   end if
    ABI_MALLOC(degblock, (2, ndeg))
    ndeg = 1; degblock(1, 1) = ibmin
    do ib=ibmin+1,ibmax
