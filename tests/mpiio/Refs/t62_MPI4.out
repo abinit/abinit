@@ -2,7 +2,7 @@
 .Version 8.1.4 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
 
-.Copyright (C) 1998-2016 ABINIT group . 
+.Copyright (C) 1998-2017 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -602,7 +602,7 @@ P          mk1mem6         64
            tolvrs6     1.00000000E-08
             typat      1  2
            useylm           1
-         wfoptalg1         14
+         wfoptalg1        114
          wfoptalg2         10
          wfoptalg3         10
          wfoptalg4         10
@@ -3014,7 +3014,7 @@ P          mk1mem6         64
            tolvrs6     1.00000000E-08
             typat      1  2
            useylm           1
-         wfoptalg1         14
+         wfoptalg1        114
          wfoptalg2         10
          wfoptalg3         10
          wfoptalg4         10

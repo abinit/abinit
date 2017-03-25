@@ -6,7 +6,7 @@
 !!  Tools for the computation of phonon self-energy.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2016 ABINIT group (GKA)
+!!  Copyright (C) 2008-2017 ABINIT group (GKA)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .

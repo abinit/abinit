@@ -11,7 +11,7 @@
 !!  to compute the matrix elements <k+q| dvscf_{idir, ipert, qpt} |k>.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2016 ABINIT group (MG)
+!! Copyright (C) 2009-2017 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2743,9 +2743,22 @@ subroutine dvdb_merge_files(nfiles, v1files, dvdb_path, prtvol)
  ! Read the headers
  ABI_DT_MALLOC(hdr1_list, (nfiles))
 
+ nperts = size(hdr1_list)
+
+ ! Write dvdb file (we only support fortran binary format)
+ if (open_file(dvdb_path, msg, newunit=ount, form="unformatted", action="write", status="unknown") /= 0) then
+   MSG_ERROR(msg)
+ end if
+ write(ount, err=10, iomsg=msg) dvdb_last_version
+ write(ount, err=10, iomsg=msg) nperts
+ 
+ ! Validate headers.
+ ! TODO: Should perform consistency check on the headers, rearrange them in blocks of q-points.
+ ! ignore POT1 files that do not correspond to atomic perturbations.
+
  do ii=1,nfiles
    write(std_out,"(a,i0,2a)")"- Reading header of file [",ii,"]: ",trim(v1files(ii))
-
+   
    if (endswith(v1files(ii), ".nc")) then
 #ifdef HAVE_NETCDF
       NCF_CHECK(nctk_open_read(units(ii), v1files(ii), xmpi_comm_self))
@@ -2772,21 +2785,8 @@ subroutine dvdb_merge_files(nfiles, v1files, dvdb_path, prtvol)
    ! 111  POT1 files with extra record with vh1(G=0) after FFT data.
    has_rhog1_g0(ii) = .True.
    if (fform == 109) has_rhog1_g0(ii) = .False.
- end do
 
- ! Validate headers.
- ! TODO: Should perform consistency check on the headers, rearrange them in blocks of q-points.
- ! ignore POT1 files that do not correspond to atomic perturbations.
- nperts = size(hdr1_list)
-
- ! Write dvdb file (we only support fortran binary format)
- if (open_file(dvdb_path, msg, newunit=ount, form="unformatted", action="write", status="unknown") /= 0) then
-   MSG_ERROR(msg)
- end if
- write(ount, err=10, iomsg=msg) dvdb_last_version
- write(ount, err=10, iomsg=msg) nperts
-
- do ii=1,nperts
+   write(std_out,"(a,i0,2a)")"- Merging file [",ii,"]: ",trim(v1files(ii))
    jj = ii
    hdr1 => hdr1_list(jj)
    call hdr_fort_write(hdr1, ount, fform_pot, ierr)
@@ -2826,6 +2826,14 @@ subroutine dvdb_merge_files(nfiles, v1files, dvdb_path, prtvol)
       if (dvdb_last_version > 1) write(ount, err=10, iomsg=msg) rhog1_g0
 #endif
    end if
+   
+   if (.not. endswith(v1files(ii), ".nc")) then
+     close(units(ii))
+   else
+#ifdef HAVE_NETCDF
+     NCF_CHECK(nf90_close(units(ii)))
+#endif
+   end if
 
    ABI_FREE(v1)
  end do ! nperts
@@ -2834,13 +2842,6 @@ subroutine dvdb_merge_files(nfiles, v1files, dvdb_path, prtvol)
 
  do ii=1,size(hdr1_list)
    call hdr_free(hdr1_list(ii))
-   if (.not. endswith(v1files(ii), ".nc")) then
-     close(units(ii))
-   else
-#ifdef HAVE_NETCDF
-     NCF_CHECK(nf90_close(units(ii)))
-#endif
-   end if
  end do
  ABI_DT_FREE(hdr1_list)
 

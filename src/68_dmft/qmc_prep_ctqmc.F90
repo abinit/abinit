@@ -7,7 +7,7 @@
 !! Prepare and call the qmc subroutines
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2016 ABINIT group (BAmadon,VPlanes)
+!! Copyright (C) 1999-2017 ABINIT group (BAmadon,VPlanes)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1200,9 +1200,13 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
          umod=zero
 
          tmpfil = 'fw1_nd_re'
-         !open (newunit=unt,file=trim(tmpfil),status='unknown',form='formatted')
+         !if (open_file(newunit=unt,message,file=trim(tmpfil),status='unknown',form='formatted')/=0) then
+         !  MSG_ERROR(message)
+         !end if
          tmpfil = 'fw1_nd_im'
-         !open (newunit=unt2,file=trim(tmpfil),status='unknown',form='formatted')
+         !if (open_file(newunit=unt2,message,file=trim(tmpfil),status='unknown',form='formatted')/=0) then
+         !  MSG_ERROR(message)
+         !end if
          write(std_out,*) "testcode==2",ispa,ispb,ima,imb
          write(std_out,*) "opt_fk==",opt_fk
          do ifreq=1,paw_dmft%dmftqmc_l

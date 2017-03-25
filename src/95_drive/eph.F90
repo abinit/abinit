@@ -9,7 +9,7 @@
 !! due to phonons and temperature effects...
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2016 ABINIT group (MG, MVer)
+!! Copyright (C) 2009-2017 ABINIT group (MG, MVer)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -363,12 +363,12 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 
  if (my_rank == master) call ebands_write(ebands, dtset%prtebands, dtfil%filnam_ds(4))
 
- if (.False.) then
- !if (.True.) then
-   !call ebands_set_interpolator(ebands, cryst, bstart, bcount, mode, espline_ords, eskw_ratio, comm)
-   call ebands_test_interpolator(ebands, dtset, cryst, dtfil%filnam_ds(4), comm)
-   MSG_ERROR("interpolation done")
- end if
+ !if (.False.) then
+ !!if (.True.) then
+ !  !call ebands_set_interpolator(ebands, cryst, bstart, bcount, mode, espline_ords, eskw_ratio, comm)
+ !  call ebands_test_interpolator(ebands, dtset, cryst, dtfil%filnam_ds(4), comm)
+ !  MSG_ERROR("interpolation done")
+ !end if
 
  call cwtime(cpu,wall,gflops,"stop")
  write(msg,'(2(a,f8.2))')"eph%edos: cpu:",cpu,", wall: ",wall

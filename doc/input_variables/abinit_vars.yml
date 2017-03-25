@@ -2675,6 +2675,33 @@
     characteristics: null
     commentdefault: null
     commentdims: null
+    defaultval: 0.0
+    definition: spatially varying CHEMical POTential
+    dimensions:
+    - 3
+    -   -   - nzchempot
+    -   -   - ntype
+    excludes: null
+    requires: '[[nzchempot]]/=0'
+    section: vargeo
+    text: |-
+        For each type of atoms, from 1 to [[ntypat]], specifies the spatially varying chemical potential, through the specification of [[nzchempot]] triplets of real numbers. They give data for [[nzchempot]] delimiting planes, all parallel to each other, each determined by its z reduced coordinate.
+
+        The first real number is the z reduced coordinate of the delimiting plane. The second real number is the value of the chemical potential for this type of atom on this plane. The third real number is the derivative of the chemical potential fior this type of atom with respect to the z reduced coordinate, evaluated on this plane.
+
+        In the space between delimiting planes, a piecewise cubic polynomial interpolation is determined : the cubic polynomial between two delimiting planes will have the imposed chemical potentials and derivatives on the two delimiting planes.
+
+        The z reduced coordinates must be ordered in increasing values, and cannot span more than 1.0 . There is an automatic periodic boundary condition imposed. Specifying two identical z reduced coordinates is allowed, and means that the first one applies to the adjacent space with lower values of z, while the second applies to the adjacent space with higher values of z.
+
+        When the spatial chemical potential is defined only for one type of atom (and no chemical potential is present for the other atoms), simply set the related values to *0.0 in the [[chempot]] array.
+
+        In the present input array, reduced positions, energies and derivatives of energies are mixed. Hence, although the chemical potential is an energy, one cannot use the usual energy definitions (i.e. the chemical potential is always to be input in Hartree atomic units).
+    varname: chempot
+    vartype: real
+- !variable
+    characteristics: null
+    commentdefault: null
+    commentdims: null
     defaultval: 0
     definition: CHecK whether the user want to EXIT
     dimensions: scalar
@@ -2752,7 +2779,7 @@
         non-symmorphic translations which might not be coherent with the exchange-correlation grid.
         </p>
         <p>
-         When [[chksymbreak]]=1, the code stops if :
+         When [[chksymbreak]]=1, the code stops (or issue a warning) if :
          <ul>
           <li>
            (1) The k point grid is non-symmetric, in case
@@ -5651,18 +5678,14 @@
     requires: null
     section: varrf
     text: |-
+        <p>
         When [[optdriver]]==7, select the task to be performed.
-        The choice is among:
-
-        <ul>
-          <li> 1: phonon linewidth </li>
-          <li> 2: electron-phonon coupling elements </li>
-        </ul>
-
-        The special value eph_task 0 corresponds to a fake task in which
-        the code returns after the initial pre-processing of the input data.
-        This option could be useful if you want to access the post-processing tools in the EPH code
-        (Fermi surface, Phonon DOS ...) without running any task.
+         The choice is among :
+         <br />
+         [[eph_task]]=1 : phonon linewidth
+         <br />
+         [[eph_task]]=2 : electron-phonon coupling elements
+        </p>
     varname: eph_task
     vartype: integer
 - !variable
@@ -5679,7 +5702,7 @@
         NB - this does not work yet.
         This variable can be used to turn on the calculation of transport
         quantities in the eph module of abinit. Value of 1 corresponds to
-        elastic LOVA as in the PRB by Savrasov and Savrasov.
+        elastic LOVA as in the PRB by Savrasov and Savrasov
     varname: eph_transport
     vartype: integer
 - !variable
@@ -9365,49 +9388,73 @@
     requires: null
     section: varrlx
     text: |-
-        Control the collective changes of images (see [[nimage]], [[npimage]], [[dynimage]], [[ntimimage]], [[tolimg]], [[istatimg]], [[prtvolimg]]).
-        Similar to [[ionmov]] in spirit, although here, a population of self-consistent calculations for different geometries is managed, while with [[ionmov]], only one geometry for self-consistent calculation is managed.
+        <p> Control the collective changes of images (see [[nimage]],[[npimage]], [[dynimage]],
+        [[ntimimage]], [[tolimg]], [[istatimg]], [[prtvolimg]]).
+        <br> Similar to [[ionmov]] in spirit, although here, a population
+        of self-consistent calculations for different geometries is managed, while with [[ionmov]],
+        only one geometry for self-consistent calculation is managed.
+        <br> In this respect the maximal number of time step for image propagation is [[ntimimage]],
+        corresponding to the input variable [[ntime]] of the single geometry case.
+        Also, the stopping criterion is governed by [[tolimg]], corresponding to the
+        input variable [[toldfe]] of the single geometry case.
+        The stopping  condition is crude: the image propagation is stopped when the mean value (over dynamic images)
+        of the absolute difference of total energy (previous and current time step) is less than [[tolimg]].
 
-        In this respect the maximal number of time step for image propagation is [[ntimimage]], corresponding to the input variable [[ntime]] of the single geometry case. Also, the stopping criterion is governed by [[tolimg]], corresponding to the input variable [[toldfe]] of the single geometry case.
-
-        The stopping  condition is crude: the image propagation is stopped when the mean value (over dynamic images) of the absolute difference of total energy (previous and current time step) is less than [[tolimg]]. Actually, there might be combinations of [[ionmov]] and [[imgmov]] in which the two mechanisms are at work. Usually, however, only one mechanism will be activated (so, usually, either [[ntimimage]] is bigger than one OR [[ntime]] is bigger than one).
-
-        In order for the user to acquire a mental representation of the interplay between [[ionmov]] and [[imgmov]], here is a F90 pseudo-code presenting the interplay between the different above-mentioned input variables, as well as with the parallelism (see input variable [[npimage]]).
-
+        <p>Actually, there might be combinations of [[ionmov]] and [[imgmov]]
+        in which the two mechanisms are at work.
+        Usually, however, only one mechanism will be activated
+        (so, usually, either [[ntimimage]] is bigger than one OR [[ntime]] is bigger than one).
+        In order for the user to acquire a mental representation of the interplay between [[ionmov]] and [[imgmov]],
+        here is a F90 pseudo-code presenting the interplay between the different above-mentioned input variables,
+        as well as with the parallelism (see input variable [[npimage]]).
+        </p>
         <p><pre>
         do itimimage=1,ntimimage
           do iimage=1,nimage
-             (possibly, parallelisation over images)
-             do itime=1,ntime
-                Compute the forces and stresses for image(iimage)
-                Examine whether the stopping criterion defined by tolmxf is fulfilled
-                Predict the next geometry for image(iimage) using ionmov
-              enddo
-           enddo
-
-           Examine whether the stopping criterion defined by tolimg is fulfilled
-           Predict the next geometries for all images using imgmov
+            (possibly, parallelisation over images)
+            do itime=1,ntime
+              Compute the forces and stresses for image(iimage)
+              Examine whether the stopping criterion defined by tolmxf is fulfilled
+              Predict the next geometry for image(iimage) using ionmov
+            enddo
+          enddo
+          Examine whether the stopping criterion defined by tolimg is fulfilled
+          Predict the next geometries for all images using imgmov
         enddo
         </pre></p>
-
         <ul>
-        <li> 0  => simply <b> copy </b> images from previous timimage step.</li>
-
-        <li> 1  => move images according to <b> Steepest Descent </b> following the (scaled) forces,
-          the scaling factor being [[fxcartfactor]]. </li>
-
-        <li> 2  => <b> String Method </b> for finding Minimal Energy Path (MEP) connecting to minima (see PRB 66, 052301 (2002)); the algorithm variant can be selected with the [[string_algo]] keyword (Simplified String Method by default). The solver for the Ordinary Differential Equation (ODE) can be selected with [[mep_solver]] (steepest-descent by default). See also [[mep_mxstep]] keyword.</li>
-
-        <li> 3  => (tentatively, not yet coded) <b> Metadynamics </b>.</li>
-
-        <li> 4  => (tentatively, not yet coded) <b> Genetic Algorithm</b>.</li>
-
-        <li> 5  => <b> Nudged Elastic Band (NEB) </b> for finding Minimal Energy Path (MEP) connecting two minima; the algorithm variant can be selected with the [[neb_algo]] keyword (NEB+improved tangent by default). The solver for the Ordinary Differential Equation (ODE) can be selected with [[mep_solver]] (steepest-descent by default). The spring constant connecting images along the path is defined by [[neb_spring]]. See also [[mep_mxstep]] keyword.</li>
-
-        <li> 9 or 13  => <b> Path-Integral Molecular Dynamics </b> (see e.g. [D. Marx and M. Parrinello, J. Chem. Phys. 104, 4077 (1996)]). Will use 9 for <b>  Langevin thermostat </b> (associated friction coefficient given by [[vis]]) and 13 for <b>  Nose-Hoover thermostat chains </b> (associated input variables are the number of thermostats in the chains, [[nnos]], and the masses of these thermostats [[qmass]]). [[nimage]] is the Trotter number (no use of [[dynimage]]); possible transformations of coordinates are defined by [[pitransform]]; Fictitious masses of the atoms (possibly different from the true masses given by [[amu]]) can be specified by [[pimass]]. At present, it is only possible to perform calculations in the (N,V,T) ensemble ([[optcell]]=0).</li>
-        </ul>
-
-        No meaning for RF calculations.
+          <li>    = 0  => simply <b> copy </b> images from previous timimage step.</li>
+          <li>    = 1  => move images according to <b> Steepest Descent </b>
+                         following the (scaled) forces, the scaling factor being [[fxcartfactor]]. </li>
+          <li>    = 2  => <b> String Method </b> for finding Minimal Energy Path (MEP)
+               connecting to minima (see PRB 66, 052301 (2002));
+               the algorithm variant can be selected with the [[string_algo]] keyword
+               (Simplified String Method by default).
+               The solver for the Ordinary Differential Equation (ODE) can be selected with [[mep_solver]]
+               (steepest-descent by default). See also [[mep_mxstep]] keyword.</li>
+          <li>    = 3  => (tentatively, not yet coded) <b> Metadynamics </b>.</li>
+          <li>    = 4  => (tentatively, not yet coded) <b> Genetic Algorithm</b>.</li>
+          <li>    = 5  => <b> Nudged Elastic Band (NEB) </b> for finding Minimal Energy Path (MEP)
+               connecting two minima;
+               the algorithm variant can be selected with the [[neb_algo]] keyword
+               (NEB+improved tangent by default).
+               The solver for the Ordinary Differential Equation (ODE) can be selected with [[mep_solver]]
+               (steepest-descent by default).
+               The spring constant connecting images along the path is defined by [[neb_spring]].
+               See also [[mep_mxstep]] keyword.</li>
+          <li>    = 9 or 13  => <b> Path-Integral Molecular Dynamics </b>
+               (see e.g. [D. Marx and M. Parrinello, J. Chem. Phys. 104, 4077 (1996)]).
+               Will use 9 for <b>  Langevin thermostat </b> (associated friction coefficient given by [[vis]])
+               and 13 for <b>  Nose-Hoover thermostat chains </b>
+               (associated input variables are the number of thermostats in the chains, [[nnos]],
+               and the masses of these thermostats [[qmass]]).
+               [[nimage]] is the Trotter number (no use of [[dynimage]]);
+               possible transformations of coordinates are defined by [[pitransform]];
+               Fictitious masses of the atoms (possibly different from the true masses given by [[amu]])
+               can be specified by [[pimass]].
+               At present, it is only possible to perform calculations in the (N,V,T) ensemble ([[optcell]]=0).</li>
+          </ul>
+          No meaning for RF calculations.
         </p>
     varname: imgmov
     vartype: integer
@@ -9580,345 +9627,147 @@
         Choice of algorithm to control the displacements of ions, and eventually (see [[optcell]])
         changes of cell shape and size.
          <ul>
+          <li> 0=&gt; Do not move ions; <br /> <br /> </li>
           <li>
-           0=&gt; do not move ions;
-           <br />
-           <br />
-          </li>
-          <li>
-           1=&gt; move atoms using molecular dynamics with
+           1=&gt; Move atoms using molecular dynamics with
         optional viscous damping (friction linearly proportional
         to velocity). The viscous damping is controlled by the
-        parameter "[[vis]]".
-        If actual undamped molecular dynamics is desired,
-        set [[vis]] to 0. The implemented algorithm
-        is the generalisation
+        parameter "[[vis]]".  If actual undamped molecular dynamics is desired,
+        set [[vis]] to 0. The implemented algorithm is the generalisation
         of the Numerov technique (6th order), but is NOT invariant
         upon time-reversal, so that the energy is not conserved.
         The value [[ionmov]]=6 will usually be preferred, although the
-        algorithm that is implemented is lower-order.
-        The time step is governed by
-        [[dtion]].
-           <br />
-           <b>
-            Purpose:
-           </b>
-           Molecular dynamics (if [[vis]]=0),
-        Structural optimization (if [[vis]]&gt;0)
-           <br />
-           <b>
-            Cell optimization:
-           </b>
-           No (Use [[optcell]]=0 only)
-           <br />
-           <b>
-            Variables related:
-           </b>
-           Viscous parameter [[vis]],
-        time step [[dtion]],
-        index of atoms fixed [[iatfix]]
-           <br />
-           <br />
+        algorithm that is implemented is lower-order. The time step is governed by [[dtion]].  <br />
+           <b> Purpose: </b>
+           Molecular dynamics (if [[vis]]=0), Structural optimization (if [[vis]]&gt;0) <br />
+           <b> Cell optimization: </b>
+           No (Use [[optcell]]=0 only) <br />
+           <b> Related variables: </b>
+           Viscous parameter [[vis]], time step [[dtion]], index of atoms fixed [[iatfix]] <br /> <br /> </li>
+          <li>
+           2=&gt; Conduct structural optimization using the Broyden-Fletcher-Goldfarb-Shanno minimization (BFGS).
+        This is much more efficient for structural optimization than viscous damping, when there are less than
+        about 10 degrees of freedom to optimize.  <br />
+           <b> Purpose: </b>
+           Structural optimization <br />
+           <b> Cell optimization: </b>
+           Yes (if [[optcell]]/=0) <br />
+           <b> Related variables: </b> <br /> <br />
           </li>
           <li>
-           2=&gt; conduct structural optimization using the
-        Broyden-Fletcher-Goldfarb-Shanno minimization (BFGS).
-        This is much more efficient for structural optimization
-        than viscous damping, when there are less than
-        about 10 degrees of freedom to optimize.
-           <br />
-           <b>
-            Purpose:
-           </b>
-           Structural optimization
-           <br />
-           <b>
-            Cell optimization:
-           </b>
-           Yes (if [[optcell]]/=0)
-           <br />
-           <b>
-            Variables related:
-           </b>
-           <br />
-           <br />
-          </li>
-          <li>
-           3=&gt; conduct structural optimization using the
-        Broyden-Fletcher-Goldfarb-Shanno minimization (BFGS),
-        modified to take into account the total energy as well as
-        the gradients (as in usual BFGS).
-           <br />
-           See the paper by
-        [Schlegel, J. Comp. Chem. 3, 214 (1982)].
+           3=&gt; Conduct structural optimization using the Broyden-Fletcher-Goldfarb-Shanno minimization (BFGS),
+        modified to take into account the total energy as well as the gradients (as in usual BFGS).  <br />
+           See the paper by [Schlegel, J. Comp. Chem. 3, 214 (1982)].
         Might be better than [[ionmov]]=2 for few degrees of freedom
-        (less than 3 or 4). Can be very unstable - use with caution!
-           <br />
-           <b>
-            Purpose:
-           </b>
-           Structural optimization
-           <br />
-           <b>
-            Cell optimization:
-           </b>
-           Yes (if [[optcell]]/=0)
-           <br />
-           <b>
-            Variables related:
-           </b>
-           <br />
-           <br />
+        (less than 3 or 4). Can be very unstable - use with caution! <br />
+           <b> Purpose: </b>
+           Structural optimization <br />
+           <b> Cell optimization: </b>
+           Yes (if [[optcell]]/=0) <br />
+           <b> Related variables: </b> <br /> <br />
           </li>
           <li>
-           4=&gt; conjugate gradient algorithm for simultaneous
-        optimization of potential and ionic degrees of freedom.
-        It can be used with [[iscf]]=2 and
-        [[iscf]]  =5 or 6
-        (WARNING : this is under development, and does not work very well in
-        many
-        cases).
-           <br />
-           <b>
-            Purpose:
-           </b>
-           Structural optimization
-           <br />
-           <b>
-            Cell optimization:
-           </b>
-           No (Use [[optcell]]=0 only)
-           <br />
-           <b>
-            Variables related:
-           </b>
-           <br />
-           <br />
+           4=&gt; Conjugate gradient algorithm for simultaneous optimization of potential and ionic degrees of freedom.
+        It can be used with [[iscf]]=2 and [[iscf]]  =5 or 6 (WARNING : this is under development, and does not work very well in many cases).  <br />
+           <b> Purpose: </b>
+           Structural optimization <br />
+           <b> Cell optimization: </b>
+           No (Use [[optcell]]=0 only) <br />
+           <b> Related variables: </b> <br /> <br />
           </li>
           <li>
-           5=&gt; Simple relaxation of ionic positions according
-        to (converged) forces. Equivalent to [[ionmov]]=1 with
-        zero masses, albeit the relaxation coefficient is not
-        [[vis]],
-        but [[iprcfc]].
-           <br />
-           <b>
-            Purpose:
-           </b>
-           Structural optimization
-           <br />
-           <b>
-            Cell optimization:
-           </b>
-           No (Use [[optcell]]=0 only)
-           <br />
-           <b>
-            Variables related:
-           </b>
-           <br />
-           <br />
+           5=&gt; Simple relaxation of ionic positions according to (converged) forces. Equivalent to [[ionmov]]=1 with
+        zero masses, albeit the relaxation coefficient is not [[vis]], but [[iprcfc]].  <br />
+           <b> Purpose: </b>
+           Structural optimization <br />
+           <b> Cell optimization: </b>
+           No (Use [[optcell]]=0 only) <br />
+           <b> Related variables: </b> <br /> <br />
           </li>
           <li>
-           6=&gt; Molecular dynamics using the Verlet algorithm, see
-        [Allen &amp; Tildesley "Computer simulation of liquids" 1987, p 81].
-        The only related parameter is the time step
-        ([[dtion]]).
-           <br />
-           <b>
-            Purpose:
-           </b>
-           Molecular dynamics
-           <br />
-           <b>
-            Cell optimization:
-           </b>
-           No (Use [[optcell]]=0 only)
-           <br />
-           <b>
-            Variables related:
-           </b>
-           time step [[dtion]],
-        index of atoms fixed [[iatfix]]
-           <br />
-           <br />
+           6=&gt; Molecular dynamics using the Verlet algorithm, see [Allen &amp; Tildesley "Computer simulation of liquids" 1987, p 81].
+        The only related parameter is the time step ([[dtion]]).  <br />
+           <b> Purpose: </b>
+           Molecular dynamics <br />
+           <b> Cell optimization: </b>
+           No (Use [[optcell]]=0 only) <br />
+           <b> Related variables: </b>
+           time step [[dtion]], index of atoms fixed [[iatfix]] <br /> <br />
           </li>
           <li>
-           7=&gt; Quenched Molecular dynamics using the Verlet
-        algorithm, and stopping each atom for which the scalar product
-        of velocity and force is negative.
-        The only related parameter is the time step
-        ([[dtion]]).
-        The goal is not
-        to produce a realistic dynamics, but to go as fast as possible
-        to the minimum. For this purpose, it is advised to set
-        all the masses to the same value (for example, use the Carbon mass,
-        i.e. set [[amu]] to 12 for all type of
-        atoms).
-           <br />
-           <b>
-            Purpose:
-           </b>
-           Structural optimization
-           <br />
-           <b>
-            Cell optimization:
-           </b>
-           No (Use [[optcell]]=0 only)
-           <br />
-           <b>
-            Variables related:
-           </b>
-           time step [[dtion]],
-        index of atoms fixed [[iatfix]]
-           <br />
-           <br />
+           7=&gt; Quenched Molecular dynamics using the Verlet algorithm, and stopping each atom for which the scalar product
+        of velocity and force is negative.  The only related parameter is the time step ([[dtion]]).  The goal is not
+        to produce a realistic dynamics, but to go as fast as possible to the minimum. For this purpose, it is advised to set
+        all the masses to the same value (for example, use the Carbon mass, i.e. set [[amu]] to 12 for all type of atoms).  <br />
+           <b> Purpose: </b>
+           Structural optimization <br />
+           <b> Cell optimization: </b>
+           No (Use [[optcell]]=0 only) <br />
+           <b> Related variables: </b>
+           time step [[dtion]], index of atoms fixed [[iatfix]] <br /> <br />
           </li>
           <li>
-           8=&gt; Molecular dynamics with Nose-Hoover thermostat,
-        using the Verlet algorithm.
-           <br />
-           <b>
-            Purpose:
-           </b>
-           Molecular dynamics
-           <br />
-           <b>
-            Cell optimization:
-           </b>
-           No (Use [[optcell]]=0 only)
-           <br />
-           <b>
-            Variables related:
-           </b>
-           time step ([[dtion]]),
-        Temperatures ([[mdtemp]]),
-        and thermostat mass ([[noseinert]]).
-           <br />
-           <br />
+           8=&gt; Molecular dynamics with Nose-Hoover thermostat, using the Verlet algorithm.  <br />
+           <b> Purpose: </b>
+           Molecular dynamics <br />
+           <b> Cell optimization: </b>
+           No (Use [[optcell]]=0 only) <br />
+           <b> Related variables: </b>
+           time step ([[dtion]]), Temperatures ([[mdtemp]]), and thermostat mass ([[noseinert]]).  <br /> <br />
           </li>
           <li>
-           9=&gt; Langevin molecular dynamics.
-           <br />
-           <b>
-            Purpose:
-           </b>
-           Molecular dynamics
-           <br />
-           <b>
-            Cell optimization:
-           </b>
-           No (Use [[optcell]]=0 only)
-           <br />
-           <b>
-            Variables related:
-           </b>
-           time step ([[dtion]]),
-        temperatures ([[mdtemp]]),
-        and friction coefficient ([[friction]]).
-           <br />
-           <br />
+           9=&gt; Langevin molecular dynamics.  <br />
+           <b> Purpose: </b>
+           Molecular dynamics <br />
+           <b> Cell optimization: </b>
+           No (Use [[optcell]]=0 only) <br />
+           <b> Related variables: </b>
+           time step ([[dtion]]), temperatures ([[mdtemp]]) and friction coefficient ([[friction]]).  <br /> <br />
           </li>
           <li>
-           10=&gt; Delocalized internal coordinates. with BFGS simple
-           <br />
-           <b>
-            Purpose:
-           </b>
-           Structural optimization
-           <br />
-           <b>
-            Cell optimization:
-           </b>
-           No (Use [[optcell]]=0 only)
-           <br />
-           <b>
-            Variables related:
-           </b>
-           <br />
-           <br />
+           10=&gt; Delocalized internal coordinates. with BFGS simple <br />
+           <b> Purpose: </b>
+           Structural optimization <br />
+           <b> Cell optimization: </b>
+           No (Use [[optcell]]=0 only) <br />
+           <b> Related variables: </b> <br /> <br />
           </li>
           <li>
-           11=&gt; Delocalized internal coordinates. with BFGS using total energy
-           <br />
-           <b>
-            Purpose:
-           </b>
-           Structural optimization
-           <br />
-           <b>
-            Cell optimization:
-           </b>
-           No (Use [[optcell]]=0 only)
-           <br />
-           <b>
-            Variables related:
-           </b>
-           <br />
-           <br />
+           11=&gt; Delocalized internal coordinates. with BFGS using total energy <br />
+           <b> Purpose: </b>
+           Structural optimization <br />
+           <b> Cell optimization: </b>
+           No (Use [[optcell]]=0 only) <br />
+           <b> Related variables: </b> <br /> <br />
           </li>
           <li>
-           12=&gt; Isokinetic ensemble molecular dynamics.
-        The equation of motion of the ions in contact with a thermostat
-        are solved with the algorithm proposed by Zhang [J. Chem. Phys. 106,
-        6102 (1997)],
-        as worked out by Minary et al [J. Chem. Phys. 188, 2510 (2003)].
-        The conservation of the kinetic energy is obtained within machine
-        precision,
-        at each step.
-           <br />
-           <s>
-            Related parameters : the time step ([[dtion]]),
-        the temperatures ([[mdtemp]]),
-        and the friction coefficient ([[friction]]).
-           </s>
-           <br />
-           <b>
-            Purpose:
-           </b>
-           Molecular dynamics
-           <br />
-           <b>
-            Cell optimization:
-           </b>
-           No (Use [[optcell]]=0 only)
-           <br />
-           <b>
-            Variables related:
-           </b>
-           <br />
-           <br />
+           12=&gt; Isokinetic ensemble molecular dynamics.  The equation of motion of the ions in contact with a thermostat
+        are solved with the algorithm proposed by Zhang [J. Chem. Phys. 106, 6102 (1997)],
+        as worked out by Minary et al [J. Chem. Phys. 188, 2510 (2003)].  The conservation of the kinetic energy is obtained within machine
+        precision, at each step.  <br />
+           <s> Related parameters : the time step ([[dtion]]), the temperatures ([[mdtemp]]), and the friction coefficient ([[friction]]).
+           </s> <br />
+           <b> Purpose: </b>
+           Molecular dynamics <br />
+           <b> Cell optimization: </b>
+           No (Use [[optcell]]=0 only) <br />
+           <b> Related variables: </b> <br /> <br />
           </li>
           <li>
            13=&gt; Isothermal/isenthalpic ensemble.
         The equation of motion of the ions in contact with a thermostat
         and a barostat are solved with the algorithm proposed by Martyna,
-        Tuckermann Tobias and Klein [Mol. Phys., 1996, p. 1117].
-           <br />
-           If optcell=1 or 2, the mass of the barostat ([[bmass]])
-        must be given in addition.
-           <br />
-           <b>
-            Purpose:
-           </b>
-           Molecular dynamics
-           <br />
-           <b>
-            Cell optimization:
-           </b>
-           Yes (if [[optcell]]/=0)
-           <br />
-           <b>
-            Variables related:
-           </b>
-           The time step ([[dtion]]),
-        the temperatures ([[mdtemp]]),
-        the number of thermostats ([[nnos]]),
-        and the masses of thermostats ([[qmass]]).
-           <br />
-           <br />
+        Tuckermann Tobias and Klein [Mol. Phys., 1996, p. 1117].  <br />
+           If optcell=1 or 2, the mass of the barostat ([[bmass]]) must be given in addition.  <br />
+           <b> Purpose: </b>
+           Molecular dynamics <br />
+           <b> Cell optimization: </b>
+           Yes (if [[optcell]]/=0) <br />
+           <b> Related variables: </b>
+           The time step ([[dtion]]), the temperatures ([[mdtemp]]), the number of thermostats ([[nnos]]), and the masses of thermostats ([[qmass]]).  <br /> <br />
           </li>
           <li>
-           14=&gt; simple molecular dynamics with a symplectic algorithm proposed
+           14=&gt; Simple molecular dynamics with a symplectic algorithm proposed
         by S.Blanes and P.C.Moans [called SRKNa14 in Practical symplectic partitioned
         Runge--Kutta and Runge--Kutta--Nystr&ouml;m methods, Journal of Computational
         and Applied Mathematics archive, volume 142,  issue 2  (May 2002), pages 313 - 330]
@@ -9926,126 +9775,75 @@
         integrators, Physics Letters A, volume 150, number 5 to 7, pages 262 - 268].
         This algorithm requires at least 14 evaluation of the forces (actually 15 are done
         within Abinit) per time step. At this cost it usually gives much better
-        energy conservation than the verlet algorithm (ionmov 6) for a 30 times bigger
-        value of [[dtion]]. Notice that the potential
-        energy of the initial atomic configuration is never evaluated using this
-        algorithm.
-           <br />
-           <b>
-            Purpose:
-           </b>
-           Molecular dynamics
-           <br />
-           <b>
-            Cell optimization:
-           </b>
-           No (Use [[optcell]]=0 only)
-           <br />
-           <b>
-            Variables related:
-           </b>
-           <br />
-           <br />
+        energy conservation than the verlet algorithm ([[ionmov]] 6) for a 30 times bigger
+        value of [[dtion]]. Notice that the potential energy of the initial atomic configuration is never evaluated using this algorithm.  <br />
+           <b> Purpose: </b>
+           Molecular dynamics <br />
+           <b> Cell optimization: </b>
+           No (Use [[optcell]]=0 only) <br />
+           <b> Related variables: </b> <br /> <br />
           </li>
           <li>
            20=&gt; Direct inversion of the iterative subspace.
-        Given a starting point xred that is a vector of length 3*natom
-        (reduced nuclei coordinates), and unit cell parameters (rprimd)
+        Given a starting point [[xred]] that is a vector of length 3*[[natom]]
+        (reduced nuclei coordinates), and unit cell parameters ([[rprimd]])
         this routine uses the DIIS (direct inversion of the iterative
         subspace) to minimize the gradient (forces) on atoms. The preconditioning
-        used to compute errors from gradients is using an inverse hessian
-        matrix obtained by a BFGS algorithm.
+        used to compute errors from gradients is using an inverse hessian matrix obtained by a BFGS algorithm.
         This method is known to converge to the nearest point where gradients
-        vanish. This is efficient to refine positions around a saddle point
-        for instance.
-           <br />
-           <b>
-            Purpose:
-           </b>
-           Structural optimization
-           <br />
-           <b>
-            Cell optimization:
-           </b>
-           No (Use [[optcell]]=0 only)
-           <br />
-           <b>
-            Variables related:
-           </b>
-           DIIS memory [[diismemory]]
-           <br />
-           <br />
+        vanish. This is efficient to refine positions around a saddle point for instance.  <br />
+           <b> Purpose: </b>
+           Structural optimization <br />
+           <b> Cell optimization: </b>
+           No (Use [[optcell]]=0 only) <br />
+           <b> Related variables: </b>
+           DIIS memory [[diismemory]] <br /> <br />
+          </li>
+          <li>
+          22=&gt; Conduct structural optimization using the Limited-memory Broyden-Fletcher-Goldfarb-Shanno minimization (L-BFGS).
+        The working routines were based on the original implementation of J. Nocera available on netlib.org.
+        This algorithm can be much better than the native implementation of BFGS in ABINIT ([[ionmov]]=2)
+        when one approaches convergence, perhaps because of better treatment of numerical details.<br />
+           <b> Purpose: </b>
+           Structural optimization <br />
+           <b> Cell optimization: </b>
+           Yes (if [[optcell]]/=0) <br />
+           <b> Related variables: </b> <br /> <br />
           </li>
           <li>
            23=&gt; Use of Learn on The Fly method (LOTF) for Molecular Dynamics.
         In the framework of isokinetic MD, the atomic forces and positions are computed
-        by using LOTF interpolation.
-        A SCF computation is performed only any [[lotf_nitex]]
+        by using LOTF interpolation.  A SCF computation is performed only any [[lotf_nitex]]
         steps. The results of the SCF are used to compute the parameters of a
         short range classical potential (for the moment only the glue potential for gold is implemented).
         Then these parameters are continuously tuned to compute atomic trajectories.
-        LOTF has to be enabled at configure time. If LOTF is not enabled and ionmov=23,
-        abinit will set automatically ionmov=12.
-           <br />
-           The LOTF cycle is divided in the following steps:
-           <br />
-           a) Initialization (SFC at t=0) and computation of potential parameters.
-           <br />
+        LOTF has to be enabled at configure time. If LOTF is not enabled and [[ionmov]]=23,
+        abinit will set automatically [[ionmov]]=12.  <br />
+           The LOTF cycle is divided in the following steps: <br />
+           a) Initialization (SFC at t=0) and computation of potential parameters.  <br />
            b) Extrapolation of the atomic forces and positions for [[lotf_nitex]] time step.
-        To perform this extrapolation, the potential computed in a) is used (Verlet algorithm).
-           <br />
-           c) SFC at t=[[lotf_nitex]]. Computation of the potential parameters.
-           <br />
+        To perform this extrapolation, the potential computed in a) is used (Verlet algorithm).  <br />
+           c) SFC at t=[[lotf_nitex]]. Computation of the potential parameters.  <br />
            d) LOTF interpolation, linear interpolation of the potential parameters and computation of the atomic
-        forces and positions between t=0 and t=lotf_nitex.
-           <br />
-           <br />
-           <b>
-            Purpose:
-           </b>
-           Molecular Dynamics
-           <br />
-           <b>
-            Cell optimization:
-           </b>
-           No (Use [[optcell]]=0 only)
-           <br />
-           <b>
-            Variables related:
-           </b>
-           <b>
-            Variables related:
-           </b>
-           [[dtion]],
-        [[lotf_classic]],
-        [[lotf_nitex]],
-        [[lotf_nneigx]],
-        [[lotf_version]].
-           <br />
-           <br />
+        forces and positions between t=0 and t=lotf_nitex.  <br /> <br />
+           <b> Purpose: </b>
+           Molecular Dynamics <br />
+           <b> Cell optimization: </b>
+           No (Use [[optcell]]=0 only) <br />
+           <b> Related variables: </b>
+           [[dtion]], [[lotf_classic]], [[lotf_nitex]], [[lotf_nneigx]], [[lotf_version]].  <br /> <br />
           </li>
           <li>
            30=&gt; Using a supercell, calculate a self consistent phonon structure
         as in PRL 100 095901 (2008). The initial phonon eigenvectors and
         eigenvalues are read in, and then atoms are displaced according
         to the normal modes populated at a given temperature until
-        convergence of the vibrational free energy (or so I hope)
-           <br />
-           <b>
-            Purpose:
-           </b>
-           Phonon structure
-           <br />
-           <b>
-            Cell optimization:
-           </b>
-           No (Use [[optcell]]=0 only)
-           <br />
-           <b>
-            Variables related:
-           </b>
-           <br />
-           <br />
+        convergence of the vibrational free energy (or so I hope) <br />
+           <b> Purpose: </b>
+           Phonon structure <br />
+           <b> Cell optimization: </b>
+           No (Use [[optcell]]=0 only) <br />
+           <b> Related variables: </b> <br /> <br />
           </li>
          </ul>
          <ul>
@@ -11888,8 +11686,8 @@
         [JP Perdew and Y Wang, Phys. Rev. B 45, 13244 (1992) ;
         Added extra digits to some constants as in the PBE routine
         see
-           <a href="http://www.chem.uci.edu/~kieron/dftold2/pbe.php">
-            http://www.chem.uci.edu/~kieron/dftold2/pbe.php
+           <a href="https://www.chem.uci.edu/~kieron/dftold2/pbe.php">
+            https://www.chem.uci.edu/~kieron/dftold2/pbe.php
            </a>
            (at some point it was available at http://dft.uci.edu/pbe.php)
         ]
@@ -14867,20 +14665,24 @@
 - !variable
     characteristics:
     - '[[DEVELOP]]'
-    commentdefault: null
+    commentdefault: 0 when [[usepaw]]=0, 1 when [[usepaw]]=1
     commentdims: null
-    defaultval: 0
-    definition: Norm-Conserving, use XC Core-Correction in G-space
+    defaultval: !valuewithconditions
+        '[[usepaw]]==0': 0
+        '[[usepaw]]==1': 1
+        defaultval: 0
+    definition: use XC Core-Correction in G-space
     dimensions: scalar
     excludes: null
     requires: null
     section: vardev
     text: |-
-        This variable is relevant only for norm-conserving calculations. Historically, Abinit treats the model core charge used for the non-linear core
+        Historically, Abinit treats the model core charge used for the non-linear core
         correction in real space. Alternatively, it is possible to instruct the code to compute the core charge in G-space following the same approach used in
         the PAW code. The G-space formalism is more accurate than the interpolation in real space, especially when derivatives of the model core charge are
-        needed, e.g. DFPT. Preliminary tests showed that the violation of the acoustic sum rule is reduced when nc_xccc_gspace==1 , especially for LDA. It's
-        worth stressing, however, that nc_xccc_gspace==1 should be used only in conjunction with NC pseudos whose model core charge that decays quickly in
+        needed, e.g. DFPT. Preliminary tests showed that the violation of the acoustic sum rule is reduced when [[nc_xccc_gspace]]==1 , especially for LDA.
+        It is worth stressing, however, that [[nc_xccc_gspace]]==1
+        should be used only in conjunction with NC pseudos whose model core charge that decays quickly in
         G-space. Several NC pseudos available in the Abinit table are not optimized for the G-space formalism and users are strongly invited to perform
         convergence studies with respect to ecut before using this option.
     varname: nc_xccc_gspace
@@ -15924,12 +15726,9 @@
     section: varrlx
     text: |-
         <p>
-         Gives the number of thermostats in the Martyna et al. chain of oscillators thermostats. The thermostat chains can be used either to perform Molecular Dynamics (MD) ([[ionmov]]=13) or to perform Path Integral Molecular Dynamics (PIMD) ([[imgmov]]=13).
-         <br />
-         The mass of these thermostats is given by
-          [[qmass]]
-         .
-         <br />
+         Gives the number of thermostats in the Martyna et al. chain of oscillators thermostats.
+         The thermostat chains can be used either to perform Molecular Dynamics (MD) ([[ionmov]]=13) or to perform Path Integral Molecular Dynamics (PIMD) ([[imgmov]]=13). <br />
+         The mass of these thermostats is given by [[qmass]].  <br />
         </p>
     varname: nnos
     vartype: integer
@@ -15952,10 +15751,14 @@
         the number of non-self-consistent loops is determined
         by [[nstep]].
          <br />
-         The Default value of 0 correspond to make
+         The Default value of 0 -- for standard plane-wave calculations -- corresponds to make
         the two first fixed potential determinations
         of wavefunctions have 2 non-self consistent loops,
         and the next ones to have only 1 non-self consistent loop.
+         <br />
+         The Default value of 0 -- for wavelets calculations ([[usewvl]]=1) -- corresponds to make
+        2 steps with 3 non-self consistent loops , 2 steps with 2 non-self consistent loops,
+        then the next ones with 1 non-self consistent loop.
         </p>
     varname: nnsclo
     vartype: integer
@@ -17160,6 +16963,20 @@
         are stored during the electronic minimisation.
         </p>
     varname: nwfshist
+    vartype: integer
+- !variable
+    characteristics: null
+    commentdefault: null
+    commentdims: null
+    defaultval: null
+    definition: Number of Z reduced coordinates that define the spatial CHEMical POTential
+    dimensions: null
+    excludes: null
+    requires: null
+    section: vargeo
+    text: |-
+        Defines the number of z reduced coordinates that defines the spatially varying chemical potential. See the input variable [[chempot]], of which [[nzchempot]] is the second dimension.
+    varname: nzchempot
     vartype: integer
 - !variable
     characteristics:
@@ -19235,8 +19052,8 @@
     text: |-
         This variable defines the number of shifts in the q-mesh used
         for the phonon DOS and for the Eliashberg functions (see [[ph_ngqpt]]).
-        If not given, the code assumes a Gamma-centered mesh.
-        The shifts are specified by [[ph_qshift]].
+        If not given, the code assumes a Gamma-centered mesh. The shifts
+        are specified by [[ph_qshift]].
     varname: ph_nqshift
     vartype: integer
 - !variable
@@ -19288,8 +19105,8 @@
     requires: '[[ph_intmeth]]==1'
     section: vareph
     text: |-
-        The gaussian broadening used for the integration of the phononDOS and the Eliashberg function.
-        See also [[ph_intmeth]] and [[ph_ngqpt]].
+        The gaussian broadening used for the integration of the phonon
+        DOS and the Eliashberg function. See also [[ph_intmeth]] and [[ph_ngqpt]].
     varname: ph_smear
     vartype: real
 - !variable
@@ -19317,7 +19134,7 @@
     dimensions:
     - '[[ntypat]]'
     excludes: null
-    requires: null
+    requires: '[[imgmov]]=9 or 13'
     section: varrlx
     text: |-
         <p>
@@ -19336,6 +19153,32 @@
         </p>
     varname: pimass
     vartype: real
+- !variable
+    characteristics: null
+    commentdefault: null
+    commentdims: null
+    defaultval: 0
+    definition: 'Path-Integral Molecular Dynamics: CONSTRAINT to be applied
+        on a reaction coordinate'
+    dimensions: scalar
+    excludes: null
+    requires: '[[imgmov]]=9 or 13'
+    section: varrlx
+    text: |-
+        Only relevant for Path-Integral Molecular Dynamics.<br/>
+        Selects a constraint to be applied during the PIMD trajectory. The constraint is holonomic (it is a relation between the position variables).In practice, the total forces applied to the atomic positions are modified so as to respect the constraint.<br/>
+        To date, the available constraints are:<br/>
+        <ul>
+        <li><b>0</b>: no constraint</li>
+        <li><b>1</b>: <i>"Blue Moon Ensemble" method</i>.<br/>
+        The constraint is a linear combination of the positions of atomic centroids (this linear combination is kept constant during the simulation). <br/>
+        Sum[W_i * X_i]=constant<br/>
+        The X_i are the coordinates of the atomic centroids. The weights W_i have to be specified with the [[wtatcon]](3,[[natcon]],[[nconeq]]), [[iatcon]]([[natcon]]) and [[natcon]] input parameters (where [[nconeq]] is fixed to 1).<br/>
+        More details on the implementation in: <a href="http://doi.org/10.1273/cbij.7.12">Y. Komeiji,Chem-Bio Informatics Journal 7, 12-23 (2007)</a>.
+        </li>
+        </ul>
+    varname: pimd_constraint
+    vartype: integer
 - !variable
     characteristics: null
     commentdefault: null
@@ -21365,6 +21208,8 @@
         residuals are printed at the end of the SCF loop. Also, the analysis
         of the value and location of the maximal density (and magnetization)
         is printed.</li>
+           <li> 3 =&gt; Print memory information for lobpcg </li>
+           <li> 4 =&gt; Like 3 and prints information of lobpcg algorithm convergence</li>
            <li> 10 =&gt; the eigenvalues are printed for
         every SCF iteration, as well as other additions (to be specified
         in the future...) </li>
@@ -27471,7 +27316,7 @@
 - !variable
     characteristics:
     - '[[DEVELOP]]'
-    commentdefault: 0 when [[usepaw]]=0 (norm-conserving pseudopotentials), 10 when [[usepaw]]=1 (PAW) ; 14 if [[paral_kgb]]=1.
+    commentdefault: 0 when [[usepaw]]=0 (norm-conserving pseudopotentials), 10 when [[usepaw]]=1 (PAW) ; 114 if [[paral_kgb]]=1.
     commentdims: null
     defaultval: '[[AUTO_FROM_PSP]]'
     definition: WaveFunction OPTimisation ALGorithm
@@ -27549,6 +27394,11 @@
         and the orthogonalization after the LOBPCG algorithm is no longer
         performed. The first modification increases the convergence and the
         second one the efficiency.
+          </li>
+        <li>
+           [[wfoptalg]]=114 :
+        A new version of [[wfoptalg]]=14 which is more efficient for few blocks and can take advance of OpenMP if abinit is compiled with a multithreaded linear algebra library.
+        With more than 1 thread [[npfft]] shoud NOT be used for the time being.
           </li>
           <li>
            [[wfoptalg]]=1 :

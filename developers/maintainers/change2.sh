@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Copyright (C) 1998-2016 ABINIT group (XG)
+# Copyright (C) 1998-2017 ABINIT group (XG)
 # 
 # The purpose of this script is to change some
 # expression by another in a whole set of files

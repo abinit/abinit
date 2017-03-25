@@ -9,7 +9,7 @@
 !! needed for allocating the input arrays in abinit.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2016 ABINIT group (XG, MKV)
+!! Copyright (C) 1999-2017 ABINIT group (XG, MKV)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -47,6 +47,8 @@
 !!  mxnspinor=maximal value of input nspinor for all the datasets
 !!  mxnsppol=maximal value of input nsppol for all the datasets
 !!  mxnsym=maximum number of symmetries
+!!  mxntypat=maximum number of types of atoms
+!!  mxnzchempot=maximal value of input nzchempot for all the datasets
 !!
 !! SIDE EFFECTS
 !!  dtsets(0:ndtset_alloc)=<type datafiles_type>contains all input variables,
@@ -68,8 +70,10 @@
 #include "abi_common.h"
 
 subroutine invars1m(dmatpuflag,dtsets,iout,lenstr,mband_upper_,&
-& msym,mxga_n_rules,mxgw_nqlwl,mxlpawu,mxmband_upper,mxnatom,mxnatpawu,mxnatsph,mxnatsph_extra,mxnatvshift,mxnconeq,&
-& mxnimage,mxn_efmas_dirs,mxnkpt,mxnkptgw,mxnnos,mxnqptdm,mxnspinor,mxnsppol,mxnsym,mxnimfrqs,mxnfreqsp,&
+& msym,mxga_n_rules,mxgw_nqlwl,mxlpawu,mxmband_upper,mxnatom,&
+& mxnatpawu,mxnatsph,mxnatsph_extra,mxnatvshift,mxnconeq,&
+& mxnimage,mxn_efmas_dirs,mxnkpt,mxnkptgw,mxnnos,mxnqptdm,mxnspinor, &
+& mxnsppol,mxnsym,mxntypat,mxnimfrqs,mxnfreqsp,mxnzchempot,&
 & mxn_projection_frequencies,ndtset,ndtset_alloc,string,npsp,zionpsp)
 
  use defs_basis
@@ -92,7 +96,8 @@ subroutine invars1m(dmatpuflag,dtsets,iout,lenstr,mband_upper_,&
  integer,intent(out) :: dmatpuflag,mxga_n_rules,mxgw_nqlwl,mxlpawu,mxmband_upper,mxnatpawu
  integer,intent(out) :: mxnatsph, mxnatsph_extra
  integer,intent(out) :: mxnatvshift,mxnconeq,mxn_efmas_dirs,mxnkpt,mxnkptgw,mxnnos
- integer,intent(out) :: mxnqptdm,mxnspinor,mxnsppol,mxnsym,mxnimfrqs,mxnfreqsp,mxn_projection_frequencies
+ integer,intent(out) :: mxnqptdm,mxnspinor,mxnsppol,mxnsym,mxntypat
+ integer,intent(out) :: mxnimfrqs,mxnfreqsp,mxnzchempot,mxn_projection_frequencies
  character(len=*),intent(inout) :: string
 !arrays
  integer,intent(out) :: mband_upper_(0:ndtset_alloc)
@@ -182,6 +187,8 @@ subroutine invars1m(dmatpuflag,dtsets,iout,lenstr,mband_upper_,&
  mxnqptdm=dtsets(1)%nqptdm
  mxnspinor=dtsets(1)%nspinor
  mxnsppol=dtsets(1)%nsppol
+ mxntypat=dtsets(1)%ntypat
+ mxnzchempot=dtsets(1)%nzchempot
 
 !Get MAX dimension over datasets
  do ii=1,ndtset_alloc
@@ -200,6 +207,8 @@ subroutine invars1m(dmatpuflag,dtsets,iout,lenstr,mband_upper_,&
    mxnqptdm=max(dtsets(ii)%nqptdm,mxnqptdm)
    mxnspinor=max(dtsets(ii)%nspinor,mxnspinor)
    mxnsppol=max(dtsets(ii)%nsppol,mxnsppol)
+   mxntypat=max(dtsets(ii)%ntypat,mxntypat)
+   mxnzchempot=max(dtsets(ii)%nzchempot,mxnzchempot)
    if (dtsets(ii)%usepawu>0) then
      if (dtsets(ii)%usedmatpu/=0) dmatpuflag=1
      lpawu=maxval(dtsets(ii)%lpawu(:))
@@ -227,6 +236,7 @@ subroutine invars1m(dmatpuflag,dtsets,iout,lenstr,mband_upper_,&
    ABI_ALLOCATE(dtsets(idtset)%bs_loband,(mxnsppol))
    ABI_ALLOCATE(dtsets(idtset)%bdgw,(2,mxnkptgw,mxnsppol))
    ABI_ALLOCATE(dtsets(idtset)%cd_imfrqs,(mxnimfrqs))
+   ABI_ALLOCATE(dtsets(idtset)%chempot,(3,mxnzchempot,mxntypat))
    nsp=max(mxnsppol,mxnspinor);nat=mxnatpawu*dmatpuflag
    ABI_ALLOCATE(dtsets(idtset)%dmatpawu,(2*mxlpawu+1,2*mxlpawu+1,nsp,nat,mxnimage))
    ABI_ALLOCATE(dtsets(idtset)%efmas_bands,(2,mxnkpt))

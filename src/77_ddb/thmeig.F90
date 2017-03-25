@@ -8,7 +8,7 @@
 !! The output is this quantity for the input k point.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2016 ABINIT group (PB, XG)
+!! Copyright (C) 1999-2017 ABINIT group (PB, XG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -352,7 +352,7 @@ subroutine thmeig(g2fsmear,acell,amu,anaddb_dtset,d2asr,&
      tolsym=tol8
      call symlatt(bravais,msym,nptsym,ptsymrel,rprimd,tolsym)
      use_inversion=1
-     call symfind(0,(/zero,zero,zero/),gprimd,0,msym,natom,0,nptsym,nsym_new,&
+     call symfind(0,(/zero,zero,zero/),gprimd,0,msym,natom,0,nptsym,nsym_new,0,&
 &     ptsymrel,spinat,symafm_new,symrel_new,tnons_new,tolsym,typat,use_inversion,xred)
      write(std_out,*)' thmeig : found ',nsym_new,' symmetries ',ch10
      qptopt=1

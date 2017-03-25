@@ -9,7 +9,7 @@
 !! (initialization of wavefunctions from scratch or from file, translations of wavefunctions, ...)
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (DCA, XG, GMR, AR, MB, MVer)
+!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR, AR, MB, MVer)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

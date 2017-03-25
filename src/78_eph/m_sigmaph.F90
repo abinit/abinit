@@ -7,7 +7,7 @@
 !!  Compute the matrix elements of the Fan-Migdal self-energy in the KS basis set.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2016 ABINIT group (MG)
+!!  Copyright (C) 2008-2017 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -2250,7 +2250,6 @@ subroutine sigmaph_gather_and_write(self, ebands, ikcalc, spin, comm)
    call c_f_pointer(c_loc(self%vals_nuq), rdata6, shape6)
    NCF_CHECK(nf90_put_var(self%ncid, nctk_idname(self%ncid, "vals_nuq"), rdata6, start=[1,1,1,1,1,1,ikcalc,spin]))
  end if
-#endif
 #endif
 
 end subroutine sigmaph_gather_and_write

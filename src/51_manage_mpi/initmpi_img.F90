@@ -7,7 +7,7 @@
 !!  Initializes the mpi informations for parallelism over images of the cell (npimage>1).
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2016 ABINIT group (MT,GG)
+!!  Copyright (C) 2008-2017 ABINIT group (MT,GG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .

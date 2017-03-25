@@ -9,7 +9,7 @@
 !!  inside a sphere or to count them.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2016 ABINIT group (SG, XG, AR, MG, MT)
+!!  Copyright (C) 2014-2017 ABINIT group (SG, XG, AR, MG, MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -3285,6 +3285,7 @@ subroutine indfftrisc(gbound,indpw_k,kg_k,mgfft,ngb,ngfft,npw_k)
    end if
    igb=igb+2
  end do
+
  if(gbound(1)<=-1)then ! g2min
    do g2=gbound(1)+n2,n2-1
      do g1=0,gbound(igb+1)

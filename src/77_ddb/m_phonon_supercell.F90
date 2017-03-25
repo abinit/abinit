@@ -10,7 +10,7 @@
 !! as well as the central init_supercell
 !!
 !! COPYRIGHT
-!! Copyright (C) 2010-2016 ABINIT group (MJV)
+!! Copyright (C) 2010-2017 ABINIT group (MJV)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -87,6 +87,8 @@ CONTAINS  !=====================================================================
 !!          1 find smallest supercell which will accomodate phonon qphon = (1/2,1/2,1/2) or ...
 !! rprimd(3,3) = real space lattice vectors (bohr)
 !! xcart(3,natom) = cartesian positions of atoms in primitive cell
+!! ordering = if true,  typat will be 1 1 1 1 1 1 2 2 2 2 2 2 3 3 3 3 ....
+!!            if false, typat will be 1 2 3 4 1 2 3 4 1 2 3 4 1 2 3 4 ....
 !!
 !! OUTPUT
 !! scell = supercell structure to be initialized
@@ -98,7 +100,7 @@ CONTAINS  !=====================================================================
 !!
 !! SOURCE
 
-subroutine init_supercell(natom, option, qphon, rprimd, typat, xcart, scell)
+subroutine init_supercell(natom, option, qphon, rprimd, typat, xcart, scell,ordering)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -112,6 +114,7 @@ subroutine init_supercell(natom, option, qphon, rprimd, typat, xcart, scell)
 !scalars
  integer, intent(in) :: natom, option
  type(supercell_type), intent(out) :: scell
+ logical,optional,intent(in) :: ordering
 !arrays
  integer , intent(in) :: typat(natom)
  real(dp), intent(in) :: qphon(3)
@@ -123,11 +126,19 @@ subroutine init_supercell(natom, option, qphon, rprimd, typat, xcart, scell)
  integer :: ii, maxsc, i1,i2,i3, iscmult
  integer :: iatom, iatom_supercell
  real(dp) :: qbymult
+ logical :: ordering_tmp
 !arrays
  integer :: r_cell(3)
  integer :: supercell(3) ! number of primitive cells in each direction for the supercell
  character(len=500) :: msg
 ! *************************************************************************
+
+!Set the optional variable ordering
+ if (present(ordering)) then
+   ordering_tmp = ordering
+ else
+   ordering_tmp = .false.
+ end if
 
 ! maximum number of unit cells in a given direction
  maxsc = 10
@@ -170,21 +181,39 @@ subroutine init_supercell(natom, option, qphon, rprimd, typat, xcart, scell)
  ABI_ALLOCATE(scell%atom_indexing_supercell,(scell%natom_supercell))
  ABI_ALLOCATE(scell%uc_indexing_supercell,(3,scell%natom_supercell))
 
- iatom_supercell = 0
- do i1 = 1, supercell(1)
-   do i2 = 1, supercell(2)
-     do i3 = 1, supercell(3)
-       do iatom = 1, natom
-         iatom_supercell = iatom_supercell + 1
-         r_cell = (/i1-1,i2-1,i3-1/)
-         scell%xcart_supercell_ref(:,iatom_supercell) = xcart(:,iatom) + matmul(rprimd,r_cell)
-         scell%atom_indexing_supercell(iatom_supercell) = iatom
-         scell%uc_indexing_supercell(:,iatom_supercell) = r_cell
-         scell%typat_supercell(iatom_supercell) = typat(iatom)
+ if (ordering_tmp) then
+   iatom_supercell = 0
+   do iatom = 1, natom
+     do i1 = 1, supercell(1)
+       do i2 = 1, supercell(2)
+         do i3 = 1, supercell(3)
+           iatom_supercell = iatom_supercell + 1
+           r_cell = (/i1-1,i2-1,i3-1/)
+           scell%xcart_supercell_ref(:,iatom_supercell) = xcart(:,iatom) + matmul(rprimd,r_cell)
+           scell%atom_indexing_supercell(iatom_supercell) = iatom
+           scell%uc_indexing_supercell(:,iatom_supercell) = r_cell
+           scell%typat_supercell(iatom_supercell) = typat(iatom)
+         end do
        end do
      end do
    end do
- end do
+ else
+   iatom_supercell = 0
+   do i1 = 1, supercell(1)
+     do i2 = 1, supercell(2)
+       do i3 = 1, supercell(3)
+         do iatom = 1, natom
+           iatom_supercell = iatom_supercell + 1
+           r_cell = (/i1-1,i2-1,i3-1/)
+           scell%xcart_supercell_ref(:,iatom_supercell) = xcart(:,iatom) + matmul(rprimd,r_cell)
+           scell%atom_indexing_supercell(iatom_supercell) = iatom
+           scell%uc_indexing_supercell(:,iatom_supercell) = r_cell
+           scell%typat_supercell(iatom_supercell) = typat(iatom)
+         end do
+       end do
+     end do
+   end do
+ end if
 
  ABI_CHECK(iatom_supercell == scell%natom_supercell, "iatom_supercell /= scell%natom_supercell")
 
