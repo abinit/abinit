@@ -2251,6 +2251,7 @@ subroutine sigmaph_gather_and_write(self, ebands, ikcalc, spin, comm)
    NCF_CHECK(nf90_put_var(self%ncid, nctk_idname(self%ncid, "vals_nuq"), rdata6, start=[1,1,1,1,1,1,ikcalc,spin]))
  end if
 #endif
+#endif
 
 end subroutine sigmaph_gather_and_write
 !!***
