@@ -7,7 +7,7 @@
 !! calculate Born effective charge tensor in Eq.(33) in PRB 75, 115116(2007).
 !!
 !! COPYRIGHT
-!! Copyright (C) 2004-2016 ABINIT group (XW).
+!! Copyright (C) 2004-2017 ABINIT group (XW).
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

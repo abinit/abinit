@@ -12,7 +12,7 @@
 !! displacement field boundary conditions.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2016 ABINIT group (XW)
+!! Copyright (C) 1999-2017 ABINIT group (XW)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

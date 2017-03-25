@@ -9,7 +9,7 @@
 !! Compute strain phonon coupling by finite differences
 !! Return the effective_potential with the third order
 !! COPYRIGHT
-!! Copyright (C) 2010-2015 ABINIT group (AM)
+!! Copyright (C) 2010-2017 ABINIT group (AM)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -334,8 +334,9 @@ subroutine anharmonics_terms_setCoeffs(coeffs,anharmonics_terms,ncoeff)
   anharmonics_terms%ncoeff = ncoeff  
   ABI_DATATYPE_ALLOCATE(anharmonics_terms%coefficients,(ncoeff))
   do ii=1,anharmonics_terms%ncoeff
-    call polynomial_coeff_init(coeffs(ii)%coefficient,coeffs(ii)%name,coeffs(ii)%nterm,&
-&                              anharmonics_terms%coefficients(ii),coeffs(ii)%terms)
+    call polynomial_coeff_init(coeffs(ii)%coefficient,coeffs(ii)%nterm,&
+&                              anharmonics_terms%coefficients(ii),&
+&                              coeffs(ii)%terms,name=coeffs(ii)%name)
   end do
 
 end subroutine anharmonics_terms_setCoeffs

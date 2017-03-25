@@ -7,7 +7,7 @@
 !!  Calculates the partial contribution to the COH part of the COHSEX self-energy for a given q-point.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2016 ABINIT group (FB,MG)
+!! Copyright (C) 2005-2017 ABINIT group (FB,MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -167,7 +167,7 @@ end subroutine calc_coh
 !!  function entering the definition of the GW self-energy.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2016 ABINIT group (FB,MG)
+!! Copyright (C) 2005-2017 ABINIT group (FB,MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

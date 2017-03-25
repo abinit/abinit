@@ -6,7 +6,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 1992-2016 ABINIT group (XG, MG)
+!! Copyright (C) 1992-2017 ABINIT group (XG, MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -708,6 +708,7 @@ subroutine dtset_copy(dtout, dtin)
  dtout%ntypat             = dtin%ntypat
  dtout%ntyppure           = dtin%ntyppure
  dtout%nwfshist           = dtin%nwfshist
+ dtout%nzchempot          = dtin%nzchempot
  dtout%occopt             = dtin%occopt
  dtout%optcell            = dtin%optcell
  dtout%optdriver          = dtin%optdriver
@@ -743,6 +744,7 @@ subroutine dtset_copy(dtout, dtin)
  dtout%pawujrad           = dtin%pawujrad
  dtout%pawujv             = dtin%pawujv
  dtout%pawxcdev           = dtin%pawxcdev
+ dtout%pimd_constraint    = dtin%pimd_constraint
  dtout%pitransform        = dtin%pitransform
  dtout%plowan_compute     = dtin%plowan_compute
  dtout%plowan_bandi       = dtin%plowan_bandi
@@ -1099,6 +1101,8 @@ subroutine dtset_copy(dtout, dtin)
 
  call alloc_copy( dtin%cd_imfrqs, dtout%cd_imfrqs)
 
+ call alloc_copy( dtin%chempot, dtout%chempot)
+
  call alloc_copy( dtin%corecs, dtout%corecs)
 
  call alloc_copy( dtin%densty, dtout%densty)
@@ -1308,6 +1312,9 @@ subroutine dtset_free(dtset)
  end if
  if (allocated(dtset%cd_imfrqs))   then
    ABI_DEALLOCATE(dtset%cd_imfrqs)
+ end if
+ if (allocated(dtset%chempot))    then
+   ABI_DEALLOCATE(dtset%chempot)
  end if
  if (allocated(dtset%corecs))      then
    ABI_DEALLOCATE(dtset%corecs)

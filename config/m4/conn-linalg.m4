@@ -1,6 +1,6 @@
 # -*- Autoconf -*-
 #
-# Copyright (C) 2005-2016 ABINIT Group (Yann Pouillon)
+# Copyright (C) 2005-2017 ABINIT Group (Yann Pouillon)
 #
 # This file is part of the ABINIT software package. For license information,
 # please see the COPYING file in the top-level directory of the ABINIT source
@@ -244,6 +244,20 @@ AC_DEFUN([_ABI_LINALG_CHECK_BLAS_MKL_EXTS],[
 
   if test "${abi_linalg_mkl_has_omatadd}" = "yes"; then
     AC_DEFINE([HAVE_LINALG_MKL_OMATADD],1,[Define to 1 if you have mkl_?omatadd extensions.])
+  fi
+
+  dnl mkl_threads support functions
+  AC_MSG_CHECKING([for mkl_set/get_threads in specified libraries])
+  AC_LINK_IFELSE([AC_LANG_PROGRAM([],
+    [
+      integer :: a
+      a = mkl_get_max_threads()
+      call mkl_set_num_threads
+    ])], [abi_linalg_mkl_has_threads="yes"], [abi_linalg_mkl_has_threads="no"])
+  AC_MSG_RESULT([${abi_linalg_mkl_has_threads}])
+
+  if test "${abi_linalg_mkl_has_threads}" = "yes"; then
+    AC_DEFINE([HAVE_LINALG_MKL_THREADS],1,[Define to 1 if you have mkl_*threads extensions.])
   fi
 
 ]) # _ABI_LINALG_CHECK_BLAS_MKL_EXTS

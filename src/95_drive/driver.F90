@@ -13,7 +13,7 @@
 !! selected big arrays are allocated, then the gstate, respfn, ...  subroutines are called.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2016 ABINIT group (XG,MKV,MM,MT,FJ)
+!! Copyright (C) 1999-2017 ABINIT group (XG,MKV,MM,MT,FJ)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -98,6 +98,7 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
 #if defined DEV_YP_VDWXC
  use m_xc_vdw
 #endif
+ use m_xg, only : xg_finalize
 
  use m_libpaw_tools, only : libpaw_write_comm_set
  use m_pawang,       only : pawang_type, pawang_free
@@ -298,11 +299,10 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
 !  ****************************************************************************
 !  Treat the file names (get variables)
 
+!  In the case of multiple images, the file names will be overwritten later (for each image)
+   call dtfil_init(dtfil,dtset,filnam,filstat,idtset,jdtset_,mpi_enregs(idtset),ndtset)
    if (dtset%optdriver==RUNL_GSTATE.and.dtset%nimage>1) then
      call dtfil_init_img(dtfil,dtset,dtsets,idtset,jdtset_,ndtset,ndtset_alloc)
-!    Call to dtfil_init1 is postponed in the loop over images
-   else
-     call dtfil_init(dtfil,dtset,filnam,filstat,idtset,jdtset_,mpi_enregs(idtset),ndtset)
    end if
 
 !  ****************************************************************************
@@ -806,6 +806,7 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
    ABI_DEALLOCATE(npwtot)
 
    call abi_linalg_finalize()
+   call xg_finalize()
 
    ! Check whether exiting was required by the user.
    ! If found then beat a hasty exit from time steps
@@ -814,7 +815,8 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
 
    call timab(643,2,tsec)
 
-   if (iexit/=0)exit
+   if (iexit/=0) exit
+
  end do ! idtset (allocate statements are present - an exit statement is present)
 
 !*********************************************************************

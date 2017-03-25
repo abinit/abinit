@@ -7,7 +7,7 @@
 !!  Wrappers for various numeric operations (spline, sort, ...)
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2012-2016 ABINIT group (MT,TR)
+!!  Copyright (C) 2012-2017 ABINIT group (MT,TR)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -33,6 +33,7 @@ module m_paw_numeric
 !public procedures
  public:: paw_spline
  public:: paw_splint
+ public:: paw_splint_der
  public:: paw_smooth
  public:: paw_sort_dp
  public:: paw_jbessel
@@ -228,8 +229,8 @@ end subroutine paw_spline
 !!  paw_splint
 !!
 !! FUNCTION
-!!  Compute spline interpolation. There is no hypothesis
-!!  about the spacing of the input grid points.
+!!  Compute spline interpolation of a tabulated function.
+!!  There is no hypothesis about the spacing of the input grid points.
 !!
 !! INPUTS
 !!  nspline: number of grid points of input mesh
@@ -303,7 +304,7 @@ subroutine paw_splint(nspline,xspline,yspline,ysplin2,nfit,xfit,yfit,ierr)
        invdelarg= 1.0_dp/delarg
        aa= (xspline(right)-xfit(i))*invdelarg
        bb= (xfit(i)-xspline(left))*invdelarg
-       yfit(i) = aa*yspline(left) + bb*yspline(right)    &
+       yfit(i) = aa*yspline(left)+bb*yspline(right)    &
 &               +( (aa*aa*aa-aa)*ysplin2(left) +         &
 &                  (bb*bb*bb-bb)*ysplin2(right) ) *delarg*delarg/6.0_dp
        exit
@@ -314,6 +315,99 @@ subroutine paw_splint(nspline,xspline,yspline,ysplin2,nfit,xfit,yfit,ierr)
  if (present(ierr)) ierr=my_err
 
 end subroutine paw_splint
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_paw_numeric/paw_splint_der
+!! NAME
+!!  paw_splint_der
+!!
+!! FUNCTION
+!!  Compute spline interpolation of the derivative of a tabulated function.
+!!  There is no hypothesis about the spacing of the input grid points.
+!!
+!! INPUTS
+!!  nspline: number of grid points of input mesh
+!!  xspline(nspline): input mesh
+!!  yspline(nspline): function on input mesh
+!!  ysplin2(nspline): second derivative of yspline on input mesh
+!!  nfit: number of points of output mesh
+!!  xfit(nfit): output mesh
+!!
+!! OUTPUT
+!!  dydxfit(nfit): 1st-derivative of function on output mesh
+!!  [ierr]=A non-zero value is used to signal that some points in xfit exceed xspline(nspline).
+!!    The input value is incremented by the number of such points.
+!!
+!! PARENTS
+!!      m_paw_atom,m_paw_finegrid,m_paw_gaussfit,m_paw_pwaves_lmn,m_pawpsp,m_pawxmlps
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine paw_splint_der(nspline,xspline,yspline,ysplin2,nfit,xfit,dydxfit,ierr)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'paw_splint_der'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: nfit, nspline
+ integer,optional,intent(out) :: ierr
+!arrays
+ real(dp),intent(in) :: xspline(nspline),yspline(nspline)
+ real(dp),intent(in) :: ysplin2(nspline),xfit(nfit)
+ real(dp),intent(out) :: dydxfit(nfit)
+
+!Local variables-------------------------------
+!scalars
+ integer :: left,i,k,right,my_err
+ real(dp) :: delarg,invdelarg,aa,bb
+ character(len=50) :: msg
+!arrays
+
+! *************************************************************************
+
+ my_err=0
+ left=1
+ do i=1,nfit
+   dydxfit(i)=0._dp  ! Initialize for the unlikely event that rmax exceed r(mesh)
+   do k=left+1, nspline
+     if(xspline(k) >= xfit(i)) then
+       if(xspline(k-1) <= xfit(i)) then
+         right = k
+         left = k-1
+       else
+         if (k-1.eq.1 .and. i.eq.1) then
+           msg='xfit(1) < xspline(1)'
+         else
+           msg='xfit not properly ordered'
+         end if
+         MSG_ERROR(msg)
+       end if
+       delarg= xspline(right) - xspline(left)
+       invdelarg= 1.0_dp/delarg
+       aa= (xspline(right)-xfit(i))*invdelarg
+       bb= (xfit(i)-xspline(left))*invdelarg
+       dydxfit(i) = (yspline(right)-yspline(left))*invdelarg &
+&                  -( (3.0_dp*(aa*aa)-1.0_dp) *ysplin2(left) &
+&                    -(3.0_dp*(bb*bb)-1.0_dp) *ysplin2(right) ) *delarg/6.0_dp
+       exit
+     end if
+   end do ! k
+   if (k==nspline+1) my_err=my_err+1 ! xfit not found
+ end do ! i
+ if (present(ierr)) ierr=my_err
+
+end subroutine paw_splint_der
 !!***
 
 !----------------------------------------------------------------------

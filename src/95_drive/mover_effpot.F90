@@ -7,7 +7,7 @@
 !! this routine is driver for using mover with effective potential
 !! 
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (AM)
+!! Copyright (C) 1998-2017 ABINIT group (AM)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -259,26 +259,33 @@ implicit none
 !  Set the barostat and thermonstat if ionmov == 13
    if(dtset%ionmov == 13)then
 
-     qmass = (dtset%natom* kb_THzK * dtset%mdtemp(1)) / (0.1**2)
-     bmass = (dtset%natom* kb_THzK * dtset%mdtemp(1)) / (0.01**2)
+     qmass = (abs(1+product(inp%strtarget(1:3)/3))*dtset%natom* kb_THzK * dtset%mdtemp(1)) / (0.1**2)
+     bmass = (abs(1+product(inp%strtarget(1:3)/3))*dtset%natom* kb_THzK * dtset%mdtemp(1)) / (0.01**2)
 
      if(dtset%nnos==0) then
        dtset%nnos = 1
        ABI_ALLOCATE(dtset%qmass,(dtset%nnos))
        dtset%qmass(:)  = qmass
+       write(message,'(3a,F20.1,a)')&
+&      ' WARNING: nnos is set to zero in the input',ch10,&
+&      '          value by default for qmass: ',dtset%qmass(:),ch10
+       call wrtout(std_out,message,"COLL")
      else
        ABI_ALLOCATE(dtset%qmass,(dtset%nnos)) ! Q thermostat mass
         dtset%qmass(:) = inp%qmass(:)
      end if
      if (inp%bmass == zero) then
        dtset%bmass = bmass
+       write(message,'(3a,F20.4,a)')&
+&      ' WARNING: bmass is set to zero in the input',ch10,&
+&       '          value by default for bmass: ',dtset%bmass,ch10
+       call wrtout(std_out,message,"COLL")
      else
        dtset%bmass = inp%bmass  ! Barostat mass
      end if
    end if
-
-   dtset%strtarget(1:3) = 0.0/29421.033d0 ! STRess TARGET
-   dtset%strtarget(4:6) = 0.0 ! STRess TARGET
+   
+   dtset%strtarget(1:6) = -1 * inp%strtarget(1:6) / 29421.033d0 ! STRess TARGET
    ABI_ALLOCATE(symrel,(3,3,dtset%nsym))
    symrel = one
    call alloc_copy(symrel,dtset%symrel)
@@ -323,9 +330,19 @@ implicit none
    ABI_ALLOCATE(rhor,(2,1))
    
 !  Initialize xf history (should be put in inwffil)
-   ab_xfh%nxfh=0
-   ab_xfh%mxfh=(ab_xfh%nxfh-dtset%restartxf+1)+dtset%ntime+5 
+!  Not yet implemented for ionmov 2 3 10 11 22 (memory problem...)
+!   ab_xfh%mxfh=(ab_xfh%nxfh-dtset%restartxf+1)+dtset%ntime+5 
+   ab_xfh%nxfh = 0
+
+   ab_xfh%mxfh = 1
    ABI_ALLOCATE(ab_xfh%xfhist,(3,dtset%natom+4,2,ab_xfh%mxfh))
+   if (any((/2,3,10,11,22/)==dtset%ionmov)) then
+     write(message, '(3a)' )&
+&   ' This dynamics can not be used with effective potential',ch10,&
+&   'Action: correct dynamics input'
+     MSG_BUG(message)
+   end if
+
 
 !***************************************************************
 !2  initialization of the structure for the dynamics
@@ -407,7 +424,7 @@ implicit none
 !*********************************************************
 !3   Call main routine for monte carlo / molecular dynamics
 !*********************************************************
-   write(message, '(a,(80a),3a)' ) ch10,('-',ii=1,80),ch10,&
+   write(message, '((80a),3a)' ) ('-',ii=1,80), ch10,&
 &   '-Monte Carlo / Molecular Dynamics ',ch10
    call wrtout(ab_out,message,'COLL')
    call wrtout(std_out,message,'COLL')

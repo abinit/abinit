@@ -8,7 +8,7 @@
 !!  Frequency-Reciprocal space on a transition (electron-hole) basis set.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2016 ABINIT group (M.Giantomassi, L. Reining, V. Olevano, F. Sottile, S. Albrecht, G. Onida)
+!! Copyright (C) 2009-2017 ABINIT group (M.Giantomassi, L. Reining, V. Olevano, F. Sottile, S. Albrecht, G. Onida)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -231,7 +231,7 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
  real(dp),allocatable :: ks_nhat(:,:),ks_nhatgr(:,:,:),ks_rhog(:,:),ks_rhor(:,:),qp_aerhor(:,:)
  real(dp),allocatable :: qp_rhor(:,:),qp_rhog(:,:) !,qp_vhartr(:),qp_vtrial(:,:),qp_vxc(:,:)
  real(dp),allocatable :: qp_rhor_paw(:,:),qp_rhor_n_one(:,:),qp_rhor_nt_one(:,:),qp_nhat(:,:)
- real(dp),allocatable :: grewtn(:,:),grvdw(:,:),qmax(:)
+ real(dp),allocatable :: grchempottn(:,:),grewtn(:,:),grvdw(:,:),qmax(:)
  real(dp),allocatable :: vpsp(:),xccc3d(:)
  real(dp),allocatable :: ks_vhartr(:),ks_vtrial(:,:),ks_vxc(:,:)
  real(dp),allocatable :: kxc(:,:) !,qp_kxc(:,:)
@@ -643,6 +643,7 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
  ! *******************************************************************
  ngrvdw=0
  ABI_MALLOC(grvdw,(3,ngrvdw))
+ ABI_MALLOC(grchempottn,(3,Cryst%natom))
  ABI_MALLOC(grewtn,(3,Cryst%natom))
  nkxc=0
 !if (Wfd%nspden==1) nkxc=2
@@ -681,7 +682,7 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
 
  ABI_FREE(ph1d)
 
- call setvtr(Cryst%atindx1,Dtset,KS_energies,Cryst%gmet,Cryst%gprimd,grewtn,grvdw,gsqcutf_eff,&
+ call setvtr(Cryst%atindx1,Dtset,KS_energies,Cryst%gmet,Cryst%gprimd,grchempottn,grewtn,grvdw,gsqcutf_eff,&
 & istep,kxc,mgfftf,moved_atm_inside,moved_rhor,MPI_enreg_seq,&
 & Cryst%nattyp,nfftf,ngfftf,ngrvdw,ks_nhat,ks_nhatgr,nhatgrdim,nkxc,Cryst%ntypat,Psps%n1xccc,n3xccc,&
 & optene,Pawrad,Pawtab,ph1df,Psps,ks_rhog,ks_rhor,Cryst%rmet,Cryst%rprimd,strsxc,&
@@ -717,6 +718,7 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
 
  ABI_FREE(kxc)
  ABI_FREE(xccc3d)
+ ABI_FREE(grchempottn)
  ABI_FREE(grewtn)
  ABI_FREE(grvdw)
 

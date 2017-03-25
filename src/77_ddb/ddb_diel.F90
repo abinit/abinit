@@ -11,7 +11,7 @@
 !! See the definitions Eq.(53-54) in PRB55, 10355 (1997).
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2016 ABINIT group (XG,XW)
+!! Copyright (C) 1999-2017 ABINIT group (XG,XW)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

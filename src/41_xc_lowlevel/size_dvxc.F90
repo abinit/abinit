@@ -7,7 +7,7 @@
 !! needed for the allocations depending on the routine which is called from the drivexc routine
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (TD)
+!! Copyright (C) 1998-2017 ABINIT group (TD)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

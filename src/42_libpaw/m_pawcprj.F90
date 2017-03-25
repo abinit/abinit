@@ -11,7 +11,7 @@
 !!         |Cnk> are wave functions
 !!
 !! COPYRIGHT
-!! Copyright (C) 2012-2016 ABINIT group (MT,JWZ)
+!! Copyright (C) 2012-2017 ABINIT group (MT,JWZ)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -773,7 +773,7 @@ end subroutine pawcprj_zaxpby
 
  subroutine pawcprj_symkn(cprj_fkn,cprj_ikn,cprj_sym,dimlmn,iband,indlmn,&
 &                       isym,itim,kpt,lmax,lmnmax,mband,natom,nband,nspinor,nsym,ntypat,&
-&                       typat,zarot)
+&                       typat,zarot,atindx)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -792,6 +792,7 @@ end subroutine pawcprj_zaxpby
 !arrays
  integer,intent(in) :: cprj_sym(4,nsym,natom),dimlmn(natom)
  integer,intent(in) :: indlmn(6,lmnmax,ntypat),typat(natom)
+ integer,optional,intent(in) ::atindx(natom)
  real(dp),intent(in) :: kpt(3)
  real(dp),intent(in) :: zarot(2*lmax+1,2*lmax+1,lmax+1,nsym)
  type(pawcprj_type),intent(in) :: cprj_ikn(natom,mband*nspinor)
@@ -799,14 +800,16 @@ end subroutine pawcprj_zaxpby
 
 !Local variables---------------------------
 !scalars
- integer :: iatom, ibct, ibnd, ibsp, ibst, icpgr, iin, il, il0, im
- integer :: ilmn, iln, iln0, ilpm, indexi, ispinor, itypat, jatom, mm, nlmn
+ integer :: iatm,iatom, ibct, ibnd, ibsp, ibst, icpgr, iin, il, il0, im
+ integer :: ilmn, iln, iln0, ilpm, indexi, ispinor, itypat, jatm,jatom, mm, nlmn
  real(dp) :: kdotL, phr, phi
+ logical :: order
 !arrays
  real(dp) :: rl(3), t1(2), t2(2)
 
 ! *************************************************************************
 
+! if (present(atindx)) order=.true.
  if (iband == -1) then
    ibst = 1
    ibnd = nband
@@ -816,13 +819,16 @@ end subroutine pawcprj_zaxpby
  end if
 
  do iatom = 1, natom
+   iatm=iatom!; if(order) iatm=atindx(iatom)
    itypat = typat(iatom)
-   nlmn = dimlmn(iatom)
+   nlmn = dimlmn(iatm)
    jatom = cprj_sym(4,isym,iatom)
+   jatm=jatom
    rl(:) = cprj_sym(1:3,isym,iatom)
    kdotL = dot_product(rl,kpt)
    phr = cos(two_pi*kdotL)
    phi = sin(two_pi*kdotL)
+
    il0 = -1; iln0 = -1; indexi = 1
    do ilmn = 1, nlmn
 
@@ -841,25 +847,27 @@ end subroutine pawcprj_zaxpby
 
          t1(:) = zero
          do mm = 1, 2*il+1
-           t1(1) = t1(1) + zarot(mm,ilpm,il+1,isym)*cprj_ikn(jatom,ibsp)%cp(1,indexi+mm)
-           t1(2) = t1(2) + zarot(mm,ilpm,il+1,isym)*cprj_ikn(jatom,ibsp)%cp(2,indexi+mm)
+           t1(1) = t1(1) + zarot(mm,ilpm,il+1,isym)*cprj_ikn(jatm,ibsp)%cp(1,indexi+mm)
+           t1(2) = t1(2) + zarot(mm,ilpm,il+1,isym)*cprj_ikn(jatm,ibsp)%cp(2,indexi+mm)
          end do
          t2(1) = t1(1)*phr - t1(2)*phi
          t2(2) = t1(2)*phr + t1(1)*phi
 
          if (itim == 1) t2(2) = -t2(2)
 
-         cprj_fkn(iatom,ibsp)%cp(1,ilmn) = t2(1)
-         cprj_fkn(iatom,ibsp)%cp(2,ilmn) = t2(2)
+         cprj_fkn(iatm,ibsp)%cp(1,ilmn) = t2(1)
+         cprj_fkn(iatm,ibsp)%cp(2,ilmn) = t2(2)
 
 ! do same transformations for gradients of cprj_ikn
 ! note that ncpgr = 0 if no gradients present so this loop will not be executed
 ! in this case
+
          do icpgr = 1, cprj_ikn(jatom,ibsp)%ncpgr
            t1(:) = zero
+
            do mm = 1, 2*il+1
-             t1(1) = t1(1) + zarot(mm,ilpm,il+1,isym)*cprj_ikn(jatom,ibsp)%dcp(1,icpgr,indexi+mm)
-             t1(2) = t1(2) + zarot(mm,ilpm,il+1,isym)*cprj_ikn(jatom,ibsp)%dcp(2,icpgr,indexi+mm)
+             t1(1) = t1(1) + zarot(mm,ilpm,il+1,isym)*cprj_ikn(jatm,ibsp)%dcp(1,icpgr,indexi+mm)
+             t1(2) = t1(2) + zarot(mm,ilpm,il+1,isym)*cprj_ikn(jatm,ibsp)%dcp(2,icpgr,indexi+mm)
            end do
 
            t2(1) = t1(1)*phr - t1(2)*phi
@@ -867,8 +875,8 @@ end subroutine pawcprj_zaxpby
 
            if (itim == 1) t2(2) = -t2(2)
 
-           cprj_fkn(iatom,ibsp)%dcp(1,icpgr,ilmn) = t2(1)
-           cprj_fkn(iatom,ibsp)%dcp(2,icpgr,ilmn) = t2(2)
+           cprj_fkn(iatm,ibsp)%dcp(1,icpgr,ilmn) = t2(1)
+           cprj_fkn(iatm,ibsp)%dcp(2,icpgr,ilmn) = t2(2)
 
          end do ! end loop over ncpgr
 
@@ -1117,6 +1125,7 @@ end subroutine pawcprj_lincom
  n2dim=size(cprj,dim=2)
 
  write(std_out,'(a)')' pawcprj_output '
+
  do jj=1,n2dim
    do ii=1,n1dim
      write(std_out,'(a,i4,a,i4)')'atom ',ii,' band*k ',jj

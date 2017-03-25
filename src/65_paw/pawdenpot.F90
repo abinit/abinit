@@ -9,7 +9,7 @@
 !! Can also compute first-order densities potentials and second-order energies (RF calculations).
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (FJ, MT)
+!! Copyright (C) 1998-2017 ABINIT group (FJ, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -852,6 +852,7 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
        paw_ij(iatom)%dijfock(:,:)=dijfock_vv(:,:)+dijfock_cv(:,:)
 
 !      Fock contribution to energy
+
        if (option/=1) then
          if ((cplex==1).or.(ipert==0)) then
            do ispden=1,pawrhoij(iatom)%nspden
@@ -878,6 +879,7 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
            end do
          end if
        end if
+
        ABI_DEALLOCATE(dijfock_vv)
        ABI_DEALLOCATE(dijfock_cv)
 

@@ -9,7 +9,7 @@
 !!  pawtab_type variables define TABulated data for PAW (from pseudopotential)
 !!
 !! COPYRIGHT
-!! Copyright (C) 2013-2016 ABINIT group (MT)
+!! Copyright (C) 2013-2017 ABINIT group (MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -103,6 +103,10 @@ MODULE m_pawtab
 
   type(wvlpaw_rholoc_type) :: rholoc
    ! local density
+   !   d(:,1): local rho
+   !   d(:,2): local rho 2nd-derivative
+   !   d(:,3): local pot
+   !   d(:,4): local pot 2nd-derivative
 
  end type wvlpaw_type
 

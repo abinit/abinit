@@ -10,7 +10,7 @@
 !! the exchange-correlation kernel.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2016 ABINIT group (FR, EB)
+!! Copyright (C) 2001-2017 ABINIT group (FR, EB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

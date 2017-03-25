@@ -9,7 +9,7 @@
 !! thermodynamical properties, Debye-Waller factor, and atomic mean square velocity
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2016 ABINIT group (CL,XG)
+!! Copyright (C) 1999-2017 ABINIT group (CL,XG)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

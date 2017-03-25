@@ -9,7 +9,7 @@
 !!         VNL = Sum_ij [ Dij |pi><pj| ],  with pi, pj= projectors
 !!
 !! COPYRIGHT
-!! Copyright (C) 2013-2016 ABINIT group (MT, FJ, BA, JWZ)
+!! Copyright (C) 2013-2017 ABINIT group (MT, FJ, BA, JWZ)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -643,7 +643,6 @@ subroutine pawdij(cplex,enunit,gprimd,ipert,my_natom,natom,nfft,nfftot,nspden,nt
        end do
      end if   
      LIBPAW_DEALLOCATE(dij0)
-
    end if
 
 !  ------------------------------------------------------------------------
@@ -655,6 +654,7 @@ subroutine pawdij(cplex,enunit,gprimd,ipert,my_natom,natom,nfft,nfftot,nspden,nt
 
 !    ===== DijFock already computed
      if (paw_ij(iatom)%has_dijfock==2) then
+
        if (dij_need) paw_ij(iatom)%dij(:,:)=paw_ij(iatom)%dij(:,:)+paw_ij(iatom)%dijfock(:,:)
 
      else
@@ -674,7 +674,6 @@ subroutine pawdij(cplex,enunit,gprimd,ipert,my_natom,natom,nfft,nfftot,nspden,nt
        LIBPAW_DEALLOCATE(dijfock_cv)
      end if
    end if
-
 
 !  ----------- Add Dij_Hartree to Dij
 !  ------------------------------------------------------------------------
@@ -747,7 +746,7 @@ subroutine pawdij(cplex,enunit,gprimd,ipert,my_natom,natom,nfft,nfftot,nspden,nt
        if (dij_need) paw_ij(iatom)%dij(:,:)=paw_ij(iatom)%dij(:,:)+dijxc(:,:)
        LIBPAW_DEALLOCATE(dijxc)
      end if
- 
+
    end if
 
 !  ------------------------------------------------------------------------

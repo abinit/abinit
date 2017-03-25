@@ -9,7 +9,7 @@
 !! local and non-local potentials.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2016 ABINIT group (XG, AF)
+!! Copyright (C) 1999-2017 ABINIT group (XG, AF)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

@@ -7,7 +7,7 @@
 !!  .
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2016 ABINIT group (JLJ, BR, MC)
+!! Copyright (C) 2009-2017 ABINIT group (JLJ, BR, MC)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -56,7 +56,7 @@ use m_xmpi
 use m_pawang
 use m_errors
 
-use m_io_tools,         only : get_unit
+use m_io_tools,         only : get_unit,open_file
 use m_paw_dmft,         only : paw_dmft_type
 use m_ebands,           only : ebands_init, ebands_free
 use m_gaussian_quadrature, only: gaussian_quadrature_gegenbauer, gaussian_quadrature_legendre
@@ -202,6 +202,7 @@ real(dp)       :: second_model_parameter
 
 real(dp):: tsec(2)
 integer :: GWLS_TIMAB, OPTION_TIMAB
+character(500) :: msg
 
 ! *************************************************************************
 
@@ -287,12 +288,11 @@ if(dtset%gwls_recycle == 2) then
   inquire(file='local_tmp', exist=local_tmp_exist)
   if(local_tmp_exist) recy_name = 'local_tmp/' // recy_name(1:118)
 
-#ifdef FC_NAG
-  open(newunit=recy_unit,file=recy_name,access='direct',form='unformatted',status='replace',recl=recy_line_size)
-#else
-  recy_unit = get_unit()
-  open(unit=recy_unit,file=recy_name,access='direct',form='unformatted',status='replace',recl=recy_line_size)
-#endif
+  if (open_file(file=recy_name,iomsg=msg,newunit=recy_unit,access='direct',form='unformatted',&
+&               status='replace',recl=recy_line_size)/=0) then
+    MSG_ERROR(msg)
+  end if
+
   write_solution = .true.
 end if
 
@@ -1008,6 +1008,7 @@ character(256)  :: timing_string
 integer :: recy_line_size
 character(128) :: recy_name
 logical :: local_tmp_exist
+character(500) :: msg
 
 ! Energy contributions
 
@@ -1105,12 +1106,10 @@ if(dtset%gwls_recycle == 2) then
   inquire(file='local_tmp', exist=local_tmp_exist)
   if(local_tmp_exist) recy_name = 'local_tmp/' // recy_name(1:118)
 
-#ifdef FC_NAG
-  open(newunit=recy_unit,file=recy_name,access='direct',form='unformatted',status='replace',recl=recy_line_size)
-#else
-  recy_unit = get_unit()
-  open(unit=recy_unit,file=recy_name,access='direct',form='unformatted',status='replace',recl=recy_line_size)
-#endif
+  if (open_file(file=recy_name,iomsg=msg,newunit=recy_unit,access='direct',form='unformatted',&
+&               status='replace',recl=recy_line_size)/=0) then
+    MSG_ERROR(msg)
+  end if
 
   write_solution = .true.
 end if

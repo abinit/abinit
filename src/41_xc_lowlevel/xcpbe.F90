@@ -23,7 +23,7 @@
 !! If option==6, RPBE functional of Hammer, Hansen and Norskov, PRB 59, 7413 (1999)
 !! If option==7, WC functional of Wu and Cohen, PRB 73, 235116 (2006)
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (XG,MF,LG,CE)
+!! Copyright (C) 1998-2017 ABINIT group (XG,MF,LG,CE)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
