@@ -37,6 +37,7 @@ module m_effective_potential
  use m_phonons
  use m_ddb
  use m_anharmonics_terms
+ use m_effpot_mpi, only : effpot_mpi_init,effpot_mpi_type,effpot_mpi_free
  use m_harmonics_terms
  use m_special_funcs,  only : factorial
  use m_xmpi
@@ -52,13 +53,13 @@ module m_effective_potential
  public :: effective_potential_effpot2ddb
  public :: effective_potential_effpot2dynmat
  public :: effective_potential_free
- public :: effective_potential_freempi_supercell
+ public :: effective_potential_freempi
  public :: effective_potential_generateDipDip
  public :: effective_potential_getDeltaEnergy
  public :: effective_potential_evaluate
  public :: effective_potential_getForces
  public :: effective_potential_init
- public :: effective_potential_initmpi_supercell
+ public :: effective_potential_initmpi
  public :: effective_potential_print
  public :: effective_potential_printPDOS
  public :: effective_potential_printSupercell
@@ -72,7 +73,7 @@ module m_effective_potential
  public :: effective_potential_writeNETCDF
  public :: OPERATOR(==)
 
-
+ private :: ifc_contribution
  private :: index_periodic
  private :: find_bound
 !!***
@@ -132,23 +133,12 @@ module m_effective_potential
 
 ! ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ! This is for the parallelisation over the supercell
-   integer :: comm_supercell
-   ! local Communicator over all processors treating the same cell
+   type(effpot_mpi_type) :: mpi_ifc
+   ! effpot_mpi_type with all the information for the paralellisation over IFC
 
-   integer :: me_supercell
-   ! Index of my processor in the comm. over one cell
-
-   integer my_ncell
-   ! Number of cell treated by current proc
-
-   integer,allocatable :: my_cells(:)
-   ! my_cells(my_ncell)
-   ! Number of each cells in the supercell treat by this CPU
-
-   integer,allocatable :: my_index_cells(:,:)
-   ! my_cells(my_ncell,3)
-   ! indexes of the cells in the supercell treat by this CPU
-
+   type(effpot_mpi_type) :: mpi_coeff
+   ! effpot_mpi_type with all the information for the paralellisation over coefficients
+  
  end type effective_potential_type
 !!***
 
@@ -377,15 +367,16 @@ subroutine effective_potential_init(crystal,eff_pot,energy,ifcs,ncoeff,nqpt,comm
 &                      eff_pot%crystal%typat,eff_pot%crystal%xcart, eff_pot%supercell)
  end if
 
- call effective_potential_initmpi_supercell(eff_pot,comm)
+! call effpot_mpi_init(int((/1,1,1/),sp),eff_pot%mpi_ifc,eff_pot%harmonics_terms%ifcs%nrpt,comm)
+! call effpot_mpi_init(int((/1,1,1/),sp),eff_pot%mpi_coeff,eff_pot%harmonics_terms%ifcs%nrpt,comm)
 
 end subroutine effective_potential_init
 !!***
 
 
-!!****f* m_phonon_effective_potential/effective_potential_initmpi_supercell
+!!****f* m_phonon_effective_potential/effective_potential_initmpi
 !! NAME
-!!  effective_potential_initmpi_supercell
+!!  effective_potential_initmpi
 !!
 !! FUNCTION
 !!  Initializes the mpi informations for parallelism over supercell.
@@ -416,7 +407,7 @@ end subroutine effective_potential_init
 
 #include "abi_common.h"
 
-subroutine effective_potential_initmpi_supercell(eff_pot,comm)
+subroutine effective_potential_initmpi(eff_pot,comm)
 
  use defs_basis
  use defs_abitypes
@@ -427,7 +418,7 @@ subroutine effective_potential_initmpi_supercell(eff_pot,comm)
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'effective_potential_initmpi_supercell'
+#define ABI_FUNC 'effective_potential_initmpi'
 !End of the abilint section
 
  implicit none
@@ -440,75 +431,25 @@ subroutine effective_potential_initmpi_supercell(eff_pot,comm)
 
 !Local variables-------------------------------
 !scalars
- integer :: i1,i2,i3,icell,ii
- integer :: my_rank,ncell_alone,ncell,nproc
- integer :: master = zero
- logical :: iam_master = .false.
- character(len=500) :: msg
+ integer :: ndiv
 !array
  integer :: cell_number(3)
 ! ***********************************************************************
 
 !Set the number of cell in the supercell
  cell_number(:) = int(eff_pot%supercell%qphon(:))
- ncell = product(cell_number(:))
 
-!Do some checks
- if (any(cell_number <= 0).or.ncell<=0) then
-   write(msg,'(a,a)')' No supercell found for setting'
-   MSG_ERROR(msg)
- end if
+!First mpi_ifc
+ ndiv = 1
+ call effpot_mpi_free(eff_pot%mpi_ifc)
+ call effpot_mpi_init(cell_number,eff_pot%mpi_ifc,ndiv,eff_pot%harmonics_terms%ifcs%nrpt,comm)
 
-!MPI variables
- nproc = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
- iam_master = (my_rank == master)
-
- call effective_potential_freempi_supercell(eff_pot)
-
- eff_pot%comm_supercell = comm
- eff_pot%me_supercell   = my_rank
-
-
-
-!Determine the number of cell for each CPU
- ncell_alone = mod(ncell,nproc)
- eff_pot%my_ncell = aint(real(ncell,sp)/nproc)
- if(my_rank >= (nproc-ncell_alone)) then
-   eff_pot%my_ncell = eff_pot%my_ncell  + 1
- end if
-
-!Allocation of array
- ABI_ALLOCATE(eff_pot%my_cells,(eff_pot%my_ncell))
- ABI_ALLOCATE(eff_pot%my_index_cells,(eff_pot%my_ncell,3))
- eff_pot%my_cells = zero
- eff_pot%my_index_cells = zero
-
- do icell = 1,eff_pot%my_ncell
-   if(my_rank >= (nproc-ncell_alone))then
-     eff_pot%my_cells(icell)=(aint(real(ncell,sp)/nproc))*(my_rank)+&
-&                              (my_rank - (nproc-ncell_alone)) + icell
-   else
-     eff_pot%my_cells(icell)=(eff_pot%my_ncell)*(my_rank)  + icell
-   end if
- end do
-
- icell = 0
- ii = 0
- do i1 = 1,cell_number(1)
-   do i2 = 1,cell_number(2)
-     do i3 = 1,cell_number(3)
-       ii = ii +1
-       if(any(eff_pot%my_cells==ii))then
-         icell=icell+1
-         eff_pot%my_index_cells(icell,1) = i1;
-         eff_pot%my_index_cells(icell,2) = i2;
-         eff_pot%my_index_cells(icell,3) = i3;
-       end if
-     end do
-   end do
- end do
-
-end subroutine effective_potential_initmpi_supercell
+!Second mpi_coeff
+ ndiv = 1
+ call effpot_mpi_free(eff_pot%mpi_coeff)
+ call effpot_mpi_init(cell_number,eff_pot%mpi_coeff,ndiv,eff_pot%harmonics_terms%ifcs%nrpt,comm)
+ 
+end subroutine effective_potential_initmpi
 !!***
 
 
@@ -576,15 +517,15 @@ subroutine effective_potential_free(eff_pot)
    call harmonics_terms_free(eff_pot%harmonics_terms)
    call destroy_supercell(eff_pot%supercell)
    call crystal_free(eff_pot%crystal)
-   call effective_potential_freempi_supercell(eff_pot)
+   call effective_potential_freempi(eff_pot)
 
 end subroutine effective_potential_free
 !!***
 
-!****f* m_effective_potential/effective_potential_freempi_supercell
+!****f* m_effective_potential/effective_potential_freempi
 !!
 !! NAME
-!! effective_potential_freempi_supercell
+!! effective_potential_freempi
 !!
 !! FUNCTION
 !! deallocate all dynamic memory for mpi of supercell
@@ -603,13 +544,13 @@ end subroutine effective_potential_free
 !!
 !! SOURCE
 
-subroutine effective_potential_freempi_supercell(eff_pot)
+subroutine effective_potential_freempi(eff_pot)
 
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'effective_potential_freempi_supercell'
+#define ABI_FUNC 'effective_potential_freempi'
 !End of the abilint section
 
   implicit none
@@ -624,21 +565,10 @@ subroutine effective_potential_freempi_supercell(eff_pot)
 !array
 
 ! *************************************************************************
+ call effpot_mpi_free(eff_pot%mpi_ifc)
+ call effpot_mpi_free(eff_pot%mpi_coeff)
 
- eff_pot%me_supercell = 0
- eff_pot%my_ncell     = 0
-
- if (allocated(eff_pot%my_cells)) then
-   eff_pot%my_cells(:) = zero
-   ABI_DEALLOCATE(eff_pot%my_cells)
- end if
-
- if (allocated(eff_pot%my_index_cells)) then
-   eff_pot%my_index_cells(:,:) = zero
-   ABI_DEALLOCATE(eff_pot%my_index_cells)
- end if
-
-end subroutine effective_potential_freempi_supercell
+end subroutine effective_potential_freempi
 !!***
 
 
@@ -727,7 +657,7 @@ subroutine effective_potential_generateDipDip(eff_pot,n_cell,option,asr,comm)
  do ia=1,3
    if(n_cell(ia)<0.or.n_cell(ia)>50)then
      write(message, '(a,i0,a,i0,a,a,a,i0,a)' )&
-&     'n_cell(',ia,') is ',n_cell(ia),', which is lower than 0 of superior than 20.',&
+&     'n_cell(',ia,') is ',n_cell(ia),', which is lower than 0 of superior than 50.',&
 &     ch10,'Action: correct n_cell(',ia,').'
      MSG_ERROR(message)
    end if
@@ -745,7 +675,7 @@ subroutine effective_potential_generateDipDip(eff_pot,n_cell,option,asr,comm)
 !1 Store the information of the supercell of the reference structure into effective potential
  call copy_supercell(supercell,eff_pot%supercell)
 !2 Initialisation of new mpi over supercell
- call effective_potential_initmpi_supercell(eff_pot,comm)
+ call effective_potential_initmpi(eff_pot,comm)
 
 !3 Check if the bound of new cell correspond to the effective potential
 !only for option=zero
@@ -827,7 +757,7 @@ subroutine effective_potential_generateDipDip(eff_pot,n_cell,option,asr,comm)
 !      Store the information of the supercell of the reference structure into effective potential
        call copy_supercell(supercell,eff_pot%supercell)
 !      Initialisation of new mpi over supercell
-       call effective_potential_initmpi_supercell(eff_pot,comm)
+       call effective_potential_initmpi(eff_pot,comm)
      else
        min1 = min1_cell ; min2 = min2_cell ; min3 = min3_cell
        max1 = max1_cell ; max2 = max2_cell ; max3 = max3_cell
@@ -1240,7 +1170,7 @@ subroutine effective_potential_effpot2dynmat(dynmat,delta,eff_pot,natom,n_cell,o
  do ii=1,3
    if(n_cell(ii)<0.or.n_cell(ii)>50)then
      write(msg, '(a,i0,a,i0,a,a,a,i0,a)' )&
-&     'n_cell(',ii,') is ',n_cell(ii),', which is lower than 0 of superior than 20.',&
+&     'n_cell(',ii,') is ',n_cell(ii),', which is lower than 0 of superior than 50.',&
 &     ch10,'Action: correct n_cell(',ii,').'
      MSG_ERROR(msg)
    end if
@@ -2814,11 +2744,15 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
   real(dp) :: strain_tmp(6),strten_part(6)
   real(dp) :: xcart(3,natom),xcart_tmp(3,eff_pot%supercell%natom_supercell)
   real(dp) :: xred_tmp(3,eff_pot%supercell%natom_supercell)
+!TEST_AM
+ real(dp) :: tsec(2),tcpu,tcpui,twall,twalli
 
 ! *************************************************************************
-
+!TEST_AM
+!call timein(tcpui,twalli)
+!TEST_AM
 ! Set MPI local varibaless
-  iam_master = (eff_pot%me_supercell == master)
+  iam_master = (eff_pot%mpi_ifc%my_rank == master)
 
 ! Set variables
   supercell(1:3) = eff_pot%supercell%qphon(1:3)
@@ -2857,7 +2791,9 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
 !--------------------------------------------
 ! 1 - Set the perturbations and intialisation
 !--------------------------------------------
-
+!TEST_AM
+!call timein(tcpui,twalli)
+!TEST_AM
   strain_tmp(:) = zero
 ! Try to find the strain into the input file
   if (eff_pot%has_strain) then
@@ -2919,10 +2855,19 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
   call wrtout(ab_out,message,'COLL')
   call wrtout(std_out,message,'COLL')
 
+!TEST_AM
+!    call timein(tcpu,twall)
+!    tsec(1)=tcpu-tcpui
+!    tsec(2)=twall-twalli
+!    if(iam_master) print*,"TIME FOR step 1 FOR CPU ",eff_pot%mpi_ifc%my_rank,":",tsec
+!TEST_AM
+
 !------------------------------------
 ! 2 - Transfert the reference energy
 !------------------------------------
-
+!TEST_AM
+! call timein(tcpui,twalli)
+!TEST_AM
   energy = eff_pot%energy * ncell
 
   write(message, '(a,a,1ES24.16,a)' ) ch10,' Energy of the reference strucure          :',&
@@ -2930,16 +2875,29 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
   call wrtout(ab_out,message,'COLL')
   call wrtout(std_out,message,'COLL')
 
+!TEST_AM
+!     call timein(tcpu,twall)
+!     tsec(1)=tcpu-tcpui
+!     tsec(2)=twall-twalli
+!     if(iam_master) print*,"TIME FOR step 2 FOR CPU ",eff_pot%mpi_ifc%my_rank,":",tsec
+!TEST_AM
+
 !------------------------------------
 ! 3 - Computation of the IFC part :
 !------------------------------------
-
+!TEST_AM
+ call timein(tcpui,twalli)
+!TEST_AM
   energy_part    = zero
   fcart_part(:,:)= zero
 
-  call ifc_contribution(eff_pot,disp_tmp,energy_part,fcart_part,&
-&                       eff_pot%my_cells,eff_pot%my_ncell,eff_pot%my_index_cells,&
-&                       eff_pot%comm_supercell)
+  call ifc_contribution(eff_pot%harmonics_terms%ifcs%atmfrc(1,:,:,:,:,:),disp_tmp,energy_part,&
+&                       fcart_part,eff_pot%mpi_ifc%my_cells,eff_pot%supercell%natom_supercell,&
+&                       eff_pot%crystal%natom,eff_pot%mpi_ifc%my_ncell,&
+&                       eff_pot%mpi_ifc%my_nrpt,eff_pot%mpi_ifc%my_index_cells,&
+&                       eff_pot%harmonics_terms%ifcs%cell,&
+&                       int(eff_pot%supercell%qphon(:)),&
+&                       eff_pot%mpi_ifc%my_rpt,eff_pot%mpi_ifc%comm)
 
   write(message, '(a,1ES24.16,a)' ) ' Energy of the ifc part                    :',&
 &                                     energy_part,' Hartree'
@@ -2958,10 +2916,18 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
   energy = energy + energy_part
   fcart(:,:)= fcart(:,:) + fcart_part(:,:)
 
+!TEST_AM
+     call timein(tcpu,twall)
+     tsec(1)=tcpu-tcpui
+     tsec(2)=twall-twalli
+     if(iam_master) print*,"TIME FOR step 3 FOR CPU ",eff_pot%mpi_ifc%my_rank,":",tsec
+!TEST_AM
 !----------------------------------------------------
 ! 4 - Computation of the elastic part of the energy :
 !----------------------------------------------------
-
+!TEST_AM
+! call timein(tcpui,twalli)
+!TEST_AM
 ! TO DO ADD external stress
 ! if external stress is present
 !  if (present(external_stress)) then
@@ -2989,10 +2955,18 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
   fcart(:,:) = fcart(:,:)  + fcart_part(:,:)
   strten(:) = strten(:) + strten_part(:)
 
+!TEST_AM
+!  call timein(tcpu,twall)
+!  tsec(1)=tcpu-tcpui
+!  tsec(2)=twall-twalli
+!  if(iam_master) print*,"TIME FOR step 4 FOR CPU ",eff_pot%mpi_ifc%my_rank,":",tsec
+!TEST_AM
 !------------------------------------
 ! 5 - Treat 3rd order strain-coupling:
 !------------------------------------
-
+!TEST_AM
+! call timein(tcpui,twalli)
+!TEST_AM
   if (eff_pot%has_strainCoupling) then
 
 !   1-Treat 3rd order elastic constants
@@ -3062,8 +3036,8 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
       fcart_part(:,:)= zero
 
       call ifcStrainCoupling_contribution(eff_pot,disp_tmp,energy_part,fcart_part,strain_tmp,&
-&                                         strten_part,eff_pot%my_cells,eff_pot%my_ncell,&
-&                                         eff_pot%my_index_cells,eff_pot%comm_supercell)
+&                                         strten_part,eff_pot%mpi_ifc%my_cells,eff_pot%mpi_ifc%my_ncell,&
+&                                         eff_pot%mpi_ifc%my_index_cells,eff_pot%mpi_ifc%comm)
 
       write(message, '(a,1ES24.16,a)' ) ' Energy of the 3rd (strain-phonon coupling):',&
 &                                         energy_part,' Hartree'
@@ -3107,11 +3081,19 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
       strten(:) = strten(:) + strten_part(:)
     end if
   end if
-
+!TEST_AM
+!     call timein(tcpu,twall)
+!     tsec(1)=tcpu-tcpui
+!     tsec(2)=twall-twalli
+!     if(iam_master) print*,"TIME FOR step 5 FOR CPU ",eff_pot%mpi_ifc%my_rank,":",tsec
+!TEST_AM
 
 !----------------------------------
 ! 6 - Treat polynomial coefficient:
 !----------------------------------
+!TEST_AM
+! call timein(tcpui,twalli)
+!TEST_AM
 
   if(eff_pot%anharmonics_terms%ncoeff > zero)then
 
@@ -3122,8 +3104,8 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
     call coefficients_contribution(eff_pot,disp_tmp,&
 &                                  energy_part,fcart_part,eff_pot%supercell%natom_supercell,&
 &                                  eff_pot%anharmonics_terms%ncoeff,strain_tmp,strten_part,&
-&                                  eff_pot%my_cells,eff_pot%my_ncell,eff_pot%my_index_cells,&
-&                                  eff_pot%comm_supercell)
+&                                  eff_pot%mpi_coeff%my_cells,eff_pot%mpi_coeff%my_ncell,&
+&                                  eff_pot%mpi_coeff%my_index_cells,eff_pot%mpi_coeff%comm)
 
     write(message, '(a,1ES24.16,a)' ) ' Energy of the fitted coefficient          :',&
 &                                      energy_part,' Hartree'
@@ -3134,12 +3116,17 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
     fcart(:,:)  = fcart(:,:) + fcart_part(:,:)
     strten(:) = strten(:) + strten_part(:)
   end if
-
+!TEST_AM
+!     call timein(tcpu,twall)
+!     tsec(1)=tcpu-tcpui
+!     tsec(2)=twall-twalli
+!     if(iam_master)  print*,"TIME FOR step 6 FOR CPU ",eff_pot%mpi_ifc%my_rank,":",tsec
+!TEST_AM
 
 !---------------------------------
 ! 7 - Apply factors
 !---------------------------------
-
+ call timein(tcpui,twalli)
 ! divide stess tensor by ucvol
   strten = strten / ucvol
 
@@ -3149,10 +3136,20 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
   call effective_potential_distributeResidualForces(eff_pot,fcart,eff_pot%supercell%natom_supercell)
 
   call fcart2fred(fcart,fred,rprimd,natom)
+!TEST_AM
+!     call timein(tcpu,twall)
+!     tsec(1)=tcpu-tcpui
+!     tsec(2)=twall-twalli
+!     if(iam_master)  print*,"TIME FOR step 8 FOR CPU ",eff_pot%mpi_ifc%my_rank,":",tsec
+!TEST_AM
 
 !------------------------------------
 ! 8 - Final Print:
 !------------------------------------
+!TEST_AM
+! call timein(tcpui,twalli)
+!TEST_AM
+
   write(message, '(2a,es21.14)' ) ch10,&
 &     '    >>>>>>>>> Etotal= ',energy
   call wrtout(ab_out,message,'COLL')
@@ -3222,7 +3219,9 @@ end subroutine effective_potential_evaluate
 !!            also contain supercell information
 !!  disp    = diplacement vector (3, cell1 (atm1 atm2 ...) cell2 (atm1 atm2 ...)...)
 !!  ncell   = total number of cell to treat
+!!  nrpt    = total number of rpt 
 !!  cells(ncell) = number of the cells into the supercell (1,2,3,4,5)
+!!  rpt(nrpt) = index of rpt in the ifc type => 6th dimension of ifc%atmfrc
 !!  index_cells(3,ncell) = indexes of the cells into  supercell (-1 -1 -1 ,...,1 1 1)
 !!  comm=MPI communicator
 !!
@@ -3242,7 +3241,8 @@ end subroutine effective_potential_evaluate
 !!
 !! SOURCE
 
-subroutine ifc_contribution(eff_pot,disp,energy,fcart,cells,ncell,index_cells,comm)
+subroutine ifc_contribution(atmfrc,disp,energy,fcart,cells,natom_sc,natom_uc,ncell,nrpt,&
+&                           index_cells,index_rpt,sc_size,rpt,comm)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -3256,29 +3256,27 @@ subroutine ifc_contribution(eff_pot,disp,energy,fcart,cells,ncell,index_cells,co
 !Arguments -------------------------------
 ! scalars
   real(dp),intent(out) :: energy
-  integer,intent(in) :: ncell
+  integer,intent(in) :: natom_uc,natom_sc,ncell,nrpt
   integer,intent(in) :: comm
 ! array
-  integer,intent(in) ::   cells(ncell),index_cells(ncell,3)
-  type(effective_potential_type), intent(in) :: eff_pot
-  real(dp),intent(in) :: disp(3,eff_pot%supercell%natom_supercell)
-  real(dp),intent(out) :: fcart(3,eff_pot%supercell%natom_supercell)
+  integer,intent(in) :: sc_size(3)
+  integer,intent(in) ::  index_rpt(3,nrpt),cells(ncell),index_cells(ncell,3),rpt(nrpt)
+  real(dp),intent(in) :: atmfrc(3,natom_uc,3,natom_uc,nrpt)
+  real(dp),intent(in) :: disp(3,natom_sc)
+  real(dp),intent(out) :: fcart(3,natom_sc)
 
 !Local variables-------------------------------
 ! scalar
-  integer :: i1,i2,i3,ia,ib,icell,ierr,irpt,ii,jj,kk,ll
+  integer :: i1,i2,i3,ia,ib,icell,ierr,irpt,irpt_tmp,ii,jj,kk,ll
   integer :: mu,nu
-  real(dp):: ifc
+  real(dp):: disp1,disp2,ifc,tmp,tmp2
 ! array
-  integer :: cell_number(3)
   integer :: cell_atom2(3)
   character(500) :: msg
 
 ! *************************************************************************
 
-  cell_number(:) = int(eff_pot%supercell%qphon(:))
-
-  if (any(cell_number <= 0)) then
+  if (any(sc_size <= 0)) then
     write(msg,'(a,a)')' No supercell found for getEnergy'
     MSG_ERROR(msg)
   end if
@@ -3286,33 +3284,36 @@ subroutine ifc_contribution(eff_pot,disp,energy,fcart,cells,ncell,index_cells,co
 ! Initialisation of variables
   energy   = zero
   fcart(:,:) = zero
-
   do icell = 1,ncell
-    ii = (cells(icell)-1)*eff_pot%crystal%natom
+    ii = (cells(icell)-1)*natom_uc
     i1=index_cells(icell,1); i2=index_cells(icell,2); i3=index_cells(icell,3)
-    do irpt = 1,eff_pot%harmonics_terms%ifcs%nrpt
+    do irpt_tmp = 1,nrpt
+      irpt = rpt(irpt_tmp)
+!     do irpt = 1,eff_pot%harmonics_terms%ifcs%nrpt
 !     get the cell of atom2  (0 0 0, 0 0 1...)
-      cell_atom2(1) =  (i1-1) + eff_pot%harmonics_terms%ifcs%cell(1,irpt)
-      call index_periodic(cell_atom2(1),cell_number(1))
-      cell_atom2(2) =  (i2-1) + eff_pot%harmonics_terms%ifcs%cell(2,irpt)
-      call index_periodic(cell_atom2(2),cell_number(2))
-      cell_atom2(3) =  (i3-1) + eff_pot%harmonics_terms%ifcs%cell(3,irpt)
-      call index_periodic(cell_atom2(3),cell_number(3))
+      cell_atom2(1) = (i1-1) + index_rpt(1,irpt)
+      cell_atom2(2) = (i2-1) + index_rpt(2,irpt)
+      cell_atom2(3) = (i3-1) + index_rpt(3,irpt)
+      call index_periodic(cell_atom2(1:3),sc_size(1:3))
 !     index of the second atom in the displacement array
-      jj = cell_atom2(1)*cell_number(2)*cell_number(3)*eff_pot%crystal%natom+&
-&          cell_atom2(2)*cell_number(3)*eff_pot%crystal%natom+&
-&          cell_atom2(3)*eff_pot%crystal%natom
-      do ib = 1, eff_pot%crystal%natom
+      jj = cell_atom2(1)*sc_size(2)*sc_size(3)*natom_uc+&
+&          cell_atom2(2)*sc_size(3)*natom_uc+&
+&          cell_atom2(3)*natom_uc
+      do ib = 1, natom_uc
         ll = jj + ib
         do nu=1,3
-          do ia = 1, eff_pot%crystal%natom
+          disp2 = disp(nu,ll)
+          do ia = 1, natom_uc
             kk = ii + ia
             do mu=1,3
-              ifc = eff_pot%harmonics_terms%ifcs%atmfrc(1,mu,ia,nu,ib,irpt)
+              disp1 = disp(mu,kk)
+              ifc = atmfrc(mu,ia,nu,ib,irpt)
+              tmp = disp2 * ifc
 !             accumule energy
-              energy =  energy + disp(mu,kk)*disp(nu,ll)*ifc
+              tmp2 = disp1*tmp
+              energy =  energy + tmp2
 !             accumule forces
-              fcart(mu,kk) = fcart(mu,kk)+ disp(nu,ll)*ifc
+              fcart(mu,kk) = fcart(mu,kk) + tmp
             end do
           end do
         end do
@@ -3325,6 +3326,7 @@ subroutine ifc_contribution(eff_pot,disp,energy,fcart,cells,ncell,index_cells,co
 ! MPI_SUM
   call xmpi_sum(energy, comm, ierr)
   call xmpi_sum(fcart , comm, ierr)
+
 
 end subroutine ifc_contribution
 !!***
@@ -3417,11 +3419,9 @@ subroutine ifcStrainCoupling_contribution(eff_pot,disp,energy,fcart,strain,strte
       do irpt = 1,eff_pot%anharmonics_terms%phonon_strain(alpha)%nrpt
 !       get the cell of atom2  (0 0 0, 0 0 1...)
         cell_atom2(1) =  (i1-1) + eff_pot%anharmonics_terms%phonon_strain(alpha)%cell(1,irpt)
-        call index_periodic(cell_atom2(1),cell_number(1))
         cell_atom2(2) =  (i2-1) + eff_pot%anharmonics_terms%phonon_strain(alpha)%cell(2,irpt)
-        call index_periodic(cell_atom2(2),cell_number(2))
         cell_atom2(3) =  (i3-1) + eff_pot%anharmonics_terms%phonon_strain(alpha)%cell(3,irpt)
-        call index_periodic(cell_atom2(3),cell_number(3))
+        call index_periodic(cell_atom2(1:3),cell_number(1:3))
 !       index of the second atom in the displacement array
         jj = cell_atom2(1)*cell_number(2)*cell_number(3)*eff_pot%crystal%natom+&
 &            cell_atom2(2)*cell_number(3)*eff_pot%crystal%natom+&
@@ -3664,11 +3664,9 @@ subroutine coefficients_contribution(eff_pot,disp,energy,fcart,natom,ncoeff,stra
             if(cell_atoma1(1)/=0.or.cell_atoma1(2)/=0.or.cell_atoma1(3)/=0) then
 !             if the cell is not 0 0 0 we apply PBC:
               cell_atoma1(1) =  (i1-1) + cell_atoma1(1)
-              call index_periodic(cell_atoma1(1),cell_number(1))
               cell_atoma1(2) =  (i2-1) + cell_atoma1(2)
-              call index_periodic(cell_atoma1(2),cell_number(2))
               cell_atoma1(3) =  (i3-1) + cell_atoma1(3)
-              call index_periodic(cell_atoma1(3),cell_number(3))
+              call index_periodic(cell_atoma1(1:3),cell_number(1:3))
 !             index of the first atom (position in the supercell if the cell is not 0 0 0)
               ia1 = cell_atoma1(1)*cell_number(2)*cell_number(3)*eff_pot%crystal%natom+&
 &                   cell_atoma1(2)*cell_number(3)*eff_pot%crystal%natom+&
@@ -3683,11 +3681,9 @@ subroutine coefficients_contribution(eff_pot,disp,energy,fcart,natom,ncoeff,stra
             cell_atomb1 = eff_pot%anharmonics_terms%coefficients(icoeff)%terms(iterm)%cell(:,2,idisp1)
             if(cell_atomb1(1)/=0.or.cell_atomb1(2)/=0.or.cell_atomb1(3)/=0) then
               cell_atomb1(1) =  (i1-1) + cell_atomb1(1)
-              call index_periodic(cell_atomb1(1),cell_number(1))
               cell_atomb1(2) =  (i2-1) + cell_atomb1(2)
-              call index_periodic(cell_atomb1(2),cell_number(2))
               cell_atomb1(3) =  (i3-1) + cell_atomb1(3)
-              call index_periodic(cell_atomb1(3),cell_number(3))
+              call index_periodic(cell_atomb1(1:3),cell_number(1:3))
 
 !            index of the second atom in the (position in the supercell  if the cell is not 0 0 0) 
               ib1 = cell_atomb1(1)*cell_number(2)*cell_number(3)*eff_pot%crystal%natom+&
@@ -3734,11 +3730,9 @@ subroutine coefficients_contribution(eff_pot,disp,energy,fcart,natom,ncoeff,stra
                 cell_atoma2=eff_pot%anharmonics_terms%coefficients(icoeff)%terms(iterm)%cell(:,1,idisp2)
                 if(cell_atoma2(1)/=0.or.cell_atoma2(2)/=0.or.cell_atoma2(3)/=0) then
                   cell_atoma2(1) =  (i1-1) + cell_atoma2(1)
-                  call index_periodic(cell_atoma2(1),cell_number(1))
                   cell_atoma2(2) =  (i2-1) + cell_atoma2(2)
-                  call index_periodic(cell_atoma2(2),cell_number(2))
                   cell_atoma2(3) =  (i3-1) + cell_atoma2(3)
-                  call index_periodic(cell_atoma2(3),cell_number(3))
+                  call index_periodic(cell_atoma2(1:3),cell_number(1:3))
 !                 index of the first atom (position in the supercell and direction)
 !                 if the cell of the atom a is not 0 0 0 (may happen)
                   ia2 = cell_atoma2(1)*cell_number(2)*cell_number(3)*eff_pot%crystal%natom+&
@@ -3755,11 +3749,9 @@ subroutine coefficients_contribution(eff_pot,disp,energy,fcart,natom,ncoeff,stra
                 if(cell_atomb2(1)/=0.or.cell_atomb2(2)/=0.or.cell_atomb2(3)/=0) then
 !                 indexes of the cell2 (with PBC)
                   cell_atomb2(1) =  (i1-1) + cell_atomb2(1)
-                  call index_periodic(cell_atomb2(1),cell_number(1))
                   cell_atomb2(2) =  (i2-1) + cell_atomb2(2)
-                  call index_periodic(cell_atomb2(2),cell_number(2))
                   cell_atomb2(3) =  (i3-1) + cell_atomb2(3)
-                  call index_periodic(cell_atomb2(3),cell_number(3))
+                  call index_periodic(cell_atomb2(1:3),cell_number(1:3))
 
 !                 index of the second atom in the (position in the supercell) 
                   ib2 = cell_atomb2(1)*cell_number(2)*cell_number(3)*eff_pot%crystal%natom+&
@@ -3973,16 +3965,19 @@ subroutine index_periodic(index,n_cell)
  implicit none
 
 !Arguments ---------------------------------------------
-  integer, intent(inout)  :: index
-  integer, intent(inout) :: n_cell
+  integer, intent(inout)  :: index(3)
+  integer, intent(in) :: n_cell(3)
 !Local variables ---------------------------------------
+  integer :: ii
 ! *********************************************************************
 
-  do while (index > n_cell-1)
-    index = index - n_cell
-  end do
-  do while (index < 0)
-    index = index + n_cell
+  do ii=1,3
+    do while (index(ii) > n_cell(ii)-1)
+      index(ii) = index(ii) - n_cell(ii)
+    end do
+    do while (index(ii) < 0)
+      index(ii) = index(ii) + n_cell(ii)
+    end do
   end do
 
 end subroutine index_periodic

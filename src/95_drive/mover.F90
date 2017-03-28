@@ -137,15 +137,14 @@ subroutine mover(scfcv_args,ab_xfh,acell,amass,dtfil,&
  use m_pred_lotf
 #endif
 
- use m_fstrings,         only : strcat, sjoin
- use m_crystal,          only : crystal_init, crystal_free, crystal_t
- use m_crystal_io,       only : crystal_ncwrite_path
- use m_time,             only : abi_wtime, sec2str
- use m_exit,             only : get_start_time, have_timelimit_in, get_timelimit, enable_timelimit_in
- use m_electronpositron, only : electronpositron_type
- use m_scfcv,            only : scfcv_t, scfcv_run
- use m_effective_potential
- use m_monte_carlo
+ use m_fstrings,           only : strcat, sjoin
+ use m_crystal,            only : crystal_init, crystal_free, crystal_t
+ use m_crystal_io,         only : crystal_ncwrite_path
+ use m_time,               only : abi_wtime, sec2str
+ use m_exit,               only : get_start_time, have_timelimit_in, get_timelimit, enable_timelimit_in
+ use m_electronpositron,   only : electronpositron_type
+ use m_scfcv,              only : scfcv_t, scfcv_run
+ use m_effective_potential,only : effective_potential_type,effective_potential_evaluate
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -572,11 +571,8 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
              MSG_WARNING(message)
            end if
 
-         else if(ab_mover%ionmov /= 31) then
-!          For monte carlo don't need to recompute energy here
-!          (done in pred_montecarlo)
-           call effective_potential_evaluate( &
-&               effective_potential,scfcv_args%results_gs%etotal,&
+         else 
+           call effective_potential_evaluate(effective_potential,scfcv_args%results_gs%etotal,&
 &               scfcv_args%results_gs%fcart,scfcv_args%results_gs%fred,&
 &               scfcv_args%results_gs%strten,ab_mover%natom,rprimd,xred)
          end if
@@ -772,9 +768,6 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
        case (23)
          call pred_lotf(ab_mover,hist,itime,icycle,DEBUG,iexit)
 #endif
-       case (31)         
-         call monte_carlo_step(ab_mover,effective_potential,hist,itime,ntime,DEBUG,iexit)
-         write(std_out,*) "Developpement Monte carlo"
        case default
          write(message,"(a,i0)") "Wrong value of ionmov: ",ab_mover%ionmov
          MSG_ERROR(message)

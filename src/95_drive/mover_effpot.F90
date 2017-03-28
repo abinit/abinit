@@ -123,6 +123,7 @@ implicit none
  real(dp) :: mat_strain(3,3)
  type(supercell_type) :: supercell
 !TEST_AM
+ real(dp) :: tsec(2),tcpu,tcpui,twall,twalli
  !real(dp),allocatable :: energy(:)
  !integer :: option
  !integer :: funit = 1,ii,kk
@@ -198,7 +199,7 @@ implicit none
 !Store the information of the supercell of the reference structure into effective potential
  call copy_supercell(supercell,effective_potential%supercell)
 !Set new MPI for the new supercell 
- call effective_potential_initmpi_supercell(effective_potential,comm)
+ call effective_potential_initmpi(effective_potential,comm)
 !Deallocation of useless array
  call destroy_supercell(supercell)   
 
@@ -429,6 +430,21 @@ implicit none
    call wrtout(ab_out,message,'COLL')
    call wrtout(std_out,message,'COLL')
 
+!TEST_AM
+!    do ii=1,dtset%ntime
+!      xred(:,:) = xred(:,:) + 0.02
+!      rprimd(1,1) = rprimd(1,1) + 0.02
+
+!      call timein(tcpui,twalli)
+!      call effective_potential_evaluate(effective_potential,scfcv_args%results_gs%etotal,&
+! &               scfcv_args%results_gs%fcart,scfcv_args%results_gs%fred,&
+! &               scfcv_args%results_gs%strten,dtset%natom,rprimd,xred)
+!      call timein(tcpu,twall)
+!      tsec(1)=tcpu-tcpui
+!      tsec(2)=twall-twalli
+!      if(my_rank==0)print*,"TIME FOR 1 STEP FOR CPU ",my_rank,":",tsec
+!    end do
+!TEST_AM
    call mover(scfcv_args,ab_xfh,acell,amass,dtfil,electronpositron,&
 &   rhog,rhor,dtset%rprimd_orig,vel,vel_cell,xred,xred_old,effective_potential)
    

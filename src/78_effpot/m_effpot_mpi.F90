@@ -52,6 +52,9 @@ module m_effpot_mpi
    integer :: comm
    ! local Communicator over all processors treating the same cell
 
+   integer :: my_rank
+   ! local Communicator over all processors treating the same cell
+
    integer my_ncell
    ! Number of cell treat by current proc
    
@@ -139,10 +142,9 @@ subroutine effpot_mpi_init(cell_number,effpot_mpi,ndiv,nrpt,comm)
 
 
 !Set the number of cpu for each level
- ndiv   = 2
  npcell = ncell / nproc * ndiv
- nprpt  = ncell  / ndiv
- print*,"toto",npcell,nprpt
+ nprpt  = nrpt  / ndiv
+
 !Do some checks
  if(mod(nrpt,npcell) /= 0.or.mod(ncell,npcell) /=0)then
 !   write(msg,'(2a,2I0)')' Chose another number of CPU ',ncell,nrpt
@@ -152,6 +154,7 @@ subroutine effpot_mpi_init(cell_number,effpot_mpi,ndiv,nrpt,comm)
  call effpot_mpi_free(effpot_mpi)
 
  effpot_mpi%comm = comm
+ effpot_mpi%my_rank = my_rank
 
 !Determine the number of cell for each CPU
  ncell_alone = mod(ncell,nproc)
@@ -163,7 +166,7 @@ subroutine effpot_mpi_init(cell_number,effpot_mpi,ndiv,nrpt,comm)
    effpot_mpi%my_ncell = effpot_mpi%my_ncell  + 1
  end if
 
- effpot_mpi%my_ncell = npcell
+ if(ndiv>1) effpot_mpi%my_ncell = npcell
 
 !Allocation of array
  ABI_ALLOCATE(effpot_mpi%my_cells,(effpot_mpi%my_ncell))
@@ -173,16 +176,15 @@ subroutine effpot_mpi_init(cell_number,effpot_mpi,ndiv,nrpt,comm)
 
  virt_rank = aint(real(my_rank,sp)/(ndiv))
  
- 
  do icell=1,effpot_mpi%my_ncell
-!   if(virt_rank >= (nproc-ncell_alone))then
-!     effpot_mpi%my_cells(icell)=(aint(real(ncell,sp)/nproc))*(virt_rank)+&
-!&                              (virt_rank - (nproc-ncell_alone)) + icell
-!   else
+   if(virt_rank >= (nproc-ncell_alone))then
+     effpot_mpi%my_cells(icell)=(aint(real(ncell,sp)/nproc))*(virt_rank)+&
+&                              (virt_rank - (nproc-ncell_alone)) + icell
+   else
      effpot_mpi%my_cells(icell)=(effpot_mpi%my_ncell)*(virt_rank)  + icell
-!   end if
+  end if
  end do
-print*,"titi",my_rank,virt_rank,effpot_mpi%my_ncell,effpot_mpi%my_cells(1),effpot_mpi%my_cells(effpot_mpi%my_ncell)
+
  icell = 0
  ii = 0
  do i1 = 1,cell_number(1)
@@ -220,12 +222,11 @@ print*,"titi",my_rank,virt_rank,effpot_mpi%my_ncell,effpot_mpi%my_cells(1),effpo
 !    effpot_mpi%my_rpt(irpt)=(aint(real(nrpt,sp)/nproc))*(virt_rank)+&
 !&                              (virt_rank - (nproc-ncell_alone)) + irpt
 !   else
-     effpot_mpi%my_rpt(irpt)=(effpot_mpi%my_nrpt)*(virt_rank)  + irpt
+!     effpot_mpi%my_rpt(irpt)=(effpot_mpi%my_nrpt)*(virt_rank)  + irpt
 !   end if
-!     effpot_mpi%my_rpt(irpt)= irpt
+     effpot_mpi%my_rpt(irpt)= irpt
  end do
 
- print*,"tata",my_rank,virt_rank,effpot_mpi%my_nrpt,effpot_mpi%my_rpt(1),effpot_mpi%my_rpt(effpot_mpi%my_nrpt)
  ABI_DEALLOCATE(rpt_list)
 
 end subroutine effpot_mpi_init
