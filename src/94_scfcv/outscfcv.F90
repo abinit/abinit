@@ -181,7 +181,6 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  use interfaces_18_timing
  use interfaces_28_numeric_noabirule
  use interfaces_41_geometry
- use interfaces_53_spacepar
  use interfaces_54_abiutil
  use interfaces_61_occeig
  use interfaces_62_iowfdenpot
@@ -1155,10 +1154,9 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  call timab(969,1,tsec)
 
  if (dtset%prtdipole == 1) then
-!  FIXME: need to add ionic part of multipoles
    call multipoles_out(rhor,mpi_enreg,natom,nfft,ngfft,dtset%nspden,dtset%ntypat,rprimd,&
-&   dtset%typat,ucvol,xred,dtset%ziontypat)
- end if ! prtmultipoles
+&                      dtset%typat,ucvol,ab_out,xred,dtset%ziontypat)
+ end if
 
  ! BoltzTraP output files in GENEric format
  if (dtset%prtbltztrp == 1 .and. me==0) then
