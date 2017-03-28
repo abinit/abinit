@@ -6,7 +6,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 2014-2016 ABINIT group (MG)
+!! Copyright (C) 2014-2017 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -31,7 +31,7 @@
 !!  work(2,work_ngfft(4),work_ngfft(5),work_ngfft(6)) !*ndat),
 !!
 !! PARENTS
-!!      m_phgamma,m_wfk
+!!      m_phgamma,m_sigmaph,m_wfk
 !!
 !! NOTES
 !!  Inspired to wfconv.

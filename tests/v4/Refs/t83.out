@@ -2,7 +2,7 @@
 .Version 8.0.3 of ANADDB 
 .(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
 
-.Copyright (C) 1998-2016 ABINIT group . 
+.Copyright (C) 1998-2017 ABINIT group . 
  ANADDB comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -32,8 +32,6 @@
 
  read the DDB information and perform some checks
 
--begin at tcpu      0.014  and twall      0.014 sec
-
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.2552686  5.1011170  5.1075000  G(1)= -0.1031811  0.1031811  0.0978953
  R(2)=  5.1011170  0.2552686  5.1075000  G(2)=  0.1031811 -0.1031811  0.0978953
@@ -46,7 +44,6 @@
 
  Calculation of the internal-strain  tensor
 
--begin at tcpu      0.016   and twall      0.016sec
 
  Force-response internal strain tensor(Unit:Hartree/bohr)
 
@@ -72,7 +69,6 @@
 
  Calculation of the elastic and compliances tensor (Voigt notation)
 
--begin at tcpu      0.016   and twall      0.017sec
 
  Elastic Tensor (relaxed ion) (unit:10^2GP):
   (at fixed electric field boundary condition)

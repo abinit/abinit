@@ -7,7 +7,7 @@
 !! Solve the DMFT loop from PAW data.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2016 ABINIT group (BAmadon)
+!! Copyright (C) 1999-2017 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -170,7 +170,7 @@ subroutine dmft_solve(cryst_struc,istep,lda_occup,paw_dmft,pawang,pawtab,pawprtv
 & '  == Check lda occ. mat. from green with respect to the direct calc =='
  call wrtout(std_out,message,'COLL')
  call diff_oper("Occup from LDA green function",&
-& "LDA occupations",greenlda%occup,lda_occup,1,tol4)
+& "LDA occupations",greenlda%occup,lda_occup,1,paw_dmft%dmft_tolfreq)
 ! write(message,'(2a)') ch10,&
 !& '  ***** => Warning : diff_oper is suppressed for test'
 ! call wrtout(std_out,message,'COLL')

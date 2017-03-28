@@ -8,7 +8,7 @@
 !!  and a set of generic interfaces wrapping the most commonly used MPI primitives.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2016 ABINIT group (MG, MB, XG, YP, MT)
+!! Copyright (C) 2009-2017 ABINIT group (MG, MB, XG, YP, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -244,6 +244,7 @@ interface xmpi_allgather
   module procedure xmpi_allgather_int
   module procedure xmpi_allgather_char
   module procedure xmpi_allgather_int1d
+  module procedure xmpi_allgather_int2d
   module procedure xmpi_allgather_dp1d
   module procedure xmpi_allgather_dp2d
   module procedure xmpi_allgather_dp3d
@@ -260,6 +261,8 @@ interface xmpi_allgatherv
   module procedure xmpi_allgatherv_dp2d
   module procedure xmpi_allgatherv_dp3d
   module procedure xmpi_allgatherv_dp4d
+  module procedure xmpi_allgatherv_dp5d
+  module procedure xmpi_allgatherv_dp6d
   module procedure xmpi_allgatherv_coeff2d
   module procedure xmpi_allgatherv_coeff2d_indx
 end interface xmpi_allgatherv
@@ -324,6 +327,8 @@ interface xmpi_bcast
   module procedure xmpi_bcast_dp2d
   module procedure xmpi_bcast_dp3d
   module procedure xmpi_bcast_dp4d
+  module procedure xmpi_bcast_dp5d
+  module procedure xmpi_bcast_dp6d
   module procedure xmpi_bcast_spv
   module procedure xmpi_bcast_sp1d
   module procedure xmpi_bcast_sp2d
@@ -382,6 +387,8 @@ interface xmpi_gatherv
   module procedure xmpi_gatherv_dp2d
   module procedure xmpi_gatherv_dp3d
   module procedure xmpi_gatherv_dp4d
+  module procedure xmpi_gatherv_dp5d
+  module procedure xmpi_gatherv_dp6d
 end interface xmpi_gatherv
 
 !----------------------------------------------------------------------
@@ -461,6 +468,7 @@ interface xmpi_sum_master
   module procedure xmpi_sum_master_int
   module procedure xmpi_sum_master_int2d
   module procedure xmpi_sum_master_int4d
+  module procedure xmpi_sum_master_dp
   module procedure xmpi_sum_master_dp1d
   module procedure xmpi_sum_master_dp2d
   module procedure xmpi_sum_master_dp3d
@@ -565,8 +573,8 @@ CONTAINS  !===========================================================
 !!
 !! PARENTS
 !!      abinit,aim,anaddb,band2eps,bsepostproc,conducti,cut3d,fftprof
-!!      fold2Bloch,ioprof,lapackprof,macroave,mrgddb,mrgdv,mrggkk,mrgscr,optic
-!!      ujdet,vdw_kernelgen
+!!      fold2Bloch,ioprof,lapackprof,macroave,mrgddb,mrgdv,mrggkk,mrgscr
+!!      multibinit,optic,ujdet,vdw_kernelgen
 !!
 !! CHILDREN
 !!      mpi_type_commit,mpi_type_size,xmpi_abort,xmpio_type_struct
@@ -703,7 +711,7 @@ end function xmpi_get_unit
 !!
 !! PARENTS
 !!      aim,anaddb,band2eps,bsepostproc,conducti,cut3d,fold2Bloch,lapackprof
-!!      macroave,mrgddb,mrggkk,optic,ujdet,vdw_kernelgen
+!!      m_sigmaph,macroave,mrggkk,multibinit,optic,ujdet,vdw_kernelgen
 !!
 !! CHILDREN
 !!      mpi_type_commit,mpi_type_size,xmpi_abort,xmpio_type_struct
@@ -730,6 +738,11 @@ subroutine xmpi_end()
 #ifdef HAVE_MPI
  call MPI_BARRIER(MPI_COMM_WORLD,mpierr)  !  Needed by some HPC architectures (MT, 20110315)
  call MPI_FINALIZE(mpierr)
+#endif
+
+#ifndef FC_IBM
+ ! IBM8 returns 260. 320 ...
+ call sys_exit(0)
 #endif
 
 end subroutine xmpi_end
@@ -888,7 +901,7 @@ end subroutine sys_exit
 !!  unt=Unit number for formatted output.
 !!
 !! PARENTS
-!!      abinit,leave_new,m_errors
+!!      abinit,leave_new,m_argparse
 !!
 !! CHILDREN
 !!      mpi_type_commit,mpi_type_size,xmpi_abort,xmpio_type_struct
@@ -1801,9 +1814,9 @@ end subroutine xmpi_comm_translate_ranks
 !!      datafordmft,denfgr,dfpt_nselt,dfpt_nstpaw,dfpt_scfcv,exc_build_block
 !!      fermisolverec,getcgqphase,gstateimg,iofn1,ks_ddiago,m_bse_io
 !!      m_exc_diago,m_exc_itdiago,m_exc_spectra,m_green,m_haydock,m_hdr
-!!      m_io_kss,m_io_redirect,m_ioarr,m_iowf,m_plowannier,m_slk,m_wfd,m_wffile
-!!      m_wfk,mlwfovlp,mlwfovlp_pw,mover,outkss,pawmkaewf,qmc_prep_ctqmc,sigma
-!!      tddft,vtorho,vtorhorec,wfk_analyze
+!!      m_io_kss,m_io_redirect,m_ioarr,m_iowf,m_plowannier,m_sigmaph,m_slk
+!!      m_wfd,m_wffile,m_wfk,mlwfovlp,mlwfovlp_pw,mover,outkss,pawmkaewf
+!!      qmc_prep_ctqmc,rf2_init,sigma,tddft,vtorho,vtorhorec,wfk_analyze
 !!
 !! CHILDREN
 !!      mpi_type_commit,mpi_type_size,xmpi_abort,xmpio_type_struct
@@ -2428,11 +2441,11 @@ subroutine xmpi_split_work2_i4b(ntasks,nprocs,istart,istop,warn_msg,ierr)
 
  do irank=0,nprocs-1
    if (irank<res) then
-     istart(irank+1)= irank   *block+1
-     istop (irank+1)=(irank+1)*block
+     istart(irank+1) = irank    *block+1
+     istop (irank+1) = (irank+1)*block
    else
-     istart(irank+1)=res*block+(irank-res  )*block_tmp+1
-     istop (irank+1)=res*block+(irank-res+1)*block_tmp
+     istart(irank+1) = res*block + (irank-res  )*block_tmp+1
+     istop (irank+1) = res*block + (irank-res+1)*block_tmp
    end if
  end do
 
@@ -2654,7 +2667,7 @@ pure function xmpi_distrib_with_replicas(itask,ntasks,rank,nprocs) result(bool)
 
 ! *************************************************************************
 
- ! If the number of processors is less than ntasks, we have max one task per processor, 
+ ! If the number of processors is less than ntasks, we have max one task per processor,
  ! else we replicate the tasks inside a pool of max size mnp_pool
  if (nprocs <= ntasks) then
    bool = (MODULO(itask-1, nprocs)==rank)
@@ -4232,7 +4245,7 @@ subroutine xmpio_write_frmarkers(fh,offset,sc_mode,nfrec,bsize_frecord,ierr)
    block_displ(jj+1)     = displ + bsize_frm + bsize_frecord(irec)
    jj=jj+2
    displ = displ + bsize_frecord(irec) + 2*bsize_frm ! Move to the beginning of the next column.
-   if (xmpio_max_address(displ)) then ! Check for wraparound. 
+   if (xmpio_max_address(displ)) then ! Check for wraparound.
       ierr = -1; return
    end if
  end do

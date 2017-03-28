@@ -7,7 +7,7 @@
 !! This module deals with rank objects for hashing k-point vector lists
 !!
 !! COPYRIGHT
-!! Copyright (C) 2010-2016 ABINIT group (MVer)
+!! Copyright (C) 2010-2017 ABINIT group (MVer)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -40,10 +40,10 @@ module m_kptrank
 !!****t* m_kptrank/kptrank_type
 !! NAME
 !! kptrank_type
-!! 
+!!
 !! FUNCTION
 !!  structure to contain a rank/inverse rank pair of arrays, with dimensions
-!! 
+!!
 !! SOURCE
 
  type,public :: kptrank_type
@@ -58,6 +58,7 @@ module m_kptrank
 
  public :: mkkptrank       ! Sets up the kpt ranks for comparing kpts
  public :: get_rank_1kpt   ! Calculates the rank for one kpt
+ public :: kptrank_index   ! Return the index of the k-point `kpt` in the initial set. -1 if not found.
  public :: copy_kptrank    ! Copy the object
  public :: destroy_kptrank ! Free memory
  public :: dump_kptrank    ! Prints the arrays and dimensions of a kptrank_type structure
@@ -77,14 +78,14 @@ contains
 !! INPUTS
 !!  npt = number of kpoints (eventually irreducible)
 !!  kpt = coordinates of kpoints
-!!  time_reversal = true or false to use time reversal symmetry. 
+!!  time_reversal = true or false to use time reversal symmetry.
 !!     Default is true, but only important if nsym and symrec are present
 !!
 !! OUTPUT
 !!  krank = object containing ranking and inverse ranking
 !!
 !! PARENTS
-!!      get_full_kgrid,m_ddk,m_fstab,m_nesting,m_phgamma,m_tetrahedron
+!!      get_full_kgrid,m_ddk,m_ebands,m_fstab,m_nesting,m_phgamma,m_tetrahedron
 !!      mkfskgrid,mkqptequiv,order_fs_kpts,outelph,printbxsf,read_el_veloc
 !!
 !! CHILDREN
@@ -126,12 +127,9 @@ subroutine mkkptrank (kpt,nkpt,krank,nsym,symrec, time_reversal)
 ! find smallest linear length
  smallestlen = one
  do ikpt=1, nkpt
-   if (abs(kpt(1,ikpt)) > tol10) &
-&     smallestlen = min(smallestlen, abs(kpt(1,ikpt)))
-   if (abs(kpt(2,ikpt)) > tol10) &
-&     smallestlen = min(smallestlen, abs(kpt(2,ikpt)))
-   if (abs(kpt(3,ikpt)) > tol10) &
-&     smallestlen = min(smallestlen, abs(kpt(3,ikpt)))
+   if (abs(kpt(1,ikpt)) > tol10) smallestlen = min(smallestlen, abs(kpt(1,ikpt)))
+   if (abs(kpt(2,ikpt)) > tol10) smallestlen = min(smallestlen, abs(kpt(2,ikpt)))
+   if (abs(kpt(3,ikpt)) > tol10) smallestlen = min(smallestlen, abs(kpt(3,ikpt)))
  end do
 
  krank%max_linear_density = int(one/smallestlen)+1
@@ -164,7 +162,7 @@ subroutine mkkptrank (kpt,nkpt,krank,nsym,symrec, time_reversal)
    end if
    krank%invrank(krank%rank(ikpt)) = ikpt
  end do
- 
+
 ! if symrec is provided, fill invrank with appropriate irred kpt indices
 ! for symmetry completion: kptrank_t%invrank points to the irred k-point
 ! equivalent to the k-point whose rank is provided
@@ -179,14 +177,14 @@ subroutine mkkptrank (kpt,nkpt,krank,nsym,symrec, time_reversal)
      do itim = timrev, 1, -1
        do isym = 1, nsym
          symkpt = (-1)**(timrev+1) * matmul(symrec(:,:,isym), kpt(:, ikpt))
-         
+
          call get_rank_1kpt (symkpt(:), symkptrank, krank)
 
          krank%invrank(symkptrank) = ikpt
        end do
      end do
    end do
- end if 
+ end if
 
  TETRA_ALLOCATE(krank%multipl, (nkpt))
 
@@ -250,7 +248,7 @@ subroutine get_rank_1kpt(kpt,rank,krank)
 !Local variables-------------------------------
 !scalars
  character(len=500) :: msg
-!arrays    
+!arrays
  double precision :: redkpt(3)
 
 ! *************************************************************************
@@ -296,13 +294,65 @@ end subroutine get_rank_1kpt
 
 !----------------------------------------------------------------------
 
+!!****f* m_kptrank/kptrank_index
+!!
+!! NAME
+!! kptrank_index
+!!
+!! FUNCTION
+!!  Return the index of the k-point `kpt` in the initial set. -1 if not found.
+!!
+!! INPUTS
+!!  krank = rank object for the k-grid we are using
+!!  kpt = coordinates of kpoints
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+integer function kptrank_index(krank, kpt) result(ikpt)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'kptrank_index'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ type(kptrank_type), intent(in) :: krank
+!arrays
+ double precision,intent(in) :: kpt(3)
+
+!Local variables-------------------------------
+!scalars
+ integer :: kpt_rank
+
+! *************************************************************************
+
+ call get_rank_1kpt(kpt, kpt_rank, krank)
+ ikpt = -1
+ if (kpt_rank < krank%max_rank) ikpt = krank%invrank(kpt_rank)
+
+end function kptrank_index
+!!***
+
+!----------------------------------------------------------------------
+
 !!****f* m_kptrank/copy_kptrank
 !!
 !! NAME
 !! copy_kptrank
 !!
 !! FUNCTION
-!! Copy the object 
+!! Copy the object
 !!
 !! INPUTS
 !!
@@ -336,16 +386,16 @@ subroutine copy_kptrank (krank_in, krank_out)
  krank_out%max_linear_density = krank_in%max_linear_density
  krank_out%max_rank = krank_in%max_rank
  krank_out%npoints = krank_in%npoints
- 
+
  TETRA_ALLOCATE(krank_out%rank, (krank_out%npoints))
  krank_out%rank = krank_in%rank
- 
+
  TETRA_ALLOCATE(krank_out%invrank, (krank_out%max_rank))
  krank_out%invrank = krank_in%invrank
 
  TETRA_ALLOCATE(krank_out%multipl, (krank_out%npoints))
  krank_out%multipl = krank_in%multipl
- 
+
 end subroutine copy_kptrank
 !!***
 
@@ -363,7 +413,7 @@ end subroutine copy_kptrank
 !!  krank = object containing ranking and inverse ranking, to be deallocated
 !!
 !! PARENTS
-!!      defs_elphon,get_full_kgrid,m_ddk,m_fstab,m_nesting,m_phgamma
+!!      defs_elphon,get_full_kgrid,m_ddk,m_ebands,m_fstab,m_nesting,m_phgamma
 !!      m_tetrahedron,mkfskgrid,mkqptequiv,order_fs_kpts,outelph,printbxsf
 !!      read_el_veloc
 !!
@@ -440,19 +490,19 @@ subroutine dump_kptrank (krank, unout)
 
 ! *********************************************************************
 
-  write(unout, *) 
-  write(unout, '(a)') ' Dump of the contents of a kptrank_type structure with k-point rank information' 
+  write(unout, *)
+  write(unout, '(a)') ' Dump of the contents of a kptrank_type structure with k-point rank information'
   write(unout, '(a,I8)') ' max linear density of points in 3 directions: max_linear_density = ',  krank%max_linear_density
   write(unout, '(a,I8)') ' maximum rank for any point in grid: max_rank = ',  krank%max_rank
   write(unout, '(a,I8)') ' number of points in input grid: npoints = ',  krank%npoints
-  write(unout, *) 
+  write(unout, *)
   write(unout, '(a)') ' invrank array = '
   write(unout, '(I4)') krank%invrank(:)
   write(unout, '(a)') ' rank array = '
   write(unout, '(I4)') krank%rank(:)
   write(unout, '(a)') ' multiplicity array = '
   write(unout, '(I4)') krank%multipl(:)
-  write(unout, *) 
+  write(unout, *)
 
 end subroutine dump_kptrank
 !!***

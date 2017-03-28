@@ -7,7 +7,7 @@
 !!  Initialize the data type containing parameters for a sigma calculation.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2016 ABINIT group (MG)
+!!  Copyright (C) 2008-2017 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -66,7 +66,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
 
  use m_gwdefs,        only : GW_Q0_DEFAULT, SIG_GW_AC, sigparams_t, sigma_is_herm, sigma_needs_w
  use m_io_tools,      only : file_exists
- use m_fstrings,      only : basename, sjoin
+ use m_fstrings,      only : basename, sjoin, ktoa, ltoa
  use m_crystal,       only : crystal_print, idx_spatial_inversion, crystal_t
  use m_crystal_io,    only : crystal_from_hdr
  use m_bz_mesh,       only : kmesh_t, kmesh_init, has_BZ_item, isamek, get_ng0sh, kmesh_print,&
@@ -79,7 +79,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
  use m_screening,     only : init_er_from_file, epsilonm1_results
  use m_pawtab,        only : pawtab_type
  use m_pawrhoij,      only : pawrhoij_type, pawrhoij_alloc, pawrhoij_copy, pawrhoij_free
- use m_io_kss,        only : testkss, make_gvec_kss
+ use m_io_kss,        only : make_gvec_kss
  use m_wfk,           only : wfk_read_eigenvalues
 
 !This section has been created automatically by the script Abilint (TD).
@@ -121,19 +121,19 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
  integer,parameter :: pertcase0=0,master=0
  integer :: bantot,enforce_sym,ib,ibtot,ii,ikcalc,ikibz,io,isppol,itypat,jj,method
  integer :: mod10,mod100,mqmem,mband,ng_kss,nsheps,ikcalc2bz,ierr,gap_err,ng
- integer :: gwc_nfftot,gwx_nfftot,nqlwl,test_npwkss,my_rank,nprocs,ik,nk_found,ifo,timrev 
+ integer :: gwc_nfftot,gwx_nfftot,nqlwl,test_npwkss,my_rank,nprocs,ik,nk_found,ifo,timrev
  integer :: iqbz,isym,iq_ibz,itim,ic,pinv,ig1,ng_sigx,spin,gw_qprange !band
- real(dp),parameter :: OMEGASIMIN=0.01d0
- real(dp) :: domegas,domegasi,ucvol,tol_enedif
+ real(dp),parameter :: OMEGASIMIN=0.01d0,tol_enediff=0.001_dp*eV_Ha
+ real(dp) :: domegas,domegasi,ucvol
  logical,parameter :: linear_imag_mesh=.TRUE.
- logical :: ltest,remove_inv,ltmp,changed,found
+ logical :: ltest,remove_inv,changed,found
  character(len=500) :: msg
  character(len=fnlen) :: fname,fcore,string
  type(wvl_internal_type) :: wvl
  type(gaps_t) :: gaps
 !arrays
  integer :: ng0sh_opt(3),G0(3),q_umklp(3),kpos(6)
- integer,allocatable :: npwarr(:),val_indeces(:,:) 
+ integer,allocatable :: npwarr(:),val_indeces(:,:)
  integer,pointer :: gvec_kss(:,:),gsphere_sigx_p(:,:)
  integer,pointer :: test_gvec_kss(:,:)
  real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3),rprimd(3,3),sq(3),q_bz(3),gamma_point(3,1)
@@ -237,19 +237,16 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
  end if
 
  if (Sigp%symsigma/=0.and.mod100>=20) then
-   msg = "SC-GW with symmetries is still under development. Use at your own risk!"
-   MSG_WARNING(msg)
+   MSG_WARNING("SC-GW with symmetries is still under development. Use at your own risk!")
  end if
- !
- ! === Setup parameters for Spectral function ===
+
+ ! Setup parameters for Spectral function.
  if (Dtset%gw_customnfreqsp/=0) then
    Sigp%nomegasr = Dtset%gw_customnfreqsp
-   msg = 'Custom grid for spectral function specified. Assuming experienced user.'
-   MSG_WARNING(msg)
+   MSG_WARNING('Custom grid for spectral function specified. Assuming experienced user.')
    if (Dtset%gw_customnfreqsp/=0) then
      Dtset%nfreqsp = Dtset%gw_customnfreqsp
-     msg = ' nfreqsp has been set to the same number as gw_customnfreqsp'
-     MSG_WARNING(msg)
+     MSG_WARNING('nfreqsp has been set to the same number as gw_customnfreqsp')
    end if
  else
    Sigp%nomegasr  =Dtset%nfreqsp
@@ -468,8 +465,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
 
  gap_err = get_gaps(KS_BSt, gaps)
  call gaps_print(gaps, unit=std_out)
-
- call ebands_report_gap(KS_BSt,unit=std_out)
+ call ebands_report_gap(KS_BSt, unit=std_out)
 
  ABI_MALLOC(val_indeces,(KS_BSt%nkpt,KS_BSt%nsppol))
  val_indeces = get_valence_idx(KS_BSt)
@@ -497,38 +493,49 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
  ! * maxbdgw and minbdgw are the Max and min band index for GW corrections over k-points.
  !   They are used to dimension the wavefunctions and to calculate the matrix elements.
  !
- if (Dtset%nkptgw==0) then
+ if (dtset%nkptgw==0) then
+   ! Use qp_range to select the interesting k-points and the corresponing bands.
+   !
+   !    0 --> Compute the QP corrections only for the fundamental and the optical gap.
+   ! +num --> Compute the QP corrections for all the k-points in the irreducible zone and include `num`
+   !           bands above and below the Fermi level.
+   ! -num --> Compute the QP corrections for all the k-points in the irreducible zone.
+   !          Include all occupied states and `num` empty states.
+
    call wrtout(std_out, "nkptgw == 0 ==> Automatic selection of k-points and bands for the corrections.")
-   if (gap_err /=0 .and. Dtset%gw_qprange==0) then
+   if (gap_err /=0 .and. dtset%gw_qprange==0) then
      msg = "Problem while computing the fundamental and optical gap (likely metal). Will replace gw_qprange=0 with gw_qprange=1"
      MSG_WARNING(msg)
-     Dtset%gw_qprange = 1
+     dtset%gw_qprange = 1
    end if
-   gw_qprange = Dtset%gw_qprange
+   gw_qprange = dtset%gw_qprange
 
    if (dtset%ucrpa>0) then
-     Dtset%nkptgw=Kmesh%nbz
-     Sigp%nkptgw =Dtset%nkptgw
+     dtset%nkptgw=Kmesh%nbz
+     Sigp%nkptgw =dtset%nkptgw
      ABI_MALLOC(Sigp%kptgw,(3,Sigp%nkptgw))
      ABI_MALLOC(Sigp%minbnd,(Sigp%nkptgw,Sigp%nsppol))
      ABI_MALLOC(Sigp%maxbnd,(Sigp%nkptgw,Sigp%nsppol))
      Sigp%kptgw(:,:)=Kmesh%bz(:,:)
      Sigp%minbnd=1
-     Sigp%maxbnd=Sigp%nbnds 
+     Sigp%maxbnd=Sigp%nbnds
 
    else if (gw_qprange/=0) then
      ! Include all the k-points in the IBZ.
-     Dtset%nkptgw=Kmesh%nibz
-     Sigp%nkptgw =Dtset%nkptgw
+     ! Note that kptgw == ebands%kptns so we can use a single ik index in the loop over k-points
+     ! No need to map kptgw onto ebands%kptns.
+     dtset%nkptgw=Kmesh%nibz
+     Sigp%nkptgw =dtset%nkptgw
      ABI_MALLOC(Sigp%kptgw,(3,Sigp%nkptgw))
      ABI_MALLOC(Sigp%minbnd,(Sigp%nkptgw,Sigp%nsppol))
      ABI_MALLOC(Sigp%maxbnd,(Sigp%nkptgw,Sigp%nsppol))
      Sigp%kptgw(:,:)=Kmesh%ibz(:,:)
      Sigp%minbnd=1
-     Sigp%maxbnd=Sigp%nbnds 
-   
+     Sigp%maxbnd=Sigp%nbnds
+
      if (gw_qprange>0) then
        ! All k-points: Add buffer of bands above and below the Fermi level.
+
        do spin=1,Sigp%nsppol
          do ik=1,Sigp%nkptgw
            Sigp%minbnd(ik,spin) = MAX(val_indeces(ik,spin) - gw_qprange, 1)
@@ -536,7 +543,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
          end do
        end do
 
-     else 
+     else
        ! All k-points: include all occupied states and -gw_qprange empty states.
        Sigp%minbnd = 1
        do spin=1,Sigp%nsppol
@@ -546,34 +553,32 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
        end do
      end if
 
-   else 
+   else
      ! gw_qprange is not specified in the input.
      ! Include the optical and the fundamental KS gap.
-     ! The main problem here is that kptgw and nkptgw do not depend on the spin and therefore 
+     ! The main problem here is that kptgw and nkptgw do not depend on the spin and therefore
      ! we have compute the union of the k-points where the fundamental and the optical gaps are located.
      !
      ! Find the list of `interesting` kpoints.
-     ABI_CHECK(gap_err==0, "gap_err!=0")
+     ABI_CHECK(gap_err == 0, "gw_qprange 0 cannot be used because I cannot find the gap (gap_err !=0)")
      nk_found = 1; kpos(1) = gaps%fo_kpos(1,1)
 
      do spin=1,Sigp%nsppol
        do ifo=1,3
          ik = gaps%fo_kpos(ifo, spin)
          found = .FALSE.; jj = 0
-         do while (.not. found .and. jj < nk_found) 
-           jj = jj + 1
-           found = (kpos(jj) == ik)
+         do while (.not. found .and. jj < nk_found)
+           jj = jj + 1; found = (kpos(jj) == ik)
          end do
          if (.not. found) then
-           nk_found = nk_found + 1
-           kpos(nk_found) = ik
+           nk_found = nk_found + 1; kpos(nk_found) = ik
          end if
        end do
      end do
 
      ! Now we can define the list of k-points and the bands range.
-     Dtset%nkptgw=nk_found 
-     Sigp%nkptgw =Dtset%nkptgw
+     dtset%nkptgw=nk_found
+     Sigp%nkptgw =dtset%nkptgw
 
      ABI_MALLOC(Sigp%kptgw,(3,Sigp%nkptgw))
      ABI_MALLOC(Sigp%minbnd,(Sigp%nkptgw,Sigp%nsppol))
@@ -589,16 +594,16 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
      end do
    end if
 
- else 
-   ! * Treat only the k-points and bands specified in the input file.
-   Sigp%nkptgw=Dtset%nkptgw
+ else
+   ! Treat only the k-points and bands specified in the input file.
+   Sigp%nkptgw=dtset%nkptgw
    ABI_MALLOC(Sigp%kptgw,(3,Sigp%nkptgw))
    ABI_MALLOC(Sigp%minbnd,(Sigp%nkptgw,Sigp%nsppol))
    ABI_MALLOC(Sigp%maxbnd,(Sigp%nkptgw,Sigp%nsppol))
 
    do spin=1,Sigp%nsppol
-     Sigp%minbnd(:,spin)=Dtset%bdgw(1,:,spin)
-     Sigp%maxbnd(:,spin)=Dtset%bdgw(2,:,spin)
+     Sigp%minbnd(:,spin)=dtset%bdgw(1,:,spin)
+     Sigp%maxbnd(:,spin)=dtset%bdgw(2,:,spin)
    end do
 
    do ii=1,3
@@ -613,24 +618,23 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
          write(msg,'(a,2i0,2(a,i0),2a,i0)')&
 &          "For (k,s) ",ikcalc,spin," bdgw= ",Dtset%bdgw(2,ikcalc,spin), " > nbnds=",Sigp%nbnds,ch10,&
 &          "Calculation will continue with bdgw =",Sigp%nbnds
-         Dtset%bdgw(2,ikcalc,spin)=Sigp%nbnds
          MSG_COMMENT(msg)
+         Dtset%bdgw(2,ikcalc,spin)=Sigp%nbnds
        end if
      end do
    end do
 
  end if
- !
+
  ! Make sure that all the degenerate states are included.
  ! * We will have to average the GW corrections over degenerate states if symsigma=1 is used.
  ! * KS states belonging to the same irreducible representation should be included in the basis set used for SCGW.
  if (Sigp%symsigma/=0 .or. mod100>=10) then
-   tol_enedif = 0.001/Ha_eV
    do isppol=1,Sigp%nsppol
      do ikcalc=1,Sigp%nkptgw
 
        if (has_IBZ_item(Kmesh,Sigp%kptgw(:,ikcalc),ikibz,G0)) then
-         call enclose_degbands(KS_BSt,ikibz,isppol,Sigp%minbnd(ikcalc,isppol),Sigp%maxbnd(ikcalc,isppol),changed,tol_enedif)
+         call enclose_degbands(KS_BSt,ikibz,isppol,Sigp%minbnd(ikcalc,isppol),Sigp%maxbnd(ikcalc,isppol),changed,tol_enediff)
          if (changed) then
            write(msg,'(2(a,i0),2a,2(1x,i0))')&
 &            "Not all the degenerate states at ikcalc= ",ikcalc,", spin= ",isppol,ch10,&
@@ -638,8 +642,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
            MSG_COMMENT(msg)
          end if
        else
-         write(msg,'(a,3(f6.3,1x),a)')' k-point ',Sigp%kptgw(:,ikcalc),' not in the IBZ'
-         MSG_ERROR(msg)
+         MSG_ERROR(sjoin('k-point', ktoa(Sigp%kptgw(:,ikcalc)), 'not in IBZ'))
        end if
 
      end do
@@ -648,7 +651,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
 
  !if (.not. associated(Dtset%bdgw)) then
  !  ABI_MALLOC(Dtset%bdgw, (2,Sigp%nkptgw,Sigp%nsppol))
- !end if 
+ !end if
  !do spin=1,Sigp%nsppol
  !  Dtset%bdgw(1,:,spin) = Sigp%minbnd(:,spin)
  !  Dtset%bdgw(2,:,spin) = Sigp%maxbnd(:,spin)
@@ -663,17 +666,16 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
  !FB TODO Honestly the code is not able to treat k-points, which are not in the IBZ.
  !This extension should require to change the code in different places.
  !Therefore, one should by now prevent the user from calculating sigma for a k-point not in the IBZ.
- !
+
  do ikcalc=1,Sigp%nkptgw
    if (has_BZ_item(Kmesh,Sigp%kptgw(:,ikcalc),ikcalc2bz,G0)) then
      !found = has_IBZ_item(Kmesh,Sigp%kptgw(:,ikcalc),ikcalc2bz,G0)
      Sigp%kptgw2bz(ikcalc) = ikcalc2bz
    else
-     write(msg,'(a,3(f6.3,1x),a)')' k-point ',Sigp%kptgw(:,ikcalc),' not in the set of kbz'
-     MSG_ERROR(msg)
+     MSG_ERROR(sjoin('k-point:', ktoa(Sigp%kptgw(:,ikcalc)), 'not in the kbz set'))
    end if
  end do
- !
+
  ! Check if there are duplicated k-point in Sigp%
  do ii=1,Sigp%nkptgw
    do jj=ii+1,Sigp%nkptgw
@@ -695,10 +697,9 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
 &    " Assuming expert user. Execution will continue. "
    call wrtout(ab_out,msg,"COLL")
  end if
- !
+
  ! Setup of the table used in the case of SCGW on wavefunctions to reduce the number
  ! of elements <i,kgw,s|\Sigma|j,kgw,s> that have to be calculated. No use of symmetries, except for Hermiticity.
- !
  call sigma_tables(Sigp,Kmesh)
 
  ! === Read external file and initialize basic dimension of Er% ===
@@ -708,7 +709,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
  ! * By default the entire matrix is read and used,
  ! * Define consistently npweps and ecuteps for \Sigma_c according the input
  if (Dtset%npweps>0.or.Dtset%ecuteps>0) then
-   if (Dtset%npweps>0) Dtset%ecuteps=zero   ! This should not happen : the Dtset array should not be modified after having been initialized.
+   if (Dtset%npweps>0) Dtset%ecuteps=zero   ! This should not happen: the Dtset array should not be modified after having been initialized.
    nsheps=0
    call setshells(Dtset%ecuteps,Dtset%npweps,nsheps,Dtset%nsym,gmet,gprimd,Dtset%symrel,'eps',ucvol)
  end if
@@ -780,19 +781,13 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
 
  call get_ng0sh(Sigp%nkptgw,Sigp%kptgw,Kmesh%nbz,Kmesh%bz,Qmesh%nbz,Qmesh%bz,-one,ng0sh_opt)
 
- write(msg,'(a,3i2)')' optimal value for ng0sh = ',ng0sh_opt
- call wrtout(std_out,msg,"COLL")
+ call wrtout(std_out, sjoin('optimal value for ng0sh ', ltoa(ng0sh_opt)), "COLL")
  Sigp%mG0=ng0sh_opt
 
  ! G-sphere for W and Sigma_c is initialized from the SCR file.
  call gsph_init(Gsph_c,Cryst,Er%npwe,gvec=Er%gvec)
 
- !if (gw_uses_wfk_file .and. .FALSE.) then
- !  call gsph_extend(Gsph_c,Cryst,Dtset%ecutsigx,Gsph_x)
- !  Sigp%npwx = Gsph_x%ng
- !else
  call gsph_init(Gsph_x,Cryst,Sigp%npwx,gvec=gvec_kss)
- !end if
 
  ! === Make biggest G-sphere of Sigp%npwvec vectors ===
  Sigp%npwvec=MAX(Sigp%npwwfn,Sigp%npwx)
@@ -910,15 +905,14 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
      string = Psps%filpsp(itypat)
      fcore = "CORE_"//TRIM(basename(string))
      ic = INDEX (TRIM(string), "/" , back=.TRUE.)
-     if (ic>0 .and. ic<LEN_TRIM(string)) then ! string defines a path, prepend path to fcore
+     if (ic>0 .and. ic<LEN_TRIM(string)) then
+       ! string defines a path, prepend path to fcore
        fcore = Psps%filpsp(itypat)(1:ic)//TRIM(fcore)
      end if
-     inquire(file=fcore,exist=ltmp)
-     if (ltmp) then
-       ii=ii+1
+     if (file_exists(fcore)) then
+       ii = ii+1
      else
-       msg=" HF decoupling is required but could not find file: "//TRIM(fcore)
-       MSG_WARNING(msg)
+       MSG_WARNING(sjoin("HF decoupling is required but cannot find file:", fcore))
      end if
    end do
 
@@ -963,10 +957,8 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
  end if
 
  if (mod10==SIG_GW_AC) then
-   if (Sigp%gwcalctyp/=1) &
-&      MSG_ERROR("Self-consistency with AC not implemented")
-   if (Sigp%gwcomp==1) &
-&      MSG_ERROR("AC with extrapolar technique not implemented")
+   if (Sigp%gwcalctyp/=1) MSG_ERROR("Self-consistency with AC not implemented")
+   if (Sigp%gwcomp==1) MSG_ERROR("AC with extrapolar technique not implemented")
  end if
 
  if (Sigp%nspinor==2) then
@@ -1018,7 +1010,7 @@ subroutine sigma_tables(Sigp,Kmesh,Bnd_sym)
  use m_errors
 
  use m_bz_mesh,     only : kmesh_t
- use m_esymm,   only : esymm_t, esymm_failed
+ use m_esymm,       only : esymm_t, esymm_failed
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -1197,7 +1189,7 @@ end subroutine sigma_tables
 !! my_rank=Rank of this this processor.
 !!
 !! OUTPUT
-!! my_spins(:)=Pointer to NULL in input. In output: list of spins treated by this node. 
+!! my_spins(:)=Pointer to NULL in input. In output: list of spins treated by this node.
 !! bks_mask(Sigp%nbnds,Kmesh%nibz,Sigp%nsppol)=True if this node will treat this state.
 !! keep_ur(Sigp%nbnds,Kmesh%nibz,Sigp%nsppol)=True if this node will store this state in real space.
 !! ierr=Exit status.
@@ -1252,23 +1244,23 @@ subroutine sigma_bksmask(Dtset,Sigp,Kmesh,my_rank,nprocs,my_spins,bks_mask,keep_
 
  ierr=0; nsppol=Sigp%nsppol
 
- ! List of spins for each node, number of processors per each spin 
+ ! List of spins for each node, number of processors per each spin
  ! and the MPI rank in the "spin" communicator.
  my_nspins=nsppol
  ABI_MALLOC(my_spins, (nsppol))
  my_spins= [(isp, isp=1,nsppol)]
  nprocs_spin = nprocs; rank_spin = my_rank
 
- if (nsppol==2 .and. nprocs>1) then 
+ if (nsppol==2 .and. nprocs>1) then
    ! Distribute spins (optimal distribution if nprocs is even)
    nprocs_spin(1) = nprocs/2
    nprocs_spin(2) = nprocs - nprocs/2
    my_nspins=1
    my_spins(1)=1
-   if (my_rank+1>nprocs/2) then 
+   if (my_rank+1>nprocs/2) then
      ! I will treate spin=2, compute shifted rank.
      my_spins(1)=2
-     rank_spin = my_rank - nprocs/2  
+     rank_spin = my_rank - nprocs/2
    end if
  end if
 

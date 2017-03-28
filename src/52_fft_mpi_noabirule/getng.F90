@@ -9,7 +9,7 @@
 !! Pay attention that the FFT grid must be compatible with the symmetry operations (see irrzg.f).
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (DCA, XG, GMR, MM)
+!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR, MM)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -75,6 +75,7 @@ subroutine getng(boxcutmin,ecut,gmet,kpt,me_fft,mgfft,nfft,ngfft,nproc_fft,nsym,
  use defs_basis
  use m_errors
  use m_profiling_abi
+ use m_sort
 
  use defs_fftdata,  only : mg
  use m_fftcore,     only : print_ngfft
@@ -84,7 +85,6 @@ subroutine getng(boxcutmin,ecut,gmet,kpt,me_fft,mgfft,nfft,ngfft,nproc_fft,nsym,
 #undef ABI_FUNC
 #define ABI_FUNC 'getng'
  use interfaces_14_hidewrite
- use interfaces_28_numeric_noabirule
  use interfaces_52_fft_mpi_noabirule, except_this_one => getng
 !End of the abilint section
 

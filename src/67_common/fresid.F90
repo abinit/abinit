@@ -10,7 +10,7 @@
 !!              old atomic positions, and new atomic positions
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (XG, MM, MT)
+!! Copyright (C) 1998-2017 ABINIT group (XG, MM, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -130,11 +130,6 @@ subroutine fresid(dtset,gresid,mpi_enreg,nfft,ngfft,ntypat,option,&
  logical,allocatable :: my_sphere(:)
 
 ! *************************************************************************
-
-!Statement functions are obsolete
-!Define magnitude of cross product of two vectors
-! cross(xx,yy,zz,aa,bb,cc)=&
-!& sqrt((yy*cc-zz*bb)**2+(zz*aa-xx*cc)**2+(xx*bb-yy*aa)**2)
 
 !Compute lengths of cross products for pairs of primitive
 !translation vectors (used in setting index search range below)
@@ -661,7 +656,7 @@ subroutine fresid(dtset,gresid,mpi_enreg,nfft,ngfft,ntypat,option,&
  contains
 
    function cross_fr(xx,yy,zz,aa,bb,cc)
-
+!Define magnitude of cross product of two vectors
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -669,11 +664,10 @@ subroutine fresid(dtset,gresid,mpi_enreg,nfft,ngfft,ntypat,option,&
 #define ABI_FUNC 'cross_fr'
 !End of the abilint section
 
-   real(dp)::cross_fr
-   real(dp) :: xx,yy,zz,aa,bb,cc
+   real(dp) :: cross_fr
+   real(dp),intent(in) :: xx,yy,zz,aa,bb,cc
    cross_fr=sqrt((yy*cc-zz*bb)**2+(zz*aa-xx*cc)**2+(xx*bb-yy*aa)**2)
  end function cross_fr
 
 end subroutine fresid
-
 !!***

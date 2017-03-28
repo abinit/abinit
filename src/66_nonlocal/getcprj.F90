@@ -9,7 +9,7 @@
 !!  |Proj_i> are non-local projectors (for each atom and each l,m,n)
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (MT)
+!! Copyright (C) 1998-2017 ABINIT group (MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~ABINIT/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -67,6 +67,7 @@
 !!
 !! PARENTS
 !!      cgwf,ctocprj,debug_tools,dfpt_accrho,dfpt_nstpaw,ks_ddiago,m_wfd
+!!      rf2_init
 !!
 !! CHILDREN
 !!      mkkpg,opernla_ylm,ph1d3d
@@ -198,20 +199,20 @@
    kpg_ => kpg
  end if
 
-!Eventually allocate temporary array for ph3d
- if (nloalg(2)<=0) then
-   matblk=NLO_MINCAT
-   ABI_ALLOCATE(ph3d_,(2,npw_k,matblk))
- else
-   matblk=size(ph3d,3)
-   ph3d_ => ph3d
- end if
-
 !Some other dims
  mincat=min(NLO_MINCAT,maxval(nattyp))
  cplex=2;if (istwf_k>1) cplex=1
  choice_=choice;if (cpopt==1) choice_=-choice
  signs=1;if (idir>0) signs=2
+
+!Eventually allocate temporary array for ph3d
+ if (nloalg(2)<=0) then
+   matblk=mincat
+   ABI_ALLOCATE(ph3d_,(2,npw_k,matblk))
+ else
+   matblk=size(ph3d,3)
+   ph3d_ => ph3d
+ end if
 
 !Loop over atom types
  ia1=1;iatm=0
@@ -228,7 +229,6 @@
 !  Loop on blocks of atoms inside type
    do ia3=ia1,ia2,mincat
      ia4=min(ia2,ia3+mincat-1);nincat=ia4-ia3+1
-
 !     Prepare the phase factors if they were not already computed
      if (nloalg(2)<=0) then
        call ph1d3d(ia3,ia4,kg_k,matblk,natom,npw_k,ngfft(1),ngfft(2),ngfft(3),&

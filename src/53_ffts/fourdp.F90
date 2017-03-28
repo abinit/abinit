@@ -19,7 +19,7 @@
 !!  The only real-to-complex FFT available is from SGoedecker library.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (DCA, XG)
+!! Copyright (C) 1998-2017 ABINIT group (DCA, XG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -45,11 +45,11 @@
 !! fofr(cplex*nfft)=input function f(r) (real or complex)
 !!
 !! PARENTS
-!!      atm2fft,bethe_salpeter,calc_smeared_density,dens_in_sph,dfpt_atm2fft
-!!      dfpt_dyfro,dfpt_eltfrxc,dfpt_looppert,dfpt_newvtr,dfpt_scfcv
-!!      dfpt_vlocal,dfptnl_loop,dieltcel,energy,fock_getghc,forces,fourdp_6d
-!!      fresidrsp,green_kernel,gstate,hartre,hartre1,hartrestr,initro,jellium
-!!      laplacian,m_dvdb,m_electronpositron,m_fft_prof,m_hidecudarec,m_kxc
+!!      atm2fft,bethe_salpeter,calc_smeared_density,dfpt_atm2fft,dfpt_dyfro
+!!      dfpt_eltfrxc,dfpt_looppert,dfpt_newvtr,dfpt_scfcv,dfpt_vlocal
+!!      dfptnl_loop,dieltcel,energy,fock_getghc,forces,fourdp_6d,fresidrsp
+!!      green_kernel,gstate,hartre,hartre1,hartrestr,initro,jellium,laplacian
+!!      m_dvdb,m_electronpositron,m_epjdos,m_fft_prof,m_hidecudarec,m_kxc
 !!      m_ppmodel,m_screening,make_efg_el,mklocl_realspace,mklocl_recipspace
 !!      moddiel,moddiel_csrb,mrgscr,newrho,newvtr,nonlinear,nres2vres,odamix
 !!      pawmknhat,pawmknhat_psipsi,pawmkrho,posdoppler,prcref,prcref_PMA

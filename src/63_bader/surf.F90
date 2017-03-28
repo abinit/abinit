@@ -14,7 +14,7 @@
 !! the surface is not computed row by row.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2002-2016 ABINIT group (PCasek,FF,XG)
+!! Copyright (C) 2002-2017 ABINIT group (PCasek,FF,XG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -57,12 +57,13 @@ subroutine surf(aim_dtset)
  use m_errors
  use m_xmpi
 
+ use m_numeric_tools,   only : coeffs_gausslegint
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'surf'
  use interfaces_18_timing
- use interfaces_28_numeric_noabirule
  use interfaces_63_bader, except_this_one => surf
 !End of the abilint section
 

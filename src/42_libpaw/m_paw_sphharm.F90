@@ -8,7 +8,7 @@
 !!  spherical harmonics Ylm (resp. Slm) (and gradients).
 !!
 !! COPYRIGHT
-!! Copyright (C) 2013-2016 ABINIT group (MT, FJ, TRangel)
+!! Copyright (C) 2013-2017 ABINIT group (MT, FJ, TRangel)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -242,7 +242,7 @@ end function ylmc
 !!  Case l>3 not implemented.
 !!
 !! PARENTS
-!!      m_commutator_vkbr
+!!      m_vkbr
 !!
 !! CHILDREN
 !!      wrtout
@@ -767,7 +767,7 @@ end subroutine initylmr
 !! used througout abinit. <Yl'm'|Slm> is their overlap.
 !!
 !! PARENTS
-!!      m_paw_sphharm
+!!      m_epjdos,m_paw_sphharm
 !!
 !! CHILDREN
 !!      wrtout

@@ -2,7 +2,7 @@
 .Version 8.0.3 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
 
-.Copyright (C) 1998-2016 ABINIT group . 
+.Copyright (C) 1998-2017 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -210,15 +210,19 @@
     NL   psp  energy=  1.75854586941707E+00
     >>>>>>>>> Etotal= -2.13783283584248E+01
 
- Other information on the energy :
-    Total energy(eV)= -5.81733899246221E+02 ; Band energy (Ha)=  -5.8471335236E+00
+ "Double-counting" decomposition of free energy:
+    Band energy     = -5.84713352360036E+00
+    Ion-ion energy  =  1.20000000000000E+01
+    PspCore energy  =  0.00000000000000E+00
+    Dble-C XC-energy= -2.75316441035326E+01
+    >>>> Etotal (DC)= -2.13787776271330E+01
 --------------------------------------------------------------------------------
 
 == END DATASET(S) ==============================================================
 ================================================================================
   
  -outvars: echo values of variables after computation  --------
--       accesswff           3
+-          iomode           3
             acell      1.3300000000E+01  1.3300000000E+01  1.3300000000E+01 Bohr
               amu      1.20110000E+01  1.59994000E+01
              ecut      5.00000000E+00 Hartree

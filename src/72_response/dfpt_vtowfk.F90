@@ -8,7 +8,7 @@
 !! for a given spin-polarization, from a fixed potential (vlocal1).
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2016 ABINIT group (XG, AR, DRH, MB, MVer,XW, MT)
+!! Copyright (C) 1999-2017 ABINIT group (XG, AR, DRH, MB, MVer,XW, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -68,7 +68,6 @@
 !!   on the augmented fft grid. (cumulative, so input as well as output)
 !!  rocceig(nband_k,nband_k)= (occ_kq(m)-occ_k(n))/(eig0_kq(m)-eig0_k(n)),
 !!    if this ratio has been attributed to the band n (second argument), zero otherwise
-!!  wffddk=struct info for wf ddk file.
 !!  ddk<wfk_t>=struct info for DDK file.
 !!  wtk_k=weight assigned to the k point.
 !!
@@ -93,7 +92,7 @@
 !!  enl1_k(nband_k)=first-order non-local contribution to 2nd-order total energy
 !!      from all bands at this k point.
 !!  gh1c_set(2,mpw1*nspinor*mband*mk1mem*nsppol*dim_eig2rf)= set of <G|H^{(1)}|nK>
-!!  gh0c1_set(2,mpw1*nspinor*mband*mk1mem*nsppol*dim_eig2rf)= set of <G|H^{(0)}|\Psi^{(1)}>
+!!  gh0c1_set(2,mpw1*nspinor*mband*mk1mem*nsppol*dim_eig2rf)= set of <G|H^{(0)}k+q-eig^{(0)}nk|\Psi^{(1)}kq>
 !!      The wavefunction is orthogonal to the active space (for metals). It is not coherent with cg1.
 !!  resid_k(nband_k)=residuals for each band over all k points,
 !!  rhoaug1(cplex*n4,n5,n6,nspden)= density in electrons/bohr**3,
@@ -112,7 +111,7 @@
 !!      cg_zcopy,corrmetalwf1,dfpt_accrho,dfpt_cgwf,dotprod_g,getgsc
 !!      matrixelmt_g,meanvalue_g,pawcprj_alloc,pawcprj_copy,pawcprj_free
 !!      pawcprj_get,pawcprj_put,rf2_destroy,rf2_init,sqnorm_g,status,timab
-!!      wffreaddatarec,wffreadnpwrec,wffreadskiprec,wfk_read_bks,wrtout
+!!      wfk_read_bks,wrtout
 !!
 !! SOURCE
 
@@ -132,14 +131,13 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
 & mpi_enreg,mpw,mpw1,natom,nband_k,ncpgr,&
 & nnsclo_now,npw_k,npw1_k,nspinor,nsppol,&
 & n4,n5,n6,occ_k,pawrhoij1,prtvol,psps,resid_k,rf_hamkq,rf_hamk_dir2,rhoaug1,rocceig,&
-& wffddk,ddk_f,wtk_k,nlines_done,cg1_out)
+& ddk_f,wtk_k,nlines_done,cg1_out)
 
  use defs_basis
  use defs_datatypes
  use defs_abitypes
  use m_profiling_abi
  use m_errors
- use m_wffile
  use m_xmpi
  use m_cgtools
  use m_wfk
@@ -199,7 +197,6 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
  type(pawcprj_type),intent(in) :: cprjq(natom,mcprjq)
  type(pawcprj_type),intent(inout) :: cprj1(natom,nspinor*mband*mk1mem*nsppol*gs_hamkq%usecprj)
  type(pawrhoij_type),intent(inout) :: pawrhoij1(natom*gs_hamkq%usepaw)
- type(wffile_type),intent(inout) :: wffddk(4)
  type(wfk_t),intent(inout) :: ddk_f(4)
 
 !Local variables-------------------------------
@@ -208,7 +205,7 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
  integer,save :: nskip=0
  integer :: counter,iband,idir0,ierr,iexit,igs,igscq,ii,dim_dcwf,inonsc
  integer :: iorder_cprj,iorder_cprj1,ipw,iscf_mod,ispinor,me,mgscq,nkpt_max
- integer :: nband_k_file,ndir,npw1_k_file,nspinor_file,option,opt_gvnl1,quit,test_ddk
+ integer :: option,opt_gvnl1,quit,test_ddk
  integer :: tocceig,usedcwavef,ptr,shift_band
  real(dp) :: aa,ai,ar,eig0nk,resid,residk,scprod,energy_factor
  character(len=500) :: message
@@ -222,10 +219,6 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
  type(pawcprj_type),allocatable :: cwaveprj(:,:),cwaveprj0(:,:),cwaveprj1(:,:)
 
 ! *********************************************************************
-
-#ifdef DEV_MG_WFK
- ABI_UNUSED((/ierr,nband_k_file,ndir,npw1_k_file,nspinor_file/))
-#endif
 
  DBG_ENTER('COLL')
 
@@ -270,28 +263,6 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
 & ipert==natom+10.or.ipert==natom+11) then
    test_ddk=1
    if(ipert==natom+10.or.ipert==natom+11) test_ddk=0
-#ifndef DEV_MG_WFK
-   ndir=1
-   if (ipert==natom+10.and.idir>3) ndir=2
-   if (ipert==natom+11) then 
-     ndir=3
-     if (idir>3) ndir=4
-   end if
-   do ii=1,ndir
-!    Read npw record
-     call WffReadNpwRec(ierr,ikpt,isppol,nband_k_file,npw1_k_file,nspinor_file,wffddk(ii))
-!    Skip k+G record
-     call WffReadSkipRec(ierr,1,wffddk(ii))
-     if(nband_k_file/=nband_k.or.npw1_k_file/=npw1_k.or.nspinor_file/=nspinor) then
-       write(message,'(a,i1,a,a,i6,6(a,i10))') 'After WffReadNpwRec (wffddk(',ii,')) : ',&
-&       ' Npw record does not match with given parameters at ikpt = ',ikpt, &
-&       ' ** nband_k = ',nband_k, ' / nband_k_file = ',nband_k_file, &
-&       ' ** npw1_k = ',npw1_k, ' / npw1_k_file = ',npw1_k_file, &
-&       ' ** nspinor_k = ',nspinor, ' / nspinor_k_file = ',nspinor_file
-       MSG_BUG(message)
-     end if
-   end do
-#endif
  end if
 
 !Additional stuff for PAW
@@ -325,14 +296,14 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
    ABI_DATATYPE_ALLOCATE(cwaveprj,(0,0))
    ABI_DATATYPE_ALLOCATE(cwaveprj1,(0,0))
  end if
- 
+
  energy_factor=two
  if(ipert==natom+10.or.ipert==natom+11) energy_factor=six
 
 !For rf2 perturbation :
  if(ipert==natom+10.or.ipert==natom+11) then
    call rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,gs_hamkq,ibg,icg,idir,ikpt,ipert,isppol,mkmem,&
-   mpi_enreg,mpw,nband_k,nsppol,rf_hamkq,rf_hamk_dir2,occ_k,rocceig,wffddk,ddk_f)
+   mpi_enreg,mpw,nband_k,nsppol,rf_hamkq,rf_hamk_dir2,occ_k,rocceig,ddk_f)
  end if
 
  call timab(139,1,tsec)
@@ -344,15 +315,7 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
  do iband=1,nband_k
 
 !  Skip bands not treated by current proc
-   if( (mpi_enreg%proc_distrb(ikpt, iband,isppol)/=me)) then
-     if (test_ddk==1) then
-!      Skip the eigenvalue and the wf records of this band
-#ifndef DEV_MG_WFK
-       call WffReadSkipRec(ierr,2,wffddk(1))
-#endif
-     end if
-     cycle
-   end if
+   if( (mpi_enreg%proc_distrb(ikpt, iband,isppol)/=me)) cycle
 
 !  Get ground-state wavefunctions
    ptr = 1+(iband-1)*npw_k*nspinor+icg
@@ -394,16 +357,9 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
 
 !  If electric field, the derivative of the wf should be read, and multiplied by i.
    if(test_ddk==1) then
-#ifndef DEV_MG_WFK
-!    Skip the eigenvalue record
-     call WffReadSkipRec(ierr,1,wffddk(1))
-!    Read gvnl1
-     call WffReadDataRec(gvnl1,ierr,2,npw1_k*nspinor,wffddk(1))
-#else
      ii = wfk_findk(ddk_f(1), gs_hamkq%kpt_k)
      ABI_CHECK(ii == ikpt, "ii != ikpt")
      call wfk_read_bks(ddk_f(1), iband, ikpt, isppol, xmpio_single, cg_bks=gvnl1)
-#endif
 
 !    Multiplication by -i
 !    MVeithen 021212 : use + i instead,

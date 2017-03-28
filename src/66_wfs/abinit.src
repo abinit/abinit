@@ -1,6 +1,6 @@
 # -*- Python -*-
 #
-# Copyright (C) 2005-2016 ABINIT Group (Yann Pouillon)
+# Copyright (C) 2005-2017 ABINIT Group (Yann Pouillon)
 #
 # This file is part of the ABINIT software package. For license information,
 # please see the COPYING file in the top-level directory of the ABINIT source
@@ -23,7 +23,6 @@ sources = [
  "m_invovl.F90",
  "chebfi.F90",
  "fxphas.F90",
- "fxphas_seq.F90",
  "getdc1.F90",
  "getghcnd.F90",
  "fock_getghc.F90",
@@ -33,6 +32,7 @@ sources = [
  "getgsc.F90",
  "m_bandfft_kpt.F90",
  "m_esymm.F90",
+ "multithreaded_getghc.F90",
  "prep_bandfft_tabs.F90",
  "prep_fourwf.F90",
  "prep_getghc.F90",

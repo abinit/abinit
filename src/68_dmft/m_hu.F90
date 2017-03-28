@@ -6,7 +6,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 2006-2016 ABINIT group (BAmadon)
+!! Copyright (C) 2006-2017 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -872,15 +872,10 @@ subroutine rotatevee_hu(cryst_struc,hu,nspinor,nsppol,pawprtvol,rot_mat,udens_at
      if(lpawu.ne.-1) then
        nat_correl=nat_correl+1
        if(nat_correl>1.and.(hu(itypat)%jpawu>tol4)) then
-          write(message,'(3a)')  ch10,'  -------> Warning: assume all atoms '&
-&         ,' of the same species are equivalent '
-          MSG_ERROR(message)
+          write(message,'(3a)')  ch10,'  -------> Warning: several atoms: '&
+&         ,' not extensively tested '
+          MSG_WARNING(message)
        endif
-       if(nspinor==2.and.(hu(itypat)%jpawu>tol4)) then
-          write(message,'(a)')  ch10,' Generalization to spinorial case is not done for jpawu/=0'
-          MSG_ERROR(message)
-       endif
-
 
 !  ! ================================================================
 !  !  If rotation for spin 2 and rotation for spin 1 are not equal print
@@ -1558,7 +1553,7 @@ end function reddd
 !! from the Slm to the Ylm basis if option==1 or from Ylm to Slm if !option==2
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (BA)
+!! Copyright (C) 1998-2017 ABINIT group (BA)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1724,7 +1719,7 @@ end subroutine vee_slm2ylm_hu
 !! into a full spin and orbital interaction matrix of dimension [2*(2l+1)]**4
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (BA)
+!! Copyright (C) 1998-2017 ABINIT group (BA)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1819,7 +1814,7 @@ end subroutine vee_ndim2tndim_hu_r
 !! into a full spin and orbital interaction matrix of dimension [2*(2l+1)]**4
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (BA)
+!! Copyright (C) 1998-2017 ABINIT group (BA)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1913,7 +1908,7 @@ end subroutine vee_ndim2tndim_hu
 !! from the Ylm basis to the J,M_J basis if option==1
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (BA)
+!! Copyright (C) 1998-2017 ABINIT group (BA)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2089,7 +2084,7 @@ subroutine vee_ylm2jmj_hu(lcor,mat_inp_c,mat_out_c,option)
 !! Condon tables
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (BA)
+!! Copyright (C) 1998-2017 ABINIT group (BA)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2377,7 +2372,7 @@ subroutine udens_slatercondon_hu(fk,lcor)
 !! in JMJ Basis
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (BA)
+!! Copyright (C) 1998-2017 ABINIT group (BA)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

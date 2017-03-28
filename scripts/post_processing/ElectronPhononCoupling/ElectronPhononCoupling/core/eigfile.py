@@ -9,6 +9,8 @@ import netCDF4 as nc
 
 from . import EpcFile
 
+from .constants import tol6, kb_HaK
+
 from .mpi import MPI, comm, size, rank, mpi_watch
 
 __all__ = ['EigFile']
@@ -24,10 +26,14 @@ class EigFile(EpcFile):
         """Open the Eig.nc file and read it."""
         fname = fname if fname else self.fname
 
+        super(EigFile, self).read_nc(fname)
+
         with nc.Dataset(fname, 'r') as root:
 
             self.EIG = root.variables['Eigenvalues'][:,:,:] 
             self.Kptns = root.variables['Kptns'][:,:]
+
+            self.nspin, self.nkpt, self.nband = self.EIG.shape
 
     @mpi_watch
     def broadcast(self):
@@ -39,6 +45,7 @@ class EigFile(EpcFile):
             dim = np.array([nspin, nkpt, nband], dtype=np.int)
         else:
             dim = np.empty(3, dtype=np.int)
+            self.nspin, self.nkpt, self.nband = dim
 
         comm.Bcast([dim, MPI.INT])
 
@@ -184,8 +191,48 @@ class EigFile(EpcFile):
         fan_epc_sym = np.einsum('ijkl,ijk->ijkl', fan_epc, offdiag)
     
         return fan_epc_sym
-  
 
+    def get_fermi_function_T0(self, mu):
+        """
+        Get the Fermi function for T=0.
+        Returns: occ[nspin,nkpt,nband]
+        """
+        occ = np.zeros((self.nspin, self.nkpt, self.nband))
+        occ[np.where(self.EIG < mu)] = 1.0
+        occ[np.where(self.EIG > mu)] = 0.0
+        return occ
 
+    def get_fermi_function(self, mu, temperatures):
+        """
+        Compute the Fermi function for the occupations,
+        given a chemical potential.
+        """
 
+        ntemp = len(temperatures)
+        occ = np.zeros((self.nspin, self.nkpt, self.nband, ntemp))
 
+        for itemp, T in enumerate(temperatures):
+
+            if T < tol6:
+                occ[...,itemp] = self.get_fermi_function_T0(mu)
+                continue
+
+            beta = 1. / (kb_HaK * T)
+
+            #occ[...,itemp] = 1. / (np.exp(beta * (self.EIG - mu)) + 1)
+
+            for ispin in range(self.nspin):
+                for ikpt in range(self.nkpt):
+                    for iband in range(self.nband):
+
+                        betaE = beta * (self.EIG[ispin,ikpt,iband] - mu)
+
+                        if betaE < -20:
+                            occ[ispin,ikpt,iband,itemp] = 1
+                        elif betaE > 20:
+                            occ[ispin,ikpt,iband,itemp] = 0
+                        else:
+                            occ[ispin,ikpt,iband,itemp] = 1./(np.exp(betaE)+1)
+
+        return occ
+ 

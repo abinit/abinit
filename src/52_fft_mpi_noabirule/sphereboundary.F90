@@ -25,7 +25,7 @@
 !! Debug mode, if fftalg is between 000 and 099
 !!
 !! COPYRIGHT
-!! Copyright (C) 2002-2016 ABINIT group (DCA, XG)
+!! Copyright (C) 2002-2017 ABINIT group (DCA, XG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -41,7 +41,7 @@
 !!  gbound(2*mgfft+8,2)=defined above
 !!
 !! PARENTS
-!!      dens_in_sph,dfpt_eltfrkin,dfpt_mkrho,fock_getghc,m_bandfft_kpt,m_cut3d
+!!      dfpt_eltfrkin,dfpt_mkrho,fock_getghc,m_bandfft_kpt,m_cut3d,m_epjdos
 !!      m_fft,m_fft_prof,m_fock,m_gsphere,m_hamiltonian,m_wfd,mkrho,mlwfovlp
 !!      pawmkaewf,posdoppler,scfcv,spin_current,suscep_stat,susk,tddft,wfconv
 !!
@@ -243,9 +243,12 @@ subroutine sphereboundary(gbound,istwf_k,kg_k,mgfft,npw)
          end if ! Endif take into account time-reversal symmetry
 
          if (igb+1>2*mgfft+4) then
-           write(message, '(a,3i8,a,a)' )&
-&           'iloop,igb,mgb=',iloop,igb,(2*mgfft+4),ch10,&
-&           'about to overwrite gbound.'
+           write(message, '(2a, 4(a,3(i0,1x),a))' )&
+             "About to overwrite gbound array (FFT mesh too small) ",ch10, &
+             "   iloop, igb, mgb = ",iloop,igb,2*mgfft+4, ch10, &
+             "   istwfk, mgfft, npw = ",istwf_k, mgfft, npw, ch10, &
+             "   minval(kg_k) = ",minval(kg_k, dim=2), ch10, &
+             "   maxval(kg_k) = ",maxval(kg_k, dim=2), ch10
            MSG_BUG(message)
          end if
 

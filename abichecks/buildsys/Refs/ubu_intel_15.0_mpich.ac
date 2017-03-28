@@ -322,6 +322,22 @@ CPP="icc -E"
 #
 #FCFLAGS="-O2"
 
+# Fortran flags for fixed-form source files
+#
+#FCFLAGS_FIXEDFORM="-ffixed-form"
+
+# Fortran flags for free-form source files
+#
+#FCFLAGS_FREEFORM="-ffree-form"
+
+# Fortran compiler flags to use a module directory
+#
+#FCFLAGS_MODDIR=="-J$(abinit_moddir)"
+
+# Tricky Fortran compiler flags
+#
+#FCFLAGS_HINTS="-ffree-line-length-none"
+
 # Fortran linker custom debug flags (when enable_debug=yes)
 #
 #FC_LDFLAGS_DEBUG="-Wl,-debug"
@@ -515,7 +531,7 @@ enable_mpi_io="yes"
 #     the MPI compiler wrappers are wrapped themselves, so that the
 #     specified serial compilers are used when building Abinit.
 #
-with_mpi_prefix="/usr/local/mpich3-3.2_ifort15"
+with_mpi_prefix="${MPI_HOME}"
 
 # Set MPI runner for tests (default is unset)
 # Note: replaces the former with_mpi_runner option
@@ -675,14 +691,13 @@ with_mpi_prefix="/usr/local/mpich3-3.2_ifort15"
 # Transferable I/O (TRIO) connector                                            #
 # ---------------------------------------------------------------------------- #
 
-# Flavor of transferable I/O library to support (default is netcdf+etsf_io)
+# Flavor of transferable I/O library to support (default is netcdf)
 #
 # By transferable I/O (TRIO), we mean that the files produced by Abinit
 # will be transferable seamlessly to other computers and codes
 #
 # Supported libraries:
 #
-#   * etsf_io  : ETSF_IO file format (requires netcdf)
 #   * psml     : XML pseudopotential format io library
 #   * netcdf   : NetCDF file format
 #   * yaml     : YAML output
@@ -690,17 +705,7 @@ with_mpi_prefix="/usr/local/mpich3-3.2_ifort15"
 #
 # You may specify any combination, using '+' as a separator
 #
-with_trio_flavor="netcdf+etsf_io"
-
-                       # ------------------------------ #
-
-# Include flags for the ETSF_IO library (default is unset)
-#
-#with_etsf_io_incs="-I/opt/etsf/include"
-
-# Link flags for the ETSF_IO library (default is unset)
-#
-#with_etsf_io_libs="-L/opt/etsf/lib -letsf_io"
+with_trio_flavor="netcdf"
 
                        # ------------------------------ #
 
@@ -716,11 +721,11 @@ with_trio_flavor="netcdf+etsf_io"
 
 # Include flags for the NetCDF library (default is unset)
 #
-#with_netcdf_incs="-I/usr/local/include/netcdf"
+with_netcdf_incs="-I${FALLBACKS_PATH}/netcdf/include"
 
 # Link flags for the NetCDF library (default is unset)
 #
-#with_netcdf_libs="-L/usr/local/lib/netcdf -lnetcdff -lnetcdf"
+with_netcdf_libs="-L${FALLBACKS_PATH}/netcdf/lib -lnetcdf"
 #
 #
 # Enable Netcdf mode in Abinit (use netcdf as default IO library,
@@ -918,59 +923,67 @@ with_linalg_libs="-L${MKLROOT}/lib/intel64 -Wl,--start-group  -lmkl_intel_lp64 -
 #
 # You may specify any combination, using '+' as a separator
 #
-with_dft_flavor="libxc"
+with_dft_flavor="atompaw+libxc+wannier90+bigdft"
 
                        # ------------------------------ #
 
 # Full path to the AtomPAW executables (default is unset)
 #
-#with_atompaw_bins="/usr/local/bin"
+with_atompaw_bins="${FALLBACKS_PATH}/atompaw/bin"
 
 # Include flags for the AtomPAW library (default is unset)
 #
-#with_atompaw_incs="-I/usr/local/include/atompaw"
+with_atompaw_incs="-I${FALLBACKS_PATH}/atompaw/include"
 
 # Link flags for the AtomPAW library (default is unset)
 #
-#with_atompaw_libs="-L/usr/local/lib/atompaw -latompaw"
+with_atompaw_libs="-L${FALLBACKS_PATH}/atompaw/lib -latompaw"
 
                        # ------------------------------ #
 
 # Include flags for the BigDFT library (default is unset)
 #
-#with_bigdft_incs="-I/usr/local/include/bigdft"
+with_bigdft_incs="-I${FALLBACKS_PATH}/bigdft/1.7.1.24/include"
 
 # Link flags for the BigDFT library (default is unset)
 #
-#with_bigdft_libs="-L/usr/local/lib/bigdft -lbigdft -lpoissonsolver -labinit"
+with_bigdft_libs="-L${FALLBACKS_PATH}/bigdft/1.7.1.24/lib -lbigdft-1 -labinit -lyaml -lrt"
 
                        # ------------------------------ #
 
 # Include flags for the LibXC library (default is unset)
 #
-#with_libxc_incs="-I/opt/etsf/include"
+with_libxc_incs="-I${FALLBACKS_PATH}/libxc/include"
 
 # Link flags for the LibXC library (default is unset)
 #
-#with_libxc_libs="-L/opt/etsf/lib -lxc"
+with_libxc_libs="-L${FALLBACKS_PATH}/libxc/lib -lxcf90 -lxc"
 
                        # ------------------------------ #
 
 # Full path to the Wannier90 executables (default is unset)
 #
-#with_wannier90_bins="/usr/local/bin"
+with_wannier90_bins="${FALLBACKS_PATH}/wannier90/bin"
 
 # Include flags for the Wannier90 library (default is unset)
 #
-#with_wannier90_incs="-I/usr/local/include/wannier90"
+with_wannier90_incs="-I${FALLBACKS_PATH}/wannier90/include"
 
 # Link flags for the Wannier90 library (default is unset)
 #
-#with_wannier90_libs="-L${HOME}/lib/wannier90 -lwannier90"
+with_wannier90_libs="-L${FALLBACKS_PATH}/wannier90/lib -lwannier90"
 
 # Flag to force wannier90 v1.x (autodetected by default, but may not work)
 #
 #enable_wannier90_v1="no"
+
+# ---------------------------------------------------------------------------- #
+# LIBXML support
+# ---------------------------------------------------------------------------- #
+
+# Flag to enable LIBXML library
+#
+#enable_xml=no
 
 # ---------------------------------------------------------------------------- #
 # DMFT library connector                                                        #

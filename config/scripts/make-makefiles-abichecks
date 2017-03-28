@@ -1,16 +1,19 @@
 #!/usr/bin/env python
 #
-# Copyright (C) 2014-2016 ABINIT Group (Yann Pouillon)
+# Copyright (C) 2014-2017 ABINIT Group (Yann Pouillon)
 #
 # This file is part of the ABINIT software package. For license information,
 # please see the COPYING file in the top-level directory of the ABINIT source
 # distribution.
 #
+from __future__ import print_function, division, absolute_import #, unicode_literals
 
-from ConfigParser import ConfigParser
+try:
+    from ConfigParser import ConfigParser
+except ImportError:
+    from configparser import ConfigParser
 from time import gmtime,strftime
 
-import commands
 import os
 import re
 import sys
@@ -85,16 +88,16 @@ my_output  = "abichecks/Makefile.am"
 # Check if we are in the top of the ABINIT source tree
 if ( not os.path.exists("configure.ac") or
      not os.path.exists("config/specs/abichecks.conf") ):
-  print "%s: You must be in the top of the ABINIT Test Suite source tree." % my_name
-  print "%s: Aborting now." % my_name
+  print("%s: You must be in the top of the ABINIT Test Suite source tree." % my_name)
+  print("%s: Aborting now." % my_name)
   sys.exit(1)
 
 # Read config file(s)
 cnf = MyConfigParser()
 for cnf_file in my_configs:
   if ( not os.path.exists(cnf_file) ):
-    print "%s: Could not find config file (%s)." % (my_name,cnf_file)
-    print "%s: Aborting now." % my_name
+    print("%s: Could not find config file (%s)." % (my_name,cnf_file))
+    print("%s: Aborting now." % my_name)
     sys.exit(2)
 
 # What time is it?
@@ -135,12 +138,12 @@ mf_data += "\n# Clean-up temporary directories\nclean-local:\n%s" % mf_cln
 
 # Generate EXTRA_DIST information
 mf_extra = "EXTRA_DIST ="
-xd_data = file("config/dist/abichecks.lst").read().strip().split("\n")
+xd_data = open("config/dist/abichecks.lst", "rt").read().strip().split("\n")
 for src in xd_data:
   mf_extra += " \\\n  %s" % re.sub("^abichecks/","",src)
 mf_data += "\n%s\n" % mf_extra
 
 # Write down makefile
-mf = file(my_output,"w")
+mf = open(my_output, "wt")
 mf.write(mf_data)
 mf.close()

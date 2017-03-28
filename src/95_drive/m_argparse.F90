@@ -7,7 +7,7 @@
 !!   Simple argument parser used in main programs
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2016 ABINIT group (MG)
+!!  Copyright (C) 2008-2017 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -30,7 +30,7 @@ module m_argparse
  use m_xmpi
  use m_xomp
  use m_xieee
- use m_errors 
+ use m_errors
  use m_abi_linalg
  use m_fft
  use m_exit
@@ -39,33 +39,35 @@ module m_argparse
  use m_io_tools,        only : open_file
  use m_cppopts_dumper,  only : dump_cpp_options
  use m_optim_dumper,    only : dump_optim
- use m_fstrings,        only : atoi, firstchar
+ use m_fstrings,        only : atoi, itoa, firstchar, sjoin
  use m_time,            only : str2sec
  use m_libpaw_tools,    only : libpaw_log_flag_set
- 
+
  implicit none
 
- private 
+ private
 !!***
 
 !!****t* m_argparse/args_t
 !! NAME
 !! args_t
-!! 
+!!
 !! FUNCTION
 !! Stores the command line options
-!! 
+!!
 !! SOURCE
 
  type,public :: args_t
 
-   integer :: exit=0        
+   integer :: exit=0
      ! /=0 to exit after having parsed the command line options.
 
-   integer :: dry_run=0  
+   integer :: abimem_level=0
+
+   integer :: dry_run=0
      ! /= 0 to exit after the validation of the input file.
 
-    character(len=500) :: cmdline=""
+   character(len=500) :: cmdline=""
      ! The entire command line
 
  end type args_t
@@ -73,7 +75,7 @@ module m_argparse
  public :: args_parser   ! Parse command line options.
 !!***
 
-contains 
+contains
 
 !----------------------------------------------------------------------
 
@@ -89,7 +91,7 @@ contains
 !!
 !! SOURCE
 
-function args_parser() result(args)
+type(args_t) function args_parser() result(args)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -101,18 +103,15 @@ function args_parser() result(args)
 
  implicit none
 
-!Arguments ------------------------------------
- type(args_t) :: args
-
 !Local variables-------------------------------
  integer :: ii,ierr
- logical :: iam_master
+ logical :: iam_master,verbose
  real(dp) :: timelimit
  character(len=500) :: arg,msg
 
 ! *************************************************************************
 
- args%exit = 0; ierr=0
+ args%exit = 0; ierr=0; verbose = .False.
 
 #ifndef HAVE_FC_COMMAND_ARGUMENT
  call wrtout(std_out,"get_command_argument is not supported by FC. Ignoring command lines options!")
@@ -135,6 +134,8 @@ function args_parser() result(args)
       args%exit = args%exit + 1
 
     else if (arg == "-b" .or. arg == "--build") then
+      call print_kinds(unit=std_out)
+      call xmpi_show_info(unit=std_out)
       call dump_cpp_options(std_out)
       call dump_config(std_out)
       call dump_optim(std_out)
@@ -143,6 +144,10 @@ function args_parser() result(args)
 
     else if (arg == "-d" .or. arg == "--dry-run") then
       args%dry_run = 1
+
+    else if (arg == "--abimem-level") then
+      call get_command_argument(ii+1, arg)
+      args%abimem_level = atoi(arg)
 
     else if (arg == "-j" .or. arg == "--omp-num-threads") then
       call get_command_argument(ii+1, arg)
@@ -180,7 +185,7 @@ function args_parser() result(args)
     else if (arg == "--gnu-mtrace") then
       if (iam_master) then
         call clib_mtrace(ierr)
-        if (ierr/=0 .and. iam_master) write(std_out,"(a,i0)")"clib_mtrace returned ierr: ",ierr 
+        if (ierr/=0 .and. iam_master) write(std_out,"(a,i0)")"clib_mtrace returned ierr: ",ierr
     end if
 
     else if (arg == "--log") then
@@ -205,7 +210,7 @@ function args_parser() result(args)
     !  close(std_out)
     !  if (open_file(arg, msg, unit=std_out, form='formatted', status='new', action="write") /= 0) then
     !    MSG_ERROR(message)
-    !  end if 
+    !  end if
     !  end if
 
     else if (arg == "-h" .or. arg == "--help") then
@@ -215,6 +220,7 @@ function args_parser() result(args)
         write(std_out,*)"-b, --build                Show build parameters and exit."
         write(std_out,*)"-d, --dry-run              Validate input file and exit."
         write(std_out,*)"-j, --omp-num-threads      Set the number of OpenMp threads."
+        write(std_out,*)"--abimem-level NUM         Set memory profiling level. Requires HAVE_MEM_PROFILING"
         write(std_out,*)"--ieee-halt                Halt the code if one of the *usual* IEEE exceptions is raised."
         write(std_out,*)"--ieee-signal              Signal the occurrence of the *usual* IEEE exceptions."
         write(std_out,*)"--fft-ialltoall[=bool]     Use non-blocking ialltoall in MPI-FFT (used only if ndat>1 and MPI3)."
@@ -230,9 +236,13 @@ function args_parser() result(args)
         write(std_out,*)"                               minutes"
         write(std_out,*)"                               minutes:seconds"
         write(std_out,*)"                               hours:minutes:seconds"
+        write(std_out,*)"--verbose                  Verbose mode"
         write(std_out,*)"-h, --help                 Show this help and exit."
       end if
       args%exit = args%exit + 1
+
+    else if (arg == "--verbose") then
+      verbose = .True.
 
     else
       if (firstchar(arg, "-")) then
@@ -242,12 +252,50 @@ function args_parser() result(args)
         continue
       end if
     end if
-  end do 
+  end do
 
-  !call wrtout(std_out,"Command line: "//trim(args%cmdline),"COLL")
+  if (verbose) call args_print(args)
 #endif
 
 end function args_parser
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_argparse/args_print
+!! NAME
+!!  args_print
+!!
+!! FUNCTION
+!!  Print object.
+!!
+!! PARENTS
+!!
+!! SOURCE
+
+subroutine args_print(args)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'args_print'
+ use interfaces_14_hidewrite
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+ type(args_t),intent(in) :: args
+
+! *************************************************************************
+
+ call wrtout(std_out, sjoin("Command line:", args%cmdline))
+ call wrtout(std_out, sjoin("exit:", itoa(args%abimem_level)))
+ call wrtout(std_out, sjoin("abimem_level:", itoa(args%abimem_level)))
+ call wrtout(std_out, sjoin("dry_run:", itoa(args%abimem_level)))
+
+end subroutine args_print
 !!***
 
 !!****f* m_argparse/begins_with
@@ -286,7 +334,7 @@ end function begins_with
 !!  parse_yesno
 !!
 !! FUNCTION
-!!  This function receives an argument, arg of the form --foo[=bool_value] 
+!!  This function receives an argument, arg of the form --foo[=bool_value]
 !!  that begins with optname (i.e. --foo) and returns the value of bool_value
 !!  If bool_value is not present, returns default (.True. if not specified)
 !!
@@ -313,9 +361,9 @@ logical function parse_yesno(arg, optname, default) result(bool)
  ! Assume default if value is not given
  if (len_trim(optname) == len_trim(arg)) return
 
- select case (arg(len(optname)+1:)) 
- case ("=yes", "=y")  
-   bool = .True.  
+ select case (arg(len(optname)+1:))
+ case ("=yes", "=y")
+   bool = .True.
  case ("=no", "=n")
    bool = .False.
  case default

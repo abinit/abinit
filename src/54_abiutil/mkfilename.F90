@@ -8,7 +8,7 @@
 !! From the root (input or output) file names, produce a real file name.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2002-2016 ABINIT group (XG)
+!! Copyright (C) 2002-2017 ABINIT group (XG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -94,6 +94,16 @@ subroutine mkfilename(filnam,filnam_out,get,idtset,ird,jdtset_,ndtset,stringfil,
 
 !Treatment of the multi-dataset case  (get is not relevant otherwise)
  if(ndtset/=0)then
+
+   if(ndtset==1.and.get<0.and.(jdtset_(1)+get>0))then
+     write(message, '(7a,i3,a,i3,5a)' )&
+&     'You cannot use a negative value of get',trim(stringvar),' with only 1 dataset!',ch10, &
+&     ' If you want to refer to a previously computed dataset,',ch10, &
+&     ' you should give the absolute index of it (i.e. ', &
+&     jdtset_(idtset)+get,' instead of ',get,').',ch10, &
+&     'Action: correct get',trim(stringvar),' in your input file.'
+     MSG_ERROR(message)
+   end if
 
    if(idtset+get<0)then
      write(message, '(a,a,a,a,a,i3,a,a,a,i3,a,a,a,a)' )&

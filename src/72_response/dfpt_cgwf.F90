@@ -15,7 +15,7 @@
 !! by contributions from the active space in the calling routine, if needed.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2016 ABINIT group (XG,DRH,XW,FJ,MT,LB)
+!! Copyright (C) 1999-2017 ABINIT group (XG,DRH,XW,FJ,MT,LB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -110,7 +110,7 @@
 subroutine dfpt_cgwf(band,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwavef,&
 & eig0nk,eig0_kq,eig1_k,ghc,gh1c_n,grad_berry,gsc,gscq,&
 & gs_hamkq,gvnlc,gvnl1,icgq,idir,ipert,igscq,&
-& mcgq,mgscq,mpi_enreg,mpw1,natom,nband,nbdbuf,nline,npw,npw1,nspinor,&
+& mcgq,mgscq,mpi_enreg,mpw1,natom,nband,nbdbuf,nline_in,npw,npw1,nspinor,&
 & opt_gvnl1,prtvol,quit,resid,rf_hamkq,dfpt_sciss,tolrde,tolwfr,&
 & usedcwavef,wfoptalg,nlines_done)
 
@@ -140,7 +140,7 @@ subroutine dfpt_cgwf(band,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwa
 !scalars
  integer,intent(in) :: band,berryopt
  integer,intent(in) :: icgq,idir,igscq,ipert,mcgq,mgscq,mpw1,natom,nband
- integer,intent(in) :: nbdbuf,nline,npw,npw1,nspinor,opt_gvnl1
+ integer,intent(in) :: nbdbuf,nline_in,npw,npw1,nspinor,opt_gvnl1
  integer,intent(in) :: prtvol,quit,usedcwavef,wfoptalg
  integer,intent(inout) :: nlines_done
  real(dp),intent(in) :: eig0nk,dfpt_sciss,tolrde,tolwfr
@@ -167,8 +167,8 @@ subroutine dfpt_cgwf(band,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwa
  integer,parameter :: level=15,tim_getgh1c=1,tim_getghc=2,tim_projbd=2
  integer,save :: nskip=0
  integer :: cpopt,iband,igs,iline,indx_cgq,ipw,me_g0,comm_fft
- integer :: ipws,ispinor,istwf_k,jband,optlocal,optnl,shift_band,sij_opt
- integer :: test_is_ok,useoverlap,usepaw,usevnl
+ integer :: ipws,ispinor,istwf_k,jband,nline,optlocal,optnl,shift_band,sij_opt
+ integer :: test_is_ok,useoverlap,usepaw,usevnl,usetolrde
  real(dp) :: d2edt2,d2te,d2teold,dedt,deltae,deold,dotgg
  real(dp) :: dotgp,doti,dotr,eshift,eshiftkq,gamma,optekin,prod1,prod2
  real(dp) :: theta,tol_restart,u1h0me0u1
@@ -177,7 +177,7 @@ subroutine dfpt_cgwf(band,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwa
 !arrays
  real(dp) :: dummy(0,0),tsec(2)
  real(dp),allocatable :: conjgr(:,:),cwaveq(:,:),cwwork(:,:),direc(:,:)
- real(dp),allocatable :: gberry(:,:),gh1c(:,:),gh_direc(:,:),gresid(:,:)
+ real(dp),allocatable :: gberry(:,:),gh1c(:,:),gh_direc(:,:),gresid(:,:),gvnl1_saved(:,:)
  real(dp),allocatable :: gs1c(:,:),gvnl_direc(:,:),pcon(:),sconjgr(:,:)
  real(dp),allocatable :: scprod(:,:),work(:,:),work1(:,:),work2(:,:)
  real(dp),pointer :: kinpw1(:)
@@ -193,6 +193,23 @@ subroutine dfpt_cgwf(band,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwa
 !======================================================================
 !========= LOCAL VARIABLES DEFINITIONS AND ALLOCATIONS ================
 !====================================================================
+
+ nline = nline_in
+ usetolrde = 1
+! LB-29/11/17:
+! For ipert=natom+10 or ipert=natom+11, the Sternheimer equation is non-self-consistent, so we have
+! to solve a true linear problem (A.x = b) for each kpoint and band. In this case, the conjugate
+! gradient algorithm can find the solution up to numerical precision with only ONE call of dfpt_cgwf
+! (per kpoint and band). This way, in order to avoid useless scfcv loops (and calls of rf2_init, which
+! can be time-consuming), we want leave this routine only if tolwfr is reached so tolrde and nline are
+! not used to end the procedure.
+! NOTE : This is also true for ipert==natom+1, but a lot of references in the test suite have to be
+! changed...
+ if(ipert==natom+10.or.ipert==natom+11) then
+   nline = 200 ! The default value is only 4...
+   if (nline_in>200) nline = nline_in ! Keep the possibility to increase nline
+   usetolrde = 0  ! see below
+ end if
 
 !Tell us what is going on:
  if (prtvol>=10) then
@@ -325,7 +342,11 @@ subroutine dfpt_cgwf(band,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwa
      sij_opt=0
    end if
    usevnl=1; optlocal=1; optnl=2
-   call getgh1c(berryopt,0,cwave0,cwaveprj0,gh1c,gberry,gs1c,gs_hamkq,gvnl1,idir,ipert,eshift,&
+   if (prtvol==-level.or.prtvol==-19) then
+     ABI_ALLOCATE(gvnl1_saved,(2,npw1*nspinor))
+     gvnl1_saved(:,:) = gvnl1(:,:)
+   end if
+   call getgh1c(berryopt,cwave0,cwaveprj0,gh1c,gberry,gs1c,gs_hamkq,gvnl1,idir,ipert,eshift,&
 &   mpi_enreg,optlocal,optnl,opt_gvnl1,rf_hamkq,sij_opt,tim_getgh1c,usevnl)
 
    if (gen_eigenpb) then
@@ -843,20 +864,22 @@ subroutine dfpt_cgwf(band,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwa
 !    =========== CHECK CONVERGENCE AGAINST TRIAL ENERGY ===================
 !    ======================================================================
 
-!    Check reduction in trial energy deltae, Eq.(28) of PRB55, 10337 (1997)
-     deltae=half*d2edt2*theta**2+theta*dedt
+     if(usetolrde/=0) then
+!      Check reduction in trial energy deltae, Eq.(28) of PRB55, 10337 (1997)
+       deltae=half*d2edt2*theta**2+theta*dedt
 
-     if (iline==1) then
-       deold=deltae
-!      The extra factor of two should be removed !
-     else if (abs(deltae)<tolrde*two*abs(deold) .and. iline/=nline ) then
-       if(prtvol>=10.or.prtvol==-level.or.prtvol==-19)then
-         write(msg, '(a,i4,1x,a,1p,e12.4,a,e12.4,a)' ) &
-&         ' dfpt_cgwf: line',iline,' deltae=',deltae,' < tolrde*',deold,' =>skip lines'
-         call wrtout(std_out,msg,'PERS')
+       if (iline==1) then
+         deold=deltae
+!        The extra factor of two should be removed !
+       else if (abs(deltae)<tolrde*two*abs(deold) .and. iline/=nline) then
+         if(prtvol>=10.or.prtvol==-level.or.prtvol==-19)then
+           write(msg, '(a,i4,1x,a,1p,e12.4,a,e12.4,a)' ) &
+&           ' dfpt_cgwf: line',iline,' deltae=',deltae,' < tolrde*',deold,' =>skip lines'
+           call wrtout(std_out,msg,'PERS')
+         end if
+         nskip=nskip+2*(nline-iline) ! Number of one-way 3D ffts skipped
+         exit                        ! Exit from the loop on iline
        end if
-       nskip=nskip+2*(nline-iline) ! Number of one-way 3D ffts skipped
-       exit                        ! Exit from the loop on iline
      end if
 
 !    ======================================================================
@@ -869,7 +892,7 @@ subroutine dfpt_cgwf(band,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwa
 
 !  Check that final cwavef (Psi^(1)) satisfies the orthogonality condition
    if (prtvol==-level.or.prtvol==-19) then
-     sij_opt=0 ; usevnl=0 ; optlocal=1 ; optnl=2 ; if (gen_eigenpb)  sij_opt=1
+     sij_opt=0 ; usevnl=1 ; optlocal=1 ; optnl=2 ; if (gen_eigenpb)  sij_opt=1
      ABI_ALLOCATE(work,(2,npw1*nspinor))
      ABI_ALLOCATE(work1,(2,npw1*nspinor))
      ABI_ALLOCATE(work2,(2,npw1*nspinor*sij_opt))
@@ -884,7 +907,7 @@ subroutine dfpt_cgwf(band,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwa
 
        if (ipert/=natom+10.and.ipert/=natom+11) then
          if (gen_eigenpb) then
-           call getgh1c(berryopt,0,cwave0,cwaveprj0,work1,gberry,work2,gs_hamkq,dummy,idir,ipert,eshift,&
+           call getgh1c(berryopt,cwave0,cwaveprj0,work1,gberry,work2,gs_hamkq,gvnl1_saved,idir,ipert,eshift,&
 &           mpi_enreg,optlocal,optnl,opt_gvnl1,rf_hamkq,sij_opt,tim_getgh1c,usevnl)
            work(:,:)=cgq(:,1+npw1*nspinor*(iband-1)+icgq:npw1*nspinor*iband+icgq)
            call dotprod_g(dotr,doti,istwf_k,npw1*nspinor,2,work,work2,me_g0,mpi_enreg%comm_spinorfft)
@@ -897,8 +920,8 @@ subroutine dfpt_cgwf(band,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwa
          dotr=prod1+half*rf2%amn(1,iband+(band-1)*nband)
          doti=prod2+half*rf2%amn(2,iband+(band-1)*nband)
        else
-         write(msg,'(a)') 'Use prtvol=-19 for ipert=natom+10 or +11'
-         MSG_BUG(msg)
+         write(msg,'(a)') 'CGWF3_WARNING : Use prtvol=-19 to test orthogonality for ipert=natom+10 or +11'
+         call wrtout(std_out,msg,'COLL')
        end if
        dotr=sqrt(dotr**2+doti**2)
        if(dotr>tol10) then
@@ -914,6 +937,9 @@ subroutine dfpt_cgwf(band,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwa
      ABI_DEALLOCATE(work)
      ABI_DEALLOCATE(work1)
      ABI_DEALLOCATE(work2)
+     if (ipert/=natom+10.and.ipert/=natom+11) then
+       ABI_DEALLOCATE(gvnl1_saved)
+     end if
    end if
 
 !  Check that final cwavef Psi^(1) is Pc.Psi^(1)+delta_Psi^(1)

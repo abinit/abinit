@@ -8,7 +8,7 @@
 !! Can use either FoX or pure Fortran routines.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2016 ABINIT group (MT, FJ)
+!! Copyright (C) 2005-2017 ABINIT group (MT, FJ)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1618,9 +1618,9 @@ end subroutine paw_setup_copy
    end if
 
 !  --Read TITLE, ATOMIC CHARGE AND CORE CHARGE
-   if (line(1:12)=='<atom symbol') then
+   if (line(1:6)=='<atom ') then
      paw_setup%atom%tread=.true.
-     call paw_rdfromline("atom symbol",line,strg,ierr)
+     call paw_rdfromline(" symbol",line,strg,ierr)
      paw_setup%atom%symbol=trim(strg)
      call paw_rdfromline(" Z",line,strg,ierr)
      if (len(trim(strg))<=30) then
@@ -1885,7 +1885,7 @@ end subroutine paw_setup_copy
 
 !  End of reading loop
  end do
- 
+
  if(igrid==0.or.ival==0) then
    write(msg,'(a,a,a)')"the grids and the states must be read before the shapefunction",ch10,&
 &   "Action: Modify your XML PAW data file"

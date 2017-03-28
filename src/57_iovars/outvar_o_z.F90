@@ -8,7 +8,7 @@
 !! for the ABINIT code.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (DCA, XG, GMR, MM)
+!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR, MM)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -40,6 +40,7 @@
 !!         nsppol     =maximal value of input nsppol for all the datasets
 !!         nsym       =maximum number of symmetries
 !!         ntypat     =maximum number of type of atoms
+!!         nzchempot  =maximal value of input nzchempot for all the datasets
 !!  ncid= NetCDF handler
 !!  ndtset=number of datasets
 !!  ndtset_alloc=number of datasets, corrected for allocation of at least
@@ -346,6 +347,9 @@
    call prttagm(dprarr,intarr,iout,jdtset_,1,marr,ntypat,narrm,ncid,ndtset_alloc,'pimass','DPR',0)
  end if
 
+ intarr(1,:)=dtsets(:)%pimd_constraint
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'pimd_constraint','INT',0)
+
  intarr(1,:)=dtsets(:)%pitransform
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'pitransform','INT',0)
 
@@ -492,6 +496,9 @@
  intarr(1,:)=dtsets(:)%prtdosm
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'prtdosm','INT',0)
 
+ intarr(1,:)=dtsets(:)%prtebands
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'prtebands','INT',0)
+
  intarr(1,:)=dtsets(:)%prtefg
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'prtefg','INT',0)
 
@@ -528,8 +535,15 @@
  intarr(1,:)=dtsets(:)%prtnabla
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'prtnabla','INT',0)
 
+
+ intarr(1,:)=dtsets(:)%prtphbands
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'prtphbands','INT',0)
+
  intarr(1,:)=dtsets(:)%prtphdos
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'prtphdos','INT',0)
+
+ intarr(1,:)=dtsets(:)%prtphsurf
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'prtphsurf','INT',0)
 
  intarr(1,:)=dtsets(:)%prtposcar
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'prtposcar','INT',0)
@@ -600,6 +614,9 @@
  dprarr(2,:)=dtsets(:)%pvelmax(2)
  dprarr(3,:)=dtsets(:)%pvelmax(3)
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,3,narrm,ncid,ndtset_alloc,'pvelmax','DPR',0)
+
+ dprarr(1,:)=dtsets(:)%pw_unbal_thresh
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'pw_unbal_thresh','DPR',0)
 
 !###########################################################
 !### 03. Print all the input variables (Q)
@@ -753,6 +770,22 @@
 
  intarr(1,:)=dtsets(:)%rfuser
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'rfuser','INT',0)
+
+ intarr(1,:)=dtsets(:)%rf2_dkdk
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'rf2_dkdk','INT',0)
+
+ intarr(1,:)=dtsets(:)%rf2_dkde
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'rf2_dkde','INT',0)
+
+ intarr(1,:)=dtsets(:)%rf2_pert1_dir(1)
+ intarr(2,:)=dtsets(:)%rf2_pert1_dir(2)
+ intarr(3,:)=dtsets(:)%rf2_pert1_dir(3)
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,3,narrm,ncid,ndtset_alloc,'rf2_pert1_dir','INT',0)
+
+ intarr(1,:)=dtsets(:)%rf2_pert2_dir(1)
+ intarr(2,:)=dtsets(:)%rf2_pert2_dir(2)
+ intarr(3,:)=dtsets(:)%rf2_pert2_dir(3)
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,3,narrm,ncid,ndtset_alloc,'rf2_pert2_dir','INT',0)
 
  dprarr(1,:)=dtsets(:)%rhoqpmix
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'rhoqpmix','DPR',0)
@@ -1303,18 +1336,18 @@
 & 'outvars : Printing only first ',nkpt_max,' k-points.'
 
 !WVL - wavelets variables
-!integer
-! intarr(1,:)=dtsets(:)%wvl_bigdft_comp
-! call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'wvl_bigdft_comp','INT',0)
-!real(dp)
- dprarr(1,:)=dtsets(:)%wvl_crmult
- call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'wvl_crmult','DPR',0)
- dprarr(1,:)=dtsets(:)%wvl_frmult
- call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'wvl_frmult','DPR',0)
- dprarr(1,:)=dtsets(:)%wvl_hgrid
- call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'wvl_hgrid','DPR',0)
- intarr(1,:)=dtsets(:)%wvl_nprccg
- call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'wvl_nprccg','INT',0)
+ if (any(dtsets(:)%usewvl==1)) then
+   intarr(1,:)=dtsets(:)%wvl_bigdft_comp
+   call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'wvl_bigdft_comp','INT',0)
+   dprarr(1,:)=dtsets(:)%wvl_crmult
+   call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'wvl_crmult','DPR',0)
+   dprarr(1,:)=dtsets(:)%wvl_frmult
+   call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'wvl_frmult','DPR',0)
+   dprarr(1,:)=dtsets(:)%wvl_hgrid
+   call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'wvl_hgrid','DPR',0)
+   intarr(1,:)=dtsets(:)%wvl_nprccg
+   call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'wvl_nprccg','INT',0)
+ end if
 
 !Wannier90 interface related variables
  if(sum(dtsets(1:ndtset_alloc)%prtwant) >1)then

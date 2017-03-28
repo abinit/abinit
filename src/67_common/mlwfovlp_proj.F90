@@ -8,7 +8,7 @@
 !! for Wannier code (www.wannier.org f90 version).
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2016 ABINIT group (BAmadon,FJollet,TRangel,drh)
+!! Copyright (C) 2005-2017 ABINIT group (BAmadon,FJollet,TRangel,drh)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -82,6 +82,7 @@
  use m_errors
  use m_profiling_abi
  use m_xmpi
+ use m_sort
 
  use m_pawtab,  only : pawtab_type
  use m_pawcprj, only : pawcprj_type

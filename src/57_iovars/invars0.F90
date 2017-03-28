@@ -11,7 +11,7 @@
 !! of input path for the atomic orbital file (if required).
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2016 ABINIT group (XG)
+!! Copyright (C) 1999-2017 ABINIT group (XG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -114,34 +114,33 @@ subroutine invars0(dtsets,istatr,istatshft,lenstr,&
 
 !  jdtset and udtset cannot be defined together
    if(tjdtset==1 .and. tread==1)then
-     write(message, '(a,a,a)' )&
-&     ' jdtset and udtset cannot be defined both in the input file.',ch10,&
-&     ' Action : remove one of them from your input file.'
+     write(message, '(3a)' )&
+&     'jdtset and udtset cannot be defined both in the input file.',ch10,&
+&     'Action: remove one of them from your input file.'
      MSG_ERROR(message)
    end if
 
 !  Check values of udtset
    if(tread==1)then
      if(intarr(1)<1 .or. intarr(1)>999)then
-       write(message, '(a,i0,a,a,a)' )&
-&       ' udtset(1) must be between 1 and 999, but it is',intarr(1),'.',ch10,&
-&       ' Action : change the value of udtset(1) in your input file.'
+       write(message, '(a,i0,3a)' )&
+&       'udtset(1) must be between 1 and 999, but it is ',intarr(1),'.',ch10,&
+&       'Action: change the value of udtset(1) in your input file.'
        MSG_ERROR(message)
      end if
      if(intarr(2)<1 .or. intarr(2)>9)then
-       write(message, '(a,i0,a,a,a)' )&
-&       '  udtset(2) must be between 1 and 9, but it is',intarr(2),'.',ch10,&
-&       '  Action : change the value of udtset(2) in your input file.'
+       write(message, '(a,i0,3a)' )&
+&       'udtset(2) must be between 1 and 9, but it is ',intarr(2),'.',ch10,&
+&       'Action: change the value of udtset(2) in your input file.'
        MSG_ERROR(message)
      end if
      if(intarr(1)*intarr(2) /= ndtset)then
-       write(message, '(a,a,a,i2,a,a,a,i2,a,i3,a,a,a,i3,a,a,a)' )&
-&       '  udtset(1)*udtset(2) must be equal to ndtset,',ch10,&
-&       '  but it is observed that udtset(1)=',intarr(1),',',ch10,&
-&       '  and udtset(2)=',intarr(2),' so that their product is',&
-&       intarr(1)*intarr(2),',',ch10,&
-&       '  while ndtset is',ndtset,'.',ch10,&
-&       '  Action : change udtset or ndtset in your input file.'
+       write(message, '(3a,i0,3a,i0,a,i0,3a,i0,3a)' )&
+&       'udtset(1)*udtset(2) must be equal to ndtset,',ch10,&
+&       'but it is observed that udtset(1) = ',intarr(1),',',ch10,&
+&       'and udtset(2) = ',intarr(2),' so that their product is ',intarr(1)*intarr(2),',',ch10,&
+&       'while ndtset is ',ndtset,'.',ch10,&
+&       'Action: change udtset or ndtset in your input file.'
        MSG_ERROR(message)
      end if
      idtset=0
@@ -156,11 +155,10 @@ subroutine invars0(dtsets,istatr,istatshft,lenstr,&
 !  Final check on the jdtset values
    do idtset=1,ndtset
      if(dtsets(idtset)%jdtset<1 .or. dtsets(idtset)%jdtset>9999)then
-       write(message, '(a,a,a,i3,a,i3,a,a)' )&
-&       '  The components of jdtset must be between 1 and 9999.',ch10,&
-&       '  However, the input value of the component',idtset,&
-&       ' of jdtset is',dtsets(idtset)%jdtset,ch10,&
-&       '  Action : correct jdtset in your input file.'
+       write(message, '(3a,i0,a,i0,a,a)' )&
+&       'The components of jdtset must be between 1 and 9999.',ch10,&
+&       'However, the input value of the component ',idtset,' of jdtset is ',dtsets(idtset)%jdtset,ch10,&
+&       'Action : correct jdtset in your input file.'
        MSG_ERROR(message)
      end if
    end do
@@ -198,10 +196,10 @@ subroutine invars0(dtsets,istatr,istatshft,lenstr,&
 
  if(treadh==1) cpus=dprarr(1)*3600.0_dp
  if(treads+treadm+treadh>1)then
-   write(message, '(a,a,a,a,a)' )&
-&   '  More than one input variable is used to defined the CPU time limit.',ch10,&
-&   '  This is not allowed.',ch10,&
-&   '  Action : in the input file, suppress either cpus, cpum or cpuh.'
+   write(message, '(5a)' )&
+&   'More than one input variable is used to defined the CPU time limit.',ch10,&
+&   'This is not allowed.',ch10,&
+&   'Action: in the input file, suppress either cpus, cpum or cpuh.'
    MSG_ERROR(message)
  end if
  dtsets(:)%cpus=cpus
@@ -239,17 +237,17 @@ subroutine invars0(dtsets,istatr,istatshft,lenstr,&
    if(tread==1)then
      dtsets(idtset)%natom=intarr(1)
    else
-     write(message, '(a,i0,a,a)' )&
-&     '  Input natom must be defined, but was absent for dataset',jdtset,ch10,&
-&     '  Action : check the input file.'
+     write(message, '(a,i0,2a)' )&
+&     'Input natom must be defined, but was absent for dataset ',jdtset,ch10,&
+&     'Action: check the input file.'
      MSG_ERROR(message)
    end if
 !  Check that natom is greater than 0
    if (dtsets(idtset)%natom<=0) then
-     write(message, '(a,i0,a,a,i0,a,a,a)' )&
-&     '  Input natom must be > 0, but was ',dtsets(idtset)%natom,ch10,&
-&     '  for dataset',jdtset,'. This is not allowed.',ch10,&
-&     '  Action : check the input file.'
+     write(message, '(a,i0,2a,i0,3a)' )&
+&     'Input natom must be > 0, but was ',dtsets(idtset)%natom,ch10,&
+&     'for dataset ',jdtset,'. This is not allowed.',ch10,&
+&     'Action: check the input file.'
      MSG_ERROR(message)
    end if
 
@@ -258,10 +256,10 @@ subroutine invars0(dtsets,istatr,istatshft,lenstr,&
 
 !  Check that nimage is greater than 0
    if (dtsets(idtset)%nimage<=0) then
-     write(message, '(a,i12,a,a,a,a)' )&
-&     '  nimage must be > 0, but was ',dtsets(idtset)%nimage,ch10,&
-&     '  This is not allowed.',ch10,&
-&     '  Action : check the input file.'
+     write(message, '(a,i0,4a)' )&
+&     'nimage must be > 0, but was ',dtsets(idtset)%nimage,ch10,&
+&     'This is not allowed.',ch10,&
+&     'Action: check the input file.'
      MSG_ERROR(message)
    end if
 
@@ -269,18 +267,10 @@ subroutine invars0(dtsets,istatr,istatshft,lenstr,&
    if(tread==1)dtsets(idtset)%ntypat=intarr(1)
 !  Check that ntypat is greater than 0
    if (dtsets(idtset)%ntypat<=0) then
-     write(message, '(a,i12,a,a,i6,a,a,a)' )&
-&     '  Input ntypat must be > 0, but was ',dtsets(idtset)%ntypat,ch10,&
-&     '  for dataset',jdtset,'. This is not allowed.',ch10,&
-&     '  Action : check the input file.'
-     MSG_ERROR(message)
-   end if
-
-   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'ntype',tread,'INT')
-   if(tread==1) then
-     write(message, '(a,a,a)' )&
-&     '  The use of the "ntype" input variable is forbidden since version 4.1 .',ch10,&
-&     '  Action : replace "ntype" by "ntypat".'
+     write(message, '(a,i0,2a,i0,3a)' )&
+&     'Input ntypat must be > 0, but was ',dtsets(idtset)%ntypat,ch10,&
+&     'for dataset ',jdtset,'. This is not allowed.',ch10,&
+&     'Action: check the input file.'
      MSG_ERROR(message)
    end if
 
@@ -289,10 +279,10 @@ subroutine invars0(dtsets,istatr,istatshft,lenstr,&
    if(tread==1)dtsets(idtset)%maxnsym=intarr(1)
 !  Check that maxnsym is greater than 1
    if (dtsets(idtset)%maxnsym<1) then
-     write(message, '(a,i12,a,a,i6,a,a,a)' )&
-&     '  Input maxnsym must be > 1, but was ',dtsets(idtset)%maxnsym,ch10,&
-&     '  for dataset',jdtset,'. This is not allowed.',ch10,&
-&     '  Action : check the input file.'
+     write(message, '(a,i0,2a,i0,3a)' )&
+&     'Input maxnsym must be > 1, but was ',dtsets(idtset)%maxnsym,ch10,&
+&     'for dataset ',jdtset,'. This is not allowed.',ch10,&
+&     'Action: check the input file.'
      MSG_ERROR(message)
    end if
 
@@ -345,13 +335,13 @@ subroutine invars0(dtsets,istatr,istatshft,lenstr,&
  if(mxnimage>1)then
    do idtset=2,ndtset_alloc
      if(mxnatom/=dtsets(idtset)%natom)then
-       write(message,'(5a,i5,a,i5,3a,i5,a)')&
+       write(message,'(5a,i0,a,i0,3a,i0,a)')&
 &       'When there exist one dataset with more than one image,',ch10,&
 &       'the number of atoms in each dataset must be the same.',ch10,&
-&       'However, it has been found that for dataset=',idtset,ch10,&
-&       'natom=',dtsets(idtset)%natom,' differs from the maximum number',ch10,&
-&       'of atoms, mxnatom=',mxnatom,&
-&       'Action : check the input variables natom for different datasets.'
+&       'However, it has been found that for dataset= ',idtset,ch10,&
+&       'natom= ',dtsets(idtset)%natom,' differs from the maximum number',ch10,&
+&       'of atoms, mxnatom= ',mxnatom,&
+&       'Action: check the input variables natom for different datasets.'
        MSG_ERROR(message)
      end if
    end do
@@ -366,12 +356,12 @@ subroutine invars0(dtsets,istatr,istatshft,lenstr,&
    if(ndtset_alloc>1)then
      do idtset=1,ndtset_alloc
        if(dtsets(idtset)%ntypat/=mxntypat)then
-         write(message, '(5a,i6,a,i6,a,a,i6,2a)' )&
-&         '  When npsp is not defined, the input variable ntypat must be',ch10,&
-&         '  the same for all datasets. However, it has been found that for',ch10,&
-&         '  jdtset:',dtsets(idtset)%jdtset,', ntypat=',dtsets(idtset)%ntypat,ch10,&
-&         '  differs from the maximum value of ntypat=',mxntypat,ch10,&
-&         '  Action : check the input variables npsp and ntypat.'
+         write(message, '(5a,i0,a,i0,2a,i0,2a)' )&
+&         'When npsp is not defined, the input variable ntypat must be',ch10,&
+&         'the same for all datasets. However, it has been found that for',ch10,&
+&         'jdtset: ',dtsets(idtset)%jdtset,', ntypat= ',dtsets(idtset)%ntypat,ch10,&
+&         'differs from the maximum value of ntypat= ',mxntypat,ch10,&
+&         'Action: check the input variables npsp and ntypat.'
          MSG_ERROR(message)
        end if
      end do
@@ -417,17 +407,17 @@ subroutine invars0(dtsets,istatr,istatshft,lenstr,&
 #if defined HAVE_GPU_CUDA && defined HAVE_GPU_CUDA_DP
    if (ii<=0) then
      write(message,'(3a)')&
-&     ' Input variables use_gpu_cuda is on',ch10,&
-&     ' but no available GPU device has been detected !',ch10,&
-&     ' Action : change the input variable use_gpu_cuda.'
+&     'Input variables use_gpu_cuda is on',ch10,&
+&     'but no available GPU device has been detected !',ch10,&
+&     'Action: change the input variable use_gpu_cuda.'
      MSG_ERROR(message)
    end if
 #else
    write(message,'(7a)')&
-&   '   Input variables use_gpu_cuda is on but abinit hasn''t been built',ch10,&
-&   '   with (double precision) gpu mode enabled !',ch10,&
-&   '   Action : change the input variable use_gpu_cuda',ch10,&
-&   '            or re-compile ABINIT with double-precision Cuda enabled.'
+&   'Input variables use_gpu_cuda is on but abinit hasn''t been built',ch10,&
+&   'with (double precision) gpu mode enabled !',ch10,&
+&   'Action: change the input variable use_gpu_cuda',ch10,&
+&   '        or re-compile ABINIT with double-precision Cuda enabled.'
    MSG_ERROR(message)
 #endif
  end if
@@ -436,7 +426,7 @@ subroutine invars0(dtsets,istatr,istatshft,lenstr,&
  ABI_DEALLOCATE(intarr)
 
 !We allocate the internal array, depending on the computed values.
-!WARNING : do not forget to deallocate these arrays in the routine dtsetfree
+!WARNING : do not forget to deallocate these arrays in the routine dtset_free
 !(should make a separate subroutine for allocating/deallocating these records)
  do idtset=0,ndtset_alloc
    ABI_ALLOCATE(dtsets(idtset)%acell_orig,(3,mxnimage))

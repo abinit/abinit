@@ -7,7 +7,7 @@
 !!  This module contains procedured dealing with the IO of the KSS file.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2016 ABINIT group (MG, GMR, VO, LR, RWG, MM, XG, RShaltaf)
+!! Copyright (C) 1999-2017 ABINIT group (MG, GMR, VO, LR, RWG, MM, XG, RShaltaf)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -104,9 +104,7 @@ CONTAINS  !===========================================================
 !! PARENTS
 !!
 !! CHILDREN
-!!      destroy_hamiltonian,fftpac,getghc,init_hamiltonian,load_k_hamiltonian
-!!      load_spin_hamiltonian,metric,mkffnl,mkkin,mkkpg,pawcprj_alloc
-!!      pawcprj_free,transgrid,wfk_ncdef_dims_vars,wrtout,xheevx,xhegvx
+!!      metric,mkffnl,mkkin
 !!
 !! SOURCE
 
@@ -323,9 +321,7 @@ end subroutine testkss
 !!      outkss
 !!
 !! CHILDREN
-!!      destroy_hamiltonian,fftpac,getghc,init_hamiltonian,load_k_hamiltonian
-!!      load_spin_hamiltonian,metric,mkffnl,mkkin,mkkpg,pawcprj_alloc
-!!      pawcprj_free,transgrid,wfk_ncdef_dims_vars,wrtout,xheevx,xhegvx
+!!      metric,mkffnl,mkkin
 !!
 !! SOURCE
 
@@ -561,9 +557,7 @@ end subroutine write_kss_header
 !!      m_io_kss
 !!
 !! CHILDREN
-!!      destroy_hamiltonian,fftpac,getghc,init_hamiltonian,load_k_hamiltonian
-!!      load_spin_hamiltonian,metric,mkffnl,mkkin,mkkpg,pawcprj_alloc
-!!      pawcprj_free,transgrid,wfk_ncdef_dims_vars,wrtout,xheevx,xhegvx
+!!      metric,mkffnl,mkkin
 !!
 !! SOURCE
 
@@ -801,9 +795,7 @@ end subroutine read_kss_header
 !!      m_io_kss
 !!
 !! CHILDREN
-!!      destroy_hamiltonian,fftpac,getghc,init_hamiltonian,load_k_hamiltonian
-!!      load_spin_hamiltonian,metric,mkffnl,mkkin,mkkpg,pawcprj_alloc
-!!      pawcprj_free,transgrid,wfk_ncdef_dims_vars,wrtout,xheevx,xhegvx
+!!      metric,mkffnl,mkkin
 !!
 !! SOURCE
 
@@ -942,9 +934,7 @@ end subroutine write_vkb
 !!      outkss
 !!
 !! CHILDREN
-!!      destroy_hamiltonian,fftpac,getghc,init_hamiltonian,load_k_hamiltonian
-!!      load_spin_hamiltonian,metric,mkffnl,mkkin,mkkpg,pawcprj_alloc
-!!      pawcprj_free,transgrid,wfk_ncdef_dims_vars,wrtout,xheevx,xhegvx
+!!      metric,mkffnl,mkkin
 !!
 !! SOURCE
 
@@ -1090,9 +1080,7 @@ end subroutine write_kss_wfgk
 !!      outkss
 !!
 !! CHILDREN
-!!      destroy_hamiltonian,fftpac,getghc,init_hamiltonian,load_k_hamiltonian
-!!      load_spin_hamiltonian,metric,mkffnl,mkkin,mkkpg,pawcprj_alloc
-!!      pawcprj_free,transgrid,wfk_ncdef_dims_vars,wrtout,xheevx,xhegvx
+!!      metric,mkffnl,mkkin
 !!
 !! SOURCE
 
@@ -1360,9 +1348,7 @@ end function skip_kss_record
 !!      gwls_hamiltonian,setup_screening,setup_sigma
 !!
 !! CHILDREN
-!!      destroy_hamiltonian,fftpac,getghc,init_hamiltonian,load_k_hamiltonian
-!!      load_spin_hamiltonian,metric,mkffnl,mkkin,mkkpg,pawcprj_alloc
-!!      pawcprj_free,transgrid,wfk_ncdef_dims_vars,wrtout,xheevx,xhegvx
+!!      metric,mkffnl,mkkin
 !!
 !! SOURCE
 
@@ -1533,9 +1519,7 @@ end subroutine make_gvec_kss
 !!      scfcv
 !!
 !! CHILDREN
-!!      destroy_hamiltonian,fftpac,getghc,init_hamiltonian,load_k_hamiltonian
-!!      load_spin_hamiltonian,metric,mkffnl,mkkin,mkkpg,pawcprj_alloc
-!!      pawcprj_free,transgrid,wfk_ncdef_dims_vars,wrtout,xheevx,xhegvx
+!!      metric,mkffnl,mkkin
 !!
 !! SOURCE
 
@@ -1719,11 +1703,13 @@ subroutine gshgg_mkncwrite(istep, dtset, dtfil, psps, hdr, pawtab, pawfgr, paw_i
 !* PAW: Initialize the overlap coefficients and allocate the Dij coefficients.
 
  if (PRESENT(Electronpositron)) then
-   call init_hamiltonian(gs_hamk,psps,pawtab,nspinor,nspden,natom,dtset%typat,xred,nfftc,mgfftc,ngfftc,&
-&   rprimd,dtset%nloalg,usecprj=0,electronpositron=electronpositron)
+   call init_hamiltonian(gs_hamk,psps,pawtab,nspinor,dtset%nsppol,nspden,natom,dtset%typat,xred,nfftc,&
+&   mgfftc,ngfftc,rprimd,dtset%nloalg,paw_ij=paw_ij,usecprj=0,electronpositron=electronpositron,&
+&   comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,mpi_spintab=mpi_enreg%my_isppoltab)
  else
-   call init_hamiltonian(gs_hamk,psps,pawtab,nspinor,nspden,natom,dtset%typat,xred,nfftc,mgfftc,ngfftc,&
-&   rprimd,dtset%nloalg,usecprj=0)
+   call init_hamiltonian(gs_hamk,psps,pawtab,nspinor,dtset%nsppol,nspden,natom,dtset%typat,xred,nfftc,&
+&   mgfftc,ngfftc,rprimd,dtset%nloalg,paw_ij=paw_ij,usecprj=0,&
+&   comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,mpi_spintab=mpi_enreg%my_isppoltab)
  end if
 
  ! Set up local potential vlocal with proper dimensioning, from vtrial.
@@ -1768,8 +1754,7 @@ subroutine gshgg_mkncwrite(istep, dtset, dtfil, psps, hdr, pawtab, pawfgr, paw_i
    end if
 
    !Continue to initialize the Hamiltonian
-   call load_spin_hamiltonian(gs_hamk,isppol,paw_ij=paw_ij,vlocal=vlocal, &
-     comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
+   call load_spin_hamiltonian(gs_hamk,isppol,vlocal=vlocal,with_nonlocal=.true.)
 
    do ikpt=1,dtset%nkpt
      nband_k = dtset%nband(ikpt+(isppol-1)*dtset%nkpt)
@@ -2011,10 +1996,10 @@ end subroutine gshgg_mkncwrite
 !!  *) Spinorial case is not implemented.
 !!
 !! PARENTS
-!!      m_commutator_vkbr,m_io_kss
+!!      m_io_kss
 !!
 !! CHILDREN
-!!      wrtout
+!!      metric,mkffnl,mkkin
 !!
 !! SOURCE
 

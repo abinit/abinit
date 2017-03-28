@@ -6,7 +6,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 2006-2016 ABINIT group (BAmadon,AGerossier)
+!! Copyright (C) 2006-2017 ABINIT group (BAmadon,AGerossier)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1074,6 +1074,7 @@ subroutine compute_coeff_plowannier(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,
  end do
  dimpsichi = 2*dimpsichi !for complex
  ABI_ALLOCATE(buffer1,(dimpsichi))
+ buffer1 = zero
  nnn = 0
  do ikpt = 1,wan%nkpt
    do ibandc = 1,wan%bandf_wan-wan%bandi_wan+1

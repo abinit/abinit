@@ -51,7 +51,6 @@ sources = [
  "dfpt_nsteltwf.F90",
  "dfpt_nstpaw.F90",
  "dfpt_nstwf.F90",
- "dfpt_phfrq.F90",
  "dfpt_prtph.F90",
  "dfpt_prtene.F90",
  "dfpt_rhofermi.F90",
@@ -84,6 +83,7 @@ sources = [
  "m_eig2d.F90",
  "m_rf2.F90",
  "m_paral_pert.F90",
+ "m_strain.F90",
  "newfermie1.F90",
  "outbsd.F90",
  "outddbnc.F90",
@@ -93,7 +93,6 @@ sources = [
  "rf2_init.F90",
  "rotate_rho.F90",
  "smeared_delta.F90",
- "sytens.F90",
  "vlocalstr.F90",
  "wrtloctens.F90",
 ]

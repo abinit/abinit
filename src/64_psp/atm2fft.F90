@@ -19,7 +19,7 @@
 !!   optdyfr=1: computes contribution of atomic pot./dens. to frozen part of dyn. matrix
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (FJ, MT)
+!! Copyright (C) 1998-2017 ABINIT group (FJ, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -194,11 +194,11 @@ subroutine atm2fft(atindx1,atmrho,atmvloc,dyfrn,dyfrv,eltfrn,gauss,gmet,gprimd,&
  real(dp),intent(in) :: vg(2,nfft*optn*max(optgr,optstr,optdyfr,opteltfr))
  real(dp),intent(in) :: vg1(2,nfft*optn*opteltfr),vg1_core(2,nfft*optn*opteltfr)
  real(dp),intent(in) :: vprtrb(2),vspl(mqgrid,2,ntypat*optv)
- real(dp),intent(out) :: atmrho(nfft*optn)  !vz_i
- real(dp),intent(inout) :: atmvloc(nfft*optv) !vz_i
+ real(dp),intent(out) :: atmrho(nfft*optn)
+ real(dp),intent(inout) :: atmvloc(nfft*optv)
  real(dp),intent(out) :: dyfrn(3,3,natom*optn*optdyfr),dyfrv(3,3,natom*optv*optdyfr)
  real(dp),intent(out) :: eltfrn(6+3*natom,6)
- real(dp),intent(inout) :: grn(3,natom*optn*optgr) !vz_i
+ real(dp),intent(inout) :: grn(3,natom*optn*optgr)
  real(dp),intent(out) :: grv(3,natom*optv*optgr),strn(6*optn*optstr)
  real(dp),intent(out) :: strv(6*optv*optstr)
  type(pawtab_type),target,intent(in) :: pawtab(ntypat*usepaw)
@@ -227,26 +227,6 @@ subroutine atm2fft(atindx1,atmrho,atmvloc,dyfrn,dyfrv,eltfrn,gauss,gmet,gprimd,&
  real(dp),allocatable :: dyfrn_indx(:,:,:),dyfrv_indx(:,:,:),grn_indx(:,:)
  real(dp),allocatable :: grv_indx(:,:),phim_igia(:),phre_igia(:),workn(:,:)
  real(dp),allocatable :: workv(:,:)
-
-!no_abirules
-!Statement functions are obsolete
-!Define G^2 based on G space metric gmet.
-! gsq(i1,i2,i3)=dble(i1*i1)*gmet(1,1)+dble(i2*i2)*gmet(2,2)+dble(i3*i3)*gmet(3,3) &
-!& +two*(dble(i1*i2)*gmet(1,2)+dble(i2*i3)*gmet(2,3)+dble(i3*i1)*gmet(3,1))
-
-!Define dG^2/ds based on G space metric derivative 
-! dgsqds(i1,i2,i3,is)=dble(i1*i1)*dgm(1,1,is)+dble(i2*i2)*dgm(2,2,is)+&
-!& dble(i3*i3)*dgm(3,3,is)+&
-!& dble(i1*i2)*(dgm(1,2,is)+dgm(2,1,is))+&
-!& dble(i1*i3)*(dgm(1,3,is)+dgm(3,1,is))+&
-!& dble(i2*i3)*(dgm(2,3,is)+dgm(3,2,is))
-
-!Define 2dG^2/ds1ds2  based on G space metric derivative 
-! d2gsqds(i1,i2,i3,is1,is2)=dble(i1*i1)*d2gm(1,1,is1,is2)+&
-!& dble(i2*i2)*d2gm(2,2,is1,is2)+dble(i3*i3)*d2gm(3,3,is1,is2)+&
-!& dble(i1*i2)*(d2gm(1,2,is1,is2)+d2gm(2,1,is1,is2))+&
-!& dble(i1*i3)*(d2gm(1,3,is1,is2)+d2gm(3,1,is1,is2))+&
-!& dble(i2*i3)*(d2gm(2,3,is1,is2)+d2gm(3,2,is1,is2))
 
 ! *************************************************************************
 
@@ -878,7 +858,7 @@ subroutine atm2fft(atindx1,atmrho,atmvloc,dyfrn,dyfrv,eltfrn,gauss,gmet,gprimd,&
 !End of the abilint section
 
    real(dp) :: gsq_atm
-   integer :: i1,i2,i3
+   integer,intent(in) :: i1,i2,i3
    gsq_atm=dble(i1*i1)*gmet(1,1)+dble(i2*i2)*gmet(2,2)+dble(i3*i3)*gmet(3,3) &
 &   +two*(dble(i1*i2)*gmet(1,2)+dble(i2*i3)*gmet(2,3)+dble(i3*i1)*gmet(3,1))
  end function gsq_atm
@@ -893,7 +873,7 @@ subroutine atm2fft(atindx1,atmrho,atmvloc,dyfrn,dyfrv,eltfrn,gauss,gmet,gprimd,&
 !End of the abilint section
 
    real(dp) :: dgsqds_atm
-   integer :: i1,i2,i3,is
+   integer,intent(in) :: i1,i2,i3,is
    dgsqds_atm=dble(i1*i1)*dgm(1,1,is)+dble(i2*i2)*dgm(2,2,is)+&
 &   dble(i3*i3)*dgm(3,3,is)+&
 &   dble(i1*i2)*(dgm(1,2,is)+dgm(2,1,is))+&
@@ -911,7 +891,7 @@ subroutine atm2fft(atindx1,atmrho,atmvloc,dyfrn,dyfrv,eltfrn,gauss,gmet,gprimd,&
 !End of the abilint section
 
    real(dp) :: d2gsqds_atm
-   integer :: i1,i2,i3,is1,is2
+   integer,intent(in) :: i1,i2,i3,is1,is2
    d2gsqds_atm=dble(i1*i1)*d2gm(1,1,is1,is2)+&
 &   dble(i2*i2)*d2gm(2,2,is1,is2)+dble(i3*i3)*d2gm(3,3,is1,is2)+&
 &   dble(i1*i2)*(d2gm(1,2,is1,is2)+d2gm(2,1,is1,is2))+&

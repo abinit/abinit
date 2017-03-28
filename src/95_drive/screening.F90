@@ -7,7 +7,7 @@
 !! Calculate screening and dielectric functions
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2016 ABINIT group (GMR, VO, LR, RWG, MT, MG, RShaltaf)
+!! Copyright (C) 2001-2017 ABINIT group (GMR, VO, LR, RWG, MT, MG, RShaltaf)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -104,7 +104,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
  use m_io_tools,      only : open_file, file_exists, iomode_from_fname
  use m_fstrings,      only : int2char10, sjoin, strcat, itoa
  use m_energies,      only : energies_type, energies_init
- use m_numeric_tools, only : print_arr, iseven
+ use m_numeric_tools, only : print_arr, iseven, coeffs_gausslegint
  use m_geometry,      only : normv, vdotw
  use m_gwdefs,        only : GW_TOLQ0, GW_TOLQ, em1params_free, em1params_t, GW_Q0_DEFAULT
  use m_mpinfo,        only : destroy_mpi_enreg
@@ -144,7 +144,6 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
 #define ABI_FUNC 'screening'
  use interfaces_14_hidewrite
  use interfaces_18_timing
- use interfaces_28_numeric_noabirule
  use interfaces_41_geometry
  use interfaces_51_manage_mpi
  use interfaces_53_ffts
@@ -221,7 +220,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
  real(dp),allocatable :: igwene(:,:,:),chi0_sumrule(:),ec_rpa(:),rspower(:)
  real(dp),allocatable :: nhat(:,:),nhatgr(:,:,:),ph1d(:,:),ph1df(:,:)
  real(dp),allocatable :: rhog(:,:),rhor(:,:),rhor_p(:,:),rhor_kernel(:,:),taug(:,:),taur(:,:)
- real(dp),allocatable :: z(:),zw(:),grewtn(:,:),grvdw(:,:),kxc(:,:),qmax(:)
+ real(dp),allocatable :: z(:),zw(:),grchempottn(:,:),grewtn(:,:),grvdw(:,:),kxc(:,:),qmax(:)
  real(dp),allocatable :: ks_vhartr(:),vpsp(:),ks_vtrial(:,:),ks_vxc(:,:),xccc3d(:)
  complex(gwpc),allocatable :: arr_99(:,:),kxcg(:,:),fxc_ADA(:,:,:)
  complex(dpc),allocatable :: m_lda_to_qp(:,:,:,:)
@@ -890,6 +889,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
 
  ngrvdw=0
  ABI_MALLOC(grvdw,(3,ngrvdw))
+ ABI_MALLOC(grchempottn,(3,Cryst%natom))
  ABI_MALLOC(grewtn,(3,Cryst%natom))
  nkxc=0
  if (Dtset%nspden==1) nkxc=2
@@ -909,7 +909,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
  ABI_MALLOC(ks_vxc,(nfftf,Dtset%nspden))
 
  optene=4; moved_atm_inside=0; moved_rhor=0; initialized=1; istep=1
- call setvtr(Cryst%atindx1,Dtset,KS_energies,Cryst%gmet,Cryst%gprimd,grewtn,grvdw,gsqcutf_eff,istep,kxc,mgfftf,&
+ call setvtr(Cryst%atindx1,Dtset,KS_energies,Cryst%gmet,Cryst%gprimd,grchempottn,grewtn,grvdw,gsqcutf_eff,istep,kxc,mgfftf,&
 & moved_atm_inside,moved_rhor,MPI_enreg_seq, &
 & Cryst%nattyp,nfftf,ngfftf,ngrvdw,nhat,nhatgr,nhatgrdim,nkxc,Cryst%ntypat,&
 & Psps%n1xccc,n3xccc,optene,pawrad,Pawtab,ph1df,Psps,rhog,rhor,Cryst%rmet,Cryst%rprimd,strsxc,Cryst%ucvol,usexcnhat,&
@@ -918,6 +918,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
  if (nkxc/=0)  then
    ABI_FREE(kxc)
  end if
+ ABI_FREE(grchempottn)
  ABI_FREE(grewtn)
  ABI_FREE(grvdw)
  ABI_FREE(xccc3d)
@@ -1317,21 +1318,24 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
      ABI_MALLOC(kxcg,(nfftf_tot,dim_kxcg))
 
 !  @WC: bootstrap --
-   case (-3, -4)
+   case (-3, -4, -5, -6, -7, -8)
      ABI_CHECK(Dtset%usepaw==0,"GWGamma + PAW not available")
-     MSG_WARNING('EXPERIMENTAL: Bootstrap kernel is being added to screening')
-     approx_type=4; dim_kxcg=0
-     if (Dtset%gwgamma==-3) option_test=1 ! TESTELECTRON, vertex in chi0 *and* sigma
-     if (Dtset%gwgamma==-4) option_test=0 ! TESTPARTICLE, vertex in chi0 only
-     ABI_MALLOC(kxcg,(nfftf_tot,dim_kxcg)) !--@WC
-
-   case (-5, -6)
-     ABI_CHECK(Dtset%usepaw==0,"GWGamma + PAW not available")
-     MSG_WARNING('EXPERIMENTAL: Bootstrap kernel (one-shot) is being added to screening')
-     approx_type=5; dim_kxcg=0
-     if (Dtset%gwgamma==-5) option_test=1 ! TESTELECTRON, vertex in chi0 *and* sigma
-     if (Dtset%gwgamma==-6) option_test=0 ! TESTPARTICLE, vertex in chi0 only
-     ABI_MALLOC(kxcg,(nfftf_tot,dim_kxcg)) !--@WC
+     if (Dtset%gwgamma>-5) then
+       MSG_WARNING('EXPERIMENTAL: Bootstrap kernel is being added to screening')
+       approx_type=4 
+     else if (Dtset%gwgamma>-7) then
+       MSG_WARNING('EXPERIMENTAL: Bootstrap kernel (head-only) is being added to screening')
+       approx_type=5
+     else 
+       MSG_WARNING('EXPERIMENTAL: Bootstrap kernel (RPA-type, head-only) is being added to screening')
+       approx_type=6
+     end if
+     dim_kxcg=0
+     option_test=MOD(Dtset%gwgamma,2)
+     ! 1 -> TESTELECTRON, vertex in chi0 *and* sigma
+     ! 0 -> TESTPARTICLE, vertex in chi0 only
+     ABI_MALLOC(kxcg,(nfftf_tot,dim_kxcg)) 
+!--@WC
 
    case default
      MSG_ERROR(sjoin("Wrong gwgamma:", itoa(dtset%gwgamma)))
@@ -1345,7 +1349,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
      call make_epsm1_driver(iqibz,dim_wing,Ep%npwe,Ep%nI,Ep%nJ,Ep%nomega,Ep%omega,&
      approx_type,option_test,Vcp,nfftf_tot,ngfftf,dim_kxcg,kxcg,Gsph_epsG0%gvec,&
      chi0_head,chi0_lwing,chi0_uwing,chi0,spectra,comm,fxc_ADA=fxc_ADA(:,:,iqibz))
-   else if (approx_type<6) then !@WC: bootstrap
+   else if (approx_type<7) then !@WC: bootstrap
      call make_epsm1_driver(iqibz,dim_wing,Ep%npwe,Ep%nI,Ep%nJ,Ep%nomega,Ep%omega,&
      approx_type,option_test,Vcp,nfftf_tot,ngfftf,dim_kxcg,kxcg,Gsph_epsG0%gvec,&
      chi0_head,chi0_lwing,chi0_uwing,chi0,spectra,comm)

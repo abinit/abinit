@@ -10,7 +10,7 @@
 !! If this file does not exist, return immediately
 !!
 !! COPYRIGHT
-!! Copyright (C) 2000-2016 ABINIT group (PhG,XG)
+!! Copyright (C) 2000-2017 ABINIT group (PhG,XG)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

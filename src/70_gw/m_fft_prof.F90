@@ -4,7 +4,7 @@
 !! m_FFT_prof
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2016 ABINIT group (MG)
+!!  Copyright (C) 2008-2017 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -31,6 +31,7 @@ MODULE m_FFT_prof
  use m_time,           only : cwtime
  use m_io_tools,       only : open_file
  use m_blas,           only : xcopy
+ use m_cgtools,        only : set_istwfk
  use m_fftcore,        only : get_kg, print_ngfft, fftalg_info
  use m_fft_mesh,       only : calc_eigr, calc_ceigr
  use m_mpinfo,         only : nullify_mpi_enreg, destroy_mpi_enreg, copy_mpi_enreg
@@ -188,7 +189,6 @@ subroutine fft_test_init(Ftest,fft_setup,kpoint,ecut,boxcutmin,rprimd,nsym,symre
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'fft_test_init'
- use interfaces_32_util
  use interfaces_41_geometry
  use interfaces_52_fft_mpi_noabirule
  use interfaces_53_ffts
@@ -1956,7 +1956,6 @@ subroutine prof_fourwf(fft_setups,cplex,option,kpoint,necut,ecut_arth,boxcutmin,
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'prof_fourwf'
- use interfaces_32_util
 !End of the abilint section
 
  implicit none

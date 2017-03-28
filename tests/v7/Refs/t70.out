@@ -2,7 +2,7 @@
 .Version 8.0.3 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
 
-.Copyright (C) 1998-2016 ABINIT group . 
+.Copyright (C) 1998-2017 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -257,8 +257,7 @@ P           mkmem           4
  Radial grid used for (t)core density is grid 1
  Radial grid used for Vloc is grid 1
  Radial grid used for pseudo valence density is grid 1
-
-  Mesh size for Vloc has been set to  767 to avoid numerical noise.
+ Mesh size for Vloc has been set to  767 to avoid numerical noise.
  Compensation charge density is not taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
@@ -628,8 +627,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     115.519     115.508
  Radial grid used for (t)core density is grid 1
  Radial grid used for Vloc is grid 1
  Radial grid used for pseudo valence density is grid 1
-
-  Mesh size for Vloc has been set to  767 to avoid numerical noise.
+ Mesh size for Vloc has been set to  767 to avoid numerical noise.
  Compensation charge density is not taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 

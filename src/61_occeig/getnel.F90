@@ -22,7 +22,7 @@
 !! compute the entropy only when the fermi energy is well converged
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (XG, AF)
+!! Copyright (C) 1998-2017 ABINIT group (XG, AF)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -82,6 +82,8 @@ subroutine getnel(doccde,dosdeltae,eigen,entropy,fermie,maxocc,mband,nband,&
  use m_errors
  use m_splines
 
+ use m_fstrings,   only : sjoin, itoa
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -119,9 +121,10 @@ subroutine getnel(doccde,dosdeltae,eigen,entropy,fermie,maxocc,mband,nband,&
 ! TODO: This parameter is defined in init_occ_ent but we cannot call the
 ! routine to get this value since the same variable is used to dimension the
 ! arrays! This Constants should be stored somewhere in a module.
- integer,parameter :: nptsdiv2_def=6000 
+ integer,parameter :: nptsdiv2_def=6000
+ integer,parameter :: prtdos1=1
  integer :: bantot,iband,iene,ikpt,index,index_start,isppol
- integer :: nene,nptsdiv2,prtdos
+ integer :: nene,nptsdiv2
  real(dp) :: buffer,deltaene,dosdbletot,doshalftot,dostot
  real(dp) :: enemax,enemin,enex,intdostot,limit,tsmearinv
  character(len=500) :: message
@@ -136,8 +139,7 @@ subroutine getnel(doccde,dosdeltae,eigen,entropy,fermie,maxocc,mband,nband,&
  DBG_ENTER("COLL")
 
  if(option/=1 .and. option/=2)then
-   write(message,'(a,i0,a)')' Option must be either 1 or 2. It is ',option,'.'
-   MSG_BUG(message)
+   MSG_BUG(sjoin('Option must be either 1 or 2. It is:', itoa(option)))
  end if
 
 !Initialize the occupation function and generalized entropy function,
@@ -165,19 +167,15 @@ subroutine getnel(doccde,dosdeltae,eigen,entropy,fermie,maxocc,mband,nband,&
 
 !---------------------------------------------------------------------
 
-!DEBUG
 !write(std_out,*)' getnel : debug  tphysel, tsmear = ', tphysel, tsmear
-!ENDDEBUG
  bantot=sum(nband(:))
 
  ABI_ALLOCATE(arg,(bantot))
  ABI_ALLOCATE(derfun,(bantot))
  ABI_ALLOCATE(ent,(bantot))
 
-!
-!normal evaluation of occupations and entropy
-!
  if(option==1)then
+   !normal evaluation of occupations and entropy
 
 !  Compute the arguments of the occupation and entropy functions
    arg(:)=(fermie-eigen(1:bantot))*tsmearinv
@@ -206,11 +204,7 @@ subroutine getnel(doccde,dosdeltae,eigen,entropy,fermie,maxocc,mband,nband,&
      end do
    end do
 
-!  DEBUG
 !  write(std_out,*) ' getnel : debug   wtk, occ, eigen = ', wtk, occ, eigen
-!  END DEBUG
-
-!  DEBUG
 !  write(std_out,*)xgrid(-nptsdiv2),xgrid(nptsdiv2)
 !  write(std_out,*)'fermie',fermie
 !  do ii=1,bantot
@@ -220,20 +214,33 @@ subroutine getnel(doccde,dosdeltae,eigen,entropy,fermie,maxocc,mband,nband,&
 !  write(std_out,*)'arg',arg(:)
 !  write(std_out,*)'occ',occ(:)
 !  write(std_out,*)'nelect',nelect
-!  stop
-!  ENDDEBUG
 
-!  
-!  evaluate DOS for smearing, half smearing, and double.
-!  
  else if(option==2)then
+  ! evaluate DOS for smearing, half smearing, and double.
 
    buffer=limit/tsmearinv*.5_dp
-   prtdos=1
+
+  ! A Similar section is present is dos_calcnwrite. Should move all DOS stuff to m_ebands
+  ! Choose the lower and upper energies
+   enemax=maxval(eigen(1:bantot))+buffer
+   enemin=minval(eigen(1:bantot))-buffer
+
+  ! Extend the range to a nicer value
+   enemax=0.1_dp*ceiling(enemax*10._dp)
+   enemin=0.1_dp*floor(enemin*10._dp)
+
+  ! Choose the energy increment
+   if(abs(dosdeltae)<tol10)then
+     deltaene=0.001_dp
+     if(prtdos1>=2)deltaene=0.0005_dp ! Higher resolution possible (and wanted) for tetrahedron
+   else
+     deltaene=dosdeltae
+   end if
+   nene=nint((enemax-enemin)/deltaene)+1
 
 !  Write the header of the DOS file, and also decides the energy range and increment
    call dos_hdr_write(buffer,deltaene,dosdeltae,eigen,enemax,enemin,fermie,mband,nband,nene,&
-&   nkpt,nsppol,occopt,prtdos,tphysel,tsmear,unitdos)
+&   nkpt,nsppol,occopt,prtdos1,tphysel,tsmear,unitdos)
 
    ABI_ALLOCATE(dos,(bantot))
    ABI_ALLOCATE(dosdble,(bantot))
@@ -270,15 +277,13 @@ subroutine getnel(doccde,dosdeltae,eigen,entropy,fermie,maxocc,mband,nband,&
        call splfit(xgrid,derfun,smdfun,0,arg,dosdble,(2*nptsdiv2+1),bantot)
 
 !      Now, accumulate the contribution from each eigenenergy
-       dostot=0.0_dp
-       intdostot=0.0_dp
-       doshalftot=0.0_dp
-       dosdbletot=0.0_dp
+       dostot=zero
+       intdostot=zero
+       doshalftot=zero
+       dosdbletot=zero
        index=index_start
 
-!      DEBUG
 !      write(std_out,*)' eigen, arg, dos, intdos, doshalf, dosdble'
-!      ENDDEBUG
        do ikpt=1,nkpt
          do iband=1,nband(ikpt+nkpt*(isppol-1))
            index=index+1
@@ -290,23 +295,18 @@ subroutine getnel(doccde,dosdeltae,eigen,entropy,fermie,maxocc,mband,nband,&
        end do
 
 !      Print the data for this energy
-       write(message, '(f8.3,2f14.6,2f14.3)' )enex,dostot,intdostot,doshalftot,dosdbletot
-       call wrtout(unitdos,message,'COLL')
+       write(unitdos, '(f8.3,2f14.6,2f14.3)' )enex,dostot,intdostot,doshalftot,dosdbletot
 
        enex=enex+deltaene
-
-!      End the loop over the energies
-     end do
-
-!    End the loop over isppol
-   end do
+     end do ! iene
+   end do ! isppol
 
    ABI_DEALLOCATE(dos)
    ABI_DEALLOCATE(dosdble)
    ABI_DEALLOCATE(doshalf)
    ABI_DEALLOCATE(intdos)
 
-!  MG: It does not make sense to close the unit here since the routines 
+!  MG: It does not make sense to close the unit here since the routines
 !  did not open the file here!
 !  Close the DOS file
    close(unitdos)

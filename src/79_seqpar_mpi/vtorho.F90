@@ -9,7 +9,7 @@
 !! The main part of it is a wf update over all k points.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (DCA, XG, GMR, MF, AR, MM, MT, FJ, MB, MT)
+!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR, MF, AR, MM, MT, FJ, MB, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -294,9 +294,9 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  real(dp), intent(in) :: ylmgr(dtset%mpw*dtset%mkmem,3,psps%mpsang*psps%mpsang*psps%useylm)
  real(dp), intent(in) :: ylmdiel(npwdiel,lmax_diel**2)
  real(dp), intent(out) :: dphase(3),grnl(3*natom)
- real(dp), intent(inout) :: eigen(dtset%mband*dtset%nkpt*dtset%nsppol) !vz_i
+ real(dp), intent(inout) :: eigen(dtset%mband*dtset%nkpt*dtset%nsppol)
  real(dp), intent(out) :: nhat(nfftf,dtset%nspden*psps%usepaw)
- real(dp), intent(inout) :: resid(dtset%mband*dtset%nkpt*dtset%nsppol) !vz_i
+ real(dp), intent(inout) :: resid(dtset%mband*dtset%nkpt*dtset%nsppol)
  real(dp), intent(out) :: nvresid(nfftf,dtset%nspden)
  real(dp), intent(out) :: susmat(2,npwdiel*afford,dtset%nspden,npwdiel,dtset%nspden)
  real(dp), intent(inout) :: cg(2,mcg)
@@ -325,7 +325,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  integer :: spaceComm_distrb,usecprj_local,usetimerev
  logical :: berryflag,computesusmat,fixed_occ
  logical :: locc_test,paral_atom,remove_inv,usefock,with_vxctau
- logical :: wvlbigdft=.false.
+ logical :: do_last_ortho,wvlbigdft=.false.
  real(dp) :: dmft_ldaocc
  real(dp) :: edmft,ebandlda,ebanddmft,ebandldatot,ekindmft,ekindmft2,ekinlda
  real(dp) :: min_occ,vxcavg_dum,strsxc(6)
@@ -334,11 +334,11 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  type(gs_hamiltonian_type) :: gs_hamk
 !arrays
  integer,allocatable :: kg_k(:,:)
- real(dp) :: dielar(7),dphase_k(3),kpoint(3),qpt(3),rhodum(1),tsec(2),ylmgr_dum(1)
+ real(dp) :: dielar(7),dphase_k(3),kpoint(3),qpt(3),rhodum(1),tsec(2),ylmgr_dum(0,0,0)
  real(dp),allocatable :: EigMin(:,:),buffer1(:),buffer2(:),cgq(:,:)
  real(dp),allocatable :: cgrkxc(:,:),cgrvtrial(:,:),doccde(:)
  real(dp),allocatable :: dphasek(:,:),eig_k(:),ek_k(:),ek_k_nd(:,:,:),eknk(:),eknk_nd(:,:,:,:,:)
- real(dp),allocatable :: enl_k(:),enlnk(:),ffnl(:,:,:,:),grnl_k(:,:), xcart(:,:)
+ real(dp),allocatable :: enl_k(:),enlnk(:),focknk(:),ffnl(:,:,:,:),grnl_k(:,:), xcart(:,:)
  real(dp),allocatable :: grnlnk(:,:),kinpw(:),kpg_k(:,:),occ_k(:),ph3d(:,:,:)
  real(dp),allocatable :: pwnsfacq(:,:),resid_k(:),rhoaug(:,:,:,:),rhowfg(:,:),rhowfr(:,:)
  real(dp),allocatable :: vlocal(:,:,:,:),vlocal_tmp(:,:,:),vxctaulocal(:,:,:,:,:),ylm_k(:,:),zshift(:)
@@ -365,7 +365,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  prtvol=dtset%prtvol
 
 !If usewvl: wvlbigdft indicates that the BigDFT workflow will be followed
- if (dtset%usewvl==1 .and. dtset%wvl_bigdft_comp==1) wvlbigdft=.true.
+ wvlbigdft=(dtset%usewvl==1.and.dtset%wvl_bigdft_comp==1)
 
 !Several inits
  n1=dtset%ngfft(1) ; n2=dtset%ngfft(2) ; n3=dtset%ngfft(3)
@@ -408,6 +408,10 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
    energies%e_eigenvalues = zero
    energies%e_kinetic     = zero
    energies%e_nonlocalpsp = zero
+   if (usefock) then
+     energies%e_fock=zero
+     energies%e_fockdc=zero
+   end if
    grnl(:)=zero
    resid(:) = zero ! JWZ 13 May 2010. resid and eigen need to be fully zeroed each time before use
    eigen(:) = zero
@@ -419,15 +423,17 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 
  if(dtset%usewvl==0) then
    ABI_ALLOCATE(eknk,(mbdkpsp))
+   ABI_ALLOCATE(enlnk,(mbdkpsp))
    ABI_ALLOCATE(eknk_nd,(dtset%nsppol,dtset%nkpt,2,dtset%mband,dtset%mband*paw_dmft%use_dmft))
    ABI_ALLOCATE(EigMin,(2,dtset%mband))
    ABI_ALLOCATE(grnlnk,(3*natom,mbdkpsp*optforces))
-   if (psps%usepaw==0)  then
-     ABI_ALLOCATE(enlnk,(mbdkpsp))
+   if (usefock) then
+     ABI_ALLOCATE(focknk,(mbdkpsp))
+     focknk=zero
    end if
+   eknk(:)=zero;enlnk(:)=zero
+   if (optforces>0) grnlnk(:,:)=zero
    if(paw_dmft%use_dmft==1) eknk_nd=zero
-   eknk(:)=zero;if (optforces>0) grnlnk(:,:)=zero
-   if (psps%usepaw==0) enlnk(:)=zero
  end if !usewvl==0
 
 !Initialize rhor if needed; store old rhor
@@ -446,21 +452,35 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 
 !Set max number of non-self-consistent loops nnsclo_now for use in vtowfk
  if(iscf<0)then
+   ! ===== Non self-consistent =====
    nnsclo_now=dtset%nstep
- else if(iscf>=0)then
-   if(dtset%nnsclo>0 .or. (dtset%usewvl==1 .and. dtset%nnsclo==0)) then
+ else
+   ! ===== Self-consistent =====
+   if(dtset%nnsclo>0) then
+   ! ===== Self-consistent + imposed =====
      nnsclo_now=dtset%nnsclo
-   else if(dtset%nnsclo<=0)then
+   else
+   ! ===== Self-consistent + default =====
      nnsclo_now=1
-     if(istep<=2)nnsclo_now=2
+     if (dtset%usewvl==0) then
+     ! ----- Plane waves -----
+       if (istep<=2.and.iscf/=0) nnsclo_now=2
+     else
+     ! ----- Wavelets -----
+       if (iscf==0) then
+         nnsclo_now=0
+       else if (istep<=2) then
+         nnsclo_now=3
+       else if (istep<=4) then
+         nnsclo_now=2
+       end if
+     end if
    end if
+   ! ===== Double is required =====
    if(dbl_nnsclo==1)then
-!    write(std_out,*)' vtorho : use doubled nnsclo '
      nnsclo_now=nnsclo_now*2
    end if
  end if
- if(wvlbigdft)  nnsclo_now=dtset%nnsclo
-
  if(dtset%wfoptalg==2)nnsclo_now=40  ! UNDER DEVELOPMENT
 
  write(message, '(a,i0,a,3(i0,1x))' ) ' vtorho : nnsclo_now=',nnsclo_now,&
@@ -469,9 +489,10 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 
 !==== Initialize most of the Hamiltonian ====
 !Allocate all arrays and initialize quantities that do not depend on k and spin.
- call init_hamiltonian(gs_hamk,psps,pawtab,dtset%nspinor,dtset%nspden,natom,&
+ call init_hamiltonian(gs_hamk,psps,pawtab,dtset%nspinor,dtset%nsppol,dtset%nspden,natom,&
 & dtset%typat,xred,dtset%nfft,dtset%mgfft,dtset%ngfft,rprimd,dtset%nloalg,&
-& usecprj=usecprj_local,ph1d=ph1d,electronpositron=electronpositron,fock=fock,&
+& paw_ij=paw_ij,ph1d=ph1d,usecprj=usecprj_local,electronpositron=electronpositron,fock=fock,&
+& comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,mpi_spintab=mpi_enreg%my_isppoltab,&
 & nucdipmom=dtset%nucdipmom,use_gpu_cuda=dtset%use_gpu_cuda)
 
 !Initializations for PAW (projected wave functions)
@@ -496,13 +517,17 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  call timab(981,2,tsec)
 
 !===================================================================
-! WAVELETS - Branching with a separate VTORHO procedure 
+! WAVELETS - Branching with a separate VTORHO procedure
 !===================================================================
 
  if (dtset%usewvl == 1) then
 #ifndef HAVE_BIGDFT
    BIGDFT_NOTENABLED_ERROR()
 #else
+
+!  do_last_ortho in case of diagonalization scheme
+   if (     wvlbigdft) do_last_ortho=(dtset%iscf/=0)
+   if (.not.wvlbigdft) do_last_ortho=(.true.)
 
    ABI_ALLOCATE(xcart,(3, dtset%natom))
    call xred2xcart(dtset%natom, rprimd, xcart, xred)
@@ -515,12 +540,11 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
      call wvl_nscf_loop()
    end if
 
-!  Diagonalization scheme:
-   if (nnsclo_now > 0) then
+!  Eventually orthogonalize WFs now
+   if (do_last_ortho) then
      call write_energies(ii,0,wvl%e%energs,0.d0,0.d0,"final")
      call last_orthon(me_distrb, nproc_distrb, ii, wvl%wfs%ks, wvl%e%energs%evsum, .true.)
      if(wvlbigdft) energies%e_xcdc = wvl%e%energs%evxc
-
 !    If occupation numbers are not changed...
      if (fixed_occ .or. (iscf<0 .and. iscf/=-3)) then
        call wvl_comm_eigen()
@@ -539,47 +563,35 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 !    This might accelerate convergence:
      wvl%wfs%ks%diis%energy_min=one
      wvl%wfs%ks%diis%alpha=two
-   end if !nnsclo_now>0
+   end if !do_last_ortho
 
 !  Compute eigenvalues energy
    if(.not. wvlbigdft .and. nnsclo_now>0) then
      call e_eigen(eigen,energies%e_eigenvalues,dtset%mband,dtset%nband,dtset%nkpt,&
 &     dtset%nsppol,occ,dtset%wtk)
    else
-     if(wvlbigdft) then
-       energies%e_eigenvalues = energies%e_kinetic +  energies%e_nonlocalpsp +&
-&       (energies%e_localpsp+wvl%e%energs%evxc+two*wvl%e%energs%eh)
-     else
-       energies%e_eigenvalues = energies%e_kinetic +  &
-&       two*energies%e_hartree + energies%e_xcdc + energies%e_localpsp
-       if(psps%usepaw==1) then
-         energies%e_eigenvalues=energies%e_eigenvalues&
-&         + energies%e_paw !-energies%e_pawdc
-       else
-         energies%e_eigenvalues=energies%e_eigenvalues&
-&         + energies%e_nonlocalpsp
-       end if
-     end if
+     energies%e_eigenvalues = energies%e_kinetic + energies%e_localpsp &
+&            + energies%e_xcdc  + two*energies%e_hartree +energies%e_nonlocalpsp
    end if
 
-   if (optforces == 1) then
+   if (optforces == 1) then ! not compatible with iscf=0 and wvlbigdftcomp=1 + PAW
      call wvl_nl_gradient(grnl, mpi_enreg, dtset%natom, rprimd, wvl, xcart)
    end if
 
 !  For iscf<0 we do not update the density
-   if(dtset%iscf>=0 .and. .not. wvlbigdft ) then
+   if (dtset%iscf>=0) then !(dtset%iscf>=0 .and. .not. wvlbigdft ) then
      call wvl_mkrho(dtset,irrzon,mpi_enreg,phnons,rhor,wvl%wfs,wvl%den)
    end if
    ABI_DEALLOCATE(xcart)
 
 !  Note in WVL+NC: the rest will be skipped.
 !  For PAW: we will compute Rho_ij at the end.
-   if(wvlbigdft) return
+   !if(wvlbigdft) return
 #endif
  else
 
 !===================================================================
-! PLANE WAVES - Standard VTORHO procedure 
+! PLANE WAVES - Standard VTORHO procedure
 !===================================================================
 
 !  Electric fields: set flag to turn on various behaviors
@@ -647,8 +659,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
      rhoaug(:,:,:,:)=zero
 
 !    Continue to initialize the Hamiltonian
-     call load_spin_hamiltonian(gs_hamk,isppol,paw_ij=paw_ij,vlocal=vlocal,&
-&     comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
+     call load_spin_hamiltonian(gs_hamk,isppol,vlocal=vlocal,with_nonlocal=.true.)
      if (with_vxctau) then
        call load_spin_hamiltonian(gs_hamk,isppol,vxctaulocal=vxctaulocal)
      end if
@@ -733,22 +744,18 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 
        ABI_ALLOCATE(eig_k,(nband_k))
        ABI_ALLOCATE(ek_k,(nband_k))
+       ABI_ALLOCATE(enl_k,(nband_k))
        ABI_ALLOCATE(ek_k_nd,(2,nband_k,nband_k*paw_dmft%use_dmft))
        ABI_ALLOCATE(occ_k,(nband_k))
        ABI_ALLOCATE(resid_k,(nband_k))
        ABI_ALLOCATE(zshift,(nband_k))
        ABI_ALLOCATE(grnl_k,(3*natom,nband_k*optforces))
-       if (psps%usepaw==0)  then
-         ABI_ALLOCATE(enl_k,(nband_k))
-       else
-         ABI_ALLOCATE(enl_k,(0))
-       end if
 
        eig_k(:)=zero
        ek_k(:)=zero
+       enl_k(:)=zero
        if(paw_dmft%use_dmft==1) ek_k_nd(:,:,:)=zero
        if (optforces>0) grnl_k(:,:)=zero
-       if (psps%usepaw==0) enl_k(:)=zero
        kpoint(:)=dtset%kptns(:,ikpt)
        occ_k(:)=occ(1+bdtot_index:nband_k+bdtot_index)
        resid_k(:)=zero
@@ -808,8 +815,8 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 &         kinpw_k  =my_bandfft_kpt%kinpw_gather, &
 &         kg_k     =my_bandfft_kpt%kg_k_gather, &
 &         kpg_k    =my_bandfft_kpt%kpg_k_gather, &
-         ffnl_k   =my_bandfft_kpt%ffnl_gather, &
-         ph3d_k   =my_bandfft_kpt%ph3d_gather)
+          ffnl_k   =my_bandfft_kpt%ffnl_gather, &
+          ph3d_k   =my_bandfft_kpt%ph3d_gather)
        end if
 
 !      Build inverse of overlap matrix for chebfi
@@ -823,7 +830,9 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
          gemm_nonlop_ikpt_this_proc_being_treated = my_ikpt
          if (istep <= 1) then
            !Init the arrays
-           call make_gemm_nonlop(my_ikpt,gs_hamk)
+           call make_gemm_nonlop(my_ikpt,gs_hamk%npw_fft_k,gs_hamk%lmnmax, &
+&          gs_hamk%ntypat, gs_hamk%indlmn, gs_hamk%nattyp, gs_hamk%istwf_k, gs_hamk%ucvol, gs_hamk%ffnl_k,&
+&          gs_hamk%ph3d_k)
          end if
        end if
 
@@ -838,6 +847,11 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 !      Update the value of ikpt,isppol in fock_exchange and allocate the memory space to perform HF calculation.
        if (usefock) then
          call fock_updateikpt(fock,ikpt,isppol)
+       end if
+       if ((psps%usepaw==1).and.(usefock)) then
+         if (fock%optfor) then
+           fock%forces_ikpt=zero
+         end if
        end if
 
 !      Compute the eigenvalues, wavefunction, residuals,
@@ -884,28 +898,30 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 !      Save eigenvalues (hartree), residuals (hartree**2)
        eigen(1+bdtot_index : nband_k+bdtot_index) = eig_k(:)
        eknk (1+bdtot_index : nband_k+bdtot_index) = ek_k (:)
+       if(usefock)    focknk (1+bdtot_index : nband_k+bdtot_index) = fock%eigen_ikpt (:)
        if(paw_dmft%use_dmft==1) eknk_nd(isppol,ikpt,:,:,:) = ek_k_nd(:,:,:)
        resid(1+bdtot_index : nband_k+bdtot_index) = resid_k(:)
        if (optforces>0) grnlnk(:,1+bdtot_index : nband_k+bdtot_index) = grnl_k(:,:)
-       if (psps%usepaw==0) enlnk(1+bdtot_index : nband_k+bdtot_index) = enl_k(:)
+       enlnk(1+bdtot_index : nband_k+bdtot_index) = enl_k(:)
 
        if(iscf>0 .or. iscf==-3)then
 !        Accumulate sum over k points for band, nonlocal and kinetic energies,
 !        also accumulate gradients of Enonlocal:
          do iband=1,nband_k
            if (abs(occ_k(iband))>tol8) then
-             energies%e_kinetic = energies%e_kinetic + dtset%wtk(ikpt)*occ_k(iband)*ek_k(iband)
+             energies%e_kinetic     = energies%e_kinetic     + dtset%wtk(ikpt)*occ_k(iband)*ek_k(iband)
              energies%e_eigenvalues = energies%e_eigenvalues + dtset%wtk(ikpt)*occ_k(iband)*eig_k(iband)
-
+             energies%e_nonlocalpsp = energies%e_nonlocalpsp + dtset%wtk(ikpt)*occ_k(iband)*enl_k(iband)
              if (optforces>0) grnl(:)=grnl(:)+dtset%wtk(ikpt)*occ_k(iband)*grnl_k(:,iband)
-             if (psps%usepaw==0) then
-               energies%e_nonlocalpsp = energies%e_nonlocalpsp + dtset%wtk(ikpt)*occ_k(iband)*enl_k(iband)
-             end if
+             if (usefock) energies%e_fock=energies%e_fock + half*fock%eigen_ikpt(iband)*occ_k(iband)*dtset%wtk(ikpt)
            end if
          end do
+
 !        Calculate Fock contribution to the total energy if required
-         if (usefock) then
-           call fock_calc_ene(dtset,fock,energies%e_exactX,ikpt,nband_k,occ_k)
+         if ((psps%usepaw==1).and.(usefock)) then
+           if (fock%optfor) then
+              call fock_calc_ene(dtset,fock,energies%e_exactX,ikpt,nband_k,occ_k)
+           end if
          end if
        end if
 
@@ -963,7 +979,11 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
    end do ! End loop over spins
 
    call timab(988,1,tsec)
-
+   if (usefock) then
+     if(fock%optfor) then
+       call xmpi_sum(fock%forces,mpi_enreg%comm_kpt,ierr)
+     end if
+   end if
 !  Electric field: compute string-averaged change in Zak phase
 !  along each direction, store it in dphase(idir)
 !  ji: it is not convenient to do this anymore. Remove. Set dphase(idir)=0.0_dp.
@@ -994,7 +1014,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        call timab(989,1,tsec)
 
 !      If needed, exchange the values of eigen,resid,eknk,enlnk,grnlnk
-       ABI_ALLOCATE(buffer1,((4+3*natom*optforces-psps%usepaw)*mbdkpsp))
+       ABI_ALLOCATE(buffer1,((4+3*natom*optforces+dtset%usefock)*mbdkpsp))
        if(paw_dmft%use_dmft==1) then
          ABI_ALLOCATE(buffer2,(mb2dkpsp*paw_dmft%use_dmft))
        end if
@@ -1002,6 +1022,13 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        buffer1(1          :  mbdkpsp)=eigen(:)
        buffer1(1+  mbdkpsp:2*mbdkpsp)=resid(:)
        buffer1(1+2*mbdkpsp:3*mbdkpsp)=eknk(:)
+       buffer1(1+3*mbdkpsp:4*mbdkpsp)=enlnk(:)
+       index1=4*mbdkpsp
+       if (optforces>0) then
+         buffer1(index1+1:index1+3*natom*mbdkpsp)=reshape(grnlnk,(/(3*natom)*mbdkpsp/) )
+         index1=index1+3*natom*mbdkpsp
+       end if
+       if (usefock) buffer1(1+index1:index1+mbdkpsp)=focknk(:)
        if(paw_dmft%use_dmft==1) then
          nnn=0
          do ikpt=1,dtset%nkpt
@@ -1021,15 +1048,6 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
            MSG_BUG(message)
          end if
        end if
-       index1=3*mbdkpsp
-       if (psps%usepaw==0) then
-         buffer1(index1+1:index1+mbdkpsp)=enlnk(:)
-         index1=index1+mbdkpsp
-       end if
-       if (optforces>0) then
-         buffer1(index1+1:index1+3*natom*mbdkpsp)=reshape(grnlnk, (/(3*natom)*mbdkpsp/) )
-       end if
-
 !      Build sum of everything
        call timab(48,1,tsec)
        call xmpi_sum(buffer1,mpi_enreg%comm_kpt,ierr)
@@ -1042,6 +1060,11 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        eigen(:) =buffer1(1          :  mbdkpsp)
        resid(:) =buffer1(1+  mbdkpsp:2*mbdkpsp)
        eknk(:)  =buffer1(1+2*mbdkpsp:3*mbdkpsp)
+       enlnk(:) =buffer1(1+3*mbdkpsp:4*mbdkpsp)
+       index1=4*mbdkpsp
+       if (optforces>0) then
+         grnlnk(:,:)=reshape(buffer1(index1+1:index1+3*natom*mbdkpsp),(/3*natom,mbdkpsp/) )
+       end if
        if(paw_dmft%use_dmft==1) then
          nnn=0
          do ikpt=1,dtset%nkpt
@@ -1056,14 +1079,6 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
              end do
            end do
          end do
-       end if
-       index1=3*mbdkpsp
-       if (psps%usepaw==0) then
-         enlnk(:) =buffer1(index1+1:index1+mbdkpsp)
-         index1=index1+mbdkpsp
-       end if
-       if (optforces>0) then
-         grnlnk(:,:)=reshape(buffer1(index1+1:index1+3*natom*mbdkpsp),(/ 3*natom , mbdkpsp /) )
        end if
        if(allocated(buffer2))  then
          ABI_DEALLOCATE(buffer2)
@@ -1141,7 +1156,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 !        ==  gather crystal structure date into data "cryst_struc"
          remove_inv=.false.
          if(dtset%nspden==4) remove_inv=.true.
-         call crystal_init(cryst_struc,dtset%spgroup,natom,dtset%npsp,ntypat, &
+         call crystal_init(dtset%amu_orig(:,1),cryst_struc,dtset%spgroup,natom,dtset%npsp,ntypat, &
 &         dtset%nsym,rprimd,dtset%typat,xred,dtset%ziontypat,dtset%znucl,1,&
 &         dtset%nspden==2.and.dtset%nsppol==1,remove_inv,hdr%title,&
 &         dtset%symrel,dtset%tnons,dtset%symafm)
@@ -1223,6 +1238,8 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
      energies%e_eigenvalues = zero
      energies%e_kinetic     = zero
      energies%e_nonlocalpsp = zero
+     if (usefock) energies%e_fock     = zero
+     if (optforces>0) grnl(:)=zero
      if(paw_dmft%use_dmft>=1) then
        ebandlda               = zero
        ebanddmft              = zero
@@ -1233,8 +1250,6 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
      end if
 
 !    Compute new energy terms due to non diagonal occupations and DMFT.
-     if (psps%usepaw==0) energies%e_nonlocalpsp = zero
-     if (optforces>0) grnl(:)=zero
      bdtot_index=1
      do isppol=1,dtset%nsppol
        do ikpt=1,dtset%nkpt
@@ -1270,9 +1285,12 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 &             dtset%wtk(ikpt)*occ(bdtot_index)*eigen(bdtot_index)
              energies%e_kinetic = energies%e_kinetic + &
 &             dtset%wtk(ikpt)*occ(bdtot_index)*eknk(bdtot_index)
-             if (optforces>0) grnl(:)=grnl(:)+dtset%wtk(ikpt)*occ(bdtot_index)*grnlnk(:,bdtot_index)
-             if (psps%usepaw==0) energies%e_nonlocalpsp = energies%e_nonlocalpsp + &
+             energies%e_nonlocalpsp = energies%e_nonlocalpsp + &
 &             dtset%wtk(ikpt)*occ(bdtot_index)*enlnk(bdtot_index)
+             if (usefock) then
+               energies%e_fock=energies%e_fock + half*focknk(bdtot_index)*occ(bdtot_index)*dtset%wtk(ikpt)
+             end if
+             if (optforces>0) grnl(:)=grnl(:)+dtset%wtk(ikpt)*occ(bdtot_index)*grnlnk(:,bdtot_index)
            end if
            bdtot_index=bdtot_index+1
            if(paw_dmft%use_dmft==1.and.dtset%nbandkss==0) then
@@ -1328,7 +1346,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 
        call timab(989,1,tsec)
 
-       nbuf=2*mbdkpsp+dtset%nfft*dtset%nspden+3-psps%usepaw+3*natom*optforces
+       nbuf=2*mbdkpsp+dtset%nfft*dtset%nspden+3+3*natom*optforces
 !      * If Hartree-Fock calculation, the exact exchange energy is k-dependent.
        if(dtset%usefock==1) nbuf=nbuf+1
        if(iscf==-1 .or. iscf==-2)nbuf=2*mbdkpsp
@@ -1346,11 +1364,11 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
          index1=index1+dtset%nfft*dtset%nspden
          buffer1(index1+1) = energies%e_kinetic
          buffer1(index1+2) = energies%e_eigenvalues
-         if (psps%usepaw==0) buffer1(index1+3) = energies%e_nonlocalpsp
-         index1=index1+3-psps%usepaw
+         buffer1(index1+3) = energies%e_nonlocalpsp
+         index1=index1+3
 !        * If Hartree-Fock calculation, save e_exactX in buffer1
          if (dtset%usefock==1) then
-           buffer1(index1+1) = energies%e_exactX
+           buffer1(index1+1) = energies%e_fock
            index1=index1+1
          end if
          if (optforces>0) buffer1(index1+1:index1+3*natom)=grnl(1:3*natom)
@@ -1386,11 +1404,11 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
          index1=index1+dtset%nfft*dtset%nspden
          energies%e_kinetic = buffer1(index1+1)
          energies%e_eigenvalues = buffer1(index1+2)
-         if (psps%usepaw==0) energies%e_nonlocalpsp = buffer1(index1+3)
-         index1=index1+3-psps%usepaw
+         energies%e_nonlocalpsp = buffer1(index1+3)
+         index1=index1+3
 !        * If Hartree-Fock calculation, save e_exactX in buffer1
          if (dtset%usefock==1) then
-           energies%e_exactX = buffer1(index1+1)
+           energies%e_fock = buffer1(index1+1)
            index1=index1+1
          end if
          if (optforces>0) grnl(1:3*natom)=buffer1(index1+1:index1+3*natom)
@@ -1451,11 +1469,12 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
    end if
 
    ABI_DEALLOCATE(eknk)
+   if (usefock) then
+     ABI_DEALLOCATE(focknk)
+   end if
    ABI_DEALLOCATE(eknk_nd)
    ABI_DEALLOCATE(grnlnk)
-   if (psps%usepaw==0)  then
-     ABI_DEALLOCATE(enlnk)
-   end if
+   ABI_DEALLOCATE(enlnk)
 
 !  In the non-self-consistent case, print eigenvalues and residuals
    if(iscf<=0)then
@@ -1545,8 +1564,8 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        call ctocprj(atindx,cg,1,cprj_tmp,gmet,gprimd,0,0,0,dtset%istwfk,kg,dtset%kptns,&
 &       dtset%mband,mcg,mcprj_tmp,dtset%mgfft,dtset%mkmem,mpi_enreg,psps%mpsang,dtset%mpw,&
 &       dtset%natom,nattyp,dtset%nband,dtset%natom,dtset%ngfft,dtset%nkpt,dtset%nloalg,&
-&       npwarr,dtset%nspinor,dtset%nsppol,ntypat,0,dtset%paral_kgb,ph1d,psps,rmet,dtset%typat,&
-&       ucvol,dtfil%unpaw,0,xred,ylm,ylmgr_dum)
+&       npwarr,dtset%nspinor,dtset%nsppol,ntypat,dtset%paral_kgb,ph1d,psps,rmet,dtset%typat,&
+&       ucvol,dtfil%unpaw,xred,ylm,ylmgr_dum)
        call pawmkrhoij(atindx,atindx1,cprj_tmp,gs_hamk%dimcprj,dtset%istwfk,dtset%kptopt,&
 &       dtset%mband,mband_cprj,mcprj_tmp,dtset%mkmem,mpi_enreg,natom,dtset%nband,dtset%nkpt,&
 &       dtset%nspinor,dtset%nsppol,occ,dtset%paral_kgb,paw_dmft,dtset%pawprtvol,pawrhoij_unsym,&
@@ -1679,10 +1698,10 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 !!
 !! FUNCTION
 !!  Non-self-consistent field cycle in Wavelets
-!!  See also "wvl_nscf_loop_bigdft.F9P"
+!!  See also "wvl_nscf_loop_bigdft"
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2012-2016 ABINIT group (T. Rangel)
+!!  Copyright (C) 2012-2017 ABINIT group (T. Rangel)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1736,11 +1755,11 @@ subroutine wvl_nscf_loop()
 ! type(pawcprj_type),dimension(dtset%natom,mcprj),intent(out)::cprj
 
 !Local variables-------------------------------
- logical,parameter::wvlbigdft=.false.
- logical,parameter::do_scf=.false. !do not do a SCF cycle
  integer :: inonsc,ii
- real(dp):: eproj, raux
-!character(len=500) :: message                   ! to be uncommented, if needed
+ integer,parameter :: iscf_=-1       !do not do a SCF cycle
+ logical,parameter :: do_scf=.false. !do not do a SCF cycle
+ logical,parameter :: wvlbigdft=.false.
+ real(dp) :: dum,eexctx,eh,ekin,eloc,enl,esicdc,evxc,exc
 
 ! *************************************************************************
 
@@ -1748,54 +1767,51 @@ subroutine wvl_nscf_loop()
 
    if(nnsclo_now>0) then
      do inonsc=1,nnsclo_now
-       call wvl_psitohpsi(dtset%diemix,energies%e_exactX,energies%e_xc,energies%e_hartree,&
-&       energies%e_kinetic, energies%e_localpsp, eproj, energies%e_sicdc,&
-&       istep,inonsc, dtset%iscf,mpi_enreg%me_wvl,dtset%natom,&
-&       nfftf,mpi_enreg%nproc_wvl,dtset%nspden,&
-&       raux,do_scf,energies%e_xcdc,wvl,wvlbigdft,xcart,strsxc)
-
-!      eproj: output of wvl_psitohpsi. copy to energies object:
-       if(dtset%usepaw==1) energies%e_paw=eproj
-       if(dtset%usepaw==0) energies%e_nonlocalpsp=eproj
-
-       !call wvl_hpsitopsi(cprj_ptr,dtset, energies, inonsc,mcprj_local, mpi_enreg, &
-       call wvl_hpsitopsi(cprj,dtset, energies, inonsc,mcprj_local, mpi_enreg, &
-&       residm,wvl,xcart)
-
+       call wvl_psitohpsi(dtset%diemix,eexctx,exc,eh,ekin,eloc,enl,esicdc,&
+&                         istep,inonsc,iscf_,mpi_enreg%me_wvl,dtset%natom,&
+&                         nfftf,mpi_enreg%nproc_wvl,dtset%nspden,&
+&                         dum,do_scf,evxc,wvl,wvlbigdft,xcart,strsxc)
+       call wvl_hpsitopsi(cprj,dtset,energies,inonsc,mcprj_local,mpi_enreg, &
+&                         residm,wvl,xcart)
        if(residm<dtset%tolwfr) exit !Exit loop if converged
      end do
-
-!    PENDING: optimize this:
-!    (note that wvl_hpsitopsi should be called at least once,
-!    since cprj are copied there to ABINIT, and some energy terms as well.
-!    hpsi is lost in hpsitopsi,
-!    so we recalculate this here, because last_orthon will be called afterwards.
-     call wvl_psitohpsi(dtset%diemix,energies%e_exactX,energies%e_xc,energies%e_hartree,&
-&     energies%e_kinetic, energies%e_localpsp, eproj, energies%e_sicdc,&
-&     istep,inonsc, dtset%iscf,mpi_enreg%me_wvl,dtset%natom,&
-&     nfftf,mpi_enreg%nproc_wvl,dtset%nspden,&
-&     raux,do_scf,energies%e_xcdc,wvl,wvlbigdft,xcart,strsxc)
 
    else
      do ii=1, dtset%nline
-!      Direc minimization technique: no diagonalization
-       call wvl_psitohpsi(dtset%diemix,energies%e_exactX,energies%e_xc,energies%e_hartree,&
-&       energies%e_kinetic, energies%e_localpsp, eproj, energies%e_sicdc,&
-&       istep,ii, dtset%iscf,mpi_enreg%me_wvl,dtset%natom,&
-&       nfftf,mpi_enreg%nproc_wvl,dtset%nspden,&
-&       raux,do_scf,energies%e_xcdc,wvl,wvlbigdft,xcart,strsxc)
-
-!      eproj: output of wvl_psitohpsi. copy to energies object:
-       if(dtset%usepaw==1) energies%e_paw=eproj
-       if(dtset%usepaw==0) energies%e_nonlocalpsp=eproj
-!
-       !call wvl_hpsitopsi(cprj_ptr,dtset, energies, ii,mcprj_local, mpi_enreg, &
-       call wvl_hpsitopsi(cprj,dtset, energies, ii,mcprj_local, mpi_enreg, &
-&       residm,wvl,xcart)
-
+!      Direct minimization technique: no diagonalization
+       call wvl_psitohpsi(dtset%diemix,eexctx,exc,eh,ekin,eloc,enl,esicdc,&
+&                         istep,ii,iscf_,mpi_enreg%me_wvl,dtset%natom,&
+&                         nfftf,mpi_enreg%nproc_wvl,dtset%nspden,&
+&                         dum,do_scf,evxc,wvl,wvlbigdft,xcart,strsxc)
+       call wvl_hpsitopsi(cprj,dtset,energies,ii,mcprj_local,mpi_enreg, &
+&                         residm,wvl,xcart)
        if(residm<dtset%tolwfr) exit !Exit loop if converged
-
      end do
+   end if
+
+!  Update energies depending on new WF
+   energies%e_kinetic=ekin
+   energies%e_nonlocalpsp=enl
+   energies%e_exactX=eexctx
+   energies%e_sicdc=esicdc
+
+!  Eventually update energies depending on density
+   if (dtset%iscf<10) then
+     energies%e_localpsp=eloc
+      energies%e_hartree=eh
+      energies%e_xc=exc ; energies%e_xcdc=evxc
+   else if (nnsclo_now==0) then
+     energies%e_localpsp=eloc
+   end if
+
+!  End of nscf iterations
+   if (do_last_ortho) then
+!    !Don't update energies (nscf cycle has been done); just recompute potential
+     inonsc=nnsclo_now;if (nnsclo_now==0) inonsc=dtset%nline
+     call wvl_psitohpsi(dtset%diemix,eexctx,exc,eh,ekin,eloc,enl,esicdc,&
+&                       istep,inonsc,iscf_,mpi_enreg%me_wvl,dtset%natom,&
+&                       nfftf,mpi_enreg%nproc_wvl,dtset%nspden,&
+&                       dum,do_scf,evxc,wvl,wvlbigdft,xcart,strsxc)
    end if
 
    DBG_EXIT("COLL")
@@ -1810,10 +1826,10 @@ subroutine wvl_nscf_loop()
 !! FUNCTION
 !!  Non-self-consistent field cycle in Wavelets
 !!  It follows the BigDFT scheme.
-!!  See also "wvl_nscf_loop.F9P"
+!!  See also "wvl_nscf_loop"
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2012-2016 ABINIT group (T. Rangel, D. Caliste)
+!!  Copyright (C) 2012-2017 ABINIT group (T. Rangel, D. Caliste)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1875,30 +1891,47 @@ subroutine wvl_nscf_loop_bigdft()
 ! type(pawcprj_type),dimension(dtset%natom,mcprj),intent(out)::cprj
 
 !Local variables-------------------------------
- logical,parameter::wvlbigdft=.true.
- logical,parameter::do_scf=.false. !do not do a SCF cycle
  integer :: inonsc
+ integer,parameter :: iscf_=-1       !do not do a SCF cycle
+ logical,parameter :: do_scf=.false. !do not do a SCF cycle
+ logical,parameter :: wvlbigdft=.true.
+ real(dp) :: dum,eexctx,eh,ekin,eloc,enl,esicdc,evxc,exc
 
 ! *************************************************************************
 
    DBG_ENTER("COLL")
 
-!  This loop is for diaganolisation scheme.
-   do inonsc = 1, nnsclo_now - 1, 1
-   !call wvl_hpsitopsi(cprj_ptr, dtset,energies, inonsc, mcprj_local,mpi_enreg,&
-     call wvl_hpsitopsi(cprj, dtset,energies, inonsc, mcprj_local,mpi_enreg,&
-&     residm, wvl,xcart)
-     call wvl_psitohpsi(dtset%diemix, energies%e_exactX, energies%e_xc, &
-&     energies%e_hartree, energies%e_kinetic, energies%e_localpsp, &
-&     energies%e_nonlocalpsp, energies%e_sicdc, istep, inonsc, dtset%iscf, &
-&     mpi_enreg%me_wvl, dtset%natom, nfftf, mpi_enreg%nproc_wvl,&
-&     dtset%nspden, nres2, do_scf,energies%e_xcdc, wvl, wvlbigdft,xcart, strsxc)
-   end do
+   call wvl_hpsitopsi(cprj,dtset, energies, istep, mcprj_local,mpi_enreg, &
+&                     residm, wvl,xcart)
 
-   if(nnsclo_now<=1) then
-   !call wvl_hpsitopsi(cprj_ptr,dtset, energies, istep, mcprj_local,mpi_enreg, &
-     call wvl_hpsitopsi(cprj,dtset, energies, istep, mcprj_local,mpi_enreg, &
-&     residm, wvl,xcart)
+   if (nnsclo_now>2) then
+     do inonsc = 2, nnsclo_now-1
+       call wvl_psitohpsi(dtset%diemix, energies%e_exactX, energies%e_xc, &
+&            energies%e_hartree, energies%e_kinetic, energies%e_localpsp, &
+&            energies%e_nonlocalpsp, energies%e_sicdc, istep, inonsc, iscf_, &
+&           mpi_enreg%me_wvl, dtset%natom, nfftf, mpi_enreg%nproc_wvl,&
+&            dtset%nspden, nres2, do_scf,energies%e_xcdc, &
+&            wvl, wvlbigdft, xcart, strsxc)
+       call wvl_hpsitopsi(cprj,dtset, energies, inonsc, mcprj_local,mpi_enreg, &
+&                         residm, wvl,xcart)
+     end do
+   end if
+
+!  End of nscf iterations
+   if (do_last_ortho.and.nnsclo_now<=1) then
+!    !Don't update energies (nscf cycle has been done); just recompute potential
+     call wvl_psitohpsi(dtset%diemix,eexctx,exc,eh,ekin,eloc,enl,esicdc, &
+&          istep, 1, iscf_, mpi_enreg%me_wvl, dtset%natom, nfftf, &
+&          mpi_enreg%nproc_wvl,dtset%nspden, nres2, do_scf,evxc, &
+&          wvl, wvlbigdft, xcart, strsxc)
+   else if (do_last_ortho.and.nnsclo_now>1) then
+!    !Update energies and potential (nscf cycles are not finished)
+     call wvl_psitohpsi(dtset%diemix, energies%e_exactX, energies%e_xc, &
+&          energies%e_hartree,energies%e_kinetic, energies%e_localpsp, &
+&          energies%e_nonlocalpsp, energies%e_sicdc, istep, nnsclo_now, iscf_, &
+&          mpi_enreg%me_wvl, dtset%natom, nfftf, mpi_enreg%nproc_wvl,&
+&          dtset%nspden, nres2, do_scf,energies%e_xcdc, &
+&          wvl, wvlbigdft, xcart, strsxc)
    end if
 
    DBG_EXIT("COLL")
@@ -1914,7 +1947,7 @@ subroutine wvl_nscf_loop_bigdft()
 !!  Computes eigenvalues energy from eigen, occ, kpt, wtk
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2016 ABINIT group (T. Rangel)
+!!  Copyright (C) 2013-2017 ABINIT group (T. Rangel)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1998,7 +2031,7 @@ subroutine e_eigen(eigen,e_eigenvalues,mband,nband,nkpt,nsppol,occ,wtk)
 !!  Computes occupations for the wavelet case
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2016 ABINIT group (T. Rangel)
+!!  Copyright (C) 2013-2017 ABINIT group (T. Rangel)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -2069,7 +2102,7 @@ subroutine wvl_occ()
 !!  Using BigDFT routines
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2016 ABINIT group (D.Caliste, T. Rangel)
+!!  Copyright (C) 2013-2017 ABINIT group (D.Caliste, T. Rangel)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -2138,7 +2171,7 @@ subroutine wvl_occ_bigdft()
 !!  Using BigDFT routines
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2016 ABINIT group (D.Caliste, T. Rangel)
+!!  Copyright (C) 2013-2017 ABINIT group (D.Caliste, T. Rangel)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .

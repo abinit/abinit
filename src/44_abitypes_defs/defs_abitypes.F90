@@ -30,7 +30,7 @@
 !! * macro_uj_type : TO BE COMPLETED
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2016 ABINIT group (XG)
+!! Copyright (C) 2001-2017 ABINIT group (XG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -188,6 +188,7 @@ type dataset_type
  integer :: cineb_start
  integer :: cgtyphf
  integer :: delayperm
+ integer :: diismemory
  integer :: dmatpuopt
  integer :: dmatudiag
  integer :: dmft_dc
@@ -212,6 +213,7 @@ type dataset_type
  integer :: dmftctqmc_mov
  integer :: dmftctqmc_mrka
  integer :: dmftctqmc_order
+ integer :: dmftctqmc_triqs_nleg
  integer :: dmftqmc_l
  integer :: dmftqmc_seed
  integer :: dmftqmc_therm
@@ -363,6 +365,7 @@ type dataset_type
  integer :: natsph
  integer :: natsph_extra
  integer :: natvshift
+ integer :: nbandhf
  integer :: nbandkss
  integer :: nbdblock
  integer :: nbdbuf
@@ -378,11 +381,9 @@ type dataset_type
  integer :: nfreqim
  integer :: nfreqre
  integer :: nfreqsp
- integer :: diismemory
  integer :: nimage
- integer :: nbandhf
- integer :: nkptgw
  integer :: nkpt
+ integer :: nkptgw
  integer :: nkpthf
  integer :: nline
  integer :: nnsclo
@@ -422,6 +423,7 @@ type dataset_type
  integer :: ntypat
  integer :: ntyppure
  integer :: nwfshist
+ integer :: nzchempot
  integer :: occopt
  integer :: optcell
  integer :: optdriver
@@ -456,6 +458,7 @@ type dataset_type
  integer :: macro_uj
  integer :: pawujat
  integer :: pawxcdev
+ integer :: pimd_constraint
  integer :: pitransform
  integer :: plowan_bandi
  integer :: plowan_bandf
@@ -477,6 +480,7 @@ type dataset_type
  integer :: prtdipole
  integer :: prtdos
  integer :: prtdosm
+ integer :: prtebands=1
  integer :: prtefg
  integer :: prteig
  integer :: prtelf
@@ -494,6 +498,8 @@ type dataset_type
  integer :: prtpmp
  integer :: prtposcar
  integer :: prtphdos
+ integer :: prtphbands=1
+ integer :: prtphsurf=0
  integer :: prtpot
  integer :: prtpsps=0
  integer :: prtspcur
@@ -556,11 +562,11 @@ type dataset_type
  integer :: usepawu
  integer :: usepotzero
  integer :: userec
- integer :: useria
- integer :: userib
- integer :: useric
- integer :: userid
- integer :: userie
+ integer :: useria=0
+ integer :: userib=0
+ integer :: useric=0
+ integer :: userid=0
+ integer :: userie=0
  integer :: usewvl
  integer :: usexcnhat_orig
  integer :: useylm
@@ -655,6 +661,7 @@ type dataset_type
  real(dp) :: diemixmag
  real(dp) :: dilatmx
  real(dp) :: dmft_mxsf
+ real(dp) :: dmft_tolfreq
  real(dp) :: dmft_tollc
  real(dp) :: dmftqmc_n
  real(dp) :: dosdeltae
@@ -682,6 +689,7 @@ type dataset_type
  real(dp) :: fxcartfactor
  real(dp) :: ga_opt_percent
  real(dp) :: gwencomp
+ real(dp) :: gwfockmix
  real(dp) :: gwls_model_parameter         ! Parameter used in modelization of dielectric function
  real(dp) :: gwls_second_model_parameter  ! another Parameter used in modelization of dielectric function
  real(dp) :: gw_toldfeig
@@ -704,6 +712,7 @@ type dataset_type
  real(dp) :: postoldfe
  real(dp) :: postoldff
  real(dp) :: ppmfrq
+ real(dp) :: pw_unbal_thresh
  real(dp) :: ratsph_extra
  real(dp) :: recrcut
  real(dp) :: recefermi
@@ -735,11 +744,11 @@ type dataset_type
  real(dp) :: tolwfr
  real(dp) :: tphysel
  real(dp) :: tsmear
- real(dp) :: userra
- real(dp) :: userrb
- real(dp) :: userrc
- real(dp) :: userrd
- real(dp) :: userre
+ real(dp) :: userra=zero
+ real(dp) :: userrb=zero
+ real(dp) :: userrc=zero
+ real(dp) :: userrd=zero
+ real(dp) :: userre=zero
  real(dp) :: vacwidth
  real(dp) :: vdw_tol
  real(dp) :: vdw_tol_3bt
@@ -796,6 +805,7 @@ type dataset_type
  real(dp), allocatable :: amu_orig(:,:)     !SET2NULL  ! amu(ntypat,nimage)
  real(dp), allocatable :: atvshift(:,:,:)   !SET2NULL  ! atvshift(16,nsppol,natom)
  real(dp), allocatable :: cd_imfrqs(:)      !SET2NULL  ! cd_imfrqs(cd_customnimfrqs)
+ real(dp), allocatable :: chempot(:,:,:)    !SET2NULL  ! chempot(3,nzchempot,ntypat)
  real(dp), allocatable :: corecs(:)         !SET2NULL  ! corecs(ntypat)
  real(dp), allocatable :: densty(:,:)       !SET2NULL  ! densty(ntypat,4)
  real(dp), allocatable :: dmatpawu(:,:,:,:,:) !SET2NULL  ! dmatpawu(2*lpawu+1,2*lpawu+1,nsppol*nspinor,natpu,nimage)
@@ -868,10 +878,10 @@ type dataset_type
 
 !EPH variables
 ! ifc variables
- integer :: asr 
+ integer :: asr
  integer :: dipdip
  integer :: chneut
- integer :: symdynmat 
+ integer :: symdynmat
 
 ! Phonon variables.
  integer :: ph_ndivsm    ! =20
@@ -891,7 +901,7 @@ type dataset_type
  real(dp) :: eph_fsmear != 0.01
  real(dp) :: eph_fsewin != 0.04
  integer :: eph_ngqpt_fine(3)
- integer :: eph_transport 
+ integer :: eph_transport
 
  integer :: ph_intmeth
  real(dp) :: ph_wstep
@@ -900,9 +910,13 @@ type dataset_type
  real(dp) :: ddb_shiftq(3)
 !END EPH
 
+ integer :: ndivsm=0
+ integer :: nkpath=0
+ real(dp) :: einterp(4)=zero
+ real(dp),allocatable :: kptbounds(:,:)
+
  end type dataset_type
 !!***
-
 
 !----------------------------------------------------------------------
 
@@ -1115,6 +1129,9 @@ type dataset_type
 
    integer, allocatable :: my_kpttab(:)
     ! Indicates the correspondence between the ikpt and ikpt_this_proc
+
+   real(dp) :: pw_unbal_thresh
+    !Threshold (in %) activating the plane-wave load balancing process (see kpgsph routine)
 
 ! ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ! This is for the parallelisation over kpt/nsppol in the Berry Phase case
@@ -1584,10 +1601,10 @@ type dataset_type
   integer :: nwvlarr(2)
   ! nwvlarr(2) array holding the number of wavelets for each resolution.
 
-  integer :: kptrlatt_orig(3,3)   
+  integer :: kptrlatt_orig(3,3)
   ! Original kptrlatt
 
-  integer :: kptrlatt(3,3)        
+  integer :: kptrlatt(3,3)
   ! kptrlatt after inkpts.
 
   integer, allocatable :: istwfk(:)
@@ -1638,13 +1655,13 @@ type dataset_type
   real(dp), allocatable :: wtk(:)
   ! weight of kpoints wtk(nkpt)
 
-  real(dp),allocatable :: shiftk_orig(:,:)   
+  real(dp),allocatable :: shiftk_orig(:,:)
   ! original shifts given in input (changed in inkpts).
 
-  real(dp),allocatable :: shiftk(:,:)        
+  real(dp),allocatable :: shiftk(:,:)
   ! shiftk(3,nshiftk), shiftks after inkpts
 
-  real(dp),allocatable :: amu(:)             
+  real(dp),allocatable :: amu(:)
   ! amu(ntypat) ! EVOLVING variable
 
   real(dp), allocatable :: xred(:,:)
@@ -1726,6 +1743,7 @@ type dataset_type
     integer :: nsym
     integer :: ntypalch
     integer :: ntypat
+    integer :: nzchempot
 
  end type ab_dimensions
 !!***

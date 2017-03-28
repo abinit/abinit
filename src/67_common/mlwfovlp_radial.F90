@@ -10,7 +10,7 @@
 !! Schrodinger equation as it is explained in Table 3.3 of the Wannier90 user guide.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2016 ABINIT group (trangel,drh)
+!!  Copyright (C) 2008-2017 ABINIT group (trangel,drh)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -55,12 +55,12 @@ subroutine mlwfovlp_radial(alpha,lmax,lmax2,radial,rvalue,xx)
  use m_profiling_abi
 
  use m_numeric_tools,   only : simpson_int
+ use m_special_funcs,   only : besjm
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'mlwfovlp_radial'
- use interfaces_32_util
 !End of the abilint section
 
  implicit none

@@ -9,7 +9,7 @@
 !! Eventually compute xc kernel (if option=-2, 2, 3, 10 or 12).
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (DCA, XG, GMR, MF, GZ, DRH, MT)
+!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR, MF, GZ, DRH, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -190,13 +190,12 @@
 !!   for more details about notations please see pdf in /doc/theory/MGGA/
 !!
 !! PARENTS
-!!      afterscfloop,calc_vhxc_me,cvxclda,energy,kxc_alda,nonlinear
-!!      nres2vres,odamix,prcref,prcref_PMA,prctfvw2,respfn,rhotov,scfcv,setvtr
-!!      xc_kernel,xc_kernel_ADA
+!!      calc_vhxc_me,energy,hybrid_corr,m_kxc,nonlinear,nres2vres,odamix,prcref
+!!      prcref_PMA,respfn,rhotov,scfcv,setvtr,xchybrid_ncpp_cc
 !!
 !! CHILDREN
-!!      dotprod_vn,drivexc_main,hartre,leave_new,mean_fftr,metric,mkdenpos,size_dvxc
-!!      timab,wrtout,xcden,xcmult,xcpositron,xcpot,xmpi_sum
+!!      dotprod_vn,drivexc_main,hartre,mean_fftr,metric,mkdenpos,size_dvxc
+!!      timab,xc_vdw_aggregate,xcden,xcmult,xcpositron,xcpot,xctfw,xmpi_sum
 !!
 !! SOURCE
 

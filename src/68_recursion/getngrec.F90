@@ -10,7 +10,7 @@
 !!     - ngfft (the initial fft box) is the maximum fft box
 !! 
 !! COPYRIGHT
-!! Copyright (C) 2008-2016 ABINIT group ( ).
+!! Copyright (C) 2008-2017 ABINIT group ( ).
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -46,16 +46,15 @@
 
 subroutine getngrec(ngfft,rmet,ngfftrec,nfftrec,recrcut,delta,tronc)
 
-use m_profiling_abi
-
-use defs_basis
+ use defs_basis
+ use m_profiling_abi
+ use m_sort
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'getngrec'
  use interfaces_18_timing
- use interfaces_28_numeric_noabirule
 !End of the abilint section
 
 implicit none
@@ -81,16 +80,6 @@ integer,allocatable :: iperm(:),srch(:)
 real(dp) :: tsec(2)
 real(dp) :: inf_rmet(3,3)
 ! *************************************************************************
-
-!Statement functions are obsolete
-!dsq(ii,jj,kk)=sqrt(&
-!& inf_rmet(1,1)*dble(ii**2)&
-!& +inf_rmet(2,2)*dble(jj**2)&
-!& +inf_rmet(3,3)*dble(kk**2)&
-!& +two*(inf_rmet(1,2)*dble(ii*jj)&
-!& +inf_rmet(2,3)*dble(jj*kk)&
-!& +inf_rmet(3,1)*dble(kk*ii)))
-
 
  call timab(602,1,tsec)
 
@@ -336,9 +325,9 @@ real(dp) :: inf_rmet(3,3)
 #define ABI_FUNC 'dsq_rec'
 !End of the abilint section
 
-   integer :: ii,jj,kk
    real(dp) :: dsq_rec
-   real(dp) :: inf_rmet(3,3)
+   integer,intent(in) :: ii,jj,kk
+   real(dp),intent(in) :: inf_rmet(3,3)
    dsq_rec=sqrt(&
 &   inf_rmet(1,1)*dble(ii**2)&
 &   +inf_rmet(2,2)*dble(jj**2)&

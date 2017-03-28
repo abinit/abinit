@@ -30,7 +30,7 @@
 !! * pspheader_type : for norm-conserving pseudopotentials, the header of the file
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2016 ABINIT group (XG)
+!! Copyright (C) 2001-2017 ABINIT group (XG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -583,7 +583,7 @@ module defs_datatypes
   integer :: lmax       ! maximum l quantum number (-1 if only local)
                         ! Example : s only       -> lmax=0
                         !           s and p      -> lmax=1
-                        !           d only       -> lmax=2
+                        !           s,p,d        -> lmax=2
 
   integer :: pspcod     
     ! code number of the pseudopotential
@@ -598,7 +598,7 @@ module defs_datatypes
     ! spin-orbit characteristics
     ! 0 if pseudo does not support SOC, 1 or 2 if SOC terms are available in the pp file.
     ! Note that one could have a pseudo with SOC terms but ignore the SOC contribution
-    ! For example, it's possible to use npsinor=2 and set so_psp to 0 in the input file
+    ! For example, it's possible to use nspinor=2 and set so_psp to 0 in the input file
     ! or perform a run with nspinor=1 with pseudos containing SOC terms.
 
   integer :: usewvl

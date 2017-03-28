@@ -10,7 +10,7 @@
 !! for a merging utility.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2016 ABINIT group (XG,MT)
+!! Copyright (C) 1999-2017 ABINIT group (XG,MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -154,7 +154,7 @@ subroutine outddbnc (dtfil, dtset, hdr0, psps, natom, mpert, rprimd, xred, qpt, 
  ! ------------------------------
  ! Write crystal info
  ! ------------------------------
- call crystal_init(Crystal, dtset%spgroup, dtset%natom, dtset%npsp, psps%ntypat, &
+ call crystal_init(dtset%amu_orig(:,1),Crystal, dtset%spgroup, dtset%natom, dtset%npsp, psps%ntypat, &
 & dtset%nsym, rprimd, dtset%typat, xred, dtset%ziontypat, dtset%znucl, 1, &
 & dtset%nspden==2.and.dtset%nsppol==1, .false., hdr0%title, &
 & dtset%symrel, dtset%tnons, dtset%symafm)

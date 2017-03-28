@@ -99,6 +99,7 @@ variables to be used in the main input file of the abinit code.
  <a href="#gwcalctyp">gwcalctyp</a>&nbsp;&nbsp;
  <a href="#gwcomp">gwcomp</a>&nbsp;&nbsp;
  <a href="#gwencomp">gwencomp</a>&nbsp;&nbsp;
+ <a href="#gwfockmix">gwfockmix</a>&nbsp;&nbsp;
  <a href="#gwgamma">gwgamma</a>&nbsp;&nbsp;
  <a href="#gwls_band_index">gwls_band_index</a>&nbsp;&nbsp;
  <a href="#gwls_correlation">gwls_correlation</a>&nbsp;&nbsp;
@@ -1680,7 +1681,6 @@ gw_freqsp         -0.5  -0.1  0.0  1.0  10.0 eV
  If <a href="vargw.html#nfreqsp">nfreqsp</a> is not equal to
 <a href="vargw.html#gw_customnfreqsp">gw_customnfreqsp</a> a warning will be issued.
 </p>
-
 </font>
 
 <br><br><br><br><a href=#top>Go to the top</a>
@@ -2287,6 +2287,23 @@ completeness and make the convergence against the number of bands much faster.
 <B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
 
 
+<br><font id="title"><a name="gwfockmix">gwfockmix</a></font>
+<br><font id="definition">Mnemonics: GW FOCK exchange MIXing parameter</font>
+<br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#gw">GW</a></font>
+<br><font id="vartype">Variable type: real</font>
+<br><font id="default">Default is 0.25</font>
+<br><br><font id="requires">
+Only relevant if <a href="vargs.html#optdriver">optdriver</a>=4, <a href="vargw.html#gwcalctyp">gwcalctyp</a> = 1x5 (HSE) or 2x5 (PBE0).
+</font>
+<br><font id="text">
+<p>
+Mixing parameter of Fock exchange for PBE0 and HSE hybrid-functional calculations via the GW self-energy subroutine. <b>gwfockmix</b> ranges from 0 (essentially PBE) to 1.
+</font>
+
+<br><br><br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
+
+
 <br><font id="title"><a name="gwgamma">gwgamma</a></font>
 <br><font id="definition">Mnemonics: GW Gamma</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#gw">GW</a></font>
@@ -2307,6 +2324,10 @@ Not available for PAW calculations.
 </p>
 <p>
 <b>gwgamma</b>=-4 activates the bootstrap kernel of Sharma et al. [Phys. Rev. Lett. 107, 186401 (2011)] in the test-charge-test-charge dielectric function [cf. Chen and Pasquarello, Phys. Rev. B 92, 041115(R) (2015)]. A cheaper one-shot variant can be achieved with <b>gwgamma</b>=-6 using only the head of the kernel.
+</p>
+<p>
+<b>gwgamma</b>=-8 uses the RPA bootstrap-like kernel (one-shot) [Phys. Rev.  Lett. 115, 137402 (2015), ibid. 114, 146402 (2015)].
+</p>
 </p>
 </font>
 
@@ -3556,7 +3577,6 @@ Only relevant if <a href="vargs.html#optdriver">optdriver</a>==3 and <a href="va
 When a screening calculation (<a href="vargs.html#optdriver">optdriver</a>==3) uses a spectral representation of the irreducible polarizability in which
 the delta function is replaced by the gaussian approximant (<a href="vargw.html#spmeth">spmeth</a>==2), the standard deviation of the gaussian
 is given by <b>spbroad</b>.
-
 </font>
 
 <br><br><br><br><a href=#top>Go to the top</a>

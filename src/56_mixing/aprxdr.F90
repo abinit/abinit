@@ -10,7 +10,7 @@
 !! Eq.(11) in PRB54, 4383 (1996).
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (XG)
+!! Copyright (C) 1998-2017 ABINIT group (XG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

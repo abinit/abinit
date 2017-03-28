@@ -1,0 +1,15 @@
+This directory, v8, contains tests which
+are related to the development of the various development in
+version 8.x.x of Abinit
+
+Please, see the README file in the tests directory (above this one) to get help.
+
+
+------------------------------------------------------------------
+
+* Tests 1-40 concern ground state 
+
+* Tests 41-79 concern response functions
+
+* Tests 80-99 concern GW/BSE
+------------------------------------------------------------------

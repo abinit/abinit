@@ -8,7 +8,7 @@
 !! This routine sets up the full FS kpt grid by symmetry
 !!
 !! COPYRIGHT
-!! Copyright (C) 2004-2016 ABINIT group (MVer)
+!! Copyright (C) 2004-2017 ABINIT group (MVer)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -53,6 +53,7 @@ subroutine mkFSkgrid (elph_k, nsym, symrec, timrev)
  use m_kptrank
  use m_profiling_abi
  use m_errors
+ use m_sort
 
  use m_numeric_tools,   only : wrap2_pmhalf
 
@@ -61,7 +62,6 @@ subroutine mkFSkgrid (elph_k, nsym, symrec, timrev)
 #undef ABI_FUNC
 #define ABI_FUNC 'mkFSkgrid'
  use interfaces_14_hidewrite
- use interfaces_28_numeric_noabirule
 !End of the abilint section
 
  implicit none

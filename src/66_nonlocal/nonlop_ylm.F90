@@ -23,7 +23,7 @@
 !! * This routine uses spherical harmonics Ylm to express Vnl.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (MT)
+!! Copyright (C) 1998-2017 ABINIT group (MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -329,12 +329,12 @@
  real(dp),intent(in) :: phkxredin(2,natom),phkxredout(2,natom)
  real(dp),intent(in) :: sij(dimenl1,ntypat*((paw_opt+1)/3))
  real(dp),intent(inout) :: ph3din(2,npwin,matblk),ph3dout(2,npwout,matblk)
- real(dp),intent(inout) :: vectin(2,npwin*nspinor)
- real(dp),intent(out) :: enlout(nnlout)
- real(dp),intent(out) :: svectout(2,npwout*nspinor*(paw_opt/3))
- real(dp),intent(inout) :: vectout (2,npwout*nspinor)
- type(pawcprj_type),intent(inout) :: cprjin(natom,nspinor*((cpopt+5)/5))
- type(pawcprj_type),optional,intent(in) :: cprjin_left(natom,nspinor)
+ real(dp),intent(inout) :: vectin(:,:)
+ real(dp),intent(out) :: enlout(:)
+ real(dp),intent(out) :: svectout(:,:)
+ real(dp),intent(inout) :: vectout (:,:)
+ type(pawcprj_type),intent(inout) :: cprjin(:,:)
+ type(pawcprj_type),optional,intent(in) :: cprjin_left(:,:)
 
 !Local variables-------------------------------
 !scalars
@@ -645,7 +645,9 @@
 
 !      Prepare the phase factors if they were not already computed
        if (nloalg(2)<=0) then
+!write(87,*) "coucou0",ia3,ia4
          call ph1d3d(ia3,ia4,kgin,matblk,natom,npwin,n1,n2,n3,phkxredin,ph1d,ph3din)
+!write(87,*) "ph3din",ph3din(1,487,:)
        end if
 
 !      Allocate memory for projected scalars
@@ -705,14 +707,15 @@
        if (cpopt==4.and.ndgxdt>0) then
          ndgxdt_stored = cprjin(1,1)%ncpgr
          ishift=0
-         if (choice==2.and.ndgxdt_stored>ndgxdt) ishift=ndgxdt_stored-ndgxdt
+         if ((choice==2).and.(ndgxdt_stored>ndgxdt).and.(signs==2)) ishift=idir-ndgxdt
+         if (choice==2.and.(ndgxdt_stored>ndgxdt).and.(signs==1)) ishift=ndgxdt_stored-ndgxdt
          if(cplex == 2) then
            do ispinor=1,nspinor
              do ia=1,nincat
                if (ndgxdt_stored==ndgxdt.or.(ndgxdt_stored>ndgxdt.and.choice==2)) then
                  dgxdt(1:2,1:ndgxdt,1:nlmn,ia,ispinor)=cprjin(iatm+ia,ispinor)%dcp(1:2,1+ishift:ndgxdt+ishift,1:nlmn)
                else if (signs==2.and.ndgxdt_stored==3) then
-                 if (choice==5) then ! ndgxdt=1
+                 if (choice==5.or.choice==51.or.choice==52) then ! ndgxdt=1
                    dgxdt(1:2,1,1:nlmn,ia,ispinor)=cprjin(iatm+ia,ispinor)%dcp(1:2,idir,1:nlmn)
                  else if (choice==8) then ! ndgxdt=2
                    idir1=(idir-1)/3+1; idir2=mod((idir-1),3)+1
@@ -735,7 +738,7 @@
                      dgxdt(1,ii,ilmn,ia,ispinor)=cprjin(iatm+ia,ispinor)%dcp(ic,ii+ishift,ilmn)
                    end do
                  else if (signs==2.and.ndgxdt_stored==3) then
-                   if (choice==5) then ! ndgxdt=1
+                   if (choice==5.or.choice==51.or.choice==52) then ! ndgxdt=1
                      dgxdt(1,1,ilmn,ia,ispinor)=cprjin(iatm+ia,ispinor)%dcp(cplex_dgxdt(1),idir,ilmn)
                    else if (choice==8) then ! ndgxdt=2
                      idir1=(idir-1)/3+1; idir2=mod((idir-1),3)+1

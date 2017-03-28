@@ -14,7 +14,7 @@
 !! Returns indirect indexing list indkk.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (DCA, XG, GMR)
+!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -29,7 +29,7 @@
 !!  sppoldbl=if 1, no spin-polarisation doubling
 !!           if 2, spin-polarisation doubling using symafm
 !!  symafm(nsym)=(anti)ferromagnetic part of symmetry operations
-!!  symmat(3,3,nsym)=symmetry operations (symrel or symrec, depending on 
+!!  symmat(3,3,nsym)=symmetry operations (symrel or symrec, depending on
 !!                   value of use_symrec
 !!  timrev=1 if the use of time-reversal is allowed; 0 otherwise
 !!  use_symrec :: if present and true, symmat assumed to be symrec, otherwise assumed to be symrel (default)
@@ -51,14 +51,14 @@
 !! NOTES
 !!  The tolerances tol12 and tol8 aims at giving a machine-independent ordering.
 !!  (this trick is used in bonds.f, listkk.f, prtrhomxmn.f and rsiaf9.f)
-!!  The tolerance tol12 is used for each component of the k vectors, 
+!!  The tolerance tol12 is used for each component of the k vectors,
 !!  and for the length of the vectors
 !!  while the tolerance tol8 is used for the comparison of the squared lengths
 !!  of the separate vectors.
 !!
 !! PARENTS
-!!      initberry,inwffil,m_bz_mesh,m_dvdb,m_ebands,m_fock,m_fstab,m_phgamma
-!!      mlwfovlp_qp
+!!      initberry,inwffil,m_dvdb,m_ebands,m_fock,m_fstab,m_ifc,m_kpts,m_phgamma
+!!      m_sigmaph,mlwfovlp_qp,printbxsf
 !!
 !! CHILDREN
 !!      sort_dp,timab
@@ -78,13 +78,13 @@ subroutine listkk(dksqmax,gmet,indkk,kptns1,kptns2,nkpt1,nkpt2,nsym,&
  use defs_basis
  use m_errors
  use m_profiling_abi
+ use m_sort
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'listkk'
  use interfaces_18_timing
- use interfaces_28_numeric_noabirule
 !End of the abilint section
 
  implicit none
@@ -101,7 +101,6 @@ subroutine listkk(dksqmax,gmet,indkk,kptns1,kptns2,nkpt1,nkpt2,nsym,&
 
 !Local variables-------------------------------
 !scalars
-!integer, save :: counter=0
  integer :: l3,ig1,ig2,ig3,ii,ikpg1,ikpt1,ikpt2,ikpt2_done
  integer :: ilarger,ismaller,itrial
  integer :: isppol,isym,itimrev,jkpt1,jsym,jtime,limit
@@ -113,18 +112,12 @@ subroutine listkk(dksqmax,gmet,indkk,kptns1,kptns2,nkpt1,nkpt2,nsym,&
  integer, allocatable :: isort(:)
  real(dp) :: tsec(2)
  real(dp) :: dk(3),kpg1(3),kpt1a(3),k1(3),k2(3)
-!DEBUG
 !real(dp) :: kasq,ka(3)
-!ENDDEBUG
  real(dp),allocatable :: lkpg1(:),lkpg1_sorted(:)
 
 ! *************************************************************************
 
-!DEBUG
-!write(std_out,*)' listkk : enter, counter= ',counter
-!counter=counter+1
 !write(std_out,*)' listkk : nkpt1,nkpt2,nsym=',nkpt1,nkpt2,nsym
-!ENDDEBUG
  call timab(1021,1,tsec)
 
  if(sppoldbl<1 .or. sppoldbl>2)then
@@ -143,22 +136,18 @@ subroutine listkk(dksqmax,gmet,indkk,kptns1,kptns2,nkpt1,nkpt2,nsym,&
  if(usesym==0)nsym_used=1
  if(usesym==0)timrev_used=0
 
-!Precompute the length of the kpt1 vectors, also taking into account 
+!Precompute the length of the kpt1 vectors, also taking into account
 !possible umpklapp vectors
  limit=1 ; l3 = (2*limit+1)**3
  ABI_ALLOCATE(lkpg1,(l3*nkpt1))
- ABI_ALLOCATE(lkpg1_sorted,(l3*nkpt1)) 
- ABI_ALLOCATE(isort,(l3*nkpt1)) 
-!DEBUG
+ ABI_ALLOCATE(lkpg1_sorted,(l3*nkpt1))
+ ABI_ALLOCATE(isort,(l3*nkpt1))
 !write(std_out,*)' List of kpt1 vectors '
 !write(std_out,*)' Length of the kpt1 vectors :'
-!ENDDEBUG
 
  do ikpt1=1,nkpt1
    k1(:)=kptns1(:,ikpt1)
-!  DEBUG
 !  write(std_out,*)ikpt1,k1(:)
-!  ENDDEBUG
    k1int(:)=nint(k1(:)+tol12)
    k1(:)=k1(:)-k1int(:)
    do ig1=-limit,limit
@@ -175,9 +164,7 @@ subroutine listkk(dksqmax,gmet,indkk,kptns1,kptns2,nkpt1,nkpt2,nsym,&
 &         gmet(3,2)*kpg1(3)*kpg1(2)+gmet(3,1)*kpg1(3)*kpg1(1)))
          lkpg1_sorted(ikpg1)=lkpg1(ikpg1)
          isort(ikpg1)=ikpg1
-!        DEBUG
 !        write(std_out,*)' ikpt1,ig1,ig2,ig3,lkpg1=',ikpt1,ig1,ig2,ig3,lkpg1(ikpg1)
-!        ENDDEBUG
        end do
      end do
    end do
@@ -189,7 +176,7 @@ subroutine listkk(dksqmax,gmet,indkk,kptns1,kptns2,nkpt1,nkpt2,nsym,&
 !write(std_out,*)' listkk : output list of kpt1 for checking purposes '
 !write(std_out,*)' ii,ikpt1,isort(ii)-l3*(ikpt1-1),lkpg1_sorted(ii),lkpg1(isort(ii)) '
 !do ii=1,l3*nkpt1
-!ikpt1=(isort(ii)-1)/l3+1 
+!ikpt1=(isort(ii)-1)/l3+1
 !write(std_out,*)ii,ikpt1,isort(ii)-l3*(ikpt1-1),lkpg1_sorted(ii),lkpg1(isort(ii))
 !enddo
 !stop
@@ -199,7 +186,7 @@ subroutine listkk(dksqmax,gmet,indkk,kptns1,kptns2,nkpt1,nkpt2,nsym,&
  do isppol=1,sppoldbl
    do ikpt2=1,nkpt2
 
-     ikpt2_done=0 
+     ikpt2_done=0
 !    Precompute the length of the kpt2 vector, with the Umklapp vector such that it is the closest to the Gamma point
      k2(:)=kptns2(:,ikpt2)
      k2int(:)=nint(k2(:)+tol12)
@@ -234,9 +221,7 @@ subroutine listkk(dksqmax,gmet,indkk,kptns1,kptns2,nkpt1,nkpt2,nsym,&
      if(abs(llarger-lk2)<abs(lsmaller-lk2)-tol12)itrial=ilarger
      if(itrial==0)itrial=ilarger
      ismaller=itrial ; ilarger=itrial
-!    DEBUG
 !    write(std_out,*)' listkk : starting search at itrial=',itrial
-!    ENDDEBUG
 
      dksqmn=huge(one)
 
@@ -254,7 +239,7 @@ subroutine listkk(dksqmax,gmet,indkk,kptns1,kptns2,nkpt1,nkpt2,nsym,&
 !      ENDDEBUG
        if(ldiff**2>dksqmn+tol8)exit
 
-!      If this k-point has already been examined in a previous batch, skip it  
+!      If this k-point has already been examined in a previous batch, skip it
 !      First, compute the minimum of the difference of length of the sets of associated vectors thanks to Umklapp vectors
 !      with the target vector
        ikpt1=(isort(itrial)-1)/l3+1
@@ -266,8 +251,11 @@ subroutine listkk(dksqmax,gmet,indkk,kptns1,kptns2,nkpt1,nkpt2,nsym,&
 !      ENDDEBUG
 
        if(min_l > ldiff-tol12)then
-         
+
 !        Now, will examine the trial vector, and the symmetric ones
+!MG FIXME:
+! Here there's a possible problem with the order of symmetries because
+! in symkpt, time-reversal is the innermost loop. This can create inconsistencies in the symmetry tables.
          do itimrev=0,timrev_used
            do isym=1,nsym_used
 
@@ -322,7 +310,7 @@ subroutine listkk(dksqmax,gmet,indkk,kptns1,kptns2,nkpt1,nkpt2,nsym,&
                  ikpt2_done=1
                end if
 
-!              Update in three cases : either if succeeded to have exactly the vector, or the distance is better, 
+!              Update in three cases : either if succeeded to have exactly the vector, or the distance is better,
 !              or the distance is only slightly worsened so select the lowest itimrev, isym or ikpt1, in order to respect previous ordering
                if(  ikpt2_done==1 .or. &
 &               dksq+tol12<dksqmn .or. &
@@ -353,7 +341,7 @@ subroutine listkk(dksqmax,gmet,indkk,kptns1,kptns2,nkpt1,nkpt2,nsym,&
 !                write(std_out,*)' Actual k1sq=',kasq
 !                ENDDEBUG
                end if
-               
+
              end if
              if(ikpt2_done==1)exit
 
@@ -413,11 +401,6 @@ subroutine listkk(dksqmax,gmet,indkk,kptns1,kptns2,nkpt1,nkpt2,nsym,&
  ABI_DEALLOCATE(lkpg1_sorted)
 
  call timab(1021,2,tsec)
-
-!DEBUG
-!write(std_out,*)' listkk : exit '
-!stop
-!ENDDEBUG
 
 end subroutine listkk
 !!***

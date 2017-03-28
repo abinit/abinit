@@ -9,7 +9,7 @@
 !! Also (when installed) symmetrize the different part and their sum.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2000-2016 ABINIT group (XG,MT)
+!! Copyright (C) 2000-2017 ABINIT group (XG,MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -157,7 +157,7 @@ subroutine dfpt_dyfro(atindx1,dyfrnl,dyfrlo,dyfrwf,dyfrxc,dyfr_cplex,dyfr_nondia
 ! *************************************************************************
 
  if(nspden==4)then
-   MSG_WARNING('dfpt_dyfro : under development for nspden=4!')
+   MSG_WARNING('dfpt_dyfro : DFPT with nspden=4 works at the moment just for insulators and norm-conserving psp!')
  end if
 
  n1=ngfft(1); n2=ngfft(2); n3=ngfft(3)

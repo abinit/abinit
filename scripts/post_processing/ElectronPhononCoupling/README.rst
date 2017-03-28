@@ -17,8 +17,9 @@ and the script "ElectronPhononCoupling/scripts/pp-temperature" in your $PATH
 
 requires
 
-    numpy >= 1.8.1
-    mpi4py >= 2.0.0
+    * numpy >= 1.8.1
+    * mpi4py >= 2.0.0
+    * netCDF4 >= 1.2.1
 
 Usage
 -----
@@ -42,8 +43,5 @@ in serial or in parallel with e.g.:
 
     mpirun -n 4 python my_script.py
 
-See the examples in ElectronPhononCoupling/data/inputs_for_tests/
-for how to use this module.
-The generation of the data with Abinit is explained in the
-input file located in ElectronPhononCoupling/data/data_LiF/.
+See the examples in the Examples directory for how to use this module.
 

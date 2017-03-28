@@ -11,7 +11,7 @@
 !! S is the overlap operator between |Cnk> (used for PAW).
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (MT)
+!! Copyright (C) 1998-2017 ABINIT group (MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -121,6 +121,8 @@ subroutine getgsc(cg,cprj,gs_ham,gsc,ibg,icg,igsc,ikpt,isppol,&
 
 !Keep track of total time spent in getgsc:
  call timab(565,1,tsec)
+
+ gsc = zero
 
 !Prepare some data
  ABI_ALLOCATE(cwavef,(2,npw_k*my_nspinor))

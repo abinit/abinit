@@ -10,7 +10,7 @@
 !!  The later quantity is required in case of GW calculations.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2016 ABINIT group (MG)
+!!  Copyright (C) 2008-2017 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -155,6 +155,7 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,gsqcutf_eff,nfftf,ngfftf,&
  integer :: rank,comm,master,nprocs
  integer :: isp1,isp2,iab,nsploop,nkxc,option,n3xccc_,nk3xc,my_nbbp,my_nmels
  real(dp) :: nfftfm1,fact,DijH,enxc_val,enxc_hybrid_val,vxcval_avg,vxcval_hybrid_avg,h0dij,vxc1,vxc1_val,re_p,im_p,dijsigcx
+ real(dp) :: omega ! HSE Fock exchange screening parameter
  logical :: ltest
  character(len=500) :: msg
  type(MPI_type) :: MPI_enreg_seq
@@ -292,6 +293,18 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,gsqcutf_eff,nfftf,ngfftf,&
        call libxc_functionals_end()
      end if
      call libxc_functionals_init(Dtset_dummy%ixc,Dtset_dummy%nspden)
+     if (Dtset_dummy%ixc==-428) then !HSE06
+       if (Dtset_dummy%rcut>tol8) then
+         omega = one/Dtset_dummy%rcut
+         call libxc_functionals_set_hybridparams(hyb_range=omega,hyb_mixing_sr=Dtset_dummy%gwfockmix)
+       else
+         call libxc_functionals_get_hybridparams(hyb_range=omega)
+       end if
+     end if
+     write(msg, '(a, f4.2)') ' Fock fraction = ', Dtset_dummy%gwfockmix
+     call wrtout(std_out,msg,'COLL')
+     write(msg, '(a, f5.2, a)') ' Fock inverse screening length = ', omega, ' (bohr^-1)'
+     call wrtout(std_out,msg,'COLL')
 
      ABI_MALLOC(vxc_val_hybrid,(nfftf,nspden))
 

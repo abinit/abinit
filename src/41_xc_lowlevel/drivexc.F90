@@ -10,7 +10,7 @@
 !! of the XC kernel (the third derivative of the XC energy)
 !!
 !! COPYRIGHT
-!! Copyright (C) 2002-2016 ABINIT group (XG)
+!! Copyright (C) 2002-2017 ABINIT group (XG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -119,11 +119,11 @@
 !!  [fxcT(npts)]=XC free energy of the electron gaz at finite temperature (to be used for plasma systems)
 !!
 !! PARENTS
-!!      pawxc,pawxcsph,rhohxc
+!!      drivexc_main
 !!
 !! CHILDREN
-!!      invcb,leave_new,libxc_functionals_getvxc,wrtout,xchcth,xchelu,xclb
-!!      xcpbe,xcpzca,xcspol,xctetr,xcwign,xcxalp
+!!      invcb,libxc_functionals_getvxc,xchcth,xchelu,xciit,xclb,xcpbe,xcpzca
+!!      xcspol,xctetr,xcwign,xcxalp
 !!
 !! SOURCE
 

@@ -9,7 +9,7 @@
 !! Remember:for each atom, rho_ij=Sum_{n,k} {occ(n,k)*<Cnk|p_i><p_j|Cnk>}
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (FJ, MT)
+!! Copyright (C) 1998-2017 ABINIT group (FJ, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -151,7 +151,7 @@
 !Check if cprj is distributed over bands
  nprocband=(mband/mband_cprj)
  if (paral_kgb==1.and.nprocband/=mpi_enreg%nproc_band) then
-   msg=' mband/mband_cprj must be equal to mband !'
+   msg=' mband/mband_cprj must be equal to nproc_band!'
    MSG_BUG(msg)
  end if
  if (paw_dmft%use_sc_dmft/=0.and.nprocband/=1) then
@@ -322,7 +322,6 @@
 &             nspinor,occup(1),option,pawrhoij_all,usetimerev,wtk_k)
            end if
          end if
-
        end do ! ib1c
      end do ! ib
 

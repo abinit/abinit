@@ -1,16 +1,19 @@
 #!/usr/bin/env python
 #
-# Copyright (C) 2005-2016 ABINIT Group (Yann Pouillon)
+# Copyright (C) 2005-2017 ABINIT Group (Yann Pouillon)
 #
 # This file is part of the ABINIT software package. For license information,
 # please see the COPYING file in the top-level directory of the ABINIT source
 # distribution.
 #
+from __future__ import print_function, division, absolute_import #, unicode_literals
 
-from ConfigParser import ConfigParser,NoOptionError
+try:
+    from ConfigParser import ConfigParser,NoOptionError
+except ImportError:
+    from configparser import ConfigParser,NoOptionError
 from time import gmtime,strftime
 
-import commands
 import os
 import re
 import sys
@@ -64,18 +67,18 @@ my_output  = "src/98_main/Makefile.am"
 # Check if we are in the top of the ABINIT source tree
 if ( not os.path.exists("configure.ac") or
      not os.path.exists("src/98_main/abinit.F90") ):
-  print "%s: You must be in the top of an ABINIT source tree." % my_name
-  print "%s: Aborting now." % my_name
+  print("%s: You must be in the top of an ABINIT source tree." % my_name)
+  print("%s: Aborting now." % my_name)
   sys.exit(1)
 
 # Read config file(s)
 for cnf_file in my_configs.values():
   if ( os.path.exists(cnf_file) ):
     if ( re.search("\.cf$",cnf_file) ):
-      execfile(cnf_file)
+      exec(compile(open(cnf_file).read(), cnf_file, 'exec'))
   else:
-    print "%s: Could not find config file (%s)." % (my_name,cnf_file)
-    print "%s: Aborting now." % my_name
+    print("%s: Could not find config file (%s)." % (my_name,cnf_file))
+    print("%s: Aborting now." % my_name)
     sys.exit(2)
 
 # What time is it?
@@ -100,7 +103,7 @@ inc_list = ""
 # Main binary includes
 cnf_file = "src/98_main/abinit.dir"
 if ( os.path.exists(cnf_file) ):
-  execfile(cnf_file)
+  exec(compile(open(cnf_file).read(), cnf_file, 'exec'))
 else:
   include_dirs = []
 
@@ -271,8 +274,8 @@ if ( ext_print == 1 ):
 
 # Write additional hand-made information
 if ( os.path.exists(add) ):
-  makefile += "\n"+file(add,"r").read()
+  makefile += "\n" + open(add, "rt").read()
 
-mf = file(my_output,"w")
+mf = open(my_output, "wt")
 mf.write(makefile)
 mf.close()

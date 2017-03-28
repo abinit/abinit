@@ -8,7 +8,7 @@
 !! The output eig2nkq is this quantity for the input k points.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2016 ABINIT group (SP,PB,XG)
+!! Copyright (C) 1999-2017 ABINIT group (SP,PB,XG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -547,7 +547,7 @@ subroutine eig2tot(dtfil,xred,psps,pawtab,natom,bdeigrf,clflg,dim_eig2nkq,eigen0
 !  Crystalline structure.
    remove_inv=.false.
    if(dtset%nspden==4 .and. dtset%usedmft==1) remove_inv=.true.
-   call crystal_init(Crystal,dtset%spgroup,dtset%natom,dtset%npsp,psps%ntypat, &
+   call crystal_init(dtset%amu_orig(:,1),Crystal,dtset%spgroup,dtset%natom,dtset%npsp,psps%ntypat, &
 &   dtset%nsym,rprimd,dtset%typat,xred,dtset%ziontypat,dtset%znucl,1,&
 &   dtset%nspden==2.and.dtset%nsppol==1,remove_inv,hdr0%title,&
 &   dtset%symrel,dtset%tnons,dtset%symafm)

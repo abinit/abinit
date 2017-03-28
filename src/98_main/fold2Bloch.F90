@@ -7,7 +7,7 @@
 !! Main routine for the unfolding of the wavefuntion.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2014-2016 ABINIT group (AB)
+!! Copyright (C) 2014-2017 ABINIT group (AB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -89,7 +89,7 @@ character(len=500) :: msg
 #endif
 
  if (xmpi_comm_size(comm) /= 1) then
-   MSG_ERROR("flod2block not programmed for parallel execution.")
+   MSG_ERROR("fold2bloch not programmed for parallel execution.")
  end if
 
  ! Test if the netcdf library supports MPI-IO
@@ -109,7 +109,8 @@ character(len=500) :: msg
  end if
 
  pos=INDEX(fname,"_") 
- read(fname(1:pos-1),*) seedname ! File name root
+ !read(fname(1:pos-1),*) seedname ! File name root
+ write(seedname,'(a)') fname(1:pos-1) 
 !folds=(/1,2,3/)
 
  write(std_out,*) '         '//achar(27)//'[97m ***********************' !print program header in pearl white

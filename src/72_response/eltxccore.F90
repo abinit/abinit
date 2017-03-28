@@ -12,7 +12,7 @@
 !! over the second strain and over all atomic displacements.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (DRH, DCA, XG, GMR)
+!! Copyright (C) 1998-2017 ABINIT group (DRH, DCA, XG, GMR)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -117,11 +117,6 @@ subroutine eltxccore(eltfrxc,is2_in,my_natom,natom,nfft,ntypat,&
  real(dp),allocatable :: d2rm(:,:,:,:)
 
 ! *************************************************************************
-
-!Statement functions are obsolete
-!Define magnitude of cross product of two vectors
-! cross(xx,yy,zz,aa,bb,cc)=&
-!& sqrt((yy*cc-zz*bb)**2+(zz*aa-xx*cc)**2+(xx*bb-yy*aa)**2)
 
 !Compute lengths of cross products for pairs of primitive
 !translation vectors (used in setting index search range below)
@@ -376,8 +371,7 @@ subroutine eltxccore(eltfrxc,is2_in,my_natom,natom,nfft,ntypat,&
  contains
 
    function cross_elt(xx,yy,zz,aa,bb,cc)
-! cross(xx,yy,zz,aa,bb,cc)=&
-!& sqrt((yy*cc-zz*bb)**2+(zz*aa-xx*cc)**2+(xx*bb-yy*aa)**2)
+!Define magnitude of cross product of two vectors
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -385,8 +379,8 @@ subroutine eltxccore(eltfrxc,is2_in,my_natom,natom,nfft,ntypat,&
 #define ABI_FUNC 'cross_elt'
 !End of the abilint section
 
-   real(dp)::cross_elt
-   real(dp) :: xx,yy,zz,aa,bb,cc
+   real(dp) :: cross_elt
+   real(dp),intent(in) :: xx,yy,zz,aa,bb,cc
    cross_elt=sqrt((yy*cc-zz*bb)**2+(zz*aa-xx*cc)**2+(xx*bb-yy*aa)**2)
  end function cross_elt
 

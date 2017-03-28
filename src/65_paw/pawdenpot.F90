@@ -9,7 +9,7 @@
 !! Can also compute first-order densities potentials and second-order energies (RF calculations).
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (FJ, MT)
+!! Copyright (C) 1998-2017 ABINIT group (FJ, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -182,7 +182,7 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
  end if
 
  if (my_natom>0) then
-   if(paw_ij(1)%has_dijhartree==0.and. .not.(ipert==natom+1.or.ipert==natom+10.or.ipert==natom+11)) then
+   if(paw_ij(1)%has_dijhartree==0.and. .not.(ipert==natom+1.or.ipert==natom+10)) then
      msg='dijhartree must be allocated !'
      MSG_BUG(msg)
    end if
@@ -203,7 +203,7 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
      MSG_BUG(msg)
    end if
    if(paw_an(1)%has_vxc==0.and.(option==0.or.option==1).and. &
-&   .not.(ipert==natom+1.or.ipert==natom+10.or.ipert==natom+11)) then
+&   .not.(ipert==natom+1.or.ipert==natom+10)) then
      msg='vxc1 and vxct1 must be allocated !'
      MSG_BUG(msg)
    end if
@@ -238,7 +238,7 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
 & my_natom_ref=my_natom)
 
 !For some perturbations, nothing to do
- if (ipert==natom+1.or.ipert==natom+10.or.ipert==natom+11) then
+ if (ipert==natom+1.or.ipert==natom+10) then
    if (option/=1) then
      epaw=zero;epawdc=zero
    end if
@@ -657,7 +657,7 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
 !  Electron-positron calculation: compute Dij due to fixed particles (elec. or pos. depending on calctype)
    if (ipositron/=0) then
      ABI_ALLOCATE(dij_ep,(cplex*lmn2_size))
-     call pawdijhartree(cplex,dij_ep,nspden,electronpositron%pawrhoij_ep(iatom),pawtab(itypat))
+     call pawdijhartree(paw_ij(iatom)%cplex,dij_ep,nspden,electronpositron%pawrhoij_ep(iatom),pawtab(itypat))
      if (option/=1) then
        do ispden=1,nspdiag
          jrhoij=1
@@ -675,7 +675,7 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
 
 !  Hartree Dij computation
    if (ipositron/=1) then
-     call pawdijhartree(cplex,paw_ij(iatom)%dijhartree,nspden,pawrhoij(iatom),pawtab(itypat))
+     call pawdijhartree(paw_ij(iatom)%cplex,paw_ij(iatom)%dijhartree,nspden,pawrhoij(iatom),pawtab(itypat))
    else
      paw_ij(iatom)%dijhartree(:)=zero
    end if
@@ -852,6 +852,7 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
        paw_ij(iatom)%dijfock(:,:)=dijfock_vv(:,:)+dijfock_cv(:,:)
 
 !      Fock contribution to energy
+
        if (option/=1) then
          if ((cplex==1).or.(ipert==0)) then
            do ispden=1,pawrhoij(iatom)%nspden
@@ -878,6 +879,7 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
            end do
          end if
        end if
+
        ABI_DEALLOCATE(dijfock_vv)
        ABI_DEALLOCATE(dijfock_cv)
 

@@ -1,0 +1,28 @@
+##############################################################################
+#Test for multibinit, just read xml and generate the effective potential into XML file
+##############################################################################
+prt_effpot = 3
+
+n_cell =   2 2 2
+dynamics =  12
+temperature = 1000
+ntime  = 50
+
+## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = multibinit
+#%% test_chain = t07.in,t08.in,t09.in,t10.in,t11.in
+#%% system_xml = t10_sys.xml
+#%% [files]
+#%% files_to_test = 
+#%%   t10.out, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -easy;
+#%%   t10_sys.xml, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -easy
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% authors = A. MARTIN
+#%% keywords = Effective potential, multibinit
+#%% description = 
+#%%   read xml and generate effective potential in XML file
+#%%<END TEST_INFO>

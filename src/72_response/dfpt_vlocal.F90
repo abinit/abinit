@@ -10,7 +10,7 @@
 !! electric field perturbation, the 1st-order local potential vanishes.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2016 ABINIT group (XG,MM)
+!! Copyright (C) 1999-2017 ABINIT group (XG,MM)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -108,24 +108,6 @@ subroutine dfpt_vlocal(atindx,cplex,gmet,gsqcut,idir,ipert,&
  real(dp),allocatable :: work1(:,:)
 
 ! *********************************************************************
-
-!Statement functions are obsolete.
-!Real and imaginary parts of phase--statment functions:
-! phr(x1,y1,x2,y2,x3,y3)=(x1*x2-y1*y2)*x3-(y1*x2+x1*y2)*y3
-! phi(x1,y1,x2,y2,x3,y3)=(x1*x2-y1*y2)*y3+(y1*x2+x1*y2)*x3
-! ph1(nri,ig1,ia)=ph1d(nri,ig1+1+n1+(atindx(ia)-1)*(2*n1+1))
-! ph2(nri,ig2,ia)=ph1d(nri,ig2+1+n2+(atindx(ia)-1)*(2*n2+1)+&
-!& natom*(2*n1+1))
-! ph3(nri,ig3,ia)=ph1d(nri,ig3+1+n3+(atindx(ia)-1)*(2*n3+1)+&
-!& natom*(2*n1+1+2*n2+1))
-! phre(ig1,ig2,ig3,ia)=phr(ph1(re,ig1,ia),ph1(im,ig1,ia),&
-!& ph2(re,ig2,ia),ph2(im,ig2,ia),ph3(re,ig3,ia),ph3(im,ig3,ia))
-! phimag(ig1,ig2,ig3,ia)=phi(ph1(re,ig1,ia),ph1(im,ig1,ia),&
-!& ph2(re,ig2,ia),ph2(im,ig2,ia),ph3(re,ig3,ia),ph3(im,ig3,ia))
-!!
-! gsq(g1,g2,g3)=g1*g1*gmet(1,1)+g2*g2*gmet(2,2)+&
-!& g3*g3*gmet(3,3)+2.0_dp*g1*g2*gmet(1,2)+&
-!& 2.0_dp*g2*g3*gmet(2,3)+2.0_dp*g3*g1*gmet(3,1)
 
  iatom=ipert
 
@@ -252,7 +234,8 @@ subroutine dfpt_vlocal(atindx,cplex,gmet,gsqcut,idir,ipert,&
 #define ABI_FUNC 'phr_vl3'
 !End of the abilint section
 
-   real(dp) :: phr_vl3,x1,x2,x3,y1,y2,y3
+   real(dp) :: phr_vl3
+   real(dp),intent(in) :: x1,x2,x3,y1,y2,y3
    phr_vl3=(x1*x2-y1*y2)*x3-(y1*x2+x1*y2)*y3
  end function phr_vl3
 
@@ -265,7 +248,8 @@ subroutine dfpt_vlocal(atindx,cplex,gmet,gsqcut,idir,ipert,&
 #define ABI_FUNC 'phi_vl3'
 !End of the abilint section
 
-   real(dp):: phi_vl3,x1,x2,x3,y1,y2,y3
+   real(dp) :: phi_vl3
+   real(dp),intent(in) :: x1,x2,x3,y1,y2,y3
    phi_vl3=(x1*x2-y1*y2)*y3+(y1*x2+x1*y2)*x3
  end function phi_vl3
 
@@ -279,8 +263,8 @@ subroutine dfpt_vlocal(atindx,cplex,gmet,gsqcut,idir,ipert,&
 #define ABI_FUNC 'ph1_vl3'
 !End of the abilint section
 
-   real(dp):: ph1_vl3
-   integer :: nri,ig1,ia
+   real(dp) :: ph1_vl3
+   integer,intent(in) :: nri,ig1,ia
    ph1_vl3=ph1d(nri,ig1+1+n1+(atindx(ia)-1)*(2*n1+1))
  end function ph1_vl3
 
@@ -294,8 +278,8 @@ subroutine dfpt_vlocal(atindx,cplex,gmet,gsqcut,idir,ipert,&
 #define ABI_FUNC 'ph2_vl3'
 !End of the abilint section
 
-   real(dp):: ph2_vl3
-   integer :: nri,ig2,ia
+   real(dp) :: ph2_vl3
+   integer,intent(in) :: nri,ig2,ia
    ph2_vl3=ph1d(nri,ig2+1+n2+(atindx(ia)-1)*(2*n2+1)+natom*(2*n1+1))
  end function ph2_vl3
 
@@ -309,8 +293,8 @@ subroutine dfpt_vlocal(atindx,cplex,gmet,gsqcut,idir,ipert,&
 #define ABI_FUNC 'ph3_vl3'
 !End of the abilint section
 
-   real(dp):: ph3_vl3
-   integer :: nri,ig3,ia
+   real(dp) :: ph3_vl3
+   integer,intent(in) :: nri,ig3,ia
    ph3_vl3=ph1d(nri,ig3+1+n3+(atindx(ia)-1)*(2*n3+1)+natom*(2*n1+1+2*n2+1))
  end function ph3_vl3
 
@@ -323,8 +307,8 @@ subroutine dfpt_vlocal(atindx,cplex,gmet,gsqcut,idir,ipert,&
 #define ABI_FUNC 'phre_vl3'
 !End of the abilint section
 
-   real(dp):: phre_vl3
-   integer :: ig1,ig2,ig3,ia
+   real(dp) :: phre_vl3
+   integer,intent(in) :: ig1,ig2,ig3,ia
    phre_vl3=phr_vl3(ph1_vl3(re,ig1,ia),ph1_vl3(im,ig1,ia),&
 &   ph2_vl3(re,ig2,ia),ph2_vl3(im,ig2,ia),ph3_vl3(re,ig3,ia),ph3_vl3(im,ig3,ia))
  end function phre_vl3
@@ -339,7 +323,7 @@ subroutine dfpt_vlocal(atindx,cplex,gmet,gsqcut,idir,ipert,&
 !End of the abilint section
 
    real(dp) :: phimag_vl3
-   integer :: ig1,ig2,ig3,ia
+   integer,intent(in) :: ig1,ig2,ig3,ia
    phimag_vl3=phi_vl3(ph1_vl3(re,ig1,ia),ph1_vl3(im,ig1,ia),&
 &   ph2_vl3(re,ig2,ia),ph2_vl3(im,ig2,ia),ph3_vl3(re,ig3,ia),ph3_vl3(im,ig3,ia))
  end function phimag_vl3
@@ -354,7 +338,7 @@ subroutine dfpt_vlocal(atindx,cplex,gmet,gsqcut,idir,ipert,&
 !End of the abilint section
 
    real(dp) :: gsq_vl3
-   real(dp) :: g1,g2,g3 ! Note that they are real, unlike in other similar function definitions
+   real(dp),intent(in) :: g1,g2,g3 ! Note that they are real, unlike in other similar function definitions
 !Define G^2 based on G space metric gmet.
    gsq_vl3=g1*g1*gmet(1,1)+g2*g2*gmet(2,2)+&
 &   g3*g3*gmet(3,3)+2.0_dp*g1*g2*gmet(1,2)+&

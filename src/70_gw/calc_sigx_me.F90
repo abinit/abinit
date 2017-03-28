@@ -7,7 +7,7 @@
 !! Calculate diagonal and off-diagonal matrix elements of the exchange part of the self-energy operator.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2016 ABINIT group (FB, GMR, VO, LR, RWG, MG, RShaltaf)
+!! Copyright (C) 1999-2017 ABINIT group (FB, GMR, VO, LR, RWG, MG, RShaltaf)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -102,7 +102,7 @@
 
 subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsph_x,Vcp,Kmesh,Qmesh,&
 & Ltg_k,Pawtab,Pawang,Paw_pwff,Pawfgrtab,Paw_onsite,Psps,Wfd,Wfdf,allQP_sym,gwx_ngfft,ngfftf,&
-& prtvol,pawcross)
+& prtvol,pawcross,gwfockmix)
 
  use defs_basis
  use defs_datatypes
@@ -149,6 +149,7 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: sigmak_ibz,ikcalc,prtvol,minbnd,maxbnd,pawcross
+ real(dp), intent(in) :: gwfockmix
  type(crystal_t),intent(in) :: Cryst
  type(ebands_t),target,intent(in) :: QP_BSt
  type(kmesh_t),intent(in) :: Kmesh,Qmesh
@@ -271,9 +272,9 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
    ! B3LYP factor = 0.20
    alpha_hybrid = 0.2_dp
  else
-   ! PBE0  factor = 0.25
-   ! HSE06 factor = 0.25
-   alpha_hybrid = 0.25_dp !@WC: change_alpha_here
+   ! PBE0 and HSE06 mixing determined by gwfockmix
+   ! default 0.25
+   alpha_hybrid = gwfockmix
  endif
 
  if (ANY(gwx_ngfft(1:3) /= Wfd%ngfft(1:3)) ) then

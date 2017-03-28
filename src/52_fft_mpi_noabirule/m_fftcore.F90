@@ -9,7 +9,7 @@
 !!  inside a sphere or to count them.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2016 ABINIT group (SG, XG, AR, MG, MT)
+!!  Copyright (C) 2014-2017 ABINIT group (SG, XG, AR, MG, MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -21,7 +21,7 @@
 !!
 !!  2) Merge this module with m_distribfft
 !!
-!!  3) Get rid of paral_kgb and MPI_type! This is a low-level module that may be called by other 
+!!  3) Get rid of paral_kgb and MPI_type! This is a low-level module that may be called by other
 !!     code in which paral_kgb is meaningless! FFT tables and a MPI communicator are sufficient.
 !!
 !! SOURCE
@@ -33,7 +33,7 @@
 #include "abi_common.h"
 
 module m_fftcore
-    
+
  use defs_basis
  use m_profiling_abi
  use m_errors
@@ -48,12 +48,12 @@ module m_fftcore
 
  public :: fftalg_isavailable  ! True if the FFT library specified by fftalg is available.
  public :: fftalg_has_mpi      ! True if fftalg provides MPI-FFTs.
- public :: fftalg_for_npfft    ! Returns the default value for fftalg given the number of processors for the FFT. 
+ public :: fftalg_for_npfft    ! Returns the default value for fftalg given the number of processors for the FFT.
  public :: fftalg_info         ! Returns strings with info on the FFT library specified by fftalg.
  public :: get_cache_kb        ! Returns the cache size in Kbs (based on CPP variables).
  public :: ngfft_seq           ! initialize ngfft(18) from the FFT divisions (assume sequential FFT)
  public :: print_ngfft         ! Print the content of ngfft(18) in explicative format.
- public :: sphere 
+ public :: sphere
  public :: sphere_fft      ! Insert cg inside box.
  public :: sphere_fft1     ! TODO: This one should be replaced by sphere_fft.
  public :: change_istwfk   ! Change the istwfk mode of a set of wavefunctions (sequential version, same k-point)
@@ -117,10 +117,10 @@ module m_fftcore
 #define FFTALGC_SIZE 2
  character(len=*),private,parameter :: fftalgc2name(0:FFTALGC_SIZE)= &
 & (/"No pad         ",&
-&   "zero-pad       ",&                                                 
+&   "zero-pad       ",&
 &   "zero-pad+cache "/)
 
-contains 
+contains
 !!***
 
 !----------------------------------------------------------------------
@@ -152,7 +152,7 @@ pure function fftalg_isavailable(fftalg) result(ans)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: fftalg 
+ integer,intent(in) :: fftalg
  logical :: ans
 
 !Local variables-------------------------------
@@ -207,7 +207,7 @@ pure function fftalg_has_mpi(fftalg) result(ans)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: fftalg 
+ integer,intent(in) :: fftalg
  logical :: ans
 
 !Local variables-------------------------------
@@ -260,15 +260,15 @@ pure function fftalg_for_npfft(nproc_fft) result(fftalg)
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nproc_fft
- integer :: fftalg 
+ integer :: fftalg
 
 ! *************************************************************************
 
  ! Default  for the sequential case.
- fftalg = 112 
+ fftalg = 112
 
  ! Use Goedecker2002 if fftalg does not support MPI (e.g 112)
- if (nproc_fft > 1) fftalg = 401 
+ if (nproc_fft > 1) fftalg = 401
  !if (nproc_fft > 1) fftalg = 402
 
 #ifdef HAVE_FFT_FFTW3
@@ -321,7 +321,7 @@ subroutine fftalg_info(fftalg,library,cplex_mode,padding_mode)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: fftalg 
+ integer,intent(in) :: fftalg
  character(len=*),intent(out) :: library,cplex_mode,padding_mode
 
 !Local variables-------------------------------
@@ -362,7 +362,7 @@ end subroutine fftalg_info
 !!
 !! SOURCE
 
-pure function get_cache_kb() 
+pure function get_cache_kb()
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -394,7 +394,7 @@ end function get_cache_kb
 !! ngfft_seq
 !!
 !! FUNCTION
-!! Helper function used to initialize ngfft(18) from the FFT divisions 
+!! Helper function used to initialize ngfft(18) from the FFT divisions
 !! in the case of sequential execution.
 !!
 !! INPUTS
@@ -435,7 +435,7 @@ pure subroutine ngfft_seq(ngfft, n123)
 ! *************************************************************************
 
  ! Default  for the sequential case.
- fftalg = 112 
+ fftalg = 112
 #ifdef HAVE_FFT_FFTW3
  fftalg = 312
 #elif defined HAVE_FFT_DFTI
@@ -474,7 +474,7 @@ end subroutine ngfft_seq
 !!  [mode_paral]=either "COLL" or "PERS" ("COLL" is default).
 !!
 !! OUTPUT
-!!  Only writing 
+!!  Only writing
 !!
 !! PARENTS
 !!      bethe_salpeter,eph,getng,m_fft,m_fft_prof,m_wfd,screening,setup_bse
@@ -716,7 +716,7 @@ subroutine sphere(cg,ndat,npw,cfft,n1,n2,n3,n4,n5,n6,kg_k,istwf_k,iflag,me_g0,sh
    else if (istwf_k>=2) then
 
      npwmin=1
-     if (istwf_k==2 .and. me_g0==1) then 
+     if (istwf_k==2 .and. me_g0==1) then
        ! If gamma point, then cfft must be completed
        do idat=1,ndat
          cfft(1,1,1,1+n6*(idat-1))=cg(1,1+npw*(idat-1))
@@ -832,7 +832,7 @@ subroutine sphere(cg,ndat,npw,cfft,n1,n2,n3,n4,n5,n6,kg_k,istwf_k,iflag,me_g0,sh
 
      npwmin=1
      if (istwf_k==2 .and. me_g0==1) then
-       ! Extract cg from cfft, in a way that projects on a 
+       ! Extract cg from cfft, in a way that projects on a
        ! wavefunction with time-reversal symmetry
        do idat=1,ndat
          ipwdat = 1 + (idat-1) * npw
@@ -1039,7 +1039,7 @@ subroutine sphere_fft(cg,ndat,npw,cfft,n1,n2,n3,n4,n5,kg_k,tab_fftwf2_local,nd2p
 !Insert cg into cfft with extra 0 s around outside:
  cfft = zero
 
-!$OMP PARALLEL DO PRIVATE(i1,i2,i2_local,i3) 
+!$OMP PARALLEL DO PRIVATE(i1,i2,i2_local,i3)
  do ipw=1,npw
    i1=kg_k(1,ipw); if(i1<0)i1=i1+n1; i1=i1+1
    i2=kg_k(2,ipw); if(i2<0)i2=i2+n2; i2=i2+1
@@ -1107,7 +1107,7 @@ end subroutine sphere_fft
 !!
 !! TODO
 !!   Order arguments
-!!   sphere_fft1 is similar to sphere_fft, the only difference being that ndat > 1 is not supported. 
+!!   sphere_fft1 is similar to sphere_fft, the only difference being that ndat > 1 is not supported.
 !!   Why? Should merge the two APIs.
 !!
 !! PARENTS
@@ -1147,7 +1147,7 @@ subroutine sphere_fft1(cg,ndat,npw,cfft,n1,n2,n3,n4,n5,n6,kg_k,tab_fftwf2_local)
 !Insert cg into cfft with extra 0 s around outside:
 
  cfft = zero
-!$OMP PARALLEL DO PRIVATE(i1,i2,i2_local,i3) 
+!$OMP PARALLEL DO PRIVATE(i1,i2,i2_local,i3)
  do idat=1,ndat
    do ipw=1,npw
      i1=kg_k(1,ipw); if(i1<0)i1=i1+n1; i1=i1+1
@@ -1169,7 +1169,7 @@ end subroutine sphere_fft1
 !! change_istwfk
 !!
 !! FUNCTION
-!! This function allows one to change the time-reversal storage mode (istwfk) 
+!! This function allows one to change the time-reversal storage mode (istwfk)
 !! of a *full* set of u(G). It does not support MPI-FFT!
 !!
 !! INPUTS
@@ -1181,8 +1181,8 @@ end subroutine sphere_fft1
 !! to_istwfk=option parameter that describes the storage in to_cg
 !! n1,n2,n3=physical dimension of the box (must be large enough to contain the sphere, no check is done)
 !! ndat=number of wavefunctions
-!! from_cg(2,from_npw*ndat)= Input u(g) values 
-!! 
+!! from_cg(2,from_npw*ndat)= Input u(g) values
+!!
 !! OUTPUTS
 !! to_cg(2,to_npw*ndat)= Output u(g) defined on the list of vectors to_kg_k with time-reversal mode to_istwfk
 !!
@@ -1224,9 +1224,9 @@ subroutine change_istwfk(from_npw,from_kg,from_istwfk,to_npw,to_kg,to_istwfk,n1,
 
 ! *************************************************************************
 
- n4=2*(n1/2)+1  
- n5=2*(n2/2)+1  
- n6=2*(n3/2)+1  
+ n4=2*(n1/2)+1
+ n5=2*(n2/2)+1
+ n6=2*(n3/2)+1
 
  ABI_MALLOC(cfft, (2,n4,n5,n6*ndat))
 
@@ -1303,7 +1303,7 @@ end subroutine switch
 !!
 !! INPUTS
 !!  n1dfft=Number of 1D FFTs to perform
-!!  max2=Max G_y in the small box enclosing the G-sphere. 
+!!  max2=Max G_y in the small box enclosing the G-sphere.
 !!  m2=Size of the small box enclosing the G-sphere along y
 !!  n2=Dimension of the transform along y
 !!  lot=Cache blocking factor.
@@ -1699,7 +1699,7 @@ end subroutine fill
 !!
 !! FUNCTION
 !!   Receives a set of z-lines in reciprocal space,
-!!   insert the values in cache work array defined on the FFT box 
+!!   insert the values in cache work array defined on the FFT box
 !!   and pads the central of the frequency region with zeros.
 !!
 !! INPUTS
@@ -1713,7 +1713,7 @@ end subroutine fill
 !!
 !! OUTPUT
 !!   zw(2,lot,n3)= Filled cache work array.
-!!     zw(:,1:n1dfft,n3) contains the lines to be transformed along. 
+!!     zw(:,1:n1dfft,n3) contains the lines to be transformed along.
 !!
 !! PARENTS
 !!
@@ -1828,7 +1828,7 @@ end subroutine unfill
 !!  unfill_cent
 !!
 !! FUNCTION
-!!  Transfer data from the cache work array to zf. 
+!!  Transfer data from the cache work array to zf.
 !!  Takes into account zero padding (only the non-zero entries are moved)
 !!
 !! INPUTS
@@ -2142,7 +2142,7 @@ end subroutine unscramble
 !! FUNCTION
 !!
 !! INPUTS
-!!  n1dfft=Number of 1D FFTs 
+!!  n1dfft=Number of 1D FFTs
 !!  n2=Dimension of the transform along y
 !!  lot=Cache blocking factor.
 !!  n1=Dimension of the transform along x.
@@ -2196,7 +2196,7 @@ end subroutine unswitch
 !!
 !! INPUTS
 !!  n1dfft=Number of 1D FFTs to perform
-!!  max2=Max G_y in the small box enclosing the G-sphere. 
+!!  max2=Max G_y in the small box enclosing the G-sphere.
 !!  m2=Size of the small box enclosing the G-sphere along y
 !!  n2=Dimension of the transform along y
 !!  lot=Cache blocking factor.
@@ -2326,7 +2326,7 @@ end subroutine unswitchreal
 !!
 !! INPUTS
 !!  n1dfft=Number of 1D FFTs to perform
-!!  max2=Max G_y in the small box enclosing the G-sphere. 
+!!  max2=Max G_y in the small box enclosing the G-sphere.
 !!  n2=Dimension of the transform along y
 !!  lot=Cache blocking factor.
 !!  n1zt
@@ -2466,7 +2466,7 @@ pure subroutine mpiswitch(j3,n1dfft,Jp2st,J2st,lot,n1,nd2proc,nd3proc,nproc,iopt
        end if
        ind=(Jp2-1) * nd2proc + J2
        jj2=(ind-1)/nproc +1
-   
+
        !jjp2=modulo(ind,nproc) +1
        jjp2=modulo(ind-1,nproc)+1
 
@@ -2527,7 +2527,7 @@ pure subroutine mpiswitch_cent(j3,n1dfft,Jp2stb,J2stb,lot,max1,md1,m1,n1,md2proc
  implicit none
 
 !Arguments ------------------------------------
- integer,intent(in) :: j3,n1dfft,lot,max1,md1,m1,n1,md2proc,nd3proc,nproc,ioption 
+ integer,intent(in) :: j3,n1dfft,lot,max1,md1,m1,n1,md2proc,nd3proc,nproc,ioption
  integer,intent(in) :: m2,max2,n2
  integer,intent(inout) :: Jp2stb,J2stb
  real(dp),intent(in) :: zmpi1(2,md1,md2proc,nd3proc,nproc)
@@ -2660,7 +2660,7 @@ pure subroutine mpifft_fg2dbox(nfft,ndat,fofg,n1,n2,n3,n4,nd2proc,n6,fftn2_distr
  real(dp),intent(inout) :: workf(2,n4,n6,nd2proc*ndat)
 
 !Local variables-------------------------------
- integer :: idat,i1,i2,i3,i2_local,i2_ldat,fgbase 
+ integer :: idat,i1,i2,i3,i2_local,i2_ldat,fgbase
 
 ! *************************************************************************
 
@@ -2668,7 +2668,7 @@ pure subroutine mpifft_fg2dbox(nfft,ndat,fofg,n1,n2,n3,n4,nd2proc,n6,fftn2_distr
    do i3=1,n3
      do i2=1,n2
        if (fftn2_distrib(i2) == me_fft) then
-         i2_local = ffti2_local(i2) 
+         i2_local = ffti2_local(i2)
          i2_ldat = i2_local + (idat-1) * nd2proc
          fgbase= n1*(i2_local-1 + nd2proc*(i3-1)) + (idat-1) * nfft
          do i1=1,n1
@@ -2719,7 +2719,7 @@ pure subroutine mpifft_fg2dbox_dpc(nfft,ndat,fofg,n1,n2,n3,n4,nd2proc,n6,fftn2_d
  complex(dpc),intent(inout) :: workf(n4,n6,nd2proc*ndat)
 
 !Local variables-------------------------------
- integer :: idat,i1,i2,i3,i2_local,i2_ldat,fgbase 
+ integer :: idat,i1,i2,i3,i2_local,i2_ldat,fgbase
 
 ! *************************************************************************
 
@@ -2727,7 +2727,7 @@ pure subroutine mpifft_fg2dbox_dpc(nfft,ndat,fofg,n1,n2,n3,n4,nd2proc,n6,fftn2_d
    do i3=1,n3
      do i2=1,n2
        if (fftn2_distrib(i2) == me_fft) then
-         i2_local = ffti2_local(i2) 
+         i2_local = ffti2_local(i2)
          i2_ldat = i2_local + (idat-1) * nd2proc
          fgbase= n1*(i2_local-1 + nd2proc*(i3-1)) + (idat-1) * nfft
          do i1=1,n1
@@ -2788,7 +2788,7 @@ pure subroutine mpifft_dbox2fg(n1,n2,n3,n4,nd2proc,n6,ndat,fftn2_distrib,ffti2_l
  do idat=1,ndat
    do i2=1,n2
      if( fftn2_distrib(i2) == me_fft) then
-       i2_local = ffti2_local(i2) 
+       i2_local = ffti2_local(i2)
        i2_ldat = i2_local + (idat-1) * nd2proc
        do i3=1,n3
          fgbase = n1*(i2_local - 1 + nd2proc*(i3-1)) + (idat - 1) * nfft
@@ -2851,7 +2851,7 @@ pure subroutine mpifft_dbox2fg_dpc(n1,n2,n3,n4,nd2proc,n6,ndat,fftn2_distrib,fft
  do idat=1,ndat
    do i2=1,n2
      if( fftn2_distrib(i2) == me_fft) then
-       i2_local = ffti2_local(i2) 
+       i2_local = ffti2_local(i2)
        i2_ldat = i2_local + (idat-1) * nd2proc
        do i3=1,n3
          fgbase = n1*(i2_local - 1 + nd2proc*(i3-1)) + (idat - 1) * nfft
@@ -2913,7 +2913,7 @@ pure subroutine mpifft_dbox2fr(n1,n2,n3,n4,n5,nd3proc,ndat,fftn3_distrib,ffti3_l
    do idat=1,ndat
      do i3=1,n3
        if( fftn3_distrib(i3) == me_fft) then
-         i3_local = ffti3_local(i3) 
+         i3_local = ffti3_local(i3)
          i3_ldat = i3_local + (idat - 1) * nd3proc
          do i2=1,n2
            frbase=n1*(i2-1+n2*(i3_local-1)) + (idat - 1) * nfft
@@ -2930,14 +2930,14 @@ pure subroutine mpifft_dbox2fr(n1,n2,n3,n4,n5,nd3proc,ndat,fftn3_distrib,ffti3_l
    do idat=1,ndat
      do i3=1,n3
        if (fftn3_distrib(i3) == me_fft) then
-         i3_local = ffti3_local(i3) 
+         i3_local = ffti3_local(i3)
          i3_ldat = i3_local + (idat - 1) * nd3proc
          do i2=1,n2
            frbase=2*n1*(i2-1+n2*(i3_local-1)) + (idat - 1) * cplex * nfft
            !if (frbase > cplex*nfft*ndat - 2*n1) then
            !   write(std_out,*)i2,i3_local,frbase,cplex*nfft*ndat
            !   MSG_ERROR("frbase")
-           !end if 
+           !end if
            do i1=1,n1
              fofr(2*i1-1+frbase)=workr(1,i1,i2,i3_ldat)
              fofr(2*i1  +frbase)=workr(2,i1,i2,i3_ldat)
@@ -2947,7 +2947,7 @@ pure subroutine mpifft_dbox2fr(n1,n2,n3,n4,n5,nd3proc,ndat,fftn3_distrib,ffti3_l
      end do
    end do
 
- case default 
+ case default
    !MSG_BUG("Wrong cplex")
    fofr = huge(one)
  end select
@@ -2991,7 +2991,7 @@ pure subroutine mpifft_dbox2fr_dpc(n1,n2,n3,n4,n5,nd3proc,ndat,fftn3_distrib,fft
  real(dp),intent(out) :: fofr(cplex*nfft*ndat)
 
 !Local variables-------------------------------
- integer :: idat,i1,i2,i3,i3_local,i3_ldat,frbase 
+ integer :: idat,i1,i2,i3,i3_local,i3_ldat,frbase
 
 ! *************************************************************************
 
@@ -3001,7 +3001,7 @@ pure subroutine mpifft_dbox2fr_dpc(n1,n2,n3,n4,n5,nd3proc,ndat,fftn3_distrib,fft
    do idat=1,ndat
      do i3=1,n3
        if( fftn3_distrib(i3) == me_fft) then
-         i3_local = ffti3_local(i3) 
+         i3_local = ffti3_local(i3)
          i3_ldat = i3_local + (idat - 1) * nd3proc
          do i2=1,n2
            frbase=n1*(i2-1+n2*(i3_local-1)) + (idat - 1) * nfft
@@ -3018,7 +3018,7 @@ pure subroutine mpifft_dbox2fr_dpc(n1,n2,n3,n4,n5,nd3proc,ndat,fftn3_distrib,fft
    do idat=1,ndat
      do i3=1,n3
        if (fftn3_distrib(i3) == me_fft) then
-         i3_local = ffti3_local(i3) 
+         i3_local = ffti3_local(i3)
          i3_ldat = i3_local + (idat - 1) * nd3proc
          do i2=1,n2
            frbase=2*n1*(i2-1+n2*(i3_local-1)) + (idat - 1) * cplex * nfft
@@ -3031,7 +3031,7 @@ pure subroutine mpifft_dbox2fr_dpc(n1,n2,n3,n4,n5,nd3proc,ndat,fftn3_distrib,fft
      end do
    end do
 
- case default 
+ case default
    !MSG_BUG("Wrong cplex")
    fofr = huge(one)
  end select
@@ -3075,7 +3075,7 @@ pure subroutine mpifft_fr2dbox(cplex,nfft,ndat,fofr,n1,n2,n3,n4,n5,nd3proc,fftn3
  real(dp),intent(inout) :: workr(2,n4,n5,nd3proc*ndat)
 
 !Local variables-------------------------------
- integer :: idat,i1,i2,i3,i3_local,i3_ldat,frbase 
+ integer :: idat,i1,i2,i3,i3_local,i3_ldat,frbase
 
 ! *************************************************************************
 
@@ -3085,7 +3085,7 @@ pure subroutine mpifft_fr2dbox(cplex,nfft,ndat,fofr,n1,n2,n3,n4,n5,nd3proc,fftn3
    do idat=1,ndat
      do i3=1,n3
        if( me_fft == fftn3_distrib(i3) ) then
-         i3_local = ffti3_local(i3) 
+         i3_local = ffti3_local(i3)
          i3_ldat = i3_local + (idat-1) * nd3proc
          do i2=1,n2
            frbase=n1*(i2-1+n2*(i3_local-1)) + (idat-1) * nfft
@@ -3103,7 +3103,7 @@ pure subroutine mpifft_fr2dbox(cplex,nfft,ndat,fofr,n1,n2,n3,n4,n5,nd3proc,fftn3
    do idat=1,ndat
      do i3=1,n3
        if( me_fft == fftn3_distrib(i3) ) then
-         i3_local = ffti3_local(i3) 
+         i3_local = ffti3_local(i3)
          i3_ldat = i3_local + (idat-1) * nd3proc
          do i2=1,n2
            frbase=2*n1*(i2-1+n2*(i3_local-1)) + (idat-1) * cplex * nfft
@@ -3160,7 +3160,7 @@ pure subroutine mpifft_fr2dbox_dpc(cplex,nfft,ndat,fofr,n1,n2,n3,n4,n5,nd3proc,f
  complex(dpc),intent(inout) :: workr(n4,n5,nd3proc*ndat)
 
 !Local variables-------------------------------
- integer :: idat,i1,i2,i3,i3_local,i3_ldat,frbase 
+ integer :: idat,i1,i2,i3,i3_local,i3_ldat,frbase
 
 ! *************************************************************************
 
@@ -3170,7 +3170,7 @@ pure subroutine mpifft_fr2dbox_dpc(cplex,nfft,ndat,fofr,n1,n2,n3,n4,n5,nd3proc,f
    do idat=1,ndat
      do i3=1,n3
        if( me_fft == fftn3_distrib(i3) ) then
-         i3_local = ffti3_local(i3) 
+         i3_local = ffti3_local(i3)
          i3_ldat = i3_local + (idat-1) * nd3proc
          do i2=1,n2
            frbase=n1*(i2-1+n2*(i3_local-1)) + (idat-1) * nfft
@@ -3187,7 +3187,7 @@ pure subroutine mpifft_fr2dbox_dpc(cplex,nfft,ndat,fofr,n1,n2,n3,n4,n5,nd3proc,f
    do idat=1,ndat
      do i3=1,n3
        if( me_fft == fftn3_distrib(i3) ) then
-         i3_local = ffti3_local(i3) 
+         i3_local = ffti3_local(i3)
          i3_ldat = i3_local + (idat-1) * nd3proc
          do i2=1,n2
            frbase=2*n1*(i2-1+n2*(i3_local-1)) + (idat-1) * cplex * nfft
@@ -3285,6 +3285,7 @@ subroutine indfftrisc(gbound,indpw_k,kg_k,mgfft,ngb,ngfft,npw_k)
    end if
    igb=igb+2
  end do
+
  if(gbound(1)<=-1)then ! g2min
    do g2=gbound(1)+n2,n2-1
      do g1=0,gbound(igb+1)
@@ -3310,7 +3311,7 @@ subroutine indfftrisc(gbound,indpw_k,kg_k,mgfft,ngb,ngfft,npw_k)
 !and for them, the second index does not fill 1:npw . It is only
 !the number of z-transform FFTs.
 
-!$OMP PARALLEL DO PRIVATE(i1,i2,i3) 
+!$OMP PARALLEL DO PRIVATE(i1,i2,i3)
  do ipw=1,npw_k
    i1=kg_k(1,ipw); if(i1<0)i1=i1+n1 ; i1=i1+1
    i2=kg_k(2,ipw); if(i2<0)i2=i2+n2 ; i2=i2+1
@@ -3399,7 +3400,7 @@ subroutine kpgsph(ecut,exchn2n3d,gmet,ikg,ikpt,istwf_k,kg,kpt,mkmem,mpi_enreg,mp
  real(dp),intent(in) :: ecut
  type(MPI_type),intent(inout) :: mpi_enreg
 !arrays
- integer,intent(inout) :: kg(3,mpw*mkmem) !vz_i
+ integer,intent(inout) :: kg(3,mpw*mkmem)
  real(dp),intent(in) :: gmet(3,3),kpt(3)
 
 !Local variables-------------------------------
@@ -3407,7 +3408,6 @@ subroutine kpgsph(ecut,exchn2n3d,gmet,ikg,ikpt,istwf_k,kg,kpt,mkmem,mpi_enreg,mp
  integer :: i1,ig,ig1p,ig1pmax,ig2,ig2p,ig2pmax,ig2pmin,ig3,ig3p,ig3pmax
  integer :: ig3pmin,igtot,ii,ikpt_this_proc,in,ind,np_band,np_fft,npw_before,npw_remain,npw_split
  integer, save :: alloc_size=0
- real(dp), parameter :: reequilibration_threshold = 0.2_dp
  real(dp) :: gap_pw,gmet11,gmet_trace,gmin,gs_fact,gs_part,gscut,v1,v2,v3,xx
  logical :: ipw_ok
  character(len=500) :: message
@@ -3644,18 +3644,20 @@ subroutine kpgsph(ecut,exchn2n3d,gmet,ikg,ikpt,istwf_k,kg,kpt,mkmem,mpi_enreg,mp
  ABI_DEALLOCATE(kg3arr)
 
 !BandFFT: plane-wave load balancing
- if (mpi_enreg%paral_kgb==1.and.mpi_enreg%nproc_fft>1.and.istwf_k==1) then
+ if (mpi_enreg%paral_kgb==1.and.mpi_enreg%nproc_fft>1.and. &
+&    mpi_enreg%pw_unbal_thresh>zero.and. &
+&    istwf_k==1) then
 !  Check for reequilibration
    np_fft=max(1,mpi_enreg%nproc_fft)
    ABI_ALLOCATE(npw_gather,(np_fft)) ! Count pw before balancing
    call xmpi_allgather(npw,npw_gather,mpi_enreg%comm_fft,ierr)
-   gap_pw = (maxval(npw_gather(:)) - minval(npw_gather))/(1.*sum(npw_gather(:))/np_fft)
-   write(message,'(a,f8.2)' ) ' Relative gap for number of plane waves between process: ', gap_pw
+   gap_pw = 100._dp*(maxval(npw_gather(:))-minval(npw_gather))/(1.*sum(npw_gather(:))/np_fft)
+   write(message,'(a,f5.2)' ) ' Relative gap for number of plane waves between process (%): ',gap_pw
    call wrtout(std_out,message,'COLL')
-
-   if(gap_pw > reequilibration_threshold ) then ! Effective reequilibration
-     write(message,'(a,f8.2,a)' ) &
-&        ' Gap is higher than threshold (',reequilibration_threshold,'); plane waves will be balanced'
+   if(gap_pw > mpi_enreg%pw_unbal_thresh) then ! Effective reequilibration
+     write(message,'(a,f5.2,a,i4,a,f5.2,a)') &
+&        'Plane-wave unbalancing (',gap_pw,'%) for kpt ',ikpt,' is higher than threshold (',&
+&        mpi_enreg%pw_unbal_thresh,'%); a plane-wave balancing procedure is activated!'
      call wrtout(std_out,message,'COLL')
      !Get optimal number
      npw_split=sum(npw_gather(:))
@@ -3682,7 +3684,7 @@ subroutine kpgsph(ecut,exchn2n3d,gmet,ikg,ikpt,istwf_k,kg,kpt,mkmem,mpi_enreg,mp
 &            kg_small_gather,3*npw_gather, 3*npw_disp,mpi_enreg%comm_fft,ierr)
        npw_before=mpi_enreg%me_fft*(npw_split/np_fft)+min(npw_remain,mpi_enreg%me_fft)
        kg_small(:,1:npw)=kg_small_gather(:,npw_before+1:npw_before+npw)
-       kg_ind    (  1:npw)=kg_ind_gather    (  npw_before+1:npw_before+npw)
+       kg_ind(  1:npw)=kg_ind_gather(npw_before+1:npw_before+npw)
 #ifdef DEBUG_MODE
        call wrtout(std_out,"keeping values done",'COLL')
 #endif
@@ -3719,6 +3721,7 @@ subroutine kpgsph(ecut,exchn2n3d,gmet,ikg,ikpt,istwf_k,kg,kpt,mkmem,mpi_enreg,mp
  end if
 
  ABI_DEALLOCATE(array_ipw)
+
 !Take care of the me_g0 flag
  if(mpi_enreg%paral_kgb==1.and.mpi_enreg%nproc_band>0) then
    if(mpi_enreg%me_band==0.and.mpi_enreg%me_g0==1) then
@@ -3729,6 +3732,16 @@ subroutine kpgsph(ecut,exchn2n3d,gmet,ikg,ikpt,istwf_k,kg,kpt,mkmem,mpi_enreg,mp
      mpi_enreg%me_g0=0
    end if
  end if
+
+!Check that npw is not zero
+ if(mpi_enreg%paral_kgb==1.and.npw==0) then
+   write(message,'(5a)' )&
+&   'Please decrease the number of npband*npfft MPI processes!',ch10,&
+&   'One of the MPI process has no plane-wave to handle.',ch10,&
+&   'Action: decrease npband and/or npfft.'
+   MSG_ERROR(message)
+ endif
+
  call timab(23,2,tsec)
 
  DBG_EXIT("COLL")
@@ -3828,10 +3841,10 @@ subroutine kpgcount(ecut,exchn2n3d,gmet,istwfk,kpt,ngmax,ngmin,nkpt)
 
    ng1=ngrid(1);if(istwf_k==2.or.istwf_k==3) ng1=nmax(1)+1
    if(exchn2n3d==0)then
-     ng3=ngrid(3) 
+     ng3=ngrid(3)
      ng2=ngrid(2);if(istwf_k>=2) ng2=nmax(2)+1
      if(istwf_k>=2.and.istwf_k<=5) ng2=ng2-1
-   else 
+   else
      ng2=ngrid(2)
      ng3=ngrid(3);if(istwf_k>=2) ng3=nmax(3)+1
      if(istwf_k==2.or.istwf_k==3.or.istwf_k==6.or.istwf_k==7) ng3=ng3-1
@@ -3876,8 +3889,8 @@ end subroutine kpgcount
 !!   output: kg_k(3,npw_k) contains the list of G-vectors.
 !!
 !! PARENTS
-!!      fftprof,m_ebands,m_fft,m_fft_prof,m_io_kss,m_phgamma,m_shirley,m_wfd
-!!      m_wfk,outkss
+!!      fftprof,m_ebands,m_fft,m_fft_prof,m_gkk,m_io_kss,m_phgamma,m_phpi
+!!      m_shirley,m_sigmaph,m_wfd,m_wfk,outkss
 !!
 !! CHILDREN
 !!      xmpi_sum,xmpi_sum_master
@@ -4027,7 +4040,7 @@ end subroutine addrho
 !!  icplexwf=1 if u(r) is real, 2 otherwise.
 !!  icplex=1 if v(r) is real, 2 otherwise.
 !!  includelast
-!!  nd1,nd2=Leading dimensions of pot(icplex*nd1,nd2) 
+!!  nd1,nd2=Leading dimensions of pot(icplex*nd1,nd2)
 !!  n2
 !!  lot
 !!  n1dfft
@@ -4093,7 +4106,7 @@ subroutine multpot(icplexwf,icplex,includelast,nd1,nd2,n2,lot,n1dfft,pot,zw)
    ! Complex u(r)
 
    if (icplex==1) then
-     
+
      do i2=1,n2-1,2
        do j=1,n1dfft
          zw(1,j,i2)=zw(1,j,i2)*pot(j,i2)
@@ -4206,7 +4219,7 @@ subroutine mpifft_collect_datar(ngfft,cplex,nfft,nspden,rhor,comm_fft,fftn3_dist
    do ispden=1,nspden
      do i3=1,n3
        if (me_fft == fftn3_distrib(i3)) then
-         i3_local = ffti3_local(i3) 
+         i3_local = ffti3_local(i3)
          do i2=1,n2
            my_fftbase =   cplex * ( (i2-1)*n1 + (i3_local-1)*n1*n2 )
            glob_fftbase = cplex * ( (i2-1)*n1 + (i3-1)*n1*n2 )

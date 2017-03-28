@@ -1,17 +1,20 @@
 #!/usr/bin/env python
 #
-# Copyright (C) 2009-2016 ABINIT Group (Yann Pouillon)
+# Copyright (C) 2009-2017 ABINIT Group (Yann Pouillon)
 #
 # This file is part of the ABINIT software package. For license information,
 # please see the COPYING file in the top-level directory of the ABINIT source
 # distribution.
 #
-
 #
 # Management of hints flags
 #
+from __future__ import print_function, division, absolute_import #, unicode_literals
 
-from ConfigParser import ConfigParser
+try:
+    from ConfigParser import ConfigParser
+except ImportError:
+    from configparser import ConfigParser
 from time import gmtime,strftime
 
 import os
@@ -36,7 +39,7 @@ def indent_snippet(level,text):
 def sh_cases(case_data,case_indent=0,case_item=True):
 
   if ( isinstance(case_data,dict) ):
-    if ( len(case_data.keys()) > 2 ):
+    if ( len(list(case_data.keys())) > 2 ):
       ret = indent_snippet(case_indent,"case \"${%s}\" in\n" % \
         (case_data["case"]))
       case_indent += 1
@@ -57,13 +60,13 @@ def sh_cases(case_data,case_indent=0,case_item=True):
           (case_data["case"],case_indent,case_item))
       if ( (case_indent > 0) and case_item ):
         ret += indent_snippet(case_indent,";;\n")
-    elif ( len(case_data.keys()) == 2 ):
+    elif ( len(list(case_data.keys())) == 2 ):
       if ( "default" in case_data ):
         ret = indent_snippet(case_indent,"%s_hnt=\"default\"\n" % \
           (case_data["case"])) + \
           sh_cases(case_data["default"],case_indent,case_item)
       else:
-        test_value = case_data.keys()
+        test_value = list(case_data.keys())
         test_value.remove("case")
         test_value = test_value[0]
         ret = indent_snippet(case_indent,"if test \"${%s}\" = \"%s\"; then\n" % \
@@ -75,7 +78,7 @@ def sh_cases(case_data,case_indent=0,case_item=True):
         case_indent -= 1
         ret += indent_snippet(case_indent,"fi\n")
     else:
-      raise ValueError, "case_data must contain at least 2 items"
+      raise ValueError("case_data must contain at least 2 items")
       
   else:
     ret = case_data.strip()
@@ -90,11 +93,11 @@ def make_flags(config,hntflags_names):
 
   ret = ""
 
-  for (key,val) in config.iteritems():
+  for (key,val) in config.items():
     if ( key in hntflags_names ):
       ret += "%s='%s'\n" % (hntflags_names[key],val)
     else:
-      #print "Warning key not in hntflags", key, val
+      #print("Warning key not in hntflags", key, val)
       ret += "%s='%s'\n" % (key,val)
 
   return ret
@@ -115,20 +118,20 @@ my_output   = "config/m4/auto-hints.m4"
 # Check if we are in the top of the ABINIT source tree
 if ( not os.path.exists("configure.ac") or
      not os.path.exists("src/98_main/abinit.F90") ):
-  print "%s: You must be in the top of an ABINIT source tree." % my_name
-  print "%s: Aborting now." % my_name
+  print("%s: You must be in the top of an ABINIT source tree." % my_name)
+  print("%s: Aborting now." % my_name)
   sys.exit(1)
 
 # Check if we have a config file
 if ( not os.path.exists(my_config) ):
-  print "%s: Could not find config file (%s)." % (my_name,my_config)
-  print "%s: Aborting now." % my_name
+  print("%s: Could not find config file (%s)." % (my_name,my_config))
+  print("%s: Aborting now." % my_name)
   sys.exit(2)
 
 # Check if we have a config directory
 if ( not os.path.exists(my_confdir) ):
-  print "%s: Could not find config dir (%s)." % (my_name,my_confdir)
-  print "%s: Aborting now." % my_name
+  print("%s: Could not find config dir (%s)." % (my_name,my_confdir))
+  print("%s: Aborting now." % my_name)
   sys.exit(3)
 
 # What time is it?
@@ -217,7 +220,7 @@ for compilo in compilers:
   hnt_macro += "\n  dnl Look for hints flags\n"
   hnt_macro += "  AC_MSG_CHECKING([which %s hints to apply])\n\n" % \
     (compilo)
-  if ( len(hnt_config.keys()) > 1 ):
+  if ( len(list(hnt_config.keys())) > 1 ):
     hnt_macro += "  dnl Case built from config/hints/%s_*.conf\n" % (compilo)
     hnt_macro += indent_snippet(1,sh_cases(hnt_config))
   else:
@@ -229,4 +232,4 @@ for compilo in compilers:
   hnt_macro += "]) #ABI_%s_HINTS\n" % (compilo.upper())
 
 # Write data
-file(my_output,"w").write(hnt_macro)
+open(my_output,"wt").write(hnt_macro)

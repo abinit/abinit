@@ -1,11 +1,12 @@
 #!/usr/bin/env python
 #
-# Copyright (C) 2010-2016 ABINIT Group (Yann Pouillon)
+# Copyright (C) 2010-2017 ABINIT Group (Yann Pouillon)
 #
 # This file is part of the ABINIT software package. For license information,
 # please see the COPYING file in the top-level directory of the ABINIT source
 # distribution.
 #
+from __future__ import print_function, division, absolute_import #, unicode_literals
 
 from time import gmtime,strftime
 
@@ -45,16 +46,16 @@ tgt_version = sys.argv[1]
 ac_init = re.compile(r"^(AC_INIT\([^, ]*,)[^, ]*(.*)$", re.MULTILINE)
 
 # Change the version number in configure.ac
-ac_data = file("configure.ac", "r").read()
+ac_data = open("configure.ac", "rt").read()
 ac_data = re.sub(ac_init, "\\1[%s]\\2" % (tgt_version), ac_data)
-file("configure.ac", "w").write(ac_data)
+open("configure.ac", "wt").write(ac_data)
 
 # Change the version number in doc/configure.ac
-ac_data = file("doc/configure.ac", "r").read()
+ac_data = open("doc/configure.ac", "rt").read()
 ac_data = re.sub(ac_init, "\\1[%s]\\2" % (tgt_version), ac_data)
-file("doc/configure.ac", "w").write(ac_data)
+open("doc/configure.ac", "wt").write(ac_data)
 
 # Change the version number in tests/configure.ac
-ac_data = file("tests/configure.ac", "r").read()
+ac_data = open("tests/configure.ac", "rt").read()
 ac_data = re.sub(ac_init, "\\1[%s]\\2" % (tgt_version), ac_data)
-file("tests/configure.ac", "w").write(ac_data)
+open("tests/configure.ac", "wt").write(ac_data)

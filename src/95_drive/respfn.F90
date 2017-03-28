@@ -7,7 +7,7 @@
 !! Primary routine for conducting DFT calculations of Response functions.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2016 ABINIT group (XG, DRH, MT)
+!! Copyright (C) 1999-2017 ABINIT group (XG, DRH, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -96,7 +96,7 @@
 !!      pawrhoij_alloc,pawrhoij_bcast,pawrhoij_copy,pawrhoij_free
 !!      pawrhoij_nullify,pawtab_get_lsize,prteigrs,psddb8,pspini,q0dy3_apply
 !!      q0dy3_calc,read_rhor,rhohxc,setsym,setsymrhoij,setup1,status,symdij
-!!      symkchk,symmetrize_xred,timab,transgrid,vdw_dftd2,vdw_dftd3,wffclose
+!!      symmetrize_xred,sytens,timab,transgrid,vdw_dftd2,vdw_dftd3,wffclose
 !!      wings3,wrtloctens,wrtout,xmpi_bcast
 !!
 !! SOURCE
@@ -124,7 +124,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  use m_results_respfn
  use m_hdr
 
- use m_dynmat,      only : chkph3, d2sym3, q0dy3_apply, q0dy3_calc, wings3
+ use m_dynmat,      only : chkph3, d2sym3, q0dy3_apply, q0dy3_calc, wings3, dfpt_phfrq, sytens
  use m_ddb,         only : psddb8, DDB_VERSION
  use m_efmas,       only : efmasdeg_free_array, efmasfr_free_array
  use m_wfk,         only : wfk_read_eigenvalues
@@ -190,18 +190,20 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  integer,parameter :: formeig=0,level=10
  integer,parameter :: response=1,syuse=0,master=0,cplex1=1
  integer :: nk3xc
- integer :: analyt,ask_accurate,band_index,bantot,bdeigrf,choice,cplex
+ integer :: analyt,ask_accurate,band_index,bantot,bdeigrf,choice,coredens_method,cplex
  integer :: dim_eig2nkq,dim_eigbrd,dyfr_cplex,dyfr_nondiag,fullinit,gnt_option
  integer :: gscase,has_dijnd,has_kxc,iatom,iatom_tot,iband,idir,ider,ierr,ifft,ii,ikpt,indx
+ integer :: i1dir,i1pert,i2dir,i2pert,i3dir,i3pert
  integer :: initialized,ipert,ipert2,ireadwf0,iscf,iscf_eff,ispden,isppol
  integer :: itypat,izero,mcg,me,mgfftf,mk1mem,mkqmem,mpert,mu
- integer :: my_natom,natom,n3xccc,nband_k,nblok,nfftf,nfftot,nfftotf,nhatdim,nhatgrdim
+ integer :: my_natom,n1,natom,n3xccc,nband_k,nblok,nfftf,nfftot,nfftotf,nhatdim,nhatgrdim
  integer :: nkpt_eff,nkpt_max,nkpt_rbz,nkxc,nkxc1,nspden_rhoij,ntypat,nzlmopt,openexit
  integer :: optcut,option,optgr0,optgr1,optgr2,optorth,optrad
  integer :: optatm,optdyfr,opteltfr,optgr,optn,optn2,optstr,optv
  integer :: outd2,pawbec,pawpiezo,prtbbb,psp_gencond,qzero,rdwr,rdwrpaw
  integer :: req_cplex_dij,rfasr,rfddk,rfelfd,rfphon,rfstrs,rfuser,rf2_dkdk,rf2_dkde
- integer :: spaceworld,sumg0,sz1,sz2,tim_mkrho,timrev,usecprj,usevdw,usexcnhat,use_sym
+ integer :: spaceworld,sumg0,sz1,sz2,tim_mkrho,timrev,usecprj,usevdw
+ integer :: usexcnhat,use_sym,vloc_method
  logical :: has_full_piezo,has_allddk,paral_atom,qeq0,use_nhat_gga,call_pawinit
  real(dp) :: boxcut,compch_fft,compch_sph,cpus,ecore,ecut_eff,ecutdg_eff,ecutf
  real(dp) :: eei,eew,ehart,eii,ek,enl,entropy,enxc
@@ -216,11 +218,11 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  type(pawfgr_type) :: pawfgr
  type(wffile_type) :: wffgs,wfftgs
  type(wvl_data) :: wvl
- integer :: ddkfil(3),ngfft(18),ngfftf(18),rfdir(3)
+ integer :: ddkfil(3),ngfft(18),ngfftf(18),rfdir(3),rf2_dirs_from_rfpert_nl(3,3)
  integer,allocatable :: atindx(:),atindx1(:),blkflg(:,:,:,:),blkflgfrx1(:,:,:,:),blkflg1(:,:,:,:)
  integer,allocatable :: blkflg2(:,:,:,:),carflg(:,:,:,:),clflg(:,:),indsym(:,:,:)
  integer,allocatable :: irrzon(:,:,:),kg(:,:),l_size_atm(:),nattyp(:),npwarr(:)
- integer,allocatable :: pertsy(:,:),rfpert(:),symq(:,:,:),symrec(:,:,:)
+ integer,allocatable :: pertsy(:,:),rfpert(:),rfpert_nl(:,:,:,:,:,:),symq(:,:,:),symrec(:,:,:)
  real(dp) :: dum_gauss(0),dum_dyfrn(0),dum_dyfrv(0),dum_eltfrxc(0)
  real(dp) :: dum_grn(0),dum_grv(0),dum_rhog(0),dum_vg(0)
  real(dp) :: dummy6(6),gmet(3,3),gprimd(3,3),qphon(3)
@@ -569,7 +571,8 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  if(psps%usepaw==1) then
 !  1-Initialize values for several arrays depending only on atomic data
    gnt_option=1
-   if (dtset%pawxcdev==2.or.dtset%rfphon/=0.or.dtset%rfstrs/=0.or.dtset%rfelfd==1.or.dtset%rfelfd==3) gnt_option=2
+   if (dtset%pawxcdev==2.or.dtset%rfphon/=0.or.dtset%rfstrs/=0.or.dtset%rfelfd==1.or.&
+   dtset%rfelfd==3.or.dtset%rf2_dkde==1) gnt_option=2
 
    ! Test if we have to call pawinit
    call paw_gencond(Dtset,gnt_option,"test",call_pawinit)
@@ -621,12 +624,12 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
      optgr1=dtset%pawstgylm
      if (rfphon==1) optgr2=1
    end if
-   if (rfphon==1.or.rfstrs/=0.or.rfelfd==3) then
+   if (rfphon==1.or.rfstrs/=0.or.rfelfd==3.or.rf2_dkde==1) then ! LB2016-11-28 : Why not rfelfd==1?
      if (optgr1==0) optgr1=dtset%pawstgylm
      if (optgr2==0) optgr2=dtset%pawstgylm
-     if (optrad==0.and.(.not.qeq0.or.rfstrs/=0.or.rfelfd==3)) optrad=1
+     if (optrad==0.and.(.not.qeq0.or.rfstrs/=0.or.rfelfd==3.or.rf2_dkde==1)) optrad=1  ! LB2016-11-28 : Why not rfelfd==1?
    end if
-   if (rfelfd==1.or.rfelfd==3) then
+   if (rfelfd==1.or.rfelfd==3.or.rf2_dkde==1) then
      if (optgr1==0) optgr1=dtset%pawstgylm
    end if
    call status(0,dtfil%filstat,iexit,level,'call nhatgrid ')
@@ -656,7 +659,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
    if(any(abs(dtset%nucdipmom)>tol8)) then
      has_dijnd=1; req_cplex_dij=2
    end if
-   if (rfphon/=0.or.rfelfd==1.or.rfelfd==3.or.rfstrs/=0) then
+   if (rfphon/=0.or.rfelfd==1.or.rfelfd==3.or.rfstrs/=0.or.rf2_dkde/=0) then
      has_kxc=1;nkxc1=2*dtset%nspden-1 ! LDA only
      if(dtset%xclevel==2.and.dtset%pawxcdev==0) nkxc1=23
    end if
@@ -774,17 +777,32 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  ABI_ALLOCATE(xccc3d,(n3xccc))
  ABI_ALLOCATE(vpsp,(nfftf))
 
- if (psps%usepaw==1 .or. psps%nc_xccc_gspace==1) then
-!  PAW or NC with nc_xccc_gspace: compute Vloc and core charge together in reciprocal space
+!Determine by which method the local ionic potential and/or
+! the pseudo core charge density have to be computed
+!Local ionic potential:
+! Method 1: PAW ; Method 2: Norm-conserving PP
+ vloc_method=1;if (psps%usepaw==0) vloc_method=2
+!Pseudo core charge density:
+! Method 1: PAW, nc_xccc_gspace ; Method 2: Norm-conserving PP
+ coredens_method=1;if (psps%usepaw==0) coredens_method=2
+ if (psps%nc_xccc_gspace==1) coredens_method=1
+ if (psps%nc_xccc_gspace==0) coredens_method=2
+
+!Local ionic potential and/or pseudo core charge by method 1
+ if (vloc_method==1.or.coredens_method==1) then
    call timab(562,1,tsec)
-   optatm=1;optdyfr=0;opteltfr=0;optgr=0;optstr=0;optv=1;optn=n3xccc/nfftf;optn2=1
+   optv=0;if (vloc_method==1) optv=1
+   optn=0;if (coredens_method==1) optn=n3xccc/nfftf
+   optatm=1;optdyfr=0;opteltfr=0;optgr=0;optstr=0;optn2=1
    call atm2fft(atindx1,xccc3d,vpsp,dum_dyfrn,dum_dyfrv,dum_eltfrxc,dum_gauss,gmet,gprimd,&
 &   dum_grn,dum_grv,gsqcut,mgfftf,psps%mqgrid_vl,natom,nattyp,nfftf,ngfftf,&
 &   ntypat,optatm,optdyfr,opteltfr,optgr,optn,optn2,optstr,optv,psps,pawtab,ph1df,psps%qgrid_vl,&
 &   dtset%qprtrb,dum_rhog,strn_dummy6,strv_dummy6,ucvol,psps%usepaw,dum_vg,dum_vg,dum_vg,dtset%vprtrb,psps%vlspl)
    call timab(562,2,tsec)
- else
-!  Norm-cons.: compute Vloc in reciprocal space and core charge in real space
+ end if
+
+!Local ionic potential by method 2
+ if (vloc_method==2) then
    option=1
    ABI_ALLOCATE(dyfrlo_indx,(3,3,natom))
    ABI_ALLOCATE(grtn_indx,(3,natom))
@@ -794,15 +812,18 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 &   dtset%qprtrb,rhog,rhor,rprimd,ucvol,dtset%vprtrb,vpsp,wvl%descr,wvl%den,xred)
    ABI_DEALLOCATE(dyfrlo_indx)
    ABI_DEALLOCATE(grtn_indx)
-   if (psps%n1xccc/=0) then
-     ABI_ALLOCATE(dyfrx2,(3,3,natom))
-     ABI_ALLOCATE(vxc,(0,0)) ! dummy
-     call mkcore(dummy6,dyfrx2,grxc,mpi_enreg,natom,nfftf,dtset%nspden,ntypat,&
+ end if
+
+!Pseudo core electron density by method 2
+ if (coredens_method==2.and.psps%n1xccc/=0) then
+   option=1
+   ABI_ALLOCATE(dyfrx2,(3,3,natom))
+   ABI_ALLOCATE(vxc,(0,0)) ! dummy
+   call mkcore(dummy6,dyfrx2,grxc,mpi_enreg,natom,nfftf,dtset%nspden,ntypat,&
 &     ngfftf(1),psps%n1xccc,ngfftf(2),ngfftf(3),option,rprimd,dtset%typat,ucvol,vxc,&
 &     psps%xcccrc,psps%xccc1d,xccc3d,xred)
-     ABI_DEALLOCATE(dyfrx2)
-     ABI_DEALLOCATE(vxc) ! dummy
-   end if
+   ABI_DEALLOCATE(dyfrx2)
+   ABI_DEALLOCATE(vxc) ! dummy
  end if
 
 !Set up hartree and xc potential. Compute kxc here.
@@ -973,7 +994,9 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 !  Verify that k-point set has full space-group symmetry; otherwise exit
    call status(0,dtfil%filstat,iexit,level,'call symkchk ')
    timrev=1
-   call symkchk(dtset%kptns,dtset%nkpt,dtset%nsym,symrec,timrev)
+   if (symkchk(dtset%kptns,dtset%nkpt,dtset%nsym,symrec,timrev,message) /= 0) then
+     MSG_ERROR(message)
+   end if
 
 !  Calculate the kinetic part of the elastic tensor
    call dfpt_eltfrkin(cg,eltfrkin,dtset%ecut,dtset%ecutsm,dtset%effmass,&
@@ -1096,12 +1119,68 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  end do
 
 !test if the user left default rfdir 0 0 0
- if (ii==1) then
+ if (ii==1 .and. rf2_dkdk==0 .and. rf2_dkde==0) then
    write(message,'(5a)')ch10,&
 &   ' WARNING: no perturbations to be done at this q-point.',ch10,&
 &   ' You may have forgotten to set the rfdir or rfatpol variables. Continuing normally.',ch10
    call wrtout(ab_out,message,'COLL')
    MSG_WARNING(message)
+ end if
+
+ if (dtset%prepanl==1.and.(rf2_dkdk/=0 .or. rf2_dkde/=0)) then
+   ABI_ALLOCATE(rfpert_nl,(3,natom+2,3,natom+2,3,natom+2))
+   rfpert_nl = 0
+   rfpert_nl(:,natom+2,:,natom+2,:,natom+2) = 1
+   rfpert_nl(:,1:natom,:,natom+2,:,natom+2) = 1
+   rfpert_nl(:,natom+2,:,1:natom,:,natom+2) = 1
+   rfpert_nl(:,natom+2,:,natom+2,:,1:natom) = 1
+   call sytens(indsym,natom+2,natom,dtset%nsym,rfpert_nl,symrec,dtset%symrel)
+   write(message, '(a,a,a,a,a)' ) ch10, &
+&   ' The list of irreducible elements of the Raman and non-linear',&
+&   ch10,' optical susceptibility tensors is:',ch10
+   call wrtout(std_out,message,'COLL')
+
+   write(message,'(12x,a)')&
+&   'i1pert  i1dir   i2pert  i2dir   i3pert  i3dir'
+   call wrtout(std_out,message,'COLL')
+   n1 = 0
+   rf2_dirs_from_rfpert_nl(:,:) = 0
+   do i1pert = 1, natom + 2
+     do i1dir = 1, 3
+       do i2pert = 1, natom + 2
+         do i2dir = 1, 3
+           do i3pert = 1, natom + 2
+             do i3dir = 1,3
+               if (rfpert_nl(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)==1) then
+                 n1 = n1 + 1
+                 write(message,'(2x,i4,a,6(5x,i3))') n1,')', &
+&                 i1pert,i1dir,i2pert,i2dir,i3pert,i3dir
+                 call wrtout(std_out,message,'COLL')
+                 if (i2pert==natom+2) then
+                   if (i3pert==natom+2) then
+                     rf2_dirs_from_rfpert_nl(i3dir,i2dir) = 1
+                   else if (i1pert==natom+2) then
+                     rf2_dirs_from_rfpert_nl(i1dir,i2dir) = 1
+                   end if
+                 end if
+               end if
+             end do
+           end do
+         end do
+       end do
+     end do
+   end do
+   write(message,'(a,a)') ch10,ch10
+   call wrtout(std_out,message,'COLL')
+
+   write(message,'(a)') 'rf2_dirs_from_rfpert_nl :'
+   call wrtout(std_out,message,'COLL')
+   do i1dir = 1, 3
+     do i2dir = 1, 3
+       write(message,'(3(a,i1))') ' ',i1dir,' ',i2dir,' : ',rf2_dirs_from_rfpert_nl(i1dir,i2dir)
+       call wrtout(std_out,message,'COLL')
+     end do
+   end do
  end if
 
 !Contribution to the dynamical matrix from ion-ion energy
@@ -1225,7 +1304,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 &   dtset%mkmem,mkqmem,mk1mem,mpert,mpi_enreg,my_natom,nattyp,&
 &   nfftf,nhat,dtset%nkpt,nkxc,dtset%nspden,dtset%nsym,occ,&
 &   paw_an,paw_ij,pawang,pawfgr,pawfgrtab,pawrad,pawrhoij,pawtab,&
-&   pertsy,prtbbb,psps,rfpert,rhog,rhor,symq,symrec,timrev,&
+&   pertsy,prtbbb,psps,rfpert,rf2_dirs_from_rfpert_nl,rhog,rhor,symq,symrec,timrev,&
 &   usecprj,usevdw,vtrial,vxc,vxcavg,xred,clflg,occ_rbz_pert,eigen0_pert,eigenq_pert,&
 &   eigen1_pert,nkpt_rbz,eigenq_fine,hdr_fine,hdr0)
 
@@ -1240,6 +1319,9 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  call wrtout(std_out,message,'COLL')
 
  ABI_DEALLOCATE(vxc)
+ if (dtset%prepanl==1.and.(rf2_dkdk/=0 .or. rf2_dkde/=0)) then
+   ABI_DEALLOCATE(rfpert_nl)
+ end if
 
 !Output of the localization tensor
  if ( rfpert(natom+1) /= 0 .and. (me == 0) .and. dtset%occopt<=2) then

@@ -8,7 +8,7 @@
 !!  _SCR and _SUSC file as well as methods used to read/write/echo.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2016 ABINIT group (MG)
+!! Copyright (C) 2008-2017 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -40,6 +40,7 @@ MODULE m_io_screening
  use netcdf
 #endif
  use m_hdr
+ use m_sort
 
  use m_gwdefs,          only : em1params_t, GW_TOLQ
  use m_fstrings,        only : sjoin, itoa, endswith, replace_ch0
@@ -2325,7 +2326,6 @@ subroutine ioscr_wmerge(nfiles, filenames, hscr_file, freqremax, fname_out, ohsc
 #undef ABI_FUNC
 #define ABI_FUNC 'ioscr_wmerge'
  use interfaces_14_hidewrite
- use interfaces_28_numeric_noabirule
 !End of the abilint section
 
  implicit none

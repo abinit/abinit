@@ -10,7 +10,7 @@
 !! Can also treat initial empty string, then simply returns the integer in the form of a string
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (DCA, XG, GMR)
+!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -25,8 +25,8 @@
 !!
 !! PARENTS
 !!      berryphase_new,d2frnl,dfpt_looppert,dfpt_nstdy,dfpt_nstpaw,dfpt_scfcv
-!!      dfptnl_loop,dtfil_init,intagm,m_ifc,m_io_redirect,mkfilename,prtocc
-!!      prttagm,prttagm_images,uderiv
+!!      dfptnl_loop,dtfil_init,intagm,m_gkk,m_ifc,m_io_redirect,mkfilename
+!!      prtocc,prttagm,prttagm_images,uderiv
 !!
 !! CHILDREN
 !!

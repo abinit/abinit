@@ -61,7 +61,7 @@ nsym1 0
 ############ SECOND DATASET: Read density and produce wavefunctions with nsym=1
 #==================================================================================
 #Bug with the convergence of the DEN file
-getden2 -1
+getden2 1
 nstep2     10
 nnsclo2 5
 nline2 5
@@ -70,7 +70,7 @@ nline2 5
 ############ THIRD DATASET: Read Wfc and produce KSS file
 #==================================================================================
 #  Definitions of parameters for the calculation of the KSS file
-getwfk3 -1
+getwfk3 2
 nbandkss3 -1         # Number of bands in KSS file (-1 means the maximum possible)
 
 kssform 3
@@ -94,7 +94,7 @@ jpawu      0.0000000000000000  0.0  0.0  eV
 ############ FOURTH DATASET:  Calculation of the screening (epsilon^-1 matrix)
 #==================================================================================
  optdriver4     3     # Screening calculation
- getwfk4       -1     # Obtain KSS file from previous dataset
+# getwfk4        3    # Obtain KSS file from previous dataset
  ecutwfn4       3.0   # Cut-off energy of the planewave set to represent the wavefunctions. It would be more convenient to keep the default ecut value.
  ecuteps4       3.0   # Cut-off energy of the planewave set to represent the dielectric matrix. It is important to adjust this parameter.
 # ppmfrq4   16.1 eV   # Imaginary frequency where to calculate the screening

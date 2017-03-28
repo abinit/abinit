@@ -7,7 +7,7 @@
 !! Calculate diagonal and off-diagonal matrix elements of the self-energy operator.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2016 ABINIT group (FB, GMR, VO, LR, RWG, MG, RShaltaf)
+!! Copyright (C) 1999-2017 ABINIT group (FB, GMR, VO, LR, RWG, MG, RShaltaf)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -128,7 +128,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
  use defs_basis
  use defs_datatypes
  use defs_abitypes
- use m_gwdefs 
+ use m_gwdefs
  use m_profiling_abi
  use m_xmpi
  use m_defs_ptgroups
@@ -136,7 +136,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
  use m_time
 
  use m_blas,          only : xdotc, xgemv
- use m_numeric_tools, only : hermitianize, imin_loc
+ use m_numeric_tools, only : hermitianize, imin_loc, coeffs_gausslegint
  use m_fstrings,      only : sjoin, itoa
  use m_geometry,      only : normv
  use m_crystal,       only : crystal_t
@@ -164,7 +164,6 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
 #define ABI_FUNC 'calc_sigc_me'
  use interfaces_14_hidewrite
  use interfaces_18_timing
- use interfaces_28_numeric_noabirule
  use interfaces_65_paw
  use interfaces_70_gw, except_this_one => calc_sigc_me
 !End of the abilint section
@@ -673,7 +672,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
      end do
    end if
 
-   write(msg,'(3(a,i0),a,i0)')'Sigma_c: ik_bz ',ik_bz,'/',Kmesh%nbz,", spin:",spin,' done by rank: ',Wfd%my_rank
+   write(msg,'(3(a,i0),a,i0)')'Sigma_c: ik_bz ',ik_bz,'/',Kmesh%nbz,", spin: ",spin,' done by rank: ',Wfd%my_rank
    call wrtout(std_out,msg,'PERS')
    !
    ! === Find the corresponding irred q-point ===
@@ -719,7 +718,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
      call pawpwij_init(Pwij_qg,Sigp%npwc,q0,Gsph_c%gvec,Cryst%rprimd,Psps,Pawtab,Paw_pwff)
    end if
 
-   if (Er%mqmem==0) then 
+   if (Er%mqmem==0) then
      ! Read q-slice of epsilon^{-1}|chi0 in Er%epsm1(:,:,:,1) (much slower but less memory).
      call get_epsm1(Er,Vcp,0,0,Dtset%iomode,xmpi_comm_self,iqibzA=iq_ibz)
      if (sigma_needs_ppm(Sigp)) then
@@ -1040,7 +1039,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
 
            ABI_FREE(sigcme_new)
 
-         CASE (SIG_QPGW_CD) 
+         CASE (SIG_QPGW_CD)
            ! MODEL GW with numerical integration.
            ! Check if pole contributions need to be summed (this avoids unnecessary
            ! splint calls and saves time)

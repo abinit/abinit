@@ -9,7 +9,7 @@
 !! for one particular dataset, characterized by jdtset.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2011-2016 ABINIT group (XG)
+!! Copyright (C) 2011-2017 ABINIT group (XG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -198,7 +198,7 @@ subroutine inqpt(chksymbreak,iout,jdtset,lenstr,msym,natom,qptn,wtqc,rprimd,spin
    end if
 
 !  Re-generate symmetry operations from the lattice and atomic coordinates
-!  This is a fundamental difference with respect ot the k point generation.
+!  This is a fundamental difference with respect to the k point generation.
    tolsym=tol8
    ABI_ALLOCATE(ptsymrel,(3,3,msym))
    ABI_ALLOCATE(symafm_new,(msym))
@@ -207,7 +207,7 @@ subroutine inqpt(chksymbreak,iout,jdtset,lenstr,msym,natom,qptn,wtqc,rprimd,spin
    call symlatt(bravais,msym,nptsym,ptsymrel,rprimd,tolsym)
    use_inversion=1
    call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
-   call symfind(0,(/zero,zero,zero/),gprimd,0,msym,natom,0,nptsym,nsym_new,&
+   call symfind(0,(/zero,zero,zero/),gprimd,0,msym,natom,0,nptsym,nsym_new,0,&
 &   ptsymrel,spinat,symafm_new,symrel_new,tnons_new,tolsym,typat,use_inversion,xred)
 
 !  Prepare to compute the q-point grid in the ZB or IZB

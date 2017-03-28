@@ -1,16 +1,19 @@
 #!/usr/bin/env python
 #
-# Copyright (C) 2005-2016 ABINIT Group (Yann Pouillon)
+# Copyright (C) 2005-2017 ABINIT Group (Yann Pouillon)
 #
 # This file is part of the ABINIT software package. For license information,
 # please see the COPYING file in the top-level directory of the ABINIT source
 # distribution.
 #
+from __future__ import print_function, division, absolute_import #, unicode_literals
 
-from ConfigParser import ConfigParser
+try:
+    from ConfigParser import ConfigParser
+except ImportError:
+    from configparser import ConfigParser
 from time import gmtime,strftime
 
-import commands
 import os
 import re
 import sys
@@ -49,7 +52,7 @@ endif
 
 # minimun test for checking testsuite machinery
 check-local:
-	../../tests/runtests.py fast[1] --no-colors --no-logo
+	[ -f "runtests.py" ] && ./runtests.py fast -o1 --no-colors --no-logo || ../../tests/runtests.py fast -o1 --no-colors --no-logo
 	@rm -rf Test_suite .prev_run.pickle
 
 # Display help by default
@@ -148,16 +151,16 @@ my_output  = "Makefile.am"
 # Check if we are in the top of the ABINIT source tree
 if ( not os.path.exists("configure.ac") or
      not os.path.exists("config/specs/tests.conf") ):
-  print "%s: You must be in the top of the ABINIT Test Suite source tree." % my_name
-  print "%s: Aborting now." % my_name
+  print("%s: You must be in the top of the ABINIT Test Suite source tree." % my_name)
+  print("%s: Aborting now." % my_name)
   sys.exit(1)
 
 # Read config file(s)
 cnf = MyConfigParser()
 for cnf_file in my_configs:
   if ( not os.path.exists(cnf_file) ):
-    print "%s: Could not find config file (%s)." % (my_name,cnf_file)
-    print "%s: Aborting now." % my_name
+    print("%s: Could not find config file (%s)." % (my_name,cnf_file))
+    print("%s: Aborting now." % my_name)
     sys.exit(2)
 
 # What time is it?
@@ -169,7 +172,7 @@ abinit_tests = cnf.sections()
 abinit_tests.sort()
 
 # Start to write Makefile.am
-mf = file(my_output,"w")
+mf = open(my_output, "wt")
 mf.write(makefile_top(my_name,now))
 
 # Prepare EXTRA_DIST target
@@ -222,9 +225,9 @@ mf.write(ins + "\n\n" + cln)
 # Look for additional information
 add = "config/makefiles/tests.am"
 if ( os.path.exists(add) ):
-  mf.write(file(add,"r").read())
+  mf.write(open(add, "rt").read())
 
 mf.close()
 
 # Write down timeout Makefile
-file("Timeout/Makefile.am","w").write(makefile_timeout(my_name,now))
+open("Timeout/Makefile.am", "wt").write(makefile_timeout(my_name,now))

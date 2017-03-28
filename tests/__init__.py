@@ -53,6 +53,7 @@ class AbinitEnvironment(object):
         self.tests_dir, tail = os.path.split(filepath)
         self.home_dir, tail = os.path.split(self.tests_dir)
 
+        self.src_dir = os.path.join(self.home_dir, "src")
         self.psps_dir = os.path.join(self.tests_dir, "Psps_for_tests")
         self.fldiff_path = os.path.join(self.tests_dir, "Scripts", "fldiff.pl")
 
@@ -72,6 +73,63 @@ class AbinitEnvironment(object):
         abinit_path = os.path.join(self.home_dir, "src", "98_main", "abinit")
         return os.path.isfile(configh_path) and os.path.isfile(abinit_path)
 
+    def touch_srcfiles(self, patterns):
+        """
+        Touch all Abinit source files containing the specified list of `patterns`.
+        """
+        def touch(fname):
+            """
+            Python touch
+            See also http://stackoverflow.com/questions/1158076/implement-touch-using-python
+            for a race-condition free version based on py3k
+            """
+            try:
+                os.utime(fname, None)
+            except:
+                open(fname, 'a').close()
+
+        top = os.path.join(abenv.home_dir, "src")
+        print("Walking through directory:", top)
+        print("Touching all files containing:", str(patterns))
+
+        for root, dirs, files in os.walk(self.src_dir):
+            for path in files:
+                path = os.path.join(root, path)
+                with open(path, "rt") as fh:
+                    for line in fh:
+                        if any(p in line for p in patterns):
+                            print("Touching %s" % path)
+                            touch(path)
+                            break
+
+    def start_watching_sources(self):
+        def is_source(fname):
+            # NB: `.finc` include files are ignored on purpose because
+            # make is not tracking them. one should change the Fortran file
+            # that includes .finc to force recompilation.
+            _, ext = os.path.splitext(fname)
+            return ext.lower() in (".f", ".f90", ".c") # ".finc"
+
+        self.srcpath_stat = {}
+        for root, dirs, files in os.walk(self.src_dir):
+            for fname in files:
+                if not is_source(fname): continue
+                path = os.path.join(root, fname)
+                self.srcpath_stat[path] = os.stat(path)
+
+        return self.srcpath_stat
+
+    def changed_sources(self):
+        """Return list of files that have been modified."""
+        changed = []
+        for path, old_stat in self.srcpath_stat.items():
+            now_stat = os.stat(path)
+            if now_stat.st_mtime != old_stat.st_mtime:
+               changed.append(path)
+               self.srcpath_stat[path] = now_stat
+        return changed
+
+
 abenv = AbinitEnvironment()
 
 database_path = os.path.join(abenv.tests_dir, "test_suite.cpkl")
@@ -81,7 +139,7 @@ _tsuite_dirs = [
     #"abirules",
     "atompaw",
     "bigdft",
-    #"bigdft_paral",
+    "bigdft_paral",
     #"buildsys",
     "built-in",
     #"cpu",      This directory is disabled
@@ -107,6 +165,7 @@ _tsuite_dirs = [
     "v6",
     "v67mbpt",
     "v7",
+    "v8",
     "vdwxc",
     "wannier90",
 ]
@@ -334,15 +393,20 @@ class AbinitTestsDatabase(dict):
                         inp2test[ius] += 1
 
             def remove_file(fname):
-                # XG130810 : When the report.in files in abirules/Input/report.in  buildsys/Input/report.in 
-                # will have been suppressed, one might replace the next line by the simpler :    
+                # XG130810 : When the report.in files in abirules/Input/report.in  buildsys/Input/report.in
+                # will have been suppressed, one might replace the next line by the simpler :
                 # return fname.endswith(".files")
                 return fname.endswith(".files") or os.path.basename(fname) in ["report.in"]
 
+            keys = []
             for fname, ntimes in inp2test.items():
-                if remove_file(fname):
-                    ntest = inp2test.pop(fname)
+                if not remove_file(fname):
+                    keys.append(fname)
+                else:
+                    ntest = inp2test[fname]
                     assert ntest == 0
+            #inp2test = {k: inp2test[k] for k in keys} # requires py2.7
+            inp2test = dict([(k, inp2test[k]) for k in keys])
 
             # At this point inp2test should be >= 1.
             for fname, ntimes in inp2test.items():
@@ -382,7 +446,7 @@ class AbinitTestsDatabase(dict):
 
                 for o in files_to_test:
                     # FIXME due to out --> stdout replacement
-                    if o.endswith(".stdout"): o = o[:-7] + ".out" 
+                    if o.endswith(".stdout"): o = o[:-7] + ".out"
                     if o not in ref2test:
                         err.write("files_to_test %s does not appear in Refs!\n" % o)
                     else:
@@ -445,7 +509,7 @@ def path2str(path):
     head, fname = os.path.split(path)
     head, x = os.path.split(head)
     _, dirname = os.path.split(head)
-                                                         
+
     return "["+dirname+"]["+fname+"]"
 
 
@@ -500,7 +564,7 @@ class AbinitTests(object):
             all_subnames.extend(suite.subsuites.keys())
 
         if len(all_subnames) != len(set(all_subnames)):
-            raise RuntimeError("The suite/subsuite name must be unique\n" + 
+            raise RuntimeError("The suite/subsuite name must be unique\n" +
                 "Please change the name of the suite/subsuite")
 
         return all_subnames
@@ -544,7 +608,7 @@ class AbinitTests(object):
         Return an instance of TestsDatabase initialized from an external pickle file.
 
         Args:
-            regenerate: 
+            regenerate:
                 True to force the regeneration of the database
                 and the writing of a new pickle file.
             with_pickle:
@@ -568,7 +632,7 @@ class AbinitTests(object):
                 lock.release()
 
         else:
-            logger.info("Loading database from file: %s" % database_path)
+            cprint("Loading database from: %s" % database_path, "yellow")
 
             # Read the database from the cpickle file.
             # Use file locking mechanism to prevent IO from other processes.
@@ -660,14 +724,15 @@ class AbinitTests(object):
 
         return d
 
-    def select_tests(self, suite_args, regenerate=False, keys=None, 
+    def select_tests(self, suite_args, regenerate=False, keys=None,
                      authors=None, ivars=None, with_pickle=True):
         """
         Main entry point for client code.
         Return an instance of AbinitTestSuite
 
-        with_pickle:
-            Save the generated database in pickle format.
+        Args:
+            with_pickle:
+                Save the generated database in pickle format.
         """
         try:
             tests_todo = self._suite_args_parser(suite_args)
@@ -803,7 +868,7 @@ KNOWN_KEYWORDS = {
     "mrgscr": "Test mrgscr code",
     "mrggkk": "Test mrggkk code",
     "mrgddb": "Test mrgddb code",
-    'mrgdv': "Test mrgdv code", 
+    'mrgdv': "Test mrgdv code",
     "optic": "Test optic code",
     "ujdet": "Test ujdet code",
     "aim": "Test aim code",
@@ -854,8 +919,8 @@ KNOWN_KEYWORDS = {
     'DFT-D3': "DFT-D3 dispersion correction",
     '3-BODY_TERM': "DFT-D3 dispersion correction",
     'GWLS': "GW with the Sternheimer approach",
-    'Projected_Wannier': "Projected Wannier functions", 
-    'VDW': "van der Wall interaction", 
+    'Projected_Wannier': "Projected Wannier functions",
+    'VDW': "van der Wall interaction",
     'LOBSTER': "Interface with LOBSTER code",
     'RELAXATION': "Structural relaxations",
     'magnetic_constraint': "Tests employing magnetic constraints",
