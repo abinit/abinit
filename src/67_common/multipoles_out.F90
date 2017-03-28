@@ -49,13 +49,13 @@ subroutine multipoles_out(rhor,mpi_enreg,natom,nfft,ngfft,nspden,&
  use m_profiling_abi
  use defs_basis
  use defs_abitypes
- use m_cgtools
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'multipoles_out'
  use interfaces_14_hidewrite
+ use interfaces_53_spacepar
 !End of the abilint section
 
  implicit none
