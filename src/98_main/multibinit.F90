@@ -200,7 +200,7 @@ program multibinit
 !Read the harmonics parts
  call effective_potential_file_read(filnam(3),reference_effective_potential,inp,comm)
 !Read the coefficient from fit
- if(inp%ncoeff/=0.and.filnam(4)/=''.and.filnam(4)/='no')then
+ if(filnam(4)/=''.and.filnam(4)/='no')then
    call effective_potential_file_getType(filnam(4),filetype)
    if(filetype==3) then
      call effective_potential_file_read(filnam(4),reference_effective_potential,inp,comm)
@@ -272,7 +272,10 @@ program multibinit
      end if
    case (1)
      if(iam_master)then
-       call fit_polynomial_coeff_get(inp%fit_cutoff,reference_effective_potential,1)
+       call fit_polynomial_coeff_get(inp%fit_cutoff,&
+&                                    reference_effective_potential%anharmonics_terms%coefficients,&
+&                                    reference_effective_potential,&
+&                                    reference_effective_potential%anharmonics_terms%ncoeff,1)
      end if
 !      call polynomial_coeff_broacast(reference_effective_potential%anharmonics_terms%coefficients,&
 ! &                                    master,comm)

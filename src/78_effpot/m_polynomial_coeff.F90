@@ -325,7 +325,7 @@ end subroutine polynomial_coeff_setCoefficient
 !!
 !! SOURCE
 
-subroutine polynomial_coeff_getName(name,atm1,atm2,dir,power,polynomial_coeff,cell_atm1,cell_atm2)
+subroutine polynomial_coeff_getName(name,atm1,atm2,dir,power,polynomial_coeff,cell_atm1,cell_atm2,strain)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -339,7 +339,7 @@ subroutine polynomial_coeff_getName(name,atm1,atm2,dir,power,polynomial_coeff,ce
 !Arguments ------------------------------------
 !scalars
 !arrays
- character(len=1),optional,intent(in) :: dir,power
+ character(len=1),optional,intent(in) :: dir,power,strain
  character(len=5),optional,intent(in) :: atm1,atm2
  character(len=100),optional,intent(out):: name
  type(polynomial_coeff_type),optional, intent(in) :: polynomial_coeff
@@ -376,6 +376,8 @@ subroutine polynomial_coeff_getName(name,atm1,atm2,dir,power,polynomial_coeff,ce
        atm2_tmp = trim(atm2)//"_"//dir
      end if
      name="("//trim(atm1_tmp)//"-"//trim(atm2_tmp)//")^"//power
+   else if (present(strain).and.present(power))then
+      name="("//"eta_"//trim(strain)//")^"//power
    end if
  end if
 
@@ -572,8 +574,8 @@ subroutine polynomial_coeff_writeXML(coeffs,ncoeff,filename)
 
 !   Close header
     do icoeff = 1, ncoeff
-      WRITE(unit_xml,'("  <coefficient number=""",I0,""" text=""",a,""">")') &
-        icoeff,trim(coeffs(icoeff)%name)
+      WRITE(unit_xml,'("  <coefficient number=""",I0,""" value=""",E19.10,""" text=""",a,""">")') &
+        icoeff,coeffs(icoeff)%coefficient,trim(coeffs(icoeff)%name)
       do iterm = 1,coeffs(icoeff)%nterm
         WRITE(unit_xml,'("    <term weight=""",F9.6,""">")') &
           coeffs(icoeff)%terms(iterm)%weight
@@ -703,7 +705,7 @@ subroutine polynomial_coeff_dot(coeff1_in,coeff2_in,coeffs_out,natom,power,symbo
 !arrays
  integer,allocatable :: atindx(:,:),cell(:,:,:),dir_int(:),powers(:)
  character(len=1) :: powerchar
- character(len=1) :: mutodir(3) = (/"x","y","z"/)
+ character(len=1) :: mutodir(9) = (/"x","y","z","1","2","3","4","5","6"/)
  character(len=100):: name,text
  type(polynomial_term_type),dimension(:),allocatable :: terms
 

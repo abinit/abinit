@@ -42,7 +42,7 @@ module m_effective_potential
  use m_special_funcs,  only : factorial
  use m_xmpi
  use m_copy,           only : alloc_copy
- use m_crystal,        only : crystal_t, crystal_init, crystal_free, crystal_t,crystal_print
+ use m_crystal,        only : crystal_t, crystal_init, crystal_free,crystal_print
  use m_anaddb_dataset, only : anaddb_dataset_type, anaddb_dtset_free, outvars_anaddb, invars9
  use m_dynmat,         only : make_bigbox,q0dy3_apply, q0dy3_calc, dfpt_phfrq
 
@@ -262,23 +262,12 @@ subroutine effective_potential_init(crystal,eff_pot,energy,ifcs,ncoeff,nqpt,comm
  eff_pot%energy = energy
 
 !1-Fill the crystal
- eff_pot%crystal%natom  = crystal%natom
- eff_pot%crystal%ntypat = crystal%ntypat
- eff_pot%crystal%ucvol  = crystal%ucvol
- eff_pot%crystal%rprimd = crystal%rprimd
-
-
- ABI_ALLOCATE(eff_pot%crystal%xcart,(3,eff_pot%crystal%natom))
- eff_pot%crystal%xcart = crystal%xcart
-
- ABI_ALLOCATE(eff_pot%crystal%amu,(crystal%ntypat))
- eff_pot%crystal%amu = crystal%amu
-
- ABI_ALLOCATE(eff_pot%crystal%typat,(crystal%natom))
- eff_pot%crystal%typat = crystal%typat
-
- ABI_ALLOCATE(eff_pot%crystal%znucl,(crystal%ntypat))
- eff_pot%crystal%znucl = crystal%znucl
+!Warning znucl is dimension with ntypat = nspsp hence alchemy is not supported here
+ call crystal_init(crystal%amu,eff_pot%crystal,crystal%space_group,crystal%natom,&
+&                  crystal%npsp,crystal%ntypat,crystal%nsym,crystal%rprimd,&
+&                  crystal%typat,crystal%xred,crystal%zion,crystal%znucl,&
+&                  crystal%timrev,.FALSE.,.FALSE.,crystal%title,&
+&                  symrel=crystal%symrel,tnons=crystal%tnons,symafm=crystal%symafm)
 
 !4-Fill harmonic part
  call harmonics_terms_init(eff_pot%harmonics_terms,ifcs,crystal%natom,ifcs%nrpt)
@@ -2707,6 +2696,7 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
 #undef ABI_FUNC
 #define ABI_FUNC 'effective_potential_evaluate'
  use interfaces_14_hidewrite
+ use interfaces_18_timing
  use interfaces_41_geometry
 !End of the abilint section
 

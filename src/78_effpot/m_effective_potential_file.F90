@@ -60,7 +60,7 @@ module m_effective_potential_file
 
 #if defined HAVE_LIBXML
  public :: effpot_xml_checkXML
- public :: effpot_xml_getDimTerm
+ public :: effpot_xml_getDimCoeff
  public :: effpot_xml_readSystem
  public :: effpot_xml_getValue
  public :: effpot_xml_getAttribute
@@ -108,18 +108,19 @@ module m_effective_potential_file
  end interface
 
  interface
-   subroutine effpot_xml_readTerm(filename,icoeff,iterm,ndisp,nterm,atindx,cell,direction,&
-&                                 power,weight)&
-&                          bind(C,name="effpot_xml_readTerm")
+   subroutine effpot_xml_readCoeff(filename,ncoeff,ndisp,nterm,&
+&                                 coefficient,atindx,cell,direction,power,weight)&
+&                          bind(C,name="effpot_xml_readCoeff")
      use iso_c_binding, only : C_CHAR,C_DOUBLE,C_INT
      character(kind=C_CHAR) :: filename(*)
-     integer(C_INT) :: atindx(2,ndisp)
-     integer(C_INT) :: cell(3,2,ndisp)
-     integer(C_INT) :: icoeff,iterm,ndisp,nterm
-     integer(C_INT) :: direction(ndisp)
-     integer(C_INT) :: power(ndisp)
-     real(C_DOUBLE) :: weight
-   end subroutine effpot_xml_readTerm
+     integer(C_INT) :: atindx(ncoeff,nterm,2,ndisp)
+     integer(C_INT) :: cell(ncoeff,nterm,3,2,ndisp)
+     integer(C_INT) :: ncoeff,ndisp,nterm
+     integer(C_INT) :: direction(ncoeff,nterm,ndisp)
+     integer(C_INT) :: power(ncoeff,nterm,ndisp)
+     real(C_DOUBLE) :: coefficient(ncoeff)
+     real(C_DOUBLE) :: weight(ncoeff,nterm)
+   end subroutine effpot_xml_readCoeff
  end interface
 
  interface
@@ -142,14 +143,14 @@ module m_effective_potential_file
  end interface
 
  interface
-   subroutine effpot_xml_getDimTerm(filename,icoeff,name,ndisp,nterm)&
-&                          bind(C,name="effpot_xml_getDimTerm")
+   subroutine effpot_xml_getDimCoeff(filename,ncoeff,nterm_max,ndisp_max)&
+&                          bind(C,name="effpot_xml_getDimCoeff")
      use iso_c_binding, only : C_CHAR,C_DOUBLE,C_INT,C_PTR
      character(kind=C_CHAR) :: filename(*)
 !     character(kind=C_CHAR) :: name(*)
      type(C_PTR) :: name
-     integer(C_INT) :: icoeff,ndisp,nterm
-   end subroutine effpot_xml_getDimTerm
+     integer(C_INT) :: coeff,ndisp_max,nterm_max
+   end subroutine effpot_xml_getDimCoeff
  end interface
 
 
@@ -335,18 +336,14 @@ subroutine effective_potential_file_read(filename,eff_pot,inp,comm)
 
 !     Assign the coeff number from input
       if(inp%ncoeff==zero)then
-        write(message,'(6a)') ch10,&
+        write(message,'(8a)') ch10,&
 &      ' WARNING : The number of coefficients in set to 0',&
 &      ' in the input file.',ch10,&
-&      '           The coefficients must be fitted'
+&      '           The values of the coefficient will be read in the XML',ch10,&
+&      '           or might be fitted'
         call wrtout(std_out,message,'COLL')
-!       if no coefficients is set in the input
-!       their values are set to zero in oder to fit them.
-        do ii = 1,eff_pot%anharmonics_terms%ncoeff
-          call polynomial_coeff_setCoefficient(zero,eff_pot%anharmonics_terms%coefficients(ii))
-        end do
       else
-        if (eff_pot%anharmonics_terms%ncoeff > inp%ncoeff)then
+        if (eff_pot%anharmonics_terms%ncoeff /= inp%ncoeff)then
           write(message, '(5a)' )&
 &            ' The number of coefficient in the XML file is superior to the ',ch10,&
 &            ' number of coefficient in the input ',ch10,&
@@ -613,7 +610,7 @@ end subroutine effective_potential_file_getDimSystem
 !!
 !! SOURCE
 
-subroutine effective_potential_file_getDimCoeff(filename,ncoeff)
+subroutine effective_potential_file_getDimCoeff(filename,ncoeff,ndisp_max,nterm_max)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -628,13 +625,14 @@ subroutine effective_potential_file_getDimCoeff(filename,ncoeff)
 !Arguments ------------------------------------
 !scalars
  character(len=fnlen),intent(in) :: filename
- integer,intent(out) :: ncoeff
+ integer,intent(out) :: ncoeff,ndisp_max,nterm_max
 !Local variables-------------------------------
  !scalar
- integer :: filetype
+ integer ::  filetype
 #ifndef HAVE_LIBXML
+ integer ::  count,count2
   integer :: funit = 1,ios=0
-  logical :: found
+  logical :: found,found2
 #endif
 !arrays
 #ifndef HAVE_LIBXML
@@ -652,10 +650,12 @@ subroutine effective_potential_file_getDimCoeff(filename,ncoeff)
    call wrtout(std_out,message,'COLL')
 
    ncoeff = zero
+   nterm_max = zero
+   ndisp_max = zero
 
 #if defined HAVE_LIBXML
 !  Read with libxml the number of coefficient
-   call effpot_xml_getNumberKey(char_f2c(trim(filename)),char_f2c("coefficient"),ncoeff)
+   call effpot_xml_getDimCoeff(char_f2c(trim(filename)),ncoeff,nterm_max,ndisp_max)
 #else
 !  Read by hand
 !  Start a reading loop
@@ -668,7 +668,7 @@ subroutine effective_potential_file_getDimCoeff(filename,ncoeff)
    end if
 
 !  First parse to know the number of atoms
-   do while (ios == 0.and.(.not.found))
+   do while (ios == 0)
      read(funit,'(a)',iostat=ios) readline
      if(ios == 0)then
        call rmtabfromline(readline)
@@ -677,6 +677,36 @@ subroutine effective_potential_file_getDimCoeff(filename,ncoeff)
 !      from old script includes tarbulation at the begining of each line
        if (line(1:12)==char(60)//'coefficient') then
          ncoeff=ncoeff+1
+         count = zero
+         found = .false.
+         do while(.not.found)
+           read(funit,'(a)',iostat=ios) readline
+           line=adjustl(readline)
+           if (line(1:5)==char(60)//'term') then
+             count = count +1
+             found2 = .false.
+             count2 = zero
+             do while(.not.found2)
+               read(funit,'(a)',iostat=ios) readline
+               line=adjustl(readline)
+               if (line(1:13)==char(60)//'displacement') then
+                 count2 = count2 + 1
+               else if (line(1:7)==char(60)//'strain') then
+                 count2 = count2 + 1
+               else if (line(1:6)==char(60)//'/term') then
+                 if (count2 > ndisp_max) ndisp_max = count2
+                 found2 = .true.
+               else
+                 cycle
+               end if
+             end do
+           else  if (line(1:13)==char(60)//'/coefficient') then
+             if (count > nterm_max) nterm_max = count
+             found = .true.
+           else
+             cycle
+           end if
+         end do
          cycle
        end if
      end if
@@ -1890,12 +1920,12 @@ end subroutine system_getDimFromXML
  end if
 
 !Initialisation of eff_pot
-call effective_potential_init(crystal,eff_pot,energy,ifcs,ncoeff,nph1l,comm,&
-&                             dynmat=dynmat,elastic_constants=elastic_constants,&
-&                             elastic3rd=elastic3rd,elastic_displacement=elastic_displacement,&
-&                             epsilon_inf=epsilon_inf,internal_strain=internal_strain,&
-&                             phonon_strain=phonon_strain,phfrq=phfrq,qpoints=qph1l,&
-&                             has_strainCoupling=has_anharmonics,zeff=zeff)
+ call effective_potential_init(crystal,eff_pot,energy,ifcs,ncoeff,nph1l,comm,&
+&                              dynmat=dynmat,elastic_constants=elastic_constants,&
+&                              elastic3rd=elastic3rd,elastic_displacement=elastic_displacement,&
+&                              epsilon_inf=epsilon_inf,internal_strain=internal_strain,&
+&                              phonon_strain=phonon_strain,phfrq=phfrq,qpoints=qph1l,&
+&                              has_strainCoupling=has_anharmonics,zeff=zeff)
 
 !DEALLOCATION OF ARRAYS
  ABI_DEALLOCATE(all_amu)
@@ -2606,6 +2636,7 @@ subroutine coeffs_xml2effpot(eff_pot,filename,comm)
  use m_polynomial_coeff
  use m_polynomial_term
 #if defined HAVE_LIBXML
+ use m_crystal, only : symbols_crystal
  use iso_c_binding, only : C_CHAR,C_PTR,c_f_pointer
 #endif
 
@@ -2627,17 +2658,15 @@ subroutine coeffs_xml2effpot(eff_pot,filename,comm)
 
  !Local variables-------------------------------
  !scalar
- integer :: ii,jj,my_rank,ndisp,ncoeff,nproc,nterm
- real(dp):: coefficient,weight
+ integer :: ii,jj,my_rank,ndisp,ncoeff,nterm_max,ndisp_max,nproc,nterm
+! character(len=200),allocatable :: name(:)
  character(len=200) :: name
 #ifdef HAVE_LIBXML
- type(C_PTR) :: name_tmp
- !character(kind=C_CHAR,len=1),pointer :: name_tmp2
- integer :: funit = 1,ios = 0
- integer :: icoeff,idisp,iterm
- logical :: found
- character (len=XML_RECL) :: line,readline
- character (len=XML_RECL) :: strg,strg1
+ integer :: icoeff,iterm,idisp
+ character(len=1) :: mutodir(9) = (/"x","y","z","1","2","3","4","5","6"/)
+ character(len=1) :: powerchar
+ character(len=5),allocatable :: symbols(:)
+ character(len=200) :: text
 #endif
 
 #ifndef HAVE_LIBXML
@@ -2652,9 +2681,10 @@ subroutine coeffs_xml2effpot(eff_pot,filename,comm)
  logical :: iam_master
  logical :: debug =.FALSE.
  !arrays
- integer,allocatable :: atindx(:,:), cell(:,:,:),direction(:),power(:)
+ real(dp),allocatable :: coefficient(:),weight(:,:)
+ integer,allocatable :: atindx(:,:,:,:), cell(:,:,:,:,:),direction(:,:,:),power(:,:,:)
  type(polynomial_coeff_type),dimension(:),allocatable :: coeffs
- type(polynomial_term_type),dimension(:),allocatable :: terms
+ type(polynomial_term_type),dimension(:,:),allocatable :: terms
 
 ! *************************************************************************
 
@@ -2673,12 +2703,27 @@ subroutine coeffs_xml2effpot(eff_pot,filename,comm)
  nterm  = zero
  ndisp  = zero
 
- call effective_potential_file_getDimCoeff(filename,ncoeff)
+ call effective_potential_file_getDimCoeff(filename,ncoeff,ndisp_max,nterm_max)
+
+!  Do some checks
+ if (nterm_max<=zero) then
+   write(message, '(a,a,a)' )&
+&     ' Unable to read the number of terms in ',trim(filename),ch10
+   MSG_ERROR(message)
+ end if
+
+  if (ndisp_max<=zero) then
+    write(message, '(a,a,a)' )&
+&    ' Unable to read the number of displacement in ',trim(filename),ch10
+    MSG_ERROR(message)
+  end if
+
 
 !Allocation ov the polynomial coeff type
  ABI_DATATYPE_ALLOCATE(coeffs,(ncoeff))
 
  if(iam_master)then
+
 #if defined HAVE_LIBXML
    write(message,'(3a)')'-Reading the file ',trim(filename),&
 &   ' with LibXML library'
@@ -2689,175 +2734,82 @@ subroutine coeffs_xml2effpot(eff_pot,filename,comm)
    call wrtout(ab_out,message,'COLL')
    call wrtout(std_out,message,'COLL')
 
-!  Read all the coefficients
-   do ii=1,ncoeff
-    !Read with libxml librarie
 
+ !Read with libxml librarie
 #if defined HAVE_LIBXML
-!    1- Read the number of terms and displacement for this coefficients
-     call effpot_xml_getDimTerm(char_f2c(trim(filename)),ii,name_tmp,ndisp,nterm)
 
-!  AM_NEED TO FIX BUG IN THE READING OF THE NAME
-!    Convert character from C
-!     call c_f_pointer(name_tmp,name_tmp2)
-!     call char_c2f(name_tmp2,name)
-!    AM_TEST
-! Read by hand nedd to fix bug
-     name = ''
-     if (open_file(filename,message,unit=funit,form="formatted",&
-&                 status="old",action="read") /= 0) then
-       MSG_ERROR(message)
-     end if
-!Start a reading loop in fortran
-     rewind(unit=funit)
-     ios = 0
-     found=.false.
-!  Initialisation of counter
-     icoeff  = zero
-     iterm   = zero
-     idisp   = zero
-!    Parser
-      do while (ios == 0..and..not.found)
-       read(funit,'(a)',iostat=ios) readline
-       if(ios == 0)then
-         call rmtabfromline(readline)
-         line=adjustl(readline)
-         if ((line(1:12)==char(60)//'coefficient')) then
-           call rdfromline('number',line,strg)
-           if (strg/="") then
-             strg1=trim(strg)
-             read(strg1,*) icoeff
-           end if
-           if (icoeff==ii)then
-             call rdfromline('text',line,strg)
-             if (strg/="") then
-               strg1=trim(strg)
-               read(strg1,*) name
-               found = .true.
-               cycle
-             end if
-           end if
-         end if
-       end if
+   ABI_DATATYPE_ALLOCATE(terms,(ncoeff,nterm_max))
+   ABI_ALLOCATE(atindx,(ncoeff,nterm_max,2,ndisp_max))
+   ABI_ALLOCATE(coefficient,(ncoeff))
+   ABI_ALLOCATE(cell,(ncoeff,nterm_max,3,2,ndisp_max))
+   ABI_ALLOCATE(direction,(ncoeff,nterm_max,ndisp_max))
+   ABI_ALLOCATE(power,(ncoeff,nterm_max,ndisp_max))
+   ABI_ALLOCATE(weight,(ncoeff,nterm_max))
+   ABI_ALLOCATE(symbols,(eff_pot%crystal%natom))
+
+!  Get the symbols arrays
+   call symbols_crystal(eff_pot%crystal%natom,eff_pot%crystal%ntypat,&
+&                       eff_pot%crystal%npsp,symbols,eff_pot%crystal%typat,eff_pot%crystal%znucl)
+
+
+!  Read the values of this term with libxml
+   call effpot_xml_readCoeff(char_f2c(trim(filename)),ncoeff,ndisp_max,nterm_max,&
+&                            coefficient,atindx,cell,direction,power,weight) !  
+!  In the XML the atom index begin to zero
+!  Need to shift for fortran array
+   atindx(:,:,:,:) = atindx(:,:,:,:) + 1
+
+   do icoeff=1,ncoeff
+     do iterm=1,nterm_max
+!      Initialisation of the polynomial_term structure with the values from the
+       call polynomial_term_init(atindx(icoeff,iterm,:,:),cell(icoeff,iterm,:,:,:),&
+&                                direction(icoeff,iterm,:),ndisp_max,terms(icoeff,iterm),&
+&                                power(icoeff,iterm,:),weight(icoeff,iterm),check=.true.)
      end do
-     close(unit=funit)
-!AM_TEST
+
+!    Get the name of this coefficient if the term is the first
+     name = ""
+     do idisp=1,terms(icoeff,1)%ndisp
+       write(powerchar,'(I0)') terms(icoeff,1)%power(idisp)
+       text = ""
+       if(terms(icoeff,1)%direction(idisp) > zero) then
+         call polynomial_coeff_getName(text,atm1=symbols(terms(icoeff,1)%atindx(1,idisp)),&
+&                                           atm2=symbols(terms(icoeff,1)%atindx(2,idisp)),&
+&                                           dir=mutodir(terms(icoeff,1)%direction(idisp)),&
+&                                           power=trim(powerchar),&
+&                                           cell_atm1=terms(icoeff,1)%cell(:,1,idisp),&
+&                                           cell_atm2=terms(icoeff,1)%cell(:,2,idisp))
+       else
+         call polynomial_coeff_getName(text,strain=mutodir(3+abs(terms(icoeff,1)%direction(idisp))),&
+&                                           power=trim(powerchar))
+
+       end if
+       name = trim(name)//trim(text)
+     end do
+!    Initialisation of the polynomial_coefficent structure with the values
+     call polynomial_coeff_init(coefficient(icoeff),nterm_max,coeffs(icoeff),&
+&                               terms(icoeff,:),name=name,check=.true.)
+!    Free them all
+     do iterm=1,nterm_max
+       call polynomial_term_free(terms(icoeff,iterm))
+     end do
+   end do
+   ABI_DEALLOCATE(symbols)
 
 #else
-
-! Read by hand
-     if (open_file(filename,message,unit=funit,form="formatted",&
-&                 status="old",action="read") /= 0) then
-       MSG_ERROR(message)
-     end if
-
-!Start a reading loop in fortran
-     rewind(unit=funit)
-     ios = zero
-     found=.false.
-     found2=.false.
-
-!  Initialisation of counter
-     icoeff  = zero
-     iterm   = zero
-     idisp   = zero
-
-!    Parser
-     do while (ios == 0)
-       read(funit,'(a)',iostat=ios) readline
-       if(ios == 0)then
-         call rmtabfromline(readline)
-         line=adjustl(readline)
-         if ((line(1:12)==char(60)//'coefficient')) then
-           call rdfromline('number',line,strg)
-           if (strg/="") then
-             strg1=trim(strg)
-             read(strg1,*) icoeff
-           end if
-           if (icoeff==ii)then
-             call rdfromline('text',line,strg)
-             if (strg/="") then
-               strg1=trim(strg)
-               read(strg1,*) name
-             end if
-             do while (.not.found)
-               read(funit,'(a)',iostat=ios) readline
-               call rmtabfromline(readline)
-               line=adjustl(readline)
-               if ((line(1:13)==char(60)//'/coefficient')) then
-                 found= .true.
-               end if
-               if ((line(1:5)==char(60)//'term')) then
-                 iterm = iterm + 1
-                 do while(.not.found2)
-                   read(funit,'(a)',iostat=ios) readline
-                   call rmtabfromline(readline)
-                   line=adjustl(readline)
-                   if ((line(1:13)==char(60)//'displacement')) then
-                     idisp = idisp + 1
-                   end if
-                   if ((line(1:7)==char(60)//'strain')) then
-                     idisp = idisp + 1 
-                   end if
-                   if ((line(1:6)==char(60)//'/term')) then
-                     found2 = .true.
-                   end if
-                 end do
-               end if
-             end do
-           end if
-           cycle
-         end if
-       end if
-     end do
-
-     close(unit=funit)
-
-     nterm = iterm
-     ndisp = idisp
-
-!  Do some checks
-     if (nterm<=zero) then
-       write(message, '(a,a,a)' )&
-&       ' Unable to read the number of terms in ',trim(filename),ch10
-       MSG_ERROR(message)
-     end if
-
-     if (ndisp<=zero) then
-       write(message, '(a,a,a)' )&
-&       ' Unable to read the number of displacement in ',trim(filename),ch10
-       MSG_ERROR(message)
-     end if
-#endif
-!    2- Allocataion of the terms array
-     ABI_DATATYPE_ALLOCATE(terms,(nterm))
-     ABI_ALLOCATE(atindx,(2,ndisp))
-     ABI_ALLOCATE(cell,(3,2,ndisp))
-     ABI_ALLOCATE(direction,(ndisp))
-     ABI_ALLOCATE(power,(ndisp))
-
-#if defined HAVE_LIBXML
-!    3- Loop over the number of term of this coefficient
-     do jj=1,nterm
-!      4-Read the values of this term with libxml
-       call effpot_xml_readTerm(char_f2c(trim(filename)),ii,jj,ndisp,nterm,&
-&                               atindx,cell,direction,power,weight)
-!     5-In the XML the atom index begin to zero
-!       Need to shift for fortran array
-       atindx(:,:) = atindx(:,:) + 1
-
-!      6-Initialisation of the polynomial_term structure with the values from the
-!        previous step
-       call polynomial_term_init(atindx,cell,direction,ndisp,terms(jj),power,weight)
-     end do
-
-#else
-!    3-4 Loop over the file
-!        Read the values of all the terms with fortran
-     if (open_file(filename,message,unit=funit,form="formatted",&
+   ABI_DATATYPE_ALLOCATE(terms,(1,nterm_max))
+   ABI_ALLOCATE(atindx,(1,1,2,ndisp_max))
+   ABI_ALLOCATE(coefficient,(1))
+   ABI_ALLOCATE(cell,(1,1,3,2,ndisp_max))
+   ABI_ALLOCATE(direction,(1,1,ndisp_max))
+   ABI_ALLOCATE(power,(1,1,ndisp_max))
+   ABI_ALLOCATE(weight,(1,1))
+!  Loop over the file
+!  Read the values of all the terms with fortran
+   if (open_file(filename,message,unit=funit,form="formatted",&
 &              status="old",action="read") /= 0) then
-       MSG_ERROR(message)
-     end if
+     MSG_ERROR(message)
+   end if
 
 !    Start a reading loop in fortran
      rewind(unit=funit)
@@ -2865,174 +2817,189 @@ subroutine coeffs_xml2effpot(eff_pot,filename,comm)
      found=.false.
 
 !    Initialisation of counter
-     icoeff  = one
-     iterm   = one
-     idisp   = one
+     icoeff  = zero
 
 !    Parser
-     do while ((ios==0).or..not.found)
+     do while (ios==0)
        read(funit,'(a)',iostat=ios) readline
        if (ios == 0) then
          call rmtabfromline(readline)
          line=adjustl(readline)
          if ((line(1:12)==char(60)//'coefficient')) then
-           call rdfromline('number',line,strg)
+!          Read headers of coefficient
+           call rdfromline('text',line,strg)
+           if (strg/="") then
+             name=trim(strg)
+           end if
+           call rdfromline('value',line,strg)
            if (strg/="") then
              strg1=trim(strg)
-             read(strg1,*) icoeff
+             read(strg1,*) coefficient(1)
            end if
-           if (icoeff==ii)then
-             do while (.not.found)
-               read(funit,'(a)',iostat=ios) readline
-               call rmtabfromline(readline)
-               line=adjustl(readline)
-               if ((line(1:13)==char(60)//'/coefficient')) then
-                 iterm   = one
-                 idisp   = one
-                 found= .true.
-                 cycle
+!          End read headers of coefficient
+!          Reset counter
+           found  = .false.
+           atindx = zero
+           cell   = zero
+           direction = zero
+           power  = zero           
+           iterm  = zero
+           idisp  = zero  
+           nterm  = zero
+           do while (.not.found)
+             read(funit,'(a)',iostat=ios) readline
+             call rmtabfromline(readline)
+             line=adjustl(readline)
+             if ((line(1:13)==char(60)//'/coefficient')) then
+               found= .true.
+               cycle
+             end if
+             if ((line(1:5)==char(60)//'term')) then
+               nterm = nterm + 1
+               ndisp = zero
+               idisp = zero
+               displacement = .true.
+               call rdfromline('weight',line,strg)
+               if (strg/="") then
+                 strg1=trim(strg)
+                 read(strg1,*) weight
                end if
-               if ((line(1:5)==char(60)//'term')) then
-                 idisp = one
-                 displacement = .true.
-                 call rdfromline('weight',line,strg)
-                 if (strg/="") then
-                   strg1=trim(strg)
-                   read(strg1,*) weight
+               do while(displacement)
+                 read(funit,'(a)',iostat=ios) readline
+                 call rmtabfromline(readline)
+                 line=adjustl(readline)
+                 if ((line(1:6)==char(60)//'/term')) then
+                   displacement = .false.
                  end if
-                 do while(displacement)
-                   read(funit,'(a)',iostat=ios) readline
-                   call rmtabfromline(readline)
-                   line=adjustl(readline)
-                   if ((line(1:6)==char(60)//'/term')) then
-                     displacement = .false.
+                 if ((line(1:7)==char(60)//'strain')) then
+                   ndisp = ndisp + 1
+                   idisp = idisp + 1
+                   call rdfromline('power',line,strg)
+                   if (strg/="") then 
+                     strg1=trim(strg)
+                     read(strg1,*) power(1,1,idisp)
                    end if
-                   if ((line(1:7)==char(60)//'strain')) then
-                     call rdfromline('power',line,strg)
-                     if (strg/="") then 
-                       strg1=trim(strg)
-                       read(strg1,*) power(idisp)
-                     end if
-                     call rdfromline('voigt',line,strg)
-                     if (strg/="") then 
-                       strg1=trim(strg)
-                       read(strg1,*) direction(idisp) 
-                       direction(idisp) = -1*direction(idisp) 
-!                      Set to -1 the useless quantitiers for strain                       
-                       atindx(:,idisp)  = -1
-                       cell(:,:,idisp)  = -1
-                     end if
-                     idisp=idisp+1
+                   call rdfromline('voigt',line,strg)
+                   if (strg/="") then 
+                     strg1=trim(strg)
+                     read(strg1,*) direction(1,1,idisp) 
+                     direction(1,1,idisp) = -1*direction(1,1,idisp) 
+!                    Set to -1 the useless quantitiers for strain                       
+                     atindx(1,1,:,idisp)  = -1
+                     cell(1,1,:,:,idisp)  = -1
                    end if
-                   if ((line(1:18)==char(60)//'displacement_diff')) then
-                     found2=.true.
-                     call rdfromline('atom_a',line,strg)
-                     if (strg/="") then
-                       strg1=trim(strg)
-                       read(strg1,*) atindx(1,idisp)
-                     end if
-                     call rdfromline('atom_b',line,strg)
-                     if (strg/="") then
-                       strg1=trim(strg)
-                       read(strg1,*) atindx(2,idisp)
-                     end if
-                     call rdfromline('direction',line,strg)
-                     if (strg/="") then
-                       strg1=trim(strg)
-                       if (trim(strg1).eq."x") direction(idisp) = 1
-                       if (trim(strg1).eq."y") direction(idisp) = 2
-                       if (trim(strg1).eq."z") direction(idisp) = 3
-                     end if
-                     call rdfromline('power',line,strg)
-                     if (strg/="") then
-                       strg1=trim(strg)
-                       read(strg1,*) power(idisp)
-                     end if
-                     do while(found2)
-                       read(funit,'(a)',iostat=ios) readline
-                       call rmtabfromline(readline)
-                       line=adjustl(readline)
-                       if ((line(1:7)==char(60)//'cell_a')) then
+                 end if
+                 if ((line(1:18)==char(60)//'displacement_diff')) then
+                   ndisp = ndisp + 1
+                   idisp = idisp + 1
+                   found2=.true.
+                   call rdfromline('atom_a',line,strg)
+                   if (strg/="") then
+                     strg1=trim(strg)
+                     read(strg1,*) atindx(1,1,1,idisp)
+                   end if
+                   call rdfromline('atom_b',line,strg)
+                   if (strg/="") then
+                     strg1=trim(strg)
+                     read(strg1,*) atindx(1,1,2,idisp)
+                   end if
+                   call rdfromline('direction',line,strg)
+                   if (strg/="") then
+                     strg1=trim(strg)
+                     if (trim(strg1).eq."x") direction(1,1,idisp) = 1
+                     if (trim(strg1).eq."y") direction(1,1,idisp) = 2
+                     if (trim(strg1).eq."z") direction(1,1,idisp) = 3
+                   end if
+                   call rdfromline('power',line,strg)
+                   if (strg/="") then
+                     strg1=trim(strg)
+                     read(strg1,*) power(1,1,idisp)
+                   end if
+                   do while(found2)
+                     read(funit,'(a)',iostat=ios) readline
+                     call rmtabfromline(readline)
+                     line=adjustl(readline)
+                     if ((line(1:7)==char(60)//'cell_a')) then
+                       call rdfromline_value('cell_a',line,strg)
+                       if (strg/="") then
+                         strg1=trim(strg)
+                         read(strg1,*) (cell(1,1,mu,1,idisp),mu=1,3)
+                       else
+                         read(funit,'(a)',iostat=ios) readline
+                         call rmtabfromline(readline)
+                         line=adjustl(readline)
                          call rdfromline_value('cell_a',line,strg)
                          if (strg/="") then
                            strg1=trim(strg)
-                           read(strg1,*) (cell(mu,1,idisp),mu=1,3)
+                           read(strg1,*)(cell(1,1,mu,1,idisp),mu=1,3)
                          else
-                           read(funit,'(a)',iostat=ios) readline
-                           call rmtabfromline(readline)
-                           line=adjustl(readline)
-                           call rdfromline_value('cell_a',line,strg)
-                           if (strg/="") then
-                             strg1=trim(strg)
-                             read(strg1,*)(cell(mu,1,idisp),mu=1,3)
-                           else
-                             strg1=trim(line)
-                             read(strg1,*)(cell(mu,1,idisp),mu=1,3)
-                           end if
-                         end  if
-                       end if
-                       if ((line(1:7)==char(60)//'cell_b')) then
+                           strg1=trim(line)
+                           read(strg1,*)(cell(1,1,mu,1,idisp),mu=1,3)
+                         end if
+                       end  if
+                     end if
+                     if ((line(1:7)==char(60)//'cell_b')) then
+                       call rdfromline_value('cell_b',line,strg)
+                       if (strg/="") then
+                         strg1=trim(strg)
+                         read(strg1,*) (cell(1,1,mu,2,idisp),mu=1,3)
+                       else
+                         read(funit,'(a)',iostat=ios) readline
+                         call rmtabfromline(readline)
+                         line=adjustl(readline)
                          call rdfromline_value('cell_b',line,strg)
                          if (strg/="") then
                            strg1=trim(strg)
-                           read(strg1,*) (cell(mu,2,idisp),mu=1,3)
+                           read(strg1,*)(cell(1,1,mu,1,idisp),mu=1,3)
                          else
-                           read(funit,'(a)',iostat=ios) readline
-                           call rmtabfromline(readline)
-                           line=adjustl(readline)
-                           call rdfromline_value('cell_b',line,strg)
-                           if (strg/="") then
-                             strg1=trim(strg)
-                             read(strg1,*)(cell(mu,1,idisp),mu=1,3)
-                           else
-                             strg1=trim(line)
-                             read(strg1,*)(cell(mu,1,idisp),mu=1,3)
-                           end if
-                         end  if
-                       end if
-                       if ((line(1:19)==char(60)//'/displacement_diff')) then
-                         idisp=idisp+1
-                         found2=.false.
-                       end if
-                     end do
-                   end if
-                 end do
+                           strg1=trim(line)
+                           read(strg1,*)(cell(1,1,mu,1,idisp),mu=1,3)
+                         end if
+                       end  if
+                     end if
+                     if ((line(1:19)==char(60)//'/displacement_diff')) then
+                       found2=.false.
+                     end if
+                   end do
+                 end if
+               end do!end do while displacement
+!              In the XML the atom index begin to zero
+!              Need to shift for fortran array
+               atindx(1,1,:,:) = atindx(1,1,:,:) + 1
+!              Initialisation of the polynomial_term structure with the values from the
+!              previous step
+               iterm = iterm + 1
+               call polynomial_term_init(atindx(1,1,:,:),cell(1,1,:,:,:),&
+&                                        direction(1,1,:),ndisp,terms(1,iterm),&
+&                                        power(1,1,:),weight(1,1),check=.true.)
+             end if!end if term
+           end do!end do while found (coeff)
 
-!                5-In the XML the atom index begin to zero
-!                  Need to shift for fortran array
-                 atindx(:,:) = atindx(:,:) + 1
+!          Initialisation of the polynomial_coefficent structure with the values from the
+!          previous step
+           icoeff = icoeff + 1
+           call polynomial_coeff_init(coefficient(1),nterm,coeffs(icoeff),terms(1,:),name=name)
 
-!                6-Initialisation of the polynomial_term structure with the values from the
-!                previous step
-                 call polynomial_term_init(atindx,cell,direction,ndisp,terms(iterm),power,weight)
-                 iterm = iterm + 1
-               end if
-             end do
-           end if
-           cycle
-         end if
-       end if
-     end do
-
+!          Deallocation of the terms array for this coefficient
+           do jj=1,nterm_max
+             call polynomial_term_free(terms(1,jj))
+           end do
+         end if!end if line = coefficient
+       end if!end if ios==0
+     end do!end do while on file
+     
      close(unit=funit)
 
 #endif
 
-!    7-Initialisation of the polynomial_coefficent structure with the values from the
-!      previous step
-     call polynomial_coeff_init(coefficient,nterm,coeffs(ii),terms,name=name)
-
-!    8-Deallocation of the terms array for this coefficient
-     do jj=1,nterm
-       call polynomial_term_free(terms(jj))
-     end do
      ABI_DATATYPE_DEALLOCATE(terms)
      ABI_DEALLOCATE(atindx)
+     ABI_DEALLOCATE(coefficient)
      ABI_DEALLOCATE(cell)
      ABI_DEALLOCATE(direction)
      ABI_DEALLOCATE(power)
-   end do
- end if !End if master
+     ABI_DEALLOCATE(weight)
+   end if !End if master
 
 !9-MPI BROADCAST
  do ii=1,ncoeff
