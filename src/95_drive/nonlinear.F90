@@ -76,7 +76,7 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,&
  use m_hdr
  use m_ebands
 
- use m_dynmat,   only : d3sym
+ use m_dynmat,   only : d3sym, sytens
  use m_ddb,      only : psddb8, nlopt, DDB_VERSION
  use m_ioarr,    only : read_rhor
  use m_pawrad,   only : pawrad_type
@@ -250,7 +250,7 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,&
 & ch10,' optical susceptibility tensors is:',ch10
  call wrtout(ab_out,message,'COLL')
  call wrtout(std_out,message,'COLL')
- 
+
  write(message,'(12x,a)')&
 & 'i1pert  i1dir   i2pert  i2dir   i3pert  i3dir'
  call wrtout(ab_out,message,'COLL')
@@ -280,6 +280,37 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,&
  write(message,'(a,a)') ch10,ch10
  call wrtout(ab_out,message,'COLL')
  call wrtout(std_out,message,'COLL')
+
+ !if (dtset%paral_rf == -1) then
+   write(std_out,'(a)')"--- !IrredPerts"
+   write(std_out,'(a)')'# List of irreducible perturbations for nonlinear'
+   write(std_out,'(a)')'irred_perts:'
+
+   n1 = 0
+   do i1pert = 1, natom + 2
+     do i1dir = 1, 3
+       do i2pert = 1, natom + 2
+         do i2dir = 1, 3
+           do i3pert = 1, natom + 2
+             do i3dir = 1,3
+               if (rfpert(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)==1) then
+                 n1 = n1 + 1
+                 write(std_out,'(a,i0)')"   - i1pert: ",i1pert
+                 write(std_out,'(a,i0)')"     i1dir: ",i1dir
+                 write(std_out,'(a,i0)')"     i2pert: ",i2pert
+                 write(std_out,'(a,i0)')"     i2dir: ",i2dir
+                 write(std_out,'(a,i0)')"     i3pert: ",i3pert
+                 write(std_out,'(a,i0)')"     i3dir: ",i3dir
+               end if
+             end do
+           end do
+         end do
+       end do
+     end do
+   end do
+   write(std_out,'(a)')"..."
+   !MSG_ERROR_NODUMP("aborting now")
+ !end if
 
 !Set up for iterations
  ecut_eff= (dtset%ecut) * (dtset%dilatmx) **2

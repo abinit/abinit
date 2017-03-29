@@ -362,14 +362,23 @@ program anaddb
  end if
 
 !***************************************************************************
+ ! Compute only the non-linear optical susceptibilities
+ if (inp%nlflag == 3) then
+    ABI_ALLOCATE(dchide,(3,3,3))
+    if (ddb_get_dchidet(ddb,inp%ramansr,inp%nlflag,dchide,dchidt) == 0) then
+      MSG_ERROR("Cannot find block corresponding to non-linear optical susceptibilities in DDB file")
+    end if
+ end if ! nlflag
+
+!***************************************************************************
 
  ! Compute non-linear optical susceptibilities and
  ! First-order change in the linear dielectric susceptibility induced by an atomic displacement
- if (inp%nlflag > 0) then
+ if (inp%nlflag > 0 .AND. inp%nlflag < 3) then
    ABI_ALLOCATE(dchide,(3,3,3))
    ABI_ALLOCATE(dchidt,(natom,3,3,3))
 
-   if (ddb_get_dchidet(ddb,inp%ramansr,dchide,dchidt) == 0) then
+   if (ddb_get_dchidet(ddb,inp%ramansr,inp%nlflag,dchide,dchidt) == 0) then
      MSG_ERROR("Cannot find block corresponding to non-linear optical susceptibilities in DDB file")
    end if
  end if ! nlflag
@@ -710,10 +719,12 @@ program anaddb
  end if ! condition on nlflag
 
  ABI_DEALLOCATE(fact_oscstr)
- if (inp%nlflag > 0)  then
+ if (inp%nlflag ==3) then
    ABI_DEALLOCATE(dchide)
-   ABI_DEALLOCATE(dchidt)
+ else if (inp%nlflag > 0 .AND. inp%nlflag < 3) then
+   ABI_DEALLOCATE(dchide)
    ABI_DEALLOCATE(rsus)
+   ABI_DEALLOCATE(dchidt)
  end if
 
 !**********************************************************************

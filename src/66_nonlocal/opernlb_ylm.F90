@@ -148,7 +148,7 @@ subroutine opernlb_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_fac,&
  real(dp),intent(in) :: ffnl(npw,dimffnl,nlmn),gxfac(cplex_fac,nlmn,nincat,nspinor)
  real(dp),intent(in) :: gxfac_sij(cplex,nlmn,nincat,nspinor*(paw_opt/3))
  real(dp),intent(in) :: kpg(npw,nkpg),ph3d(2,npw,matblk)
- real(dp),intent(inout) :: svect(2,npw*nspinor*(paw_opt/3)),vect(2,npw*nspinor)
+ real(dp),intent(inout) :: svect(:,:),vect(:,:)
 !Local variables-------------------------------
 !Arrays
 !scalars

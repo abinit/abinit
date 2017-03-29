@@ -196,11 +196,11 @@
  real(dp),intent(in) :: phkxredin(2,natom),phkxredout(2,natom)
  real(dp),intent(in) :: sij(dimenl1,ntypat*((paw_opt+1)/3))
  real(dp),intent(inout) :: ph3din(2,npwin,matblk),ph3dout(2,npwout,matblk)
- real(dp),intent(inout) :: vectin(2,npwin*nspinor)
- real(dp),intent(out) :: enlout(nnlout)
- real(dp),intent(out),target :: svectout(2,npwout*nspinor*(paw_opt/3))
- real(dp),intent(out),target :: vectout (2,npwout*nspinor)
- type(pawcprj_type),intent(inout) :: cprjin(natom,nspinor*((cpopt+5)/5))
+ real(dp),intent(inout) :: vectin(:,:)
+ real(dp),intent(out) :: enlout(:)
+ real(dp),intent(out),target :: svectout(:,:)
+ real(dp),intent(out),target :: vectout (:,:)
+ type(pawcprj_type),intent(inout) :: cprjin(:,:)
 
 !Local variables-------------------------------
 !scalars
