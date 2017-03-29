@@ -186,7 +186,6 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  use interfaces_52_manage_cuda
 #endif
  use interfaces_53_ffts
- use interfaces_54_abiutil
  use interfaces_56_io_mpi
  use interfaces_56_recipspace
  use interfaces_57_iovars
