@@ -120,7 +120,7 @@ subroutine opernl4b(choice,dgxds,dgxdt,ffnl,gmet,gxa,&
  real(dp),intent(in) :: ffnl(1,npw,nffnl,lmnmax,ntypat),gmet(3,3)
  real(dp),intent(in) :: gxa(2,mlang3,mincat,mproj),kpg_k(npw,nkpg),kpt(3)
  real(dp),intent(in) :: ph3d(2,npw,matblk)
- real(dp),intent(inout) :: vect(2,npw) !vz_i
+ real(dp),intent(inout) :: vect(:,:) !vz_i
 
 !Local variables-------------------------------
 !scalars
