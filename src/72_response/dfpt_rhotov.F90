@@ -179,7 +179,6 @@
  if(ipert==natom+5)then
 
   ABI_ALLOCATE(v1zeeman,(cplex*nfft,nspden))
-  write(std_out,*) "SPr, Zeeman field perturbation along",idir," axis"
 
   if(idir==3)then       ! Zeeman field along the 3rd axis    
    v1zeeman(:,1)=-0.5d0

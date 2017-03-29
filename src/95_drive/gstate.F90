@@ -1314,7 +1314,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 &   dtset%nband,dtset%nkpt,npwarr,dtset%nsppol,&
 &   occ,resid,response,dtfil%unwff2,wvl%wfs,wvl%descr)
 
-   call printmagvtk(mpi_enreg,dtset%nspden,nfftf,ngfftf,rhor,rprimd,'DEN.vtk')
+  !call printmagvtk(mpi_enreg,dtset%nspden,nfftf,ngfftf,rhor,rprimd,'DEN.vtk') SPr debug
  end if
 
  if (dtset%prtwf==2) then
