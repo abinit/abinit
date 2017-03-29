@@ -83,8 +83,6 @@ subroutine multipoles_out(rhor,mpi_enreg,natom,nfft,ngfft,nspden,&
  nspden_updn=merge(1,2,nspden/=2)
 
 !Title
- write (message, '(2a)') ch10,' ----- Electric nuclear dipole wrt the center of ionic charge ----- '
- call wrtout(unit_out, message, 'COLL')
 
 !Get nuclear part of dipole
  dipole_ions_red(:) = zero ; ziontotal = zero
@@ -96,9 +94,6 @@ subroutine multipoles_out(rhor,mpi_enreg,natom,nfft,ngfft,nspden,&
 
 !Find coordinates of center of charge on FFT grid
  center_of_charge(1:3) = dipole_ions_red(1:3)/ziontotal
- write (message, '(a,3(1x,ES12.5))') &
-&   ' Center of charge for ionic distribution (red. coord.): ',center_of_charge(1:3)
- call wrtout(unit_out, message, 'COLL')
 
 !Get electronic part of dipole with respect to center of charge of ions (in cart. coord.)
  dipole_el = zero
@@ -120,6 +115,11 @@ subroutine multipoles_out(rhor,mpi_enreg,natom,nfft,ngfft,nspden,&
  dipole_tot(3) = - sum(dipole_el(3,1:nspden_updn))
 
 !Output
+ write (message, '(2a)') ch10,' ----- Electric nuclear dipole wrt the center of ionic charge ----- '
+ call wrtout(unit_out, message, 'COLL')
+ write (message, '(a,3(1x,ES12.5))') &
+&   ' Center of charge for ionic distribution (red. coord.): ',center_of_charge(1:3)
+ call wrtout(unit_out, message, 'COLL')
  write (message, '(3a,3(1x,E16.6),3a,3(1x,E16.6),a)') ' -----',ch10,&
 &          ' Ionic dipole (cart. coord.)     = ',dipole_ions_cart, ' (a.u.)',ch10, &
 &          '                                 = ',dipole_ions_cart/dipole_moment_debye,' (D)'
