@@ -94,7 +94,6 @@ subroutine prep_getghc(cwavef,gs_hamk,gvnlc,gwavef,swavef,lambda,blocksize,&
  integer :: old_me_g0,spaceComm=0
  logical :: flag_inv_sym, do_transpose
  character(len=100) :: msg
- integer :: iomp
 !arrays
  integer,allocatable :: index_wavef_band(:),index_wavef_send(:),index_wavef_spband(:)
  integer,allocatable :: rdisplsloc(:),recvcountsloc(:),sdisplsloc(:),sendcountsloc(:)
@@ -204,19 +203,19 @@ subroutine prep_getghc(cwavef,gs_hamk,gvnlc,gwavef,swavef,lambda,blocksize,&
    ABI_ALLOCATE(gwavef_alltoall1,(2,ndatarecv*my_nspinor*bandpp))
    ABI_ALLOCATE(swavef_alltoall1,(2,ndatarecv*my_nspinor*bandpp))
    ABI_ALLOCATE(gvnlc_alltoall1,(2,ndatarecv*my_nspinor*bandpp))
-   !swavef_alltoall1(:,:)=zero
-   !gvnlc_alltoall1(:,:)=zero
-   !cwavef_alltoall1(:,:)=zero
-   !gwavef_alltoall1(:,:)=zero
+   swavef_alltoall1(:,:)=zero
+   gvnlc_alltoall1(:,:)=zero
+   cwavef_alltoall1(:,:)=zero
+   gwavef_alltoall1(:,:)=zero
  end if
  ABI_ALLOCATE(cwavef_alltoall2,(2,ndatarecv*my_nspinor*bandpp))
  ABI_ALLOCATE(gwavef_alltoall2,(2,ndatarecv*my_nspinor*bandpp))
  ABI_ALLOCATE(swavef_alltoall2,(2,ndatarecv*my_nspinor*bandpp))
  ABI_ALLOCATE(gvnlc_alltoall2,(2,ndatarecv*my_nspinor*bandpp))
- !swavef_alltoall2(:,:)=zero
- !gvnlc_alltoall2(:,:)=zero
- !cwavef_alltoall2(:,:)=zero
- !gwavef_alltoall2(:,:)=zero
+ swavef_alltoall2(:,:)=zero
+ gvnlc_alltoall2(:,:)=zero
+ cwavef_alltoall2(:,:)=zero
+ gwavef_alltoall2(:,:)=zero
 
  recvcountsloc(:)=recvcounts(:)*2*my_nspinor*bandpp
  rdisplsloc(:)=rdispls(:)*2*my_nspinor*bandpp
@@ -286,14 +285,8 @@ subroutine prep_getghc(cwavef,gs_hamk,gvnlc,gwavef,swavef,lambda,blocksize,&
 !  -------------------------------------------------------
 !  Sorting of the waves functions below bandpp
 !  -------------------------------------------------------
-!$OMP parallel
-!$OMP do 
-     do iomp=1,size(index_wavef_band)
-       cwavef_alltoall2(:,iomp) = cwavef_alltoall1(:,index_wavef_band(iomp))
-     end do
-!$OMP end do nowait
+     cwavef_alltoall2(:,:) = cwavef_alltoall1(:,index_wavef_band)
      call timab(632,2,tsec)
-!$OMP end parallel
    end if
 
 !  ----------------------
@@ -310,17 +303,12 @@ subroutine prep_getghc(cwavef,gs_hamk,gvnlc,gwavef,swavef,lambda,blocksize,&
    if(do_transpose) then
      call timab(634,3,tsec)
 !    cwavef_alltoall(:,index_wavef_band) = cwavef_alltoall(:,:)   ! NOT NEEDED
-!$OMP parallel 
-!$OMP do 
-     do iomp=1,size(index_wavef_band)
-       gwavef_alltoall1(:,index_wavef_band(iomp)) = gwavef_alltoall2(:,iomp)
-       if (sij_opt==1) swavef_alltoall1(:,index_wavef_band(iomp)) = swavef_alltoall2(:,iomp)
-       gvnlc_alltoall1(:,index_wavef_band(iomp))  = gvnlc_alltoall2(:,iomp)
-     end do
-!$OMP end do nowait
-     call timab(634,2,tsec)
-!$OMP end parallel
+     gwavef_alltoall1(:,index_wavef_band) = gwavef_alltoall2(:,:)
+     if (sij_opt==1) swavef_alltoall1(:,index_wavef_band) = swavef_alltoall2(:,:)
+     gvnlc_alltoall1(:,index_wavef_band)  = gvnlc_alltoall2(:,:)
+
      ABI_DEALLOCATE(index_wavef_band)
+     call timab(634,2,tsec)
    end if
 
 
@@ -339,7 +327,7 @@ subroutine prep_getghc(cwavef,gs_hamk,gvnlc,gwavef,swavef,lambda,blocksize,&
 !  -------------------------------------------------------
 !  Sorting the wave functions below bandpp
 !  -------------------------------------------------------
-!$OMP parallel do 
+!!$OMP parallel do 
      do iomp=1,size(index_wavef_band)
        cwavef_alltoall2(:,iomp) = cwavef_alltoall1(:,index_wavef_band(iomp))
      end do
@@ -364,9 +352,9 @@ subroutine prep_getghc(cwavef,gs_hamk,gvnlc,gwavef,swavef,lambda,blocksize,&
    ABI_ALLOCATE(swavef_alltoall_sym,(2,(ndatarecv_tot*bandpp_sym)*iscalc))
    ABI_ALLOCATE(gvnlc_alltoall_sym ,(2,ndatarecv_tot*bandpp_sym))
 
-   !gwavef_alltoall_sym(:,:)=zero
-   !swavef_alltoall_sym(:,:)=zero
-   !gvnlc_alltoall_sym(:,:)=zero
+   gwavef_alltoall_sym(:,:)=zero
+   swavef_alltoall_sym(:,:)=zero
+   gvnlc_alltoall_sym(:,:)=zero
 
    call timab(632,2,tsec)
 
@@ -447,17 +435,11 @@ subroutine prep_getghc(cwavef,gs_hamk,gvnlc,gwavef,swavef,lambda,blocksize,&
 !  -------------------------------------------------------
    if(do_transpose) then
 !    cwavef_alltoall(:,index_wavef_band) = cwavef_alltoall(:,:)   ! NOT NEEDED
-!$OMP parallel 
-!$OMP do 
-     do iomp = 1, size(index_wavef_band)
-       if (sij_opt==1) swavef_alltoall1(:,index_wavef_band(iomp)) = swavef_alltoall2(:,iomp)
-       gwavef_alltoall1(:,index_wavef_band(iomp)) = gwavef_alltoall2(:,iomp)
-       gvnlc_alltoall1(:,index_wavef_band(iomp))  = gvnlc_alltoall2(:,iomp)
-     end do
-!$OMP end do nowait
-     call timab(634,2,tsec)
-!$OMP end parallel
+     gwavef_alltoall1(:,index_wavef_band) = gwavef_alltoall2(:,:)
+     if (sij_opt==1) swavef_alltoall1(:,index_wavef_band) = swavef_alltoall2(:,:)
+     gvnlc_alltoall1(:,index_wavef_band)  = gvnlc_alltoall2(:,:)
      ABI_DEALLOCATE(index_wavef_band)
+     call timab(634,2,tsec)
    end if
 
  end if
