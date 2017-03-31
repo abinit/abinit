@@ -302,11 +302,9 @@ subroutine prep_getghc(cwavef,gs_hamk,gvnlc,gwavef,swavef,lambda,blocksize,&
 !  -----------------------------------------------------
    if(do_transpose) then
      call timab(634,3,tsec)
-!    cwavef_alltoall(:,index_wavef_band) = cwavef_alltoall(:,:)   ! NOT NEEDED
      gwavef_alltoall1(:,index_wavef_band) = gwavef_alltoall2(:,:)
      if (sij_opt==1) swavef_alltoall1(:,index_wavef_band) = swavef_alltoall2(:,:)
      gvnlc_alltoall1(:,index_wavef_band)  = gvnlc_alltoall2(:,:)
-
      ABI_DEALLOCATE(index_wavef_band)
      call timab(634,2,tsec)
    end if
@@ -327,10 +325,7 @@ subroutine prep_getghc(cwavef,gs_hamk,gvnlc,gwavef,swavef,lambda,blocksize,&
 !  -------------------------------------------------------
 !  Sorting the wave functions below bandpp
 !  -------------------------------------------------------
-!!$OMP parallel do 
-     do iomp=1,size(index_wavef_band)
-       cwavef_alltoall2(:,iomp) = cwavef_alltoall1(:,index_wavef_band(iomp))
-     end do
+      cwavef_alltoall2(:,:) = cwavef_alltoall1(:,index_wavef_band)
    end if
 
 !  ------------------------------------------------------------
