@@ -46,7 +46,7 @@ MODULE m_cgtools
  use m_errors
  use m_xmpi
 
- use m_fstrings,  only : toupper
+ use m_fstrings,   only : toupper
 
  implicit none
 
@@ -1746,7 +1746,7 @@ end subroutine sqnorm_v
 !!  meansp(nspden)=mean value for each nspden component
 !!
 !! PARENTS
-!!      fresid,multipoles_fftr,newvtr,pawmknhat,prcref,prcref_PMA
+!!      fresid,newvtr,pawmknhat,prcref,prcref_PMA
 !!      psolver_rhohxc,rhohxc,rhohxcpositron,rhotov
 !!
 !! CHILDREN

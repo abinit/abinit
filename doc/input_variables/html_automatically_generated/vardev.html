@@ -255,8 +255,8 @@ exact exchange contribution only for the initial guess (not for the gradient dir
 <br><font id="definition">Mnemonics: DENSity and FORces PREDictor</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#develop">DEVELOP</a></font>
 <br><font id="vartype">Variable type: integer</font>
-<br><font id="default">Default is 3 if <a href="varrlx.html#ionmov">ionmov</a>==4 and <a href="varbas.html#iscf">iscf</a>==5,
-6 if <a href="varpar.html#paral_kgb">paral_kgb</a>==1,
+<br><font id="default">Default is 6 if <a href="varpar.html#paral_kgb">paral_kgb</a>==1,
+3 if <a href="varrlx.html#ionmov">ionmov</a>==4 and <a href="varbas.html#iscf">iscf</a>==5,
 2 otherwise.
 </font>
 <br><br><font id="requires">
@@ -615,7 +615,7 @@ CTQMC calculations are much more time consuming that Hubbard I calculations. Nev
     Phys. Rev. Lett 97, 076405, (2006) </a>.
     For a discussion  of density-density approximation with respect
     with the rotationnally invariant formulation, see e.g.
-   <a href="http://link.aps.org/doi/10.1103/PhysRevB.86.155107">
+   <a href="https://journals.aps.org/prb/abstract/10.1103/PhysRevB.86.155107">
      Phys. Rev. B 86, 155107 (2012)
    </a>.
  <br />
@@ -1251,8 +1251,8 @@ ABINIT 7.10: this option is <b>under development</b> and might give wrong result
 <br><font id="definition">Mnemonics: Fast Fourier Transform ALGorithm</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#develop">DEVELOP</a></font>
 <br><font id="vartype">Variable type: integer</font>
-<br><font id="default">Default is 312 if <a href="specials.html#FFTW3">FFTW3</a> and <a href="vardev.html#usedmft">usedmft</a>==0,
-401 if <a href="varpar.html#paral_kgb">paral_kgb</a>==1,
+<br><font id="default">Default is 401 if <a href="varpar.html#paral_kgb">paral_kgb</a>==1,
+312 if <a href="specials.html#FFTW3">FFTW3</a> and <a href="vardev.html#usedmft">usedmft</a>==0,
 112 otherwise.
 </font>
 <br><font id="text">
@@ -2140,17 +2140,20 @@ then <a href="varbas.html#nband">nband</a>/<b>nbdblock</b> ).
 
 
 <br><font id="title"><a name="nc_xccc_gspace">nc_xccc_gspace</a></font>
-<br><font id="definition">Mnemonics: Norm-Conserving, use XC Core-Correction in G-space</font>
+<br><font id="definition">Mnemonics: use XC Core-Correction in G-space</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#develop">DEVELOP</a></font>
 <br><font id="vartype">Variable type: integer</font>
-<br><font id="default">Default is 0</font>
+<br><font id="default">Default is 0 if <a href="varint.html#usepaw">usepaw</a>==0,
+1 if <a href="varint.html#usepaw">usepaw</a>==1,
+0 otherwise.
+ (Comment: 0 when <a href="varint.html#usepaw">usepaw</a>=0, 1 when <a href="varint.html#usepaw">usepaw</a>=1)</font>
 <br><font id="text">
 <p>
-This variable is relevant only for norm-conserving calculations. Historically, Abinit treats the model core charge used for the non-linear core
+Historically, Abinit treats the model core charge used for the non-linear core
 correction in real space. Alternatively, it is possible to instruct the code to compute the core charge in G-space following the same approach used in
 the PAW code. The G-space formalism is more accurate than the interpolation in real space, especially when derivatives of the model core charge are
-needed, e.g. DFPT. Preliminary tests showed that the violation of the acoustic sum rule is reduced when <b>nc_xccc_gspace</b>==1 , especially for LDA. 
-It is worth stressing, however, that <b>nc_xccc_gspace</b>==1 
+needed, e.g. DFPT. Preliminary tests showed that the violation of the acoustic sum rule is reduced when <b>nc_xccc_gspace</b>==1 , especially for LDA.
+It is worth stressing, however, that <b>nc_xccc_gspace</b>==1
 should be used only in conjunction with NC pseudos whose model core charge that decays quickly in
 G-space. Several NC pseudos available in the Abinit table are not optimized for the G-space formalism and users are strongly invited to perform
 convergence studies with respect to ecut before using this option.
@@ -4353,7 +4356,7 @@ in the article of Rom&aacute;n-P&eacute;rez and Soler
 <br><font id="definition">Mnemonics: WaveFunction OPTimisation ALGorithm</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#develop">DEVELOP</a></font>
 <br><font id="vartype">Variable type: integer</font>
-<br><font id="default">Default is <a href="specials.html#AUTO_FROM_PSP">AUTO_FROM_PSP</a> (Comment: 0 when <a href="varint.html#usepaw">usepaw</a>=0 (norm-conserving pseudopotentials), 10 when <a href="varint.html#usepaw">usepaw</a>=1 (PAW) ; 14 if <a href="varpar.html#paral_kgb">paral_kgb</a>=1.)</font>
+<br><font id="default">Default is <a href="specials.html#AUTO_FROM_PSP">AUTO_FROM_PSP</a> (Comment: 0 when <a href="varint.html#usepaw">usepaw</a>=0 (norm-conserving pseudopotentials), 10 when <a href="varint.html#usepaw">usepaw</a>=1 (PAW) ; 114 if <a href="varpar.html#paral_kgb">paral_kgb</a>=1.)</font>
 <br><font id="text">
 <p>
 <p>
@@ -4425,6 +4428,11 @@ the block vectors does not depend on the kinetic energy of each band,
 and the orthogonalization after the LOBPCG algorithm is no longer
 performed. The first modification increases the convergence and the
 second one the efficiency.
+  </li>
+<li>
+   <b>wfoptalg</b>=114 :
+A new version of <b>wfoptalg</b>=14 which is more efficient for few blocks and can take advance of OpenMP if abinit is compiled with a multithreaded linear algebra library.
+With more than 1 thread <a href="varpar.html#npfft">npfft</a> shoud NOT be used for the time being.
   </li>
   <li>
    <b>wfoptalg</b>=1 :
