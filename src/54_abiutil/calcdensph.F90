@@ -92,6 +92,7 @@ subroutine calcdensph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,nunit,ratsph
  real(dp) :: fsm, ratsm, ratsm2 
  real(dp) :: mag_coll, mag_x, mag_y, mag_z ! EB
  real(dp) :: sum_mag, sum_mag_x,sum_mag_y,sum_mag_z,sum_rho_up,sum_rho_dn,sum_rho_tot ! EB
+ real(dp) :: rho_tot
 ! real(dp) :: rho_up,rho_dn,rho_tot !EB 
  logical   :: grid_found
  character(len=500) :: message
@@ -232,26 +233,30 @@ subroutine calcdensph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,nunit,ratsph
    mag_coll=0
 !  rho_up=0
 !  rho_dn=0
-!  rho_tot=0
+   rho_tot=0
    do ifft=1,nfft
 !   rho_up=rho_up+rhor(ifft,2)
 !   rho_dn=rho_dn+(rhor(ifft,2)-rhor(ifft,1))
-!   rho_tot=rho_tot+rhor(ifft,1)
+     rho_tot=rho_tot+rhor(ifft,1)
      mag_coll=mag_coll+2*rhor(ifft,2)-rhor(ifft,1)
    end do
    mag_coll=mag_coll*ucvol/dble(nfftot)
+   rho_tot =rho_tot*ucvol/dble(nfftot)
 !  rho_up=rho_up*ucvol/dble(nfftot)
 !  rho_dn=rho_dn*ucvol/dble(nfftot)
 !  rho_tot=rho_tot*ucvol/dble(nfftot) 
  else if (nspden==4) then
+   rho_tot=0
    mag_x=0
    mag_y=0
    mag_z=0
    do ifft=1,nfft
+     rho_tot=rho_tot+rhor(ifft,1)
      mag_x=mag_x+rhor(ifft,2)
      mag_y=mag_y+rhor(ifft,3)
      mag_z=mag_z+rhor(ifft,4)
    end do
+   rho_tot=rho_tot*ucvol/dble(nfftot)
    mag_x=mag_x*ucvol/dble(nfftot)
    mag_y=mag_y*ucvol/dble(nfftot)
    mag_z=mag_z*ucvol/dble(nfftot)
@@ -261,7 +266,7 @@ subroutine calcdensph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,nunit,ratsph
  if(mpi_enreg%nproc_fft>1)then
    call timab(48,1,tsec)
    call xmpi_sum(intgden_,mpi_enreg%comm_fft,ierr)
-!   call xmpi_sum(rho_tot,mpi_enreg%comm_fft,ierr) ! EB
+   call xmpi_sum(rho_tot,mpi_enreg%comm_fft,ierr)  ! EB
 !   call xmpi_sum(rho_up,mpi_enreg%comm_fft,ierr)  ! EB
 !   call xmpi_sum(rho_dn,mpi_enreg%comm_fft,ierr)  ! EB
    call xmpi_sum(mag_coll,mpi_enreg%comm_fft,ierr) ! EB
@@ -319,6 +324,8 @@ subroutine calcdensph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,nunit,ratsph
    call wrtout(nunit,message,'COLL')
    write(message, '(a,f14.6)') ' Total magnetization (exact up - dn):                 ', mag_coll
    call wrtout(nunit,message,'COLL')
+   write(message, '(a,f14.6)') ' Total density (exact)              :                 ', rho_tot 
+   call wrtout(nunit,message,'COLL')
    ! EB for testing purpose print rho_up, rho_dn and rho_tot
 !    write(message, '(a,3f14.4,2i8)') ' rho_up, rho_dn, rho_tot, nfftot, nfft: ', rho_up,rho_dn,rho_tot,nfft,nfft
 !   call wrtout(nunit,message,'COLL')   
@@ -345,6 +352,8 @@ subroutine calcdensph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,nunit,ratsph
    write(message, '(a,f12.6,f12.6,f12.6)') ' Total magnetization (spheres)   ', sum_mag_x,sum_mag_y,sum_mag_z
    call wrtout(nunit,message,'COLL')
    write(message, '(a,f12.6,f12.6,f12.6)') ' Total magnetization (exact)     ', mag_x,mag_y,mag_z
+   call wrtout(nunit,message,'COLL')
+   write(message, '(a,f12.6)') ' Total density (exact)           ', rho_tot
    call wrtout(nunit,message,'COLL')
  end if
 

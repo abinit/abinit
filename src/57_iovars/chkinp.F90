@@ -149,7 +149,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
    rprimd(:,:)=dtsets(idtset)%rprimd_orig(:,:,intimage)    ! For the purpose of checking symmetries
    response=0
    if(dt%rfelfd/=0.or.dt%rfphon/=0.or.dt%rfstrs/=0.or.dt%rfddk/=0.or.dt%rfuser/=0 &
-&   .or.dt%rf2_dkdk/=0.or.dt%rf2_dkde/=0) response=1
+&   .or.dt%rf2_dkdk/=0.or.dt%rf2_dkde/=0.or.dt%rfmagn/=0) response=1
    call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
    nproc=mpi_enregs(idtset)%nproc
    mgga=0;if(dt%ixc>=31.and.dt%ixc<=34)mgga=1
@@ -1860,8 +1860,8 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
 &     'The input variable optdriver=',dt%optdriver,ch10,&
 &     'This is in conflict with the values of the other input variables,',ch10,&
 &     'rfphon=',dt%rfphon,'  rfddk=',dt%rfddk,'  rf2_dkdk=',dt%rf2_dkdk,'  rf2_dkde=',dt%rf2_dkde,&
-&     '  rfelfd=',dt%rfelfd,'rfstrs=',dt%rfstrs,'  rfuser=',dt%rfuser,ch10,&
-&     'Action : check the values of optdriver, rfphon, rfddk, rf2dkdk, rf2dkde, rfelfd, rfstrs',ch10,&
+&     '  rfelfd=',dt%rfelfd,'  rfmagn=',dt%rfelfd,'rfstrs=',dt%rfstrs,'  rfuser=',dt%rfuser,ch10,&
+&     'Action : check the values of optdriver, rfphon, rfddk, rf2dkdk, rf2dkde, rfelfd, rfmagn, rfstrs',ch10,&
 &     'and rfuser in your input file.'
      MSG_ERROR_NOSTOP(message, ierr)
    end if
@@ -1964,8 +1964,8 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
 &     'The input variable paral_rf=',dt%paral_rf,ch10,&
 &     'This is in conflict with the values of the other input variables,',ch10,&
 &     'rfphon=',dt%rfphon,'  rfddk=',dt%rfddk,'  rf2_dkdk=',dt%rf2_dkdk,'  rf2_dkde=',dt%rf2_dkde,&
-&     '  rfelfd=',dt%rfelfd,'rfstrs=',dt%rfstrs,'  rfuser=',dt%rfuser,ch10,&
-&     'Action: check the values of paral_rf, rfphon, rfddk, rf2dkdk, rf2dkde, rfelfd, rfstrs',ch10,&
+&     '  rfelfd=',dt%rfelfd,'  rfmagn=',dt%rfmagn,'rfstrs=',dt%rfstrs,'  rfuser=',dt%rfuser,ch10,&
+&     'Action: check the values of paral_rf, rfphon, rfddk, rf2dkdk, rf2dkde, rfelfd, rfmagn, rfstrs',ch10,&
 &     '        and rfuser in your input file.'
      MSG_ERROR_NOSTOP(message, ierr)
    end if

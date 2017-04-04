@@ -176,27 +176,39 @@
    rhor1_ => rhor1
  end if
 
+ ABI_ALLOCATE(v1zeeman,(cplex*nfft,nspden))
  if(ipert==natom+5)then
-
-  ABI_ALLOCATE(v1zeeman,(cplex*nfft,nspden))
-
-  if(idir==3)then       ! Zeeman field along the 3rd axis    
-   v1zeeman(:,1)=-0.5d0
-   v1zeeman(:,2)=+0.5d0
-   v1zeeman(:,3)= 0.0d0
-   v1zeeman(:,4)= 0.0d0
-  else if(idir==2)then  ! Zeeman field along the 2nd axis
-   v1zeeman(:,1)= 0.0d0
-   v1zeeman(:,2)= 0.0d0
-   v1zeeman(:,3)= 0.0d0
-   v1zeeman(:,4)=+0.5d0   
-  else                  ! Zeeman field along the 1st axis
-   v1zeeman(:,1)= 0.0d0
-   v1zeeman(:,2)= 0.0d0
-   v1zeeman(:,3)=-0.5d0
-   v1zeeman(:,4)= 0.0d0
-  endif
-
+   if (nspden==4) then
+     if(idir==3)then       ! Zeeman field along the 3rd axis    
+       v1zeeman(:,1)=-0.5d0
+       v1zeeman(:,2)=+0.5d0
+       v1zeeman(:,3)= 0.0d0
+       v1zeeman(:,4)= 0.0d0
+     else if(idir==2)then  ! Zeeman field along the 2nd axis
+       v1zeeman(:,1)= 0.0d0
+       v1zeeman(:,2)= 0.0d0
+       v1zeeman(:,3)= 0.0d0
+       v1zeeman(:,4)=+0.5d0   
+     else                  ! Zeeman field along the 1st axis
+       v1zeeman(:,1)= 0.0d0
+       v1zeeman(:,2)= 0.0d0
+       v1zeeman(:,3)=-0.5d0
+       v1zeeman(:,4)= 0.0d0
+     endif
+   else
+       v1zeeman(:,1)= 1.0d0
+       v1zeeman(:,2)= 0.5d0
+   endif
+ else
+   if (nspden==4) then
+     v1zeeman(:,1)= 0.0d0
+     v1zeeman(:,2)= 0.0d0
+     v1zeeman(:,3)= 0.0d0
+     v1zeeman(:,4)= 0.0d0
+   else
+     v1zeeman(:,1)= 0.0d0
+     v1zeeman(:,2)= 0.0d0       
+   endif
  endif
 
 !------ Compute 1st-order Hartree potential (and energy) ----------------------
@@ -238,11 +250,12 @@
      optnc=1
      optxc=1
      nkxc_cur=nkxc ! TODO: remove nkxc_cur?
+
      call dfpt_mkvxc_noncoll(1,ixc,kxc,mpi_enreg,nfft,ngfft,nhat1,usepaw,nhat1gr,nhat1grdim,nkxc,&
 &     nkxc_cur,nspden,n3xccc,optnc,option,optxc,paral_kgb,qphon,rhor,rhor1,rprimd,usexcnhat,vxc1_,xccc3d1)
-      if(ipert==natom+5)then
-        vxc1_(:,:) = vxc1_(:,:) + v1zeeman(:,:)
-      endif
+      !if(ipert==natom+5)then SPr deb (to remove)
+      !  vxc1_(:,:) = vxc1_(:,:) + v1zeeman(:,:)
+      !endif
    else
      call dfpt_mkvxc(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,nhat1,usepaw,nhat1gr,nhat1grdim,nkxc,&
 &     nspden,n3xccc,option,paral_kgb,qphon,rhor1,rprimd,usexcnhat,vxc1_,xccc3d1)
@@ -269,6 +282,7 @@
 !  Note that there is a factor 2 difference with the similar GS formula
    elpsp1=two*(elpsp1+elpsp10)
  end if
+
 
 !Compute XC valence contribution exc1 and complete eventually Vxc^(1)
  if (optene>0) then
@@ -317,14 +331,14 @@
 !$OMP PARALLEL DO COLLAPSE(2)
    do ispden=1,min(nspden,2)
      do ifft=1,cplex*nfft
-       vresid1(ifft,ispden)=vhartr1_(ifft)+vxc1_(ifft,ispden)+vpsp1(ifft)-vtrial1(ifft,ispden)
+       vresid1(ifft,ispden)=vhartr1_(ifft)+vxc1_(ifft,ispden)+vpsp1(ifft)-vtrial1(ifft,ispden)+v1zeeman(ifft,ispden)
      end do
    end do
    if(nspden==4)then
 !$OMP PARALLEL DO COLLAPSE(2)
      do ispden=3,4
        do ifft=1,cplex*nfft
-         vresid1(ifft,ispden)=vxc1_(ifft,ispden)-vtrial1(ifft,ispden)
+         vresid1(ifft,ispden)=vxc1_(ifft,ispden)+v1zeeman(ifft,ispden)-vtrial1(ifft,ispden)
        end do
      end do
    end if
@@ -340,14 +354,14 @@
 !$OMP PARALLEL DO COLLAPSE(2)
    do ispden=1,min(nspden,2)
      do ifft=1,cplex*nfft
-       vtrial1(ifft,ispden)=vhartr1_(ifft)+vxc1_(ifft,ispden)+vpsp1(ifft)
+       vtrial1(ifft,ispden)=vhartr1_(ifft)+vxc1_(ifft,ispden)+vpsp1(ifft)+v1zeeman(ifft,ispden)
      end do
    end do
    if(nspden==4)then
 !$OMP PARALLEL DO COLLAPSE(2)
      do ispden=3,4
        do ifft=1,cplex*nfft
-         vtrial1(ifft,ispden)=vxc1_(ifft,ispden)
+         vtrial1(ifft,ispden)=vxc1_(ifft,ispden)+v1zeeman(ifft,ispden)
        end do
      end do
    end if
@@ -362,9 +376,7 @@
    ABI_DEALLOCATE(vxc1_)
  end if
 
- if(ipert==natom+5)then
-   ABI_DEALLOCATE(v1zeeman)
- endif
+ ABI_DEALLOCATE(v1zeeman)
 
  call timab(157,2,tsec)
 

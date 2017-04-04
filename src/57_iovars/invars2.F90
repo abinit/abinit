@@ -440,7 +440,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
 
 !RESPFN integer input variables (needed here to get the value of response
 !Presently, rfmeth is not used.
-!Warning : rfddk,rfelfd,rfphon,rfstrs,rfuser,rf2_dkdk and rf2_dkde are also read in invars1
+!Warning : rfddk,rfelfd,rfmagn,rfphon,rfstrs,rfuser,rf2_dkdk and rf2_dkde are also read in invars1
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'rfasr',tread,'INT')
  if(tread==1) dtset%rfasr=intarr(1)
 
@@ -455,6 +455,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'rfelfd',tread,'INT')
  if(tread==1) dtset%rfelfd=intarr(1)
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'rfmagn',tread,'INT')
+ if(tread==1) dtset%rfmagn=intarr(1)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'rfmeth',tread,'INT')
  if(tread==1) dtset%rfmeth=intarr(1)
