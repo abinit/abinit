@@ -395,7 +395,7 @@ subroutine crystal_init(amu,Cryst,space_group,natom,npsp,ntypat,nsym,rprimd,typa
  ! * indsym(4,  isym,iat) gives iat_sym in the original unit cell.
  ! * indsym(1:3,isym,iat) gives the lattice vector $R_0$.
  !
- ABI_MALLOC(indsym,(4,Cryst%nsym,natom))
+ ABI_MALLOC(indsym,(4,Cryst%nsym,natom)); indsym(:,:,:)=zero
  tolsym8=tol8
  call symatm(indsym,natom,Cryst%nsym,Cryst%symrec,Cryst%tnons,tolsym8,Cryst%typat,Cryst%xred)
 
