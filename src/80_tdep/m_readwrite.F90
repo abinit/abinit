@@ -10,6 +10,7 @@ module m_readwrite
   use m_xmpi
   use m_abihist
   use m_abimover, only : abimover
+  use m_errors
 
 
  implicit none
@@ -173,8 +174,10 @@ contains
   type(abihist) :: Hist
   ! Temp variable to get dimensions of HIST file
   integer :: ncid, ncerr
-  integer :: nimage, mdtime, natom_id,nimage_id,time_id,xyz_id,six_id,has_nimage
-  integer :: ntypat_id, dtion
+  integer :: nimage, mdtime, natom_id,nimage_id,time_id,xyz_id,six_id
+  integer :: ntypat_id
+  logical :: has_nimage
+  real(dp) :: dtion
   real(dp), allocatable :: znucl(:)
 
 ! Define output files  
@@ -254,11 +257,11 @@ contains
  !Open netCDF file
   ncerr=nf90_open(path=trim(filename),mode=NF90_NOWRITE,ncid=ncid)
   if(ncerr /= NF90_NOERR) then
-    write(InvVar%stdout,*) 'Could no open ',trim(filename),', starting from scratch'
+    write(InVar%stdout,'(3a)') 'Could no open ',trim(filename),', starting from scratch'
     InVar%netcdf=.false.
   else
-    write(InVar%stdout,*) 'Succesfully open ',trim(filename),' for reading'
-    write(InVar%stdout,*) 'Extracting information from NetCDF file...'
+    write(InVar%stdout,'(3a)') 'Succesfully open ',trim(filename),' for reading'
+    write(InVar%stdout,'(a)') 'Extracting information from NetCDF file...'
     InVar%netcdf=.true.
   end if
 
