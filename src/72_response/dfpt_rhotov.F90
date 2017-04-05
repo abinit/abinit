@@ -195,9 +195,11 @@
        v1zeeman(:,3)=-0.5d0
        v1zeeman(:,4)= 0.0d0
      endif
-   else
-       v1zeeman(:,1)= 1.0d0
+   else if (nspden==2) then
+       v1zeeman(:,1)= 1.0d-16
        v1zeeman(:,2)= 0.5d0
+   else 
+       v1zeeman(:,1)= 0.0d0
    endif
  else
    if (nspden==4) then
@@ -205,9 +207,11 @@
      v1zeeman(:,2)= 0.0d0
      v1zeeman(:,3)= 0.0d0
      v1zeeman(:,4)= 0.0d0
-   else
+   else if (nspden==2) then
      v1zeeman(:,1)= 0.0d0
-     v1zeeman(:,2)= 0.0d0       
+     v1zeeman(:,2)= 0.0d0   
+   else
+     v1zeeman(:,1)= 0.0d0         
    endif
  endif
 
