@@ -324,8 +324,9 @@ subroutine calcdensph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,nunit,ratsph
    call wrtout(nunit,message,'COLL')
    write(message, '(a,f14.6)') ' Total magnetization (exact up - dn):                 ', mag_coll
    call wrtout(nunit,message,'COLL')
-   write(message, '(a,f14.6)') ' Total density (exact)              :                 ', rho_tot 
-   call wrtout(nunit,message,'COLL')
+!  SPr for dfpt debug
+!   write(message, '(a,f14.6)') ' Total density (exact)              :                 ', rho_tot 
+!   call wrtout(nunit,message,'COLL')
    ! EB for testing purpose print rho_up, rho_dn and rho_tot
 !    write(message, '(a,3f14.4,2i8)') ' rho_up, rho_dn, rho_tot, nfftot, nfft: ', rho_up,rho_dn,rho_tot,nfft,nfft
 !   call wrtout(nunit,message,'COLL')   
@@ -353,8 +354,9 @@ subroutine calcdensph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,nunit,ratsph
    call wrtout(nunit,message,'COLL')
    write(message, '(a,f12.6,f12.6,f12.6)') ' Total magnetization (exact)     ', mag_x,mag_y,mag_z
    call wrtout(nunit,message,'COLL')
-   write(message, '(a,f12.6)') ' Total density (exact)           ', rho_tot
-   call wrtout(nunit,message,'COLL')
+!  SPr for dfpt debug
+!   write(message, '(a,f12.6)') ' Total density (exact)           ', rho_tot
+!   call wrtout(nunit,message,'COLL')
  end if
 
  if (present(intgden)) then
