@@ -224,6 +224,7 @@ program anaddb
 #ifdef HAVE_NETCDF
    NCF_CHECK_MSG(nctk_open_create(ana_ncid, "anaddb.nc", xmpi_comm_self), "Creating anaddb.nc")
    NCF_CHECK(nctk_def_basedims(ana_ncid))
+   NCF_CHECK(nctk_def_dims(ana_ncid, [nctkdim_t('number_of_phonon_modes', 3*natom)],defmode=.True.))
    NCF_CHECK(nctk_defnwrite_ivars(ana_ncid, ["anaddb_version"], [1]))
    NCF_CHECK(crystal_ncwrite(crystal, ana_ncid))
    ncerr = nctk_def_arrays(ana_ncid, [nctkarr_t('atomic_mass_units', "dp", "number_of_atom_species")],defmode=.True.)
@@ -362,25 +363,36 @@ program anaddb
  end if
 
 !***************************************************************************
- ! Compute only the non-linear optical susceptibilities
- if (inp%nlflag == 3) then
-    ABI_ALLOCATE(dchide,(3,3,3))
-    if (ddb_get_dchidet(ddb,inp%ramansr,inp%nlflag,dchide,dchidt) == 0) then
-      MSG_ERROR("Cannot find block corresponding to non-linear optical susceptibilities in DDB file")
-    end if
- end if ! nlflag
 
-!***************************************************************************
-
- ! Compute non-linear optical susceptibilities and
+ ! Compute non-linear optical susceptibilities and, if inp%nlflag < 3,
  ! First-order change in the linear dielectric susceptibility induced by an atomic displacement
- if (inp%nlflag > 0 .AND. inp%nlflag < 3) then
+ if (inp%nlflag > 0) then
    ABI_ALLOCATE(dchide,(3,3,3))
    ABI_ALLOCATE(dchidt,(natom,3,3,3))
 
    if (ddb_get_dchidet(ddb,inp%ramansr,inp%nlflag,dchide,dchidt) == 0) then
      MSG_ERROR("Cannot find block corresponding to non-linear optical susceptibilities in DDB file")
    end if
+
+   ! Save to the netcdf
+   if (my_rank == master) then
+#ifdef HAVE_NETCDF
+     ncerr = nctk_def_arrays(ana_ncid, [nctkarr_t("dchide", "dp", "three, three, three")], defmode=.True.)
+     NCF_CHECK(ncerr)
+     NCF_CHECK(nctk_set_datamode(ana_ncid))
+     NCF_CHECK(nf90_put_var(ana_ncid, nctk_idname(ana_ncid, "dchide"), dchide))
+
+     ! dchidt only present if nlflag==1 or 2
+     if (inp%nlflag < 3) then
+       ncerr = nctk_def_arrays(ana_ncid, [nctkarr_t("dchidt", "dp", &
+         "number_of_atoms, three, three, three")], defmode=.True.)
+       NCF_CHECK(ncerr)
+       NCF_CHECK(nctk_set_datamode(ana_ncid))
+       NCF_CHECK(nf90_put_var(ana_ncid, nctk_idname(ana_ncid, "dchidt"), dchidt))
+     end if
+#endif
+   end if
+
  end if ! nlflag
 
 !**********************************************************************
@@ -578,9 +590,7 @@ program anaddb
 #ifdef HAVE_NETCDF
        NCF_CHECK(nctk_def_basedims(ana_ncid, defmode=.True.))
 
-       ncerr = nctk_def_dims(ana_ncid, [&
-       nctkdim_t("number_of_non_analytical_directions", nph2l), nctkdim_t('number_of_phonon_modes', 3*natom)],&
-       defmode=.True.)
+       ncerr = nctk_def_dims(ana_ncid, [nctkdim_t("number_of_non_analytical_directions", nph2l)],defmode=.True.)
        NCF_CHECK(ncerr)
 
        ncerr = nctk_def_arrays(ana_ncid, [&
@@ -668,7 +678,7 @@ program anaddb
 
      ! Evaluation of the oscillator strengths and frequency-dependent dielectric tensor.
      call ddb_diel(Crystal,ddb%amu,inp,dielt_rlx,displ,d2cart,epsinf,fact_oscstr,&
-&     ab_out,lst,mpert,natom,nph2l,phfrq,comm)
+&     ab_out,lst,mpert,natom,nph2l,phfrq,comm,ana_ncid)
      ! write(std_out,*)'after ddb_diel, dielt_rlx(:,:)=',dielt_rlx(:,:)
    end if
 
@@ -676,7 +686,7 @@ program anaddb
    if (inp%dieflag==2.or.inp%dieflag==3.or. inp%dieflag==4) then
 !    Everything is already in place...
      call ddb_diel(Crystal,ddb%amu,inp,dielt_rlx,displ,d2cart,epsinf,fact_oscstr,&
-&     ab_out,lst,mpert,natom,nph2l,phfrq,comm)
+&     ab_out,lst,mpert,natom,nph2l,phfrq,comm,ana_ncid)
    end if
 
  end if ! either nph2l/=0  or  dieflag==1
@@ -697,7 +707,7 @@ program anaddb
 
    ! Print the electronic dielectric tensor
    call ddb_diel(Crystal,ddb%amu,inp,dielt_rlx,displ,d2cart,epsinf,fact_oscstr,&
-     ab_out,lst,mpert,natom,nph2l,phfrq,comm)
+     ab_out,lst,mpert,natom,nph2l,phfrq,comm,ana_ncid)
  end if
 
 !**********************************************************************
@@ -719,9 +729,7 @@ program anaddb
  end if ! condition on nlflag
 
  ABI_DEALLOCATE(fact_oscstr)
- if (inp%nlflag ==3) then
-   ABI_DEALLOCATE(dchide)
- else if (inp%nlflag > 0 .AND. inp%nlflag < 3) then
+ if (inp%nlflag > 0) then
    ABI_DEALLOCATE(dchide)
    ABI_DEALLOCATE(rsus)
    ABI_DEALLOCATE(dchidt)
