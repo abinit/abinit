@@ -359,7 +359,7 @@ subroutine rf2_accumulate_bands(rf2,choice,gs_hamkq,mpi_enreg,iband,idir1,idir2,
       write(op1,'(2a,i1,a)')      '     dH/',pert2,idir2,'    '
       write(op2,'(2a,i1,a)')      '     dS/',pert2,idir2,'    '
    end select
-   write(msg,'(3a,2(a,es22.13E3))') bra_i,op1,ket_j,' = ',dotr,',',doti
+   write(msg,'(3a,2(a,es17.8E3))') bra_i,op1,ket_j,' = ',dotr,',',doti
    call wrtout(std_out,msg)
  end if
 
@@ -369,7 +369,7 @@ subroutine rf2_accumulate_bands(rf2,choice,gs_hamkq,mpi_enreg,iband,idir1,idir2,
    call dotprod_g(dotr,doti,gs_hamkq%istwf_k,size_wf,2,vi,v2j,mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
 
    if(print_info/=0) then
-     write(msg,'(3a,2(a,es22.13E3))') bra_i,op2,ket_j,' = ',dotr,',',doti
+     write(msg,'(3a,2(a,es17.8E3))') bra_i,op2,ket_j,' = ',dotr,',',doti
      call wrtout(std_out,msg)
    end if
 
@@ -489,7 +489,7 @@ subroutine rf2_apply_hamiltonian(cg_jband,cprj_jband,cwave,cwaveprj,h_cwave,s_cw
 !Local variables ---------------------------------------
 !scalars
  integer,parameter :: berryopt=0,optlocal=1,optnl=2,tim_getghc=1,tim_getgh1c=1,tim_getgh2c=1 ! to change
- integer :: cpopt,iband,natom,sij_opt,opt_gvnl1,usevnl
+ integer :: cpopt,iband,natom,sij_opt,opt_gvnl1,opt_gvnl2,usevnl
  logical :: compute_conjugate,has_cprj_jband,has_cwaveprj
  real(dp) :: dotr,doti,dotr2,doti2,tol_test
  character(len=500) :: msg
@@ -527,9 +527,11 @@ subroutine rf2_apply_hamiltonian(cg_jband,cprj_jband,cwave,cwaveprj,h_cwave,s_cw
 
  usevnl     = 0
  opt_gvnl1  = 0
+ opt_gvnl2  = 0
  if (ipert==natom+2.or.(ipert==natom+11.and.gs_hamkq%usepaw==1)) then
    usevnl = 1
    opt_gvnl1 = 2
+   opt_gvnl2 = 1
  end if
  sij_opt=1;if (gs_hamkq%usepaw==0) sij_opt=0
  tol_test=tol8
@@ -569,7 +571,7 @@ subroutine rf2_apply_hamiltonian(cg_jband,cprj_jband,cwave,cwaveprj,h_cwave,s_cw
      dotr = dotr - eig0(jband)
      dotr = sqrt(dotr**2+doti**2)
      if (dotr > tol_test) then
-       write(msg,'(a,es22.13E3)') 'RF2 TEST GETGHC : NOT PASSED dotr = ',dotr
+       write(msg,'(a,es17.8E3)') 'RF2 TEST GETGHC : NOT PASSED dotr = ',dotr
        call wrtout(std_out,msg)
      end if
    end if ! end tests
@@ -604,7 +606,7 @@ subroutine rf2_apply_hamiltonian(cg_jband,cprj_jband,cwave,cwaveprj,h_cwave,s_cw
        doti = doti - eig1_k_jband(2+2*(iband-1))
        dotr = sqrt(dotr**2+doti**2)
        if (dotr > tol_test) then
-         write(msg,'(4(a,i2),a,es22.13E3)') 'RF2 TEST GETGH1 : ipert=',ipert,' idir=',idir,&
+         write(msg,'(4(a,i2),a,es17.8E3)') 'RF2 TEST GETGH1 : ipert=',ipert,' idir=',idir,&
                                             ' jband=',jband,' iband=',iband,' NOT PASSED dotr = ',dotr
          call wrtout(std_out,msg,'COLL')
        end if
@@ -621,7 +623,7 @@ subroutine rf2_apply_hamiltonian(cg_jband,cprj_jband,cwave,cwaveprj,h_cwave,s_cw
  else if (ipert==natom+10.or.ipert==natom+11) then
 
    call getgh2c(cwave,cwaveprj,h_cwave,s_cwave,gs_hamkq,gvnl1,idir,ipert,zero,&
-                mpi_enreg,optlocal,optnl,opt_gvnl1,rf_hamk_idir,sij_opt,tim_getgh2c,usevnl,conj=compute_conjugate)
+                mpi_enreg,optlocal,optnl,opt_gvnl2,rf_hamk_idir,sij_opt,tim_getgh2c,usevnl,conj=compute_conjugate)
 
  else
 

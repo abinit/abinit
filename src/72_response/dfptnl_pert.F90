@@ -166,7 +166,7 @@ subroutine dfptnl_pert(atindx,atindx1,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,ei
  integer :: me,n1,n2,n3,n4,n5,n6,nband_k,ncpgr,nkpg,nkpg1,nnlout,nsp,nspden_rhoij,npert_phon,npw_k,npw1_k,nzlmopt
  integer :: offset_cgi,offset_cgj,offset_eigen,offset_eig0,option,paw_opt,print_info,esigns
  integer :: signs,size_wf,size_cprj,spaceComm,tim_fourwf,tim_nonlop,tim_getgh2c,usepaw,useylmgr1
- integer :: sij_opt,usevnl,opt_gvnl1,optnl,optlocal
+ integer :: sij_opt,usevnl,opt_gvnl2,optnl,optlocal
  real(dp) :: arg,dot1i,dot1r,dot2i,dot2r,doti,dotr,exc3,e3tot,lagi,lagr,rho2r_re,rho2r_im,rho3r_re,rho3r_im
  real(dp) :: sumi,sum_enlout_im,sum_enlout_re,sum_psi1H1psi1,sum_lambda1psi1psi1,sum_psi0H2psi1a,sum_psi0H2psi1b
  real(dp) :: tol_test,valuei,weight
@@ -785,7 +785,7 @@ subroutine dfptnl_pert(atindx,atindx1,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,ei
            cwavef2(:,:) = cg2(:,1+offset_cgj:size_wf+offset_cgj)
            sij_opt = 0
            usevnl = 1
-           opt_gvnl1 = 1
+           opt_gvnl2 = 1
            optnl = 1
            optlocal = 0
 !          Read dkde file
@@ -799,7 +799,7 @@ subroutine dfptnl_pert(atindx,atindx1,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,ei
            iddk(2,:) =  s_cwave(1,:)
            call rf2_getidir(idir_phon,idir_elfd,idir_getgh2c)
            call getgh2c(cwavef2,cwaveprj0,s_cwave,dummy_array2,gs_hamkq,iddk,idir_getgh2c,ipert_phon+natom+11,zero,&
-&                  mpi_enreg,optlocal,optnl,opt_gvnl1,rf_hamkq_i2pert,sij_opt,tim_getgh2c,usevnl,enl=chi_ij)
+&                  mpi_enreg,optlocal,optnl,opt_gvnl2,rf_hamkq_i2pert,sij_opt,tim_getgh2c,usevnl,enl=chi_ij)
            call dotprod_g(enlout1(1),enlout1(2),gs_hamkq%istwf_k,npw_k*nspinor,2,cgj,s_cwave,&
 &                 mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
            sum_psi0H2psi1a = sum_psi0H2psi1a + dtset%wtk(ikpt)*occ_k(jband)*enlout1(1)
@@ -815,7 +815,7 @@ subroutine dfptnl_pert(atindx,atindx1,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,ei
            iddk(1,:) = -s_cwave(2,:)
            iddk(2,:) =  s_cwave(1,:)
            call getgh2c(cgj,cwaveprj0,s_cwave,dummy_array2,gs_hamkq,iddk,idir_getgh2c,ipert_phon+natom+11,zero,&
-&                  mpi_enreg,optlocal,optnl,opt_gvnl1,rf_hamkq_i2pert,sij_opt,tim_getgh2c,usevnl,enl=chi_ij)
+&                  mpi_enreg,optlocal,optnl,opt_gvnl2,rf_hamkq_i2pert,sij_opt,tim_getgh2c,usevnl,enl=chi_ij)
            call dotprod_g(enlout2(1),enlout2(2),gs_hamkq%istwf_k,npw_k*nspinor,2,cwavef2,s_cwave,&
 &                 mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
            sum_psi0H2psi1b = sum_psi0H2psi1b + dtset%wtk(ikpt)*occ_k(jband)*enlout2(1)
