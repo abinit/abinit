@@ -43,6 +43,7 @@ module m_fit_polynomial_coeff
  public :: fit_polynomial_coeff_init
  public :: fit_polynomial_coeff_getList
  public :: fit_polynomial_coeff_get
+ public :: fit_polynomial_coeff_fit
  public :: fit_polynomial_getOrder1
  public :: fit_polynomial_getOrder2
  public :: fit_polynomial_getOrder3
@@ -1849,6 +1850,61 @@ subroutine fit_polynomial_getOrder5(cell,coeffs_out,cut_off,list_coeff,&
  ABI_DEALLOCATE(coeffs_tmp)
 
 end subroutine fit_polynomial_getOrder5
+!!***
+
+!!****f* m_fit_polynomial_coeff/fit_polynomial_coeff_fit
+!!
+!! NAME
+!! fit_polynomial_coeff_fit
+!!
+!! FUNCTION
+!! Free polynomial_coeff
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!! polynomial_coeff = polynomial_coeff structure to be free
+!!
+!! PARENTS
+!!      m_fit_polynomial_coeff
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine fit_polynomial_coeff_fit(cell,coeffs_out,cut_off,list_coeff,&
+&                                   natom,ncoeff_out,ncoeff,nrpt,nsym,&
+&                                   rprimd,symbols,xcart)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'fit_polynomial_coeff_fit'
+ use interfaces_14_hidewrite
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in)  :: natom,ncoeff,nsym,nrpt
+ integer,intent(out) :: ncoeff_out
+ real(dp),intent(in) :: cut_off
+!arrays
+ integer,intent(in) :: cell(3,nrpt)
+ integer,intent(in) :: list_coeff(6,ncoeff,nsym)
+ real(dp),intent(in) :: xcart(3,natom),rprimd(3,3)
+ character(len=5),intent(in) :: symbols(natom)
+ type(polynomial_coeff_type),allocatable,intent(inout) :: coeffs_out(:)
+!Local variables-------------------------------
+!scalar
+!arrays
+
+! *************************************************************************
+
+
+end subroutine fit_polynomial_coeff_fit
 !!***
 
 

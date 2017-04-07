@@ -7,6 +7,7 @@
 !! FUNCTION
 !! Module for using the paralelisation of effective potential
 !! Container type is defined, and destruction, print subroutines
+!! This module is still experimental
 !!
 !! COPYRIGHT
 !! Copyright (C) 2010-2017 ABINIT group (AM)
@@ -36,7 +37,7 @@ module m_effpot_mpi
  public :: effpot_mpi_free
 !!***
 
-!!****t* defs_abitypes/effective_potential_type
+!!****t* defs_abitypes/effpot_mpi_type
 !! NAME
 !! effective_potential_type
 !!
@@ -201,7 +202,7 @@ subroutine effpot_mpi_init(cell_number,effpot_mpi,ndiv,nrpt,comm)
    end do
  end do
 
-!TREAT RPT
+!TREAT RPT Not yet parallelised 
  ABI_ALLOCATE(rpt_list,(nproc))
  
  irpt = 1

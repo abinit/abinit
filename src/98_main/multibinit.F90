@@ -310,8 +310,8 @@ program multibinit
 &                                  reference_effective_potential%anharmonics_terms%coefficients,&
 &                                  reference_effective_potential,&
 &                                  reference_effective_potential%anharmonics_terms%ncoeff,1)
-!      call fit_polynomial_coeff_init
-!      call fit_polynomial_coeff_init(reference_effective_potential%,filnam,inp,comm)
+
+     
    end select
  end if
 !END_TEST_AM_SECTION

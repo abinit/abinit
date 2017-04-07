@@ -642,7 +642,7 @@ subroutine effective_potential_generateDipDip(eff_pot,n_cell,option,asr,comm)
  integer :: max1,max2,max3,my_rank,ncell,nproc,second_coordinate,size,sumg0
  integer :: my_nrpt,nrpt_alone
  real(dp) :: ucvol
- character(len=500) :: message
+ character(len=500) :: msg
  logical :: iam_master=.FALSE.
 !array
  integer,allocatable :: my_index_rpt(:,:)
@@ -665,10 +665,10 @@ subroutine effective_potential_generateDipDip(eff_pot,n_cell,option,asr,comm)
 !0 Check the size of the cell
  do ia=1,3
    if(n_cell(ia)<0.or.n_cell(ia)>50)then
-     write(message, '(a,i0,a,i0,a,a,a,i0,a)' )&
+     write(msg, '(a,i0,a,i0,a,a,a,i0,a)' )&
 &     'n_cell(',ia,') is ',n_cell(ia),', which is lower than 0 of superior than 50.',&
 &     ch10,'Action: correct n_cell(',ia,').'
-     MSG_ERROR(message)
+     MSG_ERROR(msg)
    end if
  end do
 
@@ -699,29 +699,29 @@ subroutine effective_potential_generateDipDip(eff_pot,n_cell,option,asr,comm)
  if(option==0) then
    if(((max1-min1+1)/=n_cell(1).and.&
 &    (max2-min2+1)/=n_cell(2).and.(max3-min3+1)/=n_cell(3))) then
-     write(message, '(88a,3I3,5a,3I3,a)' )ch10,('-',i1=1,80),ch10,ch10,&
+     write(msg, '(88a,3I3,5a,3I3,a)' )ch10,('-',i1=1,80),ch10,ch10,&
 &      ' WARNING: dipdip is set to zero, the longe range interation might be wrong',ch10,&
 &      '          because it is not recompute.',ch10,&
 &      '          The previous harmonic part is build for ',(max1-min1+1),(max2-min2+1),(max3-min3+1)&
 &,     ' cell.',ch10,'          Be sure than the dipole-dipole interation ',ch10,&
 &      '          is correct for the supercell: ',n_cell(:),' or set dipdip to 1'
-     call wrtout(std_out,message,"COLL")
+     call wrtout(std_out,msg,"COLL")
    else
-     write(message,'(84a)')ch10,('-',i1=1,80),ch10,ch10,&
+     write(msg,'(84a)')ch10,('-',i1=1,80),ch10,ch10,&
 &    ' WARNING: dipdip is set to zero, the longe range interation is not recompute'
-     call wrtout(std_out,message,"COLL")
+     call wrtout(std_out,msg,"COLL")
    end if
 
-   write(message,'(a,(80a))') ch10,('=',i1=1,80)
-   call wrtout(ab_out,message,'COLL')
-   call wrtout(std_out,message,'COLL')
+   write(msg,'(a,(80a))') ch10,('=',i1=1,80)
+   call wrtout(ab_out,msg,'COLL')
+   call wrtout(std_out,msg,'COLL')
 
 !4-Adapt harmonic part
  else if (option>=1.and.all(n_cell(:)>0)) then
 
-   write(message,'(a,(80a),3a)') ch10,('=',i1=1,80),ch10,' Generation of new ifc',ch10
-   call wrtout(ab_out,message,'COLL')
-   call wrtout(std_out,message,'COLL')
+   write(msg,'(a,(80a),3a)') ch10,('=',i1=1,80),ch10,' Generation of new ifc',ch10
+   call wrtout(ab_out,msg,'COLL')
+   call wrtout(std_out,msg,'COLL')
 
    irpt_ref = 0
    irpt     = 0
@@ -733,23 +733,23 @@ subroutine effective_potential_generateDipDip(eff_pot,n_cell,option,asr,comm)
    call find_bound(min2_cell,max2_cell,n_cell(2))
    call find_bound(min3_cell,max3_cell,n_cell(3))
 
-   write(message, '(2a)' )&
+   write(msg, '(2a)' )&
 &        ' dipdip is set to one, the dipole-dipole interation is recompute.'
-   call wrtout(ab_out,message,'COLL')
-   call wrtout(std_out,message,'COLL')
+   call wrtout(ab_out,msg,'COLL')
+   call wrtout(std_out,msg,'COLL')
 
 !  Generate new bound
    if(option==1)then
      if ((abs(min1) > abs(min1_cell)).or.(abs(max1) > abs(max1_cell)).or.&
 &        (abs(min2) > abs(min2_cell)).or.(abs(max2) > abs(max2_cell)).or.&
 &        (abs(min3) > abs(min3_cell)).or.(abs(max3) > abs(max3_cell))) then
-       write(message, '(6a,3I4,5a)' )ch10,&
+       write(msg, '(6a,3I4,5a)' )ch10,&
 &        ' --- !WARNING',ch10,&
 &        '     The previous harmonic part was build for bigger cell,',ch10,&
 &        '     ifc is adjust on ',int((/(max1-min1+1),(max2-min2+1),(max3-min3+1)/),dp),' cell',ch10,&
 &        '     The simulation might be completely wong',ch10,&
 &        ' ---'
-       call wrtout(std_out,message,"COLL")
+       call wrtout(std_out,msg,"COLL")
        if (abs(min1) < abs(min1_cell)) min1 = min1_cell
        if (abs(min2) < abs(min2_cell)) min2 = min2_cell
        if (abs(min3) < abs(min3_cell)) min3 = min3_cell
@@ -774,11 +774,11 @@ subroutine effective_potential_generateDipDip(eff_pot,n_cell,option,asr,comm)
    end if
 
 !  Print the new boundary
-   write(message,'(5a,2I3,a,2I3,a,2I3,4a)') ch10,' New bound for ifc (long+short):',&
+   write(msg,'(5a,2I3,a,2I3,a,2I3,4a)') ch10,' New bound for ifc (long+short):',&
 &    ch10,ch10, " x=[",min1,max1,"], y=[",min2,max2,"] and z=[",min3,max3,"]",ch10,ch10,&
 &    " Computation of new dipole-dipole interaction."
-   call wrtout(ab_out,message,'COLL')
-   call wrtout(std_out,message,'COLL')
+   call wrtout(ab_out,msg,'COLL')
+   call wrtout(std_out,msg,'COLL')
 
 !  Count the new number of ifc
    do i1=min1,max1
@@ -972,10 +972,10 @@ subroutine effective_potential_generateDipDip(eff_pot,n_cell,option,asr,comm)
    call effective_potential_applySumRule(asr,eff_pot%harmonics_terms%ifcs,eff_pot%crystal%natom)
  end if
 
- write(message, '(a,(80a),a)' ) ch10,&
+ write(msg, '(a,(80a),a)' ) ch10,&
 &   ('=',ii=1,80)
- call wrtout(ab_out,message,'COLL')
- call wrtout(std_out,message,'COLL')
+ call wrtout(ab_out,msg,'COLL')
+ call wrtout(std_out,msg,'COLL')
 
 ! Free suppercell
  call destroy_supercell(supercell)
@@ -1034,7 +1034,7 @@ subroutine effective_potential_applySumRule(asr,ifc,natom,option)
  integer :: ia,ib,irpt,irpt_ref
  integer :: mu,nu
  real(dp) :: sum
- character(500) :: message
+ character(500) :: msg
 !array
  real(dp),pointer :: atmfrc(:,:,:,:,:,:)
 ! *************************************************************************
@@ -1051,24 +1051,24 @@ subroutine effective_potential_applySumRule(asr,ifc,natom,option)
  end do
 
  if (irpt_ref<=0) then
-   write(message,'(a,a)')' Unable to find the cell of reference in IFC'
-   MSG_ERROR(message)
+   write(msg,'(a,a)')' Unable to find the cell of reference in IFC'
+   MSG_ERROR(msg)
  end if
 
  if (present(option)) then
    if (option == 1) then
      atmfrc => ifc%short_atmfrc
-     write(message,'(3a)') ch10," Impose acoustic sum rule on short range"
+     write(msg,'(3a)') ch10," Impose acoustic sum rule on short range"
    else if (option == 2) then
      atmfrc => ifc%ewald_atmfrc
-     write(message,'(3a)') ch10," Impose acoustic sum rule on long range"
+     write(msg,'(3a)') ch10," Impose acoustic sum rule on long range"
    end if
  else
    atmfrc => ifc%atmfrc
-     write(message,'(3a)') ch10," Impose acoustic sum rule on total ifc"
+     write(msg,'(3a)') ch10," Impose acoustic sum rule on total ifc"
  end if
- call wrtout(ab_out,message,'COLL')
- call wrtout(std_out,message,'COLL')
+ call wrtout(ab_out,msg,'COLL')
+ call wrtout(std_out,msg,'COLL')
 
 !impose acoustic sum rule:
  do mu=1,3
@@ -1679,83 +1679,83 @@ subroutine effective_potential_print(eff_pot,option,filename)
 !scalar
   integer :: ia,ii
   real(dp):: fact
-  character(len=500) :: message
+  character(len=500) :: msg
 !array
 ! *************************************************************************
 
   if(option >= 1) then
     if(present(filename)) then
-      write(message, '(a,a,a,a,a,a)' )ch10,' The file ',trim(filename),&
+      write(msg, '(a,a,a,a,a,a)' )ch10,' The file ',trim(filename),&
 &     ' contains this effective potential for ',trim(eff_pot%name),':'
     else
-      write(message, '(a,a,a,a)' )ch10,' This effective potential contains ',&
+      write(msg, '(a,a,a,a)' )ch10,' This effective potential contains ',&
 &     trim(eff_pot%name),':'
     end if
 
-    call wrtout(std_out,message,'COLL')
-    call wrtout(ab_out,message,'COLL')
+    call wrtout(std_out,msg,'COLL')
+    call wrtout(ab_out,msg,'COLL')
 
 !**********************************************************************
 ! Write basics values
 !**********************************************************************
 
-    write(message,'(a,F20.10,2a,I3,2a,I4,2a,I4,2a,I3,2a)') &
+    write(msg,'(a,F20.10,2a,I3,2a,I4,2a,I4,2a,I3,2a)') &
 &     '  - Reference energy:  ',eff_pot%energy ,ch10,&
 &     '  - Number of types of atoms:  ',eff_pot%crystal%ntypat ,ch10,&
 &     '  - Number of atoms:  ',eff_pot%crystal%natom ,ch10,&
 &     '  - Number of cells:  ',eff_pot%harmonics_terms%ifcs%nrpt ,ch10,&
 &     '  - Number of qpoints:  ',eff_pot%harmonics_terms%nqpt ,ch10,&
 &     '  - Primitive vectors (unit:Bohr):  '
-    call wrtout(ab_out,message,'COLL')
-    call wrtout(std_out,message,'COLL')
+    call wrtout(ab_out,msg,'COLL')
+    call wrtout(std_out,msg,'COLL')
     do ii = 1,3
-      write(message,'(3F12.6)') eff_pot%crystal%rprimd(1,ii),&
+      write(msg,'(3F12.6)') eff_pot%crystal%rprimd(1,ii),&
 &                               eff_pot%crystal%rprimd(2,ii),&
 &                               eff_pot%crystal%rprimd(3,ii)
-      call wrtout(ab_out,message,'COLL')
-      call wrtout(std_out,message,'COLL')
+      call wrtout(ab_out,msg,'COLL')
+      call wrtout(std_out,msg,'COLL')
     end do
-    write(message,'(2a,3F12.6)') '  - acell (unit:Bohr):',ch10,one,one,one
+    write(msg,'(2a,3F12.6)') '  - acell (unit:Bohr):',ch10,one,one,one
 
-    call wrtout(ab_out,message,'COLL')
-    call wrtout(std_out,message,'COLL')
-    write(message,'(a)') '  - Dielectric tensor:  '
-    call wrtout(ab_out,message,'COLL')
-    call wrtout(std_out,message,'COLL')
+    call wrtout(ab_out,msg,'COLL')
+    call wrtout(std_out,msg,'COLL')
+    write(msg,'(a)') '  - Dielectric tensor:  '
+    call wrtout(ab_out,msg,'COLL')
+    call wrtout(std_out,msg,'COLL')
     do ii=1,3
-      write(message,'(3F12.6)')eff_pot%harmonics_terms%epsilon_inf(1,ii),&
+      write(msg,'(3F12.6)')eff_pot%harmonics_terms%epsilon_inf(1,ii),&
 &                              eff_pot%harmonics_terms%epsilon_inf(2,ii),&
 &                              eff_pot%harmonics_terms%epsilon_inf(3,ii)
-      call wrtout(ab_out,message,'COLL')
-      call wrtout(std_out,message,'COLL')
+      call wrtout(ab_out,msg,'COLL')
+      call wrtout(std_out,msg,'COLL')
     end do
-      write(message,'(a)') '  - Elastic tensor (unit:10^2GPa):  '
-      call wrtout(ab_out,message,'COLL')
-      call wrtout(std_out,message,'COLL')
+      write(msg,'(a)') '  - Elastic tensor (unit:10^2GPa):  '
+      call wrtout(ab_out,msg,'COLL')
+      call wrtout(std_out,msg,'COLL')
       fact = HaBohr3_GPa / eff_pot%crystal%ucvol
     do ii=1,6
-      write(message,'(6F12.6)')&
+      write(msg,'(6F12.6)')&
 &      eff_pot%harmonics_terms%elastic_constants(1,ii)*fact/100,&
 &      eff_pot%harmonics_terms%elastic_constants(2,ii)*fact/100,&
 &      eff_pot%harmonics_terms%elastic_constants(3,ii)*fact/100,&
 &      eff_pot%harmonics_terms%elastic_constants(4,ii)*fact/100,&
 &      eff_pot%harmonics_terms%elastic_constants(5,ii)*fact/100,&
 &      eff_pot%harmonics_terms%elastic_constants(6,ii)*fact/100
-      call wrtout(ab_out,message,'COLL')
-      call wrtout(std_out,message,'COLL')
+      call wrtout(ab_out,msg,'COLL')
+      call wrtout(std_out,msg,'COLL')
     end do
     do ia=1,eff_pot%crystal%natom
-      write(message,'(a,I4,2a,F10.4,2a,F10.4,2a,3F12.6,2a)')'  - Atoms',ia,ch10,&
+      write(msg,'(a,I4,2a,F10.4,2a,F10.4,2a,3F12.6,2a)')'  - Atoms',ia,ch10,&
 &             "    - atomic number:",eff_pot%crystal%znucl(eff_pot%crystal%typat(ia)),ch10,&
 &             "    - atomic mass:",eff_pot%crystal%amu(eff_pot%crystal%typat(ia)),ch10,&
 &             "    - cartesian position:",eff_pot%crystal%xcart(:,ia),ch10,&
 &             "    - Effective charges:"
-      call wrtout(ab_out,message,'COLL')
-      call wrtout(std_out,message,'COLL')
+      call wrtout(ab_out,msg,'COLL')
+      call wrtout(std_out,msg,'COLL')
       do ii = 1,3
-        write(message,'(a,3(F12.6))') "  ",eff_pot%harmonics_terms%zeff(:,ii,ia)
-        call wrtout(ab_out,message,'COLL')
-        call wrtout(std_out,message,'COLL')
+        write(msg,'(a,3(F12.6))') "  ",eff_pot%harmonics_terms%zeff(:,ii,ia)
+        call wrtout(ab_out,msg,'COLL')
+        call wrtout(std_out,msg,'COLL')
       end do
     end do
   end if
@@ -1811,7 +1811,7 @@ subroutine effective_potential_printSupercell(eff_pot,supercell)
 !Local variables-------------------------------
 !scalar
  integer :: iatom,ii
- character(len=500) :: message
+ character(len=500) :: msg
 !array
  real(dp), allocatable :: xred(:,:)
  type(supercell_type),pointer :: supercell_tmp
@@ -1825,10 +1825,10 @@ subroutine effective_potential_printSupercell(eff_pot,supercell)
  end if
 
  if(supercell_tmp%natom_supercell /= eff_pot%supercell%natom_supercell) then
-   write(message, '(3a)' )&
+   write(msg, '(3a)' )&
 &  ' There is not the same numbers of atoms in the two supercell',ch10,&
 &   'Action: modify the code'
-   MSG_BUG(message)
+   MSG_BUG(msg)
  end if
 
  ABI_ALLOCATE(xred,(3,supercell_tmp%natom_supercell))
@@ -1837,82 +1837,82 @@ subroutine effective_potential_printSupercell(eff_pot,supercell)
 ! Write basics values
 !**********************************************************************
 
- write (message, '(4a,I8,a)') ' Structure parameters of the supercell :',ch10,ch10,&
+ write (msg, '(4a,I8,a)') ' Structure parameters of the supercell :',ch10,ch10,&
                        '  natom ', supercell_tmp%natom_supercell,ch10
- call wrtout(ab_out,message,'COLL')
- call wrtout(std_out,message,'COLL')
+ call wrtout(ab_out,msg,'COLL')
+ call wrtout(std_out,msg,'COLL')
 
- write (message, '(a)') '  znucl '
- call wrtout(ab_out,message,'COLL')
- call wrtout(std_out,message,'COLL')
- write(message,*) ''
+ write (msg, '(a)') '  znucl '
+ call wrtout(ab_out,msg,'COLL')
+ call wrtout(std_out,msg,'COLL')
+ write(msg,*) ''
  do iatom = 1, size(eff_pot%crystal%znucl)
-   write (message, '(a,I5)') trim(message),int(eff_pot%crystal%znucl(iatom))
+   write (msg, '(a,I5)') trim(msg),int(eff_pot%crystal%znucl(iatom))
    if (mod(iatom,6) == 0) then
-     call wrtout(ab_out,message,'COLL')
-     call wrtout(std_out,message,'COLL')
-     write(message,*) ''
+     call wrtout(ab_out,msg,'COLL')
+     call wrtout(std_out,msg,'COLL')
+     write(msg,*) ''
    end if
  end do
- write (message, '(2a)') trim(message),ch10
- call wrtout(ab_out,message,'COLL')
- call wrtout(std_out,message,'COLL')
- write (message, '(a,I7,3a)') '  ntypat', size(eff_pot%crystal%znucl),ch10,ch10, '  typat '
- call wrtout(ab_out,message,'COLL')
- call wrtout(std_out,message,'COLL')
+ write (msg, '(2a)') trim(msg),ch10
+ call wrtout(ab_out,msg,'COLL')
+ call wrtout(std_out,msg,'COLL')
+ write (msg, '(a,I7,3a)') '  ntypat', size(eff_pot%crystal%znucl),ch10,ch10, '  typat '
+ call wrtout(ab_out,msg,'COLL')
+ call wrtout(std_out,msg,'COLL')
 
- write(message,*) ''
+ write(msg,*) ''
  do iatom = 1, supercell_tmp%natom_supercell
-   write (message, '(a,I5)') trim(message),&
+   write (msg, '(a,I5)') trim(msg),&
 &         supercell_tmp%typat_supercell(supercell_tmp%atom_indexing_supercell(iatom))
    if (mod(iatom,12) == 0)then
-     call wrtout(ab_out,message,'COLL')
-     call wrtout(std_out,message,'COLL')
-     write(message,*) ''
+     call wrtout(ab_out,msg,'COLL')
+     call wrtout(std_out,msg,'COLL')
+     write(msg,*) ''
    end if
  end do
- write (message, '(2a)') trim(message),ch10
- call wrtout(ab_out,message,'COLL')
- call wrtout(std_out,message,'COLL')
- write (message, '(3a)') '  acell 1.0 1.0 1.0',ch10,ch10
- write (message, '(2a)') trim(message),'  rprim'
- call wrtout(ab_out,message,'COLL')
- call wrtout(std_out,message,'COLL')
+ write (msg, '(2a)') trim(msg),ch10
+ call wrtout(ab_out,msg,'COLL')
+ call wrtout(std_out,msg,'COLL')
+ write (msg, '(3a)') '  acell 1.0 1.0 1.0',ch10,ch10
+ write (msg, '(2a)') trim(msg),'  rprim'
+ call wrtout(ab_out,msg,'COLL')
+ call wrtout(std_out,msg,'COLL')
 
  do ii = 1,3
-   write(message,'(3E23.14,3E23.14,3E23.14)') supercell_tmp%rprimd_supercell(1,ii),&
+   write(msg,'(3E23.14,3E23.14,3E23.14)') supercell_tmp%rprimd_supercell(1,ii),&
 &                                             supercell_tmp%rprimd_supercell(2,ii),&
 &                                             supercell_tmp%rprimd_supercell(3,ii)
-   call wrtout(ab_out,message,'COLL')
-   call wrtout(std_out,message,'COLL')
+   call wrtout(ab_out,msg,'COLL')
+   call wrtout(std_out,msg,'COLL')
  end do
 
-  write (message, '(2a)') ch10,'  xcart'
-  call wrtout(ab_out,message,'COLL')
-  call wrtout(std_out,message,'COLL')
+  write (msg, '(2a)') ch10,'  xcart'
+  call wrtout(ab_out,msg,'COLL')
+  call wrtout(std_out,msg,'COLL')
   do iatom = 1, supercell_tmp%natom_supercell
-    write (message, '(3E23.14)') supercell_tmp%xcart_supercell(1,iatom),&
+    write (msg, '(3E23.14)') supercell_tmp%xcart_supercell(1,iatom),&
 &                                supercell_tmp%xcart_supercell(2,iatom),&
 &                                supercell_tmp%xcart_supercell(3,iatom)
-    call wrtout(ab_out,message,'COLL')
-    call wrtout(std_out,message,'COLL')
+    call wrtout(ab_out,msg,'COLL')
+    call wrtout(std_out,msg,'COLL')
   end do
   call xcart2xred(supercell_tmp%natom_supercell,supercell_tmp%rprimd_supercell,&
  &                supercell_tmp%xcart_supercell,xred)
-  write (message, '(2a)') ch10,'  xred'
-  call wrtout(ab_out,message,'COLL')
-  call wrtout(std_out,message,'COLL')
+  write (msg, '(2a)') ch10,'  xred'
+  call wrtout(ab_out,msg,'COLL')
+  call wrtout(std_out,msg,'COLL')
   do iatom = 1, supercell_tmp%natom_supercell
-    write (message, '(3E23.14)') xred(1,iatom),&
+    write (msg, '(3E23.14)') xred(1,iatom),&
 &                                xred(2,iatom),&
 &                                xred(3,iatom)
-    call wrtout(ab_out,message,'COLL')
-    call wrtout(std_out,message,'COLL')
+    call wrtout(ab_out,msg,'COLL')
+    call wrtout(std_out,msg,'COLL')
   end do
 
-  write (message, '(a)') ''
-  call wrtout(ab_out,message,'COLL')
-  call wrtout(std_out,message,'COLL')
+  write (msg, '(a)') ''
+  call wrtout(ab_out,msg,'COLL')
+  call wrtout(std_out,msg,'COLL')
 
 ! Deallocation array
   ABI_DEALLOCATE(xred)
@@ -1984,7 +1984,7 @@ subroutine effective_potential_writeXML(eff_pot,option,filename)
  integer :: ii,ia,ib,jj
  integer :: iqpt,irpt,mu,nu
  integer :: unit_xml=22
- character(len=500) :: message
+ character(len=500) :: msg
  character(len=fnlen) :: namefile
  character(len=10) :: natom
 !arrays
@@ -2013,21 +2013,21 @@ subroutine effective_potential_writeXML(eff_pot,option,filename)
 
    call isfile(namefile,'new')
 
-   if (open_file(namefile,message,unit=unit_xml,form="formatted",&
+   if (open_file(namefile,msg,unit=unit_xml,form="formatted",&
 &      status="new",action="write") /= 0) then
-     MSG_ERROR(message)
+     MSG_ERROR(msg)
    end if
 
-   write(message, '(a,(80a),a)' ) ch10,&
+   write(msg, '(a,(80a),a)' ) ch10,&
 &    ('=',ii=1,80)
-   call wrtout(ab_out,message,'COLL')
-   call wrtout(std_out,message,'COLL')
+   call wrtout(ab_out,msg,'COLL')
+   call wrtout(std_out,msg,'COLL')
 
-   write(message,'(a,a,a)')ch10,&
+   write(msg,'(a,a,a)')ch10,&
  &       ' Generation of the xml file for the reference structure in ',trim(namefile)
 
-   call wrtout(ab_out,message,'COLL')
-   call wrtout(std_out,message,'COLL')
+   call wrtout(ab_out,msg,'COLL')
+   call wrtout(std_out,msg,'COLL')
 
 !  Write header
    WRITE(unit_xml,'("<?xml version=""1.0"" ?>")')
@@ -2103,10 +2103,10 @@ subroutine effective_potential_writeXML(eff_pot,option,filename)
 !      ....       ]
      if(all(abs(eff_pot%harmonics_terms%ifcs%atmfrc(1,:,:,:,:,irpt))<tol9)) then
        if(any(abs(eff_pot%harmonics_terms%ifcs%short_atmfrc(1,:,:,:,:,irpt))>tol9)) then
-         write(message, '(a,a,a,a)' )&
+         write(msg, '(a,a,a,a)' )&
 &         ' There is no total range but short range in your effective potential',ch10,&
 &         'Action: contact abinit group'
-         MSG_BUG(message)
+         MSG_BUG(msg)
        end if
      else
        WRITE(unit_xml,'("  <total_force_constant units=""hartree/bohrradius**2"">")')
@@ -2302,7 +2302,7 @@ subroutine effective_potential_writeNETCDF(eff_pot,option,filename)
  integer :: ncerr,ncid,npsp
  integer :: dimCids(2),dimEids(2),dimIids(6),dimPids(1),dimRids(2),dimXids(2)
  integer :: etotal_id,rprimd_id,xcart_id
- character(len=500) :: message
+ character(len=500) :: msg
  character(len=fnlen) :: namefile
 !arrays
  real :: strain(9,6)
@@ -2329,11 +2329,11 @@ subroutine effective_potential_writeNETCDF(eff_pot,option,filename)
 
    call isfile(namefile,'new')
 
-   write(message,'(a,a,a)')ch10,&
+   write(msg,'(a,a,a)')ch10,&
 &   ' Generation of the xml file for the reference structure in ',namefile
 
-   call wrtout(ab_out,message,'COLL')
-   call wrtout(std_out,message,'COLL')
+   call wrtout(ab_out,msg,'COLL')
+   call wrtout(std_out,msg,'COLL')
 
 !  1. Create netCDF file
    ncerr = nf90_create(path=trim(namefile),cmode=NF90_CLOBBER, ncid=ncid)
@@ -2517,7 +2517,7 @@ subroutine effective_potential_writeAbiInput(eff_pot,filename,strain)
 !Local variables-------------------------------
 !scalar
  integer :: unit = 20
- character(len=500) :: message
+ character(len=500) :: msg
  character(len=fnlen) :: namefile
 !arrays
  real(dp) :: xred(3,eff_pot%crystal%natom)
@@ -2551,14 +2551,14 @@ subroutine effective_potential_writeAbiInput(eff_pot,filename,strain)
 
  call isfile(namefile,'new')
 
- if (open_file(namefile,message,unit=unit,form="formatted",status="new",action="write") /= 0) then
-   MSG_ERROR(message)
+ if (open_file(namefile,msg,unit=unit,form="formatted",status="new",action="write") /= 0) then
+   MSG_ERROR(msg)
  end if
 
-  write(message,'(a,a,a,a)')ch10,&
+  write(msg,'(a,a,a,a)')ch10,&
  &   ' Generation of the input file in ',namefile,ch10
-  call wrtout(ab_out,message,'COLL')
-  call wrtout(std_out,message,'COLL')
+  call wrtout(ab_out,msg,'COLL')
+  call wrtout(std_out,msg,'COLL')
 
   write(unit,'("#Abinit Input for DFPT, this file contrains the keyword")')
   write(unit,'("#To run DFPT calculation of")')
@@ -2807,7 +2807,7 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
   integer :: alpha,beta,gamma,delta,ii,ia,mu,ncell
   real(dp):: cijk,energy_part
   real(dp):: ucvol
-  character(len=500) :: message
+  character(len=500) :: msg
   logical :: has_strain = .FALSE.
   logical :: iam_master
   integer, parameter:: master = 0
@@ -2833,31 +2833,31 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
 
 !Check some variables
   if (natom /= eff_pot%supercell%natom_supercell) then
-    write(message,'(a,I7,a,I7,a)')' The number of atoms is not correct :',natom,&
+    write(msg,'(a,I7,a,I7,a)')' The number of atoms is not correct :',natom,&
 &   ' in argument istead of ',eff_pot%supercell%natom_supercell, ' in supercell'
-    MSG_ERROR(message)
+    MSG_ERROR(msg)
   end if
 
   if (present(displacement))then
     if(size(displacement(1,:)) /= eff_pot%supercell%natom_supercell) then
-      write(message,'(a,I7,a,I7,a)')' The number of atoms is not correct :',size(displacement(1,:)),&
+      write(msg,'(a,I7,a,I7,a)')' The number of atoms is not correct :',size(displacement(1,:)),&
 &      ' in displacement array instead of ',eff_pot%supercell%natom_supercell, ' in supercell'
-      MSG_ERROR(message)
+      MSG_ERROR(msg)
     end if
   end if
   do ii=1,3
     if(eff_pot%supercell%qphon(ii)<0.or.eff_pot%supercell%qphon(ii)>50)then
-      write(message, '(a,i0,a,i2,a,a,a,i0,a)' )&
+      write(msg, '(a,i0,a,i2,a,a,a,i0,a)' )&
 &     'eff_pot%supercell%qphon(',ii,') is ',int(eff_pot%supercell%qphon(ii)),&
 &     ', which is lower than 0 of superior than 10.',ch10,'Action: correct n_cell(',ii,').'
-      MSG_ERROR(message)
+      MSG_ERROR(msg)
     end if
   end do
 
-  write(message, '(a,a,a)' ) ch10,' enter get_energy : Calculation of the energy'
-  call wrtout(std_out,message,'COLL')
-  write(message, '(a,a,a)' ) ch10,' Calculation of the energy with effective potential'
-  call wrtout(ab_out,message,'COLL')
+  write(msg, '(a,a,a)' ) ch10,' enter get_energy : Calculation of the energy'
+  call wrtout(std_out,msg,'COLL')
+  write(msg, '(a,a,a)' ) ch10,' Calculation of the energy with effective potential'
+  call wrtout(ab_out,msg,'COLL')
 
   call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
 
@@ -2882,8 +2882,8 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
   else
   ! else => calculation of the strain
     call strain_get(strain,rprim=eff_pot%supercell%rprimd_supercell,rprim_def=rprimd)
-     write(message,'(80a)')('-',mu=1,80)
-     call wrtout(std_out,message,'COLL')
+     write(msg,'(80a)')('-',mu=1,80)
+     call wrtout(std_out,msg,'COLL')
     call strain_print(strain)
     if (strain%name /= "reference")  then
       has_strain = .TRUE.
@@ -2921,10 +2921,10 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
   strten(:)      = zero
 
 
-  write(message, '(80a,2a)' ) ('-',mu=1,80),&
+  write(msg, '(80a,2a)' ) ('-',mu=1,80),&
 &     ch10,' Components of total energy (in Hartree) :'
-  call wrtout(ab_out,message,'COLL')
-  call wrtout(std_out,message,'COLL')
+  call wrtout(ab_out,msg,'COLL')
+  call wrtout(std_out,msg,'COLL')
 
 !------------------------------------
 ! 2 - Transfert the reference energy
@@ -2932,10 +2932,10 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
 
   energy = eff_pot%energy * ncell
 
-  write(message, '(a,a,1ES24.16,a)' ) ch10,' Energy of the reference strucure          :',&
+  write(msg, '(a,a,1ES24.16,a)' ) ch10,' Energy of the reference strucure          :',&
 &                                          energy,' Hartree'
-  call wrtout(ab_out,message,'COLL')
-  call wrtout(std_out,message,'COLL')
+  call wrtout(ab_out,msg,'COLL')
+  call wrtout(std_out,msg,'COLL')
 
 !------------------------------------
 ! 3 - Computation of the IFC part :
@@ -2952,18 +2952,18 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
 &                       int(eff_pot%supercell%qphon(:)),&
 &                       eff_pot%mpi_ifc%my_rpt,eff_pot%mpi_ifc%comm)
 
-  write(message, '(a,1ES24.16,a)' ) ' Energy of the ifc part                    :',&
+  write(msg, '(a,1ES24.16,a)' ) ' Energy of the ifc part                    :',&
 &                                     energy_part,' Hartree'
-  call wrtout(ab_out,message,'COLL')
-  call wrtout(std_out,message,'COLL')
+  call wrtout(ab_out,msg,'COLL')
+  call wrtout(std_out,msg,'COLL')
 
   if(energy_part < zero.and.eff_pot%anharmonics_terms%ncoeff == zero)then
-    write(message, '(8a)' )ch10,&
+    write(msg, '(8a)' )ch10,&
 &        ' --- !WARNING!',ch10,&
 &        '        The harmonic part is negative, the simulation will diverge',ch10,&
 &        '        if the anharmonic part is not used',ch10,&
 &        ' ---'
-    call wrtout(std_out,message,"COLL")
+    call wrtout(std_out,msg,"COLL")
   end if
 
   energy = energy + energy_part
@@ -2991,10 +2991,10 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
 &                           ncell,strten_part,strain_tmp)
 
   if(has_strain)then
-    write(message, '(a,1ES24.16,a)' ) ' Energy of the elastic part                :',&
+    write(msg, '(a,1ES24.16,a)' ) ' Energy of the elastic part                :',&
 &                                       energy_part,' Hartree'
-    call wrtout(ab_out,message,'COLL')
-    call wrtout(std_out,message,'COLL')
+    call wrtout(ab_out,msg,'COLL')
+    call wrtout(std_out,msg,'COLL')
   end if
 
   energy = energy + energy_part
@@ -3023,10 +3023,10 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
         end do
       end do
 
-      write(message, '(a,1ES24.16,a)' ) ' Energy of the 3rd elastics constants      :',&
+      write(msg, '(a,1ES24.16,a)' ) ' Energy of the 3rd elastics constants      :',&
 &                                         energy_part,' Hartree'
-      call wrtout(ab_out,message,'COLL')
-      call wrtout(std_out,message,'COLL')
+      call wrtout(ab_out,msg,'COLL')
+      call wrtout(std_out,msg,'COLL')
 
       energy = energy + energy_part
       strten(:) = strten(:) + strten_part(:)
@@ -3060,10 +3060,10 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
       strten(:) = strten(:) + strten_part(:)
       fcart(:,:)= fcart(:,:)+ fcart_part(:,:)
 
-      write(message, '(a,1ES24.16,a)' ) ' Energy of the 3rd (elastics-disp coupling):',&
+      write(msg, '(a,1ES24.16,a)' ) ' Energy of the 3rd (elastics-disp coupling):',&
 &                                         energy_part,' Hartree'
-      call wrtout(ab_out,message,'COLL')
-      call wrtout(std_out,message,'COLL')
+      call wrtout(ab_out,msg,'COLL')
+      call wrtout(std_out,msg,'COLL')
     end if
 
 !   3-Part due to the strain-phonon coupling
@@ -3076,10 +3076,10 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
 &                                         strten_part,eff_pot%mpi_ifc%my_cells,eff_pot%mpi_ifc%my_ncell,&
 &                                         eff_pot%mpi_ifc%my_index_cells,eff_pot%mpi_ifc%comm)
 
-      write(message, '(a,1ES24.16,a)' ) ' Energy of the 3rd (strain-phonon coupling):',&
+      write(msg, '(a,1ES24.16,a)' ) ' Energy of the 3rd (strain-phonon coupling):',&
 &                                         energy_part,' Hartree'
-      call wrtout(ab_out,message,'COLL')
-      call wrtout(std_out,message,'COLL')
+      call wrtout(ab_out,msg,'COLL')
+      call wrtout(std_out,msg,'COLL')
 
       energy = energy + energy_part
       fcart  = fcart  + fcart_part
@@ -3109,10 +3109,10 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
       end do
 
 
-      write(message, '(a,1ES24.16,a)' ) ' Energy of the 4rd elastics constants      :',&
+      write(msg, '(a,1ES24.16,a)' ) ' Energy of the 4rd elastics constants      :',&
 &                                         energy_part,' Hartree'
-      call wrtout(ab_out,message,'COLL')
-      call wrtout(std_out,message,'COLL')
+      call wrtout(ab_out,msg,'COLL')
+      call wrtout(std_out,msg,'COLL')
 
       energy = energy + energy_part
       strten(:) = strten(:) + strten_part(:)
@@ -3129,16 +3129,18 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
     fcart_part(:,:)  = zero
     strten_part(:) = zero
 
-    call coefficients_contribution(eff_pot,disp_tmp,&
+    call coefficients_contribution(eff_pot%anharmonics_terms%coefficients,disp_tmp,&
 &                                  energy_part,fcart_part,eff_pot%supercell%natom_supercell,&
-&                                  eff_pot%anharmonics_terms%ncoeff,strain_tmp,strten_part,&
+&                                  eff_pot%anharmonics_terms%ncoeff,&
+&                                  int(eff_pot%supercell%qphon(:)),strain_tmp,strten_part,&
+&                                  eff_pot%crystal%natom,&
 &                                  eff_pot%mpi_coeff%my_cells,eff_pot%mpi_coeff%my_ncell,&
 &                                  eff_pot%mpi_coeff%my_index_cells,eff_pot%mpi_coeff%comm)
 
-    write(message, '(a,1ES24.16,a)' ) ' Energy of the fitted coefficient          :',&
+    write(msg, '(a,1ES24.16,a)' ) ' Energy of the fitted coefficient          :',&
 &                                      energy_part,' Hartree'
-    call wrtout(ab_out,message,'COLL')
-    call wrtout(std_out,message,'COLL')
+    call wrtout(ab_out,msg,'COLL')
+    call wrtout(std_out,msg,'COLL')
 
     energy = energy + energy_part
     fcart(:,:)  = fcart(:,:) + fcart_part(:,:)
@@ -3157,18 +3159,18 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
 &                                 eff_pot%confinement%factor_strain,fcart_part,strain_tmp,&
 &                                 eff_pot%confinement%cutoff_strain,strten_part,&
 &                                 eff_pot%confinement%power_disp,eff_pot%confinement%power_strain,&
-&                                 eff_pot%mpi_ifc%my_cells,&
+&                                 eff_pot%mpi_coeff%my_cells,&
 &                                 eff_pot%supercell%natom_supercell,eff_pot%crystal%natom,&
-&                                 eff_pot%mpi_ifc%my_ncell,eff_pot%mpi_ifc%my_index_cells,&
-&                                 eff_pot%mpi_ifc%comm)
+&                                 eff_pot%mpi_coeff%my_ncell,eff_pot%mpi_coeff%my_index_cells,&
+&                                 eff_pot%mpi_coeff%comm)
 
       energy = energy + energy_part
 
     if(abs(energy_part) > tol10 )then
-      write(message, '(a,1ES24.16,a)' ) ' Energy of the confinement part            :',&
+      write(msg, '(a,1ES24.16,a)' ) ' Energy of the confinement part            :',&
 &                                       energy_part,' Hartree'
-      call wrtout(ab_out,message,'COLL')
-      call wrtout(std_out,message,'COLL')
+      call wrtout(ab_out,msg,'COLL')
+      call wrtout(std_out,msg,'COLL')
     end if
   end if
 
@@ -3190,59 +3192,59 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
 ! 8 - Final Print:
 !------------------------------------
 
-  write(message, '(2a,es21.14)' ) ch10,&
+  write(msg, '(2a,es21.14)' ) ch10,&
 &     '    >>>>>>>>> Etotal= ',energy
-  call wrtout(ab_out,message,'COLL')
-  call wrtout(std_out,message,'COLL')
+  call wrtout(ab_out,msg,'COLL')
+  call wrtout(std_out,msg,'COLL')
 
- write(message,'(2a,1p,e15.7,a)') ch10,' Unit cell volume ucvol=',ucvol+tol10,' bohr^3'
- call wrtout(std_out,  message,'COLL') 
+ write(msg,'(2a,1p,e15.7,a)') ch10,' Unit cell volume ucvol=',ucvol+tol10,' bohr^3'
+ call wrtout(std_out,  msg,'COLL') 
 
-  write(message, '(a,80a,3a)' ) ch10,('-',mu=1,80),ch10,&
+  write(msg, '(a,80a,3a)' ) ch10,('-',mu=1,80),ch10,&
 &   ' Cartesian components of stress tensor (hartree/bohr^3)'
-  call wrtout(ab_out,message,'COLL')
-  call wrtout(std_out,  message,'COLL')
+  call wrtout(ab_out,msg,'COLL')
+  call wrtout(std_out,  msg,'COLL')
 
-  write(message, '(a,1p,e16.8,a,1p,e16.8)' ) &
+  write(msg, '(a,1p,e16.8,a,1p,e16.8)' ) &
 &   '  sigma(1 1)=',strten(1),'  sigma(3 2)=',strten(4)
-  call wrtout(ab_out,message,'COLL')
-  call wrtout(std_out,  message,'COLL')
-  write(message, '(a,1p,e16.8,a,1p,e16.8)' ) &
+  call wrtout(ab_out,msg,'COLL')
+  call wrtout(std_out,  msg,'COLL')
+  write(msg, '(a,1p,e16.8,a,1p,e16.8)' ) &
 &   '  sigma(2 2)=',strten(2),'  sigma(3 1)=',strten(5)
-  call wrtout(ab_out,message,'COLL')
-  call wrtout(std_out,  message,'COLL')
-  write(message, '(a,1p,e16.8,a,1p,e16.8)' ) &
+  call wrtout(ab_out,msg,'COLL')
+  call wrtout(std_out,  msg,'COLL')
+  write(msg, '(a,1p,e16.8,a,1p,e16.8)' ) &
 &   '  sigma(3 3)=',strten(3),'  sigma(2 1)=',strten(6)
-  call wrtout(ab_out,message,'COLL')
-  call wrtout(std_out,  message,'COLL')
+  call wrtout(ab_out,msg,'COLL')
+  call wrtout(std_out,  msg,'COLL')
 
 ! Also output the pressure (minus one third the trace of the stress
 ! tensor.
-  write(message, '(a,a,es12.4,a)' ) ch10,&
+  write(msg, '(a,a,es12.4,a)' ) ch10,&
 &   '-Cartesian components of stress tensor (GPa)         [Pressure=',&
 &   -(strten(1)+strten(2)+strten(3))*HaBohr3_GPa/3.0_dp,' GPa]'
 
-  call wrtout(ab_out,message,'COLL')
-  call wrtout(std_out,  message,'COLL')
+  call wrtout(ab_out,msg,'COLL')
+  call wrtout(std_out,  msg,'COLL')
 
-  write(message, '(a,1p,e16.8,a,1p,e16.8)' ) &
+  write(msg, '(a,1p,e16.8,a,1p,e16.8)' ) &
 &   '- sigma(1 1)=',strten(1)*HaBohr3_GPa,&
 &   '  sigma(3 2)=',strten(4)*HaBohr3_GPa
-  call wrtout(ab_out,message,'COLL')
-  call wrtout(std_out,  message,'COLL')
-  write(message, '(a,1p,e16.8,a,1p,e16.8)' ) &
+  call wrtout(ab_out,msg,'COLL')
+  call wrtout(std_out,  msg,'COLL')
+  write(msg, '(a,1p,e16.8,a,1p,e16.8)' ) &
 &   '- sigma(2 2)=',strten(2)*HaBohr3_GPa,&
 &   '  sigma(3 1)=',strten(5)*HaBohr3_GPa
-  call wrtout(ab_out,message,'COLL')
-  call wrtout(std_out,  message,'COLL')
-  write(message, '(a,1p,e16.8,a,1p,e16.8,a)' ) &
+  call wrtout(ab_out,msg,'COLL')
+  call wrtout(std_out,  msg,'COLL')
+  write(msg, '(a,1p,e16.8,a,1p,e16.8,a)' ) &
 &   '- sigma(3 3)=',strten(3)*HaBohr3_GPa,&
 &   '  sigma(2 1)=',strten(6)*HaBohr3_GPa
-  call wrtout(ab_out,message,'COLL')
-  call wrtout(std_out,  message,'COLL')
-  write(message, '(80a,a)' ) ('-',mu=1,80),ch10
-  call wrtout(ab_out,message,'COLL')
-  call wrtout(std_out,message,'COLL')
+  call wrtout(ab_out,msg,'COLL')
+  call wrtout(std_out,  msg,'COLL')
+  write(msg, '(80a,a)' ) ('-',mu=1,80),ch10
+  call wrtout(ab_out,msg,'COLL')
+  call wrtout(std_out,msg,'COLL')
 
 end subroutine effective_potential_evaluate
 !!***
@@ -3317,7 +3319,7 @@ subroutine ifc_contribution(atmfrc,disp,energy,fcart,cells,natom_sc,natom_uc,nce
 ! *************************************************************************
 
   if (any(sc_size <= 0)) then
-    write(msg,'(a,a)')' No supercell found for getEnergy'
+    write(msg,'(a,a)')' sc_size can not be inferior or equal to zero'
     MSG_ERROR(msg)
   end if
 
@@ -3539,7 +3541,7 @@ subroutine ifcStrainCoupling_contribution(eff_pot,disp,energy,fcart,strain,strte
 
   cell_number(:) = int(eff_pot%supercell%qphon(:))
   if (any(cell_number <= 0)) then
-    write(msg,'(a,a)')' No supercell found for getEnergy'
+    write(msg,'(a,a)')' sc_size can not be inferior or equal to zero'
     MSG_ERROR(msg)
   end if
 
@@ -3712,8 +3714,8 @@ end subroutine  elastic_contribution
 !!
 !! SOURCE
 !!
-subroutine coefficients_contribution(eff_pot,disp,energy,fcart,natom,ncoeff,strain,strten,cells,ncell,&
-&                                    index_cells,comm)
+subroutine coefficients_contribution(coefficients,disp,energy,fcart,sc_natom,ncoeff,sc_size,&
+&                                    strain,strten,uc_natom,cells,ncell,index_cells,comm)
 
 !Arguments ------------------------------------
 ! scalar
@@ -3725,16 +3727,16 @@ subroutine coefficients_contribution(eff_pot,disp,energy,fcart,natom,ncoeff,stra
 !End of the abilint section
 
   real(dp),intent(out):: energy
-  integer, intent(in) :: natom,ncell,ncoeff
+  integer, intent(in) :: ncell,ncoeff,sc_natom,uc_natom
   integer, intent(in) :: comm
 ! array
   real(dp),intent(out):: strten(6)
   real(dp),intent(in) :: strain(6)
+  real(dp),intent(out):: fcart(3,sc_natom)
+  real(dp),intent(in) :: disp(3,sc_natom)
   integer,intent(in) ::   cells(ncell),index_cells(ncell,3)
-  type(effective_potential_type),intent(in) :: eff_pot
-  real(dp),intent(out):: fcart(3,natom)
-  real(dp),intent(in) :: disp(3,natom)
-
+  integer,intent(in) :: sc_size(3)
+  type(polynomial_coeff_type),intent(in) :: coefficients(ncoeff)
  !Local variables-------------------------------
 ! scalar
   integer :: i1,i2,i3,ia1,ib1,ia2,ib2,idir1,idir2,ierr,ii
@@ -3742,40 +3744,45 @@ subroutine coefficients_contribution(eff_pot,disp,energy,fcart,natom,ncoeff,stra
   real(dp):: coeff,disp1,disp2,tmp1,tmp2,tmp3
 ! array
   integer :: cell_atoma1(3),cell_atoma2(3)
-  integer :: cell_atomb1(3),cell_atomb2(3),cell_number(3)
-
+  integer :: cell_atomb1(3),cell_atomb2(3)
+  character(len=500) :: msg
 ! *************************************************************************
 
+! Check
+  if (any(sc_size <= 0)) then
+    write(msg,'(a,a)')' No supercell found for getEnergy'
+    MSG_ERROR(msg)
+  end if
+
 ! Initialisation of variables
-  cell_number(:) = int(eff_pot%supercell%qphon(:))
   energy     = zero
   fcart(:,:) = zero
   strten(:)  = zero
 
   do icell = 1,ncell
-    ii = (cells(icell)-1)*eff_pot%crystal%natom
+    ii = (cells(icell)-1)*uc_natom
     i1=index_cells(icell,1); i2=index_cells(icell,2); i3=index_cells(icell,3)
 !   Loop over coefficients
     do icoeff=1,ncoeff
 !     Set the value of the coefficient
-      coeff = eff_pot%anharmonics_terms%coefficients(icoeff)%coefficient
+      coeff = coefficients(icoeff)%coefficient
 !     Loop over terms of this coefficient
-      do iterm=1,eff_pot%anharmonics_terms%coefficients(icoeff)%nterm
+      do iterm=1,coefficients(icoeff)%nterm
 !       Set the weight of this term
-        weight =eff_pot%anharmonics_terms%coefficients(icoeff)%terms(iterm)%weight
+        weight =coefficients(icoeff)%terms(iterm)%weight
         tmp1 = one
 !       Loop over displacement and strain
-        do idisp1=1,eff_pot%anharmonics_terms%coefficients(icoeff)%terms(iterm)%ndisp
+        do idisp1=1,coefficients(icoeff)%terms(iterm)%ndisp
 
 !         Set to one the acculation of forces and strain
           tmp2 = one
           tmp3 = one
 
 !         Set the power of the displacement:
-          power = eff_pot%anharmonics_terms%coefficients(icoeff)%terms(iterm)%power(idisp1)
+          power = coefficients(icoeff)%terms(iterm)%power(idisp1)
 
 !         Get the direction of the displacement or strain
-          idir1 = eff_pot%anharmonics_terms%coefficients(icoeff)%terms(iterm)%direction(idisp1)
+          idir1 = coefficients(icoeff)%terms(iterm)%direction(idisp1)
 
 !         Strain case idir => -6, -5, -4, -3, -2 or -1
           if (idir1 < zero)then
@@ -3796,39 +3803,39 @@ subroutine coefficients_contribution(eff_pot,disp,energy,fcart,natom,ncoeff,stra
           else
 !           Displacement case idir = 1, 2  or 3
 !           indexes of the cell of the atom a
-            cell_atoma1 = eff_pot%anharmonics_terms%coefficients(icoeff)%terms(iterm)%cell(:,1,idisp1)
+            cell_atoma1 = coefficients(icoeff)%terms(iterm)%cell(:,1,idisp1)
             if(cell_atoma1(1)/=0.or.cell_atoma1(2)/=0.or.cell_atoma1(3)/=0) then
 !             if the cell is not 0 0 0 we apply PBC:
               cell_atoma1(1) =  (i1-1) + cell_atoma1(1)
               cell_atoma1(2) =  (i2-1) + cell_atoma1(2)
               cell_atoma1(3) =  (i3-1) + cell_atoma1(3)
-              call index_periodic(cell_atoma1(1:3),cell_number(1:3))
+              call index_periodic(cell_atoma1(1:3),sc_size(1:3))
 !             index of the first atom (position in the supercell if the cell is not 0 0 0)
-              ia1 = cell_atoma1(1)*cell_number(2)*cell_number(3)*eff_pot%crystal%natom+&
-&                   cell_atoma1(2)*cell_number(3)*eff_pot%crystal%natom+&
-&                   cell_atoma1(3)*eff_pot%crystal%natom+&
-&                   eff_pot%anharmonics_terms%coefficients(icoeff)%terms(iterm)%atindx(1,idisp1)
+              ia1 = cell_atoma1(1)*sc_size(2)*sc_size(3)*uc_natom+&
+&                   cell_atoma1(2)*sc_size(3)*uc_natom+&
+&                   cell_atoma1(3)*uc_natom+&
+&                   coefficients(icoeff)%terms(iterm)%atindx(1,idisp1)
             else
 !             index of the first atom (position in the supercell if the cell is 0 0 0)
-              ia1 = ii + eff_pot%anharmonics_terms%coefficients(icoeff)%terms(iterm)%atindx(1,idisp1)
+              ia1 = ii + coefficients(icoeff)%terms(iterm)%atindx(1,idisp1)
             end if
 
 !           indexes of the cell of the atom b  (with PBC) same as ia1
-            cell_atomb1 = eff_pot%anharmonics_terms%coefficients(icoeff)%terms(iterm)%cell(:,2,idisp1)
+            cell_atomb1 = coefficients(icoeff)%terms(iterm)%cell(:,2,idisp1)
             if(cell_atomb1(1)/=0.or.cell_atomb1(2)/=0.or.cell_atomb1(3)/=0) then
               cell_atomb1(1) =  (i1-1) + cell_atomb1(1)
               cell_atomb1(2) =  (i2-1) + cell_atomb1(2)
               cell_atomb1(3) =  (i3-1) + cell_atomb1(3)
-              call index_periodic(cell_atomb1(1:3),cell_number(1:3))
+              call index_periodic(cell_atomb1(1:3),sc_size(1:3))
 
 !            index of the second atom in the (position in the supercell  if the cell is not 0 0 0) 
-              ib1 = cell_atomb1(1)*cell_number(2)*cell_number(3)*eff_pot%crystal%natom+&
-&                   cell_atomb1(2)*cell_number(3)*eff_pot%crystal%natom+&
-&                   cell_atomb1(3)*eff_pot%crystal%natom+&
-&                   eff_pot%anharmonics_terms%coefficients(icoeff)%terms(iterm)%atindx(2,idisp1)
+              ib1 = cell_atomb1(1)*sc_size(2)*sc_size(3)*uc_natom+&
+&                   cell_atomb1(2)*sc_size(3)*uc_natom+&
+&                   cell_atomb1(3)*uc_natom+&
+&                   coefficients(icoeff)%terms(iterm)%atindx(2,idisp1)
             else
 !             index of the first atom (position in the supercell if the cell is 0 0 0)
-              ib1 = ii + eff_pot%anharmonics_terms%coefficients(icoeff)%terms(iterm)%atindx(2,idisp1)
+              ib1 = ii + coefficients(icoeff)%terms(iterm)%atindx(2,idisp1)
             end if
 
 !           Get the displacement for the both atoms
@@ -3850,59 +3857,59 @@ subroutine coefficients_contribution(eff_pot,disp,energy,fcart,natom,ncoeff,stra
             end if
           end if
 
-          do idisp2=1,eff_pot%anharmonics_terms%coefficients(icoeff)%terms(iterm)%ndisp
+          do idisp2=1,coefficients(icoeff)%terms(iterm)%ndisp
 
             if(idisp2 /= idisp1) then
-              idir2 = eff_pot%anharmonics_terms%coefficients(icoeff)%terms(iterm)%direction(idisp2)
+              idir2 = coefficients(icoeff)%terms(iterm)%direction(idisp2)
               if (idir2 < zero)then
 !               Strain case
 !               Set the power of the strain:
-                power = eff_pot%anharmonics_terms%coefficients(icoeff)%terms(iterm)%power(idisp2)
+                power = coefficients(icoeff)%terms(iterm)%power(idisp2)
 !               Accumulate energy forces
                 tmp2 = tmp2 * (strain(abs(idir2)))**power
 !               Accumulate stress for each strain (\sum (Y(eta_2)^Y-1(eta_2)^Z+...))
                 tmp3 = tmp3 * (strain(abs(idir2)))**power
               else
-                cell_atoma2=eff_pot%anharmonics_terms%coefficients(icoeff)%terms(iterm)%cell(:,1,idisp2)
+                cell_atoma2=coefficients(icoeff)%terms(iterm)%cell(:,1,idisp2)
                 if(cell_atoma2(1)/=0.or.cell_atoma2(2)/=0.or.cell_atoma2(3)/=0) then
                   cell_atoma2(1) =  (i1-1) + cell_atoma2(1)
                   cell_atoma2(2) =  (i2-1) + cell_atoma2(2)
                   cell_atoma2(3) =  (i3-1) + cell_atoma2(3)
-                  call index_periodic(cell_atoma2(1:3),cell_number(1:3))
+                  call index_periodic(cell_atoma2(1:3),sc_size(1:3))
 !                 index of the first atom (position in the supercell and direction)
 !                 if the cell of the atom a is not 0 0 0 (may happen)
-                  ia2 = cell_atoma2(1)*cell_number(2)*cell_number(3)*eff_pot%crystal%natom+&
-&                       cell_atoma2(2)*cell_number(3)*eff_pot%crystal%natom+&
-&                       cell_atoma2(3)*eff_pot%crystal%natom+&
-&                       eff_pot%anharmonics_terms%coefficients(icoeff)%terms(iterm)%atindx(1,idisp2)
+                  ia2 = cell_atoma2(1)*sc_size(2)*sc_size(3)*uc_natom+&
+&                       cell_atoma2(2)*sc_size(3)*uc_natom+&
+&                       cell_atoma2(3)*uc_natom+&
+&                       coefficients(icoeff)%terms(iterm)%atindx(1,idisp2)
                 else
 !                 index of the first atom (position in the supercell and direction)
-                  ia2 = ii + eff_pot%anharmonics_terms%coefficients(icoeff)%terms(iterm)%atindx(1,idisp2)
+                  ia2 = ii + coefficients(icoeff)%terms(iterm)%atindx(1,idisp2)
                 end if
 
-                cell_atomb2= eff_pot%anharmonics_terms%coefficients(icoeff)%terms(iterm)%cell(:,2,idisp2)
+                cell_atomb2= coefficients(icoeff)%terms(iterm)%cell(:,2,idisp2)
 
                 if(cell_atomb2(1)/=0.or.cell_atomb2(2)/=0.or.cell_atomb2(3)/=0) then
 !                 indexes of the cell2 (with PBC)
                   cell_atomb2(1) =  (i1-1) + cell_atomb2(1)
                   cell_atomb2(2) =  (i2-1) + cell_atomb2(2)
                   cell_atomb2(3) =  (i3-1) + cell_atomb2(3)
-                  call index_periodic(cell_atomb2(1:3),cell_number(1:3))
+                  call index_periodic(cell_atomb2(1:3),sc_size(1:3))
 
 !                 index of the second atom in the (position in the supercell) 
-                  ib2 = cell_atomb2(1)*cell_number(2)*cell_number(3)*eff_pot%crystal%natom+&
-&                       cell_atomb2(2)*cell_number(3)*eff_pot%crystal%natom+&
-&                       cell_atomb2(3)*eff_pot%crystal%natom+&
-&                       eff_pot%anharmonics_terms%coefficients(icoeff)%terms(iterm)%atindx(2,idisp2)
+                  ib2 = cell_atomb2(1)*sc_size(2)*sc_size(3)*uc_natom+&
+&                       cell_atomb2(2)*sc_size(3)*uc_natom+&
+&                       cell_atomb2(3)*uc_natom+&
+&                       coefficients(icoeff)%terms(iterm)%atindx(2,idisp2)
                 else
-                  ib2 = ii + eff_pot%anharmonics_terms%coefficients(icoeff)%terms(iterm)%atindx(2,idisp2)
+                  ib2 = ii + coefficients(icoeff)%terms(iterm)%atindx(2,idisp2)
                 end if
 
                 disp1 = disp(idir2,ia2)
                 disp2 = disp(idir2,ib2)
 
 !               Set the power of the displacement:
-                power = eff_pot%anharmonics_terms%coefficients(icoeff)%terms(iterm)%power(idisp2)
+                power = coefficients(icoeff)%terms(iterm)%power(idisp2)
 
                 tmp2 = tmp2 * (disp1-disp2)**power
                 tmp3 = tmp3 * (disp1-disp2)**power
@@ -4048,15 +4055,15 @@ subroutine effective_potential_getDeltaEnergy(eff_pot,energy,iatom,idir,natom,rp
 !Local variables-------------------------------
 !scalar
   real(dp) :: ifc_contribution
-  character(len=500) :: message
+  character(len=500) :: msg
 !array
 ! *************************************************************************
 
 !Check some variables
   if (natom /= eff_pot%supercell%natom_supercell) then
-    write(message,'(a,I7,a,I7,a)')' The number of atoms is not correct :',natom,&
+    write(msg,'(a,I7,a,I7,a)')' The number of atoms is not correct :',natom,&
 &   ' in argument istead of ',eff_pot%supercell%natom_supercell, ' in supercell'
-    MSG_ERROR(message)
+    MSG_ERROR(msg)
   end if
 
 !------------------------------------

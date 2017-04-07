@@ -206,8 +206,6 @@ implicit none
  ABI_DEALLOCATE(xred)
  ABI_DEALLOCATE(xcart)
 
- call effective_potential_printSupercell(effective_potential)
-
  if(inp%dynamics==12.or.inp%dynamics==13) then
 !***************************************************************
 !1 Convert some parameters into the structures used by mover.F90
@@ -388,39 +386,6 @@ implicit none
    xred_old = xred
    vel_cell(:,:) = zero
    vel(:,:)      = zero
-
-!TEST_AM
-!  Random initilisation of the velocitie and scale to the temperature 
-!  with Maxwell-Boltzman distribution
-!     do ia=1,dtset%natom
-!       do mu=1,3
-!         vel(mu,ia)=sqrt(kb_HaK*dtset%mdtemp(1)/amass(ia))*cos(two_pi*uniformrandom(rand_seed))
-!         vel(mu,ia)=vel(mu,ia)*sqrt(-2._dp*log(uniformrandom(rand_seed)))
-!       end do
-!     end do
-
-! ! !  Get rid of center-of-mass velocity
-!     sum_mass=sum(amass(:))
-!     do mu=1,3
-!       mass_ia=sum(amass(:)*vel(mu,:))
-!       vel(mu,:)=vel(mu,:)-mass_ia/sum_mass
-!     end do
-
-! ! !  Compute v2gauss
-!     v2gauss = zero
-!     do ia=1,dtset%natom
-!       do mu=1,3
-!         v2gauss=v2gauss+vel(mu,ia)*vel(mu,ia)*amass(ia)
-!       end do
-!     end do
-!  !  Now rescale the velocities to give the exact temperature
-!     rescale_vel=sqrt(3._dp*dtset%natom*kb_HaK*dtset%mdtemp(1)/v2gauss)
-!     vel(:,:)=vel(:,:)*rescale_vel
-
-   vel_cell(:,:) = zero
-   vel(:,:)      = zero
-
-!TEST_AM
 
 !*********************************************************
 !3   Call main routine for monte carlo / molecular dynamics
