@@ -120,6 +120,7 @@ subroutine getgh2c(cwavef,cwaveprj,gh2c,gs2c,gs_hamkq,gvnl2,idir,ipert,lambda,&
  real(dp),allocatable :: nonlop_out(:,:)
  real(dp),ABI_CONTIGUOUS pointer :: gvnl2_(:,:)
  real(dp), pointer :: ddkinpw(:),kinpw1(:),enl_ptr(:,:,:)
+ real(dp),allocatable,target :: enl_temp(:,:,:)
  type(pawcprj_type),allocatable,target :: cwaveprj_tmp(:,:)
  type(pawcprj_type),pointer :: cwaveprj_ptr(:,:)
 
@@ -154,10 +155,14 @@ subroutine getgh2c(cwavef,cwaveprj,gh2c,gs2c,gs_hamkq,gvnl2,idir,ipert,lambda,&
  if((ipert==natom+11.or.pert_phon_elfd).and.gs_hamkq%usepaw==1.and.optnl>=1) then
    if (present(enl)) then
      enl_ptr => enl
+   else if (allocated(rf_hamkq%e1kbfr).and.allocated(rf_hamkq%e1kbsc).and.optnl==2) then
+     ABI_ALLOCATE(enl_temp,(gs_hamkq%dimekb1,gs_hamkq%dimekb2,gs_hamkq%nspinor**2))
+     enl_temp = rf_hamkq%e1kbfr + rf_hamkq%e1kbsc
+     enl_ptr => enl_temp
    else if (allocated(rf_hamkq%e1kbfr)) then
      enl_ptr => rf_hamkq%e1kbfr
    else
-     msg='For ipert=natom+11/pert_phon_elfd : e1kbfr must be allocated or enl optional input must be present.'
+     msg='For ipert=natom+11/pert_phon_elfd : e1kbfr and/or e1kbsc must be allocated or enl optional input must be present.'
      MSG_BUG(msg)
    end if
    if (usevnl==0) then
@@ -440,6 +445,9 @@ subroutine getgh2c(cwavef,cwaveprj,gh2c,gs2c,gs_hamkq,gvnl2,idir,ipert,lambda,&
        ABI_DATATYPE_DEALLOCATE(cwaveprj_tmp)
      end if
      nullify(cwaveprj_ptr)
+
+     if (associated(enl_ptr)) nullify(enl_ptr)
+     if (allocated(enl_temp)) ABI_DEALLOCATE(enl_temp)
 
    end if
 
