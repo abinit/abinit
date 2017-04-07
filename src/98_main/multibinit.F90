@@ -225,12 +225,11 @@ program multibinit
  end if
 !****************************************************************************************
 
-!If needed, fit the anharmonic part
+! If needed, fit the anharmonic part and compute the confinement potential
 !****************************************************************************************
-!TEST_AM_SECTION
- if (inp%fit_coeff/=0) then
+ if (inp%fit_coeff/=0.or.inp%confinement==2) then
    if(iam_master) then
-!      Read the MD file
+!    Read the MD file
      write(message,'(a,(80a),7a)')ch10,('=',ii=1,80),ch10,ch10,&
 &       '-Reading the file ',trim(filnam(5)),ch10,&
 &       ' with NetCDF in order to fit the polynomial coefficients'
@@ -239,17 +238,53 @@ program multibinit
      if(filnam(5)/=''.and.filnam(5)/='no')then
        call read_md_hist(filnam(5),hist,.FALSE.,.FALSE.)
      else
-       write(message, '(3a)' )&
+       if (inp%fit_coeff/=0) then
+         write(message, '(3a)' )&
 &         'There is no MD file to fit the coefficients ',ch10,&
 &         'Action: add MD file'
-       MSG_ERROR(message)
+         MSG_ERROR(message)
+       else if(inp%confinement==2) then
+         write(message, '(3a)' )&
+&         'There is no MD file to compute the confinement',ch10,&
+&         'Action: add MD file'
+         MSG_ERROR(message)
+       end if
      end if
    end if
 
-   option=inp%fit_coeff
 !  MPI BROADCAST the history of the MD
    call abihist_bcast(hist,master,comm)
+ end if
 
+!Generate the confinement polynome
+ if(inp%confinement/=0)then
+   option=inp%confinement
+   select case(option)
+   case(1)
+     call effective_potential_setConfinement(inp%conf_cutoff_disp,inp%conf_cutoff_strain,&
+&                                            reference_effective_potential,inp%conf_power_fact_disp,&
+&                                            inp%conf_power_fact_strain,inp%conf_power_disp,&
+&                                            inp%conf_power_disp,inp%conf_power_strain,&
+&                                            need_confinement=.TRUE.)
+
+     write(message,'(a,(80a),3a)') ch10,('=',ii=1,80),ch10,ch10,&
+&                       ' The confinement potential is active.'
+     call wrtout(ab_out,message,'COLL')
+     call wrtout(std_out,message,'COLL')
+
+   case(2)
+     write(message,'(a,(80a),3a)') ch10,('=',ii=1,80),ch10,ch10,&
+&                       ' The confinement potential is computed from the MD file and actived.'
+     call wrtout(ab_out,message,'COLL')
+     call wrtout(std_out,message,'COLL')
+
+   end select
+ end if
+
+!TEST_AM_SECTION
+!Fit the coeff
+ if (inp%fit_coeff/=0)then
+   option=inp%fit_coeff
    select case(option)
    case (-1)
 !      option == -1
@@ -271,19 +306,14 @@ program multibinit
        end if
      end if
    case (1)
-     if(iam_master)then
-       call fit_polynomial_coeff_get(inp%fit_cutoff,&
-&                                    reference_effective_potential%anharmonics_terms%coefficients,&
-&                                    reference_effective_potential,&
-&                                    reference_effective_potential%anharmonics_terms%ncoeff,1)
-     end if
-!      call polynomial_coeff_broacast(reference_effective_potential%anharmonics_terms%coefficients,&
-! &                                    master,comm)
+     call fit_polynomial_coeff_get(inp%fit_cutoff,&
+&                                  reference_effective_potential%anharmonics_terms%coefficients,&
+&                                  reference_effective_potential,&
+&                                  reference_effective_potential%anharmonics_terms%ncoeff,1)
 !      call fit_polynomial_coeff_init
 !      call fit_polynomial_coeff_init(reference_effective_potential%,filnam,inp,comm)
    end select
  end if
-
 !END_TEST_AM_SECTION
 !****************************************************************************************
 
@@ -398,5 +428,5 @@ program multibinit
 
  call xmpi_end()
  
-  end program multibinit
+end program multibinit
 !!***

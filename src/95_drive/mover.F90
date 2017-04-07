@@ -575,8 +575,18 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
            call effective_potential_evaluate(effective_potential,scfcv_args%results_gs%etotal,&
 &               scfcv_args%results_gs%fcart,scfcv_args%results_gs%fred,&
 &               scfcv_args%results_gs%strten,ab_mover%natom,rprimd,xred)
-         end if
 
+!          Check if the simulation does not diverged...
+           if(ABS(scfcv_args%results_gs%etotal - hist%etot(1)) > 1E6)then
+             if(me==master)then
+               message = "The simulation is diverging, please check your effective potential"
+               MSG_WARNING(message)
+             end if
+!            Set the flag to finish the simulation
+             iexit=1
+             stat4xml="Failed"
+           end if
+         end if
 #if defined HAVE_LOTF
        end if
 #endif
@@ -895,7 +905,7 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
 !  ###########################################################
 !  ### 20. End loop itime
 
-end do ! do itime=1,ntime
+ end do ! do itime=1,ntime
 
  ! Call fconv here if we exited due to wall time limit.
  if (timelimit_exit==1 .and. specs%isFconv) then

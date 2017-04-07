@@ -36,6 +36,7 @@ module m_effective_potential
  use m_phonon_supercell
  use m_phonons
  use m_ddb
+ use m_polynomial_conf
  use m_anharmonics_terms
  use m_effpot_mpi, only : effpot_mpi_init,effpot_mpi_type,effpot_mpi_free
  use m_harmonics_terms
@@ -64,6 +65,7 @@ module m_effective_potential
  public :: effective_potential_printPDOS
  public :: effective_potential_printSupercell
  public :: effective_potential_setCoeffs
+ public :: effective_potential_setConfinement
  public :: effective_potential_setElastic3rd
  public :: effective_potential_setElastic4rd
  public :: effective_potential_setElasticDispCoupling
@@ -74,6 +76,8 @@ module m_effective_potential
  public :: OPERATOR(==)
 
  private :: ifc_contribution
+ private :: coefficients_contribution
+ private :: confinement_contribution
  private :: index_periodic
  private :: find_bound
 !!***
@@ -126,6 +130,9 @@ module m_effective_potential
 
    type(anharmonics_terms_type) :: anharmonics_terms
 !     type with all information for anharmonics terms
+
+   type(polynomial_conf_type) :: confinement
+!     type with all the informations for the confinement
 
    type(supercell_type) :: supercell
 !     super cell type
@@ -193,7 +200,8 @@ subroutine effective_potential_init(crystal,eff_pot,energy,ifcs,ncoeff,nqpt,comm
 &                                   coeffs,dynmat,elastic_constants,elastic3rd,&
 &                                   elastic_displacement,epsilon_inf,external_stress,&
 &                                   forces,internal_strain,internal_stress,name,phonon_strain,&
-&                                   phfrq,qpoints,strain,has_strainCoupling,supercell,zeff)
+&                                   polynomial_conf,phfrq,qpoints,strain,has_strainCoupling,&
+&                                   supercell,zeff)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -227,6 +235,8 @@ subroutine effective_potential_init(crystal,eff_pot,energy,ifcs,ncoeff,nqpt,comm
  type(polynomial_coeff_type),optional :: coeffs(ncoeff)
  real(dp),optional,intent(in) :: external_stress(6),internal_stress(6)
  real(dp),optional,intent(in) :: forces(3,crystal%natom)
+ type(polynomial_conf_type),optional,intent(in) :: polynomial_conf
+
 !Local variables-------------------------------
 !scalar
  character(len=500) :: msg
@@ -354,6 +364,15 @@ subroutine effective_potential_init(crystal,eff_pot,energy,ifcs,ncoeff,nqpt,comm
  else
    call init_supercell(eff_pot%crystal%natom, 0, real((/1,1,1/),dp), eff_pot%crystal%rprimd,&
 &                      eff_pot%crystal%typat,eff_pot%crystal%xcart, eff_pot%supercell)
+ end if
+
+!Set the confinement potential
+ if(present(polynomial_conf)) then
+   call effective_potential_setConfinement(polynomial_conf%cutoff_disp,polynomial_conf%cutoff_strain,&
+&                                          eff_pot,polynomial_conf%factor_disp,&
+&                                          polynomial_conf%factor_strain,polynomial_conf%ndisp,&
+&                                          polynomial_conf%power_disp,polynomial_conf%power_strain,&
+&                                          polynomial_conf%need_confinement)
  end if
 
 ! call effpot_mpi_init(int((/1,1,1/),sp),eff_pot%mpi_ifc,eff_pot%harmonics_terms%ifcs%nrpt,comm)
@@ -507,6 +526,7 @@ subroutine effective_potential_free(eff_pot)
    call destroy_supercell(eff_pot%supercell)
    call crystal_free(eff_pot%crystal)
    call effective_potential_freempi(eff_pot)
+   call polynomial_conf_free(eff_pot%confinement)
 
 end subroutine effective_potential_free
 !!***
@@ -1541,6 +1561,73 @@ subroutine effective_potential_setElasticDispCoupling(eff_pot,natom,elastic_disp
 end subroutine effective_potential_setElasticDispCoupling
 !!***
 
+!!****f* m_effective_potential/effective_potential_setConfinement
+!!
+!! NAME
+!! effective_potential_setConfinement
+!!
+!! FUNCTION
+!! Set the confinement in the effective_potential type
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!!
+!! PARENTS
+!!
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine effective_potential_setConfinement(cutoff_disp,cutoff_strain,eff_pot,factor_disp,&
+&                                             factor_strain,ndisp,power_disp,power_strain,&
+&                                             need_confinement)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'effective_potential_setConfinement'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer, intent(in) :: power_disp,power_strain,ndisp
+ real(dp),intent(in) :: factor_disp,factor_strain
+ logical,optional,intent(in)  :: need_confinement
+!arrays
+ real(dp),intent(in) :: cutoff_disp(ndisp),cutoff_strain(6)
+ type(effective_potential_type),intent(inout) :: eff_pot
+!Local variables-------------------------------
+!scalar
+ logical  :: need_confinement_tmp = .FALSE.
+!arrays
+ character(len=500) :: msg
+
+! *************************************************************************
+
+!Checks
+ if (ndisp <= 0) then
+   write(msg,'(a,a)')' ndisp can not be inferior or equal to zero'
+   MSG_ERROR(msg)
+ end if
+
+!First free the type
+ call  polynomial_conf_free(eff_pot%confinement)
+
+ if (present(need_confinement)) need_confinement_tmp = need_confinement
+
+ call  polynomial_conf_init(cutoff_disp,cutoff_strain,factor_disp,factor_strain,ndisp,&
+&                           eff_pot%confinement,power_disp,power_strain,&
+&                           need_confinement=need_confinement_tmp)
+
+
+end subroutine effective_potential_setConfinement
+!!***
 
 !****f* m_effective_potential/effective_potential_print
 !!
@@ -2734,13 +2821,9 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
   real(dp) :: strain_tmp(6),strten_part(6)
   real(dp) :: xcart(3,natom),xcart_tmp(3,eff_pot%supercell%natom_supercell)
   real(dp) :: xred_tmp(3,eff_pot%supercell%natom_supercell)
-!TEST_AM
- real(dp) :: tsec(2),tcpu,tcpui,twall,twalli
 
 ! *************************************************************************
-!TEST_AM
-!call timein(tcpui,twalli)
-!TEST_AM
+
 ! Set MPI local varibaless
   iam_master = (eff_pot%mpi_ifc%my_rank == master)
 
@@ -2781,9 +2864,7 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
 !--------------------------------------------
 ! 1 - Set the perturbations and intialisation
 !--------------------------------------------
-!TEST_AM
-!call timein(tcpui,twalli)
-!TEST_AM
+
   strain_tmp(:) = zero
 ! Try to find the strain into the input file
   if (eff_pot%has_strain) then
@@ -2845,19 +2926,10 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
   call wrtout(ab_out,message,'COLL')
   call wrtout(std_out,message,'COLL')
 
-!TEST_AM
-!    call timein(tcpu,twall)
-!    tsec(1)=tcpu-tcpui
-!    tsec(2)=twall-twalli
-!    if(iam_master) print*,"TIME FOR step 1 FOR CPU ",eff_pot%mpi_ifc%my_rank,":",tsec
-!TEST_AM
-
 !------------------------------------
 ! 2 - Transfert the reference energy
 !------------------------------------
-!TEST_AM
-! call timein(tcpui,twalli)
-!TEST_AM
+
   energy = eff_pot%energy * ncell
 
   write(message, '(a,a,1ES24.16,a)' ) ch10,' Energy of the reference strucure          :',&
@@ -2865,19 +2937,10 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
   call wrtout(ab_out,message,'COLL')
   call wrtout(std_out,message,'COLL')
 
-!TEST_AM
-!     call timein(tcpu,twall)
-!     tsec(1)=tcpu-tcpui
-!     tsec(2)=twall-twalli
-!     if(iam_master) print*,"TIME FOR step 2 FOR CPU ",eff_pot%mpi_ifc%my_rank,":",tsec
-!TEST_AM
-
 !------------------------------------
 ! 3 - Computation of the IFC part :
 !------------------------------------
-!TEST_AM
- call timein(tcpui,twalli)
-!TEST_AM
+
   energy_part    = zero
   fcart_part(:,:)= zero
 
@@ -2906,18 +2969,11 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
   energy = energy + energy_part
   fcart(:,:)= fcart(:,:) + fcart_part(:,:)
 
-!TEST_AM
-     call timein(tcpu,twall)
-     tsec(1)=tcpu-tcpui
-     tsec(2)=twall-twalli
-     if(iam_master) print*,"TIME FOR step 3 FOR CPU ",eff_pot%mpi_ifc%my_rank,":",tsec
-!TEST_AM
+
 !----------------------------------------------------
 ! 4 - Computation of the elastic part of the energy :
 !----------------------------------------------------
-!TEST_AM
-! call timein(tcpui,twalli)
-!TEST_AM
+
 ! TO DO ADD external stress
 ! if external stress is present
 !  if (present(external_stress)) then
@@ -2945,18 +3001,9 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
   fcart(:,:) = fcart(:,:)  + fcart_part(:,:)
   strten(:) = strten(:) + strten_part(:)
 
-!TEST_AM
-!  call timein(tcpu,twall)
-!  tsec(1)=tcpu-tcpui
-!  tsec(2)=twall-twalli
-!  if(iam_master) print*,"TIME FOR step 4 FOR CPU ",eff_pot%mpi_ifc%my_rank,":",tsec
-!TEST_AM
 !------------------------------------
 ! 5 - Treat 3rd order strain-coupling:
 !------------------------------------
-!TEST_AM
-! call timein(tcpui,twalli)
-!TEST_AM
   if (eff_pot%has_strainCoupling) then
 
 !   1-Treat 3rd order elastic constants
@@ -3071,19 +3118,10 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
       strten(:) = strten(:) + strten_part(:)
     end if
   end if
-!TEST_AM
-!     call timein(tcpu,twall)
-!     tsec(1)=tcpu-tcpui
-!     tsec(2)=twall-twalli
-!     if(iam_master) print*,"TIME FOR step 5 FOR CPU ",eff_pot%mpi_ifc%my_rank,":",tsec
-!TEST_AM
 
 !----------------------------------
 ! 6 - Treat polynomial coefficient:
 !----------------------------------
-!TEST_AM
-! call timein(tcpui,twalli)
-!TEST_AM
 
   if(eff_pot%anharmonics_terms%ncoeff > zero)then
 
@@ -3106,17 +3144,38 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
     fcart(:,:)  = fcart(:,:) + fcart_part(:,:)
     strten(:) = strten(:) + strten_part(:)
   end if
-!TEST_AM
-!     call timein(tcpu,twall)
-!     tsec(1)=tcpu-tcpui
-!     tsec(2)=twall-twalli
-!     if(iam_master)  print*,"TIME FOR step 6 FOR CPU ",eff_pot%mpi_ifc%my_rank,":",tsec
-!TEST_AM
 
 !---------------------------------
-! 7 - Apply factors
+! 7 - Compute confinement
 !---------------------------------
- call timein(tcpui,twalli)
+  if(eff_pot%confinement%need_confinement) then
+
+    energy_part = zero
+    
+    call confinement_contribution(disp_tmp,eff_pot%confinement%cutoff_disp,energy_part,&
+&                                 eff_pot%confinement%factor_disp,&
+&                                 eff_pot%confinement%factor_strain,fcart_part,strain_tmp,&
+&                                 eff_pot%confinement%cutoff_strain,strten_part,&
+&                                 eff_pot%confinement%power_disp,eff_pot%confinement%power_strain,&
+&                                 eff_pot%mpi_ifc%my_cells,&
+&                                 eff_pot%supercell%natom_supercell,eff_pot%crystal%natom,&
+&                                 eff_pot%mpi_ifc%my_ncell,eff_pot%mpi_ifc%my_index_cells,&
+&                                 eff_pot%mpi_ifc%comm)
+
+      energy = energy + energy_part
+
+    if(abs(energy_part) > tol10 )then
+      write(message, '(a,1ES24.16,a)' ) ' Energy of the confinement part            :',&
+&                                       energy_part,' Hartree'
+      call wrtout(ab_out,message,'COLL')
+      call wrtout(std_out,message,'COLL')
+    end if
+  end if
+
+!---------------------------------
+! 8 - Apply factors
+!---------------------------------
+
 ! divide stess tensor by ucvol
   strten = strten / ucvol
 
@@ -3126,19 +3185,10 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
   call effective_potential_distributeResidualForces(eff_pot,fcart,eff_pot%supercell%natom_supercell)
 
   call fcart2fred(fcart,fred,rprimd,natom)
-!TEST_AM
-!     call timein(tcpu,twall)
-!     tsec(1)=tcpu-tcpui
-!     tsec(2)=twall-twalli
-!     if(iam_master)  print*,"TIME FOR step 8 FOR CPU ",eff_pot%mpi_ifc%my_rank,":",tsec
-!TEST_AM
 
 !------------------------------------
 ! 8 - Final Print:
 !------------------------------------
-!TEST_AM
-! call timein(tcpui,twalli)
-!TEST_AM
 
   write(message, '(2a,es21.14)' ) ch10,&
 &     '    >>>>>>>>> Etotal= ',energy
@@ -3319,6 +3369,102 @@ subroutine ifc_contribution(atmfrc,disp,energy,fcart,cells,natom_sc,natom_uc,nce
 
 
 end subroutine ifc_contribution
+!!***
+
+!!****f* m_effective_potential/confinement_contribution
+!! NAME
+!!  confinement_contribution
+!!
+!! FUNCTION
+!!  This fonction compute the confinement part of the energy, forces and stresses
+!!
+!! INPUTS
+!!  eff_pot = effective potential of the structure
+!!            also contain supercell information
+!!  disp    = diplacement vector (3, cell1 (atm1 atm2 ...) cell2 (atm1 atm2 ...)...)
+!!  comm=MPI communicator
+!!
+!! OUTPUT
+!!   energy = contribution of the ifc to the energy
+!!   fcart(3,natom) = contribution of the ifc to the forces
+!!   strten(6) = stress tensor part 
+!!
+!! PARENT
+!!   effective_potential_evaluate
+!!
+!! CHILDREN
+!!
+!! PARENTS
+!!      m_effective_potential
+!!
+!! CHILDREN
+!!      asrq0_free,effective_potential_effpot2ddb,invars9,mkphbs
+!!
+!! SOURCE
+
+subroutine confinement_contribution(disp,disp_ref,energy,factor_disp,factor_strain,fcart,&
+&                                   strain,strain_ref,strten,power_disp,power_strain,cells,&
+&                                   natom_sc,natom_uc,ncell,index_cells,comm)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'confinement_contribution'
+!End of the abilint section
+
+ implicit none
+
+!Arguments -------------------------------
+! scalars
+  real(dp),intent(out) :: energy
+  integer,intent(in) :: natom_uc,natom_sc,ncell
+  integer,intent(in) :: power_disp,power_strain
+  integer,intent(in) :: comm
+  real(dp),intent(in) :: factor_disp,factor_strain
+! array
+  integer,intent(in) ::  cells(ncell),index_cells(ncell,3)
+  real(dp),intent(in) :: disp(3,natom_sc),strain(6)
+  real(dp),intent(out) :: fcart(3,natom_sc),strten(6)
+  real(dp),intent(in) :: disp_ref(natom_uc),strain_ref(6)
+!Local variables-------------------------------
+! scalar
+  integer :: ia,icell,ierr,ii,kk
+  integer :: mu
+  real(dp):: diff,diff_tmp
+! array
+
+! *************************************************************************
+
+! Initialisation of variables
+  energy   = zero
+  fcart(:,:) = zero
+  strten(:) = zero
+
+  do icell = 1,ncell
+    ii = (cells(icell)-1)*natom_uc
+    do ia = 1, natom_uc
+      kk = ii + ia
+      diff_tmp = zero
+      do mu=1,3
+        diff_tmp = diff_tmp + disp(mu,kk)**2
+      end do
+      
+      diff_tmp = diff_tmp**0.5
+
+!     Compute diff between ref and curent displacement
+      diff = diff_tmp - disp_ref(ia)
+
+!     Accumule energy
+      energy =  energy + (sign(half, diff)+half)*(factor_disp*((diff_tmp/disp_ref(ia))**power_disp))
+    end do
+  end do
+
+! MPI_SUM
+  call xmpi_sum(energy, comm, ierr)
+
+
+end subroutine confinement_contribution
 !!***
 
 !!****f* m_effective_potential/ifcStrainCoupling_contribution

@@ -319,7 +319,7 @@ subroutine effective_potential_file_read(filename,eff_pot,inp,comm)
       
       call system_xml2effpot(eff_pot,filename,comm,strcpling=inp%strcpling)
 
-!   Generate long rage interation for the effective potential for both type and generate suppercell
+!     Generate long rage interation for the effective potential for both type and generate suppercell
       call effective_potential_generateDipDip(eff_pot,inp%n_cell,inp%dipdip,inp%asr,comm)
 
 !     If needed, print the effective potential
@@ -2662,11 +2662,8 @@ subroutine coeffs_xml2effpot(eff_pot,filename,comm)
 ! character(len=200),allocatable :: name(:)
  character(len=200) :: name
 #ifdef HAVE_LIBXML
- integer :: icoeff,iterm,idisp
- character(len=1) :: mutodir(9) = (/"x","y","z","1","2","3","4","5","6"/)
- character(len=1) :: powerchar
+ integer :: icoeff,iterm
  character(len=5),allocatable :: symbols(:)
- character(len=200) :: text
 #endif
 
 #ifndef HAVE_LIBXML
@@ -2767,28 +2764,14 @@ subroutine coeffs_xml2effpot(eff_pot,filename,comm)
 &                                power(icoeff,iterm,:),weight(icoeff,iterm),check=.true.)
      end do
 
-!    Get the name of this coefficient if the term is the first
-     name = ""
-     do idisp=1,terms(icoeff,1)%ndisp
-       write(powerchar,'(I0)') terms(icoeff,1)%power(idisp)
-       text = ""
-       if(terms(icoeff,1)%direction(idisp) > zero) then
-         call polynomial_coeff_getName(text,atm1=symbols(terms(icoeff,1)%atindx(1,idisp)),&
-&                                           atm2=symbols(terms(icoeff,1)%atindx(2,idisp)),&
-&                                           dir=mutodir(terms(icoeff,1)%direction(idisp)),&
-&                                           power=trim(powerchar),&
-&                                           cell_atm1=terms(icoeff,1)%cell(:,1,idisp),&
-&                                           cell_atm2=terms(icoeff,1)%cell(:,2,idisp))
-       else
-         call polynomial_coeff_getName(text,strain=mutodir(3+abs(terms(icoeff,1)%direction(idisp))),&
-&                                           power=trim(powerchar))
-
-       end if
-       name = trim(name)//trim(text)
-     end do
 !    Initialisation of the polynomial_coefficent structure with the values
      call polynomial_coeff_init(coefficient(icoeff),nterm_max,coeffs(icoeff),&
-&                               terms(icoeff,:),name=name,check=.true.)
+&                               terms(icoeff,:),check=.true.)
+
+!    Get the name of this coefficient  and set it
+     call polynomial_coeff_getName(name,eff_pot%crystal%natom,coeffs(icoeff),symbols,recompute=.true.)
+     call polynomial_coeff_setName(name,coeffs(icoeff))
+
 !    Free them all
      do iterm=1,nterm_max
        call polynomial_term_free(terms(icoeff,iterm))

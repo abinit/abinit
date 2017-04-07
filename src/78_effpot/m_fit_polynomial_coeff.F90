@@ -330,11 +330,11 @@ subroutine fit_polynomial_coeff_get(cut_off,coefficients,eff_pot,ncoeff,option)
  call fit_polynomial_getOrder4(cell,coeffs4,cut_off,list_symcoeff,natom,ncoeff4,ncoeff_sym,&
 &                              nrpt,nsym,rprimd,symbols,xcart)
 
-! call fit_polynomial_getOrder5(cell,coeffs5,cut_off,list_symcoeff,natom,ncoeff5,ncoeff_sym,&
-!&                              nrpt,nsym,rprimd,symbols,xcart)
+ call fit_polynomial_getOrder5(cell,coeffs5,cut_off,list_symcoeff,natom,ncoeff5,ncoeff_sym,&
+&                              nrpt,nsym,rprimd,symbols,xcart)
 
 !Final tranfert
-!first count the total number of coefficient
+!1- count the total number of coefficient
  ncoeff = zero
  do icoeff=1,ncoeff3
    if (coeffs3(icoeff)%coefficient /= zero) then
@@ -352,7 +352,7 @@ subroutine fit_polynomial_coeff_get(cut_off,coefficients,eff_pot,ncoeff,option)
    end if
  end do
 
-!Second :transfer
+!2- Transfer
  ABI_ALLOCATE(coefficients,(ncoeff))
  icoeff2 = zero
  do icoeff=1,ncoeff3
@@ -614,9 +614,8 @@ subroutine fit_polynomial_coeff_getList(cell,cut_off,dist,eff_pot,list_symcoeff,
 !            including the expression of the symmetry matrix, see
 !            if the symmetric perturbations are available
              do idisy1=1,3
-               do idisy2=1,3              
-
-                 if (idisy1/=idisy2) then 
+               do idisy2=1,3
+                 if (idisy1/=idisy2) then
 !                  Remove this term (is not computed)
 !                  Also remove opposite term... (Srx-Tix) = (Ti-Srx)
                    blkval(idisy1,ipesy1,idisy2,ipesy2,irpt_sym) = 0
@@ -736,7 +735,7 @@ subroutine fit_polynomial_coeff_getList(cell,cut_off,dist,eff_pot,list_symcoeff,
 &            list_symcoeff_tmp2(2,list_symcoeff_tmp2(6,icoeff,isym),1).and.&
 &            list_symcoeff_tmp2(3,icoeff,isym)/=&
 &            list_symcoeff_tmp2(3,list_symcoeff_tmp2(6,icoeff,isym),1)).and.&
-&          ( list_symcoeff_tmp2(2,icoeff,isym)/=&
+&           (list_symcoeff_tmp2(2,icoeff,isym)/=&
 &            list_symcoeff_tmp2(3,list_symcoeff_tmp2(6,icoeff,isym),1).and.&
 &            list_symcoeff_tmp2(3,icoeff,isym)/=&
 &            list_symcoeff_tmp2(2,list_symcoeff_tmp2(6,icoeff,isym),1)))then
@@ -766,9 +765,8 @@ subroutine fit_polynomial_coeff_getList(cell,cut_off,dist,eff_pot,list_symcoeff,
 &                               list_symcoeff_tmp2(1,icoeff,isym),&
 &                               real(list_symcoeff_tmp2(5,icoeff,isym),dp),ncoeff)
      if (icoeff2> icoeff)then
-       list_symcoeff_tmp2(:,icoeff2,1) = zero
+      list_symcoeff_tmp2(:,icoeff2,1) = zero
      end if
-
    end do
  end do
 
@@ -794,13 +792,30 @@ subroutine fit_polynomial_coeff_getList(cell,cut_off,dist,eff_pot,list_symcoeff,
  end do
 
 !5/ Final transfert
- ABI_ALLOCATE(list_symcoeff,(5,ncoeff2,nsym))
+ ABI_ALLOCATE(list_symcoeff,(6,ncoeff2,nsym))
  list_symcoeff = zero
  icoeff = zero
  do icoeff = 1,ncoeff2
-   list_symcoeff(1:5,icoeff,:) = list_symcoeff_tmp(1:5,icoeff,:)
+   list_symcoeff(1:6,icoeff,:) = list_symcoeff_tmp(1:6,icoeff,:)
    do isym=1,nsym
-     write(100,*) icoeff,isym,list_symcoeff(1:5,icoeff,isym)
+     write(100,*) icoeff,isym,list_symcoeff(1:6,icoeff,isym)
+   end do
+ end do
+
+!6/ reset the dimension six of list_symcoeff_tmp2(6,icoeffs,1)
+!   and check is a symetric coeff is not coresspondig to an other
+!   one, in this case we set this coeff to 0
+
+ do icoeff = 1,ncoeff2
+!  found the index of each coeff in list_fullcoeff
+   do isym = 1,nsym
+     icoeff2 = getCoeffFromList(list_symcoeff(:,:,1),&
+&                               list_symcoeff(2,icoeff,isym),&
+&                               list_symcoeff(3,icoeff,isym),&
+&                               list_symcoeff(4,icoeff,isym),&
+&                               list_symcoeff(1,icoeff,isym),&
+&                               real(list_symcoeff(5,icoeff,isym),dp),ncoeff)
+     list_symcoeff(6,icoeff,isym) = icoeff2
    end do
  end do
 
@@ -864,7 +879,7 @@ subroutine fit_polynomial_getOrder1(cell,coeffs_out,cut_off,list_symcoeff,&
  real(dp),intent(in) :: cut_off
 !arrays
  integer,intent(in) :: cell(3,nrpt)
- integer,intent(in) :: list_symcoeff(5,ncoeff,nsym)
+ integer,intent(in) :: list_symcoeff(6,ncoeff,nsym)
  real(dp),intent(in) :: xcart(3,natom),rprimd(3,3)
  character(len=5),intent(in) :: symbols(natom)
  type(polynomial_coeff_type),allocatable,intent(inout) :: coeffs_out(:)
@@ -874,12 +889,11 @@ subroutine fit_polynomial_getOrder1(cell,coeffs_out,cut_off,list_symcoeff,&
  integer :: isym,iterm,mu,ncoeff_max,ndisp,nterm_max
  real(dp):: coefficient,weight
 !arrays
- integer,allocatable :: atindx(:,:),cells(:,:,:),dir_int(:)
+ integer,allocatable :: atindx(:,:),blkval(:),cells(:,:,:),dir_int(:)
  integer,allocatable :: powers(:)
  character(len=1) :: dir_char(3)
- character(len=1) :: powerchar
  character(len=1) :: mutodir(9) = (/"x","y","z","1","2","3","4","5","6"/)
- character(len=100):: name,text
+ character(len=100):: name
  character(len=500) :: message
  character(len=fnlen) :: filename
  type(polynomial_term_type),dimension(:),allocatable :: terms
@@ -892,8 +906,20 @@ subroutine fit_polynomial_getOrder1(cell,coeffs_out,cut_off,list_symcoeff,&
  ncoeff_max = ncoeff
  ndisp = 1
 
+ ABI_ALLOCATE(blkval,(ncoeff_max))
+ blkval = one
+!  do icoeff=1,ncoeff
+!    do isym=1,nsym
+!      if(list_symcoeff(6,icoeff,isym) > 0.and.&
+! &       list_symcoeff(6,icoeff,isym) > icoeff.and.&
+! &       list_symcoeff(6,icoeff,isym) < ncoeff) blkval(list_symcoeff(6,icoeff,isym)) = zero
+!    end do
+!  end do
+ 
  ABI_ALLOCATE(coeffs_tmp,(ncoeff_max))
  ABI_ALLOCATE(terms,(nterm_max))
+
+
  icoeff_tmp = zero 
  icoeff1_opp = zero
  ABI_ALLOCATE(atindx,(2,ndisp))
@@ -910,10 +936,12 @@ subroutine fit_polynomial_getOrder1(cell,coeffs_out,cut_off,list_symcoeff,&
    end if
  end do
 
+
  write(message,'(a)') " Irreductible coefficient and associated atom 1, atom 2 and direction:"
  call wrtout(std_out,message,'COLL') 
 
   do icoeff=1,ncoeff
+    if(blkval(icoeff)==zero)cycle
 !   Reset counter
     iterm = zero
     coefficient = one
@@ -931,7 +959,6 @@ subroutine fit_polynomial_getOrder1(cell,coeffs_out,cut_off,list_symcoeff,&
       powers(:)   = one
       cells(:,1,1) = (/0,0,0/)
       cells(:,2,1) = cell(:,irpt)
-
       iterm = iterm + 1
       call polynomial_term_init(atindx,cells,dir_int,ndisp,terms(iterm),powers,weight,check=.true.)
     end do!end do sym
@@ -949,11 +976,11 @@ subroutine fit_polynomial_getOrder1(cell,coeffs_out,cut_off,list_symcoeff,&
   end do!end do coeff_sym
 
  ABI_DEALLOCATE(terms)
-
  ABI_DEALLOCATE(atindx)
  ABI_DEALLOCATE(cells)
  ABI_DEALLOCATE(dir_int)
  ABI_DEALLOCATE(powers)
+ ABI_DEALLOCATE(blkval)
 
 !Count the number of terms
  ncoeff_out = zero
@@ -968,20 +995,12 @@ subroutine fit_polynomial_getOrder1(cell,coeffs_out,cut_off,list_symcoeff,&
  icoeff = zero
  do icoeff_tmp=1,ncoeff_max
    if (coeffs_tmp(icoeff_tmp)%coefficient/=zero)then
+!    Get the name of this coefficient
+     call polynomial_coeff_getName(name,natom,coeffs_tmp(icoeff_tmp),symbols)
+!    Increase icoeff and fill the coeffs_out array
      icoeff = icoeff + 1
-!    Get the name of this coefficient if the term is the first
-     name = ""
-     write(powerchar,'(I0)') 1
-     call polynomial_coeff_getName(text,atm1=symbols(coeffs_tmp(icoeff_tmp)%terms(1)%atindx(1,1)),&
-&                                       atm2=symbols(coeffs_tmp(icoeff_tmp)%terms(1)%atindx(2,1)),&
-&                                       dir=mutodir(coeffs_tmp(icoeff_tmp)%terms(1)%direction(1)),&
-&                                       power=trim(powerchar),&
-&                                       cell_atm1=coeffs_tmp(icoeff_tmp)%terms(1)%cell(:,1,1),&
-&                                       cell_atm2=coeffs_tmp(icoeff_tmp)%terms(1)%cell(:,2,1))
-     name = trim(name)//trim(text)
-!    Set the coefficient
-     call polynomial_coeff_init(one,coeffs_tmp(icoeff_tmp)%nterm,&
-&                               coeffs_out(icoeff),coeffs_tmp(icoeff_tmp)%terms,name=name)
+      call polynomial_coeff_init(one,coeffs_tmp(icoeff_tmp)%nterm,&
+ &                               coeffs_out(icoeff),coeffs_tmp(icoeff_tmp)%terms,name=name)
 
      write(message,'(2a)')' ',trim(name)
      call wrtout(std_out,message,'COLL') 
@@ -1002,9 +1021,9 @@ subroutine fit_polynomial_getOrder1(cell,coeffs_out,cut_off,list_symcoeff,&
  end do
 
  filename = "terms_1st_order.xml"
- call polynomial_coeff_writeXML(coeffs_out,ncoeff_out,filename=filename)
- write(message,'(a,I0,a)')&
-&       ' with ',ncoeff_out,' for the 1st order '
+! call polynomial_coeff_writeXML(coeffs_out,ncoeff_out,filename=filename)
+ write(message,'(a,1x,I0,a)') ch10,&
+&       ncoeff_out,' coefficients for the 1st order '
  call wrtout(ab_out,message,'COLL')
  call wrtout(std_out,message,'COLL') 
 
@@ -1058,7 +1077,7 @@ subroutine fit_polynomial_getOrder2(cell,coeffs_out,cut_off,list_coeff,&
  real(dp),intent(in) :: cut_off
 !arrays
  integer,intent(in) :: cell(3,nrpt)
- integer,intent(in) :: list_coeff(5,ncoeff,nsym)
+ integer,intent(in) :: list_coeff(6,ncoeff,nsym)
  real(dp),intent(in) :: xcart(3,natom),rprimd(3,3)
  character(len=5),intent(in) :: symbols(natom)
  type(polynomial_coeff_type),allocatable,intent(inout) :: coeffs_out(:)
@@ -1074,9 +1093,8 @@ subroutine fit_polynomial_getOrder2(cell,coeffs_out,cut_off,list_coeff,&
  integer,allocatable :: cells(:,:,:),dir_int(:)
  integer,allocatable :: powers(:)
  character(len=1) :: dir_char(3)
- character(len=1) :: powerchar
  character(len=1) :: mutodir(9) = (/"x","y","z","1","2","3","4","5","6"/)
- character(len=100):: name,text
+ character(len=100):: name
  character(len=500) :: message
  character(len=fnlen) :: filename
  type(polynomial_term_type),dimension(:),allocatable :: terms
@@ -1194,27 +1212,20 @@ subroutine fit_polynomial_getOrder2(cell,coeffs_out,cut_off,list_coeff,&
  do icoeff_tmp=1,ncoeff_max
    if (coeffs_tmp(icoeff_tmp)%coefficient/=zero)then
      name = ''
-     do idisp=1,coeffs_tmp(icoeff_tmp)%terms(1)%ndisp
-       write(powerchar,'(I0)') coeffs_tmp(icoeff_tmp)%terms(1)%power(idisp)
-       call polynomial_coeff_getName(text,atm1=symbols(coeffs_tmp(icoeff_tmp)%terms(1)%atindx(1,idisp)),&
-&                                         atm2=symbols(coeffs_tmp(icoeff_tmp)%terms(1)%atindx(2,idisp)),&
-&                                         dir=mutodir(coeffs_tmp(icoeff_tmp)%terms(1)%direction(idisp)),&
-&                                         power=trim(powerchar),&
-&                                         cell_atm1=coeffs_tmp(icoeff_tmp)%terms(1)%cell(:,1,idisp),&
-&                                         cell_atm2=coeffs_tmp(icoeff_tmp)%terms(1)%cell(:,2,idisp))
-       name = trim(name)//trim(text)          
-     end do
+!    Get the name of this coefficient
+     call polynomial_coeff_getName(name,natom,coeffs_tmp(icoeff_tmp),symbols)
+!    Increase icoeff and fill the coeffs_out array
      icoeff1 = icoeff1 + 1
      call polynomial_coeff_init(one,coeffs_tmp(icoeff_tmp)%nterm,&
 &                               coeffs_out(icoeff1),coeffs_tmp(icoeff_tmp)%terms,&
 &                               name=name)
-   end if
+    end if
  end do
 
  filename = "terms_2nd_order.xml"
- call polynomial_coeff_writeXML(coeffs_out,ncoeff_out,filename=filename)
- write(message,'(a,I0,a)')&
-&       ' with ',ncoeff_out,' for the 2st order '
+! call polynomial_coeff_writeXML(coeffs_out,ncoeff_out,filename=filename)
+ write(message,'(1x,I0,a)')&
+&       ncoeff_out,' coefficients for the 2st order '
  call wrtout(ab_out,message,'COLL')
  call wrtout(std_out,message,'COLL') 
 
@@ -1268,7 +1279,7 @@ subroutine fit_polynomial_getOrder3(cell,coeffs_out,cut_off,list_coeff,&
  real(dp),intent(in) :: cut_off
 !arrays
  integer,intent(in) :: cell(3,nrpt)
- integer,intent(in) :: list_coeff(5,ncoeff,nsym)
+ integer,intent(in) :: list_coeff(6,ncoeff,nsym)
  real(dp),intent(in) :: xcart(3,natom),rprimd(3,3)
  character(len=5),intent(in) :: symbols(natom)
  type(polynomial_coeff_type),allocatable,intent(inout) :: coeffs_out(:)
@@ -1284,9 +1295,8 @@ subroutine fit_polynomial_getOrder3(cell,coeffs_out,cut_off,list_coeff,&
  integer,allocatable :: cells(:,:,:),dir_int(:)
  integer,allocatable :: powers(:)
  character(len=1) :: dir_char(3)
- character(len=1) :: powerchar
  character(len=1) :: mutodir(9) = (/"x","y","z","1","2","3","4","5","6"/)
- character(len=100):: name,text
+ character(len=100):: name
  character(len=500) :: message
  character(len=fnlen) :: filename
  type(polynomial_term_type),dimension(:),allocatable :: terms
@@ -1403,27 +1413,20 @@ subroutine fit_polynomial_getOrder3(cell,coeffs_out,cut_off,list_coeff,&
  do icoeff_tmp=1,ncoeff_max
    if (coeffs_tmp(icoeff_tmp)%coefficient/=zero)then
      name = ''
-     do idisp=1,coeffs_tmp(icoeff_tmp)%terms(1)%ndisp
-       write(powerchar,'(I0)') coeffs_tmp(icoeff_tmp)%terms(1)%power(idisp)
-       call polynomial_coeff_getName(text,atm1=symbols(coeffs_tmp(icoeff_tmp)%terms(1)%atindx(1,idisp)),&
-&                                         atm2=symbols(coeffs_tmp(icoeff_tmp)%terms(1)%atindx(2,idisp)),&
-&                                         dir=mutodir(coeffs_tmp(icoeff_tmp)%terms(1)%direction(idisp)),&
-&                                         power=trim(powerchar),&
-&                                         cell_atm1=coeffs_tmp(icoeff_tmp)%terms(1)%cell(:,1,idisp),&
-&                                         cell_atm2=coeffs_tmp(icoeff_tmp)%terms(1)%cell(:,2,idisp))
-       name = trim(name)//trim(text)          
-     end do
+!    Get the name of this coefficient
+     call polynomial_coeff_getName(name,natom,coeffs_tmp(icoeff_tmp),symbols)
+!    Increase icoeff and fill the coeffs_out array
      icoeff1 = icoeff1 + 1
      call polynomial_coeff_init(one,coeffs_tmp(icoeff_tmp)%nterm,&
 &                               coeffs_out(icoeff1),coeffs_tmp(icoeff_tmp)%terms,&
 &                               name=name)
-   end if
+    end if
  end do
 
  filename = "terms_3rd_order.xml"
- call polynomial_coeff_writeXML(coeffs_out,ncoeff_out,filename=filename)
- write(message,'(a,I0,a)')&
-&       ' with ',ncoeff_out,' for the 3rd order '
+! call polynomial_coeff_writeXML(coeffs_out,ncoeff_out,filename=filename)
+ write(message,'(1x,I0,a)')&
+&       ncoeff_out,' coefficient for the 3rd order '
  call wrtout(ab_out,message,'COLL')
  call wrtout(std_out,message,'COLL') 
 
@@ -1478,7 +1481,7 @@ subroutine fit_polynomial_getOrder4(cell,coeffs_out,cut_off,list_coeff,&
  real(dp),intent(in) :: cut_off
 !arrays
  integer,intent(in) :: cell(3,nrpt)
- integer,intent(in) :: list_coeff(5,ncoeff,nsym)
+ integer,intent(in) :: list_coeff(6,ncoeff,nsym)
  real(dp),intent(in) :: xcart(3,natom),rprimd(3,3)
  character(len=5),intent(in) :: symbols(natom)
  type(polynomial_coeff_type),allocatable,intent(inout) :: coeffs_out(:)
@@ -1494,9 +1497,8 @@ subroutine fit_polynomial_getOrder4(cell,coeffs_out,cut_off,list_coeff,&
  integer,allocatable :: cells(:,:,:),dir_int(:)
  integer,allocatable :: powers(:)
  character(len=1),allocatable :: dir_char(:)
- character(len=1) :: powerchar
  character(len=1) :: mutodir(9) = (/"x","y","z","1","2","3","4","5","6"/)
- character(len=100):: name,text
+ character(len=100):: name
  character(len=500) :: message
  character(len=fnlen) :: filename
  type(polynomial_term_type),dimension(:),allocatable :: terms
@@ -1617,16 +1619,9 @@ subroutine fit_polynomial_getOrder4(cell,coeffs_out,cut_off,list_coeff,&
  do icoeff_tmp=1,ncoeff_max
    if (coeffs_tmp(icoeff_tmp)%coefficient/=zero)then
      name = ''
-     do idisp=1,coeffs_tmp(icoeff_tmp)%terms(1)%ndisp
-       write(powerchar,'(I0)') coeffs_tmp(icoeff_tmp)%terms(1)%power(idisp)
-       call polynomial_coeff_getName(text,atm1=symbols(coeffs_tmp(icoeff_tmp)%terms(1)%atindx(1,idisp)),&
-&                                         atm2=symbols(coeffs_tmp(icoeff_tmp)%terms(1)%atindx(2,idisp)),&
-&                                         dir=mutodir(coeffs_tmp(icoeff_tmp)%terms(1)%direction(idisp)),&
-&                                         power=trim(powerchar),&
-&                                         cell_atm1=coeffs_tmp(icoeff_tmp)%terms(1)%cell(:,1,idisp),&
-&                                         cell_atm2=coeffs_tmp(icoeff_tmp)%terms(1)%cell(:,2,idisp))
-       name = trim(name)//trim(text)          
-     end do
+!    Get the name of this coefficient
+     call polynomial_coeff_getName(name,natom,coeffs_tmp(icoeff_tmp),symbols)
+!    Increase icoeff and fill the coeffs_out array
      icoeff1 = icoeff1 + 1
      call polynomial_coeff_init(one,coeffs_tmp(icoeff_tmp)%nterm,&
 &                               coeffs_out(icoeff1),coeffs_tmp(icoeff_tmp)%terms,&
@@ -1635,9 +1630,9 @@ subroutine fit_polynomial_getOrder4(cell,coeffs_out,cut_off,list_coeff,&
  end do
 
  filename = "terms_4th_order.xml"
- call polynomial_coeff_writeXML(coeffs_out,ncoeff_out,filename=filename)
- write(message,'(a,I0,a)')&
-&       ' with ',ncoeff_out,' for the 4th order '
+! call polynomial_coeff_writeXML(coeffs_out,ncoeff_out,filename=filename)
+ write(message,'(1x,I0,a)')&
+&       ncoeff_out,' coefficients for the 4th order '
  call wrtout(ab_out,message,'COLL')
  call wrtout(std_out,message,'COLL') 
 
@@ -1691,7 +1686,7 @@ subroutine fit_polynomial_getOrder5(cell,coeffs_out,cut_off,list_coeff,&
  real(dp),intent(in) :: cut_off
 !arrays
  integer,intent(in) :: cell(3,nrpt)
- integer,intent(in) :: list_coeff(5,ncoeff,nsym)
+ integer,intent(in) :: list_coeff(6,ncoeff,nsym)
  real(dp),intent(in) :: xcart(3,natom),rprimd(3,3)
  character(len=5),intent(in) :: symbols(natom)
  type(polynomial_coeff_type),allocatable,intent(inout) :: coeffs_out(:)
@@ -1707,9 +1702,8 @@ subroutine fit_polynomial_getOrder5(cell,coeffs_out,cut_off,list_coeff,&
  integer,allocatable :: cells(:,:,:),dir_int(:)
  integer,allocatable :: powers(:)
  character(len=1),allocatable :: dir_char(:)
- character(len=1) :: powerchar
  character(len=1) :: mutodir(9) = (/"x","y","z","1","2","3","4","5","6"/)
- character(len=100):: name,text
+ character(len=100):: name
  character(len=500) :: message
  character(len=fnlen) :: filename
  type(polynomial_term_type),dimension(:),allocatable :: terms
@@ -1831,28 +1825,20 @@ subroutine fit_polynomial_getOrder5(cell,coeffs_out,cut_off,list_coeff,&
  icoeff1 = zero
  do icoeff_tmp=1,ncoeff_max
    if (coeffs_tmp(icoeff_tmp)%coefficient/=zero)then
-     name = ''
-     do idisp=1,coeffs_tmp(icoeff_tmp)%terms(1)%ndisp
-       write(powerchar,'(I0)') coeffs_tmp(icoeff_tmp)%terms(1)%power(idisp)
-       call polynomial_coeff_getName(text,atm1=symbols(coeffs_tmp(icoeff_tmp)%terms(1)%atindx(1,idisp)),&
-&                                         atm2=symbols(coeffs_tmp(icoeff_tmp)%terms(1)%atindx(2,idisp)),&
-&                                         dir=mutodir(coeffs_tmp(icoeff_tmp)%terms(1)%direction(idisp)),&
-&                                         power=trim(powerchar),&
-&                                         cell_atm1=coeffs_tmp(icoeff_tmp)%terms(1)%cell(:,1,idisp),&
-&                                         cell_atm2=coeffs_tmp(icoeff_tmp)%terms(1)%cell(:,2,idisp))
-       name = trim(name)//trim(text)          
-     end do
-     icoeff1 = icoeff1 + 1
-     call polynomial_coeff_init(one,coeffs_tmp(icoeff_tmp)%nterm,&
+!    Get the name of this coefficient
+     call polynomial_coeff_getName(name,natom,coeffs_tmp(icoeff_tmp),symbols)
+!     Increase icoeff and fill the coeffs_out array
+      icoeff1 = icoeff1 + 1
+      call polynomial_coeff_init(one,coeffs_tmp(icoeff_tmp)%nterm,&
 &                               coeffs_out(icoeff1),coeffs_tmp(icoeff_tmp)%terms,&
 &                               name=name)
-   end if
+    end if
  end do
 
  filename = "terms_5th_order.xml"
- call polynomial_coeff_writeXML(coeffs_out,ncoeff_out,filename=filename)
- write(message,'(a,I0,a)')&
-&       ' with ',ncoeff_out,' for the 5th order '
+! call polynomial_coeff_writeXML(coeffs_out,ncoeff_out,filename=filename)
+ write(message,'(1x,I0,a)')&
+&       ncoeff_out,' coefficients for the 5th order '
  call wrtout(ab_out,message,'COLL')
  call wrtout(std_out,message,'COLL') 
 
