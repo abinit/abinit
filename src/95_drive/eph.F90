@@ -338,24 +338,27 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  call cwtime(cpu,wall,gflops,"start")
 
  ! Compute electron DOS.
- ! TODO: Optimize this part. Really slow if tetra and lots of points
- ! Could just do DOS around efermi
- edos_intmeth = 2; if (dtset%prtdos == 1) edos_intmeth = 1
- !edos_intmeth = 1
- edos_step = dtset%dosdeltae; edos_broad = dtset%tsmear
- edos_step = 0.01 * eV_Ha; edos_broad = 0.3 * eV_Ha
- edos = ebands_get_edos(ebands,cryst,edos_intmeth,edos_step,edos_broad,comm)
+ if (dtset%kptopt>0 .and. dtset%nkpt>1) then
+   ! TODO: Optimize this part. Really slow if tetra and lots of points
+   ! Could just do DOS around efermi
+   edos_intmeth = 2; if (dtset%prtdos == 1) edos_intmeth = 1
+   !edos_intmeth = 1
+   edos_step = dtset%dosdeltae; edos_broad = dtset%tsmear
+   edos_step = 0.01 * eV_Ha; edos_broad = 0.3 * eV_Ha
+   edos = ebands_get_edos(ebands,cryst,edos_intmeth,edos_step,edos_broad,comm)
 
- ! Store DOS per spin channels
- n0(:) = edos%gef(1:edos%nsppol)
- if (my_rank == master) then
-   call edos_print(edos, unit=ab_out)
-   path = strcat(dtfil%filnam_ds(4), "_EDOS")
-   call wrtout(ab_out, sjoin("- Writing electron DOS to file:", path))
-   call edos_write(edos, path)
+   ! Store DOS per spin channels
+   n0(:) = edos%gef(1:edos%nsppol)
+   if (my_rank == master) then
+     call edos_print(edos, unit=ab_out)
+     path = strcat(dtfil%filnam_ds(4), "_EDOS")
+     call wrtout(ab_out, sjoin("- Writing electron DOS to file:", path))
+     call edos_write(edos, path)
+   end if
+
+   call edos_free(edos)
+
  end if
-
- call edos_free(edos)
 
  ! =======================================
  ! Output useful info on electronic bands
