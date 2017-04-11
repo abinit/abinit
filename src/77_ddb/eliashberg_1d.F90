@@ -10,7 +10,7 @@
 !!   then the full case which gives the gap as a function of temperature.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2004-2016 ABINIT group (MVer)
+!! Copyright (C) 2004-2017 ABINIT group (MVer)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -228,7 +228,7 @@ end subroutine eliashberg_1d
 !!   Apply the linearized Eliashberg matrix once to the input vector.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2004-2016 ABINIT group (MVer)
+!! Copyright (C) 2004-2017 ABINIT group (MVer)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -360,7 +360,7 @@ end subroutine eli_app_m_1d
 !!  get right-eigenvalues and vectors
 !!
 !! COPYRIGHT
-!! Copyright (C) 2004-2016 ABINIT group (MVer)
+!! Copyright (C) 2004-2017 ABINIT group (MVer)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -488,7 +488,7 @@ end subroutine eli_diag_m_1d
 !!  Solid State Physics vol 37 ed Ehrenreich Seitz and Turnbull, p.45
 !!
 !! COPYRIGHT
-!! Copyright (C) 2004-2016 ABINIT group (MVer)
+!! Copyright (C) 2004-2017 ABINIT group (MVer)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -582,7 +582,7 @@ end subroutine eli_lambda_1d
 !!  Find largest eigenvalue of M matrix, to deduce superconducting Tc
 !!
 !! COPYRIGHT
-!! Copyright (C) 2004-2016 ABINIT group (MVer)
+!! Copyright (C) 2004-2017 ABINIT group (MVer)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -740,7 +740,7 @@ end subroutine eli_m_iter_1d
 !!  Solid State Physics vol 37 ed Ehrenreich Seitz and Turnbull
 !!
 !! COPYRIGHT
-!! Copyright (C) 2004-2016 ABINIT group (MVer)
+!! Copyright (C) 2004-2017 ABINIT group (MVer)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

@@ -8,7 +8,7 @@
 !! continued fraction at a point from a fixed potential. 
 !! 
 !! COPYRIGHT
-!! Copyright (C) 2008-2016 ABINIT group (SLeroux,MMancini).
+!! Copyright (C) 2008-2017 ABINIT group (SLeroux,MMancini).
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

@@ -10,7 +10,7 @@
 !!  The later quantity is required in case of GW calculations.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2016 ABINIT group (MG)
+!!  Copyright (C) 2008-2017 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -292,18 +292,15 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,gsqcutf_eff,nfftf,ngfftf,&
      if(Dtset%ixc<0) then
        call libxc_functionals_end()
      end if
+     call libxc_functionals_init(Dtset_dummy%ixc,Dtset_dummy%nspden)
      if (Dtset_dummy%ixc==-428) then !HSE06
        if (Dtset_dummy%rcut>tol8) then
-         omega = 1.0_dp/Dtset_dummy%rcut
-         call wrtout(std_out, msg, 'COLL')
+         omega = one/Dtset_dummy%rcut
+         call libxc_functionals_set_hybridparams(hyb_range=omega,hyb_mixing_sr=Dtset_dummy%gwfockmix)
        else
-         omega = 0.11_dp !HSE06 default
+         call libxc_functionals_get_hybridparams(hyb_range=omega)
        end if
      end if
-     !
-     call libxc_functionals_init(Dtset_dummy%ixc,Dtset_dummy%nspden, &
-&           exx_alpha=Dtset_dummy%gwfockmix,exx_omega=omega)
-
      write(msg, '(a, f4.2)') ' Fock fraction = ', Dtset_dummy%gwfockmix
      call wrtout(std_out,msg,'COLL')
      write(msg, '(a, f5.2, a)') ' Fock inverse screening length = ', omega, ' (bohr^-1)'

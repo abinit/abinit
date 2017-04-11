@@ -1,5 +1,5 @@
 ##############################################################################
-#Test for multibinit, reed DDB and generate the effective potential into XML file
+#Test for multibinit, read DDB and generate the effective potential into XML file
 ##############################################################################
 prt_effpot = -1
 energy_reference = -1.7145176622E+01
@@ -35,25 +35,25 @@ ntime  = 50
 #%% nprocs_to_test = 1, 2, 4, 10
 #%% max_nprocs = 10
 #%% [NCPU_1]
-#%% input_ddb  = t95_MPI1o_DS3_DDB 
+#%% input_ddb  = t95_DDB
 #%% files_to_test = 
 #%%   t96_MPI1.out, tolnlines = 0, tolabs = 0, tolrel = 0, fld_options = -easy;
-#%%   system.xml, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -easy
+#%%   t96_MPI1_sys.xml, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -easy
 #%% [NCPU_2]
-#%% input_ddb  = t95_MPI2o_DS3_DDB 
+#%% input_ddb  = t95_DDB 
 #%% files_to_test = 
 #%%   t96_MPI2.out, tolnlines = 0, tolabs = 0, tolrel = 0, fld_options = -easy;
-#%%   system.xml, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -easy
+#%%   t96_MPI2_sys.xml, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -easy
 #%% [NCPU_4]
-#%% input_ddb  = t95_MPI4o_DS3_DDB 
+#%% input_ddb  = t95_DDB 
 #%% files_to_test = 
 #%%   t96_MPI4.out, tolnlines = 0, tolabs = 0, tolrel = 0, fld_options = -easy;
-#%%   system.xml, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -easy
+#%%   t96_MPI4_sys.xml, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -easy
 #%% [NCPU_10]
-#%% input_ddb  = t95_MPI10o_DS3_DDB 
+#%% input_ddb  = t95_DDB 
 #%% files_to_test = 
 #%%   t96_MPI10.out, tolnlines = 0, tolabs = 0, tolrel = 0, fld_options = -easy;
-#%%   system.xml, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -easy
+#%%   t96_MPI10_sys.xml, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -easy
 #%% [extra_info]
 #%% authors = A. MARTIN
 #%% keywords = Effective potential, multibinit

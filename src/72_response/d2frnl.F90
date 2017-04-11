@@ -8,7 +8,7 @@
 !! (strain and/or phonon)
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (DCA, XG, GM, AR, MB, MT, AM)
+!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GM, AR, MB, MT, AM)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnuC.org/copyleft/gpl.txt .
@@ -385,7 +385,7 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
 !  For each atom and for electric field direction k:
 !  becij(k)=<Phi_i|r_k-R_k|Phi_j>-<tPhi_i|r_k-R_k|tPhi_j> + sij.R_k
    if (need_becfr.or.need_piezofr) then
-     ABI_ALLOCATE(becij,(gs_ham%dimekb1,gs_ham%dimekb1,dtset%nspinor**2,3))
+     ABI_ALLOCATE(becij,(gs_ham%dimekb1,gs_ham%dimekb2,dtset%nspinor**2,3))
      becij=zero
      ABI_DATATYPE_ALLOCATE(paw_ij_tmp,(my_natom))
      ABI_DATATYPE_ALLOCATE(pawfgrtab_tmp,(my_natom))
@@ -990,7 +990,7 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
    ABI_ALLOCATE(nhat_dum,(1,0))
    call pawgrnl(gs_ham%atindx1,dimnhat,dyfrnl,dyfr_cplex,eltfrnl,dummy,gsqcut,mgfftf,my_natom,natom,&
 &   gs_ham%nattyp,nfftf,ngfftf,nhat_dum,dummy,dtset%nspden,dtset%nsym,psps%ntypat,optgr,optgr2,optstr,optstr2,&
-&   pawang,pawfgrtab,pawrhoij_tot,pawtab,ph1df,psps,dtset%qptn,rprimd,symrec,dtset%typat,vtrial,vxc,xred,&
+&   pawang,pawfgrtab,pawrhoij_tot,pawtab,ph1df,psps,dtset%qptn,rprimd,symrec,dtset%typat,ucvol,vtrial,vxc,xred,&
 &   mpi_atmtab=my_atmtab,comm_atom=my_comm_atom)
    ABI_DEALLOCATE(nhat_dum)
  end if !PAW

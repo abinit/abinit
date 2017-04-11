@@ -8,7 +8,7 @@ This file is still under development. It should describe the rules
 followed in the abinit code specifically related with the features
 that make the MPI parallel execution possible.
 
-Copyright (C) 1998-2016 ABINIT group (GMR,XG,DCA)
+Copyright (C) 1998-2017 ABINIT group (GMR,XG,DCA)
 This file is distributed under the terms of the
 GNU General Public License, see ~abinit/COPYING
 or http://www.gnu.org/copyleft/gpl.txt .

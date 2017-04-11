@@ -7,7 +7,7 @@
 !!  Module to fit PAW related data to sums of gaussians
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2012-2016 ABINIT group (T. Rangel)
+!!  Copyright (C) 2012-2017 ABINIT group (T. Rangel)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1634,7 +1634,7 @@ end subroutine gaussfit_calc_deriv_c4
 !!  Uses the Levenberg-Marquardt algorithm.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2011-2016 ABINIT group (T. Rangel)
+!!  Copyright (C) 2011-2017 ABINIT group (T. Rangel)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1826,7 +1826,7 @@ end subroutine gaussfit_rlsf
 !!  Finds chisq, alpha and beta parameters for LSF using the Levenberg-Marquardt algorithm.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2011-2016 ABINIT group (T. Rangel)
+!!  Copyright (C) 2011-2017 ABINIT group (T. Rangel)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -2563,7 +2563,7 @@ subroutine gaussfit_projector(basis_size,mparam,nparam_array,nterm_bounds,orbita
      else
        call paw_splint(msz1,pawrad%rad,&
 &       tproj_tmp1(:),d2(:),&
-&       1,rr,raux,ierr)
+&       1,rr,raux,ierr=ierr)
      end if
      tproj_tmp2(ir)=raux(1)
    end do

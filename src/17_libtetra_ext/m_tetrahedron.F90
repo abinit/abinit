@@ -8,7 +8,7 @@
 !!  depends on sort_tetra and on m_kpt_rank
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2010-2016 ABINIT group (MJV)
+!!  Copyright (C) 2010-2017 ABINIT group (MJV)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -27,9 +27,10 @@
 
 module m_tetrahedron
 
- use m_kptrank
  USE_MEMORY_PROFILING
  USE_MSG_HANDLING
+ use m_kptrank
+ use m_io_tools, only : open_file
 #if defined HAVE_MPI2
  use mpi
 #endif
@@ -518,10 +519,19 @@ subroutine tetra_write(tetra, nkibz, kibz, path)
 !Local variables-------------------------------
  integer,parameter :: version=1
  integer :: ik,it,unt
+#ifdef HAVE_LIBTETRA_ABINIT
+ character(len=500) :: msg
+#endif
 
 ! *********************************************************************
 
- open(file=trim(path), newunit=unt, form="formatted", status="unknown", action="write")
+#ifdef HAVE_LIBTETRA_ABINIT
+ if (open_file(file=trim(path),iomsg=msg,newunit=unt,form="formatted",status="unknown",action="write")/=0) then
+   TETRA_ERROR(msg)
+ end if
+#else
+ open(file=trim(path),newunit=unt,form="formatted",status="unknown",action="write")
+#endif
 
  write(unt,*)version, " # version number"
 

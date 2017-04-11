@@ -10,7 +10,7 @@
 !!   from projected scalars to reciprocal space.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (MT)
+!! Copyright (C) 1998-2017 ABINIT group (MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -148,7 +148,7 @@ subroutine opernlb_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_fac,&
  real(dp),intent(in) :: ffnl(npw,dimffnl,nlmn),gxfac(cplex_fac,nlmn,nincat,nspinor)
  real(dp),intent(in) :: gxfac_sij(cplex,nlmn,nincat,nspinor*(paw_opt/3))
  real(dp),intent(in) :: kpg(npw,nkpg),ph3d(2,npw,matblk)
- real(dp),intent(inout) :: svect(2,npw*nspinor*(paw_opt/3)),vect(2,npw*nspinor)
+ real(dp),intent(inout) :: svect(:,:),vect(:,:)
 !Local variables-------------------------------
 !Arrays
 !scalars
@@ -219,7 +219,6 @@ subroutine opernlb_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_fac,&
 !    Loop on atoms (blocking)
      do ia=1,nincat
        iaph3d=ia;if (nloalg(2)>0) iaph3d=ia+ia3-1
-
 !      Scale gxfac with 4pi/sqr(omega).(-i)^l
        if (paw_opt/=3) then
          do ilmn=1,nlmn
@@ -498,9 +497,12 @@ subroutine opernlb_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_fac,&
          end if
 
 !        ------
+!write(87,*) "ztab",ztab(487),ph3d(1,487,iaph3d),iaph3d
          ztab(:)=ztab(:)*cmplx(ph3d(1,:,iaph3d),-ph3d(2,:,iaph3d),kind=dp)
+
          vect(1,1+ipwshft:npw+ipwshft)=vect(1,1+ipwshft:npw+ipwshft)+real(ztab(:))
          vect(2,1+ipwshft:npw+ipwshft)=vect(2,1+ipwshft:npw+ipwshft)+aimag(ztab(:))
+
        end if
 
 !      Compute <g|S|c> (or derivatives) for each plane wave:

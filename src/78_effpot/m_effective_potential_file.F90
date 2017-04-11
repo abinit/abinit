@@ -8,7 +8,7 @@
 !! (XML or DDB)
 !!
 !! COPYRIGHT
-!! Copyright (C) 2000-2015 ABINIT group (AM)
+!! Copyright (C) 2000-2017 ABINIT group (AM)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -875,7 +875,7 @@ subroutine system_getDimFromXML(filename,natom,ntypat,nph1l,nrpt)
 
 !Open the atomicdata XML file for reading
  write(message,'(5a)') ' system_getDimFromXML :',&
-&    ' Opening the file ',trim(filename),' to read dimensions',&
+&    '-Opening the file ',trim(filename),' to read dimensions',&
 &    ' (before initialisation)'
 
  call wrtout(std_out,message,'COLL')
@@ -983,13 +983,13 @@ subroutine system_getDimFromXML(filename,natom,ntypat,nph1l,nrpt)
 &   '          Dipdip must be set to zero',ch10
      call wrtout(std_out,message,'COLL')
    else if (nrpt2 > nrpt1) then
-     write(message, '(2a,I5,3a,I5,5a)' )ch10,&
+     write(message, '(2a,I0,3a,I0,5a)' )ch10,&
 &   ' WARNING: the number of total IFC  (',nrpt2,') is not equal to the  ',ch10,&
 &   '          the number of short range IFC (',nrpt1,') in ',filename,ch10,&
 &   '          the missing ifc will be set to zero',ch10
      call wrtout(std_out,message,'COLL')
    else if(nrpt1>nrpt2)then
-     write(message, '(2a,I5,3a,I5,5a)' )ch10,&
+     write(message, '(2a,I0,3a,I0,5a)' )ch10,&
 &   ' The number of total IFC  (',nrpt2,') is inferior to  ',ch10,&
 &   ' the number of short range IFC (',nrpt1,') in ',filename,ch10,&
 &   ' This is not possible',ch10
@@ -1096,7 +1096,7 @@ end subroutine system_getDimFromXML
 
 
  !Open the atomicdata XML file for reading
- write(message,'(a,a)')' Opening the file ',filename
+ write(message,'(a,a)')'-Opening the file ',filename
 
  call wrtout(ab_out,message,'COLL')
  call wrtout(std_out,message,'COLL')
@@ -1140,8 +1140,6 @@ end subroutine system_getDimFromXML
    phonon_strain(ii)%atmfrc = zero
    phonon_strain(ii)%cell   = zero
  end do
-
- 
 
  all_amu(:) = zero
  dynmat(:,:,:,:,:,:)  = zero
@@ -2046,25 +2044,16 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
   blkval = reshape(ddb%val,(/2,3,mpert,3,mpert,nblok/))
 
 !**********************************************************************
-! Transfert basics values
+! Transfert crystal values 
 !**********************************************************************
-
-  effective_potential%crystal%natom  = crystal%natom
-  effective_potential%crystal%ntypat = crystal%ntypat
-  effective_potential%crystal%rprimd = crystal%rprimd
-  effective_potential%crystal%ucvol  = crystal%ucvol
-
-  ABI_ALLOCATE(effective_potential%crystal%amu,(crystal%ntypat))
-  effective_potential%crystal%amu(:)    = ddb%amu(:)
-
-  ABI_ALLOCATE(effective_potential%crystal%typat,(crystal%natom))
-  effective_potential%crystal%typat(:)  = crystal%typat(:)
-
-  ABI_ALLOCATE(effective_potential%crystal%xcart,(3,crystal%natom))
-  effective_potential%crystal%xcart(:,:)  = crystal%xcart(:,:)
-
-  ABI_ALLOCATE(effective_potential%crystal%znucl,(crystal%ntypat))
-  effective_potential%crystal%znucl(:)  = crystal%znucl(:)
+  call crystal_init(ddb%amu,effective_potential%crystal,&
+&                   crystal%space_group,crystal%natom,crystal%npsp,&
+&                   crystal%ntypat,crystal%nsym,crystal%rprimd,&
+&                   crystal%typat,crystal%xred,crystal%zion,&
+&                   crystal%znucl,crystal%timrev,crystal%use_antiferro,&
+&                   .FALSE.,crystal%title,&
+&                   symrel=crystal%symrel,tnons=crystal%tnons,&
+&                   symafm=crystal%symafm)
 
 !**********************************************************************
 ! Transfert energy from input file
@@ -2671,7 +2660,7 @@ subroutine coeffs_xml2effpot(eff_pot,filename,comm)
 
 
  !Open the atomicdata XML file for reading
- write(message,'(a,a)')' Opening the file ',filename
+ write(message,'(a,a)')'-Opening the file ',filename
 
  call wrtout(ab_out,message,'COLL')
  call wrtout(std_out,message,'COLL')
@@ -3031,7 +3020,7 @@ subroutine coeffs_xml2effpot(eff_pot,filename,comm)
 
 !    7-Initialisation of the polynomial_coefficent structure with the values from the
 !      previous step
-     call polynomial_coeff_init(coefficient,name,nterm,coeffs(ii),terms)
+     call polynomial_coeff_init(coefficient,nterm,coeffs(ii),terms,name=name)
 
 !    8-Deallocation of the terms array for this coefficient
      do jj=1,nterm
@@ -3045,10 +3034,9 @@ subroutine coeffs_xml2effpot(eff_pot,filename,comm)
    end do
  end if !End if master
 
-
 !9-MPI BROADCAST
  do ii=1,ncoeff
-   call polynomial_coeff_broacast(coeffs(ii),master, comm)
+   call polynomial_coeff_broadcast(coeffs(ii),master, comm)
  end do
 
 !10-checks

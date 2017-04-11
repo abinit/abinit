@@ -32,6 +32,7 @@ variables to be used in the main input file of the abinit code.
  <br>D.
  <br>E.
  <a href="#ecut">ecut</a>&nbsp;&nbsp;
+ <a href="#einterp">einterp</a>&nbsp;&nbsp;
  <br>F.
  <br>G.
  <br>H.
@@ -52,6 +53,7 @@ variables to be used in the main input file of the abinit code.
  <a href="#nbandhf">nbandhf</a>&nbsp;&nbsp;
  <a href="#ndtset">ndtset</a>&nbsp;&nbsp;
  <a href="#ngkpt">ngkpt</a>&nbsp;&nbsp;
+ <a href="#nkpath">nkpath</a>&nbsp;&nbsp;
  <a href="#nkpt">nkpt</a>&nbsp;&nbsp;
  <a href="#nkpthf">nkpthf</a>&nbsp;&nbsp;
  <a href="#nshiftk">nshiftk</a>&nbsp;&nbsp;
@@ -828,6 +830,51 @@ smoothing of the kinetic energy, needed to optimize unit cell parameters.
 <B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
 
 
+<br><font id="title"><a name="einterp">einterp</a></font>
+<br><font id="definition">Mnemonics: Electron bands INTERPOolation</font>
+<br><font id="characteristic">Characteristic: </font>
+<br><font id="vartype">Variable type: real(4)</font>
+<br><font id="default">Default is [0, 0, 0, 0]</font>
+<br><font id="text">
+<p>
+This variable activates the interpolation of the electronic eigenvalues.
+It can be used to interpolate KS eigenvalues at the end of the GS run or to interpolate GW energies in sigma calculations (<a href="vargs.html#optdriver">optdriver</a> = 4).
+The k-path can be specified with <a href="vargs.html#kptbounds">kptbounds</a> and <a href="varbas.html#nkpath">nkpath</a>.
+
+einterp consists of 4 entries.
+The first element specificies the interpolation method.
+
+<ul>
+<li> 0 --> No interpolation (default) </li>
+<li> 1 --> Star-function interpolation (Shankland-Koelling-Wood Fourier interpolation scheme,
+    see <a href="http://journals.aps.org/prb/abstract/10.1103/PhysRevB.38.2721"> PRB 38 2721</a>
+</li>
+<li> 2 --> B-spline interpolation. </li>
+</ul>
+
+The meaning of the other entries depend on the interpolation technique selected.
+<br>
+
+In the case of star-function interpolation:
+
+<ul>
+<li> einterp(2): Number of star-functions per ab-initio k-point </li>
+<li> einterp(3): If non-zero, activate Fourier filtering according to Eq 9 of
+<a href="http://journals.aps.org/prb/abstract/10.1103/PhysRevB.61.1639"> PRB 61 1639</a>.
+In this case, rcut is given by einterp(2) * Rmax where Rmax is the maximum length of the lattice vectors included in the star expansion </li>
+<li> einterp(4): Used if einterp(2) /= 0. It defines rsigma in Eq 9</li>
+</ul>
+<br>
+
+For B-spline interpolation:
+
+einterp(2:4): Order of B-spline for the three reduced directions. Cubic spline (3) is the recomended value.
+</font>
+
+<br><br><br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
+
+
 <br><font id="title"><a name="iscf">iscf</a></font>
 <br><font id="definition">Mnemonics: Integer for Self-Consistent-Field cycles</font>
 <br><font id="characteristic">Characteristic: </font>
@@ -1276,8 +1323,8 @@ Perdew and Zunger, Phys. Rev. B 23, 5048 (1981)
 [JP Perdew and Y Wang, Phys. Rev. B 45, 13244 (1992) ;
 Added extra digits to some constants as in the PBE routine
 see
-   <a href="http://www.chem.uci.edu/~kieron/dftold2/pbe.php">
-    http://www.chem.uci.edu/~kieron/dftold2/pbe.php
+   <a href="https://www.chem.uci.edu/~kieron/dftold2/pbe.php">
+    https://www.chem.uci.edu/~kieron/dftold2/pbe.php
    </a>
    (at some point it was available at http://dft.uci.edu/pbe.php)
 ]
@@ -2378,6 +2425,31 @@ their defining integer numbers are even.
 For a measure of the efficiency, see the input variable
 <a href="vargs.html#kptrlen">kptrlen</a>.
 </p>
+</font>
+
+<br><br><br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="nkpath">nkpath</a></font>
+<br><font id="definition">Mnemonics: Number of K-points defining the PATH</font>
+<br><font id="characteristic">Characteristic: </font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><font id="text">
+<p>
+This variable is used to define the number of high-symmetry k-points in the <a href="vargs.html#kptbounds">kptbounds</a> array when <a href="varbas.html#kptopt">kptopt</a> > 0.
+Historically, <a href="vargs.html#kptbounds">kptbounds</a> is used in conjuction with a negative
+value of <a href="varbas.html#kptopt">kptopt</a> when performing a NSCF band structure calculation. In this case, the number of k-points in kptbounds
+is given by abs(kptopt) + 1.
+
+There are, however, other cases in which one has to specify a k-path in the input file in order to activate some kind of post-processing tool.
+Typical examples are the interpolation of
+the GW corrections at the end of the sigma run or the interpolation
+of the KS eigenvalues along a path at the end of the SCF run (see
+also <a href="varbas.html#einterp">einterp</a>)
+In a nutshell, nkpath replaces <a href="varbas.html#kptopt">kptopt</a> when we are not performing a NSCF calculation.
+Note that, unlike <a href="varbas.html#kptopt">kptopt</a>, nkpath represents the total number of points in the <a href="vargs.html#kptbounds">kptbounds</a> array.
 </font>
 
 <br><br><br><br><a href=#top>Go to the top</a>
@@ -3748,7 +3820,7 @@ are given by:
   R_cartesian = xred1*rprimd1+xred2*rprimd2+xred3*rprimd3
  </tele>
  <br />
- where (t1,t2,t3) are the "reduced coordinates" given in
+ where (xred1,xred2,xred3) are the "reduced coordinates" given in
 columns of "<b>xred</b>", (rprimd1,rprimd2,rprimd3) are the columns of
 primitive vectors array "<a href="varbas.html#rprimd">rprimd</a>" in Bohr.
  <br />

@@ -8,7 +8,7 @@
 !!  functions and berryphase
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2016 ABINIT group (T Rangel,BAmadon,FJollet,PHermet)
+!! Copyright (C) 2005-2017 ABINIT group (T Rangel,BAmadon,FJollet,PHermet)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

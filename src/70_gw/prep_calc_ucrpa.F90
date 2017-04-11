@@ -7,7 +7,7 @@
 !! Prepare data for the calculation of U with the CRPA method: oscillators strenghs and k-points.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2016 ABINIT group (FB, GMR, VO, LR, RWG, MG, RShaltaf,TApplencourt,BAmadon)
+!! Copyright (C) 1999-2017 ABINIT group (FB, GMR, VO, LR, RWG, MG, RShaltaf,TApplencourt,BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

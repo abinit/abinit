@@ -63,6 +63,18 @@ def main(opts):
                 if ( not tmp_def in cpp_libpaw ):
                   cpp_libpaw.append(tmp_def)
 
+  # Extract CPP options from the libTetra header files
+  cpp_libtetra = list()
+  for root,dirs,files in os.walk("src/17_libtetra_ext"):
+    for src in files:
+      if ( re_hdrfile.search(src) ):
+        with open(os.path.join(root,src), "rt") as fh:
+            for line in fh:
+              if ( re_cppdef.search(line) ):
+                tmp_def = re.sub("^[# ]*define[ ]*([0-9A-Z_]*).*","\\1",line).strip()
+                if ( not tmp_def in cpp_libtetra ):
+                  cpp_libtetra.append(tmp_def)
+
   # Extract CPP options from the build system
   cpp_buildsys = list()
   for root,dirs,files in os.walk("config/m4"):
@@ -82,7 +94,7 @@ def main(opts):
           if ( not tmp_def in cpp_buildsys ):
             cpp_buildsys.append(tmp_def)
 
-  cpp_buildsys = cpp_buildsys + cpp_libpaw
+  cpp_buildsys = cpp_buildsys + cpp_libpaw + cpp_libtetra
   cpp_buildsys.sort()
 
   # Create CPP naming blocks

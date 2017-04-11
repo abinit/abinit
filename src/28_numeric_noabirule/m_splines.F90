@@ -7,7 +7,7 @@
 !!  This module contains routines for spline interpolation.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2010-2016 ABINIT group (YP, BAmadon)
+!!  Copyright (C) 2010-2017 ABINIT group (YP, BAmadon)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -876,6 +876,14 @@ end subroutine splint_complex
 !!
 !! FUNCTION
 !!  Calculates an integral using cubic spline interpolation.
+!!
+!! COPYRIGHT
+!!  Copyright (C) 2010-2017 ABINIT Group (Yann Pouillon)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!  For the initials of contributors, see
+!!  ~abinit/doc/developers/contributors.txt .
 !!
 !! INPUTS
 !!  npts= number of grid points of input mesh

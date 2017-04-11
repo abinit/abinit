@@ -682,18 +682,14 @@ specified in Ha (the default), Ry, eV or Kelvin, since
 <br><font id="default">Default is 1</font>
 <br><font id="text">
 <p>
+<p>
 When <a href="vargs.html#optdriver">optdriver</a>==7, select the task to be performed.
-The choice is among:
-
-<ul>
-  <li> 1: phonon linewidth </li>
-  <li> 2: electron-phonon coupling elements </li>
-</ul>
-
-The special value eph_task 0 corresponds to a fake task in which
-the code returns after the initial pre-processing of the input data.
-This option could be useful if you want to access the post-processing tools in the EPH code
-(Fermi surface, Phonon DOS ...) without running any task.
+ The choice is among :
+ <br />
+ <b>eph_task</b>=1 : phonon linewidth
+ <br />
+ <b>eph_task</b>=2 : electron-phonon coupling elements
+</p>
 </font>
 
 <br><br><br><br><a href=#top>Go to the top</a>
@@ -973,7 +969,7 @@ with the two independent input variables
 
 
 <br><font id="title"><a name="rfatpol">rfatpol</a></font>
-<br><font id="definition">Mnemonics: Response Function : Acoustic Sum Rule</font>
+<br><font id="definition">Mnemonics: Response Function : ATomic POLarisation</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#respfn">RESPFN</a></font>
 <br><font id="vartype">Variable type: integer(2)</font>
 <br><font id="default">Default is [1, 1]</font>

@@ -8,7 +8,7 @@
 !!  Minimal Energy Path (MEP) search implementation.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2012-2016 ABINIT group (MT)
+!! Copyright (C) 2012-2017 ABINIT group (MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -921,7 +921,7 @@ subroutine mep_gbfgs(fcart,itime,list_dynimage,mep_param,mpi_enreg,natom,&
      where (mep_param%iatfix(:,:)==1) ! iatfix is defined in reduced coordinates
        fred(:,:)=zero
      end where
-     call fred2fcart(favg,fcartp_all(:,:,idynimage),fred,gprimd_all(:,:,idynimage),0,natom)
+     call fred2fcart(favg,.TRUE.,fcartp_all(:,:,idynimage),fred,gprimd_all(:,:,idynimage),natom)
      do iatom=1,natom
        fcartp_all(:,iatom,idynimage)=fcartp_all(:,iatom,idynimage) &
 &                                   +fcart_all(:,iatom,idynimage)+favg(:)
@@ -1124,7 +1124,7 @@ subroutine mep_rk4(fcart,itime,list_dynimage,mep_param,natom,ndynimage,nimage,rp
  if (istep_rk==0) then
    ABI_ALLOCATE(xstep,(3,natom))
  end if
- 
+
  do idynimage=1,ndynimage
    iimage=list_dynimage(idynimage)
    xred_old(:,:)=xred(:,:,iimage)

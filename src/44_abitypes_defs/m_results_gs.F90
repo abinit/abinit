@@ -8,7 +8,7 @@
 !!  used to store results from GS calculations.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2011-2016 ABINIT group (MT)
+!! Copyright (C) 2011-2017 ABINIT group (MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -146,6 +146,11 @@ MODULE m_results_gs
    ! Part of the gradient of the total energy (Hartree) with respect
    ! to change of reduced coordinates, that comes from the Ewald energy
 
+  real(dp), allocatable :: grchempottn(:,:)
+   ! grchempottn(3,natom)
+   ! Part of the gradient of the total energy (Hartree) with respect
+   ! to change of reduced coordinates, that comes from the spatially-varying chemical potential
+
   real(dp), allocatable :: grvdw(:,:)
    ! grvdw(3,ngrvdw)
    ! Part of the gradient of the total energy (Hartree) with respect
@@ -271,6 +276,8 @@ subroutine init_results_gs(natom,nsppol,results_gs,only_part)
    results_gs%gresid=zero
    ABI_ALLOCATE(results_gs%grewtn,(3,natom))
    results_gs%grewtn=zero
+   ABI_ALLOCATE(results_gs%grchempottn,(3,natom))
+   results_gs%grchempottn=zero
    ABI_ALLOCATE(results_gs%grxc,(3,natom))
    results_gs%grxc  =zero
    ABI_ALLOCATE(results_gs%synlgr,(3,natom))
@@ -372,6 +379,8 @@ subroutine init_results_gs_array(natom,nsppol,results_gs,only_part)
          results_gs(jj,ii)%gresid=zero
          ABI_ALLOCATE(results_gs(jj,ii)%grewtn,(3,natom))
          results_gs(jj,ii)%grewtn=zero
+         ABI_ALLOCATE(results_gs(jj,ii)%grchempottn,(3,natom))
+         results_gs(jj,ii)%grchempottn=zero
          ABI_ALLOCATE(results_gs(jj,ii)%grxc,(3,natom))
          results_gs(jj,ii)%grxc  =zero
          ABI_ALLOCATE(results_gs(jj,ii)%synlgr,(3,natom))
@@ -447,6 +456,9 @@ subroutine destroy_results_gs(results_gs)
  end if
  if (allocated(results_gs%grewtn))  then
    ABI_DEALLOCATE(results_gs%grewtn)
+ end if
+ if (allocated(results_gs%grchempottn))  then
+   ABI_DEALLOCATE(results_gs%grchempottn)
  end if
  if (allocated(results_gs%grvdw))  then
    ABI_DEALLOCATE(results_gs%grvdw)
@@ -530,6 +542,9 @@ subroutine destroy_results_gs_array(results_gs)
        if (allocated(results_gs(jj,ii)%grewtn))  then
          ABI_DEALLOCATE(results_gs(jj,ii)%grewtn)
        end if
+       if (allocated(results_gs(jj,ii)%grchempottn))  then
+         ABI_DEALLOCATE(results_gs(jj,ii)%grchempottn)
+       end if
        if (allocated(results_gs(jj,ii)%grvdw))  then
          ABI_DEALLOCATE(results_gs(jj,ii)%grvdw)
        end if
@@ -612,6 +627,9 @@ subroutine copy_results_gs(results_gs_in,results_gs_out)
    if (allocated(results_gs_out%grewtn))  then
      ABI_DEALLOCATE(results_gs_out%grewtn)
    end if
+  if (allocated(results_gs_out%grchempottn))  then
+     ABI_DEALLOCATE(results_gs_out%grchempottn)
+   end if
    if (allocated(results_gs_out%grvdw))  then
      ABI_DEALLOCATE(results_gs_out%grvdw)
    end if
@@ -633,6 +651,9 @@ subroutine copy_results_gs(results_gs_in,results_gs_out)
    end if
    if (allocated(results_gs_in%grewtn))  then
      ABI_ALLOCATE(results_gs_out%grewtn,(3,natom_in))
+   end if
+   if (allocated(results_gs_in%grchempottn))  then
+     ABI_ALLOCATE(results_gs_out%grchempottn,(3,natom_in))
    end if
    if (allocated(results_gs_in%grvdw))  then
      ABI_ALLOCATE(results_gs_out%grvdw,(3,ngrvdw_in))
@@ -677,6 +698,8 @@ subroutine copy_results_gs(results_gs_in,results_gs_out)
  if (allocated(results_gs_in%gaps))   results_gs_out%gaps(:,1:nsppol_in) =results_gs_in%gaps(:,1:nsppol_in)
  if (allocated(results_gs_in%gresid)) results_gs_out%gresid(:,1:natom_in)=results_gs_in%gresid(:,1:natom_in)
  if (allocated(results_gs_in%grewtn)) results_gs_out%grewtn(:,1:natom_in)=results_gs_in%grewtn(:,1:natom_in)
+ if (allocated(results_gs_in%grchempottn))&
+&  results_gs_out%grchempottn(:,1:natom_in)=results_gs_in%grchempottn(:,1:natom_in)
  if (allocated(results_gs_in%grxc))   results_gs_out%grxc(:,1:natom_in)  =results_gs_in%grxc(:,1:natom_in)
  if (allocated(results_gs_in%synlgr)) results_gs_out%synlgr(:,1:natom_in)=results_gs_in%synlgr(:,1:natom_in)
  if (allocated(results_gs_in%grvdw).and.ngrvdw_in>0) then
