@@ -317,7 +317,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 & response,rmet,dtset%rprim_orig(1:3,1:3,1),rprimd,ucvol,psps%usepaw)
 
 !Define the set of admitted perturbations
- mpert=natom+6
+ mpert=natom+7
  if (rf2_dkdk>0.or.rf2_dkde>0) mpert=natom+11
 
 !Initialize the list of perturbations rfpert
@@ -1480,7 +1480,8 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  end if !end me == 0
 
 !Compute the other terms for AHC dynamic and AHC full
- if (.not.(rfphon==0 .and. (rf2_dkdk/=0 .or. rf2_dkde/=0.or. rfddk/=0 .or. rfelfd==2) .and. rfstrs==0 .and. rfuser==0 .and. rfmagn==0)) then
+ if (.not.(rfphon==0 .and. (rf2_dkdk/=0 .or. rf2_dkde/=0.or. rfddk/=0 .or. rfelfd==2) .and. rfstrs==0 .and. rfuser==0 &
+&          .and. rfmagn==0)) then
    if(rfphon==1) then ! AHC can only be computed in case of phonons
 
 !    Stuff for parallelism
@@ -1555,7 +1556,8 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 
 
  if(me==0)then
-   if (.not.(rfphon==0 .and. (rf2_dkdk/=0 .or. rf2_dkde/=0 .or. rfddk/=0 .or. rfelfd==2) .and. rfstrs==0 .and.rfuser==0 .and. rfmagn==0) )then
+   if (.not.(rfphon==0 .and. (rf2_dkdk/=0 .or. rf2_dkde/=0 .or. rfddk/=0 .or. rfelfd==2) .and. rfstrs==0 .and.rfuser==0 &
+&            .and. rfmagn==0) )then
      if(rfphon==1)then
 !      Compute and print the T=0 Fan, and possibly DDW contributions to the eigenenergies.
        if(dtset%ieig2rf > 0) then

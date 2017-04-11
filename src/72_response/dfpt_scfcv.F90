@@ -223,6 +223,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
  use netcdf
 #endif
 
+ use m_cgtools,  only : mean_fftr
  use m_fstrings, only : int2char4, sjoin
  use m_time,     only : abi_wtime, sec2str
  use m_io_tools, only : open_file
@@ -345,6 +346,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
  integer :: my_quit,quitsum_request,timelimit_exit,varid,ncerr,ncid
  integer ABI_ASYNC :: quitsum_async
  integer :: rdwrpaw,spaceComm,sz1,sz2,usexcnhat,Z_kappa
+ integer :: mpi_comm_sphgrid
  logical :: need_fermie1,paral_atom,use_nhat_gga
  real(dp) :: wtime_step,now,prev
  real(dp) :: born,born_bar,boxcut,deltae,diffor,diel_q,dum,ecut,ecutf,elast
@@ -363,6 +365,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
  real(dp) :: favg(3),gmet(3,3),gprimd(3,3),q_cart(3),qphon2(3),qred2cart(3,3)
  real(dp) :: rmet(3,3),tollist(12),tsec(2)
  real(dp) :: zeff_red(3),zeff_bar(3,3)
+ real(dp) :: zdmc_red(3),zdmc_bar(3,3),mean_rhor1(1) !dynamic magnetic charges and mean density 
  real(dp),allocatable :: dielinv(:,:,:,:,:)
  real(dp),allocatable :: fcart(:,:),nhat1(:,:),nhat1gr(:,:,:),nhatfermi(:,:),nvresid1(:,:),nvresid2(:,:)
  real(dp),allocatable :: qmat(:,:,:,:,:,:),resid2(:),rhog2(:,:),rhor2(:,:),rhorfermi(:,:)
@@ -1013,6 +1016,29 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 !----------------------------------------------------------------------
 
  call timab(160,1,tsec)
+
+!Compute Dynamic magnetic charges (dmc) in case of rfphon, 
+!and magnetic susceptibility in case of rfmagn from first order density
+!(results to be comapred to dmc from d2e)
+!SPr deb
+!if (ipert<=dtset%natom.and.dtset%nspden>=2) then
+!
+!  mpi_comm_sphgrid=mpi_enreg%comm_fft
+!  call mean_fftr(rhor1(:,1),mean_rhor1,nfftf,nfftotf,1,mpi_comm_sphgrid)
+!  write(*,*) '   Mean 1st order density: ', mean_rhor1
+!  call mean_fftr(rhor1(:,2),mean_rhor1,nfftf,nfftotf,1,mpi_comm_sphgrid)
+!  if (dtset%nspden==2) then
+!    write(*,*) '        1st order m_z    : ', mean_rhor1
+!  else !nspden==4
+!    write(*,*) '        1st order m_x    : ', mean_rhor1
+!    call mean_fftr(rhor1(:,3),mean_rhor1,nfftf,nfftotf,1,mpi_comm_sphgrid)
+!    write(*,*) '        1st order m_y    : ', mean_rhor1
+!    call mean_fftr(rhor1(:,4),mean_rhor1,nfftf,nfftotf,1,mpi_comm_sphgrid)
+!    write(*,*) '        1st order m_z    : ', mean_rhor1
+!  endif
+! 
+!endif
+
 
 !Eventually close the dot file, before calling dfpt_nstdy
  if ((ipert==dtset%natom+2.and.sum((dtset%qptn(1:3))**2)<=1.0d-7.and.&
