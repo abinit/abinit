@@ -2123,12 +2123,19 @@ module m_xg
 !End of the abilint section
 
     type(xgBlock_t), intent(inout) :: xgBlock
+    integer :: i
 
     select case(xgBlock%space)
     case (SPACE_R,SPACE_CR)
-      xgBlock%vecR = 0.d0
+      !$omp parallel do
+      do i = 1, xgBlock%cols
+        xgBlock%vecR(:,i) = 0.d0
+      end do
     case (SPACE_C)
-      xgBlock%vecC = dcmplx(0.d0)
+      !$omp parallel do
+      do i = 1, xgBlock%cols
+        xgBlock%vecC = dcmplx(0.d0)
+      end do
     end select
 
   end subroutine xgBlock_zero
@@ -2147,10 +2154,12 @@ module m_xg
 
     select case(xgBlock%space)
     case (SPACE_R,SPACE_CR)
+      !$omp parallel do
       do i = 1, min(xgBlock%rows,xgBlock%cols)
         xgBlock%vecR(i,i) = 1.d0
       end do
     case (SPACE_C)
+      !$omp parallel do
       do i = 1, min(xgBlock%rows,xgBlock%cols)
         xgBlock%vecC(i,i) = dcmplx(1.d0)
       end do
@@ -2179,10 +2188,12 @@ module m_xg
     case (SPACE_R,SPACE_CR)
       select case(diag%space)
       case (SPACE_R,SPACE_CR)
+        !$omp parallel do
         do i = 1, min(xgBlock%rows,xgBlock%cols)
           xgBlock%vecR(i,i) = diag%vecR(i,1)
         end do
       case (SPACE_C)
+        !$omp parallel do
         do i = 1, min(xgBlock%rows,xgBlock%cols)
           xgBlock%vecR(i,i) = dble(diag%vecC(i,1))
         end do
@@ -2190,10 +2201,12 @@ module m_xg
     case (SPACE_C)
       select case(diag%space)
       case (SPACE_R,SPACE_CR)
+        !$omp parallel do
         do i = 1, min(xgBlock%rows,xgBlock%cols)
           xgBlock%vecC(i,i) = dcmplx(diag%vecR(i,1))
         end do
       case (SPACE_C)
+        !$omp parallel do
         do i = 1, min(xgBlock%rows,xgBlock%cols)
           xgBlock%vecC(i,i) = diag%vecR(i,1)
         end do
