@@ -43,6 +43,7 @@ MODULE m_pimd
  public :: pimd_nullify
  public :: pimd_destroy
  public :: pimd_init_qtb
+ public :: pimd_skip_qtb
  public :: pimd_print
  public :: pimd_is_restart
  public :: pimd_temperature
@@ -431,6 +432,64 @@ subroutine pimd_init_qtb(dtset,qtb_file_unit)
  end if
 
 end subroutine pimd_init_qtb
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_pimd/pimd_skip_qtb
+!! NAME
+!!  pimd_skip_qtb
+!!
+!! FUNCTION
+!!  Only relevant in case of PI-QTB:
+!!  Skip a line in a QTB random force file
+!!
+!! INPUTS
+!!  pimd_param=datastructure of type pimd_type.
+!!             several parameters for Path-Integral MD.
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!      gstateimg
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine pimd_skip_qtb(pimd_param)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'pimd_skip_qtb'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ type(pimd_type),intent(in) :: pimd_param
+!arrays
+!Local variables-------------------------------
+!scalars
+ character(len=500) :: msg
+!arrays
+
+!************************************************************************
+
+ if (pimd_param%use_qtb==0) return
+
+ if (pimd_param%qtb_file_unit<0) then
+   msg='QTB forces file unit should be positive!'
+   MSG_BUG(msg)
+ end if
+
+!Skip one line QTB random forces file
+ read(pimd_param%qtb_file_unit)
+
+end subroutine pimd_skip_qtb
 !!***
 
 !----------------------------------------------------------------------

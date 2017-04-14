@@ -3655,7 +3655,7 @@ subroutine wght9(brav,gprim,natom,ngqpt,nqpt,nqshft,nrpt,qshft,rcan,rpt,rprimd,n
  character(len=500) :: message
 !arrays
  integer :: nbord(9)
- real(dp) :: rdiff(9),red(3,3),ptws(4, 729),pp(3)
+ real(dp) :: rdiff(9),red(3,3),ptws(4, 729),pp(3),rdiff_tmp(3)
 
 ! *********************************************************************
 
@@ -3780,14 +3780,15 @@ subroutine wght9(brav,gprim,natom,ngqpt,nqpt,nqshft,nrpt,qshft,rcan,rpt,rprimd,n
 !        Change of rpt to reduced coordinates
          do ii=1,3
            red(3,ii)=  rpt(1,irpt)*gprim(1,ii) +rpt(2,irpt)*gprim(2,ii) +rpt(3,irpt)*gprim(3,ii)
-           if (new_wght==0) then
-             rdiff(ii)=red(2,ii)-red(1,ii)+red(3,ii)
-           else
-             ! rdiff in cartesian coordinates
-             rdiff(ii)=(red(2,1)-red(1,1)+red(3,1))*rprimd(ii,1)+(red(2,2)-red(1,2) &
-                       +red(3,2))*rprimd(ii,2)+(red(2,3)-red(1,3)+red(3,3))*rprimd(ii,3)
-           end if
+           rdiff(ii)=red(2,ii)-red(1,ii)+red(3,ii)
          end do
+         if (new_wght==1) then
+           ! rdiff in cartesian coordinates
+           do ii=1,3
+             rdiff_tmp(ii)=rdiff(1)*rprimd(ii,1)+rdiff(2)*rprimd(ii,2)+rdiff(3)*rprimd(ii,3)
+           end do
+           rdiff(1:3)=rdiff_tmp(1:3)
+         end if
 !        Other lattices
        else
          do ii=1,3
