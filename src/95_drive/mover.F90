@@ -267,6 +267,7 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
 !20. Ionic positions relaxation using DIIS
 !21. Steepest descent algorithm
 !23. LOTF method
+!24. Velocity verlet molecular dynamics
 
  call abimover_nullify(ab_mover)
 
@@ -740,6 +741,8 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
 !    MT->GAF: dirty trick to predict vel(t)
 !    do a double loop: 1- compute vel, 2- exit
      nloop=1
+
+
      if (scfcv_args%dtset%nctime>0.and.iexit==1) then
        iexit=0;nloop=2
      end if
@@ -778,6 +781,11 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
        case (23)
          call pred_lotf(ab_mover,hist,itime,icycle,DEBUG,iexit)
 #endif
+       case (24)
+         call pred_velverlet(ab_mover,hist,itime,ntime,DEBUG,iexit)
+       case (25)
+         call pred_hmc(ab_mover,hist,itime,icycle,ntime,ncycle,DEBUG,iexit)
+
        case default
          write(message,"(a,i0)") "Wrong value of ionmov: ",ab_mover%ionmov
          MSG_ERROR(message)

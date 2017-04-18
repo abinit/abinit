@@ -602,7 +602,7 @@ P          mk1mem6         64
            tolvrs6     1.00000000E-08
             typat      1  2
            useylm           1
-         wfoptalg1         14
+         wfoptalg1        114
          wfoptalg2         10
          wfoptalg3         10
          wfoptalg4         10
@@ -3014,7 +3014,7 @@ P          mk1mem6         64
            tolvrs6     1.00000000E-08
             typat      1  2
            useylm           1
-         wfoptalg1         14
+         wfoptalg1        114
          wfoptalg2         10
          wfoptalg3         10
          wfoptalg4         10

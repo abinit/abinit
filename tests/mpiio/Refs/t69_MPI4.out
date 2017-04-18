@@ -338,7 +338,7 @@ P          mk1mem4          8
            tolwfr3     1.00000000E-22
            tolwfr4     1.00000000E-16
             typat      1  2
-         wfoptalg1         14
+         wfoptalg1        114
          wfoptalg2          0
          wfoptalg3          0
          wfoptalg4          0
@@ -1435,7 +1435,7 @@ P          mk1mem4          8
            tolwfr3     1.00000000E-22
            tolwfr4     1.00000000E-16
             typat      1  2
-         wfoptalg1         14
+         wfoptalg1        114
          wfoptalg2          0
          wfoptalg3          0
          wfoptalg4          0

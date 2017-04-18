@@ -830,7 +830,9 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
          gemm_nonlop_ikpt_this_proc_being_treated = my_ikpt
          if (istep <= 1) then
            !Init the arrays
-           call make_gemm_nonlop(my_ikpt,gs_hamk)
+           call make_gemm_nonlop(my_ikpt,gs_hamk%npw_fft_k,gs_hamk%lmnmax, &
+&          gs_hamk%ntypat, gs_hamk%indlmn, gs_hamk%nattyp, gs_hamk%istwf_k, gs_hamk%ucvol, gs_hamk%ffnl_k,&
+&          gs_hamk%ph3d_k)
          end if
        end if
 

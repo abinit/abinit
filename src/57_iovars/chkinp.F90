@@ -951,7 +951,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
 
 !  ionmov
    call chkint_eq(0,0,cond_string,cond_values,ierr,'ionmov',&
-&   dt%ionmov,19,(/0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,20,21,22,23/),iout)
+&   dt%ionmov,21,(/0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,20,21,22,23,24,25/),iout)
 
 !  When optcell/=0, ionmov must be 2, 3, 13 or 22 (except if imgmov>0)
    if(dt%optcell/=0)then
@@ -1088,7 +1088,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
      MSG_ERROR_NOSTOP(message,ierr)
    end if
    if (dt%optdriver==RUNL_GSTATE) then
-     if ((dt%wfoptalg==4.or.dt%wfoptalg==14).and.maxval(dt%istwfk(:)-2)>0) then
+     if ((dt%wfoptalg==4.or.dt%wfoptalg==14.or.dt%wfoptalg==114).and.maxval(dt%istwfk(:)-2)>0) then
        write(message, '(a,a,a,a,a)' )&
 &       'Only the gamma point can use time-reversal and wfoptalg=4 or 14',ch10,&
 &       'Action: put istwfk to 1 or remove k points with half integer coordinates ',ch10,&
@@ -3038,7 +3038,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
    if (usepaw==1) then
      write(cond_string(1), "(A)") 'usepaw'
      cond_values(1)=1
-     call chkint_eq(0,1,cond_string,cond_values,ierr,'wfoptalg',dt%wfoptalg,5,(/0,1,4,10,14/),iout)
+     call chkint_eq(0,1,cond_string,cond_values,ierr,'wfoptalg',dt%wfoptalg,6,(/0,1,4,10,14,114/),iout)
    end if
 
    ! Check if FFT library supports MPI-FFT.
@@ -3137,7 +3137,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
        write(message,'(a,i0,a,a,a,a)')&
 &       'The value of wfoptalg is found to be ',dt%wfoptalg,ch10,&
 &       'This is not allowed in the case of band-FFT parallelization.',ch10,&
-&       'Action: put wfoptalg = 4 or 14 in your input file'
+&       'Action: put wfoptalg = 4, 14 or 114 in your input file'
        MSG_ERROR_NOSTOP(message,ierr)
      end if
 !    Make sure all nband are equal

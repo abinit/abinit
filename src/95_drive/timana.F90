@@ -146,15 +146,16 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  integer,allocatable :: list(:)
  real(dp) :: ftimes(2,mtim),ftsec(2),mflops(mtim),nflops(mtim),times(2,mtim),tsec(2),my_tsec(2)
  character(len=32) :: names(-1:mtim),entry_name
- character(len=*),parameter :: format01040 ="('- ',a24,f12.3,f6.1,f11.3,f6.1,i15)"
- character(len=*),parameter :: format01041 ="('- ',a24,f12.3,f6.1,f11.3,f6.1,i15,3x,g12.3)"
+ character(len=*),parameter :: format01040 ="('- ',a24,f12.3,f6.1,f11.3,f6.1,i15,16x,f7.2,1x,f10.2)"
+ character(len=*),parameter :: format01041 ="('- ',a24,f12.3,f6.1,f11.3,f6.1,i15,3x,g12.3,1x,f7.2,1x,f10.2)"
  character(len=*),parameter :: format01042 ="('- ',a24,f12.3,f6.1,f11.3,g12.3,i15)"
  character(len=*),parameter :: format01045 ="('-',i3,a19,f15.3,f6.1,f11.3,f6.1)"
  !character(len=*),parameter ::  format01200 ="('- subtotal     ',f15.3,f6.1,f11.3,f6.1)"
 
 ! *************************************************************************
 
- 01200 format('- subtotal             ',f15.3,f6.1,f11.3,f6.1)
+ 01200 format('- subtotal             ',f15.3,f6.1,f11.3,f6.1,31x,f7.2,1x,f10.2)
+ 01201 format(/,'- subtotal             ',f15.3,f6.1,f11.3,f6.1,31x,f7.2,1x,f10.2)
 
  ount = ab_out
 
@@ -858,6 +859,40 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(1620) = 'mkinvovl                      '
  names(1621) = 'mkinvovl(build_d)             '
  names(1622) = 'mkinvovl(build_ptp)           '
+ 
+ ! lobpcg2
+ names(1650) = 'lobpcgwf2                     '; basic(1650) = 1
+ names(1651) = 'lobpcg_init                    '
+ names(1652) = 'lobpcg_free                    '
+ names(1653) = 'lobpcg_run                     '
+ names(1654) = 'lobpcg_getAX_BX                '
+ names(1655) = 'lobpcg_orthoWrtPrev            '
+ names(1656) = 'lobpcg_Bortho                  '
+ names(1657) = 'lobpcg_RayleighRitz            '
+ names(1658) = 'lobpcg_maxResidu               '
+ names(1659) = 'lobpcg_run@getAX_BX            '
+ names(1660) = 'lobpcg_pcond                   '
+ names(1661) = 'lobpcg_RayleighRitz@hegv       '
+
+ ! xg_t
+ names(1670) = 'xgBlock_potrf                  '
+ names(1671) = 'xgBlock_trsm                   '
+ names(1672) = 'xgBlock_gemm                   '
+ names(1673) = 'xgBlock_set                    '
+ names(1674) = 'xgBlock_get                    '
+ names(1675) = 'xgBlock_heev                   '
+ names(1676) = 'xgBlock_heevd                  '
+ names(1677) = 'xgBlock_hpev                   '
+ names(1678) = 'xgBlock_hpevd                  '
+ names(1679) = 'xgBlock_hegv                   '
+ names(1680) = 'xgBlock_hegvx                  '
+ names(1681) = 'xgBlock_hegvd                  '
+ names(1682) = 'xgBlock_hpgv                   '
+ names(1683) = 'xgBlock_hpgvx                  '
+ names(1684) = 'xgBlock_hpgvd                  '
+ names(1685) = 'xgBlock_copy                   '
+ names(1686) = 'xgBlock_cshift                 '
+ names(1687) = 'xgBlock_pack                   '
 
  ! GWLS GW code
  names(1701)='gwls_sternheimer                ';basic(1701)=1
@@ -927,7 +962,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  spaceworld= mpi_enreg%comm_world
  nproc     = mpi_enreg%nproc
  me        = mpi_enreg%me
- nthreads  = xomp_get_max_threads()
+ nthreads  = xomp_get_num_threads(open_parallel=.true.)
 
  call timab(49,2,tsec)
 
@@ -1231,7 +1266,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
    end if
  end do
 
- percent_limit=0.5_dp; if (timopt<0) percent_limit=-0.1_dp
+ percent_limit=0.5_dp; if (timopt<0) percent_limit=0.0001_dp
 
 !In case there is parallelism, report times for node 0
 !if (me==0 .and. nproc>1) then
@@ -1255,8 +1290,8 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
    write(ount,"(2(a,f13.1))")"- cpu_time =  ",my_tsec(1),", wall_time =  ",my_tsec(2)
    write(ount,"(a)")"-"
 
-   write(ount, '(a,t34,a,t42,a,t50,a,t59,a,t65,a,t82,a)' )&
-&   '- routine','cpu','%','wall','%',' number of calls ',' Gflops '
+   write(ount, '(a,t34,a,t42,a,t50,a,t59,a,t65,a,t82,a,3x,a7,1x,a10)' )&
+&   '- routine','cpu','%','wall','%',' number of calls ',' Gflops ', 'Speedup', 'Efficacity'
    write(ount,'(a,t35,a,t43,a,t51,a,t60,a,t66,a,t78,a)')&
 &   '-                ','   ',' ','    ',' ','  (-1=no count)'
 
@@ -1276,11 +1311,12 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
    do ilist=1,nlist
      isort = list(ilist)
 
-     if ( (times(1,isort)*cpunm  > percent_limit .or. &
+     if ( (times(1,isort)*cpunm  > percent_limit .and. &
 &     times(2,isort)*wallnm > percent_limit) .and. ncount(isort)/=0 ) then ! Timing analysis
 
        write(ount,format01041)names(isort),&
-&       times(1,isort),times(1,isort)*cpunm,times(2,isort),times(2,isort)*wallnm,ncount(isort),mflops(isort)
+&       times(1,isort),times(1,isort)*cpunm,times(2,isort),times(2,isort)*wallnm,ncount(isort),mflops(isort), &
+&       times(1,isort)/times(2,isort),times(1,isort)/times(2,isort)/nthreads
 
      else
        nothers=nothers+1
@@ -1292,12 +1328,15 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
      subwal=subwal+times(2,isort)
    end do
 
+   other_wal = other_wal + tol14
    write(entry_name,"(a,i0,a)")"others (",nothers,")"
-   write(ount,format01041)entry_name,other_cpu,other_cpu*cpunm,other_wal,other_wal*wallnm,-1,-1.0
+   write(ount,format01041)entry_name,other_cpu,other_cpu*cpunm,other_wal,other_wal*wallnm,-1,-1.0, &
+&  other_cpu/other_wal,other_cpu/other_wal/nthreads
    write(ount,"(a)")"-<END_TIMER>"
 
    write(ount,'(a)' ) '-'
-   write(ount,01200) subcpu,subcpu*cpunm,subwal,subwal*wallnm
+   subwal = subwal + tol14
+   write(ount,01200) subcpu,subcpu*cpunm,subwal,subwal*wallnm,subcpu/subwal,subcpu/subwal/nthreads
  end if
 
 !Now, gather all information
@@ -1338,8 +1377,9 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
 !  write(ount,"(2(a,f13.1))")"- my_cpu_time =  ",my_tsec(1),", my_wall_time =  ",my_tsec(2)
    write(ount,"(a)")"-"
 
-   write(ount,'(a,t35,a,t43,a,t51,a,t60,a,t66,a,t82,a)')&
-&   '- routine        ','cpu','%','wall','%', ' number of calls ',' Gflops '
+   write(ount,'(a,t35,a,t43,a,t51,a,t60,a,t66,a,t82,a,3x,a7,1x,a10)')&
+&   '- routine        ','cpu','%','wall','%', ' number of calls ',' Gflops ', &
+'Speedup', 'Efficacity'
    write(ount,'(a,t35,a,t43,a,t51,a,t60,a,t66,a,t78,a)')&
 &   '-                ','   ',' ','    ',' ','  (-1=no count)'
 
@@ -1358,11 +1398,12 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
 
    do ilist=1,nlist
      isort = list(ilist)
-     if( (times(1,isort)*cpunm > percent_limit .or.  &
+     if( (times(1,isort)*cpunm > percent_limit .and.  &
 &     times(2,isort)*wallnm> percent_limit) .and. ncount(isort)/=0 )then
 
        write(ount,format01041)names(isort),&
-&       times(1,isort),times(1,isort)*cpunm,times(2,isort),times(2,isort)*wallnm,ncount(isort),mflops(isort) 
+&       times(1,isort),times(1,isort)*cpunm,times(2,isort),times(2,isort)*wallnm,ncount(isort),mflops(isort), &
+&       times(1,isort)/times(2,isort),times(1,isort)/times(2,isort)/nthreads
      else
        nothers=nothers+1
        other_cpu=other_cpu+times(1,isort)
@@ -1372,13 +1413,15 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
      subwal=subwal+times(2,isort)
    end do
 
+   other_wal = other_wal + tol14
    write(entry_name,"(a,i0,a)")"others (",nothers,")"
-   write(ount,format01041)entry_name,other_cpu,other_cpu*cpunm,other_wal,other_wal*wallnm,-1,-1.0
+   write(ount,format01041)entry_name,other_cpu,other_cpu*cpunm,other_wal,other_wal*wallnm,-1,-1.0, &
+&  other_cpu/other_wal,other_cpu/other_wal/nthreads
 
    write(ount,"(a)")"-<END_TIMER>"
 
-   write(ount,'(/,a,f15.3,f6.1,f11.3,f6.1)')&
-&   '- subtotal             ', subcpu,subcpu*cpunm,subwal,subwal*wallnm
+   subwal = subwal + tol14
+   write(ount,01201) subcpu,subcpu*cpunm,subwal,subwal*wallnm,subcpu/subwal,subcpu/subwal/nthreads
 
 !  (2) Partitionings
    if (timopt<0) then
@@ -1517,6 +1560,12 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
        case(74)
          list(:7)=(/1741,1742,1743,1744,1745,1746,1747/) 
          message='gwls: computing the matrix elements of eps_model^{-1}(w) -1 '
+       case(75)
+         list(:12)=(/1650,1651,1652,1653,1654,1655,1656,1657,1658,1659,1660,1661/)
+         message='lobpcgwf2 core engine '
+       case(76)
+         list(:18)=(/1670,1671,1672,1673,1674,1675,1676,1677,1678,1679,1680,1681,1682,1683,1684,1685,1686,1687/)
+         message='low-level xgBlock type '
        case default   
          cycle ! This allows to disable temporarily some partitionings
          
@@ -1537,8 +1586,8 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
 
        if(ncount(list(1))/=0)then
          write(ount,'(/,a,a)')' Partitioning of ',trim(message)
-         subcpu=0.0_dp
-         subwal=0.0_dp
+         subcpu=zero
+         subwal=zero
          do ilist=1,nlist
            isort = list(ilist)
 !          When the LAST item is mtim, a complement is evaluated (count number set to -1)
@@ -1566,9 +1615,11 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
            end if
            if(ncount(isort)/=0)then
              if(times(2,isort)*wallnm>0.02d0 .or. ilist==1)then   ! Does not write a slot if the wall time ratio is below a threshold
+               if ( times(2,isort) < 0.0001 ) times(2,isort) = -1.d0
                write(ount,format01040)names(isort),&
 &               times(1,isort),times(1,isort)*cpunm,&
-&               times(2,isort),times(2,isort)*wallnm,ncount(isort)
+&               times(2,isort),times(2,isort)*wallnm,ncount(isort), &
+&               times(1,isort)/times(2,isort),times(1,isort)/times(2,isort)/nthreads
              end if
              if(ilist/=1)then
                subcpu=subcpu+times(1,isort)
@@ -1579,8 +1630,8 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
            end if
          end do
 
-         write(ount, '(/a,f15.3,f6.1,f11.3,f6.1)' )&
-&         '- subtotal             ', subcpu,subcpu*cpunm,subwal,subwal*wallnm
+         subwal = subwal + tol14
+         write(ount, 01201 ) subcpu,subcpu*cpunm,subwal,subwal*wallnm, subcpu/subwal,subcpu/subwal/nthreads
 #ifdef HAVE_TEST_TIME_PARTITIONING
          if( wallnm*abs(subwal-times(2,list(1)))>1.d0 .and. abs(subwal-times(2,list(1)))>0.2d0 )then
            write(ount, '(3a,es16.6,2a,es16.6,4a,es16.6,2a,es16.6,6a,i4)')&
@@ -1617,7 +1668,8 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
            if (ncount(isort)/=0) then
              write(ount,format01040)names(isort),&
 &             times(1,isort),times(1,isort)*cpunm,&
-&             times(2,isort),times(2,isort)*wallnm,ncount(isort)
+&             times(2,isort),times(2,isort)*wallnm,ncount(isort), &
+&             times(1,isort)/(tol14+times(2,isort)),times(1,isort)/(times(2,isort)+tol14)/nthreads
 
              if(ilist/=1)then
                subcpu=subcpu+times(1,isort)
@@ -1629,8 +1681,8 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
 !          
          end do !ilist
 
-         write(ount, '(a,/,a,f15.3,f6.1,f11.3,f6.1)' )'-',&
-&         '- subtotal             ', subcpu,subcpu*cpunm,subwal,subwal*wallnm
+         subwal = subwal + tol14
+         write(ount, 01200 ) subcpu,subcpu*cpunm,subwal,subwal*wallnm, subcpu/subwal,subcpu/subwal/nthreads
        end if !ncount
      end if !xmpi_paral
 
@@ -1645,7 +1697,8 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
            flag_write=0
          end if
          write(ount,format01040)names(isort),&
-&         times(1,isort),times(1,isort)*cpunm,times(2,isort),times(2,isort)*wallnm,ncount(isort)
+&         times(1,isort),times(1,isort)*cpunm,times(2,isort),times(2,isort)*wallnm,ncount(isort), &
+&         times(1,isort)/(tol14+times(2,isort)),times(1,isort)/(tol14+times(2,isort))/nthreads
        end if
      end do
 
@@ -1660,7 +1713,8 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
            flag_write=0
          end if
          write(ount,format01040)names(isort),&
-&         times(1,isort),times(1,isort)*cpunm,times(2,isort),times(2,isort)*wallnm,ncount(isort)
+&         times(1,isort),times(1,isort)*cpunm,times(2,isort),times(2,isort)*wallnm,ncount(isort), &
+&         times(1,isort)/(tol14+times(2,isort)),times(1,isort)/(tol14+times(2,isort))/nthreads
        end if
      end do
 

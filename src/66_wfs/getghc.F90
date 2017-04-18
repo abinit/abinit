@@ -121,7 +121,8 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlc,lambda,mpi_enreg,nd
 !arrays
  integer,intent(in),optional,target :: kg_fft_k(:,:),kg_fft_kp(:,:)
  real(dp),intent(out),target :: gsc(:,:)
- real(dp),intent(inout) :: cwavef(:,:),ghc(:,:),gvnlc(:,:)
+ real(dp),intent(inout) :: cwavef(:,:)
+ real(dp),intent(out) :: ghc(:,:),gvnlc(:,:)
  type(pawcprj_type),intent(inout),target :: cwaveprj(:,:)
 
 !Local variables-------------------------------
@@ -582,7 +583,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlc,lambda,mpi_enreg,nd
    if(prtvol/=-level)then
      do idat=1,ndat
        if (k1_eq_k2) then
-!      !$OMP PARALLEL DO PRIVATE(igspinor) COLLAPSE(2)
+!      !!$OMP PARALLEL DO PRIVATE(igspinor) COLLAPSE(2)
          do ispinor=1,my_nspinor
            do ig=1,npw_k2
              igspinor=ig+npw_k2*(ispinor-1)+npw_k2*my_nspinor*(idat-1)
@@ -601,7 +602,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlc,lambda,mpi_enreg,nd
          end do ! ispinor
 
        else
-!      !$OMP PARALLEL DO PRIVATE(igspinor) COLLAPSE(2)
+!      !!$OMP PARALLEL DO PRIVATE(igspinor) COLLAPSE(2)
          do ispinor=1,my_nspinor
            do ig=1,npw_k2
              igspinor=ig+npw_k2*(ispinor-1)+npw_k2*my_nspinor*(idat-1)
@@ -825,7 +826,7 @@ subroutine getghc_mGGA(cwavef,ghc_mGGA,gbound_k,gprimd,istwf_k,kg_k,kpt,mgfft,mp
 !  STEP1: Compute grad of cwavef and Laplacian of cwavef
    ABI_ALLOCATE(gcwavef,(2,npw_k*ndat,3))
    ABI_ALLOCATE(lcwavef,(2,npw_k*ndat))
-!$OMP PARALLEL DO
+!!$OMP PARALLEL DO
    do idat=1,ndat
      do ipw=1,npw_k
        gcwavef(:,ipw+(idat-1)*npw_k,1:3)=zero
@@ -853,7 +854,7 @@ subroutine getghc_mGGA(cwavef,ghc_mGGA,gbound_k,gprimd,istwf_k,kg_k,kpt,mgfft,mp
    call fourwf(1,vxctaulocal(:,:,:,:,1),lcwavef,ghc1,work,gbound_k,gbound_k,&
 &   istwf_k,kg_k,kg_k,mgfft,mpi_enreg,ndat,ngfft,npw_k,npw_k,n4,n5,n6,2,&
 &   mpi_enreg%paral_kgb,tim_fourwf,weight,weight,use_gpu_cuda=use_gpu_cuda)
-!$OMP PARALLEL DO
+!!$OMP PARALLEL DO
    do idat=1,ndat
      do ipw=1,npw_k
        ghc_mGGA(:,ipw+(idat-1)*npw_k)=ghc_mGGA(:,ipw+(idat-1)*npw_k)-half*ghc1(:,ipw+(idat-1)*npw_k)
@@ -865,7 +866,7 @@ subroutine getghc_mGGA(cwavef,ghc_mGGA,gbound_k,gprimd,istwf_k,kg_k,kpt,mgfft,mp
      call fourwf(1,vxctaulocal(:,:,:,:,1+idir),gcwavef(:,:,idir),ghc1,work,gbound_k,gbound_k,&
      istwf_k,kg_k,kg_k,mgfft,mpi_enreg,ndat,ngfft,npw_k,npw_k,n4,n5,n6,2,&
 &     mpi_enreg%paral_kgb,tim_fourwf,weight,weight,use_gpu_cuda=use_gpu_cuda)
-!$OMP PARALLEL DO
+!!$OMP PARALLEL DO
      do idat=1,ndat
        do ipw=1,npw_k
          ghc_mGGA(:,ipw+(idat-1)*npw_k)=ghc_mGGA(:,ipw+(idat-1)*npw_k)-half*ghc1(:,ipw+(idat-1)*npw_k)
@@ -897,7 +898,7 @@ subroutine getghc_mGGA(cwavef,ghc_mGGA,gbound_k,gprimd,istwf_k,kg_k,kpt,mgfft,mp
 !    STEP1: Compute grad of cwavef and Laplacian of cwavef
      ABI_ALLOCATE(gcwavef1,(2,npw_k*ndat,3))
      ABI_ALLOCATE(lcwavef1,(2,npw_k*ndat))
-!$OMP PARALLEL DO
+!!$OMP PARALLEL DO
      do idat=1,ndat
        do ipw=1,npw_k
          gcwavef1(:,ipw+(idat-1)*npw_k,1:3)=zero
@@ -925,7 +926,7 @@ subroutine getghc_mGGA(cwavef,ghc_mGGA,gbound_k,gprimd,istwf_k,kg_k,kpt,mgfft,mp
      call fourwf(1,vxctaulocal(:,:,:,:,1),lcwavef1,ghc1,work,gbound_k,gbound_k,&
 &     istwf_k,kg_k,kg_k,mgfft,mpi_enreg,ndat,ngfft,npw_k,npw_k,n4,n5,n6,2,&
 &     mpi_enreg%paral_kgb,tim_fourwf,weight,weight,use_gpu_cuda=use_gpu_cuda)
-!$OMP PARALLEL DO
+!!$OMP PARALLEL DO
      do idat=1,ndat
        do ipw=1,npw_k
          ghc_mGGA(:,ipw+(idat-1)*my_nspinor*npw_k)=ghc_mGGA(:,ipw+(idat-1)*my_nspinor*npw_k)-half*ghc1(:,ipw+(idat-1)*npw_k)
@@ -937,7 +938,7 @@ subroutine getghc_mGGA(cwavef,ghc_mGGA,gbound_k,gprimd,istwf_k,kg_k,kpt,mgfft,mp
        call fourwf(1,vxctaulocal(:,:,:,:,1+idir),gcwavef1(:,:,idir),ghc1,work,gbound_k,gbound_k,&
        istwf_k,kg_k,kg_k,mgfft,mpi_enreg,ndat,ngfft,npw_k,npw_k,n4,n5,n6,2,&
 &       mpi_enreg%paral_kgb,tim_fourwf,weight,weight,use_gpu_cuda=use_gpu_cuda)
-!$OMP PARALLEL DO
+!!$OMP PARALLEL DO
        do idat=1,ndat
          do ipw=1,npw_k
            ghc_mGGA(:,ipw+(idat-1)*my_nspinor*npw_k) = ghc_mGGA(:,ipw+(idat-1)*my_nspinor*npw_k)-half*ghc1(:,ipw+(idat-1)*npw_k)
@@ -957,7 +958,7 @@ subroutine getghc_mGGA(cwavef,ghc_mGGA,gbound_k,gprimd,istwf_k,kg_k,kpt,mgfft,mp
 !    STEP1: Compute grad of cwavef and Laplacian of cwavef
      ABI_ALLOCATE(gcwavef2,(2,npw_k*ndat,3))
      ABI_ALLOCATE(lcwavef2,(2,npw_k*ndat))
-!$OMP PARALLEL DO
+!!$OMP PARALLEL DO
      do idat=1,ndat
        do ipw=1,npw_k
          gcwavef2(:,ipw+(idat-1)*npw_k,1:3)=zero
@@ -985,7 +986,7 @@ subroutine getghc_mGGA(cwavef,ghc_mGGA,gbound_k,gprimd,istwf_k,kg_k,kpt,mgfft,mp
      call fourwf(1,vxctaulocal(:,:,:,:,1),lcwavef2,ghc2,work,gbound_k,gbound_k,&
 &     istwf_k,kg_k,kg_k,mgfft,mpi_enreg,ndat,ngfft,npw_k,npw_k,n4,n5,n6,2,&
 &     mpi_enreg%paral_kgb,tim_fourwf,weight,weight,use_gpu_cuda=use_gpu_cuda)
-!$OMP PARALLEL DO
+!!$OMP PARALLEL DO
      do idat=1,ndat
        do ipw=1,npw_k
          ghc_mGGA(:,ipw+(idat-1)*my_nspinor*npw_k)=ghc_mGGA(:,ipw+(idat-1)*my_nspinor*npw_k)-half*ghc2(:,ipw+(idat-1)*npw_k)
@@ -997,7 +998,7 @@ subroutine getghc_mGGA(cwavef,ghc_mGGA,gbound_k,gprimd,istwf_k,kg_k,kpt,mgfft,mp
        call fourwf(1,vxctaulocal(:,:,:,:,1+idir),gcwavef2(:,:,idir),ghc2,work,gbound_k,gbound_k,&
        istwf_k,kg_k,kg_k,mgfft,mpi_enreg,ndat,ngfft,npw_k,npw_k,n4,n5,n6,2,&
 &       mpi_enreg%paral_kgb,tim_fourwf,weight,weight,use_gpu_cuda=use_gpu_cuda)
-!$OMP PARALLEL DO
+!!$OMP PARALLEL DO
        do idat=1,ndat
          do ipw=1,npw_k
            ghc_mGGA(:,ipw+(idat-1)*my_nspinor*npw_k)=ghc_mGGA(:,ipw+(idat-1)*my_nspinor*npw_k)-half*ghc2(:,ipw+(idat-1)*npw_k)

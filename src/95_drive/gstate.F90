@@ -347,6 +347,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 
  ecore=zero
  results_gs%pel(1:3)   =zero
+ results_gs%grchempottn(:,:)=zero
  results_gs%grewtn(:,:)=zero
 !MT Feb 2012: I dont know why but grvdw has to be allocated
 !when using BigDFT to ensure success on inca_gcc44_sdebug
@@ -897,7 +898,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    if (psp_gencond==1.or.call_pawinit) then
      call timab(553,1,tsec)
      gsqcut_shp=two*abs(dtset%diecut)*dtset%dilatmx**2/pi**2
-     hyb_range=zero;if (dtset%ixc<0) call libxc_functionals_get_hybridcoef(hyb_range=hyb_range)
+     hyb_range=zero;if (dtset%ixc<0) call libxc_functionals_get_hybridparams(hyb_range=hyb_range)
      call pawinit(gnt_option,gsqcut_shp,hyb_range,dtset%pawlcutd,dtset%pawlmix,&
 &     psps%mpsang,dtset%pawnphi,dtset%nsym,dtset%pawntheta,&
 &     pawang,pawrad,dtset%pawspnorb,pawtab,dtset%pawxcdev,dtset%xclevel,dtset%usepotzero)
@@ -1210,7 +1211,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 !    ========================================
 !    New structure for geometry optimization
 !    ========================================
-   else if (dtset%ionmov>50.or.dtset%ionmov<=23) then
+   else if (dtset%ionmov>50.or.dtset%ionmov<=25) then
 
      ! TODO: return conv_retcode
      call mover(scfcv_args,ab_xfh,acell,amass,dtfil,&
@@ -1230,7 +1231,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    else ! Not an allowed option
      write(message, '(a,i0,2a)' )&
 &     'Disallowed value for ionmov=',dtset%ionmov,ch10,&
-&     'Allowed values are: 1,2,3,4,5,6,7,8,9,10,11,12,13,14,20,21 and 30'
+&     'Allowed values are: 1,2,3,4,5,6,7,8,9,10,11,12,13,14,20,21,22,23,24 and 30'
      MSG_BUG(message)
    end if
 
@@ -1477,7 +1478,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  end if
 
  if (dtset%nstep>0 .and. dtset%prtstm==0 .and. dtset%positron/=1) then
-   call clnup2(psps%n1xccc,results_gs%fred,results_gs%gresid,&
+   call clnup2(psps%n1xccc,results_gs%fred,results_gs%grchempottn,results_gs%gresid,&
 &   results_gs%grewtn,results_gs%grvdw,results_gs%grxc,dtset%iscf,dtset%natom,&
 &   results_gs%ngrvdw,dtset%optforces,dtset%optstress,dtset%prtvol,start,&
 &   results_gs%strten,results_gs%synlgr,xred)
