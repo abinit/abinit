@@ -2237,21 +2237,21 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
    call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'vdw_supercell',tread,'INT')
    if(tread==1)then
      dtset%vdw_supercell(1:3)=intarr(1:3)
-     if (dtset%supercell(1)<zero.and.dtset%supercell(2)<zero) then
+     if (dtset%vdw_supercell(1)<zero.and.dtset%vdw_supercell(2)<zero) then
        write(message, '(7a)' )&
 &       ' only one component of vdw_supercell could be < 0, however, it was ',ch10,&
 &       dtset%vdw_supercell(1),dtset%vdw_supercell(2),dtset%vdw_supercell(3),ch10,&
 &       'Action: check the components of vdw_supercell.'
        MSG_ERROR(message)
      end if
-     if (dtset%supercell(2)<zero.and.dtset%supercell(3)<zero) then
+     if (dtset%vdw_supercell(2)<zero.and.dtset%vdw_supercell(3)<zero) then
        write(message, '(7a)' )&
 &       'only one component of vdw_supercell could be < 0, however, it was ',ch10,&
 &       dtset%vdw_supercell(1),dtset%vdw_supercell(2),dtset%vdw_supercell(3),ch10,&
 &       'Action: check the components of vdw_supercell.'
        MSG_ERROR(message)
      end if
-     if (dtset%supercell(1)<zero.and.dtset%supercell(3)<zero) then
+     if (dtset%vdw_supercell(1)<zero.and.dtset%vdw_supercell(3)<zero) then
        write(message, '(7a)' )&
 &       'only one component of vdw_supercell could be < 0, however, it was ',ch10,&
 &       dtset%vdw_supercell(1),dtset%vdw_supercell(2),dtset%vdw_supercell(3),ch10,&
