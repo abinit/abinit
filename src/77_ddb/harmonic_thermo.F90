@@ -108,6 +108,7 @@ subroutine harmonic_thermo(Ifc,Crystal,amu,anaddb_dtset,iout,outfilename_radix,c
  character(len=fnlen) :: vij_filename
 !arrays
  integer :: symrec(3,3,Crystal%nsym),symrel(3,3,Crystal%nsym)
+ real(dp) :: symrec_cart(3,3,Crystal%nsym)
  integer :: igqpt2(3),ii(6),jj(6),qptrlatt(3,3)
  integer,allocatable :: indqpt1(:),nchan2(:)
  real(dp) :: gprimd(3,3),qphon(3),rprimd(3,3),tens1(3,3),tens2(3,3)
@@ -129,6 +130,13 @@ subroutine harmonic_thermo(Ifc,Crystal,amu,anaddb_dtset,iout,outfilename_radix,c
  natom = Crystal%natom
  symrel = Crystal%symrel
  symrec = Crystal%symrec
+
+ call mkrdim(Ifc%acell,Ifc%rprim,rprimd)
+ call matr3inv(rprimd,gprimd)
+ do isym = 1, Crystal%nsym
+   symrec_cart(:,:,isym) = matmul( gprimd, matmul(dble(symrec(:,:,isym)), transpose(rprimd)) )
+! net result is tens1 = rprimd symrec^T gprimd^T   tens1   gprimd symrec rprimd^T
+ end do
 
  thermal_filename=trim(outfilename_radix)//"_THERMO"
  if (open_file(thermal_filename, msg, newunit=thermal_unit) /= 0) then
@@ -184,7 +192,6 @@ subroutine harmonic_thermo(Ifc,Crystal,amu,anaddb_dtset,iout,outfilename_radix,c
    ABI_ALLOCATE(gw,(nchan,nwchan))
  end if
 
- call mkrdim(Ifc%acell,Ifc%rprim,rprimd)
 
 !initialize ii and jj arrays
  ii(1)=1 ; ii(2)=2 ; ii(3)=3
@@ -354,7 +361,6 @@ subroutine harmonic_thermo(Ifc,Crystal,amu,anaddb_dtset,iout,outfilename_radix,c
    call end_sortph()
 
 !  Symmetrize the gij
-   call matr3inv(rprimd,gprimd)
    do ichan=1,nchan
      do iwchan=nwchan,1,-1
        do iatom=1,natom
@@ -371,61 +377,70 @@ subroutine harmonic_thermo(Ifc,Crystal,amu,anaddb_dtset,iout,outfilename_radix,c
            do ij=1,6
              tens1(ii(ij),jj(ij))=bbij(ij,ind,1)
            end do
+!          complete the 3x3 tensor from the upper triangle
            tens1(2,1)=tens1(1,2)
            tens1(3,1)=tens1(1,3)
            tens1(3,2)=tens1(2,3)
 !          Here acomplishes the tensorial operations
-!          1) Goto reduced coordinates for both indices
+!!          1) Goto reduced coordinates for both indices
+!!          make this a BLAS call, or better yet batch the whole thing?
+!!          tens1 = gprimd^T tens1 gprimd
+!           do iii=1,3
+!             do jjj=1,3
+!               tens2(iii,jjj)=tens1(iii,1)*gprimd(1,jjj)&
+!&               +tens1(iii,2)*gprimd(2,jjj)&
+!&               +tens1(iii,3)*gprimd(3,jjj)
+!             end do
+!           end do
+!           do jjj=1,3
+!             do iii=1,3
+!               tens1(iii,jjj)=tens2(1,jjj)*gprimd(1,iii)&
+!&               +tens2(2,jjj)*gprimd(2,iii)&
+!&               +tens2(3,jjj)*gprimd(3,iii)
+!             end do
+!           end do
+!          2) Apply the symmetry operation on both indices   USING symrec in
+!          cartesian coordinates
+!          tens1 = symrec(isym)^T tens1 symrec(isym)
            do iii=1,3
              do jjj=1,3
-               tens2(iii,jjj)=tens1(iii,1)*gprimd(1,jjj)&
-&               +tens1(iii,2)*gprimd(2,jjj)&
-&               +tens1(iii,3)*gprimd(3,jjj)
+               tens2(iii,jjj)=tens1(iii,1)*symrec_cart(1,jjj,isym)&
+&               +tens1(iii,2)*symrec_cart(2,jjj,isym)&
+&               +tens1(iii,3)*symrec_cart(3,jjj,isym)
              end do
            end do
            do jjj=1,3
              do iii=1,3
-               tens1(iii,jjj)=tens2(1,jjj)*gprimd(1,iii)&
-&               +tens2(2,jjj)*gprimd(2,iii)&
-&               +tens2(3,jjj)*gprimd(3,iii)
+               tens1(iii,jjj)=tens2(1,jjj)*symrec_cart(1,iii,isym)&
+&               +tens2(2,jjj)*symrec_cart(2,iii,isym)&
+&               +tens2(3,jjj)*symrec_cart(3,iii,isym)
              end do
            end do
-!          2) Apply the symmetry operation on both indices
-           do iii=1,3
-             do jjj=1,3
-               tens2(iii,jjj)=tens1(iii,1)*symrec(1,jjj,isym)&
-&               +tens1(iii,2)*symrec(2,jjj,isym)&
-&               +tens1(iii,3)*symrec(3,jjj,isym)
-             end do
-           end do
-           do jjj=1,3
-             do iii=1,3
-               tens1(iii,jjj)=tens2(1,jjj)*symrec(1,iii,isym)&
-&               +tens2(2,jjj)*symrec(2,iii,isym)&
-&               +tens2(3,jjj)*symrec(3,iii,isym)
-             end do
-           end do
-!          3) Go back to cartesian coordinates
-           do iii=1,3
-             do jjj=1,3
-               tens2(iii,jjj)=tens1(iii,1)*rprimd(jjj,1)&
-&               +tens1(iii,2)*rprimd(jjj,2)&
-&               +tens1(iii,3)*rprimd(jjj,3)
-             end do
-           end do
-           do jjj=1,3
-             do iii=1,3
-               tens1(iii,jjj)=tens2(1,jjj)*rprimd(iii,1)&
-&               +tens2(2,jjj)*rprimd(iii,2)&
-&               +tens2(3,jjj)*rprimd(iii,3)
-             end do
-           end do
+!!          3) Go back to cartesian coordinates
+!!          tens1 = rprimd tens1 rprimd^T
+!           do iii=1,3
+!             do jjj=1,3
+!               tens2(iii,jjj)=tens1(iii,1)*rprimd(jjj,1)&
+!&               +tens1(iii,2)*rprimd(jjj,2)&
+!&               +tens1(iii,3)*rprimd(jjj,3)
+!             end do
+!           end do
+!           do jjj=1,3
+!             do iii=1,3
+!               tens1(iii,jjj)=tens2(1,jjj)*rprimd(iii,1)&
+!&               +tens2(2,jjj)*rprimd(iii,2)&
+!&               +tens2(3,jjj)*rprimd(iii,3)
+!             end do
+!           end do
+! net result is tens1 = rprimd symrec^T gprimd^T   tens1   gprimd symrec rprimd^T
 
+!          This accumulates over atoms, to account for all symmetric ones
            do ij=1,6
              ggij(ij,iatom,ichan,iwchan)=ggij(ij,iatom,ichan,iwchan) + tens1(ii(ij),jj(ij))
            end do
 
          end do
+!        Each one will be replicated nsym times in the end:
          do ij=1,6
            ggij(ij,iatom,ichan,iwchan)=ggij(ij,iatom,ichan,iwchan)/dble(Crystal%nsym)
          end do
@@ -539,15 +554,16 @@ subroutine harmonic_thermo(Ifc,Crystal,amu,anaddb_dtset,iout,outfilename_radix,c
 
          do itemper=1,ntemper
 
-           tmp=anaddb_dtset%tempermin+anaddb_dtset%temperinc*dble(itemper-1)
-!          The temperature (tmp) is given in Kelvin
-
 !          Put zeroes for F, E, S, Cv
            free(itemper)=zero
            energy(itemper)=zero
            entropy(itemper)=zero
            spheat(itemper)=zero
            if (iavfrq>0) wme(itemper)=zero
+
+           tmp=anaddb_dtset%tempermin+anaddb_dtset%temperinc*dble(itemper-1)
+!          The temperature (tmp) is given in Kelvin
+           if (tmp < tol6) cycle
 
            dosinc=dble(iwchan)
 
@@ -572,10 +588,10 @@ subroutine harmonic_thermo(Ifc,Crystal,amu,anaddb_dtset,iout,outfilename_radix,c
              end if
              if (iavfrq>0) wme(itemper)=wme(itemper)+factorw*kb_HaK*wovert**2/sinh(wovert)**2
 
-           end do
+           end do ! ichan
 
            if (iavfrq>0.and.abs(spheat(itemper))>tol8) wme(itemper)=wme(itemper)/spheat(itemper)
-         end do
+         end do ! itemper
 
 !        Check if the thermodynamic functions change within tolerance,
          if (ngrids>1) then
@@ -750,9 +766,6 @@ subroutine harmonic_thermo(Ifc,Crystal,amu,anaddb_dtset,iout,outfilename_radix,c
 
          do itemper=1,ntemper
 
-           tmp=anaddb_dtset%tempermin+anaddb_dtset%temperinc*dble(itemper-1)
-!          tmp in K
-
 !          Put zeroes for Bij(k)
            do iatom=1,natom
              do ij=1,6
@@ -760,6 +773,10 @@ subroutine harmonic_thermo(Ifc,Crystal,amu,anaddb_dtset,iout,outfilename_radix,c
                vij(ij,iatom,itemper)=0._dp
              end do
            end do
+
+           tmp=anaddb_dtset%tempermin+anaddb_dtset%temperinc*dble(itemper-1)
+!          tmp in K
+           if (tmp < tol6) cycle
 
            dosinc=dble(iwchan)
 !
