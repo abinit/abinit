@@ -143,7 +143,7 @@ _tsuite_dirs = [
     #"buildsys",
     "built-in",
     #"cpu",      This directory is disabled
-    "netcdf",
+    "etsf_io",
     "fast",
     "psml",
     "gpu",
