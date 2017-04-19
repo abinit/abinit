@@ -720,7 +720,7 @@ subroutine harmonic_thermo(Ifc,Crystal,amu,anaddb_dtset,iout,outfilename_radix,c
                gijsum = gijsum + gij(ij,iatom,ichan,iwchan)
                gijerr=gijerr&
 &               +abs(ggij(ij,iatom,ichan,iwchan)/gnorm&
-&               -gij(ij,iatom,ichan,iwchan))
+&               -     gij(ij,iatom,ichan,iwchan))
              end do
              if(gijerr>anaddb_dtset%dostol) then
                wgijcnv(iwchan)=.false.
@@ -786,6 +786,7 @@ subroutine harmonic_thermo(Ifc,Crystal,amu,anaddb_dtset,iout,outfilename_radix,c
              wovert=dosinc*(dble(ichan)-half)/Ha_cmm1/(two*kb_HaK*tmp)
              expm2x=exp(-two*wovert)
              do iatom=1,natom
+!   factor contains 1/2 omega
                factor=Ha_cmm1/(two*dosinc*(dble(ichan)-half))    &
 &               *(one+expm2x)/(one-expm2x) /amu(Crystal%typat(iatom))/amu_emass
 

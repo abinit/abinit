@@ -2117,11 +2117,11 @@ end subroutine a2fw_write
 !! INPUTS
 !!  a2f<a2fw_t>=Container storing the Eliashberg functions.
 !!  ntemp=Number of temperatures
-!!  temp_range
-!!  wcut
+!!  temp_range = min and max temperatures
+!!  wcut = frequency cutoff for Matsubara sums
 !!  mustar= mustar parameter
 !!  nstep=Max number of SCF steps
-!!  reltol
+!!  reltol = relative tolerance accepted for exit of main Eliashberg loop
 !!  comm=MPI communicator
 !!
 !! OUTPUT

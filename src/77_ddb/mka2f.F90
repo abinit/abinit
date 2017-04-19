@@ -446,6 +446,11 @@ subroutine mka2f(Cryst,ifc,a2f_1d,dos_phon,elph_ds,kptrlatt,mustar)
        a2f2mom(iomega)  =     a2f1mom(iomega)*abs(omega)  ! second positive moment of alpha2F
        a2f3mom(iomega)  =     a2f2mom(iomega)*abs(omega)  ! third positive moment of alpha2F
        a2f4mom(iomega)  =     a2f3mom(iomega)*abs(omega)  ! fourth positive moment of alpha2F
+!
+!  electron lifetimes eq 4.48 in Grimvall electron phonon coupling in Metals (with T dependency). Also 5.69-5.72, 5.125, section 3.4
+!  phonon lifetimes eq 19 in Savrasov PhysRevB.54.16487 (T=0)
+!  a first T dependent expression in Allen PRB 6 2577 eq 10. Not sure about the units though
+!
        do itemp = 1, ntemp
          temp = (itemp-1)*10._dp*kb_HaK
          linewidth_integrand(iomega, itemp) = a2f_1d(iomega) * (fermi_dirac(omega,zero,temp) + bose_einstein(omega,temp))
