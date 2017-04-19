@@ -10,9 +10,9 @@
   typat   1
   spinat  0.0 0.0 4.0
 
-  nsppol  1  # 1 => single wf 2=> separate wvf for spin up and spin dwn chanels
-  nspinor 2  # 1=> scalar wavefunctions 2 => spinor wavefunctions
-  nspden  4  # conponents of density matrix
+  nsppol  1 
+  nspinor 2 
+  nspden  4 
 
   so_psp  0
 
@@ -22,11 +22,6 @@
   ecut    15.0
   tsmear  0.01
   occopt  3
-
-#Rather standard input for a bcc metal 
-# prtden    1
-# prtdos    1
-# prtdensph 1
 
   nstep   100
   rprim  -0.5  0.5  0.5
@@ -60,7 +55,7 @@
 #%% test_chain = t20.in
 #%% [files]
 #%% files_to_test = 
-#%%   t20.out, tolnlines = 0, tolabs = 0, tolrel = 0, fld_options = -easy
+#%%   t20.out, tolnlines = 4, tolabs = 0, tolrel = 0, fld_options = -easy
 #%% psp_files = 26fe.pspnc
 #%% [paral_info]
 #%% max_nprocs = 1
