@@ -99,6 +99,7 @@ variables to be used in the main input file of the abinit code.
  <a href="#postoldfe">postoldfe</a>&nbsp;&nbsp;
  <a href="#postoldff">postoldff</a>&nbsp;&nbsp;
  <a href="#prtdensph">prtdensph</a>&nbsp;&nbsp;
+ <a href="#prtebands">prtebands</a>&nbsp;&nbsp;
  <br>Q.
  <a href="#qpt">qpt</a>&nbsp;&nbsp;
  <a href="#qptnrm">qptnrm</a>&nbsp;&nbsp;
@@ -358,7 +359,7 @@ source of symmetry breaking, related e.g. to the k point grid or the presence of
 non-symmorphic translations which might not be coherent with the exchange-correlation grid.
 </p>
 <p>
- When <b>chksymbreak</b>=1, the code stops if :
+ When <b>chksymbreak</b>=1, the code stops (or issue a warning) if :
  <ul>
   <li>
    (1) The k point grid is non-symmetric, in case
@@ -736,9 +737,9 @@ for self-consistency.
 <br><font id="definition">Mnemonics: model DIElectric MIXing factor for the MAGgnetization</font>
 <br><font id="characteristic">Characteristic: </font>
 <br><font id="vartype">Variable type: real</font>
-<br><font id="default">Default is <a href="vargs.html#diemix">diemix</a> if <a href="varbas.html#iscf">iscf</a><10,
-<a href="vargs.html#diemix">diemix</a> if 70 < <a href="vargs.html#iprcel">iprcel</a> and <a href="vargs.html#iprcel">iprcel</a> < 80,
+<br><font id="default">Default is <a href="vargs.html#diemix">diemix</a> if 70 < <a href="vargs.html#iprcel">iprcel</a> and <a href="vargs.html#iprcel">iprcel</a> < 80,
 <a href="vargs.html#diemix">diemix</a> if <a href="vargs.html#iprcel">iprcel</a>==0,
+<a href="vargs.html#diemix">diemix</a> if <a href="varbas.html#iscf">iscf</a><10,
 -<a href="vargs.html#diemix">diemix</a> otherwise.
 </font>
 <br><font id="text">
@@ -837,9 +838,9 @@ output of eigenvalues (and eventual phonon frequencies)
 <br><font id="definition">Mnemonics: Factor for the number of BANDs</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#input_only">INPUT_ONLY</a></font>
 <br><font id="vartype">Variable type: real</font>
-<br><font id="default">Default is 0.125 if <a href="varbas.html#occopt">occopt</a>==1,
+<br><font id="default">Default is 0.5 if <a href="varbas.html#occopt">occopt</a>>2,
 0.0 if <a href="varbas.html#usewvl">usewvl</a>==1,
-0.5 if <a href="varbas.html#occopt">occopt</a>>2,
+0.125 if <a href="varbas.html#occopt">occopt</a>==1,
 0.0 otherwise.
 </font>
 <br><font id="text">
@@ -1772,8 +1773,8 @@ built.
 <br><font id="definition">Mnemonics: Number of BanDs for the BUFfer</font>
 <br><font id="characteristic">Characteristic: </font>
 <br><font id="vartype">Variable type: integer</font>
-<br><font id="default">Default is 2*<a href="vargs.html#nspinor">nspinor</a> if <a href="vargs.html#optdriver">optdriver</a>==1 and 3<=<a href="varbas.html#occopt">occopt</a> and <a href="varbas.html#occopt">occopt</a><= 8,
-2*<a href="vargs.html#nspinor">nspinor</a> if <a href="vargs.html#optdriver">optdriver</a>==0 and <a href="varbas.html#iscf">iscf</a><0,
+<br><font id="default">Default is 2*<a href="vargs.html#nspinor">nspinor</a> if <a href="vargs.html#optdriver">optdriver</a>==0 and <a href="varbas.html#iscf">iscf</a><0,
+2*<a href="vargs.html#nspinor">nspinor</a> if <a href="vargs.html#optdriver">optdriver</a>==1 and 3<=<a href="varbas.html#occopt">occopt</a> and <a href="varbas.html#occopt">occopt</a><= 8,
 0 otherwise.
 </font>
 <br><font id="text">
@@ -2790,6 +2791,31 @@ However, since the purpose of this output is to get a rough idea of the repartit
 this is not a real problem. If you are interested in a more accurate estimation
 of the density within a sphere, you should use the cut3d postprocessor.
 </p>
+</font>
+
+<br><br><br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="prtebands">prtebands</a></font>
+<br><font id="definition">Mnemonics: PRinT Electron BANDS</font>
+<br><font id="characteristic">Characteristic: </font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0 if <a href="varrlx.html#nimage">nimage</a> > 1,
+1 otherwise.
+</font>
+<br><font id="text">
+<p>
+This option activates the output of the electron eigenvalues.
+Possible values:
+
+<ul>
+<li>0 Disable the output of the band energies.</li>
+<li>1 Write eigenvalues in xmgrace format.  A file with extension `EBANDS.agr` is produced at the end of the run.
+Use `xmgrace file_EBANDS.agr` to visualize the band energies</li>
+<li>2 Write eigenvalues in gnuplot format. The code produces a `EBANDS.dat` file with the eigenvalues and a `EBANDS.gnuplot` script.
+Use `gnuplot file_EBANDS.gnuplot` to visualize the band energies.</li>
+</ul>
 </font>
 
 <br><br><br><br><a href=#top>Go to the top</a>
