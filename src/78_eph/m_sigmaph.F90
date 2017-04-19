@@ -1618,7 +1618,6 @@ contains
    vid = nctk_idname(ncid, vname)
  end function vid
 !!***
-#endif
 
 end function sigmaph_new
 !!***
