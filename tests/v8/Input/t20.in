@@ -1,0 +1,73 @@
+# Test for non-collinear dfpt response with bfield (rfmagn input variable)
+# bcc Fe, low ecut
+# note: currently in development, the results are not physical
+
+  ndtset  2
+
+  natom   1
+  znucl   26
+  ntypat  1
+  typat   1
+  spinat  0.0 0.0 4.0
+
+  nsppol  1  # single wf
+  nspinor 2  # wf is spinorial
+  nspden  4  # conponents of density matrix
+
+  so_psp  0
+
+  acell   3*5.42
+  xred    0.0  0.0  0.0
+  nband   20
+  ecut    20.0
+  tsmear  0.01
+  occopt  3
+
+#Rather standard input for a bcc metal
+# prtden    1
+# prtdos    1
+# prtdensph 1
+
+  nstep   100
+  rprim  -0.5  0.5  0.5
+          0.5 -0.5  0.5
+          0.5  0.5 -0.5
+
+  ngkpt   2 2 2
+  nshiftk 1
+  shiftk  0.5  0.5  0.5
+
+
+#####################################################
+# Dataset 1 (gs run to get wf and den)
+#####################################################
+  tolvrs1  1.0d-10
+
+#####################################################
+# Dataset 2 (dfpt run to get susceptibility response)
+#####################################################
+
+ toldfe2    1.0d-6
+ getwfk2    1
+ rfmagn2    1
+  rfdir2    1 0 1
+
+## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% test_chain = t20.in
+#%% [files]
+#%% files_to_test = 
+#%%   t20.out, tolnlines = 0, tolabs = 0, tolrel = 0, fld_options = -easy
+#%% psp_files = 26fe.pspnc
+#%% [paral_info]
+#%% max_nprocs = 4
+#%% [extra_info]
+#%% authors = S. Prokhorenko
+#%% keywords = DFPT
+#%% description = 
+#%%   Response of magnetic metal to external magnetic field.
+#%%   First, ground state wf is computed, then dfpt calculation.
+#%%<END TEST_INFO>
+
