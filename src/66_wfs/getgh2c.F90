@@ -71,7 +71,7 @@
 #include "abi_common.h"
 
 subroutine getgh2c(cwavef,cwaveprj,gh2c,gs2c,gs_hamkq,gvnl2,idir,ipert,lambda,&
-&                  mpi_enreg,optlocal,optnl,opt_gvnl2,rf_hamkq,sij_opt,tim_getgh2c,usevnl,enl)
+&                  mpi_enreg,optlocal,optnl,opt_gvnl2,rf_hamkq,sij_opt,tim_getgh2c,usevnl,conj,enl)
 
  use defs_basis
  use defs_abitypes
@@ -92,6 +92,7 @@ subroutine getgh2c(cwavef,cwaveprj,gh2c,gs2c,gs_hamkq,gvnl2,idir,ipert,lambda,&
 
 !Arguments ------------------------------------
 !scalars
+ logical,intent(in),optional :: conj
  integer,intent(in) :: idir,ipert,optlocal,optnl,opt_gvnl2,sij_opt,tim_getgh2c,usevnl
  real(dp),intent(in) :: lambda
  type(MPI_type),intent(in) :: mpi_enreg
@@ -108,7 +109,7 @@ subroutine getgh2c(cwavef,cwaveprj,gh2c,gs2c,gs_hamkq,gvnl2,idir,ipert,lambda,&
 !scalars
  integer :: choice,cpopt,iatm,idir1,idir2,idirc,ipw,ipws,ispinor,my_nspinor
  integer :: natom,ncpgr,nnlout=1,npw,npw1,paw_opt,signs,tim_nonlop,usecprj
- logical :: has_kin,has_vnl,pert_phon_elfd
+ logical :: compute_conjugate,has_kin,has_vnl,pert_phon_elfd
  real(dp) :: enlout_dum(1)
  character(len=500) :: msg
 !arrays
@@ -119,6 +120,7 @@ subroutine getgh2c(cwavef,cwaveprj,gh2c,gs2c,gs_hamkq,gvnl2,idir,ipert,lambda,&
  real(dp),allocatable :: nonlop_out(:,:)
  real(dp),ABI_CONTIGUOUS pointer :: gvnl2_(:,:)
  real(dp), pointer :: ddkinpw(:),kinpw1(:),enl_ptr(:,:,:)
+ real(dp),allocatable,target :: enl_temp(:,:,:)
  type(pawcprj_type),allocatable,target :: cwaveprj_tmp(:,:)
  type(pawcprj_type),pointer :: cwaveprj_ptr(:,:)
 
@@ -141,7 +143,7 @@ subroutine getgh2c(cwavef,cwaveprj,gh2c,gs2c,gs_hamkq,gvnl2,idir,ipert,lambda,&
    MSG_BUG(msg)
  end if
  pert_phon_elfd = .false.
- if (ipert>=natom+11.and.ipert<=2*natom+11) pert_phon_elfd = .true.
+ if (ipert>natom+11.and.ipert<=2*natom+11) pert_phon_elfd = .true.
  if (mpi_enreg%paral_spinor==1) then
    msg='Not compatible with parallelization over spinorial components!'
    MSG_BUG(msg)
@@ -153,10 +155,14 @@ subroutine getgh2c(cwavef,cwaveprj,gh2c,gs2c,gs_hamkq,gvnl2,idir,ipert,lambda,&
  if((ipert==natom+11.or.pert_phon_elfd).and.gs_hamkq%usepaw==1.and.optnl>=1) then
    if (present(enl)) then
      enl_ptr => enl
+   else if (allocated(rf_hamkq%e1kbfr).and.allocated(rf_hamkq%e1kbsc).and.optnl==2) then
+     ABI_ALLOCATE(enl_temp,(gs_hamkq%dimekb1,gs_hamkq%dimekb2,gs_hamkq%nspinor**2))
+     enl_temp = rf_hamkq%e1kbfr + rf_hamkq%e1kbsc
+     enl_ptr => enl_temp
    else if (allocated(rf_hamkq%e1kbfr)) then
      enl_ptr => rf_hamkq%e1kbfr
    else
-     msg='For ipert=natom+11/pert_phon_elfd : e1kbfr must be allocated or enl optional input must be present.'
+     msg='For ipert=natom+11/pert_phon_elfd : e1kbfr and/or e1kbsc must be allocated or enl optional input must be present.'
      MSG_BUG(msg)
    end if
    if (usevnl==0) then
@@ -219,6 +225,9 @@ subroutine getgh2c(cwavef,cwaveprj,gh2c,gs2c,gs_hamkq,gvnl2,idir,ipert,lambda,&
  if (tim_getgh2c==3                 ) tim_nonlop=0
 
  idir1=alpha(idir);idir2=beta(idir)
+
+ compute_conjugate = .false.
+ if(present(conj)) compute_conjugate = conj
 
 !======================================================================
 !== Apply the 2nd-order local potential to the wavefunction
@@ -318,6 +327,13 @@ subroutine getgh2c(cwavef,cwaveprj,gh2c,gs2c,gs_hamkq,gvnl2,idir,ipert,lambda,&
          gvnl2_(:,ipw)=gvnl2_(:,ipw)+nonlop_out(:,ipw)
        end do
 
+     else
+
+!$OMP PARALLEL DO
+       do ipw=1,npw1*my_nspinor
+         gvnl2_(:,ipw)=zero
+       end do
+
      end if ! opt_gvnl2==1
 
 !    Compute derivatives due to projectors |d^2[p_i]/dk1dk2>,|d[p_i]/dk1>,|d[p_i]/dk2>
@@ -327,11 +343,19 @@ subroutine getgh2c(cwavef,cwaveprj,gh2c,gs2c,gs_hamkq,gvnl2,idir,ipert,lambda,&
      call nonlop(choice,cpopt,cwaveprj_ptr,enlout_dum,gs_hamkq,idirc,(/lambda/),mpi_enreg,1,nnlout,&
 &     paw_opt,signs,nonlop_out,tim_nonlop,cwavef,vectout_dum)
 
+     if(compute_conjugate) then
 !$OMP PARALLEL DO
-     do ipw=1,npw1*my_nspinor ! Note the multiplication by i
-       gvnl2_(1,ipw)=gvnl2_(1,ipw)-nonlop_out(2,ipw)
-       gvnl2_(2,ipw)=gvnl2_(2,ipw)+nonlop_out(1,ipw)
-     end do
+       do ipw=1,npw1*my_nspinor ! Note the multiplication by -i
+         gvnl2_(1,ipw)=gvnl2_(1,ipw)+nonlop_out(2,ipw)
+         gvnl2_(2,ipw)=gvnl2_(2,ipw)-nonlop_out(1,ipw)
+       end do
+     else
+!$OMP PARALLEL DO
+       do ipw=1,npw1*my_nspinor ! Note the multiplication by i
+         gvnl2_(1,ipw)=gvnl2_(1,ipw)-nonlop_out(2,ipw)
+         gvnl2_(2,ipw)=gvnl2_(2,ipw)+nonlop_out(1,ipw)
+       end do
+     end if
 
      ABI_DEALLOCATE(nonlop_out)
      if (sij_opt==1) gs2c=zero
@@ -384,6 +408,13 @@ subroutine getgh2c(cwavef,cwaveprj,gh2c,gs2c,gs_hamkq,gvnl2,idir,ipert,lambda,&
          gvnl2_(:,ipw)=gvnl2_(:,ipw)+nonlop_out(:,ipw)
        end do
 
+     else
+
+!$OMP PARALLEL DO
+       do ipw=1,npw1*my_nspinor
+         gvnl2_(:,ipw)=zero
+       end do
+
      end if ! opt_gvnl2==1
 
 !    Compute derivatives due to projectors |d^2[p_i]/dtau1dk2>,|d[p_i]/dtau1>,|d[p_i]/dk2>
@@ -393,11 +424,19 @@ subroutine getgh2c(cwavef,cwaveprj,gh2c,gs2c,gs_hamkq,gvnl2,idir,ipert,lambda,&
      call nonlop(choice,cpopt,cwaveprj_ptr,enlout_dum,gs_hamkq,idirc,(/lambda/),mpi_enreg,1,nnlout,&
 &     paw_opt,signs,nonlop_out,tim_nonlop,cwavef,vectout_dum,iatom_only=iatm)
 
+     if(compute_conjugate) then
 !$OMP PARALLEL DO
-     do ipw=1,npw1*my_nspinor ! Note the multiplication by i
-       gvnl2_(1,ipw)=gvnl2_(1,ipw)-nonlop_out(2,ipw)
-       gvnl2_(2,ipw)=gvnl2_(2,ipw)+nonlop_out(1,ipw)
-     end do
+       do ipw=1,npw1*my_nspinor ! Note the multiplication by -i
+         gvnl2_(1,ipw)=gvnl2_(1,ipw)+nonlop_out(2,ipw)
+         gvnl2_(2,ipw)=gvnl2_(2,ipw)-nonlop_out(1,ipw)
+       end do
+     else
+!$OMP PARALLEL DO
+       do ipw=1,npw1*my_nspinor ! Note the multiplication by i
+         gvnl2_(1,ipw)=gvnl2_(1,ipw)-nonlop_out(2,ipw)
+         gvnl2_(2,ipw)=gvnl2_(2,ipw)+nonlop_out(1,ipw)
+       end do
+     end if
 
      ABI_DEALLOCATE(nonlop_out)
      if (sij_opt==1) gs2c=zero
@@ -406,6 +445,9 @@ subroutine getgh2c(cwavef,cwaveprj,gh2c,gs2c,gs_hamkq,gvnl2,idir,ipert,lambda,&
        ABI_DATATYPE_DEALLOCATE(cwaveprj_tmp)
      end if
      nullify(cwaveprj_ptr)
+
+     if (associated(enl_ptr)) nullify(enl_ptr)
+     if (allocated(enl_temp)) ABI_DEALLOCATE(enl_temp)
 
    end if
 

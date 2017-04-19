@@ -127,7 +127,7 @@ CONTAINS  !=====================================================================
 !! rf2_getidir
 !!
 !! FUNCTION
-!!  Get the direction of the 1st and 2nd perturbations according to inputs idir1 and idir2
+!!  Get the direction of the 2nd order perturbation according to inputs idir1 and idir2
 !!
 !! INPUTS
 !!  idir1 : index of the 1st direction (1<=idir1<=3)
@@ -359,7 +359,7 @@ subroutine rf2_accumulate_bands(rf2,choice,gs_hamkq,mpi_enreg,iband,idir1,idir2,
       write(op1,'(2a,i1,a)')      '     dH/',pert2,idir2,'    '
       write(op2,'(2a,i1,a)')      '     dS/',pert2,idir2,'    '
    end select
-   write(msg,'(3a,2(a,es22.13E3))') bra_i,op1,ket_j,' = ',dotr,',',doti
+   write(msg,'(3a,2(a,es17.8E3))') bra_i,op1,ket_j,' = ',dotr,',',doti
    call wrtout(std_out,msg)
  end if
 
@@ -369,7 +369,7 @@ subroutine rf2_accumulate_bands(rf2,choice,gs_hamkq,mpi_enreg,iband,idir1,idir2,
    call dotprod_g(dotr,doti,gs_hamkq%istwf_k,size_wf,2,vi,v2j,mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
 
    if(print_info/=0) then
-     write(msg,'(3a,2(a,es22.13E3))') bra_i,op2,ket_j,' = ',dotr,',',doti
+     write(msg,'(3a,2(a,es17.8E3))') bra_i,op2,ket_j,' = ',dotr,',',doti
      call wrtout(std_out,msg)
    end if
 
@@ -450,7 +450,7 @@ end subroutine rf2_accumulate_bands
 !                                 print_info,prtvol,rf_hamk_idir)
 subroutine rf2_apply_hamiltonian(cg_jband,cprj_jband,cwave,cwaveprj,h_cwave,s_cwave,eig0,eig1_k_jband,&
 &                                jband,gs_hamkq,gvnl1,idir,ipert,ikpt,isppol,mkmem,mpi_enreg,nband_k,nsppol,&
-                                 print_info,prtvol,rf_hamk_idir,size_cprj,size_wf)
+                                 print_info,prtvol,rf_hamk_idir,size_cprj,size_wf,conj)
 
  use defs_basis
  use defs_abitypes
@@ -472,6 +472,7 @@ subroutine rf2_apply_hamiltonian(cg_jband,cprj_jband,cwave,cwaveprj,h_cwave,s_cw
 
 !Arguments ---------------------------------------------
 !scalars
+ logical,intent(in),optional :: conj
  integer,intent(in) :: idir,ipert,ikpt,isppol,jband,mkmem,nband_k,nsppol,print_info,prtvol,size_wf,size_cprj
  type(gs_hamiltonian_type),intent(inout) :: gs_hamkq
 ! type(rf2_t),intent(in) :: rf2
@@ -488,8 +489,8 @@ subroutine rf2_apply_hamiltonian(cg_jband,cprj_jband,cwave,cwaveprj,h_cwave,s_cw
 !Local variables ---------------------------------------
 !scalars
  integer,parameter :: berryopt=0,optlocal=1,optnl=2,tim_getghc=1,tim_getgh1c=1,tim_getgh2c=1 ! to change
- integer :: cpopt,iband,natom,sij_opt,opt_gvnl1,usevnl
- logical :: has_cprj_jband,has_cwaveprj
+ integer :: cpopt,iband,natom,sij_opt,opt_gvnl1,opt_gvnl2,usevnl
+ logical :: compute_conjugate,has_cprj_jband,has_cwaveprj
  real(dp) :: dotr,doti,dotr2,doti2,tol_test
  character(len=500) :: msg
 
@@ -500,6 +501,9 @@ subroutine rf2_apply_hamiltonian(cg_jband,cprj_jband,cwave,cwaveprj,h_cwave,s_cw
  type(pawcprj_type),target :: cprj_empty(0,0)
  type(pawcprj_type),pointer :: cprj_j(:,:)
 ! *********************************************************************
+
+ compute_conjugate = .false.
+ if(present(conj)) compute_conjugate = conj
 
 !Check sizes
  if (size(cprj_jband)/=0) then
@@ -523,9 +527,11 @@ subroutine rf2_apply_hamiltonian(cg_jband,cprj_jband,cwave,cwaveprj,h_cwave,s_cw
 
  usevnl     = 0
  opt_gvnl1  = 0
+ opt_gvnl2  = 0
  if (ipert==natom+2.or.(ipert==natom+11.and.gs_hamkq%usepaw==1)) then
    usevnl = 1
    opt_gvnl1 = 2
+   opt_gvnl2 = 1
  end if
  sij_opt=1;if (gs_hamkq%usepaw==0) sij_opt=0
  tol_test=tol8
@@ -565,7 +571,7 @@ subroutine rf2_apply_hamiltonian(cg_jband,cprj_jband,cwave,cwaveprj,h_cwave,s_cw
      dotr = dotr - eig0(jband)
      dotr = sqrt(dotr**2+doti**2)
      if (dotr > tol_test) then
-       write(msg,'(a,es22.13E3)') 'RF2 TEST GETGHC : NOT PASSED dotr = ',dotr
+       write(msg,'(a,es17.8E3)') 'RF2 TEST GETGHC : NOT PASSED dotr = ',dotr
        call wrtout(std_out,msg)
      end if
    end if ! end tests
@@ -587,7 +593,7 @@ subroutine rf2_apply_hamiltonian(cg_jband,cprj_jband,cwave,cwaveprj,h_cwave,s_cw
      if (has_cprj_jband) cprj_j => cprj_jband(:,1+(jband-1)*size_cprj:jband*size_cprj)
      iddk(:,:) = zero;if (ipert==natom+2) iddk(:,:)=cg_jband(:,1+(jband-1)*size_wf:jband*size_wf,2)
      call getgh1c(berryopt,cwave_j,cprj_j,h_cwave,cwave_empty,s_cwave,gs_hamkq,iddk,idir,ipert,zero,&
-                  mpi_enreg,optlocal,optnl,opt_gvnl1,rf_hamk_idir,sij_opt,tim_getgh1c,usevnl)
+                  mpi_enreg,optlocal,optnl,opt_gvnl1,rf_hamk_idir,sij_opt,tim_getgh1c,usevnl,conj=compute_conjugate)
      do iband=1,nband_k
        cwave_i => cg_jband(:,1+(iband-1)*size_wf:iband*size_wf,1)
        call dotprod_g(dotr,doti,gs_hamkq%istwf_k,size_wf,2,cwave_i,h_cwave,mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
@@ -600,7 +606,7 @@ subroutine rf2_apply_hamiltonian(cg_jband,cprj_jband,cwave,cwaveprj,h_cwave,s_cw
        doti = doti - eig1_k_jband(2+2*(iband-1))
        dotr = sqrt(dotr**2+doti**2)
        if (dotr > tol_test) then
-         write(msg,'(4(a,i2),a,es22.13E3)') 'RF2 TEST GETGH1 : ipert=',ipert,' idir=',idir,&
+         write(msg,'(4(a,i2),a,es17.8E3)') 'RF2 TEST GETGH1 : ipert=',ipert,' idir=',idir,&
                                             ' jband=',jband,' iband=',iband,' NOT PASSED dotr = ',dotr
          call wrtout(std_out,msg,'COLL')
        end if
@@ -609,7 +615,7 @@ subroutine rf2_apply_hamiltonian(cg_jband,cprj_jband,cwave,cwaveprj,h_cwave,s_cw
    end if ! end tests
 
    call getgh1c(berryopt,cwave,cwaveprj,h_cwave,cwave_empty,s_cwave,gs_hamkq,gvnl1,idir,ipert,zero,&
-                mpi_enreg,optlocal,optnl,opt_gvnl1,rf_hamk_idir,sij_opt,tim_getgh1c,usevnl)
+                mpi_enreg,optlocal,optnl,opt_gvnl1,rf_hamk_idir,sij_opt,tim_getgh1c,usevnl,conj=compute_conjugate)
 
 ! *******************************************************************************************
 ! apply H^(2)
@@ -617,7 +623,7 @@ subroutine rf2_apply_hamiltonian(cg_jband,cprj_jband,cwave,cwaveprj,h_cwave,s_cw
  else if (ipert==natom+10.or.ipert==natom+11) then
 
    call getgh2c(cwave,cwaveprj,h_cwave,s_cwave,gs_hamkq,gvnl1,idir,ipert,zero,&
-                mpi_enreg,optlocal,optnl,opt_gvnl1,rf_hamk_idir,sij_opt,tim_getgh2c,usevnl)
+                mpi_enreg,optlocal,optnl,opt_gvnl2,rf_hamk_idir,sij_opt,tim_getgh2c,usevnl,conj=compute_conjugate)
 
  else
 

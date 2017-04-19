@@ -479,27 +479,32 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,mpi_enreg,npwtot,occ,&
  n1 = 0
  do i1pert = 1, natom + 2
    do i1dir = 1, 3
-     do i2pert = 1, natom + 2
-       do i2dir = 1, 3
-         do i3pert = 1, natom + 2
-           do i3dir = 1,3
+     do i3pert = 1, natom + 2
+       do i3dir = 1, 3
+         do i2pert = 1, natom + 2
+           do i2dir = 1,3
              if (rfpert(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)==1) then
                n1 = n1 + 1
-               write(message,'(2x,i4,a,6(5x,i3))') n1,')', &
+!               write(message,'(2x,i4,a,6(5x,i3))') n1,')', &
+               write(message,'(a,i4,a,6(5x,i3))') ' pert number :',n1,')', &
 &               i1pert,i1dir,i2pert,i2dir,i3pert,i3dir
                call wrtout(ab_out,message,'COLL')
                call wrtout(std_out,message,'COLL')
              else if (rfpert(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)==-2) then
+               n1 = n1 + 1
 !               write(message,'(2x,i4,a,6(5x,i3),a)') n1,')', &
-!&               i1pert,i1dir,i2pert,i2dir,i3pert,i3dir,' => must be zero, not computed'
-!               call wrtout(ab_out,message,'COLL')
-!               call wrtout(std_out,message,'COLL')
+               write(message,'(a,i4,a,6(5x,i3),a)') ' pert number :',n1,')', &
+&               i1pert,i1dir,i2pert,i2dir,i3pert,i3dir,' => must be zero, not computed'
+               call wrtout(ab_out,message,'COLL')
+               call wrtout(std_out,message,'COLL')
                blkflg(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert) = 1
-!             else if (rfpert(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)==-1) then
+             else if (rfpert(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)==-1) then
+               n1 = n1 + 1
 !               write(message,'(2x,i4,a,6(5x,i3),a)') n1,')', &
-!&               i1pert,i1dir,i2pert,i2dir,i3pert,i3dir,' => symmetric of an other element, not computed'
-!               call wrtout(ab_out,message,'COLL')
-!               call wrtout(std_out,message,'COLL')
+               write(message,'(a,i4,a,6(5x,i3),a)') ' pert number :',n1,')', &
+&               i1pert,i1dir,i2pert,i2dir,i3pert,i3dir,' => symmetric of an other element, not computed'
+               call wrtout(ab_out,message,'COLL')
+               call wrtout(std_out,message,'COLL')
              end if
            end do
          end do
