@@ -60,6 +60,7 @@ to perform electron-phonon calculations.
  <a href="#ph_qshift">ph_qshift</a>&nbsp;&nbsp;
  <a href="#ph_smear">ph_smear</a>&nbsp;&nbsp;
  <a href="#ph_wstep">ph_wstep</a>&nbsp;&nbsp;
+ <a href="#prtphbands">prtphbands</a>&nbsp;&nbsp;
  <a href="#prtphdos">prtphdos</a>&nbsp;&nbsp;
  <a href="#prtphsurf">prtphsurf</a>&nbsp;&nbsp;
  <br>Q.
@@ -278,7 +279,7 @@ If eph_ngqpt_fine is not given, the EPH code uses the list of irreducible q-poin
 NB - this does not work yet.
 This variable can be used to turn on the calculation of transport
 quantities in the eph module of abinit. Value of 1 corresponds to
-elastic LOVA as in the PRB by Savrasov and Savrasov.
+elastic LOVA as in the PRB by Savrasov and Savrasov
 </font>
 
 <br><br><br><br><a href=#top>Go to the top</a>
@@ -344,8 +345,8 @@ This integer defines the number of points in the <a href="varrf.html#ph_qpath">p
 <p>
 This variable defines the number of shifts in the q-mesh used
 for the phonon DOS and for the Eliashberg functions (see <a href="varrf.html#ph_ngqpt">ph_ngqpt</a>).
-If not given, the code assumes a Gamma-centered mesh.
-The shifts are specified by <a href="vareph.html#ph_qshift">ph_qshift</a>.
+If not given, the code assumes a Gamma-centered mesh. The shifts
+are specified by <a href="vareph.html#ph_qshift">ph_qshift</a>.
 </font>
 
 <br><br><br><br><a href=#top>Go to the top</a>
@@ -380,8 +381,8 @@ Only relevant if <a href="vareph.html#ph_intmeth">ph_intmeth</a>==1
 </font>
 <br><font id="text">
 <p>
-The gaussian broadening used for the integration of the phononDOS and the Eliashberg function.
-See also <a href="vareph.html#ph_intmeth">ph_intmeth</a> and <a href="varrf.html#ph_ngqpt">ph_ngqpt</a>.
+The gaussian broadening used for the integration of the phonon
+DOS and the Eliashberg function. See also <a href="vareph.html#ph_intmeth">ph_intmeth</a> and <a href="varrf.html#ph_ngqpt">ph_ngqpt</a>.
 </font>
 
 <br><br><br><br><a href=#top>Go to the top</a>
@@ -397,6 +398,31 @@ See also <a href="vareph.html#ph_intmeth">ph_intmeth</a> and <a href="varrf.html
 <p>
 The step used to generate the (linear) frequency mesh for the phonon DOS and the Eliashberg function.
 The extrema of the mesh are automatically computed by the code.
+</font>
+
+<br><br><br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="prtphbands">prtphbands</a></font>
+<br><font id="definition">Mnemonics: PRinT PHonon BANDS</font>
+<br><font id="characteristic">Characteristic: </font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 1</font>
+<br><font id="text">
+<p>
+This option activates the output of the phonon frequencies in the EPH code.
+Possible values:
+
+<ul>
+<li>0 Disable the output of the phonon frequencies.</li>
+
+<li>1 Write frequencies in xmgrace format.  A file with extension `PHBANDS.agr` is produced.
+Use `xmgrace file_PHBANDS.agr` to visualize the data</li>
+
+<li>2 Write frequencies in gnuplot format. The code produces a `PHBANDS.dat` file with the eigenvalues and a `PHBANDS.gnuplot` script.
+Use `gnuplot file_PHBANDS.gnuplot` to visualize the phonon band structure.</li>
+</ul>
 </font>
 
 <br><br><br><br><a href=#top>Go to the top</a>
