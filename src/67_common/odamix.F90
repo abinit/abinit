@@ -84,6 +84,7 @@
 !!   | entropy(IN)=entropy due to the occupation number smearing (if metal)
 !!   | e_localpsp(IN)=local psp energy (hartree)
 !!   | e_eigenvalues(IN)=Sum of the eigenvalues - Band energy (Hartree)
+!!   | e_chempot(IN)=energy from spatially varying chemical potential (hartree)
 !!   | e_ewald(IN)=Ewald energy (hartree)
 !!   | e_vdw_dftd(IN)=VdW DFT-D energy
 !!   | e_hartree(IN)=Hartree part of total energy (hartree units)
@@ -476,7 +477,7 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
 !etotal = energies%e_eigenvalues - energies%e_hartree + energies%e_xc - &
 !& energies%e_xcdc + energies%e_corepsp + &
 !& energies%e_entropy + energies%e_elecfield
- etotal = etotal + energies%e_ewald + energies%e_vdw_dftd
+ etotal = etotal + energies%e_ewald + energies%e_chempot + energies%e_vdw_dftd
  if (usepaw==0) then
    etotal = etotal + energies%e_nonlocalpsp
  else
@@ -613,7 +614,7 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
 
  etotal=energies%h0+energies%e_hartree+energies%e_xc+energies%e_corepsp + &
 & energies%e_entropy + energies%e_elecfield + energies%e_magfield
- etotal = etotal + energies%e_ewald + energies%e_vdw_dftd
+ etotal = etotal + energies%e_ewald + energies%e_chempot + energies%e_vdw_dftd
  if (usepaw==1) then
    do iatom=1,my_natom
      itypat=paw_ij(iatom)%itypat

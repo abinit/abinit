@@ -708,6 +708,7 @@ subroutine dtset_copy(dtout, dtin)
  dtout%ntypat             = dtin%ntypat
  dtout%ntyppure           = dtin%ntyppure
  dtout%nwfshist           = dtin%nwfshist
+ dtout%nzchempot          = dtin%nzchempot
  dtout%occopt             = dtin%occopt
  dtout%optcell            = dtin%optcell
  dtout%optdriver          = dtin%optdriver
@@ -1100,6 +1101,8 @@ subroutine dtset_copy(dtout, dtin)
 
  call alloc_copy( dtin%cd_imfrqs, dtout%cd_imfrqs)
 
+ call alloc_copy( dtin%chempot, dtout%chempot)
+
  call alloc_copy( dtin%corecs, dtout%corecs)
 
  call alloc_copy( dtin%densty, dtout%densty)
@@ -1309,6 +1312,9 @@ subroutine dtset_free(dtset)
  end if
  if (allocated(dtset%cd_imfrqs))   then
    ABI_DEALLOCATE(dtset%cd_imfrqs)
+ end if
+ if (allocated(dtset%chempot))    then
+   ABI_DEALLOCATE(dtset%chempot)
  end if
  if (allocated(dtset%corecs))      then
    ABI_DEALLOCATE(dtset%corecs)

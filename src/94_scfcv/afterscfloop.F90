@@ -35,6 +35,7 @@
 !!   | nsym=number of symmetries in space group
 !!  eigen(mband*nkpt*nsppol)=array for holding eigenvalues (hartree)
 !!  fock <type(fock_type)>= quantities to calculate Fock exact exchange
+!!  grchempottn(3,natom)=d(E_chemical_potential)/d(xred) (hartree)
 !!  grewtn(3,natom)=d(Ewald)/d(xred) (hartree)
 !!  grvdw(3,ngrvdw)=gradients of energy due to Van der Waals DFT-D2 dispersion (hartree)
 !!  gsqcut=cutoff value on G**2 for (large) sphere inside FFT box.
@@ -151,6 +152,7 @@
 !!   | entropy(IN)=entropy due to the occupation number smearing (if metal)
 !!   | e_localpsp(IN)=local psp energy (hartree)
 !!   | e_eigenvalues(IN)=Sum of the eigenvalues - Band energy (Hartree)
+!!   | e_chempot(IN)=energy from spatially varying chemical potential (hartree)
 !!   | e_ewald(IN)=Ewald energy (hartree)
 !!   | e_vdw_dftd(IN)=VdW DFT-D energy
 !!   | e_hartree(IN)=Hartree part of total energy (hartree units)
@@ -197,7 +199,8 @@
 
 subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
 & deltae,diffor,dtefield,dtfil,dtset,eigen,electronpositron,elfr,&
-& energies,etotal,favg,fcart,fock,forold,fred,gresid,grewtn,grhf,grhor,grvdw,&
+& energies,etotal,favg,fcart,fock,forold,fred,grchempottn,&
+& gresid,grewtn,grhf,grhor,grvdw,&
 & grxc,gsqcut,hdr,indsym,irrzon,istep,kg,kxc,lrhor,maxfor,mcg,mcprj,mgfftf,&
 & moved_atm_inside,mpi_enreg,my_natom,n3xccc,nattyp,nfftf,ngfft,ngfftf,ngrvdw,nhat,&
 & nkxc,npwarr,nvresid,occ,optres,paw_an,paw_ij,pawang,pawfgr,&
@@ -289,7 +292,7 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
  integer,intent(in) :: ngfft(18),ngfftf(18),npwarr(dtset%nkpt)
  integer,intent(in) :: pwind(pwind_alloc,2,3),symrec(3,3,dtset%nsym)
  integer,intent(out) :: conv_retcode
- real(dp),intent(in) :: grewtn(3,dtset%natom),grvdw(3,ngrvdw)
+ real(dp),intent(in) :: grchempottn(3,dtset%natom),grewtn(3,dtset%natom),grvdw(3,ngrvdw)
  real(dp),intent(in) :: phnons(2,dtset%nfft**(1-1/dtset%nsym),(dtset%nspden/dtset%nsppol)-3*(dtset%nspden/4))
  real(dp),intent(in) :: pwnsfac(2,pwind_alloc)
  real(dp),intent(in) :: resid(dtset%mband*dtset%nkpt*dtset%nsppol)
@@ -867,7 +870,8 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
    end if
 
    call forstr(atindx1,cg,cprj,diffor,dtefield,dtset,&
-&     eigen,electronpositron,energies,favg,fcart,fock,forold,fred,gresid,grewtn,&
+&     eigen,electronpositron,energies,favg,fcart,fock,&
+&     forold,fred,grchempottn,gresid,grewtn,&
 &     grhf,grvdw,grxc,gsqcut,indsym,&
 &     kg,kxc,maxfor,mcg,mcprj,mgfftf,mpi_enreg,my_natom,&
 &     n3xccc,nattyp,nfftf,ngfftf,ngrvdw,nhat,nkxc,&
@@ -986,6 +990,7 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
  results_gs%res2       =res2
  results_gs%fcart(:,:) =fcart(:,:)
  results_gs%fred(:,:)  =fred(:,:)
+ results_gs%grchempottn(:,:)=grchempottn(:,:)
  results_gs%gresid(:,:)=gresid(:,:)
  results_gs%grewtn(:,:)=grewtn(:,:)
  results_gs%grxc(:,:)  =grxc(:,:)

@@ -93,6 +93,7 @@
 !!  electronpositron <type(electronpositron_type)>=quantities for the electron-positron annihilation (optional argument)
 !!  energies <type(energies_type)>=all part of total energy.
 !!   | entropy(IN)=entropy due to the occupation number smearing (if metal)
+!!   | e_chempot(IN)=energy from spatially varying chemical potential (hartree)
 !!   | e_ewald(IN)=Ewald energy (hartree)
 !!   | e_vdw_dftd(IN)=VdW DFT-D energy
 !!   | e_corepsp(IN)=psp core-core energy
@@ -575,8 +576,8 @@ subroutine energy(cg,compch_fft,dtset,electronpositron,&
        my_bandfft_kpt => bandfft_kpt(my_ikpt)
      else
        my_ikpt=ikpt
-       nblockbd=nband_k/mpi_enreg%nproc_fft
-       if (nband_k/=nblockbd*mpi_enreg%nproc_fft) nblockbd=nblockbd+1
+       nblockbd=nband_k/mpi_enreg%bandpp
+       !if (nband_k/=nblockbd*mpi_enreg%nproc_fft) nblockbd=nblockbd+1
      end if
      blocksize=nband_k/nblockbd
 
@@ -653,7 +654,9 @@ subroutine energy(cg,compch_fft,dtset,electronpositron,&
 !    Setup gemm_nonlop
      if (gemm_nonlop_use_gemm) then
        gemm_nonlop_ikpt_this_proc_being_treated = my_ikpt
-       call make_gemm_nonlop(my_ikpt,gs_hamk)
+       call make_gemm_nonlop(my_ikpt,gs_hamk%npw_fft_k,gs_hamk%lmnmax, &
+&          gs_hamk%ntypat, gs_hamk%indlmn, gs_hamk%nattyp, gs_hamk%istwf_k, gs_hamk%ucvol, gs_hamk%ffnl_k,&
+&          gs_hamk%ph3d_k)
      end if
 
 #if defined HAVE_GPU_CUDA
@@ -680,7 +683,7 @@ subroutine energy(cg,compch_fft,dtset,electronpositron,&
 
          if (mpi_enreg%paral_kgb/=1) then
            tim_nonlop=3
-           call nonlop(choice,cpopt,cwaveprj,enlout,gs_hamk,idir,(/zero/),mpi_enreg,1,nnlout,&
+           call nonlop(choice,cpopt,cwaveprj,enlout,gs_hamk,idir,(/zero/),mpi_enreg,blocksize,nnlout,&
 &           paw_opt,signs,nonlop_out,tim_nonlop,cwavef,cwavef)
          else
            tim_nonlop=14
@@ -783,7 +786,7 @@ subroutine energy(cg,compch_fft,dtset,electronpositron,&
 &           energies%e_xcdc + energies%e_corepsp - energies%e_corepspdc
    if (psps%usepaw==1) etotal=etotal + energies%e_pawdc
  end if
- etotal = etotal + energies%e_ewald + energies%e_vdw_dftd
+ etotal = etotal + energies%e_ewald + energies%e_chempot + energies%e_vdw_dftd
  if(dtset%occopt>=3 .and. dtset%occopt<=8) etotal=etotal-dtset%tsmear*energies%entropy
 
 !Additional stuff for electron-positron

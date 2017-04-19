@@ -84,7 +84,7 @@ void effpot_xml_checkXML(char *filename,char *name_xml){
 void effpot_xml_getDimSystem(char *filename,int *natom,int *ntypat, int *nqpt, int *loc_nrpt,\
                              int *tot_nrpt){
   xmlDocPtr doc;
-  int i,iatom,irpt1,irpt2,iqpt,itypat,present;
+  int i,iatom,irpt1,irpt2,iqpt,itypat,j,present;
   xmlNodePtr cur,cur2;
   xmlChar *key,*uri;
   Array typat;
@@ -113,20 +113,9 @@ void effpot_xml_getDimSystem(char *filename,int *natom,int *ntypat, int *nqpt, i
     if ((!xmlStrcmp(cur->name, (const  xmlChar *) "atom"))) {
       iatom++;
       uri = xmlGetProp(cur, (const  xmlChar *) "mass");
-      present = 0;
-      for(i=0;i<=sizeof(typat.array);i++){
-        if (typat.array[i] == strtod(uri,NULL)){
-          present = 1;
-          break;
-        }
-      }
-      if(present==0){
-        itypat++;
-        insertArray(&typat,strtod(uri,NULL)); 
-      }
-      xmlFree(uri);
-      
-   } 
+      insertArray(&typat,strtod(uri,NULL)); 
+      xmlFree(uri);      
+    } 
     if ((!xmlStrcmp(cur->name, (const  xmlChar *) "local_force_constant"))) {irpt1++;}
     if ((!xmlStrcmp(cur->name, (const  xmlChar *) "total_force_constant"))) {irpt2++;}
     if ((!xmlStrcmp(cur->name, (const  xmlChar *) "phonon"))) {
@@ -138,6 +127,19 @@ void effpot_xml_getDimSystem(char *filename,int *natom,int *ntypat, int *nqpt, i
     }
     cur = cur->next;
   }
+  for(i=0;i<typat.used;i++){
+    present = 0;
+    for(j=i+1;j<typat.used;j++){
+      if (typat.array[i] == typat.array[j] && typat.array[i] != 0){
+        present = 1;
+        break;
+      }
+    }
+    if(present==0 && typat.array[i] !=0){
+      itypat++;
+    }
+  }
+ 
   freeArray(&typat);
 
   *natom  = iatom;
@@ -429,6 +431,8 @@ void effpot_xml_readSystem(char *filename,int *natom,int *ntypat,int *nrpt,int *
       for(j=0;j<3;j++){
         cell[i][j] = cell_local[i][j];        
       }
+    }
+    for(i=0;i<irpt1;i++){
       for(ia=0;ia<*natom;ia++){
         for(mu=0;mu<3;mu++){
           for(ib=0;ib<*natom;ib++){
@@ -436,6 +440,10 @@ void effpot_xml_readSystem(char *filename,int *natom,int *ntypat,int *nrpt,int *
               atmfrc[i][ib][nu][ia][mu][0]=local_atmfrc[i][ib][nu][ia][mu][0];
               short_atmfrc[i][ib][nu][ia][mu][0]=local_atmfrc[i][ib][nu][ia][mu][0];
               ewald_atmfrc[i][ib][nu][ia][mu][0]=0.0;
+              //Set imaginary part to 0
+              short_atmfrc[i][ib][nu][ia][mu][1]= 0.0;
+              atmfrc[i][ib][nu][ia][mu][1] = 0.0;      
+              ewald_atmfrc[i][ib][nu][ia][mu][1]= 0.0;
             }
           }
         }    
@@ -447,6 +455,8 @@ void effpot_xml_readSystem(char *filename,int *natom,int *ntypat,int *nrpt,int *
       for(j=0;j<3;j++){
         cell[i][j] = cell_total[i][j];        
       }
+    }
+    for(i=0;i<irpt1;i++){
       for(ia=0;ia<*natom;ia++){
         for(mu=0;mu<3;mu++){
           for(ib=0;ib<*natom;ib++){
@@ -454,6 +464,11 @@ void effpot_xml_readSystem(char *filename,int *natom,int *ntypat,int *nrpt,int *
               atmfrc[i][ib][nu][ia][mu][0]=total_atmfrc[i][ib][nu][ia][mu][0];
               short_atmfrc[i][ib][nu][ia][mu][0]=0.0;
               ewald_atmfrc[i][ib][nu][ia][mu][0]=total_atmfrc[i][ib][nu][ia][mu][0];
+              //Set imaginary part to 0
+              short_atmfrc[i][ib][nu][ia][mu][1]= 0.0;
+              atmfrc[i][ib][nu][ia][mu][1] = 0.0;      
+              ewald_atmfrc[i][ib][nu][ia][mu][1]= 0.0;
+
             }
           }
         }    
@@ -466,39 +481,47 @@ void effpot_xml_readSystem(char *filename,int *natom,int *ntypat,int *nrpt,int *
         for(j=0;j<3;j++){
           cell[i][j] = cell_total[i][j];
         }
+      }
+      for(i=0;i<irpt2;i++){
         for(ia=0;ia<*natom;ia++){
           for(mu=0;mu<3;mu++){
             for(ib=0;ib<*natom;ib++){
               for(nu=0;nu<3;nu++){
-                atmfrc[i][ib][nu][ia][mu][0]=total_atmfrc[i][ib][nu][ia][mu][0];
+                atmfrc[i][ib][nu][ia][mu][0] = total_atmfrc[i][ib][nu][ia][mu][0];
+                ewald_atmfrc[i][ib][nu][ia][mu][0]= atmfrc[i][ib][nu][ia][mu][0]-
+                                                    short_atmfrc[i][ib][nu][ia][mu][0];
+                //Set imaginary part to 0
+                atmfrc[i][ib][nu][ia][mu][1] = 0.0; 
+                ewald_atmfrc[i][ib][nu][ia][mu][1]= 0.0;
                 for(j=0;j<irpt1;j++){
                   if(cell_local[j][0] == cell[i][0] && 
                      cell_local[j][1] == cell[i][1] &&
                      cell_local[j][2] == cell[i][2] ){
+                    if(ia==0 && ib==0 && mu==0 && nu==0){irpt3++;}
                     short_atmfrc[i][ib][nu][ia][mu][0]= local_atmfrc[j][ib][nu][ia][mu][0];
-                    ewald_atmfrc[i][ib][nu][ia][mu][0]= atmfrc[i][ib][nu][ia][mu][0]-
-                                                 short_atmfrc[i][ib][nu][ia][mu][0];
-                    irpt3++;
+                    short_atmfrc[i][ib][nu][ia][mu][1]= 0.0;
                   }
                 }
-              }
+              }    
             }
-          }    
+          }
         }
       }
       if(irpt3 != irpt1){
-        fprintf(stderr,"error: Probleme between local and total rpt in the XML file:%d %d\n",\
-                irpt1,irpt3);
-        
+        fprintf(stdout,"\n WARNING: The number of local and total rpt are not equivalent\n");
+        fprintf(stdout,"          in the XML file :%d %d\n",irpt1,irpt3);
+        fprintf(stdout,"          The missing local IFC will be set to zero\n");        
       }
     }
     else{
       fprintf(stderr,"error: Local rpt is superior to total rpt in the XML file:%d %d\n",\
               irpt1,irpt2);
+      exit(0);
     }
   }else{
     fprintf(stderr,"error: Number of local and total rpt doesn't match with the XML file:%d %d\n",\
             irpt1,irpt2);
+    exit(0);
   }
 }
 

@@ -76,8 +76,9 @@
 !!   | e_xcdc=exchange-correlation double-counting energy (hartree)
 !!  ==== if dtset%vdw_xc == 5 or 6 or 7
 !!   | e_vdw_dftd=Dispersion energy from DFT-D Van der Waals correction (hartree)
-!!   | grvdw(3,ngrvdw)=gradients of energy due to Van der Waals DFT-D2 dispersion (hartree)
+!!  grchempottn(3,natom)=grads of spatially-varying chemical energy (hartree)
 !!  grewtn(3,natom)=grads of Ewald energy (hartree)
+!!  grvdw(3,ngrvdw)=gradients of energy due to Van der Waals DFT-D2 dispersion (hartree)
 !!  kxc(nfft,nkxc)=exchange-correlation kernel, will be computed if nkxc/=0 .
 !!                 see routine rhohxc for a more complete description
 !!  strsxc(6)=xc contribution to stress tensor (hartree/bohr^3)
@@ -120,7 +121,7 @@
 
 #include "abi_common.h"
 
-subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grewtn,grvdw,gsqcut,&
+subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gsqcut,&
 &  istep,kxc,mgfft,moved_atm_inside,moved_rhor,mpi_enreg,&
 &  nattyp,nfft,ngfft,ngrvdw,nhat,nhatgr,nhatgrdim,nkxc,ntypat,n1xccc,n3xccc,&
 &  optene,pawrad,pawtab,ph1d,psps,rhog,rhor,rmet,rprimd,strsxc,&
@@ -192,6 +193,7 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grewtn,grvdw,gsqcut,&
  real(dp),intent(out),optional :: vxctau(nfft,dtset%nspden,4*dtset%usekden)
  real(dp),intent(inout) :: xccc3d(n3xccc)
  real(dp),intent(in) :: xred(3,dtset%natom)
+ real(dp),intent(out) :: grchempottn(3,dtset%natom)
  real(dp),intent(out) :: grewtn(3,dtset%natom),grvdw(3,ngrvdw),kxc(nfft,nkxc),strsxc(6)
  type(pawtab_type),intent(in) :: pawtab(ntypat*dtset%usepaw)
  type(pawrad_type),intent(in) :: pawrad(ntypat*dtset%usepaw)
@@ -201,7 +203,7 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grewtn,grvdw,gsqcut,&
  integer :: coredens_method,mpi_comm_sphgrid,nk3xc
  integer :: iatom,ifft,ipositron,ispden,nfftot
  integer :: optatm,optdyfr,opteltfr,optgr,option,optn,optn2,optstr,optv,vloc_method
- real(dp) :: doti,e_xcdc_vxctau,ebb,ebn,evxc,ucvol_local,rpnrm
+ real(dp) :: doti,e_chempot,e_xcdc_vxctau,ebb,ebn,evxc,ucvol_local,rpnrm
  logical :: add_tfw_,is_hybrid_ncpp,with_vxctau,wvlbigdft
  real(dp), allocatable :: xcart(:,:)
  character(len=500) :: message
@@ -244,8 +246,8 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grewtn,grvdw,gsqcut,&
 !Test addition of Weiszacker gradient correction to Thomas-Fermi kin energy
  add_tfw_=.false.;if (present(add_tfw)) add_tfw_=add_tfw
 
-!Get Ewald energy and Ewald forces
-!--------------------------------------------------------------
+!Get Ewald energy and Ewald forces, as well as vdW-DFTD energy and forces, and chemical potential energy and forces.
+!-------------------------------------------------------------------------------------------------------------------
  call timab(5,1,tsec)
  if (ipositron/=1) then
    if (dtset%icoulomb == 0 .or. (dtset%usewvl == 0 .and. dtset%icoulomb == 2)) then
@@ -268,6 +270,9 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grewtn,grvdw,gsqcut,&
      call ionion_surface(dtset, energies%e_ewald, grewtn, mpi_enreg%me_wvl, mpi_enreg%nproc_wvl, rprimd, &
 &     wvl%descr, wvl%den, xred)
    end if
+   if (dtset%nzchempot>0) then
+     call spatialchempot(energies%e_chempot,dtset%chempot,grchempottn,dtset%natom,ntypat,dtset%nzchempot,dtset%typat,xred)
+   endif
    if (dtset%vdw_xc==5.and.ngrvdw==dtset%natom) then
      call vdw_dftd2(energies%e_vdw_dftd,dtset%ixc,dtset%natom,ntypat,1,dtset%typat,rprimd,&
 &     dtset%vdw_tol,xred,psps%znucltypat,fred_vdw_dftd2=grvdw)
@@ -279,6 +284,8 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grewtn,grvdw,gsqcut,&
    end if
  else
    energies%e_ewald=zero
+   energies%e_chempot=zero
+   grchempottn=zero
    grewtn=zero
    energies%e_vdw_dftd=zero
    if (ngrvdw>0) grvdw=zero

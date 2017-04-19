@@ -725,7 +725,7 @@ subroutine effective_potential_generateDipDip(eff_pot,n_cell,option,asr,comm)
 
 !0 Check the size of the cell
  do ia=1,3
-   if(n_cell(ia)<0.or.n_cell(ia)>20)then
+   if(n_cell(ia)<0.or.n_cell(ia)>50)then
      write(message, '(a,i0,a,i0,a,a,a,i0,a)' )&
 &     'n_cell(',ia,') is ',n_cell(ia),', which is lower than 0 of superior than 20.',&
 &     ch10,'Action: correct n_cell(',ia,').'
@@ -1238,7 +1238,7 @@ subroutine effective_potential_effpot2dynmat(dynmat,delta,eff_pot,natom,n_cell,o
  end if
 
  do ii=1,3
-   if(n_cell(ii)<0.or.n_cell(ii)>20)then
+   if(n_cell(ii)<0.or.n_cell(ii)>50)then
      write(msg, '(a,i0,a,i0,a,a,a,i0,a)' )&
 &     'n_cell(',ii,') is ',n_cell(ii),', which is lower than 0 of superior than 20.',&
 &     ch10,'Action: correct n_cell(',ii,').'
@@ -1904,6 +1904,10 @@ subroutine effective_potential_printSupercell(eff_pot,supercell)
     call wrtout(std_out,message,'COLL')
   end do
 
+  write (message, '(a)') ''
+  call wrtout(ab_out,message,'COLL')
+  call wrtout(std_out,message,'COLL')
+
 ! Deallocation array
   ABI_DEALLOCATE(xred)
 
@@ -1949,6 +1953,7 @@ subroutine effective_potential_writeXML(eff_pot,option,filename)
  use defs_basis
  use m_errors
  use m_profiling_abi
+ use m_fstrings,   only : replace
  use m_multibinit_dataset, only : multibinit_dataset_type
 
 !This section has been created automatically by the script Abilint (TD).
@@ -1994,7 +1999,8 @@ subroutine effective_potential_writeXML(eff_pot,option,filename)
 !  convert natom in character
    write (natom,'(I9)') eff_pot%crystal%natom
    if(present(filename)) then
-     namefile=trim(filename)
+     namefile=replace(trim(filename),".out","")
+     namefile=trim(namefile)//"_sys.xml"
    else
      namefile='system.xml'
    end if
@@ -2208,7 +2214,12 @@ subroutine effective_potential_writeXML(eff_pot,option,filename)
 
 !Print only the coefficients into XML file
  if (option==  -1 .or. option == 2) then
-   namefile='coefficients.xml'
+   if(present(filename)) then
+     namefile=replace(trim(filename),".out","")
+     namefile=trim(namefile)//"_coeffs.xml"
+   else
+     namefile='coeffs.xml'
+   end if
    if(eff_pot%anharmonics_terms%ncoeff > 0) then
      call polynomial_coeff_writeXML(eff_pot%anharmonics_terms%coefficients,&
 &                                 eff_pot%anharmonics_terms%ncoeff,namefile)
@@ -2661,7 +2672,6 @@ subroutine effective_potential_getForces(eff_pot,fcart,fred,natom,rprimd,xcart,d
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'effective_potential_getForces'
- use interfaces_41_geometry
 !End of the abilint section
 
   implicit none
@@ -2678,7 +2688,7 @@ subroutine effective_potential_getForces(eff_pot,fcart,fred,natom,rprimd,xcart,d
 !scalar
   integer,parameter :: master=0
   integer :: ii
-  real(dp):: dummy
+!  real(dp):: dummy
   character(500) :: msg
 !array
   integer :: cell_number(3)
@@ -2714,17 +2724,19 @@ subroutine effective_potential_getForces(eff_pot,fcart,fred,natom,rprimd,xcart,d
       disp_tmp1(:,ii) = xcart(:,ii) - eff_pot%supercell%xcart_supercell(:,ii)
     end do
   end if
-
+!AM
+!Need to be update...
+!AM
 ! ifc contribution of the forces
-  call ifc_contribution(eff_pot,disp_tmp1,dummy,fcart,eff_pot%my_cells,&
-&                       eff_pot%my_ncell,eff_pot%my_index_cells,eff_pot%comm_supercell)
+!  call ifc_contribution(eff_pot,disp_tmp1,dummy,fcart,eff_pot%my_cells,&
+!&                       eff_pot%my_ncell,eff_pot%my_index_cells,eff_pot%comm_supercell)
 
 ! Redistribute the residuale of the forces
-  call effective_potential_distributeResidualForces(eff_pot,fcart,eff_pot%supercell%natom_supercell)
+!  call effective_potential_distributeResidualForces(eff_pot,fcart,eff_pot%supercell%natom_supercell)
 
 ! convert forces into reduced coordinates and multiply by -1
-  fcart = -1 * fcart
-  call fcart2fred(fcart,fred,rprimd,natom)
+!  fcart = -1 * fcart
+!  call fcart2fred(fcart,fred,rprimd,natom)
 
 end subroutine effective_potential_getForces
 !!***
@@ -2756,7 +2768,7 @@ end subroutine effective_potential_getForces
 !! SOURCE
 
 subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,rprimd,&
-&                                       xred,displacement,strain_in,external_stress)
+&                                       xred,displacement,strain_in)
 
   use m_strain
 
@@ -2782,7 +2794,6 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
   real(dp),intent(out) :: strten(6)
   real(dp),intent(in),optional :: strain_in(6)
   real(dp),intent(in),optional :: displacement(3,eff_pot%supercell%natom_supercell)
-  real(dp),intent(in),optional :: external_stress(6)
 
 !Local variables-------------------------------
 !scalar
@@ -2828,14 +2839,13 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
     end if
   end if
   do ii=1,3
-    if(eff_pot%supercell%qphon(ii)<0.or.eff_pot%supercell%qphon(ii)>20)then
+    if(eff_pot%supercell%qphon(ii)<0.or.eff_pot%supercell%qphon(ii)>50)then
       write(message, '(a,i0,a,i2,a,a,a,i0,a)' )&
-&     'eff_pot%supercell%qphon(',ii,') is ',eff_pot%supercell%qphon(ii),&
+&     'eff_pot%supercell%qphon(',ii,') is ',int(eff_pot%supercell%qphon(ii)),&
 &     ', which is lower than 0 of superior than 10.',ch10,'Action: correct n_cell(',ii,').'
       MSG_ERROR(message)
     end if
   end do
-
 
   write(message, '(a,a,a)' ) ch10,' enter get_energy : Calculation of the energy'
   call wrtout(std_out,message,'COLL')
@@ -2904,7 +2914,7 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
   strten(:)      = zero
 
 
-  write(message, '(2a,80a,2a)' ) ch10,('-',mu=1,80),&
+  write(message, '(80a,2a)' ) ('-',mu=1,80),&
 &     ch10,' Components of total energy (in Hartree) :'
   call wrtout(ab_out,message,'COLL')
   call wrtout(std_out,message,'COLL')
@@ -3609,7 +3619,7 @@ subroutine coefficients_contribution(eff_pot,disp,energy,fcart,natom,ncoeff,stra
   do icell = 1,ncell
     ii = (cells(icell)-1)*eff_pot%crystal%natom
     i1=index_cells(icell,1); i2=index_cells(icell,2); i3=index_cells(icell,3)
-!   Loop over coefficient
+!   Loop over coefficients
     do icoeff=1,ncoeff
 !     Set the value of the coefficient
       coeff = eff_pot%anharmonics_terms%coefficients(icoeff)%coefficient
@@ -3634,12 +3644,19 @@ subroutine coefficients_contribution(eff_pot,disp,energy,fcart,natom,ncoeff,stra
 !         Strain case idir => -6, -5, -4, -3, -2 or -1
           if (idir1 < zero)then
 
-!           Accumulate energy fo each displacement (\sum ((A_x-O_x)^Y(A_y-O_c)^Z))
-            tmp1 = tmp1 * (strain(abs(idir1)))**power
-           
-!           Accumulate stress for each strain (\sum (Y(eta_2)^Y-1(eta_2)^Z+...))
-            tmp3 = tmp3 *  power*(strain(abs(idir1)))**(power-1)
-
+            if(abs(strain(abs(idir1))) > tol10)then
+!             Accumulate energy fo each displacement (\sum ((A_x-O_x)^Y(A_y-O_c)^Z))
+              tmp1 = tmp1 * (strain(abs(idir1)))**power           
+              if(power > 1) then
+!             Accumulate stress for each strain (\sum (Y(eta_2)^Y-1(eta_2)^Z+...))
+                tmp3 = tmp3 *  power*(strain(abs(idir1)))**(power-1)
+              end if
+            else
+              tmp1 = zero
+              if(power > 1) then
+                tmp3 = zero
+              end if
+            end if
           else
 !           Displacement case idir = 1, 2  or 3
 !           indexes of the cell of the atom a
@@ -3686,11 +3703,19 @@ subroutine coefficients_contribution(eff_pot,disp,energy,fcart,natom,ncoeff,stra
             disp1 = disp(idir1,ia1)
             disp2 = disp(idir1,ib1)
 
+            if(abs(disp1) > tol10 .or. abs(disp2)> tol10)then
 !           Accumulate energy fo each displacement (\sum ((A_x-O_x)^Y(A_y-O_c)^Z))
-            tmp1 = tmp1 * (disp1-disp2)**power
-!           Accumulate forces for each displacement (\sum (Y(A_x-O_x)^Y-1(A_y-O_c)^Z+...))
-            tmp2 = tmp2 * power*(disp1-disp2)**(power-1)
-
+              tmp1 = tmp1 * (disp1-disp2)**power
+              if(power > 1) then
+!               Accumulate forces for each displacement (\sum (Y(A_x-O_x)^Y-1(A_y-O_c)^Z+...))
+                tmp2 = tmp2 * power*(disp1-disp2)**(power-1)
+              end if
+            else
+              tmp1 = zero
+              if(power > 1) then
+                tmp2 = zero
+              end if
+            end if
           end if
 
           do idisp2=1,eff_pot%anharmonics_terms%coefficients(icoeff)%terms(iterm)%ndisp
@@ -3774,7 +3799,6 @@ subroutine coefficients_contribution(eff_pot,disp,energy,fcart,natom,ncoeff,stra
       end do
     end do
   end do
-
 
 ! MPI_SUM
   call xmpi_sum(energy, comm, ierr)

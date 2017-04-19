@@ -48,11 +48,12 @@ program multibinit
  use m_profiling_abi
  use m_errors
  use m_effective_potential
+ use m_fit_polynomial_coeff
  use m_multibinit_dataset
  use m_effective_potential_file
  use m_abihist
  use m_io_tools,   only : get_unit, flush_unit,open_file
- use m_fstrings,   only : int2char4
+ use m_fstrings,   only : int2char4,replace
  use m_time ,      only : asctime
 
 !This section has been created automatically by the script Abilint (TD).
@@ -146,7 +147,7 @@ program multibinit
 &   action="write") /= 0) then
      MSG_ERROR(message)
    end if
-!   call open_file(unit=ab_out,file=tmpfilename,form='formatted',status='new')
+!  Call open_file(unit=ab_out,file=tmpfilename,form='formatted',status='new')
    rewind (unit=ab_out)
    call herald(codename,abinit_version,ab_out)
 !  Print the number of cpus in output
@@ -199,7 +200,7 @@ program multibinit
 !Read the harmonics parts
  call effective_potential_file_read(filnam(3),reference_effective_potential,inp,comm)
 !Read the coefficient from fit
- if(filnam(4)/=''.and.filnam(4)/='no')then
+ if(inp%ncoeff/=0.and.filnam(4)/=''.and.filnam(4)/='no')then
    call effective_potential_file_getType(filnam(4),filetype)
    if(filetype==3) then
      call effective_potential_file_read(filnam(4),reference_effective_potential,inp,comm)
@@ -227,30 +228,59 @@ program multibinit
 !If needed, fit the anharmonic part
 !****************************************************************************************
 !TEST_AM_SECTION
- if(.false.)then
-   if (iam_master.and.inp%ncoeff == 0.and.inp%fit_coeff==1) then
+ if (inp%fit_coeff/=0) then
+   if(iam_master) then
+!      Read the MD file
      write(message,'(a,(80a),7a)')ch10,('=',ii=1,80),ch10,ch10,&
-&     '-Reading the file ',trim(filnam(5)),ch10,&
-&     ' with NetCDF in order to fit the polynomial coefficients'
+&       '-Reading the file ',trim(filnam(5)),ch10,&
+&       ' with NetCDF in order to fit the polynomial coefficients'
      call wrtout(std_out,message,'COLL') 
      call wrtout(ab_out,message,'COLL') 
-     if(filnam(5)/=''.or.filnam(5)/='no')then
+     if(filnam(5)/=''.and.filnam(5)/='no')then
        call read_md_hist(filnam(5),hist,.FALSE.,.FALSE.)
      else
        write(message, '(3a)' )&
-&       'There is no MD file to fit the coefficients ',ch10,&
-&       'Action: add MD file'
+&         'There is no MD file to fit the coefficients ',ch10,&
+&         'Action: add MD file'
        MSG_ERROR(message)
      end if
    end if
-!MPI BROADCAST
+
+   option=inp%fit_coeff
+!  MPI BROADCAST the history of the MD
    call abihist_bcast(hist,master,comm)
 
-   
-!   call fit_polynomial_coeff_init
-!   call fit_polynomial_coeff_init(reference_effective_potential%,filnam,inp,comm)
-
+   select case(option)
+   case (-1)
+!      option == -1
+!      Print the file in the specific format for the script of carlos
+!      Born_Charges  
+!      Dielectric_Tensor
+!      harmonic.xml
+!      Reference_structure
+!      Strain_Tensor
+!      symmetry_operations (only cubic)
+     if (iam_master) then
+       if(hist%mxhist >0)then
+         call fit_polynomial_printSystemFiles(reference_effective_potential,hist)
+       else
+         write(message, '(3a)' )&
+&         'There is no step in the MD file ',ch10,&
+&         'Action: add MD file'
+         MSG_ERROR(message)
+       end if
+     end if
+   case (1)
+     if(iam_master)then
+       call fit_polynomial_coeff_get(inp%fit_cutoff,reference_effective_potential,1)
+     end if
+!      call polynomial_coeff_broacast(reference_effective_potential%anharmonics_terms%coefficients,&
+! &                                    master,comm)
+!      call fit_polynomial_coeff_init
+!      call fit_polynomial_coeff_init(reference_effective_potential%,filnam,inp,comm)
+   end select
  end if
+
 !END_TEST_AM_SECTION
 !****************************************************************************************
 
@@ -258,14 +288,14 @@ program multibinit
 !Print the effective potential system + coefficients (only master CPU)
  if(iam_master.and.(inp%prt_effpot<=-1.or.inp%prt_effpot>=3)) then
    select case(inp%prt_effpot)
-   case (-1)  
-     name = "system.xml"
+   case (-1) 
+     name = replace(trim(filnam(2)),".out","")
      call effective_potential_writeXML(reference_effective_potential,-1,filename=name)
    case(-2)
-     name = "system.nc"
+     name = trim(filnam(2))//"_sys.nc"
      call effective_potential_writeNETCDF(reference_effective_potential,1,filename=name)
    case (3)  
-     name = "system.xml"
+     name = replace(trim(filnam(2)),".out","")
      call effective_potential_writeXML(reference_effective_potential,1,filename=name)
    end select
  end if

@@ -113,7 +113,7 @@ subroutine opernl4a(choice,dgxdis,dgxds,d2gxdis,d2gxds2,dgxdt,&
  integer,intent(in) :: indlmn(6,lmnmax,ntypat),jproj(nlang),kg_k(3,npw)
  integer,intent(in) :: nloalg(3)
  real(dp),intent(in) :: ffnl(npw,nffnl,lmnmax,ntypat),gmet(3,3),kpg_k(npw,nkpg)
- real(dp),intent(in) :: kpt(3),ph3d(2,npw,matblk),vect(2,npw)
+ real(dp),intent(in) :: kpt(3),ph3d(2,npw,matblk),vect(:,:)
  real(dp),intent(out) :: d2gxdis(2,mlang5,mincat,mproj)
  real(dp),intent(out) :: d2gxds2(2,mlang6,mincat,mproj)
  real(dp),intent(out) :: dgxdis(2,mlang1,mincat,mproj)

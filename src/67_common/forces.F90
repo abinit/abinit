@@ -38,6 +38,7 @@
 !!   | typat(natom)=type integer for each atom in cell
 !!   | wtatcon(3,natom,nconeq)=weights for atomic constraints
 !!  fock <type(fock_type)>= quantities to calculate Fock exact exchange
+!!  grchempottn(3,natom)=d(E_chemical potential)/d(xred) (hartree)
 !!  grewtn(3,natom)=d(Ewald)/d(xred) (hartree)
 !!  grnl(3*natom)=gradients of Etot due to nonlocal contributions
 !!  grvdw(3,ngrvdw)=gradients of energy due to Van der Waals DFT-D dispersion (hartree)
@@ -116,7 +117,8 @@
 
 #include "abi_common.h"
 
-subroutine forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,forold,fred,gresid,grewtn,&
+subroutine forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,&
+&                  forold,fred,grchempottn,gresid,grewtn,&
 &                  grhf,grnl,grvdw,grxc,gsqcut,indsym,&
 &                  maxfor,mgfft,mpi_enreg,n1xccc,n3xccc,&
 &                  nattyp,nfft,ngfft,ngrvdw,ntypat,&
@@ -167,7 +169,7 @@ subroutine forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,forold,fred,gres
 !arrays
  integer,intent(in) :: atindx1(dtset%natom),indsym(4,dtset%nsym,dtset%natom)
  integer,intent(in) :: nattyp(ntypat),ngfft(18),symrec(3,3,dtset%nsym)
- real(dp),intent(in) :: grewtn(3,dtset%natom),grvdw(3,ngrvdw),grnl(3*dtset%natom)
+ real(dp),intent(in) :: grchempottn(3,dtset%natom),grewtn(3,dtset%natom),grvdw(3,ngrvdw),grnl(3*dtset%natom)
  real(dp),intent(in) :: ph1d(2,3*(2*mgfft+1)*dtset%natom)
  real(dp),intent(in) :: rhog(2,nfft),rhor(nfft,dtset%nspden),rprimd(3,3)
  real(dp),intent(in) :: vxc(nfft,dtset%nspden)
@@ -452,7 +454,8 @@ subroutine forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,forold,fred,gres
 !Collect grads of etot wrt reduced coordinates
 !This gives non-symmetrized Hellman-Feynman reduced gradients
  ABI_ALLOCATE(grtn,(3,dtset%natom))
- grtn(:,:)=grl(:,:)+grewtn(:,:)+synlgr(:,:)+grxc(:,:)
+ grtn(:,:)=grl(:,:)+grchempottn(:,:)+grewtn(:,:)+synlgr(:,:)+grxc(:,:)
+! grtn(:,:)=grl(:,:)+grewtn(:,:)+synlgr(:,:)+grxc(:,:)
 
  if (usefock==1 .and. associated(fock).and.fock%optfor) then
    grtn(:,:)=grtn(:,:)+fock%forces(:,:)
@@ -488,7 +491,8 @@ subroutine forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,forold,fred,gres
    end if
  end if
  if (abs(ipositron)==1) then
-   grtn(:,:)=grtn(:,:)-grxc(:,:)-grewtn(:,:)-gresid(:,:)-two*grl(:,:)
+   grtn(:,:)=grtn(:,:)-grxc(:,:)-grchempottn(:,:)-grewtn(:,:)-gresid(:,:)-two*grl(:,:)
+!  grtn(:,:)=grtn(:,:)-grxc(:,:)-grewtn(:,:)-gresid(:,:)-two*grl(:,:)
    grl(:,:)=-grl(:,:);grxc(:,:)=zero;gresid(:,:)=zero
    if (ngrvdw==dtset%natom) grtn(:,:)=grtn(:,:)-grvdw(:,:)
    if ( dtset%berryopt== 4 .or. dtset%berryopt== 6 .or. dtset%berryopt== 7 .or. &
@@ -512,7 +516,7 @@ subroutine forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,forold,fred,gres
 ! notice that fred2fcart multiplies fred by -1 to convert it 
 ! from a gradient (input) to a force (output)
 
- call fred2fcart(favg,(dtset%jellslab==0),fcart,fred,gprimd,dtset%natom)
+ call fred2fcart(favg,(dtset%jellslab==0 .and. dtset%nzchempot==0),fcart,fred,gprimd,dtset%natom)
 
 !Compute maximal force and maximal difference
  maxfor=zero;diffor=zero

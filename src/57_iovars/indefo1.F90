@@ -114,7 +114,6 @@ subroutine indefo1(dtset)
  dtset%mkqmem=-1
  dtset%mk1mem=-1
 !N
- dtset%nnos=0
  dtset%natpawu=0
  dtset%natsph=0
  dtset%natsph_extra=0
@@ -124,6 +123,7 @@ subroutine indefo1(dtset)
  dtset%nkpt=-1
  dtset%nkptgw=0
  dtset%nkpthf=0
+ dtset%nnos=0
  dtset%npband=1
  dtset%npfft=1
  dtset%nphf=1
@@ -132,6 +132,7 @@ subroutine indefo1(dtset)
  dtset%nppert=1
  dtset%npspalch=0
  dtset%npspinor=1
+ dtset%np_slk=1000000
  dtset%nqptdm=0
  dtset%nspden=1
  dtset%nspinor=1
@@ -141,7 +142,7 @@ subroutine indefo1(dtset)
  dtset%ntypalch=0
  dtset%ntyppure=-1
  dtset%nucdipmom(:,:)=zero
- dtset%np_slk=1000000
+ dtset%nzchempot=0
 !O
  dtset%optdriver=0
 !P

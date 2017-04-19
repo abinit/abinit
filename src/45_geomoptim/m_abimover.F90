@@ -322,7 +322,7 @@ type, public :: ab_xfh_type
    ! mxfh = last dimension of the xfhist array
    ! nxfh = actual number of (x,f) history pairs, see xfhist array
 
- real(dp),pointer :: xfhist(:,:,:,:)
+ real(dp),allocatable :: xfhist(:,:,:,:)
    ! xfhist(3,natom+4,2,mxfh) = (x,f) history array, also including rprim and stress
 
 end type ab_xfh_type
@@ -834,9 +834,34 @@ character(len=fnlen), target, intent(in) :: filnam_ds(:)   ! dtfil%filnam_ds(5)
    specs%crit4xml='tolmxf'
 !  Name of specs%method
    specs%method = 'Using LOTF Molecular dynamics'
-!  This is the initialization for ionmov==31
+!  This is the initialization for ionmov==24
 !  -------------------------------------------
- case (31)
+ case (24)
+   specs%ncycle=1
+!  TEMPORARLY optcell is not allow
+   specs%isARused=.FALSE.
+   specs%isVused=.TRUE.  ! Velocities are used
+!  Values use in XML Output
+   specs%isFconv=.FALSE.      ! Convergence is not used for MD
+   specs%type4xml='velver'
+   specs%crit4xml='none'
+!  Name of specs%method
+   specs%method = 'Symplectic velocity verlet Molecular dynamics'
+!  This is the initialization for ionmov==25
+!  -------------------------------------------
+ case (25)                ! Hybrid Monte Carlo algorithm (fixed lattice vectors)
+   specs%ncycle = 12      ! Number of internal cycles (10+2)
+   specs%isFconv=.FALSE.  ! Convergence is not used for Monte Carlo
+   specs%isVused=.TRUE.   ! Velocities are used for update of atomic positions
+!  optcell is not allowed
+   specs%isARused=.FALSE.
+!  Values use in XML Output
+   specs%type4xml='hmc'
+   specs%crit4xml='none'
+!  Name of specs%method
+   specs%method = 'Hybrid Monte Carlo'
+
+case (31)
    specs%ncycle=1 ! Number of internal cycles for first itime
    specs%isFconv=.FALSE.     ! Convergence is not used for MD
    specs%isVused=.FALSE. ! Velocities are used
@@ -848,7 +873,8 @@ character(len=fnlen), target, intent(in) :: filnam_ds(:)   ! dtfil%filnam_ds(5)
 !  Name of specs%method
    write(specs%method,'(a,1p,e12.5,a)')&
      'Monte carlo'
- case default
+
+case default
    write(msg,"(a,i0)")"Wrong value for ionmov: ",ab_mover%ionmov
  end select
 end subroutine abimover_ini
