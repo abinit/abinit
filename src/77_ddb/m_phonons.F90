@@ -560,9 +560,10 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,dos_qsh
  integer,parameter :: brav1=1,chksymbreak0=0,bcorr0=0,qptopt1=1,master=0
  integer :: facbrv,iat,jat,idir,imesh,imode,io,iq_ibz,itype,nkpt_fullbz
  integer :: nmesh,nqbz,nqpt_max,nqshft,option,timrev,ierr,natom,nomega
- integer :: jdir, idispl, jdispl, isym
+ integer :: jdir, isym
  integer :: nprocs, my_rank
  real(dp) :: nsmallq
+ real(dp) :: acc
  real(dp) :: dum,gaussfactor,gaussprefactor,gaussval,low_bound,max_occ,pnorm
  real(dp) :: upr_bound,xx,gaussmaxarg
  real(dp) :: max_smallq = 0.0625_dp
@@ -799,17 +800,13 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,dos_qsh
                    PHdos%pjdos(io,idir,iat)=PHdos%pjdos(io,idir,iat)+ pnorm*wtqibz(iq_ibz)*gaussval
 
                    ! accumulate outer product of displacement vectors
-                   idispl = (imode-1)*3*natom + (iat-1)*3 + idir
                    do jdir=1,3
-                     jdispl = (imode-1)*3*natom + (iat-1)*3 + jdir
                      ! NB: only accumulate real part. I think the full sum over the BZ should guarantee Im=0
                      ! this sum only does irreducible points: the matrix is symmetrized below
                      ! msqd_atom_tmp has units of bohr^2 / Ha as gaussval ~ 1/smear ~ 1/Ha
-                     msqd_atom_tmp(jdir,idir) = msqd_atom_tmp(jdir,idir) &
-&                       + (displ(2*(idispl-1)+1)* displ(2*(jdispl-1)+1) &
-&                       -  displ(2*(idispl-1)+2)* displ(2*(jdispl-1)+2) &
-&                       +  displ(2*(idispl-1)+2)* displ(2*(jdispl-1)+1) &
-&                       -  displ(2*(idispl-1)+1)* displ(2*(jdispl-1)+2)) * wtqibz(iq_ibz) * gaussval
+                     msqd_atom_tmp(jdir,idir) = msqd_atom_tmp(jdir,idir) + ( &
+&                          eigvec(1,idir,iat,imode)* eigvec(1,jdir,iat,imode) &
+&                       +  eigvec(2,idir,iat,imode)* eigvec(2,jdir,iat,imode) ) * wtqibz(iq_ibz) * gaussval
                    end do ! jdir
                  end do ! idir
                  ! msqd_atom_tmp is in cartesian coordinates
@@ -817,9 +814,11 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,dos_qsh
 ! Symmetrize matrices to get full sum of tensor over all BZ, not just IBZ.
 !   the atom is not necessarily invariant under symops, so these contributions should be added to each iat separately
 !   normalization by nsym is done at the end outside the iqpt loop and after the tetrahedron clause
+!  NB: looks consistent with the sym in harmonic thermo, just used in opposite
+!  direction for symops: symrel here instead of symrec and the inverse of
+!  indsym in harmonic_thermo
                  do isym=1, Crystal%nsym
                    jat = Crystal%indsym(4,isym,iat)
-!  TODO:  need to check the direction of the symcart vs transpose or inverse, given that jat is the pre-image of iat...
                    PHdos%msqd_dos_atom(io,:,:,jat) = PHdos%msqd_dos_atom(io,:,:,jat) &
 &                    + matmul( (symcart(:,:,isym)), matmul(msqd_atom_tmp, transpose(symcart(:,:,isym))) )
                  end do
@@ -911,6 +910,7 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,dos_qsh
 
      do io=1,PHdos%nomega
        do iq_ibz=1,PHdos%nqibz
+         acc = zero
          PHdos%phdos(io)=PHdos%phdos(io)+dtweightde(iq_ibz,io)
          PHdos%phdos_int(io)=PHdos%phdos_int(io)+tweight(iq_ibz,io)
          do iat=1,natom
@@ -923,14 +923,17 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,dos_qsh
              ! accumulate outer product of displacement vectors
              do jdir=1,3
                ! NB: only accumulate real part. I think the full sum over the BZ should guarantee Im=0
+               acc = acc + abs(full_eigvec(2,idir,iat,imode,iq_ibz)*full_eigvec(1,jdir,iat,imode,iq_ibz) &
+&                           +  full_eigvec(1,idir,iat,imode,iq_ibz)*full_eigvec(2,jdir,iat,imode,iq_ibz))
+
                msqd_atom_tmp(jdir,idir) = msqd_atom_tmp(jdir,idir) &
 &                + (full_eigvec(1,idir,iat,imode,iq_ibz)* full_eigvec(1,jdir,iat,imode,iq_ibz) &
-&                -  full_eigvec(2,idir,iat,imode,iq_ibz)* full_eigvec(2,jdir,iat,imode,iq_ibz) &
-&                +  full_eigvec(2,idir,iat,imode,iq_ibz)* full_eigvec(1,jdir,iat,imode,iq_ibz) &
-&                -  full_eigvec(1,idir,iat,imode,iq_ibz)* full_eigvec(2,jdir,iat,imode,iq_ibz)) &
-&                * dtweightde(iq_ibz,io)
-             end do
-           end do
+&                +  full_eigvec(2,idir,iat,imode,iq_ibz)* full_eigvec(2,jdir,iat,imode,iq_ibz) &
+!&                -  full_eigvec(2,idir,iat,imode,iq_ibz)* full_eigvec(1,jdir,iat,imode,iq_ibz) &
+!&                -  full_eigvec(1,idir,iat,imode,iq_ibz)* full_eigvec(2,jdir,iat,imode,iq_ibz)&
+&                ) * dtweightde(iq_ibz,io)
+             end do ! jdir
+           end do ! idir
 
 ! Symmetrize matrices to get full sum of tensor over all BZ, not just IBZ.
 !   the atom is not necessarily invariant under symops, so these contributions should be added to each iat separately
@@ -940,10 +943,10 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,dos_qsh
 !   from loops above only the eigvec are kept and not the displ, so we still have to divide by the masses
 !  TODO:  need to check the direction of the symcart vs transpose or inverse, given that jat is the pre-image of iat...
              PHdos%msqd_dos_atom(io,:,:,jat) = PHdos%msqd_dos_atom(io,:,:,jat) + &
-&                matmul( (symcart(:,:,isym)), matmul(msqd_atom_tmp, transpose(symcart(:,:,isym))) ) * invmass(iat)
-           end do
-         end do ! isym
-       end do ! iat
+&                matmul( (symcart(:,:,isym)), matmul(msqd_atom_tmp, transpose(symcart(:,:,isym))) )
+           end do ! isym
+         end do ! iat
+       end do ! iq
      end do  ! io
    end do ! imode
    ABI_FREE(tmp_phfrq)
@@ -953,6 +956,11 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,dos_qsh
 
 ! normalize by nsym : symmetrization is used in all prtdos cases
  PHdos%msqd_dos_atom = PHdos%msqd_dos_atom / Crystal%nsym
+
+! normalize by mass and factor of 2
+ do iat=1, natom
+   PHdos%msqd_dos_atom(:,:,:,iat) = PHdos%msqd_dos_atom(:,:,:,iat) * invmass(iat) * half
+ end do ! iat
 
  ! =======================
  ! === calculate IPDOS ===
