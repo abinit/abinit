@@ -876,6 +876,9 @@ subroutine ebands_free(ebands)
  if (allocated(ebands%eig)) then
    ABI_FREE(ebands%eig)
  end if
+ if (allocated(ebands%lifetime)) then
+   ABI_FREE(ebands%lifetime)
+ end if
  if (allocated(ebands%occ)) then
    ABI_FREE(ebands%occ)
  end if
@@ -976,6 +979,10 @@ subroutine ebands_copy(ibands,obands)
  call alloc_copy(ibands%wtk   , obands%wtk   )
  call alloc_copy(ibands%shiftk_orig, obands%shiftk_orig)
  call alloc_copy(ibands%shiftk, obands%shiftk)
+
+ if(allocated(ibands%lifetime)) then
+   call alloc_copy(ibands%lifetime, obands%lifetime)  
+ end if
 
 end subroutine ebands_copy
 !!***

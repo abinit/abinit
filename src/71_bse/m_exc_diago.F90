@@ -42,6 +42,7 @@ MODULE m_exc_diago
  use m_crystal,         only : crystal_t
  use m_bz_mesh,         only : kmesh_t
  use m_ebands,          only : ebands_report_gap
+ use m_eprenorms,       only : eprenorms_t
  use m_wfd,             only : wfd_t
  use m_pawhr,           only : pawhur_t
  use m_pawtab,          only : pawtab_type
@@ -50,7 +51,8 @@ MODULE m_exc_diago
  use m_blas,            only : xdotc, xgemm
  use m_bse_io,          only : exc_fullh_from_blocks, offset_in_file, rrs_of_glob, ccs_of_glob, &
 &                              exc_read_bshdr, exc_skip_bshdr_mpio, exc_read_rblock_fio
-use m_exc_spectra,      only : build_spectra
+ use m_exc_spectra,     only : build_spectra
+ use m_fstrings,        only : int2char4
 
  implicit none
 
@@ -96,7 +98,7 @@ contains
 !! SOURCE
 
 subroutine exc_diago_driver(Wfd,Bsp,BS_files,KS_BSt,QP_BSt,Cryst,Kmesh,Psps,&
-&  Pawtab,Hur,Hdr_bse,drude_plsmf)
+&  Pawtab,Hur,Hdr_bse,drude_plsmf,Epren)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -118,6 +120,7 @@ subroutine exc_diago_driver(Wfd,Bsp,BS_files,KS_BSt,QP_BSt,Cryst,Kmesh,Psps,&
  type(kmesh_t),intent(in) :: Kmesh
  type(ebands_t),intent(in) :: KS_BSt,QP_BSt
  type(wfd_t),intent(inout) :: Wfd
+ type(eprenorms_t),intent(in) :: Epren
 !arrays
  type(pawtab_type),intent(in) :: Pawtab(Cryst%ntypat*Wfd%usepaw)
  type(pawhur_t),intent(in) :: Hur(Cryst%natom*Wfd%usepaw)
@@ -153,6 +156,9 @@ subroutine exc_diago_driver(Wfd,Bsp,BS_files,KS_BSt,QP_BSt,Cryst,Kmesh,Psps,&
    case (BSE_ALGO_DDIAGO)
      if (BSp%use_coupling==0) then
        call exc_diago_resonant(BSp,BS_files,Hdr_bse,prtvol,comm)
+       if(Bsp%do_ep_renorm) then
+         call exc_diago_resonant(BSp,BS_files,Hdr_bse,prtvol,comm,Epren=Epren,Kmesh=Kmesh,Cryst=Cryst,elph_lifetime=.TRUE.)
+       end if
      else
        if (Bsp%have_complex_ene) then 
          ! Solve Hv = ev with generic complex matrix. 
@@ -185,6 +191,12 @@ subroutine exc_diago_driver(Wfd,Bsp,BS_files,KS_BSt,QP_BSt,Cryst,Kmesh,Psps,&
  end if
 
  call build_spectra(BSp,BS_files,Cryst,Kmesh,KS_BSt,QP_BSt,Psps,Pawtab,Wfd,Hur,drude_plsmf,comm)
+
+ ! Electron-phonon renormalization !
+ if (BSp%algorithm == BSE_ALGO_DDIAGO .and. BSp%use_coupling == 0 .and. BSp%do_ep_renorm) then
+   call build_spectra(BSp,BS_files,Cryst,Kmesh,KS_BSt,QP_BSt,Psps,Pawtab,Wfd,Hur,drude_plsmf,comm,Epren=Epren)
+ end if
+
 
  DBG_EXIT("COLL")
 
@@ -223,7 +235,7 @@ end subroutine exc_diago_driver
 !!
 !! SOURCE
 
-subroutine exc_diago_resonant(Bsp,BS_files,Hdr_bse,prtvol,comm)
+subroutine exc_diago_resonant(Bsp,BS_files,Hdr_bse,prtvol,comm,Epren,Kmesh,Cryst,elph_lifetime)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -231,6 +243,7 @@ subroutine exc_diago_resonant(Bsp,BS_files,Hdr_bse,prtvol,comm)
 #undef ABI_FUNC
 #define ABI_FUNC 'exc_diago_resonant'
  use interfaces_14_hidewrite
+ use interfaces_56_recipspace
 !End of the abilint section
 
  implicit none
@@ -238,14 +251,18 @@ subroutine exc_diago_resonant(Bsp,BS_files,Hdr_bse,prtvol,comm)
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: comm,prtvol
+ logical,optional,intent(in) :: elph_lifetime
  type(excparam),intent(in) :: BSp
  type(excfiles),intent(in) :: BS_files
  type(Hdr_type),intent(in) :: Hdr_bse
+ type(eprenorms_t),optional,intent(in) :: Epren
+ type(kmesh_t),optional,intent(in) :: Kmesh
+ type(crystal_t),optional,intent(in) :: Cryst
 
 !Local variables ------------------------------
 !scalars
  integer,parameter :: master=0
- integer :: ii,it,mi,hreso_unt,eig_unt,exc_size,neh1,neh2
+ integer :: ii,it,mi,hreso_unt,eig_unt,exc_size,neh1,neh2,j
  integer :: nsppol,il,iu,mene_found,nstates
  integer :: nprocs,my_rank,fform,nene_printed,ierr
  real(dp) :: exc_gap,exc_maxene,abstol
@@ -266,6 +283,20 @@ subroutine exc_diago_resonant(Bsp,BS_files,Hdr_bse,prtvol,comm)
  type(matrix_scalapack)    :: Slk_mat,Slk_vec 
  type(processor_scalapack) :: Slk_processor
 #endif
+
+ logical :: found_kpt
+ integer :: ik, ic, iv, isppol, ireh, ep_ik, itemp
+ complex(dpc) :: en
+
+ real(dp) :: dksqmax
+ integer,allocatable :: bs2eph(:,:)
+ integer :: sppoldbl, timrev
+ logical :: do_ep_renorm, do_ep_lifetime
+ integer :: ntemp
+ character(len=4) :: ts
+ complex(dpc),allocatable :: exc_vl(:,:),exc_ene_c(:)
+ complex(dpc) :: ctemp
+!! complex(dpc),allocatable :: ovlp(:,:)
 
 !************************************************************************
 
@@ -324,6 +355,24 @@ subroutine exc_diago_resonant(Bsp,BS_files,Hdr_bse,prtvol,comm)
  ABI_STAT_MALLOC(exc_ene,(exc_size), ierr)
  ABI_CHECK(ierr==0, 'out of memory: excitonic eigenvalues')
 
+ ABI_STAT_MALLOC(exc_ene_c,(exc_size), ierr)
+ ABI_CHECK(ierr==0,'out of memory: excitonic complex eigenvalues')
+
+ do_ep_renorm = .FALSE.
+ ntemp = 1
+ do_ep_lifetime = .FALSE.
+ if(BSp%do_ep_renorm .and. present(Epren)) then
+   do_ep_renorm = .TRUE.
+   ntemp = Epren%ntemp
+   if(present(elph_lifetime)) then
+     do_ep_lifetime = elph_lifetime
+   end if
+ end if
+
+ if (do_ep_renorm) then
+   ABI_CHECK(nsppol == 1, "Nsppol == 2 not supported with elphon renormalizations")
+ end if
+
  SELECT CASE (use_scalapack)
  CASE (.FALSE.)
 
@@ -340,6 +389,8 @@ subroutine exc_diago_resonant(Bsp,BS_files,Hdr_bse,prtvol,comm)
    ABI_STAT_MALLOC(exc_mat,(exc_size,exc_size), ierr)
    ABI_CHECK(ierr==0, 'out of memory: excitonic hamiltonian')
 
+   ABI_STAT_MALLOC(exc_vl,(exc_size,exc_size),ierr)
+   ABI_CHECK(ierr==0,'out of memory for left eigenvectors !')
    !exc_mat = HUGE(zero)
    !
    ! Read data from file.
@@ -358,39 +409,155 @@ subroutine exc_diago_resonant(Bsp,BS_files,Hdr_bse,prtvol,comm)
 
    close(hreso_unt)
 
-   if (do_full_diago) then 
-     call wrtout(std_out," Full diagonalization with XHEEV... ","COLL")
-     call xheev("Vectors","Upper",exc_size,exc_mat,exc_ene)
-   else
-     call wrtout(std_out," Partial diagonalization with XHEEVX... ","COLL")
-     abstol=zero; il=1; iu=nstates
-     ABI_STAT_MALLOC(exc_vec,(exc_size,nstates), ierr)
-     ABI_CHECK(ierr==0, "out of memory in exc_vec")
-     call xheevx("Vectors","Index","Upper",exc_size,exc_mat,vl,vu,il,iu,abstol,mene_found,exc_ene,exc_vec,exc_size)
-     exc_mat(:,1:nstates) = exc_vec
-     ABI_FREE(exc_vec)
-   end if
-   !
-   ! ==============================================
-   ! === Now exc_mat contains the eigenvectors ====
-   ! ==============================================
-
-   ! * Write the final results.
-   call wrtout(std_out,' Writing eigenvalues and eigenvectors on file: '//TRIM(bseig_fname),"COLL")
-
-   if (open_file(bseig_fname,msg,newunit=eig_unt,form="unformatted",action="write") /= 0) then
-     MSG_ERROR(msg)
+ 
+   if (do_ep_renorm) then  
+     write(std_out,'(a)') "Mapping kpts from bse to eph"
+     sppoldbl = 1 !; if (any(Cryst%symafm == -1) .and. Epren%nsppol == 1) nsppoldbl=2
+     ABI_MALLOC(bs2eph, (Kmesh%nbz*sppoldbl, 6))
+     timrev = 1
+     call listkk(dksqmax, Cryst%gmet, bs2eph, Epren%kpts, Kmesh%bz, Epren%nkpt, Kmesh%nbz, Cryst%nsym, &
+&       sppoldbl, Cryst%symafm, Cryst%symrel, timrev, use_symrec=.False.)
    end if
 
-   write(eig_unt) exc_size, nstates
-   write(eig_unt) CMPLX(exc_ene(1:nstates),kind=dpc)
-   do mi=1,nstates
-     write(eig_unt) exc_mat(1:exc_size,mi)
+   do itemp = 1, ntemp
+
+     !TODO should find a way not to read again and again !
+     !  but without storing it twice !!!
+     !exc_mat = HUGE(zero)
+     !
+     ! Read data from file.
+     if (open_file(hreso_fname,msg,newunit=hreso_unt,form="unformatted",status="old",action="read") /= 0) then
+       MSG_ERROR(msg)
+     end if
+     !
+     ! Read the header and perform consistency checks.
+     call exc_read_bshdr(hreso_unt,Bsp,fform,ierr)
+     ABI_CHECK(ierr==0,"Fatal error, cannot continue")
+     !
+     ! Construct full resonant block using Hermiticity. 
+     diagonal_is_real = .not.Bsp%have_complex_ene
+     call exc_read_rblock_fio(hreso_unt,diagonal_is_real,nsppol,Bsp%nreh,exc_size,exc_mat,ierr)
+     ABI_CHECK(ierr==0,"Fatal error, cannot continue")
+
+     close(hreso_unt)
+
+     bseig_fname = BS_files%out_eig
+
+     if (do_ep_renorm) then
+       write(std_out,'(a,i4)') "Will perform elphon renormalization for itemp = ",itemp
+
+       call int2char4(itemp,ts)
+
+       bseig_fname = TRIM(BS_files%out_eig) // TRIM("_T") // ts
+
+       ! Should patch the diagonal of exc_mat
+
+       do isppol = 1, BSp%nsppol
+         do ireh = 1, BSp%nreh(isppol)
+           ic = BSp%Trans(ireh,isppol)%c
+           iv = BSp%Trans(ireh,isppol)%v
+           ik = BSp%Trans(ireh,isppol)%k ! In the full bz
+           en = BSp%Trans(ireh,isppol)%en
+
+           ep_ik = bs2eph(ik,1)
+           
+           !TODO support multiple spins !
+           if(ABS(en - (Epren%eigens(ic,ep_ik,isppol)-Epren%eigens(iv,ep_ik,isppol)+BSp%mbpt_sciss)) > tol3) then
+             MSG_ERROR("Eigen from the transition does not correspond to the EP file !")
+           end if
+           exc_mat(ireh,ireh) = exc_mat(ireh,ireh) + (Epren%renorms(1,ic,ik,isppol,itemp) - Epren%renorms(1,iv,ik,isppol,itemp))
+
+           ! Add lifetime
+           if(do_ep_lifetime) then
+             exc_mat(ireh,ireh) = exc_mat(ireh,ireh) - j_dpc*(Epren%lifetimes(1,ic,ik,isppol,itemp) &
+&                + Epren%lifetimes(1,iv,ik,isppol,itemp))
+           end if
+
+         end do
+       end do
+
+     end if
+
+     if (do_full_diago) then 
+       if(do_ep_renorm) then
+         call wrtout(std_out," Full diagonalization with XGEEV... ","COLL")
+         ABI_MALLOC(exc_vec,(exc_size,exc_size))
+         call xgeev('V','V',exc_size,exc_mat,exc_size,exc_ene_c,exc_vl,exc_size,exc_vec,exc_size)
+         exc_mat(:,1:nstates) = exc_vec
+         ABI_FREE(exc_vec)
+       else
+         call wrtout(std_out," Full diagonalization with XHEEV... ","COLL")
+         call xheev("Vectors","Upper",exc_size,exc_mat,exc_ene)
+         exc_ene_c(:) = exc_ene(:)
+       end if
+     else
+       call wrtout(std_out," Partial diagonalization with XHEEVX... ","COLL")
+       abstol=zero; il=1; iu=nstates
+       ABI_STAT_MALLOC(exc_vec,(exc_size,nstates),ierr)
+       ABI_CHECK(ierr==0,"out of memory in exc_vec")
+       call xheevx("Vectors","Index","Upper",exc_size,exc_mat,vl,vu,il,iu,abstol,mene_found,exc_ene,exc_vec,exc_size)
+       exc_mat(:,1:nstates) = exc_vec
+       exc_ene_c(:) = exc_ene(:)
+       ABI_FREE(exc_vec)
+     end if
+     !
+     ! ==============================================
+     ! === Now exc_mat contains the eigenvectors ====
+     ! ==============================================
+
+     ! * Write the final results.
+     call wrtout(std_out,' Writing eigenvalues and eigenvectors on file: '//TRIM(bseig_fname),"COLL")
+
+     if (open_file(bseig_fname,msg,newunit=eig_unt,form="unformatted",action="write") /= 0) then
+       MSG_ERROR(msg)
+     end if
+
+     !!! !DBYG
+     !!! !Compute overlap matrix
+     !!! ABI_MALLOC(ovlp,(exc_size,exc_size))
+     !!! do mi=1,nstates
+     !!!   do ireh=1,nstates
+     !!!     ovlp(mi,ireh) = xdotc(exc_size,exc_vl(:,mi),1,exc_mat(:,ireh),1)
+     !!!     if(mi==ireh) then
+     !!!       !if(ABS(ovlp(mi,ireh)) < 0.999) then
+     !!!       !  write(*,*) "it,itp = ",mi,ireh,"ovlp = ",ovlp(mi,ireh)
+     !!!       !end if
+     !!!     else
+     !!!       if(ABS(ovlp(mi,ireh)) > 0.001) then
+     !!!         write(*,*) "it,itp = ",mi,ireh,"ovlp = ",ovlp(mi,ireh)
+     !!!       end if
+     !!!     end if
+     !!!   end do
+     !!! end do
+     !!! !call xgemm("C","N",exc_size,nstates,nstates,cone,exc_vl,exc_size,exc_mat,exc_size,czero,ovlp,nstates)
+
+     !!! write(777,*) ovlp
+     !!! ABI_FREE(ovlp)
+     !!! !ENDDBYG
+
+     !% fform = 1002 ! FIXME
+     !% call hdr_io_int(fform,Hdr_bse,2,eig_unt)
+
+     write(eig_unt) do_ep_lifetime
+     write(eig_unt) exc_size, nstates
+     write(eig_unt) exc_ene_c(1:nstates)
+     do mi=1,nstates
+       write(eig_unt) exc_mat(1:exc_size,mi)
+       if(do_ep_lifetime) then
+         write(eig_unt) exc_vl(1:exc_size,mi)
+       end if
+     end do
+
+     close(eig_unt)
+
    end do
 
-   close(eig_unt)
-
    ABI_FREE(exc_mat)
+   ABI_FREE(exc_vl)
+
+   if (do_ep_renorm) then
+     ABI_FREE(bs2eph)
+   end if
 
  CASE (.TRUE.)
 
@@ -448,6 +615,8 @@ subroutine exc_diago_resonant(Bsp,BS_files,Hdr_bse,prtvol,comm)
      il=1; iu=nstates; abstol=zero !ABSTOL = PDLAMCH(comm,'U')
      call slk_pzheevx("Vectors","Index","Upper",Slk_mat,vl,vu,il,iu,abstol,Slk_vec,mene_found,exc_ene)
    end if
+ 
+   exc_ene_c(:) = exc_ene(:)
 
    call destruction_matrix_scalapack(Slk_mat)
 
@@ -459,7 +628,7 @@ subroutine exc_diago_resonant(Bsp,BS_files,Hdr_bse,prtvol,comm)
        MSG_ERROR(msg)
      end if
      write(eig_unt) exc_size, nstates
-     write(eig_unt) CMPLX(exc_ene(1:nstates),kind=dpc)
+     write(eig_unt) exc_ene_c(1:nstates)
      close(eig_unt)
    end if
 
@@ -494,18 +663,30 @@ subroutine exc_diago_resonant(Bsp,BS_files,Hdr_bse,prtvol,comm)
 
  END SELECT
 
+ ! Order the eigenvalues
+ do ii=nstates,2,-1
+   do j=1,ii-1
+     if (DBLE(exc_ene_c(j)) > DBLE(exc_ene_c(j+1))) then
+       ctemp = exc_ene_c(j)
+       exc_ene_c(j) = exc_ene_c(j+1)
+       exc_ene_c(j+1) = ctemp
+     end if
+   end do
+ end do
+ 
+
  write(msg,'(a,i4)')' Excitonic eigenvalues in eV up to n= ',nene_printed 
  call wrtout(std_out,msg,"PERS")
  call wrtout(ab_out,msg,"COLL")
 
  do it=0,(nene_printed-1)/8
-   write(msg,'(8f10.5)') ( exc_ene(ii)*Ha_eV, ii=1+it*8,MIN(it*8+8,nene_printed) )
+   write(msg,'(8f10.5)') ( DBLE(exc_ene_c(ii))*Ha_eV, ii=1+it*8,MIN(it*8+8,nene_printed) )
    call wrtout(std_out,msg,"PERS")
    call wrtout(ab_out,msg,"COLL")
  end do
-                                                                                   
- exc_gap    = MINVAL(exc_ene(1:nstates))
- exc_maxene = MAXVAL(exc_ene(1:nstates))
+
+ exc_gap    = MINVAL(DBLE(exc_ene_c(1:nstates)))
+ exc_maxene = MAXVAL(DBLE(exc_ene_c(1:nstates)))
 
  write(msg,'(a,2(a,f7.2,2a),a)')ch10,&                          
 &  " First excitonic eigenvalue= ",exc_gap*Ha_eV,   " [eV]",ch10,&
@@ -513,6 +694,7 @@ subroutine exc_diago_resonant(Bsp,BS_files,Hdr_bse,prtvol,comm)
  call wrtout(std_out,msg,"COLL",do_flush=.True.)
  call wrtout(ab_out,msg,"COLL",do_flush=.True.)
 
+ ABI_FREE(exc_ene_c)
  ABI_FREE(exc_ene)
 
 10 call xmpi_barrier(comm)
@@ -591,6 +773,7 @@ subroutine exc_print_eig(BSp,bseig_fname,gw_gap,exc_gap)
    MSG_ERROR(msg)
  end if
 
+ read(eig_unt) ! do_ep_lifetime
  read(eig_unt) hsize_read, nstates_read
 
  if (BSp%use_coupling==0) hsize_exp =   SUM(Bsp%nreh)
@@ -630,7 +813,7 @@ subroutine exc_print_eig(BSp,bseig_fname,gw_gap,exc_gap)
 
  do ii=1,nstates_read
    if (ABS(DBLE(exc_cene(ii))) < DBLE(exc_gap)) then
-     exc_gap = CMPLX(ABS(DBLE(exc_cene(ii))),AIMAG(exc_cene(ii)))
+     exc_gap = DCMPLX(ABS(DBLE(exc_cene(ii))),AIMAG(exc_cene(ii)))
    end if
  end do
 
@@ -746,6 +929,7 @@ subroutine exc_diago_coupling(Bsp,BS_files,Hdr_bse,prtvol,comm)
  integer :: nene_printed,ierr
  real(dp) :: exc_gap,exc_maxene,temp
  logical :: diago_is_real,do_full_diago
+ logical :: do_ep_lifetime
  character(len=500) :: msg
  character(len=fnlen) :: hreso_fname,hcoup_fname,bseig_fname
 !arrays
@@ -918,6 +1102,10 @@ subroutine exc_diago_coupling(Bsp,BS_files,Hdr_bse,prtvol,comm)
    MSG_ERROR(msg)
  end if
 
+!YG : new version with lifetime
+ do_ep_lifetime = .FALSE.
+ write(eig_unt) do_ep_lifetime
+
  write(eig_unt)exc_size,nstates
  write(eig_unt)CMPLX(exc_ene(1:nstates),kind=dpc)
  do mi=1,nstates
@@ -1028,6 +1216,7 @@ subroutine exc_diago_coupling_hegv(Bsp,BS_files,Hdr_bse,prtvol,comm)
  character(len=500) :: msg
  character(len=fnlen) :: reso_fname,coup_fname,bseig_fname
  logical :: use_scalapack,do_full_diago,diago_is_real
+ logical :: do_ep_lifetime
 !arrays
  real(dp),allocatable :: exc_ene(:) !,test_ene(:)
  complex(dpc),allocatable :: exc_ham(:,:),exc_rvect(:,:),fmat(:,:),ovlp(:,:)
@@ -1201,6 +1390,8 @@ write(666)exc_ham
      MSG_ERROR(msg)
    end if
 
+   do_ep_lifetime = .FALSE.
+   write(eig_unt) do_ep_lifetime
    write(eig_unt) exc_size, nstates
    write(eig_unt) CMPLX(exc_ene(1:nstates),kind=dpc)
    do mi=1,nstates

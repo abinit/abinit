@@ -695,6 +695,8 @@ integer function nctk_open_read(ncid, path, comm) result(ncerr)
  integer,intent(out) :: ncid
  integer,intent(in) :: comm
  character(len=*),intent(in) :: path
+!Local variables
+ integer :: nprocs
 
 !Local variables-------------------------------
  integer :: nprocs
