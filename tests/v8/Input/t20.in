@@ -10,8 +10,8 @@
   typat   1
   spinat  0.0 0.0 4.0
 
-  nsppol  1  # single wf
-  nspinor 2  # wf is spinorial
+  nsppol  1  # 1 => single wf 2=> separate wvf for spin up and spin dwn chanels
+  nspinor 2  # 1=> scalar wavefunctions 2 => spinor wavefunctions
   nspden  4  # conponents of density matrix
 
   so_psp  0
@@ -19,11 +19,11 @@
   acell   3*5.42
   xred    0.0  0.0  0.0
   nband   20
-  ecut    20.0
+  ecut    15.0
   tsmear  0.01
   occopt  3
 
-#Rather standard input for a bcc metal
+#Rather standard input for a bcc metal 
 # prtden    1
 # prtdos    1
 # prtdensph 1
@@ -33,7 +33,8 @@
           0.5 -0.5  0.5
           0.5  0.5 -0.5
 
-  ngkpt   2 2 2
+  kptopt  3
+  ngkpt   1 1 1
   nshiftk 1
   shiftk  0.5  0.5  0.5
 
@@ -62,12 +63,11 @@
 #%%   t20.out, tolnlines = 0, tolabs = 0, tolrel = 0, fld_options = -easy
 #%% psp_files = 26fe.pspnc
 #%% [paral_info]
-#%% max_nprocs = 4
+#%% max_nprocs = 1
 #%% [extra_info]
-#%% authors = S. Prokhorenko
+#%% authors = S. PROKHORENKO
 #%% keywords = DFPT
 #%% description = 
 #%%   Response of magnetic metal to external magnetic field.
 #%%   First, ground state wf is computed, then dfpt calculation.
 #%%<END TEST_INFO>
-
