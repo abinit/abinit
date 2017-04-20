@@ -1070,6 +1070,11 @@ subroutine pawxc(corexc,enxc,enxcdc,ixc,kxc,lm_size,lmselect,nhat,nkxc,nrad,nspd
              kxc(1:nrad,ipts,13+2*ii+ispden)=rhonow(1:nrad,ispden,ii)
            end do
          end do
+         if (nspden_updn==1) then
+           do ii=1,4
+             kxc(1:nrad,ipts,15+2*ii)=half*rhonow(1:nrad,1,ii)
+           end do  
+         end if
        end if
      end if
 

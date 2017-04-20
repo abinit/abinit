@@ -913,6 +913,11 @@ subroutine rhohxc(dtset,enxc,gsqcut,izero,kxc,mpi_enreg,nfft,ngfft, &
                kxc(ifft:ifft+npts-1,13+ispden+2*ii)=rhonow(ifft:ifft+npts-1,ispden,ii)
              end do
            end do
+           if (nspden_updn==1) then
+             do ii=1,4
+               kxc(ifft:ifft+npts-1,15+2*ii)=half*rhonow(ifft:ifft+npts-1,1,ii)
+             end do  
+           end if
          end if
        end if
 
