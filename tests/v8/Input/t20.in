@@ -1,6 +1,6 @@
-# Test for non-collinear dfpt response with bfield (rfmagn input variable)
+# Test for collinear dfpt response with bfield (rfmagn input variable)
 # bcc Fe, low ecut
-# note: currently in development, the results are not physical
+# note: currently in development, the results are not fully physical
 
 
   ndtset  2

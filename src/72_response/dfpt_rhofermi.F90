@@ -256,7 +256,7 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
  DBG_ENTER('COLL')
 
 !Check arguments validity
- if (ipert>natom.and.ipert/=natom+3.and.ipert/=natom+4) then
+ if (ipert>natom.and.ipert/=natom+3.and.ipert/=natom+4.and.ipert/=natom+5) then
    MSG_BUG('wrong ipert argument!')
  end if
  if (cplex/=1) then
@@ -466,6 +466,8 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
        if (ipert==natom+3) istr=idir
        if (ipert==natom+4) istr=idir+3
        ider=1;idir0=-istr
+     else if (ipert==natom+5) then !SPr deb rfmagn
+       ider=0;idir0=0
      end if
      dimffnl1=1+ider;if (ider==1.and.idir0==0) dimffnl1=dimffnl1+2*psps%useylm
      ABI_ALLOCATE(ffnl1,(npw1_k,dimffnl1,psps%lmnmax,dtset%ntypat))
