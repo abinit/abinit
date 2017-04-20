@@ -104,6 +104,9 @@ module m_phonons
   ! Gaussian broadening.
 
 ! Real pointers
+  real(dp),allocatable :: atom_mass(:)
+   ! atom_mass(natom)
+
   real(dp),allocatable :: omega(:)
    ! omega(nomega)
    ! Frequency grid.
@@ -454,6 +457,9 @@ subroutine phdos_free(PHdos)
 ! *************************************************************************
 
  !@phonon_dos_type
+ if (allocated(PHdos%atom_mass)) then
+   ABI_FREE(PHdos%atom_mass)
+ end if
  if (allocated(PHdos%omega)) then
    ABI_FREE(PHdos%omega)
  end if
@@ -563,7 +569,6 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,dos_qsh
  integer :: jdir, isym
  integer :: nprocs, my_rank
  real(dp) :: nsmallq
- real(dp) :: acc
  real(dp) :: dum,gaussfactor,gaussprefactor,gaussval,low_bound,max_occ,pnorm
  real(dp) :: upr_bound,xx,gaussmaxarg
  real(dp) :: max_smallq = 0.0625_dp
@@ -583,7 +588,7 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,dos_qsh
  real(dp) :: eigvec(2,3,Crystal%natom,3*Crystal%natom),phfrq(3*Crystal%natom)
  real(dp) :: qlatt(3,3),qphon(3),rlatt(3,3)
  real(dp) :: msqd_atom_tmp(3,3)
- real(dp) :: symcart(3,3,crystal%nsym),invmass(crystal%natom)
+ real(dp) :: symcart(3,3,crystal%nsym)
  real(dp),allocatable :: dtweightde(:,:),full_eigvec(:,:,:,:,:),full_phfrq(:,:),Prf3D(:,:,:)
  real(dp),allocatable :: kpt_fullbz(:,:),qbz(:,:),qibz(:,:),qshft(:,:),tmp_phfrq(:),tweight(:,:)
  real(dp),allocatable :: qibz2(:,:),qshft2(:,:),wtq(:),wtq_folded(:),wtqibz(:)
@@ -613,9 +618,6 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,dos_qsh
  do isym = 1, Crystal%nsym
    call symredcart(Crystal%rprimd,Crystal%gprimd,symcart(:,:,isym),Crystal%symrel(:,:,isym))
  end do
- do iat = 1, natom
-   invmass(iat) = one / Crystal%amu(Crystal%typat(iat))/amu_emass
- end do
 
  nomega = 1
  PHdos%ntypat     = crystal%ntypat
@@ -627,6 +629,10 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,dos_qsh
  PHdos%omega_min  = greatest_real
  PHdos%omega_step = dosdeltae
  PHdos%dossmear   = dossmear
+
+ ABI_MALLOC(PHdos%atom_mass, (natom))
+ PHdos%atom_mass(:) = Crystal%amu(Crystal%typat(:))*amu_emass
+ 
 
  ABI_MALLOC(PHdos%omega, (nomega))
  ABI_MALLOC(PHdos%phdos, (nomega))
@@ -910,7 +916,6 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,dos_qsh
 
      do io=1,PHdos%nomega
        do iq_ibz=1,PHdos%nqibz
-         acc = zero
          PHdos%phdos(io)=PHdos%phdos(io)+dtweightde(iq_ibz,io)
          PHdos%phdos_int(io)=PHdos%phdos_int(io)+tweight(iq_ibz,io)
          do iat=1,natom
@@ -922,15 +927,9 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,dos_qsh
 
              ! accumulate outer product of displacement vectors
              do jdir=1,3
-               ! NB: only accumulate real part. I think the full sum over the BZ should guarantee Im=0
-               acc = acc + abs(full_eigvec(2,idir,iat,imode,iq_ibz)*full_eigvec(1,jdir,iat,imode,iq_ibz) &
-&                           +  full_eigvec(1,idir,iat,imode,iq_ibz)*full_eigvec(2,jdir,iat,imode,iq_ibz))
-
                msqd_atom_tmp(jdir,idir) = msqd_atom_tmp(jdir,idir) &
 &                + (full_eigvec(1,idir,iat,imode,iq_ibz)* full_eigvec(1,jdir,iat,imode,iq_ibz) &
 &                +  full_eigvec(2,idir,iat,imode,iq_ibz)* full_eigvec(2,jdir,iat,imode,iq_ibz) &
-!&                -  full_eigvec(2,idir,iat,imode,iq_ibz)* full_eigvec(1,jdir,iat,imode,iq_ibz) &
-!&                -  full_eigvec(1,idir,iat,imode,iq_ibz)* full_eigvec(2,jdir,iat,imode,iq_ibz)&
 &                ) * dtweightde(iq_ibz,io)
              end do ! jdir
            end do ! idir
@@ -957,10 +956,10 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,dos_qsh
 ! normalize by nsym : symmetrization is used in all prtdos cases
  PHdos%msqd_dos_atom = PHdos%msqd_dos_atom / Crystal%nsym
 
-! normalize by mass and factor of 2
- do iat=1, natom
-   PHdos%msqd_dos_atom(:,:,:,iat) = PHdos%msqd_dos_atom(:,:,:,iat) * invmass(iat) * half
- end do ! iat
+! normalize by mass and factor of 2 ! now added in the printout to agree with harmonic_thermo
+! do iat=1, natom
+!   PHdos%msqd_dos_atom(:,:,:,iat) = PHdos%msqd_dos_atom(:,:,:,iat) * invmass(iat) * half
+! end do ! iat
 
  ! =======================
  ! === calculate IPDOS ===
@@ -1645,7 +1644,7 @@ subroutine phdos_print_msqd(PHdos, fname, ntemper, tempermin, temperinc)
    call DGEMM('T','N', 9, ntemper, PHdos%nomega, one, tmp_msqd,PHdos%nomega,&
 &      bose, PHdos%nomega, zero, integ, 9)
 ! NB: this presumes an equidistant omega grid
-   integ = integ * (PHdos%omega(2)-PHdos%omega(1))
+   integ = integ * (PHdos%omega(2)-PHdos%omega(1)) / PHdos%atom_mass(iatom)
 
 ! print out stuff
    do itemp = 1, ntemper

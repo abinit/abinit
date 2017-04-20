@@ -448,14 +448,6 @@ program anaddb
 
    call mkphdos(Phdos,Crystal,Ifc, inp%prtdos,inp%dosdeltae,inp%dossmear, inp%ng2qpt, inp%q2shft, comm)
 
-   phdos_fname = TRIM(filnam(2))//"_MSQD_T"
-   call phdos_print_msqd(Phdos, phdos_fname, inp%ntemper, inp%tempermin, inp%temperinc)
-
-   phdos_fname = TRIM(filnam(2))//"_PHDOS"
-   call phdos_print(Phdos,phdos_fname)
-
-   call phdos_print_debye(Phdos, Crystal%ucvol)
-
    if (iam_master) then
      call phdos_print_msqd(Phdos, strcat(filnam(2), "_MSQD_T"), inp%ntemper, inp%tempermin, inp%temperinc)
      call phdos_print(Phdos, strcat(filnam(2), "_PHDOS"))

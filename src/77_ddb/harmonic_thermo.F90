@@ -739,6 +739,7 @@ subroutine harmonic_thermo(Ifc,Crystal,amu,anaddb_dtset,iout,outfilename_radix,c
            do ij=1,6
              gij(ij,iatom,ichan,iwchan)=ggij(ij,iatom,ichan,iwchan)/(gnorm/(3*natom))
            end do
+!if (iwchan==1) write (200+iatom,'(I6,6(E20.10,2x))') ichan, gij(1:6,iatom,ichan,iwchan)
          end do
        end do
 
