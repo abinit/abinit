@@ -320,47 +320,6 @@ subroutine dfpt_mkvxc(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,nhat1,nhat1dim,nhat1gr,
      nhat1gr_ => nhat1gr
    end if
 
-!   if (option/=0.and.nhat1dim==1) then
-!     ABI_ALLOCATE(nhat1_,(cplex*nfft,nspden))
-!     nhat1dim_=1
-!     if (nspden==1)then
-!       do ir=1,cplex*nfft
-!         nhat1_(ir,1)=nhat1(ir,1)
-!       end do 
-!     else
-!       do ir=1,cplex*nfft
-!         rho1_dn=nhat1(ir,1)-nhat1(ir,2)
-!         nhat1_(ir,1)=nhat1(ir,2)
-!         nhat1_(ir,2)=rho1_dn
-!       end do
-!     end if
-!   else
-!     ABI_ALLOCATE(nhat1_,(0,0))
-!     nhat1dim_=0
-!   end if
-!   if (option/=0.and.nhat1grdim==1) then
-!     ABI_ALLOCATE(nhat1gr_,(cplex*nfft,nspden,3))
-!     nhat1rgdim_=1
-!     if (nspden==1)then
-!       do ii=1,3
-!         do ir=1,cplex*nfft
-!           nhat1gr_(ir,1,ii)=nhat1gr(ir,1,ii)
-!         end do 
-!       end do 
-!     else
-!       do ii=1,3
-!         do ir=1,cplex*nfft
-!           rho1_dn=nhat1gr(ir,1,ii)-nhat1gr(ir,2,ii)
-!           nhat1gr_(ir,1,ii)=nhat1gr(ir,2,ii)
-!           nhat1gr_(ir,2,ii)=rho1_dn
-!         end do
-!       end do
-!     end if
-!   else
-!     ABI_ALLOCATE(nhat1gr_,(0,0,0))
-!     nhat1rgdim_=0
-!   end if
-
    call matr3inv(rprimd,gprimd)
 
    call dfpt_mkvxcgga(cplex,gprimd,kxc,mpi_enreg,nfft,ngfft,nhat1_,nhat1dim_,&
