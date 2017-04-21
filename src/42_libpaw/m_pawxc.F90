@@ -35,9 +35,9 @@ module m_pawxc
  private
 
  public:: pawxc           ! Compute xc correlation potential and energies inside a paw sphere. USE (r,theta,phi)
- public:: pawxcpositron   ! Compute electron-positron correlation potential and energies inside a PAW sphere USE (r,theta,phi)
+ public:: pawxcpositron   ! Compute electron-positron correlation potential and energies inside a PAW sphere. USE (r,theta,phi)
  public:: pawxc3          ! Compute first-order change of XC potential and contribution to
-                          ! 2nd-order change of XC energy inside a PAW sphere.USE (r,theta,phi)
+                          ! 2nd-order change of XC energy inside a PAW sphere. USE (r,theta,phi)
  public:: pawxcsum        ! Compute useful sums of moments of densities needed to compute on-site contributions to XC energy and potential
  public:: pawxcm          ! Compute xc correlation potential and energies inside a paw sphere. USE (L,M) MOMENTS
  public:: pawxcmpositron  ! Compute electron-positron correlation potential and energies inside a PAW sphere. USE (L,M) MOMENTS
@@ -1689,12 +1689,12 @@ subroutine pawxc3_gga(corexc1,cplex_den,cplex_vxc,d2enxc,ixc,kxc,lm_size,lmselec
 
 !Local variables-------------------------------
 !scalars
- integer :: ii,ilm,ipts,ir,ispden,jr,lm_size_eff,nkxc_,npts
+ integer :: ii,ilm,ipts,ir,ispden,jr,kr,lm_size_eff,nkxc_,npts
  logical :: need_impart
  real(dp),parameter :: tol24=tol12*tol12
  real(dp) :: coeff_grho,coeff_grho_corr,coeff_grho_dn,coeff_grho_up
- real(dp) :: coeff_grhoim_corr,coeff_grhoim_dn,coeff_grhoim_up
- real(dp) :: factor,factor_gxc
+ real(dp) :: coeff_grhoim,coeff_grhoim_corr,coeff_grhoim_dn,coeff_grhoim_up
+ real(dp) :: dylmdr_ii,factor,factor_ang_intg,ylm_ii
  real(dp) :: grho_grho,grho_grho1,grho_grho1_up,grho_grho1_dn
  real(dp) :: grho_grho1im,grho_grho1im_up,grho_grho1im_dn
  real(dp) :: rho_dn,rho_up,rhoim_dn,rhoim_up
@@ -1706,8 +1706,8 @@ subroutine pawxc3_gga(corexc1,cplex_den,cplex_vxc,d2enxc,ixc,kxc,lm_size,lmselec
  real(dp) :: g1im(3),g1im_dn(3),g1im_up(3)
  real(dp) :: gxc1i(3,2),gxc1r(3,2)
 ! real(dp) :: tsec(2)
- real(dp),allocatable :: dgxc1(:),drho1(:,:),drho1core(:,:),dylmdr(:,:,:),ff(:),gg(:)
- real(dp),allocatable :: grho1_updn(:,:,:),gxc1(:,:,:,:)
+ real(dp),allocatable :: dgxc1(:),drho1(:,:),drho1core(:,:),dylmdr(:,:,:)
+ real(dp),allocatable :: ff(:),gg(:),grho1_updn(:,:,:),gxc1(:,:,:,:)
  real(dp),allocatable :: kxc_(:,:),rho1_updn(:,:),rho1arr(:,:,:)
  real(dp),allocatable,target :: rhohat1(:,:,:)
  real(dp),pointer :: rho1_(:,:,:),vxc1_(:,:,:)
@@ -1962,9 +1962,10 @@ subroutine pawxc3_gga(corexc1,cplex_den,cplex_vxc,d2enxc,ixc,kxc,lm_size,lmselec
                ff(2:nrad)=ff(2:nrad)/pawrad%rad(2:nrad)
                call pawrad_deducer0(ff,nrad,pawrad)
                do ii=1,3
+                 ylm_ii=pawang%ylmr(ilm,ipts)*pawang%anginit(ii,ipts)
+                 dylmdr_ii=dylmdr(ii,ipts,ilm)
                  grho1_updn(1:nrad,ispden,ii)=grho1_updn(1:nrad,ispden,ii) &
-&                 +drho1(1:nrad,1)*pawang%ylmr(ilm,ipts)*pawang%anginit(ii,ipts) &
-&                 +ff(1:nrad)*dylmdr(ii,ipts,ilm)
+&                 +drho1(1:nrad,1)*ylm_ii+ff(1:nrad)*dylmdr_ii
                end do
              end if
            end do
@@ -1987,14 +1988,14 @@ subroutine pawxc3_gga(corexc1,cplex_den,cplex_vxc,d2enxc,ixc,kxc,lm_size,lmselec
                call pawrad_deducer0(ff,nrad,pawrad)
                call pawrad_deducer0(gg,nrad,pawrad)
                do ii=1,3
+                 ylm_ii=pawang%ylmr(ilm,ipts)*pawang%anginit(ii,ipts)
+                 dylmdr_ii=dylmdr(ii,ipts,ilm)
                  do ir=2,nrad
-                   jr=2*ir
+                   jr=2*ir 
                    grho1_updn(jr-1,ispden,ii)=grho1_updn(jr-1,ispden,ii) &
-&                   +drho1(ir,1)*pawang%ylmr(ilm,ipts)*pawang%anginit(ii,ipts) &
-&                   +ff(ir)*dylmdr(ii,ipts,ilm)
+&                   +drho1(ir,1)*ylm_ii+ff(ir)*dylmdr_ii
                    grho1_updn(jr  ,ispden,ii)=grho1_updn(jr  ,ispden,ii) &
-&                   +drho1(ir,2)*pawang%ylmr(ilm,ipts)*pawang%anginit(ii,ipts) &
-&                   +gg(ir)*dylmdr(ii,ipts,ilm)
+&                   +drho1(ir,2)*ylm_ii+gg(ir)*dylmdr_ii
                  end do
                end do
              end if
@@ -2030,32 +2031,51 @@ subroutine pawxc3_gga(corexc1,cplex_den,cplex_vxc,d2enxc,ixc,kxc,lm_size,lmselec
        LIBPAW_DEALLOCATE(drho1)
 
 !      Apply XC kernel
-!      Scaling factor: integral over angles times spin factor
-       factor_gxc=four_pi;if (nspden==1) factor_gxc=two_pi
+!      Will compute Vxc^(1) as: vxc1 - Nabla .dot. gxc1
 
+!      Scaling factor for angular integrals: four_pi x spin_factor
+       factor_ang_intg=four_pi;if (nspden==1) factor_ang_intg=two_pi
+
+!      A- NON POLARIZED SYSTEMS
        if (nspden==1) then
-         if (cplex_vxc==1) then  ! cplex_vxc==1 and (cplex_den==1 or cplex_den=2)           
-           do ir=1,nrad
-             jr=cplex_den*(ir-1)+1
-             g0(:)=kxc_(ir,5:7) ; g1(:)=grho1_updn(jr,1,2:4)
-             grho_grho1=g1(1)*g0(1)+g1(2)*g0(2)+g1(3)*g0(3)
-             vxc1_(ir,ipts,1)=kxc_(ir,1)*rho1_updn(jr,1) + kxc_(ir,3)*grho_grho1 
-             coeff_grho =kxc_(ir,3)*rho1_updn(jr,1) + kxc_(ir,4)*grho_grho1
-             gxc1r(1:3,1)=g1(:)*kxc_(ir,2)+g0(:)*coeff_grho
-           end do
+
+         do ir=1,nrad
+           jr=cplex_den*(ir-1)+1 ; kr=cplex_vxc*(ir-1)+1
+           g0(:)=kxc_(ir,5:7) ; g1(:)=grho1_updn(jr,1,2:4)
+           grho_grho1=g1(1)*g0(1)+g1(2)*g0(2)+g1(3)*g0(3)
+           coeff_grho=kxc_(ir,3)*rho1_updn(jr,1)+kxc_(ir,4)*grho_grho1
+           vxc1_(kr,ipts,1)=kxc_(ir,1)*rho1_updn(jr,1)+kxc_(ir,3)*grho_grho1
+           gxc1r(:,1)=g1(:)*kxc_(ir,2)+g0(:)*coeff_grho
+           !Accumulate gxc1_lm moments as Intg[gxc1(omega).Ylm(omega).d_omega]
            do ilm=1,pawang%ylm_size
+             ylm_ii=pawang%ylmr(ilm,ipts)*pawang%angwgth(ipts)*factor_ang_intg
              do ii=1,3
-               gxc1(ir,ii,ilm,1)=gxc1(ir,ii,ilm,1) &
-                 +gxc1r(ii,1)*pawang%ylmr(ilm,ipts)*pawang%angwgth(ipts)*factor_gxc
+               gxc1(kr,ii,ilm,1)=gxc1(ir,ii,ilm,1)+gxc1r(ii,1)*ylm_ii
              end do
            end do
-         else
-           ! TO BE COMPLETED
-         end if
+           if (cplex_vxc==2) then
+             if (cplex_den==2) then
+               g1im(:)=grho1_updn(jr+1,1,2:4)
+               grho_grho1im=g1im(1)*g0(1)+g1im(2)*g0(2)+g1im(3)*g0(3)
+               vxc1_(kr+1,ipts,1)=kxc_(ir,1)*rho1_updn(jr+1,1)+kxc_(ir,3)*grho_grho1im
+               gxc1i(:,1)=g1im(:)*kxc_(ir,2)+g0(:)*coeff_grhoim
+               !Accumulate gxc1_lm moments as Intg[gxc1(omega).Ylm(omega).d_omega]
+               do ilm=1,pawang%ylm_size
+                 ylm_ii=pawang%ylmr(ilm,ipts)*pawang%angwgth(ipts)*factor_ang_intg
+                 do ii=1,3
+                   gxc1(kr+1,ii,ilm,1)=gxc1(kr+1,ii,ilm,1)+gxc1i(ii,1)*ylm_ii
+                 end do
+               end do
+             else
+               vxc1_(kr+1,ipts,1)=zero ; gxc1i(:,1)=zero
+             end if
+           end if
+         end do ! ir
 
+!      A- POLARIZED SYSTEMS (COLLINEAR)
        else ! nspden==2
-           ! TO BE COMPLETED
 
+! TO BE COMPLETED
 !       do ir=1,nrad
 !         if (cplex_vxc==1) then  ! cplex_vxc==1 and (cplex_den==1 or cplex_den=2)
 !           jr=cplex_den*(ir-1)+1
@@ -2092,7 +2112,7 @@ subroutine pawxc3_gga(corexc1,cplex_den,cplex_vxc,d2enxc,ixc,kxc,lm_size,lmselec
 !             do ilm=1,pawang%ylm_size
 !               do ii=1,3
 !                 gxc1(ir,ii,ilm,ispden)=gxc1(ir,ii,ilm,ispden) &
-!                 +gxc1r(ii,ispden)*pawang%ylmr(ilm,ipts)*pawang%angwgth(ipts)*factor_gxc
+!                 +gxc1r(ii,ispden)*pawang%ylmr(ilm,ipts)*pawang%angwgth(ipts)*factor_ang_intg
 !               end do
 !             end do
 !           end do
@@ -2186,16 +2206,16 @@ subroutine pawxc3_gga(corexc1,cplex_den,cplex_vxc,d2enxc,ixc,kxc,lm_size,lmselec
 !          do ilm=1,pawang%ylm_size
 !          do ii=1,3
 !          gxc1(jr  ,ii,ilm,ispden)=gxc1(jr  ,ii,ilm,ispden) &
-!          +gxc1r(ii,ispden)*pawang%ylmr(ilm,ipts)*pawang%angwgth(ipts)*factor_gxc
+!          +gxc1r(ii,ispden)*pawang%ylmr(ilm,ipts)*pawang%angwgth(ipts)*factor_ang_intg
 !          gxc1(jr+1,ii,ilm,ispden)=gxc1(jr+1,ii,ilm,ispden) &
-!          +gxc1i(ii,ispden)*pawang%ylmr(ilm,ipts)*pawang%angwgth(ipts)*factor_gxc
+!          +gxc1i(ii,ispden)*pawang%ylmr(ilm,ipts)*pawang%angwgth(ipts)*factor_ang_intg
 !          end do
 !          end do
 !          end do
 !         end if   ! cplex_vxc
 !       end do ! ir
 
-       end if
+       end if ! nspden
 
        if (nspden==1) then
          LIBPAW_DEALLOCATE(kxc_)
@@ -2222,68 +2242,62 @@ subroutine pawxc3_gga(corexc1,cplex_den,cplex_vxc,d2enxc,ixc,kxc,lm_size,lmselec
  end if
 
 !----------------------------------------------------------------------
-!----- If GGA, modify potential with term from density gradient
+!----- If GGA, modify 1st-order potential with term from density gradient
 !----------------------------------------------------------------------
  if (xclevel==2.and.ixc/=13.and.option/=3) then
-!  Compute divergence of gxc1 and substract it from Vxc
-   LIBPAW_ALLOCATE(dgxc1,(cplex_vxc*nrad))
-!  Need to multiply gxc by 2 in the non-polarised case
+!  Compute divergence of gxc1 and substract it from Vxc1
+
+!  Need to multiply gxc1 by 2 in the non-polarised case
    factor=one;if (nspden==1) factor=two
-   if (cplex_vxc==1) then
-     LIBPAW_ALLOCATE(ff,(nrad))
+
+   LIBPAW_ALLOCATE(dgxc1,(nrad))
+   LIBPAW_ALLOCATE(gg,(nrad))
+   do ispden=1,nspden
+     do ilm=1,pawang%ylm_size
+       do ii=1,3
+         do ir=1,nrad
+           jr=cplex_vxc*(ir-1)+1
+           gg(ir)=gxc1(jr,ii,ilm,ispden)
+         end do
+         call nderiv_gen(dgxc1,gg,pawrad)
+         gg(2:nrad)=gg(2:nrad)/pawrad%rad(2:nrad)
+         call pawrad_deducer0(gg,nrad,pawrad)
+         do ipts=1,npts
+           ylm_ii=pawang%ylmr(ilm,ipts)*pawang%anginit(ii,ipts)
+           dylmdr_ii=dylmdr(ii,ipts,ilm)
+           do ir=1,nrad
+             jr=cplex_vxc*(ir-1)+1
+             vxc1_(jr,ipts,ispden)=vxc1_(jr,ipts,ispden) &
+&               -factor*(dgxc1(ir)*ylm_ii+gg(ir)*dylmdr_ii)
+           end do
+         end do ! ipts
+       end do ! ii
+     end do ! ilm
+   end do ! ispden
+   if (cplex_vxc==2) then
      do ispden=1,nspden
        do ilm=1,pawang%ylm_size
          do ii=1,3
-           ff(1:nrad)=gxc1(1:nrad,ii,ilm,ispden)
-           call nderiv_gen(dgxc1,ff,pawrad)
-           ff(2:nrad)=ff(2:nrad)/pawrad%rad(2:nrad)
-           call pawrad_deducer0(ff,nrad,pawrad)
-           do ipts=1,npts
-             vxc1_(1:nrad,ipts,ispden)=vxc1_(1:nrad,ipts,ispden) &
-&             -factor*(dgxc1(1:nrad)*pawang%anginit(ii,ipts)*pawang%ylmr(ilm,ipts) &
-&             +ff(1:nrad)*dylmdr(ii,ipts,ilm))
+           do ir=1,nrad
+             gg(ir)=gxc1(2*ir,ii,ilm,ispden)
            end do
-         end do
-       end do
-     end do
-     LIBPAW_DEALLOCATE(ff)
-!    else
-!    LIBPAW_ALLOCATE(ff,(nrad))
-!    LIBPAW_ALLOCATE(gg,(nrad))
-!    do ispden=1,nspden
-!    !      do ispden=1,nspden2
-!    do ilm=1,pawang%ylm_size
-!    do ii=1,3
-!    do ir=1,nrad
-!    jr=2*ir
-!    ff(ir)=gxc1(jr-1,ii,ilm,ispden)
-!    gg(ir)=gxc1(jr  ,ii,ilm,ispden)
-!    end do
-!    call nderiv_gen(dgxc1(1:nrad)       ,ff,pawrad)
-!    call nderiv_gen(dgxc1(nrad+1:2*nrad),gg,pawrad)
-!    ff(2:nrad)=ff(2:nrad)/pawrad%rad(2:nrad)
-!    gg(2:nrad)=gg(2:nrad)/pawrad%rad(2:nrad)
-!    call pawrad_deducer0(ff,nrad,pawrad)
-!    call pawrad_deducer0(gg,nrad,pawrad)
-!    do ipts=1,npts
-!    do ir=1,nrad
-!    jr=2*ir
-!    vxc1_(jr-1,ipts,ispden)=vxc1_(jr-1,ipts,ispden) &
-!    &               -factor*(dgxc1(ir)*pawang%anginit(ii,ipts)*pawang%ylmr(ilm,ipts) &
-!    &                       +ff(ir)*dylmdr(ii,ipts,ilm))
-!    vxc1_(jr  ,ipts,ispden)=vxc1_(jr  ,ipts,ispden) &
-!    &               -factor*(dgxc1(ir)*pawang%anginit(ii,ipts)*pawang%ylmr(ilm,ipts) &
-!    &                       +gg(ir)*dylmdr(ii,ipts,ilm))
-!    end do
-!    end do
-!    end do
-!    end do
-!    end do
-!    LIBPAW_DEALLOCATE(ff)
-!    LIBPAW_DEALLOCATE(gg)
-!    end if
-     LIBPAW_DEALLOCATE(dgxc1)
-   end if
+           call nderiv_gen(dgxc1,gg,pawrad)
+           gg(2:nrad)=gg(2:nrad)/pawrad%rad(2:nrad)
+           call pawrad_deducer0(gg,nrad,pawrad)
+           do ipts=1,npts
+             ylm_ii=pawang%ylmr(ilm,ipts)*pawang%anginit(ii,ipts)
+             dylmdr_ii=dylmdr(ii,ipts,ilm)
+             do ir=1,nrad
+               vxc1_(2*ir,ipts,ispden)=vxc1_(2*ir,ipts,ispden) &
+  &               -factor*(dgxc1(ir)*ylm_ii+gg(ir)*dylmdr_ii)
+             end do
+           end do ! ipts
+         end do ! ii
+       end do ! ilm
+     end do ! ispden
+   end if ! cplex_vxc
+   LIBPAW_DEALLOCATE(dgxc1)
+   LIBPAW_DEALLOCATE(gg)
 
  end if ! GGA
 
