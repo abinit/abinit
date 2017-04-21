@@ -1596,7 +1596,7 @@ subroutine phdos_print_msqd(PHdos, fname, ntemper, tempermin, temperinc)
  end if
 
 ! write a header
-   write (msg, '(2a)') '# mean square displacement for each atom as a function of T'
+   write (msg, '(2a)') '# mean square displacement for each atom as a function of T (bohr^2)'
 
 ! NB: this call to wrtout does not seem to work from the eph executable, even in sequential, and whether within or outside a clause for me==master.
 !  Do not change this to wrtout without checking extensively.

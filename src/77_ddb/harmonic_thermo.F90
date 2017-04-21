@@ -382,26 +382,9 @@ subroutine harmonic_thermo(Ifc,Crystal,amu,anaddb_dtset,iout,outfilename_radix,c
            tens1(3,1)=tens1(1,3)
            tens1(3,2)=tens1(2,3)
 !          Here acomplishes the tensorial operations
-!!          1) Goto reduced coordinates for both indices
 !!          make this a BLAS call, or better yet batch the whole thing?
-!!          tens1 = gprimd^T tens1 gprimd
-!           do iii=1,3
-!             do jjj=1,3
-!               tens2(iii,jjj)=tens1(iii,1)*gprimd(1,jjj)&
-!&               +tens1(iii,2)*gprimd(2,jjj)&
-!&               +tens1(iii,3)*gprimd(3,jjj)
-!             end do
-!           end do
-!           do jjj=1,3
-!             do iii=1,3
-!               tens1(iii,jjj)=tens2(1,jjj)*gprimd(1,iii)&
-!&               +tens2(2,jjj)*gprimd(2,iii)&
-!&               +tens2(3,jjj)*gprimd(3,iii)
-!             end do
-!           end do
 !          2) Apply the symmetry operation on both indices   USING symrec in
 !          cartesian coordinates
-!          tens1 = symrec(isym)^T tens1 symrec(isym)
            do iii=1,3
              do jjj=1,3
                tens2(iii,jjj)=tens1(iii,1)*symrec_cart(1,jjj,isym)&
@@ -416,22 +399,6 @@ subroutine harmonic_thermo(Ifc,Crystal,amu,anaddb_dtset,iout,outfilename_radix,c
 &               +tens2(3,jjj)*symrec_cart(3,iii,isym)
              end do
            end do
-!!          3) Go back to cartesian coordinates
-!!          tens1 = rprimd tens1 rprimd^T
-!           do iii=1,3
-!             do jjj=1,3
-!               tens2(iii,jjj)=tens1(iii,1)*rprimd(jjj,1)&
-!&               +tens1(iii,2)*rprimd(jjj,2)&
-!&               +tens1(iii,3)*rprimd(jjj,3)
-!             end do
-!           end do
-!           do jjj=1,3
-!             do iii=1,3
-!               tens1(iii,jjj)=tens2(1,jjj)*rprimd(iii,1)&
-!&               +tens2(2,jjj)*rprimd(iii,2)&
-!&               +tens2(3,jjj)*rprimd(iii,3)
-!             end do
-!           end do
 ! net result is tens1 = rprimd symrec^T gprimd^T   tens1   gprimd symrec rprimd^T
 
 !          This accumulates over atoms, to account for all symmetric ones
