@@ -92,12 +92,13 @@ subroutine harmonic_thermo(Ifc,Crystal,amu,anaddb_dtset,iout,outfilename_radix,c
 !Local variables -------------------------
 !scalars
  integer,parameter :: master=0
- integer :: convth,facbrv,iatom,iavfrq,ichan,icomp,igrid,iii,iiii,ij,ind
+ integer :: convth,facbrv,iatom,ichan,icomp,igrid,iii,iiii,ij,ind
  integer :: iqpt2,isym,itemper,iwchan,jjj,mqpt2,nchan,ngrids,natom
  integer :: nqpt2,nspqpt,ntemper,nwchan,option,timrev
  integer :: thermal_unit
  integer :: bij_unit
  integer :: vij_unit
+ integer :: nomega
  real(dp) :: change,cothx,diffbb,dosinc,expm2x,factor,factorw,factorv,gerr
  real(dp) :: ggsum,ggsumsum,ggrestsum
  real(dp) :: gijerr,gijsum,gnorm,ln2shx,qphnrm,relchg,tmp,wovert,thmtol
@@ -120,6 +121,7 @@ subroutine harmonic_thermo(Ifc,Crystal,amu,anaddb_dtset,iout,outfilename_radix,c
  real(dp),allocatable :: ggij(:,:,:,:),gij(:,:,:,:),gw(:,:),qpt2(:,:),spheat(:)
  real(dp),allocatable :: spheat0(:),spqpt2(:,:),wme(:),wtq(:),wtq2(:)
  real(dp),allocatable :: wtq_folded(:),vij(:,:,:)
+ real(dp),allocatable :: phon_dos(:)
  logical,allocatable :: wgcnv(:),wgijcnv(:)
 
 ! *********************************************************************
@@ -162,7 +164,6 @@ subroutine harmonic_thermo(Ifc,Crystal,amu,anaddb_dtset,iout,outfilename_radix,c
  ntemper=anaddb_dtset%ntemper
  nwchan=anaddb_dtset%nwchan
  ngrids=anaddb_dtset%ngrids
- iavfrq=anaddb_dtset%iavfrq
 
  ABI_ALLOCATE(bbij,(6,natom,ntemper))
  ABI_ALLOCATE(bij,(6,natom,ntemper))
@@ -187,10 +188,8 @@ subroutine harmonic_thermo(Ifc,Crystal,amu,anaddb_dtset,iout,outfilename_radix,c
  ABI_ALLOCATE(spheat0,(ntemper))
  ABI_ALLOCATE(wgcnv,(nwchan))
  ABI_ALLOCATE(wgijcnv,(nwchan))
- if (iavfrq>0)  then
-   ABI_ALLOCATE(wme,(ntemper))
-   ABI_ALLOCATE(gw,(nchan,nwchan))
- end if
+ ABI_ALLOCATE(wme,(ntemper))
+ ABI_ALLOCATE(gw,(nchan,nwchan))
 
 
 !initialize ii and jj arrays
@@ -270,7 +269,7 @@ subroutine harmonic_thermo(Ifc,Crystal,amu,anaddb_dtset,iout,outfilename_radix,c
 
    gg(:,:)=zero
    ggij(:,:,:,:)=zero
-   if (iavfrq>0) gw(:,:)=zero
+   gw(:,:)=zero
 
 !  Sum over the sampled q points
    do iqpt2=1,nqpt2
@@ -312,7 +311,7 @@ subroutine harmonic_thermo(Ifc,Crystal,amu,anaddb_dtset,iout,outfilename_radix,c
 
            gg(ichan,iwchan)=gg(ichan,iwchan)+wtq2(iqpt2)
 
-           if (iavfrq>0) gw(ichan,iwchan)=gw(ichan,iwchan)+wtq2(iqpt2)*phfrq(iii)*Ha_cmm1
+           gw(ichan,iwchan)=gw(ichan,iwchan)+wtq2(iqpt2)*phfrq(iii)*Ha_cmm1
 
 !          to calculate two phonon DOS for qshift = 0.0
            do iiii=1,3*natom
@@ -469,11 +468,9 @@ subroutine harmonic_thermo(Ifc,Crystal,amu,anaddb_dtset,iout,outfilename_radix,c
          gg_sum(ichan,iwchan)=gg_sum(ichan,iwchan)/ggsumsum
          gg_rest(ichan,iwchan)=gg_rest(ichan,iwchan)/ggrestsum
        end do
-       if (iavfrq>0) then
-         do ichan=1,nchan2(iwchan)
-           gw(ichan,iwchan)=gw(ichan,iwchan)/ggsum
-         end do
-       end if
+       do ichan=1,nchan2(iwchan)
+         gw(ichan,iwchan)=gw(ichan,iwchan)/ggsum
+       end do
 
 !      Write gerr for each q sampling and w width
        write(msg,'(a,a,i3,3i6,f10.1,f10.5)') ch10, &
@@ -519,30 +516,34 @@ subroutine harmonic_thermo(Ifc,Crystal,amu,anaddb_dtset,iout,outfilename_radix,c
            call wrtout(iout,msg,'COLL')
          end if
 
-         do itemper=1,ntemper
+         nomega = nchan2(iwchan)
+         dosinc=dble(iwchan)
 
-!          Put zeroes for F, E, S, Cv
-           free(itemper)=zero
-           energy(itemper)=zero
-           entropy(itemper)=zero
-           spheat(itemper)=zero
-           if (iavfrq>0) wme(itemper)=zero
+         ABI_ALLOCATE(phon_dos(nomega))
+         phon_dos = gdos(:,iwchan)
+
+!Put zeroes for F, E, S, Cv
+         free(:)=zero
+         energy(:)=zero
+         entropy(:)=zero
+         spheat(:)=zero
+         wme(:)=zero
+
+         do itemper=1,ntemper
 
            tmp=anaddb_dtset%tempermin+anaddb_dtset%temperinc*dble(itemper-1)
 !          The temperature (tmp) is given in Kelvin
            if (tmp < tol6) cycle
 
-           dosinc=dble(iwchan)
-
-           do ichan=1,nchan2(iwchan)
+           do iomega=1,nomega
 
 !            wovert= hbar*w / 2kT dimensionless
-             wovert=dosinc*(dble(ichan)-0.5_dp)/Ha_cmm1/(2._dp*kb_HaK*tmp)
+             wovert=dosinc*(dble(iomega)-0.5_dp)/Ha_cmm1/(2._dp*kb_HaK*tmp)
              expm2x=exp(-2.0_dp*wovert)
              ln2shx=wovert+log(1.0_dp-expm2x)
              cothx=(1.0_dp+expm2x)/(1.0_dp-expm2x)
-             factor=dble(3*natom)*gdos(ichan,iwchan)
-             if (iavfrq>0) factorw=3*natom*gw(ichan,iwchan)
+             factor=dble(3*natom)*phon_dos(iomega,iwchan)
+             factorw=3*natom*gw(iomega,iwchan)
 
 !            This matches the equations published in Lee & Gonze, PRB 51, 8610 (1995)
              free(itemper)=free(itemper) +factor*kb_HaK*tmp*ln2shx
@@ -553,12 +554,13 @@ subroutine harmonic_thermo(Ifc,Crystal,amu,anaddb_dtset,iout,outfilename_radix,c
              if(wovert<100.0_dp)then
                spheat(itemper)=spheat(itemper)+factor*kb_HaK*wovert**2/sinh(wovert)**2
              end if
-             if (iavfrq>0) wme(itemper)=wme(itemper)+factorw*kb_HaK*wovert**2/sinh(wovert)**2
+             wme(itemper)=wme(itemper)+factorw*kb_HaK*wovert**2/sinh(wovert)**2
 
-           end do ! ichan
+           end do ! iomega
 
-           if (iavfrq>0.and.abs(spheat(itemper))>tol8) wme(itemper)=wme(itemper)/spheat(itemper)
+           if (abs(spheat(itemper))>tol8) wme(itemper)=wme(itemper)/spheat(itemper)
          end do ! itemper
+         ABI_DEALLOCATE(phon_dos)
 
 !        Check if the thermodynamic functions change within tolerance,
          if (ngrids>1) then
@@ -616,13 +618,8 @@ subroutine harmonic_thermo(Ifc,Crystal,amu,anaddb_dtset,iout,outfilename_radix,c
 !        Update F,E,S,C and eventually write them if converged
          if(convth==1)then
            part1=.true.
-           if (iavfrq>0) then
-             write(msg,'(a,a,a)') ch10,&
-&             ' # At  T     F(J/mol-c)     E(J/mol-c)     S(J/(mol-c.K)) C(J/(mol-c.K)) Omega_mean(cm-1)'
-           else
-             write(msg,'(a,a,a)') ch10,&
-&             ' # At  T     F(J/mol-c)     E(J/mol-c)     S(J/(mol-c.K)) C(J/(mol-c.K))'
-           end if
+           write(msg,'(a,a,a)') ch10,&
+&           ' # At  T     F(J/mol-c)     E(J/mol-c)     S(J/(mol-c.K)) C(J/(mol-c.K)) Omega_mean(cm-1)'
            call wrtout(iout,msg,'COLL')
            call wrtout(thermal_unit,msg,'COLL')
            msg = ' # (A mol-c is the abbreviation of a mole-cell, that is, the'
@@ -646,20 +643,12 @@ subroutine harmonic_thermo(Ifc,Crystal,amu,anaddb_dtset,iout,outfilename_radix,c
 
            if(convth==1)then
              tmp=anaddb_dtset%tempermin+anaddb_dtset%temperinc*dble(itemper-1)
-             if (iavfrq>0) then
-               write(msg,'(es11.3,5es15.7)') tmp+tol8,&
-&               Ha_eV*e_Cb*Avogadro*free(itemper),&
-&               Ha_eV*e_Cb*Avogadro*energy(itemper),&
-&               Ha_eV*e_Cb*Avogadro*entropy(itemper),&
-&               Ha_eV*e_Cb*Avogadro*spheat(itemper),&
-&               wme(itemper)
-             else
-               write(msg,'(es11.3,4es15.7)') tmp+tol8,&
-&               Ha_eV*e_Cb*Avogadro*free(itemper),&
-&               Ha_eV*e_Cb*Avogadro*energy(itemper),&
-&               Ha_eV*e_Cb*Avogadro*entropy(itemper),&
-&               Ha_eV*e_Cb*Avogadro*spheat(itemper)
-             end if
+             write(msg,'(es11.3,5es15.7)') tmp+tol8,&
+&             Ha_eV*e_Cb*Avogadro*free(itemper),&
+&             Ha_eV*e_Cb*Avogadro*energy(itemper),&
+&             Ha_eV*e_Cb*Avogadro*entropy(itemper),&
+&             Ha_eV*e_Cb*Avogadro*spheat(itemper),&
+&             wme(itemper)
              call wrtout(iout,msg,'COLL')
              call wrtout(thermal_unit,msg,'COLL')
            end if
@@ -961,10 +950,8 @@ subroutine harmonic_thermo(Ifc,Crystal,amu,anaddb_dtset,iout,outfilename_radix,c
  if(allocated(wtq2)) then
    ABI_DEALLOCATE(wtq2)
  end if
- if (iavfrq>0)  then
-   ABI_DEALLOCATE(gw)
-   ABI_DEALLOCATE(wme)
- end if
+ ABI_DEALLOCATE(gw)
+ ABI_DEALLOCATE(wme)
 
  if(.not.part1)then
    write(msg, '(a,a,a,a,a,a,a,a,a)' )&

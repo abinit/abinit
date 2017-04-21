@@ -77,7 +77,6 @@ module m_anaddb_dataset
   integer :: gkk_rptwrite
   integer :: gkqwrite
   integer :: gruns_nddbs
-  integer :: iavfrq
   integer :: ifcana
   integer :: ifcflag
   integer :: ifcout
@@ -722,16 +721,6 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
 !H
 
 !I
-
- anaddb_dtset%iavfrq=0
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'iavfrq',tread,'INT')
- if(tread==1) anaddb_dtset%iavfrq=intarr(1)
- if(anaddb_dtset%iavfrq<0.or.anaddb_dtset%iavfrq>1)then
-   write(message, '(a,i0,5a)' )&
-&   'iavfrq is ',anaddb_dtset%iavfrq,', but the only allowed values',ch10,&
-&   'are 0 or 1 .',ch10,'Action: correct iavfrq in your input file.'
-   MSG_ERROR(message)
- end if
 
  anaddb_dtset%ifcana=0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'ifcana',tread,'INT')
@@ -1869,7 +1858,6 @@ subroutine outvars_anaddb (anaddb_dtset,nunit)
    write(nunit,'(3x,a9,3i10)')'  ntemper',anaddb_dtset%ntemper
    write(nunit,'(3x,a9,7x,3es16.8)')'temperinc',anaddb_dtset%temperinc
    write(nunit,'(3x,a9,7x,3es16.8)')'tempermin',anaddb_dtset%tempermin
-   if (anaddb_dtset%iavfrq/=0) write(nunit,'(3x,a9,3i10)')'    iavfrq',anaddb_dtset%iavfrq
    write(nunit,'(a)')' Description of grid 2 :'
    write(nunit,'(3x,a9,3i10)')'   ng2qpt',anaddb_dtset%ng2qpt(1:3)
    write(nunit,'(3x,a9,3i10)')'   ngrids',anaddb_dtset%ngrids
@@ -2182,7 +2170,7 @@ subroutine anaddb_chkvars(string)
  list_vars=trim(list_vars)//' gkk2write gkk_rptwrite gkqwrite gruns_nddbs'
 !H
 !I
- list_vars=trim(list_vars)//' iavfrq ifcana ifcflag ifcout ifltransport instrflag istrfix iatfix iatprj_bs'
+ list_vars=trim(list_vars)//' ifcana ifcflag ifcout ifltransport instrflag istrfix iatfix iatprj_bs'
 !J
 !K
  list_vars=trim(list_vars)//' kptrlatt kptrlatt_fine'

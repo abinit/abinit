@@ -175,7 +175,6 @@ you can go back to the tutorial window.</i>
  <br>I.
  <a href="anaddb_help.html#iatfix">iatfix</a>&nbsp;&nbsp;
  <a href="anaddb_help.html#iatprj_bs">iatprj_bs</a>&nbsp;&nbsp;
- <a href="anaddb_help.html#iavfrq">iavfrq</a>&nbsp;&nbsp;
  <a href="anaddb_help.html#ifcana">ifcana</a>&nbsp;&nbsp;
  <a href="anaddb_help.html#ifcflag">ifcflag</a>&nbsp;&nbsp;
  <a href="anaddb_help.html#ifltransport">ifltransport</a>&nbsp;&nbsp;
@@ -1064,30 +1063,6 @@ used for the calculation of the Gruneisen parameters.
 <br><br><br><br><a href=#top>Go to the top</a>
 <B> | </B><a href="anaddb_help.html#list">List of ANADDB input variables</a>
 <hr>
-
-<font id="title"><a name="iavfrq">iavfrq</a></font>
-<br><font id="definition">Mnemonics: Integer for the printing of AVerage FReQuency</font>
-<br><font id="category">Characteristic:  </font>
-<br><font id="vartype">Variable type: integer </font>
-<br><font id="default">Default: 0</font>
-<br><br><font id="text">
-Used only when <a href="anaddb_help.html#thmflag">thmflag</a>=1.<br>
-When this flag is set to 1, the "average frequency" is printed out (as a
-function of temperature, with phonon internal energy, free energy, entropy, ...).
-The average frequency is defined as:<br>
-Omega_average = Sum_over_q_and_i [Cv_iq Omega_iq]/Cv<br>
-where<br>
-- Omega_iq is the frequency of the i-th mode for q-point q<br>
-- Cv is the specific heat<br>
-- Cv_iq is the contribution to the specific heat of the i-th mode for q-point q<br>
-The "average frequency" can be used to have an estimation of the average
-Gruneisen parameter: Gamma_average=-d(log(Omega_average))/d(log(V)).<br>
-</font>
-
-<br><br><br><br><a href=#top>Go to the top</a>
-<B> | </B><a href="anaddb_help.html#list">List of ANADDB input variables</a>
-<hr>
-
 
 <font id="title"><a name="iatfix">iatfix</a></font>
 <br><font id="definition">Mnemonics: Indices of the AToms that are FIXed</font>
@@ -2757,7 +2732,6 @@ Flag controlling the calculation of thermal quantities.
 <li> the mean-square velocity tensor for each atom, as a function of temperature </li>
 <li> the "average frequency"
               as a function of the temperature
-              (if <a href="anaddb_help.html#iavfrq">iavfrq</a>=1) </li>
 </ul> </li>
 <li>When <b>thmflag</b> == 2, all the phonon frequencies for the
 q points in the second grid are printed. </li>
