@@ -115,21 +115,23 @@ subroutine dfpt_mkvxcgga(cplex,gprimd,kxc,mpi_enreg,nfft,ngfft,&
 !Exchange correlation kernel
  nkxc_=nkxc
  if (nspden==1) then
-   nkxc_=12
+   nkxc_=7
    ABI_ALLOCATE(kxc_,(nfft,nkxc_))
-   !Get unpolarized Kxc from polarized one
-   kxc_(:,1)=half*kxc(:,1)
-   kxc_(:,2)=half*kxc(:,3)
-   kxc_(:,3)=quarter*kxc(:,5)
-   kxc_(:,4)=eighth*kxc(:,7)
-   kxc_(:,5)=half*(kxc(:,9)+kxc(:,10))
-   kxc_(:,6)=kxc(:,12)
-   kxc_(:,7)=kxc(:,13)
-   kxc_(:,8)=kxc(:,15)
-   kxc_(:,9)=kxc(:,16)
-   kxc_(:,10)=kxc(:,18)
-   kxc_(:,11)=kxc(:,20)
-   kxc_(:,12)=kxc(:,22)
+  !Get unpolarized Kxc from polarized one
+  !kxc(:,1)= d2Exc/drho drho
+  !kxc(:,2)= dExc/d(abs(grad(rho))) / abs(grad(rho))
+  !kxc(:,3)= d2Exc/d(abs(grad(rho))) drho / abs(grad(rho))
+  !kxc(:,4)= 1/abs(grad(rho)) * d/d(abs(grad(rho)) (dExc/d(abs(grad(rho))) /abs(grad(rho)))
+  !kxc(:,5)= gradx(rho)
+  !kxc(:,6)= grady(rho)
+  !kxc(:,7)= gradz(rho)
+   kxc_(:,1)=half*(kxc(:,1)+kxc(:,9)+kxc(:,10))
+   kxc_(:,2)=half*kxc(:,3)+kxc(:,12)
+   kxc_(:,3)=quarter*kxc(:,5)+kxc(:,13)
+   kxc_(:,4)=eighth*kxc(:,7)+kxc(:,15)
+   kxc_(:,5)=kxc(:,18)
+   kxc_(:,6)=kxc(:,20)
+   kxc_(:,7)=kxc(:,22)
  else
    kxc_ => kxc
  end if
@@ -168,14 +170,8 @@ subroutine dfpt_mkvxcgga(cplex,gprimd,kxc,mpi_enreg,nfft,ngfft,&
 !Transfer the ground-state density and its gradient to spin-polarized storage
 !rhortmp(:,:,1) contains the GS density, and
 !rhortmp(:,:,2:4) contains the gradients of the GS density
- ABI_ALLOCATE(rhortmp,(nfft,nspden,4))
- if(nspden==1)then
-   do ii=1,4
-     do ir=1,nfft
-       rhortmp(ir,1,ii)=kxc_(ir,8+ii)
-     end do
-   end do
- else
+ if(nspden==2)then
+   ABI_ALLOCATE(rhortmp,(nfft,nspden,4))
    do ii=1,4
      do ir=1,nfft
        rhortmp(ir,1,ii)=kxc_(ir,15+2*ii)
@@ -191,14 +187,12 @@ subroutine dfpt_mkvxcgga(cplex,gprimd,kxc,mpi_enreg,nfft,ngfft,&
  if (cplex==1) then  ! Treat real case first
    if (nspden==1) then
      do ir=1,nfft
-       r0(:)=rhortmp(ir,1,2:4) ; r1(:)=rho1now(ir,1,2:4)
+       r0(:)=kxc_(ir,5:7) ; r1(:)=rho1now(ir,1,2:4)
        gradrho_gradrho1=r1(1)*r0(1)+r1(2)*r0(2)+r1(3)*r0(3)
-       dnexcdn(ir,1)=(kxc_(ir,1)+kxc_(ir,5))*rho1now(ir,1,1) &
-&                   +(kxc_(ir,3)+kxc_(ir,7))*gradrho_gradrho1 
-       coeff_grho=(kxc_(ir,3)+kxc_(ir,7))*rho1now(ir,1,1) &
-&                +(kxc_(ir,4)+kxc_(ir,8))*gradrho_gradrho1
+       dnexcdn(ir,1)=kxc_(ir,1)*rho1now(ir,1,1) + kxc_(ir,3)*gradrho_gradrho1 
+       coeff_grho=kxc_(ir,3)*rho1now(ir,1,1) + kxc_(ir,4)*gradrho_gradrho1
   !    Reuse the storage in rho1now
-       rho1now(ir,1,2:4)=r1(:)*(kxc_(ir,2)+kxc_(ir,6))+r0(:)*coeff_grho
+       rho1now(ir,1,2:4)=r1(:)*kxc_(ir,2)+r0(:)*coeff_grho
      end do
    else
      do ir=1,nfft
@@ -238,22 +232,18 @@ subroutine dfpt_mkvxcgga(cplex,gprimd,kxc,mpi_enreg,nfft,ngfft,&
  else ! if cplex==2
    if (nspden==1) then
      do ir=1,nfft
-       r0(:)=rhortmp(ir,1,2:4)
+       r0(:)=kxc_(ir,5:7)
        r1(:)  =rho1now(2*ir-1,1,2:4)
        r1im(:)=rho1now(2*ir  ,1,2:4)
        gradrho_gradrho1  =r1(1)*r0(1)+r1(2)*r0(2)+r1(3)*r0(3)
        gradrho_gradrho1im=r1im(1)*r0(1)+r1im(2)*r0(2)+r1im(3)*r0(3)
-       dnexcdn(2*ir-1,1)=(kxc_(ir,1)+kxc_(ir,5))*rho1now(2*ir-1,1,1) &
-&                       +(kxc_(ir,3)+kxc_(ir,7))*gradrho_gradrho1 
-       dnexcdn(2*ir  ,1)=(kxc_(ir,1)+kxc_(ir,5))*rho1now(2*ir  ,1,1) &
-&                       +(kxc_(ir,3)+kxc_(ir,7))*gradrho_gradrho1im
-       coeff_grho  =(kxc_(ir,3)+kxc_(ir,7))*rho1now(2*ir-1,1,1) &
-&                  +(kxc_(ir,4)+kxc_(ir,8))*gradrho_gradrho1
-       coeffim_grho=(kxc_(ir,3)+kxc_(ir,7))*rho1now(2*ir  ,1,1) &
-&                  +(kxc_(ir,4)+kxc_(ir,8))*gradrho_gradrho1im
+       dnexcdn(2*ir-1,1)=kxc_(ir,1)*rho1now(2*ir-1,1,1) + kxc_(ir,3)*gradrho_gradrho1 
+       dnexcdn(2*ir  ,1)=kxc_(ir,1)*rho1now(2*ir  ,1,1) + kxc_(ir,3)*gradrho_gradrho1im
+       coeff_grho  =kxc_(ir,3)*rho1now(2*ir-1,1,1) + kxc_(ir,4)*gradrho_gradrho1
+       coeffim_grho=kxc_(ir,3)*rho1now(2*ir  ,1,1) + kxc_(ir,4)*gradrho_gradrho1im
   !    Reuse the storage in rho1now
-       rho1now(2*ir-1,1,2:4)=r1(:)  *(kxc_(ir,2)+kxc_(ir,6))+r0(:)*coeff_grho
-       rho1now(2*ir  ,1,2:4)=r1im(:)*(kxc_(ir,2)+kxc_(ir,6))+r0(:)*coeffim_grho
+       rho1now(2*ir-1,1,2:4)=r1(:)  *kxc_(ir,2)+r0(:)*coeff_grho
+       rho1now(2*ir  ,1,2:4)=r1im(:)*kxc_(ir,2)+r0(:)*coeffim_grho
      end do
    else
      do ir=1,nfft
@@ -325,7 +315,9 @@ subroutine dfpt_mkvxcgga(cplex,gprimd,kxc,mpi_enreg,nfft,ngfft,&
 !call filterpot(paral_kgb,cplex,gmet,gsqcut,nfft,ngfft,nspden,qphon,vxc1)
 
  ABI_DEALLOCATE(dnexcdn)
- ABI_DEALLOCATE(rhortmp)
+ if (nspden==2) then
+   ABI_DEALLOCATE(rhortmp)
+ end if
  ABI_DEALLOCATE(rho1now)
  if (nspden==1) then
    ABI_DEALLOCATE(kxc_)
