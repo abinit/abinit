@@ -1,6 +1,42 @@
 #if defined HAVE_CONFIG_H
 #include "config.h"
 #endif
+!{\src2tex{textfont=tt}}
+!!****m* ABINIT/m_xgTools
+!! NAME
+!!  m_xgTools
+!! 
+!! FUNCTION 
+!! This is a module to manage and help developer with 2D arrays for low level
+!! routines.
+!! Particularly, it manages memory for allocations and deallocations (see
+!! xg_routines),
+!! It handles MPI, complex and real values (*8 kind only) automatically.
+!! It is also possible to build sub-block of an array and work on it vey easyly(see
+!! xgBlock_routines)
+!! Several routines are also available for performing blas/lapack which again
+!! manage the type and MPI (and openmp if needed)
+!! Almost all routines are timed by abinit timers
+!! This is starting point and have to be improved/developed
+!! An example of how to use those types and routines can be found in
+!! 30_diago/m_lobpcg2.F90. This is a full rewrite of LOBPCG algorithm which uses
+!! only these type to perfom calculations.
+!! 
+!! COPYRIGHT
+!!  Copyright (C) 2016-2017 ABINIT group (J. Bieder)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! NOTES
+!!
+!! PARENTS
+!!  Will be filled automatically by the parent script
+!!
+!! CHILDREN
+!!  Will be filled automatically by the parent script
+!!
+!! SOURCE
 
 #include "abi_common.h"
 
@@ -2123,12 +2159,19 @@ module m_xg
 !End of the abilint section
 
     type(xgBlock_t), intent(inout) :: xgBlock
+    integer :: i
 
     select case(xgBlock%space)
     case (SPACE_R,SPACE_CR)
-      xgBlock%vecR = 0.d0
+      !$omp parallel do
+      do i = 1, xgBlock%cols
+        xgBlock%vecR(:,i) = 0.d0
+      end do
     case (SPACE_C)
-      xgBlock%vecC = dcmplx(0.d0)
+      !$omp parallel do
+      do i = 1, xgBlock%cols
+        xgBlock%vecC = dcmplx(0.d0)
+      end do
     end select
 
   end subroutine xgBlock_zero
@@ -2147,10 +2190,12 @@ module m_xg
 
     select case(xgBlock%space)
     case (SPACE_R,SPACE_CR)
+      !$omp parallel do
       do i = 1, min(xgBlock%rows,xgBlock%cols)
         xgBlock%vecR(i,i) = 1.d0
       end do
     case (SPACE_C)
+      !$omp parallel do
       do i = 1, min(xgBlock%rows,xgBlock%cols)
         xgBlock%vecC(i,i) = dcmplx(1.d0)
       end do
@@ -2179,10 +2224,12 @@ module m_xg
     case (SPACE_R,SPACE_CR)
       select case(diag%space)
       case (SPACE_R,SPACE_CR)
+        !$omp parallel do
         do i = 1, min(xgBlock%rows,xgBlock%cols)
           xgBlock%vecR(i,i) = diag%vecR(i,1)
         end do
       case (SPACE_C)
+        !$omp parallel do
         do i = 1, min(xgBlock%rows,xgBlock%cols)
           xgBlock%vecR(i,i) = dble(diag%vecC(i,1))
         end do
@@ -2190,10 +2237,12 @@ module m_xg
     case (SPACE_C)
       select case(diag%space)
       case (SPACE_R,SPACE_CR)
+        !$omp parallel do
         do i = 1, min(xgBlock%rows,xgBlock%cols)
           xgBlock%vecC(i,i) = dcmplx(diag%vecR(i,1))
         end do
       case (SPACE_C)
+        !$omp parallel do
         do i = 1, min(xgBlock%rows,xgBlock%cols)
           xgBlock%vecC(i,i) = diag%vecR(i,1)
         end do
