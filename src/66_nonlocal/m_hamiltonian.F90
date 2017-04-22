@@ -465,7 +465,7 @@ module m_hamiltonian
 
   real(dp), ABI_CONTIGUOUS pointer :: vlocal1(:,:,:,:) => null()
    ! vlocal1(cplex*n4,n5,n6,nvloc)
-   ! &st-order local potential in real space, on the augmented fft grid
+   ! 1st-order local potential in real space, on the augmented fft grid
 
  end type rf_hamiltonian_type
 

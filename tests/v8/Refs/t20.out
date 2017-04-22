@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see http://www.abinit.org .
 
-.Starting date : Thu 20 Apr 2017.
-- ( at 11h59 )
+.Starting date : Sat 22 Apr 2017.
+- ( at 01h55 )
   
 - input  file    -> t20.in
 - output file    -> t20.out
@@ -483,43 +483,43 @@ P newkpt: treating     22 bands with npw=     340 for ikpt=   7 by node    0
 P newkpt: treating     22 bands with npw=     370 for ikpt=   8 by node    0
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   12.116032240105      1.212E+01 2.496E-32 7.250E+03
- ETOT  2   17.525436320679      5.409E+00 1.354E-03 1.381E+04
- ETOT  3   12.304845229008     -5.221E+00 1.300E-03 1.180E+03
- ETOT  4   13.726990093459      1.422E+00 1.163E-04 6.578E+00
- ETOT  5   14.973803531080      1.247E+00 2.210E-05 9.468E-02
- ETOT  6   15.092651878313      1.188E-01 5.581E-07 5.553E-05
- ETOT  7   15.096543906095      3.892E-03 5.087E-08 2.124E-06
- ETOT  8   15.096688760919      1.449E-04 1.875E-09 4.020E-10
- ETOT  9   15.096694322286      5.561E-06 2.989E-09 2.948E-12
- ETOT 10   15.096694848288      5.260E-07 4.610E-10 1.291E-14
- ETOT 11   15.096694845951     -2.338E-09 7.386E-10 1.849E-15
+-ETOT  1   12.142549007466      1.214E+01 2.496E-32 7.265E+03
+ ETOT  2   17.562182618791      5.420E+00 1.358E-03 1.388E+04
+ ETOT  3   12.291330265382     -5.271E+00 1.303E-03 1.174E+03
+ ETOT  4   13.719978999441      1.429E+00 1.161E-04 6.635E+00
+ ETOT  5   14.967390527142      1.247E+00 2.222E-05 8.231E-02
+ ETOT  6   15.084638356111      1.172E-01 5.407E-07 9.984E-05
+ ETOT  7   15.088474507966      3.836E-03 5.031E-08 6.622E-07
+ ETOT  8   15.088595886847      1.214E-04 1.861E-09 7.020E-10
+ ETOT  9   15.088601729661      5.843E-06 3.014E-09 1.571E-12
+ ETOT 10   15.088602269784      5.401E-07 4.547E-10 1.314E-14
+ ETOT 11   15.088602270750      9.656E-10 7.403E-10 2.018E-15
 
  At SCF step   11, etot is converged : 
-  for the second time, diff in etot=  2.338E-09 < toldfe=  1.000E-06
+  for the second time, diff in etot=  9.656E-10 < toldfe=  1.000E-06
  Integrated electronic and magnetization densities in atomic spheres:
  ---------------------------------------------------------------------
  Note: Diff(up-dn) is a rough approximation of local magnetic moment
  Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
-    1   2.00000    12.849289   -11.170612      1.678677    24.019902
+    1   2.00000    12.849999   -11.164985      1.685014    24.014983
  ---------------------------------------------------------------------
-  Sum:             12.849289   -11.170612      1.678677    24.019902
- Total magnetization (from the atomic spheres):            24.019902
- Total magnetization (exact up - dn):                      30.193390
+  Sum:             12.849999   -11.164985      1.685014    24.014983
+ Total magnetization (from the atomic spheres):            24.014983
+ Total magnetization (exact up - dn):                      30.177205
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   2.3774E-12; max=  7.3856E-10
+ Mean square residual over all n,k,spin=   2.3508E-12; max=  7.4026E-10
 
  Eight components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
-     kin0=   1.28571071E-01 eigvalue=   7.57451131E-03  local=  -6.76884567E-03
+     kin0=   1.28559452E-01 eigvalue=   7.57409118E-03  local=  -6.76904161E-03
  4,5,6: 1st-order hamiltonian combined with 1st and 0th-order wfs
- loc psp =   0.00000000E+00  Hartree=   1.99116443E+00     xc=  -1.52646664E+01
+ loc psp =   0.00000000E+00  Hartree=   1.99038581E+00     xc=  -1.52507994E+01
  note that "loc psp" includes a xc core correction that could be resolved
  7,8,9: eventually, occupation + non-local contributions
-    edocc=   2.82697597E+01     enl0=  -2.89396282E-02   enl1=   0.00000000E+00
+    edocc=   2.82485854E+01     enl0=  -2.89340622E-02   enl1=   0.00000000E+00
  1-9 gives the relaxation energy (to be shifted if some occ is /=2.0)
    erelax=   0.00000000E+00
 ================================================================================
@@ -561,7 +561,7 @@ P newkpt: treating     22 bands with npw=     370 for ikpt=   8 by node    0
               amu      5.58470000E+01
              ecut      2.00000000E+01 Hartree
            etotal1    -2.4796967735E+01
-           etotal2     1.5096694846E+01
+           etotal2     1.5088602271E+01
             fcart1    -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
             fcart2     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
 -          fftalg         312
@@ -779,10 +779,10 @@ P          mk1mem           8
 - Computational Materials Science 25, 478-492 (2002). http://dx.doi.org/10.1016/S0927-0256(02)00325-7
 - Comment : the original paper describing the ABINIT project.
 -
-- Proc.   0 individual time (sec): cpu=          9.3  wall=          9.3
+- Proc.   0 individual time (sec): cpu=          9.1  wall=          9.1
 
 ================================================================================
 
  Calculation completed.
 .Delivered   7 WARNINGs and   0 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          9.3  wall=          9.3
++Overall time at end (sec) : cpu=          9.1  wall=          9.1

@@ -195,6 +195,7 @@ subroutine dfpt_wfkfermi(cg,cgq,cplex,cprj,cprjq,&
 !Arguments of getgh1c routine (want only (NL+kin) frozen H(1))
  berryopt=0;usevnl=0;sij_opt=-gs_hamkq%usepaw;tim_getgh1c=3
  optlocal=0;optnl=1;opt_gvnl1=0
+ if(ipert==gs_hamkq%natom+5) optnl=0; ! no 1st order NL in H(1), also no kin, but this will be taken into account later
 !Arguments of the dfpt_accrho routine
  tim_fourwf=5 ; opt_accrho=1 ; opt_corr=0
 !Null potentially unassigned output variables
@@ -248,6 +249,7 @@ subroutine dfpt_wfkfermi(cg,cgq,cplex,cprj,cprjq,&
        call status(0,dtfil%filstat,iexit,level,'after wf read ')
      end if
 
+
 !    Apply H^(1)-Esp.S^(1) to Psi^(0) (H(^1)=only (NL+kin) frozen part)
      lambda=eig0_k(iband)
      call getgh1c(berryopt,cwave0,cwaveprj0,gh1,dum_grad_berry,dum_gs1,gs_hamkq,dum_gvnl1,&
@@ -259,7 +261,6 @@ subroutine dfpt_wfkfermi(cg,cgq,cplex,cprj,cprjq,&
 &     mpi_enreg%comm_spinorfft)
      indx=2*iband-1+(iband-1)*2*nband_k
      eig1_k(indx)=dotr
-
 !    Compute the fixed contribution to the 1st-order Fermi energy
      fe1fixed_k(iband)=two*wtband*eig1_k(indx)
      fe1norm_k(iband) =two*wtband

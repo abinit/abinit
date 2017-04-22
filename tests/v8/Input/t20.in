@@ -1,7 +1,5 @@
-# Test for collinear dfpt response with bfield (rfmagn input variable)
-# bcc Fe, low ecut
-# note: currently in development, the results are not fully physical
-
+# Test for collinear dfpt response with B field (rfmagn input variable)
+# bcc Fe, low ecut, coars kpt grid
 
   ndtset  2
 
@@ -45,7 +43,7 @@
   tolvrs1  1.0d-10
 
 #####################################################
-# Dataset 2 (dfpt run to get susceptibility response)
+# Dataset 2 (dfpt run to get B-field response)
 #####################################################
 
  toldfe2    1.0d-6
