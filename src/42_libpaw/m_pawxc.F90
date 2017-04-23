@@ -1674,7 +1674,8 @@ subroutine pawxc3_gga(corexc1,cplex_den,cplex_vxc,d2enxc,ixc,kxc,lm_size,lmselec
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: cplex_den,cplex_vxc,ixc,lm_size,nkxc,nrad,nspden,option,usecore,usexcnhat,xclevel
+ integer,intent(in) :: cplex_den,cplex_vxc,ixc,lm_size,nkxc,nrad,nspden,option
+ integer,intent(in) :: usecore,usexcnhat,xclevel
  real(dp),intent(out) :: d2enxc
  real(dp),intent(out),optional :: d2enxc_im
  type(pawang_type),intent(in) :: pawang
@@ -1695,7 +1696,7 @@ subroutine pawxc3_gga(corexc1,cplex_den,cplex_vxc,d2enxc,ixc,kxc,lm_size,lmselec
  real(dp) :: coeff_grho,coeff_grho_corr,coeff_grho_dn,coeff_grho_up
  real(dp) :: coeff_grhoim,coeff_grhoim_corr,coeff_grhoim_dn,coeff_grhoim_up
  real(dp) :: dylmdr_ii,factor,factor_ang_intg,ylm_ii
- real(dp) :: grho_grho,grho_grho1,grho_grho1_up,grho_grho1_dn
+ real(dp) :: grho_grho1,grho_grho1_up,grho_grho1_dn
  real(dp) :: grho_grho1im,grho_grho1im_up,grho_grho1im_dn
  real(dp) :: rho_dn,rho_up,rhoim_dn,rhoim_up
  real(dp) :: ro11i,ro11r,ro12i,ro12r,ro21i,ro21r,ro22i,ro22r
@@ -1705,7 +1706,6 @@ subroutine pawxc3_gga(corexc1,cplex_den,cplex_vxc,d2enxc,ixc,kxc,lm_size,lmselec
  real(dp) :: g0(3),g0_dn(3),g0_up(3),g1(3),g1_dn(3),g1_up(3)
  real(dp) :: g1im(3),g1im_dn(3),g1im_up(3)
  real(dp) :: gxc1i(3,2),gxc1r(3,2)
-! real(dp) :: tsec(2)
  real(dp),allocatable :: dgxc1(:),drho1(:,:),drho1core(:,:),dylmdr(:,:,:)
  real(dp),allocatable :: ff(:),gg(:),grho1_updn(:,:,:),gxc1(:,:,:,:)
  real(dp),allocatable :: kxc_(:,:),rho1_updn(:,:),rho1arr(:,:,:)
@@ -1852,7 +1852,7 @@ subroutine pawxc3_gga(corexc1,cplex_den,cplex_vxc,d2enxc,ixc,kxc,lm_size,lmselec
      if (xclevel==1.or.ixc==13) then
 
 !      Non-spin-polarized
-       if(nspden==1)then
+       if (nspden==1) then
          if (cplex_vxc==1) then
            if (cplex_den==1) then  ! cplex_vxc==1 and cplex_den==1
              vxc1_(1:nrad,ipts,1)=kxc(1:nrad,ipts,1)*rho1arr(1:nrad,1,ipts)
@@ -2041,8 +2041,9 @@ subroutine pawxc3_gga(corexc1,cplex_den,cplex_vxc,d2enxc,ixc,kxc,lm_size,lmselec
 
          do ir=1,nrad
            jr=cplex_den*(ir-1)+1 ; kr=cplex_vxc*(ir-1)+1
-           g0(:)=kxc_(ir,5:7) ; g1(:)=grho1_updn(jr,1,2:4)
-           grho_grho1=g1(1)*g0(1)+g1(2)*g0(2)+g1(3)*g0(3)
+
+           g0(:)=kxc_(ir,5:7) ; g1(:)=grho1_updn(jr,1,:)
+           grho_grho1=dot_product(g0,g1)
            coeff_grho=kxc_(ir,3)*rho1_updn(jr,1)+kxc_(ir,4)*grho_grho1
            vxc1_(kr,ipts,1)=kxc_(ir,1)*rho1_updn(jr,1)+kxc_(ir,3)*grho_grho1
            gxc1r(:,1)=g1(:)*kxc_(ir,2)+g0(:)*coeff_grho
@@ -2056,7 +2057,8 @@ subroutine pawxc3_gga(corexc1,cplex_den,cplex_vxc,d2enxc,ixc,kxc,lm_size,lmselec
            if (cplex_vxc==2) then
              if (cplex_den==2) then
                g1im(:)=grho1_updn(jr+1,1,2:4)
-               grho_grho1im=g1im(1)*g0(1)+g1im(2)*g0(2)+g1im(3)*g0(3)
+               grho_grho1im=dot_product(g0,g1im)
+               coeff_grhoim=kxc_(ir,3)*rho1_updn(jr+1,1)+kxc_(ir,4)*grho_grho1im
                vxc1_(kr+1,ipts,1)=kxc_(ir,1)*rho1_updn(jr+1,1)+kxc_(ir,3)*grho_grho1im
                gxc1i(:,1)=g1im(:)*kxc_(ir,2)+g0(:)*coeff_grhoim
                !Accumulate gxc1_lm moments as Intg[gxc1(omega).Ylm(omega).d_omega]
@@ -2072,148 +2074,97 @@ subroutine pawxc3_gga(corexc1,cplex_den,cplex_vxc,d2enxc,ixc,kxc,lm_size,lmselec
            end if
          end do ! ir
 
-!      A- POLARIZED SYSTEMS (COLLINEAR)
+!      B- POLARIZED SYSTEMS (COLLINEAR)
        else ! nspden==2
 
-! TO BE COMPLETED
-!       do ir=1,nrad
-!         if (cplex_vxc==1) then  ! cplex_vxc==1 and (cplex_den==1 or cplex_den=2)
-!           jr=cplex_den*(ir-1)+1
-!           g0_up(:)=grho_updn(ir,1,:)    ! grad of spin-up GS rho    WARNING: USE KXC INSTEAD
-!           g0_dn(:)=grho_updn(ir,2,:)    ! grad of spin-down GS rho
-!           g0(:)=g0_up(:)+g0_dn(:)       ! grad of GS rho
-!           g1_up(:)=grho1_updn(jr,1,:)   ! grad of spin-up rho1
-!           g1_dn(:)=grho1_updn(jr,2,:)   ! grad of spin-down rho1
-!           g1(:)=g1_up(:)+g1_dn(:)       ! grad of GS rho1
-!           grho_grho1_up=g1_up(1)*g0_up(1)+g1_up(2)*g0_up(2)+g1_up(3)*g0_up(3)
-!           grho_grho1_dn=g1_dn(1)*g0_dn(1)+g1_dn(2)*g0_dn(2)+g1_dn(3)*g0_dn(3)
-!           grho_grho1   =g1   (1)*g0   (1)+g1   (2)*g0   (2)+g1   (3)*g0   (3)
-!           grho_grho    =g0   (1)*g0   (1)+g0   (2)*g0   (2)+g0   (3)*g0   (3)
-!           vxc1_(ir,ipts,1)=(kxc(ir,ipts, 1)+kxc(ir,ipts, 9))*rho1_updn(jr,1) &
-!&           +kxc(ir,ipts,10)                 *rho1_updn(jr,2) &
-!&           +kxc(ir,ipts, 5)*grho_grho1_up &
-!&           +kxc(ir,ipts,13)*grho_grho1
-!           if (nspden==2) then
-!             vxc1_(ir,ipts,2)=(kxc(ir,ipts, 2)+kxc(ir,ipts,11))*rho1_updn(jr,2) &
-!&             +kxc(ir,ipts,10)                 *rho1_updn(jr,1) &
-!&             +kxc(ir,ipts, 6)*grho_grho1_dn &
-!&             +kxc(ir,ipts,14)*grho_grho1
-!           end if
-!           coeff_grho_corr=kxc(ir,ipts,13)*rho1_updn(jr,1)+kxc(ir,ipts,14)*rho1_updn(jr,2) &
-!&           +kxc(ir,ipts,15)*grho_grho1
-!           coeff_grho_up  =kxc(ir,ipts, 5)*rho1_updn(jr,1)+kxc(ir,ipts, 7)*grho_grho1_up
-!           coeff_grho_dn  =kxc(ir,ipts, 6)*rho1_updn(jr,2)+kxc(ir,ipts, 8)*grho_grho1_dn
-!           gxc1r(1:3,1)=g1_up(1:3)*(kxc(ir,ipts, 3)+kxc(ir,ipts,12))+g1_dn(1:3)*kxc(ir,ipts,12) &
-!&           +g0_up(1:3)*coeff_grho_up+g0(1:3)*coeff_grho_corr
-!           gxc1r(1:3,2)=g1_dn(1:3)*(kxc(ir,ipts, 4)+kxc(ir,ipts,12))+g1_up(1:3)*kxc(ir,ipts,12) &
-!&           +g0_dn(1:3)*coeff_grho_dn+g0(1:3)*coeff_grho_corr
-!           if (grho_grho<tol24) gxc1r(:,:)=zero ! ???
-!           do ispden=1,nspden2
-!             do ilm=1,pawang%ylm_size
-!               do ii=1,3
-!                 gxc1(ir,ii,ilm,ispden)=gxc1(ir,ii,ilm,ispden) &
-!                 +gxc1r(ii,ispden)*pawang%ylmr(ilm,ipts)*pawang%angwgth(ipts)*factor_ang_intg
-!               end do
-!             end do
-!           end do
-!!          abirules
-!           if (.false.) write(std_out,*) coeff_grhoim_corr,coeff_grhoim_dn,coeff_grhoim_up
-!           if (.false.) write(std_out,*) grho_grho1im,grho_grho1im_up,grho_grho1im_dn
-!           if (.false.) write(std_out,*) gxc1i,g1im,g1im_dn,g1im_up
-!          else
-!          if (cplex_den==1) then  ! cplex_vxc==2 and cplex_den==1
-!          jr=2*ir-1
-!          g0_up(:)=grho_updn(ir,1,:)     ! grad of spin-up GS rho
-!          g0_dn(:)=grho_updn(ir,2,:)     ! grad of spin-down GS rho
-!          g0(:)=g0_up(:)+g0_dn(:)        ! grad of GS rho
-!          g1_up(:)=grho1_updn(ir,1,:)    ! grad of spin-up rho1
-!          g1_dn(:)=grho1_updn(ir,2,:)    ! grad of spin-down rho1
-!          g1(:)=g1_up(:)+g1_dn(:)        ! grad of GS rho1
-!          grho_grho1_up=g1_up(1)*g0_up(1)+g1_up(2)*g0_up(2)+g1_up(3)*g0_up(3)
-!          grho_grho1_dn=g1_dn(1)*g0_dn(1)+g1_dn(2)*g0_dn(2)+g1_dn(3)*g0_dn(3)
-!          grho_grho1   =g1(1)*g0(1)+g1(2)*g0(2)+g1(3)*g0(3)
-!          vxc1_(jr  ,ipts,1)=(kxc(ir,ipts,1)+kxc(ir,ipts,9))*rho1_updn(ir,1) &
-!          &             +kxc(ir,ipts,10)*rho1_updn(ir,2) &
-!          &             +kxc(ir,ipts,5)*grho_grho1_up &
-!          &             +kxc(ir,ipts,13)*grho_grho1
-!          vxc1_(jr+1,ipts,1)=zero
-!          vxc1_(jr  ,ipts,2)=(kxc(ir,ipts,2)+kxc(ir,ipts,11))*rho1_updn(ir,2) &
-!          &             +kxc(ir,ipts,10)*rho1_updn(ir,1) &
-!          &             +kxc(ir,ipts,6)*grho_grho1_dn &
-!          &             +kxc(ir,ipts,14)*grho_grho1
-!          vxc1_(jr+1,ipts,2)=zero
-!          coeff_grho_corr=kxc(ir,ipts,13)*rho1_updn(ir,1)+kxc(ir,ipts,14)*rho1_updn(ir,2) &
-!          &             +kxc(ir,ipts,15)*grho_grho1
-!          coeff_grho_up  =kxc(ir,ipts,5)*rho1_updn(ir,1)+kxc(ir,ipts,7)*grho_grho1_up
-!          coeff_grho_dn  =kxc(ir,ipts,6)*rho1_updn(ir,2)+kxc(ir,ipts,8)*grho_grho1_dn
-!          grho1_updn(jr  ,1,:)=g1_up(:)*(kxc(ir,ipts,3)+kxc(ir,ipts,12))+g1_dn(:)*kxc(ir,ipts,12) &
-!          &             +g0_up(:)*coeff_grho_up+g0(:)*coeff_grho_corr
-!          grho1_updn(jr+1,1,:)=zero
-!          grho1_updn(jr,2,:)=g1_dn(:)*(kxc(ir,ipts,4)+kxc(ir,ipts,12))+g1_up(:)*kxc(ir,ipts,12) &
-!          &             +g0_dn(:)*coeff_grho_dn+g0(:)*coeff_grho_corr
-!          grho1_updn(jr+1,2,:)=zero
-!          else                    ! cplex_vxc==2 and cplex_den==2
-!          jr=2*ir-1
-!          g0_up(:)=grho_updn(ir,1,:)       ! grad of spin-up GS rho
-!          g0_dn(:)=grho_updn(ir,2,:)       ! grad of spin-down GS rho
-!          g0(:)=g0_up(:)+g0_dn(:)          ! grad of GS rho
-!          g1_up(:)  =grho1_updn(jr  ,1,:)  ! grad of spin-up rho1
-!          g1im_up(:)=grho1_updn(jr+1,1,:)  ! grad of spin-up rho1, im part
-!          g1_dn(:)  =grho1_updn(jr  ,2,:)  ! grad of spin-down rho1
-!          g1im_dn(:)=grho1_updn(jr+1,2,:)  ! grad of spin-down rho1, im part
-!          g1(:)=g1_up(:)+g1_dn(:)          ! grad of GS rho1
-!          g1im(:)=g1im_up(:)+g1im_dn(:)    ! grad of GS rho1, im part
-!          grho_grho1_up=g1_up(1)*g0_up(1)+g1_up(2)*g0_up(2)+g1_up(3)*g0_up(3)
-!          grho_grho1_dn=g1_dn(1)*g0_dn(1)+g1_dn(2)*g0_dn(2)+g1_dn(3)*g0_dn(3)
-!          grho_grho1   =g1(1)*g0(1)+g1(2)*g0(2)+g1(3)*g0(3)
-!          grho_grho1im_up=g1im_up(1)*g0_up(1)+g1im_up(2)*g0_up(2)+g1im_up(3)*g0_up(3)
-!          grho_grho1im_dn=g1im_dn(1)*g0_dn(1)+g1im_dn(2)*g0_dn(2)+g1im_dn(3)*g0_dn(3)
-!          grho_grho1im   =g1im(1)*g0(1)+g1im(2)*g0(2)+g1im(3)*g0(3)
-!          vxc1_(jr  ,ipts,1)=(kxc(ir,ipts,1)+kxc(ir,ipts,9))*rho1_updn(jr,1) &
-!          &             +kxc(ir,ipts,10)*rho1_updn(jr,2) &
-!          &             +kxc(ir,ipts,5)*grho_grho1_up &
-!          &             +kxc(ir,ipts,13)*grho_grho1
-!          vxc1_(jr+1,ipts,1)=(kxc(ir,ipts,1)+kxc(ir,ipts,9))*rho1_updn(jr+1,1) &
-!          &             +kxc(ir,ipts,10)*rho1_updn(jr+1,2) &
-!          &             +kxc(ir,ipts,5)*grho_grho1im_up &
-!          &             +kxc(ir,ipts,13)*grho_grho1im
-!          vxc1_(jr  ,ipts,2)=(kxc(ir,ipts,2)+kxc(ir,ipts,11))*rho1_updn(jr,2) &
-!          &             +kxc(ir,ipts,10)*rho1_updn(jr,1) &
-!          &             +kxc(ir,ipts,6)*grho_grho1_dn &
-!          &             +kxc(ir,ipts,14)*grho_grho1
-!          vxc1_(jr+1,ipts,2)=(kxc(ir,ipts,2)+kxc(ir,ipts,11))*rho1_updn(jr+1,2) &
-!          &             +kxc(ir,ipts,10)*rho1_updn(jr+1,1) &
-!          &             +kxc(ir,ipts,6)*grho_grho1im_dn &
-!          &             +kxc(ir,ipts,14)*grho_grho1im
-!          coeff_grho_corr  =kxc(ir,ipts,13)*rho1_updn(jr,1)+kxc(ir,ipts,14)*rho1_updn(jr,2) &
-!          &             +kxc(ir,ipts,15)*grho_grho1
-!          coeff_grhoim_corr=kxc(ir,ipts,13)*rho1_updn(jr+1,1)+kxc(ir,ipts,14)*rho1_updn(jr+1,2) &
-!          &             +kxc(ir,ipts,15)*grho_grho1im
-!          coeff_grho_up    =kxc(ir,ipts,5)*rho1_updn(jr,1)+kxc(ir,ipts,7)*grho_grho1_up
-!          coeff_grhoim_up  =kxc(ir,ipts,5)*rho1_updn(jr+1,1)+kxc(ir,ipts,7)*grho_grho1im_up
-!          coeff_grho_dn    =kxc(ir,ipts,6)*rho1_updn(jr,2)+kxc(ir,ipts,8)*grho_grho1_dn
-!          coeff_grhoim_dn  =kxc(ir,ipts,6)*rho1_updn(jr+1,2)+kxc(ir,ipts,8)*grho_grho1im_dn
-!          grho1_updn(jr  ,1,:)=g1_up(:)*(kxc(ir,ipts,3)+kxc(ir,ipts,12))+g1_dn(:)*kxc(ir,ipts,12) &
-!          &             +g0_up(:)*coeff_grho_up+g0(:)*coeff_grho_corr
-!          grho1_updn(jr+1,1,:)=g1im_up(:)*(kxc(ir,ipts,3)+kxc(ir,ipts,12))+g1im_dn(:)*kxc(ir,ipts,12) &
-!          &             +g0_up(:)*coeff_grhoim_up+g0(:)*coeff_grhoim_corr
-!          grho1_updn(jr  ,2,:)=g1_dn(:)*(kxc(ir,ipts,4)+kxc(ir,ipts,12))+g1_up(:)*kxc(ir,ipts,12) &
-!          &             +g0_dn(:)*coeff_grho_dn+g0(:)*coeff_grho_corr
-!          grho1_updn(jr+1,2,:)=g1im_dn(:)*(kxc(ir,ipts,4)+kxc(ir,ipts,12))+g1im_up(:)*kxc(ir,ipts,12) &
-!          &             +g0_dn(:)*coeff_grhoim_dn+g0(:)*coeff_grhoim_corr
-!          end if ! cplex_den
-!          do ispden=1,nspden2
-!          do ilm=1,pawang%ylm_size
-!          do ii=1,3
-!          gxc1(jr  ,ii,ilm,ispden)=gxc1(jr  ,ii,ilm,ispden) &
-!          +gxc1r(ii,ispden)*pawang%ylmr(ilm,ipts)*pawang%angwgth(ipts)*factor_ang_intg
-!          gxc1(jr+1,ii,ilm,ispden)=gxc1(jr+1,ii,ilm,ispden) &
-!          +gxc1i(ii,ispden)*pawang%ylmr(ilm,ipts)*pawang%angwgth(ipts)*factor_ang_intg
-!          end do
-!          end do
-!          end do
-!         end if   ! cplex_vxc
-!       end do ! ir
+         do ir=1,nrad
+           jr=cplex_den*(ir-1)+1 ; kr=cplex_vxc*(ir-1)+1
+
+           g0_up(1)=kxc(ir,ipts,19);g0_dn(1)=kxc(ir,ipts,18)-kxc(ir,ipts,19)
+           g0_up(2)=kxc(ir,ipts,21);g0_dn(2)=kxc(ir,ipts,20)-kxc(ir,ipts,21)
+           g0_up(3)=kxc(ir,ipts,23);g0_dn(3)=kxc(ir,ipts,22)-kxc(ir,ipts,23)
+           g1_up(:)=grho1_updn(jr,1,:);g1_dn(:)=grho1_updn(jr,2,:)
+           g0(:)=g0_up(:)+g0_dn(:);g1(:)=g1_up(:)+g1_dn(:)
+           grho_grho1_up=dot_product(g0,g1_up)
+           grho_grho1_dn=dot_product(g0,g1_dn)
+           grho_grho1   =dot_product(g0,g1)
+           coeff_grho_corr=kxc(ir,ipts,13)*rho1_updn(jr,1) &
+&                         +kxc(ir,ipts,14)*rho1_updn(jr,2) &
+&                         +kxc(ir,ipts,15)*grho_grho1
+           coeff_grho_up=kxc(ir,ipts,5)*rho1_updn(jr,1) &
+&                       +kxc(ir,ipts,7)*grho_grho1_up
+           coeff_grho_dn=kxc(ir,ipts,6)*rho1_updn(jr,2) &
+&                       +kxc(ir,ipts,8)*grho_grho1_dn
+           vxc1_(kr,ipts,1)=(kxc(ir,ipts,1)+kxc(ir,ipts, 9))*rho1_updn(jr,1) &
+&                          +kxc(ir,ipts,10)*rho1_updn(jr,2) &
+&                          +kxc(ir,ipts, 5)*grho_grho1_up &
+&                          +kxc(ir,ipts,13)*grho_grho1
+           vxc1_(kr,ipts,2)=(kxc(ir,ipts,2)+kxc(ir,ipts,11))*rho1_updn(jr,2) &
+&                           +kxc(ir,ipts,10)*rho1_updn(jr,1) &
+&                           +kxc(ir,ipts, 6)*grho_grho1_dn &
+&                           +kxc(ir,ipts,14)*grho_grho1
+           gxc1r(:,1)=g1_up(:)*(kxc(ir,ipts,3)+kxc(ir,ipts,12)) &
+&                    +g1_dn(:)*kxc(ir,ipts,12) &
+&                    +g0_up(:)*coeff_grho_up &
+&                    +g0(:)*coeff_grho_corr
+           gxc1r(:,2)=g1_dn(:)*(kxc(ir,ipts,4)+kxc(ir,ipts,12)) &
+&                    +g1_up(:)*kxc(ir,ipts,12) &
+&                    +g0_dn(:)*coeff_grho_dn &
+&                    +g0(:)*coeff_grho_corr
+           !Accumulate gxc1_lm moments as Intg[gxc1(omega).Ylm(omega).d_omega]
+           do ispden=1,nspden
+             do ilm=1,pawang%ylm_size
+               ylm_ii=pawang%ylmr(ilm,ipts)*pawang%angwgth(ipts)*factor_ang_intg
+               do ii=1,3
+                 gxc1(kr,ii,ilm,ispden)=gxc1(kr,ii,ilm,ispden)+gxc1r(ii,ispden)*ylm_ii
+               end do
+             end do
+           end do
+
+           if (cplex_vxc==2) then
+             if (cplex_den==2) then
+               g1im_up(:)=grho1_updn(jr+1,1,:);g1im_dn(:)=grho1_updn(jr+1,2,:)
+               grho_grho1im_up=dot_product(g0,g1im_up)
+               grho_grho1im_dn=dot_product(g0,g1im_dn)
+               grho_grho1im   =dot_product(g0,g1im)
+               coeff_grhoim_corr=kxc(ir,ipts,13)*rho1_updn(jr+1,1) &
+&                               +kxc(ir,ipts,14)*rho1_updn(jr+1,2) &
+&                               +kxc(ir,ipts,15)*grho_grho1im
+               coeff_grhoim_up=kxc(ir,ipts,5)*rho1_updn(jr+1,1) &
+&                             +kxc(ir,ipts,7)*grho_grho1im_up
+               coeff_grhoim_dn=kxc(ir,ipts,6)*rho1_updn(jr+1,2) &
+&                             +kxc(ir,ipts,8)*grho_grho1im_dn
+               vxc1_(kr+1,ipts,1)=(kxc(ir,ipts,1)+kxc(ir,ipts, 9))*rho1_updn(jr+1,1) &
+&                                +kxc(ir,ipts,10)*rho1_updn(jr+1,2) &
+&                                +kxc(ir,ipts, 5)*grho_grho1im_up &
+&                                +kxc(ir,ipts,13)*grho_grho1im
+               vxc1_(kr+1,ipts,2)=(kxc(ir,ipts,2)+kxc(ir,ipts,11))*rho1_updn(jr+1,2) &
+&                                +kxc(ir,ipts,10)*rho1_updn(jr+1,1) &
+&                                +kxc(ir,ipts, 6)*grho_grho1im_dn &
+&                                +kxc(ir,ipts,14)*grho_grho1im
+               gxc1i(:,1)=g1im_up(:)*(kxc(ir,ipts,3)+kxc(ir,ipts,12)) &
+&                        +g1im_dn(:)*kxc(ir,ipts,12) &
+&                        +g0_up(:)*coeff_grhoim_up &
+&                        +g0(:)*coeff_grhoim_corr
+               gxc1i(:,2)=g1im_dn(:)*(kxc(ir,ipts,4)+kxc(ir,ipts,12)) &
+&                        +g1im_up(:)*kxc(ir,ipts,12) &
+&                        +g0_dn(:)*coeff_grhoim_dn &
+&                        +g0(:)*coeff_grhoim_corr
+               !Accumulate gxc1_lm moments as Intg[gxc1(omega).Ylm(omega).d_omega]
+               do ispden=1,nspden
+                 do ilm=1,pawang%ylm_size
+                   ylm_ii=pawang%ylmr(ilm,ipts)*pawang%angwgth(ipts)*factor_ang_intg
+                   do ii=1,3
+                     gxc1(kr+1,ii,ilm,ispden)=gxc1(kr+1,ii,ilm,ispden)+gxc1i(ii,ispden)*ylm_ii
+                   end do
+                 end do
+               end do
+             else
+               vxc1_(kr+1,ipts,1:2)=zero ; gxc1i(:,1:2)=zero
+             end if
+           end if
+
+         end do ! ir
 
        end if ! nspden
 
@@ -2365,21 +2316,19 @@ subroutine pawxc3_gga(corexc1,cplex_den,cplex_vxc,d2enxc,ixc,kxc,lm_size,lmselec
        else                                          ! other cases for cplex_vxc and cplex_den
          v11i=zero;ro11i=zero
          do ir=1,nrad
-           jr=cplex_vxc*(ir-1)+1
-           v11r=vxc1_(jr,ipts,1);if (cplex_vxc==2) v11i=vxc1_(jr+1,ipts,1)
-           jr=cplex_den*(ir-1)+1
+           jr=cplex_den*(ir-1)+1 ; kr=cplex_vxc*(ir-1)+1
            ro11r=rho1arr(jr,nspden,ipts);if (cplex_den==2) ro11i=rho1arr(jr+1,nspden,ipts)
+           v11r=vxc1_(kr,ipts,1);if (cplex_vxc==2) v11i=vxc1_(kr+1,ipts,1)
            ff(ir)=v11r*ro11r+v11i*ro11i
            if (need_impart) gg(ir)=v11r*ro11i-v11i*ro11r
          end do
          if (nspden==2) then
            v22i=zero;ro22i=zero
            do ir=1,nrad
-             jr=cplex_vxc*(ir-1)+1
-             v22r=vxc1_(jr,ipts,2);if (cplex_vxc==2) v22i=vxc1_(jr+1,ipts,2)
-             jr=cplex_den*(ir-1)+1
+             jr=cplex_den*(ir-1)+1 ; kr=cplex_vxc*(ir-1)+1
              ro22r=rho1arr(jr,1,ipts)-rho1arr(jr,2,ipts)
              if (cplex_den==2) ro22i=rho1arr(jr+1,1,ipts)-rho1arr(jr+1,2,ipts)
+             v22r=vxc1_(kr,ipts,2);if (cplex_vxc==2) v22i=vxc1_(kr+1,ipts,2)
              ff(ir)=ff(ir)+v22r*ro22r+v22i*ro22i
              gg(ir)=gg(ir)+v22r*ro22i-v22i*ro22r
            end do
@@ -2399,17 +2348,7 @@ subroutine pawxc3_gga(corexc1,cplex_den,cplex_vxc,d2enxc,ixc,kxc,lm_size,lmselec
 !        V is stored as : v^11, v^22, V^12, i.V^21 (each are complex)
 !        N is stored as : n, m_x, m_y, mZ          (each are complex)
          do ir=1,nrad
-           jr=cplex_vxc*(ir-1)+1
-           v11r= vxc1_(jr,ipts,1);v22r= vxc1_(jr,ipts,2)
-           v12r= vxc1_(jr,ipts,3);v21i=-vxc1_(jr,ipts,1)
-           if (cplex_vxc==2) then
-             v11i= vxc1_(jr+1,ipts,1);v22i= vxc1_(jr+1,ipts,2)
-             v12i= vxc1_(jr+1,ipts,3);v21r= vxc1_(jr+1,ipts,1)
-           else
-             v11i=zero;v22i=zero
-             v12i=zero;v21i=zero
-           end if
-           jr=cplex_den*(ir-1)+1
+           jr=cplex_den*(ir-1)+1 ; kr=cplex_vxc*(ir-1)+1
            ro11r= rho1arr(jr,1,ipts)+rho1arr(jr,4,ipts)
            ro22r= rho1arr(jr,1,ipts)-rho1arr(jr,4,ipts)
            ro12r= rho1arr(jr,2,ipts);ro12i=-rho1arr(jr,3,ipts)
@@ -2422,12 +2361,22 @@ subroutine pawxc3_gga(corexc1,cplex_den,cplex_vxc,d2enxc,ixc,kxc,lm_size,lmselec
            else
              ro11i=zero;ro22i=zero
            end if
+           v11r= vxc1_(kr,ipts,1);v22r= vxc1_(kr,ipts,2)
+           v12r= vxc1_(kr,ipts,3);v21i=-vxc1_(kr,ipts,1)
+           if (cplex_vxc==2) then
+             v11i= vxc1_(kr+1,ipts,1);v22i= vxc1_(kr+1,ipts,2)
+             v12i= vxc1_(kr+1,ipts,3);v21r= vxc1_(kr+1,ipts,1)
+           else
+             v11i=zero;v22i=zero
+             v12i=zero;v21i=zero
+           end if
 !          Real part
            ff(ir)=half*(v11r*ro11r+v11i*ro11i+v22r*ro22r+v22i*ro22i &
-&           +v12r*ro12r+v12i*ro12i+v21r*ro21r+v21i*ro21i)
+&                      +v12r*ro12r+v12i*ro12i+v21r*ro21r+v21i*ro21i)
 !          Imaginary part
-           if (need_impart) gg(ir)=half*(v11r*ro11i-v11i*ro11r+v22r*ro22i-v22i*ro22r &
-&           +v12r*ro12i-v12i*ro12r+v21r*ro21i-v21i*ro21r)
+           if (need_impart) &
+&            gg(ir)=half*(v11r*ro11i-v11i*ro11r+v22r*ro22i-v22i*ro22r &
+&                        +v12r*ro12i-v12i*ro12r+v21r*ro21i-v21i*ro21r)
          end do
        end if ! cplex_vxc and cplex_den
      end if ! nspden
