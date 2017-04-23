@@ -703,7 +703,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 &         dtset%nsppol,dtset%typat,pawtab=pawtab,mpi_atmtab=mpi_enreg%my_atmtab,&
 &         comm_atom=mpi_enreg%comm_atom)
        end if
-
+      
        call dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
 &       doccde_rbz,docckqde,dtfil,dtset,eigenq,eigen0,eigen1,fe1fixed,gmet,gprimd,idir,&
 &       indsy1,ipert,irrzon1,istwfk_rbz,kg,kg1,kpt_rbz,dtset%mband,mkmem,mkqmem,mk1mem,mpi_enreg,&
@@ -1200,12 +1200,13 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 
  if(ipert==dtset%natom+5)then
   !debug: write out the vtk first-order density components
-  call appdig(pertcase,dtfil%fnameabo_den,fi1o_vtk)
-  call printmagvtk(mpi_enreg,nspden,nfftf,ngfftf,rhor1,rprimd,adjustl(adjustr(fi1o_vtk)//".vtk"))
+  !call appdig(pertcase,dtfil%fnameabo_den,fi1o_vtk)
+  !call printmagvtk(mpi_enreg,nspden,nfftf,ngfftf,rhor1,rprimd,adjustl(adjustr(fi1o_vtk)//".vtk"))
   !compute the contributions to susceptibility from different attomic spheres:
   call calcdensph(gmet,mpi_enreg,dtset%natom,nfftf,ngfftf,nspden,&
 &   dtset%ntypat,ab_out,dtset%ratsph,rhor1,rprimd,dtset%typat,ucvol,xred,&
-&   0,intgden,dentot)
+&   idir+1,intgden,dentot)
+
  endif
 
  if (iwrite_fftdatar(mpi_enreg)) then

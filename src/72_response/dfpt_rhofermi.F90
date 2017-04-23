@@ -247,6 +247,7 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
  real(dp),allocatable :: kinpw1(:),kpg1_k(:,:),kpg_k(:,:)
  real(dp),allocatable :: occ_k(:),occ_kq(:),ph3d(:,:,:),ph3d1(:,:,:)
  real(dp),allocatable :: rhoaug(:,:,:),rhogfermi(:,:),rhowfr(:,:)
+ real(dp),allocatable :: rhoaug4(:,:,:,:)
  real(dp),allocatable :: rocceig(:,:),ylm1_k(:,:),ylm_k(:,:),ylmgr1_k(:,:,:)
  type(paw_ij_type),allocatable :: paw_ij1fr(:)
  type(pawrhoij_type),pointer :: pawrhoijfermi_unsym(:)
@@ -286,7 +287,11 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
  qne0=(dtset%qptn(1)**2+dtset%qptn(2)**2+dtset%qptn(3)**2>=tol14)
  mbd2kpsp=2*mband**2*nkpt_rbz*nsppol
  fe1norm=zero
- ABI_ALLOCATE(rhoaug,(cplex*n4,n5,n6))
+ if (nspden/=4) then
+   ABI_ALLOCATE(rhoaug,(cplex*n4,n5,n6))
+ else
+   ABI_ALLOCATE(rhoaug4,(cplex*n4,n5,n6,nspden))
+ end if
  ABI_ALLOCATE(kg_k,(3,mpw))
  ABI_ALLOCATE(kg1_k,(3,mpw1))
  if (psps%usepaw==1) then
@@ -370,7 +375,6 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
 !LOOP OVER SPINS
  do isppol=1,nsppol
    ikg=0;ikg1=0
-
 !  Continue to initialize the Hamiltonian at k+q
    call load_spin_hamiltonian(gs_hamkq,isppol,with_nonlocal=.true.)
    call load_spin_rf_hamiltonian(rf_hamkq,gs_hamkq,isppol,with_nonlocal=.true.)
@@ -387,8 +391,11 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
 
 
 !  Nullify contribution to density at EFermi from this k-point
-   rhoaug(:,:,:)=zero
-
+   if (nspden/=4) then
+     rhoaug(:,:,:)=zero
+   else
+     rhoaug4(:,:,:,:)=zero
+   endif
    call timab(125,1,tsec)
 
 !  BIG FAT k POINT LOOP
@@ -566,11 +573,17 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
      fe1fixed_k(:)=zero ; fe1norm_k(:)=zero
 
 !    Note that dfpt_wfkfermi is called with kpoint, while kpt is used inside dfpt_wfkfermi
-     call dfpt_wfkfermi(cg,cgq,cplex,cprj,cprjq,dtfil,eig0_k,eig1_k,fe1fixed_k,&
-&     fe1norm_k,gs_hamkq,ibg,ibgq,icg,icgq,idir,ikpt,ipert,isppol,dtset%kptopt,mband,&
-&     mcgq,mcprjq,mkmem,mpi_enreg,mpw,nband_k,ncpgr,npw_k,npw1_k,dtset%nspinor,nsppol,occ_k,&
-&     pawrhoijfermi_unsym,prtvol,rf_hamkq,rhoaug,rocceig,wtk_k)
-
+     if (nspden/=4) then
+       call dfpt_wfkfermi(cg,cgq,cplex,cprj,cprjq,dtfil,eig0_k,eig1_k,fe1fixed_k,&
+&       fe1norm_k,gs_hamkq,ibg,ibgq,icg,icgq,idir,ikpt,ipert,isppol,dtset%kptopt,mband,&
+&       mcgq,mcprjq,mkmem,mpi_enreg,mpw,nband_k,ncpgr,npw_k,npw1_k,dtset%nspinor,nsppol,occ_k,&
+&       pawrhoijfermi_unsym,prtvol,rf_hamkq,rhoaug,rocceig,wtk_k)
+     else
+       call dfpt_wfkfermi(cg,cgq,cplex,cprj,cprjq,dtfil,eig0_k,eig1_k,fe1fixed_k,&
+&       fe1norm_k,gs_hamkq,ibg,ibgq,icg,icgq,idir,ikpt,ipert,isppol,dtset%kptopt,mband,&
+&       mcgq,mcprjq,mkmem,mpi_enreg,mpw,nband_k,ncpgr,npw_k,npw1_k,dtset%nspinor,nsppol,occ_k,&
+&       pawrhoijfermi_unsym,prtvol,rf_hamkq,rhoaug4,rocceig,wtk_k)
+     endif
 !    Free temporary storage
      ABI_DEALLOCATE(kpg_k)
      ABI_DEALLOCATE(kpg1_k)
@@ -630,14 +643,24 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
    end do
 
    call timab(125,2,tsec)
+   
 
 !  Transfer density on augmented fft grid to normal fft grid in real space
 !  Also take into account the spin.
-   if (psps%usepaw==0) then
-     call fftpac(isppol,mpi_enreg,nspden,cplex*n1,n2,n3,cplex*n4,n5,n6,dtset%ngfft,rhorfermi,rhoaug,1)
+   if (nspden/=4) then
+     if (psps%usepaw==0) then
+       call fftpac(isppol,mpi_enreg,nspden,cplex*n1,n2,n3,cplex*n4,n5,n6,dtset%ngfft,rhorfermi,rhoaug,1)
+     else
+       call fftpac(isppol,mpi_enreg,nspden,cplex*n1,n2,n3,cplex*n4,n5,n6,dtset%ngfft,rhowfr   ,rhoaug,1)
+     end if
    else
-     call fftpac(isppol,mpi_enreg,nspden,cplex*n1,n2,n3,cplex*n4,n5,n6,dtset%ngfft,rhowfr   ,rhoaug,1)
-   end if
+     if (psps%usepaw==0) then
+       call fftpac(1,mpi_enreg,nspden,cplex*n1,n2,n3,cplex*n4,n5,n6,dtset%ngfft,rhorfermi,rhoaug4(:,:,:,1),1)
+       call fftpac(2,mpi_enreg,nspden,cplex*n1,n2,n3,cplex*n4,n5,n6,dtset%ngfft,rhorfermi,rhoaug4(:,:,:,2),1)
+       call fftpac(3,mpi_enreg,nspden,cplex*n1,n2,n3,cplex*n4,n5,n6,dtset%ngfft,rhorfermi,rhoaug4(:,:,:,3),1)
+       call fftpac(4,mpi_enreg,nspden,cplex*n1,n2,n3,cplex*n4,n5,n6,dtset%ngfft,rhorfermi,rhoaug4(:,:,:,4),1)
+     endif
+   endif
  end do ! End loop over spins
  
 ! if (ipert==natom+5) then
@@ -662,7 +685,11 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
    call paw_ij_free(paw_ij1fr)
    ABI_DATATYPE_DEALLOCATE(paw_ij1fr)
  end if
- ABI_DEALLOCATE(rhoaug)
+ if (nspden/=4) then
+   ABI_DEALLOCATE(rhoaug)
+ else
+   ABI_DEALLOCATE(rhoaug4)
+ endif
  ABI_DEALLOCATE(kg_k)
  ABI_DEALLOCATE(kg1_k)
 

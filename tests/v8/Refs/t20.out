@@ -15,7 +15,7 @@
  For more information, see http://www.abinit.org .
 
 .Starting date : Sun 23 Apr 2017.
-- ( at 17h11 )
+- ( at 22h05 )
   
 - input  file    -> t20.in
 - output file    -> t20.out
@@ -497,6 +497,17 @@ P newkpt: treating     22 bands with npw=     370 for ikpt=   8 by node    0
 
  At SCF step   11, etot is converged : 
   for the second time, diff in etot=  9.656E-10 < toldfe=  1.000E-06
+
+ ------------------------------------------------------------------------
+ Magnetic susceptibility (integrated first order magnetization density):
+ ------------------------------------------------------------------------
+
+           chi_33 =   30.17720454
+
+   n^(1) integral =    0.00000000
+
+ ------------------------------------------------------------------------
+
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -770,10 +781,10 @@ P          mk1mem           8
 - Computational Materials Science 25, 478-492 (2002). http://dx.doi.org/10.1016/S0927-0256(02)00325-7
 - Comment : the original paper describing the ABINIT project.
 -
-- Proc.   0 individual time (sec): cpu=          9.1  wall=          9.1
+- Proc.   0 individual time (sec): cpu=          8.9  wall=          8.9
 
 ================================================================================
 
  Calculation completed.
 .Delivered   7 WARNINGs and   0 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          9.1  wall=          9.1
++Overall time at end (sec) : cpu=          8.9  wall=          8.9

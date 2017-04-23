@@ -127,7 +127,7 @@ subroutine dfpt_wfkfermi(cg,cgq,cplex,cprj,cprjq,&
 !arrays
  real(dp),intent(in) :: cg(2,mpw*nspinor*mband*mkmem*nsppol),cgq(2,mcgq)
  real(dp),intent(in) :: eig0_k(nband_k),occ_k(nband_k),rocceig(nband_k,nband_k)
- real(dp),intent(inout) :: rhoaug(cplex*gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6)
+ real(dp),intent(inout) :: rhoaug(cplex*gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,gs_hamkq%nvloc)
  real(dp),intent(inout) :: eig1_k(2*nband_k**2)
  real(dp),intent(out) :: fe1fixed_k(nband_k)
  real(dp),intent(out) :: fe1norm_k(nband_k)
@@ -255,7 +255,6 @@ subroutine dfpt_wfkfermi(cg,cgq,cplex,cprj,cprjq,&
      call getgh1c(berryopt,cwave0,cwaveprj0,gh1,dum_grad_berry,dum_gs1,gs_hamkq,dum_gvnl1,&
 &     idir,ipert,lambda,mpi_enreg,optlocal,optnl,opt_gvnl1,rf_hamkq,sij_opt,&
 &     tim_getgh1c,usevnl)
-
 !    Compute Eig1=<Psi^(0)|H^(1)-Eps.S^(1)|Psi(0)>
      call dotprod_g(dotr,lambda,gs_hamkq%istwf_k,npw_k*nspinor,1,cwave0,gh1,mpi_enreg%me_g0, &
 &     mpi_enreg%comm_spinorfft)
@@ -264,7 +263,7 @@ subroutine dfpt_wfkfermi(cg,cgq,cplex,cprj,cprjq,&
 !    Compute the fixed contribution to the 1st-order Fermi energy
      fe1fixed_k(iband)=two*wtband*eig1_k(indx)
      fe1norm_k(iband) =two*wtband
-
+     
 !    Accumulate contribution to density and PAW occupation matrix
      call dfpt_accrho(counter,cplex,cwave0,cwaveq,cwaveq,cwaveprj0,cwaveprjq,dotr,&
 &     dtfil%filstat,gs_hamkq,iband,0,0,isppol,kptopt,mpi_enreg,gs_hamkq%natom,nband_k,ncpgr,&

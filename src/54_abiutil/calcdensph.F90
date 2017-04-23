@@ -363,7 +363,31 @@ subroutine calcdensph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,nunit,ratsph
 !    write(message, '(a,f12.6)') ' Total density (exact)           ', rho_tot
 !   call wrtout(nunit,message,'COLL')
    end if
- end if! prtopt==1
+ else   ! prtopt different from 1 (either 2,3 or 4)
+   write(message, '(2a)') ch10,' ------------------------------------------------------------------------'
+   call wrtout(nunit,message,'COLL')
+   write(message, '(4a)' ) &
+&     ' Magnetic susceptibility (integrated first order magnetization density):',ch10,&
+&     ' ------------------------------------------------------------------------',ch10
+   call wrtout(nunit,message,'COLL')
+   if (nspden==2) then
+     write(message, '(a,f13.8)') '           chi_33 = ', mag_coll
+     call wrtout(nunit,message,'COLL')
+   else if (nspden==4) then
+     write(message, '(a,i1,a,f13.8)') '           chi_1',prtopt-1,' = ',mag_x
+     call wrtout(nunit,message,'COLL')
+     write(message, '(a,i1,a,f13.8)') '           chi_2',prtopt-1,' = ',mag_y
+     call wrtout(nunit,message,'COLL')
+     write(message, '(a,i1,a,f13.8)') '           chi_3',prtopt-1,' = ',mag_z
+     call wrtout(nunit,message,'COLL')
+   endif
+
+   write(message, '(2a,f13.8)') ch10,'   n^(1) integral = ', rho_tot
+   call wrtout(nunit,message,'COLL')
+   write(message, '(3a)') ch10,' ------------------------------------------------------------------------',ch10
+   call wrtout(nunit,message,'COLL')    
+
+ end if ! prtopt if conditions
 
  if (present(intgden)) then
    intgden = intgden_
