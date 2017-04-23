@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see http://www.abinit.org .
 
-.Starting date : Sat 22 Apr 2017.
-- ( at 01h55 )
+.Starting date : Sun 23 Apr 2017.
+- ( at 17h11 )
   
 - input  file    -> t20.in
 - output file    -> t20.out
@@ -497,15 +497,6 @@ P newkpt: treating     22 bands with npw=     370 for ikpt=   8 by node    0
 
  At SCF step   11, etot is converged : 
   for the second time, diff in etot=  9.656E-10 < toldfe=  1.000E-06
- Integrated electronic and magnetization densities in atomic spheres:
- ---------------------------------------------------------------------
- Note: Diff(up-dn) is a rough approximation of local magnetic moment
- Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
-    1   2.00000    12.849999   -11.164985      1.685014    24.014983
- ---------------------------------------------------------------------
-  Sum:             12.849999   -11.164985      1.685014    24.014983
- Total magnetization (from the atomic spheres):            24.014983
- Total magnetization (exact up - dn):                      30.177205
 ================================================================================
 
  ----iterations are completed or convergence reached----

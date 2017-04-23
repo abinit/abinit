@@ -1205,7 +1205,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
   !compute the contributions to susceptibility from different attomic spheres:
   call calcdensph(gmet,mpi_enreg,dtset%natom,nfftf,ngfftf,nspden,&
 &   dtset%ntypat,ab_out,dtset%ratsph,rhor1,rprimd,dtset%typat,ucvol,xred,&
-&   intgden,dentot,0)
+&   0,intgden,dentot)
  endif
 
  if (iwrite_fftdatar(mpi_enreg)) then

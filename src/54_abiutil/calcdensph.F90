@@ -30,7 +30,7 @@
 !!  typat(natom)=type of each atom
 !!  ucvol=unit cell volume in bohr**3
 !!  xred(3,natom)=reduced dimensionless atomic coordinates
-!!  prtopt = if not present, the default printing is on, otherwise special printing options (optional argument)  
+!!  prtopt = if 1, the default printing is on, otherwise special printing options  
 !!
 !! OUTPUT
 !!  intgden(nspden, natom)=intgrated density (magnetization...) for each atom in a sphere of radius ratsph. Optional arg
@@ -52,7 +52,7 @@
 #include "abi_common.h"
 
 subroutine calcdensph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,nunit,ratsph,rhor,rprimd,typat,ucvol,xred,&
-&    intgden,dentot,prtopt,atgridpts)
+&    prtopt,intgden,dentot)
 
  use defs_basis
  use defs_abitypes
@@ -81,10 +81,10 @@ subroutine calcdensph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,nunit,ratsph
  integer,intent(in) :: ngfft(18),typat(natom)
  real(dp),intent(in) :: gmet(3,3),ratsph(ntypat),rhor(nfft,nspden),rprimd(3,3)
  real(dp),intent(in) :: xred(3,natom)
- integer,intent(inout),optional :: atgridpts(nfft)
+!integer,intent(out),optional :: atgridpts(nfft)
+ integer ,intent(in) :: prtopt
  real(dp),intent(out),optional  :: intgden(nspden,natom)
  real(dp),intent(out),optional  :: dentot(nspden)
- integer,intent(in),optional    :: prtopt
 !Local variables ------------------------------
 !scalars
  integer,parameter :: ishift=5
@@ -142,10 +142,10 @@ subroutine calcdensph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,nunit,ratsph
 
  do iatom=1,natom
 
-   if (present(atgridpts)) then
-     npts(iatom)=0           !SPr: initialize the number of grid points within atomic sphere around atom i
-     ii=ii+1                 !SPr: initialize running index for constructing an array of grid point indexes
-   end if                    !     within atomic spheres
+   !if (present(atgridpts)) then
+   !  npts(iatom)=0           !SPr: initialize the number of grid points within atomic sphere around atom i
+   !  ii=ii+1                 !SPr: initialize running index for constructing an array of grid point indexes
+   !end if                    !     within atomic spheres
 
 !  Define a "box" around the atom
    r2atsph=1.0000001_dp*ratsph(typat(iatom))**2
@@ -187,10 +187,10 @@ subroutine calcdensph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,nunit,ratsph
 
            ifft_local=1+ix+n1*(iy+n2*izloc)
 
-           if(present(atgridpts)) then
-             ii=ii+1                     
-             atgridpts(ii)=ifft_local    !SPr: save grid point index (dbg: to check whether ifft_local is a valid "global" index )
-           end if
+           !if(present(atgridpts)) then
+           !  ii=ii+1                     
+           !  atgridpts(ii)=ifft_local    !SPr: save grid point index (dbg: to check whether ifft_local is a valid "global" index )
+           !end if
 
            if (nspden==1) then
 !            intgden_(1,iatom)= integral of total density
@@ -218,13 +218,13 @@ subroutine calcdensph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,nunit,ratsph
 
    intgden_(:,iatom)=intgden_(:,iatom)*ucvol/dble(nfftot)
 
-   if (present(atgridpts)) then
-     npts(iatom)=ii-1
-     do is=1,iatom-1,1
-       npts(iatom)=npts(iatom)-npts(is)-1
-     end do
-     atgridpts(ii-npts(iatom))=npts(iatom)    !SPr: save number of grid points around atom i
-   end if
+   !if (present(atgridpts)) then
+   !  npts(iatom)=ii-1
+   !  do is=1,iatom-1,1
+   !    npts(iatom)=npts(iatom)-npts(is)-1
+   !  end do
+   !  atgridpts(ii-npts(iatom))=npts(iatom)    !SPr: save number of grid points around atom i
+   !end if
    
 
 !  End loop over atoms
@@ -288,8 +288,8 @@ subroutine calcdensph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,nunit,ratsph
  sum_rho_up=zero
  sum_rho_dn=zero
  sum_rho_tot=zero
- 
- if (.not.present(prtopt)) then
+
+ if (prtopt==1) then
    if (nspden==1) then
      write(message, '(4a)' ) &
 &     ' Integrated electronic density in atomic spheres:',ch10,&
@@ -363,7 +363,7 @@ subroutine calcdensph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,nunit,ratsph
 !    write(message, '(a,f12.6)') ' Total density (exact)           ', rho_tot
 !   call wrtout(nunit,message,'COLL')
    end if
- end if! prtopt not present
+ end if! prtopt==1
 
  if (present(intgden)) then
    intgden = intgden_
