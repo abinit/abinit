@@ -109,7 +109,7 @@ subroutine printmagvtk(mpi_enreg,nspden,nfft,ngfft,rhor,rprimd,fname)
 
  DBG_EXIT("COLL")
 
- write(std_out,*) ' Writing out .vtk file: ',fname
+!write(std_out,*) ' Writing out .vtk file: ',fname
 
   !if 1 or two component density then write out either 1 or 2 scalar density fields
   !if 4, then write one scalar field (density) and one vector field (magnetization density)
