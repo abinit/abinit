@@ -193,8 +193,8 @@ subroutine pawpsp_nl(ffspl,indlmn,lmnmax,lnmax,mqgrid,qgrid,radmesh,wfll)
  LIBPAW_ALLOCATE(rrwf,(meshsz))
  LIBPAW_ALLOCATE(rr2wf,(meshsz))
  LIBPAW_ALLOCATE(work,(mqgrid))
- rr(:) =radmesh%rad(:)
- rr2(:)=two_pi*rr(:)*rr(:)
+ rr(1:meshsz) =radmesh%rad(1:meshsz)
+ rr2(1:meshsz)=two_pi*rr(1:meshsz)*rr(1:meshsz)
  argn=two_pi*qgrid(mqgrid)
  mmax=meshsz
 
@@ -1327,8 +1327,8 @@ subroutine pawpsp_read(core_mesh,funit,imainmesh,lmax,&
      LIBPAW_ALLOCATE(work2,(msz))
      LIBPAW_ALLOCATE(work3,(msz))
      LIBPAW_ALLOCATE(work4,(pawtab%mesh_size))
-     work3(:)=shpf_mesh%rad(:)
-     work4(:)=pawrad%rad(:)
+     work3(1:pawtab%mesh_size)=shpf_mesh%rad(1:pawtab%mesh_size)
+     work4(1:pawtab%mesh_size)=pawrad%rad(1:pawtab%mesh_size)
      do il=1,pawtab%l_size
        call bound_deriv(shpf(1:msz,il),shpf_mesh,msz,yp1,ypn)
        call paw_spline(work3,shpf(:,il),msz,yp1,ypn,work1)
@@ -2077,17 +2077,17 @@ subroutine pawpsp_calc(core_mesh,epsatm,ffspl,imainmesh,ixc,lnmax,&
    LIBPAW_ALLOCATE(nwk,(core_mesh%mesh_size))
    LIBPAW_ALLOCATE(vh,(core_mesh%mesh_size))
    if (core_mesh%mesh_type==5) then
-     nwk(:)=tncore(:)*four_pi*core_mesh%rad(:)**2
+     nwk(1:msz)=tncore(1:msz)*four_pi*core_mesh%rad(1:msz)**2
      call simp_gen(qcore,nwk,core_mesh)
      qcore=znucl-zion-qcore
    else
-     nwk(:)=(ncore(:)-tncore(:))*four_pi*core_mesh%rad(:)**2
+     nwk(1:msz)=(ncore(1:msz)-tncore(1:msz))*four_pi*core_mesh%rad(1:msz)**2
      ib=1
-     do ir=core_mesh%mesh_size,2,-1
+     do ir=msz,2,-1
        if(abs(nwk(ir))<tol14)ib=ir
      end do
      call simp_gen(qcore,nwk,core_mesh,r_for_intg=core_mesh%rad(ib))
-     nwk(:)=tncore(:)*four_pi*core_mesh%rad(:)**2
+     nwk(1:msz)=tncore(1:msz)*four_pi*core_mesh%rad(1:msz)**2
    end if
    nwk(1:msz)=nwk(1:msz)+r2k(1:msz)*(qcore-znucl)
    call poisson(nwk,0,core_mesh,vh)
@@ -2312,7 +2312,7 @@ subroutine pawpsp_calc(core_mesh,epsatm,ffspl,imainmesh,ixc,lnmax,&
  if (msz<core_mesh%mesh_size) nwk(msz+1:core_mesh%mesh_size)=zero
 
 ! perform the spherical integration
- nwk(:)=nwk(:)*four_pi*core_mesh%rad(:)**2
+ nwk(1:msz)=nwk(1:msz)*four_pi*core_mesh%rad(1:msz)**2
 
  call simp_gen(pawtab%beta,nwk,core_mesh)
 
@@ -2339,7 +2339,7 @@ subroutine pawpsp_calc(core_mesh,epsatm,ffspl,imainmesh,ixc,lnmax,&
    LIBPAW_ALLOCATE(work1,(msz))
    LIBPAW_ALLOCATE(work2,(msz))
    LIBPAW_ALLOCATE(work3,(msz))
-   work3(:)=vloc_mesh%rad(:)
+   work3(1:msz)=vloc_mesh%rad(1:msz)
    call paw_spline(work3,vlocr,msz,yp1,ypn,work1)
    call paw_splint(msz,work3,vlocr,work1,reduced_mshsz,rvloc_mesh%rad,rvlocr)
    LIBPAW_DEALLOCATE(work1)
@@ -2379,7 +2379,7 @@ subroutine pawpsp_calc(core_mesh,epsatm,ffspl,imainmesh,ixc,lnmax,&
    LIBPAW_ALLOCATE(work1,(msz))
    LIBPAW_ALLOCATE(work2,(msz))
    LIBPAW_ALLOCATE(work3,(msz))
-   work3(:)=core_mesh%rad(:)
+   work3(1:msz)=core_mesh%rad(1:msz)
    call paw_spline(work3,tncore,msz,yp1,ypn,work1)
    call paw_splint(msz,work3,tncore,work1,reduced_mshsz,rcore_mesh%rad,rtncor)
    LIBPAW_DEALLOCATE(work1)
@@ -2403,7 +2403,7 @@ subroutine pawpsp_calc(core_mesh,epsatm,ffspl,imainmesh,ixc,lnmax,&
      LIBPAW_ALLOCATE(work1,(msz))
      LIBPAW_ALLOCATE(work2,(msz))
      LIBPAW_ALLOCATE(work3,(msz))
-     work3(:)=vale_mesh%rad(:)
+     work3(1:msz)=vale_mesh%rad(1:msz)
      call paw_spline(work3,tnvale,msz,yp1,ypn,work1)
      call paw_splint(msz,work3,tnvale,work1,reduced_mshsz,rvale_mesh%rad,rtnval)
      LIBPAW_DEALLOCATE(work1)
@@ -2844,7 +2844,7 @@ subroutine pawpsp_wvl_calc(pawtab,tnvale,usewvl,vale_mesh,vloc_mesh,vlocr)
  LIBPAW_ALLOCATE(pawtab%wvl%rholoc%d,(msz,4))
  LIBPAW_ALLOCATE(pawtab%wvl%rholoc%rad,(msz))
  pawtab%wvl%rholoc%msz=msz
- pawtab%wvl%rholoc%rad(:)=vloc_mesh%rad(:)
+ pawtab%wvl%rholoc%rad(1:msz)=vloc_mesh%rad(1:msz)
 
 !get rho from v:
  call pawpsp_vhar2rho(vloc_mesh,pawtab%wvl%rholoc%d(:,1),vlocr)
@@ -3530,8 +3530,8 @@ subroutine pawpsp_17in(epsatm,ffspl,icoulomb,ipsp,ixc,lmax,&
      LIBPAW_ALLOCATE(work2,(msz))
      LIBPAW_ALLOCATE(work3,(msz))
      LIBPAW_ALLOCATE(work4,(pawrad%mesh_size))
-     work3(:)=shpf_mesh%rad(:)
-     work4(:)=pawrad%rad(:)
+     work3(1:msz)=shpf_mesh%rad(1:msz)
+     work4(1:pawrad%mesh_size)=pawrad%rad(1:pawrad%mesh_size)
      do il=1,pawtab%l_size
        call bound_deriv(shpf(1:msz,il),shpf_mesh,msz,yp1,ypn)
        call paw_spline(work3,shpf(:,il),msz,yp1,ypn,work1)
