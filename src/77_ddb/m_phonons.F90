@@ -152,6 +152,7 @@ module m_phonons
  public :: phdos_print
  public :: phdos_print_debye
  public :: phdos_print_msqd
+ public :: phdos_print_thermo
  public :: phdos_free
  public :: phdos_ncwrite
 !!**
@@ -418,6 +419,143 @@ implicit none
 end subroutine phdos_print_debye
 !!***
 
+!----------------------------------------------------------------------
+
+!****f* m_phonons/phdos_print_thermo
+!!
+!! NAME
+!! phdos_print_thermo
+!!
+!! FUNCTION
+!! Print out global thermodynamic quantities based on DOS
+!!
+!! INPUTS
+!! phonon_dos= container object for phonon DOS
+!! ucvol = unit cell volume
+!!
+!! OUTPUT
+!!  Only writing.
+!!
+!! PARENTS
+!!      anaddb
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine phdos_print_thermo(PHdos, fname, ntemper, tempermin, temperinc)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'phdos_print_debye'
+ use interfaces_14_hidewrite
+!End of the abilint section
+
+implicit none
+
+!Arguments ------------------------------------
+ integer, intent(in) :: ntemper
+ real(dp), intent(in) :: tempermin, temperinc
+ type(phonon_dos_type),intent(in) :: PHdos
+ character(len=*),intent(in) :: fname
+
+!Local variables-------------------------------
+ integer :: iomega, itemper, thermal_unit
+ character(len=500) :: msg
+ real(dp) :: wover2t, expmx, ln2shx, cothx, invsinh2
+ real(dp) :: tmp, domega
+!arrays
+ real(dp), allocatable :: free(:), energy(:), entropy(:), spheat(:),wme(:)
+
+ ABI_ALLOCATE(free,    (PHdos%nomega))
+ ABI_ALLOCATE(energy,  (PHdos%nomega))
+ ABI_ALLOCATE(entropy, (PHdos%nomega))
+ ABI_ALLOCATE(spheat,  (PHdos%nomega))
+ ABI_ALLOCATE(wme,     (PHdos%nomega))
+
+!Put zeroes for F, E, S, Cv
+ free(:)=zero
+ energy(:)=zero
+ entropy(:)=zero
+ spheat(:)=zero
+ wme(:)=zero
+
+!open THERMO file
+ if (open_file(fname,msg,newunit=thermal_unit,form="formatted",action="write") /= 0) then
+   MSG_ERROR(msg)
+ end if
+
+! print header
+ write(msg,'(a,a)') ch10,&
+&  ' # At  T     F(J/mol-c)     E(J/mol-c)     S(J/(mol-c.K)) C(J/(mol-c.K)) Omega_mean(cm-1) from prtdos DOS'
+ call wrtout(thermal_unit,msg,'COLL')
+ msg = ' # (A mol-c is the abbreviation of a mole-cell, that is, the'
+ call wrtout(thermal_unit,msg,'COLL')
+ msg = ' #  number of Avogadro times the atoms in a unit cell)'
+ call wrtout(thermal_unit,msg,'COLL')
+
+ write(msg, '(a,a,a)' )&
+&  ' phdos_print_thermo : thermodynamic functions calculated from prtdos DOS (not histogram)',ch10,&
+&  '     see THERMO output file ...'
+ call wrtout(std_out,msg,'COLL')
+
+ domega = (PHdos%omega(2)-PHdos%omega(1))
+
+ do itemper=1,ntemper
+
+!  The temperature (tmp) is given in Ha
+   tmp=(tempermin+temperinc*dble(itemper-1))*kb_HaK
+
+   do iomega=1,PHdos%nomega
+
+!    wover2t= hbar*w / 2kT dimensionless
+     wover2t = 1.e200_dp; if(tmp > tol14) wover2t=PHdos%omega(iomega)*half/tmp
+     expmx=zero;         if (abs(wover2t) < 600._dp) expmx=exp(-wover2t)
+     ! should not be much of a problem for the log, but still put a check.
+     ln2shx=zero;        if (one-expmx > 1.e-200_dp) ln2shx=log(two * sinh(wover2t)) !wover2t+log(one-expmx)
+     cothx=zero;         if (abs(one-expmx) > tol14) cothx=one/tanh(wover2t) !(one+expmx)/(one-expmx)
+     invsinh2=zero;      if (wover2t < 100.0_dp) invsinh2=one/sinh(wover2t)**2
+
+!    This matches the equations published in Lee & Gonze, PRB 51, 8610 (1995)
+     free(itemper)   = free(itemper)    + PHdos%phdos(iomega)*tmp*ln2shx
+     energy(itemper) = energy(itemper)  + PHdos%phdos(iomega)*half*PHdos%omega(iomega)*cothx
+     spheat(itemper) = spheat(itemper)  + PHdos%phdos(iomega)*wover2t**2 * invsinh2
+     entropy(itemper)= entropy(itemper) + PHdos%phdos(iomega)*(wover2t*cothx - ln2shx)
+     wme(itemper)    = wme(itemper)     + PHdos%phdos(iomega)*PHdos%omega(iomega)*wover2t**2 * invsinh2
+
+   end do ! iomega
+
+   ! suppose homogeneous omega grid and multiply by domega
+   free(itemper)   = free(itemper)    * domega
+   energy(itemper) = energy(itemper)  * domega
+   entropy(itemper)= entropy(itemper) * domega
+   spheat(itemper) = spheat(itemper)  * domega
+   wme(itemper)    = wme(itemper)     * domega
+
+   if (abs(spheat(itemper))>tol8) wme(itemper)=wme(itemper)/spheat(itemper)
+
+! do the printing to file
+   write(msg,'(es11.3,5es15.7)') tmp/kb_HaK,&
+&    Ha_J*Avogadro*free(itemper),&
+&    Ha_J*Avogadro*energy(itemper),&
+&    Ha_J*Avogadro*kb_HaK*entropy(itemper),&
+&    Ha_J*Avogadro*kb_HaK*spheat(itemper),&
+&    wme(itemper)*Ha_cmm1
+   call wrtout(thermal_unit,msg,'COLL')
+ end do ! itemper
+
+ ABI_DEALLOCATE(free)
+ ABI_DEALLOCATE(energy)
+ ABI_DEALLOCATE(entropy)
+ ABI_DEALLOCATE(spheat)
+ ABI_DEALLOCATE(wme)
+
+ close(thermal_unit)
+
+end subroutine phdos_print_thermo
+!!***
 !----------------------------------------------------------------------
 
 !!****f* m_phonons/phdos_free

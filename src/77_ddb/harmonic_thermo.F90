@@ -98,7 +98,7 @@ subroutine harmonic_thermo(Ifc,Crystal,amu,anaddb_dtset,iout,outfilename_radix,c
  integer :: thermal_unit
  integer :: bij_unit
  integer :: vij_unit
- integer :: nomega
+ integer :: nomega, iomega
  real(dp) :: change,cothx,diffbb,dosinc,expm2x,factor,factorw,factorv,gerr
  real(dp) :: ggsum,ggsumsum,ggrestsum
  real(dp) :: gijerr,gijsum,gnorm,ln2shx,qphnrm,relchg,tmp,wovert,thmtol
@@ -519,7 +519,7 @@ subroutine harmonic_thermo(Ifc,Crystal,amu,anaddb_dtset,iout,outfilename_radix,c
          nomega = nchan2(iwchan)
          dosinc=dble(iwchan)
 
-         ABI_ALLOCATE(phon_dos(nomega))
+         ABI_ALLOCATE(phon_dos, (nomega))
          phon_dos = gdos(:,iwchan)
 
 !Put zeroes for F, E, S, Cv
@@ -542,7 +542,7 @@ subroutine harmonic_thermo(Ifc,Crystal,amu,anaddb_dtset,iout,outfilename_radix,c
              expm2x=exp(-2.0_dp*wovert)
              ln2shx=wovert+log(1.0_dp-expm2x)
              cothx=(1.0_dp+expm2x)/(1.0_dp-expm2x)
-             factor=dble(3*natom)*phon_dos(iomega,iwchan)
+             factor=dble(3*natom)*phon_dos(iomega)
              factorw=3*natom*gw(iomega,iwchan)
 
 !            This matches the equations published in Lee & Gonze, PRB 51, 8610 (1995)

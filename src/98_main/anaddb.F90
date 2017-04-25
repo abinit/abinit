@@ -452,6 +452,7 @@ program anaddb
      call phdos_print_msqd(Phdos, strcat(filnam(2), "_MSQD_T"), inp%ntemper, inp%tempermin, inp%temperinc)
      call phdos_print(Phdos, strcat(filnam(2), "_PHDOS"))
      call phdos_print_debye(Phdos, Crystal%ucvol)
+     call phdos_print_thermo(PHdos, strcat(filnam(2), "_THERMO"), inp%ntemper, inp%tempermin, inp%temperinc)
 
 #ifdef HAVE_NETCDF
      ncerr = nctk_open_create(phdos_ncid, strcat(filnam(2), "_PHDOS.nc"), xmpi_comm_self)
