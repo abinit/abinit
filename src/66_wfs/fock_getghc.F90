@@ -422,29 +422,6 @@ type(pseudopotential_type) :: psps
        if (fock%optfor.and.(fock%ieigen/=0)) then
          call matr3inv(gs_ham%gprimd,rprimd)
          choice=2; dotr=zero;doti=zero;cpopt=4
-
-<<<<<<< HEAD
-=======
-         if (testtrue) then
-           optgr=1;optgr2=0;optstr=0;optstr2=0
-           ABI_ALLOCATE(grnl,(3*natom))
-           ABI_ALLOCATE(vxc,(nfftf,cplex_fock))
-           ABI_ALLOCATE(vtrial,(nfftf,1))
-           vxc=zero
-           do ifft=1,nfftf
-             vtrial(ifft,1)=vfock(2*ifft-1)
-           end do
-           grnl=zero
-           call pawgrnl(gs_ham%atindx1,0,dummy,1,dummy,grnl,fock%gsqcut,mgfftf,natom,natom,&
-&            gs_ham%nattyp,nfftf,ngfftf,nhat_dum,dummy,1,0,fock%ntypat,optgr,optgr2,optstr,optstr2,&
-&            fock%pawang,fock%pawfgrtab,pawrhoij,fock%pawtab,gs_ham%ph1d,psps,qphon,rprimd,dumint,&
-&            gs_ham%typat,gs_ham%ucvol,vtrial,vxc,gs_ham%xred)
-           ABI_DEALLOCATE(vxc)
-           ABI_DEALLOCATE(vtrial)
-           ABI_DEALLOCATE(grnl)
-         end if
-
->>>>>>> 094f28fe48abff2f5c59c029fd5118a216f531e2
          do iatom=1,natom
            do idir=1,3
              call nonlop(choice,cpopt,cwaveocc_prj,enlout_dum,gs_ham,idir,(/zero/),mpi_enreg,&

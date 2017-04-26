@@ -204,25 +204,10 @@ subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,e
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'forstr'
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'forstr'
  use interfaces_18_timing
  use interfaces_41_geometry
  use interfaces_56_xc
  use interfaces_62_wvl_wfs
- use interfaces_65_paw
- use interfaces_66_nonlocal
- use interfaces_67_common, except_this_one => forstr
-!End of the abilint section
-
-<<<<<<< HEAD
- use interfaces_56_xc
-=======
- use interfaces_62_wvl_wfs
->>>>>>> 094f28fe48abff2f5c59c029fd5118a216f531e2
  use interfaces_65_paw
  use interfaces_66_nonlocal
  use interfaces_67_common, except_this_one => forstr
@@ -277,24 +262,17 @@ subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,e
 
 !Local variables-------------------------------
 !scalars
-<<<<<<< HEAD
- integer :: ifft,ispden,occopt_,optgr,optgr2,option,optnc,optstr,optstr2,iorder_cprj,ctocprj_choice,idir,iatom,unpaw
- real(dp) ::dum,dum1
-=======
- integer :: comm_grid,ifft,ispden,occopt_,optgr,optgr2,option,optnc,optstr,optstr2
- real(dp) :: dum,ucvol_
+
+ integer :: comm_grid,ifft,ispden,occopt_,optgr,optgr2,option,optnc,optstr,optstr2,iorder_cprj,ctocprj_choice,idir,iatom,unpaw
+ real(dp) ::dum,dum1,ucvol_
  logical :: apply_residual
->>>>>>> 094f28fe48abff2f5c59c029fd5118a216f531e2
 !arrays
  real(dp),parameter :: k0(3)=(/zero,zero,zero/)
  real(dp) :: kinstr(6),nlstr(6),tsec(2),strdum(6),gmet(3,3),gprimd(3,3),rmet(3,3)
  real(dp) :: dummy(0)
-<<<<<<< HEAD
- real(dp),allocatable :: grnl(:),vcurrent(:,:),vxc_hf(:,:)
-=======
- real(dp),allocatable :: grnl(:),vlocal(:,:),xcart(:,:)
+ real(dp),allocatable :: grnl(:),vlocal(:,:),vxc_hf(:,:),xcart(:,:)
  real(dp), ABI_CONTIGUOUS pointer :: resid(:,:)
->>>>>>> 094f28fe48abff2f5c59c029fd5118a216f531e2
+
 
 ! *************************************************************************
 
@@ -427,15 +405,9 @@ subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,e
 !==========================================================================
 !Here compute stress tensor (if required)
 !==========================================================================
-<<<<<<< HEAD
 
- if (stress_needed==1) then
-   if (dtset%usefock==1 .and. associated(fock).and.fock%optstr.and.psps%usepaw==0) then
-=======
  if (stress_needed==1.and.dtset%usewvl==0) then
-   if (dtset%usefock==1 .and. associated(fock).and.fock%optstr) then
-!write(80,*)fock%stress
->>>>>>> 094f28fe48abff2f5c59c029fd5118a216f531e2
+   if (dtset%usefock==1 .and. associated(fock).and.fock%optstr.and.psps%usepaw==0) then
      fock%stress(1:3)=fock%stress(1:3)-energies%e_fock/ucvol
      if (n3xccc>0.and.psps%usepaw==0 .and. &
 &       (dtset%ixc==41.or.dtset%ixc==42.or.libxc_functionals_is_hybrid())) then
@@ -449,14 +421,9 @@ subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,e
 &   mpi_enreg,psps%mqgrid_vl,psps%n1xccc,n3xccc,dtset%natom,nattyp,&
 &   nfftf,ngfftf,nlstr,dtset%nspden,dtset%nsym,ntypat,dtset%paral_kgb,psps,pawrad,pawtab,ph1df,&
 &   dtset%prtvol,psps%qgrid_vl,dtset%red_efieldbar,rhog,rprimd,strten,strsxc,symrec,&
-<<<<<<< HEAD
 &   dtset%typat,dtset%usefock,psps%usepaw,&
 &   dtset%vdw_tol,dtset%vdw_tol_3bt,dtset%vdw_xc,psps%vlspl,vxc,vxc_hf,psps%xccc1d,xccc3d,psps%xcccrc,xred,&
 &   psps%ziontypat,psps%znucltypat,qvpotzero,&
-=======
-&   dtset%typat,dtset%usefock,psps%usepaw,dtset%vdw_tol,dtset%vdw_tol_3bt,dtset%vdw_xc,psps%vlspl,&
-&   vxc,psps%xccc1d,xccc3d,psps%xcccrc,xred,psps%ziontypat,psps%znucltypat,qvpotzero,&
->>>>>>> 094f28fe48abff2f5c59c029fd5118a216f531e2
 &   electronpositron=electronpositron)
  end if
 

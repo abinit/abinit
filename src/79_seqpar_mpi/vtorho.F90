@@ -1365,15 +1365,9 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
          index1=index1+dtset%nfft*dtset%nspden
          buffer1(index1+1) = energies%e_kinetic
          buffer1(index1+2) = energies%e_eigenvalues
-<<<<<<< HEAD
-         if (psps%usepaw==0) buffer1(index1+3) = energies%e_nonlocalpsp
-         index1=index1+3-psps%usepaw
-!        * If Hartree-Fock calculation, save e_fock in buffer1
-=======
          buffer1(index1+3) = energies%e_nonlocalpsp
          index1=index1+3
-!        * If Hartree-Fock calculation, save e_exactX in buffer1
->>>>>>> 094f28fe48abff2f5c59c029fd5118a216f531e2
+!        * If Hartree-Fock calculation, save e_fock in buffer1
          if (dtset%usefock==1) then
            buffer1(index1+1) = energies%e_fock
            index1=index1+1
@@ -1411,15 +1405,9 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
          index1=index1+dtset%nfft*dtset%nspden
          energies%e_kinetic = buffer1(index1+1)
          energies%e_eigenvalues = buffer1(index1+2)
-<<<<<<< HEAD
-         if (psps%usepaw==0) energies%e_nonlocalpsp = buffer1(index1+3)
-         index1=index1+3-psps%usepaw
-!        * If Hartree-Fock calculation, save e_fock in buffer1
-=======
          energies%e_nonlocalpsp = buffer1(index1+3)
          index1=index1+3
-!        * If Hartree-Fock calculation, save e_exactX in buffer1
->>>>>>> 094f28fe48abff2f5c59c029fd5118a216f531e2
+!        * If Hartree-Fock calculation, save e_fock in buffer1
          if (dtset%usefock==1) then
            energies%e_fock = buffer1(index1+1)
            index1=index1+1

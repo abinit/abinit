@@ -186,13 +186,8 @@
 
 !Local variables-------------------------------
 !scalars
-<<<<<<< HEAD
- integer :: iatom,idir,ii,ipositron,mu,optatm,optdyfr,opteltfr,opt_hybr,optgr,option
- integer :: optn,optn2,optstr,optv,sdir
-=======
- integer :: coredens_method,iatom,icoulomb,idir,ii,ipositron,mu,optatm,optdyfr
- integer :: opteltfr,optgr,option,optn,optn2,optstr,optv,sdir,vloc_method
->>>>>>> 094f28fe48abff2f5c59c029fd5118a216f531e2
+ integer :: coredens_method,iatom,icoulomb,idir,ii,ipositron,mu,optatm,optdyfr,opteltfr,opt_hybr,optgr,option
+ integer :: optn,optn2,optstr,optv,sdir,vloc_method
  real(dp),parameter :: tol=1.0d-15
  real(dp) :: e_dum,strsii,ucvol,vol_element
  character(len=500) :: message
@@ -274,9 +269,6 @@
    call mklocl_recipspace(dyfr_dum,eei,gmet,gprimd,gr_dum,gsqcut,lpsstr,mgfft,&
 &   mpi_enreg,mqgrid,natom,nattyp,nfft,ngfft,ntypat,option,paral_kgb,ph1d,qgrid,&
 &   qprtrb_dum,rhog,ucvol,vlspl,vprtrb_dum,v_dum)
-<<<<<<< HEAD
-   if (n3xccc>0.and.opt_hybr==0) then
-=======
    ABI_DEALLOCATE(dyfr_dum)
    ABI_DEALLOCATE(gr_dum)
    ABI_DEALLOCATE(v_dum)
@@ -285,7 +277,6 @@
 !Pseudo core electron density by method 2
  if (coredens_method==2) then
    if (n1xccc/=0) then
->>>>>>> 094f28fe48abff2f5c59c029fd5118a216f531e2
      call timab(55,1,tsec)
      option=3
      ABI_ALLOCATE(dyfr_dum,(3,3,natom))
@@ -293,9 +284,15 @@
      ABI_ALLOCATE(v_dum,(nfft))
      icoulomb=0 ! not yet compatible with icoulomb
      if (psps%usewvl==0.and.usepaw==0.and.icoulomb==0) then
-       call mkcore(corstr,dyfr_dum,gr_dum,mpi_enreg,natom,nfft,nspden,ntypat,ngfft(1),&
-&       n1xccc,ngfft(2),ngfft(3),option,rprimd,typat,ucvol,vxc,&
-&       xcccrc,xccc1d,xccc3d,xred)
+       if(opt_hybr==0) then
+         call mkcore(corstr,dyfr_dum,gr_dum,mpi_enreg,natom,nfft,nspden,ntypat,ngfft(1),&
+&         n1xccc,ngfft(2),ngfft(3),option,rprimd,typat,ucvol,vxc,&
+&         xcccrc,xccc1d,xccc3d,xred)
+       else
+         call mkcore(corstr,dyfr_dum,gr_dum,mpi_enreg,natom,nfft,nspden,ntypat,ngfft(1),&
+&        n1xccc,ngfft(2),ngfft(3),option,rprimd,typat,ucvol,vxc_hf,&
+&        xcccrc,xccc1d,xccc3d,xred)
+       end if
      else if (psps%usewvl==0.and.(usepaw==1.or.icoulomb==1)) then
        call mkcore_alt(atindx1,corstr,dyfr_dum,gr_dum,icoulomb,mpi_enreg,natom,nfft,&
 &           nspden,nattyp,ntypat,ngfft(1),n1xccc,ngfft(2),ngfft(3),option,rprimd,&
@@ -305,10 +302,6 @@
      ABI_DEALLOCATE(gr_dum)
      ABI_DEALLOCATE(v_dum)
      call timab(55,2,tsec)
-   else if (n3xccc>0.and.opt_hybr==1) then
-      call mkcore(corstr,dyfr_dum,gr_dum,mpi_enreg,natom,nfft,nspden,ntypat,ngfft(1),&
-&     n1xccc,ngfft(2),ngfft(3),option,rprimd,typat,ucvol,vxc_hf,&
-&     xcccrc,xccc1d,xccc3d,xred)
    else
      corstr(:)=zero
    end if
