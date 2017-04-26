@@ -9,7 +9,7 @@
 !! due to phonons and temperature effects...
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2016 ABINIT group (MG, MVer)
+!! Copyright (C) 2009-2017 ABINIT group (MG, MVer)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -338,24 +338,27 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  call cwtime(cpu,wall,gflops,"start")
 
  ! Compute electron DOS.
- ! TODO: Optimize this part. Really slow if tetra and lots of points
- ! Could just do DOS around efermi
- edos_intmeth = 2; if (dtset%prtdos == 1) edos_intmeth = 1
- !edos_intmeth = 1
- edos_step = dtset%dosdeltae; edos_broad = dtset%tsmear
- edos_step = 0.01 * eV_Ha; edos_broad = 0.3 * eV_Ha
- edos = ebands_get_edos(ebands,cryst,edos_intmeth,edos_step,edos_broad,comm)
+ if (dtset%kptopt>0 .and. dtset%nkpt>1) then
+   ! TODO: Optimize this part. Really slow if tetra and lots of points
+   ! Could just do DOS around efermi
+   edos_intmeth = 2; if (dtset%prtdos == 1) edos_intmeth = 1
+   !edos_intmeth = 1
+   edos_step = dtset%dosdeltae; edos_broad = dtset%tsmear
+   edos_step = 0.01 * eV_Ha; edos_broad = 0.3 * eV_Ha
+   edos = ebands_get_edos(ebands,cryst,edos_intmeth,edos_step,edos_broad,comm)
 
- ! Store DOS per spin channels
- n0(:) = edos%gef(1:edos%nsppol)
- if (my_rank == master) then
-   call edos_print(edos, unit=ab_out)
-   path = strcat(dtfil%filnam_ds(4), "_EDOS")
-   call wrtout(ab_out, sjoin("- Writing electron DOS to file:", path))
-   call edos_write(edos, path)
+   ! Store DOS per spin channels
+   n0(:) = edos%gef(1:edos%nsppol)
+   if (my_rank == master) then
+     call edos_print(edos, unit=ab_out)
+     path = strcat(dtfil%filnam_ds(4), "_EDOS")
+     call wrtout(ab_out, sjoin("- Writing electron DOS to file:", path))
+     call edos_write(edos, path)
+   end if
+
+   call edos_free(edos)
+
  end if
-
- call edos_free(edos)
 
  ! =======================================
  ! Output useful info on electronic bands
@@ -386,12 +389,12 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 
  if (my_rank == master) call ebands_write(ebands, dtset%prtebands, dtfil%filnam_ds(4))
 
- if (.False.) then
- !if (.True.) then
-   !call ebands_set_interpolator(ebands, cryst, bstart, bcount, mode, espline_ords, eskw_ratio, comm)
-   call ebands_test_interpolator(ebands, dtset, cryst, dtfil%filnam_ds(4), comm)
-   MSG_ERROR("interpolation done")
- end if
+ !if (.False.) then
+ !!if (.True.) then
+ !  !call ebands_set_interpolator(ebands, cryst, bstart, bcount, mode, espline_ords, eskw_ratio, comm)
+ !  call ebands_test_interpolator(ebands, dtset, cryst, dtfil%filnam_ds(4), comm)
+ !  MSG_ERROR("interpolation done")
+ !end if
 
  call cwtime(cpu,wall,gflops,"stop")
  write(msg,'(2(a,f8.2))')"eph%edos: cpu:",cpu,", wall: ",wall

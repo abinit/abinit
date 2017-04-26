@@ -9,7 +9,7 @@
 !!  and the procedures to perform this calculation.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2012-2016 ABINIT group (CMartins,FJ,FA,MT)
+!!  Copyright (C) 2012-2017 ABINIT group (CMartins,FJ,FA,MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -821,8 +821,8 @@ subroutine fock_init(atindx,cplex,dtset,fock,gsqcut,indsym,kg,mpi_enreg,nattyp,n
      call wrtout(std_out,msg,'COLL')
    end if
    if (dtset%ixc<0) then
-     call libxc_functionals_get_hybridcoef(hyb_mixing=fock%hybrid_mixing,hyb_mixing_sr=fock%hybrid_mixing_sr,&
-&                                          hyb_range=fock%hybrid_range)
+     call libxc_functionals_get_hybridparams(hyb_mixing=fock%hybrid_mixing,hyb_mixing_sr=fock%hybrid_mixing_sr,&
+&                                            hyb_range=fock%hybrid_range)
      if (abs(fock%hybrid_mixing)>tol8.or.abs(fock%hybrid_mixing_sr)>tol8) then
        msg=' - This is a hybrid XC functional from LibXC. The mixing and range coeffs are set accordingly.'
        call wrtout(std_out,msg,'COLL')
@@ -2449,7 +2449,7 @@ end subroutine bare_vqg
 !! Compute Fock energy contribution to stress tensor (Cartesian coordinates).
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (FJ)
+!! Copyright (C) 1998-2017 ABINIT group (FJ)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

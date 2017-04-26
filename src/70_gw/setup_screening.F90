@@ -8,7 +8,7 @@
 !!  as well as basic objects describing the BZ sampling .... TODO list to be completed
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2016 ABINIT group (MG)
+!!  Copyright (C) 2008-2017 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -86,7 +86,7 @@ subroutine setup_screening(codvsn,acell,rprim,ngfftf,wfk_fname,dtfil,Dtset,Psps,
  use m_gsphere,       only : gsphere_t, gsph_init, merge_and_sort_kg, gsph_free, setshells
  use m_pawtab,        only : pawtab_type
  use m_pawrhoij,      only : pawrhoij_type, pawrhoij_alloc, pawrhoij_copy, pawrhoij_free
- use m_io_kss,        only : testkss, make_gvec_kss
+ use m_io_kss,        only : make_gvec_kss
  use m_wfk,           only : wfk_read_eigenvalues
 
 !This section has been created automatically by the script Abilint (TD).

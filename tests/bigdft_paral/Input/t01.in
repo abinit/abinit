@@ -33,11 +33,12 @@ istwfk 1               #This is mandatory for WVLs
 #Variables to control convergency:
 iscf1     17  # Density mixing
 iscf2     7   # Potential mixing
-diemix   0.4
-nstep    10
+diemix   0.7
+nstep    20
+nnsclo   3
 
 # Self-consistent run to get the density
-tolvrs     1.00d-3     #too low
+tolvrs     1.00d-06
 amu 1.00
 
 #semiconducting case:
@@ -62,7 +63,7 @@ znucl     8.00
 
 #Minimal test: do not print WFK files etc..
 chksymbreak 0
-optforces  0 
+#optforces  0 
 optstress 0
 kptopt 0
 prtden 0
@@ -79,11 +80,11 @@ prteig 0
 #%% max_nprocs = 10
 #%% nprocs_to_test = 4, 10
 #%%[NCPU_4]
-#%% files_to_test = t01_MPI4.out, tolnlines = 17, tolabs = 1.000e-12, tolrel = 1.000e-12
+#%% files_to_test = t01_MPI4.out, tolnlines = 15, tolabs = 1.100e-7, tolrel = 5.0e-7
 #%%[NCPU_10]
-#%% files_to_test = t01_MPI10.out, tolnlines = 17, tolabs = 1.000e-12, tolrel = 1.000e-12
+#%% files_to_test = t01_MPI10.out, tolnlines = 15, tolabs = 1.100e-7, tolrel = 5.0e-7
 #%% [extra_info]
-#%% authors = T. Rangel
+#%% authors = T. Rangel, M. Torrent
 #%% keywords =  NC, WVL
 #%% description = O2 in a box (NC). ABINIT routines are used (wvl_bigdft_comp=0)
 #%% Test: DIIS, potential/density mixing and parallelism

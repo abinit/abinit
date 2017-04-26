@@ -7,7 +7,7 @@
 !!  Examines the input string, to check whether all names are allowed.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2007-2016 ABINIT group (XG).
+!! Copyright (C) 2007-2017 ABINIT group (XG).
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -78,7 +78,7 @@ subroutine chkvars (string)
 !C
  list_vars=trim(list_vars)//' cd_customnimfrqs cd_frqim_method cd_full_grid cd_imfrqs'
  list_vars=trim(list_vars)//' cd_halfway_freq cd_max_freq cd_subset_freq'
- list_vars=trim(list_vars)//' charge chkexit chkprim chksymbreak chneut cineb_start cpus cpum cpuh cgtyphf'
+ list_vars=trim(list_vars)//' charge chempot chkexit chkprim chksymbreak chneut cineb_start cpus cpum cpuh cgtyphf'
 !D
  list_vars=trim(list_vars)//' ddamp ddb_ngqpt ddb_shiftq delayperm densfor_pred densty dfield'
  list_vars=trim(list_vars)//' dfpt_sciss diecut diegap dielam dielng diemac'
@@ -165,7 +165,7 @@ subroutine chkvars (string)
  list_vars=trim(list_vars)//' npulayit npvel npwkss'
  list_vars=trim(list_vars)//' np_slk nqpt nqptdm nscforder nshiftk nshiftq'
  list_vars=trim(list_vars)//' nspden nspinor nsppol nstep nsym'
- list_vars=trim(list_vars)//' ntime ntimimage ntypalch ntypat nucdipmom nwfshist'
+ list_vars=trim(list_vars)//' ntime ntimimage ntypalch ntypat nucdipmom nwfshist nzchempot'
 !O
  list_vars=trim(list_vars)//' objaat objbat objaax objbax objan objbn objarf'
  list_vars=trim(list_vars)//' objbrf objaro objbro objatr objbtr occ'
@@ -176,8 +176,8 @@ subroutine chkvars (string)
  list_vars=trim(list_vars)//' pawecutdg pawfatbnd pawlcutd pawlmix'
  list_vars=trim(list_vars)//' pawmixdg pawnhatxc pawnphi pawntheta pawnzlm pawoptmix pawoptosc pawovlp'
  list_vars=trim(list_vars)//' pawprtdos pawprtvol pawprtwf pawprt_b pawprt_k pawspnorb pawstgylm'
- list_vars=trim(list_vars)//' pawsushat pawujat pawujrad pawujv pawusecp pawxcdev pimass pitransform'
- list_vars=trim(list_vars)//' ph_ndivsm ph_nqpath ph_qpath ph_ngqpt'
+ list_vars=trim(list_vars)//' pawsushat pawujat pawujrad pawujv pawusecp pawxcdev pimass pimd_constraint'
+ list_vars=trim(list_vars)//' pitransform ph_ndivsm ph_nqpath ph_qpath ph_ngqpt'
  list_vars=trim(list_vars)//' ph_wstep ph_intmeth ph_smear ph_nqshift ph_qshift'
  list_vars=trim(list_vars)//' plowan_bandi plowan_bandf plowan_compute plowan_iatom plowan_it plowan_lcalc'
  list_vars=trim(list_vars)//' plowan_natom plowan_nbl plowan_nt plowan_projcalc plowan_realspace'

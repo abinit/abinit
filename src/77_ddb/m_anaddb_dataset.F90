@@ -6,7 +6,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2016 ABINIT group (XG,JCC,CL,MVeithen,XW,MJV)
+!!  Copyright (C) 2014-2017 ABINIT group (XG,JCC,CL,MVeithen,XW,MJV)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -929,10 +929,10 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
  anaddb_dtset%nlflag=0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nlflag',tread,'INT')
  if(tread==1) anaddb_dtset%nlflag=intarr(1)
- if(anaddb_dtset%nlflag<0.or.anaddb_dtset%nlflag>2)then
+ if(anaddb_dtset%nlflag<0.or.anaddb_dtset%nlflag>3)then
    write(message, '(a,i0,5a)' )&
 &   'nlflag is ',anaddb_dtset%nlflag,', but the only allowed values',ch10,&
-&   'are 0, 1 or 2.',ch10,'Action: correct nlflag in your input file.'
+&   'are 0, 1, 2 or 3.',ch10,'Action: correct nlflag in your input file.'
    MSG_ERROR(message)
  end if
 

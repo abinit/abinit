@@ -7,7 +7,7 @@
 !! Output routine for the scfcv.F90 routine
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2016 ABINIT group (XG)
+!! Copyright (C) 2005-2017 ABINIT group (XG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -184,7 +184,6 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  use interfaces_18_timing
  use interfaces_28_numeric_noabirule
  use interfaces_41_geometry
- use interfaces_53_spacepar
  use interfaces_54_abiutil
  use interfaces_62_iowfdenpot
  use interfaces_65_paw
@@ -1151,10 +1150,9 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  call timab(969,1,tsec)
 
  if (dtset%prtdipole == 1) then
-!  FIXME: need to add ionic part of multipoles
    call multipoles_out(rhor,mpi_enreg,natom,nfft,ngfft,dtset%nspden,dtset%ntypat,rprimd,&
-&   dtset%typat,ucvol,xred,dtset%ziontypat)
- end if ! prtmultipoles
+&                      dtset%typat,ucvol,ab_out,xred,dtset%ziontypat)
+ end if
 
  ! BoltzTraP output files in GENEric format
  if (dtset%prtbltztrp == 1 .and. me==master) then

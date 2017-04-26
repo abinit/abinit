@@ -8,7 +8,7 @@
 !! the trial (local) potential and the residual potential.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (XG, GMR, MT, EB)
+!! Copyright (C) 1998-2017 ABINIT group (XG, GMR, MT, EB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -188,7 +188,7 @@ subroutine rhotov(dtset,energies,gprimd,gsqcut,istep,kxc,mpi_enreg,nfft,ngfft,&
 & (dtset%ixc==41.or.dtset%ixc==42.or.libxc_functionals_is_hybrid()))
 
 !If usewvl: wvlbigdft indicates that the BigDFT workflow will be followed
- if(dtset%usewvl==1 .and. dtset%wvl_bigdft_comp==1) wvlbigdft=.true.
+ wvlbigdft=(dtset%usewvl==1.and.dtset%wvl_bigdft_comp==1)
 
 !mpi communicator for spherical grid
  mpi_comm_sphgrid=mpi_enreg%comm_fft
@@ -202,7 +202,7 @@ subroutine rhotov(dtset,energies,gprimd,gsqcut,istep,kxc,mpi_enreg,nfft,ngfft,&
 
 !------Compute Hartree and xc potentials----------------------------------
 
-!allocate vnew here. 
+!allocate vnew here.
 !In wvl: vnew is used at call to wvl_psitohpsi
  if (optres==0) then
    ABI_ALLOCATE(vnew,(nfft,dtset%nspden))
@@ -250,7 +250,7 @@ subroutine rhotov(dtset,energies,gprimd,gsqcut,istep,kxc,mpi_enreg,nfft,ngfft,&
      call timab(943,2,tsec)
    end if
 !  For icoulomb==0 and usewvl Ehartree is calculated in psolver_rhohxc().
-!  For PAW we recalculate this since nhat was not taken into account 
+!  For PAW we recalculate this since nhat was not taken into account
 !  in psolver_rhohxc: E_H= int v_H (n+nhat) dr
    if(.not. wvlbigdft .and. (dtset%icoulomb==0 .or. dtset%usepaw==1 ) ) then
      call timab(942,1,tsec)
@@ -283,7 +283,7 @@ subroutine rhotov(dtset,energies,gprimd,gsqcut,istep,kxc,mpi_enreg,nfft,ngfft,&
 
  calc_xcdc=.false.
  if (optene==1.or.optene==2) calc_xcdc=.true.
- if (dtset%usewvl==1 .and. dtset%nnsclo>0) calc_xcdc=.true.
+ if (dtset%usewvl==1.and.dtset%nnsclo>0) calc_xcdc=.true.
  if (wvlbigdft) calc_xcdc=.false.
  if (dtset%usefock==1) calc_xcdc=.true.
 
@@ -323,7 +323,7 @@ subroutine rhotov(dtset,energies,gprimd,gsqcut,istep,kxc,mpi_enreg,nfft,ngfft,&
  vzeeman(:) = zero
  if (any(abs(dtset%zeemanfield(:))>tol8)) then
    if(dtset%nspden==2)then
-!    EB The collinear case has to be checked : 
+!    EB The collinear case has to be checked :
 !    EB Is it vzeeman(1) or (2) that has to be added here? to be checked in setvtr and energy as well
      vzeeman(1) =-half*dtset%zeemanfield(3)  ! For collinear ispden=2 is rho_up only
    else if(dtset%nspden==4)then
@@ -375,22 +375,25 @@ subroutine rhotov(dtset,energies,gprimd,gsqcut,istep,kxc,mpi_enreg,nfft,ngfft,&
      end if
      offset   = 0
 
+     if (dtset%iscf==0) vtrial=vnew
+
 !    Pass vtrial to BigDFT object
      if(dtset%usewvl==1) then
-       call wvl_vtrial_abi2big(1,vtrial,wvl%den)
+       call wvl_vtrial_abi2big(1,vnew,wvl%den)
+!      call wvl_vtrial_abi2big(1,vtrial,wvl%den)
      end if
 
    else
 !    Compute with covering comms the different part of the potential.
-!    only forwvlbigdft
+!    only for wvlbigdft
      ABI_ALLOCATE(xcart,(3, dtset%natom))
      call xred2xcart(dtset%natom, rprimd, xcart, xred)
      call wvl_psitohpsi(dtset%diemix,energies%e_exactX, energies%e_xc, energies%e_hartree, &
 &     energies%e_kinetic, energies%e_localpsp, energies%e_nonlocalpsp, energies%e_sicdc, &
-&     istep + 1, istep, dtset%iscf, mpi_enreg%me_wvl, dtset%natom, dtset%nfft,&
+&     istep + 1, 1, dtset%iscf, mpi_enreg%me_wvl, dtset%natom, dtset%nfft,&
 &     mpi_enreg%nproc_wvl, dtset%nspden, &
 &     vres2, .true., energies%e_xcdc, wvl,&
-&     wvlbigdft, xcart, strsxc,vnew, vxc)
+&     wvlbigdft, xcart, strsxc,vtrial=vnew,vxc=vxc)
      ABI_DEALLOCATE(xcart)
 
      vresidnew = vnew - vtrial
@@ -457,7 +460,7 @@ subroutine rhotov(dtset,energies,gprimd,gsqcut,istep,kxc,mpi_enreg,nfft,ngfft,&
      call xred2xcart(dtset%natom, rprimd, xcart, xred)
      call wvl_psitohpsi(dtset%diemix,energies%e_exactX, energies%e_xc, energies%e_hartree, &
 &     energies%e_kinetic, energies%e_localpsp, energies%e_nonlocalpsp, energies%e_sicdc, &
-&     istep + 1, istep, dtset%iscf, mpi_enreg%me_wvl, &
+&     istep + 1, 1, dtset%iscf, mpi_enreg%me_wvl, &
 &     dtset%natom, dtset%nfft, mpi_enreg%nproc_wvl,&
 &     dtset%nspden,vres2, .true.,energies%e_xcdc,  wvl,&
 &     wvlbigdft, xcart, strsxc, vtrial, vxc)

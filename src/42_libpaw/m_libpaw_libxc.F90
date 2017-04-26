@@ -8,7 +8,7 @@
 !!  correlation potentials and energies.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2015-2016 ABINIT group (MO, MT)
+!! Copyright (C) 2015-2017 ABINIT group (MO, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -60,7 +60,8 @@ module m_libpaw_libxc_funcs
  public :: libpaw_libxc_is_hybrid          ! Return TRUE if the XC functional is hybrid (GGA or meta-GGA)
  public :: libpaw_libxc_has_kxc            ! Return TRUE if Kxc (3rd der) is available for the XC functional
  public :: libpaw_libxc_nspin              ! The number of spin components for the XC functionals
- public :: libpaw_libxc_get_hybridcoef     ! Retrieve coefficients for hybrid functionals
+ public :: libpaw_libxc_get_hybridparams   ! Retrieve parameter(s) of a hybrid functional
+ public :: libpaw_libxc_set_hybridparams   ! Change parameter(s) of a hybrid functional
  public :: libpaw_libxc_gga_from_hybrid    ! Return the id of the XC-GGA used for the hybrid
 
 !Private functions
@@ -1435,21 +1436,21 @@ end subroutine libpaw_libxc_getvxc
 
 !----------------------------------------------------------------------
 
-!!****f* m_libpaw_libxc_funcs/libpaw_libxc_get_hybridcoef
+!!****f* m_libpaw_libxc_funcs/libpaw_libxc_get_hybridparams
 !! NAME
-!!  libpaw_libxc_get_hybridcoef
+!!  libpaw_libxc_get_hybridparams
 !!
 !! FUNCTION
-!!  Returns the mixing coefficients and the range separation for a hybrid functional
+!!  Returns the parameters of an hybrid functional (mixing coefficient(s) and range separation)
 !!
 !! INPUTS
 !! [xc_functionals(2)]=<type(libpaw_libxc_type)>, optional argument
 !!                     XC functionals to initialize
 !!
 !! OUTPUT
-!!  hyb_mixing   = mixing factor of Fock contribution
-!!  hyb_mixing_sr= mixing factor of short-range Fock contribution
-!!  hyb_range    = Range (for separation)
+!!  [hyb_mixing]  = mixing factor of Fock contribution
+!!  [hyb_mixing_sr]= mixing factor of short-range Fock contribution
+!!  [hyb_range]    = Range (for separation)
 !!
 !! PARENTS
 !!
@@ -1457,13 +1458,13 @@ end subroutine libpaw_libxc_getvxc
 !!
 !! SOURCE
 
-subroutine libpaw_libxc_get_hybridcoef(hyb_mixing,hyb_mixing_sr,hyb_range,xc_functionals)
+subroutine libpaw_libxc_get_hybridparams(hyb_mixing,hyb_mixing_sr,hyb_range,xc_functionals)
 
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'libpaw_libxc_get_hybridcoef'
+#define ABI_FUNC 'libpaw_libxc_get_hybridparams'
 !End of the abilint section
 
  implicit none
@@ -1529,7 +1530,109 @@ subroutine libpaw_libxc_get_hybridcoef(hyb_mixing,hyb_mixing_sr,hyb_range,xc_fun
 
  end do
 
-end subroutine libpaw_libxc_get_hybridcoef
+end subroutine libpaw_libxc_get_hybridparams
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* libpaw_libxc/libpaw_libxc_set_hybridparams
+!! NAME
+!!  libpaw_libxc_set_hybridparams
+!!
+!! FUNCTION
+!!  Set the parameters of an hybrid functional (mixing coefficient(s) and range separation)
+!!
+!! INPUTS
+!! [hyb_mixing]       = mixing factor of Fock contribution
+!! [hyb_mixing_sr]    = mixing factor of short-range Fock contribution
+!! [hyb_range]        = Range (for separation)
+!! [xc_functionals(2)]=<type(libpaw_libxc_type)>, optional argument
+!!                     XC functionals to initialize
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!      calc_vhxc_me
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine libpaw_libxc_set_hybridparams(hyb_mixing,hyb_mixing_sr,hyb_range,xc_functionals)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'libpaw_libxc_set_hybridparams'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+ real(dp),intent(in),optional :: hyb_mixing,hyb_mixing_sr,hyb_range
+ type(libpaw_libxc_type),intent(in),optional,target :: xc_functionals(2)
+!Local variables -------------------------------
+ integer :: ii
+ logical :: is_pbe0,is_hse
+ character(len=500) :: msg
+#ifdef LIBPAW_ISO_C_BINDING
+ real(C_DOUBLE) :: alpha_c,beta_c,omega_c
+#endif
+ type(libpaw_libxc_type),pointer :: xc_func
+
+! *************************************************************************
+
+ is_pbe0=.false.
+ is_hse =.false.
+
+ do ii = 1, 2
+
+!  Select XC functional
+   if (present(xc_functionals)) then
+     xc_func => xc_functionals(ii)
+   else
+     xc_func => paw_xc_global(ii)
+   end if
+
+!  Doesnt work with all hybrid functionals
+   if (is_pbe0.or.is_hse) then
+     msg='Invalid XC functional: contains 2 hybrid exchange functionals!'
+     MSG_ERROR(msg)
+   end if
+   is_pbe0=(xc_func%id==libpaw_libxc_getid('HYB_GGA_XC_PBEH'))
+   is_hse=((xc_func%id==libpaw_libxc_getid('HYB_GGA_XC_HSE03')).or.&
+&          (xc_func%id==libpaw_libxc_getid('HYB_GGA_XC_HSE06')))
+   if ((.not.is_pbe0).and.(.not.is_hse)) cycle
+
+#ifdef LIBPAW_ISO_C_BINDING
+!  First retrieve current values of parameters
+   call xc_hyb_cam_coef(xc_func%conf,omega_c,alpha_c,beta_c)
+
+!  New values for parameters
+   if (present(hyb_mixing)) alpha_c=real(hyb_mixing,kind=C_DOUBLE)
+   if (present(hyb_mixing_sr)) beta_c=real(hyb_mixing_sr,kind=C_DOUBLE)
+   if (present(hyb_range)) omega_c=real(hyb_range,kind=C_DOUBLE)
+
+!  PBE0: set parameters
+   if (is_pbe0) then
+       call xc_hyb_gga_xc_pbeh_set_params(xc_func%conf,alpha_c)
+   end if
+
+!  HSE: set parameters
+   if (is_hse) then
+     call xc_hyb_gga_xc_hse_set_params(xc_func%conf,beta_c,omega_c)
+   end if
+#endif
+
+ end do
+
+ if ((.not.is_pbe0).and.(.not.is_hse)) then
+   msg='Invalid XC functional: not able to change parameters for this functional!'
+   MSG_WARNING(msg)
+ end if
+
+end subroutine libpaw_libxc_set_hybridparams
 !!***
 
 !----------------------------------------------------------------------
@@ -1873,7 +1976,7 @@ end module m_libpaw_libxc_funcs
 !!   - Use of embedded m_libpaw_libxc_funcs module
 !!
 !! COPYRIGHT
-!! Copyright (C) 2014-2016 ABINIT group (MT)
+!! Copyright (C) 2014-2017 ABINIT group (MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1887,21 +1990,22 @@ module m_libpaw_libxc
 
 #else
  use m_libpaw_libxc_funcs, only : &
-& libxc_functionals_check           => libpaw_libxc_check, &
-& libxc_functionals_init            => libpaw_libxc_init, &
-& libxc_functionals_end             => libpaw_libxc_end, &
-& libxc_functionals_fullname        => libpaw_libxc_fullname, &
-& libxc_functionals_getid           => libpaw_libxc_getid, &
-& libxc_functionals_family_from_id  => libpaw_libxc_family_from_id, &
-& libxc_functionals_ixc             => libpaw_libxc_ixc, &
-& libxc_functionals_getvxc          => libpaw_libxc_getvxc, &
-& libxc_functionals_isgga           => libpaw_libxc_isgga, &
-& libxc_functionals_ismgga          => libpaw_libxc_ismgga, &
-& libxc_functionals_is_hybrid       => libpaw_libxc_is_hybrid, &
-& libxc_functionals_has_kxc         => libpaw_libxc_has_kxc, &
-& libxc_functionals_nspin           => libpaw_libxc_nspin, &
-& libxc_functionals_get_hybridcoef  => libpaw_libxc_get_hybridcoef, &
-& libxc_functionals_gga_from_hybrid => libpaw_libxc_gga_from_hybrid
+& libxc_functionals_check            => libpaw_libxc_check, &
+& libxc_functionals_init             => libpaw_libxc_init, &
+& libxc_functionals_end              => libpaw_libxc_end, &
+& libxc_functionals_fullname         => libpaw_libxc_fullname, &
+& libxc_functionals_getid            => libpaw_libxc_getid, &
+& libxc_functionals_family_from_id   => libpaw_libxc_family_from_id, &
+& libxc_functionals_ixc              => libpaw_libxc_ixc, &
+& libxc_functionals_getvxc           => libpaw_libxc_getvxc, &
+& libxc_functionals_isgga            => libpaw_libxc_isgga, &
+& libxc_functionals_ismgga           => libpaw_libxc_ismgga, &
+& libxc_functionals_is_hybrid        => libpaw_libxc_is_hybrid, &
+& libxc_functionals_has_kxc          => libpaw_libxc_has_kxc, &
+& libxc_functionals_nspin            => libpaw_libxc_nspin, &
+& libxc_functionals_get_hybridparams => libpaw_libxc_get_hybridparams, &
+& libxc_functionals_set_hybridparams => libpaw_libxc_set_hybridparams, &
+& libxc_functionals_gga_from_hybrid  => libpaw_libxc_gga_from_hybrid
 #endif
 
  implicit none

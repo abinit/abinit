@@ -29,12 +29,12 @@ ntime  = 50
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = multibinit
-#%% test_chain = t120.in,t121.in,t122.in,t123.in,t124.in
-#%% input_ddb = t121.ddb.out
+#%% test_chain = t07.in,t08.in,t09.in,t10.in,t11.in
+#%% input_ddb = t09.ddb.in
 #%% [files]
 #%% files_to_test = 
-#%%   t122.out, tolnlines = 0, tolabs = 0, tolrel = 0, fld_options = -easy;
-#%%   system.xml, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -easy
+#%%   t09.out, tolnlines = 0, tolabs = 0, tolrel = 0, fld_options = -easy;
+#%%   t09_sys.xml, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -easy
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]

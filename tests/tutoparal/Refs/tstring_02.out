@@ -2,7 +2,7 @@
 .Version 6.9.0  of ABINIT 
 .(MPI version, prepared for a x86_64_linux_intel12.0 computer) 
 
-.Copyright (C) 1998-2016 ABINIT group . 
+.Copyright (C) 1998-2017 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -88,7 +88,7 @@ P           mkmem           1
            toldff      5.00000000E-07
             typat      1  3  3  2  3  3  3  3
            useylm           1
-         wfoptalg          14
+         wfoptalg         114
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                       -3.0410000000E-01 -1.9040000000E-01  9.0870000000E-01
                       -3.2250000000E-01  9.0280000000E-01 -1.8830000000E-01
@@ -1538,7 +1538,7 @@ P           mkmem           1
            toldff      5.00000000E-07
             typat      1  3  3  2  3  3  3  3
            useylm           1
-         wfoptalg          14
+         wfoptalg         114
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                       -3.0400286349E-01 -1.9039526061E-01  9.0873550186E-01
                       -3.2251946581E-01  9.0284480687E-01 -1.8824324581E-01

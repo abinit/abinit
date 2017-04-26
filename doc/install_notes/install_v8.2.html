@@ -4,7 +4,9 @@
 </head>
 <body>
 
+<hr>
 <h1>Installation notes for ABINIT v8.2</h1>
+<hr>
 
 <p>
 
@@ -25,7 +27,7 @@ welcome! Simply contact the ABINIT group (http://forum.abinit.org/).
 </p>
 
 <h5>
-Copyright (C) 1998-2016 ABINIT group (XG,DCA)<br />
+Copyright (C) 1998-2017 ABINIT group (XG,DCA)<br />
 This file is distributed under the terms of the GNU General Public
 License,<br />
 see ~abinit/COPYING or <a href="http://www.gnu.org/copyleft/gpl.txt">
@@ -99,9 +101,7 @@ tests?</strong></a> and the following sections.
 <br />
 <p>
 If you want to have a much better handling on ABINIT than normal users,
-or if on the contrary you simply want to download pre-compiled
-executable (no compilation), or want to use Windows, then go to <a
-href="#get_version"><strong>1. How to get a version of ABINIT?</strong></a>.
+then go to <a href="#get_version"><strong>1. How to get a version of ABINIT?</strong></a>.
 </p>
 <br />
 <p>
@@ -115,7 +115,7 @@ Running all tests will require more than 2.5 GBytes.
 <p>We will distinguish two cases:</p>
 <ul>
    <li><a href="#get_full_handle">1.A.</a> You have a F90 compiler under
-   UNIX/Linux or MacOS X, as well as (free) software like bazaar,
+   UNIX/Linux or MacOS X, as well as (free) software applications like git,
    automake, autoconf, libtool, perl, python, and you want to have a
    full handle on the package (compilation, modification of files,
    writing of scripts ... this is the preferred case for developers). We
@@ -135,9 +135,12 @@ the others ...).</p>
 
 <h3><a name="get_full_handle"></a>1.A. To get a full handle of ABINIT</h3>
 
+<p> Important warning : this section has not yet been upgraded for the replacement of bzr (bazaar) by Git(lab).
+Should be done for v8.2.2
+
 <p>
 You have a F90 compiler under UNIX/Linux or MacOS X, as well as (free)
-software like bazaar, automake, autoconf, libtool, perl, python, and you
+software like git, automake, autoconf, libtool, perl, python, and you
 want to have a full handle on the package (compilation, modification of
 files, writing of scripts). This is the preferred case for developers...
 We will sometimes refer to this case as the "autotools development
@@ -155,33 +158,27 @@ consult your local computer guru, and the following pages:
 </ul>
 
 <p>
-If you want to develop, please have a bazaar branch (public + private)
-created for you by contacting Yann Pouillon or Jean-Michel Beuken, as
+If you want to develop, please have a Git(lab) access
+created for you by contacting Jean-Michel Beuken, as
 described in these pages.
 </p>
 
 <p>
 It is strongly advised to subscribe to the
-<a href="http://forum.abinit.org/">ABINIT forum </a> if you want to be
+<a href="http://forum.abinit.org/">ABINIT forum</a> if you want to be
 able to get the latest information concerning the autotools development
 mode.
 </p>
 
 <p>
-After having installed Bazaar, and obtained a branch on the ABINIT
+After having installed git, and obtained a branch on the ABINIT
 worldwide repository, create an automomous copy of the source code, on
-top of which you have to make your development:
-</p>
-<pre>bzr branch bzr+ssh://forge.abinit.org/abinit/(developer)/(branch)</pre>
+top of which you have to make your development.
+This is explained in the ABINIT wiki
+<a href="https://wiki.abinit.org/doku.php?id=developers:specificities_git_abinit">git(lab) : ABINIT specificities</a>
 <p>
-As an example, for the development of version 8.0 for the user 'hacker',
-issue:
-</p>
-<pre>bzr branch bzr+ssh://forge.abinit.org/abinit/hacker/8.0.7-private</pre>
-<br />
-<p>
-For your branches (public + private) on the ABINIT worldwide repository,
-you will have the permission not only to download, but also to commit (push)
+For your branches on the ABINIT worldwide repository,
+you will have the permission not only to clone/fetch/pull, but also to commit/push
 your modifications. You might alternatively download other branches of
 the archives, but you will not be able to commit in these branches. So,
 do not start to modify these, you will not be able to include them
@@ -189,7 +186,7 @@ afterwards in the archive.
 </p>
 
 <p>
-Working with <tt>bzr branch</tt> creates a local archive for your daily work,
+Working with <tt>git clone</tt> creates a local archive for your daily work,
 this archive being linked to the main ABINIT archive. This very
 efficient technique is recommended, as it makes you more independent for
 the management of your work (you will be able to create new branches).
@@ -198,7 +195,7 @@ can develop and commit safely without a network connection.
 </p>
 
 <p>
-Now, issue:
+Now, cd to the newly created abinit directory, and issue : 
 </p>
 <pre>
 ./config/scripts/makemake
@@ -366,7 +363,8 @@ Additional targets, for developers, can be obtained by typing:
 It is possible to compile only one of the executable,
 just after the configure step by typing:
 </p>
-<pre>make name_of_the_binary (where name_of_the_binary can be abinit, cut3d, anaddb, ...)</pre>
+<pre>make name_of_the_binary</pre>
+(where name_of_the_binary can be abinit, cut3d, anaddb, ...).
 
 <p>
 These are only a tiny fraction of the things that you can realize thanks
@@ -400,7 +398,7 @@ character, e.g. abiref or my_machine ...
 
 <p>
 There is a template for such a file, located in
-~abinit/doc/config/. Its name is build-config.ac. Examples
+~abinit/doc/config/. Its name is config-template.ac. Examples
 of such files, that have been used for testing the package,
 can be found in ~abinit/doc/build/config-examples/. By the way, the
 known problems observed for these different tests are mentioned
@@ -413,8 +411,8 @@ Most of the examples provided in the ~abinit/doc/build/config-examples/
 directory contain about five definitions: F90 and C locations, F90 and
 C options, MPI library location (or the indication that MPI is not
 enabled).  On the other hand, there are many other possible control
-flags, needed for advanced use. In case you have trouble with some
-library, (NetCDF, LibXC, ETSF_IO, FoX), you may disable their build.
+flags ("with_XYZ"), needed for advanced use. In case you have trouble with some
+library (LibXC, WANNIER90, ETSF_IO ...), you may disable its build.
 </p>
 
 <p>
@@ -455,7 +453,7 @@ directory:
 <ul>
   <li>configure or ./configure  (or first create a tmp directory, then
   cd tmp, create a hostname.ac file, then ../configure)</li>
-  <li>make or make  (or make multi for using several processors on a SMP
+  <li>make or make mj4 (or make multi for using several processors on a SMP
   machine)</li>
   <li>(optionally) make install</li>
 </ul>
@@ -576,7 +574,7 @@ the order of 1GB).
 <p>
 ~ABINIT/tests/fast/ is the simplest, and its content will be described
 in some detail below.  For tests of the parallel version see
-the directory test/paral/, as well as the ~abinit/doc/paral_use text
+the directory tests/paral/, as well as the ~abinit/doc/users/paral_use text
 file.  For tests of the response function features of abinit, and for
 tests of mrgddb and anaddb, see the subdirectories tests/v2.  The other
 directories tests/v3, tests/v4, ...  presents further
@@ -596,8 +594,13 @@ tests.
 </p>
 
 <p>
-The description of the tests can be found at the end of the
-~abinit/tests/fast/README file.
+The input files for each of the tests can be found in the
+~abinit/tests/fast/Input directory. At the bottom of the
+each of the input file, some metadata is present.
+Such metadata mentions the executable to be used (automatically), 
+possibly the other input files (like pseudopotentials), the output files to be analyzed,
+the admitted tolerances with respect to reference output files,
+the author of the test, and a brief description of the test.
 </p>
 
 <p>
@@ -608,7 +611,7 @@ To run only the tests in this directory, simply issue, in the
 <pre><strong>./runtests.py fast</strong></pre>
 
 <p>
-It will create a directory Test_suite
+It will create a directory named Test_suite.
 All the results will be in that
 directory. The output files will be automatically compared, thanks to
 a 'diff' command, to a set of reference files (in
@@ -744,11 +747,12 @@ report files are also available. 64 MB of memory should be enough for
 these tests.
 </p>
 
-<p><strong>4) tests/v3, tests/v4, tests/v5, tests/v6, tests/v67mbpt, tests/v7, tests/bigdft, tests/etsf_io, tests/libxc, tests/wannier90</strong></p>
+<p><strong>4) tests/v3, tests/v4, tests/v5, tests/v6, tests/v67mbpt, tests/v7, tests/v8, 
+tests/bigdft, tests/etsf_io, tests/libxc, tests/wannier90</strong></p>
 
 <p>
 These directories contain tests built in the same spirit as those in the
-test/fast/ directory, but that exercise features not present in the
+tests/fast/ directory, but that exercise features not present in the
 Plane_Wave code, nor in version 1 or 2 of the ABINIT package, noticeably
 the use of the GW code, the utilities Cut3d, AIM, .., the PAW ... . Or
 the interfacing with fallbacks.  Again, the automatic difference procedure
@@ -821,7 +825,7 @@ packages.</h2>
    </li>
 
    <li>
-   The plug-ins are <strong>not</strong> in the installation package.
+   The "fallbacks" are <strong>not</strong> in the installation package.
    They are downloaded from the Web automatically at configure time.
    If you do not have the command "wget" install on your machine, 
    or if you do not have an access to the internet, you should
@@ -829,19 +833,13 @@ packages.</h2>
    </li>
 
    <li>The Web site <a href="http://www.abinit.org">http://www.abinit.org</a>
-   contains many other things ...<br />
-   The benchmarks results, the mailing lists, ...
+   contains many other things, including links to the forum, the mailing list, the ABINIT events, ...<br />
    </li>
 
 </ul>
 
 <hr>
 <h2><a name="modify"></a>7. For developers: how to modify the code?</h2>
-
-<p>
-(Of course, you cannot modify the code if you only downloaded a binary
-package).
-</p>
 
 <h3><a name="modify1"></a>7.1. To modify a file (arguments unchanged).</h3>
 

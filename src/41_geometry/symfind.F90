@@ -12,7 +12,7 @@
 !! Comp. Phys. Comm. 3, 88 (1972)
 !!
 !! COPYRIGHT
-!! Copyright (C) 2000-2016 ABINIT group (XG)
+!! Copyright (C) 2000-2017 ABINIT group (XG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -29,6 +29,7 @@
 !!         else 0
 !! nptsym=number of point symmetries of the Bravais lattice
 !! nucdipmom(3,natom) (optional) array of nuclear dipole moments
+!! nzchempot=if non-zero, means that a z-spatially varying chemical potential is added 
 !! ptsymrel(3,3,1:msym)= nptsym point-symmetry operations
 !!   of the Bravais lattice in real space in terms
 !!   of primitive translations.
@@ -61,8 +62,8 @@
 #include "abi_common.h"
 
  subroutine symfind(berryopt,efield,gprimd,jellslab,msym,natom,noncoll,nptsym,nsym,&
-&           ptsymrel,spinat,symafm,symrel,tnons,tolsym,typat,use_inversion,xred,&
-&           nucdipmom)
+&  nzchempot,ptsymrel,spinat,symafm,symrel,tnons,tolsym,typat,use_inversion,xred,&
+&  nucdipmom)
 
  use defs_basis
  use m_errors
@@ -78,7 +79,7 @@
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: berryopt,jellslab,msym,natom,noncoll,nptsym,use_inversion
+ integer,intent(in) :: berryopt,jellslab,msym,natom,noncoll,nptsym,nzchempot,use_inversion
  integer,intent(out) :: nsym
  real(dp),intent(in) :: tolsym
 !arrays
@@ -106,21 +107,21 @@
 !**************************************************************************
 
 !DEBUG
-!write(std_out,*)' symfind : enter'
-!call flush(6)
-!write(std_out,*)' symfind : jellslab = ',jellslab
-!write(std_out,*)'   ptsymrel matrices are :'
-!do isym=1,nptsym
-!write(std_out,'(i4,4x,9i4)' )isym,ptsymrel(:,:,isym)
-!end do
-!write(std_out,*)' symfind : natom=',natom
-!do iatom=1,natom
-!write(std_out,*)'  atom number',iatom
-!write(std_out,*)'   typat   =',typat(iatom)
-!write(std_out,*)'   spinat  =',spinat(:,iatom)
-!write(std_out,*)'   xred    =',xred(:,iatom)
-!end do
-!call flush(6)
+! write(std_out,*)' symfind : enter'
+! call flush(6)
+! write(std_out,*)' symfind : nzchempot= ',nzchempot
+! write(std_out,*)'   ptsymrel matrices are :'
+! do isym=1,nptsym
+! write(std_out,'(i4,4x,9i4)' )isym,ptsymrel(:,:,isym)
+! end do
+! write(std_out,*)' symfind : natom=',natom
+! do iatom=1,natom
+! write(std_out,*)'  atom number',iatom
+! write(std_out,*)'   typat   =',typat(iatom)
+! write(std_out,*)'   spinat  =',spinat(:,iatom)
+! write(std_out,*)'   xred    =',xred(:,iatom)
+! end do
+! call flush(6)
 !ENDDEBUG
 
 !Find the number of classes of atoms (type and spinat must be identical,
@@ -269,8 +270,9 @@
      if(det==-1) cycle
    end if
 
-!  jellium slab case:
-   if (jellslab/=0) then
+!  jellium slab and spatially varying chemical potential cases:
+!  (actually, an inversion symmetry/mirror plane perpendicular to z symmetry operation might still be allowed... TO BE DONE !)
+   if (jellslab/=0 .or. nzchempot/=0) then
 !    check whether symmetry operation produce a rotation only in the xy plane
      if( ptsymrel(1,3,isym)/=0 .or. ptsymrel(2,3,isym)/=0 .or. &
 &     ptsymrel(3,1,isym)/=0 .or. ptsymrel(3,2,isym)/=0 ) cycle
@@ -413,11 +415,11 @@
  end if
 
 !DEBUG
-!write(std_out,*)' symfind : exit, nsym=',nsym
-!write(std_out,*)'   symrel matrices, symafm and tnons are :'
-!do isym=1,nsym
-!write(std_out,'(i4,4x,3i4,2x,3i4,2x,3i4,4x,i4,4x,3f8.4)' )isym,symrel(:,:,isym),symafm(isym),tnons(:,isym)
-!end do
+ write(std_out,*)' symfind : exit, nsym=',nsym
+ write(std_out,*)'   symrel matrices, symafm and tnons are :'
+ do isym=1,nsym
+ write(std_out,'(i4,4x,3i4,2x,3i4,2x,3i4,4x,i4,4x,3f8.4)' )isym,symrel(:,:,isym),symafm(isym),tnons(:,isym)
+ end do
 !stop
 !ENDDEBUG
 

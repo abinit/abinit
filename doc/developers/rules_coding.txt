@@ -4,7 +4,7 @@ Rules_coding
 ABINIT style for Fortran programming
 (revised many times from the original draft in 1991 ... )
 
-Copyright (C) 1991-2016 ABINIT group (DCA,XG,GMR,MM,HM,PT,MV)
+Copyright (C) 1991-2017 ABINIT group (DCA,XG,GMR,MM,HM,PT,MV)
 This file is distributed under the terms of the
 GNU General Public License, see ~abinit/COPYING
 or http://www.gnu.org/copyleft/gpl.txt .
@@ -369,7 +369,7 @@ The header format is the most easily understood by a commented example ...
 The string "name_of_subroutine" must be replaced by the name of the subroutine.
 In the copyright notice, "yyy1" and "yyy2" must be replaced by years of modifications,
 "initials" must be replaced by the initials of the contributors, for example
-!! Copyright (C) 2007-2016 ABINIT group (DCA, XG).
+!! Copyright (C) 2007-2017 ABINIT group (DCA, XG).
 "arg1=..." and similar strings must be replaced by the actual description
 of input or output variables. They must appear in the same order in which
 they appear as arguments to the subroutine. Note that the Robodoc keywords

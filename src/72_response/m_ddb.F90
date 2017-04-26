@@ -10,7 +10,7 @@
 !!  Main entry point for client code that needs to read the DDB data.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2011-2016 ABINIT group (MJV, XG, MT, MM, MVeithen, MG, PB, JCC)
+!! Copyright (C) 2011-2017 ABINIT group (MJV, XG, MT, MM, MVeithen, MG, PB, JCC)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -39,7 +39,8 @@ MODULE m_ddb
  use m_geometry,       only : phdispl_cart2red
  use m_crystal,        only : crystal_t, crystal_init
  use m_pawtab,         only : pawtab_type,pawtab_nullify,pawtab_free
- use m_dynmat,         only : cart29, d2sym3, cart39, d3sym, chneu9, asria_calc, asria_corr, asrprs, dfpt_phfrq
+ use m_dynmat,         only : cart29, d2sym3, cart39, d3sym, chneu9, asria_calc, asria_corr, asrprs, &
+&                             dfpt_phfrq, sytens
 
  implicit none
 
@@ -2842,6 +2843,7 @@ subroutine rdddb9(acell,atifc,amu,ddb,&
  integer :: mtypat,mkpt,matom
  integer :: choice,fullinit,iblok,intxc,iscf,isym,ixc
  integer :: nsize,nspden,nspinor,nsppol,nunit,timrev,useylm,vrsddb
+ integer :: i1dir,i1pert,i2dir,i2pert,i3dir,i3pert
  real(dp),parameter :: tolsym8=tol8
  real(dp) :: dilatmx,ecut,ecutsm,kptnrm,pawecutdg,dfpt_sciss,tolwfr
  real(dp) :: tphysel,tsmear
@@ -2849,7 +2851,7 @@ subroutine rdddb9(acell,atifc,amu,ddb,&
 !arrays
  integer :: ngfft(18),symq(4,2,msym)
  integer,allocatable :: car3flg(:,:,:,:,:,:),carflg(:,:,:,:),indlmn(:,:,:)
- integer,allocatable :: nband(:),pspso(:),tmpflg(:,:,:,:,:,:)
+ integer,allocatable :: nband(:),pspso(:),tmpflg(:,:,:,:,:,:),rfpert(:,:,:,:,:,:)
  real(dp) :: gprimd(3,3),qpt(3),rprimd(3,3)
  real(dp),allocatable :: d2cart(:,:,:,:,:),d3cart(:,:,:,:,:,:,:),ekb(:,:)
  real(dp),allocatable :: kpt(:,:),occ(:),spinat(:,:),tmpval(:,:,:,:,:,:,:)
@@ -2970,10 +2972,37 @@ subroutine rdddb9(acell,atifc,amu,ddb,&
      nsize=3*mpert*3*mpert*3*mpert
      ABI_MALLOC(tmpflg,(3,mpert,3,mpert,3,mpert))
      ABI_MALLOC(tmpval,(2,3,mpert,3,mpert,3,mpert))
+     ABI_MALLOC(rfpert,(3,mpert,3,mpert,3,mpert))
 
      tmpflg(:,:,:,:,:,:) = reshape(ddb%flg(1:nsize,iblok), shape = (/3,mpert,3,mpert,3,mpert/))
      tmpval(1,:,:,:,:,:,:) = reshape(ddb%val(1,1:nsize,iblok), shape = (/3,mpert,3,mpert,3,mpert/))
      tmpval(2,:,:,:,:,:,:) = reshape(ddb%val(2,1:nsize,iblok), shape = (/3,mpert,3,mpert,3,mpert/))
+
+!    Set the elements that are zero by symmetry for raman and
+!    non-linear optical susceptibility tensors
+     rfpert = 0
+     rfpert(:,natom+2,:,natom+2,:,natom+2) = 1
+     rfpert(:,1:natom,:,natom+2,:,natom+2) = 1
+     rfpert(:,natom+2,:,1:natom,:,natom+2) = 1
+     rfpert(:,natom+2,:,natom+2,:,1:natom) = 1
+     call sytens(indsym,mpert,natom,nsym,rfpert,symrec,symrel)
+     do i1pert = 1,mpert
+       do i2pert = 1,mpert
+         do i3pert = 1,mpert
+           do i1dir=1,3
+             do i2dir=1,3
+               do i3dir=1,3
+                 if ((rfpert(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)==-2) .and. &
+&                  (tmpflg(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)/=1)) then
+                   tmpval(:,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert) = zero
+                   tmpflg(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)=1
+                 end if
+               end do
+             end do
+           end do
+         end do
+       end do
+     end do
 
      call d3sym(tmpflg,tmpval,indsym,mpert,natom,nsym,symrec,symrel)
 
@@ -2990,6 +3019,7 @@ subroutine rdddb9(acell,atifc,amu,ddb,&
      ABI_FREE(car3flg)
      ABI_FREE(tmpflg)
      ABI_FREE(tmpval)
+     ABI_FREE(rfpert)
    end if
  end do ! iblok
 
@@ -3826,6 +3856,7 @@ end subroutine dtech9
 !! ramansr= if /= 0, impose sum rule on first-order derivatives
 !!                   of the electronic susceptibility with respect
 !!                   to atomic displacements
+!! nlflag= if =3, only the non-linear optical susceptibilities is computed
 !!
 !! OUTPUT
 !! dchide(3,3,3) = non-linear optical coefficients
@@ -3839,7 +3870,7 @@ end subroutine dtech9
 !!
 !! SOURCE
 
-subroutine dtchi(blkval,dchide,dchidt,mpert,natom,ramansr)
+subroutine dtchi(blkval,dchide,dchidt,mpert,natom,ramansr,nlflag)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -3852,7 +3883,7 @@ subroutine dtchi(blkval,dchide,dchidt,mpert,natom,ramansr)
 
 !Arguments -------------------------------
 !scalars
- integer,intent(in) :: mpert,natom,ramansr
+ integer,intent(in) :: mpert,natom,ramansr,nlflag
 !arrays
  real(dp),intent(in) :: blkval(2,3*mpert*3*mpert*3*mpert)
  real(dp),intent(out) :: dchide(3,3,3),dchidt(natom,3,3,3)
@@ -3896,15 +3927,17 @@ subroutine dtchi(blkval,dchide,dchidt,mpert,natom,ramansr)
  dvoigt(:,:) = dvoigt(:,:)*16*(pi**2)*(Bohr_Ang**2)*1.0d-8*eps0/e_Cb
 
 !Extraction of $\frac{d \chi}{d \tau}$
- do iatom = 1, natom
-   do depl = 1,3
-     do elfd1 = 1,3
-       do elfd2 = 1,3
-         dchidt(iatom,depl,elfd1,elfd2) = d3cart(1,depl,iatom,elfd1,natom+2,elfd2,natom+2)
+ if (nlflag < 3) then
+   do iatom = 1, natom
+     do depl = 1,3
+       do elfd1 = 1,3
+         do elfd2 = 1,3
+           dchidt(iatom,depl,elfd1,elfd2) = d3cart(1,depl,iatom,elfd1,natom+2,elfd2,natom+2)
+         end do
        end do
      end do
    end do
- end do
+ end if
 
  wghtat(:) = zero
  if (ramansr == 1) then
@@ -3972,25 +4005,27 @@ subroutine dtchi(blkval,dchide,dchidt,mpert,natom,ramansr)
     end if
  end if    ! ramansr
 
- if (iwrite) then
-   write(ab_out,*)ch10
-   write(ab_out,*)' First-order change in the electronic dielectric '
-   write(ab_out,*)' susceptibility tensor (Bohr^-1)'
-   write(ab_out,*)' induced by an atomic displacement'
-   if (ramansr /= 0) then
-     write(ab_out,*)' (after imposing the sum over all atoms to vanish)'
-   end if
-   write(ab_out,*)'  atom  displacement'
+ if (nlflag < 3) then
+   if (iwrite) then
+     write(ab_out,*)ch10
+     write(ab_out,*)' First-order change in the electronic dielectric '
+     write(ab_out,*)' susceptibility tensor (Bohr^-1)'
+     write(ab_out,*)' induced by an atomic displacement'
+     if (ramansr /= 0) then
+       write(ab_out,*)' (after imposing the sum over all atoms to vanish)'
+     end if
+     write(ab_out,*)'  atom  displacement'
 
-   do iatom = 1,natom
-     do depl = 1,3
-       write(ab_out,'(1x,i4,9x,i2,3(3x,f16.9))')iatom,depl,dchidt(iatom,depl,1,:)
-       write(ab_out,'(16x,3(3x,f16.9))')dchidt(iatom,depl,2,:)
-       write(ab_out,'(16x,3(3x,f16.9))')dchidt(iatom,depl,3,:)
+     do iatom = 1,natom
+       do depl = 1,3
+         write(ab_out,'(1x,i4,9x,i2,3(3x,f16.9))')iatom,depl,dchidt(iatom,depl,1,:)
+         write(ab_out,'(16x,3(3x,f16.9))')dchidt(iatom,depl,2,:)
+         write(ab_out,'(16x,3(3x,f16.9))')dchidt(iatom,depl,3,:)
+       end do
+
+       write(ab_out,*)
      end do
-
-     write(ab_out,*)
-   end do
+   end if
  end if
 
 !DEBUG
@@ -4205,6 +4240,8 @@ end function ddb_get_dielt_zeff
 !! ramansr= if /= 0, impose sum rule on first-order derivatives
 !!                   of the electronic susceptibility with respect
 !!                   to atomic displacements
+!! nlflag= if =3, only the non-linear optical susceptibilities is computed
+!!
 !! OUTPUT
 !! dchide(3,3,3) = non-linear optical coefficients
 !! dchidt(natom,3,3,3) = first-order change of the electronic dielectric
@@ -4218,7 +4255,7 @@ end function ddb_get_dielt_zeff
 !!
 !! SOURCE
 
-integer function ddb_get_dchidet(ddb,ramansr,dchide,dchidt) result(iblok)
+integer function ddb_get_dchidet(ddb,ramansr,nlflag,dchide,dchidt) result(iblok)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -4231,7 +4268,7 @@ integer function ddb_get_dchidet(ddb,ramansr,dchide,dchidt) result(iblok)
 
 !Arguments -------------------------------
 !scalars
- integer,intent(in) :: ramansr
+ integer,intent(in) :: ramansr, nlflag
  type(ddb_type),intent(in) :: ddb
 !arrays
  real(dp),intent(out) :: dchide(3,3,3),dchidt(ddb%natom,3,3,3)
@@ -4247,15 +4284,21 @@ integer function ddb_get_dchidet(ddb,ramansr,dchide,dchidt) result(iblok)
 
  qphon(:,:) = zero
  qphnrm(:)  = one
- rfphon(1)  = 1 ; rfphon(2:3) = 0
+! rfphon(1)  = 1 ; rfphon(2:3) = 0
  rfelfd(:)  = 2
  rfstrs(:)  = 0
  rftyp = 3
 
+ if (nlflag < 3) then
+   rfphon(1)  = 1 ; rfphon(2:3) = 0
+ else
+   rfphon(1)  = 0 ; rfphon(2:3) = 0
+ end if
+
  call gtblk9(ddb,iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,rftyp)
 
  if (iblok /= 0) then
-   call dtchi(ddb%val(:,:,iblok),dchide,dchidt,ddb%mpert,ddb%natom,ramansr)
+   call dtchi(ddb%val(:,:,iblok),dchide,dchidt,ddb%mpert,ddb%natom,ramansr,nlflag)
  else
    ! Let the caller handle the error.
    dchide = huge(one); dchidt = huge(one)

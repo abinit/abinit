@@ -11,7 +11,7 @@
 !! and were used to dimension the arrays needed here.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (DCA, XG, GMR)
+!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -165,7 +165,8 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
 & nimage,&
 & 3*dtset%nqptdm,&
 & 3*dtset%natsph_extra,&
-& dtset%natvshift*nsppol*natom)
+& dtset%natvshift*nsppol*natom,&
+& 3*dtset%nzchempot*ntypat)
  ABI_ALLOCATE(intarr,(marr))
  ABI_ALLOCATE(dprarr,(marr))
 
@@ -709,6 +710,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'adpimd_gamma',tread,'DPR')
  if(tread==1) dtset%adpimd_gamma=dprarr(1)
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'pimd_constraint',tread,'INT')
+ if(tread==1) dtset%pimd_constraint=intarr(1)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'pitransform',tread,'INT')
  if(tread==1) dtset%pitransform=intarr(1)
@@ -1268,6 +1272,12 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'iscf',tread,'INT')
  if(tread==1) then
    dtset%iscf=intarr(1)
+   if (dtset%usewvl==1) then
+     !wvl_bigdft_comp should be 1 for iscf=0, 0 for iscf>0, except if it is set by the user
+     call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'wvl_bigdft_comp',tread,'INT')
+     if (tread==0.and.dtset%iscf==0) dtset%wvl_bigdft_comp=1
+     if (tread==0.and.dtset%iscf >0) dtset%wvl_bigdft_comp=0
+   end if
  else if (dtset%optdriver==RUNL_RESPFN.and.dtset%iscf>=10) then
    dtset%iscf=dtset%iscf-10
  else if (dtset%optdriver==RUNL_GWLS) then
@@ -2557,6 +2567,13 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
 
    ABI_DEALLOCATE(iatcon)
    ABI_DEALLOCATE(natcon)
+ end if
+
+!Initialize chempot
+ if(dtset%nzchempot>0)then
+   call intagm(dprarr,intarr,jdtset,marr,3*dtset%nzchempot*ntypat,string(1:lenstr),'chempot',tread,'DPR')
+   if(tread==1) dtset%chempot(1:3,1:dtset%nzchempot,1:ntypat)=&
+&   reshape(dprarr(1:3*dtset%nzchempot*ntypat),(/3,dtset%nzchempot,ntypat/))
  end if
 
 !Initialize the list of k points, as well as wtk and istwfk

@@ -8,7 +8,7 @@
 !! using the "cg" convention, namely real array of shape cg(2,...)
 !!
 !! COPYRIGHT
-!! Copyright (C) 1992-2016 ABINIT group (MG, MT, XG, DCA, GZ, FB, MVer)
+!! Copyright (C) 1992-2017 ABINIT group (MG, MT, XG, DCA, GZ, FB, MVer)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -46,7 +46,7 @@ MODULE m_cgtools
  use m_errors
  use m_xmpi
 
- use m_fstrings,  only : toupper
+ use m_fstrings,   only : toupper
 
  implicit none
 
@@ -1746,7 +1746,7 @@ end subroutine sqnorm_v
 !!  meansp(nspden)=mean value for each nspden component
 !!
 !! PARENTS
-!!      fresid,multipoles_fftr,newvtr,pawmknhat,prcref,prcref_PMA
+!!      fresid,newvtr,pawmknhat,prcref,prcref_PMA
 !!      psolver_rhohxc,rhohxc,rhohxcpositron,rhotov
 !!
 !! CHILDREN

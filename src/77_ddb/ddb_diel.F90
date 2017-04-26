@@ -11,7 +11,7 @@
 !! See the definitions Eq.(53-54) in PRB55, 10355 (1997).
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2016 ABINIT group (XG,XW)
+!! Copyright (C) 1999-2017 ABINIT group (XG,XW)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -38,6 +38,7 @@
 !!  case, give minus the square root of the absolute value
 !!  of the matrix eigenvalues). Hartree units.
 !! comm=MPI communicator.
+!! ncid=the id of the open NetCDF file. Set to nctk_noid if netcdf output is not wanted.
 !!
 !! OUTPUT
 !! fact_oscstr(2,3,3*natom)=oscillator strengths for the different eigenmodes,
@@ -69,13 +70,17 @@
 
 
 subroutine ddb_diel(Crystal,amu,anaddb_dtset,dielt_rlx,displ,d2cart,epsinf,fact_oscstr,&
-& iout,lst,mpert,natom,nph2l,phfrq,comm)
+& iout,lst,mpert,natom,nph2l,phfrq,comm,ncid)
 
  use defs_basis
  use m_errors
  use m_xmpi
  use m_profiling_abi
  use m_ddb
+ use m_nctk
+#ifdef HAVE_NETCDF
+ use netcdf
+#endif
 
  use m_anaddb_dataset, only : anaddb_dataset_type
  use m_crystal,        only : crystal_t
@@ -92,7 +97,7 @@ subroutine ddb_diel(Crystal,amu,anaddb_dtset,dielt_rlx,displ,d2cart,epsinf,fact_
 
 !Arguments -------------------------------
 !scalars
- integer,intent(in) :: iout,mpert,natom,nph2l,comm
+ integer,intent(in) :: iout,mpert,natom,nph2l,comm,ncid
  type(crystal_t),intent(in) :: Crystal
  type(anaddb_dataset_type),intent(in) :: anaddb_dtset
 !arrays
@@ -105,7 +110,7 @@ subroutine ddb_diel(Crystal,amu,anaddb_dtset,dielt_rlx,displ,d2cart,epsinf,fact_
 !scalars
  integer,parameter :: master=0
  integer :: dieflag,i1,idir1,idir2,ifreq,ii,imode,ipert1,iphl2,nfreq
- integer :: nprocs,my_rank
+ integer :: nprocs,my_rank,ncerr
  real(dp) :: afreq,difffr,eps,lst0,q2,usquare,ucvol
  character(len=500) :: message
  logical :: t_degenerate
@@ -276,6 +281,18 @@ subroutine ddb_diel(Crystal,amu,anaddb_dtset,dielt_rlx,displ,d2cart,epsinf,fact_
 &       oscstr(2,1,2,imode),oscstr(2,1,3,imode),oscstr(2,2,3,imode)
      end do
 
+     ! write the oscillator strength to the netcdf 
+#ifdef HAVE_NETCDF
+     if (ncid /= nctk_noid) then
+       ncerr = nctk_def_arrays(ncid, [nctkarr_t("oscillator_strength", "dp", &
+         "complex, number_of_cartesian_directions, number_of_cartesian_directions, number_of_phonon_modes")], &
+         defmode=.True.)
+       NCF_CHECK(ncerr)
+       NCF_CHECK(nctk_set_datamode(ncid))
+       NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "oscillator_strength"), oscstr))
+     end if
+#endif
+
      !  Write the trace of oscillator strength (real part only) for each mode
      write(iout, '(a)' )'  '
      write(iout, '(a)' )' Trace of oscillator strength, for each phonon mode :'
@@ -309,6 +326,7 @@ subroutine ddb_diel(Crystal,amu,anaddb_dtset,dielt_rlx,displ,d2cart,epsinf,fact_
    end do
    call wrtout(iout, " ",'COLL')
    call wrtout(std_out, " ",'COLL')
+
  end if
 
 !Only in case the frequency-dependent dielectric tensor is needed
@@ -361,6 +379,18 @@ subroutine ddb_diel(Crystal,amu,anaddb_dtset,dielt_rlx,displ,d2cart,epsinf,fact_
    end do
    call wrtout(iout, " ",'COLL')
    call wrtout(std_out, " ",'COLL')
+
+   ! write the relaxed ion dielectric tensor to the netcdf 
+#ifdef HAVE_NETCDF
+   if (ncid /= nctk_noid) then
+     ncerr = nctk_def_arrays(ncid, [nctkarr_t("emacro_cart_rlx", "dp", &
+       "number_of_cartesian_directions, number_of_cartesian_directions")],defmode=.True.)
+     NCF_CHECK(ncerr)
+     NCF_CHECK(nctk_set_datamode(ncid))
+     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "emacro_cart_rlx"), dielt_rlx))
+   end if
+#endif
+
  end if
 
 !Only in case the frequency-dependent dielectric tensor is needed

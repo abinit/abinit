@@ -13,7 +13,7 @@
 !! Note that the wavevector of the perturbation must also be invariant, a translation vector in real space is NOT allowed ).
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2016 ABINIT group (XG, DRH)
+!! Copyright (C) 1999-2017 ABINIT group (XG, DRH)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

@@ -139,7 +139,7 @@ _tsuite_dirs = [
     #"abirules",
     "atompaw",
     "bigdft",
-    #"bigdft_paral",
+    "bigdft_paral",
     #"buildsys",
     "built-in",
     #"cpu",      This directory is disabled
@@ -904,6 +904,7 @@ KNOWN_KEYWORDS = {
     "STS": "STS calculations",
     "CTQMC": "CTQMC method for DMFT",
     "ETSF_IO": "Tests using ETSF-IO library",
+    "netcdf": "Tests using netcdf",
     "WVL": "Wavelets",
     "PIMD": "Path integral molecular dynamics",
     "HF": "Calculations including Hartree-Fock term in DFT",

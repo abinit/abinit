@@ -8,7 +8,7 @@
 !! (strain and/or phonon)
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (DCA, XG, GM, AR, MB, MT, AM)
+!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GM, AR, MB, MT, AM)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnuC.org/copyleft/gpl.txt .
@@ -990,7 +990,7 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
    ABI_ALLOCATE(nhat_dum,(1,0))
    call pawgrnl(gs_ham%atindx1,dimnhat,dyfrnl,dyfr_cplex,eltfrnl,dummy,gsqcut,mgfftf,my_natom,natom,&
 &   gs_ham%nattyp,nfftf,ngfftf,nhat_dum,dummy,dtset%nspden,dtset%nsym,psps%ntypat,optgr,optgr2,optstr,optstr2,&
-&   pawang,pawfgrtab,pawrhoij_tot,pawtab,ph1df,psps,dtset%qptn,rprimd,symrec,dtset%typat,vtrial,vxc,xred,&
+&   pawang,pawfgrtab,pawrhoij_tot,pawtab,ph1df,psps,dtset%qptn,rprimd,symrec,dtset%typat,ucvol,vtrial,vxc,xred,&
 &   mpi_atmtab=my_atmtab,comm_atom=my_comm_atom)
    ABI_DEALLOCATE(nhat_dum)
  end if !PAW

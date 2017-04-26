@@ -13,7 +13,7 @@
 !! with previous calculation
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (DCA, XG, GMR)
+!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -28,19 +28,8 @@
 !!          | vis:    viscosity
 !!          | iatfix: Index of atoms and directions fixed
 !!          | amass:  Mass of ions
-!! hist<type abihist>=Historical record of positions, forces
-!!      |                    acell, stresses, and energies,
-!!      |                    contains:
-!!      | mxhist:  Maximun number of records
-!!      | histA:   Historical record of acell(A) and rprimd(R)
-!!      | histE:   Historical record of energy(E)
-!!      | histEk:  Historical record of Ionic kinetic energy(Ek)
-!!      | histEnt: Historical record of Entropy
-!!      | histT:   Historical record of time(T) (For MD or iteration for GO)
-!!      | histR:   Historical record of rprimd(R)
-!!      | histS:   Historical record of strten(S)
-!!      | histV:   Historical record of velocity(V)
-!!      | histXF:  Historical record of positions(X) and forces(F)
+!! hist<type abihist>=Historical record of positions, forces,
+!!                               stresses, cell and energies,
 !! iout=unit number for printing
 !!
 !! OUTPUT
@@ -58,6 +47,8 @@
 #include "config.h"
 #endif
 
+#include "abi_common.h"
+
 subroutine prtxfase(ab_mover,hist,iout,pos)
 
  use defs_basis
@@ -70,39 +61,42 @@ subroutine prtxfase(ab_mover,hist,iout,pos)
 #undef ABI_FUNC
 #define ABI_FUNC 'prtxfase'
  use interfaces_14_hidewrite
+ use interfaces_41_geometry
 !End of the abilint section
 
 implicit none
 
 !Arguments ------------------------------------
 !scalars
-type(abimover),intent(in) :: ab_mover
-type(abihist),intent(in) :: hist
-integer,intent(in) :: iout
-integer,intent(in) :: pos
+ type(abimover),intent(in) :: ab_mover
+ type(abihist),intent(in),target :: hist
+ integer,intent(in) :: iout
+ integer,intent(in) :: pos
 !arrays
 
 !Local variables-------------------------------
 !scalars
-integer :: jj,kk,unfixd,iprt
-real(dp) :: val_max,val_rms,ucvol ! Values maximal and RMS, Volume of Unitary cell
-real(dp) :: dEabs,dErel ! Diff of energy absolute and relative
-real(dp) :: ekin
-real(dp) :: angle(3),rmet(3,3)
+ integer :: jj,kk,unfixd,iprt
+ real(dp) :: val_max,val_rms,ucvol ! Values maximal and RMS, Volume of Unitary cell
+ real(dp) :: dEabs,dErel ! Diff of energy absolute and relative
+ real(dp) :: ekin
+ real(dp) :: angle(3),rmet(3,3)
 !character(len=80*(max(ab_mover%natom,3)+1)) :: message
 !MGNAG: This is not very safe. One should use line-based output istead of appending chars
 ! and then outputting everything! For the time being I use this temporary hack to solve the problem with NAG
-character(len=max(80*(max(ab_mover%natom,3)+1),50000)) :: message
-character(len=18)   :: fmt1
-logical :: prtallatoms
+ character(len=max(80*(max(ab_mover%natom,3)+1),50000)) :: message
+ character(len=18)   :: fmt1
+ logical :: prtallatoms
 !arrays
-logical :: atlist(ab_mover%natom)
+ logical :: atlist(ab_mover%natom)
+ real(dp),allocatable :: fred(:,:),xcart(:,:)
+ real(dp),pointer :: acell(:),fcart(:,:),rprimd(:,:),strten(:),vel(:,:),xred(:,:)
 
 ! ***********************************************************
 
  fmt1='(a,a,1p,3e22.14)'
 
-!###########################################################
+!##########################################################
 !### 1. Organize list of atoms to print
 
  prtallatoms=.TRUE.
@@ -115,26 +109,37 @@ logical :: atlist(ab_mover%natom)
    if (ab_mover%prtatlist(iprt)>0.and.ab_mover%prtatlist(iprt)<=ab_mover%natom) atlist(ab_mover%prtatlist(iprt))=.TRUE.
  end do
 
-!write(iout,*) 'GAF_NATOM=',ab_mover%natom
+ acell  => hist%acell(:,hist%ihist)
+ rprimd => hist%rprimd(:,:,hist%ihist)
+ xred   => hist%xred(:,:,hist%ihist)
+ fcart  => hist%fcart(:,:,hist%ihist)
+ strten => hist%strten(:,hist%ihist)
+ vel    => hist%vel(:,:,hist%ihist)
 
 !###########################################################
 !### 1. Positions
 
+ ABI_ALLOCATE(xcart,(3,ab_mover%natom))
+ call xred2xcart(ab_mover%natom,rprimd,xcart,xred)
+
  write(message, '(a,a)' )&
 & ch10,' Cartesian coordinates (xcart) [bohr]'
- call prtnatom(atlist,iout,message,ab_mover%natom,&
-& prtallatoms,hist%histXF(:,:,1,hist%ihist))
+ call prtnatom(atlist,iout,message,ab_mover%natom,prtallatoms,xcart)
 
  write(message, '(a)' )&
 & ' Reduced coordinates (xred)'
- call prtnatom(atlist,iout,message,ab_mover%natom,&
-& prtallatoms,hist%histXF(:,:,2,hist%ihist))
+ call prtnatom(atlist,iout,message,ab_mover%natom,prtallatoms,xred)
 
+ ABI_DEALLOCATE(xcart)
 
 !###########################################################
 !### 2. Forces
 
  if(pos==mover_AFTER)then
+
+   ABI_ALLOCATE(fred,(3,ab_mover%natom))
+   call fcart2fred(fcart,fred,rprimd,ab_mover%natom)
+
 !  Compute max |f| and rms f,
 !  EXCLUDING the components determined by iatfix
    val_max=0.0_dp
@@ -144,8 +149,8 @@ logical :: atlist(ab_mover%natom)
      do jj=1,3
        if (ab_mover%iatfix(jj,kk) /= 1) then
          unfixd=unfixd+1
-         val_rms=val_rms+hist%histXF(jj,kk,3,hist%ihist)**2
-         val_max=max(val_max,abs(hist%histXF(jj,kk,3,hist%ihist)**2))
+         val_rms=val_rms+fcart(jj,kk)**2
+         val_max=max(val_max,abs(fcart(jj,kk)**2))
        end if
      end do
    end do
@@ -154,14 +159,13 @@ logical :: atlist(ab_mover%natom)
    write(message, '(a,1p,2e12.5,a)' ) &
 &   ' Cartesian forces (fcart) [Ha/bohr]; max,rms=',&
 &   sqrt(val_max),val_rms,' (free atoms)'
-   call prtnatom(atlist,iout,message,ab_mover%natom,&
-&   prtallatoms,hist%histXF(:,:,3,hist%ihist))
-
+   call prtnatom(atlist,iout,message,ab_mover%natom,prtallatoms,fcart)
 
    write(message, '(a)' )&
 &   ' Reduced forces (fred)'
-   call prtnatom(atlist,iout,message,ab_mover%natom,&
-&   prtallatoms,hist%histXF(:,:,4,hist%ihist))
+   call prtnatom(atlist,iout,message,ab_mover%natom,prtallatoms,fred)
+
+   ABI_DEALLOCATE(fred)
 
  end if
 
@@ -171,7 +175,7 @@ logical :: atlist(ab_mover%natom)
 !Only if the velocities are being used
  if (hist%isVused)then
 !  Only if velocities are recorded in a history
-   if (allocated(hist%histV))then
+   if (allocated(hist%vel))then
 !    Compute max |v| and rms v,
 !    EXCLUDING the components determined by iatfix
      val_max=0.0_dp
@@ -181,8 +185,8 @@ logical :: atlist(ab_mover%natom)
        do jj=1,3
          if (ab_mover%iatfix(jj,kk) /= 1) then
            unfixd=unfixd+1
-           val_rms=val_rms+hist%histV(jj,kk,hist%ihist)**2
-           val_max=max(val_max,abs(hist%histV(jj,kk,hist%ihist)**2))
+           val_rms=val_rms+vel(jj,kk)**2
+           val_max=max(val_max,abs(vel(jj,kk)**2))
          end if
        end do
      end do
@@ -191,8 +195,7 @@ logical :: atlist(ab_mover%natom)
      write(message, '(a,1p,2e12.5,a)' ) &
 &     ' Cartesian velocities (vel) [bohr*Ha/hbar]; max,rms=',&
 &     sqrt(val_max),val_rms,' (free atoms)'
-     call prtnatom(atlist,iout,message,ab_mover%natom,&
-&     prtallatoms,hist%histV(:,:,hist%ihist))
+     call prtnatom(atlist,iout,message,ab_mover%natom,prtallatoms,vel)
 
 !    Compute the ionic kinetic energy (no cell shape kinetic energy yet)
      ekin=0.0_dp
@@ -201,7 +204,7 @@ logical :: atlist(ab_mover%natom)
 !        Warning : the fixing of atoms is implemented in reduced
 !        coordinates, so that this expression is wrong
          if (ab_mover%iatfix(jj,kk) == 0) then
-           ekin=ekin+0.5_dp*ab_mover%amass(kk)*hist%histV(jj,kk,hist%ihist)**2
+           ekin=ekin+0.5_dp*ab_mover%amass(kk)*vel(jj,kk)**2
          end if
        end do
      end do
@@ -218,13 +221,12 @@ logical :: atlist(ab_mover%natom)
 !Only if the acell is being used
  if (hist%isARused)then
 !  Only if acell is recorded in a history
-   if (allocated(hist%histA))then
+   if (allocated(hist%acell))then
 
      write(message, '(a)' ) &
 &     ' Scale of Primitive Cell (acell) [bohr]'
      write(message,fmt1)&
-&     TRIM(message),ch10,&
-&     hist%histA(:,hist%ihist)
+&     TRIM(message),ch10,acell(:)
      call wrtout(iout,message,'COLL')
    end if
  end if
@@ -235,13 +237,13 @@ logical :: atlist(ab_mover%natom)
 !Only if the acell is being used
  if (hist%isARused)then
 !  Only if rprimd is recorded in a history
-   if (allocated(hist%histR))then
+   if (allocated(hist%rprimd))then
      write(message, '(a)' ) &
 &     ' Real space primitive translations (rprimd) [bohr]'
      do kk=1,3
        write(message,fmt1)&
 &       TRIM(message),ch10,&
-&       hist%histR(:,kk,hist%ihist)
+&       rprimd(:,kk)
      end do
      call wrtout(iout,message,'COLL')
    end if
@@ -252,15 +254,10 @@ logical :: atlist(ab_mover%natom)
 
  if (ab_mover%optcell/=0)then
 
-   ucvol=hist%histR(1,1,hist%ihist)*&
-&   (hist%histR(2,2,hist%ihist)*hist%histR(3,3,hist%ihist)-&
-&   hist%histR(3,2,hist%ihist)*hist%histR(2,3,hist%ihist))+&
-&   hist%histR(2,1,hist%ihist)*&
-&   (hist%histR(3,2,hist%ihist)*hist%histR(1,3,hist%ihist)-&
-&   hist%histR(1,2,hist%ihist)*hist%histR(3,3,hist%ihist))+&
-&   hist%histR(3,1,hist%ihist)*&
-&   (hist%histR(1,2,hist%ihist)*hist%histR(2,3,hist%ihist)-&
-&   hist%histR(2,2,hist%ihist)*hist%histR(1,3,hist%ihist))
+   ucvol=&
+&   rprimd(1,1)*(rprimd(2,2)*rprimd(3,3)-rprimd(3,2)*rprimd(2,3))+&
+&   rprimd(2,1)*(rprimd(3,2)*rprimd(1,3)-rprimd(1,2)*rprimd(3,3))+&
+&   rprimd(3,1)*(rprimd(1,2)*rprimd(2,3)-rprimd(2,2)*rprimd(1,3))
 
    write(message, '(a,1p,e22.14)' )&
 &   ' Unitary Cell Volume (ucvol) [Bohr^3]=',&
@@ -271,7 +268,7 @@ logical :: atlist(ab_mover%natom)
 !  ### 5. Angles and lengths
 
 !  Compute real space metric.
-   rmet = MATMUL(TRANSPOSE(hist%histR(:,:,hist%ihist)),hist%histR(:,:,hist%ihist))
+   rmet = MATMUL(TRANSPOSE(rprimd),rprimd)
 
    angle(1)=acos(rmet(2,3)/sqrt(rmet(2,2)*rmet(3,3)))/two_pi*360.0d0
    angle(2)=acos(rmet(1,3)/sqrt(rmet(1,1)*rmet(3,3)))/two_pi*360.0d0
@@ -297,26 +294,20 @@ logical :: atlist(ab_mover%natom)
 
    if(pos==mover_AFTER)then
 !    Only if strten is recorded in a history
-     if (allocated(hist%histS))then
+     if (allocated(hist%strten))then
 
        write(message, '(a)' ) &
 &       ' Stress tensor in cartesian coordinates (strten) [Ha/bohr^3]'
 
        write(message,fmt1)&
 &       TRIM(message),ch10,&
-&       hist%histS(1,hist%ihist),&
-&       hist%histS(6,hist%ihist),&
-&       hist%histS(5,hist%ihist)
+&       strten(1),strten(6),strten(5)
        write(message,fmt1)&
 &       TRIM(message),ch10,&
-&       hist%histS(6,hist%ihist),&
-&       hist%histS(2,hist%ihist),&
-&       hist%histS(4,hist%ihist)
+&       strten(6),strten(2),strten(4)
        write(message,fmt1)&
 &       TRIM(message),ch10,&
-&       hist%histS(5,hist%ihist),&
-&       hist%histS(4,hist%ihist),&
-&       hist%histS(3,hist%ihist)
+&       strten(5),strten(4),strten(3)
        call wrtout(iout,message,'COLL')
      end if
    end if
@@ -328,12 +319,12 @@ logical :: atlist(ab_mover%natom)
  if(pos==mover_AFTER)then
    write(message, '(a,1p,e22.14)' )&
 &   ' Total energy (etotal) [Ha]=',&
-&   hist%histE(hist%ihist)
+&   hist%etot(hist%ihist)
 
    if (hist%ihist>1)then
-     dEabs=hist%histE(hist%ihist)-hist%histE(hist%ihist-1)
-     dErel=2*dEabs/(abs(hist%histE(hist%ihist))+&
-&     abs(hist%histE(hist%ihist-1)))
+     dEabs=hist%etot(hist%ihist)-hist%etot(hist%ihist-1)
+     dErel=2*dEabs/(abs(hist%etot(hist%ihist))+&
+&     abs(hist%etot(hist%ihist-1)))
      write(message, '(a,a,a,a)' )&
 &     TRIM(message),ch10,ch10,&
 &     ' Difference of energy with previous step (new-old):'
@@ -345,7 +336,7 @@ logical :: atlist(ab_mover%natom)
    call wrtout(iout,message,'COLL')
  end if
 
- contains 
+ contains
 !!***
 
 !!****f* ABINIT/gettag

@@ -8,7 +8,7 @@
 !! as well as kinetic energy contribution to stress tensor.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (DCA, XG, GMR, AF, AR, MB, MT)
+!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR, AF, AR, MB, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -455,9 +455,8 @@ use m_cgtools
        my_bandfft_kpt => bandfft_kpt(my_ikpt)
      else
        my_ikpt=ikpt
-       nblockbd=nband_k/mpi_enreg%nproc_fft
-       bandpp=1
-       if (nband_k/=nblockbd*mpi_enreg%nproc_fft) nblockbd=nblockbd+1
+       bandpp=mpi_enreg%bandpp
+       nblockbd=nband_k/bandpp
      end if
      blocksize=nband_k/nblockbd
      mband_cprj=mband/mpi_enreg%nproc_band
@@ -643,7 +642,10 @@ use m_cgtools
      call timab(922,2,tsec)
 
 !    Loop over (blocks of) bands; accumulate forces and/or stresses
+!    The following is now wrong. In sequential, nblockbd=nband_k/bandpp
+!    blocksize= bandpp (JB 2016/04/16)
 !    Note that in sequential mode iblock=iband, nblockbd=nband_k and blocksize=1
+!   
      ABI_ALLOCATE(lambda,(blocksize))
      ABI_ALLOCATE(occblock,(blocksize))
      ABI_ALLOCATE(weight,(blocksize))
@@ -684,6 +686,7 @@ use m_cgtools
          call timab(923,2,tsec)
          call timab(926,1,tsec)
 
+         lambda(1:blocksize)= eigen(1+(iblock-1)*blocksize+bdtot_index:iblock*blocksize+bdtot_index)
          if (mpi_enreg%paral_kgb/=1) then
 !TESTDFPT
 !            if (ikpt==1.and.isppol==1.and.testdfpt.and.(iband==iband_test.or.iband_test==-1)) then
@@ -724,11 +727,9 @@ use m_cgtools
 !              ABI_DEALLOCATE(enlout_test)
 !            end if
 !TESTDFPT
-           lambda(1)=eigen(iblock+bdtot_index)
-           call nonlop(choice,cpopt,cwaveprj,enlout,gs_hamk,idir,lambda,mpi_enreg,1,nnlout,&
+           call nonlop(choice,cpopt,cwaveprj,enlout,gs_hamk,idir,lambda,mpi_enreg,blocksize,nnlout,&
 &           paw_opt,signs,nonlop_dum,tim_nonlop,cwavef,cwavef)
          else
-           lambda(1:blocksize)= eigen(1+(iblock-1)*blocksize+bdtot_index:iblock*blocksize+bdtot_index)
            call prep_nonlop(choice,cpopt,cwaveprj,enlout,gs_hamk,idir,lambda,blocksize,&
 &           mpi_enreg,nnlout,paw_opt,signs,nonlop_dum,tim_nonlop_prep,cwavef,cwavef)
          end if

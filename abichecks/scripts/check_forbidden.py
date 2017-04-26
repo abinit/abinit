@@ -115,6 +115,7 @@ ALLOCATE_FORBIDDEN_LIST = [  # Note: use only lowercases
 IGNORED_ALLOCATE_FILES = [
 "abi_common.h",
 "libpaw.h",
+"libtetra.h",
 "malloc.finc",
 "defs.h"
 ]
@@ -128,6 +129,7 @@ CALL_STATEMENT_LIST = [  # Note: use only lowercases
 IGNORED_CALL_FILES = [  # Note: use only lowercases
 "abi_common.h",
 "libpaw.h",
+"libtetra.h",
 "defs.h"
 ]
 

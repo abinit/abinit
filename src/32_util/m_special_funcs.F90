@@ -8,7 +8,7 @@
 !! evaluate special functions frequently needed in Abinit.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2016 ABINIT group (MG,MT,FB,XG,MVer,FJ,NH,GZ)
+!! Copyright (C) 2008-2017 ABINIT group (MG,MT,FB,XG,MVer,FJ,NH,GZ)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
