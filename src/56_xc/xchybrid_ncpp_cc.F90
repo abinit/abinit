@@ -11,11 +11,7 @@
 !! contribution have to be also substracted from the GGA exchange-correlation.
 !!
 !! COPYRIGHT
-<<<<<<< HEAD
-!!  Copyright (C) 2015-2016 ABINIT group (FA,MT,FJ)
-=======
-!!  Copyright (C) 2015-2017 ABINIT group (FA,MT)
->>>>>>> 094f28fe48abff2f5c59c029fd5118a216f531e2
+!!  Copyright (C) 2015-2017 ABINIT group (FA,MT,FJ)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
