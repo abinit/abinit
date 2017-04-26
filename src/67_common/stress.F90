@@ -69,6 +69,7 @@
 !!  vdw_xc= Van der Waals correction flag
 !!  vlspl(mqgrid,2,ntypat)=local psp spline
 !!  vxc(nfft,nspden)=exchange-correlation potential (hartree) in real space
+!!  vxc_hf(nfft,nspden)=exchange-correlation potential (hartree) in real space for Hartree-Fock corrections
 !!  xccc1d(n1xccc*(1-usepaw),6,ntypat)=1D core charge function and five derivatives,
 !!                          for each type of atom, from psp (used in Norm-conserving only)
 !!  xccc3d(n3xccc)=3D core electron density for XC core correction, bohr^-3
@@ -126,7 +127,7 @@
 &                  nfft,ngfft,nlstr,nspden,nsym,ntypat,paral_kgb,psps,pawtab,ph1d,&
 &                  prtvol,qgrid,red_efieldbar,rhog,rprimd,strten,strsxc,symrec,&
 &                  typat,usefock,usepaw,vdw_tol,vdw_tol_3bt,vdw_xc,&
-&                  vlspl,vxc,xccc1d,xccc3d,xcccrc,xred,zion,znucl,qvpotzero,&
+&                  vlspl,vxc,vxc_hf,xccc1d,xccc3d,xcccrc,xred,zion,znucl,qvpotzero,&
 &                  electronpositron) ! optional argument
 
  use defs_basis
@@ -173,6 +174,7 @@
  real(dp),intent(in) :: ph1d(2,3*(2*mgfft+1)*natom),qgrid(mqgrid)
  real(dp),intent(in) :: red_efieldbar(3),rhog(2,nfft),rprimd(3,3),strsxc(6)
  real(dp),intent(in) :: vlspl(mqgrid,2,ntypat),vxc(nfft,nspden)
+ real(dp),allocatable,intent(in) :: vxc_hf(:,:)
  real(dp),intent(in) :: xccc1d(n1xccc*(1-usepaw),6,ntypat),xcccrc(ntypat)
  real(dp),intent(in) :: xred(3,natom),zion(ntypat),znucl(ntypat)
  real(dp),intent(inout) :: xccc3d(n3xccc)
@@ -181,7 +183,7 @@
 
 !Local variables-------------------------------
 !scalars
- integer :: iatom,idir,ii,ipositron,mu,optatm,optdyfr,opteltfr,optgr,option
+ integer :: iatom,idir,ii,ipositron,mu,optatm,optdyfr,opteltfr,opt_hybr,optgr,option
  integer :: optn,optn2,optstr,optv,sdir
  real(dp),parameter :: tol=1.0d-15
  real(dp) :: e_dum,strsii,ucvol,vol_element
@@ -196,7 +198,7 @@
  real(dp) :: vdwstr(6),vprtrb_dum(2)
  real(dp) :: dummy_in(0)
  real(dp) :: dummy_out1(0),dummy_out2(0),dummy_out3(0),dummy_out4(0),dummy_out5(0),dummy_out6(0),dummy_out7(0) 
- real(dp),allocatable :: dummy(:),dyfr_dum(:,:,:),gr_dum(:,:),rhog_ep(:,:),v_dum(:)
+ real(dp),allocatable :: dummy(:),dyfr_dum(:,:,:),gr_dum(:,:),rhog_ep(:,:),v_dum(:),vxc_loc(:,:)
  real(dp),allocatable :: vxctotg(:,:)
  character(len=10) :: EPName(1:2)=(/"Electronic","Positronic"/)
 
@@ -206,7 +208,8 @@
 
 !Compute different geometric tensor, as well as ucvol, from rprimd
  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
-
+ opt_hybr=0
+ if (allocated(vxc_hf)) opt_hybr=1
 !=======================================================================
 !========= Local pseudopotential and core charge contributions =========
 !=======================================================================
@@ -253,12 +256,16 @@
    call mklocl_recipspace(dyfr_dum,eei,gmet,gprimd,gr_dum,gsqcut,lpsstr,mgfft,&
 &   mpi_enreg,mqgrid,natom,nattyp,nfft,ngfft,ntypat,option,paral_kgb,ph1d,qgrid,&
 &   qprtrb_dum,rhog,ucvol,vlspl,vprtrb_dum,v_dum)
-   if (n3xccc>0) then
+   if (n3xccc>0.and.opt_hybr==0) then
      call timab(55,1,tsec)
      call mkcore(corstr,dyfr_dum,gr_dum,mpi_enreg,natom,nfft,nspden,ntypat,ngfft(1),&
 &     n1xccc,ngfft(2),ngfft(3),option,rprimd,typat,ucvol,vxc,&
 &     xcccrc,xccc1d,xccc3d,xred)
      call timab(55,2,tsec)
+   else if (n3xccc>0.and.opt_hybr==1) then
+      call mkcore(corstr,dyfr_dum,gr_dum,mpi_enreg,natom,nfft,nspden,ntypat,ngfft(1),&
+&     n1xccc,ngfft(2),ngfft(3),option,rprimd,typat,ucvol,vxc_hf,&
+&     xcccrc,xccc1d,xccc3d,xred)
    else
      corstr(:)=zero
    end if

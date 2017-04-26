@@ -589,11 +589,11 @@ subroutine libxc_functionals_init(ixc,nspden,xc_functionals,exx_alpha,exx_omega)
    end if
 
 !  Mixing parameter for PBE0 and HSE 
-   if (xc_func%id==libxc_functionals_getid('HYB_GGA_XC_PBEH')) then
+   if (present(exx_alpha).and.xc_func%id==libxc_functionals_getid('HYB_GGA_XC_PBEH')) then
      call xc_hyb_gga_xc_pbeh_set_params(xc_func%conf, exx_alpha)
    end if
 
-   if (xc_func%id==libxc_functionals_getid('HYB_GGA_XC_HSE06')) then
+   if (present(exx_alpha).and.present(exx_omega).and.xc_func%id==libxc_functionals_getid('HYB_GGA_XC_HSE06')) then
      call xc_hyb_gga_xc_hse_set_params(xc_func%conf, exx_alpha, exx_omega)
    end if
 

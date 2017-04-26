@@ -472,6 +472,7 @@ subroutine pawgrnl(atindx1,dimnhat,dyfrnl,dyfr_cplex,eltfrnl,grnl,gsqcut,mgfft,m
          call pawgylm(rdum,pawfgrtab_iatom%gylmgr,rdum2,lm_size,pawfgrtab_iatom%nfgd,&
 &         0,1,0,pawtab(itypat),pawfgrtab_iatom%rfgd)
        end if
+
      end if
      if (optgr2==1.or.optstr2==1) then
        opt1=0;opt2=0;opt3=0
@@ -547,7 +548,6 @@ subroutine pawgrnl(atindx1,dimnhat,dyfrnl,dyfr_cplex,eltfrnl,grnl,gsqcut,mgfft,m
 &       vspl=psps%vlspl,comm_fft=my_comm_fft,me_g0=my_me_g0,&
 &       paral_kgb=my_paral_kgb,distribfft=my_distribfft)
      end if
-
 
 !    ------------------------------------------------------------------
 !    Loop over spin components
@@ -1441,6 +1441,7 @@ subroutine pawgrnl(atindx1,dimnhat,dyfrnl,dyfr_cplex,eltfrnl,grnl,gsqcut,mgfft,m
 
 !===== Convert stresses (add diag and off-diag contributions) =====
  if (optstr==1) then
+
 !  Has to compute int[nhat*vtrial]
    hatstr_diag=zero
    if (nspden==1.or.dimvtrial==1) then
@@ -1464,6 +1465,7 @@ subroutine pawgrnl(atindx1,dimnhat,dyfrnl,dyfr_cplex,eltfrnl,grnl,gsqcut,mgfft,m
    end if
 
 !  Convert hat contribution
+
    hatstr(1:3)=(hatstr(1:3)+hatstr_diag)/ucvol
    hatstr(4:6)= hatstr(4:6)/ucvol
 

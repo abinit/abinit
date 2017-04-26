@@ -348,6 +348,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  type(crystal_t) :: cryst_struc
  integer :: idum1(0),idum3(0,0,0)
  real(dp) :: rdum2(0,0),rdum4(0,0,0,0)
+
 !Variables for BigDFT
 #if defined HAVE_BIGDFT
  integer :: occopt_bigdft
@@ -1377,7 +1378,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
          buffer1(index1+2) = energies%e_eigenvalues
          if (psps%usepaw==0) buffer1(index1+3) = energies%e_nonlocalpsp
          index1=index1+3-psps%usepaw
-!        * If Hartree-Fock calculation, save e_exactX in buffer1
+!        * If Hartree-Fock calculation, save e_fock in buffer1
          if (dtset%usefock==1) then
            buffer1(index1+1) = energies%e_fock
            index1=index1+1
@@ -1417,7 +1418,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
          energies%e_eigenvalues = buffer1(index1+2)
          if (psps%usepaw==0) energies%e_nonlocalpsp = buffer1(index1+3)
          index1=index1+3-psps%usepaw
-!        * If Hartree-Fock calculation, save e_exactX in buffer1
+!        * If Hartree-Fock calculation, save e_fock in buffer1
          if (dtset%usefock==1) then
            energies%e_fock = buffer1(index1+1)
            index1=index1+1

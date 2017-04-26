@@ -11,7 +11,7 @@
 !! contribution have to be also substracted from the GGA exchange-correlation.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2015-2016 ABINIT group (FA,MT)
+!!  Copyright (C) 2015-2016 ABINIT group (FA,MT,FJ)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -21,15 +21,21 @@
 !!  mpi_enreg= information about MPI parallelization
 !!  nfft= number of fft grid points.
 !!  ngfft(1:3)= integer fft box dimensions, see getng for ngfft(4:8).
+!!  n1xccc=dimension of xccc1d ; 0 if no XC core correction is used
 !!  n3xccc=dimension of the xccc3d array (0 or nfft).
+!!  optstr= calculate corrected vxc if optstr=1 
 !!  rhor(nfft,nspden)= electron density in real space in electrons/bohr**3
 !!  rprimd(3,3)= dimensional primitive translations for real space in Bohr.
 !!  xccc3d(n3xccc)=3D core electron density for XC core correction (bohr^-3)
-!!
+!!  xcccrc(ntypat)=XC core correction cutoff radius (bohr) for each atom type
+!!  xccc1d(n1xccc*(1-usepaw),6,ntypat)=1D core charge function and five derivatives,
+!!                          for each type of atom, from psp (used in Norm-conserving only)
+!!  xred(3,natom)=reduced dimensionless atomic coordinates
 !! OUTPUT
 !!
 !! SIDE EFFECTS
 !!  enxc= exchange correlation energy
+!!  grxc= correction yo the forces 
 !!  strsxc(6)= exchange correlation contribution to stress tensor
 !!  vxc= exchange correlation potential
 !!  vxcavg= unit cell average of Vxc
@@ -56,7 +62,7 @@
 #include "abi_common.h"
 
 subroutine xchybrid_ncpp_cc(dtset,enxc,mpi_enreg,nfft,ngfft,n3xccc,rhor,rprimd,strsxc,vxcavg,xccc3d,vxc,grxc,xcccrc,xccc1d,&
-&                           xred,n1xccc)
+&                           xred,n1xccc,optstr)
 
  use defs_basis
  use m_profiling_abi
@@ -79,7 +85,7 @@ subroutine xchybrid_ncpp_cc(dtset,enxc,mpi_enreg,nfft,ngfft,n3xccc,rhor,rprimd,s
 !Arguments -------------------------------------------------------------
 !scalars
  integer,intent(in) :: nfft,n3xccc
- integer,optional,intent(in) :: n1xccc
+ integer,optional,intent(in) :: n1xccc,optstr
  real(dp),intent(out) :: enxc,vxcavg
  type(dataset_type),intent(in) :: dtset
  type(MPI_type),intent(in) :: mpi_enreg
@@ -92,7 +98,7 @@ subroutine xchybrid_ncpp_cc(dtset,enxc,mpi_enreg,nfft,ngfft,n3xccc,rhor,rprimd,s
 
 !Local variables -------------------------------------------------------
 !scalars
- integer :: ixc_gga,izero,ndim,nkxc,n3xccc_null,option,usexcnhat
+ integer :: ixc_gga,izero,ndim,nkxc,n3xccc_null,option,optstr_loc,usexcnhat
  real(dp) :: enxc_corr,ucvol,vxcavg_corr
  character(len=500) :: msg
  type(dataset_type) :: dtLocal
@@ -110,7 +116,8 @@ subroutine xchybrid_ncpp_cc(dtset,enxc,mpi_enreg,nfft,ngfft,n3xccc,rhor,rprimd,s
  if (dtset%usepaw==1) return
  if(n3xccc==0) return
  calcgrxc=(present(grxc).and.present(n1xccc).and.present(xcccrc).and.present(xred).and.present(xccc1d)) 
-
+ optstr_loc=0
+ if(present(optstr)) optstr_loc=1
 !Not applicable for electron-positron
  if (dtset%positron>0) then
    msg='NCPP+Hybrid functionals not applicable for electron-positron calculations!'
@@ -140,7 +147,7 @@ subroutine xchybrid_ncpp_cc(dtset,enxc,mpi_enreg,nfft,ngfft,n3xccc,rhor,rprimd,s
  ABI_ALLOCATE(vhartr_dum,(nfft))
  ABI_ALLOCATE(vxc_corr,(nfft,dtset%nspden))
 
- if (present(vxc)) then
+ if (present(vxc).and.optstr_loc==0) then
 !Initialize args for rhohxc
    option=0 ! XC only
    ABI_ALLOCATE(xccc3d_null,(n3xccc_null))
@@ -198,6 +205,19 @@ subroutine xchybrid_ncpp_cc(dtset,enxc,mpi_enreg,nfft,ngfft,n3xccc,rhor,rprimd,s
    ABI_DEALLOCATE(dyfrx2_dum)
    ABI_DEALLOCATE(xccc3d_null)
  end if
+
+ if(optstr_loc==1) then
+!  Initialize GGA functional
+   dtLocal%ixc=ixc_gga
+   if (dtLocal%ixc<0) then
+     call libxc_functionals_end()
+     call libxc_functionals_init(dtLocal%ixc,dtLocal%nspden)
+   end if
+!calculate Vxc^GGA(rho_core+rho_val)
+   option=0
+   call rhohxc(dtLocal,enxc_corr,zero,izero,kxc_dum,mpi_enreg,nfft,ngfft,nhat,ndim,nhatgr,ndim,nkxc,nkxc,&
+&   dtLocal%nspden,n3xccc,option,rhog_dum,rhor,rprimd,strsxc_corr,usexcnhat,vhartr_dum,vxc,vxcavg_corr,xccc3d)
+ end if 
 
 ! Revert libxc to original settings
  if (dtLocal%ixc<0) then

@@ -669,10 +669,11 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
      ncpgr=0
      if (usefock==1) then
        ctocprj_choice = 1
-       if (dtset%optforces /= 0 .and. dtset%optstress == 0) then
+       if (dtset%optforces /= 0) then
          ncpgr = 3 ; ctocprj_choice = 2
- !        else if (dtset%optstress /= 0) then
- !       ncpgr = 9 ; ctocprj_choice = 23
+       end if
+       if (dtset%optstress /= 0) then
+         ncpgr = 6 ; ctocprj_choice = 3
        end if
      end if
      call pawcprj_alloc(cprj,ncpgr,dimcprj_srt)
