@@ -114,7 +114,7 @@ real(dp) :: dummy(0),nhat_dum(0,0),rprimd(3,3),for11(3),for12(3),eigen1,nlstr(6)
  real(dp), allocatable ::grnl(:),vxc(:,:), vtrial(:,:)
 type(pseudopotential_type) :: psps
  type(pawrhoij_type),allocatable  ::  pawrhoij(:)
- logical :: testtrue
+
 ! *************************************************************************
 !return
  call timab(1504,1,tsec)
@@ -680,10 +680,7 @@ type(pseudopotential_type) :: psps
  ABI_DEALLOCATE(dummytab)
  ABI_DEALLOCATE(vfock)
  ABI_DEALLOCATE(vqg)
- if(testtrue)then
-   call pawrhoij_free(pawrhoij)
-   ABI_DATATYPE_DEALLOCATE(pawrhoij)
- end if
+
  call timab(1504,2,tsec)
 
 end subroutine fock_getghc
