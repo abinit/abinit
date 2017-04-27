@@ -4,10 +4,15 @@
 !! m_eprenorms
 !!
 !! FUNCTION
-!! This module contains datatypes for efmas functionalities.
+!! This module contains datatypes to compute the renormalization of electronic states due to
+!! eph coupling and temperature effects
+!!
+!! NOTES
+!! This code is still under development and the API will change in the next versions.
+!! Contact gmatteo
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2015 ABINIT group (XG)
+!! Copyright (C) 2001-2015 ABINIT group (YG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -27,7 +32,7 @@ module m_eprenorms
  use defs_datatypes
  use m_errors
  use m_xmpi
- 
+
  use m_crystal, only :       crystal_t
 
 #ifdef HAVE_NETCDF
@@ -36,7 +41,7 @@ module m_eprenorms
  use m_nctk
 
  implicit none
- private 
+ private
 !!***
 
 !!****t* m_eprenorms/eprenorms_t
@@ -97,7 +102,7 @@ module m_eprenorms
 
  public :: renorm_bst
 !!***
- 
+
 CONTAINS  !============================================================================
 !!***
 
@@ -109,7 +114,6 @@ CONTAINS  !=====================================================================
 !!  Initializes an eprenorms_t datatype
 !!
 !! INPUTS
-!!   
 !!
 !! OUTPUT
 !!  Epren<eprenorms_t>=Datatype gathering electron-phonon renormalizations
@@ -190,7 +194,7 @@ subroutine eprenorms_free(Epren)
 !End of the abilint section
 
  implicit none
- 
+
 !Arguments -----------------------------------
 !scalars
  type(eprenorms_t),intent(inout) :: Epren
@@ -342,7 +346,7 @@ subroutine eprenorms_bcast(Epren,master,comm)
   call eprenorms_init(Epren, Epren%nkpt, Epren%nsppol, Epren%mband, Epren%ntemp)
  end if
 
- call xmpi_bcast(Epren%kpts, master, comm, ierr) 
+ call xmpi_bcast(Epren%kpts, master, comm, ierr)
  call xmpi_bcast(Epren%temps, master, comm, ierr)
  call xmpi_bcast(Epren%eigens, master, comm, ierr)
  call xmpi_bcast(Epren%occs, master, comm, ierr)
@@ -448,7 +452,7 @@ subroutine renorm_bst(Epren,Bst,Cryst,itemp,do_lifetime,do_check)
 
      ! Upgrade energies
      Bst%eig(1:nband_tmp,ikpt,isppol) = BSt%eig(1:nband_tmp,ikpt,isppol) + Epren%renorms(1,1:nband_tmp,ik_eph,isppol,itemp)
- 
+
      if(do_lifetime) then
        Bst%lifetime(1:nband_tmp,ikpt,isppol) = Epren%lifetimes(1,1:nband_tmp,ik_eph,isppol,itemp)
      end if

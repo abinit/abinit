@@ -110,4 +110,5 @@
 #%% keywords = NC, optic
 #%% description = 
 #%%   Silicon: Solution of optic with temperature-dependent renormalization
+#%%   WARNING: This feature is still under testing, files and variables could change in the next versions
 #%%<END TEST_INFO>
