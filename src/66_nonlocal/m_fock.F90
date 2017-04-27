@@ -1819,7 +1819,6 @@ subroutine fock_updatecwaveocc(cg,cprj,dtset,fock,fock_energy,indsym,istep,mcg,m
            indsym_(4,:,iatm)=fock%atindx(indsym(4,:,iatom))
        end do
        end if
-
      end if
 
 ! Local variables to perform FFT

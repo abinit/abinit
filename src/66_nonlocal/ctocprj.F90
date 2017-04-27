@@ -253,7 +253,9 @@
    dimffnl=1+ider
  else
    dimffnl=1+6*ider
-   istart=ider;iend=6*ider
+   if(choice==3)then
+     istart=ider;iend=6*ider
+   end if
  end if
  nkpg=0
  if (choice==3.or.choice==2.or.choice==23) nkpg=3*nloalg(3)
