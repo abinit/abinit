@@ -38,6 +38,7 @@
 !!  case, give minus the square root of the absolute value
 !!  of the matrix eigenvalues). Hartree units.
 !! comm=MPI communicator.
+!! ncid=the id of the open NetCDF file. Set to nctk_noid if netcdf output is not wanted.
 !!
 !! OUTPUT
 !! fact_oscstr(2,3,3*natom)=oscillator strengths for the different eigenmodes,
@@ -69,13 +70,17 @@
 
 
 subroutine ddb_diel(Crystal,amu,anaddb_dtset,dielt_rlx,displ,d2cart,epsinf,fact_oscstr,&
-& iout,lst,mpert,natom,nph2l,phfrq,comm)
+& iout,lst,mpert,natom,nph2l,phfrq,comm,ncid)
 
  use defs_basis
  use m_errors
  use m_xmpi
  use m_profiling_abi
  use m_ddb
+ use m_nctk
+#ifdef HAVE_NETCDF
+ use netcdf
+#endif
 
  use m_anaddb_dataset, only : anaddb_dataset_type
  use m_crystal,        only : crystal_t
@@ -92,7 +97,7 @@ subroutine ddb_diel(Crystal,amu,anaddb_dtset,dielt_rlx,displ,d2cart,epsinf,fact_
 
 !Arguments -------------------------------
 !scalars
- integer,intent(in) :: iout,mpert,natom,nph2l,comm
+ integer,intent(in) :: iout,mpert,natom,nph2l,comm,ncid
  type(crystal_t),intent(in) :: Crystal
  type(anaddb_dataset_type),intent(in) :: anaddb_dtset
 !arrays
@@ -105,7 +110,7 @@ subroutine ddb_diel(Crystal,amu,anaddb_dtset,dielt_rlx,displ,d2cart,epsinf,fact_
 !scalars
  integer,parameter :: master=0
  integer :: dieflag,i1,idir1,idir2,ifreq,ii,imode,ipert1,iphl2,nfreq
- integer :: nprocs,my_rank
+ integer :: nprocs,my_rank,ncerr
  real(dp) :: afreq,difffr,eps,lst0,q2,usquare,ucvol
  character(len=500) :: message
  logical :: t_degenerate
@@ -286,20 +291,29 @@ subroutine ddb_diel(Crystal,amu,anaddb_dtset,dielt_rlx,displ,d2cart,epsinf,fact_
      call wrtout(iout,message,'COLL')
    end do
 
-!  Write the trace of oscillator strength (real part only) for each mode
-   write(message, '(a)' )'  '
-   call wrtout(iout,message,'COLL')
-   write(message, '(a)' )' Trace of oscillator strength, for each phonon mode :'
-   call wrtout(iout,message,'COLL')
-   do imode=1,3*natom,5
-     if (3*natom-imode<5) then
-       write(message, '(1x,5es14.6)') ((oscstr(1,1,1,ii)+oscstr(1,2,2,ii)+oscstr(1,3,3,ii)),ii=imode,3*natom)
-       call wrtout(iout,message,'COLL')
-     else
-       write(message, '(1x,5es14.6)') ((oscstr(1,1,1,ii)+oscstr(1,2,2,ii)+oscstr(1,3,3,ii)),ii=imode,imode+4)
-       call wrtout(iout,message,'COLL')
+     ! write the oscillator strength to the netcdf 
+#ifdef HAVE_NETCDF
+     if (ncid /= nctk_noid) then
+       ncerr = nctk_def_arrays(ncid, [nctkarr_t("oscillator_strength", "dp", &
+         "complex, number_of_cartesian_directions, number_of_cartesian_directions, number_of_phonon_modes")], &
+         defmode=.True.)
+       NCF_CHECK(ncerr)
+       NCF_CHECK(nctk_set_datamode(ncid))
+       NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "oscillator_strength"), oscstr))
      end if
-   end do
+#endif
+
+     !  Write the trace of oscillator strength (real part only) for each mode
+     write(iout, '(a)' )'  '
+     write(iout, '(a)' )' Trace of oscillator strength, for each phonon mode :'
+     do imode=1,3*natom,5
+       if (3*natom-imode<5) then
+         write(iout, '(1x,5es14.6)') ((oscstr(1,1,1,ii)+oscstr(1,2,2,ii)+oscstr(1,3,3,ii)),ii=imode,3*natom)
+       else
+         write(iout, '(1x,5es14.6)') ((oscstr(1,1,1,ii)+oscstr(1,2,2,ii)+oscstr(1,3,3,ii)),ii=imode,imode+4)
+       end if
+     end do
+   end if
 
    ABI_DEALLOCATE(metacharacter)
 
@@ -320,9 +334,9 @@ subroutine ddb_diel(Crystal,amu,anaddb_dtset,dielt_rlx,displ,d2cart,epsinf,fact_
      call wrtout(std_out,message,'COLL')
      call wrtout(iout,message,'COLL')
    end do
-   write(message, '(a)' )' '
-   call wrtout(std_out,message,'COLL')
-   call wrtout(iout,message,'COLL')
+   call wrtout(iout, " ",'COLL')
+   call wrtout(std_out, " ",'COLL')
+
  end if
 
 !Only in case the frequency-dependent dielectric tensor is needed
@@ -373,9 +387,20 @@ subroutine ddb_diel(Crystal,amu,anaddb_dtset,dielt_rlx,displ,d2cart,epsinf,fact_
      call wrtout(std_out,message,'COLL')
      call wrtout(iout,message,'COLL')
    end do
-   write(message,'(a)')' '
-   call wrtout(std_out,message,'COLL')
-   call wrtout(iout,message,'COLL')
+   call wrtout(iout, " ",'COLL')
+   call wrtout(std_out, " ",'COLL')
+
+   ! write the relaxed ion dielectric tensor to the netcdf 
+#ifdef HAVE_NETCDF
+   if (ncid /= nctk_noid) then
+     ncerr = nctk_def_arrays(ncid, [nctkarr_t("emacro_cart_rlx", "dp", &
+       "number_of_cartesian_directions, number_of_cartesian_directions")],defmode=.True.)
+     NCF_CHECK(ncerr)
+     NCF_CHECK(nctk_set_datamode(ncid))
+     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "emacro_cart_rlx"), dielt_rlx))
+   end if
+#endif
+
  end if
 
 !Only in case the frequency-dependent dielectric tensor is needed

@@ -280,6 +280,19 @@ _setup2: Arith. and geom. avg. npw (full set) are    3013.000    3013.000
  Atom  Sphere_radius  Integrated_density
     1        2.00000          0.06022825
     2        2.00000          5.04579069
+
+ ----- Electric nuclear dipole wrt the center of ionic charge -----
+ Center of charge for ionic distribution (red. coord.):   8.85809E-02  0.00000E+00  0.00000E+00
+ -----
+ Ionic dipole (cart. coord.)     =      0.141729E+02     0.000000E+00     0.000000E+00 (a.u.)
+                                 =      0.360240E+02     0.000000E+00     0.000000E+00 (D)
+ -----
+ Electronic dipole (cart. coord.)=      0.309208E+01    -0.192893E-01    -0.192893E-01 (a.u.)
+                                 =      0.785928E+01    -0.490286E-01    -0.490286E-01 (D)
+ -----
+ Total dipole (cart. coord.)     =     -0.309208E+01     0.192893E-01     0.192893E-01 (a.u.)
+                                 =     -0.785928E+01     0.490286E-01     0.490286E-01 (D)
+
 ================================================================================
 
  ----iterations are completed or convergence reached----

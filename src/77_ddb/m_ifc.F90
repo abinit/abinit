@@ -1119,15 +1119,16 @@ subroutine ifc_speedofsound(ifc, crystal, qrad_tolms, ncid, comm)
 !scalars
  integer,parameter :: master=0
  integer :: ii,nu,igrid,my_rank,nprocs,ierr,converged,npts,num_negw,vs_ierr,ncerr
+ integer :: iatom,iatref,num_acoustic,isacoustic
  real(dp) :: min_negw,cpu,wall,gflops
  real(dp) :: qrad,tolms
  character(len=500) :: msg
  type(lebedev_t) :: lgrid
 !arrays
  integer :: asnu(3)
- real(dp) :: qred(3),qvers_cart(3),qvers_red(3),quad(3),prev_quad(3),vs(4,3)
+ real(dp) :: qred(3),qvers_cart(3),qvers_red(3),quad(3),prev_quad(3),vs(7,3)
  real(dp) :: phfrqs(3*crystal%natom),dwdq(3,3*crystal%natom)
- real(dp) :: displ_cart(2,3*crystal%natom,3*crystal%natom)
+ real(dp) :: displ_cart(2,3*crystal%natom,3*crystal%natom),eigvec(2,3*crystal%natom,3*crystal%natom)
 
 ! *********************************************************************
 
@@ -1144,26 +1145,36 @@ subroutine ifc_speedofsound(ifc, crystal, qrad_tolms, ncid, comm)
  ! In this case, indeed, we end up computing derivatives for the wrong branches, the integration becomes
  ! unstable and difficult to converge.
  qred = zero
- call ifc_fourq(ifc, crystal, qred, phfrqs, displ_cart)
+ call ifc_fourq(ifc, crystal, qred, phfrqs, displ_cart,out_eigvec=eigvec)
  !write(std_out,*)"omega(q==Gamma): ",phfrqs
- asnu = [1, 2, 3]
- do nu=1,3*crystal%natom
-   if (abs(phfrqs(nu)) < tol8) then
-     asnu = [nu, nu+1, nu+2]; exit
+
+ num_acoustic = 0
+ do nu = 1, 3*crystal%natom
+!  Check if this mode is acoustic like: scalar product of all displacement vectors are collinear
+   isacoustic = 1
+!  Find reference atom with non-zero displacement
+   do iatom=1,crystal%natom
+     if(sum(displ_cart(:,(iatom-1)*3+1:(iatom-1)*3+3,nu)**2) >tol16)iatref=iatom
+   enddo
+!  Now compute scalar product, and check they are all positive
+   do iatom = 1, crystal%natom
+     if (sum(eigvec(:,(iatom-1)*3+1:(iatom-1)*3+3, nu)*eigvec(:,(iatref-1)*3+1:(iatref-1)*3+3, nu)) < tol16 ) isacoustic = 0
+   end do
+   if (isacoustic == 1) then
+     num_acoustic=num_acoustic+1
+     asnu(num_acoustic)=nu
+     if (num_acoustic==3) exit
    end if
  end do
 
- if (asnu(1) /= 1) then
-   MSG_WARNING(sjoin("Found unstable modes at Gamma. The first acoustic mode has index:", itoa(asnu(1))))
- end if
- if (asnu(3) > 3 * crystal%natom) then
-   MSG_ERROR(sjoin("Something wrong while computing index of acoustic modes. asnu:", ltoa(asnu)))
- end if
+ ABI_CHECK(num_acoustic == 3, sjoin("Wrong number of acoustic modes:", itoa(num_acoustic)))
+
+ write(std_out,"(a,3i2,a)") "The bands with indices ",asnu(:)," will be used to calculate the sound velocities"
 
  ! Speed of sound along reduced directions.
- do ii=1,3
-   qred = zero; qred(ii) = one
-   !if (ii >= 4 .and. ii <= 6) qred = matmul(crystal%rprimd, qred) ! Cartesian directions.
+ do ii=1,6
+   qred = zero; qred(MOD(ii-1,3)+1) = one
+   if (ii >= 4 .and. ii <= 6) qred = matmul(crystal%rprimd, qred) ! Cartesian directions.
    !if (ii >= 7 .and. ii <= 9) qred = matmul(crystal%rprimd, qred) ! Cartesian directions.
    qvers_red = (qred / normv(qred, crystal%gmet, "G"))
    qred = qrad * qvers_red
@@ -1226,7 +1237,7 @@ subroutine ifc_speedofsound(ifc, crystal, qrad_tolms, ncid, comm)
      end if
    end if
    prev_quad = quad
-   vs(4, :) = quad
+   vs(7, :) = quad
  end do ! igrid
 
  if (my_rank == master) then
@@ -1237,7 +1248,7 @@ subroutine ifc_speedofsound(ifc, crystal, qrad_tolms, ncid, comm)
    end do
    write(ab_out,'(2(a,es12.4),a,i0)') &
      " Lebedev-Laikov integration with qradius: ", qrad, " tolms: ",tolms, " [m/s], npts: ", npts
-   write(ab_out,"(a,3es12.4,a,es12.4)")" Spherical average:",vs(4,:)," [m/s], ",sum(vs(4,:))/3
+   write(ab_out,"(a,3es12.4,a,es12.4)")" Spherical average:",vs(7,:)," [m/s], ",sum(vs(7,:))/3
    if (converged /= 2) then
      vs_ierr = 1
      write(msg,'(a,es12.4,a)')" WARNING: Results are not converged within: ",tolms, " [m/s]"
@@ -1256,11 +1267,13 @@ subroutine ifc_speedofsound(ifc, crystal, qrad_tolms, ncid, comm)
    ! Dump results to netcdf file.
    if (ncid /= nctk_noid) then
 #ifdef HAVE_NETCDF
-     ncerr = nctk_def_arrays(ncid, [nctkarr_t("vsound", "dp", "four, three")], defmode=.True.)
+     ncerr = nctk_def_arrays(ncid, [nctkarr_t("vsound", "dp", "seven, three")], defmode=.True.)
      NCF_CHECK(ncerr)
      ncerr = nctk_def_iscalars(ncid, [character(len=nctk_slen) :: "vsound_ierr"])
      NCF_CHECK(ncerr)
      ncerr = nctk_def_dpscalars(ncid, [character(len=nctk_slen) :: "vsound_qrad", "vsound_tolms"])
+     NCF_CHECK(ncerr)
+     ncerr = nctk_def_arrays(ncid, [nctkarr_t("asnu", "i", "three")], defmode=.True.)
      NCF_CHECK(ncerr)
      ! Write data.
      NCF_CHECK(nctk_set_datamode(ncid))
@@ -1268,6 +1281,7 @@ subroutine ifc_speedofsound(ifc, crystal, qrad_tolms, ncid, comm)
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "vsound_qrad"), qrad))
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "vsound_tolms"), tolms))
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "vsound"), vs))
+     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "asnu"), asnu))
 #endif
    end if
  end if

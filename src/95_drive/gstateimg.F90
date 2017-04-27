@@ -401,7 +401,7 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
    res_img => results_img_timimage(:,itimimage_eff)
    call_predictor=(ntimimage>1)
 
-!  If history is activated and if curent image is inside it: do not compute anything
+!  If history is activated and if current image is inside it: do not compute anything
    if (use_hist_prev) then
      if (all(hist_prev(:)%ihist<=hist_prev(:)%mxhist)) then
        do iimage=1,nimage
@@ -421,6 +421,8 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
 &                        hist_prev(iimage)%rprimd(:,:,ih),dtset%natom)
          hist_prev(iimage)%ihist=hist_prev(iimage)%ihist+1
        end do
+       !PI-QTB: skip a record in random force file
+       if (pimd_param%use_qtb==1) call pimd_skip_qtb(pimd_param)
        !call_predictor=.false.
        goto 110 ! This is temporary
      end if

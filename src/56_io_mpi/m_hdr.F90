@@ -3429,7 +3429,7 @@ integer function hdr_ncwrite(hdr, ncid, fform, nc_define) result(ncerr)
    NCF_CHECK(ncerr)
 
    ! Define states section. TODO: write smearing_scheme
-   ncerr = nctk_def_arrays(ncid, [&
+   ncerr = nctk_def_arrays(ncid, [ &
      nctkarr_t("number_of_states", "int", "number_of_kpoints, number_of_spins"), &
      nctkarr_t("eigenvalues", "dp", "max_number_of_states, number_of_kpoints, number_of_spins"), &
      nctkarr_t("occupations", "dp", "max_number_of_states, number_of_kpoints, number_of_spins"), &
@@ -3441,6 +3441,7 @@ integer function hdr_ncwrite(hdr, ncid, fform, nc_define) result(ncerr)
    NCF_CHECK(ncerr)
    ncerr = nctk_def_dpscalars(ncid, [character(len=nctk_slen) :: "fermi_energy", "smearing_width"])
    NCF_CHECK(ncerr)
+   NCF_CHECK(nctk_set_atomic_units(ncid, "smearing_width"))
 
    ! Some variables require the specifications of units.
    NCF_CHECK(nctk_set_atomic_units(ncid, "eigenvalues"))
@@ -3555,6 +3556,8 @@ integer function hdr_ncwrite(hdr, ncid, fform, nc_define) result(ncerr)
 
  ! Write electrons
  NCF_CHECK(nf90_put_var(ncid, vid("fermi_energy"), hdr%fermie))
+ NCF_CHECK(nf90_put_var(ncid, vid("smearing_width"), hdr%tsmear))
+ NCF_CHECK(nf90_put_var(ncid, vid("smearing_scheme"), nctk_string_from_occopt(hdr%occopt)))
 
  ! transfer data from (stupid) 1d hdr%nband and hdr%occ in packed form to 2d - 3d matrix with stride
  ! native support for array and array syntax is one of the reasons why we still use Fortran
@@ -3638,6 +3641,8 @@ integer function hdr_ncwrite(hdr, ncid, fform, nc_define) result(ncerr)
    "nelect", "charge"],[hdr%nelect, hdr%charge])
  NCF_CHECK(ncerr)
 
+ ! FIXME: in etsf_io the number of electrons is declared as integer!!!
+ NCF_CHECK(nf90_put_var(ncid, vid("number_of_electrons"), nint(hdr%nelect)))
  NCF_CHECK(nf90_put_var(ncid, vid("kptrlatt_orig"), hdr%kptrlatt_orig))
  NCF_CHECK(nf90_put_var(ncid, vid("kptrlatt"), hdr%kptrlatt))
  NCF_CHECK(nf90_put_var(ncid, vid("shiftk_orig"), hdr%shiftk_orig))
