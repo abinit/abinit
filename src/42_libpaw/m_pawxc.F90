@@ -44,8 +44,6 @@ module m_pawxc
  public:: pawxcm3         ! Compute first-order change of XC potential and contribution to 2nd-order change of XC energy inside a PAW sphere. USE (L,M) MOMENTS
 
 !Private procedures
- private:: pawxc3_gga               ! Compute first-order change of XC potential and contribution to
-                                    ! 2nd-order change of XC energy inside a PAW sphere.
  private:: pawxcsph                 ! Compute XC energy and potential for a spherical density rho(r) given as (up,dn)
  private:: pawxcsphpositron         ! Compute electron-positron XC energy and potential for spherical densities rho_el(r) rho_pos(r)
  private:: pawxcsph3                ! Compute XC 1st-order potential for a 1st-order spherical density rho1(r)
@@ -788,14 +786,46 @@ end subroutine pawxc_mkdenpos_wrapper
 !!        (see notes below for nkxc)
 !!
 !! NOTES
-!!  Dimension of Kxc:
-!!   ===== if LDA (xclevel=1) :
-!!    if nspden==1: return kxc(:,1)= d2Exc/drho2
-!!       that is 1/2 (d2Exc/drho_up drho_up + d2Exc/drho_up drho_dn)
-!!    if nspden==1: also return kxc(:,2)= d2Exc/drho_up drho_dn
-!!    if nspden>=2, return  kxc(:,1)=d2Exc/drho_up drho_up
-!!                          kxc(:,2)=d2Exc/drho_up drho_dn
-!!                          kxc(:,3)=d2Exc/drho_dn drho_dn
+!!  Content of Kxc array:
+!!   ===== if LDA
+!!    if nspden==1: kxc(:,1)= d2Exc/drho2
+!!                 (kxc(:,2)= d2Exc/drho_up drho_dn)
+!!    if nspden>=2: kxc(:,1)=d2Exc/drho_up drho_up
+!!                         kxc(:,2)=d2Exc/drho_up drho_dn
+!!                         kxc(:,3)=d2Exc/drho_dn drho_dn
+!!   ===== if GGA
+!!    if nspden==1:
+!!       kxc(:,1)= d2Exc/drho2
+!!       kxc(:,2)= 1/|grad(rho)| dExc/d|grad(rho)|
+!!       kxc(:,3)= 1/|grad(rho)| d2Exc/d|grad(rho)| drho
+!!       kxc(:,4)= 1/|grad(rho)| * d/d|grad(rho)| ( 1/|grad(rho)| dExc/d|grad(rho)| )
+!!       kxc(:,5)= gradx(rho)
+!!       kxc(:,6)= grady(rho)
+!!       kxc(:,7)= gradz(rho)
+!!    if nspden>=2:
+!!       kxc(:,1)= d2Ex/drho_up drho_up
+!!       kxc(:,2)= d2Ex/drho_dn drho_dn
+!!       kxc(:,3)= 1/|grad(rho_up)| dEx/d|grad(rho_up)|
+!!       kxc(:,4)= 1/|grad(rho_dn)| dEx/d|grad(rho_dn)|
+!!       kxc(:,5)= 1/|grad(rho_up)| d2Ex/d|grad(rho_up)| drho_up
+!!       kxc(:,6)= 1/|grad(rho_dn)| d2Ex/d|grad(rho_dn)| drho_dn
+!!       kxc(:,7)= 1/|grad(rho_up)| * d/d|grad(rho_up)| ( 1/|grad(rho_up)| dEx/d|grad(rho_up)| )
+!!       kxc(:,8)= 1/|grad(rho_dn)| * d/d|grad(rho_dn)| ( 1/|grad(rho_dn)| dEx/d|grad(rho_dn)| )
+!!       kxc(:,9)= d2Ec/drho_up drho_up
+!!       kxc(:,10)=d2Ec/drho_up drho_dn
+!!       kxc(:,11)=d2Ec/drho_dn drho_dn
+!!       kxc(:,12)=1/|grad(rho)| dEc/d|grad(rho)|
+!!       kxc(:,13)=1/|grad(rho)| d2Ec/d|grad(rho)| drho_up
+!!       kxc(:,14)=1/|grad(rho)| d2Ec/d|grad(rho)| drho_dn
+!!       kxc(:,15)=1/|grad(rho)| * d/d|grad(rho)| ( 1/|grad(rho)| dEc/d|grad(rho)| )
+!!       kxc(:,16)=rho_up
+!!       kxc(:,17)=rho_dn
+!!       kxc(:,18)=gradx(rho_up)
+!!       kxc(:,19)=gradx(rho_dn)
+!!       kxc(:,20)=grady(rho_up)
+!!       kxc(:,21)=grady(rho_dn)
+!!       kxc(:,22)=gradz(rho_up)
+!!       kxc(:,23)=gradz(rho_dn)
 !!
 !! PARENTS
 !!      m_pawpsp,pawdenpot
@@ -1054,27 +1084,33 @@ subroutine pawxc(corexc,enxc,enxcdc,ixc,kxc,lm_size,lmselect,nhat,nkxc,nrad,nspd
 !    ----- Accumulate and store XC kernel
 !    ----------------------------------------------------------------------
      if (nkxc>0.and.ndvxc>0) then
-       kxc(1:nrad,ipts,1:nkxc)=zero
        if (nkxc==1.and.ndvxc==15) then
          kxc(1:nrad,ipts,1)=half*(dvxci(1:nrad,1)+dvxci(1:nrad,9)+dvxci(1:nrad,10))
        else if (nkxc==3.and.ndvxc==15) then
          kxc(1:nrad,ipts,1)=dvxci(1:nrad,1)+dvxci(1:nrad,9)
          kxc(1:nrad,ipts,2)=dvxci(1:nrad,10)
          kxc(1:nrad,ipts,3)=dvxci(1:nrad,2)+dvxci(1:nrad,11)
+       else if (nkxc==7.and.ndvxc==15) then
+         kxc(1:nrad,ipts,1)=half*(dvxci(1:nrad,1)+dvxci(1:nrad,9)+dvxci(1:nrad,10))
+         kxc(1:nrad,ipts,2)=half*dvxci(1:nrad,3)+dvxci(1:nrad,12)
+         kxc(1:nrad,ipts,3)=quarter*dvxci(1:nrad,5)+dvxci(1:nrad,13)
+         kxc(1:nrad,ipts,4)=eighth*dvxci(1:nrad,7)+dvxci(1:nrad,15)
+         kxc(1:nrad,ipts,5)=rhonow(1:nrad,1,2)
+         kxc(1:nrad,ipts,6)=rhonow(1:nrad,1,3)
+         kxc(1:nrad,ipts,7)=rhonow(1:nrad,1,4)
+       else if (nkxc==23.and.ndvxc==15) then
+         kxc(1:nrad,ipts,1:15)=dvxci(1:nrad,1:15)
+         kxc(1:nrad,ipts,16)=rhonow(1:nrad,1,1)
+         kxc(1:nrad,ipts,17)=rhonow(1:nrad,2,1)
+         kxc(1:nrad,ipts,18)=rhonow(1:nrad,1,2)
+         kxc(1:nrad,ipts,19)=rhonow(1:nrad,2,2)
+         kxc(1:nrad,ipts,20)=rhonow(1:nrad,1,3)
+         kxc(1:nrad,ipts,21)=rhonow(1:nrad,2,3)
+         kxc(1:nrad,ipts,22)=rhonow(1:nrad,1,4)
+         kxc(1:nrad,ipts,23)=rhonow(1:nrad,2,4)
        else
+         kxc(1:nrad,ipts,1:nkxc)=zero
          kxc(1:nrad,ipts,1:min(nkxc,ndvxc))=dvxci(1:nrad,1:min(nkxc,ndvxc))
-       end if
-       if (nkxc==23)then
-         do ii=1,4
-           do ispden=1,nspden_updn
-             kxc(1:nrad,ipts,13+2*ii+ispden)=rhonow(1:nrad,ispden,ii)
-           end do
-         end do
-         if (nspden_updn==1) then
-           do ii=1,4
-             kxc(1:nrad,ipts,15+2*ii)=half*rhonow(1:nrad,1,ii)
-           end do  
-         end if
        end if
      end if
 
@@ -1604,9 +1640,9 @@ end subroutine pawxcpositron
 
 !----------------------------------------------------------------------
 
-!!****f* m_pawxc/pawxc3_gga
+!!****f* m_pawxc/pawxc3
 !! NAME
-!! pawxc3_gga
+!! pawxc3
 !!
 !! FUNCTION
 !! Compute first-order change of XC potential and contribution to
@@ -1651,6 +1687,48 @@ end subroutine pawxcpositron
 !!      Unused if option==2
 !!      Input  if option==3
 !!
+!! NOTES
+!!  Content of Kxc array:
+!!   ===== if LDA
+!!    if nspden==1: kxc(:,1)= d2Exc/drho2
+!!                 (kxc(:,2)= d2Exc/drho_up drho_dn)
+!!    if nspden>=2: kxc(:,1)=d2Exc/drho_up drho_up
+!!                  kxc(:,2)=d2Exc/drho_up drho_dn
+!!                  kxc(:,3)=d2Exc/drho_dn drho_dn
+!!   ===== if GGA
+!!    if nspden==1:
+!!       kxc(:,1)= d2Exc/drho2
+!!       kxc(:,2)= 1/|grad(rho)| dExc/d|grad(rho)|
+!!       kxc(:,3)= 1/|grad(rho)| d2Exc/d|grad(rho)| drho
+!!       kxc(:,4)= 1/|grad(rho)| * d/d|grad(rho)| ( 1/|grad(rho)| dExc/d|grad(rho)| )
+!!       kxc(:,5)= gradx(rho)
+!!       kxc(:,6)= grady(rho)
+!!       kxc(:,7)= gradz(rho)
+!!    if nspden>=2:
+!!       kxc(:,1)= d2Ex/drho_up drho_up
+!!       kxc(:,2)= d2Ex/drho_dn drho_dn
+!!       kxc(:,3)= 1/|grad(rho_up)| dEx/d|grad(rho_up)|
+!!       kxc(:,4)= 1/|grad(rho_dn)| dEx/d|grad(rho_dn)|
+!!       kxc(:,5)= 1/|grad(rho_up)| d2Ex/d|grad(rho_up)| drho_up
+!!       kxc(:,6)= 1/|grad(rho_dn)| d2Ex/d|grad(rho_dn)| drho_dn
+!!       kxc(:,7)= 1/|grad(rho_up)| * d/d|grad(rho_up)| ( 1/|grad(rho_up)| dEx/d|grad(rho_up)| )
+!!       kxc(:,8)= 1/|grad(rho_dn)| * d/d|grad(rho_dn)| ( 1/|grad(rho_dn)| dEx/d|grad(rho_dn)| )
+!!       kxc(:,9)= d2Ec/drho_up drho_up
+!!       kxc(:,10)=d2Ec/drho_up drho_dn
+!!       kxc(:,11)=d2Ec/drho_dn drho_dn
+!!       kxc(:,12)=1/|grad(rho)| dEc/d|grad(rho)|
+!!       kxc(:,13)=1/|grad(rho)| d2Ec/d|grad(rho)| drho_up
+!!       kxc(:,14)=1/|grad(rho)| d2Ec/d|grad(rho)| drho_dn
+!!       kxc(:,15)=1/|grad(rho)| * d/d|grad(rho)| ( 1/|grad(rho)| dEc/d|grad(rho)| )
+!!       kxc(:,16)=rho_up
+!!       kxc(:,17)=rho_dn
+!!       kxc(:,18)=gradx(rho_up)
+!!       kxc(:,19)=gradx(rho_dn)
+!!       kxc(:,20)=grady(rho_up)
+!!       kxc(:,21)=grady(rho_dn)
+!!       kxc(:,22)=gradz(rho_up)
+!!       kxc(:,23)=gradz(rho_dn)
+
 !! PARENTS
 !!      m_pawxc
 !!
@@ -1659,7 +1737,7 @@ end subroutine pawxcpositron
 !!
 !! SOURCE
 
-subroutine pawxc3_gga(corexc1,cplex_den,cplex_vxc,d2enxc,ixc,kxc,lm_size,lmselect,nhat1,nkxc,nrad,nspden,&
+subroutine pawxc3(corexc1,cplex_den,cplex_vxc,d2enxc,ixc,kxc,lm_size,lmselect,nhat1,nkxc,nrad,nspden,&
 &                 option,pawang,pawrad,rhor1,usecore,usexcnhat,vxc1,xclevel,&
 &                 d2enxc_im) ! optional
 
@@ -1667,7 +1745,7 @@ subroutine pawxc3_gga(corexc1,cplex_den,cplex_vxc,d2enxc,ixc,kxc,lm_size,lmselec
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'pawxc3_gga'
+#define ABI_FUNC 'pawxc3'
 !End of the abilint section
 
  implicit none
@@ -1690,7 +1768,7 @@ subroutine pawxc3_gga(corexc1,cplex_den,cplex_vxc,d2enxc,ixc,kxc,lm_size,lmselec
 
 !Local variables-------------------------------
 !scalars
- integer :: ii,ilm,ipts,ir,ispden,jr,kr,lm_size_eff,nkxc_,npts
+ integer :: ii,ilm,ipts,ir,ispden,jr,kr,lm_size_eff,npts
  logical :: need_impart
  real(dp),parameter :: tol24=tol12*tol12
  real(dp) :: coeff_grho,coeff_grho_corr,coeff_grho_dn,coeff_grho_up
@@ -1708,7 +1786,7 @@ subroutine pawxc3_gga(corexc1,cplex_den,cplex_vxc,d2enxc,ixc,kxc,lm_size,lmselec
  real(dp) :: gxc1i(3,2),gxc1r(3,2)
  real(dp),allocatable :: dgxc1(:),drho1(:,:),drho1core(:,:),dylmdr(:,:,:)
  real(dp),allocatable :: ff(:),gg(:),grho1_updn(:,:,:),gxc1(:,:,:,:)
- real(dp),allocatable :: kxc_(:,:),rho1_updn(:,:),rho1arr(:,:,:)
+ real(dp),allocatable :: rho1_updn(:,:),rho1arr(:,:,:)
  real(dp),allocatable,target :: rhohat1(:,:,:)
  real(dp),pointer :: rho1_(:,:,:),vxc1_(:,:,:)
 
@@ -1724,11 +1802,11 @@ subroutine pawxc3_gga(corexc1,cplex_den,cplex_vxc,d2enxc,ixc,kxc,lm_size,lmselec
  end if
  if(option/=3) then
    if (xclevel==1.and.nkxc/=2*min(nspden,2)-1) then
-     msg='nkxc must be 1 or 3!'
+     msg='nkxc must be 1 or 3 for LDA!'
      MSG_BUG(msg)
    end if
-   if(xclevel==2.and.nkxc/=23) then
-     msg='nkxc should be 23 for GGA!'
+   if(xclevel==2.and.nkxc/=16*min(nspden,2)-9) then
+     msg='nkxc should be 7 or 23 for GGA!'
      MSG_BUG(msg)
    end if
  end if
@@ -1919,28 +1997,6 @@ subroutine pawxc3_gga(corexc1,cplex_den,cplex_vxc,d2enxc,ixc,kxc,lm_size,lmselec
 !      ======================= GGA ===========================================
 !      =======================================================================
 
-!      Exchange correlation kernel
-       nkxc_=nkxc
-       if (nspden==1) then
-         nkxc_=7
-         LIBPAW_ALLOCATE(kxc_,(nrad,nkxc_))
-!        Get unpolarized Kxc from polarized one
-!        kxc(:,1)= d2Exc/drho drho
-!        kxc(:,2)= dExc/d(abs(grad(rho))) / abs(grad(rho))
-!        kxc(:,3)= d2Exc/d(abs(grad(rho))) drho / abs(grad(rho))
-!        kxc(:,4)= 1/abs(grad(rho)) * d/d(abs(grad(rho)) (dExc/d(abs(grad(rho))) /abs(grad(rho)))
-!        kxc(:,5)= gradx(rho)
-!        kxc(:,6)= grady(rho)
-!        kxc(:,7)= gradz(rho)
-         kxc_(:,1)=half*(kxc(:,ipts,1)+kxc(:,ipts,9)+kxc(:,ipts,10))
-         kxc_(:,2)=half*kxc(:,ipts,3)+kxc(:,ipts,12)
-         kxc_(:,3)=quarter*kxc(:,ipts,5)+kxc(:,ipts,13)
-         kxc_(:,4)=eighth*kxc(:,ipts,7)+kxc(:,ipts,15)
-         kxc_(:,5)=kxc(:,ipts,18)
-         kxc_(:,6)=kxc(:,ipts,20)
-         kxc_(:,7)=kxc(:,ipts,22)
-       end if
-
 !      Convert the 1st-order density in (up,dn) format
        if (nspden==1) then
          rho1_updn(:,1)=half*rho1arr(:,1,ipts)
@@ -2042,11 +2098,11 @@ subroutine pawxc3_gga(corexc1,cplex_den,cplex_vxc,d2enxc,ixc,kxc,lm_size,lmselec
          do ir=1,nrad
            jr=cplex_den*(ir-1)+1 ; kr=cplex_vxc*(ir-1)+1
 
-           g0(:)=kxc_(ir,5:7) ; g1(:)=grho1_updn(jr,1,1:3)
+           g0(:)=kxc(ir,ipts,5:7) ; g1(:)=grho1_updn(jr,1,1:3)
            grho_grho1=dot_product(g0,g1)
-           coeff_grho=kxc_(ir,3)*rho1_updn(jr,1)+kxc_(ir,4)*grho_grho1
-           vxc1_(kr,ipts,1)=kxc_(ir,1)*rho1_updn(jr,1)+kxc_(ir,3)*grho_grho1
-           gxc1r(:,1)=g1(:)*kxc_(ir,2)+g0(:)*coeff_grho
+           coeff_grho=kxc(ir,ipts,3)*rho1_updn(jr,1)+kxc(ir,ipts,4)*grho_grho1
+           vxc1_(kr,ipts,1)=kxc(ir,ipts,1)*rho1_updn(jr,1)+kxc(ir,ipts,3)*grho_grho1
+           gxc1r(:,1)=g1(:)*kxc(ir,ipts,2)+g0(:)*coeff_grho
            !Accumulate gxc1_lm moments as Intg[gxc1(omega).Ylm(omega).d_omega]
            do ilm=1,pawang%ylm_size
              ylm_ii=pawang%ylmr(ilm,ipts)*pawang%angwgth(ipts)*factor_ang_intg
@@ -2058,9 +2114,9 @@ subroutine pawxc3_gga(corexc1,cplex_den,cplex_vxc,d2enxc,ixc,kxc,lm_size,lmselec
              if (cplex_den==2) then
                g1im(:)=grho1_updn(jr+1,1,1:3)
                grho_grho1im=dot_product(g0,g1im)
-               coeff_grhoim=kxc_(ir,3)*rho1_updn(jr+1,1)+kxc_(ir,4)*grho_grho1im
-               vxc1_(kr+1,ipts,1)=kxc_(ir,1)*rho1_updn(jr+1,1)+kxc_(ir,3)*grho_grho1im
-               gxc1i(:,1)=g1im(:)*kxc_(ir,2)+g0(:)*coeff_grhoim
+               coeff_grhoim=kxc(ir,ipts,3)*rho1_updn(jr+1,1)+kxc(ir,ipts,4)*grho_grho1im
+               vxc1_(kr+1,ipts,1)=kxc(ir,ipts,1)*rho1_updn(jr+1,1)+kxc(ir,ipts,3)*grho_grho1im
+               gxc1i(:,1)=g1im(:)*kxc(ir,ipts,2)+g0(:)*coeff_grhoim
                !Accumulate gxc1_lm moments as Intg[gxc1(omega).Ylm(omega).d_omega]
                do ilm=1,pawang%ylm_size
                  ylm_ii=pawang%ylmr(ilm,ipts)*pawang%angwgth(ipts)*factor_ang_intg
@@ -2167,10 +2223,6 @@ subroutine pawxc3_gga(corexc1,cplex_den,cplex_vxc,d2enxc,ixc,kxc,lm_size,lmselec
          end do ! ir
 
        end if ! nspden
-
-       if (nspden==1) then
-         LIBPAW_DEALLOCATE(kxc_)
-       end if
 
      end if ! LDA or GGA
 
@@ -2414,435 +2466,6 @@ subroutine pawxc3_gga(corexc1,cplex_den,cplex_vxc,d2enxc,ixc,kxc,lm_size,lmselec
    LIBPAW_DEALLOCATE(dylmdr)
  end if
 
-end subroutine pawxc3_gga
-!!***
-
-!----------------------------------------------------------------------
-
-!!****f* m_pawxc/pawxc3
-!! NAME
-!! pawxc3
-!!
-!! FUNCTION
-!! Compute first-order change of XC potential and contribution to
-!! 2nd-order change of XC energy inside a PAW sphere.
-!! LDA ONLY - USE THE DENSITY OVER A WHOLE SPHERICAL GRID (r,theta,phi)
-!!
-!! INPUTS
-!!  corexc1(cplex_den*nrad)=first-order change of core density on radial grid
-!!  cplex_den= if 1, 1st-order densities are REAL, if 2, COMPLEX
-!!  cplex_vxc= if 1, 1st-order XC potential is complex, if 2, COMPLEX
-!!  ixc= choice of exchange-correlation scheme
-!!  kxc(nrad,pawang%angl_size,nkxc)=GS xc kernel
-!!  lm_size=size of density array rhor (see below)
-!!  lmselect(lm_size)=select the non-zero LM-moments of input density rhor1
-!!  nhat1(cplex_den*nrad,lm_size,nspden)=first-order change of compensation density
-!!                                        (total in 1st half and spin-up in 2nd half if nspden=2)
-!!  nkxc=second dimension of the kxc array
-!!  nrad=size of radial mesh for densities/potentials (might be different from pawrad%mesh_size)
-!!  nspden=number of spin-density components
-!!  option=0  compute both 2nd-order XC energy and 1st-order potential
-!!         1  compute only 1st-order XC potential
-!!         2  compute only 2nd-order XC energy, XC potential is temporary computed here
-!!         3  compute only 2nd-order XC energy, XC potential is input in vxc1(:)
-!!  pawang <type(pawang_type)>=paw angular mesh and related data
-!!  pawrad <type(pawrad_type)>=paw radial mesh and related data
-!!  rhor1(cplex_den*nrad,lm_size,nspden)=first-order change of density
-!!  usecore= 1 if core density has to be used in Exc/Vxc ; 0 otherwise
-!!  usexcnhat= 0 if compensation density does not have to be used
-!!             1 if compensation density has to be used in d2Exc only
-!!             2 if compensation density (nhat) has to be used in d2Exc and Vxc1
-!!  xclevel= XC functional level
-!!
-!! OUTPUT
-!!  == if option=0 or 2 or 3 ==
-!!    d2enxc   =returned exchange-cor. contribution to 2nd-order XC energy
-!!    d2enxc_im=returned IMAGINARY PART of exchange-cor. contribution to 2nd-order XC energy
-!!              (optional argument)
-!!
-!! SIDE EFFECTS
-!!    vxc1(cplex_vxc*nrad,pawang%angl_size,nspden)=1st-order XC potential
-!!      Output if option==0 or 1
-!!      Unused if option==2
-!!      Input  if option==3
-!!
-!! PARENTS
-!!      pawdenpot,pawdfptenergy
-!!
-!! CHILDREN
-!!      libxc_functionals_getvxc
-!!
-!! SOURCE
-
-subroutine pawxc3(corexc1,cplex_den,cplex_vxc,d2enxc,ixc,kxc,lm_size,lmselect,nhat1,nkxc,nrad,nspden,&
-&                 option,pawang,pawrad,rhor1,usecore,usexcnhat,vxc1,xclevel,&
-&                 d2enxc_im) ! optional
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawxc3'
-!End of the abilint section
-
- implicit none
-
-!Arguments ------------------------------------
-!scalars
- integer,intent(in) :: cplex_den,cplex_vxc,ixc,lm_size,nkxc,nrad,nspden,option,usecore,usexcnhat,xclevel
- real(dp),intent(out) :: d2enxc
- real(dp),intent(out),optional :: d2enxc_im
- type(pawang_type),intent(in) :: pawang
- type(pawrad_type),intent(in) :: pawrad
-!arrays
- logical,intent(in) :: lmselect(lm_size)
- real(dp),intent(in) :: corexc1(cplex_den*nrad)
- real(dp),intent(in) :: kxc(nrad,pawang%angl_size,nkxc)
- real(dp),intent(in) :: nhat1(cplex_den*nrad,lm_size,nspden*((usexcnhat+1)/2))
- real(dp),intent(in) :: rhor1(cplex_den*nrad,lm_size,nspden)
- real(dp),intent(inout) :: vxc1(cplex_vxc*nrad,pawang%angl_size,nspden)
-
-!Local variables-------------------------------
-!scalars
- integer :: ilm,ipts,ir,ispden,jr,lm_size_eff,npts
- logical :: need_impart
- real(dp) :: rho_dn,rho_up,rhoim_dn,rhoim_up,ro11i,ro11r,ro12i,ro12r,ro21i,ro21r,ro22i,ro22r
- real(dp) :: v11i,v11r,v12i,v12r,v21i,v21r,v22i,v22r,vxcrho
- character(len=500) :: msg
-!arrays
-! real(dp) :: tsec(2)
- real(dp),allocatable :: ff(:),gg(:),rho1arr(:,:),vxc1_(:,:)
-
-! *************************************************************************
-
-!----------------------------------------------------------------------
-!----- Check options
-!----------------------------------------------------------------------
-
- if(option<0.or.option>3) then
-   msg='wrong option!'
-   MSG_BUG(msg)
- end if
-!if(xclevel==2) then
- if (.true.) then
-   if (present(d2enxc_im)) then
-     call pawxc3_gga(corexc1,cplex_den,cplex_vxc,d2enxc,ixc,kxc,lm_size,lmselect,nhat1,nkxc,nrad,nspden,&
-&     option,pawang,pawrad,rhor1,usecore,usexcnhat,vxc1,xclevel,&
-&     d2enxc_im=d2enxc_im)
-   else
-     call pawxc3_gga(corexc1,cplex_den,cplex_vxc,d2enxc,ixc,kxc,lm_size,lmselect,nhat1,nkxc,nrad,nspden,&
-&     option,pawang,pawrad,rhor1,usecore,usexcnhat,vxc1,xclevel)
-   end if
-   return
-   msg='GGA is not implemented!'
-   MSG_ERROR(msg)
- end if
- if(option/=3.and.nkxc/=2*min(nspden,2)-1) then
-   msg='nkxc must be 1 or 3!'
-   MSG_BUG(msg)
- end if
- if(nspden==4.and.option/=3) then
-   msg='nspden=4 not implemented (for vxc)!'
-   MSG_ERROR(msg)
- end if
- if(pawang%angl_size==0) then
-   msg='pawang%angl_size=0!'
-   MSG_BUG(msg)
- end if
- if(.not.allocated(pawang%ylmr)) then
-   msg='pawang%ylmr must be allocated!'
-   MSG_BUG(msg)
- end if
- if (option/=1) then
-   if (nrad<pawrad%int_meshsz) then
-     msg='When option=0,2, nrad must be greater than pawrad%int_meshsz!'
-     MSG_BUG(msg)
-   end if
- end if
-
-!----------------------------------------------------------------------
-!----- Initializations
-!----------------------------------------------------------------------
-
- npts=pawang%angl_size
- lm_size_eff=min(lm_size,pawang%ylm_size)
- need_impart=present(d2enxc_im)
- if (option/=1) then
-   d2enxc=zero
-   if (need_impart) d2enxc_im=zero
- end if
- if (option<=1) vxc1(:,:,:)=zero
-
-!Special case: no XC applied
- if (ixc==0.or.(nkxc==0.and.option/=3)) then
-   msg='Note that no xc is applied (ixc=0). Returning'
-   MSG_WARNING(msg)
-   return
- end if
-
- LIBPAW_ALLOCATE(rho1arr,(cplex_den*nrad,nspden))
- LIBPAW_ALLOCATE(vxc1_,(cplex_vxc*nrad,nspden))
-
-!----------------------------------------------------------------------
-!----- Loop on the angular part and inits
-!----------------------------------------------------------------------
-
-!Do loop on the angular part (theta,phi)
- do ipts=1,npts
-
-!  Copy the input 1st-order density for this (theta,phi)
-   rho1arr(:,:)=zero
-   if (usexcnhat==0.or.usexcnhat==1) then
-     do ispden=1,nspden
-       do ilm=1,lm_size_eff
-         if (lmselect(ilm)) rho1arr(:,ispden)=rho1arr(:,ispden) &
-&         +rhor1(:,ilm,ispden)*pawang%ylmr(ilm,ipts)
-       end do
-     end do
-   else
-     do ispden=1,nspden
-       do ilm=1,lm_size_eff
-         if (lmselect(ilm)) rho1arr(:,ispden)=rho1arr(:,ispden) &
-&         +(rhor1(:,ilm,ispden)+nhat1(:,ilm,ispden))*pawang%ylmr(ilm,ipts)
-       end do
-     end do
-   end if
-
-   if (usecore==1) then
-     rho1arr(:,1)=rho1arr(:,1)+corexc1(:)
-     if (nspden==2) rho1arr(:,2)=rho1arr(:,2)+half*corexc1(:)
-   end if
-
-!  
-!  ----------------------------------------------------------------------
-!  ----- Accumulate and store 1st-order change of XC potential
-!  ----------------------------------------------------------------------
-
-   if (option/=3) then
-!    Non-spin-polarized
-     if(nspden==1)then
-       if (cplex_vxc==1) then
-         if (cplex_den==1) then  ! cplex_vxc==1 and cplex_den==1
-           vxc1_(1:nrad,1)=kxc(1:nrad,ipts,1)*rho1arr(1:nrad,1)
-         else                    ! cplex_vxc==1 and cplex_den==2
-           do ir=1,nrad
-             vxc1_(ir,1)=kxc(ir,ipts,1)*rho1arr(2*ir-1,1)
-           end do
-         end if
-       else
-         if (cplex_den==1) then  ! cplex_vxc==2 and cplex_den==1
-           do ir=1,nrad
-             vxc1_(2*ir-1,1)=kxc(ir,ipts,1)*rho1arr(ir,1)
-             vxc1_(2*ir  ,1)=zero
-           end do
-         else                    ! cplex_vxc==2 and cplex_den==2
-           do ir=1,nrad
-             vxc1_(2*ir-1,1)=kxc(ir,ipts,1)*rho1arr(2*ir-1,1)
-             vxc1_(2*ir  ,1)=kxc(ir,ipts,1)*rho1arr(2*ir  ,1)
-           end do
-         end if
-       end if
-!      Spin-polarized
-     else
-       if (cplex_vxc==1) then
-         if (cplex_den==1) then  ! cplex_vxc==1 and cplex_den==1
-           do ir=1,nrad
-             rho_up=rho1arr(ir,2);rho_dn=rho1arr(ir,1)-rho_up
-             vxc1_(ir,1)=kxc(ir,ipts,1)*rho_up+kxc(ir,ipts,2)*rho_dn
-             vxc1_(ir,2)=kxc(ir,ipts,2)*rho_up+kxc(ir,ipts,3)*rho_dn
-           end do
-         else                    ! cplex_vxc==1 and cplex_den==2
-           do ir=1,nrad
-             jr=2*ir-1
-             rho_up=rho1arr(jr,2);rho_dn=rho1arr(jr,1)-rho_up
-             vxc1_(ir,1)=kxc(ir,ipts,1)*rho_up+kxc(ir,ipts,2)*rho_dn
-             vxc1_(ir,2)=kxc(ir,ipts,2)*rho_up+kxc(ir,ipts,3)*rho_dn
-           end do
-         end if
-       else
-         if (cplex_den==1) then  ! cplex_vxc==2 and cplex_den==1
-           do ir=1,nrad
-             jr=2*ir-1
-             rho_up=rho1arr(ir,2);rho_dn=rho1arr(ir,1)-rho_up
-             vxc1_(jr,1)=kxc(ir,ipts,1)*rho_up+kxc(ir,ipts,2)*rho_dn
-             vxc1_(jr,2)=kxc(ir,ipts,2)*rho_up+kxc(ir,ipts,3)*rho_dn
-           end do
-         else                    ! cplex_vxc==2 and cplex_den==2
-           do ir=1,nrad
-             jr=2*ir
-             rho_up  =rho1arr(jr-1,2);rho_dn  =rho1arr(jr-1,1)-rho_up
-             rhoim_up=rho1arr(jr  ,2);rhoim_dn=rho1arr(jr  ,1)-rhoim_up
-             vxc1_(jr-1,1)=kxc(ir,ipts,1)*rho_up  +kxc(ir,ipts,2)*rho_dn
-             vxc1_(jr  ,1)=kxc(ir,ipts,1)*rhoim_up+kxc(ir,ipts,2)*rhoim_dn
-             vxc1_(jr-1,2)=kxc(ir,ipts,2)*rho_up  +kxc(ir,ipts,3)*rho_dn
-             vxc1_(jr  ,2)=kxc(ir,ipts,2)*rhoim_up+kxc(ir,ipts,3)*rhoim_dn
-           end do
-         end if
-       end if
-     end if
-
-     if (option<=1) then
-       vxc1(1:cplex_vxc*nrad,ipts,1:nspden)=vxc1_(1:cplex_vxc*nrad,1:nspden)
-     end if
-
-   else  ! option==3
-     vxc1_(1:cplex_vxc*nrad,1:nspden)=vxc1(1:cplex_vxc*nrad,ipts,1:nspden)
-   end if
-
-!  ----------------------------------------------------------------------
-!  ----- Accumulate and store 2nd-order change of XC energy
-!  ----------------------------------------------------------------------
-   if (option/=1) then
-
-!    For usexnhat=1 particular case, add now compensation density
-     if (usexcnhat==1) then
-       do ispden=1,nspden
-         do ilm=1,lm_size_eff
-           if (lmselect(ilm)) rho1arr(:,ispden)=rho1arr(:,ispden)+nhat1(:,ilm,ispden)*pawang%ylmr(ilm,ipts)
-         end do
-       end do
-     end if
-
-!    ----- Calculate d2Exc=Int[Vxc^(1)^*(r).n^(1)(r).dr]
-     LIBPAW_ALLOCATE(ff,(nrad))
-     if (need_impart) then
-       LIBPAW_ALLOCATE(gg,(nrad))
-     end if
-
-!    COLLINEAR MAGNETISM
-     if (nspden/=4) then
-       if (cplex_vxc==1.and.cplex_den==1) then       ! cplex_vxc==1 and cplex_den==1
-         ff(:)=vxc1_(:,1)*rho1arr(:,nspden)
-         if (nspden==2) ff(:)=ff(:)+vxc1_(:,2)*(rho1arr(:,1)-rho1arr(:,2))
-         if (need_impart) gg(:)=zero
-       else if (cplex_vxc==2.and.cplex_den==2) then  ! cplex_vxc==2 and cplex_den==2
-         if (.not.need_impart) then      ! Real part only
-           do ir=1,nrad
-             jr=2*ir;v11r=vxc1_(jr-1,1);v11i=vxc1_(jr,1)
-             ro11r=rho1arr(jr-1,nspden);ro11i=rho1arr(jr,nspden)
-             ff(ir)=v11r*ro11r+v11i*ro11i
-           end do
-           if (nspden==2) then
-             do ir=1,nrad
-               jr=2*ir;v22r=vxc1_(jr-1,2);v22i=vxc1_(jr,2)
-               ro22r=rho1arr(jr-1,1)-rho1arr(jr-1,2)
-               ro22i=rho1arr(jr  ,1)-rho1arr(jr  ,2)
-               ff(ir)=ff(ir)+v22r*ro22r+v22i*ro22i
-             end do
-           end if
-         else
-           do ir=1,nrad                  ! Real and imaginary parts
-             jr=2*ir;v11r=vxc1_(jr-1,1);v11i=vxc1_(jr,1)
-             ro11r=rho1arr(jr-1,nspden);ro11i=rho1arr(jr,nspden)
-             ff(ir)=v11r*ro11r+v11i*ro11i
-             gg(ir)=v11r*ro11i-v11i*ro11r
-           end do
-           if (nspden==2) then
-             do ir=1,nrad
-               jr=2*ir;v22r=vxc1_(jr-1,2);v22i=vxc1_(jr,2)
-               ro22r=rho1arr(jr-1,1)-rho1arr(jr-1,2)
-               ro22i=rho1arr(jr  ,1)-rho1arr(jr  ,2)
-               ff(ir)=ff(ir)+v22r*ro22r+v22i*ro22i
-               gg(ir)=gg(ir)+v22r*ro22i-v22i*ro22r
-             end do
-           end if
-         end if
-       else                                          ! other cases for cplex_vxc and cplex_den
-         v11i=zero;ro11i=zero
-         do ir=1,nrad
-           jr=cplex_vxc*(ir-1)+1
-           v11r=vxc1_(jr,1);if (cplex_vxc==2) v11i=vxc1_(jr+1,1)
-           jr=cplex_den*(ir-1)+1
-           ro11r=rho1arr(jr,nspden);if (cplex_den==2) ro11i=rho1arr(jr+1,nspden)
-           ff(ir)=v11r*ro11r+v11i*ro11i
-           if (need_impart) gg(ir)=v11r*ro11i-v11i*ro11r
-         end do
-         if (nspden==2) then
-           v22i=zero;ro22i=zero
-           do ir=1,nrad
-             jr=cplex_vxc*(ir-1)+1
-             v22r=vxc1_(jr,2);if (cplex_vxc==2) v22i=vxc1_(jr+1,2)
-             jr=cplex_den*(ir-1)+1
-             ro22r=rho1arr(jr,1)-rho1arr(jr,2)
-             if (cplex_den==2) ro22i=rho1arr(jr+1,1)-rho1arr(jr+1,2)
-             ff(ir)=ff(ir)+v22r*ro22r+v22i*ro22i
-             gg(ir)=gg(ir)+v22r*ro22i-v22i*ro22r
-           end do
-         end if
-       end if ! cplex_vxc and cplex_den
-
-!      NON-COLLINEAR MAGNETISM
-     else
-       if (cplex_vxc==1.and.cplex_den==1) then   ! cplex_vxc==1 and cplex_den==1
-         ff(:)=half*(vxc1_(:,1)*(rho1arr(:,1)+rho1arr(:,4)) &
-&         +vxc1_(:,2)*(rho1arr(:,1)-rho1arr(:,4))) &
-&         +vxc1_(:,3)*rho1arr(:,2) &
-&         -vxc1_(:,4)*rho1arr(:,3)
-         if (need_impart) gg(:)=zero
-       else                                      ! other cases for cplex_vxc and cplex_den
-
-!        V is stored as : v^11, v^22, V^12, i.V^21 (each are complex)
-!        N is stored as : n, m_x, m_y, mZ          (each are complex)
-         do ir=1,nrad
-           jr=cplex_vxc*(ir-1)+1
-           v11r= vxc1_(jr,1);v22r= vxc1_(jr,2)
-           v12r= vxc1_(jr,3);v21i=-vxc1_(jr,1)
-           if (cplex_vxc==2) then
-             v11i= vxc1_(jr+1,1);v22i= vxc1_(jr+1,2)
-             v12i= vxc1_(jr+1,3);v21r= vxc1_(jr+1,1)
-           else
-             v11i=zero;v22i=zero
-             v12i=zero;v21i=zero
-           end if
-           jr=cplex_den*(ir-1)+1
-           ro11r= rho1arr(jr,1)+rho1arr(jr,4)
-           ro22r= rho1arr(jr,1)-rho1arr(jr,4)
-           ro12r= rho1arr(jr,2);ro12i=-rho1arr(jr,3)
-           ro21r= rho1arr(jr,2);ro21i= rho1arr(jr,3)
-           if (cplex_den==2) then
-             ro11i=rho1arr(jr+1,1)+rho1arr(jr+1,4)
-             ro22i=rho1arr(jr+1,1)-rho1arr(jr+1,4)
-             ro12r=ro12r+rho1arr(jr+1,3);ro12i=ro12i+rho1arr(jr+1,2)
-             ro21r=ro21r-rho1arr(jr+1,3);ro21i=ro21i+rho1arr(jr+1,2)
-           else
-             ro11i=zero;ro22i=zero
-           end if
-!          Real part
-           ff(ir)=half*(v11r*ro11r+v11i*ro11i+v22r*ro22r+v22i*ro22i &
-&           +v12r*ro12r+v12i*ro12i+v21r*ro21r+v21i*ro21i)
-!          Imaginary part
-           if (need_impart) gg(ir)=half*(v11r*ro11i-v11i*ro11r+v22r*ro22i-v22i*ro22r &
-&           +v12r*ro12i-v12i*ro12r+v21r*ro21i-v21i*ro21r)
-         end do
-       end if ! cplex_vxc and cplex_den
-     end if ! nspden
-
-     ff(1:nrad)=ff(1:nrad)*pawrad%rad(1:nrad)**2
-     call simp_gen(vxcrho,ff,pawrad)
-     d2enxc=d2enxc+vxcrho*pawang%angwgth(ipts)
-     LIBPAW_DEALLOCATE(ff)
-
-     if (need_impart) then
-       gg(1:nrad)=gg(1:nrad)*pawrad%rad(1:nrad)**2
-       call simp_gen(vxcrho,gg,pawrad)
-       d2enxc_im=d2enxc_im+vxcrho*pawang%angwgth(ipts)
-       LIBPAW_DEALLOCATE(gg)
-     end if
-
-   end if
-
-!  ----- End of the loop on npts (angular part)
- end do
-
-!Add the four*pi factor of the angular integration
- if (option/=1) then
-   d2enxc=d2enxc*four_pi
-   if (need_impart) d2enxc_im=d2enxc_im*four_pi
- end if
-
- LIBPAW_DEALLOCATE(rho1arr)
- LIBPAW_DEALLOCATE(vxc1_)
-
 end subroutine pawxc3
 !!***
 
@@ -2873,13 +2496,13 @@ end subroutine pawxc3
 !!  vxc((nrad,nspden)= XC potential
 !!  === Only if nkxc>0 ===
 !!  kxc(nrad,nkxc)=exchange and correlation kernel (returned only if nkxc/=0)
-!!   allowed if LDAs (dtset%xclevel=1) :
-!!    if nspden==1: return kxc(:,1)= d2Exc/drho2
-!!       that is 1/2 ( d2Exc/drho_up drho_up + d2Exc/drho_up drho_dn )
-!!    if nspden==1: also return kxc(:,2)= d2Exc/drho_up drho_dn
-!!    if nspden>=2, return  kxc(:,1)=d2Exc/drho_up drho_up
-!!                          kxc(:,2)=d2Exc/drho_up drho_dn
-!!                          kxc(:,3)=d2Exc/drho_dn drho_dn
+!!   Content of Kxc array:
+!!   ===== if LDA
+!!    if nspden==1: kxc(:,1)= d2Exc/drho2
+!!                 (kxc(:,2)= d2Exc/drho_up drho_dn)
+!!    if nspden>=2: kxc(:,1)=d2Exc/drho_up drho_up
+!!                  kxc(:,2)=d2Exc/drho_up drho_dn
+!!                  kxc(:,3)=d2Exc/drho_dn drho_dn
 !!
 !! PARENTS
 !!      m_pawxc
@@ -2984,23 +2607,33 @@ end subroutine pawxc3
 
 !Transfer the XC kernel
  if (nkxc>0.and.ndvxc>0) then
-   kxc(1:nrad,1:nkxc)=zero
    if (nkxc==1.and.ndvxc==15) then
      kxc(1:nrad,1)=half*(dvxci(1:nrad,1)+dvxci(1:nrad,9)+dvxci(1:nrad,10))
    else if (nkxc==3.and.ndvxc==15) then
      kxc(1:nrad,1)=dvxci(1:nrad,1)+dvxci(1:nrad,9)
      kxc(1:nrad,2)=dvxci(1:nrad,10)
      kxc(1:nrad,3)=dvxci(1:nrad,2)+dvxci(1:nrad,11)
+   else if (nkxc==7.and.ndvxc==15) then
+     kxc(1:nrad,1)=half*(dvxci(1:nrad,1)+dvxci(1:nrad,9)+dvxci(1:nrad,10))
+     kxc(1:nrad,2)=half*dvxci(1:nrad,3)+dvxci(1:nrad,12)
+     kxc(1:nrad,3)=quarter*dvxci(1:nrad,5)+dvxci(1:nrad,13)
+     kxc(1:nrad,4)=eighth*dvxci(1:nrad,7)+dvxci(1:nrad,15)
+     kxc(1:nrad,5)=grho_updn(1:nrad,1)  ! Not correct
+     kxc(1:nrad,6)=grho_updn(1:nrad,1)  ! Not correct
+     kxc(1:nrad,7)=grho_updn(1:nrad,1)  ! Not correct
+   else if (nkxc==23.and.ndvxc==15) then
+     kxc(1:nrad,1:15)=dvxci(1:nrad,1:15)
+     kxc(1:nrad,16)=rho_updn(1:nrad,1)  ! Not correct
+     kxc(1:nrad,17)=rho_updn(1:nrad,2)  ! Not correct
+     kxc(1:nrad,18)=grho_updn(1:nrad,1) ! Not correct
+     kxc(1:nrad,19)=grho_updn(1:nrad,2) ! Not correct
+     kxc(1:nrad,20)=grho_updn(1:nrad,1) ! Not correct
+     kxc(1:nrad,21)=grho_updn(1:nrad,2) ! Not correct
+     kxc(1:nrad,22)=grho_updn(1:nrad,1) ! Not correct
+     kxc(1:nrad,23)=grho_updn(1:nrad,2) ! Not correct
    else
+     kxc(1:nrad,1:nkxc)=zero
      kxc(1:nrad,1:min(nkxc,ndvxc))=dvxci(1:nrad,1:min(nkxc,ndvxc))
-   end if
-   if (nkxc==23)then
-     do ispden=1,nspden
-       kxc(1:nrad,15+ispden)=rho_updn(1:nrad,ispden)
-       do ii=1,3
-         kxc(1:nrad,15+ispden+2*ii)=grho_updn(1:nrad,ispden) ! ????
-       end do
-     end do
    end if
  end if
  LIBPAW_DEALLOCATE(dvxci)
@@ -3187,7 +2820,7 @@ subroutine pawxcsph3(cplex_den,cplex_vxc,ixc,nrad,nspden,pawrad,rho_updn,rho1_up
  order=2 ! We need Kxc
  ngrad=1;if (xclevel==2) ngrad=2 ! ngrad=1 is for LDAs or LSDs; ngrad=2 is for GGAs
  call pawxc_size_dvxc_wrapper(ixc,ndvxc,ngr2,nd2vxc,nspden,nvxcdgr,order)
- nkxc=2*nspden-1;if (xclevel==2) nkxc=15
+ nkxc=2*nspden-1;if (xclevel==2) nkxc=15 ! Not correct for nspden=1
  mgga=0 !metaGGA contributions are not taken into account here
 
 !--------------------------------------------------------------------------
@@ -3256,18 +2889,37 @@ subroutine pawxcsph3(cplex_den,cplex_vxc,ixc,nrad,nspden,pawrad,rho_updn,rho1_up
  call pawxc_drivexc_wrapper(exc,ixc,mgga,ndvxc,nd2vxc,ngr2,nrad,nspden,nvxcdgr,order,rho_updn,vxc,xclevel, &
 & dvxc=dvxc,grho2=grho2,vxcgrho=dvxcdgr)
 
-
 !Transfer the XC kernel
  LIBPAW_ALLOCATE(kxc,(nrad,nkxc))
- kxc(1:nrad,1:nkxc)=zero
- if (nkxc==1.and.ndvxc==15) then
-   kxc(1:nrad,1)=half*(dvxc(1:nrad,1)+dvxc(1:nrad,9)+dvxc(1:nrad,10))
- else if (nkxc==3.and.ndvxc==15) then
-   kxc(1:nrad,1)=dvxc(1:nrad,1)+dvxc(1:nrad,9)
-   kxc(1:nrad,2)=dvxc(1:nrad,10)
-   kxc(1:nrad,3)=dvxc(1:nrad,2)+dvxc(1:nrad,11)
- else
-   kxc(1:nrad,1:min(nkxc,ndvxc))=dvxc(1:nrad,1:min(nkxc,ndvxc))
+ if (nkxc>0.and.ndvxc>0) then
+   if (nkxc==1.and.ndvxc==15) then
+     kxc(1:nrad,1)=half*(dvxc(1:nrad,1)+dvxc(1:nrad,9)+dvxc(1:nrad,10))
+   else if (nkxc==3.and.ndvxc==15) then
+     kxc(1:nrad,1)=dvxc(1:nrad,1)+dvxc(1:nrad,9)
+     kxc(1:nrad,2)=dvxc(1:nrad,10)
+     kxc(1:nrad,3)=dvxc(1:nrad,2)+dvxc(1:nrad,11)
+   else if (nkxc==7.and.ndvxc==15) then
+     kxc(1:nrad,1)=half*(dvxc(1:nrad,1)+dvxc(1:nrad,9)+dvxc(1:nrad,10))
+     kxc(1:nrad,2)=half*dvxc(1:nrad,3)+dvxc(1:nrad,12)
+     kxc(1:nrad,3)=quarter*dvxc(1:nrad,5)+dvxc(1:nrad,13)
+     kxc(1:nrad,4)=eighth*dvxc(1:nrad,7)+dvxc(1:nrad,15)
+     kxc(1:nrad,5)=zero ! Not correct
+     kxc(1:nrad,6)=zero ! Not correct
+     kxc(1:nrad,7)=zero ! Not correct
+   else if (nkxc==23.and.ndvxc==15) then
+     kxc(1:nrad,1:15)=dvxc(1:nrad,1:15)
+     kxc(1:nrad,16)=zero ! Not correct
+     kxc(1:nrad,17)=zero ! Not correct
+     kxc(1:nrad,18)=zero ! Not correct
+     kxc(1:nrad,19)=zero ! Not correct
+     kxc(1:nrad,20)=zero ! Not correct
+     kxc(1:nrad,21)=zero ! Not correct
+     kxc(1:nrad,22)=zero ! Not correct
+     kxc(1:nrad,23)=zero ! Not correct
+   else
+     kxc(1:nrad,1:nkxc)=zero
+     kxc(1:nrad,1:min(nkxc,ndvxc))=dvxc(1:nrad,1:min(nkxc,ndvxc))
+   end if
  end if
 
  LIBPAW_DEALLOCATE(exc)
@@ -3302,67 +2954,67 @@ subroutine pawxcsph3(cplex_den,cplex_vxc,ixc,nrad,nspden,pawrad,rho_updn,rho1_up
 
 !  FOR NSPDEN=1, should eliminate computation of gxc1i(...), vxc1i(...)
 
-   LIBPAW_ALLOCATE(vxc1r,(nrad,2))
-   LIBPAW_ALLOCATE(vxc1i,(nrad,2))
-   LIBPAW_ALLOCATE(gxc1r,(nrad,2))
-   LIBPAW_ALLOCATE(gxc1i,(nrad,2))
-   do ir=1,nrad
-     if (cplex_vxc==1) then  ! cplex_vxc==1 and (cplex_den==1 or cplex_den=2)
-       jr=cplex_den*(ir-1)+1
-       grho_grho1_up=grho_updn(ir,1)*grho1_updn(jr,1)
-       grho_grho1_dn=grho_updn(ir,2)*grho1_updn(jr,2)
-       vxc1r(ir,1)=(kxc(ir, 1)+kxc(ir, 9))*rho1_updn(jr,1)+kxc(ir,10)*rho1_updn(jr,2) &
-&       +kxc(ir, 5)*grho_grho1_up+kxc(ir,13)*grho_grho1
-       vxc1r(ir,2)=(kxc(ir, 2)+kxc(ir,11))*rho1_updn(jr,2)+kxc(ir,10)*rho1_updn(jr,1) &
-&       +kxc(ir, 6)*grho_grho1_dn+kxc(ir,14)*grho_grho1
-       coeff_grho_corr=kxc(ir,13)*rho1_updn(jr,1)+kxc(ir,14)*rho1_updn(jr,2)+kxc(ir,15)*grho_grho1
-       coeff_grho_up  =kxc(ir, 5)*rho1_updn(jr,1)+kxc(ir, 7)*grho_grho1_up
-       coeff_grho_dn  =kxc(ir, 6)*rho1_updn(jr,2)+kxc(ir, 8)*grho_grho1_dn
-       gxc1r(ir,1)=(kxc(ir, 3)+kxc(ir,12))*grho1_updn(jr,1)+kxc(ir,12)*grho1_updn(jr,2) &
-&       +coeff_grho_up*grho_updn(jr,1)+coeff_grho_corr*(grho_updn(jr,1)+grho_updn(jr,2))
-       gxc1r(ir,2)=(kxc(ir, 4)+kxc(ir,12))*grho1_updn(jr,2)+kxc(ir,12)*grho1_updn(jr,1) &
-&       +coeff_grho_dn*grho_updn(jr,2)+coeff_grho_corr*(grho_updn(jr,1)+grho_updn(jr,2))
-     end if
-     if (grho2(ir,1)<tol24) gxc1r(ir,:)=zero ! ???
-   end do
-
-!  Apply divergence
-   fact=one;if (nspden==1) fact=two  ! Is it true  ? we force nspden=2 for gxc...
-   if (cplex_vxc==1) then
-     LIBPAW_ALLOCATE(dff,(nrad))
-     do ispden=1,nspden
-       call nderiv_gen(dff,gxc1r(:,ispden),pawrad)
-       vxc1(2:nrad,ispden)=vxc1r(2:nrad,ispden)-fact*(dff(2:nrad)+two*gxc1r(2:nrad,ispden)/pawrad%rad(2:nrad))
-       call pawrad_deducer0(vxc1(:,ispden),nrad,pawrad)
-     end do
-     LIBPAW_DEALLOCATE(dff)
-   else
-     LIBPAW_ALLOCATE(dff,(nrad))
-     LIBPAW_ALLOCATE(dgg,(nrad))
-     LIBPAW_ALLOCATE(ff,(nrad))
-     LIBPAW_ALLOCATE(gg,(nrad))
-     do ispden=1,nspden
-       call nderiv_gen(dff,gxc1r(:,ispden),pawrad)
-       call nderiv_gen(dgg,gxc1i(:,ispden),pawrad)
-       ff(2:nrad)=vxc1r(2:nrad,ispden)-fact*(dff(2:nrad)+two*gxc1r(2:nrad,ispden)/pawrad%rad(2:nrad))
-       gg(2:nrad)=vxc1i(2:nrad,ispden)-fact*(dgg(2:nrad)+two*gxc1i(2:nrad,ispden)/pawrad%rad(2:nrad))
-       call pawrad_deducer0(ff,nrad,pawrad)
-       call pawrad_deducer0(gg,nrad,pawrad)
-       do ir=1,nrad
-         vxc1(2*ir-1,ispden)=ff(ir)
-         vxc1(2*ir  ,ispden)=gg(ir)
-       end do
-     end do
-     LIBPAW_DEALLOCATE(dff)
-     LIBPAW_DEALLOCATE(dgg)
-     LIBPAW_DEALLOCATE(ff)
-     LIBPAW_DEALLOCATE(gg)
-   end if
-
-   LIBPAW_DEALLOCATE(vxc1r)
-   LIBPAW_DEALLOCATE(vxc1i)
-   LIBPAW_DEALLOCATE(gxc1r)
-   LIBPAW_DEALLOCATE(gxc1i)
+!    LIBPAW_ALLOCATE(vxc1r,(nrad,2))
+!    LIBPAW_ALLOCATE(vxc1i,(nrad,2))
+!    LIBPAW_ALLOCATE(gxc1r,(nrad,2))
+!    LIBPAW_ALLOCATE(gxc1i,(nrad,2))
+!    do ir=1,nrad
+!      if (cplex_vxc==1) then  ! cplex_vxc==1 and (cplex_den==1 or cplex_den=2)
+!        jr=cplex_den*(ir-1)+1
+!        grho_grho1_up=grho_updn(ir,1)*grho1_updn(jr,1)
+!        grho_grho1_dn=grho_updn(ir,2)*grho1_updn(jr,2)
+!        vxc1r(ir,1)=(kxc(ir, 1)+kxc(ir, 9))*rho1_updn(jr,1)+kxc(ir,10)*rho1_updn(jr,2) &
+! &       +kxc(ir, 5)*grho_grho1_up+kxc(ir,13)*grho_grho1
+!        vxc1r(ir,2)=(kxc(ir, 2)+kxc(ir,11))*rho1_updn(jr,2)+kxc(ir,10)*rho1_updn(jr,1) &
+! &       +kxc(ir, 6)*grho_grho1_dn+kxc(ir,14)*grho_grho1
+!        coeff_grho_corr=kxc(ir,13)*rho1_updn(jr,1)+kxc(ir,14)*rho1_updn(jr,2)+kxc(ir,15)*grho_grho1
+!        coeff_grho_up  =kxc(ir, 5)*rho1_updn(jr,1)+kxc(ir, 7)*grho_grho1_up
+!        coeff_grho_dn  =kxc(ir, 6)*rho1_updn(jr,2)+kxc(ir, 8)*grho_grho1_dn
+!        gxc1r(ir,1)=(kxc(ir, 3)+kxc(ir,12))*grho1_updn(jr,1)+kxc(ir,12)*grho1_updn(jr,2) &
+! &       +coeff_grho_up*grho_updn(jr,1)+coeff_grho_corr*(grho_updn(jr,1)+grho_updn(jr,2))
+!        gxc1r(ir,2)=(kxc(ir, 4)+kxc(ir,12))*grho1_updn(jr,2)+kxc(ir,12)*grho1_updn(jr,1) &
+! &       +coeff_grho_dn*grho_updn(jr,2)+coeff_grho_corr*(grho_updn(jr,1)+grho_updn(jr,2))
+!      end if
+!      if (grho2(ir,1)<tol24) gxc1r(ir,:)=zero ! ???
+!    end do
+! 
+! !  Apply divergence
+!    fact=one;if (nspden==1) fact=two  ! Is it true  ? we force nspden=2 for gxc...
+!    if (cplex_vxc==1) then
+!      LIBPAW_ALLOCATE(dff,(nrad))
+!      do ispden=1,nspden
+!        call nderiv_gen(dff,gxc1r(:,ispden),pawrad)
+!        vxc1(2:nrad,ispden)=vxc1r(2:nrad,ispden)-fact*(dff(2:nrad)+two*gxc1r(2:nrad,ispden)/pawrad%rad(2:nrad))
+!        call pawrad_deducer0(vxc1(:,ispden),nrad,pawrad)
+!      end do
+!      LIBPAW_DEALLOCATE(dff)
+!    else
+!      LIBPAW_ALLOCATE(dff,(nrad))
+!      LIBPAW_ALLOCATE(dgg,(nrad))
+!      LIBPAW_ALLOCATE(ff,(nrad))
+!      LIBPAW_ALLOCATE(gg,(nrad))
+!      do ispden=1,nspden
+!        call nderiv_gen(dff,gxc1r(:,ispden),pawrad)
+!        call nderiv_gen(dgg,gxc1i(:,ispden),pawrad)
+!        ff(2:nrad)=vxc1r(2:nrad,ispden)-fact*(dff(2:nrad)+two*gxc1r(2:nrad,ispden)/pawrad%rad(2:nrad))
+!        gg(2:nrad)=vxc1i(2:nrad,ispden)-fact*(dgg(2:nrad)+two*gxc1i(2:nrad,ispden)/pawrad%rad(2:nrad))
+!        call pawrad_deducer0(ff,nrad,pawrad)
+!        call pawrad_deducer0(gg,nrad,pawrad)
+!        do ir=1,nrad
+!          vxc1(2*ir-1,ispden)=ff(ir)
+!          vxc1(2*ir  ,ispden)=gg(ir)
+!        end do
+!      end do
+!      LIBPAW_DEALLOCATE(dff)
+!      LIBPAW_DEALLOCATE(dgg)
+!      LIBPAW_DEALLOCATE(ff)
+!      LIBPAW_DEALLOCATE(gg)
+!    end if
+! 
+!    LIBPAW_DEALLOCATE(vxc1r)
+!    LIBPAW_DEALLOCATE(vxc1i)
+!    LIBPAW_DEALLOCATE(gxc1r)
+!    LIBPAW_DEALLOCATE(gxc1i)
 
  end if ! ngrad==2
 
@@ -3891,14 +3543,46 @@ end subroutine pawxcsphpositron
 !!    kxc(nrad,lm_size,nkxc)=xc kernel (see notes below for nkxc)
 !!
 !! NOTES
-!!  Dimension of Kxc:
-!!   ===== if LDA (xclevel=1) :
-!!    if nspden==1: return kxc(:,1)= d2Exc/drho2
-!!       that is 1/2 (d2Exc/drho_up drho_up + d2Exc/drho_up drho_dn)
-!!    if nspden==1: also return kxc(:,2)= d2Exc/drho_up drho_dn
-!!    if nspden>=2, return  kxc(:,1)=d2Exc/drho_up drho_up
-!!                          kxc(:,2)=d2Exc/drho_up drho_dn
-!!                          kxc(:,3)=d2Exc/drho_dn drho_dn
+!!  Content of Kxc array:
+!!   ===== if LDA
+!!    if nspden==1: kxc(:,1)= d2Exc/drho2
+!!                 (kxc(:,2)= d2Exc/drho_up drho_dn)
+!!    if nspden>=2: kxc(:,1)=d2Exc/drho_up drho_up
+!!                  kxc(:,2)=d2Exc/drho_up drho_dn
+!!                  kxc(:,3)=d2Exc/drho_dn drho_dn
+!!   ===== if GGA
+!!    if nspden==1:
+!!       kxc(:,1)= d2Exc/drho2
+!!       kxc(:,2)= 1/|grad(rho)| dExc/d|grad(rho)|
+!!       kxc(:,3)= 1/|grad(rho)| d2Exc/d|grad(rho)| drho
+!!       kxc(:,4)= 1/|grad(rho)| * d/d|grad(rho)| ( 1/|grad(rho)| dExc/d|grad(rho)| )
+!!       kxc(:,5)= gradx(rho)
+!!       kxc(:,6)= grady(rho)
+!!       kxc(:,7)= gradz(rho)
+!!    if nspden>=2:
+!!       kxc(:,1)= d2Ex/drho_up drho_up
+!!       kxc(:,2)= d2Ex/drho_dn drho_dn
+!!       kxc(:,3)= 1/|grad(rho_up)| dEx/d|grad(rho_up)|
+!!       kxc(:,4)= 1/|grad(rho_dn)| dEx/d|grad(rho_dn)|
+!!       kxc(:,5)= 1/|grad(rho_up)| d2Ex/d|grad(rho_up)| drho_up
+!!       kxc(:,6)= 1/|grad(rho_dn)| d2Ex/d|grad(rho_dn)| drho_dn
+!!       kxc(:,7)= 1/|grad(rho_up)| * d/d|grad(rho_up)| ( 1/|grad(rho_up)| dEx/d|grad(rho_up)| )
+!!       kxc(:,8)= 1/|grad(rho_dn)| * d/d|grad(rho_dn)| ( 1/|grad(rho_dn)| dEx/d|grad(rho_dn)| )
+!!       kxc(:,9)= d2Ec/drho_up drho_up
+!!       kxc(:,10)=d2Ec/drho_up drho_dn
+!!       kxc(:,11)=d2Ec/drho_dn drho_dn
+!!       kxc(:,12)=1/|grad(rho)| dEc/d|grad(rho)|
+!!       kxc(:,13)=1/|grad(rho)| d2Ec/d|grad(rho)| drho_up
+!!       kxc(:,14)=1/|grad(rho)| d2Ec/d|grad(rho)| drho_dn
+!!       kxc(:,15)=1/|grad(rho)| * d/d|grad(rho)| ( 1/|grad(rho)| dEc/d|grad(rho)| )
+!!       kxc(:,16)=rho_up
+!!       kxc(:,17)=rho_dn
+!!       kxc(:,18)=gradx(rho_up)
+!!       kxc(:,19)=gradx(rho_dn)
+!!       kxc(:,20)=grady(rho_up)
+!!       kxc(:,21)=grady(rho_dn)
+!!       kxc(:,22)=gradz(rho_up)
+!!       kxc(:,23)=gradz(rho_dn)
 !!
 !! PARENTS
 !!      m_pawpsp,pawdenpot

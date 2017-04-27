@@ -660,8 +660,9 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
      has_dijnd=1; req_cplex_dij=2
    end if
    if (rfphon/=0.or.rfelfd==1.or.rfelfd==3.or.rfstrs/=0.or.rf2_dkde/=0) then
-     has_kxc=1;nkxc1=2*dtset%nspden-1 ! LDA only
-     if(dtset%xclevel==2.and.dtset%pawxcdev==0) nkxc1=23
+     has_kxc=1;nkxc1=2*dtset%nspden-1                   ! LDA
+     if(dtset%xclevel==2.and.dtset%nspden==1) nkxc1=7   ! GGA non-polarized
+     if(dtset%xclevel==2.and.dtset%nspden==2) nkxc1=23  ! GGA polarized
    end if
    call paw_an_init(paw_an,dtset%natom,dtset%ntypat,nkxc1,dtset%nspden,cplex,dtset%pawxcdev,&
 &   dtset%typat,pawang,pawtab,has_vxc=1,has_vxc_ex=1,has_kxc=has_kxc,&
@@ -828,7 +829,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 
 !Set up hartree and xc potential. Compute kxc here.
  option=2 ; nk3xc=1
- nkxc=2*min(dtset%nspden,2)-1;if(dtset%xclevel==2)nkxc=23
+ nkxc=2*min(dtset%nspden,2)-1;if(dtset%xclevel==2)nkxc=16*min(dtset%nspden,2)-9
  call check_kxc(dtset%ixc,dtset%optdriver)
  ABI_ALLOCATE(kxc,(nfftf,nkxc))
  ABI_ALLOCATE(vhartr,(nfftf))
