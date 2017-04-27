@@ -221,32 +221,26 @@ subroutine ddb_diel(Crystal,amu,anaddb_dtset,dielt_rlx,displ,d2cart,epsinf,fact_
      if(t_degenerate)metacharacter(imode)='-'
    end do
 
-!  Write the mode effective charge for each mode
-   write(message, '(a)' )'  '
-   call wrtout(iout,message,'COLL')
-   write(message, '(a)' )' Mode effective charges '
-   call wrtout(iout,message,'COLL')
-   write(message, '(a)' )' Mode number.     x               y               z '
-   call wrtout(iout,message,'COLL')
-   do imode=1,3*natom
-     write(message, '(a,i4,3f16.3)' )metacharacter(imode),imode,(modez(1,idir1,imode),idir1=1,3)
-     call wrtout(iout,message,'COLL')
-   end do
+   if (my_rank == master) then
+     !  Write the mode effective charge for each mode
+     write(iout, '(a)' )'  '
+     write(iout, '(a)' )' Mode effective charges '
+     write(iout, '(a)' )' Mode number.     x               y               z '
+     do imode=1,3*natom
+       write(iout, '(a,i4,3f16.3)' )metacharacter(imode),imode,(modez(1,idir1,imode),idir1=1,3)
+     end do
 
-!  Write the mode effective charge length for each mode
-   write(message, '(a)' )'  '
-   call wrtout(iout,message,'COLL')
-   write(message, '(a)' )' Length of mode effective charge for each phonon mode :'
-   call wrtout(iout,message,'COLL')
-   do imode=1,3*natom,5
-     if (3*natom-imode<5) then
-       write(message, '(1x,5es14.6)') (sqrt(modez(1,1,ii)**2+modez(1,2,ii)**2+modez(1,3,ii)**2),ii=imode,3*natom)
-       call wrtout(iout,message,'COLL')
-     else
-       write(message, '(1x,5es14.6)') (sqrt(modez(1,1,ii)**2+modez(1,2,ii)**2+modez(1,3,ii)**2),ii=imode,imode+4) 
-       call wrtout(iout,message,'COLL')
-     end if
-   end do
+     !  Write the mode effective charge length for each mode
+     write(iout, '(a)' )'  '
+     write(iout, '(a)' )' Length of mode effective charge for each phonon mode :'
+     do imode=1,3*natom,5
+       if (3*natom-imode<5) then
+         write(iout, '(1x,5es14.6)') (sqrt(modez(1,1,ii)**2+modez(1,2,ii)**2+modez(1,3,ii)**2),ii=imode,3*natom)
+       else
+         write(iout, '(1x,5es14.6)') (sqrt(modez(1,1,ii)**2+modez(1,2,ii)**2+modez(1,3,ii)**2),ii=imode,imode+4)
+       end if
+     end do
+   end if ! master
 
 !  Get the oscillator strengths
    do imode=1,3*natom
@@ -273,23 +267,19 @@ subroutine ddb_diel(Crystal,amu,anaddb_dtset,dielt_rlx,displ,d2cart,epsinf,fact_
      end do
    end do
 
-!  Write the oscillator strength for each mode
-   write(message, '(a)' )'  '
-   call wrtout(iout,message,'COLL')
-   write(message, '(a)' )' Oscillator strengths (in a.u. ; 1 a.u.=253.2638413 m3/s2). Set to zero if abs()<tol14.'
-   call wrtout(iout,message,'COLL')
-   write(message, '(a)' )' Mode number.       xx          yy          zz          xy          xz          yz '
-   call wrtout(iout,message,'COLL')
-   do imode=1,3*natom
-     write(message, '(a,i4,a,6es12.4)' )&
-&     metacharacter(imode),imode,'     Real  ',(oscstr(1,idir1,idir1,imode),idir1=1,3),&
-&     oscstr(1,1,2,imode), oscstr(1,1,3,imode),oscstr(1,2,3,imode)
-     call wrtout(iout,message,'COLL')
-     write(message, '(a,a,6es12.4)' )&
-&     metacharacter(imode),'         Imag  ',(oscstr(2,idir1,idir1,imode),idir1=1,3),&
-&     oscstr(2,1,2,imode),oscstr(2,1,3,imode),oscstr(2,2,3,imode)
-     call wrtout(iout,message,'COLL')
-   end do
+   if (my_rank == master) then
+     !  Write the oscillator strength for each mode
+     write(iout, '(a)' )'  '
+     write(iout, '(a)' )' Oscillator strengths (in a.u. ; 1 a.u.=253.2638413 m3/s2). Set to zero if abs()<tol14.'
+     write(iout, '(a)' )' Mode number.       xx          yy          zz          xy          xz          yz '
+     do imode=1,3*natom
+       write(iout, '(a,i4,a,6es12.4)' )&
+&       metacharacter(imode),imode,'     Real  ',(oscstr(1,idir1,idir1,imode),idir1=1,3),&
+&       oscstr(1,1,2,imode), oscstr(1,1,3,imode),oscstr(1,2,3,imode)
+       write(iout, '(a,a,6es12.4)' )&
+&       metacharacter(imode),'         Imag  ',(oscstr(2,idir1,idir1,imode),idir1=1,3),&
+&       oscstr(2,1,2,imode),oscstr(2,1,3,imode),oscstr(2,2,3,imode)
+     end do
 
      ! write the oscillator strength to the netcdf 
 #ifdef HAVE_NETCDF
@@ -409,22 +399,19 @@ subroutine ddb_diel(Crystal,amu,anaddb_dtset,dielt_rlx,displ,d2cart,epsinf,fact_
    difffr=zero
    if(nfreq>1)difffr=(anaddb_dtset%frmax-anaddb_dtset%frmin)/(nfreq-1)
 
-   if (nfreq>10) then
-     write(message, '(a,a,a,a,a,a,a,a)' )&
+   if (nfreq>10 .and. my_rank == master) then
+     write(iout, '(a,a,a,a,a,a,a,a)' )&
 &     ' ddb_diel : the number of frequencies is larger',&
 &     ' than 10 => I will consider only',ch10,&
 &     ' the three principal directions, assume that the tensor',ch10,&
 &     ' is diagonalized, and give dielectric constant and ',ch10,&
 &     ' reflectivities.'
-     call wrtout(iout,message,'COLL')
-     write(message, '(a,a)' )&
+     write(iout, '(a,a)' )&
 &     ' Frequency(Hartree)    Dielectric constant   ',&
 &     '             Reflectivity    '
-     call wrtout(iout,message,'COLL')
-     write(message, '(a,a)' )&
+     write(iout, '(a,a)' )&
 &     '                     x           y          z',&
 &     '          x        y        z'
-     call wrtout(iout,message,'COLL')
    end if
 
 !  Loop on frequencies
@@ -455,20 +442,18 @@ subroutine ddb_diel(Crystal,amu,anaddb_dtset,dielt_rlx,displ,d2cart,epsinf,fact_
            refl(idir1)=( (sqrt(frdiel(idir1,idir1,ifreq)) -one) /(sqrt(frdiel(idir1,idir1,ifreq)) +one) )**2
          end if
        end do
-       write(message, '(7es12.4)' )&
-&       afreq,(frdiel(idir1,idir1,ifreq),idir1=1,3),(refl(idir1),idir1=1,3)
-       call wrtout(iout,message,'COLL')
+       if (my_rank == master) then
+         write(iout, '(7es12.4)' )afreq,(frdiel(idir1,idir1,ifreq),idir1=1,3),(refl(idir1),idir1=1,3)
+       end if
 
      else
-       write(message, '(a,es12.4,a)' )&
-&       ' Full dielectric tensor at frequency',afreq,' Hartree'
-       call wrtout(iout,message,'COLL')
-       do idir1=1,3
-         write(message, '(3es16.8)' ) (frdiel(idir1,idir2,ifreq),idir2=1,3)
-         call wrtout(iout,message,'COLL')
-       end do
-       write(message, '(a)' )' '
-       call wrtout(iout,message,'COLL')
+       if (my_rank == master) then
+         write(iout, '(a,es12.4,a)' )' Full dielectric tensor at frequency',afreq,' Hartree'
+         do idir1=1,3
+           write(iout, '(3es16.8)' ) (frdiel(idir1,idir2,ifreq),idir2=1,3)
+         end do
+         write(iout, '(a)' )' '
+       end if
      end if
 
    end do ! End of the loop on frequencies
@@ -499,9 +484,10 @@ subroutine ddb_diel(Crystal,amu,anaddb_dtset,dielt_rlx,displ,d2cart,epsinf,fact_
 &       qphon(3)**2*epsinf(3,3)+ 2* ( qphon(1)*qphon(2)*epsinf(1,2)+&
 &       qphon(1)*qphon(3)*epsinf(1,3)+qphon(2)*qphon(3)*epsinf(2,3))
        eps=eps/q2*exp(lst(iphl2)-lst0)
-       write(message, '(3f10.5,es18.8)' )qphon,eps
-       call wrtout(std_out,message,'COLL')
-       call wrtout(iout,message,'COLL')
+       if (my_rank == master) then
+         write(iout, '(3f10.5,es18.8)' )qphon,eps
+         write(std_out,'(3f10.5,es18.8)' )qphon,eps
+       end if
      end if
    end do
  end if ! End of the condition of nph2l does not vanish
