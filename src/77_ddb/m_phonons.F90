@@ -514,7 +514,7 @@ implicit none
      wover2t = 1.e200_dp; if(tmp > tol14) wover2t=PHdos%omega(iomega)*half/tmp
      expmx=zero;         if (abs(wover2t) < 600._dp) expmx=exp(-wover2t)
      ! should not be much of a problem for the log, but still put a check.
-     ln2shx=zero;        if (one-expmx > 1.e-200_dp) ln2shx=log(two * sinh(wover2t)) !wover2t+log(one-expmx)
+     ln2shx=zero;        if (wover2t > tol8 .and. wover2t < 100.0_dp) ln2shx=log(two * sinh(wover2t)) !wover2t+log(one-expmx)
      cothx=zero;         if (abs(one-expmx) > tol14) cothx=one/tanh(wover2t) !(one+expmx)/(one-expmx)
      invsinh2=zero;      if (wover2t < 100.0_dp) invsinh2=one/sinh(wover2t)**2
 
