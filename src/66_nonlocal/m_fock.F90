@@ -2628,7 +2628,6 @@ subroutine strfock(gprimd,gsqcut,fockstr,hybrid_mixing,hybrid_mixing_sr,hybrid_r
 #ifdef FC_IBM
 !DO not remove : seems needed to avoid problem with pathscale compiler, in parallel
  write(std_out,*)' strfock : after mpi_comm, fockstr=',fockstr
- write(std_out,*)' strfock : efock,ucvol=',efock,ucvol
 #endif
 
 !Normalize and add term -efock/ucvol on diagonal
