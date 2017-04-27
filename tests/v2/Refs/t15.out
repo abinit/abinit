@@ -54,7 +54,6 @@
      ntemper        10
    temperinc         1.00000000E+02
    tempermin         1.00000000E+02
-       iavfr         1
  Description of grid 2 :
       ng2qpt        12        12        12
       ngrids         3

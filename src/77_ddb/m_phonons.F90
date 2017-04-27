@@ -449,7 +449,7 @@ subroutine phdos_print_thermo(PHdos, fname, ntemper, tempermin, temperinc)
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'phdos_print_debye'
+#define ABI_FUNC 'phdos_print_thermo'
  use interfaces_14_hidewrite
 !End of the abilint section
 
