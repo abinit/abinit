@@ -645,9 +645,7 @@
 
 !      Prepare the phase factors if they were not already computed
        if (nloalg(2)<=0) then
-!write(87,*) "coucou0",ia3,ia4
          call ph1d3d(ia3,ia4,kgin,matblk,natom,npwin,n1,n2,n3,phkxredin,ph1d,ph3din)
-!write(87,*) "ph3din",ph3din(1,487,:)
        end if
 
 !      Allocate memory for projected scalars
@@ -707,12 +705,12 @@
        if (cpopt==4.and.ndgxdt>0) then
          ndgxdt_stored = cprjin(1,1)%ncpgr
          ishift=0
-         if ((choice==2).and.(ndgxdt_stored>ndgxdt).and.(signs==2)) ishift=idir-ndgxdt
+         if (((choice==2).or.(choice==3)).and.(ndgxdt_stored>ndgxdt).and.(signs==2)) ishift=idir-ndgxdt
          if (choice==2.and.(ndgxdt_stored>ndgxdt).and.(signs==1)) ishift=ndgxdt_stored-ndgxdt
          if(cplex == 2) then
            do ispinor=1,nspinor
              do ia=1,nincat
-               if (ndgxdt_stored==ndgxdt.or.(ndgxdt_stored>ndgxdt.and.choice==2)) then
+               if (ndgxdt_stored==ndgxdt.or.(ndgxdt_stored>ndgxdt.and.((choice==2).or.(choice==3)))) then
                  dgxdt(1:2,1:ndgxdt,1:nlmn,ia,ispinor)=cprjin(iatm+ia,ispinor)%dcp(1:2,1+ishift:ndgxdt+ishift,1:nlmn)
                else if (signs==2.and.ndgxdt_stored==3) then
                  if (choice==5.or.choice==51.or.choice==52) then ! ndgxdt=1
@@ -732,7 +730,7 @@
            do ispinor=1,nspinor
              do ia=1,nincat
                do ilmn=1,nlmn
-                 if (ndgxdt_stored==ndgxdt.or.(ndgxdt_stored>ndgxdt.and.choice==2)) then
+                 if (ndgxdt_stored==ndgxdt.or.(ndgxdt_stored>ndgxdt.and.((choice==2).or.(choice==3)))) then
                    do ii=1,ndgxdt
                      ic = cplex_dgxdt(ii)
                      dgxdt(1,ii,ilmn,ia,ispinor)=cprjin(iatm+ia,ispinor)%dcp(ic,ii+ishift,ilmn)
@@ -845,7 +843,6 @@
 &             nincat,nlmn,nnlout,nspinor,paw_opt,strnlk)
              ABI_DEALLOCATE(gx_left)
            end if
-
          end if
 
 !        Operate with the non-local potential on the projected scalars,
