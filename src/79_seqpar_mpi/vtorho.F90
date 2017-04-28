@@ -1066,6 +1066,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        if (optforces>0) then
          grnlnk(:,:)=reshape(buffer1(index1+1:index1+3*natom*mbdkpsp),(/3*natom,mbdkpsp/) )
        end if
+       if (usefock) focknk(:)=buffer1(1+index1:index1+mbdkpsp)
        if(paw_dmft%use_dmft==1) then
          nnn=0
          do ikpt=1,dtset%nkpt

@@ -12388,6 +12388,55 @@
           </li>
          </ul>
         </p>
+        <p>
+         Hybrid functionals (do not forget to add a minus sign, as discussed above). 
+        </p>
+        <p>
+         <ul>
+          <li>
+           402=&gt; XC_HYB_GGA_XC_B3LYP !  The (in)famous B3LYP
+        [PJ Stephens, FJ Devlin, CF Chabalowski, MJ Frisch, J. Phys. Chem. 98 11623 (1994)
+        ]
+          </li>
+          <li>
+           406=&gt; XC_HYB_GGA_XC_PBEH !  PBEH (PBE0)
+        [C Adamo and V Barone, J. Chem. Phys. 110, 6158 (1999);
+         M. Ernzerhof, G. E. Scuseria, J. Chem. Phys. 110, 5029 (1999)
+        ]
+          </li>
+          <li>
+           427=&gt; XC_HYB_GGA_XC_HSE03 !  The 2003 version of the screened hybrid HSE (in this case one should use omega^HF = 0.15/sqrt(2) and
+       omega^PBE = 0.15*CBRT(2.0))
+           <br>
+           428=&gt; XC_HYB_GGA_XC_HSE06 !  The 2006 version of the screened hybrid HSE (in this case one should use omega^HF = omega^PBE = 0.11)
+           <br>
+           (The following section is taken from the LibXC sources. In ABINIT, we stick to the LibXC choice.)
+           Note that there is an enormous mess in the literature concerning
+     the values of omega in HSE. This is due to an error in the
+     original paper that stated that they had used omega=0.15. This
+     was in fact not true, and the real value used was omega^HF =
+     0.15/sqrt(2) ~ 0.1061 and omega^PBE = 0.15*cbrt(2) ~ 0.1890. In
+     2006 Krukau et al [JCP 125, 224106 (2006)] tried to clarify the
+     situation, and called HSE03 to the above choice of parameters,
+     and called HSE06 to the functional where omega^HF=omega^PBE. By
+     testing several properties for atoms they reached the conclusion
+     that the best value for omega=0.11.
+     Of course, codes are just as messy as the papers. In espresso
+     HSE06 has the value omega=0.106. VASP, on the other hand, uses
+     for HSE03 the same value omega^HF = omega^PBE = 0.3 (A^-1) ~
+     0.1587 and for HSE06 omega^HF = omega^PBE = 0.2 (A^-1) ~ 0.1058.
+        [J Heyd, GE Scuseria, and M Ernzerhof, J. Chem. Phys. 118, 8207 (2003);
+         J Heyd, GE Scuseria, and M Ernzerhof, J. Chem. Phys. 124, 219906 (2006);
+         AV Krukau, OA Vydrov, AF Izmaylov, and GE Scuseria, J. Chem. Phys. 125, 224106 (2006)
+        ]
+          </li>
+          <li>
+           456=&gt; XC_HYB_GGA_XC_PBE0_13 !  PBE0-1/3
+        [P Cortona, J. Chem. Phys. 136, 086101 (2012)
+        ]
+          </li>
+         </ul>
+        </p>
     varname: ixc
     vartype: integer
 - !variable
