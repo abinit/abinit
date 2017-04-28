@@ -43,6 +43,7 @@ tolwfr1 1.0d-18
 toldfe2 1.0d-7    # Will stop when, twice in a row, the difference 
                   # between two consecutive evaluations of total energy 
                   # differ by less than toldfe (in Hartree) 
+toldfe3 1.0d-7
 diemac 12.0  
 
 #Definition of the Hartree-Fock calculation
@@ -51,8 +52,8 @@ ixc3 41             # Calculation with PBE0 functional
 getwfk -1        # Start from previous wavefunctions to ease convergence
 
 #Additional (and facultative) variables for Hartree-Fock
-nkpthf2 27          # number of k-point in the full-BZ 
-nbandhf2 4         # number of occupied states
+nkpthf  27          # number of k-point in the full-BZ 
+nbandhf  4         # number of occupied states
 
 ## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
 #%%<BEGIN TEST_INFO>
