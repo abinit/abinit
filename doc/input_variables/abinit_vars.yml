@@ -22251,7 +22251,7 @@
          Truncation of the Coulomb interaction in real space. The meaning of [[rcut]] is governed by the cutoff shape option [[icutcoul]].
         </p>
         <p>
-         If [[rcut]] is negative, the cutoff is automatically calculated so to enclose the same volume inside the cutoff as the volume of the solid.
+         If [[rcut]] is negative, the cutoff is automatically calculated so to enclose the same volume inside the cutoff as the volume of the primitive cell.
         </p>
     varname: rcut
     vartype: real
