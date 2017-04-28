@@ -913,16 +913,25 @@ subroutine rhohxc(dtset,enxc,gsqcut,izero,kxc,mpi_enreg,nfft,ngfft, &
            kxc(ifft:ifft+npts-1,1)=dvxc_b(1:npts,1)+dvxc_b(1:npts,9)
            kxc(ifft:ifft+npts-1,2)=dvxc_b(1:npts,10)
            kxc(ifft:ifft+npts-1,3)=dvxc_b(1:npts,2)+dvxc_b(1:npts,11)
+         else if (nkxc_eff==7.and.ndvxc==8) then
+           kxc(ifft:ifft+npts-1,1)=half*dvxc_b(1:npts,1)
+           kxc(ifft:ifft+npts-1,2)=half*dvxc_b(1:npts,3)
+           kxc(ifft:ifft+npts-1,3)=quarter*dvxc_b(1:npts,5)
+           kxc(ifft:ifft+npts-1,4)=eighth*dvxc_b(1:npts,7)
          else if (nkxc_eff==7.and.ndvxc==15) then
            kxc(ifft:ifft+npts-1,1)=half*(dvxc_b(1:npts,1)+dvxc_b(1:npts,9)+dvxc_b(1:npts,10))
            kxc(ifft:ifft+npts-1,2)=half*dvxc_b(1:npts,3)+dvxc_b(1:npts,12)
            kxc(ifft:ifft+npts-1,3)=quarter*dvxc_b(1:npts,5)+dvxc_b(1:npts,13)
            kxc(ifft:ifft+npts-1,4)=eighth*dvxc_b(1:npts,7)+dvxc_b(1:npts,15)
+         else ! All other cases
+           kxc(ifft:ifft+npts-1,1:nkxc_eff)=zero
+           kxc(ifft:ifft+npts-1,1:min(nkxc_eff,ndvxc))=dvxc_b(1:npts,1:min(nkxc_eff,ndvxc))
+         end if
+         if (nkxc_eff==7) then
            kxc(ifft:ifft+npts-1,5)=rhonow(ifft:ifft+npts-1,1,2)
            kxc(ifft:ifft+npts-1,6)=rhonow(ifft:ifft+npts-1,1,3)
            kxc(ifft:ifft+npts-1,7)=rhonow(ifft:ifft+npts-1,1,4)
-         else if (nkxc_eff==23.and.ndvxc==15) then
-           kxc(ifft:ifft+npts-1,1:15)=dvxc_b(1:npts,1:15)
+         else if (nkxc_eff==23) then
            kxc(ifft:ifft+npts-1,16)=rhonow(ifft:ifft+npts-1,1,1)
            kxc(ifft:ifft+npts-1,17)=rhonow(ifft:ifft+npts-1,2,1)
            kxc(ifft:ifft+npts-1,18)=rhonow(ifft:ifft+npts-1,1,2)
@@ -931,9 +940,6 @@ subroutine rhohxc(dtset,enxc,gsqcut,izero,kxc,mpi_enreg,nfft,ngfft, &
            kxc(ifft:ifft+npts-1,21)=rhonow(ifft:ifft+npts-1,2,3)
            kxc(ifft:ifft+npts-1,22)=rhonow(ifft:ifft+npts-1,1,4)
            kxc(ifft:ifft+npts-1,23)=rhonow(ifft:ifft+npts-1,2,4)
-         else
-           kxc(ifft:ifft+npts-1,1:nkxc_eff)=zero
-           kxc(ifft:ifft+npts-1,1:min(nkxc_eff,ndvxc))=dvxc_b(1:npts,1:min(nkxc_eff,ndvxc))
          end if
        end if
 

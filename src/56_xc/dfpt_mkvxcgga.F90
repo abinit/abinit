@@ -211,8 +211,8 @@ subroutine dfpt_mkvxcgga(cplex,gprimd,kxc,mpi_enreg,nfft,ngfft,&
        r1_up(:)=rho1now(ir,1,2:4)   ! grad of spin-up rho1
        r1_dn(:)=rho1now(ir,2,2:4)   ! grad of spin-down rho1
        r1(:)=r1_up(:)+r1_dn(:)      ! grad of GS rho1
-       gradrho_gradrho1_up=dot_product(r0,r1_up)
-       gradrho_gradrho1_dn=dot_product(r0,r1_dn)
+       gradrho_gradrho1_up=dot_product(r0_up,r1_up)
+       gradrho_gradrho1_dn=dot_product(r0_dn,r1_dn)
        gradrho_gradrho1   =dot_product(r0,r1)
        dnexcdn(ir,1)=(kxc(ir,1)+kxc(ir,9))*rho1now(ir,1,1)+&
   &     kxc(ir,10)*rho1now(ir,2,1)+&
@@ -244,8 +244,8 @@ subroutine dfpt_mkvxcgga(cplex,gprimd,kxc,mpi_enreg,nfft,ngfft,&
        r0(:)=kxc(ir,5:7)
        r1(:)  =rho1now(2*ir-1,1,2:4)
        r1im(:)=rho1now(2*ir  ,1,2:4)
-       gradrho_gradrho1  =r1(1)*r0(1)+r1(2)*r0(2)+r1(3)*r0(3)
-       gradrho_gradrho1im=r1im(1)*r0(1)+r1im(2)*r0(2)+r1im(3)*r0(3)
+       gradrho_gradrho1  =dot_product(r0,r1)
+       gradrho_gradrho1im=dot_product(r0,r1im)
        dnexcdn(2*ir-1,1)=kxc(ir,1)*rho1now(2*ir-1,1,1) + kxc(ir,3)*gradrho_gradrho1
        dnexcdn(2*ir  ,1)=kxc(ir,1)*rho1now(2*ir  ,1,1) + kxc(ir,3)*gradrho_gradrho1im
        coeff_grho  =kxc(ir,3)*rho1now(2*ir-1,1,1) + kxc(ir,4)*gradrho_gradrho1
@@ -265,11 +265,11 @@ subroutine dfpt_mkvxcgga(cplex,gprimd,kxc,mpi_enreg,nfft,ngfft,&
        r1im_dn(:)=rho1now(2*ir,2,2:4)   ! grad of spin-down rho1 , im part
        r1(:)=r1_up(:)+r1_dn(:)      ! grad of GS rho1
        r1im(:)=r1im_up(:)+r1im_dn(:)      ! grad of GS rho1, im part
-       gradrho_gradrho1_up  =dot_product(r0,r1_up)
-       gradrho_gradrho1_dn  =dot_product(r0,r1_dn)
+       gradrho_gradrho1_up  =dot_product(r0_up,r1_up)
+       gradrho_gradrho1_dn  =dot_product(r0_dn,r1_dn)
        gradrho_gradrho1     =dot_product(r0,r1)
-       gradrho_gradrho1im_up=dot_product(r0,r1im_up)
-       gradrho_gradrho1im_dn=dot_product(r0,r1im_dn)
+       gradrho_gradrho1im_up=dot_product(r0_up,r1im_up)
+       gradrho_gradrho1im_dn=dot_product(r0_dn,r1im_dn)
        gradrho_gradrho1im   =dot_product(r0,r1im)
        dnexcdn(2*ir-1,1)=(kxc(ir,1)+kxc(ir,9))*rho1now(2*ir-1,1,1)+&
 &       kxc(ir,10)*rho1now(2*ir-1,2,1)+&

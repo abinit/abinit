@@ -168,7 +168,7 @@ subroutine dfpt_mkvxcstrgga(cplex,dgprimdds,gprimd,istr,kxc,mpi_enreg,nfft,ngfft
 !To finally get:
 !   (nabla)^(alpha,beta)_i[n] = -half ( delta_alpha,i nabla_beta[n] + delta_beta,i nabla_alpha[n] )
  ABI_ALLOCATE(rhodgnow,(cplex*nfft,nspden,ngrad*ngrad))
- rhodgnow(1:nfft,1,2:4)=zero
+ rhodgnow(1:nfft,1:nspden,1:4)=zero
  if (nspden==1) then
    if (istr==1) rhodgnow(1:nfft,1,2)=-     kxc(1:nfft,5)
    if (istr==2) rhodgnow(1:nfft,1,3)=-     kxc(1:nfft,6)
@@ -190,35 +190,15 @@ subroutine dfpt_mkvxcstrgga(cplex,dgprimdds,gprimd,istr,kxc,mpi_enreg,nfft,ngfft
    if (istr==6) rhodgnow(1:nfft,1,2)=-half*kxc(1:nfft,21)
    if (istr==6) rhodgnow(1:nfft,1,3)=-half*kxc(1:nfft,19)
    if (istr==1) rhodgnow(1:nfft,2,2)=-     (kxc(1:nfft,18)-kxc(1:nfft,19))
-   if (istr==2) rhodgnow(1:nfft,1,3)=-     (kxc(1:nfft,20)-kxc(1:nfft,21))
-   if (istr==3) rhodgnow(1:nfft,1,4)=-     (kxc(1:nfft,22)-kxc(1:nfft,23))
-   if (istr==4) rhodgnow(1:nfft,1,3)=-half*(kxc(1:nfft,22)-kxc(1:nfft,23))
-   if (istr==4) rhodgnow(1:nfft,1,4)=-half*(kxc(1:nfft,20)-kxc(1:nfft,21))
-   if (istr==5) rhodgnow(1:nfft,1,2)=-half*(kxc(1:nfft,22)-kxc(1:nfft,23))
-   if (istr==5) rhodgnow(1:nfft,1,4)=-half*(kxc(1:nfft,18)-kxc(1:nfft,19))
-   if (istr==6) rhodgnow(1:nfft,1,2)=-half*(kxc(1:nfft,20)-kxc(1:nfft,21))
-   if (istr==6) rhodgnow(1:nfft,1,3)=-half*(kxc(1:nfft,18)-kxc(1:nfft,19))
+   if (istr==2) rhodgnow(1:nfft,2,3)=-     (kxc(1:nfft,20)-kxc(1:nfft,21))
+   if (istr==3) rhodgnow(1:nfft,2,4)=-     (kxc(1:nfft,22)-kxc(1:nfft,23))
+   if (istr==4) rhodgnow(1:nfft,2,3)=-half*(kxc(1:nfft,22)-kxc(1:nfft,23))
+   if (istr==4) rhodgnow(1:nfft,2,4)=-half*(kxc(1:nfft,20)-kxc(1:nfft,21))
+   if (istr==5) rhodgnow(1:nfft,2,2)=-half*(kxc(1:nfft,22)-kxc(1:nfft,23))
+   if (istr==5) rhodgnow(1:nfft,2,4)=-half*(kxc(1:nfft,18)-kxc(1:nfft,19))
+   if (istr==6) rhodgnow(1:nfft,2,2)=-half*(kxc(1:nfft,20)-kxc(1:nfft,21))
+   if (istr==6) rhodgnow(1:nfft,2,3)=-half*(kxc(1:nfft,18)-kxc(1:nfft,19))
  end if
-
-!  if (nspden==1) then
-!    rhodgnow(1:nfft,1,2:4)=zero
-!    if (istr==1) rhodgnow(1:nfft,1,2)=-     kxc(1:nfft,5)
-!    if (istr==2) rhodgnow(1:nfft,1,3)=-     kxc(1:nfft,6)
-!    if (istr==3) rhodgnow(1:nfft,1,4)=-     kxc(1:nfft,7)
-!    if (istr==4) rhodgnow(1:nfft,1,3)=-half*kxc(1:nfft,7)
-!    if (istr==4) rhodgnow(1:nfft,1,4)=-half*kxc(1:nfft,6)
-!    if (istr==5) rhodgnow(1:nfft,1,2)=-half*kxc(1:nfft,7)
-!    if (istr==5) rhodgnow(1:nfft,1,4)=-half*kxc(1:nfft,5)
-!    if (istr==6) rhodgnow(1:nfft,1,2)=-half*kxc(1:nfft,6)
-!    if (istr==6) rhodgnow(1:nfft,1,3)=-half*kxc(1:nfft,5)
-!  else
-!    ABI_ALLOCATE(rhordgtmp,(nfft,nspden))
-!    do ispden=1,nspden
-!      rhordgtmp(1:nfft,ispden)=rhortmp(1:nfft,ispden,1)
-!    end do
-!    call xcden(cplex,dgprimdds,ishift,mpi_enreg,nfft,ngfft,ngrad,nspden,paral_kgb,qphon,rhordgtmp,rhodgnow)
-!    ABI_DEALLOCATE(rhordgtmp)
-!  end if
 
 !Add to the gradients of the first-order density
  do ii=2,4
@@ -257,9 +237,9 @@ subroutine dfpt_mkvxcstrgga(cplex,dgprimdds,gprimd,istr,kxc,mpi_enreg,nfft,ngfft
      r1_up(:)=rho1now(ir,1,2:4)   ! grad of spin-up rho1
      r1_dn(:)=rho1now(ir,2,2:4)   ! grad of spin-down rho1
      r1(:)=r1_up(:)+r1_dn(:)      ! grad of GS rho1
-     gradrho_gradrho1_up=r1_up(1)*r0_up(1)+r1_up(2)*r0_up(2)+r1_up(3)*r0_up(3)
-     gradrho_gradrho1_dn=r1_dn(1)*r0_dn(1)+r1_dn(2)*r0_dn(2)+r1_dn(3)*r0_dn(3)
-     gradrho_gradrho1   =r1(1)*r0(1)+r1(2)*r0(2)+r1(3)*r0(3)
+     gradrho_gradrho1_up=dot_product(r0_up,r1_up)
+     gradrho_gradrho1_dn=dot_product(r0_dn,r1_dn)
+     gradrho_gradrho1   =dot_product(r0,r1)
 
      dnexcdn(ir,1)=(kxc(ir,1)+kxc(ir,9))*rho1now(ir,1,1)+&
 &     kxc(ir,10)*rho1now(ir,2,1)+&

@@ -1090,16 +1090,25 @@ subroutine pawxc(corexc,enxc,enxcdc,ixc,kxc,lm_size,lmselect,nhat,nkxc,nrad,nspd
          kxc(1:nrad,ipts,1)=dvxci(1:nrad,1)+dvxci(1:nrad,9)
          kxc(1:nrad,ipts,2)=dvxci(1:nrad,10)
          kxc(1:nrad,ipts,3)=dvxci(1:nrad,2)+dvxci(1:nrad,11)
+       else if (nkxc==7.and.ndvxc==8) then
+         kxc(1:nrad,ipts,1)=half*dvxci(1:nrad,1)
+         kxc(1:nrad,ipts,2)=half*dvxci(1:nrad,3)
+         kxc(1:nrad,ipts,3)=quarter*dvxci(1:nrad,5)
+         kxc(1:nrad,ipts,4)=eighth*dvxci(1:nrad,7)
        else if (nkxc==7.and.ndvxc==15) then
          kxc(1:nrad,ipts,1)=half*(dvxci(1:nrad,1)+dvxci(1:nrad,9)+dvxci(1:nrad,10))
          kxc(1:nrad,ipts,2)=half*dvxci(1:nrad,3)+dvxci(1:nrad,12)
          kxc(1:nrad,ipts,3)=quarter*dvxci(1:nrad,5)+dvxci(1:nrad,13)
          kxc(1:nrad,ipts,4)=eighth*dvxci(1:nrad,7)+dvxci(1:nrad,15)
+       else ! Other cases
+         kxc(1:nrad,ipts,1:nkxc)=zero
+         kxc(1:nrad,ipts,1:min(nkxc,ndvxc))=dvxci(1:nrad,1:min(nkxc,ndvxc))
+       end if
+       if (nkxc==7) then
          kxc(1:nrad,ipts,5)=rhonow(1:nrad,1,2)
          kxc(1:nrad,ipts,6)=rhonow(1:nrad,1,3)
          kxc(1:nrad,ipts,7)=rhonow(1:nrad,1,4)
-       else if (nkxc==23.and.ndvxc==15) then
-         kxc(1:nrad,ipts,1:15)=dvxci(1:nrad,1:15)
+       else if (nkxc==23) then
          kxc(1:nrad,ipts,16)=rhonow(1:nrad,1,1)
          kxc(1:nrad,ipts,17)=rhonow(1:nrad,2,1)
          kxc(1:nrad,ipts,18)=rhonow(1:nrad,1,2)
@@ -1108,9 +1117,6 @@ subroutine pawxc(corexc,enxc,enxcdc,ixc,kxc,lm_size,lmselect,nhat,nkxc,nrad,nspd
          kxc(1:nrad,ipts,21)=rhonow(1:nrad,2,3)
          kxc(1:nrad,ipts,22)=rhonow(1:nrad,1,4)
          kxc(1:nrad,ipts,23)=rhonow(1:nrad,2,4)
-       else
-         kxc(1:nrad,ipts,1:nkxc)=zero
-         kxc(1:nrad,ipts,1:min(nkxc,ndvxc))=dvxci(1:nrad,1:min(nkxc,ndvxc))
        end if
      end if
 
@@ -2141,8 +2147,8 @@ subroutine pawxc3(corexc1,cplex_den,cplex_vxc,d2enxc,ixc,kxc,lm_size,lmselect,nh
            g0_up(3)=kxc(ir,ipts,23);g0_dn(3)=kxc(ir,ipts,22)-kxc(ir,ipts,23)
            g1_up(:)=grho1_updn(jr,1,:);g1_dn(:)=grho1_updn(jr,2,:)
            g0(:)=g0_up(:)+g0_dn(:);g1(:)=g1_up(:)+g1_dn(:)
-           grho_grho1_up=dot_product(g0,g1_up)
-           grho_grho1_dn=dot_product(g0,g1_dn)
+           grho_grho1_up=dot_product(g0_up,g1_up)
+           grho_grho1_dn=dot_product(g0_dn,g1_dn)
            grho_grho1   =dot_product(g0,g1)
            coeff_grho_corr=kxc(ir,ipts,13)*rho1_updn(jr,1) &
 &                         +kxc(ir,ipts,14)*rho1_updn(jr,2) &
@@ -2180,8 +2186,8 @@ subroutine pawxc3(corexc1,cplex_den,cplex_vxc,d2enxc,ixc,kxc,lm_size,lmselect,nh
            if (cplex_vxc==2) then
              if (cplex_den==2) then
                g1im_up(:)=grho1_updn(jr+1,1,:);g1im_dn(:)=grho1_updn(jr+1,2,:)
-               grho_grho1im_up=dot_product(g0,g1im_up)
-               grho_grho1im_dn=dot_product(g0,g1im_dn)
+               grho_grho1im_up=dot_product(g0_up,g1im_up)
+               grho_grho1im_dn=dot_product(g0_dn,g1im_dn)
                grho_grho1im   =dot_product(g0,g1im)
                coeff_grhoim_corr=kxc(ir,ipts,13)*rho1_updn(jr+1,1) &
 &                               +kxc(ir,ipts,14)*rho1_updn(jr+1,2) &
@@ -2613,16 +2619,25 @@ end subroutine pawxc3
      kxc(1:nrad,1)=dvxci(1:nrad,1)+dvxci(1:nrad,9)
      kxc(1:nrad,2)=dvxci(1:nrad,10)
      kxc(1:nrad,3)=dvxci(1:nrad,2)+dvxci(1:nrad,11)
+   else if (nkxc==7.and.ndvxc==8) then
+     kxc(1:nrad,1)=half*dvxci(1:nrad,1)
+     kxc(1:nrad,2)=half*dvxci(1:nrad,3)
+     kxc(1:nrad,3)=quarter*dvxci(1:nrad,5)
+     kxc(1:nrad,4)=eighth*dvxci(1:nrad,7)
    else if (nkxc==7.and.ndvxc==15) then
      kxc(1:nrad,1)=half*(dvxci(1:nrad,1)+dvxci(1:nrad,9)+dvxci(1:nrad,10))
      kxc(1:nrad,2)=half*dvxci(1:nrad,3)+dvxci(1:nrad,12)
      kxc(1:nrad,3)=quarter*dvxci(1:nrad,5)+dvxci(1:nrad,13)
      kxc(1:nrad,4)=eighth*dvxci(1:nrad,7)+dvxci(1:nrad,15)
+   else ! Other cases
+     kxc(1:nrad,1:nkxc)=zero
+     kxc(1:nrad,1:min(nkxc,ndvxc))=dvxci(1:nrad,1:min(nkxc,ndvxc))
+   end if
+   if (nkxc==7) then
      kxc(1:nrad,5)=grho_updn(1:nrad,1)  ! Not correct
      kxc(1:nrad,6)=grho_updn(1:nrad,1)  ! Not correct
      kxc(1:nrad,7)=grho_updn(1:nrad,1)  ! Not correct
-   else if (nkxc==23.and.ndvxc==15) then
-     kxc(1:nrad,1:15)=dvxci(1:nrad,1:15)
+   else if (nkxc==23) then
      kxc(1:nrad,16)=rho_updn(1:nrad,1)  ! Not correct
      kxc(1:nrad,17)=rho_updn(1:nrad,2)  ! Not correct
      kxc(1:nrad,18)=grho_updn(1:nrad,1) ! Not correct
@@ -2631,9 +2646,6 @@ end subroutine pawxc3
      kxc(1:nrad,21)=grho_updn(1:nrad,2) ! Not correct
      kxc(1:nrad,22)=grho_updn(1:nrad,1) ! Not correct
      kxc(1:nrad,23)=grho_updn(1:nrad,2) ! Not correct
-   else
-     kxc(1:nrad,1:nkxc)=zero
-     kxc(1:nrad,1:min(nkxc,ndvxc))=dvxci(1:nrad,1:min(nkxc,ndvxc))
    end if
  end if
  LIBPAW_DEALLOCATE(dvxci)
@@ -2898,16 +2910,25 @@ subroutine pawxcsph3(cplex_den,cplex_vxc,ixc,nrad,nspden,pawrad,rho_updn,rho1_up
      kxc(1:nrad,1)=dvxc(1:nrad,1)+dvxc(1:nrad,9)
      kxc(1:nrad,2)=dvxc(1:nrad,10)
      kxc(1:nrad,3)=dvxc(1:nrad,2)+dvxc(1:nrad,11)
+   else if (nkxc==7.and.ndvxc==8) then
+     kxc(1:nrad,1)=half*dvxc(1:nrad,1)
+     kxc(1:nrad,2)=half*dvxc(1:nrad,3)
+     kxc(1:nrad,3)=quarter*dvxc(1:nrad,5)
+     kxc(1:nrad,4)=eighth*dvxc(1:nrad,7)
    else if (nkxc==7.and.ndvxc==15) then
      kxc(1:nrad,1)=half*(dvxc(1:nrad,1)+dvxc(1:nrad,9)+dvxc(1:nrad,10))
      kxc(1:nrad,2)=half*dvxc(1:nrad,3)+dvxc(1:nrad,12)
      kxc(1:nrad,3)=quarter*dvxc(1:nrad,5)+dvxc(1:nrad,13)
      kxc(1:nrad,4)=eighth*dvxc(1:nrad,7)+dvxc(1:nrad,15)
+   else ! Other cases
+     kxc(1:nrad,1:nkxc)=zero
+     kxc(1:nrad,1:min(nkxc,ndvxc))=dvxc(1:nrad,1:min(nkxc,ndvxc))
+   end if
+   if (nkxc==7) then
      kxc(1:nrad,5)=zero ! Not correct
      kxc(1:nrad,6)=zero ! Not correct
      kxc(1:nrad,7)=zero ! Not correct
-   else if (nkxc==23.and.ndvxc==15) then
-     kxc(1:nrad,1:15)=dvxc(1:nrad,1:15)
+   else if (nkxc==23) then
      kxc(1:nrad,16)=zero ! Not correct
      kxc(1:nrad,17)=zero ! Not correct
      kxc(1:nrad,18)=zero ! Not correct
@@ -2916,9 +2937,6 @@ subroutine pawxcsph3(cplex_den,cplex_vxc,ixc,nrad,nspden,pawrad,rho_updn,rho1_up
      kxc(1:nrad,21)=zero ! Not correct
      kxc(1:nrad,22)=zero ! Not correct
      kxc(1:nrad,23)=zero ! Not correct
-   else
-     kxc(1:nrad,1:nkxc)=zero
-     kxc(1:nrad,1:min(nkxc,ndvxc))=dvxc(1:nrad,1:min(nkxc,ndvxc))
    end if
  end if
 
