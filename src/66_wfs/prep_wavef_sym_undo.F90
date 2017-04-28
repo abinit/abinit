@@ -137,12 +137,12 @@ subroutine prep_wavef_sym_undo(mpi_enreg,bandpp,nspinor,&
 !---------------------------------------------
 !Initialisation
 !---------------------------------------------
- !gwavef_alltoall_loc(:,:) =0.
+ gwavef_alltoall_loc(:,:) =0.
 
- !sendcounts_sym_loc(:) =0
- !sdispls_sym_loc(:)    =0
- !recvcounts_sym_loc(:) =0
- !rdispls_sym_loc(:)    =0
+ sendcounts_sym_loc(:) =0
+ sdispls_sym_loc(:)    =0
+ recvcounts_sym_loc(:) =0
+ rdispls_sym_loc(:)    =0
 
 
 !-------------------------------------------------
