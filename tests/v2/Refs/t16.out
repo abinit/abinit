@@ -1014,7 +1014,7 @@ iatom,iwchan,igqpt2(i),gij error=   3  1     4     4     4   0.00000
  DOS  with channel width=    9 newly converged
    with maximal error =    0.24759
 
- # At  T     F(J/mol-c)     E(J/mol-c)     S(J/(mol-c.K)) C(J/(mol-c.K))
+ # At  T     F(J/mol-c)     E(J/mol-c)     S(J/(mol-c.K)) C(J/(mol-c.K)) Omega_mean(cm-1)
  # (A mol-c is the abbreviation of a mole-cell, that is, the
  #  number of Avogadro times the atoms in a unit cell)
   1.000E+02  1.1662437E+04  1.2467634E+04  8.0519720E+00  1.5027127E+01  1.9740982E+02

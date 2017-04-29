@@ -231,7 +231,7 @@ Values initialized with zeros
 
  Debye frequency from partial sums:     0.5262667706E-02 (Ha)
 -                                 =     0.3462669009E+02 (THz)
- Debye temperature from partial sums:     0.1661817053E+04 (K)
+-Debye temperature from partial sums:     0.1661817053E+04 (K)
 
 - Writing phonon DOS to file: t44o_DS1_PHDOS
 qpoint: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] is present in the DVDB file
@@ -370,7 +370,7 @@ Values initialized with zeros
 
  Debye frequency from partial sums:     0.5262667706E-02 (Ha)
 -                                 =     0.3462669009E+02 (THz)
- Debye temperature from partial sums:     0.1661817053E+04 (K)
+-Debye temperature from partial sums:     0.1661817053E+04 (K)
 
 - Writing phonon DOS to file: t44o_DS2_PHDOS
 qpoint: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] is present in the DVDB file

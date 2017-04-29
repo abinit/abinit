@@ -407,7 +407,7 @@ implicit none
  call wrtout (std_out,msg,"COLL")
 
 ! Debye temperature = hbar * Debye frequency / kb
- write (msg,'(a,E20.10,2a)') ' Debye temperature from DOS: ', debyefreq*Ha_K, ' (K)', ch10
+ write (msg,'(a,E20.10,2a)') '-Debye temperature from DOS: ', debyefreq*Ha_K, ' (K)', ch10
  call wrtout (ab_out,msg,"COLL")
  call wrtout (std_out,msg,"COLL")
 
@@ -1014,7 +1014,7 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,dos_qsh
      call wrtout (std_out,msg,"COLL")
 
 ! Debye temperature = hbar * Debye frequency / kb
-     write (msg,'(a,E20.10,2a)') ' Debye temperature from partial sums: ', debyefreq*Ha_K, ' (K)', ch10
+     write (msg,'(a,E20.10,2a)') '-Debye temperature from partial sums: ', debyefreq*Ha_K, ' (K)', ch10
      call wrtout (ab_out,msg,"COLL")
      call wrtout (std_out,msg,"COLL")
    end if

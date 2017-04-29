@@ -889,7 +889,7 @@
  is reduced to   770 .
  DOS  with channel width=    5               :
 
- # At  T     F(J/mol-c)     E(J/mol-c)     S(J/(mol-c.K)) C(J/(mol-c.K))
+ # At  T     F(J/mol-c)     E(J/mol-c)     S(J/(mol-c.K)) C(J/(mol-c.K)) Omega_mean(cm-1)
  # (A mol-c is the abbreviation of a mole-cell, that is, the
  #  number of Avogadro times the atoms in a unit cell)
   1.000E+02  8.9266489E+04  9.2214173E+04  2.9476841E+01  4.7619794E+01  1.8754572E+02
