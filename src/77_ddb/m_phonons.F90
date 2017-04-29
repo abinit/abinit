@@ -511,12 +511,12 @@ implicit none
    do iomega=1,PHdos%nomega
 
 !    wover2t= hbar*w / 2kT dimensionless
-     wover2t = 1.e200_dp; if(tmp > tol14) wover2t=PHdos%omega(iomega)*half/tmp
-     expmx=zero;         if (abs(wover2t) < 600._dp) expmx=exp(-wover2t)
+     wover2t = zero;     if(tmp > tol14) wover2t=PHdos%omega(iomega)*half/tmp
+     !expmx=zero;         if (abs(wover2t) < 600._dp) expmx=exp(-wover2t)
      ! should not be much of a problem for the log, but still put a check.
-     ln2shx=zero;        if (wover2t > tol8 .and. wover2t < 100.0_dp) ln2shx=log(two * sinh(wover2t)) !wover2t+log(one-expmx)
-     cothx=zero;         if (abs(one-expmx) > tol14) cothx=one/tanh(wover2t) !(one+expmx)/(one-expmx)
-     invsinh2=zero;      if (wover2t < 100.0_dp) invsinh2=one/sinh(wover2t)**2
+     ln2shx=zero;        if (wover2t > tol16 .and. wover2t < 100.0_dp) ln2shx=log(two * sinh(wover2t)) !wover2t+log(one-expmx)
+     cothx=zero;         if (wover2t > tol16) cothx=one/tanh(wover2t) !(one+expmx)/(one-expmx)
+     invsinh2=zero;      if (wover2t > tol16 .and. wover2t < 100.0_dp) invsinh2=one/sinh(wover2t)**2
 
 !    This matches the equations published in Lee & Gonze, PRB 51, 8610 (1995)
      free(itemper)   = free(itemper)    + PHdos%phdos(iomega)*tmp*ln2shx
