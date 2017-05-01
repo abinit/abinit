@@ -47,8 +47,8 @@ toldfe3 1.0d-7
 diemac 12.0  
 
 #Definition of the Hartree-Fock calculation
-ixc2 -428           # Calculation with PBE0 functional
-ixc3 -427           # Calculation with PBE0 functional
+ixc2 -428           # Calculation with HSE06 functional
+ixc3 -427           # Calculation with HSE03 functional
 getwfk -1        # Start from previous wavefunctions to ease convergence
 
 #Additional (and facultative) variables for Hartree-Fock
@@ -68,4 +68,6 @@ nbandhf  4         # number of occupied states
 #%% authors = X. Gonze, C. Martins
 #%% keywords = HF, FAILS_IFMPI
 #%% description = Test of HSE06 and HSE03 in sequential case, norm conserving, from LibXC
+#%%  XG170501 : I would have expected HSE06 and HSE03 total energies to be quite close to each other, which is not true,
+#%%  as LDA gives -7.867332Ha, HSE06 gives -7.887495 Ha and HSE03 gives -7.963222 Ha . Might be a problem ?
 #%%<END TEST_INFO>

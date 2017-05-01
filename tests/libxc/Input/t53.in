@@ -1,7 +1,7 @@
 # Crystalline diamond : computation of the total energy
 #
 
-ndtset 2         # Two datasets : 1) LDA 2) HSE06 with PAW, just one step.
+ndtset 2         # Two datasets : 1) GGA 2) HSE06 with PAW, just one step.
 
 #Definition of the unit cell
 acell 3*6.740652601    # Data from PRB 48, 5058
