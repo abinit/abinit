@@ -469,11 +469,11 @@ implicit none
 !arrays
  real(dp), allocatable :: free(:), energy(:), entropy(:), spheat(:),wme(:)
 
- ABI_ALLOCATE(free,    (PHdos%nomega))
- ABI_ALLOCATE(energy,  (PHdos%nomega))
- ABI_ALLOCATE(entropy, (PHdos%nomega))
- ABI_ALLOCATE(spheat,  (PHdos%nomega))
- ABI_ALLOCATE(wme,     (PHdos%nomega))
+ ABI_ALLOCATE(free,    (ntemper))
+ ABI_ALLOCATE(energy,  (ntemper))
+ ABI_ALLOCATE(entropy, (ntemper))
+ ABI_ALLOCATE(spheat,  (ntemper))
+ ABI_ALLOCATE(wme,     (ntemper))
 
 !Put zeroes for F, E, S, Cv
  free(:)=zero
