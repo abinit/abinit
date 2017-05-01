@@ -227,10 +227,10 @@ program anaddb
    NCF_CHECK(nctk_def_dims(ana_ncid, [nctkdim_t('number_of_phonon_modes', 3*natom)],defmode=.True.))
    NCF_CHECK(nctk_defnwrite_ivars(ana_ncid, ["anaddb_version"], [1]))
    NCF_CHECK(crystal_ncwrite(crystal, ana_ncid))
-   ncerr = nctk_def_arrays(ana_ncid, [nctkarr_t('atomic_mass_units', "dp", "number_of_atom_species")],defmode=.True.)
-   NCF_CHECK(ncerr)
-   NCF_CHECK(nctk_set_datamode(ana_ncid))
-   NCF_CHECK(nf90_put_var(ana_ncid, nctk_idname(ana_ncid, 'atomic_mass_units'), ddb%amu))
+   !ncerr = nctk_def_arrays(ana_ncid, [nctkarr_t('atomic_mass_units', "dp", "number_of_atom_species")],defmode=.True.)
+   !NCF_CHECK(ncerr)
+   !NCF_CHECK(nctk_set_datamode(ana_ncid))
+   !NCF_CHECK(nf90_put_var(ana_ncid, nctk_idname(ana_ncid, 'atomic_mass_units'), ddb%amu))
 #endif
  end if
 
