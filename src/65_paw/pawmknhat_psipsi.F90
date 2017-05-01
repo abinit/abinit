@@ -47,7 +47,7 @@
 !!  === if ider=1 or 2
 !!    grnhat12(nfft,nspinor**2,3)=gradient of (nhat*exp(iqr)) on fine rectangular grid (derivative versus r)
 !!  === if ider=3
-!!    grnhat_12(nfft,nspinor**2,3)=derivatives of nhat on fine rectangular grid versus R*exp(iqr)
+!!    grnhat_12(nfft,nspinor**2,3,natom*(ider/3))=derivatives of nhat on fine rectangular grid versus R*exp(iqr)
 !!
 !! PARENTS
 !!      calc_sigx_me,fock_getghc,prep_calc_ucrpa
