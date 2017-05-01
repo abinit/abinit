@@ -1,4 +1,4 @@
-# Crystalline silicon : computation of the total energy using HSE06 functional
+# Crystalline silicon : computation of the total energy using PBE0 functional
 # Norm-conserving. Check forces and stresses.
 
 ndtset 3         #  First LDA, then PBE0 from LibXC, then native ABINIT PBE0
@@ -47,7 +47,7 @@ toldfe3 1.0d-7
 diemac 12.0  
 
 #Definition of the Hartree-Fock calculation
-ixc2 -456           # Calculation with PBE0 functional
+ixc2 -406           # Calculation with PBE0 functional
 ixc3 41             # Calculation with PBE0 functional
 getwfk -1        # Start from previous wavefunctions to ease convergence
 
