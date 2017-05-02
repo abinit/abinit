@@ -190,6 +190,8 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  real(dp),allocatable :: subham(:),subovl(:),subvnl(:),totvnl(:,:),wfraug(:,:,:,:)
  type(pawcprj_type),allocatable :: cwaveprj(:,:)
 
+
+
 ! **********************************************************************
 
  DBG_ENTER("COLL")
@@ -201,7 +203,6 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
    write(message,'(80a,a,a)') ('=',ii=1,80),ch10,'vtowfk : enter'
    call wrtout(std_out,message,'PERS')
  end if
-
 
 
 !=========================================================================
@@ -491,10 +492,8 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
    choice=2*optforces
    paw_opt=2;cpopt=0;tim_nonlop=10-8*optforces
    if (dtset%usefock==1) then
-     if (dtset%optforces/= 0 .and. dtset%optstress == 0) then
+     if (dtset%optforces/= 0) then
        choice=2;cpopt=1; nnlout=3*natom
-!     else if (dtset%optstress /= 0) then
-!       choice=23;cpopt=4 ;nnlout=6+3*natom
      end if
    end if
  end if

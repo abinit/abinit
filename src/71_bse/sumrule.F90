@@ -269,7 +269,11 @@ subroutine check_fsumrule(n,o,e2,omegaplasma)
  end do
 
  integral = real(simpson_cplx(n,domega,intg))
- omegaplasmaeff = sqrt(integral*two/pi)
+ if(integral < 0) then
+   MSG_ERROR("The integral of the imaginary of dielectric function is negative !!!")
+ else
+   omegaplasmaeff = sqrt(integral*two/pi)
+ end if
 
  fsumrule = abs((omegaplasmaeff - omegaplasma)) / omegaplasma
 

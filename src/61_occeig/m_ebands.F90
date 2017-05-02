@@ -876,6 +876,9 @@ subroutine ebands_free(ebands)
  if (allocated(ebands%eig)) then
    ABI_FREE(ebands%eig)
  end if
+ if (allocated(ebands%lifetime)) then
+   ABI_FREE(ebands%lifetime)
+ end if
  if (allocated(ebands%occ)) then
    ABI_FREE(ebands%occ)
  end if
@@ -976,6 +979,10 @@ subroutine ebands_copy(ibands,obands)
  call alloc_copy(ibands%wtk   , obands%wtk   )
  call alloc_copy(ibands%shiftk_orig, obands%shiftk_orig)
  call alloc_copy(ibands%shiftk, obands%shiftk)
+
+ if(allocated(ibands%lifetime)) then
+   call alloc_copy(ibands%lifetime, obands%lifetime)  
+ end if
 
 end subroutine ebands_copy
 !!***
@@ -2744,22 +2751,7 @@ integer function ebands_ncwrite(ebands,ncid) result(ncerr)
 
 ! *************************************************************************
 
- select case (ebands%occopt)
- case (3)
-   smearing = "Fermi-Dirac"
- case (4)
-   smearing = "cold smearing of N. Marzari with minimization of the bump"
- case (5)
-   smearing = "cold smearing of N. Marzari with monotonic function in the tail"
- case (6)
-   smearing = "Methfessel and Paxton"
- case (7)
-   smearing = "gaussian"
- case (8)
-   smearing = "uniform"
- case default
-   smearing = "none"
- end select
+ smearing = nctk_string_from_occopt(ebands%occopt)
 
  ! ==============================================
  ! === Write the dimensions specified by ETSF ===

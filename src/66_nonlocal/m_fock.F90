@@ -251,6 +251,10 @@ module m_fock
     ! edc(mkpt*nband)
     ! double counting energy for each band and kpoint
 
+ real(dp), allocatable  :: ffnl_str(:,:,:,:)
+    ! ffnl_str(npw,dimffnl,lmnmax,ntypat)
+    ! nonlocal form factors for stresses calculation
+
   real(dp), allocatable :: occ_bz(:,:)
     ! occ_bz(mkptband,my_nsppol))
     ! occupancy of each bands at each k point 
@@ -295,6 +299,7 @@ module m_fock
   type(pawfgr_type),pointer :: pawfgr 
   type(pawfgrtab_type),allocatable :: pawfgrtab(:)
   type(pawcprj_type), allocatable :: cwaveocc_prj(:,:)
+  type(pawrhoij_type),pointer :: pawrhoij(:)
     ! (natom,mcprj))
 
  end type fock_type
@@ -728,12 +733,8 @@ subroutine fock_init(atindx,cplex,dtset,fock,gsqcut,indsym,kg,mpi_enreg,nattyp,n
      ABI_ALLOCATE(dimcprj,(dtset%natom))
      call pawcprj_getdim(dimcprj,dtset%natom,nattyp,dtset%ntypat,dtset%typat,pawtab,'O')
      ncpgr = 0
- !    if (dtset%optforces/= 0 .and. dtset%optstress == 0) then
-     if (dtset%optforces/= 0) then
-       ncpgr = 3 
- !    else if (dtset%optstress /= 0) then
- !      ncpgr = 9 
-     end if
+     if (dtset%optforces/= 0) ncpgr = 3 
+     if (dtset%optstress /= 0) ncpgr = 6 
      call pawcprj_alloc(fock%cwaveocc_prj,ncpgr,dimcprj)
      ABI_DEALLOCATE(dimcprj)
      ABI_ALLOCATE(fock%edc,(fock%mkpt*nband))
@@ -1015,6 +1016,7 @@ subroutine fock_init(atindx,cplex,dtset,fock,gsqcut,indsym,kg,mpi_enreg,nattyp,n
    end do
    ABI_ALLOCATE(fock%symrec,(3,3,dtset%nsym))
    fock%symrec=symrec
+
    ABI_ALLOCATE(invsym,(dtset%nsym))
    invsym=0
    ident(1,:3)=(/1,0,0/)
@@ -1478,6 +1480,9 @@ subroutine fock_destroy(fock)
  if (allocated(fock%edc)) then
     ABI_DEALLOCATE(fock%edc)
  endif
+ if (allocated(fock%ffnl_str)) then
+    ABI_DEALLOCATE(fock%ffnl_str)
+ endif
  ! Put the integer to 0
  fock%ieigen=0
  fock%ikpt=0
@@ -1786,12 +1791,8 @@ subroutine fock_updatecwaveocc(cg,cprj,dtset,fock,fock_energy,indsym,istep,mcg,m
        ABI_ALLOCATE(dimlmn,(dtset%natom))
        call pawcprj_getdim(dimlmn,dtset%natom,nattyp,dtset%ntypat,dtset%typat,fock%pawtab,"O")
        ncpgr = 0
-       if (dtset%optforces/= 0 .and. dtset%optstress == 0) then
-!       if (dtset%optforces/= 0) then 
-         ncpgr = 3 
-!       else if (dtset%optstress /= 0) then
-!         ncpgr = 9 
-       end if
+       if (dtset%optforces/= 0) ncpgr = 3 
+       if (dtset%optstress /= 0) ncpgr = 6 
        call pawcprj_alloc(cprj_tmp,ncpgr,dimlmn)
 
        lmnmax=maxval(fock%pawtab(:)%lmn_size)
@@ -1818,7 +1819,6 @@ subroutine fock_updatecwaveocc(cg,cprj,dtset,fock,fock_energy,indsym,istep,mcg,m
            indsym_(4,:,iatm)=fock%atindx(indsym(4,:,iatom))
        end do
        end if
-
      end if
 
 ! Local variables to perform FFT
@@ -2325,7 +2325,6 @@ subroutine bare_vqg(qphon,gsqcut,gmet,izero,hybrid_mixing,hybrid_mixing_sr,hybri
 !Treatment of the divergence at q+g=zero
 !For the time being, only Spencer-Alavi scheme...
  rcut= (three*nkpt_bz*ucvol/four_pi)**(one/three)
-! rcut=4.72d0
  divgq0= two_pi*rcut**two
 !divgq0=zero
 !Initialize a few quantities
@@ -2400,6 +2399,7 @@ subroutine bare_vqg(qphon,gsqcut,gmet,izero,hybrid_mixing,hybrid_mixing_sr,hybri
 !        Spencer-Alavi screening
          if (abs(hybrid_mixing)>tol8) &
 &          vqg(ii)=vqg(ii)+hybrid_mixing*den*(one-cos(rcut*sqrt(four_pi/den)))
+!&          vqg(ii)=vqg(ii)+hybrid_mixing*den
 !        Erfc screening
          if (abs(hybrid_mixing_sr)>tol8) &
 &          vqg(ii)=vqg(ii)+hybrid_mixing_sr*den*(one-exp(-pi/(den*hybrid_range**2)))
@@ -2455,7 +2455,6 @@ end subroutine bare_vqg
 !! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! INPUTS
-!!  efock=Fock energy (hartree)
 !!  gsqcut=cutoff value on $G^2$ for (large) sphere inside fft box.
 !!  $gsqcut=(boxcut^2)*ecut/(2._dp*(\pi^2))$
 !!  gprimd(3,3)=reciprocal space dimensional primitive translations
@@ -2468,7 +2467,7 @@ end subroutine bare_vqg
 !!  nkpt_bz= number of k points in the BZ
 !!  qphon(3)=reduced coordinates for the phonon wavelength (needed if cplex==2).
 !!  rhog(2,nfft)=Fourier transform of charge density (bohr^-3)
-!!  rhog(2,nfft)= optional argument: Fourier transform of a second charge density (bohr^-3)
+!!  rhog2(2,nfft)= optional argument: Fourier transform of a second charge density (bohr^-3)
 !!  ucvol=unit cell volume (bohr^3)
 !!  vqg(nfft)=4pi/(G+q)**2
 !!
@@ -2493,7 +2492,7 @@ end subroutine bare_vqg
 #include "abi_common.h"
 
 
-subroutine strfock(efock,gprimd,gsqcut,fockstr,hybrid_mixing,hybrid_mixing_sr,hybrid_range,mpi_enreg,nfft,ngfft,&
+subroutine strfock(gprimd,gsqcut,fockstr,hybrid_mixing,hybrid_mixing_sr,hybrid_range,mpi_enreg,nfft,ngfft,&
 &                  nkpt_bz,rhog,ucvol,qphon,&
 &                 rhog2) ! optional argument
 
@@ -2510,7 +2509,7 @@ subroutine strfock(efock,gprimd,gsqcut,fockstr,hybrid_mixing,hybrid_mixing_sr,hy
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nfft,nkpt_bz
- real(dp),intent(in) :: efock,gsqcut,hybrid_mixing,hybrid_mixing_sr,hybrid_range,ucvol
+ real(dp),intent(in) :: gsqcut,hybrid_mixing,hybrid_mixing_sr,hybrid_range,ucvol
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: ngfft(18)
@@ -2539,12 +2538,10 @@ subroutine strfock(efock,gprimd,gsqcut,fockstr,hybrid_mixing,hybrid_mixing_sr,hy
  end if
 
  fockstr(:)=zero
-!ehtest=0.0_dp (used for testing)
  rcut= (three*nkpt_bz*ucvol/four_pi)**(one/three)
-!rcut=4.72d0
  irho2=0;if (present(rhog2)) irho2=1
-! divgq0=four_pi/three*rcut**2
-divgq0=zero
+ divgq0=two_pi/three*rcut**2
+
 !Conduct looping over all fft grid points to find G vecs inside gsqcut
 !Include G**2 on surface of cutoff sphere as well as inside:
  cutoff=gsqcut*tolfix
@@ -2568,39 +2565,38 @@ divgq0=zero
        do i1=1,n1
          tot=zero; tot1=zero
          ig1=i1-(i1/id1)*n1-1
-!        ii=ii+1
          ii=i1+n1*(ffti2_local(i2)-1+(n2/nproc_fft)*(i3-1))
-!        **     GET RID OF THIS IF STATEMENT LATER for speed if needed
-!        Avoid G=0:
-!        if (ii>1) then
-!         if (nint(ig1+qphon(1))==0 .and. nint(ig2+qphon(2))==0 .and. nint(ig3+qphon(3))==0) cycle
+
 !        Compute cartesian components of G
          gcart(1)=gprimd(1,1)*(dble(ig1)+qphon(1))+gprimd(1,2)*(dble(ig2)+qphon(2))+gprimd(1,3)*(dble(ig3)+qphon(3))
          gcart(2)=gprimd(2,1)*(dble(ig1)+qphon(1))+gprimd(2,2)*(dble(ig2)+qphon(2))+gprimd(2,3)*(dble(ig3)+qphon(3))
          gcart(3)=gprimd(3,1)*(dble(ig1)+qphon(1))+gprimd(3,2)*(dble(ig2)+qphon(2))+gprimd(3,3)*(dble(ig3)+qphon(3))
 !        Compute |G+q|^2
          gsquar=gcart(1)**2+gcart(2)**2+gcart(3)**2
-         if(gsquar<tol10) then 
-           if (abs(hybrid_mixing_sr)>tol8) cycle
-           if (abs(hybrid_mixing)>tol8) then
-             fockstr(1)=divgq0
-             fockstr(2)=divgq0
-             fockstr(3)=divgq0
-             cycle
-           end if
-         end if
 !        take |rho(G)|^2 for complex rhog
          if (irho2==0) then
            rhogsq=rhog(re,ii)**2+rhog(im,ii)**2
          else
            rhogsq=rhog(re,ii)*rhog2(re,ii)+rhog(im,ii)*rhog2(im,ii)
          end if
+!        Case G=0:
+         if(gsquar<tol10) then 
+           if (abs(hybrid_mixing_sr)>tol8) cycle
+           if (abs(hybrid_mixing)>tol8) then
+             fockstr(1)=fockstr(1)+hybrid_mixing*divgq0*rhogsq
+             fockstr(2)=fockstr(2)+hybrid_mixing*divgq0*rhogsq
+             fockstr(3)=fockstr(3)+hybrid_mixing*divgq0*rhogsq
+             cycle
+           end if
+         end if
+
 !        Spencer-Alavi screening
          if (abs(hybrid_mixing)>tol8) then
            arg=two_pi*rcut*sqrt(gsquar)
-           tot=tot+hybrid_mixing*rhogsq*piinv/(gsquar**2)*(1-cos(arg)-arg*sin(arg)/two)
-!           tot1=tot1+hybrid_mixing*rhogsq/three*rcut*sin(arg)/sqrt(gsquar)
+           tot=hybrid_mixing*rhogsq*piinv/(gsquar**2)*(1-cos(arg)-arg*sin(arg)/two)
+           tot1=hybrid_mixing*rhogsq/three*rcut*sin(arg)/sqrt(gsquar)
          end if 
+
 !        Erfc screening
          if (abs(hybrid_mixing_sr)>tol8) then
            arg=-gsquar*pi**2/(hybrid_range**2)
@@ -2612,7 +2608,6 @@ divgq0=zero
          fockstr(4)=fockstr(4)+tot*gcart(3)*gcart(2)
          fockstr(5)=fockstr(5)+tot*gcart(3)*gcart(1) 
          fockstr(6)=fockstr(6)+tot*gcart(2)*gcart(1)
-!write (80,*) gcart(1)*gcart(1),gcart(2)*gcart(2),gcart(3)*gcart(3)
        end do
      end if
    end do
@@ -2633,19 +2628,17 @@ divgq0=zero
 #ifdef FC_IBM
 !DO not remove : seems needed to avoid problem with pathscale compiler, in parallel
  write(std_out,*)' strfock : after mpi_comm, fockstr=',fockstr
- write(std_out,*)' strfock : efock,ucvol=',efock,ucvol
 #endif
 
 !Normalize and add term -efock/ucvol on diagonal
 !efock has been set to zero because it is not yet known. It will be added later.
- fockstr(1)=-fockstr(1)-efock/ucvol
- fockstr(2)=-fockstr(2)-efock/ucvol
- fockstr(3)=-fockstr(3)-efock/ucvol
+ fockstr(1)=-fockstr(1)
+ fockstr(2)=-fockstr(2)
+ fockstr(3)=-fockstr(3)
  fockstr(4)=-fockstr(4)
  fockstr(5)=-fockstr(5)
  fockstr(6)=-fockstr(6)
-!write(80,*)hybrid_mixing,hybrid_mixing_sr,divgq0,rcut
-!write(80,*) "strfock", fockstr
+
  call timab(568,2,tsec)
 
 end subroutine strfock

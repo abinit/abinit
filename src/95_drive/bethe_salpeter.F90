@@ -125,6 +125,7 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
  use m_energies,        only : energies_type, energies_init
  use m_haydock,         only : exc_haydock_driver
  use m_exc_diago,       only : exc_diago_driver
+ use m_eprenorms,       only : eprenorms_t, eprenorms_free
  use m_pawang,          only : pawang_type
  use m_pawrad,          only : pawrad_type
  use m_pawtab,          only : pawtab_type, pawtab_print, pawtab_get_lsize
@@ -219,6 +220,7 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
  type(wfd_t) :: Wfd_dense
  type(double_grid_t) :: grid
  type(vcoul_t) :: Vcp_dense
+ type(eprenorms_t) :: Epren
 !arrays
  integer :: ngfft_osc(18),ngfftc(18),ngfftf(18),nrcell(3)
  integer,allocatable :: ktabr(:,:),l_size_atm(:)
@@ -315,7 +317,7 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
 
  ! === Initialization of basic objects including the BSp structure that defines the parameters of the run ===
  call setup_bse(codvsn,acell,rprim,ngfftf,ngfft_osc,Dtset,Dtfil,BS_files,Psps,Pawtab,BSp,&
-& Cryst,Kmesh,Qmesh,KS_BSt,QP_BSt,Hdr_wfk,Gsph_x,Gsph_c,Vcp,Hdr_bse,w_fname,comm,wvl%descr)
+& Cryst,Kmesh,Qmesh,KS_BSt,QP_BSt,Hdr_wfk,Gsph_x,Gsph_c,Vcp,Hdr_bse,w_fname,Epren,comm,wvl%descr)
 
  if (BSp%use_interp) then
    call setup_bse_interp(Dtset,Dtfil,BSp,Cryst,Kmesh,Kmesh_dense,&
@@ -914,42 +916,43 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
  call timab(659,2,tsec) ! bse(make_pawhur_t)
 
  select case (BSp%algorithm)
- case (BSE_ALGO_NONE)
-   MSG_COMMENT("Skipping solution of the BSE equation")
+   case (BSE_ALGO_NONE)
+     MSG_COMMENT("Skipping solution of the BSE equation")
 
- case (BSE_ALGO_DDIAGO, BSE_ALGO_CG)
-   call timab(660,1,tsec) ! bse(exc_diago_driver)
-   call exc_diago_driver(Wfd,Bsp,BS_files,KS_BSt,QP_BSt,Cryst,Kmesh,Psps,Pawtab,Hur,Hdr_bse,drude_plsmf)
-   call timab(660,2,tsec) ! bse(exc_diago_driver)
+   case (BSE_ALGO_DDIAGO, BSE_ALGO_CG)
+     call timab(660,1,tsec) ! bse(exc_diago_driver)
+     call exc_diago_driver(Wfd,Bsp,BS_files,KS_BSt,QP_BSt,Cryst,Kmesh,Psps,&
+&     Pawtab,Hur,Hdr_bse,drude_plsmf,Epren)
+     call timab(660,2,tsec) ! bse(exc_diago_driver)
 
-   if (.FALSE.) then ! Calculate electron-hole excited state density. Not tested at all.
-     call exc_den(BSp,BS_files,ngfftf,nfftf,Kmesh,ktabr,Wfd)
-   end if
+     if (.FALSE.) then ! Calculate electron-hole excited state density. Not tested at all.
+       call exc_den(BSp,BS_files,ngfftf,nfftf,Kmesh,ktabr,Wfd)
+     end if
 
-   if (.FALSE.) then
-     paw_add_onsite=.FALSE.; spin_opt=1; which_fixed=1; eh_rcoord=(/zero,zero,zero/); nrcell=(/2,2,2/)
+     if (.FALSE.) then
+       paw_add_onsite=.FALSE.; spin_opt=1; which_fixed=1; eh_rcoord=(/zero,zero,zero/); nrcell=(/2,2,2/)
 !    call exc_plot(Bsp,Bs_files,Wfd,Kmesh,Cryst,Psps,Pawtab,Pawrad,paw_add_onsite,spin_opt,which_fixed,eh_rcoord,nrcell,ngfftf)
-   end if
+     end if
 
-   if (BSp%use_interp) then
-     MSG_ERROR("Interpolation technique not coded for diagonalization and CG")
-   end if   
+     if (BSp%use_interp) then
+       MSG_ERROR("Interpolation technique not coded for diagonalization and CG")
+     end if   
 
- case (BSE_ALGO_Haydock)
-   call timab(661,1,tsec) ! bse(exc_haydock_driver)
+   case (BSE_ALGO_Haydock)
+     call timab(661,1,tsec) ! bse(exc_haydock_driver)
 
-   if (BSp%use_interp) then
-     
-     call exc_haydock_driver(BSp,BS_files,Cryst,Kmesh,Hdr_bse,KS_BSt,QP_BSt,Wfd,Psps,Pawtab,Hur,&
-&     Kmesh_dense,KS_BSt_dense,QP_BSt_dense,Wfd_dense,Vcp_dense,grid)
-   else
-     call exc_haydock_driver(BSp,BS_files,Cryst,Kmesh,Hdr_bse,KS_BSt,QP_BSt,Wfd,Psps,Pawtab,Hur)
-   end if
+     if (BSp%use_interp) then
+       
+       call exc_haydock_driver(BSp,BS_files,Cryst,Kmesh,Hdr_bse,KS_BSt,QP_BSt,Wfd,Psps,Pawtab,Hur,Epren,&
+&       Kmesh_dense,KS_BSt_dense,QP_BSt_dense,Wfd_dense,Vcp_dense,grid)
+     else
+       call exc_haydock_driver(BSp,BS_files,Cryst,Kmesh,Hdr_bse,KS_BSt,QP_BSt,Wfd,Psps,Pawtab,Hur,Epren)
+     end if
    
-   call timab(661,2,tsec) ! bse(exc_haydock_driver)
- case default
-   write(msg,'(a,i0)')" Wrong BSE algorithm: ",BSp%algorithm
-   MSG_ERROR(msg)
+     call timab(661,2,tsec) ! bse(exc_haydock_driver)
+   case default
+     write(msg,'(a,i0)')" Wrong BSE algorithm: ",BSp%algorithm
+     MSG_ERROR(msg)
  end select
 
  call timab(657,2,tsec) ! bse(mkexceps)
@@ -986,6 +989,7 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
  call bs_parameters_free(BSp)
  call wfd_free(Wfd)
  call pawfgr_destroy(Pawfgr)
+ call eprenorms_free(Epren)
 
  ! Free memory used for interpolation.
  if (BSp%use_interp) then 
