@@ -59,7 +59,7 @@ Alfredo Pasquarello       Alfredo.Pasquarello@epfl.ch
 Guido Petretto            guido.petretto@uclouvain.be
 Valentin Planes           valentinplanes@live.fr
 Samuel Ponce              samuel.ponce@uclouvain.be
-Yann Pouillon             yann.pouillon@ehu.es
+Yann Pouillon             yann.pouillon@materialsevolution.es
 Tonatiuh Rangel           tonatiuh_rangel@hotmail.com
 Vanina Recoules           vanina.recoules@cea.fr
 Fabio Ricci               fabio.ricci@ulg.ac.be
@@ -135,7 +135,7 @@ Tonatiuh Rangel           tonatiuh_rangel@hotmail.com
 Vanina Recoules           vanina.recoules@cea.fr
 Fabio Ricci               fabio.ricci@ulg.ac.be
 Gian-Marco Rignanese      gian-marco.rignanese@uclouvain.be
-Aldo Romero               aromero@qro.cinvestav.mx
+Aldo Romero               Aldo.Romero@mail.wvu.edu
 Bruno Rousseau            bruno.rousseau@umontreal.ca
 Oleg Rubel                orubel@lakeheadu.ca
 Davide Sangalli           davide.sangalli@gmail.com

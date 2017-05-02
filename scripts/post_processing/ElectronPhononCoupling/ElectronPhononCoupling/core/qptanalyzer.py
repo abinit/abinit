@@ -197,6 +197,7 @@ class QptAnalyzer(object):
         # Get reduced displacement (scaled with frequency)
         displ_red_FAN2, displ_red_DDW2 = self.ddb.get_reduced_displ_squared()
 
+        # FIXME this will not work for nsppol=2
         # nmode, nkpt, nband
         fan = einsum('ijklmn,olnkm->oij', self.eigr2d.EIG2D, displ_red_FAN2)
         ddw = einsum('ijklmn,olnkm->oij', self.eigr2d0.EIG2D, displ_red_DDW2)
