@@ -119,7 +119,6 @@ program anaddb
  type(crystal_t) :: Crystal
 #ifdef HAVE_NETCDF
  integer :: phdos_ncid, ec_ncid, ncerr
- integer :: na_phmodes_varid, na_phdispl_varid
 #endif
 
 !******************************************************************
@@ -588,21 +587,8 @@ program anaddb
 
      if (my_rank == master) then
 #ifdef HAVE_NETCDF
-       NCF_CHECK(nctk_def_basedims(ana_ncid, defmode=.True.))
-
-       ncerr = nctk_def_dims(ana_ncid, [nctkdim_t("number_of_non_analytical_directions", nph2l)],defmode=.True.)
-       NCF_CHECK(ncerr)
-
-       ncerr = nctk_def_arrays(ana_ncid, [&
-       nctkarr_t('non_analytical_directions', "dp", "number_of_cartesian_directions, number_of_non_analytical_directions"),&
-       nctkarr_t('non_analytical_phonon_modes', "dp", "number_of_phonon_modes, number_of_non_analytical_directions"),&
-       nctkarr_t('non_analytical_phdispl_cart', "dp", &
-       "complex, number_of_phonon_modes, number_of_phonon_modes, number_of_non_analytical_directions")],&
-       defmode=.True.)
-       NCF_CHECK(ncerr)
-
-       NCF_CHECK(nctk_set_datamode(ana_ncid))
-       NCF_CHECK(nf90_put_var(ana_ncid, nctk_idname(ana_ncid, "non_analytical_directions") ,inp%qph2l))
+       iphl2 = 0
+       call nctk_defwrite_nonanal_terms(ana_ncid, iphl2, nph2l, inp%qph2l, natom, phfrq, displ, "define")
 #endif
      end if
 
@@ -623,12 +609,8 @@ program anaddb
 
        if (my_rank == master) then
 #ifdef HAVE_NETCDF
-         NCF_CHECK(nf90_inq_varid(ana_ncid, "non_analytical_phonon_modes", na_phmodes_varid))
-         NCF_CHECK(nf90_put_var(ana_ncid,na_phmodes_varid,phfrq*Ha_eV,start=[1, iphl2], count=[3*natom, 1]))
-         NCF_CHECK(nf90_inq_varid(ana_ncid, "non_analytical_phdispl_cart", na_phdispl_varid))
-         ncerr = nf90_put_var(ana_ncid,na_phdispl_varid,RESHAPE(displ,[2, 3*natom, 3*natom])*Bohr_Ang,&
-         start=[1,1,1,iphl2], count=[2,3*natom,3*natom, 1])
-         NCF_CHECK(ncerr)
+         ! Loop is not MPI-parallelized --> no need for MPI-IO API.
+         call nctk_defwrite_nonanal_terms(ana_ncid, iphl2, nph2l, inp%qph2l, natom, phfrq, displ, "write")
 #endif
        end if
 
