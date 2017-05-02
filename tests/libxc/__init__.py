@@ -38,7 +38,7 @@ inp_files = [
 "t43.in", 
 "t51.in", 
 "t52.in", 
-"-t53.in",  # Disabled
+"t53.in",  
 "t81.in", 
 "t82.in", 
 ]
