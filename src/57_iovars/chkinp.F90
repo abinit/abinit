@@ -414,6 +414,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
    if(dt%iscf>0)then
      cond_string(1)='iscf';cond_values(1)=dt%iscf
      call chkint_le(0,1,cond_string,cond_values,ierr,'densfor_pred',dt%densfor_pred,6,iout)
+     call chkint_ge(0,1,cond_string,cond_values,ierr,'densfor_pred',dt%densfor_pred,-6,iout)
      if (dt%densfor_pred<0.and.mod(dt%iprcel,100)>=61.and.(dt%iprcel<71.or.dt%iprcel>79)) then
        cond_string(1)='iscf';cond_values(1)=dt%iscf
        cond_string(2)='iprcel';cond_values(2)=dt%iprcel

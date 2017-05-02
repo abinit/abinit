@@ -36,8 +36,8 @@
 !!  option=0 for xc only (exc, vxc, strsxc),
 !!         1 for Hxc (idem + vhartr) ,
 !!         2 for Hxc and kxc (no paramagnetic part if nspden=1)
-!!        10 for xc  and kxc with only LDA part (d2Exc/drho^2)
-!!        12 for Hxc and kxc with only LDA part (d2Exc/drho^2)
+!!        10 for xc  and kxc with only partial derivatives wrt density part (d2Exc/drho^2)
+!!        12 for Hxc and kxc with only partial derivatives wrt density part (d2Exc/drho^2)
 !!         3 for Hxc, kxc and k3xc
 !!        -2 for Hxc and kxc (with paramagnetic part if nspden=1)
 !!  rhog(2,nfft)=electron density in G space

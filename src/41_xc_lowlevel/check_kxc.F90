@@ -58,14 +58,15 @@ subroutine check_kxc(ixc,optdriver)
  kxc_available=.false.
 
  if (ixc>=0) then
-   kxc_available=(ixc/=16.and.ixc/=17.and.ixc/=26.and.ixc/=27)
+   kxc_available=(ixc/=16.and.ixc/=17.and.ixc/=26.and.ixc/=27.and.ixc/=40.and.ixc/=41.and.ixc/=42)
    if (.not.kxc_available) then
      write(msg,'(a,i0,3a)') &
 &     'The selected XC functional (ixc=',ixc,')',ch10,&
 &     'does not provide Kxc (dVxc/drho) !'
    end if
-
- else ! ixc<0
+ else if (ixc==-406.or.ixc==-427.or.ixc==-428.or.ixc==-456)then 
+   kxc_available=.true.
+ else ! ixc<0 and not one of the allowed hybrids
    kxc_available=libxc_functionals_has_kxc()
    if (.not.kxc_available) then
      write(msg,'(a,i0,7a)') &
@@ -85,7 +86,9 @@ subroutine check_kxc(ixc,optdriver)
 &     '>Possible action (2):',ch10,&
 &     'If you are using density mixing for the SCF cycle',ch10,&
 &     '(iscf>=10, which is the default for PAW),',ch10,&
-&     'change to potential mixing (iscf=7, for instance).'
+&     'change to potential mixing (iscf=7, for instance).',ch10,&
+&     '>Possible action (3):',ch10,&
+&     'Switch to another value of densfor_pred (=5, for instance).'
    end if
    MSG_ERROR(msg)
  end if

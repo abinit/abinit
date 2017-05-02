@@ -57,6 +57,7 @@ nstep2 1
 pawecutdg 12.0
 paral_atom 0
 prtvol 10
+densfor_pred 5
 optstress 0
 istwfk 4*1
 

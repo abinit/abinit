@@ -3339,24 +3339,25 @@
            6 =&gt; density changed using D. Alfe 2nd-order algorithm (**) and forces corrected with the use of Harris functional formula (*)
           </li>
          </ul>
+        Similar negative values are also allowed (see the meaning later), for development purposes only.
          No meaning for RF calculations.
          <br />
          <br />
          For the time being,
          <br />
-         - the choice 3 must be used with [[ionmov]]=4
+         - [[densfor_pred]]=3 must be used with [[ionmov]]=4
         and [[iscf]]=5.
          <br />
-         - the choices 4, 5 or 6 must be used when band-FFT parallelism is selected.
+         - [[densfor_pred]]=4, 5 or 6 must be used when band-FFT parallelism is selected.
          <br />
-         Otherwise, use the choice 2.
+         Otherwise, use [[densfor_pred]]=2
          <br />
          <br />
          <b>
           (*)
          </b>
          <u>
-         Note concerning the use of [[densfor_pred]]=4 or 6 (correction of forces)
+         Note concerning the correction of forces (use of [[densfor_pred]]=1, 2, 3, 4 or 6)
          </u>
          :
          <br />
@@ -3379,9 +3380,9 @@
          <i>
           dVxc/drho=Kxc
          </i>
-         which computation is time-consuming for GGA functionals.
-        By default the LDA exchange-correlation kernel is used (even for GGA, for which it seems to give a reasonable accuracy).
-        Using the exact GGA exchange correlation kernel is always possible by giving a negative value to [[densfor_pred]].
+         whose computation is time-consuming for GGA functionals.
+        By default (positive values of [[densfor_pred]]), the local-density part of the GGA exchange-correlation kernel is used (even for GGA, for which it seems to give a reasonable accuracy).
+        Using the full GGA exchange correlation kernel (so, including derivatives with respect to the gradient of the density) is always possible by giving a negative value to [[densfor_pred]].
          <br />
          <br />
          <b>
