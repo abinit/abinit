@@ -177,6 +177,12 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
 !  D
    dtsets(idtset)%ddamp=0.1_dp
    dtsets(idtset)%delayperm=0
+   dtsets(idtset)%densfor_pred=2
+   if (dtsets(idtset)%paral_kgb>0.and.idtset>0) dtsets(idtset)%densfor_pred=6 ! Recommended for band-FFT parallelism
+!XG170502 : This section is completely useless, as ionmov is NOT know at present !
+!#ifdef HAVE_LOTF
+!   if (dtsets(idtset)%ionmov==23) dtsets(idtset)%densfor_pred=2 ! Recommended for LOTF
+!#endif
    dtsets(idtset)%dfpt_sciss=zero
    dtsets(idtset)%diecut=2.2_dp
    dtsets(idtset)%dielng=1.0774841_dp
@@ -364,9 +370,10 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%ionmov=0
    dtsets(idtset)%densfor_pred=2
    if (dtsets(idtset)%paral_kgb>0.and.idtset>0) dtsets(idtset)%densfor_pred=6 ! Recommended for band-FFT parallelism
-#ifdef HAVE_LOTF
-   if (dtsets(idtset)%ionmov==23) dtsets(idtset)%densfor_pred=2 ! Recommended for LOTF
-#endif
+!This section is completely useless, as ionmov is NOT know at present !
+!#ifdef HAVE_LOTF
+!   if (dtsets(idtset)%ionmov==23) dtsets(idtset)%densfor_pred=2 ! Recommended for LOTF
+!#endif
    dtsets(idtset)%iprcel=0
    dtsets(idtset)%iprcfc=0
    dtsets(idtset)%irandom=3
