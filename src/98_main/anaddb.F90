@@ -217,6 +217,18 @@ program anaddb
  call ddb_from_file(ddb,filnam(3),inp%brav,natom,inp%natifc,inp%atifc,Crystal,comm, prtvol=inp%prtvol)
  nsym = Crystal%nsym
 
+ ! Acoustic Sum Rule
+ ! In case the interatomic forces are not calculated, the
+ ! ASR-correction (asrq0%d2asr) has to be determined here from the Dynamical matrix at Gamma.
+ asrq0 = ddb_get_asrq0(ddb, inp%asr, inp%rfmeth, crystal%xcart)
+
+ ! TODO: This is to maintain the previous behaviour in which all the arrays were initialized to zero.
+ ! In the new version asrq0%d2asr is always computed if the Gamma block is present
+ ! and this causes changes in [v5][t28]
+ if (.not. (inp%ifcflag==0 .or. inp%instrflag/=0 .or. inp%elaflag/=0)) then
+   asrq0%d2asr = zero; asrq0%singular = zero; asrq0%uinvers = zero; asrq0%vtinvers = zero
+ end if
+
  ! Open the netcdf file that will contain the anaddb results
  ana_ncid = nctk_noid
  if (iam_master) then
@@ -251,18 +263,6 @@ program anaddb
 
 !**********************************************************************
 !**********************************************************************
-
- ! Acoustic Sum Rule
- ! In case the interatomic forces are not calculated, the
- ! ASR-correction (asrq0%d2asr) has to be determined here from the Dynamical matrix at Gamma.
- asrq0 = ddb_get_asrq0(ddb, inp%asr, inp%rfmeth, crystal%xcart)
-
- ! TODO: This is to maintain the previous behaviour in which all the arrays were initialized to zero.
- ! In the new version asrq0%d2asr is always computed if the Gamma block is present
- ! and this causes changes in [v5][t28]
- if (.not. (inp%ifcflag==0 .or. inp%instrflag/=0 .or. inp%elaflag/=0)) then
-   asrq0%d2asr = zero; asrq0%singular = zero; asrq0%uinvers = zero; asrq0%vtinvers = zero
- end if
 
  ! Get Dielectric Tensor and Effective Charges
  ! (initialized to one_3D and zero if the derivatives are not available in the DDB file)

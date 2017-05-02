@@ -195,7 +195,7 @@ MODULE m_ifc
  public :: ifc_print         ! Print info on the object.
  public :: ifc_fourq         ! Use Fourier interpolation to compute interpolated frequencies w(q) and eigenvectors e(q)
  public :: ifc_speedofsound  ! Compute the speed of sound by averaging phonon group velocities.
- public :: ifc_write          ! Print the ifc (output, netcdf and text file)
+ public :: ifc_write         ! Print the ifc (output, netcdf and text file)
  public :: ifc_outphbtrap    ! Print out phonon frequencies on regular grid for BoltzTrap code.
  public :: ifc_printbxsf     ! Output phonon isosurface in Xcrysden format.
 !!***
