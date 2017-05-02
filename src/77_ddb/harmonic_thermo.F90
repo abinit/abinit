@@ -519,8 +519,8 @@ subroutine harmonic_thermo(Ifc,Crystal,amu,anaddb_dtset,iout,outfilename_radix,c
          nomega = nchan2(iwchan)
          dosinc=dble(iwchan)
 
-         ABI_ALLOCATE(phon_dos, (nomega))
-         phon_dos = gdos(:,iwchan)
+         ABI_ALLOCATE(phon_dos,(nomega))
+         phon_dos = gdos(1:nomega,iwchan)
 
 !Put zeroes for F, E, S, Cv
          free(:)=zero
