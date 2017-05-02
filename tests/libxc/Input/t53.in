@@ -1,7 +1,8 @@
 # Crystalline diamond : computation of the total energy
 #
 
-ndtset 2         # Two datasets : 1) GGA 2) HSE06 with PAW, just one step.
+ndtset 3         # Three datasets : 1) GGA 2) HSE06 with PAW, just one step, without correction of forces
+                 # then 3) HSE06 with PAW, again one step from case 1, with correction of forces.
 
 #Definition of the unit cell
 acell 3*6.740652601    # Data from PRB 48, 5058
@@ -40,24 +41,30 @@ shiftk 0.0 0.0 0.0
 
 #Definition of the SCF procedure
 nstep 10          # Maximal number of SCF cycles
-toldfe1 1.0d-12
-toldfe2 1.0d-7     # Will stop when, twice in a row, the difference 
+toldfe 1.0d-12
 
 diemac 12.0  
 
-#Definition of the Hartree-Fock calculation
+#Definition of the Hartree-Fock calculations
 ixc2 -428         # Calculation with HSE06
-getwfk2 -1        # Start from previous LDA wavefunctions to ease convergence
+ixc3 -428         # Calculation with HSE06
+getwfk2 1         # Start from GGA wavefunctions to ease convergence
+getwfk3 1         # Start from GGA wavefunctions to ease convergence
+densfor_pred2 5   # No correction of forces
+densfor_pred3 6   # Correction of forces using a "fallback" GGA functional
+toldfe2 1.0d-7     # Will stop when, twice in a row, the difference
+toldfe3 1.0d-7     # Will stop when, twice in a row, the difference
+nstep2 1
+nstep3 1
+
 
 #Parameters for parallelization with Hartree-Fock
 #npkpt2 2           # Number of processors for k-point parallelization
 #nphf2  2           # Number of processors for occupied states parallelization
                    # The calculation thus requires npkpt*nphf processors.
-nstep2 1
 pawecutdg 12.0
 paral_atom 0
 prtvol 10
-densfor_pred 5
 optstress 0
 istwfk 4*1
 

@@ -271,7 +271,8 @@ subroutine rhohxc(dtset,enxc,gsqcut,izero,kxc,mpi_enreg,nfft,ngfft, &
  logical :: allow3,test_nhat,with_vxctau
  character(len=500) :: message
 !arrays
- real(dp) :: gga_id(2),gm_norm(3),grho(3),gmet(3,3),gprimd(3,3),qphon(3),rmet(3,3)
+ integer :: gga_id(2)
+ real(dp) :: gm_norm(3),grho(3),gmet(3,3),gprimd(3,3),qphon(3),rmet(3,3)
  real(dp) :: tsec(2),vxcmean(4)
  real(dp),allocatable :: d2vxc_b(:,:),depsxc(:,:),depsxc_apn(:,:),dvxc_apn(:),dvxc_b(:,:)
  real(dp),allocatable :: exc_b(:),fxc_b(:),fxc_apn(:),grho2_apn(:),grho2_b_updn(:,:),lrhonow(:,:),lrho_b_updn(:,:)
@@ -417,8 +418,8 @@ subroutine rhohxc(dtset,enxc,gsqcut,izero,kxc,mpi_enreg,nfft,ngfft, &
 !  Define the fallback GGA xc kernel in case of hybrid functionals
    ixc_fallbackkxc_hyb=dtset%ixc
    if (option==12) then
-     if(dtset%ixc==41 .or. dtset%ixc==42)ixc_fallback_hyb=11
-     if(dtset%ixc==-406 .or. dtset%ixc==-427 .or. dtset%ixc==-428 .or. dtset%-456)then
+     if(dtset%ixc==41 .or. dtset%ixc==42)ixc_fallbackkxc_hyb=11
+     if(dtset%ixc==-406 .or. dtset%ixc==-427 .or. dtset%ixc==-428 .or. dtset%ixc==-456)then
        if (libxc_functionals_gga_from_hybrid(gga_id=gga_id)) then
          ixc_fallbackkxc_hyb=-gga_id(1)*1000-gga_id(2)
        endif
@@ -715,10 +716,10 @@ subroutine rhohxc(dtset,enxc,gsqcut,izero,kxc,mpi_enreg,nfft,ngfft, &
 !      In case of a hybrid functional, if one needs to compute the fallback GGA Kxc, a separate call to drivexc_main
 !      is first needed to compute Kxc using such fallback GGA, 
 !      before calling again drivexc_main using the correct functional for Exc and Vxc
-       if(ixc_fallbackkxc_hib/=dtset%ixc)then
+       if(ixc_fallbackkxc_hyb/=dtset%ixc)then
          call libxc_functionals_end()
-         call libxc_functionals_init(ixc_fallbackkxc_hib,dtset%nspden)
-         call drivexc_main(exc_b,ixc_fallbackkxc,mgga,ndvxc,nd2vxc,ngr2,npts,nspden_updn,nvxcgrho,order,&
+         call libxc_functionals_init(ixc_fallbackkxc_hyb,dtset%nspden)
+         call drivexc_main(exc_b,ixc_fallbackkxc_hyb,mgga,ndvxc,nd2vxc,ngr2,npts,nspden_updn,nvxcgrho,order,&
 &          rho_b_updn,vxcrho_b_updn,dtset%xclevel, &
 &          dvxc=dvxc_b,d2vxc=d2vxc_b,grho2=grho2_b_updn,vxcgrho=vxcgrho_b, &
 &          lrho=lrho_b_updn,tau=tau_b_updn,vxclrho=vxclrho_b_updn,vxctau=vxctau_b_updn, &
@@ -934,7 +935,7 @@ subroutine rhohxc(dtset,enxc,gsqcut,izero,kxc,mpi_enreg,nfft,ngfft, &
        end if
 
 !      Transfer the xc kernel
-       if (nkxc_eff>0.and.ndvxc>0 .and. ixc_fallbackkxc_hib/=dtset%ixc) then
+       if (nkxc_eff>0.and.ndvxc>0 .and. ixc_fallbackkxc_hyb/=dtset%ixc) then
          kxc(ifft:ifft+npts-1,1:nkxc_eff)=zero
          if (nkxc_eff==1.and.ndvxc==15) then
            kxc(ifft:ifft+npts-1,1)=half*(dvxc_b(1:npts,1)+dvxc_b(1:npts,9)+dvxc_b(1:npts,10))

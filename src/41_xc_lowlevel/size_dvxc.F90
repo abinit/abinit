@@ -77,7 +77,7 @@ subroutine size_dvxc(ixc,ndvxc,ngr2,nd2vxc,nspden,nvxcdgr,order,add_tfw)
 !Dimension for the gradient of the density (only allocated for GGA or mGGA)
  if ((ixc>=11.and.ixc<=17).or.(ixc>=23.and.ixc<=24).or.ixc==26.or.ixc==27.or. &
 & (ixc>=31.and.ixc<=34).or.(ixc==41.or.ixc==42).or.(add_tfw_)) ngr2=2*min(nspden,2)-1
- if (ixc<0.and.(libxc_functionals_isgga().or.libxc_functionals_ismgga().or.libxc_functional_is_hybrid() )) &
+ if (ixc<0.and.(libxc_functionals_isgga().or.libxc_functionals_ismgga().or.libxc_functionals_is_hybrid() )) &
 & ngr2=2*min(nspden,2)-1
 
 !A-Only Exc and Vxc
@@ -120,7 +120,7 @@ subroutine size_dvxc(ixc,ndvxc,ngr2,nd2vxc,nspden,nvxcdgr,order,add_tfw)
    else if (ixc==50) then
      ndvxc=1 !  IIT xc (no spin-pol)
    else if (ixc<0) then
-     if(libxc_functionals_isgga() .or. libxc_functionals_ismgga() .or. libxc_functional_is_hybrid()) then
+     if(libxc_functionals_isgga() .or. libxc_functionals_ismgga() .or. libxc_functionals_is_hybrid()) then
        ndvxc=15
      else
        ndvxc=3
