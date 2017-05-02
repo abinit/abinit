@@ -588,7 +588,7 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
      ifirst=merge(0,1,itimimage>1)
      call write_md_hist_img(hist,hist_filename,ifirst,dtset%natom,dtset%ntypat,&
 &                           dtset%typat,amu_img(:,1),dtset%znucl,dtion,&
-&                           nimage=dtset%nimage,comm_img=mpi_enreg%comm_img,&
+&                           nimage=dtset%nimage,imgmov=dtset%imgmov,comm_img=mpi_enreg%comm_img,&
 &                           imgtab=mpi_enreg%my_imgtab)
    end if
 #endif
