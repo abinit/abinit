@@ -980,21 +980,6 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
      call chkint_ge(1,1,cond_string,cond_values,ierr,'nnos',dt%nnos,1,iout)
    end if
 
-!  densfor_pred
-!  if (abs(dt%densfor_pred)>=1.and.dt%iscf>=10.and.nspden==4) then
-!  write(message,'(8a)')ch10,&
-!  &   ' chkinp : ERROR -',ch10,&
-!  &   '  When non-collinear magnetism is activated (nspden=4),',ch10,&
-!  &   '  densfor_pred/=0 is not compatible with SCF mixing on density (iscf>=10) !',ch10,&
-!  &   '  Action : choose SCF mixing on potential (iscf<10) or change densfor_pred value.'
-!  call wrtout(std_out,message,'COLL')
-!  ierr=ierr+1
-!  end if
-   if (dt%densfor_pred<0.and.mod(dt%iprcel,100)>=61.and.(dt%iprcel<71.or.dt%iprcel>79)) then
-     cond_string(1)='iprcel';cond_values(1)=dt%iprcel
-     call chkint_ge(0,2,cond_string,cond_values,ierr,'densfor_pred',dt%densfor_pred,0,iout)
-   end if
-
 !  iprcel
    call chkint(0,0,cond_string,cond_values,ierr,'iprcel',dt%iprcel,1,(/0/),1,21,iout)   !  0 or superior to 21
    if(nsppol==2 .and. (dt%occopt>=3 .and. dt%occopt<=8).and.mod(dt%iprcel,10)>49 )then
