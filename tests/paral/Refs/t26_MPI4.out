@@ -225,6 +225,7 @@ _ WF disk file :      0.095 Mbytes ; DEN or POT disk file :      0.358 Mbytes.
         bs_loband7          0
         bs_loband8          0
         bs_loband9          0       0
+     densfor_pred           6
            diemac      1.20000000E+01
           dilatmx1     1.00000000E+00
           dilatmx2     1.00000000E+00
@@ -256,7 +257,6 @@ _ WF disk file :      0.095 Mbytes ; DEN or POT disk file :      0.358 Mbytes.
            ionmov7          3
            ionmov8          3
            ionmov9          0
-     densfor_pred           6
              iscf1         17
              iscf2         17
              iscf3         17
@@ -5217,6 +5217,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
         bs_loband7          0
         bs_loband8          0
         bs_loband9          0       0
+     densfor_pred           6
            diemac      1.20000000E+01
           dilatmx1     1.00000000E+00
           dilatmx2     1.00000000E+00
@@ -5275,7 +5276,6 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
            ionmov7          3
            ionmov8          3
            ionmov9          0
-     densfor_pred           6
              iscf1         17
              iscf2         17
              iscf3         17

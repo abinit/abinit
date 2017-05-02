@@ -76,6 +76,7 @@ _ WF disk file :      0.435 Mbytes ; DEN or POT disk file :      0.424 Mbytes.
             acell      7.9270000000E+00  7.9270000000E+00  7.9270000000E+00 Bohr
               amu      5.86900000E+01  1.59994000E+01
       chksymbreak           0
+     densfor_pred           6
         dmatpuopt           1
         dmftbandf1          0
         dmftbandf2         34
@@ -93,7 +94,6 @@ _ WF disk file :      0.435 Mbytes ; DEN or POT disk file :      0.424 Mbytes.
 -          fftalg         401
            getwfk1          0
            getwfk2         -1
-     densfor_pred           6
               ixc           7
            jdtset        1    2
               kpt      2.50000000E-01  2.50000000E-01  2.50000000E-01
@@ -1658,6 +1658,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     135.500     135.484
             acell      7.9270000000E+00  7.9270000000E+00  7.9270000000E+00 Bohr
               amu      5.86900000E+01  1.59994000E+01
       chksymbreak           0
+     densfor_pred           6
         dmatpuopt           1
         dmftbandf1          0
         dmftbandf2         34
@@ -1685,7 +1686,6 @@ _setup2: Arith. and geom. avg. npw (full set) are     135.500     135.484
 -          fftalg         401
            getwfk1          0
            getwfk2         -1
-     densfor_pred           6
               ixc           7
            jdtset        1    2
               kpt      2.50000000E-01  2.50000000E-01  2.50000000E-01

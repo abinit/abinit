@@ -52,6 +52,7 @@ _ WF disk file :      0.268 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
  -outvars: echo values of preprocessed input variables --------
             acell      1.0263110000E+01  1.0263110000E+01  1.0263110000E+01 Bohr
               amu      2.80000000E+01
+     densfor_pred           1
            diemac      1.20000000E+01
             dtion      3.50000000E+02
              ecut      2.99000000E+00 Hartree
@@ -60,7 +61,6 @@ _ WF disk file :      0.268 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
            iatfix        2    3    4    5    6    7    8
             intxc           1
            ionmov           1
-     densfor_pred           1
            irdwfk           1
               kpt      1.00000000E+00  1.00000000E+00  1.00000000E+00
                       -1.00000000E+00  1.00000000E+00  1.00000000E+00
@@ -1261,6 +1261,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     272.000     272.000
  -outvars: echo values of variables after computation  --------
             acell      1.0263110000E+01  1.0263110000E+01  1.0263110000E+01 Bohr
               amu      2.80000000E+01
+     densfor_pred           1
            diemac      1.20000000E+01
             dtion      3.50000000E+02
              ecut      2.99000000E+00 Hartree
@@ -1278,9 +1279,6 @@ _setup2: Arith. and geom. avg. npw (full set) are     272.000     272.000
            iatfix        2    3    4    5    6    7    8
             intxc           1
            ionmov           1
-     densfor_pred           1
-           irdwfk           1
-              kpt      1.00000000E+00  1.00000000E+00  1.00000000E+00
                       -1.00000000E+00  1.00000000E+00  1.00000000E+00
                        1.00000000E+00 -1.00000000E+00  1.00000000E+00
                        1.00000000E+00  1.00000000E+00 -1.00000000E+00

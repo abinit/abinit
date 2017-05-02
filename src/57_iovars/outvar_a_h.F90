@@ -491,6 +491,9 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
  intarr(1,:)=dtsets(:)%delayperm
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'delayperm','INT',0)
 
+ intarr(1,:)=dtsets(:)%densfor_pred
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'densfor_pred','INT',0)
+
 !densty
  narr=mxvals%ntypat              ! default size for all datasets
  do idtset=0,ndtset_alloc        ! especific size for each dataset
