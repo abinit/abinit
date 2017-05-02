@@ -3382,7 +3382,7 @@
          </i>
          whose computation is time-consuming for GGA functionals.
         By default (positive values of [[densfor_pred]]), the local-density part of the GGA exchange-correlation kernel is used (even for GGA, for which it seems to give a reasonable accuracy).
-        Using the full GGA exchange correlation kernel (so, including derivatives with respect to the gradient of the density) is always possible by giving a negative value to [[densfor_pred]].
+        Using the full GGA exchange correlation kernel (so, including derivatives with respect to the gradient of the density) is always possible by giving a negative value to [[densfor_pred]]. In case of hybrid functionals, a similar correction term is added, although in the density mixing scheme, the related GGA kernel is used instead of the hybrid functional kernel.
          <br />
          <br />
          <b>
