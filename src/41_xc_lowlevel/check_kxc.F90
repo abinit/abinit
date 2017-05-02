@@ -58,7 +58,7 @@ subroutine check_kxc(ixc,optdriver)
  kxc_available=.false.
 
  if (ixc>=0) then
-   kxc_available=(ixc/=16.and.ixc/=17.and.ixc/=26.and.ixc/=27.and.ixc/=40.and.ixc/=41.and.ixc/=42)
+   kxc_available=(ixc/=16.and.ixc/=17.and.ixc/=26.and.ixc/=27)
    if (.not.kxc_available) then
      write(msg,'(a,i0,3a)') &
 &     'The selected XC functional (ixc=',ixc,')',ch10,&
@@ -82,7 +82,7 @@ subroutine check_kxc(ixc,optdriver)
 &   '>Possible action:',ch10,&
 &   'Change the XC functional in psp file or input file.'
    if (optdriver==0) then
-     write(msg,'(9a)') trim(msg),ch10,&
+     write(msg,'(13a)') trim(msg),ch10,&
 &     '>Possible action (2):',ch10,&
 &     'If you are using density mixing for the SCF cycle',ch10,&
 &     '(iscf>=10, which is the default for PAW),',ch10,&
