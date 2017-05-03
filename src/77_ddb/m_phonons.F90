@@ -509,6 +509,7 @@ implicit none
    tmp=(tempermin+temperinc*dble(itemper-1))*kb_HaK
 
    do iomega=1,PHdos%nomega
+     if (abs(PHdos%phdos(iomega)) < 1.e-200_dp) cycle
 
 !    wover2t= hbar*w / 2kT dimensionless
      wover2t = zero;     if(tmp > tol14) wover2t=PHdos%omega(iomega)*half/tmp
