@@ -815,6 +815,7 @@ subroutine dtset_copy(dtout, dtin)
  dtout%rfasr              = dtin%rfasr
  dtout%rfddk              = dtin%rfddk
  dtout%rfelfd             = dtin%rfelfd
+ dtout%rfmagn             = dtin%rfmagn
  dtout%rfmeth             = dtin%rfmeth
  dtout%rfphon             = dtin%rfphon
  dtout%rfstrs             = dtin%rfstrs

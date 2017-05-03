@@ -114,8 +114,10 @@ subroutine get_npert_rbz(dtset,nband_rbz,nkpt_rbz,npert)
  if(dtset%rfstrs==1.or.dtset%rfstrs==3)rfpert(dtset%natom+3)=1
  if(dtset%rfstrs==2.or.dtset%rfstrs==3)rfpert(dtset%natom+4)=1
 
- if(dtset%rfuser==1.or.dtset%rfuser==3)rfpert(dtset%natom+5)=1
- if(dtset%rfuser==2.or.dtset%rfuser==3)rfpert(dtset%natom+6)=1
+ if(dtset%rfuser==1.or.dtset%rfuser==3)rfpert(dtset%natom+6)=1
+ if(dtset%rfuser==2.or.dtset%rfuser==3)rfpert(dtset%natom+7)=1
+
+ if(dtset%rfmagn==1) rfpert(dtset%natom+5)=1 
 
  ABI_ALLOCATE(pertsy,(3,mpert))
  call irreducible_set_pert(indsym,mpert,dtset%natom,dtset%nsym,pertsy,dtset%rfdir,rfpert,symq,symrec,dtset%symrel)

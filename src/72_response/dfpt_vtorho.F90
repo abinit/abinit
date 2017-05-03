@@ -446,6 +446,10 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
      end if
    end if
 
+   if (ipert==natom+5) then !SPr deb, in case of magnetic field perturbation, no non-local
+     call load_spin_rf_hamiltonian(rf_hamkq,gs_hamkq,isppol,vlocal1=vlocal1)
+   end if
+
 !  Nullify contribution to 1st-order density from this k-point
    rhoaug1(:,:,:,:)=zero
 

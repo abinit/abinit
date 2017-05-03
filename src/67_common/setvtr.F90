@@ -8,7 +8,7 @@
 !! Set up the trial potential and some energy terms
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (XG, GMR, FJ, MT, EB)
+!! Copyright (C) 1998-2017 ABINIT group (XG, GMR, FJ, MT, EB, SPr)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -55,6 +55,13 @@
 !!  psps <type(pseudopotential_type)>=variables related to pseudopotentials
 !!  rhog(2,nfft)=Fourier transform of electron density
 !!  rhor(nfft,nspden)=electron density in electrons/bohr**3.
+!!   | definition for spin components:
+!!   | case of nspden = 2
+!!   |      rhor(:,1) => rho_up + rho_dwn
+!!   |      rhor(:,2) => rho_up
+!!   | case of nspden = 4
+!!   |      rhor(:,1)   => rho_upup + rho_dwndwn
+!!   |      rhor(:,2:4) => {m_x,m_y,m_z}
 !!  rmet(3,3)=real space metric (bohr**2)
 !!  rprimd(3,3)=dimensional primitive translations in real space (bohr)
 !!  [taug(2,nfftf*dtset%usekden)]=array for Fourier transform of kinetic energy density
@@ -577,19 +584,21 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
 
 !Add the zeeman field to vtrial
  if (any(abs(dtset%zeemanfield(:))>tol8)) then
-   vzeeman(:) = zero
+   vzeeman(:) = zero                            ! vzeeman_ij = -1/2*sigma_ij^alpha*B_alpha
    if(dtset%nspden==2)then
-     vzeeman(1) = -half*dtset%zeemanfield(3) ! For collinear ispden=2 is rho_up only
+      vzeeman(1) = -half*dtset%zeemanfield(3)   ! v_dwndwn = -1/2*B_z  
+      vzeeman(2) =  half*dtset%zeemanfield(3)   ! v_upup   =  1/2*B_z
      do ifft=1,nfft
-       vtrial(ifft,2) = vtrial(ifft,2) + vzeeman(1)
+       vtrial(ifft,1) = vtrial(ifft,1) + vzeeman(1) !SPr: added 1st component
+       vtrial(ifft,2) = vtrial(ifft,2) + vzeeman(2)
      end do !ifft
    end if
    if(dtset%nspden==4)then
-     vzeeman(1)=-half*dtset%zeemanfield(3)
-     vzeeman(2)= half*dtset%zeemanfield(3)
-     vzeeman(3)=-half*dtset%zeemanfield(1)
-     vzeeman(4)= half*dtset%zeemanfield(2)
-     do ispden=2,dtset%nspden
+     vzeeman(1)=-half*dtset%zeemanfield(3)     ! v_dwndwn                  => v_11 
+     vzeeman(2)= half*dtset%zeemanfield(3)     ! v_upup                    => v_22
+     vzeeman(3)=-half*dtset%zeemanfield(1)     ! Re(v_dwnup) = Re(v_updwn) => Re(v_12)
+     vzeeman(4)= half*dtset%zeemanfield(2)     ! Im(v_dwnup) =-Im(v_dwnup) => Im(v_12)
+     do ispden=1,dtset%nspden
        do ifft=1,nfft
          vtrial(ifft,ispden) = vtrial(ifft,ispden) + vzeeman(ispden)
        end do
@@ -604,7 +613,7 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
    call mag_constr(dtset%natom,dtset%spinat,dtset%nspden,dtset%magconon,dtset%magcon_lambda,rprimd, &
 &   mpi_enreg,nfft,ngfft,dtset%ntypat,dtset%ratsph,rhor,dtset%typat,Vmagconstr,xred)
    if(dtset%nspden==4)then
-     do ispden=2,dtset%nspden
+     do ispden=2,dtset%nspden ! SPr: both components should be used?
        do ifft=1,nfft
          vtrial(ifft,ispden) = vtrial(ifft,ispden) + Vmagconstr(ifft,ispden)
        end do !ifft
@@ -612,7 +621,9 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
    else if(dtset%nspden==2)then
      do ifft=1,nfft
 !      TODO : MJV: check that magnetic constraint works also for nspden 2 or add input variable condition
- !            EB: ispden=2 is rho_up only: to be tested
+!              EB: ispden=2 is rho_up only: to be tested
+!             SPr: for ispden=2, both components should be used (e.g. see definition for vzeeman)?
+!      vtrial(ifft,1) = vtrial(ifft,1) + Vmagconstr(ifft,1) !SPr: added the first component here
        vtrial(ifft,2) = vtrial(ifft,2) + Vmagconstr(ifft,2)
      end do !ifft
    end if
