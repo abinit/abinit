@@ -225,8 +225,8 @@ MODULE m_nctk
 
  public :: nctk_write_datar
  public :: nctk_read_datar
- public :: nctk_defwrite_nonanal_terms  ! Write phonon frequencies and displacements for q-->0
-                                        ! in the presence of non-analytical behaviour.
+ public :: nctk_defwrite_nonana_terms  ! Write phonon frequencies and displacements for q-->0
+                                       ! in the presence of non-analytical behaviour.
 #endif
 
  !integer,save ABI_PROTECTED, public :: nctk_cache_size = 32000000
@@ -2818,9 +2818,9 @@ subroutine var_from_name(ncid, name, var)
 end subroutine var_from_name
 !!***
 
-!!****f* n_nctk/nctk_defwrite_nonanal_terms
+!!****f* n_nctk/nctk_defwrite_nonana_terms
 !! NAME
-!! nctk_defwrite_nonanal_terms
+!! nctk_defwrite_nonana_terms
 !!
 !! FUNCTION
 !!  Write phonon frequencies and displacements for q-->0 in the presence of non-analytical behaviour.
@@ -2845,12 +2845,12 @@ end subroutine var_from_name
 !!
 !! SOURCE
 
-subroutine nctk_defwrite_nonanal_terms(ncid, iphl2, nph2l, qph2l, natom, phfrq, cart_displ, mode)
+subroutine nctk_defwrite_nonana_terms(ncid, iphl2, nph2l, qph2l, natom, phfrq, cart_displ, mode)
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'nctk_defwrite_nonanal_terms'
+#define ABI_FUNC 'nctk_defwrite_nonana_terms'
 !End of the abilint section
 
  implicit none
@@ -2872,8 +2872,7 @@ subroutine nctk_defwrite_nonanal_terms(ncid, iphl2, nph2l, qph2l, natom, phfrq, 
 
  select case (mode)
  case ("define")
-   NCF_CHECK(nctk_def_basedims(ncid, defmode=.True.))
-
+   !NCF_CHECK(nctk_def_basedims(ncid, defmode=.True.))
    ncerr = nctk_def_dims(ncid, [nctkdim_t("number_of_non_analytical_directions", nph2l)], defmode=.True.)
    NCF_CHECK(ncerr)
 
@@ -2881,11 +2880,11 @@ subroutine nctk_defwrite_nonanal_terms(ncid, iphl2, nph2l, qph2l, natom, phfrq, 
    nctkarr_t('non_analytical_directions', "dp", "number_of_cartesian_directions, number_of_non_analytical_directions"),&
    nctkarr_t('non_analytical_phonon_modes', "dp", "number_of_phonon_modes, number_of_non_analytical_directions"),&
    nctkarr_t('non_analytical_phdispl_cart', "dp", &
-   "complex, number_of_phonon_modes, number_of_phonon_modes, number_of_non_analytical_directions")])
+   "two, number_of_phonon_modes, number_of_phonon_modes, number_of_non_analytical_directions")])
    NCF_CHECK(ncerr)
 
    NCF_CHECK(nctk_set_datamode(ncid))
-   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "non_analytical_directions") ,qph2l))
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "non_analytical_directions"), qph2l))
 
  case ("write")
 
@@ -2900,7 +2899,7 @@ subroutine nctk_defwrite_nonanal_terms(ncid, iphl2, nph2l, qph2l, natom, phfrq, 
    MSG_ERROR(sjoin("Wrong value for mode", mode))
  end select
 
-end subroutine nctk_defwrite_nonanal_terms
+end subroutine nctk_defwrite_nonana_terms
 
 #endif
 

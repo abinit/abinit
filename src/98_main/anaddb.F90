@@ -89,7 +89,7 @@ program anaddb
  integer,parameter :: rftyp4=4
  integer :: dimekb,comm,iatom,iblok,iblok_stress,idir,ii,index
  integer :: ierr,iphl2,lenstr,lmnmax,mband,mtyp,mpert,msize,natom,nblok,nblok2
- integer :: nkpt,nph2l,nsym,ntypat,option,usepaw,nproc,my_rank,ana_ncid
+ integer :: nkpt,nsym,ntypat,option,usepaw,nproc,my_rank,ana_ncid
  logical :: iam_master
  integer :: rfelfd(4),rfphon(4),rfstrs(4),ngqpt_coarse(3)
  integer,allocatable :: d2flg(:)
@@ -234,14 +234,9 @@ program anaddb
  if (iam_master) then
 #ifdef HAVE_NETCDF
    NCF_CHECK_MSG(nctk_open_create(ana_ncid, "anaddb.nc", xmpi_comm_self), "Creating anaddb.nc")
-   NCF_CHECK(nctk_def_basedims(ana_ncid))
    NCF_CHECK(nctk_def_dims(ana_ncid, [nctkdim_t('number_of_phonon_modes', 3*natom)],defmode=.True.))
    NCF_CHECK(nctk_defnwrite_ivars(ana_ncid, ["anaddb_version"], [1]))
    NCF_CHECK(crystal_ncwrite(crystal, ana_ncid))
-   !ncerr = nctk_def_arrays(ana_ncid, [nctkarr_t('atomic_mass_units', "dp", "number_of_atom_species")],defmode=.True.)
-   !NCF_CHECK(ncerr)
-   !NCF_CHECK(nctk_set_datamode(ana_ncid))
-   !NCF_CHECK(nf90_put_var(ana_ncid, nctk_idname(ana_ncid, 'atomic_mass_units'), ddb%amu))
 #endif
  end if
 
@@ -258,8 +253,7 @@ program anaddb
  ABI_ALLOCATE(eigvec,(2,3,natom,3,natom))
  ABI_ALLOCATE(phfrq,(3*natom))
  ABI_ALLOCATE(zeff,(3,3,natom))
- nph2l=inp%nph2l
- ABI_ALLOCATE(lst,(nph2l))
+ ABI_ALLOCATE(lst,(inp%nph2l))
 
 !**********************************************************************
 !**********************************************************************
@@ -550,7 +544,7 @@ program anaddb
  end if
  ABI_ALLOCATE(fact_oscstr,(2,3,3*natom))
 
- if (nph2l/=0 .or. inp%dieflag==1) then
+ if (inp%nph2l/=0 .or. inp%dieflag==1) then
 
    write(message, '(a,(80a),a,a,a,a)' ) ch10,('=',ii=1,80),ch10,&
 &   ch10,' Treat the second list of vectors ',ch10
@@ -583,17 +577,17 @@ program anaddb
      call asrq0_apply(asrq0, natom, mpert, msize, crystal%xcart, d2cart)
    end if ! end of the generation of the dynamical matrix at gamma.
 
-   if (nph2l/=0) then
+   if (inp%nph2l/=0) then
 
      if (my_rank == master) then
 #ifdef HAVE_NETCDF
        iphl2 = 0
-       call nctk_defwrite_nonanal_terms(ana_ncid, iphl2, nph2l, inp%qph2l, natom, phfrq, displ, "define")
+       call nctk_defwrite_nonana_terms(ana_ncid, iphl2, inp%nph2l, inp%qph2l, natom, phfrq, displ, "define")
 #endif
      end if
 
      ! Examine every wavevector of this list
-     do iphl2=1,nph2l
+     do iphl2=1,inp%nph2l
 
        ! Initialisation of the phonon wavevector
        qphon(:,1)=inp%qph2l(:,iphl2)
@@ -610,7 +604,7 @@ program anaddb
        if (my_rank == master) then
 #ifdef HAVE_NETCDF
          ! Loop is not MPI-parallelized --> no need for MPI-IO API.
-         call nctk_defwrite_nonanal_terms(ana_ncid, iphl2, nph2l, inp%qph2l, natom, phfrq, displ, "write")
+         call nctk_defwrite_nonana_terms(ana_ncid, iphl2, inp%nph2l, inp%qph2l, natom, phfrq, displ, "write")
 #endif
        end if
 
@@ -660,7 +654,7 @@ program anaddb
 
      ! Evaluation of the oscillator strengths and frequency-dependent dielectric tensor.
      call ddb_diel(Crystal,ddb%amu,inp,dielt_rlx,displ,d2cart,epsinf,fact_oscstr,&
-&     ab_out,lst,mpert,natom,nph2l,phfrq,comm,ana_ncid)
+&     ab_out,lst,mpert,natom,inp%nph2l,phfrq,comm,ana_ncid)
      ! write(std_out,*)'after ddb_diel, dielt_rlx(:,:)=',dielt_rlx(:,:)
    end if
 
@@ -668,7 +662,7 @@ program anaddb
    if (inp%dieflag==2.or.inp%dieflag==3.or. inp%dieflag==4) then
 !    Everything is already in place...
      call ddb_diel(Crystal,ddb%amu,inp,dielt_rlx,displ,d2cart,epsinf,fact_oscstr,&
-&     ab_out,lst,mpert,natom,nph2l,phfrq,comm,ana_ncid)
+&     ab_out,lst,mpert,natom,inp%nph2l,phfrq,comm,ana_ncid)
    end if
 
  end if ! either nph2l/=0  or  dieflag==1
@@ -689,7 +683,7 @@ program anaddb
 
    ! Print the electronic dielectric tensor
    call ddb_diel(Crystal,ddb%amu,inp,dielt_rlx,displ,d2cart,epsinf,fact_oscstr,&
-     ab_out,lst,mpert,natom,nph2l,phfrq,comm,ana_ncid)
+     ab_out,lst,mpert,natom,inp%nph2l,phfrq,comm,ana_ncid)
  end if
 
 !**********************************************************************

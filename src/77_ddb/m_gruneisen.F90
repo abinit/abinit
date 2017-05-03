@@ -773,7 +773,7 @@ end subroutine gruns_free
 !!  gruns_anaddb
 !!
 !! FUNCTION
-!!  Driver routine called in anaddb to computate Gruneisen parameters.
+!!  Driver routine called in anaddb to compute Gruneisen parameters.
 !!
 !! INPUTS
 !!  inp<anaddb_dataset_type: :: anaddb input variables.
@@ -809,19 +809,15 @@ subroutine gruns_anaddb(inp, prefix, comm)
 !Local variables-------------------------------
 !scalars
  integer,parameter :: master=0
- integer :: ii,nprocs,my_rank,ncid,iv0,iphl2,msize
+ integer :: ii,nprocs,my_rank,ncid,iv0
 #ifdef HAVE_NETCDF
  integer :: ncerr
 #endif
  real(dp) :: cpu,wall,gflops
  type(gruns_t),target :: gruns
  type(kpath_t) :: qpath
- type(ifc_type),pointer :: ifc
- type(crystal_t),pointer :: crystal
  character(len=500) :: msg
 !arrays
- real(dp) :: qphnrm(3),qphon(3,3)
- real(dp),allocatable :: displ(:,:,:),phfrq(:),d2cart(:,:),eigvec(:,:,:),eigval(:)
 
 ! ************************************************************************
 
@@ -892,71 +888,18 @@ subroutine gruns_anaddb(inp, prefix, comm)
    call ifc_speedofsound(gruns%ifc_vol(iv0), gruns%cryst_vol(iv0), inp%vs_qrad_tolms, ncid, comm)
  end if
 
- !Now treat the second list of vectors (only at the Gamma point, but can include non-analyticities)
- if (inp%nph2l /= 0) then
-   ifc => gruns%ifc_vol(gruns%iv0)
-   crystal => gruns%cryst_vol(gruns%iv0)
-   msize = gruns%ddb_vol(gruns%iv0)%msize
-
-   ABI_MALLOC(phfrq, (3*crystal%natom))
-   ABI_MALLOC(displ, (2, 3*crystal%natom, 3*crystal%natom))
-   ABI_MALLOC(d2cart, (2, msize))
-   ABI_MALLOC(eigvec, (2, 3*crystal%natom, 3*crystal%natom))
-   ABI_MALLOC(eigval, (3*crystal%natom))
-
-   ! Before examining every direction or the dielectric tensor, generates the dynamical matrix at gamma
-   qphon(:,1)=zero; qphnrm(1)=zero
-
-   ! Generation of the dynamical matrix in cartesian coordinates
-   ! Get d2cart using the interatomic forces and the
-   ! long-range coulomb interaction through Ewald summation
-   call gtdyn9(ifc%acell,ifc%atmfrc,ifc%dielt,ifc%dipdip, &
-     ifc%dyewq0,d2cart,crystal%gmet,ifc%gprim,ifc%mpert,crystal%natom, &
-     ifc%nrpt,qphnrm(1),qphon,crystal%rmet,ifc%rprim,ifc%rpt, &
-     ifc%trans,crystal%ucvol,ifc%wghatm,crystal%xred,ifc%zeff)
-
-#ifdef HAVE_NETCDF
-   if (my_rank == master) then
-     iphl2 = 0
-     call nctk_defwrite_nonanal_terms(ncid, iphl2, inp%nph2l, inp%qph2l, crystal%natom, phfrq, displ, "define")
-   end if
-#endif
-   ! Examine every wavevector of this list
-   do iphl2=1,inp%nph2l
-     ! Initialisation of the phonon wavevector
-     qphon(:,1) = inp%qph2l(:,iphl2)
-     qphnrm(1) = inp%qnrml2(iphl2)
-
-     ! Calculation of the eigenvectors and eigenvalues of the dynamical matrix
-     call dfpt_phfrq(ifc%amu,displ,d2cart,eigval,eigvec,crystal%indsym, &
-        ifc%mpert,crystal%nsym,crystal%natom,crystal%nsym,crystal%ntypat,phfrq,qphnrm(1),qphon, &
-        crystal%rprimd,ifc%symdynmat,crystal%symrel,crystal%symafm,crystal%typat,crystal%ucvol)
-
-     ! Write the phonon frequencies
-     !call dfpt_prtph(displ,inp%eivec,inp%enunit,ab_out,natom,phfrq,qphnrm(1),qphon)
-
-#ifdef HAVE_NETCDF
-     if (my_rank == master) then
-       ! Loop is not MPI-parallelized --> no need for MPI-IO API.
-       call nctk_defwrite_nonanal_terms(ncid, iphl2, inp%nph2l, inp%qph2l, crystal%natom, phfrq, displ, "write")
-     end if
-#endif
-   end do ! iphl2
-
-   ABI_FREE(phfrq)
-   ABI_FREE(displ)
-   ABI_FREE(d2cart)
-   ABI_FREE(eigvec)
-   ABI_FREE(eigval)
+ ! Now treat the second list of vectors (only at the Gamma point, but can include non-analyticities)
+ if (my_rank == master .and. inp%nph2l /= 0 .and. inp%ifcflag == 1) then
+   call ifc_calcnwrite_nana_terms(gruns%ifc_vol(iv0), gruns%cryst_vol(iv0), inp%nph2l, inp%qph2l, inp%qnrml2, ncid)
  end if
-
- call gruns_free(gruns)
 
 #ifdef HAVE_NETCDF
  if (my_rank == master) then
    NCF_CHECK(nf90_close(ncid))
  end if
 #endif
+
+ call gruns_free(gruns)
 
  call cwtime(cpu,wall,gflops,"stop")
  write(msg,'(2(a,f8.2))')" gruns_anaddb completed. cpu:",cpu,", wall:",wall
