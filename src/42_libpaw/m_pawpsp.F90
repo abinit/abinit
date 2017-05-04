@@ -2974,7 +2974,7 @@ subroutine pawpsp_17in(epsatm,ffspl,icoulomb,ipsp,ixc,lmax,&
 
 !Local variables ------------------------------
 !scalars
- integer :: ib,icoremesh,il,ilm,ilmn,ilmn0,iln,imainmesh,imsh,iprojmesh,ipsploc
+ integer :: has_v_minushalf,ib,icoremesh,il,ilm,ilmn,ilmn0,iln,imainmesh,imsh,iprojmesh,ipsploc
  integer :: ir,iread1,ishpfmesh,ivalemesh,ivlocmesh,j0lmn,jlm,pngau
  integer :: jlmn,jln,klmn,msz,nmesh,nval,pspversion,sz10,usexcnhat,vlocopt
  real(dp), parameter :: rmax_vloc=10.0_dp
@@ -2985,7 +2985,7 @@ subroutine pawpsp_17in(epsatm,ffspl,icoulomb,ipsp,ixc,lmax,&
 !arrays
  integer,allocatable :: nprj(:)
  real(dp),allocatable :: kij(:),ncore(:)
- real(dp),allocatable :: shpf(:,:),tncore(:),tnvale(:),tproj(:,:),vhnzc(:),vlocr(:)
+ real(dp),allocatable :: shpf(:,:),tncore(:),tnvale(:),tproj(:,:),vhnzc(:),vlocr(:),v_minushalf(:)
  real(dp),allocatable :: work1(:),work2(:),work3(:),work4(:)
  type(pawrad_type),allocatable :: radmesh(:)
 
@@ -3352,6 +3352,7 @@ subroutine pawpsp_17in(epsatm,ffspl,icoulomb,ipsp,ixc,lmax,&
  call wrtout(ab_out,msg,'COLL')
  call wrtout(std_out,  msg,'COLL')
 
+
 !---------------------------------
 !Read core density (coredens)
  do imsh=1,nmesh
@@ -3485,6 +3486,31 @@ subroutine pawpsp_17in(epsatm,ffspl,icoulomb,ipsp,ixc,lmax,&
  call wrtout(ab_out,msg,'COLL')
  call wrtout(std_out,  msg,'COLL')
 
+!-------------------------------------------------
+!Read LDA-1/2 potential
+ if (paw_setup(ipsploc)%LDA_minus_half_potential%tread) then
+   do imsh=1,nmesh
+     if(trim(paw_setup(ipsploc)%LDA_minus_half_potential%grid)==trim(paw_setup(ipsploc)%radial_grid(imsh)%id)) then
+       iread1=imsh
+       cycle
+     end if
+   end do
+   if(iread1/=ivlocmesh) then
+     write(msg, '(a)' )&
+&     'The LDA-1/2 potential must be given on the same grid as the local potential.'
+     MSG_ERROR(msg)
+   end if
+   has_v_minushalf=1
+   LIBPAW_ALLOCATE(v_minushalf,(vloc_mesh%mesh_size))
+   v_minushalf(1:vloc_mesh%mesh_size)=paw_setup(ipsploc)%LDA_minus_half_potential%data(1:vloc_mesh%mesh_size)/sqrt(fourpi)
+   write(msg,'(a,i1)') &
+&   ' Radial grid used for LDA-1/2 potential is grid ',ivlocmesh
+   call wrtout(ab_out,msg,'COLL')
+   call wrtout(std_out,  msg,'COLL')
+ else
+   has_v_minushalf=0
+   LIBPAW_ALLOCATE(v_minushalf,(0))
+ end if
 !---------------------------------
 !Eventually read "numeric" shapefunctions (if shape_type=-1)
  if (pawtab%shape_type==-1) then

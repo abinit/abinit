@@ -244,7 +244,7 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
 !or Electric field perturbation
 !or Strain perturbation
 !-------------------------------------------
- if (ipert<=natom+4.and.ipert/=natom+1.and.optlocal>0) then
+ if (ipert<=natom+5.and.ipert/=natom+1.and.optlocal>0) then !SPr deb
 
    ABI_ALLOCATE(work,(2,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6))
 
@@ -1009,6 +1009,9 @@ subroutine getgh1c_setup(gs_hamkq,rf_hamkq,dtset,psps,kpoint,kpq,idir,ipert,&   
    if (ipert==natom+3) istr=idir
    if (ipert==natom+4) istr=idir+3
    ider=1;idir0=-istr
+ !-- Magnetic field perturbation ( SPr, Zeeman )
+ else if(ipert==natom+5)then
+   ider=0;idir0=0
  end if
 
 !Compute nonlocal form factors ffnl1 at (k+q+G), for all atoms
