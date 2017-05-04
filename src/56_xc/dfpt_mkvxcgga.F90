@@ -53,29 +53,25 @@
 !!       kxc(:,6)= grady(rho)
 !!       kxc(:,7)= gradz(rho)
 !!    if nspden>=2:
-!!       kxc(:,1)= d2Ex/drho_up drho_up
-!!       kxc(:,2)= d2Ex/drho_dn drho_dn
-!!       kxc(:,3)= 1/|grad(rho_up)| dEx/d|grad(rho_up)|
-!!       kxc(:,4)= 1/|grad(rho_dn)| dEx/d|grad(rho_dn)|
-!!       kxc(:,5)= 1/|grad(rho_up)| d2Ex/d|grad(rho_up)| drho_up
-!!       kxc(:,6)= 1/|grad(rho_dn)| d2Ex/d|grad(rho_dn)| drho_dn
-!!       kxc(:,7)= 1/|grad(rho_up)| * d/d|grad(rho_up)| ( 1/|grad(rho_up)| dEx/d|grad(rho_up)| )
-!!       kxc(:,8)= 1/|grad(rho_dn)| * d/d|grad(rho_dn)| ( 1/|grad(rho_dn)| dEx/d|grad(rho_dn)| )
-!!       kxc(:,9)= d2Ec/drho_up drho_up
-!!       kxc(:,10)=d2Ec/drho_up drho_dn
-!!       kxc(:,11)=d2Ec/drho_dn drho_dn
-!!       kxc(:,12)=1/|grad(rho)| dEc/d|grad(rho)|
-!!       kxc(:,13)=1/|grad(rho)| d2Ec/d|grad(rho)| drho_up
-!!       kxc(:,14)=1/|grad(rho)| d2Ec/d|grad(rho)| drho_dn
-!!       kxc(:,15)=1/|grad(rho)| * d/d|grad(rho)| ( 1/|grad(rho)| dEc/d|grad(rho)| )
-!!       kxc(:,16)=rho_up
-!!       kxc(:,17)=rho_dn
-!!       kxc(:,18)=gradx(rho_up)
-!!       kxc(:,19)=gradx(rho_dn)
-!!       kxc(:,20)=grady(rho_up)
-!!       kxc(:,21)=grady(rho_dn)
-!!       kxc(:,22)=gradz(rho_up)
-!!       kxc(:,23)=gradz(rho_dn)
+!!       kxc(:,1)= d2Exc/drho_up drho_up
+!!       kxc(:,2)= d2Exc/drho_up drho_dn
+!!       kxc(:,3)= d2Exc/drho_dn drho_dn
+!!       kxc(:,4)= 1/|grad(rho_up)| dEx/d|grad(rho_up)|
+!!       kxc(:,5)= 1/|grad(rho_dn)| dEx/d|grad(rho_dn)|
+!!       kxc(:,6)= 1/|grad(rho_up)| d2Ex/d|grad(rho_up)| drho_up
+!!       kxc(:,7)= 1/|grad(rho_dn)| d2Ex/d|grad(rho_dn)| drho_dn
+!!       kxc(:,8)= 1/|grad(rho_up)| * d/d|grad(rho_up)| ( 1/|grad(rho_up)| dEx/d|grad(rho_up)| )
+!!       kxc(:,9)= 1/|grad(rho_dn)| * d/d|grad(rho_dn)| ( 1/|grad(rho_dn)| dEx/d|grad(rho_dn)| )
+!!       kxc(:,10)=1/|grad(rho)| dEc/d|grad(rho)|
+!!       kxc(:,11)=1/|grad(rho)| d2Ec/d|grad(rho)| drho_up
+!!       kxc(:,12)=1/|grad(rho)| d2Ec/d|grad(rho)| drho_dn
+!!       kxc(:,13)=1/|grad(rho)| * d/d|grad(rho)| ( 1/|grad(rho)| dEc/d|grad(rho)| )
+!!       kxc(:,14)=gradx(rho_up)
+!!       kxc(:,15)=gradx(rho_dn)
+!!       kxc(:,16)=grady(rho_up)
+!!       kxc(:,17)=grady(rho_dn)
+!!       kxc(:,18)=gradz(rho_up)
+!!       kxc(:,19)=gradz(rho_dn)
 !!
 !! PARENTS
 !!      dfpt_mkvxc
@@ -131,16 +127,21 @@ subroutine dfpt_mkvxcgga(cplex,gprimd,kxc,mpi_enreg,nfft,ngfft,&
  real(dp) :: coeffim_grho,coeffim_grho_corr,coeffim_grho_dn,coeffim_grho_up
  real(dp) :: gradrho_gradrho1,gradrho_gradrho1_dn,gradrho_gradrho1_up
  real(dp) :: gradrho_gradrho1im,gradrho_gradrho1im_dn,gradrho_gradrho1im_up
+ character(len=500) :: msg
 !arrays
  real(dp) :: r0(3),r0_dn(3),r0_up(3),r1(3),r1_dn(3),r1_up(3)
  real(dp) :: r1im(3),r1im_dn(3),r1im_up(3)
  real(dp),allocatable :: dnexcdn(:,:),rho1now(:,:,:)
- real(dp),allocatable :: rhortmp(:,:,:)
  real(dp),ABI_CONTIGUOUS pointer :: rhor1_ptr(:,:)
 
 ! *************************************************************************
 
  DBG_ENTER("COLL")
+
+ if (nkxc/=12*min(nspden,2)-5) then
+   msg='Wrong nkxc value for GGA!'
+   MSG_BUG(msg)
+ end if
 
 !metaGGA contributions are not taken into account here
  mgga=0
@@ -176,19 +177,6 @@ subroutine dfpt_mkvxcgga(cplex,gprimd,kxc,mpi_enreg,nfft,ngfft,&
    ABI_DEALLOCATE(rhor1_ptr)
  end if
 
-!Transfer the ground-state density and its gradient to spin-polarized storage
-!rhortmp(:,:,1) contains the GS density, and
-!rhortmp(:,:,2:4) contains the gradients of the GS density
- if(nspden==2)then
-   ABI_ALLOCATE(rhortmp,(nfft,nspden,4))
-   do ii=1,4
-     do ir=1,nfft
-       rhortmp(ir,1,ii)=kxc(ir,15+2*ii)
-       rhortmp(ir,2,ii)=kxc(ir,14+2*ii)-kxc(ir,15+2*ii)
-     end do
-   end do
- end if
-
 !Apply the XC kernel
  nspgrad=2; if (nspden==2) nspgrad=5
  ABI_ALLOCATE(dnexcdn,(cplex*nfft,nspgrad))
@@ -205,8 +193,9 @@ subroutine dfpt_mkvxcgga(cplex,gprimd,kxc,mpi_enreg,nfft,ngfft,&
      end do
    else
      do ir=1,nfft
-       r0_up(:)=rhortmp(ir,1,2:4)   ! grad of spin-up GS rho
-       r0_dn(:)=rhortmp(ir,2,2:4)   ! grad of spin-down GS rho
+       do ii=1,3  ! grad of spin-up ans spin_dn GS rho
+         r0_up(ii)=kxc(ir,13+2*ii);r0_dn(ii)=kxc(ir,12+2*ii)-kxc(ir,13+2*ii)
+       end do
        r0(:)=r0_up(:)+r0_dn(:)      ! grad of GS rho
        r1_up(:)=rho1now(ir,1,2:4)   ! grad of spin-up rho1
        r1_dn(:)=rho1now(ir,2,2:4)   ! grad of spin-down rho1
@@ -214,27 +203,28 @@ subroutine dfpt_mkvxcgga(cplex,gprimd,kxc,mpi_enreg,nfft,ngfft,&
        gradrho_gradrho1_up=dot_product(r0_up,r1_up)
        gradrho_gradrho1_dn=dot_product(r0_dn,r1_dn)
        gradrho_gradrho1   =dot_product(r0,r1)
-       dnexcdn(ir,1)=(kxc(ir,1)+kxc(ir,9))*rho1now(ir,1,1)+&
-  &     kxc(ir,10)*rho1now(ir,2,1)+&
-  &     kxc(ir,5)*gradrho_gradrho1_up+&
-  &     kxc(ir,13)*gradrho_gradrho1
-       dnexcdn(ir,2)=(kxc(ir,2)+kxc(ir,11))*rho1now(ir,2,1)+&
-  &     kxc(ir,10)*rho1now(ir,1,1)+&
-  &     kxc(ir,6)*gradrho_gradrho1_dn+&
-  &     kxc(ir,14)*gradrho_gradrho1
-       coeff_grho_corr=(kxc(ir,13)*rho1now(ir,1,1)+kxc(ir,14)*rho1now(ir,2,1))+&
-  &     kxc(ir,15)*gradrho_gradrho1
-       coeff_grho_up= kxc(ir,5)*rho1now(ir,1,1)+kxc(ir,7)*gradrho_gradrho1_up
-       coeff_grho_dn= kxc(ir,6)*rho1now(ir,2,1)+kxc(ir,8)*gradrho_gradrho1_dn
+       dnexcdn(ir,1)=kxc(ir, 1)*rho1now(ir,1,1)     &
+&                   +kxc(ir, 2)*rho1now(ir,2,1)     &
+&                   +kxc(ir, 6)*gradrho_gradrho1_up &
+&                   +kxc(ir,11)*gradrho_gradrho1
+       dnexcdn(ir,2)=kxc(ir, 3)*rho1now(ir,2,1)     &
+&                   +kxc(ir, 2)*rho1now(ir,1,1)     &
+&                   +kxc(ir, 7)*gradrho_gradrho1_dn &
+&                   +kxc(ir,12)*gradrho_gradrho1
+       coeff_grho_corr=kxc(ir,11)*rho1now(ir,1,1) &
+&                     +kxc(ir,12)*rho1now(ir,2,1) &
+&                     +kxc(ir,13)*gradrho_gradrho1
+       coeff_grho_up=kxc(ir,6)*rho1now(ir,1,1)+kxc(ir,8)*gradrho_gradrho1_up
+       coeff_grho_dn=kxc(ir,7)*rho1now(ir,2,1)+kxc(ir,9)*gradrho_gradrho1_dn
   !    Reuse the storage in rho1now
-       rho1now(ir,1,2:4)=r1_up(:)*(kxc(ir,3)+kxc(ir,12))   &
-  &     +r1_dn(:)*kxc(ir,12)               &
-  &     +r0_up(:)*coeff_grho_up            &
-  &     +r0(:)*coeff_grho_corr
-       rho1now(ir,2,2:4)=r1_dn(:)*(kxc(ir,4)+kxc(ir,12))   &
-  &     +r1_up(:)*kxc(ir,12)               &
-  &     +r0_dn(:)*coeff_grho_dn            &
-  &     +r0(:)*coeff_grho_corr
+       rho1now(ir,1,2:4)=(kxc(ir,4)+kxc(ir,10))*r1_up(:) &
+&                       +kxc(ir,10)            *r1_dn(:) &
+&                       +coeff_grho_up         *r0_up(:) &
+&                       +coeff_grho_corr       *r0(:)
+       rho1now(ir,2,2:4)=(kxc(ir,5)+kxc(ir,10))*r1_dn(:) &
+&                       +kxc(ir,10)            *r1_up(:) &
+&                       +coeff_grho_dn         *r0_dn(:) &
+&                       +coeff_grho_corr       *r0(:)
      end do
    end if ! nspden
 
@@ -256,9 +246,10 @@ subroutine dfpt_mkvxcgga(cplex,gprimd,kxc,mpi_enreg,nfft,ngfft,&
      end do
    else
      do ir=1,nfft
-       r0_up(:)=rhortmp(ir,1,2:4)   ! grad of spin-up GS rho
-       r0_dn(:)=rhortmp(ir,2,2:4)   ! grad of spin-down GS rho
-       r0(:)=r0_up(:)+r0_dn(:)      ! grad of GS rho
+       do ii=1,3  ! grad of spin-up ans spin_dn GS rho
+         r0_up(ii)=kxc(ir,13+2*ii);r0_dn(ii)=kxc(ir,12+2*ii)-kxc(ir,13+2*ii)
+       end do
+       r0(:)=r0_up(:)+r0_dn(:)          ! grad of GS rho
        r1_up(:)=rho1now(2*ir-1,1,2:4)   ! grad of spin-up rho1
        r1im_up(:)=rho1now(2*ir,1,2:4)   ! grad of spin-up rho1 , im part
        r1_dn(:)=rho1now(2*ir-1,2,2:4)   ! grad of spin-down rho1
@@ -271,47 +262,49 @@ subroutine dfpt_mkvxcgga(cplex,gprimd,kxc,mpi_enreg,nfft,ngfft,&
        gradrho_gradrho1im_up=dot_product(r0_up,r1im_up)
        gradrho_gradrho1im_dn=dot_product(r0_dn,r1im_dn)
        gradrho_gradrho1im   =dot_product(r0,r1im)
-       dnexcdn(2*ir-1,1)=(kxc(ir,1)+kxc(ir,9))*rho1now(2*ir-1,1,1)+&
-&       kxc(ir,10)*rho1now(2*ir-1,2,1)+&
-&       kxc(ir,5)*gradrho_gradrho1_up+&
-&       kxc(ir,13)*gradrho_gradrho1
-       dnexcdn(2*ir  ,1)=(kxc(ir,1)+kxc(ir,9))*rho1now(2*ir,1,1)+&
-&       kxc(ir,10)*rho1now(2*ir,2,1)+&
-&       kxc(ir,5)*gradrho_gradrho1im_up+&
-&       kxc(ir,13)*gradrho_gradrho1im
-       dnexcdn(2*ir-1,2)=(kxc(ir,2)+kxc(ir,11))*rho1now(2*ir-1,2,1)+&
-&       kxc(ir,10)*rho1now(2*ir-1,1,1)+&
-&       kxc(ir,6)*gradrho_gradrho1_dn+&
-&       kxc(ir,14)*gradrho_gradrho1
-       dnexcdn(2*ir  ,2)=(kxc(ir,2)+kxc(ir,11))*rho1now(2*ir,2,1)+&
-&       kxc(ir,10)*rho1now(2*ir,1,1)+&
-&       kxc(ir,6)*gradrho_gradrho1im_dn+&
-&       kxc(ir,14)*gradrho_gradrho1im
-       coeff_grho_corr=(kxc(ir,13)*rho1now(2*ir-1,1,1)+kxc(ir,14)*rho1now(2*ir-1,2,1))+&
-&       kxc(ir,15)*gradrho_gradrho1
-       coeffim_grho_corr=(kxc(ir,13)*rho1now(2*ir,1,1)+kxc(ir,14)*rho1now(2*ir,2,1))+&
-&       kxc(ir,15)*gradrho_gradrho1im
-       coeff_grho_up= kxc(ir,5)*rho1now(2*ir-1,1,1)+kxc(ir,7)*gradrho_gradrho1_up
-       coeffim_grho_up= kxc(ir,5)*rho1now(2*ir,1,1)+kxc(ir,7)*gradrho_gradrho1im_up
-       coeff_grho_dn= kxc(ir,6)*rho1now(2*ir-1,2,1)+kxc(ir,8)*gradrho_gradrho1_dn
-       coeffim_grho_dn= kxc(ir,6)*rho1now(2*ir,2,1)+kxc(ir,8)*gradrho_gradrho1im_dn
+       dnexcdn(2*ir-1,1)=kxc(ir, 1)*rho1now(2*ir-1,1,1) &
+&                       +kxc(ir, 2)*rho1now(2*ir-1,2,1) &
+&                       +kxc(ir, 6)*gradrho_gradrho1_up &
+&                       +kxc(ir,11)*gradrho_gradrho1
+       dnexcdn(2*ir-1,2)=kxc(ir, 3)*rho1now(2*ir-1,2,1) &
+&                       +kxc(ir, 2)*rho1now(2*ir-1,1,1) &
+&                       +kxc(ir, 7)*gradrho_gradrho1_dn &
+&                       +kxc(ir,12)*gradrho_gradrho1
+       dnexcdn(2*ir  ,1)=kxc(ir, 1)*rho1now(2*ir  ,1,1) &
+&                       +kxc(ir, 2)*rho1now(2*ir  ,2,1) &
+&                       +kxc(ir, 6)*gradrho_gradrho1im_up &
+&                       +kxc(ir,11)*gradrho_gradrho1im
+       dnexcdn(2*ir  ,2)=kxc(ir, 3)*rho1now(2*ir  ,2,1) &
+&                       +kxc(ir, 2)*rho1now(2*ir  ,1,1) &
+&                       +kxc(ir, 7)*gradrho_gradrho1im_dn &
+&                       +kxc(ir,12)*gradrho_gradrho1im
+       coeff_grho_corr  =kxc(ir,11)*rho1now(2*ir-1,1,1) &
+&                       +kxc(ir,12)*rho1now(2*ir-1,2,1) &
+&                       +kxc(ir,13)*gradrho_gradrho1
+       coeffim_grho_corr=kxc(ir,11)*rho1now(2*ir  ,1,1) &
+&                       +kxc(ir,12)*rho1now(2*ir  ,2,1) &
+&                       +kxc(ir,13)*gradrho_gradrho1im
+       coeff_grho_up  =kxc(ir,6)*rho1now(2*ir-1,1,1)+kxc(ir,8)*gradrho_gradrho1_up
+       coeff_grho_dn  =kxc(ir,7)*rho1now(2*ir-1,2,1)+kxc(ir,9)*gradrho_gradrho1_dn
+       coeffim_grho_up=kxc(ir,6)*rho1now(2*ir  ,1,1)+kxc(ir,8)*gradrho_gradrho1im_up
+       coeffim_grho_dn=kxc(ir,7)*rho1now(2*ir  ,2,1)+kxc(ir,9)*gradrho_gradrho1im_dn
 !      Reuse the storage in rho1now
-       rho1now(2*ir-1,1,2:4)=r1_up(:)*(kxc(ir,3)+kxc(ir,12))   &
-&       +r1_dn(:)*kxc(ir,12)               &
-&       +r0_up(:)*coeff_grho_up            &
-&       +(r0_up(:)+r0_dn(:))*coeff_grho_corr
-       rho1now(2*ir  ,1,2:4)=r1im_up(:)*(kxc(ir,3)+kxc(ir,12))   &
-&       +r1im_dn(:)*kxc(ir,12)               &
-&       +r0_up(:)*coeffim_grho_up            &
-&       +(r0_up(:)+r0_dn(:))*coeffim_grho_corr
-       rho1now(2*ir-1,2,2:4)=r1_dn(:)*(kxc(ir,4)+kxc(ir,12))   &
-&       +r1_up(:)*kxc(ir,12)               &
-&       +r0_dn(:)*coeff_grho_dn            &
-&       +(r0_up(:)+r0_dn(:))*coeff_grho_corr
-       rho1now(2*ir  ,2,2:4)=r1im_dn(:)*(kxc(ir,4)+kxc(ir,12))   &
-&       +r1im_up(:)*kxc(ir,12)               &
-&       +r0_dn(:)*coeffim_grho_dn            &
-&       +(r0_up(:)+r0_dn(:))*coeffim_grho_corr
+       rho1now(2*ir-1,1,2:4)=(kxc(ir,4)+kxc(ir,10))*r1_up(:) &
+&                           +kxc(ir,10)            *r1_dn(:) &
+&                           +coeff_grho_up         *r0_up(:) &
+&                           +coeff_grho_corr*r0(:)
+       rho1now(2*ir-1,2,2:4)=(kxc(ir,5)+kxc(ir,10))*r1_dn(:) &
+&                           +kxc(ir,10)            *r1_up(:) &
+&                           +coeff_grho_dn         *r0_dn(:) &
+&                           +coeff_grho_corr*r0(:)
+       rho1now(2*ir  ,1,2:4)=(kxc(ir,4)+kxc(ir,10))*r1im_up(:) &
+&                           +kxc(ir,10)            *r1im_dn(:) &
+&                           +coeffim_grho_up       *r0_up(:)   &
+&                           +coeffim_grho_corr     *r0(:)
+       rho1now(2*ir  ,2,2:4)=(kxc(ir,5)+kxc(ir,10))*r1im_dn(:) &
+&                           +kxc(ir,10)            *r1im_up(:) &
+&                           +coeffim_grho_dn       *r0_dn(:)   &
+&                           +coeffim_grho_corr     *r0(:)
      end do
    end if ! nspden
 
@@ -324,9 +317,6 @@ subroutine dfpt_mkvxcgga(cplex,gprimd,kxc,mpi_enreg,nfft,ngfft,&
 !call filterpot(paral_kgb,cplex,gmet,gsqcut,nfft,ngfft,nspden,qphon,vxc1)
 
  ABI_DEALLOCATE(dnexcdn)
- if (nspden==2) then
-   ABI_DEALLOCATE(rhortmp)
- end if
  ABI_DEALLOCATE(rho1now)
 
  DBG_EXIT("COLL")

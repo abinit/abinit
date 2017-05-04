@@ -128,7 +128,7 @@ subroutine nres2vres(dtset,gsqcut,izero,kxc,mpi_enreg,my_natom,nfft,ngfft,nhat,&
 ! *************************************************************************
 
 !Compatibility tests:
- has_nkxc_gga=(nkxc==7.or.nkxc==23)
+ has_nkxc_gga=(nkxc==7.or.nkxc==19)
 
  if(optxc<-1.or.optxc>1)then
    write(message,'(a,i0)')' Wrong value for optxc ',optxc
@@ -153,8 +153,8 @@ subroutine nres2vres(dtset,gsqcut,izero,kxc,mpi_enreg,my_natom,nfft,ngfft,nhat,&
  nkxc_cur=0
  m_norm_min=EPSILON(0.0_dp)**2
  usexcnhat=0;if (usepaw==1) usexcnhat=maxval(pawtab(1:dtset%ntypat)%usexcnhat)
- if (dtset%xclevel==1.or.optxc==0) nkxc_cur=3 -2*mod(dtset%nspden,2) ! LDA: nkxc=1,3
- if (dtset%xclevel==2.and.optxc==1)nkxc_cur=16-9*mod(dtset%nspden,2) ! GGA: nkxc=7,23
+ if (dtset%xclevel==1.or.optxc==0) nkxc_cur= 2*min(dtset%nspden,2)-1 ! LDA: nkxc=1,3
+ if (dtset%xclevel==2.and.optxc==1)nkxc_cur=12*min(dtset%nspden,2)-5 ! GGA: nkxc=7,19
  ABI_ALLOCATE(vhres,(nfft))
 
 !Compute different geometric tensor, as well as ucvol, from rprimd

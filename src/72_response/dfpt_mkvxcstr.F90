@@ -98,12 +98,11 @@ subroutine dfpt_mkvxcstr(cplex,idir,ipert,kxc,mpi_enreg,natom,nfft,ngfft,nhat,nh
 
 !Local variables-------------------------------
 !scalars
- integer :: ii,ir,istr,jj,ka,kb
+ integer :: ii,ir,istr
  real(dp) :: rho1_dn,rho1_up,spin_scale,str_scale
  character(len=500) :: message
 !arrays
- integer,save :: idx(12)=(/1,1,2,2,3,3,3,2,3,1,2,1/)
- real(dp) :: dgprimdds(3,3),gprimd(3,3),tsec(2)
+ real(dp) :: gprimd(3,3),tsec(2)
  real(dp),allocatable :: rhor1tmp(:,:),rhowk1(:,:)
  real(dp),pointer :: rhor_(:,:),rhor1_(:,:)
  
@@ -186,7 +185,7 @@ subroutine dfpt_mkvxcstr(cplex,idir,ipert,kxc,mpi_enreg,natom,nfft,ngfft,nhat,nh
    end if ! n3xccc==0
 
 !  Treat GGA
- else if (nkxc==7.or.nkxc==23) then
+ else if (nkxc==7.or.nkxc==19) then
 
 !  Generates gprimd and its strain derivative
 !  Note that unlike the implicitly symmetric metric tensor strain
@@ -200,14 +199,6 @@ subroutine dfpt_mkvxcstr(cplex,idir,ipert,kxc,mpi_enreg,natom,nfft,ngfft,nhat,nh
 &     'Possible values are 1,2,3,4,5,6 only.'
      MSG_BUG(message)
    end if
-   dgprimdds(:,:)=zero
-   ka=idx(2*istr-1);kb=idx(2*istr)
-   do ii=1,3
-     do jj=1,3
-       if(jj==ka) dgprimdds(jj,ii)=-half*gprimd(kb,ii)
-       if(jj==kb) dgprimdds(jj,ii)=dgprimdds(jj,ii)-half*gprimd(ka,ii)
-     end do
-   end do
 
 !  Rescalling needed for use in dfpt_eltfrxc for elastic tensor (not internal strain tensor).
    str_scale=one;if(option==2) str_scale=two
@@ -234,7 +225,7 @@ subroutine dfpt_mkvxcstr(cplex,idir,ipert,kxc,mpi_enreg,natom,nfft,ngfft,nhat,nh
      end do
    end if
 
-   call dfpt_mkvxcstrgga(cplex,dgprimdds,gprimd,istr,kxc,mpi_enreg,nfft,ngfft,nkxc,&
+   call dfpt_mkvxcstrgga(cplex,gprimd,istr,kxc,mpi_enreg,nfft,ngfft,nkxc,&
 &                        nspden,paral_kgb,qphon,rhor1tmp,str_scale,vxc1)
    ABI_DEALLOCATE(rhor1tmp)
 

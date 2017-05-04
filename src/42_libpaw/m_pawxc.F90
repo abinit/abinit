@@ -790,9 +790,9 @@ end subroutine pawxc_mkdenpos_wrapper
 !!   ===== if LDA
 !!    if nspden==1: kxc(:,1)= d2Exc/drho2
 !!                 (kxc(:,2)= d2Exc/drho_up drho_dn)
-!!    if nspden>=2: kxc(:,1)=d2Exc/drho_up drho_up
-!!                         kxc(:,2)=d2Exc/drho_up drho_dn
-!!                         kxc(:,3)=d2Exc/drho_dn drho_dn
+!!    if nspden>=2: kxc(:,1)= d2Exc/drho_up drho_up
+!!                  kxc(:,2)= d2Exc/drho_up drho_dn
+!!                  kxc(:,3)= d2Exc/drho_dn drho_dn
 !!   ===== if GGA
 !!    if nspden==1:
 !!       kxc(:,1)= d2Exc/drho2
@@ -803,29 +803,25 @@ end subroutine pawxc_mkdenpos_wrapper
 !!       kxc(:,6)= grady(rho)
 !!       kxc(:,7)= gradz(rho)
 !!    if nspden>=2:
-!!       kxc(:,1)= d2Ex/drho_up drho_up
-!!       kxc(:,2)= d2Ex/drho_dn drho_dn
-!!       kxc(:,3)= 1/|grad(rho_up)| dEx/d|grad(rho_up)|
-!!       kxc(:,4)= 1/|grad(rho_dn)| dEx/d|grad(rho_dn)|
-!!       kxc(:,5)= 1/|grad(rho_up)| d2Ex/d|grad(rho_up)| drho_up
-!!       kxc(:,6)= 1/|grad(rho_dn)| d2Ex/d|grad(rho_dn)| drho_dn
-!!       kxc(:,7)= 1/|grad(rho_up)| * d/d|grad(rho_up)| ( 1/|grad(rho_up)| dEx/d|grad(rho_up)| )
-!!       kxc(:,8)= 1/|grad(rho_dn)| * d/d|grad(rho_dn)| ( 1/|grad(rho_dn)| dEx/d|grad(rho_dn)| )
-!!       kxc(:,9)= d2Ec/drho_up drho_up
-!!       kxc(:,10)=d2Ec/drho_up drho_dn
-!!       kxc(:,11)=d2Ec/drho_dn drho_dn
-!!       kxc(:,12)=1/|grad(rho)| dEc/d|grad(rho)|
-!!       kxc(:,13)=1/|grad(rho)| d2Ec/d|grad(rho)| drho_up
-!!       kxc(:,14)=1/|grad(rho)| d2Ec/d|grad(rho)| drho_dn
-!!       kxc(:,15)=1/|grad(rho)| * d/d|grad(rho)| ( 1/|grad(rho)| dEc/d|grad(rho)| )
-!!       kxc(:,16)=rho_up
-!!       kxc(:,17)=rho_dn
-!!       kxc(:,18)=gradx(rho_up)
-!!       kxc(:,19)=gradx(rho_dn)
-!!       kxc(:,20)=grady(rho_up)
-!!       kxc(:,21)=grady(rho_dn)
-!!       kxc(:,22)=gradz(rho_up)
-!!       kxc(:,23)=gradz(rho_dn)
+!!       kxc(:,1)= d2Exc/drho_up drho_up
+!!       kxc(:,2)= d2Exc/drho_up drho_dn
+!!       kxc(:,3)= d2Exc/drho_dn drho_dn
+!!       kxc(:,4)= 1/|grad(rho_up)| dEx/d|grad(rho_up)|
+!!       kxc(:,5)= 1/|grad(rho_dn)| dEx/d|grad(rho_dn)|
+!!       kxc(:,6)= 1/|grad(rho_up)| d2Ex/d|grad(rho_up)| drho_up
+!!       kxc(:,7)= 1/|grad(rho_dn)| d2Ex/d|grad(rho_dn)| drho_dn
+!!       kxc(:,8)= 1/|grad(rho_up)| * d/d|grad(rho_up)| ( 1/|grad(rho_up)| dEx/d|grad(rho_up)| )
+!!       kxc(:,9)= 1/|grad(rho_dn)| * d/d|grad(rho_dn)| ( 1/|grad(rho_dn)| dEx/d|grad(rho_dn)| )
+!!       kxc(:,10)=1/|grad(rho)| dEc/d|grad(rho)|
+!!       kxc(:,11)=1/|grad(rho)| d2Ec/d|grad(rho)| drho_up
+!!       kxc(:,12)=1/|grad(rho)| d2Ec/d|grad(rho)| drho_dn
+!!       kxc(:,13)=1/|grad(rho)| * d/d|grad(rho)| ( 1/|grad(rho)| dEc/d|grad(rho)| )
+!!       kxc(:,14)=gradx(rho_up)
+!!       kxc(:,15)=gradx(rho_dn)
+!!       kxc(:,16)=grady(rho_up)
+!!       kxc(:,17)=grady(rho_dn)
+!!       kxc(:,18)=gradz(rho_up)
+!!       kxc(:,19)=gradz(rho_dn)
 !!
 !! PARENTS
 !!      m_pawpsp,pawdenpot
@@ -1100,6 +1096,20 @@ subroutine pawxc(corexc,enxc,enxcdc,ixc,kxc,lm_size,lmselect,nhat,nkxc,nrad,nspd
          kxc(1:nrad,ipts,2)=half*dvxci(1:nrad,3)+dvxci(1:nrad,12)
          kxc(1:nrad,ipts,3)=quarter*dvxci(1:nrad,5)+dvxci(1:nrad,13)
          kxc(1:nrad,ipts,4)=eighth*dvxci(1:nrad,7)+dvxci(1:nrad,15)
+       else if (nkxc==19.and.ndvxc==15) then
+         kxc(1:nrad,ipts,1)=dvxci(1:nrad,1)+dvxci(1:nrad,9)
+         kxc(1:nrad,ipts,2)=dvxci(1:nrad,10)
+         kxc(1:nrad,ipts,3)=dvxci(1:nrad,2)+dvxci(1:nrad,11)
+         kxc(1:nrad,ipts,4)=dvxci(1:nrad,3)
+         kxc(1:nrad,ipts,5)=dvxci(1:nrad,4)
+         kxc(1:nrad,ipts,6)=dvxci(1:nrad,5)
+         kxc(1:nrad,ipts,7)=dvxci(1:nrad,6)
+         kxc(1:nrad,ipts,8)=dvxci(1:nrad,7)
+         kxc(1:nrad,ipts,9)=dvxci(1:nrad,8)
+         kxc(1:nrad,ipts,10)=dvxci(1:nrad,12)
+         kxc(1:nrad,ipts,11)=dvxci(1:nrad,13)
+         kxc(1:nrad,ipts,12)=dvxci(1:nrad,14)
+         kxc(1:nrad,ipts,13)=dvxci(1:nrad,15)
        else ! Other cases
          kxc(1:nrad,ipts,1:nkxc)=zero
          kxc(1:nrad,ipts,1:min(nkxc,ndvxc))=dvxci(1:nrad,1:min(nkxc,ndvxc))
@@ -1108,15 +1118,13 @@ subroutine pawxc(corexc,enxc,enxcdc,ixc,kxc,lm_size,lmselect,nhat,nkxc,nrad,nspd
          kxc(1:nrad,ipts,5)=rhonow(1:nrad,1,2)
          kxc(1:nrad,ipts,6)=rhonow(1:nrad,1,3)
          kxc(1:nrad,ipts,7)=rhonow(1:nrad,1,4)
-       else if (nkxc==23) then
-         kxc(1:nrad,ipts,16)=rhonow(1:nrad,1,1)
-         kxc(1:nrad,ipts,17)=rhonow(1:nrad,2,1)
-         kxc(1:nrad,ipts,18)=rhonow(1:nrad,1,2)
-         kxc(1:nrad,ipts,19)=rhonow(1:nrad,2,2)
-         kxc(1:nrad,ipts,20)=rhonow(1:nrad,1,3)
-         kxc(1:nrad,ipts,21)=rhonow(1:nrad,2,3)
-         kxc(1:nrad,ipts,22)=rhonow(1:nrad,1,4)
-         kxc(1:nrad,ipts,23)=rhonow(1:nrad,2,4)
+       else if (nkxc==19) then
+         kxc(1:nrad,ipts,14)=rhonow(1:nrad,1,2)
+         kxc(1:nrad,ipts,15)=rhonow(1:nrad,2,2)
+         kxc(1:nrad,ipts,16)=rhonow(1:nrad,1,3)
+         kxc(1:nrad,ipts,17)=rhonow(1:nrad,2,3)
+         kxc(1:nrad,ipts,18)=rhonow(1:nrad,1,4)
+         kxc(1:nrad,ipts,19)=rhonow(1:nrad,2,4)
        end if
      end if
 
@@ -1698,9 +1706,9 @@ end subroutine pawxcpositron
 !!   ===== if LDA
 !!    if nspden==1: kxc(:,1)= d2Exc/drho2
 !!                 (kxc(:,2)= d2Exc/drho_up drho_dn)
-!!    if nspden>=2: kxc(:,1)=d2Exc/drho_up drho_up
-!!                  kxc(:,2)=d2Exc/drho_up drho_dn
-!!                  kxc(:,3)=d2Exc/drho_dn drho_dn
+!!    if nspden>=2: kxc(:,1)= d2Exc/drho_up drho_up
+!!                  kxc(:,2)= d2Exc/drho_up drho_dn
+!!                  kxc(:,3)= d2Exc/drho_dn drho_dn
 !!   ===== if GGA
 !!    if nspden==1:
 !!       kxc(:,1)= d2Exc/drho2
@@ -1711,29 +1719,25 @@ end subroutine pawxcpositron
 !!       kxc(:,6)= grady(rho)
 !!       kxc(:,7)= gradz(rho)
 !!    if nspden>=2:
-!!       kxc(:,1)= d2Ex/drho_up drho_up
-!!       kxc(:,2)= d2Ex/drho_dn drho_dn
-!!       kxc(:,3)= 1/|grad(rho_up)| dEx/d|grad(rho_up)|
-!!       kxc(:,4)= 1/|grad(rho_dn)| dEx/d|grad(rho_dn)|
-!!       kxc(:,5)= 1/|grad(rho_up)| d2Ex/d|grad(rho_up)| drho_up
-!!       kxc(:,6)= 1/|grad(rho_dn)| d2Ex/d|grad(rho_dn)| drho_dn
-!!       kxc(:,7)= 1/|grad(rho_up)| * d/d|grad(rho_up)| ( 1/|grad(rho_up)| dEx/d|grad(rho_up)| )
-!!       kxc(:,8)= 1/|grad(rho_dn)| * d/d|grad(rho_dn)| ( 1/|grad(rho_dn)| dEx/d|grad(rho_dn)| )
-!!       kxc(:,9)= d2Ec/drho_up drho_up
-!!       kxc(:,10)=d2Ec/drho_up drho_dn
-!!       kxc(:,11)=d2Ec/drho_dn drho_dn
-!!       kxc(:,12)=1/|grad(rho)| dEc/d|grad(rho)|
-!!       kxc(:,13)=1/|grad(rho)| d2Ec/d|grad(rho)| drho_up
-!!       kxc(:,14)=1/|grad(rho)| d2Ec/d|grad(rho)| drho_dn
-!!       kxc(:,15)=1/|grad(rho)| * d/d|grad(rho)| ( 1/|grad(rho)| dEc/d|grad(rho)| )
-!!       kxc(:,16)=rho_up
-!!       kxc(:,17)=rho_dn
-!!       kxc(:,18)=gradx(rho_up)
-!!       kxc(:,19)=gradx(rho_dn)
-!!       kxc(:,20)=grady(rho_up)
-!!       kxc(:,21)=grady(rho_dn)
-!!       kxc(:,22)=gradz(rho_up)
-!!       kxc(:,23)=gradz(rho_dn)
+!!       kxc(:,1)= d2Exc/drho_up drho_up
+!!       kxc(:,2)= d2Exc/drho_up drho_dn
+!!       kxc(:,3)= d2Exc/drho_dn drho_dn
+!!       kxc(:,4)= 1/|grad(rho_up)| dEx/d|grad(rho_up)|
+!!       kxc(:,5)= 1/|grad(rho_dn)| dEx/d|grad(rho_dn)|
+!!       kxc(:,6)= 1/|grad(rho_up)| d2Ex/d|grad(rho_up)| drho_up
+!!       kxc(:,7)= 1/|grad(rho_dn)| d2Ex/d|grad(rho_dn)| drho_dn
+!!       kxc(:,8)= 1/|grad(rho_up)| * d/d|grad(rho_up)| ( 1/|grad(rho_up)| dEx/d|grad(rho_up)| )
+!!       kxc(:,9)= 1/|grad(rho_dn)| * d/d|grad(rho_dn)| ( 1/|grad(rho_dn)| dEx/d|grad(rho_dn)| )
+!!       kxc(:,10)=1/|grad(rho)| dEc/d|grad(rho)|
+!!       kxc(:,11)=1/|grad(rho)| d2Ec/d|grad(rho)| drho_up
+!!       kxc(:,12)=1/|grad(rho)| d2Ec/d|grad(rho)| drho_dn
+!!       kxc(:,13)=1/|grad(rho)| * d/d|grad(rho)| ( 1/|grad(rho)| dEc/d|grad(rho)| )
+!!       kxc(:,14)=gradx(rho_up)
+!!       kxc(:,15)=gradx(rho_dn)
+!!       kxc(:,16)=grady(rho_up)
+!!       kxc(:,17)=grady(rho_dn)
+!!       kxc(:,18)=gradz(rho_up)
+!!       kxc(:,19)=gradz(rho_dn)
 
 !! PARENTS
 !!      m_pawxc
@@ -1811,8 +1815,8 @@ subroutine pawxc3(corexc1,cplex_den,cplex_vxc,d2enxc,ixc,kxc,lm_size,lmselect,nh
      msg='nkxc must be 1 or 3 for LDA!'
      MSG_BUG(msg)
    end if
-   if(xclevel==2.and.nkxc/=16*min(nspden,2)-9) then
-     msg='nkxc should be 7 or 23 for GGA!'
+   if(xclevel==2.and.nkxc/=12*min(nspden,2)-5) then
+     msg='nkxc should be 7 or 19 for GGA!'
      MSG_BUG(msg)
    end if
  end if
@@ -2142,37 +2146,37 @@ subroutine pawxc3(corexc1,cplex_den,cplex_vxc,d2enxc,ixc,kxc,lm_size,lmselect,nh
          do ir=1,nrad
            jr=cplex_den*(ir-1)+1 ; kr=cplex_vxc*(ir-1)+1
 
-           g0_up(1)=kxc(ir,ipts,19);g0_dn(1)=kxc(ir,ipts,18)-kxc(ir,ipts,19)
-           g0_up(2)=kxc(ir,ipts,21);g0_dn(2)=kxc(ir,ipts,20)-kxc(ir,ipts,21)
-           g0_up(3)=kxc(ir,ipts,23);g0_dn(3)=kxc(ir,ipts,22)-kxc(ir,ipts,23)
+           g0_up(1)=kxc(ir,ipts,15);g0_dn(1)=kxc(ir,ipts,14)-kxc(ir,ipts,15)
+           g0_up(2)=kxc(ir,ipts,17);g0_dn(2)=kxc(ir,ipts,16)-kxc(ir,ipts,17)
+           g0_up(3)=kxc(ir,ipts,19);g0_dn(3)=kxc(ir,ipts,18)-kxc(ir,ipts,19)
            g1_up(:)=grho1_updn(jr,1,:);g1_dn(:)=grho1_updn(jr,2,:)
            g0(:)=g0_up(:)+g0_dn(:);g1(:)=g1_up(:)+g1_dn(:)
            grho_grho1_up=dot_product(g0_up,g1_up)
            grho_grho1_dn=dot_product(g0_dn,g1_dn)
            grho_grho1   =dot_product(g0,g1)
-           coeff_grho_corr=kxc(ir,ipts,13)*rho1_updn(jr,1) &
-&                         +kxc(ir,ipts,14)*rho1_updn(jr,2) &
-&                         +kxc(ir,ipts,15)*grho_grho1
-           coeff_grho_up=kxc(ir,ipts,5)*rho1_updn(jr,1) &
-&                       +kxc(ir,ipts,7)*grho_grho1_up
-           coeff_grho_dn=kxc(ir,ipts,6)*rho1_updn(jr,2) &
-&                       +kxc(ir,ipts,8)*grho_grho1_dn
-           vxc1_(kr,ipts,1)=(kxc(ir,ipts,1)+kxc(ir,ipts, 9))*rho1_updn(jr,1) &
-&                          +kxc(ir,ipts,10)*rho1_updn(jr,2) &
-&                          +kxc(ir,ipts, 5)*grho_grho1_up &
-&                          +kxc(ir,ipts,13)*grho_grho1
-           vxc1_(kr,ipts,2)=(kxc(ir,ipts,2)+kxc(ir,ipts,11))*rho1_updn(jr,2) &
-&                           +kxc(ir,ipts,10)*rho1_updn(jr,1) &
-&                           +kxc(ir,ipts, 6)*grho_grho1_dn &
-&                           +kxc(ir,ipts,14)*grho_grho1
-           gxc1r(:,1)=g1_up(:)*(kxc(ir,ipts,3)+kxc(ir,ipts,12)) &
-&                    +g1_dn(:)*kxc(ir,ipts,12) &
-&                    +g0_up(:)*coeff_grho_up &
-&                    +g0(:)*coeff_grho_corr
-           gxc1r(:,2)=g1_dn(:)*(kxc(ir,ipts,4)+kxc(ir,ipts,12)) &
-&                    +g1_up(:)*kxc(ir,ipts,12) &
-&                    +g0_dn(:)*coeff_grho_dn &
-&                    +g0(:)*coeff_grho_corr
+           coeff_grho_corr=kxc(ir,ipts,11)*rho1_updn(jr,1) &
+&                         +kxc(ir,ipts,12)*rho1_updn(jr,2) &
+&                         +kxc(ir,ipts,13)*grho_grho1
+           coeff_grho_up=kxc(ir,ipts,6)*rho1_updn(jr,1) &
+&                       +kxc(ir,ipts,8)*grho_grho1_up
+           coeff_grho_dn=kxc(ir,ipts,7)*rho1_updn(jr,2) &
+&                       +kxc(ir,ipts,9)*grho_grho1_dn
+           vxc1_(kr,ipts,1)=kxc(ir,ipts, 1)*rho1_updn(jr,1) &
+&                          +kxc(ir,ipts, 2)*rho1_updn(jr,2) &
+&                          +kxc(ir,ipts, 6)*grho_grho1_up &
+&                          +kxc(ir,ipts,11)*grho_grho1
+           vxc1_(kr,ipts,2)=kxc(ir,ipts, 3)*rho1_updn(jr,2) &
+&                          +kxc(ir,ipts, 2)*rho1_updn(jr,1) &
+&                          +kxc(ir,ipts, 7)*grho_grho1_dn &
+&                          +kxc(ir,ipts,12)*grho_grho1
+           gxc1r(:,1)=(kxc(ir,ipts,4)+kxc(ir,ipts,10))*g1_up(:) &
+&                    +kxc(ir,ipts,10)                 *g1_dn(:) &
+&                    +coeff_grho_up                   *g0_up(:) &
+&                    +coeff_grho_corr                 *g0(:)
+           gxc1r(:,2)=(kxc(ir,ipts,5)+kxc(ir,ipts,10))*g1_dn(:) &
+&                    +kxc(ir,ipts,10)                 *g1_up(:) &
+&                    +coeff_grho_dn                   *g0_dn(:) &
+&                    +coeff_grho_corr                 *g0(:)
            !Accumulate gxc1_lm moments as Intg[gxc1(omega).Ylm(omega).d_omega]
            do ispden=1,nspden
              do ilm=1,pawang%ylm_size
@@ -2189,29 +2193,29 @@ subroutine pawxc3(corexc1,cplex_den,cplex_vxc,d2enxc,ixc,kxc,lm_size,lmselect,nh
                grho_grho1im_up=dot_product(g0_up,g1im_up)
                grho_grho1im_dn=dot_product(g0_dn,g1im_dn)
                grho_grho1im   =dot_product(g0,g1im)
-               coeff_grhoim_corr=kxc(ir,ipts,13)*rho1_updn(jr+1,1) &
-&                               +kxc(ir,ipts,14)*rho1_updn(jr+1,2) &
-&                               +kxc(ir,ipts,15)*grho_grho1im
-               coeff_grhoim_up=kxc(ir,ipts,5)*rho1_updn(jr+1,1) &
-&                             +kxc(ir,ipts,7)*grho_grho1im_up
-               coeff_grhoim_dn=kxc(ir,ipts,6)*rho1_updn(jr+1,2) &
-&                             +kxc(ir,ipts,8)*grho_grho1im_dn
-               vxc1_(kr+1,ipts,1)=(kxc(ir,ipts,1)+kxc(ir,ipts, 9))*rho1_updn(jr+1,1) &
-&                                +kxc(ir,ipts,10)*rho1_updn(jr+1,2) &
-&                                +kxc(ir,ipts, 5)*grho_grho1im_up &
-&                                +kxc(ir,ipts,13)*grho_grho1im
-               vxc1_(kr+1,ipts,2)=(kxc(ir,ipts,2)+kxc(ir,ipts,11))*rho1_updn(jr+1,2) &
-&                                +kxc(ir,ipts,10)*rho1_updn(jr+1,1) &
-&                                +kxc(ir,ipts, 6)*grho_grho1im_dn &
-&                                +kxc(ir,ipts,14)*grho_grho1im
-               gxc1i(:,1)=g1im_up(:)*(kxc(ir,ipts,3)+kxc(ir,ipts,12)) &
-&                        +g1im_dn(:)*kxc(ir,ipts,12) &
-&                        +g0_up(:)*coeff_grhoim_up &
-&                        +g0(:)*coeff_grhoim_corr
-               gxc1i(:,2)=g1im_dn(:)*(kxc(ir,ipts,4)+kxc(ir,ipts,12)) &
-&                        +g1im_up(:)*kxc(ir,ipts,12) &
-&                        +g0_dn(:)*coeff_grhoim_dn &
-&                        +g0(:)*coeff_grhoim_corr
+               coeff_grhoim_corr=kxc(ir,ipts,11)*rho1_updn(jr+1,1) &
+&                               +kxc(ir,ipts,12)*rho1_updn(jr+1,2) &
+&                               +kxc(ir,ipts,13)*grho_grho1im
+               coeff_grhoim_up=kxc(ir,ipts,6)*rho1_updn(jr+1,1) &
+&                             +kxc(ir,ipts,8)*grho_grho1im_up
+               coeff_grhoim_dn=kxc(ir,ipts,7)*rho1_updn(jr+1,2) &
+&                             +kxc(ir,ipts,9)*grho_grho1im_dn
+               vxc1_(kr+1,ipts,1)=kxc(ir,ipts, 1)*rho1_updn(jr+1,1) &
+&                                +kxc(ir,ipts, 2)*rho1_updn(jr+1,2) &
+&                                +kxc(ir,ipts, 6)*grho_grho1im_up   &
+&                                +kxc(ir,ipts,11)*grho_grho1im
+               vxc1_(kr+1,ipts,2)=kxc(ir,ipts, 3)*rho1_updn(jr+1,2) &
+&                                +kxc(ir,ipts, 2)*rho1_updn(jr+1,1) &
+&                                +kxc(ir,ipts, 7)*grho_grho1im_dn   &
+&                                +kxc(ir,ipts,12)*grho_grho1im
+               gxc1i(:,1)=(kxc(ir,ipts,4)+kxc(ir,ipts,10))*g1im_up(:) &
+&                        +kxc(ir,ipts,10)                 *g1im_dn(:) &
+&                        +coeff_grhoim_up                 *g0_up(:)   &
+&                        +coeff_grhoim_corr               *g0(:)
+               gxc1i(:,2)=(kxc(ir,ipts,5)+kxc(ir,ipts,10))*g1im_dn(:) &
+&                        +kxc(ir,ipts,10)                 *g1im_up(:) &
+&                        +coeff_grhoim_dn                 *g0_dn(:)   &
+&                        +coeff_grhoim_corr               *g0(:)
                !Accumulate gxc1_lm moments as Intg[gxc1(omega).Ylm(omega).d_omega]
                do ispden=1,nspden
                  do ilm=1,pawang%ylm_size
@@ -2629,6 +2633,20 @@ end subroutine pawxc3
      kxc(1:nrad,2)=half*dvxci(1:nrad,3)+dvxci(1:nrad,12)
      kxc(1:nrad,3)=quarter*dvxci(1:nrad,5)+dvxci(1:nrad,13)
      kxc(1:nrad,4)=eighth*dvxci(1:nrad,7)+dvxci(1:nrad,15)
+   else if (nkxc==19.and.ndvxc==15) then
+     kxc(1:nrad,1)=dvxci(1:nrad,1)+dvxci(1:nrad,9)
+     kxc(1:nrad,2)=dvxci(1:nrad,10)
+     kxc(1:nrad,3)=dvxci(1:nrad,2)+dvxci(1:nrad,11)
+     kxc(1:nrad,4)=dvxci(1:nrad,3)
+     kxc(1:nrad,5)=dvxci(1:nrad,4)
+     kxc(1:nrad,6)=dvxci(1:nrad,5)
+     kxc(1:nrad,7)=dvxci(1:nrad,6)
+     kxc(1:nrad,8)=dvxci(1:nrad,7)
+     kxc(1:nrad,9)=dvxci(1:nrad,8)
+     kxc(1:nrad,10)=dvxci(1:nrad,12)
+     kxc(1:nrad,11)=dvxci(1:nrad,13)
+     kxc(1:nrad,12)=dvxci(1:nrad,14)
+     kxc(1:nrad,13)=dvxci(1:nrad,15)
    else ! Other cases
      kxc(1:nrad,1:nkxc)=zero
      kxc(1:nrad,1:min(nkxc,ndvxc))=dvxci(1:nrad,1:min(nkxc,ndvxc))
@@ -2637,15 +2655,13 @@ end subroutine pawxc3
      kxc(1:nrad,5)=grho_updn(1:nrad,1)  ! Not correct
      kxc(1:nrad,6)=grho_updn(1:nrad,1)  ! Not correct
      kxc(1:nrad,7)=grho_updn(1:nrad,1)  ! Not correct
-   else if (nkxc==23) then
-     kxc(1:nrad,16)=rho_updn(1:nrad,1)  ! Not correct
-     kxc(1:nrad,17)=rho_updn(1:nrad,2)  ! Not correct
+   else if (nkxc==19) then
+     kxc(1:nrad,14)=grho_updn(1:nrad,1) ! Not correct
+     kxc(1:nrad,15)=grho_updn(1:nrad,2) ! Not correct
+     kxc(1:nrad,16)=grho_updn(1:nrad,1) ! Not correct
+     kxc(1:nrad,17)=grho_updn(1:nrad,2) ! Not correct
      kxc(1:nrad,18)=grho_updn(1:nrad,1) ! Not correct
      kxc(1:nrad,19)=grho_updn(1:nrad,2) ! Not correct
-     kxc(1:nrad,20)=grho_updn(1:nrad,1) ! Not correct
-     kxc(1:nrad,21)=grho_updn(1:nrad,2) ! Not correct
-     kxc(1:nrad,22)=grho_updn(1:nrad,1) ! Not correct
-     kxc(1:nrad,23)=grho_updn(1:nrad,2) ! Not correct
    end if
  end if
  LIBPAW_DEALLOCATE(dvxci)
@@ -2920,6 +2936,20 @@ subroutine pawxcsph3(cplex_den,cplex_vxc,ixc,nrad,nspden,pawrad,rho_updn,rho1_up
      kxc(1:nrad,2)=half*dvxc(1:nrad,3)+dvxc(1:nrad,12)
      kxc(1:nrad,3)=quarter*dvxc(1:nrad,5)+dvxc(1:nrad,13)
      kxc(1:nrad,4)=eighth*dvxc(1:nrad,7)+dvxc(1:nrad,15)
+   else if (nkxc==19.and.ndvxc==15) then
+     kxc(1:nrad,1)=dvxc(1:nrad,1)+dvxc(1:nrad,9)
+     kxc(1:nrad,2)=dvxc(1:nrad,10)
+     kxc(1:nrad,3)=dvxc(1:nrad,2)+dvxc(1:nrad,11)
+     kxc(1:nrad,4)=dvxc(1:nrad,3)
+     kxc(1:nrad,5)=dvxc(1:nrad,4)
+     kxc(1:nrad,6)=dvxc(1:nrad,5)
+     kxc(1:nrad,7)=dvxc(1:nrad,6)
+     kxc(1:nrad,8)=dvxc(1:nrad,7)
+     kxc(1:nrad,9)=dvxc(1:nrad,8)
+     kxc(1:nrad,10)=dvxc(1:nrad,12)
+     kxc(1:nrad,11)=dvxc(1:nrad,13)
+     kxc(1:nrad,12)=dvxc(1:nrad,14)
+     kxc(1:nrad,13)=dvxc(1:nrad,15)
    else ! Other cases
      kxc(1:nrad,1:nkxc)=zero
      kxc(1:nrad,1:min(nkxc,ndvxc))=dvxc(1:nrad,1:min(nkxc,ndvxc))
@@ -2928,15 +2958,13 @@ subroutine pawxcsph3(cplex_den,cplex_vxc,ixc,nrad,nspden,pawrad,rho_updn,rho1_up
      kxc(1:nrad,5)=zero ! Not correct
      kxc(1:nrad,6)=zero ! Not correct
      kxc(1:nrad,7)=zero ! Not correct
-   else if (nkxc==23) then
+   else if (nkxc==19) then
+     kxc(1:nrad,14)=zero ! Not correct
+     kxc(1:nrad,15)=zero ! Not correct
      kxc(1:nrad,16)=zero ! Not correct
      kxc(1:nrad,17)=zero ! Not correct
      kxc(1:nrad,18)=zero ! Not correct
      kxc(1:nrad,19)=zero ! Not correct
-     kxc(1:nrad,20)=zero ! Not correct
-     kxc(1:nrad,21)=zero ! Not correct
-     kxc(1:nrad,22)=zero ! Not correct
-     kxc(1:nrad,23)=zero ! Not correct
    end if
  end if
 
@@ -3565,9 +3593,9 @@ end subroutine pawxcsphpositron
 !!   ===== if LDA
 !!    if nspden==1: kxc(:,1)= d2Exc/drho2
 !!                 (kxc(:,2)= d2Exc/drho_up drho_dn)
-!!    if nspden>=2: kxc(:,1)=d2Exc/drho_up drho_up
-!!                  kxc(:,2)=d2Exc/drho_up drho_dn
-!!                  kxc(:,3)=d2Exc/drho_dn drho_dn
+!!    if nspden>=2: kxc(:,1)= d2Exc/drho_up drho_up
+!!                  kxc(:,2)= d2Exc/drho_up drho_dn
+!!                  kxc(:,3)= d2Exc/drho_dn drho_dn
 !!   ===== if GGA
 !!    if nspden==1:
 !!       kxc(:,1)= d2Exc/drho2
@@ -3578,29 +3606,25 @@ end subroutine pawxcsphpositron
 !!       kxc(:,6)= grady(rho)
 !!       kxc(:,7)= gradz(rho)
 !!    if nspden>=2:
-!!       kxc(:,1)= d2Ex/drho_up drho_up
-!!       kxc(:,2)= d2Ex/drho_dn drho_dn
-!!       kxc(:,3)= 1/|grad(rho_up)| dEx/d|grad(rho_up)|
-!!       kxc(:,4)= 1/|grad(rho_dn)| dEx/d|grad(rho_dn)|
-!!       kxc(:,5)= 1/|grad(rho_up)| d2Ex/d|grad(rho_up)| drho_up
-!!       kxc(:,6)= 1/|grad(rho_dn)| d2Ex/d|grad(rho_dn)| drho_dn
-!!       kxc(:,7)= 1/|grad(rho_up)| * d/d|grad(rho_up)| ( 1/|grad(rho_up)| dEx/d|grad(rho_up)| )
-!!       kxc(:,8)= 1/|grad(rho_dn)| * d/d|grad(rho_dn)| ( 1/|grad(rho_dn)| dEx/d|grad(rho_dn)| )
-!!       kxc(:,9)= d2Ec/drho_up drho_up
-!!       kxc(:,10)=d2Ec/drho_up drho_dn
-!!       kxc(:,11)=d2Ec/drho_dn drho_dn
-!!       kxc(:,12)=1/|grad(rho)| dEc/d|grad(rho)|
-!!       kxc(:,13)=1/|grad(rho)| d2Ec/d|grad(rho)| drho_up
-!!       kxc(:,14)=1/|grad(rho)| d2Ec/d|grad(rho)| drho_dn
-!!       kxc(:,15)=1/|grad(rho)| * d/d|grad(rho)| ( 1/|grad(rho)| dEc/d|grad(rho)| )
-!!       kxc(:,16)=rho_up
-!!       kxc(:,17)=rho_dn
-!!       kxc(:,18)=gradx(rho_up)
-!!       kxc(:,19)=gradx(rho_dn)
-!!       kxc(:,20)=grady(rho_up)
-!!       kxc(:,21)=grady(rho_dn)
-!!       kxc(:,22)=gradz(rho_up)
-!!       kxc(:,23)=gradz(rho_dn)
+!!       kxc(:,1)= d2Exc/drho_up drho_up
+!!       kxc(:,2)= d2Exc/drho_up drho_dn
+!!       kxc(:,3)= d2Exc/drho_dn drho_dn
+!!       kxc(:,4)= 1/|grad(rho_up)| dEx/d|grad(rho_up)|
+!!       kxc(:,5)= 1/|grad(rho_dn)| dEx/d|grad(rho_dn)|
+!!       kxc(:,6)= 1/|grad(rho_up)| d2Ex/d|grad(rho_up)| drho_up
+!!       kxc(:,7)= 1/|grad(rho_dn)| d2Ex/d|grad(rho_dn)| drho_dn
+!!       kxc(:,8)= 1/|grad(rho_up)| * d/d|grad(rho_up)| ( 1/|grad(rho_up)| dEx/d|grad(rho_up)| )
+!!       kxc(:,9)= 1/|grad(rho_dn)| * d/d|grad(rho_dn)| ( 1/|grad(rho_dn)| dEx/d|grad(rho_dn)| )
+!!       kxc(:,10)=1/|grad(rho)| dEc/d|grad(rho)|
+!!       kxc(:,11)=1/|grad(rho)| d2Ec/d|grad(rho)| drho_up
+!!       kxc(:,12)=1/|grad(rho)| d2Ec/d|grad(rho)| drho_dn
+!!       kxc(:,13)=1/|grad(rho)| * d/d|grad(rho)| ( 1/|grad(rho)| dEc/d|grad(rho)| )
+!!       kxc(:,14)=gradx(rho_up)
+!!       kxc(:,15)=gradx(rho_dn)
+!!       kxc(:,16)=grady(rho_up)
+!!       kxc(:,17)=grady(rho_dn)
+!!       kxc(:,18)=gradz(rho_up)
+!!       kxc(:,19)=gradz(rho_dn)
 !!
 !! PARENTS
 !!      m_pawpsp,pawdenpot

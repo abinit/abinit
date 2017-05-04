@@ -421,7 +421,7 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,&
  option=3
  nkxc=2*nspden-1 ! LDA
  if(dtset%xclevel==2.and.nspden==1) nkxc=7  ! non-polarized GGA
- if(dtset%xclevel==2.and.nspden==2) nkxc=23 ! polarized GGA
+ if(dtset%xclevel==2.and.nspden==2) nkxc=19 ! polarized GGA
  nk3xc=3*nspden-2
  ABI_ALLOCATE(kxc,(nfft,nkxc))
  ABI_ALLOCATE(k3xc,(nfft,nk3xc))

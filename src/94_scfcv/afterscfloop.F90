@@ -637,7 +637,7 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
 
 !We use routine xcden to compute gradient of electron density (grhor),
 !NOTE: If GGA is used, gradient of electron density is already computed
-!and it is stored in exchange correlation kernel kxc(:,5:7) (nspden=1) or kxc(:,18:23) (nspden=2).
+!and it is stored in exchange correlation kernel kxc(:,5:7) (nspden=1) or kxc(:,14:19) (nspden=2).
 !In order to save memory and do not have the same quantity twice
 !in memory we should use kxc.
 !But unfortunately only spin up ans spin down component are stored in kxc.

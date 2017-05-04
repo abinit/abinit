@@ -51,9 +51,9 @@
 !!   ===== if LDA
 !!    if nspden==1: kxc(:,1)= d2Exc/drho2
 !!                 (kxc(:,2)= d2Exc/drho_up drho_dn)
-!!    if nspden>=2: kxc(:,1)=d2Exc/drho_up drho_up
-!!                  kxc(:,2)=d2Exc/drho_up drho_dn
-!!                  kxc(:,3)=d2Exc/drho_dn drho_dn
+!!    if nspden>=2: kxc(:,1)= d2Exc/drho_up drho_up
+!!                  kxc(:,2)= d2Exc/drho_up drho_dn
+!!                  kxc(:,3)= d2Exc/drho_dn drho_dn
 !!   ===== if GGA
 !!    if nspden==1:
 !!       kxc(:,1)= d2Exc/drho2
@@ -64,29 +64,25 @@
 !!       kxc(:,6)= grady(rho)
 !!       kxc(:,7)= gradz(rho)
 !!    if nspden>=2:
-!!       kxc(:,1)= d2Ex/drho_up drho_up
-!!       kxc(:,2)= d2Ex/drho_dn drho_dn
-!!       kxc(:,3)= 1/|grad(rho_up)| dEx/d|grad(rho_up)|
-!!       kxc(:,4)= 1/|grad(rho_dn)| dEx/d|grad(rho_dn)|
-!!       kxc(:,5)= 1/|grad(rho_up)| d2Ex/d|grad(rho_up)| drho_up
-!!       kxc(:,6)= 1/|grad(rho_dn)| d2Ex/d|grad(rho_dn)| drho_dn
-!!       kxc(:,7)= 1/|grad(rho_up)| * d/d|grad(rho_up)| ( 1/|grad(rho_up)| dEx/d|grad(rho_up)| )
-!!       kxc(:,8)= 1/|grad(rho_dn)| * d/d|grad(rho_dn)| ( 1/|grad(rho_dn)| dEx/d|grad(rho_dn)| )
-!!       kxc(:,9)= d2Ec/drho_up drho_up
-!!       kxc(:,10)=d2Ec/drho_up drho_dn
-!!       kxc(:,11)=d2Ec/drho_dn drho_dn
-!!       kxc(:,12)=1/|grad(rho)| dEc/d|grad(rho)|
-!!       kxc(:,13)=1/|grad(rho)| d2Ec/d|grad(rho)| drho_up
-!!       kxc(:,14)=1/|grad(rho)| d2Ec/d|grad(rho)| drho_dn
-!!       kxc(:,15)=1/|grad(rho)| * d/d|grad(rho)| ( 1/|grad(rho)| dEc/d|grad(rho)| )
-!!       kxc(:,16)=rho_up
-!!       kxc(:,17)=rho_dn
-!!       kxc(:,18)=gradx(rho_up)
-!!       kxc(:,19)=gradx(rho_dn)
-!!       kxc(:,20)=grady(rho_up)
-!!       kxc(:,21)=grady(rho_dn)
-!!       kxc(:,22)=gradz(rho_up)
-!!       kxc(:,23)=gradz(rho_dn)
+!!       kxc(:,1)= d2Exc/drho_up drho_up
+!!       kxc(:,2)= d2Exc/drho_up drho_dn
+!!       kxc(:,3)= d2Exc/drho_dn drho_dn
+!!       kxc(:,4)= 1/|grad(rho_up)| dEx/d|grad(rho_up)|
+!!       kxc(:,5)= 1/|grad(rho_dn)| dEx/d|grad(rho_dn)|
+!!       kxc(:,6)= 1/|grad(rho_up)| d2Ex/d|grad(rho_up)| drho_up
+!!       kxc(:,7)= 1/|grad(rho_dn)| d2Ex/d|grad(rho_dn)| drho_dn
+!!       kxc(:,8)= 1/|grad(rho_up)| * d/d|grad(rho_up)| ( 1/|grad(rho_up)| dEx/d|grad(rho_up)| )
+!!       kxc(:,9)= 1/|grad(rho_dn)| * d/d|grad(rho_dn)| ( 1/|grad(rho_dn)| dEx/d|grad(rho_dn)| )
+!!       kxc(:,10)=1/|grad(rho)| dEc/d|grad(rho)|
+!!       kxc(:,11)=1/|grad(rho)| d2Ec/d|grad(rho)| drho_up
+!!       kxc(:,12)=1/|grad(rho)| d2Ec/d|grad(rho)| drho_dn
+!!       kxc(:,13)=1/|grad(rho)| * d/d|grad(rho)| ( 1/|grad(rho)| dEc/d|grad(rho)| )
+!!       kxc(:,14)=gradx(rho_up)
+!!       kxc(:,15)=gradx(rho_dn)
+!!       kxc(:,16)=grady(rho_up)
+!!       kxc(:,17)=grady(rho_dn)
+!!       kxc(:,18)=gradz(rho_up)
+!!       kxc(:,19)=gradz(rho_dn)
 !!
 !! PARENTS
 !!      dfpt_dyxc1,dfpt_mkvxc_noncoll,dfpt_nstdy,dfpt_nstpaw,dfpt_rhotov
@@ -295,7 +291,7 @@ subroutine dfpt_mkvxc(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,nhat1,nhat1dim,nhat1gr,
    end if
 
 !  Treat GGA
- else if (nkxc==7.or.nkxc==23) then
+ else if (nkxc==7.or.nkxc==19) then
 
 ! Transfer the data to spin-polarized storage
 

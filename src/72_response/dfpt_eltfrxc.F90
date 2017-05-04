@@ -186,11 +186,7 @@ subroutine dfpt_eltfrxc(atindx,dtset,eltfrxc,enxc,gsqcut,kxc,mpi_enreg,mgfft,&
    n3xccc_loc=n3xccc
  end if
 
- if(nkxc==7.or.nkxc==23) then
-   fgga=1
- else 
-   fgga=0
- end if
+ fgga=0 ; if(nkxc==7.or.nkxc==19) fgga=1
 
  ABI_ALLOCATE(eltfrxc_tmp,(6+3*dtset%natom,6))
  ABI_ALLOCATE(eltfrxc_tmp2,(6+3*dtset%natom,6))

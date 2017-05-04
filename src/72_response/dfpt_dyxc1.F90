@@ -32,7 +32,7 @@
 !!                    kxc(:,5)= gradx(rho)
 !!                    kxc(:,6)= grady(rho)
 !!                    kxc(:,7)= gradz(rho)
-!!    if (nkxc=23) spin-polarized GGA case (same as nkxc=7 with up and down components)
+!!    if (nkxc=19) spin-polarized GGA case (same as nkxc=7 with up and down components)
 !!  mgfft=maximum size of 1D FFTs
 !!  mpert=maximum number of ipert
 !!  mpi_enreg=information about MPI parallelization

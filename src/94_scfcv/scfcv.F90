@@ -881,13 +881,13 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
  if (dtset%iscf==-1 .and. dtset%nspden==1) nkxc=2
  if (dtset%iscf==-1 .and. dtset%nspden==2) nkxc=3
 !Eventually need kxc-LDA when susceptibility matrix has to be computed
- if (dtset%iscf>0.and.modulo(dtset%iprcel,100)>=61.and.(dtset%iprcel<71.or.dtset%iprcel>79)) nkxc=min(2*dtset%nspden-1,3)
+ if (dtset%iscf>0.and.modulo(dtset%iprcel,100)>=61.and.(dtset%iprcel<71.or.dtset%iprcel>79)) nkxc=2*min(dtset%nspden,2)-1
 !Eventually need kxc-LDA for residual forces (when density mixing is selected)
  if (dtset%iscf>=10.and.dtset%usewvl==0.and.forces_needed>0 .and. &
 & abs(dtset%densfor_pred)>=1.and.abs(dtset%densfor_pred)<=6.and.abs(dtset%densfor_pred)/=5) then
-   if (dtset%xclevel==1.or.dtset%densfor_pred>=0) nkxc=min(2*dtset%nspden-1,3)
+   if (dtset%xclevel==1.or.dtset%densfor_pred>=0) nkxc=2*min(dtset%nspden,2)-1
    if (dtset%xclevel==2.and.dtset%nspden==1.and.dtset%densfor_pred<0) nkxc=7
-   if (dtset%xclevel==2.and.dtset%nspden==2.and.dtset%densfor_pred<0) nkxc=23
+   if (dtset%xclevel==2.and.dtset%nspden==2.and.dtset%densfor_pred<0) nkxc=19
  end if
  if (nkxc>0) then
    call check_kxc(dtset%ixc,dtset%optdriver)
@@ -1576,7 +1576,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
 &     dtset%iscf<10.and. &
 &     (dtset%iprcel>=100.or.istep==1.or.istep==dielstrt)) optxc=2
      if (dtset%iscf>=10.and.dtset%densfor_pred/=0.and.abs(dtset%densfor_pred)/=5) optxc=2
-     if (optxc==2.and.dtset%xclevel==2.and.nkxc==3-2*mod(dtset%nspden,2)) optxc=12
+     if (optxc==2.and.dtset%xclevel==2.and.nkxc==2*min(dtset%nspden,2)-1) optxc=12
    end if
 
    if (dtset%iscf/=22) then

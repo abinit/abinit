@@ -17,7 +17,6 @@
 !! INPUTS
 !!  cplex= if 1, real space 1-order functions on FFT grid are REAL,
 !!    if 2, COMPLEX
-!!  dgprimdds(3,3)=strain derivaive of gprimd.
 !!  gprimd(3,3)=dimensional primitive translations in reciprocal space (bohr^-1)
 !!  istr=index of the strain perturbation (1..6)
 !!  kxc(nfft,nkxc)=exchange and correlation kernel (see rhohxc.f)
@@ -48,29 +47,25 @@
 !!       kxc(:,6)= grady(rho)
 !!       kxc(:,7)= gradz(rho)
 !!    if nspden>=2:
-!!       kxc(:,1)= d2Ex/drho_up drho_up
-!!       kxc(:,2)= d2Ex/drho_dn drho_dn
-!!       kxc(:,3)= 1/|grad(rho_up)| dEx/d|grad(rho_up)|
-!!       kxc(:,4)= 1/|grad(rho_dn)| dEx/d|grad(rho_dn)|
-!!       kxc(:,5)= 1/|grad(rho_up)| d2Ex/d|grad(rho_up)| drho_up
-!!       kxc(:,6)= 1/|grad(rho_dn)| d2Ex/d|grad(rho_dn)| drho_dn
-!!       kxc(:,7)= 1/|grad(rho_up)| * d/d|grad(rho_up)| ( 1/|grad(rho_up)| dEx/d|grad(rho_up)| )
-!!       kxc(:,8)= 1/|grad(rho_dn)| * d/d|grad(rho_dn)| ( 1/|grad(rho_dn)| dEx/d|grad(rho_dn)| )
-!!       kxc(:,9)= d2Ec/drho_up drho_up
-!!       kxc(:,10)=d2Ec/drho_up drho_dn
-!!       kxc(:,11)=d2Ec/drho_dn drho_dn
-!!       kxc(:,12)=1/|grad(rho)| dEc/d|grad(rho)|
-!!       kxc(:,13)=1/|grad(rho)| d2Ec/d|grad(rho)| drho_up
-!!       kxc(:,14)=1/|grad(rho)| d2Ec/d|grad(rho)| drho_dn
-!!       kxc(:,15)=1/|grad(rho)| * d/d|grad(rho)| ( 1/|grad(rho)| dEc/d|grad(rho)| )
-!!       kxc(:,16)=rho_up
-!!       kxc(:,17)=rho_dn
-!!       kxc(:,18)=gradx(rho_up)
-!!       kxc(:,19)=gradx(rho_dn)
-!!       kxc(:,20)=grady(rho_up)
-!!       kxc(:,21)=grady(rho_dn)
-!!       kxc(:,22)=gradz(rho_up)
-!!       kxc(:,23)=gradz(rho_dn)
+!!       kxc(:,1)= d2Exc/drho_up drho_up
+!!       kxc(:,2)= d2Exc/drho_up drho_dn
+!!       kxc(:,3)= d2Exc/drho_dn drho_dn
+!!       kxc(:,4)= 1/|grad(rho_up)| dEx/d|grad(rho_up)|
+!!       kxc(:,5)= 1/|grad(rho_dn)| dEx/d|grad(rho_dn)|
+!!       kxc(:,6)= 1/|grad(rho_up)| d2Ex/d|grad(rho_up)| drho_up
+!!       kxc(:,7)= 1/|grad(rho_dn)| d2Ex/d|grad(rho_dn)| drho_dn
+!!       kxc(:,8)= 1/|grad(rho_up)| * d/d|grad(rho_up)| ( 1/|grad(rho_up)| dEx/d|grad(rho_up)| )
+!!       kxc(:,9)= 1/|grad(rho_dn)| * d/d|grad(rho_dn)| ( 1/|grad(rho_dn)| dEx/d|grad(rho_dn)| )
+!!       kxc(:,10)=1/|grad(rho)| dEc/d|grad(rho)|
+!!       kxc(:,11)=1/|grad(rho)| d2Ec/d|grad(rho)| drho_up
+!!       kxc(:,12)=1/|grad(rho)| d2Ec/d|grad(rho)| drho_dn
+!!       kxc(:,13)=1/|grad(rho)| * d/d|grad(rho)| ( 1/|grad(rho)| dEc/d|grad(rho)| )
+!!       kxc(:,14)=gradx(rho_up)
+!!       kxc(:,15)=gradx(rho_dn)
+!!       kxc(:,16)=grady(rho_up)
+!!       kxc(:,17)=grady(rho_dn)
+!!       kxc(:,18)=gradz(rho_up)
+!!       kxc(:,19)=gradz(rho_dn)
 !!
 !! PARENTS
 !!      dfpt_mkvxcstr
@@ -87,7 +82,7 @@
 #include "abi_common.h"
 
 
-subroutine dfpt_mkvxcstrgga(cplex,dgprimdds,gprimd,istr,kxc,mpi_enreg,nfft,ngfft,&
+subroutine dfpt_mkvxcstrgga(cplex,gprimd,istr,kxc,mpi_enreg,nfft,ngfft,&
 & nkxc,nspden,paral_kgb,qphon,rhor1tmp,str_scale,vxc1)
 
  use defs_basis
@@ -111,7 +106,7 @@ subroutine dfpt_mkvxcstrgga(cplex,dgprimdds,gprimd,istr,kxc,mpi_enreg,nfft,ngfft
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: ngfft(18)
- real(dp),intent(in) :: dgprimdds(3,3),gprimd(3,3),kxc(nfft,nkxc)
+ real(dp),intent(in) :: gprimd(3,3),kxc(nfft,nkxc)
  real(dp),intent(in) :: qphon(3),rhor1tmp(cplex*nfft,2)
  real(dp),intent(out) :: vxc1(cplex*nfft,nspden)
 !Local variables-------------------------------
@@ -123,12 +118,15 @@ subroutine dfpt_mkvxcstrgga(cplex,dgprimdds,gprimd,istr,kxc,mpi_enreg,nfft,ngfft
 !arrays
  real(dp) :: r0(3),r0_dn(3),r0_up(3),r1(3),r1_dn(3),r1_up(3)
  real(dp),allocatable :: dnexcdn(:,:),rho1now(:,:,:),rhodgnow(:,:,:)
- real(dp),allocatable :: rhordgtmp(:,:),rhortmp(:,:,:)
 
 ! *************************************************************************
 
  DBG_ENTER("COLL")
 
+ if (nkxc/=12*min(nspden,2)-5) then
+   msg='Wrong nkxc value for GGA!'
+   MSG_BUG(msg)
+ end if
  if (nspden>2) then
    msg='Not compatible with non-collinear magnetism!'
    MSG_ERROR(msg)
@@ -148,63 +146,50 @@ subroutine dfpt_mkvxcstrgga(cplex,dgprimdds,gprimd,istr,kxc,mpi_enreg,nfft,ngfft
  ABI_ALLOCATE(rho1now,(cplex*nfft,nspden,ngrad*ngrad))
  call xcden(cplex,gprimd,ishift,mpi_enreg,nfft,ngfft,ngrad,nspden,paral_kgb,qphon,rhor1tmp,rho1now)
 
-!Transfer the ground-state density and its gradient to spin-polarized storage
-!rhortmp(:,:,1) contains the GS density, and
-!rhortmp(:,:,2:4) contains the gradients of the GS density
- ABI_ALLOCATE(rhortmp,(nfft,nspden,4))
- if(nspden==2)then
-   do ii=1,4
-     do ir=1,nfft
-       rhortmp(ir,1,ii)=kxc(ir,15+2*ii)
-       rhortmp(ir,2,ii)=kxc(ir,14+2*ii)-kxc(ir,15+2*ii)
-     end do
-   end do
- end if
-
 !Calculate the 1st-order contribution to grad(n) from the strain derivative
 !  acting on the gradient operator acting on the GS charge density,
 !Simply use the following formula:
 !   (dGprim/ds_alpha_beta)(i,j) = -half.( delta_alpha,i Gprim(beta,j) + delta_beta,i Gprim(alpha,j) )
 !To finally get:
 !   (nabla)^(alpha,beta)_i[n] = -half ( delta_alpha,i nabla_beta[n] + delta_beta,i nabla_alpha[n] )
- ABI_ALLOCATE(rhodgnow,(cplex*nfft,nspden,ngrad*ngrad))
- rhodgnow(1:nfft,1:nspden,1:4)=zero
+ ABI_ALLOCATE(rhodgnow,(cplex*nfft,nspden,3))
+ rhodgnow(1:nfft,1:nspden,1:3)=zero
  if (nspden==1) then
-   if (istr==1) rhodgnow(1:nfft,1,2)=-     kxc(1:nfft,5)
-   if (istr==2) rhodgnow(1:nfft,1,3)=-     kxc(1:nfft,6)
-   if (istr==3) rhodgnow(1:nfft,1,4)=-     kxc(1:nfft,7)
-   if (istr==4) rhodgnow(1:nfft,1,3)=-half*kxc(1:nfft,7)
-   if (istr==4) rhodgnow(1:nfft,1,4)=-half*kxc(1:nfft,6)
-   if (istr==5) rhodgnow(1:nfft,1,2)=-half*kxc(1:nfft,7)
-   if (istr==5) rhodgnow(1:nfft,1,4)=-half*kxc(1:nfft,5)
-   if (istr==6) rhodgnow(1:nfft,1,2)=-half*kxc(1:nfft,6)
-   if (istr==6) rhodgnow(1:nfft,1,3)=-half*kxc(1:nfft,5)
+   if (istr==1) rhodgnow(1:nfft,1,1)=-     kxc(1:nfft,5)
+   if (istr==2) rhodgnow(1:nfft,1,2)=-     kxc(1:nfft,6)
+   if (istr==3) rhodgnow(1:nfft,1,3)=-     kxc(1:nfft,7)
+   if (istr==4) rhodgnow(1:nfft,1,2)=-half*kxc(1:nfft,7)
+   if (istr==4) rhodgnow(1:nfft,1,3)=-half*kxc(1:nfft,6)
+   if (istr==5) rhodgnow(1:nfft,1,1)=-half*kxc(1:nfft,7)
+   if (istr==5) rhodgnow(1:nfft,1,3)=-half*kxc(1:nfft,5)
+   if (istr==6) rhodgnow(1:nfft,1,1)=-half*kxc(1:nfft,6)
+   if (istr==6) rhodgnow(1:nfft,1,2)=-half*kxc(1:nfft,5)
  else
-   if (istr==1) rhodgnow(1:nfft,1,2)=-     kxc(1:nfft,19)
-   if (istr==2) rhodgnow(1:nfft,1,3)=-     kxc(1:nfft,21)
-   if (istr==3) rhodgnow(1:nfft,1,4)=-     kxc(1:nfft,23)
-   if (istr==4) rhodgnow(1:nfft,1,3)=-half*kxc(1:nfft,23)
-   if (istr==4) rhodgnow(1:nfft,1,4)=-half*kxc(1:nfft,21)
-   if (istr==5) rhodgnow(1:nfft,1,2)=-half*kxc(1:nfft,23)
-   if (istr==5) rhodgnow(1:nfft,1,4)=-half*kxc(1:nfft,19)
-   if (istr==6) rhodgnow(1:nfft,1,2)=-half*kxc(1:nfft,21)
-   if (istr==6) rhodgnow(1:nfft,1,3)=-half*kxc(1:nfft,19)
-   if (istr==1) rhodgnow(1:nfft,2,2)=-     (kxc(1:nfft,18)-kxc(1:nfft,19))
-   if (istr==2) rhodgnow(1:nfft,2,3)=-     (kxc(1:nfft,20)-kxc(1:nfft,21))
-   if (istr==3) rhodgnow(1:nfft,2,4)=-     (kxc(1:nfft,22)-kxc(1:nfft,23))
-   if (istr==4) rhodgnow(1:nfft,2,3)=-half*(kxc(1:nfft,22)-kxc(1:nfft,23))
-   if (istr==4) rhodgnow(1:nfft,2,4)=-half*(kxc(1:nfft,20)-kxc(1:nfft,21))
-   if (istr==5) rhodgnow(1:nfft,2,2)=-half*(kxc(1:nfft,22)-kxc(1:nfft,23))
-   if (istr==5) rhodgnow(1:nfft,2,4)=-half*(kxc(1:nfft,18)-kxc(1:nfft,19))
-   if (istr==6) rhodgnow(1:nfft,2,2)=-half*(kxc(1:nfft,20)-kxc(1:nfft,21))
-   if (istr==6) rhodgnow(1:nfft,2,3)=-half*(kxc(1:nfft,18)-kxc(1:nfft,19))
+   if (istr==1) rhodgnow(1:nfft,1,1)=-     kxc(1:nfft,15)
+   if (istr==2) rhodgnow(1:nfft,1,2)=-     kxc(1:nfft,17)
+   if (istr==3) rhodgnow(1:nfft,1,3)=-     kxc(1:nfft,19)
+   if (istr==4) rhodgnow(1:nfft,1,2)=-half*kxc(1:nfft,19)
+   if (istr==4) rhodgnow(1:nfft,1,3)=-half*kxc(1:nfft,17)
+   if (istr==5) rhodgnow(1:nfft,1,1)=-half*kxc(1:nfft,19)
+   if (istr==5) rhodgnow(1:nfft,1,3)=-half*kxc(1:nfft,15)
+   if (istr==6) rhodgnow(1:nfft,1,1)=-half*kxc(1:nfft,17)
+   if (istr==6) rhodgnow(1:nfft,1,2)=-half*kxc(1:nfft,15)
+   if (istr==1) rhodgnow(1:nfft,2,1)=-     (kxc(1:nfft,14)-kxc(1:nfft,15))
+   if (istr==2) rhodgnow(1:nfft,2,2)=-     (kxc(1:nfft,16)-kxc(1:nfft,17))
+   if (istr==3) rhodgnow(1:nfft,2,3)=-     (kxc(1:nfft,18)-kxc(1:nfft,19))
+   if (istr==4) rhodgnow(1:nfft,2,2)=-half*(kxc(1:nfft,18)-kxc(1:nfft,19))
+   if (istr==4) rhodgnow(1:nfft,2,3)=-half*(kxc(1:nfft,16)-kxc(1:nfft,17))
+   if (istr==5) rhodgnow(1:nfft,2,1)=-half*(kxc(1:nfft,18)-kxc(1:nfft,19))
+   if (istr==5) rhodgnow(1:nfft,2,3)=-half*(kxc(1:nfft,14)-kxc(1:nfft,15))
+   if (istr==6) rhodgnow(1:nfft,2,1)=-half*(kxc(1:nfft,16)-kxc(1:nfft,17))
+   if (istr==6) rhodgnow(1:nfft,2,2)=-half*(kxc(1:nfft,14)-kxc(1:nfft,15))
  end if
 
 !Add to the gradients of the first-order density
- do ii=2,4
+ do ii=1,3
    do ispden=1,nspden
      rhodgnow(1:nfft,ispden,ii)=str_scale*rhodgnow(1:nfft,ispden,ii)
-     rho1now(1:nfft,ispden,ii)=rho1now(1:nfft,ispden,ii)+rhodgnow(1:nfft,ispden,ii)
+     rho1now(1:nfft,ispden,1+ii)=rho1now(1:nfft,ispden,1+ii)+rhodgnow(1:nfft,ispden,ii)
    end do
  end do
 
@@ -223,7 +208,7 @@ subroutine dfpt_mkvxcstrgga(cplex,dgprimdds,gprimd,istr,kxc,mpi_enreg,nfft,ngfft
      coeff_grho=kxc(ir,3)*rho1now(ir,1,1) + kxc(ir,4)*gradrho_gradrho1
 !    Grad strain derivative contribution enters the following term with a
 !    factor of two compared to above terms, so add it again.
-     r1(:)=r1(:)+rhodgnow(ir,1,2:4)
+     r1(:)=r1(:)+rhodgnow(ir,1,1:3)
 !    Reuse the storage in rho1now
      rho1now(ir,1,2:4)=r1(:)*kxc(ir,2)+r0(:)*coeff_grho
    end do
@@ -231,8 +216,9 @@ subroutine dfpt_mkvxcstrgga(cplex,dgprimdds,gprimd,istr,kxc,mpi_enreg,nfft,ngfft
 !== Spin-polarized
  else ! nspden==2
    do ir=1,nfft
-     r0_up(:)=rhortmp(ir,1,2:4)   ! grad of spin-up GS rho
-     r0_dn(:)=rhortmp(ir,2,2:4)   ! grad of spin-down GS rho
+     do ii=1,3  ! grad of spin-up ans spin_dn GS rho
+       r0_up(ii)=kxc(ir,13+2*ii);r0_dn(ii)=kxc(ir,12+2*ii)-kxc(ir,13+2*ii)
+     end do
      r0(:)=r0_up(:)+r0_dn(:)      ! grad of GS rho
      r1_up(:)=rho1now(ir,1,2:4)   ! grad of spin-up rho1
      r1_dn(:)=rho1now(ir,2,2:4)   ! grad of spin-down rho1
@@ -241,33 +227,34 @@ subroutine dfpt_mkvxcstrgga(cplex,dgprimdds,gprimd,istr,kxc,mpi_enreg,nfft,ngfft
      gradrho_gradrho1_dn=dot_product(r0_dn,r1_dn)
      gradrho_gradrho1   =dot_product(r0,r1)
 
-     dnexcdn(ir,1)=(kxc(ir,1)+kxc(ir,9))*rho1now(ir,1,1)+&
-&     kxc(ir,10)*rho1now(ir,2,1)+&
-&     kxc(ir,5)*gradrho_gradrho1_up+&
-&     kxc(ir,13)*gradrho_gradrho1
-     dnexcdn(ir,2)=(kxc(ir,2)+kxc(ir,11))*rho1now(ir,2,1)+&
-&     kxc(ir,10)*rho1now(ir,1,1)+&
-&     kxc(ir,6)*gradrho_gradrho1_dn+&
-&     kxc(ir,14)*gradrho_gradrho1
-     coeff_grho_corr=(kxc(ir,13)*rho1now(ir,1,1)+kxc(ir,14)*rho1now(ir,2,1))+&
-&     kxc(ir,15)*gradrho_gradrho1
-     coeff_grho_up= kxc(ir,5)*rho1now(ir,1,1)+kxc(ir,7)*gradrho_gradrho1_up
-     coeff_grho_dn= kxc(ir,6)*rho1now(ir,2,1)+kxc(ir,8)*gradrho_gradrho1_dn
+     dnexcdn(ir,1)=kxc(ir, 1)*rho1now(ir,1,1)     &
+&                 +kxc(ir, 2)*rho1now(ir,2,1)     &
+&                 +kxc(ir, 6)*gradrho_gradrho1_up &
+&                 +kxc(ir,11)*gradrho_gradrho1
+     dnexcdn(ir,2)=kxc(ir, 3)*rho1now(ir,2,1)     &
+&                 +kxc(ir, 2)*rho1now(ir,1,1)     &
+&                 +kxc(ir, 7)*gradrho_gradrho1_dn &
+&                 +kxc(ir,12)*gradrho_gradrho1
+     coeff_grho_corr=kxc(ir,11)*rho1now(ir,1,1) &
+&                   +kxc(ir,12)*rho1now(ir,2,1) &
+&                   +kxc(ir,13)*gradrho_gradrho1
+     coeff_grho_up=kxc(ir,6)*rho1now(ir,1,1)+kxc(ir,8)*gradrho_gradrho1_up
+     coeff_grho_dn=kxc(ir,7)*rho1now(ir,2,1)+kxc(ir,9)*gradrho_gradrho1_dn
 
-!    grad strain derivative contribution enters the following term with a
+!    Grad strain derivative contribution enters the following term with a
 !    factor of two compared to above terms, so add it again.
-     r1_up(:)=r1_up(:)+rhodgnow(ir,1,2:4)
-     r1_dn(:)=r1_dn(:)+rhodgnow(ir,2,2:4)
+     r1_up(:)=r1_up(:)+rhodgnow(ir,1,1:3)
+     r1_dn(:)=r1_dn(:)+rhodgnow(ir,2,1:3)
 
 !    Reuse the storage in rho1now
-     rho1now(ir,1,2:4)=r1_up(:)*(kxc(ir,3)+kxc(ir,12))   &
-&     +r1_dn(:)*kxc(ir,12)               &
-&     +r0_up(:)*coeff_grho_up            &
-&     +r0(:)*coeff_grho_corr
-     rho1now(ir,2,2:4)=r1_dn(:)*(kxc(ir,4)+kxc(ir,12))   &
-&     +r1_up(:)*kxc(ir,12)               &
-&     +r0_dn(:)*coeff_grho_dn            &
-&     +r0(:)*coeff_grho_corr
+     rho1now(ir,1,2:4)=(kxc(ir,4)+kxc(ir,10))*r1_up(:) &
+&                     +kxc(ir,10)            *r1_dn(:) &
+&                     +coeff_grho_up         *r0_up(:) &
+&                     +coeff_grho_corr       *r0(:)
+     rho1now(ir,2,2:4)=(kxc(ir,5)+kxc(ir,10))*r1_dn(:) &
+&                     +kxc(ir,10)            *r1_up(:) &
+&                     +coeff_grho_dn         *r0_dn(:) &
+&                     +coeff_grho_corr       *r0(:)
    end do
 
  end if ! nspden
@@ -282,9 +269,6 @@ subroutine dfpt_mkvxcstrgga(cplex,dgprimdds,gprimd,istr,kxc,mpi_enreg,nfft,ngfft
 !call filterpot(cplex,gmet,gsqcut,nfft,ngfft,nspden,qphon,vxc1)
 
  ABI_DEALLOCATE(dnexcdn)
- if (nspden==2) then
-   ABI_DEALLOCATE(rhortmp)
- end if
  ABI_DEALLOCATE(rho1now)
 
 end subroutine dfpt_mkvxcstrgga
