@@ -1786,7 +1786,7 @@ subroutine pawxc3(corexc1,cplex_den,cplex_vxc,d2enxc,ixc,kxc,lm_size,lmselect,nh
  real(dp) :: dylmdr_ii,factor,factor_ang_intg,ylm_ii
  real(dp) :: grho_grho1,grho_grho1_up,grho_grho1_dn
  real(dp) :: grho_grho1im,grho_grho1im_up,grho_grho1im_dn
- real(dp) :: rho_dn,rho_up,rhoim_dn,rhoim_up
+ real(dp) :: rho1_dn,rho1_up,rho1im_dn,rho1im_up
  real(dp) :: ro11i,ro11r,ro12i,ro12r,ro21i,ro21r,ro22i,ro22r
  real(dp) :: v11i,v11r,v12i,v12r,v21i,v21r,v22i,v22r,vxcrho
  character(len=500) :: msg
@@ -1795,8 +1795,7 @@ subroutine pawxc3(corexc1,cplex_den,cplex_vxc,d2enxc,ixc,kxc,lm_size,lmselect,nh
  real(dp) :: g1im(3),g1im_dn(3),g1im_up(3)
  real(dp) :: gxc1i(3,2),gxc1r(3,2)
  real(dp),allocatable :: dgxc1(:),drho1(:,:),drho1core(:,:),dylmdr(:,:,:)
- real(dp),allocatable :: ff(:),gg(:),grho1_updn(:,:,:),gxc1(:,:,:,:)
- real(dp),allocatable :: rho1_updn(:,:),rho1arr(:,:,:)
+ real(dp),allocatable :: ff(:),gg(:),grho1arr(:,:,:),gxc1(:,:,:,:),rho1arr(:,:,:)
  real(dp),allocatable,target :: rhohat1(:,:,:)
  real(dp),pointer :: rho1_(:,:,:),vxc1_(:,:,:)
 
@@ -1878,8 +1877,7 @@ subroutine pawxc3(corexc1,cplex_den,cplex_vxc,d2enxc,ixc,kxc,lm_size,lmselect,nh
 
 !Need gradients and additional allocations in case of GGA
  if (xclevel==2.and.option/=3) then
-   LIBPAW_ALLOCATE(rho1_updn,(cplex_den*nrad,nspden))
-   LIBPAW_ALLOCATE(grho1_updn,(cplex_den*nrad,nspden,3))
+   LIBPAW_ALLOCATE(grho1arr,(cplex_den*nrad,nspden,3))
    LIBPAW_ALLOCATE(gxc1,(cplex_vxc*nrad,3,pawang%ylm_size,nspden))
    gxc1=zero
    if (usecore==1) then
@@ -1968,35 +1966,35 @@ subroutine pawxc3(corexc1,cplex_den,cplex_vxc,d2enxc,ixc,kxc,lm_size,lmselect,nh
          if (cplex_vxc==1) then
            if (cplex_den==1) then  ! cplex_vxc==1 and cplex_den==1
              do ir=1,nrad
-               rho_up=rho1arr(ir,2,ipts);rho_dn=rho1arr(ir,1,ipts)-rho_up
-               vxc1_(ir,ipts,1)=kxc(ir,ipts,1)*rho_up+kxc(ir,ipts,2)*rho_dn
-               vxc1_(ir,ipts,2)=kxc(ir,ipts,2)*rho_up+kxc(ir,ipts,3)*rho_dn
+               rho1_up=rho1arr(ir,2,ipts);rho1_dn=rho1arr(ir,1,ipts)-rho1_up
+               vxc1_(ir,ipts,1)=kxc(ir,ipts,1)*rho1_up+kxc(ir,ipts,2)*rho1_dn
+               vxc1_(ir,ipts,2)=kxc(ir,ipts,2)*rho1_up+kxc(ir,ipts,3)*rho1_dn
              end do
            else                    ! cplex_vxc==1 and cplex_den==2
              do ir=1,nrad
                jr=2*ir-1
-               rho_up=rho1arr(jr,2,ipts);rho_dn=rho1arr(jr,1,ipts)-rho_up
-               vxc1_(ir,ipts,1)=kxc(ir,ipts,1)*rho_up+kxc(ir,ipts,2)*rho_dn
-               vxc1_(ir,ipts,2)=kxc(ir,ipts,2)*rho_up+kxc(ir,ipts,3)*rho_dn
+               rho1_up=rho1arr(jr,2,ipts);rho1_dn=rho1arr(jr,1,ipts)-rho1_up
+               vxc1_(ir,ipts,1)=kxc(ir,ipts,1)*rho1_up+kxc(ir,ipts,2)*rho1_dn
+               vxc1_(ir,ipts,2)=kxc(ir,ipts,2)*rho1_up+kxc(ir,ipts,3)*rho1_dn
              end do
            end if
          else
            if (cplex_den==1) then  ! cplex_vxc==2 and cplex_den==1
              do ir=1,nrad
                jr=2*ir-1
-               rho_up=rho1arr(ir,2,ipts);rho_dn=rho1arr(ir,1,ipts)-rho_up
-               vxc1_(jr,ipts,1)=kxc(ir,ipts,1)*rho_up+kxc(ir,ipts,2)*rho_dn
-               vxc1_(jr,ipts,2)=kxc(ir,ipts,2)*rho_up+kxc(ir,ipts,3)*rho_dn
+               rho1_up=rho1arr(ir,2,ipts);rho1_dn=rho1arr(ir,1,ipts)-rho1_up
+               vxc1_(jr,ipts,1)=kxc(ir,ipts,1)*rho1_up+kxc(ir,ipts,2)*rho1_dn
+               vxc1_(jr,ipts,2)=kxc(ir,ipts,2)*rho1_up+kxc(ir,ipts,3)*rho1_dn
              end do
            else                    ! cplex_vxc==2 and cplex_den==2
              do ir=1,nrad
                jr=2*ir
-               rho_up  =rho1arr(jr-1,2,ipts);rho_dn  =rho1arr(jr-1,1,ipts)-rho_up
-               rhoim_up=rho1arr(jr  ,2,ipts);rhoim_dn=rho1arr(jr  ,1,ipts)-rhoim_up
-               vxc1_(jr-1,ipts,1)=kxc(ir,ipts,1)*rho_up  +kxc(ir,ipts,2)*rho_dn
-               vxc1_(jr  ,ipts,1)=kxc(ir,ipts,1)*rhoim_up+kxc(ir,ipts,2)*rhoim_dn
-               vxc1_(jr-1,ipts,2)=kxc(ir,ipts,2)*rho_up  +kxc(ir,ipts,3)*rho_dn
-               vxc1_(jr  ,ipts,2)=kxc(ir,ipts,2)*rhoim_up+kxc(ir,ipts,3)*rhoim_dn
+               rho1_up  =rho1arr(jr-1,2,ipts);rho1_dn  =rho1arr(jr-1,1,ipts)-rho1_up
+               rho1im_up=rho1arr(jr  ,2,ipts);rho1im_dn=rho1arr(jr  ,1,ipts)-rho1im_up
+               vxc1_(jr-1,ipts,1)=kxc(ir,ipts,1)*rho1_up  +kxc(ir,ipts,2)*rho1_dn
+               vxc1_(jr  ,ipts,1)=kxc(ir,ipts,1)*rho1im_up+kxc(ir,ipts,2)*rho1im_dn
+               vxc1_(jr-1,ipts,2)=kxc(ir,ipts,2)*rho1_up  +kxc(ir,ipts,3)*rho1_dn
+               vxc1_(jr  ,ipts,2)=kxc(ir,ipts,2)*rho1im_up+kxc(ir,ipts,3)*rho1im_dn
              end do
            end if
          end if
@@ -2007,16 +2005,8 @@ subroutine pawxc3(corexc1,cplex_den,cplex_vxc,d2enxc,ixc,kxc,lm_size,lmselect,nh
 !      ======================= GGA ===========================================
 !      =======================================================================
 
-!      Convert the 1st-order density in (up,dn) format
-       if (nspden==1) then
-         rho1_updn(:,1)=half*rho1arr(:,1,ipts)
-       else if (nspden==2) then
-         rho1_updn(:,1)=rho1arr(:,2,ipts)
-         rho1_updn(:,2)=rho1arr(:,1,ipts)-rho1arr(:,2,ipts)
-       end if
-
 !      Compute the gradient of the first-order density
-       grho1_updn(:,:,1:3)=zero
+       grho1arr(:,:,1:3)=zero
        LIBPAW_ALLOCATE(drho1,(nrad,cplex_den))
        if (cplex_den==1) then
          LIBPAW_ALLOCATE(ff,(nrad))
@@ -2030,7 +2020,7 @@ subroutine pawxc3(corexc1,cplex_den,cplex_vxc,d2enxc,ixc,kxc,lm_size,lmselect,nh
                do ii=1,3
                  ylm_ii=pawang%ylmr(ilm,ipts)*pawang%anginit(ii,ipts)
                  dylmdr_ii=dylmdr(ii,ipts,ilm)
-                 grho1_updn(1:nrad,ispden,ii)=grho1_updn(1:nrad,ispden,ii) &
+                 grho1arr(1:nrad,ispden,ii)=grho1arr(1:nrad,ispden,ii) &
 &                 +drho1(1:nrad,1)*ylm_ii+ff(1:nrad)*dylmdr_ii
                end do
              end if
@@ -2058,9 +2048,9 @@ subroutine pawxc3(corexc1,cplex_den,cplex_vxc,d2enxc,ixc,kxc,lm_size,lmselect,nh
                  dylmdr_ii=dylmdr(ii,ipts,ilm)
                  do ir=2,nrad
                    jr=2*ir 
-                   grho1_updn(jr-1,ispden,ii)=grho1_updn(jr-1,ispden,ii) &
+                   grho1arr(jr-1,ispden,ii)=grho1arr(jr-1,ispden,ii) &
 &                   +drho1(ir,1)*ylm_ii+ff(ir)*dylmdr_ii
-                   grho1_updn(jr  ,ispden,ii)=grho1_updn(jr  ,ispden,ii) &
+                   grho1arr(jr  ,ispden,ii)=grho1arr(jr  ,ispden,ii) &
 &                   +drho1(ir,2)*ylm_ii+gg(ir)*dylmdr_ii
                  end do
                end do
@@ -2071,23 +2061,22 @@ subroutine pawxc3(corexc1,cplex_den,cplex_vxc,d2enxc,ixc,kxc,lm_size,lmselect,nh
          LIBPAW_DEALLOCATE(gg)
        end if
        if (usecore==1) then
+         factor=one;if (nspden==2) factor=half
          if (cplex_den==1) then
            do ispden=1,nspden
-             factor=one;if (ispden==2) factor=half
              do ii=1,3
-               grho1_updn(1:nrad,ispden,ii)=grho1_updn(1:nrad,ispden,ii) &
+               grho1arr(1:nrad,ispden,ii)=grho1arr(1:nrad,ispden,ii) &
 &               +factor*drho1core(1:nrad,1)*pawang%anginit(ii,ipts)
              end do
            end do
          else
            do ispden=1,nspden
-             factor=one;if (ispden==2) factor=half
              do ii=1,3
                do ir=1,nrad
                  jr=2*ir
-                 grho1_updn(jr-1,ispden,ii)=grho1_updn(jr-1,ispden,ii) &
+                 grho1arr(jr-1,ispden,ii)=grho1arr(jr-1,ispden,ii) &
 &                 +factor*drho1core(ir,1)*pawang%anginit(ii,ipts)
-                 grho1_updn(jr  ,ispden,ii)=grho1_updn(jr  ,ispden,ii) &
+                 grho1arr(jr  ,ispden,ii)=grho1arr(jr  ,ispden,ii) &
 &                 +factor*drho1core(ir,2)*pawang%anginit(ii,ipts)
                end do
              end do
@@ -2108,10 +2097,10 @@ subroutine pawxc3(corexc1,cplex_den,cplex_vxc,d2enxc,ixc,kxc,lm_size,lmselect,nh
          do ir=1,nrad
            jr=cplex_den*(ir-1)+1 ; kr=cplex_vxc*(ir-1)+1
 
-           g0(:)=kxc(ir,ipts,5:7) ; g1(:)=grho1_updn(jr,1,1:3)
+           g0(:)=kxc(ir,ipts,5:7) ; g1(:)=grho1arr(jr,1,1:3)
            grho_grho1=dot_product(g0,g1)
-           coeff_grho=kxc(ir,ipts,3)*rho1_updn(jr,1)+kxc(ir,ipts,4)*grho_grho1
-           vxc1_(kr,ipts,1)=kxc(ir,ipts,1)*rho1_updn(jr,1)+kxc(ir,ipts,3)*grho_grho1
+           coeff_grho=kxc(ir,ipts,3)*rho1arr(jr,1,ipts)+kxc(ir,ipts,4)*grho_grho1
+           vxc1_(kr,ipts,1)=kxc(ir,ipts,1)*rho1arr(jr,1,ipts)+kxc(ir,ipts,3)*grho_grho1
            gxc1r(:,1)=g1(:)*kxc(ir,ipts,2)+g0(:)*coeff_grho
            !Accumulate gxc1_lm moments as Intg[gxc1(omega).Ylm(omega).d_omega]
            do ilm=1,pawang%ylm_size
@@ -2122,10 +2111,10 @@ subroutine pawxc3(corexc1,cplex_den,cplex_vxc,d2enxc,ixc,kxc,lm_size,lmselect,nh
            end do
            if (cplex_vxc==2) then
              if (cplex_den==2) then
-               g1im(:)=grho1_updn(jr+1,1,1:3)
+               g1im(:)=grho1arr(jr+1,1,1:3)
                grho_grho1im=dot_product(g0,g1im)
-               coeff_grhoim=kxc(ir,ipts,3)*rho1_updn(jr+1,1)+kxc(ir,ipts,4)*grho_grho1im
-               vxc1_(kr+1,ipts,1)=kxc(ir,ipts,1)*rho1_updn(jr+1,1)+kxc(ir,ipts,3)*grho_grho1im
+               coeff_grhoim=kxc(ir,ipts,3)*rho1arr(jr+1,1,ipts)+kxc(ir,ipts,4)*grho_grho1im
+               vxc1_(kr+1,ipts,1)=kxc(ir,ipts,1)*rho1arr(jr+1,1,ipts)+kxc(ir,ipts,3)*grho_grho1im
                gxc1i(:,1)=g1im(:)*kxc(ir,ipts,2)+g0(:)*coeff_grhoim
                !Accumulate gxc1_lm moments as Intg[gxc1(omega).Ylm(omega).d_omega]
                do ilm=1,pawang%ylm_size
@@ -2146,27 +2135,28 @@ subroutine pawxc3(corexc1,cplex_den,cplex_vxc,d2enxc,ixc,kxc,lm_size,lmselect,nh
          do ir=1,nrad
            jr=cplex_den*(ir-1)+1 ; kr=cplex_vxc*(ir-1)+1
 
+           rho1_up=rho1arr(jr,2,ipts);rho1_dn=rho1arr(jr,1,ipts)-rho1_up
            g0_up(1)=kxc(ir,ipts,15);g0_dn(1)=kxc(ir,ipts,14)-kxc(ir,ipts,15)
            g0_up(2)=kxc(ir,ipts,17);g0_dn(2)=kxc(ir,ipts,16)-kxc(ir,ipts,17)
            g0_up(3)=kxc(ir,ipts,19);g0_dn(3)=kxc(ir,ipts,18)-kxc(ir,ipts,19)
-           g1_up(:)=grho1_updn(jr,1,:);g1_dn(:)=grho1_updn(jr,2,:)
+           g1_up(:)=grho1arr(jr,2,:);g1_dn(:)=grho1arr(jr,1,:)-grho1arr(jr,2,:)
            g0(:)=g0_up(:)+g0_dn(:);g1(:)=g1_up(:)+g1_dn(:)
            grho_grho1_up=dot_product(g0_up,g1_up)
            grho_grho1_dn=dot_product(g0_dn,g1_dn)
            grho_grho1   =dot_product(g0,g1)
-           coeff_grho_corr=kxc(ir,ipts,11)*rho1_updn(jr,1) &
-&                         +kxc(ir,ipts,12)*rho1_updn(jr,2) &
+           coeff_grho_corr=kxc(ir,ipts,11)*rho1_up &
+&                         +kxc(ir,ipts,12)*rho1_dn &
 &                         +kxc(ir,ipts,13)*grho_grho1
-           coeff_grho_up=kxc(ir,ipts,6)*rho1_updn(jr,1) &
+           coeff_grho_up=kxc(ir,ipts,6)*rho1_up &
 &                       +kxc(ir,ipts,8)*grho_grho1_up
-           coeff_grho_dn=kxc(ir,ipts,7)*rho1_updn(jr,2) &
+           coeff_grho_dn=kxc(ir,ipts,7)*rho1_dn &
 &                       +kxc(ir,ipts,9)*grho_grho1_dn
-           vxc1_(kr,ipts,1)=kxc(ir,ipts, 1)*rho1_updn(jr,1) &
-&                          +kxc(ir,ipts, 2)*rho1_updn(jr,2) &
+           vxc1_(kr,ipts,1)=kxc(ir,ipts, 1)*rho1_up &
+&                          +kxc(ir,ipts, 2)*rho1_dn &
 &                          +kxc(ir,ipts, 6)*grho_grho1_up &
 &                          +kxc(ir,ipts,11)*grho_grho1
-           vxc1_(kr,ipts,2)=kxc(ir,ipts, 3)*rho1_updn(jr,2) &
-&                          +kxc(ir,ipts, 2)*rho1_updn(jr,1) &
+           vxc1_(kr,ipts,2)=kxc(ir,ipts, 3)*rho1_dn &
+&                          +kxc(ir,ipts, 2)*rho1_up &
 &                          +kxc(ir,ipts, 7)*grho_grho1_dn &
 &                          +kxc(ir,ipts,12)*grho_grho1
            gxc1r(:,1)=(kxc(ir,ipts,4)+kxc(ir,ipts,10))*g1_up(:) &
@@ -2189,23 +2179,25 @@ subroutine pawxc3(corexc1,cplex_den,cplex_vxc,d2enxc,ixc,kxc,lm_size,lmselect,nh
 
            if (cplex_vxc==2) then
              if (cplex_den==2) then
-               g1im_up(:)=grho1_updn(jr+1,1,:);g1im_dn(:)=grho1_updn(jr+1,2,:)
+               rho1im_up=rho1arr(jr+1,2,ipts);rho1im_dn=rho1arr(jr+1,1,ipts)-rho1im_up
+               g1im_up(:)=grho1arr(jr+1,2,:);g1im_dn(:)=grho1arr(jr+1,1,:)-grho1arr(jr+1,2,:)
+               g1im(:)=g1im_up(:)+g1im_dn(:)
                grho_grho1im_up=dot_product(g0_up,g1im_up)
                grho_grho1im_dn=dot_product(g0_dn,g1im_dn)
                grho_grho1im   =dot_product(g0,g1im)
-               coeff_grhoim_corr=kxc(ir,ipts,11)*rho1_updn(jr+1,1) &
-&                               +kxc(ir,ipts,12)*rho1_updn(jr+1,2) &
+               coeff_grhoim_corr=kxc(ir,ipts,11)*rho1im_up &
+&                               +kxc(ir,ipts,12)*rho1im_dn &
 &                               +kxc(ir,ipts,13)*grho_grho1im
-               coeff_grhoim_up=kxc(ir,ipts,6)*rho1_updn(jr+1,1) &
+               coeff_grhoim_up=kxc(ir,ipts,6)*rho1im_up &
 &                             +kxc(ir,ipts,8)*grho_grho1im_up
-               coeff_grhoim_dn=kxc(ir,ipts,7)*rho1_updn(jr+1,2) &
+               coeff_grhoim_dn=kxc(ir,ipts,7)*rho1im_dn &
 &                             +kxc(ir,ipts,9)*grho_grho1im_dn
-               vxc1_(kr+1,ipts,1)=kxc(ir,ipts, 1)*rho1_updn(jr+1,1) &
-&                                +kxc(ir,ipts, 2)*rho1_updn(jr+1,2) &
+               vxc1_(kr+1,ipts,1)=kxc(ir,ipts, 1)*rho1im_up &
+&                                +kxc(ir,ipts, 2)*rho1im_dn &
 &                                +kxc(ir,ipts, 6)*grho_grho1im_up   &
 &                                +kxc(ir,ipts,11)*grho_grho1im
-               vxc1_(kr+1,ipts,2)=kxc(ir,ipts, 3)*rho1_updn(jr+1,2) &
-&                                +kxc(ir,ipts, 2)*rho1_updn(jr+1,1) &
+               vxc1_(kr+1,ipts,2)=kxc(ir,ipts, 3)*rho1im_dn &
+&                                +kxc(ir,ipts, 2)*rho1im_up &
 &                                +kxc(ir,ipts, 7)*grho_grho1im_dn   &
 &                                +kxc(ir,ipts,12)*grho_grho1im
                gxc1i(:,1)=(kxc(ir,ipts,4)+kxc(ir,ipts,10))*g1im_up(:) &
@@ -2247,8 +2239,7 @@ subroutine pawxc3(corexc1,cplex_den,cplex_vxc,d2enxc,ixc,kxc,lm_size,lmselect,nh
    LIBPAW_DEALLOCATE(rhohat1)
  end if
  if (xclevel==2.and.option/=3) then
-   LIBPAW_DEALLOCATE(rho1_updn)
-   LIBPAW_DEALLOCATE(grho1_updn)
+   LIBPAW_DEALLOCATE(grho1arr)
    if (usecore==1)  then
      LIBPAW_DEALLOCATE(drho1core)
    end if

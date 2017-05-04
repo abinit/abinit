@@ -410,10 +410,10 @@ subroutine dfpt_eltfrxc(atindx,dtset,eltfrxc,enxc,gsqcut,kxc,mpi_enreg,mgfft,&
 !          Collect the needed derivatives of Exc.  The factors introduced
 !          deal with the difference between density as used here and
 !          spin density as used with these kxc terms in other contexts.
-           dexdgs  =quarter       *kxc(ifft,2+ispden)
-           d2exdgs2=quarter*eighth*kxc(ifft,6+ispden)
-           decdgs  =eighth        *kxc(ifft,12)
-           d2ecdgs2=eighth*eighth *kxc(ifft,15)
+           dexdgs  =quarter       *kxc(ifft,3+ispden)
+           d2exdgs2=quarter*eighth*kxc(ifft,7+ispden)
+           decdgs  =eighth        *kxc(ifft,10)
+           d2ecdgs2=eighth*eighth *kxc(ifft,13)
 
 !          Loop over 1st strain index
            do is1=1,6
@@ -453,6 +453,7 @@ subroutine dfpt_eltfrxc(atindx,dtset,eltfrxc,enxc,gsqcut,kxc,mpi_enreg,mgfft,&
              eltfrxc(is1,is2)=eltfrxc(is1,is2)+spnorm*&
 &             (d2exdgs2*(dgsds10 *dgsds20) + dexdgs*d2gsds1ds2&
 &             +d2ecdgs2*(dgstds10*dgstds20)+ decdgs*d2gstds1ds2)
+
            end do !is1
          end do !ifft
        end do !ispden
@@ -583,7 +584,7 @@ subroutine dfpt_eltfrxc(atindx,dtset,eltfrxc,enxc,gsqcut,kxc,mpi_enreg,mgfft,&
  call timab(48,1,tsec)
  call xmpi_sum(eltfrxc,mpi_enreg%comm_fft,ierr)
  call timab(48,2,tsec)
- 
+
  !Normalize accumulated 2nd derivatives in NC case
  if(psps%usepaw==1)then
    eltfrxc(:,:)=eltfrxc_tmp(:,:)+eltfrxc

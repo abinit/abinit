@@ -312,8 +312,7 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
    lmn2_size=paw_ij(iatom)%lmn2_size
    lm_size=paw_an(iatom)%lm_size
    mesh_size=pawtab(itypat)%mesh_size
-write(77,*) iatom,pawtab(itypat)%mesh_size,pawrad(itypat)%mesh_size
-flush(77)
+
    usecore=1;usetcore =pawtab(itypat)%usetcore
    if (ipert/=0) usecore=0  ! This is true for phonons and Efield pert.
    if (ipert/=0) usetcore=0 ! This is true for phonons and Efield pert.
