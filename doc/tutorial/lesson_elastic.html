@@ -790,7 +790,8 @@ It's  a good idea   to check these properties  against a standard  text such
 as <cite>    J. F. Nye,   Physical Properties of Crystals  (Oxford  U. P.,
 Oxford  1985).</cite>       Departures   from expected symmetries  (there
  are a few  in the last decimal place here)   are due to either convergence
-  errors or,  if large, incorrectly specified   geometry.<br>
+errors or,  if large, incorrectly specified   geometry (however, see the final
+comments on symmetry <a href="#symmetry-comment"> below</a>).<br>
                     <br>
                          Next in telast_3.out we find the piezoelectric tensor
    results:<br>
@@ -1225,7 +1226,7 @@ system of interest  will usually  suffice for this testing.  &nbsp;Don't
 get caught publishing  a result that  another researcher refutes  on convergence
 grounds, and don't  blame such a mistake on Abinit!</p>
 
-<p>Finally, we conclude the lesson with a comparison with experiment. &nbsp;Converting
+<p>Now we make a comparison with experiment. &nbsp;Converting
         the C's to standard units (Ha/Bohr^3 = 2.94210119E+04 GPa) and using
    zero-temperature     extrapolated experimental results from <cite>P. M.
  Sutton,  Phys. Rev. 91,   816 (1953)</cite>, we find<br>
@@ -1245,11 +1246,27 @@ on  DFT   calculations    of full sets of elastic constants. &nbsp;Many calculat
 wouldn't  be expected to make  a large difference   for a nearly-free-electron
  metal.<br>
 
-<p></p>
-
-<p>  </p>
-
-<p>      </p>
+<h3 id="symmetry-comment"><b>Comment on symmetry</b></h3>
+It is important to bear in mind that the way a tensor like the elastic tensor appears
+is a function of the frame used. Thus for the aluminum fcc case considered above,
+the nonzero elements are <I>C<SUB>11</SUB></I>, <I>C<SUB>12</SUB></I>, and <I>C<SUB>44</SUB></I>,
+<I> provided that the crystal axes are aligned with the laboratory frame. </I> For an
+arbitrary alignment of the crystal axes, many more <I>C<SUB>ij</SUB></I> elements will be
+non-zero, and this can be confusing. It's easy to see why this happens if you imagine actually
+measuring the elastic tensor elements. If you start with the conventional cubic cell, and apply pressure
+to one face, you can measure <I>C<SUB>11</SUB></I>. But if you turn the cell to some random angle, you'll
+measure a response that is a mixture of <I>C<SUB>11</SUB></I> and <I>C<SUB>12</SUB></I>.
+Within ABINIT, if the aluminum fcc cell is described
+using <a href="../input_variables/html_automatically_generated/varbas.html#angdeg" target="kwimg">angdeg</a>
+and <a href="../input_variables/html_automatically_generated/varbas.html#angdeg" target="kwimg">acell</a>, 
+then an axis of the primitive cell will be aligned along the laboratory <I>z</I> axis but this will not lead
+to a (conventional) cell alignment with the laboratory frame. The resulting elastic tensor
+will be correct but will appear to be more complicated than in the illustration above. It can be rotated
+back to a simple frame by hand (bearing in mind that all four indices of the fourth-rank elastic
+tensor have to be rotated!) but it's easier to start with a more conventional alignment of the unit cell.
+If you use a standard text like <cite>Bradley and Cracknell, The Mathematical Theory of Symmetry in Solids, Oxford </CITE>
+you can find the standard primitive cell descriptions for the Bravais lattice types and these are
+aligned as much as possible with a standard laboratory frame. 
 
 <hr>
 <p>&nbsp;          <br>
