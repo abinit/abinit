@@ -1935,11 +1935,6 @@ _setup2: Arith. and geom. avg. npw (full set) are     104.000     104.000
  ETOT  7   10.799777578244     -1.843E-08 3.924E-12 1.597E-08
  ETOT  8   10.799777578207     -3.716E-11 1.617E-14 3.628E-10
  ETOT  9   10.799777578207     -4.974E-13 3.905E-16 3.776E-12
-
- scprqt:  WARNING -
-  nstep=    9 was not enough SCF cycles to converge;
-  maximum energy difference=  4.974E-13 exceeds toldfe=  1.000E-14
-
 ================================================================================
 
  ----iterations are completed or convergence reached----

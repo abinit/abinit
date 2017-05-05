@@ -4490,7 +4490,7 @@ end subroutine pawxcsphpositron
    MSG_BUG(msg)
  end if
  if(option/=3.and.nkxc/=2*min(nspden,2)-1) then
-   msg='nkxc must be 1 or 3!'
+   msg='nkxc must be 1 or 3 (not OK for GGA)!'
    MSG_BUG(msg)
  end if
 ! if(xclevel==2) then

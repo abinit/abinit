@@ -178,7 +178,7 @@
     kpt11  0.5d0 2*0.25d0
     wtk11  1
   natom11  2
- toldfe11  1.0d-14
+ toldfe11  1.0d-12
    typat11  1 1
 #Unperturbed atomic positions
    xred11  3*0.0d0
