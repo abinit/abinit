@@ -488,8 +488,12 @@ subroutine ddk_free(ddk)
  ! integer arrays
 
  ! real arrays
- if (allocated(ddk%velocity)) ABI_DEALLOCATE(ddk%velocity)
- if (allocated(ddk%velocity_fsavg)) ABI_DEALLOCATE(ddk%velocity_fsavg)
+ if (allocated(ddk%velocity)) then
+   ABI_DEALLOCATE(ddk%velocity)
+ end if
+ if (allocated(ddk%velocity_fsavg)) then
+   ABI_DEALLOCATE(ddk%velocity_fsavg)
+ end if
 
  ! types
  call crystal_free(ddk%cryst)
