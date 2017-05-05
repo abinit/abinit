@@ -98,8 +98,6 @@ natom 2
 #%%    t27_MPI4.out, tolnlines=11, tolabs=2.0e-7, tolrel=1.0;
 #%%    t27_MPI4o_DS1_DOS_AT0001, tolnlines=50, tolabs=0.05, tolrel=0.01, fld_options = -ridiculous;
 #%%    t27_MPI4o_DS2_DOS_AT0001, tolnlines=50, tolabs=0.05, tolrel=0.01, fld_options = -ridiculous;
-#%%    t27_MPI4o_DS1_VCLMB_1DM, tolnlines=0, tolabs=0., tolrel=0.01, fld_options = -ridiculous;
-#%%    t27_MPI4o_DS2_VCLMB_1DM, tolnlines=0, tolabs=0., tolrel=0.01, fld_options = -ridiculous;
 #%% [extra_info]
 #%% keywords = NC, PSP8
 #%% authors = M. Giantomassi
