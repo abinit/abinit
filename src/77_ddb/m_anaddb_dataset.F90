@@ -1681,11 +1681,11 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
  end if
 
 !check that q-grid refinement is a divisor of ngqpt in each direction
- if(any(anaddb_dtset%qrefine(:) > 1) .and. &
-&   any(abs(dmod(dble(anaddb_dtset%ngqpt(1:3))/dble(anaddb_dtset%qrefine(:)),one)) > tol10) ) then
-   write(message, '(a,3i0,a,a,a,3i8,a,a)' )&
-&   'qrefine is',anaddb_dtset%qrefine,' The only allowed values',ch10,&
-&   'are integers which are divisors of the ngqpt grid', anaddb_dtset%ngqpt,ch10,&
+ if(any(anaddb_dtset%qrefine(1:3) > 1) .and. &
+&   any(abs(dmod(dble(anaddb_dtset%ngqpt(1:3))/dble(anaddb_dtset%qrefine(1:3)),one)) > tol10) ) then
+   write(message, '(a,3i10,a,a,a,3i8,a,a)' )&
+&   'qrefine is',anaddb_dtset%qrefine(1:3),' The only allowed values',ch10,&
+&   'are integers which are divisors of the ngqpt grid', anaddb_dtset%ngqpt(1:3),ch10,&
 &   'Action: correct qrefine in your input file.'
    MSG_ERROR(message)
  end if
