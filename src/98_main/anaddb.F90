@@ -110,6 +110,7 @@ program anaddb
  character(len=24) :: start_datetime
  character(len=strlen) :: string
  character(len=fnlen) :: filnam(7),elph_base_name,tmpfilename
+ character(len=fnlen) :: phdos_fname
  character(len=500) :: message
  type(anaddb_dataset_type) :: inp
  type(phonon_dos_type) :: Phdos
@@ -398,11 +399,19 @@ program anaddb
    call wrtout(std_out,message,'COLL')
    call wrtout(ab_out,message,'COLL')
 
-   if (inp%qrefine > 1) then
+! TODO : check if this wrtout should be removed in latest merge 17 feb 2017
+   call timein(tcpu,twall)
+   write(message, '(a,f11.3,a,f11.3,a)' )'-begin at tcpu',tcpu-tcpui,'  and twall',twall-twalli,' sec'
+   call wrtout(std_out,message,'COLL')
+   call wrtout(ab_out,message,'COLL')
+
+   if (any(inp%qrefine(:) > 1)) then
      ! Gaal-Nagy's algorithm in PRB 73 014117.
 
      ! Build the IFCs using the coarse q-mesh.
-     ngqpt_coarse(1:3) = inp%ngqpt(1:3)/inp%qrefine
+     do ii = 1, 3
+       ngqpt_coarse(ii) = inp%ngqpt(ii)/inp%qrefine(ii)
+     end do
      call ifc_init(Ifc_coarse,Crystal,ddb,&
 &     inp%brav,inp%asr,inp%symdynmat,inp%dipdip,inp%rfmeth,ngqpt_coarse,inp%nqshft,inp%q1shft,dielt,zeff,&
 &     inp%nsphere,inp%rifcsph,inp%prtsrlr,inp%enunit,comm)
@@ -457,6 +466,7 @@ program anaddb
      call phdos_print_msqd(Phdos, strcat(filnam(2), "_MSQD_T"), inp%ntemper, inp%tempermin, inp%temperinc)
      call phdos_print(Phdos, strcat(filnam(2), "_PHDOS"))
      call phdos_print_debye(Phdos, Crystal%ucvol)
+     call phdos_print_thermo(PHdos, strcat(filnam(2), "_THERMO"), inp%ntemper, inp%tempermin, inp%temperinc)
 
 #ifdef HAVE_NETCDF
      ncerr = nctk_open_create(phdos_ncid, strcat(filnam(2), "_PHDOS.nc"), xmpi_comm_self)

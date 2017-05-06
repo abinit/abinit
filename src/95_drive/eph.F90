@@ -456,6 +456,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
      path = strcat(dtfil%filnam_ds(4), "_PHDOS")
      call wrtout(ab_out, sjoin("- Writing phonon DOS to file:", path))
      call phdos_print(phdos, path)
+
      !call phdos_print_debye(phdos, crystal%ucvol)
 
 !TODO: do we want to pass the temper etc... from anaddb_dtset into the full dtset for abinit?
@@ -463,6 +464,8 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 !MG: Disabled for the time being because of SIGFPE in v8[41]
      path = strcat(dtfil%filnam_ds(4), "_MSQD_T")
      !call phdos_print_msqd(phdos, path, 1000, one, one)
+     path = strcat(dtfil%filnam_ds(4), "_THERMO")
+     call phdos_print_thermo(PHdos, path, 1000, zero, one)
 
 #ifdef HAVE_NETCDF
      path = strcat(dtfil%filnam_ds(4), "_PHDOS.nc")
@@ -495,7 +498,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  call wrtout(std_out, msg, do_flush=.True.)
  call cwtime(cpu,wall,gflops,"start")
 
- ! Initialize the object used to read DeltaVscf (required if eph_tash /= 0)
+ ! Initialize the object used to read DeltaVscf (required if eph_task /= 0)
  if (use_dvdb) then
    call dvdb_init(dvdb, dvdb_path, comm)
    if (my_rank == master) then

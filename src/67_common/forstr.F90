@@ -312,10 +312,10 @@ subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,e
        iatom=-1;idir=0;ctocprj_choice=3;iorder_cprj=0;unpaw=26
        call metric(gmet,gprimd,-1,rmet,rprimd,dum)
        call ctocprj(fock%atindx,fock%cgocc,ctocprj_choice,fock%cwaveocc_prj,gmet,gprimd,iatom,idir,&
-&         iorder_cprj,fock%istwfk_bz,fock%kg_bz,fock%kptns_bz,fock%mband,mcg,fock%mcprj,dtset%mgfft,fock%mkpt,mpi_enreg,psps%mpsang,&
-&         dtset%mpw,dtset%natom,nattyp,fock%nbandocc_bz,dtset%natom,dtset%ngfft,fock%nkpt_bz,dtset%nloalg,fock%npwarr,dtset%nspinor,&
-&         dtset%nsppol,dtset%ntypat,dtset%paral_kgb,ph1d,psps,rmet,dtset%typat,ucvol,unpaw,&
-&         xred,ylm,ylmgr)
+&        iorder_cprj,fock%istwfk_bz,fock%kg_bz,fock%kptns_bz,fock%mband,mcg,fock%mcprj,dtset%mgfft,fock%mkpt,mpi_enreg,psps%mpsang,&
+&        dtset%mpw,dtset%natom,nattyp,fock%nbandocc_bz,dtset%natom,dtset%ngfft,fock%nkpt_bz,dtset%nloalg,fock%npwarr,dtset%nspinor,&
+&        dtset%nsppol,dtset%ntypat,dtset%paral_kgb,ph1d,psps,rmet,dtset%typat,ucvol,unpaw,&
+&        xred,ylm,ylmgr)
      end if
    end if
    call forstrnps(cg,cprj,dtset%ecut,dtset%ecutsm,dtset%effmass,eigen,electronpositron,fock,grnl,&

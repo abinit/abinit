@@ -104,6 +104,9 @@ module m_phonons
   ! Gaussian broadening.
 
 ! Real pointers
+  real(dp),allocatable :: atom_mass(:)
+   ! atom_mass(natom)
+
   real(dp),allocatable :: omega(:)
    ! omega(nomega)
    ! Frequency grid.
@@ -149,6 +152,7 @@ module m_phonons
  public :: phdos_print
  public :: phdos_print_debye
  public :: phdos_print_msqd
+ public :: phdos_print_thermo
  public :: phdos_free
  public :: phdos_ncwrite
 !!**
@@ -390,19 +394,20 @@ implicit none
 ! this value is also useful for partial atomic DOS, related to kinetic energy and Force constant in Moessbauer
 
  avgspeedofsound = (ucvol / 2 / pi**2 / avgom2dos)**third
- write (msg,'(a,E20.10,a,F16.4,2a)') '- Average speed of sound: ', avgspeedofsound, ' (at units) = ', &
-&    avgspeedofsound * Bohr_Ang * 1.d-10 / Time_Sec, ' (m/s)',ch10
+ write (msg,'(a,E20.10,3a,F16.4,2a)') ' Average speed of sound: ', avgspeedofsound, ' (at units) ',ch10,&
+&             '-                      = ', avgspeedofsound * Bohr_Ang * 1.d-10 / Time_Sec, ' (m/s)',ch10
  call wrtout (ab_out,msg,"COLL")
  call wrtout (std_out,msg,"COLL")
 
 ! Debye frequency = vs * (6 pi^2 natom / ucvol)**1/3
  debyefreq = avgspeedofsound * (six*pi**2/ucvol)**(1./3.)
- write (msg,'(a,E20.10,a,E20.10,a)') ' Debye frequency from DOS: ', debyefreq, ' (Ha) = ', debyefreq*Ha_THz, ' (THz)'
+ write (msg,'(a,E20.10,3a,E20.10,a)') ' Debye frequency from DOS: ', debyefreq, ' (Ha) ',ch10,&
+&                                    '-                        = ', debyefreq*Ha_THz, ' (THz)'
  call wrtout (ab_out,msg,"COLL")
  call wrtout (std_out,msg,"COLL")
 
 ! Debye temperature = hbar * Debye frequency / kb
- write (msg,'(a,E20.10,2a)') ' Debye temperature from DOS: ', debyefreq*Ha_K, ' (K)', ch10
+ write (msg,'(a,E20.10,2a)') '-Debye temperature from DOS: ', debyefreq*Ha_K, ' (K)', ch10
  call wrtout (ab_out,msg,"COLL")
  call wrtout (std_out,msg,"COLL")
 
@@ -414,6 +419,144 @@ implicit none
 end subroutine phdos_print_debye
 !!***
 
+!----------------------------------------------------------------------
+
+!****f* m_phonons/phdos_print_thermo
+!!
+!! NAME
+!! phdos_print_thermo
+!!
+!! FUNCTION
+!! Print out global thermodynamic quantities based on DOS
+!!
+!! INPUTS
+!! phonon_dos= container object for phonon DOS
+!! ucvol = unit cell volume
+!!
+!! OUTPUT
+!!  Only writing.
+!!
+!! PARENTS
+!!      anaddb
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine phdos_print_thermo(PHdos, fname, ntemper, tempermin, temperinc)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'phdos_print_thermo'
+ use interfaces_14_hidewrite
+!End of the abilint section
+
+implicit none
+
+!Arguments ------------------------------------
+ integer, intent(in) :: ntemper
+ real(dp), intent(in) :: tempermin, temperinc
+ type(phonon_dos_type),intent(in) :: PHdos
+ character(len=*),intent(in) :: fname
+
+!Local variables-------------------------------
+ integer :: iomega, itemper, thermal_unit
+ character(len=500) :: msg
+ real(dp) :: wover2t, expmx, ln2shx, cothx, invsinh2
+ real(dp) :: tmp, domega
+!arrays
+ real(dp), allocatable :: free(:), energy(:), entropy(:), spheat(:),wme(:)
+
+ ABI_ALLOCATE(free,    (ntemper))
+ ABI_ALLOCATE(energy,  (ntemper))
+ ABI_ALLOCATE(entropy, (ntemper))
+ ABI_ALLOCATE(spheat,  (ntemper))
+ ABI_ALLOCATE(wme,     (ntemper))
+
+!Put zeroes for F, E, S, Cv
+ free(:)=zero
+ energy(:)=zero
+ entropy(:)=zero
+ spheat(:)=zero
+ wme(:)=zero
+
+!open THERMO file
+ if (open_file(fname,msg,newunit=thermal_unit,form="formatted",action="write") /= 0) then
+   MSG_ERROR(msg)
+ end if
+
+! print header
+ write(msg,'(a,a)') ch10,&
+&  ' # At  T     F(J/mol-c)     E(J/mol-c)     S(J/(mol-c.K)) C(J/(mol-c.K)) Omega_mean(cm-1) from prtdos DOS'
+ call wrtout(thermal_unit,msg,'COLL')
+ msg = ' # (A mol-c is the abbreviation of a mole-cell, that is, the'
+ call wrtout(thermal_unit,msg,'COLL')
+ msg = ' #  number of Avogadro times the atoms in a unit cell)'
+ call wrtout(thermal_unit,msg,'COLL')
+
+ write(msg, '(a,a,a)' )&
+&  ' phdos_print_thermo : thermodynamic functions calculated from prtdos DOS (not histogram)',ch10,&
+&  '     see THERMO output file ...'
+ call wrtout(std_out,msg,'COLL')
+
+ domega = (PHdos%omega(2)-PHdos%omega(1))
+
+ do itemper=1,ntemper
+
+!  The temperature (tmp) is given in Ha
+   tmp=(tempermin+temperinc*dble(itemper-1))*kb_HaK
+
+   do iomega=1,PHdos%nomega
+     if (abs(PHdos%phdos(iomega)) < 1.e-200_dp) cycle
+
+!    wover2t= hbar*w / 2kT dimensionless
+     wover2t = zero;     if(tmp > tol14) wover2t=PHdos%omega(iomega)*half/tmp
+     !expmx=zero;         if (abs(wover2t) < 600._dp) expmx=exp(-wover2t)
+     ! should not be much of a problem for the log, but still put a check.
+     ln2shx=zero;        if (wover2t > tol16 .and. wover2t < 100.0_dp) ln2shx=log(two * sinh(wover2t)) !wover2t+log(one-expmx)
+     cothx=zero;         if (wover2t > tol16) cothx=one/tanh(wover2t) !(one+expmx)/(one-expmx)
+     invsinh2=zero;      if (wover2t > tol16 .and. wover2t < 100.0_dp) invsinh2=one/sinh(wover2t)**2
+
+!    This matches the equations published in Lee & Gonze, PRB 51, 8610 (1995)
+     free(itemper)   = free(itemper)    + PHdos%phdos(iomega)*tmp*ln2shx
+     energy(itemper) = energy(itemper)  + PHdos%phdos(iomega)*half*PHdos%omega(iomega)*cothx
+     spheat(itemper) = spheat(itemper)  + PHdos%phdos(iomega)*wover2t**2 * invsinh2
+     entropy(itemper)= entropy(itemper) + PHdos%phdos(iomega)*(wover2t*cothx - ln2shx)
+     wme(itemper)    = wme(itemper)     + PHdos%phdos(iomega)*PHdos%omega(iomega)*wover2t**2 * invsinh2
+
+   end do ! iomega
+
+   ! suppose homogeneous omega grid and multiply by domega
+   free(itemper)   = free(itemper)    * domega
+   energy(itemper) = energy(itemper)  * domega
+   entropy(itemper)= entropy(itemper) * domega
+   spheat(itemper) = spheat(itemper)  * domega
+   wme(itemper)    = wme(itemper)     * domega
+
+   if (abs(spheat(itemper))>tol8) wme(itemper)=wme(itemper)/spheat(itemper)
+
+! do the printing to file
+   write(msg,'(es11.3,5es15.7)') tmp/kb_HaK,&
+&    Ha_J*Avogadro*free(itemper),&
+&    Ha_J*Avogadro*energy(itemper),&
+&    Ha_J*Avogadro*kb_HaK*entropy(itemper),&
+&    Ha_J*Avogadro*kb_HaK*spheat(itemper),&
+&    wme(itemper)*Ha_cmm1
+   call wrtout(thermal_unit,msg,'COLL')
+ end do ! itemper
+
+ ABI_DEALLOCATE(free)
+ ABI_DEALLOCATE(energy)
+ ABI_DEALLOCATE(entropy)
+ ABI_DEALLOCATE(spheat)
+ ABI_DEALLOCATE(wme)
+
+ close(thermal_unit)
+
+end subroutine phdos_print_thermo
+!!***
 !----------------------------------------------------------------------
 
 !!****f* m_phonons/phdos_free
@@ -453,6 +596,9 @@ subroutine phdos_free(PHdos)
 ! *************************************************************************
 
  !@phonon_dos_type
+ if (allocated(PHdos%atom_mass)) then
+   ABI_FREE(PHdos%atom_mass)
+ end if
  if (allocated(PHdos%omega)) then
    ABI_FREE(PHdos%omega)
  end if
@@ -544,7 +690,8 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,dos_qsh
 
 !Arguments -------------------------------
 !scalars
- integer,intent(in) :: prtdos,comm
+ integer,intent(in) :: prtdos
+ integer,intent(in) :: comm
  real(dp),intent(in) :: dosdeltae,dossmear
  type(crystal_t),intent(in) :: Crystal
  type(ifc_type),intent(in) :: Ifc
@@ -558,9 +705,14 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,dos_qsh
  integer,parameter :: brav1=1,chksymbreak0=0,bcorr0=0,qptopt1=1,master=0
  integer :: facbrv,iat,jat,idir,imesh,imode,io,iq_ibz,itype,nkpt_fullbz
  integer :: nmesh,nqbz,nqpt_max,nqshft,option,timrev,ierr,natom,nomega
- integer :: jdir, idispl, jdispl, isym, my_rank, nprocs
+ integer :: jdir, isym
+ integer :: nprocs, my_rank
+ real(dp) :: nsmallq
  real(dp) :: dum,gaussfactor,gaussprefactor,gaussval,low_bound,max_occ,pnorm
- real(dp) :: upr_bound,xx,gaussmaxarg,wall,cpu,gflops
+ real(dp) :: upr_bound,xx,gaussmaxarg
+ real(dp) :: max_smallq = 0.0625_dp
+ real(dp) :: normq
+ real(dp) :: cpu, wall, gflops
  logical :: out_of_bounds
  character(len=500) :: msg
  character(len=80) :: errstr
@@ -568,11 +720,14 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,dos_qsh
 !arrays
  integer :: qptrlatt(3,3)
  integer,allocatable :: bz2ibz(:),ngqpt(:,:)
+ real(dp) :: speedofsound(3)
+ real(dp) :: speedofsound_(3)
+ real(dp) :: debyefreq
  real(dp) :: displ(2*3*Crystal%natom*3*Crystal%natom)
  real(dp) :: eigvec(2,3,Crystal%natom,3*Crystal%natom),phfrq(3*Crystal%natom)
  real(dp) :: qlatt(3,3),qphon(3),rlatt(3,3)
  real(dp) :: msqd_atom_tmp(3,3)
- real(dp) :: symcart(3,3,crystal%nsym),invmass(crystal%natom)
+ real(dp) :: symcart(3,3,crystal%nsym)
  real(dp),allocatable :: dtweightde(:,:),full_eigvec(:,:,:,:,:),full_phfrq(:,:),Prf3D(:,:,:)
  real(dp),allocatable :: kpt_fullbz(:,:),qbz(:,:),qibz(:,:),qshft(:,:),tmp_phfrq(:),tweight(:,:)
  real(dp),allocatable :: qibz2(:,:),qshft2(:,:),wtq(:),wtq_folded(:),wtqibz(:)
@@ -602,9 +757,6 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,dos_qsh
  do isym = 1, Crystal%nsym
    call symredcart(Crystal%rprimd,Crystal%gprimd,symcart(:,:,isym),Crystal%symrel(:,:,isym))
  end do
- do iat = 1, natom
-   invmass(iat) = one / Crystal%amu(Crystal%typat(iat))/amu_emass
- end do
 
  nomega = 1
  PHdos%ntypat     = crystal%ntypat
@@ -616,6 +768,10 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,dos_qsh
  PHdos%omega_min  = greatest_real
  PHdos%omega_step = dosdeltae
  PHdos%dossmear   = dossmear
+
+ ABI_MALLOC(PHdos%atom_mass, (natom))
+ PHdos%atom_mass(:) = Crystal%amu(Crystal%typat(:))*amu_emass
+ 
 
  ABI_MALLOC(PHdos%omega, (nomega))
  ABI_MALLOC(PHdos%phdos, (nomega))
@@ -648,6 +804,9 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,dos_qsh
  nmesh=2
  ABI_MALLOC(ngqpt,(3,nmesh))
  do imesh=1,nmesh
+
+   write(msg,'(a,I6)') ' Mesh number ', imesh
+   call wrtout(std_out,msg,'COLL')
 
    if (imesh==1) then
      ! Coarse q-mesh used in RF calculation.
@@ -739,8 +898,21 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,dos_qsh
      ABI_CALLOC(PHdos%msqd_dos_atom,(PHdos%nomega,3,3,natom))
 
      ! === Sum over irreducible q-points ===
+     nsmallq = zero
+     speedofsound = zero
      do iq_ibz=1,PHdos%nqibz
        !if (mod(iq_ibz, nprocs) /= my_rank) cycle ! mpi-parallelism
+
+!TODO: this is where the mpi distribution should happen.
+! then sync the following integrals:
+!   speedofsound
+!   nsmallq
+!   PHdos%phdos
+!   PHdos%msqd_dos_atom
+!   full_phfrq
+!   full_eigvec
+
+
 
        ! Fourier interpolation.
        call ifc_fourq(Ifc,Crystal,qibz(:,iq_ibz),phfrq,displ,out_eigvec=eigvec)
@@ -748,6 +920,13 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,dos_qsh
        dum=MINVAL(phfrq); PHdos%omega_min=MIN(PHdos%omega_min,dum)
        dum=MAXVAL(phfrq); PHdos%omega_max=MAX(PHdos%omega_max,dum)
        out_of_bounds = (PHdos%omega_min<low_bound .or. PHdos%omega_max>upr_bound)
+
+       normq = sum(qibz(:,iq_ibz)**2)
+       if (normq < max_smallq .and. normq > tol6) then
+          call phdos_calc_vsound(eigvec, Crystal%gmet, natom, phfrq, qibz(:,iq_ibz), speedofsound_)
+         speedofsound = speedofsound + speedofsound_*wtqibz(iq_ibz)
+         nsmallq = nsmallq + wtqibz(iq_ibz)
+       end if
 
        if (imesh>1.and..not.out_of_bounds) then
          select case (prtdos)
@@ -766,17 +945,13 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,dos_qsh
                    PHdos%pjdos(io,idir,iat)=PHdos%pjdos(io,idir,iat)+ pnorm*wtqibz(iq_ibz)*gaussval
 
                    ! accumulate outer product of displacement vectors
-                   idispl = (imode-1)*3*natom + (iat-1)*3 + idir
                    do jdir=1,3
-                     jdispl = (imode-1)*3*natom + (iat-1)*3 + jdir
                      ! NB: only accumulate real part. I think the full sum over the BZ should guarantee Im=0
                      ! this sum only does irreducible points: the matrix is symmetrized below
                      ! msqd_atom_tmp has units of bohr^2 / Ha as gaussval ~ 1/smear ~ 1/Ha
-                     msqd_atom_tmp(jdir,idir) = msqd_atom_tmp(jdir,idir) &
-&                       + (displ(2*(idispl-1)+1)* displ(2*(jdispl-1)+1) &
-&                       -  displ(2*(idispl-1)+2)* displ(2*(jdispl-1)+2) &
-&                       +  displ(2*(idispl-1)+2)* displ(2*(jdispl-1)+1) &
-&                       -  displ(2*(idispl-1)+1)* displ(2*(jdispl-1)+2)) * wtqibz(iq_ibz) * gaussval
+                     msqd_atom_tmp(jdir,idir) = msqd_atom_tmp(jdir,idir) + ( &
+&                          eigvec(1,idir,iat,imode)* eigvec(1,jdir,iat,imode) &
+&                       +  eigvec(2,idir,iat,imode)* eigvec(2,jdir,iat,imode) ) * wtqibz(iq_ibz) * gaussval
                    end do ! jdir
                  end do ! idir
                  ! msqd_atom_tmp is in cartesian coordinates
@@ -784,9 +959,11 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,dos_qsh
 ! Symmetrize matrices to get full sum of tensor over all BZ, not just IBZ.
 !   the atom is not necessarily invariant under symops, so these contributions should be added to each iat separately
 !   normalization by nsym is done at the end outside the iqpt loop and after the tetrahedron clause
+!  NB: looks consistent with the sym in harmonic thermo, just used in opposite
+!  direction for symops: symrel here instead of symrec and the inverse of
+!  indsym in harmonic_thermo
                  do isym=1, Crystal%nsym
                    jat = Crystal%indsym(4,isym,iat)
-!  TODO:  need to check the direction of the symcart vs transpose or inverse, given that jat is the pre-image of iat...
                    PHdos%msqd_dos_atom(io,:,:,jat) = PHdos%msqd_dos_atom(io,:,:,jat) &
 &                    + matmul( (symcart(:,:,isym)), matmul(msqd_atom_tmp, transpose(symcart(:,:,isym))) )
                  end do
@@ -821,6 +998,27 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,dos_qsh
        EXIT !infinite loop
      end if
    end do !infinite loop
+
+   if (nsmallq > tol10) then
+     speedofsound = speedofsound/nsmallq
+
+     write (msg,'(a,E20.10,3a,F16.4,2a)') ' Average speed of sound partial sums: ', third*sum(speedofsound), ' (at units)',ch10,&
+&               '-                                   = ', third*sum(speedofsound) * Bohr_Ang * 1.d-10 / Time_Sec, ' (m/s)',ch10
+     call wrtout (ab_out,msg,"COLL")
+     call wrtout (std_out,msg,"COLL")
+
+! Debye frequency = vs * (6 pi^2 natom / ucvol)**1/3
+     debyefreq = third*sum(speedofsound) * (six*pi**2/Crystal%ucvol)**(1./3.)
+     write (msg,'(a,E20.10,3a,E20.10,a)') ' Debye frequency from partial sums: ', debyefreq, ' (Ha)',ch10,&
+&                                         '-                                 = ', debyefreq*Ha_THz, ' (THz)'
+     call wrtout (ab_out,msg,"COLL")
+     call wrtout (std_out,msg,"COLL")
+
+! Debye temperature = hbar * Debye frequency / kb
+     write (msg,'(a,E20.10,2a)') '-Debye temperature from partial sums: ', debyefreq*Ha_K, ' (K)', ch10
+     call wrtout (ab_out,msg,"COLL")
+     call wrtout (std_out,msg,"COLL")
+   end if
 
    ABI_FREE(qibz)
    ABI_FREE(qbz)
@@ -868,15 +1066,12 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,dos_qsh
 
              ! accumulate outer product of displacement vectors
              do jdir=1,3
-               ! NB: only accumulate real part. I think the full sum over the BZ should guarantee Im=0
                msqd_atom_tmp(jdir,idir) = msqd_atom_tmp(jdir,idir) &
 &                + (full_eigvec(1,idir,iat,imode,iq_ibz)* full_eigvec(1,jdir,iat,imode,iq_ibz) &
-&                -  full_eigvec(2,idir,iat,imode,iq_ibz)* full_eigvec(2,jdir,iat,imode,iq_ibz) &
-&                +  full_eigvec(2,idir,iat,imode,iq_ibz)* full_eigvec(1,jdir,iat,imode,iq_ibz) &
-&                -  full_eigvec(1,idir,iat,imode,iq_ibz)* full_eigvec(2,jdir,iat,imode,iq_ibz)) &
-&                * dtweightde(iq_ibz,io)
-             end do
-           end do
+&                +  full_eigvec(2,idir,iat,imode,iq_ibz)* full_eigvec(2,jdir,iat,imode,iq_ibz) &
+&                ) * dtweightde(iq_ibz,io)
+             end do ! jdir
+           end do ! idir
 
 ! Symmetrize matrices to get full sum of tensor over all BZ, not just IBZ.
 !   the atom is not necessarily invariant under symops, so these contributions should be added to each iat separately
@@ -886,10 +1081,10 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,dos_qsh
 !   from loops above only the eigvec are kept and not the displ, so we still have to divide by the masses
 !  TODO:  need to check the direction of the symcart vs transpose or inverse, given that jat is the pre-image of iat...
              PHdos%msqd_dos_atom(io,:,:,jat) = PHdos%msqd_dos_atom(io,:,:,jat) + &
-&                matmul( (symcart(:,:,isym)), matmul(msqd_atom_tmp, transpose(symcart(:,:,isym))) ) * invmass(iat)
-           end do
-         end do ! isym
-       end do ! iat
+&                matmul( (symcart(:,:,isym)), matmul(msqd_atom_tmp, transpose(symcart(:,:,isym))) )
+           end do ! isym
+         end do ! iat
+       end do ! iq
      end do  ! io
    end do ! imode
    ABI_FREE(tmp_phfrq)
@@ -899,6 +1094,11 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,dos_qsh
 
 ! normalize by nsym : symmetrization is used in all prtdos cases
  PHdos%msqd_dos_atom = PHdos%msqd_dos_atom / Crystal%nsym
+
+! normalize by mass and factor of 2 ! now added in the printout to agree with harmonic_thermo
+! do iat=1, natom
+!   PHdos%msqd_dos_atom(:,:,:,iat) = PHdos%msqd_dos_atom(:,:,:,iat) * invmass(iat) * half
+! end do ! iat
 
  ! =======================
  ! === calculate IPDOS ===
@@ -1121,6 +1321,7 @@ subroutine mkphbs(Ifc,Crystal,inp,ddb,asrq0,prefix,comm)
 !arrays
  integer :: rfphon(4),rfelfd(4),rfstrs(4)
  integer,allocatable :: ndiv(:)
+ real(dp) :: speedofsound(3)
  real(dp) :: qphnrm(3), qphon(3), qphon_padded(3,3),res(3)
  real(dp) :: d2cart(2,ddb%msize),real_qphon(3)
  real(dp) :: displ(2*3*crystal%natom*3*crystal%natom),eigval(3,crystal%natom)
@@ -1251,7 +1452,8 @@ subroutine mkphbs(Ifc,Crystal,inp,ddb,asrq0,prefix,comm)
    call wrap2_pmhalf(qphon, real_qphon, res)
    if (sqrt(real_qphon(1)**2+real_qphon(2)**2+real_qphon(3)**2) < quarter .and. &
 &   sqrt(real_qphon(1)**2+real_qphon(2)**2+real_qphon(3)**2) > tol6) then
-     call phdos_print_vsound(ab_out,eigvec, Crystal%gmet, natom, phfrq, real_qphon, Crystal%ucvol)
+     call phdos_calc_vsound(eigvec, Crystal%gmet, natom, phfrq, real_qphon, speedofsound)
+     if (my_rank == master) call phdos_print_vsound(ab_out, Crystal%ucvol, speedofsound)
    end if
 
  end do ! iphl1
@@ -1320,19 +1522,18 @@ subroutine mkphbs(Ifc,Crystal,inp,ddb,asrq0,prefix,comm)
    ABI_FREE(alloc_path)
  end if
 
-contains
+end subroutine mkphbs
 !!***
 
-!!****f* m_phonons/phdos_print_vsound
+!!****f* m_phonons/phdos_calc_vsound
 !!
 !! NAME
-!! phdos_print_vsound
+!! phdos_calc_vsound
 !!
 !! FUNCTION
-!!  From the frequencies for acoustic modes at small q, estimate speed of sound and Debye temperature
+!!  From the frequencies for acoustic modes at small q, estimate speed of sound (which also gives Debye temperature)
 !!
 !! INPUTS
-!! unit=Fortran unit number
 !! eigvec(2,3*natom,3*natom) = phonon eigenvectors at present q-point
 !! gmet(3,3) = metric tensor in reciprocal space.
 !! natom = number of atoms in the unit cell
@@ -1349,7 +1550,86 @@ contains
 !!
 !! SOURCE
 
-subroutine phdos_print_vsound(unit,eigvec,gmet,natom,phfrq,qphon,ucvol)
+subroutine phdos_calc_vsound(eigvec,gmet,natom,phfrq,qphon, &
+&   speedofsound)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'phdos_calc_vsound'
+!End of the abilint section
+
+ implicit none
+
+!Arguments -------------------------------
+!scalras
+ integer, intent(in) :: natom
+!arrays
+ real(dp), intent(in) :: gmet(3,3),qphon(3)
+ real(dp), intent(in) :: phfrq(3*natom),eigvec(2,3*natom,3*natom)
+
+ real(dp), intent(out) :: speedofsound(3)
+
+!Local variables -------------------------
+ integer :: iatref,imode, iatom, isacoustic, imode_acoustic
+ character(len=500) :: msg
+ real(dp) :: qnormcart
+ real(dp) :: qtmp(3)
+
+! *********************************************************************
+
+ imode_acoustic = 0
+ do imode = 1, 3*natom
+
+!  Check if this mode is acoustic like: scalar product of all displacement vectors are collinear
+   isacoustic = 1
+!  Find reference atom with non-zero displacement
+   do iatom=1,natom
+     if(sum(eigvec(:,(iatom-1)*3+1:(iatom-1)*3+3,imode)**2) >tol16)iatref=iatom
+   enddo
+!  Now compute scalar product, and check they are all positive
+   do iatom = 1, natom
+     if (sum(eigvec(:,(iatom-1)*3+1:(iatom-1)*3+3, imode)&
+&           *eigvec(:,(iatref-1)*3+1:(iatref-1)*3+3, imode)) < tol16 ) isacoustic = 0
+   end do
+   if (isacoustic == 0) cycle
+   imode_acoustic = imode_acoustic + 1
+
+!   write (msg, '(a,I6,a,3F12.4)') ' Found acoustic mode ', imode, ' for |q| in red coord < 0.25 ; q = ', qphon
+!   call wrtout(std_out,msg,'COLL')
+
+   qtmp = matmul(gmet, qphon)
+   qnormcart = two * pi * sqrt(sum(qphon*qtmp))
+   speedofsound(imode_acoustic) = phfrq(imode) / qnormcart
+ end do
+
+end subroutine phdos_calc_vsound
+!!***
+
+!!****f* m_phonons/phdos_print_vsound
+!!
+!! NAME
+!! phdos_print_vsound
+!!
+!! FUNCTION
+!!  Print out estimate speed of sound and Debye temperature at this (small) q
+!!  should only be called by master proc for the hard unit number
+!!
+!! INPUTS
+!! unit=Fortran unit number
+!! speedofsound(3) 
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!      m_phonons
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine phdos_print_vsound(iunit,ucvol,speedofsound)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -1363,64 +1643,44 @@ subroutine phdos_print_vsound(unit,eigvec,gmet,natom,phfrq,qphon,ucvol)
 
 !Arguments -------------------------------
 !scalras
- integer, intent(in) :: natom,unit
+ integer, intent(in) :: iunit
  real(dp), intent(in) :: ucvol
 !arrays
- real(dp), intent(in) :: gmet(3,3),qphon(3)
- real(dp), intent(in) :: phfrq(3*natom),eigvec(2,3*natom,3*natom)
+ real(dp), intent(in) :: speedofsound(3)
 
 !Local variables -------------------------
- integer :: iatref,imode, iatom, isacoustic
+ integer :: imode_acoustic
  character(len=500) :: msg
- real(dp) :: qnormcart, speedofsound, tdebye
- real(dp) :: qtmp(3)
+ real(dp) :: tdebye
 
 ! *********************************************************************
 
- do imode = 1, 3*natom
-
-!  Check if this mode is acoustic like: scalar product of all displacement vectors are collinear
-   isacoustic = 1
-!  Find reference atom with non-zero displacement
-   do iatom=1,natom
-     if(sum(eigvec(:,(iatom-1)*3+1:(iatom-1)*3+3,imode)**2) >tol16)iatref=iatom
-   enddo
-!  Now compute scalar product, and check they are all positive
-   do iatom = 1, natom
-     if (sum(eigvec(:,(iatom-1)*3+1:(iatom-1)*3+3, imode)*eigvec(:,(iatref-1)*3+1:(iatref-1)*3+3, imode)) < tol16 ) isacoustic = 0
-   end do
-   if (isacoustic == 0) cycle
-
-   write (msg, '(a,I6,a,3F12.4)') ' Found acoustic mode ', imode, ' for |q| in red coord < 0.25 ; q = ', qphon
-   call wrtout(unit,msg,'COLL')
-   call wrtout(std_out,msg,'COLL')
-
-   qtmp = matmul(gmet, qphon)
-   qnormcart = two * pi * sqrt(sum(qphon*qtmp))
-   speedofsound = phfrq(imode) / qnormcart
-
+ do imode_acoustic = 1, 3
 !  from phonon frequency, estimate speed of sound by linear interpolation from Gamma
    write (msg, '(2a,a,E20.10,a,a,F20.5)') &
 &   ' Speed of sound for this q and mode:',ch10,&
-&   '   in atomic units: ', speedofsound, ch10,&
-&   '   in SI units m/s: ', speedofsound * Bohr_Ang * 1.d-10 / Time_Sec
-   call wrtout(unit,msg,'COLL')
+&   '   in atomic units: ', speedofsound(imode_acoustic), ch10,&
+&   '   in SI units m/s: ', speedofsound(imode_acoustic) * Bohr_Ang * 1.d-10 / Time_Sec
+   call wrtout(iunit,msg,'COLL')
+   call wrtout(std_out,msg,'COLL')
 
 !  also estimate partial Debye temperature, = energy if this band went to zone edge
-   tdebye = speedofsound * pi * (six / pi / ucvol)**(third)
+   tdebye = speedofsound(imode_acoustic) * pi * (six / pi / ucvol)**(third)
    write (msg, '(2a,a,E20.10,a,a,F20.5)') &
 &   ' Partial Debye temperature for this q and mode:',ch10,&
 &   '   in atomic units: ', tdebye, ch10,&
 &   '   in SI units K  : ', tdebye * Ha_K
-   call wrtout(unit,msg,'COLL')
-   call wrtout(unit,"",'COLL')
+   call wrtout(iunit,msg,'COLL')
+   call wrtout(iunit,"",'COLL')
+   call wrtout(std_out,msg,'COLL')
+   call wrtout(std_out,"",'COLL')
  end do
 
 end subroutine phdos_print_vsound
 !!***
 
-end subroutine mkphbs
-!!***
+
+
 
 !----------------------------------------------------------------------
 
@@ -1478,7 +1738,7 @@ subroutine phdos_print_msqd(PHdos, fname, ntemper, tempermin, temperinc)
  end if
 
 ! write a header
-   write (msg, '(2a)') '# mean square displacement for each atom as a function of T'
+   write (msg, '(2a)') '# mean square displacement for each atom as a function of T (bohr^2)'
 
 ! NB: this call to wrtout does not seem to work from the eph executable, even in sequential, and whether within or outside a clause for me==master.
 !  Do not change this to wrtout without checking extensively.
@@ -1526,7 +1786,7 @@ subroutine phdos_print_msqd(PHdos, fname, ntemper, tempermin, temperinc)
    call DGEMM('T','N', 9, ntemper, PHdos%nomega, one, tmp_msqd,PHdos%nomega,&
 &      bose, PHdos%nomega, zero, integ, 9)
 ! NB: this presumes an equidistant omega grid
-   integ = integ * (PHdos%omega(2)-PHdos%omega(1))
+   integ = integ * (PHdos%omega(2)-PHdos%omega(1)) / PHdos%atom_mass(iatom)
 
 ! print out stuff
    do itemp = 1, ntemper
