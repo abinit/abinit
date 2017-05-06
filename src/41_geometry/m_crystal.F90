@@ -335,12 +335,6 @@ subroutine crystal_init(amu,Cryst,space_group,natom,npsp,ntypat,nsym,rprimd,typa
    end do
  end do
 
- ! Be careful when we have alchemy.
- !if isalchemical(Cryst)
- !ABI_MALLOC(Cryst%amu, (ntypat))
- !call atomdata_from_znucl(atom,znucl)
- !atom%amu
-
  Cryst%timrev = timrev
 
  if (PRESENT(symrel).and.PRESENT(tnons).and.PRESENT(symafm)) then

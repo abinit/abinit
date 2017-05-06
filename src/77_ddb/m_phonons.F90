@@ -48,7 +48,7 @@ module m_phonons
  use m_dynmat,          only : gtdyn9, dfpt_phfrq
  use m_crystal,         only : crystal_t
  use m_bz_mesh,         only : isamek, make_path, kpath_t, kpath_new, kpath_free
- use m_ifc,             only : ifc_type, ifc_fourq
+ use m_ifc,             only : ifc_type, ifc_fourq, ifc_calcnwrite_nana_terms
  use m_anaddb_dataset,  only : anaddb_dataset_type
  use m_kpts,            only : kpts_ibz_from_kptrlatt
 
@@ -1471,9 +1471,12 @@ subroutine mkphbs(Ifc,Crystal,inp,ddb,asrq0,prefix,comm)
    NCF_CHECK_MSG(nctk_open_create(ncid, strcat(prefix, "_PHBST.nc"), xmpi_comm_self), "Creating PHBST")
    NCF_CHECK(crystal_ncwrite(Crystal, ncid))
    call phonons_ncwrite(ncid,natom,nfineqpath,save_qpoints,weights,save_phfrq,save_phdispl_cart)
-   NCF_CHECK(nctk_def_arrays(ncid, [nctkarr_t('atomic_mass_units', "dp", "number_of_atom_species")],defmode=.True.))
-   NCF_CHECK(nctk_set_datamode(ncid))
-   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, 'atomic_mass_units'), ddb%amu))
+
+   ! Now treat the second list of vectors (only at the Gamma point, but can include non-analyticities)
+   if (inp%nph2l /= 0 .and. inp%ifcflag == 1) then
+     call ifc_calcnwrite_nana_terms(ifc, crystal, inp%nph2l, inp%qph2l, inp%qnrml2, ncid)
+   end if
+
    NCF_CHECK(nf90_close(ncid))
 #endif
 
