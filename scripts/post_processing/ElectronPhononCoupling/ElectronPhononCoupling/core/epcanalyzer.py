@@ -568,6 +568,28 @@ class EpcAnalyzer(object):
 
         return qred, omega
 
+    @mpi_watch
+    def sum_qpt_functions_double_grid(self, func_coarse, func_fine,
+                                      *args, **kwargs):
+        """
+        Sum a certain function on the coarse grid,
+        and another one on the fine grid.
+        Only master sums the result.
+        """
+        self.distribute_workload(fine=False)
+        sum_coarse = self.sum_qpt_function(func_coarse, fine=False)
+
+        self.distribute_workload(fine=True)
+        self.read_zero_files()
+        sum_fine = self.sum_qpt_function(func_fine, fine=True)
+
+        if i_am_master:
+            result = sum_coarse + sum_fine
+        else:
+            result = None
+
+        return result
+
     def compute_static_zp_renormalization_nosplit(self):
         """Compute the zero-point renormalization in a static scheme."""
         self.distribute_workload()
@@ -601,16 +623,9 @@ class EpcAnalyzer(object):
         in a dynamical scheme.
         """
         self.check_temperatures()
-        self.distribute_workload(fine=False)
-        tdr_stern = self.sum_qpt_function('get_tdr_static_nosplit',
-                                          fine=False)
-
-        self.distribute_workload(fine=True)
-        self.read_zero_files()
-        tdr_active = self.sum_qpt_function('get_tdr_dynamical_active',
-                                           fine=True)
-
-        self.temperature_dependent_renormalization = tdr_stern + tdr_active
+        self.temperature_dependent_renormalization = (
+            self.sum_qpt_functions_double_grid('get_tdr_static_nosplit',
+                                               'get_tdr_dynamical_active'))
         self.renormalization_is_dynamical = True
 
     def compute_dynamical_zp_renormalization_double_grid(self):
@@ -619,23 +634,16 @@ class EpcAnalyzer(object):
         in a dynamical scheme.
         """
         self.check_temperatures()
-        self.distribute_workload(fine=False)
-        zpr_stern = self.sum_qpt_function('get_zpr_static_sternheimer',
-                                          fine=False)
-
-        self.distribute_workload(fine=True)
-        self.read_zero_files()
-        zpr_active = self.sum_qpt_function('get_zpr_dynamical_active',
-                                           fine=True)
-
-        self.zero_point_renormalization = zpr_stern + zpr_active
+        self.zero_point_renormalization = (
+            self.sum_qpt_functions_double_grid('get_zpr_static_sternheimer',
+                                               'get_zpr_dynamical_active'))
         self.renormalization_is_dynamical = True
 
     def compute_dynamical_zp_renormalization(self):
         """Compute the zero-point renormalization in a dynamical scheme."""
         self.distribute_workload()
-        self.zero_point_renormalization = self.sum_qpt_function(
-            'get_zpr_dynamical')
+        self.zero_point_renormalization = (
+            self.sum_qpt_function('get_zpr_dynamical'))
         self.renormalization_is_dynamical = True
 
     def compute_static_td_renormalization(self):
@@ -645,8 +653,8 @@ class EpcAnalyzer(object):
         """
         self.check_temperatures()
         self.distribute_workload()
-        self.temperature_dependent_renormalization = self.sum_qpt_function(
-            'get_tdr_static')
+        self.temperature_dependent_renormalization = (
+            self.sum_qpt_function('get_tdr_static'))
         self.renormalization_is_dynamical = False
 
     def compute_static_zp_renormalization(self):
@@ -654,8 +662,8 @@ class EpcAnalyzer(object):
         Compute the zero-point renormalization in a static scheme
         with the transitions split between active and sternheimer.
         """
-        self.zero_point_renormalization = self.sum_qpt_function(
-            'get_zpr_static')
+        self.zero_point_renormalization = (
+            self.sum_qpt_function('get_zpr_static'))
         self.renormalization_is_dynamical = False
 
     def compute_dynamical_td_broadening(self):
@@ -665,8 +673,8 @@ class EpcAnalyzer(object):
         """
         self.check_temperatures()
         self.distribute_workload()
-        self.temperature_dependent_broadening = self.sum_qpt_function(
-            'get_tdb_dynamical')
+        self.temperature_dependent_broadening = (
+            self.sum_qpt_function('get_tdb_dynamical'))
         self.broadening_is_dynamical = True
 
     def compute_dynamical_zp_broadening(self):
@@ -675,8 +683,8 @@ class EpcAnalyzer(object):
         from the GKK files.
         """
         self.distribute_workload()
-        self.zero_point_broadening = self.sum_qpt_function(
-            'get_zpb_dynamical')
+        self.zero_point_broadening = (
+            self.sum_qpt_function('get_zpb_dynamical'))
         self.broadening_is_dynamical = True
 
     def compute_static_td_broadening(self):
@@ -686,8 +694,8 @@ class EpcAnalyzer(object):
         """
         self.check_temperatures()
         self.distribute_workload()
-        self.temperature_dependent_broadening = self.sum_qpt_function(
-            'get_tdb_static')
+        self.temperature_dependent_broadening = (
+            self.sum_qpt_function('get_tdb_static'))
         self.broadening_is_dynamical = False
 
     def compute_static_zp_broadening(self):
@@ -696,8 +704,8 @@ class EpcAnalyzer(object):
         from the GKK files.
         """
         self.distribute_workload()
-        self.zero_point_broadening = self.sum_qpt_function(
-            'get_zpb_static')
+        self.zero_point_broadening = (
+            self.sum_qpt_function('get_zpb_static'))
         self.broadening_is_dynamical = False
 
     def compute_static_td_broadening_nosplit(self):
@@ -707,8 +715,8 @@ class EpcAnalyzer(object):
         """
         self.check_temperatures()
         self.distribute_workload()
-        self.temperature_dependent_broadening = self.sum_qpt_function(
-            'get_tdb_static_nosplit')
+        self.temperature_dependent_broadening = (
+            self.sum_qpt_function('get_tdb_static_nosplit'))
         self.broadening_is_dynamical = False
 
     def compute_static_zp_broadening_nosplit(self):
@@ -717,9 +725,18 @@ class EpcAnalyzer(object):
         from the EIGI2D files.
         """
         self.distribute_workload()
-        self.zero_point_broadening = self.sum_qpt_function(
-            'get_zpb_static_nosplit')
+        self.zero_point_broadening = (
+            self.sum_qpt_function('get_zpb_static_nosplit'))
         self.broadening_is_dynamical = False
+
+    def compute_ddw_active_zpr(self):
+        """
+        Compute the zero-point renormalization in a static scheme
+        with the transitions split between active and sternheimer.
+        """
+        self.zero_point_renormalization = (
+            self.sum_qpt_function('get_zpr_ddw_active'))
+        self.renormalization_is_dynamical = False
 
     def compute_static_zp_broadening(self):
         """
@@ -737,7 +754,8 @@ class EpcAnalyzer(object):
         Retain the mode decomposition of the zpr.
         """
         self.distribute_workload()
-        self.zero_point_renormalization_modes = self.sum_qpt_function('get_zpr_static_modes')
+        self.zero_point_renormalization_modes = (
+            self.sum_qpt_function('get_zpr_static_modes'))
         self.renormalization_is_dynamical = False
 
     def compute_zp_self_energy(self):
@@ -828,16 +846,9 @@ class EpcAnalyzer(object):
         in a dynamical scheme.
         """
         self.check_temperatures()
-        self.distribute_workload(fine=False)
-        se_stern = self.sum_qpt_function('get_zp_self_energy_sternheimer',
-                                          fine=False)
-
-        self.distribute_workload(fine=True)
-        self.read_zero_files()
-        se_active = self.sum_qpt_function('get_zp_self_energy_active',
-                                           fine=True)
-
-        self.self_energy = se_stern + se_active
+        self.self_energy = (
+          self.sum_qpt_functions_double_grid('get_zp_self_energy_sternheimer',
+                                             'get_zp_self_energy_active'))
 
     def compute_td_self_energy_double_grid(self):
         """
@@ -845,16 +856,9 @@ class EpcAnalyzer(object):
         in a dynamical scheme.
         """
         self.check_temperatures()
-        self.distribute_workload(fine=False)
-        se_stern = self.sum_qpt_function('get_td_self_energy_sternheimer',
-                                          fine=False)
-
-        self.distribute_workload(fine=True)
-        self.read_zero_files()
-        se_active = self.sum_qpt_function('get_td_self_energy_active',
-                                           fine=True)
-
-        self.self_energy_T = se_stern + se_active
+        self.self_energy_T = (
+          self.sum_qpt_functions_double_grid('get_td_self_energy_sternheimer',
+                                             'get_td_self_energy_active'))
 
     @master_only
     def write_netcdf(self):
