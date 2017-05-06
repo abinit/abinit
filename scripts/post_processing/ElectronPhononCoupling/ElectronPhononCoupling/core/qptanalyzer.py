@@ -320,7 +320,8 @@ class QptAnalyzer(object):
       
         return fan, ddw
     
-    def get_fan_ddw_active(self, mode=False, omega=False, temperature=False, dynamical=True):
+    def get_fan_ddw_active(self, mode=False, omega=False, temperature=False,
+                           dynamical=True):
         """
         Compute the fan and ddw contributions to the self-energy
         from the active space, that is, the the lower bands.
@@ -512,6 +513,8 @@ class QptAnalyzer(object):
                         dynamical=True,
                         only_sternheimer=False,
                         only_active=False,
+                        only_fan=False,
+                        only_ddw=False,
                         ):
 
         if only_sternheimer and only_active:
@@ -539,7 +542,14 @@ class QptAnalyzer(object):
                 omega=omega,
                 dynamical=dynamical)
 
-        se = self.wtq * (fan - ddw)
+        if only_fan:
+            se_q = fan
+        elif only_ddw:
+            se_q = - ddw
+        else:
+            se_q = fan - ddw
+
+        se = self.wtq * se_q
         se = self.eig0.make_average(se)
     
         return se
@@ -678,7 +688,7 @@ class QptAnalyzer(object):
             only_active=False,
             )
         # nkpt, nband, nomegase, nband
-        self.sigma = einsum('lkn->knl', self.sigma)
+        self.sigma = einsum('lkn->knl', self.sigma) # FIXME why??
         return self.sigma
 
     def get_td_self_energy(self):
@@ -702,7 +712,7 @@ class QptAnalyzer(object):
             only_active=False,
             )
         # nkpt, nband, nomegase, nband
-        self.sigma = einsum('tlkn->knlt', self.sigma)
+        self.sigma = einsum('tlkn->knlt', self.sigma) # FIXME why??
         return self.sigma
 
     def get_zp_self_energy_active(self):
@@ -727,7 +737,7 @@ class QptAnalyzer(object):
             only_active=True,
             )
         # nkpt, nband, nomegase, nband
-        self.sigma = einsum('lkn->knl', self.sigma)
+        self.sigma = einsum('lkn->knl', self.sigma) # FIXME why??
         return self.sigma
 
     def get_zp_self_energy_sternheimer(self):
@@ -752,7 +762,7 @@ class QptAnalyzer(object):
             only_active=False,
             )
         # nkpt, nband, nomegase, nband
-        self.sigma = einsum('lkn->knl', self.sigma)
+        self.sigma = einsum('lkn->knl', self.sigma) # FIXME why??
         return self.sigma
 
     def get_td_self_energy_active(self):
@@ -777,7 +787,7 @@ class QptAnalyzer(object):
             only_active=True,
             )
         # nkpt, nband, nomegase, nband
-        self.sigma = einsum('tlkn->knlt', self.sigma)
+        self.sigma = einsum('tlkn->knlt', self.sigma) # FIXME why??
         return self.sigma
 
     def get_td_self_energy_sternheimer(self):
@@ -802,7 +812,7 @@ class QptAnalyzer(object):
             only_active=False,
             )
         # nkpt, nband, nomegase, nband
-        self.sigma = einsum('tlkn->knlt', self.sigma)
+        self.sigma = einsum('tlkn->knlt', self.sigma) # FIXME why??
         return self.sigma
 
     def get_zpr_static_sternheimer(self):
@@ -863,7 +873,7 @@ class QptAnalyzer(object):
             only_active=False,
             ).real
         # nkpt, nband, ntemp
-        self.tdr = einsum('tkn->knt', self.tdr)
+        self.tdr = einsum('tkn->knt', self.tdr) # FIXME why??
         return self.tdr
     
     def get_tdr_dynamical(self):
@@ -880,7 +890,7 @@ class QptAnalyzer(object):
             only_active=False,
             ).real
         # nkpt, nband, ntemp
-        self.tdr = einsum('tkn->knt', self.tdr)
+        self.tdr = einsum('tkn->knt', self.tdr) # FIXME why??
         return self.tdr
 
     def get_tdr_static_nosplit(self):
@@ -897,7 +907,7 @@ class QptAnalyzer(object):
             only_active=False,
             ).real
         # nkpt, nband, ntemp
-        self.tdr = einsum('tkn->knt', self.tdr)
+        self.tdr = einsum('tkn->knt', self.tdr) # FIXME why??
         return self.tdr
 
     def get_tdr_dynamical_active(self):
@@ -915,7 +925,7 @@ class QptAnalyzer(object):
             only_active=True,
             ).real
         # nkpt, nband, ntemp
-        self.tdr = einsum('tkn->knt', self.tdr)
+        self.tdr = einsum('tkn->knt', self.tdr) # FIXME why??
         return self.tdr
 
     def get_zpr_dynamical_active(self):
@@ -970,7 +980,7 @@ class QptAnalyzer(object):
         """
         self.tdb = self.get_broadening(mode=False, temperature=True,
                                        omega=False, dynamical=True)
-        self.tdb = einsum('tkn->knt', self.tdb)
+        self.tdb = einsum('tkn->knt', self.tdb) # FIXME why??
         return self.tdb
     
     def get_zpb_static(self):
@@ -991,7 +1001,7 @@ class QptAnalyzer(object):
         """
         self.tdb = self.get_broadening(mode=False, temperature=True,
                                        omega=False, dynamical=False)
-        self.tdb = einsum('tkn->knt', self.tdb)
+        self.tdb = einsum('tkn->knt', self.tdb) # FIXME why??
         return self.tdb
 
     def get_tdb_static_nosplit(self):
@@ -1055,3 +1065,18 @@ class QptAnalyzer(object):
     
         return self.zpb
 
+    def get_zpr_ddw_active(self):
+        """
+        Compute the q-point zpr contribution in a static scheme
+        with the transitions split between active and sternheimer.
+        """
+        self.zpr = self.get_self_energy(
+            mode=False,
+            temperature=False,
+            omega=False,
+            dynamical=False,
+            only_sternheimer=False,
+            only_active=True,
+            only_ddw=True,
+            ).real
+        return self.zpr
