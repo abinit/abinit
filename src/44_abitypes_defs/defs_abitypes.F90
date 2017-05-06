@@ -1469,7 +1469,10 @@ type dataset_type
   character(len=fnlen) :: fnameabo_sig
   character(len=fnlen) :: fnameabo_spcur
   character(len=fnlen) :: fnameabo_sus
+  character(len=fnlen) :: fnameabo_vha
+  character(len=fnlen) :: fnameabo_vpsp
   character(len=fnlen) :: fnameabo_vso
+  character(len=fnlen) :: fnameabo_vxc
   character(len=fnlen) :: fnameabo_wan
   character(len=fnlen) :: fnameabo_wfk
   character(len=fnlen) :: fnameabo_wfq
