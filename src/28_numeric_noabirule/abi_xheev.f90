@@ -63,8 +63,10 @@
  real(dp) :: tsec(2)
  integer  :: cplx_
 #ifdef HAVE_LINALG_MAGMA
- integer :: liwork,lwork_, lrwork_
+ integer :: liwork_,lwork_, lrwork_,iwk_(1)
  integer, dimension(:), allocatable :: iwork
+ real(dp) :: rwk_(1)
+ complex(dpc) :: cwk_(1)
 #endif
 #ifdef HAVE_LINALG_PLASMA
  integer :: jobz_plasma_a
@@ -92,17 +94,29 @@
 #ifdef HAVE_LINALG_MAGMA
  if (usegpu_==1) then
     !work only if  lwork=n**2 + 33*n?
-    lrwork_= 1 + 5*n + 2*(n**2)
-    liwork = 3 + 5*n
-    ABI_ALLOCATE(iwork,(liwork))
     if (cplx_ == 2 .and. present(rwork)) then
-       lwork_=33*n + (n**2)
-       call magmaf_zheevd(jobz,uplo,n,a,lda,w,work(1:2*lwork_),lwork_,rwork(1:lrwork_),lrwork_,iwork,liwork,info)
+       !old
+       !lwork_=33*n + (n**2)
+       !lrwork_= 1 + 5*n + 2*(n**2)
+       !liwork_ = 3 + 5*n
+       !new
+       call magmaf_zheevd(jobz,uplo,n,a,lda,w,cwk_(1),-1,rwk_(1),-1,iwk_(1),-1,info)
+       lwork_=int(real(cwk_(1))) ; lrwork_=int(rwk_(1)) ; liwork_=iwk_(1)
+       ABI_ALLOCATE(iwork,(liwork_))
+       call magmaf_zheevd(jobz,uplo,n,a,lda,w,work(1:2*lwork_),lwork_,rwork(1:lrwork_),lrwork_,iwork,liwork_,info)
+       ABI_DEALLOCATE(iwork)
     else
-       lwork_= 1+n*(6 + 2*n)
-       call magmaf_dsyevd(jobz,uplo,n,a,lda,w,work(1:lwork_),lwork_,iwork(1:liwork),liwork,info)
+       !old
+       !lwork_= 1+n*(6 + 2*n)
+       !lrwork_= 1 + 5*n + 2*(n**2)
+       !liwork_ = 3 + 5*n
+       !new
+       call magmaf_dsyevd(jobz,uplo,n,a,lda,w,rwk_(1),-1,iwk_(1),-1,info)
+       lwork_=int(rwk_(1)) ; liwork_=iwk_(1)
+       ABI_ALLOCATE(iwork,(liwork_))
+       call magmaf_dsyevd(jobz,uplo,n,a,lda,w,work(1:lwork_),lwork_,iwork(1:liwork_),liwork_,info)
+       ABI_DEALLOCATE(iwork)
     endif
-    ABI_DEALLOCATE(iwork)
  else
 #endif
 

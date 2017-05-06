@@ -291,7 +291,6 @@ implicit none
    call alloc_copy(symrel,dtset%symrel)
    ABI_ALLOCATE(tnons,(3,dtset%nsym))
    tnons = zero
-   dtset%tnons = tnons
    call alloc_copy(tnons,dtset%tnons)
    call alloc_copy(effective_potential%supercell%typat_supercell,dtset%typat)
    call alloc_copy(effective_potential%crystal%znucl,dtset%znucl)   
