@@ -371,6 +371,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
  real(dp),allocatable :: fcart(:,:),nhat1(:,:),nhat1gr(:,:,:),nhatfermi(:,:),nvresid1(:,:),nvresid2(:,:)
  real(dp),allocatable :: qmat(:,:,:,:,:,:),resid2(:),rhog2(:,:),rhor2(:,:),rhorfermi(:,:)
  real(dp),allocatable :: susmat(:,:,:,:,:),vhartr1(:),vxc1(:,:)
+ real(dp),allocatable :: vhartr1_tmp(:,:)
  real(dp),allocatable,target :: vtrial1(:,:),vtrial2(:,:)
  real(dp),pointer :: vtrial1_tmp(:,:)
  type(pawcprj_type),allocatable :: cprj1(:,:)
@@ -492,6 +493,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 !Various allocations (potentials)
  ABI_ALLOCATE(vhartr1,(cplex*nfftf))
  ABI_ALLOCATE(vtrial1,(cplex*nfftf,nspden))
+! TODO: for non collinear case this should always be nspden, in NCPP case as well!!!
  ABI_ALLOCATE(vxc1,(cplex*nfftf,nspden*(1-usexcnhat)*psps%usepaw)) ! Not always needed
  vtrial1_tmp => vtrial1   ! this is to avoid errors when vtrial1_tmp is unused
 
@@ -1226,6 +1228,39 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
    call fftdatar_write_from_hdr("first_order_potential",fi1o,dtset%iomode,hdr,&
    ngfftf,cplex,nfftf,dtset%nspden,vtrial1,mpi_enreg)
 
+! output files for perturbed potential components: vhartr1,vpsp1,vxc
+! NB: only 1 spin for these
+   if (dtset%prtvha > 0) then
+     rdwrpaw=0
+     ABI_ALLOCATE(vhartr1_tmp, (cplex*nfftf, dtset%nspden))
+     vhartr1_tmp = zero
+     vhartr1_tmp(:,1) = vhartr1(:) 
+     call appdig(pertcase,dtfil%fnameabo_vha,fi1o)
+     ! TODO: should we write pawrhoij1 or pawrhoij. Note that ioarr writes hdr%pawrhoij
+     call fftdatar_write_from_hdr("first_order_vhartree",fi1o,dtset%iomode,hdr,&
+       ngfftf,cplex,nfftf,dtset%nspden,vhartr1_tmp,mpi_enreg)
+     ABI_DEALLOCATE(vhartr1_tmp)
+   end if
+   
+
+! vpsp1 needs to be copied to a temp array - intent(inout) in fftdatar_write_from_hdr though I do not know why
+!   if (dtset%prtvpsp > 0) then
+!     rdwrpaw=0
+!     call appdig(pertcase,dtfil%fnameabo_vpsp,fi1o)
+!     ! TODO: should we write pawrhoij1 or pawrhoij. Note that ioarr writes hdr%pawrhoij
+!     call fftdatar_write_from_hdr("first_order_vpsp",fi1o,dtset%iomode,hdr,&
+!       ngfftf,cplex,nfftf,1,vpsp1,mpi_enreg)
+!   end if
+   
+   if (dtset%prtvxc > 0) then
+     rdwrpaw=0
+     call appdig(pertcase,dtfil%fnameabo_vxc,fi1o)
+     ! TODO: should we write pawrhoij1 or pawrhoij. Note that ioarr writes hdr%pawrhoij
+     call fftdatar_write_from_hdr("first_order_vxc",fi1o,dtset%iomode,hdr,&
+       ngfftf,cplex,nfftf,dtset%nspden,vxc1,mpi_enreg)
+   end if
+
+
    ! Add rhog1(G=0) to file
    if (mpi_enreg%me_g0 == 1) then
      if (dtset%iomode == IO_MODE_ETSF) then
@@ -1248,7 +1283,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
      end if
    end if
 
- end if
+ end if ! iwrite_fftdatar(mpi_enreg)
 
 !All procs waiting here...
  if(mpi_enreg%paral_kgb==1)then

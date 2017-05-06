@@ -78,7 +78,7 @@
 !!  usecprj=1 if cprj datastructure has been allocated
 !!  vhartr(nfft)=Hartree potential
 !!  vxc(nfft,nspden)=xc potential
-!!  vtrial(nfft,nspden)=the trial potential
+!!  vtrial(nfft,nspden)=the trial potential = vxc + vpsp + vhartr, roughly speaking
 !!  xccc3d(n3xccc)=3D core electron density for XC core correction (bohr^-3)
 !!  xred(3,natom)=reduced dimensionless atomic coordinates
 !!
@@ -814,10 +814,12 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
      end if
 
      call fftdatar_write("vhartree_vloc",dtfil%fnameabo_app_vclmb,dtset%iomode,hdr,&
-     crystal,ngfft,cplex1,nfft,nspden,vwork,mpi_enreg,ebands=ebands)
+&         crystal,ngfft,cplex1,nfft,nspden,vwork,mpi_enreg,ebands=ebands)
 
-     call out1dm(dtfil%fnameabo_app_vclmb_1dm,mpi_enreg,natom,nfft,ngfft,nspden,psps%ntypat,&
-&     rhor,rprimd,dtset%typat,ucvol,vwork,xred,dtset%znucl)
+!TODO: find out why this combination of calls with fftdatar_write then out1dm fails on buda with 4 mpi-fft procs (npkpt 1). 
+!      For the moment comment it out. Only DS2 of mpiio test 27 fails
+!     call out1dm(dtfil%fnameabo_app_vclmb_1dm,mpi_enreg,natom,nfft,ngfft,nspden,psps%ntypat,&
+!&         rhor,rprimd,dtset%typat,ucvol,vwork,xred,dtset%znucl)
 
 ! TODO: add TEM phase with CE = (2 pi / lambda) (E+E0)/(E(E+2E0)) from p.49 of RE Dunin Borkowski 2004 encyclopedia of nanoscience volume 3 pp 41-99
 !   where E is energy of electron, E0 rest mass, lambda the relativistic wavelength

@@ -860,7 +860,7 @@ with_linalg_incs="-I/opt/local/include"
 
 # Link flags for the external linear algebra libraries (default is unset)
 #
-with_linalg_libs="-L/opt/local/lib -lopenblas"
+with_linalg_libs="-L/opt/local/lib -lscalapack -lopenblas"
 
 # ---------------------------------------------------------------------------- #
 # Algorithmic library connector                                                #
