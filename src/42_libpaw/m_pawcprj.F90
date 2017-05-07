@@ -499,6 +499,8 @@ end subroutine pawcprj_copy
    if (LEN_TRIM(msg) > 0) then
      MSG_ERROR(msg)
    end if
+ else
+   n1dimx=0;n2dimx=0;ncpgrx=0
  end if
 
  if (abs(alpha)<=tol16) then

@@ -853,17 +853,17 @@ subroutine pawrad_bcast(pawrad,comm_mpi)
    indx=5
    if (if_rad==1) then
      isz1=pawrad%mesh_size
-     list_dpr(indx:indx+isz1-1)=pawrad%rad(:)
+     list_dpr(indx:indx+isz1-1)=pawrad%rad(1:isz1)
      indx=indx+isz1
    end if
    if (if_radfact==1) then
      isz1=pawrad%mesh_size
-     list_dpr(indx:indx+isz1-1)=pawrad%radfact(:)
+     list_dpr(indx:indx+isz1-1)=pawrad%radfact(1:isz1)
      indx=indx+isz1
    end if
    if (if_simfact==1) then
      isz1=pawrad%mesh_size
-     list_dpr(indx:indx+isz1-1)=pawrad%simfact(:)
+     list_dpr(indx:indx+isz1-1)=pawrad%simfact(1:isz1)
      indx=indx+isz1
    end if
  end if
@@ -888,19 +888,19 @@ subroutine pawrad_bcast(pawrad,comm_mpi)
    if(if_rad==1) then
      isz1=pawrad%mesh_size
      LIBPAW_ALLOCATE(pawrad%rad,(isz1))
-     pawrad%rad(:)=list_dpr(indx:indx+isz1-1)
+     pawrad%rad(1:isz1)=list_dpr(indx:indx+isz1-1)
      indx=indx+isz1
    end if
    if(if_radfact==1) then
      isz1=pawrad%mesh_size
      LIBPAW_ALLOCATE(pawrad%radfact,(isz1))
-     pawrad%radfact(:)=list_dpr(indx:indx+isz1-1)
+     pawrad%radfact(1:isz1)=list_dpr(indx:indx+isz1-1)
      indx=indx+isz1
    end if
    if(if_simfact==1) then
      isz1=pawrad%mesh_size
      LIBPAW_ALLOCATE(pawrad%simfact,(isz1))
-     pawrad%simfact(:)=list_dpr(indx:indx+isz1-1)
+     pawrad%simfact(1:isz1)=list_dpr(indx:indx+isz1-1)
      indx=indx+isz1
    end if
  end if
