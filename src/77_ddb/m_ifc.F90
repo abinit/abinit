@@ -3420,11 +3420,11 @@ end subroutine ifc_test_phinterp
 
 subroutine ifc_calcnwrite_nana_terms(ifc, crystal, nph2l, qph2l, qnrml2, ncid)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'ifc_calcnwrite_nana_terms'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
