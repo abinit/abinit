@@ -56,11 +56,11 @@
 !! Based on mkcore.F90. Adapted to WVL case.
 !!
 !! PARENTS
-!!      forces,setvtr,stress
+!!      forces,setvtr
 !!
 !! CHILDREN
-!!      ext_buffers,ind_positions,metric,mkdenpos,pawrad_free,pawrad_init,strconv,timab
-!!      wrtout,xred2xcart,xmpi_sum
+!!      ext_buffers,ind_positions,metric,mkcore_inner,mkdenpos,pawrad_free
+!!      pawrad_init,strconv,timab,wrtout,xcart2xred,xmpi_sum,xred2xcart
 !!
 !! SOURCE
 
@@ -527,7 +527,6 @@ end subroutine mkcore_wvl
 !! Based on mkcore.F90
 !!
 !! PARENTS
-!!      setvtr,forces
 !!
 !! CHILDREN
 !!      ext_buffers,ind_positions,metric,mkcore_inner,mkdenpos,pawrad_free

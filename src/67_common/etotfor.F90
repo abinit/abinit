@@ -140,7 +140,7 @@
 !!      scfcv
 !!
 !! CHILDREN
-!!      forces,metric,nres2vres,pawgrnl,timab
+!!      forces,nres2vres,pawgrnl,timab
 !!
 !! SOURCE
 

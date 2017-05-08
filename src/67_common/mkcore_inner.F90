@@ -26,7 +26,7 @@
 !!      mkcore_paw,mkcore_wvl
 !!
 !! CHILDREN
-!!      sort_dp,splint,xred2xcart
+!!      paw_splint,paw_splint_der,sort_dp
 !!
 !! SOURCE
 

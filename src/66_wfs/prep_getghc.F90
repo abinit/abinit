@@ -37,10 +37,10 @@
 !!  cwaveprj(natom,my_nspinor*bandpp)= wave functions at k projected with nl projectors
 !!
 !! PARENTS
-!!      chebfi,lobpcgwf,mkresi
+!!      chebfi,lobpcgwf,m_lobpcgwf,mkresi
 !!
 !! CHILDREN
-!!      dcopy,getghc,prep_index_wavef_bandpp,prep_sort_wavef_spin
+!!      dcopy,multithreaded_getghc,prep_index_wavef_bandpp,prep_sort_wavef_spin
 !!      prep_wavef_sym_do,prep_wavef_sym_undo,timab,xmpi_alltoallv
 !!
 !! SOURCE

@@ -73,7 +73,8 @@
 !!      forces,prcref,prcref_PMA,respfn,setvtr
 !!
 !! CHILDREN
-!!      mklocl_realspace,mklocl_recipspace,mklocl_wavelets,xred2xcart
+!!      mklocl_realspace,mklocl_recipspace,mklocl_wavelets,wvl_rho_abi2big
+!!      xred2xcart
 !!
 !! SOURCE
 

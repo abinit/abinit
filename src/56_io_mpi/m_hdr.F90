@@ -2059,8 +2059,7 @@ end subroutine hdr_io_int
 !!  Only writing
 !!
 !! PARENTS
-!!      cut3d,initaim,ioprof,m_ddk,m_dvdb,m_hdr,m_io_kss,m_wfd,m_wfk,mrggkk
-!!      rchkgsheader
+!!      cut3d,initaim,ioprof,m_ddk,m_dvdb,m_hdr,m_wfd,m_wfk,mrggkk,rchkgsheader
 !!
 !! CHILDREN
 !!
@@ -2550,8 +2549,7 @@ end subroutine hdr_update
 !! This routine is called only in the case of MPI version of the code.
 !!
 !! PARENTS
-!!      elphon,initaim,m_dvdb,m_hdr,m_io_kss,m_io_screening,m_ioarr,m_wfk,optic
-!!      read_gkk
+!!      elphon,initaim,m_dvdb,m_hdr,m_io_screening,m_ioarr,m_wfk,optic,read_gkk
 !!
 !! CHILDREN
 !!
@@ -2879,8 +2877,8 @@ end subroutine hdr_bcast
 !! The file is supposed to be open already
 !!
 !! PARENTS
-!!      elphon,initaim,inpgkk,m_bse_io,m_cut3d,m_dvdb,m_hdr,m_io_kss
-!!      m_io_screening,m_ioarr,macroave,mrggkk,rchkgsheader,read_gkk
+!!      elphon,initaim,inpgkk,m_bse_io,m_cut3d,m_dvdb,m_hdr,m_io_screening
+!!      m_ioarr,macroave,mrggkk,rchkgsheader,read_gkk
 !!
 !! CHILDREN
 !!
@@ -3011,7 +3009,7 @@ end subroutine hdr_fort_read
 !!  fform=kind of the array in the file. if the reading fails, return fform=0
 !!
 !! PARENTS
-!!      initaim,inwffil,m_dvdb,m_hdr,m_io_kss,m_io_screening,m_ioarr,macroave
+!!      initaim,inwffil,m_dvdb,m_hdr,m_io_screening,m_ioarr,macroave
 !!
 !! CHILDREN
 !!

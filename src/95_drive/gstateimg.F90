@@ -108,12 +108,14 @@
 !!      driver,gwls_sternheimer
 !!
 !! CHILDREN
-!!      args_gs_free,args_gs_init,copy_results_img,destroy_results_img
-!!      dtfil_init,ga_destroy,ga_init,gstate,init_results_img
-!!      libpaw_spmsg_mpisum,localfilnam,localrdfile,localredirect,localwrfile
-!!      mep_destroy,mep_init,pimd_destroy,pimd_init,predictimg,prtimg
-!!      scf_history_free,scf_history_nullify,specialmsg_mpisum,status,timab
-!!      wrtout,xmpi_barrier,xmpi_sum
+!!      abihist_bcast,abihist_copy,abihist_free,abihist_init,args_gs_free
+!!      args_gs_init,copy_results_img,destroy_results_img,dtfil_init,fcart2fred
+!!      ga_destroy,ga_init,gstate,init_results_img,libpaw_spmsg_mpisum
+!!      localfilnam,localrdfile,localredirect,localwrfile,mep_destroy,mep_init
+!!      mkradim,mkrdim,pimd_destroy,pimd_init,pimd_skip_qtb,predictimg,prtimg
+!!      read_md_hist_img,scf_history_free,scf_history_nullify,specialmsg_mpisum
+!!      status,timab,var2hist,vel2hist,write_md_hist_img,wrtout,xmpi_barrier
+!!      xmpi_sum
 !!
 !! SOURCE
 

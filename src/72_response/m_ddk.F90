@@ -382,7 +382,6 @@ end subroutine ddk_read_fsvelocities
 !!   comm=MPI communicator
 !!
 !! PARENTS
-!!      m_phgamma
 !!
 !! CHILDREN
 !!      wrtout

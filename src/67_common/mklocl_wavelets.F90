@@ -44,8 +44,7 @@
 !!      mklocl,wvl_wfsinp_scratch
 !!
 !! CHILDREN
-!!      createionicpotential,h_potential,local_forces,wrtout,wvl_rhov_abi2big
-!!      xmpi_sum
+!!      calcdvloc_wvl,derf_ab,paw_splint_der
 !!
 !! SOURCE
 
@@ -288,7 +287,7 @@ end subroutine mklocl_wavelets
 !!      mklocl_wavelets
 !!
 !! CHILDREN
-!!      ind_positions
+!!      calcdvloc_wvl,derf_ab,paw_splint_der
 !!
 !! SOURCE
 
@@ -524,6 +523,10 @@ subroutine local_forces_wvl(iproc,natom,rxyz,hxh,hyh,hzh,n1,n2,n3,n3pi,i3s,n1i,n
 !! OUTPUT
 !!
 !! PARENTS
+!!      mklocl_wavelets
+!!
+!! CHILDREN
+!!      calcdvloc_wvl,derf_ab,paw_splint_der
 !!
 !! SOURCE
 

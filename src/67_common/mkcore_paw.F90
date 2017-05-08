@@ -23,7 +23,6 @@
 !! NOTES
 !!
 !! PARENTS
-!!      setvtr
 !!
 !! CHILDREN
 !!      ind_positions_,mkcore_inner,mkgrid_fft,pawrad_free,pawrad_init

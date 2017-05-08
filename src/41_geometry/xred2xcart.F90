@@ -31,15 +31,16 @@
 !!
 !! PARENTS
 !!      afterscfloop,berryphase,berryphase_new,bonds_lgth_angles,constrf,cut3d
-!!      denfgr,driver,evdw_wannier,ingeo,ionion_realspace,ionion_surface
-!!      m_crystal,m_ddb,m_effective_potential,m_mep,m_monte_carlo,m_pred_lotf
-!!      m_results_img,make_efg_el,make_efg_ion,mkcore_inner,mkcore_paw
-!!      mkcore_wvl,mkgrid_fft,mklocl,mklocl_realspace,mlwfovlp_projpaw,mover
+!!      denfgr,driver,evdw_wannier,forstr,ingeo,ionion_realspace,ionion_surface
+!!      m_abihist,m_crystal,m_ddb,m_effective_potential,m_fit_polynomial_coeff
+!!      m_mep,m_pred_lotf,m_results_img,make_efg_el,make_efg_ion,mkcore_paw
+!!      mkcore_wvl,mkgrid_fft,mklocl,mklocl_realspace,mlwfovlp_projpaw
 !!      mover_effpot,out1dm,outqmc,outvar_o_z,outxml,pimd_langevin_npt
-!!      pimd_langevin_nvt,pimd_nosehoover_npt,pimd_nosehoover_nvt,pred_bfgs
-!!      pred_isokinetic,pred_isothermal,pred_langevin,pred_lbfgs,pred_nose
-!!      pred_srkna14,pred_verlet,prtimg,prtspgroup,randomcellpos,rhotov,setvtr
-!!      spin_current,symspgr,thmeig,vso_realspace_local,vtorho
+!!      pimd_langevin_nvt,pimd_nosehoover_npt,pimd_nosehoover_nvt,prec_simple
+!!      pred_delocint,pred_diisrelax,pred_hmc,pred_isokinetic,pred_isothermal
+!!      pred_langevin,pred_moldyn,pred_nose,pred_srkna14,pred_steepdesc
+!!      pred_velverlet,pred_verlet,prtimg,prtspgroup,prtxfase,randomcellpos
+!!      rhotov,setvtr,spin_current,symspgr,thmeig,vso_realspace_local,vtorho
 !!      wrt_moldyn_netcdf,wvl_denspot_set,wvl_initro,wvl_memory,wvl_nhatgrid
 !!      wvl_projectors_set,wvl_rwwf,wvl_setboxgeometry,wvl_wfs_set
 !!      wvl_wfsinp_reformat,wvl_wfsinp_scratch,xfh_recover_deloc

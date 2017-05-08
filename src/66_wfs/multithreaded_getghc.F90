@@ -63,11 +63,10 @@
 !!  cwaveprj(natom,my_nspinor*(1+cpopt)*ndat)= wave function projected on nl projectors (PAW only)
 !!
 !! PARENTS
-!!      cgwf,chebfi,dfpt_cgwf,gwls_hamiltonian,ks_ddiago,lobpcgwf,m_io_kss
-!!      mkresi,prep_getghc
+!!      m_lobpcgwf,prep_getghc
 !!
 !! CHILDREN
-!!      fourwf
+!!      getghc,mkl_set_num_threads,omp_set_nested
 !!
 !! SOURCE
 

@@ -53,9 +53,9 @@
 !!
 !! PARENTS
 !!      dfpt_dyfro,forces,nonlinear,prcref,prcref_PMA,respfn,setvtr,stress
+!!      xchybrid_ncpp_cc
 !!
 !! CHILDREN
-!!      ptabs_fourdp,strconv,timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -611,7 +611,6 @@ end subroutine mkcore
 !!      forces,setvtr,stress
 !!
 !! CHILDREN
-!!      ptabs_fourdp,strconv,timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -1116,6 +1115,8 @@ subroutine mkcore_alt(atindx1,corstr,dyfrx2,grxc,icoulomb,mpi_enreg,natom,nfft,n
 !!  Determine also whether the index is inside or outside the box for free BC
 !!
 !! PARENTS
+!!      mkcore
+!!
 !! CHILDREN
 !!
 !! SOURCE

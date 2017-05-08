@@ -1740,7 +1740,7 @@ end subroutine pawxcpositron
 !!       kxc(:,19)=gradz(rho_dn)
 
 !! PARENTS
-!!      m_pawxc
+!!      pawdenpot,pawdfptenergy
 !!
 !! CHILDREN
 !!      libxc_functionals_getvxc

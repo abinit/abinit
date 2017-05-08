@@ -251,8 +251,11 @@ end function gruns_new
 !!  The derivative dD/dV is computed via central finite difference.
 !!
 !! PARENTS
+!!      m_gruneisen
 !!
 !! CHILDREN
+!!      cwtime,gruns_free,gruns_qmesh,gruns_qpath,ifc_calcnwrite_nana_terms
+!!      ifc_speedofsound,kpath_free,wrtout
 !!
 !! SOURCE
 
@@ -350,8 +353,11 @@ end subroutine gruns_fourq
 !!  Only writing
 !!
 !! PARENTS
+!!      m_gruneisen
 !!
 !! CHILDREN
+!!      cwtime,gruns_free,gruns_qmesh,gruns_qpath,ifc_calcnwrite_nana_terms
+!!      ifc_speedofsound,kpath_free,wrtout
 !!
 !! SOURCE
 
@@ -488,8 +494,11 @@ end subroutine gruns_qpath
 !! OUTPUT
 !!
 !! PARENTS
+!!      m_gruneisen
 !!
 !! CHILDREN
+!!      cwtime,gruns_free,gruns_qmesh,gruns_qpath,ifc_calcnwrite_nana_terms
+!!      ifc_speedofsound,kpath_free,wrtout
 !!
 !! SOURCE
 
@@ -716,8 +725,11 @@ end subroutine gruns_qmesh
 !!  Free dynamic memory.
 !!
 !! PARENTS
+!!      m_gruneisen
 !!
 !! CHILDREN
+!!      cwtime,gruns_free,gruns_qmesh,gruns_qpath,ifc_calcnwrite_nana_terms
+!!      ifc_speedofsound,kpath_free,wrtout
 !!
 !! SOURCE
 
@@ -784,8 +796,11 @@ end subroutine gruns_free
 !!  Only writing.
 !!
 !! PARENTS
+!!      anaddb
 !!
 !! CHILDREN
+!!      cwtime,gruns_free,gruns_qmesh,gruns_qpath,ifc_calcnwrite_nana_terms
+!!      ifc_speedofsound,kpath_free,wrtout
 !!
 !! SOURCE
 

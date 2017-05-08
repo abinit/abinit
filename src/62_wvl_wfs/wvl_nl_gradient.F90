@@ -21,7 +21,7 @@
 !! NOTES
 !!
 !! PARENTS
-!!      afterscfloop,vtorho
+!!      forstr,vtorho
 !!
 !! CHILDREN
 !!      nonlocal_forces,wrtout,xmpi_sum

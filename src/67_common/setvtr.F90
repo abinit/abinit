@@ -116,9 +116,9 @@
 !!
 !! CHILDREN
 !!      atm2fft,denspot_set_history,dotprod_vn,ewald,ionion_realspace
-!!      ionion_surface,jellium,mag_constr,mkcore,mkcore_paw,mkcore_wvl,mklocl
-!!      psolver_rhohxc,rhohxc,rhohxcpositron,timab,vdw_dftd2,vdw_dftd3
-!!      wvl_psitohpsi,wvl_vtrial_abi2big,xchybrid_ncpp_cc,xred2xcart
+!!      ionion_surface,jellium,mag_constr,mkcore,mkcore_alt,mkcore_wvl,mklocl
+!!      psolver_rhohxc,rhohxc,rhohxcpositron,spatialchempot,timab,vdw_dftd2
+!!      vdw_dftd3,wvl_psitohpsi,wvl_vtrial_abi2big,xchybrid_ncpp_cc,xred2xcart
 !!
 !! SOURCE
 

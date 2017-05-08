@@ -115,7 +115,7 @@ end function kpts_timrev_from_kptopt
 !!  [new_shiftk(3,new_nshiftk)] = New set of shifts returned by getkgrid
 !!
 !! PARENTS
-!!      m_dvdb,m_ebands,m_ifc,m_kpts,m_phgamma,m_phonons,m_sigmaph
+!!      m_dvdb,m_ebands,m_gruneisen,m_ifc,m_kpts,m_phgamma,m_phonons,m_sigmaph
 !!
 !! CHILDREN
 !!      getkgrid,init_tetra,kpts_ibz_from_kptrlatt,listkk

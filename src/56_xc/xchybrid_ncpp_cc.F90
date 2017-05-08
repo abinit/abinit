@@ -47,11 +47,11 @@
 !!   Vxc=Vxc_libXC[rho_val] + Vxc_gga[rho_core+rho_val] - Vxc_gga[rho_val]
 !!
 !! PARENTS
-!!      rhotov,setvtr,forces
+!!      forces,forstr,rhotov,setvtr
 !!
 !! CHILDREN
 !!      dtset_copy,dtset_free,libxc_functionals_end,libxc_functionals_init
-!!      rhohxc
+!!      metric,mkcore,rhohxc
 !!
 !! SOURCE
 

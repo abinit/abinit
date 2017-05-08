@@ -44,12 +44,10 @@
 !! in Hybrid Monte Carlo iterations. 
 !!
 !! PARENTS
-!!
-!! mover, pred_hmc
+!!      mover,pred_hmc
 !!
 !! CHILDREN
-!! 
-!! hist2var, xcart2xred, var2hist 
+!!      hist2var,var2hist,xcart2xred,xred2xcart
 !!
 !! SOURCE
 

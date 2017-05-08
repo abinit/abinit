@@ -38,7 +38,7 @@
 !!  Rest is printing
 !!
 !! PARENTS
-!!      mag_constr,mag_constr_e,outscfcv
+!!      dfpt_scfcv,mag_constr,mag_constr_e,outscfcv
 !!
 !! CHILDREN
 !!      timab,wrtout,xmpi_sum

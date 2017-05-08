@@ -1552,7 +1552,6 @@ end subroutine libpaw_libxc_get_hybridparams
 !! OUTPUT
 !!
 !! PARENTS
-!!      calc_vhxc_me
 !!
 !! CHILDREN
 !!

@@ -406,7 +406,6 @@ end function nctk_string_from_occopt
 !!      conducti_nc,optic
 !!
 !! CHILDREN
-!!      var_from_id
 !!
 !! SOURCE
 
@@ -526,7 +525,6 @@ end function nctk_try_fort_or_ncfile
 !!      abinit
 !!
 !! CHILDREN
-!!      var_from_id
 !!
 !! SOURCE
 
@@ -1409,7 +1407,6 @@ end function nctk_def_basedims
 !!      m_abihist,m_bse_io,m_effective_potential,write_eig
 !!
 !! CHILDREN
-!!      var_from_id
 !!
 !! SOURCE
 
@@ -2548,7 +2545,6 @@ end function nctk_read_datar
 !!      m_nctk
 !!
 !! CHILDREN
-!!      var_from_id
 !!
 !! SOURCE
 
@@ -2639,7 +2635,6 @@ end subroutine collect_datar
 !!      m_nctk
 !!
 !! CHILDREN
-!!      var_from_id
 !!
 !! SOURCE
 
@@ -2717,7 +2712,6 @@ end subroutine distrib_datar
 !!      m_nctk
 !!
 !! CHILDREN
-!!      var_from_id
 !!
 !! SOURCE
 
@@ -2786,7 +2780,6 @@ end subroutine var_from_id
 !! PARENTS
 !!
 !! CHILDREN
-!!      var_from_id
 !!
 !! SOURCE
 
@@ -2840,6 +2833,7 @@ end subroutine var_from_name
 !!  Only writing.
 !!
 !! PARENTS
+!!      anaddb,m_ifc
 !!
 !! CHILDREN
 !!

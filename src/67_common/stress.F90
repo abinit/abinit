@@ -112,8 +112,8 @@
 !!      forstr
 !!
 !! CHILDREN
-!!      atm2fft,ewald2,fourdp,metric,mkcore,mklocl_recipspace,stresssym,strhar
-!!      timab,vdw_dftd2,vdw_dftd3,wrtout,zerosym
+!!      atm2fft,ewald2,fourdp,metric,mkcore,mkcore_alt,mklocl_recipspace
+!!      stresssym,strhar,timab,vdw_dftd2,vdw_dftd3,wrtout,zerosym
 !!
 !! SOURCE
 

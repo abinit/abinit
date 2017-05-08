@@ -1627,7 +1627,6 @@ end subroutine fock_calc_ene
 !!   If the cgocc_bz are not updated at each iteration, be careful to calculate Fock energy at the same frequency.
 !!
 !! PARENTS
-!!      scfcv
 !!
 !! CHILDREN
 !!      ptabs_fourdp,timab,xmpi_sum
@@ -1703,7 +1702,7 @@ end subroutine fock_update_exc
 !! May be improved by selecting only the occupied states with the same spin isppol.
 !!
 !! PARENTS
-!!      forstr,scfcv
+!!      scfcv
 !!
 !! CHILDREN
 !!      ptabs_fourdp,timab,xmpi_sum

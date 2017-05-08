@@ -179,6 +179,8 @@ CONTAINS  !=====================================================================
 !!      anaddb,eph
 !!
 !! CHILDREN
+!!      ifc_fourq,kpath_free,phonons_ncwrite,phonons_write_gnuplot
+!!      phonons_write_phfrq,phonons_write_xmgrace,xmpi_sum_master
 !!
 !! SOURCE
 
@@ -319,6 +321,8 @@ end subroutine phdos_print
 !!      anaddb
 !!
 !! CHILDREN
+!!      ifc_fourq,kpath_free,phonons_ncwrite,phonons_write_gnuplot
+!!      phonons_write_phfrq,phonons_write_xmgrace,xmpi_sum_master
 !!
 !! SOURCE
 
@@ -437,9 +441,11 @@ end subroutine phdos_print_debye
 !!  Only writing.
 !!
 !! PARENTS
-!!      anaddb
+!!      anaddb,eph
 !!
 !! CHILDREN
+!!      ifc_fourq,kpath_free,phonons_ncwrite,phonons_write_gnuplot
+!!      phonons_write_phfrq,phonons_write_xmgrace,xmpi_sum_master
 !!
 !! SOURCE
 
@@ -576,6 +582,8 @@ end subroutine phdos_print_thermo
 !!      anaddb,eph
 !!
 !! CHILDREN
+!!      ifc_fourq,kpath_free,phonons_ncwrite,phonons_write_gnuplot
+!!      phonons_write_phfrq,phonons_write_xmgrace,xmpi_sum_master
 !!
 !! SOURCE
 
@@ -671,6 +679,8 @@ end subroutine phdos_free
 !!      anaddb,eph
 !!
 !! CHILDREN
+!!      ifc_fourq,kpath_free,phonons_ncwrite,phonons_write_gnuplot
+!!      phonons_write_phfrq,phonons_write_xmgrace,xmpi_sum_master
 !!
 !! SOURCE
 
@@ -1177,6 +1187,8 @@ end subroutine mkphdos
 !!      anaddb,eph
 !!
 !! CHILDREN
+!!      ifc_fourq,kpath_free,phonons_ncwrite,phonons_write_gnuplot
+!!      phonons_write_phfrq,phonons_write_xmgrace,xmpi_sum_master
 !!
 !! SOURCE
 
@@ -1284,6 +1296,8 @@ end subroutine phdos_ncwrite
 !!      anaddb,m_effective_potential
 !!
 !! CHILDREN
+!!      ifc_fourq,kpath_free,phonons_ncwrite,phonons_write_gnuplot
+!!      phonons_write_phfrq,phonons_write_xmgrace,xmpi_sum_master
 !!
 !! SOURCE
 
@@ -1547,6 +1561,8 @@ end subroutine mkphbs
 !!      m_phonons
 !!
 !! CHILDREN
+!!      ifc_fourq,kpath_free,phonons_ncwrite,phonons_write_gnuplot
+!!      phonons_write_phfrq,phonons_write_xmgrace,xmpi_sum_master
 !!
 !! SOURCE
 
@@ -1626,6 +1642,8 @@ end subroutine phdos_calc_vsound
 !!      m_phonons
 !!
 !! CHILDREN
+!!      ifc_fourq,kpath_free,phonons_ncwrite,phonons_write_gnuplot
+!!      phonons_write_phfrq,phonons_write_xmgrace,xmpi_sum_master
 !!
 !! SOURCE
 
@@ -1700,9 +1718,11 @@ end subroutine phdos_print_vsound
 !!   to file only
 !!
 !! PARENTS
-!!      anaddb,eph
+!!      anaddb
 !!
 !! CHILDREN
+!!      ifc_fourq,kpath_free,phonons_ncwrite,phonons_write_gnuplot
+!!      phonons_write_phfrq,phonons_write_xmgrace,xmpi_sum_master
 !!
 !! SOURCE
 
@@ -1838,6 +1858,8 @@ end subroutine phdos_print_msqd
 !!      m_phonons
 !!
 !! CHILDREN
+!!      ifc_fourq,kpath_free,phonons_ncwrite,phonons_write_gnuplot
+!!      phonons_write_phfrq,phonons_write_xmgrace,xmpi_sum_master
 !!
 !! SOURCE
 
@@ -1934,6 +1956,8 @@ end subroutine phonons_ncwrite
 !!      m_phonons
 !!
 !! CHILDREN
+!!      ifc_fourq,kpath_free,phonons_ncwrite,phonons_write_gnuplot
+!!      phonons_write_phfrq,phonons_write_xmgrace,xmpi_sum_master
 !!
 !! SOURCE
 
@@ -2035,6 +2059,8 @@ end subroutine phonons_write_phfrq
 !! PARENTS
 !!
 !! CHILDREN
+!!      ifc_fourq,kpath_free,phonons_ncwrite,phonons_write_gnuplot
+!!      phonons_write_phfrq,phonons_write_xmgrace,xmpi_sum_master
 !!
 !! SOURCE
 
@@ -2458,6 +2484,8 @@ end subroutine phonons_writeEPS
 !!      m_phonons
 !!
 !! CHILDREN
+!!      ifc_fourq,kpath_free,phonons_ncwrite,phonons_write_gnuplot
+!!      phonons_write_phfrq,phonons_write_xmgrace,xmpi_sum_master
 !!
 !! SOURCE
 
@@ -2591,8 +2619,11 @@ end subroutine phonons_write_xmgrace
 !!  Only writing
 !!
 !! PARENTS
+!!      m_phonons
 !!
 !! CHILDREN
+!!      ifc_fourq,kpath_free,phonons_ncwrite,phonons_write_gnuplot
+!!      phonons_write_phfrq,phonons_write_xmgrace,xmpi_sum_master
 !!
 !! SOURCE
 
@@ -2727,8 +2758,11 @@ end subroutine phonons_write_gnuplot
 !!  Only writing.
 !!
 !! PARENTS
+!!      eph
 !!
 !! CHILDREN
+!!      ifc_fourq,kpath_free,phonons_ncwrite,phonons_write_gnuplot
+!!      phonons_write_phfrq,phonons_write_xmgrace,xmpi_sum_master
 !!
 !! SOURCE
 

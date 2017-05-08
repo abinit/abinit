@@ -50,11 +50,11 @@
 !!      predict_pimd
 !!
 !! CHILDREN
-!!      pimd_coord_transform,pimd_energies,pimd_force_transform,pimd_forces
-!!      pimd_initvel,pimd_langevin_forces,pimd_langevin_random
-!!      pimd_langevin_random_init,pimd_langevin_random_qtb,pimd_mass_spring
-!!      pimd_predict_taylor,pimd_predict_verlet,pimd_print,pimd_stresses
-!!      xcart2xred,xred2xcart
+!!      pimd_apply_constraint,pimd_coord_transform,pimd_energies
+!!      pimd_force_transform,pimd_forces,pimd_initvel,pimd_langevin_forces
+!!      pimd_langevin_random,pimd_langevin_random_init,pimd_langevin_random_qtb
+!!      pimd_mass_spring,pimd_predict_taylor,pimd_predict_verlet,pimd_print
+!!      pimd_stresses,xcart2xred,xred2xcart
 !!
 !! SOURCE
 

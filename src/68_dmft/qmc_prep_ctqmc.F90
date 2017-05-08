@@ -31,15 +31,15 @@
 !!
 !! CHILDREN
 !!      add_matlu,checkreal_matlu,compute_levels,copy_green,copy_matlu
-!!      ctqmc_printgreen,ctqmc_triqs_run,ctqmcinterface_finalize
-!!      ctqmcinterface_init,ctqmcinterface_run,ctqmcinterface_setopts
-!!      data4entropydmft_setdocc,destroy_green,destroy_matlu,destroy_oper
-!!      diag_matlu,diff_matlu,fac_matlu,flush_unit,fourier_green
-!!      hybridization_asymptotic_coefficient,identity_matlu,init_green
-!!      init_matlu,init_oper,int_fct,inverse_oper,jbessel,occup_green_tau
-!!      print_green,print_matlu,printocc_green,printplot_matlu,prod_matlu
-!!      rotate_matlu,rotatevee_hu,sbf8,shift_matlu,slm2ylm_matlu,sym_matlu
-!!      testcode_ctqmc,vee_ndim2tndim_hu_r,wrtout,xginv,xmpi_barrier,xmpi_bcast
+!!      ctqmc_triqs_run,ctqmcinterface_finalize,ctqmcinterface_init
+!!      ctqmcinterface_run,ctqmcinterface_setopts,data4entropydmft_setdocc
+!!      destroy_green,destroy_matlu,destroy_oper,diag_matlu,diff_matlu
+!!      fac_matlu,flush_unit,fourier_green,hybridization_asymptotic_coefficient
+!!      identity_matlu,init_green,init_matlu,init_oper,int_fct,inverse_oper
+!!      jbessel,occup_green_tau,print_green,print_matlu,printocc_green
+!!      printplot_matlu,prod_matlu,rotate_matlu,rotatevee_hu,sbf8,shift_matlu
+!!      slm2ylm_matlu,sym_matlu,testcode_ctqmc,vee_ndim2tndim_hu_r,wrtout,xginv
+!!      xmpi_barrier,xmpi_bcast
 !!
 !! SOURCE
 

@@ -68,19 +68,19 @@
 !! CHILDREN
 !!      bs_parameters_free,chkpawovlp,crystal_free,denfgr,destroy_mpi_enreg
 !!      double_grid_free,ebands_free,ebands_update_occ,energies_init
-!!      exc_build_ham,exc_den,exc_diago_driver,exc_haydock_driver,fourdp
-!!      get_gftt,getph,gsph_free,hdr_free,init_distribfft_seq,initmpi_seq
-!!      kmesh_free,metric,mkdenpos,mkrdim,nhatgrid,paw_an_free,paw_an_init
-!!      paw_an_nullify,paw_gencond,paw_ij_free,paw_ij_init,paw_ij_nullify
-!!      pawdenpot,pawdij,pawfgr_destroy,pawfgr_init,pawfgrtab_free
-!!      pawfgrtab_init,pawhur_free,pawhur_init,pawinit,pawmknhat,pawnabla_init
-!!      pawprt,pawpuxinit,pawpwff_free,pawpwff_init,pawrhoij_alloc
-!!      pawrhoij_copy,pawrhoij_free,pawtab_get_lsize,pawtab_print,print_ngfft
-!!      prtrhomxmn,pspini,rdqps,rotate_fft_mesh,screen_free,screen_init
-!!      screen_nullify,setsymrhoij,setup_bse,setup_bse_interp,setvtr,symdij
-!!      test_charge,timab,vcoul_free,wfd_free,wfd_init,wfd_mkrho,wfd_print
-!!      wfd_read_wfk,wfd_reset_ur_cprj,wfd_rotate,wfd_test_ortho,wfd_wave_free
-!!      wrtout,xmpi_bcast
+!!      eprenorms_free,exc_build_ham,exc_den,exc_diago_driver
+!!      exc_haydock_driver,fourdp,get_gftt,getph,gsph_free,hdr_free
+!!      init_distribfft_seq,initmpi_seq,kmesh_free,metric,mkdenpos,mkrdim
+!!      nhatgrid,paw_an_free,paw_an_init,paw_an_nullify,paw_gencond,paw_ij_free
+!!      paw_ij_init,paw_ij_nullify,pawdenpot,pawdij,pawfgr_destroy,pawfgr_init
+!!      pawfgrtab_free,pawfgrtab_init,pawhur_free,pawhur_init,pawinit,pawmknhat
+!!      pawnabla_init,pawprt,pawpuxinit,pawpwff_free,pawpwff_init
+!!      pawrhoij_alloc,pawrhoij_copy,pawrhoij_free,pawtab_get_lsize
+!!      pawtab_print,print_ngfft,prtrhomxmn,pspini,rdqps,rotate_fft_mesh
+!!      screen_free,screen_init,screen_nullify,setsymrhoij,setup_bse
+!!      setup_bse_interp,setvtr,symdij,test_charge,timab,vcoul_free,wfd_free
+!!      wfd_init,wfd_mkrho,wfd_print,wfd_read_wfk,wfd_reset_ur_cprj,wfd_rotate
+!!      wfd_test_ortho,wfd_wave_free,wrtout,xmpi_bcast
 !!
 !! SOURCE
 

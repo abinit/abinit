@@ -2877,8 +2877,8 @@ end subroutine pawcprj_bcast
 !!  dimcprj(natom)=Number of nlm elements in the <p_{lmn}^i|\psi> matrix elements for i=1,...,natom.
 !!
 !! PARENTS
-!!      berryphase_new,dfpt_looppert,dfpt_scfcv,extrapwf,getghc,initberry
-!!      m_fock,m_hamiltonian,mlwfovlp_qp,outkss,scfcv,smatrix_pawinit
+!!      afterscfloop,berryphase_new,dfpt_looppert,dfpt_scfcv,extrapwf,getghc
+!!      initberry,m_fock,m_hamiltonian,mlwfovlp_qp,outkss,scfcv,smatrix_pawinit
 !!
 !! CHILDREN
 !!      xmpi_sum

@@ -39,6 +39,7 @@
 !! PARENTS
 !!
 !! CHILDREN
+!!      xmpi_gather
 !!
 !! SOURCE
 

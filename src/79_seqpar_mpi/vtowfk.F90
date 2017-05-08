@@ -85,8 +85,8 @@
 !!      vtorho
 !!
 !! CHILDREN
-!!      build_h,cgwf,chebfi,dsymm,fourwf,fxphas,lobpcgwf,meanvalue_g,nonlop
-!!      pawcprj_alloc,pawcprj_copy,pawcprj_free,pawcprj_put,prep_fourwf
+!!      build_h,cgwf,chebfi,dsymm,fourwf,fxphas,lobpcgwf,lobpcgwf2,meanvalue_g
+!!      nonlop,pawcprj_alloc,pawcprj_copy,pawcprj_free,pawcprj_put,prep_fourwf
 !!      prep_nonlop,pw_orthon,subdiago,timab,wrtout,xmpi_sum,zhemm
 !!
 !! NOTES

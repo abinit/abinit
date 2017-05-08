@@ -49,13 +49,13 @@
 !! CHILDREN
 !!      apply_scissor,bsp_calctype2str,crystal_from_hdr,crystal_print
 !!      ebands_copy,ebands_init,ebands_print,ebands_report_gap
-!!      ebands_update_occ,find_qmesh,get_bz_item,get_ng0sh,gsph_extend
-!!      gsph_init,hdr_init,hdr_update,hdr_vs_dtset,hscr_bcast,hscr_free
-!!      hscr_from_file,hscr_print,init_transitions,kmesh_init,kmesh_print
-!!      make_mesh,matrginv,metric,mkrdim,pawrhoij_alloc,pawrhoij_copy
-!!      pawrhoij_free,print_bs_files,print_bs_parameters,print_gsphere
-!!      print_ngfft,rdgw,setmesh,vcoul_init,wfk_read_eigenvalues,wrtout
-!!      xmpi_bcast,xmpi_max,xmpi_split_work
+!!      ebands_update_occ,eprenorms_bcast,eprenorms_from_epnc,find_qmesh
+!!      get_bz_item,get_ng0sh,gsph_extend,gsph_init,hdr_init,hdr_update
+!!      hdr_vs_dtset,hscr_bcast,hscr_free,hscr_from_file,hscr_print
+!!      init_transitions,kmesh_init,kmesh_print,make_mesh,matrginv,metric
+!!      mkrdim,pawrhoij_alloc,pawrhoij_copy,pawrhoij_free,print_bs_files
+!!      print_bs_parameters,print_gsphere,print_ngfft,rdgw,setmesh,vcoul_init
+!!      wfk_read_eigenvalues,wrtout,xmpi_bcast,xmpi_max,xmpi_split_work
 !!
 !! SOURCE
 

@@ -26,11 +26,12 @@
 !!      asrq0_apply,asrq0_free,crystal_free,ddb_diel,ddb_elast,ddb_free
 !!      ddb_from_file,ddb_getdims,ddb_internalstr,ddb_piezo,dfpt_phfrq
 !!      dfpt_prtph,dfpt_symph,elast_ncwrite,electrooptic,elphon,flush_unit
-!!      gtblk9,gtdyn9,harmonic_thermo,herald,ifc_free,ifc_init,ifc_outphbtrap
-!!      ifc_write,instrng,int2char4,inupper,invars9,isfile,mkphbs,mkphdos
+!!      gruns_anaddb,gtblk9,gtdyn9,harmonic_thermo,herald,ifc_free,ifc_init
+!!      ifc_outphbtrap,ifc_print,ifc_speedofsound,ifc_write,instrng,int2char4
+!!      inupper,invars9,isfile,mkphbs,mkphdos,nctk_defwrite_nonana_terms
 !!      outvars_anaddb,phdos_free,phdos_ncwrite,phdos_print,phdos_print_debye
-!!      phdos_print_msqd,ramansus,relaxpol,thmeig,timein,wrtout,xmpi_bcast
-!!      xmpi_end,xmpi_init,xmpi_sum
+!!      phdos_print_msqd,phdos_print_thermo,ramansus,relaxpol,thmeig,timein
+!!      wrtout,xmpi_bcast,xmpi_end,xmpi_init,xmpi_sum
 !!
 !! SOURCE
 

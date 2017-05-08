@@ -134,19 +134,18 @@
 !!      afterscfloop,build_vxc,check_kxc,chkpawovlp,cprj_clean,cprj_paw_alloc
 !!      ctocprj,destroy_distribfft,destroy_mpi_enreg,energies_init,energy
 !!      etotfor,extraprho,fftdatar_write_from_hdr,first_rec,fock_destroy
-!!      fock_init,fock_update_exc,fock_updatecwaveocc,fourdp,fresid,getcut
-!!      getmpw,getng,getph,gshgg_mkncwrite,hdr_update,init_distribfft
-!!      init_distribfft_seq,init_metricrec,initmpi_seq,initylmg,int2char4,kpgio
-!!      metric,newrho,newvtr,nhatgrid,odamix,out_geometry_xml,out_resultsgs_xml
-!!      outscfcv,paw2wvl_ij,paw_an_free,paw_an_init,paw_an_nullify
-!!      paw_an_reset_flags,paw_ij_free,paw_ij_init,paw_ij_nullify
-!!      paw_ij_reset_flags,pawcprj_alloc,pawcprj_free,pawcprj_getdim
-!!      pawcprj_reorder,pawdenpot,pawdij,pawfgrtab_free,pawfgrtab_init
-!!      pawmknhat,pawtab_get_lsize,pawuj_red,prc_mem_free,prtene,psolver_rhohxc
-!!      rhohxc,rhotov,scprqt,setnoccmmp,setrhoijpbe0,setsym,setup_positron
-!!      setvtr,sphereboundary,status,symdij,symmetrize_xred,timab
-!!      update_e_field_vars,vtorho,vtorhorec,vtorhotf,wrtout,wvl_cprjreorder
-!!      wvl_nhatgrid,xmpi_isum,xmpi_sum,xmpi_wait
+!!      fock_init,fock_updatecwaveocc,fourdp,fresid,getcut,getmpw,getng,getph
+!!      gshgg_mkncwrite,hdr_update,init_distribfft,init_distribfft_seq
+!!      init_metricrec,initmpi_seq,initylmg,int2char4,kpgio,metric,newrho
+!!      newvtr,nhatgrid,odamix,out_geometry_xml,out_resultsgs_xml,outscfcv
+!!      paw2wvl_ij,paw_an_free,paw_an_init,paw_an_nullify,paw_an_reset_flags
+!!      paw_ij_free,paw_ij_init,paw_ij_nullify,paw_ij_reset_flags,pawcprj_alloc
+!!      pawcprj_free,pawcprj_getdim,pawcprj_reorder,pawdenpot,pawdij
+!!      pawfgrtab_free,pawfgrtab_init,pawmknhat,pawtab_get_lsize,pawuj_red
+!!      prc_mem_free,prtene,psolver_rhohxc,rhohxc,rhotov,scprqt,setnoccmmp
+!!      setrhoijpbe0,setsym,setup_positron,setvtr,sphereboundary,status,symdij
+!!      symmetrize_xred,timab,update_e_field_vars,vtorho,vtorhorec,vtorhotf
+!!      wrtout,wvl_cprjreorder,wvl_nhatgrid,xmpi_isum,xmpi_sum,xmpi_wait
 !!
 !! SOURCE
 

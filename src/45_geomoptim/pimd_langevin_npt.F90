@@ -56,9 +56,10 @@
 !!      predict_pimd
 !!
 !! CHILDREN
-!!      matr3inv,pimd_energies,pimd_forces,pimd_initvel,pimd_langevin_forces
-!!      pimd_langevin_random,pimd_langevin_random_bar,pimd_langevin_random_init
-!!      pimd_mass_spring,pimd_print,pimd_stresses,xcart2xred,xred2xcart
+!!      matr3inv,pimd_apply_constraint,pimd_energies,pimd_forces,pimd_initvel
+!!      pimd_langevin_forces,pimd_langevin_random,pimd_langevin_random_bar
+!!      pimd_langevin_random_init,pimd_mass_spring,pimd_print,pimd_stresses
+!!      xcart2xred,xred2xcart
 !!
 !! SOURCE
 

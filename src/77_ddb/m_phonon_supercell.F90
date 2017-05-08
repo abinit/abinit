@@ -94,7 +94,8 @@ CONTAINS  !=====================================================================
 !! scell = supercell structure to be initialized
 !!
 !! PARENTS
-!!      freeze_displ_allmodes,m_effective_potential,mover_effpot
+!!      freeze_displ_allmodes,m_effective_potential,m_fit_polynomial_coeff
+!!      mover_effpot
 !!
 !! CHILDREN
 !!
@@ -477,8 +478,8 @@ end subroutine copy_supercell
 !! scell = supercell structure with data to be output
 !!
 !! PARENTS
-!!      freeze_displ_allmodes,m_effective_potential,m_phonon_supercell
-!!      mover_effpot
+!!      freeze_displ_allmodes,m_effective_potential,m_fit_polynomial_coeff
+!!      m_phonon_supercell,mover_effpot
 !!
 !! CHILDREN
 !!

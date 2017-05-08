@@ -73,6 +73,7 @@ CONTAINS  !===========================================================
 !!      chiscwrt,ioniondist,newkpt,pawuj_det,pawuj_red,pawuj_utils,shellstruct
 !!
 !! CHILDREN
+!!      wrap2_pmhalf
 !!
 !! SOURCE
 
@@ -159,6 +160,7 @@ end subroutine prmat
 !!      denfgr,exc_plot,m_kxc,m_nesting,m_wfd,spin_current
 !!
 !! CHILDREN
+!!      wrap2_pmhalf
 !!
 !! SOURCE
 
@@ -295,6 +297,7 @@ end subroutine printxsf
 !!      m_cut3d
 !!
 !! CHILDREN
+!!      wrap2_pmhalf
 !!
 !! SOURCE
 
@@ -389,6 +392,7 @@ end subroutine print_fofr_ri
 !!      m_cut3d
 !!
 !! CHILDREN
+!!      wrap2_pmhalf
 !!
 !! SOURCE
 
@@ -490,6 +494,7 @@ end subroutine print_fofr_xyzri
 !!      m_cut3d
 !!
 !! CHILDREN
+!!      wrap2_pmhalf
 !!
 !! SOURCE
 
@@ -603,7 +608,7 @@ end subroutine print_fofr_cube
 !!      m_ebands,m_ifc
 !!
 !! CHILDREN
-!!      destroy_kptrank,get_rank_1kpt,listkk,mkkptrank
+!!      wrap2_pmhalf
 !!
 !! SOURCE
 

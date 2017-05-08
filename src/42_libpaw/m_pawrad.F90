@@ -181,7 +181,7 @@ CONTAINS
 !!
 !! PARENTS
 !!      dfpt_eltfrxc,m_atom,m_paw_gaussfit,m_pawpsp,m_pawpwij,m_pawxmlps,m_psps
-!!      mkcore_paw,mkcore_wvl,psp8in,wvl_initro
+!!      mkcore,mkcore_paw,mkcore_wvl,psp8in,wvl_initro
 !!
 !! CHILDREN
 !!      poisson,simp_gen

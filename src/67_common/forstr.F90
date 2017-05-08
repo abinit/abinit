@@ -159,7 +159,8 @@
 !!      afterscfloop,setup_positron
 !!
 !! CHILDREN
-!!      fock_updatecwaveocc,forces,forstrnps,nres2vres,pawgrnl,stress,timab
+!!      ctocprj,forces,forstrnps,metric,nres2vres,pawgrnl,stress,timab
+!!      wvl_nl_gradient,xchybrid_ncpp_cc,xred2xcart
 !!
 !! SOURCE
 

@@ -595,7 +595,6 @@ end subroutine mklocl_realspace
 !!      mklocl_realspace
 !!
 !! CHILDREN
-!!      ind_positions_mklocl
 !!
 !! SOURCE
 subroutine createIonicPotential_new(fftn3_distrib,ffti3_local,geocode,iproc,&
@@ -888,6 +887,7 @@ implicit none
 !! OUTPUT
 !!
 !! PARENTS
+!!      mklocl_realspace
 !!
 !! CHILDREN
 !!
@@ -1023,7 +1023,6 @@ end subroutine createIonicPotential_new
 !!      mklocl_realspace
 !!
 !! CHILDREN
-!!      ind_positions_mklocl
 !!
 !! SOURCE
 subroutine local_forces_new(fftn3_distrib,ffti3_local,&
@@ -1240,6 +1239,9 @@ subroutine local_forces_new(fftn3_distrib,ffti3_local,&
 !! OUTPUT
 !!
 !! PARENTS
+!!      mklocl_realspace
+!!
+!! CHILDREN
 !!
 !! SOURCE
 subroutine calcdVloc_mklocl(yy,xx,rloc,Z)
@@ -1372,7 +1374,7 @@ end subroutine local_forces_new
 !! OUTPUT
 !!
 !! PARENTS
-!!      mklocl_realspace,local_forces_new
+!!      mklocl_realspace
 !!
 !! CHILDREN
 !!

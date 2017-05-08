@@ -35,12 +35,10 @@
 !! NOTES
 !!
 !! PARENTS
-!!
-!!  mover
+!!      mover
 !!
 !! CHILDREN
-!!
-!!  var2hist,hist2var,pred_velverlet,xred2xcart
+!!      hist2var,pred_velverlet,var2hist,xred2xcart
 !!
 !! SOURCE
 

@@ -107,7 +107,7 @@
 !!
 !! CHILDREN
 !!      atm2fft,constrf,dgemv,fourdp,fred2fcart,fresid,fresidrsp,metric,mkcore
-!!      mklocl,sygrad,timab,zerosym
+!!      mkcore_alt,mkcore_wvl,mklocl,sygrad,timab,xchybrid_ncpp_cc,zerosym
 !!
 !! SOURCE
 

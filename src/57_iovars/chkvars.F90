@@ -23,7 +23,6 @@
 !!      abinit
 !!
 !! CHILDREN
-!!      inupper
 !!
 !! SOURCE
 
@@ -290,6 +289,7 @@ end subroutine chkvars
 !!  Abort if variable name is not recognized.
 !!
 !! PARENTS
+!!      chkvars,m_anaddb_dataset
 !!
 !! CHILDREN
 !!

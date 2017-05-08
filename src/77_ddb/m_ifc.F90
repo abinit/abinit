@@ -256,12 +256,11 @@ CONTAINS  !===========================================================
 !!
 !! PARENTS
 !!      anaddb,compute_anharmonics,eph,m_anharmonics_terms
-!!      m_effective_potential,m_effective_potential_file,m_harmonics_terms
-!!      m_ifc
+!!      m_effective_potential,m_effective_potential_file,m_gruneisen
+!!      m_harmonics_terms,m_ifc
 !!
 !! CHILDREN
-!!      cwtime,ifc_fourq,phbspl_evalq,phbspl_free,random_number,skw_eval_bks
-!!      skw_free,wrap2_pmhalf,xmpi_sum
+!!      dfpt_phfrq,gtdyn9,nctk_defwrite_nonana_terms
 !!
 !! SOURCE
 
@@ -385,11 +384,10 @@ end subroutine ifc_free
 !! Ifc<ifc_type>=Object containing the dynamical matrix and the IFCs.
 !!
 !! PARENTS
-!!      anaddb,eph,m_effective_potential_file
+!!      anaddb,eph,m_effective_potential_file,m_gruneisen
 !!
 !! CHILDREN
-!!      cwtime,ifc_fourq,phbspl_evalq,phbspl_free,random_number,skw_eval_bks
-!!      skw_free,wrap2_pmhalf,xmpi_sum
+!!      dfpt_phfrq,gtdyn9,nctk_defwrite_nonana_terms
 !!
 !! SOURCE
 
@@ -750,8 +748,10 @@ end subroutine ifc_init
 !!  Only printing
 !!
 !! PARENTS
+!!      anaddb,eph
 !!
 !! CHILDREN
+!!      dfpt_phfrq,gtdyn9,nctk_defwrite_nonana_terms
 !!
 !! SOURCE
 
@@ -846,13 +846,12 @@ end subroutine ifc_print
 !!  [dwdq(3,3*natom)] = Group velocities i.e. d(omega(q))/dq in Cartesian coordinates.
 !!
 !! PARENTS
-!!      get_nv_fs_en,get_tau_k,harmonic_thermo,interpolate_gkk,m_ifc,m_phgamma
-!!      m_phonons,m_phpi,m_sigmaph,mka2f,mka2f_tr,mka2f_tr_lova,mkph_linwid
-!!      read_gkk
+!!      get_nv_fs_en,get_tau_k,harmonic_thermo,interpolate_gkk,m_gruneisen
+!!      m_ifc,m_phgamma,m_phonons,m_phpi,m_sigmaph,mka2f,mka2f_tr,mka2f_tr_lova
+!!      mkph_linwid,read_gkk
 !!
 !! CHILDREN
-!!      cwtime,ifc_fourq,phbspl_evalq,phbspl_free,random_number,skw_eval_bks
-!!      skw_free,wrap2_pmhalf,xmpi_sum
+!!      dfpt_phfrq,gtdyn9,nctk_defwrite_nonana_terms
 !!
 !! SOURCE
 
@@ -969,8 +968,10 @@ end subroutine ifc_fourq
 !!    \nabla_q w(q, nu) = 1/(2 w(q, nu))  <u(q, nu)| \nabla_q D(q) | u(q, nu)>
 !!
 !! PARENTS
+!!      m_ifc
 !!
 !! CHILDREN
+!!      dfpt_phfrq,gtdyn9,nctk_defwrite_nonana_terms
 !!
 !! SOURCE
 
@@ -1091,8 +1092,10 @@ end subroutine ifc_get_dwdq
 !! OUTPUT
 !!
 !! PARENTS
+!!      anaddb,m_gruneisen
 !!
 !! CHILDREN
+!!      dfpt_phfrq,gtdyn9,nctk_defwrite_nonana_terms
 !!
 !! SOURCE
 
@@ -1315,8 +1318,10 @@ end subroutine ifc_speedofsound
 !!  ifc%atmfrc(2,3,natom,3,natom,nrpt)= ASR-imposed Interatomic Forces
 !!
 !! PARENTS
+!!      m_ifc
 !!
 !! CHILDREN
+!!      dfpt_phfrq,gtdyn9,nctk_defwrite_nonana_terms
 !!
 !! SOURCE
 
@@ -1479,8 +1484,7 @@ end subroutine ifc_autocutoff
 !!      m_ifc
 !!
 !! CHILDREN
-!!      cwtime,ifc_fourq,phbspl_evalq,phbspl_free,random_number,skw_eval_bks
-!!      skw_free,wrap2_pmhalf,xmpi_sum
+!!      dfpt_phfrq,gtdyn9,nctk_defwrite_nonana_terms
 !!
 !! SOURCE
 
@@ -1618,8 +1622,7 @@ end subroutine corsifc9
 !!      anaddb
 !!
 !! CHILDREN
-!!      cwtime,ifc_fourq,phbspl_evalq,phbspl_free,random_number,skw_eval_bks
-!!      skw_free,wrap2_pmhalf,xmpi_sum
+!!      dfpt_phfrq,gtdyn9,nctk_defwrite_nonana_terms
 !!
 !! SOURCE
 
@@ -1980,8 +1983,7 @@ end subroutine ifc_write
 !!      m_ifc
 !!
 !! CHILDREN
-!!      cwtime,ifc_fourq,phbspl_evalq,phbspl_free,random_number,skw_eval_bks
-!!      skw_free,wrap2_pmhalf,xmpi_sum
+!!      dfpt_phfrq,gtdyn9,nctk_defwrite_nonana_terms
 !!
 !! SOURCE
 
@@ -2304,8 +2306,7 @@ end subroutine ifc_getiaf
 !!      m_ifc
 !!
 !! CHILDREN
-!!      cwtime,ifc_fourq,phbspl_evalq,phbspl_free,random_number,skw_eval_bks
-!!      skw_free,wrap2_pmhalf,xmpi_sum
+!!      dfpt_phfrq,gtdyn9,nctk_defwrite_nonana_terms
 !!
 !! SOURCE
 
@@ -2508,8 +2509,7 @@ end subroutine omega_decomp
 !!      anaddb,eph
 !!
 !! CHILDREN
-!!      cwtime,ifc_fourq,phbspl_evalq,phbspl_free,random_number,skw_eval_bks
-!!      skw_free,wrap2_pmhalf,xmpi_sum
+!!      dfpt_phfrq,gtdyn9,nctk_defwrite_nonana_terms
 !!
 !! SOURCE
 
@@ -2634,8 +2634,7 @@ end subroutine ifc_outphbtrap
 !!      eph
 !!
 !! CHILDREN
-!!      cwtime,ifc_fourq,phbspl_evalq,phbspl_free,random_number,skw_eval_bks
-!!      skw_free,wrap2_pmhalf,xmpi_sum
+!!      dfpt_phfrq,gtdyn9,nctk_defwrite_nonana_terms
 !!
 !! SOURCE
 
@@ -2934,8 +2933,7 @@ end function ifc_build_phbspl
 !!      m_ifc
 !!
 !! CHILDREN
-!!      cwtime,ifc_fourq,phbspl_evalq,phbspl_free,random_number,skw_eval_bks
-!!      skw_free,wrap2_pmhalf,xmpi_sum
+!!      dfpt_phfrq,gtdyn9,nctk_defwrite_nonana_terms
 !!
 !! SOURCE
 
@@ -3011,8 +3009,7 @@ end subroutine phbspl_evalq
 !!      m_ifc
 !!
 !! CHILDREN
-!!      cwtime,ifc_fourq,phbspl_evalq,phbspl_free,random_number,skw_eval_bks
-!!      skw_free,wrap2_pmhalf,xmpi_sum
+!!      dfpt_phfrq,gtdyn9,nctk_defwrite_nonana_terms
 !!
 !! SOURCE
 
@@ -3200,8 +3197,7 @@ end function ifc_build_skw
 !!      eph
 !!
 !! CHILDREN
-!!      cwtime,ifc_fourq,phbspl_evalq,phbspl_free,random_number,skw_eval_bks
-!!      skw_free,wrap2_pmhalf,xmpi_sum
+!!      dfpt_phfrq,gtdyn9,nctk_defwrite_nonana_terms
 !!
 !! SOURCE
 
@@ -3413,8 +3409,10 @@ end subroutine ifc_test_phinterp
 !!  This routine should be called by master node and when ifcflag == 1.
 !!
 !! PARENTS
+!!      m_gruneisen,m_phonons
 !!
 !! CHILDREN
+!!      dfpt_phfrq,gtdyn9,nctk_defwrite_nonana_terms
 !!
 !! SOURCE
 

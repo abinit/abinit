@@ -45,7 +45,7 @@
 !!      mover
 !!
 !! CHILDREN
-!!      hist2var,metric,var2hist,wrtout,xcart2xred,xred2xcart
+!!      hist2var,var2hist,wrtout,xcart2xred,xred2xcart
 !!
 !! SOURCE
 
