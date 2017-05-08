@@ -123,7 +123,7 @@ subroutine predict_neb(itimimage,itimimage_eff,list_dynimage,mep_param,mpi_enreg
    ABI_ALLOCATE(fcart,(3,natom,nimage))
    ABI_ALLOCATE(rprimd,(3,3,nimage))
    call get_geometry_img(etotal,natom,nimage,results_img(:,itimimage_eff),&
-&                        fcart,rprimd,xcart,xred)
+&   fcart,rprimd,xcart,xred)
 
 !  Array containing effective NEB forces (F_ortho+F_spring)
    ABI_ALLOCATE(neb_forces,(3,natom,nimage))

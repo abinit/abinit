@@ -238,7 +238,7 @@ subroutine posratecore(dtset,electronpositron,iatom,my_natom,mesh_sizej,mpi_enre
 
      ABI_ALLOCATE(ff,(mesh_size))
      ff(1:mesh_size)=rhoarr1_ep(1:mesh_size)*rhocorej(1:mesh_size) &
-&                   *gamma(1:mesh_size,1)*pawrad(itypat)%rad(1:mesh_size)**2
+&     *gamma(1:mesh_size,1)*pawrad(itypat)%rad(1:mesh_size)**2
      call simp_gen(intg,ff,pawrad(itypat))
      intg=intg*pawang%angwgth(ipt)*four_pi
      rate         =rate         +intg

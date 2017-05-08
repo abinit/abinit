@@ -792,19 +792,19 @@ subroutine harmonic_thermo(Ifc,Crystal,amu,anaddb_dtset,iout,outfilename_radix,c
 &           '    Angstrom^2, cartesian coordinates'
            call wrtout(std_out,msg,'COLL')
            call wrtout(iout,msg,'COLL')
-         
+           
            do itemper=1,ntemper
 !            tmp in K
              tmp=anaddb_dtset%tempermin+anaddb_dtset%temperinc*dble(itemper-1)
              do iatom=1,natom
-                 write(iout,'(2i3,es11.3,6es12.4)')&
-&                 iwchan,iatom,tmp+tol10,&
-&                 Bohr_Ang**2*bij(1,iatom,itemper)+tol10,&
-&                 Bohr_Ang**2*bij(2,iatom,itemper)+tol10,&
-&                 Bohr_Ang**2*bij(3,iatom,itemper)+tol10,&
-&                 Bohr_Ang**2*bij(4,iatom,itemper)+tol10,&
-&                 Bohr_Ang**2*bij(5,iatom,itemper)+tol10,&
-&                 Bohr_Ang**2*bij(6,iatom,itemper)+tol10
+               write(iout,'(2i3,es11.3,6es12.4)')&
+&               iwchan,iatom,tmp+tol10,&
+&               Bohr_Ang**2*bij(1,iatom,itemper)+tol10,&
+&               Bohr_Ang**2*bij(2,iatom,itemper)+tol10,&
+&               Bohr_Ang**2*bij(3,iatom,itemper)+tol10,&
+&               Bohr_Ang**2*bij(4,iatom,itemper)+tol10,&
+&               Bohr_Ang**2*bij(5,iatom,itemper)+tol10,&
+&               Bohr_Ang**2*bij(6,iatom,itemper)+tol10
              end do ! end loop over natom
            end do ! end loop over ntemper
 
@@ -876,25 +876,25 @@ subroutine harmonic_thermo(Ifc,Crystal,amu,anaddb_dtset,iout,outfilename_radix,c
              call wrtout(vij_unit,msg,'COLL')
              do itemper=1,ntemper
 !            tmp in K
-             tmp=anaddb_dtset%tempermin+anaddb_dtset%temperinc*float(itemper-1)
-             vij(:,iatom,itemper)=Bohr_Ang**2*vij(:,iatom,itemper)/(Time_Sec*1.0e12)**2
+               tmp=anaddb_dtset%tempermin+anaddb_dtset%temperinc*float(itemper-1)
+               vij(:,iatom,itemper)=Bohr_Ang**2*vij(:,iatom,itemper)/(Time_Sec*1.0e12)**2
 
 !            The following check zeros out <v^2> if it is very small, in order to 
 !            avoid numerical noise being interpreted by the automatic tests as
 !            something real. Note also that we compare it in
 !            absolute value, that's because if any of the phonon frequencies are
 !            computed as negative, <v^2> can take a negative value.      
-             do icomp=1, 6
-               if (abs(vij(icomp,iatom,itemper)) < 1.0e-12) vij(icomp,iatom,itemper)=zero
-             end do
-             write(vij_unit,'(es11.3,6es12.4)')&
-&             tmp,&
-&             vij(1,iatom,itemper),&
-&             vij(2,iatom,itemper),&
-&             vij(3,iatom,itemper),&
-&             vij(4,iatom,itemper),&
-&             vij(5,iatom,itemper),&
-&             vij(6,iatom,itemper)
+               do icomp=1, 6
+                 if (abs(vij(icomp,iatom,itemper)) < 1.0e-12) vij(icomp,iatom,itemper)=zero
+               end do
+               write(vij_unit,'(es11.3,6es12.4)')&
+&               tmp,&
+&               vij(1,iatom,itemper),&
+&               vij(2,iatom,itemper),&
+&               vij(3,iatom,itemper),&
+&               vij(4,iatom,itemper),&
+&               vij(5,iatom,itemper),&
+&               vij(6,iatom,itemper)
              end do ! end loop over ntemper
            end do ! end loop over natom
          end if ! end check on convergence

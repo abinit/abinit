@@ -1051,7 +1051,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  end do
 
  if (Dtset%gwfockmix < 0.0_dp .or. (Dtset%gwfockmix-1.0_dp) > tol8) then
-    MSG_ERROR('gwfockmix is invalid.')
+   MSG_ERROR('gwfockmix is invalid.')
  end if
 
  call calc_vhxc_me(Wfd,KS_mflags,KS_me,Cryst,Dtset,gsqcutf_eff,nfftf,ngfftf,&

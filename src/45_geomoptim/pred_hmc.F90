@@ -120,7 +120,7 @@ subroutine pred_hmc(ab_mover,hist,itime,icycle,ntime,ncycle,zDEBUG,iexit)
  DBG_EXIT("COLL")
 
 
-if(iexit/=0)then
+  if(iexit/=0)then
    if (allocated(xcart_hmc_prev))  then
      ABI_DEALLOCATE(xcart_hmc_prev)
    end if
@@ -128,7 +128,7 @@ if(iexit/=0)then
      ABI_DEALLOCATE(xred_hmc_prev)
    end if
    return
-end if
+  end if
 
 
  !get current values of ionic positions and cell geometry and set up the target temperature
@@ -145,73 +145,73 @@ end if
 
   !write(239117,*) ' entering first cycle of HMC iteration ',itime
 
-  if(itime==1)then
-    seed=-239
+   if(itime==1)then
+     seed=-239
 
-    if (allocated(xcart_hmc_prev))  then
-      ABI_DEALLOCATE(xcart_hmc_prev)
-    end if
-    if (allocated(xred_hmc_prev))  then
-      ABI_DEALLOCATE(xred_hmc_prev)
-    end if
-    ABI_ALLOCATE(xcart_hmc_prev,(3,ab_mover%natom))
-    ABI_ALLOCATE(xred_hmc_prev,(3,ab_mover%natom))
-  endif
+     if (allocated(xcart_hmc_prev))  then
+       ABI_DEALLOCATE(xcart_hmc_prev)
+     end if
+     if (allocated(xred_hmc_prev))  then
+       ABI_DEALLOCATE(xred_hmc_prev)
+     end if
+     ABI_ALLOCATE(xcart_hmc_prev,(3,ab_mover%natom))
+     ABI_ALLOCATE(xred_hmc_prev,(3,ab_mover%natom))
+   end if
 
  !generate new set of velocities and get rid of the possible overall momentum
-  mtot=sum(ab_mover%amass(:))         ! total mass to eventually get rid of total center of mass (CoM) momentum
+   mtot=sum(ab_mover%amass(:))         ! total mass to eventually get rid of total center of mass (CoM) momentum
 
   ! generate velocities from normal distribution with zero mean and correct standard deviation
-  do ii=1,ab_mover%natom
-    do jj=1,3
-      vel(jj,ii)=sqrt(kbtemp/ab_mover%amass(ii))*cos(two_pi*uniformrandom(seed))
-      vel(jj,ii)=vel(jj,ii)*sqrt(-2.0*log(uniformrandom(seed)))
-    end do
-  end do
+   do ii=1,ab_mover%natom
+     do jj=1,3
+       vel(jj,ii)=sqrt(kbtemp/ab_mover%amass(ii))*cos(two_pi*uniformrandom(seed))
+       vel(jj,ii)=vel(jj,ii)*sqrt(-2.0*log(uniformrandom(seed)))
+     end do
+   end do
   !since number of atoms is most probably not big enough to obtain overall zero CoM momentum, shift the velocities
   !and then renormalize
-  mvtot=zero ! total momentum
-  do ii=1,ab_mover%natom
-    do jj=1,3
+   mvtot=zero ! total momentum
+   do ii=1,ab_mover%natom
+     do jj=1,3
        mvtot(jj)=mvtot(jj)+ab_mover%amass(ii)*vel(jj,ii)
-    end do
-  end do
-  do ii=1,ab_mover%natom
-    do jj=1,3
+     end do
+   end do
+   do ii=1,ab_mover%natom
+     do jj=1,3
        vel(jj,ii)=vel(jj,ii)-(mvtot(jj)/mtot)
-    end do
-  end do
+     end do
+   end do
   !now the total cell momentum is zero
-  mv2tot=0.0
-  do ii=1,ab_mover%natom
+   mv2tot=0.0
+   do ii=1,ab_mover%natom
      do jj=1,3
        mv2tot=mv2tot+ab_mover%amass(ii)*vel(jj,ii)**2
      end do
-  end do
-  factor = mv2tot/(dble(3*ab_mover%natom))
-  factor = sqrt(kbtemp/factor)
-  vel(:,:)=vel(:,:)*factor
-  hist%vel(:,:,hist%ihist)=vel(:,:)
+   end do
+   factor = mv2tot/(dble(3*ab_mover%natom))
+   factor = sqrt(kbtemp/factor)
+   vel(:,:)=vel(:,:)*factor
+   hist%vel(:,:,hist%ihist)=vel(:,:)
 
 
 
   !save the starting values of ionic positions (before an update attempt is performed)
-  call hist2var(acell_hmc_prev,hist,ab_mover%natom,rprimd_hmc_prev,xred_hmc_prev,zDEBUG)
-  call xred2xcart(ab_mover%natom,rprimd_hmc_prev,xcart_hmc_prev,xred_hmc_prev)
+   call hist2var(acell_hmc_prev,hist,ab_mover%natom,rprimd_hmc_prev,xred_hmc_prev,zDEBUG)
+   call xred2xcart(ab_mover%natom,rprimd_hmc_prev,xcart_hmc_prev,xred_hmc_prev)
 
   !also save the initial total energy
-  ekin=0.0
-  do ii=1,ab_mover%natom
+   ekin=0.0
+   do ii=1,ab_mover%natom
      do jj=1,3
        ekin=ekin+half*ab_mover%amass(ii)*vel(jj,ii)**2
      end do
-  end do
-  epot = hist%etot(hist%ihist)                     ! electronic sub-system energy
-  etotal_hmc_prev = epot + ekin                    ! total energy before an attempt of variables update is performed
+   end do
+   epot = hist%etot(hist%ihist)                     ! electronic sub-system energy
+   etotal_hmc_prev = epot + ekin                    ! total energy before an attempt of variables update is performed
 
 
-  call pred_velverlet(ab_mover,hist,itime,ntime,zDEBUG,iexit,1,icycle,ncycle)
- 
+   call pred_velverlet(ab_mover,hist,itime,ntime,zDEBUG,iexit,1,icycle,ncycle)
+   
   !call hist2var(acell,hist,ab_mover%natom,rprim,rprimd,xcart,xred,zDEBUG)
   !write(std_out,*) '  xcart_after_update:'
   !write(std_out,*) '  ',xcart(1,:)
@@ -222,50 +222,50 @@ end if
 
  else if(icycle<ncycle)then
 
-  call pred_velverlet(ab_mover,hist,itime,ntime,zDEBUG,iexit,1,icycle,ncycle)
+   call pred_velverlet(ab_mover,hist,itime,ntime,zDEBUG,iexit,1,icycle,ncycle)
   !call hist2var(acell,hist,ab_mover%natom,rprim,rprimd,xcart,xred,zDEBUG)
   !vel(:,:)   = hist%vel(:,:,hist%ihist)                ! velocities of all ions, not needed in reality
 
  else !icycle==ncycle 
 
   !the only thing left to do, is to compute the difference of the total energies and decide whether to accept the new state
-  vel(:,:)=hist%vel(:,:,hist%ihist)
-  ekin=0.0
-  do ii=1,ab_mover%natom
+   vel(:,:)=hist%vel(:,:,hist%ihist)
+   ekin=0.0
+   do ii=1,ab_mover%natom
      do jj=1,3
        ekin=ekin+half*ab_mover%amass(ii)*vel(jj,ii)**2
      end do
-  end do
-  epot = hist%etot(hist%ihist)      ! electronic sub-system energy
-  etotal = epot + ekin
-  de = etotal - etotal_hmc_prev
+   end do
+   epot = hist%etot(hist%ihist)      ! electronic sub-system energy
+   etotal = epot + ekin
+   de = etotal - etotal_hmc_prev
 
-  iacc=0
-  rnd=uniformrandom(seed)
-  if(de<0)then
-    iacc=1
-  else
-    if(exp(-de/kbtemp)>rnd)then
+   iacc=0
+   rnd=uniformrandom(seed)
+   if(de<0)then
      iacc=1
-    endif
-  endif
+   else
+     if(exp(-de/kbtemp)>rnd)then
+       iacc=1
+     end if
+   end if
   !write(238,*) '  random number: ',rnd,' -de/kbtemp:',-de/kbtemp,' acceptance decision: ',iacc
   !write(std_out,*) '  de: ',de,' estart: ',etotal_hmc_prev,' efin:', etotal
 
-  call hist2var(acell,hist,ab_mover%natom,rprimd,xred,zDEBUG)
+   call hist2var(acell,hist,ab_mover%natom,rprimd,xred,zDEBUG)
   !call xred2xcart(ab_mover%natom,rprimd,xcart,xred)
 
-  if(iacc==0)then  !in case the new state is not accepted, then roll back the coordinates
+   if(iacc==0)then  !in case the new state is not accepted, then roll back the coordinates
     !write(std_out,*) '  the proposed state was not accepted, roll back the configuration'
     !xcart(:,:)=xcart_hmc_prev(:,:)
     !no need to roll back xcart any longer, everything is stored in xred now (v8.3.1)
-    xred(:,:)=xred_hmc_prev(:,:)
-  endif
+     xred(:,:)=xred_hmc_prev(:,:)
+   end if
 
-  hist%ihist=hist%ihist+1
-  call var2hist(acell,hist,ab_mover%natom,rprimd,xred,zDEBUG)
+   hist%ihist=hist%ihist+1
+   call var2hist(acell,hist,ab_mover%natom,rprimd,xred,zDEBUG)
 
- endif
+ end if
 
 ! note: add update of lattice vectors and parameters in case optcell/=0
 

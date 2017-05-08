@@ -114,40 +114,40 @@ subroutine printmagvtk(mpi_enreg,nspden,nfft,ngfft,rhor,rprimd,fname)
 
   !if 1 or two component density then write out either 1 or 2 scalar density fields
   !if 4, then write one scalar field (density) and one vector field (magnetization density)
-  if(nspden/=4)then
-    nfields=nspden
-  else
-    nfields=2
-  endif
+ if(nspden/=4)then
+   nfields=nspden
+ else
+   nfields=2
+ end if
 
   ! FFT mesh specifications: full grid
-  nx=ngfft(1)        ! number of points along 1st lattice vector
-  ny=ngfft(2)        ! number of points along 2nd lattice vector
-  nz=ngfft(3)        ! number of points along 3rd lattice vector
-  nfft_tot=nx*ny*nz  ! total number of fft mesh points (can be different from nfft in case of distributed memory of nproc_fft processors)
+ nx=ngfft(1)        ! number of points along 1st lattice vector
+ ny=ngfft(2)        ! number of points along 2nd lattice vector
+ nz=ngfft(3)        ! number of points along 3rd lattice vector
+ nfft_tot=nx*ny*nz  ! total number of fft mesh points (can be different from nfft in case of distributed memory of nproc_fft processors)
  
 
   ! Gather information about memory distribution
-  mpi_head=0
-  mpi_comm = mpi_enreg%comm_fft
-  mpi_rank = xmpi_comm_rank(mpi_comm)
-  nproc_fft=ngfft(10)
+ mpi_head=0
+ mpi_comm = mpi_enreg%comm_fft
+ mpi_rank = xmpi_comm_rank(mpi_comm)
+ nproc_fft=ngfft(10)
 
   ! Create array to host full FFT mesh
-  if(mpi_rank==mpi_head)then
-    ABI_ALLOCATE(rhorfull,(nfft_tot,nspden))
-  endif
+ if(mpi_rank==mpi_head)then
+   ABI_ALLOCATE(rhorfull,(nfft_tot,nspden))
+ end if
 
   ! Fill up the mesh
-  if(nproc_fft==1)then
-    rhorfull=rhor
-  else
-    do ir=1,nspden
-      call xmpi_gather(rhor(:,ir),nfft,rhorfull(:,ir),nfft,mpi_head,mpi_comm,ierr)
-    enddo
-  endif
+ if(nproc_fft==1)then
+   rhorfull=rhor
+ else
+   do ir=1,nspden
+     call xmpi_gather(rhor(:,ir),nfft,rhorfull(:,ir),nfft,mpi_head,mpi_comm,ierr)
+   end do
+ end if
 
-  if(mpi_rank==mpi_head)then
+ if(mpi_rank==mpi_head)then
 
     !write(std_out,*)
     !write(std_out,*) 'DEV: my_isppoltab(2):,' ,mpi_enreg%my_isppoltab(:)
@@ -156,104 +156,104 @@ subroutine printmagvtk(mpi_enreg,nspden,nfft,ngfft,rhor,rprimd,fname)
     !write(std_out,*)
 
     ! Open the output vtk file
-    if (open_file(fname,msg,newunit=denvtk,status='replace',form='formatted') /=0) then
-      MSG_WARNING(msg)
-      RETURN
-    end if
+   if (open_file(fname,msg,newunit=denvtk,status='replace',form='formatted') /=0) then
+     MSG_WARNING(msg)
+     RETURN
+   end if
 
 
     ! Write the header of the output vtk file
-    write(denvtk,"(a)") '# vtk DataFile Version 2.0'
-    write(denvtk,"(a)") 'Electron density components'
-    write(denvtk,"(a)") 'ASCII'
-    write(denvtk,"(a)") 'DATASET STRUCTURED_GRID'
-    write(denvtk,"(a,3i6)") 'DIMENSIONS ', nx,ny,nz
-    write(denvtk,"(a,i18,a)") 'POINTS ',nfft_tot,' double'
+   write(denvtk,"(a)") '# vtk DataFile Version 2.0'
+   write(denvtk,"(a)") 'Electron density components'
+   write(denvtk,"(a)") 'ASCII'
+   write(denvtk,"(a)") 'DATASET STRUCTURED_GRID'
+   write(denvtk,"(a,3i6)") 'DIMENSIONS ', nx,ny,nz
+   write(denvtk,"(a,i18,a)") 'POINTS ',nfft_tot,' double'
 
     ! Write out information about grid points
-    do kk=0,nz-1
-      do jj=0,ny-1
-        do ii=0,nx-1
+   do kk=0,nz-1
+     do jj=0,ny-1
+       do ii=0,nx-1
 
-           rx=(dble(ii)/nx)*rprimd(1,1)+(dble(jj)/ny)*rprimd(1,2)+(dble(kk)/nz)*rprimd(1,3)
-           ry=(dble(ii)/nx)*rprimd(2,1)+(dble(jj)/ny)*rprimd(2,2)+(dble(kk)/nz)*rprimd(2,3)
-           rz=(dble(ii)/nx)*rprimd(3,1)+(dble(jj)/ny)*rprimd(3,2)+(dble(kk)/nz)*rprimd(3,3)
-           write(denvtk,'(3f16.8)') rx,ry,rz  !coordinates of the grid point
+         rx=(dble(ii)/nx)*rprimd(1,1)+(dble(jj)/ny)*rprimd(1,2)+(dble(kk)/nz)*rprimd(1,3)
+         ry=(dble(ii)/nx)*rprimd(2,1)+(dble(jj)/ny)*rprimd(2,2)+(dble(kk)/nz)*rprimd(2,3)
+         rz=(dble(ii)/nx)*rprimd(3,1)+(dble(jj)/ny)*rprimd(3,2)+(dble(kk)/nz)*rprimd(3,3)
+         write(denvtk,'(3f16.8)') rx,ry,rz  !coordinates of the grid point
 
-        enddo
-      enddo
-    enddo
+       end do
+     end do
+   end do
 
     ! Write out information about field defined on the FFT mesh
-    write(denvtk,"(a,i18)") 'POINT_DATA ',nfft_tot
-    write(denvtk,"(a,i6)") 'FIELD Densities ',nfields
+   write(denvtk,"(a,i18)") 'POINT_DATA ',nfft_tot
+   write(denvtk,"(a,i6)") 'FIELD Densities ',nfields
 
 
     ! Write out different fields depending on the number of density matrix components
-    if(nspden==1)then
+   if(nspden==1)then
       !single component, so just write out the density
-      write(denvtk,"(a,i18,a)") 'rho 1 ',nfft_tot,' double'
-      do kk=0,nz-1
-        do jj=0,ny-1
-          do ii=0,nx-1
-            ind=1+ii+nx*(jj+ny*kk)
-            write(denvtk,'(f16.8)') rhorfull(ind,1)
-          enddo
-        enddo
-      enddo
+     write(denvtk,"(a,i18,a)") 'rho 1 ',nfft_tot,' double'
+     do kk=0,nz-1
+       do jj=0,ny-1
+         do ii=0,nx-1
+           ind=1+ii+nx*(jj+ny*kk)
+           write(denvtk,'(f16.8)') rhorfull(ind,1)
+         end do
+       end do
+     end do
 
-    else if(nspden==2)then
+   else if(nspden==2)then
 
       !two component, write the density for spin_up and spin_down channels
-      write(denvtk,"(a,i18,a)") 'rho_up 1 ',nfft_tot,' double'
-      do kk=0,nz-1
-        do jj=0,ny-1
-          do ii=0,nx-1
-            ind=1+ii+nx*(jj+ny*kk)
-            write(denvtk,'(f16.8)') rhorfull(ind,1)
-          enddo
-        enddo
-      enddo
-      write(denvtk,"(a,i18,a)") 'rho_dwn 1 ',nfft_tot,' double'
-      do kk=0,nz-1
-        do jj=0,ny-1
-          do ii=0,nx-1
-            ind=1+ii+nx*(jj+ny*kk)
-            write(denvtk,'(f16.8)') rhorfull(ind,2)
-          enddo
-        enddo
-      enddo
+     write(denvtk,"(a,i18,a)") 'rho_up 1 ',nfft_tot,' double'
+     do kk=0,nz-1
+       do jj=0,ny-1
+         do ii=0,nx-1
+           ind=1+ii+nx*(jj+ny*kk)
+           write(denvtk,'(f16.8)') rhorfull(ind,1)
+         end do
+       end do
+     end do
+     write(denvtk,"(a,i18,a)") 'rho_dwn 1 ',nfft_tot,' double'
+     do kk=0,nz-1
+       do jj=0,ny-1
+         do ii=0,nx-1
+           ind=1+ii+nx*(jj+ny*kk)
+           write(denvtk,'(f16.8)') rhorfull(ind,2)
+         end do
+       end do
+     end do
 
-    else
+   else
 
       !four component, write the density (scalar field) and magnetization density (vector field)
-      write(denvtk,"(a,i18,a)") 'rho0 1 ',nfft_tot,' double'
-      do kk=0,nz-1
-        do jj=0,ny-1
-          do ii=0,nx-1
-            ind=1+ii+nx*(jj+ny*kk)
-            write(denvtk,'(f16.8)') rhorfull(ind,1)
-          enddo
-        enddo
-      enddo
-      write(denvtk,"(a,i18,a)") 'magnetization 3 ',nfft_tot,' double'
-      do kk=0,nz-1
-        do jj=0,ny-1
-          do ii=0,nx-1
-            ind=1+ii+nx*(jj+ny*kk)
-            write(denvtk,'(3f16.8)') rhorfull(ind,2),rhorfull(ind,3),rhorfull(ind,4)
-          enddo
-        enddo
-      enddo
+     write(denvtk,"(a,i18,a)") 'rho0 1 ',nfft_tot,' double'
+     do kk=0,nz-1
+       do jj=0,ny-1
+         do ii=0,nx-1
+           ind=1+ii+nx*(jj+ny*kk)
+           write(denvtk,'(f16.8)') rhorfull(ind,1)
+         end do
+       end do
+     end do
+     write(denvtk,"(a,i18,a)") 'magnetization 3 ',nfft_tot,' double'
+     do kk=0,nz-1
+       do jj=0,ny-1
+         do ii=0,nx-1
+           ind=1+ii+nx*(jj+ny*kk)
+           write(denvtk,'(3f16.8)') rhorfull(ind,2),rhorfull(ind,3),rhorfull(ind,4)
+         end do
+       end do
+     end do
 
-    endif
+   end if
 
-    close (denvtk)
+   close (denvtk)
 
     !clean up the gathered FFT mesh
-    ABI_DEALLOCATE(rhorfull)
+   ABI_DEALLOCATE(rhorfull)
 
-  endif
+ end if
 
 
 end subroutine printmagvtk

@@ -1771,25 +1771,25 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
          dz=dt%chempot(1,iz,itypat)-dt%chempot(1,iz-1,itypat)
          if(dz<-tol12)then
            write(message, '(a,2i6,a,a,d16.10,a,a, a,d16.10,a,a, a,a,a)' )&
-&            ' For izchempot,itypat=',iz,itypat,ch10,&
-&            ' chempot(1,izchempot-1,itypat) = ',dt%chempot(1,iz-1,itypat),' and', ch10,&
-&            ' chempot(1,izchempot  ,itypat) = ',dt%chempot(1,iz  ,itypat),',',ch10,&
-&            ' while they should be ordered in increasing values =>stop',ch10,&
-&            'Action: correct chempot(1,*,itypat) in input file.'
+&           ' For izchempot,itypat=',iz,itypat,ch10,&
+&           ' chempot(1,izchempot-1,itypat) = ',dt%chempot(1,iz-1,itypat),' and', ch10,&
+&           ' chempot(1,izchempot  ,itypat) = ',dt%chempot(1,iz  ,itypat),',',ch10,&
+&           ' while they should be ordered in increasing values =>stop',ch10,&
+&           'Action: correct chempot(1,*,itypat) in input file.'
            MSG_ERROR_NOSTOP(message,ierr)
-         endif
-       enddo
+         end if
+       end do
        dz=dt%chempot(1,dt%nzchempot,itypat)-dt%chempot(1,1,itypat)
        if(dz>one)then
          write(message, '(a,2i6,a,a,d16.10,a,a, a,d16.10,a,a, a,a,a)' )&
-&          ' For nzchempot,itypat=',dt%nzchempot,itypat,ch10,&
-&          ' chempot(1,1,itypat) = ',dt%chempot(1,1,itypat),' and', ch10,&
-&          ' chempot(1,nzchempot  ,itypat) = ',dt%chempot(1,dt%nzchempot,itypat),'.',ch10,&
-&          ' However, the latter should, at most, be one more than the former =>stop',ch10,&
-&          'Action: correct chempot(1,nzchempot,itypat) in input file.'
+&         ' For nzchempot,itypat=',dt%nzchempot,itypat,ch10,&
+&         ' chempot(1,1,itypat) = ',dt%chempot(1,1,itypat),' and', ch10,&
+&         ' chempot(1,nzchempot  ,itypat) = ',dt%chempot(1,dt%nzchempot,itypat),'.',ch10,&
+&         ' However, the latter should, at most, be one more than the former =>stop',ch10,&
+&         'Action: correct chempot(1,nzchempot,itypat) in input file.'
          MSG_ERROR_NOSTOP(message,ierr)
-       endif
-     enddo
+       end if
+     end do
    end if
 
 !  occ

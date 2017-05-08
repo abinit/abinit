@@ -823,8 +823,8 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
    ABI_ALLOCATE(dyfrx2,(3,3,natom))
    ABI_ALLOCATE(vxc,(0,0)) ! dummy
    call mkcore(dummy6,dyfrx2,grxc,mpi_enreg,natom,nfftf,dtset%nspden,ntypat,&
-&     ngfftf(1),psps%n1xccc,ngfftf(2),ngfftf(3),option,rprimd,dtset%typat,ucvol,vxc,&
-&     psps%xcccrc,psps%xccc1d,xccc3d,xred)
+&   ngfftf(1),psps%n1xccc,ngfftf(2),ngfftf(3),option,rprimd,dtset%typat,ucvol,vxc,&
+&   psps%xcccrc,psps%xccc1d,xccc3d,xred)
    ABI_DEALLOCATE(dyfrx2)
    ABI_DEALLOCATE(vxc) ! dummy
  end if
@@ -1482,7 +1482,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 
 !Compute the other terms for AHC dynamic and AHC full
  if (.not.(rfphon==0 .and. (rf2_dkdk/=0 .or. rf2_dkde/=0.or. rfddk/=0 .or. rfelfd==2) .and. rfstrs==0 .and. rfuser==0 &
-&          .and. rfmagn==0)) then
+& .and. rfmagn==0)) then
    if(rfphon==1) then ! AHC can only be computed in case of phonons
 
 !    Stuff for parallelism
@@ -1558,7 +1558,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 
  if(me==0)then
    if (.not.(rfphon==0 .and. (rf2_dkdk/=0 .or. rf2_dkde/=0 .or. rfddk/=0 .or. rfelfd==2) .and. rfstrs==0 .and.rfuser==0 &
-&            .and. rfmagn==0) )then
+&   .and. rfmagn==0) )then
      if(rfphon==1)then
 !      Compute and print the T=0 Fan, and possibly DDW contributions to the eigenenergies.
        if(dtset%ieig2rf > 0) then

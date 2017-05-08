@@ -395,7 +395,7 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
      rhoaug(:,:,:)=zero
    else
      rhoaug4(:,:,:,:)=zero
-   endif
+   end if
    call timab(125,1,tsec)
 
 !  BIG FAT k POINT LOOP
@@ -583,7 +583,7 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
 &       fe1norm_k,gs_hamkq,ibg,ibgq,icg,icgq,idir,ikpt,ipert,isppol,dtset%kptopt,mband,&
 &       mcgq,mcprjq,mkmem,mpi_enreg,mpw,nband_k,ncpgr,npw_k,npw1_k,dtset%nspinor,nsppol,occ_k,&
 &       pawrhoijfermi_unsym,prtvol,rf_hamkq,rhoaug4,rocceig,wtk_k)
-     endif
+     end if
 !    Free temporary storage
      ABI_DEALLOCATE(kpg_k)
      ABI_DEALLOCATE(kpg1_k)
@@ -659,8 +659,8 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
        call fftpac(2,mpi_enreg,nspden,cplex*n1,n2,n3,cplex*n4,n5,n6,dtset%ngfft,rhorfermi,rhoaug4(:,:,:,2),1)
        call fftpac(3,mpi_enreg,nspden,cplex*n1,n2,n3,cplex*n4,n5,n6,dtset%ngfft,rhorfermi,rhoaug4(:,:,:,3),1)
        call fftpac(4,mpi_enreg,nspden,cplex*n1,n2,n3,cplex*n4,n5,n6,dtset%ngfft,rhorfermi,rhoaug4(:,:,:,4),1)
-     endif
-   endif
+     end if
+   end if
  end do ! End loop over spins
  
 ! if (ipert==natom+5) then
@@ -689,7 +689,7 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
    ABI_DEALLOCATE(rhoaug)
  else
    ABI_DEALLOCATE(rhoaug4)
- endif
+ end if
  ABI_DEALLOCATE(kg_k)
  ABI_DEALLOCATE(kg1_k)
 

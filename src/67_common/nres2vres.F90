@@ -172,7 +172,7 @@ subroutine nres2vres(dtset,gsqcut,izero,kxc,mpi_enreg,my_natom,nfft,ngfft,nhat,&
 !For GGA, has to recompute gradients of nhat
  nhatgrdim=0
  if ((nkxc==nkxc_cur.and.has_nkxc_gga).or.(optxc==-1.and.has_nkxc_gga).or.&
-&    (optxc/=-1.and.nkxc/=nkxc_cur)) then
+& (optxc/=-1.and.nkxc/=nkxc_cur)) then
    if (usepaw==1.and.dtset%xclevel==2.and.usexcnhat>0.and.dtset%pawnhatxc>0) then
      nhatgrdim=1
      ABI_ALLOCATE(nhatgr,(nfft,dtset%nspden,3))

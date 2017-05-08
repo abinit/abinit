@@ -194,13 +194,13 @@
        v1zeeman(:,2)= 0.0d0
        v1zeeman(:,3)=-0.5d0
        v1zeeman(:,4)= 0.0d0
-     endif
+     end if
    else if (nspden==2) then
-       v1zeeman(:,1)=-0.5d0
-       v1zeeman(:,2)= 0.5d0
+     v1zeeman(:,1)=-0.5d0
+     v1zeeman(:,2)= 0.5d0
    else 
-       v1zeeman(:,1)= 0.0d0
-   endif
+     v1zeeman(:,1)= 0.0d0
+   end if
  else
    if (nspden==4) then
      v1zeeman(:,1)= 0.0d0
@@ -212,8 +212,8 @@
      v1zeeman(:,2)= 0.0d0   
    else
      v1zeeman(:,1)= 0.0d0         
-   endif
- endif
+   end if
+ end if
 
 !------ Compute 1st-order Hartree potential (and energy) ----------------------
 

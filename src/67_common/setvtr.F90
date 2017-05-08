@@ -279,7 +279,7 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
    end if
    if (dtset%nzchempot>0) then
      call spatialchempot(energies%e_chempot,dtset%chempot,grchempottn,dtset%natom,ntypat,dtset%nzchempot,dtset%typat,xred)
-   endif
+   end if
    if (dtset%vdw_xc==5.and.ngrvdw==dtset%natom) then
      call vdw_dftd2(energies%e_vdw_dftd,dtset%ixc,dtset%natom,ntypat,1,dtset%typat,rprimd,&
 &     dtset%vdw_tol,xred,psps%znucltypat,fred_vdw_dftd2=grvdw)
@@ -366,12 +366,12 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
    ABI_ALLOCATE(dyfr_dum,(3,3,dtset%natom))
    if (psps%usewvl==0.and.psps%usepaw==0.and.dtset%icoulomb==0) then
      call mkcore(dummy6,dyfr_dum,gr_dum,mpi_enreg,dtset%natom,nfft,dtset%nspden,ntypat,&
-&                ngfft(1),n1xccc,ngfft(2),ngfft(3),option,rprimd,dtset%typat,ucvol,&
-&                vxc,psps%xcccrc,psps%xccc1d,xccc3d,xred)
+&     ngfft(1),n1xccc,ngfft(2),ngfft(3),option,rprimd,dtset%typat,ucvol,&
+&     vxc,psps%xcccrc,psps%xccc1d,xccc3d,xred)
    else if (psps%usewvl==0.and.(psps%usepaw==1.or.dtset%icoulomb==1)) then
      call mkcore_alt(atindx1,dummy6,dyfr_dum,gr_dum,dtset%icoulomb,mpi_enreg,dtset%natom,&
-&         nfft,dtset%nspden,nattyp,ntypat,ngfft(1),n1xccc,ngfft(2),ngfft(3),option,rprimd,&
-&         ucvol,vxc,psps%xcccrc,psps%xccc1d,xccc3d,xred,pawrad,pawtab,psps%usepaw)
+&     nfft,dtset%nspden,nattyp,ntypat,ngfft(1),n1xccc,ngfft(2),ngfft(3),option,rprimd,&
+&     ucvol,vxc,psps%xcccrc,psps%xccc1d,xccc3d,xred,pawrad,pawtab,psps%usepaw)
    else if (psps%usewvl==1.and.psps%usepaw==1) then
 #if defined HAVE_BIGDFT
 !      call mkcore_wvl_old(atindx1,dummy6,dyfr_dum,wvl%descr%atoms%astruct%geocode,gr_dum,wvl%descr%h,&
@@ -380,9 +380,9 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
 ! &         wvl%descr%Glr%d%n2i,wvl%descr%Glr%d%n3,wvl%den%denspot%dpbox%n3pi,n3xccc,option,&
 ! &         pawrad,pawtab,psps%gth_params%psppar,rprimd,ucvol_local,vxc,xccc3d,xred,&
 ! &         mpi_comm_wvl=mpi_enreg%comm_wvl)
-    call mkcore_wvl(atindx1,dummy6,gr_dum,dtset%natom,nattyp,nfft,dtset%nspden,ntypat,&
-&                   n1xccc,n3xccc,option,pawrad,pawtab,rprimd,vxc,psps%xccc1d,xccc3d,&
-&                   psps%xcccrc,xred,wvl%den,wvl%descr,mpi_comm_wvl=mpi_enreg%comm_wvl)
+     call mkcore_wvl(atindx1,dummy6,gr_dum,dtset%natom,nattyp,nfft,dtset%nspden,ntypat,&
+&     n1xccc,n3xccc,option,pawrad,pawtab,rprimd,vxc,psps%xccc1d,xccc3d,&
+&     psps%xcccrc,xred,wvl%den,wvl%descr,mpi_comm_wvl=mpi_enreg%comm_wvl)
 #endif
    end if
    ABI_DEALLOCATE(gr_dum)
@@ -568,7 +568,7 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
    wvl%e%energs%eion = energies%e_ewald
 !  Setup the mixing, if necessary
    call denspot_set_history(wvl%den%denspot,dtset%iscf,dtset%nsppol, &
-&     wvl%den%denspot%dpbox%ndims(1),wvl%den%denspot%dpbox%ndims(2))
+&   wvl%den%denspot%dpbox%ndims(1),wvl%den%denspot%dpbox%ndims(2))
 #endif
    ABI_ALLOCATE(xcart,(3, dtset%natom))
    call xred2xcart(dtset%natom, rprimd, xcart, xred)
@@ -586,8 +586,8 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
  if (any(abs(dtset%zeemanfield(:))>tol8)) then
    vzeeman(:) = zero                            ! vzeeman_ij = -1/2*sigma_ij^alpha*B_alpha
    if(dtset%nspden==2)then
-      vzeeman(1) = -half*dtset%zeemanfield(3)   ! v_dwndwn = -1/2*B_z  
-      vzeeman(2) =  half*dtset%zeemanfield(3)   ! v_upup   =  1/2*B_z
+     vzeeman(1) = -half*dtset%zeemanfield(3)   ! v_dwndwn = -1/2*B_z  
+     vzeeman(2) =  half*dtset%zeemanfield(3)   ! v_upup   =  1/2*B_z
      do ifft=1,nfft
        vtrial(ifft,1) = vtrial(ifft,1) + vzeeman(1) !SPr: added 1st component
        vtrial(ifft,2) = vtrial(ifft,2) + vzeeman(2)

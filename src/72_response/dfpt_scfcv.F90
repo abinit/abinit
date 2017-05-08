@@ -705,7 +705,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 &         dtset%nsppol,dtset%typat,pawtab=pawtab,mpi_atmtab=mpi_enreg%my_atmtab,&
 &         comm_atom=mpi_enreg%comm_atom)
        end if
-      
+       
        call dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
 &       doccde_rbz,docckqde,dtfil,dtset,eigenq,eigen0,eigen1,fe1fixed,gmet,gprimd,idir,&
 &       indsy1,ipert,irrzon1,istwfk_rbz,kg,kg1,kpt_rbz,dtset%mband,mkmem,mkqmem,mk1mem,mpi_enreg,&
@@ -1205,11 +1205,11 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
   !call appdig(pertcase,dtfil%fnameabo_den,fi1o_vtk)
   !call printmagvtk(mpi_enreg,nspden,nfftf,ngfftf,rhor1,rprimd,adjustl(adjustr(fi1o_vtk)//".vtk"))
   !compute the contributions to susceptibility from different attomic spheres:
-  call calcdensph(gmet,mpi_enreg,dtset%natom,nfftf,ngfftf,nspden,&
+   call calcdensph(gmet,mpi_enreg,dtset%natom,nfftf,ngfftf,nspden,&
 &   dtset%ntypat,ab_out,dtset%ratsph,rhor1,rprimd,dtset%typat,ucvol,xred,&
 &   idir+1,intgden,dentot)
 
- endif
+ end if
 
  if (iwrite_fftdatar(mpi_enreg)) then
    if (dtset%prtden>0) then
@@ -1238,7 +1238,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
      call appdig(pertcase,dtfil%fnameabo_vha,fi1o)
      ! TODO: should we write pawrhoij1 or pawrhoij. Note that ioarr writes hdr%pawrhoij
      call fftdatar_write_from_hdr("first_order_vhartree",fi1o,dtset%iomode,hdr,&
-       ngfftf,cplex,nfftf,dtset%nspden,vhartr1_tmp,mpi_enreg)
+     ngfftf,cplex,nfftf,dtset%nspden,vhartr1_tmp,mpi_enreg)
      ABI_DEALLOCATE(vhartr1_tmp)
    end if
    
@@ -1257,7 +1257,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
      call appdig(pertcase,dtfil%fnameabo_vxc,fi1o)
      ! TODO: should we write pawrhoij1 or pawrhoij. Note that ioarr writes hdr%pawrhoij
      call fftdatar_write_from_hdr("first_order_vxc",fi1o,dtset%iomode,hdr,&
-       ngfftf,cplex,nfftf,dtset%nspden,vxc1,mpi_enreg)
+     ngfftf,cplex,nfftf,dtset%nspden,vxc1,mpi_enreg)
    end if
 
 

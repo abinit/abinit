@@ -101,11 +101,11 @@ subroutine mkcore_inner(corfra,core_mesh,dyfrx2,grxc1,grxc2,grxc3,ifftsph,msz,na
  call sort_dp(nfgd,rr_tmp,iindex(1:nfgd),tol16)
  if (option==1.or.option==3) then
    call paw_splint(msz,core_mesh%rad,pawtab%tcoredens(:,1),pawtab%tcoredens(:,3),&
-&                  nfgd,rr_tmp,tcore)
+&   nfgd,rr_tmp,tcore)
  end if
  if (option>=2) then
    call paw_splint_der(msz,core_mesh%rad,pawtab%tcoredens(:,1),pawtab%tcoredens(:,3),&
-&                  nfgd,rr_tmp,dtcore)
+&   nfgd,rr_tmp,dtcore)
  end if
 
 !Accumulate contributions to core density on the entire cell
@@ -150,7 +150,7 @@ subroutine mkcore_inner(corfra,core_mesh,dyfrx2,grxc1,grxc2,grxc3,ifftsph,msz,na
    if(nfgd>0) then
 !    Evaluate spline fit of 2nd der of pseudo core density
      call paw_splint(msz,core_mesh%rad,pawtab%tcoredens(:,3),pawtab%tcoredens(:,5),&
-&                    nfgd,rr_tmp,d2tcore)
+&     nfgd,rr_tmp,d2tcore)
      do ifgd=1,nfgd
        ii=iindex(ifgd);jj=ifftsph(ii)
        term=vxc(jj,1)*dtcore(ifgd)/rr_tmp(ifgd)
@@ -158,9 +158,9 @@ subroutine mkcore_inner(corfra,core_mesh,dyfrx2,grxc1,grxc2,grxc3,ifftsph,msz,na
        do mu=1,3
          do nu=1,3
            dyfrx2(mu,nu,iatom)=dyfrx2(mu,nu,iatom)&
-&             +(term2-term/rr_tmp(iindex(ifgd))**2)&
-&             *rred(mu,iatom)*rred(nu,iatom)+term*rmet(mu,nu)
-        end do
+&           +(term2-term/rr_tmp(iindex(ifgd))**2)&
+&           *rred(mu,iatom)*rred(nu,iatom)+term*rmet(mu,nu)
+         end do
        end do
      end do
    end if
@@ -168,7 +168,7 @@ subroutine mkcore_inner(corfra,core_mesh,dyfrx2,grxc1,grxc2,grxc3,ifftsph,msz,na
    if (nfgd_r0>0) then
      rr_tmp(1)=tol10
      call paw_splint(msz,core_mesh%rad,pawtab%tcoredens(:,3),pawtab%tcoredens(:,5),&
-&                    1,rr_tmp,d2tcore(1))
+&     1,rr_tmp,d2tcore(1))
      ifgd=1
      ii=iindex(ifgd);jj=ifftsph(ii)
      term=vxc(jj,1)*d2tcore(ifgd)

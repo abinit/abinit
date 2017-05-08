@@ -476,19 +476,19 @@ subroutine poslifetime(dtset,electronpositron,gprimd,my_natom,mpi_enreg,n3xccc,n
              if (option/=1) rhoarr1(:)=rhoarr1_j(:)
              do ii=1,4
                if (ii==1) ff(1:mesh_size)=rhoarr1(1:mesh_size)*rhoarr1_ep(1:mesh_size) &
-&                                        *gamma(1:mesh_size,1)*pawrad(itypat)%rad(1:mesh_size)**2
+&               *gamma(1:mesh_size,1)*pawrad(itypat)%rad(1:mesh_size)**2
                if (ii==2) ff(1:mesh_size)=rhoarr1(1:mesh_size)*rhoarr1_ep(1:mesh_size) &
-&                                        *gamma(1:mesh_size,2)*pawrad(itypat)%rad(1:mesh_size)**2
+&               *gamma(1:mesh_size,2)*pawrad(itypat)%rad(1:mesh_size)**2
                if (electronpositron%particle==EP_ELECTRON) then
                  if (ii==3) ff(1:mesh_size)=rhoarr1(1:mesh_size)*rhocore(1:mesh_size) &
-&                                          *gamma(1:mesh_size,1)*pawrad(itypat)%rad(1:mesh_size)**2
+&                 *gamma(1:mesh_size,1)*pawrad(itypat)%rad(1:mesh_size)**2
                  if (ii==4) ff(1:mesh_size)=rhoarr1(1:mesh_size)*rhocore(1:mesh_size) &
-&                                          *pawrad(itypat)%rad(1:mesh_size)**2
+&                 *pawrad(itypat)%rad(1:mesh_size)**2
                else
                  if (ii==3) ff(1:mesh_size)=rhoarr1_ep(1:mesh_size)*rhocore(1:mesh_size) &
-&                                          *gamma(1:mesh_size,1)*pawrad(itypat)%rad(1:mesh_size)**2
+&                 *gamma(1:mesh_size,1)*pawrad(itypat)%rad(1:mesh_size)**2
                  if (ii==4) ff(1:mesh_size)=rhoarr1_ep(1:mesh_size)*rhocore(1:mesh_size) &
-&                                          *pawrad(itypat)%rad(1:mesh_size)**2
+&                 *pawrad(itypat)%rad(1:mesh_size)**2
                end if
                call simp_gen(intg,ff,pawrad(itypat))
                intg=intg*pawang%angwgth(ipt)*four_pi

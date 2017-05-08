@@ -218,7 +218,7 @@ subroutine mkcore_paw(atindx1,corstr,dyfrx2,grxc,icoulomb,natom,mpi_enreg,&
 !  since core_mesh_size can be bigger than pawrad%mesh_size, 
    msz=pawtab(itypat)%core_mesh_size
    call pawrad_init(core_mesh,mesh_size=msz,mesh_type=pawrad(itypat)%mesh_type,&
-&                   rstep=pawrad(itypat)%rstep,lstep=pawrad(itypat)%lstep)
+&   rstep=pawrad(itypat)%rstep,lstep=pawrad(itypat)%lstep)
 
 !  Big loop on atoms  
    do iat=1,nattyp(itypat)

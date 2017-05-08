@@ -325,7 +325,7 @@ subroutine prep_getghc(cwavef,gs_hamk,gvnlc,gwavef,swavef,lambda,blocksize,&
 !  -------------------------------------------------------
 !  Sorting the wave functions below bandpp
 !  -------------------------------------------------------
-      cwavef_alltoall2(:,:) = cwavef_alltoall1(:,index_wavef_band)
+     cwavef_alltoall2(:,:) = cwavef_alltoall1(:,index_wavef_band)
    end if
 
 !  ------------------------------------------------------------

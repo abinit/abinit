@@ -339,7 +339,7 @@ subroutine rhotov(dtset,energies,gprimd,gsqcut,istep,kxc,mpi_enreg,nfft,ngfft,&
 !                                     v(1)    => v_dwndwn
 !                                     v(2)    => v_upup
 !         verified by comparing collinear and non-collinear calculations
- 
+     
      vzeeman(1) = -half*dtset%zeemanfield(3)  ! v_dwndwn
      vzeeman(2) =  half*dtset%zeemanfield(3)  ! v_upup
    else if(dtset%nspden==4)then

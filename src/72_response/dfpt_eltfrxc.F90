@@ -430,7 +430,7 @@ subroutine dfpt_eltfrxc(atindx,dtset,eltfrxc,enxc,gsqcut,kxc,mpi_enreg,mgfft,&
                do ii=1,3
                  tmp0=rho0_redgr(ii,ifft,ispden)*rho0_redgr(jj,ifft,ispden)
                  tmp0t=(rho0_redgr(ii,ifft,ispden)+rho0_redgr(ii,ifft,ispden_c))&
-&                     *(rho0_redgr(jj,ifft,ispden)+rho0_redgr(jj,ifft,ispden_c))
+&                 *(rho0_redgr(jj,ifft,ispden)+rho0_redgr(jj,ifft,ispden_c))
                  dgsds10=dgsds10+dgm(ii,jj,is1)*tmp0
                  dgsds20=dgsds20+dgm(ii,jj,is2)*tmp0
                  dgstds10=dgstds10+dgm(ii,jj,is1)*tmp0t
@@ -458,7 +458,7 @@ subroutine dfpt_eltfrxc(atindx,dtset,eltfrxc,enxc,gsqcut,kxc,mpi_enreg,mgfft,&
          end do !ifft
        end do !ispden
 
-    end if ! nspden
+     end if ! nspden
 
    end if !GGA
 

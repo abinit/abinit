@@ -578,9 +578,9 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
 !          For monte carlo don't need to recompute energy here
 !          (done in pred_montecarlo)
            call effective_potential_evaluate( &
-&               effective_potential,scfcv_args%results_gs%etotal,&
-&               scfcv_args%results_gs%fcart,scfcv_args%results_gs%fred,&
-&               scfcv_args%results_gs%strten,ab_mover%natom,rprimd,xred)
+&           effective_potential,scfcv_args%results_gs%etotal,&
+&           scfcv_args%results_gs%fcart,scfcv_args%results_gs%fred,&
+&           scfcv_args%results_gs%strten,ab_mover%natom,rprimd,xred)
          end if
 
 #if defined HAVE_LOTF
@@ -657,7 +657,7 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
 !        Call it only for specific ionmov
          if(any((/2,3,10,11,22/)==ab_mover%ionmov)) then
            call xfh_update(ab_xfh,acell,fred_corrected,ab_mover%natom,rprim,&
-&                        hist%strten(:,hist%ihist),xred)
+&           hist%strten(:,hist%ihist),xred)
          end if
        end if
        ABI_DEALLOCATE(fred_corrected)
@@ -671,7 +671,7 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
      if (me==master) then
        ifirst=merge(0,1,(itime>1.or.icycle>1))
        call write_md_hist(hist,filename,ifirst,ab_mover%natom,ab_mover%ntypat,&
-&                    ab_mover%typat,amu,ab_mover%znucl,ab_mover%dtion)
+&       ab_mover%typat,amu,ab_mover%znucl,ab_mover%dtion)
      end if
 #endif
 
@@ -794,7 +794,7 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
      ! check dilatmx here and correct if necessary
      if (scfcv_args%dtset%usewvl == 0) then
        call chkdilatmx(scfcv_args%dtset%dilatmx,rprimd,scfcv_args%dtset%rprimd_orig(1:3,1:3,1),&
-&                      dilatmx_errmsg)
+&       dilatmx_errmsg)
        _IBM6("dilatxm_errmsg: "//TRIM(dilatmx_errmsg))
        if (LEN_TRIM(dilatmx_errmsg) /= 0) then
          MSG_WARNING(dilatmx_errmsg)
@@ -911,7 +911,7 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
 !  ###########################################################
 !  ### 20. End loop itime
 
-end do ! do itime=1,ntime
+  end do ! do itime=1,ntime
 
  ! Call fconv here if we exited due to wall time limit.
  if (timelimit_exit==1 .and. specs%isFconv) then

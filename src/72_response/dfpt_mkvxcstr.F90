@@ -226,7 +226,7 @@ subroutine dfpt_mkvxcstr(cplex,idir,ipert,kxc,mpi_enreg,natom,nfft,ngfft,nhat,nh
    end if
 
    call dfpt_mkvxcstrgga(cplex,gprimd,istr,kxc,mpi_enreg,nfft,ngfft,nkxc,&
-&                        nspden,paral_kgb,qphon,rhor1tmp,str_scale,vxc1)
+&   nspden,paral_kgb,qphon,rhor1tmp,str_scale,vxc1)
    ABI_DEALLOCATE(rhor1tmp)
 
  else

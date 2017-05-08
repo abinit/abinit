@@ -366,12 +366,12 @@ subroutine mlwfovlp_projpaw(A_paw,band_in,cprj,just_augmentation,max_num_bands,m
 !          ff= \int R_wan(r) (R_phi(ln;r)/r ) r^2 dr
 !          
            ff(1:mesh_size)= aux(1:mesh_size) * pawtab(itypat)%phi(1:mesh_size,ln) &
-&                                            * pawrad(itypat)%rad(1:mesh_size)
+&           * pawrad(itypat)%rad(1:mesh_size)
          else
 !          Inside sphere contribution = \phi - \tphi
 !          ff= \int R_wan(r) (R_phi(ln;r)/r - R_tphi(ln;r)/r) r^2 dr
            ff(1:mesh_size)= aux(1:mesh_size) * (pawtab(itypat)%phi(1:mesh_size,ln)-pawtab(itypat)%tphi(1:mesh_size,ln)) &
-&                                            * pawrad(itypat)%rad(1:mesh_size)
+&           * pawrad(itypat)%rad(1:mesh_size)
          end if
 !        
 !        Integration with simpson routine

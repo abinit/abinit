@@ -237,8 +237,8 @@ subroutine mkcore_wvl(atindx1,corstr,grxc,natom,nattyp,nfft,nspden,ntypat,n1xccc
 !  PAW: create mesh for core density
    if (USE_PAW) then
      call pawrad_init(core_mesh,mesh_size=pawtab(itypat)%core_mesh_size,&
-&                     mesh_type=pawrad(itypat)%mesh_type,&
-&                     rstep=pawrad(itypat)%rstep,lstep=pawrad(itypat)%lstep)
+&     mesh_type=pawrad(itypat)%mesh_type,&
+&     rstep=pawrad(itypat)%rstep,lstep=pawrad(itypat)%lstep)
    end if
 
 !  Loop over atoms of the type
@@ -323,23 +323,23 @@ subroutine mkcore_wvl(atindx1,corstr,grxc,natom,nattyp,nfft,nspden,ntypat,n1xccc
          if (option==1.or.option==3) then
 !          Evaluate fit of core density
            call paw_splint(core_mesh%mesh_size,core_mesh%rad, &
-&                          pawtab(itypat)%tcoredens(:,1), &
-&                          pawtab(itypat)%tcoredens(:,3),&
-&                          npts,rnorm(1:npts),tcore(1:npts))
+&           pawtab(itypat)%tcoredens(:,1), &
+&           pawtab(itypat)%tcoredens(:,3),&
+&           npts,rnorm(1:npts),tcore(1:npts))
          end if
          if (option>=2) then
 !          Evaluate fit of 1-der of core density
            call paw_splint(core_mesh%mesh_size,core_mesh%rad, &
-&                          pawtab(itypat)%tcoredens(:,2), &
-&                          pawtab(itypat)%tcoredens(:,4),&
-&                          npts,rnorm(1:npts),dtcore(1:npts))
+&           pawtab(itypat)%tcoredens(:,2), &
+&           pawtab(itypat)%tcoredens(:,4),&
+&           npts,rnorm(1:npts),dtcore(1:npts))
          end if
          if (option==4) then
 !          Evaluate fit of 2nd-der of core density
            call paw_splint(core_mesh%mesh_size,core_mesh%rad, &
-&                          pawtab(itypat)%tcoredens(:,3), &
-&                          pawtab(itypat)%tcoredens(:,5),&
-&                          npts,rnorm(1:npts),d2tcore(1:npts))
+&           pawtab(itypat)%tcoredens(:,3), &
+&           pawtab(itypat)%tcoredens(:,5),&
+&           npts,rnorm(1:npts),d2tcore(1:npts))
          end if
        else
 !        Norm-conserving PP:
@@ -353,15 +353,15 @@ subroutine mkcore_wvl(atindx1,corstr,grxc,natom,nattyp,nfft,nspden,ntypat,n1xccc
            dd = bb*(bb**2-one)*delta2div6
            if (option==1.or.option==3) then
              tcore(ipts)=aa*xccc1d(jj,1,itypat)+bb*xccc1d(jj+1,1,itypat) +&
-&                        cc*xccc1d(jj,3,itypat)+dd*xccc1d(jj+1,3,itypat)
+&             cc*xccc1d(jj,3,itypat)+dd*xccc1d(jj+1,3,itypat)
            end if
            if (option>=2) then
              dtcore(ipts)=aa*xccc1d(jj,2,itypat)+bb*xccc1d(jj+1,2,itypat) +&
-&                         cc*xccc1d(jj,4,itypat)+dd*xccc1d(jj+1,4,itypat)
+&             cc*xccc1d(jj,4,itypat)+dd*xccc1d(jj+1,4,itypat)
            end if
            if (option==4) then
              d2tcore(ipts)=aa*xccc1d(jj,3,itypat)+bb*xccc1d(jj+1,3,itypat) +&
-&                          cc*xccc1d(jj,5,itypat)+dd*xccc1d(jj+1,5,itypat)
+&             cc*xccc1d(jj,5,itypat)+dd*xccc1d(jj+1,5,itypat)
            end if
          end do
        end if
@@ -488,8 +488,8 @@ subroutine mkcore_wvl(atindx1,corstr,grxc,natom,nattyp,nfft,nspden,ntypat,n1xccc
 #else
  BIGDFT_NOTENABLED_ERROR()
  if (.false.) write(std_out,*) natom,nfft,nspden,ntypat,n1xccc,n3xccc,option,mpi_comm_wvl,&
-&  wvl_den%symObj,wvl_descr%h(1),atindx1(1),nattyp(1),rprimd(1,1),vxc(1,1),&
-&  xred(1,1),xccc1d(1,1,1),corstr(1),grxc(1,1),xccc3d(1),pawrad(1)%mesh_size,pawtab(1)%lmn_size
+& wvl_den%symObj,wvl_descr%h(1),atindx1(1),nattyp(1),rprimd(1,1),vxc(1,1),&
+& xred(1,1),xccc1d(1,1,1),corstr(1),grxc(1,1),xccc3d(1),pawrad(1)%mesh_size,pawtab(1)%lmn_size
 #endif
 
 end subroutine mkcore_wvl

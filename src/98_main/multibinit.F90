@@ -208,13 +208,13 @@ program multibinit
      call effective_potential_file_read(filnam(4),reference_effective_potential,inp,comm)
    else
      write(message,'(a,(80a),3a)') ch10,('=',ii=1,80),ch10,ch10,&
-&                       ' There is no file for the coefficients from polynomial fitting'
+&     ' There is no file for the coefficients from polynomial fitting'
      call wrtout(ab_out,message,'COLL')
      call wrtout(std_out,message,'COLL')
    end if
  else
    write(message,'(a,(80a),3a)') ch10,('=',ii=1,80),ch10,ch10,&
-&                       ' There is no file for the coefficients from polynomial fitting'
+&   ' There is no file for the coefficients from polynomial fitting'
    call wrtout(ab_out,message,'COLL')
    call wrtout(std_out,message,'COLL')
  end if
@@ -234,16 +234,16 @@ program multibinit
    if(iam_master) then
 !      Read the MD file
      write(message,'(a,(80a),7a)')ch10,('=',ii=1,80),ch10,ch10,&
-&       '-Reading the file ',trim(filnam(5)),ch10,&
-&       ' with NetCDF in order to fit the polynomial coefficients'
+&     '-Reading the file ',trim(filnam(5)),ch10,&
+&     ' with NetCDF in order to fit the polynomial coefficients'
      call wrtout(std_out,message,'COLL') 
      call wrtout(ab_out,message,'COLL') 
      if(filnam(5)/=''.and.filnam(5)/='no')then
        call read_md_hist(filnam(5),hist,.FALSE.,.FALSE.)
      else
        write(message, '(3a)' )&
-&         'There is no MD file to fit the coefficients ',ch10,&
-&         'Action: add MD file'
+&       'There is no MD file to fit the coefficients ',ch10,&
+&       'Action: add MD file'
        MSG_ERROR(message)
      end if
    end if
@@ -397,5 +397,5 @@ program multibinit
 
  call xmpi_end()
  
-  end program multibinit
+ end program multibinit
 !!***

@@ -367,8 +367,8 @@ subroutine calcdensph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,nunit,ratsph
    write(message, '(2a)') ch10,' ------------------------------------------------------------------------'
    call wrtout(nunit,message,'COLL')
    write(message, '(4a)' ) &
-&     ' Magnetic susceptibility (integrated first order magnetization density):',ch10,&
-&     ' ------------------------------------------------------------------------',ch10
+&   ' Magnetic susceptibility (integrated first order magnetization density):',ch10,&
+&   ' ------------------------------------------------------------------------',ch10
    call wrtout(nunit,message,'COLL')
    if (nspden==2) then
      write(message, '(a,f13.8)') '           chi_33 = ', mag_coll
@@ -380,7 +380,7 @@ subroutine calcdensph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,nunit,ratsph
      call wrtout(nunit,message,'COLL')
      write(message, '(a,i1,a,f13.8)') '           chi_3',prtopt-1,' = ',mag_z
      call wrtout(nunit,message,'COLL')
-   endif
+   end if
 
    write(message, '(2a,f13.8)') ch10,'   n^(1) integral = ', rho_tot
    call wrtout(nunit,message,'COLL')
@@ -402,7 +402,7 @@ subroutine calcdensph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,nunit,ratsph
      dentot(2)=mag_x
      dentot(3)=mag_y
      dentot(4)=mag_z
-   endif
+   end if
  end if 
 
 end subroutine calcdensph

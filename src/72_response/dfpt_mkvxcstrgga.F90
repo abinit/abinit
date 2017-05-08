@@ -228,16 +228,16 @@ subroutine dfpt_mkvxcstrgga(cplex,gprimd,istr,kxc,mpi_enreg,nfft,ngfft,&
      gradrho_gradrho1   =dot_product(r0,r1)
 
      dnexcdn(ir,1)=kxc(ir, 1)*rho1now(ir,1,1)     &
-&                 +kxc(ir, 2)*rho1now(ir,2,1)     &
-&                 +kxc(ir, 6)*gradrho_gradrho1_up &
-&                 +kxc(ir,11)*gradrho_gradrho1
+&     +kxc(ir, 2)*rho1now(ir,2,1)     &
+&     +kxc(ir, 6)*gradrho_gradrho1_up &
+&     +kxc(ir,11)*gradrho_gradrho1
      dnexcdn(ir,2)=kxc(ir, 3)*rho1now(ir,2,1)     &
-&                 +kxc(ir, 2)*rho1now(ir,1,1)     &
-&                 +kxc(ir, 7)*gradrho_gradrho1_dn &
-&                 +kxc(ir,12)*gradrho_gradrho1
+&     +kxc(ir, 2)*rho1now(ir,1,1)     &
+&     +kxc(ir, 7)*gradrho_gradrho1_dn &
+&     +kxc(ir,12)*gradrho_gradrho1
      coeff_grho_corr=kxc(ir,11)*rho1now(ir,1,1) &
-&                   +kxc(ir,12)*rho1now(ir,2,1) &
-&                   +kxc(ir,13)*gradrho_gradrho1
+&     +kxc(ir,12)*rho1now(ir,2,1) &
+&     +kxc(ir,13)*gradrho_gradrho1
      coeff_grho_up=kxc(ir,6)*rho1now(ir,1,1)+kxc(ir,8)*gradrho_gradrho1_up
      coeff_grho_dn=kxc(ir,7)*rho1now(ir,2,1)+kxc(ir,9)*gradrho_gradrho1_dn
 
@@ -248,13 +248,13 @@ subroutine dfpt_mkvxcstrgga(cplex,gprimd,istr,kxc,mpi_enreg,nfft,ngfft,&
 
 !    Reuse the storage in rho1now
      rho1now(ir,1,2:4)=(kxc(ir,4)+kxc(ir,10))*r1_up(:) &
-&                     +kxc(ir,10)            *r1_dn(:) &
-&                     +coeff_grho_up         *r0_up(:) &
-&                     +coeff_grho_corr       *r0(:)
+&     +kxc(ir,10)            *r1_dn(:) &
+&     +coeff_grho_up         *r0_up(:) &
+&     +coeff_grho_corr       *r0(:)
      rho1now(ir,2,2:4)=(kxc(ir,5)+kxc(ir,10))*r1_dn(:) &
-&                     +kxc(ir,10)            *r1_up(:) &
-&                     +coeff_grho_dn         *r0_dn(:) &
-&                     +coeff_grho_corr       *r0(:)
+&     +kxc(ir,10)            *r1_up(:) &
+&     +coeff_grho_dn         *r0_dn(:) &
+&     +coeff_grho_corr       *r0(:)
    end do
 
  end if ! nspden
@@ -262,7 +262,7 @@ subroutine dfpt_mkvxcstrgga(cplex,gprimd,istr,kxc,mpi_enreg,nfft,ngfft,&
 
  vxc1(:,:)=zero
  call xcpot(cplex,dnexcdn,gprimd,ishift,mgga,mpi_enreg,nfft,ngfft,ngrad,nspden,&
-&           nspgrad,paral_kgb,qphon,rho1now,vxc1)
+& nspgrad,paral_kgb,qphon,rho1now,vxc1)
 
 !if you uncomment the following line, you will have to modify
 !the original function call to pass in gmet and gsqcut

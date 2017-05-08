@@ -281,7 +281,7 @@ subroutine pawmknhat_psipsi(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngfft,nha
              if (pawang%gntselect(ilslm,klm)>0) then
                cpf_ql(1)=cpf(1)*qijl(ilslm,klmn)
                cpf_ql(2)=cpf(2)*qijl(ilslm,klmn)
-                do ic=1,pawfgrtab(iatom)%nfgd
+               do ic=1,pawfgrtab(iatom)%nfgd
                  jc=pawfgrtab(iatom)%ifftsph(ic)
                  grnhat12(1,jc,isploop,1)=grnhat12(1,jc,isploop,1)+cpf_ql(1)*pawfgrtab(iatom)%gylmgr(1,ic,ilslm)
                  grnhat12(1,jc,isploop,2)=grnhat12(1,jc,isploop,2)+cpf_ql(1)*pawfgrtab(iatom)%gylmgr(2,ic,ilslm)

@@ -815,7 +815,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
      end if
 
      call fftdatar_write("vhartree_vloc",dtfil%fnameabo_app_vclmb,dtset%iomode,hdr,&
-&         crystal,ngfft,cplex1,nfft,nspden,vwork,mpi_enreg,ebands=ebands)
+&     crystal,ngfft,cplex1,nfft,nspden,vwork,mpi_enreg,ebands=ebands)
 
 !TODO: find out why this combination of calls with fftdatar_write then out1dm fails on buda with 4 mpi-fft procs (npkpt 1). 
 !      For the moment comment it out. Only DS2 of mpiio test 27 fails
@@ -1154,7 +1154,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 
  if (dtset%prtdipole == 1) then
    call multipoles_out(rhor,mpi_enreg,natom,nfft,ngfft,dtset%nspden,dtset%ntypat,rprimd,&
-&                      dtset%typat,ucvol,ab_out,xred,dtset%ziontypat)
+&   dtset%typat,ucvol,ab_out,xred,dtset%ziontypat)
  end if
 
  ! BoltzTraP output files in GENEric format

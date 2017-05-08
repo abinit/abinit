@@ -391,9 +391,9 @@ subroutine etotfor(atindx1,deltae,diffor,dtefield,dtset,&
        end do
      end if
      ucvol_=ucvol
-#    if defined HAVE_BIGDFT
+#if defined HAVE_BIGDFT
      if (dtset%usewvl==1) ucvol_=product(wvl_den%denspot%dpbox%hgrids)*real(product(wvl_den%denspot%dpbox%ndims),dp)
-#    endif
+#endif
      dimnhat=0;optgr=1;optgr2=0;optstr=0;optstr2=0
      comm_grid=mpi_enreg%comm_fft;if(dtset%usewvl==1) comm_grid=mpi_enreg%comm_wvl
      call pawgrnl(atindx1,dimnhat,dummy,1,dummy,grnl,gsqcut,mgfft,my_natom, &
@@ -405,7 +405,7 @@ subroutine etotfor(atindx1,deltae,diffor,dtefield,dtset,&
    end if
 
    apply_residual=(optres==1 .and. dtset%usewvl==0.and.abs(dtset%densfor_pred)>=1 .and. &
-&                  abs(dtset%densfor_pred)<=6.and.abs(dtset%densfor_pred)/=5)
+&   abs(dtset%densfor_pred)<=6.and.abs(dtset%densfor_pred)/=5)
 
 !  If residual is a density residual (and forces from residual asked),
 !  has to convert it into a potential residualbefore calling forces routine
@@ -420,10 +420,10 @@ subroutine etotfor(atindx1,deltae,diffor,dtefield,dtset,&
      resid => nvresid
    end if
    call forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,forold,fred,grchempottn,gresid,grewtn,&
-&     grhf,grnl,grvdw,grxc,gsqcut,indsym,maxfor,mgfft,mpi_enreg,&
-&     n1xccc,n3xccc,nattyp,nfft,ngfft,ngrvdw,ntypat,&
-&     pawrad,pawtab,ph1d,psps,rhog,rhor,rprimd,symrec,synlgr,dtset%usefock,resid,vxc,wvl,wvl_den,xred,&
-&     electronpositron=electronpositron)
+&   grhf,grnl,grvdw,grxc,gsqcut,indsym,maxfor,mgfft,mpi_enreg,&
+&   n1xccc,n3xccc,nattyp,nfft,ngfft,ngrvdw,ntypat,&
+&   pawrad,pawtab,ph1d,psps,rhog,rhor,rprimd,symrec,synlgr,dtset%usefock,resid,vxc,wvl,wvl_den,xred,&
+&   electronpositron=electronpositron)
    if (apply_residual) then
      ABI_DEALLOCATE(resid)
    end if

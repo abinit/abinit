@@ -209,7 +209,7 @@ subroutine pimd_langevin_nvt(etotal,forces,itimimage,natom,pimd_param,prtvolimg,
  call pimd_forces(forces,natom,spring,pitransform,trotter,xcart)
  call pimd_langevin_forces(alea,forces,forces_pimd,friction,langev,mass,natom,trotter,vel)
  call pimd_apply_constraint(pimd_param%constraint,constraint_output,forces_pimd,&
-&                           mass,natom,trotter,pimd_param%wtatcon,xcart)
+& mass,natom,trotter,pimd_param%wtatcon,xcart)
 
 !Compute atomic positions at t+dt
  if (itimimage<=1) then
@@ -243,7 +243,7 @@ subroutine pimd_langevin_nvt(etotal,forces,itimimage,natom,pimd_param,prtvolimg,
      call pimd_langevin_forces(alea,forces,forces_pimd,friction,&
 &     langev,mass,natom,trotter,vel)
      call pimd_apply_constraint(pimd_param%constraint,constraint_output,forces_pimd,&
-&                               mass,natom,trotter,pimd_param%wtatcon,xcart)
+&     mass,natom,trotter,pimd_param%wtatcon,xcart)
 !    Compute new positions
      call pimd_predict_verlet(dtion,forces_pimd,mass,natom,trotter,&
 &     xcart,xcart_next,xcart_prev)

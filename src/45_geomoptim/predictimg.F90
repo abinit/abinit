@@ -159,32 +159,32 @@ subroutine predictimg(deltae,imagealgo_str,imgmov,itimimage,itimimage_eff,list_d
  case(0)
 
    call predict_copy(itimimage,itimimage_eff,list_dynimage,ndynimage,nimage,&
-&                    ntimimage_stored,results_img)
+&   ntimimage_stored,results_img)
 
  case(1)
 
    call predict_steepest(itimimage,itimimage_eff,list_dynimage,mep_param,natom,ndynimage,nimage,&
-&                        ntimimage_stored,results_img)
+&   ntimimage_stored,results_img)
 
  case(2)
 
    call predict_string(itimimage,itimimage_eff,list_dynimage,mep_param,mpi_enreg,natom,&
-&                      ndynimage,nimage,nimage_tot,ntimimage_stored,results_img)
+&   ndynimage,nimage,nimage_tot,ntimimage_stored,results_img)
 
  case(4)
 
    call predict_ga(itimimage,itimimage_eff,idum,ga_param,natom,nimage,&
-&                  ntimimage_stored,results_img)
+&   ntimimage_stored,results_img)
 
  case(5)
 
    call predict_neb(itimimage,itimimage_eff,list_dynimage,mep_param,mpi_enreg,natom,&
-&                   ndynimage,nimage,nimage_tot,ntimimage_stored,results_img)
+&   ndynimage,nimage,nimage_tot,ntimimage_stored,results_img)
 
  case(9, 10, 13)
 !    Path Integral Molecular Dynamics
    call predict_pimd(imgmov,itimimage,itimimage_eff,mpi_enreg,natom,nimage,nimage_tot,&
-&                    ntimimage_stored,pimd_param,prtvolimg,results_img)
+&   ntimimage_stored,pimd_param,prtvolimg,results_img)
 
  case default
 

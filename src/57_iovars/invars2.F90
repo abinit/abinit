@@ -1706,12 +1706,12 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
    if(tread==1) dtset%dmftbandf=intarr(1)
    if((dtset%dmftbandf-dtset%dmftbandi+1)<2*maxval(dtset%lpawu(:))+1.and.(dtset%dmft_t2g==0)) then
      write(message, '(4a,i2,2a)' )&
-      '   dmftbandf-dmftbandi+1)<2*max(lpawu(:))+1)',ch10, &
+     '   dmftbandf-dmftbandi+1)<2*max(lpawu(:))+1)',ch10, &
 &     '   Number of bands to construct Wannier functions is not', &
 &     ' sufficient to build Wannier functions for l=',maxval(dtset%lpawu(:)),ch10, &
 &     '   Action: select a correct number of KS bands with dmftbandi and dmftbandf.'
      MSG_ERROR(message)
-   endif
+   end if
 
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmftcheck',tread,'INT')
    if(tread==1) dtset%dmftcheck=intarr(1)

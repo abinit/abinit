@@ -380,7 +380,7 @@ program anaddb
      ! dchidt only present if nlflag==1 or 2
      if (inp%nlflag < 3) then
        ncerr = nctk_def_arrays(ana_ncid, [nctkarr_t("dchidt", "dp", &
-         "number_of_atoms, three, three, three")], defmode=.True.)
+       "number_of_atoms, three, three, three")], defmode=.True.)
        NCF_CHECK(ncerr)
        NCF_CHECK(nctk_set_datamode(ana_ncid))
        NCF_CHECK(nf90_put_var(ana_ncid, nctk_idname(ana_ncid, "dchidt"), dchidt))
@@ -694,7 +694,7 @@ program anaddb
 
    ! Print the electronic dielectric tensor
    call ddb_diel(Crystal,ddb%amu,inp,dielt_rlx,displ,d2cart,epsinf,fact_oscstr,&
-     ab_out,lst,mpert,natom,inp%nph2l,phfrq,comm,ana_ncid)
+   ab_out,lst,mpert,natom,inp%nph2l,phfrq,comm,ana_ncid)
  end if
 
 !**********************************************************************
@@ -825,7 +825,7 @@ program anaddb
  ABI_DEALLOCATE(zeff)
  ABI_DEALLOCATE(instrain)
 
-50 continue
+  50 continue
  call asrq0_free(asrq0)
  call ifc_free(Ifc)
  call crystal_free(Crystal)
