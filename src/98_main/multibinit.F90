@@ -47,6 +47,7 @@ program multibinit
  use m_xomp
  use m_profiling_abi
  use m_errors
+ use m_argparse
  use m_effective_potential
  use m_fit_polynomial_coeff
  use m_multibinit_dataset
@@ -89,9 +90,11 @@ program multibinit
  type(multibinit_dataset_type) :: inp
  type(effective_potential_type) :: reference_effective_potential
  type(abihist) :: hist
+ type(args_t) :: args
 !TEST_AM
-! integer :: natom_sp
-! real(dp),allocatable :: dynmat(:,:,:,:,:)
+ integer :: natom_sp
+ real(dp) :: mse,msef,mses
+ real(dp),allocatable :: dynmat(:,:,:,:,:)
 !TEST_AM
 !******************************************************************
 
@@ -105,6 +108,10 @@ program multibinit
  comm = xmpi_world
  nproc = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
  iam_master = (my_rank == master)
+
+
+! Parse command line arguments.
+ args = args_parser(); if (args%exit /= 0) goto 100
 
 !Initialize memory profiling if it is activated !if a full abimem.mocc report is desired, 
 !set the argument of abimem_init to "2" instead of "0"
@@ -199,6 +206,7 @@ program multibinit
 
 !Read the harmonics parts
  call effective_potential_file_read(filnam(3),reference_effective_potential,inp,comm)
+
 !Read the coefficient from fit
  if(filnam(4)/=''.and.filnam(4)/='no')then
    call effective_potential_file_getType(filnam(4),filetype)
@@ -211,10 +219,19 @@ program multibinit
      call wrtout(std_out,message,'COLL')
    end if
  else
-   write(message,'(a,(80a),3a)') ch10,('=',ii=1,80),ch10,ch10,&
-&                       ' There is no file for the coefficients from polynomial fitting'
-   call wrtout(ab_out,message,'COLL')
-   call wrtout(std_out,message,'COLL')
+   if(inp%ncoeff/=zero) then
+         write(message, '(5a)' )&
+&         'ncoeff is specified in the input but,',ch10,&
+&         'there is no file for the coefficients ',ch10,&
+&         'Action: add coefficients.xml file'
+         MSG_ERROR(message)
+     
+   else
+     write(message,'(a,(80a),3a)') ch10,('=',ii=1,80),ch10,ch10,&
+&                        ' There is no file for the coefficients from polynomial fitting'
+     call wrtout(ab_out,message,'COLL')
+     call wrtout(std_out,message,'COLL')
+   end if
  end if
 !****************************************************************************************
 
@@ -228,6 +245,7 @@ program multibinit
 ! If needed, fit the anharmonic part and compute the confinement potential
 !****************************************************************************************
  if (inp%fit_coeff/=0.or.inp%confinement==2) then
+
    if(iam_master) then
 !    Read the MD file
      write(message,'(a,(80a),7a)')ch10,('=',ii=1,80),ch10,ch10,&
@@ -236,7 +254,13 @@ program multibinit
      call wrtout(std_out,message,'COLL') 
      call wrtout(ab_out,message,'COLL') 
      if(filnam(5)/=''.and.filnam(5)/='no')then
-       call read_md_hist(filnam(5),hist,.FALSE.,.FALSE.)
+       call read_md_hist(filnam(5),hist,.FALSE.,.FALSE.,.FALSE.)
+       if (hist%mxhist == 0)then
+         write(message, '(5a)' )&
+&         'The MD ',trim(filnam(5)),' file is not correct ',ch10,&
+&         'Action: add MD file'
+         MSG_ERROR(message)
+       end if
      else
        if (inp%fit_coeff/=0) then
          write(message, '(3a)' )&
@@ -254,6 +278,8 @@ program multibinit
 
 !  MPI BROADCAST the history of the MD
    call abihist_bcast(hist,master,comm)
+!  Map the hist in order to be consistent with the supercell into reference_effective_potential
+   call fit_polynomial_coeff_mapHistToRef(reference_effective_potential,hist,comm)
  end if
 
 !Generate the confinement polynome
@@ -281,40 +307,35 @@ program multibinit
    end select
  end if
 
-!TEST_AM_SECTION
 !Fit the coeff
  if (inp%fit_coeff/=0)then
    option=inp%fit_coeff
-   select case(option)
-   case (-1)
-!      option == -1
-!      Print the file in the specific format for the script of carlos
-!      Born_Charges  
-!      Dielectric_Tensor
-!      harmonic.xml
-!      Reference_structure
-!      Strain_Tensor
-!      symmetry_operations (only cubic)
-     if (iam_master) then
-       if(hist%mxhist >0)then
+   if(hist%mxhist >0)then
+     select case(option)
+     case (-1)
+!    option == -1
+!    Print the file in the specific format for the script of carlos
+!    Born_Charges  
+!    Dielectric_Tensor
+!    harmonic.xml
+!    Reference_structure
+!    Strain_Tensor
+!    symmetry_operations (only cubic)
+       if (iam_master) then
          call fit_polynomial_printSystemFiles(reference_effective_potential,hist)
-       else
-         write(message, '(3a)' )&
-&         'There is no step in the MD file ',ch10,&
-&         'Action: add MD file'
-         MSG_ERROR(message)
        end if
-     end if
-   case (1)
-     call fit_polynomial_coeff_get(inp%fit_cutoff,&
-&                                  reference_effective_potential%anharmonics_terms%coefficients,&
-&                                  reference_effective_potential,&
-&                                  reference_effective_potential%anharmonics_terms%ncoeff,1)
-
-     
-   end select
+     case (1)
+!    option = 1
+       call fit_polynomial_coeff_fit(inp%fit_cutoff,reference_effective_potential,hist)
+     end select
+   else
+     write(message, '(3a)' )&
+&         'There is no step in the MD file ',ch10,&
+&         'Action: add correct MD file'
+     MSG_ERROR(message)
+   end if
  end if
-!END_TEST_AM_SECTION
+
 !****************************************************************************************
 
 !****************************************************************************************
@@ -336,7 +357,7 @@ program multibinit
 
 !TEST_AM SECTION
 ! Print the Phonon dos/spectrum
-!   if(inp%prt_phfrq > 0) then
+! if(inp%prt_phfrq > 0) then
 !     call effective_potential_printPDOS(reference_effective_potential,filnam(2),&
 !&           inp%n_cell,inp%nph1l,inp%prt_phfrq,inp%qph1l)
 !   end if
@@ -347,14 +368,15 @@ program multibinit
 !   call effective_potential_writeXML(reference_effective_potential,1,filename=name)
 ! just for TEST
 !   if(inp%prt_phfrq > 0) then
-!     natom_sp = reference_effective_potential%supercell%natom_supercell
-!     ABI_ALLOCATE(dynmat,(2,3,natom_sp,3,natom_sp))
-!     call effective_potential_effpot2dynmat(dynmat,inp%delta_df,reference_effective_potential,&
-!&                                           reference_effective_potential%supercell%natom_supercell,&
-!&                                           int(reference_effective_potential%supercell%qphon),3)
-!
-!     ABI_DEALLOCATE(dynmat)
-!   end if
+!      natom_sp = reference_effective_potential%supercell%natom_supercell
+!      ABI_ALLOCATE(dynmat,(2,3,natom_sp,3,natom_sp))
+!      call effective_potential_effpot2dynmat(dynmat,inp%delta_df,reference_effective_potential,&
+! &                                           reference_effective_potential%supercell%natom_supercell,&
+! &                                           int(reference_effective_potential%supercell%qphon),3)
+     
+!      ABI_DEALLOCATE(dynmat)
+!    end if
+! end if
 !TEST_AM SECTION
 
 
@@ -426,7 +448,7 @@ program multibinit
 
  if (iam_master) close(ab_out)
 
- call xmpi_end()
+100 call xmpi_end()
  
 end program multibinit
 !!***

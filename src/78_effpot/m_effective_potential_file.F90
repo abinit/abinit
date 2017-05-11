@@ -36,6 +36,10 @@ module m_effective_potential_file
  use m_crystal,        only : crystal_t, crystal_init, crystal_free
  use m_ifc
  use m_io_tools, only : open_file
+ use m_abihist, only : abihist,read_md_hist
+#if defined HAVE_NETCDF
+ use netcdf
+#endif
 
  implicit none
 
@@ -220,7 +224,7 @@ CONTAINS  !=====================================================================
 !!
 !! SOURCE
 
-subroutine effective_potential_file_read(filename,eff_pot,inp,comm)
+subroutine effective_potential_file_read(filename,eff_pot,inp,comm,hist)
 
   use m_effective_potential
   use m_multibinit_dataset
@@ -247,6 +251,7 @@ subroutine effective_potential_file_read(filename,eff_pot,inp,comm)
   type(multibinit_dataset_type),optional,intent(in) :: inp
   type(ddb_type) :: ddb
   type(crystal_t) :: Crystal
+  type(abihist),optional :: hist
 !Local variables------------------------------
 !scalars
   integer :: ii,filetype,natom,ntypat,nqpt,nrpt
@@ -336,18 +341,32 @@ subroutine effective_potential_file_read(filename,eff_pot,inp,comm)
 
 !     Assign the coeff number from input
       if(inp%ncoeff==zero)then
-        write(message,'(8a)') ch10,&
-&      ' WARNING : The number of coefficients in set to 0',&
+        write(message,'(12a)') ch10,&
+&      ' --- !WARNING',ch10,&
+&      '     The number of coefficients in set to 0',&
 &      ' in the input file.',ch10,&
-&      '           The values of the coefficient will be read in the XML',ch10,&
-&      '           or might be fitted'
+&      '     The values of the coefficient will be read in the XML',ch10,&
+&      '     or might be fitted',ch10,&
+&      ' ---',ch10
         call wrtout(std_out,message,'COLL')
+        if(inp%fit_coeff <= zero .and. all(eff_pot%anharmonics_terms%coefficients(:)%coefficient == zero)) then
+
+          write(message,'(12a)') ch10,&
+&          ' --- !WARNING',ch10,&
+&          '     The input for the fit process is set to 0 or -1',&
+&          ' in the input file.',ch10,&
+&          '     The values of the coefficients in the XMF files are zero,',ch10,&
+&          '     So the coefficients can not be used',ch10,&
+&          ' ---',ch10
+          call wrtout(std_out,message,'COLL')
+
+        end if
       else
         if (eff_pot%anharmonics_terms%ncoeff /= inp%ncoeff)then
           write(message, '(5a)' )&
-&            ' The number of coefficient in the XML file is superior to the ',ch10,&
-&            ' number of coefficient in the input ',ch10,&
-&            ' Action: correct your input file'
+&            ' The number of coefficients in the XML file is superior to the ',ch10,&
+&            'number of coefficients in the input ',ch10,&
+&            'Action: correct your input file or change the file'
           MSG_ERROR(message)
         end if
         do ii = 1,eff_pot%anharmonics_terms%ncoeff
@@ -355,13 +374,29 @@ subroutine effective_potential_file_read(filename,eff_pot,inp,comm)
 &                                              eff_pot%anharmonics_terms%coefficients(ii))
         end do
       end if
-    end if
-  else
-    write(message, '(5a)' )&
+
+    else if(filetype==4) then
+      if(present(hist))then
+        write(message,'(5a)')ch10,&
+&         '-Reading the file ',trim(filename),ch10,&
+&         ' with NetCDF in order to fit the polynomial coefficients'
+        call wrtout(std_out,message,'COLL') 
+        call wrtout(ab_out,message,'COLL')
+        
+        call read_md_hist(filename,hist,.FALSE.,.FALSE.,.FALSE.)
+      else
+       write(message, '(3a)' )&
+&         'There is no hist argument ',ch10,&
+&         'Action: add hist argument'
+       MSG_ERROR(message)        
+     end if
+   end if
+ else
+   write(message, '(5a)' )&
 &      ' The file ',trim(filename),' is not readable with Multibinit',ch10,&
 &      ' Action: Change the file.'
-    MSG_BUG(message)
-  end if
+   MSG_BUG(message)
+ end if
 
 ! Deallocation of array
   call crystal_free(Crystal)
@@ -416,10 +451,37 @@ subroutine effective_potential_file_getType(filename,filetype)
  integer :: ddbun = 666
  character(len=500) :: message
  character (len=1000) :: line,readline
+#if defined HAVE_NETCDF
+ logical :: md_file = .FALSE.
+ integer :: natom_id,time_id,xyz_id,six_id
+ integer :: ncid,ncerr
+#endif
 !arrays
 ! *************************************************************************
 
  filetype = 0
+
+!try to read netcdf
+#if defined HAVE_NETCDF
+
+!Open netCDF file
+ ncerr=nf90_open(path=trim(filename),mode=NF90_NOWRITE,ncid=ncid)
+ if(ncerr == NF90_NOERR) then
+   md_file = .TRUE.
+   ncerr = nf90_inq_dimid(ncid,"natom",natom_id)
+   if(ncerr /= NF90_NOERR)  md_file = .FALSE.    
+   ncerr = nf90_inq_dimid(ncid,"xyz",xyz_id)
+   if(ncerr /= NF90_NOERR)  md_file = .FALSE.
+   ncerr = nf90_inq_dimid(ncid,"time",time_id)
+   if(ncerr /= NF90_NOERR)  md_file = .FALSE.
+   ncerr = nf90_inq_dimid(ncid,"six",six_id)
+   if(ncerr /= NF90_NOERR)  md_file = .FALSE.
+   if (md_file) then
+     filetype = 4
+     return
+   end if
+ end if
+#endif
 
  if (open_file(filename,message,unit=ddbun,form="formatted",status="old",action="read") /= 0) then
    MSG_ERROR(message)

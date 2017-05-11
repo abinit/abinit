@@ -335,12 +335,19 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
 #if defined HAVE_NETCDF
  filename=trim(ab_mover%filnam_ds(4))//'_HIST.nc'
 
- if (ab_mover%restartxf<=0)then
+ if (ab_mover%restartxf<0)then
 !  Read history from file (and broadcast if MPI)
    if (me==master) then
-     call read_md_hist(filename,hist_prev,specs%isVused,specs%isARused)
+     call read_md_hist(filename,hist_prev,specs%isVused,specs%isARused,ab_mover%restartxf==-3)
    end if
    call abihist_bcast(hist_prev,master,comm)
+
+   if(hist_prev%mxhist==0)then
+     write(message,"(7a)") "There is no molecular dynamics history in the file",&
+&                           trim(filename),", ",ch10,"However restarxf is not set to zero",ch10,&
+&                          "Action: change restarxf of add correct HIST.nc file"
+     MSG_ERROR(message)
+   end if
 
 !  If restartxf specifies to reconstruct the history
    if (hist_prev%mxhist>0.and.ab_mover%restartxf==-1)then
@@ -362,6 +369,14 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
      acell(:)   =hist_prev%acell(:,minIndex)
      rprimd(:,:)=hist_prev%rprimd(:,:,minIndex)
      xred(:,:)  =hist_prev%xred(:,:,minIndex)
+     call abihist_free(hist_prev)
+   end if
+!  If restarxf specifies to start to the last iteration
+   if (hist_prev%mxhist>0.and.ab_mover%restartxf==-3)then     
+     acell(:)   =hist_prev%acell(:,hist_prev%mxhist)
+     rprimd(:,:)=hist_prev%rprimd(:,:,hist_prev%mxhist)
+     xred(:,:)  =hist_prev%xred(:,:,hist_prev%mxhist)  
+     call abihist_free(hist_prev)     
    end if
 
  end if !if (ab_mover%restartxf<=0)
@@ -980,7 +995,7 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
  ABI_DEALLOCATE(xred_prev)
 
  call abihist_free(hist)
- call abihist_free(hist_prev)
+
  call abimover_fin(ab_mover)
  call abiforstr_fin(preconforstr)
 

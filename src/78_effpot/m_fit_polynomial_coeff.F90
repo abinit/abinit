@@ -33,23 +33,28 @@ module m_fit_polynomial_coeff
  use m_sort
  use m_phonon_supercell
  use m_crystal,only : symbols_crystal
- use m_effective_potential, only :  effective_potential_type
+ use m_effective_potential, only : effective_potential_type,effective_potential_evaluate
+ use m_effective_potential, only : effective_potential_setSupercell
  use m_io_tools,   only : open_file
- use m_abihist, only : abihist
+ use m_abihist, only : abihist,abihist_init,abihist_free,abihist_copy
 
  implicit none
 
+ public :: fit_polynomial_coeff_computeMSE
+ public :: fit_polynomial_coeff_fit
  public :: fit_polynomial_coeff_free
  public :: fit_polynomial_coeff_init
  public :: fit_polynomial_coeff_getList
  public :: fit_polynomial_coeff_get
- public :: fit_polynomial_coeff_fit
- public :: fit_polynomial_getOrder1
- public :: fit_polynomial_getOrder2
- public :: fit_polynomial_getOrder3
- public :: fit_polynomial_getOrder4
- public :: fit_polynomial_getOrder5
+ public :: fit_polynomial_coeff_getOrder1
+ public :: fit_polynomial_coeff_getOrder2
+ public :: fit_polynomial_coeff_getOrder3
+ public :: fit_polynomial_coeff_getOrder4
+ public :: fit_polynomial_coeff_getOrder5
+ public :: fit_polynomial_coeff_mapHistToRef
  public :: fit_polynomial_printSystemFiles
+
+
 !!***
 
 !!****t* m_fit_polynomial_coeff/fit_polynomial_coeff_type
@@ -319,19 +324,19 @@ subroutine fit_polynomial_coeff_get(cut_off,coefficients,eff_pot,ncoeff,option)
  call fit_polynomial_coeff_getList(cell,cut_off,dist,eff_pot,list_symcoeff,&
 &                                  natom,ncoeff_sym,nrpt)
 
- call fit_polynomial_getOrder1(cell,coeffs1,cut_off,list_symcoeff,natom,ncoeff1,ncoeff_sym,&
+ call fit_polynomial_coeff_getOrder1(cell,coeffs1,cut_off,list_symcoeff,natom,ncoeff1,ncoeff_sym,&
 &                              nrpt,nsym,rprimd,symbols,xcart)
 
- call fit_polynomial_getOrder2(cell,coeffs2,cut_off,list_symcoeff,natom,ncoeff2,ncoeff_sym,&
+ call fit_polynomial_coeff_getOrder2(cell,coeffs2,cut_off,list_symcoeff,natom,ncoeff2,ncoeff_sym,&
 &                              nrpt,nsym,rprimd,symbols,xcart)
 
- call fit_polynomial_getOrder3(cell,coeffs3,cut_off,list_symcoeff,natom,ncoeff3,ncoeff_sym,&
+ call fit_polynomial_coeff_getOrder3(cell,coeffs3,cut_off,list_symcoeff,natom,ncoeff3,ncoeff_sym,&
 &                              nrpt,nsym,rprimd,symbols,xcart)
 
- call fit_polynomial_getOrder4(cell,coeffs4,cut_off,list_symcoeff,natom,ncoeff4,ncoeff_sym,&
+ call fit_polynomial_coeff_getOrder4(cell,coeffs4,cut_off,list_symcoeff,natom,ncoeff4,ncoeff_sym,&
 &                              nrpt,nsym,rprimd,symbols,xcart)
 
- call fit_polynomial_getOrder5(cell,coeffs5,cut_off,list_symcoeff,natom,ncoeff5,ncoeff_sym,&
+ call fit_polynomial_coeff_getOrder5(cell,coeffs5,cut_off,list_symcoeff,natom,ncoeff5,ncoeff_sym,&
 &                              nrpt,nsym,rprimd,symbols,xcart)
 
 !Final tranfert
@@ -839,10 +844,10 @@ subroutine fit_polynomial_coeff_getList(cell,cut_off,dist,eff_pot,list_symcoeff,
 end subroutine fit_polynomial_coeff_getList
 !!***
 
-!!****f* m_fit_polynomial_coeff/fit_polynomial_getOrder1
+!!****f* m_fit_polynomial_coeff/fit_polynomial_coeff_getOrder1
 !!
 !! NAME
-!! fit_polynomial_getOrder1
+!! fit_polynomial_coeff_getOrder1
 !!
 !! FUNCTION
 !! Free polynomial_coeff
@@ -859,7 +864,7 @@ end subroutine fit_polynomial_coeff_getList
 !!
 !! SOURCE
 
-subroutine fit_polynomial_getOrder1(cell,coeffs_out,cut_off,list_symcoeff,&
+subroutine fit_polynomial_coeff_getOrder1(cell,coeffs_out,cut_off,list_symcoeff,&
 &                                   natom,ncoeff_out,ncoeff,nrpt,nsym,&
 &                                   rprimd,symbols,xcart)
 
@@ -867,7 +872,7 @@ subroutine fit_polynomial_getOrder1(cell,coeffs_out,cut_off,list_symcoeff,&
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'fit_polynomial_getOrder1'
+#define ABI_FUNC 'fit_polynomial_coeff_getOrder1'
  use interfaces_14_hidewrite
 !End of the abilint section
 
@@ -1034,13 +1039,13 @@ subroutine fit_polynomial_getOrder1(cell,coeffs_out,cut_off,list_symcoeff,&
  end do
  ABI_DEALLOCATE(coeffs_tmp)
 
-end subroutine fit_polynomial_getOrder1
+end subroutine fit_polynomial_coeff_getOrder1
 !!***
 
-!!****f* m_fit_polynomial_coeff/fit_polynomial_getOrder2
+!!****f* m_fit_polynomial_coeff/fit_polynomial_coeff_getOrder2
 !!
 !! NAME
-!! fit_polynomial_getOrder2
+!! fit_polynomial_coeff_getOrder2
 !!
 !! FUNCTION
 !! Free polynomial_coeff
@@ -1057,7 +1062,7 @@ end subroutine fit_polynomial_getOrder1
 !!
 !! SOURCE
 
-subroutine fit_polynomial_getOrder2(cell,coeffs_out,cut_off,list_coeff,&
+subroutine fit_polynomial_coeff_getOrder2(cell,coeffs_out,cut_off,list_coeff,&
 &                                   natom,ncoeff_out,ncoeff,nrpt,nsym,&
 &                                   rprimd,symbols,xcart)
 
@@ -1065,7 +1070,7 @@ subroutine fit_polynomial_getOrder2(cell,coeffs_out,cut_off,list_coeff,&
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'fit_polynomial_getOrder2'
+#define ABI_FUNC 'fit_polynomial_coeff_getOrder2'
  use interfaces_14_hidewrite
 !End of the abilint section
 
@@ -1236,13 +1241,13 @@ subroutine fit_polynomial_getOrder2(cell,coeffs_out,cut_off,list_coeff,&
  end do
  ABI_DEALLOCATE(coeffs_tmp)
 
-end subroutine fit_polynomial_getOrder2
+end subroutine fit_polynomial_coeff_getOrder2
 !!***
 
-!!****f* m_fit_polynomial_coeff/fit_polynomial_getOrder3
+!!****f* m_fit_polynomial_coeff/fit_polynomial_coeff_getOrder3
 !!
 !! NAME
-!! fit_polynomial_getOrder3
+!! fit_polynomial_coeff_getOrder3
 !!
 !! FUNCTION
 !! Free polynomial_coeff
@@ -1259,7 +1264,7 @@ end subroutine fit_polynomial_getOrder2
 !!
 !! SOURCE
 
-subroutine fit_polynomial_getOrder3(cell,coeffs_out,cut_off,list_coeff,&
+subroutine fit_polynomial_coeff_getOrder3(cell,coeffs_out,cut_off,list_coeff,&
 &                                   natom,ncoeff_out,ncoeff,nrpt,nsym,&
 &                                   rprimd,symbols,xcart)
 
@@ -1267,7 +1272,7 @@ subroutine fit_polynomial_getOrder3(cell,coeffs_out,cut_off,list_coeff,&
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'fit_polynomial_getOrder3'
+#define ABI_FUNC 'fit_polynomial_coeff_getOrder3'
  use interfaces_14_hidewrite
 !End of the abilint section
 
@@ -1437,14 +1442,14 @@ subroutine fit_polynomial_getOrder3(cell,coeffs_out,cut_off,list_coeff,&
  end do
  ABI_DEALLOCATE(coeffs_tmp)
 
-end subroutine fit_polynomial_getOrder3
+end subroutine fit_polynomial_coeff_getOrder3
 !!***
 
 
-!!****f* m_fit_polynomial_coeff/fit_polynomial_getOrder4
+!!****f* m_fit_polynomial_coeff/fit_polynomial_coeff_getOrder4
 !!
 !! NAME
-!! fit_polynomial_getOrder4
+!! fit_polynomial_coeff_getOrder4
 !!
 !! FUNCTION
 !! Free polynomial_coeff
@@ -1461,7 +1466,7 @@ end subroutine fit_polynomial_getOrder3
 !!
 !! SOURCE
 
-subroutine fit_polynomial_getOrder4(cell,coeffs_out,cut_off,list_coeff,&
+subroutine fit_polynomial_coeff_getOrder4(cell,coeffs_out,cut_off,list_coeff,&
 &                                   natom,ncoeff_out,ncoeff,nrpt,nsym,&
 &                                   rprimd,symbols,xcart)
 
@@ -1469,7 +1474,7 @@ subroutine fit_polynomial_getOrder4(cell,coeffs_out,cut_off,list_coeff,&
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'fit_polynomial_getOrder4'
+#define ABI_FUNC 'fit_polynomial_coeff_getOrder4'
  use interfaces_14_hidewrite
 !End of the abilint section
 
@@ -1643,13 +1648,13 @@ subroutine fit_polynomial_getOrder4(cell,coeffs_out,cut_off,list_coeff,&
  end do
  ABI_DEALLOCATE(coeffs_tmp)
 
-end subroutine fit_polynomial_getOrder4
+end subroutine fit_polynomial_coeff_getOrder4
 !!***
 
-!!****f* m_fit_polynomial_coeff/fit_polynomial_getOrder5
+!!****f* m_fit_polynomial_coeff/fit_polynomial_coeff_getOrder5
 !!
 !! NAME
-!! fit_polynomial_getOrder5
+!! fit_polynomial_coeff_getOrder5
 !!
 !! FUNCTION
 !! Free polynomial_coeff
@@ -1666,7 +1671,7 @@ end subroutine fit_polynomial_getOrder4
 !!
 !! SOURCE
 
-subroutine fit_polynomial_getOrder5(cell,coeffs_out,cut_off,list_coeff,&
+subroutine fit_polynomial_coeff_getOrder5(cell,coeffs_out,cut_off,list_coeff,&
 &                                   natom,ncoeff_out,ncoeff,nrpt,nsym,&
 &                                   rprimd,symbols,xcart)
 
@@ -1674,7 +1679,7 @@ subroutine fit_polynomial_getOrder5(cell,coeffs_out,cut_off,list_coeff,&
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'fit_polynomial_getOrder5'
+#define ABI_FUNC 'fit_polynomial_coeff_getOrder5'
  use interfaces_14_hidewrite
 !End of the abilint section
 
@@ -1849,7 +1854,7 @@ subroutine fit_polynomial_getOrder5(cell,coeffs_out,cut_off,list_coeff,&
  end do
  ABI_DEALLOCATE(coeffs_tmp)
 
-end subroutine fit_polynomial_getOrder5
+end subroutine fit_polynomial_coeff_getOrder5
 !!***
 
 !!****f* m_fit_polynomial_coeff/fit_polynomial_coeff_fit
@@ -1872,9 +1877,7 @@ end subroutine fit_polynomial_getOrder5
 !!
 !! SOURCE
 
-subroutine fit_polynomial_coeff_fit(cell,coeffs_out,cut_off,list_coeff,&
-&                                   natom,ncoeff_out,ncoeff,nrpt,nsym,&
-&                                   rprimd,symbols,xcart)
+subroutine fit_polynomial_coeff_fit(cut_off,eff_pot,hist)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -1888,21 +1891,65 @@ subroutine fit_polynomial_coeff_fit(cell,coeffs_out,cut_off,list_coeff,&
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in)  :: natom,ncoeff,nsym,nrpt
- integer,intent(out) :: ncoeff_out
  real(dp),intent(in) :: cut_off
 !arrays
- integer,intent(in) :: cell(3,nrpt)
- integer,intent(in) :: list_coeff(6,ncoeff,nsym)
- real(dp),intent(in) :: xcart(3,natom),rprimd(3,3)
- character(len=5),intent(in) :: symbols(natom)
- type(polynomial_coeff_type),allocatable,intent(inout) :: coeffs_out(:)
+ type(effective_potential_type),intent(inout) :: eff_pot
+ type(abihist),intent(in) :: hist
 !Local variables-------------------------------
 !scalar
+ integer :: ii,icycle,natom_sc,ncycle,ntime
+ real(dp) :: ffact,sfact,mse,msef,mses
 !arrays
-
+ character(len=500) :: message
+ type(polynomial_coeff_type),allocatable :: coeffs_in(:)
 ! *************************************************************************
 
+ write(message,'(a,(80a))') ch10,('=',ii=1,80)
+ call wrtout(ab_out,message,'COLL')
+ call wrtout(std_out,message,'COLL')
+
+ write(message,'(2a)') ch10,' Starting Fit process:'
+ call wrtout(ab_out,message,'COLL')
+ call wrtout(std_out,message,'COLL')
+
+ if(eff_pot%anharmonics_terms%ncoeff > zero)then
+   write(message, '(4a)' )ch10,' The coefficients present in the effective',&
+&      ' potential will be used for the fit'
+   call wrtout(std_out,message,'COLL')
+   call wrtout(ab_out,message,'COLL')
+ else
+
+!  Fit the coefficients, need MD file...
+   write(message, '(4a)' )ch10,' The coefficients for the fit must',&
+&                              ' be generate... ',ch10
+   call wrtout(std_out,message,'COLL')
+   call wrtout(ab_out,message,'COLL')
+
+   call fit_polynomial_coeff_get(cut_off,eff_pot%anharmonics_terms%coefficients,&
+&                                eff_pot,eff_pot%anharmonics_terms%ncoeff,1)
+ end if
+
+! Get the standard deviation before the fit
+ call fit_polynomial_coeff_computeMSE(eff_pot,hist,mse,msef,mses,&
+&                                     eff_pot%supercell%natom_supercell,compute_anharmonic=.FALSE.)
+
+ write(message, '(a,F18.6)' )' Standard deviation of the energy at the begining (meV/f.u.): ',&
+&               mse* 1000*27.21138386 / product(eff_pot%supercell%qphon(:)) 
+ call wrtout(ab_out,message,'COLL')
+ call wrtout(std_out,message,'COLL')
+
+!MVE IT TO INPUT IN THE FUTURE
+ ncycle = 30
+
+!Initialisation of constants
+ ntime    = hist%mxhist
+ natom_sc = eff_pot%supercell%natom_supercell
+ ffact    = 1.0/(ntime*natom_sc)
+ sfact    = 1.0/(ntime*6)
+ print*,"toto",ntime,natom_sc,ffact,sfact
+ do icycle=1,ncycle
+
+ end do
 
 end subroutine fit_polynomial_coeff_fit
 !!***
@@ -2008,6 +2055,273 @@ function getCoeffFromList(list_coeff,ia,ib,irpt,mu,weight,ncoeff) result(coeff)
  end do
 
 end function getCoeffFromList
+!!***
+
+!!****f* m_fit_polynomial_coeff/fit_polynomial_coeff_computeMSE
+!!
+!! NAME
+!! fit_polynomial_coeff_computeMSE
+!!
+!! FUNCTION
+
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine fit_polynomial_coeff_computeMSE(eff_pot,hist,mse,msef,mses,natom,compute_anharmonic)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'fit_polynomial_coeff_computeMSE'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer, intent(in) :: natom
+ real(dp),intent(out):: mse,msef,mses
+ logical,optional,intent(in) :: compute_anharmonic
+!arrays
+ type(effective_potential_type),intent(in) :: eff_pot
+ type(abihist),intent(in) :: hist
+!Local variables-------------------------------
+!scalar
+ integer :: ii,nstep,ntime
+ real(dp):: energy
+ logical :: need_anharmonic = .TRUE.
+!arrays
+ real(dp):: fcart(3,natom),fred(3,natom),strten(6),rprimd(3,3),xred(3,natom)
+
+! *************************************************************************
+
+ mse  = zero
+ msef = zero
+ mses = zero
+
+ nstep= 1
+ ntime = hist%mxhist
+
+ if(present(compute_anharmonic))then
+   need_anharmonic = compute_anharmonic
+ end if
+
+ do ii=1,ntime
+   xred(:,:)   = hist%xred(:,:,ii)
+   rprimd(:,:) = hist%rprimd(:,:,ii)
+   call effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,rprimd,&
+&                                    xred,compute_anharmonic=need_anharmonic,verbose=.false.)
+
+   mse = mse + abs(hist%etot(ii) - energy)
+  
+ end do
+
+ mse = mse  / ntime 
+
+end subroutine fit_polynomial_coeff_computeMSE
+!!***
+
+!!****f* m_fit_polynomial_coeff/fit_polynomial_coeff_mapHistToRef
+!!
+!! NAME
+!! fit_polynomial_coeff_mapHistToRef
+!!
+!! FUNCTION
+!! Generate the supercell in the effective potential according to the size of the 
+!! supercell in the hist file
+!! Check if the hist file match to reference supercell in the effective potential
+!! If not, the hist file is reordering 
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine fit_polynomial_coeff_mapHistToRef(eff_pot,hist,comm)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'fit_polynomial_coeff_mapHistToRef'
+ use interfaces_14_hidewrite
+ use interfaces_41_geometry
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: comm
+!arrays
+ type(effective_potential_type),intent(inout) :: eff_pot
+ type(abihist),intent(inout) :: hist
+!Local variables-------------------------------
+!scalar
+ integer :: ia,ib,ii,jj,natom_hist,nstep_hist
+ real(dp):: factor
+ logical :: revelant_factor,need_map
+!arrays
+ real(dp) :: rprimd_hist(3,3),rprimd_ref(3,3),scale_cell(3)
+ integer :: n_cell(3)
+ integer,allocatable  :: blkval(:),list(:)
+ real(dp),allocatable :: xred_hist(:,:),xred_ref(:,:)
+ character(len=500) :: msg
+ type(abihist) :: hist_tmp
+! *************************************************************************
+
+ natom_hist = size(hist%xred,2)
+ nstep_hist = size(hist%xred,3)
+
+!Try to set the supercell according to the hist file
+ rprimd_ref(:,:)  = eff_pot%crystal%rprimd
+ rprimd_hist(:,:) = hist%rprimd(:,:,1)
+ do ia=1,3
+   scale_cell(:) = zero
+   do ii=1,3
+     if(abs(rprimd_ref(ii,ia)) > tol10)then
+       scale_cell(ii) = rprimd_hist(ii,ia) / rprimd_ref(ii,ia)
+     end if
+   end do
+!  Check if the factor for the supercell is revelant
+   revelant_factor = .TRUE.
+   do ii=1,3
+     if(abs(scale_cell(ii)) < tol10) cycle
+     factor = abs(scale_cell(ii))
+     do jj=ii,3
+       if(abs(scale_cell(jj)) < tol10) cycle
+       if(abs(abs(scale_cell(ii))-abs(scale_cell(jj))) > tol10) revelant_factor = .FALSE.
+     end do
+   end do
+   if(.not.revelant_factor)then
+     write(msg, '(3a)' )&
+&         'unable to map the hist file ',ch10,&
+&         'Action: check/change your MD file'
+     MSG_ERROR(msg)
+   else
+     n_cell(ia) = nint(factor)
+   end if
+ end do
+ 
+!Set the new supercell structure into the effective potential reference
+ call effective_potential_setSupercell(eff_pot,comm,n_cell)
+
+!allocation
+ ABI_ALLOCATE(blkval,(natom_hist))
+ ABI_ALLOCATE(list,(natom_hist))
+ ABI_ALLOCATE(xred_hist,(3,natom_hist))
+ ABI_ALLOCATE(xred_ref,(3,natom_hist))
+ blkval = one
+
+ call xcart2xred(eff_pot%supercell%natom_supercell,eff_pot%supercell%rprimd_supercell,&
+&                eff_pot%supercell%xcart_supercell,xred_ref)
+
+ xred_hist = hist%xred(:,:,1)
+
+ write(msg,'(2a,I2,a,I2,a,I2)') ch10,&
+&       ' The size of the supercell for the fit is ',n_cell(1),' ',n_cell(2),' ',n_cell(3)
+ call wrtout(std_out,msg,'COLL') 
+ call wrtout(ab_out,msg,'COLL') 
+
+!try to map
+ do ia=1,natom_hist
+   do ib=1,natom_hist
+     if(blkval(ib)==1)then
+       if(abs(xred_ref(1,ia)-xred_hist(1,ib)) < tol10 .and.abs(xred_ref(2,ia)-xred_hist(2,ib)) < tol10 &
+&      .and.abs(xred_ref(3,ia)-xred_hist(3,ib)) < tol10) then
+         blkval(ib) = zero
+         list(ib) = ia
+       end if
+     end if
+   end do
+ end do
+
+!Check before transfert
+ if(.not.all(blkval==zero))then
+   write(msg, '(5a)' )&
+&         'The hist file does correspond ',ch10,&
+&         'to the reference supercell structure',ch10,&
+&         'Action: change MD file'
+     MSG_ERROR(msg)
+ end if
+
+ do ia=1,natom_hist
+   if(.not.any(list(:)==ia))then
+     write(msg, '(5a)' )&
+&         'The hist file does correspond ',ch10,&
+&         'to the reference supercell structure',ch10,&
+&         'Action: change MD file'
+     MSG_ERROR(msg)
+   end if
+ end do
+
+ need_map = .FALSE.
+ do ia=1,natom_hist
+   if(list(ia) /= ia) need_map = .TRUE.
+ end do
+ if(need_map)then
+   write(msg, '(11a)' )ch10,&
+&      ' --- !WARNING',ch10,&
+&      '     The ordering of the atoms in the hist file is different,',ch10,&
+&      '     of the one built by multibinit. The hist file will be map,',ch10,&
+&      '     on the ordering of multibinit.',ch10,&
+&      ' ---',ch10
+   call wrtout(ab_out,msg,'COLL')
+   call wrtout(std_out,msg,'COLL')
+
+
+! Allocate hist structure 
+   call abihist_init(hist_tmp,natom_hist,nstep_hist,.false.,.false.)
+! copy all the information
+   do ia=1,nstep_hist
+     hist%ihist = ia
+     hist_tmp%ihist = ia
+     call abihist_copy(hist,hist_tmp)
+   end do
+   hist_tmp%mxhist = nstep_hist
+
+! reoder array
+   do ia=1,natom_hist
+     hist_tmp%xred(:,list(ia),:)=hist%xred(:,ia,:)
+     hist_tmp%fcart(:,list(ia),:)=hist%fcart(:,ia,:)
+     hist_tmp%vel(:,list(ia),:)=hist%vel(:,ia,:)
+   end do
+
+! free the old hist and reinit
+   call abihist_free(hist)
+   call abihist_init(hist,natom_hist,nstep_hist,.false.,.false.)
+! copy the temporary hist into output
+   do ia=1,nstep_hist
+     hist%ihist = ia
+     hist_tmp%ihist = ia
+     call abihist_copy(hist_tmp,hist)
+   end do
+   hist_tmp%mxhist = nstep_hist
+
+   call abihist_free(hist_tmp)
+ end if
+
+!deallocation
+ ABI_DEALLOCATE(blkval)
+ ABI_DEALLOCATE(list)
+ ABI_DEALLOCATE(xred_hist)
+ ABI_DEALLOCATE(xred_ref)
+
+end subroutine fit_polynomial_coeff_mapHistToRef
 !!***
 
 

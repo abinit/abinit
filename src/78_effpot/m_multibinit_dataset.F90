@@ -93,6 +93,7 @@ module m_multibinit_dataset
   integer :: prtsrlr  ! print the short-range/long-range decomposition of phonon freq.
   integer :: qrefine
   integer :: rfmeth
+  integer :: restarxf
   integer :: symdynmat
 
   integer :: fit_grid(3)
@@ -706,6 +707,17 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
  end if
 
 !R
+ multibinit_dtset%restarxf=0
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'restarxf',tread,'INT')
+ if(tread==1) multibinit_dtset%restarxf=intarr(1)
+ if(multibinit_dtset%restarxf < -3 .or. multibinit_dtset%restarxf > 0)then
+   write(message, '(a,i8,a,a,a,a,a)' )&
+&   'restarxf is',multibinit_dtset%restarxf,', but the only allowed values',ch10,&
+&   'is -2 or 0.',ch10,&
+&   'Action: correct restarxf in your input file.'
+   MSG_ERROR(message)
+ end if
+
  multibinit_dtset%rfmeth=1
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'rfmeth',tread,'INT')
  if(tread==1) multibinit_dtset%rfmeth=intarr(1)
@@ -1227,6 +1239,9 @@ subroutine outvars_multibinit (multibinit_dtset,nunit)
    write(nunit,'(3x,a9,3I10.1)')'    ntime',multibinit_dtset%ntime
    write(nunit,'(3x,a9,3i10)')  '    ncell',multibinit_dtset%n_cell
    write(nunit,'(3x,a9,3i10)')  '    dtion',multibinit_dtset%dtion
+   if (multibinit_dtset%restarxf /= zero ) then
+     write(nunit,'(3x,a9,3i10)')  ' restarxf',multibinit_dtset%restarxf
+   end if
    if(multibinit_dtset%dynamics==13)then
      write(nunit,'(3x,a9,3i10)')'  optcell',multibinit_dtset%optcell
      write(nunit,'(3x,a9,3F12.1)')'    bmass',multibinit_dtset%bmass

@@ -72,7 +72,6 @@ subroutine mover_effpot(inp,filnam,effective_potential,comm)
 #undef ABI_FUNC
 #define ABI_FUNC 'mover_effpot'
  use interfaces_14_hidewrite
- use interfaces_28_numeric_noabirule
  use interfaces_41_geometry
  use interfaces_95_drive, except_this_one => mover_effpot
 !End of the abilint section
@@ -88,8 +87,8 @@ implicit none
  character(len=fnlen),intent(in) :: filnam(15)
 !Local variables-------------------------------
 !scalar
- integer :: ii,jj,nproc,my_rank
- real(dp):: qmass,bmass
+ integer :: ii,jj,nproc,my_rank,option_fit = zero
+ real(dp):: freq_q,freq_b,qmass,bmass
  logical :: iam_master
  integer, parameter:: master = 0
 !TEST_AM
@@ -220,23 +219,17 @@ implicit none
    dtset%nctime = 0     ! NetCdf TIME between output of molecular dynamics informations 
    dtset%delayperm = 0  ! DELAY between trials to PERMUTE atoms
    dtset%dilatmx = 1.0  ! DILATation : MaXimal value
-   dtset%dtion = inp%dtion  ! Delta Time for IONs
    dtset%diismemory = 8 ! Direct Inversion in the Iterative Subspace MEMORY
    dtset%friction = 0.0001 ! internal FRICTION coefficient
    dtset%goprecon = 0   ! Geometry Optimization PREconditioner equations
-   dtset%ionmov = inp%dynamics  ! Number for the dynamic
    dtset%jellslab = 0   ! include a JELLium SLAB in the cell
    dtset%mdwall = 10000 ! Molecular Dynamics WALL location
    dtset%natom = effective_potential%supercell%natom_supercell
    dtset%ntypat = effective_potential%crystal%ntypat
    dtset%nconeq = 0     ! Number of CONstraint EQuations
    dtset%noseinert = 1.d-5 ! NOSE INERTia factor
-   dtset%nnos = inp%nnos       ! Number of nose masses Characteristic
-   dtset%ntime = inp%ntime  ! Number of TIME steps 
    dtset%nsym = 1       ! Number of SYMmetry operations
    dtset%prtxml = 0     ! print the xml
-   dtset%optcell = inp%optcell    ! OPTimize the CELL shape and dimensions Characteristic
-   dtset%restartxf = 0  ! RESTART from (X,F) history
    dtset%signperm = 1   ! SIGN of PERMutation potential      
    dtset%strprecon = 1  ! STRess PRECONditioner
    dtset%tolmxf = 2.0d-5
@@ -249,17 +242,59 @@ implicit none
    ABI_ALLOCATE(dtset%iatfix,(3,dtset%natom)) ! Indices of AToms that are FIXed
    dtset%iatfix = zero
    dtset%goprecprm(:) = zero !Geometry Optimization PREconditioner PaRaMeters equations
-   dtset%mdtemp(1) = inp%temperature   !Molecular Dynamics Temperatures 
-   dtset%mdtemp(2) = inp%temperature   !Molecular Dynamics Temperatures 
    ABI_ALLOCATE(dtset%prtatlist,(dtset%natom)) !PRinT by ATom LIST of ATom
    dtset%prtatlist(:) = zero
+
+
+   if(option_fit==0)then
+     dtset%dtion = inp%dtion  ! Delta Time for IONs
+     dtset%ionmov = inp%dynamics  ! Number for the dynamic
+     dtset%nnos = inp%nnos       ! Number of nose masses Characteristic
+     dtset%ntime = inp%ntime  ! Number of TIME steps 
+     dtset%optcell = inp%optcell    ! OPTimize the CELL shape and dimensions Characteristic
+     dtset%restartxf = inp%restarxf  ! RESTART from (X,F) history
+     dtset%mdtemp(1) = inp%temperature   !Molecular Dynamics Temperatures 
+     dtset%mdtemp(2) = inp%temperature   !Molecular Dynamics Temperatures 
+
+   else
+!    Set default for the fit
+     dtset%restartxf = 0  ! RESTART from (X,F) history
+     dtset%dtion = 100  ! Delta Time for IONs
+     dtset%ionmov = 13  ! Number for the dynamic
+     dtset%nnos = 1       ! Number of nose masses Characteristic
+     dtset%ntime = 2000  ! Number of TIME steps 
+     dtset%optcell = 2    ! OPTimize the CELL shape and dimensions Characteristic 
+     dtset%mdtemp(1) = 5   !Molecular Dynamics Temperatures 
+     dtset%mdtemp(2) = 0.1 !Molecular Dynamics Temperatures 
+
+   end if
 
 
 !  Set the barostat and thermonstat if ionmov == 13
    if(dtset%ionmov == 13)then
 
-     qmass = (abs(1+product(inp%strtarget(1:3)/3))*dtset%natom* kb_THzK * dtset%mdtemp(1)) / (0.1**2)
-     bmass = (abs(1+product(inp%strtarget(1:3)/3))*dtset%natom* kb_THzK * dtset%mdtemp(1)) / (0.01**2)
+!    Select frequency of the barostat as a function of temperature
+!    For small temperature, we need huge barostat and inversely
+     if(dtset%mdtemp(1) <= 10) then
+       freq_q = 0.002
+       freq_b = 0.0002
+     else  if(dtset%mdtemp(1) <= 50) then
+       freq_q = 0.02
+       freq_b = 0.002 
+     else  if(dtset%mdtemp(1) > 50.and.dtset%mdtemp(1) < 300) then
+       freq_q = 0.1
+       freq_b = 0.01 
+     else
+       freq_q = 0.2
+       freq_b = 0.02
+     end if
+
+!TEST_AM
+     freq_q = 0.1
+     freq_b = 0.01
+!TEST_AM
+     qmass = (abs(1+product(inp%strtarget(1:3)/3))*dtset%natom* kb_THzK * dtset%mdtemp(1)) / (freq_q**2)
+     bmass = (abs(1+product(inp%strtarget(1:3)/3))*dtset%natom* kb_THzK * dtset%mdtemp(1)) / (freq_b**2)
 
      if(dtset%nnos==0) then
        dtset%nnos = 1

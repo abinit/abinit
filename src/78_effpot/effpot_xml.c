@@ -770,7 +770,7 @@ void effpot_xml_readCoeff(char *filename,int*ncoeff,int*ndisp,int*nterm,
       if(uri != NULL) {
         coefficient[icoeff] = strtod(uri,NULL);
       }else{
-        coefficient[icoeff] = 1;
+        coefficient[icoeff] = 0.0;
       }        
       xmlFree(uri);
       //Get the children of coeff node
