@@ -2701,7 +2701,7 @@ end subroutine pimd_force_transform
 !!  forces(3,natom,trotter)=array containing forces
 !!
 !! PARENTS
-!!      pimd_langevin_nvt,pimd_nosehoover_nvt
+!!      pimd_langevin_npt,pimd_langevin_nvt,pimd_nosehoover_nvt
 !!
 !! CHILDREN
 !!

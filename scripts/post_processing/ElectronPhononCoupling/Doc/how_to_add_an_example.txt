@@ -1,0 +1,28 @@
+
+
+In order to create an example, follow these steps:
+
+1)
+    Place the Abinit inputs in a subdirectory of Examples/Calculations/
+    (including pseudopotentials).
+
+    If this test relied on an external module to produce the Abinit inputs,
+    the script that generated them may be included,
+    but the calculation must be usable without this script.
+
+2)
+    Place the script using EPC in the Examples/
+    and make sure that the output files are produced in Examples/Out/.
+
+3)
+    Edit the setup.py so that the outputs and data produced by Abinit
+    and by EPC are excluded from the MANIFEST.in file.
+
+4)
+    Edit the .gitignore file
+    that the outputs and data produced by Abinit
+    and by EPC are excluded from the git revision.
+
+    to add the output and data files of the calculations 
+    to the list of excluded files.
+

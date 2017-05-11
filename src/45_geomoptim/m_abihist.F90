@@ -179,7 +179,7 @@ contains  !=============================================================
 !! SIDE EFFECTS
 !!
 !! PARENTS
-!!      m_abihist,mover
+!!      m_abihist
 !!
 !! CHILDREN
 !!
@@ -262,7 +262,6 @@ end subroutine abihist_init_0D
 !! SIDE EFFECTS
 !!
 !! PARENTS
-!!      gstateimg
 !!
 !! CHILDREN
 !!
@@ -315,7 +314,7 @@ end subroutine abihist_init_1D
 !!  hist <type(abihist)> = The hist to deallocate
 !!
 !! PARENTS
-!!      m_abihist,m_abiimages,mover,multibinit
+!!      m_abihist
 !!
 !! CHILDREN
 !!
@@ -404,7 +403,6 @@ end subroutine abihist_free_0D
 !!  hist(:) <type(abihist)> = The hist to deallocate
 !!
 !! PARENTS
-!!      gstateimg
 !!
 !! CHILDREN
 !!
@@ -457,7 +455,7 @@ end subroutine abihist_free_1D
 !!  hist <type(abihist)> = The hist to broadcast
 !!
 !! PARENTS
-!!      mover
+!!      m_abihist
 !!
 !! CHILDREN
 !!
@@ -667,7 +665,6 @@ end subroutine abihist_bcast_0D
 !!  hist(:) <type(abihist)> = The hist to broadcast
 !!
 !! PARENTS
-!!      gstateimg
 !!
 !! CHILDREN
 !!
@@ -729,9 +726,10 @@ end subroutine abihist_bcast_1D
 !!      |                    acell, stresses, and energies,
 !!
 !! PARENTS
-!!      m_pred_lotf,mover,pred_bfgs,pred_delocint,pred_diisrelax
-!!      pred_isokinetic,pred_isothermal,pred_langevin,pred_moldyn,pred_nose
-!!      pred_srkna14,pred_steepdesc,pred_verlet
+!!      gstateimg,m_monte_carlo,m_pred_lotf,mover,pred_bfgs,pred_delocint
+!!      pred_diisrelax,pred_hmc,pred_isokinetic,pred_isothermal,pred_langevin
+!!      pred_lbfgs,pred_moldyn,pred_nose,pred_srkna14,pred_steepdesc
+!!      pred_velverlet,pred_verlet
 !!
 !! CHILDREN
 !!
@@ -811,9 +809,10 @@ end subroutine var2hist
 !! SIDE EFFECTS
 !!
 !! PARENTS
-!!      m_pred_lotf,mover,pred_bfgs,pred_delocint,pred_diisrelax
-!!      pred_isokinetic,pred_isothermal,pred_langevin,pred_moldyn,pred_nose
-!!      pred_srkna14,pred_steepdesc,pred_verlet
+!!      m_monte_carlo,m_pred_lotf,mover,pred_bfgs,pred_delocint,pred_diisrelax
+!!      pred_hmc,pred_isokinetic,pred_isothermal,pred_langevin,pred_lbfgs
+!!      pred_moldyn,pred_nose,pred_srkna14,pred_steepdesc,pred_velverlet
+!!      pred_verlet
 !!
 !! CHILDREN
 !!
@@ -968,7 +967,7 @@ end subroutine vel2hist
 !!  hist_out <type(abihist)>
 !!
 !! PARENTS
-!!
+!!      gstateimg
 !!
 !! CHILDREN
 !!
@@ -1453,7 +1452,7 @@ end subroutine write_md_hist_img
 !!                     cell dims and energies,
 !!
 !! PARENTS
-!!      mover
+!!      mover,multibinit
 !!
 !! CHILDREN
 !!
@@ -1684,6 +1683,7 @@ end subroutine read_md_hist_img
 !! OUTPUT
 !!
 !! PARENTS
+!!      m_abihist
 !!
 !! CHILDREN
 !!
@@ -1886,6 +1886,7 @@ end subroutine def_file_hist
 !! OUTPUT
 !!
 !! PARENTS
+!!      m_abihist
 !!
 !! CHILDREN
 !!
@@ -1970,6 +1971,7 @@ end subroutine get_dims_hist
 !! OUTPUT
 !!
 !! PARENTS
+!!      m_abihist
 !!
 !! CHILDREN
 !!
@@ -2062,6 +2064,7 @@ end subroutine get_varid_hist
 !! OUTPUT
 !!
 !! PARENTS
+!!      m_abihist
 !!
 !! CHILDREN
 !!
@@ -2144,6 +2147,7 @@ end subroutine write_csts_hist
 !! OUTPUT
 !!
 !! PARENTS
+!!      m_abihist
 !!
 !! CHILDREN
 !!
@@ -2320,6 +2324,7 @@ end subroutine write_vars_hist
 !! OUTPUT
 !!
 !! PARENTS
+!!      m_abihist
 !!
 !! CHILDREN
 !!

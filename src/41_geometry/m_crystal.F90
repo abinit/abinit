@@ -233,11 +233,11 @@ CONTAINS  !=====================================================================
 !!
 !! PARENTS
 !!      dfpt_looppert,eig2tot,gwls_hamiltonian,m_crystal_io,m_ddb
-!!      m_effective_potential,m_effective_potential_file,mover,outddbnc
+!!      m_effective_potential,m_effective_potential_file,mover,optic,outddbnc
 !!      outscfcv,vtorho
 !!
 !! CHILDREN
-!!      mati3inv
+!!      mati3inv,sg_multable
 !!
 !! SOURCE
 
@@ -336,12 +336,6 @@ subroutine crystal_init(amu,Cryst,space_group,natom,npsp,ntypat,nsym,rprimd,typa
    end do
  end do
 
- ! Be careful when we have alchemy.
- !if isalchemical(Cryst)
- !ABI_MALLOC(Cryst%amu, (ntypat))
- !call atomdata_from_znucl(atom,znucl)
- !atom%amu
-
  Cryst%timrev = timrev
 
  if (PRESENT(symrel).and.PRESENT(tnons).and.PRESENT(symafm)) then
@@ -424,12 +418,12 @@ end subroutine crystal_init
 !!
 !! PARENTS
 !!      anaddb,bethe_salpeter,dfpt_looppert,eig2tot,eph,gstate,gwls_hamiltonian
-!!      m_ddk,m_dvdb,m_effective_potential,m_effective_potential_file,m_ioarr
-!!      m_iowf,m_wfd,m_wfk,mlwfovlp_qp,mover,mrgscr,outddbnc,outscfcv,screening
-!!      sigma,vtorho,wfk_analyze
+!!      m_ddk,m_dvdb,m_effective_potential,m_effective_potential_file
+!!      m_gruneisen,m_ioarr,m_iowf,m_wfd,m_wfk,mlwfovlp_qp,mover,mrgscr,optic
+!!      outddbnc,outscfcv,screening,sigma,vtorho,wfk_analyze
 !!
 !! CHILDREN
-!!      mati3inv
+!!      mati3inv,sg_multable
 !!
 !! SOURCE
 
@@ -532,11 +526,11 @@ end subroutine crystal_free
 !!  Only printing
 !!
 !! PARENTS
-!!      eph,gwls_hamiltonian,m_effective_potential,setup_bse,setup_screening
-!!      setup_sigma,wfk_analyze
+!!      eph,gwls_hamiltonian,m_dvdb,m_effective_potential,m_gruneisen,setup_bse
+!!      setup_screening,setup_sigma,wfk_analyze
 !!
 !! CHILDREN
-!!      mati3inv
+!!      mati3inv,sg_multable
 !!
 !! SOURCE
 
@@ -628,7 +622,7 @@ end subroutine crystal_print
 !!      gensymspgr,hdr_vs_dtset,m_crystal
 !!
 !! CHILDREN
-!!      mati3inv
+!!      mati3inv,sg_multable
 !!
 !! SOURCE
 
@@ -986,9 +980,10 @@ end function symbol_type
 !!  has_inversion=True if spatial inversion is present in the point group.
 !!
 !! PARENTS
+!!      m_skw
 !!
 !! CHILDREN
-!!      mati3inv
+!!      mati3inv,sg_multable
 !!
 !! SOURCE
 

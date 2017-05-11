@@ -103,6 +103,7 @@ CONTAINS  !=====================================================================
 !! PARENTS
 !!
 !! CHILDREN
+!!      destroy_supercell,init_supercell,xred2xcart
 !!
 !! SOURCE
 
@@ -156,6 +157,7 @@ end subroutine fit_polynomial_coeff_init
 !!      m_fit_polynomial_coeff
 !!
 !! CHILDREN
+!!      destroy_supercell,init_supercell,xred2xcart
 !!
 !! SOURCE
 
@@ -197,9 +199,10 @@ end subroutine fit_polynomial_coeff_free
 !! polynomial_coeff = polynomial_coeff structure to be free
 !!
 !! PARENTS
-!!      m_fit_polynomial_coeff
+!!      multibinit
 !!
 !! CHILDREN
+!!      destroy_supercell,init_supercell,xred2xcart
 !!
 !! SOURCE
 
@@ -448,6 +451,7 @@ end subroutine fit_polynomial_coeff_get
 !!      m_fit_polynomial_coeff
 !!
 !! CHILDREN
+!!      destroy_supercell,init_supercell,xred2xcart
 !!
 !! SOURCE
 
@@ -861,6 +865,7 @@ end subroutine fit_polynomial_coeff_getList
 !!      m_fit_polynomial_coeff
 !!
 !! CHILDREN
+!!      destroy_supercell,init_supercell,xred2xcart
 !!
 !! SOURCE
 
@@ -1059,6 +1064,7 @@ end subroutine fit_polynomial_coeff_getOrder1
 !!      m_fit_polynomial_coeff
 !!
 !! CHILDREN
+!!      destroy_supercell,init_supercell,xred2xcart
 !!
 !! SOURCE
 
@@ -2339,9 +2345,10 @@ end subroutine fit_polynomial_coeff_mapHistToRef
 !! polynomial_coeff = polynomial_coeff structure to be free
 !!
 !! PARENTS
-!!      m_fit_polynomial_coeff
+!!      multibinit
 !!
 !! CHILDREN
+!!      destroy_supercell,init_supercell,xred2xcart
 !!
 !! SOURCE
 

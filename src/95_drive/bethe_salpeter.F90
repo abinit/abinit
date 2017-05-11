@@ -68,19 +68,19 @@
 !! CHILDREN
 !!      bs_parameters_free,chkpawovlp,crystal_free,denfgr,destroy_mpi_enreg
 !!      double_grid_free,ebands_free,ebands_update_occ,energies_init
-!!      exc_build_ham,exc_den,exc_diago_driver,exc_haydock_driver,fourdp
-!!      get_gftt,getph,gsph_free,hdr_free,init_distribfft_seq,initmpi_seq
-!!      kmesh_free,metric,mkdenpos,mkrdim,nhatgrid,paw_an_free,paw_an_init
-!!      paw_an_nullify,paw_gencond,paw_ij_free,paw_ij_init,paw_ij_nullify
-!!      pawdenpot,pawdij,pawfgr_destroy,pawfgr_init,pawfgrtab_free
-!!      pawfgrtab_init,pawhur_free,pawhur_init,pawinit,pawmknhat,pawnabla_init
-!!      pawprt,pawpuxinit,pawpwff_free,pawpwff_init,pawrhoij_alloc
-!!      pawrhoij_copy,pawrhoij_free,pawtab_get_lsize,pawtab_print,print_ngfft
-!!      prtrhomxmn,pspini,rdqps,rotate_fft_mesh,screen_free,screen_init
-!!      screen_nullify,setsymrhoij,setup_bse,setup_bse_interp,setvtr,symdij
-!!      test_charge,timab,vcoul_free,wfd_free,wfd_init,wfd_mkrho,wfd_print
-!!      wfd_read_wfk,wfd_reset_ur_cprj,wfd_rotate,wfd_test_ortho,wfd_wave_free
-!!      wrtout,xmpi_bcast
+!!      eprenorms_free,exc_build_ham,exc_den,exc_diago_driver
+!!      exc_haydock_driver,fourdp,get_gftt,getph,gsph_free,hdr_free
+!!      init_distribfft_seq,initmpi_seq,kmesh_free,metric,mkdenpos,mkrdim
+!!      nhatgrid,paw_an_free,paw_an_init,paw_an_nullify,paw_gencond,paw_ij_free
+!!      paw_ij_init,paw_ij_nullify,pawdenpot,pawdij,pawfgr_destroy,pawfgr_init
+!!      pawfgrtab_free,pawfgrtab_init,pawhur_free,pawhur_init,pawinit,pawmknhat
+!!      pawnabla_init,pawprt,pawpuxinit,pawpwff_free,pawpwff_init
+!!      pawrhoij_alloc,pawrhoij_copy,pawrhoij_free,pawtab_get_lsize
+!!      pawtab_print,print_ngfft,prtrhomxmn,pspini,rdqps,rotate_fft_mesh
+!!      screen_free,screen_init,screen_nullify,setsymrhoij,setup_bse
+!!      setup_bse_interp,setvtr,symdij,test_charge,timab,vcoul_free,wfd_free
+!!      wfd_init,wfd_mkrho,wfd_print,wfd_read_wfk,wfd_reset_ur_cprj,wfd_rotate
+!!      wfd_test_ortho,wfd_wave_free,wrtout,xmpi_bcast
 !!
 !! SOURCE
 
@@ -125,6 +125,7 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
  use m_energies,        only : energies_type, energies_init
  use m_haydock,         only : exc_haydock_driver
  use m_exc_diago,       only : exc_diago_driver
+ use m_eprenorms,       only : eprenorms_t, eprenorms_free
  use m_pawang,          only : pawang_type
  use m_pawrad,          only : pawrad_type
  use m_pawtab,          only : pawtab_type, pawtab_print, pawtab_get_lsize
@@ -219,6 +220,7 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
  type(wfd_t) :: Wfd_dense
  type(double_grid_t) :: grid
  type(vcoul_t) :: Vcp_dense
+ type(eprenorms_t) :: Epren
 !arrays
  integer :: ngfft_osc(18),ngfftc(18),ngfftf(18),nrcell(3)
  integer,allocatable :: ktabr(:,:),l_size_atm(:)
@@ -315,7 +317,7 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
 
  ! === Initialization of basic objects including the BSp structure that defines the parameters of the run ===
  call setup_bse(codvsn,acell,rprim,ngfftf,ngfft_osc,Dtset,Dtfil,BS_files,Psps,Pawtab,BSp,&
-& Cryst,Kmesh,Qmesh,KS_BSt,QP_BSt,Hdr_wfk,Gsph_x,Gsph_c,Vcp,Hdr_bse,w_fname,comm,wvl%descr)
+& Cryst,Kmesh,Qmesh,KS_BSt,QP_BSt,Hdr_wfk,Gsph_x,Gsph_c,Vcp,Hdr_bse,w_fname,Epren,comm,wvl%descr)
 
  if (BSp%use_interp) then
    call setup_bse_interp(Dtset,Dtfil,BSp,Cryst,Kmesh,Kmesh_dense,&
@@ -919,7 +921,8 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
 
  case (BSE_ALGO_DDIAGO, BSE_ALGO_CG)
    call timab(660,1,tsec) ! bse(exc_diago_driver)
-   call exc_diago_driver(Wfd,Bsp,BS_files,KS_BSt,QP_BSt,Cryst,Kmesh,Psps,Pawtab,Hur,Hdr_bse,drude_plsmf)
+   call exc_diago_driver(Wfd,Bsp,BS_files,KS_BSt,QP_BSt,Cryst,Kmesh,Psps,&
+&   Pawtab,Hur,Hdr_bse,drude_plsmf,Epren)
    call timab(660,2,tsec) ! bse(exc_diago_driver)
 
    if (.FALSE.) then ! Calculate electron-hole excited state density. Not tested at all.
@@ -940,10 +943,10 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
 
    if (BSp%use_interp) then
      
-     call exc_haydock_driver(BSp,BS_files,Cryst,Kmesh,Hdr_bse,KS_BSt,QP_BSt,Wfd,Psps,Pawtab,Hur,&
+     call exc_haydock_driver(BSp,BS_files,Cryst,Kmesh,Hdr_bse,KS_BSt,QP_BSt,Wfd,Psps,Pawtab,Hur,Epren,&
 &     Kmesh_dense,KS_BSt_dense,QP_BSt_dense,Wfd_dense,Vcp_dense,grid)
    else
-     call exc_haydock_driver(BSp,BS_files,Cryst,Kmesh,Hdr_bse,KS_BSt,QP_BSt,Wfd,Psps,Pawtab,Hur)
+     call exc_haydock_driver(BSp,BS_files,Cryst,Kmesh,Hdr_bse,KS_BSt,QP_BSt,Wfd,Psps,Pawtab,Hur,Epren)
    end if
    
    call timab(661,2,tsec) ! bse(exc_haydock_driver)
@@ -986,6 +989,7 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
  call bs_parameters_free(BSp)
  call wfd_free(Wfd)
  call pawfgr_destroy(Pawfgr)
+ call eprenorms_free(Epren)
 
  ! Free memory used for interpolation.
  if (BSp%use_interp) then 

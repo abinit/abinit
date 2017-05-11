@@ -71,7 +71,7 @@
 
 subroutine dfpt_etot(berryopt,deltae,eberry,edocc,eeig0,eew,efrhar,efrkin,efrloc,&
 &                efrnl,efrx1,efrx2,ehart1,ek0,ek1,eii,elast,eloc0,elpsp1,&
-&                enl0,enl1,epaw1,etotal,evar,evdw,exc1,ipert,natom,optene)
+&                enl0,enl1,epaw1,etotal,evar,evdw,exc1,elmag1,ipert,natom,optene)
 
  use defs_basis
  use m_profiling_abi
@@ -90,7 +90,7 @@ subroutine dfpt_etot(berryopt,deltae,eberry,edocc,eeig0,eew,efrhar,efrkin,efrloc
  integer,intent(in) :: berryopt,ipert,natom,optene
  real(dp),intent(in) :: eberry,edocc,eeig0,eew,efrhar,efrkin,efrloc,efrnl,efrx1
  real(dp),intent(in) :: efrx2,ehart1,eii,ek0,ek1,eloc0,elpsp1,enl0,enl1,epaw1
- real(dp),intent(in) :: evdw,exc1
+ real(dp),intent(in) :: evdw,exc1,elmag1
  real(dp),intent(inout) :: elast
  real(dp),intent(out) :: deltae,etotal,evar
 
@@ -127,6 +127,10 @@ subroutine dfpt_etot(berryopt,deltae,eberry,edocc,eeig0,eew,efrhar,efrkin,efrloc
 !      All terms enter for strain perturbation
      else if ( ipert==natom+3 .or. ipert==natom+4 ) then
        evar=ek0+ek1+edocc+eeig0+eloc0+elpsp1+ehart1+exc1+enl0+enl1+epaw1
+
+!    terms for Zeeman perturbation, SPr 2deb
+     else if ( ipert==natom+5 ) then
+       evar=ek0+edocc+eeig0+eloc0+ehart1+exc1+enl0+epaw1
      end if
    end if
 

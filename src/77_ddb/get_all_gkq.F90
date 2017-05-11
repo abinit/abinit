@@ -147,7 +147,7 @@ subroutine get_all_gkq (elph_ds,Cryst,ifc,Bst,FSfullpqtofull,nband,n1wf,onegkksi
    fname=trim(elph_ds%elph_base_name) // "_P" // trim(procnum) // '_GKKQ'
 
    iost=open_file(file=fname,iomsg=message,newunit=elph_ds%unitgkq,access='direct',&
-&            recl=onegkksize,form='unformatted')
+&   recl=onegkksize,form='unformatted')
    if (iost /= 0) then
      write (message,'(2a)')' get_all_gkq : ERROR- opening file ',trim(fname)
      MSG_ERROR(message)

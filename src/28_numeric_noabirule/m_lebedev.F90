@@ -181,7 +181,7 @@ end function lebedev_new
 !!  Free an instance of lebedev_t
 !!
 !! PARENTS
-!!      m_lebedev
+!!      m_ifc
 !!
 !! CHILDREN
 !!      gen_oh

@@ -22,13 +22,15 @@
 !! PARENTS
 !!
 !! CHILDREN
-!!      abi_io_redirect,abihist_bcast,abihist_fin,abimem_init,abinit_doctor
+!!      abi_io_redirect,abihist_bcast,abihist_free,abimem_init,abinit_doctor
 !!      compute_anharmonics,effective_potential_file_getdimsystem
 !!      effective_potential_file_gettype,effective_potential_file_read
 !!      effective_potential_free,effective_potential_writenetcdf
-!!      effective_potential_writexml,flush_unit,herald,init10,instrng,inupper
-!!      invars10,isfile,mover_effpot,multibinit_dtset_free,outvars_multibinit
-!!      read_md_hist,timein,wrtout,xmpi_bcast,xmpi_end,xmpi_init,xmpi_sum
+!!      effective_potential_writexml,fit_polynomial_coeff_get
+!!      fit_polynomial_printsystemfiles,flush_unit,herald,init10,instrng
+!!      inupper,invars10,isfile,mover_effpot,multibinit_dtset_free
+!!      outvars_multibinit,read_md_hist,timein,wrtout,xmpi_bcast,xmpi_end
+!!      xmpi_init,xmpi_sum
 !!
 !! SOURCE
 
@@ -214,7 +216,7 @@ program multibinit
      call effective_potential_file_read(filnam(4),reference_effective_potential,inp,comm)
    else
      write(message,'(a,(80a),3a)') ch10,('=',ii=1,80),ch10,ch10,&
-&                       ' There is no file for the coefficients from polynomial fitting'
+&     ' There is no file for the coefficients from polynomial fitting'
      call wrtout(ab_out,message,'COLL')
      call wrtout(std_out,message,'COLL')
    end if
@@ -249,8 +251,8 @@ program multibinit
    if(iam_master) then
 !    Read the MD file
      write(message,'(a,(80a),7a)')ch10,('=',ii=1,80),ch10,ch10,&
-&       '-Reading the file ',trim(filnam(5)),ch10,&
-&       ' with NetCDF in order to fit the polynomial coefficients'
+&     '-Reading the file ',trim(filnam(5)),ch10,&
+&     ' with NetCDF in order to fit the polynomial coefficients'
      call wrtout(std_out,message,'COLL') 
      call wrtout(ab_out,message,'COLL') 
      if(filnam(5)/=''.and.filnam(5)/='no')then
@@ -264,8 +266,8 @@ program multibinit
      else
        if (inp%fit_coeff/=0) then
          write(message, '(3a)' )&
-&         'There is no MD file to fit the coefficients ',ch10,&
-&         'Action: add MD file'
+&       'There is no MD file to fit the coefficients ',ch10,&
+&       'Action: add MD file'
          MSG_ERROR(message)
        else if(inp%confinement==2) then
          write(message, '(3a)' )&

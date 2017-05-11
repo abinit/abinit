@@ -37,10 +37,10 @@
 !!  cwaveprj(natom,my_nspinor*bandpp)= wave functions at k projected with nl projectors
 !!
 !! PARENTS
-!!      chebfi,lobpcgwf,mkresi
+!!      chebfi,lobpcgwf,m_lobpcgwf,mkresi
 !!
 !! CHILDREN
-!!      dcopy,getghc,prep_index_wavef_bandpp,prep_sort_wavef_spin
+!!      dcopy,multithreaded_getghc,prep_index_wavef_bandpp,prep_sort_wavef_spin
 !!      prep_wavef_sym_do,prep_wavef_sym_undo,timab,xmpi_alltoallv
 !!
 !! SOURCE
@@ -94,7 +94,6 @@ subroutine prep_getghc(cwavef,gs_hamk,gvnlc,gwavef,swavef,lambda,blocksize,&
  integer :: old_me_g0,spaceComm=0
  logical :: flag_inv_sym, do_transpose
  character(len=100) :: msg
- integer :: iomp
 !arrays
  integer,allocatable :: index_wavef_band(:),index_wavef_send(:),index_wavef_spband(:)
  integer,allocatable :: rdisplsloc(:),recvcountsloc(:),sdisplsloc(:),sendcountsloc(:)
@@ -286,15 +285,8 @@ subroutine prep_getghc(cwavef,gs_hamk,gvnlc,gwavef,swavef,lambda,blocksize,&
 !  -------------------------------------------------------
 !  Sorting of the waves functions below bandpp
 !  -------------------------------------------------------
-   cwavef_alltoall2(:,:) = cwavef_alltoall1(:,index_wavef_band)
-!!$OMP parallel
-!!$OMP do 
-!     do iomp=1,size(index_wavef_band)
-!       cwavef_alltoall2(:,iomp) = cwavef_alltoall1(:,index_wavef_band(iomp))
-!     end do
-!!$OMP end do nowait
-!     call timab(632,2,tsec)
-!!$OMP end parallel
+     cwavef_alltoall2(:,:) = cwavef_alltoall1(:,index_wavef_band)
+     call timab(632,2,tsec)
    end if
 
 !  ----------------------
@@ -310,18 +302,11 @@ subroutine prep_getghc(cwavef,gs_hamk,gvnlc,gwavef,swavef,lambda,blocksize,&
 !  -----------------------------------------------------
    if(do_transpose) then
      call timab(634,3,tsec)
-!    cwavef_alltoall(:,index_wavef_band) = cwavef_alltoall(:,:)   ! NOT NEEDED
-!!$OMP parallel 
-!!$OMP do 
-     do iomp=1,size(index_wavef_band)
-       gwavef_alltoall1(:,index_wavef_band(iomp)) = gwavef_alltoall2(:,iomp)
-       if (sij_opt==1) swavef_alltoall1(:,index_wavef_band(iomp)) = swavef_alltoall2(:,iomp)
-       gvnlc_alltoall1(:,index_wavef_band(iomp))  = gvnlc_alltoall2(:,iomp)
-     end do
-!!$OMP end do nowait
-     call timab(634,2,tsec)
-!!$OMP end parallel
+     gwavef_alltoall1(:,index_wavef_band) = gwavef_alltoall2(:,:)
+     if (sij_opt==1) swavef_alltoall1(:,index_wavef_band) = swavef_alltoall2(:,:)
+     gvnlc_alltoall1(:,index_wavef_band)  = gvnlc_alltoall2(:,:)
      ABI_DEALLOCATE(index_wavef_band)
+     call timab(634,2,tsec)
    end if
 
 
@@ -340,11 +325,7 @@ subroutine prep_getghc(cwavef,gs_hamk,gvnlc,gwavef,swavef,lambda,blocksize,&
 !  -------------------------------------------------------
 !  Sorting the wave functions below bandpp
 !  -------------------------------------------------------
-      cwavef_alltoall2(:,:) = cwavef_alltoall1(:,index_wavef_band)
-!!$OMP parallel do 
-!     do iomp=1,size(index_wavef_band)
-!       cwavef_alltoall2(:,iomp) = cwavef_alltoall1(:,index_wavef_band(iomp))
-!     end do
+     cwavef_alltoall2(:,:) = cwavef_alltoall1(:,index_wavef_band)
    end if
 
 !  ------------------------------------------------------------
@@ -449,17 +430,11 @@ subroutine prep_getghc(cwavef,gs_hamk,gvnlc,gwavef,swavef,lambda,blocksize,&
 !  -------------------------------------------------------
    if(do_transpose) then
 !    cwavef_alltoall(:,index_wavef_band) = cwavef_alltoall(:,:)   ! NOT NEEDED
-!!$OMP parallel 
-!!$OMP do 
-     do iomp = 1, size(index_wavef_band)
-       if (sij_opt==1) swavef_alltoall1(:,index_wavef_band(iomp)) = swavef_alltoall2(:,iomp)
-       gwavef_alltoall1(:,index_wavef_band(iomp)) = gwavef_alltoall2(:,iomp)
-       gvnlc_alltoall1(:,index_wavef_band(iomp))  = gvnlc_alltoall2(:,iomp)
-     end do
-!!$OMP end do nowait
-     call timab(634,2,tsec)
-!!$OMP end parallel
+     gwavef_alltoall1(:,index_wavef_band) = gwavef_alltoall2(:,:)
+     if (sij_opt==1) swavef_alltoall1(:,index_wavef_band) = swavef_alltoall2(:,:)
+     gvnlc_alltoall1(:,index_wavef_band)  = gvnlc_alltoall2(:,:)
      ABI_DEALLOCATE(index_wavef_band)
+     call timab(634,2,tsec)
    end if
 
  end if

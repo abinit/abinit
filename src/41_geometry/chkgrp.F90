@@ -172,7 +172,7 @@ end subroutine chkgrp
 !!  This improved version should replace chkgrp.
 !!
 !! PARENTS
-!!      m_shirley
+!!      m_crystal,m_shirley
 !!
 !! CHILDREN
 !!
