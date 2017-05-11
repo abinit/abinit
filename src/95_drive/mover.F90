@@ -588,8 +588,10 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
              MSG_WARNING(message)
            end if
 
-         else 
-           call effective_potential_evaluate(effective_potential,scfcv_args%results_gs%etotal,&
+         else if(ab_mover%ionmov /= 31) then
+!          For monte carlo don't need to recompute energy here
+!          (done in pred_montecarlo)
+           call effective_potential_evaluate( &
 &           effective_potential,scfcv_args%results_gs%etotal,&
 &           scfcv_args%results_gs%fcart,scfcv_args%results_gs%fred,&
 &           scfcv_args%results_gs%strten,ab_mover%natom,rprimd,xred)
