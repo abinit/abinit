@@ -98,7 +98,6 @@ CONTAINS  !=====================================================================
 !!      bethe_salpeter
 !!
 !! CHILDREN
-!!      continued_fract,hexc_matmul_full,wrtout
 !!
 !! SOURCE
 
@@ -635,7 +634,6 @@ end subroutine exc_haydock_driver
 !!      m_haydock
 !!
 !! CHILDREN
-!!      continued_fract,hexc_matmul_full,wrtout
 !!
 !! SOURCE
 
@@ -926,7 +924,6 @@ end subroutine haydock_herm
 !!      m_haydock
 !!
 !! CHILDREN
-!!      continued_fract,hexc_matmul_full,wrtout
 !!
 !! SOURCE
 
@@ -1114,7 +1111,6 @@ end subroutine haydock_herm_algo
 !!      m_haydock
 !!
 !! CHILDREN
-!!      continued_fract,hexc_matmul_full,wrtout
 !!
 !! SOURCE
 
@@ -1242,7 +1238,6 @@ end subroutine haydock_restart
 !!      m_haydock
 !!
 !! CHILDREN
-!!      continued_fract,hexc_matmul_full,wrtout
 !!
 !! SOURCE
 
@@ -1378,7 +1373,6 @@ end subroutine haydock_mdf_to_tensor
 !!      m_haydock
 !!
 !! CHILDREN
-!!      continued_fract,hexc_matmul_full,wrtout
 !!
 !! SOURCE
 
@@ -1643,7 +1637,6 @@ end subroutine haydock_psherm
 !!      m_haydock
 !!
 !! CHILDREN
-!!      continued_fract,hexc_matmul_full,wrtout
 !!
 !! SOURCE
 
@@ -1949,7 +1942,6 @@ end subroutine haydock_psherm_optalgo
 !!      m_haydock
 !!
 !! CHILDREN
-!!      continued_fract_general,hexc_matmul_full,wrtout
 !!
 !! SOURCE
 
@@ -2266,7 +2258,6 @@ end subroutine haydock_bilanczos
 !!      m_haydock
 !!
 !! CHILDREN
-!!      continued_fract,hexc_matmul_full,wrtout
 !!
 !! SOURCE
 

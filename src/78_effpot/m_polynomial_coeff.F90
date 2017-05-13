@@ -96,10 +96,12 @@ CONTAINS  !=====================================================================
 !! polynomial_coeff = polynomial_coeff structure to be initialized
 !!
 !! PARENTS
-!!      m_anharmonics_terms,m_effective_potential_file
+!!      m_anharmonics_terms,m_effective_potential_file,m_fit_polynomial_coeff
+!!      m_polynomial_coeff
 !!
 !! CHILDREN
-!!      isfile,wrtout
+!!      polynomial_coeff_getname,polynomial_coeff_init,polynomial_term_free
+!!      polynomial_term_init
 !!
 !! SOURCE
 
@@ -212,10 +214,12 @@ end subroutine polynomial_coeff_init
 !! polynomial_coeff = polynomial_coeff structure to be free
 !!
 !! PARENTS
-!!      m_anharmonics_terms,m_effective_potential_file,m_polynomial_coeff
+!!      m_anharmonics_terms,m_effective_potential_file,m_fit_polynomial_coeff
+!!      m_polynomial_coeff
 !!
 !! CHILDREN
-!!      isfile,wrtout
+!!      polynomial_coeff_getname,polynomial_coeff_init,polynomial_term_free
+!!      polynomial_term_init
 !!
 !! SOURCE
 
@@ -272,7 +276,8 @@ end subroutine polynomial_coeff_free
 !!      m_effective_potential_file
 !!
 !! CHILDREN
-!!      isfile,wrtout
+!!      polynomial_coeff_getname,polynomial_coeff_init,polynomial_term_free
+!!      polynomial_term_init
 !!
 !! SOURCE
 
@@ -318,10 +323,11 @@ end subroutine polynomial_coeff_setCoefficient
 !! polynomial_coeff = polynomial_coeff structure to be free
 !!
 !! PARENTS
-!!      m_effective_potential_file
+!!      m_fit_polynomial_coeff,m_polynomial_coeff
 !!
 !! CHILDREN
-!!      isfile,wrtout
+!!      polynomial_coeff_getname,polynomial_coeff_init,polynomial_term_free
+!!      polynomial_term_init
 !!
 !! SOURCE
 
@@ -402,7 +408,8 @@ end subroutine polynomial_coeff_getName
 !!      m_effective_potential_file
 !!
 !! CHILDREN
-!!      isfile,wrtout
+!!      polynomial_coeff_getname,polynomial_coeff_init,polynomial_term_free
+!!      polynomial_term_init
 !!
 !! SOURCE
 
@@ -498,10 +505,11 @@ end subroutine polynomial_coeff_broadcast
 !! OUTPUT
 !!
 !! PARENTS
-!!      m_effective_potential
+!!      m_effective_potential,m_fit_polynomial_coeff
 !!
 !! CHILDREN
-!!      isfile,wrtout
+!!      polynomial_coeff_getname,polynomial_coeff_init,polynomial_term_free
+!!      polynomial_term_init
 !!
 !! SOURCE
 
@@ -636,6 +644,12 @@ end subroutine polynomial_coeff_writeXML
 !!
 !! OUTPUT
 !!
+!! PARENTS
+!!
+!! CHILDREN
+!!      polynomial_coeff_getname,polynomial_coeff_init,polynomial_term_free
+!!      polynomial_term_init
+!!
 !! SOURCE
 
 subroutine polynomial_coeff_chksym(coeffs,ncoeff)
@@ -673,6 +687,12 @@ end subroutine polynomial_coeff_chksym
 !! INPUTS
 !!
 !! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!      polynomial_coeff_getname,polynomial_coeff_init,polynomial_term_free
+!!      polynomial_term_init
 !!
 !! SOURCE
 

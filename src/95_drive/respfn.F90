@@ -201,7 +201,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  integer :: optcut,option,optgr0,optgr1,optgr2,optorth,optrad
  integer :: optatm,optdyfr,opteltfr,optgr,optn,optn2,optstr,optv
  integer :: outd2,pawbec,pawpiezo,prtbbb,psp_gencond,qzero,rdwr,rdwrpaw
- integer :: req_cplex_dij,rfasr,rfddk,rfelfd,rfphon,rfstrs,rfuser,rf2_dkdk,rf2_dkde
+ integer :: req_cplex_dij,rfasr,rfddk,rfelfd,rfphon,rfstrs,rfuser,rf2_dkdk,rf2_dkde,rfmagn
  integer :: spaceworld,sumg0,sz1,sz2,tim_mkrho,timrev,usecprj,usevdw
  integer :: usexcnhat,use_sym,vloc_method
  logical :: has_full_piezo,has_allddk,paral_atom,qeq0,use_nhat_gga,call_pawinit
@@ -283,7 +283,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 
 !Respfn input variables
  rfasr=dtset%rfasr   ; rfdir(1:3)=dtset%rfdir(1:3)
- rfddk=dtset%rfddk   ; rfelfd=dtset%rfelfd
+ rfddk=dtset%rfddk   ; rfelfd=dtset%rfelfd ; rfmagn=dtset%rfmagn
  rfphon=dtset%rfphon ; rfstrs=dtset%rfstrs
  rfuser=dtset%rfuser ; rf2_dkdk=dtset%rf2_dkdk ; rf2_dkde=dtset%rf2_dkde
 
@@ -317,7 +317,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 & response,rmet,dtset%rprim_orig(1:3,1:3,1),rprimd,ucvol,psps%usepaw)
 
 !Define the set of admitted perturbations
- mpert=natom+6
+ mpert=natom+7
  if (rf2_dkdk>0.or.rf2_dkde>0) mpert=natom+11
 
 !Initialize the list of perturbations rfpert
@@ -337,8 +337,10 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  if(rfstrs==1.or.rfstrs==3)rfpert(natom+3)=1
  if(rfstrs==2.or.rfstrs==3)rfpert(natom+4)=1
 
- if(rfuser==1.or.rfuser==3)rfpert(natom+5)=1
- if(rfuser==2.or.rfuser==3)rfpert(natom+6)=1
+ if(rfuser==1.or.rfuser==3)rfpert(natom+6)=1
+ if(rfuser==2.or.rfuser==3)rfpert(natom+7)=1
+
+ if(rfmagn==1) rfpert(natom+5)=1
 
  qeq0=(dtset%qptn(1)**2+dtset%qptn(2)**2+dtset%qptn(3)**2<1.d-14)
 
@@ -660,8 +662,9 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
      has_dijnd=1; req_cplex_dij=2
    end if
    if (rfphon/=0.or.rfelfd==1.or.rfelfd==3.or.rfstrs/=0.or.rf2_dkde/=0) then
-     has_kxc=1;nkxc1=2*dtset%nspden-1 ! LDA only
-     if(dtset%xclevel==2.and.dtset%pawxcdev==0) nkxc1=23
+     has_kxc=1;nkxc1=2*dtset%nspden-1                   ! LDA
+     if(dtset%xclevel==2.and.dtset%nspden==1) nkxc1=7   ! GGA non-polarized
+     if(dtset%xclevel==2.and.dtset%nspden==2) nkxc1=19  ! GGA polarized
    end if
    call paw_an_init(paw_an,dtset%natom,dtset%ntypat,nkxc1,dtset%nspden,cplex,dtset%pawxcdev,&
 &   dtset%typat,pawang,pawtab,has_vxc=1,has_vxc_ex=1,has_kxc=has_kxc,&
@@ -820,15 +823,15 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
    ABI_ALLOCATE(dyfrx2,(3,3,natom))
    ABI_ALLOCATE(vxc,(0,0)) ! dummy
    call mkcore(dummy6,dyfrx2,grxc,mpi_enreg,natom,nfftf,dtset%nspden,ntypat,&
-&     ngfftf(1),psps%n1xccc,ngfftf(2),ngfftf(3),option,rprimd,dtset%typat,ucvol,vxc,&
-&     psps%xcccrc,psps%xccc1d,xccc3d,xred)
+&   ngfftf(1),psps%n1xccc,ngfftf(2),ngfftf(3),option,rprimd,dtset%typat,ucvol,vxc,&
+&   psps%xcccrc,psps%xccc1d,xccc3d,xred)
    ABI_DEALLOCATE(dyfrx2)
    ABI_DEALLOCATE(vxc) ! dummy
  end if
 
 !Set up hartree and xc potential. Compute kxc here.
  option=2 ; nk3xc=1
- nkxc=2*min(dtset%nspden,2)-1;if(dtset%xclevel==2)nkxc=23
+ nkxc=2*min(dtset%nspden,2)-1;if(dtset%xclevel==2)nkxc=12*min(dtset%nspden,2)-5
  call check_kxc(dtset%ixc,dtset%optdriver)
  ABI_ALLOCATE(kxc,(nfftf,nkxc))
  ABI_ALLOCATE(vhartr,(nfftf))
@@ -1333,7 +1336,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 !rfpert(natom+1)=0
 
 !Were 2DTE computed ?
- if(rfphon==0 .and. (rf2_dkdk/=0 .or. rf2_dkde/=0 .or. rfddk/=0 .or. rfelfd==2) .and. rfstrs==0 .and. rfuser==0)then
+ if(rfphon==0 .and. (rf2_dkdk/=0 .or. rf2_dkde/=0 .or. rfddk/=0 .or. rfelfd==2) .and. rfstrs==0 .and. rfuser==0 .and. rfmagn==0)then
 
    write(message,'(a,a)' )ch10,' respfn : d/dk was computed, but no 2DTE, so no DDB output.'
    call wrtout(std_out,message,'COLL')
@@ -1478,7 +1481,8 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  end if !end me == 0
 
 !Compute the other terms for AHC dynamic and AHC full
- if (.not.(rfphon==0 .and. (rf2_dkdk/=0 .or. rf2_dkde/=0.or. rfddk/=0 .or. rfelfd==2) .and. rfstrs==0 .and. rfuser==0)) then
+ if (.not.(rfphon==0 .and. (rf2_dkdk/=0 .or. rf2_dkde/=0.or. rfddk/=0 .or. rfelfd==2) .and. rfstrs==0 .and. rfuser==0 &
+& .and. rfmagn==0)) then
    if(rfphon==1) then ! AHC can only be computed in case of phonons
 
 !    Stuff for parallelism
@@ -1553,7 +1557,8 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 
 
  if(me==0)then
-   if (.not.(rfphon==0 .and. (rf2_dkdk/=0 .or. rf2_dkde/=0 .or. rfddk/=0 .or. rfelfd==2) .and. rfstrs==0 .and.rfuser==0) )then
+   if (.not.(rfphon==0 .and. (rf2_dkdk/=0 .or. rf2_dkde/=0 .or. rfddk/=0 .or. rfelfd==2) .and. rfstrs==0 .and.rfuser==0 &
+&   .and. rfmagn==0) )then
      if(rfphon==1)then
 !      Compute and print the T=0 Fan, and possibly DDW contributions to the eigenenergies.
        if(dtset%ieig2rf > 0) then

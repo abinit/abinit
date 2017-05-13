@@ -47,11 +47,11 @@
 !!   Vxc=Vxc_libXC[rho_val] + Vxc_gga[rho_core+rho_val] - Vxc_gga[rho_val]
 !!
 !! PARENTS
-!!      rhotov,setvtr,forces
+!!      forces,forstr,rhotov,setvtr
 !!
 !! CHILDREN
 !!      dtset_copy,dtset_free,libxc_functionals_end,libxc_functionals_init
-!!      rhohxc
+!!      metric,mkcore,rhohxc
 !!
 !! SOURCE
 
@@ -176,7 +176,7 @@ subroutine xchybrid_ncpp_cc(dtset,enxc,mpi_enreg,nfft,ngfft,n3xccc,rhor,rprimd,s
    vxc(:,:)=vxc(:,:)-vxc_corr(:,:)
    vxcavg=vxcavg-vxcavg_corr
    strsxc(:)=strsxc(:)-strsxc_corr(:)
- 
+   
 !Release memory
    ABI_DEALLOCATE(xccc3d_null)
  end if
@@ -195,13 +195,13 @@ subroutine xchybrid_ncpp_cc(dtset,enxc,mpi_enreg,nfft,ngfft,n3xccc,rhor,rprimd,s
    option=1
 ! calculate xccc3d in this case
    call mkcore(strsxc_corr,dyfrx2_dum,grxc,mpi_enreg,dtset%natom,nfft,dtset%nspden,dtset%ntypat,ngfft(1),n1xccc,ngfft(2),&
-&     ngfft(3),option,rprimd,dtset%typat,ucvol,vxc_corr,xcccrc,xccc1d,xccc3d_null,xred)
+&   ngfft(3),option,rprimd,dtset%typat,ucvol,vxc_corr,xcccrc,xccc1d,xccc3d_null,xred)
 !Add Vxc^GGA(rho_core+rho_val)
    call rhohxc(dtLocal,enxc_corr,zero,izero,kxc_dum,mpi_enreg,nfft,ngfft,nhat,ndim,nhatgr,ndim,nkxc,nkxc,&
 &   dtLocal%nspden,n3xccc,option,rhog_dum,rhor,rprimd,strsxc_corr,usexcnhat,vhartr_dum,vxc_corr,vxcavg_corr,xccc3d_null)
    option=2
    call mkcore(strsxc_corr,dyfrx2_dum,grxc,mpi_enreg,dtset%natom,nfft,dtset%nspden,dtset%ntypat,ngfft(1),n1xccc,ngfft(2),&
-&     ngfft(3),option,rprimd,dtset%typat,ucvol,vxc_corr,xcccrc,xccc1d,xccc3d_null,xred)
+&   ngfft(3),option,rprimd,dtset%typat,ucvol,vxc_corr,xcccrc,xccc1d,xccc3d_null,xred)
    ABI_DEALLOCATE(dyfrx2_dum)
    ABI_DEALLOCATE(xccc3d_null)
  end if

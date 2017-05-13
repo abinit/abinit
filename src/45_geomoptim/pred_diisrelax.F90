@@ -42,8 +42,8 @@
 !!      mover
 !!
 !! CHILDREN
-!!      dcopy,dgemv,dsysv,hessinit,hessupdt,hist2var,metric,mkrdim,var2hist
-!!      xcart2xred
+!!      dcopy,dgemv,dsysv,hessinit,hessupdt,hist2var,var2hist,xcart2xred
+!!      xred2xcart
 !!
 !! SOURCE
 

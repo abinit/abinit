@@ -833,7 +833,7 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,gs_hamkq,ibg,icg,idir,
  end do ! jband
 
 ! For the following, "rf2%lambda_mn" and "rf2%RHS_Stern" must be computed for every bands
-  call xmpi_barrier(mpi_enreg%comm_band)
+ call xmpi_barrier(mpi_enreg%comm_band)
 
 ! **************************************************************************************************
 !  FINAL TEST

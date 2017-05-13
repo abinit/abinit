@@ -33,8 +33,9 @@
 !!      forstrnps,getghc
 !!
 !! CHILDREN
-!!      bare_vqg,dotprod_g,fftpac,fourdp,fourwf,hartre,load_kprime_hamiltonian
-!!      nonlop,pawdijhat,pawmknhat_psipsi,sphereboundary,strfock,timab,xmpi_sum
+!!      bare_vqg,dotprod_g,fftpac,fourdp,fourwf,hartre,load_k_hamiltonian
+!!      load_kprime_hamiltonian,matr3inv,nonlop,pawdijhat,pawmknhat_psipsi
+!!      sphereboundary,strfock,timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -284,7 +285,7 @@ type(pseudopotential_type) :: psps
    call bare_vqg(qvec_j,fock%gsqcut,gs_ham%gmet,fock%usepaw,fock%hybrid_mixing,&
 &   fock%hybrid_mixing_sr,fock%hybrid_range,nfftf,fock%nkpt_bz,ngfftf,gs_ham%ucvol,vqg)
 
- 
+   
 
 
 ! =================================================
@@ -415,7 +416,7 @@ type(pseudopotential_type) :: psps
          call nonlop(choice,cpopt,cwaveocc_prj,enlout_dum,gs_ham,idir,(/zero/),mpi_enreg,&
 &         ndat1,nnlout,paw_opt,signs,gsc_dum,tim_nonlop,vectin_dum,gvnlc,enl=dijhat,&
 &         select_k=K_H_KPRIME)
-          ghc2=ghc2-gvnlc*occ*wtk
+         ghc2=ghc2-gvnlc*occ*wtk
        end if
 
 ! Forces calculation
@@ -455,7 +456,7 @@ type(pseudopotential_type) :: psps
          do idir=1,6
            call nonlop(choice,cpopt,cwaveocc_prj,enlout_dum,gs_ham,idir,(/zero/),mpi_enreg,&
 &           ndat1,nnlout,paw_opt,signs,gsc_dum,tim_nonlop,vectin_dum,&
-&          strout,enl=dijhat,select_k=K_H_KPRIME)
+&           strout,enl=dijhat,select_k=K_H_KPRIME)
            call dotprod_g(dotr(idir),doti,gs_ham%istwf_k,npw,2,cwavef,strout,mpi_enreg%me_g0,mpi_enreg%comm_fft)
            fock%stress_ikpt(idir,fock%ieigen)=fock%stress_ikpt(idir,fock%ieigen)-dotr(idir)*occ*wtk/gs_ham%ucvol
          end do
@@ -468,7 +469,7 @@ type(pseudopotential_type) :: psps
                do ifft=1,fock%pawfgrtab(iatom)%nfgd
                  ind=fock%pawfgrtab(iatom)%ifftsph(ifft)
                  str(idir,idir1)=str(idir,idir1)+(vfock(2*ind-1)*grnhat_12(1,ind,1,idir,iatom)-&
-&                             vfock(2*ind)*grnhat_12(2,ind,1,idir,iatom))*fock%pawfgrtab(iatom)%rfgd(idir1,ifft)
+&                 vfock(2*ind)*grnhat_12(2,ind,1,idir,iatom))*fock%pawfgrtab(iatom)%rfgd(idir1,ifft)
 
                end do
              end do

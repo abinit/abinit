@@ -237,7 +237,8 @@ subroutine posratecore(dtset,electronpositron,iatom,my_natom,mesh_sizej,mpi_enre
 !    Compute contribution to annihilation rates
 
      ABI_ALLOCATE(ff,(mesh_size))
-     ff(:)=rhoarr1_ep(:)*rhocorej(:)*gamma(:,1)*pawrad(itypat)%rad(:)**2
+     ff(1:mesh_size)=rhoarr1_ep(1:mesh_size)*rhocorej(1:mesh_size) &
+&     *gamma(1:mesh_size,1)*pawrad(itypat)%rad(1:mesh_size)**2
      call simp_gen(intg,ff,pawrad(itypat))
      intg=intg*pawang%angwgth(ipt)*four_pi
      rate         =rate         +intg
@@ -409,7 +410,7 @@ subroutine posratecore(dtset,electronpositron,iatom,my_natom,mesh_sizej,mpi_enre
      if (lmselect_ep(ilm)) gg(:,1)=gg(:,1)+rhotot_ep(:,ilm)*rhocorej(:)*gammam(:,ilm)
    end do
    ABI_DEALLOCATE(rhoarr2)
-   gg(:,1)=gg(:,1)*pawrad(itypat)%rad(:)**2
+   gg(1:mesh_size,1)=gg(1:mesh_size,1)*pawrad(itypat)%rad(1:mesh_size)**2
    call simp_gen(intg,gg(:,1),pawrad(itypat))
    rate         =rate         +intg
    ABI_DEALLOCATE(gg)
@@ -438,8 +439,6 @@ subroutine posratecore(dtset,electronpositron,iatom,my_natom,mesh_sizej,mpi_enre
    call xmpi_sum(mpibuf,mpi_enreg%comm_atom,ierr)
    rate=mpibuf
  end if
-
-
 
  DBG_EXIT("COLL")
 

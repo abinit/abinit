@@ -210,8 +210,8 @@ subroutine predict_pimd(imgmov,itimimage,itimimage_eff,mpi_enreg,natom,nimage,ni
 
 !    Compute the volume of the supercell
      volume=rprimd(1,1)*(rprimd(2,2)*rprimd(3,3)-rprimd(3,2)*rprimd(2,3))+&
-&           rprimd(2,1)*(rprimd(3,2)*rprimd(1,3)-rprimd(1,2)*rprimd(3,3))+&
-&           rprimd(3,1)*(rprimd(1,2)*rprimd(2,3)-rprimd(2,2)*rprimd(1,3))
+&     rprimd(2,1)*(rprimd(3,2)*rprimd(1,3)-rprimd(1,2)*rprimd(3,3))+&
+&     rprimd(3,1)*(rprimd(1,2)*rprimd(2,3)-rprimd(2,2)*rprimd(1,3))
      volume=abs(volume)
 
      select case(imgmov)

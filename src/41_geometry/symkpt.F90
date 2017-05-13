@@ -47,7 +47,7 @@
 !!
 !! PARENTS
 !!      dfpt_looppert,elphon,ep_setupqpt,get_npert_rbz,getkgrid,harmonic_thermo
-!!      m_bz_mesh,m_sigmaph
+!!      m_bz_mesh,m_ifc,m_sigmaph
 !!
 !! CHILDREN
 !!      sort_dp,wrtout
