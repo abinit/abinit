@@ -741,7 +741,7 @@ end subroutine readwf
 !!  WARNING : writing the two first records is also done in the dfpt_vtowfk routine
 !!
 !! PARENTS
-!!      m_io_kss,rwwf
+!!      rwwf
 !!
 !! CHILDREN
 !!      mpi_bcast,wffreadwrite_mpio,wffwritenpwrec,xderivewrecend

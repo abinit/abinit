@@ -223,6 +223,13 @@ Values initialized with zeros
   8)   5.00000000E-01  5.00000000E-01  5.00000000E-01
 
  The interatomic forces have been obtained
+ Average speed of sound partial sums:     0.5701666765E-02 (at units)
+-                                   =       12473.4865 (m/s)
+
+ Debye frequency from partial sums:     0.5262667706E-02 (Ha)
+-                                 =     0.3462669009E+02 (THz)
+-Debye temperature from partial sums:     0.1661817053E+04 (K)
+
 - Writing phonon DOS to file: t44o_DS1_PHDOS
 qpoint: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] is present in the DVDB file
  The list of irreducible perturbations for this q vector is:
@@ -361,6 +368,13 @@ Values initialized with zeros
   8)   5.00000000E-01  5.00000000E-01  5.00000000E-01
 
  The interatomic forces have been obtained
+ Average speed of sound partial sums:     0.5701666765E-02 (at units)
+-                                   =       12473.4865 (m/s)
+
+ Debye frequency from partial sums:     0.5262667706E-02 (Ha)
+-                                 =     0.3462669009E+02 (THz)
+-Debye temperature from partial sums:     0.1661817053E+04 (K)
+
 - Writing phonon DOS to file: t44o_DS2_PHDOS
 qpoint: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] is present in the DVDB file
  The list of irreducible perturbations for this q vector is:

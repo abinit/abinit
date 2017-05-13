@@ -3348,7 +3348,7 @@ end function kpath_new
 !!  Free memory allocated in the object
 !!
 !! PARENTS
-!!      wfk_analyze
+!!      m_ebands,m_gruneisen,m_ifc,m_phgamma,m_phonons,wfk_analyze
 !!
 !! CHILDREN
 !!
@@ -3413,6 +3413,7 @@ end subroutine kpath_free
 !!  Only printing
 !!
 !! PARENTS
+!!      m_ebands,m_gruneisen,m_phgamma
 !!
 !! CHILDREN
 !!

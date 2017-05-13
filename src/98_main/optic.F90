@@ -61,12 +61,13 @@
 !! PARENTS
 !!
 !! CHILDREN
-!!      abi_io_redirect,abimem_init,abinit_doctor,ebands_free,ebands_init
-!!      ebands_update_occ,flush_unit,hdr_bcast,hdr_copy,hdr_free,herald
-!!      int2char4,linelop,linopt,mati3inv,matr3inv,metric,nctk_fort_or_ncfile
-!!      nlinopt,nonlinopt,pmat2cart,pmat_renorm,sym2cart,timein,wfk_close
-!!      wfk_open_read,wfk_read_eigk,wrtout,xmpi_bcast,xmpi_end,xmpi_init
-!!      xmpi_sum
+!!      abi_io_redirect,abimem_init,abinit_doctor,crystal_free,crystal_init
+!!      ebands_copy,ebands_free,ebands_init,ebands_update_occ,eprenorms_bcast
+!!      eprenorms_free,eprenorms_from_epnc,flush_unit,hdr_bcast,hdr_copy
+!!      hdr_free,herald,int2char4,linelop,linopt,mati3inv,matr3inv,metric
+!!      nctk_fort_or_ncfile,nlinopt,nonlinopt,pmat2cart,pmat_renorm,renorm_bst
+!!      sym2cart,timein,wfk_close,wfk_open_read,wfk_read_eigk,wrtout,xmpi_bcast
+!!      xmpi_end,xmpi_init,xmpi_sum
 !!
 !! SOURCE
 
@@ -91,6 +92,8 @@ program optic
  use m_nctk
  use m_hdr
  use m_ebands
+ use m_eprenorms
+ use m_crystal
 
  use m_time ,     only : asctime
  use m_io_tools,  only : flush_unit, open_file, file_exists, num_opened_units, show_units
@@ -133,7 +136,7 @@ program optic
  real(dp),allocatable :: symcart(:,:,:)
  real(dp) :: domega,ecut,fermie!,maxocc,entropy
  real(dp):: eff
- logical :: do_antiresonant
+ logical :: do_antiresonant, do_temperature
  integer,allocatable :: istwfk(:), npwarr(:)
  real(dp) :: nelect
  real(dp) :: broadening,ucvol,maxomega,scissor,tolerance,tphysel
@@ -142,11 +145,11 @@ program optic
  real(dp) :: gmet(3,3),gmet_inv(3,3),gprimd(3,3),rmet(3,3),rprimd(3,3),gprimd_trans(3,3)
  real(dp),allocatable :: kpt(:,:)
  real(dp),allocatable :: cond_kg(:),cond_nd(:),doccde(:)
- real(dp),allocatable :: eig0tmp(:),eigen0(:),eigen11(:)
- real(dp),allocatable :: eigen12(:),eigtmp(:)
+ real(dp),allocatable :: eig0tmp(:), eigen0(:)
+ real(dp),allocatable :: eigen11(:),eigen12(:),eigtmp(:)
  real(dp),allocatable :: eigen13(:),occ(:),wtk(:)
  complex(dpc),allocatable :: pmat(:,:,:,:,:)
- character(len=fnlen) :: filnam,wfkfile,ddkfile_1,ddkfile_2,ddkfile_3,filnam_out
+ character(len=fnlen) :: filnam,wfkfile,ddkfile_1,ddkfile_2,ddkfile_3,filnam_out, epfile
 !  for the moment this is imposed by the format in linopt.f and nlinopt.f
  character(len=256) :: fn_radix,tmp_radix
  character(len=10) :: s1,s2,s3
@@ -154,17 +157,28 @@ program optic
  character(len=24) :: start_datetime
  character(len=500) :: msg
  type(hdr_type) :: hdr
- type(ebands_t) :: BSt
+ type(ebands_t) :: BSt, EPBSt
  integer :: finunt
  namelist /FILES/ ddkfile_1, ddkfile_2, ddkfile_3, wfkfile
- namelist /PARAMETERS/ broadening, domega, maxomega, scissor, tolerance, do_antiresonant, &
+ namelist /PARAMETERS/ broadening, domega, maxomega, scissor, tolerance, do_antiresonant, do_temperature, &
                        autoparal, max_ncpus
  namelist /COMPUTATIONS/ num_lin_comp, lin_comp, num_nonlin_comp, nonlin_comp, &
 &        num_linel_comp, linel_comp, num_nonlin2_comp, nonlin2_comp
+ namelist /TEMPERATURE/ epfile
  !character(len=fnlen) :: test
  integer :: iomode
  integer :: comm,nproc,my_rank
  type(wfk_t) :: wfk0,wfk1,wfk2,wfk3
+
+ !_EP_NC reading !
+ type(eprenorms_t) :: Epren
+ character(len=fnlen) :: ep_nc_fname
+ integer :: ep_ntemp
+ logical :: do_ep_renorm
+ integer :: itemp
+ character(len=10) :: stemp
+ type(crystal_t) :: Cryst
+ logical :: remove_inv
 
 ! *********************************************************************************
 
@@ -219,11 +233,17 @@ program optic
    scissor = 0.0_dp ! no scissor by default
    tolerance = 1e-3_dp ! Ha
    do_antiresonant = .TRUE. ! do use antiresonant approximation (only resonant transitions in the calculation)
+   do_temperature = .FALSE.
 
    ! Read input file
    read(finunt,nml=FILES)
    read(finunt,nml=PARAMETERS)
    read(finunt,nml=COMPUTATIONS)
+
+   if(do_temperature) then
+     read(finunt, nml=TEMPERATURE)
+   end if
+
    close(finunt)
 
    ! Validate input
@@ -284,6 +304,21 @@ program optic
    !  Read the header from the gs file
    call hdr_copy(wfk0%hdr, hdr)
 
+   ep_nc_fname = 'test_EP.nc'
+   if(do_temperature) then
+     ep_nc_fname = epfile
+   end if
+   do_ep_renorm = file_exists(ep_nc_fname)
+   if(do_ep_renorm) then
+     call eprenorms_from_epnc(Epren,ep_nc_fname)
+     ep_ntemp = Epren%ntemp
+   else if(do_temperature) then
+     MSG_ERROR("You have asked for temperature but the epfile is not present !")
+   else
+     ep_ntemp = 1
+   end if
+
+
    ! autoparal section
    if (autoparal /= 0 .and. max_ncpus /= 0) then
      write(std_out,'(a)')"--- !Autoparal"
@@ -337,6 +372,13 @@ program optic
  call xmpi_bcast(nonlin2_comp,master,comm,ierr)
  call xmpi_bcast(do_antiresonant,master,comm,ierr)
 
+ call xmpi_bcast(do_ep_renorm,master,comm,ierr)
+ call xmpi_bcast(ep_ntemp,master,comm,ierr)
+
+ if(do_ep_renorm) then
+   call eprenorms_bcast(Epren, master, comm)
+ end if
+
 !Extract info from the header
  headform=hdr%headform
  bantot=hdr%bantot
@@ -373,6 +415,15 @@ program optic
      MSG_ERROR("nband must be constant across kpts")
    end if
  end do
+
+ ! Initializes crystal
+ remove_inv = .false.
+ if(hdr%nspden == 4) remove_inv = .true.
+ !space_group = 0
+ call crystal_init(hdr%amu, Cryst, 0, hdr%natom, hdr%npsp, hdr%ntypat, &
+& hdr%nsym, rprimd, hdr%typat, hdr%xred, hdr%zionpsp, hdr%znuclpsp, 1, &
+& (hdr%nspden==2 .and. hdr%nsppol==1),remove_inv, hdr%title,&
+& symrel, hdr%tnons, hdr%symafm)
 
  if(my_rank == master) then
    write(std_out,*)
@@ -434,6 +485,7 @@ program optic
    
    ABI_DEALLOCATE(eigtmp)
    ABI_DEALLOCATE(eig0tmp)
+
  end if
 
  call xmpi_bcast(eigen0,master,comm,ierr)
@@ -473,7 +525,6 @@ program optic
  fermie = BSt%fermie
  ABI_DEALLOCATE(istwfk)
  ABI_DEALLOCATE(npwarr)
- call ebands_free(BSt)
 
 !---------------------------------------------------------------------------------
 !size of the frequency range
@@ -525,19 +576,36 @@ program optic
 !
  call wrtout(std_out," optic : Call linopt","COLL")
 
- do ii=1,num_lin_comp
-   lin1 = int(lin_comp(ii)/10.0_dp)
-   lin2 = mod(lin_comp(ii),10)
-   write(msg,*) ' linopt ', lin1,lin2
-   call wrtout(std_out,msg,"COLL")
-   call int2char4(lin1,s1)
-   call int2char4(lin2,s2)
-   ABI_CHECK((s1(1:1)/='#'),'Bug: string length too short!')
-   ABI_CHECK((s2(1:1)/='#'),'Bug: string length too short!')
-   tmp_radix = trim(fn_radix)//"_"//trim(s1)//"_"//trim(s2)
-   call linopt(nsppol,ucvol,nkpt,wtk,nsym,symcart,mband,occ,eigen0,fermie,pmat, &
-   lin1,lin2,nomega,domega,scissor,broadening,tmp_radix,comm)
+ do itemp=1,ep_ntemp
+   call ebands_copy(BSt, EPBst)
+   if(do_ep_renorm) then
+     call renorm_bst(Epren, EPBst, Cryst, itemp, do_lifetime=.True.,do_check=.True.)
+   end if
+   do ii=1,num_lin_comp
+     lin1 = int(lin_comp(ii)/10.0_dp)
+     lin2 = mod(lin_comp(ii),10)
+     write(msg,*) ' linopt ', lin1,lin2
+     call wrtout(std_out,msg,"COLL")
+     call int2char4(lin1,s1)
+     call int2char4(lin2,s2)
+     call int2char4(itemp,stemp)
+     ABI_CHECK((s1(1:1)/='#'),'Bug: string length too short!')
+     ABI_CHECK((s2(1:1)/='#'),'Bug: string length too short!')
+     ABI_CHECK((stemp(1:1)/='#'),'Bug: string length too short!')
+     if(do_ep_renorm) then
+       tmp_radix = trim(fn_radix)//"_"//trim(s1)//"_"//trim(s2)//"_T"//trim(stemp)
+     else
+       tmp_radix = trim(fn_radix)//"_"//trim(s1)//"_"//trim(s2)
+     end if
+     call linopt(nsppol,ucvol,nkpt,wtk,nsym,symcart,mband,BSt,EPBst,fermie,pmat, &
+     lin1,lin2,nomega,domega,scissor,broadening,tmp_radix,comm)
+   end do
+   call ebands_free(EPBst)
  end do
+ 
+ if(do_ep_renorm) then
+   call eprenorms_free(Epren)
+ end if
  
  call wrtout(std_out," optic : Call nlinopt","COLL")
  
@@ -607,7 +675,9 @@ program optic
  ABI_DEALLOCATE(symcart)
  ABI_DEALLOCATE(pmat)
 
+ call ebands_free(BSt)
  call hdr_free(hdr)
+ call crystal_free(Cryst)
 
  call timein(tcpu,twall)
 

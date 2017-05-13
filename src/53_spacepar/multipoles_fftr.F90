@@ -28,10 +28,10 @@
 !!  dipole(nspden)=mean value of the dipole of input array, for each nspden component
 !!
 !! PARENTS
-!!      multipoles_fftr
+!!      multipoles_out
 !!
 !! CHILDREN
-!!      multipoles_fftr,wrtout
+!!      destroy_distribfft,init_distribfft_seq,xmpi_sum
 !!
 !! SOURCE
 

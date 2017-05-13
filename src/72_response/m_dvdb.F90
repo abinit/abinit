@@ -1800,7 +1800,7 @@ end subroutine rotate_fqg
 !!  comm=MPI communicator
 !!
 !! PARENTS
-!!      m_dvdb,m_phgamma,m_sigmaph
+!!      m_dvdb,m_gkk,m_phgamma,m_sigmaph
 !!
 !! CHILDREN
 !!      dvdb_free,dvdb_ftinterp_qpt,dvdb_ftinterp_setup,dvdb_init

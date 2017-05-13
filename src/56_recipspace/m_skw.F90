@@ -419,6 +419,7 @@ end function skw_new
 !!      m_skw
 !!
 !! CHILDREN
+!!      get_irredg,sort_dp,xmpi_allgatherv,xmpi_split_work2_i4b,xmpi_sum
 !!
 !! SOURCE
 
@@ -474,9 +475,10 @@ end subroutine skw_print
 !!  [oder2(3,3)]=Second-order derivatives wrt k in reduced coordinates.
 !!
 !! PARENTS
-!!      m_ifc,m_skw
+!!      m_ebands,m_ifc,m_skw
 !!
 !! CHILDREN
+!!      get_irredg,sort_dp,xmpi_allgatherv,xmpi_split_work2_i4b,xmpi_sum
 !!
 !! SOURCE
 
@@ -576,6 +578,7 @@ end subroutine skw_eval_bks
 !! PARENTS
 !!
 !! CHILDREN
+!!      get_irredg,sort_dp,xmpi_allgatherv,xmpi_split_work2_i4b,xmpi_sum
 !!
 !! SOURCE
 
@@ -696,9 +699,10 @@ end subroutine skw_eval_fft
 !!  Free memory
 !!
 !! PARENTS
-!!      eph,m_ifc
+!!      m_ebands,m_ifc
 !!
 !! CHILDREN
+!!      get_irredg,sort_dp,xmpi_allgatherv,xmpi_split_work2_i4b,xmpi_sum
 !!
 !! SOURCE
 
@@ -770,6 +774,7 @@ end subroutine skw_free
 !!      m_skw
 !!
 !! CHILDREN
+!!      get_irredg,sort_dp,xmpi_allgatherv,xmpi_split_work2_i4b,xmpi_sum
 !!
 !! SOURCE
 
@@ -831,6 +836,7 @@ end subroutine mkstar
 !!      m_skw
 !!
 !! CHILDREN
+!!      get_irredg,sort_dp,xmpi_allgatherv,xmpi_split_work2_i4b,xmpi_sum
 !!
 !! SOURCE
 
@@ -894,6 +900,7 @@ end subroutine mkstar_dk1
 !!      m_skw
 !!
 !! CHILDREN
+!!      get_irredg,sort_dp,xmpi_allgatherv,xmpi_split_work2_i4b,xmpi_sum
 !!
 !! SOURCE
 
@@ -971,8 +978,10 @@ end subroutine mkstar_dk2
 !!  or2vals(skw%nr)=||R||**2
 !!
 !! PARENTS
+!!      m_skw
 !!
 !! CHILDREN
+!!      get_irredg,sort_dp,xmpi_allgatherv,xmpi_split_work2_i4b,xmpi_sum
 !!
 !! SOURCE
 

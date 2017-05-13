@@ -56,13 +56,13 @@
 !!      crystal_free,crystal_from_hdr,crystal_print,cwtime,ddb_free
 !!      ddb_from_file,ddk_free,ddk_init,destroy_mpi_enreg,dvdb_free,dvdb_init
 !!      dvdb_list_perts,dvdb_print,ebands_free,ebands_print,ebands_prtbltztrp
-!!      ebands_set_fermie,ebands_set_scheme,ebands_update_occ
-!!      eph_gkk
-!!      eph_phgamma,eph_phpi,hdr_free,hdr_vs_dtset,ifc_free,ifc_init
-!!      ifc_outphbtrap,ifc_printbxsf,ifc_test_phinterp,init_distribfft_seq
-!!      initmpi_seq,mkphdos,pawfgr_destroy,pawfgr_init,phdos_free,phdos_ncwrite
-!!      phdos_print,phdos_print_msqd,print_ngfft,pspini,sigmaph,skw_free
-!!      wfk_read_eigenvalues,wrtout,xmpi_bcast
+!!      ebands_set_fermie,ebands_set_scheme,ebands_update_occ,ebands_write
+!!      edos_free,edos_print,edos_write,eph_gkk,eph_phgamma,eph_phpi,hdr_free
+!!      hdr_vs_dtset,ifc_free,ifc_init,ifc_mkphbs,ifc_outphbtrap,ifc_print
+!!      ifc_printbxsf,ifc_test_phinterp,init_distribfft_seq,initmpi_seq,mkphdos
+!!      pawfgr_destroy,pawfgr_init,phdos_free,phdos_ncwrite,phdos_print
+!!      phdos_print_thermo,print_ngfft,pspini,sigmaph,wfk_read_eigenvalues
+!!      wrtout,xmpi_bcast,xmpi_end
 !!
 !! SOURCE
 
@@ -430,6 +430,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
      path = strcat(dtfil%filnam_ds(4), "_PHDOS")
      call wrtout(ab_out, sjoin("- Writing phonon DOS to file:", path))
      call phdos_print(phdos, path)
+
      !call phdos_print_debye(phdos, crystal%ucvol)
 
 !TODO: do we want to pass the temper etc... from anaddb_dtset into the full dtset for abinit?
@@ -438,6 +439,8 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 !    2) I've addeded a new abinit variable (tmesh) to specifiy the list of temperatures.
      path = strcat(dtfil%filnam_ds(4), "_MSQD_T")
      !call phdos_print_msqd(phdos, path, 1000, one, one)
+     path = strcat(dtfil%filnam_ds(4), "_THERMO")
+     call phdos_print_thermo(PHdos, path, 1000, zero, one)
 
 #ifdef HAVE_NETCDF
      path = strcat(dtfil%filnam_ds(4), "_PHDOS.nc")
@@ -470,7 +473,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  call wrtout(std_out, msg, do_flush=.True.)
  call cwtime(cpu,wall,gflops,"start")
 
- ! Initialize the object used to read DeltaVscf (required if eph_tash /= 0)
+ ! Initialize the object used to read DeltaVscf (required if eph_task /= 0)
  if (use_dvdb) then
    call dvdb_init(dvdb, dvdb_path, comm)
    if (my_rank == master) then

@@ -285,8 +285,8 @@ subroutine ddb_diel(Crystal,amu,anaddb_dtset,dielt_rlx,displ,d2cart,epsinf,fact_
 #ifdef HAVE_NETCDF
      if (ncid /= nctk_noid) then
        ncerr = nctk_def_arrays(ncid, [nctkarr_t("oscillator_strength", "dp", &
-         "complex, number_of_cartesian_directions, number_of_cartesian_directions, number_of_phonon_modes")], &
-         defmode=.True.)
+       "complex, number_of_cartesian_directions, number_of_cartesian_directions, number_of_phonon_modes")], &
+       defmode=.True.)
        NCF_CHECK(ncerr)
        NCF_CHECK(nctk_set_datamode(ncid))
        NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "oscillator_strength"), oscstr))
@@ -384,7 +384,7 @@ subroutine ddb_diel(Crystal,amu,anaddb_dtset,dielt_rlx,displ,d2cart,epsinf,fact_
 #ifdef HAVE_NETCDF
    if (ncid /= nctk_noid) then
      ncerr = nctk_def_arrays(ncid, [nctkarr_t("emacro_cart_rlx", "dp", &
-       "number_of_cartesian_directions, number_of_cartesian_directions")],defmode=.True.)
+     "number_of_cartesian_directions, number_of_cartesian_directions")],defmode=.True.)
      NCF_CHECK(ncerr)
      NCF_CHECK(nctk_set_datamode(ncid))
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "emacro_cart_rlx"), dielt_rlx))

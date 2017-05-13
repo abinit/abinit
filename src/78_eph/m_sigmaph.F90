@@ -1811,6 +1811,8 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
  !call xmpi_barrier(comm)
  !NCF_CHECK(nctk_open_modify(new%ncid, strcat(dtfil%filnam_ds(4), "_SIGMAPH.nc"), comm))
  !NCF_CHECK(nctk_set_datamode(new%ncid))
+ NCF_CHECK(nctk_open_modify(new%ncid, strcat(dtfil%filnam_ds(4), "_SIGMAPH.nc"), xmpi_comm_self))
+ NCF_CHECK(nctk_set_datamode(new%ncid))
 #endif
 
 end function sigmaph_new

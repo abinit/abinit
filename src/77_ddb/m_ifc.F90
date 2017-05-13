@@ -118,6 +118,9 @@ MODULE m_ifc
      ! Min and max frequency obtained on the initial ab-initio q-mesh (-+ 30 cmm1)
      ! Used to generate frequency meshes for DOSes.
 
+   real(dp) :: r_inscribed_sphere
+     ! radius of biggest sphere inscribed in the WS supercell
+
    real(dp),allocatable :: amu(:)
      ! amu(ntypat)
      ! mass of the atoms (atomic mass unit)
@@ -195,9 +198,10 @@ MODULE m_ifc
  public :: ifc_print         ! Print info on the object.
  public :: ifc_fourq         ! Use Fourier interpolation to compute interpolated frequencies w(q) and eigenvectors e(q)
  public :: ifc_speedofsound  ! Compute the speed of sound by averaging phonon group velocities.
- public :: ifc_write          ! Print the ifc (output, netcdf and text file)
+ public :: ifc_write         ! Print the ifc (output, netcdf and text file)
  public :: ifc_outphbtrap    ! Print out phonon frequencies on regular grid for BoltzTrap code.
  public :: ifc_printbxsf     ! Output phonon isosurface in Xcrysden format.
+ public :: ifc_calcnwrite_nana_terms   ! Compute phonons for q--> 0 with LO-TO
 !!***
 
 !----------------------------------------------------------------------
@@ -252,12 +256,11 @@ CONTAINS  !===========================================================
 !!
 !! PARENTS
 !!      anaddb,compute_anharmonics,eph,m_anharmonics_terms
-!!      m_effective_potential,m_effective_potential_file,m_harmonics_terms
-!!      m_ifc
+!!      m_effective_potential,m_effective_potential_file,m_gruneisen
+!!      m_harmonics_terms,m_ifc
 !!
 !! CHILDREN
-!!      cwtime,ifc_fourq,phbspl_evalq,phbspl_free,random_number,skw_eval_bks
-!!      skw_free,wrap2_pmhalf,xmpi_sum
+!!      dfpt_phfrq,gtdyn9,nctk_defwrite_nonana_terms
 !!
 !! SOURCE
 
@@ -381,11 +384,10 @@ end subroutine ifc_free
 !! Ifc<ifc_type>=Object containing the dynamical matrix and the IFCs.
 !!
 !! PARENTS
-!!      anaddb,eph,m_effective_potential_file
+!!      anaddb,eph,m_effective_potential_file,m_gruneisen
 !!
 !! CHILDREN
-!!      cwtime,ifc_fourq,phbspl_evalq,phbspl_free,random_number,skw_eval_bks
-!!      skw_free,wrap2_pmhalf,xmpi_sum
+!!      dfpt_phfrq,gtdyn9,nctk_defwrite_nonana_terms
 !!
 !! SOURCE
 
@@ -431,6 +433,7 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
  integer :: nprocs,my_rank,ierr
  real(dp),parameter :: qphnrm=one
  real(dp) :: xval,cpu,wall,gflops,rcut_min
+ real(dp) :: r_inscribed_sphere
  character(len=500) :: message
  type(ifc_type) :: ifc_tmp
 !arrays
@@ -610,7 +613,8 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
 ! MG FIXME: Why ngqpt is intent(inout)?
  ABI_MALLOC(ifc_tmp%wghatm,(natom,natom,ifc_tmp%nrpt))
  new_wght = 0
- call wght9(Ifc%brav,gprim,natom,ngqpt,nqbz,nqshft,ifc_tmp%nrpt,q1shft,rcan,ifc_tmp%rpt,rprimd,new_wght,ifc_tmp%wghatm)
+ call wght9(Ifc%brav,gprim,natom,ngqpt,nqbz,nqshft,ifc_tmp%nrpt,q1shft,rcan,&
+&     ifc_tmp%rpt,rprimd,r_inscribed_sphere,new_wght,ifc_tmp%wghatm)
 
 ! Fourier transformation of the dynamical matrices (q-->R)
  ABI_MALLOC(ifc_tmp%atmfrc,(2,3,natom,3,natom,ifc_tmp%nrpt))
@@ -658,6 +662,7 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
      Ifc%rpt(:,irpt_new) = ifc_tmp%rpt(:,irpt)
      Ifc%wghatm(:,:,irpt_new) = ifc_tmp%wghatm(:,:,irpt)
      Ifc%cell(:,irpt_new) = ifc_tmp%cell(:,irpt)
+     Ifc%r_inscribed_sphere = r_inscribed_sphere
      irpt_new = irpt_new + 1
    end if
  end do
@@ -743,8 +748,10 @@ end subroutine ifc_init
 !!  Only printing
 !!
 !! PARENTS
+!!      anaddb,eph
 !!
 !! CHILDREN
+!!      dfpt_phfrq,gtdyn9,nctk_defwrite_nonana_terms
 !!
 !! SOURCE
 
@@ -839,13 +846,12 @@ end subroutine ifc_print
 !!  [dwdq(3,3*natom)] = Group velocities i.e. d(omega(q))/dq in Cartesian coordinates.
 !!
 !! PARENTS
-!!      get_nv_fs_en,get_tau_k,harmonic_thermo,interpolate_gkk,m_ifc,m_phgamma
-!!      m_phonons,m_phpi,m_sigmaph,mka2f,mka2f_tr,mka2f_tr_lova,mkph_linwid
-!!      read_gkk
+!!      get_nv_fs_en,get_tau_k,harmonic_thermo,interpolate_gkk,m_gruneisen
+!!      m_ifc,m_phgamma,m_phonons,m_phpi,m_sigmaph,mka2f,mka2f_tr,mka2f_tr_lova
+!!      mkph_linwid,read_gkk
 !!
 !! CHILDREN
-!!      cwtime,ifc_fourq,phbspl_evalq,phbspl_free,random_number,skw_eval_bks
-!!      skw_free,wrap2_pmhalf,xmpi_sum
+!!      dfpt_phfrq,gtdyn9,nctk_defwrite_nonana_terms
 !!
 !! SOURCE
 
@@ -962,8 +968,10 @@ end subroutine ifc_fourq
 !!    \nabla_q w(q, nu) = 1/(2 w(q, nu))  <u(q, nu)| \nabla_q D(q) | u(q, nu)>
 !!
 !! PARENTS
+!!      m_ifc
 !!
 !! CHILDREN
+!!      dfpt_phfrq,gtdyn9,nctk_defwrite_nonana_terms
 !!
 !! SOURCE
 
@@ -1084,8 +1092,10 @@ end subroutine ifc_get_dwdq
 !! OUTPUT
 !!
 !! PARENTS
+!!      anaddb,m_gruneisen
 !!
 !! CHILDREN
+!!      dfpt_phfrq,gtdyn9,nctk_defwrite_nonana_terms
 !!
 !! SOURCE
 
@@ -1308,8 +1318,10 @@ end subroutine ifc_speedofsound
 !!  ifc%atmfrc(2,3,natom,3,natom,nrpt)= ASR-imposed Interatomic Forces
 !!
 !! PARENTS
+!!      m_ifc
 !!
 !! CHILDREN
+!!      dfpt_phfrq,gtdyn9,nctk_defwrite_nonana_terms
 !!
 !! SOURCE
 
@@ -1472,8 +1484,7 @@ end subroutine ifc_autocutoff
 !!      m_ifc
 !!
 !! CHILDREN
-!!      cwtime,ifc_fourq,phbspl_evalq,phbspl_free,random_number,skw_eval_bks
-!!      skw_free,wrap2_pmhalf,xmpi_sum
+!!      dfpt_phfrq,gtdyn9,nctk_defwrite_nonana_terms
 !!
 !! SOURCE
 
@@ -1611,8 +1622,7 @@ end subroutine corsifc9
 !!      anaddb
 !!
 !! CHILDREN
-!!      cwtime,ifc_fourq,phbspl_evalq,phbspl_free,random_number,skw_eval_bks
-!!      skw_free,wrap2_pmhalf,xmpi_sum
+!!      dfpt_phfrq,gtdyn9,nctk_defwrite_nonana_terms
 !!
 !! SOURCE
 
@@ -1638,10 +1648,11 @@ subroutine ifc_write(Ifc,ifcana,atifc,ifcout,prt_ifc,ncid)
 
 !Local variables -------------------------
 !scalars
- integer :: ia,ii,ncerr,iatifc,ifcout1,mu,nu,iout, irpt
-! unit number to print out ifc information for dynamical matrix (AI2PS)
+ integer :: ia,ib,ii,ncerr,iatifc,ifcout1,mu,nu,iout, irpt
+! unit number to print out ifc information for dynamical matrix (AI2PS) 
  integer :: unit_ifc, unit_tdep
  real(dp) :: detdlt
+ real(dp) :: maxdist_tdep
  character(len=500) :: message
  character(len=4) :: str1, str2
 !arrays
@@ -1726,8 +1737,12 @@ subroutine ifc_write(Ifc,ifcana,atifc,ifcout,prt_ifc,ncid)
 &   ' constants in TDEP format. This is because prt_ifc==1. '
    ! Print necessary stuff for TDEP
    write(unit_tdep,"(1X,I10,15X,'How many atoms per unit cell')") Ifc%natom
-
-   write(unit_tdep,"(1X,F20.15,5X,'Realspace cutoff (A)')") maxval(dist)*Bohr_Ang+1E-5_dp
+ 
+   ! look at all pairs, find furthest one with weight 1
+!   do ia 
+!Ifc%wghatm(ia,ib,irpt)
+   maxdist_tdep = Ifc%r_inscribed_sphere !maxval(dist)*0.8_dp
+   write(unit_tdep,"(1X,F20.15,5X,'Realspace cutoff (A)')") maxdist_tdep*Bohr_Ang
  end if
 
 #ifdef HAVE_NETCDF
@@ -1805,21 +1820,29 @@ subroutine ifc_write(Ifc,ifcana,atifc,ifcout,prt_ifc,ncid)
 
 
      if (prt_ifc == 1) then
-       write(unit_tdep,"(1X,I10,15X,'How many neighbours does atom ',I3,' have')") ifcout1, ia
+       do ii=1,ifcout1
+         if (wkdist(ii) > maxdist_tdep) exit
+       end do
+       ii = ii - 1
+       write(unit_tdep,"(1X,I10,15X,'How many neighbours does atom ',I3,' have')") ii, ia
 
        do ii=1,ifcout1
+         ib = indngb(ii)
+         irpt = (list(ii)-1)/Ifc%natom+1
+         ! limit printing to maximum distance for tdep
+         if (wkdist(ii) > maxdist_tdep) cycle
+
          !TDEP
          call int2char4(ii, str1)
          call int2char4(ia, str2)
-         write(unit_tdep,"(1X,I10,15X,a,a,a,a)") indngb(ii), &
+         write(unit_tdep,"(1X,I10,15X,a,a,a,a)") ib, &
 &            'In the unit cell, what is the index of neighbour ', &
 &            trim(str1), " of atom ", trim(str2)
          ! The lattice vector needs to be in reduced coordinates?
          ! TODO: check whether this is correct for TDEP: might need just lattice
          ! vector part and not full vector, and could be in integers instead of
          ! cartesian vector...
-         irpt=(list(ii)-1)/Ifc%natom+1
-         write(unit_tdep,'(3es28.16)') matmul(Ifc%rpt(1:3,irpt),Ifc%gprim)
+         write (unit_tdep,'(3es28.16)') matmul(Ifc%rpt(1:3,irpt),Ifc%gprim) 
 
          !AI2PS
          write(unit_ifc,'(i6,i6)') ia,ii
@@ -1828,8 +1851,9 @@ subroutine ifc_write(Ifc,ifcana,atifc,ifcout,prt_ifc,ncid)
            !TDEp
            ! And the actual short ranged forceconstant: TODO: check if
            ! a transpose is needed or a swap between the nu and the mu
-           write(unit_tdep,'(3f28.16)') (sriaf(nu,mu,ii)*Ha_eV/amu_emass, mu=1, 3)
-
+           !write(unit_tdep,'(3f28.16)') (sriaf(nu,mu,ii)*Ha_eV/amu_emass, mu=1, 3)
+           write(unit_tdep,'(3f28.16)') (Ifc%short_atmfrc(1,mu,ia,nu,ib,irpt)*Ha_eV/Bohr_Ang**2, mu=1, 3)
+           
            !AI2PS
            write(unit_ifc,'(3f28.16)')(rsiaf(nu,mu,ii),mu=1,3)
          end do
@@ -1904,6 +1928,13 @@ subroutine ifc_write(Ifc,ifcana,atifc,ifcout,prt_ifc,ncid)
 contains
  integer function vid(vname)
 
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'vid'
+!End of the abilint section
+
    character(len=*),intent(in) :: vname
    vid = nctk_idname(ncid, vname)
  end function vid
@@ -1952,8 +1983,7 @@ end subroutine ifc_write
 !!      m_ifc
 !!
 !! CHILDREN
-!!      cwtime,ifc_fourq,phbspl_evalq,phbspl_free,random_number,skw_eval_bks
-!!      skw_free,wrap2_pmhalf,xmpi_sum
+!!      dfpt_phfrq,gtdyn9,nctk_defwrite_nonana_terms
 !!
 !! SOURCE
 
@@ -2277,8 +2307,7 @@ end subroutine ifc_getiaf
 !!      m_ifc
 !!
 !! CHILDREN
-!!      cwtime,ifc_fourq,phbspl_evalq,phbspl_free,random_number,skw_eval_bks
-!!      skw_free,wrap2_pmhalf,xmpi_sum
+!!      dfpt_phfrq,gtdyn9,nctk_defwrite_nonana_terms
 !!
 !! SOURCE
 
@@ -2481,8 +2510,7 @@ end subroutine omega_decomp
 !!      anaddb,eph
 !!
 !! CHILDREN
-!!      cwtime,ifc_fourq,phbspl_evalq,phbspl_free,random_number,skw_eval_bks
-!!      skw_free,wrap2_pmhalf,xmpi_sum
+!!      dfpt_phfrq,gtdyn9,nctk_defwrite_nonana_terms
 !!
 !! SOURCE
 
@@ -2607,8 +2635,7 @@ end subroutine ifc_outphbtrap
 !!      eph
 !!
 !! CHILDREN
-!!      cwtime,ifc_fourq,phbspl_evalq,phbspl_free,random_number,skw_eval_bks
-!!      skw_free,wrap2_pmhalf,xmpi_sum
+!!      dfpt_phfrq,gtdyn9,nctk_defwrite_nonana_terms
 !!
 !! SOURCE
 
@@ -2907,8 +2934,7 @@ end function ifc_build_phbspl
 !!      m_ifc
 !!
 !! CHILDREN
-!!      cwtime,ifc_fourq,phbspl_evalq,phbspl_free,random_number,skw_eval_bks
-!!      skw_free,wrap2_pmhalf,xmpi_sum
+!!      dfpt_phfrq,gtdyn9,nctk_defwrite_nonana_terms
 !!
 !! SOURCE
 
@@ -2984,8 +3010,7 @@ end subroutine phbspl_evalq
 !!      m_ifc
 !!
 !! CHILDREN
-!!      cwtime,ifc_fourq,phbspl_evalq,phbspl_free,random_number,skw_eval_bks
-!!      skw_free,wrap2_pmhalf,xmpi_sum
+!!      dfpt_phfrq,gtdyn9,nctk_defwrite_nonana_terms
 !!
 !! SOURCE
 
@@ -3173,8 +3198,7 @@ end function ifc_build_skw
 !!      eph
 !!
 !! CHILDREN
-!!      cwtime,ifc_fourq,phbspl_evalq,phbspl_free,random_number,skw_eval_bks
-!!      skw_free,wrap2_pmhalf,xmpi_sum
+!!      dfpt_phfrq,gtdyn9,nctk_defwrite_nonana_terms
 !!
 !! SOURCE
 
@@ -3361,6 +3385,118 @@ subroutine ifc_test_phinterp(ifc, cryst, ngqpt, nshiftq, shiftq, ords, comm, tes
  MSG_COMMENT("ifc_test_phinterp done")
 
 end subroutine ifc_test_phinterp
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_gruneisen/ifc_calcnwrite_nana_terms
+!! NAME
+!!  ifc_calcnwrite_nana_terms
+!!
+!! FUNCTION
+!!  Compute frequencies and phonon displacement for q-->0 in the presence of non-analytical behaviour.
+!!
+!! INPUTS
+!!  nph2l=Number of qpoints.
+!!  qph2l(3,nph2l)=List of phonon wavevector directions along which the non-analytical correction
+!!    to the Gamma-point phonon frequencies will be calculated
+!!    The direction is in CARTESIAN COORDINATES
+!!  qnrml2(nph2l)=Normalizatin factor.
+!!
+!! OUTPUT
+!!  Only writing.
+!!
+!! NOTES:
+!!  This routine should be called by master node and when ifcflag == 1.
+!!
+!! PARENTS
+!!      m_gruneisen,m_phonons
+!!
+!! CHILDREN
+!!      dfpt_phfrq,gtdyn9,nctk_defwrite_nonana_terms
+!!
+!! SOURCE
+
+subroutine ifc_calcnwrite_nana_terms(ifc, crystal, nph2l, qph2l, qnrml2, ncid)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'ifc_calcnwrite_nana_terms'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+ integer,intent(in) :: nph2l, ncid
+ type(ifc_type),intent(in) :: ifc
+ type(crystal_t),intent(in) :: crystal
+!arrays
+ real(dp),intent(in) :: qph2l(3, nph2l), qnrml2(nph2l)
+
+!Local variables-------------------------------
+!scalars
+ integer :: iphl2
+ !character(len=500) :: msg
+!arrays
+ real(dp) :: qphnrm(3),qphon(3,3)
+ real(dp),allocatable :: displ_cart(:,:,:),phfrq(:),d2cart(:,:,:),eigvec(:,:,:),eigval(:)
+
+! ************************************************************************
+
+ if (nph2l == 0) return
+
+ !Now treat the second list of vectors (only at the Gamma point, but can include non-analyticities)
+ ABI_MALLOC(phfrq, (3*crystal%natom))
+ ABI_MALLOC(displ_cart, (2, 3*crystal%natom, 3*crystal%natom))
+ ABI_MALLOC(d2cart, (2, 3*ifc%mpert, 3*ifc%mpert))
+ ABI_MALLOC(eigvec, (2, 3*crystal%natom, 3*crystal%natom))
+ ABI_MALLOC(eigval, (3*crystal%natom))
+
+ ! Before examining every direction or the dielectric tensor, generates the dynamical matrix at gamma
+ qphon(:,1)=zero; qphnrm(1)=zero
+
+ ! Generation of the dynamical matrix in cartesian coordinates
+ ! Get d2cart using the interatomic forces and the
+ ! long-range coulomb interaction through Ewald summation
+ call gtdyn9(ifc%acell,ifc%atmfrc,ifc%dielt,ifc%dipdip, &
+   ifc%dyewq0,d2cart,crystal%gmet,ifc%gprim,ifc%mpert,crystal%natom, &
+   ifc%nrpt,qphnrm(1),qphon,crystal%rmet,ifc%rprim,ifc%rpt, &
+   ifc%trans,crystal%ucvol,ifc%wghatm,crystal%xred,ifc%zeff)
+
+#ifdef HAVE_NETCDF
+ iphl2 = 0
+ call nctk_defwrite_nonana_terms(ncid, iphl2, nph2l, qph2l, crystal%natom, phfrq, displ_cart, "define")
+#endif
+
+ ! Examine every wavevector of this list
+ do iphl2=1,nph2l
+   ! Initialisation of the phonon wavevector
+   qphon(:,1) = qph2l(:,iphl2)
+   qphnrm(1) = qnrml2(iphl2)
+
+   ! Calculation of the eigenvectors and eigenvalues of the dynamical matrix
+   call dfpt_phfrq(ifc%amu,displ_cart,d2cart,eigval,eigvec,crystal%indsym, &
+      ifc%mpert,crystal%nsym,crystal%natom,crystal%nsym,crystal%ntypat,phfrq,qphnrm(1),qphon, &
+      crystal%rprimd,ifc%symdynmat,crystal%symrel,crystal%symafm,crystal%typat,crystal%ucvol)
+
+   ! Write the phonon frequencies
+   !call dfpt_prtph(displ_cart,inp%eivec,inp%enunit,ab_out,natom,phfrq,qphnrm(1),qphon)
+
+#ifdef HAVE_NETCDF
+   ! Loop is not MPI-parallelized --> no need for MPI-IO API.
+   call nctk_defwrite_nonana_terms(ncid, iphl2, nph2l, qph2l, crystal%natom, phfrq, displ_cart, "write")
+#endif
+ end do ! iphl2
+
+ ABI_FREE(phfrq)
+ ABI_FREE(displ_cart)
+ ABI_FREE(d2cart)
+ ABI_FREE(eigvec)
+ ABI_FREE(eigval)
+
+end subroutine ifc_calcnwrite_nana_terms
 !!***
 
 !----------------------------------------------------------------------

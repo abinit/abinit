@@ -51,6 +51,7 @@ class DdbFile(EpcFile):
             self.E2D = np.zeros((self.natom, self.ncart, self.natom, self.ncart), dtype=np.complex)
             self.E2D.real = root.variables['second_derivative_of_energy'][:,:,:,:,0]
             self.E2D.imag = root.variables['second_derivative_of_energy'][:,:,:,:,1]
+            self.E2D = np.einsum('aibj->bjai', self.E2D)  # Indicies are reversed when writing them from Fortran.
 
             self.BECT = root.variables['born_effective_charge_tensor'][:self.ncart,:self.natom,:self.ncart]
 
@@ -139,6 +140,10 @@ class DdbFile(EpcFile):
                   for dir4 in np.arange(3):
                     E2D_cart[dir1,ii,dir2,jj] += (self.E2D[ii,dir3,jj,dir4] *
                             self.gprimd[dir1,dir3] * self.gprimd[dir2,dir4])
+
+        # DEBUG
+        #print(repr(E2D_cart))
+        # END DEBUG
     
         # Reduce the 4 dimensional E2D_cart matrice to 2 dimensional Dynamical matrice
         # with scaled masses.

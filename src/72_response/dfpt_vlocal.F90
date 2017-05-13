@@ -7,7 +7,7 @@
 !! Compute local part of 1st-order potential from the appropriate
 !! atomic pseudopotential with structure and derivative factor.
 !! In case of derivative with respect to k or
-!! electric field perturbation, the 1st-order local potential vanishes.
+!! electric (magnetic Zeeman) field perturbation, the 1st-order local potential vanishes.
 !!
 !! COPYRIGHT
 !! Copyright (C) 1999-2017 ABINIT group (XG,MM)
@@ -111,9 +111,9 @@ subroutine dfpt_vlocal(atindx,cplex,gmet,gsqcut,idir,ipert,&
 
  iatom=ipert
 
- if(iatom==natom+1 .or. iatom==natom+2 .or. iatom==natom+10  .or. iatom==natom+11)then
+ if(iatom==natom+1 .or. iatom==natom+2 .or. iatom==natom+10  .or. iatom==natom+11 .or. iatom==natom+5)then
 
-!  (In case of d/dk or an electric field)
+!  (In case of d/dk or an electric field, or magnetic (Zeeman) field->[natom+5] SPr deb )
    vpsp1(1:cplex*nfft)=zero
 
  else

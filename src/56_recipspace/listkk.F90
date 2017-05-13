@@ -57,8 +57,8 @@
 !!  of the separate vectors.
 !!
 !! PARENTS
-!!      initberry,inwffil,m_dvdb,m_ebands,m_fock,m_fstab,m_ifc,m_kpts,m_phgamma
-!!      m_sigmaph,mlwfovlp_qp,printbxsf
+!!      initberry,inwffil,m_dvdb,m_ebands,m_eprenorms,m_exc_diago,m_fock
+!!      m_fstab,m_haydock,m_ifc,m_kpts,m_phgamma,m_sigmaph,mlwfovlp_qp
 !!
 !! CHILDREN
 !!      sort_dp,timab

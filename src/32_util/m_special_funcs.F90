@@ -63,6 +63,9 @@ module m_special_funcs
 !!
 !! SOURCE
 
+ public :: fermi_dirac        ! Fermi Dirac distribution
+ public :: bose_einstein      ! Bose Einstein distribution
+
  type,public :: jlspline_t
 
    integer :: nx
@@ -1305,6 +1308,122 @@ pure function phim(costheta,sintheta,mm)
 & +costheta*two*sintheta*costheta)
 
  end function phim
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_special_funcs/fermi_dirac
+!! NAME
+!!  fermi_dirac
+!!
+!! FUNCTION
+!!  Returns the Fermi Dirac distribution for T and energy wrt Fermi level
+!!  presumes everything is in Hartree!!!! Not Kelvin for T
+!!
+!! INPUTS
+!!  energy = electron energy level
+!!  mu = chemical potential
+!!  temperature = T
+!!
+!! PARENTS
+!!
+!! SOURCE
+
+function fermi_dirac(energy, mu, temperature)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'fermi_dirac'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ real(dp),intent(in) :: energy, mu, temperature
+ real(dp) :: fermi_dirac
+
+!Local variables-------------------------------
+!scalars
+ real(dp) :: arg
+ character(len=500) :: message
+
+! *************************************************************************
+
+ fermi_dirac = zero
+ if (temperature > tol12) then
+   arg = (energy-mu)/temperature
+   if(arg < -600._dp)then ! far below Ef
+     fermi_dirac = one
+   else if (arg < 600._dp)then ! around Ef
+     fermi_dirac = one / (exp(arg)  + one)
+   end if
+ else  ! T is too small - just step function
+   if (mu-energy > tol12) fermi_dirac = one
+ end if
+
+end function fermi_dirac
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_special_funcs/bose_einstein
+!! NAME
+!!  bose_einstein
+!!
+!! FUNCTION
+!!  Returns the Bose Einstein distribution for T and energy 
+!!  presumes everything is in Hartree!!!! Not Kelvin for T
+!!
+!! INPUTS
+!!  energy = electron energy level
+!!  temperature = T
+!!
+!! PARENTS
+!!
+!! SOURCE
+
+function bose_einstein(energy, temperature)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'bose_einstein'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ real(dp),intent(in) :: energy, temperature
+ real(dp) :: bose_einstein
+
+!Local variables-------------------------------
+!scalars
+ real(dp) :: arg
+ character(len=500) :: message
+
+! *************************************************************************
+
+ bose_einstein = zero
+ if (temperature > tol12) then
+   arg = energy/temperature
+   if(arg > tol12 .and. arg < 600._dp)then
+     bose_einstein = one / (exp(arg)  - one)
+   else if (arg < tol12) then
+     write(message,'(a)') 'No Bose Einstein for negative energies'
+     MSG_WARNING(message)
+   end if
+ else if (arg < tol12) then
+   write(message,'(a)') 'No Bose Einstein for negative or 0 T'
+   MSG_WARNING(message)
+ end if
+ 
+
+end function bose_einstein
 !!***
 
 !----------------------------------------------------------------------

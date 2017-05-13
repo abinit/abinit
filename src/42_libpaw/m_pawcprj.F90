@@ -499,6 +499,8 @@ end subroutine pawcprj_copy
    if (LEN_TRIM(msg) > 0) then
      MSG_ERROR(msg)
    end if
+ else
+   n1dimx=0;n2dimx=0;ncpgrx=0
  end if
 
  if (abs(alpha)<=tol16) then
@@ -2875,8 +2877,8 @@ end subroutine pawcprj_bcast
 !!  dimcprj(natom)=Number of nlm elements in the <p_{lmn}^i|\psi> matrix elements for i=1,...,natom.
 !!
 !! PARENTS
-!!      berryphase_new,dfpt_looppert,dfpt_scfcv,extrapwf,getghc,initberry
-!!      m_fock,m_hamiltonian,mlwfovlp_qp,outkss,scfcv,smatrix_pawinit
+!!      afterscfloop,berryphase_new,dfpt_looppert,dfpt_scfcv,extrapwf,getghc
+!!      initberry,m_fock,m_hamiltonian,mlwfovlp_qp,outkss,scfcv,smatrix_pawinit
 !!
 !! CHILDREN
 !!      xmpi_sum

@@ -263,8 +263,8 @@
 !!
 !! PARENTS
 !!      d2frnl,dfpt_nsteltwf,dfptnl_resp,energy,fock_getghc,forstrnps,getgh1c
-!!      getgh2c,getghc,getgsc,m_invovl,make_grad_berry,prep_nonlop,vtowfk
-!!      wfd_vnlpsi
+!!      getgh2c,getghc,getgsc,m_invovl,m_lobpcgwf,make_grad_berry,prep_nonlop
+!!      vtowfk,wfd_vnlpsi
 !!
 !! CHILDREN
 !!      gemm_nonlop,nonlop_gpu,nonlop_pl,nonlop_ylm,pawcprj_alloc,pawcprj_copy
@@ -472,7 +472,7 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
 !if (paw_opt==0.or.cpopt<2.or.((cpopt==2.or.cpopt==3).and.choice>1)) then
  if (size(ffnlin,1)/=npwin.or.size(ffnlin,3)/=hamk%lmnmax) then
    msg = 'Incorrect size for ffnlin!'
-   MSG_BUG(msg)
+!   MSG_BUG(msg)
  end if
  if(signs==2) then
    if (size(ffnlout,1)/=npwout.or.size(ffnlout,3)/=hamk%lmnmax) then
@@ -503,6 +503,7 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
  if(cpopt>=0) then
    if (size(cprjin)/=hamk%natom*my_nspinor*ndat) then
      msg = 'Incorrect size for cprjin!'
+
      MSG_BUG(msg)
    end if
  end if
@@ -643,40 +644,40 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
      e0 = npwin*my_nspinor*idat
      if (choice/=0.and.signs==2.and.paw_opt/=3) then
        !vectout_idat => vectout(:,1+npwout*my_nspinor*(idat-1):npwout*my_nspinor*idat)
-      b1 = 1+npwout*my_nspinor*(idat-1)
-      e1 = npwout*my_nspinor*idat
+       b1 = 1+npwout*my_nspinor*(idat-1)
+       e1 = npwout*my_nspinor*idat
      else
        !vectout_idat => vectout
-      b1 = lbound(vectout,dim=2)
-      e1 = ubound(vectout,dim=2)
+       b1 = lbound(vectout,dim=2)
+       e1 = ubound(vectout,dim=2)
      end if
      if (choice/=0.and.signs==2.and.paw_opt>=3) then
        !svectout_idat => svectout(:,1+npwout*my_nspinor*(idat-1):npwout*my_nspinor*idat)
-      b2 = 1+npwout*my_nspinor*(idat-1)
-      e2 = npwout*my_nspinor*idat
+       b2 = 1+npwout*my_nspinor*(idat-1)
+       e2 = npwout*my_nspinor*idat
      else
        !svectout_idat => svectout
-      b2 = lbound(svectout,dim=2)
-      e2 = ubound(svectout,dim=2)
+       b2 = lbound(svectout,dim=2)
+       e2 = ubound(svectout,dim=2)
      end if
 
      if (cpopt>=0) then
        !cprjin_idat => cprjin_(:,my_nspinor*(idat-1)+1:my_nspinor*(idat))
-      b3 = my_nspinor*(idat-1)+1
-      e3 = my_nspinor*(idat)
+       b3 = my_nspinor*(idat-1)+1
+       e3 = my_nspinor*(idat)
      else
        !cprjin_idat => cprjin_
-      b3 = lbound(cprjin_,dim=2)
-      e3 = ubound(cprjin_,dim=2)
+       b3 = lbound(cprjin_,dim=2)
+       e3 = ubound(cprjin_,dim=2)
      end if
      if (nnlout>0) then
       !enlout_idat => enlout((idat-1)*nnlout+1:(idat*nnlout))
-      b4 = (idat-1)*nnlout+1
-      e4 = (idat*nnlout)
+       b4 = (idat-1)*nnlout+1
+       e4 = (idat*nnlout)
      else
       !enlout_idat => enlout
-      b4 = lbound(enlout,dim=1)
-      e4 = ubound(enlout,dim=1)
+       b4 = lbound(enlout,dim=1)
+       e4 = ubound(enlout,dim=1)
      end if
 
 !    Legendre Polynomials version

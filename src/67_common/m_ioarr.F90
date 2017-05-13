@@ -124,7 +124,7 @@ CONTAINS  !=====================================================================
 !!  pawrhoij(my_natom*usepaw) <type(pawrhoij_type)>= paw rhoij occupancies and related data
 !!
 !! PARENTS
-!!      outscfcv
+!!      gstate,outscfcv
 !!
 !! CHILDREN
 !!      hdr_check,hdr_fort_read,hdr_free

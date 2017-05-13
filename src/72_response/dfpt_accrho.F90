@@ -6,7 +6,7 @@
 !!
 !! FUNCTION
 !! Response function calculation only:
-!!  Accumulate contribution to first-order density due do current (k,band)
+!!  Accumulate contribution to first-order density due to current (k,band)
 !!  Also accumulate zero-order potential part of the 2nd-order total energy (if needed)
 !!
 !! COPYRIGHT
@@ -182,6 +182,7 @@ subroutine dfpt_accrho(counter,cplex,cwave0,cwave1,cwavef,cwaveprj0,cwaveprj1,&
        else
          cwavef_sp => cwavef(:,1+npw1_k:2*npw1_k)
        end if
+       !make an inverse FFT from cwavef_sp to wfraug1
        call fourwf(cplex,rhoaug,cwavef_sp,dummy,wfraug1,gs_hamkq%gbound_kp,gs_hamkq%gbound_kp,&
 &       gs_hamkq%istwf_k,gs_hamkq%kg_kp,gs_hamkq%kg_kp,gs_hamkq%mgfft,mpi_enreg,1,gs_hamkq%ngfft,&
 &       gs_hamkq%npw_kp,1,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,0,mpi_enreg%paral_kgb,tim_fourwf,&

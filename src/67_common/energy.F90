@@ -655,8 +655,8 @@ subroutine energy(cg,compch_fft,dtset,electronpositron,&
      if (gemm_nonlop_use_gemm) then
        gemm_nonlop_ikpt_this_proc_being_treated = my_ikpt
        call make_gemm_nonlop(my_ikpt,gs_hamk%npw_fft_k,gs_hamk%lmnmax, &
-&          gs_hamk%ntypat, gs_hamk%indlmn, gs_hamk%nattyp, gs_hamk%istwf_k, gs_hamk%ucvol, gs_hamk%ffnl_k,&
-&          gs_hamk%ph3d_k)
+&       gs_hamk%ntypat, gs_hamk%indlmn, gs_hamk%nattyp, gs_hamk%istwf_k, gs_hamk%ucvol, gs_hamk%ffnl_k,&
+&       gs_hamk%ph3d_k)
      end if
 
 #if defined HAVE_GPU_CUDA
@@ -778,12 +778,12 @@ subroutine energy(cg,compch_fft,dtset,electronpositron,&
 !Compute total (free) energy
  if (optene==0.or.optene==2) then
    etotal = energies%e_kinetic + energies%e_hartree + energies%e_xc + &
-&           energies%e_localpsp + energies%e_corepsp
+&   energies%e_localpsp + energies%e_corepsp
    if (psps%usepaw==0) etotal=etotal + energies%e_nonlocalpsp
    if (psps%usepaw==1) etotal=etotal + energies%e_paw
  else if (optene==1.or.optene==3) then
    etotal = energies%e_eigenvalues - energies%e_hartree + energies%e_xc - &
-&           energies%e_xcdc + energies%e_corepsp - energies%e_corepspdc
+&   energies%e_xcdc + energies%e_corepsp - energies%e_corepspdc
    if (psps%usepaw==1) etotal=etotal + energies%e_pawdc
  end if
  etotal = etotal + energies%e_ewald + energies%e_chempot + energies%e_vdw_dftd
