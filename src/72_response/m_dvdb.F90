@@ -557,6 +557,7 @@ end subroutine dvdb_open_read
 
 subroutine dvdb_close(db)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
