@@ -10,7 +10,7 @@
 !! the exchange-correlation kernel.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2017 ABINIT group (FR, EB)
+!! Copyright (C) 2001-2017 ABINIT group (FR, EB, SPr)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -69,7 +69,7 @@
 
 #include "abi_common.h"
 
-subroutine dfpt_mkvxc_noncoll(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,nhat1,nhat1dim,nhat1gr,nhat1grdim,&
+subroutine dfpt_mkvxc_noncoll(cplex,ixc,kxc,bxc,mpi_enreg,nfft,ngfft,nhat1,nhat1dim,nhat1gr,nhat1grdim,&
 &          nkxc,nkxc_cur,nspden,n3xccc,optnc,option,optxc,paral_kgb,qphon,rhor,rhor1,rprimd,usexcnhat,vxc1,xccc3d1)
 
  use defs_basis
@@ -96,6 +96,7 @@ subroutine dfpt_mkvxc_noncoll(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,nhat1,nhat1dim,
  integer,intent(in) :: ngfft(18)
  real(dp),intent(in) :: nhat1gr(cplex*nfft,nspden,3*nhat1grdim)
  real(dp),intent(in) :: kxc(nfft,nkxc),rhor(cplex*nfft,nspden)
+ real(dp),intent(in) :: bxc(nfft)
  real(dp),intent(in),target :: rhor1(cplex*nfft,nspden),qphon(3)
  real(dp),intent(in) :: rprimd(3,3),xccc3d1(cplex*n3xccc)
  real(dp),intent(out) :: vxc1(cplex*nfft,nspden)
@@ -106,6 +107,7 @@ subroutine dfpt_mkvxc_noncoll(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,nhat1,nhat1dim,
  integer :: ifft, ir
  real(dp),parameter :: m_norm_min=1.d-8
  real(dp) :: dum,dvdn,dvdz,fact,m_dot_m1
+ real(dp) :: mx1,my1,mz1,mdirx,mdiry,mdirz
 !arrays
  real(dp) :: tsec(2)
  real(dp),allocatable :: m_norm(:)
@@ -212,13 +214,24 @@ subroutine dfpt_mkvxc_noncoll(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,nhat1,nhat1dim,
          dvdn=(vxc1_diag(ifft,1)+vxc1_diag(ifft,2))*half
          dvdz=(vxc1_diag(ifft,1)-vxc1_diag(ifft,2))*half
          if(m_norm(ifft)>m_norm_min)then
-           fact=dvdz/m_norm(ifft)
+           fact=dvdz/m_norm(ifft)    ! this is in fact = delta_bxc
            dum=rhor(ifft,4)*fact
            vxc1(ifft,1)=dvdn+dum
            vxc1(ifft,2)=dvdn-dum
            vxc1(ifft,3)= rhor(ifft,2)*fact
            vxc1(ifft,4)=-rhor(ifft,3)*fact
-!
+
+           !add remaining contributions comming from the change of magnetization direction
+           m_dot_m1=(rhor(ifft,2)*rhor1(ifft,2)+rhor(ifft,3)*rhor1(ifft,3) &
+&                  +rhor(ifft,4)*rhor1(ifft,4))/m_norm(ifft)
+           mx1=rhor1(ifft,2); mdirx=rhor(ifft,2)/m_norm(ifft);
+           my1=rhor1(ifft,3); mdiry=rhor(ifft,3)/m_norm(ifft);
+           mz1=rhor1(ifft,4); mdirz=rhor(ifft,4)/m_norm(ifft);
+           vxc1(ifft,1) = vxc1(ifft,1)+ bxc(ifft)*( mz1 - mdirz*m_dot_m1 )
+           vxc1(ifft,2) = vxc1(ifft,2)+ bxc(ifft)*(-mz1 + mdirz*m_dot_m1 )
+           vxc1(ifft,3) = vxc1(ifft,3)+ bxc(ifft)*( mx1 - mdirx*m_dot_m1 )
+           vxc1(ifft,4) = vxc1(ifft,4)+ bxc(ifft)*(-my1 + mdiry*m_dot_m1 )
+
          else
            vxc1(ifft,1:2)=dvdn
            vxc1(ifft,3:4)=zero

@@ -9,7 +9,7 @@
 !! Eventually compute xc kernel (if option=-2, 2, 3, 10 or 12).
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR, MF, GZ, DRH, MT)
+!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR, MF, GZ, DRH, MT, SPr)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -208,7 +208,7 @@
 subroutine rhohxc(dtset,enxc,gsqcut,izero,kxc,mpi_enreg,nfft,ngfft, &
 & nhat,nhatdim,nhatgr,nhatgrdim,nkxc,nk3xc,nspden,n3xccc,option, &
 & rhog,rhor,rprimd,strsxc,usexcnhat,vhartr,vxc,vxcavg,xccc3d, &
-& k3xc,electronpositron,taug,taur,vxctau,exc_vdw_out,add_tfw) ! optional arguments
+& k3xc,electronpositron,taug,taur,vxctau,exc_vdw_out,add_tfw,bxc) ! optional arguments
 
  use defs_basis
  use defs_abitypes
@@ -254,6 +254,7 @@ subroutine rhohxc(dtset,enxc,gsqcut,izero,kxc,mpi_enreg,nfft,ngfft, &
  real(dp),intent(out) :: kxc(nfft,nkxc),strsxc(6),vhartr(nfft),vxc(nfft,nspden)
  real(dp),intent(in),optional :: taug(:,:),taur(:,:)
  real(dp),intent(out),optional :: k3xc(1:nfft,1:nk3xc),vxctau(:,:,:)
+ real(dp),intent(out),optional :: bxc(1:nfft)
 
 !Local variables-------------------------------
 !scalars
@@ -972,6 +973,10 @@ subroutine rhohxc(dtset,enxc,gsqcut,izero,kxc,mpi_enreg,nfft,ngfft, &
 &         dtset%paral_kgb,qphon,rhonow_ptr,vxc)
        end if
 
+       if (present(bxc)) then
+         bxc(:) = 0.0d0
+       endif
+ 
      else
 
 !      If non-collinear magnetism, restore potential in proper axis before adding it
@@ -979,6 +984,15 @@ subroutine rhohxc(dtset,enxc,gsqcut,izero,kxc,mpi_enreg,nfft,ngfft, &
        vxcrho_b_updn=zero
        call xcpot(cplex,depsxc,gprimd,ishift,mgga,mpi_enreg,nfft,ngfft,ngrad,nspden_eff,nspgrad,&
 &       dtset%paral_kgb,qphon,rhonow_ptr,vxcrho_b_updn)
+       if (present(bxc)) then
+         do ifft=1,nfft
+           !if(m_norm(ifft)>m_norm_min) then
+           bxc(ifft) = half*(vxcrho_b_updn(ifft,1)-vxcrho_b_updn(ifft,2))/m_norm(ifft)
+           !else
+           !do calculation through kxc
+           !endif
+         end do  
+       endif
        do ifft=1,nfft
          dvdn=half*(vxcrho_b_updn(ifft,1)+vxcrho_b_updn(ifft,2))
          if(m_norm(ifft)>m_norm_min) then

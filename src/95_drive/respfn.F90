@@ -246,7 +246,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  real(dp),allocatable :: ph1d(:,:),ph1df(:,:),phfrq(:),phnons(:,:,:),piezofrnl(:,:)
  real(dp),allocatable :: rhog(:,:),rhor(:,:),rhowfg(:,:),rhowfr(:,:)
  real(dp),allocatable :: vhartr(:),vpsp(:),vtrial(:,:)
- real(dp),allocatable :: vxc(:,:),work(:),xccc3d(:),ylm(:,:),ylmgr(:,:,:)
+ real(dp),allocatable :: vxc(:,:),bxc(:),work(:),xccc3d(:),ylm(:,:),ylmgr(:,:,:)
  real(dp),pointer :: eigenq_fine(:,:,:),eigen1_pert(:,:,:)
  real(dp),allocatable :: eigen0_pert(:),eigenq_pert(:),occ_rbz_pert(:)
  type(efmasdeg_type),allocatable :: efmasdeg(:)
@@ -833,12 +833,13 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  ABI_ALLOCATE(kxc,(nfftf,nkxc))
  ABI_ALLOCATE(vhartr,(nfftf))
  ABI_ALLOCATE(vxc,(nfftf,dtset%nspden))
+ ABI_ALLOCATE(bxc,(nfftf))
 
  _IBM6("Before rhohxc")
 
  call rhohxc(dtset,enxc,gsqcut,psps%usepaw,kxc,mpi_enreg,nfftf,ngfftf,&
 & nhat,nhatdim,nhatgr,nhatgrdim,nkxc,nk3xc,dtset%nspden,n3xccc,option,rhog,rhor,&
-& rprimd,strsxc,usexcnhat,vhartr,vxc,vxcavg,xccc3d)
+& rprimd,strsxc,usexcnhat,vhartr,vxc,vxcavg,xccc3d,bxc=bxc)
 
 !Compute local + Hxc potential, and subtract mean potential.
  ABI_ALLOCATE(vtrial,(nfftf,dtset%nspden))
@@ -1201,7 +1202,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
      call dfpt_dyxc1(atindx,blkflgfrx1,dyfrx1,gmet,gsqcut,dtset%ixc,kxc,mgfftf,mpert,mpi_enreg,&
 &     psps%mqgrid_vl,natom,nfftf,ngfftf,nkxc,dtset%nspden,&
 &     ntypat,psps%n1xccc,dtset%paral_kgb,psps,pawtab,ph1df,psps%qgrid_vl,qphon,&
-&     rfdir,rfpert,rprimd,timrev,dtset%typat,ucvol,psps%usepaw,psps%xcccrc,psps%xccc1d,xred,rhor=rhor)
+&     rfdir,rfpert,rprimd,timrev,dtset%typat,ucvol,psps%usepaw,psps%xcccrc,psps%xccc1d,xred,rhor=rhor,bxc=bxc)
    else
      call dfpt_dyxc1(atindx,blkflgfrx1,dyfrx1,gmet,gsqcut,dtset%ixc,kxc,mgfftf,mpert,mpi_enreg,&
 &     psps%mqgrid_vl,natom,nfftf,ngfftf,nkxc,dtset%nspden,&
@@ -1300,7 +1301,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 &   ddkfil,dtfil,dtset,dyew,dyfrlo,dyfrnl,dyfrx1,dyfrx2,dyvdw,dyfr_cplex,dyfr_nondiag,&
 &   d2bbb,d2lo,d2nl,d2ovl,efmasdeg,efmasfr,eigbrd,eig2nkq,&
 &   eltcore,elteew,eltfrhar,eltfrkin,eltfrloc,eltfrnl,eltfrxc,eltvdw,&
-&   etotal,fermie,iexit,indsym,kxc,&
+&   etotal,fermie,iexit,indsym,kxc,bxc,&
 &   dtset%mkmem,mkqmem,mk1mem,mpert,mpi_enreg,my_natom,nattyp,&
 &   nfftf,nhat,dtset%nkpt,nkxc,dtset%nspden,dtset%nsym,occ,&
 &   paw_an,paw_ij,pawang,pawfgr,pawfgrtab,pawrad,pawrhoij,pawtab,&
@@ -1319,6 +1320,8 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  call wrtout(std_out,message,'COLL')
 
  ABI_DEALLOCATE(vxc)
+ ABI_DEALLOCATE(bxc)
+
  if (dtset%prepanl==1.and.(rf2_dkdk/=0 .or. rf2_dkde/=0)) then
    ABI_DEALLOCATE(rfpert_nl)
  end if
