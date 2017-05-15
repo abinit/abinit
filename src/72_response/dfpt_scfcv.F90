@@ -223,6 +223,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
  use netcdf
 #endif
 
+ use m_cgtools,  only : mean_fftr
  use m_fstrings, only : int2char4, sjoin
  use m_time,     only : abi_wtime, sec2str
  use m_io_tools, only : open_file
@@ -250,6 +251,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
  use interfaces_32_util
  use interfaces_41_geometry
  use interfaces_53_ffts
+ use interfaces_54_abiutil
  use interfaces_56_recipspace
  use interfaces_65_paw
  use interfaces_67_common
@@ -344,13 +346,15 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
  integer :: my_quit,quitsum_request,timelimit_exit,varid,ncerr,ncid
  integer ABI_ASYNC :: quitsum_async
  integer :: rdwrpaw,spaceComm,sz1,sz2,usexcnhat,Z_kappa
+ integer :: mpi_comm_sphgrid
  logical :: need_fermie1,paral_atom,use_nhat_gga
  real(dp) :: wtime_step,now,prev
  real(dp) :: born,born_bar,boxcut,deltae,diffor,diel_q,dum,ecut,ecutf,elast
  real(dp) :: epawdc1_dum,evar,fe1fixed,fermie1,gsqcut,qphon_norm,maxfor,renorm,res2,res3,residm2
- real(dp) :: ucvol,vxcavg
+ real(dp) :: ucvol,vxcavg,elmag1
  character(len=500) :: msg
  character(len=fnlen) :: fi1o
+ character(len=fnlen) :: fi1o_vtk
  type(ab7_mixing_object) :: mix
  type(efield_type) :: dtefield
 !arrays
@@ -361,6 +365,8 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
  real(dp) :: favg(3),gmet(3,3),gprimd(3,3),q_cart(3),qphon2(3),qred2cart(3,3)
  real(dp) :: rmet(3,3),tollist(12),tsec(2)
  real(dp) :: zeff_red(3),zeff_bar(3,3)
+ real(dp) :: intgden(dtset%nspden,dtset%natom),dentot(dtset%nspden)
+!real(dp) :: zdmc_red(3),zdmc_bar(3,3),mean_rhor1(1) !dynamic magnetic charges and mean density 
  real(dp),allocatable :: dielinv(:,:,:,:,:)
  real(dp),allocatable :: fcart(:,:),nhat1(:,:),nhat1gr(:,:,:),nhatfermi(:,:),nvresid1(:,:),nvresid2(:,:)
  real(dp),allocatable :: qmat(:,:,:,:,:,:),resid2(:),rhog2(:,:),rhor2(:,:),rhorfermi(:,:)
@@ -410,7 +416,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 
  need_fermie1=((qzero==1.and.dtset%frzfermi==0.and.nstep>0).and.&
 & (dtset%occopt>=3.and.dtset%occopt<=8).and. &
-& (ipert<=dtset%natom.or.ipert==dtset%natom+3.or.ipert==dtset%natom+4))
+& (ipert<=dtset%natom.or.ipert==dtset%natom+3.or.ipert==dtset%natom+4.or.ipert==dtset%natom+5)) !rfmagn deb
 
 !The value of iscf must be modified if ddk perturbation, see dfpt_looppert.f
  if (ipert==dtset%natom+1.or.ipert==dtset%natom+10.or.ipert==dtset%natom+11) iscf_mod=-3
@@ -429,7 +435,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 !This might be taken away later
  edocc=zero ; eeig0=zero ; ehart01=zero ; ehart1=zero ; ek0=zero ; ek1=zero
  eloc0=zero ; elpsp1=zero ; enl0=zero ; enl1=zero ; eovl1=zero; exc1=zero
- deltae=zero ; fermie1=zero ; epaw1=zero ; eberry=zero
+ deltae=zero ; fermie1=zero ; epaw1=zero ; eberry=zero ; elmag1=zero
 
 !Examine tolerance criteria, and eventually  print a line to the output
 !file (with choice=1, the only non-dummy arguments of scprqt are
@@ -678,6 +684,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 &     nkxc,nspden,n3xccc,optene,option,dtset%paral_kgb,dtset%qptn,&
 &     rhog,rhog1,rhor,rhor1,rprimd,ucvol,psps%usepaw,usexcnhat,vhartr1,vpsp1,&
 &     nvresid1,res2,vtrial1,vxc1,xccc3d1)
+
 !    For Q=0 and metallic occupation, initialize quantities needed to
 !    compute the first-order Fermi energy
 !    ----------------------------------------------------------------------
@@ -696,7 +703,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 &         dtset%nsppol,dtset%typat,pawtab=pawtab,mpi_atmtab=mpi_enreg%my_atmtab,&
 &         comm_atom=mpi_enreg%comm_atom)
        end if
-
+      
        call dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
 &       doccde_rbz,docckqde,dtfil,dtset,eigenq,eigen0,eigen1,fe1fixed,gmet,gprimd,idir,&
 &       indsy1,ipert,irrzon1,istwfk_rbz,kg,kg1,kpt_rbz,dtset%mband,mkmem,mkqmem,mk1mem,mpi_enreg,&
@@ -779,7 +786,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 !  No need to continue and call dfpt_vtorho, when nstep==0
    if(nstep==0) exit
 
-!  ######################################################################
+!  #######################e1magh###############################################
 !  Compute the 1st-order density rho1 from the 1st-order trial potential
 !  ----------------------------------------------------------------------
 
@@ -809,6 +816,11 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
      end if
    end if
 
+   !if (ipert==dtset%natom+5) then
+   !calculate 1st order magnetic potential contribution to the energy
+   !  call dfpt_e1mag(e1mag,rhor1,rhog1);
+   !endif
+
 !  ######################################################################
 !  Skip out of step loop if non-SCF (completed)
 !  ----------------------------------------------------------------------
@@ -825,7 +837,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
      optene = 1 ! use double counting scheme
      call dfpt_etot(dtset%berryopt,deltae,eberry,edocc,eeig0,eew,efrhar,efrkin,&
 &     efrloc,efrnl,efrx1,efrx2,ehart1,ek0,ek1,eii,elast,eloc0,elpsp1,&
-&     enl0,enl1,epaw1,etotal,evar,evdw,exc1,ipert,dtset%natom,optene)
+&     enl0,enl1,epaw1,etotal,evar,evdw,exc1,elmag1,ipert,dtset%natom,optene)
 
      call timab(152,1,tsec)
      choice=2
@@ -888,7 +900,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
      optene = 0 ! use direct scheme
      call dfpt_etot(dtset%berryopt,deltae,eberry,edocc,eeig0,eew,efrhar,efrkin,&
 &     efrloc,efrnl,efrx1,efrx2,ehart1,ek0,ek1,eii,elast,eloc0,elpsp1,&
-&     enl0,enl1,epaw1,etotal,evar,evdw,exc1,ipert,dtset%natom,optene)
+&     enl0,enl1,epaw1,etotal,evar,evdw,exc1,elmag1,ipert,dtset%natom,optene)
 
      call timab(152,1,tsec)
      choice=2
@@ -1010,6 +1022,29 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 !----------------------------------------------------------------------
 
  call timab(160,1,tsec)
+
+!Compute Dynamic magnetic charges (dmc) in case of rfphon, 
+!and magnetic susceptibility in case of rfmagn from first order density
+!(results to be comapred to dmc from d2e)
+!SPr deb
+!if (ipert<=dtset%natom.and.dtset%nspden>=2) then
+!
+!  mpi_comm_sphgrid=mpi_enreg%comm_fft
+!  call mean_fftr(rhor1(:,1),mean_rhor1,nfftf,nfftotf,1,mpi_comm_sphgrid)
+!  write(*,*) '   Mean 1st order density: ', mean_rhor1
+!  call mean_fftr(rhor1(:,2),mean_rhor1,nfftf,nfftotf,1,mpi_comm_sphgrid)
+!  if (dtset%nspden==2) then
+!    write(*,*) '        1st order m_z    : ', mean_rhor1
+!  else !nspden==4
+!    write(*,*) '        1st order m_x    : ', mean_rhor1
+!    call mean_fftr(rhor1(:,3),mean_rhor1,nfftf,nfftotf,1,mpi_comm_sphgrid)
+!    write(*,*) '        1st order m_y    : ', mean_rhor1
+!    call mean_fftr(rhor1(:,4),mean_rhor1,nfftf,nfftotf,1,mpi_comm_sphgrid)
+!    write(*,*) '        1st order m_z    : ', mean_rhor1
+!  endif
+! 
+!endif
+
 
 !Eventually close the dot file, before calling dfpt_nstdy
  if ((ipert==dtset%natom+2.and.sum((dtset%qptn(1:3))**2)<=1.0d-7.and.&
@@ -1162,6 +1197,18 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 !Warnings :
 !- core charge is excluded from the charge density;
 !- the potential is the INPUT vtrial.
+
+ if(ipert==dtset%natom+5)then
+  !debug: write out the vtk first-order density components
+  !call appdig(pertcase,dtfil%fnameabo_den,fi1o_vtk)
+  !call printmagvtk(mpi_enreg,nspden,nfftf,ngfftf,rhor1,rprimd,adjustl(adjustr(fi1o_vtk)//".vtk"))
+  !compute the contributions to susceptibility from different attomic spheres:
+  call calcdensph(gmet,mpi_enreg,dtset%natom,nfftf,ngfftf,nspden,&
+&   dtset%ntypat,ab_out,dtset%ratsph,rhor1,rprimd,dtset%typat,ucvol,xred,&
+&   idir+1,intgden,dentot)
+
+ endif
+
  if (iwrite_fftdatar(mpi_enreg)) then
    if (dtset%prtden>0) then
      rdwrpaw=0

@@ -49,7 +49,7 @@
 #include "abi_common.h"
 
 
-subroutine printmagvtk(mpi_enreg,nspden,nfft,ngfft,rhor,rprimd)
+subroutine printmagvtk(mpi_enreg,nspden,nfft,ngfft,rhor,rprimd,fname)
     
  use defs_basis
  use m_errors
@@ -73,6 +73,7 @@ subroutine printmagvtk(mpi_enreg,nspden,nfft,ngfft,rhor,rprimd)
 !arrays
  integer,intent(in)          :: ngfft(18)
  real(dp),intent(in)         :: rhor(nfft,nspden),rprimd(3,3)
+ character(len=*),intent(in) :: fname
 
 !Local variables-------------------------------
 !scalars
@@ -108,6 +109,7 @@ subroutine printmagvtk(mpi_enreg,nspden,nfft,ngfft,rhor,rprimd)
 
  DBG_EXIT("COLL")
 
+!write(std_out,*) ' Writing out .vtk file: ',fname
 
   !if 1 or two component density then write out either 1 or 2 scalar density fields
   !if 4, then write one scalar field (density) and one vector field (magnetization density)
@@ -153,7 +155,7 @@ subroutine printmagvtk(mpi_enreg,nspden,nfft,ngfft,rhor,rprimd)
     !write(std_out,*)
 
     ! Open the output vtk file
-    if (open_file('DEN.vtk',msg,newunit=denvtk,status='replace',form='formatted') /=0) then
+    if (open_file(fname,msg,newunit=denvtk,status='replace',form='formatted') /=0) then
       MSG_WARNING(msg)
       RETURN
     end if
