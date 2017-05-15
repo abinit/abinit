@@ -759,6 +759,9 @@
  intarr(1,:)=dtsets(:)%rfelfd
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'rfelfd','INT',0)
 
+ intarr(1,:)=dtsets(:)%rfmagn
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'rfmagn','INT',0)
+
  intarr(1,:)=dtsets(:)%rfmeth
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'rfmeth','INT',0)
 

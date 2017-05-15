@@ -31,10 +31,6 @@
 !!
 !! CHILDREN
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -100,9 +96,9 @@
        deltaziz=chempot(1,iz,itypat)-chempot(1,1,itypat)
      else
        deltaziz=one
-     endif
+     end if
      if(deltaziz>deltaz)exit
-   enddo
+   end do
 
 !  Defines coordinates and values inside the delimiting interval, 
 !  with respect to the lower delimiting plane
@@ -111,7 +107,7 @@
      dz1=chempot(1,iz,itypat)-chempot(1,iz-1,itypat) ; cp1=chempot(2,iz,itypat) ; dcp1=chempot(3,iz,itypat)
    else
      dz1=(chempot(1,1,itypat)+one)-chempot(1,nzchempot,itypat) ; cp1=chempot(2,1,itypat) ; dcp1=chempot(3,1,itypat)
-   endif
+   end if
    ddz=deltaz-z0
 
 !DEBUG
@@ -145,7 +141,7 @@
 !  write(std_out,'(a,3es20.10)')' grchempottn=',grchempottn(:,iatom)
 !ENDDEBUG
 
- enddo
+ end do
 
 !DEBUG
 !write(std_out,'(a)')' spatialchempot : exit '

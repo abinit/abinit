@@ -72,7 +72,7 @@ contains
 !!      setvtr
 !!
 !! CHILDREN
-!!      matr3inv
+!!      matr3inv,spline
 !!
 !! SOURCE
 
@@ -364,7 +364,7 @@ end subroutine ewald
 !!      stress
 !!
 !! CHILDREN
-!!      matr3inv
+!!      matr3inv,spline
 !!
 !! SOURCE
 
@@ -632,7 +632,7 @@ end subroutine ewald2
 !!      ddb_hybrid,m_dynmat,m_effective_potential,m_ifc
 !!
 !! CHILDREN
-!!      matr3inv
+!!      matr3inv,spline
 !!
 !! SOURCE
 

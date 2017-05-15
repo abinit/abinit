@@ -186,6 +186,9 @@ type,public :: excparam
   logical :: sum_overlaps      ! .TRUE. if making the sum of the overlaps to 1
   logical :: prt_ncham           ! .TRUE. if we dump the hamiltonian in NetCDF
 
+  logical :: do_ep_renorm      ! .TRUE. for electron-phonon renormalization of the spectrum
+  logical :: do_lifetime       ! .TRUE. if using elphon lifetime (not yet implemented)
+
 !arrays
   integer :: mg0(3)            ! For each reduced direction gives the max G0 component
                                ! to account for umklapp processes

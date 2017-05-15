@@ -50,7 +50,7 @@ iomode  3
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% need_cpp_vars = HAVE_ETSF_IO
+#%% need_cpp_vars = HAVE_NETCDF
 #%% [files]
 #%% psp_files= 20ca.paw
 #%% [paral_info]

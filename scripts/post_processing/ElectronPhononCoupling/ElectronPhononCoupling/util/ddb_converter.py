@@ -41,6 +41,7 @@ class DdbFileConverter(object):
             self.E2D = np.zeros((self.natom, self.ncart, self.natom, self.ncart), dtype=np.complex)
             self.E2D.real = root.variables['second_derivative_of_energy'][:,:,:,:,0]
             self.E2D.imag = root.variables['second_derivative_of_energy'][:,:,:,:,1]
+            self.E2D = np.einsum('aibj->bjai', self.E2D)  # Indicies are reversed when writing them from Fortran.
 
             self.BECT = root.variables['born_effective_charge_tensor'][:self.ncart,:self.natom,:self.ncart]
 
@@ -84,6 +85,7 @@ class DdbFileConverter(object):
             data = root.createVariable('second_derivative_of_energy', 'd', ('number_of_atoms', 'number_of_cartesian_directions',
                                                                             'number_of_atoms', 'number_of_cartesian_directions',
                                                                             'cplex'))
+            E2D_swap = np.einsum('aibj->bjai', E2D_swap)  # Indicies are reversed when writing them from Fortran.
             data[...,0] = E2D_swap.real
             data[...,1] = E2D_swap.imag
 

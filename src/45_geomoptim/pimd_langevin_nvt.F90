@@ -50,11 +50,11 @@
 !!      predict_pimd
 !!
 !! CHILDREN
-!!      pimd_coord_transform,pimd_energies,pimd_force_transform,pimd_forces
-!!      pimd_initvel,pimd_langevin_forces,pimd_langevin_random
-!!      pimd_langevin_random_init,pimd_langevin_random_qtb,pimd_mass_spring
-!!      pimd_predict_taylor,pimd_predict_verlet,pimd_print,pimd_stresses
-!!      xcart2xred,xred2xcart
+!!      pimd_apply_constraint,pimd_coord_transform,pimd_energies
+!!      pimd_force_transform,pimd_forces,pimd_initvel,pimd_langevin_forces
+!!      pimd_langevin_random,pimd_langevin_random_init,pimd_langevin_random_qtb
+!!      pimd_mass_spring,pimd_predict_taylor,pimd_predict_verlet,pimd_print
+!!      pimd_stresses,xcart2xred,xred2xcart
 !!
 !! SOURCE
 
@@ -209,7 +209,7 @@ subroutine pimd_langevin_nvt(etotal,forces,itimimage,natom,pimd_param,prtvolimg,
  call pimd_forces(forces,natom,spring,pitransform,trotter,xcart)
  call pimd_langevin_forces(alea,forces,forces_pimd,friction,langev,mass,natom,trotter,vel)
  call pimd_apply_constraint(pimd_param%constraint,constraint_output,forces_pimd,&
-&                           mass,natom,trotter,pimd_param%wtatcon,xcart)
+& mass,natom,trotter,pimd_param%wtatcon,xcart)
 
 !Compute atomic positions at t+dt
  if (itimimage<=1) then
@@ -243,7 +243,7 @@ subroutine pimd_langevin_nvt(etotal,forces,itimimage,natom,pimd_param,prtvolimg,
      call pimd_langevin_forces(alea,forces,forces_pimd,friction,&
 &     langev,mass,natom,trotter,vel)
      call pimd_apply_constraint(pimd_param%constraint,constraint_output,forces_pimd,&
-&                               mass,natom,trotter,pimd_param%wtatcon,xcart)
+&     mass,natom,trotter,pimd_param%wtatcon,xcart)
 !    Compute new positions
      call pimd_predict_verlet(dtion,forces_pimd,mass,natom,trotter,&
 &     xcart,xcart_next,xcart_prev)

@@ -81,6 +81,7 @@ variables to be used in the main input file of the abinit code.
  <a href="#rfddk">rfddk</a>&nbsp;&nbsp;
  <a href="#rfdir">rfdir</a>&nbsp;&nbsp;
  <a href="#rfelfd">rfelfd</a>&nbsp;&nbsp;
+ <a href="#rfmagn">rfmagn</a>&nbsp;&nbsp;
  <a href="#rfmeth">rfmeth</a>&nbsp;&nbsp;
  <a href="#rfphon">rfphon</a>&nbsp;&nbsp;
  <a href="#rfstrs">rfstrs</a>&nbsp;&nbsp;
@@ -1127,6 +1128,25 @@ it is usually not applied for the d/dk response).
 <B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
 
 
+<br><font id="title"><a name="rfmagn">rfmagn</a></font>
+<br><font id="definition">Mnemonics: Response Function with respect to MAGNetic B-field perturbation</font>
+<br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#respfn">RESPFN</a></font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><font id="text">
+<p>
+<p>
+ It must be equal to 1
+ to run response function calculations with respect to external magnetic field.
+ Currently, orbital magnetism is not taken into account and the perturbing potential
+ has Zeeman form.
+</p>
+</font>
+
+<br><br><br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
+
+
 <br><font id="title"><a name="rfmeth">rfmeth</a></font>
 <br><font id="definition">Mnemonics: Response Function METHod</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#respfn">RESPFN</a></font>
@@ -1208,21 +1228,21 @@ calculations (e.g. needed to get elastic constants). Define, with
 <p>
 <p>
  Available to the developpers, to activate
-the use of ipert=natom+5 and ipert=natom+6, two sets of perturbations
+the use of ipert=natom+6 and ipert=natom+7, two sets of perturbations
 that the developpers can define.
  <br />
  <ul>
   <li>
-   0=&gt;no computations for ipert=natom+5 or ipert=natom+6
+   0=&gt;no computations for ipert=natom+6 or ipert=natom+7
   </li>
   <li>
-   1=&gt;response with respect to perturbation natom+5 will be computed
+   1=&gt;response with respect to perturbation natom+6 will be computed
   </li>
   <li>
-   2=&gt;response with respect to perturbation natom+6 will be computed
+   2=&gt;response with respect to perturbation natom+7 will be computed
   </li>
   <li>
-   3=&gt;responses with respect to perturbations natom+5 and natom+6 will be computed
+   3=&gt;responses with respect to perturbations natom+6 and natom+7 will be computed
   </li>
  </ul>
 </p>

@@ -31,7 +31,7 @@
 !!    pawfgrtab(natom)%rfgd(3,nfgd)= coordinates of r-r_atom around each atom
 !!
 !! PARENTS
-!!      scfcv
+!!      afterscfloop,scfcv
 !!
 !! CHILDREN
 !!      pawgylm,pawrfgd_wvl,timab,xred2xcart
