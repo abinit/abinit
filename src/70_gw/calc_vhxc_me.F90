@@ -207,7 +207,7 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,gsqcutf_eff,nfftf,ngfftf,&
  nspinor=Wfd%nspinor
  nsppol =Wfd%nsppol
  nspden =Wfd%nspden
- ABI_CHECK(nspinor==1,"Remember to ADD SO")
+ if (nspinor == 1) MSG_WARNING("Remember to ADD SO")
  !
  !    TODO not used for the time being but it should be a standard input of the routine.
  !  bbks_mask(Wfd%mband,Wfd%mband,Wfd%nkibz,Wfd%nsppol)=Logical mask used to select
@@ -566,6 +566,8 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,gsqcutf_eff,nfftf,ngfftf,&
    ! * Tests if needed pointers in Paw_ij are allocated.
    ltest=(allocated(Paw_ij(1)%dijxc).and.allocated(Paw_ij(1)%dijxc_hat).and.allocated(Paw_ij(1)%dijxc_val))
    ABI_CHECK(ltest,"dijxc, dijxc_hat or dijxc_val not allocated")
+
+   ABI_CHECK(nspinor == 1, "PAW with nspinor not tested")
 
    !* For LDA+U
    do iat=1,Cryst%natom

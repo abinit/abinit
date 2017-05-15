@@ -157,11 +157,13 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
  Sigp%nbnds      = Dtset%nband(1)
  Sigp%symsigma   = Dtset%symsigma
  Sigp%zcut       = Dtset%zcut
- Sigp%mbpt_sciss   = Dtset%mbpt_sciss
+ Sigp%mbpt_sciss = Dtset%mbpt_sciss
+
  timrev=  2 ! This information is not reported in the header
             ! 1 => do not use time-reversal symmetry
             ! 2 => take advantage of time-reversal symmetry
- !
+ if (any(dtset%kptopt == [3, 4])) timrev = 1
+
  ! === For HF, SEX or COHSEX use Hybertsen-Louie PPM (only $\omega=0$) ===
  ! * Use fake screening for HF.
  ! FIXME Why, we should not redefine Sigp%ppmodel

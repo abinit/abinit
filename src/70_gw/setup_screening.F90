@@ -188,6 +188,8 @@ subroutine setup_screening(codvsn,acell,rprim,ngfftf,wfk_fname,dtfil,Dtset,Psps,
  timrev = 2 ! This information is not reported in the header
             ! 1 --> do not use time-reversal symmetry
             ! 2 --> take advantage of time-reversal symmetry
+ if (any(dtset%kptopt == [3, 4])) timrev = 1
+
  if (timrev==1.and.Dtset%awtr/=0) then
    MSG_ERROR("awtr/=0 cannot be used when time-reversal symmetry doesn't hold")
  end if

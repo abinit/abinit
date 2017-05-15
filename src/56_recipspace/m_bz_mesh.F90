@@ -433,7 +433,7 @@ subroutine kmesh_init(Kmesh,Cryst,nkibz,kibz,kptopt,wrap_1zone,ref_bz,break_symm
 
  if (ALL(kptopt/=(/1,3/))) then
    write(msg,'(a,i0)')" Not allowed value for kptopt: ",kptopt
-   MSG_BUG(msg)
+   MSG_WARNING(msg)
  end if
 
  Kmesh%kptopt = kptopt
@@ -1494,7 +1494,7 @@ subroutine make_mesh(Kmesh,Cryst,kptopt,kptrlatt,nshiftk,shiftk,&
 !Local variables -------------------------
 !scalars
  integer,parameter :: chksymbreak0=0
- integer :: timrev,iscf,nkbz,nkibz,nkpt_computed,my_nshiftk
+ integer :: iscf,nkbz,nkibz,nkpt_computed,my_nshiftk
  real(dp) :: kptrlen
  character(len=500) :: msg
  logical :: my_break_symmetry
@@ -1510,10 +1510,8 @@ subroutine make_mesh(Kmesh,Cryst,kptopt,kptrlatt,nshiftk,shiftk,&
  !if (ALL(kptopt/=(/1,2,3,4/))) then
  if (ALL(kptopt/=(/1,3/))) then
    write(msg,'(a,i0)')" Not allowed value for kptopt: ",kptopt
-   MSG_BUG(msg)
+   MSG_WARNING(msg)
  end if
-
- timrev=0; if (Cryst%timrev==2) timrev=1  !FIXME there an incompatibly between Cryst%timrev and symkpt
  !
  ! ======================================================================
  ! ==== First call to getkgrid to obtain nkibz as well as the BZ set ====

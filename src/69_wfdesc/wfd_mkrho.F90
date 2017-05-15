@@ -38,8 +38,9 @@
 !! OUTPUT
 !!  rhor(nfftf,nspden)=The density in the real space on the fine FFT grid.
 !!   If nsppol==2, total charge in first half, spin-up component in second half.
+!!   (for non-collinear magnetism, first element: total density, 3 next ones: mx,my,mz in units of hbar/2)
 !!   If optcalc==1 (optional argument, default value is 0), then rhor will actually
-!!   contain kinetic energy density (taur) instead of electronic density.
+!!   contains kinetic energy density (taur) instead of electronic density.
 !!
 !! NOTES
 !! In the case of PAW calculations:
@@ -131,11 +132,11 @@ subroutine wfd_mkrho(Wfd,Cryst,Psps,Kmesh,Bands,ngfftf,nfftf,rhor,&
  if (Wfd%nspden==1.and.Wfd%nspinor==2) then
    MSG_ERROR('nspden==1 and nspinor==2 not implemented')
  end if
-                                                                                     
+
  ABI_CHECK(Wfd%nsppol==Bands%nsppol,"mismatch in nspppol")
 
  if ( ANY(ngfftf(1:3) /= Wfd%ngfft(1:3)) ) then
-   call wfd_change_ngfft(Wfd,Cryst,Psps,ngfftf) 
+   call wfd_change_ngfft(Wfd,Cryst,Psps,ngfftf)
  end if
  !
  ! === Calculate IBZ contribution to the charge density ===
@@ -152,22 +153,25 @@ subroutine wfd_mkrho(Wfd,Cryst,Psps,Kmesh,Bands,ngfftf,nfftf,rhor,&
      rhor_mx  =zero
      rhor_my  =zero
    else !TODO
-     MSG_ERROR('nspden/=4 and nspinor=2 not implemented') 
+     MSG_ERROR('nspden/=4 and nspinor=2 not implemented')
    end if
  end if
 
  ! Update the (b,k,s) distribution table.
- call wfd_update_bkstab(Wfd) 
+ call wfd_update_bkstab(Wfd)
 
  ! Calculate the unsymmetrized density.
  rhor=zero
  myoptcalc=0;  if (present(optcalc)) myoptcalc=optcalc
- nalpha=1;  if (myoptcalc==1) nalpha=3   
+ nalpha=1;  if (myoptcalc==1) nalpha=3
+ if (myoptcalc == 1 .and. wfd%nspinor == 2) then
+   MSG_ERROR("kinetic energy density with nspinor == 2 not implemented")
+ end if
 
  ! Build the iterator that will distribute the states in an automated way.
  Iter_bks = wfd_iterator_bks(Wfd,bks_mask=ABS(Bands%occ)>=tol8)
 
- do alpha=1,nalpha  
+ do alpha=1,nalpha
    do is=1,Wfd%nsppol
      do ik=1,Wfd%nkibz
        !
@@ -185,8 +189,8 @@ subroutine wfd_mkrho(Wfd,Cryst,Psps,Kmesh,Bands,ngfftf,nfftf,rhor,&
            cwavef(1,:)= REAL(Wfd%Wave(ib,ik,is)%ug(:))
            cwavef(2,:)=AIMAG(Wfd%Wave(ib,ik,is)%ug(:))
 !          Multiplication by 2pi i (k+G)_alpha
-           gp2pi1=Cryst%gprimd(alpha,1)*two_pi; 
-           gp2pi2=Cryst%gprimd(alpha,2)*two_pi; 
+           gp2pi1=Cryst%gprimd(alpha,1)*two_pi
+           gp2pi2=Cryst%gprimd(alpha,2)*two_pi
            gp2pi3=Cryst%gprimd(alpha,3)*two_pi
            kpt_cart=gp2pi1*Wfd%kibz(1,ik)+gp2pi2*Wfd%kibz(2,ik)+gp2pi3*Wfd%kibz(3,ik)
            do ipw=1,Wfd%Kdata(ik)%npw
@@ -205,7 +209,7 @@ subroutine wfd_mkrho(Wfd,Cryst,Psps,Kmesh,Bands,ngfftf,nfftf,rhor,&
            ABI_FREE(work)
            ABI_FREE(cwavef)
            ABI_FREE(gradug)
-         end if        
+         end if
 
 !$OMP PARALLEL DO
          do ir=1,nfftf
@@ -217,7 +221,7 @@ subroutine wfd_mkrho(Wfd,Cryst,Psps,Kmesh,Bands,ngfftf,nfftf,rhor,&
            cwavef2 => wfr(1+nfftf:2*nfftf)
            wfr_x(:)=cwavef1(:)+cwavef2(:)       ! $(\Psi^{1}+\Psi^{2})$
            wfr_y(:)=cwavef1(:)-j_dpc*cwavef2(:) ! $(\Psi^{1}-i\Psi^{2})$
-!$OMP PARALLEL DO 
+!$OMP PARALLEL DO
            do ir=1,nfftf
              rhor_down(ir)=rhor_down(ir)+CONJG(cwavef2(ir))*cwavef2(ir)*bks_weight
              rhor_mx  (ir)=rhor_mx  (ir)+CONJG(wfr_x  (ir))*wfr_x  (ir)*bks_weight
@@ -229,15 +233,22 @@ subroutine wfd_mkrho(Wfd,Cryst,Psps,Kmesh,Bands,ngfftf,nfftf,rhor,&
      end do
    end do
 
- end do ! enddo alpha  
+ end do ! enddo alpha
 
  if (myoptcalc==1) then ! convention for taur = 1/2 Sum_i |grad phi_i|^2
-   rhor(:,:)=half*rhor(:,:)  
+   rhor(:,:)=half*rhor(:,:)
  end if
 
  call iter_free(Iter_bks)
+
+ if (wfd%nspinor == 2) then
+   rhor(:, 2) = rhor_mx
+   rhor(:, 3) = rhor_my
+   rhor(:, 4) = rhor_down
+ end if
+
  call xmpi_sum(rhor,Wfd%comm,ierr)
- !
+
  ! === Symmetrization in G-space implementing also the AFM case ===
  n1=ngfftf(1)
  n2=ngfftf(2)
@@ -339,7 +350,7 @@ subroutine test_charge(nfftf,nelectron_exp,nspden,rhor,ucvol,&
 
 !Local variables ------------------------------
 !scalars
- real(dp) :: nelectron_tot,nelectron_fft 
+ real(dp) :: nelectron_tot,nelectron_fft
  real(dp) :: nelectron_pw,nelectron_sph,rhoav,rs,nratio
  character(len=500) :: msg
 
@@ -371,7 +382,7 @@ end if
    call wrtout(std_out,msg,'COLL')
  end if !PAW
 
- nelectron_pw =SUM(rhor(:,1))*ucvol/nfftf 
+ nelectron_pw =SUM(rhor(:,1))*ucvol/nfftf
  nelectron_tot=nelectron_pw
  nratio       =nelectron_exp/nelectron_tot
 
