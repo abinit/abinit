@@ -56,6 +56,8 @@ module m_effective_potential
  public :: effective_potential_free
  public :: effective_potential_freempi
  public :: effective_potential_generateDipDip
+ public :: effective_potential_getDisp
+ public::  effective_potential_GetIndexPeriodic
  public :: effective_potential_evaluate
  public :: effective_potential_getForces
  public :: effective_potential_init
@@ -78,7 +80,6 @@ module m_effective_potential
  private :: ifc_contribution
  private :: coefficients_contribution
  private :: confinement_contribution
- private :: index_periodic
  private :: find_bound
 !!***
 
@@ -1300,56 +1301,51 @@ subroutine effective_potential_setCoeffs(coeffs,eff_pot,ncoeff)
  use interfaces_14_hidewrite
 !End of the abilint section
 
-  implicit none
+ implicit none
 
 !Arguments ------------------------------------
 !scalars
-  integer,intent(in) :: ncoeff
+ integer,intent(in) :: ncoeff
 !array
-  type(effective_potential_type),intent(inout) :: eff_pot
-  type(polynomial_coeff_type),intent(in) :: coeffs(ncoeff)
+ type(effective_potential_type),intent(inout) :: eff_pot
+ type(polynomial_coeff_type),intent(in) :: coeffs(ncoeff)
 !Local variables-------------------------------
 !scalar
-  integer :: ii,jj
-  logical :: has_straincoupling=.FALSE.
-  character(len=500) :: msg
+ integer :: ii,jj
+ logical :: has_straincoupling=.FALSE.
+ character(len=500) :: msg
 !array
 ! *************************************************************************
 
-  if(ncoeff /= size(coeffs))then
-    write(msg, '(a)' )&
-&        ' ncoeff has not the same size than coeffs array, '
-    MSG_BUG(msg)
-  end if
+ if(ncoeff /= size(coeffs))then
+   write(msg, '(a)' )&
+&       ' ncoeff has not the same size than coeffs array, '
+   MSG_BUG(msg)
+ end if
 
 ! Check if the strain coupling is present
-  do ii=1,ncoeff
-    do jj=1,coeffs(ii)%nterm
-      if (any(coeffs(ii)%terms(jj)%direction(:) < zero)) then
-        has_straincoupling = .TRUE.
-      end if
-    end do
-  end do
+ do ii=1,ncoeff
+   do jj=1,coeffs(ii)%nterm
+     if (any(coeffs(ii)%terms(jj)%direction(:) < zero)) then
+       has_straincoupling = .TRUE.
+     end if
+   end do
+ end do
 
 ! Set to false the strain coupling from the finite differences
-  if(has_straincoupling)then
-    if(eff_pot%has_strainCoupling) then
-       write(msg, '(8a)' )ch10,&
+ if(has_straincoupling)then
+   if(eff_pot%has_strainCoupling) then
+     write(msg, '(8a)' )ch10,&
 &        ' --- !WARNING',ch10,&
 &        '     There is strain coupling with the fitted coefficients,',ch10,&
 &        '     The previous contribution will be set to zero',ch10,&
 &        ' ---'
-     else
-       write(msg, '(2a)' )ch10,&
-&        ' There is strain coupling with the fitted coefficients'
-     end if
-
-     eff_pot%has_strainCoupling = .FALSE.
      call wrtout(std_out,msg,"COLL")
+   end if
+   eff_pot%has_strainCoupling = .FALSE.
+ end if
 
-  end if
-
-  call anharmonics_terms_setCoeffs(coeffs,eff_pot%anharmonics_terms,ncoeff)
+ call anharmonics_terms_setCoeffs(coeffs,eff_pot%anharmonics_terms,ncoeff)
 
 end subroutine effective_potential_setCoeffs
 !!***
@@ -2756,7 +2752,6 @@ subroutine effective_potential_getForces(eff_pot,fcart,fred,natom,rprimd,xcart,d
 !Local variables-------------------------------
 !scalar
   integer,parameter :: master=0
-  integer :: ii
 !  real(dp):: dummy
   character(500) :: msg
 !array
@@ -2857,7 +2852,7 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
   integer, intent(in) :: natom
 !array
   type(effective_potential_type),intent(in) :: eff_pot
-  real(dp),intent(inout) :: rprimd(3,3),xred(3,natom)
+  real(dp),intent(in)  :: rprimd(3,3),xred(3,natom)
   real(dp),intent(out) :: energy
   real(dp),intent(out) :: fcart(3,eff_pot%supercell%natom_supercell)
   real(dp),intent(out) :: fred(3,eff_pot%supercell%natom_supercell)
@@ -2882,8 +2877,6 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
   real(dp) :: fcart_part(3,eff_pot%supercell%natom_supercell)
   real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3)
   real(dp) :: strain_tmp(6),strten_part(6)
-  real(dp) :: xcart(3,natom),xcart_tmp(3,eff_pot%supercell%natom_supercell)
-  real(dp) :: xred_tmp(3,eff_pot%supercell%natom_supercell)
 
 ! *************************************************************************
 
@@ -2978,19 +2971,10 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
   if (present(displacement)) then
     disp_tmp(:,:) = displacement(:,:)
   else
-    call xred2xcart(natom, rprimd, xcart, xred)
-    if(has_strain) then
-      call xcart2xred(natom,eff_pot%supercell%rprimd_supercell,&
-&                     eff_pot%supercell%xcart_supercell,xred_tmp)
-      call xred2xcart(natom, rprimd, xcart_tmp, xred_tmp)
-      do ii = 1, natom
-        disp_tmp(:,ii) = xcart(:,ii) - xcart_tmp(:,ii)
-      end do
-    else
-      do ii = 1, natom
-        disp_tmp(:,ii) = xcart(:,ii) - eff_pot%supercell%xcart_supercell(:,ii)
-      end do
-    end if
+!   Compute the displacement
+    call effective_potential_getDisp(disp_tmp,natom,rprimd,eff_pot%supercell%rprimd_supercell,&
+&                                          xred_hist=xred,&
+&                                          xcart_ref =eff_pot%supercell%xcart_supercell)
   end if
 
   energy         = zero
@@ -3269,7 +3253,7 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
 ! divide stess tensor by ucvol
   strten = strten / ucvol
 
-! convert forces into reduced coordinates and multiply by -1 
+! multiply forces by -1 
   fcart = -1 * fcart
 ! Redistribute the residuale of the forces
   call effective_potential_distributeResidualForces(eff_pot,fcart,eff_pot%supercell%natom_supercell)
@@ -3338,6 +3322,118 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
 
 end subroutine effective_potential_evaluate
 !!***
+
+!****f* m_effective_potential/effective_potential_getDisp
+!!
+!! NAME
+!! effective_potential_getDisp
+!!
+!! FUNCTION
+!! Compute cartesian coordinates of the displacment 
+!! between two configurations
+!!
+!! INPUTS
+!!
+!!
+!! OUTPUT
+!! displacement =  cartesian coordinates of the displacment 
+!!                 between two configurations
+!!
+!! PARENTS
+!!
+!!
+!! CHILDREN
+!!
+!!
+!! SOURCE
+
+subroutine effective_potential_getDisp(displacement,natom,rprimd_hist,rprimd_ref,&
+&                                            xcart_hist,xred_hist,xred_ref,xcart_ref)
+
+  use m_strain
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'effective_potential_getDisp'
+ use interfaces_41_geometry
+!End of the abilint section
+
+  implicit none
+
+!Arguments ------------------------------------
+!scalars
+  integer, intent(in) :: natom
+!array
+  real(dp),intent(in) :: rprimd_ref(3,3),rprimd_hist(3,3)
+  real(dp),intent(out) :: displacement(3,natom)
+  real(dp),intent(in),optional :: xred_hist(3,natom),xcart_hist(3,natom)
+  real(dp),intent(in),optional :: xred_ref(3,natom),xcart_ref(3,natom)
+!Local variables-------------------------------
+!scalar
+  integer :: ii
+  character(len=500) :: msg
+  logical :: has_strain = .FALSE.
+!array
+  type(strain_type) :: strain
+  real(dp) :: xcart_hist_tmp(3,natom),xcart_ref_tmp(3,natom)
+  real(dp) :: xred_ref_tmp(3,natom)
+
+! *************************************************************************
+
+  if (.not.(present(xred_ref).or.present(xcart_ref))) then
+     write(msg, '(3a)' )&
+&         'You need at least give xcart_ref of xred_ref '
+     MSG_ERROR(msg)
+  end if
+
+  if (.not.(present(xred_hist).or.present(xcart_hist))) then
+     write(msg, '(3a)' )&
+&         'You need at least give xcart_hist of xred_hist '
+     MSG_ERROR(msg)
+
+  end if
+
+!--------------------------------------------
+! 1 - Get the strain for this step
+!--------------------------------------------
+
+  call strain_get(strain,rprim=rprimd_ref,rprim_def=rprimd_hist)
+  if (strain%name /= "reference")  then
+    has_strain = .TRUE.
+  end if
+
+! fill the history position
+  if(present(xcart_hist)) then
+    xcart_hist_tmp(:,:) = xcart_hist(:,:)
+  else
+    call xred2xcart(natom, rprimd_hist, xcart_hist_tmp, xred_hist) 
+  end if
+
+
+! Fill the reference position and change the cartesian coordinates
+! if the rprimd is different
+  if(has_strain) then
+    if(present(xcart_ref)) then
+      call xcart2xred(natom, rprimd_ref,  xcart_ref,     xred_ref_tmp)
+      call xred2xcart(natom, rprimd_hist, xcart_ref_tmp, xred_ref_tmp)
+    else
+      call xred2xcart(natom, rprimd_hist, xcart_ref_tmp, xred_ref)
+    end if
+  else
+    if(present(xcart_ref)) then
+      xcart_ref_tmp(:,:) = xcart_ref(:,:)
+    else
+      call xred2xcart(natom, rprimd_ref, xcart_ref_tmp, xred_ref)
+    end if
+  end if
+
+! Compute displacement
+  do ii = 1, natom
+    displacement(:,ii) = xcart_hist_tmp(:,ii) - xcart_ref_tmp(:,ii)
+  end do
+
+end subroutine effective_potential_getDisp
 
 !!****f* m_effective_potential/ifc_contribution
 !! NAME
@@ -3426,7 +3522,7 @@ subroutine ifc_contribution(atmfrc,disp,energy,fcart,cells,natom_sc,natom_uc,nce
       cell_atom2(1) = (i1-1) + index_rpt(1,irpt)
       cell_atom2(2) = (i2-1) + index_rpt(2,irpt)
       cell_atom2(3) = (i3-1) + index_rpt(3,irpt)
-      call index_periodic(cell_atom2(1:3),sc_size(1:3))
+      call effective_potential_GetIndexPeriodic(cell_atom2(1:3),sc_size(1:3))
 !     index of the second atom in the displacement array
       jj = cell_atom2(1)*sc_size(2)*sc_size(3)*natom_uc+&
 &          cell_atom2(2)*sc_size(3)*natom_uc+&
@@ -3651,7 +3747,7 @@ subroutine ifcStrainCoupling_contribution(eff_pot,disp,energy,fcart,strain,strte
         cell_atom2(1) =  (i1-1) + eff_pot%anharmonics_terms%phonon_strain(alpha)%cell(1,irpt)
         cell_atom2(2) =  (i2-1) + eff_pot%anharmonics_terms%phonon_strain(alpha)%cell(2,irpt)
         cell_atom2(3) =  (i3-1) + eff_pot%anharmonics_terms%phonon_strain(alpha)%cell(3,irpt)
-        call index_periodic(cell_atom2(1:3),cell_number(1:3))
+        call effective_potential_GetIndexPeriodic(cell_atom2(1:3),cell_number(1:3))
 !       index of the second atom in the displacement array
         jj = cell_atom2(1)*cell_number(2)*cell_number(3)*eff_pot%crystal%natom+&
 &            cell_atom2(2)*cell_number(3)*eff_pot%crystal%natom+&
@@ -3901,7 +3997,7 @@ subroutine coefficients_contribution(coefficients,disp,energy,fcart,sc_natom,nco
               cell_atoma1(1) =  (i1-1) + cell_atoma1(1)
               cell_atoma1(2) =  (i2-1) + cell_atoma1(2)
               cell_atoma1(3) =  (i3-1) + cell_atoma1(3)
-              call index_periodic(cell_atoma1(1:3),sc_size(1:3))
+              call effective_potential_GetIndexPeriodic(cell_atoma1(1:3),sc_size(1:3))
 !             index of the first atom (position in the supercell if the cell is not 0 0 0)
               ia1 = cell_atoma1(1)*sc_size(2)*sc_size(3)*uc_natom+&
 &                   cell_atoma1(2)*sc_size(3)*uc_natom+&
@@ -3918,7 +4014,7 @@ subroutine coefficients_contribution(coefficients,disp,energy,fcart,sc_natom,nco
               cell_atomb1(1) =  (i1-1) + cell_atomb1(1)
               cell_atomb1(2) =  (i2-1) + cell_atomb1(2)
               cell_atomb1(3) =  (i3-1) + cell_atomb1(3)
-              call index_periodic(cell_atomb1(1:3),sc_size(1:3))
+              call effective_potential_GetIndexPeriodic(cell_atomb1(1:3),sc_size(1:3))
 
 !            index of the second atom in the (position in the supercell  if the cell is not 0 0 0) 
               ib1 = cell_atomb1(1)*sc_size(2)*sc_size(3)*uc_natom+&
@@ -3967,7 +4063,7 @@ subroutine coefficients_contribution(coefficients,disp,energy,fcart,sc_natom,nco
                   cell_atoma2(1) =  (i1-1) + cell_atoma2(1)
                   cell_atoma2(2) =  (i2-1) + cell_atoma2(2)
                   cell_atoma2(3) =  (i3-1) + cell_atoma2(3)
-                  call index_periodic(cell_atoma2(1:3),sc_size(1:3))
+                  call effective_potential_GetIndexPeriodic(cell_atoma2(1:3),sc_size(1:3))
 !                 index of the first atom (position in the supercell and direction)
 !                 if the cell of the atom a is not 0 0 0 (may happen)
                   ia2 = cell_atoma2(1)*sc_size(2)*sc_size(3)*uc_natom+&
@@ -3986,7 +4082,7 @@ subroutine coefficients_contribution(coefficients,disp,energy,fcart,sc_natom,nco
                   cell_atomb2(1) =  (i1-1) + cell_atomb2(1)
                   cell_atomb2(2) =  (i2-1) + cell_atomb2(2)
                   cell_atomb2(3) =  (i3-1) + cell_atomb2(3)
-                  call index_periodic(cell_atomb2(1:3),sc_size(1:3))
+                  call effective_potential_GetIndexPeriodic(cell_atomb2(1:3),sc_size(1:3))
 
 !                 index of the second atom in the (position in the supercell) 
                   ib2 = cell_atomb2(1)*sc_size(2)*sc_size(3)*uc_natom+&
@@ -4103,9 +4199,9 @@ subroutine effective_potential_distributeResidualForces(eff_pot,fcart,natom)
 end subroutine effective_potential_distributeResidualForces
 !!***
 
-!!****f* m_effective_potential/index_periodic
+!!****f* m_effective_potential/effective_potential_GetIndexPeriodic
 !! NAME
-!!  delta ernegy
+!! Get the index of the cell by using PBC
 !!
 !! FUNCTION
 !!
@@ -4117,13 +4213,13 @@ end subroutine effective_potential_distributeResidualForces
 !!
 !! SOURCE
 
-subroutine index_periodic(index,n_cell)
+subroutine effective_potential_GetIndexPeriodic(index,n_cell)
 
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'index_periodic'
+#define ABI_FUNC 'effective_potential_GetIndexPeriodic'
 !End of the abilint section
 
  implicit none
@@ -4144,7 +4240,7 @@ subroutine index_periodic(index,n_cell)
     end do
   end do
 
-end subroutine index_periodic
+end subroutine effective_potential_GetIndexPeriodic
 !!***
 
 !!****f* m_effective_potential/find_bound
@@ -4286,7 +4382,7 @@ subroutine effective_potential_effpot2ddb(ddb,crystal,eff_pot,n_cell,nph1l,optio
   real(dp) :: gmet(3,3),rmet(3,3)
   real(dp) :: gprimd(3,3),rprimd(3,3)
   real(dp),allocatable :: xred(:,:)
-  character :: title(eff_pot%crystal%ntypat)
+!  character :: title(eff_pot%crystal%ntypat)
   integer,allocatable :: symrel(:,:,:),symafm(:)
   real(dp),allocatable :: tnons(:,:)
 
@@ -4452,13 +4548,13 @@ subroutine effective_potential_printPDOS(eff_pot,filename,n_cell,nph1l,option,qp
   character(len=fnlen),intent(in) :: filename
 !Local variables-------------------------------
 !scalar
- integer :: lenstr
- character(len=strlen) :: string
+! integer :: lenstr
+! character(len=strlen) :: string
 !array
  type(crystal_t) :: Crystal
- type(anaddb_dataset_type) :: inp
+! type(anaddb_dataset_type) :: inp
  type(ddb_type) :: ddb
- type(asrq0_t) :: asrq0
+! type(asrq0_t) :: asrq0
 
 ! *************************************************************************
 
