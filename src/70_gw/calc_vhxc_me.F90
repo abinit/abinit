@@ -273,8 +273,7 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,gsqcutf_eff,nfftf,ngfftf,&
  if(Mflags%has_vxcval_hybrid==1) then
    if(libxc_functionals_check()) then
 
-     write(msg,'(a)') ' Hybrid functional xc potential is being set'
-     call wrtout(std_out,msg,'COLL')
+     call wrtout(std_out,' Hybrid functional xc potential is being set')
      !
      ! copy the Dtset into the temporary Dtset_dummy
      call dtset_copy(Dtset_dummy,Dtset)
@@ -322,8 +321,7 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,gsqcutf_eff,nfftf,ngfftf,&
      end if
 
    else
-     write(msg,'(a)') 'LIBXC is not present: hybrid functionals are not available'
-     call wrtout(std_out,msg,'COLL')
+     call wrtout(std_out, 'LIBXC is not present: hybrid functionals are not available')
    end if
  endif
 
@@ -456,7 +454,6 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,gsqcutf_eff,nfftf,ngfftf,&
        do ib=b_start,jb
 
          if (bbp_ks_distrb(ib,jb,ikc,is)/=rank) CYCLE
-
          ! * Off-diagonal elements only for QPSCGW.
          if (Mflags%only_diago==1.and.ib/=jb) CYCLE
 
@@ -464,17 +461,17 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,gsqcutf_eff,nfftf,ngfftf,&
 
          u1cjg_u2dpc(1:nfftf)=CONJG(ur1(1:nfftf))*ur2(1:nfftf)
 
-         if (Mflags%has_vxc==1)      &
-&          Mels%vxc     (ib,jb,ik_ibz,is)=SUM(u1cjg_u2dpc(1:nfftf)*vxc    (1:nfftf,is))*nfftfm1
+         if (Mflags%has_vxc==1) &
+&          Mels%vxc(ib,jb,ik_ibz,is) = SUM(u1cjg_u2dpc(1:nfftf)*vxc(1:nfftf,is))*nfftfm1
 
-         if (Mflags%has_vxcval==1)   &
-&          Mels%vxcval  (ib,jb,ik_ibz,is)=SUM(u1cjg_u2dpc(1:nfftf)*vxc_val(1:nfftf,is))*nfftfm1
+         if (Mflags%has_vxcval==1)  &
+&          Mels%vxcval(ib,jb,ik_ibz,is) = SUM(u1cjg_u2dpc(1:nfftf)*vxc_val(1:nfftf,is))*nfftfm1
 
-         if (Mflags%has_vxcval_hybrid==1)   &
-&          Mels%vxcval_hybrid(ib,jb,ik_ibz,is)=SUM(u1cjg_u2dpc(1:nfftf)*vxc_val_hybrid(1:nfftf,is))*nfftfm1
+         if (Mflags%has_vxcval_hybrid==1) &
+&          Mels%vxcval_hybrid(ib,jb,ik_ibz,is) = SUM(u1cjg_u2dpc(1:nfftf)*vxc_val_hybrid(1:nfftf,is))*nfftfm1
 
          if (Mflags%has_vhartree==1) &
-&          Mels%vhartree(ib,jb,ik_ibz,is)=SUM(u1cjg_u2dpc(1:nfftf)*vhartr (1:nfftf))   *nfftfm1
+&          Mels%vhartree(ib,jb,ik_ibz,is) = SUM(u1cjg_u2dpc(1:nfftf)*vhartr (1:nfftf))*nfftfm1
 
          if (Mflags%has_hbare==1) then
            cg1 => Wfd%Wave(ib,ik_ibz,is)%ug(1:npw_k)
@@ -658,7 +655,7 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,gsqcutf_eff,nfftf,ngfftf,&
                  klmn=j0lmn+ilmn
                  ! TODO Be careful, here I assume that the onsite terms ij are symmetric
                  ! should check the spin-orbit case!
-                 fact=one ; if (ilmn==jlmn) fact=half
+                 fact=one; if (ilmn==jlmn) fact=half
 
                  ! === Loop over four components if nspinor==2 ===
                  ! * If collinear nsploop==1
@@ -776,13 +773,13 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,gsqcutf_eff,nfftf,ngfftf,&
            if (nspinor==1) then
 
              if (Mflags%has_hbare==1)    &
-&              Mels%hbare   (ib,jb,ik_ibz,is) = Mels%hbare   (ib,jb,ik_ibz,is) + DCMPLX(tmp_h0ij(1,1),tmp_h0ij(2,1))
+&              Mels%hbare(ib,jb,ik_ibz,is) = Mels%hbare(ib,jb,ik_ibz,is) + DCMPLX(tmp_h0ij(1,1),tmp_h0ij(2,1))
 
              if (Mflags%has_vxc==1)      &
-&              Mels%vxc     (ib,jb,ik_ibz,is) = Mels%vxc     (ib,jb,ik_ibz,is) + DCMPLX(tmp_xc(1,1),tmp_xc(2,1))
+&              Mels%vxc(ib,jb,ik_ibz,is) = Mels%vxc(ib,jb,ik_ibz,is) + DCMPLX(tmp_xc(1,1),tmp_xc(2,1))
 
              if (Mflags%has_vxcval==1)   &
-&              Mels%vxcval  (ib,jb,ik_ibz,is) = Mels%vxcval  (ib,jb,ik_ibz,is) + DCMPLX(tmp_xcval(1,1),tmp_xcval(2,1))
+&              Mels%vxcval(ib,jb,ik_ibz,is) = Mels%vxcval(ib,jb,ik_ibz,is) + DCMPLX(tmp_xcval(1,1),tmp_xcval(2,1))
 
              if (Mflags%has_vxcval_hybrid==1)   &
 &              Mels%vxcval_hybrid(ib,jb,ik_ibz,is) = Mels%vxcval_hybrid(ib,jb,ik_ibz,is) + DCMPLX(tmp_xcval(1,1),tmp_xcval(2,1))
@@ -791,30 +788,30 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,gsqcutf_eff,nfftf,ngfftf,&
 &              Mels%vhartree(ib,jb,ik_ibz,is) = Mels%vhartree(ib,jb,ik_ibz,is) + DCMPLX(tmp_H (1,1),tmp_H (2,1))
 
              if (Mflags%has_vu==1)       &
-&              Mels%vu      (ib,jb,ik_ibz,is) = DCMPLX(tmp_U(1,1),tmp_U(2,1))
+&              Mels%vu(ib,jb,ik_ibz,is) = DCMPLX(tmp_U(1,1),tmp_U(2,1))
 
              if (Mflags%has_sxcore==1)   &
-&              Mels%sxcore  (ib,jb,ik_ibz,is) = DCMPLX(tmp_sigcx(1,1),tmp_sigcx(2,1))
+&              Mels%sxcore(ib,jb,ik_ibz,is) = DCMPLX(tmp_sigcx(1,1),tmp_sigcx(2,1))
 
            else
 
              if (Mflags%has_hbare==1)    &
-&              Mels%hbare   (ib,jb,ik_ibz,:) = Mels%hbare(ib,jb,ik_ibz,:) + DCMPLX(tmp_h0ij(1,:),tmp_h0ij(2,:))
+&              Mels%hbare(ib,jb,ik_ibz,:) = Mels%hbare(ib,jb,ik_ibz,:) + DCMPLX(tmp_h0ij(1,:),tmp_h0ij(2,:))
 
              if (Mflags%has_vxc==1)      &
-&              Mels%vxc     (ib,jb,ik_ibz,:) = Mels%vxc   (ib,jb,ik_ibz,:) + DCMPLX(tmp_xc(1,:),tmp_xc(2,:))
+&              Mels%vxc(ib,jb,ik_ibz,:) = Mels%vxc(ib,jb,ik_ibz,:) + DCMPLX(tmp_xc(1,:),tmp_xc(2,:))
 
              if (Mflags%has_vxcval==1)   &
-&              Mels%vxcval  (ib,jb,ik_ibz,:) = Mels%vxcval(ib,jb,ik_ibz,:) + DCMPLX(tmp_xcval(1,:),tmp_xcval(2,:))
+&              Mels%vxcval(ib,jb,ik_ibz,:) = Mels%vxcval(ib,jb,ik_ibz,:) + DCMPLX(tmp_xcval(1,:),tmp_xcval(2,:))
 
              if (Mflags%has_vxcval_hybrid==1)   &
-&              Mels%vxcval_hybrid  (ib,jb,ik_ibz,:) = Mels%vxcval_hybrid(ib,jb,ik_ibz,:) + DCMPLX(tmp_xcval(1,:),tmp_xcval(2,:))
+&              Mels%vxcval_hybrid(ib,jb,ik_ibz,:) = Mels%vxcval_hybrid(ib,jb,ik_ibz,:) + DCMPLX(tmp_xcval(1,:),tmp_xcval(2,:))
 
              if (Mflags%has_vhartree==1) &
 &              Mels%vhartree(ib,jb,ik_ibz,:) = Mels%vhartree(ib,jb,ik_ibz,:) + DCMPLX(tmp_H (1,:),tmp_H (2,:))
 
              if (Mflags%has_vu==1)       &
-&              Mels%vu      (ib,jb,ik_ibz,:) = DCMPLX(tmp_U(1,:),tmp_U(2,:))
+&              Mels%vu(ib,jb,ik_ibz,:) = DCMPLX(tmp_U(1,:),tmp_U(2,:))
            end if
 
          end do !ib

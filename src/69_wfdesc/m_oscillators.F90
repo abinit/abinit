@@ -29,7 +29,7 @@ MODULE m_oscillators
  use defs_basis
  use m_errors
  use m_profiling_abi
- use m_fft     
+ use m_fft
 
  use m_gwdefs,    only : czero_gw
  use m_fstrings,  only : toupper
@@ -38,12 +38,12 @@ MODULE m_oscillators
 
  implicit none
 
- private 
+ private
 !!***
 
 !----------------------------------------------------------------------
 
- public :: rho_tw_g 
+ public :: rho_tw_g
  public :: get_uug
  public :: calc_wfwfg         ! Calculate the Fourier transform of the product u_{bk}^*(r).u_{b"k}(r) at an arbitrary k in the BZ.
  public :: sym_rhotwgq0       ! Symmetrize the oscillator matrix elements in the BZ in the special case of q=0.
@@ -70,14 +70,14 @@ CONTAINS  !=====================================================================
 !! map2sphere= 1 to retrieve Fourier components indexed according to igfftg0.
 !!             0 to retrieve Fourier components indexed according to the FFT box.
 !!               NOTE: If map2sphere==0 npwvec must be equal to nr
-!! use_padfft= Only compatible with map2sphere 1. 
+!! use_padfft= Only compatible with map2sphere 1.
 !!             1 if matrix elements are calculated via zero-padded FFT.
 !!             0 R-->G Transform in done on the full FFT box.
 !! igfftg0(npwvec*map2sphere)=index of G-G_o in the FFT array for each G in the sphere.
 !! i1=1 if kbz1 = Sk1, 2 if kbz1 = -Sk_1 (k_1 is in the IBZ)
 !! i2=1 if kbz2 = Sk2, 2 if kbz2 = -Sk_2 (k_2 is in the IBZ)
 !! ktabr1(nr),ktabr2(nr)= tables R^-1(r-t) for the two k-points
-!! ktabp1,ktabp2 = phase factors for non-simmorphic symmetries e^{-i 2\pi kbz.\tau} 
+!! ktabp1,ktabp2 = phase factors for non-simmorphic symmetries e^{-i 2\pi kbz.\tau}
 !! ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
 !! npwvec=number of plane waves (in the sphere if map2sphere==1, in the FFT box if map2sphere==1)
 !! nr=number of FFT grid points
@@ -141,7 +141,7 @@ subroutine rho_tw_g(nspinor,npwvec,nr,ndat,ngfft,map2sphere,use_padfft,igfftg0,g
  complex(gwpc) :: u1a,u1b,u2a,u2b
  type(fftbox_plan3_t) :: plan
 !arrays
- integer :: spinor_pad(2,4) 
+ integer :: spinor_pad(2,4)
  complex(dpc) :: spinrot_mat1(2,2),spinrot_mat2(2,2)
  complex(gwpc),allocatable :: u12prod(:),cwavef1(:),cwavef2(:)
 
@@ -156,7 +156,7 @@ subroutine rho_tw_g(nspinor,npwvec,nr,ndat,ngfft,map2sphere,use_padfft,igfftg0,g
 &    wfn1,i1,ktabr1,ktabp1,&
 &    wfn2,i2,ktabr2,ktabp2,rhotwg)
 #else
-!$OMP PARALLEL DO PRIVATE(upt,rhopt) SCHEDULE(DYNAMIC) 
+!$OMP PARALLEL DO PRIVATE(upt,rhopt) SCHEDULE(DYNAMIC)
    do dat=1,ndat
      upt   = 1 + (dat-1)*nr
      rhopt = 1 + (dat-1)*npwvec
@@ -168,7 +168,7 @@ subroutine rho_tw_g(nspinor,npwvec,nr,ndat,ngfft,map2sphere,use_padfft,igfftg0,g
 
  CASE (2) ! Spinorial case.
 
-   MSG_ERROR("Add zero-padded FFT") !TODO
+   !MSG_ERROR("Add zero-padded FFT") !TODO
    ABI_CHECK(ndat==1,"ndat != 1 not coded")
    dat = 1
    upt = 1
@@ -180,21 +180,21 @@ subroutine rho_tw_g(nspinor,npwvec,nr,ndat,ngfft,map2sphere,use_padfft,igfftg0,g
    ! === Apply Time-reversal if required ===
    ! \psi_{-k}^1 =  (\psi_k^2)^*
    ! \psi_{-k}^2 = -(\psi_k^1)^*
-   if (i1==1) then 
-     cwavef1(:)=wfn1(:) 
+   if (i1==1) then
+     cwavef1(:)=wfn1(:)
    else if (i1==2) then
      cwavef1(1:nr)     = GWPC_CONJG(wfn1(nr+1:2*nr))
      cwavef1(nr+1:2*nr)=-GWPC_CONJG(wfn1(1:nr))
-   else 
+   else
      MSG_ERROR('Wrong i1 in spinor')
    end if
 
-   if (i2==1) then 
-     cwavef2(:)=wfn2(:) 
+   if (i2==1) then
+     cwavef2(:)=wfn2(:)
    else if (i2==2) then
      cwavef2(1:nr)     = GWPC_CONJG(wfn2(nr+1:2*nr))
      cwavef2(nr+1:2*nr)=-GWPC_CONJG(wfn2(1:nr))
-   else 
+   else
      MSG_ERROR('Wrong i2 in spinor')
    end if
 
@@ -205,7 +205,7 @@ subroutine rho_tw_g(nspinor,npwvec,nr,ndat,ngfft,map2sphere,use_padfft,igfftg0,g
        ir1=ktabr1(ir); ir2=ktabr2(ir)
        cwavef1(ir+spad0) = cwavef1(ir1+spad0)*ktabp1
        cwavef2(ir+spad0) = cwavef2(ir2+spad0)*ktabp2
-     end do 
+     end do
    end do !ispinor
 
    ! === Rotation in spinor space ===
@@ -228,12 +228,12 @@ subroutine rho_tw_g(nspinor,npwvec,nr,ndat,ngfft,map2sphere,use_padfft,igfftg0,g
      !ai=wavefspinor(2,ir)
      !br=wavefspinor(1,npw2+ir)
      !bi=wavefspinor(2,npw2+ir)
-     u1a=cwavef1(ir) 
-     u1b=cwavef1(ir+nr) 
+     u1a=cwavef1(ir)
+     u1b=cwavef1(ir+nr)
      cwavef1(ir)   =spinrot_mat1(1,1)*u1a+spinrot_mat1(1,2)*u1b
      cwavef1(ir+nr)=spinrot_mat1(2,1)*u1a+spinrot_mat1(2,2)*u1b
-     u2a=cwavef2(ir) 
-     u2b=cwavef2(ir+nr) 
+     u2a=cwavef2(ir)
+     u2b=cwavef2(ir+nr)
      cwavef2(ir)   =spinrot_mat2(1,1)*u2a+spinrot_mat2(1,2)*u2b
      cwavef2(ir+nr)=spinrot_mat2(2,1)*u2a+spinrot_mat2(2,2)*u2b
      !wavefspinor(1,ir)     = spinrots*ar-spinrotz*ai +spinroty*br-spinrotx*bi
@@ -251,18 +251,18 @@ subroutine rho_tw_g(nspinor,npwvec,nr,ndat,ngfft,map2sphere,use_padfft,igfftg0,g
      u12prod = GWPC_CONJG(cwavef1(spad1+1:spad1+nr)) * cwavef2(spad2+1:spad2+nr)
 
      ! Add compensation charge.
-     !if (PRESENT(nhat12)) then 
+     !if (PRESENT(nhat12)) then
      !  u12prod = u12prod + CMPLX(nhat12(1,:,iab),nhat12(2,:,iab))
      !end if
      spad0=(iab-1)*npwvec
 
      SELECT CASE (map2sphere)
-     
+
      CASE (0) ! Need results on the full FFT box thus cannot use zero-padded FFT.
 
        call fftbox_plan3_many(plan,ndat,ngfft(1:3),ngfft(1:3),ngfft(7),-1)
        call fftbox_execute(plan,u12prod)
-       rhotwg(spad0+1:spad0+npwvec)=u12prod 
+       rhotwg(spad0+1:spad0+npwvec)=u12prod
 
      CASE (1) ! Need results on the G-sphere. Call zero-padded FFT routines if required.
 
@@ -270,7 +270,7 @@ subroutine rho_tw_g(nspinor,npwvec,nr,ndat,ngfft,map2sphere,use_padfft,igfftg0,g
          nx =ngfft(1); ny =ngfft(2); nz =ngfft(3); mgfft = MAXVAL(ngfft(1:3))
          ldx=nx      ; ldy=ny      ; ldz=nz
          call fftpad(u12prod,ngfft,nx,ny,nz,ldx,ldy,ldz,ndat,mgfft,-1,gbound)
-       else 
+       else
          call fftbox_plan3_many(plan,ndat,ngfft(1:3),ngfft(1:3),ngfft(7),-1)
          call fftbox_execute(plan,u12prod)
        end if
@@ -278,7 +278,7 @@ subroutine rho_tw_g(nspinor,npwvec,nr,ndat,ngfft,map2sphere,use_padfft,igfftg0,g
        do ig=1,npwvec      ! Have to map FFT to G-sphere.
          igfft=igfftg0(ig)
          if (igfft/=0) then ! G-G0 belong to the FFT mesh.
-           rhotwg(ig+spad0)=u12prod(igfft) 
+           rhotwg(ig+spad0)=u12prod(igfft)
          else               ! Set this component to zero
            rhotwg(ig+spad0)=czero_gw
          end if
@@ -292,7 +292,7 @@ subroutine rho_tw_g(nspinor,npwvec,nr,ndat,ngfft,map2sphere,use_padfft,igfftg0,g
    ABI_FREE(cwavef1)
    ABI_FREE(cwavef2)
 
- CASE DEFAULT 
+ CASE DEFAULT
    MSG_BUG('Wrong nspinor')
  END SELECT
 
@@ -313,7 +313,7 @@ end subroutine rho_tw_g
 !! nr=number of FFT grid points
 !! ndat=Number of wavefunctions to transform.
 !! ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
-!! use_padfft= 
+!! use_padfft=
 !!             1 if matrix elements are calculated via zero-padded FFT.
 !!             0 R-->G Transform in done on the full FFT box.
 !! igfftg0(npw)=index of G-G_o in the FFT array for each G in the sphere.
@@ -333,7 +333,7 @@ end subroutine rho_tw_g
 !!
 !! SOURCE
 
-subroutine get_uug(npw,nr,ndat,ngfft,use_padfft,igfftg0,gbound,u1,u2,usug,trans1,trans2) 
+subroutine get_uug(npw,nr,ndat,ngfft,use_padfft,igfftg0,gbound,u1,u2,usug,trans1,trans2)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -360,7 +360,7 @@ subroutine get_uug(npw,nr,ndat,ngfft,use_padfft,igfftg0,gbound,u1,u2,usug,trans1
  character(len=1) :: my_trans1,my_trans2
  type(fftbox_plan3_t) :: plan
 !arrays
- complex(gwpc),allocatable :: u12prod(:) 
+ complex(gwpc),allocatable :: u12prod(:)
 
 ! *************************************************************************
 
@@ -377,7 +377,7 @@ subroutine get_uug(npw,nr,ndat,ngfft,use_padfft,igfftg0,gbound,u1,u2,usug,trans1
    u12prod = u1 * GWPC_CONJG(u2)
  else if (my_trans1=="H" .and. my_trans2=="H") then
    u12prod = GWPC_CONJG(u1) * GWPC_CONJG(u2)
- else 
+ else
    MSG_ERROR("Wrong combination of trans1, trans2")
  end if
 
@@ -413,14 +413,14 @@ end subroutine get_uug
 !! map2sphere= 1 to retrieve Fourier components indexed according to igfftg0.
 !!             0 to retrieve Fourier components indexed according to the FFT box.
 !!               NOTE: If map2sphere==0 npw must be equal to nr
-!! use_padfft= Only compatible with map2sphere 1. 
+!! use_padfft= Only compatible with map2sphere 1.
 !!             1 if matrix elements are calculated via zero-padded FFT.
 !!             0 R-->G Transform in done on the full FFT box.
 !! igfftg0(npw*map2sphere)=index of G-G_o in the FFT array for each G in the sphere.
 !! time1=1 if kbz1 = Sk1, 2 if kbz1 = -Sk_1 (k_1 is in the IBZ)
 !! time2=1 if kbz2 = Sk2, 2 if kbz2 = -Sk_2 (k_2 is in the IBZ)
 !! ktabr1(nr),ktabr2(nr)= tables R^-1(r-t) for the two k-points
-!! ktabp1,ktabp2 = phase factors for non-simmorphic symmetries e^{-i 2\pi kbz.\tau} 
+!! ktabp1,ktabp2 = phase factors for non-simmorphic symmetries e^{-i 2\pi kbz.\tau}
 !! ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
 !! npw=number of plane waves (in the sphere if map2sphere==1, in the FFT box if map2sphere==1)
 !! nr=number of FFT grid points
@@ -467,12 +467,12 @@ subroutine ts_usug_kkp_bz(npw,nr,ndat,ngfft,map2sphere,use_padfft,igfftg0,gbound
  integer :: nx,ny,nz,ldx,ldy,ldz,mgfft
  type(fftbox_plan3_t) :: plan
 !arrays
- complex(gwpc),allocatable :: u12prod(:) 
+ complex(gwpc),allocatable :: u12prod(:)
 
 ! *************************************************************************
 
  ! Form rho-twiddle(r)=u_1^*(r,b1,kbz1) u_2(r,b2,kbz2), to account for symmetries:
- ! u(r,b,kbz)=e^{-2i\pi kibz.(R^{-1}t} u (R{^-1}(r-t),b,kibz) 
+ ! u(r,b,kbz)=e^{-2i\pi kibz.(R^{-1}t} u (R{^-1}(r-t),b,kibz)
  !           =e^{+2i\pi kibz.(R^{-1}t} u*({R^-1}(r-t),b,kibz) for time-reversal
  !
  ABI_MALLOC(u12prod,(nr*ndat))
@@ -480,18 +480,18 @@ subroutine ts_usug_kkp_bz(npw,nr,ndat,ngfft,map2sphere,use_padfft,igfftg0,gbound
  call usur_kkp_bz(nr,ndat,time1,ktabr1,ktabp1,u1,time2,ktabr2,ktabp2,u2,u12prod)
  !
  ! Add compensation charge.
- !if (PRESENT(nhat12)) then 
+ !if (PRESENT(nhat12)) then
  !  u12prod = u1prod + CMPLX(nhat12(1,:,1),nhat12(2,:,1))
  !end if
 
  SELECT CASE (map2sphere)
- CASE (0) 
+ CASE (0)
    ! Need results on the full FFT box thus cannot use zero-padded FFT.
    call fftbox_plan3_many(plan,ndat,ngfft(1:3),ngfft(1:3),ngfft(7),-1)
    call fftbox_execute(plan,u12prod)
    call xcopy(nr*ndat,u12prod,1,usug,1)
 
- CASE (1) 
+ CASE (1)
    ! Need results on the G-sphere. Call zero-padded FFT routines if required.
    if (use_padfft==1) then
      nx =ngfft(1); ny =ngfft(2); nz =ngfft(3); mgfft = MAXVAL(ngfft(1:3))
@@ -531,7 +531,7 @@ end subroutine ts_usug_kkp_bz
 !! time1=1 if kbz1 = Sk1, 2 if kbz1 = -Sk_1 (k_1 is in the IBZ)
 !! time2=1 if kbz2 = Sk2, 2 if kbz2 = -Sk_2 (k_2 is in the IBZ)
 !! ktabr1(nr),ktabr2(nr)= tables R^-1(r-t) for the two k-points
-!! ktabp1,ktabp2 = phase factors for non-simmorphic symmetries e^{-i 2\pi kbz.\tau} 
+!! ktabp1,ktabp2 = phase factors for non-simmorphic symmetries e^{-i 2\pi kbz.\tau}
 !!
 !! OUTPUT
 !!  u12prod(nr*dat) = u1_kbz^*(r) u2_kbz(r) for the ndat pairs.
@@ -569,13 +569,13 @@ subroutine usur_kkp_bz(nr,ndat,time1,ktabr1,ktabp1,u1,time2,ktabr2,ktabp2,u2,u12
  integer :: ir,dat,padat
  complex(gwpc) :: my_ktabp1,my_ktabp2
 !arrays
- complex(gwpc),allocatable :: u1_bz(:),u2_bz(:) 
+ complex(gwpc),allocatable :: u1_bz(:),u2_bz(:)
 
 ! *************************************************************************
 
  !
  ! Form rho-twiddle(r)=u_1^*(r,b1,kbz1) u_2(r,b2,kbz2), to account for symmetries:
- ! u(r,b,kbz)=e^{-2i\pi kibz.(R^{-1}t} u (R{^-1}(r-t),b,kibz) 
+ ! u(r,b,kbz)=e^{-2i\pi kibz.(R^{-1}t} u (R{^-1}(r-t),b,kibz)
  !           =e^{+2i\pi kibz.(R^{-1}t} u*({R^-1}(r-t),b,kibz) for time-reversal
  !
  ABI_MALLOC(u1_bz,(nr*ndat))
@@ -628,7 +628,7 @@ subroutine usur_kkp_bz(nr,ndat,time1,ktabr1,ktabp1,u1,time2,ktabr2,ktabp2,u2,u12
      else
        MSG_ERROR("Wrong time2")
      end if
-   else 
+   else
      if (time2==1) then
 !$OMP PARALLEL DO PRIVATE(padat)
        do dat=1,ndat
@@ -708,7 +708,7 @@ end subroutine usur_kkp_bz
 !! INPUTS
 !! nr=number of FFT grid points
 !! ndat=Number of wavefunctions to transform.
-!! npw=number of plane waves in the sphere 
+!! npw=number of plane waves in the sphere
 !! igfftg0(npw)=index of G-G_o in the FFT array for each G in the sphere.
 !! iarrbox(nr*ndat)=Input array on the FFT mesh
 !!
@@ -752,9 +752,9 @@ subroutine gw_box2gsph(nr,ndat,npw,igfftg0,iarrbox,oarrsph)
    do ig=1,npw
      igfft=igfftg0(ig)
      if (igfft/=0) then ! G-G0 belong to the FFT mesh.
-       oarrsph(ig) = iarrbox(igfft) 
+       oarrsph(ig) = iarrbox(igfft)
      else               ! Set this component to zero.
-       oarrsph(ig) = czero_gw 
+       oarrsph(ig) = czero_gw
      end if
    end do
  else
@@ -765,9 +765,9 @@ subroutine gw_box2gsph(nr,ndat,npw,igfftg0,iarrbox,oarrsph)
      do ig=1,npw
        igfft=igfftg0(ig)
        if (igfft/=0) then ! G-G0 belong to the FFT mesh.
-         oarrsph(ig+pgsp) = iarrbox(igfft+pfft) 
+         oarrsph(ig+pgsp) = iarrbox(igfft+pfft)
        else               ! Set this component to zero.
-         oarrsph(ig+pgsp) = czero_gw 
+         oarrsph(ig+pgsp) = czero_gw
        end if
      end do
    end do
@@ -783,7 +783,7 @@ end subroutine gw_box2gsph
 !! calc_wfwfg
 !!
 !! FUNCTION
-!!  Calculate the Fourier transform of the product u_{bk}^*(r).u_{b"k}(r) 
+!!  Calculate the Fourier transform of the product u_{bk}^*(r).u_{b"k}(r)
 !!
 !! INPUTS
 !!
@@ -851,7 +851,7 @@ end subroutine calc_wfwfg
 
 !----------------------------------------------------------------------
 
-!!****f* m_oscillators/sym_rhotwgq0   
+!!****f* m_oscillators/sym_rhotwgq0
 !! NAME
 !!  sym_rhotwgq0
 !!
@@ -862,7 +862,7 @@ end subroutine calc_wfwfg
 !!  strictly speaking the symmetrization can be performed only for non-degenerate states.
 !!
 !! INPUTS
-!!  Gsph<gsphere_t>=Info on the G-sphere used to describe wavefunctions and W (the largest one is actually stored).  
+!!  Gsph<gsphere_t>=Info on the G-sphere used to describe wavefunctions and W (the largest one is actually stored).
 !!  npw=Number of G-vectors
 !!  dim_rtwg=Number of spin-spin combinations, 1 for collinear spin, 4 is nspinor==2 (TODO NOT CODED)
 !!  itim_k=2 if time reversal is used to reconstruct the k in the BZ, 1 otherwise.
@@ -901,8 +901,8 @@ function sym_rhotwgq0(itim_k,isym_k,dim_rtwg,npw,rhxtwg_in,Gsph) result(rhxtwg_s
  integer,intent(in) :: npw,dim_rtwg,itim_k,isym_k
  type(gsphere_t),intent(in) :: Gsph
 !arrays
- complex(gwpc),intent(in) :: rhxtwg_in(dim_rtwg*npw) 
- complex(gwpc) :: rhxtwg_sym(dim_rtwg*npw) 
+ complex(gwpc),intent(in) :: rhxtwg_in(dim_rtwg*npw)
+ complex(gwpc) :: rhxtwg_sym(dim_rtwg*npw)
 
 !Local variables ------------------------------
 !scalars
@@ -919,7 +919,7 @@ function sym_rhotwgq0(itim_k,isym_k,dim_rtwg,npw,rhxtwg_in,Gsph) result(rhxtwg_s
 
  CASE (1) ! Fractional translation associated to E is assumed to be (zero,zero,zero).
 
-   SELECT CASE (itim_k) 
+   SELECT CASE (itim_k)
    CASE (1) ! Identity, no time-reversal. No symmetrization is needed.
      rhxtwg_sym(:) = rhxtwg_in(:)
 
@@ -935,11 +935,11 @@ function sym_rhotwgq0(itim_k,isym_k,dim_rtwg,npw,rhxtwg_in,Gsph) result(rhxtwg_s
 
  CASE DEFAULT ! Rotate wavefunctions.
 
-   SELECT CASE (itim_k) 
+   SELECT CASE (itim_k)
 
    CASE (1) ! no time-reversal, only rotation.
     do ig=1,npw
-      rhxtwg_sym( Gsph%rottb(ig,itim_k,isym_k) ) = rhxtwg_in(ig) * Gsph%phmSGt(ig,isym_k) 
+      rhxtwg_sym( Gsph%rottb(ig,itim_k,isym_k) ) = rhxtwg_in(ig) * Gsph%phmSGt(ig,isym_k)
     end do
 
    CASE (2) ! time-reversal + spatial rotation.
@@ -952,7 +952,7 @@ function sym_rhotwgq0(itim_k,isym_k,dim_rtwg,npw,rhxtwg_in,Gsph) result(rhxtwg_s
      MSG_ERROR(msg)
    END SELECT
 
- END SELECT 
+ END SELECT
 
 end function sym_rhotwgq0
 !!***
