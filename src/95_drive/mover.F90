@@ -343,13 +343,6 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
    end if
    call abihist_bcast(hist_prev,master,comm)
 
-   if(hist_prev%mxhist==0)then
-     write(message,"(7a)") "There is no molecular dynamics history in the file",&
-&                           trim(filename),", ",ch10,"However restarxf is not set to zero",ch10,&
-&                          "Action: change restarxf of add correct HIST.nc file"
-     MSG_ERROR(message)
-   end if
-
 !  If restartxf specifies to reconstruct the history
    if (hist_prev%mxhist>0.and.ab_mover%restartxf==-1)then
      ntime=ntime+hist_prev%mxhist
