@@ -199,6 +199,7 @@ for section, content in all_contents.items():
  #f_cur.write("<br /><br />\n")
  f_cur.write("\n")
  content += "<script type=\"text/javascript\" src=\""+js_path+"list_internal_links.js\"> </script>\n\n"
+ content += "<script type=\"text/javascript\" src=\""+js_path+"copyright.js\"> </script>\n\n"
  content += "</body>\n"
  content += "</html>"
  f_cur.write(content)
@@ -230,13 +231,16 @@ for (speckey, specval) in list_specials:
 
 
 cur_content = "\n<script type=\"text/javascript\" src=\""+js_path+"list_internal_links.js\"> </script>\n\n"
+cur_content += "<script type=\"text/javascript\" src=\""+js_path+"copyright.js\"> </script>\n\n"
 cur_content += "</body>\n"
 cur_content += "</html>"
 
 f_sp.write(cur_content)
 f_sp.close()
 
+
 output += "<script type=\"text/javascript\" src=\""+js_path+"list_internal_links.js\"> </script>\n\n"
+output += "<script type=\"text/javascript\" src=\""+js_path+"copyright.js\"> </script>\n\n"
 output += "</body>\n"
 output += "</html>"
 
