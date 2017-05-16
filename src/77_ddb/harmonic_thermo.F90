@@ -743,11 +743,12 @@ subroutine harmonic_thermo(Ifc,Crystal,amu,anaddb_dtset,iout,outfilename_radix,c
              wovert=dosinc*(dble(ichan)-half)/Ha_cmm1/(two*kb_HaK*tmp)
              expm2x=exp(-two*wovert)
              do iatom=1,natom
-!   factor contains 1/2 omega
+!   factor contains 1 / (2 omega)
                factor=Ha_cmm1/(two*dosinc*(dble(ichan)-half))    &
 &               *(one+expm2x)/(one-expm2x) /amu(Crystal%typat(iatom))/amu_emass
 
-               factorv=(half*dosinc*(float(ichan)-half)/Ha_cmm1)    &
+!   this becomes * 0.5 * omega for the velocities
+               factorv=(half*dosinc*(dble(ichan)-half)/Ha_cmm1)    &
 &               *(one+expm2x)/(one-expm2x) /amu(Crystal%typat(iatom))/amu_emass
 
                do ij=1,6

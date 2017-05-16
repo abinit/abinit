@@ -1687,7 +1687,7 @@ end subroutine phdos_print_vsound
 !! phdos_print_msqd
 !!
 !! FUNCTION
-!!  Print out mean square displacement for each atom (trace and full matrix) as a function of T
+!!  Print out mean square displacement and velocity for each atom (trace and full matrix) as a function of T
 !!  see for example https://atztogo.github.io/phonopy/thermal-displacement.html#thermal-displacement
 !!
 !! INPUTS
@@ -1722,15 +1722,19 @@ subroutine phdos_print_msqd(PHdos, fname, ntemper, tempermin, temperinc)
  real(dp), intent(in) :: tempermin, temperinc
 
 !Local variables -------------------------
- integer :: io, iomin, itemp, iunit, iatom
+ integer :: io, iomin, itemp, iunit, junit, iatom
  real(dp) :: temper
  character(len=500) :: msg
 !arrays
- real(dp), allocatable :: bose(:,:), tmp_msqd(:,:), integ(:,:)
+ real(dp), allocatable :: bose_msqd(:,:), tmp_msqd(:,:), integ_msqd(:,:)
+ real(dp), allocatable :: bose_msqv(:,:), tmp_msqv(:,:), integ_msqv(:,:)
 
 ! *********************************************************************
 
  if (open_file(fname, msg, newunit=iunit, form="formatted", status="unknown", action="write") /= 0) then
+   MSG_ERROR(msg)
+ end if
+ if (open_file(fname, msg, newunit=junit, form="formatted", status="unknown", action="write") /= 0) then
    MSG_ERROR(msg)
  end if
 
@@ -1741,25 +1745,39 @@ subroutine phdos_print_msqd(PHdos, fname, ntemper, tempermin, temperinc)
 !  Do not change this to wrtout without checking extensively.
    !call wrtout(iunit, msg, 'COLL')
    write (iunit, '(a)') trim(msg)
+
+   write (msg, '(2a)') '# mean square velocity for each atom as a function of T (bohr^2/atomic time unit^2)'
+   write (junit, '(a)') trim(msg)
+
    write (msg, '(a,F18.10,a,F18.10,a)') '#  T in Kelvin, from ', tempermin, ' to ', tempermin+(ntemper-1)*temperinc
    !call wrtout(iunit, msg, 'COLL')
    write (iunit, '(a)') trim(msg)
+   write (junit, '(a)') trim(msg)
+
    write (msg, '(2a)') '#    T             |u^2|                u_xx                u_yy                u_zz',&
-&                                              '                u_yz                u_xz                y_xy in bohr^2'
+&                                              '                u_yz                u_xz                u_xy in bohr^2'
    !call wrtout(iunit, msg, 'COLL')
    write (iunit, '(a)') trim(msg)
+   write (msg, '(2a)') '#    T             |v^2|                v_xx                v_yy                v_zz',&
+&                                              '                v_yz                v_xz                v_xy in bohr^2/atomic time unit^2'
+   !call wrtout(iunit, msg, 'COLL')
+   write (junit, '(a)') trim(msg)
 
  ABI_ALLOCATE (tmp_msqd, (PHdos%nomega,9))
- ABI_ALLOCATE (integ, (9,ntemper))
+ ABI_ALLOCATE (tmp_msqv, (PHdos%nomega,9))
+ ABI_ALLOCATE (integ_msqd, (9,ntemper))
+ ABI_ALLOCATE (integ_msqv, (9,ntemper))
+ ABI_ALLOCATE (bose_msqd, (PHdos%nomega, ntemper))
+ ABI_ALLOCATE (bose_msqv, (PHdos%nomega, ntemper))
 
- ABI_ALLOCATE (bose, (PHdos%nomega, ntemper))
  do io=1, PHdos%nomega
      if (PHdos%omega(io) >= 1.d-10) exit
  end do
  iomin = io
 
  ! calculate bose only once for each atom (instead of for each atom)
- bose = zero
+ bose_msqd = zero
+ bose_msqv = zero
  do itemp = 1, ntemper
    temper = tempermin + (itemp-1) * temperinc
    if (abs(temper) < 1.e-10) cycle
@@ -1767,7 +1785,8 @@ subroutine phdos_print_msqd(PHdos, fname, ntemper, tempermin, temperinc)
 ! NB: factors follow convention in phonopy documentation
 !   the 1/sqrt(omega) factor in phonopy is contained in the displacement vector definition
 !   bose() is dimensionless
-     bose(io, itemp) =  (half + one  / ( exp(PHdos%omega(io)/(kb_HaK*temper)) - one )) / PHdos%omega(io)
+     bose_msqd(io, itemp) =  (half + one  / ( exp(PHdos%omega(io)/(kb_HaK*temper)) - one )) / PHdos%omega(io)
+     bose_msqv(io, itemp) =  (half + one  / ( exp(PHdos%omega(io)/(kb_HaK*temper)) - one )) * PHdos%omega(io)
    end do
  end do
 
@@ -1775,33 +1794,53 @@ subroutine phdos_print_msqd(PHdos, fname, ntemper, tempermin, temperinc)
    write (msg, '(a,I8)') '# atom number ', iatom
    !call wrtout(iunit, msg, 'COLL')
    write (iunit, '(a)') trim(msg)
-! for each T and each atom, integrate msqd matrix with Bose Einstein factor and output
-   integ = zero
-   tmp_msqd = reshape(PHdos%msqd_dos_atom(:,:,:,iatom), (/PHdos%nomega, 9/))
+   write (junit, '(a)') trim(msg)
 
-! perform all integrations as matrix multiplication: integ (idir, itemp) = [tmp_msqd(io,idir)]^T  * bose(io,itemp)
+! for each T and each atom, integrate msqd matrix with Bose Einstein factor and output
+   integ_msqd = zero
+   tmp_msqd = reshape(PHdos%msqd_dos_atom(:,:,:,iatom), (/PHdos%nomega, 9/))
+! perform all integrations as matrix multiplication: integ_msqd (idir, itemp) = [tmp_msqd(io,idir)]^T  * bose_msqd(io,itemp)
    call DGEMM('T','N', 9, ntemper, PHdos%nomega, one, tmp_msqd,PHdos%nomega,&
-&      bose, PHdos%nomega, zero, integ, 9)
+&      bose_msqd, PHdos%nomega, zero, integ_msqd, 9)
 ! NB: this presumes an equidistant omega grid
-   integ = integ * (PHdos%omega(2)-PHdos%omega(1)) / PHdos%atom_mass(iatom)
+   integ_msqd = integ_msqd * (PHdos%omega(2)-PHdos%omega(1)) / PHdos%atom_mass(iatom)
+
+   integ_msqv = zero
+   tmp_msqv = reshape(PHdos%msqd_dos_atom(:,:,:,iatom), (/PHdos%nomega, 9/))
+! perform all integrations as matrix multiplication: integ_msqv (idir, itemp) = [tmp_msqv(io,idir)]^T  * bose_msqv(io,itemp)
+   call DGEMM('T','N', 9, ntemper, PHdos%nomega, one, tmp_msqv,PHdos%nomega,&
+&      bose_msqv, PHdos%nomega, zero, integ_msqv, 9)
+! NB: this presumes an equidistant omega grid
+   integ_msqv = integ_msqv * (PHdos%omega(2)-PHdos%omega(1)) / PHdos%atom_mass(iatom)
+
 
 ! print out stuff
    do itemp = 1, ntemper
      temper = tempermin + (itemp-1) * temperinc
-     write (msg, '(F10.2,4x,F18.10,2x,6F18.10)') temper, third*(integ(1,itemp)+integ(5,itemp)+integ(9,itemp)), &
-&                      integ(1,itemp),integ(5,itemp),integ(9,itemp), &
-&                      integ(6,itemp),integ(3,itemp),integ(2,itemp)
+     write (msg, '(F10.2,4x,F18.10,2x,6F18.10)') temper, third*(integ_msqd(1,itemp)+integ_msqd(5,itemp)+integ_msqd(9,itemp)), &
+&                      integ_msqd(1,itemp),integ_msqd(5,itemp),integ_msqd(9,itemp), &
+&                      integ_msqd(6,itemp),integ_msqd(3,itemp),integ_msqd(2,itemp)
      !call wrtout(iunit, msg, 'COLL')
      write (iunit, '(a)') trim(msg)
+     write (msg, '(F10.2,4x,F18.10,2x,6F18.10)') temper, third*(integ_msqv(1,itemp)+integ_msqv(5,itemp)+integ_msqv(9,itemp)), &
+&                      integ_msqv(1,itemp),integ_msqv(5,itemp),integ_msqv(9,itemp), &
+&                      integ_msqv(6,itemp),integ_msqv(3,itemp),integ_msqv(2,itemp)
+     write (junit, '(a)') trim(msg)
    end do ! itemp
+
    !call wrtout(iunit, msg, 'COLL')
    write (iunit, '(a)') ''
+   write (junit, '(a)') ''
  enddo ! iatom
 
  ABI_DEALLOCATE (tmp_msqd)
- ABI_DEALLOCATE (bose)
- ABI_DEALLOCATE (integ)
+ ABI_DEALLOCATE (tmp_msqv)
+ ABI_DEALLOCATE (bose_msqd)
+ ABI_DEALLOCATE (bose_msqv)
+ ABI_DEALLOCATE (integ_msqd)
+ ABI_DEALLOCATE (integ_msqv)
  close(iunit)
+ close(junit)
 
 end subroutine phdos_print_msqd
 !!***
