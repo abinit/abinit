@@ -470,7 +470,7 @@ program anaddb
    call mkphdos(Phdos,Crystal,Ifc, inp%prtdos,inp%dosdeltae,inp%dossmear, inp%ng2qpt, inp%q2shft, comm)
 
    if (iam_master) then
-     call phdos_print_msqd(Phdos, strcat(filnam(2), "_MSQD_T"), inp%ntemper, inp%tempermin, inp%temperinc)
+     call phdos_print_msqd(Phdos, filnam(2), inp%ntemper, inp%tempermin, inp%temperinc)
      call phdos_print(Phdos, strcat(filnam(2), "_PHDOS"))
      call phdos_print_debye(Phdos, Crystal%ucvol)
      call phdos_print_thermo(PHdos, strcat(filnam(2), "_THERMO"), inp%ntemper, inp%tempermin, inp%temperinc)
