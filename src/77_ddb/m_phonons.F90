@@ -1725,16 +1725,20 @@ subroutine phdos_print_msqd(PHdos, fname, ntemper, tempermin, temperinc)
  integer :: io, iomin, itemp, iunit, junit, iatom
  real(dp) :: temper
  character(len=500) :: msg
+ character(len=fnlen) :: fname_msqd
+ character(len=fnlen) :: fname_veloc
 !arrays
  real(dp), allocatable :: bose_msqd(:,:), tmp_msqd(:,:), integ_msqd(:,:)
  real(dp), allocatable :: bose_msqv(:,:), tmp_msqv(:,:), integ_msqv(:,:)
 
 ! *********************************************************************
 
- if (open_file(fname, msg, newunit=iunit, form="formatted", status="unknown", action="write") /= 0) then
+ fname_msqd = trim(fname) //"_MSQD_T"
+ if (open_file(fname_msqd, msg, newunit=iunit, form="formatted", status="unknown", action="write") /= 0) then
    MSG_ERROR(msg)
  end if
- if (open_file(fname, msg, newunit=junit, form="formatted", status="unknown", action="write") /= 0) then
+ fname_veloc = trim(fname) // "_MSQV_T"
+ if (open_file(fname_veloc, msg, newunit=junit, form="formatted", status="unknown", action="write") /= 0) then
    MSG_ERROR(msg)
  end if
 
@@ -1817,12 +1821,12 @@ subroutine phdos_print_msqd(PHdos, fname, ntemper, tempermin, temperinc)
 ! print out stuff
    do itemp = 1, ntemper
      temper = tempermin + (itemp-1) * temperinc
-     write (msg, '(F10.2,4x,F18.10,2x,6F18.10)') temper, third*(integ_msqd(1,itemp)+integ_msqd(5,itemp)+integ_msqd(9,itemp)), &
+     write (msg, '(F10.2,4x,E22.10,2x,6E22.10)') temper, third*(integ_msqd(1,itemp)+integ_msqd(5,itemp)+integ_msqd(9,itemp)), &
 &                      integ_msqd(1,itemp),integ_msqd(5,itemp),integ_msqd(9,itemp), &
 &                      integ_msqd(6,itemp),integ_msqd(3,itemp),integ_msqd(2,itemp)
      !call wrtout(iunit, msg, 'COLL')
      write (iunit, '(a)') trim(msg)
-     write (msg, '(F10.2,4x,F18.10,2x,6F18.10)') temper, third*(integ_msqv(1,itemp)+integ_msqv(5,itemp)+integ_msqv(9,itemp)), &
+     write (msg, '(F10.2,4x,E22.10,2x,6E22.10)') temper, third*(integ_msqv(1,itemp)+integ_msqv(5,itemp)+integ_msqv(9,itemp)), &
 &                      integ_msqv(1,itemp),integ_msqv(5,itemp),integ_msqv(9,itemp), &
 &                      integ_msqv(6,itemp),integ_msqv(3,itemp),integ_msqv(2,itemp)
      write (junit, '(a)') trim(msg)
