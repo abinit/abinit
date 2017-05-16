@@ -213,30 +213,36 @@ subroutine dfpt_mkvxc_noncoll(cplex,ixc,kxc,bxc,mpi_enreg,nfft,ngfft,nhat1,nhat1
        do ifft=1,nfft
          dvdn=(vxc1_diag(ifft,1)+vxc1_diag(ifft,2))*half
          dvdz=(vxc1_diag(ifft,1)-vxc1_diag(ifft,2))*half
-         if(m_norm(ifft)>m_norm_min)then
-           fact=dvdz/m_norm(ifft)    ! this is in fact = delta_bxc
-           dum=rhor(ifft,4)*fact
+         if(m_norm(ifft)>m_norm_min*1000)then
+           fact=dvdz/m_norm(ifft)    ! this part describes the change of the magnitude of the xc magnetic field
+           dum=rhor(ifft,4)*fact     ! and the change of the scalar part of the xc electrostatic potential
            vxc1(ifft,1)=dvdn+dum
            vxc1(ifft,2)=dvdn-dum
            vxc1(ifft,3)= rhor(ifft,2)*fact
            vxc1(ifft,4)=-rhor(ifft,3)*fact
-
            !add remaining contributions comming from the change of magnetization direction
            m_dot_m1=(rhor(ifft,2)*rhor1(ifft,2)+rhor(ifft,3)*rhor1(ifft,3) &
 &                  +rhor(ifft,4)*rhor1(ifft,4))/m_norm(ifft)
            mx1=rhor1(ifft,2); mdirx=rhor(ifft,2)/m_norm(ifft);
            my1=rhor1(ifft,3); mdiry=rhor(ifft,3)/m_norm(ifft);
            mz1=rhor1(ifft,4); mdirz=rhor(ifft,4)/m_norm(ifft);
-           vxc1(ifft,1) = vxc1(ifft,1)+ bxc(ifft)*( mz1 - mdirz*m_dot_m1 )
-           vxc1(ifft,2) = vxc1(ifft,2)+ bxc(ifft)*(-mz1 + mdirz*m_dot_m1 )
-           vxc1(ifft,3) = vxc1(ifft,3)+ bxc(ifft)*( mx1 - mdirx*m_dot_m1 )
-           vxc1(ifft,4) = vxc1(ifft,4)+ bxc(ifft)*(-my1 + mdiry*m_dot_m1 )
-
+          vxc1(ifft,1) = vxc1(ifft,1)+ bxc(ifft)*( mz1 - mdirz*m_dot_m1 )
+          vxc1(ifft,2) = vxc1(ifft,2)+ bxc(ifft)*(-mz1 + mdirz*m_dot_m1 )
+          vxc1(ifft,3) = vxc1(ifft,3)+ bxc(ifft)*( mx1 - mdirx*m_dot_m1 )
+          vxc1(ifft,4) = vxc1(ifft,4)+ bxc(ifft)*(-my1 + mdiry*m_dot_m1 )
+!          write(*,*) m_dot_m1/m_norm(ifft)
+!          write(*,*)   ( mx1 - mdirx*m_dot_m1 )*rhor(ifft,2) + &
+!&                       ( my1 - mdiry*m_dot_m1 )*rhor(ifft,3) + &
+!&                       ( mz1 - mdirz*m_dot_m1 )*rhor(ifft,4)
+!           write(238,*)  vxc1(ifft,1),bxc(ifft)*( mz1 - mdirz*m_dot_m1 )
+!           write(239,*)  vxc1(ifft,2),bxc(ifft)*(-mz1 + mdirz*m_dot_m1 )
+!           write(240,*)  vxc1(ifft,3),bxc(ifft)*( mx1 - mdirx*m_dot_m1 )
+!           write(241,*)  vxc1(ifft,4),bxc(ifft)*(-my1 + mdiry*m_dot_m1 )
          else
            vxc1(ifft,1:2)=dvdn
            vxc1(ifft,3:4)=zero
          end if
-       end do
+      end do
      else
        do ifft=1,nfft
          dvdn=(vxc1_diag(ifft,1)+vxc1_diag(ifft,2))*half

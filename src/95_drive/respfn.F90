@@ -839,9 +839,12 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 
  _IBM6("Before rhohxc")
 
+ bxc(:) = 0.0d0
  call rhohxc(dtset,enxc,gsqcut,psps%usepaw,kxc,mpi_enreg,nfftf,ngfftf,&
 & nhat,nhatdim,nhatgr,nhatgrdim,nkxc,nk3xc,dtset%nspden,n3xccc,option,rhog,rhor,&
 & rprimd,strsxc,usexcnhat,vhartr,vxc,vxcavg,xccc3d,bxc=bxc)
+
+
 
 !Compute local + Hxc potential, and subtract mean potential.
  ABI_ALLOCATE(vtrial,(nfftf,dtset%nspden))

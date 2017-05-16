@@ -679,7 +679,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 !    ----------------------------------------------------------------------
      call status(istep,dtfil%filstat,iexit,level,'get vtrial1   ')
      option=1;optene=0;if (iscf_mod==-2) optene=1
-     call dfpt_rhotov(cplex,ehart01,ehart1,elpsp1,exc1,gmet,gprimd,gsqcut,idir,ipert,&
+     call dfpt_rhotov(cplex,ehart01,ehart1,elpsp1,exc1,elmag1,gmet,gprimd,gsqcut,idir,ipert,&
 &     dtset%ixc,kxc,bxc,mpi_enreg,dtset%natom,nfftf,ngfftf,nhat,nhat1,nhat1gr,nhat1grdim,&
 &     nkxc,nspden,n3xccc,optene,option,dtset%paral_kgb,dtset%qptn,&
 &     rhog,rhog1,rhor,rhor1,rprimd,ucvol,psps%usepaw,usexcnhat,vhartr1,vpsp1,&
@@ -871,7 +871,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
    if (ipert<dtset%natom+10) then
      optene=1
      call status(istep,dtfil%filstat,iexit,level,'call dfpt_rhotov   ')
-     call dfpt_rhotov(cplex,ehart01,ehart1,elpsp1,exc1,gmet,gprimd,gsqcut,idir,ipert,&
+     call dfpt_rhotov(cplex,ehart01,ehart1,elpsp1,exc1,elmag1,gmet,gprimd,gsqcut,idir,ipert,&
 &     dtset%ixc,kxc,bxc,mpi_enreg,dtset%natom,nfftf,ngfftf,nhat,nhat1,nhat1gr,nhat1grdim,nkxc,&
 &     nspden,n3xccc,optene,optres,dtset%paral_kgb,dtset%qptn,rhog,rhog1,rhor,rhor1,&
 &     rprimd,ucvol,psps%usepaw,usexcnhat,vhartr1,vpsp1,nvresid1,res2,vtrial1,vxc1,xccc3d1)
@@ -1200,8 +1200,8 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 
  if(ipert==dtset%natom+5)then
   !debug: write out the vtk first-order density components
-  !call appdig(pertcase,dtfil%fnameabo_den,fi1o_vtk)
-  !call printmagvtk(mpi_enreg,nspden,nfftf,ngfftf,rhor1,rprimd,adjustl(adjustr(fi1o_vtk)//".vtk"))
+  call appdig(pertcase,dtfil%fnameabo_den,fi1o_vtk)
+  call printmagvtk(mpi_enreg,nspden,nfftf,ngfftf,rhor1,rprimd,adjustl(adjustr(fi1o_vtk)//".vtk"))
   !compute the contributions to susceptibility from different attomic spheres:
   call calcdensph(gmet,mpi_enreg,dtset%natom,nfftf,ngfftf,nspden,&
 &   dtset%ntypat,ab_out,dtset%ratsph,rhor1,rprimd,dtset%typat,ucvol,xred,&

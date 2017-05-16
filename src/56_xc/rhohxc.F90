@@ -986,13 +986,14 @@ subroutine rhohxc(dtset,enxc,gsqcut,izero,kxc,mpi_enreg,nfft,ngfft, &
 &       dtset%paral_kgb,qphon,rhonow_ptr,vxcrho_b_updn)
        if (present(bxc)) then
          do ifft=1,nfft
-           !if(m_norm(ifft)>m_norm_min) then
-           bxc(ifft) = half*(vxcrho_b_updn(ifft,1)-vxcrho_b_updn(ifft,2))/m_norm(ifft)
-           !else
-           !do calculation through kxc
-           !endif
+           if(m_norm(ifft)>m_norm_min) then
+             bxc(ifft) = half*(vxcrho_b_updn(ifft,1)-vxcrho_b_updn(ifft,2))/m_norm(ifft)
+           else
+             bxc(ifft) = half*(half*(kxc(ifft,1)+kxc(ifft,3))-kxc(ifft,2))
+           endif
          end do  
        endif
+
        do ifft=1,nfft
          dvdn=half*(vxcrho_b_updn(ifft,1)+vxcrho_b_updn(ifft,2))
          if(m_norm(ifft)>m_norm_min) then

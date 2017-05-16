@@ -85,7 +85,7 @@
 #include "abi_common.h"
 
 
- subroutine dfpt_rhotov(cplex,ehart01,ehart1,elpsp1,exc1,gmet,gprimd,gsqcut,idir,ipert,&
+ subroutine dfpt_rhotov(cplex,ehart01,ehart1,elpsp1,exc1,elmag1,gmet,gprimd,gsqcut,idir,ipert,&
 &           ixc,kxc,bxc,mpi_enreg,natom,nfft,ngfft,nhat,nhat1,nhat1gr,nhat1grdim,nkxc,nspden,n3xccc,&
 &           optene,optres,paral_kgb,qphon,rhog,rhog1,rhor,rhor1,rprimd,ucvol,&
 &           usepaw,usexcnhat,vhartr1,vpsp1,vresid1,vres2,vtrial1,vxc1,xccc3d1)
@@ -179,17 +179,17 @@
  ABI_ALLOCATE(v1zeeman,(cplex*nfft,nspden))
  if(ipert==natom+5)then
    if (nspden==4) then
-     if(idir==3)then       ! Zeeman field along the 3rd axis    
+     if(idir==3)then       ! Zeeman field along the 3rd axis (z)   
        v1zeeman(:,1)=-0.5d0
        v1zeeman(:,2)=+0.5d0
        v1zeeman(:,3)= 0.0d0
        v1zeeman(:,4)= 0.0d0
-     else if(idir==2)then  ! Zeeman field along the 2nd axis
+     else if(idir==2)then  ! Zeeman field along the 2nd axis (y)
        v1zeeman(:,1)= 0.0d0
        v1zeeman(:,2)= 0.0d0
        v1zeeman(:,3)= 0.0d0
        v1zeeman(:,4)=+0.5d0   
-     else                  ! Zeeman field along the 1st axis
+     else                  ! Zeeman field along the 1st axis (x)
        v1zeeman(:,1)= 0.0d0
        v1zeeman(:,2)= 0.0d0
        v1zeeman(:,3)=-0.5d0
