@@ -1768,7 +1768,7 @@ subroutine phdos_print_msqd(PHdos, fname, ntemper, tempermin, temperinc)
    !call wrtout(iunit, msg, 'COLL')
    write (iunit, '(a)') trim(msg)
    write (msg, '(2a)') '#    T             |u^2|                u_xx                u_yy                u_zz',&
-&                                              '                u_yz                u_xz                y_xy in bohr^2'
+&                                              '                u_yz                u_xz                u_xy in bohr^2'
    !call wrtout(iunit, msg, 'COLL')
    write (iunit, '(a)') trim(msg)
 
