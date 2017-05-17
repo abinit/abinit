@@ -12,7 +12,7 @@
 !!                second derivative of E wrt xred
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (DCA, XG, GMR)
+!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -23,7 +23,7 @@
 !!  gprimd(3,3)=reciprocal space dimensional primitive translations
 !!  gsqcut=cutoff on $|G|^2$: see setup1 for definition (doubled sphere).
 !!  mgfft=maximum size of 1D FFTs
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  mqgrid=number of grid pts in q array for f(q) spline.
 !!  natom=number of atoms in unit cell.
 !!  nattyp(ntypat)=number of atoms of each type in cell.
@@ -102,7 +102,7 @@ subroutine mklocl_recipspace(dyfrlo,eei,gmet,gprimd,grtn,gsqcut,lpsstr,mgfft,&
 !scalars
  integer,intent(in) :: mgfft,mqgrid,natom,nfft,ntypat,option,paral_kgb
  real(dp),intent(in) :: eei,gsqcut,ucvol
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: nattyp(ntypat),ngfft(18),qprtrb(3)
  real(dp),intent(in) :: gmet(3,3),gprimd(3,3),ph1d(2,3*(2*mgfft+1)*natom)

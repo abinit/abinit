@@ -8,7 +8,7 @@
 !! electric field case
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group
+!! Copyright (C) 1998-2017 ABINIT group
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -33,7 +33,7 @@
 !!  mcgq=second dimension of the cgq array
 !!  mkgq = second dimension of pwnsfacq
 !!  nkpt=number of k points
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  npw=number of planewaves in basis sphere at given k.
 !!  nspinor=number of spinorial components of the wavefunctions (on current proc)
 !!  nsppol=number of spin polarizations
@@ -100,7 +100,7 @@ subroutine make_grad_berry(cg,cgq,cprj_k,detovc,dimlmn,dimlmn_srt,direc,dtefield
  integer,intent(in) :: mkgq,mpw,natom,nkpt,npw,nspinor,nsppol,pwind_alloc
  type(gs_hamiltonian_type),intent(in) :: gs_hamk
  type(efield_type),intent(inout) :: dtefield
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
 
 !arrays
  integer,intent(in) :: dimlmn(natom),dimlmn_srt(natom)
@@ -109,7 +109,7 @@ subroutine make_grad_berry(cg,cgq,cprj_k,detovc,dimlmn,dimlmn_srt,direc,dtefield
  real(dp),intent(inout) :: direc(2,npw*nspinor)
  real(dp),intent(in) :: pwnsfac(2,pwind_alloc),pwnsfacq(2,mkgq)
  real(dp),intent(out) :: detovc(2,2,3),grad_berry(2,npw*nspinor)
- type(pawcprj_type),intent(in) :: cprj_k(natom,dtefield%nband_occ*gs_hamk%usepaw*dtefield%nspinor)
+ type(pawcprj_type),intent(in) :: cprj_k(natom,dtefield%mband_occ*gs_hamk%usepaw*dtefield%nspinor)
 
 !Local variables-------------------------------
 !scalars
@@ -119,10 +119,10 @@ subroutine make_grad_berry(cg,cgq,cprj_k,detovc,dimlmn,dimlmn_srt,direc,dtefield
  real(dp) :: fac
  character(len=500) :: message
 !arrays
- integer :: pwind_k(npw),sflag_k(dtefield%nband_occ)
+ integer :: pwind_k(npw),sflag_k(dtefield%mband_occ)
  real(dp) :: cg1_k(2,npw*nspinor),dtm_k(2),pwnsfac_k(4,mpw)
- real(dp) :: smat_k(2,dtefield%nband_occ,dtefield%nband_occ)
- real(dp) :: smat_inv(2,dtefield%nband_occ,dtefield%nband_occ),svectout_dum(2,0)
+ real(dp) :: smat_k(2,dtefield%mband_occ,dtefield%mband_occ)
+ real(dp) :: smat_inv(2,dtefield%mband_occ,dtefield%mband_occ),svectout_dum(2,0)
  real(dp) :: dummy_enlout(0)
  real(dp),allocatable :: cgq_k(:,:),enl_rij(:,:,:),grad_berry_ev(:,:)
  real(dp),allocatable :: qijbkk(:,:,:),smat_k_paw(:,:,:)
@@ -136,7 +136,7 @@ subroutine make_grad_berry(cg,cgq,cprj_k,detovc,dimlmn,dimlmn_srt,direc,dtefield
 
 !DBG_ENTER("COLL")
 
- nbo = dtefield%nband_occ
+ nbo = dtefield%mband_occ
 
 !allocations
 
@@ -237,7 +237,7 @@ subroutine make_grad_berry(cg,cgq,cprj_k,detovc,dimlmn,dimlmn_srt,direc,dtefield
 
      icg1 = 0 ; ddkflag = 1
      call smatrix(cg,cgq_k,cg1_k,ddkflag,dtm_k,icg,icg1,itrs,&
-&     job,iband,mcg,mcg_q,mcg1_k,iband,mpw,nbo,&
+&     job,iband,mcg,mcg_q,mcg1_k,iband,mpw,nbo,dtefield%nband_occ(isppol),&
 &     npw,npw_k2,nspinor,pwind_k,pwnsfac_k,sflag_k,&
 &     shiftbd,smat_inv,smat_k,smat_k_paw,gs_hamk%usepaw)
      ABI_DEALLOCATE(cgq_k)

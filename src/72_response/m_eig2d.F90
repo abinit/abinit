@@ -9,7 +9,7 @@
 !!  displacements.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2014-2016 ABINIT group (SP)
+!! Copyright (C) 2014-2017 ABINIT group (SP)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -33,7 +33,7 @@ MODULE m_eig2d
  use m_errors
  use m_profiling_abi
  use m_nctk
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
  use netcdf
 #endif
 
@@ -253,7 +253,7 @@ subroutine eigr2d_ncwrite(eigr2d,iqpt,wtq,ncid)
  type(eigr2d_t),intent(in) :: eigr2d
 
 !Local variables-------------------------------
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
  integer :: ncerr
  integer :: cplex,cart_dir,one_dim
 
@@ -446,7 +446,7 @@ end subroutine fan_init
 !! SIDE EFFECTS
 !!
 !! PARENTS
-!!      dfpt_looppert,eig2tot
+!!      dfpt_looppert,eig2tot,m_gkk
 !!
 !! CHILDREN
 !!
@@ -529,7 +529,7 @@ subroutine fan_ncwrite(fan2d,iqpt,wtq,ncid)
  type(fan_t),intent(in) :: fan2d
 
 !Local variables-------------------------------
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
  integer :: ncerr
  integer :: cplex,cart_dir,one_dim
 
@@ -604,7 +604,7 @@ end subroutine fan_ncwrite
 !! OUTPUT
 !!  
 !! PARENTS
-!!      dfpt_looppert,eig2tot
+!!      dfpt_looppert,eig2tot,m_gkk
 !!
 !! CHILDREN
 !!
@@ -628,7 +628,7 @@ subroutine gkk_ncwrite(gkk2d,iqpt,wtq,ncid)
  type(gkk_t),intent(in) :: gkk2d
 
 !Local variables-------------------------------
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
  integer :: cplex,one_dim,ncerr,vid_
 
 ! *************************************************************************
@@ -759,7 +759,7 @@ end subroutine fan_free
 !!  (only deallocate)
 !!
 !! PARENTS
-!!      dfpt_looppert,eig2tot
+!!      dfpt_looppert,eig2tot,m_gkk
 !!
 !! CHILDREN
 !!

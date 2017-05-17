@@ -2,7 +2,7 @@
 .Version 8.0.3 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
 
-.Copyright (C) 1998-2016 ABINIT group . 
+.Copyright (C) 1998-2017 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -2259,9 +2259,9 @@ P newkpt: treating      4 bands with npw=      43 for ikpt=  16 by node    0
            etotal1    -8.1897080025E+00
            etotal3    -8.9923534368E+00
            etotal4    -1.8307130005E+02
-           etotal5     1.0000000000E+20
-           etotal6     1.0000000000E+20
-           etotal7     1.0000000000E+20
+           etotal5     0.0000000000E+00
+           etotal6     0.0000000000E+00
+           etotal7     0.0000000000E+00
             fcart1    -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
                       -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
             fcart3     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00

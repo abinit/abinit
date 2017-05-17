@@ -9,7 +9,7 @@
 !! (initialization of wavefunctions from scratch or from file, translations of wavefunctions, ...)
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (DCA, XG, GMR, AR, MB, MVer)
+!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR, AR, MB, MVer)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -263,7 +263,7 @@ subroutine inwffil(ask_accurate,cg,dtset,ecut,ecut_eff,eigen,exchn2n3d,&
    rdwr=1
    if ( ANY(wff1%iomode == (/IO_MODE_FORTRAN_MASTER, IO_MODE_FORTRAN, IO_MODE_MPI/) )) then
      call hdr_io(fform_dum,hdr0,rdwr,wff1)
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
    else if (wff1%iomode == IO_MODE_ETSF) then
      call hdr_ncread(hdr0, wff1%unwff, fform_dum)
 #endif

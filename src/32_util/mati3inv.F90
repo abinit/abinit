@@ -7,7 +7,7 @@
 !! Invert and transpose orthogonal 3x3 matrix of INTEGER elements.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (DCA, XG, GMR)
+!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -24,8 +24,6 @@
 !! Since these form a group, inverses are also integer
 !! arrays.  Returned array is TRANSPOSE of inverse, as needed.
 !! Note use of integer arithmetic.
-!! Also: has been designed so that mit can be same storage space as m, in
-!! which case m is overwritten by resulting mit.
 !!
 !! PARENTS
 !!      cg_rotate,chkgrp,classify_bands,debug_tools,dfpt_nstdy,get_full_kgrid

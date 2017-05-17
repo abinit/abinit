@@ -7,7 +7,7 @@
 !!  Points WVL objects to PAW objects
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2011-2016 ABINIT group (T. Rangel)
+!!  Copyright (C) 2011-2017 ABINIT group (T. Rangel)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -57,7 +57,7 @@ subroutine paw2wvl(pawtab,proj,wvl)
  type(wvl_projectors_type),intent(inout)::proj
 
 !Local variables-------------------------------
-#if defined HAVE_DFT_BIGDFT
+#if defined HAVE_BIGDFT
  integer :: ib,ig
  integer :: itypat,jb,ll,lmnmax,lmnsz,nn,ntypat,ll_,nn_
  integer ::maxmsz,msz1,ptotgau,max_lmn2_size
@@ -79,7 +79,7 @@ subroutine paw2wvl(pawtab,proj,wvl)
 !write (std_out,*) ' paw2wvl : enter'
 !ENDDEBUG
 
-#if defined HAVE_DFT_BIGDFT
+#if defined HAVE_BIGDFT
 
  ntypat=size(pawtab)
 

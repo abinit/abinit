@@ -13,7 +13,7 @@
 !! for spin-polarized case, as everything is done as if nspden=1
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (DCA, XG, GMR).
+!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR).
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -56,7 +56,7 @@ subroutine psolver_hartree(enhartr, hgrid, icoulomb, me, mpi_comm, nfft, ngfft, 
  use defs_basis
  use m_errors
  use m_profiling_abi
-#if defined HAVE_DFT_BIGDFT
+#if defined HAVE_BIGDFT
  use BigDFT_API,     only : coulomb_operator
  use poisson_solver, only : H_potential
 #endif
@@ -82,7 +82,7 @@ subroutine psolver_hartree(enhartr, hgrid, icoulomb, me, mpi_comm, nfft, ngfft, 
   real(dp),intent(out)   :: vhartr(nfft)
 
   !Local variables-------------------------------
-#if defined HAVE_DFT_BIGDFT
+#if defined HAVE_BIGDFT
   !scalars
   character(len=500) :: message
   character(len = 1) :: datacode, bndcode
@@ -93,7 +93,7 @@ subroutine psolver_hartree(enhartr, hgrid, icoulomb, me, mpi_comm, nfft, ngfft, 
 
 ! *********************************************************************
 
-#if defined HAVE_DFT_BIGDFT
+#if defined HAVE_BIGDFT
 
  if (icoulomb == 0) then
 !  The kernel is built with 'P'eriodic boundary counditions.

@@ -2,7 +2,7 @@
 
 #: List of CPP variables that should be defined in config.h in order to enable this suite.
 need_cpp_vars = [
-"HAVE_DFT_LIBXC",
+"HAVE_LIBXC",
 ]
 
 #: List of keywords that are automatically added to all the tests of this suite. 
@@ -35,6 +35,7 @@ inp_files = [
 "t21.in",
 "t41.in",
 "t42.in", 
+"t43.in", 
 "t81.in", 
 "t82.in", 
 ]

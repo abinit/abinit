@@ -7,7 +7,7 @@
 !!  This module provides routines to read the Bethe-Salpeter Hamiltonian from file
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2016 ABINIT group (MG)
+!!  Copyright (C) 2008-2017 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -33,7 +33,7 @@ MODULE m_bse_io
 #if defined HAVE_MPI2
  use mpi
 #endif
-#if defined HAVE_TRIO_NETCDF
+#if defined HAVE_NETCDF
  use netcdf
 #endif
  use m_nctk
@@ -1578,7 +1578,7 @@ subroutine exc_write_optme(filname,minb,maxb,nkbz,nsppol,nq,opt_cvk,ierr)
  real(dp) :: complex2(2)
  ! *************************************************************************
 
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
  ierr = 1
 
 !1. Create netCDF file
@@ -1695,7 +1695,7 @@ subroutine exc_ham_ncwrite(ncid,Kmesh,BSp,hsize,nreh,vcks2t,hreso,diag)
  complex(dpc),target,intent(in) :: diag(hsize)
 
 !Local variables-------------------------------
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
  integer :: ncerr
  integer :: max_nreh, sum_nreh
  real(dp), ABI_CONTIGUOUS pointer :: r2vals(:,:),r3vals(:,:,:)

@@ -7,7 +7,7 @@
 !! Defines wvl%atoms% data structure
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (DC)
+!! Copyright (C) 1998-2017 ABINIT group (DC)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -49,7 +49,7 @@ subroutine wvl_descr_atoms_set(acell, icoulomb, natom, ntypat, typat, wvl)
 
  use defs_basis
  use defs_wvltypes
-#if defined HAVE_DFT_BIGDFT
+#if defined HAVE_BIGDFT
  use BigDFT_API, only: atoms_data_null,f_routine,f_release_routine,&
 &                      astruct_set_n_atoms,astruct_set_n_types,&
 &                      allocate_atoms_nat,allocate_atoms_ntypes
@@ -73,13 +73,13 @@ subroutine wvl_descr_atoms_set(acell, icoulomb, natom, ntypat, typat, wvl)
 
 !Local variables-------------------------------
 !scalars
-#if defined HAVE_DFT_BIGDFT
+#if defined HAVE_BIGDFT
   integer :: itype
 #endif
 
 ! *********************************************************************
 
-#if defined HAVE_DFT_BIGDFT
+#if defined HAVE_BIGDFT
 
  call f_routine(ABI_FUNC)
 

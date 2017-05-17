@@ -14,7 +14,7 @@
 !! to the use of the memory, so the code is simpler.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (XG).
+!! Copyright (C) 1998-2017 ABINIT group (XG).
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -47,7 +47,7 @@
 !!  mcg=dimension of cg
 !!  mgfftdiel=maximum size of 1D FFTs, for the computation of
 !!     the dielectric matrix
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  natom=number of atoms in cell
 !!  nband_k=number of bands at this k point for that spin polarization
 !!  ndiel4,ndiel5,ndiel6= FFT dimensions, modified to avoid cache trashing
@@ -160,7 +160,7 @@ subroutine susk(atindx,bdtot_index,cg_mpi,cprj_k,doccde,drhode,eigen,extrap,gbou
  integer,intent(in),target :: icg_mpi,npw_k_mpi
  real(dp),intent(in) :: ucvol
  real(dp),intent(inout) :: sumdocc
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
  type(pawang_type),intent(in) :: pawang
 !arrays
  integer,intent(in) :: atindx(natom),gbound_diel(2*mgfftdiel+8,2)

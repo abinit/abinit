@@ -17,7 +17,7 @@
 !! and unshifted grids.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (DRH, DCA, XG, GMR)
+!! Copyright (C) 1998-2017 ABINIT group (DRH, DCA, XG, GMR)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -67,7 +67,7 @@ subroutine redgr (frin,frredgr,mpi_enreg,nfft,ngfft,paral_kgb)
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nfft,paral_kgb
- type(MPI_type) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: ngfft(18)
  real(dp),intent(in) :: frin(nfft)

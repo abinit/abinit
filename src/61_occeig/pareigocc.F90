@@ -13,7 +13,7 @@
 !!     Yet the code is not already written. 
 !!
 !! COPYRIGHT
-!! Copyright (C) 2000-2016 ABINIT group (XG, AR)
+!! Copyright (C) 2000-2017 ABINIT group (XG, AR)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -24,7 +24,7 @@
 !!  localrdwf=(for parallel case) if 1, the eig and occ initial values
 !!            are local to each machine, if 0, they are on proc me=0.
 !!  mband=maximum number of bands of the output wavefunctions
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  nband(nkpt*nsppol)=desired number of bands at each k point
 !!  nkpt=number of k points
 !!  nsppol=1 for unpolarized, 2 for spin-polarized, output wf file processors,
@@ -86,7 +86,7 @@ subroutine pareigocc(eigen,formeig,localrdwf,mpi_enreg,mband,nband,nkpt,nsppol,o
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: formeig,localrdwf,mband,nkpt,nsppol,transmit_occ
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: nband(nkpt*nsppol)
  real(dp),intent(inout) :: eigen(mband*(2*mband)**formeig*nkpt*nsppol)

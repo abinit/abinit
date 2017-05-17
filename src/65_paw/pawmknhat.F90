@@ -9,7 +9,7 @@
 !! Can also compute first-order compensation charge density (RF calculations)
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (FJ, MT)
+!! Copyright (C) 1998-2017 ABINIT group (FJ, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -179,7 +179,7 @@ subroutine pawmknhat(compch_fft,cplex,ider,idir,ipert,izero,gprimd,&
  end if
 
 !nhat1 does not have to be computed for ddk or d2dk
- if (ipert==natom+1.or.ipert==natom+10.or.ipert==natom+11) return
+ if (ipert==natom+1.or.ipert==natom+10) return
 
 !Set up parallelism over atoms
  paral_atom=(present(comm_atom).and.(my_natom/=natom))

@@ -9,16 +9,16 @@
 !! IONMOV 10:
 !! Given a starting point xred that is a vector of length 3*(natom-1)
 !! (reduced nuclei coordinates),
-!! and unit cell parameters (acell and rprim) the
+!! and unit cell parameters (acell and rprimd) the
 !! Broyden-Fletcher-Goldfarb-Shanno minimization is performed on the
-!! total energy function, using its gradient (atomic forces and
-!! stress : fred or fcart and stress) as calculated by the routine scfcv.
-!! Some atoms can be kept fixed, while the optimization of unit cell
+!! total energy function, using its gradient (atomic forces and stresses)
+!  as calculated by the routine scfcv. Some atoms can be kept fixed,
+!! while the optimization of unit cell
 !! parameters is only performed if optcell/=0.
 !! The convergence requirement on
 !! the atomic forces, 'tolmxf',  allows an early exit.
 !! Otherwise no more than 'ntime' steps are performed.
-!! Returned quantities are xred, and eventually acell and rprim (new ones!).
+!! Returned quantities are xred, and eventually acell and rprimd (new ones!).
 !! Could see Numerical Recipes (Fortran), 1986, page 307.
 !!
 !!  Implements the delocalized internal coordinate scheme
@@ -30,7 +30,7 @@
 !!    S matrix is eigenvectors of F = B^{T}B
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (DCA, XG, GMR, JCC, SE)
+!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR, JCC, SE)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -55,9 +55,10 @@
 !!      mover
 !!
 !! CHILDREN
-!!      brdene,calc_prim_int,deloc2xcart,fred2fdeloc,hessupdt,hist2var
-!!      make_prim_internals,metric,mkrdim,var2hist,wrtout,xcart2deloc
+!!      brdene,calc_prim_int,deloc2xcart,fcart2fred,fred2fdeloc,hessupdt
+!!      hist2var,make_prim_internals,metric,var2hist,wrtout,xcart2deloc
 !!      xcart2xred,xfh_recover_deloc,xfpack_f2vout,xfpack_vin2x,xfpack_x2vin
+!!      xred2xcart
 !!
 !! SOURCE
 
@@ -105,7 +106,6 @@ subroutine pred_delocint(ab_mover,ab_xfh,forstr,hist,ionmov,itime,zDEBUG,iexit)
  real(dp),save :: ucvol0
  real(dp) :: ucvol
  real(dp) :: etotal,etotal_prev
- real(dp) :: favg
  logical  :: DEBUG=.TRUE.
  integer,save :: icenter,irshift ! DELOCINT indexes
  integer,save :: nshell,ndeloc ! DELOCINT number of
@@ -119,11 +119,12 @@ subroutine pred_delocint(ab_mover,ab_xfh,forstr,hist,ionmov,itime,zDEBUG,iexit)
  real(dp),allocatable :: prim_int(:)
  real(dp),allocatable,save :: u_matrix(:,:) ! DELOCINT this may need to be added to type inside ab_mover
  real(dp) :: acell(3)
- real(dp) :: rprimd(3,3),rprim(3,3)
+ real(dp) :: rprimd(3,3)
  real(dp) :: gprimd(3,3)
  real(dp) :: gmet(3,3)
  real(dp) :: rmet(3,3)
- real(dp) :: residual(3,ab_mover%natom),residual_corrected(3,ab_mover%natom)
+ real(dp) :: residual(3,ab_mover%natom)
+!real(dp) :: residual_corrected(3,ab_mover%natom)
  real(dp) :: xred(3,ab_mover%natom),xcart(3,ab_mover%natom)
  real(dp) :: strten(6)
  real(dp) :: deloc_force(3*(ab_mover%natom-1))
@@ -244,15 +245,16 @@ subroutine pred_delocint(ab_mover,ab_xfh,forstr,hist,ionmov,itime,zDEBUG,iexit)
 !##########################################################
 !### 04. Obtain the present values from the history
 
- call hist2var(acell,hist,ab_mover%natom,rprim,rprimd,xcart,xred,zDEBUG)
+ call hist2var(acell,hist,ab_mover%natom,rprimd,xred,zDEBUG)
+ call xred2xcart(ab_mover%natom,rprimd,xcart,xred)
 
- strten(:)=hist%histS(:,hist%ihist)
- etotal   =hist%histE(hist%ihist)
+ strten(:)=hist%strten(:,hist%ihist)
+ etotal   =hist%etot(hist%ihist)
 
 !Fill the residual with forces (No preconditioning)
 !Or the preconditioned forces
  if (ab_mover%goprecon==0)then
-   residual(:,:)= hist%histXF(:,:,4,hist%ihist)
+   call fcart2fred(hist%fcart(:,:,hist%ihist),residual,rprimd,ab_mover%natom)
  else
    residual(:,:)= forstr%fred(:,:)
  end if
@@ -267,7 +269,6 @@ subroutine pred_delocint(ab_mover,ab_xfh,forstr,hist,ionmov,itime,zDEBUG,iexit)
    write (std_out,*) 'etotal:'
    write (std_out,*) etotal
  end if
-
 
  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
 
@@ -285,16 +286,15 @@ subroutine pred_delocint(ab_mover,ab_xfh,forstr,hist,ionmov,itime,zDEBUG,iexit)
 
 !Get rid of mean force on whole unit cell, but only if no
 !generalized constraints are in effect
- if(ab_mover%nconeq==0)then
-   do ii=1,3
-     favg=sum(residual(ii,:))/dble(ab_mover%natom)
-     residual_corrected(ii,:)=residual(ii,:)-favg
-     if(ab_mover%jellslab/=0.and.ii==3)&
-&     residual_corrected(ii,:)=residual(ii,:)
-   end do
- else
-   residual_corrected(:,:)=residual(:,:)
- end if
+!  residual_corrected(:,:)=residual(:,:)
+!  if(ab_mover%nconeq==0)then
+!    do ii=1,3
+!      if (ii/=3.or.ab_mover%jellslab==0) then
+!        favg=sum(residual_corrected(ii,:))/dble(ab_mover%natom)
+!        residual_corrected(ii,:)=residual_corrected(ii,:)-favg
+!      end if
+!    end do
+!  end if
 
 !write(std_out,*) 'delocint 05'
 !##########################################################
@@ -410,7 +410,7 @@ subroutine pred_delocint(ab_mover,ab_xfh,forstr,hist,ionmov,itime,zDEBUG,iexit)
 !The values of vin from the previous iteration
 !should be the same
  call xfpack_x2vin(acell, acell0, ab_mover%natom-1, ndim,&
-& ab_mover%nsym, ab_mover%optcell, rprim, rprimd0,&
+& ab_mover%nsym, ab_mover%optcell, rprimd, rprimd0,&
 & ab_mover%symrel, ucvol, ucvol0, vin, deloc_int)
 !end if
 
@@ -461,7 +461,7 @@ subroutine pred_delocint(ab_mover,ab_xfh,forstr,hist,ionmov,itime,zDEBUG,iexit)
    if (ab_mover%restartxf/=0) then
 
      call xfh_recover_deloc(ab_xfh,ab_mover,acell,acell0,cycl_main,&
-&     residual,hessin,ndim,rprim,rprimd0,strten,ucvol,ucvol0,vin,vin_prev,&
+&     residual,hessin,ndim,rprimd,rprimd0,strten,ucvol,ucvol0,vin,vin_prev,&
 &     vout,vout_prev,xred,ab_mover%deloc,deloc_int,deloc_force,bt_inv_matrix,gprimd,prim_int,&
 &     u_matrix)
 
@@ -530,7 +530,7 @@ subroutine pred_delocint(ab_mover,ab_xfh,forstr,hist,ionmov,itime,zDEBUG,iexit)
  else
    if(ionmov==11)then
 
-     etotal_prev=hist%histE(hist%ihist-1)
+     etotal_prev=hist%etot(hist%ihist-1)
 !    Here the BFGS algorithm, modified to take into account the
 !    energy
      call brdene(etotal,etotal_prev,hessin,&
@@ -575,9 +575,9 @@ subroutine pred_delocint(ab_mover,ab_xfh,forstr,hist,ionmov,itime,zDEBUG,iexit)
 !##########################################################
 !### 10. Convert from delocalized to xcart and xred
 
-!Transfer vin  to deloc_int, acell and rprim
+!Transfer vin  to deloc_int, acell and rprimd
  call xfpack_vin2x(acell, acell0, ab_mover%natom-1, ndim,&
-& ab_mover%nsym, ab_mover%optcell, rprim, rprimd0,&
+& ab_mover%nsym, ab_mover%optcell, rprimd, rprimd0,&
 & ab_mover%symrel, ucvol, ucvol0,&
 & vin, deloc_int)
 
@@ -619,13 +619,13 @@ subroutine pred_delocint(ab_mover,ab_xfh,forstr,hist,ionmov,itime,zDEBUG,iexit)
  hist%ihist=hist%ihist+1
 
  if(ab_mover%optcell/=0)then
-   call mkrdim(acell,rprim,rprimd)
    call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
  end if
 
 !Fill the history with the variables
-!xcart, xred, acell, rprimd
- call var2hist(acell,hist,ab_mover%natom,rprim,rprimd,xcart,xred,zDEBUG)
+!xred, acell, rprimd, vel
+ call var2hist(acell,hist,ab_mover%natom,rprimd,xred,zDEBUG)
+ hist%vel(:,:,hist%ihist)=hist%vel(:,:,hist%ihist-1)
 
  if(zDEBUG)then
    write (std_out,*) 'residual:'
@@ -637,8 +637,6 @@ subroutine pred_delocint(ab_mover,ab_xfh,forstr,hist,ionmov,itime,zDEBUG,iexit)
    write (std_out,*) 'etotal:'
    write (std_out,*) etotal
  end if
-
- hist%histV(:,:,hist%ihist)=hist%histV(:,:,hist%ihist-1)
 
 end subroutine pred_delocint
 !!***

@@ -7,7 +7,7 @@
 !! This routine is called to compute the energy corresponding to constrained magnetic moments.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (ILuk)
+!! Copyright (C) 1998-2017 ABINIT group (ILuk)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -62,7 +62,7 @@ use defs_abitypes
  integer, intent(in) :: ngfft(18),typat(natom)
  real(dp),intent(in) :: spinat(3,natom), rprimd(3,3)
  real(dp),intent(in) :: ratsph(ntypat),rhor(nfft,nspden),xred(3,natom)
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
 
 !Local variables-------------------------------
 !scalars
@@ -84,7 +84,7 @@ use defs_abitypes
 
 !We need the integrated magnetic moments
  call calcdensph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,std_out,ratsph,rhor,rprimd,typat,ucvol,xred,&
-& intgden)
+& 1,intgden)
 
  Epen=0
  Econstr=0

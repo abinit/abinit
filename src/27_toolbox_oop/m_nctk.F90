@@ -7,16 +7,16 @@
 !!  Tools and wrappers for NETCDF-IO.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2016 ABINIT group (MG)
+!!  Copyright (C) 2008-2017 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! TODO
 !!   Remove create_nc_file, write_var_netcdf, the output of OUT.nc is dangereous
-!!     because we can create too many dimensions and get 
+!!     because we can create too many dimensions and get
 !!    nf90_def_dim - NetCDF library returned:   NetCDF: NC_MAX_DIMS exceeded
-!!   Moreover the multiple calls to redef render the IO very inefficient 
+!!   Moreover the multiple calls to redef render the IO very inefficient
 !!   That part should be rationalized!
 !!
 !! PARENTS
@@ -37,7 +37,7 @@ MODULE m_nctk
  use m_errors
  use iso_c_binding
  use m_xmpi
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
  use netcdf
 #endif
 
@@ -46,24 +46,24 @@ MODULE m_nctk
 
  implicit none
 
- private 
+ private
 !!***
 
  integer,public,parameter :: nctk_noid = -huge(1)
  ! This value is used to signal to procedures that IO should not be performed.
 
- ! Basic variables  
+ ! Basic variables
  character(len=*),public,parameter :: etsfio_file_format = "ETSF Nanoquanta"
  character(len=*),public,parameter :: etsfio_conventions = "http://www.etsf.eu/fileformats/"
 
- integer,public,parameter :: etsfio_charlen = 80  
+ integer,public,parameter :: etsfio_charlen = 80
  ! The value corresponding to character_string_len
 
- real,public,parameter :: etsfio_version = 3.3  
- ! This is clearly wrong because one should use strings instad of floats that cannot be represented exactly 
+ real,public,parameter :: etsfio_version = 3.3
+ ! This is clearly wrong because one should use strings instad of floats that cannot be represented exactly
  ! but, unfortunately, it's in the specifications and we have to live with it!
 
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
  integer,public,parameter :: nctk_max_dims = NF90_MAX_DIMS
  ! Maximum number of dimensions
 
@@ -74,21 +74,21 @@ MODULE m_nctk
 #else
  ! replacements
  integer,public,parameter :: nctk_max_dims = 7
- integer,public,parameter :: nctk_slen=256  
+ integer,public,parameter :: nctk_slen=256
 #endif
- 
+
 
 !!****t* m_nctk/nctkerr_t
 !! NAME
 !! nctkerr_t
-!! 
+!!
 !! FUNCTION
-!! 
+!!
 !! SOURCE
 !!
  type,private :: nctkerr_t
-#ifdef HAVE_TRIO_NETCDF
-   integer :: ncerr = nf90_noerr              
+#ifdef HAVE_NETCDF
+   integer :: ncerr = nf90_noerr
 #else
    integer :: ncerr = 0
 #endif
@@ -103,10 +103,10 @@ MODULE m_nctk
 !!****t* m_nctk/ncfdim_t
 !! NAME
 !! nctkdim_t
-!! 
+!!
 !! FUNCTION
 !!  Stores the name and the value of a netcdf dimension
-!! 
+!!
 !! SOURCE
 
  type,public :: nctkdim_t
@@ -119,10 +119,10 @@ MODULE m_nctk
 !!****t* m_nctk/nctkarr_t
 !! NAME
 !! nctkarr_t
-!! 
+!!
 !! FUNCTION
 !!  Stores the name and the shape of a netcdf array
-!! 
+!!
 !! SOURCE
 
  type,public :: nctkarr_t
@@ -144,30 +144,30 @@ MODULE m_nctk
 
  type nctkvar_t
 
-   integer :: id 
+   integer :: id
    ! the id used by NetCDF to access this variable.
 
-   integer :: xtype 
+   integer :: xtype
    ! the type of the variable
 
    integer :: ndims
    ! the number of dimensions (0 for scalar variable).
 
-   integer :: natts 
+   integer :: natts
    ! The number of attributes associated to the variable
 
    character(len=nctk_slen) :: name
    ! the variable name.
 
    character(len=nctk_slen) :: dimnames(nctk_max_dims)
-   ! the name corresponding to each dimension 
-   ! Only if array variable, only (1:ndims) are relevent 
+   ! the name corresponding to each dimension
+   ! Only if array variable, only (1:ndims) are relevent
 
-   integer :: dimids(nctk_max_dims) = -1  
-   ! The id of the dimensions. only (1:ndims) are relevent 
+   integer :: dimids(nctk_max_dims) = -1
+   ! The id of the dimensions. only (1:ndims) are relevent
 
    integer :: dimlens(nctk_max_dims) = 0
-   ! the size for each dimension if array variable, only (1:ndims) are relevent 
+   ! the size for each dimension if array variable, only (1:ndims) are relevent
 
    !character(len=nctk_slen) :: dimnames(nctk_max_dims)
    !character(len=nctk_slen), pointer :: ncattnames(:)
@@ -175,15 +175,16 @@ MODULE m_nctk
 
  end type nctkvar_t
  !!***
- 
+
  public :: nctk_idname              ! Return the nc identifier from the name of the variable.
  public :: nctk_ncify               ! Append ".nc" to ipath if ipath does not end with ".nc"
- public :: nctk_fort_or_ncfile      ! Test wheter a path exists (fortran or nc file) and 
+ public :: nctk_string_from_occopt  ! Return human-readable string with the smearing scheme.
+ public :: nctk_fort_or_ncfile      ! Test wheter a path exists (fortran or nc file) and
                                     ! select iomode depending on file extension.
  public :: nctk_try_fort_or_ncfile  ! Return fortran or netcdf filename depending on the existence of the file.
  public :: nctk_test_mpiio          ! Test at run-time whether the netcdf library supports parallel IO.
 
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
  public :: ab_define_var            ! Helper function used to declare a netcdf variable.
 
  ! Helper functions
@@ -191,7 +192,7 @@ MODULE m_nctk
  public :: nctk_open_create         ! Create a netcdf file for modifications.
  public :: nctk_open_modify         ! Open an already existent file for modifications.
  public :: nctk_add_etsf_header     ! Add the ETSF-IO header.
- public :: nctk_set_defmode         ! Set the file in define mode (metadata) 
+ public :: nctk_set_defmode         ! Set the file in define mode (metadata)
  public :: nctk_set_datamode        ! Set the file in datamode (IO)
  public :: nctk_set_collective      ! Set collective access for a netcdf variable
 
@@ -202,7 +203,7 @@ MODULE m_nctk
  end interface nctk_def_dims
 
  public :: nctk_set_atomic_units    ! Set the value of the attributes "units" and "scale_to_atomic_units".
- public :: nctk_def_basedims        ! Define the basic dimensions used in ETSF-IO files. 
+ public :: nctk_def_basedims        ! Define the basic dimensions used in ETSF-IO files.
  public :: nctk_def_scalars_type    ! Declare a list of scalars of the given type.
  public :: nctk_def_iscalars        ! Declare a list of integer scalars.
  public :: nctk_def_dpscalars       ! Declare a list of double precision scalars.
@@ -212,34 +213,38 @@ MODULE m_nctk
  public :: nctk_defnwrite_dpvars    ! Declare and write a list of double precisions scalars.
  public :: nctk_write_ibz           ! Write k-points in the IBZ and corresponding weights.
 
+ public :: nctk_def_one_array
  public :: nctk_def_arrays          ! Define netcdf arrays.
- interface nctk_def_arrays  
+
+ interface nctk_def_arrays
    module procedure nctk_def_one_array
    module procedure nctk_def_array_list
- end interface nctk_def_arrays  
+ end interface nctk_def_arrays
 
  public :: nctk_get_dim
 
  public :: nctk_write_datar
  public :: nctk_read_datar
-#endif 
+ public :: nctk_defwrite_nonana_terms  ! Write phonon frequencies and displacements for q-->0
+                                       ! in the presence of non-analytical behaviour.
+#endif
 
  !integer,save ABI_PROTECTED, public :: nctk_cache_size = 32000000
- ! If the cache_size is provided when opening a netCDF-4/HDF5 file, it will be used instead 
+ ! If the cache_size is provided when opening a netCDF-4/HDF5 file, it will be used instead
  ! of the default (32000000) as the size, in bytes, of the HDF5 chunk cache.
 
  !integer,save ABI_PROTECTED, public :: nctk_cache_nelems = 1000
- ! If cache_nelems is provided when opening a netCDF-4/HDF5 file, it will be used instead 
+ ! If cache_nelems is provided when opening a netCDF-4/HDF5 file, it will be used instead
  ! of the default (1000) as the maximum number of elements in the HDF5 chunk cache.
 
  !real,save ABI_PROTECTED, public :: nctk_cache_premtion = 0.75
- ! If cache_preemption is provided when opening a netCDF-4/HDF5 file, it will be used 
- ! instead of the default (0.75) as the preemption value for the HDF5 chunk cache. 
+ ! If cache_preemption is provided when opening a netCDF-4/HDF5 file, it will be used
+ ! instead of the default (0.75) as the preemption value for the HDF5 chunk cache.
 
  logical, save ABI_PROTECTED, public :: nctk_has_mpiio = .False.
  ! This flag is set to true if the netcdf library supports parallel IO.
- ! Cannot use CPP flags because nf90_open_par and other similar functions are always 
- ! exported by netcdf. As a consequence we have to check at run-time if we can 
+ ! Cannot use CPP flags because nf90_open_par and other similar functions are always
+ ! exported by netcdf. As a consequence we have to check at run-time if we can
  ! perform parallel IO and we use nctk_has_mpiio to select the IO algorithms.
 
 CONTAINS
@@ -277,7 +282,7 @@ integer function nctk_idname(ncid, varname) result(varid)
 
 ! *********************************************************************
 
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
  ! nctk_idname must be available outside CPP blocks due to a bug in abilint.
  ncerr = nf90_inq_varid(ncid, varname, varid)
 
@@ -329,6 +334,51 @@ function nctk_ncify(ipath) result(opath)
 end function nctk_ncify
 !!***
 
+
+!----------------------------------------------------------------------
+
+!!****f* m_nctk/nctk_string_from_occopt
+!! NAME
+!!  nctk_string_from_occopt
+!!
+!! FUNCTION
+!!
+!! SOURCE
+
+pure function nctk_string_from_occopt(occopt) result(smearing)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'nctk_string_from_occopt'
+!End of the abilint section
+
+ integer,intent(in) :: occopt
+ character(len=etsfio_charlen) :: smearing
+
+! *********************************************************************
+
+ select case (occopt)
+ case (3)
+   smearing = "Fermi-Dirac"
+ case (4)
+   smearing = "cold smearing of N. Marzari with minimization of the bump"
+ case (5)
+   smearing = "cold smearing of N. Marzari with monotonic function in the tail"
+ case (6)
+   smearing = "Methfessel and Paxton"
+ case (7)
+   smearing = "gaussian"
+ case (8)
+   smearing = "uniform"
+ case default
+   smearing = "none"
+ end select
+
+end function nctk_string_from_occopt
+!!***
+
 !----------------------------------------------------------------------
 
 !!****f* m_nctk/nctk_fort_or_ncfile
@@ -336,7 +386,7 @@ end function nctk_ncify
 !!  nctk_fort_or_ncfile
 !!
 !! FUNCTION
-!!  Return the iomode used to perform IO operations on filename. 
+!!  Return the iomode used to perform IO operations on filename.
 !!  If filename does not exist, a similar file with extension `.nc` is tried
 !!  and iomode is set to IO_MODE_ETSF if the file exists.
 !!  This trick is used to run the Abinit test suite in netcdf mode without changing the input files.
@@ -348,15 +398,14 @@ end function nctk_ncify
 !!
 !! OUTPUT
 !!  iomode=Flag selecting the IO library. Set to IO_MODE_ETSF if netcdf file, else IO_MODE_MPI
-!!    if MPI supports it, finally IO_MODE_FORTRAN 
-!!  errmsg=String with error message. Use `if (len_trim(errmsg) /= 0) MSG_ERROR(errmsg)` 
+!!    if MPI supports it, finally IO_MODE_FORTRAN
+!!  errmsg=String with error message. Use `if (len_trim(errmsg) /= 0) MSG_ERROR(errmsg)`
 !!    to handle possible errors in the caller.
 !!
 !! PARENTS
 !!      conducti_nc,optic
 !!
 !! CHILDREN
-!!      var_from_id
 !!
 !! SOURCE
 
@@ -445,7 +494,7 @@ integer function nctk_try_fort_or_ncfile(filename, errmsg, unit) result(ierr)
  ierr = 0; errmsg = ""
 
  if (.not.file_exists(filename)) then
-   ! Try netcdf exists. 
+   ! Try netcdf exists.
    if (file_exists(nctk_ncify(filename))) then
      if (unt /= dev_null) then
        write(unt,"(3a)")"- File: ",trim(filename)," does not exist but found netcdf file with similar name."
@@ -464,23 +513,22 @@ end function nctk_try_fort_or_ncfile
 
 !!****f* m_nctk/nctk_test_mpiio
 !! NAME
-!!  nctk_test_mpiio 
+!!  nctk_test_mpiio
 !!
 !! FUNCTION
-!!  Test at run-time whether the netcdf library supports parallel IO and 
+!!  Test at run-time whether the netcdf library supports parallel IO and
 !!  set the value of the module variable `nctk_has_mpiio`.
-!!  This is a COLLECTIVE routine that should be called by all processors 
+!!  This is a COLLECTIVE routine that should be called by all processors
 !!  in MPI_COMM_WORLD at the beginning of the calculation
 !!
 !! PARENTS
 !!      abinit
 !!
 !! CHILDREN
-!!      var_from_id
 !!
 !! SOURCE
 
-subroutine nctk_test_mpiio() 
+subroutine nctk_test_mpiio()
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -494,7 +542,7 @@ subroutine nctk_test_mpiio()
 
 !Local variables-------------------------------
 !scalars
-#ifdef HAVE_TRIO_NETCDF_MPI
+#ifdef HAVE_NETCDF_MPI
  integer,parameter :: master=0
  integer :: ierr,ncid,ncerr
  character(len=500) :: msg
@@ -505,14 +553,12 @@ subroutine nctk_test_mpiio()
 
  nctk_has_mpiio = .False.
 
-#ifdef HAVE_TRIO_NETCDF_MPI
+#ifdef HAVE_NETCDF_MPI
  if (xmpi_comm_rank(xmpi_world) == master) then
    ! Try to open a file with hdf5.
    apath = pick_aname()
    ncerr = nf90_create(apath, cmode=ior(ior(nf90_netcdf4, nf90_mpiio), nf90_write), ncid=ncid, &
      comm=xmpi_comm_self, info=xmpio_info)
-   ncerr = nf90_close(ncid)
-   call delete_file(apath, ierr)
 
    if (ncerr == nf90_noerr) then
      nctk_has_mpiio = .True.
@@ -521,29 +567,38 @@ subroutine nctk_test_mpiio()
      ! This is the value returned by the C function ifndef USE_PARALLEL
      MSG_WARNING(sjoin("netcdf lib does not support MPI-IO and: ", nf90_strerror(ncerr)))
      nctk_has_mpiio = .False.
-   else 
+   else
      ! Maybe something wrong in the low-level layer!
      MSG_WARNING(sjoin("Strange, netcdf seems to support MPI-IO but: ", nf90_strerror(ncerr)))
      nctk_has_mpiio = .False.
    end if
+
+   ncerr = nf90_close(ncid)
+   call delete_file(apath, ierr)
  end if
 
  ! Master broadcast nctk_has_mpiio
  call xmpi_bcast(nctk_has_mpiio,master,xmpi_world,ierr)
 
-  if (.not. nctk_has_mpiio) then
-    write(msg,"(5a)")&
-       "The netcdf library does not support parallel IO, see message above",ch10,&
-       "Abinit won't be able to produce files in parallel e.g. when paral_kgb==1 is used.",ch10,&
-       "Action: install a netcdf4+HDF5 library with MPI-IO support."
-    MSG_WARNING(msg)
-  end if
+ if (.not. nctk_has_mpiio) then
+   write(msg,"(5a)")&
+      "The netcdf library does not support parallel IO, see message above",ch10,&
+      "Abinit won't be able to produce files in parallel e.g. when paral_kgb==1 is used.",ch10,&
+      "Action: install a netcdf4+HDF5 library with MPI-IO support."
+   MSG_WARNING(msg)
+ end if
+#endif
+
+#ifdef HAVE_NETCDF_DEFAULT
+ if (.not. nctk_has_mpiio) then
+   MSG_ERROR("--netcdf-default is on but netcdf library does not support MPI-IO. Aborting now")
+ end if
 #endif
 
 end subroutine nctk_test_mpiio
 !!***
 
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
 
 !!****f* m_nctk/str2xtype
 !! NAME
@@ -579,14 +634,14 @@ integer function str2xtype(string) result(xtype)
  character(len=*),intent(in) :: string
 
 ! *********************************************************************
-  
+
  !Type 	FORTRAN API Mnemonic 	Bits
  !byte      NF90_BYTE           8
  !char      NF90_CHAR           8
  !short     NF90_SHORT          16
  !int       NF90_INT            32
  !float     NF90_FLOAT          32
- !double    NF90_DOUBLE         64 
+ !double    NF90_DOUBLE         64
 
  select case (string)
  case ("c", "ch", "char")
@@ -610,7 +665,7 @@ end function str2xtype
 !!
 !! FUNCTION
 !!
-!! INPUTS 
+!! INPUTS
 !!  ncerr=Netcdf error
 !!  line=line number of the file where problem occurred
 !!  file=name of the f90 file containing the caller
@@ -687,23 +742,28 @@ integer function nctk_open_read(ncid, path, comm) result(ncerr)
  integer,intent(in) :: comm
  character(len=*),intent(in) :: path
 
-! *********************************************************************
+!Local variables-------------------------------
+ integer :: nprocs
 
- if (nctk_has_mpiio) then
-#ifdef HAVE_TRIO_NETCDF_MPI
+! *********************************************************************
+ nprocs = xmpi_comm_size(comm)
+
+ ! Enforce netcdf4 only if the communicator contains more than one processor.
+ if (nctk_has_mpiio .and. nprocs > 1) then
+#ifdef HAVE_NETCDF_MPI
    ncerr = nf90_open(path, mode=ior(ior(nf90_netcdf4, nf90_mpiio), nf90_nowrite),&
                      comm=comm, info=xmpio_info, ncid=ncid)
 #else
    ncerr = nf90_einval
    MSG_WARNING("Netcdf without MPI support. Cannot open file, will abort in caller")
-   !ncerr = nf90_open(path, mode=nf90_nowrite, ncid=ncid)
 #endif
-   NCF_CHECK_MSG(ncerr, sjoin("opening file: ",path))
+   NCF_CHECK_MSG(ncerr, sjoin("opening file:", path))
  else
    ncerr = nf90_open(path, mode=nf90_nowrite, ncid=ncid)
-   NCF_CHECK_MSG(ncerr, sjoin("opening file: ",path))
-   if (xmpi_comm_size(comm) > 1) then
-     MSG_WARNING("netcdf without MPI-IO support with nprocs > 1!")
+   NCF_CHECK_MSG(ncerr, sjoin("opening file:", path))
+   if (nprocs > 1) then
+     ncerr = nf90_einval
+     MSG_WARNING("netcdf without MPI-IO support with nprocs > 1! Will abort in the caller")
    end if
  endif
 
@@ -722,7 +782,7 @@ end function nctk_open_read
 !! INPUTS
 !!  path=Name of the file
 !!  comm=MPI communicator.
-!! 
+!!
 !! OUTPUT
 !!  ncid=Netcdf identifier.
 !!
@@ -752,7 +812,7 @@ integer function nctk_open_create(ncid, path, comm) result(ncerr)
  ! Always use mpiio mode (i.e. hdf5) if available so that one perform parallel parallel IO
  if (nctk_has_mpiio) then
    ncerr = nf90_einval
-#ifdef HAVE_TRIO_NETCDF_MPI
+#ifdef HAVE_NETCDF_MPI
    call wrtout(std_out, sjoin("Creating HDf5 file: ", path), "COLL")
    ! Believe it or not, I have to use xmpi_comm_self even in sequential to avoid weird SIGSEV in the MPI layer!
    ncerr = nf90_create(path, cmode=ior(ior(nf90_netcdf4, nf90_mpiio), nf90_write), ncid=ncid, &
@@ -775,7 +835,7 @@ integer function nctk_open_create(ncid, path, comm) result(ncerr)
  NCF_CHECK(nf90_put_att(ncid, NF90_GLOBAL, "code", "Abinit"))
  NCF_CHECK(nf90_put_att(ncid, NF90_GLOBAL, "abinit_version", abinit_version))
 
- ! Define the basic dimensions used in ETSF-IO files. 
+ ! Define the basic dimensions used in ETSF-IO files.
  NCF_CHECK(nctk_def_basedims(ncid, defmode=.True.))
 
 end function nctk_open_create
@@ -826,7 +886,7 @@ integer function nctk_open_modify(ncid, path, comm) result(ncerr)
  end if
 
  if (xmpi_comm_size(comm) > 1) then
-#ifdef HAVE_TRIO_NETCDF_MPI
+#ifdef HAVE_NETCDF_MPI
    ncerr = nf90_open_par(path, cmode=ior(ior(nf90_netcdf4, nf90_mpiio), nf90_write), &
      comm=comm, info=xmpio_info, ncid=ncid)
    NCF_CHECK_MSG(ncerr, sjoin("nf90_open_par: ", path))
@@ -838,7 +898,7 @@ integer function nctk_open_modify(ncid, path, comm) result(ncerr)
    NCF_CHECK_MSG(ncerr, sjoin("nf90_open: ", path))
  end if
 
- ! Set file in define mode. 
+ ! Set file in define mode.
  ncerr = nctk_set_defmode(ncid)
 
 end function nctk_open_modify
@@ -885,7 +945,7 @@ integer function nctk_add_etsf_header(ncid, title, history) result(ncerr)
 !Local variables-------------------------------
  !integer :: ncerr
  character(len=*), parameter :: file_format = "ETSF Nanoquanta"
- character(len=*), parameter :: conventions = "http://www.etsf.eu/fileformats/" 
+ character(len=*), parameter :: conventions = "http://www.etsf.eu/fileformats/"
  real :: format_version = 3.3 ! Real is not a good choice for a version!
 
 ! *********************************************************************
@@ -918,7 +978,7 @@ integer function nctk_add_etsf_header(ncid, title, history) result(ncerr)
  end if
 
  ! These are extensions not in the standard.
- ! Add info on the code that produced this file 
+ ! Add info on the code that produced this file
  ncerr = nf90_put_att(ncid, NF90_GLOBAL, "code", "Abinit")
  if (ncerr /= nf90_noerr) return
 
@@ -1071,7 +1131,7 @@ integer function nctk_set_collective(ncid, varid) result(ncerr)
 ! *********************************************************************
 
   ncerr = nf90_einval
-#ifdef HAVE_TRIO_NETCDF_MPI
+#ifdef HAVE_NETCDF_MPI
   ncerr = nf90_var_par_access(ncid, varid, nf90_collective)
 #else
   MSG_ERROR("nctk_set_collective should not be called if NETCDF does not support MPI-IO")
@@ -1268,7 +1328,7 @@ end function nctk_set_atomic_units
 !!  nctk_def_basedims
 !!
 !! FUNCTION
-!!  Define the basic dimensions used in ETSF-IO files. 
+!!  Define the basic dimensions used in ETSF-IO files.
 !!
 !! INPUTS
 !!  ncid=Netcdf identifier.
@@ -1309,10 +1369,11 @@ integer function nctk_def_basedims(ncid, defmode) result(ncerr)
  ! Basic ETSF-IO dimensions that should be always present in the file.
  ncerr = nctk_def_dims(ncid, [&
    nctkdim_t("complex", 2), nctkdim_t("symbol_length", 2), nctkdim_t("character_string_length", etsfio_charlen),&
-   nctkdim_t("number_of_cartesian_directions", 3), nctkdim_t("number_of_reduced_dimensions", 3),& 
+   nctkdim_t("number_of_cartesian_directions", 3), nctkdim_t("number_of_reduced_dimensions", 3),&
    nctkdim_t("number_of_vectors", 3)])
+ NCF_CHECK(ncerr)
 
- ! Useful integers. 
+ ! Useful integers.
  ncerr = nctk_def_dims(ncid, [&
    nctkdim_t("one", 1), nctkdim_t("two", 2), nctkdim_t("three", 3), &
    nctkdim_t("four", 4), nctkdim_t("five", 5), nctkdim_t("six", 6), &
@@ -1343,10 +1404,9 @@ end function nctk_def_basedims
 !!  (only writing)
 !!
 !! PARENTS
-!!      m_abihist,m_bse_io,write_eig
+!!      m_abihist,m_bse_io,m_effective_potential,write_eig
 !!
 !! CHILDREN
-!!      var_from_id
 !!
 !! SOURCE
 
@@ -1363,7 +1423,7 @@ subroutine ab_define_var(ncid, var_dim_id, var_id, var_type, var_name, var_mnemo
 
 !Arguments ------------------------------------
 !scalars
- integer, intent(in) :: ncid 
+ integer, intent(in) :: ncid
  integer, intent(out) :: var_id
  character(len=*), intent(in) :: var_mnemo,var_units,var_name
  integer,intent(in) :: var_type
@@ -1376,10 +1436,10 @@ subroutine ab_define_var(ncid, var_dim_id, var_id, var_type, var_name, var_mnemo
 
 ! *************************************************************************
 
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
  ncerr = nf90_def_var(ncid, trim(var_name), var_type, var_dim_id, var_id)
  NCF_CHECK_MSG(ncerr," define variable "//trim(var_name))
- 
+
  ncerr = nf90_put_att(ncid, var_id,  "units",trim(var_units))
  NCF_CHECK_MSG(ncerr," define attribute for "//trim(var_name))
 
@@ -1446,14 +1506,14 @@ integer function nctk_def_scalars_type(ncid, varnames, xtype, defmode) result(nc
  do ii=1,size(varnames)
 
    if (nf90_inq_varid(ncid, varnames(ii), varid) == nf90_noerr)  then
-       ! Variable already exists. Check if type and dimensions agree 
+       ! Variable already exists. Check if type and dimensions agree
        call var_from_id(ncid, varid, var)
 
        if (.not. (var%xtype == xtype .and. var%ndims == 0)) then
          MSG_ERROR("variable already exists with a different definition.")
        else
          cycle ! Dimension matches, skip definition.
-       end if        
+       end if
 
    else
      ! Define variable since it doesn't exist.
@@ -1618,16 +1678,16 @@ integer function nctk_def_one_array(ncid, nctk_array, defmode, varid) result(nce
 
  ! Build array of strings with the dimensions.
  string = nctk_array%shape_str
- nn = char_count(string, ",") 
+ nn = char_count(string, ",")
  ABI_CHECK(nn <= NF90_MAX_DIMS, "Too many dimensions!")
 
  if (nn == 0) then
-   cnt = 1 
+   cnt = 1
    sarr(1) = lstrip(string)
  else
    prev = 0; cnt = 0
    do ii=1,len_trim(string)
-     if (string(ii:ii) == ",") then 
+     if (string(ii:ii) == ",") then
        cnt = cnt + 1
        sarr(cnt) = lstrip(string(prev+1:ii-1))
        prev = ii
@@ -1645,7 +1705,7 @@ integer function nctk_def_one_array(ncid, nctk_array, defmode, varid) result(nce
  end do
 
  ! Check if dimension already exists.
- ! Variable already exists. Check if type and dimensions agree 
+ ! Variable already exists. Check if type and dimensions agree
  if (nf90_inq_varid(ncid, nctk_array%name, vid) == nf90_noerr)  then
    call var_from_id(ncid, vid, var)
    if (.not. (var%xtype == xtype .and. var%ndims == cnt)) then
@@ -1658,7 +1718,7 @@ integer function nctk_def_one_array(ncid, nctk_array, defmode, varid) result(nce
    if (any(dimvals(1:cnt) /= var%dimlens(1:var%ndims))) then
       write(msg,"(4a,2(3a))")&
         "variable ",trim(nctk_array%name)," already exists but with different shape.",ch10,&
-        "In file:     dims = ",trim(ltoa(var%dimlens(:var%ndims))),ch10,& 
+        "In file:     dims = ",trim(ltoa(var%dimlens(:var%ndims))),ch10,&
         "From caller  dims = ",trim(ltoa(dimvals(:cnt))),ch10
       MSG_ERROR(msg)
    end if
@@ -2094,7 +2154,7 @@ integer function nctk_get_dim(ncid, dimname, dimlen, datamode) result(ncerr)
  ncerr = nf90_noerr
 
  if (present(datamode)) then
-   if (datamode) then 
+   if (datamode) then
      NCF_CHECK(nctk_set_datamode(ncid))
    end if
  end if
@@ -2117,7 +2177,7 @@ end function nctk_get_dim
 !! INPUTS
 !!  path=Filename
 !!  varname=Name of the variable to write.
-!!  ngfft(18)=information about 3D FFT 
+!!  ngfft(18)=information about 3D FFT
 !!  cplex=1 for real arrays (e.g. GS rhor), 2 for complex array.
 !!  nfft=number of points in the real space FFT mesh treated by this MPI proc
 !!  nspden=number of spin-density components
@@ -2162,7 +2222,7 @@ integer function nctk_write_datar(varname,path,ngfft,cplex,nfft,nspden,&
 !scalars
  integer,parameter :: master=0
  integer :: ncid,varid,i3,nproc_fft,me_fft,i3_glob,n1,n2,n3,ispden
- logical :: ionode 
+ logical :: ionode
  character(len=nctk_slen) :: cplex_name,my_action
  !character(len=500) :: msg
 !arrays
@@ -2183,9 +2243,9 @@ integer function nctk_write_datar(varname,path,ngfft,cplex,nfft,nspden,&
  ionode = .True.; ncerr = nf90_noerr
  if (nproc_fft == 1) then
    select case(my_action)
-   case ("open") 
+   case ("open")
      ncerr = nf90_open(path, mode=nf90_write, ncid=ncid)
-   case ("create") 
+   case ("create")
      !ncerr = nf90_create(path, cmode=nf90_clobber, ncid=ncid)
      ncerr = nctk_open_create(ncid, path, comm_fft)
    case default
@@ -2197,11 +2257,11 @@ integer function nctk_write_datar(varname,path,ngfft,cplex,nfft,nspden,&
      call wrtout(std_out, strcat("nctk_write_datar: using MPI-IO to write ", varname, path), "COLL")
 
      ncerr = nf90_einval
-#ifdef HAVE_TRIO_NETCDF_MPI
+#ifdef HAVE_NETCDF_MPI
      select case(my_action)
-     case ("open") 
+     case ("open")
        ncerr = nf90_open(path, mode=nf90_write, comm=comm_fft, info=xmpio_info, ncid=ncid)
-     case ("create") 
+     case ("create")
        ncerr = nf90_create(path, cmode=ior(ior(nf90_netcdf4, nf90_mpiio), nf90_write), &
          comm=comm_fft, info=xmpio_info, ncid=ncid)
      case default
@@ -2213,9 +2273,9 @@ integer function nctk_write_datar(varname,path,ngfft,cplex,nfft,nspden,&
      ionode = (me_fft == master)
      if (ionode) then
        select case(my_action)
-       case ("open") 
+       case ("open")
          ncerr = nf90_open(path, mode=nf90_write, ncid=ncid)
-       case ("create") 
+       case ("create")
          ncerr = nf90_create(path, cmode=nf90_clobber, ncid=ncid)
        case default
          MSG_ERROR(strcat("Wrong action:", my_action))
@@ -2232,8 +2292,8 @@ integer function nctk_write_datar(varname,path,ngfft,cplex,nfft,nspden,&
    ncerr = nctk_def_dims(ncid, [&
      nctkdim_t(cplex_name, cplex),&
      nctkdim_t("number_of_grid_points_vector1", n1),&
-     nctkdim_t("number_of_grid_points_vector2", n2),& 
-     nctkdim_t("number_of_grid_points_vector3", n3),& 
+     nctkdim_t("number_of_grid_points_vector2", n2),&
+     nctkdim_t("number_of_grid_points_vector3", n3),&
      nctkdim_t("number_of_components", nspden)], defmode=.True.)
    NCF_CHECK(ncerr)
 
@@ -2253,7 +2313,7 @@ integer function nctk_write_datar(varname,path,ngfft,cplex,nfft,nspden,&
    NCF_CHECK(nctk_set_datamode(ncid))
    NCF_CHECK(nf90_put_var(ncid, varid, datar, start=[1,1,1,1,1], count=[cplex, n1, n2, n3, nspden]))
    NCF_CHECK(nf90_close(ncid))
- 
+
  else
    ! Must handle data distribution.
    ABI_CHECK(mod(n3, nproc_fft) == 0, "assuming mod(n3, nproc_fft) == 0")
@@ -2261,7 +2321,7 @@ integer function nctk_write_datar(varname,path,ngfft,cplex,nfft,nspden,&
    i3_glob = -1
    do i3=1,ngfft(3)
      if (fftn3_distrib(i3) == me_fft) then
-        i3_glob = i3 
+        i3_glob = i3
         exit
      end if
    end do
@@ -2284,7 +2344,7 @@ integer function nctk_write_datar(varname,path,ngfft,cplex,nfft,nspden,&
      ncerr = nf90_einval
      NCF_CHECK(nctk_set_collective(ncid, varid))
 
-     do ispden=1,nspden 
+     do ispden=1,nspden
        ncerr = nf90_put_var(ncid, varid, datar(:,ispden), start=[1,1,1,i3_glob,ispden], &
                 count=[cplex,n1,n2,n3/nproc_fft,1])
        NCF_CHECK(ncerr)
@@ -2294,7 +2354,7 @@ integer function nctk_write_datar(varname,path,ngfft,cplex,nfft,nspden,&
      ABI_MALLOC(glob_datar, (cplex*product(ngfft(1:3)), nspden))
      call collect_datar(ngfft,cplex,nfft,nspden,datar,comm_fft,fftn3_distrib,ffti3_local,glob_datar,master=master)
 
-     if (ionode) then 
+     if (ionode) then
        ! Write global array.
        NCF_CHECK(nf90_put_var(ncid, varid, glob_datar, start=[1,1,1,1,1], count=[cplex,n1,n2,n3,nspden]))
      end if
@@ -2307,11 +2367,11 @@ integer function nctk_write_datar(varname,path,ngfft,cplex,nfft,nspden,&
  end if
 
  !ok = .True.
- ! Sequential IO 
+ ! Sequential IO
  !do rank=0,nproc_fft-1
  !  if (rank == me_fft) then
  !     ncerr = nf90_open(path, mode=nf90_write, ncid=ncid)
- !     do ispden=1,nspden 
+ !     do ispden=1,nspden
  !       ncerr = nf90_put_var(ncid, varid, datar(1:,ispden), start=[1,1,1,i3_glob,ispden], &
  !                count=[cplex,ngfft(1),ngfft(2),ngfft(3)/nproc_fft,1])
  !     end do
@@ -2333,7 +2393,7 @@ end function nctk_write_datar
 !! INPUTS
 !!  path=Filename
 !!  varname=Name of the variable to read.
-!!  ngfft(18)=information about 3D FFT 
+!!  ngfft(18)=information about 3D FFT
 !!  cplex=1 for real arrays (e.g. GS rhor), 2 for complex array.
 !!  nfft=number of points in the real space FFT mesh treated by this MPI proc
 !!  nspden=number of spin-density components
@@ -2386,16 +2446,16 @@ integer function nctk_read_datar(path,varname,ngfft,cplex,nfft,nspden,&
 
  ! TODO: Be careful here because we should always create with HDF5 if available
  ! to avoid problems if we have to reread with nproc_fft > 1 and MPI-IO
- ionode = .True. 
+ ionode = .True.
  if (nproc_fft == 1) then
    ncerr = nf90_open(path, mode=nf90_nowrite, ncid=ncid)
  else
    if (nctk_has_mpiio) then
      !write(std_out,*)"open_par: ",trim(path)
-     !ncerr = nf90_open_par(path, nf90_nowrite, 
+     !ncerr = nf90_open_par(path, nf90_nowrite,
      ! Don't know why but the format is not autodected!
      ncerr = nf90_einval
-#ifdef HAVE_TRIO_NETCDF_MPI
+#ifdef HAVE_NETCDF_MPI
      ncerr = nf90_open(path, mode=ior(ior(nf90_netcdf4, nf90_mpiio), nf90_nowrite),&
                        comm=comm_fft, info=xmpio_info, ncid=ncid)
 #endif
@@ -2410,12 +2470,12 @@ integer function nctk_read_datar(path,varname,ngfft,cplex,nfft,nspden,&
  NCF_CHECK(nf90_inq_varid(ncid, varname, varid))
  !write(std_out,*)"about to read varname, ngfft, cplex, nfft, nspden:", trim(varname), ngfft(:3), cplex,nfft,nspden
 
- ! netcdf array has shape [cplex, n1, n2, n3, nspden] 
+ ! netcdf array has shape [cplex, n1, n2, n3, nspden]
  if (nproc_fft == 1) then
    ! No MPI-FFT --> easy
    NCF_CHECK(nf90_get_var(ncid, varid, datar, start=[1,1,1,1], count=[cplex, n1, n2, n3, nspden]))
    NCF_CHECK(nf90_close(ncid))
- 
+
  else
    ! Handle data distribution.
    ABI_CHECK(mod(ngfft(3), nproc_fft) == 0, "assuming mod(n3, nproc_fft) == 0")
@@ -2423,7 +2483,7 @@ integer function nctk_read_datar(path,varname,ngfft,cplex,nfft,nspden,&
    i3_glob = -1
    do i3=1,ngfft(3)
      if (fftn3_distrib(i3) == me_fft) then
-        i3_glob = i3 
+        i3_glob = i3
         exit
      end if
    end do
@@ -2434,7 +2494,7 @@ integer function nctk_read_datar(path,varname,ngfft,cplex,nfft,nspden,&
      ncerr = nf90_einval
      NCF_CHECK(nctk_set_collective(ncid, varid))
 
-     do ispden=1,nspden 
+     do ispden=1,nspden
        ncerr = nf90_get_var(ncid, varid, datar(:,ispden), start=[1,1,1,i3_glob,ispden], &
                 count=[cplex,ngfft(1),ngfft(2),ngfft(3)/nproc_fft,1])
        NCF_CHECK(ncerr)
@@ -2485,7 +2545,6 @@ end function nctk_read_datar
 !!      m_nctk
 !!
 !! CHILDREN
-!!      var_from_id
 !!
 !! SOURCE
 
@@ -2528,7 +2587,7 @@ subroutine collect_datar(ngfft,cplex,nfft,nspden,rhor,comm_fft,fftn3_distrib,fft
    do ispden=1,nspden
      do i3=1,n3
        if (me_fft == fftn3_distrib(i3)) then
-         i3_local = ffti3_local(i3) 
+         i3_local = ffti3_local(i3)
          do i2=1,n2
            my_fftbase =   cplex * ( (i2-1)*n1 + (i3_local-1)*n1*n2 )
            glob_fftbase = cplex * ( (i2-1)*n1 + (i3-1)*n1*n2 )
@@ -2556,7 +2615,7 @@ end subroutine collect_datar
 !!  distrib_datar
 !!
 !! FUNCTION
-!! distribute a real-space MPI-FFT 
+!! distribute a real-space MPI-FFT
 !!
 !! INPUTS
 !!  ngfft(18)=contain all needed information about 3D FFT (see NOTES at beginning of scfcv)
@@ -2576,7 +2635,6 @@ end subroutine collect_datar
 !!      m_nctk
 !!
 !! CHILDREN
-!!      var_from_id
 !!
 !! SOURCE
 
@@ -2618,12 +2676,12 @@ subroutine distrib_datar(ngfft,cplex,nfft,nspden,rhor_glob,master,comm_fft,fftn3
    do ispden=1,nspden
      do i3=1,n3
        if (me_fft == fftn3_distrib(i3)) then
-         i3_local = ffti3_local(i3) 
+         i3_local = ffti3_local(i3)
          do i2=1,n2
            my_fftbase =   cplex * ( (i2-1)*n1 + (i3_local-1)*n1*n2 )
            glob_fftbase = cplex * ( (i2-1)*n1 + (i3-1)*n1*n2 )
            do i1=1,cplex * n1
-             rhor(i1+my_fftbase,ispden) = rhor_glob(i1+glob_fftbase,ispden) 
+             rhor(i1+my_fftbase,ispden) = rhor_glob(i1+glob_fftbase,ispden)
            end do
          end do
        end if
@@ -2654,7 +2712,6 @@ end subroutine distrib_datar
 !!      m_nctk
 !!
 !! CHILDREN
-!!      var_from_id
 !!
 !! SOURCE
 
@@ -2676,10 +2733,10 @@ subroutine var_from_id(ncid, varid, var)
 !Local variables-------------------------------
 !scalars
  integer :: ii, ncerr
- !character(len=NF90_MAX_NAME) :: ncname    
+ !character(len=NF90_MAX_NAME) :: ncname
 
 ! *********************************************************************
-    
+
  ! Get info about the variable.
  var%id = varid
  ncerr = nf90_inquire_variable(ncid, var%id, &
@@ -2723,7 +2780,6 @@ end subroutine var_from_id
 !! PARENTS
 !!
 !! CHILDREN
-!!      var_from_id
 !!
 !! SOURCE
 
@@ -2740,13 +2796,12 @@ subroutine var_from_name(ncid, name, var)
 
 !Arguments ------------------------------------
  integer, intent(in) :: ncid
- character(len=*),intent(in) :: name    
+ character(len=*),intent(in) :: name
  type(nctkvar_t), intent(out) :: var
 
 !Local variables-------------------------------
 !scalars
- integer :: varid !ncerr
-!arrays
+ integer :: varid
 
 ! *********************************************************************
 
@@ -2756,9 +2811,92 @@ subroutine var_from_name(ncid, name, var)
 end subroutine var_from_name
 !!***
 
-#endif
+!!****f* n_nctk/nctk_defwrite_nonana_terms
+!! NAME
+!! nctk_defwrite_nonana_terms
+!!
+!! FUNCTION
+!!  Write phonon frequencies and displacements for q-->0 in the presence of non-analytical behaviour.
+!!
+!! INPUTS
+!!  ncid=netcdf file id.
+!!  iphl2=Index of the q-point to be written to file
+!!  nph2l=Number of qpoints.
+!!  qph2l(3,nph2l)=List of phonon wavevector directions along which the non-analytical correction
+!!    to the Gamma-point phonon frequencies will be calculated
+!!    The direction is in CARTESIAN COORDINATES
+!!  natom=Number of atoms
+!!  phfrq(3*natom)=Phonon frequencies in Ha
+!!  cart_displ(2,3*natom,3*natom)=displacements in CARTESIAN coordinates.
+!!
+!! OUTPUT
+!!  Only writing.
+!!
+!! PARENTS
+!!      anaddb,m_ifc
+!!
+!! CHILDREN
+!!
+!! SOURCE
 
-!----------------------------------------------------------------------
+subroutine nctk_defwrite_nonana_terms(ncid, iphl2, nph2l, qph2l, natom, phfrq, cart_displ, mode)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'nctk_defwrite_nonana_terms'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: ncid,iphl2,nph2l,natom
+ character(len=*),intent(in) :: mode
+!arrays
+ real(dp),intent(in) :: qph2l(3, nph2l)
+ real(dp),intent(in) :: phfrq(3*natom)
+ real(dp),intent(in) :: cart_displ(2,3*natom,3*natom)
+
+!Local variables-------------------------------
+!scalars
+ integer :: ncerr, na_phmodes_varid, na_phdispl_varid
+
+! *************************************************************************
+
+ select case (mode)
+ case ("define")
+   !NCF_CHECK(nctk_def_basedims(ncid, defmode=.True.))
+   ncerr = nctk_def_dims(ncid, [nctkdim_t("number_of_non_analytical_directions", nph2l)], defmode=.True.)
+   NCF_CHECK(ncerr)
+
+   ncerr = nctk_def_arrays(ncid, [&
+   nctkarr_t('non_analytical_directions', "dp", "number_of_cartesian_directions, number_of_non_analytical_directions"),&
+   nctkarr_t('non_analytical_phonon_modes', "dp", "number_of_phonon_modes, number_of_non_analytical_directions"),&
+   nctkarr_t('non_analytical_phdispl_cart', "dp", &
+   "two, number_of_phonon_modes, number_of_phonon_modes, number_of_non_analytical_directions")])
+   NCF_CHECK(ncerr)
+
+   NCF_CHECK(nctk_set_datamode(ncid))
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "non_analytical_directions"), qph2l))
+
+ case ("write")
+
+   NCF_CHECK(nf90_inq_varid(ncid, "non_analytical_phonon_modes", na_phmodes_varid))
+   NCF_CHECK(nf90_put_var(ncid,na_phmodes_varid,phfrq*Ha_eV,start=[1, iphl2], count=[3*natom, 1]))
+   NCF_CHECK(nf90_inq_varid(ncid, "non_analytical_phdispl_cart", na_phdispl_varid))
+   ncerr = nf90_put_var(ncid,na_phdispl_varid,cart_displ*Bohr_Ang,&
+   start=[1,1,1,iphl2], count=[2,3*natom,3*natom, 1])
+   NCF_CHECK(ncerr)
+
+ case default
+   MSG_ERROR(sjoin("Wrong value for mode", mode))
+ end select
+
+end subroutine nctk_defwrite_nonana_terms
+
+#endif
 
 END MODULE m_nctk
 !!***

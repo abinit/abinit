@@ -10,7 +10,7 @@
 !! might estimate the available memory.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (DC)
+!! Copyright (C) 1998-2017 ABINIT group (DC)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -61,7 +61,7 @@ subroutine wvl_memory(dtset, idtset, mpi_enreg, npsp, option, pspheads)
  use m_errors
  use m_xmpi
 
-#if defined HAVE_DFT_BIGDFT
+#if defined HAVE_BIGDFT
  use BigDFT_API, only: MemoryEstimator, createWavefunctionsDescriptors, deallocate_lr, &
       & atomic_info, memory_estimation
 #endif
@@ -86,7 +86,7 @@ subroutine wvl_memory(dtset, idtset, mpi_enreg, npsp, option, pspheads)
   type(pspheader_type),intent(in) :: pspheads(npsp)
 
 !Local variables-------------------------------
-#if defined HAVE_DFT_BIGDFT
+#if defined HAVE_BIGDFT
   !scalars
   integer :: ityp, i, mu, nstates, me, nproc, comm
   character(len=500) :: message
@@ -101,7 +101,7 @@ subroutine wvl_memory(dtset, idtset, mpi_enreg, npsp, option, pspheads)
 
 ! **************************************************************************
  
-#if defined HAVE_DFT_BIGDFT
+#if defined HAVE_BIGDFT
 
  comm=mpi_enreg%comm_wvl
  me=xmpi_comm_rank(comm)

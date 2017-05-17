@@ -8,7 +8,7 @@
 !! using the ChebFi method (see paper by A. Levitt and M. Torrent)
 !!
 !! COPYRIGHT
-!! Copyright (C) 2014-2016 ABINIT group (AL)
+!! Copyright (C) 2014-2017 ABINIT group (AL)
 !! this file is distributed under the terms of the
 !! gnu general public license, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -18,7 +18,7 @@
 !!  dtset <type(dataset_type)>=all input variales for this dataset
 !!  gs_hamk <type(gs_hamiltonian_type)>=all data for the hamiltonian at k
 !!  kinpw(npw)=(modified) kinetic energy for each plane wave (hartree)
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  nband=number of bands at this k point for that spin polarization
 !!  npw=number of plane waves at this k point
 !!  nspinor=number of plane waves at this k point
@@ -166,7 +166,7 @@ subroutine chebfi(cg,dtset,eig,enl,gs_hamk,gsc,kinpw,mpi_enreg,nband,npw,nspinor
  mcg = npw*nspinor*nband
 
  ! Init pcon
- pcon = (27+kinpw*(18+kinpw*(12+8*kinpw))) / (27+kinpw*(18+kinpw*(12+8*kinpw)) + 16+kinpw**4)
+ pcon = (27+kinpw*(18+kinpw*(12+8*kinpw))) / (27+kinpw*(18+kinpw*(12+8*kinpw)) + 16*kinpw**4)
 
  ghc=zero; gvnlc=zero
 
@@ -589,7 +589,7 @@ end subroutine chebfi
 !! Computes the value of the Chebyshev polynomial of degree n on the interval [a,b] at x
 !!
 !! COPYRIGHT
-!! Copyright (C) 2014-2016 ABINIT group (AL)
+!! Copyright (C) 2014-2017 ABINIT group (AL)
 !! this file is distributed under the terms of the
 !! gnu general public license, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -656,7 +656,7 @@ end function cheb_poly
 !! Here as in the rest of the code, the convention is that residuals are squared (||Ax-lx||^2)
 !!
 !! COPYRIGHT
-!! Copyright (C) 2014-2016 ABINIT group (AL)
+!! Copyright (C) 2014-2017 ABINIT group (AL)
 !! this file is distributed under the terms of the
 !! gnu general public license, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

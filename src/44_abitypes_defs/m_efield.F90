@@ -9,7 +9,7 @@
 !!  Imported object from defs_datatypes
 !!
 !! COPYRIGHT
-!! Copyright (C) 2011-2016 ABINIT group (MJV)
+!! Copyright (C) 2011-2017 ABINIT group (MJV)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -78,7 +78,7 @@ module m_efield
   integer :: mkmem_max           ! max of mkmem
   integer :: natom               ! number of atoms in unit cell
   integer :: my_natom            ! number of atoms treated by current proc
-  integer :: nband_occ           ! number of occupied bands
+  integer :: mband_occ           ! max number of occupied bands (over spin)
                                  ! this number must be the same for every k
   integer :: nspinor             ! nspinor input from data set
   integer :: nsym
@@ -144,11 +144,13 @@ module m_efield
   integer, allocatable :: lmn_size(:)        ! lmn_size(ntypat)
   integer, allocatable :: lmn2_size(:)       ! lmn2_size(ntypat)
 
+  integer, allocatable :: nband_occ(:)       ! nband_occ(nsppol) = actual number of occupied bands
+                                             !  can be different for spin up and down!!!
   integer, allocatable :: nneigh(:)          ! nneigh(nkpt)
                                          ! for each k-point, nneigh stores
                                          ! the number of its nearest neighbours
                                          ! that are not related by symmetry
-  integer, allocatable :: sflag(:,:,:,:)  ! sflag(nband_occ,nkpt*nsppol,2,3)
+  integer, allocatable :: sflag(:,:,:,:)  ! sflag(mband_occ,nkpt*nsppol,2,3)
                                       ! sflag = 0 : compute the whole row of
                                       !             smat
                                       ! sflag = 1 : the row is up to date
@@ -212,7 +214,7 @@ module m_efield
  ! these are used only in the PAW case with electric field
 
   real(dp), allocatable :: smat(:,:,:,:,:,:)
-! smat(2,nband_occ,nband_occ,nkpt*nsppol,2,3)
+! smat(2,mband_occ,mband_occ,nkpt*nsppol,2,3)
 ! Overlap matrix for every k-point. In an electric field calculation,
 ! smat is updated at every iteration.
 
@@ -300,6 +302,9 @@ subroutine destroy_efield(dtefield)
   end if
   if(allocated(dtefield%lmn2_size))  then
     ABI_DEALLOCATE(dtefield%lmn2_size)
+  end if
+  if(allocated(dtefield%nband_occ))  then
+    ABI_DEALLOCATE(dtefield%nband_occ)
   end if
   if(allocated(dtefield%nneigh))  then
     ABI_DEALLOCATE(dtefield%nneigh)

@@ -10,7 +10,7 @@
 !!  Also contains basic container datatype for LibXC interfacing.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2016 ABINIT group (MOliveira,LHH,FL,GMR,MT)
+!! Copyright (C) 2008-2017 ABINIT group (MOliveira,LHH,FL,GMR,MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -76,7 +76,8 @@ module libxc_functionals
  public :: libxc_functionals_is_hybrid          ! Return TRUE if the XC functional is hybrid (GGA or meta-GGA)
  public :: libxc_functionals_has_kxc            ! Return TRUE if Kxc (3rd der) is available for the XC functional
  public :: libxc_functionals_nspin              ! The number of spin components for the XC functionals
- public :: libxc_functionals_get_hybridcoef     ! Retrieve coefficients for hybrid functionals
+ public :: libxc_functionals_get_hybridparams   ! Retrieve parameter(s) for hybrid functionals
+ public :: libxc_functionals_set_hybridparams   ! Change parameter(s) for a hybrid functionals
  public :: libxc_functionals_gga_from_hybrid    ! Return the id of the XC-GGA used for the hybrid
 
 !Private functions
@@ -211,6 +212,22 @@ module libxc_functionals
      type(C_PTR) :: xc_func
    end subroutine xc_mgga
  end interface
+!PBE0
+ interface
+   subroutine xc_hyb_gga_xc_pbeh_set_params(xc_func, alpha) bind(C)
+     use iso_c_binding, only : C_DOUBLE,C_PTR
+     real(C_DOUBLE),value :: alpha
+     type(C_PTR) :: xc_func
+   end subroutine xc_hyb_gga_xc_pbeh_set_params
+ end interface
+!HSE
+ interface
+   subroutine xc_hyb_gga_xc_hse_set_params(xc_func, alpha, omega) bind(C)
+     use iso_c_binding, only : C_DOUBLE,C_PTR
+     real(C_DOUBLE),value :: alpha, omega
+     type(C_PTR) :: xc_func
+   end subroutine xc_hyb_gga_xc_hse_set_params
+ end interface
 !
  interface
    subroutine xc_lda_c_xalpha_set_params(xc_func,alpha) bind(C)
@@ -336,13 +353,13 @@ contains
  implicit none
 
 !Local variables-------------------------------
-#if defined HAVE_DFT_LIBXC && defined HAVE_FC_ISO_C_BINDING
+#if defined HAVE_LIBXC && defined HAVE_FC_ISO_C_BINDING
  integer(C_INT) :: i1,i2,i3,i4,i5,i6,i7,i8
 #endif
 
 ! *************************************************************************
 
-#if defined HAVE_DFT_LIBXC && defined HAVE_FC_ISO_C_BINDING
+#if defined HAVE_LIBXC && defined HAVE_FC_ISO_C_BINDING
   call xc_get_singleprecision_constant(i1)
   XC_SINGLE_PRECISION     = int(i1)
   call xc_get_family_constants(i1,i2,i3,i4,i5,i6,i7,i8)
@@ -410,7 +427,7 @@ contains
 
  libxc_functionals_check=.true. ; msg=""
 
-#if defined HAVE_DFT_LIBXC
+#if defined HAVE_LIBXC
 #if defined FC_G95
  libxc_functionals_check=.false.
  msg='LibXC cannot be used with G95 Fortran compiler!'
@@ -487,7 +504,7 @@ contains
  integer :: ii,nspden_eff
  character(len=500) :: msg
  type(libxc_functional_type),pointer :: xc_func
-#if defined HAVE_DFT_LIBXC && defined HAVE_FC_ISO_C_BINDING
+#if defined HAVE_LIBXC && defined HAVE_FC_ISO_C_BINDING
  integer :: flags
  integer(C_INT) :: func_id_c,nspin_c,success_c
  real(C_DOUBLE) :: alpha_c,beta_c,omega_c
@@ -549,7 +566,7 @@ contains
      MSG_ERROR(msg)
    end if
 
-#if defined HAVE_DFT_LIBXC && defined HAVE_FC_ISO_C_BINDING
+#if defined HAVE_LIBXC && defined HAVE_FC_ISO_C_BINDING
 
 !  Allocate functional
    func_ptr_c=xc_func_type_malloc()
@@ -581,10 +598,12 @@ contains
    xc_func%has_kxc=(iand(flags,XC_FLAGS_HAVE_KXC)>0)
 
 !  Retrieve parameters for hybrid functionals
-   call xc_hyb_cam_coef(xc_func%conf,omega_c,alpha_c,beta_c)
-   xc_func%hyb_mixing=real(alpha_c,kind=dp)
-   xc_func%hyb_mixing_sr=real(beta_c,kind=dp)
-   xc_func%hyb_range=real(omega_c,kind=dp)
+   if (xc_func%family==XC_FAMILY_HYB_GGA.or.xc_func%family==XC_FAMILY_MGGA) then
+     call xc_hyb_cam_coef(xc_func%conf,omega_c,alpha_c,beta_c)
+     xc_func%hyb_mixing=real(alpha_c,kind=dp)
+     xc_func%hyb_mixing_sr=real(beta_c,kind=dp)
+     xc_func%hyb_range=real(omega_c,kind=dp)
+   endif
 
 !  Dump functional information
    call c_f_pointer(xc_get_info_name(xc_func%conf),strg_c)
@@ -668,7 +687,7 @@ end subroutine libxc_functionals_init
    xc_func%hyb_mixing_sr=zero
    xc_func%hyb_range=zero
    if (associated(xc_func%conf)) then
-#if defined HAVE_DFT_LIBXC && defined HAVE_FC_ISO_C_BINDING
+#if defined HAVE_LIBXC && defined HAVE_FC_ISO_C_BINDING
      call xc_func_end(xc_func%conf)
      call xc_func_type_free(c_loc(xc_func%conf))
 #endif
@@ -716,7 +735,7 @@ end subroutine libxc_functionals_init
  type(libxc_functional_type),intent(in),optional,target :: xc_functionals(2)
 !Local variables-------------------------------
  type(libxc_functional_type),pointer :: xc_funcs(:)
-#if defined HAVE_DFT_LIBXC && defined HAVE_FC_ISO_C_BINDING
+#if defined HAVE_LIBXC && defined HAVE_FC_ISO_C_BINDING
  character(len=100) :: xcname
  character(kind=C_CHAR,len=1),pointer :: strg_c
 #endif
@@ -731,7 +750,7 @@ end subroutine libxc_functionals_init
    xc_funcs => xc_global
  end if
 
-#if defined HAVE_DFT_LIBXC && defined HAVE_FC_ISO_C_BINDING
+#if defined HAVE_LIBXC && defined HAVE_FC_ISO_C_BINDING
  if (xc_funcs(1)%id == 0) then
    if (xc_funcs(2)%id /= 0) then
      call c_f_pointer(xc_functional_get_name(xc_funcs(2)%id),strg_c)
@@ -788,13 +807,13 @@ end function libxc_functionals_fullname
  integer :: libxc_functionals_family_from_id
  integer,intent(in) :: xcid
 !Local variables-------------------------------
-#if defined HAVE_DFT_LIBXC && defined HAVE_FC_ISO_C_BINDING
+#if defined HAVE_LIBXC && defined HAVE_FC_ISO_C_BINDING
  integer(C_INT) :: xcid_c
 #endif
 
 ! *************************************************************************
 
-#if defined HAVE_DFT_LIBXC && defined HAVE_FC_ISO_C_BINDING
+#if defined HAVE_LIBXC && defined HAVE_FC_ISO_C_BINDING
  xcid_c=int(xcid,kind=C_INT)
  libxc_functionals_family_from_id=int(xc_family_from_id(xcid_c,C_NULL_PTR,C_NULL_PTR))
 #else
@@ -839,7 +858,7 @@ end function libxc_functionals_family_from_id
  integer :: libxc_functionals_getid
  character(len=*),intent(in) :: xcname
 !Local variables-------------------------------
-#if defined HAVE_DFT_LIBXC && defined HAVE_FC_ISO_C_BINDING
+#if defined HAVE_LIBXC && defined HAVE_FC_ISO_C_BINDING
  character(len=256) :: str
  character(kind=C_CHAR,len=1),target :: name_c(len_trim(xcname)+1)
  character(kind=C_CHAR,len=1),target :: name_c_xc(len_trim(xcname)-2)
@@ -848,7 +867,7 @@ end function libxc_functionals_family_from_id
 
 ! *************************************************************************
 
-#if defined HAVE_DFT_LIBXC && defined HAVE_FC_ISO_C_BINDING
+#if defined HAVE_LIBXC && defined HAVE_FC_ISO_C_BINDING
  str=trim(xcname)
  if (xcname(1:3)=="XC_".or.xcname(1:3)=="xc_") then
    str=xcname(4:);name_c_xc=xc_char_to_c(str)
@@ -1235,7 +1254,7 @@ end function libxc_functionals_nspin
  integer  :: ii,ipts
  logical :: is_gga,is_mgga
  real(dp) :: xc_tb09_c_
-#if defined HAVE_DFT_LIBXC && defined HAVE_FC_ISO_C_BINDING
+#if defined HAVE_LIBXC && defined HAVE_FC_ISO_C_BINDING
  type(C_PTR) :: rho_c,sigma_c,lrho_c,tau_c
 #endif
 !arrays
@@ -1243,7 +1262,7 @@ end function libxc_functionals_nspin
  real(dp),target :: v2rho2(3),v2rhosigma(6),v2sigma2(6),v3rho3(4)
  real(dp),target :: lrhotmp(nspden),tautmp(nspden),vlrho(nspden),vtau(nspden)
  type(libxc_functional_type),pointer :: xc_funcs(:)
-#if defined HAVE_DFT_LIBXC && defined HAVE_FC_ISO_C_BINDING
+#if defined HAVE_LIBXC && defined HAVE_FC_ISO_C_BINDING
  type(C_PTR) :: exc_c(2),vxc_c(2),vsigma_c(2)
  type(C_PTR) :: v2rho2_c(2),v2rhosigma_c(2),v2sigma2_c(2)
  type(C_PTR) :: v3rho3_c(2),vlrho_c(2),vtau_c(2)
@@ -1272,7 +1291,7 @@ end function libxc_functionals_nspin
  if (is_mgga.and.present(vxctau)) vxctau=zero
 
 !Determine which XC outputs can be computed
-#if defined HAVE_DFT_LIBXC && defined HAVE_FC_ISO_C_BINDING
+#if defined HAVE_LIBXC && defined HAVE_FC_ISO_C_BINDING
  do ii = 1,2
    if (xc_funcs(ii)%has_exc) then
      exc_c(ii)=c_loc(exctmp)
@@ -1308,7 +1327,7 @@ end function libxc_functionals_nspin
 #endif
 
 !Initialize temporary arrays
-#if defined HAVE_DFT_LIBXC && defined HAVE_FC_ISO_C_BINDING
+#if defined HAVE_LIBXC && defined HAVE_FC_ISO_C_BINDING
  rhotmp=zero ; rho_c=c_loc(rhotmp)
  if (is_gga.or.is_mgga) then
    sigma=zero ; sigma_c=c_loc(sigma)
@@ -1364,7 +1383,7 @@ end function libxc_functionals_nspin
      if (xc_funcs(ii)%id==0) cycle
 
 !    Get the potential (and possibly the energy)
-#if defined HAVE_DFT_LIBXC && defined HAVE_FC_ISO_C_BINDING
+#if defined HAVE_LIBXC && defined HAVE_FC_ISO_C_BINDING
      exctmp=zero ; vxctmp=zero
 !    ===== LDA =====
      if (xc_funcs(ii)%family==XC_FAMILY_LDA) then
@@ -1486,36 +1505,36 @@ end subroutine libxc_functionals_getvxc
 
 !----------------------------------------------------------------------
 
-!!****f* libxc_functionals/libxc_functionals_get_hybridcoef
+!!****f* libxc_functionals/libxc_functionals_get_hybridparams
 !! NAME
-!!  libxc_functionals_get_hybridcoef
+!!  libxc_functionals_get_hybridparams
 !!
 !! FUNCTION
-!!  Returns the mixing coefficients and the range separation for a hybrid functional
+!!  Returns the parameters of an hybrid functional (mixing coefficient(s) and range separation)
 !!
 !! INPUTS
 !! [xc_functionals(2)]=<type(libxc_functional_type)>, optional argument
 !!                     XC functionals to initialize
 !!
 !! OUTPUT
-!!  hyb_mixing   = mixing factor of Fock contribution
-!!  hyb_mixing_sr= mixing factor of short-range Fock contribution
-!!  hyb_range    = Range (for separation)
+!!  [hyb_mixing]  = mixing factor of Fock contribution
+!!  [hyb_mixing_sr]= mixing factor of short-range Fock contribution
+!!  [hyb_range]    = Range (for separation)
 !!
 !! PARENTS
-!!      m_fock
+!!      calc_vhxc_me,m_fock
 !!
 !! CHILDREN
 !!
 !! SOURCE
 
-subroutine libxc_functionals_get_hybridcoef(hyb_mixing,hyb_mixing_sr,hyb_range,xc_functionals)
+subroutine libxc_functionals_get_hybridparams(hyb_mixing,hyb_mixing_sr,hyb_range,xc_functionals)
 
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'libxc_functionals_get_hybridcoef'
+#define ABI_FUNC 'libxc_functionals_get_hybridparams'
 !End of the abilint section
 
  implicit none
@@ -1581,7 +1600,109 @@ subroutine libxc_functionals_get_hybridcoef(hyb_mixing,hyb_mixing_sr,hyb_range,x
 
  end do
 
-end subroutine libxc_functionals_get_hybridcoef
+end subroutine libxc_functionals_get_hybridparams
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* libxc_functionals/libxc_functionals_set_hybridparams
+!! NAME
+!!  libxc_functionals_set_hybridparams
+!!
+!! FUNCTION
+!!  Set the parameters of an hybrid functional (mixing coefficient(s) and range separation)
+!!
+!! INPUTS
+!! [hyb_mixing]       = mixing factor of Fock contribution
+!! [hyb_mixing_sr]    = mixing factor of short-range Fock contribution
+!! [hyb_range]        = Range (for separation)
+!! [xc_functionals(2)]=<type(libxc_functional_type)>, optional argument
+!!                     XC functionals to initialize
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!      calc_vhxc_me
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine libxc_functionals_set_hybridparams(hyb_mixing,hyb_mixing_sr,hyb_range,xc_functionals)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'libxc_functionals_set_hybridparams'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+ real(dp),intent(in),optional :: hyb_mixing,hyb_mixing_sr,hyb_range
+ type(libxc_functional_type),intent(in),optional,target :: xc_functionals(2)
+!Local variables -------------------------------
+ integer :: ii
+ logical :: is_pbe0,is_hse
+ character(len=500) :: msg
+#if defined HAVE_LIBXC && defined HAVE_FC_ISO_C_BINDING
+ real(C_DOUBLE) :: alpha_c,beta_c,omega_c
+#endif
+ type(libxc_functional_type),pointer :: xc_func
+
+! *************************************************************************
+
+ is_pbe0=.false.
+ is_hse =.false.
+
+ do ii = 1, 2
+
+!  Select XC functional
+   if (present(xc_functionals)) then
+     xc_func => xc_functionals(ii)
+   else
+     xc_func => xc_global(ii)
+   end if
+
+!  Doesnt work with all hybrid functionals
+   if (is_pbe0.or.is_hse) then
+     msg='Invalid XC functional: contains 2 hybrid exchange functionals!'
+     MSG_ERROR(msg)
+   end if
+   is_pbe0=(xc_func%id==libxc_functionals_getid('HYB_GGA_XC_PBEH'))
+   is_hse=((xc_func%id==libxc_functionals_getid('HYB_GGA_XC_HSE03')).or.&
+&          (xc_func%id==libxc_functionals_getid('HYB_GGA_XC_HSE06')))
+   if ((.not.is_pbe0).and.(.not.is_hse)) cycle
+
+#if defined HAVE_LIBXC && defined HAVE_FC_ISO_C_BINDING
+!  First retrieve current values of parameters
+   call xc_hyb_cam_coef(xc_func%conf,omega_c,alpha_c,beta_c)
+
+!  New values for parameters
+   if (present(hyb_mixing)) alpha_c=real(hyb_mixing,kind=C_DOUBLE)
+   if (present(hyb_mixing_sr)) beta_c=real(hyb_mixing_sr,kind=C_DOUBLE)
+   if (present(hyb_range)) omega_c=real(hyb_range,kind=C_DOUBLE)
+
+!  PBE0: set parameters
+   if (is_pbe0) then
+       call xc_hyb_gga_xc_pbeh_set_params(xc_func%conf,alpha_c)
+   end if
+
+!  HSE: set parameters
+   if (is_hse) then
+     call xc_hyb_gga_xc_hse_set_params(xc_func%conf,beta_c,omega_c)
+   end if
+#endif
+
+ end do
+
+ if ((.not.is_pbe0).and.(.not.is_hse)) then
+   msg='Invalid XC functional: not able to change parameters for this functional!'
+   MSG_WARNING(msg)
+ end if
+
+end subroutine libxc_functionals_set_hybridparams
 !!***
 
 !----------------------------------------------------------------------
@@ -1633,7 +1754,7 @@ function libxc_functionals_gga_from_hybrid(gga_id,hybrid_id,xc_functionals)
 !scalars
  integer :: family,ii
  character(len=100) :: c_name,x_name,msg
-#if defined HAVE_DFT_LIBXC && defined HAVE_FC_ISO_C_BINDING
+#if defined HAVE_LIBXC && defined HAVE_FC_ISO_C_BINDING
  character(len=100) :: xc_name
  character(kind=C_CHAR,len=1),pointer :: strg_c
 #endif
@@ -1668,7 +1789,7 @@ function libxc_functionals_gga_from_hybrid(gga_id,hybrid_id,xc_functionals)
      MSG_ERROR(msg)
    end if
 
-#if defined HAVE_DFT_LIBXC && defined HAVE_FC_ISO_C_BINDING
+#if defined HAVE_LIBXC && defined HAVE_FC_ISO_C_BINDING
 
    call c_f_pointer(xc_functional_get_name(trial_id(ii)),strg_c)
    call xc_char_to_f(strg_c,xc_name)
@@ -1808,7 +1929,7 @@ end function libxc_functionals_gga_from_hybrid
 !  Set c in XC data structure
    do ii=1,2
      if (xc_funcs(ii)%id==libxc_functionals_getid('XC_MGGA_X_TB09')) then
-#if defined HAVE_DFT_LIBXC && defined HAVE_FC_ISO_C_BINDING
+#if defined HAVE_LIBXC && defined HAVE_FC_ISO_C_BINDING
        call xc_mgga_x_tb09_set_params(xc_funcs(ii)%conf,cc)
 #endif
      end if

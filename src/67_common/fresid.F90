@@ -10,7 +10,7 @@
 !!              old atomic positions, and new atomic positions
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (XG, MM, MT)
+!! Copyright (C) 1998-2017 ABINIT group (XG, MM, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -24,7 +24,7 @@
 !!  | typat(natom)=integer type for each atom in cell
 !!  | usepaw= 0 for non paw calculation; =1 for paw calculation
 !!  | xclevel= level of the XC functional
-!! mpi_enreg=informations about MPI parallelization
+!! mpi_enreg=information about MPI parallelization
 !! nfft=(effective) number of FFT grid points (for this processor)
 !! ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
 !! ntypat=number of types of atoms in cell.
@@ -91,7 +91,7 @@ subroutine fresid(dtset,gresid,mpi_enreg,nfft,ngfft,ntypat,option,&
 !scalars
  integer,intent(in) :: nfft,ntypat,option
  real(dp),intent(in) :: ucvol
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
  type(dataset_type),intent(in) :: dtset
 !arrays
  integer,intent(in) :: ngfft(18)
@@ -130,11 +130,6 @@ subroutine fresid(dtset,gresid,mpi_enreg,nfft,ngfft,ntypat,option,&
  logical,allocatable :: my_sphere(:)
 
 ! *************************************************************************
-
-!Statement functions are obsolete
-!Define magnitude of cross product of two vectors
-! cross(xx,yy,zz,aa,bb,cc)=&
-!& sqrt((yy*cc-zz*bb)**2+(zz*aa-xx*cc)**2+(xx*bb-yy*aa)**2)
 
 !Compute lengths of cross products for pairs of primitive
 !translation vectors (used in setting index search range below)
@@ -661,7 +656,7 @@ subroutine fresid(dtset,gresid,mpi_enreg,nfft,ngfft,ntypat,option,&
  contains
 
    function cross_fr(xx,yy,zz,aa,bb,cc)
-
+!Define magnitude of cross product of two vectors
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -669,11 +664,10 @@ subroutine fresid(dtset,gresid,mpi_enreg,nfft,ngfft,ntypat,option,&
 #define ABI_FUNC 'cross_fr'
 !End of the abilint section
 
-   real(dp)::cross_fr
-   real(dp) :: xx,yy,zz,aa,bb,cc
+   real(dp) :: cross_fr
+   real(dp),intent(in) :: xx,yy,zz,aa,bb,cc
    cross_fr=sqrt((yy*cc-zz*bb)**2+(zz*aa-xx*cc)**2+(xx*bb-yy*aa)**2)
  end function cross_fr
 
 end subroutine fresid
-
 !!***

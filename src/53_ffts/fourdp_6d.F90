@@ -22,7 +22,7 @@
 !!     ------------------------------------------------------------------
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2016 ABINIT group (MG)
+!!  Copyright (C) 2008-2017 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -68,7 +68,7 @@ subroutine fourdp_6d(cplex,matrix,isign,MPI_enreg,nfft,ngfft,paral_kgb,tim_fourd
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: cplex,isign,nfft,paral_kgb,tim_fourdp
- type(MPI_type),intent(inout) :: MPI_enreg
+ type(MPI_type),intent(in) :: MPI_enreg
 !arrays
  integer,intent(in) :: ngfft(18)
  complex(gwpc),intent(inout) :: matrix(nfft,nfft)

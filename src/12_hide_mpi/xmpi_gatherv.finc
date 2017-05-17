@@ -9,7 +9,7 @@
 !!  xmpi_gatherv is the generic function.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2001-2016 ABINIT group (MT,GG)
+!!  Copyright (C) 2001-2017 ABINIT group (MT,GG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~ABINIT/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -625,4 +625,134 @@ subroutine xmpi_gatherv_dp4d(xval,nelem,recvbuf,recvcounts,displs,root,spaceComm
 #endif
 
 end subroutine xmpi_gatherv_dp4d
+!!***
+
+!!****f* ABINIT/xmpi_gatherv_dp5d
+!! NAME
+!!  xmpi_gatherv_dp5d
+!!
+!! FUNCTION
+!!  Gathers data from all tasks and delivers it to all.
+!!  Target: double precision four-dimensional arrays.
+!!
+!! INPUTS
+!!  xval= buffer array
+!!  recvcounts= number of received elements
+!!  displs= relative offsets for incoming data
+!!  nelem= number of elements
+!!  root= rank of receiving process
+!!  spaceComm= MPI communicator
+!!
+!! OUTPUT
+!!  ier= exit status, a non-zero value meaning there is an error
+!!
+!! SIDE EFFECTS
+!!  recvbuf= received buffer
+!!
+!! SOURCE
+
+subroutine xmpi_gatherv_dp5d(xval,nelem,recvbuf,recvcounts,displs,root,spaceComm,ier)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'xmpi_gatherv_dp5d'
+!End of the abilint section
+
+ implicit none
+
+!Arguments-------------------------
+ real(dp), DEV_CONTARRD intent(in) :: xval(:,:,:,:,:)
+ real(dp), DEV_CONTARRD intent(inout)   :: recvbuf(:,:,:,:,:)
+ integer, DEV_CONTARRD intent(in) :: recvcounts(:),displs(:)
+ integer,intent(in) :: nelem,root,spaceComm
+ integer,intent(out) :: ier
+
+!Local variables-------------------
+ integer :: cc,dd,sz1234
+
+! *************************************************************************
+
+ ier=0
+#if defined HAVE_MPI
+ if (spaceComm /= MPI_COMM_SELF .and. spaceComm /= MPI_COMM_NULL) then
+   call MPI_gatherV(xval,nelem,MPI_DOUBLE_PRECISION,recvbuf,recvcounts,displs,&
+&   MPI_DOUBLE_PRECISION,root,spaceComm,ier)
+ else if (spaceComm == MPI_COMM_SELF) then
+#endif
+   sz1234=size(xval,1)*size(xval,2)*size(xval,3)*size(xval,4)
+   dd=0;if (size(displs)>0) dd=displs(1)/sz1234
+   cc=size(xval,5);if (size(recvcounts)>0) cc=recvcounts(1)/sz1234
+   recvbuf(:,:,:,:,dd+1:dd+cc)=xval(:,:,:,:,1:cc)
+#if defined HAVE_MPI
+ end if
+#endif
+!!***
+
+end subroutine xmpi_gatherv_dp5d
+
+!!****f* ABINIT/xmpi_gatherv_dp6d
+!! NAME
+!!  xmpi_gatherv_dp6d
+!!
+!! FUNCTION
+!!  Gathers data from all tasks and delivers it to all.
+!!  Target: double precision four-dimensional arrays.
+!!
+!! INPUTS
+!!  xval= buffer array
+!!  recvcounts= number of received elements
+!!  displs= relative offsets for incoming data
+!!  nelem= number of elements
+!!  root= rank of receiving process
+!!  spaceComm= MPI communicator
+!!
+!! OUTPUT
+!!  ier= exit status, a non-zero value meaning there is an error
+!!
+!! SIDE EFFECTS
+!!  recvbuf= received buffer
+!!
+!! SOURCE
+
+subroutine xmpi_gatherv_dp6d(xval,nelem,recvbuf,recvcounts,displs,root,spaceComm,ier)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'xmpi_gatherv_dp6d'
+!End of the abilint section
+
+ implicit none
+
+!Arguments-------------------------
+ real(dp), DEV_CONTARRD intent(in) :: xval(:,:,:,:,:,:)
+ real(dp), DEV_CONTARRD intent(inout)   :: recvbuf(:,:,:,:,:,:)
+ integer, DEV_CONTARRD intent(in) :: recvcounts(:),displs(:)
+ integer,intent(in) :: nelem,root,spaceComm
+ integer,intent(out) :: ier
+
+!Local variables-------------------
+ integer :: cc,dd,sz12345
+
+! *************************************************************************
+
+ ier=0
+#if defined HAVE_MPI
+ if (spaceComm /= MPI_COMM_SELF .and. spaceComm /= MPI_COMM_NULL) then
+   call MPI_gatherV(xval,nelem,MPI_DOUBLE_PRECISION,recvbuf,recvcounts,displs,&
+&   MPI_DOUBLE_PRECISION,root,spaceComm,ier)
+ else if (spaceComm == MPI_COMM_SELF) then
+#endif
+   sz12345=size(xval,1)*size(xval,2)*size(xval,3)*size(xval,4)*size(xval,5)
+   dd=0;if (size(displs)>0) dd=displs(1)/sz12345
+   cc=size(xval,6);if (size(recvcounts)>0) cc=recvcounts(1)/sz12345
+   recvbuf(:,:,:,:,:,dd+1:dd+cc)=xval(:,:,:,:,:,1:cc)
+#if defined HAVE_MPI
+ end if
+#endif
+
+end subroutine xmpi_gatherv_dp6d
 !!***

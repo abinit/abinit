@@ -10,7 +10,7 @@
 !! by setting the first non-zero element to be positive.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (DCA, XG, GMR, MT)
+!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -26,7 +26,7 @@
 !!    (set to 1 if usual complex vectors)
 !!  mcg=size of second dimension of cg
 !!  mgsc=size of second dimension of gsc
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  nband_k=number of bands
 !!  npw_k=number of planewaves
 !!  useoverlap=describe the overlap of wavefunctions:
@@ -76,7 +76,7 @@ subroutine fxphas(cg,gsc,icg,igsc,istwfk,mcg,mgsc,mpi_enreg,nband_k,npw_k,useove
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: icg,igsc,istwfk,mcg,mgsc,nband_k,npw_k,useoverlap
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  real(dp),intent(inout) :: cg(2,mcg),gsc(2,mgsc*useoverlap)
 
@@ -164,7 +164,7 @@ subroutine fxphas(cg,gsc,icg,igsc,istwfk,mcg,mgsc,mpi_enreg,nband_k,npw_k,useove
            if (root2>root1) theta=thppi
          else
 !          The real part vector and the imaginary part vector are orthogonal, and of same norm. Strong indeterminacy.
-!          Will determine the first non-zero coefficient, and fix its phase 
+!          Will determine the first non-zero coefficient, and fix its phase
 !          Hypothesis : there is at least one non-zero element on the master node ...
            do ii=1+indx,npw_k+indx
              cre=cg(1,ii)

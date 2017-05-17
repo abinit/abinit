@@ -322,6 +322,22 @@ FCFLAGS_EXTRA="-fopenmp"
 #
 #FCFLAGS="-O2"
 
+# Fortran flags for fixed-form source files
+#
+#FCFLAGS_FIXEDFORM="-ffixed-form"
+
+# Fortran flags for free-form source files
+#
+#FCFLAGS_FREEFORM="-ffree-form"
+
+# Fortran compiler flags to use a module directory
+#
+#FCFLAGS_MODDIR=="-J$(abinit_moddir)"
+
+# Tricky Fortran compiler flags
+#
+#FCFLAGS_HINTS="-ffree-line-length-none"
+
 # Fortran linker custom debug flags (when enable_debug=yes)
 #
 #FC_LDFLAGS_DEBUG="-Wl,-debug"
@@ -675,14 +691,13 @@ enable_mpi_io="no"
 # Transferable I/O (TRIO) connector                                            #
 # ---------------------------------------------------------------------------- #
 
-# Flavor of transferable I/O library to support (default is netcdf+etsf_io)
+# Flavor of transferable I/O library to support (default is netcdf)
 #
 # By transferable I/O (TRIO), we mean that the files produced by Abinit
 # will be transferable seamlessly to other computers and codes
 #
 # Supported libraries:
 #
-#   * etsf_io  : ETSF_IO file format (requires netcdf)
 #   * psml     : XML pseudopotential format io library
 #   * netcdf   : NetCDF file format
 #   * yaml     : YAML output
@@ -690,17 +705,7 @@ enable_mpi_io="no"
 #
 # You may specify any combination, using '+' as a separator
 #
-with_trio_flavor="etsf_io+netcdf"
-
-                       # ------------------------------ #
-
-# Include flags for the ETSF_IO library (default is unset)
-#
-#with_etsf_io_incs="-I/opt/etsf/include"
-
-# Link flags for the ETSF_IO library (default is unset)
-#
-#with_etsf_io_libs="-L/opt/etsf/lib -letsf_io"
+with_trio_flavor="netcdf"
 
                        # ------------------------------ #
 
@@ -716,11 +721,11 @@ with_trio_flavor="etsf_io+netcdf"
 
 # Include flags for the NetCDF library (default is unset)
 #
-#with_netcdf_incs="-I/usr/local/include/netcdf"
+with_netcdf_incs="-I/usr/include -I/usr/lib64/gfortran/modules"
 
 # Link flags for the NetCDF library (default is unset)
 #
-#with_netcdf_libs="-L/usr/local/lib/netcdf -lnetcdff -lnetcdf"
+with_netcdf_libs="-L/usr/lib64 -lnetcdf -lnetcdff"
 #
 #
 # Enable Netcdf mode in Abinit (use netcdf as default IO library,
@@ -847,15 +852,15 @@ with_trio_flavor="etsf_io+netcdf"
 #     problems with MKL, by going to
 #     http://software.intel.com/en-us/articles/intel-mkl-link-line-advisor/
 #
-with_linalg_flavor="none"
+with_linalg_flavor="atlas"
 
 # Include flags for the external linear algebra libraries (default is unset)
 #
-#with_linalg_incs="-I/usr/local/include"
+with_linalg_incs="-I/usr/include/atlas"
 
 # Link flags for the external linear algebra libraries (default is unset)
 #
-#with_linalg_libs="-L/usr/local/lib -llapack -lblas"
+with_linalg_libs="-L/usr/lib64 -llapack -L/usr/lib64/atlas -lf77blas -lcblas -latlas"
 
 # ---------------------------------------------------------------------------- #
 # Algorithmic library connector                                                #
@@ -971,6 +976,14 @@ with_dft_flavor="none"
 # Flag to force wannier90 v1.x (autodetected by default, but may not work)
 #
 #enable_wannier90_v1="no"
+
+# ---------------------------------------------------------------------------- #
+# LIBXML support
+# ---------------------------------------------------------------------------- #
+
+# Flag to enable LIBXML library
+#
+#enable_xml=no
 
 # ---------------------------------------------------------------------------- #
 # DMFT library connector                                                        #

@@ -7,7 +7,7 @@
 !! Calculate the smeared charge density on the an FFT grid in real space.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2016 ABINIT group (GMR, VO, LR, RWG, MG, RShaltaf)
+!! Copyright (C) 1999-2017 ABINIT group (GMR, VO, LR, RWG, MG, RShaltaf)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -88,7 +88,7 @@ subroutine calc_smeared_density(rhor,kappa_strategy,rhotilder,nfftf,ngfftf,npw,&
  real(dp), intent(inout) :: rhor(nfftf)
  real(dp), intent(out) :: rhotilder(nfftf)
 ! types
- type(MPI_type), intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
 
 !Local variables ------------------------------
 !scalars

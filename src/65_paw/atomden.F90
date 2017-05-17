@@ -19,7 +19,7 @@
 !! Units are atomic.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2016 ABINIT group (SM,VR,FJ,MT)
+!! Copyright (C) 2005-2017 ABINIT group (SM,VR,FJ,MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~ABINIT/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -86,13 +86,13 @@ subroutine atomden(MPI_enreg,natom,ntypat,typat,ngrid,r_vec_grid,rho,a,b,c,atom_
  use m_profiling_abi
  use m_xmpi
  use m_splines
+ use m_sort
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'atomden'
  use interfaces_14_hidewrite
- use interfaces_28_numeric_noabirule
 !End of the abilint section
 
  implicit none

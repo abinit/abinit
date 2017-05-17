@@ -7,7 +7,7 @@
 !!  Thin wrapper for the PAPI library.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2016 ABINIT group (MG,DC)
+!! Copyright (C) 2009-2017 ABINIT group (MG,DC)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -29,7 +29,7 @@ MODULE m_xpapi
 
  private
 
-#ifdef HAVE_TIMER_PAPI
+#ifdef HAVE_PAPI
 #include "f90papi.h"
 #endif
 
@@ -72,7 +72,7 @@ subroutine xpapi_init()
 
  implicit none
 
-#ifdef HAVE_TIMER_PAPI
+#ifdef HAVE_PAPI
 !Local variables-------------------------------
  character(len=PAPI_MAX_STR_LEN) :: papi_errstr
  integer(C_INT) :: check
@@ -148,7 +148,7 @@ subroutine xpapi_show_info(unit,mode_paral)
  character(len=*),optional,intent(in) :: mode_paral
 
 !Local variables-------------------
-#ifdef HAVE_TIMER_PAPI
+#ifdef HAVE_PAPI
  integer :: unt
  integer(C_INT) :: num_hwcntrs,ncpu,nnodes,totalcpus,vendor,model
  real(C_FLOAT) :: revision,mhz
@@ -158,7 +158,7 @@ subroutine xpapi_show_info(unit,mode_paral)
 
 ! *************************************************************************
 
-#ifdef HAVE_TIMER_PAPI
+#ifdef HAVE_PAPI
  unt = std_out;    if (PRESENT(unit)) unt = unit
  my_mode = "COLL"; if (PRESENT(mode_paral)) my_mode = mode_paral
 
@@ -245,7 +245,7 @@ subroutine xpapi_flops(real_time,proc_time,flops,mflops,check)
 
 ! *************************************************************************
 
-#ifdef HAVE_TIMER_PAPI
+#ifdef HAVE_PAPI
  call PAPIf_flops(real_time, proc_time, flops, mflops, check)
 #endif
 
@@ -282,7 +282,7 @@ subroutine xpapi_shutdown()
 
 ! *************************************************************************
 
-#ifdef HAVE_TIMER_PAPI
+#ifdef HAVE_PAPI
  call PAPIf_shutdown()
 #endif
 
@@ -327,7 +327,7 @@ subroutine xpapi_handle_error(check,err_msg,file,line)
  character(len=10) :: lnum
  character(len=500) :: f90name
  character(len=500) :: my_msg
-#ifdef HAVE_TIMER_PAPI
+#ifdef HAVE_PAPI
  integer(C_INT) :: ierr,ans
  character(len=PAPI_MAX_STR_LEN) :: papi_errstr
 #endif
@@ -350,7 +350,7 @@ subroutine xpapi_handle_error(check,err_msg,file,line)
 
  my_msg=TRIM(f90name)//":"//TRIM(lnum)//":"
 
-#ifdef HAVE_TIMER_PAPI
+#ifdef HAVE_PAPI
  if (check /= PAPI_OK) then
    write(std_out,*) " Error in papi library at: "//TRIM(my_msg)
    write(std_out,*) " User message: "//TRIM(err_msg)

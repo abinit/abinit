@@ -26,8 +26,7 @@ getwfk2     1        # Obtain the KSS file from previous dataset
 awtr2       1        # Take advantage of time reversal symmetry to halve CPU time.
 nband2      30       # Bands to be used in the chi0 calculation
 ecuteps2    5.0      # Cut-off energy of the planewave set to represent the dielectric matrix
-inclvkb2    0        # Treat the non-analytic behaviour of heads and wings of chi0 for q->0 using real spherical harmonics.
-                     # much faster than inclvkb=1
+inclvkb2    0        # Do not include [Vnl, r] for q-->0
 
 # Calculation of the screening and of the RPA correlation energy
 optdriver3  3        # Screening calculation
@@ -39,8 +38,8 @@ getwfk3     1        # Obtain the KSS file from previous dataset
 awtr3       1        # Take advantage of time reversal symmetry to halve CPU time.
 nband3      30       # Bands to be used in the chi0 calculation
 ecuteps3    5.0      # Cut-off energy of the planewave set to represent the dielectric matrix
-inclvkb3    0        # Treat the non-analytic behaviour of heads and wings of chi0 for q->0 using real spherical harmonics.
-                     # much faster than inclvkb=1
+inclvkb3    0        
+                    
 
 # Calculation of the screening and of the RPA correlation energy
 optdriver4  3        # Screening calculation
@@ -51,8 +50,8 @@ getwfk4     1        # Obtain the KSS file from previous dataset
 awtr4       1        # Take advantage of time reversal symmetry to halve CPU time.
 nband4      30       # Bands to be used in the chi0 calculation
 ecuteps4    5.0      # Cut-off energy of the planewave set to represent the dielectric matrix
-inclvkb4    0        # Treat the non-analytic behaviour of heads and wings of chi0 for q->0 using real spherical harmonics.
-                     # much faster than inclvkb=1
+inclvkb4    0        
+                     
 gwcomp4     1        # Extrapolar trick to accelerate convergence vs. empty bands
 gwencomp4   1.00
 
@@ -65,8 +64,8 @@ getwfk5     1        # Obtain the KSS file from previous dataset
 awtr5       1        # Take advantage of time reversal symmetry to halve CPU time.
 nband5      30       # Bands to be used in the chi0 calculation
 ecuteps5    5.0      # Cut-off energy of the planewave set to represent the dielectric matrix
-inclvkb5    0        # Treat the non-analytic behaviour of heads and wings of chi0 for q->0 using real spherical harmonics.
-                     # much faster than inclvkb=1
+inclvkb5    0        
+                    
 gwcomp5     1        # Extrapolar trick to accelerate convergence vs. empty bands
 gwencomp5   1.00
 

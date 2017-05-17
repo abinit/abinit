@@ -8,7 +8,7 @@
 !! The routine computes -if requested- the forces.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (FJ, MT)
+!! Copyright (C) 1998-2017 ABINIT group (FJ, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -42,7 +42,7 @@
 !!   | xclevel= XC functional level
 !!  gprimd(3,3)=dimensional reciprocal space primitive translations
 !!  gsqcut=cutoff on (k+G)^2 (bohr^-2)
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  my_natom=number of atoms treated by current processor
 !!  nfft=(effective) number of FFT grid points (for this processor)
 !!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
@@ -84,6 +84,7 @@
 !!   | entropy(IN)=entropy due to the occupation number smearing (if metal)
 !!   | e_localpsp(IN)=local psp energy (hartree)
 !!   | e_eigenvalues(IN)=Sum of the eigenvalues - Band energy (Hartree)
+!!   | e_chempot(IN)=energy from spatially varying chemical potential (hartree)
 !!   | e_ewald(IN)=Ewald energy (hartree)
 !!   | e_vdw_dftd(IN)=VdW DFT-D energy
 !!   | e_hartree(IN)=Hartree part of total energy (hartree units)
@@ -175,7 +176,7 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
  real(dp),intent(in) :: gsqcut,ucvol
  real(dp),intent(inout) :: elast
  real(dp),intent(out) :: deltae,etotal,vxcavg
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
  type(dataset_type),intent(in) :: dtset
  type(energies_type),intent(inout) :: energies
  type(pawang_type),intent(in) :: pawang
@@ -206,7 +207,7 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
  integer :: jrhoij,klmn,klmn1,kmix,nfftot,nhatgrdim,nselect,nzlmopt,nk3xc,option,optxc
  logical :: with_vxctau
  real(dp) :: alphaopt,compch_fft,compch_sph,doti,e1t10,e_ksnm1,e_xcdc_vxctau
- real(dp) :: eenth,enonlocal,fp0,gammp1,ro_dlt,ucvol_local
+ real(dp) :: eenth,fp0,gammp1,ro_dlt,ucvol_local
  character(len=500) :: message
 !arrays
  real(dp) :: A(3,3),A1(3,3),A_new(3,3),efield_new(3)
@@ -476,16 +477,15 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
 !etotal = energies%e_eigenvalues - energies%e_hartree + energies%e_xc - &
 !& energies%e_xcdc + energies%e_corepsp + &
 !& energies%e_entropy + energies%e_elecfield
- etotal = etotal + energies%e_ewald + energies%e_vdw_dftd
+ etotal = etotal + energies%e_ewald + energies%e_chempot + energies%e_vdw_dftd
  if (usepaw==0) then
    etotal = etotal + energies%e_nonlocalpsp
  else
    etotal = etotal + energies%e_paw
  end if
+
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!!!!!!!!!!!! now, compute mixed densities
-
-
 
  gammp1=etotal-e_ksnm1-fp0
  if (fp0>0.d0) then
@@ -499,16 +499,11 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
  if (abs(energies%h0)<=tol10) alphaopt=one
  write(std_out,*) " alphaopt",alphaopt
 
- if (usepaw==0) then
-   enonlocal =energies%e_nonlocalpsp
- else
-   enonlocal = zero
- end if
+ energies%h0=(one-alphaopt)*energies%h0 + alphaopt*(energies%e_kinetic+energies%e_localpsp)
+ if (usepaw==0) energies%h0=energies%h0 + alphaopt*energies%e_nonlocalpsp
 
- energies%h0=(one-alphaopt)*energies%h0+alphaopt*(energies%e_kinetic+energies%e_localpsp+enonlocal)
  rhor= rhor+(alphaopt-one)*nvresid
  call fourdp(1,rhog,rhor(:,1),-1,mpi_enreg,nfft,ngfft,dtset%paral_kgb,0)
-
 
  if (usepaw==1) then
    do iatom=1,my_natom
@@ -619,7 +614,7 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
 
  etotal=energies%h0+energies%e_hartree+energies%e_xc+energies%e_corepsp + &
 & energies%e_entropy + energies%e_elecfield + energies%e_magfield
- etotal = etotal + energies%e_ewald + energies%e_vdw_dftd
+ etotal = etotal + energies%e_ewald + energies%e_chempot + energies%e_vdw_dftd
  if (usepaw==1) then
    do iatom=1,my_natom
      itypat=paw_ij(iatom)%itypat

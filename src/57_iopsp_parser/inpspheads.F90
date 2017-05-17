@@ -7,7 +7,7 @@
 !! Read the pseudopotential header of each psp file, in order to initialize pspheads(1:npsp).
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (DCA, XG, GMR, FrD, AF, MT)
+!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR, FrD, AF, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -50,10 +50,10 @@
 &                       paw_setup_copy, paw_setup_free, getecutfromxml
  use m_psxml2ab
 
-#if defined HAVE_TRIO_PSML
+#if defined HAVE_PSML
  use m_psml
 #endif
-#if defined HAVE_DFT_BIGDFT
+#if defined HAVE_BIGDFT
   use BigDFT_API, only: atomic_info,psp_from_data
 #endif
 
@@ -92,7 +92,7 @@
  integer :: nproj(0:3),nprojso(1:3)
  integer,allocatable :: orb(:)
  real(dp) :: hdum(3)
-#if defined HAVE_DFT_BIGDFT
+#if defined HAVE_BIGDFT
  !new variables for wvl+paw
  character(len=2) :: symbol
  integer :: iasctype,nzatom, nelpsp, npspcode_,ixc_
@@ -192,7 +192,7 @@
      pspheads(ipsp)%pspso=0
 
    else if (usexml==1 .and. test_paw==0) then
-#if defined HAVE_TRIO_PSML
+#if defined HAVE_PSML
      write(message,'(a,a)')  &
 &     '- inpspheads : Reading pseudopotential header in XML form from ', trim(filnam(ipsp))
      call wrtout(ab_out,message,'COLL')
@@ -396,7 +396,7 @@
      ABI_DEALLOCATE(orb)
 
 !    WVL+PAW case, need to define GTHradii
-#if defined HAVE_DFT_BIGDFT
+#if defined HAVE_BIGDFT
      if(pspheads(ipsp)%usewvl==1) then
 !      Obtain the HGH parameters by default from BigDFT
 

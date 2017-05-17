@@ -7,7 +7,7 @@
 !! Solve the hubbard one approximation
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2016 ABINIT group (BAmadon)
+!! Copyright (C) 1999-2017 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -336,7 +336,7 @@ subroutine hubbard_one(cryst_struc,green,hu,paw_dmft,pawang,pawprtvol,hdc,weiss)
 !! 
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2016 ABINIT group (BAmadon)
+!! Copyright (C) 1999-2017 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -365,12 +365,12 @@ subroutine hubbard_one(cryst_struc,green,hu,paw_dmft,pawang,pawprtvol,hdc,weiss)
 
 subroutine green_atomic_hubbard(cryst_struc,green_hubbard,hu,level_diag,paw_dmft,udens_atoms)
 
- use m_profiling_abi
 
  use defs_basis
  use m_errors
+ use m_profiling_abi
  use m_crystal, only : crystal_t
- use m_special_funcs,  only : factorial
+ use m_special_funcs,  only : factorial, permutations
  use m_green, only : green_type,init_green,destroy_green
  use m_hu, only : hu_type
  use m_paw_dmft, only : paw_dmft_type
@@ -380,7 +380,6 @@ subroutine green_atomic_hubbard(cryst_struc,green_hubbard,hu,level_diag,paw_dmft
 #undef ABI_FUNC
 #define ABI_FUNC 'green_atomic_hubbard'
  use interfaces_14_hidewrite
- use interfaces_32_util
 !End of the abilint section
 
  implicit none
@@ -756,7 +755,7 @@ subroutine green_atomic_hubbard(cryst_struc,green_hubbard,hu,level_diag,paw_dmft
 !! 
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2016 ABINIT group (BAmadon)
+!! Copyright (C) 1999-2017 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

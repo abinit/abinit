@@ -11,7 +11,7 @@
 !!  inside the spheres around each atom.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2016 ABINIT group (MG,MT)
+!! Copyright (C) 2008-2017 ABINIT group (MG,MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -42,6 +42,7 @@ MODULE m_paw_pwaves_lmn
  use m_errors
  use m_profiling_abi
  use m_xmpi
+ use m_sort
 
  use m_numeric_tools, only : wrap2_zero_one
  use m_pawrad,        only : pawrad_type, nderiv_gen, pawrad_deducer0
@@ -140,7 +141,6 @@ subroutine paw_pwaves_lmn_init(Paw_onsite,my_natom,natom,ntypat,rprimd,xcart,Paw
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'paw_pwaves_lmn_init'
- use interfaces_28_numeric_noabirule
  use interfaces_41_geometry
 !End of the abilint section
 

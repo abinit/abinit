@@ -1,7 +1,7 @@
 /* abi_common.h */
 
 /*
- * Copyright (C) 2008-2016 ABINIT Group (MG)
+ * Copyright (C) 2008-2017 ABINIT Group (MG)
  *
  * This file is part of the ABINIT software package. For license information,
  * please see the COPYING file in the top-level directory of the ABINIT source
@@ -257,7 +257,7 @@
 /* Dummy use of unused arguments to silence compiler warnings */
 #define ABI_UNUSED(var) if (.FALSE.) call unused_var(var)
 
-#ifdef HAVE_TIMER_PAPI
+#ifdef HAVE_PAPI
 #  define XPAPI_CHECK(check,msg) if (check/=PAPI_OK) call xpapi_handle_error(check, msg _FILE_LINE_ARGS_)
 #else
 #  define XPAPI_CHECK(check,msg)
@@ -355,7 +355,6 @@
 
 /*
 */
-#define DEV_MG_WFK
 
 #endif
 /* _ABINIT_COMMON_H */

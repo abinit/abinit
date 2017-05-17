@@ -10,7 +10,7 @@
 !!
 !! COPYRIGHT
 !! Copyright (C) 1992-2009 EXC group (L.Reining, V.Olevano, F.Sottile, S.Albrecht, G.Onida)
-!! Copyright (C) 2009-2016 ABINIT group (L.Reining, V.Olevano, F.Sottile, S.Albrecht, G.Onida, M.Giantomassi)
+!! Copyright (C) 2009-2017 ABINIT group (L.Reining, V.Olevano, F.Sottile, S.Albrecht, G.Onida, M.Giantomassi)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -49,13 +49,13 @@
 !! CHILDREN
 !!      apply_scissor,bsp_calctype2str,crystal_from_hdr,crystal_print
 !!      ebands_copy,ebands_init,ebands_print,ebands_report_gap
-!!      ebands_update_occ,find_qmesh,get_bz_item,get_ng0sh,gsph_extend
-!!      gsph_init,hdr_init,hdr_update,hdr_vs_dtset,hscr_bcast,hscr_free
-!!      hscr_from_file,hscr_print,init_transitions,kmesh_init,kmesh_print
-!!      make_mesh,matrginv,metric,mkrdim,pawrhoij_alloc,pawrhoij_copy
-!!      pawrhoij_free,print_bs_files,print_bs_parameters,print_gsphere
-!!      print_ngfft,rdgw,setmesh,vcoul_init,wfk_read_eigenvalues,wrtout
-!!      xmpi_bcast,xmpi_max,xmpi_split_work
+!!      ebands_update_occ,eprenorms_bcast,eprenorms_from_epnc,find_qmesh
+!!      get_bz_item,get_ng0sh,gsph_extend,gsph_init,hdr_init,hdr_update
+!!      hdr_vs_dtset,hscr_bcast,hscr_free,hscr_from_file,hscr_print
+!!      init_transitions,kmesh_init,kmesh_print,make_mesh,matrginv,metric
+!!      mkrdim,pawrhoij_alloc,pawrhoij_copy,pawrhoij_free,print_bs_files
+!!      print_bs_parameters,print_gsphere,print_ngfft,rdgw,setmesh,vcoul_init
+!!      wfk_read_eigenvalues,wrtout,xmpi_bcast,xmpi_max,xmpi_split_work
 !!
 !! SOURCE
 
@@ -66,7 +66,7 @@
 #include "abi_common.h"
 
 subroutine setup_bse(codvsn,acell,rprim,ngfftf,ngfft_osc,Dtset,Dtfil,BS_files,Psps,Pawtab,BSp,&
-& Cryst,Kmesh,Qmesh,KS_BSt,QP_bst,Hdr_wfk,Gsph_x,Gsph_c,Vcp,Hdr_bse,w_fname,comm,Wvl)
+& Cryst,Kmesh,Qmesh,KS_BSt,QP_bst,Hdr_wfk,Gsph_x,Gsph_c,Vcp,Hdr_bse,w_fname,Epren,comm,Wvl)
 
  use defs_basis
  use defs_datatypes
@@ -88,6 +88,7 @@ subroutine setup_bse(codvsn,acell,rprim,ngfftf,ngfft_osc,Dtset,Dtfil,BS_files,Ps
  use m_bz_mesh,       only : kmesh_t, kmesh_init, get_ng0sh, kmesh_print, get_BZ_item, find_qmesh, make_mesh
  use m_ebands,        only : ebands_init, ebands_print, ebands_copy, ebands_free, &
 &                            ebands_update_occ, get_valence_idx, apply_scissor, ebands_report_gap
+ use m_eprenorms,     only : eprenorms_t, eprenorms_from_epnc, eprenorms_bcast
  use m_vcoul,         only : vcoul_t, vcoul_init
  use m_fftcore,       only : print_ngfft
  use m_fft_mesh,      only : setmesh
@@ -129,6 +130,7 @@ subroutine setup_bse(codvsn,acell,rprim,ngfftf,ngfft_osc,Dtset,Dtfil,BS_files,Ps
  type(vcoul_t),intent(out) :: Vcp
  type(excfiles),intent(out) :: BS_files
  type(wvl_internal_type), intent(in) :: Wvl
+ type(eprenorms_t),intent(out) :: Epren
 !arrays
  integer,intent(in) :: ngfftf(18)
  integer,intent(out) :: ngfft_osc(18)
@@ -149,6 +151,7 @@ subroutine setup_bse(codvsn,acell,rprim,ngfftf,ngfft_osc,Dtset,Dtfil,BS_files,Ps
  logical :: ltest,occ_from_dtset
  character(len=500) :: msg
  character(len=fnlen) :: gw_fname,test_file,wfk_fname
+ character(len=fnlen) :: ep_nc_fname
  type(hscr_t) :: Hscr
 !arrays
  integer :: ng0sh_opt(3),val_idx(Dtset%nsppol)
@@ -902,6 +905,25 @@ subroutine setup_bse(codvsn,acell,rprim,ngfftf,ngfft_osc,Dtset,Dtfil,BS_files,Ps
  end if
 
  call print_bs_files(BS_files,unit=std_out)
+
+
+ !
+ ! ==========================================================
+ ! ==== Temperature dependence of the spectrum ==============
+ ! ==========================================================
+ BSp%do_ep_renorm = .FALSE.
+ BSp%do_lifetime = .FALSE. ! Not yet implemented
+
+ ep_nc_fname = 'test_EP.nc'
+ if(file_exists(ep_nc_fname)) then
+   BSp%do_ep_renorm = .TRUE.
+
+   if(my_rank == master) then
+     call eprenorms_from_epnc(Epren,ep_nc_fname)
+   end if
+   call eprenorms_bcast(Epren,master,comm)
+ end if 
+
 
  !
  ! ==========================================================

@@ -9,7 +9,7 @@
 !! local and non-local potentials.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2016 ABINIT group (JJ, MVer)
+!! Copyright (C) 1999-2017 ABINIT group (JJ, MVer)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -81,7 +81,7 @@ subroutine psp9in(filpsp,ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
  use m_splines
  use m_errors
  use m_profiling_abi
-#if defined HAVE_TRIO_PSML
+#if defined HAVE_PSML
  use m_psml
 #endif
 
@@ -133,21 +133,21 @@ subroutine psp9in(filpsp,ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
 !                    charge density becomes zero
 !                    (here we have set up a tolerance of 1.d-12).
 
-#if defined HAVE_TRIO_PSML
+#if defined HAVE_PSML
  type(ps_t) :: psxml
 #endif
 
 ! ***************************************************************************
 
- if(.false.)write(std_out,*)filpsp ! Just to keep filpsp when HAVE_TRIO_PSML is false
- if(.false.)write(std_out,*)lloc   ! Just to keep lloc when HAVE_TRIO_PSML is false
- if(.false.)write(std_out,*)lmax   ! Just to keep lmax when HAVE_TRIO_PSML is false
- if(.false.)write(std_out,*)qgrid  ! Just to keep qgrid when HAVE_TRIO_PSML is false
- if(.false.)write(std_out,*)useylm ! Just to keep useylm when HAVE_TRIO_PSML is false
- if(.false.)write(std_out,*)zion   ! Just to keep zion when HAVE_TRIO_PSML is false
- if(.false.)write(std_out,*)znucl  ! Just to keep znucl when HAVE_TRIO_PSML is false
+ if(.false.)write(std_out,*)filpsp ! Just to keep filpsp when HAVE_PSML is false
+ if(.false.)write(std_out,*)lloc   ! Just to keep lloc when HAVE_PSML is false
+ if(.false.)write(std_out,*)lmax   ! Just to keep lmax when HAVE_PSML is false
+ if(.false.)write(std_out,*)qgrid  ! Just to keep qgrid when HAVE_PSML is false
+ if(.false.)write(std_out,*)useylm ! Just to keep useylm when HAVE_PSML is false
+ if(.false.)write(std_out,*)zion   ! Just to keep zion when HAVE_PSML is false
+ if(.false.)write(std_out,*)znucl  ! Just to keep znucl when HAVE_PSML is false
 
-#if defined HAVE_TRIO_PSML
+#if defined HAVE_PSML
 
  call ps_destroy(psxml)
  call psml_reader(filpsp,psxml,debug=.true.)

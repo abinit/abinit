@@ -9,7 +9,7 @@
 !! in real space.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2000-2016 ABINIT group (XG)
+!! Copyright (C) 2000-2017 ABINIT group (XG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -45,12 +45,12 @@ subroutine invacuum(jdtset,lenstr,natom,rprimd,string,vacuum,xred)
 
  use defs_basis
  use m_profiling_abi
+ use m_sort
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'invacuum'
- use interfaces_28_numeric_noabirule
  use interfaces_41_geometry
  use interfaces_42_parser
 !End of the abilint section

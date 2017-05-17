@@ -8,7 +8,7 @@
 !! for // case
 !!
 !! COPYRIGHT
-!! Copyright (C) 2003-2016 ABINIT  group 
+!! Copyright (C) 2003-2017 ABINIT  group 
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -87,7 +87,7 @@ subroutine cgq_builder(berryflag,cg,cgq,dtefield,dtset,ikpt,ikpt_loc,isppol,mcg,
  logical,intent(in) :: berryflag
  type(dataset_type), intent(in) :: dtset
  type(efield_type), intent(inout) :: dtefield
- type(MPI_type), intent(inout) :: mpi_enreg
+ type(MPI_type), intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: npwarr(dtset%nkpt) 
  real(dp),intent(in) :: cg(2,mcg),pwnsfac(2,pwind_alloc)

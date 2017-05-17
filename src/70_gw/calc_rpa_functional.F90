@@ -8,7 +8,7 @@
 !!  from the irreducible polarizability. 
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2016 ABINIT group (FB)
+!!  Copyright (C) 2008-2017 ABINIT group (FB)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -51,6 +51,7 @@ subroutine calc_rpa_functional(gwrpacorr,iqcalc,iq,Ep,Pvc,Qmesh,Dtfil,gmet,chi0,
 
  use m_gwdefs,        only : GW_TOLQ0, em1params_t
  use m_io_tools,      only : open_file
+ use m_numeric_tools, only : coeffs_gausslegint
  use m_abilasi,       only : xginv, xheev
  use m_geometry,      only : normv
  use m_bz_mesh,       only : kmesh_t
@@ -61,7 +62,6 @@ subroutine calc_rpa_functional(gwrpacorr,iqcalc,iq,Ep,Pvc,Qmesh,Dtfil,gmet,chi0,
 #undef ABI_FUNC
 #define ABI_FUNC 'calc_rpa_functional'
  use interfaces_14_hidewrite
- use interfaces_28_numeric_noabirule
 !End of the abilint section
 
  implicit none

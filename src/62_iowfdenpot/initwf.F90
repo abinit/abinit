@@ -14,7 +14,7 @@
 !!        eigenvectors with 0 s, hermitian matrix of eigenvalues)
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (DCA, XG, GMR)
+!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -90,7 +90,7 @@ subroutine initwf(cg,eig_k,formeig,headform,icg,ikpt,ikptsp_old,&
 !scalars
  integer,intent(in) :: formeig,headform,icg,ikpt,spin,mcg,nband_k,nkpt,npw,nspinor
  integer,intent(inout) :: ikptsp_old
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
  type(wffile_type),intent(inout) :: wff1
 !arrays
  real(dp),intent(inout) :: occ_k(nband_k)

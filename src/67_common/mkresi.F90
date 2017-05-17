@@ -7,7 +7,7 @@
 !! Make residuals from knowledge of wf in G space and application of Hamiltonian.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (DCA, XG, GMR, MT)
+!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -19,7 +19,7 @@
 !!  ikpt=index of k-point
 !!  isppol=index of spin
 !!  mcg=second dimension of the cg array
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  nband=number of bands involved in subspace matrix.
 !!  npw=number of planewaves in basis sphere at this k point.
 !!  prtvol=control print volume and debugging output

@@ -7,7 +7,7 @@
 !!
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2016 ABINIT group (JLJ, BR, MC)
+!! Copyright (C) 2009-2017 ABINIT group (JLJ, BR, MC)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2263,9 +2263,10 @@ title(i) = "Bloup" ! The clean way would be to get the psps structure in this mo
 ! (build_vxc is called from a place in GS calculations where it is available;
 ! should be the easiest way). For now, this allows the code to run.
 end do
-call crystal_init(Cryst,dtset%spgroup,dtset%natom,dtset%npsp,dtset%ntypat,dtset%nsym,dtset%rprimd_orig(:,:,1),&
-&                   dtset%typat,dtset%xred_orig(:,:,1),dtset%ziontypat,dtset%znucl,timrev,.false.,.false.,title,&
-&                   dtset%symrel,dtset%tnons,dtset%symafm)
+call crystal_init(dtset%amu_orig(:,1),Cryst,dtset%spgroup,dtset%natom,dtset%npsp,&
+&                 dtset%ntypat,dtset%nsym,dtset%rprimd_orig(:,:,1),dtset%typat,&
+&                 dtset%xred_orig(:,:,1),dtset%ziontypat,dtset%znucl,timrev,.false.,.false.,title,&
+&                 dtset%symrel,dtset%tnons,dtset%symafm)
 ABI_DEALLOCATE(title)
 call crystal_print(Cryst)
 

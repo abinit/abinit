@@ -8,7 +8,7 @@
 !!  Matrix elements = <Phi_i|Nabla|Phi_j>
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2016 ABINIT group (SM,VR,FJ,MT)
+!! Copyright (C) 2005-2017 ABINIT group (SM,VR,FJ,MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~ABINIT/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -27,7 +27,7 @@
 !!  mcg=size of wave-functions array (cg) =mpw*nspinor*mband*mkmem*nsppol
 !!  mcprj=size of projected wave-functions array (cprj) =nspinor*mband*mkmem*nsppol
 !!  mkmem =number of k points treated by this node.
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  mpsang =1+maximum angular momentum for nonlocal pseudopotentials
 !!  mpw=maximum dimensioned size of npw.
 !!  natom=number of atoms in cell.
@@ -92,7 +92,7 @@
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: mband,mcg,mcprj,mkmem,mpsang,mpw,natom,nkpt,nsppol
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
  type(datafiles_type),intent(in) :: dtfil
  type(dataset_type),intent(in) :: dtset
  type(hdr_type),intent(inout) :: hdr

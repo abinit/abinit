@@ -33,7 +33,7 @@
 !! and for zeroing arrays.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (DCA, XG, GMR, FF)
+!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR, FF)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -102,8 +102,8 @@
 !!   modification of the different wrappers used for specialized FFTs such as FFTW3 and MKL-DFTI
 !!
 !! PARENTS
-!!      dens_in_sph,dfpt_accrho,dfpt_mkrho,dfptnl_resp,fock_getghc,getgh1c
-!!      getghc,gwls_hamiltonian,m_cut3d,m_fft_prof,m_fock,mkrho,mlwfovlp
+!!      dfpt_accrho,dfpt_mkrho,dfptnl_resp,fock_getghc,getgh1c,getghc
+!!      gwls_hamiltonian,m_cut3d,m_epjdos,m_fft_prof,m_fock,mkrho,mlwfovlp
 !!      pawmkaewf,pawsushat,posdoppler,prep_fourwf,spin_current,susk,suskmm
 !!      tddft,vtowfk
 !!

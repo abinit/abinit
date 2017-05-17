@@ -8,7 +8,7 @@
 !!                second derivative of E wrt xred
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (DRH, DCA, XG, GMR)
+!! Copyright (C) 1998-2017 ABINIT group (DRH, DCA, XG, GMR)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -19,7 +19,7 @@
 !!  gsqcut=cutoff on $|G|^2$: see setup1 for definition (doubled sphere).
 !!  istr=1,...6 specifies cartesian strain component 11,22,33,32,31,21
 !!  mgfft=maximum size of 1D FFTs
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  mqgrid=number of grid pts in q array for f(q) spline.
 !!  natom=number of atoms in unit cell.
 !!  nattyp(ntypat)=number of atoms of each type in cell.
@@ -84,7 +84,7 @@ subroutine vlocalstr(gmet,gprimd,gsqcut,istr,mgfft,mpi_enreg,&
 !scalars
  integer,intent(in) :: istr,mgfft,mqgrid,natom,nfft,ntypat,paral_kgb
  real(dp),intent(in) :: gsqcut,ucvol
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: nattyp(ntypat),ngfft(18)
  real(dp),intent(in) :: gmet(3,3),gprimd(3,3),ph1d(2,3*(2*mgfft+1)*natom)

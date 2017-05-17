@@ -8,7 +8,7 @@
 !! electric field with or without Berry phases (berryopt keyword)
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2016 ABINIT group (XG)
+!! Copyright (C) 2005-2017 ABINIT group (XG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -26,7 +26,7 @@
 !! mband=maximum number of bands
 !! mcg=size of wave-functions array (cg) =mpw*nspinor*mband*mkmem*nsppol
 !! mkmem=number of k points treated by this node.
-!! mpi_enreg=informations about MPI parallelization
+!! mpi_enreg=information about MPI parallelization
 !! mpw=maximum dimensioned size of npw
 !! my_natom=number of atoms treated by current processor
 !! natom=number of atoms in cell
@@ -117,7 +117,7 @@ subroutine elpolariz(atindx1,cg,cprj,dtefield,dtfil,dtset,etotal,enefield,gprimd
  integer,intent(in) :: pwind_alloc,usecprj
  real(dp),intent(in) :: ucvol
  real(dp),intent(inout) :: enefield,etotal
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
  type(datafiles_type),intent(in) :: dtfil
  type(dataset_type),intent(inout) :: dtset
  type(efield_type),intent(inout) :: dtefield

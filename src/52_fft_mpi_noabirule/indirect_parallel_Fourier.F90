@@ -15,7 +15,7 @@
 !! A final ordering put everything in place
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (GZ)
+!! Copyright (C) 1998-2017 ABINIT group (GZ)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -81,7 +81,7 @@ subroutine indirect_parallel_Fourier(index,left,mpi_enreg,ngleft,ngright,nleft,n
 !Arguments ---------------------------------------------
 !scalars
  integer,intent(in) :: ngleft(18),ngright(18),nleft,nright,paral_kgb,sizeindex
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: index(sizeindex)
  real(dp),intent(in) :: right(2,nright)

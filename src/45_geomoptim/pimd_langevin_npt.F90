@@ -12,7 +12,7 @@
 !! an estimation of the velocities, stress and new cell at time t+dtion
 !!
 !! COPYRIGHT
-!! Copyright (C) 2011-2016 ABINIT group (GG,MT)
+!! Copyright (C) 2011-2017 ABINIT group (GG,MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -56,9 +56,10 @@
 !!      predict_pimd
 !!
 !! CHILDREN
-!!      matr3inv,pimd_energies,pimd_forces,pimd_initvel,pimd_langevin_forces
-!!      pimd_langevin_random,pimd_langevin_random_bar,pimd_langevin_random_init
-!!      pimd_mass_spring,pimd_print,pimd_stresses,xcart2xred,xred2xcart
+!!      matr3inv,pimd_apply_constraint,pimd_energies,pimd_forces,pimd_initvel
+!!      pimd_langevin_forces,pimd_langevin_random,pimd_langevin_random_bar
+!!      pimd_langevin_random_init,pimd_mass_spring,pimd_print,pimd_stresses
+!!      xcart2xred,xred2xcart
 !!
 !! SOURCE
 
@@ -112,12 +113,13 @@ subroutine pimd_langevin_npt(etotal,forces,itimimage,natom,pimd_param,prtvolimg,
 
 !scalars
  integer :: idum=-5
- integer :: iatom,ii,iimage,irestart,jj,ndof,prtstress
- real(dp) :: dtion,eharm,eharm2,epot,friction,frictionbar,initemp,kt,scalebar
+ integer :: constraint,iatom,ii,iimage,irestart,jj,ndof,prtstress
+ real(dp) :: dtion,eharm,eharm2,epot,friction,frictionbar,initemp,kt,rescale_temp,scalebar
  real(dp) :: temperature1,temperature2,temp2_prev,thermtemp,tol,tracepg,wg
 !arrays
  real, parameter :: identity(3,3)=reshape((/(one,(zero,ii=1,3),jj=1,2),one/),(/3,3/))
- real(dp) :: aleabar(3,3),ddh(3,3),diffstress(3,3),dstrhh(3,3),fg(3,3),invrprimd(3,3),rescale_temp
+ real(dp) :: aleabar(3,3),constraint_output(2),ddh(3,3),diffstress(3,3)
+ real(dp) :: dstrhh(3,3),fg(3,3),invrprimd(3,3)
  real(dp) :: langev_bar(3,3),pg(3,3),pgdh(3,3),stress_pimd(3,3,3),strtarget(6),tmp(3,3)
  real(dp),allocatable :: alea(:,:,:),forces_orig(:,:,:),forces_pimd(:,:,:),forces_pimd_red(:,:)
  real(dp),allocatable :: fsup(:,:),hxredpoint(:,:,:),inertmass(:),langev(:,:)
@@ -183,7 +185,7 @@ subroutine pimd_langevin_npt(etotal,forces,itimimage,natom,pimd_param,prtvolimg,
 
 !Initialize derivatives
  if (mod(irestart,10)==0) then
-   call pimd_initvel(idum,mass,natom,initemp,trotter,vel)
+   call pimd_initvel(idum,mass,natom,initemp,trotter,vel,pimd_param%constraint,pimd_param%wtatcon)
  end if
 !vel_cell does not depend on Trotter...
  ddh=vel_cell(:,:,1);if (irestart<10) ddh=zero
@@ -211,6 +213,8 @@ subroutine pimd_langevin_npt(etotal,forces,itimimage,natom,pimd_param,prtvolimg,
 !  Compute PIMD and Langevin contributions to forces
    call pimd_forces(forces,natom,spring,0,trotter,xcart)
    call pimd_langevin_forces(alea,forces,forces_pimd,friction,langev,mass,natom,trotter,hxredpoint)
+   call pimd_apply_constraint(pimd_param%constraint,constraint_output,forces_pimd,&
+&   mass,natom,trotter,pimd_param%wtatcon,xcart)
    tmp=matmul(invrprimd,ddh)
    pg=wg*matmul(ddh,invrprimd)
    tracepg=pg(1,1)+pg(2,2)+pg(3,3)
@@ -306,6 +310,8 @@ subroutine pimd_langevin_npt(etotal,forces,itimimage,natom,pimd_param,prtvolimg,
 !  Compute PIMD and Langevin contributions to forces
    call pimd_forces(forces,natom,spring,0,trotter,xcart)
    call pimd_langevin_forces(alea,forces,forces_pimd,friction,langev,mass,natom,trotter,hxredpoint)
+   call pimd_apply_constraint(pimd_param%constraint,constraint_output,forces_pimd,&
+&   mass,natom,trotter,pimd_param%wtatcon,xcart)
 
 !  Compute difference between instantaneous stress and imposed stress (barostat)
    call pimd_stresses(mass,natom,quantummass,stress_pimd,stressin,thermtemp,thermtemp,trotter,hxredpoint,volume,xcart)
@@ -351,6 +357,8 @@ subroutine pimd_langevin_npt(etotal,forces,itimimage,natom,pimd_param,prtvolimg,
      end do
 !    Reestimate the forces
      call pimd_langevin_forces(alea,forces,forces_pimd,friction,langev,mass,natom,trotter,hxredpoint)
+     call pimd_apply_constraint(pimd_param%constraint,constraint_output,forces_pimd,&
+&     mass,natom,trotter,pimd_param%wtatcon,xcart)
 !    Compute variation of temperature (to check convergence of SC loop)
      temperature2=pimd_temperature(mass,xredpoint)*rescale_temp
      tol=dabs(temperature2-temp2_prev)/dabs(temp2_prev)
@@ -415,7 +423,8 @@ subroutine pimd_langevin_npt(etotal,forces,itimimage,natom,pimd_param,prtvolimg,
 
 !Print messages
  prtstress=1
- call pimd_print(eharm,eharm2,epot,forces_pimd,inertmass,irestart,&
+ call pimd_print(constraint,constraint_output,&
+& eharm,eharm2,epot,forces_pimd,inertmass,irestart,&
 & itimimage,kt,natom,pimd_param%optcell,prtstress,prtvolimg,rprimd,&
 & stress_pimd,temperature1,temperature2,&
 & pimd_param%traj_unit,trotter,vel,ddh,xcart,xred)

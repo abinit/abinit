@@ -7,7 +7,7 @@
 !! calculation of the energy from the term \Omega E \cdot P
 !!
 !! COPYRIGHT
-!! Copyright (C) 2004-2016 ABINIT group (XW).
+!! Copyright (C) 2004-2017 ABINIT group (XW).
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -28,7 +28,7 @@
 !! npwar1(nkpt) = number of planewaves in basis and boundary for response wfs
 !! nspinor = 1 for scalar wfs, 2 for spinor wfs
 !! nsppol = 1 for unpolarized, 2 for spin-polarized
-!! qmat(2,dtefield%nband_occ,dtefield%nband_occ,nkpt,2,3) =
+!! qmat(2,dtefield%mband_occ,dtefield%mband_occ,nkpt,2,3) =
 !! inverse of the overlap matrix
 !! pwindall(max(mpw,mpw1)*mkmem,8,3) = array used to compute the overlap matrices
 !! pwindall(:,1,:) <- <u^(0)_i|u^(0)_i+1>
@@ -41,7 +41,7 @@
 !! pwindall(:,8,:) <- <u^(0)_i|u^(1)_i-n-1>
 !!
 !! OUTPUT
-!! grad_berry(2,mpw1,dtefield%nband_occ) = the gradient of the Berry phase term
+!! grad_berry(2,mpw1,dtefield%mband_occ) = the gradient of the Berry phase term
 !!
 !! PARENTS
 !!      dfpt_scfcv
@@ -84,7 +84,7 @@ subroutine dfptff_ebp(cg,cg1,dtefield,eberry,mband,mkmem,&
  integer,intent(in) :: pwindall(max(mpw,mpw1)*mkmem,8,3)
  real(dp),intent(in) :: cg(2,mpw*mband*mkmem*nspinor*nsppol)
  real(dp),intent(in) :: cg1(2,mpw1*mband*mkmem*nspinor*nsppol)
- real(dp),intent(in) :: qmat(2,dtefield%nband_occ,dtefield%nband_occ,nkpt,2,3)
+ real(dp),intent(in) :: qmat(2,dtefield%mband_occ,dtefield%mband_occ,nkpt,2,3)
 
 !Local variables ----------------------------------
 !scalars
@@ -101,11 +101,11 @@ subroutine dfptff_ebp(cg,cg1,dtefield,eberry,mband,mkmem,&
 
 !calculate 4 matrices -----------------------------
  mpw_tmp=max(mpw,mpw1)
- ABI_ALLOCATE(umat,(2,dtefield%nband_occ,dtefield%nband_occ,4))
+ ABI_ALLOCATE(umat,(2,dtefield%mband_occ,dtefield%mband_occ,4))
  ABI_ALLOCATE(vect1,(2,0:mpw_tmp))
  ABI_ALLOCATE(vect2,(2,0:mpw_tmp))
  ABI_ALLOCATE(pwind_tmp,(mpw_tmp))
- ABI_ALLOCATE(Amat,(2,dtefield%nband_occ,dtefield%nband_occ))
+ ABI_ALLOCATE(Amat,(2,dtefield%mband_occ,dtefield%mband_occ))
  vect1(:,0) = zero ; vect2(:,0) = zero
  eberry=zero
 
@@ -126,13 +126,13 @@ subroutine dfptff_ebp(cg,cg1,dtefield,eberry,mband,mkmem,&
      npw_k2 = npwar1(ikpt1)
      pwind_tmp(1:npw_k1) = pwindall((ikpt-1)*mpw_tmp+1:(ikpt-1)*mpw_tmp+npw_k1,3,idir)
      vect1(:,0) = zero ; vect2(:,0) = zero
-     do jband = 1, dtefield%nband_occ
+     do jband = 1, dtefield%mband_occ
        vect2(:,1:npw_k2) = &
 &       cg1(:,icg1 + 1 + (jband-1)*npw_k2*nspinor:icg1 + jband*npw_k2*nspinor)
 
        if (npw_k2 < mpw_tmp) vect2(:,npw_k2+1:mpw_tmp) = zero
 
-       do iband = 1, dtefield%nband_occ
+       do iband = 1, dtefield%mband_occ
 
          pwmin = (iband-1)*npw_k1*nspinor
          pwmax = pwmin + npw_k1*nspinor
@@ -158,12 +158,12 @@ subroutine dfptff_ebp(cg,cg1,dtefield,eberry,mband,mkmem,&
      pwind_tmp(1:npw_k1) = pwindall((ikpt-1)*mpw_tmp+1:(ikpt-1)*mpw_tmp+npw_k1,7,idir)
 
      vect1(:,0) = zero ; vect2(:,0) = zero
-     do jband = 1, dtefield%nband_occ
+     do jband = 1, dtefield%mband_occ
        vect2(:,1:npw_k2) = &
 &       cg1(:,icg1 + 1 + (jband-1)*npw_k2*nspinor:icg1 + jband*npw_k2*nspinor)
        if (npw_k2 < mpw_tmp) vect2(:,npw_k2+1:mpw_tmp) = zero
 
-       do iband = 1, dtefield%nband_occ
+       do iband = 1, dtefield%mband_occ
 
          pwmin = (iband-1)*npw_k1*nspinor
          pwmax = pwmin + npw_k1*nspinor
@@ -190,12 +190,12 @@ subroutine dfptff_ebp(cg,cg1,dtefield,eberry,mband,mkmem,&
      pwind_tmp(1:npw_k1) = pwindall((ikptn-1)*mpw_tmp+1:(ikptn-1)*mpw_tmp+npw_k1,5,idir)
 
      vect1(:,0) = zero ; vect2(:,0) = zero
-     do jband = 1, dtefield%nband_occ
+     do jband = 1, dtefield%mband_occ
        vect2(:,1:npw_k2) = &
 &       cg(:,icg1 + 1 + (jband-1)*npw_k2*nspinor:icg1 + jband*npw_k2*nspinor)
        if (npw_k2 < mpw_tmp) vect2(:,npw_k2+1:mpw_tmp) = zero
 
-       do iband = 1, dtefield%nband_occ
+       do iband = 1, dtefield%mband_occ
 
          pwmin = (iband-1)*npw_k1*nspinor
          pwmax = pwmin + npw_k1*nspinor
@@ -223,12 +223,12 @@ subroutine dfptff_ebp(cg,cg1,dtefield,eberry,mband,mkmem,&
      pwind_tmp(1:npw_k1) = pwindall((ikptnm-1)*mpw_tmp+1:(ikptnm-1)*mpw_tmp+npw_k1,7,idir)
 
      vect1(:,0) = zero ; vect2(:,0) = zero
-     do jband = 1, dtefield%nband_occ
+     do jband = 1, dtefield%mband_occ
        vect2(:,1:npw_k2) = &
 &       cg1(:,icg1 + 1 + (jband-1)*npw_k2*nspinor:icg1 + jband*npw_k2*nspinor)
        if (npw_k2 < mpw_tmp) vect2(:,npw_k2+1:mpw_tmp) = zero
 
-       do iband = 1, dtefield%nband_occ
+       do iband = 1, dtefield%mband_occ
 
          pwmin = (iband-1)*npw_k1*nspinor
          pwmax = pwmin + npw_k1*nspinor
@@ -246,8 +246,8 @@ subroutine dfptff_ebp(cg,cg1,dtefield,eberry,mband,mkmem,&
 !    sum over the whole------------------------------------------------------------
 
      e0=zero
-     do iband=1,dtefield%nband_occ
-       do jband=1,dtefield%nband_occ
+     do iband=1,dtefield%mband_occ
+       do jband=1,dtefield%mband_occ
          e0 = e0 + 4_dp*(umat(1,iband,jband,1)*qmat(2,jband,iband,ikpt,1,idir)&
 &         +       umat(2,iband,jband,1)*qmat(1,jband,iband,ikpt,1,idir))
          
@@ -263,9 +263,9 @@ subroutine dfptff_ebp(cg,cg1,dtefield,eberry,mband,mkmem,&
      Amat(:,:,:)=zero
 
 !    calculate Amat
-     do iband=1, dtefield%nband_occ
-       do jband=1, dtefield%nband_occ
-         do kband=1, dtefield%nband_occ
+     do iband=1, dtefield%mband_occ
+       do jband=1, dtefield%mband_occ
+         do kband=1, dtefield%mband_occ
            Amat(1,iband,jband) = Amat(1,iband,jband) + (umat(1,iband,kband,3))*&
 &           qmat(1,kband,jband,ikpt,1,idir)&
 &           - (umat(2,iband,kband,3))*qmat(2,kband,jband,ikpt,1,idir)
@@ -276,9 +276,9 @@ subroutine dfptff_ebp(cg,cg1,dtefield,eberry,mband,mkmem,&
        end do
      end do
 
-     do iband=1, dtefield%nband_occ
-       do jband=1, dtefield%nband_occ
-         do kband=1, dtefield%nband_occ
+     do iband=1, dtefield%mband_occ
+       do jband=1, dtefield%mband_occ
+         do kband=1, dtefield%mband_occ
 
            z1(1) = (umat(1,jband,iband,4)+umat(1,iband,jband,2))*&
 &           qmat(1,jband,kband,ikptn,1,idir)&

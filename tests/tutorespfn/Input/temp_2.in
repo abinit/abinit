@@ -2,6 +2,7 @@
 
 !Flags
  ifcflag   1     ! Interatomic force constant flag
+ ifcout 0
  thmflag 3
  telphint 1
  ntemper 20
@@ -35,7 +36,7 @@
 #%% files_to_test =
 #%%   temp_2.out , tolnlines=  0, tolabs=  0.000e+00, tolrel=  0.000e+00, fld_options=-easy
 #%% [paral_info]
-#%% max_nprocs = 1
+#%% max_nprocs = 2
 #%% [extra_info]
 #%% authors = S. Ponc\'e
 #%% keywords = NC, DFPT, EPH

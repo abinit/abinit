@@ -9,7 +9,7 @@
 !! Then, call one of the self-consistency drivers, and  update vtrial.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (DCA, XG, MT)
+!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -40,7 +40,7 @@
 !!  ispmix=1 if mixing is done in real space, 2 if mixing is done in reciprocal space
 !!  istep= number of the step in the SCF cycle
 !!  mixtofft(nfftmix*(1-nfftmix/nfft))=Index of the points of the FFT grid used for mixing (coarse) on the FFT (fine) grid
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  my_natom=number of atoms treated by current processor
 !!  nfft=(effective) number of FFT grid points (for this processor)
 !!  nfftmix=dimension of FFT grid used to mix the densities (used in PAW only)
@@ -128,7 +128,7 @@ subroutine dfpt_newvtr(cplex,dbl_nnsclo,dielar,dtset,etotal,ffttomix,&
  integer,intent(in) :: nfftmix,npawmix,usepaw
  integer,intent(inout) :: dbl_nnsclo !vz_i
  real(dp),intent(in) :: etotal
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
  type(ab7_mixing_object), intent(inout) :: mix
  type(dataset_type),intent(in) :: dtset
 !arrays

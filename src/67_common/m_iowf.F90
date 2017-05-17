@@ -7,7 +7,7 @@
 !! Procedures for the IO of the WFK file.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (DCA, XG, GMR, AR, MB, MVer, MG)
+!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR, AR, MB, MVer, MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -32,7 +32,7 @@ MODULE m_iowf
  use m_abi_etsf 
  use m_nctk
  use m_wfk
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
  use netcdf
 #endif
  use m_hdr
@@ -82,7 +82,7 @@ CONTAINS  !=====================================================================
 !!  mband=maximum number of bands
 !!  mcg=size of wave-functions array (cg) =mpw*nspinor*mband*mkmem*nsppol
 !!  mkmem=Number of k-points treated by this node.
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  mpw=maximum number of plane waves
 !!  natom=number of atoms in unit cell
 !!  nband=number of bands
@@ -135,7 +135,7 @@ subroutine outwf(cg,dtset,psps,eigen,filnam,hdr,kg,kptns,mband,mcg,mkmem,&
  integer,intent(in) :: mband,mcg,mkmem,mpw,natom,nkpt,nsppol,response,unwff2
 !integer,intent(in) :: nstep
  character(len=*),intent(in) :: filnam
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
  type(dataset_type),intent(in) :: dtset
  type(pseudopotential_type),intent(in) :: psps
  type(hdr_type), intent(inout) :: hdr
@@ -299,7 +299,7 @@ subroutine outwf(cg,dtset,psps,eigen,filnam,hdr,kg,kptns,mband,mcg,mkmem,&
    if (dtset%iomode==IO_MODE_ETSF) iomode = IO_MODE_ETSF
 !  iomode=IO_MODE_MPI
 
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
    if (dtset%iomode == IO_MODE_ETSF .and. dtset%usewvl == 0) then
      call cg_ncwrite(filnam,hdr,dtset,response,mpw,mband,nband,nkpt,nsppol,&
        dtset%nspinor,mcg,mkmem,eigen,occ,cg,npwarr,kg,mpi_enreg,done)
@@ -322,7 +322,7 @@ subroutine outwf(cg,dtset,psps,eigen,filnam,hdr,kg,kptns,mband,mcg,mkmem,&
    ! Create an ETSF file for the wavefunctions
    if (iomode == IO_MODE_ETSF) then
      ABI_CHECK(xmpi_comm_size(spaceComm) == 1, "Legacy etsf-io code does not support nprocs > 1")
-#ifdef HAVE_TRIO_ETSF_IO
+#ifdef HAVE_ETSF_IO
      call abi_etsf_init(dtset, filnam, 2, .true., hdr%lmn_size, psps, wfs)
      !call crystal_from_hdr(crystal, hdr, 2)
      !NCF_CHECK(crystal_ncwrite_path(crystal, nctk_ncify(filnam)))
@@ -369,7 +369,7 @@ subroutine outwf(cg,dtset,psps,eigen,filnam,hdr,kg,kptns,mband,mcg,mkmem,&
      call hdr_io(fform,hdr,rdwr,wff2)
      call WffKg(wff2,1)
    else if (wff2%iomode==IO_MODE_ETSF .and. iam_master) then
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
      NCF_CHECK(hdr_ncwrite(hdr, wff2%unwff, fform, nc_define=.True.))
 #endif
    end if
@@ -638,7 +638,7 @@ end subroutine outwf
 !!
 !! SOURCE
 
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
 
 subroutine cg_ncwrite(fname,hdr,dtset,response,mpw,mband,nband,nkpt,nsppol,nspinor,mcg,&
                       mkmem,eigen,occ,cg,npwarr,kg,mpi_enreg,done)
@@ -791,11 +791,11 @@ subroutine cg_ncwrite(fname,hdr,dtset,response,mpw,mband,nband,nkpt,nsppol,nspin
 
    if (.not. single_writer) then
 
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
      ! master opens the file and write the metadata.
      if (xmpi_comm_rank(comm_cell) == master) then
        ncerr = nf90_einval
-#ifdef HAVE_TRIO_NETCDF_MPI
+#ifdef HAVE_NETCDF_MPI
        ncerr = nf90_create(path, cmode=ior(ior(nf90_netcdf4, nf90_mpiio), nf90_write), &
          comm=xmpi_comm_self, info=xmpio_info, ncid=ncid)
 #endif
@@ -887,7 +887,7 @@ subroutine cg_ncwrite(fname,hdr,dtset,response,mpw,mband,nband,nkpt,nsppol,nspin
      if (comm_mpiio == xmpi_comm_null) goto 100
 
      ncerr = nf90_einval
-#ifdef HAVE_TRIO_NETCDF_MPI
+#ifdef HAVE_NETCDF_MPI
      ncerr = nf90_open(path, mode=ior(ior(nf90_netcdf4, nf90_mpiio), nf90_write),&
                        comm=comm_mpiio, info=xmpio_info, ncid=ncid)
 #endif
@@ -912,7 +912,7 @@ subroutine cg_ncwrite(fname,hdr,dtset,response,mpw,mband,nband,nkpt,nsppol,nspin
        call wrtout(std_out,"Using collective IO for the CGs","COLL")
        ! Use collective IO for the CGs
        ncerr = nf90_einval
-#ifdef HAVE_TRIO_NETCDF_MPI
+#ifdef HAVE_NETCDF_MPI
        ncerr = nf90_var_par_access(ncid, cg_varid, nf90_collective)
 #endif
        NCF_CHECK(ncerr)
@@ -969,7 +969,7 @@ subroutine cg_ncwrite(fname,hdr,dtset,response,mpw,mband,nband,nkpt,nsppol,nspin
      write(msg,'(2(a,f8.2))')" collective ncwrite, cpu: ",cpu,", wall: ",wall
      call wrtout(std_out,msg,"PERS")
 #endif 
-! HAVE_TRIO_NETCDF
+! HAVE_NETCDF
    else ! single_writer
      if (nproc_cell > 1) then
        MSG_WARNING("Slow version without MPI-IO support. Processors send data to master...")
@@ -1066,14 +1066,14 @@ subroutine cg_ncwrite(fname,hdr,dtset,response,mpw,mband,nband,nkpt,nsppol,nspin
  else ! not same_layout
 
    if (nctk_has_mpiio) then
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
      call wrtout(std_out, &
        sjoin("scattered data. writing WFK file",trim(path),", with iomode",iomode2str(iomode)), 'PERS', do_flush=.True.)
 
      ! master write the metadata.
      if (xmpi_comm_rank(comm_cell) == master) then
        ncerr = nf90_einval
-#ifdef HAVE_TRIO_NETCDF_MPI
+#ifdef HAVE_NETCDF_MPI
        ncerr = nf90_create(path, cmode=ior(ior(nf90_netcdf4, nf90_mpiio), nf90_write), &
          comm=xmpi_comm_self, info=xmpio_info, ncid=ncid)
 #endif
@@ -1095,7 +1095,7 @@ subroutine cg_ncwrite(fname,hdr,dtset,response,mpw,mband,nband,nkpt,nsppol,nspin
      ! Reopen the file inside comm_cell
      call xmpi_barrier(comm_cell)
      ncerr = nf90_einval
-#ifdef HAVE_TRIO_NETCDF_MPI
+#ifdef HAVE_NETCDF_MPI
      ncerr = nf90_open(path, mode=ior(ior(nf90_netcdf4, nf90_mpiio), nf90_write), &
        comm=comm_cell, info=xmpio_info, ncid=ncid)
 #endif
@@ -1237,7 +1237,7 @@ subroutine cg_ncwrite(fname,hdr,dtset,response,mpw,mband,nband,nkpt,nsppol,nspin
      write(msg,'(2(a,f8.2))')"scattered ncwrite, cpu: ",cpu,", wall: ",wall
      call wrtout(std_out,msg,"PERS")
 #endif 
-! HAVE_TRIO_NETCDF
+! HAVE_NETCDF
    end if !nctk_has_mpiio
  end if
 
@@ -1349,7 +1349,7 @@ end subroutine ncwrite_eigen1_occ
 !!***
 
 #endif 
-! HAVE_TRIO_NETCDF
+! HAVE_NETCDF
 
 !----------------------------------------------------------------------
 

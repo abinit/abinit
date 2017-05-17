@@ -7,7 +7,7 @@
 !! Add symmetry information to  wvl%atoms data structure.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (DC)
+!! Copyright (C) 1998-2017 ABINIT group (DC)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -50,7 +50,7 @@ subroutine wvl_descr_atoms_set_sym(wvl, efield, irrzon, nsppol, nsym, phnons, &
  use defs_basis
  use defs_wvltypes
  use m_ab7_symmetry
-#if defined HAVE_DFT_BIGDFT
+#if defined HAVE_BIGDFT
  use BigDFT_API, only: astruct_set_symmetries
 #endif
 
@@ -76,14 +76,14 @@ subroutine wvl_descr_atoms_set_sym(wvl, efield, irrzon, nsppol, nsym, phnons, &
 
 !Local variables-------------------------------
 !scalars
-#if defined HAVE_DFT_BIGDFT
+#if defined HAVE_BIGDFT
   integer :: errno
  character(len=500) :: message
 #endif
 
 ! *********************************************************************
 
-#if defined HAVE_DFT_BIGDFT
+#if defined HAVE_BIGDFT
 
  write(message, '(a,a)' ) ch10,&
 & ' wvl_descr_atoms_set_sym: Create symmetries for the wvl%atoms object.'

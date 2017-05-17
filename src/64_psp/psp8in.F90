@@ -9,7 +9,7 @@
 !! local and non-local potentials.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2016 ABINIT group (DRH, XG, AF)
+!! Copyright (C) 1999-2017 ABINIT group (DRH, XG, AF)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -355,7 +355,6 @@ subroutine psp8in(ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
 
  call psp8lo(amesh,epsatm,mmax,mqgrid,qgrid,&
 & vlspl(:,1),rad,vloc,yp1,ypn,zion)
-
 
 !Fit spline to q^2 V(q) (Numerical Recipes subroutine)
  ABI_ALLOCATE(work_space,(mqgrid))

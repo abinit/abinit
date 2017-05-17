@@ -5,7 +5,7 @@
 #Date: 22/09/2004
 #
 #------------------------------------------------------
-# Copyright (C) 2004-2016 ABINIT group (td)
+# Copyright (C) 2004-2017 ABINIT group (td)
 # This file is distributed under the terms of the
 # GNU General Public License, see ~abinit/COPYING
 # or http://www.gnu.org/copyleft/gpl.txt .

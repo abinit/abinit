@@ -12,7 +12,7 @@
 !! states, thanks to the closure relation (referred to as an extrapolation).
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (XG,AR,MB)
+!! Copyright (C) 1998-2017 ABINIT group (XG,AR,MB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -42,7 +42,7 @@
 !!  mcprj=size of projected wave-functions array (cprj) =nspinor*mband*mkmem*nsppol
 !!  mgfftdiel=maximum size of 1D FFTs, for the computation of the dielectric matrix
 !!  mkmem=number of k points treated by this node 
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  mpw=maximum allowed value for npw
 !!  natom=number of atoms in cell
 !!  nband(nkpt*nsppol)=number of bands to be included in summation
@@ -160,7 +160,7 @@ subroutine suscep_stat(atindx,atindx1,cg,cprj,dielar,dimcprj,doccde,&
  integer,intent(in) :: nfftdiel,nkpt,npwdiel,nspden,nspinor,nsppol,nsym,ntypat,occopt
  integer,intent(in) :: unpaw,usecprj,usepaw,usetimerev
  real(dp),intent(in) :: ucvol
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
  type(pawang_type),intent(in) :: pawang
 !arrays
  integer,intent(in) :: atindx(natom),atindx1(natom),dimcprj(natom*usepaw)

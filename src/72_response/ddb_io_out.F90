@@ -6,11 +6,11 @@
 !!
 !! FUNCTION
 !! Open Derivative DataBase, then
-!! reads or write Derivative DataBase preliminary information.
-!! Note: only one processor read or write the DDB.
+!! write Derivative DataBase preliminary information.
+!! Note: only one processor writes the DDB.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2016 ABINIT group (XG,MT)
+!! Copyright (C) 1999-2017 ABINIT group (XG,MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

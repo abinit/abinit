@@ -7,7 +7,7 @@
 !!  FIXME: add description.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2012-2016 ABINIT group (TR, MT)
+!!  Copyright (C) 2012-2017 ABINIT group (TR, MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -44,7 +44,7 @@ subroutine paw2wvl_ij(option,paw_ij,wvl)
  use m_errors
  use m_paw_ij, only : paw_ij_type
 
-#if defined HAVE_DFT_BIGDFT
+#if defined HAVE_BIGDFT
  use BigDFT_API, only : nullify_paw_ij_objects
 #endif
 
@@ -61,7 +61,7 @@ subroutine paw2wvl_ij(option,paw_ij,wvl)
  type(wvl_internal_type), intent(inout)::wvl
  type(paw_ij_type),intent(in) :: paw_ij(:)
 !Local variables-------------------------------
-#if defined HAVE_DFT_BIGDFT
+#if defined HAVE_BIGDFT
  integer :: iatom,iaux,my_natom
  character(len=500) :: message
 #endif
@@ -70,7 +70,7 @@ subroutine paw2wvl_ij(option,paw_ij,wvl)
  
  DBG_ENTER("COLL")
 
-#if defined HAVE_DFT_BIGDFT
+#if defined HAVE_BIGDFT
  my_natom=size(paw_ij)
 
 !Option==1: allocate and copy

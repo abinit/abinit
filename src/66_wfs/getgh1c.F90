@@ -12,7 +12,7 @@
 !! If required, <G|S^(1)|C> is returned in gs1c (S=overlap - PAW only)
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (XG, DRH, MT)
+!! Copyright (C) 1998-2017 ABINIT group (XG, DRH, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -22,6 +22,7 @@
 !!  berryopt=option for Berry phase
 !!  cwave(2,npw*nspinor)=input wavefunction, in reciprocal space
 !!  cwaveprj(natom,nspinor*usecprj)=<p_lmn|C> coefficients for wavefunction |C> (and 1st derivatives)
+!!     if not allocated or size=0, they are locally computed (and not sotred)
 !!  dkinpw(npw)=derivative of the (modified) kinetic energy for each plane wave at k (Hartree)
 !!  grad_berry(2,npw1*nspinor*(berryopt/4))= the gradient of the Berry phase term
 !!  gs_hamkq <type(gs_hamiltonian_type)>=all data for the Hamiltonian at k+q
@@ -61,7 +62,8 @@
 !!  gs1c(2,npw1*nspinor)=<G|S^(1)|C> (S=overlap) on the k+q sphere.
 !!
 !! PARENTS
-!!      dfpt_cgwf,dfpt_nstpaw,dfpt_nstwf,dfpt_wfkfermi,m_phgamma,m_rf2
+!!      dfpt_cgwf,dfpt_nstpaw,dfpt_nstwf,dfpt_wfkfermi,m_gkk,m_phgamma,m_phpi
+!!      m_rf2,m_sigmaph
 !!
 !! CHILDREN
 !!      kpgstr,load_k_hamiltonian,load_k_rf_hamiltonian,load_kprime_hamiltonian
@@ -102,7 +104,7 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
 !scalars
  integer,intent(in) :: berryopt,idir,ipert,optlocal,optnl,opt_gvnl1,sij_opt,tim_getgh1c,usevnl
  real(dp),intent(in) :: lambda
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
  type(gs_hamiltonian_type),intent(inout),target :: gs_hamkq
  type(rf_hamiltonian_type),intent(inout),target :: rf_hamkq
 !arrays
@@ -117,8 +119,8 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
 !scalars
  integer,parameter :: level=16
  integer :: choice,cplex1,cpopt,ipw,ipws,ispinor,istr,i1,i2,i3
- integer :: my_nspinor,natom,nnlout=1,npw,npw1,paw_opt,signs
- integer :: tim_fourwf,tim_nonlop
+ integer :: my_nspinor,natom,ncpgr,nnlout=1,npw,npw1,paw_opt,signs
+ integer :: tim_fourwf,tim_nonlop,usecprj
  logical :: has_kin,usevnl2
  real(dp) :: weight
  character(len=500) :: msg
@@ -144,28 +146,18 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
  npw  =gs_hamkq%npw_k
  npw1 =gs_hamkq%npw_kp
  natom=gs_hamkq%natom
- 
+
 !Compatibility tests
- if(gs_hamkq%usepaw==0.and.gs_hamkq%usecprj==1)then
-   msg='usecprj==1 not allowed for NC psps !'
-   MSG_BUG(msg)
- end if
  if(gs_hamkq%usepaw==1.and.(ipert>=0.and.(ipert<=natom.or.ipert==natom+3.or.ipert==natom+4))) then
-   if ((optnl>=1.and.(.not.allocated(rf_hamkq%e1kbfr))).or. &
-&   (optnl>=2.and.(.not.allocated(rf_hamkq%e1kbsc))))then
+   if ((optnl>=1.and.(.not.associated(rf_hamkq%e1kbfr))).or. &
+&   (optnl>=2.and.(.not.associated(rf_hamkq%e1kbsc))))then
      msg='ekb derivatives must be allocated for ipert<=natom or natom+3/4 !'
      MSG_BUG(msg)
    end if
-   if (gs_hamkq%usecprj==1) then
-     if (cwaveprj(1,1)%ncpgr/=1)then
-       msg='Projected WFs (cprj) derivatives are not correctly stored !'
-       MSG_BUG(msg)
-     end if
-   end if
  end if
  if(gs_hamkq%usepaw==1.and.(ipert==natom+2)) then
-   if ((optnl>=1.and.(.not.allocated(rf_hamkq%e1kbfr))).or. &
-&   (optnl>=2.and.(.not.allocated(rf_hamkq%e1kbsc))))then
+   if ((optnl>=1.and.(.not.associated(rf_hamkq%e1kbfr))).or. &
+&   (optnl>=2.and.(.not.associated(rf_hamkq%e1kbsc))))then
      msg='ekb derivatives must be allocated for ipert=natom+2 !'
      MSG_BUG(msg)
    end if
@@ -181,10 +173,6 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
  if (mpi_enreg%paral_spinor==1) then
    msg='Not compatible with parallelization over spinorial components !'
    MSG_BUG(msg)
- end if
- if (gs_hamkq%nvloc>1) then !FR EB
-   msg='Not compatible with nvloc=4 (non-coll. magnetism): work in progress !'
-   MSG_WARNING(msg)
  end if
 
 !Check sizes
@@ -209,17 +197,34 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
      MSG_BUG(msg)
    end if
  end if
- if (gs_hamkq%usepaw==1) then
-   if (gs_hamkq%usecprj/=0) then
+ if (berryopt>=4) then
+   if (size(grad_berry)<2*npw1*my_nspinor) then
+     msg='wrong size for grad_berry!'
+     MSG_BUG(msg)
+   end if
+ end if
+
+!PAW: specific treatment for usecprj input arg
+!     force it to zero if cwaveprj is not allocated
+ usecprj=gs_hamkq%usecprj ; ncpgr=0
+ if(gs_hamkq%usepaw==1) then
+   if (size(cwaveprj)==0) usecprj=0
+   if (usecprj/=0) then
+     ncpgr=cwaveprj(1,1)%ncpgr
      if (size(cwaveprj)<gs_hamkq%natom*my_nspinor) then
        msg='wrong size for cwaveprj!'
        MSG_BUG(msg)
      end if
+     if(gs_hamkq%usepaw==1.and.(ipert>=0.and.(ipert<=natom.or.ipert==natom+3.or.ipert==natom+4))) then
+       if (ncpgr/=1)then
+         msg='Projected WFs (cprj) derivatives are not correctly stored !'
+         MSG_BUG(msg)
+       end if
+     end if
    end if
- end if
- if (berryopt>=4) then
-   if (size(grad_berry)<2*npw1*my_nspinor) then
-     msg='wrong size for grad_berry!'
+ else
+   if(usecprj==1)then
+     msg='usecprj==1 not allowed for NC psps !'
      MSG_BUG(msg)
    end if
  end if
@@ -230,7 +235,7 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
  if (tim_getgh1c==1.and.ipert> natom) tim_nonlop=8
  if (tim_getgh1c==2.and.ipert> natom) tim_nonlop=5
  if (tim_getgh1c==3                 ) tim_nonlop=0
- 
+
 !======================================================================
 !== Apply the 1st-order local potential to the wavefunction
 !======================================================================
@@ -239,7 +244,7 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
 !or Electric field perturbation
 !or Strain perturbation
 !-------------------------------------------
- if (ipert<=natom+4.and.ipert/=natom+1.and.optlocal>0) then
+ if (ipert<=natom+5.and.ipert/=natom+1.and.optlocal>0) then !SPr deb
 
    ABI_ALLOCATE(work,(2,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6))
 
@@ -277,7 +282,6 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
        ABI_ALLOCATE(gh1c3,(2,npw1))
        ABI_ALLOCATE(gh1c4,(2,npw1))
        gh1c1(:,:)=zero; gh1c2(:,:)=zero; gh1c3(:,:)=zero ;  gh1c4(:,:)=zero
-       cplex1=2
        ABI_ALLOCATE(vlocal_tmp,(gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6))
        ABI_ALLOCATE(cwavef1,(2,npw))
        ABI_ALLOCATE(cwavef2,(2,npw))
@@ -287,17 +291,18 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
        end do
 !      gh1c1=v11*phi1
        vlocal_tmp(:,:,:)=rf_hamkq%vlocal1(:,:,:,1)
-       call fourwf(1,vlocal_tmp,cwavef1,gh1c1,work,gs_hamkq%gbound_k,gs_hamkq%gbound_kp,&
+       call fourwf(rf_hamkq%cplex,vlocal_tmp,cwavef1,gh1c1,work,gs_hamkq%gbound_k,gs_hamkq%gbound_kp,&
 &       gs_hamkq%istwf_k,gs_hamkq%kg_k,gs_hamkq%kg_kp,gs_hamkq%mgfft,mpi_enreg,1,gs_hamkq%ngfft,&
 &       npw,npw1,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,2,mpi_enreg%paral_kgb,tim_fourwf,weight,weight,&
 &       use_gpu_cuda=gs_hamkq%use_gpu_cuda)
 !      gh1c2=v22*phi2
        vlocal_tmp(:,:,:)=rf_hamkq%vlocal1(:,:,:,2)
-       call fourwf(1,vlocal_tmp,cwavef2,gh1c2,work,gs_hamkq%gbound_k,gs_hamkq%gbound_kp,&
+       call fourwf(rf_hamkq%cplex,vlocal_tmp,cwavef2,gh1c2,work,gs_hamkq%gbound_k,gs_hamkq%gbound_kp,&
 &       gs_hamkq%istwf_k,gs_hamkq%kg_k,gs_hamkq%kg_kp,gs_hamkq%mgfft,mpi_enreg,1,gs_hamkq%ngfft,&
 &       npw,npw1,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,2,mpi_enreg%paral_kgb,tim_fourwf,weight,weight,&
 &       use_gpu_cuda=gs_hamkq%use_gpu_cuda)
        ABI_DEALLOCATE(vlocal_tmp)
+       cplex1=2
        ABI_ALLOCATE(vlocal_tmp,(cplex1*gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6))
 !      gh1c3=(re(v12)-im(v12))*phi1
        do i3=1,gs_hamkq%n6
@@ -308,7 +313,7 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
            end do
          end do
        end do
-       call fourwf(rf_hamkq%cplex,vlocal_tmp,cwavef1,gh1c3,work,gs_hamkq%gbound_k,gs_hamkq%gbound_kp,&
+       call fourwf(cplex1,vlocal_tmp,cwavef1,gh1c3,work,gs_hamkq%gbound_k,gs_hamkq%gbound_kp,&
 &       gs_hamkq%istwf_k,gs_hamkq%kg_k,gs_hamkq%kg_kp,gs_hamkq%mgfft,mpi_enreg,1,gs_hamkq%ngfft,&
 &       npw,npw1,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,2,mpi_enreg%paral_kgb,tim_fourwf,weight,weight,&
 &       use_gpu_cuda=gs_hamkq%use_gpu_cuda)
@@ -320,7 +325,7 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
            end do
          end do
        end do
-       call fourwf(rf_hamkq%cplex,vlocal_tmp,cwavef2,gh1c4,work,gs_hamkq%gbound_k,gs_hamkq%gbound_kp,&
+       call fourwf(cplex1,vlocal_tmp,cwavef2,gh1c4,work,gs_hamkq%gbound_k,gs_hamkq%gbound_kp,&
 &       gs_hamkq%istwf_k,gs_hamkq%kg_k,gs_hamkq%kg_kp,gs_hamkq%mgfft,mpi_enreg,1,gs_hamkq%ngfft,&
 &       npw,npw1,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,2,mpi_enreg%paral_kgb,tim_fourwf,weight,weight,&
 &       use_gpu_cuda=gs_hamkq%use_gpu_cuda)
@@ -345,7 +350,7 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
    end if ! nvloc
 
    ABI_DEALLOCATE(work)
-   
+
 !  k-point perturbation (or no local part, i.e. optlocal=0)
 !  -------------------------------------------
  else if (ipert==natom+1.or.optlocal==0) then
@@ -378,7 +383,7 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
 !  PAW:
    if (gs_hamkq%usepaw==1) then
 
-     if (gs_hamkq%usecprj==1) then
+     if (usecprj==1) then
        cwaveprj_ptr => cwaveprj
      else
        ABI_DATATYPE_ALLOCATE(cwaveprj_tmp,(natom,my_nspinor))
@@ -388,7 +393,7 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
 
 !    1- Compute derivatives due to projectors |p_i>^(1)
 !    Only displaced atom contributes
-     cpopt=-1+5*gs_hamkq%usecprj ; choice=2 ; signs=2
+     cpopt=-1+5*usecprj ; choice=2 ; signs=2
      paw_opt=1;if (sij_opt/=0) paw_opt=sij_opt+3
      call nonlop(choice,cpopt,cwaveprj_ptr,enlout,gs_hamkq,idir,(/lambda/),mpi_enreg,1,nnlout,&
 &     paw_opt,signs,gs1c,tim_nonlop,cwave,gvnl1_,iatom_only=ipert)
@@ -396,7 +401,7 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
 !    All atoms contribute
      if (optnl>=1) then
        ABI_ALLOCATE(gvnl2,(2,npw1*my_nspinor))
-       cpopt=1+3*gs_hamkq%usecprj ; choice=1 ; signs=2 ; paw_opt=1
+       cpopt=1+3*usecprj ; choice=1 ; signs=2 ; paw_opt=1
        call nonlop(choice,cpopt,cwaveprj_ptr,enlout,gs_hamkq,idir,(/lambda/),mpi_enreg,1,nnlout,&
 &       paw_opt,signs,svectout_dum,tim_nonlop,cwave,gvnl2,enl=rf_hamkq%e1kbfr)
 !$OMP PARALLEL DO
@@ -414,7 +419,7 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
        ABI_DEALLOCATE(gvnl2)
      end if
 
-     if (gs_hamkq%usecprj==0) then
+     if (usecprj==0) then
        call pawcprj_free(cwaveprj_tmp)
        ABI_DATATYPE_DEALLOCATE(cwaveprj_tmp)
      end if
@@ -426,7 +431,12 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
      cpopt=-1 ; choice=2 ; signs=2 ; paw_opt=0
      call nonlop(choice,cpopt,cwaveprj,enlout,gs_hamkq,idir,(/lambda/),mpi_enreg,1,nnlout,&
 &     paw_opt,signs,svectout_dum,tim_nonlop,cwave,gvnl1_,iatom_only=ipert)
-     if (sij_opt==1) gs1c=zero
+     if (sij_opt==1) then
+!$OMP PARALLEL DO
+       do ipw=1,npw1*my_nspinor
+         gs1c(:,ipw)=zero
+       end do
+     end if
    end if
 
 !  k-point perturbation
@@ -436,19 +446,24 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
 !  Remember, q=0, so can take all RF data...
    tim_nonlop=8 ; signs=2 ; choice=5
    if (gs_hamkq%usepaw==1) then
-     if (gs_hamkq%usecprj==1) then
+     if (usecprj==1) then
        cwaveprj_ptr => cwaveprj
      else
        ABI_DATATYPE_ALLOCATE(cwaveprj_tmp,(natom,my_nspinor))
        call pawcprj_alloc(cwaveprj_tmp,1,gs_hamkq%dimcprj)
        cwaveprj_ptr => cwaveprj_tmp
      end if
-     cpopt=-1+5*gs_hamkq%usecprj; paw_opt=1; if (sij_opt/=0) paw_opt=sij_opt+3
-!    JLJ: BUG (wrong result) of H^(1) if stored cprj are used in PAW DDKs with nspinor==2 (==1 works fine). 
-!    To be debugged, if someone has time... 
-     if(gs_hamkq%nspinor==2) cpopt=-1 
+     cpopt=-1+5*usecprj; paw_opt=1; if (sij_opt/=0) paw_opt=sij_opt+3
+!    JLJ: BUG (wrong result) of H^(1) if stored cprj are used in PAW DDKs with nspinor==2 (==1 works fine).
+!    To be debugged, if someone has time...
+     if(gs_hamkq%nspinor==2) cpopt=-1
      call nonlop(choice,cpopt,cwaveprj_ptr,enlout,gs_hamkq,idir,(/lambda/),mpi_enreg,1,nnlout,&
 &     paw_opt,signs,gs1c,tim_nonlop,cwave,gvnl1_)
+     if (usecprj==0) then
+       call pawcprj_free(cwaveprj_tmp)
+       ABI_DATATYPE_DEALLOCATE(cwaveprj_tmp)
+     end if
+     nullify(cwaveprj_ptr)
    else
      cpopt=-1 ; paw_opt=0
      call nonlop(choice,cpopt,cwaveprj,enlout,gs_hamkq,idir,(/lambda/),mpi_enreg,1,nnlout,&
@@ -464,7 +479,7 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
 !  It contains |i du^(0)/dk_band>
 
    if (gs_hamkq%usepaw==1) then
-     if (gs_hamkq%usecprj==1) then
+     if (usecprj==1) then
        cwaveprj_ptr => cwaveprj
      else
        ABI_DATATYPE_ALLOCATE(cwaveprj_tmp,(natom,my_nspinor))
@@ -484,7 +499,7 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
        end do
 
 !      PAW: Compute part of H^(1) due to derivative of S
-       cpopt=4*gs_hamkq%usecprj ; choice=51 ; paw_opt=3 ; signs=2
+       cpopt=4*usecprj ; choice=51 ; paw_opt=3 ; signs=2
        call nonlop(choice,cpopt,cwaveprj_ptr,enlout,gs_hamkq,idir,(/lambda/),mpi_enreg,1,nnlout,&
 &       paw_opt,signs,nonlop_out,tim_nonlop,cwave,vectout_dum)
 
@@ -510,13 +525,18 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
 !    PAW: Compute derivatives due to part of D_ij^(1) depending on VHxc^(1)
      if (optnl>=2) then
        ABI_ALLOCATE(gvnl2,(2,npw1*my_nspinor))
-       cpopt=-1+3*gs_hamkq%usecprj;if (opt_gvnl1==2) cpopt=2
+       cpopt=-1+3*usecprj;if (opt_gvnl1==2) cpopt=2
        choice=1 ; paw_opt=1 ; signs=2
        call nonlop(choice,cpopt,cwaveprj_ptr,enlout,gs_hamkq,0,(/lambda/),mpi_enreg,1,nnlout,&
 &       paw_opt,signs,svectout_dum,tim_nonlop,cwave,gvnl2,enl=rf_hamkq%e1kbsc)
      end if
-     if (sij_opt==1) gs1c=zero
-     if (gs_hamkq%usecprj==0) then
+     if (sij_opt==1) then
+!$OMP PARALLEL DO
+       do ipw=1,npw1*my_nspinor
+         gs1c(:,ipw)=zero
+       end do
+     end if
+     if (usecprj==0) then
        call pawcprj_free(cwaveprj_tmp)
        ABI_DATATYPE_DEALLOCATE(cwaveprj_tmp)
      end if
@@ -535,7 +555,12 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
        gvnl1_(2,ipw)= grad_berry(1,ipw)
      end do
    end if
-   if (sij_opt==1) gs1c=zero
+   if (sij_opt==1) then
+!$OMP PARALLEL DO
+     do ipw=1,npw1*my_nspinor
+       gs1c(:,ipw)=zero
+     end do
+   end if
 
 !  Strain perturbation
 !  -------------------------------------------
@@ -547,7 +572,7 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
 !  PAW:
    if (gs_hamkq%usepaw==1) then
 
-     if (gs_hamkq%usecprj==1) then
+     if (usecprj==1) then
        cwaveprj_ptr => cwaveprj
      else
        ABI_DATATYPE_ALLOCATE(cwaveprj_tmp,(natom,my_nspinor))
@@ -557,7 +582,7 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
 
 !    1- Compute derivatives due to projectors |p_i>^(1)
 !    All atoms contribute
-     cpopt=-1+5*gs_hamkq%usecprj ; choice=3
+     cpopt=-1+5*usecprj ; choice=3
      paw_opt=1;if (sij_opt/=0) paw_opt=sij_opt+3
      call nonlop(choice,cpopt,cwaveprj_ptr,enlout,gs_hamkq,istr,(/lambda/),mpi_enreg,1,nnlout,&
 &     paw_opt,signs,gs1c,tim_nonlop,cwave,gvnl1_)
@@ -566,7 +591,7 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
      if (optnl>=1) then
        ABI_ALLOCATE(gvnl2,(2,npw1*my_nspinor))
        gvnl2 = zero
-       cpopt=1+3*gs_hamkq%usecprj ; choice=1 ; paw_opt=1
+       cpopt=1+3*usecprj ; choice=1 ; paw_opt=1
        call nonlop(choice,cpopt,cwaveprj_ptr,enlout,gs_hamkq,istr,(/lambda/),mpi_enreg,1,nnlout,&
 &       paw_opt,signs,svectout_dum,tim_nonlop,cwave,gvnl2,&
 &       enl=rf_hamkq%e1kbfr)
@@ -585,7 +610,7 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
      else if (optnl==1) then
        ABI_DEALLOCATE(gvnl2)
      end if
-     if (gs_hamkq%usecprj==0) then
+     if (usecprj==0) then
        call pawcprj_free(cwaveprj_tmp)
        ABI_DATATYPE_DEALLOCATE(cwaveprj_tmp)
      end if
@@ -597,7 +622,12 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
      choice=3 ; cpopt=-1 ; paw_opt=0
      call nonlop(choice,cpopt,cwaveprj,enlout,gs_hamkq,istr,(/lambda/),mpi_enreg,1,nnlout,&
 &     paw_opt,signs,svectout_dum,tim_nonlop,cwave,gvnl1_)
-     if (sij_opt==1) gs1c=zero
+     if (sij_opt==1) then
+!$OMP PARALLEL DO
+       do ipw=1,npw1*my_nspinor
+         gs1c(:,ipw)=zero
+       end do
+     end if
    end if
 
 !  No non-local part
@@ -610,7 +640,12 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
        gvnl1_(:,ipw)=zero
      end do
    end if
-   if (sij_opt/=0) gs1c=zero
+   if (sij_opt/=0) then
+!$OMP PARALLEL DO
+     do ipw=1,npw1*my_nspinor
+       gs1c(:,ipw)=zero
+     end do
+   end if
 
  end if
 
@@ -733,7 +768,7 @@ end subroutine getgh1c
 !!  vlocal1(cplex*n4,n5,n6,nvloc)= RF local potential in real space, on the augmented coarse fft grid
 !!
 !! PARENTS
-!!      dfpt_vtorho,m_phgamma
+!!      dfpt_vtorho,m_gkk,m_phgamma,m_phpi,m_sigmaph
 !!
 !! CHILDREN
 !!      kpgstr,load_k_hamiltonian,load_k_rf_hamiltonian,load_kprime_hamiltonian
@@ -765,7 +800,7 @@ subroutine rf_transgrid_and_pack(isppol,nspden,usepaw,cplex,nfftf,nfft,ngfft,nvl
 !scalars
  integer,intent(in) :: isppol,nspden,usepaw,cplex,nfftf,nfft,nvloc
  type(pawfgr_type),intent(in) :: pawfgr
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: ngfft(18)
  real(dp),intent(in),target :: vtrial(nfftf,nspden)
@@ -779,7 +814,7 @@ subroutine rf_transgrid_and_pack(isppol,nspden,usepaw,cplex,nfftf,nfft,ngfft,nvl
 !arrays
  real(dp) :: rhodum(1)
  real(dp), ABI_CONTIGUOUS pointer :: vtrial_ptr(:,:),vtrial1_ptr(:,:)
- real(dp),allocatable :: cgrvtrial(:,:),vlocal_tmp(:,:,:),vlocal1_tmp(:,:,:)
+ real(dp),allocatable :: cgrvtrial(:,:),cgrvtrial1(:,:),vlocal_tmp(:,:,:),vlocal1_tmp(:,:,:)
 
 ! *************************************************************************
 
@@ -817,12 +852,13 @@ subroutine rf_transgrid_and_pack(isppol,nspden,usepaw,cplex,nfftf,nfft,ngfft,nvl
      end do
    else ! TODO FR EB check the correctness of the following lines for PAW calculations
      ABI_ALLOCATE(cgrvtrial,(nfft,nspden))
+     ABI_ALLOCATE(cgrvtrial1,(nfft,nspden))
      call transgrid(cplex,mpi_enreg,nspden,-1,0,0,paral_kgb,pawfgr,rhodum,rhodum,cgrvtrial,vtrial_ptr)
-     call transgrid(cplex,mpi_enreg,nspden,-1,0,0,paral_kgb,pawfgr,rhodum,rhodum,cgrvtrial,vtrial1_ptr) ! cgvtrial1??
+     call transgrid(cplex,mpi_enreg,nspden,-1,0,0,paral_kgb,pawfgr,rhodum,rhodum,cgrvtrial1,vtrial1_ptr)
      do ispden=1,nspden
        call fftpac(ispden,mpi_enreg,nspden,n1,n2,n3,n4,n5,n6,ngfft,vtrial_ptr,vlocal_tmp,2)
        vlocal(:,:,:,ispden)=vlocal_tmp(:,:,:)
-       call fftpac(ispden,mpi_enreg,nspden,n1,n2,n3,n4,n5,n6,ngfft,cgrvtrial,vlocal1_tmp,2)
+       call fftpac(ispden,mpi_enreg,nspden,n1,n2,n3,n4,n5,n6,ngfft,vtrial1_ptr,vlocal1_tmp,2)
        vlocal1(:,:,:,ispden)=vlocal1_tmp(:,:,:)
      end do
      ABI_DEALLOCATE(cgrvtrial)
@@ -847,7 +883,7 @@ end subroutine rf_transgrid_and_pack
 !! OUTPUT
 !!
 !! PARENTS
-!!      dfpt_vtorho,m_phgamma
+!!      dfpt_vtorho,m_gkk,m_phgamma,m_phpi,m_sigmaph
 !!
 !! CHILDREN
 !!      kpgstr,load_k_hamiltonian,load_k_rf_hamiltonian,load_kprime_hamiltonian
@@ -973,6 +1009,9 @@ subroutine getgh1c_setup(gs_hamkq,rf_hamkq,dtset,psps,kpoint,kpq,idir,ipert,&   
    if (ipert==natom+3) istr=idir
    if (ipert==natom+4) istr=idir+3
    ider=1;idir0=-istr
+ !-- Magnetic field perturbation ( SPr, Zeeman )
+ else if(ipert==natom+5)then
+   ider=0;idir0=0
  end if
 
 !Compute nonlocal form factors ffnl1 at (k+q+G), for all atoms
@@ -983,11 +1022,6 @@ subroutine getgh1c_setup(gs_hamkq,rf_hamkq,dtset,psps,kpoint,kpq,idir,ipert,&   
  call mkffnl(psps%dimekb,dimffnl1,psps%ekb,ffnl1,psps%ffspl,gmet,gprimd,ider,idir0,&
 & psps%indlmn,kg1_k,kpg1_k,kpq,psps%lmnmax,psps%lnmax,psps%mpsang,psps%mqgrid_ff,nkpg1,&
 & npw1_k,ntypat,psps%pspso,psps%qgrid_ff,rmet,psps%usepaw,psps%useylm,ylm1_k,ylmgr1_k)
-
-!For rf2 perturbation, cprj coeffs are computed on-the-fly in nonlop
- if(ipert==natom+10 .or. ipert==natom+11) then
-   gs_hamkq%usecprj=0
- end if
 
 !===== Preparation of the kinetic contributions
 
@@ -1100,9 +1134,6 @@ subroutine getgh1c_setup(gs_hamkq,rf_hamkq,dtset,psps,kpoint,kpq,idir,ipert,&   
      call load_k_rf_hamiltonian(rf_hamk_dir2,dkinpw_k=dkinpw2,ddkinpw_k=ddkinpw)
    end if
  end if
-! if (ipert==natom+11) then
-!   call load_k_rf_hamiltonian(rf_hamk_dir2,dkinpw_k=dkinpw2,ddkinpw_k=ddkinpw)
-! end if
 
 end subroutine getgh1c_setup
 !!***

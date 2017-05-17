@@ -13,7 +13,7 @@
 !! NULL if none has been associated.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (DCA, XG, GMR, TRangel).
+!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR, TRangel).
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -52,7 +52,7 @@ subroutine psolver_kernel(hgrid, iaction,  icoulomb, &
  use m_profiling_abi
  use m_errors
 
-#if defined HAVE_DFT_BIGDFT
+#if defined HAVE_BIGDFT
  use BigDFT_API,     only  : coulomb_operator,nullify_coulomb_operator, &
 &                            deallocate_coulomb_operator,mpi_environment
  use poisson_solver, only : pkernel_init,pkernel_set
@@ -78,7 +78,7 @@ subroutine psolver_kernel(hgrid, iaction,  icoulomb, &
   real(dp),intent(in) :: hgrid(3)
 
 !Local variables-------------------------
-#if defined HAVE_DFT_BIGDFT
+#if defined HAVE_BIGDFT
   !scalars
   integer,parameter :: igpu=0 !no GPUs
   !arrays
@@ -95,7 +95,7 @@ subroutine psolver_kernel(hgrid, iaction,  icoulomb, &
 
 ! *************************************************************************
 
-#if defined HAVE_DFT_BIGDFT
+#if defined HAVE_BIGDFT
 
  if (icoulomb == 0) then
 !  The kernel is built with 'P'eriodic boundary counditions.

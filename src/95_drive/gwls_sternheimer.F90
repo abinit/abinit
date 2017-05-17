@@ -7,7 +7,7 @@
 !! .
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2016 ABINIT group (GMR, VO, LR, RWG, MG, RShaltaf)
+!! Copyright (C) 1999-2017 ABINIT group (GMR, VO, LR, RWG, MG, RShaltaf)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -80,7 +80,7 @@ character(len=6),intent(in) :: codvsn
 character(len=fnlen),optional,intent(in) :: filstat
 type(MPI_type),intent(inout) :: mpi_enreg
 type(datafiles_type),target,intent(inout) :: dtfil
-type(dataset_type),target,intent(inout) :: dtset
+type(dataset_type),intent(inout) :: dtset
 type(pawang_type),intent(inout) :: pawang
 type(pseudopotential_type),intent(inout) :: psps
 !arrays

@@ -8,7 +8,7 @@
 !! Computes integrals using corrected Simpson integration on a linear grid.
 !! 
 !! COPYRIGHT
-!!  Copyright (C) 2010-2016 ABINIT group (Camilo Espejo)
+!!  Copyright (C) 2010-2017 ABINIT group (Camilo Espejo)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -139,6 +139,7 @@ subroutine radsintr(funr,funq,mqgrid,mrgrid,qgrid,rgrid,yq1,yqn)
 &   *(sin(arg*rgrid(1))/arg-rgrid(1)*cos(arg*rgrid(1)))
 
 !  Integral from r1 to rmax
+   rzf=zero
    do ir=1,irmax
      if (abs(ff(ir))>1.e-20_dp) rzf(ir)=sin(arg*rgrid(ir))*ff(ir)
    end do

@@ -12,7 +12,7 @@
 !!         see PRB 78, 035105 (2008), Eq. (42)
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2016 ABINIT group (MT)
+!! Copyright (C) 2009-2017 ABINIT group (MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -26,7 +26,7 @@
 !!  istwfk=option parameter that describes the storage of wfs
 !!  mcgq=second dimension of the cgq array
 !!  mcprjq=second dimension of the cprjq array
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  natom= number of atoms in cell
 !!  nband=number of bands
 !!  npw1=number of planewaves in basis sphere at k+Q
@@ -77,7 +77,7 @@ subroutine getdc1(cgq,cprjq,dcwavef,dcwaveprj,ibgq,icgq,istwfk,mcgq,mcprjq,&
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ibgq,icgq,istwfk,mcgq,mcprjq,natom,nband,npw1,nspinor,optcprj
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  real(dp),intent(in) :: cgq(2,mcgq),s1cwave0(2,npw1*nspinor)
  real(dp),intent(out) :: dcwavef(2,npw1*nspinor)

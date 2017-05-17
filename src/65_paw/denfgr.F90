@@ -8,7 +8,7 @@
 !!  and adding PAW corrections
 !!
 !! COPYRIGHT
-!!   Copyright (C) 2005-2016 ABINIT group (JWZ)
+!!   Copyright (C) 2005-2017 ABINIT group (JWZ)
 !!   This file is distributed under the terms of the
 !!   GNU General Public License, see ~ABINIT/COPYING
 !!   or http://www.gnu.org/copyleft/gpl.txt .
@@ -79,6 +79,7 @@
  use m_errors
  use m_xmpi
  use m_splines
+ use m_sort
 
  use m_io_tools,    only : open_file
  use m_pptools,     only : printxsf
@@ -95,7 +96,6 @@
 #undef ABI_FUNC
 #define ABI_FUNC 'denfgr'
  use interfaces_14_hidewrite
- use interfaces_28_numeric_noabirule
  use interfaces_41_geometry
  use interfaces_65_paw, except_this_one => denfgr
 !End of the abilint section

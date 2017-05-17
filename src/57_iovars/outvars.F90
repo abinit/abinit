@@ -7,7 +7,7 @@
 !! Echo variables for the ABINIT code.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (DCA, XG, GMR)
+!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -37,6 +37,7 @@
 !!         nsppol     =maximal value of input nsppol for all the datasets
 !!         nsym       =maximum number of symmetries
 !!         ntypat     =maximum number of type of atoms
+!!         nzchempot  =maximal value of input nzchempot for all the datasets
 !!  ndtset=number of datasets
 !!  ndtset_alloc=number of datasets, corrected for allocation of at least
 !!   one data set. Use for most dimensioned arrays.
@@ -78,7 +79,7 @@ subroutine outvars(choice,dmatpuflag,dtsets,filnam4,iout,&
  use m_errors
  use m_xomp
  use m_xmpi
-#if defined HAVE_TRIO_NETCDF
+#if defined HAVE_NETCDF
  use netcdf
 #endif
 
@@ -109,7 +110,7 @@ subroutine outvars(choice,dmatpuflag,dtsets,filnam4,iout,&
  integer :: marr,mu,ncerr
  integer :: nshiftk
  integer :: prtvol_glob,max_nthreads
- integer :: rfddk,rfelfd,rfphon,rfstrs,rfuser
+ integer :: rfddk,rfelfd,rfphon,rfstrs,rfuser,rfmagn,rf2_dkdk,rf2_dkde
  integer :: ncid=0 ! Variables for NetCDF output
  character(len=500) :: message
  character(len=4) :: stringimage
@@ -164,7 +165,7 @@ subroutine outvars(choice,dmatpuflag,dtsets,filnam4,iout,&
 !###########################################################
 !### 02. Open NetCDF file for export variables
 
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
  ! Enable netcdf output only if the number of datasets is small.
  ! otherwise v6[34] crashes with errmess: 
  !    nf90_def_dim - NetCDF library returned:   NetCDF: NC_MAX_DIMS exceeded
@@ -219,6 +220,7 @@ subroutine outvars(choice,dmatpuflag,dtsets,filnam4,iout,&
  multivals%nsym=0
  multivals%ntypat=0
  multivals%ntypalch=0
+ multivals%nzchempot=0
 
  if(ndtset_alloc>1)then
    do idtset=1,ndtset_alloc
@@ -246,6 +248,7 @@ subroutine outvars(choice,dmatpuflag,dtsets,filnam4,iout,&
      if(dtsets(1)%nsym     /=dtsets(idtset)%nsym     ) multivals%nsym     =1
      if(dtsets(1)%ntypat   /=dtsets(idtset)%ntypat   ) multivals%ntypat   =1
      if(dtsets(1)%ntypalch /=dtsets(idtset)%ntypalch ) multivals%ntypalch =1
+     if(dtsets(1)%nzchempot/=dtsets(idtset)%nzchempot) multivals%nzchempot=1
    end do
  end if
 
@@ -277,8 +280,11 @@ subroutine outvars(choice,dmatpuflag,dtsets,filnam4,iout,&
    rfphon=dtsets(idtset)%rfphon
    rfstrs=dtsets(idtset)%rfstrs
    rfuser=dtsets(idtset)%rfuser
-   if(rfddk/=0 .or. rfelfd/=0 .or. &
-&   rfphon/=0 .or. rfstrs/=0 .or. rfuser/=0)then
+   rfmagn=dtsets(idtset)%rfmagn
+   rf2_dkdk=dtsets(idtset)%rf2_dkdk
+   rf2_dkde=dtsets(idtset)%rf2_dkde
+   if(rfddk/=0 .or. rfelfd/=0 .or. rfphon/=0 .or. rfstrs/=0 .or. &
+&   rfuser/=0 .or. rf2_dkdk/=0 .or. rf2_dkde/=0 .or. rfmagn/=0)then
      response_(idtset)=1
    end if
  end do
@@ -300,6 +306,7 @@ subroutine outvars(choice,dmatpuflag,dtsets,filnam4,iout,&
 & 3*mxvals%natom*mxvals%nconeq,&
 & mxvals%nnos,&
 & 3*mxvals%nqptdm,&
+& 3*mxvals%nzchempot*mxvals%ntypat,&
 & 3*mxvals%gw_nqlwl,&
 & (2*mxvals%lpawu+1)**2*max(mxvals%nsppol,mxvals%nspinor)*mxvals%natpawu*dmatpuflag,&
 & 30 ) ! used by ga_rules TODO : replace with mxvals% ga_n_rules
@@ -353,7 +360,7 @@ subroutine outvars(choice,dmatpuflag,dtsets,filnam4,iout,&
  write(message,'(a,80a)')ch10,('=',mu=1,80)
  call wrtout(iout,message,'COLL')
 
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
  if (ncid /= 0) then
    ncerr=nf90_close(abs(ncid))
    if (ncerr/=nf90_NoErr) then

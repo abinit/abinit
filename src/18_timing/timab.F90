@@ -21,7 +21,7 @@
 !!  so that it can be done near the top of his/her main routine.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2016 ABINIT group (DCA, XG, GMR)
+!!  Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -57,18 +57,18 @@
 !!      initberry,initwf,inkpts,invars2,inwffil,listkk,lobpcgwf
 !!      m_ab7_invars_f90,m_ab7_mixing,m_cgtools,m_dyson_solver,m_fftcore
 !!      m_fftw3,m_fock,m_green,m_haydock,m_hexc,m_invovl,m_iowf,m_lobpcg
-!!      m_paral_pert,m_sg2002,m_wfutils,mag_constr,mkcore,mkcore_paw,mkcore_wvl
-!!      mkffnl,mklocl_realspace,mklocl_recipspace,mkresi,mkrho,newkpt,newocc
-!!      newrho,newvtr,nhatgrid,nlenergyrec,nonlinear,nonlop,odamix,opernla_ylm
-!!      optics_paw,optics_paw_core,optics_vloc,outkss,outscfcv,pareigocc
-!!      partial_dos_fractions_paw,pawdenpot,pawdfptenergy,pawinit,pawmknhat
-!!      pawmknhat_psipsi,pawmkrho,pawpolev,prep_bandfft_tabs,prep_calc_ucrpa
-!!      prep_fourwf,prep_getghc,prep_nonlop,pspatm,pspheads_comm,pspini
-!!      pw_orthon,rayleigh_ritz,recursion,recursion_nl,redgr,respfn,rhohxc
-!!      rhotov,rwwf,scfcv,screening,setsym,setvtr,sigma,sqnormm_v,status,stress
-!!      strhar,suscep_stat,susk,suskmm,symrhg,symsgcube,tddft,timana,vn_nl_rec
-!!      vtorho,vtorhorec,vtorhotf,vtowfk,wfconv,wfk_analyze,wfsinp,wvl_nhatgrid
-!!      xcden,xcpot
+!!      m_lobpcg2,m_lobpcgwf,m_paral_pert,m_sg2002,m_wfutils,m_xg,mag_constr
+!!      mkcore,mkcore_paw,mkcore_wvl,mkffnl,mklocl_realspace,mklocl_recipspace
+!!      mkresi,mkrho,newkpt,newocc,newrho,newvtr,nhatgrid,nlenergyrec,nonlinear
+!!      nonlop,odamix,opernla_ylm,optics_paw,optics_paw_core,optics_vloc,outkss
+!!      outscfcv,pareigocc,partial_dos_fractions_paw,pawdenpot,pawdfptenergy
+!!      pawinit,pawmknhat,pawmknhat_psipsi,pawmkrho,pawpolev,prep_bandfft_tabs
+!!      prep_calc_ucrpa,prep_fourwf,prep_getghc,prep_nonlop,pspatm
+!!      pspheads_comm,pspini,pw_orthon,rayleigh_ritz,recursion,recursion_nl
+!!      redgr,respfn,rhohxc,rhotov,rwwf,scfcv,screening,setsym,setvtr,sigma
+!!      sqnormm_v,status,stress,strhar,suscep_stat,susk,suskmm,symrhg,symsgcube
+!!      tddft,timana,vn_nl_rec,vtorho,vtorhorec,vtorhotf,vtowfk,wfconv
+!!      wfk_analyze,wfsinp,wvl_nhatgrid,xcden,xcpot
 !!
 !! CHILDREN
 !!      papif_flops,papif_perror,timein
@@ -99,7 +99,7 @@ subroutine timab(nn,option,tottim)
 
  implicit none
 
-#ifdef HAVE_TIMER_PAPI
+#ifdef HAVE_PAPI
 #include "f90papi.h"
 #endif
 
@@ -113,7 +113,7 @@ subroutine timab(nn,option,tottim)
 !scalars
  real(dp),save :: cpu,wall
  character(len=500) :: message
-#ifdef HAVE_TIMER_PAPI
+#ifdef HAVE_PAPI
  integer(C_INT) :: check 
  integer(C_LONG_LONG),save :: flops1
  real(C_FLOAT),save :: real_time,proc_time
@@ -134,7 +134,7 @@ subroutine timab(nn,option,tottim)
      MSG_BUG(message)
    end if
 
-#ifdef HAVE_TIMER_PAPI
+#ifdef HAVE_PAPI
 !  for all active options for time if papi analysis has been selected.
    if (option/=3.and.time_get_papiopt()==1) then 
      call PAPIf_flops(real_time, proc_time, flops1, mflops1, check)
@@ -166,7 +166,7 @@ subroutine timab(nn,option,tottim)
      call timein(cpu,wall)
      tzero(1,nn)=cpu
      tzero(2,nn)=wall
-#ifdef HAVE_TIMER_PAPI
+#ifdef HAVE_PAPI
      papi_flops(nn)   = flops1       ! Initialize megaflops for nn
      papi_tzero(1,nn) = proc_time
      papi_tzero(2,nn) = real_time
@@ -178,7 +178,7 @@ subroutine timab(nn,option,tottim)
      acctim(1,nn)=acctim(1,nn)+cpu -tzero(1,nn)
      acctim(2,nn)=acctim(2,nn)+wall-tzero(2,nn)
      ncount(nn)=ncount(nn)+1
-#ifdef HAVE_TIMER_PAPI
+#ifdef HAVE_PAPI
 !      accumulate time and flops for nn Difference between 2 calls to Papif_flops 
      papi_acctim(1,nn)=papi_acctim(1,nn)+ proc_time - papi_tzero(1,nn)
      papi_acctim(2,nn)=papi_acctim(2,nn)+ real_time - papi_tzero(2,nn)
@@ -189,7 +189,7 @@ subroutine timab(nn,option,tottim)
        ! Use previously obtained values to initialize timab for nn
      tzero(1,nn)=cpu
      tzero(2,nn)=wall
-#ifdef HAVE_TIMER_PAPI
+#ifdef HAVE_PAPI
      papi_flops(nn)=flops1
      papi_tzero(1,nn) = proc_time
      papi_tzero(2,nn) = real_time
@@ -200,7 +200,7 @@ subroutine timab(nn,option,tottim)
      call timein(cpu,wall)
      tottim(1)=cpu-tzero(1,nn)
      tottim(2)=wall-tzero(2,nn)
-#ifdef HAVE_TIMER_PAPI
+#ifdef HAVE_PAPI
 !      return elapsed floating point operationfor nn (do not accumulate)
      papi_tottim(1,nn)= proc_time - papi_tzero(1,nn)
      papi_tottim(2,nn)= real_time - papi_tzero(2,nn)

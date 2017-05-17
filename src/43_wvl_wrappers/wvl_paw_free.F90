@@ -7,7 +7,7 @@
 !!  Frees memory for WVL+PAW implementation
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2012-2016 ABINIT group (T. Rangel)
+!!  Copyright (C) 2012-2017 ABINIT group (T. Rangel)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -57,7 +57,7 @@ subroutine wvl_paw_free(wvl)
  
 ! *************************************************************************
  
-#if defined HAVE_DFT_BIGDFT
+#if defined HAVE_BIGDFT
 
 !PAW objects
  if( associated(wvl%paw%spsi)) then

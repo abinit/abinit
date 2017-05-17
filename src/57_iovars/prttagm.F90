@@ -17,7 +17,7 @@
 !! different or not.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2016 ABINIT group (XG)
+!! Copyright (C) 1999-2017 ABINIT group (XG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -255,7 +255,7 @@ subroutine prttagm(dprarr,intarr,iout,jdtset_,length,&
          if (narr_eff/=0) then
 
            if (print_out) write(iout,full_format) token,trim(appen),intarr(1:narr_eff,idtset)
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
            if (print_netcdf) then
              call write_var_netcdf(intarr(1:narr_eff,idtset),&
 &             dprarr(1:narr_eff,idtset),marr,narr_eff,abs(ncid),typevarphys,token//appen)
@@ -395,7 +395,7 @@ subroutine prttagm(dprarr,intarr,iout,jdtset_,length,&
            else
              if (print_out) write(iout,full_format) token,trim(appen),dprarr(1:narr_eff,idtset)*scale_factor,trim(out_unit)
            end if
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
            if (print_netcdf) then
              call write_var_netcdf(intarr(1:narr_eff,idtset),dprarr(1:narr_eff,idtset),&
 &             marr,narr_eff,abs(ncid),'DPR',token//trim(appen))

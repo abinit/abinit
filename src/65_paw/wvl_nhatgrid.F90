@@ -10,7 +10,7 @@
 !! (and derivatives) on this grid (g_l=radial shape function).
 !!
 !! COPYRIGHT
-!! Copyright (C) 2011-2016 ABINIT group (T Rangel)
+!! Copyright (C) 2011-2017 ABINIT group (T Rangel)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -31,7 +31,7 @@
 !!    pawfgrtab(natom)%rfgd(3,nfgd)= coordinates of r-r_atom around each atom
 !!
 !! PARENTS
-!!      scfcv
+!!      afterscfloop,scfcv
 !!
 !! CHILDREN
 !!      pawgylm,pawrfgd_wvl,timab,xred2xcart
@@ -98,7 +98,7 @@ subroutine wvl_nhatgrid(atindx1,geocode,h,i3s,natom,natom_tot,&
 
  DBG_ENTER("COLL")
 
-#if !defined HAVE_DFT_BIGDFT
+#if !defined HAVE_BIGDFT
  BIGDFT_NOTENABLED_ERROR()
 #endif
 

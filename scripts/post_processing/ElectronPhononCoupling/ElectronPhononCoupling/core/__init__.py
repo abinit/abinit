@@ -9,6 +9,7 @@ from .ddbfile import *
 from .eigr2dfile import *
 from .fanfile import *
 from .gkkfile import *
+from .gsrfile import *
 
 from .qptanalyzer import *
 from .epcanalyzer import *

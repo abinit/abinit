@@ -7,7 +7,7 @@
 !! Prepare and call the qmc subroutines
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2016 ABINIT group (BAmadon)
+!! Copyright (C) 1999-2017 ABINIT group (BAmadon,VPlanes)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -31,15 +31,15 @@
 !!
 !! CHILDREN
 !!      add_matlu,checkreal_matlu,compute_levels,copy_green,copy_matlu
-!!      ctqmc_printgreen,ctqmc_triqs_run,ctqmcinterface_finalize
-!!      ctqmcinterface_init,ctqmcinterface_run,ctqmcinterface_setopts
-!!      data4entropydmft_setdocc,destroy_green,destroy_matlu,destroy_oper
-!!      diag_matlu,diff_matlu,fac_matlu,flush_unit,fourier_green
-!!      hybridization_asymptotic_coefficient,identity_matlu,init_green
-!!      init_matlu,init_oper,int_fct,inverse_oper,jbessel,occup_green_tau
-!!      print_green,print_matlu,printocc_green,printplot_matlu,prod_matlu
-!!      rotate_matlu,rotatevee_hu,sbf8,shift_matlu,slm2ylm_matlu,sym_matlu
-!!      testcode_ctqmc,vee_ndim2tndim_hu_r,wrtout,xginv,xmpi_barrier,xmpi_bcast
+!!      ctqmc_triqs_run,ctqmcinterface_finalize,ctqmcinterface_init
+!!      ctqmcinterface_run,ctqmcinterface_setopts,data4entropydmft_setdocc
+!!      destroy_green,destroy_matlu,destroy_oper,diag_matlu,diff_matlu
+!!      fac_matlu,flush_unit,fourier_green,hybridization_asymptotic_coefficient
+!!      identity_matlu,init_green,init_matlu,init_oper,int_fct,inverse_oper
+!!      jbessel,occup_green_tau,print_green,print_matlu,printocc_green
+!!      printplot_matlu,prod_matlu,rotate_matlu,rotatevee_hu,sbf8,shift_matlu
+!!      slm2ylm_matlu,sym_matlu,testcode_ctqmc,vee_ndim2tndim_hu_r,wrtout,xginv
+!!      xmpi_barrier,xmpi_bcast
 !!
 !! SOURCE
 
@@ -159,7 +159,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
  
  integer :: nfreq,unt,unt2
  integer :: ntau ! >= 2*nfreq + 1
- integer :: nleg = 30  ! default value
+ integer :: nleg 
  integer :: ileg
  integer :: verbosity_solver ! min 0 -> max 3
  integer :: seed
@@ -1200,9 +1200,13 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
          umod=zero
 
          tmpfil = 'fw1_nd_re'
-         !open (newunit=unt,file=trim(tmpfil),status='unknown',form='formatted')
+         !if (open_file(newunit=unt,message,file=trim(tmpfil),status='unknown',form='formatted')/=0) then
+         !  MSG_ERROR(message)
+         !end if
          tmpfil = 'fw1_nd_im'
-         !open (newunit=unt2,file=trim(tmpfil),status='unknown',form='formatted')
+         !if (open_file(newunit=unt2,message,file=trim(tmpfil),status='unknown',form='formatted')/=0) then
+         !  MSG_ERROR(message)
+         !end if
          write(std_out,*) "testcode==2",ispa,ispb,ima,imb
          write(std_out,*) "opt_fk==",opt_fk
          do ifreq=1,paw_dmft%dmftqmc_l
@@ -1335,6 +1339,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
      
      if(paw_dmft%dmft_solv>=6) then
        ABI_ALLOCATE(gw_tmp_nd,(paw_dmft%dmft_nwli,nflavor,nflavor)) !because size allocation problem with TRIQS paw_dmft%dmft_nwlo must be >= paw_dmft%dmft_nwli
+       open(unit=505,file=trim(paw_dmft%filapp)//"_Legendre_coefficients.dat", status='unknown',form='formatted')
      else
        ABI_ALLOCATE(gw_tmp,(paw_dmft%dmft_nwlo,nflavor+1))
        ABI_ALLOCATE(gw_tmp_nd,(paw_dmft%dmft_nwlo,nflavor,nflavor+1))
@@ -1407,6 +1412,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
          nfreq = paw_dmft%dmft_nwli
        !paw_dmft%dmft_nwlo = paw_dmft%dmft_nwli !transparent for user 
          ntau  = paw_dmft%dmftqmc_l !(2*paw_dmft%dmftqmc_l)+1 !nfreq=paw_dmft%dmft_nwli
+         nleg  = paw_dmft%dmftctqmc_triqs_nleg
 
          if ( ntau >= (2*nfreq)+1 ) then
 
@@ -1568,6 +1574,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
              do ileg=1,nleg
                WRITE(505,*) ileg,((gl_nd(ileg,iflavor,iflavor1),iflavor=1,nflavor),iflavor1=1,nflavor)
              end do
+             close(505)
            end if
 !        if(paw_dmft%myproc==0) then
 !          do itau=1,paw_dmft%dmftqmc_l
@@ -1745,7 +1752,12 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
          if (open_file(trim(paw_dmft%filapp)//"_atom_"//iatomnb//"_Gtau_"//gtau_iter//".dat", message, newunit=unt) /= 0) then
            MSG_ERROR(message)
          end if
-         call Ctqmc_printGreen(paw_dmft%hybrid(iatom)%hybrid,unt) !Problem here
+         !call Ctqmc_printGreen(paw_dmft%hybrid(iatom)%hybrid,unt) !Problem here
+         do itau=1,paw_dmft%dmftqmc_l
+           write(unt,'(29f21.14)') float(itau-1)/float(paw_dmft%dmftqmc_l)/paw_dmft%temp,&
+           (gtmp(itau,iflavor), iflavor=1, nflavor) 
+         end do
+         write(unt,'(29f21.14)') 1/paw_dmft%temp, (-1_dp-gtmp(1,iflavor), iflavor=1, nflavor) 
          close(unt)
          !open(unit=4243, file=trim(paw_dmft%filapp)//"_atom_"//iatomnb//"_F_"//gtau_iter//".dat")
          !call BathOperator_printF(paw_dmft%hybrid(iatom)%hybrid%bath,4243) !Already comment here
@@ -1755,7 +1767,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
          end if
          do ifreq=1,paw_dmft%dmft_nwlo
            write(unt,'(29f21.14)') paw_dmft%omega_lo(ifreq), &
-&           (gw_tmp_nd(ifreq,iflavor,iflavor), iflavor=1, nflavor) 
+&           (gw_tmp(ifreq,iflavor), iflavor=1, nflavor) 
          end do
          close(unt)
        end if
@@ -1893,7 +1905,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
          end do
        end do
      end if
-     ABI_DEALLOCATE(gw_tmp)
+     if(paw_dmft%dmft_solv<6) ABI_DEALLOCATE(gw_tmp)
      ABI_DEALLOCATE(gw_tmp_nd)
      ABI_DEALLOCATE(gtmp)
      ABI_DEALLOCATE(gtmp_nd)

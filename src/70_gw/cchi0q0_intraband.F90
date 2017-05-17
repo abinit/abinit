@@ -7,7 +7,7 @@
 !! Calculate chi0 in the limit q-->0
 !!
 !! COPYRIGHT
-!! Copyright (C) 2010-2016 ABINIT group (MG)
+!! Copyright (C) 2010-2017 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -62,14 +62,13 @@
 !!      screening
 !!
 !! CHILDREN
-!!      assemblychi0_sym,clib_progress_bar,destroy_kb_potential,get_bz_item
-!!      getnel,gsph_fft_tabs,init_kb_potential,kmesh_free,kmesh_init
-!!      littlegroup_free,littlegroup_init,littlegroup_print,pack_eneocc
-!!      paw_rho_tw_g,paw_symcprj,pawcprj_alloc,pawcprj_copy,pawcprj_free
-!!      pawhur_free,pawhur_init,pawpwij_free,pawpwij_init,print_arr,rho_tw_g
-!!      rotate_fft_mesh,symmetrize_afm_chi0,unpack_eneocc,wfd_barrier
-!!      wfd_change_ngfft,wfd_distribute_bands,wfd_get_cprj,wfd_get_ur,wrtout
-!!      xmpi_sum
+!!      assemblychi0_sym,clib_progress_bar,get_bz_item,getnel,gsph_fft_tabs
+!!      kmesh_free,kmesh_init,littlegroup_free,littlegroup_init
+!!      littlegroup_print,pack_eneocc,paw_rho_tw_g,paw_symcprj,pawcprj_alloc
+!!      pawcprj_copy,pawcprj_free,pawhur_free,pawhur_init,pawpwij_free
+!!      pawpwij_init,print_arr,rho_tw_g,rotate_fft_mesh,symmetrize_afm_chi0
+!!      unpack_eneocc,vkbr_free,vkbr_init,wfd_barrier,wfd_change_ngfft
+!!      wfd_distribute_bands,wfd_get_cprj,wfd_get_ur,wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -100,7 +99,7 @@ subroutine chi0q0_intraband(Wfd,Cryst,Ep,Psps,BSt,Gsph_epsG0,Pawang,Pawrad,Pawta
  use m_gsphere,         only : gsphere_t, gsph_fft_tabs
  use m_oscillators,     only : rho_tw_g
  use m_pawhr,           only : pawhur_t, pawhur_free, pawhur_init, paw_ihr
- use m_commutator_vkbr, only : kb_potential, destroy_kb_potential, init_kb_potential, nc_ihr_comm
+ use m_vkbr,            only : vkbr_t, vkbr_free, vkbr_init, nc_ihr_comm
  use m_chi0,            only : assemblychi0_sym, symmetrize_afm_chi0
  use m_pawang,          only : pawang_type
  use m_pawrad,          only : pawrad_type
@@ -160,7 +159,7 @@ subroutine chi0q0_intraband(Wfd,Cryst,Ep,Psps,BSt,Gsph_epsG0,Pawang,Pawrad,Pawta
  character(len=500) :: msg,msg_tmp !,allup
  type(kmesh_t) :: Kmesh
  type(littlegroup_t) :: Ltg_q
- type(kb_potential) :: KBgrad_k
+ type(vkbr_t) :: vkbr
 !arrays
  integer :: my_band_list(Wfd%mband)
  integer,ABI_CONTIGUOUS pointer :: kg_k(:,:)
@@ -230,16 +229,18 @@ subroutine chi0q0_intraband(Wfd,Cryst,Ep,Psps,BSt,Gsph_epsG0,Pawang,Pawrad,Pawta
      if (my_nband==0) CYCLE
      
      if (Wfd%usepaw==0.and.inclvkb/=0) then ! Include term <n,k|[Vnl,iqr]|n"k>' for q->0.
-       call init_kb_potential(KBgrad_k,Cryst,Psps,inclvkb,istwf_k,npw_k,kpt,kg_k)
+       call vkbr_init(vkbr,Cryst,Psps,inclvkb,istwf_k,npw_k,kpt,kg_k)
      end if
 
      do lbidx=1,my_nband
        band=my_band_list(lbidx)
        ug => Wfd%Wave(band,ik_ibz,spin)%ug
 
-       if (Wfd%usepaw==0) then  ! Matrix elements of i[H,r] for NC pseudopotentials.        
-         comm_kbbs = nc_ihr_comm(nspinor,npw_k,istwf_k,inclvkb,Kmesh%ibz(:,ik_ibz),KBgrad_k,ug,ug,kg_k) 
-       else                     ! Matrix elements of i[H,r] for PAW.
+       if (Wfd%usepaw==0) then  
+         ! Matrix elements of i[H,r] for NC pseudopotentials.        
+         comm_kbbs = nc_ihr_comm(vkbr,cryst,psps,npw_k,nspinor,istwf_k,inclvkb,Kmesh%ibz(:,ik_ibz),ug,ug,kg_k) 
+       else                     
+         ! Matrix elements of i[H,r] for PAW.
          call wfd_get_cprj(Wfd,band,ik_ibz,spin,Cryst,Cp_bks,sorted=.FALSE.)
          comm_kbbs = paw_ihr(spin,nspinor,npw_k,istwf_k,Kmesh%ibz(:,ik_ibz),Cryst,Pawtab,ug,ug,kg_k,Cp_bks,Cp_bks,HUr)
        end if
@@ -247,7 +248,7 @@ subroutine chi0q0_intraband(Wfd,Cryst,Ep,Psps,BSt,Gsph_epsG0,Pawang,Pawrad,Pawta
        ihr_comm(:,:,band,ik_ibz,spin) = comm_kbbs
      end do
 
-     call destroy_kb_potential(KBgrad_k) ! Not need anymore as we loop only over IBZ.
+     call vkbr_free(vkbr) ! Not need anymore as we loop only over IBZ.
    end do
  end do
  !

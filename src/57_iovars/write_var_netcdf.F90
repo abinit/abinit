@@ -8,7 +8,7 @@
 !! Write the history into a netcdf dataset
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (DCA, XG, GMR)
+!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -44,7 +44,7 @@ subroutine write_var_netcdf(arr_int,arr_real,marr,narr,ncid,typevar,varname)
  use defs_basis
  use m_profiling_abi
  use m_errors 
-#if defined HAVE_TRIO_NETCDF
+#if defined HAVE_NETCDF
  use netcdf
 #endif
 
@@ -74,7 +74,7 @@ implicit none
 
  !write(std_out,*)"about to write varname: ",trim(varname)
 
-#if defined HAVE_TRIO_NETCDF
+#if defined HAVE_NETCDF
  if (ncid>0) then
 !  ### Put the file in definition mode
    ncerr=nf90_redef(ncid)

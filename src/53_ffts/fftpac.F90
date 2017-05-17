@@ -13,7 +13,7 @@
 !! MG FIXME: THIS IS **VERY BAD** AS FORTRAN DOES NOT ALLOW FOR ALIASING
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (DCA, MF, XG, GMR).
+!! Copyright (C) 1998-2017 ABINIT group (DCA, MF, XG, GMR).
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -38,9 +38,9 @@
 !!  option=11 aa(n1*n2*n3,ispden) <-- bb(nd1,nd2,nd3) complex case like option 1 imag part
 !!
 !! PARENTS
-!!      dens_in_sph,dfpt_mkrho,dfpt_nstpaw,dfpt_rhofermi,dfpt_vtorho
-!!      dfptnl_resp,energy,fock_getghc,getgh1c,gwls_hamiltonian,ks_ddiago
-!!      m_io_kss,mkrho,suscep_stat,vtorho
+!!      dfpt_mkrho,dfpt_nstpaw,dfpt_rhofermi,dfpt_vtorho,dfptnl_resp,energy
+!!      fock_getghc,getgh1c,gwls_hamiltonian,ks_ddiago,m_epjdos,m_io_kss,mkrho
+!!      suscep_stat,vtorho
 !!
 !! CHILDREN
 !!      ptabs_fourdp

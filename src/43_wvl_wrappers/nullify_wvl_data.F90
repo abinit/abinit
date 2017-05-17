@@ -7,7 +7,7 @@
 !!  Nullify all wvl pointers
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2016 ABINIT group (T. Rangel)
+!!  Copyright (C) 2013-2017 ABINIT group (T. Rangel)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -45,7 +45,7 @@ subroutine nullify_wvl_data(wvl)
  use m_errors
  use defs_basis
  use defs_wvltypes
-#if defined HAVE_DFT_BIGDFT
+#if defined HAVE_BIGDFT
   use BigDFT_API, only : &
 & nullify_gaussian_basis,nullify_local_zone_descriptors,&
 & nullify_orbitals_data,comms_cubic,comms_linear_null, &
@@ -71,7 +71,7 @@ subroutine nullify_wvl_data(wvl)
  
 ! *************************************************************************
  
-#if defined HAVE_DFT_BIGDFT
+#if defined HAVE_BIGDFT
 
  DBG_ENTER("COLL")
 
@@ -132,7 +132,7 @@ subroutine nullify_wvl_data(wvl)
  ABI_UNUSED(wvl%den%symObj)
 #endif
 
-#if defined HAVE_DFT_BIGDFT
+#if defined HAVE_BIGDFT
  contains
 !!***
 

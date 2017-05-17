@@ -8,7 +8,7 @@
 !!  to store results from GS calculations for a given image of the cell.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2011-2016 ABINIT group (MT)
+!! Copyright (C) 2011-2017 ABINIT group (MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -499,7 +499,7 @@ end subroutine copy_results_img
 !! INPUTS
 !!  allgather= --optional, default=false--  if TRUE do ALL_GATHER instead of GATHER
 !!  master= --optional, default=0-- index of master proc receiving gathered data (if allgather=false)
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  only_one_per_img= --optional, default=true--  if TRUE, the gather operation
 !!                    is only done by one proc per image (master of the comm_cell)
 !!  results_img(:)=<type(results_img_type)>=results_img datastructure array on each proc
@@ -531,7 +531,7 @@ subroutine gather_results_img(mpi_enreg,results_img,results_img_all,&
 !scalars
  integer,optional,intent(in) :: master
  logical,optional,intent(in) :: allgather,only_one_per_img
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  type(results_img_type),intent(inout) :: results_img(:)
  type(results_img_type),intent(inout) :: results_img_all(:)
@@ -790,7 +790,7 @@ end subroutine gather_results_img
 !! INPUTS
 !!  allgather= --optional, default=false--  if TRUE do ALL_GATHER instead of GATHER
 !!  master= --optional, default=0-- index of master proc receiving gathered data (if allgather=false)
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  only_one_per_img= --optional, default=true--  if TRUE, the gather operation
 !!                    is only done by one proc per image (master of the comm_cell)
 !!  array_img(:,:)= (real) 1D-array distributed (has 2 dimensions; the 2nd one is nimage)
@@ -822,7 +822,7 @@ subroutine gather_array_img_1D(array_img,array_img_all,mpi_enreg,&
 !scalars
  integer,optional,intent(in) :: master
  logical,optional,intent(in) :: allgather,only_one_per_img
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  real(dp),intent(in) :: array_img(:,:)
  real(dp),intent(inout) :: array_img_all(:,:)
@@ -956,7 +956,7 @@ end subroutine gather_array_img_1D
 !! INPUTS
 !!  allgather= --optional, default=false--  if TRUE do ALL_GATHER instead of GATHER
 !!  master= --optional, default=0-- index of master proc receiving gathered data (if allgather=false)
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  only_one_per_img= --optional, default=true--  if TRUE, the gather operation
 !!                    is only done by one proc per image (master of the comm_cell)
 !!  array_img(:,:,:)= (real) 2D-array distributed (has 3 dimensions; the 3rd one is nimage)
@@ -988,7 +988,7 @@ subroutine gather_array_img_2D(array_img,array_img_all,mpi_enreg,&
 !scalars
  integer,optional,intent(in) :: master
  logical,optional,intent(in) :: allgather,only_one_per_img
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  real(dp),intent(in) :: array_img(:,:,:)
  real(dp),intent(inout) :: array_img_all(:,:,:)
@@ -1122,7 +1122,7 @@ end subroutine gather_array_img_2D
 !!
 !! INPUTS
 !!  master= --optional, default=0-- index of master proc sending data
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  only_one_per_img= --optional, default=true--  if TRUE, the scatter operation
 !!                    is only done by one proc per image (master of the comm_cell)
 !!  array_img_all(:,:,:)= (real) global 2D-array (has 3 dimensions; the 3rd one is nimagetot)
@@ -1155,7 +1155,7 @@ subroutine scatter_array_img(array_img,array_img_all,mpi_enreg,&
 !scalars
  integer,optional,intent(in) :: master
  logical,optional,intent(in) :: only_one_per_img
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  real(dp),intent(inout) :: array_img(:,:,:)
  real(dp),intent(in) :: array_img_all(:,:,:)

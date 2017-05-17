@@ -7,7 +7,7 @@
 !! Initialization of response calculations in finite electric field. 
 !!
 !! COPYRIGHT
-!! Copyright (C) 2004-2016 ABINIT group (XW).
+!! Copyright (C) 2004-2017 ABINIT group (XW).
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -40,6 +40,10 @@
 !! pwindall(:,6,:) <- <u^(1)_i|u^(0)_i+n-1>
 !! pwindall(:,7,:) <- <u^(0)_i|u^(1)_i-n+1>
 !! pwindall(:,8,:) <- <u^(0)_i|u^(1)_i-n-1>
+!!
+!! NOTES
+!!      this duplicates in part initberry for the init of the dtefield - should be made
+!!      into a common constructor in m_dtefield or somethin
 !!
 !! PARENTS
 !!      dfpt_scfcv
@@ -95,7 +99,7 @@ subroutine  dfptff_initberry(dtefield,dtset,gmet,kg,kg1,mband,mkmem,mpi_enreg,&
 ! arrays
 !scalars
  integer :: flag,iband,icg,idir,ifor,ikg,ikg1,ikpt,ikpt1,ikpt2,ikstr
- integer :: index,ipw,isppol,istr,iunmark,jpw,nband_k,nband_occ_k,nkstr,npw_k
+ integer :: index,ipw,isppol,istr,iunmark,jpw,nband_k,mband_occ_k,nkstr,npw_k
  integer :: npw_k1,orig
  real(dp) :: ecut_eff,occ_val
  character(len=500) :: message
@@ -121,6 +125,8 @@ subroutine  dfptff_initberry(dtefield,dtset,gmet,kg,kg1,mband,mkmem,mpi_enreg,&
  ABI_ALLOCATE(dtefield%kgindex,(nkpt))
  dtefield%ikpt_dk(:,:,:) = 0
  dtefield%cgindex(:,:) = 0
+ dtefield%mband_occ = 0
+ ABI_ALLOCATE(dtefield%nband_occ,(nsppol))
  dtefield%nband_occ = 0
  pwindall(:,:,:) = 0
 
@@ -130,25 +136,28 @@ subroutine  dfptff_initberry(dtefield,dtset,gmet,kg,kg1,mband,mkmem,mpi_enreg,&
  occ_val = two/(dtset%nsppol*one)
 
  index = 0
- do ikpt = 1, nkpt
-
-   nband_occ_k = 0
-   nband_k = dtset%nband(ikpt)
-
-   do iband = 1, nband_k
-     index = index + 1
-     if (abs(occ(index) - occ_val) < tol8) nband_occ_k = nband_occ_k + 1
-   end do
-
-   if (ikpt > 1) then
-     if (dtefield%nband_occ /= nband_occ_k) then
-       message = ' The number of valence bands is not the same for every k-point'
-       MSG_ERROR(message)
+ do isppol = 1, nsppol
+   do ikpt = 1, nkpt
+     
+     mband_occ_k = 0
+     nband_k = dtset%nband(ikpt)
+     
+     do iband = 1, nband_k
+       index = index + 1
+       if (abs(occ(index) - occ_val) < tol8) mband_occ_k = mband_occ_k + 1
+     end do
+     
+     if (ikpt > 1) then
+       if (dtefield%nband_occ(isppol) /= mband_occ_k) then
+         message = ' The number of valence bands is not the same for every k-point for present spin'
+         MSG_ERROR(message)
+       end if
+     else
+       dtefield%mband_occ = max(dtefield%mband_occ,mband_occ_k)
+       dtefield%nband_occ(isppol) = mband_occ_k
      end if
-   else
-     dtefield%nband_occ = nband_occ_k
-   end if
-
+     
+   end do
  end do
 
 !DEBUG

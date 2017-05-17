@@ -8,7 +8,7 @@
 !!  This routine is an interface to Cuda Kernel gpu_nonlop.cu
 !!
 !! COPYRIGHT
-!! Copyright (C) 2011-2016 ABINIT group (FDahm, MT)
+!! Copyright (C) 2011-2017 ABINIT group (FDahm, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -55,7 +55,7 @@
 !!  lmnmax=max. number of (l,m,n) components over all types of atoms
 !!  matblk=dimension of the arrays ph3din and ph3dout
 !!  mgfft=maximum size of 1D FFTs
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  natom=number of atoms in cell
 !!  nattyp(ntypat)=number of atoms of each type
 !!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
@@ -184,7 +184,7 @@
  integer,intent(in) :: istwf_k,lmnmax,matblk,mgfft,natom,nkpgin,nkpgout,nnlout
  integer,intent(in) :: npwin,npwout,nspinor,nspinortot,ntypat,paw_opt,signs
  real(dp),intent(in) :: lambda,ucvol
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: atindx1(natom),indlmn(6,lmnmax,ntypat),kgin(3,npwin)
  integer,intent(in) :: kgout(3,npwout),nattyp(ntypat),ngfft(18),nloalg(3)
@@ -196,11 +196,11 @@
  real(dp),intent(in) :: phkxredin(2,natom),phkxredout(2,natom)
  real(dp),intent(in) :: sij(dimenl1,ntypat*((paw_opt+1)/3))
  real(dp),intent(inout) :: ph3din(2,npwin,matblk),ph3dout(2,npwout,matblk)
- real(dp),intent(inout) :: vectin(2,npwin*nspinor)
- real(dp),intent(out) :: enlout(nnlout)
- real(dp),intent(out),target :: svectout(2,npwout*nspinor*(paw_opt/3))
- real(dp),intent(out),target :: vectout (2,npwout*nspinor)
- type(pawcprj_type),intent(inout) :: cprjin(natom,nspinor*((cpopt+5)/5))
+ real(dp),intent(inout) :: vectin(:,:)
+ real(dp),intent(out) :: enlout(:)
+ real(dp),intent(out),target :: svectout(:,:)
+ real(dp),intent(out),target :: vectout (:,:)
+ type(pawcprj_type),intent(inout) :: cprjin(:,:)
 
 !Local variables-------------------------------
 !scalars

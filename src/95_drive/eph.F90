@@ -4,11 +4,12 @@
 !!  eph
 !!
 !! FUNCTION
-!! Main routine that computes the electron phonon coupling matrix elements and 
-!! calculates related properties - Tc, phonon linewidths...
+!! Main routine to compute electron phonon coupling matrix elements and
+!! calculate related properties - superconductin Tc, phonon linewidths, electronic renormalization
+!! due to phonons and temperature effects...
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2016 ABINIT group (MG, MVer)
+!! Copyright (C) 2009-2017 ABINIT group (MG, MVer)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -53,13 +54,15 @@
 !!
 !! CHILDREN
 !!      crystal_free,crystal_from_hdr,crystal_print,cwtime,ddb_free
-!!      ddb_from_file,destroy_mpi_enreg,dvdb_free,dvdb_init,dvdb_list_perts
-!!      dvdb_print,ebands_free,ebands_print,ebands_set_fermie,ebands_set_scheme
-!!      ebands_update_occ,edos_free,edos_init,edos_write,eph_phgamma,hdr_free
-!!      hdr_vs_dtset,ifc_free,ifc_init,ifc_outphbtrap,init_distribfft_seq
-!!      initmpi_seq,mkphdos,pawfgr_destroy,pawfgr_init,phdos_free,phdos_print
-!!      print_ngfft,prtbltztrp_out,pspini,wfk_read_eigenvalues,wrtout
-!!      xmpi_bcast
+!!      ddb_from_file,ddk_free,ddk_init,destroy_mpi_enreg,dvdb_free,dvdb_init
+!!      dvdb_list_perts,dvdb_print,ebands_free,ebands_print,ebands_prtbltztrp
+!!      ebands_set_fermie,ebands_set_scheme,ebands_update_occ,ebands_write
+!!      edos_free,edos_print,edos_write,eph_gkk,eph_phgamma,eph_phpi,hdr_free
+!!      hdr_vs_dtset,ifc_free,ifc_init,ifc_mkphbs,ifc_outphbtrap,ifc_print
+!!      ifc_printbxsf,ifc_test_phinterp,init_distribfft_seq,initmpi_seq,mkphdos
+!!      pawfgr_destroy,pawfgr_init,phdos_free,phdos_ncwrite,phdos_print
+!!      phdos_print_thermo,print_ngfft,pspini,sigmaph,wfk_read_eigenvalues
+!!      wrtout,xmpi_bcast,xmpi_end
 !!
 !! SOURCE
 
@@ -81,18 +84,23 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  use m_crystal
  use m_crystal_io
  use m_ebands
+ use m_ddk
  use m_ddb
  use m_dvdb
  use m_ifc
  use m_phonons
  use m_nctk
  use m_wfk
+#ifdef HAVE_NETCDF
+ use netcdf
+#endif
 
  use m_io_tools,        only : file_exists
  use m_time,            only : cwtime
- use m_fstrings,        only : strcat, sjoin, ftoa
+ use m_fstrings,        only : strcat, sjoin, ftoa, itoa
  use m_fftcore,         only : print_ngfft
  use m_mpinfo,          only : destroy_mpi_enreg
+ !use m_bz_mesh,         only : kpath_t, kpath_free, kpath_new
  use m_pawang,          only : pawang_type
  use m_pawrad,          only : pawrad_type
  use m_pawtab,          only : pawtab_type, pawtab_print, pawtab_get_lsize
@@ -100,9 +108,11 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  use m_paw_ij,          only : paw_ij_type, paw_ij_init, paw_ij_free, paw_ij_nullify
  use m_pawfgrtab,       only : pawfgrtab_type, pawfgrtab_free, pawfgrtab_init
  use m_pawrhoij,        only : pawrhoij_type, pawrhoij_alloc, pawrhoij_copy, pawrhoij_free, symrhoij
- !use m_pawdij,          only : pawdij, symdij
  use m_pawfgr,          only : pawfgr_type, pawfgr_init, pawfgr_destroy
  use m_phgamma,         only : eph_phgamma
+ use m_gkk,             only : eph_gkk
+ use m_phpi,            only : eph_phpi
+ use m_sigmaph,         only : sigmaph
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -111,7 +121,6 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  use interfaces_14_hidewrite
  use interfaces_51_manage_mpi
  use interfaces_56_io_mpi
- use interfaces_61_occeig
  use interfaces_64_psp
 !End of the abilint section
 
@@ -121,7 +130,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 !scalars
  character(len=6),intent(in) :: codvsn
  type(datafiles_type),intent(in) :: dtfil
- type(dataset_type),intent(inout) :: dtset
+ type(dataset_type),intent(in) :: dtset
  type(pawang_type),intent(inout) :: pawang
  type(pseudopotential_type),intent(inout) :: psps
 !arrays
@@ -132,21 +141,27 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 !Local variables ------------------------------
 !scalars
  integer,parameter :: master=0,level40=40,natifc0=0,brav1=1,timrev2=2,selectz0=0
- integer,parameter :: nsphere0=0,prt_ifc0=0,ifcana0=0,ifcout0=0,prtsrlr0=0
+ integer,parameter :: nsphere0=0,prtsrlr0=0
  integer :: ii,comm,nprocs,my_rank,psp_gencond,mgfftf,nfftf !,nfftf_tot
  integer :: iblock,ddb_nqshift,ierr,edos_intmeth
- real(dp),parameter :: rifcsph0=zero,spinmagntarget=-99.99_dp
+#ifdef HAVE_NETCDF
+ integer :: ncid,ncerr
+#endif
+ real(dp),parameter :: rifcsph0=zero
  real(dp) :: ecore,ecut_eff,ecutdg_eff,gsqcutc_eff,gsqcutf_eff
  real(dp) :: edos_step,edos_broad
  real(dp) :: cpu,wall,gflops
- character(len=500) :: eph_task,msg
- character(len=fnlen) :: wfk0_path,ddb_path,dvdb_path,path
- type(hdr_type) :: wfk0_hdr
+ logical :: use_wfq,use_dvdb
+ character(len=500) :: msg
+ character(len=fnlen) :: wfk0_path,wfq_path,ddb_path,dvdb_path,path
+ character(len=fnlen) :: ddk_path(3)
+ type(hdr_type) :: wfk0_hdr, wfq_hdr
  type(crystal_t) :: cryst,cryst_ddb
- type(ebands_t) :: ebands
+ type(ebands_t) :: ebands, ebands_kq
  type(edos_t) :: edos
  type(ddb_type) :: ddb
  type(dvdb_t) :: dvdb
+ type(ddk_t) :: ddk
  type(ifc_type) :: ifc
  type(pawfgr_type) :: pawfgr
  type(mpi_type) :: mpi_enreg
@@ -155,7 +170,6 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  integer :: ngfftc(18),ngfftf(18)
  integer,allocatable :: dummy_atifc(:)
  real(dp),parameter :: k0(3)=zero
- real(dp) :: nelect_per_spin(dtset%nsppol)
  real(dp) :: dielt(3,3),zeff(3,3,dtset%natom),n0(dtset%nsppol)
  real(dp),pointer :: gs_eigen(:,:,:) !,gs_occ(:,:,:)
  real(dp),allocatable :: ddb_qshifts(:,:)
@@ -175,10 +189,10 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  ! 5) Pseudos and PAW basic objects.
  !
  ! Once we have these objects, we can call specialized routines for e-ph calculations.
- ! Notes: 
+ ! Notes:
  !   * Any modification to the basic objects mentioned above should be done here (e.g. change of efermi)
  !   * This routines shall not allocate big chunks of memory. The CPU-demanding sections should be
- !     performed in the specialized routines that will use different MPI distribution schemes.
+ !     performed in the specialized routines that will employ different MPI distribution schemes.
 
  DBG_ENTER('COLL')
 
@@ -192,31 +206,67 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 
  comm = xmpi_world; nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
 
+ ! Initialize filenames
  wfk0_path = dtfil%fnamewffk
+ wfq_path = dtfil%fnamewffq
  ddb_path = dtfil%filddbsin
  dvdb_path = dtfil%filddbsin; ii=len_trim(dvdb_path); dvdb_path(ii-2:ii+1) = "DVDB"
+ use_wfq = (dtset%irdwfq/=0 .or. dtset%getwfq/=0)
+ use_dvdb = (dtset%eph_task /= 0)
+
+ ddk_path(1) = strcat(dtfil%fnamewffddk, itoa(3*dtset%natom+1))
+ ddk_path(2) = strcat(dtfil%fnamewffddk, itoa(3*dtset%natom+2))
+ ddk_path(3) = strcat(dtfil%fnamewffddk, itoa(3*dtset%natom+3))
 
  if (my_rank == master) then
    if (.not. file_exists(ddb_path)) MSG_ERROR(sjoin("Cannot find DDB file:", ddb_path))
-   if (.not. file_exists(dvdb_path)) MSG_ERROR(sjoin("Cannot find DVDB file:", dvdb_path))
+   if (use_dvdb .and. .not. file_exists(dvdb_path)) MSG_ERROR(sjoin("Cannot find DVDB file:", dvdb_path))
+
    ! Accept WFK file in Fortran or netcdf format.
-   if (.not. file_exists(wfk0_path)) then
-     if (file_exists(nctk_ncify(wfk0_path))) then
-       write(std_out,"(3a)")"- File: ",trim(wfk0_path)," does not exist but found netcdf file with similar name."
-       wfk0_path = nctk_ncify(wfk0_path)
-     else
-       MSG_ERROR(sjoin("Cannot find GS WFK file:", wfk0_path))
+   if (nctk_try_fort_or_ncfile(wfk0_path, msg) /= 0) then
+     MSG_ERROR(sjoin("Cannot find GS WFK file:", wfk0_path, msg))
+   end if
+   ! WFQ file
+   if (use_wfq) then
+     if (nctk_try_fort_or_ncfile(wfq_path, msg) /= 0) then
+       MSG_ERROR(sjoin("Cannot find GS WFQ file:", wfq_path, msg))
      end if
    end if
- end if
+
+   if (dtset%eph_transport > 0) then
+     do ii=1,3
+       if (nctk_try_fort_or_ncfile(ddk_path(ii), msg) /= 0) then
+         MSG_ERROR(sjoin("Cannot find DDK file:", ddk_path(ii), msg))
+       end if
+     end do
+   end if
+
+ end if ! master
+
+ ! Broadcast filenames (needed because they might have been changed if we are using netcdf files)
  call xmpi_bcast(wfk0_path,master,comm,ierr)
- call wrtout(ab_out, sjoin("- Reading GS states from WFK file:", wfk0_path) )
- call wrtout(ab_out, sjoin("- Reading DDB from file:",dvdb_path))
- call wrtout(ab_out, sjoin("- Reading DVDB from file:",dvdb_path))
+ call wrtout(ab_out, sjoin("- Reading GS states from WFK file:", wfk0_path))
+ if (use_wfq) then
+   call xmpi_bcast(wfq_path,master,comm,ierr)
+   call wrtout(ab_out, sjoin("- Reading GS states from WFQ file:", wfq_path) )
+ end if
+ call wrtout(ab_out, sjoin("- Reading DDB from file:", ddb_path))
+ if (use_dvdb) call wrtout(ab_out, sjoin("- Reading DVDB from file:", dvdb_path))
+ if (dtset%eph_transport > 0) then
+   call xmpi_bcast(ddk_path,master,comm,ierr)
+   call wrtout(ab_out, sjoin("- Reading DDK x from file:", ddk_path(1)))
+   call wrtout(ab_out, sjoin("- Reading DDK y from file:", ddk_path(2)))
+   call wrtout(ab_out, sjoin("- Reading DDK z from file:", ddk_path(3)))
+   ! Read header in DDK files and init basic dimensions.
+   ! subdrivers will use ddk to get the matrix elements from file.
+   call ddk_init(ddk, ddk_path, comm)
+   ! TODO: Should perform consistency check
+   !call hdr_vs_dtset(ddk_hdr(ii), dtset)
+ end if
 
  call cwtime(cpu,wall,gflops,"start")
 
- ! Costruct crystal and ebands from the GS WFK file.
+ ! Construct crystal and ebands from the GS WFK file.
  call wfk_read_eigenvalues(wfk0_path,gs_eigen,wfk0_hdr,comm) !,gs_occ)
  call hdr_vs_dtset(wfk0_hdr,dtset)
 
@@ -225,9 +275,17 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 
  ebands = ebands_from_hdr(wfk0_hdr,maxval(wfk0_hdr%nband),gs_eigen)
  call hdr_free(wfk0_hdr)
- ! TODO: 
- ! Make sure everything is OK if WFK comes from a NSCF run since occ are set to zero
- ! fermie is set to 0 if nscf!
+ ABI_FREE(gs_eigen)
+
+ ! Read WFQ and construct ebands on the shifted grid.
+ if (use_wfq) then
+   call wfk_read_eigenvalues(wfq_path,gs_eigen,wfq_hdr,comm) !,gs_occ)
+   ! GKA TODO: Have to construct a header with the proper set of q-shifted k-points then compare against file.
+   !call hdr_vs_dtset(wfq_hdr,dtset)
+   ebands_kq = ebands_from_hdr(wfq_hdr,maxval(wfq_hdr%nband),gs_eigen)
+   call hdr_free(wfq_hdr)
+   ABI_FREE(gs_eigen)
+ end if
 
  ! Here we change the GS bands (fermi level, scissors operator ...)
  ! All the modifications to ebands should be done here.
@@ -238,134 +296,217 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
    "   From WFK file: occopt = ",ebands%occopt,", tsmear = ",ebands%tsmear,ch10,&
    "   From input:    occopt = ",dtset%occopt,", tsmear = ",dtset%tsmear,ch10
    call wrtout(ab_out,msg)
-   call ebands_set_scheme(ebands,dtset%occopt,dtset%tsmear,spinmagntarget,dtset%prtvol)
+   call ebands_set_scheme(ebands,dtset%occopt,dtset%tsmear,dtset%spinmagntarget,dtset%prtvol)
+   if (use_wfq) then
+     call ebands_set_scheme(ebands_kq,dtset%occopt,dtset%tsmear,dtset%spinmagntarget,dtset%prtvol)
+   end if
  end if
- 
+
  if (dtset%eph_fermie /= zero) then ! default value of eph_fermie is zero hence no tolerance is used!
    ABI_CHECK(abs(dtset%eph_extrael) <= tol12, "eph_fermie and eph_extrael are mutually exclusive")
    call wrtout(ab_out, sjoin(" Fermi level set by the user at:",ftoa(dtset%eph_fermie)))
    call ebands_set_fermie(ebands, dtset%eph_fermie, msg)
    call wrtout(ab_out,msg)
+   if (use_wfq) then
+     call ebands_set_fermie(ebands_kq, dtset%eph_fermie, msg)
+     call wrtout(ab_out,msg)
+   end if
 
  else if (abs(dtset%eph_extrael) > tol12) then
    NOT_IMPLEMENTED_ERROR()
    ! TODO: Be careful with the trick used in elphon for passing the concentration
-   !call ebands_set_nelect(ebands, dtset%eph_extrael, spinmagntarget, msg)
-   call wrtout(ab_out,msg)
+   !call ebands_set_nelect(ebands, dtset%eph_extrael, dtset%spinmagntarget, msg)
+   !call wrtout(ab_out,msg)
+   !if (use_wfq) then
+   !  call ebands_set_nelect(ebands_kq, dtset%eph_extrael, dtset%spinmagntarget, msg)
+   !  call wrtout(ab_out,msg)
+   !end if
  end if
 
- call ebands_update_occ(ebands, spinmagntarget)
+ ! Recompute occupations. This is needed if WFK files have been produced in a NSCF run
+ ! since occ are set to zero, and fermie is taken from the previous density.
+ call ebands_update_occ(ebands, dtset%spinmagntarget, prtvol=dtset%prtvol)
  call ebands_print(ebands,header="Ground state energies",prtvol=dtset%prtvol)
- ABI_FREE(gs_eigen)
+ if (use_wfq) then
+   call ebands_update_occ(ebands_kq, dtset%spinmagntarget, prtvol=dtset%prtvol)
+   call ebands_print(ebands_kq,header="Ground state energies (K+Q)", prtvol=dtset%prtvol)
+ end if
 
  call cwtime(cpu,wall,gflops,"stop")
  write(msg,'(2(a,f8.2))')"eph%init: cpu: ",cpu,", wall: ",wall
- call wrtout(std_out,msg,"COLL",do_flush=.True.)
+ call wrtout(std_out, msg, do_flush=.True.)
  call cwtime(cpu,wall,gflops,"start")
 
  ! Compute electron DOS.
- ! TODO: Optimize this part. Really slow if tetra and lots of points
- ! Could just do DOS around efermi
- edos_intmeth = 2; if (dtset%prtdos == 1) edos_intmeth = 1
- edos_step = dtset%dosdeltae; edos_broad = dtset%tsmear
- edos_step = 0.01 * eV_Ha; edos_broad = 0.3 * eV_Ha
- call edos_init(edos,ebands,cryst,edos_intmeth,edos_step,edos_broad,comm,ierr)
- ABI_CHECK(ierr==0, "Error in edos_init, see message above.")
+ if (dtset%kptopt>0 .and. dtset%nkpt>1) then
+   ! TODO: Optimize this part. Really slow if tetra and lots of points
+   ! Could just do DOS around efermi
+   edos_intmeth = 2; if (dtset%prtdos == 1) edos_intmeth = 1
+   !edos_intmeth = 1
+   edos_step = dtset%dosdeltae; edos_broad = dtset%tsmear
+   edos_step = 0.01 * eV_Ha; edos_broad = 0.3 * eV_Ha
+   edos = ebands_get_edos(ebands,cryst,edos_intmeth,edos_step,edos_broad,comm)
 
- ! Store DOS per spin channels
- n0(:) = edos%gef(1:edos%nsppol)
+   ! Store DOS per spin channels
+   n0(:) = edos%gef(1:edos%nsppol)
+   if (my_rank == master) then
+     call edos_print(edos, unit=ab_out)
+     path = strcat(dtfil%filnam_ds(4), "_EDOS")
+     call wrtout(ab_out, sjoin("- Writing electron DOS to file:", path))
+     call edos_write(edos, path)
+   end if
+
+   call edos_free(edos)
+
+ end if
+
+ ! =======================================
+ ! Output useful info on electronic bands
+ ! =======================================
  if (my_rank == master) then
-   path = strcat(dtfil%filnam_ds(4), "_EDOS") 
-   call edos_write(edos, path)
-   !call edos_print(edos)
-   write(ab_out,"(a)")sjoin("- Writing electron DOS to file:", path)
-   write(ab_out,'(a,es16.8,a)')' Fermi level: ',edos%mesh(edos%ief)*Ha_eV," [eV]"
-   write(ab_out,"(a,es16.8)")" Total electron DOS in states/eV : ",edos%gef(0) / Ha_eV
-   if (ebands%nsppol == 2) then
-     write(ab_out,"(a,es16.8)")"   Spin up:  ",edos%gef(1) / Ha_eV
-     write(ab_out,"(a,es16.8)")"   Spin down:",edos%gef(2) / Ha_eV
+   ! Fermi Surface
+   if (dtset%prtfsurf /= 0) then
+     path = strcat(dtfil%filnam_ds(4), "_BXSF")
+     call wrtout(ab_out, sjoin("- Writing Fermi surface to file:", path))
+     if (ebands_write_bxsf(ebands,cryst,path) /= 0) then
+       msg = "Cannot produce file for Fermi surface, check log file for more info"
+       MSG_WARNING(msg)
+       call wrtout(ab_out,msg)
+     end if
    end if
- end if
 
- call edos_free(edos)
-
- ! Output useful info on the electronic bands.
- ! Fermi Surface
- if (dtset%prtfsurf /= 0  .and. my_rank == master) then
-   path = strcat(dtfil%filnam_ds(4), "_BXSF")
-   if (ebands_write_bxsf(ebands,cryst,path) /= 0) then
-     MSG_WARNING("Cannot produce file for Fermi surface, check log file for more info")
+   ! Nesting factor (requires qpath)
+   if (dtset%prtnest /= 0 .and. dtset%ph_nqpath > 0) then
+     path = strcat(dtfil%filnam_ds(4), "_NEST")
+     call wrtout(ab_out, sjoin("- Writing nesting factor to file:", path))
+     if (ebands_write_nesting(ebands,cryst,path,dtset%prtnest,&
+     dtset%tsmear,dtset%fermie_nest,dtset%ph_qpath(:,1:dtset%ph_nqpath),msg) /= 0) then
+       MSG_WARNING(msg)
+       call wrtout(ab_out,msg)
+     end if
    end if
- end if
+ end if ! master
 
- ! Nesting factor (requires qpath)
- if (dtset%prtnest /= 0 .and. dtset%ph_nqpath > 0 .and. my_rank == master) then
-   path = strcat(dtfil%filnam_ds(4), "_NEST")
-   if (ebands_write_nesting(ebands,cryst,path,dtset%prtnest,&
-   dtset%tsmear,dtset%fermie_nest,dtset%ph_qpath(:,1:dtset%ph_nqpath),msg) /= 0) then
-     MSG_WARNING(msg)
-     call wrtout(ab_out,msg,'COLL')
-   end if
- end if
+ if (my_rank == master) call ebands_write(ebands, dtset%prtebands, dtfil%filnam_ds(4))
+
+ !if (.False.) then
+ !!if (.True.) then
+ !  !call ebands_set_interpolator(ebands, cryst, bstart, bcount, mode, espline_ords, eskw_ratio, comm)
+ !  call ebands_test_interpolator(ebands, dtset, cryst, dtfil%filnam_ds(4), comm)
+ !  MSG_ERROR("interpolation done")
+ !end if
 
  call cwtime(cpu,wall,gflops,"stop")
  write(msg,'(2(a,f8.2))')"eph%edos: cpu:",cpu,", wall: ",wall
- call wrtout(std_out,msg,"COLL",do_flush=.True.)
+ call wrtout(std_out, msg, do_flush=.True.)
  call cwtime(cpu,wall,gflops,"start")
 
- ! Read the DDB file. 
+ ! Read the DDB file.
  ABI_CALLOC(dummy_atifc, (cryst%natom))
 
- call ddb_from_file(ddb,ddb_path,brav1,cryst%natom,natifc0,dummy_atifc,cryst_ddb,comm)
+ call ddb_from_file(ddb,ddb_path,brav1,cryst%natom,natifc0,dummy_atifc,cryst_ddb,comm, prtvol=dtset%prtvol)
  call crystal_free(cryst_ddb)
  ABI_FREE(dummy_atifc)
 
  ddb_nqshift = 1
  ABI_CALLOC(ddb_qshifts, (3,ddb_nqshift))
 
+ ! Set the q-shift for the DDB
+ ddb_qshifts(:,1) = dtset%ddb_shiftq(:)
+
  ! Get Dielectric Tensor and Effective Charges
  ! (initialized to one_3D and zero if the derivatives are not available in the DDB file)
  iblock = ddb_get_dielt_zeff(ddb,cryst,dtset%rfmeth,dtset%chneut,selectz0,dielt,zeff)
- if (iblock == 0) then
-   call wrtout(std_out,"DDB does not contain the dielectric tensor and the effective charges. Init with zeros", "COLL")
+ if (my_rank == master) then
+   if (iblock == 0) then
+     call wrtout(ab_out, sjoin("- Cannot find dielectric tensor and Born effective charges in DDB file:", ddb_path))
+     call wrtout(ab_out, "Values initialized with zeros")
+   else
+     call wrtout(ab_out, sjoin("- Found dielectric tensor and Born effective charges in DDB file:", ddb_path))
+   end if
  end if
 
  ! Build the inter-atomic force constants.
  call ifc_init(ifc,cryst,ddb,&
  brav1,dtset%asr,dtset%symdynmat,dtset%dipdip,dtset%rfmeth,dtset%ddb_ngqpt,ddb_nqshift,ddb_qshifts,dielt,zeff,&
- nsphere0,rifcsph0,prtsrlr0,dtset%enunit)
+ nsphere0,rifcsph0,prtsrlr0,dtset%enunit,comm)
  ABI_FREE(ddb_qshifts)
+ call ifc_print(ifc, unit=std_out)
 
- ! Phonon Density of States.
- ! FIXME: mkphdos expects qshift(3) instead of qshift(3, nqshift)
- call mkphdos(phdos,cryst,ifc,dtset%ph_intmeth,dtset%ph_wstep,dtset%ph_smear,dtset%ph_ngqpt,dtset%ph_qshift)
-
- !call phdos_print_debye(phdos, cryst%ucvol)
- if (my_rank == master) then
-   call phdos_print(phdos, strcat(dtfil%filnam_ds(4), "_PHDOS"))
-   !call phdos_ncwrite(phdos, ncid) 
+ ! Test B-spline interpolation of phonons
+ !if (.True.) then
+ if (.False.) then
+   call ifc_test_phinterp(ifc, cryst, [8,8,8], 1, [zero,zero,zero], [3,3,3], comm)
+   !call ifc_set_interpolator(ifc, cryst, nustart, nucount, mode, phspline_ords, phskw_ratio, comm)
+   !call ifc_test_intepolator(ifc, dtset, dtfil, comm)
+   call xmpi_end()
  end if
- call phdos_free(phdos)
+
+ ! Output phonon band structure (requires qpath)
+ if (dtset%prtphbands /= 0) call ifc_mkphbs(ifc, cryst, dtset, dtfil%filnam_ds(4), comm)
+
+ if (dtset%prtphdos == 1) then
+
+   ! Phonon Density of States.
+   ! FIXME: mkphdos expects qshift(3) instead of qshift(3, nqshift)
+   ! TODO: Parallelize this routine.
+   call mkphdos(phdos,cryst,ifc,dtset%ph_intmeth,dtset%ph_wstep,dtset%ph_smear,dtset%ph_ngqpt,dtset%ph_qshift,comm)
+
+   if (my_rank == master) then
+     path = strcat(dtfil%filnam_ds(4), "_PHDOS")
+     call wrtout(ab_out, sjoin("- Writing phonon DOS to file:", path))
+     call phdos_print(phdos, path)
+
+     !call phdos_print_debye(phdos, crystal%ucvol)
+
+!TODO: do we want to pass the temper etc... from anaddb_dtset into the full dtset for abinit?
+! Otherwise just leave these defaults.
+!MG: Disabled for the time being because of SIGFPE in v8[41]
+     path = strcat(dtfil%filnam_ds(4), "_MSQD_T")
+     !call phdos_print_msqd(phdos, path, 1000, one, one)
+     path = strcat(dtfil%filnam_ds(4), "_THERMO")
+     call phdos_print_thermo(PHdos, path, 1000, zero, one)
+
+#ifdef HAVE_NETCDF
+     path = strcat(dtfil%filnam_ds(4), "_PHDOS.nc")
+     ncerr = nctk_open_create(ncid, path, xmpi_comm_self)
+     NCF_CHECK_MSG(ncerr, sjoin("Creating PHDOS.nc file:", path))
+     NCF_CHECK(crystal_ncwrite(cryst, ncid))
+     call phdos_ncwrite(phdos, ncid)
+     NCF_CHECK(nf90_close(ncid))
+#endif
+   end if
+   call phdos_free(phdos)
+ end if
 
  if (dtset%prtbltztrp == 1 .and. my_rank == master) then
    call ifc_outphbtrap(ifc,cryst,dtset%ph_ngqpt,dtset%ph_nqshift,dtset%ph_qshift,dtfil%filnam_ds(4))
 
    ! BoltzTraP output files in GENEric format
-   ! TODO: ebands method
-   nelect_per_spin = ebands_nelect_per_spin(ebands)
-   call prtbltztrp_out(ebands%eig, ebands%fermie, dtfil%filnam_ds(4), ebands%kptns, cryst%natom, ebands%nband(1), &
-   nelect_per_spin, ebands%nkpt, ebands%nspinor, ebands%nsppol, cryst%nsym, cryst%rprimd, cryst%symrel)
+   call ebands_prtbltztrp(ebands, cryst, dtfil%filnam_ds(4))
+ end if
+
+ ! Output phonon isosurface in Xcrysden format.
+ if (dtset%prtphsurf == 1) then
+   path = strcat(dtfil%filnam_ds(4), "_PH.bxsf")
+   call wrtout(ab_out, sjoin("- Writing phonon frequencies in Xcrysden format to file:", path))
+   call ifc_printbxsf(ifc, cryst, dtset%ph_ngqpt, dtset%ph_nqshift, dtset%ph_qshift, path, comm)
  end if
 
  call cwtime(cpu,wall,gflops,"stop")
  write(msg,'(2(a,f8.2))')"eph%ifc: cpu:",cpu,", wall: ",wall
- call wrtout(std_out,msg,"COLL",do_flush=.True.)
+ call wrtout(std_out, msg, do_flush=.True.)
  call cwtime(cpu,wall,gflops,"start")
 
- ! Initialize the object used to read DeltaVscf 
- call dvdb_init(dvdb, dvdb_path, comm)
- call dvdb_print(dvdb)
- if (dtset%prtvol > 0) call dvdb_list_perts(dvdb, [-1,-1,-1])
+ ! Initialize the object used to read DeltaVscf (required if eph_task /= 0)
+ if (use_dvdb) then
+   call dvdb_init(dvdb, dvdb_path, comm)
+   if (my_rank == master) then
+     call dvdb_print(dvdb)
+     call dvdb_list_perts(dvdb, [-1,-1,-1], unit=ab_out)
+   end if
+   ! TODO: Routine to compute \delta V_{q,nu)(r) and dump the results in XSF format/netcdf.
+ end if
 
  ! TODO Recheck getng, should use same trick as that used in screening and sigma.
  call pawfgr_init(pawfgr,dtset,mgfftf,nfftf,ecut_eff,ecutdg_eff,ngfftc,ngfftf,&
@@ -383,14 +524,44 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  ! === Open and read pseudopotential files ===
  ! ===========================================
  call pspini(dtset,dtfil,ecore,psp_gencond,gsqcutc_eff,gsqcutf_eff,level40,&
- pawrad,pawtab,psps,cryst%rprimd,comm_mpi=comm)
+& pawrad,pawtab,psps,cryst%rprimd,comm_mpi=comm)
 
- eph_task = "ph_linwid"
- if (eph_task == "ph_linwid") then
+ ! ====================================================
+ ! === This is the real epc stuff once all is ready ===
+ ! ====================================================
+! TODO: decide whether to make several driver functions.
+!  before that, however, need to encapsulate most of the functionalities in eph_phgamma
+!  otherwise there will be tons of duplicated code
+
+ ! TODO: Make sure that all subdrivers work with useylm == 1
+ ABI_CHECK(dtset%useylm == 0, "useylm != 0 not implemented/tested")
+ select case (dtset%eph_task)
+ case (0)
+   continue
+
+ case (1)
    ! Compute phonon linewidths in metals.
-   call eph_phgamma(wfk0_path,dtfil,ngfftc,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
+   call eph_phgamma(wfk0_path,dtfil,ngfftc,ngfftf,dtset,cryst,ebands,dvdb,ddk,ifc,&
    pawfgr,pawang,pawrad,pawtab,psps,mpi_enreg,n0,comm)
- end if
+
+ case (2)
+   ! Compute electron-phonon matrix elements
+   call eph_gkk(wfk0_path,wfq_path,dtfil,ngfftc,ngfftf,dtset,cryst,ebands,ebands_kq,dvdb,ifc,&
+   pawfgr,pawang,pawrad,pawtab,psps,mpi_enreg,comm)
+
+ case (3)
+   ! Compute phonon self-energy
+   call eph_phpi(wfk0_path,wfq_path,dtfil,ngfftc,ngfftf,dtset,cryst,ebands,ebands_kq,dvdb,ifc,&
+   pawfgr,pawang,pawrad,pawtab,psps,mpi_enreg,comm)
+
+ case (4)
+   ! Compute electron self-energy (phonon contribution)
+   call sigmaph(wfk0_path,dtfil,ngfftc,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
+   pawfgr,pawang,pawrad,pawtab,psps,mpi_enreg,comm)
+
+ case default
+   MSG_ERROR(sjoin("Unsupported value of eph_task:", itoa(dtset%eph_task)))
+ end select
 
  !=====================
  !==== Free memory ====
@@ -398,13 +569,15 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  call crystal_free(cryst)
  call dvdb_free(dvdb)
  call ddb_free(ddb)
+ call ddk_free(ddk)
  call ifc_free(ifc)
  call ebands_free(ebands)
+ if (use_wfq) call ebands_free(ebands_kq)
  call pawfgr_destroy(pawfgr)
  call destroy_mpi_enreg(mpi_enreg)
 
  ! Deallocation for PAW.
- if (dtset%usepaw==1) then 
+ if (dtset%usepaw==1) then
    !call pawrhoij_free(pawrhoij)
    !ABI_DT_FREE(pawrhoij)
    !call pawfgrtab_free(pawfgrtab)

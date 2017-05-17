@@ -7,7 +7,7 @@
 !!  Calculates van der Waals corrections to exchange-correlation.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2010-2016 ABINIT group (Yann Pouillon, Camilo Espejo)
+!!  Copyright (C) 2010-2017 ABINIT group (Yann Pouillon, Camilo Espejo)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -43,7 +43,7 @@ module m_xc_vdw
  use m_numeric_tools,only : simpson_int
 
  use m_io_tools,only : flush_unit, open_file
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
  use netcdf
 #endif
 
@@ -252,7 +252,7 @@ contains
 !!  produces energy, potential and stress tensor.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2010-2016 ABINIT group (Yann Pouillon, Camilo Espejo)
+!!  Copyright (C) 2010-2017 ABINIT group (Yann Pouillon, Camilo Espejo)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -647,7 +647,7 @@ end subroutine xc_vdw_aggregate
 !!  van der Waals interactions at one point.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2010-2016 ABINIT group (Yann Pouillon, Camilo Espejo)
+!!  Copyright (C) 2010-2017 ABINIT group (Yann Pouillon, Camilo Espejo)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -875,7 +875,7 @@ end subroutine xc_vdw_energy
 !!  not needed anymore.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2010-2016 ABINIT group (Yann Pouillon, Camilo Espejo)
+!!  Copyright (C) 2010-2017 ABINIT group (Yann Pouillon, Camilo Espejo)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -940,7 +940,7 @@ end subroutine xc_vdw_done
 !!  Exports internal vdW-DF parameters.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2010-2016 ABINIT group (Yann Pouillon, Camilo Espejo)
+!!  Copyright (C) 2010-2017 ABINIT group (Yann Pouillon, Camilo Espejo)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1009,7 +1009,7 @@ end subroutine xc_vdw_get_params
 !!  Calculates the van der Waals kernel.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2010-2016 ABINIT group (Yann Pouillon, Camilo Espejo)
+!!  Copyright (C) 2010-2017 ABINIT group (Yann Pouillon, Camilo Espejo)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1404,7 +1404,7 @@ end subroutine xc_vdw_init
 !!  calculations.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2011-2016 ABINIT group (Yann Pouillon, Camilo Espejo)
+!!  Copyright (C) 2011-2017 ABINIT group (Yann Pouillon, Camilo Espejo)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1492,7 +1492,7 @@ end subroutine xc_vdw_libxc_init
 !!  Estimates the memory to be used by the vdW-DF method.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2010-2016 ABINIT group (Yann Pouillon, Camilo Espejo)
+!!  Copyright (C) 2010-2017 ABINIT group (Yann Pouillon, Camilo Espejo)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1614,7 +1614,7 @@ end subroutine xc_vdw_memcheck
 !!  Reads vdW-DF variables from disk.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2010-2016 ABINIT group (Yann Pouillon, Camilo Espejo)
+!!  Copyright (C) 2010-2017 ABINIT group (Yann Pouillon, Camilo Espejo)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1659,7 +1659,7 @@ subroutine xc_vdw_read(filename)
 
   VDWXC_DBG_ENTER("COLL",ABI_FUNC)
 
-#if defined HAVE_TRIO_NETCDF
+#if defined HAVE_NETCDF
   write(msg,'("Reading vdW-DF data from",1x,a)') trim(filename)
   call wrtout(std_out,msg,'COLL')
 
@@ -1797,7 +1797,7 @@ end subroutine xc_vdw_read
 !!  Sets the vdW-DF parameters directly related to the functional.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2010-2016 ABINIT group (Yann Pouillon, Camilo Espejo)
+!!  Copyright (C) 2010-2017 ABINIT group (Yann Pouillon, Camilo Espejo)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1849,7 +1849,7 @@ end subroutine xc_vdw_set_functional
 !!  Imports external vdW-DF parameters.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2010-2016 ABINIT group (Yann Pouillon, Camilo Espejo)
+!!  Copyright (C) 2010-2017 ABINIT group (Yann Pouillon, Camilo Espejo)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1918,7 +1918,7 @@ end subroutine xc_vdw_set_params
 !!  Displays the parameters in use for the vdW-DF corrections.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2010-2016 ABINIT group (Yann Pouillon, Camilo Espejo)
+!!  Copyright (C) 2010-2017 ABINIT group (Yann Pouillon, Camilo Espejo)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -2005,7 +2005,7 @@ end subroutine xc_vdw_show
 !!  Returns the status of the main vdW-DF switch.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2010-2016 ABINIT group (Yann Pouillon, Camilo Espejo)
+!!  Copyright (C) 2010-2017 ABINIT group (Yann Pouillon, Camilo Espejo)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -2052,7 +2052,7 @@ end function xc_vdw_status
 !!  Switches on and off the calculation of vdW interactions.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2010-2016 ABINIT group (Yann Pouillon, Camilo Espejo)
+!!  Copyright (C) 2010-2017 ABINIT group (Yann Pouillon, Camilo Espejo)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -2118,7 +2118,7 @@ end subroutine xc_vdw_trigger
 !!  Writes vdW-DF variables to disk.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2010-2016 ABINIT group (Yann Pouillon, Camilo Espejo)
+!!  Copyright (C) 2010-2017 ABINIT group (Yann Pouillon, Camilo Espejo)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -2161,7 +2161,7 @@ subroutine xc_vdw_write(filename)
 
   VDWXC_DBG_ENTER("COLL",ABI_FUNC)
 
-#if defined HAVE_TRIO_NETCDF
+#if defined HAVE_NETCDF
   write(msg,'(a,1x,"Writing vdW-DF data to",1x,a)') ch10,trim(filename)
   call wrtout(std_out,msg,'COLL')
 
@@ -2310,7 +2310,7 @@ end subroutine xc_vdw_write
 !!  Softens the kernel by applying a filter in reciprocal space.
 !!  
 !! COPYRIGHT
-!!  Copyright (C) 2010-2016 ABINIT group (Yann Pouillon, Camilo Espejo)
+!!  Copyright (C) 2010-2017 ABINIT group (Yann Pouillon, Camilo Espejo)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -2484,7 +2484,7 @@ end subroutine vdw_df_filter
 !!  polynomial for small distances.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2010-2016 ABINIT group (Yann Pouillon, Camilo Espejo)
+!!  Copyright (C) 2010-2017 ABINIT group (Yann Pouillon, Camilo Espejo)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -2595,7 +2595,7 @@ end function vdw_df_kernel
 !!  direct integration of Eq.(14) of Dion et al., PRL 92, 246401 (2004).
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2010-2016 ABINIT group (Yann Pouillon, Camilo Espejo)
+!!  Copyright (C) 2010-2017 ABINIT group (Yann Pouillon, Camilo Espejo)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -2794,7 +2794,7 @@ end function vdw_df_kernel_value
 !!  Calculates LDA-based XC energy density for other vdW routines.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2011-2016 ABINIT group (Yann Pouillon, Camilo Espejo)
+!!  Copyright (C) 2011-2017 ABINIT group (Yann Pouillon, Camilo Espejo)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -2923,7 +2923,7 @@ end subroutine vdw_df_ldaxc
 !!  Creates a 1D mesh following user specifications.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2016 ABINIT group (Yann Pouillon, Camilo Espejo)
+!!  Copyright (C) 2013-2017 ABINIT group (Yann Pouillon, Camilo Espejo)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -3157,7 +3157,7 @@ end subroutine vdw_df_create_mesh
 !!  Returns the index of a specified value in a sorted array.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2010-2016 ABINIT group (Yann Pouillon, Camilo Espejo)
+!!  Copyright (C) 2010-2017 ABINIT group (Yann Pouillon, Camilo Espejo)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -3225,7 +3225,7 @@ end function vdw_df_indexof
 !!  Calculates values of Phi(d1,d2) by interpolating the kernel.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2010-2016 ABINIT group (Yann Pouillon, Camilo Espejo)
+!!  Copyright (C) 2010-2017 ABINIT group (Yann Pouillon, Camilo Espejo)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -3321,7 +3321,7 @@ end function vdw_df_interpolate
 !!  Performs consistency checks of the vdW-DF kernel.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2016 ABINIT group (Camilo Espejo, Yann Pouillon)
+!!  Copyright (C) 2013-2017 ABINIT group (Camilo Espejo, Yann Pouillon)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -3486,7 +3486,7 @@ subroutine vdw_df_netcdf_ioerr(ncerr,file_name,file_line)
     my_file_line = file_line
   end if
 
-#if defined HAVE_TRIO_NETCDF
+#if defined HAVE_NETCDF
   write(msg,'(a,a,3x,a)') &
 &  'NetCDF returned the error:',ch10,trim(nf90_strerror(ncerr))
   if ( ncerr /= NF90_NOERR ) then
@@ -3505,7 +3505,7 @@ end subroutine vdw_df_netcdf_ioerr
 !!  Expands user-specified tweaks for internal use.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2016 ABINIT group (Yann Pouillon, Camilo Espejo)
+!!  Copyright (C) 2013-2017 ABINIT group (Yann Pouillon, Camilo Espejo)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -3561,7 +3561,7 @@ end subroutine vdw_df_set_tweaks
 !!  Writes function names for debugging purposes.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2016 ABINIT group (Yann Pouillon, Camilo Espejo)
+!!  Copyright (C) 2013-2017 ABINIT group (Yann Pouillon, Camilo Espejo)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .

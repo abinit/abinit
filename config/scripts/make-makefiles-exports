@@ -1,16 +1,19 @@
 #!/usr/bin/env python
 #
-# Copyright (C) 2005-2016 ABINIT Group (Yann Pouillon)
+# Copyright (C) 2005-2017 ABINIT Group (Yann Pouillon)
 #
 # This file is part of the ABINIT software package. For license information,
 # please see the COPYING file in the top-level directory of the ABINIT source
 # distribution.
 #
+from __future__ import print_function, division, absolute_import #, unicode_literals
 
-from ConfigParser import ConfigParser,NoOptionError
+try:
+    from ConfigParser import ConfigParser,NoOptionError
+except ImportError:
+    from configparser import ConfigParser,NoOptionError
 from time import gmtime,strftime
 
-import commands
 import os
 import re
 import sys
@@ -57,16 +60,16 @@ my_configs = ["config/specs/exports.conf"]
 # Check if we are at the top of the ABINIT source tree
 if ( not os.path.exists("configure.ac") or
      not os.path.exists("src/98_main/abinit.F90") ):
-  print "%s: You must be in the top of an ABINIT source tree." % my_name
-  print "%s: Aborting now." % my_name
+  print("%s: You must be in the top of an ABINIT source tree." % my_name)
+  print("%s: Aborting now." % my_name)
   sys.exit(1)
 
 # Read config file(s)
 cnf = MyConfigParser()
 for cnf_file in my_configs:
   if ( not os.path.exists(cnf_file) ):
-    print "%s: Could not find config file (%s)." % (my_name,cnf_file)
-    print "%s: Aborting now." % my_name
+    print("%s: Could not find config file (%s)." % (my_name,cnf_file))
+    print("%s: Aborting now." % my_name)
     sys.exit(2)
 
 # What time is it?
@@ -98,10 +101,10 @@ for exp in abinit_exports:
     # Get library contents
     src_desc = "src/%s/abinit.src" % (lib)
     if ( os.path.exists(src_desc) ):
-      execfile(src_desc)
+      exec(compile(open(src_desc).read(), src_desc, 'exec'))
     else:
-      print "%s: Could not find config file (%s)." % (my_name,src_desc)
-      print "%s: Aborting now." % my_name
+      print("%s: Could not find config file (%s)." % (my_name,src_desc))
+      print("%s: Aborting now." % my_name)
       sys.exit(3)
 
     # Add objects to the export item
@@ -119,7 +122,7 @@ for exp in abinit_exports:
 exp_libs += "\n\n"
 
 # Output to makefile
-mf = file("src/libs/Makefile.am","w")
+mf = open("src/libs/Makefile.am", "wt")
 mf.write(makefile_header(my_name,now)+exp_libs+exp_dscs)
 mf.write("clean-local:\n\trm -f *.a *.la *.so*\n")
 mf.close()

@@ -11,7 +11,7 @@
 !!  inv_s_projs = - (s_projs^-1 + projs'*projs)^-1
 !!
 !! COPYRIGHT
-!! Copyright (C) 2013-2016 ABINIT group (AL)
+!! Copyright (C) 2013-2017 ABINIT group (AL)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -661,7 +661,7 @@ subroutine solve_inner(invovl, ham, cplx, mpi_enreg, proj, ndat, sm1proj, PtPsm1
  integer :: array_nlmntot_pp(mpi_enreg%nproc_fft)
  integer :: nlmntot_this_proc, ibeg, iend, ierr, i, nprojs
  real(dp) :: resid(cplx, invovl%nprojs,ndat), precondresid(cplx, invovl%nprojs,ndat)
- real(dp) :: normprojs(ndat), errs(ndat), maxerr
+ real(dp) :: normprojs(ndat), errs(ndat), maxerr, previous_maxerr
  character(len=500) :: message
 
  real(dp), parameter :: precision = 1e-16 ! maximum relative error. TODO: use tolwfr ?
@@ -719,8 +719,10 @@ subroutine solve_inner(invovl, ham, cplx, mpi_enreg, proj, ndat, sm1proj, PtPsm1
      convergence_rate = -LOG(1e-10) / i
      additional_steps_to_take = CEILING(-LOG(precision/1e-10)/convergence_rate) + 1
    else if(additional_steps_to_take > 0) then
+     if(previous_maxerr<maxerr)exit 
      additional_steps_to_take = additional_steps_to_take - 1
    end if
+   previous_maxerr=maxerr
 
    ! add preconditionned residual
    call apply_block(ham, cplx, invovl%inv_s_approx, nprojs, ndat, resid, precondresid)

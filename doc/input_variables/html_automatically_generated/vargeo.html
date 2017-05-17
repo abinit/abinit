@@ -27,6 +27,7 @@ variables to be used in the main input file of the abinit code.
  <br>B.
  <a href="#brvltt">brvltt</a>&nbsp;&nbsp;
  <br>C.
+ <a href="#chempot">chempot</a>&nbsp;&nbsp;
  <br>D.
  <br>E.
  <br>F.
@@ -41,6 +42,7 @@ variables to be used in the main input file of the abinit code.
  <br>N.
  <a href="#natrd">natrd</a>&nbsp;&nbsp;
  <a href="#nobj">nobj</a>&nbsp;&nbsp;
+ <a href="#nzchempot">nzchempot</a>&nbsp;&nbsp;
  <br>O.
  <a href="#objaat">objaat</a>&nbsp;&nbsp;
  <a href="#objaax">objaax</a>&nbsp;&nbsp;
@@ -158,6 +160,33 @@ and two associated translations: (2/3, 1/3, 1/3) and
  </a>
  .
 </p>
+</font>
+
+<br><br><br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="chempot">chempot</a></font>
+<br><font id="definition">Mnemonics: spatially varying CHEMical POTential</font>
+<br><font id="characteristic">Characteristic: </font>
+<br><font id="vartype">Variable type: real(3,[['nzchempot']],[['ntype']])</font>
+<br><font id="default">Default is 0.0</font>
+<br><br><font id="requires">
+Only relevant if <a href="vargeo.html#nzchempot">nzchempot</a>/=0
+</font>
+<br><font id="text">
+<p>
+For each type of atoms, from 1 to <a href="varbas.html#ntypat">ntypat</a>, specifies the spatially varying chemical potential, through the specification of <a href="vargeo.html#nzchempot">nzchempot</a> triplets of real numbers. They give data for <a href="vargeo.html#nzchempot">nzchempot</a> delimiting planes, all parallel to each other, each determined by its z reduced coordinate.
+
+The first real number is the z reduced coordinate of the delimiting plane. The second real number is the value of the chemical potential for this type of atom on this plane. The third real number is the derivative of the chemical potential fior this type of atom with respect to the z reduced coordinate, evaluated on this plane.
+
+In the space between delimiting planes, a piecewise cubic polynomial interpolation is determined : the cubic polynomial between two delimiting planes will have the imposed chemical potentials and derivatives on the two delimiting planes.
+
+The z reduced coordinates must be ordered in increasing values, and cannot span more than 1.0 . There is an automatic periodic boundary condition imposed. Specifying two identical z reduced coordinates is allowed, and means that the first one applies to the adjacent space with lower values of z, while the second applies to the adjacent space with higher values of z.
+
+When the spatial chemical potential is defined only for one type of atom (and no chemical potential is present for the other atoms), simply set the related values to *0.0 in the <b>chempot</b> array.
+
+In the present input array, reduced positions, energies and derivatives of energies are mixed. Hence, although the chemical potential is an energy, one cannot use the usual energy definitions (i.e. the chemical potential is always to be input in Hartree atomic units).
 </font>
 
 <br><br><br><br><a href=#top>Go to the top</a>
@@ -305,6 +334,20 @@ Go to <a href="vargeo.html#objan">objan</a>, for example.
 <B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
 
 
+<br><font id="title"><a name="nzchempot">nzchempot</a></font>
+<br><font id="definition">Mnemonics: Number of Z reduced coordinates that define the spatial CHEMical POTential</font>
+<br><font id="characteristic">Characteristic: </font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">No default</font>
+<br><font id="text">
+<p>
+Defines the number of z reduced coordinates that defines the spatially varying chemical potential. See the input variable <a href="vargeo.html#chempot">chempot</a>, of which <b>nzchempot</b> is the second dimension.
+</font>
+
+<br><br><br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
+
+
 <br><font id="title"><a name="objaat">objaat</a></font>
 <br><font id="definition">Mnemonics: OBJect A : list of AToms, OBJect B : list of AToms</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#geometry_builder">GEOMETRY_BUILDER</a>, <a href="../../users/abinit_help.html#input_only">INPUT_ONLY</a></font>
@@ -326,7 +369,6 @@ of atoms.
  Look at <a href="vargeo.html#objarf">objarf</a> for further explanations.
 <br />
 </p>
-
 </font>
 
 <br><br><br><br><a href=#top>Go to the top</a>
@@ -845,7 +887,6 @@ monoclinic groups is for example:
   </li>
  </ol>
 </p>
-
 </font>
 
 <br><br><br><br><a href=#top>Go to the top</a>
@@ -1050,7 +1091,6 @@ and <a href="varbas.html#xangst">xangst</a> from. This input can not be mixed wi
 <p>
  Notes: do not quote the file name in the abinit input file, simply leave a space after xyzfile. The xyz format is the number of atoms on the first line, a comment line, then one line per atom, with the element as a 2 letter symbol ("As" "O" or "Pu") and the three cartesian coordinates in Angstrom.
 </p>
-
 </font>
 
 <br><br><br><br><a href=#top>Go to the top</a>

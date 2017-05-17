@@ -7,7 +7,7 @@
 !! Main routine for Bader Atom-In-Molecule analysis.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2002-2016 ABINIT group (PCasek,FF,XG)
+!! Copyright (C) 2002-2017 ABINIT group (PCasek,FF,XG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -46,7 +46,7 @@ program aim
  use m_build_info
  use m_errors
  use m_nctk
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
  use netcdf
 #endif
 
@@ -203,7 +203,7 @@ program aim
        write(std_out,"(3a)")"- File: ",trim(dnfile)," does not exist but found netcdf file with similar name."
        dnfile = nctk_ncify(dnfile)
        aim_iomode = IO_MODE_ETSF
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
        NCF_CHECK(nctk_open_read(untad, dnfile, xmpi_comm_self))
 #else
        MSG_ERROR("Cannot read netcdf file because netcdf support in Abinit is missing.")

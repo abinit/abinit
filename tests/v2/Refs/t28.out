@@ -2,7 +2,7 @@
 .Version 8.0.5 of ANADDB 
 .(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
 
-.Copyright (C) 1998-2016 ABINIT group . 
+.Copyright (C) 1998-2017 ABINIT group . 
  ANADDB comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -64,8 +64,6 @@
 
  read the DDB information and perform some checks
 
--begin at tcpu      0.027  and twall      0.027 sec
-
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  3.8000000  3.8000000  G(1)= -0.1315789  0.1315789  0.1315789
  R(2)=  3.8000000  0.0000000  3.8000000  G(2)=  0.1315789 -0.1315789  0.1315789
@@ -78,7 +76,6 @@
 
  Calculation of the interatomic forces 
 
--begin at tcpu      0.032  and twall      0.032 sec
        Homogeneous q point set in the B.Z.
  Grid q points  :       32
   1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -435,7 +432,6 @@
 
  Treat the first list of vectors 
 
--begin at tcpu      0.042  and twall      0.042 sec
  
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.00000
  Phonon energies in Hartree :
@@ -467,7 +463,6 @@
 - -1.981659E+00  1.107166E+00  1.107166E+00
  Phonon energies in Kelvin  :
 - -9.510449E+01  5.313553E+01  5.313553E+01
- Found acoustic mode      1 for |q| in red coord < 0.25 ; q =       0.1000      0.1000      0.0000
  Speed of sound for this q and mode:
    in atomic units:    -0.1821493042E-02
    in SI units m/s:          -3984.86440
@@ -475,7 +470,6 @@
    in atomic units:    -0.1482919536E-02
    in SI units K  :           -468.26840
 
- Found acoustic mode      2 for |q| in red coord < 0.25 ; q =       0.1000      0.1000      0.0000
  Speed of sound for this q and mode:
    in atomic units:     0.1017680514E-02
    in SI units m/s:           2226.37076
@@ -483,7 +477,6 @@
    in atomic units:     0.8285172009E-03
    in SI units K  :            261.62473
 
- Found acoustic mode      3 for |q| in red coord < 0.25 ; q =       0.1000      0.1000      0.0000
  Speed of sound for this q and mode:
    in atomic units:     0.1017680514E-02
    in SI units m/s:           2226.37076
@@ -611,7 +604,6 @@
 - -1.331412E+00 -6.787657E-01  1.569152E+00
  Phonon energies in Kelvin  :
 - -6.389760E+01 -3.257558E+01  7.530735E+01
- Found acoustic mode      1 for |q| in red coord < 0.25 ; q =       0.0720      0.0720      0.1440
  Speed of sound for this q and mode:
    in atomic units:    -0.1201886756E-02
    in SI units m/s:          -2629.35715
@@ -619,7 +611,6 @@
    in atomic units:    -0.9784837548E-03
    in SI units K  :           -308.98037
 
- Found acoustic mode      2 for |q| in red coord < 0.25 ; q =       0.0720      0.0720      0.1440
  Speed of sound for this q and mode:
    in atomic units:    -0.6127327852E-03
    in SI units m/s:          -1340.47016
@@ -627,7 +618,6 @@
    in atomic units:    -0.4988399059E-03
    in SI units K  :           -157.52100
 
- Found acoustic mode      3 for |q| in red coord < 0.25 ; q =       0.0720      0.0720      0.1440
  Speed of sound for this q and mode:
    in atomic units:     0.1416499208E-02
    in SI units m/s:           3098.86293
@@ -666,7 +656,6 @@
 - -7.085905E-01 -7.085905E-01  1.520492E+00
  Phonon energies in Kelvin  :
 - -3.400694E+01 -3.400694E+01  7.297201E+01
- Found acoustic mode      1 for |q| in red coord < 0.25 ; q =       0.1250      0.1250      0.1250
  Speed of sound for this q and mode:
    in atomic units:    -0.6016630731E-03
    in SI units m/s:          -1316.25304
@@ -674,7 +663,6 @@
    in atomic units:    -0.4898277977E-03
    in SI units K  :           -154.67520
 
- Found acoustic mode      2 for |q| in red coord < 0.25 ; q =       0.1250      0.1250      0.1250
  Speed of sound for this q and mode:
    in atomic units:    -0.6016630731E-03
    in SI units m/s:          -1316.25304
@@ -682,7 +670,6 @@
    in atomic units:    -0.4898277977E-03
    in SI units K  :           -154.67520
 
- Found acoustic mode      3 for |q| in red coord < 0.25 ; q =       0.1250      0.1250      0.1250
  Speed of sound for this q and mode:
    in atomic units:     0.1291047325E-02
    in SI units m/s:           2824.41294

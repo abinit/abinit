@@ -1,6 +1,6 @@
 # -*- Python -*-
 #
-# Copyright (C) 2005-2016 ABINIT Group (Yann Pouillon)
+# Copyright (C) 2005-2017 ABINIT Group (Yann Pouillon)
 #
 # This file is part of the ABINIT software package. For license information,
 # please see the COPYING file in the top-level directory of the ABINIT source
@@ -27,7 +27,6 @@ sources = [
  "chkint_le.F90",
  "chkint_ne.F90",
  "chkint_prt.F90",
- "chkneu.F90",
  "chkvars.F90",
  "compute_kgb_indicator.F90",
  "create_nc_file.F90",

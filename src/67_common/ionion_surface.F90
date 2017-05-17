@@ -11,7 +11,7 @@
 !! potentials calculations and includes replica interactions.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (DCA, XG, GMR)
+!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -47,7 +47,7 @@ subroutine ionion_surface(dtset, eew, grewtn, me, nproc, rprimd, wvl, wvl_den, x
  use defs_abitypes
  use defs_wvltypes
  use m_profiling_abi
-#if defined HAVE_DFT_BIGDFT
+#if defined HAVE_BIGDFT
  use BigDFT_API, only: IonicEnergyandForces
 #endif
 
@@ -79,7 +79,7 @@ subroutine ionion_surface(dtset, eew, grewtn, me, nproc, rprimd, wvl, wvl_den, x
 !arrays
  real(dp),allocatable :: xcart(:,:)
  real(dp),pointer :: grew_cart(:,:),fdisp(:,:)
-#if defined HAVE_DFT_BIGDFT
+#if defined HAVE_BIGDFT
  real(dp) :: edisp
  real(dp) :: ewaldstr(6)
 #endif
@@ -94,7 +94,7 @@ subroutine ionion_surface(dtset, eew, grewtn, me, nproc, rprimd, wvl, wvl_den, x
  nullify(grew_cart)
  dispersion = 0
  psoffset = 0._dp
-#if defined HAVE_DFT_BIGDFT
+#if defined HAVE_BIGDFT
  call IonicEnergyandForces(me, nproc, wvl_den%denspot%dpbox,&
 & wvl%atoms, dtset%efield, xcart, &
 & eew, grew_cart, dispersion, edisp, fdisp,&
@@ -120,7 +120,7 @@ subroutine ionion_surface(dtset, eew, grewtn, me, nproc, rprimd, wvl, wvl_den, x
    ABI_DEALLOCATE(grew_cart)
  end if
 
-#if !defined HAVE_DFT_BIGDFT
+#if !defined HAVE_BIGDFT
  if (.false.) write(std_out,*) me,nproc,wvl%h(1),wvl_den%symObj
 #endif
 

@@ -7,7 +7,7 @@
 !! Contains the predictor for LOTF (ionmov==23)
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (DCA, XG, GMR, JCC, SE)
+!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR, JCC, SE)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -51,7 +51,7 @@ CONTAINS !===========================================================
  !! Lotf ensemble molecular dynamics.
  !!
  !! COPYRIGHT
- !! Copyright (C) 1998-2016 ABINIT group (DCA, XG, GMR, JCC, SE)
+ !! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR, JCC, SE)
  !! This file is distributed under the terms of the
  !! GNU General Public License, see ~abinit/COPYING
  !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -78,8 +78,8 @@ CONTAINS !===========================================================
 !!
  !! CHILDREN
 !!      extrapolation_loop,fitclus,hist2var,init_lotf,intparms
-!!      lotf_interpolation,metric,var2hist,vel_rescale,vel_to_gauss,wrtout
-!!      xcart2xred,xred2xcart
+!!      lotf_interpolation,var2hist,vel_rescale,vel_to_gauss,wrtout,xcart2xred
+!!      xred2xcart
 !!
  !! SOURCE
  subroutine pred_lotf(ab_mover,hist,itime,icycle,zDEBUG,iexit)
@@ -107,7 +107,7 @@ CONTAINS !===========================================================
   !Local variables-------------------------------
   !scalars
   integer  :: kk,iatom,idim,idum=5
-  real(dp) :: ucvol,v2gauss
+  real(dp) :: v2gauss
   real(dp),parameter :: v2tol=tol8
   real(dp) :: etotal
   character(len=5000) :: message
@@ -116,9 +116,7 @@ CONTAINS !===========================================================
   real(dp),allocatable,save :: fcart_m(:,:),vel_nexthalf(:,:)
   real(dp),allocatable,save :: xcart_old(:,:),vel_old(:,:)
 
-  real(dp) :: acell(3),rprim(3,3),rprimd(3,3)
-  real(dp) :: gprimd(3,3),gmet(3,3),rmet(3,3),fcart(3,ab_mover%natom)
-  real(dp) :: fred(3,ab_mover%natom)
+  real(dp) :: acell(3),rprimd(3,3),fcart(3,ab_mover%natom)
   real(dp) :: xcart(3,ab_mover%natom),xcart_next(3,ab_mover%natom)
   real(dp) :: xred(3,ab_mover%natom),xred_next(3,ab_mover%natom)
   real(dp) :: vel(3,ab_mover%natom)
@@ -198,26 +196,19 @@ CONTAINS !===========================================================
   !##########################################################
   !### 04. Obtain the present values from the history
 
-  call hist2var(acell,hist,ab_mover%natom,rprim,rprimd,xcart,xred,zDEBUG)
+  call hist2var(acell,hist,ab_mover%natom,rprimd,xred,zDEBUG)
 
-  fcart(:,:) =hist%histXF(:,:,3,hist%ihist)
-  fred(:,:)  =hist%histXF(:,:,4,hist%ihist)
-  vel(:,:)   =hist%histV(:,:,hist%ihist)
-  strten(:)  =hist%histS(:,hist%ihist)
-  etotal     =hist%histE(hist%ihist)
-
-!PRINT *,'HH-input  ',itime,icycle,sum(abs(xcart(1,:))),sum(abs(fcart(1,:))),sum(abs(vel(1,:)))
+  fcart(:,:)=hist%fcart(:,:,hist%ihist)
+  strten(:) =hist%strten(:,hist%ihist)
+  vel(:,:)  =hist%vel(:,:,hist%ihist)
+  etotal    =hist%etot(hist%ihist)
 
   if(zDEBUG)then
     write (std_out,*) 'fcart:'
     do kk=1,ab_mover%natom
       write (std_out,*) fcart(:,kk)
     end do
-    write (std_out,*) 'fred:'
-    do kk=1,ab_mover%natom
-      write (std_out,*) fred(:,kk)
-    end do
-    write (std_out,*) 'vel:'
+   write (std_out,*) 'vel:'
     do kk=1,ab_mover%natom
       write (std_out,*) vel(:,kk)
     end do
@@ -226,9 +217,6 @@ CONTAINS !===========================================================
     write (std_out,*) 'etotal:'
     write (std_out,*) etotal
   end if
-
-  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
-
 
   !write(std_out,*) 'lotf 05'
   !##########################################################
@@ -361,7 +349,7 @@ CONTAINS !===========================================================
   xcart = xcart_next
   xred = xred_next
 
-    !PRINT *,'HH-final-1',itime,icycle,sum(abs(xcart(1,:))),sum(abs(fcart(1,:))),sum(abs(vel(1,:)))
+  !PRINT *,'HH-final-1',itime,icycle,sum(abs(xcart(1,:))),sum(abs(fcart(1,:))),sum(abs(vel(1,:)))
 
   !print *,"XCART_final",sum(abs(xcart(1,:))),sum(abs(xcart(2,:))),sum(abs(xcart(3,:)))
 
@@ -369,16 +357,14 @@ CONTAINS !===========================================================
 &    ' --- XCART_final',sum(abs(xcart(1,:))),sum(abs(xcart(2,:))),sum(abs(xcart(3,:)))
   call wrtout(std_out,message,'PERS')
 
-
-  !Compute xcart from xred, and rprimd
-  call xred2xcart(ab_mover%natom,rprimd,xcart,xred)
-
   !Increase indexes
   hist%ihist = hist%ihist+1
 
   !Fill the history with the variables
   !xcart, xred, acell, rprimd
-  call var2hist(acell,hist,ab_mover%natom,rprim,rprimd,xcart,xred,zDEBUG)
+  call var2hist(acell,hist,ab_mover%natom,rprimd,xred,zDEBUG)
+  hist%vel(:,:,hist%ihist) = vel(:,:)
+  hist%time(hist%ihist)=real(itime,kind=dp)*ab_mover%dtion
 
   if(zDEBUG)then
     write (std_out,*) 'xcart:'
@@ -389,10 +375,6 @@ CONTAINS !===========================================================
     do kk=1,ab_mover%natom
       write (std_out,*) fcart(:,kk)
     end do
-    write (std_out,*) 'fred:'
-    do kk=1,ab_mover%natom
-      write (std_out,*) fred(:,kk)
-    end do
     write (std_out,*) 'vel:'
     do kk=1,ab_mover%natom
       write (std_out,*) vel(:,kk)
@@ -402,22 +384,6 @@ CONTAINS !===========================================================
     write (std_out,*) 'etotal:'
     write (std_out,*) etotal
   end if
-
-  hist%histV(:,:,hist%ihist) = vel(:,:)
-  hist%histT(hist%ihist) = itime*ab_mover%dtion
-
-
-  !write(std_out,*) 'lotf 07'
-  !##########################################################
-  !### 07. Deallocate in the last iteration
-  !###     When itime==ntime the predictor will be no called
-
-  !Temporarily deactivated (MT sept. 2011)
-  ! if (.false.) write(std_out,*) ntime
-  !if(itime==ntime-1)then
-  !  if (allocated(fcart_m))      deallocate(fcart_m)
-  !  if (allocated(vel_nexthalf)) deallocate(vel_nexthalf)
-  !end if
 
  end subroutine pred_lotf
  !!***

@@ -2,7 +2,7 @@
 .Version 8.0.3 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
 
-.Copyright (C) 1998-2016 ABINIT group . 
+.Copyright (C) 1998-2017 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -126,7 +126,7 @@ P          mk1mem10         4
                        0  1  0   0  0  1   1  0  0       0 -1  0   0  0 -1  -1  0  0
                        0  0  1   0  1  0   1  0  0       0  0 -1   0 -1  0  -1  0  0
            toldfe8     0.00000000E+00 Hartree
-           toldfe10    1.00000000E-12 Hartree
+           toldfe10    1.10000000E-12 Hartree
            tolvrs8     1.00000000E-20
            tolvrs10    0.00000000E+00
             typat      1  1
@@ -356,7 +356,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      65.000      65.000
  ETOT 13   2.4815612460323     -2.842E-14 3.065E-16 7.845E-15
 
  At SCF step   13, etot is converged : 
-  for the second time, diff in etot=  2.842E-14 < toldfe=  1.000E-12
+  for the second time, diff in etot=  2.842E-14 < toldfe=  1.100E-12
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -564,7 +564,7 @@ P          mk1mem10         4
                        0  1  0   0  0  1   1  0  0       0 -1  0   0  0 -1  -1  0  0
                        0  0  1   0  1  0   1  0  0       0  0 -1   0 -1  0  -1  0  0
            toldfe8     0.00000000E+00 Hartree
-           toldfe10    1.00000000E-12 Hartree
+           toldfe10    1.10000000E-12 Hartree
            tolvrs8     1.00000000E-20
            tolvrs10    0.00000000E+00
             typat      1  1

@@ -6,7 +6,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2016 ABINIT group (MG, XG, MT)
+!! Copyright (C) 2009-2017 ABINIT group (MG, XG, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -491,8 +491,10 @@ end function abi_wtime
 !!
 !! PARENTS
 !!      calc_sigc_me,calc_sigx_me,cchi0,cchi0q0,eph,exc_build_block
-!!      exc_build_ham,lapackprof,m_abilasi,m_bse_io,m_exc_itdiago,m_fft
-!!      m_fft_prof,m_ioarr,m_iowf,m_phgamma,m_shirley,m_wfd,m_wfk
+!!      exc_build_ham,lapackprof,m_abilasi,m_bse_io,m_epjdos,m_exc_itdiago
+!!      m_fft,m_fft_prof,m_fstab,m_gkk,m_gruneisen,m_ifc,m_ioarr,m_iowf
+!!      m_phgamma,m_phonons,m_phpi,m_shirley,m_sigmaph,m_skw,m_wfd,m_wfk
+!!      partial_dos_fractions
 !!
 !! CHILDREN
 !!      xpapi_flops
@@ -517,7 +519,7 @@ subroutine cwtime(cpu,wall,gflops,start_or_stop)
  character(len=*),intent(in) :: start_or_stop
 
 !Local variables-------------------------------
-#ifndef HAVE_TIMER_PAPI
+#ifndef HAVE_PAPI
  logical,parameter :: use_papi=.FALSE.
 #else
  logical,parameter :: use_papi=.TRUE.

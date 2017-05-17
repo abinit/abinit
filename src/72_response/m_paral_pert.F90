@@ -8,7 +8,7 @@
 !!  over perturbations
 !!
 !! COPYRIGHT
-!! Copyright (C) 2013-2016 ABINIT group (MT,FJ,MD)
+!! Copyright (C) 2013-2017 ABINIT group (MT,FJ,MD)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -72,7 +72,7 @@ CONTAINS
 !!  nppert=number of processes for the parallelization over perturbations
 !!
 !! SIDE EFFECTS
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!
 !! PARENTS
 !!      dfpt_looppert
@@ -131,7 +131,7 @@ end  subroutine set_pert_comm
 !! Unset the MPI communicators over the perturbed cell; restore the global communicators.
 !!
 !! SIDE EFFECTS
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!
 !! PARENTS
 !!      dfpt_looppert
@@ -210,7 +210,7 @@ end  subroutine unset_pert_comm
 !!  old_comm_atom=save the identifier of the MPI communicator
 !!
 !! SIDE EFFECTS
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  my_natom=number of atoms treated by current processor
 !!  paw_an(my_natom)<type(paw_an_type)>=PAW arrays given on angular mesh
 !!  paw_ij(my_natom)<type(paw_ij_type)>=PAW arrays given on (i,j) channels

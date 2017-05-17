@@ -8,7 +8,7 @@
 !! for the bigDFT Poisson Solver
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2016 ABINIT group (MT)
+!! Copyright (C) 2001-2017 ABINIT group (MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -23,7 +23,7 @@ module defs_PSolver
  implicit none
 !!***
 
-#if defined HAVE_DFT_BIGDFT
+#if defined HAVE_BIGDFT
  interface
 !!****m* defs_PSolver/PSolver
 !! NAME

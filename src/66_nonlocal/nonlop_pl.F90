@@ -18,7 +18,7 @@
 !! * This routine uses Legendre polynomials Pl to express Vnl.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (DCA, XG, GMR, GZ, MT, FF, DRH)
+!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR, GZ, MT, FF, DRH)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -59,7 +59,7 @@
 !!  lmnmax=max. number of (l,m,n) components over all types of atoms
 !!  matblk=dimension of the arrays ph3din and ph3dout
 !!  mgfft=maximum size of 1D FFTs
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  natom=number of atoms in cell
 !!  nattyp(ntypat)=number of atoms of each type
 !!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
@@ -174,7 +174,7 @@ subroutine nonlop_pl(choice,dimekb1,dimekb2,dimffnlin,dimffnlout,ekb,enlout,&
  integer,intent(in) :: lmnmax,matblk,mgfft,mpsang,mpssoang,natom,nkpgin,nkpgout
  integer,intent(in) :: nnlout,npwin,npwout,nspinor,nspinortot,ntypat,only_SO,signs
  real(dp),intent(in) :: ucvol
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: indlmn(6,lmnmax,ntypat),kgin(3,npwin),kgout(3,npwout)
  integer,intent(in) :: nattyp(ntypat),ngfft(18),nloalg(3) !,pspso(ntypat) UNUSED
@@ -187,9 +187,9 @@ subroutine nonlop_pl(choice,dimekb1,dimekb2,dimffnlin,dimffnlout,ekb,enlout,&
  real(dp),intent(in) :: ph1d(2,*) !vz_d
  real(dp),intent(in) :: phkxredin(2,natom),phkxredout(2,natom)
  real(dp),intent(inout) :: ph3din(2,npwin,matblk),ph3dout(2,npwout,matblk)
- real(dp),intent(inout) :: vectin(2,nspinor*npwin)
- real(dp),intent(out) :: enlout(nnlout) !vz_i
- real(dp),intent(inout) :: vectout(2,nspinor*npwout) !vz_i
+ real(dp),intent(inout) :: vectin(:,:)
+ real(dp),intent(out) :: enlout(:) !vz_i
+ real(dp),intent(inout) :: vectout(:,:) !vz_i
 
 !Local variables-------------------------------
 !mlang is the maximum number of different angular momenta

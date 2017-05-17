@@ -2,7 +2,7 @@
 
 #: List of CPP variables that should be defined in config.h in order to enable this suite.
 need_cpp_vars = [
-"HAVE_DFT_BIGDFT"
+"HAVE_BIGDFT"
 ]
 
 #: List of keywords that are automatically added to all the tests of this suite. 
@@ -35,7 +35,7 @@ inp_files = [
 "t31.in",
 "t32.in",
 "t33.in",
-"-t34.in",
+"t34.in",
 "-t35.in",
 "-t36.in",
 ]

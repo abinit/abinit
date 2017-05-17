@@ -11,7 +11,7 @@
 !! rs = $(3/(4\pi))^{1/3}* \rho (r)^{-1/3}$.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (DCA, XG, GMR)
+!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -31,7 +31,6 @@
 !!      drivexc
 !!
 !! CHILDREN
-!!      leave_new,wrtout
 !!
 !! SOURCE
 

@@ -2,7 +2,7 @@
 .Version 8.0.5 of ANADDB 
 .(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
 
-.Copyright (C) 1998-2016 ABINIT group . 
+.Copyright (C) 1998-2017 ABINIT group . 
  ANADDB comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -64,8 +64,6 @@
 
  read the DDB information and perform some checks
 
--begin at tcpu      0.018  and twall      0.018 sec
-
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  5.0900000  5.0900000  G(1)= -0.0982318  0.0982318  0.0982318
  R(2)=  5.0900000  0.0000000  5.0900000  G(2)=  0.0982318 -0.0982318  0.0982318
@@ -112,7 +110,6 @@
 
  Calculation of the interatomic forces 
 
--begin at tcpu      0.023  and twall      0.023 sec
        Homogeneous q point set in the B.Z.
  Grid q points  :      256
  greater than 80, so only write 20 of them
@@ -460,7 +457,6 @@
     thermodynamical properties, 
     and Debye-Waller factors.
 
--begin at tcpu      0.185  and twall      0.189 sec
        Homogeneous q point set in the B.Z.
  Grid q points  :       32
   1)   2.50000000E-01  2.50000000E-01  2.50000000E-01
@@ -1018,25 +1014,24 @@ iatom,iwchan,igqpt2(i),gij error=   3  1     4     4     4   0.00000
  DOS  with channel width=    9 newly converged
    with maximal error =    0.24759
 
- # At  T     F(J/mol-c)     E(J/mol-c)     S(J/(mol-c.K)) C(J/(mol-c.K))
+ # At  T     F(J/mol-c)     E(J/mol-c)     S(J/(mol-c.K)) C(J/(mol-c.K)) Omega_mean(cm-1)
  # (A mol-c is the abbreviation of a mole-cell, that is, the
  #  number of Avogadro times the atoms in a unit cell)
-  1.000E+02  1.1662437E+04  1.2467634E+04  8.0519720E+00  1.5027127E+01
-  2.000E+02  1.0065420E+04  1.4860831E+04  2.3977053E+01  3.1423321E+01
-  3.000E+02  6.9207220E+03  1.8469549E+04  3.8496092E+01  3.9696347E+01
-  4.000E+02  2.4504792E+03  2.2659009E+04  5.0521325E+01  4.3642024E+01
-  5.000E+02 -3.1155662E+03  2.7137216E+04  6.0505564E+01  4.5720100E+01
-  6.000E+02 -9.5997023E+03  3.1774500E+04  6.8957003E+01  4.6925332E+01
-  7.000E+02 -1.6868524E+04  3.6507487E+04  7.6251444E+01  4.7679932E+01
-  8.000E+02 -2.4820315E+04  4.1302147E+04  8.2653077E+01  4.8181395E+01
-  9.000E+02 -3.3375684E+04  4.6138739E+04  8.8349359E+01  4.8530660E+01
-  1.000E+03 -4.2471247E+04  5.1005081E+04  9.3476328E+01  4.8783263E+01
+  1.000E+02  1.1662437E+04  1.2467634E+04  8.0519720E+00  1.5027127E+01  1.9740982E+02
+  2.000E+02  1.0065420E+04  1.4860831E+04  2.3977053E+01  3.1423321E+01  2.8184252E+02
+  3.000E+02  6.9207220E+03  1.8469549E+04  3.8496092E+01  3.9696347E+01  3.0821961E+02
+  4.000E+02  2.4504792E+03  2.2659009E+04  5.0521325E+01  4.3642024E+01  3.1830527E+02
+  5.000E+02 -3.1155662E+03  2.7137216E+04  6.0505564E+01  4.5720100E+01  3.2311025E+02
+  6.000E+02 -9.5997023E+03  3.1774500E+04  6.8957003E+01  4.6925332E+01  3.2575458E+02
+  7.000E+02 -1.6868524E+04  3.6507487E+04  7.6251444E+01  4.7679932E+01  3.2736028E+02
+  8.000E+02 -2.4820315E+04  4.1302147E+04  8.2653077E+01  4.8181395E+01  3.2840686E+02
+  9.000E+02 -3.3375684E+04  4.6138739E+04  8.8349359E+01  4.8530660E+01  3.2912638E+02
+  1.000E+03 -4.2471247E+04  5.1005081E+04  9.3476328E+01  4.8783263E+01  3.2964203E+02
 
 ================================================================================
 
  Treat the first list of vectors 
 
--begin at tcpu      0.473  and twall      0.480 sec
  
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.00000
  Phonon energies in Hartree :

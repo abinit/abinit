@@ -88,6 +88,7 @@ variables to be used in the main input file of the abinit code.
  <a href="#optcell">optcell</a>&nbsp;&nbsp;
  <br>P.
  <a href="#pimass">pimass</a>&nbsp;&nbsp;
+ <a href="#pimd_constraint">pimd_constraint</a>&nbsp;&nbsp;
  <a href="#pitransform">pitransform</a>&nbsp;&nbsp;
  <a href="#prtatlist">prtatlist</a>&nbsp;&nbsp;
  <br>Q.
@@ -421,18 +422,16 @@ be taken, for example 200.
 <br><font id="default">Default is *1 (Comment: if <a href="varrlx.html#imgmov">imgmov</a> in [2,5] (String Method, NEB), <b>dynimage(1)</b>=0 and <b>dynimage(<a href="varrlx.html#nimage">nimage</a>)</b>=0.)</font>
 <br><font id="text">
 <p>
-<p>
- This input variable is relevant when sets of images are activated (see
+This input variable is relevant when sets of images are activated (see
 <a href="varrlx.html#imgmov">imgmov</a>). Not all images might be required to evolve from one time step to the other.
+
 Indeed, in the String Method or the Nudged Elastic Band, one might impose that the extremal configurations of the string are fixed.
 In case the <b>dynimage</b>(iimage)=0, the image with index "iimage" will be consider as fixed.
-Thus, there is no need to compute forces and stresses for this image at each time step. The purpose of
-nevertheless defining extremal images is to make the input/output easier.
+Thus, there is no need to compute forces and stresses for this image at each time step. The purpose of defining extremal images is to make the input/output easier.
  <br />
  <br />
  In order to save CPU time, the computation of properties of static images (<b>dynimage</b>(iimage)=0)
 can be avoided: see <a href="varrlx.html#istatimg">istatimg</a> keyword.
-</p>
 </font>
 
 <br><br><br><br><a href=#top>Go to the top</a>
@@ -1202,24 +1201,24 @@ See the variable <a href="varrlx.html#iatfix">iatfix</a> for more information.
 <br><font id="default">Default is 0</font>
 <br><font id="text">
 <p>
-<p> Control the collective changes of images (see <a href="varrlx.html#nimage">nimage</a>,<a href="varpar.html#npimage">npimage</a>, <a href="varrlx.html#dynimage">dynimage</a>, 
+<p> Control the collective changes of images (see <a href="varrlx.html#nimage">nimage</a>,<a href="varpar.html#npimage">npimage</a>, <a href="varrlx.html#dynimage">dynimage</a>,
 <a href="varrlx.html#ntimimage">ntimimage</a>, <a href="varrlx.html#tolimg">tolimg</a>, <a href="varrlx.html#istatimg">istatimg</a>, <a href="varfil.html#prtvolimg">prtvolimg</a>).
-<br> Similar to <a href="varrlx.html#ionmov">ionmov</a> in spirit, although here, a population 
+<br> Similar to <a href="varrlx.html#ionmov">ionmov</a> in spirit, although here, a population
 of self-consistent calculations for different geometries is managed, while with <a href="varrlx.html#ionmov">ionmov</a>,
 only one geometry for self-consistent calculation is managed.
 <br> In this respect the maximal number of time step for image propagation is <a href="varrlx.html#ntimimage">ntimimage</a>,
 corresponding to the input variable <a href="varrlx.html#ntime">ntime</a> of the single geometry case.
-Also, the stopping criterion is governed by <a href="varrlx.html#tolimg">tolimg</a>, corresponding to the 
+Also, the stopping criterion is governed by <a href="varrlx.html#tolimg">tolimg</a>, corresponding to the
 input variable <a href="varbas.html#toldfe">toldfe</a> of the single geometry case.
 The stopping  condition is crude: the image propagation is stopped when the mean value (over dynamic images)
 of the absolute difference of total energy (previous and current time step) is less than <a href="varrlx.html#tolimg">tolimg</a>.
 
-<p>Actually, there might be combinations of <a href="varrlx.html#ionmov">ionmov</a> and <b>imgmov</b> 
+<p>Actually, there might be combinations of <a href="varrlx.html#ionmov">ionmov</a> and <b>imgmov</b>
 in which the two mechanisms are at work.
-Usually, however, only one mechanism will be activated 
+Usually, however, only one mechanism will be activated
 (so, usually, either <a href="varrlx.html#ntimimage">ntimimage</a> is bigger than one OR <a href="varrlx.html#ntime">ntime</a> is bigger than one).
 In order for the user to acquire a mental representation of the interplay between <a href="varrlx.html#ionmov">ionmov</a> and <b>imgmov</b>,
-here is a F90 pseudo-code presenting the interplay between the different above-mentioned input variables, 
+here is a F90 pseudo-code presenting the interplay between the different above-mentioned input variables,
 as well as with the parallelism (see input variable <a href="varpar.html#npimage">npimage</a>).
 </p>
 <p><pre>
@@ -1235,12 +1234,12 @@ do itimimage=1,ntimimage
   Examine whether the stopping criterion defined by tolimg is fulfilled
   Predict the next geometries for all images using imgmov
 enddo
-</pre></p>        
+</pre></p>
 <ul>
   <li>    = 0  => simply <b> copy </b> images from previous timimage step.</li>
-  <li>    = 1  => move images according to <b> Steepest Descent </b> 
+  <li>    = 1  => move images according to <b> Steepest Descent </b>
                  following the (scaled) forces, the scaling factor being <a href="varrlx.html#fxcartfactor">fxcartfactor</a>. </li>
-  <li>    = 2  => <b> String Method </b> for finding Minimal Energy Path (MEP) 
+  <li>    = 2  => <b> String Method </b> for finding Minimal Energy Path (MEP)
        connecting to minima (see PRB 66, 052301 (2002));
        the algorithm variant can be selected with the <a href="varrlx.html#string_algo">string_algo</a> keyword
        (Simplified String Method by default).
@@ -1248,12 +1247,12 @@ enddo
        (steepest-descent by default). See also <a href="varrlx.html#mep_mxstep">mep_mxstep</a> keyword.</li>
   <li>    = 3  => (tentatively, not yet coded) <b> Metadynamics </b>.</li>
   <li>    = 4  => (tentatively, not yet coded) <b> Genetic Algorithm</b>.</li>
-  <li>    = 5  => <b> Nudged Elastic Band (NEB) </b> for finding Minimal Energy Path (MEP) 
+  <li>    = 5  => <b> Nudged Elastic Band (NEB) </b> for finding Minimal Energy Path (MEP)
        connecting two minima;
-       the algorithm variant can be selected with the <a href="varrlx.html#neb_algo">neb_algo</a> keyword 
+       the algorithm variant can be selected with the <a href="varrlx.html#neb_algo">neb_algo</a> keyword
        (NEB+improved tangent by default).
        The solver for the Ordinary Differential Equation (ODE) can be selected with <a href="varrlx.html#mep_solver">mep_solver</a>
-       (steepest-descent by default). 
+       (steepest-descent by default).
        The spring constant connecting images along the path is defined by <a href="varrlx.html#neb_spring">neb_spring</a>.
        See also <a href="varrlx.html#mep_mxstep">mep_mxstep</a> keyword.</li>
   <li>    = 9 or 13  => <b> Path-Integral Molecular Dynamics </b>
@@ -1261,11 +1260,11 @@ enddo
        Will use 9 for <b>  Langevin thermostat </b> (associated friction coefficient given by <a href="varrlx.html#vis">vis</a>)
        and 13 for <b>  Nose-Hoover thermostat chains </b>
        (associated input variables are the number of thermostats in the chains, <a href="varrlx.html#nnos">nnos</a>,
-       and the masses of these thermostats <a href="varrlx.html#qmass">qmass</a>). 
+       and the masses of these thermostats <a href="varrlx.html#qmass">qmass</a>).
        <a href="varrlx.html#nimage">nimage</a> is the Trotter number (no use of <a href="varrlx.html#dynimage">dynimage</a>);
        possible transformations of coordinates are defined by <a href="varrlx.html#pitransform">pitransform</a>;
        Fictitious masses of the atoms (possibly different from the true masses given by <a href="varrlx.html#amu">amu</a>)
-       can be specified by <a href="varrlx.html#pimass">pimass</a>. 
+       can be specified by <a href="varrlx.html#pimass">pimass</a>.
        At present, it is only possible to perform calculations in the (N,V,T) ensemble (<a href="varrlx.html#optcell">optcell</a>=0).</li>
   </ul>
   No meaning for RF calculations.
@@ -1287,345 +1286,147 @@ enddo
 Choice of algorithm to control the displacements of ions, and eventually (see <a href="varrlx.html#optcell">optcell</a>)
 changes of cell shape and size.
  <ul>
+  <li> 0=&gt; Do not move ions; <br /> <br /> </li>
   <li>
-   0=&gt; do not move ions;
-   <br />
-   <br />
-  </li>
-  <li>
-   1=&gt; move atoms using molecular dynamics with
+   1=&gt; Move atoms using molecular dynamics with
 optional viscous damping (friction linearly proportional
 to velocity). The viscous damping is controlled by the
-parameter "<a href="varrlx.html#vis">vis</a>".
-If actual undamped molecular dynamics is desired,
-set <a href="varrlx.html#vis">vis</a> to 0. The implemented algorithm
-is the generalisation
+parameter "<a href="varrlx.html#vis">vis</a>".  If actual undamped molecular dynamics is desired,
+set <a href="varrlx.html#vis">vis</a> to 0. The implemented algorithm is the generalisation
 of the Numerov technique (6th order), but is NOT invariant
 upon time-reversal, so that the energy is not conserved.
 The value <b>ionmov</b>=6 will usually be preferred, although the
-algorithm that is implemented is lower-order.
-The time step is governed by
-<a href="varrlx.html#dtion">dtion</a>.
-   <br />
-   <b>
-    Purpose:
-   </b>
-   Molecular dynamics (if <a href="varrlx.html#vis">vis</a>=0),
-Structural optimization (if <a href="varrlx.html#vis">vis</a>&gt;0)
-   <br />
-   <b>
-    Cell optimization:
-   </b>
-   No (Use <a href="varrlx.html#optcell">optcell</a>=0 only)
-   <br />
-   <b>
-    Variables related:
-   </b>
-   Viscous parameter <a href="varrlx.html#vis">vis</a>,
-time step <a href="varrlx.html#dtion">dtion</a>,
-index of atoms fixed <a href="varrlx.html#iatfix">iatfix</a>
-   <br />
-   <br />
+algorithm that is implemented is lower-order. The time step is governed by <a href="varrlx.html#dtion">dtion</a>.  <br />
+   <b> Purpose: </b>
+   Molecular dynamics (if <a href="varrlx.html#vis">vis</a>=0), Structural optimization (if <a href="varrlx.html#vis">vis</a>&gt;0) <br />
+   <b> Cell optimization: </b>
+   No (Use <a href="varrlx.html#optcell">optcell</a>=0 only) <br />
+   <b> Related variables: </b>
+   Viscous parameter <a href="varrlx.html#vis">vis</a>, time step <a href="varrlx.html#dtion">dtion</a>, index of atoms fixed <a href="varrlx.html#iatfix">iatfix</a> <br /> <br /> </li>
+  <li>
+   2=&gt; Conduct structural optimization using the Broyden-Fletcher-Goldfarb-Shanno minimization (BFGS).
+This is much more efficient for structural optimization than viscous damping, when there are less than
+about 10 degrees of freedom to optimize.  <br />
+   <b> Purpose: </b>
+   Structural optimization <br />
+   <b> Cell optimization: </b>
+   Yes (if <a href="varrlx.html#optcell">optcell</a>/=0) <br />
+   <b> Related variables: </b> <br /> <br />
   </li>
   <li>
-   2=&gt; conduct structural optimization using the
-Broyden-Fletcher-Goldfarb-Shanno minimization (BFGS).
-This is much more efficient for structural optimization
-than viscous damping, when there are less than
-about 10 degrees of freedom to optimize.
-   <br />
-   <b>
-    Purpose:
-   </b>
-   Structural optimization
-   <br />
-   <b>
-    Cell optimization:
-   </b>
-   Yes (if <a href="varrlx.html#optcell">optcell</a>/=0)
-   <br />
-   <b>
-    Variables related:
-   </b>
-   <br />
-   <br />
-  </li>
-  <li>
-   3=&gt; conduct structural optimization using the
-Broyden-Fletcher-Goldfarb-Shanno minimization (BFGS),
-modified to take into account the total energy as well as
-the gradients (as in usual BFGS).
-   <br />
-   See the paper by
-[Schlegel, J. Comp. Chem. 3, 214 (1982)].
+   3=&gt; Conduct structural optimization using the Broyden-Fletcher-Goldfarb-Shanno minimization (BFGS),
+modified to take into account the total energy as well as the gradients (as in usual BFGS).  <br />
+   See the paper by [Schlegel, J. Comp. Chem. 3, 214 (1982)].
 Might be better than <b>ionmov</b>=2 for few degrees of freedom
-(less than 3 or 4). Can be very unstable - use with caution!
-   <br />
-   <b>
-    Purpose:
-   </b>
-   Structural optimization
-   <br />
-   <b>
-    Cell optimization:
-   </b>
-   Yes (if <a href="varrlx.html#optcell">optcell</a>/=0)
-   <br />
-   <b>
-    Variables related:
-   </b>
-   <br />
-   <br />
+(less than 3 or 4). Can be very unstable - use with caution! <br />
+   <b> Purpose: </b>
+   Structural optimization <br />
+   <b> Cell optimization: </b>
+   Yes (if <a href="varrlx.html#optcell">optcell</a>/=0) <br />
+   <b> Related variables: </b> <br /> <br />
   </li>
   <li>
-   4=&gt; conjugate gradient algorithm for simultaneous
-optimization of potential and ionic degrees of freedom.
-It can be used with <a href="varbas.html#iscf">iscf</a>=2 and
-<a href="varbas.html#iscf">iscf</a>  =5 or 6
-(WARNING : this is under development, and does not work very well in
-many
-cases).
-   <br />
-   <b>
-    Purpose:
-   </b>
-   Structural optimization
-   <br />
-   <b>
-    Cell optimization:
-   </b>
-   No (Use <a href="varrlx.html#optcell">optcell</a>=0 only)
-   <br />
-   <b>
-    Variables related:
-   </b>
-   <br />
-   <br />
+   4=&gt; Conjugate gradient algorithm for simultaneous optimization of potential and ionic degrees of freedom.
+It can be used with <a href="varbas.html#iscf">iscf</a>=2 and <a href="varbas.html#iscf">iscf</a>  =5 or 6 (WARNING : this is under development, and does not work very well in many cases).  <br />
+   <b> Purpose: </b>
+   Structural optimization <br />
+   <b> Cell optimization: </b>
+   No (Use <a href="varrlx.html#optcell">optcell</a>=0 only) <br />
+   <b> Related variables: </b> <br /> <br />
   </li>
   <li>
-   5=&gt; Simple relaxation of ionic positions according
-to (converged) forces. Equivalent to <b>ionmov</b>=1 with
-zero masses, albeit the relaxation coefficient is not
-<a href="varrlx.html#vis">vis</a>,
-but <a href="vardev.html#iprcfc">iprcfc</a>.
-   <br />
-   <b>
-    Purpose:
-   </b>
-   Structural optimization
-   <br />
-   <b>
-    Cell optimization:
-   </b>
-   No (Use <a href="varrlx.html#optcell">optcell</a>=0 only)
-   <br />
-   <b>
-    Variables related:
-   </b>
-   <br />
-   <br />
+   5=&gt; Simple relaxation of ionic positions according to (converged) forces. Equivalent to <b>ionmov</b>=1 with
+zero masses, albeit the relaxation coefficient is not <a href="varrlx.html#vis">vis</a>, but <a href="vardev.html#iprcfc">iprcfc</a>.  <br />
+   <b> Purpose: </b>
+   Structural optimization <br />
+   <b> Cell optimization: </b>
+   No (Use <a href="varrlx.html#optcell">optcell</a>=0 only) <br />
+   <b> Related variables: </b> <br /> <br />
   </li>
   <li>
-   6=&gt; Molecular dynamics using the Verlet algorithm, see
-[Allen &amp; Tildesley "Computer simulation of liquids" 1987, p 81].
-The only related parameter is the time step
-(<a href="varrlx.html#dtion">dtion</a>).
-   <br />
-   <b>
-    Purpose:
-   </b>
-   Molecular dynamics
-   <br />
-   <b>
-    Cell optimization:
-   </b>
-   No (Use <a href="varrlx.html#optcell">optcell</a>=0 only)
-   <br />
-   <b>
-    Variables related:
-   </b>
-   time step <a href="varrlx.html#dtion">dtion</a>,
-index of atoms fixed <a href="varrlx.html#iatfix">iatfix</a>
-   <br />
-   <br />
+   6=&gt; Molecular dynamics using the Verlet algorithm, see [Allen &amp; Tildesley "Computer simulation of liquids" 1987, p 81].
+The only related parameter is the time step (<a href="varrlx.html#dtion">dtion</a>).  <br />
+   <b> Purpose: </b>
+   Molecular dynamics <br />
+   <b> Cell optimization: </b>
+   No (Use <a href="varrlx.html#optcell">optcell</a>=0 only) <br />
+   <b> Related variables: </b>
+   time step <a href="varrlx.html#dtion">dtion</a>, index of atoms fixed <a href="varrlx.html#iatfix">iatfix</a> <br /> <br />
   </li>
   <li>
-   7=&gt; Quenched Molecular dynamics using the Verlet
-algorithm, and stopping each atom for which the scalar product
-of velocity and force is negative.
-The only related parameter is the time step
-(<a href="varrlx.html#dtion">dtion</a>).
-The goal is not
-to produce a realistic dynamics, but to go as fast as possible
-to the minimum. For this purpose, it is advised to set
-all the masses to the same value (for example, use the Carbon mass,
-i.e. set <a href="varrlx.html#amu">amu</a> to 12 for all type of
-atoms).
-   <br />
-   <b>
-    Purpose:
-   </b>
-   Structural optimization
-   <br />
-   <b>
-    Cell optimization:
-   </b>
-   No (Use <a href="varrlx.html#optcell">optcell</a>=0 only)
-   <br />
-   <b>
-    Variables related:
-   </b>
-   time step <a href="varrlx.html#dtion">dtion</a>,
-index of atoms fixed <a href="varrlx.html#iatfix">iatfix</a>
-   <br />
-   <br />
+   7=&gt; Quenched Molecular dynamics using the Verlet algorithm, and stopping each atom for which the scalar product
+of velocity and force is negative.  The only related parameter is the time step (<a href="varrlx.html#dtion">dtion</a>).  The goal is not
+to produce a realistic dynamics, but to go as fast as possible to the minimum. For this purpose, it is advised to set
+all the masses to the same value (for example, use the Carbon mass, i.e. set <a href="varrlx.html#amu">amu</a> to 12 for all type of atoms).  <br />
+   <b> Purpose: </b>
+   Structural optimization <br />
+   <b> Cell optimization: </b>
+   No (Use <a href="varrlx.html#optcell">optcell</a>=0 only) <br />
+   <b> Related variables: </b>
+   time step <a href="varrlx.html#dtion">dtion</a>, index of atoms fixed <a href="varrlx.html#iatfix">iatfix</a> <br /> <br />
   </li>
   <li>
-   8=&gt; Molecular dynamics with Nose-Hoover thermostat,
-using the Verlet algorithm.
-   <br />
-   <b>
-    Purpose:
-   </b>
-   Molecular dynamics
-   <br />
-   <b>
-    Cell optimization:
-   </b>
-   No (Use <a href="varrlx.html#optcell">optcell</a>=0 only)
-   <br />
-   <b>
-    Variables related:
-   </b>
-   time step (<a href="varrlx.html#dtion">dtion</a>),
-Temperatures (<a href="varrlx.html#mdtemp">mdtemp</a>),
-and thermostat mass (<a href="varrlx.html#noseinert">noseinert</a>).
-   <br />
-   <br />
+   8=&gt; Molecular dynamics with Nose-Hoover thermostat, using the Verlet algorithm.  <br />
+   <b> Purpose: </b>
+   Molecular dynamics <br />
+   <b> Cell optimization: </b>
+   No (Use <a href="varrlx.html#optcell">optcell</a>=0 only) <br />
+   <b> Related variables: </b>
+   time step (<a href="varrlx.html#dtion">dtion</a>), Temperatures (<a href="varrlx.html#mdtemp">mdtemp</a>), and thermostat mass (<a href="varrlx.html#noseinert">noseinert</a>).  <br /> <br />
   </li>
   <li>
-   9=&gt; Langevin molecular dynamics.
-   <br />
-   <b>
-    Purpose:
-   </b>
-   Molecular dynamics
-   <br />
-   <b>
-    Cell optimization:
-   </b>
-   No (Use <a href="varrlx.html#optcell">optcell</a>=0 only)
-   <br />
-   <b>
-    Variables related:
-   </b>
-   time step (<a href="varrlx.html#dtion">dtion</a>),
-temperatures (<a href="varrlx.html#mdtemp">mdtemp</a>),
-and friction coefficient (<a href="varrlx.html#friction">friction</a>).
-   <br />
-   <br />
+   9=&gt; Langevin molecular dynamics.  <br />
+   <b> Purpose: </b>
+   Molecular dynamics <br />
+   <b> Cell optimization: </b>
+   No (Use <a href="varrlx.html#optcell">optcell</a>=0 only) <br />
+   <b> Related variables: </b>
+   time step (<a href="varrlx.html#dtion">dtion</a>), temperatures (<a href="varrlx.html#mdtemp">mdtemp</a>) and friction coefficient (<a href="varrlx.html#friction">friction</a>).  <br /> <br />
   </li>
   <li>
-   10=&gt; Delocalized internal coordinates. with BFGS simple
-   <br />
-   <b>
-    Purpose:
-   </b>
-   Structural optimization
-   <br />
-   <b>
-    Cell optimization:
-   </b>
-   No (Use <a href="varrlx.html#optcell">optcell</a>=0 only)
-   <br />
-   <b>
-    Variables related:
-   </b>
-   <br />
-   <br />
+   10=&gt; Delocalized internal coordinates. with BFGS simple <br />
+   <b> Purpose: </b>
+   Structural optimization <br />
+   <b> Cell optimization: </b>
+   No (Use <a href="varrlx.html#optcell">optcell</a>=0 only) <br />
+   <b> Related variables: </b> <br /> <br />
   </li>
   <li>
-   11=&gt; Delocalized internal coordinates. with BFGS using total energy
-   <br />
-   <b>
-    Purpose:
-   </b>
-   Structural optimization
-   <br />
-   <b>
-    Cell optimization:
-   </b>
-   No (Use <a href="varrlx.html#optcell">optcell</a>=0 only)
-   <br />
-   <b>
-    Variables related:
-   </b>
-   <br />
-   <br />
+   11=&gt; Delocalized internal coordinates. with BFGS using total energy <br />
+   <b> Purpose: </b>
+   Structural optimization <br />
+   <b> Cell optimization: </b>
+   No (Use <a href="varrlx.html#optcell">optcell</a>=0 only) <br />
+   <b> Related variables: </b> <br /> <br />
   </li>
   <li>
-   12=&gt; Isokinetic ensemble molecular dynamics.
-The equation of motion of the ions in contact with a thermostat
-are solved with the algorithm proposed by Zhang [J. Chem. Phys. 106,
-6102 (1997)],
-as worked out by Minary et al [J. Chem. Phys. 188, 2510 (2003)].
-The conservation of the kinetic energy is obtained within machine
-precision,
-at each step.
-   <br />
-   <s>
-    Related parameters : the time step (<a href="varrlx.html#dtion">dtion</a>),
-the temperatures (<a href="varrlx.html#mdtemp">mdtemp</a>),
-and the friction coefficient (<a href="varrlx.html#friction">friction</a>).
-   </s>
-   <br />
-   <b>
-    Purpose:
-   </b>
-   Molecular dynamics
-   <br />
-   <b>
-    Cell optimization:
-   </b>
-   No (Use <a href="varrlx.html#optcell">optcell</a>=0 only)
-   <br />
-   <b>
-    Variables related:
-   </b>
-   <br />
-   <br />
+   12=&gt; Isokinetic ensemble molecular dynamics.  The equation of motion of the ions in contact with a thermostat
+are solved with the algorithm proposed by Zhang [J. Chem. Phys. 106, 6102 (1997)],
+as worked out by Minary et al [J. Chem. Phys. 188, 2510 (2003)].  The conservation of the kinetic energy is obtained within machine
+precision, at each step.  <br />
+   <s> Related parameters : the time step (<a href="varrlx.html#dtion">dtion</a>), the temperatures (<a href="varrlx.html#mdtemp">mdtemp</a>), and the friction coefficient (<a href="varrlx.html#friction">friction</a>).
+   </s> <br />
+   <b> Purpose: </b>
+   Molecular dynamics <br />
+   <b> Cell optimization: </b>
+   No (Use <a href="varrlx.html#optcell">optcell</a>=0 only) <br />
+   <b> Related variables: </b> <br /> <br />
   </li>
   <li>
    13=&gt; Isothermal/isenthalpic ensemble.
 The equation of motion of the ions in contact with a thermostat
 and a barostat are solved with the algorithm proposed by Martyna,
-Tuckermann Tobias and Klein [Mol. Phys., 1996, p. 1117].
-   <br />
-   If optcell=1 or 2, the mass of the barostat (<a href="varrlx.html#bmass">bmass</a>)
-must be given in addition.
-   <br />
-   <b>
-    Purpose:
-   </b>
-   Molecular dynamics
-   <br />
-   <b>
-    Cell optimization:
-   </b>
-   Yes (if <a href="varrlx.html#optcell">optcell</a>/=0)
-   <br />
-   <b>
-    Variables related:
-   </b>
-   The time step (<a href="varrlx.html#dtion">dtion</a>),
-the temperatures (<a href="varrlx.html#mdtemp">mdtemp</a>),
-the number of thermostats (<a href="varrlx.html#nnos">nnos</a>),
-and the masses of thermostats (<a href="varrlx.html#qmass">qmass</a>).
-   <br />
-   <br />
+Tuckermann Tobias and Klein [Mol. Phys., 1996, p. 1117].  <br />
+   If optcell=1 or 2, the mass of the barostat (<a href="varrlx.html#bmass">bmass</a>) must be given in addition.  <br />
+   <b> Purpose: </b>
+   Molecular dynamics <br />
+   <b> Cell optimization: </b>
+   Yes (if <a href="varrlx.html#optcell">optcell</a>/=0) <br />
+   <b> Related variables: </b>
+   The time step (<a href="varrlx.html#dtion">dtion</a>), the temperatures (<a href="varrlx.html#mdtemp">mdtemp</a>), the number of thermostats (<a href="varrlx.html#nnos">nnos</a>), and the masses of thermostats (<a href="varrlx.html#qmass">qmass</a>).  <br /> <br />
   </li>
   <li>
-   14=&gt; simple molecular dynamics with a symplectic algorithm proposed
+   14=&gt; Simple molecular dynamics with a symplectic algorithm proposed
 by S.Blanes and P.C.Moans [called SRKNa14 in Practical symplectic partitioned
 Runge--Kutta and Runge--Kutta--Nystr&ouml;m methods, Journal of Computational
 and Applied Mathematics archive, volume 142,  issue 2  (May 2002), pages 313 - 330]
@@ -1633,126 +1434,75 @@ of the kind first published by H. Yoshida [Construction of higher order symplect
 integrators, Physics Letters A, volume 150, number 5 to 7, pages 262 - 268].
 This algorithm requires at least 14 evaluation of the forces (actually 15 are done
 within Abinit) per time step. At this cost it usually gives much better
-energy conservation than the verlet algorithm (ionmov 6) for a 30 times bigger
-value of <a href="varrlx.html#dtion">dtion</a>. Notice that the potential
-energy of the initial atomic configuration is never evaluated using this
-algorithm.
-   <br />
-   <b>
-    Purpose:
-   </b>
-   Molecular dynamics
-   <br />
-   <b>
-    Cell optimization:
-   </b>
-   No (Use <a href="varrlx.html#optcell">optcell</a>=0 only)
-   <br />
-   <b>
-    Variables related:
-   </b>
-   <br />
-   <br />
+energy conservation than the verlet algorithm (<b>ionmov</b> 6) for a 30 times bigger
+value of <a href="varrlx.html#dtion">dtion</a>. Notice that the potential energy of the initial atomic configuration is never evaluated using this algorithm.  <br />
+   <b> Purpose: </b>
+   Molecular dynamics <br />
+   <b> Cell optimization: </b>
+   No (Use <a href="varrlx.html#optcell">optcell</a>=0 only) <br />
+   <b> Related variables: </b> <br /> <br />
   </li>
   <li>
    20=&gt; Direct inversion of the iterative subspace.
-Given a starting point xred that is a vector of length 3*natom
-(reduced nuclei coordinates), and unit cell parameters (rprimd)
+Given a starting point <a href="varbas.html#xred">xred</a> that is a vector of length 3*<a href="varbas.html#natom">natom</a>
+(reduced nuclei coordinates), and unit cell parameters (<a href="varbas.html#rprimd">rprimd</a>)
 this routine uses the DIIS (direct inversion of the iterative
 subspace) to minimize the gradient (forces) on atoms. The preconditioning
-used to compute errors from gradients is using an inverse hessian
-matrix obtained by a BFGS algorithm.
+used to compute errors from gradients is using an inverse hessian matrix obtained by a BFGS algorithm.
 This method is known to converge to the nearest point where gradients
-vanish. This is efficient to refine positions around a saddle point
-for instance.
-   <br />
-   <b>
-    Purpose:
-   </b>
-   Structural optimization
-   <br />
-   <b>
-    Cell optimization:
-   </b>
-   No (Use <a href="varrlx.html#optcell">optcell</a>=0 only)
-   <br />
-   <b>
-    Variables related:
-   </b>
-   DIIS memory <a href="varrlx.html#diismemory">diismemory</a>
-   <br />
-   <br />
+vanish. This is efficient to refine positions around a saddle point for instance.  <br />
+   <b> Purpose: </b>
+   Structural optimization <br />
+   <b> Cell optimization: </b>
+   No (Use <a href="varrlx.html#optcell">optcell</a>=0 only) <br />
+   <b> Related variables: </b>
+   DIIS memory <a href="varrlx.html#diismemory">diismemory</a> <br /> <br />
+  </li>
+  <li>
+  22=&gt; Conduct structural optimization using the Limited-memory Broyden-Fletcher-Goldfarb-Shanno minimization (L-BFGS).
+The working routines were based on the original implementation of J. Nocera available on netlib.org.
+This algorithm can be much better than the native implementation of BFGS in ABINIT (<b>ionmov</b>=2)
+when one approaches convergence, perhaps because of better treatment of numerical details.<br />
+   <b> Purpose: </b>
+   Structural optimization <br />
+   <b> Cell optimization: </b>
+   Yes (if <a href="varrlx.html#optcell">optcell</a>/=0) <br />
+   <b> Related variables: </b> <br /> <br />
   </li>
   <li>
    23=&gt; Use of Learn on The Fly method (LOTF) for Molecular Dynamics.
 In the framework of isokinetic MD, the atomic forces and positions are computed
-by using LOTF interpolation.
-A SCF computation is performed only any <a href="vardev.html#lotf_nitex">lotf_nitex</a>
+by using LOTF interpolation.  A SCF computation is performed only any <a href="vardev.html#lotf_nitex">lotf_nitex</a>
 steps. The results of the SCF are used to compute the parameters of a
 short range classical potential (for the moment only the glue potential for gold is implemented).
 Then these parameters are continuously tuned to compute atomic trajectories.
-LOTF has to be enabled at configure time. If LOTF is not enabled and ionmov=23,
-abinit will set automatically ionmov=12.
-   <br />
-   The LOTF cycle is divided in the following steps:
-   <br />
-   a) Initialization (SFC at t=0) and computation of potential parameters.
-   <br />
+LOTF has to be enabled at configure time. If LOTF is not enabled and <b>ionmov</b>=23,
+abinit will set automatically <b>ionmov</b>=12.  <br />
+   The LOTF cycle is divided in the following steps: <br />
+   a) Initialization (SFC at t=0) and computation of potential parameters.  <br />
    b) Extrapolation of the atomic forces and positions for <a href="vardev.html#lotf_nitex">lotf_nitex</a> time step.
-To perform this extrapolation, the potential computed in a) is used (Verlet algorithm).
-   <br />
-   c) SFC at t=<a href="vardev.html#lotf_nitex">lotf_nitex</a>. Computation of the potential parameters.
-   <br />
+To perform this extrapolation, the potential computed in a) is used (Verlet algorithm).  <br />
+   c) SFC at t=<a href="vardev.html#lotf_nitex">lotf_nitex</a>. Computation of the potential parameters.  <br />
    d) LOTF interpolation, linear interpolation of the potential parameters and computation of the atomic
-forces and positions between t=0 and t=lotf_nitex.
-   <br />
-   <br />
-   <b>
-    Purpose:
-   </b>
-   Molecular Dynamics
-   <br />
-   <b>
-    Cell optimization:
-   </b>
-   No (Use <a href="varrlx.html#optcell">optcell</a>=0 only)
-   <br />
-   <b>
-    Variables related:
-   </b>
-   <b>
-    Variables related:
-   </b>
-   <a href="varrlx.html#dtion">dtion</a>,
-<a href="vardev.html#lotf_classic">lotf_classic</a>,
-<a href="vardev.html#lotf_nitex">lotf_nitex</a>,
-<a href="vardev.html#lotf_nneigx">lotf_nneigx</a>,
-<a href="vardev.html#lotf_version">lotf_version</a>.
-   <br />
-   <br />
+forces and positions between t=0 and t=lotf_nitex.  <br /> <br />
+   <b> Purpose: </b>
+   Molecular Dynamics <br />
+   <b> Cell optimization: </b>
+   No (Use <a href="varrlx.html#optcell">optcell</a>=0 only) <br />
+   <b> Related variables: </b>
+   <a href="varrlx.html#dtion">dtion</a>, <a href="vardev.html#lotf_classic">lotf_classic</a>, <a href="vardev.html#lotf_nitex">lotf_nitex</a>, <a href="vardev.html#lotf_nneigx">lotf_nneigx</a>, <a href="vardev.html#lotf_version">lotf_version</a>.  <br /> <br />
   </li>
   <li>
    30=&gt; Using a supercell, calculate a self consistent phonon structure
 as in PRL 100 095901 (2008). The initial phonon eigenvectors and
 eigenvalues are read in, and then atoms are displaced according
 to the normal modes populated at a given temperature until
-convergence of the vibrational free energy (or so I hope)
-   <br />
-   <b>
-    Purpose:
-   </b>
-   Phonon structure
-   <br />
-   <b>
-    Cell optimization:
-   </b>
-   No (Use <a href="varrlx.html#optcell">optcell</a>=0 only)
-   <br />
-   <b>
-    Variables related:
-   </b>
-   <br />
-   <br />
+convergence of the vibrational free energy (or so I hope) <br />
+   <b> Purpose: </b>
+   Phonon structure <br />
+   <b> Cell optimization: </b>
+   No (Use <a href="varrlx.html#optcell">optcell</a>=0 only) <br />
+   <b> Related variables: </b> <br /> <br />
   </li>
  </ul>
  <ul>
@@ -2348,12 +2098,9 @@ than those of the second image.
 <br><font id="text">
 <p>
 <p>
- Gives the number of thermostats in the Martyna et al. chain of oscillators thermostats. The thermostat chains can be used either to perform Molecular Dynamics (MD) (<a href="varrlx.html#ionmov">ionmov</a>=13) or to perform Path Integral Molecular Dynamics (PIMD) (<a href="varrlx.html#imgmov">imgmov</a>=13).
- <br />
- The mass of these thermostats is given by
-  <a href="varrlx.html#qmass">qmass</a>
- .
- <br />
+ Gives the number of thermostats in the Martyna et al. chain of oscillators thermostats.
+ The thermostat chains can be used either to perform Molecular Dynamics (MD) (<a href="varrlx.html#ionmov">ionmov</a>=13) or to perform Path Integral Molecular Dynamics (PIMD) (<a href="varrlx.html#imgmov">imgmov</a>=13). <br />
+ The mass of these thermostats is given by <a href="varrlx.html#qmass">qmass</a>.  <br />
 </p>
 </font>
 
@@ -2475,7 +2222,6 @@ a calculation with a non-zero <b>optcell</b> value from the
 (x,f) history of another run with a different non-zero <b>optcell</b>
 value. There
 are still a few problems at that level.
-
 </font>
 
 <br><br><br><br><a href=#top>Go to the top</a>
@@ -2487,6 +2233,9 @@ are still a few problems at that level.
 <br><font id="characteristic">Characteristic: </font>
 <br><font id="vartype">Variable type: real(<a href="varbas.html#ntypat">ntypat</a>)</font>
 <br><font id="default">Default is <a href="varbas.html#ntypat">ntypat</a></font>
+<br><br><font id="requires">
+Only relevant if <a href="varrlx.html#imgmov">imgmov</a>=9 or 13
+</font>
 <br><font id="text">
 <p>
 <p>
@@ -2503,6 +2252,34 @@ in performing Path Integral Molecular Dynamics (PIMD), they are different from t
  If <a href="varrlx.html#pitransform">pitransform</a>=1 (normal mode transformation), or <a href="varrlx.html#pitransform">pitransform</a>=2 (staging transformation), <b>pimass</b> is automatically set to its optimal value.
  <br />
 </p>
+</font>
+
+<br><br><br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="pimd_constraint">pimd_constraint</a></font>
+<br><font id="definition">Mnemonics: Path-Integral Molecular Dynamics: CONSTRAINT to be applied on a reaction coordinate</font>
+<br><font id="characteristic">Characteristic: </font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><br><font id="requires">
+Only relevant if <a href="varrlx.html#imgmov">imgmov</a>=9 or 13
+</font>
+<br><font id="text">
+<p>
+Only relevant for Path-Integral Molecular Dynamics.<br/>
+Selects a constraint to be applied during the PIMD trajectory. The constraint is holonomic (it is a relation between the position variables).In practice, the total forces applied to the atomic positions are modified so as to respect the constraint.<br/>
+To date, the available constraints are:<br/>
+<ul>
+<li><b>0</b>: no constraint</li>
+<li><b>1</b>: <i>"Blue Moon Ensemble" method</i>.<br/>
+The constraint is a linear combination of the positions of atomic centroids (this linear combination is kept constant during the simulation). <br/>
+Sum[W_i * X_i]=constant<br/>
+The X_i are the coordinates of the atomic centroids. The weights W_i have to be specified with the <a href="varrlx.html#wtatcon">wtatcon</a>(3,<a href="varrlx.html#natcon">natcon</a>,<a href="varrlx.html#nconeq">nconeq</a>), <a href="varrlx.html#iatcon">iatcon</a>(<a href="varrlx.html#natcon">natcon</a>) and <a href="varrlx.html#natcon">natcon</a> input parameters (where <a href="varrlx.html#nconeq">nconeq</a> is fixed to 1).<br/>
+More details on the implementation in: <a href="http://doi.org/10.1273/cbij.7.12">Y. Komeiji,Chem-Bio Informatics Journal 7, 12-23 (2007)</a>.
+</li>
+</ul>
 </font>
 
 <br><br><br><br><a href=#top>Go to the top</a>
@@ -2729,7 +2506,6 @@ to continue your job.
 <p>
 +1 favors alternation of species
 -1 favors segregation
-
 </font>
 
 <br><br><br><br><a href=#top>Go to the top</a>
@@ -2868,7 +2644,6 @@ The conversion factor
 between Ha/Bohr**3 and GPa is : 1 Ha/Bohr**3 = 29421.033d0 GPa.
 <br />
 Not used if <a href="varrlx.html#optcell">optcell</a>==0.
-
 </font>
 
 <br><br><br><br><a href=#top>Go to the top</a>
@@ -3070,7 +2845,6 @@ optimizing <b>vis</b> for a given situation.
 <br />
 <br />
 In the case of Path-Integral Molecular Dynamics using the Langevin Thermostat (<a href="varrlx.html#imgmov">imgmov</a>=9), <b>vis</b> defines the friction coefficient, in atomic units. Typical value range is 0.00001-0.001.
-
 </font>
 
 <br><br><br><br><a href=#top>Go to the top</a>

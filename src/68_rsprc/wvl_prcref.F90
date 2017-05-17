@@ -7,7 +7,7 @@
 !!  FIXME: add description.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2012-2016 ABINIT group (T. Rangel)
+!!  Copyright (C) 2012-2017 ABINIT group (T. Rangel)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -75,7 +75,7 @@ subroutine wvl_prcref(dielar,iprcel,my_natom,nfftprc,npawmix,nspden,pawrhoij,&
 !check prcref.F90 and moddiel.F90
 
 
-#if defined HAVE_DFT_BIGDFT
+#if defined HAVE_BIGDFT
 #endif
 
  if(iprcel .ne. 0) then

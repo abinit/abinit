@@ -2,7 +2,7 @@
 .Version 8.0.3 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
 
-.Copyright (C) 1998-2016 ABINIT group . 
+.Copyright (C) 1998-2017 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -1903,7 +1903,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    3013.000    3013.000
            etotal11   -2.2865664035E+01
            etotal13   -3.1944590199E+00
            etotal14   -8.0804294511E+01
-           etotal15    1.0000000000E+20
+           etotal15    0.0000000000E+00
             fcart11    9.9738425069E-03 -0.0000000000E+00 -0.0000000000E+00
                       -9.9738425069E-03 -0.0000000000E+00 -0.0000000000E+00
             fcart13    0.0000000000E+00  0.0000000000E+00  0.0000000000E+00

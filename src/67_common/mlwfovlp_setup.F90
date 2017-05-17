@@ -8,7 +8,7 @@
 !! overlap for Wannier code (www.wannier.org f90 version).
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2016 ABINIT group (BAmadon,FJollet)
+!! Copyright (C) 2005-2017 ABINIT group (BAmadon,FJollet)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -201,7 +201,7 @@
    write(message, '(a,a)' )ch10,&
 &   '** mlwfovlp_setup:  call wannier90 library subroutine wannier_setup'
    call wrtout(std_out,message,'COLL')
-#if defined HAVE_DFT_WANNIER90
+#if defined HAVE_WANNIER90
    nwan(:)=0
    num_bands(:)=0
    do isppol=1,nsppol

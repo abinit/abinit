@@ -2,7 +2,7 @@
 .Version 8.0.3 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
 
-.Copyright (C) 1998-2016 ABINIT group . 
+.Copyright (C) 1998-2017 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -103,7 +103,7 @@ _ WF disk file :      1.729 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 --------------------------------------------------------------------------------
 -
 - outvars: echo of selected default values                                      
--   accesswff0 =  0 , fftalg0 =312 , wfoptalg0 = 10
+-   iomode0 =  0 , fftalg0 =312 , wfoptalg0 = 10
 -
 - outvars: echo of global parameters not present in the input file              
 -  max_nthreads =    0
@@ -1019,12 +1019,6 @@ _setup2: Arith. and geom. avg. npw (full set) are      84.333      84.147
   sigma(2 2)=  4.55053309E-03  sigma(3 1)= -6.43545424E-08
   sigma(3 3)=  4.55051786E-03  sigma(2 1)= -5.17762481E-08
 
- Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
- R(1)=  3.4110000  3.4110000  0.0000000  G(1)=  0.1465846  0.1465846 -0.1465846
- R(2)=  0.0000000  3.4110000  3.4110000  G(2)= -0.1465846  0.1465846  0.1465846
- R(3)=  3.4110000  0.0000000  3.4110000  G(3)=  0.1465846 -0.1465846  0.1465846
- Unit cell volume ucvol=  7.9373431E+01 bohr^3
- Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density

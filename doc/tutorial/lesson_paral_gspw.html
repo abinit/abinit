@@ -22,15 +22,6 @@ the convergence speed of a self consistent field calculation. <br>
 <p>You are supposed to know already some basics of parallelism in ABINIT, explained in the tutorial 
 <a href="lesson_basepar.html">A first introduction to ABINIT in parallel</a>.
 </p><p>On the contrary, the present tutorial is not a prerequisite for other tutorials about parallelism in ABINIT.</p><p>
-<h5>Copyright (C) 2005-2016 ABINIT group (FB)
-<br>This file is distributed under the terms of the GNU General
-Public
-License, see
-~abinit/COPYING or <a href="http://www.gnu.org/copyleft/gpl.txt">
-http://www.gnu.org/copyleft/gpl.txt </a>.
-<br>For the initials of contributors, see
-~abinit/doc/developers/contributors.txt .
-</h5>
 
 <script type="text/javascript" src="list_internal_links.js"> </script>
 
@@ -120,7 +111,7 @@ see the results (in particular the scaling) in: </p>
   <li>the publication concerning the KGB parallelisation: <cite>F. Bottin, S. Leroux, A. Knyazev, G. Zerah,
     Comput. Mat. Science 42, 329, (2008) "Large scale ab initio calculations
     based on three levels of parallelization "
-    (<a href="http://arxiv.org/abs/0707.3405">available on Arxiv.org</a>)</cite>.
+    (<a href="https://arxiv.org/abs/0707.3405">available on Arxiv.org</a>)</cite>.
   </li>
   <li>the Abinit paper: <em>X. Gonze, B. Amadon, P.-M. Anglade, J.-M.
 Beuken, F. Bottin, P. Boulanger, F. Bruneval,' D. Caliste, R. Caracas,
@@ -375,7 +366,7 @@ to improve the convergence whatever the timing</span><span style="font-weight: b
 <h3><b>5. The KGB parallelization.</b></h3>
 <p>Up to now, we only performed a GB parallelization. This implies
 parallelization over 2 levels of PWs or over 2 levels of bands and FFTs,
-for different sections of the code (see the <a href="http://arxiv.org/abs/0707.3405">paper</a>
+for different sections of the code (see the <a href="https://arxiv.org/abs/0707.3405">paper</a>
 or <a href="http://www.abinit.org/community/events/program3rd">presentation</a>). If the system
 has more than 1 <span style="font-weight: bold;">k</span>-point,
 one can add a third level of parallelization and perform a real KBG
@@ -455,6 +446,16 @@ To do in the future:<span style="font-weight: bold; font-style: italic;"></span>
 <ul>
 <li><a href="lesson_paral_gspw.html">6.</a> What else about the convergency: wfoptalg, nline 
   </li><li><a href="lesson_paral_gspw.html">7.</a> MPI-IO is direct </li><li><a href="lesson_paral_gspw.html">8.</a> Future: only one keyword, then ... none.</li></ul>
+
+<h5>Copyright (C) 2005-2017 ABINIT group (FB)
+<br>This file is distributed under the terms of the GNU General
+Public
+License, see
+~abinit/COPYING or <a href="http://www.gnu.org/copyleft/gpl.txt">
+http://www.gnu.org/copyleft/gpl.txt </a>.
+<br>For the initials of contributors, see
+~abinit/doc/developers/contributors.txt .
+</h5>
 
 <script type="text/javascript" src="list_internal_links.js"> </script>
 

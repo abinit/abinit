@@ -7,7 +7,7 @@
 !!  Compute psichi (and print some data for check)
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2016 ABINIT group (BAmadon)
+!! Copyright (C) 2005-2017 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -28,7 +28,7 @@
 !!  lda_occup <type(oper_type)> = occupations in the correlated orbitals in LDA
 !!  mband=maximum number of bands
 !!  mkmem =number of k points treated by this node
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  nkpt=number of k points.
 !!  my_nspinor=number of spinorial components of the wavefunctions (on current proc)
 !!  nsppol=1 for unpolarized, 2 for spin-polarized
@@ -104,7 +104,7 @@ subroutine datafordmft(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,&
  integer,intent(in) :: unpaw,usecprj
  integer, optional, intent(in) :: nbandkss
  real(dp),intent(in) :: fermie
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
  type(dataset_type),intent(in) :: dtset
  type(oper_type), intent(inout) :: lda_occup !vz_i
  type(pawang_type),intent(in) :: pawang

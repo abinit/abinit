@@ -1,6 +1,6 @@
 # -*- Autoconf -*-
 #
-# Copyright (C) 2011-2016 ABINIT Group (Yann Pouillon)
+# Copyright (C) 2011-2017 ABINIT Group (Yann Pouillon)
 #
 # This file is part of the ABINIT software package. For license information,
 # please see the COPYING file in the top-level directory of the ABINIT source
@@ -137,7 +137,7 @@ AC_DEFUN([ABI_CONNECT_ALGO],[
         abi_algo_serial="${abi_algo_levmar_serial}"
         abi_algo_mpi="${abi_algo_levmar_mpi}"
         if test "${abi_algo_serial}" = "yes"; then
-          AC_DEFINE([HAVE_ALGO_LEVMAR],1,[Define to 1 if you have the Levenberg-Marquardt algorithmic library.])
+          AC_DEFINE([HAVE_LEVMAR],1,[Define to 1 if you have the Levenberg-Marquardt algorithmic library.])
           lib_algo_fcflags="${abi_algo_levmar_fcflags}"
           lib_algo_ldflags="${abi_algo_levmar_ldflags}"
           lib_algo_incs="${abi_algo_levmar_incs}"
@@ -151,19 +151,6 @@ AC_DEFUN([ABI_CONNECT_ALGO],[
 
     esac
 
-  fi
-
-  dnl Transmit serial status to the source code
-  if test "${abi_algo_serial}" = "yes"; then
-    AC_DEFINE([HAVE_ALGO],1,[Define to 1 if you have an optimized algorithmic library.])
-    AC_DEFINE([HAVE_ALGO_SERIAL],1,[Define to 1 if you have an optimized serial algorithmic library.])
-  elif test "${with_algo_flavor}" != "none"; then
-    lib_algo_flavor="broken"
-  fi
-
-  dnl Transmit MPI status to the source code
-  if test "${abi_algo_mpi}" = "yes"; then
-    AC_DEFINE([HAVE_ALGO_MPI],1,[Define to 1 if you have an optimized MPI-parallel algorithmic library.])
   fi
 
   dnl Restore build environment

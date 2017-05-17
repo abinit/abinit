@@ -11,7 +11,7 @@
 !! S is the overlap operator between |Cnk> (used for PAW).
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (MT)
+!! Copyright (C) 1998-2017 ABINIT group (MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -28,7 +28,7 @@
 !!  mcg=second dimension of the cg array
 !!  mcprj=second dimension of the cprj array
 !!  mgsc=second dimension of the gsc array
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  natom=number of atoms in unit cell.
 !!  nband= if positive: number of bands at this k point for that spin polarization
 !!         if negative: abs(nband) is the index of the only band to be computed
@@ -87,7 +87,7 @@ subroutine getgsc(cg,cprj,gs_ham,gsc,ibg,icg,igsc,ikpt,isppol,&
  integer,intent(in) :: ibg,icg,igsc,ikpt,isppol,mcg,mcprj
  integer,intent(in) :: mgsc,natom,nband,npw_k,nspinor
  integer,intent(in),optional :: select_k
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
  type(gs_hamiltonian_type),intent(inout),target :: gs_ham
 !arrays
  real(dp),intent(in) :: cg(2,mcg)
@@ -121,6 +121,8 @@ subroutine getgsc(cg,cprj,gs_ham,gsc,ibg,icg,igsc,ikpt,isppol,&
 
 !Keep track of total time spent in getgsc:
  call timab(565,1,tsec)
+
+ gsc = zero
 
 !Prepare some data
  ABI_ALLOCATE(cwavef,(2,npw_k*my_nspinor))

@@ -8,7 +8,7 @@
 !! Freeing routine.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (DC)
+!! Copyright (C) 1998-2017 ABINIT group (DC)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -42,7 +42,7 @@ subroutine wvl_wfs_free(wfs)
  use defs_wvltypes
  use m_profiling_abi
  use m_errors
-#if defined HAVE_DFT_BIGDFT
+#if defined HAVE_BIGDFT
  use BigDFT_API, only: deallocate_Lzd_except_Glr, deallocate_lr, &
       & deallocate_orbs, deallocate_comms
  use dynamic_memory
@@ -64,7 +64,7 @@ subroutine wvl_wfs_free(wfs)
 
 ! *********************************************************************
 
-#if defined HAVE_DFT_BIGDFT
+#if defined HAVE_BIGDFT
  call deallocate_Lzd_except_Glr(wfs%ks%lzd)
  call deallocate_lr(wfs%ks%lzd%Glr)
  call deallocate_orbs(wfs%ks%orbs)

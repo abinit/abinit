@@ -7,7 +7,7 @@
 !!  Module containing functions for calculating and fitting model dielectric functions
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2016 ABINIT group (MS)
+!!  Copyright (C) 2008-2017 ABINIT group (MS)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -465,7 +465,7 @@ subroutine sequential_fitting(omega,refval,imfval,nomega,nfreqre,coeff,&
       startcoeff(idx:idx+2) = thiscoeff(1:3) 
     end if
     ! Make fit
-#ifdef HAVE_ALGO_LEVMAR
+#ifdef HAVE_LEVMAR
     call dfit_re_and_im_screening(re_zvals,im_zvals,imfval,refval,&
 &    nomega,3,thiscoeff,prtvol)
 #else

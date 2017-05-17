@@ -10,7 +10,7 @@
 !! Build occupation matrix (packed storage)
 !!
 !! COPYRIGHT
-!! Copyright (C) 2010-2016 ABINIT group (MT)
+!! Copyright (C) 2010-2017 ABINIT group (MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -24,7 +24,7 @@
 !!  ipert=index of perturbation if pawrhoij is a pertubed rhoij
 !!        no meaning for ground-state calculations (should be 0)
 !!  idir=direction of atomic displacement (in case of atomic displ. perturb.)
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  my_natom=number of atoms treated by current processor
 !!  natom=number of atoms in cell
 !!  nspden=number of spin-density components
@@ -72,7 +72,7 @@
 !!  (in that case pawrhoij_unsym should not be distributed over atomic sites).
 !!
 !! PARENTS
-!!      dfpt_nstpaw,dfpt_rhofermi,dfpt_vtorho,vtorho
+!!      afterscfloop,dfpt_nstpaw,dfpt_rhofermi,dfpt_vtorho,vtorho
 !!
 !! CHILDREN
 !!      fourdp,pawmknhat,pawrhoij_copy,pawrhoij_free,pawrhoij_free_unpacked
@@ -121,7 +121,7 @@ subroutine pawmkrho(compch_fft,cplex,gprimd,idir,indsym,ipert,mpi_enreg,&
  integer,intent(in) :: usewvl
  real(dp),intent(in) :: ucvol
  real(dp),intent(out) :: compch_fft
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
  type(pawang_type),intent(in) :: pawang
  type(pawang_type),intent(in),optional :: pawang_sym
  type(pawfgr_type),intent(in) :: pawfgr

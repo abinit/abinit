@@ -9,7 +9,7 @@
 !! of Marzari and Vanderbilt (see PRB 56, 12847 (1997)).
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2016 ABINIT group (MVeithen)
+!! Copyright (C) 1999-2017 ABINIT group (MVeithen)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -22,7 +22,7 @@
 !! kpt2(3,nkpt2) = reduced coordinates of the k-points in the
 !!                 reduced part of the BZ (see below)
 !! mkmem = number of k points which can fit in memory
-!! mpi_enreg = informations about MPI parallelization
+!! mpi_enreg = information about MPI parallelization
 !! nkpt2 = number of k-points in the reduced BZ
 !! nkpt3 = number of k-points in the full BZ
 !! nshiftk = number of kpoint grid shifts
@@ -111,7 +111,7 @@ subroutine getshell(gmet,kneigh,kg_neigh,kptindex,kptopt,kptrlatt,kpt2,&
  integer,intent(in) :: kptopt,mkmem,nkpt2,nkpt3
  integer,intent(inout) :: nshiftk
  integer,intent(out) :: mkmem_max,nneigh
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(inout) :: kptrlatt(3,3)
  integer,intent(out) :: kneigh(30,nkpt2),kptindex(2,nkpt3),kg_neigh(30,nkpt2,3)

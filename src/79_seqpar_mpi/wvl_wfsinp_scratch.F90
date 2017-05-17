@@ -13,7 +13,7 @@
 !! When initialised from memory (reformating), wvl%wfs%[h]psi will be reallocated.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (DC)
+!! Copyright (C) 1998-2017 ABINIT group (DC)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -64,7 +64,7 @@ subroutine wvl_wfsinp_scratch(dtset, mpi_enreg, occ, rprimd, wvl, xred)
 
  use m_abi2big,          only : wvl_occ_abi2big,wvl_occopt_abi2big
 
-#if defined HAVE_DFT_BIGDFT
+#if defined HAVE_BIGDFT
  use BigDFT_API, only : createIonicPotential, input_wf_diag, gaussian_basis, &
       & input_variables, calculate_rhocore, deallocate_Lzd_except_Glr, INPUT_IG_OFF,&
       & SMEARING_DIST_ERF, PSPCODE_PAW
@@ -92,13 +92,13 @@ subroutine wvl_wfsinp_scratch(dtset, mpi_enreg, occ, rprimd, wvl, xred)
   real(dp), intent(in)                  :: xred(3, dtset%natom)
 
 !Local variables-------------------------------
-#if defined HAVE_DFT_BIGDFT
+#if defined HAVE_BIGDFT
   character(len = 500)  :: message
   integer               :: comm,me,nproc
   integer               :: iscf_local
   integer               :: nvirt
-  integer               :: shift_vpsp,size_vpsp
-  logical               :: onlywf=.false. ! find the wavefuncitons and return
+  integer               :: ii,shift_vpsp,size_vpsp
+  logical               :: onlywf=.false. ! find the wavefunctions and return
   logical               :: wvlbigdft=.false.
   real(dp), allocatable :: xcart(:,:)
   real(dp), allocatable :: rhor(:,:)
@@ -110,12 +110,12 @@ subroutine wvl_wfsinp_scratch(dtset, mpi_enreg, occ, rprimd, wvl, xred)
 
 ! *********************************************************************
 
-#if defined HAVE_DFT_BIGDFT
+#if defined HAVE_BIGDFT
 
  elecfield=zero
 
 !If usewvl: wvlbigdft indicates that the BigDFT workflow will be followed
- if(dtset%usewvl==1 .and. dtset%wvl_bigdft_comp==1) wvlbigdft=.true.
+ wvlbigdft=(dtset%usewvl==1.and.dtset%wvl_bigdft_comp==1)
 
  write(message, '(a,a)' ) ch10,&
 & ' wvl_wfsinp_scratch: wavefunction initialisation.'
@@ -184,13 +184,15 @@ subroutine wvl_wfsinp_scratch(dtset, mpi_enreg, occ, rprimd, wvl, xred)
 & dtset%ixc, wvl%wfs%ks%psi, wvl%wfs%ks%hpsi, wvl%wfs%ks%psit, &
 & Gvirt, in%nspin, wvl%wfs%GPU, in, onlywf, wvl%projectors%G, wvl%descr%paw)
 
-!This provisory: wvl%descr%paw could be passed as optional 
+!This provisory: wvl%descr%paw could be passed as optional
 !to input_wf_diag to allocate spsi inside this routine
- if(dtset%usepaw==1) then 
-   ABI_ALLOCATE(wvl%descr%paw%spsi,(max(wvl%wfs%ks%orbs%npsidim_orbs,wvl%wfs%ks%orbs%npsidim_comp)))
+ if(dtset%usepaw==1) then
    wvl%descr%atoms%npspcode(:)=PSPCODE_PAW
-!if( onlywf)
-!     wvl%wfs%ks%orbs%eval=-0.5_dp
+   ABI_ALLOCATE(wvl%descr%paw%spsi,(max(wvl%wfs%ks%orbs%npsidim_orbs,wvl%wfs%ks%orbs%npsidim_comp)))
+   do ii=1,size(wvl%wfs%ks%psi)
+     wvl%descr%paw%spsi(ii)=wvl%wfs%ks%psi(ii)
+     wvl%wfs%ks%hpsi(ii)=wvl%wfs%ks%psi(ii)
+   end do
  end if
 
  if(wvlbigdft ) then

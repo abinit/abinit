@@ -2,7 +2,7 @@
 .Version 8.0.3 of ANADDB 
 .(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
 
-.Copyright (C) 1998-2016 ABINIT group . 
+.Copyright (C) 1998-2017 ABINIT group . 
  ANADDB comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -45,8 +45,6 @@
 ================================================================================
 
  read the DDB information and perform some checks
-
--begin at tcpu      0.017  and twall      0.018 sec
 
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  7.5589000  0.0000000  0.0000000  G(1)=  0.1322944  0.0000000  0.0000000
@@ -103,7 +101,6 @@
 
  Treat the first list of vectors 
 
--begin at tcpu      0.033  and twall      0.034 sec
  
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.00000
  Phonon energies in Hartree :
@@ -181,7 +178,6 @@
 - -1.366861E+02 -1.366861E+02  6.964238E+01  6.964238E+01  1.033256E+02
 -  1.800358E+02  1.843564E+02  1.843564E+02  2.715171E+02  3.104355E+02
 -  3.104355E+02  4.468197E+02  4.468197E+02  4.610483E+02  6.448836E+02
- Found acoustic mode      3 for |q| in red coord < 0.25 ; q =       0.1250      0.1250      0.1250
  Speed of sound for this q and mode:
    in atomic units:     0.1763182878E-02
    in SI units m/s:           3857.29976
@@ -189,7 +185,6 @@
    in atomic units:     0.9091923200E-03
    in SI units K  :            287.09989
 
- Found acoustic mode      4 for |q| in red coord < 0.25 ; q =       0.1250      0.1250      0.1250
  Speed of sound for this q and mode:
    in atomic units:     0.1763182878E-02
    in SI units m/s:           3857.29976
@@ -197,7 +192,6 @@
    in atomic units:     0.9091923200E-03
    in SI units K  :            287.09989
 
- Found acoustic mode      5 for |q| in red coord < 0.25 ; q =       0.1250      0.1250      0.1250
  Speed of sound for this q and mode:
    in atomic units:     0.2615963963E-02
    in SI units m/s:           5722.92148
@@ -230,7 +224,6 @@
 
  Treat the second list of vectors 
 
--begin at tcpu      0.039  and twall      0.041 sec
  
   Phonon at Gamma, with non-analyticity in the
   direction (cartesian coordinates)  0.00000  0.00000  1.00000

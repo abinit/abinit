@@ -8,7 +8,7 @@
 !!  with the inverse dielectric matrix as well as related methods.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2016 ABINIT group (MG)
+!! Copyright (C) 2008-2017 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -36,7 +36,7 @@ MODULE m_screening
  use m_profiling_abi
  use m_lebedev
  use m_nctk
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
  use netcdf
 #endif
 
@@ -56,7 +56,7 @@ MODULE m_screening
 &                              hscr_copy, HSCR_LATEST_HEADFORM, hscr_t, ncname_from_id, em1_ncname
  use m_spectra,         only : spectra_t, spectra_init, spectra_free, spectra_repr
  use m_paw_sphharm,     only : ylmc
- use m_mpinfo,          only : destroy_mpi_enreg 
+ use m_mpinfo,          only : destroy_mpi_enreg
 
  implicit none
 
@@ -77,47 +77,47 @@ MODULE m_screening
 
  type,public :: Epsilonm1_results
 
-  integer :: id                          
+  integer :: id
   ! Matrix identifier: O if not yet defined, 1 for chi0,
   ! 2 for chi, 3 for epsilon, 4 for espilon^{-1}, 5 for W.
 
-  integer :: ikxc                        
+  integer :: ikxc
   ! Kxc kernel used, 0 for None (RPA), >0 for static TDDFT (=ixc), <0 for TDDFT
 
-  integer :: fform                       
-  ! File format: 1002 for SCR|SUSC files. 
+  integer :: fform
+  ! File format: 1002 for SCR|SUSC files.
 
-  integer :: mqmem                       
+  integer :: mqmem
   ! =0 for out-of-core solution, =nqibz if entire matrix is stored in memory.
 
-  integer :: nI,nJ                       
+  integer :: nI,nJ
   ! Number of components (rows,columns) in chi|eps^-1. (1,1) if collinear.
 
-  integer :: nqibz                       
+  integer :: nqibz
   ! Number of q-points in the IBZ used.
 
-  integer :: nqlwl                       
+  integer :: nqlwl
   ! Number of point used for the treatment of the long wave-length limit.
 
-  integer :: nomega                      
+  integer :: nomega
   ! Total number of frequencies.
 
-  integer :: nomega_i                    
+  integer :: nomega_i
   ! Number of purely imaginary frequencies used.
 
-  integer :: nomega_r                    
+  integer :: nomega_r
   ! Number of real frequencies used.
 
-  integer :: npwe                        
+  integer :: npwe
   ! Number of G vectors.
 
-  integer :: test_type                    
+  integer :: test_type
   ! 0 for None, 1 for TEST-PARTICLE, 2 for TEST-ELECTRON (only for TDDFT)
 
-  integer :: tordering                   
+  integer :: tordering
   ! 0 if not defined, 1 for Time-Ordered, 2 for Advanced, 3 for Retarded.
 
-  character(len=fnlen) :: fname          
+  character(len=fnlen) :: fname
   ! Name of the file from which epsm1 is read.
 
   integer,allocatable :: gvec(:,:)
@@ -132,11 +132,11 @@ MODULE m_screening
   ! qlwl(3,nqlwl)
   ! q-points used for the long wave-length limit treatment.
 
-  !real(gwp),allocatable :: epsm1_pole(:,:,:,:)  
+  !real(gwp),allocatable :: epsm1_pole(:,:,:,:)
   ! epsm1(npwe,npwe,nomega,nqibz)
   ! Contains the two-point function $\epsilon_{G,Gp}(q,omega)$ in frequency and reciprocal space.
 
-  complex(gwpc),allocatable :: epsm1(:,:,:,:) 
+  complex(gwpc),allocatable :: epsm1(:,:,:,:)
   ! epsm1(npwe,npwe,nomega,nqibz)
   ! Contains the two-point function $\epsilon_{G,Gp}(q,omega)$ in frequency and reciprocal space.
 
@@ -162,7 +162,7 @@ MODULE m_screening
  public :: get_epsm1
  public :: decompose_epsm1
  public :: make_epsm1_driver              !  Calculate the inverse symmetrical dielectric matrix starting from chi0
- public :: mkem1_q0                       ! construct the microscopic dieletric matrix for q-->0 
+ public :: mkem1_q0                       ! construct the microscopic dieletric matrix for q-->0
  public :: screen_mdielf                  ! Calculates W_{G,G'}(q,w) for a given q-point in the BZ using a model dielectric function.
  public :: rpa_symepsm1
 !!***
@@ -173,7 +173,7 @@ MODULE m_screening
 !!  chi_t
 !!
 !! FUNCTION
-!!  This object contains the head and the wings of the polarizability 
+!!  This object contains the head and the wings of the polarizability
 !!  These quantities are used to treat the q-->0 limit
 !!
 !! SOURCE
@@ -183,7 +183,7 @@ MODULE m_screening
    integer :: npwe
    ! Number of G vectors.
 
-   integer :: nomega          
+   integer :: nomega
    ! Number of frequencies
 
    complex(gwpc),allocatable :: mat(:,:,:)
@@ -192,14 +192,14 @@ MODULE m_screening
    complex(dpc),allocatable :: head(:,:,:)
    ! head(3,3,nomega)
 
-   complex(dpc),allocatable :: lwing(:,:,:) 
+   complex(dpc),allocatable :: lwing(:,:,:)
    ! lwing(3,npwe,nomega)
    ! Lower wings
 
    complex(dpc),allocatable :: uwing(:,:,:)
    ! uwing(3,npwe,nomega)
    ! Upper wings.
- 
+
  end type chi_t
 
  public :: chi_new    ! Create new object (allocate memory)
@@ -219,7 +219,7 @@ MODULE m_screening
   integer :: npwe
   ! Number of G vectors.
 
-  integer :: nomega          
+  integer :: nomega
   ! Number of frequencies
 
   integer :: method
@@ -227,13 +227,13 @@ MODULE m_screening
   ! 2 = head + wings
   ! 3 = head + wings + body corrections.
 
-  character(len=fnlen) :: fname          
+  character(len=fnlen) :: fname
    ! Name of the file from which epsm1 is read.
 
    complex(dpc),allocatable :: head(:,:,:)
    ! head(3,3,nomega)
 
-   complex(dpc),allocatable :: lwing(:,:,:) 
+   complex(dpc),allocatable :: lwing(:,:,:)
    ! lwing(3,npwe,nomega)
    ! Lower wings
 
@@ -586,10 +586,10 @@ subroutine Epsm1_symmetrizer(iq_bz,nomega,npwc,Er,Gsph,Qmesh,remove_exchange,eps
 !$OMP PARALLEL DO COLLAPSE(2) PRIVATE(sg2,sg1,phmsg1t,phmsg2t_star)
  do iw=1,nomega
    do jj=1,npwc
-     sg2 = Gsph%rottb(jj,itim_q,isym_q)  
+     sg2 = Gsph%rottb(jj,itim_q,isym_q)
      phmsg2t_star = CONJG(Gsph%phmSGt(jj,isym_q))
      do ii=1,npwc
-       sg1 = Gsph%rottb(ii,itim_q,isym_q)  
+       sg1 = Gsph%rottb(ii,itim_q,isym_q)
        phmsg1t = Gsph%phmSGt(ii,isym_q)
        epsm1_qbz(sg1,sg2,iw) = Er%epsm1(ii,jj,iw,iq_loc) * phmsg1t * phmsg2t_star
        !epsm1_qbz(sg1,sg2,iw) = Er%epsm1(ii,jj,iw,iq_loc) * phmSgt(ii) * CONJG(phmSgt(jj))
@@ -717,10 +717,10 @@ subroutine Epsm1_symmetrizer_inplace(iq_bz,nomega,npwc,Er,Gsph,Qmesh,remove_exch
 !$OMP PARALLEL DO PRIVATE(sg2,sg1,phmsg1t,phmsg2t_star) IF (nomega > 1)
  do iw=1,nomega
    do jj=1,npwc
-     sg2 = Gsph%rottb(jj,itim_q,isym_q)  
+     sg2 = Gsph%rottb(jj,itim_q,isym_q)
      phmsg2t_star = CONJG(Gsph%phmSGt(jj,isym_q))
      do ii=1,npwc
-       sg1 = Gsph%rottb(ii,itim_q,isym_q)  
+       sg1 = Gsph%rottb(ii,itim_q,isym_q)
        phmsg1t = Gsph%phmSGt(ii,isym_q)
        work(sg1,sg2) = Er%epsm1(ii,jj,iw,iq_loc) * phmsg1t * phmsg2t_star
        !work(grottb(ii),grottb(jj))=Er%epsm1(ii,jj,iw,iq_loc)*phmSgt(ii)*CONJG(phmSgt(jj))
@@ -989,7 +989,7 @@ subroutine mkdump_Er(Er,Vcp,npwe,gvec,nkxc,kxcg,id_required,approx_type,&
    ! === The two-point function we are asking for is already stored on file ===
    ! * According to mqmem either read and store the entire matrix in memory or do nothing.
 
-   if (Er%mqmem>0) then 
+   if (Er%mqmem>0) then
      ! In-core solution.
      write(msg,'(a,f12.1,a)')' Memory needed for Er%epsm1 = ',two*gwpc*npwe**2*Er%nomega*Er%nqibz*b2Mb,' [Mb]'
      call wrtout(std_out,msg,'PERS')
@@ -1003,7 +1003,7 @@ subroutine mkdump_Er(Er,Vcp,npwe,gvec,nkxc,kxcg,id_required,approx_type,&
      else
        call read_screening(in_varname,Er%fname,Er%npwe,Er%nqibz,Er%nomega,Er%epsm1,iomode,comm)
      end if
-   else  
+   else
      ! Out-of-core solution ===
      msg = " mqmem==0 => allocating a single q-slice of (W|chi0) (slower but less memory)."
      MSG_COMMENT(msg)
@@ -1024,11 +1024,11 @@ subroutine mkdump_Er(Er,Vcp,npwe,gvec,nkxc,kxcg,id_required,approx_type,&
 
      if (my_rank==master) then
        if (iomode == IO_MODE_ETSF) then
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
           ofname = nctk_ncify(ofname)
           NCF_CHECK(nctk_open_create(unt_dump, ofname, xmpi_comm_self))
 #endif
-       else 
+       else
          if (open_file(ofname,msg,newunit=unt_dump,form="unformatted",status="unknown",action="write") /= 0) then
            MSG_ERROR(msg)
          end if
@@ -1069,7 +1069,7 @@ subroutine mkdump_Er(Er,Vcp,npwe,gvec,nkxc,kxcg,id_required,approx_type,&
          ABI_MALLOC(dummy_uwing,(npwe*Er%nJ,Er%nomega,dim_wing))
          ABI_MALLOC(dummy_head,(dim_wing,dim_wing,Er%nomega))
 
-         if (approx_type<2 .or. approx_type>3) then ! bootstrap 
+         if (approx_type<2 .or. approx_type>3) then ! bootstrap
            MSG_WARNING('Entering out-of core RPA or Kxc branch')
            call make_epsm1_driver(iqibz,dim_wing,npwe,Er%nI,Er%nJ,Er%nomega,Er%omega,&
 &                    approx_type,option_test,Vcp,nfftot,ngfft,nkxc,kxcg,gvec,dummy_head,&
@@ -1096,7 +1096,7 @@ subroutine mkdump_Er(Er,Vcp,npwe,gvec,nkxc,kxcg,id_required,approx_type,&
        end do
 
        if (iomode == IO_MODE_ETSF) then
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
          NCF_CHECK(nf90_close(unt_dump))
 #endif
        else
@@ -1105,7 +1105,7 @@ subroutine mkdump_Er(Er,Vcp,npwe,gvec,nkxc,kxcg,id_required,approx_type,&
 
        ABI_FREE(epsm1)
      end if !master
-     
+
      ! Master broadcasts ofname.
      ! NOTE: A synchronization is required here, else the other procs start to read the
      ! SCR file before it is written by the master. xmpi_bcast will synch the procs.
@@ -1145,7 +1145,7 @@ subroutine mkdump_Er(Er,Vcp,npwe,gvec,nkxc,kxcg,id_required,approx_type,&
        ABI_MALLOC(dummy_uwing,(npwe*Er%nJ,Er%nomega,dim_wing))
        ABI_MALLOC(dummy_head,(dim_wing,dim_wing,Er%nomega))
 
-       if (approx_type<2 .or. approx_type>3) then 
+       if (approx_type<2 .or. approx_type>3) then
          MSG_WARNING('Entering in-core RPA and Kxc branch')
          call make_epsm1_driver(iqibz,dim_wing,npwe,Er%nI,Er%nJ,Er%nomega,Er%omega,&
 &                  approx_type,option_test,Vcp,nfftot,ngfft,nkxc,kxcg,gvec,dummy_head,&
@@ -1248,7 +1248,7 @@ subroutine get_epsm1(Er,Vcp,approx_type,option_test,iomode,comm,iqibzA)
  ng = Vcp%ng
 
  select case (Er%mqmem)
- case (0) 
+ case (0)
    !  Out-of-core solution
    if (allocated(Er%epsm1))  then
      ABI_FREE(Er%epsm1)
@@ -1339,7 +1339,7 @@ subroutine decompose_epsm1(Er,iqibz,eigs)
 
  do iw=1,Er%nomega
 
-   if (ABS(REAL(Er%omega(iw)))>0.00001) then 
+   if (ABS(REAL(Er%omega(iw)))>0.00001) then
      ! Eigenvalues for a generic complex matrix
      lwork=4*2*npwe
      ABI_MALLOC(wwc,(npwe))
@@ -1366,7 +1366,7 @@ subroutine decompose_epsm1(Er,iqibz,eigs)
      ABI_FREE(vs)
      ABI_FREE(Afull)
 
-   else 
+   else
      ! Hermitian version.
      lwork=2*npwe-1
      ABI_MALLOC(ww,(npwe))
@@ -1497,7 +1497,7 @@ subroutine make_epsm1_driver(iqibz,dim_wing,npwe,nI,nJ,nomega,omega,&
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: iqibz,nI,nJ,npwe,nomega,dim_wing,approx_type,option_test,nkxc,nfftot,comm
- type(vcoul_t),target,intent(in) :: Vcp 
+ type(vcoul_t),target,intent(in) :: Vcp
  type(spectra_t),intent(out) :: Spectra
 !arrays
  integer,intent(in) :: ngfft(18),gvec(3,npwe)
@@ -1522,7 +1522,7 @@ subroutine make_epsm1_driver(iqibz,dim_wing,npwe,nI,nJ,nomega,omega,&
  integer,allocatable :: istart(:),istop(:)
  real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3)
  real(dp),allocatable :: eelf(:,:),tmp_eelf(:)
- complex(dpc),allocatable :: epsm_lf(:,:),epsm_nlf(:,:),tmp_lf(:),tmp_nlf(:) 
+ complex(dpc),allocatable :: epsm_lf(:,:),epsm_nlf(:,:),tmp_lf(:),tmp_nlf(:)
  complex(dpc),allocatable :: buffer_lwing(:,:),buffer_uwing(:,:)
  complex(gwpc),allocatable :: kxcg_mat(:,:)
 
@@ -1622,7 +1622,7 @@ subroutine make_epsm1_driver(iqibz,dim_wing,npwe,nI,nJ,nomega,omega,&
      end if
    end do ! nomega
 
- CASE (1) 
+ CASE (1)
    ! Vertex correction from Adiabatic TDDFT. chi_{G1,G2} = [\delta -\chi0 (vc+kxc)]^{-1}_{G1,G3} \chi0_{G3,G2}
    ABI_CHECK(Vcp%nqlwl==1,"nqlwl/=1 not coded")
    ABI_CHECK(nkxc==1,"nkxc/=1 not coded")
@@ -1672,7 +1672,7 @@ subroutine make_epsm1_driver(iqibz,dim_wing,npwe,nI,nJ,nomega,omega,&
      call print_arr(chi0(:,:,io),mode_paral='PERS')
    end do
 
- CASE (2) 
+ CASE (2)
    ! ADA nonlocal vertex correction contained in fxc_ADA
    MSG_WARNING('Entered fxc_ADA branch: EXPERIMENTAL!')
    ! Test that argument was passed
@@ -1699,7 +1699,7 @@ subroutine make_epsm1_driver(iqibz,dim_wing,npwe,nI,nJ,nomega,omega,&
      call print_arr(chi0(:,:,io),mode_paral='PERS')
    end do
 
- CASE (4) 
+ CASE (4)
    !@WC bootstrap vertex correction [Sharma et al. PRL 107, 196401 (2011)]
    ABI_STAT_MALLOC(vfxc_boot,(npwe*nI,npwe*nJ), ierr)
    ABI_CHECK(ierr==0, "out-of-memory in vfxc_boot")
@@ -1724,7 +1724,7 @@ subroutine make_epsm1_driver(iqibz,dim_wing,npwe,nI,nJ,nomega,omega,&
 
    do istep=1,nstep
      chi0 = chi0_save
-     do io=1,1 ! static 
+     do io=1,1 ! static
        !if (omega_distrb(io) == my_rank) then
        call atddft_symepsm1(iqibz,Vcp,npwe,nI,nJ,chi0(:,:,io),vfxc_boot,0,my_nqlwl,dim_wing,omega(io),&
 &       chi0_head(:,:,io),chi0_lwing(:,io,:),chi0_uwing(:,io,:),tmp_lf,tmp_nlf,tmp_eelf,comm_self)
@@ -1733,7 +1733,7 @@ subroutine make_epsm1_driver(iqibz,dim_wing,npwe,nI,nJ,nomega,omega,&
        eelf(io,:) = tmp_eelf
        !end if
      end do
-   
+
      conv_err = smallest_real
      do ig2=1,npwe*nJ
        do ig1=1,npwe*nI
@@ -1768,17 +1768,17 @@ subroutine make_epsm1_driver(iqibz,dim_wing,npwe,nI,nJ,nomega,omega,&
        exit
      else if (istep < nstep) then
        chi0_tmp = chi0(:,:,1)
-       !vfxc_boot = chi0(:,:,1)/chi00_head ! full G vectors
-       vfxc_boot = czero; vfxc_boot(1,1) = chi0(1,1,1)/chi00_head ! head only
+       vfxc_boot = chi0(:,:,1)/chi00_head ! full G vectors
+       !vfxc_boot = czero; vfxc_boot(1,1) = chi0(1,1,1)/chi00_head ! head only
        fxc_head = vfxc_boot(1,1)
        do ig1=1,npwe
          vfxc_boot(ig1,:) = vc_sqrt(ig1)*vc_sqrt(:)*vfxc_boot(ig1,:)
        end do
      else
-       write(msg,'(a,i4,a)') ' -> bootstrap fxc not converged after ', nstep, ' iterations'  
+       write(msg,'(a,i4,a)') ' -> bootstrap fxc not converged after ', nstep, ' iterations'
        MSG_WARNING(msg)
        ! proceed to calculate the dielectric function even fxc is not converged
-       chi0 = chi0_save  
+       chi0 = chi0_save
        do io=1,nomega
          if (omega_distrb(io) == my_rank) then
            call atddft_symepsm1(iqibz,Vcp,npwe,nI,nJ,chi0(:,:,io),vfxc_boot,option_test,my_nqlwl,dim_wing,omega(io),&
@@ -1801,7 +1801,7 @@ subroutine make_epsm1_driver(iqibz,dim_wing,npwe,nI,nJ,nomega,omega,&
      call print_arr(chi0(:,:,io),mode_paral='PERS')
    end do
 
- CASE(5) 
+ CASE(5)
    !@WC: one-shot scalar bootstrap approximation
    ABI_STAT_MALLOC(vfxc_boot,(npwe*nI,npwe*nJ), ierr)
    ABI_CHECK(ierr==0, "out-of-memory in vfxc_boot")
@@ -1815,7 +1815,7 @@ subroutine make_epsm1_driver(iqibz,dim_wing,npwe,nI,nJ,nomega,omega,&
    end if
 
    chi0_save = chi0 ! a copy of chi0
-   fxc_head = czero; vfxc_boot = czero; 
+   fxc_head = czero; vfxc_boot = czero;
    epsm_lf = czero; epsm_nlf = czero; eelf = zero
    chi00_head = chi0(1,1,1)*vc_sqrt(1)**2
    write(msg,'(a,2f10.6)') ' -> chi0_dft(head): ',chi00_head
@@ -1825,12 +1825,12 @@ subroutine make_epsm1_driver(iqibz,dim_wing,npwe,nI,nJ,nomega,omega,&
    fxc_head = 0.5*fxc_head + 0.5*sqrt(fxc_head**2 - 4.0*vc_sqrt(1)**4/(chi00_head*chi00_head))
    vfxc_boot(1,1) = fxc_head
    write(msg,'(a,2f10.6)') ' -> v^-1*fxc(head): ',fxc_head/vc_sqrt(1)**2
-   call wrtout(std_out,msg,'COLL')  
+   call wrtout(std_out,msg,'COLL')
 
    chi0 = chi0_save
    do io=1,nomega
      if (omega_distrb(io) == my_rank) then
-       call atddft_symepsm1(iqibz,Vcp,npwe,nI,nJ,chi0(:,:,io),vfxc_boot,0,my_nqlwl,dim_wing,omega(io),&
+       call atddft_symepsm1(iqibz,Vcp,npwe,nI,nJ,chi0(:,:,io),vfxc_boot,option_test,my_nqlwl,dim_wing,omega(io),&
 &         chi0_head(:,:,io),chi0_lwing(:,io,:),chi0_uwing(:,io,:),tmp_lf,tmp_nlf,tmp_eelf,comm_self)
        epsm_lf(io,:) = tmp_lf
        epsm_nlf(io,:) = tmp_nlf
@@ -1839,7 +1839,63 @@ subroutine make_epsm1_driver(iqibz,dim_wing,npwe,nI,nJ,nomega,omega,&
    end do
    write(msg,'(a,2f10.6)')  '    eps^-1(head):   ',chi0(1,1,1)
    call wrtout(std_out,msg,'COLL')
-   
+
+   ABI_FREE(chi0_save)
+   ABI_FREE(vfxc_boot)
+
+   do io=1,nomega
+     write(msg,'(a,i4,a,2f9.4,a)')' Symmetrical epsilon^-1(G,G'') at the ',io,' th omega',omega(io)*Ha_eV,' [eV]'
+     call wrtout(std_out,msg,'COLL')
+     call print_arr(chi0(:,:,io),mode_paral='PERS')
+   end do
+
+CASE(6)
+   !@WC: RPA bootstrap by Rigamonti et al. (PRL 114, 146402) and Berger (PRL 115, 137402)
+   ABI_STAT_MALLOC(vfxc_boot,(npwe*nI,npwe*nJ), ierr)
+   ABI_CHECK(ierr==0, "out-of-memory in vfxc_boot")
+   ABI_STAT_MALLOC(chi0_save,(npwe*nI,npwe*nJ,nomega), ierr)
+   ABI_CHECK(ierr==0, "out-of-memory in chi0_save")
+
+   if (iqibz==1) then
+     vc_sqrt => Vcp%vcqlwl_sqrt(:,1)  ! Use Coulomb term for q-->0
+   else
+     vc_sqrt => Vcp%vc_sqrt(:,iqibz)
+   end if
+
+   chi0_save = chi0 ! a copy of chi0
+   fxc_head = czero; vfxc_boot = czero;
+   epsm_lf = czero; epsm_nlf = czero; eelf = zero
+   chi00_head = chi0(1,1,1)*vc_sqrt(1)**2
+   write(msg,'(a,2f10.6)') ' -> chi0_dft(head): ',chi00_head
+   call wrtout(std_out,msg,'COLL')
+
+   ! static
+   io = 1
+   call atddft_symepsm1(iqibz,Vcp,npwe,nI,nJ,chi0(:,:,io),vfxc_boot,0,my_nqlwl,dim_wing,omega(io),&
+&    chi0_head(:,:,io),chi0_lwing(:,io,:),chi0_uwing(:,io,:),tmp_lf,tmp_nlf,tmp_eelf,comm_self)
+   epsm_lf(1,:) = tmp_lf
+
+   vfxc_boot(1,1) = 1.0/(chi00_head * epsm_lf(1,1))
+   fxc_head = vfxc_boot(1,1)
+   do ig1=1,npwe
+     vfxc_boot(ig1,:) = vc_sqrt(ig1)*vc_sqrt(:)*vfxc_boot(ig1,:)
+   end do
+   write(msg,'(a,2f10.6)') ' -> v^-1*fxc(head): ',fxc_head
+   call wrtout(std_out,msg,'COLL')
+
+   chi0 = chi0_save
+   do io=1,nomega
+     if (omega_distrb(io) == my_rank) then
+       call atddft_symepsm1(iqibz,Vcp,npwe,nI,nJ,chi0(:,:,io),vfxc_boot,option_test,my_nqlwl,dim_wing,omega(io),&
+&        chi0_head(:,:,io),chi0_lwing(:,io,:),chi0_uwing(:,io,:),tmp_lf,tmp_nlf,tmp_eelf,comm_self)
+       epsm_lf(io,:) = tmp_lf
+       epsm_nlf(io,:) = tmp_nlf
+       eelf(io,:) = tmp_eelf
+     end if
+   end do
+   write(msg,'(a,2f10.6)')  '    eps^-1(head):   ',chi0(1,1,1)
+   call wrtout(std_out,msg,'COLL')
+
    ABI_FREE(chi0_save)
    ABI_FREE(vfxc_boot)
 
@@ -1853,7 +1909,7 @@ subroutine make_epsm1_driver(iqibz,dim_wing,npwe,nI,nJ,nomega,omega,&
    MSG_BUG(sjoin('Wrong approx_type:',itoa(approx_type)))
  END SELECT
 
- if (use_MPI) then 
+ if (use_MPI) then
    ! Collect results on each node.
    ABI_MALLOC(buffer_lwing, (size(chi0_lwing,dim=1), size(chi0_lwing, dim=3)))
    ABI_MALLOC(buffer_uwing, (size(chi0_uwing,dim=1), size(chi0_uwing, dim=3)))
@@ -1893,7 +1949,7 @@ subroutine make_epsm1_driver(iqibz,dim_wing,npwe,nI,nJ,nomega,omega,&
    call xmpi_sum(epsm_nlf,comm,ierr)
    call xmpi_sum(eelf,    comm,ierr)
    ABI_FREE(buffer_lwing)
-   ABI_FREE(buffer_uwing) 
+   ABI_FREE(buffer_uwing)
  end if
 
  ! Save results in Spectra%, mind the slicing.
@@ -2223,7 +2279,7 @@ subroutine atddft_symepsm1(iqibz,Vcp,npwe,nI,nJ,chi0,kxcg_mat,option_test,my_nql
  chi0=chitmp
 
  select case (option_test)
- case (0) 
+ case (0)
    ! Symmetrized TESTPARTICLE epsilon^-1
    call wrtout(std_out,' Calculating TESTPARTICLE epsilon^-1(G,G") = 1 + Vc*chi','COLL')
    do ig1=1,npwe
@@ -2231,7 +2287,7 @@ subroutine atddft_symepsm1(iqibz,Vcp,npwe,nI,nJ,chi0,kxcg_mat,option_test,my_nql
      chi0(ig1,ig1)=one+chi0(ig1,ig1)
    end do
 
- case (1) 
+ case (1)
    ! Symmetrized TESTELECTRON epsilon^-1
    call wrtout(std_out,' Calculating TESTELECTRON epsilon^-1(G,G") = 1 + (Vc + fxc)*chi',"COLL")
    chitmp=MATMUL(kxcg_mat,chi0)
@@ -2484,7 +2540,6 @@ subroutine lebedev_laikov_int()
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'lebedev_laikov_int'
- use interfaces_28_numeric_noabirule
 !End of the abilint section
 
  implicit none
@@ -2516,11 +2571,11 @@ subroutine lebedev_laikov_int()
  ABI_MALLOC(vz,(npts))
  ABI_MALLOC(ww,(npts))
 
- call LD0026(vx,vy,vz,ww,on)
+ !call LD0026(vx,vy,vz,ww,on)
 
  ang_int=czero
  do ii=1,npts
-   cart_vpt = (/vx(ii),vy(ii),vz(ii)/)
+   cart_vpt = [vx(ii),vy(ii),vz(ii)]
    ang_int = ang_int + ww(ii)*DOT_PRODUCT(cart_vpt,MATMUL(tensor,cart_vpt))
  end do
 
@@ -2532,14 +2587,14 @@ subroutine lebedev_laikov_int()
  ABI_FREE(vz)
  ABI_FREE(ww)
 
- call init_lebedev_gridset()
+ !call init_lebedev_gridset()
  cplx_pars = RESHAPE(tensor,(/9/)); accuracy=tol10
 
  ! This is the function to be expanded evaluated on the lebedev_laikov grid of index leb_idx
  leb_idx=3; npts=lebedev_npts(leb_idx)
  ABI_MALLOC(ref_func,(npts))
  do ii=1,npts
-   cart_vpt = Lgridset(leb_idx)%versor(:,ii)
+   !cart_vpt = Lgridset(leb_idx)%versor(:,ii)
    ref_func(ii) = one/DOT_PRODUCT(cart_vpt,MATMUL(tensor,cart_vpt))
  end do
 
@@ -2557,7 +2612,7 @@ subroutine lebedev_laikov_int()
      write(std_out,*)ll,mm,ang_int
      !tmp_momenta(mm) = ang_int
      do ii=1,npts
-       cart_vpt = Lgridset(leb_idx)%versor(:,ii)
+       !cart_vpt = Lgridset(leb_idx)%versor(:,ii)
        expd_func(ii) = expd_func(ii) + four_pi*ang_int*ylmc(ll,mm,cart_vpt)
      end do
    end do
@@ -2574,7 +2629,6 @@ subroutine lebedev_laikov_int()
 
  ABI_FREE(expd_func)
  ABI_FREE(ref_func)
- call destroy_lebedev_gridset()
 
  MSG_ERROR("Exiting from lebedev_laikov_int")
 
@@ -3233,7 +3287,7 @@ subroutine lwl_write(path, cryst, vcp, npwe, nomega, gvec, chi0, chi0_head, chi0
    if (iomode == IO_MODE_FORTRAN) then
      close(unt)
    else
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
      NCF_CHECK(nf90_close(unt))
 #endif
    end if
@@ -3309,7 +3363,7 @@ subroutine lwl_init(lwl, path, method, cryst, vcp, npwe, gvec, comm)
    case (IO_MODE_FORTRAN)
      if (open_file(path, msg, newunit=unt, action="read", form="unformatted", status="old") /= 0) then
        MSG_ERROR(msg)
-     end if 
+     end if
 
      close(unt)
 

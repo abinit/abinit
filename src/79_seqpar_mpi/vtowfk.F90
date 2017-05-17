@@ -9,7 +9,7 @@
 !! but might also simply compute eigenvectors and eigenvalues at this k point
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (DCA, XG, GMR, MT)
+!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -85,8 +85,8 @@
 !!      vtorho
 !!
 !! CHILDREN
-!!      build_h,cgwf,chebfi,dsymm,fourwf,fxphas,lobpcgwf,meanvalue_g,nonlop
-!!      pawcprj_alloc,pawcprj_copy,pawcprj_free,pawcprj_put,prep_fourwf
+!!      build_h,cgwf,chebfi,dsymm,fourwf,fxphas,lobpcgwf,lobpcgwf2,meanvalue_g
+!!      nonlop,pawcprj_alloc,pawcprj_copy,pawcprj_free,pawcprj_put,prep_fourwf
 !!      prep_nonlop,pw_orthon,subdiago,timab,wrtout,xmpi_sum,zhemm
 !!
 !! NOTES
@@ -124,6 +124,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  use m_pawcprj,     only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_put,pawcprj_copy
  use m_paw_dmft,    only : paw_dmft_type
  use gwls_hamiltonian, only : build_H
+ use m_lobpcgwf,    only : lobpcgwf2
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -166,6 +167,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  type(pawcprj_type),intent(inout) :: cprj(natom,mcprj*gs_hamk%usecprj)
 
 !Local variables-------------------------------
+ logical :: newlobpcg
  integer,parameter :: level=112,tim_fourwf=2,tim_nonlop_prep=11
  integer,save :: nskip=0
 !     Flag use_subovl: 1 if "subovl" array is computed (see below)
@@ -178,15 +180,17 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  integer :: nband_k_cprj,nblockbd,ncpgr,ndat,nkpt_max,nnlout,ortalgo
  integer :: paw_opt,quit,signs,spaceComm,tim_nonlop,wfoptalg,wfopta10
  logical :: nspinor1TreatedByThisProc,nspinor2TreatedByThisProc
- real(dp) :: ar,ar_im,eshift,lambda_k,occblock
+ real(dp) :: ar,ar_im,eshift,occblock
  real(dp) :: res,residk,weight
  character(len=500) :: message
  real(dp) :: dummy(2,1),nonlop_dum(1,1),tsec(2)
  real(dp),allocatable :: cwavef(:,:),cwavef1(:,:),cwavef_x(:,:),cwavef_y(:,:),cwavefb(:,:,:)
  real(dp),allocatable :: eig_save(:),enlout(:),evec(:,:),evec_loc(:,:),gsc(:,:)
- real(dp),allocatable :: lambda_loc(:),mat_loc(:,:),mat1(:,:,:),matvnl(:,:,:)
+ real(dp),allocatable :: mat_loc(:,:),mat1(:,:,:),matvnl(:,:,:)
  real(dp),allocatable :: subham(:),subovl(:),subvnl(:),totvnl(:,:),wfraug(:,:,:,:)
  type(pawcprj_type),allocatable :: cwaveprj(:,:)
+
+
 
 ! **********************************************************************
 
@@ -207,7 +211,8 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 
  nkpt_max=50; if(xmpi_paral==1)nkpt_max=-1
 
- wfoptalg=dtset%wfoptalg; wfopta10=mod(wfoptalg,10)
+ wfoptalg=mod(dtset%wfoptalg,100); wfopta10=mod(wfoptalg,10)
+ newlobpcg = (dtset%wfoptalg == 114 .and. dtset%use_gpu_cuda == 0)
  istwf_k=gs_hamk%istwf_k
  quit=0
 
@@ -224,12 +229,12 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  end if
 
 !Parallelism over FFT and/or bands: define sizes and tabs
- if (mpi_enreg%paral_kgb==1) then
-   nblockbd=nband_k/(mpi_enreg%nproc_band*mpi_enreg%bandpp)
- else
-   nblockbd=nband_k/mpi_enreg%nproc_fft
-   if (nband_k/=nblockbd*mpi_enreg%nproc_fft) nblockbd=nblockbd+1
- end if
+ !if (mpi_enreg%paral_kgb==1) then
+ nblockbd=nband_k/(mpi_enreg%nproc_band*mpi_enreg%bandpp)
+ !else
+ !  nblockbd=nband_k/mpi_enreg%nproc_fft
+ !  if (nband_k/=nblockbd*mpi_enreg%nproc_fft) nblockbd=nblockbd+1
+ !end if
  blocksize=nband_k/nblockbd
 
 !Save eshift
@@ -241,14 +246,16 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 
  n1=gs_hamk%ngfft(1); n2=gs_hamk%ngfft(2); n3=gs_hamk%ngfft(3)
 
- igsc=0
- mgsc=nband_k*npw_k*my_nspinor*gs_hamk%usepaw
+ if ( .not. newlobpcg ) then
+   igsc=0
+   mgsc=nband_k*npw_k*my_nspinor*gs_hamk%usepaw
 
- ABI_STAT_ALLOCATE(gsc,(2,mgsc), ierr)
- ABI_CHECK(ierr==0, "out of memory in gsc")
- gsc=zero
+   ABI_STAT_ALLOCATE(gsc,(2,mgsc), ierr)
+   ABI_CHECK(ierr==0, "out of memory in gsc")
+   gsc=zero
+ end if
 
- if(wfopta10 /= 1) then !chebfi already does this stuff inside
+ if(wfopta10 /= 1 .and. .not. newlobpcg ) then !chebfi already does this stuff inside
    ABI_ALLOCATE(evec,(2*nband_k,nband_k))
    ABI_ALLOCATE(subham,(nband_k*(nband_k+1)))
 
@@ -296,7 +303,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  do inonsc=1,nnsclo_now
 
 !  This initialisation is needed for the MPI-parallelisation (gathering using sum)
-   if(wfopta10 /= 1) then
+   if(wfopta10 /= 1 .and. .not. newlobpcg) then
      subham(:)=zero
      if (gs_hamk%usepaw==0) then
        if (wfopta10==4) then
@@ -341,25 +348,31 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 !    ============ MINIMIZATION OF BANDS: LOBPCG ==============================
 !    =========================================================================
        if (wfopta10==4) then
-         call lobpcgwf(cg,dtset,gs_hamk,gsc,icg,igsc,kinpw,mcg,mgsc,mpi_enreg,&
-&         nband_k,nblockbd,npw_k,prtvol,resid_k,subham,totvnl)
-!        In case of FFT parallelism, exchange subspace arrays
-         spaceComm=mpi_enreg%comm_bandspinorfft
-         call xmpi_sum(subham,spaceComm,ierr)
-         if (gs_hamk%usepaw==0) then
-           if (wfopta10==4) then
-             call xmpi_sum(totvnl,spaceComm,ierr)
-           else
-             call xmpi_sum(subvnl,spaceComm,ierr)
+         if ( .not. newlobpcg ) then
+           call lobpcgwf(cg,dtset,gs_hamk,gsc,icg,igsc,kinpw,mcg,mgsc,mpi_enreg,&
+&           nband_k,nblockbd,npw_k,prtvol,resid_k,subham,totvnl)
+!          In case of FFT parallelism, exchange subspace arrays
+           spaceComm=mpi_enreg%comm_bandspinorfft
+           call xmpi_sum(subham,spaceComm,ierr)
+           if (gs_hamk%usepaw==0) then
+             if (wfopta10==4) then
+               call xmpi_sum(totvnl,spaceComm,ierr)
+             else
+               call xmpi_sum(subvnl,spaceComm,ierr)
+             end if
            end if
+           if (use_subovl==1) call xmpi_sum(subovl,spaceComm,ierr)
+         else
+           call lobpcgwf2(cg(:,icg+1:),dtset,eig_k,enl_k,gs_hamk,kinpw,mpi_enreg,&
+&           nband_k,npw_k,my_nspinor,prtvol,resid_k)
          end if
-         if (use_subovl==1) call xmpi_sum(subovl,spaceComm,ierr)
+!        In case of FFT parallelism, exchange subspace arrays
 
 !    =========================================================================
 !    ============ MINIMIZATION OF BANDS: CHEBYSHEV FILTERING =================
 !    =========================================================================
        else if (wfopta10 == 1) then
-         call chebfi(cg(:, icg+1:),dtset,eig_k,enl_k,gs_hamk,gsc(:, igsc+1:),kinpw,&
+         call chebfi(cg(:, icg+1:),dtset,eig_k,enl_k,gs_hamk,gsc,kinpw,&
 &         mpi_enreg,nband_k,npw_k,my_nspinor,prtvol,resid_k)
        end if
 
@@ -396,7 +409,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 !  ========== DIAGONALIZATION OF HAMILTONIAN IN WFs SUBSPACE ===============
 !  =========================================================================
 
-   if(.not. wfopta10 == 1) then
+   if( .not. wfopta10 == 1 .and. .not. newlobpcg ) then
      call timab(585,1,tsec) !"vtowfk(subdiago)"
      call subdiago(cg,eig_k,evec,gsc,icg,igsc,istwf_k,&
 &     mcg,mgsc,nband_k,npw_k,my_nspinor,dtset%paral_kgb,&
@@ -444,7 +457,13 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 !  DEBUG seq==par comment next block
 !  Fix phases of all bands
    if ((xmpi_paral/=1).or.(mpi_enreg%paral_kgb/=1)) then
-     call fxphas(cg,gsc,icg,igsc,istwf_k,mcg,mgsc,mpi_enreg,nband_k,npw_k*my_nspinor,gs_hamk%usepaw)
+     if ( .not. newlobpcg ) then
+       call fxphas(cg,gsc,icg,igsc,istwf_k,mcg,mgsc,mpi_enreg,nband_k,npw_k*my_nspinor,gs_hamk%usepaw)
+     else
+       ! GSC is local to vtowfk and is completely useless since everything
+       ! is calcultated in my lobpcg, we don't care about the phase of gsc !
+       call fxphas(cg,gsc,icg,igsc,istwf_k,mcg,mgsc,mpi_enreg,nband_k,npw_k*my_nspinor,0)
+     end if
    end if
 
    if (residk<dtset%tolwfr) exit  !  Exit loop over inonsc if converged
@@ -473,10 +492,8 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
    choice=2*optforces
    paw_opt=2;cpopt=0;tim_nonlop=10-8*optforces
    if (dtset%usefock==1) then
-     if (dtset%optforces/= 0 .and. dtset%optstress == 0) then
+     if (dtset%optforces/= 0) then
        choice=2;cpopt=1; nnlout=3*natom
-!     else if (dtset%optstress /= 0) then
-!       choice=23;cpopt=4 ;nnlout=6+3*natom
      end if
    end if
  end if
@@ -485,13 +502,12 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 
 !Allocation of memory space for one WF
  ABI_ALLOCATE(cwavef,(2,npw_k*my_nspinor*blocksize))
- if (gs_hamk%usepaw==1.and.iscf>0) then
+ if (gs_hamk%usepaw==1.and.(iscf>0.or.gs_hamk%usecprj==1)) then
    iorder_cprj=0
    nband_k_cprj=nband_k*(mband_cprj/dtset%mband)
-   bandpp_cprj=1;if (mpi_enreg%paral_kgb==1) bandpp_cprj=mpi_enreg%bandpp
+   bandpp_cprj=mpi_enreg%bandpp
    ABI_DATATYPE_ALLOCATE(cwaveprj,(natom,my_nspinor*bandpp_cprj))
-   ncpgr=0
-   if((dtset%usefock==1).and.(cpopt==1)) ncpgr=cprj(1,1)%ncpgr
+   ncpgr=0;if (cpopt==1) ncpgr=cprj(1,1)%ncpgr
    call pawcprj_alloc(cwaveprj,ncpgr,gs_hamk%dimcprj)
  else
    ABI_DATATYPE_ALLOCATE(cwaveprj,(0,0))
@@ -708,10 +724,12 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
          ABI_DEALLOCATE(cwavefb)
        end if
      end if
+   end if ! End of SCF calculation
 
 !    Call to nonlocal operator:
 !    - Compute nonlocal forces from most recent wfs
-!    - PAW: compute contribution to augmentation occ. (rhoij)
+!    - PAW: compute projections of WF onto NL projectors (cprj)
+   if(iscf>0.or.gs_hamk%usecprj==1)then
      if (gs_hamk%usepaw==1.or.optforces/=0) then
 !      Treat all wavefunctions in case of varying occupation numbers or PAW
 !      Only treat occupied bands in case of fixed occupation numbers and NCPP
@@ -726,23 +744,20 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
            call pawcprj_copy(cprj(:,1+(iblock-1)*my_nspinor*blocksize+ibg:iblock*my_nspinor*blocksize+ibg),cwaveprj)
          end if
          if (mpi_enreg%paral_kgb==1) then
-           ABI_ALLOCATE(lambda_loc,(blocksize))
            call timab(572,1,tsec) ! 'prep_nonlop%vtowfk'
-           lambda_loc(1:blocksize)=eig_k(1+(iblock-1)*blocksize:iblock*blocksize)
-           call prep_nonlop(choice,cpopt,cwaveprj,enlout,gs_hamk,idir,lambda_loc,blocksize,&
+           call prep_nonlop(choice,cpopt,cwaveprj,enlout,gs_hamk,idir, &
+&           eig_k(1+(iblock-1)*blocksize:iblock*blocksize),blocksize,&
 &           mpi_enreg,nnlout,paw_opt,signs,nonlop_dum,tim_nonlop_prep,cwavef,cwavef)
            call timab(572,2,tsec)
-           ABI_DEALLOCATE(lambda_loc)
          else
-           lambda_k=eig_k(iblock)
-           call nonlop(choice,cpopt,cwaveprj,enlout,gs_hamk,idir,(/lambda_k/),mpi_enreg,1,nnlout,&
+           call nonlop(choice,cpopt,cwaveprj,enlout,gs_hamk,idir,eig_k(1+(iblock-1)*blocksize:iblock*blocksize),&
+&           mpi_enreg,blocksize,nnlout,&
 &           paw_opt,signs,nonlop_dum,tim_nonlop,cwavef,cwavef)
          end if
-
          if(gs_hamk%usepaw==1) then
            call timab(554,2,tsec)
          end if
-
+!        Acccumulate forces
          if (optforces>0) then
            iband=(iblock-1)*blocksize
            do iblocksize=1,blocksize
@@ -752,6 +767,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
              grnl_k(1:nnlout,iband)=enlout(ibs+1:ibs+nnlout)
            end do
          end if
+!        Store cprj (<Pnl|Psi>)
          if (gs_hamk%usepaw==1.and.gs_hamk%usecprj==1) then
            iband=1+(iblock-1)*bandpp_cprj
            call pawcprj_put(gs_hamk%atindx,cwaveprj,cprj,natom,iband,ibg,ikpt,iorder_cprj,isppol,&
@@ -759,15 +775,15 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 &           dtset%nsppol,dtfil%unpaw,mpicomm=mpi_enreg%comm_kpt,proc_distrb=mpi_enreg%proc_distrb)
          end if
        end if
-     end if
+     end if ! PAW or forces
+   end if ! iscf>0 or iscf=-3
 
-   end if ! End of SCF calculation
  end do !  End of loop on blocks
 
  ABI_DEALLOCATE(cwavef)
  ABI_DEALLOCATE(enlout)
 
- if (gs_hamk%usepaw==1.and.iscf>0) then
+ if (gs_hamk%usepaw==1.and.(iscf>0.or.gs_hamk%usecprj==1)) then
    call pawcprj_free(cwaveprj)
  end if
  ABI_DATATYPE_DEALLOCATE(cwaveprj)
@@ -783,7 +799,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  end if
 
 !Norm-conserving only: Compute nonlocal part of total energy : rotate subvnl
- if (gs_hamk%usepaw==0 .and. wfopta10 /= 1) then
+ if (gs_hamk%usepaw==0 .and. wfopta10 /= 1 .and. .not. newlobpcg ) then
    call timab(586,1,tsec)   ! 'vtowfk(nonlocalpart)'
    ABI_ALLOCATE(matvnl,(2,nband_k,nband_k))
    ABI_ALLOCATE(mat1,(2,nband_k,nband_k))
@@ -893,7 +909,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
    call build_H(dtset,mpi_enreg,cpopt,cg,gs_hamk,kg_k,kinpw)
  end if
 
- if(wfopta10 /= 1) then
+ if(wfopta10 /= 1 .and. .not. newlobpcg) then
    ABI_DEALLOCATE(evec)
    ABI_DEALLOCATE(subham)
    !if (gs_hamk%usepaw==0) then
@@ -905,7 +921,9 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
    !end if
    ABI_DEALLOCATE(subovl)
  end if
- ABI_DEALLOCATE(gsc)
+ if ( .not. newlobpcg ) then
+   ABI_DEALLOCATE(gsc)
+ end if
 
  if(wfoptalg==3) then
    ABI_DEALLOCATE(eig_save)

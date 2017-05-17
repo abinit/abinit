@@ -12,7 +12,7 @@
 !! If required, <G|S^(2)|C> is returned in gs2c (S=overlap - PAW only)
 !!
 !! COPYRIGHT
-!! Copyright (C) 2015-2016 ABINIT group (MT,JLJ)
+!! Copyright (C) 2015-2017 ABINIT group (MT,JLJ)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -21,19 +21,20 @@
 !! INPUTS
 !!  cwavef(2,npw*nspinor)=input wavefunction, in reciprocal space
 !!  cwaveprj(natom,nspinor*usecprj)=<p_lmn|C> coefficients for wavefunction |C>
-!!  ddkinpw(npw)=derivative of the (modified) kinetic energy for each plane wave at k (Hartree)
 !!  gs_hamkq <type(gs_hamiltonian_type)>=all data for the Hamiltonian
 !!  idir=direction of the perturbation
 !!  ipert=type of the perturbation
 !!  lambda=real use to apply H^(2)-lambda.S^(2)
 !!  mpi_enreg=information about MPI parallelization
-!!  natom=number of atoms in unit cell.
-!!  npw,npw1=number of planewaves in basis sphere (should be identical as q=0)
 !!  optlocal=0: local part of H^(2) is not computed in gh2c=<G|H^(2)|C>
 !!           1: local part of H^(2) is computed in gh2c=<G|H^(2)|C>
 !!  optnl=0: non-local part of H^(2) is not computed in gh2c=<G|H^(2)|C>
 !!        1: non-local part of H^(2) depending on VHxc^(2) is not computed in gh2c=<G|H^(2)|C>
 !!        2: non-local part of H^(2) is totally computed in gh2c=<G|H^(2)|C>
+!!  opt_gvnl2=option controlling the use of gvnl2 array:
+!!            0: not used
+!!            1: used as input:    - used only for PAW and ipert=natom+11
+!!               At input: contains the ddk 1-st order WF (times i)
 !!  rf_hamkq <type(rf_hamiltonian_type)>=all data for the 2nd-order Hamiltonian at k,k+q
 !!  sij_opt= -PAW ONLY-  if  0, only matrix elements <G|H^(2)|C> have to be computed
 !!     (S=overlap)       if  1, matrix elements <G|S^(2)|C> have to be computed in gs2c in addition to gh2c
@@ -42,19 +43,19 @@
 !!  usevnl=1 if gvnl2=(part of <G|K^(2)+Vnl^(2)-lambda.S^(2)|C> not depending on VHxc^(2)) has to be input/output
 !!
 !! OUTPUT
-!! gh2c(2,npw*nspinor)= <G|H^(2)|C> or  <G|H^(2)-lambda.S^(2)|C>
+!! gh2c(2,npw1*nspinor)= <G|H^(2)|C> or  <G|H^(2)-lambda.S^(2)|C>
 !!                     (only kinetic+non-local parts if optlocal=0)
 !! if (usevnl==1)
 !!  gvnl2(2,npw1*nspinor)=  part of <G|K^(2)+Vnl^(2)|C> not depending on VHxc^(2)              (sij_opt/=-1)
 !!                       or part of <G|K^(2)+Vnl^(2)-lambda.S^(2)|C> not depending on VHxc^(2) (sij_opt==-1)
 !! if (sij_opt=1)
-!!  gs2c(2,npw*nspinor)=<G|S^(2)|C> (S=overlap).
+!!  gs2c(2,npw1*nspinor)=<G|S^(2)|C> (S=overlap).
 !!
 !! PARENTS
 !!      m_rf2
 !!
 !! CHILDREN
-!!      nonlop
+!!      nonlop,pawcprj_alloc,pawcprj_free
 !!
 !! SOURCE
 
@@ -65,14 +66,14 @@
 #include "abi_common.h"
 
 subroutine getgh2c(cwavef,cwaveprj,gh2c,gs2c,gs_hamkq,gvnl2,idir,ipert,lambda,&
-&                  mpi_enreg,optlocal,optnl,rf_hamkq,sij_opt,tim_getgh2c,usevnl)
+&                  mpi_enreg,optlocal,optnl,opt_gvnl2,rf_hamkq,sij_opt,tim_getgh2c,usevnl)
 
  use defs_basis
  use defs_abitypes
  use m_profiling_abi
  use m_errors
 
- use m_pawcprj,     only : pawcprj_type
+ use m_pawcprj,     only : pawcprj_type,pawcprj_alloc,pawcprj_free
  use m_hamiltonian, only : gs_hamiltonian_type,rf_hamiltonian_type
 
 !This section has been created automatically by the script Abilint (TD).
@@ -86,9 +87,9 @@ subroutine getgh2c(cwavef,cwaveprj,gh2c,gs2c,gs_hamkq,gvnl2,idir,ipert,lambda,&
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: idir,ipert,optlocal,optnl,sij_opt,tim_getgh2c,usevnl
+ integer,intent(in) :: idir,ipert,optlocal,optnl,opt_gvnl2,sij_opt,tim_getgh2c,usevnl
  real(dp),intent(in) :: lambda
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
  type(gs_hamiltonian_type),intent(inout),target :: gs_hamkq
  type(rf_hamiltonian_type),intent(inout),target :: rf_hamkq
 !arrays
@@ -99,8 +100,8 @@ subroutine getgh2c(cwavef,cwaveprj,gh2c,gs2c,gs_hamkq,gvnl2,idir,ipert,lambda,&
 
 !Local variables-------------------------------
 !scalars
- integer :: choice,cpopt,idir1,idir2,idirc,ipw,ipws,ispinor
- integer :: my_nspinor,natom,nnlout=1,npw,npw1,paw_opt,signs,tim_nonlop
+ integer :: choice,cpopt,idir1,idir2,idirc,ipw,ipws,ispinor,my_nspinor
+ integer :: natom,ncpgr,nnlout=1,npw,npw1,paw_opt,signs,tim_nonlop,usecprj
  logical :: has_kin,has_vnl
  real(dp) :: enlout_dum(1)
  character(len=500) :: msg
@@ -108,9 +109,12 @@ subroutine getgh2c(cwavef,cwaveprj,gh2c,gs2c,gs_hamkq,gvnl2,idir,ipert,lambda,&
 ! integer,parameter :: alpha(6)=(/1,2,3,3,3,2/),beta(6)=(/1,2,3,2,1,1/)
  integer,parameter :: alpha(9)=(/1,2,3,2,1,1,3,3,2/),beta(9)=(/1,2,3,3,3,2,2,1,1/)
 !real(dp) :: tsec(2)
- real(dp) :: svectout_dum(1,1)
+ real(dp) :: svectout_dum(1,1),vectout_dum(1,1)
+ real(dp),allocatable :: nonlop_out(:,:)
  real(dp),ABI_CONTIGUOUS pointer :: gvnl2_(:,:)
  real(dp), pointer :: ddkinpw(:),kinpw1(:)
+ type(pawcprj_type),allocatable,target :: cwaveprj_tmp(:,:)
+ type(pawcprj_type),pointer :: cwaveprj_ptr(:,:)
 
 ! *********************************************************************
 
@@ -130,10 +134,6 @@ subroutine getgh2c(cwavef,cwaveprj,gh2c,gs2c,gs_hamkq,gvnl2,idir,ipert,lambda,&
    msg='only ipert<>natom+10/natom+11 implemented!'
    MSG_BUG(msg)
  end if
- if(gs_hamkq%usepaw==0.and.gs_hamkq%usecprj==1)then
-   msg='usecprj==1 not allowed for NC psps!'
-   MSG_BUG(msg)
- end if
  if (mpi_enreg%paral_spinor==1) then
    msg='Not compatible with parallelization over spinorial components!'
    MSG_BUG(msg)
@@ -141,6 +141,20 @@ subroutine getgh2c(cwavef,cwaveprj,gh2c,gs2c,gs_hamkq,gvnl2,idir,ipert,lambda,&
  if (gs_hamkq%nvloc>1) then
    msg='Not compatible with nvloc=4 (non-coll. magnetism)!'
    MSG_BUG(msg)
+ end if
+ if(ipert==natom+11.and.gs_hamkq%usepaw==1) then
+   if (optnl>=1.and.((.not.associated(rf_hamkq%e1kbfr)).or.(.not.associated(rf_hamkq%e1kbsc)))) then
+     msg='ekb derivatives must be allocated for ipert=natom+11 !'
+     MSG_BUG(msg)
+   end if
+   if (usevnl==0) then
+     msg='gvnl2 must be allocated for ipert=natom+11 !'
+     MSG_BUG(msg)
+   end if
+   if(opt_gvnl2==0) then
+     msg='opt_gvnl2=0 not compatible with ipert=natom+11 !'
+     MSG_BUG(msg)
+   end if
  end if
 
 !Check sizes
@@ -165,9 +179,22 @@ subroutine getgh2c(cwavef,cwaveprj,gh2c,gs2c,gs_hamkq,gvnl2,idir,ipert,lambda,&
      MSG_BUG(msg)
    end if
  end if
- if (gs_hamkq%usepaw==1.and.gs_hamkq%usecprj/=0) then
-   if (size(cwaveprj)<gs_hamkq%natom*my_nspinor) then
-     msg='wrong size for cwaveprj!'
+
+!PAW: specific treatment for usecprj input arg
+!     force it to zero if cwaveprj is not allocated
+ usecprj=gs_hamkq%usecprj ; ncpgr=0
+ if(gs_hamkq%usepaw==1) then
+   if (size(cwaveprj)==0) usecprj=0
+   if (usecprj/=0) then
+     ncpgr=cwaveprj(1,1)%ncpgr
+     if (size(cwaveprj)<gs_hamkq%natom*my_nspinor) then
+       msg='wrong size for cwaveprj!'
+       MSG_BUG(msg)
+     end if
+   end if
+ else
+   if(usecprj==1)then
+     msg='usecprj==1 not allowed for NC psps !'
      MSG_BUG(msg)
    end if
  end if
@@ -179,22 +206,15 @@ subroutine getgh2c(cwavef,cwaveprj,gh2c,gs2c,gs_hamkq,gvnl2,idir,ipert,lambda,&
  if (tim_getgh2c==2.and.ipert> natom) tim_nonlop=5
  if (tim_getgh2c==3                 ) tim_nonlop=0
 
-! if (ipert==natom+10) then
  idir1=alpha(idir);idir2=beta(idir)
-! else if (ipert==natom+11) then
-!   idir1=alpha(3+idir);idir2=beta(3+idir)
-! end if
 
 !======================================================================
 !== Apply the 2nd-order local potential to the wavefunction
 !======================================================================
 
-!Not implemented
-
  if (ipert/=natom+10.and.ipert/=natom+11.and.optlocal>0) then
    msg='local part not implemented'
    MSG_BUG(msg)
-
  else
 !  In the case of ddk operator, no local contribution (also because no self-consistency)
 !$OMP PARALLEL DO
@@ -209,7 +229,7 @@ subroutine getgh2c(cwavef,cwaveprj,gh2c,gs2c,gs_hamkq,gvnl2,idir,ipert,lambda,&
 !======================================================================
 
  has_vnl=(ipert==natom+10.or.ipert==natom+11)
- 
+
 !Use of gvnl2 depends on usevnl
  if (usevnl==1) then
    gvnl2_ => gvnl2
@@ -217,23 +237,92 @@ subroutine getgh2c(cwavef,cwaveprj,gh2c,gs2c,gs_hamkq,gvnl2,idir,ipert,lambda,&
    ABI_ALLOCATE(gvnl2_,(2,npw1*my_nspinor))
  end if
 
-!k-point perturbation
-!  -------------------------------------------
  if (has_vnl.and.(optnl>0.or.sij_opt/=0)) then
 
    idirc=3*(idir1-1)+idir2 !xx=1, xy=2, xz=3, yx=4, yy=5, yz=6, zx=7, zy=8, zz=9, (xyz,xyz)=(idir1,idir2)
 
-   if (gs_hamkq%usepaw==1) then
-!    cpopt=-1+5*gs_hamkq%usecprj -> cpopt=-1
-!    usecprj should be used again
-     choice=8; signs=2; cpopt=-1; paw_opt=1; if (sij_opt/=0) paw_opt=sij_opt+3
-     call nonlop(choice,cpopt,cwaveprj,enlout_dum,gs_hamkq,idirc,(/lambda/),mpi_enreg,1,nnlout,&
-&     paw_opt,signs,gs2c,tim_nonlop,cwavef,gvnl2_)
-   else
-     choice=8; signs=2; cpopt=-1 ; paw_opt=0
-     call nonlop(choice,cpopt,cwaveprj,enlout_dum,gs_hamkq,idirc,(/lambda/),mpi_enreg,1,nnlout,&
-&     paw_opt,signs,svectout_dum,tim_nonlop,cwavef,gvnl2_)
-   end if
+! d^2[H_nl]/dk1dk2
+!  -------------------------------------------
+   if (ipert==natom+10) then
+     if (gs_hamkq%usepaw==1) then
+       if (usecprj==1) then
+         cwaveprj_ptr => cwaveprj
+       else
+         ABI_DATATYPE_ALLOCATE(cwaveprj_tmp,(natom,my_nspinor))
+         call pawcprj_alloc(cwaveprj_tmp,0,gs_hamkq%dimcprj)
+         cwaveprj_ptr => cwaveprj_tmp
+       end if
+       cpopt=-1+5*usecprj
+       choice=8; signs=2; paw_opt=1; if (sij_opt/=0) paw_opt=sij_opt+3
+       call nonlop(choice,cpopt,cwaveprj_ptr,enlout_dum,gs_hamkq,idirc,(/lambda/),mpi_enreg,1,nnlout,&
+&       paw_opt,signs,gs2c,tim_nonlop,cwavef,gvnl2_)
+       if (usecprj==0) then
+         call pawcprj_free(cwaveprj_tmp)
+         ABI_DATATYPE_DEALLOCATE(cwaveprj_tmp)
+       end if
+       nullify(cwaveprj_ptr)
+     else
+       choice=8; signs=2; cpopt=-1 ; paw_opt=0
+       call nonlop(choice,cpopt,cwaveprj,enlout_dum,gs_hamkq,idirc,(/zero/),mpi_enreg,1,nnlout,&
+&       paw_opt,signs,svectout_dum,tim_nonlop,cwavef,gvnl2_)
+     end if
+
+! d^2[H_nl]/dk1dE2 : Non-zero only in PAW
+!  -------------------------------------------
+   else if (ipert==natom+11.and.gs_hamkq%usepaw==1) then
+
+     ABI_ALLOCATE(nonlop_out,(2,npw1*my_nspinor))
+
+     if (usecprj==1) then
+       cwaveprj_ptr => cwaveprj
+     else
+       ABI_DATATYPE_ALLOCATE(cwaveprj_tmp,(natom,my_nspinor))
+       call pawcprj_alloc(cwaveprj_tmp,2,gs_hamkq%dimcprj)
+       cwaveprj_ptr => cwaveprj_tmp
+     end if
+
+     if (opt_gvnl2==1.and.optnl>=1) then
+
+!      Compute application of dS/dk1 to i*d[cwavef]/dk2
+       cpopt=-1 ; choice=5 ; paw_opt=3 ; signs=2
+       call nonlop(choice,cpopt,cwaveprj_ptr,enlout_dum,gs_hamkq,idir1,(/zero/),mpi_enreg,1,nnlout,&
+&       paw_opt,signs,nonlop_out,tim_nonlop,gvnl2_,vectout_dum)
+!$OMP PARALLEL DO
+       do ipw=1,npw1*my_nspinor
+         gvnl2_(:,ipw)=nonlop_out(:,ipw)
+       end do
+
+!      Compute part of H^(2) due to derivative of projectors (idir1) and derivative of Dij (idir2)
+       cpopt=4*usecprj
+       choice=5 ; paw_opt=1 ; signs=2
+       call nonlop(choice,cpopt,cwaveprj_ptr,enlout_dum,gs_hamkq,idir1,(/zero/),mpi_enreg,1,nnlout,&
+&       paw_opt,signs,svectout_dum,tim_nonlop,cwavef,nonlop_out,&
+&       enl=rf_hamkq%e1kbfr+rf_hamkq%e1kbsc)
+!$OMP PARALLEL DO
+       do ipw=1,npw1*my_nspinor
+         gvnl2_(:,ipw)=gvnl2_(:,ipw)+nonlop_out(:,ipw)
+       end do
+
+     end if ! opt_gvnl2==1
+
+!    Compute derivatives due to projectors |d^2[p_i]/dk1dk2>,|d[p_i]/dk1>,|d[p_i]/dk2>
+     cpopt=-1+5*usecprj
+     choice=81 ; paw_opt=3 ; signs=2
+     call nonlop(choice,cpopt,cwaveprj_ptr,enlout_dum,gs_hamkq,idirc,(/lambda/),mpi_enreg,1,nnlout,&
+&     paw_opt,signs,nonlop_out,tim_nonlop,cwavef,vectout_dum)
+!$OMP PARALLEL DO
+     do ipw=1,npw1*my_nspinor ! Note the multiplication by i
+       gvnl2_(1,ipw)=gvnl2_(1,ipw)-nonlop_out(2,ipw)
+       gvnl2_(2,ipw)=gvnl2_(2,ipw)+nonlop_out(1,ipw)
+     end do
+     ABI_DEALLOCATE(nonlop_out)
+     if (sij_opt==1) gs2c=zero
+     if (usecprj==0) then
+       call pawcprj_free(cwaveprj_tmp)
+       ABI_DATATYPE_DEALLOCATE(cwaveprj_tmp)
+     end if
+     nullify(cwaveprj_ptr)
+   end if  ! ipert==natom+11 and gs_hamkq%usepaw==1
 
 !No non-local part
 !-------------------------------------------
@@ -245,7 +334,12 @@ subroutine getgh2c(cwavef,cwaveprj,gh2c,gs2c,gs_hamkq,gvnl2,idir,ipert,lambda,&
        gvnl2_(:,ipw)=zero
      end do
    end if
-   if (sij_opt/=0) gs2c=zero
+   if (sij_opt/=0) then
+ !$OMP PARALLEL DO
+     do ipw=1,npw1*my_nspinor
+       gs2c(:,ipw)=zero
+     end do
+   end if
 
  end if
 
@@ -253,7 +347,7 @@ subroutine getgh2c(cwavef,cwaveprj,gh2c,gs2c,gs_hamkq,gvnl2,idir,ipert,lambda,&
 !== Apply the 2nd-order kinetic operator to the wavefunction
 !======================================================================
 
- has_kin=(ipert==natom+10.or.ipert==natom+11)
+ has_kin=(ipert==natom+10)
 
 !k-point perturbation
 !-------------------------------------------
@@ -283,7 +377,6 @@ subroutine getgh2c(cwavef,cwaveprj,gh2c,gs2c,gs_hamkq,gvnl2,idir,ipert,lambda,&
          gvnl2_(2,ipws)=zero
        end if
      end do
-
    end do
  end if
 

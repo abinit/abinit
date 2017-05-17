@@ -7,7 +7,7 @@
 !! output gkk file for one perturbation (used for elphon calculations in anaddb)
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2016 ABINIT group (MVer)
+!! Copyright (C) 2008-2017 ABINIT group (MVer)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -59,7 +59,7 @@ subroutine outgkk(bantot0,bantot1,outfile,eigen0,eigen1,hdr0,hdr1,mpi_enreg,phas
 !scalars
  integer,intent(in) :: bantot0,bantot1
  character(len=fnlen),intent(in) :: outfile
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
  type(hdr_type),intent(inout) :: hdr0,hdr1
 !arrays
  real(dp),intent(in) :: eigen0(bantot0),eigen1(2*bantot1)

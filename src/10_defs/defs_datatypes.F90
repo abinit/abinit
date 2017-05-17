@@ -30,7 +30,7 @@
 !! * pspheader_type : for norm-conserving pseudopotentials, the header of the file
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2016 ABINIT group (XG)
+!! Copyright (C) 2001-2017 ABINIT group (XG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -104,6 +104,10 @@ module defs_datatypes
   real(dp),allocatable :: eig(:,:,:) 
   ! eig(mband,nkpt,nsppol)
   ! Eigenvalues of each band.
+
+  real(dp),allocatable :: lifetime(:,:,:)
+  ! lifetime(mband,nkpt,nsppol)
+  ! Lifetime of each band
 
   real(dp),allocatable :: occ(:,:,:) 
   ! occ(mband,nkpt,nsppol)
@@ -319,9 +323,8 @@ module defs_datatypes
    !  If mpspso is 2, lmnmax takes into account the spin-orbit projectors,
    !  so, it is equal to the max of lnprojso, see pspheader_type
 
-  integer :: mproj    ! TO BE SUPPRESSED
-   ! Maximum number of non-local projectors over all angular momenta
-   !  and type of psps
+  integer :: mproj  
+   ! Maximum number of non-local projectors over all angular momenta and type of psps
    ! 0 only if all psps are local
 
   integer :: mpsang
@@ -406,6 +409,7 @@ module defs_datatypes
    ! For each type of psp,
    ! array giving l,m,n,lm,ln,spin for i=ln  (if useylm=0)
    !                                or i=lmn (if useylm=1)
+   ! NB: spin is used for NC pseudos with SOC term: 1 if scalar term (spin diagonal), 2 if SOC term.
 
   integer, allocatable :: pspdat(:) 
    ! pspdat(ntypat)
@@ -583,7 +587,7 @@ module defs_datatypes
   integer :: lmax       ! maximum l quantum number (-1 if only local)
                         ! Example : s only       -> lmax=0
                         !           s and p      -> lmax=1
-                        !           d only       -> lmax=2
+                        !           s,p,d        -> lmax=2
 
   integer :: pspcod     
     ! code number of the pseudopotential
@@ -598,7 +602,7 @@ module defs_datatypes
     ! spin-orbit characteristics
     ! 0 if pseudo does not support SOC, 1 or 2 if SOC terms are available in the pp file.
     ! Note that one could have a pseudo with SOC terms but ignore the SOC contribution
-    ! For example, it's possible to use npsinor=2 and set so_psp to 0 in the input file
+    ! For example, it's possible to use nspinor=2 and set so_psp to 0 in the input file
     ! or perform a run with nspinor=1 with pseudos containing SOC terms.
 
   integer :: usewvl

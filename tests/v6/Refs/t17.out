@@ -1,8 +1,8 @@
 
-.Version 8.0.3 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
+.Version 8.3.2 of ABINIT 
+.(MPI version, prepared for a x86_64_linux_gnu5.4 computer) 
 
-.Copyright (C) 1998-2016 ABINIT group . 
+.Copyright (C) 1998-2017 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see http://www.abinit.org .
 
-.Starting date : Mon  4 Apr 2016.
-- ( at 12h00 )
+.Starting date : Tue 11 Apr 2017.
+- ( at 21h50 )
   
 - input  file    -> t17.in
 - output file    -> t17.out
@@ -34,7 +34,7 @@
 -    mband =           4        mffmem =           1         mkmem =           1
        mpw =         523          nfft =       19683          nkpt =           1
 ================================================================================
-P This job should need less than                       9.126 Mbytes of memory.
+P This job should need less than                       9.054 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.066 Mbytes ; DEN or POT disk file :      0.302 Mbytes.
 ================================================================================
@@ -51,7 +51,7 @@ _ WF disk file :      0.066 Mbytes ; DEN or POT disk file :      0.302 Mbytes.
 -    mband =           4        mffmem =           1         mkmem =           1
        mpw =         523          nfft =       19683          nkpt =           1
 ================================================================================
-P This job should need less than                       9.863 Mbytes of memory.
+P This job should need less than                       9.791 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.066 Mbytes ; DEN or POT disk file :      0.302 Mbytes.
 ================================================================================
@@ -129,7 +129,7 @@ _ WF disk file :      0.130 Mbytes ; DEN or POT disk file :      0.152 Mbytes.
 --------------------------------------------------------------------------------
 -
 - outvars: echo of selected default values                                      
--   accesswff0 =  0 , fftalg0 =312 , wfoptalg0 =  0
+-   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
 -
 - outvars: echo of global parameters not present in the input file              
 -  max_nthreads =    0
@@ -387,8 +387,8 @@ P           mkmem           1
          ecut(hartree)=      8.000   => boxcut(ratio)=   2.04204
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is 83bi.psphgh
+- pspatm: opening atomic psp file    83bi.psphgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -427,12 +427,12 @@ _setup2: Arith. and geom. avg. npw (full set) are    1045.000    1045.000
  ETOT  4  -5.4668801093025    -8.096E-04 4.801E-07 4.015E-01
  ETOT  5  -5.4668954563596    -1.535E-05 3.888E-08 3.115E-02
  ETOT  6  -5.4668959236760    -4.673E-07 3.181E-09 2.316E-03
- ETOT  7  -5.4668961554604    -2.318E-07 3.563E-10 4.952E-05
+ ETOT  7  -5.4668961554603    -2.318E-07 3.563E-10 4.952E-05
  ETOT  8  -5.4668961646169    -9.157E-09 2.814E-11 9.541E-07
- ETOT  9  -5.4668961646369    -2.002E-11 1.539E-13 2.140E-07
+ ETOT  9  -5.4668961646370    -2.003E-11 1.539E-13 2.140E-07
 
  At SCF step    9, etot is converged : 
-  for the second time, diff in etot=  2.002E-11 < toldfe=  1.000E-07
+  for the second time, diff in etot=  2.003E-11 < toldfe=  1.000E-07
 
  Compute kinetic energy density
 
@@ -478,7 +478,7 @@ Result for kinetic energy density :
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   3.6531E-14; max=  1.5393E-13
+ Mean square residual over all n,k,spin=   3.6536E-14; max=  1.5393E-13
  reduced coordinates (array xred) for    1 atoms
        0.000000000000      0.000000000000      0.000000000000
  rms dE/dt=  0.0000E+00; max dE/dt=  0.0000E+00; dE/dt below (all hartree)
@@ -497,28 +497,28 @@ Result for kinetic energy density :
  length scales= 10.000000000000 10.000000000000 10.000000000000 bohr
               =  5.291772085900  5.291772085900  5.291772085900 angstroms
  prteigrs : about to open file t17o_DS11_EIG
- Fermi (or HOMO) energy (hartree) =  -0.42484   Average Vxc (hartree)=  -0.14144
+ Fermi (or HOMO) energy (hartree) =   0.07516   Average Vxc (hartree)=  -0.14144
  Eigenvalues (hartree) for nkpt=   1  k points, SPIN UP:
  kpt#   1, nband=  4, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -0.99968   -0.62328   -0.62328   -0.62328
  Eigenvalues (hartree) for nkpt=   1  k points, SPIN DOWN:
  kpt#   1, nband=  4, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
-  -0.42484   -0.05271   -0.05271   -0.05271
+   0.07516    0.44729    0.44729    0.44729
 
 --------------------------------------------------------------------------------
  Components of total free energy (in Hartree) :
 
-    Kinetic energy  =  1.74058788871948E+00
-    Hartree energy  =  1.20065641097181E+00
-    XC energy       = -1.30059850363113E+00
+    Kinetic energy  =  1.74058788871543E+00
+    Hartree energy  =  1.20065641096869E+00
+    XC energy       = -1.30059850362987E+00
     Ewald energy    = -3.54662184935089E+00
     PspCore energy  =  1.73973577808835E-01
-    Loc. psp. energy= -3.78594644087213E+00
-    NL   psp  energy=  5.10527517171151E-02
-    >>>>>>>>> Etotal= -5.46689616463692E+00
+    Loc. psp. energy= -3.78594644086631E+00
+    NL   psp  energy=  5.10527517171459E-02
+    >>>>>>>>> Etotal= -5.46689616463697E+00
 
  Other information on the energy :
-    Total energy(eV)= -1.48761810058697E+02 ; Band energy (Ha)=  -3.2943406826E+00
+    Total energy(eV)= -1.48761810058698E+02 ; Band energy (Ha)=  -2.7943406826E+00
 --------------------------------------------------------------------------------
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -559,18 +559,12 @@ _setup2: Arith. and geom. avg. npw (full set) are    1045.000    1045.000
 ================================================================================
 
      iter   Etot(hartree)     deltaE(h) residm    vres2    magn
- ETOT  1  -5.4630629461399    -5.46E+00 3.39E-17 8.63E+03 3.000
- ETOT  2  -5.4664309948365    -3.37E-03 2.22E-10 4.69E+01 3.000
- ETOT  3  -5.4668168724928    -3.86E-04 4.22E-07 1.27E+00 3.000
- ETOT  4  -5.4668678297468    -5.10E-05 2.63E-08 3.17E-01 3.000
- ETOT  5  -5.4668917453241    -2.39E-05 2.66E-08 5.20E-02 3.000
- ETOT  6  -5.4668957973423    -4.05E-06 5.84E-09 1.50E-02 3.000
- ETOT  7  -5.4668960863696    -2.89E-07 4.06E-09 1.49E-03 3.000
- ETOT  8  -5.4668961586537    -7.23E-08 3.30E-10 2.60E-04 3.000
- ETOT  9  -5.4668961646164    -5.96E-09 1.40E-11 7.73E-07 3.000
+ ETOT  1  -5.4668961646486    -5.47E+00 3.39E-17 3.48E-09 3.000
+ ETOT  2  -5.4668961646492    -6.00E-13 8.74E-20 4.71E-10 3.000
+ ETOT  3  -5.4668961646494    -1.93E-13 6.09E-17 5.55E-11 3.000
 
- At SCF step    9, etot is converged : 
-  for the second time, diff in etot=  5.963E-09 < toldfe=  1.000E-07
+ At SCF step    3, etot is converged : 
+  for the second time, diff in etot=  1.927E-13 < toldfe=  1.000E-07
 
  Compute kinetic energy density
 
@@ -579,19 +573,19 @@ Result for kinetic energy density :
 --------------------------------------------------------------------------------
  Total kinetic energy density [Ha/Bohr^3]
       Maximum=    3.0097E-02  at reduced coord.    0.0000    0.9259    0.9630
-      Minimum=    8.4882E-06  at reduced coord.    0.4444    0.4444    0.4074
+      Minimum=    8.4893E-06  at reduced coord.    0.4444    0.4444    0.4074
    Integrated=    1.7406E+00
  Spin up density      [Ha/Bohr^3]
       Maximum=    2.1321E-02  at reduced coord.    0.9259    0.9630    0.9630
-      Minimum=    8.4483E-06  at reduced coord.    0.4444    0.4444    0.4074
+      Minimum=    8.4494E-06  at reduced coord.    0.4444    0.4444    0.4074
    Integrated=    1.4362E+00
  Spin down density    [Ha/Bohr^3]
-      Maximum=    9.8647E-03  at reduced coord.    0.0000    0.0000    0.9259
+      Maximum=    9.8648E-03  at reduced coord.    0.0000    0.0000    0.9259
       Minimum=    0.0000E+00  at reduced coord.    0.0000    0.0000    0.0000
    Integrated=    3.0441E-01
  Magnetization (spin up - spin down) [Ha/Bohr^3]
       Maximum=    1.5311E-02  at reduced coord.    0.9259    0.9259    0.9630
-      Minimum=    8.4083E-06  at reduced coord.    0.4444    0.4444    0.4074
+      Minimum=    8.4094E-06  at reduced coord.    0.4444    0.4444    0.4074
    Integrated=    1.1318E+00
  Relative magnetization (=zeta, between -1 and 1)
       Maximum=    1.0000E+00  at reduced coord.    0.0000    0.0000    0.0000
@@ -599,24 +593,24 @@ Result for kinetic energy density :
 --------------------------------------------------------------------------------
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)= -4.69018969E-05  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)= -4.69018969E-05  sigma(3 1)=  0.00000000E+00
-  sigma(3 3)= -4.69018969E-05  sigma(2 1)=  0.00000000E+00
+  sigma(1 1)= -4.69020017E-05  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)= -4.69020017E-05  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)= -4.69020017E-05  sigma(2 1)=  0.00000000E+00
 
  Integrated electronic and magnetization densities in atomic spheres:
  ---------------------------------------------------------------------
  Note: Diff(up-dn) is a rough approximation of local magnetic moment
  Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
-    1   2.00000     1.060850     0.457902      1.518752     0.602948
+    1   2.00000     1.060848     0.457904      1.518753     0.602944
  ---------------------------------------------------------------------
-  Sum:              1.060850     0.457902      1.518752     0.602948
- Total magnetization (from the atomic spheres):             0.602948
+  Sum:              1.060848     0.457904      1.518753     0.602944
+ Total magnetization (from the atomic spheres):             0.602944
  Total magnetization (exact up - dn):                       3.000000
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   7.0869E-12; max=  1.3990E-11
+ Mean square residual over all n,k,spin=   4.4161E-17; max=  6.0922E-17
  reduced coordinates (array xred) for    1 atoms
        0.000000000000      0.000000000000      0.000000000000
  rms dE/dt=  0.0000E+00; max dE/dt=  0.0000E+00; dE/dt below (all hartree)
@@ -635,48 +629,48 @@ Result for kinetic energy density :
  length scales= 10.000000000000 10.000000000000 10.000000000000 bohr
               =  5.291772085900  5.291772085900  5.291772085900 angstroms
  prteigrs : about to open file t17o_DS12_EIG
- Fermi (or HOMO) energy (hartree) =  -0.22944   Average Vxc (hartree)=  -0.14144
+ Fermi (or HOMO) energy (hartree) =   0.25100   Average Vxc (hartree)=  -0.14144
  Magnetization (Bohr magneton)=  3.00000000E+00
  Total spin up =  4.00000000E+00   Total spin down =  1.00000000E+00
  Eigenvalues (hartree) for nkpt=   1  k points, SPIN UP:
  kpt#   1, nband=  4, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
-  -0.99968   -0.62328   -0.62328   -0.62328
+  -0.99967   -0.62327   -0.62327   -0.62327
       occupation numbers for kpt#   1
    1.00000    1.00000    1.00000    1.00000
  Eigenvalues (hartree) for nkpt=   1  k points, SPIN DOWN:
  kpt#   1, nband=  4, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
-  -0.42484   -0.05271   -0.05271   -0.05271
+   0.07516    0.44729    0.44729    0.44729
       occupation numbers for kpt#   1
    1.00000    0.00000    0.00000    0.00000
 
 --------------------------------------------------------------------------------
  Components of total free energy (in Hartree) :
 
-    Kinetic energy  =  1.74058661625191E+00
-    Hartree energy  =  1.20065561284908E+00
-    XC energy       = -1.30059840591905E+00
+    Kinetic energy  =  1.74058438926285E+00
+    Hartree energy  =  1.20065251746634E+00
+    XC energy       = -1.30059695569043E+00
     Ewald energy    = -3.54662184935089E+00
     PspCore energy  =  1.73973577808835E-01
-    Loc. psp. energy= -3.78594406316978E+00
-    NL   psp  energy=  5.10523469134591E-02
-    >>>>> Internal E= -5.46689616461645E+00
+    Loc. psp. energy= -3.78594009509965E+00
+    NL   psp  energy=  5.10522509535783E-02
+    >>>>> Internal E= -5.46689616464937E+00
 
     -kT*entropy     = -9.44077350995180E-18
-    >>>>>>>>> Etotal= -5.46689616461645E+00
+    >>>>>>>>> Etotal= -5.46689616464937E+00
 
  Other information on the energy :
-    Total energy(eV)= -1.48761810058140E+02 ; Band energy (Ha)=  -3.2943745759E+00
+    Total energy(eV)= -1.48761810059036E+02 ; Band energy (Ha)=  -2.7943331425E+00
 --------------------------------------------------------------------------------
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)= -4.69018969E-05  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)= -4.69018969E-05  sigma(3 1)=  0.00000000E+00
-  sigma(3 3)= -4.69018969E-05  sigma(2 1)=  0.00000000E+00
+  sigma(1 1)= -4.69020017E-05  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)= -4.69020017E-05  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)= -4.69020017E-05  sigma(2 1)=  0.00000000E+00
 
 -Cartesian components of stress tensor (GPa)         [Pressure=  1.3799E+00 GPa]
-- sigma(1 1)= -1.37990121E+00  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)= -1.37990121E+00  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)= -1.37990121E+00  sigma(2 1)=  0.00000000E+00
+- sigma(1 1)= -1.37990430E+00  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)= -1.37990430E+00  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)= -1.37990430E+00  sigma(2 1)=  0.00000000E+00
 
 ================================================================================
 == DATASET 21 ==================================================================
@@ -703,17 +697,17 @@ _setup2: Arith. and geom. avg. npw (full set) are    1045.000    1045.000
 ================================================================================
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -5.0406897880164    -5.041E+00 2.830E-02 4.692E+01
- ETOT  2  -5.0623003313884    -2.161E-02 1.852E-02 5.254E+00
- ETOT  3  -5.0645947007712    -2.294E-03 6.660E-04 1.121E+00
- ETOT  4  -5.0646774199623    -8.272E-05 4.202E-04 3.208E-01
- ETOT  5  -5.0646786754189    -1.255E-06 1.544E-04 4.276E-02
- ETOT  6  -5.0646791678805    -4.925E-07 1.522E-04 1.321E-03
- ETOT  7  -5.0646791867396    -1.886E-08 4.886E-05 8.437E-05
- ETOT  8  -5.0646791872839    -5.444E-10 5.380E-05 1.669E-06
+ ETOT  1  -5.0326590295135    -5.033E+00 6.342E-03 5.003E+01
+ ETOT  2  -5.0625061399746    -2.985E-02 3.095E-04 4.831E+00
+ ETOT  3  -5.0646057565072    -2.100E-03 1.533E-04 1.134E+00
+ ETOT  4  -5.0646773617182    -7.161E-05 2.229E-04 2.388E-01
+ ETOT  5  -5.0646787151103    -1.353E-06 3.443E-05 3.515E-02
+ ETOT  6  -5.0646791710146    -4.559E-07 7.562E-05 1.158E-03
+ ETOT  7  -5.0646791869207    -1.591E-08 1.044E-05 4.827E-05
+ ETOT  8  -5.0646791872585    -3.378E-10 2.257E-05 1.151E-06
 
  At SCF step    8, etot is converged : 
-  for the second time, diff in etot=  5.444E-10 < toldfe=  1.000E-07
+  for the second time, diff in etot=  3.378E-10 < toldfe=  1.000E-07
 
  Compute kinetic energy density
 
@@ -721,96 +715,96 @@ Result for kinetic energy density :
 
 --------------------------------------------------------------------------------
  Total kinetic energy density [Ha/Bohr^3]
-      Maximum=    2.6344E-02  at reduced coord.    0.9630    0.9259    0.0370
-      Minimum=    3.1777E-06  at reduced coord.    0.5556    0.4074    0.5556
+      Maximum=    2.6343E-02  at reduced coord.    0.0370    0.0370    0.9259
+      Minimum=    3.1778E-06  at reduced coord.    0.5556    0.5556    0.4074
    Integrated=    1.7097E+00
  x component of magnetization [Ha/Bohr^3]
-      Maximum=    0.0000E+00  at reduced coord.    0.8519    0.9630    0.9630
-      Minimum=   -1.9312E-08  at reduced coord.    0.9259    0.9630    0.9630
-   Integrated=   -2.7057E-08
+      Maximum=    0.0000E+00  at reduced coord.    0.6296    0.9630    0.9630
+      Minimum=   -1.1198E-07  at reduced coord.    0.9259    0.9630    0.0000
+   Integrated=   -4.9070E-06
  y component of magnetization [Ha/Bohr^3]
-      Maximum=    4.0031E-08  at reduced coord.    0.0741    0.9259    0.9630
-      Minimum=   -1.3797E-08  at reduced coord.    0.9259    0.0741    0.0370
-   Integrated=    3.2546E-07
+      Maximum=    0.0000E+00  at reduced coord.    0.7407    0.9630    0.9630
+      Minimum=   -3.4718E-08  at reduced coord.    0.9630    0.0370    0.0741
+   Integrated=   -1.0383E-06
  z component of magnetization [Ha/Bohr^3]
-      Maximum=    2.6344E-02  at reduced coord.    0.9630    0.9259    0.0370
-      Minimum=    3.1777E-06  at reduced coord.    0.5556    0.4074    0.5556
+      Maximum=    2.6343E-02  at reduced coord.    0.0370    0.0370    0.9259
+      Minimum=    3.1778E-06  at reduced coord.    0.5556    0.5556    0.4074
    Integrated=    1.7097E+00
  Magnetization (absolute value) [Ha/Bohr^3]
-      Maximum=    2.6344E-02  at reduced coord.    0.9630    0.9259    0.0370
-      Minimum=    3.1777E-06  at reduced coord.    0.5556    0.4074    0.5556
+      Maximum=    2.6343E-02  at reduced coord.    0.0370    0.0370    0.9259
+      Minimum=    3.1778E-06  at reduced coord.    0.5556    0.5556    0.4074
    Integrated=    1.7097E+00
  Relative magnetization (=zeta, between -1 and 1)
       Maximum=    1.0000E+00  at reduced coord.    0.9630    0.9630    0.9630
-      Minimum=    1.0000E+00  at reduced coord.    0.4444    0.4074    0.4444
+      Minimum=    1.0000E+00  at reduced coord.    0.4815    0.5185    0.3704
 --------------------------------------------------------------------------------
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)= -1.51209353E-05  sigma(3 2)= -3.97891808E-10
-  sigma(2 2)= -1.51216505E-05  sigma(3 1)= -5.49243689E-10
-  sigma(3 3)= -1.51216621E-05  sigma(2 1)=  1.59803153E-10
+  sigma(1 1)= -1.51150961E-05  sigma(3 2)= -3.57657141E-10
+  sigma(2 2)= -1.51151853E-05  sigma(3 1)= -5.13077914E-10
+  sigma(3 3)= -1.51148880E-05  sigma(2 1)=  8.22177467E-11
 
  Integrated electronic and magnetization densities in atomic spheres:
  ---------------------------------------------------------------------
  Note:      this is a rough approximation of local magnetic moments
  Atom   Radius      Total density     mag(x)      mag(y)      mag(z)
-    1   2.00000        1.275233     -0.000000    0.000000    1.275233
+    1   2.00000        1.275229     -0.000005   -0.000001    1.275229
  ---------------------------------------------------------------------
- Total magnetization (spheres)      -0.000000    0.000000    1.275233
- Total magnetization (exact)        -0.000000    0.000001    5.000000
+ Total magnetization (spheres)      -0.000005   -0.000001    1.275229
+ Total magnetization (exact)        -0.000011   -0.000003    5.000000
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   6.7252E-06; max=  5.3802E-05
+ Mean square residual over all n,k,spin=   2.8211E-06; max=  2.2569E-05
  reduced coordinates (array xred) for    1 atoms
        0.000000000000      0.000000000000      0.000000000000
- rms dE/dt=  2.8543E-07; max dE/dt=  0.0000E+00; dE/dt below (all hartree)
-    1      -0.000000024410     -0.000000336993     -0.000000360901
+ rms dE/dt=  1.1598E-07; max dE/dt=  1.8698E-07; dE/dt below (all hartree)
+    1      -0.000000043315      0.000000186982      0.000000059283
 
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
 
  cartesian forces (hartree/bohr) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
- frms,max,avg= 0.0000000E+00 0.0000000E+00   2.441E-09  3.370E-08  3.609E-08 h/b
+ frms,max,avg= 0.0000000E+00 0.0000000E+00   4.332E-09 -1.870E-08 -5.928E-09 h/b
 
  cartesian forces (eV/Angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
- frms,max,avg= 0.0000000E+00 0.0000000E+00   1.255E-07  1.733E-06  1.856E-06 e/A
+ frms,max,avg= 0.0000000E+00 0.0000000E+00   2.227E-07 -9.615E-07 -3.048E-07 e/A
  length scales= 10.000000000000 10.000000000000 10.000000000000 bohr
               =  5.291772085900  5.291772085900  5.291772085900 angstroms
  prteigrs : about to open file t17o_DS21_EIG
  Fermi (or HOMO) energy (hartree) =  -0.55741   Average Vxc (hartree)=  -0.15719
  Eigenvalues (hartree) for nkpt=   1  k points:
  kpt#   1, nband=  8, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
-  -1.12119   -0.71095   -0.71095   -0.71095   -0.55741   -0.45727   -0.45727   -0.33326
+  -1.12119   -0.71095   -0.71095   -0.71095   -0.55741   -0.45727   -0.45727   -0.33343
 
 --------------------------------------------------------------------------------
  Components of total free energy (in Hartree) :
 
-    Kinetic energy  =  1.70968667081716E+00
-    Hartree energy  =  7.76015832702035E-01
-    XC energy       = -1.24408453389434E+00
+    Kinetic energy  =  1.70968172934165E+00
+    Hartree energy  =  7.76011736136768E-01
+    XC energy       = -1.24408282923226E+00
     Ewald energy    = -3.54662184935089E+00
     PspCore energy  =  1.73973577808835E-01
-    Loc. psp. energy= -3.06246473080342E+00
-    NL   psp  energy=  1.28815845436674E-01
-    >>>>>>>>> Etotal= -5.06467918728395E+00
+    Loc. psp. energy= -3.06245588393375E+00
+    NL   psp  energy=  1.28814331971152E-01
+    >>>>>>>>> Etotal= -5.06467918725850E+00
 
  Other information on the energy :
-    Total energy(eV)= -1.37816929492936E+02 ; Band energy (Ha)=  -3.8114554072E+00
+    Total energy(eV)= -1.37816929492244E+02 ; Band energy (Ha)=  -3.8114485233E+00
 --------------------------------------------------------------------------------
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)= -1.51209353E-05  sigma(3 2)= -3.97891808E-10
-  sigma(2 2)= -1.51216505E-05  sigma(3 1)= -5.49243689E-10
-  sigma(3 3)= -1.51216621E-05  sigma(2 1)=  1.59803153E-10
+  sigma(1 1)= -1.51150961E-05  sigma(3 2)= -3.57657141E-10
+  sigma(2 2)= -1.51151853E-05  sigma(3 1)= -5.13077914E-10
+  sigma(3 3)= -1.51148880E-05  sigma(2 1)=  8.22177467E-11
 
--Cartesian components of stress tensor (GPa)         [Pressure=  4.4489E-01 GPa]
-- sigma(1 1)= -4.44873200E-01  sigma(3 2)= -1.17063792E-05
-- sigma(2 2)= -4.44894242E-01  sigma(3 1)= -1.61593045E-05
-- sigma(3 3)= -4.44894583E-01  sigma(2 1)=  4.70157029E-06
+-Cartesian components of stress tensor (GPa)         [Pressure=  4.4470E-01 GPa]
+- sigma(1 1)= -4.44701405E-01  sigma(3 2)= -1.05226346E-05
+- sigma(2 2)= -4.44704031E-01  sigma(3 1)= -1.50952709E-05
+- sigma(3 3)= -4.44695283E-01  sigma(2 1)=  2.41892922E-06
 
 ================================================================================
 == DATASET 22 ==================================================================
@@ -840,12 +834,12 @@ _setup2: Arith. and geom. avg. npw (full set) are    1045.000    1045.000
 ================================================================================
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -5.0646811711825    -5.065E+00 6.252E-02 6.787E-09
- ETOT  2  -5.0646811711836    -1.036E-12 1.543E-04 1.965E-09
- ETOT  3  -5.0646811711839    -2.789E-13 1.154E-05 3.288E-10
+ ETOT  1  -5.0646811711824    -5.065E+00 6.697E-06 1.136E-08
+ ETOT  2  -5.0646811711836    -1.160E-12 1.987E-06 3.931E-09
+ ETOT  3  -5.0646811711839    -3.189E-13 2.363E-07 4.068E-10
 
  At SCF step    3, etot is converged : 
-  for the second time, diff in etot=  2.789E-13 < toldfe=  1.000E-07
+  for the second time, diff in etot=  3.189E-13 < toldfe=  1.000E-07
 
  Compute kinetic energy density
 
@@ -853,8 +847,8 @@ Result for kinetic energy density :
 
 --------------------------------------------------------------------------------
  Total kinetic energy density [Ha/Bohr^3]
-      Maximum=    2.6343E-02  at reduced coord.    0.0370    0.9259    0.9630
-      Minimum=    3.1835E-06  at reduced coord.    0.4444    0.5556    0.4074
+      Maximum=    2.6343E-02  at reduced coord.    0.9630    0.0741    0.0370
+      Minimum=    3.1835E-06  at reduced coord.    0.4444    0.4444    0.4074
    Integrated=    1.7097E+00
  x component of magnetization [Ha/Bohr^3]
       Maximum=    0.0000E+00  at reduced coord.    0.9630    0.9630    0.9630
@@ -865,12 +859,12 @@ Result for kinetic energy density :
       Minimum=    0.0000E+00  at reduced coord.    0.0000    0.0000    0.0000
    Integrated=    0.0000E+00
  z component of magnetization [Ha/Bohr^3]
-      Maximum=    2.6343E-02  at reduced coord.    0.0370    0.9259    0.9630
-      Minimum=    3.1835E-06  at reduced coord.    0.4444    0.5556    0.4074
+      Maximum=    2.6343E-02  at reduced coord.    0.9630    0.0741    0.0370
+      Minimum=    3.1835E-06  at reduced coord.    0.4444    0.4444    0.4074
    Integrated=    1.7097E+00
  Magnetization (absolute value) [Ha/Bohr^3]
-      Maximum=    2.6343E-02  at reduced coord.    0.0370    0.9259    0.9630
-      Minimum=    3.1835E-06  at reduced coord.    0.4444    0.5556    0.4074
+      Maximum=    2.6343E-02  at reduced coord.    0.9630    0.0741    0.0370
+      Minimum=    3.1835E-06  at reduced coord.    0.4444    0.4444    0.4074
    Integrated=    1.7097E+00
  Relative magnetization (=zeta, between -1 and 1)
       Maximum=    1.0000E+00  at reduced coord.    0.9630    0.9630    0.9630
@@ -878,76 +872,76 @@ Result for kinetic energy density :
 --------------------------------------------------------------------------------
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)= -1.51301279E-05  sigma(3 2)=  1.47170003E-11
-  sigma(2 2)= -1.51301192E-05  sigma(3 1)=  3.62126227E-12
-  sigma(3 3)= -1.51301216E-05  sigma(2 1)= -2.15187665E-12
+  sigma(1 1)= -1.51302582E-05  sigma(3 2)=  1.14048750E-11
+  sigma(2 2)= -1.51302582E-05  sigma(3 1)=  9.94794137E-12
+  sigma(3 3)= -1.51302595E-05  sigma(2 1)= -5.44716550E-12
 
  Integrated electronic and magnetization densities in atomic spheres:
  ---------------------------------------------------------------------
  Note:      this is a rough approximation of local magnetic moments
  Atom   Radius      Total density     mag(x)      mag(y)      mag(z)
-    1   2.00000        1.275218     -0.000000    0.000000    1.275218
+    1   2.00000        1.275219     -0.000000   -0.000000    1.275219
  ---------------------------------------------------------------------
- Total magnetization (spheres)      -0.000000    0.000000    1.275218
- Total magnetization (exact)         0.000000    0.000000    5.000000
+ Total magnetization (spheres)      -0.000000   -0.000000    1.275219
+ Total magnetization (exact)        -0.000001   -0.000000    5.000000
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   1.4424E-06; max=  1.1539E-05
+ Mean square residual over all n,k,spin=   2.9539E-08; max=  2.3631E-07
  reduced coordinates (array xred) for    1 atoms
        0.000000000000      0.000000000000      0.000000000000
- rms dE/dt=  1.0180E-08; max dE/dt=  1.5624E-08; dE/dt below (all hartree)
-    1      -0.000000005031      0.000000015624      0.000000006439
+ rms dE/dt=  9.7413E-09; max dE/dt=  1.2996E-08; dE/dt below (all hartree)
+    1      -0.000000008211      0.000000012996     -0.000000006954
 
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
 
  cartesian forces (hartree/bohr) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
- frms,max,avg= 0.0000000E+00 0.0000000E+00   5.031E-10 -1.562E-09 -6.439E-10 h/b
+ frms,max,avg= 0.0000000E+00 0.0000000E+00   8.211E-10 -1.300E-09  6.954E-10 h/b
 
  cartesian forces (eV/Angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
- frms,max,avg= 0.0000000E+00 0.0000000E+00   2.587E-08 -8.034E-08 -3.311E-08 e/A
+ frms,max,avg= 0.0000000E+00 0.0000000E+00   4.222E-08 -6.683E-08  3.576E-08 e/A
  length scales= 10.000000000000 10.000000000000 10.000000000000 bohr
               =  5.291772085900  5.291772085900  5.291772085900 angstroms
  prteigrs : about to open file t17o_DS22_EIG
  Fermi (or HOMO) energy (hartree) =  -0.50863   Average Vxc (hartree)=  -0.15719
  Eigenvalues (hartree) for nkpt=   1  k points:
  kpt#   1, nband=  8, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
-  -1.12119   -0.71095   -0.71095   -0.71095   -0.55741   -0.45727   -0.45727   -0.33352
+  -1.12119   -0.71095   -0.71095   -0.71095   -0.55741   -0.45727   -0.45727   -0.33353
       occupation numbers for kpt#   1
    1.00000    1.00000    1.00000    1.00000    0.99972    0.00014    0.00014    0.00000
 
 --------------------------------------------------------------------------------
  Components of total free energy (in Hartree) :
 
-    Kinetic energy  =  1.70971999956220E+00
-    Hartree energy  =  7.76037875883097E-01
-    XC energy       = -1.24408981116039E+00
+    Kinetic energy  =  1.70972013193473E+00
+    Hartree energy  =  7.76038005514767E-01
+    XC energy       = -1.24408985199287E+00
     Ewald energy    = -3.54662184935089E+00
     PspCore energy  =  1.73973577808835E-01
-    Loc. psp. energy= -3.06248905928476E+00
-    NL   psp  energy=  1.28818265568254E-01
-    >>>>> Internal E= -5.06465100097367E+00
+    Loc. psp. energy= -3.06248929686459E+00
+    NL   psp  energy=  1.28818282212528E-01
+    >>>>> Internal E= -5.06465100073749E+00
 
-    -kT*entropy     = -3.01702101955038E-05
-    >>>>>>>>> Etotal= -5.06468117118386E+00
+    -kT*entropy     = -3.01704464175827E-05
+    >>>>>>>>> Etotal= -5.06468117118391E+00
 
  Other information on the energy :
-    Total energy(eV)= -1.37816983477598E+02 ; Band energy (Ha)=  -3.8114187213E+00
+    Total energy(eV)= -1.37816983477600E+02 ; Band energy (Ha)=  -3.8114188608E+00
 --------------------------------------------------------------------------------
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)= -1.51301279E-05  sigma(3 2)=  1.47170003E-11
-  sigma(2 2)= -1.51301192E-05  sigma(3 1)=  3.62126227E-12
-  sigma(3 3)= -1.51301216E-05  sigma(2 1)= -2.15187665E-12
+  sigma(1 1)= -1.51302582E-05  sigma(3 2)=  1.14048750E-11
+  sigma(2 2)= -1.51302582E-05  sigma(3 1)=  9.94794137E-12
+  sigma(3 3)= -1.51302595E-05  sigma(2 1)= -5.44716550E-12
 
--Cartesian components of stress tensor (GPa)         [Pressure=  4.4514E-01 GPa]
-- sigma(1 1)= -4.45143658E-01  sigma(3 2)=  4.32989024E-07
-- sigma(2 2)= -4.45143399E-01  sigma(3 1)=  1.06541196E-07
-- sigma(3 3)= -4.45143471E-01  sigma(2 1)= -6.33103863E-08
+-Cartesian components of stress tensor (GPa)         [Pressure=  4.4515E-01 GPa]
+- sigma(1 1)= -4.45147491E-01  sigma(3 2)=  3.35542952E-07
+- sigma(2 2)= -4.45147490E-01  sigma(3 1)=  2.92678490E-07
+- sigma(3 3)= -4.45147528E-01  sigma(2 1)= -1.60261115E-07
 
 ================================================================================
 == DATASET 31 ==================================================================
@@ -974,17 +968,17 @@ _setup2: Arith. and geom. avg. npw (full set) are    1045.000    1045.000
 ================================================================================
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -5.0406897880164    -5.041E+00 2.830E-02 4.692E+01
- ETOT  2  -5.0623003313884    -2.161E-02 1.852E-02 5.254E+00
- ETOT  3  -5.0645947007712    -2.294E-03 6.660E-04 1.121E+00
- ETOT  4  -5.0646774199623    -8.272E-05 4.202E-04 3.208E-01
- ETOT  5  -5.0646786754189    -1.255E-06 1.544E-04 4.276E-02
- ETOT  6  -5.0646791678805    -4.925E-07 1.522E-04 1.321E-03
- ETOT  7  -5.0646791867396    -1.886E-08 4.886E-05 8.437E-05
- ETOT  8  -5.0646791872839    -5.444E-10 5.380E-05 1.669E-06
+ ETOT  1  -5.0326590295135    -5.033E+00 6.342E-03 5.003E+01
+ ETOT  2  -5.0625061399746    -2.985E-02 3.095E-04 4.831E+00
+ ETOT  3  -5.0646057565072    -2.100E-03 1.533E-04 1.134E+00
+ ETOT  4  -5.0646773617182    -7.161E-05 2.229E-04 2.388E-01
+ ETOT  5  -5.0646787151103    -1.353E-06 3.443E-05 3.515E-02
+ ETOT  6  -5.0646791710146    -4.559E-07 7.562E-05 1.158E-03
+ ETOT  7  -5.0646791869207    -1.591E-08 1.044E-05 4.827E-05
+ ETOT  8  -5.0646791872585    -3.378E-10 2.257E-05 1.151E-06
 
  At SCF step    8, etot is converged : 
-  for the second time, diff in etot=  5.444E-10 < toldfe=  1.000E-07
+  for the second time, diff in etot=  3.378E-10 < toldfe=  1.000E-07
 
  Compute kinetic energy density
 
@@ -992,96 +986,96 @@ Result for kinetic energy density :
 
 --------------------------------------------------------------------------------
  Total kinetic energy density [Ha/Bohr^3]
-      Maximum=    2.6344E-02  at reduced coord.    0.9630    0.9259    0.0370
-      Minimum=    3.1777E-06  at reduced coord.    0.5556    0.4074    0.5556
+      Maximum=    2.6343E-02  at reduced coord.    0.0370    0.0370    0.9259
+      Minimum=    3.1778E-06  at reduced coord.    0.5556    0.5556    0.4074
    Integrated=    1.7097E+00
  x component of magnetization [Ha/Bohr^3]
-      Maximum=    0.0000E+00  at reduced coord.    0.8519    0.9630    0.9630
-      Minimum=   -1.9312E-08  at reduced coord.    0.9259    0.9630    0.9630
-   Integrated=   -2.7057E-08
+      Maximum=    0.0000E+00  at reduced coord.    0.6296    0.9630    0.9630
+      Minimum=   -1.1198E-07  at reduced coord.    0.9259    0.9630    0.0000
+   Integrated=   -4.9070E-06
  y component of magnetization [Ha/Bohr^3]
-      Maximum=    4.0031E-08  at reduced coord.    0.0741    0.9259    0.9630
-      Minimum=   -1.3797E-08  at reduced coord.    0.9259    0.0741    0.0370
-   Integrated=    3.2546E-07
+      Maximum=    0.0000E+00  at reduced coord.    0.7407    0.9630    0.9630
+      Minimum=   -3.4718E-08  at reduced coord.    0.9630    0.0370    0.0741
+   Integrated=   -1.0383E-06
  z component of magnetization [Ha/Bohr^3]
-      Maximum=    2.6344E-02  at reduced coord.    0.9630    0.9259    0.0370
-      Minimum=    3.1777E-06  at reduced coord.    0.5556    0.4074    0.5556
+      Maximum=    2.6343E-02  at reduced coord.    0.0370    0.0370    0.9259
+      Minimum=    3.1778E-06  at reduced coord.    0.5556    0.5556    0.4074
    Integrated=    1.7097E+00
  Magnetization (absolute value) [Ha/Bohr^3]
-      Maximum=    2.6344E-02  at reduced coord.    0.9630    0.9259    0.0370
-      Minimum=    3.1777E-06  at reduced coord.    0.5556    0.4074    0.5556
+      Maximum=    2.6343E-02  at reduced coord.    0.0370    0.0370    0.9259
+      Minimum=    3.1778E-06  at reduced coord.    0.5556    0.5556    0.4074
    Integrated=    1.7097E+00
  Relative magnetization (=zeta, between -1 and 1)
       Maximum=    1.0000E+00  at reduced coord.    0.9630    0.9630    0.9630
-      Minimum=    1.0000E+00  at reduced coord.    0.4444    0.4074    0.4444
+      Minimum=    1.0000E+00  at reduced coord.    0.4815    0.5185    0.3704
 --------------------------------------------------------------------------------
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)= -1.51209353E-05  sigma(3 2)= -3.97891808E-10
-  sigma(2 2)= -1.51216505E-05  sigma(3 1)= -5.49243689E-10
-  sigma(3 3)= -1.51216621E-05  sigma(2 1)=  1.59803153E-10
+  sigma(1 1)= -1.51150961E-05  sigma(3 2)= -3.57657141E-10
+  sigma(2 2)= -1.51151853E-05  sigma(3 1)= -5.13077914E-10
+  sigma(3 3)= -1.51148880E-05  sigma(2 1)=  8.22177467E-11
 
  Integrated electronic and magnetization densities in atomic spheres:
  ---------------------------------------------------------------------
  Note:      this is a rough approximation of local magnetic moments
  Atom   Radius      Total density     mag(x)      mag(y)      mag(z)
-    1   2.00000        1.275233     -0.000000    0.000000    1.275233
+    1   2.00000        1.275229     -0.000005   -0.000001    1.275229
  ---------------------------------------------------------------------
- Total magnetization (spheres)      -0.000000    0.000000    1.275233
- Total magnetization (exact)        -0.000000    0.000001    5.000000
+ Total magnetization (spheres)      -0.000005   -0.000001    1.275229
+ Total magnetization (exact)        -0.000011   -0.000003    5.000000
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   6.7252E-06; max=  5.3802E-05
+ Mean square residual over all n,k,spin=   2.8211E-06; max=  2.2569E-05
  reduced coordinates (array xred) for    1 atoms
        0.000000000000      0.000000000000      0.000000000000
- rms dE/dt=  2.8543E-07; max dE/dt=  0.0000E+00; dE/dt below (all hartree)
-    1      -0.000000024410     -0.000000336993     -0.000000360901
+ rms dE/dt=  1.1598E-07; max dE/dt=  1.8698E-07; dE/dt below (all hartree)
+    1      -0.000000043315      0.000000186982      0.000000059283
 
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
 
  cartesian forces (hartree/bohr) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
- frms,max,avg= 0.0000000E+00 0.0000000E+00   2.441E-09  3.370E-08  3.609E-08 h/b
+ frms,max,avg= 0.0000000E+00 0.0000000E+00   4.332E-09 -1.870E-08 -5.928E-09 h/b
 
  cartesian forces (eV/Angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
- frms,max,avg= 0.0000000E+00 0.0000000E+00   1.255E-07  1.733E-06  1.856E-06 e/A
+ frms,max,avg= 0.0000000E+00 0.0000000E+00   2.227E-07 -9.615E-07 -3.048E-07 e/A
  length scales= 10.000000000000 10.000000000000 10.000000000000 bohr
               =  5.291772085900  5.291772085900  5.291772085900 angstroms
  prteigrs : about to open file t17o_DS31_EIG
  Fermi (or HOMO) energy (hartree) =  -0.55741   Average Vxc (hartree)=  -0.15719
  Eigenvalues (hartree) for nkpt=   1  k points:
  kpt#   1, nband=  8, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
-  -1.12119   -0.71095   -0.71095   -0.71095   -0.55741   -0.45727   -0.45727   -0.33326
+  -1.12119   -0.71095   -0.71095   -0.71095   -0.55741   -0.45727   -0.45727   -0.33343
 
 --------------------------------------------------------------------------------
  Components of total free energy (in Hartree) :
 
-    Kinetic energy  =  1.70968667081716E+00
-    Hartree energy  =  7.76015832702035E-01
-    XC energy       = -1.24408453389434E+00
+    Kinetic energy  =  1.70968172934165E+00
+    Hartree energy  =  7.76011736136768E-01
+    XC energy       = -1.24408282923226E+00
     Ewald energy    = -3.54662184935089E+00
     PspCore energy  =  1.73973577808835E-01
-    Loc. psp. energy= -3.06246473080342E+00
-    NL   psp  energy=  1.28815845436674E-01
-    >>>>>>>>> Etotal= -5.06467918728395E+00
+    Loc. psp. energy= -3.06245588393375E+00
+    NL   psp  energy=  1.28814331971152E-01
+    >>>>>>>>> Etotal= -5.06467918725850E+00
 
  Other information on the energy :
-    Total energy(eV)= -1.37816929492936E+02 ; Band energy (Ha)=  -3.8114554072E+00
+    Total energy(eV)= -1.37816929492244E+02 ; Band energy (Ha)=  -3.8114485233E+00
 --------------------------------------------------------------------------------
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)= -1.51209353E-05  sigma(3 2)= -3.97891808E-10
-  sigma(2 2)= -1.51216505E-05  sigma(3 1)= -5.49243689E-10
-  sigma(3 3)= -1.51216621E-05  sigma(2 1)=  1.59803153E-10
+  sigma(1 1)= -1.51150961E-05  sigma(3 2)= -3.57657141E-10
+  sigma(2 2)= -1.51151853E-05  sigma(3 1)= -5.13077914E-10
+  sigma(3 3)= -1.51148880E-05  sigma(2 1)=  8.22177467E-11
 
--Cartesian components of stress tensor (GPa)         [Pressure=  4.4489E-01 GPa]
-- sigma(1 1)= -4.44873200E-01  sigma(3 2)= -1.17063792E-05
-- sigma(2 2)= -4.44894242E-01  sigma(3 1)= -1.61593045E-05
-- sigma(3 3)= -4.44894583E-01  sigma(2 1)=  4.70157029E-06
+-Cartesian components of stress tensor (GPa)         [Pressure=  4.4470E-01 GPa]
+- sigma(1 1)= -4.44701405E-01  sigma(3 2)= -1.05226346E-05
+- sigma(2 2)= -4.44704031E-01  sigma(3 1)= -1.50952709E-05
+- sigma(3 3)= -4.44695283E-01  sigma(2 1)=  2.41892922E-06
 
 ================================================================================
 == DATASET 32 ==================================================================
@@ -1111,12 +1105,12 @@ _setup2: Arith. and geom. avg. npw (full set) are    1045.000    1045.000
 ================================================================================
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -5.0646811711825    -5.065E+00 6.252E-02 6.787E-09
- ETOT  2  -5.0646811711836    -1.036E-12 1.543E-04 1.965E-09
- ETOT  3  -5.0646811711839    -2.789E-13 1.154E-05 3.288E-10
+ ETOT  1  -5.0646811711824    -5.065E+00 6.697E-06 1.136E-08
+ ETOT  2  -5.0646811711836    -1.160E-12 1.987E-06 3.931E-09
+ ETOT  3  -5.0646811711839    -3.189E-13 2.363E-07 4.068E-10
 
  At SCF step    3, etot is converged : 
-  for the second time, diff in etot=  2.789E-13 < toldfe=  1.000E-07
+  for the second time, diff in etot=  3.189E-13 < toldfe=  1.000E-07
 
  Compute kinetic energy density
 
@@ -1124,8 +1118,8 @@ Result for kinetic energy density :
 
 --------------------------------------------------------------------------------
  Total kinetic energy density [Ha/Bohr^3]
-      Maximum=    2.6343E-02  at reduced coord.    0.0370    0.9259    0.9630
-      Minimum=    3.1835E-06  at reduced coord.    0.4444    0.5556    0.4074
+      Maximum=    2.6343E-02  at reduced coord.    0.9630    0.0741    0.0370
+      Minimum=    3.1835E-06  at reduced coord.    0.4444    0.4444    0.4074
    Integrated=    1.7097E+00
  x component of magnetization [Ha/Bohr^3]
       Maximum=    0.0000E+00  at reduced coord.    0.9630    0.9630    0.9630
@@ -1136,12 +1130,12 @@ Result for kinetic energy density :
       Minimum=    0.0000E+00  at reduced coord.    0.0000    0.0000    0.0000
    Integrated=    0.0000E+00
  z component of magnetization [Ha/Bohr^3]
-      Maximum=    2.6343E-02  at reduced coord.    0.0370    0.9259    0.9630
-      Minimum=    3.1835E-06  at reduced coord.    0.4444    0.5556    0.4074
+      Maximum=    2.6343E-02  at reduced coord.    0.9630    0.0741    0.0370
+      Minimum=    3.1835E-06  at reduced coord.    0.4444    0.4444    0.4074
    Integrated=    1.7097E+00
  Magnetization (absolute value) [Ha/Bohr^3]
-      Maximum=    2.6343E-02  at reduced coord.    0.0370    0.9259    0.9630
-      Minimum=    3.1835E-06  at reduced coord.    0.4444    0.5556    0.4074
+      Maximum=    2.6343E-02  at reduced coord.    0.9630    0.0741    0.0370
+      Minimum=    3.1835E-06  at reduced coord.    0.4444    0.4444    0.4074
    Integrated=    1.7097E+00
  Relative magnetization (=zeta, between -1 and 1)
       Maximum=    1.0000E+00  at reduced coord.    0.9630    0.9630    0.9630
@@ -1149,76 +1143,76 @@ Result for kinetic energy density :
 --------------------------------------------------------------------------------
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)= -1.51301279E-05  sigma(3 2)=  1.47170003E-11
-  sigma(2 2)= -1.51301192E-05  sigma(3 1)=  3.62126227E-12
-  sigma(3 3)= -1.51301216E-05  sigma(2 1)= -2.15187665E-12
+  sigma(1 1)= -1.51302582E-05  sigma(3 2)=  1.14048750E-11
+  sigma(2 2)= -1.51302582E-05  sigma(3 1)=  9.94794137E-12
+  sigma(3 3)= -1.51302595E-05  sigma(2 1)= -5.44716550E-12
 
  Integrated electronic and magnetization densities in atomic spheres:
  ---------------------------------------------------------------------
  Note:      this is a rough approximation of local magnetic moments
  Atom   Radius      Total density     mag(x)      mag(y)      mag(z)
-    1   2.00000        1.275218     -0.000000    0.000000    1.275218
+    1   2.00000        1.275219     -0.000000   -0.000000    1.275219
  ---------------------------------------------------------------------
- Total magnetization (spheres)      -0.000000    0.000000    1.275218
- Total magnetization (exact)         0.000000    0.000000    5.000000
+ Total magnetization (spheres)      -0.000000   -0.000000    1.275219
+ Total magnetization (exact)        -0.000001   -0.000000    5.000000
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   1.4424E-06; max=  1.1539E-05
+ Mean square residual over all n,k,spin=   2.9539E-08; max=  2.3631E-07
  reduced coordinates (array xred) for    1 atoms
        0.000000000000      0.000000000000      0.000000000000
- rms dE/dt=  1.0180E-08; max dE/dt=  1.5624E-08; dE/dt below (all hartree)
-    1      -0.000000005031      0.000000015624      0.000000006439
+ rms dE/dt=  9.7413E-09; max dE/dt=  1.2996E-08; dE/dt below (all hartree)
+    1      -0.000000008211      0.000000012996     -0.000000006954
 
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
 
  cartesian forces (hartree/bohr) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
- frms,max,avg= 0.0000000E+00 0.0000000E+00   5.031E-10 -1.562E-09 -6.439E-10 h/b
+ frms,max,avg= 0.0000000E+00 0.0000000E+00   8.211E-10 -1.300E-09  6.954E-10 h/b
 
  cartesian forces (eV/Angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
- frms,max,avg= 0.0000000E+00 0.0000000E+00   2.587E-08 -8.034E-08 -3.311E-08 e/A
+ frms,max,avg= 0.0000000E+00 0.0000000E+00   4.222E-08 -6.683E-08  3.576E-08 e/A
  length scales= 10.000000000000 10.000000000000 10.000000000000 bohr
               =  5.291772085900  5.291772085900  5.291772085900 angstroms
  prteigrs : about to open file t17o_DS32_EIG
  Fermi (or HOMO) energy (hartree) =  -0.50863   Average Vxc (hartree)=  -0.15719
  Eigenvalues (hartree) for nkpt=   1  k points:
  kpt#   1, nband=  8, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
-  -1.12119   -0.71095   -0.71095   -0.71095   -0.55741   -0.45727   -0.45727   -0.33352
+  -1.12119   -0.71095   -0.71095   -0.71095   -0.55741   -0.45727   -0.45727   -0.33353
       occupation numbers for kpt#   1
    1.00000    1.00000    1.00000    1.00000    0.99972    0.00014    0.00014    0.00000
 
 --------------------------------------------------------------------------------
  Components of total free energy (in Hartree) :
 
-    Kinetic energy  =  1.70971999956220E+00
-    Hartree energy  =  7.76037875883097E-01
-    XC energy       = -1.24408981116039E+00
+    Kinetic energy  =  1.70972013193473E+00
+    Hartree energy  =  7.76038005514767E-01
+    XC energy       = -1.24408985199287E+00
     Ewald energy    = -3.54662184935089E+00
     PspCore energy  =  1.73973577808835E-01
-    Loc. psp. energy= -3.06248905928476E+00
-    NL   psp  energy=  1.28818265568254E-01
-    >>>>> Internal E= -5.06465100097367E+00
+    Loc. psp. energy= -3.06248929686459E+00
+    NL   psp  energy=  1.28818282212528E-01
+    >>>>> Internal E= -5.06465100073749E+00
 
-    -kT*entropy     = -3.01702101955038E-05
-    >>>>>>>>> Etotal= -5.06468117118386E+00
+    -kT*entropy     = -3.01704464175827E-05
+    >>>>>>>>> Etotal= -5.06468117118391E+00
 
  Other information on the energy :
-    Total energy(eV)= -1.37816983477598E+02 ; Band energy (Ha)=  -3.8114187213E+00
+    Total energy(eV)= -1.37816983477600E+02 ; Band energy (Ha)=  -3.8114188608E+00
 --------------------------------------------------------------------------------
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)= -1.51301279E-05  sigma(3 2)=  1.47170003E-11
-  sigma(2 2)= -1.51301192E-05  sigma(3 1)=  3.62126227E-12
-  sigma(3 3)= -1.51301216E-05  sigma(2 1)= -2.15187665E-12
+  sigma(1 1)= -1.51302582E-05  sigma(3 2)=  1.14048750E-11
+  sigma(2 2)= -1.51302582E-05  sigma(3 1)=  9.94794137E-12
+  sigma(3 3)= -1.51302595E-05  sigma(2 1)= -5.44716550E-12
 
--Cartesian components of stress tensor (GPa)         [Pressure=  4.4514E-01 GPa]
-- sigma(1 1)= -4.45143658E-01  sigma(3 2)=  4.32989024E-07
-- sigma(2 2)= -4.45143399E-01  sigma(3 1)=  1.06541196E-07
-- sigma(3 3)= -4.45143471E-01  sigma(2 1)= -6.33103863E-08
+-Cartesian components of stress tensor (GPa)         [Pressure=  4.4515E-01 GPa]
+- sigma(1 1)= -4.45147491E-01  sigma(3 2)=  3.35542952E-07
+- sigma(2 2)= -4.45147490E-01  sigma(3 1)=  2.92678490E-07
+- sigma(3 3)= -4.45147528E-01  sigma(2 1)= -1.60261115E-07
 
 == END DATASET(S) ==============================================================
 ================================================================================
@@ -1324,18 +1318,18 @@ P           mkmem           1
           spgroup31         1
           spgroup32         1
            spinat      0.0000000000E+00  0.0000000000E+00  3.0000000000E+00
-           strten11   -4.6905323188E-05 -4.6905323188E-05 -4.6905323188E-05
+           strten11   -4.6905323184E-05 -4.6905323184E-05 -4.6905323184E-05
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-           strten12   -4.6901896853E-05 -4.6901896853E-05 -4.6901896853E-05
+           strten12   -4.6902001701E-05 -4.6902001701E-05 -4.6902001701E-05
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-           strten21   -1.5120935277E-05 -1.5121650478E-05 -1.5121662056E-05
-                      -3.9789180763E-10 -5.4924368915E-10  1.5980315309E-10
-           strten22   -1.5130127940E-05 -1.5130119161E-05 -1.5130121604E-05
-                       1.4717000273E-11  3.6212622725E-12 -2.1518766541E-12
-           strten31   -1.5120935277E-05 -1.5121650478E-05 -1.5121662056E-05
-                      -3.9789180763E-10 -5.4924368915E-10  1.5980315309E-10
-           strten32   -1.5130127940E-05 -1.5130119161E-05 -1.5130121604E-05
-                       1.4717000273E-11  3.6212622725E-12 -2.1518766541E-12
+           strten21   -1.5115096084E-05 -1.5115185337E-05 -1.5114887993E-05
+                      -3.5765714089E-10 -5.1307791404E-10  8.2217746749E-11
+           strten22   -1.5130258233E-05 -1.5130258195E-05 -1.5130259492E-05
+                       1.1404875042E-11  9.9479413680E-12 -5.4471655048E-12
+           strten31   -1.5115096084E-05 -1.5115185337E-05 -1.5114887993E-05
+                      -3.5765714089E-10 -5.1307791404E-10  8.2217746749E-11
+           strten32   -1.5130258233E-05 -1.5130258195E-05 -1.5130259492E-05
+                       1.1404875042E-11  9.9479413680E-12 -5.4471655048E-12
            symafm11      1    1    1    1    1    1    1    1    1    1
                          1    1    1    1    1    1    1    1    1    1
                          1    1    1    1    1    1    1    1    1    1
@@ -1488,23 +1482,40 @@ P           mkmem           1
  of the ABINIT implementation.
  For information on why they are suggested, see also http://www.abinit.org/about/?text=acknowledgments.
 -
-- [1] ABINIT : First-principles approach of materials and nanosystem properties.
+- [1] Recent developments in the ABINIT software package.
+- Computer Phys. Comm. 205, 106 (2016).
+- X.Gonze, F.Jollet, F.Abreu Araujo, D.Adams, B.Amadon, T.Applencourt,
+- C.Audouze, J.-M.Beuken, J.Bieder, A.Bokhanchuk, E.Bousquet, F.Bruneval
+- D.Caliste, M.Cote, F.Dahm, F.Da Pieve, M.Delaveau, M.Di Gennaro,
+- B.Dorado, C.Espejo, G.Geneste, L.Genovese, A.Gerossier, M.Giantomassi,
+- Y.Gillet, D.R.Hamann, L.He, G.Jomard, J.Laflamme Janssen, S.Le Roux,
+- A.Levitt, A.Lherbier, F.Liu, I.Lukacevic, A.Martin, C.Martins,
+- M.J.T.Oliveira, S.Ponce, Y.Pouillon, T.Rangel, G.-M.Rignanese,
+- A.H.Romero, B.Rousseau, O.Rubel, A.A.Shukri, M.Stankovski, M.Torrent,
+- M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
+- B.Xue, A.Zhou, J.W.Zwanziger.
+- Comment : the fourth generic paper describing the ABINIT project.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- is available at http://www.abinit.org/about/ABINIT16.pdf .
+- The licence allows the authors to put it on the Web.
+-
+- [2] ABINIT : First-principles approach of materials and nanosystem properties.
+- Computer Phys. Comm. 180, 2582-2615 (2009).
 - X. Gonze, B. Amadon, P.-M. Anglade, J.-M. Beuken, F. Bottin, P. Boulanger, F. Bruneval,
 - D. Caliste, R. Caracas, M. Cote, T. Deutsch, L. Genovese, Ph. Ghosez, M. Giantomassi
 - S. Goedecker, D.R. Hamann, P. Hermet, F. Jollet, G. Jomard, S. Leroux, M. Mancini, S. Mazevet,
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
-- Computer Phys. Comm. 180, 2582-2615 (2009).
 - Comment : the third generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at http://www.abinit.org/about/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
 -
-- [2] A brief introduction to the ABINIT software package.
+- [3] A brief introduction to the ABINIT software package.
+- Z. Kristallogr. 220, 558-562 (2005).
 - X. Gonze, G.-M. Rignanese, M. Verstraete, J.-M. Beuken, Y. Pouillon, R. Caracas, F. Jollet,
 - M. Torrent, G. Zerah, M. Mikami, Ph. Ghosez, M. Veithen, J.-Y. Raty, V. Olevano, F. Bruneval,
 - L. Reining, R. Godby, G. Onida, D.R. Hamann, and D.C. Allan.
-- Z. Kristallogr. 220, 558-562 (2005).
 - Comment : the second generic paper describing the ABINIT project. Note that this paper
 - should be cited especially if you are using the GW part of ABINIT, as several authors
 - of this part are not in the list of authors of the first or third paper.
@@ -1514,20 +1525,16 @@ P           mkmem           1
 -
 - And optionally:
 -
-- [3] First-principles computation of material properties : the ABINIT software project. 
+- [4] First-principles computation of material properties : the ABINIT software project. 
 - X. Gonze, J.-M. Beuken, R. Caracas, F. Detraux, M. Fuchs, G.-M. Rignanese, L. Sindic,
 - M. Verstraete, G. Zerah, F. Jollet, M. Torrent, A. Roy, M. Mikami, Ph. Ghosez, J.-Y. Raty, D.C. Allan.
 - Computational Materials Science 25, 478-492 (2002). http://dx.doi.org/10.1016/S0927-0256(02)00325-7
 - Comment : the original paper describing the ABINIT project.
 -
-- [4] Fast radix 2, 3, 4 and 5 kernels for Fast Fourier Transformations
-- on computers with overlapping multiply-add instructions.
-- S. Goedecker, SIAM J. on Scientific Computing 18, 1605 (1997).
--
-- Proc.   0 individual time (sec): cpu=          8.0  wall=          8.8
+- Proc.   0 individual time (sec): cpu=          4.5  wall=          4.5
 
 ================================================================================
 
  Calculation completed.
-.Delivered   9 WARNINGs and  14 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          8.0  wall=          8.8
+.Delivered  11 WARNINGs and  13 COMMENTs to log file.
++Overall time at end (sec) : cpu=          4.5  wall=          4.5

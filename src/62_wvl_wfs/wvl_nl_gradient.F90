@@ -7,7 +7,7 @@
 !! Compute the non local part of the wavefunction gradient.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2016 ABINIT group (DC)
+!! Copyright (C) 2005-2017 ABINIT group (DC)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -21,7 +21,7 @@
 !! NOTES
 !!
 !! PARENTS
-!!      afterscfloop,vtorho
+!!      forstr,vtorho
 !!
 !! CHILDREN
 !!      nonlocal_forces,wrtout,xmpi_sum
@@ -43,7 +43,7 @@ subroutine wvl_nl_gradient(grnl, mpi_enreg, natom, rprimd, wvl, xcart)
  use m_errors
  use m_xmpi
 
-#if defined HAVE_DFT_BIGDFT
+#if defined HAVE_BIGDFT
  use BigDFT_API, only: nonlocal_forces
 #endif
 
@@ -59,14 +59,14 @@ subroutine wvl_nl_gradient(grnl, mpi_enreg, natom, rprimd, wvl, xcart)
 !Arguments ------------------------------------
 !scalars
  integer, intent(in) :: natom
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
  type(wvl_data),intent(inout) :: wvl
 !arrays
  real(dp),intent(in) :: xcart(3,natom),rprimd(3,3)
  real(dp),intent(inout) :: grnl(3,natom)
 
 !Local variables-------------------------------
-#if defined HAVE_DFT_BIGDFT
+#if defined HAVE_BIGDFT
 !scalars
  integer :: ia,ierr,igeo,me,nproc,spaceComm
  character(len=500) :: message
@@ -77,10 +77,10 @@ subroutine wvl_nl_gradient(grnl, mpi_enreg, natom, rprimd, wvl, xcart)
 
 ! *************************************************************************
 
-#if defined HAVE_DFT_BIGDFT
+#if defined HAVE_BIGDFT
 
 !Compute forces
- write(message, '(a,a)' ) 'wvl_nl_gradient(): compute non-local part to gradient.'
+ write(message, '(a,a)' ) ' wvl_nl_gradient(): compute non-local part to gradient.'
  call wrtout(std_out,message,'COLL')
 
 !Nullify output arrays.
@@ -97,7 +97,8 @@ subroutine wvl_nl_gradient(grnl, mpi_enreg, natom, rprimd, wvl, xcart)
  call nonlocal_forces(wvl%descr%Glr, &
 & wvl%descr%h(1), wvl%descr%h(2), wvl%descr%h(3), wvl%descr%atoms, &
 & xcart, wvl%wfs%ks%orbs, wvl%projectors%nlpsp, wvl%wfs%ks%Lzd%Glr%wfd, &
-& wvl%wfs%ks%psi, gxyz, .true.,strtens(1,2))
+& wvl%wfs%ks%psi, gxyz, .true.,strtens(1,2), &
+& proj_G=wvl%projectors%G,paw=wvl%descr%paw)
 
  if (nproc > 1) then
    call xmpi_sum(gxyz, spaceComm, ierr)

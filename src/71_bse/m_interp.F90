@@ -6,7 +6,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2016 ABINIT group (M.Giantomassi, Y. Gillet)
+!!  Copyright (C) 2014-2017 ABINIT group (M.Giantomassi, Y. Gillet)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -33,7 +33,7 @@ MODULE m_interp
  use m_nctk
  use m_haydock_io
  use m_linalg_interfaces
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
  use netcdf
 #endif
 

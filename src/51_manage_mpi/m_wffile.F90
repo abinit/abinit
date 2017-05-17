@@ -8,7 +8,7 @@
 !!  As the type contains MPI-dependent fields, it has to be declared in a MPI-managed directory.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2016 ABINIT group (MT,MB,MVer,ZL,MD)
+!! Copyright (C) 2009-2017 ABINIT group (MT,MB,MVer,ZL,MD)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -40,7 +40,7 @@ MODULE m_wffile
  use mpi
 #endif
  use m_nctk
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
  use netcdf
 #endif
 
@@ -942,7 +942,6 @@ end subroutine xderiveRRecInit
 !! SIDE EFFECTS
 !!
 !! PARENTS
-!!      d2frnl,dfpt_nstpaw,dfpt_vtorho
 !!
 !! CHILDREN
 !!
@@ -1150,9 +1149,9 @@ end function wff_ireadf90
 !! wff= structured info about the wavefunction file
 !!
 !! PARENTS
-!!      conducti_paw,conducti_paw_core,d2frnl,dfpt_looppert,dfpt_nstdy
-!!      dfpt_nstpaw,emispec_paw,inwffil,linear_optics_paw,m_ioarr,m_iowf,m_wfk
-!!      optics_paw,optics_paw_core,optics_vloc,posdoppler,uderiv
+!!      conducti_paw,conducti_paw_core,emispec_paw,inwffil,linear_optics_paw
+!!      m_ioarr,m_iowf,m_wfk,optics_paw,optics_paw_core,optics_vloc,posdoppler
+!!      uderiv
 !!
 !! CHILDREN
 !!
@@ -1275,7 +1274,7 @@ subroutine WffOpen(iomode,spaceComm,filename,ier,wff,master,me,unwff,&
    end if
 #endif
 
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
  else if (wff%iomode==IO_MODE_ETSF)then
    fildata = nctk_ncify(filename)
    NCF_CHECK(nctk_open_modify(wff%unwff, fildata, xmpi_comm_self))
@@ -1312,10 +1311,9 @@ end subroutine WffOpen
 !! ierr=error code
 !!
 !! PARENTS
-!!      conducti_paw,conducti_paw_core,d2frnl,dfpt_looppert,dfpt_nstdy
-!!      dfpt_nstpaw,dfpt_scfcv,dfptnl_loop,emispec_paw,gstate,m_ioarr,m_iowf
-!!      m_wfk,nonlinear,optics_paw,optics_paw_core,optics_vloc,posdoppler
-!!      respfn,uderiv
+!!      conducti_paw,conducti_paw_core,dfpt_looppert,dfptnl_loop,emispec_paw
+!!      gstate,m_ioarr,m_iowf,m_wfk,nonlinear,optics_paw,optics_paw_core
+!!      optics_vloc,posdoppler,respfn,uderiv
 !!
 !! CHILDREN
 !!
@@ -1344,7 +1342,7 @@ subroutine WffClose(wff,ier)
  if(wff%iomode==IO_MODE_FORTRAN) then ! All processors see a local file
    close(unit=wff%unwff)
 
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
  else if(wff%iomode == IO_MODE_ETSF)then
    NCF_CHECK(nf90_close(wff%unwff))
 #endif
@@ -1711,7 +1709,7 @@ end subroutine WffReadDataRec_dp2d
 !! SIDE EFFECTS
 !!
 !! PARENTS
-!!      d2frnl,dfpt_nstdy,dfpt_nstpaw,dfpt_nstwf,dfpt_vtowfk,rwwf
+!!      rwwf
 !!
 !! CHILDREN
 !!
@@ -1735,7 +1733,7 @@ subroutine WffReadNpwRec(ierr,ikpt,isppol,nband_disk,npw,nspinor,wff)
 
 !Local variables-------------------------------
  !character(len=500) :: msg
-#if defined HAVE_TRIO_NETCDF
+#if defined HAVE_NETCDF
  integer :: vid
 #endif
 
@@ -1757,7 +1755,7 @@ subroutine WffReadNpwRec(ierr,ikpt,isppol,nband_disk,npw,nspinor,wff)
 
  else if (wff%iomode == IO_MODE_ETSF) then
 
-#if defined HAVE_TRIO_NETCDF
+#if defined HAVE_NETCDF
    !write(std_out,*)"readnpwrec: ikpt, spin", ikpt, spin
    NCF_CHECK(nctk_get_dim(wff%unwff, "number_of_spinor_components", nspinor))
    vid = nctk_idname(wff%unwff, "number_of_coefficients")
@@ -1805,7 +1803,7 @@ end subroutine WffReadNpwRec
 !! For the future : one should treat the possible errors of backspace
 !!
 !! PARENTS
-!!      d2frnl,dfpt_nstdy,dfpt_nstpaw,dfpt_nstwf,dfpt_vtowfk,gstate,randac,rwwf
+!!      gstate,randac,rwwf
 !!
 !! CHILDREN
 !!

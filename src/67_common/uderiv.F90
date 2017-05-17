@@ -10,7 +10,7 @@
 !! Work for nsppol=1 or 2, but only accept nspinor=1,
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2016 ABINIT group (NSAI).
+!! Copyright (C) 2001-2017 ABINIT group (NSAI).
 !!
 !! INPUTS
 !!  bdberry(4)=band limits for Berry phase contributions (or du/dk)
@@ -29,7 +29,7 @@
 !!  mband=maximum number of bands
 !!  mcg=size of wave-functions array (cg) =mpw*nspinor*mband*mkmem*nsppol
 !!  mkmem=number of k points treated by this node.
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  mpw=maximum dimensioned size of npw
 !!  natom=number of atoms in cell
 !!  nband(nkpt*nsppol)=number of bands at each k point, for each polarization
@@ -120,7 +120,7 @@ subroutine uderiv(bdberry,cg,gprimd,hdr,istwfk,kberry,kg,kpt_,kptopt,kptrlatt,&
 !scalars
  integer,intent(in) :: kptopt,mband,mcg,mkmem,mpw,natom,nberry,nkpt_,nspinor
  integer,intent(in) :: nsppol,unddk
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
  type(hdr_type),intent(inout) :: hdr
 !arrays
  integer,intent(in) :: bdberry(4),istwfk(nkpt_),kberry(3,20),kg(3,mpw*mkmem)

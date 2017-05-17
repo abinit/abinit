@@ -9,7 +9,7 @@
 !! from the Kubo-Greenwood formula for PAW formalism
 !!
 !! COPYRIGHT
-!! Copyright (C) 2002-2016 ABINIT group (VRecoules, PGhosh)
+!! Copyright (C) 2002-2017 ABINIT group (VRecoules, PGhosh)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~ABINIT/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -84,7 +84,7 @@
 !Arguments -----------------------------------
 !scalars
  character(len=fnlen) :: filnam,filnam_out
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
 
 !Local variables-------------------------------
 !scalars

@@ -7,7 +7,7 @@
 !! Calculate the annihilataion rate of a given core state
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (JW,GJ,MT)
+!! Copyright (C) 1998-2017 ABINIT group (JW,GJ,MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -22,7 +22,7 @@
 !!   | usepaw=flag for PAW
 !!  iatom= index of the current atom in posdoppler
 !!  mesh_sizej= size of the radial mesh for the current atom in posdoppler
-!!  mpi_enreg= informations about MPI parallelization
+!!  mpi_enreg= information about MPI parallelization
 !!  my_natom=number of atoms treated by current processor
 !!  option= if 1, use gamma
 !!          if 2, use IPM (gamma=1)
@@ -86,7 +86,7 @@ subroutine posratecore(dtset,electronpositron,iatom,my_natom,mesh_sizej,mpi_enre
  real(dp),intent(out) :: rate
  type(dataset_type), intent(in) :: dtset
  type(electronpositron_type),pointer :: electronpositron
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
  type(pawang_type), intent(in) :: pawang
 !arrays
  real(dp),intent(in) :: rhocorej(mesh_sizej)
@@ -237,7 +237,8 @@ subroutine posratecore(dtset,electronpositron,iatom,my_natom,mesh_sizej,mpi_enre
 !    Compute contribution to annihilation rates
 
      ABI_ALLOCATE(ff,(mesh_size))
-     ff(:)=rhoarr1_ep(:)*rhocorej(:)*gamma(:,1)*pawrad(itypat)%rad(:)**2
+     ff(1:mesh_size)=rhoarr1_ep(1:mesh_size)*rhocorej(1:mesh_size) &
+&     *gamma(1:mesh_size,1)*pawrad(itypat)%rad(1:mesh_size)**2
      call simp_gen(intg,ff,pawrad(itypat))
      intg=intg*pawang%angwgth(ipt)*four_pi
      rate         =rate         +intg
@@ -409,7 +410,7 @@ subroutine posratecore(dtset,electronpositron,iatom,my_natom,mesh_sizej,mpi_enre
      if (lmselect_ep(ilm)) gg(:,1)=gg(:,1)+rhotot_ep(:,ilm)*rhocorej(:)*gammam(:,ilm)
    end do
    ABI_DEALLOCATE(rhoarr2)
-   gg(:,1)=gg(:,1)*pawrad(itypat)%rad(:)**2
+   gg(1:mesh_size,1)=gg(1:mesh_size,1)*pawrad(itypat)%rad(1:mesh_size)**2
    call simp_gen(intg,gg(:,1),pawrad(itypat))
    rate         =rate         +intg
    ABI_DEALLOCATE(gg)
@@ -438,8 +439,6 @@ subroutine posratecore(dtset,electronpositron,iatom,my_natom,mesh_sizej,mpi_enre
    call xmpi_sum(mpibuf,mpi_enreg%comm_atom,ierr)
    rate=mpibuf
  end if
-
-
 
  DBG_EXIT("COLL")
 

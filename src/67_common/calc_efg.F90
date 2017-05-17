@@ -7,7 +7,7 @@
 !! calculation and output of electric field gradient tensor at each atomic site
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2016 ABINIT group (JZ,MT)
+!! Copyright (C) 2005-2017 ABINIT group (JZ,MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~ABINIT/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -15,7 +15,7 @@
 !! INPUTS
 !!  mpi_atmtab(:)=--optional-- indexes of the atoms treated by current proc
 !!  comm_atom=--optional-- MPI communicator over atoms
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  my_natom=number of atoms treated by current processor
 !!  natom=number of atoms in cell.
 !!  nfft=number of points on fft grid
@@ -101,7 +101,7 @@
  integer,intent(in) :: my_natom,natom,nfft,nspden,nsym,ntypat,paral_kgb,prtefg,usepaw
  integer,optional,intent(in) :: comm_atom
  real(dp),intent(in) :: ucvol
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
  type(pawang_type),intent(in) :: pawang
 !arrays
  integer,intent(in) :: ngfft(18),symrel(3,3,nsym),typat(natom)

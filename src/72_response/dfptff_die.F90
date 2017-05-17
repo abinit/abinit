@@ -7,7 +7,7 @@
 !! calculate electric susceptibility tensor in Eq.(28) in PRB 75, 115116(2007). 
 !!
 !! COPYRIGHT
-!! Copyright (C) 2004-2016 ABINIT group (XW).
+!! Copyright (C) 2004-2017 ABINIT group (XW).
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -28,7 +28,7 @@
 !! npwar1(nkpt) = number of planewaves in basis and boundary for response wfs
 !! nspinor = 1 for scalar wfs, 2 for spinor wfs
 !! nsppol = 1 for unpolarized, 2 for spin-polarized
-!! qmat(2,dtefield%nband_occ,dtefield%nband_occ,nkpt,2,3) =
+!! qmat(2,dtefield%mband_occ,dtefield%mband_occ,nkpt,2,3) =
 !! inverse of the overlap matrix
 !! pwindall(max(mpw,mpw1)*mkmem,8,3) = array used to compute the overlap matrices
 !! pwindall(:,1,:) <- <u^(0)_i|u^(0)_i+1>
@@ -84,7 +84,7 @@ subroutine dfptff_die(cg,cg1,dtefield,d2lo,idirpert,ipert,mband,mkmem,&
  integer,intent(in) :: pwindall(max(mpw,mpw1)*mkmem,8,3)
  real(dp),intent(in) :: cg(2,mpw*mband*mkmem*nspinor*nsppol)
  real(dp),intent(in) :: cg1(2,mpw1*mband*mkmem*nspinor*nsppol)
- real(dp),intent(in) :: qmat(2,dtefield%nband_occ,dtefield%nband_occ,nkpt,2,3)
+ real(dp),intent(in) :: qmat(2,dtefield%mband_occ,dtefield%mband_occ,nkpt,2,3)
  real(dp),intent(in) :: rprimd(3,3)
  real(dp),intent(inout) :: d2lo(2,3,mpert,3,mpert) !vz_i
 
@@ -102,7 +102,7 @@ subroutine dfptff_die(cg,cg1,dtefield,d2lo,idirpert,ipert,mband,mkmem,&
 
 !calculate s1 matrices -----------------------------
  mpw_tmp=max(mpw,mpw1)
- ABI_ALLOCATE(s1mat,(2,dtefield%nband_occ,dtefield%nband_occ))
+ ABI_ALLOCATE(s1mat,(2,dtefield%mband_occ,dtefield%mband_occ))
  ABI_ALLOCATE(vect1,(2,0:mpw_tmp))
  ABI_ALLOCATE(vect2,(2,0:mpw_tmp))
  ABI_ALLOCATE(pwind_tmp,(mpw_tmp))
@@ -123,11 +123,11 @@ subroutine dfptff_die(cg,cg1,dtefield,d2lo,idirpert,ipert,mband,mkmem,&
      pwind_tmp(1:npw_k1) = pwindall((ikpt-1)*mpw_tmp+1:(ikpt-1)*mpw_tmp+npw_k1,7,idir)
 
      vect1(:,0) = zero ; vect2(:,0) = zero
-     do jband = 1, dtefield%nband_occ
+     do jband = 1, dtefield%mband_occ
        vect2(:,1:npw_k2) = &
 &       cg1(:,icg1 + 1 + (jband-1)*npw_k2*nspinor:icg1 + jband*npw_k2*nspinor)
        if (npw_k2 < mpw_tmp) vect2(:,npw_k2+1:mpw_tmp) = zero
-       do iband = 1, dtefield%nband_occ
+       do iband = 1, dtefield%mband_occ
          pwmin = (iband-1)*npw_k1*nspinor
          pwmax = pwmin + npw_k1*nspinor
          vect1(:,1:npw_k1) = &
@@ -150,11 +150,11 @@ subroutine dfptff_die(cg,cg1,dtefield,d2lo,idirpert,ipert,mband,mkmem,&
      npw_k2 = npwarr(ikpt1)
      pwind_tmp(1:npw_k1) = pwindall((ikpt-1)*mpw_tmp+1:(ikpt-1)*mpw_tmp+npw_k1,5,idir)
      vect1(:,0) = zero ; vect2(:,0) = zero
-     do jband = 1, dtefield%nband_occ
+     do jband = 1, dtefield%mband_occ
        vect2(:,1:npw_k2) = &
 &       cg(:,icg1 + 1 + (jband-1)*npw_k2*nspinor:icg1 + jband*npw_k2*nspinor)
        if (npw_k2 < mpw_tmp) vect2(:,npw_k2+1:mpw_tmp) = zero
-       do iband = 1, dtefield%nband_occ
+       do iband = 1, dtefield%mband_occ
          pwmin = (iband-1)*npw_k1*nspinor
          pwmax = pwmin + npw_k1*nspinor
          vect1(:,1:npw_k1) = &
@@ -171,8 +171,8 @@ subroutine dfptff_die(cg,cg1,dtefield,d2lo,idirpert,ipert,mband,mkmem,&
 
      e0=zero
 
-     do iband=1,dtefield%nband_occ
-       do jband=1,dtefield%nband_occ
+     do iband=1,dtefield%mband_occ
+       do jband=1,dtefield%mband_occ
          e0 = e0 + (s1mat(1,iband,jband)*qmat(2,jband,iband,ikpt,1,idir)&
 &         +    s1mat(2,iband,jband)*qmat(1,jband,iband,ikpt,1,idir))
          

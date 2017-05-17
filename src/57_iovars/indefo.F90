@@ -8,7 +8,7 @@
 !! (some are initialized earlier, see indefo1 routine)
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2016 ABINIT group (XG,MM,FF)
+!! Copyright (C) 1999-2017 ABINIT group (XG,MM,FF)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -97,6 +97,7 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
  dtsets(0)%shiftk(:,:)=half
  dtsets(0)%tolsym=tol8
  dtsets(0)%znucl(:)=zero
+ dtsets(0)%ucrpa=0
  dtsets(0)%usedmft=0
 
  paral_atom_default=0
@@ -167,6 +168,7 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%cd_frqim_method=1
    dtsets(idtset)%cd_full_grid=0
    dtsets(idtset)%charge=zero
+   dtsets(idtset)%chempot(:,:,:)=zero
    dtsets(idtset)%chkexit=0
    dtsets(idtset)%chksymbreak=1
    dtsets(idtset)%cineb_start=7
@@ -202,7 +204,9 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%dmft_read_occnd=0
    dtsets(idtset)%dmft_rslf=0
    dtsets(idtset)%dmft_solv=5
+   if(dtsets(idtset)%ucrpa>0.and.dtsets(idtset)%usedmft==1) dtsets(idtset)%dmft_solv=0
    dtsets(idtset)%dmft_t2g=0
+   dtsets(idtset)%dmft_tolfreq=tol4
    dtsets(idtset)%dmft_tollc=tol5
    dtsets(idtset)%dmftbandi=0
    dtsets(idtset)%dmftbandf=0
@@ -215,6 +219,7 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%dmftctqmc_mrka  =0
    dtsets(idtset)%dmftctqmc_mov   =0
    dtsets(idtset)%dmftctqmc_order =0
+   dtsets(idtset)%dmftctqmc_triqs_nleg=30
    dtsets(idtset)%dmftqmc_l=0
    dtsets(idtset)%dmftqmc_n=0.0_dp
    dtsets(idtset)%dmftqmc_seed=jdtset
@@ -323,6 +328,7 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%gwmem=11
    dtsets(idtset)%gwpara=2
    dtsets(idtset)%gwrpacorr=0
+   dtsets(idtset)%gwfockmix=0.25_dp
    dtsets(idtset)%gwls_sternheimer_kmax=1
    dtsets(idtset)%gwls_model_parameter=1.0_dp
    dtsets(idtset)%gwls_second_model_parameter=0.0_dp
@@ -406,6 +412,7 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%kptgw(:,:)=zero
    dtsets(idtset)%kptnrm=one
    dtsets(idtset)%kptopt=1
+   if(dtsets(idtset)%nspden==4)dtsets(idtset)%kptopt=4
    dtsets(idtset)%kptrlen=30.0_dp
    dtsets(idtset)%kssform=1
 !  L
@@ -440,7 +447,11 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%nbdblock=1
    dtsets(idtset)%nbdbuf=0
    dtsets(idtset)%nberry=1
-   dtsets(idtset)%nc_xccc_gspace=0
+   if (dtsets(idtset)%usepaw==0) then
+     dtsets(idtset)%nc_xccc_gspace=0
+   else
+     dtsets(idtset)%nc_xccc_gspace=1
+   end if
    dtsets(idtset)%nbandkss=0
    dtsets(idtset)%nctime=0
    dtsets(idtset)%ndtset = -1
@@ -476,7 +487,7 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
 
 !  nloalg is also a special case
    dtsets(idtset)%nloalg(1)=4
-   dtsets(idtset)%nloalg(2)=1 
+   dtsets(idtset)%nloalg(2)=1
    dtsets(idtset)%nloalg(3)=dtsets(idtset)%usepaw
    dtsets(idtset)%ngkpt=0
    dtsets(idtset)%nnsclo=0
@@ -548,6 +559,7 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%pawujv=0.1_dp/Ha_eV
    dtsets(idtset)%pawusecp=1
    dtsets(idtset)%pawxcdev=1
+   dtsets(idtset)%pimd_constraint=0
    dtsets(idtset)%pitransform=0
    dtsets(idtset)%ptcharge(:) = zero
    dtsets(idtset)%plowan_bandi=0
@@ -582,6 +594,7 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%prtdipole=0
    dtsets(idtset)%prtdos=0
    dtsets(idtset)%prtdosm=0
+   dtsets(idtset)%prtebands=1;if (dtsets(idtset)%nimage>1) dtsets(idtset)%prtebands=0
    dtsets(idtset)%prtefg=0
    dtsets(idtset)%prteig=1;if (dtsets(idtset)%nimage>1) dtsets(idtset)%prteig=0
    dtsets(idtset)%prtelf=0
@@ -595,6 +608,8 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%prtlden=0
    dtsets(idtset)%prtnabla=0
    dtsets(idtset)%prtnest=0
+   dtsets(idtset)%prtphdos=1
+   dtsets(idtset)%prtphsurf=0
    dtsets(idtset)%prtposcar=0
    dtsets(idtset)%prtpot=0
    dtsets(idtset)%prtpsps=0
@@ -618,6 +633,7 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    end do
    dtsets(idtset)%prt1dm=0
    dtsets(idtset)%pvelmax(:)=one
+   dtsets(idtset)%pw_unbal_thresh=40.
 !  Q
    dtsets(idtset)%qmass(:)=ten
    dtsets(idtset)%qprtrb(1:3)=0
@@ -641,6 +657,7 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%rfddk=0
    dtsets(idtset)%rfdir(1:3)=0
    dtsets(idtset)%rfelfd=0
+   dtsets(idtset)%rfmagn=0
    dtsets(idtset)%rfmeth=1
    dtsets(idtset)%rfphon=0
    dtsets(idtset)%rfstrs=0
@@ -687,7 +704,6 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%tolwfr=zero
    dtsets(idtset)%tsmear=0.01_dp
 !  U
-   dtsets(idtset)%ucrpa=0
    dtsets(idtset)%ucrpa_bands(:)=-1
    dtsets(idtset)%ucrpa_window(:)=-1.0_dp
    dtsets(idtset)%upawu(:,:)=zero
@@ -798,12 +814,15 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%eph_fsmear = 0.01
    dtsets(idtset)%eph_fsewin = 0.04
    dtsets(idtset)%eph_ngqpt_fine = [0, 0, 0]
+   dtsets(idtset)%eph_task = 1
+   dtsets(idtset)%eph_transport  = 0
 
    dtsets(idtset)%ph_wstep = 0.1/Ha_meV
    dtsets(idtset)%ph_intmeth = 2
    dtsets(idtset)%ph_nqshift = 1
    dtsets(idtset)%ph_smear = 0.00002_dp
    dtsets(idtset)%ddb_ngqpt = [0, 0, 0]
+   dtsets(idtset)%ddb_shiftq(:) = zero
 
 ! JB:UNINITIALIZED VALUES (not found in this file neither indefo1)
 ! They might be initialized somewhereelse, I don't know.

@@ -8,7 +8,7 @@
 !! can be used to perform a sigma calculation.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2016 ABINIT group (RS, MG, MS)
+!! Copyright (C) 2005-2017 ABINIT group (RS, MG, MS)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -58,7 +58,7 @@ program mrgscr
  use m_build_info
  use m_errors
  use m_nctk
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
  use netcdf 
 #endif
  use m_hdr

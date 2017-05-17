@@ -7,7 +7,7 @@
 !! Main calculation of the independent-particle susceptibility chi0 for qpoint!=0
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2016 ABINIT group (GMR, VO, LR, RWG, MG, RShaltaf)
+!! Copyright (C) 1999-2017 ABINIT group (GMR, VO, LR, RWG, MG, RShaltaf)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -105,7 +105,6 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
  use defs_abitypes
  use m_xmpi
  use m_blas
- use m_commutator_vkbr
  use m_errors
  use m_profiling_abi
  use m_time

@@ -9,7 +9,7 @@
 !! LDA bloch function representation for Wannier code (www.wannier.org f90 version).
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2016 ABINIT group (DRH)
+!!  Copyright (C) 2008-2017 ABINIT group (DRH)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -83,13 +83,13 @@ subroutine mlwfovlp_qp(cg,Cprj_BZ,dtset,dtfil,eigen,mband,mcg,mcprj,mkmem,mpw,na
  use m_bz_mesh,        only : kmesh_t, kmesh_init, kmesh_free
  use m_ebands,         only : ebands_init, ebands_free
  use m_qparticles,     only : rdqps, rdgw
+ use m_sort,           only : sort_dp
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'mlwfovlp_qp'
  use interfaces_14_hidewrite
- use interfaces_28_numeric_noabirule
  use interfaces_41_geometry
  use interfaces_51_manage_mpi
  use interfaces_56_recipspace
@@ -104,7 +104,7 @@ subroutine mlwfovlp_qp(cg,Cprj_BZ,dtset,dtfil,eigen,mband,mcg,mcprj,mkmem,mpw,na
  type(dataset_type),intent(in) :: dtset
  type(datafiles_type),intent(in) :: dtfil
  type(Hdr_type),intent(in) :: Hdr
- type(MPI_type),intent(inout) :: MPI_enreg
+ type(MPI_type),intent(in) :: MPI_enreg
  type(pawcprj_type),target,intent(inout) :: Cprj_BZ(natom,mcprj)
  type(Pawtab_type),intent(in) :: Pawtab(ntypat*Dtset%usepaw)
 !arrays
@@ -169,7 +169,7 @@ subroutine mlwfovlp_qp(cg,Cprj_BZ,dtset,dtfil,eigen,mband,mcg,mcprj,mkmem,mpw,na
  ABI_CHECK(ltest,'nband(:) should be constant')
  !
  ! MPI initialization
- nprocs=MPI_enreg% nproc_cell
+ nprocs=MPI_enreg%nproc_cell
 
  if (nprocs/=1) then
    MSG_ERROR("mlwfovlp_qp not programmed for parallel execution")

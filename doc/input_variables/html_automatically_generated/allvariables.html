@@ -80,6 +80,7 @@ variables to be used in the main input file of the abinit code.
 <a href="vargw.html#cd_subset_freq">cd_subset_freq</a>&nbsp;&nbsp;
 <a href="vardev.html#cgtyphf">cgtyphf</a>&nbsp;&nbsp;
 <a href="vargs.html#charge">charge</a>&nbsp;&nbsp;
+<a href="vargeo.html#chempot">chempot</a>&nbsp;&nbsp;
 <a href="vargs.html#chkexit">chkexit</a>&nbsp;&nbsp;
 <a href="vargs.html#chkprim">chkprim</a>&nbsp;&nbsp;
 <a href="vargs.html#chksymbreak">chksymbreak</a>&nbsp;&nbsp;
@@ -102,7 +103,8 @@ variables to be used in the main input file of the abinit code.
 <a href="varrf.html#d3e_pert3_elfd">d3e_pert3_elfd</a>&nbsp;&nbsp;
 <a href="varrf.html#d3e_pert3_phon">d3e_pert3_phon</a>&nbsp;&nbsp;
 <a href="varff.html#ddamp">ddamp</a>&nbsp;&nbsp;
-<a href="varrf.html#ddb_ngqpt">ddb_ngqpt</a>&nbsp;&nbsp;
+<a href="vareph.html#ddb_ngqpt">ddb_ngqpt</a>&nbsp;&nbsp;
+<a href="vareph.html#ddb_shiftq">ddb_shiftq</a>&nbsp;&nbsp;
 <a href="varrlx.html#delayperm">delayperm</a>&nbsp;&nbsp;
 <a href="vardev.html#densfor_pred">densfor_pred</a>&nbsp;&nbsp;
 <a href="vardev.html#densty">densty</a>&nbsp;&nbsp;
@@ -132,6 +134,7 @@ variables to be used in the main input file of the abinit code.
 <a href="vardev.html#dmft_rslf">dmft_rslf</a>&nbsp;&nbsp;
 <a href="vardev.html#dmft_solv">dmft_solv</a>&nbsp;&nbsp;
 <a href="vardev.html#dmft_t2g">dmft_t2g</a>&nbsp;&nbsp;
+<a href="vardev.html#dmft_tolfreq">dmft_tolfreq</a>&nbsp;&nbsp;
 <a href="vardev.html#dmft_tollc">dmft_tollc</a>&nbsp;&nbsp;
 <a href="vardev.html#dmftbandf">dmftbandf</a>&nbsp;&nbsp;
 <a href="vardev.html#dmftbandi">dmftbandi</a>&nbsp;&nbsp;
@@ -145,6 +148,7 @@ variables to be used in the main input file of the abinit code.
 <a href="vardev.html#dmftctqmc_mov">dmftctqmc_mov</a>&nbsp;&nbsp;
 <a href="vardev.html#dmftctqmc_mrka">dmftctqmc_mrka</a>&nbsp;&nbsp;
 <a href="vardev.html#dmftctqmc_order">dmftctqmc_order</a>&nbsp;&nbsp;
+<a href="vardev.html#dmftctqmc_triqs_nleg">dmftctqmc_triqs_nleg</a>&nbsp;&nbsp;
 <a href="vardev.html#dmftqmc_l">dmftqmc_l</a>&nbsp;&nbsp;
 <a href="vardev.html#dmftqmc_n">dmftqmc_n</a>&nbsp;&nbsp;
 <a href="vardev.html#dmftqmc_seed">dmftqmc_seed</a>&nbsp;&nbsp;
@@ -169,6 +173,7 @@ variables to be used in the main input file of the abinit code.
 <a href="varrf.html#efmas_dirs">efmas_dirs</a>&nbsp;&nbsp;
 <a href="varrf.html#efmas_n_dirs">efmas_n_dirs</a>&nbsp;&nbsp;
 <a href="varrf.html#efmas_ntheta">efmas_ntheta</a>&nbsp;&nbsp;
+<a href="varbas.html#einterp">einterp</a>&nbsp;&nbsp;
 <a href="varrf.html#elph2_imagden">elph2_imagden</a>&nbsp;&nbsp;
 <a href="vargs.html#enunit">enunit</a>&nbsp;&nbsp;
 <a href="vareph.html#eph_extrael">eph_extrael</a>&nbsp;&nbsp;
@@ -178,6 +183,8 @@ variables to be used in the main input file of the abinit code.
 <a href="vareph.html#eph_intmeth">eph_intmeth</a>&nbsp;&nbsp;
 <a href="vareph.html#eph_mustar">eph_mustar</a>&nbsp;&nbsp;
 <a href="vareph.html#eph_ngqpt_fine">eph_ngqpt_fine</a>&nbsp;&nbsp;
+<a href="varrf.html#eph_task">eph_task</a>&nbsp;&nbsp;
+<a href="vareph.html#eph_transport">eph_transport</a>&nbsp;&nbsp;
 <a href="vardev.html#eshift">eshift</a>&nbsp;&nbsp;
 <a href="varrf.html#esmear">esmear</a>&nbsp;&nbsp;
 <a href="vardev.html#exchmix">exchmix</a>&nbsp;&nbsp;
@@ -247,6 +254,7 @@ variables to be used in the main input file of the abinit code.
 <a href="vargw.html#gwcalctyp">gwcalctyp</a>&nbsp;&nbsp;
 <a href="vargw.html#gwcomp">gwcomp</a>&nbsp;&nbsp;
 <a href="vargw.html#gwencomp">gwencomp</a>&nbsp;&nbsp;
+<a href="vargw.html#gwfockmix">gwfockmix</a>&nbsp;&nbsp;
 <a href="vargw.html#gwgamma">gwgamma</a>&nbsp;&nbsp;
 <a href="vargw.html#gwls_band_index">gwls_band_index</a>&nbsp;&nbsp;
 <a href="vargw.html#gwls_correlation">gwls_correlation</a>&nbsp;&nbsp;
@@ -398,6 +406,7 @@ variables to be used in the main input file of the abinit code.
 <a href="varbas.html#ngkpt">ngkpt</a>&nbsp;&nbsp;
 <a href="vargs.html#ngqpt">ngqpt</a>&nbsp;&nbsp;
 <a href="varrlx.html#nimage">nimage</a>&nbsp;&nbsp;
+<a href="varbas.html#nkpath">nkpath</a>&nbsp;&nbsp;
 <a href="varbas.html#nkpt">nkpt</a>&nbsp;&nbsp;
 <a href="vargw.html#nkptgw">nkptgw</a>&nbsp;&nbsp;
 <a href="varbas.html#nkpthf">nkpthf</a>&nbsp;&nbsp;
@@ -446,6 +455,7 @@ variables to be used in the main input file of the abinit code.
 <a href="vargs.html#ntyppure">%ntyppure</a>&nbsp;&nbsp;
 <a href="vargs.html#nucdipmom">nucdipmom</a>&nbsp;&nbsp;
 <a href="vargs.html#nwfshist">nwfshist</a>&nbsp;&nbsp;
+<a href="vargeo.html#nzchempot">nzchempot</a>&nbsp;&nbsp;
 <p>O.
 <a href="vargeo.html#objaat">objaat</a>&nbsp;&nbsp;
 <a href="vargeo.html#objaax">objaax</a>&nbsp;&nbsp;
@@ -512,6 +522,7 @@ variables to be used in the main input file of the abinit code.
 <a href="vareph.html#ph_smear">ph_smear</a>&nbsp;&nbsp;
 <a href="vareph.html#ph_wstep">ph_wstep</a>&nbsp;&nbsp;
 <a href="varrlx.html#pimass">pimass</a>&nbsp;&nbsp;
+<a href="varrlx.html#pimd_constraint">pimd_constraint</a>&nbsp;&nbsp;
 <a href="varrlx.html#pitransform">pitransform</a>&nbsp;&nbsp;
 <a href="vardev.html#plowan_bandf">plowan_bandf</a>&nbsp;&nbsp;
 <a href="vardev.html#plowan_bandi">plowan_bandi</a>&nbsp;&nbsp;
@@ -546,6 +557,7 @@ variables to be used in the main input file of the abinit code.
 <a href="vardev.html#prtdipole">prtdipole</a>&nbsp;&nbsp;
 <a href="varfil.html#prtdos">prtdos</a>&nbsp;&nbsp;
 <a href="varfil.html#prtdosm">prtdosm</a>&nbsp;&nbsp;
+<a href="vargs.html#prtebands">prtebands</a>&nbsp;&nbsp;
 <a href="varpaw.html#prtefg">prtefg</a>&nbsp;&nbsp;
 <a href="varfil.html#prteig">prteig</a>&nbsp;&nbsp;
 <a href="varfil.html#prtelf">prtelf</a>&nbsp;&nbsp;
@@ -560,6 +572,9 @@ variables to be used in the main input file of the abinit code.
 <a href="varfil.html#prtlden">prtlden</a>&nbsp;&nbsp;
 <a href="varpaw.html#prtnabla">prtnabla</a>&nbsp;&nbsp;
 <a href="vardev.html#prtnest">prtnest</a>&nbsp;&nbsp;
+<a href="vareph.html#prtphbands">prtphbands</a>&nbsp;&nbsp;
+<a href="vareph.html#prtphdos">prtphdos</a>&nbsp;&nbsp;
+<a href="vareph.html#prtphsurf">prtphsurf</a>&nbsp;&nbsp;
 <a href="vardev.html#prtposcar">prtposcar</a>&nbsp;&nbsp;
 <a href="varfil.html#prtpot">prtpot</a>&nbsp;&nbsp;
 <a href="varfil.html#prtpsps">prtpsps</a>&nbsp;&nbsp;
@@ -581,6 +596,7 @@ variables to be used in the main input file of the abinit code.
 <a href="varpaw.html#ptcharge">ptcharge</a>&nbsp;&nbsp;
 <a href="vargeo.html#ptgroupma">%ptgroupma</a>&nbsp;&nbsp;
 <a href="vargw.html#pvelmax">pvelmax</a>&nbsp;&nbsp;
+<a href="varpar.html#pw_unbal_thresh">pw_unbal_thresh</a>&nbsp;&nbsp;
 <p>Q.
 <a href="varrlx.html#qmass">qmass</a>&nbsp;&nbsp;
 <a href="varff.html#qprtrb">qprtrb</a>&nbsp;&nbsp;
@@ -614,6 +630,7 @@ variables to be used in the main input file of the abinit code.
 <a href="varrf.html#rfddk">rfddk</a>&nbsp;&nbsp;
 <a href="varrf.html#rfdir">rfdir</a>&nbsp;&nbsp;
 <a href="varrf.html#rfelfd">rfelfd</a>&nbsp;&nbsp;
+<a href="varrf.html#rfmagn">rfmagn</a>&nbsp;&nbsp;
 <a href="varrf.html#rfmeth">rfmeth</a>&nbsp;&nbsp;
 <a href="varrf.html#rfphon">rfphon</a>&nbsp;&nbsp;
 <a href="varrf.html#rfstrs">rfstrs</a>&nbsp;&nbsp;

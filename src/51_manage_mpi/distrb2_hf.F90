@@ -9,7 +9,7 @@
 !!  bands and spin indices) for an Hartree-Fock calculation.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2000-2016 ABINIT group (CMartins)
+!!  Copyright (C) 2000-2017 ABINIT group (CMartins)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -187,9 +187,9 @@ subroutine distrb2_hf(nbandhf,nkpthf, nproc, nsppol, mpi_enreg)
 !    proc_max=0
 !    proc_min=nproc_hf
 !    do iikpt=1,nkpthf
-!      nband_occ_k = nband_occ(iikpt+(iisppol-1)*nkpthf)
-!      proc_max=maxval(mpi_enreg%distrb_hf(iikpt,1:nband_occ_k,1))
-!      proc_min=minval(mpi_enreg%distrb_hf(iikpt,1:nband_occ_k,1))
+!      mband_occ_k = mband_occ(iikpt+(iisppol-1)*nkpthf)
+!      proc_max=maxval(mpi_enreg%distrb_hf(iikpt,1:mband_occ_k,1))
+!      proc_min=minval(mpi_enreg%distrb_hf(iikpt,1:mband_occ_k,1))
 !    end do
 ! 
 !    if(proc_max>(nproc_hf-1)) then

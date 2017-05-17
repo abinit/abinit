@@ -7,7 +7,7 @@
 !! Verify that the paw spheres are not overlapping
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (FJ, MT)
+!! Copyright (C) 1998-2017 ABINIT group (FJ, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -80,12 +80,6 @@ subroutine chkpawovlp(natom,ntypat,pawovlp,pawtab,rmet,typat,xred)
 
 
 ! *************************************************************************
-
-!Statement functions areobsolete.
-!Statement function: squared norm of a vector
-! sqnrm(u1,u2,u3)=rmet(1,1)*u1*u1+rmet(2,1)*u2*u1+rmet(3,1)*u3*u1&
-!& +rmet(1,2)*u1*u2+rmet(2,2)*u2*u2+rmet(3,2)*u3*u2&
-!& +rmet(1,3)*u1*u3+rmet(2,3)*u2*u3+rmet(3,3)*u3*u3
 
  DBG_ENTER("COLL")
 
@@ -214,7 +208,7 @@ subroutine chkpawovlp(natom,ntypat,pawovlp,pawtab,rmet,typat,xred)
  contains
 
    function sqnrm_pawovlp(u1,u2,u3)
-
+!squared norm of a vector
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -223,7 +217,7 @@ subroutine chkpawovlp(natom,ntypat,pawovlp,pawtab,rmet,typat,xred)
 !End of the abilint section
 
    real(dp) :: sqnrm_pawovlp
-   real(dp) :: u1,u2,u3
+   real(dp),intent(in) :: u1,u2,u3
    
    sqnrm_pawovlp=rmet(1,1)*u1*u1+rmet(2,1)*u2*u1+rmet(3,1)*u3*u1&
 &   +rmet(1,2)*u1*u2+rmet(2,2)*u2*u2+rmet(3,2)*u3*u2&

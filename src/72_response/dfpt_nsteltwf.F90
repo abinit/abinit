@@ -8,7 +8,7 @@
 !! 2DTE matrix elements, in the non-stationary formulation
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2016 ABINIT group (DRH,XG,AR,MB,MVer)
+!! Copyright (C) 1999-2017 ABINIT group (DRH,XG,AR,MB,MVer)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -34,7 +34,7 @@
 !!  mkmem =number of k points treated by this node.
 !!  mk1mem =number of k points treated by this node (RF data).
 !!  mpert =maximum number of ipert
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  mpw=maximum dimensioned size of npw or wfs at k
 !!  mpw1=maximum dimensioned size of npw for wfs at k+q (also for 1-order wfs).
 !!  natom=number of atoms in cell.
@@ -101,7 +101,7 @@ subroutine dfpt_nsteltwf(cg,cg1,d2nl_k,ecut,ecutsm,effmass,gs_hamk,icg,icg1,ikpt
  integer,intent(in) :: nspinor,nsppol,ntypat
  integer,intent(inout) :: nband_k,npw1_k,npw_k
  real(dp),intent(in) :: ecut,ecutsm,effmass,wtk_k
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
  type(pseudopotential_type),intent(in) :: psps
 !arrays
  integer,intent(in) :: kg1_k(3,npw1_k),kg_k(3,npw_k)

@@ -8,7 +8,7 @@
 !! elastic tensor
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (DRH, DCA, XG, GM, AR, MB)
+!! Copyright (C) 1998-2017 ABINIT group (DRH, DCA, XG, GM, AR, MB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -26,7 +26,7 @@
 !!  mband=maximum number of bands
 !!  mgfft=maximum size of 1D FFTs
 !!  mkmem=number of k points treated by this node.
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  mpw=maximum dimension for number of planewaves
 !!  nband(nkpt*nsppol)=number of bands being considered per k point
 !!  nkpt=number of k points
@@ -86,7 +86,7 @@ subroutine dfpt_eltfrkin(cg,eltfrkin,ecut,ecutsm,effmass,&
 !scalars
  integer,intent(in) :: mband,mgfft,mkmem,mpw,nkpt,nspinor,nsppol
  real(dp),intent(in) :: ecut,ecutsm,effmass
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: istwfk(nkpt),kg(3,mpw*mkmem),nband(nkpt*nsppol)
  integer,intent(in) :: ngfft(18),npwarr(nkpt)

@@ -1,16 +1,19 @@
 #!/usr/bin/env python
 #
-# Copyright (C) 2005-2016 ABINIT Group (Yann Pouillon)
+# Copyright (C) 2005-2017 ABINIT Group (Yann Pouillon)
 #
 # This file is part of the ABINIT software package. For license information,
 # please see the COPYING file in the top-level directory of the ABINIT source
 # distribution.
 #
+from __future__ import print_function, division, absolute_import #, unicode_literals
 
-from ConfigParser import ConfigParser
+try:
+    from ConfigParser import ConfigParser
+except ImportError:
+    from configparser import ConfigParser
 from time import gmtime,strftime
 
-import commands
 import os
 import re
 import sys
@@ -67,16 +70,16 @@ sep = "# -----------------------------------------------------------------------
 # Check if we are in the top of the ABINIT source tree
 if ( not os.path.exists("configure.ac") or
      not os.path.exists("src/98_main/abinit.F90") ):
-  print "%s: You must be in the top of an ABINIT source tree." % my_name
-  print "%s: Aborting now." % my_name
+  print("%s: You must be in the top of an ABINIT source tree." % my_name)
+  print("%s: Aborting now." % my_name)
   sys.exit(1)
 
 # Read config file(s)
 cnf = MyConfigParser()
 for cnf_file in my_configs:
   if ( not os.path.exists(cnf_file) ):
-    print "%s: Could not find config file (%s)." % (my_name,cnf_file)
-    print "%s: Aborting now." % my_name
+    print("%s: Could not find config file (%s)." % (my_name,cnf_file))
+    print("%s: Aborting now." % my_name)
     sys.exit(2)
 
 # What time is it?
@@ -91,7 +94,7 @@ cnf.read(my_configs[0])
 # Check whether some subsystem modes have been customized
 blk_custom = {}
 if ( os.path.exists(my_custom) ):
-  for line in file(my_custom,"r").readlines():
+  for line in open(my_custom, "rt").readlines():
     (key,val) = line.strip().split()
     blk_custom[key] = val
 
@@ -118,11 +121,11 @@ for blk in cnf.sections():
       abinit_subdirs["data"][urgency] += sub_list
 
 # Sort subdirs
-abinit_priorities = abinit_subdirs["data"].keys()
+abinit_priorities = list(abinit_subdirs["data"].keys())
 abinit_priorities.sort()
 for urgency in abinit_priorities:
   abinit_other_dirs += abinit_subdirs["data"][urgency]
-abinit_priorities = abinit_subdirs["subsystem"].keys()
+abinit_priorities = list(abinit_subdirs["subsystem"].keys())
 abinit_priorities.sort()
 for urgency in abinit_priorities:
   abinit_top_dirs += abinit_subdirs["subsystem"][urgency]
@@ -135,17 +138,17 @@ clean += "DISTCLEANFILES = .abilint abilint.out abilint.log\n\n"
 ext = "EXTRA_DIST =\n"
 for subdir in abinit_other_dirs:
   sub_files = "config/dist/%s.lst" % subdir
-  ext += file(sub_files,"r").read()
+  ext += open(sub_files, "rt").read()
 ext = re.sub("\n"," \\\n\t",ext[:-1])
 ext += "\n\n"
 
 # Write Makefile.am
-mf = file("Makefile.am","w")
+mf = open("Makefile.am", "wt")
 mf.write(makefile_header(my_name,now))
 mf.write("SUBDIRS = %s\n\n" % (" ".join(abinit_top_dirs)))
 mf.write(clean)
 mf.write(ext)
 add = "config/makefiles/top.am"
 if ( os.path.exists(add) ):
-  mf.write(sep+file(add,"r").read())
+  mf.write(sep + open(add,"rt").read())
 mf.close()

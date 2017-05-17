@@ -9,7 +9,7 @@
 !!         VNL = Sum_ij [ Dij |pi><pj| ],  with pi, pj= projectors
 !!
 !! COPYRIGHT
-!! Copyright (C) 2013-2016 ABINIT group (MT, FJ, BA, JWZ)
+!! Copyright (C) 2013-2017 ABINIT group (MT, FJ, BA, JWZ)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -296,7 +296,7 @@ subroutine pawdij(cplex,enunit,gprimd,ipert,my_natom,natom,nfft,nfftot,nspden,nt
 !------------------------------------------------------------------------
 
 !Nothing to do for some perturbations (RF case)
- if (ipert==natom+1.or.ipert==natom+10.or.ipert==natom+11) then
+ if (ipert==natom+1.or.ipert==natom+10) then
    do iatom=1,my_natom
      if (paw_ij(iatom)%has_dij==1) paw_ij(iatom)%dij=zero
      if (paw_ij(iatom)%has_dij0==1) paw_ij(iatom)%dij0=zero
@@ -643,7 +643,6 @@ subroutine pawdij(cplex,enunit,gprimd,ipert,my_natom,natom,nfft,nfftot,nspden,nt
        end do
      end if   
      LIBPAW_DEALLOCATE(dij0)
-
    end if
 
 !  ------------------------------------------------------------------------
@@ -674,7 +673,6 @@ subroutine pawdij(cplex,enunit,gprimd,ipert,my_natom,natom,nfft,nfftot,nspden,nt
        LIBPAW_DEALLOCATE(dijfock_cv)
      end if
    end if
-
 
 !  ----------- Add Dij_Hartree to Dij
 !  ------------------------------------------------------------------------
@@ -747,7 +745,7 @@ subroutine pawdij(cplex,enunit,gprimd,ipert,my_natom,natom,nfft,nfftot,nspden,nt
        if (dij_need) paw_ij(iatom)%dij(:,:)=paw_ij(iatom)%dij(:,:)+dijxc(:,:)
        LIBPAW_DEALLOCATE(dijxc)
      end if
- 
+
    end if
 
 !  ------------------------------------------------------------------------
@@ -2188,7 +2186,7 @@ subroutine pawdijhat(cplex,cplex_dij,dijhat,gprimd,iatom,ipert,&
    end if
  end if
 
-!Eventually compute exp(-i.q.r) factors for the current atom (if not already done)
+!Eventually compute exp(i.q.r) factors for the current atom (if not already done)
  if ((ipert==iatom).and.qne0.and.(pawfgrtab%expiqr_allocated==0)) then
    if (allocated(pawfgrtab%expiqr))  then
      LIBPAW_DEALLOCATE(pawfgrtab%expiqr)
@@ -3326,7 +3324,7 @@ subroutine pawdijfr(cplex,gprimd,idir,ipert,my_natom,natom,nfft,ngfft,nspden,nty
 ! *************************************************************************
 
 !Nothing to be done for DDK
- if (ipert==natom+1.or.ipert==natom+10.or.ipert==natom+11) return
+ if (ipert==natom+1.or.ipert==natom+10) return
 
 !Set up parallelism over atoms
  paral_atom=(present(comm_atom).and.(my_natom/=natom))
@@ -3376,7 +3374,7 @@ subroutine pawdijfr(cplex,gprimd,idir,ipert,my_natom,natom,nfft,ngfft,nspden,nty
 !  Select which part of Dijfr to compute
    need_dijfr_1=(ipert==iatom_tot.and.paw_ij1(iatom)%has_dijfr==1)
    need_dijfr_2=(ipert<=natom.and.paw_ij1(iatom)%has_dijfr==1.and.(option==0))
-   need_dijfr_3=((ipert==natom+2).and.paw_ij1(iatom)%has_dijfr==1)
+   need_dijfr_3=((ipert==natom+2.or.ipert==natom+11).and.paw_ij1(iatom)%has_dijfr==1)
    need_dijfr_4=((ipert==natom+3.or.ipert==natom+4).and.paw_ij1(iatom)%has_dijfr==1)
 
    if ((.not.need_dijfr_1).and.(.not.need_dijfr_2).and.(.not.need_dijfr_3).and.(.not.need_dijfr_4)) then
@@ -3613,7 +3611,7 @@ subroutine pawdijfr(cplex,gprimd,idir,ipert,my_natom,natom,nfft,ngfft,nspden,nty
        end if
 
 !    ============ Electric field perturbation =======================
-     else if (ipert==natom+2) then
+     else if (ipert==natom+2.or.ipert==natom+11) then
 
        if (need_dijfr_3) then
 
@@ -4415,7 +4413,7 @@ subroutine symdij(gprimd,indsym,ipert,my_natom,natom,nsym,ntypat,option_dij,&
  call get_my_atmtab(my_comm_atom,my_atmtab,my_atmtab_allocated,paral_atom,natom,my_natom_ref=my_natom)
 
 !Symmetrization occurs only when nsym>1
- if (nsym>1.and.ipert/=natom+1.and.ipert/=natom+10.and.ipert/=natom+11) then
+ if (nsym>1.and.ipert/=natom+1.and.ipert/=natom+10) then
 
    if (pawang%nsym==0) then
      msg='pawang%zarot must be allocated!'
@@ -4835,7 +4833,7 @@ subroutine symdij(gprimd,indsym,ipert,my_natom,natom,nsym,ntypat,option_dij,&
      LIBPAW_DATATYPE_DEALLOCATE(my_tmp_dij)
    end if
 
- else if (ipert/=natom+1.and.ipert/=natom+10.and.ipert/=natom+11) then  ! nsym>1
+ else if (ipert/=natom+1.and.ipert/=natom+10) then  ! nsym>1
 
 !  *********************************************************************
 !  If nsym==1, only cut small components of dij
@@ -4899,7 +4897,7 @@ subroutine symdij(gprimd,indsym,ipert,my_natom,natom,nsym,ntypat,option_dij,&
 !*********************************************************************
 !Printing of Dij
 
- if (abs(pawprtvol)>=1.and.option_dij==0.and.ipert/=natom+1.and.ipert/=natom+10.and.ipert/=natom+11) then
+ if (abs(pawprtvol)>=1.and.option_dij==0.and.ipert/=natom+1.and.ipert/=natom+10) then
    wrt_mode='COLL';if (paral_atom) wrt_mode='PERS'
    pertstrg="DIJ";if (ipert>0) pertstrg="DIJ(1)"
    natinc=1;if(my_natom>1.and.pawprtvol>=0) natinc=my_natom-1

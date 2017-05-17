@@ -7,7 +7,7 @@
 !! this routine prepares the data to the call of nonlop.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (FB,MT,GZ,MD,FDahm)
+!! Copyright (C) 1998-2017 ABINIT group (FB,MT,GZ,MD,FDahm)
 !! this file is distributed under the terms of the
 !! gnu general public license, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -70,7 +70,7 @@
 !! (if useylm=0, should have cpopt=-1)
 !!
 !! PARENTS
-!!      energy,forstrnps,m_invovl,vtowfk
+!!      energy,forstrnps,m_invovl,m_lobpcgwf,vtowfk
 !!
 !! CHILDREN
 !!      dcopy,nonlop,prep_index_wavef_bandpp,prep_sort_wavef_spin,timab

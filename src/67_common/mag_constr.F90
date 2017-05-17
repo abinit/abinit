@@ -7,7 +7,7 @@
 !! This routine is called to compute the potential corresponding to constrained magnetic moments.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (ILuk, MVer)
+!! Copyright (C) 1998-2017 ABINIT group (ILuk, MVer)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -79,7 +79,7 @@ subroutine mag_constr(natom,spinat,nspden,magconon,magcon_lambda,rprimd, &
  integer,intent(in) :: ntypat
  real(dp),intent(in) :: magcon_lambda
  real(dp),intent(out) :: Vmagconstr(nfft,nspden)
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in)  :: typat(natom)
  integer,intent(in)  :: ngfft(18)
@@ -116,7 +116,7 @@ subroutine mag_constr(natom,spinat,nspden,magconon,magcon_lambda,rprimd, &
  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
 
 !We need the integrated magnetic moments and the smoothing function
- call calcdensph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,std_out,ratsph,rhor,rprimd,typat,ucvol,xred, intgden)
+ call calcdensph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,std_out,ratsph,rhor,rprimd,typat,ucvol,xred,1,intgden)
 
  n1 = ngfft(1)
  n2 = ngfft(2)

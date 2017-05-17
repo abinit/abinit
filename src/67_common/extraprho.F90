@@ -10,7 +10,7 @@
 !! Use algorithm proposed by D. Alfe in Comp. Phys. Comm. 118 (1999), 31-33
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (MT)
+!! Copyright (C) 1998-2017 ABINIT group (MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -32,7 +32,7 @@
 !!  kg(3,mpw*mkmem)=reduced planewave coordinates.
 !!  mgfft=maximum size of 1D FFTs
 !!  mcg=size of wave-functions array (cg) =mpw*nspinor*mband*mkmem*nsppol
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  mqgrid=number of grid pts in q array for f(q) spline.
 !!  my_natom=number of atoms treated by current processor
 !!  nattyp(ntypat)=number of atoms of each type in cell.
@@ -105,7 +105,7 @@ subroutine extraprho(atindx,atindx1,cg,dtset,gmet,gprimd,gsqcut,istep,&
 !scalars
  integer,intent(in) :: istep,mcg,mgfft,my_natom,mqgrid,nfft,ntypat,usepaw
  real(dp),intent(in) :: gsqcut,ucvol
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
  type(dataset_type),intent(in) :: dtset
  type(scf_history_type),intent(inout) :: scf_history
  type(pseudopotential_type),intent(in) :: psps

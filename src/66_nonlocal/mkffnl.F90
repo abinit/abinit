@@ -13,7 +13,7 @@
 !!   components; in this case, form factors are multiplied by Ylm(k+G).
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (DCA, XG, GMR, MT, DRH)
+!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR, MT, DRH)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -105,7 +105,7 @@
 !!                                with d(ffnl)/dK^cart_i = Sum_nu [ Gprim(nu,i) dffnl_nu ]
 !!                                for |idir|->(mu,nu) (1->11,2->22,3->33,4->32,5->31,6->21)
 !!     --if (idir==-7)
-!!       ffnl(ig,3:8,(l,m,n),itypat)=1/2 [d(ffnl)/dK^cart_mu K^cart_nu + d(ffnl)/dK^cart_nu K^cart_mu]
+!!       ffnl(ig,2:7,(l,m,n),itypat)=1/2 [d(ffnl)/dK^cart_mu K^cart_nu + d(ffnl)/dK^cart_nu K^cart_mu]
 !!                                with d(ffnl)/dK^cart_i = Sum_nu [ Gprim(nu,i) dffnl_nu ]
 !!                                for all (mu,nu) (6 independant terms)
 !!     === if ider==2
@@ -135,8 +135,8 @@
 !!
 !! PARENTS
 !!      ctocprj,d2frnl,dfpt_nsteltwf,dfpt_nstpaw,dfpt_nstwf,dfpt_rhofermi
-!!      dfptnl_resp,energy,forstrnps,getgh1c,ks_ddiago,m_commutator_vkbr
-!!      m_io_kss,m_shirley,m_wfd,vtorho
+!!      dfptnl_resp,energy,forstrnps,getgh1c,ks_ddiago,m_io_kss,m_shirley
+!!      m_vkbr,m_wfd,vtorho
 !!
 !! CHILDREN
 !!      mkkin,splfit,timab
@@ -273,7 +273,7 @@ subroutine mkffnl(dimekb,dimffnl,ekb,ffnl,ffspl,gmet,gprimd,ider,idir,indlmn,&
        end if
      end do
    else
-!$OMP PARALLEL DO PRIVATE(ig,kpgc1,kpgc2,kpgc3) 
+!$OMP PARALLEL DO PRIVATE(ig,kpgc1,kpgc2,kpgc3)
      do ig=1,npw
        kpgc1=kpg(ig,1)*gprimd(1,1)+kpg(ig,2)*gprimd(1,2)+kpg(ig,3)*gprimd(1,3)
        kpgc2=kpg(ig,1)*gprimd(2,1)+kpg(ig,2)*gprimd(2,2)+kpg(ig,3)*gprimd(2,3)
@@ -295,14 +295,14 @@ subroutine mkffnl(dimekb,dimffnl,ekb,ffnl,ffspl,gmet,gprimd,ider,idir,indlmn,&
 !    Note that with ecutsm=0, the right kinetic energy is computed
 !     call mkkin(ecut,ecutsm,effmass,gmet,kg,kpgnorm,kpt,npw)
      call mkkin(ecut,ecutsm,effmass,gmet,kg,kpgnorm,kpt,npw,0,0)
-!$OMP PARALLEL DO 
+!$OMP PARALLEL DO
      do ig=1,npw
        kpgnorm(ig)=sqrt(renorm_factor*kpgnorm(ig))
        kpgnorm_inv(ig)=1.d0/max(kpgnorm(ig),tol_norm)
        if (kpgnorm(ig)<=tol_norm) ig0=ig
      end do
    else
-!$OMP PARALLEL DO PRIVATE(ig,kpgc1,kpgc2,kpgc3) 
+!$OMP PARALLEL DO PRIVATE(ig,kpgc1,kpgc2,kpgc3)
      do ig=1,npw
        kpgc1=kpg(ig,1)*gprimd(1,1)+kpg(ig,2)*gprimd(1,2)+kpg(ig,3)*gprimd(1,3)
        kpgc2=kpg(ig,1)*gprimd(2,1)+kpg(ig,2)*gprimd(2,2)+kpg(ig,3)*gprimd(2,3)
@@ -398,13 +398,13 @@ subroutine mkffnl(dimekb,dimffnl,ekb,ffnl,ffspl,gmet,gprimd,ider,idir,indlmn,&
 !        ffnl_prime_prime(K,l,m,n)=6 reduced coordinates of d2(ffnl)/dK^cart.dK^cart
 
          if (useylm==1) then
-!$OMP PARALLEL DO 
+!$OMP PARALLEL DO
            do ig=1,npw
              ffnl(ig,1,iffnl,itypat)=ylm(ig,ilm)*wk_ffnl1(ig)
            end do
 
            if (ider>=1) then
-!$OMP PARALLEL DO COLLAPSE(2) 
+!$OMP PARALLEL DO COLLAPSE(2)
              do mu=1,3
                do ig=1,npw
                  dffnl_red(ig,mu)=ylm(ig,ilm)*wk_ffnl2(ig)*kpgn(ig,mu)+ylm_gr(ig,mu,ilm)*wk_ffnl1(ig)
@@ -425,7 +425,7 @@ subroutine mkffnl(dimekb,dimffnl,ekb,ffnl,ffspl,gmet,gprimd,ider,idir,indlmn,&
                end do
              end if
              if (idir==0) then
-!$OMP PARALLEL DO COLLAPSE(2) 
+!$OMP PARALLEL DO COLLAPSE(2)
                do mu=1,3
                  do ig=1,npw
                    ffnl(ig,1+mu,iffnl,itypat)=dffnl_red(ig,mu)
@@ -433,7 +433,7 @@ subroutine mkffnl(dimekb,dimffnl,ekb,ffnl,ffspl,gmet,gprimd,ider,idir,indlmn,&
                end do
              else
                dffnl_cart=zero
-!$OMP PARALLEL DO COLLAPSE(2) 
+!$OMP PARALLEL DO COLLAPSE(2)
                do mu=1,3
                  do ig=1,npw
                    do nu=1,3
@@ -475,7 +475,7 @@ subroutine mkffnl(dimekb,dimffnl,ekb,ffnl,ffspl,gmet,gprimd,ider,idir,indlmn,&
                  end do
                else if (idir/=-7) then
                  mu=abs(idir);mua=alpha(mu);mub=beta(mu)
-!$OMP PARALLEL DO 
+!$OMP PARALLEL DO
                  do ig=1,npw
                    ffnl(ig,2,iffnl,itypat)=0.5d0* &
 &                   (dffnl_cart(ig,mua)*kpgc(ig,mub) &
@@ -578,23 +578,23 @@ subroutine mkffnl(dimekb,dimffnl,ekb,ffnl,ffspl,gmet,gprimd,ider,idir,indlmn,&
          else if (iln>iln0) then
 
            if (il==0) then
-!$OMP PARALLEL DO 
+!$OMP PARALLEL DO
              do ig=1,npw
                ffnl(ig,1,iffnl,itypat)=wk_ffnl1(ig)
              end do
            else
-!$OMP PARALLEL DO 
+!$OMP PARALLEL DO
              do ig=1,npw
                ffnl(ig,1,iffnl,itypat)=wk_ffnl1(ig)*kpgnorm_inv(ig)**il
              end do
            end if
            if (ider>=1) then
-!$OMP PARALLEL DO 
+!$OMP PARALLEL DO
              do ig=1,npw
                ffnl(ig,2,iffnl,itypat)= (wk_ffnl2(ig)-dble(il)*wk_ffnl1(ig)*kpgnorm_inv(ig))*kpgnorm_inv(ig)**(il+1)
              end do
              if (ider==2) then
-!$OMP PARALLEL DO 
+!$OMP PARALLEL DO
                do ig=1,npw
                  ffnl(ig,3,iffnl,itypat)= (wk_ffnl3(ig)-       &
 &                 dble(2*il+1)*wk_ffnl2(ig)*kpgnorm_inv(ig)+   &
@@ -606,7 +606,7 @@ subroutine mkffnl(dimekb,dimffnl,ekb,ffnl,ffspl,gmet,gprimd,ider,idir,indlmn,&
          end if  ! End if - Use of Ylm or not
 
        else ! No NL part
-!$OMP PARALLEL DO COLLAPSE(2) 
+!$OMP PARALLEL DO COLLAPSE(2)
          do mu=1,dimffnl
            do ig=1,npw
              ffnl(ig,mu,iffnl,itypat)=zero

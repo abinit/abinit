@@ -10,7 +10,9 @@ import numpy as np
 from numpy import zeros
 import netCDF4 as nc
 
-from .constants import tol6, me_amu, kb_HaK
+from .mpi import MPI, comm, size, rank, mpi_watch
+
+from .constants import tol5, tol6, me_amu, kb_HaK
 from . import EpcFile
 
 __all__ = ['DdbFile']
@@ -31,6 +33,8 @@ class DdbFile(EpcFile):
         """Open the DDB.nc file and read it."""
         fname = fname if fname else self.fname
 
+        super(DdbFile, self).read_nc(fname)
+
         with nc.Dataset(fname, 'r') as root:
 
             self.natom = len(root.dimensions['number_of_atoms'])
@@ -47,8 +51,49 @@ class DdbFile(EpcFile):
             self.E2D = np.zeros((self.natom, self.ncart, self.natom, self.ncart), dtype=np.complex)
             self.E2D.real = root.variables['second_derivative_of_energy'][:,:,:,:,0]
             self.E2D.imag = root.variables['second_derivative_of_energy'][:,:,:,:,1]
+            self.E2D = np.einsum('aibj->bjai', self.E2D)  # Indicies are reversed when writing them from Fortran.
 
             self.BECT = root.variables['born_effective_charge_tensor'][:self.ncart,:self.natom,:self.ncart]
+
+    def broadcast(self):
+        """Broadcast the data from master to all workers."""
+    
+        comm.Barrier()
+
+        if rank == 0:
+            dim = np.array([self.natom, self.ncart, self.ntypat], dtype=np.int)
+        else:
+            dim = np.empty(3, dtype=np.int)
+
+        comm.Bcast([dim, MPI.INT])
+
+        if rank != 0:
+
+            self.natom, self.ncart, self.ntypat = dim[:]
+
+            self.typat = np.empty(self.natom, dtype='i')
+            self.amu = np.empty(self.ntypat, dtype=np.float)
+            rprim = np.empty((self.ncart, self.ncart), dtype=np.float)
+            self.xred = np.empty((self.natom, self.ncart), dtype=np.float)
+            self.qred = np.empty((self.ncart), dtype=np.float)
+
+            self.E2D = np.empty((self.natom, self.ncart, self.natom, self.ncart),
+                                dtype=np.complex)
+
+            self.BECT = np.empty((self.ncart, self.natom, self.ncart), dtype=np.float)
+
+        else:
+            rprim = self.rprim
+
+        comm.Bcast([self.typat, MPI.INT])
+        comm.Bcast([self.amu, MPI.DOUBLE])
+        comm.Bcast([self.xred, MPI.DOUBLE])
+        comm.Bcast([self.qred, MPI.DOUBLE])
+        comm.Bcast([self.E2D, MPI.COMPLEX])
+        comm.Bcast([self.BECT, MPI.DOUBLE])
+        comm.Bcast([rprim, MPI.DOUBLE])
+
+        self.rprim = rprim
 
     @property
     def is_gamma(self):
@@ -62,6 +107,10 @@ class DdbFile(EpcFile):
     def rprim(self, value):
         self._rprim = np.array(value)
         self.gprimd = np.linalg.inv(np.matrix(self._rprim))
+
+    @property
+    def nmode(self):
+        return 3 * self.natom
 
     def compute_dynmat(self, asr=None):
         """
@@ -91,6 +140,10 @@ class DdbFile(EpcFile):
                   for dir4 in np.arange(3):
                     E2D_cart[dir1,ii,dir2,jj] += (self.E2D[ii,dir3,jj,dir4] *
                             self.gprimd[dir1,dir3] * self.gprimd[dir2,dir4])
+
+        # DEBUG
+        #print(repr(E2D_cart))
+        # END DEBUG
     
         # Reduce the 4 dimensional E2D_cart matrice to 2 dimensional Dynamical matrice
         # with scaled masses.
@@ -141,6 +194,9 @@ class DdbFile(EpcFile):
         Compute the squared reduced displacements (scaled by phonon frequencies)
         for the Fan and the DDW terms.
         """
+        # Minimal value for omega (Ha)
+        omega_tolerance = 1e-5
+
         natom = self.natom
         omega, eigvect = self.compute_dynmat()
 
@@ -152,7 +208,7 @@ class DdbFile(EpcFile):
         for imode in np.arange(3*natom):
 
           # Skip mode with zero frequency (leave displacements null)
-          if omega[imode].real < tol6:
+          if omega[imode].real < omega_tolerance:
             continue
 
           for iatom1 in np.arange(natom):

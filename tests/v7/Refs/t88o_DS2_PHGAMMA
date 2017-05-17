@@ -3,12 +3,13 @@
 #
 # Phonon frequencies, ph linewidths and lambda calculated on 41 q-points
 # eph_scalprod = 0
-# Description of the q-path:
-# Number of line segment = 2
-# Vertices of the q-path and corresponding index = 
-#      0.000000E+00     0.000000E+00     0.000000E+00 1
-#      0.500000E+00     0.000000E+00     0.000000E+00 21
-#      0.500000E+00     0.500000E+00     0.000000E+00 41
+# ==== Description of the q-path: ====
+# Number of points: 41 , ndivsmall: 20
+# Boundaries and corresponding index in the k-points array:
+# 1 [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+# 21 [ 5.0000E-01,  0.0000E+00,  0.0000E+00]
+# 41 [ 5.0000E-01,  5.0000E-01,  0.0000E+00]
+# 
 # 
 # 
 # Total DOS at Fermi level     0.438367E+01
@@ -16,7 +17,7 @@
 #
 # phonon mode [1] q-index omega gamma lambda
 #
-       1    0.000000E+00    6.510384E-20    0.000000E+00
+       1    0.000000E+00    7.073036E-20    0.000000E+00
        2    2.344720E-05    5.326974E-09    3.517881E-01
        3    4.719776E-05    2.080390E-08    3.390662E-01
        4    7.151491E-05    4.496769E-08    3.192198E-01
@@ -60,7 +61,7 @@
 #
 # phonon mode [2] q-index omega gamma lambda
 #
-       1    0.000000E+00    6.510384E-20    0.000000E+00
+       1    0.000000E+00    7.073036E-20    0.000000E+00
        2    2.344720E-05    5.326974E-09    3.517881E-01
        3    4.719776E-05    2.080390E-08    3.390662E-01
        4    7.151491E-05    4.496769E-08    3.192198E-01
@@ -104,7 +105,7 @@
 #
 # phonon mode [3] q-index omega gamma lambda
 #
-       1    0.000000E+00    6.510384E-20    0.000000E+00
+       1    0.000000E+00    7.073036E-20    0.000000E+00
        2    1.053312E-04    9.592471E-08    3.139054E-01
        3    2.102775E-04    3.746405E-07    3.076179E-01
        4    3.144407E-04    8.098510E-07    2.973789E-01

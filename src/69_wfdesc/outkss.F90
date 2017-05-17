@@ -21,7 +21,7 @@
 !!  - Writing out eigenvalues and eigenvectors.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2000-2016 ABINIT group (MT, VO, AR, MG)
+!! Copyright (C) 2000-2017 ABINIT group (MT, VO, AR, MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -73,9 +73,9 @@
 !!
 !! NOTES
 !!
-!! * This routine is maintained for legacy reasons. Abinit8 is not able to read KSS files 
+!! * This routine is maintained for legacy reasons. Abinit8 is not able to read KSS files
 !!   anymore hence KSS files should be used only to interface Abinit with external codes
-!!   that are still using the old KSS format. 
+!!   that are still using the old KSS format.
 !!
 !! * The routine can be time consuming (in particular when computing
 !!   <G|H|G_prim> elements for all (G, G_prim)) (kssform=1).
@@ -126,15 +126,12 @@ subroutine outkss(crystal,Dtfil,Dtset,ecut,gmet,gprimd,Hdr,&
  use defs_basis
  use defs_datatypes
  use defs_abitypes
- use defs_wvltypes
  use m_profiling_abi
  use m_xmpi
  use m_errors
  use m_cgtools
- use m_wffile
- use m_nctk
-#ifdef HAVE_TRIO_ETSF_IO
- use etsf_io
+#ifdef HAVE_NETCDF
+ use netcdf
 #endif
  use m_linalg_interfaces
 
@@ -243,7 +240,7 @@ subroutine outkss(crystal,Dtfil,Dtset,ecut,gmet,gprimd,Hdr,&
  nullify(eig_ene)
  nullify(eig_vec)
  nullify(Cprj_diago_k)
- 
+
  ! JB: Valgrind complains about non initialized value. Set to -1 so if an array
  ! should be allocated with this "unintialized value" it crashes
  onband_diago = -1
@@ -276,9 +273,9 @@ subroutine outkss(crystal,Dtfil,Dtset,ecut,gmet,gprimd,Hdr,&
 
  if (iomode==IO_MODE_ETSF) then
    write(msg,'(3a)')&
-&   'when iomode==3 in outkss, support for the ETSF I/O library ',ch10,&
-&   'must be compiled. Use --enable-etsf-io when configuring '
-#ifndef HAVE_TRIO_ETSF_IO
+&   'when iomode==3 in outkss, support for netcdf ',ch10,&
+&   'must be compiled. Use --enable-netcdf when configuring '
+#ifndef HAVE_NETCDF
    MSG_WARNING(msg)
    ierr = ierr + 1
 #endif
@@ -292,7 +289,6 @@ subroutine outkss(crystal,Dtfil,Dtset,ecut,gmet,gprimd,Hdr,&
    write(msg,'(a,70("="),4a,i1,a)') ch10,ch10, &
 &   ' Calculating and writing out Kohn-Sham electronic Structure file',ch10, &
 &   ' Using diagonalized wavefunctions and energies (kssform=',kssform,')'
-   !MSG_ERROR("kssform =1 is not available")
  else
    write(msg,'(a,i0,2a)')&
 &   " Unsupported value for kssform: ",kssform,ch10,&
@@ -946,7 +942,7 @@ subroutine outkss(crystal,Dtfil,Dtset,ecut,gmet,gprimd,Hdr,&
 !* Close file
  if (my_rank==master) then
    if (iomode==IO_MODE_FORTRAN) close(unit=untkss)
-#if defined HAVE_TRIO_ETSF_IO
+#if defined HAVE_NETCDF
    if (iomode==IO_MODE_ETSF) then
      NCF_CHECK(nf90_close(untkss))
    end if
@@ -968,7 +964,7 @@ subroutine outkss(crystal,Dtfil,Dtset,ecut,gmet,gprimd,Hdr,&
  DBG_EXIT("COLL")
  call timab(933,2,tsec) ! outkss
 
-contains 
+contains
 !!***
 
 !!****f* ABINIT/memkss
@@ -1170,7 +1166,7 @@ subroutine dsksta(ishm,usepaw,nbandkss,mpsang,natom,ntypat,npwkss,nkpt,nspinor,n
 ! *********************************************************************
 
 !The Abinit header is not considered.
- bsize_hdr= 80*2 + & !title 
+ bsize_hdr= 80*2 + & !title
 &5*4 + & !nsym2,nbandksseff,npwkss,ishm,mpsang
 &nsym2*9*4 + & !symrel2
 &nsym2*3*8 + & !tnons
@@ -1178,7 +1174,7 @@ subroutine dsksta(ishm,usepaw,nbandkss,mpsang,natom,ntypat,npwkss,nkpt,nspinor,n
 &ishm*4     !shlim
 
 !NOTE: vkb does not depend on nsppol, however the elements are written for each spin.
- bsize_kb=0 
+ bsize_kb=0
  if (usepaw==0) then
    bsize_kb= nsppol* &
 &   (         mpsang*ntypat       *8 + & !vkbsign
@@ -1193,8 +1189,8 @@ subroutine dsksta(ishm,usepaw,nbandkss,mpsang,natom,ntypat,npwkss,nkpt,nspinor,n
 
 !For PAW add space required by projectors.
  bsize_cprj=0
- if (usepaw==1) then 
-   bsize_cprj=SUM(dimlmn(:))*(nsppol*nkpt*nspinor*nbandkss*2*8) 
+ if (usepaw==1) then
+   bsize_cprj=SUM(dimlmn(:))*(nsppol*nkpt*nspinor*nbandkss*2*8)
  end if
 
  bsize_tot = bsize_hdr + bsize_kb + bsize_wf + bsize_cprj

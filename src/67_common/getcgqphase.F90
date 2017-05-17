@@ -7,7 +7,7 @@
 !! extract phases from wave functions, to cancel contributions to gkk matrix elements
 !!
 !! COPYRIGHT
-!! Copyright (C) 2011-2016 ABINIT group (MJV)
+!! Copyright (C) 2011-2017 ABINIT group (MJV)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -174,7 +174,7 @@ subroutine getcgqphase(dtset, timrev, cg,  mcg,  cgq, mcgq, mpi_enreg, &
      smat_k = zero
 
      call smatrix(cg, cgq, cg1_dummy, ddkflag, dtm_k_dummy, icg, icgq,&
-&     itrs, job, maxbd, mcg, mcgq, mcg1_k, minbd,dtset%mpw, dtset%mband,&
+&     itrs, job, maxbd, mcg, mcgq, mcg1_k, minbd,dtset%mpw, dtset%mband, dtset%mband,&
 &     npw_k, npw_q, dtset%nspinor, pwind_k, pwnsfac_k, sflag_k, shiftbd,&
 &     smat_inv_dummy, smat_k, smat_k_paw_dummy, usepaw)
 

@@ -7,7 +7,7 @@
 !!  This module the predures used by cut3d
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2016 ABINIT group (XG,MVerstraete,GMR,RC,LSI,JFB,MCote,MB)
+!! Copyright (C) 2008-2017 ABINIT group (XG,MVerstraete,GMR,RC,LSI,JFB,MCote,MB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -28,18 +28,23 @@ MODULE m_cut3d
  use m_errors
  use m_splines
  use m_hdr
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
  use netcdf
 #endif
  use m_nctk
  use m_wfk
  use m_xmpi
+ use m_sort
 
- use m_io_tools,         only : get_unit, iomode_from_fname, open_file, file_exists
+ use m_io_tools,         only : get_unit, iomode_from_fname, open_file, file_exists, read_string
  use m_numeric_tools,    only : interpol3d
  use m_fstrings,         only : int2char10, sjoin, itoa
+ use m_special_funcs,    only : jlspline_t, jlspline_new, jlspline_free, jlspline_integral
  use m_pptools,          only : print_fofr_ri, print_fofr_xyzri , print_fofr_cube
  use m_mpinfo,           only : destroy_mpi_enreg
+ use m_cgtools,          only : cg_getspin
+ use m_epjdos,           only : recip_ylm, dens_in_sph
+ use m_dens,             only : dens_hirsh
 
  implicit none
 
@@ -77,15 +82,13 @@ CONTAINS  !===========================================================
 !! OUTPUT
 !!  write the Hirshfeld charge decomposition
 !!
-!! SIDE EFFECTS
-!!
 !! PARENTS
 !!      cut3d
 !!
 !! CHILDREN
-!!      dens_in_sph,destroy_distribfft,destroy_mpi_enreg,fourwf,getkpgnorm
-!!      getph,getspin_1state,init_bess_spl,init_distribfft_seq,initmpi_seq
-!!      initylmg,int2char10,kpgio,metric,ph1d3d,print_fofr_cube,print_fofr_ri
+!!      cg_getspin,dens_in_sph,destroy_distribfft,destroy_mpi_enreg,fourwf
+!!      getkpgnorm,getph,init_distribfft_seq,initmpi_seq,initylmg,int2char10
+!!      jlspline_free,kpgio,metric,ph1d3d,print_fofr_cube,print_fofr_ri
 !!      print_fofr_xyzri,recip_ylm,sort_dp,sphereboundary,splint,wfk_close
 !!      wfk_open_read,wfk_read_band_block,xcart2xred
 !!
@@ -98,7 +101,6 @@ subroutine cut3d_hirsh(grid_den,natom,nrx,nry,nrz,ntypat,rprimd,xcart,typat,zion
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'cut3d_hirsh'
- use interfaces_41_geometry
 !End of the abilint section
 
  implicit none
@@ -110,25 +112,19 @@ subroutine cut3d_hirsh(grid_den,natom,nrx,nry,nrz,ntypat,rprimd,xcart,typat,zion
  integer,intent(in) :: typat(natom)
  real(dp),intent(in) :: grid_den(nrx,nry,nrz),rprimd(3,3),zion(ntypat)
  real(dp),intent(in) :: znucl(ntypat)
- real(dp),intent(inout) :: xcart(3,natom)
+ real(dp),intent(in) :: xcart(3,natom)
 
 !Local variables -------------------------
 !scalars
- integer :: i1,i2,i3,iatom,icell,ierr,igrid,ii,inmax,inmin,ipoint,istep,itypat
- integer :: k1,k2,k3,mcells,mpoint,nfftot,ngoodpoints,npt,temp_unit
- real(dp) :: aa,bb,coeff1,coeff2,coeff3,den,factor,h_inv,hh,maxrad,minimal_den
- real(dp) :: param1,param2,rr,rr2,total_charge,total_weight,total_zion,ucvol,xx
- real(dp) :: yp1,ypn,yy
+ integer,parameter :: prtcharge1=1
+ integer :: ierr,ipoint,itypat,mpoint,temp_unit
+ real(dp) :: minimal_den
+ real(dp) :: param1,param2,xx,yy
  character(len=fnlen) :: file_allelectron
  character(len=500) :: msg
 !arrays
- integer :: highest(3),lowest(3)
- integer,allocatable :: ncells(:),npoint(:)
- real(dp) :: coordat(3),coord23_1,coord23_2,coord23_3,diff1,diff2,diff3,gmet(3,3),gprimd(3,3),rmet(3,3)
- real(dp) :: vperp(3),width(3)
- real(dp),allocatable :: aeden(:,:),coord1(:,:),hcharge(:),hden(:),hweight(:),local_den(:,:,:,:)
- real(dp),allocatable :: radii(:,:),step(:,:),sum_den(:,:,:),work(:)
- real(dp),allocatable :: xcartcells(:,:,:),xred(:,:),yder2(:)
+ integer,allocatable :: npoint(:)
+ real(dp),allocatable :: aeden(:,:),hcharge(:),hden(:),hweight(:),radii(:,:)
 
 ! *********************************************************************
 
@@ -145,7 +141,9 @@ subroutine cut3d_hirsh(grid_den,natom,nrx,nry,nrz,ntypat,rprimd,xcart,typat,zion
  do itypat=1,ntypat
    write(std_out,'(a)' )' Please, give the filename of the all-electron density file'
    write(std_out,'(a,es16.6)' )' for the first type of atom, with atomic number=',znucl(itypat)
-   read(std_in, '(a)' )file_allelectron
+   if (read_string(file_allelectron, unit=std_in) /= 0) then
+     MSG_ERROR("Fatal error!")
+   end if
    write(std_out,*)' The name you entered is : ',trim(file_allelectron),ch10
    ierr = open_file(file_allelectron,msg,newunit=temp_unit,form='formatted',status='old')
    if (ierr/=0) then
@@ -154,7 +152,7 @@ subroutine cut3d_hirsh(grid_den,natom,nrx,nry,nrz,ntypat,rprimd,xcart,typat,zion
      read(temp_unit, *) param1, param2
      do ipoint=1,mpoint
 !      Either the file is finished
-       read(temp_unit, *, end = 888) xx,yy
+       read(temp_unit, *, end=888) xx,yy
        radii(ipoint,itypat)=xx
        aeden(ipoint,itypat)=yy
 !      Or the density is lower than the minimal significant value
@@ -169,289 +167,19 @@ subroutine cut3d_hirsh(grid_den,natom,nrx,nry,nrz,ntypat,rprimd,xcart,typat,zion
    close(temp_unit)
  end do
 
-!2. Compute the list of atoms that are sufficiently close to the cell
+ ABI_MALLOC(hden,(natom))
+ ABI_MALLOC(hcharge,(natom))
+ ABI_MALLOC(hweight,(natom))
 
- call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
- nfftot=nrx*nry*nrz
-!DEBUG
-!do k3=1,nrz
-!do k2=1,nry
-!do k1=1,nrx
-!total_charge=total_charge+grid_den(k1,k2,k3)
-!end do
-!end do
-!end do
-!write(std_out,*)' total_charge=',total_charge*ucvol/dble(nfftot)
-!ENDDEBUG
+ call dens_hirsh(mpoint,radii,aeden,npoint,minimal_den,grid_den, &
+  natom,nrx,nry,nrz,ntypat,rprimd,xcart,typat,zion,znucl,prtcharge1,hcharge,hden,hweight)
 
- ABI_ALLOCATE(xred,(3,natom))
- call xcart2xred(natom,rprimd,xcart,xred)
-
-!Compute the widths of the cell
-!First width : perpendicular vector length
- vperp(:)=rprimd(:,1)-rprimd(:,2)*rmet(1,2)/rmet(2,2) -rprimd(:,3)*rmet(1,3)/rmet(3,3)
- width(1)=sqrt(dot_product(vperp,vperp))
-!Second width
- vperp(:)=rprimd(:,2)-rprimd(:,1)*rmet(2,1)/rmet(1,1) -rprimd(:,3)*rmet(2,3)/rmet(3,3)
- width(2)=sqrt(dot_product(vperp,vperp))
-!Third width
- vperp(:)=rprimd(:,3)-rprimd(:,1)*rmet(3,1)/rmet(1,1) -rprimd(:,2)*rmet(3,2)/rmet(2,2)
- width(3)=sqrt(dot_product(vperp,vperp))
-
-!Compute the number of cells that will make up the supercell
- ABI_ALLOCATE(ncells,(natom))
- mcells=0
- do iatom=1,natom
-   itypat=typat(iatom)
-   maxrad=radii(npoint(itypat),itypat)
-!  Compute the lower and higher indices of the supercell
-!  for this atom
-   do ii=1,3
-     lowest(ii)=floor(-xred(ii,iatom)-maxrad/width(ii))
-     highest(ii)=ceiling(-xred(ii,iatom)+maxrad/width(ii)+1)
-!    Next coding, still incorrect
-!    lowest(ii)=floor(xred(ii,iatom)-maxrad/width(ii))-1
-!    highest(ii)=ceiling(xred(ii,iatom)+maxrad/width(ii))+1
-!    Old coding incorrect
-!    lowest(ii)=ceiling(-xred(ii,iatom)-maxrad/width(ii))
-!    highest(ii)=floor(-xred(ii,iatom)+maxrad/width(ii)+1)
-   end do
-   ncells(iatom)=(highest(1)-lowest(1)+1)* &
-&   (highest(2)-lowest(2)+1)* &
-&   (highest(3)-lowest(3)+1)
-!  DEBUG
-!  write(std_out,*)' maxrad=',maxrad
-!  write(std_out,*)' lowest(:)=',lowest(:)
-!  write(std_out,*)' highest(:)=',highest(:)
-!  write(std_out,*)' ncells(iatom)=',ncells(iatom)
-!  ENDDEBUG
- end do
- mcells=maxval(ncells(:))
-
-!Compute, for each atom, the set of image atoms
-!in the whole supercell
- ABI_ALLOCATE(xcartcells,(3,mcells,natom))
- do iatom=1,natom
-   itypat=typat(iatom)
-   maxrad=radii(npoint(itypat),itypat)
-!  Compute the lower and higher indices of the supercell
-!  for this atom
-
-   do ii=1,3
-     lowest(ii)=floor(-xred(ii,iatom)-maxrad/width(ii))
-     highest(ii)=ceiling(-xred(ii,iatom)+maxrad/width(ii)+1)
-   end do
-   icell=0
-   do i1=lowest(1),highest(1)
-     do i2=lowest(2),highest(2)
-       do i3=lowest(3),highest(3)
-         icell=icell+1
-         xcartcells(:,icell,iatom)=xcart(:,iatom)+i1*rprimd(:,1)+i2*rprimd(:,2)+i3*rprimd(:,3)
-       end do
-     end do
-   end do
- end do
-
-!DEBUG
-!write(std_out,*)' before all-electron pro-atom density'
-!ENDDEBUG
-
-!Compute, for each atom, the all-electron pro-atom density
-!at each point in the primitive cell
- ABI_ALLOCATE(local_den,(nrx,nry,nrz,natom))
- ABI_ALLOCATE(step,(2,mpoint))
- ABI_ALLOCATE(work,(mpoint))
- ABI_ALLOCATE(yder2,(mpoint))
- ABI_ALLOCATE(coord1,(3,nrx))
- coeff1=one/nrx
- coeff2=one/nry
- coeff3=one/nrz
-
- do iatom=1,natom
-   itypat=typat(iatom)
-   npt=npoint(itypat)
-   maxrad=radii(npt,itypat)
-   write(std_out,*)
-   write(std_out,'(a,i4)' )' hirsh : accumulating density for atom ',iatom
-!  DEBUG
-!  write(std_out,*)' ncells(iatom)=',ncells(iatom)
-!  ENDDEBUG
-   do istep=1,npt-1
-     step(1,istep)=radii(istep+1,itypat) - radii(istep,itypat)
-     step(2,istep)=one/step(1,istep)
-   end do
-!  Approximate first derivative for small radii
-   yp1=(aeden(2,itypat)-aeden(1,itypat))/(radii(2,itypat)-radii(1,itypat))
-   ypn=zero
-   call spline(radii(1:npt,itypat),aeden(1:npt,itypat),npt,yp1,ypn,yder2)
-
-   local_den(:,:,:,iatom)=zero
-
-!  Big loop on the cells
-   do icell=1,ncells(iatom)
-!    DEBUG
-!    write(std_out,*)' icell=',icell
-!    ENDDEBUG
-
-     coordat(:)=xcartcells(:,icell,iatom)
-
-!    Big loop on the grid points
-     do k1 = 1,nrx
-       coord1(:,k1)=rprimd(:,1)*(k1-1)*coeff1
-     end do
-     do k3 = 1, nrz
-       do k2 = 1, nry
-         coord23_1=rprimd(1,2)*(k2-1)*coeff2+rprimd(1,3)*(k3-1)*coeff3-coordat(1)
-         coord23_2=rprimd(2,2)*(k2-1)*coeff2+rprimd(2,3)*(k3-1)*coeff3-coordat(2)
-         coord23_3=rprimd(3,2)*(k2-1)*coeff2+rprimd(3,3)*(k3-1)*coeff3-coordat(3)
-         do k1 = 1, nrx
-           diff1=coord1(1,k1)+coord23_1
-           diff2=coord1(2,k1)+coord23_2
-           diff3=coord1(3,k1)+coord23_3
-           rr2=diff1**2+diff2**2+diff3**2
-           if(rr2<maxrad**2)then
-
-             rr=sqrt(rr2)
-!            Find the index of the radius by bissection
-             if (rr < radii(1,itypat)) then
-!              Linear extrapolation
-               den=aeden(1,itypat)+(rr-radii(1,itypat))/(radii(2,itypat)-radii(1,itypat))&
-&               *(aeden(2,itypat)-aeden(1,itypat))
-             else
-!              Use the spline interpolation
-!              Find the index of the radius by bissection
-               inmin=1
-               inmax=npt
-               igrid=1
-               do
-                 if(inmax-inmin==1)exit
-                 igrid=(inmin+inmax)/2
-                 if(rr>=radii(igrid,itypat))then
-                   inmin=igrid
-                 else
-                   inmax=igrid
-                 end if
-               end do
-               igrid=inmin
-!              DEBUG
-!              write(std_out,*)' igrid',igrid
-!              ENDDEBUG
-
-               hh=step(1,igrid)
-               h_inv=step(2,igrid)
-               aa= (radii(igrid+1,itypat)-rr)*h_inv
-               bb= (rr-radii(igrid,itypat))*h_inv
-               den = aa*aeden(igrid,itypat) + bb*aeden(igrid+1,itypat)  &
-&               +( (aa*aa*aa-aa)*yder2(igrid)         &
-&               +(bb*bb*bb-bb)*yder2(igrid+1) ) *hh*hh*sixth
-             end if ! Select small radius or spline
-
-             local_den(k1,k2,k3,iatom)=local_den(k1,k2,k3,iatom)+den
-
-           end if ! dist2<maxrad
-
-         end do ! k1
-       end do ! k2
-     end do ! k3
-
-   end do ! icell
-
- end do ! iatom
-
-!Compute, the total all-electron density
-!at each point in the primitive cell
- ABI_ALLOCATE(sum_den,(nrx,nry,nrz))
- sum_den(:,:,:)=zero
- do iatom=1,natom
-   sum_den(:,:,:)=sum_den(:,:,:)+local_den(:,:,:,iatom)
- end do
-
-!DEBUG
-!do k3=1,nrz
-!do k2=1,nry
-!do k1=1,nrx
-!write(std_out,'(3i4,3es16.6)' )k1,k2,k3,local_den(k1,k2,k3,1:2),sum_den(k1,k2,k3)
-!end do
-!end do
-!end do
-!write(std_out,*)' hirsh : before accumulate the integral of the density'
-!ENDDEBUG
-
-
-!Accumulate the integral of the density, to get Hirshfeld charges
-!There is a minus sign because the electron has a negative charge
- ABI_ALLOCATE(hden,(natom))
- ABI_ALLOCATE(hcharge,(natom))
- ABI_ALLOCATE(hweight,(natom))
- ngoodpoints = 0
- hcharge(:)=zero
- hweight(:)=zero
- do k3=1,nrz
-   do k2=1,nry
-     do k1=1,nrx
-!      Use minimal_den in order to avoid divide by zero
-       if (abs(sum_den(k1,k2,k3)) > minimal_den) then
-         ngoodpoints = ngoodpoints+1
-         factor=grid_den(k1,k2,k3)/(sum_den(k1,k2,k3)+minimal_den)
-         do iatom=1,natom
-           hden(iatom)=hden(iatom)+local_den(k1,k2,k3,iatom)
-           hcharge(iatom)=hcharge(iatom)-local_den(k1,k2,k3,iatom)*factor
-           hweight(iatom)=hweight(iatom)+local_den(k1,k2,k3,iatom)/(sum_den(k1,k2,k3)+minimal_den)
-         end do
-       end if
-     end do
-   end do
- end do
-
-!DEBUG
-!do iatom=1,natom
-!write(std_out,'(i9,3es17.6)' )iatom,hden(iatom),hcharge(iatom),hweight(iatom)
-!end do
-!ENDDEBUG
-
- hcharge(:)=hcharge(:)*ucvol/dble(nfftot)
- hweight(:)=hweight(:)/dble(nfftot)
-
-
-!Check on the total charge
- total_zion=sum(zion(typat(1:natom)))
- total_charge=sum(hcharge(1:natom))
- total_weight=sum(hweight(1:natom))
-
-!DEBUG
-!write(std_out,*)' ngoodpoints = ', ngoodpoints, ' out of ', nfftot
-!write(std_out,*)' total_weight=',total_weight
-!write(std_out,*)' total_weight=',total_weight
-!ENDDEBUG
-
-!Output
- write(std_out,*)
- write(std_out,*)'    Atom       Zion       Hirshfeld Charge       Net charge '
- write(std_out,*)
- do iatom=1,natom
-   write(std_out,'(i9,3es17.6)' )&
-&   iatom,zion(typat(iatom)),hcharge(iatom),hcharge(iatom)+zion(typat(iatom))
- end do
- write(std_out,*)
-!write(std_out,*)'    Total ',total_zion,total_charge,total_charge+total_zion
- write(std_out,'(a,3es17.6)')'    Total',total_zion,total_charge,total_charge+total_zion
- write(std_out,*)
-
- ABI_DEALLOCATE(hweight)
- ABI_DEALLOCATE(aeden)
- ABI_DEALLOCATE(coord1)
- ABI_DEALLOCATE(hcharge)
- ABI_DEALLOCATE(hden)
- ABI_DEALLOCATE(local_den)
- ABI_DEALLOCATE(ncells)
- ABI_DEALLOCATE(npoint)
- ABI_DEALLOCATE(radii)
- ABI_DEALLOCATE(step)
- ABI_DEALLOCATE(sum_den)
- ABI_DEALLOCATE(work)
- ABI_DEALLOCATE(xcartcells)
- ABI_DEALLOCATE(xred)
- ABI_DEALLOCATE(yder2)
+ ABI_FREE(hweight)
+ ABI_FREE(aeden)
+ ABI_FREE(hcharge)
+ ABI_FREE(hden)
+ ABI_FREE(npoint)
+ ABI_FREE(radii)
 
 end subroutine cut3d_hirsh
 !!***
@@ -481,9 +209,9 @@ end subroutine cut3d_hirsh
 !!      cut3d
 !!
 !! CHILDREN
-!!      dens_in_sph,destroy_distribfft,destroy_mpi_enreg,fourwf,getkpgnorm
-!!      getph,getspin_1state,init_bess_spl,init_distribfft_seq,initmpi_seq
-!!      initylmg,int2char10,kpgio,metric,ph1d3d,print_fofr_cube,print_fofr_ri
+!!      cg_getspin,dens_in_sph,destroy_distribfft,destroy_mpi_enreg,fourwf
+!!      getkpgnorm,getph,init_distribfft_seq,initmpi_seq,initylmg,int2char10
+!!      jlspline_free,kpgio,metric,ph1d3d,print_fofr_cube,print_fofr_ri
 !!      print_fofr_xyzri,recip_ylm,sort_dp,sphereboundary,splint,wfk_close
 !!      wfk_open_read,wfk_read_band_block,xcart2xred
 !!
@@ -525,7 +253,7 @@ end subroutine cut3d_hirsh
    write(std_out,*) '   or 2) for a line between two crystallographic-defined points '
    write(std_out,*) '   or 3) for a line defined by its direction in cartesion coordinates'
    write(std_out,*) '   or 4) for a line defined by its direction in crystallographic coordinates'
-   read(*,*) inpopt
+   read(std_in,*) inpopt
    write(std_out,*) ' You typed ',inpopt,ch10
    if (inpopt==1 .or. inpopt ==2 .or. inpopt==3 .or. inpopt==4) okline=1
  end do
@@ -534,13 +262,13 @@ end subroutine cut3d_hirsh
  if (inpopt==1) then
    write(std_out,*) ' Type the first point coordinates (Bohrs):'
    write(std_out,*) '    -> X-dir   Y-dir   Z-dir:'
-   read(*,*) x1
+   read(std_in,*) x1
    write(std_out,'(a,3es16.6,a)') ' You typed ',x1,ch10
    call reduce(r1,x1,rprimd)
 
    write(std_out,*) ' Type the second point coordinates (Bohrs):'
    write(std_out,*) '    -> X-dir   Y-dir   Z-dir:'
-   read(*,*) x2
+   read(std_in,*) x2
    write(std_out,'(a,3es16.6,a)') ' You typed ',x2,ch10
    call reduce(r2,x2,rprimd)
  end if
@@ -548,12 +276,12 @@ end subroutine cut3d_hirsh
  if (inpopt==2) then
    write(std_out,*) ' Type the first point coordinates (fractional):'
    write(std_out,*) '    -> X-dir   Y-dir   Z-dir:'
-   read(*,*) r1
+   read(std_in,*) r1
    write(std_out,'(a,3es16.6,a)') ' You typed ',r1,ch10
 
    write(std_out,*) ' Type the second point coordinates (fractional):'
    write(std_out,*) '    -> X-dir   Y-dir   Z-dir:'
-   read(*,*) r2
+   read(std_in,*) r2
    write(std_out,'(a,3es16.6,a)') ' You typed ',r2,ch10
  end if
 
@@ -561,7 +289,7 @@ end subroutine cut3d_hirsh
 
    write(std_out,*) 'Please enter now the line direction:'
    write(std_out,*) '    -> X-dir   Y-dir   Z-dir:'
-   read(*,*) x2
+   read(std_in,*) x2
    write(std_out,'(a,3es16.6,a)') 'The line direction is:',x2(1),x2(2),x2(3),ch10
 
    if (inpopt == 4) then
@@ -575,11 +303,11 @@ end subroutine cut3d_hirsh
    write(std_out,*) 'Enter now the central point of line:'
    write(std_out,*) 'Type 1) for cartesian coordinates'
    write(std_out,*) '  or 2) for crystallographic coordinates'
-   read(*,*) inpopt2
+   read(std_in,*) inpopt2
    if (inpopt2==1 .or. inpopt2==2) then
      write(std_out,*) 'Type the point coordinates:'
      write(std_out,*) '    -> X-Coord   Y-Coord   Z-Coord:'
-     read(*,*) cent
+     read(std_in,*) cent
      write(std_out,'(a,3es16.6,a)') 'Central point coordinates:', cent(1),cent(2),cent(3),ch10
      if (inpopt2==2) then
        rcart=matmul(cent,rprimd)
@@ -587,7 +315,7 @@ end subroutine cut3d_hirsh
        write(std_out,'(a,3es16.6,a)') 'Expressed in cartesian coordinates:',cent(1),cent(2),cent(3),ch10
      end if
      write(std_out,*) 'Enter line length (in cartesian coordinates, in Bohr):'
-     read(*,*) length
+     read(std_in,*) length
 
 !    Compute the extremal points in cartesian coordinates
      x1(:)=cent(:)-length*x2(:)*half
@@ -607,7 +335,7 @@ end subroutine cut3d_hirsh
  write(std_out,*)
 
  write(std_out,*) '  Enter line resolution:   (integer, number of points on the line)'
- read(*,*) nresol
+ read(std_in,*) nresol
  write(std_out,*) ' You typed',nresol,ch10
 
 !At this moment the code knows everything about the geometric input, the data and
@@ -615,7 +343,9 @@ end subroutine cut3d_hirsh
 !an interpolation
 
  write(std_out,*) ch10,'  Enter the name of an output file:'
- read(*,*) filnam
+ if (read_string(filnam, unit=std_in) /= 0) then
+   MSG_ERROR("Fatal error!")
+ end if
  write(std_out,*) '  The name of your file is : ',trim(filnam),ch10
 
  if (open_file(filnam,msg,newunit=unt,status='unknown') /= 0) then
@@ -687,9 +417,9 @@ end subroutine cut3d_lineint
 !!      m_cut3d
 !!
 !! CHILDREN
-!!      dens_in_sph,destroy_distribfft,destroy_mpi_enreg,fourwf,getkpgnorm
-!!      getph,getspin_1state,init_bess_spl,init_distribfft_seq,initmpi_seq
-!!      initylmg,int2char10,kpgio,metric,ph1d3d,print_fofr_cube,print_fofr_ri
+!!      cg_getspin,dens_in_sph,destroy_distribfft,destroy_mpi_enreg,fourwf
+!!      getkpgnorm,getph,init_distribfft_seq,initmpi_seq,initylmg,int2char10
+!!      jlspline_free,kpgio,metric,ph1d3d,print_fofr_cube,print_fofr_ri
 !!      print_fofr_xyzri,recip_ylm,sort_dp,sphereboundary,splint,wfk_close
 !!      wfk_open_read,wfk_read_band_block,xcart2xred
 !!
@@ -727,7 +457,6 @@ subroutine normalize(v)
    v(idir)=v(idir)/norm
  end do
 
- return
 end subroutine normalize
 !!***
 
@@ -758,9 +487,9 @@ end subroutine normalize
 !!      cut3d
 !!
 !! CHILDREN
-!!      dens_in_sph,destroy_distribfft,destroy_mpi_enreg,fourwf,getkpgnorm
-!!      getph,getspin_1state,init_bess_spl,init_distribfft_seq,initmpi_seq
-!!      initylmg,int2char10,kpgio,metric,ph1d3d,print_fofr_cube,print_fofr_ri
+!!      cg_getspin,dens_in_sph,destroy_distribfft,destroy_mpi_enreg,fourwf
+!!      getkpgnorm,getph,init_distribfft_seq,initmpi_seq,initylmg,int2char10
+!!      jlspline_free,kpgio,metric,ph1d3d,print_fofr_cube,print_fofr_ri
 !!      print_fofr_xyzri,recip_ylm,sort_dp,sphereboundary,splint,wfk_close
 !!      wfk_open_read,wfk_read_band_block,xcart2xred
 !!
@@ -817,7 +546,7 @@ subroutine cut3d_planeint(gridtt,gridux,griddy,gridmz,natom,nr1,nr2,nr3,nspden,r
    write(std_out,*) '    or 5) for a plane orthogonal to a cartesian direction'
    write(std_out,*) '    or 6) for a plane orthogonal to a crystallographic direction'
    write(std_out,*) '    or 0) to stop'
-   read(*,*) itypat
+   read(std_in,*) itypat
    select case (itypat)
 
    case (0)
@@ -828,21 +557,21 @@ subroutine cut3d_planeint(gridtt,gridux,griddy,gridmz,natom,nr1,nr2,nr3,nspden,r
      write(std_out,*) '  The X axis will be through atms: 1,2 '
      write(std_out,*) '  Define each atom by its species and its number:'
      write(std_out,*) '    -> atom 1 (iat):'
-     read(*,*) iat
+     read(std_in,*) iat
      x1(1)=tau(1,iat)
      x1(2)=tau(2,iat)
      x1(3)=tau(3,iat)
      write(std_out,'(a,3f10.6)') '        position: ',x1
      write(std_out,*)
      write(std_out,*) '    -> atom 2 (iat):'
-     read(*,*) iat
+     read(std_in,*) iat
      x2(1)=tau(1,iat)
      x2(2)=tau(2,iat)
      x2(3)=tau(3,iat)
      write(std_out,'(a,3f10.6)') '        position: ',x2
      write(std_out,*)
      write(std_out,*) '    -> atom 3 (iat):'
-     read(*,*) iat
+     read(std_in,*) iat
      x3(1)=tau(1,iat)
      x3(2)=tau(2,iat)
      x3(3)=tau(3,iat)
@@ -866,17 +595,17 @@ subroutine cut3d_planeint(gridtt,gridux,griddy,gridmz,natom,nr1,nr2,nr3,nspden,r
      write(std_out,*) '  The X axis will be through points: 1,2 '
      write(std_out,*) '  Define each :point coordinates'
      write(std_out,*) '    -> point 1:    X-coord  Y-coord  Z-coord:'
-     read(*,*) xcart
+     read(std_in,*) xcart
      x1(:)=xcart(:)
      write(std_out,'(a,3f10.6)') ' crystallographic position: ',x1
      write(std_out,*)
      write(std_out,*) '    -> point 2:    X-coord  Y-coord  Z-coord:'
-     read(*,*) xcart
+     read(std_in,*) xcart
      x2(:)=xcart(:)
      write(std_out,'(a,3f10.6)') ' crystallographic position: ',x2
      write(std_out,*)
      write(std_out,*) '    -> point 3:    X-coord  Y-coord  Z-coord:'
-     read(*,*) xcart
+     read(std_in,*) xcart
      x3(:)=xcart(:)
      write(std_out,'(a,3f10.6)') ' crystallographic position: ',x3
      write(std_out,*)
@@ -898,15 +627,15 @@ subroutine cut3d_planeint(gridtt,gridux,griddy,gridmz,natom,nr1,nr2,nr3,nspden,r
      write(std_out,*) '  The X axis will be through points: 1,2 '
      write(std_out,*) '  Define each :point coordinates'
      write(std_out,*) '    -> point 1:    X-coord  Y-coord  Z-coord:'
-     read(*,*) r1
+     read(std_in,*) r1
      write(std_out,'(a,3f10.6)') ' crystallographic position: ',r1
      write(std_out,*)
      write(std_out,*) '    -> point 2:    X-coord  Y-coord  Z-coord:'
-     read(*,*) r2
+     read(std_in,*) r2
      write(std_out,'(a,3f10.6)') ' crystallographic position: ',r2
      write(std_out,*)
      write(std_out,*) '    -> point 3:    X-coord  Y-coord  Z-coord:'
-     read(*,*) r3
+     read(std_in,*) r3
      write(std_out,'(a,3f10.6)') ' crystallographic position: ',r3
      write(std_out,*)
 
@@ -940,7 +669,7 @@ subroutine cut3d_planeint(gridtt,gridux,griddy,gridmz,natom,nr1,nr2,nr3,nspden,r
      do while (okhkl==0)
        write(std_out,*) '  Enter plane coordinates:'
        write(std_out,*) '    -> H  K  L '
-       read(*,*) hkl
+       read(std_in,*) hkl
        if (.not. (hkl(1)==0 .and. hkl(2)==0 .and. hkl(3)==0)) okhkl=1
      end do
      write(std_out,*) ' Miller indices are:',hkl
@@ -969,7 +698,7 @@ subroutine cut3d_planeint(gridtt,gridux,griddy,gridmz,natom,nr1,nr2,nr3,nspden,r
    case (5)
      write(std_out,*) '  Enter the cartesian coordinates of the vector orthogonal to plane:'
      write(std_out,*) '    -> X-dir   Y-dir   Z-dir (Angstroms or Bohrs):'
-     read(*,*) x1
+     read(std_in,*) x1
      call normalize(x1)
      if((x1(1).ne.0).or.(x1(2).ne.0)) then
        x2(1)=-x1(2)
@@ -989,7 +718,7 @@ subroutine cut3d_planeint(gridtt,gridux,griddy,gridmz,natom,nr1,nr2,nr3,nspden,r
    case (6)
      write(std_out,*) '  Enter crystallographic vector orthogonal to plane:'
      write(std_out,*) '    -> X-dir   Y-dir   Z-dir (Fractional coordinates):'
-     read(*,*) r1
+     read(std_in,*) r1
      okinp=1
      do mu=1,3
        x1(mu)=rprimd(mu,1)*r1(1)+rprimd(mu,2)*r1(2)+rprimd(mu,3)*r1(3)
@@ -1031,9 +760,9 @@ subroutine cut3d_planeint(gridtt,gridux,griddy,gridmz,natom,nr1,nr2,nr3,nspden,r
  write(std_out,*) '  Enter central point of plane (Bohrs):'
  write(std_out,*) '  Type 1) for Cartesian coordinates.'
  write(std_out,*) '    or 2) for Crystallographic coordinates.'
- read(*,*) inpopt
+ read(std_in,*) inpopt
  write(std_out,*) '    -> X-Coord   Y-Coord   Z-Coord:'
- read(*,*) cent
+ read(std_in,*) cent
 
  if (inpopt==2) then
 
@@ -1050,16 +779,18 @@ subroutine cut3d_planeint(gridtt,gridux,griddy,gridmz,natom,nr1,nr2,nr3,nspden,r
  do while(okparam==0)
    write(std_out,*)
    write(std_out,*) '  Enter plane width:'
-   read(*,*) width
+   read(std_in,*) width
    write(std_out,*) '  Enter plane length:'
-   read(*,*) length
+   read(std_in,*) length
    write(std_out,*)
    write(std_out,*) '  Enter plane resolution in width:'
-   read(*,*) nresolw
+   read(std_in,*) nresolw
    write(std_out,*) '  Enter plane resolution in lenth:'
-   read(*,*) nresoll
+   read(std_in,*) nresoll
    write(std_out,*) ch10,'  Enter the name of an output file:'
-   read(*,*) filnam
+   if (read_string(filnam, unit=std_in) /= 0) then
+     MSG_ERROR("Fatal error!")
+   end if
    write(std_out,*) '  The name of your file is : ',trim(filnam)
    write(std_out,*)
    write(std_out,*) '  You asked for a plane of ',length,' x ',width
@@ -1067,7 +798,7 @@ subroutine cut3d_planeint(gridtt,gridux,griddy,gridmz,natom,nr1,nr2,nr3,nspden,r
    write(std_out,*) '  The result will be redirected to the file:  ',trim(filnam)
    write(std_out,*) '  These parameters may still be changed.'
    write(std_out,*) '  Are you sure you want to keep them? (1=default=yes,2=no) '
-   read(*,*) oksure
+   read(std_in,*) oksure
    if (oksure/=2) okparam=1
  end do
 
@@ -1130,9 +861,9 @@ subroutine cut3d_planeint(gridtt,gridux,griddy,gridmz,natom,nr1,nr2,nr3,nspden,r
 !!      cut3d
 !!
 !! CHILDREN
-!!      dens_in_sph,destroy_distribfft,destroy_mpi_enreg,fourwf,getkpgnorm
-!!      getph,getspin_1state,init_bess_spl,init_distribfft_seq,initmpi_seq
-!!      initylmg,int2char10,kpgio,metric,ph1d3d,print_fofr_cube,print_fofr_ri
+!!      cg_getspin,dens_in_sph,destroy_distribfft,destroy_mpi_enreg,fourwf
+!!      getkpgnorm,getph,init_distribfft_seq,initmpi_seq,initylmg,int2char10
+!!      jlspline_free,kpgio,metric,ph1d3d,print_fofr_cube,print_fofr_ri
 !!      print_fofr_xyzri,recip_ylm,sort_dp,sphereboundary,splint,wfk_close
 !!      wfk_open_read,wfk_read_band_block,xcart2xred
 !!
@@ -1170,21 +901,21 @@ subroutine cut3d_pointint(gridt,gridu,gridd,gridm,nr1,nr2,nr3,nspden,rprimd)
    write(std_out,*) ' Select the coordinate system:'
    write(std_out,*) ' Type 1) for cartesian coordinates'
    write(std_out,*) '  or 2) for crystallographic coordinates'
-   read(*,*) inpopt
+   read(std_in,*) inpopt
    if (inpopt==1 .or. inpopt==2) okinp=1
  end do
 
  if (inpopt==1) then
 
    write(std_out,*) ' Input point Cartesian Coord:  X  Y  Z'
-   read(*,*) rcart(1),rcart(2),rcart(3)
+   read(std_in,*) rcart(1),rcart(2),rcart(3)
    call reduce(rr,rcart,rprimd)
    write(std_out,'(a,3es16.6)' ) ' Crystallographic coordinates: ',rr(1:3)
 
  else
 
    write(std_out,*) ' Input point Crystallographic Coord:  X  Y  Z'
-   read(*,*) rr(1),rr(2),rr(3)
+   read(std_in,*) rr(1),rr(2),rr(3)
 
    do mu=1,3
      rcart(mu)=rprimd(mu,1)*rr(1)+rprimd(mu,2)*rr(2)+rprimd(mu,3)*rr(3)
@@ -1252,9 +983,9 @@ end subroutine cut3d_pointint
 !!      m_cut3d
 !!
 !! CHILDREN
-!!      dens_in_sph,destroy_distribfft,destroy_mpi_enreg,fourwf,getkpgnorm
-!!      getph,getspin_1state,init_bess_spl,init_distribfft_seq,initmpi_seq
-!!      initylmg,int2char10,kpgio,metric,ph1d3d,print_fofr_cube,print_fofr_ri
+!!      cg_getspin,dens_in_sph,destroy_distribfft,destroy_mpi_enreg,fourwf
+!!      getkpgnorm,getph,init_distribfft_seq,initmpi_seq,initylmg,int2char10
+!!      jlspline_free,kpgio,metric,ph1d3d,print_fofr_cube,print_fofr_ri
 !!      print_fofr_xyzri,recip_ylm,sort_dp,sphereboundary,splint,wfk_close
 !!      wfk_open_read,wfk_read_band_block,xcart2xred
 !!
@@ -1317,9 +1048,9 @@ end subroutine reduce
 !!      cut3d
 !!
 !! CHILDREN
-!!      dens_in_sph,destroy_distribfft,destroy_mpi_enreg,fourwf,getkpgnorm
-!!      getph,getspin_1state,init_bess_spl,init_distribfft_seq,initmpi_seq
-!!      initylmg,int2char10,kpgio,metric,ph1d3d,print_fofr_cube,print_fofr_ri
+!!      cg_getspin,dens_in_sph,destroy_distribfft,destroy_mpi_enreg,fourwf
+!!      getkpgnorm,getph,init_distribfft_seq,initmpi_seq,initylmg,int2char10
+!!      jlspline_free,kpgio,metric,ph1d3d,print_fofr_cube,print_fofr_ri
 !!      print_fofr_xyzri,recip_ylm,sort_dp,sphereboundary,splint,wfk_close
 !!      wfk_open_read,wfk_read_band_block,xcart2xred
 !!
@@ -1346,7 +1077,7 @@ subroutine cut3d_rrho(path,varname,iomode,grid_full,nr1,nr2,nr3,nspden)
 !Local variables--------------------------------------------------------
 !scalars
  integer :: ispden,unt,fform
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
  integer :: varid
 #endif
  character(len=500) :: msg
@@ -1372,7 +1103,7 @@ subroutine cut3d_rrho(path,varname,iomode,grid_full,nr1,nr2,nr3,nspden)
 
  case (IO_MODE_ETSF)
    ! ETSF case
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
    NCF_CHECK(nctk_open_read(unt, path, xmpi_comm_self))
    NCF_CHECK(nf90_inq_varid(unt, varname, varid))
    ! [cplex, n1, n2, n3, nspden]
@@ -1407,9 +1138,9 @@ end subroutine cut3d_rrho
 !!      m_cut3d
 !!
 !! CHILDREN
-!!      dens_in_sph,destroy_distribfft,destroy_mpi_enreg,fourwf,getkpgnorm
-!!      getph,getspin_1state,init_bess_spl,init_distribfft_seq,initmpi_seq
-!!      initylmg,int2char10,kpgio,metric,ph1d3d,print_fofr_cube,print_fofr_ri
+!!      cg_getspin,dens_in_sph,destroy_distribfft,destroy_mpi_enreg,fourwf
+!!      getkpgnorm,getph,init_distribfft_seq,initmpi_seq,initylmg,int2char10
+!!      jlspline_free,kpgio,metric,ph1d3d,print_fofr_cube,print_fofr_ri
 !!      print_fofr_xyzri,recip_ylm,sort_dp,sphereboundary,splint,wfk_close
 !!      wfk_open_read,wfk_read_band_block,xcart2xred
 !!
@@ -1469,9 +1200,9 @@ end subroutine vdot
 !!      cut3d
 !!
 !! CHILDREN
-!!      dens_in_sph,destroy_distribfft,destroy_mpi_enreg,fourwf,getkpgnorm
-!!      getph,getspin_1state,init_bess_spl,init_distribfft_seq,initmpi_seq
-!!      initylmg,int2char10,kpgio,metric,ph1d3d,print_fofr_cube,print_fofr_ri
+!!      cg_getspin,dens_in_sph,destroy_distribfft,destroy_mpi_enreg,fourwf
+!!      getkpgnorm,getph,init_distribfft_seq,initmpi_seq,initylmg,int2char10
+!!      jlspline_free,kpgio,metric,ph1d3d,print_fofr_cube,print_fofr_ri
 !!      print_fofr_xyzri,recip_ylm,sort_dp,sphereboundary,splint,wfk_close
 !!      wfk_open_read,wfk_read_band_block,xcart2xred
 !!
@@ -1538,7 +1269,7 @@ subroutine cut3d_volumeint(gridtt,gridux,griddy,gridmz,natom,nr1,nr2,nr3,nspden,
    write(std_out,*) '    or 5) for a plane orthogonal to a cartesian direction'
    write(std_out,*) '    or 6) for a plane orthogonal to a crystallographic direction'
    write(std_out,*) '    or 0) to stop'
-   read(*,*) itypat
+   read(std_in,*) itypat
 
    select case (itypat)
 
@@ -1550,21 +1281,21 @@ subroutine cut3d_volumeint(gridtt,gridux,griddy,gridmz,natom,nr1,nr2,nr3,nspden,
      write(std_out,*) '  The X axis will be through atoms: 1,2 '
      write(std_out,*) '  Define each atom by its species and its number:'
      write(std_out,*) '    -> atom 1 (iat):'
-     read(*,*) iat
+     read(std_in,*) iat
      x1(1)=tau(1,iat)
      x1(2)=tau(2,iat)
      x1(3)=tau(3,iat)
      write(std_out,'(a,3f10.6)') '        position: ',x1
      write(std_out,*)
      write(std_out,*) '    -> atom 2 (iat):'
-     read(*,*) iat
+     read(std_in,*) iat
      x2(1)=tau(1,iat)
      x2(2)=tau(2,iat)
      x2(3)=tau(3,iat)
      write(std_out,'(a,3f10.6)') '        position: ',x2
      write(std_out,*)
      write(std_out,*) '    -> atom 3 (iat):'
-     read(*,*) iat
+     read(std_in,*) iat
      x3(1)=tau(1,iat)
      x3(2)=tau(2,iat)
      x3(3)=tau(3,iat)
@@ -1588,17 +1319,17 @@ subroutine cut3d_volumeint(gridtt,gridux,griddy,gridmz,natom,nr1,nr2,nr3,nspden,
      write(std_out,*) '  The X axis will be through points: 1,2 '
      write(std_out,*) '  Define each :point coordinates'
      write(std_out,*) '    -> point 1:    X-coord  Y-coord  Z-coord:'
-     read(*,*) xcart
+     read(std_in,*) xcart
      x1(:)=xcart(:)
      write(std_out,'(a,3f10.6)') ' crystallographic position: ',x1
      write(std_out,*)
      write(std_out,*) '    -> point 2:    X-coord  Y-coord  Z-coord:'
-     read(*,*) xcart
+     read(std_in,*) xcart
      x2(:)=xcart(:)
      write(std_out,'(a,3f10.6)') ' crystallographic position: ',x2
      write(std_out,*)
      write(std_out,*) '    -> point 3:    X-coord  Y-coord  Z-coord:'
-     read(*,*) xcart
+     read(std_in,*) xcart
      x3(:)=xcart(:)
      write(std_out,'(a,3f10.6)') ' crystallographic position: ',x3
      write(std_out,*)
@@ -1620,15 +1351,15 @@ subroutine cut3d_volumeint(gridtt,gridux,griddy,gridmz,natom,nr1,nr2,nr3,nspden,
      write(std_out,*) '  The X axis will be through points: 1,2 '
      write(std_out,*) '  Define each :point coordinates'
      write(std_out,*) '    -> point 1:    X-coord  Y-coord  Z-coord:'
-     read(*,*) r1
+     read(std_in,*) r1
      write(std_out,'(a,3f10.6)') ' crystallographic position: ',r1
      write(std_out,*)
      write(std_out,*) '    -> point 2:    X-coord  Y-coord  Z-coord:'
-     read(*,*) r2
+     read(std_in,*) r2
      write(std_out,'(a,3f10.6)') ' crystallographic position: ',r2
      write(std_out,*)
      write(std_out,*) '    -> point 3:    X-coord  Y-coord  Z-coord:'
-     read(*,*) r3
+     read(std_in,*) r3
      write(std_out,'(a,3f10.6)') ' crystallographic position: ',r3
      write(std_out,*)
 
@@ -1662,7 +1393,7 @@ subroutine cut3d_volumeint(gridtt,gridux,griddy,gridmz,natom,nr1,nr2,nr3,nspden,
      do while (okhkl==0)
        write(std_out,*) '  Enter plane coordinates:'
        write(std_out,*) '    ->H  K  L '
-       read(*,*) hkl
+       read(std_in,*) hkl
        if (.not. (hkl(1)==0 .and. hkl(2)==0 .and. hkl(3)==0)) okhkl=1
      end do
      write(std_out,*) ' Miller indices are:',hkl
@@ -1691,7 +1422,7 @@ subroutine cut3d_volumeint(gridtt,gridux,griddy,gridmz,natom,nr1,nr2,nr3,nspden,
    case (5)
      write(std_out,*) '  Enter cartesian vector orthogonal to plane:'
      write(std_out,*) '    -> X-dir   Y-dir   Z-dir (Angstroms or Bohrs):'
-     read(*,*) x1
+     read(std_in,*) x1
      call normalize(x1)
      if((x1(1).ne.0).or.(x1(2).ne.0)) then
        x2(1)=-x1(2)
@@ -1711,7 +1442,7 @@ subroutine cut3d_volumeint(gridtt,gridux,griddy,gridmz,natom,nr1,nr2,nr3,nspden,
    case (6)
      write(std_out,*) '  Enter crystallographic vector orthogonal to plane:'
      write(std_out,*) '    -> X-dir   Y-dir   Z-dir (Fractional coordinates):'
-     read(*,*) r1
+     read(std_in,*) r1
      do mu=1,3
        x1(mu)=rprimd(mu,1)*r1(1)+rprimd(mu,2)*r1(2)+rprimd(mu,3)*r1(3)
      end do
@@ -1753,17 +1484,17 @@ subroutine cut3d_volumeint(gridtt,gridux,griddy,gridmz,natom,nr1,nr2,nr3,nspden,
    write(std_out,*) '  Enter reference point of plane (Bohr):'
    write(std_out,*) '  Type 1) for Cartesian coordinates.'
    write(std_out,*) '    or 2) for Crystallographic coordinates.'
-   read(*,*) inpopt
+   read(std_in,*) inpopt
 
    select case (inpopt)
 
    case(1)
      write(std_out,*) '    -> X-Coord   Y-Coord   Z-Coord:'
-     read(*,*) cent
+     read(std_in,*) cent
      exit
    case(2)
      write(std_out,*) '    -> X-Coord   Y-Coord   Z-Coord:'
-     read(*,*) cent
+     read(std_in,*) cent
      do mu=1,3
        rcart(mu)=rprimd(mu,1)*cent(1)+rprimd(mu,2)*cent(2)+rprimd(mu,3)*cent(3)
      end do
@@ -1787,11 +1518,11 @@ subroutine cut3d_volumeint(gridtt,gridux,griddy,gridmz,natom,nr1,nr2,nr3,nspden,
  do
    write(std_out,*)
    write(std_out,*) '  Enter in-plane width:'
-   read(*,*) width
+   read(std_in,*) width
    write(std_out,*) '  Enter in-plane length:'
-   read(*,*) length
+   read(std_in,*) length
    write(std_out,*) '  Enter box height:'
-   read(*,*) height
+   read(std_in,*) height
    write(std_out,*)
    write(std_out,*) ' Enter the position of the basal plane in the box:'
    do
@@ -1799,7 +1530,7 @@ subroutine cut3d_volumeint(gridtt,gridux,griddy,gridmz,natom,nr1,nr2,nr3,nspden,
      write(std_out,*) ' Type 1) for DOWN'
      write(std_out,*) ' Type 2) for MIDDLE'
      write(std_out,*) ' Type 3) for UP'
-     read(*,*) planetype
+     read(std_in,*) planetype
 
      select case(planetype)
 
@@ -1821,7 +1552,7 @@ subroutine cut3d_volumeint(gridtt,gridux,griddy,gridmz,natom,nr1,nr2,nr3,nspden,
      write(std_out,*)
      write(std_out,*) ' Type 1) for CENTRAL position '
      write(std_out,*) ' Type 2) for CORNER(0,0) position '
-     read(*,*) referenceposition
+     read(std_in,*) referenceposition
 
      select case(referenceposition)
 
@@ -1838,21 +1569,23 @@ subroutine cut3d_volumeint(gridtt,gridux,griddy,gridmz,natom,nr1,nr2,nr3,nspden,
    write(std_out,*)
    write(std_out,*) ' Enter the box grid values:'
    write(std_out,*) '  Enter plane resolution in width:'
-   read(*,*) nresolw
+   read(std_in,*) nresolw
    write(std_out,*) '  Enter plane resolution in lenth:'
-   read(*,*) nresoll
+   read(std_in,*) nresoll
    write(std_out,*) '  Enter height resolution:'
-   read(*,*) nresolh
+   read(std_in,*) nresolh
    write(std_out,*)
    write(std_out,*) ch10,'  Enter the name of an output file:'
-   read(*,*) filnam
+   if (read_string(filnam, unit=std_in) /= 0) then
+     MSG_ERROR("Fatal error!")
+   end if
    write(std_out,*) '  The name of your file is : ',trim(filnam)
 
    do
      write(std_out,*) '  Enter the format of the output file:'
      write(std_out,*) '   Type 1=> ASCII formatted'
      write(std_out,*) '   Type 2=> Molekel formatted'
-     read(*,*) fileformattype
+     read(std_in,*) fileformattype
      if (fileformattype==1 .or. fileformattype==2) then
        exit
      else
@@ -1872,7 +1605,7 @@ subroutine cut3d_volumeint(gridtt,gridux,griddy,gridmz,natom,nr1,nr2,nr3,nspden,
    end if
    write(std_out,*) ' These parameters may still be changed.'
    write(std_out,*) ' Are you sure you want to keep them? (1=default=yes,2=no) '
-   read(*,*) okparam
+   read(std_in,*) okparam
    if (okparam==2) then
      cycle
    else
@@ -2003,7 +1736,7 @@ subroutine cut3d_volumeint(gridtt,gridux,griddy,gridmz,natom,nr1,nr2,nr3,nspden,
  end do
 
  close(unt)
- 
+
  ABI_DEALLOCATE(rhomacutt)
  ABI_DEALLOCATE(rhomacuux)
  ABI_DEALLOCATE(rhomacudy)
@@ -2051,9 +1784,9 @@ end subroutine cut3d_volumeint
 !!      cut3d
 !!
 !! CHILDREN
-!!      dens_in_sph,destroy_distribfft,destroy_mpi_enreg,fourwf,getkpgnorm
-!!      getph,getspin_1state,init_bess_spl,init_distribfft_seq,initmpi_seq
-!!      initylmg,int2char10,kpgio,metric,ph1d3d,print_fofr_cube,print_fofr_ri
+!!      cg_getspin,dens_in_sph,destroy_distribfft,destroy_mpi_enreg,fourwf
+!!      getkpgnorm,getph,init_distribfft_seq,initmpi_seq,initylmg,int2char10
+!!      jlspline_free,kpgio,metric,ph1d3d,print_fofr_cube,print_fofr_ri
 !!      print_fofr_xyzri,recip_ylm,sort_dp,sphereboundary,splint,wfk_close
 !!      wfk_open_read,wfk_read_band_block,xcart2xred
 !!
@@ -2067,14 +1800,11 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'cut3d_wffile'
- use interfaces_28_numeric_noabirule
  use interfaces_41_geometry
  use interfaces_51_manage_mpi
  use interfaces_52_fft_mpi_noabirule
  use interfaces_53_ffts
  use interfaces_56_recipspace
- use interfaces_61_occeig
- use interfaces_67_common
 !End of the abilint section
 
  implicit none
@@ -2095,13 +1825,13 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
  integer,parameter :: tim_fourwf0=0,tim_rwwf0=0,ndat1=1,formeig0=0
  integer :: cband,cgshift,ckpt,cplex,cspinor,csppol,gridshift1
  integer :: gridshift2,gridshift3,ia,iatom,iband,ichoice,ifile,iomode
- integer :: ii1,ii2,ii3,ikpt,ilang,ioffkg,iout,iprompt,ipw !,iomode,ierr,
+ integer :: ii1,ii2,ii3,ikpt,ilang,ioffkg,iout,iprompt,ipw,itypat
  integer :: ir1,ir2,ir3,ivect,ixint,mband,mbess,mcg,mgfft
  integer :: mkmem,mlang,mpw,n4,n5,n6,nfit,npw_k
  integer :: nradintmax,oldcband,oldckpt,oldcspinor,oldcsppol
- integer :: prtsphere,select_exit,unout,iunt
+ integer :: prtsphere,select_exit,unout,iunt,rc_ylm
  integer :: ikpt_qps,nkpt_qps,nband_qps,iscf_qps
- real(dp) :: arg,bessargmax,bessint_delta,kpgmax,ratsph,tmpi,tmpr,ucvol,weight,eig_k_qps
+ real(dp) :: arg,bessargmax,bessint_delta,kpgmax,ratsph,tmpi,tmpr,ucvol,weight,eig_k_qps,intg
  character(len=*), parameter :: INPUTfile='cut.in'
  character(len=1) :: outputchar
  character(len=10) :: string
@@ -2110,8 +1840,9 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
  character(len=fnlen) :: output,output1
  type(MPI_type) :: mpi_enreg
  type(wfk_t) :: Wfk
+ type(jlspline_t) :: jlspl
 !arrays
- integer :: atindx(natom),iatsph(natom),ngfft(18),nradint(natom)
+ integer :: atindx(natom),iatsph(natom),ngfft(18),nradint(natom),mlang_type(ntypat)
  integer,allocatable :: gbound(:,:),iindex(:),kg(:,:),kg_dum(:,:),kg_k(:,:)
  integer,allocatable :: npwarr1(:),npwarrk1(:),npwtot1(:)
  real(dp) :: cmax(natom),gmet(3,3),gprimd(3,3)
@@ -2119,12 +1850,12 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
  real(dp) :: tau2(3,natom),xred(3,natom),kpt_qps(3)
  real(dp) :: znucl_atom(natom)
  integer  :: znucl_atom_int(natom)
- real(dp),allocatable :: bess_fit(:,:,:),bess_spl(:,:),bess_spl_der(:,:)
+ real(dp),allocatable :: bess_fit(:,:,:)
  real(dp),allocatable :: cg_k(:,:),cgcband(:,:),denpot(:,:,:),eig_k(:)
  real(dp),allocatable :: fofgout(:,:),fofr(:,:,:,:),k1(:,:)
  real(dp),allocatable :: kpgnorm(:),occ_k(:),ph1d(:,:),ph3d(:,:,:),rint(:)
  real(dp),allocatable :: sum_1atom_1ll(:,:),sum_1atom_1lm(:,:)
- real(dp),allocatable :: x_bess(:),xfit(:),yfit(:),ylm_k(:,:)
+ real(dp),allocatable :: xfit(:),yfit(:),ylm_k(:,:)
  real(dp),allocatable :: ylmgr_dum(:,:,:)
  character(len=fnlen) :: fileqps
  character(len=fnlen),allocatable :: filename(:)
@@ -2137,6 +1868,7 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
  mband=maxval(nband)
  ABI_ALLOCATE(mpi_enreg%proc_distrb,(nkpt,mband,nsppol))
  mpi_enreg%proc_distrb=0
+ mpi_enreg%me_g0 = 1
  oldckpt=0
  oldcband=0
  oldcsppol=0
@@ -2246,7 +1978,7 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
      ABI_ALLOCATE(eig_k,((2*mband)**formeig0*mband))
      ABI_ALLOCATE(occ_k,(mband))
 
-!    FIXME 
+!    FIXME
 !    nband depends on (kpt,spin)
      iomode = iomode_from_fname(wfk_fname)
      call wfk_open_read(Wfk,wfk_fname,formeig0,iomode,get_unit(),xmpi_comm_self)
@@ -2304,15 +2036,15 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
      ABI_ALLOCATE(kg_k,(3,npw_k))
      kg_k(:,1:npw_k)=kg(:,1+ioffkg:npw_k+ioffkg)
 
-     ABI_ALLOCATE(ylm_k,(mpw,mlang*mlang))
-     ABI_ALLOCATE(ylmgr_dum,(mpw,3,mlang*mlang))
+     ABI_ALLOCATE(ylm_k,(npw_k,mlang*mlang))
+     ABI_ALLOCATE(ylmgr_dum,(npw_k,3,mlang*mlang))
 
 !    call for only the kpoint we are interested in !
      ABI_ALLOCATE(k1,(3,1))
      k1(:,1)=kpt(:,ckpt)
      ABI_ALLOCATE(npwarrk1,(1))
      npwarrk1 = (/npw_k/)
-     call initylmg(gprimd,kg_k,k1,1,mpi_enreg,mlang,mpw,nband,1,&
+     call initylmg(gprimd,kg_k,k1,1,mpi_enreg,mlang,npw_k,nband,1,&
 &     npwarrk1,nsppol,0,rprimd,ylm_k,ylmgr_dum)
      ABI_DEALLOCATE(ylmgr_dum)
      ABI_DEALLOCATE(k1)
@@ -2339,7 +2071,9 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
 
      if(ii1==1) then
        write(std_out,*) 'What is the name of the QPS file?'
-       read(std_in,*) fileqps
+       if (read_string(fileqps, unit=std_in) /= 0) then
+         MSG_ERROR("Fatal error!")
+       end if
 !      Checking the existence of data file
        if (.not. file_exists(fileqps)) then
          MSG_ERROR(sjoin('Missing data file:', fileqps))
@@ -2347,13 +2081,13 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
 
        if (open_file(fileqps, msg, newunit=iunt, status='old',form='formatted') /= 0) then
          MSG_ERROR(msg)
-       end if 
+       end if
 
        read(iunt,*) iscf_qps
        read(iunt,*) nkpt_qps
        read(iunt,*) nband_qps
        read(iunt,*) ikpt_qps
-       
+
        ABI_ALLOCATE(ccoeff,(nband_qps,nband_qps))
        do ikpt=1,ckpt ! nkpt_qps
          read(iunt,*) kpt_qps(:)
@@ -2389,10 +2123,10 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
          cgshift=(cband-1)*npw_k*nspinor
          ABI_ALLOCATE(cgcband,(2,npw_k*nspinor))
          cgcband(:,1:nspinor*npw_k)=cg_k(:,cgshift+1:cgshift+nspinor*npw_k)
-         call getspin_1state(cgcband, npw_k, spinvec)
+         call cg_getspin(cgcband, npw_k, spinvec)
          write(std_out,'(a,6E20.10)' ) ' spin vector for this state = ', (spinvec)
          ABI_DEALLOCATE(cgcband)
-       end if 
+       end if
 
 !      The shift is to get the good band values
        cgshift=(cband-1)*npw_k*nspinor + (cspinor-1)*npw_k
@@ -2428,8 +2162,7 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
 
        write(std_out,'(3a)' ) ch10,' Atomic sphere analysis ',ch10
 
-!      Init bessel function integral for recip_ylm
-!      max ang mom + 1
+!      Init bessel function integral for recip_ylm: max ang mom + 1
        mlang = 5
        bessint_delta = 0.1_dp
        kpgmax = sqrt(ecut)
@@ -2443,14 +2176,10 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
 
        write(std_out,'(a,2es16.6,i6)')' wffile : kpgmax, bessargmax, nradint = ', kpgmax, bessargmax,nradintmax
 
-!      Initialize general Bessel function array on uniform grid x_bess, from 0 to (2 \pi |k+G|_{max} |r_{max}|)
-       ABI_ALLOCATE(bess_spl,(mbess,mlang))
-       ABI_ALLOCATE(bess_spl_der,(mbess,mlang))
-       ABI_ALLOCATE(x_bess,(nradintmax))
+!      Initialize general Bessel function array on uniform grid xx, from 0 to (2 \pi |k+G|_{max} |r_{max}|)
        ABI_ALLOCATE(rint,(nradintmax))
 
-!      call init_bess_spl(mbess,bessargmax,bessint_delta,mlang,
-       call init_bess_spl(mbess,bessint_delta,mlang,bess_spl,bess_spl_der,x_bess)
+       jlspl = jlspline_new(mbess, bessint_delta, mlang)
 
        ABI_ALLOCATE(bess_fit,(mpw,nradintmax,mlang))
        ABI_ALLOCATE(xfit,(npw_k))
@@ -2467,7 +2196,7 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
          end do
          call sort_dp (npw_k,xfit,iindex,tol14)
          do ilang=1,mlang
-           call splint(mbess,x_bess,bess_spl(:,ilang),bess_spl_der(:,ilang),nfit,xfit,yfit)
+           call splint(mbess,jlspl%xx,jlspl%bess_spl(:,ilang),jlspl%bess_spl_der(:,ilang),nfit,xfit,yfit)
 !          Re-order results for different G vectors
            do ipw=1,npw_k
              bess_fit(iindex(ipw),ixint,ilang) = yfit(ipw)
@@ -2475,9 +2204,7 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
          end do ! ipw
        end do ! ixint
 
-!      Construct phases ph3d for all G vectors in present sphere
-!      make phkred for all atoms
-
+!      Construct phases ph3d for all G vectors in present sphere make phkred for all atoms
        do ia=1,natom
          iatom=atindx(ia)
          arg=two_pi*( kpt(1,ckpt)*xred(1,ia) + kpt(2,ckpt)*xred(2,ia) + kpt(3,ckpt)*xred(3,ia))
@@ -2489,14 +2216,16 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
 !      Get full phases exp (2 pi i (k+G).x_tau) in ph3d
        call ph1d3d(1,natom,kg_k,natom,natom,npw_k,nr1,nr2,nr3,phkxred,ph1d,ph3d)
 
-
        ABI_ALLOCATE(sum_1atom_1ll,(mlang,natom))
        ABI_ALLOCATE(sum_1atom_1lm,(mlang**2,natom))
        prtsphere=1
        ratsph_arr(:)=ratsph
-       call recip_ylm (bess_fit,cgcband,istwfk(ckpt),&
-&       nradint,nradintmax,mlang,mpi_enreg,mpw,natom,npw_k,ph3d,prtsphere,rint,&
-&       ratsph_arr,sum_1atom_1ll,sum_1atom_1lm,ucvol,ylm_k,znucl_atom)
+
+       rc_ylm = 1 ! Real or Complex spherical harmonics.
+       mlang_type = 5
+       call recip_ylm (bess_fit,cgcband,xmpi_comm_self,istwfk(ckpt),&
+&       nradint,nradintmax,1,mlang,mpw,natom,typat,mlang_type,npw_k,ph3d,prtsphere,rint,&
+&       ratsph_arr,rc_ylm,sum_1atom_1ll,sum_1atom_1lm,ucvol,ylm_k,znucl_atom)
 
        call dens_in_sph(cmax,cgcband,gmet,istwfk(ckpt),&
 &       kg_k,natom,ngfft,mpi_enreg,npw_k,paral_kgb,ph1d,ratsph_arr,ucvol)
@@ -2513,9 +2242,7 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
        ABI_DEALLOCATE(yfit)
        ABI_DEALLOCATE(xfit)
        ABI_DEALLOCATE(bess_fit)
-       ABI_DEALLOCATE(bess_spl)
-       ABI_DEALLOCATE(bess_spl_der)
-       ABI_DEALLOCATE(x_bess)
+       call jlspline_free(jlspl)
        ABI_DEALLOCATE(rint)
      end if ! ratsph < 0     = end if for atomic sphere analysis
 
@@ -2576,7 +2303,9 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
 
      if (ichoice>0 .and. ichoice<15)then
        write(std_out,*) ch10,'  Enter the root of an output file:'
-       read(std_in,*) output1
+       if (read_string(output1, unit=std_in) /= 0) then
+         MSG_ERROR("Fatal error!")
+       end if
        write(std_out,*) '  The root of your file is : ',trim(output1)
        output=trim(output1)
        call int2char10(ckpt,string)
@@ -2605,7 +2334,7 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
        write(std_out,*)
        if (open_file(output, msg, newunit=unout, status='replace',form='formatted') /= 0) then
          MSG_ERROR(msg)
-       end if 
+       end if
        call print_fofr_ri("RI",nr1,nr2,nr3,n4,n5,n6,fofr,unit=unout)
        close(unout)
        exit
@@ -2617,7 +2346,7 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
        write(std_out,*)
        if (open_file(output, msg, newunit=unout, status='replace',form='formatted') /= 0) then
          MSG_ERROR(msg)
-       end if 
+       end if
        call print_fofr_ri("R",nr1,nr2,nr3,n4,n5,n6,fofr,unit=unout)
        close(unout)
        exit
@@ -2629,7 +2358,7 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
        write(std_out,*)
        if (open_file(output, msg, newunit=unout, status='replace',form='formatted') /= 0) then
          MSG_ERROR(msg)
-       end if 
+       end if
        call print_fofr_ri("I",nr1,nr2,nr3,n4,n5,n6,fofr,unit=unout)
        close(unout)
        exit
@@ -2643,7 +2372,7 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
        write(std_out,*)
        if (open_file(output, msg, newunit=unout, status='replace',form='formatted') /= 0) then
          MSG_ERROR(msg)
-       end if 
+       end if
        call print_fofr_xyzri("RI",nr1,nr2,nr3,n4,n5,n6,fofr,rprimd,conv_fact=Bohr_Ang,unit=unout)
        close(unout)
        exit
@@ -2656,7 +2385,7 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
        write(std_out,*)
        if (open_file(output, msg, newunit=unout, status='replace',form='formatted') /= 0) then
          MSG_ERROR(msg)
-       end if 
+       end if
        call print_fofr_xyzri("R",nr1,nr2,nr3,n4,n5,n6,fofr,rprimd,conv_fact=Bohr_Ang,unit=unout)
        close(unout)
        exit
@@ -2669,7 +2398,7 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
        write(std_out,*)
        if (open_file(output, msg, newunit=unout, status='replace',form='formatted') /= 0) then
          MSG_ERROR(msg)
-       end if 
+       end if
        call print_fofr_xyzri("I",nr1,nr2,nr3,n4,n5,n6,fofr,rprimd,conv_fact=Bohr_Ang,unit=unout)
        close(unout)
        exit
@@ -2691,7 +2420,7 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
        do ifile=1,2
          if (open_file(filename(ifile), msg, newunit=unout, status='replace',form='formatted') /= 0) then
            MSG_ERROR(msg)
-         end if 
+         end if
          rewind(unout)
          write(unout,*)'# band,  eig_kvalues   and   occupations'
          do iband=1,nband(ckpt)
@@ -2743,7 +2472,7 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
 
        if (open_file(filename(1), msg, newunit=unout, status='replace',form='formatted') /= 0) then
          MSG_ERROR(msg)
-       end if 
+       end if
        rewind(unout)
        write(unout,*)'# band,  eig_kvalues   and   occupations'
        do iband=1,nband(ckpt)
@@ -2794,7 +2523,7 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
 
        if (open_file(filename(1), msg, newunit=unout, status='replace',form='formatted') /= 0) then
          MSG_ERROR(msg)
-       end if 
+       end if
        rewind(unout)
        write(unout,*)'# band,  eig_kvalues   and   occupations'
        do iband=1,nband(ckpt)
@@ -2849,7 +2578,7 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
        do ifile=1,2
          if (open_file(filename(ifile), msg, newunit=unout, status='replace',form='formatted') /= 0) then
            MSG_ERROR(msg)
-         end if 
+         end if
          rewind(unout)
          do iband=1,nband(ckpt)
            write(unout,'(a,2f20.16)')'#', eig_k(iband),occ_k(iband)
@@ -2884,9 +2613,9 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
          close(unit=unout)
        end do
        ABI_DEALLOCATE(filename)
-!        
+!
 !        write LATTICE_VEC.dx file
-!        
+!
        ABI_ALLOCATE(filename,(3))
        filename(1)=trim(output1)//'_LATTICE_VEC.dx'
        filename(2)=trim(output1)//'_ATOM_POS.dx'
@@ -2895,7 +2624,7 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
        write(std_out,*)'Give the lattice file, ', trim(filename(1))
        if (open_file(filename(1), msg, newunit=unout, status='replace',form='formatted') /= 0) then
          MSG_ERROR(msg)
-       end if 
+       end if
 
        write(unout,'("#",/,"#",/,"#    LATTICE VECTOR INFO:",/,"#",/,"#")')
        write(unout,'(a)') 'object "lattices" class array type float rank 1 shape 3 items 3 data follows'
@@ -2910,14 +2639,14 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
        write(unout,'(a)') 'component "data" value "lattices"'
        write(unout,'(a)') 'component "positions" value "lattices_location"'
        close(unout)
-!        
+!
 !        write ATOM_POS.dx file
-!        
+!
        write(std_out,*)'Give the atoms positions file, ', trim(filename(2))
 
        if (open_file(filename(2), msg, newunit=unout, status='replace',form='formatted') /= 0) then
          MSG_ERROR(msg)
-       end if 
+       end if
 
        write(unout,'("#",/,"#",/,"#    BALL AND STICK INFO:",/,"#",/,"#")')
        write(unout,'(a,i5,a)') 'object "atomcoord" array type float rank 1 shape 3 items ',natom,' data follows'
@@ -2934,13 +2663,13 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
        write(unout,'(a)') 'component "data" value "colorcode"'
        close(unout)
 
-!        
+!
 !        write UCELL_FRAME.dx file
-!        
+!
        write(std_out,*)'Give the enveloppe of the cell file, ',trim(filename(3))
        if (open_file(filename(3), msg, newunit=unout, status='replace',form='formatted') /= 0) then
          MSG_ERROR(msg)
-       end if 
+       end if
 
        write(unout,'("#",/,"#",/,"#    UNIT CELL FRAME INFO:",/,"#",/,"#")')
        write(unout,'(a)')'object 3 class array type int rank 1 shape 2 items 12 data follows'
@@ -2982,7 +2711,9 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
        write(std_out,*) 'Do you want to shift the grid along the x,y or z axis (y/n)?'
        write(std_out,*)
        shift_tau(:) = 0.0
-       read (std_in,*) outputchar
+       if (read_string(outputchar, unit=std_in) /= 0) then
+         MSG_ERROR("Fatal error!")
+       end if
        if (outputchar == 'y' .or. outputchar == 'Y') then
          MSG_ERROR("Shift is buggy, don't use it")
          write(std_out,*) 'Give the three shifts (x,y,z < ',nr1,nr2,nr3,') :'
@@ -2999,7 +2730,7 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
 
        if (open_file(filename(1), msg, newunit=unout, status='replace',form='formatted') /= 0) then
          MSG_ERROR(msg)
-       end if 
+       end if
        rewind(unout)
        do iband=1,nband(ckpt)
          write(unout,'(a,2f20.16)')'#', eig_k(iband),occ_k(iband)
@@ -3017,9 +2748,9 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
        end do
        write(unout,'(1X,A)') 'PRIMCOORD'
        write(unout,*) natom, ' 1'
-!        
+!
 !        generate translated coordinates to match density shift
-!        
+!
        do iatom = 1,natom
          tau2 (:,iatom) = xcart(:,iatom) - shift_tau(:)
        end do
@@ -3144,7 +2875,9 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
        write(std_out,*) 'Do you want to shift the grid along the x,y or z axis (y/n)?'
        write(std_out,*)
        shift_tau(:) = 0.0
-       read (std_in,*) outputchar
+       if (read_string(outputchar, unit=std_in) /= 0) then
+         MSG_ERROR("Fatal error!")
+       end if
        if (outputchar == 'y' .or. outputchar == 'Y') then
          MSG_ERROR("Shift is buggy, don't use it")
          write(std_out,*) 'Give the three shifts (x,y,z < ',nr1,nr2,nr3,') :'
@@ -3161,7 +2894,7 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
 
        if (open_file(filename(1), msg, newunit=unout, status='unknown',form='formatted') /= 0) then
          MSG_ERROR(msg)
-       end if 
+       end if
        rewind(unout)
 
        do iband=1,nband(ckpt)
@@ -3180,9 +2913,9 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
        end do
        write(unout,'(1X,A)') 'PRIMCOORD'
        write(unout,*) natom, ' 1'
-!        
+!
 !        generate translated coordinates to match density shift
-!        
+!
        do iatom = 1,natom
          tau2 (:,iatom) = xcart(:,iatom) - shift_tau(:)
        end do
@@ -3212,11 +2945,11 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
        end do
 
        do ir3=1,nr3+1
-         ii3=mod(ir3-1,nr3) + 1
+         ii3=mod(ir3-1+gridshift3, nr3) + 1
          do ir2=1,nr2+1
-           ii2=mod(ir2-1,nr2) + 1
+           ii2=mod(ir2-1+gridshift2, nr2) + 1
            do ir1=1,nr1+1
-             ii1=mod(ir1-1,nr1) + 1
+             ii1=mod(ir1-1+gridshift1, nr1) + 1
              write(unout,'(ES17.10)') fofr(1,ii1,ii2,ii3)
            end do
          end do
@@ -3239,7 +2972,7 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
 
        if (open_file(output, msg, newunit=unout, status='replace',form='formatted') /= 0) then
          MSG_ERROR(msg)
-       end if 
+       end if
        call print_fofr_cube(nr1,nr2,nr3,n4,n5,n6,fofr,rprimd,natom,znucl_atom_int,xcart,unit=unout)
        close(unout)
        exit

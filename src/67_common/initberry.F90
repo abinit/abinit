@@ -8,7 +8,7 @@
 !! ddk and the response of an insulator to a homogenous electric field.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2004-2016 ABINIT group (MVeithen).
+!! Copyright (C) 2004-2017 ABINIT group (MVeithen).
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -148,7 +148,7 @@ subroutine initberry(dtefield,dtset,gmet,gprimd,kg,mband,&
  integer :: idir,idum,idum1,ierr,ifor,ikg,ikg1,ikpt,ikpt1,ikpt1f
  integer :: ikpt1i,ikpt2,ikpt_loc,ikptf,ikpti,ikstr,index,ineigh,ipw,ipwnsfac
  integer :: isppol,istr,istwf_k,isym,isym1,itrs,itypat,iunmark,jpw,klmn,lmax,lmn2_size_max
- integer :: me,me_g0,mkmem_,my_nspinor,nband_k,nband_occ_k,ncpgr,nkstr,nproc,npw_k,npw_k1,spaceComm
+ integer :: me,me_g0,mkmem_,my_nspinor,nband_k,mband_occ_k,ncpgr,nkstr,nproc,npw_k,npw_k1,spaceComm
  integer :: option, brav, mkpt, nkptlatt
  integer :: jstr,ii,jj,isign
  integer :: dk_flag, coord1, coord2
@@ -409,7 +409,8 @@ subroutine initberry(dtefield,dtset,gmet,gprimd,kg,mband,&
  ABI_ALLOCATE(dtefield%fkgindex,(dtefield%fnkpt))
  dtefield%ikpt_dk(:,:,:) = 0
  dtefield%cgindex(:,:) = 0
- dtefield%nband_occ = 0
+ dtefield%mband_occ = 0
+ ABI_ALLOCATE(dtefield%nband_occ,(nsppol))
  dtefield%kgindex(:) = 0
  dtefield%fkgindex(:) = 0
 
@@ -430,18 +431,19 @@ subroutine initberry(dtefield,dtset,gmet,gprimd,kg,mband,&
 
  index = 0
  do isppol = 1, nsppol
+   dtefield%nband_occ(isppol) = 0
    do ikpt = 1, nkpt
 
-     nband_occ_k = 0
+     mband_occ_k = 0
      nband_k = dtset%nband(ikpt + (isppol - 1)*nkpt)
 
      do iband = 1, nband_k
        index = index + 1
-       if (abs(occ(index) - dtefield%sdeg) < tol8) nband_occ_k = nband_occ_k + 1
+       if (abs(occ(index) - dtefield%sdeg) < tol8) mband_occ_k = mband_occ_k + 1
      end do
 
      if (fieldflag) then
-       if (nband_k /= nband_occ_k) then
+       if (nband_k /= mband_occ_k) then
          write(message,'(a,a,a)')&
 &         '  In a finite electric field, nband must be equal ',ch10,&
 &         '  to the number of valence bands.'
@@ -449,25 +451,26 @@ subroutine initberry(dtefield,dtset,gmet,gprimd,kg,mband,&
        end if
      end if
 
-     if ((ikpt > 1).or.(isppol > 1)) then
-       if (dtefield%nband_occ /= nband_occ_k) then
-         message = "The number of valence bands is not the same for every k-point"
+     if (ikpt > 1) then
+       if (dtefield%nband_occ(isppol) /= mband_occ_k) then
+         message = "The number of valence bands is not the same for every k-point of present spin channel"
          MSG_ERROR(message)
        end if
      else
-       dtefield%nband_occ = nband_occ_k
+       dtefield%mband_occ         = max(dtefield%mband_occ, mband_occ_k)
+       dtefield%nband_occ(isppol) = mband_occ_k
      end if
 
    end do                ! close loop over ikpt
  end do                ! close loop over isppol
 
  if (fieldflag) then
-   ABI_ALLOCATE(dtefield%smat,(2,dtefield%nband_occ,dtefield%nband_occ,nkpt*nsppol,2,3))
+   ABI_ALLOCATE(dtefield%smat,(2,dtefield%mband_occ,dtefield%mband_occ,nkpt*nsppol,2,3))
 
    dtefield%smat(:,:,:,:,:,:) = zero
  end if
 
- ABI_ALLOCATE(dtefield%sflag,(dtefield%nband_occ,nkpt*nsppol,2,3))
+ ABI_ALLOCATE(dtefield%sflag,(dtefield%mband_occ,nkpt*nsppol,2,3))
  dtefield%sflag(:,:,:,:) = 0
 
 !Compute the location of each wavefunction

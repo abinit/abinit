@@ -10,6 +10,8 @@ nspinor3 1 nsppol3 2
 spinat3 0 0 0
 nband3  6
 
+so_psp 0
+
 ecut 6
 
 occopt 7
@@ -44,7 +46,7 @@ xred 0 0 0
 #%% max_nprocs = 8
 #%% [extra_info]
 #%% authors = M. Verstraete
-#%% keywords = PARTIAL_DOS, FAILS_IFMPI
+#%% keywords = PARTIAL_DOS
 #%% description = test partial dos calculation with spinors (previously not enabled) and spin 
 #%%    polarization while we are at it
 #%%<END TEST_INFO>

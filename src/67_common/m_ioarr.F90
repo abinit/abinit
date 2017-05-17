@@ -5,13 +5,13 @@
 !!
 !! FUNCTION
 !!  This module provides routines to read/write arrays given on the FFT mesh (densities, potentials ...).
-!!  The code supports both Fortran files as well as netcdf files in a transparent way. 
-!!  The appropriate IO layer is selected from files extensions: netcdf primitives are used if the 
-!!  file ends with `.nc`. If all the other cases we read/write files in Fortran format. 
-!!  MPI-IO primitives are used when the FFT arrays are MPI distributed.  
+!!  The code supports both Fortran files as well as netcdf files in a transparent way.
+!!  The appropriate IO layer is selected from files extensions: netcdf primitives are used if the
+!!  file ends with `.nc`. If all the other cases we read/write files in Fortran format.
+!!  MPI-IO primitives are used when the FFT arrays are MPI distributed.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (DCA, XG, GMR, MVer, MT, MG)
+!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR, MVer, MT, MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -39,10 +39,10 @@ MODULE m_ioarr
  use m_ebands
  use m_hdr
  use m_pawrhoij
-#ifdef HAVE_MPI2 
+#ifdef HAVE_MPI2
  use mpi
 #endif
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
  use netcdf
 #endif
 
@@ -55,19 +55,20 @@ MODULE m_ioarr
  use m_mpinfo,        only : destroy_mpi_enreg, ptabs_fourdp
  use m_distribfft,    only : init_distribfft_seq
 
-
  implicit none
 
-#ifdef HAVE_MPI1 
+#ifdef HAVE_MPI1
  include 'mpif.h'
 #endif
 
- private 
+ private
 
- public :: ioarr
- public :: fftdatar_write
- public :: fftdatar_write_from_hdr
- public :: read_rhor
+ public :: ioarr                     ! Read or write rho(r) or v(r), either ground-state or response-functions.
+ public :: fftdatar_write            ! Write an array in real space. IO library is automatically selected
+                                     ! from the file extension and the number of FFT processors:
+ public :: fftdatar_write_from_hdr   ! Write an array in real-space to file plus crystal_t and ebands_t
+ public :: read_rhor                 ! Read rhor from DEN file.
+ public :: fort_denpot_skip          ! Skip the header and the DEN/POT records (Fortran format)
 
 CONTAINS  !====================================================================================================
 !!***
@@ -107,9 +108,9 @@ CONTAINS  !=====================================================================
 !! mpi_enreg=information about MPI parallelization
 !! rdwr=choice parameter, see above
 !! rdwrpaw=1 only if rhoij PAW quantities have to be read (if rdwr=1)
-!! [single_proc]=True if only ONE MPI process is calling this routine. This usually happens when 
+!! [single_proc]=True if only ONE MPI process is calling this routine. This usually happens when
 !!   master calls ioarr to read data that is then broadcasted in the caller. Default: False.
-!!   Note that singleproc is not compatible with FFT parallelism because nfft is assumed to be 
+!!   Note that singleproc is not compatible with FFT parallelism because nfft is assumed to be
 !!   the total number of points in the FFT mesh.
 !!
 !! OUTPUT
@@ -123,10 +124,10 @@ CONTAINS  !=====================================================================
 !!  pawrhoij(my_natom*usepaw) <type(pawrhoij_type)>= paw rhoij occupancies and related data
 !!
 !! PARENTS
-!!      outscfcv
+!!      gstate,outscfcv
 !!
 !! CHILDREN
-!!      hdr_check
+!!      hdr_check,hdr_fort_read,hdr_free
 !!
 !! SOURCE
 
@@ -159,14 +160,14 @@ subroutine ioarr(accessfil,arr,dtset,etotal,fform,fildata,hdr,mpi_enreg, &
 !arrays
  integer,intent(in) :: ngfft(18)
  real(dp),intent(inout),target :: arr(cplex*nfft,dtset%nspden)
- type(pawrhoij_type),intent(inout) :: pawrhoij(:) 
+ type(pawrhoij_type),intent(inout) :: pawrhoij(:)
 
 !Local variables-------------------------------
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
  integer :: ncid,ncerr
  character(len=fnlen) :: file_etsf
 #endif
-#ifdef HAVE_DFT_BIGDFT
+#ifdef HAVE_BIGDFT
  integer :: i,i1,i2,i3,ia,ind,n1,n2,n3
  integer :: zindex,zstart,zstop
 #endif
@@ -221,7 +222,7 @@ subroutine ioarr(accessfil,arr,dtset,etotal,fform,fildata,hdr,mpi_enreg, &
 
  call wrtout(std_out,ABI_FUNC//': file name is '//TRIM(fildata),'COLL')
 
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
  if (accessfil == IO_MODE_ETSF) then ! Initialize filename in case of ETSF file.
    file_etsf = nctk_ncify(fildata)
    call wrtout(std_out,sjoin('file name for ETSF access: ', file_etsf),'COLL')
@@ -275,8 +276,8 @@ subroutine ioarr(accessfil,arr,dtset,etotal,fform,fildata,hdr,mpi_enreg, &
  if (rdwr==1) then
    if (accessfil == 0 .or. accessfil == 4) then
 
-     ! Here master checks if the input rho(r) is given on a FFT mesh that quals 
-     ! the one used in the run. If not, we perform a Fourier interpolation, we write the 
+     ! Here master checks if the input rho(r) is given on a FFT mesh that quals
+     ! the one used in the run. If not, we perform a Fourier interpolation, we write the
      ! interpolated rho(r) to a temporary file and we use this file to restart.
      if (ALLOW_FFTINTERP .and. usewvl==0) then
        need_fftinterp = .False.; icheck_fft = .True.
@@ -392,7 +393,7 @@ subroutine ioarr(accessfil,arr,dtset,etotal,fform,fildata,hdr,mpi_enreg, &
          !do idat=1,ndat
          !  do i3=1,n3
          !    if( fftn3_distrib(i3) == me_fft) then
-         !      i3_local = ffti3_local(i3) 
+         !      i3_local = ffti3_local(i3)
          !      i3_ldat = i3_local + (idat - 1) * nd3proc
          !      do i2=1,n2
          !        frbase=n1*(i2-1+n2*(i3_local-1)) + (idat - 1) * nfft
@@ -415,15 +416,15 @@ subroutine ioarr(accessfil,arr,dtset,etotal,fform,fildata,hdr,mpi_enreg, &
        close (unit=unt, err=10, iomsg=errmsg)
      end if
 
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
    else if (accessfil == 3) then
 
      ! Read the header and broadcast it in comm_cell
-     ! FIXME: Use xmpi_comm_self for the time-being because, in loper, ioarr 
-     ! is called by me==0 
+     ! FIXME: Use xmpi_comm_self for the time-being because, in loper, ioarr
+     ! is called by me==0
      call hdr_read_from_fname(hdr0, file_etsf, fform_dum, comm_cell)
      !call hdr_read_from_fname(hdr0, file_etsf, fform_dum, xmpi_comm_self)
-     ABI_CHECK(fform_dum/=0, "hdr_read_from_fname returned fform 0") 
+     ABI_CHECK(fform_dum/=0, "hdr_read_from_fname returned fform 0")
 
      ! Compare the internal header and the header from the file
      call hdr_check(fform, fform_dum, hdr, hdr0, 'COLL', restart, restartpaw)
@@ -480,7 +481,7 @@ subroutine ioarr(accessfil,arr,dtset,etotal,fform,fildata,hdr,mpi_enreg, &
 !  In the wavelet case (isolated boundary counditions), the
 !  arr array has a buffer that we need to remove.
    if (usewvl == 1) then
-#ifdef HAVE_DFT_BIGDFT
+#ifdef HAVE_BIGDFT
      zindex = wvl_den%denspot%dpbox%nscatterarr(me, 3)
      if (wvl_den%denspot%rhod%geocode == 'F') then
        n1 = (wvl_den%denspot%dpbox%ndims(1) - 31) / 2
@@ -562,12 +563,12 @@ subroutine ioarr(accessfil,arr,dtset,etotal,fform,fildata,hdr,mpi_enreg, &
        close(unt, err=10, iomsg=errmsg)
      end if
 
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
    else if ( accessfil == 3 ) then
 
      ! Master in comm_fft creates the file and writes the header.
      if (xmpi_comm_rank(comm_fft) == 0) then
-       call hdr_write_to_fname(hdr, file_etsf, fform) 
+       call hdr_write_to_fname(hdr, file_etsf, fform)
      end if
      call xmpi_barrier(comm_fft)
 
@@ -620,7 +621,7 @@ subroutine ioarr(accessfil,arr,dtset,etotal,fform,fildata,hdr,mpi_enreg, &
 
  DBG_EXIT("COLL")
 
- return 
+ return
 
  ! Handle Fortran IO error
 10 continue
@@ -660,12 +661,12 @@ end subroutine ioarr
 !!
 !! OUTPUT
 !!  Only writing
-!! 
+!!
 !! NOTES
 !!   The string passed to fftdatar_write (first argument) gives the name used to store the data in the netcdf file
 !!   The function varname_from_fname defined in the module m_hdr.F90 gives the mapping between the Abinit
 !!   file extension and the netcdf name e.g. foo_VHXC.nc --> vxc
-!!   This function is used in cut3d so that we can immediately select the data to analyze without having 
+!!   This function is used in cut3d so that we can immediately select the data to analyze without having
 !!   to prompt the user
 !!   Remember to update varname_from_fname if you add a new file or if you change the name of the variable.
 !!
@@ -675,7 +676,7 @@ end subroutine ioarr
 !!      m_ioarr,outscfcv,sigma
 !!
 !! CHILDREN
-!!      hdr_check
+!!      hdr_check,hdr_fort_read,hdr_free
 !!
 !! SOURCE
 
@@ -698,19 +699,19 @@ subroutine fftdatar_write(varname,path,iomode,hdr,crystal,ngfft,cplex,nfft,nspde
  type(hdr_type),intent(inout) :: hdr
  type(crystal_t),intent(in) :: crystal
  type(ebands_t),optional,intent(in) :: ebands
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: ngfft(18)
  real(dp),intent(inout) :: datar(cplex*nfft,nspden)
- !type(pawrhoij_type),optional,intent(inout) :: pawrhoij_all(hdr%usepaw*crystal%natom) 
+ !type(pawrhoij_type),optional,intent(inout) :: pawrhoij_all(hdr%usepaw*crystal%natom)
 
 !Local variables-------------------------------
 !!scalars
  integer,parameter :: master=0
  integer :: n1,n2,n3,comm_fft,nproc_fft,me_fft,iarr,ierr,ispden,unt,mpierr,fform
- integer :: i3_glob,my_iomode 
+ integer :: i3_glob,my_iomode
  integer(kind=XMPI_OFFSET_KIND) :: hdr_offset,my_offset,nfft_tot
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
  integer :: ncid,ncerr
  character(len=fnlen) :: file_etsf
 #endif
@@ -736,14 +737,12 @@ subroutine fftdatar_write(varname,path,iomode,hdr,crystal,ngfft,cplex,nfft,nspde
  ! Select iomode
  ! Use Fortran IO if nproc_fft 1, in principle this is not needed because the
  ! MPI-IO code should produce binary files that are readable with Fortran-IO
- ! but it seems that NAG uses its own binary format 
+ ! but it seems that NAG uses its own binary format
  my_iomode = iomode
  if (my_iomode /= IO_MODE_ETSF .and. nproc_fft == 1) my_iomode = IO_MODE_FORTRAN
  if (nproc_fft > 1 .and. my_iomode == IO_MODE_FORTRAN) my_iomode = IO_MODE_MPI
 
- call wrtout(std_out, &
-   sjoin("fftdatar_write: about to write data to:", path, "with iomode", iomode2str(my_iomode)) ,'COLL')
-
+ call wrtout(std_out, sjoin(" fftdatar_write: About to write data to:", path, "with iomode", iomode2str(my_iomode)))
  call cwtime(cputime, walltime, gflops, "start")
 
  ! Get MPI-FFT tables from input ngfft
@@ -770,15 +769,15 @@ subroutine fftdatar_write(varname,path,iomode,hdr,crystal,ngfft,cplex,nfft,nspde
 #ifdef HAVE_MPI_IO
  case (IO_MODE_MPI)
    ! Find the first z-plane treated by this node.
-   ! WARNING: Here I assume that the z-planes in real space 
+   ! WARNING: Here I assume that the z-planes in real space
    ! are distributed in contiguous blocks (as usually done in MPI-FFT)
    do i3_glob=1,n3
      if (me_fft == fftn3_distrib(i3_glob)) exit
    end do
    ABI_CHECK(i3_glob /= n3 +1, "This processor does not have z-planes!")
 
-   ! Master writes the header. 
-   if (me_fft == master) call hdr_write_to_fname(hdr,path,fform) 
+   ! Master writes the header.
+   if (me_fft == master) call hdr_write_to_fname(hdr,path,fform)
    call xmpi_barrier(comm_fft) ! TODO: Non-blocking barrier.
 
    call MPI_FILE_OPEN(comm_fft, path, MPI_MODE_RDWR, xmpio_info, unt, mpierr)
@@ -788,20 +787,20 @@ subroutine fftdatar_write(varname,path,iomode,hdr,crystal,ngfft,cplex,nfft,nspde
    call hdr_mpio_skip(unt,fform,hdr_offset)
    !write(std_out,*)"i3_glob, nfft, hdr_offset,",i3_glob,nfft,hdr_offset,fftn3_distrib == me_fft
 
-   ! Each proc writes a contiguous slice of the nspden records. 
+   ! Each proc writes a contiguous slice of the nspden records.
    ! my_offset is the position inside the Fortran record.
    do ispden=1,nspden
      my_offset = hdr_offset + xmpio_bsize_frm + ((ispden - 1) * 2 * xmpio_bsize_frm) + &
-     ((i3_glob-1) * cplex * n1 * n2 * xmpi_bsize_dp)  + ((ispden-1) * cplex * nfft_tot * xmpi_bsize_dp) 
+     ((i3_glob-1) * cplex * n1 * n2 * xmpi_bsize_dp)  + ((ispden-1) * cplex * nfft_tot * xmpi_bsize_dp)
      call MPI_FILE_WRITE_AT_ALL(unt,my_offset,datar(:,ispden),cplex*nfft,MPI_DOUBLE_PRECISION,MPI_STATUS_IGNORE,mpierr)
      ABI_CHECK_MPI(mpierr,"MPI_FILE_WRITE_AT_ALL")
    end do
 
    ! master writes the fortran record markers.
    if (me_fft == master) then
-     bsize_frecord = cplex * nfft_tot * xmpi_bsize_dp 
+     bsize_frecord = cplex * nfft_tot * xmpi_bsize_dp
 #if 1
-     my_offset = hdr_offset 
+     my_offset = hdr_offset
      do ispden=1,nspden
        call xmpio_write_frm(unt,my_offset,xmpio_single,bsize_frecord(ispden),mpierr)
        ABI_CHECK_MPI(mpierr,"xmpio_write_frm")
@@ -826,7 +825,7 @@ subroutine fftdatar_write(varname,path,iomode,hdr,crystal,ngfft,cplex,nfft,nspde
    !end if
 #endif
 
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
  case (IO_MODE_ETSF)
    file_etsf = nctk_ncify(path)
 
@@ -836,7 +835,7 @@ subroutine fftdatar_write(varname,path,iomode,hdr,crystal,ngfft,cplex,nfft,nspde
    NCF_CHECK(ncerr)
    call xmpi_barrier(comm_fft)
 
-   ! Master writes the header. 
+   ! Master writes the header.
    if (xmpi_comm_rank(comm_fft) == master) then
      NCF_CHECK(nctk_open_modify(ncid, file_etsf, xmpi_comm_self))
      NCF_CHECK(hdr_ncwrite(hdr, ncid, fform, nc_define=.True.))
@@ -863,7 +862,7 @@ subroutine fftdatar_write(varname,path,iomode,hdr,crystal,ngfft,cplex,nfft,nspde
  write(msg,'(2(a,f9.1),a)')" IO operation completed. cpu_time: ",cputime," [s], walltime: ",walltime," [s]"
  call wrtout(std_out, msg, "COLL", do_flush=.True.)
 
- return 
+ return
 
  ! Handle Fortran IO error
 10 continue
@@ -891,12 +890,12 @@ end subroutine fftdatar_write
 !! See fftdatar_write for the meaning of the other variables.
 !!
 !! OUTPUT
-!! 
+!!
 !! PARENTS
 !!      dfpt_scfcv,scfcv
 !!
 !! CHILDREN
-!!      hdr_check
+!!      hdr_check,hdr_fort_read,hdr_free
 !!
 !! SOURCE
 
@@ -916,11 +915,11 @@ subroutine fftdatar_write_from_hdr(varname,path,iomode,hdr,ngfft,cplex,nfft,nspd
  integer,intent(in) :: iomode,cplex,nfft,nspden
  character(len=*),intent(in) :: varname,path
  type(hdr_type),intent(inout) :: hdr
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: ngfft(18)
  real(dp),intent(inout) :: datar(cplex*nfft,nspden)
- real(dp),optional,intent(in) :: eigen(:) 
+ real(dp),optional,intent(in) :: eigen(:)
 
 !Local variables-------------------------------
 !!scalars
@@ -961,10 +960,10 @@ end subroutine fftdatar_write_from_hdr
 !! read_rhor
 !!
 !! FUNCTION
-!!  Read the DEN file with name fname reporting the density on the real FFT mesh 
-!!  specified through the input variable ngfft. If the FFT mesh asked and that found 
-!!  on file differ, perform a FFT interpolation and renormalize the density so that it 
-!!  integrates to the correct number of electrons. If the two FFT meshes coincides 
+!!  Read the DEN file with name fname reporting the density on the real FFT mesh
+!!  specified through the input variable ngfft. If the FFT mesh asked and that found
+!!  on file differ, perform a FFT interpolation and renormalize the density so that it
+!!  integrates to the correct number of electrons. If the two FFT meshes coincides
 !!  just report the array stored on file.
 !!
 !! INPUTS
@@ -975,10 +974,10 @@ end subroutine fftdatar_write_from_hdr
 !! ngfft(18)=Info on the FFT mesh.
 !! pawread= 1 if pawrhoij should be read from file, 0 otherwise. Meaningful only if usepaw==1.
 !! mpi_enreg<MPI_type>=Information about MPI parallelization
-!! comm=MPI communicator. See notes 
+!! comm=MPI communicator. See notes
 !! [check_hdr] <type(hdr_type)>=Optional. Used to compare with the hdr read from disk file
 !!   The routine will abort if restart cannot be performed.
-!!  
+!!
 !! OUTPUT
 !! orhor(cplex*nfft,nspden)=The density on the real space mesh.
 !! ohdr=Abinit header read from file.
@@ -995,7 +994,7 @@ end subroutine fftdatar_write_from_hdr
 !!   to get the full array and pawrhoij(natom) on the master node.
 !!
 !!   if xmpi_comm_size(comm) > 1, nfft represents the number of FFT points treated by this processor,
-!!   and pawrhoij is dimensioned with my_natom 
+!!   and pawrhoij is dimensioned with my_natom
 !!   All the processors inside comm and comm_atom should call this routine.
 !!
 !! PARENTS
@@ -1003,7 +1002,7 @@ end subroutine fftdatar_write_from_hdr
 !!      sigma
 !!
 !! CHILDREN
-!!      hdr_check
+!!      hdr_check,hdr_fort_read,hdr_free
 !!
 !! SOURCE
 
@@ -1026,7 +1025,7 @@ subroutine read_rhor(fname, cplex, nspden, nfft, ngfft, pawread, mpi_enreg, orho
 !scalars
  integer,intent(in) :: cplex,nfft,nspden,pawread,comm
  character(len=*),intent(in) :: fname
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
  type(hdr_type),intent(out) :: ohdr
  type(hdr_type),optional,intent(in) :: check_hdr
 !arrays
@@ -1039,7 +1038,7 @@ subroutine read_rhor(fname, cplex, nspden, nfft, ngfft, pawread, mpi_enreg, orho
  integer,parameter :: master=0,paral_kgb0=0
  integer :: unt,fform,iomode,optin,optout,my_rank,mybase,globase,cplex_file
  integer :: ispden,ifft,nfftot_file,nprocs,ierr,i1,i2,i3,i3_local,n1,n2,n3
- real(dp) :: ratio,ucvol 
+ real(dp) :: ratio,ucvol
  real(dp) :: cputime,walltime,gflops
  logical :: need_interp,have_mpifft
  character(len=500) :: msg,errmsg
@@ -1078,10 +1077,11 @@ subroutine read_rhor(fname, cplex, nspden, nfft, ngfft, pawread, mpi_enreg, orho
      end if
 
      call hdr_fort_read(ohdr, unt, fform)
+     ABI_CHECK(fform /= 0, sjoin("fform == 0 while reading:", my_fname))
      call validate_hdr_den()
-    
+
      ! Read PAW Rhoij
-     if (ohdr%usepaw == 1) then 
+     if (ohdr%usepaw == 1) then
        ABI_DT_MALLOC(pawrhoij_file, (ohdr%natom))
        call pawrhoij_nullify(pawrhoij_file)
        call pawrhoij_alloc(pawrhoij_file, ohdr%pawcpxocc, ohdr%nspden, ohdr%nspinor, ohdr%nsppol, ohdr%typat, &
@@ -1099,7 +1099,7 @@ subroutine read_rhor(fname, cplex, nspden, nfft, ngfft, pawread, mpi_enreg, orho
 
      close(unt)
 
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
    case (IO_MODE_ETSF)
      NCF_CHECK(nctk_open_read(unt, my_fname, xmpi_comm_self))
 
@@ -1114,7 +1114,7 @@ subroutine read_rhor(fname, cplex, nspden, nfft, ngfft, pawread, mpi_enreg, orho
      NCF_CHECK(nf90_get_var(unt, nctk_idname(unt, varname), rhor_file, count=[cplex,n1,n2,n3,nspden]))
 
      ! Read PAW Rhoij
-     if (ohdr%usepaw == 1) then 
+     if (ohdr%usepaw == 1) then
        ABI_DT_MALLOC(pawrhoij_file, (ohdr%natom))
        call pawrhoij_nullify(pawrhoij_file)
        call pawrhoij_alloc(pawrhoij_file, ohdr%pawcpxocc, ohdr%nspden, ohdr%nspinor, ohdr%nsppol, ohdr%typat, &
@@ -1137,9 +1137,9 @@ subroutine read_rhor(fname, cplex, nspden, nfft, ngfft, pawread, mpi_enreg, orho
      ! The renormalization of the charge is not done in case of PAW since the onsite
      ! contributions have to be added. This is left to the caller.
      call wrtout(std_out," read_rhor: FFT meshes differ, performing Fourier interpolation.","COLL")
-     ngfft_file(1:3) = ohdr%ngfft(1:3)  
+     ngfft_file(1:3) = ohdr%ngfft(1:3)
      ngfft_file(4) = 2*(ngfft_file(1)/2)+1 ! 4:18 are used in fourdp
-     ngfft_file(5) = 2*(ngfft_file(2)/2)+1 
+     ngfft_file(5) = 2*(ngfft_file(2)/2)+1
      ngfft_file(6) = ngfft_file(3)
      ngfft_file(7:18) = ngfft(7:18)
 
@@ -1172,14 +1172,14 @@ subroutine read_rhor(fname, cplex, nspden, nfft, ngfft, pawread, mpi_enreg, orho
  end if ! master
 
  if (nprocs == 1) then
-   orhor = rhor_file 
+   orhor = rhor_file
    if (pawread == 1) call pawrhoij_copy(pawrhoij_file, pawrhoij)
-  
+
  else
    call hdr_bcast(ohdr, master, my_rank, comm)
 
    ! Eventually copy (or distribute) PAW data
-   if (ohdr%usepaw == 1 .and. pawread == 1) then 
+   if (ohdr%usepaw == 1 .and. pawread == 1) then
      if (my_rank /= master) then
        ABI_DT_MALLOC(pawrhoij_file, (ohdr%natom))
        call pawrhoij_nullify(pawrhoij_file)
@@ -1220,7 +1220,7 @@ subroutine read_rhor(fname, cplex, nspden, nfft, ngfft, pawread, mpi_enreg, orho
      do ispden=1,nspden
        do i3=1,n3
          if (fftn3_distrib(i3) /= mpi_enreg%me_fft) cycle
-         i3_local = ffti3_local(i3) 
+         i3_local = ffti3_local(i3)
          do i2=1,n2
            mybase = cplex * (n1 * (i2-1 + n2*(i3_local-1)))
            globase = cplex * (n1 * (i2-1 + n2*(i3-1)))
@@ -1230,8 +1230,8 @@ subroutine read_rhor(fname, cplex, nspden, nfft, ngfft, pawread, mpi_enreg, orho
          end do
        end do
      end do
-   else  
-     orhor = rhor_file 
+   else
+     orhor = rhor_file
    end if
  end if ! nprocs > 1
 
@@ -1246,13 +1246,13 @@ subroutine read_rhor(fname, cplex, nspden, nfft, ngfft, pawread, mpi_enreg, orho
  write(msg,'(2(a,f9.1),a)')" IO operation completed. cpu_time: ",cputime," [s], walltime: ",walltime," [s]"
  call wrtout(std_out, msg, "COLL", do_flush=.True.)
 
- return 
+ return
 
  ! Handle Fortran IO error
 10 continue
  MSG_ERROR(errmsg)
 
-contains 
+contains
 
 subroutine validate_hdr_den()
 
@@ -1273,7 +1273,7 @@ subroutine validate_hdr_den()
 
 !Local variables-------------------------------
 !scalars
- integer,parameter :: fform_den=52 
+ integer,parameter :: fform_den=52
  integer :: restart, restartpaw
 ! *************************************************************************
 
@@ -1302,6 +1302,65 @@ end subroutine read_rhor
 !!***
 
 !----------------------------------------------------------------------
+
+!!****f* m_ioarr/fort_denpot_skip
+!! NAME
+!!  fort_denpot_skip
+!!
+!! FUNCTION
+!!  Skip the header and the DEN/POT records. Mainly used to append data to a pre-existent file.
+!!  Return exit code.
+!!
+!! INPUTS
+!!  unit=Fortran unit number (already opened in the caller).
+!!  msg=Error message if ierr /= 0
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+integer function fort_denpot_skip(unit, msg) result(ierr)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'fort_denpot_skip'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+ integer,intent(in) :: unit
+ character(len=*),intent(out) :: msg
+
+!Local variables-------------------------------
+ integer :: ii,fform,nspden
+ type(hdr_type) :: hdr
+
+! *********************************************************************
+
+ ierr = 1
+ call hdr_fort_read(hdr, unit, fform)
+ if (fform == 0) then
+    msg = "hdr_fort_read returned fform == 0"; return
+ end if
+
+ nspden = hdr%nspden
+ call hdr_free(hdr)
+
+ ! Skip the records with v1.
+ do ii=1,nspden
+   read(unit, iostat=ierr, iomsg=msg)
+   if (ierr /= 0) return
+ end do
+
+ ierr = 0
+
+end function fort_denpot_skip
+!!***
 
 end module m_ioarr
 !!***

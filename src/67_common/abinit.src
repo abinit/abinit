@@ -1,6 +1,6 @@
 # -*- Python -*-
 #
-# Copyright (C) 2005-2016 ABINIT Group (Yann Pouillon)
+# Copyright (C) 2005-2017 ABINIT Group (Yann Pouillon)
 #
 # This file is part of the ABINIT software package. For license information,
 # please see the COPYING file in the top-level directory of the ABINIT source
@@ -30,7 +30,6 @@ sources = [
  "conducti_paw.F90",
  "conducti_paw_core.F90",
  "constrf.F90",
- "dens_in_sph.F90",
  "dielmt.F90",
  "dieltcel.F90",
  "emispec_paw.F90",
@@ -59,6 +58,7 @@ sources = [
  "jellium.F90",
  "ks_ddiago.F90",
  "linemin.F90",
+ "m_epjdos.F90",
  "mag_constr.F90",
  "mag_constr_e.F90",
  "make_efg_el.F90",
@@ -88,6 +88,8 @@ sources = [
  "mlwfovlp_ylmfar.F90",
  "moddiel.F90",
  "msig.F90",
+ "multipoles_out.F90",
+ "m_eprenorms.F90",
  "m_plowannier.F90",
  "m_vcoul.F90",
  "newkpt.F90",
@@ -95,6 +97,7 @@ sources = [
  "odamix.F90",
  "optics_vloc.F90",
  "partial_dos_fractions.F90",
+ "partial_dos_fractions_paw.F90",
  "posdoppler.F90",
  "poslifetime.F90",
  "posratecore.F90",
@@ -110,6 +113,7 @@ sources = [
  "setup_positron.F90",
  "setup1.F90",
  "setvtr.F90",
+ "spatialchempot.F90",
  "spin_current.F90",
  "stress.F90",
  "strhar.F90",

@@ -11,7 +11,7 @@
 !! (see Marzari and Vanderbilt, PRB 56, 12847 (1997), Appendix B)
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2016 ABINIT group (MVeithen)
+!! Copyright (C) 1999-2017 ABINIT group (MVeithen)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -139,22 +139,24 @@ subroutine dfptnl_mv(cg,cgindex,cg1,cg3,dtset,dtfil,d3_berry,gmet,&
  real(dp), intent(out) :: d3_berry(2,3)
 !
 !---  Arguments : structured datatypes
- type(MPI_type), intent(inout) :: mpi_enreg
+ type(MPI_type), intent(in) :: mpi_enreg
  type(datafiles_type), intent(in) :: dtfil
  type(dataset_type), intent(in) :: dtset
 
 !Local variables-------------------------------
 !
 !---- Local variables : integer scalars
- integer :: bantot,count,counter,count1,iband,icg
+ integer :: count,counter,count1,iband,icg
  integer :: ierr,iexit,ii,ikpt,ikpt_loc,ikpt2
  integer :: ikpt_rbz,ineigh,info,ipw,isppol,jband,jcg,jj,jkpt,job,jpw, jkpt2, jkpt_rbz
- integer :: lband,lpband,nband_k,npw_k,npw_k1,my_source,his_source,dest,tag
+ integer :: lband,lpband,nband_occ,npw_k,npw_k1,my_source,his_source,dest,tag
  integer :: spaceComm
  integer,parameter :: level=52
+ integer :: bdtot_index
 !
 !---- Local variables : integer arrays
  integer,allocatable :: ipvt(:)
+ integer, allocatable :: bd_index(:,:)
 !
 !---- Local variables : real(dp) scalars
  real(dp) :: dotnegi,dotnegr,dotposi,dotposr
@@ -203,7 +205,6 @@ subroutine dfptnl_mv(cg,cgindex,cg1,cg3,dtset,dtfil,d3_berry,gmet,&
 !fab: I think that the following restriction must be eliminated: 
 !isppol = 1
 
- bantot = 0
  ikpt_loc = 0
  d3_aux(:,:) = 0_dp
 
@@ -214,8 +215,15 @@ subroutine dfptnl_mv(cg,cgindex,cg1,cg3,dtset,dtfil,d3_berry,gmet,&
  ABI_ALLOCATE(ipvt,(mband))
  ABI_ALLOCATE(s3mat,(2,mband,mband))
  ABI_ALLOCATE(zgwork,(2,mband))
+ ABI_ALLOCATE(bd_index, (nkpt2, nsppol))
 
-
+ bdtot_index = 0
+ do isppol = 1, nsppol
+   do ikpt_rbz = 1, nkpt2
+     bd_index(ikpt_rbz,isppol) = bdtot_index
+     bdtot_index = bdtot_index + dtset%nband(ikpt_rbz+nkpt2*(isppol-1))
+   end do
+ end do
 
 !fab: I think here I have to add the loop over spin
  
@@ -267,7 +275,13 @@ subroutine dfptnl_mv(cg,cgindex,cg1,cg3,dtset,dtfil,d3_berry,gmet,&
        ikpt2  = kneigh(ineigh,ikpt)
        ikpt_rbz = kptindex(1,ikpt2)   ! index of the k-point in the reduced BZ
        jj = cgindex(ikpt_rbz,isppol)
-       nband_k = dtset%nband(ikpt_rbz+nkpt2*(isppol-1))
+       ! previous fixed value for nband_k now called nband_occ:
+       !nband_occ = dtset%nband(ikpt_rbz+nkpt2*(isppol-1))
+       ! TODO: check if all these bands are occupied in nsppol = 2 case
+       nband_occ = 0
+       do iband = 1, dtset%nband(ikpt_rbz+nkpt2*(isppol-1))
+         if (dtset%occ_orig(bd_index(ikpt_rbz,isppol) + iband) > tol10) nband_occ = nband_occ + 1
+       end do
        npw_k1 = npwarr(ikpt_rbz)
        dk_(:) = kpt3(:,ikpt2) - dtset%kptns(:,ikpt)
        dk(:)  = dk_(:) - nint(dk_(:)) + real(kg_neigh(ineigh,ikpt,:),dp)
@@ -424,8 +438,8 @@ subroutine dfptnl_mv(cg,cgindex,cg1,cg3,dtset,dtfil,d3_berry,gmet,&
            jpw = pwind(ipw,ineigh,ikpt_loc)
            if (jpw /= 0) then
 
-             do iband = 1, nband_k
-               do jband = 1, nband_k
+             do iband = 1, nband_occ
+               do jband = 1, nband_occ
 
                  icg = ii + (iband-1)*npw_k + ipw
                  jcg = (jband-1)*npw_k1 + jpw
@@ -468,8 +482,8 @@ subroutine dfptnl_mv(cg,cgindex,cg1,cg3,dtset,dtfil,d3_berry,gmet,&
            jpw = pwind(ipw,ineigh,ikpt_loc)
            if (jpw /= 0) then
 
-             do iband = 1, nband_k
-               do jband = 1, nband_k
+             do iband = 1, nband_occ
+               do jband = 1, nband_occ
 
                  icg = ii + (iband-1)*npw_k + ipw
                  jcg = (jband-1)*npw_k1 + jpw
@@ -516,16 +530,16 @@ subroutine dfptnl_mv(cg,cgindex,cg1,cg3,dtset,dtfil,d3_berry,gmet,&
        job = 1  ! compute inverse only
        qmat(:,:,:) = smat(:,:,:)
 
-       call dzgefa(qmat,nband_k,nband_k,ipvt,info)
-       call dzgedi(qmat,nband_k,nband_k,ipvt,det,zgwork,job)
+       call dzgefa(qmat,mband,nband_occ,ipvt,info)
+       call dzgedi(qmat,mband,nband_occ,ipvt,det,zgwork,job)
 
 !      DEBUG
 !      write(100,*)
 !      write(100,*)'ikpt = ',ikpt,'ineigh = ',ineigh
-!      do iband = 1,nband_k
-!      do jband = 1,nband_k
+!      do iband = 1,nband_occ
+!      do jband = 1,nband_occ
 !      c1 = 0_dp ; c2 = 0_dp
-!      do lband = 1,nband_k
+!      do lband = 1,nband_occ
 !      c1 = c1 + smat(1,iband,lband)*qmat(1,lband,jband) - &
 !      &           smat(2,iband,lband)*qmat(2,lband,jband)
 !      c2 = c2 + smat(1,iband,lband)*qmat(2,lband,jband) + &
@@ -543,8 +557,8 @@ subroutine dfptnl_mv(cg,cgindex,cg1,cg3,dtset,dtfil,d3_berry,gmet,&
 
        dotposr = 0_dp ; dotposi = 0_dp
        dotnegr = 0_dp ; dotnegi = 0_dp
-       do iband = 1, nband_k
-         do jband = 1, nband_k
+       do iband = 1, nband_occ
+         do jband = 1, nband_occ
 
            dotposr = dotposr + &
 &           s13mat(1,iband,jband)*qmat(1,jband,iband) - &
@@ -554,8 +568,8 @@ subroutine dfptnl_mv(cg,cgindex,cg1,cg3,dtset,dtfil,d3_berry,gmet,&
 &           s13mat(2,iband,jband)*qmat(1,jband,iband)
 
 
-           do lband = 1, nband_k
-             do lpband= 1, nband_k
+           do lband = 1, nband_occ
+             do lpband= 1, nband_occ
 
                z1(1) = s1mat(1,iband,jband)*qmat(1,jband,lband) - &
 &               s1mat(2,iband,jband)*qmat(2,jband,lband)
@@ -586,8 +600,6 @@ subroutine dfptnl_mv(cg,cgindex,cg1,cg3,dtset,dtfil,d3_berry,gmet,&
      end do        ! End loop over neighbours
 
 
-     bantot = bantot + nband_k
-
    end do      ! End loop over k-points
 
  end do  ! fab: end loop over spin 
@@ -605,6 +617,7 @@ subroutine dfptnl_mv(cg,cgindex,cg1,cg3,dtset,dtfil,d3_berry,gmet,&
  ABI_DEALLOCATE(ipvt)
  ABI_DEALLOCATE(s3mat)
  ABI_DEALLOCATE(zgwork)
+ ABI_DEALLOCATE(bd_index)
 
 
 !fab: I think that in the following we have to make a distinction:

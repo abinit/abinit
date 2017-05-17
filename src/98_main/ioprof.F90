@@ -7,7 +7,7 @@
 !! Tool for frofiling and and testing the IO routines used in abinit
 !!
 !! COPYRIGHT
-!! Copyright (C) 2004-2016 ABINIT group (MG)
+!! Copyright (C) 2004-2017 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -42,7 +42,7 @@ program ioprof
  use m_wfk
  use m_profiling_abi
  use m_hdr
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
  use netcdf
 #endif
 

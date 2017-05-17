@@ -8,7 +8,7 @@
 !! continued fraction to get the density at a point from a fixed potential. 
 !! 
 !! COPYRIGHT
-!! Copyright (C) 2008-2016 ABINIT group (SLeroux,MMancini).
+!! Copyright (C) 2008-2017 ABINIT group (SLeroux,MMancini).
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -98,7 +98,7 @@ subroutine recursion(exppot,coordx,coordy,coordz,an,bn2,rho_out, &
  integer,intent(in) :: tim_fourdp,natom,dim_trott
  real(dp),intent(in) :: fermie,tol,tsmear,rtrotter
  real(dp), intent(out) :: rho_out
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
  type(nlpsprec_type),intent(in) :: nlrec
  type(metricrec_type),intent(in) :: metrec
 !arrays

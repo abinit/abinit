@@ -2,7 +2,7 @@
 .Version 8.0.3 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
 
-.Copyright (C) 1998-2016 ABINIT group . 
+.Copyright (C) 1998-2017 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -155,7 +155,6 @@ _setup2: Arith. and geom. avg. npw (full set) are    6419.000    6419.000
   sigma(2 2)=  1.29129744E-05  sigma(3 1)=  9.01660761E-15
   sigma(3 3)=  1.29129744E-05  sigma(2 1)=  0.00000000E+00
 
- io1dm : about to open file t04o_VCLMB_1DM
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density

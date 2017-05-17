@@ -17,7 +17,7 @@
 !! this routine.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2016 ABINIT group (DC)
+!! Copyright (C) 2005-2017 ABINIT group (DC)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -59,7 +59,7 @@ subroutine wvl_wfsinp_reformat(dtset, mpi_enreg, psps, rprimd, wvl, xred, xred_o
  use m_errors
  use m_xmpi
 
-#if defined HAVE_DFT_BIGDFT
+#if defined HAVE_BIGDFT
  use BigDFT_API, only : copy_old_wavefunctions, reformatmywaves, first_orthon, &
 & deallocate_wfd, wavefunctions_descriptors, deallocate_lr, &
 & local_potential_dimensions, copy_coulomb_operator, &
@@ -89,7 +89,7 @@ subroutine wvl_wfsinp_reformat(dtset, mpi_enreg, psps, rprimd, wvl, xred, xred_o
   real(dp), intent(inout)                :: xred(3, dtset%natom)
 
 !Local variables-------------------------------
-#if defined HAVE_DFT_BIGDFT
+#if defined HAVE_BIGDFT
   integer                  :: itypat
   integer                  :: nSize_old(3)
   real(dp)                 :: hgrid_old(3)
@@ -109,7 +109,7 @@ subroutine wvl_wfsinp_reformat(dtset, mpi_enreg, psps, rprimd, wvl, xred, xred_o
 
 ! *********************************************************************
 
-#if defined HAVE_DFT_BIGDFT
+#if defined HAVE_BIGDFT
 
  write(message, '(a,a)' ) ch10,&
 & ' wvl_wfsinp_reformat: reformat the wavefunctions.'
@@ -214,7 +214,7 @@ subroutine wvl_wfsinp_reformat(dtset, mpi_enreg, psps, rprimd, wvl, xred, xred_o
 
 !it seems that the table "wvl%projectors%G" is no more used
 !but it's not allocated -> fortran runtime error 
-#if defined HAVE_DFT_BIGDFT
+#if defined HAVE_BIGDFT
  ABI_DATATYPE_ALLOCATE(wvl%projectors%G,(dtset%ntypat))
  do itypat=1,dtset%ntypat
    call nullify_gaussian_basis(wvl%projectors%G(itypat))

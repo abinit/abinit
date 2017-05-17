@@ -1,16 +1,23 @@
 #!/usr/bin/env python
 #
-# Copyright (C) 2006-2016 ABINIT Group (Yann Pouillon)
+# Copyright (C) 2006-2017 ABINIT Group (Yann Pouillon)
 #
 # This file is part of the ABINIT software package. For license information,
 # please see the COPYING file in the top-level directory of the ABINIT source
 # distribution.
 #
+from __future__ import print_function, division, absolute_import #, unicode_literals
 
-from ConfigParser import ConfigParser,NoOptionError
+try:
+    from ConfigParser import ConfigParser,NoOptionError
+except ImportError:
+    from configparser import ConfigParser,NoOptionError
 from time import gmtime,strftime
 
-import commands
+try:
+    from commands import getoutput
+except:
+    from subprocess import getoutput
 import os
 import re
 import sys
@@ -180,15 +187,15 @@ my_output  = "config/m4/auto-env.m4"
 # Check if we are in the top of the ABINIT source tree
 if ( not os.path.exists("configure.ac") or
      not os.path.exists("src/98_main/abinit.F90") ):
-  print "%s: You must be in the top of an ABINIT source tree." % my_name
-  print "%s: Aborting now." % my_name
+  print("%s: You must be in the top of an ABINIT source tree." % my_name)
+  print("%s: Aborting now." % my_name)
   sys.exit(1)
 
 # Read config file(s)
 for cnf_file in my_configs:
   if ( not os.path.exists(cnf_file) ):
-    print "%s: Could not find config file (%s)." % (my_name,cnf_file)
-    print "%s: Aborting now." % my_name
+    print("%s: Could not find config file (%s)." % (my_name,cnf_file))
+    print("%s: Aborting now." % my_name)
     sys.exit(2)
 
 # What time is it?
@@ -201,7 +208,7 @@ abinit_env_vars = cnf.sections()
 abinit_env_vars.sort()
 
 # Start writing macro
-m4 = file(my_output,"w")
+m4 = open(my_output, "wt")
 m4.write(macro_header(my_name,now))
 
 # Write Autoconf macro
@@ -259,12 +266,12 @@ m4.write(re.sub("@MACRO@",src,abi_macro_restore()))
 
 # Finish
 m4.close()
-tmp = commands.getoutput("./config/scripts/add-header-typed Autoconf %s" % (my_output))
+tmp = getoutput("./config/scripts/add-header-typed Autoconf %s" % (my_output))
 if ( tmp != "" ):
-  print tmp
+  print(tmp)
 
 # Write environment dumper (for debugging)
-dumper = file("config.dump.in","a")
+dumper = open("config.dump.in","a")
 dumper.write("# Environment variables (script: %s)\n" % (my_name))
 for var in abinit_env_vars:
   dumper.write("%s=\"@%s@\"\n" % (var,var))

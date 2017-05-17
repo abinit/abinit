@@ -6,8 +6,7 @@ at the time a version of ABINIT is released.
 Note that bugs discovered later than the
 release are NOT described here...
 
-The present release 8.1.4 is a development version.
-
+The present release 8.3.3 is for development
 0. List of platforms
 1. Batteries of tests
 2. List of known problems
@@ -15,11 +14,10 @@ The present release 8.1.4 is a development version.
 ================================================================
 0. Platforms
 
-For version 8.1.4, list closed on 2016 08 11
-(Here, file modified to examine working mode on gonze/develop branch)
+For version 8.3.3, list closed on 2017 05 08
 after installation and successful tests for the standard set of platforms,
 as mentioned on 
-http://dev.abinit.org/status/nightly-builds/abinit-8.1/build-status-8.1.html
+https://bbportal.abinit.org/#/status
 and
 http://dev.abinit.org/environment/buildbot/buildbot-builder-matrix
 Corresponding configuration files are to be found in doc/build/config-examples
@@ -32,8 +30,8 @@ Versions of compilers known to be too buggy for ABINIT
 
 intel12.0 or intel 12.1.X with X lower than 4   (=> use intel 12.1.4 instead, or intel 13.1.3)
 Versions 13 and 14 of intel compilo are OK.
-Version 15 is mostly OK, except for one test paral#30.
-Version 16 is OK.
+Version 15 is mostly OK, except for one test paral#30 (on ubu).
+Version 16 is mostly OK, except for one test paral#30 (on ubu).
 
 With gcc 4.7, it has been observed that the option fast-math causes troubles : it gives numerically
 erroneous results for the test v67mbpt#16. Disactivating it for directory 71_bse (especially routine m_exc_itdiago.F90)
@@ -478,6 +476,7 @@ a large arbitrariness of the result.
 In ABINITv6.0.0, tried to average over the local DOS contributions of degenerate wavefunctions,
 writing a new routine dos_degeneratewfs.F90 . Unfortunately, the portability was not improved ?!
 See Tv5#40 .
+(MG160823) dos_fractions_average_m has been removed to reduce memory requirements.
  
 P59.11 (XG090907)
 See mail of BBertrand 

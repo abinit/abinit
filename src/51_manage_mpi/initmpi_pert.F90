@@ -7,7 +7,7 @@
 !!  Creates group for Parallelization over Perturbations.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2005-2016 ABINIT group (FJ,MT)
+!!  Copyright (C) 2005-2017 ABINIT group (FJ,MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -57,7 +57,7 @@ subroutine initmpi_pert(dtset,mpi_enreg)
 !Arguments ------------------------------------
 !scalars
  type(MPI_type),intent(inout) :: mpi_enreg
- type(dataset_type),intent(inout) :: dtset
+ type(dataset_type),intent(in) :: dtset
 
 !Local variables-------------------------------
 !scalars
@@ -133,7 +133,6 @@ subroutine initmpi_pert(dtset,mpi_enreg)
 
  ABI_DEALLOCATE(nband_rbz)
  ABI_DEALLOCATE(nkpt_rbz)
-
 
 end subroutine initmpi_pert
 !!***

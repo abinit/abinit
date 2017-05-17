@@ -7,7 +7,7 @@
 !! calculation of the inverse of the overlap matrix 
 !!
 !! COPYRIGHT
-!! Copyright (C) 2004-2016 ABINIT group (XW).
+!! Copyright (C) 2004-2017 ABINIT group (XW).
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -70,12 +70,13 @@ subroutine qmatrix(cg,dtefield,qmat,mpw,mpw1,mkmem,mband,npwarr,nkpt,nspinor,nsp
 !arrays
  integer,intent(in) :: npwarr(nkpt),pwindall(max(mpw,mpw1)*mkmem,8,3)
  real(dp),intent(in) :: cg(2,mpw*nspinor*mband*mkmem*nsppol)
- real(dp),intent(out) :: qmat(2,dtefield%nband_occ,dtefield%nband_occ,nkpt,2,3)
+ real(dp),intent(out) :: qmat(2,dtefield%mband_occ,dtefield%mband_occ,nkpt,2,3)
 
 !Local variables -------------------------
 !scalars
  integer :: iband,icg,icg1,idir,ifor,ikpt,ikpt2,info,jband,job
  integer :: npw_k1,npw_k2,pwmax,pwmin
+ integer :: isppol
  real(dp) :: doti,dotr
 !arrays
  integer,allocatable :: ipvt(:),pwind_k(:)
@@ -85,12 +86,12 @@ subroutine qmatrix(cg,dtefield,qmat,mpw,mpw1,mkmem,mband,npwarr,nkpt,nspinor,nsp
 
 ! *************************************************************************
 
- ABI_ALLOCATE(ipvt,(dtefield%nband_occ))
- ABI_ALLOCATE(sinv,(2,dtefield%nband_occ,dtefield%nband_occ))
- ABI_ALLOCATE(zgwork,(2,dtefield%nband_occ))
+ ABI_ALLOCATE(ipvt,(dtefield%mband_occ))
+ ABI_ALLOCATE(sinv,(2,dtefield%mband_occ,dtefield%mband_occ))
+ ABI_ALLOCATE(zgwork,(2,dtefield%mband_occ))
  ABI_ALLOCATE(vect1,(2,0:mpw))
  ABI_ALLOCATE(vect2,(2,0:mpw))
- ABI_ALLOCATE(smat_k,(2,dtefield%nband_occ,dtefield%nband_occ))
+ ABI_ALLOCATE(smat_k,(2,dtefield%mband_occ,dtefield%mband_occ))
  ABI_ALLOCATE(pwind_k,(max(mpw,mpw1)))
  vect1(:,0) = zero ; vect2(:,0) = zero
 
@@ -98,53 +99,55 @@ subroutine qmatrix(cg,dtefield,qmat,mpw,mpw1,mkmem,mband,npwarr,nkpt,nspinor,nsp
 
 !**************
 !loop over k points
- do ikpt = 1, nkpt
-   npw_k1 = npwarr(ikpt)
-   icg  = dtefield%cgindex(ikpt,1)
-
-   do idir = 1, 3
+ do isppol = 1, nsppol
+   do ikpt = 1, nkpt
+     npw_k1 = npwarr(ikpt)
+     icg  = dtefield%cgindex(ikpt,1)
      
-     do ifor = 1, 2
-
-       ikpt2 = dtefield%ikpt_dk(ikpt,ifor,idir)
-       npw_k2 = npwarr(ikpt2)
-       icg1 = dtefield%cgindex(ikpt2,1)
-       pwind_k(1:npw_k1) = pwindall((ikpt-1)*max(mpw,mpw1)+1:(ikpt-1)*max(mpw,mpw1)+npw_k1,ifor,idir)
-
-       do jband = 1, dtefield%nband_occ
-         vect2(:,1:npw_k2) = &
-&         cg(:,icg1 + 1 + (jband-1)*npw_k2*nspinor:icg1 + jband*npw_k2*nspinor)
-         if (npw_k2 < mpw) vect2(:,npw_k2+1:mpw) = zero
-
-         do iband = 1, dtefield%nband_occ
-
-           pwmin = (iband-1)*npw_k1*nspinor
-           pwmax = pwmin + npw_k1*nspinor
-           vect1(:,1:npw_k1) = &
-&           cg(:,icg + 1 + pwmin:icg + pwmax)
-           if (npw_k1 < mpw) vect1(:,npw_k1+1:mpw) = zero
-           call overlap_g(doti,dotr,mpw,npw_k1,npw_k2,nspinor,pwind_k,&
-&           vect1,vect2)
-           smat_k(1,iband,jband) = dotr
-           smat_k(2,iband,jband) = doti
-
-         end do    ! iband
-
-       end do    !jband
-
-       sinv(:,:,:) = smat_k(:,:,:)
-
-       call dzgefa(sinv,dtefield%nband_occ,dtefield%nband_occ,ipvt,info)
-       call dzgedi(sinv,dtefield%nband_occ,dtefield%nband_occ,ipvt,det,zgwork,job)
-
-       qmat(:,:,:,ikpt,ifor,idir) = sinv(:,:,:)
-
-
+     do idir = 1, 3
+       
+       do ifor = 1, 2
+         
+         ikpt2 = dtefield%ikpt_dk(ikpt,ifor,idir)
+         npw_k2 = npwarr(ikpt2)
+         icg1 = dtefield%cgindex(ikpt2,1)
+         pwind_k(1:npw_k1) = pwindall((ikpt-1)*max(mpw,mpw1)+1:(ikpt-1)*max(mpw,mpw1)+npw_k1,ifor,idir)
+         
+         do jband = 1, dtefield%nband_occ(isppol)
+           vect2(:,1:npw_k2) = &
+&           cg(:,icg1 + 1 + (jband-1)*npw_k2*nspinor:icg1 + jband*npw_k2*nspinor)
+           if (npw_k2 < mpw) vect2(:,npw_k2+1:mpw) = zero
+           
+           do iband = 1, dtefield%nband_occ(isppol)
+             
+             pwmin = (iband-1)*npw_k1*nspinor
+             pwmax = pwmin + npw_k1*nspinor
+             vect1(:,1:npw_k1) = &
+&             cg(:,icg + 1 + pwmin:icg + pwmax)
+             if (npw_k1 < mpw) vect1(:,npw_k1+1:mpw) = zero
+             call overlap_g(doti,dotr,mpw,npw_k1,npw_k2,nspinor,pwind_k,&
+&             vect1,vect2)
+             smat_k(1,iband,jband) = dotr
+             smat_k(2,iband,jband) = doti
+             
+           end do    ! iband
+           
+         end do    !jband
+         
+         sinv(:,:,:) = smat_k(:,:,:)
+         
+         call dzgefa(sinv,dtefield%mband_occ,dtefield%nband_occ(isppol),ipvt,info)
+         call dzgedi(sinv,dtefield%mband_occ,dtefield%nband_occ(isppol),ipvt,det,zgwork,job)
+         
+         qmat(:,:,:,ikpt,ifor,idir) = sinv(:,:,:)
+         
+         
+       end do
+       
      end do
 
-   end do
-
- end do  !end loop over k 
+   end do  !end loop over k 
+ end do
 
  ABI_DEALLOCATE(ipvt)
  ABI_DEALLOCATE(sinv)

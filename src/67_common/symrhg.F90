@@ -8,7 +8,7 @@
 !! come back to the real space for a symmetrized rho(r).
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (DCA, XG, GMR)
+!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -113,9 +113,6 @@ subroutine symrhg(cplex,gprimd,irrzon,mpi_enreg,nfft,nfftot,ngfft,nspden,nsppol,
  real(dp),allocatable :: magngx(:,:),magngy(:,:),magngz(:,:)
  real(dp),allocatable :: rhosu1_arr(:),rhosu2_arr(:),work(:)
  real(dp),allocatable :: symafm_used(:),symrec_cart(:,:,:),symrel_cart(:,:,:)
-!No abirules
-!Statement functions are obsolete
-!map(j1,n1)=mod(n1+mod(j1,n1),n1)
 
 !*************************************************************************
 !
@@ -148,6 +145,7 @@ subroutine symrhg(cplex,gprimd,irrzon,mpi_enreg,nfft,nfftot,ngfft,nspden,nsppol,
 !Special treatment for non-collinear magnetism case
  if(nspden==4) then
    call timab(17,1,tsec)
+!FR the half factors missing are recovered in dfpt_mkvxc_noncoll and dfpt_accrho
    rhor(:,1)=rhor(:,1)+rhor(:,4)     !nup+ndown
    rhor(:,2)=rhor(:,2)-rhor(:,1)     !mx (n+mx-n)
    rhor(:,3)=rhor(:,3)-rhor(:,1)     !my (n+my-n)
@@ -467,7 +465,8 @@ subroutine symrhg(cplex,gprimd,irrzon,mpi_enreg,nfft,nfftot,ngfft,nspden,nsppol,
 #define ABI_FUNC 'map_symrhg'
 !End of the abilint section
 
-   integer :: map_symrhg,j1,n1
+   integer :: map_symrhg
+   integer,intent(in) :: j1,n1
    map_symrhg=mod(n1+mod(j1,n1),n1)
  end function map_symrhg
 

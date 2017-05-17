@@ -7,7 +7,7 @@
 !! Calculate the electronic random stopping power
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2016 ABINIT group (AS,FB)
+!! Copyright (C) 2001-2017 ABINIT group (AS,FB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

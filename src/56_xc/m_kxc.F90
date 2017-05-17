@@ -9,7 +9,7 @@
 !! since the ACFD code has been disabled.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2016 ABINIT group (DCA, MF, XG, GMR, LSI, YMN, Rhaltaf, MS)
+!!  Copyright (C) 1998-2017 ABINIT group (DCA, MF, XG, GMR, LSI, YMN, Rhaltaf, MS)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -375,7 +375,7 @@ end subroutine kxc_local
 !! INPUTS
 !!  dtset <type(dataset_type)>=all input variables in this dataset
 !!  ixc = choice of exchange-correlation functional.
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  nfft = number of fft grid points.
 !!  ngfft(1:3) = integer fft box dimensions, see getng for ngfft(4:8).
 !!  nspden = number of spin-density components.
@@ -423,7 +423,7 @@ subroutine kxc_alda(dtset,ixc,kxcg,mpi_enreg,nfft,ngfft,nspden,option,rhor,rhocu
 !scalars
  integer,intent(in) :: ixc,nfft,nspden,option
  real(dp),intent(in) :: rhocut
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
  type(dataset_type),intent(in) :: dtset
 !arrays
  integer,intent(in) :: ngfft(18)
@@ -873,7 +873,7 @@ end subroutine kxc_pgg
 !! INPUTS
 !!  ixceok = 1 linear energy optimized kernel.
 !!         = 2 non-linear energy optimized kernel.
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  nfft = number of fft grid points.
 !!  ngfft(1:3) = integer fft box dimensions, see getng for ngfft(4:8).
 !!  nspden = number of spin-density components.
@@ -912,7 +912,7 @@ subroutine kxc_eok(ixceok,kxcg,mpi_enreg,nfft,ngfft,nspden,paral_kgb,rhor,rhocut
 !scalars
  integer,intent(in) :: ixceok,nfft,nspden,paral_kgb
  real(dp),intent(in) :: rhocut
- type(MPI_type) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: ngfft(18)
  real(dp),intent(in) :: rhor(nfft,2*nspden-1)
@@ -1139,11 +1139,9 @@ subroutine kxc_driver(Dtset,Cryst,ixc,ngfft,nfft_tot,nspden,rhor,npw,dim_kxcg,kx
  ngfft3=ngfft(3)
 
  if (ixc>=1.and.ixc<11) then ! LDA case
-!  nkxc=3
-!  nkxc=1
-   nkxc=2*min(nspden,2)-1
- else ! GGA
-   nkxc=23
+   nkxc= 2*min(nspden,2)-1   ! 1 or 3
+ else                        ! GGA case
+   nkxc=12*min(nspden,2)-5   ! 7 or 19
    ABI_CHECK(dtset%xclevel==2,"Functional should be GGA")
    MSG_ERROR("GGA functional not tested")
  end if
@@ -1432,12 +1430,10 @@ subroutine kxc_ADA(Dtset,Cryst,ixc,ngfft,nfft,nspden,rhor,&
  ngfft2=ngfft(2)
  ngfft3=ngfft(3)
 
- if (ixc>=1.and.ixc<11) then ! LDA case
-!  nkxc=3
-!  nkxc=1
-   nkxc=2*min(DtGW%nspden,2)-1
- else ! GGA
-   nkxc=23
+ if (ixc>=1.and.ixc<11) then     ! LDA case
+   nkxc= 2*min(DtGW%nspden,2)-1  ! 1 or 3
+ else                            ! GGA case
+   nkxc=12*min(DtGW%nspden,2)-5  ! 7 or 19
    ABI_CHECK(dtset%xclevel==2,"Functional should be GGA")
    MSG_ERROR("GGA functional not implemented for ADA vertex")
  end if

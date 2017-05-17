@@ -9,7 +9,7 @@
 !!  as methods to operate on it.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2016 ABINIT group (MT)
+!! Copyright (C) 2008-2017 ABINIT group (MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -192,7 +192,7 @@ CONTAINS
 !! INPUTS
 !!  ireadwf=if 1, read the wavefunction
 !!  dtset <type(dataset_type)>=all input variables for this dataset
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  nfft=(effective) number of FFT grid points (for this processor)
 !!  pawrhoij(natom*usepaw) <type(pawrhoij_type)>= -PAW only- atomic occupancies
 !!  pawtab(ntypat*usepaw) <type(pawtab_type)>=paw tabulated starting data
@@ -225,7 +225,7 @@ subroutine init_electronpositron(ireadwf,dtset,electronpositron,mpi_enreg,nfft,p
  integer,intent(in) :: ireadwf,nfft
  type(dataset_type),intent(in) :: dtset
  type(electronpositron_type),pointer :: electronpositron
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  type(pawrhoij_type), intent(in) :: pawrhoij(mpi_enreg%my_natom*dtset%usepaw)
  type(pawtab_type),intent(in)  :: pawtab(dtset%ntypat*dtset%usepaw)
@@ -471,7 +471,7 @@ end subroutine destroy_electronpositron
 !!
 !! INPUTS
 !!  dtset <type(dataset_type)>=all input variables for this dataset
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  my_natom=number of atoms treated by current proc
 !!  nfft=(effective) number of FFT grid points (for this processor)
 !!  ngfft(18)=contain all needed information about 3D FFT
@@ -526,7 +526,7 @@ subroutine exchange_electronpositron(cg,cprj,dtset,eigen,electronpositron,energi
  type(dataset_type),intent(in) :: dtset
  type(electronpositron_type),pointer :: electronpositron
  type(energies_type),intent(inout) :: energies
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: ngfft(18),npwarr(dtset%nkpt)
  real(dp),intent(inout) :: cg(2,mcg)

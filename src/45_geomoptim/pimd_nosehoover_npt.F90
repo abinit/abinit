@@ -13,7 +13,7 @@
 !! No change of acell and rprim at present.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2011-2016 ABINIT group (GG,MT)
+!! Copyright (C) 2011-2017 ABINIT group (GG,MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -97,10 +97,10 @@ subroutine pimd_nosehoover_npt(etotal,forces,itimimage,natom,pimd_param,prtvolim
  real(dp),parameter :: tolerance=tol7 ! SCF tolerance
 !scalars
  integer :: idum=-5
- integer :: iimage,irestart,ndof,nnos,pitransform,prtstress
+ integer :: constraint,iimage,irestart,ndof,nnos,pitransform,prtstress
  real(dp) :: dtion,eharm,eharm2,epot,initemp,kt,temperature1,temperature2,thermtemp
 !arrays
- real(dp) :: ddh(3,3),stress_pimd(3,3,3)
+ real(dp) :: constraint_output(2),ddh(3,3),stress_pimd(3,3,3)
  real(dp),allocatable :: dzeta(:,:,:,:),forces_orig(:,:,:),forces_pimd(:,:,:)
  real(dp),allocatable :: inertmass(:),masseff(:,:),qmass(:),quantummass(:),springeff(:,:)
  real(dp),allocatable :: xcart(:,:,:),xcart_next(:,:,:),xcart_prev(:,:,:),zeta(:)
@@ -152,7 +152,7 @@ subroutine pimd_nosehoover_npt(etotal,forces,itimimage,natom,pimd_param,prtvolim
 
 !Initialize derivatives
  if (mod(irestart,10)==0) then
-   call pimd_initvel(idum,masseff,natom,initemp,trotter,vel)
+   call pimd_initvel(idum,masseff,natom,initemp,trotter,vel,pimd_param%constraint,pimd_param%wtatcon)
  end if
 !vel_cell does not depend on Trotter...
  ddh=vel_cell(:,:,1);if (irestart<10) ddh=zero
@@ -178,7 +178,8 @@ subroutine pimd_nosehoover_npt(etotal,forces,itimimage,natom,pimd_param,prtvolim
 
 !Print messages
  prtstress=1
- call pimd_print(eharm,eharm2,epot,forces_pimd,inertmass,irestart,&
+ call pimd_print(constraint,constraint_output,&
+& eharm,eharm2,epot,forces_pimd,inertmass,irestart,&
 & itimimage,kt,natom,pimd_param%optcell,prtstress,prtvolimg,rprimd,&
 & stress_pimd,temperature1,temperature2,&
 & pimd_param%traj_unit,trotter,vel,ddh,xcart,xred)

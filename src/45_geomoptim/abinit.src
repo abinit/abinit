@@ -1,6 +1,6 @@
 # -*- Python -*-
 #
-# Copyright (C) 2005-2016 ABINIT Group (Yann Pouillon)
+# Copyright (C) 2005-2017 ABINIT Group (Yann Pouillon)
 #
 # This file is part of the ABINIT software package. For license information,
 # please see the COPYING file in the top-level directory of the ABINIT source
@@ -27,6 +27,7 @@ sources = [
  "m_abiimages.F90",
  "m_bfgs.F90",
  "m_ga.F90",
+ "m_lbfgs.F90",
  "m_mep.F90",
  "m_pimd.F90",
  "m_use_ga.F90",
@@ -39,14 +40,17 @@ sources = [
  "pred_bfgs.F90",
  "pred_delocint.F90",
  "pred_diisrelax.F90",
+ "pred_hmc.F90",
  "pred_isokinetic.F90",
  "pred_isothermal.F90",
  "pred_langevin.F90",
+ "pred_lbfgs.F90",
  "pred_moldyn.F90",
  "pred_nose.F90",
  "pred_simple.F90",
  "pred_srkna14.F90",
  "pred_steepdesc.F90",
+ "pred_velverlet.F90",
  "pred_verlet.F90",
  "predict_copy.F90",
  "predictimg.F90",

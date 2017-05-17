@@ -8,7 +8,7 @@
 !!   and helper functions to print/write the array in different formats.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2016 ABINIT group (MG)
+!!  Copyright (C) 2008-2017 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -31,7 +31,7 @@ MODULE m_array
  use m_profiling_abi
  use m_errors
  use m_nctk
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
  use netcdf
 #endif
 

@@ -9,7 +9,7 @@
 !! NOTE
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (GJ,MT)
+!! Copyright (C) 1998-2017 ABINIT group (GJ,MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -17,7 +17,7 @@
 !!
 !! INPUTS
 !!  gprimd(3,3)=dimensional reciprocal space primitive translations
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  nfft=(effective) number of FFT grid points (for this processor)
 !!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
 !!  nhat(nfft,nspden*usepaw)= -PAW only- compensation density
@@ -91,7 +91,7 @@ subroutine rhohxcpositron(electronpositron,gprimd,kxcapn,mpi_enreg,nfft,ngfft,nh
  real(dp),intent(in) :: gprimd(3,3)
  real(dp),intent(in) :: nhat(nfft,nspden*usepaw),rhor(nfft,nspden),xccc3d(n3xccc)
  real(dp),intent(out) :: kxcapn(nfft,nkxc),strsxc(6),vhartr(nfft),vxcapn(nfft,nspden)
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
 
 !Local variables-------------------------------
 !scalars

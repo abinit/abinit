@@ -7,14 +7,14 @@
 !! Compute new trial potential and calculate the hamiltionian application into hpsi.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (DCA, XG, MT)
+!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/dpl.txt .
 !! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! INPUTS
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!
 !! OUTPUT
 !!  vxc(nfft,nspden)=exchange-correlation potential (hartree)
@@ -46,7 +46,7 @@ subroutine wvl_psitohpsi(alphamix,eexctX, eexcu, ehart, ekin_sum, epot_sum, epro
  use m_profiling_abi
  use m_errors
  use m_abi2big, only: wvl_vxc_abi2big,wvl_vtrial_abi2big
-#if defined HAVE_DFT_BIGDFT
+#if defined HAVE_BIGDFT
  use BigDFT_API, only: psitohpsi, KS_POTENTIAL, total_energies
 #endif
 
@@ -76,35 +76,17 @@ subroutine wvl_psitohpsi(alphamix,eexctX, eexcu, ehart, ekin_sum, epot_sum, epro
 
 !Local variables-------------------------------
 !scalars
-#if defined HAVE_DFT_BIGDFT
+#if defined HAVE_BIGDFT
  character(len=500) :: message
  integer :: linflag = 0
  character(len=3), parameter :: unblock_comms = "OFF"
- !debug
- ! integer::ierr,jj,ifile
- !end debug
 #endif
 
 ! *************************************************************************
 
  DBG_ENTER("COLL")
 
-#if defined HAVE_DFT_BIGDFT
-
-!write(*,*)'wvl_psitohpsi l95,erase me'
-!ifile=me+40
-!jj=size(wvl%wfs%ks%hpsi)
-!ii=size(wvl%wfs%ks%psi)
-!write(ifile,*)"# ",jj,ii
-!do ii=1,jj
-!write(ifile,'(100f20.8)')wvl%wfs%ks%hpsi(ii),wvl%wfs%ks%psi(ii)
-!end do
-!ifile=me+50
-!jj=size(wvl%den%denspot%rhov)
-!write(ifile,*)"# ",jj
-!do ii=1,jj
-!write(ifile,'(100f20.8)')wvl%den%denspot%rhov(ii)
-!end do
+#if defined HAVE_BIGDFT
 
  if(wvl%descr%atoms%npspcode(1)==7) then
    call psitohpsi(me,nproc,wvl%descr%atoms,scf,wvl%den%denspot, &
@@ -123,14 +105,13 @@ subroutine wvl_psitohpsi(alphamix,eexctX, eexcu, ehart, ekin_sum, epot_sum, epro
    ehart     = wvl%e%energs%eh
    eexcu     = wvl%e%energs%exc
    vexcu     = wvl%e%energs%evxc
-   if(iscf<10) vexcu=0.d0 !Only needed for double counting scheme
  end if
  eexctX    = wvl%e%energs%eexctX
  eSIC_DC   = wvl%e%energs%evsic
  ekin_sum  = wvl%e%energs%ekin
  eproj_sum = wvl%e%energs%eproj
  epot_sum  = wvl%e%energs%epot
-!
+
 !Correct local potential, since in BigDFT 
 !this variable contains more terms
 !Do the following only if sumpion==.true. in psolver_rhohxc.
@@ -146,7 +127,7 @@ subroutine wvl_psitohpsi(alphamix,eexctX, eexcu, ehart, ekin_sum, epot_sum, epro
 !Note: if evxc is not rested here,
 !we have to rest this from etotal in prtene, afterscfcv and etotfor.
 !check ABINIT-6.15.1.
-!
+
  if(scf) then
    if (present(vxc)) then
      write(message, '(a,a,a,a)' ) ch10, ' wvl_psitohpsi : but why are you copying vxc :..o('
@@ -158,7 +139,7 @@ subroutine wvl_psitohpsi(alphamix,eexctX, eexcu, ehart, ekin_sum, epot_sum, epro
      call wrtout(std_out,message,'COLL')
      call wvl_vtrial_abi2big(2,vtrial,wvl%den)
    end if
- end if !if scf
+ end if
 
 #else
  BIGDFT_NOTENABLED_ERROR()

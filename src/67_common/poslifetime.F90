@@ -7,7 +7,7 @@
 !! Calculate the positron lifetime
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (GJ,MT,JW)
+!! Copyright (C) 1998-2017 ABINIT group (GJ,MT,JW)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -21,7 +21,7 @@
 !!   | pawxcdev=Choice of XC development (0=no dev. (use of angular mesh) ; 1 or 2=dev. on moments)
 !!   | usepaw=flag for PAW
 !!  gprimd(3,3)= dimensional reciprocal space primitive translations
-!!  mpi_enreg= informations about MPI parallelization
+!!  mpi_enreg= information about MPI parallelization
 !!  my_natom=number of atoms treated by current processor
 !!  n3xccc= dimension of the xccc3d array (0 or nfft).
 !!  nfft= number of FFT grid points
@@ -103,7 +103,7 @@ subroutine poslifetime(dtset,electronpositron,gprimd,my_natom,mpi_enreg,n3xccc,n
  real(dp),intent(out) :: rate,rate_paw
  type(dataset_type), intent(in) :: dtset
  type(electronpositron_type),pointer :: electronpositron
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
  type(pawang_type), intent(in) :: pawang
 !arrays
  integer,intent(in) :: ngfft(18)
@@ -475,14 +475,20 @@ subroutine poslifetime(dtset,electronpositron,gprimd,my_natom,mpi_enreg,n3xccc,n
              ABI_ALLOCATE(ff,(mesh_size))
              if (option/=1) rhoarr1(:)=rhoarr1_j(:)
              do ii=1,4
-               if (ii==1) ff(:)=rhoarr1(:)*rhoarr1_ep(:)*gamma(:,1)*pawrad(itypat)%rad(:)**2
-               if (ii==2) ff(:)=rhoarr1(:)*rhoarr1_ep(:)*gamma(:,2)*pawrad(itypat)%rad(:)**2
+               if (ii==1) ff(1:mesh_size)=rhoarr1(1:mesh_size)*rhoarr1_ep(1:mesh_size) &
+&               *gamma(1:mesh_size,1)*pawrad(itypat)%rad(1:mesh_size)**2
+               if (ii==2) ff(1:mesh_size)=rhoarr1(1:mesh_size)*rhoarr1_ep(1:mesh_size) &
+&               *gamma(1:mesh_size,2)*pawrad(itypat)%rad(1:mesh_size)**2
                if (electronpositron%particle==EP_ELECTRON) then
-                 if (ii==3) ff(:)=rhoarr1   (:)*rhocore(:)*gamma(:,1)*pawrad(itypat)%rad(:)**2
-                 if (ii==4) ff(:)=rhoarr1   (:)*rhocore(:)           *pawrad(itypat)%rad(:)**2
+                 if (ii==3) ff(1:mesh_size)=rhoarr1(1:mesh_size)*rhocore(1:mesh_size) &
+&                 *gamma(1:mesh_size,1)*pawrad(itypat)%rad(1:mesh_size)**2
+                 if (ii==4) ff(1:mesh_size)=rhoarr1(1:mesh_size)*rhocore(1:mesh_size) &
+&                 *pawrad(itypat)%rad(1:mesh_size)**2
                else
-                 if (ii==3) ff(:)=rhoarr1_ep(:)*rhocore(:)*gamma(:,1)*pawrad(itypat)%rad(:)**2
-                 if (ii==4) ff(:)=rhoarr1_ep(:)*rhocore(:)           *pawrad(itypat)%rad(:)**2
+                 if (ii==3) ff(1:mesh_size)=rhoarr1_ep(1:mesh_size)*rhocore(1:mesh_size) &
+&                 *gamma(1:mesh_size,1)*pawrad(itypat)%rad(1:mesh_size)**2
+                 if (ii==4) ff(1:mesh_size)=rhoarr1_ep(1:mesh_size)*rhocore(1:mesh_size) &
+&                 *pawrad(itypat)%rad(1:mesh_size)**2
                end if
                call simp_gen(intg,ff,pawrad(itypat))
                intg=intg*pawang%angwgth(ipt)*four_pi
@@ -744,7 +750,7 @@ subroutine poslifetime(dtset,electronpositron,gprimd,my_natom,mpi_enreg,n3xccc,n
              gg(:,4)=sqfpi*rhotot_ep(:,1)*rhocore(:)
            end if
            do ii=1,4
-             gg(:,ii)=gg(:,ii)*pawrad(itypat)%rad(:)**2
+             gg(1:mesh_size,ii)=gg(1:mesh_size,ii)*pawrad(itypat)%rad(1:mesh_size)**2
              call simp_gen(intg,gg(:,ii),pawrad(itypat))
              if (ii==1) lambda_paw         =lambda_paw         +lsign(iloop)*intg
              if (ii==2) lambda_paw_ipm     =lambda_paw_ipm     +lsign(iloop)*intg

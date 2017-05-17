@@ -6,7 +6,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2016 ABINIT group (Mver)
+!! Copyright (C) 2005-2017 ABINIT group (Mver)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -23,7 +23,7 @@
 !!  hdr <type(hdr_type)>=the header of wf, den and pot files
 !!  kg(3,mpw*mkmem)=reduced (integer) coordinates of G vecs in basis sphere
 !!  mcg=size of wave-functions array (cg) =mpw*nspinor*mband*mkmem*nsppol
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  nattyp(dtset%ntypat)=number of atoms of each type
 !!  nfftf = fft grid dimensions for fine grid
 !!  ph1d = phase factors in 1 radial dimension
@@ -87,7 +87,7 @@ subroutine spin_current(cg,dtfil,dtset,gprimd,hdr,kg,mcg,mpi_enreg,psps)
 !integer,intent(in) :: nfftf
 !real(dp),intent(in) :: ucvol
  integer,intent(in) :: mcg
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
  type(datafiles_type),intent(in) :: dtfil
  type(dataset_type),intent(in) :: dtset
  type(hdr_type),intent(inout) :: hdr

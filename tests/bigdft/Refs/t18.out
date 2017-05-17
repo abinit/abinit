@@ -2,7 +2,7 @@
 .Version 8.0.3 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
 
-.Copyright (C) 1998-2016 ABINIT group . 
+.Copyright (C) 1998-2017 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -53,7 +53,7 @@
 -  max_nthreads =    0
 -
  -outvars: echo values of preprocessed input variables --------
--       accesswff           3
+-          iomode           3
             acell      2.5000000000E+01  2.0000000000E+01  2.0000000000E+01 Bohr
               amu      1.20110000E+01  1.59994000E+01
              ecut      5.00000000E+00 Hartree
@@ -222,8 +222,12 @@
     NL   psp  energy=  1.80137671462045E+00
     >>>>>>>>> Etotal= -2.15378430266683E+01
 
- Other information on the energy :
-    Total energy(eV)= -5.86074514115095E+02 ; Band energy (Ha)=  -5.5276281161E+00
+ "Double-counting" decomposition of free energy:
+    Band energy     = -5.52762811605371E+00
+    Ion-ion energy  =  1.20000000000000E+01
+    PspCore energy  =  0.00000000000000E+00
+    Dble-C XC-energy= -2.76954541910105E+01
+    >>>> Etotal (DC)= -2.12230823070642E+01
 --------------------------------------------------------------------------------
 
 ================================================================================
@@ -296,15 +300,19 @@
     NL   psp  energy=  1.83784085865683E+00
     >>>>>>>>> Etotal= -2.16031407871095E+01
 
- Other information on the energy :
-    Total energy(eV)= -5.87851356539659E+02 ; Band energy (Ha)=  -5.8405447703E+00
+ "Double-counting" decomposition of free energy:
+    Band energy     = -5.84054477033631E+00
+    Ion-ion energy  =  1.20000000000000E+01
+    PspCore energy  =  0.00000000000000E+00
+    Dble-C XC-energy= -2.78211348213067E+01
+    >>>> Etotal (DC)= -2.16616795916430E+01
 --------------------------------------------------------------------------------
 
 == END DATASET(S) ==============================================================
 ================================================================================
   
  -outvars: echo values of variables after computation  --------
--       accesswff           3
+-          iomode           3
             acell1     1.3800000000E+01  1.3200000000E+01  1.3200000000E+01 Bohr
             acell2     1.3750000000E+01  1.3200000000E+01  1.3200000000E+01 Bohr
               amu      1.20110000E+01  1.59994000E+01

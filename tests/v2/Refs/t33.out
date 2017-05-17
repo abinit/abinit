@@ -2,7 +2,7 @@
 .Version 8.0.3 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
 
-.Copyright (C) 1998-2016 ABINIT group . 
+.Copyright (C) 1998-2017 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -212,7 +212,7 @@ P          mk1mem           1
           spgroup          25
            symrel      1  0  0   0  1  0   0  0  1       1  0  0   0  1  0   0  0 -1
                        1  0  0   0 -1  0   0  0  1       1  0  0   0 -1  0   0  0 -1
-           tolvrs      5.00000000E-20
+           tolvrs      7.00000000E-20
             typat      1  1
            xangst1    -2.9845594564E-01  0.0000000000E+00  0.0000000000E+00
                        2.9782093299E-01  0.0000000000E+00  0.0000000000E+00
@@ -328,7 +328,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     559.000     559.000
 
  scprqt:  WARNING -
   nstep=   12 was not enough SCF cycles to converge;
-  potential residual=  8.531E-17 exceeds tolvrs=  5.000E-20
+  potential residual=  8.531E-17 exceeds tolvrs=  7.000E-20
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -435,7 +435,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     559.000     559.000
  ETOT 11  -1.0580766617939     2.442E-15 6.298E-24 2.636E-18
  ETOT 12  -1.0580766617939    -1.776E-15 6.899E-25 2.199E-20
 
- At SCF step   12       vres2   =  2.20E-20 < tolvrs=  5.00E-20 =>converged.
+ At SCF step   12       vres2   =  2.20E-20 < tolvrs=  7.00E-20 =>converged.
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -2.10848087E-04  sigma(3 2)=  0.00000000E+00
@@ -547,7 +547,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     559.000     559.000
  ETOT 11  -1.0582341895634    -1.199E-14 6.309E-24 2.585E-18
  ETOT 12  -1.0582341895634    -5.995E-15 7.289E-25 2.313E-20
 
- At SCF step   12       vres2   =  2.31E-20 < tolvrs=  5.00E-20 =>converged.
+ At SCF step   12       vres2   =  2.31E-20 < tolvrs=  7.00E-20 =>converged.
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -2.10309098E-04  sigma(3 2)=  0.00000000E+00
@@ -659,7 +659,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     559.000     559.000
  ETOT 11  -1.0583912454872     1.332E-15 5.850E-24 2.596E-18
  ETOT 12  -1.0583912454872     1.088E-14 6.938E-25 2.016E-20
 
- At SCF step   12       vres2   =  2.02E-20 < tolvrs=  5.00E-20 =>converged.
+ At SCF step   12       vres2   =  2.02E-20 < tolvrs=  7.00E-20 =>converged.
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -2.09770692E-04  sigma(3 2)=  0.00000000E+00
@@ -771,7 +771,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     559.000     559.000
  ETOT 11  -1.0585478305260     7.550E-15 5.309E-24 2.504E-18
  ETOT 12  -1.0585478305260     7.550E-15 6.945E-25 1.328E-20
 
- At SCF step   12       vres2   =  1.33E-20 < tolvrs=  5.00E-20 =>converged.
+ At SCF step   12       vres2   =  1.33E-20 < tolvrs=  7.00E-20 =>converged.
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -2.09232869E-04  sigma(3 2)=  0.00000000E+00
@@ -911,7 +911,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     559.000     559.000
 
  scprqt:  WARNING -
   nstep=   18 was not enough SCF cycles to converge;
-  potential residual=  1.305E-18 exceeds tolvrs=  5.000E-20
+  potential residual=  1.305E-18 exceeds tolvrs=  7.000E-20
 
 ================================================================================
 
@@ -1175,7 +1175,7 @@ P          mk1mem           1
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
            symrel      1  0  0   0  1  0   0  0  1       1  0  0   0  1  0   0  0 -1
                        1  0  0   0 -1  0   0  0  1       1  0  0   0 -1  0   0  0 -1
-           tolvrs      5.00000000E-20
+           tolvrs      7.00000000E-20
             typat      1  1
            xangst1    -2.9845594564E-01  0.0000000000E+00  0.0000000000E+00
                        2.9782093299E-01  0.0000000000E+00  0.0000000000E+00

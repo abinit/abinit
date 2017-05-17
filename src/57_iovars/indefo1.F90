@@ -9,7 +9,7 @@
 !!  as other input variables whose existence is needed for other initialisations to proceed).
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2016 ABINIT group (XG,MM,FF)
+!! Copyright (C) 2009-2017 ABINIT group (XG,MM,FF)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -54,7 +54,7 @@ subroutine indefo1(dtset)
 !Arguments ------------------------------------
 !scalars
 !arrays
- type(dataset_type),intent(inout) :: dtset !vz_i
+ type(dataset_type),intent(inout) :: dtset
 
 !Local variables -------------------------------
 !scalars
@@ -114,7 +114,6 @@ subroutine indefo1(dtset)
  dtset%mkqmem=-1
  dtset%mk1mem=-1
 !N
- dtset%nnos=0
  dtset%natpawu=0
  dtset%natsph=0
  dtset%natsph_extra=0
@@ -124,6 +123,7 @@ subroutine indefo1(dtset)
  dtset%nkpt=-1
  dtset%nkptgw=0
  dtset%nkpthf=0
+ dtset%nnos=0
  dtset%npband=1
  dtset%npfft=1
  dtset%nphf=1
@@ -132,6 +132,7 @@ subroutine indefo1(dtset)
  dtset%nppert=1
  dtset%npspalch=0
  dtset%npspinor=1
+ dtset%np_slk=1000000
  dtset%nqptdm=0
  dtset%nspden=1
  dtset%nspinor=1
@@ -141,12 +142,12 @@ subroutine indefo1(dtset)
  dtset%ntypalch=0
  dtset%ntyppure=-1
  dtset%nucdipmom(:,:)=zero
- dtset%np_slk=1000000
+ dtset%nzchempot=0
 !O
  dtset%optdriver=0
 !P
  dtset%paral_rf=0
- dtset%pawspnorb=0
+ dtset%pawspnorb=0  ! will be changed to 1 as soon as usepaw==1 and nspinor==2
  dtset%pimass(:)=-one
 !Q
  dtset%qptn=zero
@@ -182,6 +183,7 @@ subroutine indefo1(dtset)
  if (dtset%usepaw==0) dtset%wfoptalg=0
  if (dtset%usepaw/=0) dtset%wfoptalg=10
  if (dtset%optdriver==RUNL_GSTATE.and.dtset%paral_kgb>0) dtset%wfoptalg=14
+ dtset%wvl_bigdft_comp=1
 
 !X
  dtset%xred_orig(:,:,:)=zero

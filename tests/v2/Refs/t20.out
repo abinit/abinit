@@ -2,7 +2,7 @@
 .Version 8.0.5 of ANADDB 
 .(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
 
-.Copyright (C) 1998-2016 ABINIT group . 
+.Copyright (C) 1998-2017 ABINIT group . 
  ANADDB comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -60,8 +60,6 @@
 
  read the DDB information and perform some checks
 
--begin at tcpu      0.019  and twall      0.020 sec
-
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  7.5589000  0.0000000  0.0000000  G(1)=  0.1322944  0.0000000  0.0000000
  R(2)=  0.0000000  7.5589000  0.0000000  G(2)=  0.0000000  0.1322944  0.0000000
@@ -117,7 +115,6 @@
 
  Calculation of the interatomic forces 
 
--begin at tcpu      0.036  and twall      0.036 sec
        Homogeneous q point set in the B.Z.
  Grid q points  :       16
   1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -1049,7 +1046,6 @@
 
  Treat the first list of vectors 
 
--begin at tcpu      1.105  and twall      1.113 sec
  
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.00000
  Phonon energies in Hartree :
@@ -1127,7 +1123,6 @@
 - -1.535360E+02 -1.535360E+02  6.887347E+01  6.887347E+01  1.039504E+02
 -  1.831630E+02  1.831630E+02  1.832935E+02  2.719950E+02  3.088129E+02
 -  3.088129E+02  4.475647E+02  4.475647E+02  4.595976E+02  6.418689E+02
- Found acoustic mode      3 for |q| in red coord < 0.25 ; q =       0.1250      0.1250      0.1250
  Speed of sound for this q and mode:
    in atomic units:     0.1743715980E-02
    in SI units m/s:           3814.71220
@@ -1135,7 +1130,6 @@
    in atomic units:     0.8991541359E-03
    in SI units K  :            283.93008
 
- Found acoustic mode      4 for |q| in red coord < 0.25 ; q =       0.1250      0.1250      0.1250
  Speed of sound for this q and mode:
    in atomic units:     0.1743715980E-02
    in SI units m/s:           3814.71220
@@ -1143,7 +1137,6 @@
    in atomic units:     0.8991541359E-03
    in SI units K  :            283.93008
 
- Found acoustic mode      5 for |q| in red coord < 0.25 ; q =       0.1250      0.1250      0.1250
  Speed of sound for this q and mode:
    in atomic units:     0.2631781958E-02
    in SI units m/s:           5757.52637
@@ -1176,7 +1169,6 @@
 
  Treat the second list of vectors 
 
--begin at tcpu      1.296  and twall      1.304 sec
  
   Phonon at Gamma, with non-analyticity in the
   direction (cartesian coordinates)  0.00000  0.00000  1.00000
