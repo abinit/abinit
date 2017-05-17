@@ -3718,7 +3718,7 @@ end subroutine pawxcsphpositron
                if (lmselect2(ilm2)) then
                  isel=pawang%gntselect(ilm,ilm2+ilm1*(ilm1-1)/2)
                  if (isel>0) then
-                   fact=pawang%realgnt(isel);if (ilm1/=ilm2) fact=two*fact
+                   fact=pawang%realgnt(isel) !;if (ilm1/=ilm2) fact=two*fact
                    sum2(:,ilm,1)=sum2(:,ilm,1)+fact*rho1(:,ilm1)*rho2(:,ilm2)
                  end if
                end if
@@ -3793,7 +3793,7 @@ end subroutine pawxcsphpositron
                if (lmselect2(ilm2)) then
                  isel=pawang%gntselect(ilm,ilm2+ilm1*(ilm1-1)/2)
                  if (isel>0) then
-                   fact=pawang%realgnt(isel);if (ilm1/=ilm2) fact=two*fact
+                   fact=pawang%realgnt(isel) ! ;if (ilm1/=ilm2) fact=two*fact
                    do ir=1,nrad
                      i1r=cplex1*(ir-1)+1;i2r=cplex2*(ir-1)+1;i3r=cplexsum*(ir-1)+1
                      ro1r=rho1(i1r,ilm1);ro1i=zero;if (cplex1==2) ro1i=rho1(i1r+1,ilm1)
