@@ -354,8 +354,8 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,gsqcutf_eff,nfftf,ngfftf,&
  if (nspinor==2) then
    ABI_MALLOC(vxcab,(nfftf))
    ABI_MALLOC(vxcab_val,(nfftf))
-   vxcab    (:)=DCMPLX(vxc    (:,3),vxc    (:,4))
-   vxcab_val(:)=DCMPLX(vxc_val(:,3),vxc_val(:,4))
+   vxcab    (:) = DCMPLX(vxc    (:,3),vxc    (:,4))
+   vxcab_val(:) = DCMPLX(vxc_val(:,3),vxc_val(:,4))
    if(Mflags%has_vxcval_hybrid==1) then
      ABI_MALLOC(vxcab_val_hybrid,(nfftf))
      vxcab_val_hybrid(:)=DCMPLX(vxc_val_hybrid(:,3),vxc_val_hybrid(:,4))
@@ -480,7 +480,8 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,gsqcutf_eff,nfftf,ngfftf,&
 !&            xdotc(Wfd%npwwfn,cg1(1:),1,kinwf2(1:),1) + SUM(u1cjg_u2dpc(1:nfftf)*veffh0(1:nfftf,is))*nfftfm1
          end if
 
-         if (nspinor==2) then !Here I can skip 21 if ib==jb
+         if (nspinor==2) then
+           ! Here I can skip 21 if ib==jb
            ur1_up  => ur1(1:nfftf)
            ur1_dwn => ur1(nfftf+1:2*nfftf)
            ur2_up  => ur2(1:nfftf)
@@ -564,7 +565,6 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,gsqcutf_eff,nfftf,ngfftf,&
    ! * Tests if needed pointers in Paw_ij are allocated.
    ltest=(allocated(Paw_ij(1)%dijxc).and.allocated(Paw_ij(1)%dijxc_hat).and.allocated(Paw_ij(1)%dijxc_val))
    ABI_CHECK(ltest,"dijxc, dijxc_hat or dijxc_val not allocated")
-
    ABI_CHECK(nspinor == 1, "PAW with nspinor not tested")
 
    !* For LDA+U

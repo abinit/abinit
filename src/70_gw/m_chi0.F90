@@ -45,7 +45,6 @@ MODULE m_chi0
 
  public :: assemblychi0q0_sym
  public :: assemblychi0_sym
- !public :: mkrhotwg_sigma
  public :: assemblychi0sfq0
  public :: symmetrize_afm_chi0
  public :: accumulate_chi0_q0
@@ -514,9 +513,8 @@ subroutine assemblychi0_sym(ik_bz,nspinor,Ep,Ltg_q,green_w,npwepG0,rhotwg,Gsph_e
  nthreads = xomp_get_max_threads()
 
  SELECT CASE (Ep%symchi)
-
- CASE (0) ! Do not use symmetries
-
+ CASE (0)
+   ! Do not use symmetries
    if (nspinor==1) then
      if (nthreads==1 .or. Ep%nomega>=nthreads) then
 ! MKL_10.3 xgerc is not threaded. BTW: single precision is faster (sometimes factor ~2).
@@ -540,18 +538,18 @@ subroutine assemblychi0_sym(ik_bz,nspinor,Ep,Ltg_q,green_w,npwepG0,rhotwg,Gsph_e
 !$omp end parallel
     end if
 
-   else ! spinorial case
-     ABI_MALLOC(rhotwg_I,(Ep%npwe))
-     ABI_MALLOC(rhotwg_J,(Ep%npwe))
+   else
+     ! spinorial case
+     ABI_MALLOC(rhotwg_I, (Ep%npwe))
+     ABI_MALLOC(rhotwg_J, (Ep%npwe))
 
      ! I can use symmetries to loop over the upper triangle but
      ! this makes using BLAS more difficult
-
      do jj=1,Ep%nJ
        s_jj=1 ; if (jj==4) s_jj=-1
        pad_jj=(jj-1)*Ep%npwe
        call mkrhotwg_sigma(jj,nspinor,Ep%npwe,rhotwg,rhotwg_J)
-       !
+
        do ii=1,Ep%nI
          pad_ii=(ii-1)*Ep%npwe
 
@@ -565,7 +563,6 @@ subroutine assemblychi0_sym(ik_bz,nspinor,Ep,Ltg_q,green_w,npwepG0,rhotwg,Gsph_e
           dd = s_jj*green_w(io)
           call XGERC(Ep%npwe,Ep%npwe,dd,rhotwg_I,1,rhotwg_J,1,chi0(pad_ii+1:pad_ii+Ep%npwe,pad_jj+1:pad_jj+Ep%npwe,io),Ep%npwe)
          end do
-         !
        end do !ii
      end do !jj
 
@@ -590,8 +587,8 @@ subroutine assemblychi0_sym(ik_bz,nspinor,Ep,Ltg_q,green_w,npwepG0,rhotwg,Gsph_e
    ! Mind the slicing of %rottbm1(npwepG0,timrev,nsym) and %phmGt(npwepG0,nsym) as
    ! these arrays, usually, do not conform to rho_twg_sym(npw) !
    !
-   !
-   ! === Loop over symmetries of the space group and time-reversal ===
+   ! Loop over symmetries of the space group and time-reversal.
+   ABI_CHECK(nspinor == 1, "nspinor != 1 not coded")
    do isym=1,Ltg_q%nsym_sg
      do itim=1,Ltg_q%timrev
        !
@@ -611,36 +608,34 @@ subroutine assemblychi0_sym(ik_bz,nspinor,Ep,Ltg_q,green_w,npwepG0,rhotwg,Gsph_e
          CASE DEFAULT
            MSG_BUG(sjoin('Wrong itim:', itoa(itim)))
          END SELECT
-         !
+
          ! Multiply rhotwg_sym by green_w(io) and accumulate in chi0(G,Gp,io)
 
-
-if (nthreads==1 .or. Ep%nomega>=nthreads) then
+         if (nthreads==1 .or. Ep%nomega>=nthreads) then
 ! MKL_10.3 xgerc is not threaded. BTW: single precision is faster (sometimes factor ~2).
 !$omp parallel do private(dd)
-         do io=1,Ep%nomega
-           dd=green_w(io)
-           call XGERC(Ep%npwe,Ep%npwe,dd,rhotwg_sym,1,rhotwg_sym,1,chi0(:,:,io),Ep%npwe)
-         end do
-
-else
-!write(std_out,*)"in new with nthreads = ",nthreads
-!$omp parallel private(dd)
-         do io=1,Ep%nomega
-           dd=green_w(io)
-!$omp do
-           do ig2=1,Ep%npwe
-             do ig1=1,Ep%npwe
-               chi0(ig1,ig2,io) = chi0(ig1,ig2,io) + dd * rhotwg_sym(ig1) * GWPC_CONJG(rhotwg_sym(ig2))
-             end do
+           do io=1,Ep%nomega
+             dd=green_w(io)
+             call XGERC(Ep%npwe,Ep%npwe,dd,rhotwg_sym,1,rhotwg_sym,1,chi0(:,:,io),Ep%npwe)
            end do
+
+         else
+           !write(std_out,*)"in new with nthreads = ",nthreads
+!$omp parallel private(dd)
+           do io=1,Ep%nomega
+             dd=green_w(io)
+!$omp do
+             do ig2=1,Ep%npwe
+               do ig1=1,Ep%npwe
+                 chi0(ig1,ig2,io) = chi0(ig1,ig2,io) + dd * rhotwg_sym(ig1) * GWPC_CONJG(rhotwg_sym(ig2))
+               end do
+             end do
 !$omp end do NOWAIT
-         end do
+           end do
 !$omp end parallel
-         !
-end if
+         end if
        end if
-       !
+
      end do
    end do
 
@@ -893,7 +888,6 @@ subroutine assemblychi0sfq0(nqlwl,qlwl,ikbz,isym_kbz,itim_kbz,nspinor,symchi,npw
    else ! spinorial case
      MSG_BUG("Spectral method + nspinor==2 not implemented")
    end if
-
 
  CASE (1)
    ! === Notes on the symmetrization of oscillator matrix elements ===
@@ -1183,7 +1177,7 @@ subroutine symmetrize_afm_chi0(Cryst,Gsph,Ltg_q,npwe,nomega,chi0,chi0_head,chi0_
        end do
      end do
    end if
-   !
+
    if (PRESENT(chi0_lwing)) then
      do io=1,nomega
        do ig1=1,npwe
@@ -1195,11 +1189,11 @@ subroutine symmetrize_afm_chi0(Cryst,Gsph,Ltg_q,npwe,nomega,chi0,chi0_head,chi0_
    end if
 
    do io=1,nomega
-     !
-     do ig1=1,npwe ! Take care of diagonal.
+     ! Take care of diagonal.
+     do ig1=1,npwe
        chi0(ig1,ig1,io)=two*chi0(ig1,ig1,io)
      end do
-     !
+
      ! Upper and lower triangle are treated differently:
      ! We took advantage of the fact the afm_mat is hermitian to reduce memory.
      do ig2=2,npwe
@@ -1209,7 +1203,7 @@ subroutine symmetrize_afm_chi0(Cryst,Gsph,Ltg_q,npwe,nomega,chi0,chi0_head,chi0_
          chi0(ig1,ig2,io)=afm_mat(kg)*chi0(ig1,ig2,io)
        end do
      end do
-     !
+
      do ig1=2,npwe
        k0g=ig1*(ig1-1)/2
        do ig2=1,ig1-1
@@ -1217,7 +1211,7 @@ subroutine symmetrize_afm_chi0(Cryst,Gsph,Ltg_q,npwe,nomega,chi0,chi0_head,chi0_
          chi0(ig1,ig2,io)=CONJG(afm_mat(kg))*chi0(ig1,ig2,io)
        end do
      end do
-     !
+
    end do !io
 
    ABI_FREE(afm_mat)
@@ -1400,59 +1394,59 @@ subroutine accumulate_chi0_q0(ik_bz,isym_kbz,itim_kbz,gwcomp,nspinor,npwepG0,Ep,
  ABI_UNUSED(deltaf_b1b2)
 
  SELECT CASE (Ep%symchi)
-
- CASE (0) ! Do not use symmetries.
-
+ CASE (0)
+   ! Do not use symmetries.
    if (nspinor==1) then
-    ! * Symmetrize rhotwg in the full BZ and accumulate over the full BZ i.e.
-    !     chi0(G1,G2,io) = chi0(G1,G2,io) + (rhotwg(G1)*CONJG(rhotwg(G2)))*green_w(io)
-    ! * The non-analytic term is symmetrized for this k-point in the BZ according to:
-    !    rhotwg(1)= S^-1q * rhotwx_ibz
-    !    rhotwg(1)=-S^-1q * CONJG(rhotwx_ibz) if time-reversal is used.
+     ! * Symmetrize rhotwg in the full BZ and accumulate over the full BZ i.e.
+     !     chi0(G1,G2,io) = chi0(G1,G2,io) + (rhotwg(G1)*CONJG(rhotwg(G2)))*green_w(io)
+     ! * The non-analytic term is symmetrized for this k-point in the BZ according to:
+     !    rhotwg(1)= S^-1q * rhotwx_ibz
+     !    rhotwg(1)=-S^-1q * CONJG(rhotwx_ibz) if time-reversal is used.
 
-    ! Multiply elements G1,G2 of rhotwg_sym by green_w(io) and accumulate in chi0(G1,G2,io)
+     ! Multiply elements G1,G2 of rhotwg_sym by green_w(io) and accumulate in chi0(G1,G2,io)
 !$omp parallel do private(dd)
-    do io=1,Ep%nomega
-      dd=green_w(io)
-      call XGERC(Ep%npwe,Ep%npwe,dd,rhotwg,1,rhotwg,1,chi0(:,:,io),Ep%npwe)
-    end do
+     do io=1,Ep%nomega
+       dd=green_w(io)
+       call XGERC(Ep%npwe,Ep%npwe,dd,rhotwg,1,rhotwg,1,chi0(:,:,io),Ep%npwe)
+     end do
 
-    ! === Accumulate heads and wings for each small q ===
-    ! FIXME extrapolar method should be checked!!
+     ! === Accumulate heads and wings for each small q ===
+     ! FIXME extrapolar method should be checked!!
 
-    ! Symmetrize <r> in full BZ: <Sk b|r|Sk b'> = R <k b|r|k b'> + \tau \delta_{bb'}
-    mir_kbz =(3-2*itim_kbz) * MATMUL(Cryst%symrec(:,:,isym_kbz),rhotwx(:,1))
-    if (itim_kbz==2) mir_kbz=CONJG(mir_kbz)
+     ! Symmetrize <r> in full BZ: <Sk b|r|Sk b'> = R <k b|r|k b'> + \tau \delta_{bb'}
+     mir_kbz =(3-2*itim_kbz) * MATMUL(Cryst%symrec(:,:,isym_kbz),rhotwx(:,1))
+     if (itim_kbz==2) mir_kbz=CONJG(mir_kbz)
 
-    ! here we might take advantage of Hermiticity along Im axis in RPA (see mkG0w)
-    do idir=1,3
-      do io=1,Ep%nomega
-        chi0_uwing(:,io,idir) = chi0_uwing(:,io,idir) + green_w(io) * mir_kbz(idir)*CONJG(rhotwg)
-        chi0_lwing(:,io,idir) = chi0_lwing(:,io,idir) + green_w(io) * rhotwg*CONJG(mir_kbz(idir))
-        ! Add contribution due to extrapolar technique.
-        !if (gwcomp==1.and.ABS(deltaf_b1b2) >= GW_TOL_DOCC) then
-        if (gwcomp==1) then
-          chi0_uwing(:,io,idir) = chi0_uwing(:,io,idir) + green_enhigh_w(io) * mir_kbz(idir)*CONJG(rhotwg)
-          chi0_lwing(:,io,idir) = chi0_lwing(:,io,idir) + green_enhigh_w(io) * rhotwg*CONJG(mir_kbz(idir))
-        end if
-      end do
-    end do
-    !
-    ! Accumulate the head.
-    do io=1,Ep%nomega
-      do jdir=1,3
-        do idir=1,3
-          chi0_head(idir,jdir,io) = chi0_head(idir,jdir,io) + green_w(io) * mir_kbz(idir)*CONJG(mir_kbz(jdir))
-          ! Add contribution due to extrapolar technique.
-          !if (gwcomp==1.and.ABS(deltaf_b1b2) >= GW_TOL_DOCC) then
-          if (gwcomp==1) then
-            chi0_head(idir,jdir,io) = chi0_head(idir,jdir,io) + green_enhigh_w(io) * mir_kbz(idir)*CONJG(mir_kbz(jdir))
-          end if
-        end do
-      end do
-    end do
+     ! here we might take advantage of Hermiticity along Im axis in RPA (see mkG0w)
+     do idir=1,3
+       do io=1,Ep%nomega
+         chi0_uwing(:,io,idir) = chi0_uwing(:,io,idir) + green_w(io) * mir_kbz(idir)*CONJG(rhotwg)
+         chi0_lwing(:,io,idir) = chi0_lwing(:,io,idir) + green_w(io) * rhotwg*CONJG(mir_kbz(idir))
+         ! Add contribution due to extrapolar technique.
+         !if (gwcomp==1.and.ABS(deltaf_b1b2) >= GW_TOL_DOCC) then
+         if (gwcomp==1) then
+           chi0_uwing(:,io,idir) = chi0_uwing(:,io,idir) + green_enhigh_w(io) * mir_kbz(idir)*CONJG(rhotwg)
+           chi0_lwing(:,io,idir) = chi0_lwing(:,io,idir) + green_enhigh_w(io) * rhotwg*CONJG(mir_kbz(idir))
+         end if
+       end do
+     end do
 
-  else ! spinorial case
+     ! Accumulate the head.
+     do io=1,Ep%nomega
+       do jdir=1,3
+         do idir=1,3
+           chi0_head(idir,jdir,io) = chi0_head(idir,jdir,io) + green_w(io) * mir_kbz(idir)*CONJG(mir_kbz(jdir))
+           ! Add contribution due to extrapolar technique.
+           !if (gwcomp==1.and.ABS(deltaf_b1b2) >= GW_TOL_DOCC) then
+           if (gwcomp==1) then
+             chi0_head(idir,jdir,io) = chi0_head(idir,jdir,io) + green_enhigh_w(io) * mir_kbz(idir)*CONJG(mir_kbz(jdir))
+           end if
+         end do
+       end do
+     end do
+
+  else
+    ! spinorial case
     ABI_MALLOC(rhotwg_I,(Ep%npwe))
     ABI_MALLOC(rhotwg_J,(Ep%npwe))
 
@@ -1496,7 +1490,8 @@ subroutine accumulate_chi0_q0(ik_bz,isym_kbz,itim_kbz,gwcomp,nspinor,npwepG0,Ep,
     ABI_FREE(rhotwg_J)
   end if
 
- CASE (1) ! Use symmetries to reconstruct the integrand.
+ CASE (1)
+   ! Use symmetries to reconstruct the integrand.
    if (nspinor==1) then
      ABI_MALLOC(rhotwg_sym,(Ep%npwe))
 
@@ -1510,7 +1505,6 @@ subroutine accumulate_chi0_q0(ik_bz,isym_kbz,itim_kbz,gwcomp,nspinor,npwepG0,Ep,
            Sm1G  => Gsph_epsG0%rottbm1(1:Ep%npwe,itim,isym)
 
            SELECT CASE (itim)
-
            CASE (1)
              rhotwg_sym(1:Ep%npwe)=rhotwg(Sm1G(1:Ep%npwe))*phmGt(1:Ep%npwe)
 
@@ -1520,7 +1514,7 @@ subroutine accumulate_chi0_q0(ik_bz,isym_kbz,itim_kbz,gwcomp,nspinor,npwepG0,Ep,
            CASE DEFAULT
              MSG_BUG(sjoin('Wrong value of itim:', itoa(itim)))
            END SELECT
-           !
+
            ! Multiply elements G1,G2 of rhotwg_sym by green_w(io) and accumulate in chi0(G,Gp,io)
 !$omp parallel do private(dd)
            do io=1,Ep%nomega

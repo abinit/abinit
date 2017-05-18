@@ -1,7 +1,7 @@
 !{\src2tex{textfont=tt}}
 !!****f* ABINIT/chi0q0_intraband
 !! NAME
-!! chi0q0_intraband      
+!! chi0q0_intraband
 !!
 !! FUNCTION
 !! Calculate chi0 in the limit q-->0
@@ -155,7 +155,7 @@ subroutine chi0q0_intraband(Wfd,Cryst,Ep,Psps,BSt,Gsph_epsG0,Pawang,Pawrad,Pawta
  real(dp),parameter :: dummy_dosdeltae=HUGE(zero)
  real(dp) :: o_entropy,o_nelect,maxocc
  complex(dpc) :: ph_mkt
- logical :: iscompatibleFFT !,ltest 
+ logical :: iscompatibleFFT !,ltest
  character(len=500) :: msg,msg_tmp !,allup
  type(kmesh_t) :: Kmesh
  type(littlegroup_t) :: Ltg_q
@@ -167,12 +167,12 @@ subroutine chi0q0_intraband(Wfd,Cryst,Ep,Psps,BSt,Gsph_epsG0,Pawang,Pawrad,Pawta
  !integer :: got(Wfd%nproc)
  integer,allocatable :: tabr_k(:),igffteps0(:),gw_gbound(:,:)
  real(dp),parameter :: q0(3)=(/zero,zero,zero/)
- real(dp) :: kpt(3),dedk(3),kbz(3),spinrot_kbz(4) 
+ real(dp) :: kpt(3),dedk(3),kbz(3),spinrot_kbz(4)
  !real(dp),ABI_CONTIGUOUS pointer :: ks_energy(:,:,:),qp_energy(:,:,:),qp_occ(:,:,:)
  real(dp) :: shift_ene(BSt%mband,BSt%nkpt,BSt%nsppol)
  real(dp) :: delta_occ(BSt%mband,BSt%nkpt,BSt%nsppol)
  !real(dp) :: eigen_vec(BSt%bantot)
- real(dp) :: o_doccde(BSt%bantot) 
+ real(dp) :: o_doccde(BSt%bantot)
  real(dp) :: eigen_pdelta_vec(BSt%bantot),eigen_mdelta_vec(BSt%bantot)
  real(dp) :: o_occ_pdelta(BSt%bantot),o_occ_mdelta(BSt%bantot)
  real(dp) :: delta_ene(BSt%mband,BSt%nkpt,BSt%nsppol)
@@ -183,7 +183,7 @@ subroutine chi0q0_intraband(Wfd,Cryst,Ep,Psps,BSt,Gsph_epsG0,Pawang,Pawrad,Pawta
  complex(gwpc),allocatable :: rhotwg(:)
  complex(dpc) :: green_w(Ep%nomega)
  complex(gwpc),allocatable :: ur1(:)
- complex(gwpc),ABI_CONTIGUOUS pointer :: ug(:) 
+ complex(gwpc),ABI_CONTIGUOUS pointer :: ug(:)
  logical :: bmask(Wfd%mband)
  type(pawcprj_type),allocatable :: Cprj1_bz(:,:),Cprj1_ibz(:,:),Cp_bks(:,:)
  type(pawpwij_t),allocatable :: Pwij(:)
@@ -204,7 +204,7 @@ subroutine chi0q0_intraband(Wfd,Cryst,Ep,Psps,BSt,Gsph_epsG0,Pawang,Pawrad,Pawta
  ABI_MALLOC(ihr_comm,(3,nspinor**2,Wfd%mband,Wfd%nkibz,nsppol))
  ihr_comm = czero
 
- if (Wfd%usepaw==1) then 
+ if (Wfd%usepaw==1) then
    ABI_DT_MALLOC(Cp_bks,(Cryst%natom,nspinor))
    call pawcprj_alloc(Cp_bks,0,Wfd%nlmn_atm)
    ABI_DT_MALLOC(HUr,(Cryst%natom))
@@ -227,7 +227,7 @@ subroutine chi0q0_intraband(Wfd,Cryst,Ep,Psps,BSt,Gsph_epsG0,Pawang,Pawrad,Pawta
      bmask=.FALSE.; bmask(1:nband_k)=.TRUE. ! TODO only bands around EF should be included.
      call wfd_distribute_bands(Wfd,ik_ibz,spin,my_nband,my_band_list,bmask=bmask)
      if (my_nband==0) CYCLE
-     
+
      if (Wfd%usepaw==0.and.inclvkb/=0) then ! Include term <n,k|[Vnl,iqr]|n"k>' for q->0.
        call vkbr_init(vkbr,Cryst,Psps,inclvkb,istwf_k,npw_k,kpt,kg_k)
      end if
@@ -236,10 +236,10 @@ subroutine chi0q0_intraband(Wfd,Cryst,Ep,Psps,BSt,Gsph_epsG0,Pawang,Pawrad,Pawta
        band=my_band_list(lbidx)
        ug => Wfd%Wave(band,ik_ibz,spin)%ug
 
-       if (Wfd%usepaw==0) then  
-         ! Matrix elements of i[H,r] for NC pseudopotentials.        
-         comm_kbbs = nc_ihr_comm(vkbr,cryst,psps,npw_k,nspinor,istwf_k,inclvkb,Kmesh%ibz(:,ik_ibz),ug,ug,kg_k) 
-       else                     
+       if (Wfd%usepaw==0) then
+         ! Matrix elements of i[H,r] for NC pseudopotentials.
+         comm_kbbs = nc_ihr_comm(vkbr,cryst,psps,npw_k,nspinor,istwf_k,inclvkb,Kmesh%ibz(:,ik_ibz),ug,ug,kg_k)
+       else
          ! Matrix elements of i[H,r] for PAW.
          call wfd_get_cprj(Wfd,band,ik_ibz,spin,Cryst,Cp_bks,sorted=.FALSE.)
          comm_kbbs = paw_ihr(spin,nspinor,npw_k,istwf_k,Kmesh%ibz(:,ik_ibz),Cryst,Pawtab,ug,ug,kg_k,Cp_bks,Cp_bks,HUr)
@@ -255,7 +255,7 @@ subroutine chi0q0_intraband(Wfd,Cryst,Ep,Psps,BSt,Gsph_epsG0,Pawang,Pawrad,Pawta
  ! Gather the commutator on each node.
  call xmpi_sum(ihr_comm,Wfd%comm,ierr)
 
- if (Wfd%usepaw==1) then 
+ if (Wfd%usepaw==1) then
    call pawcprj_free(Cp_bks)
    ABI_DT_FREE(Cp_bks)
    call pawhur_free(Hur)
@@ -264,7 +264,7 @@ subroutine chi0q0_intraband(Wfd,Cryst,Ep,Psps,BSt,Gsph_epsG0,Pawang,Pawrad,Pawta
 
  nqlwl=1
  ABI_MALLOC(qlwl,(3,nqlwl))
- !qlwl = GW_Q0_DEFAULT(3) 
+ !qlwl = GW_Q0_DEFAULT(3)
  qlwl(:,1) = (/0.00001_dp, 0.00002_dp, 0.00003_dp/)
  !
  write(msg,'(a,i3,a)')' Q-points for long wave-length limit in chi0q_intraband. # ',nqlwl,ch10
@@ -280,7 +280,7 @@ subroutine chi0q0_intraband(Wfd,Cryst,Ep,Psps,BSt,Gsph_epsG0,Pawang,Pawrad,Pawta
    do ik_ibz=1,Wfd%nkibz
      do band=1,Wfd%nband(ik_ibz,spin)
        dedk = REAL(ihr_comm(:,1,band,ik_ibz,spin))
-       delta_ene(band,ik_ibz,spin) = -vdotw(qlwl(:,1),dedk,Cryst%gmet,"G")  
+       delta_ene(band,ik_ibz,spin) = -vdotw(qlwl(:,1),dedk,Cryst%gmet,"G")
      end do
    end do
  end do
@@ -291,11 +291,11 @@ subroutine chi0q0_intraband(Wfd,Cryst,Ep,Psps,BSt,Gsph_epsG0,Pawang,Pawrad,Pawta
  shift_ene = BSt%eig + half*delta_ene
 
  call pack_eneocc(BSt%nkpt,BSt%nsppol,BSt%mband,BSt%nband,BSt%bantot,shift_ene,eigen_pdelta_vec)
- 
+
  call getnel(o_doccde,dummy_dosdeltae,eigen_pdelta_vec,o_entropy,BSt%fermie,maxocc,BSt%mband,BSt%nband,&
 &  o_nelect,BSt%nkpt,BSt%nsppol,o_occ_pdelta,BSt%occopt,option1,BSt%tphysel,BSt%tsmear,unitdos0,BSt%wtk)
  write(std_out,*)"nelect1: ",o_nelect
- ! 
+ !
  ! Calculate the occupations at f(e-delta/2).
  shift_ene = BSt%eig - half*delta_ene
 
@@ -315,7 +315,7 @@ subroutine chi0q0_intraband(Wfd,Cryst,Ep,Psps,BSt,Gsph_epsG0,Pawang,Pawrad,Pawta
    do ik_ibz=1,Wfd%nkibz
      do band=1,Wfd%nband(ik_ibz,spin)
        dedk = REAL(ihr_comm(:,1,band,ik_ibz,spin))
-       test_docc(band,ik_ibz,spin) = +vdotw(qlwl(:,1),dedk,Cryst%gmet,"G") * BSt%doccde(band,ik_ibz,spin) 
+       test_docc(band,ik_ibz,spin) = +vdotw(qlwl(:,1),dedk,Cryst%gmet,"G") * BSt%doccde(band,ik_ibz,spin)
        write(std_out,'(a,3(i0,1x),1x,3es16.8)')" spin,ik_ibz,band, delta_occ: ",&
 &      spin,ik_ibz,band,delta_occ(band,ik_ibz,spin),&
 &      test_docc(band,ik_ibz,spin),delta_occ(band,ik_ibz,spin)-test_docc(band,ik_ibz,spin)
@@ -329,9 +329,9 @@ subroutine chi0q0_intraband(Wfd,Cryst,Ep,Psps,BSt,Gsph_epsG0,Pawang,Pawrad,Pawta
 !     nband_k = Wfd%nband(ik_ibz,spin)
 !     do band=1,nband_k
 !       write(std_out,'(a,3i3,2es14.6)')" spin, band, ik_ibz, delta_ene, delta_occ ",&
-!&        spin,band,ik_ibz,delta_ene(band,ik_ibz,spin),delta_occ(band,ik_ibz,spin) 
+!&        spin,band,ik_ibz,delta_ene(band,ik_ibz,spin),delta_occ(band,ik_ibz,spin)
 !     end do
-!   end do 
+!   end do
 ! end do
 
  ABI_FREE(ihr_comm)
@@ -405,13 +405,13 @@ subroutine chi0q0_intraband(Wfd,Cryst,Ep,Psps,BSt,Gsph_epsG0,Pawang,Pawrad,Pawta
  !
  ! Tables for the FFT of the oscillators.
  !  a) FFT index of the G sphere (only vertical transitions, unlike cchi0, no need to shift the sphere).
- !  b) gw_gbound table for the zero-padded FFT performed in rhotwg. 
+ !  b) gw_gbound table for the zero-padded FFT performed in rhotwg.
  ABI_MALLOC(gw_gbound,(2*gw_mgfft+8,2))
  ABI_MALLOC(igffteps0,(Gsph_epsG0%ng))
 
  call gsph_fft_tabs(Gsph_epsG0,(/0,0,0/),gw_mgfft,ngfft_gw,use_padfft,gw_gbound,igffteps0)
  if ( ANY(gw_fftalga == (/2,4/)) ) use_padfft=0 ! Pad-FFT is not coded in rho_tw_g
- if (use_padfft==0) then 
+ if (use_padfft==0) then
    ABI_FREE(gw_gbound)
    ABI_MALLOC(gw_gbound,(2*gw_mgfft+8,2*use_padfft))
  end if
@@ -464,7 +464,7 @@ subroutine chi0q0_intraband(Wfd,Cryst,Ep,Psps,BSt,Gsph_epsG0,Pawang,Pawrad,Pawta
 
        call wfd_get_ur(Wfd,band,ik_ibz,spin,ur1)
 
-       if (Psps%usepaw==1) then 
+       if (Psps%usepaw==1) then
          call wfd_get_cprj(Wfd,band,ik_ibz,spin,Cryst,Cprj1_ibz,sorted=.FALSE.)
          call pawcprj_copy(Cprj1_ibz,Cprj1_bz)
          call paw_symcprj(ik_bz,nspinor,1,Cryst,Kmesh,Pawtab,Pawang,Cprj1_bz)
@@ -474,12 +474,12 @@ subroutine chi0q0_intraband(Wfd,Cryst,Ep,Psps,BSt,Gsph_epsG0,Pawang,Pawrad,Pawta
        deltaeGW_b1b2= delta_ene(band,ik_ibz,spin)
 
        ! Add small imaginary of the Time-Ordered resp function but only for non-zero real omega  FIXME What about metals?
-       if (.not.use_tr) then 
+       if (.not.use_tr) then
          do io=1,Ep%nomega
            !green_w(io) = g0g0w(Ep%omega(io),deltaf_b1b2,deltaeGW_b1b2,zcut,-one,one_pole)
            green_w(io) = g0g0w(Ep%omega(io),deltaf_b1b2,deltaeGW_b1b2,zcut,GW_TOL_W0,one_pole)
          end do
-       else 
+       else
          do io=1,Ep%nomega ! This expression implements time-reversal even when the input k-mesh breaks it.
            !green_w(io) = half * g0g0w(Ep%omega(io),deltaf_b1b2,deltaeGW_b1b2,zcut,-one,two_poles)
            green_w(io) = half * g0g0w(Ep%omega(io),deltaf_b1b2,deltaeGW_b1b2,zcut,GW_TOL_W0,two_poles)
@@ -539,12 +539,12 @@ subroutine chi0q0_intraband(Wfd,Cryst,Ep,Psps,BSt,Gsph_epsG0,Pawang,Pawrad,Pawta
  ! ===================================================
  ! ==== Construct heads and wings from the tensor ====
  ! ===================================================
- !do io=1,Ep%nomega    
+ !do io=1,Ep%nomega
  !  do ig=2,Ep%npwe
  !    wng = chi0_uwing(ig,io,:)
- !    chi0(1,ig,io) = vdotw(Ep%qlwl(:,1),wng,Cryst%gmet,"G") 
+ !    chi0(1,ig,io) = vdotw(Ep%qlwl(:,1),wng,Cryst%gmet,"G")
  !    wng = chi0_lwing(ig,io,:)
- !    chi0(ig,1,io) = vdotw(Ep%qlwl(:,1),wng,Cryst%gmet,"G") 
+ !    chi0(ig,1,io) = vdotw(Ep%qlwl(:,1),wng,Cryst%gmet,"G")
  !  end do
  !  chq = MATMUL(chi0_head(:,:,io), Ep%qlwl(:,1))
  !  chi0(1,1,io) = vdotw(Ep%qlwl(:,1),chq,Cryst%gmet,"G")  ! Use user-defined small q

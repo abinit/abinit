@@ -1658,7 +1658,7 @@ integer function sigma_ncwrite(Sigp,Er,Sr,ncid) result (ncerr)
 #endif
 
 contains
- integer function vid(vname) 
+ integer function vid(vname)
 
 
 !This section has been created automatically by the script Abilint (TD).

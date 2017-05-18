@@ -74,7 +74,7 @@
 !!  *) The terms "head", "wings" and "body" of chi(G,Gp) refer to
 !!     G=Gp=0, either G or Gp=0, and neither=0 respectively
 !!
-!!  *) Symmetry conventions: 
+!!  *) Symmetry conventions:
 !!      1) symmetry in real space is defined as: R_t f(r) = f(R^-1(r-t))
 !!      2) S=\transpose R^-1
 !!      3) kbz=S kibz
@@ -150,7 +150,7 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
  use m_paw_ij,          only : paw_ij_type
  use m_pawfgrtab,       only : pawfgrtab_type
  use m_pawcprj,         only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_copy
- use m_pawpwij,        only : pawpwff_t, pawpwij_t, pawpwij_init, pawpwij_free, paw_rho_tw_g, paw_cross_rho_tw_g 
+ use m_pawpwij,        only : pawpwff_t, pawpwij_t, pawpwij_init, pawpwij_free, paw_rho_tw_g, paw_cross_rho_tw_g
  use m_paw_pwaves_lmn,  only : paw_pwaves_lmn_t
  use m_pawhr,           only : pawhur_t, pawhur_free, pawhur_init, paw_ihr, paw_cross_ihr_comm
 
@@ -232,12 +232,12 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
  complex(dpc) :: ph_mkt
  complex(gwpc),allocatable :: sf_chi0(:,:,:)
  complex(dpc),allocatable :: kkweight(:,:)
- complex(gwpc),allocatable :: ur1_kibz(:),ur2_kibz(:) 
+ complex(gwpc),allocatable :: ur1_kibz(:),ur2_kibz(:)
  complex(gwpc),allocatable :: usr1_k(:),ur2_k(:)
  complex(gwpc),allocatable :: wfwfg(:)
  complex(gwpc),allocatable :: ur_ae1(:),ur_ae_onsite1(:),ur_ps_onsite1(:)
  complex(gwpc),allocatable :: ur_ae2(:),ur_ae_onsite2(:),ur_ps_onsite2(:)
- complex(gwpc),ABI_CONTIGUOUS pointer :: ug1(:),ug2(:) 
+ complex(gwpc),ABI_CONTIGUOUS pointer :: ug1(:),ug2(:)
  complex(dpc), allocatable :: coeffW_BZ(:,:,:,:,:,:)
  logical :: gradk_not_done(Kmesh%nibz)
  logical,allocatable :: bbp_mask(:,:)
@@ -255,13 +255,13 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
  !
  ! === Initialize MPI stuff ===
  if (ANY(ngfft_gw(1:3) /= Wfd%ngfft(1:3))) then
-   call wfd_change_ngfft(Wfd,Cryst,Psps,ngfft_gw) 
+   call wfd_change_ngfft(Wfd,Cryst,Psps,ngfft_gw)
  end if
 
  gw_mgfft = MAXVAL(ngfft_gw(1:3))
  gw_fftalga = ngfft_gw(7)/100 !; gw_fftalgc=MOD(ngfft_gw(7),10)
 
- if (Dtset%pawcross==1) mgfftf = MAXVAL(ngfftf(1:3)) 
+ if (Dtset%pawcross==1) mgfftf = MAXVAL(ngfftf(1:3))
  !
  ! == Copy some values ===
  comm   = Wfd%comm
@@ -425,7 +425,7 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
  !
  ! Tables for the FFT of the oscillators.
  !  a) FFT index of the G sphere (only vertical transitions, unlike cchi0, no need to shift the sphere).
- !  b) gw_gbound table for the zero-padded FFT performed in rhotwg. 
+ !  b) gw_gbound table for the zero-padded FFT performed in rhotwg.
  ABI_MALLOC(igffteps0,(Gsph_epsG0%ng))
  ABI_MALLOC(gw_gbound,(2*gw_mgfft+8,2))
  call gsph_fft_tabs(Gsph_epsG0,(/0,0,0/),gw_mgfft,ngfft_gw,use_padfft,gw_gbound,igffteps0)
@@ -434,7 +434,7 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
  ! XLF does not deserve this optimization (problem with [v67mbpt][t03])
  use_padfft = 0
 #endif
- if (use_padfft==0) then 
+ if (use_padfft==0) then
    ABI_FREE(gw_gbound)
    ABI_MALLOC(gw_gbound,(2*gw_mgfft+8,2*use_padfft))
  end if
@@ -442,7 +442,7 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
     ABI_MALLOC(gboundf,(2*mgfftf+8,2))
    call gsph_fft_tabs(Gsph_epsG0,(/0,0,0/),mgfftf,ngfftf,use_padfftf,gboundf,igfftepsG0f)
    if ( ANY(gw_fftalga == (/2,4/)) ) use_padfftf=0
-   if (use_padfftf==0) then 
+   if (use_padfftf==0) then
      ABI_FREE(gboundf)
      ABI_MALLOC(gboundf,(2*mgfftf+8,2*use_padfftf))
    end if
@@ -453,7 +453,7 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
  ABI_MALLOC(bbp_ks_distrb,(mband,mband,Kmesh%nbz,nsppol))
  ABI_MALLOC(bbp_mask,(mband,mband))
 
- do spin=1,nsppol      
+ do spin=1,nsppol
    do ik_bz=1,Kmesh%nbz
 
      if (Ep%symchi==1) then
@@ -463,7 +463,7 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
 
      call chi0_bbp_mask(Ep,use_tr,QP_BSt,mband,ik_ibz,ik_ibz,spin,spin_fact,bbp_mask)
 
-     call wfd_distribute_bbp(Wfd,ik_ibz,spin,allup,my_nbbp,bbp_ks_distrb(:,:,ik_bz,spin),got,bbp_mask) 
+     call wfd_distribute_bbp(Wfd,ik_ibz,spin,allup,my_nbbp,bbp_ks_distrb(:,:,ik_bz,spin),got,bbp_mask)
      my_nbbpks = my_nbbpks + my_nbbp
    end do
  end do
@@ -505,7 +505,7 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
    ABI_MALLOC(sf_lwing,(Ep%npwe,my_wl:my_wr,3))
    ABI_MALLOC(sf_uwing,(Ep%npwe,my_wl:my_wr,3))
    sf_head=czero; sf_lwing=czero; sf_uwing=czero
- 
+
    memreq = two*gwpc*Ep%npwe**2*(my_wr-my_wl+1)*b2Gb
    write(msg,'(a,f10.4,a)')' memory required per spectral point: ',2.0*gwpc*Ep%npwe**2*b2Mb,' [Mb]'
    call wrtout(std_out,msg,'PERS')
@@ -568,7 +568,7 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
      if (Dtset%pawcross==1) tabrf_k(:) = ktabrf(:,ik_bz)
 
      istwf_k =  Wfd%istwfk(ik_ibz)
-     npw_k   =  Wfd%npwarr(ik_ibz) 
+     npw_k   =  Wfd%npwarr(ik_ibz)
      kg_k    => Wfd%Kdata(ik_ibz)%kg_k
 
      if (Psps%usepaw==0.and.Ep%inclvkb/=0.and.gradk_not_done(ik_ibz)) then ! Include term <n,k|[Vnl,iqr]|n"k>' for q->0.
@@ -581,13 +581,13 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
 
        ug1 => Wfd%Wave(band1,ik_ibz,spin)%ug
 
-#if DEV_USE_OLDRHOTWG 
+#if DEV_USE_OLDRHOTWG
        call wfd_get_ur(Wfd,band1,ik_ibz,spin,ur1_kibz)
 #else
        call wfd_sym_ur(Wfd,Cryst,Kmesh,band1,ik_bz,spin,usr1_k,trans="C",ur_kibz=ur1_kibz)
 #endif
 
-       if (Psps%usepaw==1) then 
+       if (Psps%usepaw==1) then
          call wfd_get_cprj(Wfd,band1,ik_ibz,spin,Cryst,Cprj1_ibz,sorted=.FALSE.)
          call pawcprj_copy(Cprj1_ibz,Cprj1_bz)
          call paw_symcprj(ik_bz,nspinor,1,Cryst,Kmesh,Pawtab,Pawang,Cprj1_bz)
@@ -625,13 +625,13 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
 
          ug2 => Wfd%Wave(band2,ik_ibz,spin)%ug
 
-#if DEV_USE_OLDRHOTWG 
+#if DEV_USE_OLDRHOTWG
          call wfd_get_ur(Wfd,band2,ik_ibz,spin,ur2_kibz)
 #else
          call wfd_sym_ur(Wfd,Cryst,Kmesh,band2,ik_bz,spin,ur2_k,ur_kibz=ur2_kibz)
 #endif
 
-         if (Psps%usepaw==1) then 
+         if (Psps%usepaw==1) then
            call wfd_get_cprj(Wfd,band2,ik_ibz,spin,Cryst,Cprj2_ibz,sorted=.FALSE.)
            call pawcprj_copy(Cprj2_ibz,Cprj2_bz)
            call paw_symcprj(ik_bz,nspinor,1,Cryst,Kmesh,Pawtab,Pawang,Cprj2_bz)
@@ -649,7 +649,7 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
              do io=1,Ep%nomega
                green_w(io) = g0g0w(Ep%omega(io),deltaf_b1b2,deltaeGW_b1b2,Ep%zcut,GW_TOL_W0,one_pole)
              end do
-           else 
+           else
 
              if (Ep%gwcomp==0) then ! cannot be completely skipped in case of completeness correction
                if (band1<band2) CYCLE ! Here we GAIN a factor ~2
@@ -710,9 +710,9 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
            call approxdelta(Ep%nomegasf,omegasf,deltaeGW_b1b2,Ep%spsmear,iomegal,iomegar,wl,wr,Ep%spmeth)
          END SELECT
          !
-         ! FFT of u^*_{b1,k}(r) u_{b2,k}(r) and (q,G=0) limit using small q and k.p perturbation theory 
+         ! FFT of u^*_{b1,k}(r) u_{b2,k}(r) and (q,G=0) limit using small q and k.p perturbation theory
          !
-#if DEV_USE_OLDRHOTWG 
+#if DEV_USE_OLDRHOTWG
          call rho_tw_g(nspinor,Ep%npwe,nfft,ndat1,ngfft_gw,1,use_padfft,igffteps0,gw_gbound,&
 &          ur1_kibz,itim_k,tabr_k,ph_mkt,spinrot_kbz,&
 &          ur2_kibz,itim_k,tabr_k,ph_mkt,spinrot_kbz,&
@@ -722,10 +722,10 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
          call get_uug(Ep%npwe,nfft,ndat1,ngfft_gw,use_padfft,igffteps0,gw_gbound,usr1_k,ur2_k,rhotwg)
 #endif
 
-         if (Psps%usepaw==0) then  ! Matrix elements of i[H,r] for NC pseudopotentials.        
-           rhotwx = nc_ihr_comm(vkbr(ik_ibz),cryst,psps,npw_k,nspinor,istwf_k,Ep%inclvkb,Kmesh%ibz(:,ik_ibz),ug1,ug2,kg_k) 
+         if (Psps%usepaw==0) then  ! Matrix elements of i[H,r] for NC pseudopotentials.
+           rhotwx = nc_ihr_comm(vkbr(ik_ibz),cryst,psps,npw_k,nspinor,istwf_k,Ep%inclvkb,Kmesh%ibz(:,ik_ibz),ug1,ug2,kg_k)
 
-         else 
+         else
            ! 1) Add PAW onsite contribution, projectors are already in the BZ.
            call paw_rho_tw_g(Ep%npwe,dim_rtwg,nspinor,Cryst%natom,Cryst%ntypat,Cryst%typat,Cryst%xred,Gsph_epsG0%gvec,&
 &            Cprj1_bz,Cprj2_bz,Pwij,rhotwg)
@@ -750,7 +750,7 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
          ! Treat a possible degeneracy between v and c.
          if (ABS(deltaeKS_b1b2)>GW_TOL_W0) then
            rhotwx=-rhotwx/deltaeKS_b1b2
-         else 
+         else
            rhotwx=czero_gw
          end if
 
@@ -869,7 +869,7 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
  end do !spin
 
  ABI_FREE(igffteps0)
- 
+
  call vkbr_free(vkbr)
  ABI_DT_FREE(vkbr)
  !
@@ -939,12 +939,12 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
  ! ===================================================
  ! ==== Construct heads and wings from the tensor ====
  ! ===================================================
- do io=1,Ep%nomega    
+ do io=1,Ep%nomega
    do ig=2,Ep%npwe
      wng = chi0_uwing(ig,io,:)
-     chi0(1,ig,io) = vdotw(Ep%qlwl(:,1),wng,Cryst%gmet,"G") 
+     chi0(1,ig,io) = vdotw(Ep%qlwl(:,1),wng,Cryst%gmet,"G")
      wng = chi0_lwing(ig,io,:)
-     chi0(ig,1,io) = vdotw(Ep%qlwl(:,1),wng,Cryst%gmet,"G") 
+     chi0(ig,1,io) = vdotw(Ep%qlwl(:,1),wng,Cryst%gmet,"G")
    end do
    chq = MATMUL(chi0_head(:,:,io), Ep%qlwl(:,1))
    chi0(1,1,io) = vdotw(Ep%qlwl(:,1),chq,Cryst%gmet,"G")  ! Use user-defined small q

@@ -21,14 +21,14 @@
 !!  npwc=Number of G vectors for the correlation part.
 !!  npwx=Number of G vectors in rhotwgp for each spinorial component.
 !!  nspinor=Number of spinorial components.
-!!  theta_mu_minus_e0i=1 if e0i is occupied, 0 otherwise. Fractional occupancy in case of metals. 
+!!  theta_mu_minus_e0i=1 if e0i is occupied, 0 otherwise. Fractional occupancy in case of metals.
 !!  omegame0i(nomega)=Contains $\omega-\epsilon_{k-q,b1,\sigma}$
 !!  epsm1q(npwc,npwc,nomegae)=Symmetrized inverse dielectric matrix (exchange part is subtracted).
 !!  omega(nomegae)=Set of frequencies for $\epsilon^{-1}$.
 !!  rhotwgp(npwx*nspinor)=Matrix elements: $<k-q,b1,\sigma|e^{-i(q+G)r} |k,b2,\sigma>*vc_sqrt$
 !!
 !! OUTPUT
-!! ket(npwc,nomega)=Contains \Sigma_c(\omega)|\phi> in reciprocal space. 
+!! ket(npwc,nomega)=Contains \Sigma_c(\omega)|\phi> in reciprocal space.
 !!
 !! SIDE EFFECTS
 !! npoles_missing=Incremented with the number of poles whose contribution has not been taken into account due to
@@ -77,7 +77,7 @@ subroutine calc_sigc_cd(npwc,npwx,nspinor,nomega,nomegae,nomegaer,nomegaei,rhotw
 !arrays
  real(dp),intent(in) :: omegame0i(nomega)
  complex(dpc),intent(in) :: omega(nomegae)
- complex(gwpc),intent(in) :: epsm1q(npwc,npwc,nomegae) 
+ complex(gwpc),intent(in) :: epsm1q(npwc,npwc,nomegae)
  complex(gwpc),intent(in) :: rhotwgp(npwx*nspinor)
  complex(gwpc),intent(inout) :: ket(nspinor*npwc,nomega)
  logical, intent(in), optional :: calc_poles(nomega)
@@ -85,7 +85,7 @@ subroutine calc_sigc_cd(npwc,npwx,nspinor,nomega,nomegae,nomegaer,nomegaei,rhotw
 
 !Local variables-------------------------------
 !scalars
- integer, parameter :: FABIEN=1,TRAPEZOID=2,NSPLINE=3 
+ integer, parameter :: FABIEN=1,TRAPEZOID=2,NSPLINE=3
  integer :: ii,ig,io,ios,ispinor,spadc,spadx,my_err,ierr,GK_LEVEL,INTMETHOD
  integer :: i,j
  real(dp) :: rt_imag,rt_real,local_one,local_zero
@@ -129,7 +129,7 @@ subroutine calc_sigc_cd(npwc,npwx,nspinor,nomega,nomegae,nomegaer,nomegaei,rhotw
        ABI_ALLOCATE(GaussW,(GK_LEVEL-8))
        ABI_ALLOCATE(fint,(GK_LEVEL))
        ABI_ALLOCATE(fint2,(GK_LEVEL))
-       KronN(:) = Kron15N(:); KronW(:) = Kron15W(:); GaussW(:) = Gau7W(:) 
+       KronN(:) = Kron15N(:); KronW(:) = Kron15W(:); GaussW(:) = Gau7W(:)
      else if (method==4) then
        GK_LEVEL = 23
        ABI_ALLOCATE(KronN,(GK_LEVEL))
@@ -145,7 +145,7 @@ subroutine calc_sigc_cd(npwc,npwx,nspinor,nomega,nomegae,nomegaer,nomegaei,rhotw
        ABI_ALLOCATE(GaussW,(GK_LEVEL-16))
        ABI_ALLOCATE(fint,(GK_LEVEL))
        ABI_ALLOCATE(fint2,(GK_LEVEL))
-       KronN(:) = Kron31N(:); KronW(:) = Kron31W(:); GaussW(:) = Gau15W(:) 
+       KronN(:) = Kron31N(:); KronW(:) = Kron31W(:); GaussW(:) = Gau15W(:)
      end if
    end if
  end if
@@ -170,14 +170,14 @@ subroutine calc_sigc_cd(npwc,npwx,nspinor,nomega,nomegae,nomegaer,nomegaei,rhotw
    epsrho_imag(:,1)=epsrho(:,1)
    epsrho_imag(:,2:nomegaei+1)=epsrho(:,nomegaer+1:nomegae)
 
-   ! Frequency mesh for integral along the imaginary axis.    
+   ! Frequency mesh for integral along the imaginary axis.
    omega_imag(1)=omega(1)
    omega_imag(2:nomegaei+1)=omega(nomegaer+1:nomegae)
 
    ! Original implementation -- saved here for reference during development
    ! === Perform integration along the imaginary axis ===
    !do io=1,nomegaei+1
-   ! 
+   !
    !  if (io==1) then
    !    domegaleft  = omega_imag(io)
    !    domegaright =(omega_imag(io+1)-omega_imag(io  ))*half
@@ -195,7 +195,7 @@ subroutine calc_sigc_cd(npwc,npwx,nspinor,nomega,nomegae,nomegaer,nomegaei,rhotw
    !    ket(spadc+1:spadc+npwc,ios)=ket(spadc+1:spadc+npwc,ios)+epsrho_imag(:,io)*fact
    !  end do
    !end do !io
-   
+
    !ket(spadc+1:spadc+npwc,:)=ket(spadc+1:spadc+npwc,:)/pi
    !
    ! ---------------- end of original implementation -----------------------
@@ -223,7 +223,7 @@ subroutine calc_sigc_cd(npwc,npwx,nspinor,nomega,nomegae,nomegaer,nomegaei,rhotw
    end do
 
    ! Use BLAS call to perform matrix-matrix multiplication and accumulation
-   fact = CMPLX(piinv,zero) 
+   fact = CMPLX(piinv,zero)
 
    call xgemm('N','N',npwc,nomega,nomegaei+1,fact,epsrho_imag,npwc,&
 &   weight,nomegaei+1,cone_gw,ket(spadc+1:spadc+npwc,:),npwc)
@@ -244,9 +244,9 @@ subroutine calc_sigc_cd(npwc,npwx,nspinor,nomega,nomegae,nomegaer,nomegaei,rhotw
    tbeta(:)     = REAL(omegame0i_tmp(:))
    tbetasq(:)   = tbeta(:)*tbeta(:)
    tinv_beta(:) = one/tbeta(:)
-  
+
    do io=1,nomegaei
-     atermr(:)    = inv_alph*tinv_beta(:)*((alphsq+tbetasq(:))*xtab(io+1)-tbetasq(:)) 
+     atermr(:)    = inv_alph*tinv_beta(:)*((alphsq+tbetasq(:))*xtab(io+1)-tbetasq(:))
      aterml(:)    = inv_alph*tinv_beta(:)*((alphsq+tbetasq(:))*xtab(io  )-tbetasq(:))
      right(:)     = ATAN((atermr(:)-aterml(:))/(one+atermr(:)*aterml(:)))
      logup(:)     = ABS(((alphsq+tbetasq(:))*xtab(io+1)-two*tbetasq(:)) &
@@ -263,7 +263,7 @@ subroutine calc_sigc_cd(npwc,npwx,nspinor,nomega,nomegae,nomegaer,nomegaei,rhotw
      tftwo(:,io)   = epsrho_imag(:,io) - tfone(:,io)*xtab(io)
    end do
    ! Calculate weights for asymptotic behaviour
-   atermr(:)   = alph*tinv_beta(:) 
+   atermr(:)   = alph*tinv_beta(:)
    aterml(:)   = inv_alph*tinv_beta(:)*((alphsq+tbetasq(:))*xtab(nomegaei+1)-tbetasq(:))
    logup(:)    = alphsq*xtab(nomegaei+1)*xtab(nomegaei+1)
    logdown(:)  = ABS(((alphsq+tbetasq(:))*xtab(nomegaei+1)-two*tbetasq(:)) &
@@ -275,7 +275,7 @@ subroutine calc_sigc_cd(npwc,npwx,nspinor,nomega,nomegae,nomegaer,nomegaei,rhotw
                          /(one-xtab(nomegaei+1))
 
    ! Use BLAS call to perform matrix-matrix multiplication and accumulation
-   fact = CMPLX(piinv,zero) 
+   fact = CMPLX(piinv,zero)
 
    call xgemm('N','N',npwc,nomega,nomegaei+1,fact,tfone,npwc,&
 &   weight ,nomegaei+1,cone_gw,ket(spadc+1:spadc+npwc,:),npwc)
@@ -299,8 +299,8 @@ subroutine calc_sigc_cd(npwc,npwx,nspinor,nomega,nomegae,nomegaer,nomegaei,rhotw
 ! *** OPENMP SECTION *** Added by MS
 !!$OMP PARALLEL PRIVATE(ig,ftab,ftab2,s,s2,r,r2,y,y2,work,work2,beta,betasq,inv_beta, &
 !!$OMP  intsign,io,ii,i,j,re_intG,re_intK,im_intG,im_intK,temp1,temp2,temp3,temp4, &
-!!$OMP  ttil,tau,ref,fint,imf,fint2,GKttab) 
-!!$OMP DO 
+!!$OMP  ttil,tau,ref,fint,imf,fint2,GKttab)
+!!$OMP DO
    do ig=1,npwc
      ! Spline fit
      ftab (1:nomegaei+1) =  REAL(epsrho_imag(ig,1:nomegaei+1))/(one-xtab(1:nomegaei+1))
@@ -313,7 +313,7 @@ subroutine calc_sigc_cd(npwc,npwx,nspinor,nomega,nomegae,nomegaer,nomegaei,rhotw
        r2 = ( ftab2(i+1) - ftab2(i) ) / ( xtab(i+1) - xtab(i) )
        y (2,i) = r  - s; y2(2,i) = r2 - s2
        s  = r; s2 = r2
-     end do 
+     end do
      s = zero; s2 = zero
      r = zero; r2 = zero
      y(2,1) = zero; y2(2,1) = zero
@@ -327,12 +327,12 @@ subroutine calc_sigc_cd(npwc,npwx,nspinor,nomega,nomegae,nomegaer,nomegaei,rhotw
        s2 = s
        r  = s  / work (i)
        r2 = s2 / work2(i)
-     end do 
+     end do
      do j = 2, nomegaei+2-1
        i = nomegaei+2+1-j
        y (2,i) = ( ( xtab(i+1) - xtab(i) ) * y (2,i+1) - y (2,i) ) / work (i)
        y2(2,i) = ( ( xtab(i+1) - xtab(i) ) * y2(2,i+1) - y2(2,i) ) / work2(i)
-     end do 
+     end do
      do i = 1, nomegaei+2-1
        s = xtab(i+1) - xtab(i); s2 = s;
        r = y(2,i+1) - y(2,i); r2 = y2(2,i+1) - y2(2,i);
@@ -363,9 +363,9 @@ subroutine calc_sigc_cd(npwc,npwx,nspinor,nomega,nomegae,nomegaer,nomegaei,rhotw
          tau       = ttil - xtab(io)
          ref       = ftab (io) + tau*(y (1,io)+tau*(y (2,io)+tau*y (3,io)))
          fint (ii) = -ref*(one-ttil)*temp4
-         imf       = ftab2(io) + tau*(y2(1,io)+tau*(y2(2,io)+tau*y2(3,io))) 
+         imf       = ftab2(io) + tau*(y2(1,io)+tau*(y2(2,io)+tau*y2(3,io)))
          fint2(ii) = -imf*(one-ttil)*temp4
-         re_intK   = KronW(ii)*fint (ii)  
+         re_intK   = KronW(ii)*fint (ii)
          im_intK   = KronW(ii)*fint2(ii)
          ket(spadc+ig,ios) = ket(spadc+ig,ios)+intsign*CMPLX(re_intK,im_intK)
          end do ! ii
@@ -402,9 +402,9 @@ subroutine calc_sigc_cd(npwc,npwx,nspinor,nomega,nomegae,nomegaer,nomegaei,rhotw
 !!OMP !write(std_out,'(a,i0)') ' Entering openmp loop. Number of threads: ',xomp_get_num_threads()
 !$OMP PARALLEL SHARED(npwc,nomega,nomegaer,theta_mu_minus_e0i,spadc,local_one,local_zero, &
 !$OMP                    omega,epsrho,omegame0i_tmp,ket,my_calc_poles) &
-!$OMP PRIVATE(ig,ios,rtmp_r,rtmp_i,tmp_x,tmp_y,rt_real,rt_imag,ct,ierr) REDUCTION(+:my_err) 
+!$OMP PRIVATE(ig,ios,rtmp_r,rtmp_i,tmp_x,tmp_y,rt_real,rt_imag,ct,ierr) REDUCTION(+:my_err)
 !!OMP $ write(std_out,'(a,i0)') ' Entering openmp loop. Number of threads: ',xomp_get_num_threads()
-!$OMP DO 
+!$OMP DO
      do ig=1,npwc
        !
        ! * Prepare the spline interpolation by filling at once the arrays rtmp_r, rtmp_i

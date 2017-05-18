@@ -28,7 +28,7 @@
 !! Ep<type(em1params_t_type)>= Parameters related to the calculation of the inverse dielectric matrix.
 !!    %nbnds=number of bands summed over
 !!    %npwe=number of planewaves for the irreducible polarizability X^0_GGp
-!!    %npwvec=maximum number of G vectors 
+!!    %npwvec=maximum number of G vectors
 !!     used to define the dimension of some arrays e.g igfft
 !!    %nsppol=1 for unpolarized, 2 for spin-polarized
 !!    %nomega=total number of frequencies in X^0 (both real and imaginary)
@@ -237,12 +237,12 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
 ! End of reading forlb.ovlp
 
  if ( ANY(ngfft_gw(1:3) /= Wfd%ngfft(1:3)) ) then
-   call wfd_change_ngfft(Wfd,Cryst,Psps,ngfft_gw) 
+   call wfd_change_ngfft(Wfd,Cryst,Psps,ngfft_gw)
  end if
- gw_mgfft = MAXVAL(ngfft_gw(1:3)) 
+ gw_mgfft = MAXVAL(ngfft_gw(1:3))
  gw_fftalga = ngfft_gw(7)/100 !; gw_fftalgc=MOD(ngfft_gw(7),10)
 
- if (Dtset%pawcross==1) mgfftf = MAXVAL(ngfftf(1:3)) 
+ if (Dtset%pawcross==1) mgfftf = MAXVAL(ngfftf(1:3))
  !
  ! === Initialize MPI variables ===
  comm = Wfd%comm
@@ -278,7 +278,7 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
    call gsph_fft_tabs(Gsph_FFT,(/0,0,0/),Wfd%mgfft,Wfd%ngfft,dummy,dummy_gbound,gspfft_igfft)
    ABI_FREE(dummy_gbound)
    !
-   if (Psps%usepaw==1) then  ! * Prepare the onsite contributions on the GW FFT mesh.   
+   if (Psps%usepaw==1) then  ! * Prepare the onsite contributions on the GW FFT mesh.
      ABI_MALLOC(gw_gfft,(3,nfft))
      q0=zero
      call get_gftt(ngfft_gw,q0,Cryst%gmet,gw_gsq,gw_gfft) ! Get the set of plane waves in the FFT Box.
@@ -331,7 +331,7 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
  ABI_MALLOC(bbp_ks_distrb,(mband,mband,Kmesh%nbz,nsppol))
  ABI_MALLOC(bbp_mask,(mband,mband))
 
- do spin=1,nsppol      
+ do spin=1,nsppol
    do ik_bz=1,Kmesh%nbz
      if (Ep%symchi==1) then
        if (Ltg_q%ibzq(ik_bz)/=1) CYCLE  ! Only IBZ_q
@@ -349,7 +349,7 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
 
      call chi0_bbp_mask(Ep,use_tr,QP_BSt,mband,ikmq_ibz,ik_ibz,spin,spin_fact,bbp_mask)
 
-     call wfd_distribute_kb_kpbp(Wfd,ikmq_ibz,ik_ibz,spin,allup,my_nbbp,bbp_ks_distrb(:,:,ik_bz,spin),got,bbp_mask) 
+     call wfd_distribute_kb_kpbp(Wfd,ikmq_ibz,ik_ibz,spin,allup,my_nbbp,bbp_ks_distrb(:,:,ik_bz,spin),got,bbp_mask)
      my_nbbpks = my_nbbpks + my_nbbp
    end do
  end do
@@ -369,7 +369,7 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
 
  CASE (0)
    call wrtout(std_out,' Calculating chi0(q,omega,G,G")','COLL')
-   ! Allocation of green_w moved inside openmp loop 
+   ! Allocation of green_w moved inside openmp loop
 
  CASE (1,2)
    call wrtout(std_out,' Calculating Im chi0(q,omega,G,G")','COLL')
@@ -389,7 +389,7 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
      MSG_BUG('spectral method requires time-reversal')
    end if
 
-   memreq = 2.0*gwpc*Ep%npwe**2*(my_wr-my_wl+1)*b2Gb
+   memreq = two*gwpc*Ep%npwe**2*(my_wr-my_wl+1)*b2Gb
    write(msg,'(a,f10.4,a)')' memory required per spectral point: ',2.0*gwpc*Ep%npwe**2*b2Mb,' [Mb]'
    call wrtout(std_out,msg,'PERS')
    write(msg,'(a,f10.4,a)')' memory required by sf_chi0: ',memreq,' [Gb]'
@@ -485,7 +485,7 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
      call get_BZ_item(Kmesh,ik_bz,kbz,ik_ibz,isym_k,itim_k,ph_mkt,umklp_k,isirred_k)
 
      call get_BZ_diff(Kmesh,kbz,qpoint,ikmq_bz,G0,nfound)
-     if (nfound==0) then 
+     if (nfound==0) then
        MSG_ERROR("Cannot find kbz - qpoint in Kmesh")
      end if
 
@@ -524,11 +524,11 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
      !
      ! Tables for the FFT of the oscillators.
      !  a) FFT index of G-G0.
-     !  b) gw_gbound table for the zero-padded FFT performed in rhotwg. 
+     !  b) gw_gbound table for the zero-padded FFT performed in rhotwg.
      ABI_MALLOC(gw_gbound,(2*gw_mgfft+8,2))
      call gsph_fft_tabs(Gsph_epsG0,g0,gw_mgfft,ngfft_gw,use_padfft,gw_gbound,igfftepsG0)
      if ( ANY(gw_fftalga == (/2,4/)) ) use_padfft=0 ! Pad-FFT is not coded in rho_tw_g
-     if (use_padfft==0) then 
+     if (use_padfft==0) then
        ABI_FREE(gw_gbound)
        ABI_MALLOC(gw_gbound,(2*gw_mgfft+8,2*use_padfft))
      end if
@@ -537,7 +537,7 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
         ABI_MALLOC(gboundf,(2*mgfftf+8,2))
        call gsph_fft_tabs(Gsph_epsG0,g0,mgfftf,ngfftf,use_padfftf,gboundf,igfftepsG0f)
        if (ANY(gw_fftalga == (/2,4/))) use_padfftf=0
-       if (use_padfftf==0) then 
+       if (use_padfftf==0) then
          ABI_FREE(gboundf)
          ABI_MALLOC(gboundf,(2*mgfftf+8,2*use_padfftf))
        end if
@@ -547,13 +547,13 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
      do band1=1,nbmax ! Loop over "conduction" states.
        if (ALL(bbp_ks_distrb(band1,:,ik_bz,spin) /= Wfd%my_rank)) CYCLE
 
-#if DEV_USE_OLDRHOTWG 
+#if DEV_USE_OLDRHOTWG
        call wfd_get_ur(Wfd,band1,ikmq_ibz,spin,ur1_kmq_ibz)
 #else
        call wfd_sym_ur(Wfd,Cryst,Kmesh,band1,ikmq_bz,spin,usr1_kmq,trans="C",with_umklp=.FALSE.)
 #endif
 
-       if (Psps%usepaw==1) then 
+       if (Psps%usepaw==1) then
          call wfd_get_cprj(Wfd,band1,ikmq_ibz,spin,Cryst,Cprj1_kmq,sorted=.FALSE.)
          call paw_symcprj(ikmq_bz,nspinor,1,Cryst,Kmesh,Pawtab,Pawang,Cprj1_kmq)
          if (Dtset%pawcross==1) then
@@ -590,13 +590,13 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
 
          deltaeGW_b1kmq_b2k=e_b1_kmq-qp_energy(band2,ik_ibz,spin)
 
-#if DEV_USE_OLDRHOTWG 
+#if DEV_USE_OLDRHOTWG
          call wfd_get_ur(Wfd,band2,ik_ibz,spin,ur2_k_ibz)
 #else
          call wfd_sym_ur(Wfd,Cryst,Kmesh,band2,ik_bz,spin,ur2_k,with_umklp=.FALSE.,ur_kibz=ur2_k_ibz)
 #endif
 
-         if (Psps%usepaw==1) then 
+         if (Psps%usepaw==1) then
            call wfd_get_cprj(Wfd,band2,ik_ibz,spin,Cryst,Cprj2_k,sorted=.FALSE.)
            call paw_symcprj(ik_bz,nspinor,1,Cryst,Kmesh,Pawtab,Pawang,Cprj2_k)
            if (Dtset%pawcross==1) then
@@ -613,7 +613,7 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
             do io=1,Ep%nomega
               green_w(io) = g0g0w(Ep%omega(io),deltaf_b1kmq_b2k,deltaeGW_b1kmq_b2k,Ep%zcut,GW_TOL_W0,one_pole)
             end do
-          else 
+          else
 
             if (Ep%gwcomp==0) then ! cannot be completely skipped in case of completeness correction
               if (band1<band2) CYCLE ! Here we GAIN a factor ~2
@@ -628,7 +628,7 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
               if (Ep%gwcomp==1) then ! Calculate the completeness correction
                 numerator= -spin_fact*qp_occ(band2,ik_ibz,spin)
                 deltaeGW_enhigh_b2k = en_high-qp_energy(band2,ik_ibz,spin)
-                
+
                 if (REAL(Ep%omega(io))<GW_TOL_W0) then ! Completeness correction is NOT valid for real frequencies
                   green_enhigh_w(io) = g0g0w(Ep%omega(io),numerator,deltaeGW_enhigh_b2k,Ep%zcut,GW_TOL_W0,two_poles)
                 else
@@ -645,7 +645,7 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
               end if !gwcomp==1
             end do !io
             !
-            if (Ep%gwcomp==1.and.band1==band2) then 
+            if (Ep%gwcomp==1.and.band1==band2) then
               ! Add the "delta part" of the extrapolar method. TODO doesnt work for spinor
 
               call calc_wfwfg(tabr_k,itim_k,nfft,ngfft_gw,ur2_k_ibz,ur2_k_ibz,wfwfg)
@@ -676,14 +676,14 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
          !
          ! ==== Form rho-twiddle(r)=u^*_{b1,kmq_bz}(r) u_{b2,kbz}(r) and its FFT transform ====
 
-#if DEV_USE_OLDRHOTWG 
+#if DEV_USE_OLDRHOTWG
          call rho_tw_g(nspinor,Ep%npwepG0,nfft,ndat1,ngfft_gw,1,use_padfft,igfftepsG0,gw_gbound,&
 &          ur1_kmq_ibz,itim_kmq,tabr_kmq,ph_mkmqt,spinrot_kmq,&
 &          ur2_k_ibz,  itim_k  ,tabr_k  ,ph_mkt  ,spinrot_k,dim_rtwg,rhotwg)
 #else
          call get_uug(Ep%npwepG0,nfft,ndat1,ngfft_gw,use_padfft,igfftepsG0,gw_gbound,usr1_kmq,ur2_k,rhotwg)
 #endif
-         
+
          if (Psps%usepaw==1) then! Add PAW on-site contribution, projectors are already in the BZ.
            call paw_rho_tw_g(Ep%npwepG0,dim_rtwg,nspinor,Cryst%natom,Cryst%ntypat,Cryst%typat,Cryst%xred,Gsph_epsG0%gvec,&
 &           Cprj1_kmq,Cprj2_k,Pwij,rhotwg)
@@ -758,7 +758,6 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
 !             if(dtset%prtvol>=10) write(6,'(a,6i4,e15.5,a)') "*****FAC*********",ik_bz,ikmq_bz,band1,band2,m1,m2,fac," q/=0"
              green_w=green_w*fac
            endif
-
 
            call assemblychi0_sym(ik_bz,nspinor,Ep,Ltg_q,green_w,Ep%npwepG0,rhotwg,Gsph_epsG0,chi0)
 
@@ -919,7 +918,7 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
  call gsph_free(Gsph_FFT)
 
  ! deallocation for PAW.
- if (Psps%usepaw==1) then 
+ if (Psps%usepaw==1) then
    call pawpwij_free(Pwij)
    ABI_DT_FREE(Pwij)
    if (allocated(Pwij_fft)) then

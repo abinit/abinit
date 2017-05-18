@@ -76,6 +76,7 @@ subroutine wfd_mkrho(Wfd,Cryst,Psps,Kmesh,Bands,ngfftf,nfftf,rhor,&
  use m_xmpi
  use m_errors
 
+ use m_fstrings,  only : sjoin, itoa
  use m_iterators, only : iter2_t, iter_yield, iter_len, iter_free
  use m_crystal,   only : crystal_t
  use m_bz_mesh,   only : kmesh_t
@@ -149,9 +150,7 @@ subroutine wfd_mkrho(Wfd,Cryst,Psps,Kmesh,Bands,ngfftf,nfftf,rhor,&
      ABI_MALLOC(rhor_down,(nfftf))
      ABI_MALLOC(rhor_mx,(nfftf))
      ABI_MALLOC(rhor_my,(nfftf))
-     rhor_down=zero
-     rhor_mx  =zero
-     rhor_my  =zero
+     rhor_down = zero; rhor_mx = zero; rhor_my = zero
    else !TODO
      MSG_ERROR('nspden/=4 and nspinor=2 not implemented')
    end if
@@ -162,8 +161,8 @@ subroutine wfd_mkrho(Wfd,Cryst,Psps,Kmesh,Bands,ngfftf,nfftf,rhor,&
 
  ! Calculate the unsymmetrized density.
  rhor=zero
- myoptcalc=0;  if (present(optcalc)) myoptcalc=optcalc
- nalpha=1;  if (myoptcalc==1) nalpha=3
+ myoptcalc=0; if (present(optcalc)) myoptcalc=optcalc
+ nalpha=1; if (myoptcalc==1) nalpha=3
  if (myoptcalc == 1 .and. wfd%nspinor == 2) then
    MSG_ERROR("kinetic energy density with nspinor == 2 not implemented")
  end if
@@ -174,7 +173,6 @@ subroutine wfd_mkrho(Wfd,Cryst,Psps,Kmesh,Bands,ngfftf,nfftf,rhor,&
  do alpha=1,nalpha
    do is=1,Wfd%nsppol
      do ik=1,Wfd%nkibz
-       !
        do ib_iter=1,iter_len(Iter_bks,ik,is)
          ib = iter_yield(Iter_bks,ib_iter,ik,is)
          bks_weight = Bands%occ(ib,ik,is) * Kmesh%wt(ik) / Cryst%ucvol
@@ -182,7 +180,7 @@ subroutine wfd_mkrho(Wfd,Cryst,Psps,Kmesh,Bands,ngfftf,nfftf,rhor,&
          call wfd_get_ur(Wfd,ib,ik,is,wfr)
 
          cwavef1 => wfr(1:nfftf)
-         if(myoptcalc==1) then
+         if (myoptcalc == 1) then
            ABI_MALLOC(gradug,(Wfd%Kdata(ik)%npw))
            ABI_MALLOC(cwavef,(2,Wfd%Kdata(ik)%npw))
            ABI_MALLOC(work,(nfftf))
@@ -219,13 +217,13 @@ subroutine wfd_mkrho(Wfd,Cryst,Psps,Kmesh,Bands,ngfftf,nfftf,rhor,&
 
          if (Wfd%nspinor==2) then
            cwavef2 => wfr(1+nfftf:2*nfftf)
-           wfr_x(:)=cwavef1(:)+cwavef2(:)       ! $(\Psi^{1}+\Psi^{2})$
-           wfr_y(:)=cwavef1(:)-j_dpc*cwavef2(:) ! $(\Psi^{1}-i\Psi^{2})$
+           wfr_x(:) = cwavef1(:) + cwavef2(:)       ! $(\Psi^{1}+\Psi^{2})$
+           wfr_y(:) = cwavef1(:) -j_dpc*cwavef2(:)  ! $(\Psi^{1}-i\Psi^{2})$
 !$OMP PARALLEL DO
            do ir=1,nfftf
-             rhor_down(ir)=rhor_down(ir)+CONJG(cwavef2(ir))*cwavef2(ir)*bks_weight
-             rhor_mx  (ir)=rhor_mx  (ir)+CONJG(wfr_x  (ir))*wfr_x  (ir)*bks_weight
-             rhor_my  (ir)=rhor_my  (ir)+CONJG(wfr_y  (ir))*wfr_y  (ir)*bks_weight
+             rhor_down(ir) = rhor_down(ir) + CONJG(cwavef2(ir)) * cwavef2(ir) * bks_weight
+             rhor_mx(ir) = rhor_mx(ir) + CONJG(wfr_x(ir)) * wfr_x(ir) * bks_weight
+             rhor_my(ir) = rhor_my(ir) + CONJG(wfr_y(ir)) * wfr_y(ir) * bks_weight
            end do
          end if
 
@@ -235,25 +233,28 @@ subroutine wfd_mkrho(Wfd,Cryst,Psps,Kmesh,Bands,ngfftf,nfftf,rhor,&
 
  end do ! enddo alpha
 
- if (myoptcalc==1) then ! convention for taur = 1/2 Sum_i |grad phi_i|^2
-   rhor(:,:)=half*rhor(:,:)
- end if
-
  call iter_free(Iter_bks)
 
- if (wfd%nspinor == 2) then
-   rhor(:, 2) = rhor_mx
-   rhor(:, 3) = rhor_my
-   rhor(:, 4) = rhor_down
- end if
+ select case (myoptcalc)
+ case (0)
+   ! density
+   if (wfd%nspinor == 2) then
+     rhor(:, 2) = rhor_mx
+     rhor(:, 3) = rhor_my
+     rhor(:, 4) = rhor_down
+   end if
+ case (1)
+   ! convention for taur = 1/2 Sum_i |grad phi_i|^2
+   rhor(:,:)=half*rhor(:,:)
+
+ case default
+   MSG_ERROR(sjoin("Wrong myoptcalc:", itoa(myoptcalc)))
+ end select
 
  call xmpi_sum(rhor,Wfd%comm,ierr)
 
- ! === Symmetrization in G-space implementing also the AFM case ===
- n1=ngfftf(1)
- n2=ngfftf(2)
- n3=ngfftf(3)
- nfftotf=n1*n2*n3
+ ! Symmetrization in G-space implementing also the AFM case
+ n1=ngfftf(1); n2=ngfftf(2); n3=ngfftf(3); nfftotf=n1*n2*n3
 
  ABI_MALLOC(irrzon,(nfftotf**(1-1/Cryst%nsym),2,(Wfd%nspden/Wfd%nsppol)-3*(Wfd%nspden/4)))
  ABI_MALLOC(phnons,(2,nfftotf,(Wfd%nspden/Wfd%nsppol)-3*(Wfd%nspden/4)))
@@ -262,6 +263,7 @@ subroutine wfd_mkrho(Wfd,Cryst,Psps,Kmesh,Bands,ngfftf,nfftf,rhor,&
    call irrzg(irrzon,Wfd%nspden,Wfd%nsppol,Cryst%nsym,n1,n2,n3,phnons,Cryst%symafm,Cryst%symrel,Cryst%tnons)
  end if
 
+ ! Symmetrize rho(r), and pack nspden components following abinit conventions.
  cplex=1
  ABI_MALLOC(rhog,(2,cplex*nfftf))
 
@@ -271,6 +273,11 @@ subroutine wfd_mkrho(Wfd,Cryst,Psps,Kmesh,Bands,ngfftf,nfftf,rhor,&
  ABI_FREE(rhog)
  ABI_FREE(phnons)
  ABI_FREE(irrzon)
+
+ ! Find and print minimum and maximum total electron density
+ ! (or total kinetic energy density, or total element of kinetic energy density tensor) and locations
+ !call wrtout(std_out,'mkrho: echo density (plane-wave part only)','COLL')
+ !call prtrhomxmn(std_out,wfd%mpi_enreg,nfftf,ngfftf,wfd%nspden,1,rhor,optrhor=optcalc,ucvol=crystl%ucvol)
 
  write(msg,'(a,f9.4)')' planewave contribution to nelect: ',SUM(rhor(:,1))*Cryst%ucvol/nfftf
  call wrtout(std_out,msg,'COLL')
@@ -320,10 +327,6 @@ end subroutine wfd_mkrho
 !!      wrtout
 !!
 !! SOURCE
-
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
 
 subroutine test_charge(nfftf,nelectron_exp,nspden,rhor,ucvol,&
 & usepaw,usexcnhat,usefinegrid,compch_sph,compch_fft,omegaplasma)
