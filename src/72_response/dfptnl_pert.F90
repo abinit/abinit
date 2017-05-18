@@ -167,15 +167,16 @@ subroutine dfptnl_pert(atindx,atindx1,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,ei
  integer :: offset_cgi,offset_cgj,offset_eigen,offset_eig0,option,paw_opt,print_info,esigns
  integer :: signs,size_wf,size_cprj,spaceComm,tim_fourwf,tim_nonlop,tim_getgh2c,usepaw,useylmgr1
  integer :: sij_opt,usevnl,opt_gvnl2,optnl,optlocal
- real(dp) :: arg,dot1i,dot1r,dot2i,dot2r,doti,dotr,exc3,e3tot,lagi,lagr,rho2r_re,rho2r_im,rho3r_re,rho3r_im
+ real(dp) :: arg,dot1i,dot1r,dot2i,dot2r,doti,dotr,exc3,e3tot,lagi,lagi_paw,lagr,lagr_paw
+ real(dp) :: rho2r_re,rho2r_im,rho3r_re,rho3r_im
  real(dp) :: sumi,sum_enlout_im,sum_enlout_re,sum_psi1H1psi1,sum_lambda1psi1psi1,sum_psi0H2psi1a,sum_psi0H2psi1b
- real(dp) :: tol_test,valuei,weight
- real(dp) :: value_1,value_2,value_3,value_3bis,value_4,value_5,value_6,value_7,value_8
+ real(dp) :: sum_lambda1psi0S1psi1,tol_test,valuei,weight
+ real(dp) :: value_1,value_2,value_2bis,value_3,value_3bis,value_4,value_5,value_6,value_7,value_8
  character(len=500) :: msg
 !arrays
  integer,allocatable :: kg_k(:,:),kg1_k(:,:)
 ! real(dp) :: buffer(2)
- real(dp) :: buffer(5),eHxc21_paw(2),eHxc21_nhat(2),exc3_paw(2),enlout(3),kpt(3),eig0_k(mband),dum_svectout(1,1),dum(1)
+ real(dp) :: buffer(6),eHxc21_paw(2),eHxc21_nhat(2),exc3_paw(2),enlout(3),kpt(3),eig0_k(mband),dum_svectout(1,1),dum(1)
  real(dp) :: enlout1(2),enlout2(2),enlout_11(2),enlout_12(2),enlout_21(2),enlout_22(2),enlout_31(2),enlout_32(2)
  real(dp) :: rmet(3,3),dum_grad_berry(1,1),wtk_k
  real(dp) :: ylmgr_dum(1,1,1)
@@ -326,6 +327,7 @@ subroutine dfptnl_pert(atindx,atindx1,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,ei
 
  sum_psi1H1psi1 =  zero
  sum_lambda1psi1psi1 = zero
+ sum_lambda1psi0S1psi1 = zero
  sum_psi0H2psi1a = zero
  sum_psi0H2psi1b = zero
  compute_conjugate = .false.
@@ -690,6 +692,7 @@ subroutine dfptnl_pert(atindx,atindx1,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,ei
 
 !         eig1_k_i2pert(:) = eig1_k_stored(1+(jband-1)*2*nband_k:jband*2*nband_k)
          lagr = zero ; lagi = zero
+         lagr_paw = zero ; lagi_paw = zero
 
          do iband = 1, nband_k
            if(occ_k(iband)>tol10) then
@@ -724,8 +727,8 @@ subroutine dfptnl_pert(atindx,atindx1,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,ei
                call nonlop(choice,cpopt,cprj_empty,dummy_array,gs_hamkq,i1dir,(/zero/),mpi_enreg,1,nnlout,&
           &     paw_opt,signs,s_cwave,tim_nonlop,cwavef3,dummy_array2,iatom_only=i1pert)
                call dotprod_g(dot2r,dot2i,gs_hamkq%istwf_k,size_wf,2,cgj,s_cwave,mpi_enreg%me_g0, mpi_enreg%comm_spinorfft)
-               lagr = lagr + dot1r*dot2r - dot1i*dot2i
-               lagi = lagi + dot1r*dot2i + dot1i*dot2r
+               lagr_paw = lagr_paw + dot1r*dot2r - dot1i*dot2i
+               lagi_paw = lagi_paw + dot1r*dot2i + dot1i*dot2r
 
              end if
 
@@ -737,8 +740,8 @@ subroutine dfptnl_pert(atindx,atindx1,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,ei
                call nonlop(choice,cpopt,cprj_empty,dummy_array,gs_hamkq,i3dir,(/zero/),mpi_enreg,1,nnlout,&
           &     paw_opt,signs,s_cwave,tim_nonlop,cgi,dummy_array2,iatom_only=i3pert)
                call dotprod_g(dot2r,dot2i,gs_hamkq%istwf_k,size_wf,2,cwavef1,s_cwave,mpi_enreg%me_g0, mpi_enreg%comm_spinorfft)
-               lagr = lagr + dot1r*dot2r - dot1i*dot2i
-               lagi = lagi + dot1r*dot2i + dot1i*dot2r
+               lagr_paw = lagr_paw + dot1r*dot2r - dot1i*dot2i
+               lagi_paw = lagi_paw + dot1r*dot2i + dot1i*dot2r
 
              end if
 
@@ -749,9 +752,10 @@ subroutine dfptnl_pert(atindx,atindx1,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,ei
 !        Sum all band_by_band contributions
 ! **************************************************************************************************
 
-         sumi = sumi + dtset%wtk(ikpt)*occ_k(jband)*(doti-lagi)
+         sumi = sumi + dtset%wtk(ikpt)*occ_k(jband)*(doti-lagi-lagi_paw)
          sum_psi1H1psi1 = sum_psi1H1psi1 + dtset%wtk(ikpt)*occ_k(jband)*dotr
          sum_lambda1psi1psi1 = sum_lambda1psi1psi1 - dtset%wtk(ikpt)*occ_k(jband)*lagr
+         sum_lambda1psi0S1psi1 = sum_lambda1psi0S1psi1 - dtset%wtk(ikpt)*occ_k(jband)*lagr_paw
 
 ! **************************************************************************************************
 !        If compute_rho21 : accumulate rhoij and compute term with H_KV^(2)
@@ -896,12 +900,14 @@ subroutine dfptnl_pert(atindx,atindx1,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,ei
  if (xmpi_paral == 1) then
 
    buffer(1) = sum_psi1H1psi1  ; buffer(2) = sum_lambda1psi1psi1
-   buffer(3) = sum_psi0H2psi1a ; buffer(4) = sum_psi0H2psi1b
-   buffer(5) = sumi
+   buffer(3) = sum_lambda1psi0S1psi1
+   buffer(4) = sum_psi0H2psi1a ; buffer(5) = sum_psi0H2psi1b
+   buffer(6) = sumi
    call xmpi_sum(buffer,spaceComm,ierr)
    sum_psi1H1psi1  = buffer(1) ; sum_lambda1psi1psi1 = buffer(2)
-   sum_psi0H2psi1a = buffer(3) ; sum_psi0H2psi1b = buffer(4)
-   sumi = buffer(5)
+   sum_lambda1psi0S1psi1 = buffer(3)
+   sum_psi0H2psi1a = buffer(4) ; sum_psi0H2psi1b = buffer(5)
+   sumi = buffer(6)
 
 !  Accumulate PAW occupancies
    if (compute_rho21) then
@@ -1110,17 +1116,18 @@ subroutine dfptnl_pert(atindx,atindx1,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,ei
 !    ALL TERMS HAVE BEEN COMPUTED
 ! **************************************************************************************************
 
- e3tot =         sum_psi1H1psi1 + sum_lambda1psi1psi1 + sum_psi0H2psi1a + sum_psi0H2psi1b
+ e3tot = sum_psi1H1psi1 + sum_lambda1psi1psi1 + sum_lambda1psi0S1psi1 + sum_psi0H2psi1a + sum_psi0H2psi1b
  e3tot = e3tot + half * (eHxc21_paw(1)+eHxc21_nhat(1)) + sixth * (exc3 + exc3_paw(1))
- value_1 = sum_psi1H1psi1       ; if(abs(value_1)<tol7) value_1 = zero
- value_2 = sum_lambda1psi1psi1  ; if(abs(value_2)<tol7) value_2 = zero
- value_3 = sum_psi0H2psi1a      ; if(abs(value_3)<tol7) value_3 = zero
- value_3bis = sum_psi0H2psi1b   ; if(abs(value_3bis)<tol7) value_3bis = zero
- value_4 = sixth*exc3           ; if(abs(value_4)<tol7) value_4 = zero
- value_5 = sixth*exc3_paw(1)    ; if(abs(value_5)<tol7) value_5 = zero
- value_6 = half*eHxc21_paw(1)   ; if(abs(value_6)<tol7) value_6 = zero
- value_7 = half*eHxc21_nhat(1)  ; if(abs(value_7)<tol7) value_7 = zero
- value_8 = e3tot                ; if(abs(value_8)<tol7) value_8 = zero
+ value_1 = sum_psi1H1psi1          ; if(abs(value_1)<tol7) value_1 = zero
+ value_2 = sum_lambda1psi1psi1     ; if(abs(value_2)<tol7) value_2 = zero
+ value_2bis = sum_lambda1psi0S1psi1; if(abs(value_2)<tol7) value_2bis = zero
+ value_3 = sum_psi0H2psi1a         ; if(abs(value_3)<tol7) value_3 = zero
+ value_3bis = sum_psi0H2psi1b      ; if(abs(value_3bis)<tol7) value_3bis = zero
+ value_4 = sixth*exc3              ; if(abs(value_4)<tol7) value_4 = zero
+ value_5 = sixth*exc3_paw(1)       ; if(abs(value_5)<tol7) value_5 = zero
+ value_6 = half*eHxc21_paw(1)      ; if(abs(value_6)<tol7) value_6 = zero
+ value_7 = half*eHxc21_nhat(1)     ; if(abs(value_7)<tol7) value_7 = zero
+ value_8 = e3tot                   ; if(abs(value_8)<tol7) value_8 = zero
 ! if(print_info/=0) then
 !   write(msg,'(2a,3(a,i2,a,i1),8(2a,es16.7e3),a)') ch10,'NONLINEAR : ',&
 !   ' perts : ',i1pert,'.',i1dir,' / ',i2pert,'.',i2dir,' / ',i3pert,'.',i3dir,&
@@ -1129,16 +1136,17 @@ subroutine dfptnl_pert(atindx,atindx1,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,ei
    ' perts : ',i1pert,'.',i1dir,' / ',i2pert,'.',i2dir,' / ',i3pert,'.',i3dir
    call wrtout(std_out,msg,'COLL')
    call wrtout(ab_out,msg,'COLL')
-   write(msg,'(9(2a,es16.7e3),a)') &
-   ch10,'      sum_psi1H1psi1 = ',value_1,&
-   ch10,' sum_lambda1psi1psi1 = ',value_2,&
-   ch10,'     sum_psi0H2psi1a = ',value_3,&
-   ch10,'     sum_psi0H2psi1b = ',value_3bis,&
-   ch10,'              exc3/6 = ',value_4,&
-   ch10,'          exc3_paw/6 = ',value_5,&
-   ch10,'        eHxc21_paw/2 = ',value_6,&
-   ch10,'       eHxc21_nhat/2 = ',value_7,&
-   ch10,' >>>>>>>>>>>>> e3tot = ',value_8,ch10
+   write(msg,'(10(2a,es16.7e3),a)') &
+   ch10,'        sum_psi1H1psi1 = ',value_1,&
+   ch10,'   sum_lambda1psi1psi1 = ',value_2,&
+   ch10,' sum_lambda1psi0S1psi1 = ',value_2bis,&
+   ch10,'       sum_psi0H2psi1a = ',value_3,&
+   ch10,'       sum_psi0H2psi1b = ',value_3bis,&
+   ch10,'                exc3/6 = ',value_4,&
+   ch10,'            exc3_paw/6 = ',value_5,&
+   ch10,'          eHxc21_paw/2 = ',value_6,&
+   ch10,'         eHxc21_nhat/2 = ',value_7,&
+   ch10,' >>>>>>>>>>>>>>> e3tot = ',value_8,ch10
    call wrtout(std_out,msg,'COLL')
    call wrtout(ab_out,msg,'COLL')
 ! end if
