@@ -77,7 +77,7 @@ program mrgddb
 !Local variables-------------------------------
 !scalars
  integer,parameter :: mddb=5000,ddbun=2 ! mddb=maximum number of databases (cannot be made dynamic)
- integer :: chkopt,dummy,dummy1,dummy2,dummy3,dummy4,dummy5,dummy6,dummy7
+ integer :: chkopt,dummy,dummy1,dummy2,dummy3,dummy4,dummy5,dummy6,dummy7,ios
  integer :: iddb,ii,mblktyp,mblktyptmp,nddb,nfiles_cli,nargs,msym,comm,my_rank,fcnt
  real(dp) :: tcpu,tcpui,twall,twalli
  logical :: cannot_overwrite=.True.
@@ -196,10 +196,20 @@ program mrgddb
      write(std_out,'(a,a)' )' ',trim(filnam(2))
    else
      do iddb=1,nddb
+       !Added to catch error message if the number of input ddbs is greater than the 
+       !actually number of ddb files entered by the user.
+       read(std_in, '(a)',IOSTAT =ios ) filnam(iddb+1)
+       if (ios < 0) then
+        write(msg, '(a,i0,a,a,a,a)' )&
+&        'The number of input ddb files: ',nddb,' exceeds the number ',&
+&        'of ddb file names.', ch10, &
+&        'Action: change the number of ddb files in the mrgddb input file.'
+        MSG_ERROR(msg) 
+       else 
        write(std_out,*)' Give name for derivative database number',iddb,' : '
-       read(std_in, '(a)' ) filnam(iddb+1)
        write(std_out,'(a,a)' )' ',trim(filnam(iddb+1))
-     end do
+       end if
+      end do
    end if
 
  else
