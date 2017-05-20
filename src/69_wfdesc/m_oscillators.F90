@@ -33,6 +33,7 @@ MODULE m_oscillators
 
  use m_gwdefs,    only : czero_gw
  use m_fstrings,  only : toupper
+ use m_geometry,  only : spinrot_cmat
  use m_blas,      only : xcopy
  use m_gsphere,   only : gsphere_t
 
@@ -142,7 +143,7 @@ subroutine rho_tw_g(nspinor,npwvec,nr,ndat,ngfft,map2sphere,use_padfft,igfftg0,g
  type(fftbox_plan3_t) :: plan
 !arrays
  integer :: spinor_pad(2,4)
- complex(dpc) :: spinrot_mat1(2,2),spinrot_mat2(2,2)
+ complex(dpc) :: spinrot_cmat1(2,2),spinrot_cmat2(2,2)
  complex(gwpc),allocatable :: u12prod(:),cwavef1(:),cwavef2(:)
 
 ! *************************************************************************
@@ -177,7 +178,7 @@ subroutine rho_tw_g(nspinor,npwvec,nr,ndat,ngfft,map2sphere,use_padfft,igfftg0,g
    ABI_MALLOC(cwavef1,(nr*nspinor))
    ABI_MALLOC(cwavef2,(nr*nspinor))
 
-   ! === Apply Time-reversal if required ===
+   ! Apply Time-reversal if required.
    ! \psi_{-k}^1 =  (\psi_k^2)^*
    ! \psi_{-k}^2 = -(\psi_k^1)^*
    if (i1==1) then
@@ -198,84 +199,57 @@ subroutine rho_tw_g(nspinor,npwvec,nr,ndat,ngfft,map2sphere,use_padfft,igfftg0,g
      MSG_ERROR('Wrong i2 in spinor')
    end if
 
-   ! === Rotate wavefunctions in r-space ===
+   ! Rotate wavefunctions in r-space.
    do ispinor=1,nspinor
      spad0=(ispinor-1)*nr
      do ir=1,nr
        ir1=ktabr1(ir); ir2=ktabr2(ir)
-       cwavef1(ir+spad0) = cwavef1(ir1+spad0)*ktabp1
-       cwavef2(ir+spad0) = cwavef2(ir2+spad0)*ktabp2
+       cwavef1(ir+spad0) = cwavef1(ir1+spad0) * ktabp1
+       cwavef2(ir+spad0) = cwavef2(ir2+spad0) * ktabp2
      end do
    end do !ispinor
 
-   ! === Rotation in spinor space ===
-   !spinrots1=spinrot1(1) ; spinrots2=spinrot2(1)
-   !spinrotx1=spinrot1(2) ; spinrotx2=spinrot2(2)
-   !spinroty1=spinrot1(3) ; spinroty2=spinrot2(3)
-   !spinrotz1=spinrot1(4) ; spinrotz2=spinrot2(4)
-   spinrot_mat1(1,1)= spinrot1(1) + j_dpc*spinrot1(4)
-   spinrot_mat1(1,2)= spinrot1(3) + j_dpc*spinrot1(2)
-   spinrot_mat1(2,1)=-spinrot1(3) + j_dpc*spinrot1(2)
-   spinrot_mat1(2,2)= spinrot1(1) - j_dpc*spinrot1(4)
-
-   spinrot_mat2(1,1)= spinrot2(1) + j_dpc*spinrot2(4)
-   spinrot_mat2(1,2)= spinrot2(3) + j_dpc*spinrot2(2)
-   spinrot_mat2(2,1)=-spinrot2(3) + j_dpc*spinrot2(2)
-   spinrot_mat2(2,2)= spinrot2(1) - j_dpc*spinrot2(4)
-
+   ! Rotation in spinor space (same equations as in wfconv)
+   spinrot_cmat1 = spinrot_cmat(spinrot1)
+   spinrot_cmat2 = spinrot_cmat(spinrot2)
    do ir=1,nr
-     !ar=wavefspinor(1,ir)
-     !ai=wavefspinor(2,ir)
-     !br=wavefspinor(1,npw2+ir)
-     !bi=wavefspinor(2,npw2+ir)
-     u1a=cwavef1(ir)
-     u1b=cwavef1(ir+nr)
-     cwavef1(ir)   =spinrot_mat1(1,1)*u1a+spinrot_mat1(1,2)*u1b
-     cwavef1(ir+nr)=spinrot_mat1(2,1)*u1a+spinrot_mat1(2,2)*u1b
-     u2a=cwavef2(ir)
-     u2b=cwavef2(ir+nr)
-     cwavef2(ir)   =spinrot_mat2(1,1)*u2a+spinrot_mat2(1,2)*u2b
-     cwavef2(ir+nr)=spinrot_mat2(2,1)*u2a+spinrot_mat2(2,2)*u2b
-     !wavefspinor(1,ir)     = spinrots*ar-spinrotz*ai +spinroty*br-spinrotx*bi
-     !wavefspinor(2,ir)     = spinrots*ai+spinrotz*ar +spinroty*bi+spinrotx*br
-     !wavefspinor(1,npw2+ir)=-spinroty*ar-spinrotx*ai +spinrots*br+spinrotz*bi
-     !wavefspinor(2,npw2+ir)=-spinroty*ai+spinrotx*ar +spinrots*bi-spinrotz*br
+     u1a = cwavef1(ir); u1b = cwavef1(ir+nr)
+     cwavef1(ir)    = spinrot_cmat1(1,1)*u1a + spinrot_cmat1(1,2)*u1b
+     cwavef1(ir+nr) = spinrot_cmat1(2,1)*u1a + spinrot_cmat1(2,2)*u1b
+     u2a = cwavef2(ir); u2b = cwavef2(ir+nr)
+     cwavef2(ir)   = spinrot_cmat2(1,1)*u2a + spinrot_cmat2(1,2)*u2b
+     cwavef2(ir+nr)= spinrot_cmat2(2,1)*u2a + spinrot_cmat2(2,2)*u2b
    end do
 
-   spinor_pad(:,:)=RESHAPE((/0,0,nr,nr,0,nr,nr,0/),(/2,4/))
-
+   spinor_pad(:,:) = RESHAPE([0,0,nr,nr,0,nr,nr,0], [2,4])
    do iab=1,dim_rtwg
-     spad1=spinor_pad(1,iab)
-     spad2=spinor_pad(2,iab)
+     spad1=spinor_pad(1,iab); spad2=spinor_pad(2,iab)
 
      u12prod = GWPC_CONJG(cwavef1(spad1+1:spad1+nr)) * cwavef2(spad2+1:spad2+nr)
-
      ! Add compensation charge.
-     !if (PRESENT(nhat12)) then
-     !  u12prod = u12prod + CMPLX(nhat12(1,:,iab),nhat12(2,:,iab))
-     !end if
+     !if (PRESENT(nhat12)) u12prod = u12prod + CMPLX(nhat12(1,:,iab),nhat12(2,:,iab))
+
      spad0=(iab-1)*npwvec
 
      SELECT CASE (map2sphere)
-
-     CASE (0) ! Need results on the full FFT box thus cannot use zero-padded FFT.
-
+     CASE (0)
+       ! Need results on the full FFT box thus cannot use zero-padded FFT.
        call fftbox_plan3_many(plan,ndat,ngfft(1:3),ngfft(1:3),ngfft(7),-1)
        call fftbox_execute(plan,u12prod)
        rhotwg(spad0+1:spad0+npwvec)=u12prod
-
-     CASE (1) ! Need results on the G-sphere. Call zero-padded FFT routines if required.
-
+     CASE (1)
+       ! Need results on the G-sphere. Call zero-padded FFT routines if required.
        if (use_padfft==1) then
          nx =ngfft(1); ny =ngfft(2); nz =ngfft(3); mgfft = MAXVAL(ngfft(1:3))
-         ldx=nx      ; ldy=ny      ; ldz=nz
+         ldx=nx; ldy=ny; ldz=nz
          call fftpad(u12prod,ngfft,nx,ny,nz,ldx,ldy,ldz,ndat,mgfft,-1,gbound)
        else
          call fftbox_plan3_many(plan,ndat,ngfft(1:3),ngfft(1:3),ngfft(7),-1)
          call fftbox_execute(plan,u12prod)
        end if
 
-       do ig=1,npwvec      ! Have to map FFT to G-sphere.
+       ! Have to map FFT to G-sphere.
+       do ig=1,npwvec
          igfft=igfftg0(ig)
          if (igfft/=0) then ! G-G0 belong to the FFT mesh.
            rhotwg(ig+spad0)=u12prod(igfft)

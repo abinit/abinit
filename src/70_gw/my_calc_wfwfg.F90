@@ -13,29 +13,29 @@
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! INPUTS
-!! iqibz=index of the irreducible q-point in the array qibz, point which is 
-!!  related by a symmetry operation to the point q summed over (see csigme). 
+!! iqibz=index of the irreducible q-point in the array qibz, point which is
+!!  related by a symmetry operation to the point q summed over (see csigme).
 !!  This index is also used to treat the integrable coulombian singularity at q=0
 !! ngfft(18)=contain all needed information about 3D FFT for GW wavefuntions,
 !!  see ~abinit/doc/input_variables/vargs.htm#ngfft
-!! nsig_ab=Number of components in the self-energy operator (1 for collinear magnetism) 
+!! nsig_ab=Number of components in the self-energy operator (1 for collinear magnetism)
 !! npwc=number of plane waves in $\tilde epsilon^{-1}$
 !! nspinor=Number of spinorial components.
 !! nfftot=number of points in real space
-!! i_sz=contribution arising from the integrable coulombian singularity at q==0 
-!! (see csigme for the method used), note that in case of 3-D systems the factor 
-!! 4pi in the coulombian potential is included in the definition of i_sz 
-!! gvec(3,npwc)=G vectors in reduced coordinates 
+!! i_sz=contribution arising from the integrable coulombian singularity at q==0
+!! (see csigme for the method used), note that in case of 3-D systems the factor
+!! 4pi in the coulombian potential is included in the definition of i_sz
+!! gvec(3,npwc)=G vectors in reduced coordinates
 !! vc_sqrt(npwc)= square root of the coulombian matrix elements for this q-point
-!! epsm1q_o(npwc,npwc)= contains $\tilde epsilon^{-1}(q,w=0) - \delta_{G Gp}$ for 
+!! epsm1q_o(npwc,npwc)= contains $\tilde epsilon^{-1}(q,w=0) - \delta_{G Gp}$ for
 !!  the particular q-point considered in the sum
-!! wfg2_jk(nsig_ab*nfftot)= Fourier Transform of $\u_{jb k}^*(r) u_{kb k}$ 
-!!  jb,kb=left and righ band indeces definining the left and right states where the 
+!! wfg2_jk(nsig_ab*nfftot)= Fourier Transform of $\u_{jb k}^*(r) u_{kb k}$
+!!  jb,kb=left and righ band indeces definining the left and right states where the
 !!  partial contribution to the matrix element of $\Sigma_{COH}$ is evaluated
 !!
 !! OUTPUT
-!! sigcohme=partial contribution to the matrix element of 
-!!     $<jb k \sigma|\Sigma_{COH} | kb k \sigma>$ 
+!! sigcohme=partial contribution to the matrix element of
+!!     $<jb k \sigma|\Sigma_{COH} | kb k \sigma>$
 !!  coming from this single q-point
 !!
 !! PARENTS
@@ -93,12 +93,11 @@ subroutine calc_coh(nspinor,nsig_ab,nfftot,ngfft,npwc,gvec,wfg2_jk,epsm1q_o,vc_s
 ! *************************************************************************
 
  DBG_ENTER("COLL")
- 
- !
+
  ! === Partial contribution to the matrix element of Sigma_c ===
- ! * For nspinor==2, the closure relation reads: 
+ ! * For nspinor==2, the closure relation reads:
  !  $\sum_s \psi_a^*(1)\psi_b(2) = \delta_{ab} \delta(1-2)$
- !  where a,b are the spinor components. As a consequence, Sigma_{COH} is always 
+ !  where a,b are the spinor components. As a consequence, Sigma_{COH} is always
  !  diagonal in spin-space and only diagonal matrix elements have to be calculated.
  ! MG  TODO wfg2_jk should be calculated on an augmented FFT box to avoid spurious wrapping of G1-G2.
  ! MG: One has to make sure G1-G2 is still in the FFT mesh for each G1 and G2 in chi0 (not always true)
@@ -118,7 +117,7 @@ subroutine calc_coh(nspinor,nsig_ab,nfftot,ngfft,npwc,gvec,wfg2_jk,epsm1q_o,vc_s
      do ig=igmin,npwc
 
       g2mg1 = gvec(:,igp)-gvec(:,ig)
-      if (ANY(g2mg1(:)>ngfft(1:3)/2) .or. ANY(g2mg1(:)<-(ngfft(1:3)-1)/2)) then 
+      if (ANY(g2mg1(:)>ngfft(1:3)/2) .or. ANY(g2mg1(:)<-(ngfft(1:3)-1)/2)) then
         outofbox = outofbox+1; CYCLE
       end if
 
@@ -132,19 +131,19 @@ subroutine calc_coh(nspinor,nsig_ab,nfftot,ngfft,npwc,gvec,wfg2_jk,epsm1q_o,vc_s
      end do !ig
    end do !igp
 
-   if (iqibz==1.and.same_band) then 
+   if (iqibz==1.and.same_band) then
      sigcohme(ispinor) = sigcohme(ispinor) + half*wfg2_jk(spad+ig4)*epsm1q_o(1,1)*i_sz
    end if
  end do !ispinor
 
- if (outofbox/=0) then 
+ if (outofbox/=0) then
    enough=enough+1
-   if (enough<=50) then 
+   if (enough<=50) then
      write(msg,'(a,i5)')' Number of G1-G2 pairs outside the G-sphere for Wfns = ',outofbox
      MSG_WARNING(msg)
-     if (enough==50) then 
+     if (enough==50) then
        write(msg,'(a)')' ========== Stop writing Warnings =========='
-       call wrtout(std_out,msg,'COLL') 
+       call wrtout(std_out,msg,'COLL')
      end if
    end if
  end if
@@ -161,9 +160,9 @@ end subroutine calc_coh
 !! calc_coh_comp
 !!
 !! FUNCTION
-!!  Calculates the COH-like contribution to the self-energy when 
-!!  the extrapolar technique and the closure relation is used to 
-!!  reduce the number of empty states to be summed over in the Green 
+!!  Calculates the COH-like contribution to the self-energy when
+!!  the extrapolar technique and the closure relation is used to
+!!  reduce the number of empty states to be summed over in the Green
 !!  function entering the definition of the GW self-energy.
 !!
 !! COPYRIGHT
@@ -173,24 +172,24 @@ end subroutine calc_coh
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! INPUTS
-!! iqibz=index of the irreducible q-point in the array qibz, point which is 
-!!  related by a symmetry operation to the point q summed over (see csigme). 
+!! iqibz=index of the irreducible q-point in the array qibz, point which is
+!!  related by a symmetry operation to the point q summed over (see csigme).
 !!  This index is also used to treat the integrable coulombian singularity at q=0
 !! ngfft(18)=contain all needed information about 3D FFT for GW wavefuntions,
 !!  see ~abinit/doc/input_variables/vargs.htm#ngfft
-!! nsig_ab=Number of components in the self-energy operator (1 for collinear magnetism) 
+!! nsig_ab=Number of components in the self-energy operator (1 for collinear magnetism)
 !! npwc=number of plane waves in $\tilde epsilon^{-1}$
 !! nspinor=Number of spinorial components.
-!! i_sz=contribution arising from the integrable coulombian singularity at q==0 
-!! (see csigme for the method used), note that in case of 3-D systems the factor 
-!! 4pi in the coulombian potential is included in the definition of i_sz 
-!! gvec(3,npwc)=G vectors in reduced coordinates 
+!! i_sz=contribution arising from the integrable coulombian singularity at q==0
+!! (see csigme for the method used), note that in case of 3-D systems the factor
+!! 4pi in the coulombian potential is included in the definition of i_sz
+!! gvec(3,npwc)=G vectors in reduced coordinates
 !! vc_sqrt(npwc)= square root of the coulombian matrix elements for this q-point
 !! botsq = Plasmon-pole parameters
 !! otq  = PPm parameters
 !!
 !! OUTPUT
-!! sigcohme=partial contribution to the matrix element of $<jb k|\Sigma_{COH}| kb k>$ 
+!! sigcohme=partial contribution to the matrix element of $<jb k|\Sigma_{COH}| kb k>$
 !!  coming from this single q-point for completeness trick
 !!
 !! SIDE EFFECTS
@@ -251,18 +250,18 @@ subroutine calc_coh_comp(iqibz,i_sz,same_band,nspinor,nsig_ab,ediff,npwc,gvec,&
  DBG_ENTER("COLL")
 
  ! === Treat the case q --> 0 adequately ===
- ! TODO Better treatment of wings     
+ ! TODO Better treatment of wings
  igmin=1 ; if (iqibz==1) igmin=2
  !
  ! === Partial contribution to the matrix element of Sigma_c ===
- ! * For nspinor==2, the closure relation reads: 
+ ! * For nspinor==2, the closure relation reads:
  !  $\sum_s \psi_a^*(1)\psi_b(2) = \delta_{ab} \delta(1-2)$
- !  where a,b are the spinor components. As a consequence, Sigma_{COH} is always 
+ !  where a,b are the spinor components. As a consequence, Sigma_{COH} is always
  !  diagonal in spin-space and only diagonal matrix elements have to be calculated.
  ! MG  TODO wfg2_jk should be calculated on an augmented FFT box to avoid spurious wrapping of G1-G2.
  !
- ngfft1 =ngfft(1) 
- ngfft2 =ngfft(2) 
+ ngfft1 =ngfft(1)
+ ngfft2 =ngfft(2)
  ngfft3 =ngfft(3)
  sigcohme(:)=czero_gw
 
@@ -274,7 +273,7 @@ subroutine calc_coh_comp(iqibz,i_sz,same_band,nspinor,nsig_ab,ediff,npwc,gvec,&
      do ig=igmin,npwc
 
       g2mg1 = gvec(:,igp)-gvec(:,ig)
-      if (ANY(g2mg1(:)>ngfft(1:3)/2) .or. ANY(g2mg1(:)<-(ngfft(1:3)-1)/2)) then 
+      if (ANY(g2mg1(:)>ngfft(1:3)/2) .or. ANY(g2mg1(:)<-(ngfft(1:3)-1)/2)) then
         outofbox = outofbox+1; CYCLE
       end if
 
@@ -289,19 +288,19 @@ subroutine calc_coh_comp(iqibz,i_sz,same_band,nspinor,nsig_ab,ediff,npwc,gvec,&
      end do
    end do
 
-   if (iqibz==1.and.same_band) then 
+   if (iqibz==1.and.same_band) then
      sigcohme(ispinor) = sigcohme(ispinor) + half*wfg2_jk(spad+ig4)*i_sz*botsq(1,1) / ( otq(1,1) * (ediff -otq(1,1)) )
    end if
  end do !ispinor
 
- if (outofbox/=0) then 
+ if (outofbox/=0) then
    enough=enough+1
-   if (enough<=50) then 
+   if (enough<=50) then
      write(msg,'(a,i5)')' Number of G1-G2 pairs outside the G-sphere for Wfns = ',outofbox
      MSG_WARNING(msg)
-     if (enough==50) then 
+     if (enough==50) then
        write(msg,'(a)')' ========== Stop writing Warnings =========='
-       call wrtout(std_out,msg,'COLL') 
+       call wrtout(std_out,msg,'COLL')
      end if
    end if
  end if

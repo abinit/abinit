@@ -1803,10 +1803,8 @@ subroutine wfd_get_ur(Wfd,band,ik_ibz,spin,ur)
    call xcopy(nfft*nspinor,Wfd%Wave(band,ik_ibz,spin)%ur,1,ur,1)
 
  CASE DEFAULT
-   write(msg,'(a,i0)')" Wrong has_ur: ",has_this_ur
-   MSG_BUG(msg)
+   MSG_BUG(sjoin("Wrong has_this_ur:", itoa(has_this_ur)))
  END SELECT
-
 
 end subroutine wfd_get_ur
 !!***
@@ -5156,7 +5154,6 @@ subroutine wfd_test_ortho(Wfd,Cryst,Pawtab,unit,mode_paral)
  do spin=1,Wfd%nsppol
    min_norm2=greatest_real; max_norm2=-greatest_real
    my_cinf=greatest_real;  my_csup=-greatest_real
-   !
    do ik_ibz=1,Wfd%nkibz
      istwf_k = Wfd%istwfk(ik_ibz)
      npw_k   = Wfd%npwarr(ik_ibz)
@@ -5764,7 +5761,7 @@ subroutine wfd_read_wfk(Wfd,wfk_fname,iomode)
 
  tag_spin(:)=(/'      ','      '/); if (Wfd%nsppol==2) tag_spin(:)=(/' UP   ',' DOWN '/)
 
- call wrtout(std_out,"wfd_read_wfk: reading "//TRIM(wfk_fname),"COLL")
+ call wrtout(std_out," wfd_read_wfk: reading "//TRIM(wfk_fname),"COLL")
 
  wfk_unt = get_unit()
  call wfk_open_read(Wfk,wfk_fname,formeig0,iomode,wfk_unt,Wfd%comm,Hdr_out=Hdr)
@@ -5794,7 +5791,7 @@ subroutine wfd_read_wfk(Wfd,wfk_fname,iomode)
    end do
  end do
 
- write(msg,'(2a,i0,a)')ABI_FUNC,": will read ",COUNT(my_readmask)," (b,k,s) states"
+ write(msg,'(3a,i0,a)')ch10,ABI_FUNC,": will read ",COUNT(my_readmask)," (b,k,s) states"
  call wrtout(std_out,msg,"PERS")
 
  if (wfd%prtvol > 0) call wrtout(std_out,' k       eigenvalues [eV]','COLL')

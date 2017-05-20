@@ -51,7 +51,7 @@ MODULE m_melemts
  use m_xmpi
  use m_profiling_abi
 
- use m_fstrings,       only : tolower
+ use m_fstrings,       only : tolower, sjoin
  use m_numeric_tools,  only : print_arr
 
  implicit none
@@ -433,9 +433,6 @@ subroutine my_select_melements(Mels,aname,flag_p,arr_p)
 !arrays
  complex(dpc),ABI_CONTIGUOUS pointer :: arr_p(:,:,:,:)
 
-!Local variables-------------------------------
- character(len=500) :: msg
-
 ! *************************************************************************
 
  SELECT CASE (tolower(aname))
@@ -464,8 +461,7 @@ subroutine my_select_melements(Mels,aname,flag_p,arr_p)
    flag_p => Mels%flags%has_vxcval_hybrid
    arr_p  => Mels%vxcval_hybrid
  CASE DEFAULT
-   msg = "Wrong aname = "//TRIM(aname)
-   MSG_ERROR(msg)
+   MSG_ERROR(sjoin("Wrong aname: ", aname))
  END SELECT
 
 end subroutine my_select_melements
@@ -655,7 +651,7 @@ subroutine melements_herm(Mels,aname)
  integer,pointer :: flag_p
  character(len=NAMELEN) :: key
 !arrays
- integer,parameter :: trsp_idx(2:4)=(/2,4,3/)
+ integer,parameter :: trsp_idx(2:4) = [2,4,3]
  complex(dpc),ABI_CONTIGUOUS pointer :: arr_p(:,:,:,:)
 
 ! *************************************************************************
@@ -776,8 +772,6 @@ subroutine melements_mpisum(Mels,comm,aname)
      flag_p=2 ! Tag this array as calculated
    end if
  end do
-
- !call xmpi_barrier(comm)
 
 end subroutine melements_mpisum
 !!***

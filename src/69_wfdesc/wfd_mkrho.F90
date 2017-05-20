@@ -16,23 +16,13 @@
 !! INPUTS
 !!  ngfftf(18)=array containing all the information for the "fine" FFT.
 !!  Cryst<crystal_t> Info on the crystalline structure
-!!     %nsym=number of symmetry operations.
-!!     %ucvol=unit cell volume.
 !!  optcalc=option for calculation. If =0 (default value) perform calculation
 !!    of electronic density. If =1, perform calculation of kinetic energy density.
 !!    In both cases, the result is returned in rhor.
 !!  Psps<type(pseudopotential_type)>=variables related to pseudopotentials
 !!  nfftf=Total number of points on the fine FFT grid (for this processor)
 !!  Kmesh<kmesh_t>= Info on the k-sampling:
-!!     %nibz=number of irreducible k-points.
-!!     %nbz=number of k-points in the full Brillouin zone.
-!!     %wt(nibz)=irreducible k-points weights.
-!!     %timrev=2 if time-reversal symmetry can be used, 1 otherwise.
 !!  Wfd<wfd_t)=datatype gathering info on the wavefunctions.
-!!    %npwwfn=Number of plane waves used to describe the wave functions.
-!!    %nspinor=number of spinorial components.
-!!    %nsppol=1 for unpolarized, 2 for spin-polarized calculations.
-!!    %nspden=number of spin-density components.
 !! [optcalc]=Optional option used to calculate the kinetic energy density. Defaults to 0.
 !!
 !! OUTPUT

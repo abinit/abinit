@@ -652,7 +652,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
    ! * Find the corresponding irreducible k-point
    call get_BZ_item(Kmesh,ik_bz,ksum,ik_ibz,isym_ki,iik,ph_mkt)
    spinrot_kbz(:)=Cryst%spinrot(:,isym_ki)
-   npw_k =  Wfd%Kdata(ik_ibz)%npw
+   !npw_k =  Wfd%Kdata(ik_ibz)%npw
 
    ! * Identify q and G0 where q+G0=k_GW-k_i
    kgw_m_ksum=kgw-ksum
@@ -672,7 +672,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
      end do
    end if
 
-   write(msg,'(3(a,i0),a,i0)')'Sigma_c: ik_bz ',ik_bz,'/',Kmesh%nbz,", spin: ",spin,' done by rank: ',Wfd%my_rank
+   write(msg,'(3(a,i0),a,i0)')' Sigma_c: ik_bz ',ik_bz,'/',Kmesh%nbz,", spin: ",spin,' done by mpi-rank: ',Wfd%my_rank
    call wrtout(std_out,msg,'PERS')
    !
    ! === Find the corresponding irred q-point ===
@@ -877,18 +877,20 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
              rhotwg_ki(1,jb)=czero_gw
              if (ib==jb) rhotwg_ki(1,jb)=CMPLX(SQRT(Vcp%i_sz),0.0_gwp)
 
-           else ! TODO Recheck this, moreover it wont work if k-centered G-spheres are used.!
+           else
+             ! TODO Recheck this, moreover it wont work if k-centered G-spheres are used.!
+#if 0
+             npw_k  = Wfd%npwarr(ik_ibz)
              cg_sum  => Wfd%Wave(ib,ik_ibz,spin)%ug
              cg_jb   => Wfd%Wave(jb,jk_ibz,spin)%ug
-             ctmp = xdotc(Wfd%npwwfn*nspinor,cg_sum,1,cg_jb,1)
-             ovlp(1) = REAL(ctmp)
-             ovlp(2) = AIMAG(ctmp)
+             ctmp = xdotc(npw_k*nspinor,cg_sum,1,cg_jb,1)
+             ovlp(1) = REAL(ctmp); ovlp(2) = AIMAG(ctmp)
+
              if (Psps%usepaw==1) then
                i2=(2*jb-1)
                ovlp = ovlp + paw_overlap(Cprj_ksum,Cprj_kgw(:,i2:i2+1),Cryst%typat,Pawtab)
              end if
-             !ovlp(2) = -ovlp(1)
-             !if (ib==jb) ovlp(2)=cone_gw-ovlp(1)
+             !ovlp(2) = -ovlp(1); !if (ib==jb) ovlp(2)=cone_gw-ovlp(1)
              if (ib==jb) then
                norm=DBLE(ovlp(1)+ovlp(2))
                ovlp(1)=DBLE(ovlp(1)/norm)
@@ -900,6 +902,15 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
              end if
              rhotwg_ki(1          ,jb) = CMPLX(SQRT(Vcp%i_sz),0.0_gwp)*ovlp(1)
              rhotwg_ki(Sigp%npwc+1,jb) = CMPLX(SQRT(Vcp%i_sz),0.0_gwp)*ovlp(2)
+#else
+             ! DEBUG
+             rhotwg_ki(1          ,jb) = zero
+             rhotwg_ki(Sigp%npwc+1,jb) = zero
+             if (ib==jb) then
+               rhotwg_ki(1,jb)=CMPLX(SQRT(Vcp%i_sz),0.0_gwp) * sqrt(half)
+               rhotwg_ki(Sigp%npwc+1,jb) = CMPLX(SQRT(Vcp%i_sz),0.0_gwp) * sqrt(half)
+             end if
+#endif
            end if
          end if
        end do !jb  Got all matrix elements from minbnd up to maxbnd.

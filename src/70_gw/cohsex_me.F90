@@ -179,7 +179,7 @@ subroutine cohsex_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,Cryst,QP_BSt,Si
  integer :: spad,spadc,spadc1,spadc2,irow,my_nbks
  integer :: comm,ndegs,wtqm,wtqp,mod10
  integer :: isym_kgw,isym_ki,gwc_mgfft,use_padfft,gwc_fftalga,gwc_nfftot
- integer :: ifft
+ integer :: ifft,npw_k
  real(dp) :: fact_sp,theta_mu_minus_e0i,tol_empty,norm,gw_gsq
  complex(dpc) :: ctmp,scprod,ph_mkgwt,ph_mkt
  logical :: iscompatibleFFT,q_is_gamma !,ltest
@@ -577,7 +577,7 @@ subroutine cohsex_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,Cryst,QP_BSt,Si
        call pawpwij_init(Pwij_qg,Sigp%npwc,q0,Gsph_c%gvec,Cryst%rprimd,Psps,Pawtab,Paw_pwff)
      end if
 
-     if (Er%mqmem==0) then 
+     if (Er%mqmem==0) then
        ! Read q-slice of epsilon^{-1}|chi0 in Er%epsm1(:,:,:,1) (much slower but less memory).
        call get_epsm1(Er,Vcp,0,0,iomode,xmpi_comm_self,iqibzA=iq_ibz)
      end if
@@ -657,19 +657,20 @@ subroutine cohsex_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,Cryst,QP_BSt,Si
              rhotwg_ki(1,jb)=czero_gw
              if (ib==jb) rhotwg_ki(1,jb)=CMPLX(SQRT(Vcp%i_sz),0.0_gwp)
            else
-             ! TODO Recheck this!
+#if 0
+             ! TODO Recheck this, moreover it wont work if k-centered G-spheres are used.!
+             npw_k  = Wfd%npwarr(ik_ibz)
              cg_sum  => Wfd%Wave(ib,ik_ibz,spin)%ug
              cg_jb   => Wfd%Wave(jb,jk_ibz,spin)%ug
-             ctmp = xdotc(Wfd%npwwfn*nspinor,cg_sum,1,cg_jb,1)
-             ovlp(1) = REAL(ctmp)
-             ovlp(2) = AIMAG(ctmp)
+             ctmp = xdotc(npw_k*nspinor,cg_sum,1,cg_jb,1)
+             ovlp(1) = REAL(ctmp); ovlp(2) = AIMAG(ctmp)
+
              if (Psps%usepaw==1) then
                i2=(2*jb-1)
                ovlp = ovlp + paw_overlap(Cprj_ksum,Cprj_kgw(:,i2:i2+1),Cryst%typat,Pawtab,&
 &                                        spinor_comm=Wfd%MPI_enreg%comm_spinor)
              end if
-             !ovlp(2) = -ovlp(1)
-             !if (ib==jb) ovlp(2)=cone_gw-ovlp(1)
+             !ovlp(2) = -ovlp(1); if (ib==jb) ovlp(2)=cone_gw-ovlp(1)
              if (ib==jb) then
                norm=DBLE(ovlp(1)+ovlp(2))
                ovlp(1)=DBLE(ovlp(1)/norm)
@@ -681,6 +682,11 @@ subroutine cohsex_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,Cryst,QP_BSt,Si
              end if
              rhotwg_ki(1          ,jb) = CMPLX(SQRT(Vcp%i_sz),0.0_gwp)*ovlp(1)
              rhotwg_ki(Sigp%npwc+1,jb) = CMPLX(SQRT(Vcp%i_sz),0.0_gwp)*ovlp(2)
+#else
+             ! DEBUG
+             rhotwg_ki(1          ,jb) = zero
+             rhotwg_ki(Sigp%npwc+1,jb) = zero
+#endif
            end if
          end if
        end do !jb  Got all matrix elements from minbnd up to maxbnd.

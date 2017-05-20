@@ -186,7 +186,7 @@ MODULE m_sigma
   ! Diagonal matrix elements of \Sigma_c around the zeroth order eigenvalue (usually KS).
 
   complex(dpc),allocatable :: sigxcme(:,:,:,:)
-  ! sigxme(b1gw:b2gw,nkibz,nomega_r,nsppol*nsig_ab))
+  ! sigxcme(b1gw:b2gw,nkibz,nomega_r,nsppol*nsig_ab))
   ! $\<nks|\Sigma_{xc}(E)|nks\>$ at each real frequency frequency.
 
   complex(dpc),allocatable :: sigxcmesi(:,:,:,:)

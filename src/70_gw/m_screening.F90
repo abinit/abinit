@@ -1005,8 +1005,7 @@ subroutine mkdump_Er(Er,Vcp,npwe,gvec,nkxc,kxcg,id_required,approx_type,&
      end if
    else
      ! Out-of-core solution ===
-     msg = " mqmem==0 => allocating a single q-slice of (W|chi0) (slower but less memory)."
-     MSG_COMMENT(msg)
+     MSG_COMMENT("mqmem==0 => allocating a single q-slice of (W|chi0) (slower but less memory).")
      continue
    end if
 
