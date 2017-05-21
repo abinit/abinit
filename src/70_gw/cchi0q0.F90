@@ -557,10 +557,10 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
 
      if (ALL(bbp_ks_distrb(:,:,ik_bz,spin) /= Wfd%my_rank)) CYCLE
 
-     write(msg,'(2(a,i4),a,i2,a,i3)')' ik = ',ik_bz,' / ',Kmesh%nbz,' spin = ',spin,' done by processor ',Wfd%my_rank
+     write(msg,'(2(a,i4),a,i2,a,i3)')' ik= ',ik_bz,'/',Kmesh%nbz,' spin=',spin,' done by mpi rank:',Wfd%my_rank
      call wrtout(std_out,msg,'PERS')
-     !
-     ! * Get ik_ibz, non-symmorphic phase and symmetries from ik_bz.
+
+     ! Get ik_ibz, non-symmorphic phase and symmetries from ik_bz.
      call get_BZ_item(Kmesh,ik_bz,kbz,ik_ibz,isym_k,itim_k,ph_mkt)
      tabr_k=ktabr(:,ik_bz) ! Table for rotated FFT points
      spinrot_kbz(:)=Cryst%spinrot(:,isym_k)
@@ -645,7 +645,8 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
          CASE (0) ! Adler-Wiser expression.
            ! Add small imaginary of the Time-Ordered resp function but only for non-zero real omega  FIXME What about metals?
 
-           if (.not.use_tr) then ! Adler-Wiser without time-reversal.
+           if (.not.use_tr) then
+             ! Adler-Wiser without time-reversal.
              do io=1,Ep%nomega
                green_w(io) = g0g0w(Ep%omega(io),deltaf_b1b2,deltaeGW_b1b2,Ep%zcut,GW_TOL_W0,one_pole)
              end do
@@ -709,9 +710,8 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
            if (deltaeGW_b1b2<0) CYCLE
            call approxdelta(Ep%nomegasf,omegasf,deltaeGW_b1b2,Ep%spsmear,iomegal,iomegar,wl,wr,Ep%spmeth)
          END SELECT
-         !
+
          ! FFT of u^*_{b1,k}(r) u_{b2,k}(r) and (q,G=0) limit using small q and k.p perturbation theory
-         !
 #if DEV_USE_OLDRHOTWG
          call rho_tw_g(nspinor,Ep%npwe,nfft,ndat1,ngfft_gw,1,use_padfft,igffteps0,gw_gbound,&
 &          ur1_kibz,itim_k,tabr_k,ph_mkt,spinrot_kbz,&
@@ -722,7 +722,8 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
          call get_uug(Ep%npwe,nfft,ndat1,ngfft_gw,use_padfft,igffteps0,gw_gbound,usr1_k,ur2_k,rhotwg)
 #endif
 
-         if (Psps%usepaw==0) then  ! Matrix elements of i[H,r] for NC pseudopotentials.
+         if (Psps%usepaw==0) then
+           ! Matrix elements of i[H,r] for NC pseudopotentials.
            rhotwx = nc_ihr_comm(vkbr(ik_ibz),cryst,psps,npw_k,nspinor,istwf_k,Ep%inclvkb,Kmesh%ibz(:,ik_ibz),ug1,ug2,kg_k)
 
          else
@@ -832,11 +833,12 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
            endif
 !          ---------------- Ucrpa (end)
 
-           ! ==== Adler-Wiser expression, to be consistent here we use the KS eigenvalues (?) ====
+           ! Adler-Wiser expression, to be consistent here we use the KS eigenvalues (?)
            call accumulate_chi0_q0(ik_bz,isym_k,itim_k,Ep%gwcomp,nspinor,Ep%npwepG0,Ep,&
-&           Cryst,Ltg_q,Gsph_epsG0,chi0,rhotwx(:,1),rhotwg,green_w,green_enhigh_w,deltaf_b1b2,chi0_head,chi0_lwing,chi0_uwing)
+&           Cryst,Ltg_q,Gsph_epsG0,chi0,rhotwx,rhotwg,green_w,green_enhigh_w,deltaf_b1b2,chi0_head,chi0_lwing,chi0_uwing)
 
-         CASE (1,2) ! Spectral method, to be consistent here we use the KS eigenvalues.
+         CASE (1,2)
+          ! Spectral method, to be consistent here we use the KS eigenvalues.
           call accumulate_sfchi0_q0(ik_bz,isym_k,itim_k,nspinor,Ep%symchi,Ep%npwepG0,Ep%npwe,Cryst,Ltg_q,&
 &           Gsph_epsG0,deltaf_b1b2,my_wl,iomegal,wl,my_wr,iomegar,wr,rhotwx,rhotwg,Ep%nomegasf,sf_chi0,sf_head,sf_lwing,sf_uwing)
 

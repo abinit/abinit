@@ -252,7 +252,7 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
  nfft    = Wfd%nfft
  ABI_CHECK(Wfd%nfftot==nfftot_gw,"Wrong nfftot_gw")
 
- dim_rtwg=1; if (nspinor==2) dim_rtwg=4    !can reduce size depending on Ep%nI and Ep%nj
+ dim_rtwg=1; if (nspinor==2) dim_rtwg=4  ! can reduce size depending on Ep%nI and Ep%nj
  size_chi0 = Ep%npwe*Ep%nI*Ep%npwe*Ep%nJ*Ep%nomega
 
  qp_energy => QP_BSt%eig(:,:,:)
@@ -336,15 +336,15 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
      if (Ep%symchi==1) then
        if (Ltg_q%ibzq(ik_bz)/=1) CYCLE  ! Only IBZ_q
      end if
-     !
-     ! * Get ik_ibz, non-symmorphic phase, ph_mkt, and symmetries from ik_bz.
+
+     ! Get ik_ibz, non-symmorphic phase, ph_mkt, and symmetries from ik_bz.
      call get_BZ_item(Kmesh,ik_bz,kbz,ik_ibz,isym_k,itim_k)
-     !
-     ! * Get index of k-q in the BZ, stop if not found as the weight=one/nkbz is not correct.
+
+     ! Get index of k-q in the BZ, stop if not found as the weight=one/nkbz is not correct.
      call get_BZ_diff(Kmesh,kbz,qpoint,ikmq_bz,g0,nfound)
      ABI_CHECK(nfound==1,"Check kmesh")
-     !
-     ! * Get ikmq_ibz, non-symmorphic phase, ph_mkmqt, and symmetries from ikmq_bz.
+
+     ! Get ikmq_ibz, non-symmorphic phase, ph_mkmqt, and symmetries from ikmq_bz.
      call get_BZ_item(Kmesh,ikmq_bz,kmq_bz,ikmq_ibz,isym_kmq,itim_kmq)
 
      call chi0_bbp_mask(Ep,use_tr,QP_BSt,mband,ikmq_ibz,ik_ibz,spin,spin_fact,bbp_mask)
@@ -461,13 +461,10 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
    ABI_MALLOC(rhotwg,(Ep%npwepG0*nspinor**2))
    ABI_MALLOC(tabr_k,(nfft))
    ABI_MALLOC(tabr_kmq,(nfft))
-
    ABI_MALLOC(ur1_kmq_ibz,(nfft*nspinor))
    ABI_MALLOC(ur2_k_ibz,(nfft*nspinor))
-
    ABI_MALLOC(usr1_kmq,(nfft*nspinor))
    ABI_MALLOC(ur2_k,   (nfft*nspinor))
-
    ABI_MALLOC(igfftepsG0,(Ep%npwepG0))
 
    do ik_bz=1,Kmesh%nbz ! Loop over k-points in the BZ.
@@ -478,10 +475,10 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
 
      if (ALL(bbp_ks_distrb(:,:,ik_bz,spin) /= Wfd%my_rank)) CYCLE
 
-     write(msg,'(2(a,i4),a,i2,a,i3)')' ik = ',ik_bz,' / ',Kmesh%nbz,' spin = ',spin,' done by processor ',Wfd%my_rank
+     write(msg,'(2(a,i4),a,i2,a,i3)')' ik= ',ik_bz,'/',Kmesh%nbz,' spin=',spin,' done by mpi rank:',Wfd%my_rank
      call wrtout(std_out,msg,'PERS')
-     !
-     ! * Get ik_ibz, non-symmorphic phase, ph_mkt, and symmetries from ik_bz.
+
+     ! Get ik_ibz, non-symmorphic phase, ph_mkt, and symmetries from ik_bz.
      call get_BZ_item(Kmesh,ik_bz,kbz,ik_ibz,isym_k,itim_k,ph_mkt,umklp_k,isirred_k)
 
      call get_BZ_diff(Kmesh,kbz,qpoint,ikmq_bz,G0,nfound)
@@ -489,7 +486,7 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
        MSG_ERROR("Cannot find kbz - qpoint in Kmesh")
      end if
 
-     ! * Get ikmq_ibz, non-symmorphic phase, ph_mkmqt, and symmetries from ikmq_bz.
+     ! Get ikmq_ibz, non-symmorphic phase, ph_mkmqt, and symmetries from ikmq_bz.
      call get_BZ_item(Kmesh,ikmq_bz,kmq_bz,ikmq_ibz,isym_kmq,itim_kmq,ph_mkmqt,umklp_kmq,isirred_kmq)
 
 !BEGIN DEBUG
@@ -510,7 +507,7 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
      !end if
 !END DEBUG
 
-     ! * Copy tables for rotated FFT points
+     ! Copy tables for rotated FFT points
      tabr_k(:)  =ktabr(:,ik_bz)
      spinrot_k(:)=Cryst%spinrot(:,isym_k)
 
@@ -527,7 +524,7 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
      !  b) gw_gbound table for the zero-padded FFT performed in rhotwg.
      ABI_MALLOC(gw_gbound,(2*gw_mgfft+8,2))
      call gsph_fft_tabs(Gsph_epsG0,g0,gw_mgfft,ngfft_gw,use_padfft,gw_gbound,igfftepsG0)
-     if ( ANY(gw_fftalga == (/2,4/)) ) use_padfft=0 ! Pad-FFT is not coded in rho_tw_g
+     if ( ANY(gw_fftalga == [2, 4]) ) use_padfft=0 ! Pad-FFT is not coded in rho_tw_g
      if (use_padfft==0) then
        ABI_FREE(gw_gbound)
        ABI_MALLOC(gw_gbound,(2*gw_mgfft+8,2*use_padfft))
@@ -536,7 +533,7 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
      if (Dtset%pawcross==1) then
         ABI_MALLOC(gboundf,(2*mgfftf+8,2))
        call gsph_fft_tabs(Gsph_epsG0,g0,mgfftf,ngfftf,use_padfftf,gboundf,igfftepsG0f)
-       if (ANY(gw_fftalga == (/2,4/))) use_padfftf=0
+       if (ANY(gw_fftalga == [2, 4])) use_padfftf=0
        if (use_padfftf==0) then
          ABI_FREE(gboundf)
          ABI_MALLOC(gboundf,(2*mgfftf+8,2*use_padfftf))
@@ -669,13 +666,13 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
             end if
           end if ! use_tr
 
-         CASE (1,2) ! Spectral method, WARNING time-reversal here is always assumed!
+         CASE (1,2)
+           ! Spectral method, WARNING time-reversal here is always assumed!
            if (deltaeGW_b1kmq_b2k<0) CYCLE
            call approxdelta(Ep%nomegasf,omegasf,deltaeGW_b1kmq_b2k,Ep%spsmear,iomegal,iomegar,wl,wr,Ep%spmeth)
          END SELECT
-         !
-         ! ==== Form rho-twiddle(r)=u^*_{b1,kmq_bz}(r) u_{b2,kbz}(r) and its FFT transform ====
 
+         ! ==== Form rho-twiddle(r)=u^*_{b1,kmq_bz}(r) u_{b2,kbz}(r) and its FFT transform ====
 #if DEV_USE_OLDRHOTWG
          call rho_tw_g(nspinor,Ep%npwepG0,nfft,ndat1,ngfft_gw,1,use_padfft,igfftepsG0,gw_gbound,&
 &          ur1_kmq_ibz,itim_kmq,tabr_kmq,ph_mkmqt,spinrot_kmq,&
@@ -795,7 +792,7 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
        ABI_FREE(gboundf)
      end if
    end do !ik_bz
-   !
+
    ! Deallocation of arrays private to the spin loop.
    ABI_FREE(igfftepsG0)
    ABI_FREE(ur1_kmq_ibz)
@@ -815,7 +812,7 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
      ABI_FREE(green_enhigh_w)
    end if
    if (Psps%usepaw==1) then
-     call pawcprj_free(Cprj2_k  )
+     call pawcprj_free(Cprj2_k)
      ABI_DT_FREE(Cprj2_k)
      call pawcprj_free(Cprj1_kmq)
      ABI_DT_FREE(Cprj1_kmq)
@@ -833,7 +830,7 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
      end if
    end if
  end do !spin
- !
+
  ! === After big loop over transitions, now MPI ===
  ! * Master took care of the contribution in case of metallic|spin polarized systems.
  SELECT CASE (Ep%spmeth)
@@ -843,11 +840,10 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
    do io=1,Ep%nomega
      call xmpi_sum(chi0(:,:,io),comm,ierr)
    end do
-   !
- CASE (1,2) ! Spectral method.
 
+ CASE (1,2) ! Spectral method.
    call hilbert_transform(Ep%npwe,Ep%nomega,Ep%nomegasf,my_wl,my_wr,kkweight,sf_chi0,chi0,Ep%spmeth)
-   !
+
    !  Deallocate here before the xsums
    if (allocated(sf_chi0)) then
      ABI_FREE(sf_chi0)
@@ -862,12 +858,12 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
  CASE DEFAULT
    MSG_BUG("Wrong spmeth")
  END SELECT
- !
+
  ! Divide by the volume
 !$OMP PARALLEL WORKSHARE
    chi0=chi0*weight/Cryst%ucvol
 !$OMP END PARALLEL WORKSHARE
- !
+
  ! === Collect the sum rule ===
  ! * The pi factor comes from Im[1/(x-ieta)] = pi delta(x)
  call xmpi_sum(chi0_sumrule,comm,ierr)

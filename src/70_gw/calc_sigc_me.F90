@@ -879,8 +879,8 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
 
            else
              ! TODO Recheck this, moreover it wont work if k-centered G-spheres are used.!
-#if 0
              npw_k  = Wfd%npwarr(ik_ibz)
+#if 0
              cg_sum  => Wfd%Wave(ib,ik_ibz,spin)%ug
              cg_jb   => Wfd%Wave(jb,jk_ibz,spin)%ug
              ctmp = xdotc(npw_k*nspinor,cg_sum,1,cg_jb,1)
@@ -904,11 +904,17 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
              rhotwg_ki(Sigp%npwc+1,jb) = CMPLX(SQRT(Vcp%i_sz),0.0_gwp)*ovlp(2)
 #else
              ! DEBUG
-             rhotwg_ki(1          ,jb) = zero
-             rhotwg_ki(Sigp%npwc+1,jb) = zero
+             rhotwg_ki(1, jb) = zero; rhotwg_ki(Sigp%npwc+1, jb) = zero
              if (ib==jb) then
-               rhotwg_ki(1,jb)=CMPLX(SQRT(Vcp%i_sz),0.0_gwp) * sqrt(half)
-               rhotwg_ki(Sigp%npwc+1,jb) = CMPLX(SQRT(Vcp%i_sz),0.0_gwp) * sqrt(half)
+               cg_sum => Wfd%Wave(ib,ik_ibz,spin)%ug
+               cg_jb  => Wfd%Wave(jb,jk_ibz,spin)%ug
+               ctmp = xdotc(npw_k, cg_sum(1:), 1, cg_jb(1:), 1)
+               rhotwg_ki(1,jb)=CMPLX(SQRT(Vcp%i_sz),0.0_gwp) * real(ctmp)
+               ctmp = xdotc(npw_k, cg_sum(npw_k+1:), 1, cg_jb(npw_k+1:), 1)
+               rhotwg_ki(Sigp%npwc+1,jb) = CMPLX(SQRT(Vcp%i_sz),0.0_gwp) * real(ctmp)
+
+               !rhotwg_ki(1,jb)=CMPLX(SQRT(Vcp%i_sz),0.0_gwp) * sqrt(half)
+               !rhotwg_ki(Sigp%npwc+1,jb) = CMPLX(SQRT(Vcp%i_sz),0.0_gwp) * sqrt(half)
              end if
 #endif
            end if
@@ -1098,7 +1104,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
 
            jb = Sigcij_tab(spin)%col(kb)%bidx(irow)
            rhotwg=rhotwg_ki(:,jb)
-           !
+
            ! === Calculate <\phi_j|\Sigma_c|\phi_k> ===
            ! * Different freqs according to method (AC or Perturbative), see nomega_sigc.
            do iab=1,Sigp%nsig_ab
@@ -1108,7 +1114,6 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
                sigctmp(io,iab)=XDOTC(Sigp%npwc,rhotwg(spadc1+1:),1,sigc_ket(spadc2+1:,io),1)
              end do
            end do
-           !
 
            if (Sigp%gwcomp==1) then ! Evaluate Extrapolar term TODO this does not work with spinor
 
@@ -1151,8 +1156,8 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
                end do
              end if ! gwcomp==1
            end if ! gwcom==1
-           !
-           ! === Accumulate and, in case, symmetrize matrix elements of Sigma_c ===
+
+           ! Accumulate and, in case, symmetrize matrix elements of Sigma_c
            do iab=1,Sigp%nsig_ab
              is_idx=spin; if (nspinor==2) is_idx=iab
 
@@ -1165,7 +1170,8 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
            end do
          end do !jb used to calculate matrix elements of $\Sigma$
 
-         ! shaltaf (030406): this has to be done in a clean way later. TODO does not work with spinor.
+         ! shaltaf (030406): this has to be done in a clean way later.
+         ! TODO does not work with spinor.
          if (mod10==SIG_GW_PPM.and.(PPm%model==3.or.PPm%model==4)) then
            sigcme_tmp(:,kb,kb,spin)= sigcme2(:,kb)
            sigc(1,:,kb,kb,spin)= sigcme2(:,kb)
@@ -1178,7 +1184,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
      end do !ib
 
      call timab(445,2,tsec) ! csigme(SigC)
-     !
+
      ! Deallocate k-dependent quantities.
      ABI_FREE(gw_gbound)
      if (Dtset%pawcross==1) then
@@ -1216,7 +1222,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
    ABI_FREE(igfftfcg0)
  end if
 
- ! === Gather contributions from all the CPUs ===
+ ! Gather contributions from all the CPUs
  call timab(440,1,tsec) ! wfd_barrier
  call timab(440,2,tsec) ! wfd_barrier
  call timab(441,1,tsec) ! xmpi_sum
@@ -1225,7 +1231,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
  call xmpi_sum(sigc,comm,ierr)
 
  call timab(441,2,tsec) ! xmpi_sum
- !
+
  ! Multiply by constants
  ! For 3D systems sqrt(4pi) is included in vc_sqrt_qbz ===
  sigcme_tmp = sigcme_tmp /(Cryst%ucvol*Kmesh%nbz)
@@ -1236,8 +1242,8 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
  ! * TODO QP-SCGW required a more involved approach, there is a check in sigma
  ! * TODO it does not work if nspinor==2.
  call timab(442,1,tsec) ! final ops
- do spin=1,Wfd%nsppol
 
+ do spin=1,Wfd%nsppol
    if (can_symmetrize(spin)) then
      if (mod10==SIG_GW_AC) then ! FIXME here there is a problem in case of AC with symmetries
        ABI_MALLOC(sym_cme,(Sr%nomega_i,ib1:ib2,ib1:ib2))
@@ -1265,8 +1271,8 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
          call esymm_symmetrize_mels(QP_sym(spin),ib1,ib2,sigc(:,iwc,:,:,spin),sym_cme(iwc,:,:))
        end do
      end if
-     !
-     ! ==== Copy symmetrized values ====
+
+     ! Copy symmetrized values
      do ib=ib1,ib2
        do jb=ib1,ib2
          !if (mod10==SIG_GW_AC.and.average_real) CYCLE ! this is to check another scheme in case of AC
@@ -1276,7 +1282,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
      ABI_FREE(sym_cme)
    end if
  end do
- !
+
  ! Reconstruct the full sigma matrix from the upper triangle (only for HF, SEX and COHSEX)
  !if (Sigp%gwcalctyp>=20 .and. sigma_is_herm(Sigp) ) then
  !  ABI_CHECK(nspinor==1,"cannot hermitianize non-collinear sigma!")
@@ -1309,12 +1315,12 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
    call wrtout(std_out,msg,"COLL")
  end if
  call timab(442,2,tsec) ! final ops
- !
+
  ! ===========================
  ! ==== Deallocate memory ====
  ! ===========================
  if (Psps%usepaw==1) then
-   if (allocated(gw_gfft))   then
+   if (allocated(gw_gfft)) then
      ABI_FREE(gw_gfft)
    end if
    call pawcprj_free(Cprj_ksum)

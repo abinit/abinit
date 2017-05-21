@@ -122,7 +122,7 @@ subroutine cohsex_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,Cryst,QP_BSt,Si
  use m_gsphere,       only : gsphere_t, gsph_fft_tabs
  use m_fft_mesh,      only : get_gftt, rotate_fft_mesh, cigfft
  use m_vcoul,         only : vcoul_t
- use m_pawpwij,      only : pawpwff_t, pawpwij_t, pawpwij_init, pawpwij_free, paw_rho_tw_g
+ use m_pawpwij,       only : pawpwff_t, pawpwij_t, pawpwij_init, pawpwij_free, paw_rho_tw_g
  use m_wfd,           only : wfd_get_ur, wfd_t, wfd_get_cprj, wfd_change_ngfft, wfd_get_many_ur, wfd_sym_ur
  use m_oscillators,   only : rho_tw_g, calc_wfwfg, get_uug
  use m_screening,     only : epsm1_symmetrizer, get_epsm1, epsilonm1_results
@@ -684,8 +684,18 @@ subroutine cohsex_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,Cryst,QP_BSt,Si
              rhotwg_ki(Sigp%npwc+1,jb) = CMPLX(SQRT(Vcp%i_sz),0.0_gwp)*ovlp(2)
 #else
              ! DEBUG
-             rhotwg_ki(1          ,jb) = zero
-             rhotwg_ki(Sigp%npwc+1,jb) = zero
+             rhotwg_ki(1, jb) = zero; rhotwg_ki(Sigp%npwc+1, jb) = zero
+             if (ib==jb) then
+               cg_sum => Wfd%Wave(ib,ik_ibz,spin)%ug
+               cg_jb  => Wfd%Wave(jb,jk_ibz,spin)%ug
+               ctmp = xdotc(npw_k, cg_sum(1:), 1, cg_jb(1:), 1)
+               rhotwg_ki(1,jb)=CMPLX(SQRT(Vcp%i_sz),0.0_gwp) * real(ctmp)
+               ctmp = xdotc(npw_k, cg_sum(npw_k+1:), 1, cg_jb(npw_k+1:), 1)
+               rhotwg_ki(Sigp%npwc+1,jb) = CMPLX(SQRT(Vcp%i_sz),0.0_gwp) * real(ctmp)
+
+               !rhotwg_ki(1,jb)=CMPLX(SQRT(Vcp%i_sz),0.0_gwp) * sqrt(half)
+               !rhotwg_ki(Sigp%npwc+1,jb) = CMPLX(SQRT(Vcp%i_sz),0.0_gwp) * sqrt(half)
+             end if
 #endif
            end if
          end if

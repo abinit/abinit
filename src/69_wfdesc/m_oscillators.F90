@@ -135,9 +135,7 @@ subroutine rho_tw_g(nspinor,npwvec,nr,ndat,ngfft,map2sphere,use_padfft,igfftg0,g
 
 !Local variables-------------------------------
 !scalars
- integer,parameter :: nd1=1
- integer :: ig,ir,ir1,ir2,igfft,iab,spad1,spad2,spad0,ispinor,dat
- integer :: upt,rhopt
+ integer :: ig,ir,ir1,ir2,igfft,iab,spad1,spad2,spad0,ispinor
  integer :: nx,ny,nz,ldx,ldy,ldz,mgfft
  complex(gwpc) :: u1a,u1b,u2a,u2b
  type(fftbox_plan3_t) :: plan
@@ -145,38 +143,24 @@ subroutine rho_tw_g(nspinor,npwvec,nr,ndat,ngfft,map2sphere,use_padfft,igfftg0,g
  integer :: spinor_pad(2,4)
  complex(dpc) :: spinrot_cmat1(2,2),spinrot_cmat2(2,2)
  complex(gwpc),allocatable :: u12prod(:),cwavef1(:),cwavef2(:)
+ complex(gwpc),allocatable :: u1_bz(:),u2_bz(:)
 
 ! *************************************************************************
 
  SELECT CASE (nspinor)
 
- CASE (1) ! Collinear case.
-
-#if 1
+ CASE (1)
+   ! Collinear case.
    call ts_usug_kkp_bz(npwvec,nr,ndat,ngfft,map2sphere,use_padfft,igfftg0,gbound,&
 &    wfn1,i1,ktabr1,ktabp1,&
 &    wfn2,i2,ktabr2,ktabp2,rhotwg)
-#else
-!$OMP PARALLEL DO PRIVATE(upt,rhopt) SCHEDULE(DYNAMIC)
-   do dat=1,ndat
-     upt   = 1 + (dat-1)*nr
-     rhopt = 1 + (dat-1)*npwvec
-     call ts_usug_kkp_bz(npwvec,nr,nd1,ngfft,map2sphere,use_padfft,igfftg0,gbound,&
-&      wfn1(upt),i1,ktabr1,ktabp1,&
-&      wfn2(upt),i2,ktabr2,ktabp2,rhotwg(rhopt))
-   end do
-#endif
 
- CASE (2) ! Spinorial case.
-
+ CASE (2)
+   ! Spinorial case.
    !MSG_ERROR("Add zero-padded FFT") !TODO
    ABI_CHECK(ndat==1,"ndat != 1 not coded")
-   dat = 1
-   upt = 1
-   rhopt = 1
-
-   ABI_MALLOC(cwavef1,(nr*nspinor))
-   ABI_MALLOC(cwavef2,(nr*nspinor))
+   ABI_MALLOC(cwavef1, (nr*nspinor))
+   ABI_MALLOC(cwavef2, (nr*nspinor))
 
    ! Apply Time-reversal if required.
    ! \psi_{-k}^1 =  (\psi_k^2)^*
@@ -200,14 +184,23 @@ subroutine rho_tw_g(nspinor,npwvec,nr,ndat,ngfft,map2sphere,use_padfft,igfftg0,g
    end if
 
    ! Rotate wavefunctions in r-space.
+   ABI_MALLOC(u1_bz, (nspinor*nr))
+   ABI_MALLOC(u2_bz, (nspinor*nr))
+   u1_bz = cwavef1; u2_bz = cwavef2
+   cwavef1 = huge(one)
+   cwavef2 = huge(one)
+
    do ispinor=1,nspinor
-     spad0=(ispinor-1)*nr
+     spad0 = (ispinor-1)*nr
      do ir=1,nr
        ir1=ktabr1(ir); ir2=ktabr2(ir)
-       cwavef1(ir+spad0) = cwavef1(ir1+spad0) * ktabp1
-       cwavef2(ir+spad0) = cwavef2(ir2+spad0) * ktabp2
+       cwavef1(ir+spad0) = u1_bz(ir1+spad0) * ktabp1
+       cwavef2(ir+spad0) = u2_bz(ir2+spad0) * ktabp2
      end do
    end do !ispinor
+
+   ABI_FREE(u1_bz)
+   ABI_FREE(u2_bz)
 
    ! Rotation in spinor space (same equations as in wfconv)
    spinrot_cmat1 = spinrot_cmat(spinrot1)
@@ -221,7 +214,7 @@ subroutine rho_tw_g(nspinor,npwvec,nr,ndat,ngfft,map2sphere,use_padfft,igfftg0,g
      cwavef2(ir+nr)= spinrot_cmat2(2,1)*u2a + spinrot_cmat2(2,2)*u2b
    end do
 
-   spinor_pad(:,:) = RESHAPE([0,0,nr,nr,0,nr,nr,0], [2,4])
+   spinor_pad = RESHAPE([0,0,nr,nr,0,nr,nr,0], [2,4])
    do iab=1,dim_rtwg
      spad1=spinor_pad(1,iab); spad2=spinor_pad(2,iab)
 
@@ -236,10 +229,10 @@ subroutine rho_tw_g(nspinor,npwvec,nr,ndat,ngfft,map2sphere,use_padfft,igfftg0,g
        ! Need results on the full FFT box thus cannot use zero-padded FFT.
        call fftbox_plan3_many(plan,ndat,ngfft(1:3),ngfft(1:3),ngfft(7),-1)
        call fftbox_execute(plan,u12prod)
-       rhotwg(spad0+1:spad0+npwvec)=u12prod
+       rhotwg(spad0+1:spad0+npwvec) = u12prod
      CASE (1)
        ! Need results on the G-sphere. Call zero-padded FFT routines if required.
-       if (use_padfft==1) then
+       if (use_padfft == 1) then
          nx =ngfft(1); ny =ngfft(2); nz =ngfft(3); mgfft = MAXVAL(ngfft(1:3))
          ldx=nx; ldy=ny; ldz=nz
          call fftpad(u12prod,ngfft,nx,ny,nz,ldx,ldy,ldz,ndat,mgfft,-1,gbound)
@@ -250,11 +243,11 @@ subroutine rho_tw_g(nspinor,npwvec,nr,ndat,ngfft,map2sphere,use_padfft,igfftg0,g
 
        ! Have to map FFT to G-sphere.
        do ig=1,npwvec
-         igfft=igfftg0(ig)
-         if (igfft/=0) then ! G-G0 belong to the FFT mesh.
-           rhotwg(ig+spad0)=u12prod(igfft)
-         else               ! Set this component to zero
-           rhotwg(ig+spad0)=czero_gw
+         igfft = igfftg0(ig)
+         if (igfft /= 0) then
+           rhotwg(ig+spad0) = u12prod(igfft) ! G-G0 belong to the FFT mesh.
+         else
+           rhotwg(ig+spad0) = czero_gw  ! Set this component to zero
          end if
        end do
 

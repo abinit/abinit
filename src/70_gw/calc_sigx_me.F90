@@ -176,7 +176,7 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
  integer :: izero,iab,ib_sum,ib,ib1,ib2,ierr,ig,ig_rot,ii,iik,itim_q,i2
  integer :: ik_bz,ik_ibz,isym_q,iq_bz,iq_ibz,spin,isym,jb,is_idx
  integer :: jik,jk_bz,jk_ibz,kb,mod100,nspinor,nsppol,ifft
- integer :: nq_summed,ibsp,dimcprj_gw
+ integer :: nq_summed,ibsp,dimcprj_gw,dim_rtwg
  integer :: spad,spadx1,spadx2,irow,npw_k
  integer :: comm,ndegs,wtqm,wtqp,my_nbks
  integer :: isym_kgw,isym_ki,gwx_mgfft,use_padfft,use_padfftf,gwx_fftalga,gwx_fftalgb
@@ -205,8 +205,7 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
  complex(gwpc),allocatable :: wfr_bdgw(:,:),ur_ibz(:),usr_bz(:)
  complex(gwpc),allocatable :: ur_ae_sum(:),ur_ae_onsite_sum(:),ur_ps_onsite_sum(:)
  complex(gwpc),allocatable :: ur_ae_bdgw(:,:),ur_ae_onsite_bdgw(:,:),ur_ps_onsite_bdgw(:,:)
- complex(dpc),allocatable :: sigxme_tmp(:,:,:) !minbnd:maxbnd,minbnd:maxbnd,Wfd%nsppol*Sigp%nsig_ab)
- complex(dpc),allocatable :: sym_sigx(:,:),sigx(:,:,:,:)
+ complex(dpc),allocatable :: sigxme_tmp(:,:,:),sym_sigx(:,:),sigx(:,:,:,:)
  complex(gwpc),ABI_CONTIGUOUS pointer :: cg_jb(:),cg_sum(:)
  logical :: can_symmetrize(Wfd%nsppol)
  logical,allocatable :: bks_mask(:,:,:)
@@ -231,8 +230,8 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
  comm = Wfd%comm
 
  ! === Initialize some values ===
- nspinor = Wfd%nspinor
- nsppol  = Wfd%nsppol
+ nspinor = Wfd%nspinor; nsppol  = Wfd%nsppol
+ dim_rtwg = 1; if (nspinor == 2) dim_rtwg = 2
  spinor_padx = RESHAPE([0, 0, Sigp%npwx, Sigp%npwx, 0, Sigp%npwx, Sigp%npwx, 0], [2, 4])
 
  qp_ene => QP_BSt%eig(:,:,:)
@@ -389,15 +388,16 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
    call pawcprj_alloc(Cprj_ksum,0,Wfd%nlmn_atm)
 
    nhat12_grdim=0
-   if (use_pawnhat==1) then ! Compensation charge for \phi_a^*\phi_b
+   if (use_pawnhat==1) then
+     ! Compensation charge for \phi_a^*\phi_b
      call wrtout(std_out,"Using nhat12","COLL")
      ABI_MALLOC(nhat12  ,(2,gwx_nfftot,nspinor**2))
      ABI_MALLOC(grnhat12,(2,gwx_nfftot,nspinor**2,3*nhat12_grdim))
    end if
  end if
 
- ABI_MALLOC(sigxme_tmp, (minbnd:maxbnd,minbnd:maxbnd,Wfd%nsppol*Sigp%nsig_ab))
- ABI_MALLOC(sigx,(2,ib1:ib2,ib1:ib2,nsppol*Sigp%nsig_ab))
+ ABI_MALLOC(sigxme_tmp, (minbnd:maxbnd, minbnd:maxbnd, Wfd%nsppol*Sigp%nsig_ab))
+ ABI_MALLOC(sigx,(2, ib1:ib2, ib1:ib2, nsppol*Sigp%nsig_ab))
  sigxme_tmp = czero; sigx = czero
 
  nq_summed=Kmesh%nbz
@@ -570,8 +570,9 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
      do ib_sum=1,Sigp%nbnds
 
        ! Parallelism over bands
-       ! * This processor has this k-point but what about spin?
+       ! This processor has this k-point but what about spin?
        if (proc_distrb(ib_sum,ik_bz,spin)/=Wfd%my_rank) CYCLE
+
        ! Skip empty states.
        if (qp_occ(ib_sum,ik_ibz,spin)<tol_empty) CYCLE
 
@@ -581,7 +582,8 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
        call wfd_sym_ur(Wfd,Cryst,Kmesh,ib_sum,ik_bz,spin,usr_bz,trans="C",with_umklp=.FALSE.,ur_kibz=ur_ibz)
 #endif
 
-       if (Psps%usepaw==1) then ! Load cprj for point ksum, this spin or spinor and *THIS* band.
+       if (Psps%usepaw==1) then
+         ! Load cprj for point ksum, this spin or spinor and *THIS* band.
          ! TODO MG I could avoid doing this but I have to exchange spin and bands ???
          ! For sure there is a better way to do this!
          call wfd_get_cprj(Wfd,ib_sum,ik_ibz,spin,Cryst,Cprj_ksum,sorted=.FALSE.)
@@ -595,7 +597,7 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
        ! Get all <k-q,ib_sum,s|e^{-i(q+G).r}|s,jb,k>
        do jb=ib1,ib2
 
-         if (Psps%usepaw==1.and.use_pawnhat==1) then
+         if (Psps%usepaw==1 .and. use_pawnhat==1) then
            MSG_ERROR("use_pawnhat is disabled")
            i2=jb; if (nspinor==2) i2=(2*jb-1)
            spad=(nspinor-1)
@@ -608,9 +610,9 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
          else
 
 #if DEV_USE_OLDRHOTWG
-           call rho_tw_g(nspinor,Sigp%npwx,gwx_nfftot,ndat1,gwx_ngfft,1,use_padfft,igfftxg0,gwx_gbound,&
-&            ur_ibz        ,iik,ktabr(:,ik_bz),ph_mkt  ,spinrot_kbz,&
-&            wfr_bdgw(:,jb),jik,ktabr(:,jk_bz),ph_mkgwt,spinrot_kgw,&
+           call rho_tw_g(nspinor,Sigp%npwx,gwx_nfftot,ndat1,gwx_ngfft,1,use_padfft,igfftxg0,gwx_gbound, &
+&            ur_ibz        ,iik,ktabr(:,ik_bz),ph_mkt  ,spinrot_kbz, &
+&            wfr_bdgw(:,jb),jik,ktabr(:,jk_bz),ph_mkgwt,spinrot_kgw, &
 &            nspinor,rhotwg_ki(:,jb))
 #else
            call get_uug(Sigp%npwx,gwx_nfftot,ndat1,gwx_ngfft,use_padfft,igfftxg0,gwx_gbound,usr_bz,wfr_bdgw(:,jb),rhotwg_ki(:,jb))
@@ -631,22 +633,24 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
          end if
 
          ! === Multiply by the square root of the Coulomb term ===
-         ! * In 3-D systems, the factor sqrt(4pi) is included)
+         ! In 3-D systems, the factor sqrt(4pi) is included)
          do ii=1,nspinor
            spad=(ii-1)*Sigp%npwx
            rhotwg_ki(spad+1:spad+Sigp%npwx,jb) = rhotwg_ki(spad+1:spad+Sigp%npwx,jb) * vc_sqrt_qbz(1:Sigp%npwx)
          end do
-         !
-         ! === Treat analytically the case q --> 0 ===
-         ! * The oscillator is evaluated at q=O as it is considered constant in the small cube around Gamma
-         !   while the Colulomb term is integrated out.
-         ! * In the scalar case we have nonzero contribution only if ib_sum==jb
-         ! * For nspinor==2 evalute <ib_sum,up|jb,up> and <ib_sum,dwn|jb,dwn>,
-         !   impose orthonormalization since npwwfn might be < npwvec.
+
          if (ik_bz==jk_bz) then
+           ! === Treat analytically the case q --> 0 ===
+           ! * The oscillator is evaluated at q=O as it is considered constant in the small cube around Gamma
+           !   while the Colulomb term is integrated out.
+           ! * In the scalar case we have nonzero contribution only if ib_sum==jb
+           ! * For nspinor==2 evalute <ib_sum,up|jb,up> and <ib_sum,dwn|jb,dwn>,
+           !   impose orthonormalization since npwwfn might be < npwvec.
+
            if (nspinor==1) then
-             rhotwg_ki(1,jb)=czero_gw
-             if (ib_sum==jb) rhotwg_ki(1,jb)=CMPLX(SQRT(Vcp%i_sz),0.0_gwp)
+             rhotwg_ki(1,jb) = czero_gw
+             if (ib_sum == jb) rhotwg_ki(1,jb) = CMPLX(SQRT(Vcp%i_sz),0.0_gwp)
+             !rhotwg_ki(1,jb) = czero_gw ! DEBUG
            else
              npw_k  = Wfd%npwarr(ik_ibz)
 #if 0
@@ -674,19 +678,18 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
              rhotwg_ki(Sigp%npwx+1,jb)=CMPLX(SQRT(Vcp%i_sz),0.0_gwp)*ovlp(2)
 #else
              ! DEBUG
-             rhotwg_ki(1          ,jb) = zero
-             rhotwg_ki(Sigp%npwx+1,jb) = zero
-             if (ib_sum==jb) then
+             rhotwg_ki(1, jb) = zero; rhotwg_ki(Sigp%npwx+1, jb) = zero
+             if (ib_sum == jb) then
                cg_sum => Wfd%Wave(ib_sum,ik_ibz,spin)%ug
                cg_jb  => Wfd%Wave(jb,jk_ibz,spin)%ug
                ctmp = xdotc(npw_k, cg_sum(1:), 1, cg_jb(1:), 1)
                rhotwg_ki(1,jb)=CMPLX(SQRT(Vcp%i_sz),0.0_gwp) * real(ctmp)
                ctmp = xdotc(npw_k, cg_sum(npw_k+1:), 1, cg_jb(npw_k+1:), 1)
                rhotwg_ki(Sigp%npwx+1,jb) = CMPLX(SQRT(Vcp%i_sz),0.0_gwp) * real(ctmp)
-
                !rhotwg_ki(1,jb)=CMPLX(SQRT(Vcp%i_sz),0.0_gwp) * sqrt(half)
                !rhotwg_ki(Sigp%npwx+1,jb) = CMPLX(SQRT(Vcp%i_sz),0.0_gwp) * sqrt(half)
              end if
+             !rhotwg_ki(1, jb) = zero; rhotwg_ki(Sigp%npwx+1, jb) = zero
 #endif
            end if
          end if
@@ -699,11 +702,10 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
          rhotwgp(:) = rhotwg_ki(:,kb)
 
          ! Loop over the non-zero row elements of this column.
-         ! 1) If mod100<20 : only diagonal elements since QP==KS.
-         ! 2) If mod100>=20:
-         !     * Only off-diagonal elements connecting states with same character.
-         !     * Only the upper triangle if HF, SEX, or COHSEX.
-         !
+         ! If mod100 <  20: only diagonal elements since QP == KS.
+         ! If mod100 >= 20:
+         !      * Only off-diagonal elements connecting states with same character.
+         !      * Only the upper triangle if HF, SEX, or COHSEX.
          do irow=1,Sigxij_tab(spin)%col(kb)%size1
            jb = Sigxij_tab(spin)%col(kb)%bidx(irow)
            rhotwg = rhotwg_ki(:,jb)
@@ -712,17 +714,15 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
            ! Do the scalar product only if ib_sum is occupied.
            if (theta_mu_minus_esum/fact_sp >= tol_empty) then
              do iab=1,Sigp%nsig_ab
-               spadx1=spinor_padx(1,iab)
-               spadx2=spinor_padx(2,iab)
-
-               gwpc_sigxme = -XDOTC(Sigp%npwx,rhotwg(spadx1+1:),1,rhotwgp(spadx2+1:),1) * theta_mu_minus_esum
+               spadx1 = spinor_padx(1, iab)
+               spadx2 = spinor_padx(2, iab)
+               gwpc_sigxme = -XDOTC(Sigp%npwx, rhotwg(spadx1+1:), 1, rhotwgp(spadx2+1:), 1) * theta_mu_minus_esum
 
                ! Accumulate and symmetrize Sigma_x
                ! -wtqm comes from time-reversal (exchange of band indeces)
-               is_idx=spin; if (nspinor==2) is_idx=iab
-
+               is_idx = spin; if (nspinor == 2) is_idx = iab
                sigxme_tmp(jb,kb,is_idx) = sigxme_tmp(jb,kb,is_idx) + &
-&                (wtqp+wtqm)*DBLE(gwpc_sigxme) + (wtqp-wtqm)*j_gw*AIMAG(gwpc_sigxme)
+&                (wtqp + wtqm)*DBLE(gwpc_sigxme) + (wtqp - wtqm)*j_gw*AIMAG(gwpc_sigxme)
 
                sigx(1,jb,kb,is_idx) = sigx(1,jb,kb,is_idx) + wtqp *      gwpc_sigxme
                sigx(2,jb,kb,is_idx) = sigx(2,jb,kb,is_idx) + wtqm *CONJG(gwpc_sigxme)
@@ -761,13 +761,13 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
  if (pawcross==1) then
    ABI_FREE(igfftfxg0)
  end if
- !
+
  ! Gather contributions from all the CPUs.
  call xmpi_sum(sigxme_tmp,comm,ierr)
  call xmpi_sum(sigx,comm,ierr)
- !
+
  ! === Multiply by constants ===
- ! * For 3D systems sqrt(4pi) is included in vc_sqrt_qbz ===
+ ! For 3D systems sqrt(4pi) is included in vc_sqrt_qbz ===
  sigxme_tmp = (one/(Cryst%ucvol*Kmesh%nbz)) * sigxme_tmp * alpha_hybrid
  sigx       = (one/(Cryst%ucvol*Kmesh%nbz)) * sigx       * alpha_hybrid
  !
@@ -775,12 +775,11 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
  ! * Presently only diagonal terms are considered
  ! * TODO QP-SCGW required a more involved approach, there is a check in sigma
  ! * TODO it does not work if spinor==2.
-
  do spin=1,nsppol
    if (can_symmetrize(spin)) then
      ABI_MALLOC(sym_sigx,(ib1:ib2,ib1:ib2))
      sym_sigx=czero
-     !
+
      ! === Average over degenerate diagonal elements ===
      ! NOTE: frequencies for \Sigma_c(\omega) should be equal to avoid spurious results.
      ! another good reason to use a strict criterion for the tollerance on eigenvalues.
@@ -818,13 +817,17 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
    end do
  end if
 
- ! === Save diagonal elements or ab components of Sigma_x (hermitian) ===
+ ! Save diagonal elements or ab components of Sigma_x (hermitian)
  ! TODO It should be hermitian also if nspinor==2
  do spin=1,nsppol
    do jb=ib1,ib2
      do iab=1,Sigp%nsig_ab
-       is_idx=spin; if (Sigp%nsig_ab>1) is_idx=iab
-       Sr%sigxme(jb,jk_ibz,is_idx) = DBLE(sigxme_tmp(jb,jb,is_idx))
+       is_idx = spin; if (Sigp%nsig_ab>1) is_idx = iab
+       if (is_idx <= 2) then
+         Sr%sigxme(jb,jk_ibz,is_idx) = DBLE(sigxme_tmp(jb,jb,is_idx))
+       else
+         Sr%sigxme(jb,jk_ibz,is_idx) = sigxme_tmp(jb,jb,is_idx)
+       end if
      end do
      !if (Sigp%nsig_ab>1) then
      !  write(std_out,'(i3,4f8.3,a,f8.3)')jb,Sr%sigxme(jb,jk_ibz,:)*Ha_eV,' Tot ',SUM(Sr%sigxme(jb,jk_ibz,:))*Ha_eV
