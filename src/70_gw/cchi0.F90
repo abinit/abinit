@@ -210,8 +210,6 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
  type(pawpwij_t),allocatable :: Pwij(:),Pwij_fft(:)
 !************************************************************************
 
-#define DEV_USE_OLDRHOTWG 1
-
  DBG_ENTER("COLL")
 
  call timab(331,1,tsec) ! cchi0
@@ -544,11 +542,7 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
      do band1=1,nbmax ! Loop over "conduction" states.
        if (ALL(bbp_ks_distrb(band1,:,ik_bz,spin) /= Wfd%my_rank)) CYCLE
 
-#if DEV_USE_OLDRHOTWG
        call wfd_get_ur(Wfd,band1,ikmq_ibz,spin,ur1_kmq_ibz)
-#else
-       call wfd_sym_ur(Wfd,Cryst,Kmesh,band1,ikmq_bz,spin,usr1_kmq,trans="C",with_umklp=.FALSE.)
-#endif
 
        if (Psps%usepaw==1) then
          call wfd_get_cprj(Wfd,band1,ikmq_ibz,spin,Cryst,Cprj1_kmq,sorted=.FALSE.)
@@ -587,11 +581,7 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
 
          deltaeGW_b1kmq_b2k=e_b1_kmq-qp_energy(band2,ik_ibz,spin)
 
-#if DEV_USE_OLDRHOTWG
          call wfd_get_ur(Wfd,band2,ik_ibz,spin,ur2_k_ibz)
-#else
-         call wfd_sym_ur(Wfd,Cryst,Kmesh,band2,ik_bz,spin,ur2_k,with_umklp=.FALSE.,ur_kibz=ur2_k_ibz)
-#endif
 
          if (Psps%usepaw==1) then
            call wfd_get_cprj(Wfd,band2,ik_ibz,spin,Cryst,Cprj2_k,sorted=.FALSE.)
@@ -602,84 +592,82 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
          end if
 
          SELECT CASE (Ep%spmeth)
+         CASE (0)
+           ! Standard Adler-Wiser expression.
+           ! Add the small imaginary of the Time-Ordered RF only for non-zero real omega ! FIXME What about metals?
+           if (.not.use_tr) then
+             ! Have to sum over all possible resonant and anti-resonant transitions.
+             do io=1,Ep%nomega
+               green_w(io) = g0g0w(Ep%omega(io),deltaf_b1kmq_b2k,deltaeGW_b1kmq_b2k,Ep%zcut,GW_TOL_W0,one_pole)
+             end do
 
-         CASE (0) ! Standard Adler-Wiser expression.
-          ! * Add the small imaginary of the Time-Ordered RF only for non-zero real omega ! FIXME What about metals?
+           else
+             if (Ep%gwcomp==0) then ! cannot be completely skipped in case of completeness correction
+               if (band1<band2) CYCLE ! Here we GAIN a factor ~2
+             end if
 
-          if (.not.use_tr) then ! Have to sum over all possible resonant and anti-resonant transitions.
-            do io=1,Ep%nomega
-              green_w(io) = g0g0w(Ep%omega(io),deltaf_b1kmq_b2k,deltaeGW_b1kmq_b2k,Ep%zcut,GW_TOL_W0,one_pole)
-            end do
-          else
+             do io=1,Ep%nomega
+               !Rangel: In metals, the intra-band transitions term does not contain the antiresonant part
+               !green_w(io) = g0g0w(Ep%omega(io),deltaf_b1kmq_b2k,deltaeGW_b1kmq_b2k,Ep%zcut,GW_TOL_W0)
+               if (band1==band2) then
+                 green_w(io) = g0g0w(Ep%omega(io),deltaf_b1kmq_b2k,deltaeGW_b1kmq_b2k,Ep%zcut,GW_TOL_W0,one_pole)
+               else
+                 green_w(io) = g0g0w(Ep%omega(io),deltaf_b1kmq_b2k,deltaeGW_b1kmq_b2k,Ep%zcut,GW_TOL_W0,two_poles)
+               end if
 
-            if (Ep%gwcomp==0) then ! cannot be completely skipped in case of completeness correction
-              if (band1<band2) CYCLE ! Here we GAIN a factor ~2
-            end if
+               if (Ep%gwcomp==1) then ! Calculate the completeness correction
+                 numerator= -spin_fact*qp_occ(band2,ik_ibz,spin)
+                 deltaeGW_enhigh_b2k = en_high-qp_energy(band2,ik_ibz,spin)
 
-            do io=1,Ep%nomega
-              !Rangel: In metals, the intra-band transitions term does not contain the antiresonant part
-              !green_w(io) = g0g0w(Ep%omega(io),deltaf_b1kmq_b2k,deltaeGW_b1kmq_b2k,Ep%zcut,GW_TOL_W0)
-              if (band1==band2) green_w(io) = g0g0w(Ep%omega(io),deltaf_b1kmq_b2k,deltaeGW_b1kmq_b2k,Ep%zcut,GW_TOL_W0,one_pole)
-              if (band1/=band2) green_w(io) = g0g0w(Ep%omega(io),deltaf_b1kmq_b2k,deltaeGW_b1kmq_b2k,Ep%zcut,GW_TOL_W0,two_poles)
+                 if (REAL(Ep%omega(io))<GW_TOL_W0) then ! Completeness correction is NOT valid for real frequencies
+                   green_enhigh_w(io) = g0g0w(Ep%omega(io),numerator,deltaeGW_enhigh_b2k,Ep%zcut,GW_TOL_W0,two_poles)
+                 else
+                   green_enhigh_w(io) = local_czero_gw
+                 end if
+                 !
+                 !Rangel Correction for metals
+                 !if (deltaf_b1kmq_b2k<0.d0) then
+                 if (band1>=band2 .and. ABS(deltaf_b1kmq_b2k) > GW_TOL_DOCC ) then
+                   green_w(io)= green_w(io) - green_enhigh_w(io)
+                 else ! Disregard green_w, since it is already accounted for through the time-reversal
+                   green_w(io)=             - green_enhigh_w(io)
+                 end if
+               end if !gwcomp==1
+             end do !io
+             !
+             if (Ep%gwcomp==1.and.band1==band2) then
+               ! Add the "delta part" of the extrapolar method. TODO doesnt work for spinor
+               call calc_wfwfg(tabr_k,itim_k,nfft,ngfft_gw,ur2_k_ibz,ur2_k_ibz,wfwfg)
 
-              if (Ep%gwcomp==1) then ! Calculate the completeness correction
-                numerator= -spin_fact*qp_occ(band2,ik_ibz,spin)
-                deltaeGW_enhigh_b2k = en_high-qp_energy(band2,ik_ibz,spin)
+               if (Psps%usepaw==1) then
+                 call paw_rho_tw_g(nfft,dim_rtwg,nspinor,Cryst%natom,Cryst%ntypat,Cryst%typat,Cryst%xred,gw_gfft,&
+&                  Cprj2_k,Cprj2_k,Pwij_fft,wfwfg)
 
-                if (REAL(Ep%omega(io))<GW_TOL_W0) then ! Completeness correction is NOT valid for real frequencies
-                  green_enhigh_w(io) = g0g0w(Ep%omega(io),numerator,deltaeGW_enhigh_b2k,Ep%zcut,GW_TOL_W0,two_poles)
-                else
-                  green_enhigh_w(io) = local_czero_gw
-                end if
-                !
-                !Rangel Correction for metals
-                !if (deltaf_b1kmq_b2k<0.d0) then
-                if (band1>=band2 .and. ABS(deltaf_b1kmq_b2k) > GW_TOL_DOCC ) then
-                  green_w(io)= green_w(io) - green_enhigh_w(io)
-                else ! Disregard green_w, since it is already accounted for through the time-reversal
-                  green_w(io)=             - green_enhigh_w(io)
-                end if
-              end if !gwcomp==1
-            end do !io
-            !
-            if (Ep%gwcomp==1.and.band1==band2) then
-              ! Add the "delta part" of the extrapolar method. TODO doesnt work for spinor
+                 ! Add PAW cross term
+                 if (Dtset%pawcross==1) then
+                   call paw_cross_rho_tw_g(nspinor,Ep%npwepG0,nfftf_tot,ngfftf,1,use_padfftf,igfftepsG0f,gboundf,&
+&                   ur_ae2,ur_ae_onsite2,ur_ps_onsite2,itim_kmq,tabrf_kmq,ph_mkmqt,spinrot_kmq,&
+&                   ur_ae2,ur_ae_onsite2,ur_ps_onsite2,itim_k  ,tabrf_k  ,ph_mkt  ,spinrot_k,dim_rtwg,wfwfg)
+                 end if
+               end if
 
-              call calc_wfwfg(tabr_k,itim_k,nfft,ngfft_gw,ur2_k_ibz,ur2_k_ibz,wfwfg)
+               qzero=.FALSE.
+               call completechi0_deltapart(ik_bz,qzero,Ep%symchi,Ep%npwe,Gsph_FFT%ng,Ep%nomega,nspinor,&
+&                nfft,ngfft_gw,gspfft_igfft,gsph_FFT,Ltg_q,green_enhigh_w,wfwfg,chi0)
 
-              if (Psps%usepaw==1) then
-                call paw_rho_tw_g(nfft,dim_rtwg,nspinor,Cryst%natom,Cryst%ntypat,Cryst%typat,Cryst%xred,gw_gfft,&
-&                 Cprj2_k,Cprj2_k,Pwij_fft,wfwfg)
+             end if
+           end if ! use_tr
 
-                ! Add PAW cross term
-                if (Dtset%pawcross==1) then
-                  call paw_cross_rho_tw_g(nspinor,Ep%npwepG0,nfftf_tot,ngfftf,1,use_padfftf,igfftepsG0f,gboundf,&
-&                  ur_ae2,ur_ae_onsite2,ur_ps_onsite2,itim_kmq,tabrf_kmq,ph_mkmqt,spinrot_kmq,&
-&                  ur_ae2,ur_ae_onsite2,ur_ps_onsite2,itim_k  ,tabrf_k  ,ph_mkt  ,spinrot_k,dim_rtwg,wfwfg)
-                end if
-              end if
-
-              qzero=.FALSE.
-              call completechi0_deltapart(ik_bz,qzero,Ep%symchi,Ep%npwe,Gsph_FFT%ng,Ep%nomega,nspinor,&
-&               nfft,ngfft_gw,gspfft_igfft,gsph_FFT,Ltg_q,green_enhigh_w,wfwfg,chi0)
-
-            end if
-          end if ! use_tr
-
-         CASE (1,2)
+         CASE (1, 2)
            ! Spectral method, WARNING time-reversal here is always assumed!
            if (deltaeGW_b1kmq_b2k<0) CYCLE
            call approxdelta(Ep%nomegasf,omegasf,deltaeGW_b1kmq_b2k,Ep%spsmear,iomegal,iomegar,wl,wr,Ep%spmeth)
          END SELECT
 
          ! ==== Form rho-twiddle(r)=u^*_{b1,kmq_bz}(r) u_{b2,kbz}(r) and its FFT transform ====
-#if DEV_USE_OLDRHOTWG
          call rho_tw_g(nspinor,Ep%npwepG0,nfft,ndat1,ngfft_gw,1,use_padfft,igfftepsG0,gw_gbound,&
 &          ur1_kmq_ibz,itim_kmq,tabr_kmq,ph_mkmqt,spinrot_kmq,&
 &          ur2_k_ibz,  itim_k  ,tabr_k  ,ph_mkt  ,spinrot_k,dim_rtwg,rhotwg)
-#else
-         call get_uug(Ep%npwepG0,nfft,ndat1,ngfft_gw,use_padfft,igfftepsG0,gw_gbound,usr1_kmq,ur2_k,rhotwg)
-#endif
 
          if (Psps%usepaw==1) then! Add PAW on-site contribution, projectors are already in the BZ.
            call paw_rho_tw_g(Ep%npwepG0,dim_rtwg,nspinor,Cryst%natom,Cryst%ntypat,Cryst%typat,Cryst%xred,Gsph_epsG0%gvec,&
@@ -758,7 +746,8 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
 
            call assemblychi0_sym(ik_bz,nspinor,Ep,Ltg_q,green_w,Ep%npwepG0,rhotwg,Gsph_epsG0,chi0)
 
-         CASE (1,2) ! Spectral method ! TODO Does not work with spinor
+         CASE (1, 2)
+           ! Spectral method ! TODO Does not work with spinor
            call assemblychi0sf(ik_bz,nspinor,Ep%symchi,Ltg_q,Ep%npwepG0,Ep%npwe,rhotwg,Gsph_epsG0,&
 &            deltaf_b1kmq_b2k,my_wl,iomegal,wl,my_wr,iomegar,wr,Ep%nomegasf,sf_chi0)
 
@@ -834,23 +823,25 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
  ! === After big loop over transitions, now MPI ===
  ! * Master took care of the contribution in case of metallic|spin polarized systems.
  SELECT CASE (Ep%spmeth)
- CASE (0) ! Adler-Wiser
-   ! * Collective sum of the contributions of each node.
-   ! * Looping on frequencies to avoid problems with the size of the MPI packet
+ CASE (0)
+   ! Adler-Wiser
+   ! Collective sum of the contributions of each node.
+   ! Looping on frequencies to avoid problems with the size of the MPI packet
    do io=1,Ep%nomega
      call xmpi_sum(chi0(:,:,io),comm,ierr)
    end do
 
- CASE (1,2) ! Spectral method.
+ CASE (1, 2)
+   ! Spectral method.
    call hilbert_transform(Ep%npwe,Ep%nomega,Ep%nomegasf,my_wl,my_wr,kkweight,sf_chi0,chi0,Ep%spmeth)
 
-   !  Deallocate here before the xsums
+   ! Deallocate here before xmpi_sum
    if (allocated(sf_chi0)) then
      ABI_FREE(sf_chi0)
    end if
 
-   ! === Collective sum of the contributions ===
-   ! * Looping over frequencies to avoid problems with the size of the MPI packet
+   ! Collective sum of the contributions.
+   ! Looping over frequencies to avoid problems with the size of the MPI packet
    do io=1,Ep%nomega
      call xmpi_sum(chi0(:,:,io),comm,ierr)
    end do
@@ -876,7 +867,7 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
  ! Impose Hermiticity (valid only for zero or purely imaginary frequencies)
  ! MG what about metals, where we have poles around zero?
  do io=1,Ep%nomega
-   if (ABS(REAL(Ep%omega(io)))<0.00001) then
+   if (ABS(REAL(Ep%omega(io))) <0.00001) then
      do ig2=1,Ep%npwe
        do ig1=1,ig2-1
          chi0(ig2,ig1,io) = GWPC_CONJG(chi0(ig1,ig2,io))
@@ -884,14 +875,12 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
      end do
    end if
  end do
- !
+
  ! === Symmetrize chi0 in case of AFM system ===
- ! * Reconstruct $chi0{\down,\down}$ from $chi0{\up,\up}$.
- ! * Works only in case of magnetic group Shubnikov type IV.
- if (Cryst%use_antiferro) then
-   call symmetrize_afm_chi0(Cryst,Gsph_epsG0,Ltg_q,Ep%npwe,Ep%nomega,chi0)
- end if
- !
+ ! Reconstruct $chi0{\down,\down}$ from $chi0{\up,\up}$.
+ ! Works only in case of magnetic group Shubnikov type IV.
+ if (Cryst%use_antiferro) call symmetrize_afm_chi0(Cryst,Gsph_epsG0,Ltg_q,Ep%npwe,Ep%nomega,chi0)
+
  ! =====================
  ! ==== Free memory ====
  ! =====================

@@ -216,11 +216,9 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
 
 !************************************************************************
 
-#define DEV_USE_OLDRHOTWG 1
-
  DBG_ENTER("COLL")
- !
- ! === Initial check ===
+
+ ! Initial check
  ABI_CHECK(Sigp%npwx==Gsph_x%ng,"")
 
  call timab(430,1,tsec) ! csigme (SigX)
@@ -240,9 +238,8 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
  ! Exctract the symmetries of the bands for this k-point
  QP_sym => allQP_sym(sigmak_ibz,1:nsppol)
 
- ib1=minbnd
- ib2=maxbnd
- !
+ ib1=minbnd; ib2=maxbnd
+
  ! === Index of the GW point in the BZ array, its image in IBZ and time-reversal ===
  jk_bz=Sigp%kptgw2bz(ikcalc)
  call get_BZ_item(Kmesh,jk_bz,kgw,jk_ibz,isym_kgw,jik,ph_mkgwt)
@@ -576,11 +573,7 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
        ! Skip empty states.
        if (qp_occ(ib_sum,ik_ibz,spin)<tol_empty) CYCLE
 
-#if DEV_USE_OLDRHOTWG
        call wfd_get_ur(Wfd,ib_sum,ik_ibz,spin,ur_ibz)
-#else
-       call wfd_sym_ur(Wfd,Cryst,Kmesh,ib_sum,ik_bz,spin,usr_bz,trans="C",with_umklp=.FALSE.,ur_kibz=ur_ibz)
-#endif
 
        if (Psps%usepaw==1) then
          ! Load cprj for point ksum, this spin or spinor and *THIS* band.
@@ -609,14 +602,10 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
 
          else
 
-#if DEV_USE_OLDRHOTWG
            call rho_tw_g(nspinor,Sigp%npwx,gwx_nfftot,ndat1,gwx_ngfft,1,use_padfft,igfftxg0,gwx_gbound, &
 &            ur_ibz        ,iik,ktabr(:,ik_bz),ph_mkt  ,spinrot_kbz, &
 &            wfr_bdgw(:,jb),jik,ktabr(:,jk_bz),ph_mkgwt,spinrot_kgw, &
 &            nspinor,rhotwg_ki(:,jb))
-#else
-           call get_uug(Sigp%npwx,gwx_nfftot,ndat1,gwx_ngfft,use_padfft,igfftxg0,gwx_gbound,usr_bz,wfr_bdgw(:,jb),rhotwg_ki(:,jb))
-#endif
 
            if (Psps%usepaw==1.and.use_pawnhat==0) then ! Add on-site contribution, projectors are already in BZ.
              i2=jb; if (nspinor==2) i2=(2*jb-1)

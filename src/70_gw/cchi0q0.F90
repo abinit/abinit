@@ -248,8 +248,6 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
  type(vkbr_t),allocatable :: vkbr(:)
 !************************************************************************
 
-#define DEV_USE_OLDRHOTWG 1
-
  DBG_ENTER("COLL")
  call cwtime(cpu_time,wall_time,gflops,"start")
  !
@@ -576,16 +574,12 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
        gradk_not_done(ik_ibz)=.FALSE.
      end if
 
-     do band1=1,Ep%nbnds ! Loop over "conduction" states.
+     ! Loop over "conduction" states.
+     do band1=1,Ep%nbnds
        if (ALL(bbp_ks_distrb(band1,:,ik_bz,spin) /= Wfd%my_rank)) CYCLE
 
        ug1 => Wfd%Wave(band1,ik_ibz,spin)%ug
-
-#if DEV_USE_OLDRHOTWG
        call wfd_get_ur(Wfd,band1,ik_ibz,spin,ur1_kibz)
-#else
-       call wfd_sym_ur(Wfd,Cryst,Kmesh,band1,ik_bz,spin,usr1_k,trans="C",ur_kibz=ur1_kibz)
-#endif
 
        if (Psps%usepaw==1) then
          call wfd_get_cprj(Wfd,band1,ik_ibz,spin,Cryst,Cprj1_ibz,sorted=.FALSE.)
@@ -624,12 +618,7 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
          end if
 
          ug2 => Wfd%Wave(band2,ik_ibz,spin)%ug
-
-#if DEV_USE_OLDRHOTWG
          call wfd_get_ur(Wfd,band2,ik_ibz,spin,ur2_kibz)
-#else
-         call wfd_sym_ur(Wfd,Cryst,Kmesh,band2,ik_bz,spin,ur2_k,ur_kibz=ur2_kibz)
-#endif
 
          if (Psps%usepaw==1) then
            call wfd_get_cprj(Wfd,band2,ik_ibz,spin,Cryst,Cprj2_ibz,sorted=.FALSE.)
@@ -712,15 +701,10 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
          END SELECT
 
          ! FFT of u^*_{b1,k}(r) u_{b2,k}(r) and (q,G=0) limit using small q and k.p perturbation theory
-#if DEV_USE_OLDRHOTWG
          call rho_tw_g(nspinor,Ep%npwe,nfft,ndat1,ngfft_gw,1,use_padfft,igffteps0,gw_gbound,&
 &          ur1_kibz,itim_k,tabr_k,ph_mkt,spinrot_kbz,&
 &          ur2_kibz,itim_k,tabr_k,ph_mkt,spinrot_kbz,&
 &          dim_rtwg,rhotwg)
-
-#else
-         call get_uug(Ep%npwe,nfft,ndat1,ngfft_gw,use_padfft,igffteps0,gw_gbound,usr1_k,ur2_k,rhotwg)
-#endif
 
          if (Psps%usepaw==0) then
            ! Matrix elements of i[H,r] for NC pseudopotentials.
@@ -837,15 +821,15 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
            call accumulate_chi0_q0(ik_bz,isym_k,itim_k,Ep%gwcomp,nspinor,Ep%npwepG0,Ep,&
 &           Cryst,Ltg_q,Gsph_epsG0,chi0,rhotwx,rhotwg,green_w,green_enhigh_w,deltaf_b1b2,chi0_head,chi0_lwing,chi0_uwing)
 
-         CASE (1,2)
-          ! Spectral method, to be consistent here we use the KS eigenvalues.
-          call accumulate_sfchi0_q0(ik_bz,isym_k,itim_k,nspinor,Ep%symchi,Ep%npwepG0,Ep%npwe,Cryst,Ltg_q,&
-&           Gsph_epsG0,deltaf_b1b2,my_wl,iomegal,wl,my_wr,iomegar,wr,rhotwx,rhotwg,Ep%nomegasf,sf_chi0,sf_head,sf_lwing,sf_uwing)
+         CASE (1, 2)
+           ! Spectral method, to be consistent here we use the KS eigenvalues.
+           call accumulate_sfchi0_q0(ik_bz,isym_k,itim_k,nspinor,Ep%symchi,Ep%npwepG0,Ep%npwe,Cryst,Ltg_q,&
+&            Gsph_epsG0,deltaf_b1b2,my_wl,iomegal,wl,my_wr,iomegar,wr,rhotwx,rhotwg,Ep%nomegasf,sf_chi0,sf_head,sf_lwing,sf_uwing)
 
          CASE DEFAULT
            MSG_BUG("Wrong spmeth")
          END SELECT
-         !
+
          ! Accumulating the sum rule on chi0. Eq. (5.284) in G.D. Mahan Many-Particle Physics 3rd edition.
          factor=spin_fact*qp_occ(band2,ik_ibz,spin)
 
@@ -874,28 +858,28 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
 
  call vkbr_free(vkbr)
  ABI_DT_FREE(vkbr)
- !
+
  ! === After big fat loop over transitions, now MPI ===
  ! * Master took care of the contribution in case of (metallic|spin) polarized systems.
  SELECT CASE (Ep%spmeth)
-
- CASE (0)   ! Adler-Wiser expression
-   ! * Sum contributions from each proc.
-   ! * Looping on frequencies to avoid problems with the size of the MPI packet.
+ CASE (0)
+   ! Adler-Wiser expression
+   ! Sum contributions from each proc.
+   ! Looping on frequencies to avoid problems with the size of the MPI packet.
    do io=1,Ep%nomega
      call xmpi_sum(chi0(:,:,io),comm,ierr)
    end do
 
- CASE (1,2) ! Spectral method.
-
+ CASE (1, 2)
+   ! Spectral method.
    call hilbert_transform(Ep%npwe,Ep%nomega,Ep%nomegasf,my_wl,my_wr,kkweight,sf_chi0,chi0,Ep%spmeth)
 
    if (allocated(sf_chi0)) then
      ABI_FREE(sf_chi0)
    end if
-   !
-   ! === Sum contributions from each proc ===
-   ! * Looping on frequencies to avoid problems with the size of the MPI packet
+
+   ! Sum contributions from each proc ===
+   ! Looping on frequencies to avoid problems with the size of the MPI packet
    do io=1,Ep%nomega
      call xmpi_sum(chi0(:,:,io),comm,ierr)
    end do
@@ -907,37 +891,37 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
  CASE DEFAULT
    MSG_BUG("Wrong spmeth")
  END SELECT
- !
+
  ! Divide by the volume
 !$OMP PARALLEL WORKSHARE
    chi0=chi0*weight/Cryst%ucvol
 !$OMP END PARALLEL WORKSHARE
- !
+
  ! Collect sum rule. pi comes from Im[1/(x-ieta)] = pi delta(x)
  call xmpi_sum(chi0_sumrule,comm,ierr)
  chi0_sumrule=chi0_sumrule * pi * weight / Cryst%ucvol
- !
+
  ! Collect heads and wings.
  call xmpi_sum(chi0_head,comm,ierr)
  call xmpi_sum(chi0_lwing,comm,ierr)
  call xmpi_sum(chi0_uwing,comm,ierr)
 
- chi0_head  = chi0_head  * weight/Cryst%ucvol
+ chi0_head  = chi0_head * weight/Cryst%ucvol
  do io=1,Ep%nomega ! Tensor in the basis of the reciprocal lattice vectors.
    chi0_head(:,:,io) = MATMUL(chi0_head(:,:,io),Cryst%gmet) * (two_pi**2)
  end do
  chi0_lwing = chi0_lwing * weight/Cryst%ucvol
  chi0_uwing = chi0_uwing * weight/Cryst%ucvol
- !
+
  ! ===============================================
  ! ==== Symmetrize chi0 in case of AFM system ====
  ! ===============================================
- ! * Reconstruct $chi0{\down,\down}$ from $chi0{\up,\up}$.
- ! * Works only in the case of magnetic group Shubnikov type IV.
+ ! Reconstruct $chi0{\down,\down}$ from $chi0{\up,\up}$.
+ ! Works only in the case of magnetic group Shubnikov type IV.
  if (Cryst%use_antiferro) then
    call symmetrize_afm_chi0(Cryst,Gsph_epsG0,Ltg_q,Ep%npwe,Ep%nomega,chi0,chi0_head,chi0_lwing,chi0_uwing)
  end if
- !
+
  ! ===================================================
  ! ==== Construct heads and wings from the tensor ====
  ! ===================================================
@@ -968,7 +952,6 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
  ! ==== Free memory ====
  ! =====================
  ABI_FREE(bbp_ks_distrb)
-
  ABI_FREE(rhotwg)
  ABI_FREE(tabr_k)
  ABI_FREE(ur1_kibz)
