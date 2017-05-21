@@ -1,5 +1,5 @@
-# HF calculation with NC pseudos and SOC and gwpara 1
-ndtset 4
+# HF calculation with NC pseudos, nspinor in [1, 2], no SOC
+ndtset 6
 #gwpara 1
 
 nband     16
@@ -22,10 +22,10 @@ nspinor1  1 nsppol1  1 nspden1  1 so_psp1 *0
 #################
 ### DATASET 2 ###
 #################
-# non-collinear GS with SOC. Init wfs from previous WFK file.
+# non-collinear GS without SOC. Init wfs from previous WFK file.
 getwfk2    1
 nband2     16
-nspinor2   2 nsppol2  1 nspden2  4 so_psp2 *1
+nspinor2   2 nsppol2  1 nspden2  4 so_psp2 *0
 
 #################
 ### DATASET 3 ###
@@ -42,14 +42,37 @@ bdgw3       1 6
 #################
 ### DATASET 4 ###
 #################
-# non-collinear HF from WFK produced in Dataset 2
-nspinor4  2 nsppol4  1 nspden4  4 so_psp4 *1
+# non-collinear HF without SOC. Start from WFK produced in Dataset 2 
+# without no SOC --> HF energies should be equivalent to those in DATASET 3
+nspinor4  2 nsppol4  1 nspden4  4 so_psp4 *0
 optdriver4  4
 gwcalctyp4  5  # HF
 getwfk4     2
 bdgw4       1 12
             1 12
 
+#################
+### DATASET 5 ###
+#################
+# non-collinear GS with SOC. Init wfs from dataset 2
+getwfk5    2
+nband5     16
+nspinor5   2 nsppol5  1 nspden5  4 so_psp5 *1
+
+
+#################
+### DATASET 6 ###
+#################
+# non-collinear HF with SOC from WFK produced in Dataset 2
+nspinor6  2 nsppol6  1 nspden6  4 so_psp6 *1
+optdriver6  4
+gwcalctyp6  5  # HF
+getwfk6     5
+bdgw6       1 12
+            1 12
+
+
+# GW globals
 symsigma    0     # Disable symmetrization in self-energy
 nkptgw      2
 kptgw
@@ -86,6 +109,7 @@ xred
 #%% authors = M. Giantomassi
 #%% keywords = NC, GW, SOC
 #%% description = 
-#%%   Test HF calculation with NC pseudos and SOC 
+#%%   HF calculation with NC pseudos, nspinor in [1, 2], no SOC
 #%%   as well as WFK IO and wafunction conversion nspinor 1 --> nspinor 2
+#%%   QP results should not depend on nspinor
 #%%<END TEST_INFO>
