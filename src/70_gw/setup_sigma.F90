@@ -780,8 +780,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
  ! * -one is used because we loop over all the possibile differences, unlike screening
 
  call get_ng0sh(Sigp%nkptgw,Sigp%kptgw,Kmesh%nbz,Kmesh%bz,Qmesh%nbz,Qmesh%bz,-one,ng0sh_opt)
-
- call wrtout(std_out, sjoin('optimal value for ng0sh ', ltoa(ng0sh_opt)), "COLL")
+ call wrtout(std_out, sjoin(' Optimal value for ng0sh ', ltoa(ng0sh_opt)), "COLL")
  Sigp%mG0=ng0sh_opt
 
  ! G-sphere for W and Sigma_c is initialized from the SCR file.

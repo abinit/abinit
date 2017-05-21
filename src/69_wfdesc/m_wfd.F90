@@ -5791,11 +5791,9 @@ subroutine wfd_read_wfk(Wfd,wfk_fname,iomode)
    end do
  end do
 
- write(msg,'(3a,i0,a)')ch10,ABI_FUNC,": will read ",COUNT(my_readmask)," (b,k,s) states"
+ write(msg,'(3a,i0,a)')" ",ABI_FUNC,": will read ",COUNT(my_readmask)," (b,k,s) states"
  call wrtout(std_out,msg,"PERS")
-
  if (wfd%prtvol > 0) call wrtout(std_out,' k       eigenvalues [eV]','COLL')
-
  call cwtime(cpu,wall,gflops,"start")
 
  method = 2
@@ -5959,17 +5957,16 @@ subroutine wfd_read_wfk(Wfd,wfk_fname,iomode)
  end if
 
  call cwtime(cpu,wall,gflops,"stop")
- write(msg,'(2(a,f9.2))')"cpu_time = ",cpu,", wall_time = ",wall
+ write(msg,'(2(a,f9.2))')" cpu_time = ",cpu,", wall_time = ",wall
  call wrtout(std_out,msg,"PERS", do_flush=.True.)
 
  call wfk_close(Wfk)
  call hdr_free(Hdr)
- !
- ! * Free local memory.
+
+ ! Free local memory.
  ABI_FREE(my_readmask)
 
- ! Update the kbs table storing the distribution of the ug
- ! and set the MPI communicators.
+ ! Update the kbs table storing the distribution of the ug and set the MPI communicators.
  call wfd_set_mpicomm(Wfd)
  !call wfd_update_bkstab(Wfd)
 

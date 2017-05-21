@@ -312,7 +312,7 @@ subroutine setup_screening(codvsn,acell,rprim,ngfftf,wfk_fname,dtfil,Dtset,Psps,
 
  ! Find optimal value for G-sphere enlargment due to oscillator matrix elements
  call get_ng0sh(Kmesh%nbz,Kmesh%bz,Qmesh%nibz,Qmesh%ibz,Kmesh%nbz,Kmesh%bz,GW_TOLQ0,ng0sh_opt)
- call wrtout(std_out,sjoin('Optimal value for ng0sh:',ltoa(ng0sh_opt)),"COLL")
+ call wrtout(std_out,sjoin(' Optimal value for ng0sh:',ltoa(ng0sh_opt)),"COLL")
 
  Ep%mG0(:)=ng0sh_opt(:) !Ep%mG0(:) = [3, 3, 3]
 

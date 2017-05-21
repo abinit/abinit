@@ -100,7 +100,7 @@
 
 #include "abi_common.h"
 
-subroutine ingeo (acell,amu,dtset,bravais,&  
+subroutine ingeo (acell,amu,dtset,bravais,&
 & genafm,iatfix,icoulomb,iimage,iout,jdtset,jellslab,lenstr,mixalch,&
 & msym,natom,nimage,npsp,npspalch,nspden,nsppol,nsym,ntypalch,ntypat,&
 & nucdipmom,nzchempot,pawspnorb,&
@@ -142,9 +142,9 @@ subroutine ingeo (acell,amu,dtset,bravais,&
  integer,intent(inout) :: symafm(msym) !vz_i
  integer,intent(inout) :: symrel(3,3,msym) !vz_i
  integer,intent(out) :: typat(natom)
- real(dp),intent(inout) :: nucdipmom(3,natom)  
+ real(dp),intent(inout) :: nucdipmom(3,natom)
  real(dp),intent(in) :: ratsph(ntypat)
- real(dp),intent(inout) :: spinat(3,natom)  
+ real(dp),intent(inout) :: spinat(3,natom)
  real(dp),intent(out) :: acell(3),amu(ntypat),genafm(3),mixalch(npspalch,ntypalch)
  real(dp),intent(inout) :: rprim(3,3),tnons(3,msym) !vz_i
  real(dp),intent(out) :: vel(3,natom),vel_cell(3,3),xred(3,natom)
@@ -166,7 +166,7 @@ subroutine ingeo (acell,amu,dtset,bravais,&
 !arrays
  integer,allocatable :: ptsymrel(:,:,:),typat_read(:),symrec(:,:,:),indsym(:,:,:)
  integer,allocatable :: intarr(:)
- real(dp) :: angdeg(3), field_xred(3),gmet(3,3),gprimd(3,3),rmet(3,3),rcm(3) 
+ real(dp) :: angdeg(3), field_xred(3),gmet(3,3),gprimd(3,3),rmet(3,3),rcm(3)
  real(dp) :: rprimd(3,3),rprimd_new(3,3),scalecart(3)
 !real(dp) :: tsec(2)
  real(dp),allocatable :: mass_psp(:)
@@ -790,6 +790,7 @@ subroutine ingeo (acell,amu,dtset,bravais,&
 !      Use nptsym and ptsymrel, as determined by symlatt
        noncoll=0;if (nspden==4) noncoll=1
        use_inversion=1;if (nspden==4.or.pawspnorb>0) use_inversion=0
+       !use_inversion=1
 
 !      Get field in reduced coordinates (reduced e/d field)
 
@@ -800,12 +801,12 @@ subroutine ingeo (acell,amu,dtset,bravais,&
          end do
        else if (dtset%berryopt == 6 ) then
          do ii=1,3
-           field_xred(ii)=dot_product(dtset%dfield(:),gprimd(:,ii))     
+           field_xred(ii)=dot_product(dtset%dfield(:),gprimd(:,ii))
            field_xred(ii)=field_xred(ii)+ dot_product(dtset%efield(:),gprimd(:,ii)) ! note: symmetry broken by D and E
          end do
        else if (dtset%berryopt == 14) then
          do ii=1,3
-           field_xred(ii)=dot_product(dtset%red_efieldbar(:),gmet(:,ii))     
+           field_xred(ii)=dot_product(dtset%red_efieldbar(:),gmet(:,ii))
          end do
        else if (dtset%berryopt == 16) then
          do ii=1,3
@@ -813,7 +814,7 @@ subroutine ingeo (acell,amu,dtset,bravais,&
          end do
        else if (dtset%berryopt == 17) then
          do ii=1,3
-           field_xred(ii)=dot_product(dtset%red_efieldbar(:),gmet(:,ii))     
+           field_xred(ii)=dot_product(dtset%red_efieldbar(:),gmet(:,ii))
            if(dtset%jfielddir(ii)==2) field_xred(ii)=dtset%red_dfield(ii)
          end do
        end if

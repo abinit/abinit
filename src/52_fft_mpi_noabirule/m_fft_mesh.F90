@@ -541,7 +541,7 @@ subroutine setmesh(gmet,gvec,ngfft,npwvec,npwsigx,npwwfn,nfftot,method,mG0,Cryst
  else
    ! === Determine the best size for the FFT grid considering symm ops ===
    ! * Ideally n=2*m+1 but this could not be allowed by the FFT library (at present only Goedecker)
-   call wrtout(ount,'Finding a FFT mesh compatible with all the symmetries','COLL')
+   call wrtout(ount,' Finding a FFT mesh compatible with all the symmetries','COLL')
 
    ! 1) Find a FFT mesh compatible with the non-symmorphic operations
    fftnons(:)=1

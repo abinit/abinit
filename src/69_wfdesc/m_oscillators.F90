@@ -187,8 +187,7 @@ subroutine rho_tw_g(nspinor,npwvec,nr,ndat,ngfft,map2sphere,use_padfft,igfftg0,g
    ABI_MALLOC(u1_bz, (nspinor*nr))
    ABI_MALLOC(u2_bz, (nspinor*nr))
    u1_bz = cwavef1; u2_bz = cwavef2
-   cwavef1 = huge(one)
-   cwavef2 = huge(one)
+   cwavef1 = huge(1.0_gwpc); cwavef2 = huge(1.0_gwpc)
 
    do ispinor=1,nspinor
      spad0 = (ispinor-1)*nr
