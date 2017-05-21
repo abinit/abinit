@@ -1,6 +1,6 @@
 # HF calculation with NC pseudos and SOC and gwpara 1
 ndtset 4
-gwpara 1
+#gwpara 1
 
 nband     16
 ecut      8

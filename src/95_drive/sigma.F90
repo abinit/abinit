@@ -105,6 +105,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
 #endif
  use m_hdr
  use libxc_functionals
+ use m_wfd
 
  use m_numeric_tools, only : imax_loc
  use m_fstrings,      only : strcat, sjoin, itoa
@@ -126,9 +127,6 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  use m_qparticles,    only : wrqps, rdqps, rdgw, show_QP, updt_m_lda_to_qp
  use m_screening,     only : mkdump_er, em1results_free, epsilonm1_results
  use m_ppmodel,       only : ppm_init, ppm_free, setup_ppmodel, getem1_from_PPm, ppmodel_t
- use m_wfd,           only : wfd_init, wfd_free, wfd_reset_ur_cprj, wfd_print, wfd_t,&
-&                            wfd_rotate, wfd_get_cprj, wfd_iam_master, wfd_ihave_ug, wfd_change_ngfft, &
-&                            wfd_test_ortho, wfd_read_wfk, wfd_copy, wfd_barrier, wfd_write_wfk
  use m_sigma,         only : sigma_init, sigma_free, sigma_ncwrite, sigma_t, sigma_get_exene, &
 &                            write_sigma_header, write_sigma_results
  use m_dyson_solver,  only : solve_dyson
@@ -189,7 +187,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  integer :: iat,ib,ib1,ib2,ic,id_required,ider,idir,ii,ik,ierr,ount
  integer :: ik_bz,ikcalc,ik_ibz,ikxc,ipert,npw_k,omp_ncpus
  integer :: isp,is_idx,istep,itypat,itypatcor,izero,jj,first_band,last_band
- integer :: ks_iv,lcor,lmn2_size_max,mband
+ integer :: ks_iv,lcor,lmn2_size_max,mband,my_nband
  integer :: mgfftf,mod10,mod100,moved_atm_inside,moved_rhor,n3xccc !,mgfft
  integer :: nbsc,ndij,ndim,nfftf,nfftf_tot,nkcalc,gwc_nfft,gwc_nfftot,gwx_nfft,gwx_nfftot
  integer :: ngrvdw,nhatgrdim,nkxc,nkxc1,nprocs,nscf,nspden_rhoij,nzlmopt,optene
@@ -231,7 +229,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  integer :: gwc_ngfft(18),ngfftc(18),ngfftf(18),gwx_ngfft(18)
  integer,allocatable :: nq_spl(:),nlmn_atm(:),my_spins(:)
  integer,allocatable :: tmp_gfft(:,:),ks_vbik(:,:),nband(:,:),l_size_atm(:),qp_vbik(:,:)
- integer,allocatable :: tmp_kstab(:,:,:),ks_irreptab(:,:,:),qp_irreptab(:,:,:)
+ integer,allocatable :: tmp_kstab(:,:,:),ks_irreptab(:,:,:),qp_irreptab(:,:,:),my_band_list(:)
  real(dp),parameter ::  k0(3)=zero
  real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3),rprimd(3,3),strsxc(6),tsec(2)
  real(dp),allocatable :: grchempottn(:,:),grewtn(:,:),grvdw(:,:),qmax(:)
@@ -256,7 +254,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  complex(dpc),pointer :: sigcme_p(:,:,:,:)
  complex(dpc), allocatable :: rhot1_q_m(:,:,:,:,:,:,:)
  complex(dpc), allocatable :: M1_q_m(:,:,:,:,:,:,:)
- logical,allocatable :: bks_mask(:,:,:),keep_ur(:,:,:)
+ logical,allocatable :: bks_mask(:,:,:),keep_ur(:,:,:),bmask(:)
  type(esymm_t),target,allocatable :: KS_sym(:,:)
  type(esymm_t),pointer :: QP_sym(:,:)
  type(pawcprj_type),allocatable :: Cp1(:,:),Cp2(:,:)
@@ -1399,7 +1397,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
 !
 !=== KS hamiltonian hlda(b1,b1,k,s)= <b1,k,s|H_s|b1,k,s> ===
  ABI_MALLOC(hlda,(b1gw:b2gw,b1gw:b2gw,Kmesh%nibz,Sigp%nsppol*Sigp%nsig_ab))
- hlda=czero
+ hlda = czero
 
  if (Dtset%nspinor==1) then
    do spin=1,Sigp%nsppol
@@ -1409,10 +1407,15 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
        end do
      end do
    end do
- else ! Spinorial case
-!  * Note that here vxc contains the contribution of the core.
-!  * Scale ovlp if orthonormalization is not satisfied as npwwfn might be < npwvec.
-!  TODO add spin-orbit case
+ else
+   ! Spinorial case
+   !  * Note that here vxc contains the contribution of the core.
+   !  * Scale ovlp if orthonormalization is not satisfied as npwwfn might be < npwvec.
+   !  TODO add spin-orbit case and gwpara 2
+   ABI_MALLOC(my_band_list, (wfd%mband))
+   ABI_MALLOC(bmask, (wfd%mband))
+   bmask = .False.; bmask(b1gw:b2gw) = .True.
+
    if (Wfd%usepaw==1) then
      ABI_DT_MALLOC(Cp1,(Wfd%natom,Wfd%nspinor))
      call pawcprj_alloc(Cp1,0,Wfd%nlmn_atm)
@@ -1420,13 +1423,15 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
 
    do spin=1,Sigp%nsppol
      do ik_ibz=1,Kmesh%nibz
+       ! Distribute bands in [b1gw, b2gw] range
+       call wfd_distribute_bands(wfd, ik_ibz, spin, my_nband, my_band_list, bmask=bmask)
+       if (my_nband == 0) cycle
        npw_k = Wfd%npwarr(ik_ibz)
-       do ib=b1gw,b2gw
-
+       do ii=1,my_nband  ! ib=b1gw,b2gw in sequential
+         ib = my_band_list(ii)
          ug1  => Wfd%Wave(ib,ik_ibz,spin)%ug
          cdummy = xdotc(npw_k*Wfd%nspinor,ug1,1,ug1,1)
-         ovlp(1) = REAL(cdummy)
-         ovlp(2) = AIMAG(cdummy)
+         ovlp(1) = REAL(cdummy); ovlp(2) = AIMAG(cdummy)
 
          if (Psps%usepaw==1) then
            call wfd_get_cprj(Wfd,ib,ik_ibz,spin,Cryst,Cp1,sorted=.FALSE.)
@@ -1434,9 +1439,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
          end if
 !        write(std_out,*)ovlp(1),ovlp(2)
          norm=DBLE(ovlp(1)+ovlp(2))
-         ovlp(1)=DBLE(ovlp(1)/norm)
-         ovlp(2)=DBLE(ovlp(2)/norm)
-!        ovlp(2)=cone-ovlp(1)
+         ovlp(1)=DBLE(ovlp(1)/norm); ovlp(2)=DBLE(ovlp(2)/norm) ! ovlp(2)=cone-ovlp(1)
          hlda(ib,ib,ik_ibz,1) = KS_BSt%eig(ib,ik_ibz,1)*ovlp(1)-KS_me%vxc(ib,ib,ik_ibz,3)
          hlda(ib,ib,ik_ibz,2) = KS_BSt%eig(ib,ik_ibz,1)*ovlp(2)-KS_me%vxc(ib,ib,ik_ibz,4)
          hlda(ib,ib,ik_ibz,3) = KS_me%vxc(ib,ib,ik_ibz,3)
@@ -1445,12 +1448,16 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
      end do
    end do
 
+   call xmpi_sum(hlda, wfd%comm, ierr)
+
+   ABI_FREE(my_band_list)
+   ABI_FREE(bmask)
    if (Wfd%usepaw==1) then
      call pawcprj_free(Cp1)
      ABI_DT_FREE(Cp1)
    end if
  end if
-!
+
 !=== Initialize Sigma results ===
 !TODO it is better if we use ragged arrays indexed by the k-point
  call sigma_init(Sigp,Kmesh%nibz,Dtset%usepawu,Sr)
