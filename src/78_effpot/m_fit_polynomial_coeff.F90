@@ -1391,13 +1391,13 @@ subroutine fit_polynomial_printSystemFiles(eff_pot,hist)
 
 !Create new supercell corresponding to the MD
  ncell = (/2,2,2/)
- call init_supercell(eff_pot%crystal%natom, 0, real(ncell,dp), eff_pot%crystal%rprimd,&
+ call init_supercell(eff_pot%crystal%natom, (/ncell(1),0,0,  0,ncell(2),0,  0,0,ncell(3)/), eff_pot%crystal%rprimd,&
 &                    eff_pot%crystal%typat,eff_pot%crystal%xcart, supercell)
 
 !allocation of array
- ABI_ALLOCATE(xcart,(3,supercell%natom_supercell))
- ABI_ALLOCATE(fcart,(3,supercell%natom_supercell))
- ABI_ALLOCATE(typat_order,(supercell%natom_supercell))
+ ABI_ALLOCATE(xcart,(3,supercell%natom))
+ ABI_ALLOCATE(fcart,(3,supercell%natom))
+ ABI_ALLOCATE(typat_order,(supercell%natom))
  ABI_ALLOCATE(typat_order_uc,(eff_pot%crystal%natom))
 
  A = (/ 2, 3, 1/)
@@ -1413,7 +1413,7 @@ subroutine fit_polynomial_printSystemFiles(eff_pot,hist)
  do ii=1,eff_pot%crystal%ntypat
    jj = A(ii)
    do kk=1,natom_uc
-     if(supercell%typat_supercell(kk)==jj)then
+     if(supercell%typat(kk)==jj)then
        typat_order_uc(ib1) = kk
        ib1 = ib1 + 1 
        do ll=1,nshift
@@ -1469,10 +1469,10 @@ subroutine fit_polynomial_printSystemFiles(eff_pot,hist)
  write(unit_ref,'("Atomic positions (Bohr radius)")')
  write(unit_ref,'("==============================")')
 
- call xred2xcart(supercell%natom_supercell,supercell%rprimd_supercell,&
+ call xred2xcart(supercell%natom,supercell%rprimd,&
 &                  xcart,hist%xred(:,:,1))
 
- do ia=1,supercell%natom_supercell
+ do ia=1,supercell%natom
    write(unit_ref,'(3(F23.14))') xcart(:,typat_order(ia))
  end do
 
@@ -1543,12 +1543,12 @@ subroutine fit_polynomial_printSystemFiles(eff_pot,hist)
    write(unit_md,'(3(F22.14))') (hist%rprimd(:,:,ii))
 
 !  Set xcart and fcart for this step
-   call xred2xcart(supercell%natom_supercell,supercell%rprimd_supercell,&
+   call xred2xcart(supercell%natom,supercell%rprimd,&
 &                  xcart,hist%xred(:,:,ii))
 
    fcart(:,:) = hist%fcart(:,:,ii)
 
-   do ia=1,supercell%natom_supercell
+   do ia=1,supercell%natom
      write(unit_md,'(3(E22.14),3(E22.14))') xcart(:,typat_order(ia)),fcart(:,typat_order(ia))
    end do
    write(unit_md,'(6(E22.14))') hist%strten(:,ii)

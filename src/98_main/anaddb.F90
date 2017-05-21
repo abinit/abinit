@@ -66,6 +66,7 @@ program anaddb
  use m_crystal,        only : crystal_t, crystal_free
  use m_crystal_io,     only : crystal_ncwrite
  use m_dynmat,         only : gtdyn9, dfpt_phfrq
+ use m_phonon_supercell
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -118,6 +119,7 @@ program anaddb
  type(ddb_type) :: ddb
  type(asrq0_t) :: asrq0
  type(crystal_t) :: Crystal
+ type(supercell_type), allocatable :: thm_scells(:)
 #ifdef HAVE_NETCDF
  integer :: phdos_ncid, ec_ncid, ncerr
  integer :: na_phmodes_varid, na_phdispl_varid
@@ -468,6 +470,12 @@ program anaddb
    call wrtout(std_out,message,'COLL')
 
    call mkphdos(Phdos,Crystal,Ifc, inp%prtdos,inp%dosdeltae,inp%dossmear, inp%ng2qpt, inp%q2shft, comm)
+
+   if (sum(abs(inp%thermal_supercell))>0) then
+     ABI_ALLOCATE(thm_scells, (inp%ntemper))
+     call thermal_supercell_make(Crystal, Ifc, inp%ntemper, inp%thermal_supercell, inp%tempermin, inp%temperinc, thm_scells)
+   end if
+
 
    if (iam_master) then
      call phdos_print_msqd(Phdos, filnam(2), inp%ntemper, inp%tempermin, inp%temperinc)
@@ -847,6 +855,9 @@ program anaddb
  ABI_DEALLOCATE(phfrq)
  ABI_DEALLOCATE(zeff)
  ABI_DEALLOCATE(instrain)
+
+ call thermal_supercell_free(inp%ntemper, thm_scells)
+ ABI_DEALLOCATE (thm_scells)
 
 50 continue
  call asrq0_free(asrq0)
