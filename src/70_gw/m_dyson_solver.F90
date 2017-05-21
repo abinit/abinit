@@ -234,7 +234,7 @@ subroutine solve_dyson(ikcalc,minbnd,maxbnd,nomega_sigc,Sigp,Kmesh,sigcme_tmp,qp
            if (ABS(Sigp%mbpt_sciss) < tol6) then
              Sr%degw(jb,sk_ibz,spin) = Sr%ze0(jb,sk_ibz,spin) * &
 &              (Sr%sigxme(jb,sk_ibz,spin) + Sr%sigcmee0(jb,sk_ibz,spin) - Sr%e0(jb,sk_ibz,spin) + &
-&              Sr%hhartree(jb,jb,sk_ibz,spin))
+&               Sr%hhartree(jb,jb,sk_ibz,spin))
 
              Sr%egw(jb,sk_ibz,spin) = Sr%e0(jb,sk_ibz,spin) + Sr%degw(jb,sk_ibz,spin)
 
@@ -246,7 +246,7 @@ subroutine solve_dyson(ikcalc,minbnd,maxbnd,nomega_sigc,Sigp,Kmesh,sigcme_tmp,qp
              ! If GW+scissor: e0 is replaced by qp_ene which contains the updated energy eigenvalue
              Sr%degw(jb,sk_ibz,spin)= Sr%ze0(jb,sk_ibz,spin) * &
 &              (Sr%sigxme(jb,sk_ibz,spin) + Sr%sigcmee0(jb,sk_ibz,spin) - qp_ene(jb,sk_ibz,spin) + &
-&              Sr%hhartree(jb,jb,sk_ibz,spin))
+&               Sr%hhartree(jb,jb,sk_ibz,spin))
 
              Sr%egw(jb,sk_ibz,spin) = qp_ene(jb,sk_ibz,spin) + Sr%degw(jb,sk_ibz,spin)
 

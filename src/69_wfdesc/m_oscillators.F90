@@ -135,15 +135,13 @@ subroutine rho_tw_g(nspinor,npwvec,nr,ndat,ngfft,map2sphere,use_padfft,igfftg0,g
 
 !Local variables-------------------------------
 !scalars
- integer :: ig,ir,ir1,ir2,igfft,iab,spad1,spad2,spad0,ispinor
- integer :: nx,ny,nz,ldx,ldy,ldz,mgfft
+ integer :: ig,ir,ir1,ir2,igfft,iab,spad1,spad2,spad0,ispinor,nx,ny,nz,ldx,ldy,ldz,mgfft
  complex(gwpc) :: u1a,u1b,u2a,u2b
  type(fftbox_plan3_t) :: plan
 !arrays
  integer :: spinor_pad(2,4)
  complex(dpc) :: spinrot_cmat1(2,2),spinrot_cmat2(2,2)
- complex(gwpc),allocatable :: u12prod(:),cwavef1(:),cwavef2(:)
- complex(gwpc),allocatable :: u1_bz(:),u2_bz(:)
+ complex(gwpc),allocatable :: u12prod(:),cwavef1(:),cwavef2(:),u1_bz(:),u2_bz(:)
 
 ! *************************************************************************
 
@@ -213,6 +211,8 @@ subroutine rho_tw_g(nspinor,npwvec,nr,ndat,ngfft,map2sphere,use_padfft,igfftg0,g
      cwavef2(ir+nr)= spinrot_cmat2(2,1)*u2a + spinrot_cmat2(2,2)*u2b
    end do
 
+   ABI_MALLOC(u12prod, (nr))
+
    spinor_pad = RESHAPE([0,0,nr,nr,0,nr,nr,0], [2,4])
    do iab=1,dim_rtwg
      spad1=spinor_pad(1,iab); spad2=spinor_pad(2,iab)
@@ -255,6 +255,7 @@ subroutine rho_tw_g(nspinor,npwvec,nr,ndat,ngfft,map2sphere,use_padfft,igfftg0,g
      END SELECT
    end do !iab
 
+   ABI_FREE(u12prod)
    ABI_FREE(cwavef1)
    ABI_FREE(cwavef2)
 
