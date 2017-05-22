@@ -37,7 +37,6 @@ module m_phonon_supercell
  implicit none
 
  private
-!!***
 
 !!***
 
@@ -110,7 +109,7 @@ subroutine init_supercell_for_qpt(natom_primcell, qphon, rprimd_primcell, typat_
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'init_supercell'
+#define ABI_FUNC 'init_supercell_for_qpt'
 !End of the abilint section
 
  implicit none
@@ -170,6 +169,7 @@ subroutine init_supercell_for_qpt(natom_primcell, qphon, rprimd_primcell, typat_
  scell%qphon = qphon
 
 end subroutine init_supercell_for_qpt
+!!***
 
 !!****f* m_phonon_supercell/init_supercell
 !!

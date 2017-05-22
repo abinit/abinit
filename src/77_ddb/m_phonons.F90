@@ -1199,6 +1199,7 @@ end subroutine mkphdos
 subroutine thermal_supercell_make(Crystal, Ifc, ntemper, &
 &    rlatt, tempermin, temperinc, thm_scells)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -1338,6 +1339,7 @@ subroutine thermal_supercell_make(Crystal, Ifc, ntemper, &
  ABI_FREE(phdispl)
 
 end subroutine thermal_supercell_make
+!!***
 
 !----------------------------------------------------------------------
 
@@ -1362,6 +1364,7 @@ end subroutine thermal_supercell_make
 
 subroutine thermal_supercell_free(ntemper, thm_scells)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -1385,6 +1388,7 @@ subroutine thermal_supercell_free(ntemper, thm_scells)
    ABI_FREE(thm_scells)
  end if
 end subroutine thermal_supercell_free
+!!***
 
 !----------------------------------------------------------------------
 

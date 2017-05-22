@@ -314,6 +314,7 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
 #undef ABI_FUNC
 #define ABI_FUNC 'invars9'
  use interfaces_14_hidewrite
+ use interfaces_32_util
  use interfaces_42_parser
 !End of the abilint section
 
