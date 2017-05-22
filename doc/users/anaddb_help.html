@@ -245,6 +245,7 @@ you can go back to the tutorial window.</i>
  <a href="anaddb_help.html#telphint">telphint</a>&nbsp;&nbsp;
  <a href="anaddb_help.html#temperinc">temperinc</a>&nbsp;&nbsp;
  <a href="anaddb_help.html#tempermin">tempermin</a>&nbsp;&nbsp;
+ <a href="anaddb_help.html#thermal_supercell">thermal_supercell</a>&nbsp;&nbsp;
  <a href="anaddb_help.html#thmflag">thmflag</a>&nbsp;&nbsp;
  <a href="anaddb_help.html#thmtol">thmtol</a>&nbsp;&nbsp;
  <br>U.
@@ -2705,6 +2706,29 @@ have to be evaluated. Cannot be zero when <a href="anaddb_help.html#thmflag">thm
 and <a href="anaddb_help.html#ntemper">ntemper</a>.
 The default temperature grid goes from 100K to 1000K by step of 100K. For the largest temperatures, for most solids, anharmonic effects not accounted in the harmonic approximation implemented in anaddb will be important. For weakly bounded systems (e.g. Van der Waals solids), 
 such anharmonic effects might be important already at room temperature.
+</font>
+
+<br><br><br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="anaddb_help.html#list">List of ANADDB input variables</a>
+<hr>
+
+<font id="title"><a name="thermal_supercell">thermal_supercell</a></font>
+<br><font id="definition">Mnemonics: THERMAL SUPERCELL generation</font>
+<br><font id="category">Characteristic:  </font>
+<br><font id="vartype">Variable type: integer </font>
+<br><font id="default">Default: 0 0 0   0 0 0   0 0 0</font>
+<br><br><font id="text">
+Matrix defining the size and shape of a supercell of the primitive cell
+vectors. The normal usage is a diagonal matrix (n 0 0   0 m 0   0 0 p) which
+will generate an intuitive n by m by p supercell. Anaddb will generate a set of
+supercells, one for each temperature defined with 
+<a href="anaddb_help.html#ntemper">ntemper</a>, 
+<a href="anaddb_help.html#tempermin">tempermin</a> and 
+<a href="anaddb_help.html#temperinc">temperinc</a>, and populate each with the
+full set of displacements for all of the phonon modes of the cell. The normal
+mode coordinate for each phonon follows the thermal displacement, and the sign
+of the displacements is alternated, as in the prescription of Zacharias and
+Giustino PRB 94 075125 (2016).
 </font>
 
 <br><br><br><br><a href=#top>Go to the top</a>
