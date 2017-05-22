@@ -529,6 +529,7 @@ type dataset_type
  integer :: rfasr
  integer :: rfddk
  integer :: rfelfd
+ integer :: rfmagn
  integer :: rfmeth
  integer :: rfphon
  integer :: rfstrs

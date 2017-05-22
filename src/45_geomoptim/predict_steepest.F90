@@ -103,7 +103,7 @@ subroutine predict_steepest(itimimage,itimimage_eff,list_dynimage,mep_param,nato
  ABI_ALLOCATE(fcart,(3,natom,nimage))
  ABI_ALLOCATE(rprimd,(3,3,nimage))
  call get_geometry_img(etotal,natom,nimage,results_img(:,itimimage_eff),&
-&                      fcart,rprimd,xcart,xred)
+& fcart,rprimd,xcart,xred)
 
 !Compute new atomic positions in each cell
  call mep_steepest(fcart,list_dynimage,mep_param,natom,ndynimage,nimage,rprimd,xcart,xred)

@@ -33,7 +33,7 @@
 !!      mover
 !!
 !! CHILDREN
-!!      bonds_free,dsyev,dsysv,fcart2fred,make_bonds_new,mat3inv
+!!      bonds_free,dsyev,dsysv,fcart2fred,make_bonds_new,xred2xcart
 !!
 !! SOURCE
 

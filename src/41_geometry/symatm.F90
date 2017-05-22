@@ -61,8 +61,8 @@
 !!                      transformation to get back to the original unit cell.
 !!
 !! PARENTS
-!!      get_npert_rbz,ingeo,initberry,m_ab7_symmetry,m_crystal,m_ddb,setsym
-!!      thmeig
+!!      get_npert_rbz,ingeo,initberry,m_ab7_symmetry,m_crystal,m_ddb
+!!      m_fit_polynomial_coeff,setsym,thmeig
 !!
 !! CHILDREN
 !!      symchk,wrtout

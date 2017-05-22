@@ -107,14 +107,15 @@
 !!      bonds_lgth_angles,bound_deriv,calc_efg,calc_fc,calcdensph
 !!      compute_coeff_plowannier,crystal_free,crystal_init,datafordmft,denfgr
 !!      destroy_dmft,destroy_oper,destroy_plowannier,dos_calcnwrite,ebands_free
-!!      ebands_init,ebands_prtbltztrp,epjdos_free,fatbands_ncwrite
-!!      fftdatar_write,free_my_atmtab,get_my_atmtab,init_dmft,init_oper
-!!      init_plowannier,ioarr,mag_constr_e,mlwfovlp,mlwfovlp_qp,multipoles_out
-!!      optics_paw,optics_paw_core,optics_vloc,out1dm,outkss,outwant
-!!      partial_dos_fractions,partial_dos_fractions_paw,pawmkaewf,pawprt
-!!      pawrhoij_copy,pawrhoij_nullify,posdoppler,poslifetime,print_dmft
-!!      prt_cif,prtfatbands,read_atomden,simpson_int,sort_dp,spline,splint
-!!      timab,wrtout,xmpi_sum,xmpi_sum_master
+!!      ebands_init,ebands_interpolate_kpath,ebands_prtbltztrp,ebands_write
+!!      epjdos_free,fatbands_ncwrite,fftdatar_write,free_my_atmtab
+!!      get_my_atmtab,init_dmft,init_oper,init_plowannier,ioarr,mag_constr_e
+!!      mlwfovlp,mlwfovlp_qp,multipoles_out,optics_paw,optics_paw_core
+!!      optics_vloc,out1dm,outkss,outwant,partial_dos_fractions
+!!      partial_dos_fractions_paw,pawmkaewf,pawprt,pawrhoij_copy
+!!      pawrhoij_nullify,posdoppler,poslifetime,print_dmft,prt_cif,prtfatbands
+!!      read_atomden,simpson_int,sort_dp,spline,splint,timab,wrtout,xmpi_sum
+!!      xmpi_sum_master
 !!
 !! SOURCE
 
@@ -814,7 +815,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
      end if
 
      call fftdatar_write("vhartree_vloc",dtfil%fnameabo_app_vclmb,dtset%iomode,hdr,&
-&         crystal,ngfft,cplex1,nfft,nspden,vwork,mpi_enreg,ebands=ebands)
+&     crystal,ngfft,cplex1,nfft,nspden,vwork,mpi_enreg,ebands=ebands)
 
 !TODO: find out why this combination of calls with fftdatar_write then out1dm fails on buda with 4 mpi-fft procs (npkpt 1). 
 !      For the moment comment it out. Only DS2 of mpiio test 27 fails
@@ -908,7 +909,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 !Output of integrated density inside atomic spheres
  if (dtset%prtdensph==1.and.dtset%usewvl==0)then
    call calcdensph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,&
-&   ntypat,ab_out,dtset%ratsph,rhor,rprimd,dtset%typat,ucvol,xred)
+&   ntypat,ab_out,dtset%ratsph,rhor,rprimd,dtset%typat,ucvol,xred,1)
  end if
 
  call timab(960,2,tsec)
@@ -1153,7 +1154,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 
  if (dtset%prtdipole == 1) then
    call multipoles_out(rhor,mpi_enreg,natom,nfft,ngfft,dtset%nspden,dtset%ntypat,rprimd,&
-&                      dtset%typat,ucvol,ab_out,xred,dtset%ziontypat)
+&   dtset%typat,ucvol,ab_out,xred,dtset%ziontypat)
  end if
 
  ! BoltzTraP output files in GENEric format

@@ -3,13 +3,13 @@ Compute the zero-point renormalization (ZPR) using the dynamical AHC theory
 (ieig2rf=5).
 """
 
-from ElectronPhononCoupling import compute_epc
+from ElectronPhononCoupling import compute
 
 
 # Lists of files used
 # ===================
 
-DDB_fnames = """
+ddb_fnames = """
 Calculations/01-LiF-dynamical/odat_calc_DS5_DDB.nc
 Calculations/01-LiF-dynamical/odat_calc_DS9_DDB.nc
 Calculations/01-LiF-dynamical/odat_calc_DS13_DDB.nc
@@ -21,31 +21,31 @@ Calculations/01-LiF-dynamical/odat_calc_DS10_EIG.nc
 Calculations/01-LiF-dynamical/odat_calc_DS14_EIG.nc
 """.split()
 
-EIGR2D_fnames = """
+eigr2d_fnames = """
 Calculations/01-LiF-dynamical/odat_calc_DS7_EIGR2D.nc
 Calculations/01-LiF-dynamical/odat_calc_DS11_EIGR2D.nc
 Calculations/01-LiF-dynamical/odat_calc_DS15_EIGR2D.nc
 """.split()
 
-GKK_fnames = """
+gkk_fnames = """
 Calculations/01-LiF-dynamical/odat_calc_DS7_GKK.nc
 Calculations/01-LiF-dynamical/odat_calc_DS11_GKK.nc
 Calculations/01-LiF-dynamical/odat_calc_DS15_GKK.nc
 """.split()
 
-eig0_fname = 'Calculations/01-LiF-dynamical/odat_calc_DS3_EIG.nc'
+eigk_fname = 'Calculations/01-LiF-dynamical/odat_calc_DS3_EIG.nc'
 
 
 # Computation of the ZPR
 # ======================
 
-epc = compute_epc(
-    calc_type = 2,          # Perform dynamical AHC calculation
-    temperature = False,    # Do not compute temperature dependence
-    lifetime = False,       # Do not compute lifetime
+epc = compute(
+    renormalization=True,   # Compute the eigenvalues renormalization
+    broadening = False,       # Do not compute broadening
+    temperature = False,    # Compute only at T=0
 
     write = True,           # Do write the results
-    output = 'Out/1-1',     # Rootname for the output
+    rootname = 'Out/1-1',   # Rootname for the output
     
     smearing_eV = 0.01,     # Imaginary parameter for broadening.
 
@@ -54,12 +54,10 @@ epc = compute_epc(
                                 # These can be obtained by running Abinit
                                 # with the corresponding k-point grid.
     
-    eig0_fname = eig0_fname,        # All the files needed for
+    eigk_fname = eigk_fname,        # All the files needed for
     eigq_fnames = eigq_fnames,      # this calculation.
-    DDB_fnames = DDB_fnames,        #
-    EIGR2D_fnames = EIGR2D_fnames,  #
-    GKK_fnames = GKK_fnames,        # Note that instead of GKK.nc files,
-                                    # one can also use the FAN.nc files
-                                    # with the FAN_fnames keyword argument.
+    ddb_fnames = ddb_fnames,        #
+    eigr2d_fnames = eigr2d_fnames,  #
+    gkk_fnames = gkk_fnames,        #
     )
 

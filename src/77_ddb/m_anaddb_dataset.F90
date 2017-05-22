@@ -214,6 +214,7 @@ contains
 !!      anaddb
 !!
 !! CHILDREN
+!!      chkvars_in_string,inupper
 !!
 !! NOTES
 !!
@@ -301,6 +302,7 @@ end subroutine anaddb_dtset_free
 !!      anaddb,m_effective_potential
 !!
 !! CHILDREN
+!!      chkvars_in_string,inupper
 !!
 !! SOURCE
 
@@ -1748,6 +1750,7 @@ end subroutine invars9
 !!      anaddb
 !!
 !! CHILDREN
+!!      chkvars_in_string,inupper
 !!
 !! SOURCE
 
@@ -2077,6 +2080,7 @@ end subroutine outvars_anaddb
 !!      anaddb
 !!
 !! CHILDREN
+!!      chkvars_in_string,inupper
 !!
 !! SOURCE
 
@@ -2137,8 +2141,10 @@ end subroutine anaddb_init
 !! OUTPUT
 !!
 !! PARENTS
+!!      m_anaddb_dataset
 !!
 !! CHILDREN
+!!      chkvars_in_string,inupper
 !!
 !! SOURCE
 

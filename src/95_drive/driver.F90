@@ -67,8 +67,8 @@
 !!      pawrad_free,pawtab_free,pawtab_nullify,psps_free,psps_init_from_dtset
 !!      psps_init_global,respfn,screening,sigma,status,timab,wfk_analyze,wrtout
 !!      xc_vdw_done,xc_vdw_init,xc_vdw_libxc_init,xc_vdw_memcheck,xc_vdw_read
-!!      xc_vdw_show,xc_vdw_trigger,xc_vdw_write,xcart2xred,xmpi_bcast
-!!      xred2xcart
+!!      xc_vdw_show,xc_vdw_trigger,xc_vdw_write,xcart2xred,xg_finalize
+!!      xmpi_bcast,xred2xcart
 !!
 !! SOURCE
 

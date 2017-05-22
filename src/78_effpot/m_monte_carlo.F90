@@ -97,8 +97,7 @@ CONTAINS  !=====================================================================
 !! PARENTS
 !!
 !! CHILDREN
-!!      effective_potential_getdeltaenergy,hist2var,metric,random_number
-!!      var2hist,xred2xcart
+!!      effective_potential_getdeltaenergy,hist2var,random_number,var2hist
 !!
 !! SOURCE
 
@@ -228,8 +227,7 @@ end subroutine monte_carlo_run
 !!      mover
 !!
 !! CHILDREN
-!!      effective_potential_getdeltaenergy,hist2var,metric,random_number
-!!      var2hist,xred2xcart
+!!      effective_potential_getdeltaenergy,hist2var,random_number,var2hist
 !!
 !! SOURCE
 

@@ -440,7 +440,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
 
 !RESPFN integer input variables (needed here to get the value of response
 !Presently, rfmeth is not used.
-!Warning : rfddk,rfelfd,rfphon,rfstrs,rfuser,rf2_dkdk and rf2_dkde are also read in invars1
+!Warning : rfddk,rfelfd,rfmagn,rfphon,rfstrs,rfuser,rf2_dkdk and rf2_dkde are also read in invars1
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'rfasr',tread,'INT')
  if(tread==1) dtset%rfasr=intarr(1)
 
@@ -455,6 +455,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'rfelfd',tread,'INT')
  if(tread==1) dtset%rfelfd=intarr(1)
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'rfmagn',tread,'INT')
+ if(tread==1) dtset%rfmagn=intarr(1)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'rfmeth',tread,'INT')
  if(tread==1) dtset%rfmeth=intarr(1)
@@ -1703,12 +1706,12 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
    if(tread==1) dtset%dmftbandf=intarr(1)
    if((dtset%dmftbandf-dtset%dmftbandi+1)<2*maxval(dtset%lpawu(:))+1.and.(dtset%dmft_t2g==0)) then
      write(message, '(4a,i2,2a)' )&
-      '   dmftbandf-dmftbandi+1)<2*max(lpawu(:))+1)',ch10, &
+     '   dmftbandf-dmftbandi+1)<2*max(lpawu(:))+1)',ch10, &
 &     '   Number of bands to construct Wannier functions is not', &
 &     ' sufficient to build Wannier functions for l=',maxval(dtset%lpawu(:)),ch10, &
 &     '   Action: select a correct number of KS bands with dmftbandi and dmftbandf.'
      MSG_ERROR(message)
-   endif
+   end if
 
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmftcheck',tread,'INT')
    if(tread==1) dtset%dmftcheck=intarr(1)

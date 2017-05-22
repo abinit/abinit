@@ -156,9 +156,9 @@ subroutine ddb_piezo(anaddb_dtset,blkval,dielt_rlx,elast,iblok,instrain,iout,mpe
 
    call wrtout(iout,message,'COLL')
    if (iwrite) then
-    do ivarA=1,6
-      write(iout,'(3f16.8)')piezo_clamped(ivarA,1),piezo_clamped(ivarA,2),piezo_clamped(ivarA,3)
-    end do
+     do ivarA=1,6
+       write(iout,'(3f16.8)')piezo_clamped(ivarA,1),piezo_clamped(ivarA,2),piezo_clamped(ivarA,3)
+     end do
    end if
  end if
 

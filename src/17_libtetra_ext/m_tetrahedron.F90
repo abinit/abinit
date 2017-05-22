@@ -111,7 +111,7 @@ contains
 !!
 !! PARENTS
 !!      ep_el_weights,ep_fs_weights,ep_ph_weights,gstate,m_ebands,m_epjdos
-!!      m_fstab,m_phgamma,m_phonons,thmeig,wfk_analyze
+!!      m_fstab,m_gruneisen,m_phgamma,m_phonons,thmeig,wfk_analyze
 !!
 !! CHILDREN
 !!      get_onetetra_,sort_tetra
@@ -1896,7 +1896,7 @@ end subroutine get_onetetra_
 !!    for a given (band, k-point, spin).
 !!
 !! PARENTS
-!!      m_ebands,m_epjdos,m_phgamma
+!!      m_ebands,m_epjdos,m_gruneisen,m_phgamma
 !!
 !! CHILDREN
 !!      get_onetetra_,sort_tetra

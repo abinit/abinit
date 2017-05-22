@@ -267,17 +267,17 @@ implicit none
        ABI_ALLOCATE(dtset%qmass,(dtset%nnos))
        dtset%qmass(:)  = qmass
        write(message,'(3a,F20.1,a)')&
-&      ' WARNING: nnos is set to zero in the input',ch10,&
-&      '          value by default for qmass: ',dtset%qmass(:),ch10
+&       ' WARNING: nnos is set to zero in the input',ch10,&
+&       '          value by default for qmass: ',dtset%qmass(:),ch10
        call wrtout(std_out,message,"COLL")
      else
        ABI_ALLOCATE(dtset%qmass,(dtset%nnos)) ! Q thermostat mass
-        dtset%qmass(:) = inp%qmass(:)
+       dtset%qmass(:) = inp%qmass(:)
      end if
      if (inp%bmass == zero) then
        dtset%bmass = bmass
        write(message,'(3a,F20.4,a)')&
-&      ' WARNING: bmass is set to zero in the input',ch10,&
+&       ' WARNING: bmass is set to zero in the input',ch10,&
 &       '          value by default for bmass: ',dtset%bmass,ch10
        call wrtout(std_out,message,"COLL")
      else
@@ -291,7 +291,6 @@ implicit none
    call alloc_copy(symrel,dtset%symrel)
    ABI_ALLOCATE(tnons,(3,dtset%nsym))
    tnons = zero
-   dtset%tnons = tnons
    call alloc_copy(tnons,dtset%tnons)
    call alloc_copy(effective_potential%supercell%typat,dtset%typat)
    call alloc_copy(effective_potential%crystal%znucl,dtset%znucl)   
@@ -338,8 +337,8 @@ implicit none
    ABI_ALLOCATE(ab_xfh%xfhist,(3,dtset%natom+4,2,ab_xfh%mxfh))
    if (any((/2,3,10,11,22/)==dtset%ionmov)) then
      write(message, '(3a)' )&
-&   ' This dynamics can not be used with effective potential',ch10,&
-&   'Action: correct dynamics input'
+&     ' This dynamics can not be used with effective potential',ch10,&
+&     'Action: correct dynamics input'
      MSG_BUG(message)
    end if
 

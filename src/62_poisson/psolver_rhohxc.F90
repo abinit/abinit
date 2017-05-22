@@ -44,7 +44,7 @@
 !!
 !! CHILDREN
 !!      h_potential,mean_fftr,metric,mkdenpos,psolver_kernel,wrtout
-!!      wvl_rhov_abi2big,wvl_vhartr_abi2big,wvl_vxc_abi2big,xc_potential
+!!      wvl_rhov_abi2big,xc_potential
 !!
 !! SOURCE
 

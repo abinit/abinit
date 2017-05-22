@@ -248,7 +248,7 @@ program mrgddb
 
  call abinit_doctor("__mrgddb")
 
-  100 call xmpi_end()
+ 100 call xmpi_end()
 
  end program mrgddb
 !!***

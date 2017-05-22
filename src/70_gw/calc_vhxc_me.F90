@@ -68,10 +68,11 @@
 !!
 !! CHILDREN
 !!      destroy_mpi_enreg,dtset_copy,dtset_free,init_distribfft_seq,initmpi_seq
-!!      libxc_functionals_end,libxc_functionals_init,melements_herm
-!!      melements_init,melements_mpisum,mkkin,paw_mknewh0,pawcprj_alloc
-!!      pawcprj_free,rhohxc,wfd_change_ngfft,wfd_distribute_bbp,wfd_get_cprj
-!!      wfd_get_ur,wrtout
+!!      libxc_functionals_end,libxc_functionals_get_hybridparams
+!!      libxc_functionals_init,libxc_functionals_set_hybridparams
+!!      melements_herm,melements_init,melements_mpisum,mkkin,paw_mknewh0
+!!      pawcprj_alloc,pawcprj_free,rhohxc,wfd_change_ngfft,wfd_distribute_bbp
+!!      wfd_get_cprj,wfd_get_ur,wrtout
 !!
 !! SOURCE
 

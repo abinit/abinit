@@ -69,7 +69,7 @@
 !!
 !! PARENTS
 !!      cgwf,chebfi,dfpt_cgwf,gwls_hamiltonian,ks_ddiago,lobpcgwf,m_io_kss
-!!      m_rf2,mkresi,prep_getghc
+!!      m_rf2,mkresi,multithreaded_getghc
 !!
 !! CHILDREN
 !!      fourwf

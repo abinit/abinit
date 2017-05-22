@@ -3437,7 +3437,7 @@ end subroutine ftifc_r2q
 !!  These coordinates are normalized (=> * acell(3)!!)
 !!
 !! PARENTS
-!!      m_dynmat
+!!      m_ifc
 !!
 !! CHILDREN
 !!
@@ -4276,7 +4276,7 @@ end subroutine d3sym
 !!      -2   ->   element is zero by symmetry
 !!
 !! PARENTS
-!!      nonlinear,respfn
+!!      m_ddb,nonlinear,respfn
 !!
 !! CHILDREN
 !!

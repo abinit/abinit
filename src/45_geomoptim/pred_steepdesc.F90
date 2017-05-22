@@ -49,7 +49,7 @@
 !!      mover
 !!
 !! CHILDREN
-!!      hist2var,metric,mkradim,mkrdim,var2hist,xcart2xred
+!!      hist2var,mkradim,mkrdim,var2hist,xcart2xred,xred2xcart
 !!
 !! SOURCE
 

@@ -197,7 +197,7 @@ end subroutine wvl_vtrial_abi2big
 !! It uses the generic routine wvl_rhov_abi2big.
 !!
 !! PARENTS
-!!      newrho,vtorho,wvl_mkrho
+!!      afterscfloop,mklocl,newrho,vtorho,wvl_mkrho
 !!
 !! CHILDREN
 !!
@@ -286,7 +286,6 @@ end subroutine wvl_rho_abi2big
 !! It uses the generic routine wvl_rhov_abi2big.
 !!
 !! PARENTS
-!!      psolver_rhohxc
 !!
 !! CHILDREN
 !!
@@ -378,7 +377,7 @@ end subroutine wvl_vhartr_abi2big
 !! It uses the generic routine wvl_rhov_abi2big.
 !!
 !! PARENTS
-!!      psolver_rhohxc,wvl_psitohpsi
+!!      wvl_psitohpsi
 !!
 !! CHILDREN
 !!
