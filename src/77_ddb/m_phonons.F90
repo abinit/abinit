@@ -1363,15 +1363,17 @@ subroutine thermal_supercell_free(ntemper, thm_scells)
 !Arguments ------------------------------------
 !scalars
  integer, intent(in) :: ntemper
- type(supercell_type), intent(out) :: thm_scells(ntemper)
+ type(supercell_type), allocatable, intent(out) :: thm_scells(:)
 
 ! local
  integer :: itemp
 
- do itemp = 1, ntemper
-   call destroy_supercell(thm_scells(itemp))
- end do
-
+ if(allocated(thm_scells)) then
+   do itemp = 1, ntemper
+     call destroy_supercell(thm_scells(itemp))
+   end do
+   ABI_FREE(thm_scells)
+ end if
 end subroutine thermal_supercell_free
 
 !----------------------------------------------------------------------

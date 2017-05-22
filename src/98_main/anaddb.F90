@@ -857,7 +857,6 @@ program anaddb
  ABI_DEALLOCATE(instrain)
 
  call thermal_supercell_free(inp%ntemper, thm_scells)
- ABI_DEALLOCATE (thm_scells)
 
 50 continue
  call asrq0_free(asrq0)
