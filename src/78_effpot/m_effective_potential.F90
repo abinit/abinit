@@ -450,7 +450,9 @@ subroutine effective_potential_initmpi_supercell(eff_pot,comm)
 ! ***********************************************************************
 
 !Set the number of cell in the supercell
- cell_number(:) = int(eff_pot%supercell%qphon(:))
+ cell_number(1) = eff_pot%supercell%rlatt(1,1)
+ cell_number(2) = eff_pot%supercell%rlatt(2,2)
+ cell_number(3) = eff_pot%supercell%rlatt(3,3)
  ncell = product(cell_number(:))
 
 !Do some checks
@@ -1247,10 +1249,10 @@ subroutine effective_potential_effpot2dynmat(dynmat,delta,eff_pot,natom,n_cell,o
  end do
 
  do ii=1,3
-   if(eff_pot%supercell%qphon(ii) /= n_cell(ii))then
+   if(eff_pot%supercell%rlatt(ii,ii) /= n_cell(ii))then
      write(msg, '(a,i0,a,i0,a,i0,a)' )&
 &     'n_cell(',ii,') is ',n_cell(ii),', which not conrespond to n_cell in supercell ',&
-&     eff_pot%supercell%qphon(ii)
+&     eff_pot%supercell%rlatt(ii,ii)
      MSG_ERROR(msg)
    end if
  end do
@@ -2705,7 +2707,9 @@ subroutine effective_potential_getForces(eff_pot,fcart,fred,natom,rprimd,xcart,d
   end if
 
 ! Set the number of cell in the supercell
-  cell_number(:) = int(eff_pot%supercell%qphon(:))
+  cell_number(1) = eff_pot%supercell%rlatt(1,1)
+  cell_number(2) = eff_pot%supercell%rlatt(2,2)
+  cell_number(3) = eff_pot%supercell%rlatt(3,3)
 
   if (any(cell_number <= 0)) then
     write(msg,'(a,a)')' No supercell found for getForces'
@@ -2822,8 +2826,10 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
   iam_master = (eff_pot%me_supercell == master)
 
 ! Set variables
-  supercell(1:3) = eff_pot%supercell%qphon(1:3)
-  ncell          = product(eff_pot%supercell%qphon)
+  supercell(1) = eff_pot%supercell%rlatt(1,1)
+  supercell(2) = eff_pot%supercell%rlatt(2,2)
+  supercell(3) = eff_pot%supercell%rlatt(3,3)
+  ncell          = eff_pot%supercell%ncells
 
 !Check some variables
   if (natom /= eff_pot%supercell%natom) then
@@ -2840,10 +2846,10 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
     end if
   end if
   do ii=1,3
-    if(eff_pot%supercell%qphon(ii)<0.or.eff_pot%supercell%qphon(ii)>50)then
+    if(eff_pot%supercell%rlatt(ii,ii)<0.or.eff_pot%supercell%rlatt(ii,ii)>50)then
       write(message, '(a,i0,a,i2,a,a,a,i0,a)' )&
-&     'eff_pot%supercell%qphon(',ii,') is ',int(eff_pot%supercell%qphon(ii)),&
-&     ', which is lower than 0 of superior than 10.',ch10,'Action: correct n_cell(',ii,').'
+&     'eff_pot%supercell%rlatt(',ii,') is ',int(eff_pot%supercell%rlatt(ii,ii)),&
+&     ', which is lower than 0 or superior than 10.',ch10,'Action: correct n_cell(',ii,').'
       MSG_ERROR(message)
     end if
   end do
@@ -3277,7 +3283,9 @@ subroutine ifc_contribution(eff_pot,disp,energy,fcart,cells,ncell,index_cells,co
 
 ! *************************************************************************
 
-  cell_number(:) = int(eff_pot%supercell%qphon(:))
+  cell_number(1) = eff_pot%supercell%rlatt(1,1)
+  cell_number(2) = eff_pot%supercell%rlatt(2,2)
+  cell_number(3) = eff_pot%supercell%rlatt(3,3)
 
   if (any(cell_number <= 0)) then
     write(msg,'(a,a)')' No supercell found for getEnergy'
@@ -3400,7 +3408,10 @@ subroutine ifcStrainCoupling_contribution(eff_pot,disp,energy,fcart,strain,strte
 
 ! *************************************************************************
 
-  cell_number(:) = int(eff_pot%supercell%qphon(:))
+  cell_number(1) = eff_pot%supercell%rlatt(1,1)
+  cell_number(2) = eff_pot%supercell%rlatt(2,2)
+  cell_number(3) = eff_pot%supercell%rlatt(3,3)
+
   if (any(cell_number <= 0)) then
     write(msg,'(a,a)')' No supercell found for getEnergy'
     MSG_ERROR(msg)
@@ -3612,7 +3623,9 @@ subroutine coefficients_contribution(eff_pot,disp,energy,fcart,natom,ncoeff,stra
 ! *************************************************************************
 
 ! Initialisation of variables
-  cell_number(:) = int(eff_pot%supercell%qphon(:))
+  cell_number(1) = eff_pot%supercell%rlatt(1,1)
+  cell_number(2) = eff_pot%supercell%rlatt(2,2)
+  cell_number(3) = eff_pot%supercell%rlatt(3,3)
   energy     = zero
   fcart(:,:) = zero
   strten(:)  = zero
