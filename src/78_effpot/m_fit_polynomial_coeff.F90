@@ -1399,7 +1399,7 @@ subroutine fit_polynomial_printSystemFiles(eff_pot,hist)
 !Create new supercell corresponding to the MD
  ncell = (/2,2,2/)
  call init_supercell(eff_pot%crystal%natom, (/ncell(1),0,0,  0,ncell(2),0,  0,0,ncell(3)/), eff_pot%crystal%rprimd,&
-&                    eff_pot%crystal%typat,eff_pot%crystal%xcart, supercell)
+&                    eff_pot%crystal%typat,eff_pot%crystal%xcart,eff_pot%crystal%znucl, supercell)
 
 !allocation of array
  ABI_ALLOCATE(xcart,(3,supercell%natom))

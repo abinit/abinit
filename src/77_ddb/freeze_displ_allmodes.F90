@@ -90,14 +90,17 @@ subroutine freeze_displ_allmodes(displ, freeze_displ, natom, outfile_radix, phfr
 ! *************************************************************************
 
 !determine supercell needed to freeze phonon
- call init_supercell_for_qpt(natom, qphon, rprimd, typat, xcart ,scell)
+ call init_supercell_for_qpt(natom, qphon, rprimd, typat, xcart, znucl, scell)
 
  do jmode = 1, 3*natom
+! reset positions
+   scell%xcart = scell%xcart_ref
+
 !  displace atoms according to phonon jmode
    call freeze_displ_supercell(displ(:,:,jmode), freeze_displ, scell)
 
 !  print out everything for this wavevector and mode
-   call prt_supercell (phfreq(jmode), jmode, outfile_radix, scell, znucl)
+   call prt_supercell_for_qpt (phfreq(jmode), jmode, outfile_radix, scell)
  end do
 
  call destroy_supercell (scell)

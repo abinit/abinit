@@ -193,6 +193,7 @@ implicit none
 & rprimd,&
 & effective_potential%crystal%typat,&
 & xcart,&
+& effective_potential%crystal%znucl,&
 & supercell)
 
 !Store the information of the supercell of the reference structure into effective potential

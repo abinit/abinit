@@ -374,7 +374,7 @@ subroutine effective_potential_init(crystal,eff_pot,energy,ifcs,ncoeff,nqpt,comm
    call copy_supercell(supercell,eff_pot%supercell)
  else
    call init_supercell(eff_pot%crystal%natom, (/1,0,0, 0,1,0,  0,0,1/), eff_pot%crystal%rprimd,&
-&                      eff_pot%crystal%typat, eff_pot%crystal%xcart, eff_pot%supercell)
+&                      eff_pot%crystal%typat, eff_pot%crystal%xcart, eff_pot%crystal%znucl, eff_pot%supercell)
  end if
 
  call effective_potential_initmpi_supercell(eff_pot,comm)
@@ -740,6 +740,7 @@ subroutine effective_potential_generateDipDip(eff_pot,n_cell,option,asr,comm)
 &   eff_pot%crystal%rprimd,&
 &   eff_pot%crystal%typat,&
 &   eff_pot%crystal%xcart,&
+&   eff_pot%crystal%znucl,&
 &   supercell)
 
  ncell = product(n_cell(:))
@@ -824,7 +825,7 @@ subroutine effective_potential_generateDipDip(eff_pot,n_cell,option,asr,comm)
        call init_supercell(eff_pot%crystal%natom, &
 &                          (/(max1-min1+1),0,0,  0,(max2-min2+1),0,  0,0,(max3-min3+1)/),&
 &                          eff_pot%crystal%rprimd,eff_pot%crystal%typat,&
-&                          eff_pot%crystal%xcart,supercell)
+&                          eff_pot%crystal%xcart,eff_pot%crystal%znucl,supercell)
 
 !      Store the information of the supercell of the reference structure into effective potential
        call copy_supercell(supercell,eff_pot%supercell)

@@ -67,6 +67,7 @@ module m_phonons
 
  public :: thermal_supercell_make
  public :: thermal_supercell_free
+ public :: thermal_supercell_print
 !!***
 
 !!****t* m_phonons/phonon_dos_type
@@ -1293,7 +1294,7 @@ subroutine thermal_supercell_make(Crystal, Ifc, ntemper, &
 
  ! only diagonal supercell case for the moment
  do itemper = 1, ntemper
-   call init_supercell(Crystal%natom, rlatt, Crystal%rprimd, Crystal%typat, Crystal%xcart, thm_scells(itemper))
+   call init_supercell(Crystal%natom, rlatt, Crystal%rprimd, Crystal%typat, Crystal%xcart, Crystal%znucl, thm_scells(itemper))
  end do
 
  ! precalculate phase factors???
@@ -1310,8 +1311,8 @@ subroutine thermal_supercell_make(Crystal, Ifc, ntemper, &
    phdispl = phdispl_allq(:,:,:,jmode:jmode,iq)
 
    ! loop over temperatures
-   do itemper = 0, ntemper-1
-     temperature_K = tempermin + dble(itemper)*temperinc  ! this is in Kelvin 
+   do itemper = 1, ntemper
+     temperature_K = tempermin + dble(itemper-1)*temperinc  ! this is in Kelvin 
      temperature = temperature_K / Ha_K !=315774.65_dp
 
      ! trick supercell object into using present q point
@@ -1388,6 +1389,65 @@ subroutine thermal_supercell_free(ntemper, thm_scells)
    ABI_FREE(thm_scells)
  end if
 end subroutine thermal_supercell_free
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_phonons/thermal_supercell_print
+!! NAME
+!! thermal_supercell_print
+!!
+!! FUNCTION
+!!  print files with thermal array of supercells
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! NOTES
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine thermal_supercell_print(fname, ntemper, tempermin, temperinc, thm_scells)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'thermal_supercell_print'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer, intent(in) :: ntemper
+ real(dp), intent(in) :: tempermin
+ real(dp), intent(in) :: temperinc
+ type(supercell_type), intent(in) :: thm_scells(ntemper)
+ character(len=fnlen), intent(in) :: fname
+
+! local
+ integer :: itemp
+ character(len=80) :: title1, title2
+ character(len=fnlen) :: filename
+ real(dp) :: temper
+ character(len=10) :: temper_str
+
+ do itemp = 1, ntemper
+   temper = dble(itemp-1)*temperinc+tempermin
+   write (temper_str,'(F5.0)') temper
+   write (filename, '(3a)') trim(fname), "_T_", trim(temper_str)
+   write (title1, '(3a)') "#  thermalized supercell at temperature T= ", trim(temper_str), " Kelvin"
+   title2 = "#  generated with alternating thermal displacements of all phonons" 
+   call prt_supercell (filename, thm_scells(itemp), title1, title2)
+ end do
+
+end subroutine thermal_supercell_print
 !!***
 
 !----------------------------------------------------------------------

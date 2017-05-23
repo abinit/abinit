@@ -457,6 +457,12 @@ program anaddb
 
 !**********************************************************************
 
+ if (sum(abs(inp%thermal_supercell))>0 .and. inp%ifcflag==1) then
+   ABI_ALLOCATE(thm_scells, (inp%ntemper))
+   call thermal_supercell_make(Crystal, Ifc, inp%ntemper, inp%thermal_supercell, inp%tempermin, inp%temperinc, thm_scells)
+   call thermal_supercell_print(filnam(2), inp%ntemper, inp%tempermin, inp%temperinc, thm_scells)
+ end if
+
 !Phonon density of states calculation, Start if interatomic forces have been calculated
  if (inp%ifcflag==1 .and. any(inp%prtdos==[1, 2])) then
    write(message,'(a,(80a),4a)')ch10,('=',ii=1,80),ch10,ch10,' Calculation of phonon density of states ',ch10
@@ -464,12 +470,6 @@ program anaddb
    call wrtout(std_out,message,'COLL')
 
    call mkphdos(Phdos,Crystal,Ifc, inp%prtdos,inp%dosdeltae,inp%dossmear, inp%ng2qpt, inp%q2shft, comm)
-
-   if (sum(abs(inp%thermal_supercell))>0) then
-     ABI_ALLOCATE(thm_scells, (inp%ntemper))
-     call thermal_supercell_make(Crystal, Ifc, inp%ntemper, inp%thermal_supercell, inp%tempermin, inp%temperinc, thm_scells)
-   end if
-
 
    if (iam_master) then
      call phdos_print_msqd(Phdos, filnam(2), inp%ntemper, inp%tempermin, inp%temperinc)
