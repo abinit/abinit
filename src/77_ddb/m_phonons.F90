@@ -1338,6 +1338,9 @@ subroutine thermal_supercell_make(Crystal, Ifc, ntemper, &
  ABI_FREE(phfrq_allq)
  ABI_FREE(phdispl_allq)
  ABI_FREE(phdispl)
+ ABI_FREE(qibz)
+ ABI_FREE(qbz)
+ ABI_FREE(wtqibz)
 
 end subroutine thermal_supercell_make
 !!***
@@ -1377,7 +1380,7 @@ subroutine thermal_supercell_free(ntemper, thm_scells)
 !Arguments ------------------------------------
 !scalars
  integer, intent(in) :: ntemper
- type(supercell_type), allocatable, intent(out) :: thm_scells(:)
+ type(supercell_type), allocatable, intent(inout) :: thm_scells(:)
 
 ! local
  integer :: itemp
@@ -1440,8 +1443,8 @@ subroutine thermal_supercell_print(fname, ntemper, tempermin, temperinc, thm_sce
 
  do itemp = 1, ntemper
    temper = dble(itemp-1)*temperinc+tempermin
-   write (temper_str,'(F5.0)') temper
-   write (filename, '(3a)') trim(fname), "_T_", trim(temper_str)
+   write (temper_str,'(I8)') int(temper)
+   write (filename, '(3a)') trim(fname), "_T_", trim(adjustl(temper_str))
    write (title1, '(3a)') "#  thermalized supercell at temperature T= ", trim(temper_str), " Kelvin"
    title2 = "#  generated with alternating thermal displacements of all phonons" 
    call prt_supercell (filename, thm_scells(itemp), title1, title2)

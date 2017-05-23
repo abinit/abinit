@@ -833,8 +833,6 @@ program anaddb
  ABI_DEALLOCATE(zeff)
  ABI_DEALLOCATE(instrain)
 
- call thermal_supercell_free(inp%ntemper, thm_scells)
-
  50 continue
 
  call asrq0_free(asrq0)
@@ -842,6 +840,7 @@ program anaddb
  call crystal_free(Crystal)
  call ddb_free(ddb)
  call anaddb_dtset_free(inp)
+ call thermal_supercell_free(inp%ntemper, thm_scells)
 
  ! Close files
  if (iam_master) then
