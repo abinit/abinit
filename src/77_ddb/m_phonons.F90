@@ -2074,8 +2074,9 @@ subroutine phdos_print_msqd(PHdos, fname, ntemper, tempermin, temperinc)
 &                                              '                u_yz                u_xz                u_xy in bohr^2'
    !call wrtout(iunit, msg, 'COLL')
    write (iunit, '(a)') trim(msg)
-   write (msg, '(2a)') '#    T             |v^2|                v_xx                v_yy                v_zz',&
-&                                              '                v_yz                v_xz                v_xy in bohr^2/atomic time unit^2'
+   write (msg, '(3a)') '#    T             |v^2|                v_xx                v_yy                v_zz',&
+&                                              '                v_yz                v_xz                v_xy',&
+&                                              ' in bohr^2/atomic time unit^2'
    !call wrtout(iunit, msg, 'COLL')
    write (junit, '(a)') trim(msg)
 
