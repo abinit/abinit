@@ -57,10 +57,10 @@ CONTAINS  !=====================================================================
 !!
 !! PARENTS
 !!      atomden,cpdrv,critics,denfgr,finddistrproc,invacuum,listkk,m_bz_mesh
-!!      m_chi0,m_cut3d,m_exc_diago,m_gsphere,m_ifc,m_io_screening
-!!      m_paw_pwaves_lmn,m_screen,m_skw,m_use_ga,m_vcoul,mkcore_inner
-!!      mlwfovlp_qp,outscfcv,partial_dos_fractions,shellstruct,symkpt,tddft
-!!      thmeig,wvl_initro
+!!      m_chi0,m_cut3d,m_exc_diago,m_fit_polynomial_coeff,m_gsphere,m_ifc
+!!      m_io_screening,m_paw_pwaves_lmn,m_screen,m_skw,m_use_ga,m_vcoul,mkcore
+!!      mkcore_inner,mkcore_wvl,mlwfovlp_qp,outscfcv,partial_dos_fractions
+!!      shellstruct,symkpt,tddft,thmeig,wvl_initro
 !!
 !! CHILDREN
 !!

@@ -72,49 +72,56 @@
 !!  vxcavg=<Vxc>=unit cell average of Vxc = (1/ucvol) Int [Vxc(r) d^3 r].
 !!
 !!  === Only if abs(option)=2, -2, 3, 10, 12 (in case 12, for hybrids, substitution of the related GGA) ===
-!!  kxc(nfft,nkxc)=exchange and correlation kernel
-!!                 (returned only if nkxc/=0)
-!!   allowed if LDAs (dtset%xclevel=1 or option=(10 or 12)) :
-!!    if nspden==1: return kxc(:,1)= d2Exc/drho2
+!!  kxc(nfft,nkxc)=exchange and correlation kernel (returned only if nkxc/=0)
+!!    Content of Kxc array:
+!!   ===== if LDA
+!!    if nspden==1: kxc(:,1)= d2Exc/drho2
 !!       that is 1/2 ( d2Exc/drho_up drho_up + d2Exc/drho_up drho_dn )
-!!    if nspden==1: also return kxc(:,2)= d2Exc/drho_up drho_dn
-!!    if nspden>=2, return  kxc(:,1)=d2Exc/drho_up drho_up
-!!                          kxc(:,2)=d2Exc/drho_up drho_dn
-!!                          kxc(:,3)=d2Exc/drho_dn drho_dn
-!!   allowed also if GGAs (dtset%xclevel=2 and option=2 or 3)
-!!    for the time being, treat all cases as spin-polarized, with nkxc=23
-!!    kxc(:,1)= d2Ex/drho_up drho_up
-!!    kxc(:,2)= d2Ex/drho_dn drho_dn
-!!    kxc(:,3)= dEx/d(abs(grad(rho_up))) / abs(grad(rho_up))
-!!    kxc(:,4)= dEx/d(abs(grad(rho_dn))) / abs(grad(rho_dn))
-!!    kxc(:,5)= d2Ex/d(abs(grad(rho_up))) drho_up / abs(grad(rho_up))
-!!    kxc(:,6)= d2Ex/d(abs(grad(rho_dn))) drho_dn / abs(grad(rho_dn))
-!!    kxc(:,7)= 1/abs(grad(rho_up)) * d/d(abs(grad(rho_up)) (dEx/d(abs(grad(rho_up))) /abs(grad(rho_up)))
-!!    kxc(:,8)= 1/abs(grad(rho_dn)) * d/d(abs(grad(rho_dn)) (dEx/d(abs(grad(rho_dn))) /abs(grad(rho_dn)))
-!!    kxc(:,9)= d2Ec/drho_up drho_up
-!!    kxc(:,10)=d2Ec/drho_up drho_dn
-!!    kxc(:,11)=d2Ec/drho_dn drho_dn
-!!    kxc(:,12)=dEc/d(abs(grad(rho))) / abs(grad(rho))
-!!    kxc(:,13)=d2Ec/d(abs(grad(rho))) drho_up / abs(grad(rho))
-!!    kxc(:,14)=d2Ec/d(abs(grad(rho))) drho_dn / abs(grad(rho))
-!!    kxc(:,15)=1/abs(grad(rho)) * d/d(abs(grad(rho)) (dEc/d(abs(grad(rho))) /abs(grad(rho)))
-!!    kxc(:,16)=rho_up
-!!    kxc(:,17)=rho_dn
-!!    kxc(:,18)=gradx(rho_up)
-!!    kxc(:,19)=gradx(rho_dn)
-!!    kxc(:,20)=grady(rho_up)
-!!    kxc(:,21)=grady(rho_dn)
-!!    kxc(:,22)=gradz(rho_up)
-!!    kxc(:,23)=gradz(rho_dn)
+!!                 (kxc(:,2)= d2Exc/drho_up drho_dn)
+!!    if nspden>=2: kxc(:,1)= d2Exc/drho_up drho_up
+!!                  kxc(:,2)= d2Exc/drho_up drho_dn
+!!                  kxc(:,3)= d2Exc/drho_dn drho_dn
+!!   ===== if GGA
+!!    if nspden==1:
+!!       kxc(:,1)= d2Exc/drho2
+!!       kxc(:,2)= 1/|grad(rho)| dExc/d|grad(rho)|
+!!       kxc(:,3)= 1/|grad(rho)| d2Exc/d|grad(rho)| drho
+!!       kxc(:,4)= 1/|grad(rho)| * d/d|grad(rho)| ( 1/|grad(rho)| dExc/d|grad(rho)| )
+!!       kxc(:,5)= gradx(rho)
+!!       kxc(:,6)= grady(rho)
+!!       kxc(:,7)= gradz(rho)
+!!    if nspden>=2:
+!!       kxc(:,1)= d2Exc/drho_up drho_up
+!!       kxc(:,2)= d2Exc/drho_up drho_dn
+!!       kxc(:,3)= d2Exc/drho_dn drho_dn
+!!       kxc(:,4)= 1/|grad(rho_up)| dEx/d|grad(rho_up)|
+!!       kxc(:,5)= 1/|grad(rho_dn)| dEx/d|grad(rho_dn)|
+!!       kxc(:,6)= 1/|grad(rho_up)| d2Ex/d|grad(rho_up)| drho_up
+!!       kxc(:,7)= 1/|grad(rho_dn)| d2Ex/d|grad(rho_dn)| drho_dn
+!!       kxc(:,8)= 1/|grad(rho_up)| * d/d|grad(rho_up)| ( 1/|grad(rho_up)| dEx/d|grad(rho_up)| )
+!!       kxc(:,9)= 1/|grad(rho_dn)| * d/d|grad(rho_dn)| ( 1/|grad(rho_dn)| dEx/d|grad(rho_dn)| )
+!!       kxc(:,10)=1/|grad(rho)| dEc/d|grad(rho)|
+!!       kxc(:,11)=1/|grad(rho)| d2Ec/d|grad(rho)| drho_up
+!!       kxc(:,12)=1/|grad(rho)| d2Ec/d|grad(rho)| drho_dn
+!!       kxc(:,13)=1/|grad(rho)| * d/d|grad(rho)| ( 1/|grad(rho)| dEc/d|grad(rho)| )
+!!       kxc(:,14)=gradx(rho_up)
+!!       kxc(:,15)=gradx(rho_dn)
+!!       kxc(:,16)=grady(rho_up)
+!!       kxc(:,17)=grady(rho_dn)
+!!       kxc(:,18)=gradz(rho_up)
+!!       kxc(:,19)=gradz(rho_dn)
 !!
 !!  === Only if abs(option)=3 ===
 !!  [k3xc(nfft,nk3xc)]= -- optional -- third derivative of the XC energy functional of the density,
 !!    at each point of the real space grid (only in the LDA or LSDA)
-!!    if nspden==1: return k3xc(:,1)= d3Exc/drho3
-!!    if nspden>=2, return  k3xc(:,1)=d3Exc/drho_up drho_up drho_up
-!!                          k3xc(:,2)=d3Exc/drho_up drho_up drho_dn
-!!                          k3xc(:,3)=d3Exc/drho_up drho_dn drho_dn
-!!                          k3xc(:,4)=d3Exc/drho_dn drho_dn drho_dn
+!!    Content of K3xc array:
+!!    ===== if LDA
+!!    if nspden==1: k3xc(:,1)= d3Exc/drho3
+!!    if nspden>=2, k3xc(:,1)= d3Exc/drho_up drho_up drho_up
+!!                  k3xc(:,2)= d3Exc/drho_up drho_up drho_dn
+!!                  k3xc(:,3)= d3Exc/drho_up drho_dn drho_dn
+!!                  k3xc(:,4)= d3Exc/drho_dn drho_dn drho_dn
+
 !! === Additional optional output ===
 !!  [exc_vdw_out]= vdW-DF contribution to enxc (hartree)
 !!  [vxctau(nfft,nspden,4*dtset%usekden)]=(only for meta-GGA)=
@@ -934,24 +941,59 @@ subroutine rhohxc(dtset,enxc,gsqcut,izero,kxc,mpi_enreg,nfft,ngfft, &
          end if
        end if
 
+<<<<<<< HEAD
 !      Transfer the xc kernel (if this must be done, and has not yet been done)
        if (nkxc_eff>0.and.ndvxc>0 .and. ixc_fallbackkxc_hyb==dtset%ixc) then
          kxc(ifft:ifft+npts-1,1:nkxc_eff)=zero
+=======
+!      Transfer the xc kernel
+       if (nkxc_eff>0.and.ndvxc>0) then
+>>>>>>> develop
          if (nkxc_eff==1.and.ndvxc==15) then
            kxc(ifft:ifft+npts-1,1)=half*(dvxc_b(1:npts,1)+dvxc_b(1:npts,9)+dvxc_b(1:npts,10))
          else if (nkxc_eff==3.and.ndvxc==15) then
            kxc(ifft:ifft+npts-1,1)=dvxc_b(1:npts,1)+dvxc_b(1:npts,9)
            kxc(ifft:ifft+npts-1,2)=dvxc_b(1:npts,10)
            kxc(ifft:ifft+npts-1,3)=dvxc_b(1:npts,2)+dvxc_b(1:npts,11)
-         else
+         else if (nkxc_eff==7.and.ndvxc==8) then
+           kxc(ifft:ifft+npts-1,1)=half*dvxc_b(1:npts,1)
+           kxc(ifft:ifft+npts-1,2)=half*dvxc_b(1:npts,3)
+           kxc(ifft:ifft+npts-1,3)=quarter*dvxc_b(1:npts,5)
+           kxc(ifft:ifft+npts-1,4)=eighth*dvxc_b(1:npts,7)
+         else if (nkxc_eff==7.and.ndvxc==15) then
+           kxc(ifft:ifft+npts-1,1)=half*(dvxc_b(1:npts,1)+dvxc_b(1:npts,9)+dvxc_b(1:npts,10))
+           kxc(ifft:ifft+npts-1,2)=half*dvxc_b(1:npts,3)+dvxc_b(1:npts,12)
+           kxc(ifft:ifft+npts-1,3)=quarter*dvxc_b(1:npts,5)+dvxc_b(1:npts,13)
+           kxc(ifft:ifft+npts-1,4)=eighth*dvxc_b(1:npts,7)+dvxc_b(1:npts,15)
+         else if (nkxc_eff==19.and.ndvxc==15) then
+           kxc(ifft:ifft+npts-1,1)=dvxc_b(1:npts,1)+dvxc_b(1:npts,9)
+           kxc(ifft:ifft+npts-1,2)=dvxc_b(1:npts,10)
+           kxc(ifft:ifft+npts-1,3)=dvxc_b(1:npts,2)+dvxc_b(1:npts,11)
+           kxc(ifft:ifft+npts-1,4)=dvxc_b(1:npts,3)
+           kxc(ifft:ifft+npts-1,5)=dvxc_b(1:npts,4)
+           kxc(ifft:ifft+npts-1,6)=dvxc_b(1:npts,5)
+           kxc(ifft:ifft+npts-1,7)=dvxc_b(1:npts,6)
+           kxc(ifft:ifft+npts-1,8)=dvxc_b(1:npts,7)
+           kxc(ifft:ifft+npts-1,9)=dvxc_b(1:npts,8)
+           kxc(ifft:ifft+npts-1,10)=dvxc_b(1:npts,12)
+           kxc(ifft:ifft+npts-1,11)=dvxc_b(1:npts,13)
+           kxc(ifft:ifft+npts-1,12)=dvxc_b(1:npts,14)
+           kxc(ifft:ifft+npts-1,13)=dvxc_b(1:npts,15)
+         else ! All other cases
+           kxc(ifft:ifft+npts-1,1:nkxc_eff)=zero
            kxc(ifft:ifft+npts-1,1:min(nkxc_eff,ndvxc))=dvxc_b(1:npts,1:min(nkxc_eff,ndvxc))
          end if
-         if (nkxc_eff==23)then
-           do ispden=1,nspden_updn
-             do ii=1,4
-               kxc(ifft:ifft+npts-1,13+ispden+2*ii)=rhonow(ifft:ifft+npts-1,ispden,ii)
-             end do
-           end do
+         if (nkxc_eff==7) then
+           kxc(ifft:ifft+npts-1,5)=rhonow(ifft:ifft+npts-1,1,2)
+           kxc(ifft:ifft+npts-1,6)=rhonow(ifft:ifft+npts-1,1,3)
+           kxc(ifft:ifft+npts-1,7)=rhonow(ifft:ifft+npts-1,1,4)
+         else if (nkxc_eff==19) then
+           kxc(ifft:ifft+npts-1,14)=rhonow(ifft:ifft+npts-1,1,2)
+           kxc(ifft:ifft+npts-1,15)=rhonow(ifft:ifft+npts-1,2,2)
+           kxc(ifft:ifft+npts-1,16)=rhonow(ifft:ifft+npts-1,1,3)
+           kxc(ifft:ifft+npts-1,17)=rhonow(ifft:ifft+npts-1,2,3)
+           kxc(ifft:ifft+npts-1,18)=rhonow(ifft:ifft+npts-1,1,4)
+           kxc(ifft:ifft+npts-1,19)=rhonow(ifft:ifft+npts-1,2,4)
          end if
        end if
 

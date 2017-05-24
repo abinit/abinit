@@ -385,7 +385,6 @@ _setup2: Arith. and geom. avg. npw (full set) are     255.094     255.080
  bonds_lgth_angles : about to open file t27_MPI4o_DS1_GEO
 
  io1dm : about to open file t27_MPI4o_DS1_1DM
- io1dm : about to open file t27_MPI4o_DS1_VCLMB_1DM
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
@@ -499,7 +498,6 @@ _setup2: Arith. and geom. avg. npw (full set) are     134.313     134.277
  bonds_lgth_angles : about to open file t27_MPI4o_DS2_GEO
 
  io1dm : about to open file t27_MPI4o_DS2_1DM
- io1dm : about to open file t27_MPI4o_DS2_VCLMB_1DM
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
@@ -613,7 +611,6 @@ _setup2: Arith. and geom. avg. npw (full set) are     128.156     128.146
  bonds_lgth_angles : about to open file t27_MPI4o_DS3_GEO
 
  io1dm : about to open file t27_MPI4o_DS3_1DM
- io1dm : about to open file t27_MPI4o_DS3_VCLMB_1DM
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
@@ -739,7 +736,6 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.844     127.836
  bonds_lgth_angles : about to open file t27_MPI4o_DS4_GEO
 
  io1dm : about to open file t27_MPI4o_DS4_1DM
- io1dm : about to open file t27_MPI4o_DS4_VCLMB_1DM
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
@@ -856,7 +852,6 @@ _setup2: Arith. and geom. avg. npw (full set) are     511.875     511.840
  bonds_lgth_angles : about to open file t27_MPI4o_DS5_GEO
 
  io1dm : about to open file t27_MPI4o_DS5_1DM
- io1dm : about to open file t27_MPI4o_DS5_VCLMB_1DM
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density

@@ -70,7 +70,7 @@
 !! (if useylm=0, should have cpopt=-1)
 !!
 !! PARENTS
-!!      energy,forstrnps,m_invovl,vtowfk
+!!      energy,forstrnps,m_invovl,m_lobpcgwf,vtowfk
 !!
 !! CHILDREN
 !!      dcopy,nonlop,prep_index_wavef_bandpp,prep_sort_wavef_spin,timab

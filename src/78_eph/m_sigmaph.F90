@@ -1603,6 +1603,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, dtfil, comm) r
  NCF_CHECK(nctk_open_modify(new%ncid, strcat(dtfil%filnam_ds(4), "_SIGMAPH.nc"), xmpi_comm_self))
  NCF_CHECK(nctk_set_datamode(new%ncid))
 
+
 contains
 
  integer function vid(vname)
@@ -1617,6 +1618,7 @@ contains
    vid = nctk_idname(ncid, vname)
  end function vid
 !!***
+
 #endif
 
 end function sigmaph_new

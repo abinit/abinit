@@ -185,7 +185,7 @@
    ndgxdt=1
  end if
  if(cwaveprj(1,1)%ncpgr<ndgxdt+nd2gxdt) then
-     MSG_BUG('Incorrect size for ncpgr')
+   MSG_BUG('Incorrect size for ncpgr')
  end if
 !Eventually re-compute (k+G) vectors (and related data)
  if (nkpg==0) then

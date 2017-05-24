@@ -77,7 +77,7 @@
 !!                                       Usually ncprj=natom
 !!
 !! PARENTS
-!!      dfpt_looppert,extrapwf,scfcv,update_e_field_vars,vtorho
+!!      dfpt_looppert,extrapwf,forstr,scfcv,update_e_field_vars,vtorho
 !!
 !! CHILDREN
 !!      getcprj,mkffnl,mkkpg,pawcprj_alloc,pawcprj_free,pawcprj_mpi_sum

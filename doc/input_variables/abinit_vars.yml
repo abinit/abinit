@@ -22901,6 +22901,26 @@
     - '[[RESPFN]]'
     commentdefault: null
     commentdims: null
+    defaultval: 0
+    definition: Response Function with respect to MAGNetic B-field perturbation
+    dimensions: scalar
+    excludes: null
+    requires: null
+    section: varrf
+    text: |-
+        <p>
+         It must be equal to 1
+         to run response function calculations with respect to external magnetic field.
+         Currently, orbital magnetism is not taken into account and the perturbing potential
+         has Zeeman form.
+        </p>
+    varname: rfmagn
+    vartype: integer
+- !variable
+    characteristics:
+    - '[[RESPFN]]'
+    commentdefault: null
+    commentdims: null
     defaultval: 1
     definition: Response Function METHod
     dimensions: scalar
@@ -22985,21 +23005,21 @@
     text: |-
         <p>
          Available to the developpers, to activate
-        the use of ipert=natom+5 and ipert=natom+6, two sets of perturbations
+        the use of ipert=natom+6 and ipert=natom+7, two sets of perturbations
         that the developpers can define.
          <br />
          <ul>
           <li>
-           0=&gt;no computations for ipert=natom+5 or ipert=natom+6
+           0=&gt;no computations for ipert=natom+6 or ipert=natom+7
           </li>
           <li>
-           1=&gt;response with respect to perturbation natom+5 will be computed
+           1=&gt;response with respect to perturbation natom+6 will be computed
           </li>
           <li>
-           2=&gt;response with respect to perturbation natom+6 will be computed
+           2=&gt;response with respect to perturbation natom+7 will be computed
           </li>
           <li>
-           3=&gt;responses with respect to perturbations natom+5 and natom+6 will be computed
+           3=&gt;responses with respect to perturbations natom+6 and natom+7 will be computed
           </li>
          </ul>
         </p>

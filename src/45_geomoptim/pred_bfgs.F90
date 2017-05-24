@@ -55,8 +55,8 @@
 !!      mover
 !!
 !! CHILDREN
-!!      brdene,dgetrf,dgetri,hessinit,hessupdt,hist2var,metric,mkrdim,var2hist
-!!      xfh_recover_new,xfpack_f2vout,xfpack_vin2x,xfpack_x2vin,xred2xcart
+!!      brdene,dgetrf,dgetri,fcart2fred,hessinit,hessupdt,hist2var,metric
+!!      mkrdim,var2hist,xfh_recover_new,xfpack_f2vout,xfpack_vin2x,xfpack_x2vin
 !!
 !! SOURCE
 

@@ -664,6 +664,7 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%rfddk=0
    dtsets(idtset)%rfdir(1:3)=0
    dtsets(idtset)%rfelfd=0
+   dtsets(idtset)%rfmagn=0
    dtsets(idtset)%rfmeth=1
    dtsets(idtset)%rfphon=0
    dtsets(idtset)%rfstrs=0

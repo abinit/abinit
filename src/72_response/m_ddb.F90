@@ -219,7 +219,7 @@ CONTAINS  !===========================================================
 !!
 !! PARENTS
 !!      anaddb,dfpt_looppert,dfptnl_doutput,eph,gstate
-!!      m_effective_potential_file,mblktyp1,mblktyp5,thmeig
+!!      m_effective_potential_file,m_gruneisen,mblktyp1,mblktyp5,thmeig
 !!
 !! CHILDREN
 !!
@@ -1004,7 +1004,8 @@ end subroutine inprep8
 !! comm=MPI communicator.
 !!
 !! PARENTS
-!!      anaddb,m_ddb,m_effective_potential_file,mblktyp1,mblktyp5,mrgddb
+!!      anaddb,m_ddb,m_effective_potential_file,m_gruneisen,mblktyp1,mblktyp5
+!!      mrgddb
 !!
 !! CHILDREN
 !!
@@ -3325,7 +3326,7 @@ end subroutine nlopt
 !!   They are needed for legacy code!
 !!
 !! PARENTS
-!!      anaddb,dfpt_looppert,eph,m_effective_potential_file
+!!      anaddb,dfpt_looppert,eph,m_effective_potential_file,m_gruneisen
 !!
 !! CHILDREN
 !!

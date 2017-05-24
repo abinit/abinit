@@ -247,7 +247,7 @@ end subroutine paw_spline
 !!
 !! PARENTS
 !!      m_paw_atom,m_paw_finegrid,m_paw_gaussfit,m_paw_pwaves_lmn,m_pawpsp
-!!      m_pawxmlps
+!!      m_pawxmlps,mkcore,mkcore_inner,mkcore_wvl,mklocl_realspace
 !!
 !! CHILDREN
 !!      paw_jbessel
@@ -341,9 +341,10 @@ end subroutine paw_splint
 !!    The input value is incremented by the number of such points.
 !!
 !! PARENTS
-!!      m_paw_atom,m_paw_finegrid,m_paw_gaussfit,m_paw_pwaves_lmn,m_pawpsp,m_pawxmlps
+!!      mkcore_inner,mklocl_realspace,mklocl_wavelets
 !!
 !! CHILDREN
+!!      paw_jbessel
 !!
 !! SOURCE
 

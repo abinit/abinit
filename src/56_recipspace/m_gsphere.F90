@@ -1629,7 +1629,7 @@ end subroutine getfullg
 !!  The search can be optimized by looping over shells. See m_skw for a faster algo
 !!
 !! PARENTS
-!!      m_gsphere
+!!      m_gsphere,m_skw
 !!
 !! CHILDREN
 !!      gsph_free,gsph_init

@@ -328,11 +328,11 @@ real(dp),parameter:: rcov(vdw_nspecies)=&
      vdw_sr6=vdw_sr6*vdw_sr6_bp86 ; vdw_s8=vdw_s8*vdw_s8_bp86
    case (-202231,-231202)
      vdw_sr6=vdw_sr6*vdw_sr6_tpss ; vdw_s8=vdw_s8*vdw_s8_tpss
-   case (14)
+   case (14,-102130,-130102)
      vdw_sr6=vdw_sr6*vdw_sr6_revpbe ; vdw_s8=vdw_s8*vdw_s8_revpbe
    case (-170)
      vdw_sr6=vdw_sr6*vdw_sr6_b97d ; vdw_s8=vdw_s8*vdw_s8_b97d
-   case (41)
+   case (41,-406)
      vdw_sr6=vdw_sr6*vdw_sr6_pbe0 ; vdw_s8=vdw_s8*vdw_s8_pbe0
    case default
      write(msg,'(a,i8,a)')'  Van der Waals DFT-D3 correction not compatible with ixc=',ixc,' !'
@@ -349,11 +349,11 @@ real(dp),parameter:: rcov(vdw_nspecies)=&
      vdw_a1=vdw_a1_bp86 ; vdw_a2=vdw_a2_bp86 ; vdw_s8=vdwbj_s8_bp86
    case (-202231,-231202)
      vdw_a1=vdw_a1_tpss ; vdw_a2=vdw_a2_tpss ; vdw_s8=vdwbj_s8_tpss
-   case (14)
+   case (14,-102130,-130102)
      vdw_a1=vdw_a1_revpbe ; vdw_a2=vdw_a2_revpbe ; vdw_s8=vdwbj_s8_revpbe
    case (-170)
      vdw_a1=vdw_a1_b97d ; vdw_a2=vdw_a2_b97d ; vdw_s8=vdwbj_s8_b97d
-   case (41)
+   case (41,-406)
      vdw_a1=vdw_a1_pbe0 ; vdw_a2=vdw_a2_pbe0 ; vdw_s8=vdwbj_s8_pbe0
    end select
  end if
