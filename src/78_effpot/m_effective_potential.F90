@@ -2705,8 +2705,8 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
      if (present(du_delta)) then
        du_delta_tmp(:,:,:) = du_delta(:,:,:)
      else
-! !   Compute displacmeent wr to strain 
-! !   See formula A4  in PRB 95,094115
+!      Compute displacmeent wr to strain 
+!      See formula A4  in PRB 95,094115
        ABI_ALLOCATE(work,(3))
        ABI_ALLOCATE(work2,(3,eff_pot%supercell%natom_supercell))
        work2(:,:) = zero
