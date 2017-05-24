@@ -536,6 +536,7 @@ subroutine prt_supercell (filename, scell, title1, title2)
 ! print header
   write (scunit, '(a)') '#'
   write (scunit, '(a)') '# anaddb file with frozen phonon mode in supercell'
+  write (scunit, '(a)') '# !!!   Do not forget to adjust nband   !!! '
   write (scunit, '(a)') '#'
   write (scunit, '(a)') title1
   write (scunit, '(a)') title2
