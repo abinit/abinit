@@ -157,8 +157,12 @@ subroutine lbfgs_destroy()
 
 implicit none
 
- ABI_DEALLOCATE(lbfgs_plan%work)
- ABI_DEALLOCATE(lbfgs_plan%diag)
+ if(allocated (lbfgs_plan%work)) then
+   ABI_DEALLOCATE(lbfgs_plan%work)
+ end if
+ if(allocated (lbfgs_plan%diag)) then
+   ABI_DEALLOCATE(lbfgs_plan%diag)
+ end if
 
 end subroutine lbfgs_destroy
 !!***
