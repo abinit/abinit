@@ -2696,8 +2696,8 @@ subroutine coeffs_xml2effpot(eff_pot,filename,comm)
  use m_effective_potential, only : effective_potential_type
  use m_polynomial_coeff
  use m_polynomial_term
-#if defined HAVE_LIBXML
  use m_crystal, only : symbols_crystal
+#if defined HAVE_LIBXML
  use iso_c_binding, only : C_CHAR,C_PTR,c_f_pointer
 #endif
 
@@ -2724,7 +2724,6 @@ subroutine coeffs_xml2effpot(eff_pot,filename,comm)
  character(len=200) :: name
 #ifdef HAVE_LIBXML
  integer :: icoeff,iterm,idisp,ref_term
- character(len=5),allocatable :: symbols(:)
 #endif
 
 #ifndef HAVE_LIBXML
@@ -2735,6 +2734,7 @@ subroutine coeffs_xml2effpot(eff_pot,filename,comm)
  character (len=XML_RECL) :: strg,strg1
 #endif
  character(len=500) :: message
+ character(len=5),allocatable :: symbols(:)
  integer,parameter :: master=0
  logical :: iam_master
  logical :: debug =.FALSE.
@@ -2792,6 +2792,12 @@ subroutine coeffs_xml2effpot(eff_pot,filename,comm)
    call wrtout(ab_out,message,'COLL')
    call wrtout(std_out,message,'COLL')
 
+   
+   ABI_ALLOCATE(symbols,(eff_pot%crystal%natom))
+!  Get the symbols arrays
+   call symbols_crystal(eff_pot%crystal%natom,eff_pot%crystal%ntypat,&
+&                       eff_pot%crystal%npsp,symbols,eff_pot%crystal%typat,eff_pot%crystal%znucl)
+
 
  !Read with libxml librarie
 #if defined HAVE_LIBXML
@@ -2803,12 +2809,6 @@ subroutine coeffs_xml2effpot(eff_pot,filename,comm)
    ABI_ALLOCATE(direction,(ncoeff,nterm_max,ndisp_max))
    ABI_ALLOCATE(power,(ncoeff,nterm_max,ndisp_max))
    ABI_ALLOCATE(weight,(ncoeff,nterm_max))
-   ABI_ALLOCATE(symbols,(eff_pot%crystal%natom))
-
-!  Get the symbols arrays
-   call symbols_crystal(eff_pot%crystal%natom,eff_pot%crystal%ntypat,&
-&                       eff_pot%crystal%npsp,symbols,eff_pot%crystal%typat,eff_pot%crystal%znucl)
-
 
 !  Read the values of this term with libxml
    call effpot_xml_readCoeff(char_f2c(trim(filename)),ncoeff,ndisp_max,nterm_max,&
@@ -2840,39 +2840,22 @@ subroutine coeffs_xml2effpot(eff_pot,filename,comm)
 
    do icoeff=1,ncoeff
 !    Reset the ref_term
-!    Try to find the index of the term corresponding to the interation in the 
-!    reference cell (000) in order to compute the name correctly...
-!    If this coeff is not in the ref cell, take by default the first term:
-     ref_term = 1
-
      do iterm=1,nterm_max
 !      Initialisation of the polynomial_term structure with the values from the
        call polynomial_term_init(atindx(icoeff,iterm,:,:),cell(icoeff,iterm,:,:,:),&
 &                                direction(icoeff,iterm,:),ndisp_max,terms(icoeff,iterm),&
 &                                power(icoeff,iterm,:),weight(icoeff,iterm),check=.true.)
 
-!      Find the index of the ref 
-       if(ref_term ==1) then !Need to find the reference term
-         do idisp=1,terms(icoeff,iterm)%ndisp
-           if(terms(icoeff,iterm)%direction(idisp) > zero) then
-             ref_term = iterm
-             if(any(terms(icoeff,iterm)%cell(:,1,idisp) /= zero).or.&
-&               any(terms(icoeff,iterm)%cell(:,2,idisp) /= zero)) then
-               ref_term = 1
-               exit
-             end if
-           end if
-         end do!end do disp
-       end if
-     end do!end do term
-
 !    Initialisation of the polynomial_coefficent structure with the values
      call polynomial_coeff_init(coefficient(icoeff),nterm_max,coeffs(icoeff),&
 &                               terms(icoeff,:),check=.true.)
 
 !    Get the name of this coefficient  and set it
+!    Try to find the index of the term corresponding to the interation in the 
+!    reference cell (000) in order to compute the name correctly...
+!    If this coeff is not in the ref cell, take by default the first term
      call polynomial_coeff_getName(name,eff_pot%crystal%natom,coeffs(icoeff),&
-&                                  symbols,recompute=.true.,iterm=ref_term)
+&                                  symbols,recompute=.true.)
      call polynomial_coeff_setName(name,coeffs(icoeff))
 
 !    Free them all
@@ -2880,7 +2863,7 @@ subroutine coeffs_xml2effpot(eff_pot,filename,comm)
        call polynomial_term_free(terms(icoeff,iterm))
      end do
    end do
-   ABI_DEALLOCATE(symbols)
+
 
 #else
    ABI_DATATYPE_ALLOCATE(terms,(1,nterm_max))
@@ -3064,8 +3047,10 @@ subroutine coeffs_xml2effpot(eff_pot,filename,comm)
 !          Initialisation of the polynomial_coefficent structure with the values from the
 !          previous step
            icoeff = icoeff + 1
-           call polynomial_coeff_init(coefficient(1),nterm,coeffs(icoeff),terms(1,:),name=name)
-
+           call polynomial_coeff_init(coefficient(1),nterm,coeffs(icoeff),terms(1,:))
+           call polynomial_coeff_getName(name,eff_pot%crystal%natom,coeffs(icoeff),&
+&                                        symbols,recompute=.true.)
+           call polynomial_coeff_setName(name,coeffs(icoeff))
 !          Deallocation of the terms array for this coefficient
            do jj=1,nterm_max
              call polynomial_term_free(terms(1,jj))
@@ -3077,7 +3062,6 @@ subroutine coeffs_xml2effpot(eff_pot,filename,comm)
      close(unit=funit)
 
 #endif
-
      ABI_DATATYPE_DEALLOCATE(terms)
      ABI_DEALLOCATE(atindx)
      ABI_DEALLOCATE(coefficient)
@@ -3085,6 +3069,7 @@ subroutine coeffs_xml2effpot(eff_pot,filename,comm)
      ABI_DEALLOCATE(direction)
      ABI_DEALLOCATE(power)
      ABI_DEALLOCATE(weight)
+     ABI_DEALLOCATE(symbols)
    end if !End if master
 
 !9-MPI BROADCAST

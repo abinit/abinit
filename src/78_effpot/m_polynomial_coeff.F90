@@ -397,12 +397,12 @@ subroutine polynomial_coeff_getName(name,natom,polynomial_coeff,symbols,recomput
  integer,optional,intent(in) :: iterm
 !arrays
  character(len=5),intent(in) :: symbols(:)
- character(len=100),optional,intent(out):: name
+ character(len=100),intent(out):: name
  type(polynomial_coeff_type),optional, intent(in) :: polynomial_coeff
  logical,optional,intent(in) :: recompute
 !Local variables-------------------------------
 !scalar
- integer :: idisp,iterm_in = 1
+ integer :: ii,idisp,iterm_in
  logical :: need_recompute = .FALSE.
 !arrays
  integer :: cell_atm1(3),cell_atm2(3)
@@ -419,13 +419,34 @@ subroutine polynomial_coeff_getName(name,natom,polynomial_coeff,symbols,recomput
 
 !Set the optional arguments 
  if(present(recompute)) need_recompute = recompute
- if(present(iterm)) iterm_in = iterm
+ if(present(iterm)) then
+   iterm_in = iterm
+ else
+   if(need_recompute)then
+     iterm_in = 1
+     do ii=1,polynomial_coeff%nterm
+!      Find the index of the ref 
+       if(iterm_in==1) then !Need to find the reference term
+         do idisp=1,polynomial_coeff%terms(ii)%ndisp
+           if(polynomial_coeff%terms(ii)%direction(idisp) > zero) then
+             iterm_in = ii
+             if(any(polynomial_coeff%terms(ii)%cell(:,1,idisp) /= zero).or.&
+&               any(polynomial_coeff%terms(ii)%cell(:,2,idisp) /= zero)) then
+               iterm_in = 1
+               exit
+             end if
+           end if
+         end do!end do disp
+       end if
+     end do!end do term
+   end if
+ end if
 
 !Do check
  if(iterm_in > polynomial_coeff%nterm.or.iterm_in < zero) then
    write(message, '(5a)')&
-&      ' The number of the request term to generate the name of the',ch10,&
-&      'coefficient is not possible.',ch10,&
+&      ' The number of the requested term for the generation of',ch10,&
+&      'the name of the coefficient is not possible.',ch10,&
 &      'Action: Contact Abinit group.'
    MSG_BUG(message)
  end if

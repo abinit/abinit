@@ -1917,7 +1917,6 @@ subroutine fit_polynomial_coeff_fit(cut_off,eff_pot,hist,ncycle_in,comm)
  real(dp) :: energy,ffact,sfact,mse,msef,mses
  real(dp),parameter :: HaBohr_meVAng = 27.21138386 / 0.529177249
 !arrays
- character(len=500) :: message
  real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3),strain_mat_inv(3,3)
  real(dp) :: mingf(3)
  integer :: ipiv(3)
@@ -1930,6 +1929,8 @@ subroutine fit_polynomial_coeff_fit(cut_off,eff_pot,hist,ncycle_in,comm)
  real(dp),allocatable :: work(:),work2(:,:)
  type(polynomial_coeff_type),allocatable :: coeffs_tmp(:),coeffs_in(:)
  type(strain_type) :: strain_t
+ character(len=500) :: message
+ character(len=5)   :: i_char,j_char
 ! *************************************************************************
 
  write(message,'(a,(80a))') ch10,('=',ii=1,80)
@@ -2172,7 +2173,7 @@ subroutine fit_polynomial_coeff_fit(cut_off,eff_pot,hist,ncycle_in,comm)
      list_coeffs(icycle) = icoeff
 
      write(message, '(a,I0,a)')' Testing coefficient ',icoeff,': '
-     
+
 !    call the fit process routine
 !    This routine solves the linear system proposed by C.Escorihuela-Sayalero see PRB95,094115(2017)
      call fit_polynomial_coeff_solve(coeff_values(1:icycle),du_delta,fcart_coeffs,fcart_fixed,&
@@ -2241,7 +2242,9 @@ subroutine fit_polynomial_coeff_fit(cut_off,eff_pot,hist,ncycle_in,comm)
 &                                      ' the iteration ',icycle,' (meV/f.u.): ',&
 &                        mse* 1000*27.21138386 / product(eff_pot%supercell%qphon(:))
    call wrtout(std_out,message,'COLL')
-   write(message, '(a,I0,7x,I0,6x,4ES18.10)') " ",icycle,list_coeffs(icycle),&
+   write (i_char, '(i5)') icycle
+   write (j_char, '(i5)') list_coeffs(icycle)
+   write(message, '(a,a,2x,a,3x,4ES18.10)') " ",adjustl(i_char),adjustl(j_char),&
 &                                    mse* 1000*27.21138386 / product(eff_pot%supercell%qphon(:)),&
 &                                    mingf(1)*HaBohr_meVAng**2,&
 &                                    mingf(2)*HaBohr_meVAng**2,&
