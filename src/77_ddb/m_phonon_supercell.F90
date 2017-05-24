@@ -570,8 +570,7 @@ subroutine prt_supercell (filename, scell, title1, title2)
     write (scunit, '(3E20.10)') scell%xcart(:,iatom)
   end do
   ! for information, also print xred for atoms inside full supercell
-  !call matr3inv(scell%rprimd, gprimd)
-gprimd = zero
+  call matr3inv(scell%rprimd, gprimd)
   ! TODO: check this transpose is correct in some asymetric case
   gprimd = transpose(gprimd)
   write (scunit, '(a)') '# for information, add xred as well'
