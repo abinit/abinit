@@ -343,19 +343,20 @@ subroutine effective_potential_file_read(filename,eff_pot,inp,comm,hist)
       if(inp%ncoeff==zero)then
         write(message,'(12a)') ch10,&
 &      ' --- !WARNING',ch10,&
-&      '     The number of coefficients in set to 0',&
+&      '     The values of the coefficients are set to 0',&
 &      ' in the input file.',ch10,&
 &      '     The values of the coefficient will be read in the XML',ch10,&
 &      '     or might be fitted',ch10,&
 &      ' ---',ch10
         call wrtout(std_out,message,'COLL')
-        if(inp%fit_coeff <= zero .and. all(eff_pot%anharmonics_terms%coefficients(:)%coefficient == zero)) then
+        if(inp%fit_coeff <= zero .and. &
+&          all(eff_pot%anharmonics_terms%coefficients(:)%coefficient == zero)) then
 
           write(message,'(12a)') ch10,&
 &          ' --- !WARNING',ch10,&
 &          '     The input for the fit process is set to 0 or -1',&
 &          ' in the input file.',ch10,&
-&          '     The values of the coefficients in the XMF files are zero,',ch10,&
+&          '     Howerver, the values of the coefficients in the XMF files are zero,',ch10,&
 &          '     So the coefficients can not be used',ch10,&
 &          ' ---',ch10
           call wrtout(std_out,message,'COLL')
@@ -743,6 +744,7 @@ subroutine effective_potential_file_getDimCoeff(filename,ncoeff,ndisp_max,nterm_
          found = .false.
          do while(.not.found)
            read(funit,'(a)',iostat=ios) readline
+           call rmtabfromline(readline)
            line=adjustl(readline)
            if (line(1:5)==char(60)//'term') then
              count = count +1
@@ -750,6 +752,7 @@ subroutine effective_potential_file_getDimCoeff(filename,ncoeff,ndisp_max,nterm_
              count2 = zero
              do while(.not.found2)
                read(funit,'(a)',iostat=ios) readline
+               call rmtabfromline(readline)
                line=adjustl(readline)
                if (line(1:13)==char(60)//'displacement') then
                  count2 = count2 + 1
@@ -2723,7 +2726,7 @@ subroutine coeffs_xml2effpot(eff_pot,filename,comm)
 ! character(len=200),allocatable :: name(:)
  character(len=200) :: name
 #ifdef HAVE_LIBXML
- integer :: icoeff,iterm,idisp,ref_term
+ integer :: icoeff,iterm
 #endif
 
 #ifndef HAVE_LIBXML
@@ -2775,7 +2778,6 @@ subroutine coeffs_xml2effpot(eff_pot,filename,comm)
 &    ' Unable to read the number of displacement in ',trim(filename),ch10
     MSG_ERROR(message)
   end if
-
 
 !Allocation ov the polynomial coeff type
  ABI_DATATYPE_ALLOCATE(coeffs,(ncoeff))
@@ -2839,13 +2841,12 @@ subroutine coeffs_xml2effpot(eff_pot,filename,comm)
 !TEST_AM
 
    do icoeff=1,ncoeff
-!    Reset the ref_term
      do iterm=1,nterm_max
 !      Initialisation of the polynomial_term structure with the values from the
        call polynomial_term_init(atindx(icoeff,iterm,:,:),cell(icoeff,iterm,:,:,:),&
 &                                direction(icoeff,iterm,:),ndisp_max,terms(icoeff,iterm),&
 &                                power(icoeff,iterm,:),weight(icoeff,iterm),check=.true.)
-
+     end do
 !    Initialisation of the polynomial_coefficent structure with the values
      call polynomial_coeff_init(coefficient(icoeff),nterm_max,coeffs(icoeff),&
 &                               terms(icoeff,:),check=.true.)
@@ -2858,11 +2859,11 @@ subroutine coeffs_xml2effpot(eff_pot,filename,comm)
 &                                  symbols,recompute=.true.)
      call polynomial_coeff_setName(name,coeffs(icoeff))
 
-!    Free them all
-     do iterm=1,nterm_max
-       call polynomial_term_free(terms(icoeff,iterm))
-     end do
+!  Free them all
+   do iterm=1,nterm_max
+     call polynomial_term_free(terms(icoeff,iterm))
    end do
+ end do
 
 
 #else
@@ -2904,6 +2905,8 @@ subroutine coeffs_xml2effpot(eff_pot,filename,comm)
            if (strg/="") then
              strg1=trim(strg)
              read(strg1,*) coefficient(1)
+           else
+             coefficient(1) = zero
            end if
 !          End read headers of coefficient
 !          Reset counter
@@ -3019,10 +3022,10 @@ subroutine coeffs_xml2effpot(eff_pot,filename,comm)
                          call rdfromline_value('cell_b',line,strg)
                          if (strg/="") then
                            strg1=trim(strg)
-                           read(strg1,*)(cell(1,1,mu,1,idisp),mu=1,3)
+                           read(strg1,*)(cell(1,1,mu,2,idisp),mu=1,3)
                          else
                            strg1=trim(line)
-                           read(strg1,*)(cell(1,1,mu,1,idisp),mu=1,3)
+                           read(strg1,*)(cell(1,1,mu,2,idisp),mu=1,3)
                          end if
                        end  if
                      end if
