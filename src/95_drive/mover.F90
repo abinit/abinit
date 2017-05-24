@@ -587,7 +587,7 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
            call effective_potential_evaluate( &
 &           effective_potential,scfcv_args%results_gs%etotal,&
 &           scfcv_args%results_gs%fcart,scfcv_args%results_gs%fred,&
-&           scfcv_args%results_gs%strten,ab_mover%natom,rprimd,xred)
+&           scfcv_args%results_gs%strten,ab_mover%natom,rprimd,xred=xred)
 
 !          Check if the simulation does not diverged...
            if(ABS(scfcv_args%results_gs%etotal - hist%etot(1)) > 1E6)then

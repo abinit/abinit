@@ -106,7 +106,6 @@ implicit none
  type(ab_xfh_type) :: ab_xfh
  type(results_gs_type),target :: results_gs
  type(pseudopotential_type),target :: psps
- type(strain_type) :: strain
 !arrays
 !no_abirules
  integer,pointer :: indsym(:,:,:)
@@ -119,10 +118,9 @@ implicit none
  real(dp),allocatable :: fred(:,:),fcart(:,:)
  real(dp),allocatable :: vel(:,:)
  real(dp) :: vel_cell(3,3),rprimd(3,3)
- real(dp) :: mat_strain(3,3)
  type(supercell_type) :: supercell
 !TEST_AM
- real(dp) :: tsec(2),tcpu,tcpui,twall,twalli
+ !real(dp) :: tsec(2),tcpu,tcpui,twall,twalli
  !real(dp),allocatable :: energy(:)
  !integer :: option
  !integer :: funit = 1,ii,kk
@@ -393,26 +391,6 @@ implicit none
    ABI_ALLOCATE(vel,(3,dtset%natom))
    ABI_ALLOCATE(fred,(3,dtset%natom))
    ABI_ALLOCATE(fcart,(3,dtset%natom))
-
-! Fill the strain from input file
-   call strain_init(strain)
-   if (any(inp%strain /= zero)) then
-     write(message,'(2a)') ch10, ' Strain is imposed during the simulation'
-     call wrtout(std_out,message,'COLL')
-     call wrtout(ab_out,message,'COLL')
-!    convert strain into matrix
-     mat_strain(1,1) = inp%strain(1); mat_strain(2,2) = inp%strain(2); mat_strain(3,3) = inp%strain(3)
-     mat_strain(3,2) = half * inp%strain(4) ; mat_strain(2,3) = half * inp%strain(4) 
-     mat_strain(3,1) = half * inp%strain(5) ; mat_strain(1,3) = half * inp%strain(5)
-     mat_strain(1,2) = half * inp%strain(6) ; mat_strain(2,1) = half * inp%strain(6)
-     call strain_get(strain,mat_delta = mat_strain)
-     effective_potential%strain = strain
-     effective_potential%has_strain = .FALSE.
-     call strain_print(effective_potential%strain)
-     call strain_apply(effective_potential%supercell%rprimd_supercell,dtset%rprimd_orig(:,:,1),&
-&     effective_potential%strain)
-   end if
-   
    
    call xcart2xred(dtset%natom,effective_potential%supercell%rprimd_supercell,&
 &   effective_potential%supercell%xcart_supercell,xred)

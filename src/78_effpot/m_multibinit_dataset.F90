@@ -71,6 +71,7 @@ module m_multibinit_dataset
   integer :: enunit
   integer :: fit_coeff
   integer :: fit_option
+  integer :: fit_ncycle
   integer :: ifcana
   integer :: ifcflag
   integer :: ifcout
@@ -448,6 +449,19 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
 !&   'Action: correct fit_option in your input file.'
 !   MSG_ERROR(message)
 ! end if
+
+
+ multibinit_dtset%fit_ncycle=0
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'fit_ncycle',tread,'INT')
+ if(tread==1) multibinit_dtset%fit_ncycle=intarr(1)
+ if(multibinit_dtset%fit_ncycle<0)then
+   write(message, '(a,i8,a,a,a,a,a)' )&
+&   'fit_ncycle is',multibinit_dtset%fit_ncycle,', but the only allowed values',ch10,&
+&   'are positives for multibinit.',ch10,&
+&   'Action: correct fit_ncycle in your input file.'
+   MSG_ERROR(message)
+ end if
+
 
  multibinit_dtset%ifcana=0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'ifcana',tread,'INT')
@@ -1270,6 +1284,7 @@ subroutine outvars_multibinit (multibinit_dtset,nunit)
    write(nunit,'(a)')' Fit the coefficients :'
    write(nunit,'(3x,a10,I10.1)')'fit_coeff ',multibinit_dtset%fit_coeff
    write(nunit,'(3x,a10,I10.1)')'fit_option',multibinit_dtset%fit_option
+   write(nunit,'(3x,a10,I10.1)')'fit_ncycle',multibinit_dtset%fit_ncycle
    write(nunit,'(3x,a10,3i10)') '  fit_grid',multibinit_dtset%fit_grid
  end if
 

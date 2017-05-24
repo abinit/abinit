@@ -98,14 +98,14 @@ module m_effective_potential_file
  interface
    subroutine effpot_xml_readStrainCoupling(filename,natom,&
 &     nrpt,voigt,elastic3rd,elastic_displacement,&
-&     internal_strain,phonon_strain_atmfrc,phonon_strain_cell)&
+&     strain_coupling,phonon_strain_atmfrc,phonon_strain_cell)&
 &                          bind(C,name="effpot_xml_readStrainCoupling")
      use iso_c_binding, only : C_CHAR,C_DOUBLE,C_INT
      integer(C_INT) :: natom
      integer(C_INT) :: nrpt,voigt
      integer(c_INT) :: phonon_strain_cell(3,nrpt)
      real(C_DOUBLE) :: elastic3rd(6,6),elastic_displacement(6,3,natom)
-     real(C_DOUBLE) :: internal_strain(3,natom)
+     real(C_DOUBLE) :: strain_coupling(3,natom)
      real(C_DOUBLE) :: phonon_strain_atmfrc(3,natom,3,natom,nrpt)
      character(kind=C_CHAR) :: filename(*)
    end subroutine effpot_xml_readStrainCoupling
@@ -1169,7 +1169,7 @@ end subroutine system_getDimFromXML
  real(dp),allocatable :: all_amu(:), cell_local(:,:),cell_total(:,:)
  real(dp),allocatable :: elastic_displacement(:,:,:,:),dynmat(:,:,:,:,:,:)
  real(dp),allocatable :: local_atmfrc(:,:,:,:,:,:),total_atmfrc(:,:,:,:,:,:)
- real(dp),allocatable :: internal_strain(:,:,:),phfrq(:,:),qph1l(:,:),tnons(:,:)
+ real(dp),allocatable :: strain_coupling(:,:,:),phfrq(:,:),qph1l(:,:),tnons(:,:)
  real(dp),allocatable :: xcart(:,:),xred(:,:),zeff(:,:,:),znucl(:),zion(:)
  character(len=132),allocatable :: title(:)
  type(ifc_type) :: ifcs
@@ -1208,7 +1208,7 @@ end subroutine system_getDimFromXML
  ABI_ALLOCATE(ifcs%cell,(3,nrpt))
  ABI_ALLOCATE(ifcs%short_atmfrc,(2,3,natom,3,natom,nrpt))
  ABI_ALLOCATE(ifcs%ewald_atmfrc,(2,3,natom,3,natom,nrpt))
- ABI_ALLOCATE(internal_strain,(6,3,natom))
+ ABI_ALLOCATE(strain_coupling,(6,3,natom))
  ABI_ALLOCATE(total_atmfrc,(2,3,natom,3,natom,nrpt))
  ABI_ALLOCATE(local_atmfrc,(2,3,natom,3,natom,nrpt))
  ABI_ALLOCATE(dynmat,(2,3,natom,3,natom,nph1l))
@@ -1244,7 +1244,7 @@ end subroutine system_getDimFromXML
  ifcs%cell(:,:)  = zero
  ifcs%ewald_atmfrc(:,:,:,:,:,:) = zero
  ifcs%short_atmfrc(:,:,:,:,:,:) = zero
- internal_strain(:,:,:) = zero
+ strain_coupling(:,:,:) = zero
  phfrq = zero
  qph1l = zero
  xcart = zero
@@ -1288,7 +1288,7 @@ end subroutine system_getDimFromXML
 !      Get The value
        call effpot_xml_readStrainCoupling(char_f2c(trim(filename)),natom,nrpt_scoupling,(voigt-1),&
 &                                         elastic3rd(voigt,:,:),elastic_displacement(voigt,:,:,:),&
-&                                         internal_strain(voigt,:,:),&
+&                                         strain_coupling(voigt,:,:),&
 &                                         phonon_strain_atmfrc,phonon_strain_cell)
 
 !      Check if the 3rd order strain_coupling is present
@@ -1712,14 +1712,14 @@ end subroutine system_getDimFromXML
                strg1=trim(line)
                read(strg1,*) (work2(nu,natom),nu=1,3)
              end if
-             internal_strain(voigt,:,:) = work2(:,:)
+             strain_coupling(voigt,:,:) = work2(:,:)
              ABI_DEALLOCATE(work2)
            else
              ABI_ALLOCATE(work2,(3,natom))
              do mu=1,natom
                read(funit,*)(work2(nu,mu),nu=1,3)
              end do
-             internal_strain(voigt,:,:) = work2(:,:)
+             strain_coupling(voigt,:,:) = work2(:,:)
              ABI_DEALLOCATE(work2)
            end if
          end if
@@ -1914,6 +1914,7 @@ end subroutine system_getDimFromXML
  end if !End if master
 
 !MPI BROADCAST
+ call xmpi_bcast(energy,master, comm, ierr)
  call xmpi_bcast(all_amu,master, comm, ierr)
  call xmpi_bcast(dynmat,master, comm, ierr)
  call xmpi_bcast(elastic_constants,master, comm, ierr)
@@ -1923,7 +1924,7 @@ end subroutine system_getDimFromXML
  call xmpi_bcast(ifcs%cell,master, comm, ierr)
  call xmpi_bcast(ifcs%ewald_atmfrc,master, comm, ierr)
  call xmpi_bcast(ifcs%short_atmfrc,master, comm, ierr)
- call xmpi_bcast(internal_strain,master, comm, ierr)
+ call xmpi_bcast(strain_coupling,master, comm, ierr)
  call xmpi_bcast(phfrq,master, comm, ierr)
  call xmpi_bcast(qph1l,master, comm, ierr)
  call xmpi_bcast(typat,master, comm, ierr)
@@ -1985,7 +1986,7 @@ end subroutine system_getDimFromXML
  call effective_potential_init(crystal,eff_pot,energy,ifcs,ncoeff,nph1l,comm,&
 &                              dynmat=dynmat,elastic_constants=elastic_constants,&
 &                              elastic3rd=elastic3rd,elastic_displacement=elastic_displacement,&
-&                              epsilon_inf=epsilon_inf,internal_strain=internal_strain,&
+&                              epsilon_inf=epsilon_inf,strain_coupling=strain_coupling,&
 &                              phonon_strain=phonon_strain,phfrq=phfrq,qpoints=qph1l,&
 &                              has_strainCoupling=has_anharmonics,zeff=zeff)
 
@@ -2000,7 +2001,7 @@ end subroutine system_getDimFromXML
  ABI_DEALLOCATE(ifcs%short_atmfrc)
  ABI_DEALLOCATE(ifcs%ewald_atmfrc)
  ABI_DEALLOCATE(dynmat)
- ABI_DEALLOCATE(internal_strain)
+ ABI_DEALLOCATE(strain_coupling)
  ABI_DEALLOCATE(phfrq)
  ABI_DEALLOCATE(qph1l)
  ABI_DEALLOCATE(title)
@@ -2206,9 +2207,9 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
   call wrtout(std_out,message,'COLL')
   call wrtout(ab_out,message,'COLL')
 
-  ABI_ALLOCATE(effective_potential%forces,(3,natom))
-  effective_potential%forces = zero
-  effective_potential%internal_stress = zero
+  ABI_ALLOCATE(effective_potential%fcart,(3,natom))
+  effective_potential%fcart = zero
+  effective_potential%strten = zero
 
   qphon(:,1)=zero
   qphnrm(1)=zero
@@ -2222,16 +2223,16 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
   if (iblok /=0) then
 !  firts give the corect stress values store in hartree
 !  diagonal parts
-   effective_potential%internal_stress(1)=blkval(1,1,natom+3,1,1,iblok)
-   effective_potential%internal_stress(2)=blkval(1,2,natom+3,1,1,iblok)
-   effective_potential%internal_stress(3)=blkval(1,3,natom+3,1,1,iblok)
+   effective_potential%strten(1)=blkval(1,1,natom+3,1,1,iblok)
+   effective_potential%strten(2)=blkval(1,2,natom+3,1,1,iblok)
+   effective_potential%strten(3)=blkval(1,3,natom+3,1,1,iblok)
 !  the shear parts
-   effective_potential%internal_stress(4)=blkval(1,1,natom+4,1,1,iblok)
-   effective_potential%internal_stress(5)=blkval(1,2,natom+4,1,1,iblok)
-   effective_potential%internal_stress(6)=blkval(1,3,natom+4,1,1,iblok)
+   effective_potential%strten(4)=blkval(1,1,natom+4,1,1,iblok)
+   effective_potential%strten(5)=blkval(1,2,natom+4,1,1,iblok)
+   effective_potential%strten(6)=blkval(1,3,natom+4,1,1,iblok)
 
 !  Get forces
-   effective_potential%forces(:,1:natom) = blkval(1,:,1:natom,1,1,iblok)
+   effective_potential%fcart(:,1:natom) = blkval(1,:,1:natom,1,1,iblok)
 
    write(message, '(3a)' )ch10,&
 &   ' Cartesian components of forces (hartree/bohr)',ch10
@@ -2239,7 +2240,7 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
    call wrtout(std_out,  message,'COLL')
    do ii = 1, natom
      write(message, '(I4,a,3(e16.8))' ) &
-&     ii,'   ',effective_potential%forces(:,ii)
+&     ii,'   ',effective_potential%fcart(:,ii)
 
      call wrtout(ab_out,message,'COLL')
      call wrtout(std_out,  message,'COLL')
@@ -2250,18 +2251,18 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
    call wrtout(ab_out,message,'COLL')
    call wrtout(std_out,  message,'COLL')
    write(message, '(a,1p,e16.8,a,1p,e16.8)' ) &
-&   '  sigma(1 1)=',effective_potential%internal_stress(1),&
-&   '  sigma(3 2)=',effective_potential%internal_stress(4)
+&   '  sigma(1 1)=',effective_potential%strten(1),&
+&   '  sigma(3 2)=',effective_potential%strten(4)
    call wrtout(ab_out,message,'COLL')
    call wrtout(std_out,  message,'COLL')
    write(message, '(a,1p,e16.8,a,1p,e16.8)' ) &
-&   '  sigma(2 2)=',effective_potential%internal_stress(2),&
-&   '  sigma(3 1)=',effective_potential%internal_stress(5)
+&   '  sigma(2 2)=',effective_potential%strten(2),&
+&   '  sigma(3 1)=',effective_potential%strten(5)
    call wrtout(ab_out,message,'COLL')
    call wrtout(std_out,  message,'COLL')
    write(message, '(a,1p,e16.8,a,1p,e16.8)' ) &
-&   '  sigma(3 3)=',effective_potential%internal_stress(3),&
-&   '  sigma(2 1)=',effective_potential%internal_stress(6)
+&   '  sigma(3 3)=',effective_potential%strten(3),&
+&   '  sigma(2 1)=',effective_potential%strten(6)
    call wrtout(ab_out,message,'COLL')
    call wrtout(std_out,  message,'COLL')
    write(message, '(a)' ) ' '
@@ -2269,12 +2270,10 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
    call wrtout(std_out,  message,'COLL')
 
  else
-
     write(message,'(2a)')ch10,&
 &    ' Warning : Stress Tensor and forces are set to zero (not available in the DDB)'
     call wrtout(std_out,message,'COLL')
     call wrtout(ab_out,message,'COLL')
-
   end if
 
 !**********************************************************************
@@ -2629,8 +2628,8 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
   rftyp=1
   call gtblk9(ddb,iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,rftyp)
 
-  ABI_ALLOCATE(effective_potential%harmonics_terms%internal_strain,(6,3,natom))
-  effective_potential%harmonics_terms%internal_strain = zero
+  ABI_ALLOCATE(effective_potential%harmonics_terms%strain_coupling,(6,3,natom))
+  effective_potential%harmonics_terms%strain_coupling = zero
 
   if (iblok /=0) then
 
@@ -2642,7 +2641,7 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
       do ipert2=1,natom
         do idir2=1,3
           ii=3*(ipert2-1)+idir2
-            effective_potential%harmonics_terms%internal_strain(ipert1,idir2,ipert2)=&
+            effective_potential%harmonics_terms%strain_coupling(ipert1,idir2,ipert2)=&
 &                                                            instrain(ii,ipert1)
         end do
       end do
@@ -2724,7 +2723,7 @@ subroutine coeffs_xml2effpot(eff_pot,filename,comm)
 ! character(len=200),allocatable :: name(:)
  character(len=200) :: name
 #ifdef HAVE_LIBXML
- integer :: icoeff,iterm
+ integer :: icoeff,iterm,idisp,ref_term
  character(len=5),allocatable :: symbols(:)
 #endif
 
@@ -2818,20 +2817,62 @@ subroutine coeffs_xml2effpot(eff_pot,filename,comm)
 !  Need to shift for fortran array
    atindx(:,:,:,:) = atindx(:,:,:,:) + 1
 
+!TEST_AM
+   ! do icoeff=1,ncoeff
+   !   do iterm=1,nterm_max
+   !     do ii=1,ndisp_max
+   !       if (atindx(icoeff,iterm,1,ii) == 1) then
+   !         atindx(icoeff,iterm,1,ii) = 2
+   !       else if (atindx(icoeff,iterm,1,ii) == 2) then
+   !         atindx(icoeff,iterm,1,ii) = 1 
+   !       end if
+
+   !       if (atindx(icoeff,iterm,2,ii) == 1) then
+   !         atindx(icoeff,iterm,2,ii) = 2
+   !       else if (atindx(icoeff,iterm,2,ii) == 2) then
+   !         atindx(icoeff,iterm,2,ii) = 1 
+   !       end if
+
+   !     end do
+   !   end do
+   ! end do
+!TEST_AM
+
    do icoeff=1,ncoeff
+!    Reset the ref_term
+!    Try to find the index of the term corresponding to the interation in the 
+!    reference cell (000) in order to compute the name correctly...
+!    If this coeff is not in the ref cell, take by default the first term:
+     ref_term = 1
+
      do iterm=1,nterm_max
 !      Initialisation of the polynomial_term structure with the values from the
        call polynomial_term_init(atindx(icoeff,iterm,:,:),cell(icoeff,iterm,:,:,:),&
 &                                direction(icoeff,iterm,:),ndisp_max,terms(icoeff,iterm),&
 &                                power(icoeff,iterm,:),weight(icoeff,iterm),check=.true.)
-     end do
+
+!      Find the index of the ref 
+       if(ref_term ==1) then !Need to find the reference term
+         do idisp=1,terms(icoeff,iterm)%ndisp
+           if(terms(icoeff,iterm)%direction(idisp) > zero) then
+             ref_term = iterm
+             if(any(terms(icoeff,iterm)%cell(:,1,idisp) /= zero).or.&
+&               any(terms(icoeff,iterm)%cell(:,2,idisp) /= zero)) then
+               ref_term = 1
+               exit
+             end if
+           end if
+         end do!end do disp
+       end if
+     end do!end do term
 
 !    Initialisation of the polynomial_coefficent structure with the values
      call polynomial_coeff_init(coefficient(icoeff),nterm_max,coeffs(icoeff),&
 &                               terms(icoeff,:),check=.true.)
 
 !    Get the name of this coefficient  and set it
-     call polynomial_coeff_getName(name,eff_pot%crystal%natom,coeffs(icoeff),symbols,recompute=.true.)
+     call polynomial_coeff_getName(name,eff_pot%crystal%natom,coeffs(icoeff),&
+&                                  symbols,recompute=.true.,iterm=ref_term)
      call polynomial_coeff_setName(name,coeffs(icoeff))
 
 !    Free them all
