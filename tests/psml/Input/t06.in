@@ -1,4 +1,4 @@
-# Test Fe XML pseudopotential with and without sppol
+# Test Fe XML pseudopotential with and without sppol - PSP8 reference
 
 ndtset 2
 nsppol1 1
@@ -34,13 +34,14 @@ ixc -101130
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%  t02.out, tolnlines = 32, tolabs = 1.1e-06, tolrel = 9.00e-01
-#%% psp_files = 26_Fe.psml
+#%%  t06.out, tolnlines = 32, tolabs = 1.1e-06, tolrel = 9.00e-01
+#%% psp_files = 26_Fe.psp8
 #%% [paral_info]
 #%% max_nprocs = 14
 #%% [extra_info]
 #%% authors = M. Verstraete, Y. Pouillon
 #%% keywords = NC
 #%% description = 
-#%%   Bulk iron, with and without spin-polarization 
+#%%   Bulk iron, with and without spin-polarization, to compare with the PSML
+#%%   results of t02
 #%%<END TEST_INFO>

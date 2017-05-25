@@ -7,10 +7,17 @@ need_cpp_vars = [
 
 #: List of keywords that are automatically added to all the tests of this suite. 
 keywords = [
+"PSML"
 ]
 
 #: List of input files
 inp_files = [
 "t01.in",
 "t02.in",
+"t03.in",
+"t04.in",
+"t05.in",
+"t06.in",
+"t07.in",
+"t08.in",
 ]
