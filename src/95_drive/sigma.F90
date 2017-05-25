@@ -243,8 +243,9 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  real(dp),allocatable :: qp_rhor(:,:),qp_vhartr(:),qp_vtrial(:,:),qp_vxc(:,:)
  real(dp),allocatable :: qp_taur(:,:),qp_taug(:,:),igwene(:,:,:)
  real(dp),allocatable :: vpsp(:),xccc3d(:),dijexc_core(:,:,:),dij_hf(:,:,:)
- complex(dpc),allocatable :: omega(:),em1_ppm(:,:,:)
+ real(dp),allocatable :: osoc_bks(:, :, :)
  real(dp),allocatable :: ks_aepaw_rhor(:,:) !,ks_n_one_rhor(:,:),ks_nt_one_rhor(:,:)
+ complex(dpc),allocatable :: omega(:),em1_ppm(:,:,:)
  complex(dpc) :: ovlp(2)
  complex(dpc),allocatable :: ctmp(:,:),hbare(:,:,:,:)
  complex(dpc),target,allocatable :: sigcme(:,:,:,:,:)
@@ -1644,24 +1645,24 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
    ABI_FREE(hlda)
  end if
 
- !=== Prepare the storage of QP amplitudes and energies ===
- !* Initialize with KS wavefunctions and energies.
+ ! Prepare the storage of QP amplitudes and energies ===
+ ! Initialize with KS wavefunctions and energies.
  Sr%eigvec_qp=czero;  Sr%en_qp_diago=zero
  do ib=1,Sigp%nbnds
    Sr%en_qp_diago(ib,:,:)=KS_BSt%eig(ib,:,:)
    Sr%eigvec_qp(ib,ib,:,:)=cone
  end do
- !
- !=== Store <n,k,s|V_xc[n_val]|n,k,s> and <n,k,s|V_U|n,k,s> ===
- !  * Note that we store the matrix elements of V_xc in the KS basis set, not in the QP basis set
- !  * Matrix elements of V_U are zero unless we are using LDA+U as starting point
+
+ ! Store <n,k,s|V_xc[n_val]|n,k,s> and <n,k,s|V_U|n,k,s> ===
+ ! Note that we store the matrix elements of V_xc in the KS basis set, not in the QP basis set
+ ! Matrix elements of V_U are zero unless we are using LDA+U as starting point
  do ib=b1gw,b2gw
    Sr%vxcme(ib,:,:)=KS_me%vxcval(ib,ib,:,:)
    if (Dtset%usepawu>0) Sr%vUme (ib,:,:)=KS_me%vu(ib,ib,:,:)
  end do
 
- !=== Initial guess for the GW energies ===
- !  * Save the energies of the previous iteration.
+ ! Initial guess for the GW energies
+ ! Save the energies of the previous iteration.
  do spin=1,Sigp%nsppol
    do ik=1,Kmesh%nibz
      do ib=1,Sigp%nbnds
@@ -2109,7 +2110,25 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
 
  ABI_MALLOC(sigcme,(nomega_sigc,ib1:ib2,ib1:ib2,Sigp%nkptgw,Sigp%nsppol*Sigp%nsig_ab))
  sigcme=czero
-!
+
+
+ if (psps%usepaw == 0 .and. wfd%nspinor == 1 .and. any(dtset%so_psp /= 0)) then
+   call wrtout(std_out, "Computing SOC contribution with first-order perturbation theory")
+   ABI_MALLOC(bks_mask, (wfd%mband, wfd%nkibz, wfd%nsppol))
+   bks_mask = .False.
+   do spin=1,wfd%nsppol
+     do ikcalc=1,Sigp%nkptgw
+       ik_ibz = Kmesh%tab(Sigp%kptgw2bz(ikcalc)) ! Irred k-point for GW
+       ii=Sigp%minbnd(ikcalc, spin); jj=Sigp%maxbnd(ikcalc, spin)
+       bks_mask(ii:jj, ik_ibz, spin) = .True.
+     end do
+   end do
+
+   call wfd_get_socpert(wfd, cryst, psps, pawtab, bks_mask, osoc_bks)
+   ABI_FREE(bks_mask)
+   ABI_FREE(osoc_bks)
+ end if
+
 !==========================================================
 !==== Exchange part using the dense gwx_ngfft FFT mesh ====
 !==========================================================
@@ -2191,11 +2210,11 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
 &     gwx_ngfft,ngfftf,Dtset%prtvol,Dtset%pawcross,Dtset%gwfockmix)
    end do
 
-!  for the time being, do not remove this barrier!
+   ! for the time being, do not remove this barrier!
    call xmpi_barrier(Wfd%comm)
 
    call timab(421,2,tsec) ! calc_sigx_me
-   !
+
    ! ==========================================================
    ! ==== Correlation part using the coarse gwc_ngfft mesh ====
    ! ==========================================================
@@ -2209,12 +2228,11 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
 
        if (any(mod10 == [SIG_SEX, SIG_COHSEX])) then
          ! Calculate static COHSEX or SEX using the coarse gwc_ngfft mesh.
-
          call cohsex_me(ik_ibz,ikcalc,nomega_sigc,ib1,ib2,Cryst,QP_BSt,Sigp,Sr,Er,Gsph_c,Vcp,Kmesh,Qmesh,&
 &         Ltg_k(ikcalc),Pawtab,Pawang,Paw_pwff,Psps,Wfd,QP_sym,&
 &         gwc_ngfft,Dtset%iomode,Dtset%prtvol,sigcme_p)
        else
-
+         ! Compute correlated part using the coarse gwc_ngfft mesh.
          call calc_sigc_me(ik_ibz,ikcalc,nomega_sigc,ib1,ib2,Dtset,Cryst,QP_BSt,Sigp,Sr,Er,Gsph_Max,Gsph_c,Vcp,Kmesh,Qmesh,&
 &         Ltg_k(ikcalc),PPm,Pawtab,Pawang,Paw_pwff,Pawfgrtab,Paw_onsite,Psps,Wfd,Wfdf,QP_sym,&
 &         gwc_ngfft,ngfftf,nfftf,ks_rhor,use_aerhor,ks_aepaw_rhor,sigcme_p)
@@ -2224,7 +2242,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
    end if
 
    call xmpi_barrier(Wfd%comm)
-   !
+
    !  =====================================================
    !  ==== Solve Dyson equation storing results in Sr% ====
    !  =====================================================
@@ -2260,16 +2278,14 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
        end if
      end do
 
-     if (wfd_iam_master(Wfd)) then
-       call write_sigma_results(ikcalc,ik_ibz,Sigp,Sr,KS_BSt)
-     end if
+     if (wfd_iam_master(Wfd)) call write_sigma_results(ikcalc,ik_ibz,Sigp,Sr,KS_BSt)
    end do !ikcalc
 
    call timab(425,2,tsec) ! solve_dyson
    call timab(426,1,tsec) ! finalize
    !
    ! === Update the energies in QP_BSt ===
-   !  * If QPSCGW, use diagonalized eigenvalues otherwise perturbative results.
+   ! If QPSCGW, use diagonalized eigenvalues otherwise perturbative results.
    if (mod100>=10) then
      do ib=1,Sigp%nbnds
        QP_BSt%eig(ib,:,:)=Sr%en_qp_diago(ib,:,:)
@@ -2462,7 +2478,6 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  call ebands_free(KS_BSt)
  call ebands_free(QP_BSt)
  call melements_free(KS_me)
-
  call esymm_free(KS_sym)
  ABI_DT_FREE(KS_sym)
 

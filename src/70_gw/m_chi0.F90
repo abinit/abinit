@@ -1527,8 +1527,7 @@ subroutine accumulate_chi0_q0(ik_bz,isym_kbz,itim_kbz,gwcomp,nspinor,npwepG0,Ep,
           end do
         end do
       end do
-    end do
-
+    end do ! ii
   end if
 
  CASE (1)

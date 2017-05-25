@@ -58,7 +58,7 @@
 !!  xccc1d(n1xccc*(1-usepaw),6)=1D core charge function and five derivatives, from psp file (used in NC only)
 !!  nctab=<nctab_t>
 !!    has_tvale=True if the pseudo provides the valence density (used in NC only)
-!!    tvalespl(mqgrid_vl(1-usepaw),2)=the pseudo valence density and 2nd derivative in reciprocal space on a regular grid 
+!!    tvalespl(mqgrid_vl(1-usepaw),2)=the pseudo valence density and 2nd derivative in reciprocal space on a regular grid
 !!                                     (used in NC only)
 !!
 !! SIDE EFFECTS
@@ -207,7 +207,7 @@ subroutine pspatm(dq,dtset,dtfil,ekb,epsatm,ffspl,indlmn,ipsp,pawrad,pawtab,&
    ABI_CHECK(psps%usepaw==1, "paral_mode==1 is only compatible with PAW, see call to pawpsp_bcast below")
  end if
 
- nctab%has_tvale = .False.; nctab%has_tcore = .False. 
+ nctab%has_tvale = .False.; nctab%has_tcore = .False.
 
  if (me==0) then
 !  Dimensions of form factors and Vloc q grids must be the same in Norm-Conserving case
@@ -240,7 +240,7 @@ subroutine pspatm(dq,dtset,dtfil,ekb,epsatm,ffspl,indlmn,ipsp,pawrad,pawtab,&
 !    Open atomic data file (note: formatted input file)
      if (open_file(psps%filpsp(ipsp), message, unit=tmp_unit, form='formatted', status='old') /= 0) then
        MSG_ERROR(message)
-     end if 
+     end if
      rewind (unit=tmp_unit,err=10,iomsg=errmsg)
 
 !    Read and write some description of file from first line (character data)
@@ -281,16 +281,16 @@ subroutine pspatm(dq,dtset,dtfil,ekb,epsatm,ffspl,indlmn,ipsp,pawrad,pawtab,&
      call psxml2abheader( psps%filpsp(ipsp), psphead, 1 )
      znucl = psphead%znuclpsp
      zion = psphead%zionpsp
-     pspcod = psphead%pspcod 
+     pspcod = psphead%pspcod
      pspxc =  psphead%pspxc
      lmax = psphead%lmax
-     
+
 #else
      write(message,'(a,a)')  &
 &     'ABINIT is not compiled with XML support for reading this type of pseudopotential ', &
 &     trim(psps%filpsp(ipsp))
      MSG_BUG(message)
-     
+
 #endif
 ! END useless
    else if (usexml == 1 .and. xmlpaw == 1) then
@@ -557,6 +557,11 @@ subroutine pspatm(dq,dtset,dtfil,ekb,epsatm,ffspl,indlmn,ipsp,pawrad,pawtab,&
          il=indlmn(1,ilmn)
          if (indlmn(6,ilmn)==1) then
            iln0=iln0+nproj(il+1)
+           !if (dtset%optdriver == RUNL_SIGMA) then
+           !  do ii=0,nproj(il+1)-1
+           !    ekb(iln+ii) = zero
+           !  end do
+           !end if
            write(message, '(13x,i1,4f12.6)' ) il,(ekb(iln+ii),ii=0,nproj(il+1)-1)
          else
            iln0=iln0+nproj(il+psps%mpsang)
@@ -616,7 +621,7 @@ subroutine pspatm(dq,dtset,dtfil,ekb,epsatm,ffspl,indlmn,ipsp,pawrad,pawtab,&
      write (filnam, '(a,i0,a)') trim(dtfil%fnameabo_nlcc_derivs), ipsp, ".dat"
      if (open_file(filnam, message, newunit=unt) /= 0) then
        MSG_ERROR(message)
-     end if 
+     end if
      write (unt,*) '# Non-linear core corrections'
      write (unt,*) '#  r, pseudocharge, 1st, 2nd, 3rd, 4th, 5th derivatives'
      do ii = 1, psps%n1xccc
@@ -641,7 +646,7 @@ subroutine pspatm(dq,dtset,dtfil,ekb,epsatm,ffspl,indlmn,ipsp,pawrad,pawtab,&
  end if
 
 !--------------------------------------------------------------------
-!WVL+PAW: 
+!WVL+PAW:
  if (dtset%usepaw==1 .and. (dtset%icoulomb /= 0 .or. dtset%usewvl==1)) then
 #if defined HAVE_BIGDFT
    psps%gth_params%psppar(:,:,ipsp) = UNINITIALIZED(1._dp)
@@ -676,11 +681,11 @@ subroutine pspatm(dq,dtset,dtfil,ekb,epsatm,ffspl,indlmn,ipsp,pawrad,pawtab,&
    end if
 #endif
  end if
- 
+
 !end of WVL+PAW section
 !----------------------------------------------------
 
- return 
+ return
 
  ! Handle IO error
  10 continue

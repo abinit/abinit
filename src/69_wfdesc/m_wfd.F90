@@ -44,6 +44,7 @@ MODULE m_wfd
  use m_numeric_tools,  only : imin_loc, list2blocks
  use m_blas,           only : xcopy, xdotc
  use m_pptools,        only : printxsf
+ use m_cgtools,        only : cg_zdotc
  use m_fftcore,        only : print_ngfft
  use m_fft_mesh,       only : rotate_fft_mesh, calc_ceikr, check_rot_fft
  use m_fft,            only : fft_ug
@@ -169,7 +170,7 @@ MODULE m_wfd
 !!
 !! SOURCE
 
- type,public :: wave_t
+ type, public :: wave_t
 
   !integer :: npw_k
   !integer :: nfft
@@ -427,6 +428,7 @@ MODULE m_wfd
  public :: wfd_read_wfk            ! Read u(g) from the WFK file completing the initialization of the object.
  public :: wfd_from_wfk            ! Simplified interface to initialize the object from a WFK file.
  public :: wfd_dur_isk
+ public :: wfd_get_socpert
 !!***
 
 CONTAINS  !==============================================================================
@@ -5779,14 +5781,12 @@ subroutine wfd_read_wfk(Wfd,wfk_fname,iomode)
  do spin=1,Wfd%nsppol
    do ik_ibz=1,Wfd%nkibz
      do band=1,Wfd%nband(ik_ibz,spin)
-       !
        if (wfd_ihave_ug(Wfd,band,ik_ibz,spin)) then
          my_readmask(band,ik_ibz,spin) = .TRUE.
          if (wfd_ihave_ug(Wfd,band,ik_ibz,spin,"Stored")) then
            MSG_WARNING("Wavefunction is already stored!")
          end if
        end if
-       !
      end do
    end do
  end do
@@ -6557,6 +6557,209 @@ end subroutine wfd_dur_isk
 
 !----------------------------------------------------------------------
 
-END MODULE m_wfd
+!!****f* m_wfd/wfd_get_socpert
+!! NAME
+!! wfd_get_socpert
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!! cryst<crystal_t>= data type gathering info on symmetries and unit cell
+!! psps<pseudopotential_type>=variables related to pseudopotentials
+!! pawtab(psps%ntypat) <type(pawtab_type)>=paw tabulated starting data
+!! paw_ij(natom)<type(paw_ij_type)>=data structure containing PAW arrays given on (i,j) channels.
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine wfd_get_socpert(wfd, cryst, psps, pawtab, bks_mask, osoc_bks)
+
+ !use m_pawcprj
+ use m_hamiltonian,    only : destroy_hamiltonian, init_hamiltonian, &
+                              load_spin_hamiltonian,load_k_hamiltonian, gs_hamiltonian_type
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'shirley_hks'
+ use interfaces_56_recipspace
+ use interfaces_66_nonlocal
+ use interfaces_69_wfdesc
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ type(wfd_t),target,intent(inout) :: wfd
+ type(crystal_t),intent(in) :: cryst
+ type(pseudopotential_type),intent(in) :: psps
+! arrays
+ logical,intent(in) :: bks_mask(wfd%mband, wfd%nkibz, wfd%nsppol)
+ real(dp),allocatable,intent(out) :: osoc_bks(:, :, :)
+ type(Pawtab_type),intent(in) :: pawtab(psps%ntypat*psps%usepaw)
+ !type(paw_ij_type),intent(in) :: paw_ij(cryst%natom*psps%usepaw)
+
+!Local variables ------------------------------
+!scalars
+ integer,parameter :: nspinor2=2,nspden4=4,nsppol1=1,spin1=1
+ integer,parameter :: ndat1=1,nnlout0=0,tim_nonlop0=0,idir0=0 !,ider0=0,
+ integer :: natom,band,spin,ik_ibz,npw_k,istwf_k,nkpg !,ig,optder,matblk,mkmem_,nkpg,dimffnl,nspinortot
+ integer :: choice,cpopt,cp_dim,paw_opt,signs,ierr
+ !character(len=500) :: msg
+ type(gs_hamiltonian_type) :: ham_k
+!arrays
+ integer :: bks_distrb(wfd%mband, wfd%nkibz, wfd%nsppol)
+ integer, ABI_CONTIGUOUS pointer :: kg_k(:,:)
+ !real(dp) :: kptns_(3,1),ylmgr_dum(1,1,1),shifts(3)
+ !real(dp),allocatable :: ylm_k(:,:),dum_ylm_gr_k(:,:,:)
+ !real(dp),pointer :: ffnl_k(:,:,:,:)
+ real(dp) :: kpoint(3),dum_enlout(0),dummy_lambda(1),soc(2)
+ real(dp),allocatable :: kpg_k(:,:),vnl_psi(:,:),vectin(:,:) !,s_psi(:,:)
+ real(dp),allocatable :: opaw_psi(:,:) !2, npw_k*wfd%nspinor*wfd%usepaw) ! <G|1+S|Cnk>
+ real(dp),ABI_CONTIGUOUS pointer :: ffnl_k(:,:,:,:),ph3d_k(:,:,:)
+ type(pawcprj_type),allocatable :: cprj(:,:)
+
+!************************************************************************
+
+ DBG_ENTER("COLL")
+ ABI_CHECK(wfd%paral_kgb == 0, "paral_kgb not coded")
+
+ natom = cryst%natom
+
+ signs  = 2  ! => apply the non-local operator to a function in G-space.
+ choice = 1  ! => <G|V_nonlocal|vectin>.
+ cpopt  =-1; paw_opt= 0
+ if (wfd%usepaw==1) then
+   paw_opt=4 ! both PAW nonlocal part of H (Dij) and overlap matrix (Sij)
+   cpopt=3   ! <p_lmn|in> are already in memory
+
+   cp_dim = ((cpopt+5) / 5)
+   ABI_DT_MALLOC(cprj, (natom, nspinor2*cp_dim))
+   call pawcprj_alloc(cprj, 0, wfd%nlmn_sort)
+ end if
+
+ ! Initialize the Hamiltonian on the coarse FFT mesh.
+ call init_hamiltonian(ham_k, psps, pawtab, nspinor2, nsppol1, nspden4, natom, cryst%typat, cryst%xred, &
+    wfd%nfft, wfd%mgfft, wfd%ngfft, cryst%rprimd, wfd%nloalg)
+ !ham_k%ekb(:,:,1) = zero
+
+ ! Continue to prepare the GS Hamiltonian (note spin1)
+ call load_spin_hamiltonian(ham_k, spin1, with_nonlocal=.True.)
+
+ ! Distribute (b, k, s) states.
+ call wfd_bks_distrb(wfd, bks_distrb, bks_mask=bks_mask)
+
+ ABI_CALLOC(osoc_bks, (wfd%mband, wfd%nkibz, wfd%nsppol))
+ osoc_bks = zero
+
+ do spin=1,wfd%nsppol
+   do ik_ibz=1,wfd%nkibz
+     if (all(bks_distrb(:, ik_ibz, spin) /= wfd%my_rank)) cycle
+
+     kpoint = wfd%kibz(:, ik_ibz)
+     npw_k = wfd%Kdata(ik_ibz)%npw; istwf_k = wfd%istwfk(ik_ibz)
+     ABI_CHECK(istwf_k == 1, "istwf_k must be 1 if SOC term is computed with perturbation theory.")
+     kg_k => wfd%kdata(ik_ibz)%kg_k
+     ffnl_k => wfd%Kdata(ik_ibz)%fnl_dir0der0
+     ph3d_k => wfd%Kdata(ik_ibz)%ph3d
+
+     ABI_MALLOC(vectin, (2, npw_k * nspinor2))
+     ABI_MALLOC(vnl_psi, (2, npw_k * nspinor2))
+     !ABI_MALLOC(cvnl_psi, (npw_k * nspinor2))
+     !ABI_MALLOC(s_psi, (2, npw_k * nspinor2 * psps%usepaw))
+
+     ! Compute (k+G) vectors (only if psps%useylm=1)
+     nkpg = 3 * wfd%nloalg(3)
+     ABI_MALLOC(kpg_k, (npw_k, nkpg))
+     if (nkpg > 0) then
+       call mkkpg(kg_k, kpg_k, kpoint, nkpg, npw_k)
+     end if
+
+     ! Load k-dependent part in the Hamiltonian datastructure
+     !matblk = min(NLO_MINCAT, maxval(ham_k%nattyp)); if (wfd%nloalg(2) > 0) matblk = natom
+     !ABI_MALLOC(ph3d_k,(2, npw_k, matblk))
+     call load_k_hamiltonian(ham_k, kpt_k=kpoint, npw_k=npw_k, istwf_k=istwf_k, kg_k=kg_k, &
+                             kpg_k=kpg_k, ffnl_k=ffnl_k, ph3d_k=ph3d_k, compute_ph3d=(wfd%paral_kgb/=1))
+
+     ! THIS PART IS NEEDED FOR THE CALL TO opernl although some quantities won't be used.
+     ! Now I do things cleanly then we try to pass zero-sized arrays!
+     !ABI_MALLOC(ylm_k, (npw_k, psps%mpsang**2 * psps%useylm))
+     !if (psps%useylm == 1) then
+     !  kptns_(:,1) = k4intp; optder = 0; mkmem_ = 1
+     !  ABI_MALLOC(dum_ylm_gr_k,(npw_k,3+6*(optder/2),psps%mpsang**2))
+     !  ! Here mband is not used if paral_compil_kpt=0
+     !  call initylmg(cryst%gprimd, kg_k, kptns_, mkmem_, wfd%MPI_enreg, psps%mpsang, npw_k, [1], 1,&
+     !    [npw_k], 1, optder, cryst%rprimd, ylm_k, dum_ylm_gr_k)
+     !  ABI_FREE(dum_ylm_gr_k)
+     !end if
+
+     ! ========================================================
+     ! ==== Compute nonlocal form factors ffnl at all (k+G) ====
+     ! ========================================================
+     !dimffnl = 1 + ider0 ! Derivatives are not needed.
+     !ABI_MALLOC(ffnl_k, (npw_k, dimffnl, psps%lmnmax, psps%ntypat))
+     !! ffnl_k => Kdata%fnl_dir0der0
+     !call mkffnl(psps%dimekb, dimffnl, psps%ekb, ffnl_k, psps%ffspl, cryst%gmet, cryst%gprimd, ider0, idir0, psps%indlmn,&
+     !   kg_k, kpg_k, k4intp, psps%lmnmax, psps%lnmax, psps%mpsang, psps%mqgrid_ff, nkpg, npw_k, &
+     !   psps%ntypat, psps%pspso, psps%qgrid_ff, cryst%rmet, psps%usepaw, psps%useylm, ylm_k, ylmgr_dum)
+     !ABI_FREE(ylm_k)
+
+     ! Calculate <G|Vnl|psi> for this k-point
+     do band=1,wfd%nband(ik_ibz, spin)
+       if (bks_distrb(band, ik_ibz, spin) /= wfd%my_rank) cycle
+
+       ! Input wavefunction coefficients <G|Cnk>.
+       ! vectin, (2, npw_k * nspinor2))
+       if (spin == 1) then
+         vectin(1, 1:npw_k) = dble(wfd%wave(band, ik_ibz, spin)%ug)
+         vectin(2, 1:npw_k) = aimag(wfd%wave(band, ik_ibz, spin)%ug)
+         vectin(:, npw_k+1:) = zero
+       else
+         vectin(:, 1:npw_k) = zero
+         vectin(1, npw_k+1:) = dble(wfd%wave(band, ik_ibz, spin)%ug)
+         vectin(2, npw_k+1:) = aimag(wfd%wave(band, ik_ibz, spin)%ug)
+       end if
+
+       if (wfd%usepaw == 1) call wfd_get_cprj(wfd, band, ik_ibz, spin, cryst, cprj, sorted=.True.)
+
+       ! TODO: consistency check for only_SO
+       call nonlop(choice, cpopt, cprj, dum_enlout, ham_k, idir0, dummy_lambda, wfd%mpi_enreg, ndat1, nnlout0, &
+                   paw_opt, signs, opaw_psi, tim_nonlop0, vectin, vnl_psi, only_SO=1)
+
+       soc = cg_zdotc(npw_k * nspinor2, vectin, vnl_psi)
+       write(std_out,*)soc * Ha_eV, "for (b, k, s)",band, ik_ibz, spin
+       osoc_bks(band, ik_ibz, spin) = soc(1)
+     end do ! band
+
+     !ABI_FREE(ffnl_k)
+     !ABI_FREE(ph3d_k)
+     ABI_FREE(vectin)
+     ABI_FREE(vnl_psi)
+     ABI_FREE(kpg_k)
+     !ABI_FREE(cvnl_psi)
+     !ABI_FREE(s_psi)
+   end do ! ik_ibz
+ end do ! spin
+
+ call xmpi_sum(osoc_bks, wfd%comm, ierr)
+
+ call destroy_hamiltonian(ham_k)
+
+ if (wfd%usepaw == 1) then
+   call pawcprj_free(cprj)
+   ABI_DT_FREE(cprj)
+ end if
+
+ DBG_EXIT("COLL")
+
+end subroutine wfd_get_socpert
 !!***
 
+END MODULE m_wfd
+!!***

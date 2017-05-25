@@ -760,9 +760,9 @@ end subroutine destroy_hamiltonian
 !! SOURCE
 
 subroutine init_hamiltonian(ham,Psps,pawtab,nspinor,nsppol,nspden,natom,typat,&
-&                           xred,nfft,mgfft,ngfft,rprimd,nloalg,ph1d,usecprj,&
-&                           comm_atom,mpi_atmtab,mpi_spintab,paw_ij,&
-&                           electronpositron,fock,nucdipmom,use_gpu_cuda)
+&                           xred,nfft,mgfft,ngfft,rprimd,nloalg,&
+&                           ph1d,usecprj,comm_atom,mpi_atmtab,mpi_spintab,paw_ij,&  ! optional
+&                           electronpositron,fock,nucdipmom,use_gpu_cuda)           ! optional
 
 
 !This section has been created automatically by the script Abilint (TD).

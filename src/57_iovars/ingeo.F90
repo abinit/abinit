@@ -979,7 +979,7 @@ subroutine ingeo (acell,amu,dtset,bravais,&
 !  Checks the validity of natfix
    if (natfix<0 .or. natfix>natom) then
      write(message, '(a,a,a,i0,a,i4,a,a,a)' )&
-&     'The input variables natfix, 0atfixx, natfixy and natfixz must be',ch10,&
+&     'The input variables natfix, natfixx, natfixy and natfixz must be',ch10,&
 &     'between 0 and natom (= ',natom,'), while one of them is ',natfix,'.',ch10,&
 &     'Action: correct that occurence in your input file.'
      MSG_ERROR(message)
