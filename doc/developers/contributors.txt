@@ -31,6 +31,7 @@ Coming now to individuals,
 recent direct contributors to ABINIT (versions 8.0 to 8.2) are :
 name                      email
 Flavio Abreu Araujo       flavio.abreuaraujo@uclouvain.be
+Florian Altvater          altvater@berkeley.edu
 Bernard Amadon            bernard.amadon@cea.fr
 Gabriel Antonius          gabriel.antonius@gmail.com
 Frederic Arnardi          frederic.arnardi@student.ecp.fr
