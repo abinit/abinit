@@ -4554,6 +4554,7 @@ subroutine ebands_prtbltztrp(ebands, crystal, fname_radix, tau_k)
 !scalars
  integer :: iout, isym, iband, isppol, ikpt, nsppol, nband
  real(dp),parameter :: ha2ryd=two
+ real(dp) :: ewindow
  character(len=fnlen) :: filename
  character(len=2) :: so_suffix
  character(len=500) :: msg
@@ -4587,9 +4588,10 @@ subroutine ebands_prtbltztrp(ebands, crystal, fname_radix, tau_k)
      MSG_ERROR(msg)
    end if
 
+   ewindow = ebands%fermie-minval(ebands%eig(1, :, isppol))
    write (iout, '(a)') "GENE                      # Format of input: generic format, with Symmetries"
    write (iout, '(a)') "0 0 0 0.0                 # iskip (not presently used) idebug setgap shiftgap"
-   write (iout, '(E15.5,a,F10.4,a)') ebands%fermie*two, " 0.0005 0.4  ", nelec(isppol), &
+   write (iout, '(E15.5,a,2F10.4,a)') ebands%fermie*ha2ryd, " 0.0005 ", ewindow*ha2ryd, nelec(isppol), &
 &   "  # Fermilevel (Ry), energy grid spacing, energy span around Fermilevel, number of electrons for this spin"
    write (iout, '(a)') "CALC                      # CALC (calculate expansion coeff), NOCALC read from file"
    write (iout, '(a)') "3                         # lpfac, number of latt-points per k-point"
