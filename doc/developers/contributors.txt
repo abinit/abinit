@@ -56,11 +56,13 @@ Jonathan Laflamme Janssen laflammejanssenjonathan@gmail.com
 R. Laasner
 Alexandre Martin          alexandre.martin@ulg.ac.be
 Cyril Martins             cyril.martins@cea.fr
+Francesco Naccarato       fnaccarato89@gmail.com
 Alfredo Pasquarello       Alfredo.Pasquarello@epfl.ch
 Guido Petretto            guido.petretto@uclouvain.be
 Valentin Planes           valentinplanes@live.fr
 Samuel Ponce              samuel.ponce@uclouvain.be
 Yann Pouillon             yann.pouillon@materialsevolution.es
+Serguei Prokhorenko       prokhorenko.s@gmail.com
 Tonatiuh Rangel           tonatiuh_rangel@hotmail.com
 Vanina Recoules           vanina.recoules@cea.fr
 Fabio Ricci               fabio.ricci@ulg.ac.be
