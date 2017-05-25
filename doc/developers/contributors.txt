@@ -47,6 +47,7 @@ Michel Cote               Michel.Cote@umontreal.ca
 Jean-Francois Danel       jean-francois.danel@cea.fr
 Muriel Delaveau           muriel.delaveau@cea.fr
 Camilo Espejo             utadeocespejo@gmail.com
+Gregory Geneste           gregory.geneste@cea.fr
 Alexis Gerossier          alexis.gerossier@supelec.fr
 Matteo Giantomassi        matteo.giantomassi@uclouvain.be
 Yannick Gillet            yannick.gillet@uclouvain.be
