@@ -189,6 +189,8 @@ subroutine pspatm(dq,dtset,dtfil,ekb,epsatm,ffspl,indlmn,ipsp,pawrad,pawtab,&
  real(dp),allocatable :: rms(:)
 #if defined HAVE_PSML
 !!  usexml= 0 for non xml ps format ; =1 for xml ps format
+ character(len=3) :: atmsymb
+ character(len=30) :: creator
  type(pspheader_type) :: psphead
 #endif
 
@@ -270,27 +272,43 @@ subroutine pspatm(dq,dtset,dtfil,ekb,epsatm,ffspl,indlmn,ipsp,pawrad,pawtab,&
 
 ! the following is probably useless - already read in everything in inpspheads
 #if defined HAVE_PSML
-     write(message,'(a,a)') &
-&     '- pspatm: Reading pseudopotential header in XML form from ', trim(psps%filpsp(ipsp))
-     call wrtout(ab_out,message,'COLL')
-     call wrtout(std_out,  message,'COLL')
+!     write(message,'(a,a)') &
+!&     '- pspatm: Reading pseudopotential header in XML form from ', trim(psps%filpsp(ipsp))
+!     call wrtout(ab_out,message,'COLL')
+!     call wrtout(std_out,  message,'COLL')
 
-     lloc   = 0 ! does this mean s? in psml case the local potential can be different from any l channel
-     r2well = 0
-
-     call psxml2abheader( psps%filpsp(ipsp), psphead, 1 )
+     call psxml2abheader( psps%filpsp(ipsp), psphead, atmsymb, creator, 0 )
      znucl = psphead%znuclpsp
      zion = psphead%zionpsp
+     pspdat = psphead%pspdat
      pspcod = psphead%pspcod 
      pspxc =  psphead%pspxc
      lmax = psphead%lmax
-     
+     !lloc   = 0 ! does this mean s? in psml case the local potential can be different from any l channel
+     lloc = -1
+     mmax = -1
+     r2well = 0
+ 
+     write(message,'(a,1x,a3,3x,a)') "-",atmsymb,trim(creator)
+     call wrtout(ab_out,message,'COLL')
+     call wrtout(std_out,message,'COLL')
+     write(message,'(a,f9.5,f10.5,2x,i8,t47,a)')'-',znucl,zion,pspdat,'znucl, zion, pspdat'
+     call wrtout(ab_out,message,'COLL')
+     call wrtout(std_out,message,'COLL')
+     if(pspxc<0) then
+       write(message, '(i5,i8,2i5,i10,f10.5,t47,a)' ) &
+&       pspcod,pspxc,lmax,lloc,mmax,r2well,'pspcod,pspxc,lmax,lloc,mmax,r2well'
+     else
+       write(message, '(4i5,i10,f10.5,t47,a)' ) &
+&       pspcod,pspxc,lmax,lloc,mmax,r2well,'pspcod,pspxc,lmax,lloc,mmax,r2well'
+     end if
+     call wrtout(ab_out,message,'COLL')
+     call wrtout(std_out,message,'COLL')
 #else
      write(message,'(a,a)')  &
 &     'ABINIT is not compiled with XML support for reading this type of pseudopotential ', &
 &     trim(psps%filpsp(ipsp))
      MSG_BUG(message)
-     
 #endif
 ! END useless
    else if (usexml == 1 .and. xmlpaw == 1) then
@@ -484,15 +502,27 @@ subroutine pspatm(dq,dtset,dtfil,ekb,epsatm,ffspl,indlmn,ipsp,pawrad,pawtab,&
 !    DRH pseudopotentials
      call psp8in(ekb,epsatm,ffspl,indlmn,lloc,lmax,psps%lmnmax,psps%lnmax,mmax,&
 &     psps%mpsang,psps%mpssoang,psps%mqgrid_ff,psps%mqgrid_vl,nproj,psps%n1xccc,psps%pspso(ipsp),&
-&     qchrg,psps%qgrid_ff,psps%qgrid_vl,psps%useylm,vlspl,xcccrc,xccc1d,zion,psps%znuclpsp(ipsp),nctab)
+&     qchrg,psps%qgrid_ff,psps%qgrid_vl,psps%useylm,vlspl,xcccrc,xccc1d,zion,psps%znuclpsp(ipsp),nctab,maxrad)
+
+#if defined DEV_YP_DEBUG_PSP
+     call psp_dump_outputs("DBG",pspcod,psps%lmnmax,psps%lnmax,psps%mpssoang, &
+&      psps%mqgrid_ff,psps%n1xccc,mmax,maxrad,epsatm,qchrg,xcccrc,nctab, &
+&      indlmn,nproj,ekb,ffspl,vlspl,xccc1d)
+#endif
 
    else if (pspcod==9)then
 
 #if defined HAVE_PSML
      call psp9in(psps%filpsp(ipsp),ekb,epsatm,ffspl,indlmn,lloc,lmax,psps%lmnmax,psps%lnmax,mmax,&
-&     psps%mpsang,psps%mpssoang,psps%mqgrid_ff,nproj,psps%n1xccc, &
-&     psps%pspso(ipsp),qchrg,psps%qgrid_ff,psps%useylm,vlspl,&
-&     xcccrc,xccc1d,zion,psps%znuclpsp(ipsp))
+&     psps%mpsang,psps%mpssoang,psps%mqgrid_ff,psps%mqgrid_vl,nproj,psps%n1xccc, &
+&     psps%pspso(ipsp),qchrg,psps%qgrid_ff,psps%qgrid_vl,psps%useylm,vlspl,&
+&     xcccrc,xccc1d,zion,psps%znuclpsp(ipsp),nctab,maxrad)
+
+#if defined DEV_YP_DEBUG_PSP
+     call psp_dump_outputs("DBG",pspcod,psps%lmnmax,psps%lnmax,psps%mpssoang, &
+&      psps%mqgrid_ff,psps%n1xccc,mmax,maxrad,epsatm,qchrg,xcccrc,nctab, &
+&      indlmn,nproj,ekb,ffspl,vlspl,xccc1d)
+#endif
 #else
      write(message,'(2a)')  &
 &     'ABINIT is not compiled with XML support for reading this type of pseudopotential ', &
