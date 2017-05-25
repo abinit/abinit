@@ -46,8 +46,8 @@ For the initials of contributors, see the
   <li><a href="#get_version"><strong>1. How to get a version of ABINIT?</strong></a></li>
 
   <ul>
-    <li><a href="#get_full_handle"><strong>1.A. ... if you want a full handle (preferred case for developers - need some expertise)</strong></a></li>
-    <li><a href="#get_basic_compile"><strong>1.B. ... if you want to get the sources and compile them (this is the case of most users, and might also be sufficient for basic developments)</strong></a></li>
+    <li><a href="#get_full_handle"><strong>1.A. Expert user or developer.</strong></a></li>
+    <li><a href="#get_basic_compile"><strong>1.B. Normal user.</strong></a></li>
   </ul>
 
   <li><a href="#make_executable"><strong>2. How to make the executables?</strong></a></li>
@@ -68,14 +68,16 @@ For the initials of contributors, see the
 not developers, but users), here follows a short list of instructions
 needed to install it:</p>
 <ol>
-  <li>Download, gunzip and untar the latest version of ABINIT from the
-  abinit Web site, then change the current directory to the top of the directory
+  <li>Download, gunzip and untar the 
+  <a href="http://www.abinit.org/downloads/abinit-packages">latest version of the ABINIT package</a> 
+  (abinit-x.y.z.tar.gz)
+  from the abinit Web site, then change the current directory to the top of the directory
   that was created. If you do not know what all this means, go to
-  <a href="#get_version"><strong>1. How to get a version of ABINIT?</strong></a>
+  <a href="#get_basic_compile"><strong>1. How to get a version of ABINIT? (Section 1B Normal users)</strong></a>
   </li>
-  <li>configure or ./configure  (or first create a tmp directory, then cd tmp, then ../configure)</li>
-  <li>make (or make mj4 , or make multi multi_nprocs=n for using "n" processors on a SMP machine where you have to replace "n" by its value)
-  <li>(optionally) "make install"</li> 
+  <li>Issue configure or ./configure  (or first create a tmp directory, then cd tmp, then ../configure)</li>
+  <li>Issue make (or make mj4 , or make multi multi_nprocs=n for using "n" processors on a SMP machine where you have to replace "n" by its value)
+  <li>Issue (optionally) "make install"</li> 
 </ol>
 <p>
 Well, it might also be that information on the Fortran compiler is
@@ -86,24 +88,20 @@ needed, in which case something like:
 "your_F90_compiler" has to be replaced by the location of your F90
 compiler, such as /usr/local/gcc472/bin/gfortran.
 </p>
-<br />
 <p>
 If you succeeded to download, gunzip and untar the ABINIT package, but
 failed with the next steps, please go to
 <a href="#make_executable"><strong>2. How to make the executables?</strong></a>
 </p>
-<br />
 <p>If you succeeded to make the executables, but would like to check
 whether ABINIT has been installed correctly, please go to
 <a href="#make_internal_tests"><strong>3. How to make the internal
 tests?</strong></a> and the following sections.
 </p>
-<br />
 <p>
 If you want to have a much better handling on ABINIT than normal users,
-then go to <a href="#get_version"><strong>1. How to get a version of ABINIT?</strong></a>.
+then go to <a href="#get_version"><strong>1. How to get a version of ABINIT? (Section 1A Expert users of developer)</strong></a>.
 </p>
-<br />
 <p>
 To build the executables you will need at least 400 MBytes of free disk space.
 Running all tests will require more than 2.5 GBytes.
@@ -114,29 +112,27 @@ Running all tests will require more than 2.5 GBytes.
 
 <p>We will distinguish two cases:</p>
 <ul>
-   <li><a href="#get_full_handle">1.A.</a> You have a F90 compiler under
-   UNIX/Linux or MacOS X, as well as (free) software applications like git,
+   <li><a href="#get_full_handle">1.A. Expert user or developer.</a> You have a F90 compiler under
+   UNIX/Linux or MacOS X, as well as (free) 
+   <strong>software applications like git,
    automake, autoconf, libtool, perl, python, and you want to have a
-   full handle on the package (compilation, modification of files,
+   full handle</strong>  on the package (compilation, modification of files,
    writing of scripts ... this is the preferred case for developers). We
    will sometimes refer to this case as the "autotools working
    mode".</li>
 
-   <li><a href="#get_basic_compile">1.B.</a> You have a F90 compiler
-   under UNIX/Linux or MacOS X and you want simply to <strong>compile the
+   <li><a href="#get_basic_compile">1.B. Normal user.</a> You have a F90 compiler
+   under UNIX/Linux or MacOS X and you want <strong>simply to compile the
    source code</strong>, and, from time to time, <strong>modify and/or add a new
    file</strong> (this is the case of most users, system managers, and also
-   many developers). We will sometimes refer to this case as being
+   occasional developers). We will sometimes refer to this case as being
    "without autotools".</li>
 </ul>
 
 <p>You should read only the appropriate section (you can safely ignore
-the others ...).</p>
+the other one ...).</p>
 
-<h3><a name="get_full_handle"></a>1.A. To get a full handle of ABINIT</h3>
-
-<p> Important warning : this section has not yet been upgraded for the replacement of bzr (bazaar) by Git(lab).
-Should be done for v8.2.2
+<h3><a name="get_full_handle"></a>1.A. Expert user of developer</h3>
 
 <p>
 You have a F90 compiler under UNIX/Linux or MacOS X, as well as (free)
@@ -158,9 +154,10 @@ consult your local computer guru, and the following pages:
 </ul>
 
 <p>
-If you want to develop, please have a Git(lab) access
+If you want to develop on a regular basis, please have a Git(lab) access
 created for you by contacting Jean-Michel Beuken, as
-described in these pages.
+described in these pages. If it is only very occasional, you might as well rely on the
+<a href="https://github.com/abinit">ABINIT Github Web site</a>.
 </p>
 
 <p>
@@ -217,7 +214,7 @@ After this initialisation, you can proceed to the generation of the
 executables, as described in <a href="#make_executable">section 2</a>.
 </p>
 
-<h3><a name="get_basic_compile"></a>1.B. To get the sources and compile them</h3>
+<h3><a name="get_basic_compile"></a>1.B. Normal user</h3>
 
 <p>
 You have a F90 compiler under UNIX/Linux or MacOS X and you want simply
@@ -226,56 +223,57 @@ and/or add a new file</strong>. This is the case of most users, system
 managers, and also many developers. If you want to modify and/or add a
 new file, please consult the section <a href="#modify">7. For developers
 : how to modify the code?</a> after reading the present section.
+In what follows, <i>x.y.z</i> represents the ABINIT version.
 </p>
 
 <p>
-In what follows, <i>x.x.x</i> represents the ABINIT version.
-</p>
-
-<p>
-Now:
-</p>
+In order to get the ABINIT package, you have first to download the file <strong>abinit-<i>x.y.z</i>.tar.gz</strong>
+from the ABINIT Web site, see <a href="http://www.abinit.org/downloads/abinit-packages">the following page</a>
+then issue :
 <pre>
-download, gunzip and untar the file <strong>abinit-<i>x.x.x</i>.tar.gz</strong>
+gunzip <strong>abinit-<i>x.y.z</i>.tar.gz</strong> | tar -xvf -
 </pre>
+That's it. 
+</p>
 
-<p>More detailed explanations ...</p>
-
-<p>The <strong>abinit-<i>x.x.x</i>.tar.gz</strong> gzipped tar file contains all
+<p>The <strong>abinit-<i>x.y.z</i>.tar.gz</strong> gzipped tar file contains all
 the needed files, including:</p>
 <ul>
-  <li>the sources of the ABINIT code (also, the files needed for
-  generating the Blas and Lapack libraries), in the directories "src"
+  <li>the sources of the abinit code (also, the files needed for
+  generating the blas and lapack libraries), in the directories "src"
   and "lib";</li>
   <li>the documentation, in the directory "doc";</li>
   <li>the complete set of tests, and the pseudopotentials needed for the tests, in the directory "tests";</li>
   <li>all the scripts and information needed to produce makefiles, in
   other directories, especially "config".</li>
 </ul>
-<br />
+The package does not contain the object files and the binary executable files.
+</p>
 
+<p>You can go to the next section, to generate the executable files, if this worked.
+</p>
 <p>
-It does NOT contain the object files and the binary executable files.
+If this did not work, here are more detailed explanations ...
 </p>
 
 <p>So, execute the following actions:</p>
 
 <ul>
-<li>Under Mac OS X, open a terminal session, so you can work as if it were a Unix platform.</li>
-<li>Transfer the above-mentioned file(s) to your machine, in a directory suitable for the installation of the present version of ABINIT, and subsequent ones.<br />You should have about 250 MB of disk space to install the code, maybe more, depending on the version, and the number of tests that you will do.</li>
-<li> gunzip (on some machine you need gzip -d) and untar the file '<strong>abinit-<i>x.x.x</i>.tar.gz</strong>':<br /> gunzip <strong>abinit-<i>x.x.x</i>.tar.gz</strong> | tar -xvf - </li>
+<li>under mac os x, open a terminal session, so you can work as if it were a unix platform.</li>
+<li>transfer the above-mentioned file(s) to your machine, in a directory suitable for the installation of the present version of abinit, and subsequent ones.<br />you should have about 250 mb of disk space to install the code, maybe more, depending on the version, and the number of tests that you will do.</li>
+<li> gunzip (on some machine you need gzip -d) and untar the file '<strong>abinit-<i>x.y.z</i>.tar.gz</strong>':<br /> gunzip <strong>abinit-<i>x.y.z</i>.tar.gz</strong> | tar -xvf - </li>
 </ul>
 
 <p>
 If correctly done, a main directory, denoted ~abinit in the present
-document (usually, its real name will be <strong>abinit-<i>x.x.x</i></strong>) and
+document (usually, its real name will be <strong>abinit-<i>x.y.z</i></strong>) and
 a whole set of subdirectories should have been created. One of them is
-called 'doc/'. It contains many important informations.  Many of the
-files it contains are .html files, that are placed on the Web site.
-However, many other files are not available in .html format, and are NOT
-found on the Web site.  In the future, keep in mind that the
+called 'doc/'. It contains many important informations.  many of the
+files it contains are .html files, that are placed on the web site.
+However, many other files are not available in .html format, and are not
+found on the web site.  In the future, keep in mind that the
 information that you are looking for (but that you cannot find on the
-Web site) might be in the subdirectories of doc/, esp. doc/theory/,
+web site) might be in the subdirectories of doc/, esp. doc/theory/,
 doc/users/, doc/psp_infos/.
 </p>
 
@@ -284,11 +282,11 @@ You might now go to the <a href="#make_executable">section 2</a>.
 </p>
 
 <p>
-Do not forget: if you want to modify and/or add a new file, please consult the section <a href="#modify">7. For developers: how to modify the code?</a> after reading the present section.
+Do not forget: if you want to modify and/or add a new file, please consult the section <a href="#modify">7. for developers: how to modify the code?</a> after reading the present section.
 </p>
 
 <hr>
-<h2><a name="make_executable"></a>2. How to make the executables?</h2>
+<h2><a name="make_executable"></a>2. How to make the executables? (=How to compile the executables?)</h2>
 
 <p>
 We now suppose that you have a F90 compiler and you want to compile the
@@ -306,6 +304,7 @@ binaries, the location of the MPI library on your machine.
 Although the presently implemented building tools should be powerful
 enough to succeed to make the binaries without you giving such information,
 it has been seen that on a significant number of platforms, it is still better to give them.
+Indeed, you might generate a clearly suboptimal executable, executing slowly, or with downgraded capabilities.
 </p>
 
 <p>
@@ -323,7 +322,7 @@ Well, it might also be that only one additional information is needed,
 in which case something like:
 </p>
 <ul>
- <li>configure FC=f95</li>
+ <li>configure FC=gcc</li>
  <li>make </li>
 </ul>
 <p>
@@ -920,7 +919,7 @@ added (e.g. ~abinit/src/65_nonlocal/Makefile.in).
 
 <p>
 If you want to produce the source package
-abinit-<i>x.x.x</i>.tar.gz, type:
+abinit-<i>x.y.z</i>.tar.gz, type:
 </p>
 
 <pre><strong>make dist</strong></pre>
@@ -929,36 +928,9 @@ abinit-<i>x.x.x</i>.tar.gz, type:
 
 <p>
 Do not forget to change its name (e.g. add your name after
-<i><strong>x.x.x</strong></i>, to identify that this is a modified version of
+<i><strong>x.y.z</strong></i>, to identify that this is a modified version of
 ABINIT).
 </p>
-
-<!--h3><a name="modify5"></a>7.5. To generate a binary package.</h3>
-
-<div class="warning">
-  WARNING: THIS IS OBSOLETE!
-</div>
-
-<p>
-If you want to produce a binary package abinitbin-<i>x.x.x</i>.tar.gz,
-type:
-</p>
-
-<pre><strong>make seq</strong></pre>
-
-<p>or</p>
-
-<pre><strong>make seqpar</strong></pre>
-
-<p>in ~abinit/.</p>
-
-<p>
-Do not forget to change its name (e.g. first, add your name after
-<i><strong>x.x.x</strong></i>, to identify that this is a modified version of
-ABINIT, and second, change the generic "abinitbin" to the nickname of the platform, like pclinux_pathscale, to give
-pclinux_pathscale_seq-<i>x.x.x</i>.tar.gz).
-</p>
--->
 <script type="text/javascript" src="list_internal_links.js"> </script>
 
 </body>
