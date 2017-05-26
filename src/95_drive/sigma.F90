@@ -2112,7 +2112,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  sigcme=czero
 
 
- if (psps%usepaw == 0 .and. wfd%nspinor == 1 .and. any(dtset%so_psp /= 0)) then
+ if (.False. .and. psps%usepaw == 0 .and. wfd%nspinor == 1 .and. any(dtset%so_psp /= 0)) then
    call wrtout(std_out, "Computing SOC contribution with first-order perturbation theory")
    ABI_MALLOC(bks_mask, (wfd%mband, wfd%nkibz, wfd%nsppol))
    bks_mask = .False.
