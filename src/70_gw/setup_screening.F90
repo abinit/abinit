@@ -398,7 +398,7 @@ subroutine setup_screening(codvsn,acell,rprim,ngfftf,wfk_fname,dtfil,Dtset,Psps,
  if (Dtset%fftgw==30 .or. Dtset%fftgw==31) method=3
  enforce_sym=MOD(Dtset%fftgw,10)
 
- ! npwepG0 to account for umklapps.
+ ! Use npwepG0 to account for umklapps.
  call setmesh(gmet,gvec_kss,ngfft_gw,Ep%npwvec,Ep%npwepG0,Ep%npwwfn,nfftgw_tot,method,Ep%mG0,Cryst,enforce_sym)
  !call new_setmesh(Cryst,ecut_osc,ecutwfn,nkpt,kpoints,method,Ep%mG0,enforce_sym,ngfft_gw,nfftgw_tot)
 
