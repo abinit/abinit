@@ -714,6 +714,30 @@ complex(dpc), allocatable :: eps(:)
      ene=ene*ha2ev
      write(fout1, '(2es16.6)' ) ene,abs(eps(iw))
    end do
+   write(fout1,*)
+   write(fout1,*)
+   write(fout1, '(a)' )' # Energy(eV)         Im(refractive index(w)) aka kappa'
+   do iw=2,nmesh
+     ene=(iw-1)*de
+     ene=ene*ha2ev
+     write(fout1, '(2es16.6)' ) ene,sqrt(half*(abs(eps(iw)) - dble(eps(iw)) ))
+   end do
+   write(fout1,*)
+   write(fout1,*)
+   write(fout1, '(a)' )' # Energy(eV)         Re(refractive index(w)) aka n'
+   do iw=2,nmesh
+     ene=(iw-1)*de
+     ene=ene*ha2ev
+     write(fout1, '(2es16.6)' ) ene,sqrt(half*(abs(eps(iw)) + dble(eps(iw)) ))
+   end do
+   write(fout1,*)
+   write(fout1,*)
+   write(fout1, '(a)' )' # Energy(eV)         Reflectivity(w) from vacuum, at normal incidence'
+   do iw=2,nmesh
+     ene=(iw-1)*de
+     ene=ene*ha2ev
+     write(fout1, '(2es16.6)' ) ene, sqrt(half*(abs(eps(iw)) + dble(eps(iw)) ))
+   end do
 
 !  close output file
    close(fout1)
