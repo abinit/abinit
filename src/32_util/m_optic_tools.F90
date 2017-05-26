@@ -738,6 +738,13 @@ complex(dpc), allocatable :: eps(:)
      ene=ene*ha2ev
      write(fout1, '(2es16.6)' ) ene, sqrt(half*(abs(eps(iw)) + dble(eps(iw)) ))
    end do
+   write(fout1,*)
+   write(fout1,*)
+   write(fout1, '(a)' )' # Energy(eV)         absorption coeff (in m-1) = omega Im(eps) / c n(eps)'
+   do iw=2,nmesh
+     ene=(iw-1)*de
+     write(fout1, '(2es16.6)' ) ha2ev*ene, aimag(eps(iw))*ene / sqrt(half*( abs(eps(iw)) + dble(eps(iw)) )) / Sp_Lt / Bohr_meter 
+   end do
 
 !  close output file
    close(fout1)
