@@ -100,6 +100,12 @@ B.8 New algorithms for the displacement of nuclei (ionmov) :
     Tests and doc TO BE PROVIDED. 
     Work by S. Prokhorenko
 
+B.9 Refactoring of ANADDB for the production of DOS and other thermodynamic quantities.
+    As well as the mean square displacement and mean square velocity.
+    The DOS is obtained using usual DOS methods, instead of the histogram method,
+    and converges much faster with ng2qpt. Activated with prtdos 1 or 2 in anaddb.
+    By M. Verstraete.
+
 __________________________________________________________________
 
 C. Changes for the developers (also compilers)
@@ -113,9 +119,7 @@ __________________________________________________________________
 D.  Other changes
 (or on-going developments, not yet finalized).
 
-D.1 Refactoring of ANADDB for the production of DOS and other thermodynamic quantities.
-    The DOS is obtained using usual DOS methods, instead of the histogram method.
-    Also, the printing of potentials (e.g. prtvxc ...) works now for DFPT.
+D.1 The printing of potentials (e.g. prtvxc ...) works now for DFPT.
     By M. Verstraete.
 
 D.2 New input variable prtphbands.
@@ -177,9 +181,9 @@ D.15 Concerning  the Fourier interpolation of the phonon band structure,
      - Small modifications for nlflag==3 and added some quantities to the anaddb netcdf file,
      - Fix a bug in the implementation of the new weights
 
-D.16. Concerning Path Integral Molecular Dynamics with Quantum Thermal Bath :
-      allow restart from history file.
-      By M. Torrent
+D.16 Concerning Path Integral Molecular Dynamics with Quantum Thermal Bath :
+     allow restart from history file.
+     By M. Torrent
 
 D.17 Refactored the computation of the electric dipole moment.
      By M. Torrent
