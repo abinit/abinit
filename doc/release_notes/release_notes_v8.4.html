@@ -104,7 +104,7 @@ B.9 Refactoring of ANADDB for the production of DOS and other thermodynamic quan
     As well as the mean square displacement and mean square velocity.
     The DOS is obtained using usual DOS methods, instead of the histogram method,
     and converges much faster with ng2qpt. Activated with prtdos 1 or 2 in anaddb.
-    By M. Verstraete.
+    Work by M. Verstraete.
 
 __________________________________________________________________
 
@@ -188,7 +188,12 @@ D.16 Concerning Path Integral Molecular Dynamics with Quantum Thermal Bath :
 D.17 Refactored the computation of the electric dipole moment.
      By M. Torrent
 
-D.18 Numerous miscellaneous additional bug fixes and improvements of documentation by :
+D.18 The energy width for the bands in the Boltztrap intrans file is now automatically set.
+     Previously a constant 0.4 Ryd, and the user should have checked by hand if
+     the value was sufficient. Should be considered a bug fix.
+     By M Verstraete
+
+D.19 Numerous miscellaneous additional bug fixes and improvements of documentation by :
      F. Altvater, G. Antonius, J. Bieder, M. Giantomassi, F. Jollet, 
      G. Petretto, M. Verstraete, M. Torrent, J. Zwanziger. 
 
