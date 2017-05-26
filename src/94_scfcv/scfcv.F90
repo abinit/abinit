@@ -1571,6 +1571,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
 !  Set XC computation flag
    optxc=1
    if (nkxc>0) then
+! MJV 2017 May 25: you should not be able to get here with iscf < 0
      if (dtset%iscf<0) optxc=2
      if (modulo(dtset%iprcel,100)>=61.and.(dtset%iprcel<71.or.dtset%iprcel>79).and. &
 &     dtset%iscf<10.and. &
