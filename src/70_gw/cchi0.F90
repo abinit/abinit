@@ -126,7 +126,7 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
  use m_pawtab,        only : pawtab_type
  use m_pawfgrtab,     only : pawfgrtab_type
  use m_pawcprj,       only : pawcprj_type, pawcprj_alloc, pawcprj_free
- use m_pawpwij,      only : pawpwff_t, pawpwij_t, pawpwij_init, pawpwij_free, paw_rho_tw_g, paw_cross_rho_tw_g
+ use m_pawpwij,       only : pawpwff_t, pawpwij_t, pawpwij_init, pawpwij_free, paw_rho_tw_g, paw_cross_rho_tw_g
  use m_paw_pwaves_lmn,only : paw_pwaves_lmn_t
 
 !This section has been created automatically by the script Abilint (TD).
@@ -634,10 +634,10 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
                  end if
                end if !gwcomp==1
              end do !io
-             !
+
              if (Ep%gwcomp==1.and.band1==band2) then
                ! Add the "delta part" of the extrapolar method. TODO doesnt work for spinor
-               call calc_wfwfg(tabr_k,itim_k,nfft,ngfft_gw,ur2_k_ibz,ur2_k_ibz,wfwfg)
+               call calc_wfwfg(tabr_k,itim_k,spinrot_k,nfft,nspinor,ngfft_gw,ur2_k_ibz,ur2_k_ibz,wfwfg)
 
                if (Psps%usepaw==1) then
                  call paw_rho_tw_g(nfft,dim_rtwg,nspinor,Cryst%natom,Cryst%ntypat,Cryst%typat,Cryst%xred,gw_gfft,&
@@ -664,7 +664,7 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
            call approxdelta(Ep%nomegasf,omegasf,deltaeGW_b1kmq_b2k,Ep%spsmear,iomegal,iomegar,wl,wr,Ep%spmeth)
          END SELECT
 
-         ! ==== Form rho-twiddle(r)=u^*_{b1,kmq_bz}(r) u_{b2,kbz}(r) and its FFT transform ====
+         ! Form rho-twiddle(r)=u^*_{b1,kmq_bz}(r) u_{b2,kbz}(r) and its FFT transform.
          call rho_tw_g(nspinor,Ep%npwepG0,nfft,ndat1,ngfft_gw,1,use_padfft,igfftepsG0,gw_gbound,&
 &          ur1_kmq_ibz,itim_kmq,tabr_kmq,ph_mkmqt,spinrot_kmq,&
 &          ur2_k_ibz,  itim_k  ,tabr_k  ,ph_mkt  ,spinrot_k,dim_rtwg,rhotwg)

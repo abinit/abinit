@@ -1130,7 +1130,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
    QP_sym => KS_sym
  else
    ! Self-consistent GW.
-   !  * Read the unitary matrix and the QP energies of the previous step from the QPS file.
+   ! Read the unitary matrix and the QP energies of the previous step from the QPS file.
    call energies_init(QP_energies)
    QP_energies%e_corepsp=ecore/Cryst%ucvol
 
@@ -1993,7 +1993,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
      end if
    end if ! PAW or NC PPm and/or needs density
 
-!  If nfreqre is set, then output the dielectric function for these frequencies to file
+   ! If nfreqre is set, then output the dielectric function for these frequencies to file
    write(msg,'(a,i0,a,f8.2,a)')&
 &   ' Checking if PPm em1 is output, nfreqre is: ',Dtset%nfreqre,' freqremax is: ',Dtset%freqremax*Ha_eV,' eV'
    MSG_WARNING(msg)
@@ -2110,7 +2110,6 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
 
  ABI_MALLOC(sigcme,(nomega_sigc,ib1:ib2,ib1:ib2,Sigp%nkptgw,Sigp%nsppol*Sigp%nsig_ab))
  sigcme=czero
-
 
 ! if (.False. .and. psps%usepaw == 0 .and. wfd%nspinor == 1 .and. any(dtset%so_psp /= 0)) then
 !   call wrtout(std_out, "Computing SOC contribution with first-order perturbation theory")
@@ -2262,16 +2261,17 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
 
      call solve_dyson(ikcalc,ib1,ib2,nomega_sigc,Sigp,Kmesh,sigcme_p,QP_BSt%eig,Sr,Dtset%prtvol,Dtfil,Wfd%comm)
      !
-     ! === Calculate direct gap for each spin and print out final results ===
-     !   * We use the valence index of the KS system because we still do not know
-     !     all the QP corrections. Ideally one should use the QP valence index
+     ! Calculate direct gap for each spin and print out final results.
+     ! We use the valence index of the KS system because we still do not know
+     ! all the QP corrections. Ideally one should use the QP valence index
      do spin=1,Sigp%nsppol
        if ( Sigp%maxbnd(ikcalc,spin) >= ks_vbik(ik_ibz,spin)+1 .and. &
 &       Sigp%minbnd(ikcalc,spin) <= ks_vbik(ik_ibz,spin)  ) then
          ks_iv=ks_vbik(ik_ibz,spin)
-         Sr%egwgap (ik_ibz,spin)=  Sr%egw(ks_iv+1,ik_ibz,spin) -  Sr%egw(ks_iv,ik_ibz,spin)
+         Sr%egwgap (ik_ibz,spin)= Sr%egw(ks_iv+1,ik_ibz,spin) -  Sr%egw(ks_iv,ik_ibz,spin)
          Sr%degwgap(ik_ibz,spin)= Sr%degw(ks_iv+1,ik_ibz,spin) - Sr%degw(ks_iv,ik_ibz,spin)
-       else ! The "gap" cannot be computed
+       else
+         ! The "gap" cannot be computed
          Sr%e0gap  (ik_ibz,spin)=zero
          Sr%egwgap (ik_ibz,spin)=zero
          Sr%degwgap(ik_ibz,spin)=zero
@@ -2283,8 +2283,8 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
 
    call timab(425,2,tsec) ! solve_dyson
    call timab(426,1,tsec) ! finalize
-   !
-   ! === Update the energies in QP_BSt ===
+
+   ! Update the energies in QP_BSt
    ! If QPSCGW, use diagonalized eigenvalues otherwise perturbative results.
    if (mod100>=10) then
      do ib=1,Sigp%nbnds

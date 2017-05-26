@@ -562,7 +562,6 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
      call get_BZ_item(Kmesh,ik_bz,kbz,ik_ibz,isym_k,itim_k,ph_mkt)
      tabr_k=ktabr(:,ik_bz) ! Table for rotated FFT points
      spinrot_kbz(:)=Cryst%spinrot(:,isym_k)
-
      if (Dtset%pawcross==1) tabrf_k(:) = ktabrf(:,ik_bz)
 
      istwf_k =  Wfd%istwfk(ik_ibz)
@@ -671,9 +670,9 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
                end if !gwcomp==1
              end do !io
 
-             if (Ep%gwcomp==1.and.band1==band2) then ! Add the "delta part", symmetrization is done inside the routine.
-
-               call calc_wfwfg(tabr_k,itim_k,nfft,ngfft_gw,ur2_kibz,ur2_kibz,wfwfg)
+             if (Ep%gwcomp==1.and.band1==band2) then
+               ! Add the "delta part", symmetrization is done inside the routine.
+               call calc_wfwfg(tabr_k,itim_k,spinrot_kbz,nfft,nspinor,ngfft_gw,ur2_kibz,ur2_kibz,wfwfg)
 
                if (Psps%usepaw==1) then
                  call paw_rho_tw_g(nfft,dim_rtwg,nspinor,Cryst%natom,Cryst%ntypat,Cryst%typat,Cryst%xred,gw_gfft,&
@@ -691,11 +690,11 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
                qzero=.TRUE.
                call completechi0_deltapart(ik_bz,qzero,Ep%symchi,Ep%npwe,Gsph_FFT%ng,Ep%nomega,nspinor,&
 &                nfft,ngfft_gw,gspfft_igfft,Gsph_FFT,Ltg_q,green_enhigh_w,wfwfg,chi0)
-
              end if
            end if ! use_tr
 
-         CASE (1,2) ! Spectral method, here time-reversal is always assumed.
+         CASE (1, 2)
+           ! Spectral method, here time-reversal is always assumed.
            if (deltaeGW_b1b2<0) CYCLE
            call approxdelta(Ep%nomegasf,omegasf,deltaeGW_b1b2,Ep%spsmear,iomegal,iomegar,wl,wr,Ep%spmeth)
          END SELECT

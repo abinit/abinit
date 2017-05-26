@@ -34,8 +34,7 @@
 !!  partial contribution to the matrix element of $\Sigma_{COH}$ is evaluated
 !!
 !! OUTPUT
-!! sigcohme=partial contribution to the matrix element of
-!!     $<jb k \sigma|\Sigma_{COH} | kb k \sigma>$
+!! sigcohme=partial contribution to the matrix element of $<jb k \sigma|\Sigma_{COH} | kb k \sigma>$
 !!  coming from this single q-point
 !!
 !! PARENTS
@@ -76,9 +75,8 @@ subroutine calc_coh(nspinor,nsig_ab,nfftot,ngfft,npwc,gvec,wfg2_jk,epsm1q_o,vc_s
  logical,intent(in) :: same_band
 !arrays
  integer,intent(in) :: gvec(3,npwc),ngfft(18)
- complex(gwpc),intent(in) :: epsm1q_o(npwc,npwc)
- complex(gwpc),intent(in) :: vc_sqrt(npwc)
- complex(gwpc),intent(in) :: wfg2_jk(nsig_ab*nfftot)
+ complex(gwpc),intent(in) :: epsm1q_o(npwc,npwc),vc_sqrt(npwc)
+ complex(gwpc),intent(in) :: wfg2_jk(nfftot*nsig_ab)
  complex(gwpc),intent(out) :: sigcohme(nsig_ab)
 
 !Local variables-------------------------------
@@ -233,7 +231,7 @@ subroutine calc_coh_comp(iqibz,i_sz,same_band,nspinor,nsig_ab,ediff,npwc,gvec,&
  integer,intent(in) :: gvec(3,npwc),ngfft(18)
  complex(gwpc),intent(in) :: botsq(npwc,npwc),otq(npwc,npwc)
  complex(gwpc),intent(in) :: vc_sqrt(npwc)
- complex(gwpc),intent(in) :: wfg2_jk(nsig_ab*nfftot)
+ complex(gwpc),intent(in) :: wfg2_jk(nfftot*nsig_ab)
  complex(gwpc),intent(out) :: sigcohme(nsig_ab)
 
 !Local variables-------------------------------

@@ -206,7 +206,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
  integer :: ik_bz,ik_ibz,io,iiw,isym_q,iq_bz,iq_ibz,spin,isym,jb,is_idx
  integer :: band,band1,band2,idle,rank,jik,jk_bz,jk_ibz,kb,nspinor
  integer :: nomega_tot,nq_summed,ispinor,ibsp,dimcprj_gw
- integer :: spad,spadc,spadc1,spadc2,irow,my_nbks,comm,ndegs,wtqm,wtqp,mod10
+ integer :: spad,spadc,spadc1,spadc2,irow,my_nbks,ndegs,wtqm,wtqp,mod10
  integer :: isym_kgw,isym_ki,gwc_mgfft,use_padfft,gwc_fftalga,gwc_nfftot,nfftf,mgfftf,use_padfftf
  integer :: nbmax,iwc,ifft
  real(dp) :: cpu_time,wall_time,gflops
@@ -264,10 +264,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
  call cwtime(cpu_time,wall_time,gflops,"start")
 
  ! Initialize MPI variables
- comm=Wfd%comm
-
- qp_ene => QP_BSt%eig(:,:,:)
- qp_occ => QP_BSt%occ(:,:,:)
+ qp_ene => QP_BSt%eig; qp_occ => QP_BSt%occ
 
  ! Extract the symmetries of the bands for this k-point
  QP_sym => allQP_sym(sigmak_ibz,1:Wfd%nsppol)
@@ -285,9 +282,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
  !ABI_CHECK((ABS(ph_mkgwt - cone) < tol12),"ph_mkgwt!")
 
  spinrot_kgw=Cryst%spinrot(:,isym_kgw)
- !
- ib1=minbnd
- ib2=maxbnd
+ ib1=minbnd; ib2=maxbnd
 
  write(msg,'(2a,3f8.3,2a,2(i3,a))')ch10,&
 &  ' Calculating <nk|Sigma_c(omega)|nk> at k = ',kgw(:),ch10,&
@@ -412,7 +407,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
 &    ' with respect to the number of bands included',ch10,&
 &    ' with extrapolar energy: ',en_high*Ha_eV,' [eV]'
    call wrtout(std_out,msg,'COLL')
-   ABI_MALLOC(wf1swf2_g,(nspinor*gwc_nfftot))
+   ABI_MALLOC(wf1swf2_g,(gwc_nfftot*nspinor))
  endif
 
  if (Sigp%gwcomp == 1) then
@@ -806,7 +801,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
        do jb=ib1,ib2
 
          call rho_tw_g(nspinor,Sigp%npwc,gwc_nfftot,ndat1,gwc_ngfft,1,use_padfft,igfftcg0,gw_gbound,&
-&          ur_ibz       ,iik,ktabr(:,ik_bz),ph_mkt  ,spinrot_kbz,  &
+&          ur_ibz        ,iik,ktabr(:,ik_bz),ph_mkt  ,spinrot_kbz,  &
 &          wfr_bdgw(:,jb),jik,ktabr(:,jk_bz),ph_mkgwt,spinrot_kgw,&
 &          nspinor,rhotwg_ki(:,jb))
 
@@ -1074,31 +1069,29 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
            ! Calculate <\phi_j|\Sigma_c|\phi_k>
            ! Different freqs according to method (AC or Perturbative), see nomega_sigc.
            do iab=1,Sigp%nsig_ab
-             spadc1=spinor_padc(1,iab)
-             spadc2=spinor_padc(2,iab)
+             spadc1 = spinor_padc(1, iab); spadc2 = spinor_padc(2, iab)
              do io=1,nomega_sigc
                sigctmp(io,iab) = XDOTC(Sigp%npwc,rhotwg(spadc1+1:),1,sigc_ket(spadc2+1:,io),1)
              end do
            end do
 
-           if (Sigp%gwcomp==1) then ! Evaluate Extrapolar term TODO this does not work with spinor
-
+           if (Sigp%gwcomp==1) then
+             ! Evaluate Extrapolar term TODO this does not work with spinor
              if (extrapolar_distrb(jb,kb,ik_bz,spin) == Wfd%my_rank ) then
                ! Do it once as it does not depend on the ib index summed over.
                extrapolar_distrb(jb,kb,ik_bz,spin) = xmpi_undefined_rank
 #if 1
-               call calc_wfwfg(ktabr(:,jk_ibz),jik,& ! why jk_ibz?
-&                gwc_nfftot,gwc_ngfft,wfr_bdgw(:,jb),wfr_bdgw(:,kb),wf1swf2_g)
+               call calc_wfwfg(ktabr(:,jk_ibz),jik, spinrot_kgw, & ! TODO: why jk_ibz?
+                 gwc_nfftot,nspinor,gwc_ngfft,wfr_bdgw(:,jb),wfr_bdgw(:,kb),wf1swf2_g)
 #else
-               call calc_wfwfg(ktabr(:,jk_bz),jik,gwc_nfftot,gwc_ngfft,wfr_bdgw(:,jb),wfr_bdgw(:,kb),wf1swf2_g)
+               call calc_wfwfg(ktabr(:,jk_bz),jik,spinrot_kgw,&
+                 gwc_nfftot,nspinor,gwc_ngfft,wfr_bdgw(:,jb),wfr_bdgw(:,kb),wf1swf2_g)
 #endif
 
                if (Psps%usepaw==1) then
-                 i1=jb
-                 i2=kb
+                 i1=jb; i2=kb
                  if (nspinor==2) then
-                   i1=(2*jb-1)
-                   i2=(2*kb-1)
+                   i1=(2*jb-1); i2=(2*kb-1)
                  end if
                  spad=(nspinor-1)
                  call paw_rho_tw_g(gwc_nfftot,Sigp%nsig_ab,nspinor,Cryst%natom,Cryst%ntypat,Cryst%typat,Cryst%xred,&
@@ -1192,8 +1185,8 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
  call timab(440,2,tsec) ! wfd_barrier
  call timab(441,1,tsec) ! xmpi_sum
 
- call xmpi_sum(sigcme_tmp,comm,ierr)
- call xmpi_sum(sigc,comm,ierr)
+ call xmpi_sum(sigcme_tmp, wfd%comm, ierr)
+ call xmpi_sum(sigc, wfd%comm, ierr)
  call timab(441,2,tsec) ! xmpi_sum
 
  ! Multiply by constants. In 3D systems sqrt(4pi) is included in vc_sqrt_qbz ===
@@ -1258,7 +1251,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
 
  ! GW with contour deformation: check on the number of poles not included.
  if (ANY(mod10 == [SIG_GW_CD,SIG_QPGW_CD])) then
-   call xmpi_sum(npoles_missing,comm,ierr)
+   call xmpi_sum(npoles_missing, wfd%comm, ierr)
    npls = SUM(npoles_missing)
    if (npls>0) then
      MSG_WARNING(sjoin("Total number of missing poles for contour deformation method:", itoa(npls)))
@@ -1272,7 +1265,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
    end if
    ! Print data on the maximum value needed for the screening along the real axis
    w_localmax = MAXVAL(w_maxval)
-   call xmpi_max(w_localmax,w_max,comm,ierr)
+   call xmpi_max(w_localmax,w_max, wfd%comm, ierr)
    write(msg,'(a,f12.5,a)') ' Max omega value used in W(omega): ',w_max*Ha_eV,' [eV]'
    call wrtout(std_out,msg,"COLL")
  end if

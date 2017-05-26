@@ -177,11 +177,9 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
  integer :: ik_bz,ik_ibz,isym_q,iq_bz,iq_ibz,spin,isym,jb,is_idx
  integer :: jik,jk_bz,jk_ibz,kb,mod100,nspinor,nsppol,ifft
  integer :: nq_summed,ibsp,dimcprj_gw,dim_rtwg
- integer :: spad,spadx1,spadx2,irow,npw_k
- integer :: comm,ndegs,wtqm,wtqp,my_nbks
+ integer :: spad,spadx1,spadx2,irow,npw_k,ndegs,wtqm,wtqp,my_nbks
  integer :: isym_kgw,isym_ki,gwx_mgfft,use_padfft,use_padfftf,gwx_fftalga,gwx_fftalgb
- integer :: gwx_nfftot,nfftf,mgfftf
- integer :: nhat12_grdim
+ integer :: gwx_nfftot,nfftf,mgfftf,nhat12_grdim,npwx
  real(dp) :: cpu_time,wall_time,gflops
  real(dp) :: alpha_hybrid,fact_sp,theta_mu_minus_esum,tol_empty,norm
  complex(dpc) :: ctmp,scprod,ph_mkgwt,ph_mkt
@@ -218,30 +216,25 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
 
  DBG_ENTER("COLL")
 
- ! Initial check
- ABI_CHECK(Sigp%npwx==Gsph_x%ng,"")
-
  call timab(430,1,tsec) ! csigme (SigX)
  call cwtime(cpu_time,wall_time,gflops,"start")
 
+ ! Initialize some values.
  mod100=MOD(Sigp%gwcalctyp,100)
- comm = Wfd%comm
-
- ! === Initialize some values ===
- nspinor = Wfd%nspinor; nsppol  = Wfd%nsppol
+ nspinor = Wfd%nspinor; nsppol  = Wfd%nsppol; npwx = sigp%npwx
  dim_rtwg = 1; if (nspinor == 2) dim_rtwg = 2
- spinor_padx = RESHAPE([0, 0, Sigp%npwx, Sigp%npwx, 0, Sigp%npwx, Sigp%npwx, 0], [2, 4])
+ spinor_padx = RESHAPE([0, 0, npwx, npwx, 0, npwx, npwx, 0], [2, 4])
+ ABI_CHECK(Sigp%npwx==Gsph_x%ng,"")
 
- qp_ene => QP_BSt%eig(:,:,:)
- qp_occ => QP_BSt%occ(:,:,:)
+ qp_ene => QP_BSt%eig; qp_occ => QP_BSt%occ
 
  ! Exctract the symmetries of the bands for this k-point
  QP_sym => allQP_sym(sigmak_ibz,1:nsppol)
 
  ib1=minbnd; ib2=maxbnd
 
- ! === Index of the GW point in the BZ array, its image in IBZ and time-reversal ===
- jk_bz=Sigp%kptgw2bz(ikcalc)
+ ! Index of the GW point in the BZ array, its image in IBZ and time-reversal
+ jk_bz = Sigp%kptgw2bz(ikcalc)
  call get_BZ_item(Kmesh,jk_bz,kgw,jk_ibz,isym_kgw,jik,ph_mkgwt)
 
  ! TODO: the new version based of get_uug won't suppporte kptgw vectors that are not in
@@ -250,10 +243,8 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
  !ABI_CHECK(jik==1,"jik!=1")
  !ABI_CHECK(isym_kgw==1,"isym_kgw!=1")
  !ABI_CHECK((ABS(ph_mkgwt - cone) < tol12),"ph_mkgwt!")
-
  !%call get_IBZ_item(Kmesh,jk_ibz,kibz,wtk)
  spinrot_kgw(:)=Cryst%spinrot(:,isym_kgw)
- !
  write(msg,'(2a,3f8.3,2a,2(i3,a))')ch10,&
 &  ' Calculating <nk|Sigma_x|nk> at k= ',kgw,ch10,&
 &  ' bands from ',ib1,' to ',ib2,ch10
@@ -261,7 +252,7 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
 
  ! Select the mixing alpha for hybrid functional calculations if gwcalctyp >= 100
  if(Sigp%gwcalctyp<100) then
-   alpha_hybrid = 1.0_dp
+   alpha_hybrid = one
  else if (Sigp%gwcalctyp>=300) then
    ! B3LYP factor = 0.20
    alpha_hybrid = 0.2_dp
@@ -271,12 +262,9 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
    alpha_hybrid = gwfockmix
  endif
 
- if (ANY(gwx_ngfft(1:3) /= Wfd%ngfft(1:3)) ) then
-   call wfd_change_ngfft(Wfd,Cryst,Psps,gwx_ngfft)
- end if
- gwx_mgfft   = MAXVAL(gwx_ngfft(1:3))
- gwx_fftalga = gwx_ngfft(7)/100
- gwx_fftalgb = MOD(gwx_ngfft(7),100)/10
+ if (ANY(gwx_ngfft(1:3) /= Wfd%ngfft(1:3)) ) call wfd_change_ngfft(Wfd,Cryst,Psps,gwx_ngfft)
+ gwx_mgfft = MAXVAL(gwx_ngfft(1:3))
+ gwx_fftalga = gwx_ngfft(7)/100; gwx_fftalgb = MOD(gwx_ngfft(7),100)/10
 
  if (pawcross==1) mgfftf = MAXVAL(ngfftf(1:3))
 
@@ -295,17 +283,17 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
        end if
      end do
    end if
-   ABI_CHECK(nspinor==1,'Symmetrization with nspinor=2 not implemented')
+   ABI_CHECK(nspinor==1, 'Symmetrization with nspinor=2 not implemented')
  end if
 
- ABI_MALLOC(rhotwg_ki, (Sigp%npwx*nspinor,minbnd:maxbnd))
+ ABI_MALLOC(rhotwg_ki, (npwx*nspinor, minbnd:maxbnd))
  rhotwg_ki=czero_gw
- ABI_MALLOC(rhotwg, (Sigp%npwx*nspinor))
- ABI_MALLOC(rhotwgp, (Sigp%npwx*nspinor))
- ABI_MALLOC(vc_sqrt_qbz, (Sigp%npwx))
+ ABI_MALLOC(rhotwg, (npwx*nspinor))
+ ABI_MALLOC(rhotwgp, (npwx*nspinor))
+ ABI_MALLOC(vc_sqrt_qbz, (npwx))
 
- ! === Normalization of theta_mu_minus_esum ===
- ! * If nsppol==2, qp_occ $\in [0,1]$
+ ! Normalization of theta_mu_minus_esum
+ ! If nsppol==2, qp_occ $\in [0,1]$
  SELECT CASE (nsppol)
  CASE (1)
    fact_sp=half; tol_empty=0.01   ! below this value the state is assumed empty
@@ -340,10 +328,10 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
  write(msg,'(2(a,i4),a)')" Will sum ",my_nbks ," (b, k, s) occupied states in Sigma_x."
  call wrtout(std_out,msg)
  !
- ! The index of G-G0 in the FFT mesh the oscillators ===
+ ! The index of G-G0 in the FFT mesh the oscillators
  ! * Sigp%mG0 gives the MAX G0 component to account for umklapp.
- ! * Note the size MAX(Sigp%npwx,Sigp%npwc).
- ABI_MALLOC(igfftxg0,(Gsph_x%ng))
+ ! * Note the size MAX(npwx, Sigp%npwc).
+ ABI_MALLOC(igfftxg0, (Gsph_x%ng))
  !
  ! === Precalculate the FFT index of $ R^{-1}(r-\tau) $ ===
  ! * S=\transpose R^{-1} and k_BZ = S k_IBZ
@@ -379,7 +367,7 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
    ABI_FREE(irottb)
  end if
 
- ! === Additional allocations for PAW ===
+ ! Additional allocations for PAW.
  if (Psps%usepaw==1) then
    ABI_DT_MALLOC(Cprj_ksum,(Cryst%natom,nspinor))
    call pawcprj_alloc(Cprj_ksum,0,Wfd%nlmn_atm)
@@ -414,31 +402,9 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
        end do
      end do
    end do
-!   if (ANY(degtab/=0)) then ! If two states do not belong to the same complex => matrix elements of v_xc differ
-!     write(msg,'(a,3f8.3,a)')' Degenerate states at k-point = ( ',kgw(:),' ).'
-!     call wrtout(std_out,msg,'COLL')
-!     do spin=1,nsppol
-!       do ib=ib1,ib2
-!         do jb=ib+1,ib2
-!           if (degtab(ib,jb,spin)==1) then
-!             write(msg,'(a,i2,a,i4,a,i4)')' (spin ',spin,')',ib,' <====> ',jb
-!             call wrtout(std_out,msg,'COLL')
-!             if (ABS(Sr%vxcme(ib,jk_ibz,spin)-Sr%vxcme(jb,jk_ibz,spin))>ABS(tol6*Sr%vxcme(jb,jk_ibz,spin))) then
-!               write(msg,'(7a)')&
-!&                ' It seems that an accidental degeneracy is occurring at this k-point ',ch10,&
-!&                ' In this case, using symsigma=1 might lead to spurious results as the algorithm ',ch10,&
-!&                ' will treat these states as degenerate, and it won''t be able to remove the degeneracy. ',ch10,&
-!&                ' In order to avoid this deficiency, run the calculation using symsigma=0'
-!               MSG_WARNING(msg)
-!             end if
-!           end if
-!         end do
-!       end do
-!     end do
-!   end if
  end if !symsigma
 
- write(msg,'(2a,i0,a)')ch10,' calc_sigx_me: calculation status (',nq_summed,' to be completed):'
+ write(msg,'(2a,i0,a)')ch10,' calc_sigx_me: calculation status (', nq_summed, ' to be completed):'
  call wrtout(std_out,msg,'COLL')
 
  ABI_MALLOC(ur_ibz,(gwx_nfftot*nspinor))
@@ -449,19 +415,17 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
    ABI_MALLOC(ur_ae_onsite_sum,(nfftf*nspinor))
    ABI_MALLOC(ur_ps_onsite_sum,(nfftf*nspinor))
  end if
- !
+
  ! =======================================
  ! ==== Begin loop over k_i in the BZ ====
  ! =======================================
-
  do spin=1,nsppol
-
-   if (ALL(proc_distrb(:,:,spin)/=Wfd%my_rank)) CYCLE
+   if (ALL(proc_distrb(:,:,spin) /= Wfd%my_rank)) CYCLE
 
    ! Load wavefunctions for GW corrections.
-   ABI_STAT_MALLOC(wfr_bdgw,(gwx_nfftot*nspinor,ib1:ib2), ierr)
-   ABI_CHECK(ierr==0, "out of memory in wfr_bdgw")
-   call wfd_get_many_ur(Wfd,(/(jb, jb=ib1,ib2)/),jk_ibz,spin,wfr_bdgw)
+   ABI_STAT_MALLOC(wfr_bdgw, (gwx_nfftot*nspinor,ib1:ib2), ierr)
+   ABI_CHECK(ierr==0, "Out of memory in wfr_bdgw")
+   call wfd_get_many_ur(Wfd, [(jb, jb=ib1,ib2)], jk_ibz, spin, wfr_bdgw)
 
    if (Wfd%usepaw==1) then
      ! Load cprj for GW states, note the indexing.
@@ -490,12 +454,11 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
    end if
 
    do ik_bz=1,Kmesh%nbz
-     !
-     ! === Parallelization over k-points and spin ===
-     ! * For the spin there is another check in the inner loop
+     ! Parallelization over k-points and spin.
+     ! For the spin there is another check in the inner loop
      if (ALL(proc_distrb(:,ik_bz,spin)/=Wfd%my_rank)) CYCLE
-     !
-     ! * Find the corresponding irreducible k-point
+
+     ! Find the corresponding irreducible k-point
      call get_BZ_item(Kmesh,ik_bz,ksum,ik_ibz,isym_ki,iik,ph_mkt)
      spinrot_kbz = Cryst%spinrot(:,isym_ki)
 
@@ -503,9 +466,9 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
      kgw_m_ksum = kgw - ksum
      call findqg0(iq_bz,g0,kgw_m_ksum,Qmesh%nbz,Qmesh%bz,Sigp%mG0)
 
-     ! === Symmetrize the matrix elements ===
-     ! * Sum only q"s in IBZ_k. In this case elements are weighted
-     !   according to wtqp and wtqm. wtqm is for time-reversal.
+     ! Symmetrize the matrix elements ===
+     ! Sum only q"s in IBZ_k. In this case elements are weighted
+     ! according to wtqp and wtqm. wtqm is for time-reversal.
      wtqp=1; wtqm=0
      if (can_symmetrize(spin)) then
        if (Ltg_k%ibzq(iq_bz)/=1) CYCLE
@@ -519,10 +482,10 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
      write(msg,'(2(a,i4),a,i3)')' calc_sigx_me: ik_bz ',ik_bz,'/',Kmesh%nbz,' done by mpi-rank: ',Wfd%my_rank
      call wrtout(std_out,msg,'PERS')
 
-     ! * Find the corresponding irreducible q-point.
+     ! Find the corresponding irreducible q-point.
      call get_BZ_item(Qmesh,iq_bz,qbz,iq_ibz,isym_q,itim_q)
      q_is_gamma = (normv(qbz,Cryst%gmet,"G") < GW_TOL_W0)
-     !
+
      ! Tables for the FFT of the oscillators.
      !  a) FFT index of the G-G0.
      !  b) gwx_gbound table for the zero-padded FFT performed in rhotwg.
@@ -547,18 +510,18 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
        end if
      end if
 
-     ! === Evaluate oscillator matrix elements ===
-     ! * $ <phj/r|e^{-i(q+G)}|phi/r> - <tphj/r|e^{-i(q+G)}|tphi/r> $ in packed form.
      if (Psps%usepaw==1 .and. use_pawnhat==0) then
+       ! Evaluate oscillator matrix elements
+       ! $ <phj/r|e^{-i(q+G)}|phi/r> - <tphj/r|e^{-i(q+G)}|tphi/r> $ in packed form
        q0 = qbz !;if (q_is_gamma) q0 = (/0.00001_dp,0.00001_dp,0.00001_dp/) ! GW_Q0_DEFAULT
        ABI_DT_MALLOC(Pwij_qg,(Psps%ntypat))
-       call pawpwij_init(Pwij_qg,Sigp%npwx,q0,Gsph_x%gvec,Cryst%rprimd,Psps,Pawtab,Paw_pwff)
+       call pawpwij_init(Pwij_qg, npwx, q0, Gsph_x%gvec, Cryst%rprimd, Psps, Pawtab, Paw_pwff)
      end if
-     !
-     ! === Get Fourier components of the Coulomb interaction in the BZ ===
+
+     ! Get Fourier components of the Coulomb interaction in the BZ
      ! * In 3D systems, neglecting umklapp,  vc(Sq,sG)=vc(q,G)=4pi/|q+G|
      ! * The same relation holds for 0-D systems, but not in 1-D or 2D systems. It depends on S.
-     do ig=1,Sigp%npwx
+     do ig=1,npwx
        ig_rot = Gsph_x%rottb(ig,itim_q,isym_q)
        vc_sqrt_qbz(ig_rot)=Vcp%vc_sqrt(ig,iq_ibz)
      end do
@@ -601,35 +564,35 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
 &            grnhat12,nhat12,pawtab)
 
          else
-
-           call rho_tw_g(nspinor,Sigp%npwx,gwx_nfftot,ndat1,gwx_ngfft,1,use_padfft,igfftxg0,gwx_gbound, &
+           call rho_tw_g(nspinor,npwx,gwx_nfftot,ndat1,gwx_ngfft,1,use_padfft,igfftxg0,gwx_gbound, &
 &            ur_ibz        ,iik,ktabr(:,ik_bz),ph_mkt  ,spinrot_kbz, &
 &            wfr_bdgw(:,jb),jik,ktabr(:,jk_bz),ph_mkgwt,spinrot_kgw, &
 &            nspinor,rhotwg_ki(:,jb))
 
-           if (Psps%usepaw==1.and.use_pawnhat==0) then ! Add on-site contribution, projectors are already in BZ.
+           if (Psps%usepaw==1.and.use_pawnhat==0) then
+             ! Add on-site contribution, projectors are already in BZ.
              i2=jb; if (nspinor==2) i2=(2*jb-1)
              spad=(nspinor-1)
-             call paw_rho_tw_g(Sigp%npwx,nspinor,nspinor,Cryst%natom,Cryst%ntypat,Cryst%typat,Cryst%xred,Gsph_x%gvec,&
+             call paw_rho_tw_g(npwx,nspinor,nspinor,Cryst%natom,Cryst%ntypat,Cryst%typat,Cryst%xred,Gsph_x%gvec,&
 &              Cprj_ksum(:,:),Cprj_kgw(:,i2:i2+spad),Pwij_qg,rhotwg_ki(:,jb))
            end if
            if (Psps%usepaw==1.and.pawcross==1) then ! Add paw cross term
-             call paw_cross_rho_tw_g(nspinor,Sigp%npwx,nfftf,ngfftf,1,use_padfftf,igfftfxg0,gboundf,&
+             call paw_cross_rho_tw_g(nspinor,npwx,nfftf,ngfftf,1,use_padfftf,igfftfxg0,gboundf,&
 &             ur_ae_sum,ur_ae_onsite_sum,ur_ps_onsite_sum,iik,ktabrf(:,ik_bz),ph_mkt,spinrot_kbz,&
 &             ur_ae_bdgw(:,jb),ur_ae_onsite_bdgw(:,jb),ur_ps_onsite_bdgw(:,jb),jik,ktabrf(:,jk_bz),ph_mkgwt,spinrot_kgw,&
 &             nspinor,rhotwg_ki(:,jb))
            end if
          end if
 
-         ! === Multiply by the square root of the Coulomb term ===
-         ! In 3-D systems, the factor sqrt(4pi) is included)
+         ! Multiply by the square root of the Coulomb term
+         ! In 3-D systems, the factor sqrt(4pi) is included
          do ii=1,nspinor
-           spad=(ii-1)*Sigp%npwx
-           rhotwg_ki(spad+1:spad+Sigp%npwx,jb) = rhotwg_ki(spad+1:spad+Sigp%npwx,jb) * vc_sqrt_qbz(1:Sigp%npwx)
+           spad = (ii-1) * npwx
+           rhotwg_ki(spad+1:spad+npwx,jb) = rhotwg_ki(spad+1:spad + npwx,jb) * vc_sqrt_qbz(1:npwx)
          end do
 
-         if (ik_bz==jk_bz) then
-           ! === Treat analytically the case q --> 0 ===
+         if (ik_bz == jk_bz) then
+           ! Treat analytically the case q --> 0
            ! * The oscillator is evaluated at q=O as it is considered constant in the small cube around Gamma
            !   while the Colulomb term is integrated out.
            ! * In the scalar case we have nonzero contribution only if ib_sum==jb
@@ -638,7 +601,7 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
 
            if (nspinor==1) then
              rhotwg_ki(1,jb) = czero_gw
-             if (ib_sum == jb) rhotwg_ki(1,jb) = CMPLX(SQRT(Vcp%i_sz),0.0_gwp)
+             if (ib_sum == jb) rhotwg_ki(1,jb) = CMPLX(SQRT(Vcp%i_sz), 0.0_gwp)
              !rhotwg_ki(1,jb) = czero_gw ! DEBUG
            else
              npw_k  = Wfd%npwarr(ik_ibz)
@@ -663,22 +626,22 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
                ovlp(1)=ovlp(1)-scprod*half
                ovlp(2)=ovlp(2)-scprod*half
              end if
-             rhotwg_ki(1          ,jb)=CMPLX(SQRT(Vcp%i_sz),0.0_gwp)*ovlp(1)
-             rhotwg_ki(Sigp%npwx+1,jb)=CMPLX(SQRT(Vcp%i_sz),0.0_gwp)*ovlp(2)
+             rhotwg_ki(1, jb) = CMPLX(SQRT(Vcp%i_sz),0.0_gwp)*ovlp(1)
+             rhotwg_ki(npwx+1, jb) = CMPLX(SQRT(Vcp%i_sz),0.0_gwp)*ovlp(2)
 #else
              ! DEBUG
-             rhotwg_ki(1, jb) = zero; rhotwg_ki(Sigp%npwx+1, jb) = zero
+             rhotwg_ki(1, jb) = zero; rhotwg_ki(npwx+1, jb) = zero
              if (ib_sum == jb) then
                cg_sum => Wfd%Wave(ib_sum,ik_ibz,spin)%ug
                cg_jb  => Wfd%Wave(jb,jk_ibz,spin)%ug
                ctmp = xdotc(npw_k, cg_sum(1:), 1, cg_jb(1:), 1)
-               rhotwg_ki(1,jb)=CMPLX(SQRT(Vcp%i_sz),0.0_gwp) * real(ctmp)
+               rhotwg_ki(1, jb) = CMPLX(SQRT(Vcp%i_sz), 0.0_gwp) * real(ctmp)
                ctmp = xdotc(npw_k, cg_sum(npw_k+1:), 1, cg_jb(npw_k+1:), 1)
-               rhotwg_ki(Sigp%npwx+1,jb) = CMPLX(SQRT(Vcp%i_sz),0.0_gwp) * real(ctmp)
+               rhotwg_ki(npwx+1, jb) = CMPLX(SQRT(Vcp%i_sz), 0.0_gwp) * real(ctmp)
                !rhotwg_ki(1,jb)=CMPLX(SQRT(Vcp%i_sz),0.0_gwp) * sqrt(half)
-               !rhotwg_ki(Sigp%npwx+1,jb) = CMPLX(SQRT(Vcp%i_sz),0.0_gwp) * sqrt(half)
+               !rhotwg_ki(npwx+1,jb) = CMPLX(SQRT(Vcp%i_sz),0.0_gwp) * sqrt(half)
              end if
-             !rhotwg_ki(1, jb) = zero; rhotwg_ki(Sigp%npwx+1, jb) = zero
+             !rhotwg_ki(1, jb) = zero; rhotwg_ki(npwx+1, jb) = zero
 #endif
            end if
          end if
@@ -703,18 +666,17 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
            ! Do the scalar product only if ib_sum is occupied.
            if (theta_mu_minus_esum/fact_sp >= tol_empty) then
              do iab=1,Sigp%nsig_ab
-               spadx1 = spinor_padx(1, iab)
-               spadx2 = spinor_padx(2, iab)
-               gwpc_sigxme = -XDOTC(Sigp%npwx, rhotwg(spadx1+1:), 1, rhotwgp(spadx2+1:), 1) * theta_mu_minus_esum
+               spadx1 = spinor_padx(1, iab); spadx2 = spinor_padx(2, iab)
+               gwpc_sigxme = -XDOTC(npwx, rhotwg(spadx1+1:), 1, rhotwgp(spadx2+1:), 1) * theta_mu_minus_esum
 
                ! Accumulate and symmetrize Sigma_x
                ! -wtqm comes from time-reversal (exchange of band indeces)
                is_idx = spin; if (nspinor == 2) is_idx = iab
-               sigxme_tmp(jb,kb,is_idx) = sigxme_tmp(jb,kb,is_idx) + &
+               sigxme_tmp(jb, kb, is_idx) = sigxme_tmp(jb, kb, is_idx) + &
 &                (wtqp + wtqm)*DBLE(gwpc_sigxme) + (wtqp - wtqm)*j_gw*AIMAG(gwpc_sigxme)
 
-               sigx(1,jb,kb,is_idx) = sigx(1,jb,kb,is_idx) + wtqp *      gwpc_sigxme
-               sigx(2,jb,kb,is_idx) = sigx(2,jb,kb,is_idx) + wtqm *CONJG(gwpc_sigxme)
+               sigx(1, jb, kb, is_idx) = sigx(1, jb, kb, is_idx) + wtqp *      gwpc_sigxme
+               sigx(2, jb, kb, is_idx) = sigx(2, jb, kb, is_idx) + wtqm *CONJG(gwpc_sigxme)
              end do
            end if
          end do ! jb used to calculate matrix elements of Sigma_x
@@ -752,10 +714,10 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
  end if
 
  ! Gather contributions from all the CPUs.
- call xmpi_sum(sigxme_tmp,comm,ierr)
- call xmpi_sum(sigx,comm,ierr)
+ call xmpi_sum(sigxme_tmp, wfd%comm, ierr)
+ call xmpi_sum(sigx, wfd%comm, ierr)
 
- ! === Multiply by constants ===
+ ! Multiply by constants
  ! For 3D systems sqrt(4pi) is included in vc_sqrt_qbz ===
  sigxme_tmp = (one/(Cryst%ucvol*Kmesh%nbz)) * sigxme_tmp * alpha_hybrid
  sigx       = (one/(Cryst%ucvol*Kmesh%nbz)) * sigx       * alpha_hybrid

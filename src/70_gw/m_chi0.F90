@@ -329,13 +329,17 @@ subroutine mkrhotwg_sigma(ii,nspinor,npw,rhotwg,rhotwg_I)
 ! *************************************************************************
 
  SELECT CASE (ii)
- CASE (1) ! $ M_0 = M_{\up,\up} + M_{\down,\down} $
+ CASE (1)
+   ! $ M_0 = M_{\up,\up} + M_{\down,\down} $
    rhotwg_I(:) = rhotwg(1:npw) + rhotwg(npw+1:2*npw)
- CASE (2) ! $ M_z = M_{\up,\up} - M_{\down,\down} $
+ CASE (2)
+   ! $ M_z = M_{\up,\up} - M_{\down,\down} $
    rhotwg_I(:) = rhotwg(1:npw) - rhotwg(npw+1:2*npw)
- CASE (3) ! $ M_x = M_{\up,\down} + M_{\down,\up} $
+ CASE (3)
+   ! $ M_x = M_{\up,\down} + M_{\down,\up} $
    rhotwg_I(:) = ( rhotwg(2*npw+1:3*npw) + rhotwg(3*npw+1:4*npw) )
- CASE (4) ! $ M_y = i * (M_{\up,\down} -M_{\down,\up}) $
+ CASE (4)
+   ! $ M_y = i * (M_{\up,\down} -M_{\down,\up}) $
    rhotwg_I(:) = (rhotwg(2*npw+1:3*npw) - rhotwg(3*npw+1:4*npw) )*j_gw
  CASE DEFAULT
    MSG_BUG(sjoin('Wrong ii value:', itoa(ii)))
@@ -1082,14 +1086,13 @@ subroutine accumulate_chi0_q0(ik_bz,isym_kbz,itim_kbz,gwcomp,nspinor,npwepG0,Ep,
     ! spinorial case
     ! TODO
     !MSG_WARNING("Check tensor")
-    ABI_MALLOC(rhotwg_I,(Ep%npwe))
-    ABI_MALLOC(rhotwg_J,(Ep%npwe))
+    ABI_MALLOC(rhotwg_I, (Ep%npwe))
+    ABI_MALLOC(rhotwg_J, (Ep%npwe))
 
     ! I can use symmetries to loop over the upper triangle but
     ! this makes using BLAS more difficult
     ! Important NOTE: treatment of q-->0 limit is correct only
     ! for i=j=0. Other components require additional terms.
-
     do jj=1,Ep%nJ
       s_jj=1 ; if (jj==4) s_jj=-1
       pad_jj=(jj-1)*Ep%npwe

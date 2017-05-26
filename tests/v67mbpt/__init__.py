@@ -44,5 +44,7 @@ inp_files = [
 "t51.in",
 "t52.in",
 "t53.in",
+#GW-soc
 "t60.in",
+"t61.in",
 ]

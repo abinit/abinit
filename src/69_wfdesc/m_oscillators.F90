@@ -32,7 +32,7 @@ MODULE m_oscillators
  use m_fft
 
  use m_gwdefs,    only : czero_gw
- use m_fstrings,  only : toupper
+ use m_fstrings,  only : toupper, itoa, sjoin
  use m_geometry,  only : spinrot_cmat
  use m_blas,      only : xcopy
  use m_gsphere,   only : gsphere_t
@@ -84,7 +84,7 @@ CONTAINS  !=====================================================================
 !! nr=number of FFT grid points
 !! ndat=Number of wavefunctions to transform.
 !! nspinor=number of spinorial components.
-!! spinrot1(4),spinrot2(4)=components of the spinor rotation matrix :
+!! spinrot1(4),spinrot2(4)=components of the spinor rotation matrix:
 !!  spinrot(1)=$\cos\phi/2$
 !!  spinrot(2)=$\sin\phi/2 \times u_x$
 !!  spinrot(3)=$\sin\phi/2 \times u_y$
@@ -751,8 +751,11 @@ end subroutine gw_box2gsph
 !!
 !! FUNCTION
 !!  Calculate the Fourier transform of the product u_{bk}^*(r).u_{b"k}(r)
+!!  Return values on the FFT box.
 !!
 !! INPUTS
+!! nspinor=number of spinorial components.
+!! spinrot(4)=components of the spinor rotation matrix:
 !!
 !! OUTPUT
 !!
@@ -764,8 +767,7 @@ end subroutine gw_box2gsph
 !!
 !! SOURCE
 
-subroutine calc_wfwfg(ktabr_k,ktabi_k,nfftot,ngfft_gw,wfr_jb,wfr_kb,wfg2_jk)
-
+subroutine calc_wfwfg(ktabr_k,ktabi_k,spinrot,nfftot,nspinor,ngfft_gw,wfr_jb,wfr_kb,wfg2_jk)
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -777,14 +779,14 @@ subroutine calc_wfwfg(ktabr_k,ktabi_k,nfftot,ngfft_gw,wfr_jb,wfr_kb,wfg2_jk)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: ktabi_k,nfftot
+ integer,intent(in) :: ktabi_k,nfftot,nspinor
 !arrays
  integer,intent(in) :: ktabr_k(nfftot),ngfft_gw(18)
- complex(gwpc),intent(in) :: wfr_jb(nfftot),wfr_kb(nfftot)
- complex(gwpc),intent(out) :: wfg2_jk(nfftot)
+ real(dp),intent(in) :: spinrot(4)
+ complex(gwpc),intent(in) :: wfr_jb(nfftot*nspinor),wfr_kb(nfftot*nspinor)
+ complex(gwpc),intent(out) :: wfg2_jk(nfftot*nspinor)
 
 !Local variables-------------------------------
- integer,parameter :: ndat1=1
  type(fftbox_plan3_t) :: plan
 !arrays
  complex(gwpc),allocatable :: wfr2_dpcplx(:)
@@ -793,24 +795,27 @@ subroutine calc_wfwfg(ktabr_k,ktabi_k,nfftot,ngfft_gw,wfr_jb,wfr_kb,wfg2_jk)
 
  ! There is no need to take into account phases arising from non-symmorphic
  ! operations since the wavefunctions are evaluated at the same k-point.
- ABI_MALLOC(wfr2_dpcplx,(nfftot))
+ ABI_MALLOC(wfr2_dpcplx,(nfftot*nspinor))
 
- SELECT CASE (ktabi_k)
-
- CASE (1)
-   wfr2_dpcplx = GWPC_CONJG(wfr_jb(ktabr_k)) * wfr_kb(ktabr_k)
-
- CASE (2) ! Conjugate the product if time-reversal is used to reconstruct this k-point
-   wfr2_dpcplx = wfr_jb(ktabr_k) * GWPC_CONJG(wfr_kb(ktabr_k))
-
- CASE DEFAULT
-   MSG_ERROR("Wrong ktabi_k")
- END SELECT
+ if (nspinor == 1) then
+   select case (ktabi_k)
+   case (1)
+     wfr2_dpcplx = GWPC_CONJG(wfr_jb(ktabr_k)) * wfr_kb(ktabr_k)
+   case (2)
+     ! Conjugate the product if time-reversal is used to reconstruct this k-point
+     wfr2_dpcplx = wfr_jb(ktabr_k) * GWPC_CONJG(wfr_kb(ktabr_k))
+   case default
+     MSG_ERROR(sjoin("Wrong ktabi_k:", itoa(ktabi_k)))
+   end select
+ else if (nspinor == 2) then
+   NOT_IMPLEMENTED_ERROR()
+ else
+   MSG_ERROR(sjoin("Wrong nspinor:", itoa(nspinor)))
+ end if
 
  ! Transform to Fourier space (result in wfg2_jk)
- call fftbox_plan3_many(plan,ndat1,ngfft_gw(1:3),ngfft_gw(1:3),ngfft_gw(7),-1)
-
- call fftbox_execute(plan,wfr2_dpcplx,wfg2_jk)
+ call fftbox_plan3_many(plan, nspinor, ngfft_gw(1:3), ngfft_gw(1:3), ngfft_gw(7), -1)
+ call fftbox_execute(plan, wfr2_dpcplx, wfg2_jk)
  ABI_FREE(wfr2_dpcplx)
 
 end subroutine calc_wfwfg

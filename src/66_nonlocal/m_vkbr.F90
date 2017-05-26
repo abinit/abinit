@@ -657,15 +657,13 @@ function nc_ihr_comm(vkbr,cryst,psps,npw,nspinor,istwfk,inclvkb,kpoint,ug1,ug2,g
  ! hence k+G can be replaced by G.
 
  spinorwf_pad = RESHAPE([0, 0, npw, npw, 0, npw, npw, 0], [2, 4])
-
  ihr_comm = czero
 
  ! -i <c,k|\nabla_r|v,k> in reduced coordinates.
  ! This term is spin diagonal if nspinor == 2
  if (istwfk == 1) then
    do iab=1,nspinor
-     spad1 = spinorwf_pad(1,iab)
-     spad2 = spinorwf_pad(2,iab)
+     spad1 = spinorwf_pad(1,iab); spad2 = spinorwf_pad(2,iab)
      do ig=1,npw
        c_tmp = CONJG(ug1(ig+spad1)) * ug2(ig+spad2)
        ihr_comm(:,iab) = ihr_comm(:,iab) + c_tmp*gvec(:,ig)
@@ -682,8 +680,8 @@ function nc_ihr_comm(vkbr,cryst,psps,npw,nspinor,istwfk,inclvkb,kpoint,ug1,ug2,g
 
  ! Add second term $i <c,k|[Vnl,r]|v,k> in$ reduced cordinates.
  if (inclvkb /= 0) then
-   ABI_CHECK(nspinor == 1, "nspinor/=1 not coded")
    ABI_CHECK(istwfk == vkbr%istwfk, "input istwfk /= vkbr%istwfk")
+   ABI_CHECK(nspinor == 1, "nspinor/=1 not coded")
    !ABI_CHECK(istwfk == 1, "istwfk /=1 not coded")
    call add_vnlr_commutator(vkbr,cryst,psps,npw,nspinor,ug1,ug2,ihr_comm)
  end if

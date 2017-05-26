@@ -623,25 +623,40 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
 
    if ( optdriver==RUNL_BSE) then
      ! Check for BSE calculations that are not implemented.
-     cond_string(1)='optdriver'; cond_values(1)=optdriver
-     call chkint_eq(1,1,cond_string,cond_values,ierr,'nspinor',dt%nspinor,1,(/1/),iout)
+     if (dt%nspinor == 2) then
+       MSG_ERROR_NOSTOP("BSE with nspinor 2 not implemented", ierr)
+     end if
    end if
 
    ! Check for GW calculations that are not implemented.
    if (ANY(optdriver == [RUNL_SCREENING, RUNL_SIGMA])) then
      if (dt%nspinor == 2) then
+       if (dt%usepaw == 1) then
+         MSG_ERROR_NOSTOP("GW with PAW and nspinor 2 not implemented", ierr)
+       end if
        if (optdriver == RUNL_SCREENING .and. dt%symchi == 1) then
-         MSG_ERROR_NOSTOP("Screening with symchi 1 not implemented", ierr)
+         MSG_ERROR_NOSTOP("Screening with symchi 1 and nspinor 2 not implemented", ierr)
        end if
        if (optdriver == RUNL_SIGMA .and. dt%symsigma == 1) then
-         MSG_ERROR_NOSTOP("Screening with symsigma 1 not implemented", ierr)
+         MSG_ERROR_NOSTOP("Screening with symsigma 1 and nspinor 2 not implemented", ierr)
+       end if
+       if (optdriver == RUNL_SIGMA .and. &
+           any(mod(dt%gwcalctyp, 10) == [SIG_GW_AC, SIG_COHSEX, SIG_QPGW_PPM, SIG_QPGW_CD])) then
+         MSG_ERROR_NOSTOP("analytic-continuation, COHSEX, model GW with nspinor 2 are not implemented", ierr)
+       end if
+       if (optdriver == RUNL_SIGMA .and. mod(dt%gwcalctyp, 100) >= 10) then
+         MSG_ERROR_NOSTOP("Self-consistent GW with nspinor == 2 not implemented", ierr)
+       end if
+       if (dt%gwcomp /= 0) then
+         MSG_ERROR_NOSTOP("gwcomp /= 0 with nspinor 2 not implemented", ierr)
        end if
        if (dt%nspden == 1) then
          MSG_ERROR_NOSTOP("nspden 1 with screening or sigma not implemented", ierr)
        end if
-     end if
+     end if ! nspinor 2
+
      ! Avoid wasting CPUs if nsppol==2.
-     if (dt%nsppol==2 .and. .not.iseven(nproc) .and. nproc > 1) then
+     if (dt%nsppol==2 .and. .not. iseven(nproc) .and. nproc > 1) then
        write(msg,'(3a)') "Spin-polarized GW calculations should be run with an even number of processors ",ch10,&
 &       " for achieving an optimal distribution of memory and CPU load. Change the number of processors."
        MSG_ERROR_NOSTOP(msg, ierr)
@@ -868,7 +883,6 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
    call chkdpr(0,0,cond_string,cond_values,ierr,'gwls_second_model_parameter',  &
    dt%gwls_second_model_parameter,1,-1000.0_dp,iout)
 
-
 ! gwls_print_debug
    call chkint_ge(0,0,cond_string,cond_values,ierr,'gwls_print_debug',dt%gwls_print_debug,0,iout)
 
@@ -886,7 +900,6 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
 
 ! gwls_kmax_numeric
    call chkint_ge(0,0,cond_string,cond_values,ierr,'gwls_kmax_numeric',dt%gwls_kmax_numeric,0,iout)
-
 
 ! gwls_band_index
    call chkint_ge(0,0,cond_string,cond_values,ierr,'gwls_band_index',dt%gwls_band_index,1,iout)
