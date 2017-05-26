@@ -4588,7 +4588,7 @@ subroutine ebands_prtbltztrp(ebands, crystal, fname_radix, tau_k)
      MSG_ERROR(msg)
    end if
 
-   ewindow = ebands%fermie-minval(ebands%eig(1, :, isppol))
+   ewindow = 1.1_dp * ebands%fermie-minval(ebands%eig(1, :, isppol))
    write (iout, '(a)') "GENE                      # Format of input: generic format, with Symmetries"
    write (iout, '(a)') "0 0 0 0.0                 # iskip (not presently used) idebug setgap shiftgap"
    write (iout, '(E15.5,a,2F10.4,a)') ebands%fermie*ha2ryd, " 0.0005 ", ewindow*ha2ryd, nelec(isppol), &
