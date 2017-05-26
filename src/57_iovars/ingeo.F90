@@ -789,8 +789,7 @@ subroutine ingeo (acell,amu,dtset,bravais,&
 !      Find the symmetry operations : nsym, symafm, symrel and tnons.
 !      Use nptsym and ptsymrel, as determined by symlatt
        noncoll=0;if (nspden==4) noncoll=1
-       use_inversion=1;if (nspden==4.or.pawspnorb>0) use_inversion=0
-       !use_inversion=1
+       use_inversion=1;if (dtset%usepaw == 1 .and. (nspden==4.or.pawspnorb>0)) use_inversion=0
 
 !      Get field in reduced coordinates (reduced e/d field)
 
