@@ -341,12 +341,13 @@ subroutine ddk_read_fsvelocities(ddk, fstab, comm)
  ! process the eigenvalues(1): rotate to cartesian and divide by 2 pi
  ! use DGEMM better here on whole matrix and then reshape?
  vdim = ddk%maxnb*ddk%nkfs*ddk%nsppol
- ABI_MALLOC(velocityp, (3,vdim))
- velocityp = reshape (ddk%velocity, [3,vdim])
+! ABI_MALLOC(velocityp, (3,vdim))
+! velocityp = reshape (ddk%velocity, [3,vdim])
  ABI_MALLOC(velocitypp, (3,vdim))
  velocitypp = zero
- call dgemm('n','n',3,vdim,3,one,ddk%cryst%rprimd,3,velocityp,3,zero,velocitypp,3)
- ABI_FREE(velocityp)
+ call dgemm('n','n',3,vdim,3,one,ddk%cryst%rprimd,3,ddk%velocity,3,zero,velocitypp,3)
+ !call dgemm('n','n',3,vdim,3,one,ddk%cryst%rprimd,3,velocityp,3,zero,velocitypp,3)
+! ABI_FREE(velocityp)
 
 ! do isppol = 1, ddk%nsppol
 !   do ikpt = 1, ddk%nkfs
