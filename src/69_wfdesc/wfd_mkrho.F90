@@ -120,29 +120,24 @@ subroutine wfd_mkrho(Wfd,Cryst,Psps,Kmesh,Bands,ngfftf,nfftf,rhor,&
  DBG_ENTER("COLL")
 
  ! Consistency check.
- if (Wfd%nspden==1.and.Wfd%nspinor==2) then
-   MSG_ERROR('nspden==1 and nspinor==2 not implemented')
- end if
+ ABI_CHECK(Wfd%nsppol == Bands%nsppol, "mismatch in nspppol")
 
- ABI_CHECK(Wfd%nsppol==Bands%nsppol,"mismatch in nspppol")
+ if (ANY(ngfftf(1:3) /= Wfd%ngfft(1:3))) call wfd_change_ngfft(Wfd,Cryst,Psps,ngfftf)
 
- if ( ANY(ngfftf(1:3) /= Wfd%ngfft(1:3)) ) then
-   call wfd_change_ngfft(Wfd,Cryst,Psps,ngfftf)
- end if
- !
- ! === Calculate IBZ contribution to the charge density ===
+ ! Calculate IBZ contribution to the charge density.
  ABI_MALLOC(wfr,(nfftf*Wfd%nspinor))
 
  if (Wfd%nspinor==2) then
-   ABI_MALLOC(wfr_x,(nfftf))
-   ABI_MALLOC(wfr_y,(nfftf))
+   ABI_MALLOC(wfr_x, (nfftf))
+   ABI_MALLOC(wfr_y, (nfftf))
    if (Wfd%nspden==4) then
-     ABI_MALLOC(rhor_down,(nfftf))
-     ABI_MALLOC(rhor_mx,(nfftf))
-     ABI_MALLOC(rhor_my,(nfftf))
+     ABI_MALLOC(rhor_down, (nfftf))
+     ABI_MALLOC(rhor_mx, (nfftf))
+     ABI_MALLOC(rhor_my, (nfftf))
      rhor_down = zero; rhor_mx = zero; rhor_my = zero
-   else !TODO
-     MSG_ERROR('nspden/=4 and nspinor=2 not implemented')
+   else
+     !TODO
+     MSG_ERROR('nspden==1 and nspinor==2 not implemented')
    end if
  end if
 

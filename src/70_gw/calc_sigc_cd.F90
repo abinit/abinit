@@ -112,8 +112,7 @@ subroutine calc_sigc_cd(npwc,npwx,nspinor,nomega,nomegae,nomegaer,nomegaei,rhotw
  real(dp), allocatable :: KronN(:),KronW(:),GaussW(:),fint(:),fint2(:)
 !*************************************************************************
 
- my_calc_poles=.TRUE.
- my_err=0
+ my_calc_poles=.TRUE.; my_err=0
 
  ! Set integration method for imaginary axis
  INTMETHOD = FABIEN
@@ -157,9 +156,8 @@ subroutine calc_sigc_cd(npwc,npwx,nspinor,nomega,nomegae,nomegaer,nomegaei,rhotw
  end do
 
  do ispinor=1,nspinor
-   spadx=(ispinor-1)*npwx
-   spadc=(ispinor-1)*npwc
-   !
+   spadx=(ispinor-1)*npwx; spadc=(ispinor-1)*npwc
+
    ! Calculate $ \sum_{Gp} (\epsilon^{-1}_{G Gp}(\omega)-\delta_{G Gp}) \rhotwgp(Gp) $
 !$omp parallel do
    do io=1,nomegae
@@ -177,7 +175,6 @@ subroutine calc_sigc_cd(npwc,npwx,nspinor,nomega,nomegae,nomegaer,nomegaei,rhotw
    ! Original implementation -- saved here for reference during development
    ! === Perform integration along the imaginary axis ===
    !do io=1,nomegaei+1
-   !
    !  if (io==1) then
    !    domegaleft  = omega_imag(io)
    !    domegaright =(omega_imag(io+1)-omega_imag(io  ))*half
@@ -197,184 +194,176 @@ subroutine calc_sigc_cd(npwc,npwx,nspinor,nomega,nomegae,nomegaer,nomegaei,rhotw
    !end do !io
 
    !ket(spadc+1:spadc+npwc,:)=ket(spadc+1:spadc+npwc,:)/pi
-   !
    ! ---------------- end of original implementation -----------------------
 
- select case(INTMETHOD)
- case(FABIEN)
-   ! Hopefully more effective implementation MS 04.08.2011
-   ! === Perform integration along imaginary axis using BLAS ===
-   ! First calculate first and last weights
-   weight(1,:) = ATAN(-half*AIMAG(omega_imag(2))/REAL(omegame0i_tmp(:)))
-   domegaleft  = (three*omega_imag(nomegaei+1)-omega_imag(nomegaei))
-   domegaright = (omega_imag(nomegaei+1)+omega_imag(nomegaei))
-   right(:)    = -AIMAG(omega_imag(nomegaei+1)-omega_imag(nomegaei))*REAL(omegame0i_tmp(:))
-   left(:)     = quarter*AIMAG(domegaleft)*AIMAG(domegaright) &
-&                 +REAL(omegame0i_tmp(:))*REAL(omegame0i_tmp(:))
-   weight(nomegaei+1,:) = ATAN(right(:)/left(:))
-   ! Calculate the rest of the weights
-   do io=2,nomegaei
-     domegaleft  = (omega_imag(io  )+omega_imag(io-1))
-     domegaright = (omega_imag(io+1)+omega_imag(io  ))
-     right(:)    = -half*AIMAG(omega_imag(io+1)-omega_imag(io-1))*REAL(omegame0i_tmp(:))
-     left(:)     = REAL(omegame0i_tmp(:))*REAL(omegame0i_tmp(:)) &
-&     +quarter*AIMAG(domegaleft)*AIMAG(domegaright)
-     weight(io,:) = ATAN(right(:)/left(:))
-   end do
+   select case(INTMETHOD)
+   case(FABIEN)
+     ! Hopefully more effective implementation MS 04.08.2011
+     ! Perform integration along imaginary axis using BLAS
+     ! First calculate first and last weights
+     weight(1,:) = ATAN(-half*AIMAG(omega_imag(2))/REAL(omegame0i_tmp(:)))
+     domegaleft  = (three*omega_imag(nomegaei+1)-omega_imag(nomegaei))
+     domegaright = (omega_imag(nomegaei+1)+omega_imag(nomegaei))
+     right(:)    = -AIMAG(omega_imag(nomegaei+1)-omega_imag(nomegaei))*REAL(omegame0i_tmp(:))
+     left(:)     = quarter*AIMAG(domegaleft)*AIMAG(domegaright) &
+&                   +REAL(omegame0i_tmp(:))*REAL(omegame0i_tmp(:))
+     weight(nomegaei+1,:) = ATAN(right(:)/left(:))
+     ! Calculate the rest of the weights
+     do io=2,nomegaei
+       domegaleft  = (omega_imag(io  )+omega_imag(io-1))
+       domegaright = (omega_imag(io+1)+omega_imag(io  ))
+       right(:)    = -half*AIMAG(omega_imag(io+1)-omega_imag(io-1))*REAL(omegame0i_tmp(:))
+       left(:)     = REAL(omegame0i_tmp(:))*REAL(omegame0i_tmp(:)) &
+&       +quarter*AIMAG(domegaleft)*AIMAG(domegaright)
+       weight(io,:) = ATAN(right(:)/left(:))
+     end do
 
-   ! Use BLAS call to perform matrix-matrix multiplication and accumulation
-   fact = CMPLX(piinv,zero)
+     ! Use BLAS call to perform matrix-matrix multiplication and accumulation
+     fact = CMPLX(piinv,zero)
 
-   call xgemm('N','N',npwc,nomega,nomegaei+1,fact,epsrho_imag,npwc,&
-&   weight,nomegaei+1,cone_gw,ket(spadc+1:spadc+npwc,:),npwc)
+     call xgemm('N','N',npwc,nomega,nomegaei+1,fact,epsrho_imag,npwc,&
+&     weight,nomegaei+1,cone_gw,ket(spadc+1:spadc+npwc,:),npwc)
 
-!-----------------------------------------------------------
-! Trapezoidal rule
- case(TRAPEZOID)
+   case(TRAPEZOID)
+!   Trapezoidal rule Transform omega coordinates
+     alph     = plasmafreq
+     alphsq   = alph*alph
+     inv_alph = one/alph
 
-!  Transform omega coordinates
-   alph     = plasmafreq
-   alphsq   = alph*alph
-   inv_alph = one/alph
+     xtab(1:nomegaei+1) = AIMAG(omega_imag(:))/(AIMAG(omega_imag(:)) + alph)
+     xtab(nomegaei+2)   = one
 
-   xtab(1:nomegaei+1) = AIMAG(omega_imag(:))/(AIMAG(omega_imag(:)) + alph)
-   xtab(nomegaei+2)   = one
+!   Efficient trapezoidal rule with BLAS calls
+     tbeta(:)     = REAL(omegame0i_tmp(:))
+     tbetasq(:)   = tbeta(:)*tbeta(:)
+     tinv_beta(:) = one/tbeta(:)
 
-! Efficient trapezoidal rule with BLAS calls
-   tbeta(:)     = REAL(omegame0i_tmp(:))
-   tbetasq(:)   = tbeta(:)*tbeta(:)
-   tinv_beta(:) = one/tbeta(:)
+     do io=1,nomegaei
+       atermr(:)    = inv_alph*tinv_beta(:)*((alphsq+tbetasq(:))*xtab(io+1)-tbetasq(:))
+       aterml(:)    = inv_alph*tinv_beta(:)*((alphsq+tbetasq(:))*xtab(io  )-tbetasq(:))
+       right(:)     = ATAN((atermr(:)-aterml(:))/(one+atermr(:)*aterml(:)))
+       logup(:)     = ABS(((alphsq+tbetasq(:))*xtab(io+1)-two*tbetasq(:)) &
+&                     *xtab(io+1)+tbetasq(:))
+       logdown(:)   = ABS(((alphsq+tbetasq(:))*xtab(io  )-two*tbetasq(:)) &
+&                     *xtab(io  )+tbetasq(:))
+       ! Trapezoid integration weights
+       weight(io,:)  = CMPLX(-(half*alph*tbeta(:)*LOG(logup(:)/logdown(:)) + tbetasq(:) &
+&                         *right(:))/(alphsq+tbetasq(:)),zero)
+       weight2(io,:) = CMPLX(-right(:),zero)
+       ! Linear interpolation coefficients for each section (sum over ig)
+       tfone(:,io)   = (epsrho_imag(:,io+1)-epsrho_imag(:,io)) &
+&                      /(xtab(io+1)-xtab(io))
+       tftwo(:,io)   = epsrho_imag(:,io) - tfone(:,io)*xtab(io)
+     end do
 
-   do io=1,nomegaei
-     atermr(:)    = inv_alph*tinv_beta(:)*((alphsq+tbetasq(:))*xtab(io+1)-tbetasq(:))
-     aterml(:)    = inv_alph*tinv_beta(:)*((alphsq+tbetasq(:))*xtab(io  )-tbetasq(:))
+     ! Calculate weights for asymptotic behaviour
+     atermr(:)   = alph*tinv_beta(:)
+     aterml(:)   = inv_alph*tinv_beta(:)*((alphsq+tbetasq(:))*xtab(nomegaei+1)-tbetasq(:))
+     logup(:)    = alphsq*xtab(nomegaei+1)*xtab(nomegaei+1)
+     logdown(:)  = ABS(((alphsq+tbetasq(:))*xtab(nomegaei+1)-two*tbetasq(:)) &
+&                   *xtab(nomegaei+1)+tbetasq(:))
      right(:)     = ATAN((atermr(:)-aterml(:))/(one+atermr(:)*aterml(:)))
-     logup(:)     = ABS(((alphsq+tbetasq(:))*xtab(io+1)-two*tbetasq(:)) &
-&                   *xtab(io+1)+tbetasq(:))
-     logdown(:)   = ABS(((alphsq+tbetasq(:))*xtab(io  )-two*tbetasq(:)) &
-&                   *xtab(io  )+tbetasq(:))
-     ! Trapezoid integration weights
-     weight(io,:)  = CMPLX(-(half*alph*tbeta(:)*LOG(logup(:)/logdown(:)) + tbetasq(:) &
-&                       *right(:))/(alphsq+tbetasq(:)),zero)
-     weight2(io,:) = CMPLX(-right(:),zero)
-     ! Linear interpolation coefficients for each section (sum over ig)
-     tfone(:,io)   = (epsrho_imag(:,io+1)-epsrho_imag(:,io)) &
-&                    /(xtab(io+1)-xtab(io))
-     tftwo(:,io)   = epsrho_imag(:,io) - tfone(:,io)*xtab(io)
-   end do
-   ! Calculate weights for asymptotic behaviour
-   atermr(:)   = alph*tinv_beta(:)
-   aterml(:)   = inv_alph*tinv_beta(:)*((alphsq+tbetasq(:))*xtab(nomegaei+1)-tbetasq(:))
-   logup(:)    = alphsq*xtab(nomegaei+1)*xtab(nomegaei+1)
-   logdown(:)  = ABS(((alphsq+tbetasq(:))*xtab(nomegaei+1)-two*tbetasq(:)) &
-&                 *xtab(nomegaei+1)+tbetasq(:))
-   right(:)     = ATAN((atermr(:)-aterml(:))/(one+atermr(:)*aterml(:)))
-   weight (nomegaei+1,:) = CMPLX(-(half*(alphsq*tinv_beta(:)*LOG(logdown(:)/logup(:)) &
-&   - tbeta(:)*LOG(xtab(nomegaei+1)*xtab(nomegaei+1))) - alph*right(:)),zero)
-   tfone(:,nomegaei+1) = -(zero-epsrho_imag(:,nomegaei+1)*AIMAG(omega_imag(nomegaei+1))) &
-                         /(one-xtab(nomegaei+1))
+     weight (nomegaei+1,:) = CMPLX(-(half*(alphsq*tinv_beta(:)*LOG(logdown(:)/logup(:)) &
+&     - tbeta(:)*LOG(xtab(nomegaei+1)*xtab(nomegaei+1))) - alph*right(:)),zero)
+     tfone(:,nomegaei+1) = -(zero-epsrho_imag(:,nomegaei+1)*AIMAG(omega_imag(nomegaei+1))) &
+                           /(one-xtab(nomegaei+1))
 
-   ! Use BLAS call to perform matrix-matrix multiplication and accumulation
-   fact = CMPLX(piinv,zero)
+     ! Use BLAS call to perform matrix-matrix multiplication and accumulation
+     fact = CMPLX(piinv,zero)
 
-   call xgemm('N','N',npwc,nomega,nomegaei+1,fact,tfone,npwc,&
-&   weight ,nomegaei+1,cone_gw,ket(spadc+1:spadc+npwc,:),npwc)
-   call xgemm('N','N',npwc,nomega,nomegaei  ,fact,tftwo,npwc,&
-&   weight2,nomegaei  ,cone_gw,ket(spadc+1:spadc+npwc,:),npwc)
+     call xgemm('N','N',npwc,nomega,nomegaei+1,fact,tfone,npwc,&
+&     weight ,nomegaei+1,cone_gw,ket(spadc+1:spadc+npwc,:),npwc)
+     call xgemm('N','N',npwc,nomega,nomegaei  ,fact,tftwo,npwc,&
+&     weight2,nomegaei  ,cone_gw,ket(spadc+1:spadc+npwc,:),npwc)
 
+   case(NSPLINE)
+     ! Natural spline followed by Gauss-Kronrod
+     ! Transform omega coordinates
+     alph     = plasmafreq
+     alphsq   = alph*alph
+     inv_alph = one/alph
 
-!-----------------------------------------------------------
-! Natural spline followed by Gauss-Kronrod
- case(NSPLINE)
-
-!  Transform omega coordinates
-   alph     = plasmafreq
-   alphsq   = alph*alph
-   inv_alph = one/alph
-
-   xtab(1:nomegaei+1) = AIMAG(omega_imag(:))/(AIMAG(omega_imag(:)) + alph)
-   xtab(nomegaei+2)   = one
+     xtab(1:nomegaei+1) = AIMAG(omega_imag(:))/(AIMAG(omega_imag(:)) + alph)
+     xtab(nomegaei+2)   = one
 
 ! Gauss-Kronrod integration of spline fit of f(t)/(1-t) in transformed space
 ! *** OPENMP SECTION *** Added by MS
-!!$OMP PARALLEL PRIVATE(ig,ftab,ftab2,s,s2,r,r2,y,y2,work,work2,beta,betasq,inv_beta, &
+!!$OMP PARALLEL DO PRIVATE(ig,ftab,ftab2,s,s2,r,r2,y,y2,work,work2,beta,betasq,inv_beta, &
 !!$OMP  intsign,io,ii,i,j,re_intG,re_intK,im_intG,im_intK,temp1,temp2,temp3,temp4, &
 !!$OMP  ttil,tau,ref,fint,imf,fint2,GKttab)
-!!$OMP DO
-   do ig=1,npwc
-     ! Spline fit
-     ftab (1:nomegaei+1) =  REAL(epsrho_imag(ig,1:nomegaei+1))/(one-xtab(1:nomegaei+1))
-     ftab2(1:nomegaei+1) = AIMAG(epsrho_imag(ig,1:nomegaei+1))/(one-xtab(1:nomegaei+1))
-     ftab (nomegaei+2)   = zero; ftab2(nomegaei+2) = zero
-     ! Explicit calculation of spline coefficients
-     s  = zero; s2 = zero
-     do i = 1, nomegaei+2-1
-       r  = ( ftab (i+1) - ftab (i) ) / ( xtab(i+1) - xtab(i) )
-       r2 = ( ftab2(i+1) - ftab2(i) ) / ( xtab(i+1) - xtab(i) )
-       y (2,i) = r  - s; y2(2,i) = r2 - s2
-       s  = r; s2 = r2
-     end do
-     s = zero; s2 = zero
-     r = zero; r2 = zero
-     y(2,1) = zero; y2(2,1) = zero
-     y(2,nomegaei+2) = zero; y2(2,nomegaei+2) = zero
-     do i = 2, nomegaei+2-1
-       y (2,i) = y (2,i) + r  * y (2,i-1)
-       y2(2,i) = y2(2,i) + r2 * y2(2,i-1)
-       work (i) = two * ( xtab(i-1) - xtab(i+1) ) - r  * s
-       work2(i) = two * ( xtab(i-1) - xtab(i+1) ) - r2 * s2
-       s = xtab(i+1) - xtab(i)
-       s2 = s
-       r  = s  / work (i)
-       r2 = s2 / work2(i)
-     end do
-     do j = 2, nomegaei+2-1
-       i = nomegaei+2+1-j
-       y (2,i) = ( ( xtab(i+1) - xtab(i) ) * y (2,i+1) - y (2,i) ) / work (i)
-       y2(2,i) = ( ( xtab(i+1) - xtab(i) ) * y2(2,i+1) - y2(2,i) ) / work2(i)
-     end do
-     do i = 1, nomegaei+2-1
-       s = xtab(i+1) - xtab(i); s2 = s;
-       r = y(2,i+1) - y(2,i); r2 = y2(2,i+1) - y2(2,i);
-       y(3,i) = r / s; y2(3,i) = r2 / s2;
-       y(2,i) = three * y(2,i); y2(2,i) = three * y2(2,i);
-       y (1,i) = ( ftab (i+1) - ftab (i) ) / s  - ( y (2,i) + r  ) * s
-       y2(1,i) = ( ftab2(i+1) - ftab2(i) ) / s2 - ( y2(2,i) + r2 ) * s2
-     end do
-     ! End of spline interpolation
-     do ios=1,nomega
-       beta     = REAL(omegame0i_tmp(ios))
-       betasq   = beta*beta
-       inv_beta = one/beta
-       intsign = sign(half*piinv,beta)
-       beta = ABS(beta)
-       io = 1; re_intG = zero; re_intK = zero; im_intG = zero; im_intK = zero
-       do ii=1,GK_LEVEL
-         do
-           GKttab = two*alph*xtab(io+1)/(beta-(beta-alph)*xtab(io+1))-one
-           if (GKttab > KronN(ii)) EXIT
-           io = io + 1
-         end do
-         temp1     = half*(KronN(ii)+one)
-         temp2     = temp1 - half
-         temp3     = temp2*temp2
-         temp4     = half/(temp3 + quarter)
-         ttil      = beta*temp1/(alph-(alph-beta)*temp1)
-         tau       = ttil - xtab(io)
-         ref       = ftab (io) + tau*(y (1,io)+tau*(y (2,io)+tau*y (3,io)))
-         fint (ii) = -ref*(one-ttil)*temp4
-         imf       = ftab2(io) + tau*(y2(1,io)+tau*(y2(2,io)+tau*y2(3,io)))
-         fint2(ii) = -imf*(one-ttil)*temp4
-         re_intK   = KronW(ii)*fint (ii)
-         im_intK   = KronW(ii)*fint2(ii)
-         ket(spadc+ig,ios) = ket(spadc+ig,ios)+intsign*CMPLX(re_intK,im_intK)
-         end do ! ii
-     end do !ios
-   end do !ig
-!!$OMP END DO
-!!$OMP END PARALLEL
+     do ig=1,npwc
+       ! Spline fit
+       ftab (1:nomegaei+1) =  REAL(epsrho_imag(ig,1:nomegaei+1))/(one-xtab(1:nomegaei+1))
+       ftab2(1:nomegaei+1) = AIMAG(epsrho_imag(ig,1:nomegaei+1))/(one-xtab(1:nomegaei+1))
+       ftab (nomegaei+2)   = zero; ftab2(nomegaei+2) = zero
+       ! Explicit calculation of spline coefficients
+       s  = zero; s2 = zero
+       do i = 1, nomegaei+2-1
+         r  = ( ftab (i+1) - ftab (i) ) / ( xtab(i+1) - xtab(i) )
+         r2 = ( ftab2(i+1) - ftab2(i) ) / ( xtab(i+1) - xtab(i) )
+         y (2,i) = r  - s; y2(2,i) = r2 - s2
+         s  = r; s2 = r2
+       end do
+       s = zero; s2 = zero
+       r = zero; r2 = zero
+       y(2,1) = zero; y2(2,1) = zero
+       y(2,nomegaei+2) = zero; y2(2,nomegaei+2) = zero
+       do i = 2, nomegaei+2-1
+         y (2,i) = y (2,i) + r  * y (2,i-1)
+         y2(2,i) = y2(2,i) + r2 * y2(2,i-1)
+         work (i) = two * ( xtab(i-1) - xtab(i+1) ) - r  * s
+         work2(i) = two * ( xtab(i-1) - xtab(i+1) ) - r2 * s2
+         s = xtab(i+1) - xtab(i)
+         s2 = s
+         r  = s  / work (i)
+         r2 = s2 / work2(i)
+       end do
+       do j = 2, nomegaei+2-1
+         i = nomegaei+2+1-j
+         y (2,i) = ( ( xtab(i+1) - xtab(i) ) * y (2,i+1) - y (2,i) ) / work (i)
+         y2(2,i) = ( ( xtab(i+1) - xtab(i) ) * y2(2,i+1) - y2(2,i) ) / work2(i)
+       end do
+       do i = 1, nomegaei+2-1
+         s = xtab(i+1) - xtab(i); s2 = s;
+         r = y(2,i+1) - y(2,i); r2 = y2(2,i+1) - y2(2,i);
+         y(3,i) = r / s; y2(3,i) = r2 / s2;
+         y(2,i) = three * y(2,i); y2(2,i) = three * y2(2,i);
+         y (1,i) = ( ftab (i+1) - ftab (i) ) / s  - ( y (2,i) + r  ) * s
+         y2(1,i) = ( ftab2(i+1) - ftab2(i) ) / s2 - ( y2(2,i) + r2 ) * s2
+       end do
+       ! End of spline interpolation
+       do ios=1,nomega
+         beta     = REAL(omegame0i_tmp(ios))
+         betasq   = beta*beta
+         inv_beta = one/beta
+         intsign = sign(half*piinv,beta)
+         beta = ABS(beta)
+         io = 1; re_intG = zero; re_intK = zero; im_intG = zero; im_intK = zero
+         do ii=1,GK_LEVEL
+           do
+             GKttab = two*alph*xtab(io+1)/(beta-(beta-alph)*xtab(io+1))-one
+             if (GKttab > KronN(ii)) EXIT
+             io = io + 1
+           end do
+           temp1     = half*(KronN(ii)+one)
+           temp2     = temp1 - half
+           temp3     = temp2*temp2
+           temp4     = half/(temp3 + quarter)
+           ttil      = beta*temp1/(alph-(alph-beta)*temp1)
+           tau       = ttil - xtab(io)
+           ref       = ftab (io) + tau*(y (1,io)+tau*(y (2,io)+tau*y (3,io)))
+           fint (ii) = -ref*(one-ttil)*temp4
+           imf       = ftab2(io) + tau*(y2(1,io)+tau*(y2(2,io)+tau*y2(3,io)))
+           fint2(ii) = -imf*(one-ttil)*temp4
+           re_intK   = KronW(ii)*fint (ii)
+           im_intK   = KronW(ii)*fint2(ii)
+           ket(spadc+ig,ios) = ket(spadc+ig,ios)+intsign*CMPLX(re_intK,im_intK)
+           end do ! ii
+       end do !ios
+     end do !ig
+!!$OMP END PARALLEL DO
 
- end select !intmethod
+   end select !intmethod
 
    local_one = one
    local_zero = zero
@@ -397,7 +386,6 @@ subroutine calc_sigc_cd(npwc,npwx,nspinor,nomega,nomegae,nomegaer,nomegaei,rhotw
    end if
 
    if (ANY(my_calc_poles(:))) then ! Make sure we only enter if necessary
-
 ! *** OPENMP SECTION *** Added by MS
 !!OMP !write(std_out,'(a,i0)') ' Entering openmp loop. Number of threads: ',xomp_get_num_threads()
 !$OMP PARALLEL SHARED(npwc,nomega,nomegaer,theta_mu_minus_e0i,spadc,local_one,local_zero, &
@@ -406,18 +394,15 @@ subroutine calc_sigc_cd(npwc,npwx,nspinor,nomega,nomegae,nomegaer,nomegaei,rhotw
 !!OMP $ write(std_out,'(a,i0)') ' Entering openmp loop. Number of threads: ',xomp_get_num_threads()
 !$OMP DO
      do ig=1,npwc
-       !
-       ! * Prepare the spline interpolation by filling at once the arrays rtmp_r, rtmp_i
+       ! Prepare the spline interpolation by filling at once the arrays rtmp_r, rtmp_i
        call spline(DBLE(omega(1:nomegaer)),DBLE(epsrho(ig,1:nomegaer)),nomegaer,local_zero,local_zero,rtmp_r)
        call spline(DBLE(omega(1:nomegaer)),DBLE(AIMAG(epsrho(ig,1:nomegaer))),nomegaer,local_zero,local_zero,rtmp_i)
-
-       !! call spline_complex( DBLE(omega(1:nomegaer)), epsrho(ig,1:nomegaer), nomegaer, zero, zero, rtmp )
+       ! call spline_complex( DBLE(omega(1:nomegaer)), epsrho(ig,1:nomegaer), nomegaer, zero, zero, rtmp )
 
        do ios=1,nomega
-
          if (.NOT.my_calc_poles(ios)) CYCLE
 
-         ! * Interpolate real and imaginary part of epsrho at |omegame0i_tmp|.
+         ! Interpolate real and imaginary part of epsrho at |omegame0i_tmp|.
          tmp_x(1) = ABS(omegame0i_tmp(ios))
          call splint(nomegaer,DBLE(omega(1:nomegaer)),DBLE(epsrho(ig,1:nomegaer)),rtmp_r,1,tmp_x,tmp_y,ierr=ierr)
          if (ig==1.and.ispinor==1) my_err = my_err + ierr
@@ -426,7 +411,6 @@ subroutine calc_sigc_cd(npwc,npwx,nspinor,nomega,nomegae,nomegaer,nomegaei,rhotw
          tmp_x(1) = ABS(omegame0i_tmp(ios))
          call splint(nomegaer,DBLE(omega(1:nomegaer)),DBLE(AIMAG(epsrho(ig,1:nomegaer))),rtmp_i,1,tmp_x,tmp_y)
          rt_imag = tmp_y(1)
-
          !!call splint_complex(nomegaer,DBLE(omega(1:nomegaer)),epsrho(ig,1:nomegaer),rtmp,1,tmp_x,yfit)
 
          ct=DCMPLX(rt_real,rt_imag)

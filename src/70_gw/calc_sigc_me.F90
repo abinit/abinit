@@ -938,7 +938,6 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
            do io=1,Sr%nomega_i
              do ispinor=1,nspinor
                spadc=(ispinor-1)*Sigp%npwc
-
                do ig=1,Sigp%npwc
                  ctmp=czero
                  do igp=1,Sigp%npwc
@@ -946,7 +945,6 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
                  end do
                  sigc_ket(ig+spadc,io)=ctmp
                end do
-
              end do !ispinor
            end do !io
 
