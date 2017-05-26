@@ -243,7 +243,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  real(dp),allocatable :: qp_rhor(:,:),qp_vhartr(:),qp_vtrial(:,:),qp_vxc(:,:)
  real(dp),allocatable :: qp_taur(:,:),qp_taug(:,:),igwene(:,:,:)
  real(dp),allocatable :: vpsp(:),xccc3d(:),dijexc_core(:,:,:),dij_hf(:,:,:)
- real(dp),allocatable :: osoc_bks(:, :, :)
+ !real(dp),allocatable :: osoc_bks(:, :, :)
  real(dp),allocatable :: ks_aepaw_rhor(:,:) !,ks_n_one_rhor(:,:),ks_nt_one_rhor(:,:)
  complex(dpc),allocatable :: omega(:),em1_ppm(:,:,:)
  complex(dpc) :: ovlp(2)
@@ -2112,22 +2112,22 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  sigcme=czero
 
 
- if (.False. .and. psps%usepaw == 0 .and. wfd%nspinor == 1 .and. any(dtset%so_psp /= 0)) then
-   call wrtout(std_out, "Computing SOC contribution with first-order perturbation theory")
-   ABI_MALLOC(bks_mask, (wfd%mband, wfd%nkibz, wfd%nsppol))
-   bks_mask = .False.
-   do spin=1,wfd%nsppol
-     do ikcalc=1,Sigp%nkptgw
-       ik_ibz = Kmesh%tab(Sigp%kptgw2bz(ikcalc)) ! Irred k-point for GW
-       ii=Sigp%minbnd(ikcalc, spin); jj=Sigp%maxbnd(ikcalc, spin)
-       bks_mask(ii:jj, ik_ibz, spin) = .True.
-     end do
-   end do
-
-   call wfd_get_socpert(wfd, cryst, psps, pawtab, bks_mask, osoc_bks)
-   ABI_FREE(bks_mask)
-   ABI_FREE(osoc_bks)
- end if
+! if (.False. .and. psps%usepaw == 0 .and. wfd%nspinor == 1 .and. any(dtset%so_psp /= 0)) then
+!   call wrtout(std_out, "Computing SOC contribution with first-order perturbation theory")
+!   ABI_MALLOC(bks_mask, (wfd%mband, wfd%nkibz, wfd%nsppol))
+!   bks_mask = .False.
+!   do spin=1,wfd%nsppol
+!     do ikcalc=1,Sigp%nkptgw
+!       ik_ibz = Kmesh%tab(Sigp%kptgw2bz(ikcalc)) ! Irred k-point for GW
+!       ii=Sigp%minbnd(ikcalc, spin); jj=Sigp%maxbnd(ikcalc, spin)
+!       bks_mask(ii:jj, ik_ibz, spin) = .True.
+!     end do
+!   end do
+!
+!   call wfd_get_socpert(wfd, cryst, psps, pawtab, bks_mask, osoc_bks)
+!   ABI_FREE(bks_mask)
+!   ABI_FREE(osoc_bks)
+! end if
 
 !==========================================================
 !==== Exchange part using the dense gwx_ngfft FFT mesh ====

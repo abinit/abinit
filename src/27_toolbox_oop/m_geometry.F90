@@ -698,6 +698,7 @@ end subroutine phdispl_cart2red
 
 pure function spinrot_cmat(spinrot)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
