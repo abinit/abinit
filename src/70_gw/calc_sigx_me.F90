@@ -130,7 +130,7 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
  use m_wfd,           only : wfd_t, wfd_get_ur, wfd_get_cprj, wfd_change_ngfft, wfd_paw_get_aeur, wfd_get_many_ur,&
 &                            wfd_sym_ur
  use m_sigma,         only : sigma_t
- use m_oscillators,   only : rho_tw_g, get_uug
+ use m_oscillators,   only : rho_tw_g
  use m_esymm,         only : esymm_t, esymm_symmetrize_mels, esymm_failed
  use m_ptgroups,      only : sum_irreps
 
@@ -329,10 +329,10 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
  call wrtout(std_out,msg)
  !
  ! The index of G-G0 in the FFT mesh the oscillators
- ! * Sigp%mG0 gives the MAX G0 component to account for umklapp.
- ! * Note the size MAX(npwx, Sigp%npwc).
+ ! Sigp%mG0 gives the MAX G0 component to account for umklapp.
+ ! Note the size MAX(npwx, Sigp%npwc).
  ABI_MALLOC(igfftxg0, (Gsph_x%ng))
- !
+
  ! Precalculate the FFT index of $ R^{-1}(r-\tau)$
  ! S = \transpose R^{-1} and k_BZ = S k_IBZ
  ! irottb is the FFT index of $R^{-1} (r-\tau)$ used to symmetrize u_Sk.

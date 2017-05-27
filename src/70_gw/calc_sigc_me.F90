@@ -146,7 +146,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
  use m_vcoul,         only : vcoul_t
  use m_wfd,           only : wfd_get_ur, wfd_t, wfd_get_cprj, wfd_barrier, wfd_change_ngfft, wfd_paw_get_aeur, &
 &                            wfd_get_many_ur,wfd_sym_ur
- use m_oscillators,   only : rho_tw_g, calc_wfwfg, get_uug
+ use m_oscillators,   only : rho_tw_g, calc_wfwfg
  use m_screening,     only : epsilonm1_results, epsm1_symmetrizer, epsm1_symmetrizer_inplace, get_epsm1
  use m_ppmodel,       only : setup_ppmodel, ppm_get_qbz, ppmodel_t, calc_sig_ppm
  use m_sigma,         only : sigma_t

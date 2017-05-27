@@ -140,7 +140,7 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
  use m_io_tools,        only : flush_unit
  use m_wfd,             only : wfd_get_ur, wfd_t, wfd_distribute_bbp, wfd_get_cprj, &
 &                              wfd_barrier, wfd_change_ngfft,wfd_paw_get_aeur, wfd_sym_ur
- use m_oscillators,     only : rho_tw_g, calc_wfwfg, get_uug
+ use m_oscillators,     only : rho_tw_g, calc_wfwfg
  use m_vkbr,            only : vkbr_t, vkbr_free, vkbr_init, nc_ihr_comm
  use m_chi0,            only : hilbert_transform, setup_spectral, symmetrize_afm_chi0, approxdelta,&
                                accumulate_chi0_q0, accumulate_sfchi0_q0, hilbert_transform_headwings

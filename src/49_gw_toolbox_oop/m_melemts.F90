@@ -784,8 +784,7 @@ end subroutine melements_mpisum
 !!
 !! FUNCTION
 !!  Printout of the content of all calculated array.
-!!  Optionally, it is possible to print the content of a
-!!  single entry of the database.
+!!  Optionally, it is possible to print the content of a single entry of the database.
 !!
 !! INPUTS
 !!  Mels=The database
@@ -887,7 +886,6 @@ subroutine melements_print(Mels,names_list,header,unit,prtvol,mode_paral)
 
  do isppol=1,Mels%nsppol
    do ikibz=1,Mels%nkibz
-
     if (Mels%iscalc(ikibz,isppol)/=1) CYCLE
 
     write(msg,'(a,3es16.8,a,i2,a)')" kpt= (",Mels%kibz(:,ikibz),") spin=",isppol,":"
@@ -896,18 +894,19 @@ subroutine melements_print(Mels,names_list,header,unit,prtvol,mode_paral)
     b1 = Mels%bands_idx(1,ikibz,isppol)
     b2 = Mels%bands_idx(2,ikibz,isppol)
 
-    if (Mels%flags%only_diago==1.or.my_prtvol==0) then ! Print only the diagonal.
+    if (Mels%flags%only_diago==1.or.my_prtvol==0) then
+      ! Print only the diagonal.
       write(msg,'(a)')str
       call wrtout(my_unt,msg,my_mode)
       do ib=b1,b2
         do iab=1,Mels%nspinor**2
-          !write(msg,'(i3,(f8.3))')ib,(REAL (arr_p(ib,ib,ikibz,iab))*Ha_eV, iab=1,Mels%nspinor**2)
-          write(msg,fmt)ib,(REAL (data_p(tab(ikey))%arr_p(ib,ib,ikibz,iab))*Ha_eV, ikey=1,my_nkeys)
+          write(msg,fmt)ib,(REAL(data_p(tab(ikey))%arr_p(ib,ib,ikibz,iab))*Ha_eV, ikey=1,my_nkeys)
           call wrtout(my_unt,msg,my_mode)
         end do
       end do
 
-    else ! Print full matrix.
+    else
+      ! Print full matrix.
       max_r = b2-b1+1
       max_c = MIN(b2-b1+1, 9)
       ABI_MALLOC(mat,(b1:b2,b1:b2))
