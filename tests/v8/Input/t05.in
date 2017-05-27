@@ -4,7 +4,7 @@
 # ===              Test linear constraint                   ===
 # =============================================================
 
-# Restaryt managment (read HIST.nc file)
+# Restart managment (read HIST.nc file)
 restartxf -1
 
 # PIMD parameters

@@ -6,7 +6,7 @@ at the time a version of ABINIT is released.
 Note that bugs discovered later than the
 release are NOT described here...
 
-The present release 8.3.3 is for development
+The present release 8.4.0 is for production
 0. List of platforms
 1. Batteries of tests
 2. List of known problems
@@ -14,7 +14,7 @@ The present release 8.3.3 is for development
 ================================================================
 0. Platforms
 
-For version 8.3.3, list closed on 2017 05 08
+For version 8.4.0, list closed on 2017 05 24
 after installation and successful tests for the standard set of platforms,
 as mentioned on 
 https://bbportal.abinit.org/#/status
