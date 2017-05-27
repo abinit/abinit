@@ -104,17 +104,17 @@ infos_html:
 	mkdir tmp-infos-$(VERSION)/Tests/Test_tutoparal
 	mkdir tmp-infos-$(VERSION)/Tests/Test_tutoplugs
 	mkdir tmp-infos-$(VERSION)/Tests/Test_tutorespfn
-   	mkdir tmp-infos-$(VERSION)/Tests/Test_tutorial 
-   	mkdir tmp-infos-$(VERSION)/Tests/Test_unitary
-   	mkdir tmp-infos-$(VERSION)/Tests/Test_v1
-   	mkdir tmp-infos-$(VERSION)/Tests/Test_v2
-   	mkdir tmp-infos-$(VERSION)/Tests/Test_v3
-   	mkdir tmp-infos-$(VERSION)/Tests/Test_v4
-   	mkdir tmp-infos-$(VERSION)/Tests/Test_v5
-   	mkdir tmp-infos-$(VERSION)/Tests/Test_v6
-   	mkdir tmp-infos-$(VERSION)/Tests/Test_v67mbpt
-   	mkdir tmp-infos-$(VERSION)/Tests/Test_v7
-   	mkdir tmp-infos-$(VERSION)/Tests/Test_v8
+	mkdir tmp-infos-$(VERSION)/Tests/Test_tutorial 
+	mkdir tmp-infos-$(VERSION)/Tests/Test_unitary
+	mkdir tmp-infos-$(VERSION)/Tests/Test_v1
+	mkdir tmp-infos-$(VERSION)/Tests/Test_v2
+	mkdir tmp-infos-$(VERSION)/Tests/Test_v3
+	mkdir tmp-infos-$(VERSION)/Tests/Test_v4
+	mkdir tmp-infos-$(VERSION)/Tests/Test_v5
+	mkdir tmp-infos-$(VERSION)/Tests/Test_v6
+	mkdir tmp-infos-$(VERSION)/Tests/Test_v67mbpt
+	mkdir tmp-infos-$(VERSION)/Tests/Test_v7
+	mkdir tmp-infos-$(VERSION)/Tests/Test_v8
 	mkdir tmp-infos-$(VERSION)/Tests/Test_vdwxc
 	mkdir tmp-infos-$(VERSION)/Tests/Test_wannier90 
 	cp -fr tests/atompaw/Input tmp-infos-$(VERSION)/Tests/Test_atompaw
