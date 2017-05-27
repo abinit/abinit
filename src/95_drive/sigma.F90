@@ -206,7 +206,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  complex(dpc) :: max_degw,cdummy
  logical :: use_paw_aeur,dbg_mode,pole_screening,call_pawinit
  character(len=500) :: msg
- character(len=fnlen) :: wfk_fname,pawden_fname,fname
+ character(len=fnlen) :: wfk_fname,pawden_fname
  type(kmesh_t) :: Kmesh,Qmesh
  type(ebands_t) :: KS_BSt,QP_BSt
  type(vcoul_t) :: Vcp
