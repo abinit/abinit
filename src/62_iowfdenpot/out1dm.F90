@@ -306,11 +306,12 @@ subroutine out1dm(fnameabo_app_1dm,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,&
 !  End of the loops on the three dimensions
  end do
 
- write(message, '(a,a,a)' ) ch10,'#===========',&
-& '====================================================================='
- if (me_fft == 0) call wrtout(temp_unit,message,'COLL')
-
- close(temp_unit)
+ if (me_fft == 0) then
+   write(message, '(a,a,a)' ) ch10,'#===========',&
+&   '====================================================================='
+   call wrtout(temp_unit,message,'COLL')
+   close(temp_unit)
+ end if
 
 end subroutine out1dm
 !!***
