@@ -1229,6 +1229,7 @@ subroutine thermal_supercell_make(Crystal, Ifc, ntemper, &
  real(dp), allocatable :: qbz(:,:), qibz(:,:), wtqibz(:)
  real(dp), allocatable :: phfrq_allq(:), phdispl_allq(:,:,:,:,:)
  real(dp), allocatable :: phfrq(:), phdispl(:,:,:,:),pheigvec(:,:,:,:)
+ real(dp), allocatable :: phdispl1(:,:,:)
  character (len=500) :: msg
 
 ! *************************************************************************
@@ -1299,7 +1300,7 @@ subroutine thermal_supercell_make(Crystal, Ifc, ntemper, &
 
  ! precalculate phase factors???
 
- ABI_STAT_MALLOC(phdispl, (2, 3, Crystal%natom, 1), ierr)
+ ABI_STAT_MALLOC(phdispl1, (2, 3, Crystal%natom), ierr)
  ! for all modes at all q in whole list, sorted
  modesign=one
  do imode = 1, 3*Crystal%natom*nqibz
@@ -1308,7 +1309,7 @@ subroutine thermal_supercell_make(Crystal, Ifc, ntemper, &
 
    iq = ceiling(dble(modeindex(imode))/dble(3*Crystal%natom)) 
    jmode = modeindex(imode) - (iq-1)*3*Crystal%natom 
-   phdispl = phdispl_allq(:,:,:,jmode:jmode,iq)
+   phdispl1 = phdispl_allq(:,:,:,jmode,iq)
 
    ! loop over temperatures
    do itemper = 1, ntemper
@@ -1324,7 +1325,7 @@ subroutine thermal_supercell_make(Crystal, Ifc, ntemper, &
      
      ! add displacement for this mode to supercell positions eq 5 of Zacharias
      freeze_displ = modesign * sigma
-     call freeze_displ_supercell (phdispl(:,:,:,1), freeze_displ, thm_scells(itemper))
+     call freeze_displ_supercell (phdispl1(:,:,:), freeze_displ, thm_scells(itemper))
    end do !itemper
 
    ! this is the prescription: flip sign for each successive mode in full
@@ -1337,7 +1338,7 @@ subroutine thermal_supercell_make(Crystal, Ifc, ntemper, &
  ABI_FREE(modeindex)
  ABI_FREE(phfrq_allq)
  ABI_FREE(phdispl_allq)
- ABI_FREE(phdispl)
+ ABI_FREE(phdispl1)
  ABI_FREE(qibz)
  ABI_FREE(qbz)
  ABI_FREE(wtqibz)
