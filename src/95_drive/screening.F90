@@ -125,6 +125,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
  use m_fft_mesh,      only : rotate_FFT_mesh, cigfft, get_gftt
  use m_wfd,           only : wfd_init, wfd_free,  wfd_nullify, wfd_print, wfd_t, wfd_rotate, wfd_test_ortho,&
 &                            wfd_read_wfk, wfd_test_ortho, wfd_copy, wfd_change_ngfft
+ use m_chi0,          only : output_chi0sumrule
  use m_pawang,        only : pawang_type
  use m_pawrad,        only : pawrad_type
  use m_pawtab,        only : pawtab_type, pawtab_print, pawtab_get_lsize
@@ -1368,8 +1369,8 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
      ABI_FREE(fxc_ADA)
    end if
    !
-   !  Output the sum rule evaluation.
-   !  Vcp%vc_sqrt(:,iqibz) Contains vc^{1/2}(q,G), complex-valued due to a possible cutoff
+   ! Output the sum rule evaluation.
+   ! Vcp%vc_sqrt(:,iqibz) Contains vc^{1/2}(q,G), complex-valued due to a possible cutoff
    epsm1 => chi0
    call output_chi0sumrule((is_qeq0==1),iqibz,Ep%npwe,omegaplasma,chi0_sumrule,epsm1(:,:,1),Vcp%vc_sqrt(:,iqibz))
 
@@ -1381,7 +1382,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
        rspower(:)=zero
      end if
      call random_stopping_power(iqibz,Dtset%npvel,Dtset%pvelmax,Ep,Gsph_epsG0,Qmesh,Vcp,Cryst,Dtfil,epsm1,rspower)
-     if (label==Ep%nqcalc)  then
+     if (label==Ep%nqcalc) then
        ABI_FREE(rspower)
      end if
    end if

@@ -33,7 +33,6 @@ sources = [
  "cohsex_me.F90",
  "debug_tools.F90",
  "dotproductqrc.F90",
- "gwcompleteness.F90",
  "gwls_hamiltonian.F90",
  "gwls_wf.F90",
  "gwls_valenceWavefunctions.F90",

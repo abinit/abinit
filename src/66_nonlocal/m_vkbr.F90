@@ -654,7 +654,7 @@ function nc_ihr_comm(vkbr,cryst,psps,npw,nspinor,istwfk,inclvkb,kpoint,ug1,ug2,g
  ! -i <c,k|\nabla_r|v,k> = \sum_G u_{ck}^*(G) [k+G] u_{vk}(G)
  ! Note that here we assume c/=v, moreover the ug are supposed to be orthonormal and
  ! hence k+G can be replaced by G.
- ABI_CHECK(istwfk == vkbr%istwfk, "input istwfk /= vkbr%istwfk")
+
  spinorwf_pad = RESHAPE([0, 0, npw, npw, 0, npw, npw, 0], [2, 4])
  ihr_comm = czero
 
@@ -678,7 +678,10 @@ function nc_ihr_comm(vkbr,cryst,psps,npw,nspinor,istwfk,inclvkb,kpoint,ug1,ug2,g
  end if
 
  ! Add second term $i <c,k|[Vnl,r]|v,k> in$ reduced cordinates.
- if (inclvkb /= 0) call add_vnlr_commutator(vkbr,cryst,psps,npw,nspinor,ug1,ug2,ihr_comm)
+ if (inclvkb /= 0) then
+   ABI_CHECK(istwfk == vkbr%istwfk, "input istwfk /= vkbr%istwfk")
+   call add_vnlr_commutator(vkbr,cryst,psps,npw,nspinor,ug1,ug2,ihr_comm)
+ end if
 
 end function nc_ihr_comm
 !!***

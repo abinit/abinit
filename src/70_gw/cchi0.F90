@@ -121,7 +121,8 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
 &                            wfd_paw_get_aeur, wfd_sym_ur
  use m_oscillators,   only : rho_tw_g, calc_wfwfg
  use m_chi0,          only : hilbert_transform, setup_spectral, assemblychi0_sym, assemblychi0sf, symmetrize_afm_chi0,&
-&                            approxdelta
+&                            approxdelta, completechi0_deltapart, accumulate_chi0sumrule
+
  use m_pawang,        only : pawang_type
  use m_pawtab,        only : pawtab_type
  use m_pawfgrtab,     only : pawfgrtab_type
@@ -754,8 +755,8 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
          factor=spin_fact*qp_occ(band2,ik_ibz,spin)
          call accumulate_chi0sumrule(ik_bz,Ep%symchi,Ep%npwe,factor,deltaeGW_b1kmq_b2k,&
 &          Ltg_q,Gsph_epsG0,Ep%npwepG0,rhotwg,chi0_sumrule)
-         !
-         ! * Include also the completeness correction in the sum rule
+
+         ! Include also the completeness correction in the sum rule
          if (Ep%gwcomp==1) then
            factor=-spin_fact*qp_occ(band2,ik_ibz,spin)
            call accumulate_chi0sumrule(ik_bz,Ep%symchi,Ep%npwe,factor,deltaeGW_enhigh_b2k,&

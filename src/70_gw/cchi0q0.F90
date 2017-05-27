@@ -142,8 +142,9 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
 &                              wfd_barrier, wfd_change_ngfft,wfd_paw_get_aeur, wfd_sym_ur
  use m_oscillators,     only : rho_tw_g, calc_wfwfg
  use m_vkbr,            only : vkbr_t, vkbr_free, vkbr_init, nc_ihr_comm
- use m_chi0,            only : hilbert_transform, setup_spectral, symmetrize_afm_chi0, approxdelta,&
-                               accumulate_chi0_q0, accumulate_sfchi0_q0, hilbert_transform_headwings
+ use m_chi0,            only : hilbert_transform, setup_spectral, symmetrize_afm_chi0, approxdelta, &
+                               accumulate_chi0_q0, accumulate_sfchi0_q0, hilbert_transform_headwings, &
+                               completechi0_deltapart, accumulate_chi0sumrule
  use m_pawang,          only : pawang_type
  use m_pawrad,          only : pawrad_type
  use m_pawtab,          only : pawtab_type
