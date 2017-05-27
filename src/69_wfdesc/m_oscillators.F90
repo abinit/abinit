@@ -213,7 +213,7 @@ subroutine rho_tw_g(nspinor,npwvec,nr,ndat,ngfft,map2sphere,use_padfft,igfftg0,g
 
    ABI_MALLOC(u12prod, (nr))
 
-   spinor_pad = RESHAPE([0,0,nr,nr,0,nr,nr,0], [2,4])
+   spinor_pad = RESHAPE([0, 0, nr, nr, 0, nr, nr, 0], [2, 4])
    do iab=1,dim_rtwg
      spad1=spinor_pad(1,iab); spad2=spinor_pad(2,iab)
 
@@ -221,7 +221,7 @@ subroutine rho_tw_g(nspinor,npwvec,nr,ndat,ngfft,map2sphere,use_padfft,igfftg0,g
      ! Add compensation charge.
      !if (PRESENT(nhat12)) u12prod = u12prod + CMPLX(nhat12(1,:,iab),nhat12(2,:,iab))
 
-     spad0=(iab-1)*npwvec
+     spad0 = (iab-1)*npwvec
 
      SELECT CASE (map2sphere)
      CASE (0)
@@ -807,8 +807,10 @@ subroutine calc_wfwfg(ktabr_k,ktabi_k,spinrot,nfftot,nspinor,ngfft_gw,wfr_jb,wfr
    case default
      MSG_ERROR(sjoin("Wrong ktabi_k:", itoa(ktabi_k)))
    end select
+
  else if (nspinor == 2) then
    NOT_IMPLEMENTED_ERROR()
+
  else
    MSG_ERROR(sjoin("Wrong nspinor:", itoa(nspinor)))
  end if

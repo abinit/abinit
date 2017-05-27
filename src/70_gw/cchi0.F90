@@ -175,8 +175,7 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
  integer :: isym_kmq,itim_k,itim_kmq,m1,m2,my_wl,my_wr,size_chi0
  integer :: nfound,nkpt_summed,nspinor,nsppol,mband
  integer :: comm,gw_mgfft,use_padfft,gw_fftalga,lcor,mgfftf,use_padfftf
- integer :: my_nbbp,my_nbbpks,spin
- integer :: nbmax,dummy
+ integer :: my_nbbp,my_nbbpks,spin,nbmax,dummy
  real(dp) :: cpu_time,wall_time,gflops
  real(dp) :: deltaeGW_b1kmq_b2k,deltaeGW_enhigh_b2k,deltaf_b1kmq_b2k
  real(dp) :: e_b1_kmq,en_high,fac,fac2,fac3,f_b1_kmq,factor,max_rest,min_rest,my_max_rest
@@ -234,36 +233,30 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
  endif
 ! End of reading forlb.ovlp
 
- if ( ANY(ngfft_gw(1:3) /= Wfd%ngfft(1:3)) ) then
-   call wfd_change_ngfft(Wfd,Cryst,Psps,ngfft_gw)
- end if
+ if ( ANY(ngfft_gw(1:3) /= Wfd%ngfft(1:3)) ) call wfd_change_ngfft(Wfd,Cryst,Psps,ngfft_gw)
  gw_mgfft = MAXVAL(ngfft_gw(1:3))
  gw_fftalga = ngfft_gw(7)/100 !; gw_fftalgc=MOD(ngfft_gw(7),10)
 
  if (Dtset%pawcross==1) mgfftf = MAXVAL(ngfftf(1:3))
- !
- ! === Initialize MPI variables ===
- comm = Wfd%comm
- !
+
  ! == Copy some values ===
+ comm = Wfd%comm
  mband   = Wfd%mband
  nfft    = Wfd%nfft
  ABI_CHECK(Wfd%nfftot==nfftot_gw,"Wrong nfftot_gw")
 
- dim_rtwg=1; if (nspinor==2) dim_rtwg=4  ! can reduce size depending on Ep%nI and Ep%nj
+ dim_rtwg=1; if (nspinor==2) dim_rtwg=2  ! can reduce size depending on Ep%nI and Ep%nj
  size_chi0 = Ep%npwe*Ep%nI*Ep%npwe*Ep%nJ*Ep%nomega
 
- qp_energy => QP_BSt%eig(:,:,:)
- qp_occ    => QP_BSt%occ(:,:,:)
- !
- ! === Initialize the completeness correction  ===
+ qp_energy => QP_BSt%eig; qp_occ => QP_BSt%occ
+
+ ! Initialize the completeness correction
  if (Ep%gwcomp==1) then
    en_high=MAXVAL(qp_energy(Ep%nbnds,:,:)) + Ep%gwencomp
    write(msg,'(a,f8.2,a)')' Using completeness correction with the energy ',en_high*Ha_eV,' [eV]'
    call wrtout(std_out,msg,'COLL')
-   !
+
    ! Allocation of wfwfg and green_enhigh_w moved inside openmp loop
-   !
    ! Init the largest G-sphere contained in the FFT box for the wavefunctions.
    call gsph_in_fftbox(Gsph_FFT,Cryst,Wfd%ngfft)
 
@@ -271,11 +264,11 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
 
    ABI_MALLOC(gspfft_igfft,(Gsph_FFT%ng))
    ABI_MALLOC(dummy_gbound,(2*gw_mgfft+8,2))
-   !
+
    ! Mapping between G-sphere and FFT box.
    call gsph_fft_tabs(Gsph_FFT,(/0,0,0/),Wfd%mgfft,Wfd%ngfft,dummy,dummy_gbound,gspfft_igfft)
    ABI_FREE(dummy_gbound)
-   !
+
    if (Psps%usepaw==1) then  ! * Prepare the onsite contributions on the GW FFT mesh.
      ABI_MALLOC(gw_gfft,(3,nfft))
      q0=zero
@@ -283,11 +276,10 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
      ABI_DT_MALLOC(Pwij_fft,(Psps%ntypat))
      call pawpwij_init(Pwij_fft,nfft,(/zero,zero,zero/),gw_gfft,Cryst%rprimd,Psps,Pawtab,Paw_pwff)
    end if
-   !
  end if
- !
- ! === Setup weights (2 for spin unpolarized sistem, 1 for polarized) ===
- ! * spin_fact is used to normalize the occupation factors to one. Consider also the AFM case.
+
+ ! Setup weights (2 for spin unpolarized sistem, 1 for polarized).
+ ! spin_fact is used to normalize the occupation factors to one. Consider also the AFM case.
  SELECT CASE (nsppol)
  CASE (1)
    weight=two/Kmesh%nbz; spin_fact=half
@@ -302,8 +294,8 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
  CASE DEFAULT
    MSG_BUG("Wrong nsppol")
  END SELECT
- !
- ! === Weight for points in the IBZ_q ===
+
+ ! Weight for points in the IBZ_q.
  wtk_ltg(:)=1
  if (Ep%symchi==1) then
    do ik_bz=1,Ltg_q%nbz
@@ -364,14 +356,13 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
  end if
 
  SELECT CASE (Ep%spmeth)
-
  CASE (0)
    call wrtout(std_out,' Calculating chi0(q,omega,G,G")','COLL')
    ! Allocation of green_w moved inside openmp loop
 
- CASE (1,2)
+ CASE (1, 2)
    call wrtout(std_out,' Calculating Im chi0(q,omega,G,G")','COLL')
-   !
+
    ! Find Max and min resonant transitions for this q, report also treated by this proc.
    call make_transitions(Wfd,1,Ep%nbnds,nbvw,nsppol,Ep%symchi,Cryst%timrev,GW_TOL_DOCC,&
 &    max_rest,min_rest,my_max_rest,my_min_rest,Kmesh,Ltg_q,qp_energy,qp_occ,qpoint,bbp_ks_distrb)
@@ -416,16 +407,15 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
 
  write(msg,'(a,i6,a)')' Calculation status : ',nkpt_summed,' to be completed '
  call wrtout(std_out,msg,'COLL')
- !
+
  ! ============================================
  ! === Begin big fat loop over transitions ===
  ! ============================================
  chi0=czero_gw; chi0_sumrule=zero
 
  ! === Loop on spin to calculate trace $\chi_{up,up}+\chi_{down,down}$ ===
- ! * Only $\chi_{up,up} for AFM.
+ ! Only $\chi_{up,up} for AFM.
  do spin=1,nsppol
-
    if (ALL(bbp_ks_distrb(:,:,:,spin) /= Wfd%my_rank)) CYCLE
 
    ! Allocation of arrays that are private to loop
@@ -465,7 +455,8 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
    ABI_MALLOC(ur2_k,   (nfft*nspinor))
    ABI_MALLOC(igfftepsG0,(Ep%npwepG0))
 
-   do ik_bz=1,Kmesh%nbz ! Loop over k-points in the BZ.
+   ! Loop over k-points in the BZ.
+   do ik_bz=1,Kmesh%nbz
 
      if (Ep%symchi==1) then
        if (Ltg_q%ibzq(ik_bz)/=1) CYCLE  ! Only IBZ_q
@@ -488,10 +479,10 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
      call get_BZ_item(Kmesh,ikmq_bz,kmq_bz,ikmq_ibz,isym_kmq,itim_kmq,ph_mkmqt,umklp_kmq,isirred_kmq)
 
 !BEGIN DEBUG
-     if (ANY(umklp_k /=0)) then
-       write(msg,'(a,3i2)')" umklp_k /= 0 ",umklp_k
-       MSG_ERROR(msg)
-     end if
+     !if (ANY(umklp_k /=0)) then
+     !  write(msg,'(a,3i2)')" umklp_k /= 0 ",umklp_k
+     !  MSG_ERROR(msg)
+     !end if
      !if (ANY( g0 /= -umklp_kmq + umklp_k) ) then
      !if (ANY( g0 /= -umklp_kmq ) ) then
      !  write(msg,'(a,3(1x,3i2))')" g0 /= -umklp_kmq + umklp_k ",g0, umklp_kmq, umklp_k
@@ -571,8 +562,8 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
          if (Ep%gwcomp==0) then ! Skip negligible transitions.
            if (ABS(deltaf_b1kmq_b2k) < GW_TOL_DOCC) CYCLE
          else
-           ! * When the completeness correction is used,
-           !   we need to also consider transitions with vanishing deltaf
+           ! When the completeness correction is used,
+           ! we need to also consider transitions with vanishing deltaf
            !if (qp_occ(band2,ik_ibz,spin) < GW_TOL_DOCC) CYCLE
            !
            ! Rangel This is to compute chi correctly when using the extrapolar method
@@ -669,7 +660,8 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
 &          ur1_kmq_ibz,itim_kmq,tabr_kmq,ph_mkmqt,spinrot_kmq,&
 &          ur2_k_ibz,  itim_k  ,tabr_k  ,ph_mkt  ,spinrot_k,dim_rtwg,rhotwg)
 
-         if (Psps%usepaw==1) then! Add PAW on-site contribution, projectors are already in the BZ.
+         if (Psps%usepaw==1) then
+           ! Add PAW on-site contribution, projectors are already in the BZ.
            call paw_rho_tw_g(Ep%npwepG0,dim_rtwg,nspinor,Cryst%natom,Cryst%ntypat,Cryst%typat,Cryst%xred,Gsph_epsG0%gvec,&
 &           Cprj1_kmq,Cprj2_k,Pwij,rhotwg)
 
@@ -820,8 +812,8 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
    end if
  end do !spin
 
- ! === After big loop over transitions, now MPI ===
- ! * Master took care of the contribution in case of metallic|spin polarized systems.
+ ! After big loop over transitions, now MPI
+ ! Master took care of the contribution in case of metallic|spin polarized systems.
  SELECT CASE (Ep%spmeth)
  CASE (0)
    ! Adler-Wiser
@@ -895,7 +887,6 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
  if (allocated(omegasf)) then
    ABI_FREE(omegasf)
  end if
-
  if (allocated(gspfft_igfft)) then
    ABI_FREE(gspfft_igfft)
  end if

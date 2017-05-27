@@ -194,7 +194,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  integer :: optcut,optgr0,optgr1,optgr2,option,option_test,option_dij,optrad,optrhoij,psp_gencond
  integer :: my_rank,rhoxsp_method,comm,use_aerhor,use_umklp,usexcnhat
  integer :: ioe0j,spin,io,jb,nomega_sigc
- integer :: iomega,ppm_unt,temp_unt,ncid
+ integer :: temp_unt,ncid
  integer :: work_size,nstates_per_proc,my_nbks
  !integer :: jb_qp,ib_ks,ks_irr
  real(dp) :: compch_fft,compch_sph,r_s,rhoav,alpha,opt_ecut
@@ -245,7 +245,6 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  real(dp),allocatable :: vpsp(:),xccc3d(:),dijexc_core(:,:,:),dij_hf(:,:,:)
  !real(dp),allocatable :: osoc_bks(:, :, :)
  real(dp),allocatable :: ks_aepaw_rhor(:,:) !,ks_n_one_rhor(:,:),ks_nt_one_rhor(:,:)
- complex(dpc),allocatable :: omega(:),em1_ppm(:,:,:)
  complex(dpc) :: ovlp(2)
  complex(dpc),allocatable :: ctmp(:,:),hbare(:,:,:,:)
  complex(dpc),target,allocatable :: sigcme(:,:,:,:,:)
@@ -1992,44 +1991,12 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
        call setup_ppmodel(PPm,Cryst,Qmesh,Er%npwe,Er%nomega,Er%omega,Er%epsm1,nfftf,Gsph_c%gvec,ngfftf,ks_rhor(:,1))
      end if
    end if ! PAW or NC PPm and/or needs density
-
-   ! If nfreqre is set, then output the dielectric function for these frequencies to file
-   write(msg,'(a,i0,a,f8.2,a)')&
-&   ' Checking if PPm em1 is output, nfreqre is: ',Dtset%nfreqre,' freqremax is: ',Dtset%freqremax*Ha_eV,' eV'
-   MSG_WARNING(msg)
-
-   if (Dtset%nfreqre>1) then
-     ABI_CHECK(Dtset%freqremax>tol6,'freqremax must be set to maximum frequency')
-     ABI_MALLOC(em1_ppm,(1,1,Dtset%nfreqre))
-     ABI_MALLOC(omega,(Dtset%nfreqre))
-     do iomega=1,Dtset%nfreqre
-       omega(iomega) =  CMPLX((Dtset%freqremax/REAL((Dtset%nfreqre-1)))*(iomega-1),zero)
-     end do
-
-     call getem1_from_PPm(PPm,1,1,Er%Hscr%zcut,Dtset%nfreqre,omega,Vcp,em1_ppm,only_ig1=1,only_ig2=1)
-
-     if (open_file(Dtfil%fnameabo_em1_lf,msg,newunit=ppm_unt,form="formatted", status="unknown", action="write") /= 0) then
-       MSG_ERROR(msg)
-     end if
-     write(ppm_unt,'(a)')'#'
-     write(ppm_unt,'(a)')'# Macroscopic plasmon-pole Dielectric Function without local fields'
-     write(ppm_unt,'(a)')'# Omega [eV]    Re epsilon_M       IM eps_M '
-     write(ppm_unt,'(a)')'# ppmodel: ',PPm%model
-     do iomega=1,Dtset%nfreqre
-       write(ppm_unt,'((3es16.8))')REAL(omega(iomega))*Ha_eV,REAL(em1_ppm(1,1,iomega))
-     end do
-     close(ppm_unt)
-
-     ABI_FREE(em1_ppm)
-     ABI_FREE(omega)
-     MSG_WARNING('Wrote epsilon-1 for PPm to file: '//TRIM(Dtfil%fnameabo_em1_lf))
-   end if ! Check for output of eps^-1 for PPm
-
  end if ! sigma_needs_ppm
 
  call timab(409,2,tsec) ! getW
 
- if (wfd_iam_master(Wfd)) then ! Write info on the run on ab_out, then open files to store final results.
+ if (wfd_iam_master(Wfd)) then
+   ! Write info on the run on ab_out, then open files to store final results.
    call ebands_report_gap(KS_BSt,header='KS Band Gaps',unit=ab_out)
    if(dtset%ucrpa==0) then
      call write_sigma_header(Sigp,Er,Cryst,Kmesh,Qmesh)
@@ -2052,13 +2019,14 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
      MSG_ERROR(msg)
    end if
 
-   if (mod10==SIG_GW_AC) then ! Sigma along the imaginary axis.
+   if (mod10==SIG_GW_AC) then
+     ! Sigma along the imaginary axis.
      if (open_file(Dtfil%fnameabo_sgm,msg,unit=unt_sgm,status='unknown',form='formatted') /= 0) then
        MSG_ERROR(msg)
      end if
    end if
  end if
-!
+
 !=======================================================================
 !==== Calculate self-energy and output the results for each k-point ====
 !=======================================================================
@@ -2090,8 +2058,8 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
 
  nomega_sigc=Sr%nomega_r+Sr%nomega4sd; if (mod10==SIG_GW_AC) nomega_sigc=Sr%nomega_i
 
- ib1=Sigp%minbdgw ! min and max band indeces for GW corrections.
- ib2=Sigp%maxbdgw
+ ! min and max band indeces for GW corrections.
+ ib1=Sigp%minbdgw; ib2=Sigp%maxbdgw
 
  !MG TODO: I don't like the fact that ib1 and ib2 are redefined here because this
  ! prevents me from refactoring the code. In particular I want to store the self-energy
@@ -2272,9 +2240,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
          Sr%degwgap(ik_ibz,spin)= Sr%degw(ks_iv+1,ik_ibz,spin) - Sr%degw(ks_iv,ik_ibz,spin)
        else
          ! The "gap" cannot be computed
-         Sr%e0gap  (ik_ibz,spin)=zero
-         Sr%egwgap (ik_ibz,spin)=zero
-         Sr%degwgap(ik_ibz,spin)=zero
+         Sr%e0gap(ik_ibz,spin)=zero; Sr%egwgap (ik_ibz,spin)=zero; Sr%degwgap(ik_ibz,spin)=zero
        end if
      end do
 
@@ -2318,8 +2284,8 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
        call wrtout(std_out,msg,'COLL')
        call wrtout(ab_out,msg,'COLL')
      end if
-     !
-     ! * Report the QP gaps (Fundamental and Optical)
+
+     ! Report the QP gaps (Fundamental and Optical)
      call ebands_report_gap(QP_BSt,header='QP Band Gaps',unit=ab_out)
 
      ! Band structure interpolation from QP energies computed on the k-mesh.
@@ -2328,11 +2294,10 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
      end if
    end if ! Sigp%nkptgw==Kmesh%nibz
    !
-   ! === Write SCF data in case of self-consistent calculation ===
-   !  * Save Sr%en_qp_diago, Sr%eigvec_qp and m_lda_to_qp in the _QPS file.
-   !  * Note that in the first iteration qp_rhor contains KS rhor, then the mixed rhor.
+   ! Write SCF data in case of self-consistent calculation ===
+   ! Save Sr%en_qp_diago, Sr%eigvec_qp and m_lda_to_qp in the _QPS file.
+   ! Note that in the first iteration qp_rhor contains KS rhor, then the mixed rhor.
    if (mod100>=10) then
-
      ! Calculate the new m_lda_to_qp
      call updt_m_lda_to_qp(Sigp,Kmesh,nscf,Sr,Sr%m_lda_to_qp)
 
@@ -2341,18 +2306,16 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
 &       Dtset%nspden,nscf,nfftf,ngfftf,Sr,QP_BSt,Sr%m_lda_to_qp,qp_rhor)
      end if
 
-     ! === Report the MAX variation for each kptgw and spin ===
+     ! Report the MAX variation for each kptgw and spin
      call wrtout(ab_out,ch10//' Convergence of QP corrections ','COLL')
      converged=.TRUE.
      do spin=1,Sigp%nsppol
        write(msg,'(a,i2,a)')' >>>>> For spin ',spin,' <<<<< '
        call wrtout(ab_out,msg,'COLL')
        do ikcalc=1,Sigp%nkptgw
-         ib1    = Sigp%minbnd(ikcalc,spin)
-         ib2    = Sigp%maxbnd(ikcalc,spin)
-         ik_bz  = Sigp%kptgw2bz(ikcalc)
-         ik_ibz = Kmesh%tab(ik_bz)
-         ii     = imax_loc( ABS(Sr%degw(ib1:ib2,ik_ibz,spin)) )
+         ib1 = Sigp%minbnd(ikcalc,spin); ib2 = Sigp%maxbnd(ikcalc,spin)
+         ik_bz = Sigp%kptgw2bz(ikcalc); ik_ibz = Kmesh%tab(ik_bz)
+         ii = imax_loc(ABS(Sr%degw(ib1:ib2,ik_ibz,spin)))
          max_degw = Sr%degw(ii,ik_ibz,spin)
          write(msg,('(a,i3,a,2f8.3,a,i3)'))'.  kptgw no:',ikcalc,'; Maximum DeltaE = (',max_degw*Ha_eV,') for band index:',ii
          call wrtout(ab_out,msg,'COLL')
@@ -2360,13 +2323,13 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
        end do
      end do
    end if
-   ! ==============================================
-   ! ==== Save the GW results in a NETCDF file ====
-   ! ==============================================
-   if (wfd_iam_master(Wfd)) then
-     fname = TRIM(Dtfil%filnam_ds(4))//'_SIGRES.nc'
+
+   ! ============================================
+   ! ==== Save the GW results in NETCDF file ====
+   ! ============================================
 #ifdef HAVE_NETCDF
-     NCF_CHECK(nctk_open_create(ncid, fname, xmpi_comm_self))
+   if (wfd_iam_master(Wfd)) then
+     NCF_CHECK(nctk_open_create(ncid, strcat(dtfil%filnam_ds(4), '_SIGRES.nc'), xmpi_comm_self))
      NCF_CHECK(nctk_defnwrite_ivars(ncid, ["sigres_version"], [1]))
      NCF_CHECK(crystal_ncwrite(Cryst, ncid))
      NCF_CHECK(ebands_ncwrite(KS_Bst, ncid))
@@ -2375,8 +2338,8 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
      !ncerr = nctk_write_datar("qp_rhor",path,ngfft,cplex,nfft,nspden,&
      !                          comm_fft,fftn3_distrib,ffti3_local,datar,action)
      NCF_CHECK(nf90_close(ncid))
-#endif
    end if
+#endif
 
  end if ! ucrpa
 

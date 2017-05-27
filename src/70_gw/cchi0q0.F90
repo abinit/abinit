@@ -250,18 +250,14 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
 
  DBG_ENTER("COLL")
  call cwtime(cpu_time,wall_time,gflops,"start")
- !
- ! === Initialize MPI stuff ===
- if (ANY(ngfft_gw(1:3) /= Wfd%ngfft(1:3))) then
-   call wfd_change_ngfft(Wfd,Cryst,Psps,ngfft_gw)
- end if
 
- gw_mgfft = MAXVAL(ngfft_gw(1:3))
- gw_fftalga = ngfft_gw(7)/100 !; gw_fftalgc=MOD(ngfft_gw(7),10)
+ ! Change FFT mesh if needed
+ if (ANY(ngfft_gw(1:3) /= Wfd%ngfft(1:3))) call wfd_change_ngfft(Wfd,Cryst,Psps,ngfft_gw)
 
+ gw_mgfft = MAXVAL(ngfft_gw(1:3)); gw_fftalga = ngfft_gw(7)/100 !; gw_fftalgc=MOD(ngfft_gw(7),10)
  if (Dtset%pawcross==1) mgfftf = MAXVAL(ngfftf(1:3))
- !
- ! == Copy some values ===
+
+ ! Copy some values
  comm   = Wfd%comm
  nspinor= Wfd%nspinor
  nsppol = Wfd%nsppol
@@ -269,7 +265,7 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
  nfft   = Wfd%nfft
  ABI_CHECK(Wfd%nfftot==nfftot_gw,"Wrong nfftot_gw")
 
- dim_rtwg=1; if (nspinor==2) dim_rtwg=4 !can reduce size depending on Ep%nI and Ep%nj
+ dim_rtwg=1; if (nspinor==2) dim_rtwg=2 !can reduce size depending on Ep%nI and Ep%nj
 
  ucrpa_bands(1)=dtset%ucrpa_bands(1)
  ucrpa_bands(2)=dtset%ucrpa_bands(2)
@@ -283,15 +279,11 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
    call read_plowannier(Cryst,bandinf,bandsup,coeffW_BZ,itypatcor,Kmesh,lcor,luwindow,&
 & nspinor,nsppol,pawang,dtset%prtvol,ucrpa_bands)
  endif
-! End of reading forlb.ovlp
 
- ks_energy => KS_BSt%eig(:,:,:)
- qp_energy => QP_BSt%eig(:,:,:)
- qp_occ    => QP_BSt%occ(:,:,:)
+ ks_energy => KS_BSt%eig
+ qp_energy => QP_BSt%eig; qp_occ => QP_BSt%occ
 
- chi0_lwing=czero
- chi0_uwing=czero
- chi0_head =czero
+ chi0_lwing = czero; chi0_uwing= czero; chi0_head = czero
 
  if (Psps%usepaw==0) then
    if (Ep%inclvkb/=0) then ! Include the term <n,k|[Vnl,iqr]|n"k>' for q->0.
@@ -305,8 +297,8 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
      call pawhur_init(hur,nsppol,Dtset%pawprtvol,Cryst,Pawtab,Pawang,Pawrad,Paw_ij)
    end if
  end if
- !
- ! === Initialize the completeness correction ===
+
+ ! Initialize the completeness correction.
  ABI_MALLOC(green_enhigh_w,(Ep%nomega))
  green_enhigh_w=czero
 
@@ -314,9 +306,8 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
    en_high=MAXVAL(qp_energy(Ep%nbnds,:,:))+Ep%gwencomp
    write(msg,'(a,f8.2,a)')' Using completeness correction with energy ',en_high*Ha_eV,' [eV] '
    call wrtout(std_out,msg,'COLL')
-   !
    ABI_MALLOC(wfwfg,(nfft*nspinor**2))
-   !
+
    ! Init the largest G-sphere contained in the FFT box for the wavefunctions.
    call gsph_in_fftbox(Gsph_FFT,Cryst,Wfd%ngfft)  ! TODO not used yet.
 
@@ -324,12 +315,13 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
 
    ABI_MALLOC(gspfft_igfft,(Gsph_FFT%ng))
    ABI_MALLOC(dummy_gbound,(2*gw_mgfft+8,2))
-   !
+
    ! Mapping between G-sphere and FFT box.
    call gsph_fft_tabs(Gsph_FFT,(/0,0,0/),Wfd%mgfft,Wfd%ngfft,dummy,dummy_gbound,gspfft_igfft)
    ABI_FREE(dummy_gbound)
-   !
-   if (Psps%usepaw==1) then ! Prepare the onsite contributions on the GW FFT mesh.
+
+   if (Psps%usepaw==1) then
+     ! Prepare the onsite contributions on the GW FFT mesh.
      ABI_MALLOC(gw_gfft,(3,nfft))
      q0=zero
      call get_gftt(ngfft_gw,q0,Cryst%gmet,gw_gsq,gw_gfft) ! The set of plane waves in the FFT Box.
@@ -337,10 +329,10 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
      call pawpwij_init(Pwij_fft,nfft,(/zero,zero,zero/),gw_gfft,Cryst%rprimd,Psps,Pawtab,Paw_pwff)
    end if
  end if
- !
- ! === Setup weight (2 for spin unpolarized systems, 1 for polarized) ===
- ! * spin_fact is used to normalize the occupation factors to one.
- ! * Consider also the AFM case.
+
+ ! Setup weight (2 for spin unpolarized systems, 1 for polarized) ===
+ ! spin_fact is used to normalize the occupation factors to one.
+ ! Consider also the AFM case.
  SELECT CASE (nsppol)
  CASE (1)
    weight=two/Kmesh%nbz; spin_fact=half
@@ -358,7 +350,7 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
    MSG_BUG("Wrong nsppol")
  END SELECT
 
- ! === Weight for points in the IBZ_q ===
+ ! Weight for points in the IBZ_q
  wtk_ltg(:)=1
  if (Ep%symchi==1) then
    do ik_bz=1,Ltg_q%nbz

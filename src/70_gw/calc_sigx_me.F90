@@ -706,7 +706,7 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
      ABI_MALLOC(sym_sigx,(ib1:ib2,ib1:ib2))
      sym_sigx=czero
 
-     ! === Average over degenerate diagonal elements ===
+     ! Average over degenerate diagonal elements.
      ! NOTE: frequencies for \Sigma_c(\omega) should be equal to avoid spurious results.
      ! another good reason to use a strict criterion for the tollerance on eigenvalues.
      do ib=ib1,ib2

@@ -44,7 +44,6 @@ MODULE m_chi0
  private
 
  public :: assemblychi0_sym
- public :: assemblychi0sfq0
  public :: symmetrize_afm_chi0
  public :: accumulate_chi0_q0
  public :: accumulate_sfchi0_q0
@@ -346,286 +345,6 @@ subroutine mkrhotwg_sigma(ii,nspinor,npw,rhotwg,rhotwg_I)
  END SELECT
 
 end subroutine mkrhotwg_sigma
-!!***
-
-!----------------------------------------------------------------------
-
-!!****f* m_chi0/assemblychi0sfq0
-!! NAME
-!! assemblychi0sfq0
-!!
-!! FUNCTION
-!! Update the spectral function of the independent particle susceptibility at q==0 for the contribution
-!! of one pair of occupied-unoccupied band, for each frequency.
-!! If symchi==1, the symmetries belonging to the little group of the external point q are used
-!! to reconstrunct the contributions in the full Brillouin zone. In this case, the equation implented is:
-!!
-!!  $ chi0(G1,G2,io)=chi0(G1,G2,io)+\sum_S (rhotwg(G1)*rhotwg^\dagger(G2))* \delta(\omega -trans) $
-!!
-!! where S is a symmetry belonging to the little group of q.
-!! The subroutine also performs the symmetrization of the matrix elements of the
-!! gradient operator and of the commutator [V_{nl},r] with the position operator.
-!!
-!! INPUTS
-!!  ikbz=Index in the BZ of the k-point whose contribution to chi0 has to be added,
-!!   if we use symmetries, the contribution to chi0 by this k-point has to be symmetrized.
-!!  isym_kbz=Index of the symmetry such as k_bz = IS k_ibz
-!!  itim_kbz=2 if time-reversal has to be used to obtain k_bz, 1 otherwise.
-!!  my_wl,my_wr=min and Max frequency index treated by this processor.
-!!  npwe=Number of plane waves used to describe chi0.
-!!  npwepG0=Maximum number of G vectors to account for umklapps.
-!!  nomega=Number of frequencies in the imaginary part.
-!!  nqlwl=Number of q-points used for the optical limit.
-!!  qlwl(3,nqlwl)=Reciprocal space coordinates of the q-points for the long-wavelength limit treatment.
-!!  rhotwg(npwepG0*nspinor**2)=Oscillator matrix elements corresponding to an occupied-unoccupied pair of states.
-!!  rhotwx(3,nspinor**2)=Matrix elements of the gradient and of the commutator of the non-local operator with
-!!    the position operator. The second term is present only if inclvkb=1,2.
-!!  Gsph_epsG0<gsphere_t> Information on the "enlarged" G-sphere used for chi0, it contains umklapp G0 vectors
-!!    %ng=number of G vectors in the enlarged sphere. It MUST be equal to the size of rhotwg
-!!    %rottbm1(ng,2,nsym)=index of (IR)^{-1} G where I is the identity or the inversion
-!!    %phmGt(ng,nsym)=phase factors associated to non-symmorphic operations
-!!  Ltg_q<littlegroup_t_type>=Info on the little group associated to the external q-point.
-!!    %timrev=2 it time-reversal is used, 1 otherwise
-!!    %nsym_sg=Number of space group symmetries
-!!    %wtksym(2,nsym,nkbz)=1 if the symmetry (with or without time-reversal) must be considered for this k-point
-!!    %flag_umklp(timrev,nsym)= flag for umklapp processes
-!!     if 1 that the particular operation (IS) requires a G_o to preserve Q, 0 otherwise
-!! Cryst<crystal_t>=Info on unit cell and it symmetries
-!!    %nsym=Number of symmetry operations.
-!!    %symrec(3,3,nsym)=Symmetry operations in reciprocal space (reduced coordinates).
-!!
-!! OUTPUT
-!!  (see side effects)
-!!
-!! SIDE EFFECTS
-!!  chi0sf(npwe,npwe,my_wl:my_wr)=Updated spectral function at q==0.
-!!  lwing_sf(npwe,nomega,nqlwl)=Updated lower wing of the spectral function.
-!!  uwing_sf(npwe,nomega,nqlwl)=Updated Upper wing of the spectral function.
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      wrtout
-!!
-!! SOURCE
-
-subroutine assemblychi0sfq0(nqlwl,qlwl,ikbz,isym_kbz,itim_kbz,nspinor,symchi,npwepG0,npwe,Cryst,Ltg_q,Gsph_epsG0,&
-& factocc,my_wl,iomegal,wl,my_wr,iomegar,wr,rhotwx,rhotwg,nomegasf,chi0sf,lwing_sf,uwing_sf)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'assemblychi0sfq0'
- use interfaces_32_util
- use interfaces_70_gw
-!End of the abilint section
-
- implicit none
-
-!Arguments ------------------------------------
-!scalars
- integer,intent(in) :: ikbz,my_wl,my_wr,nomegasf,npwe,npwepG0,nqlwl,nspinor
- integer,intent(in) :: isym_kbz,itim_kbz,symchi,iomegal,iomegar
- real(dp),intent(in) :: factocc,wl,wr
- type(littlegroup_t),intent(in) :: Ltg_q
- type(gsphere_t),target,intent(in) :: Gsph_epsG0
- type(crystal_t),intent(in) :: Cryst
-!arrays
- real(dp),intent(in) :: qlwl(3,nqlwl)
- complex(gwpc),intent(inout) :: rhotwg(npwepG0*nspinor**2)
- complex(gwpc),intent(in) :: rhotwx(3)
- complex(gwpc),intent(inout) :: chi0sf(npwe,npwe,my_wl:my_wr)
- complex(dpc),intent(inout) :: lwing_sf(npwe,my_wl:my_wr,3)
- complex(dpc),intent(inout) :: uwing_sf(npwe,my_wl:my_wr,3)
-
-!Local variables-------------------------------
-!scalars
- integer :: itim,isym,iqlwl
- complex(gwpc) :: num
- complex(gwpc) :: mqg0,mqg0_sym,rhotwg0_bkp
- character(len=500) :: msg
-!arrays
- integer, ABI_CONTIGUOUS pointer :: Sm1G(:)
- real(dp) :: opinv(3,3),qrot(3),b1(3),b2(3),b3(3)
- complex(gwpc) :: rhotwg_sym(npwe)
- complex(gwpc),allocatable :: rhotwg_sym_star(:),rhotwg_star(:)
- complex(gwpc),ABI_CONTIGUOUS pointer :: phmGt(:)
-!************************************************************************
-
- if (iomegal<my_wl .or. iomegar>my_wr) then
-   write(msg,'(3a,2(a,i0,a,i0))')ch10,&
-&    'Indices out of boundary ',ch10,&
-&    '  my_wl = ',my_wl,' iomegal = ',iomegal,ch10,&
-&    '  my_wr = ',my_wr,' iomegar = ',iomegar,ch10
-   MSG_BUG(msg)
- end if
-
- b1(:)=two_pi*Gsph_epsG0%gprimd(:,1)
- b2(:)=two_pi*Gsph_epsG0%gprimd(:,2)
- b3(:)=two_pi*Gsph_epsG0%gprimd(:,3)
-
- SELECT CASE (symchi)
-
- CASE (0)
-   !
-   ! === Calculation without symmetries ===
-   ! * rhotwg(1)= R^-1q*rhotwx_ibz
-   ! * rhotwg(1)=-R^-1q*conjg(rhotwx_ibz) for inversion
-   ! FIXME My equation reads  -iq* <cSk|\nabla|vSk> = -i \transpose S <ck_i|\nabla\|vk_i>
-   if (nspinor==1) then
-     opinv(:,:)=REAL(Cryst%symrec(:,:,isym_kbz),dp)
-     call matrginv(opinv,3,3)
-     qrot =  (3-2*itim_kbz) * MATMUL(opinv,qlwl(:,1))
-     rhotwg(1)=dotproductqrc(qrot,rhotwx,b1,b2,b3)
-     if (itim_kbz==2) rhotwg(1) = GWPC_CONJG(rhotwg(1))
-
-     if (wl<huge(0.0_dp)*1.d-11) then !this is awful but it is still a first coding
-       num=-wl*factocc ! Num is single precision needed for cgerc check factocc
-       call XGERC(npwe,npwe,num,rhotwg,1,rhotwg,1,chi0sf(:,:,iomegal),npwe)
-     end if
-     ! Last point, must accumulate left point but not the right one
-     if (iomegar/=nomegasf+1 .and. wr<huge(0.0_dp)*1.d-11) then
-       num=-wr*factocc
-       call XGERC(npwe,npwe,num,rhotwg,1,rhotwg,1,chi0sf(:,:,iomegar),npwe)
-     end if
-     !
-     ! === Accumulate heads and wings for each small q ===
-     ! * For better performance, this part is not done if nqlwl==1
-     !   lwing and uwing will be filled in cchi0q0 after the MPI collective sum
-     !
-     if (nqlwl>1.and..FALSE.) then
-       rhotwg0_bkp = rhotwg(1) ! Save G=0 value of the first q
-       ABI_MALLOC(rhotwg_star,(npwepG0))
-       rhotwg_star = GWPC_CONJG(rhotwg(1:npwepG0))
-
-       do iqlwl=2,nqlwl
-         qrot =  (3-2*itim_kbz) * MATMUL(opinv,qlwl(:,iqlwl))
-         mqg0 = dotproductqrc(qrot,rhotwx,b1,b2,b3) !TODO get rid of this
-         if (itim_kbz==2) mqg0 = GWPC_CONJG(mqg0)
-         rhotwg     (1) =mqg0
-         rhotwg_star(1) =GWPC_CONJG(mqg0)
-         !
-         if (wl<huge(0.0_dp)*1.d-11) then !this is awful but it is still a first coding
-           num=-wl*factocc ! Num is single precision needed for cgerc check factocc
-           lwing_sf(:,iomegal,iqlwl) = lwing_sf(:,iomegal,iqlwl) + rhotwg     (1:npwepG0) * GWPC_CONJG(mqg0) * num
-           uwing_sf(:,iomegal,iqlwl) = uwing_sf(:,iomegal,iqlwl) + rhotwg_star(1:npwepG0) *            mqg0  * num
-         end if
-         !
-         ! Last point, must accumulate left point but not the right one
-         if (iomegar/=nomegasf+1 .and. wr<huge(0.0_dp)*1.d-11) then
-           num=-wr*factocc
-           lwing_sf(:,iomegar,iqlwl) = lwing_sf(:,iomegar,iqlwl) + rhotwg     (1:npwepG0) * GWPC_CONJG(mqg0) * num
-           uwing_sf(:,iomegar,iqlwl) = uwing_sf(:,iomegar,iqlwl) + rhotwg_star(1:npwepG0) *            mqg0  * num
-         end if
-       end do ! iqlwl
-
-       ABI_FREE(rhotwg_star)
-       rhotwg(1) = rhotwg0_bkp ! Reinstate previous value of rhotwg(1).
-     end if !nqlwl
-
-   else ! spinorial case
-     MSG_BUG("Spectral method + nspinor==2 not implemented")
-   end if
-
- CASE (1)
-   ! === Notes on the symmetrization of oscillator matrix elements ===
-   ! If  Sq = q then  M_G( Sk,q)= e^{-i(q+G)\cdot t} M_{ S^-1G}  (k,q)
-   ! If -Sq = q then  M_G(-Sk,q)= e^{-i(q+G)\cdot t} M_{-S^-1G}^*(k,q)
-   !
-   ! In case of an umklapp process
-   ! If  Sq = q+G_o then  M_G( Sk,q)= e^{-i(q+G)\cdot t} M_{ S^-1(G-G_o}   (k,q)
-   ! If -Sq = q+G_o then  M_G(-Sk,q)= e^{-i(q+G)\cdot t} M_{-S^-1(G-G-o)}^*(k,q)
-   !
-   ! rhotwg(1)= R^-1q*rhotwx_ibz
-   ! rhotwg(1)=-R^-1q*conjg(rhotwx_ibz) for inversion
-   !
-   if (nspinor==1) then
-     !ABI_MALLOC(rhotwg_sym,(npwe))
-     !
-     ! === Loop over symmetries of the space group and time-reversal ===
-     do isym=1,Ltg_q%nsym_sg
-       do itim=1,Ltg_q%timrev
-
-         if (Ltg_q%wtksym(itim,isym,ikbz)==1) then
-           ! === This operation belongs to the little group and has to be considered to reconstruct the BZ ===
-           ! TODO this is a hot-spot, should add a test on the umklapp
-           !
-           phmGt => Gsph_epsG0%phmGt(1:npwe,isym) ! In these 2 lines mind the slicing (1:npwe)
-           Sm1G  => Gsph_epsG0%rottbm1(1:npwe,itim,isym)
-
-           opinv(:,:)=REAL(Cryst%symrec(:,:,isym),dp)
-           call matrginv(opinv,3,3)
-           qrot = (3-2*itim) * MATMUL(opinv,qlwl(:,1))
-
-           SELECT CASE (itim)
-           CASE (1)
-             rhotwg_sym(1:npwe)=rhotwg(Sm1G(1:npwe))*phmGt(1:npwe)
-             rhotwg_sym(1)=dotproductqrc(qrot,rhotwx,b1,b2,b3)
-           CASE (2)
-             rhotwg_sym(1:npwe) = GWPC_CONJG(rhotwg(Sm1G(1:npwe)))*phmGt(1:npwe)
-             rhotwg_sym(1) = GWPC_CONJG(dotproductqrc(qrot,rhotwx,b1,b2,b3))
-           CASE DEFAULT
-             MSG_BUG(sjoin('Wrong value of itim= ', itoa(itim)))
-           END SELECT
-           !
-           ! === Multiply elements G,Gp of rhotwg_sym*num and accumulate in chi0sf(G,Gp,io) ===
-           if (wl<huge(0.0_dp)*1.d-11) then
-             num=-wl*factocc
-             call XGERC(npwe,npwe,num,rhotwg_sym,1,rhotwg_sym,1,chi0sf(:,:,iomegal),npwe)
-           end if
-           !
-           ! Last point, must accumulate left point but not the right one
-           if (iomegar/=nomegasf+1 .and. wr<huge(0.0_dp)*1.d-11) then
-             num=-wr*factocc
-             call XGERC(npwe,npwe,num,rhotwg_sym,1,rhotwg_sym,1,chi0sf(:,:,iomegar),npwe)
-           end if
-
-           ! === Accumulate heads and wings for each small q ===
-           ! * For better performance, this part is not done if nqlwl==1
-           !   lwing and uwing will be filled in cchi0q0 after the MPI collective sum
-           if (nqlwl>1.and..FALSE.) then
-             ABI_MALLOC(rhotwg_sym_star,(npwe))
-             rhotwg_sym_star = GWPC_CONJG(rhotwg_sym(1:npwe))
-
-             do iqlwl=2,nqlwl
-               qrot =  (3-2*itim_kbz) * MATMUL(opinv,qlwl(:,iqlwl))
-               mqg0_sym = dotproductqrc(qrot,rhotwx,b1,b2,b3) !TODO get rid of this
-               if (itim_kbz==2) mqg0_sym=GWPC_CONJG(mqg0_sym)
-               rhotwg_sym     (1) =mqg0_sym
-               rhotwg_sym_star(1) =GWPC_CONJG(mqg0_sym)
-               !
-               if (wl<huge(0.0_dp)*1.d-11) then !this is awful but it is still a first coding
-                 num=-wl*factocc ! Num is single precision needed for cgerc check factocc
-                 lwing_sf(:,iomegal,iqlwl) = lwing_sf(:,iomegal,iqlwl) + rhotwg_sym_star(1:npwe) * GWPC_CONJG(mqg0_sym) * num
-                 uwing_sf(:,iomegal,iqlwl) = uwing_sf(:,iomegal,iqlwl) + rhotwg_sym_star(1:npwe) *       mqg0_sym  * num
-               end if
-               ! Last point, must accumulate left point but not the right one
-               if (iomegar/=nomegasf+1 .and. wr<huge(0.0_dp)*1.d-11) then
-                 num=-wr*factocc
-                 lwing_sf(:,iomegar,iqlwl) = lwing_sf(:,iomegar,iqlwl) + rhotwg_sym_star(1:npwe) * GWPC_CONJG(mqg0_sym) * num
-                 uwing_sf(:,iomegar,iqlwl) = uwing_sf(:,iomegar,iqlwl) + rhotwg_sym_star(1:npwe) *            mqg0_sym  * num
-               end if
-             end do ! iqlwl
-
-             ABI_FREE(rhotwg_sym_star)
-           end if !nqlwl
-
-         end if !wtksym
-       end do !inv
-     end do !isym
-
-     !ABI_FREE(rhotwg_sym)
-
-   else ! spinorial case
-     MSG_BUG("Spectral method + nspinor==2 not implemented")
-   end if
-
- CASE DEFAULT
-   MSG_BUG(sjoin('Wrong value of symchi= ',itoa(symchi)))
- END SELECT
-
-end subroutine assemblychi0sfq0
 !!***
 
 !----------------------------------------------------------------------
@@ -1089,35 +808,28 @@ subroutine accumulate_chi0_q0(ik_bz,isym_kbz,itim_kbz,gwcomp,nspinor,npwepG0,Ep,
     ABI_MALLOC(rhotwg_I, (Ep%npwe))
     ABI_MALLOC(rhotwg_J, (Ep%npwe))
 
-    ! I can use symmetries to loop over the upper triangle but
-    ! this makes using BLAS more difficult
+    ! I can use symmetries to loop over the upper triangle but this makes using BLAS more difficult
     ! Important NOTE: treatment of q-->0 limit is correct only
     ! for i=j=0. Other components require additional terms.
     do jj=1,Ep%nJ
-      s_jj=1 ; if (jj==4) s_jj=-1
-      pad_jj=(jj-1)*Ep%npwe
-      call mkrhotwg_sigma(jj,nspinor,Ep%npwe,rhotwg,rhotwg_J)
-
-      !TODO RECHECK this
-      !rhotwg_J(1) = q0limit(jj, qlwl(:,1), nspinor, rhotwx, b1, b2, b3)
-      if (itim_kbz==2) rhotwg_J(1)=-CONJG(rhotwg_J(1))
+      s_jj=1; if (jj==4) s_jj=-1
+      pad_jj = (jj-1)*Ep%npwe
+      call mkrhotwg_sigma(jj, nspinor, Ep%npwe, rhotwg, rhotwg_J)
+      !if (itim_kbz==2) rhotwg_J(1)=-CONJG(rhotwg_J(1))
 
       do ii=1,Ep%nI
         pad_ii=(ii-1)*Ep%npwe
-
         if (ii/=jj) then
           call mkrhotwg_sigma(ii,nspinor,Ep%npwe,rhotwg,rhotwg_I)
-          !TODO RECHECK this
-          !rhotwg_I(1) = q0limit(ii, qlwl(:,1), nspinor, rhotwx, b1, b2, b3)
-          if (itim_kbz==2) rhotwg_I(1)=-CONJG(rhotwg_I(1))
+          !if (itim_kbz==2) rhotwg_I(1)=-CONJG(rhotwg_I(1))
         else
-          rhotwg_I(:)=rhotwg_J(:)
+          rhotwg_I(:) = rhotwg_J(:)
         end if
 
         do io=1,Ep%nomega
           dd = s_jj*green_w(io)
-          call XGERC(Ep%npwe,Ep%npwe,dd,rhotwg_I,1,rhotwg_J,1,&
-&           chi0(pad_ii+1:pad_ii+Ep%npwe,pad_jj+1:pad_jj+Ep%npwe,io),Ep%npwe)
+          call XGERC(Ep%npwe, Ep%npwe, dd, rhotwg_I, 1, rhotwg_J, 1,&
+            chi0(pad_ii+1:pad_ii+Ep%npwe,pad_jj+1:pad_jj+Ep%npwe,io), Ep%npwe)
         end do
 
       end do !ii
@@ -1218,7 +930,7 @@ subroutine accumulate_chi0_q0(ik_bz,isym_kbz,itim_kbz,gwcomp,nspinor,npwepG0,Ep,
                end if
              end do
            end do
-           !
+
            ! Accumulate the head.
            do io=1,Ep%nomega
              do jdir=1,3
@@ -1302,16 +1014,19 @@ function q0limit(ii,qlwl,nspinor,rhotwx,b1,b2,b3)
 ! *********************************************************************
 
  SELECT CASE (ii)
- CASE (1) ! M_0(q-->0) = Lim M(up,up)+M(dwn,dwn). Exact, neglecting Vnl
+ CASE (1)
+   ! M_0(q-->0) = Lim M(up,up)+M(dwn,dwn). Exact, neglecting Vnl
    q0limit =  dotproductqrc(qlwl,rhotwx(:,1),b1,b2,b3) &
 &            +dotproductqrc(qlwl,rhotwx(:,2),b1,b2,b3)
 
- CASE (2) ! M_z(q-->0) = Lim M(up,up)-M(dwn,dwn).
+ CASE (2)
+   ! M_z(q-->0) = Lim M(up,up)-M(dwn,dwn).
    ! WARNING off-diagonal elements of rV12 and rV12 are neglected
    q0limit =  dotproductqrc(qlwl,rhotwx(:,1),b1,b2,b3) &
 &            -dotproductqrc(qlwl,rhotwx(:,2),b1,b2,b3)
 
- CASE (3) ! M_x(q-->0) = M(up,dwn)+M(dwn,up).
+ CASE (3)
+   ! M_x(q-->0) = M(up,dwn)+M(dwn,up).
    ! Both diagonal elements of the form v12r-rv21 and similar terms in 12 and 21 are neglected
    q0limit =  dotproductqrc(qlwl,rhotwx(:,3),b1,b2,b3) &
 &            +dotproductqrc(qlwl,rhotwx(:,4),b1,b2,b3)
@@ -1338,7 +1053,7 @@ end function q0limit
 !! Update the spectral function of the independent particle susceptibility at q==0 for the contribution
 !! of one pair of occupied-unoccupied band, for each frequency.
 !! If symchi==1, the symmetries belonging to the little group of the external point q are used
-!! to reconstrunct the contributions in the full Brillouin zone. In this case, the equation implented is:
+!! to reconstruct the contributions in the full Brillouin zone. In this case, the equation implented is:
 !!
 !!  $ chi0(G1,G2,io)=chi0(G1,G2,io)+\sum_S (rhotwg(G1)*rhotwg^\dagger(G2))* \delta(\omega -trans) $
 !!
@@ -1439,7 +1154,6 @@ subroutine accumulate_sfchi0_q0(ikbz,isym_kbz,itim_kbz,nspinor,symchi,npwepG0,np
  end if
 
  SELECT CASE (symchi)
-
  CASE (0)
    !
    ! === Calculation without symmetries ===
@@ -1487,7 +1201,8 @@ subroutine accumulate_sfchi0_q0(ikbz,isym_kbz,itim_kbz,nspinor,symchi,npwepG0,np
        end if
      end do ! jdir
 
-   else ! spinorial case
+   else
+     ! spinorial case
      MSG_BUG("Spectral method + nspinor==2 not implemented")
    end if
 
@@ -1506,8 +1221,8 @@ subroutine accumulate_sfchi0_q0(ikbz,isym_kbz,itim_kbz,nspinor,symchi,npwepG0,np
    !
    if (nspinor==1) then
      ABI_MALLOC(rhotwg_sym,(npwe))
-     !
-     ! === Loop over symmetries of the space group and time-reversal ===
+
+     ! Loop over symmetries of the space group and time-reversal
      do isym=1,Ltg_q%nsym_sg
        do itim=1,Ltg_q%timrev
 
