@@ -138,15 +138,14 @@ subroutine mover(scfcv_args,ab_xfh,acell,amass,dtfil,&
  use m_pred_lotf
 #endif
 
- use m_fstrings,         only : strcat, sjoin
- use m_crystal,          only : crystal_init, crystal_free, crystal_t
- use m_crystal_io,       only : crystal_ncwrite_path
- use m_time,             only : abi_wtime, sec2str
- use m_exit,             only : get_start_time, have_timelimit_in, get_timelimit, enable_timelimit_in
- use m_electronpositron, only : electronpositron_type
- use m_scfcv,            only : scfcv_t, scfcv_run
- use m_effective_potential
- use m_monte_carlo
+ use m_fstrings,           only : strcat, sjoin
+ use m_crystal,            only : crystal_init, crystal_free, crystal_t
+ use m_crystal_io,         only : crystal_ncwrite_path
+ use m_time,               only : abi_wtime, sec2str
+ use m_exit,               only : get_start_time, have_timelimit_in, get_timelimit, enable_timelimit_in
+ use m_electronpositron,   only : electronpositron_type
+ use m_scfcv,              only : scfcv_t, scfcv_run
+ use m_effective_potential,only : effective_potential_type,effective_potential_evaluate
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -337,10 +336,10 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
 #if defined HAVE_NETCDF
  filename=trim(ab_mover%filnam_ds(4))//'_HIST.nc'
 
- if (ab_mover%restartxf<=0)then
+ if (ab_mover%restartxf<0)then
 !  Read history from file (and broadcast if MPI)
    if (me==master) then
-     call read_md_hist(filename,hist_prev,specs%isVused,specs%isARused)
+     call read_md_hist(filename,hist_prev,specs%isVused,specs%isARused,ab_mover%restartxf==-3)
    end if
    call abihist_bcast(hist_prev,master,comm)
 
@@ -364,6 +363,14 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
      acell(:)   =hist_prev%acell(:,minIndex)
      rprimd(:,:)=hist_prev%rprimd(:,:,minIndex)
      xred(:,:)  =hist_prev%xred(:,:,minIndex)
+     call abihist_free(hist_prev)
+   end if
+!  If restarxf specifies to start to the last iteration
+   if (hist_prev%mxhist>0.and.ab_mover%restartxf==-3)then     
+     acell(:)   =hist_prev%acell(:,hist_prev%mxhist)
+     rprimd(:,:)=hist_prev%rprimd(:,:,hist_prev%mxhist)
+     xred(:,:)  =hist_prev%xred(:,:,hist_prev%mxhist)  
+     call abihist_free(hist_prev)     
    end if
 
  end if !if (ab_mover%restartxf<=0)
@@ -580,9 +587,19 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
            call effective_potential_evaluate( &
 &           effective_potential,scfcv_args%results_gs%etotal,&
 &           scfcv_args%results_gs%fcart,scfcv_args%results_gs%fred,&
-&           scfcv_args%results_gs%strten,ab_mover%natom,rprimd,xred)
-         end if
+&           scfcv_args%results_gs%strten,ab_mover%natom,rprimd,xred=xred)
 
+!          Check if the simulation does not diverged...
+           if(ABS(scfcv_args%results_gs%etotal - hist%etot(1)) > 1E6)then
+             if(me==master)then
+               message = "The simulation is diverging, please check your effective potential"
+               MSG_WARNING(message)
+             end if
+!            Set the flag to finish the simulation
+             iexit=1
+             stat4xml="Failed"
+           end if
+         end if
 #if defined HAVE_LOTF
        end if
 #endif
@@ -781,9 +798,6 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
        case (25)
          call pred_hmc(ab_mover,hist,itime,icycle,ntime,ncycle,DEBUG,iexit)
 
-       case (31)         
-         call monte_carlo_step(ab_mover,effective_potential,hist,itime,ntime,DEBUG,iexit)
-         write(std_out,*) "Developpement Monte carlo"
        case default
          write(message,"(a,i0)") "Wrong value of ionmov: ",ab_mover%ionmov
          MSG_ERROR(message)
@@ -978,7 +992,7 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
  ABI_DEALLOCATE(xred_prev)
 
  call abihist_free(hist)
- call abihist_free(hist_prev)
+
  call abimover_fin(ab_mover)
  call abiforstr_fin(preconforstr)
 
