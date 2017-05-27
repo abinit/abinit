@@ -628,6 +628,7 @@ end subroutine usur_kkp_bz
 
 pure subroutine gw_box2gsph(nr,ndat,npw,igfftg0,iarrbox,oarrsph)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -707,6 +708,7 @@ end subroutine gw_box2gsph
 !! SOURCE
 
 subroutine calc_wfwfg(ktabr_k,ktabi_k,spinrot,nr,nspinor,ngfft_gw,wfr_jb,wfr_kb,wfg2_jk)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -890,6 +892,7 @@ end function sym_rhotwgq0
 !! SOURCE
 
 subroutine rotate_spinor(itim_kbz, ktabr_kbz, ktabp_kbz, spinrot, nr, nspinor, ndat, ug_ibz, cwork, oug_bz)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
