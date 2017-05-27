@@ -84,10 +84,9 @@ MODULE m_vkbr
 
  end type vkbr_t
 
- !vkbr_init
- public :: vkbr_init
- public :: vkbr_free
- public :: nc_ihr_comm
+ public :: vkbr_init       ! vkbr_t Constructor
+ public :: vkbr_free       ! Free memory
+ public :: nc_ihr_comm     ! Compute matrix elements of the commutator i[H,r] for NC pseudos
 !!***
 
  interface vkbr_free
@@ -365,6 +364,8 @@ subroutine add_vnlr_commutator(vkbr,cryst,psps,npw,nspinor,ug1,ug2,rhotwx)
 
 !************************************************************************
 
+ ABI_CHECK(nspinor == 1, "nspinor/=1 not coded")
+
  ! Adding term i <c,k|[Vnl,r]|v,k> ===
  select case (vkbr%inclvkb)
  case (2)
@@ -382,13 +383,11 @@ subroutine add_vnlr_commutator(vkbr,cryst,psps,npw,nspinor,ug1,ug2,rhotwx)
       if (iln <= iln0) cycle
       iln0 = iln
       !if (indlmn(6,ilmn,itypat) /= 1 .or. vkbsign(iln,itypat) == zero) cycle
-    !end do
-    !in = 1
+      !in = 1
       do im=1,2*(il-1)+1
         ! Index of im and il
         ilm = im + (il-1)*(il-1)
-
-      !do ilm=1,vkbr%mpsang**2
+        !do ilm=1,vkbr%mpsang**2
         cta1 = czero_gw; cta2(:) = czero_gw
         cta4 = czero_gw; cta3(:) = czero_gw
         do ig=1,npw
@@ -655,7 +654,7 @@ function nc_ihr_comm(vkbr,cryst,psps,npw,nspinor,istwfk,inclvkb,kpoint,ug1,ug2,g
  ! -i <c,k|\nabla_r|v,k> = \sum_G u_{ck}^*(G) [k+G] u_{vk}(G)
  ! Note that here we assume c/=v, moreover the ug are supposed to be orthonormal and
  ! hence k+G can be replaced by G.
-
+ ABI_CHECK(istwfk == vkbr%istwfk, "input istwfk /= vkbr%istwfk")
  spinorwf_pad = RESHAPE([0, 0, npw, npw, 0, npw, npw, 0], [2, 4])
  ihr_comm = czero
 
@@ -679,12 +678,7 @@ function nc_ihr_comm(vkbr,cryst,psps,npw,nspinor,istwfk,inclvkb,kpoint,ug1,ug2,g
  end if
 
  ! Add second term $i <c,k|[Vnl,r]|v,k> in$ reduced cordinates.
- if (inclvkb /= 0) then
-   ABI_CHECK(istwfk == vkbr%istwfk, "input istwfk /= vkbr%istwfk")
-   ABI_CHECK(nspinor == 1, "nspinor/=1 not coded")
-   !ABI_CHECK(istwfk == 1, "istwfk /=1 not coded")
-   call add_vnlr_commutator(vkbr,cryst,psps,npw,nspinor,ug1,ug2,ihr_comm)
- end if
+ if (inclvkb /= 0) call add_vnlr_commutator(vkbr,cryst,psps,npw,nspinor,ug1,ug2,ihr_comm)
 
 end function nc_ihr_comm
 !!***

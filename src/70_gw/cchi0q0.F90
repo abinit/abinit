@@ -621,8 +621,8 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
          end if
 
          SELECT CASE (Ep%spmeth)
-
-         CASE (0) ! Adler-Wiser expression.
+         CASE (0)
+           ! Adler-Wiser expression.
            ! Add small imaginary of the Time-Ordered resp function but only for non-zero real omega  FIXME What about metals?
 
            if (.not.use_tr) then
@@ -631,7 +631,6 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
                green_w(io) = g0g0w(Ep%omega(io),deltaf_b1b2,deltaeGW_b1b2,Ep%zcut,GW_TOL_W0,one_pole)
              end do
            else
-
              if (Ep%gwcomp==0) then ! cannot be completely skipped in case of completeness correction
                if (band1<band2) CYCLE ! Here we GAIN a factor ~2
              end if
