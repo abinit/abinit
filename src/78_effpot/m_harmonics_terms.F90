@@ -63,8 +63,8 @@ module m_harmonics_terms
 !     elastic_constant(6,6)
 !     Elastic tensor Hartree
 
-   real(dp), allocatable :: internal_strain(:,:,:)    
-!    internal_strain(6,3,natom)
+   real(dp), allocatable :: strain_coupling(:,:,:)    
+!    strain_coupling(6,3,natom)
 !    internal strain tensor 
 
    real(dp), allocatable :: zeff(:,:,:)             
@@ -115,7 +115,7 @@ CONTAINS  !=====================================================================
 !! SOURCE
 
 subroutine harmonics_terms_init(harmonics_terms,ifcs,natom,nrpt,&
-&                               dynmat,epsilon_inf,elastic_constants,internal_strain,&
+&                               dynmat,epsilon_inf,elastic_constants,strain_coupling,&
 &                               nqpt,phfrq,qpoints,zeff)
 
 
@@ -136,7 +136,7 @@ subroutine harmonics_terms_init(harmonics_terms,ifcs,natom,nrpt,&
  integer, optional,intent(in) :: nqpt
  real(dp),optional,intent(in) :: epsilon_inf(3,3),dynmat(:,:,:,:,:,:)
  real(dp),optional,intent(in) :: elastic_constants(6,6)
- real(dp),optional,intent(in) :: internal_strain(6,3,natom),zeff(3,3,natom)
+ real(dp),optional,intent(in) :: strain_coupling(6,3,natom),zeff(3,3,natom)
  real(dp),optional,intent(in) :: phfrq(:,:),qpoints(:,:)
 !Local variables-------------------------------
 !scalar
@@ -232,10 +232,10 @@ subroutine harmonics_terms_init(harmonics_terms,ifcs,natom,nrpt,&
  end if
 
 !Allocation of internal strain tensor 
- ABI_ALLOCATE(harmonics_terms%internal_strain,(6,3,natom))
- harmonics_terms%internal_strain = zero
- if (present(internal_strain)) then
-   call harmonics_terms_setInternalStrain(internal_strain,harmonics_terms,natom)
+ ABI_ALLOCATE(harmonics_terms%strain_coupling,(6,3,natom))
+ harmonics_terms%strain_coupling = zero
+ if (present(strain_coupling)) then
+   call harmonics_terms_setInternalStrain(strain_coupling,harmonics_terms,natom)
  end if
 
 end subroutine harmonics_terms_init 
@@ -292,9 +292,9 @@ subroutine harmonics_terms_free(harmonics_terms)
     ABI_DEALLOCATE(harmonics_terms%zeff)
   end if
 
-  if(allocated(harmonics_terms%internal_strain)) then
-    harmonics_terms%internal_strain=zero
-    ABI_DEALLOCATE(harmonics_terms%internal_strain)
+  if(allocated(harmonics_terms%strain_coupling)) then
+    harmonics_terms%strain_coupling=zero
+    ABI_DEALLOCATE(harmonics_terms%strain_coupling)
   end if
 
   if(allocated(harmonics_terms%dynmat))then
@@ -327,7 +327,7 @@ end subroutine harmonics_terms_free
 !!
 !! INPUTS
 !! natom = number of atoms
-!! internal_strain(6,3,natom) = internal strain coupling parameters
+!! strain_coupling(6,3,natom) = internal strain coupling parameters
 !!
 !! OUTPUT
 !! harmonics_terms = supercell structure with data to be output
@@ -339,7 +339,7 @@ end subroutine harmonics_terms_free
 !!
 !! SOURCE
  
-subroutine harmonics_terms_setInternalStrain(internal_strain,harmonics_terms,natom)
+subroutine harmonics_terms_setInternalStrain(strain_coupling,harmonics_terms,natom)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -354,7 +354,7 @@ subroutine harmonics_terms_setInternalStrain(internal_strain,harmonics_terms,nat
 !scalars
   integer,intent(in) :: natom
 !array
-  real(dp),intent(in) :: internal_strain(:,:,:)
+  real(dp),intent(in) :: strain_coupling(:,:,:)
   type(harmonics_terms_type), intent(inout) :: harmonics_terms
 !Local variables-------------------------------
 !scalars
@@ -364,20 +364,20 @@ subroutine harmonics_terms_setInternalStrain(internal_strain,harmonics_terms,nat
 ! *************************************************************************
 
 ! 0-Checks inputs
-  if(natom /= size(internal_strain,3)) then
+  if(natom /= size(strain_coupling,3)) then
     write(msg, '(a)' )&
-&        ' natom has not the same size internal_strain array. '
+&        ' natom has not the same size strain_coupling array. '
     MSG_BUG(msg)
   end if
 
 ! 1-deallocate old array
-  if(allocated(harmonics_terms%internal_strain))then
-    ABI_DEALLOCATE(harmonics_terms%internal_strain)
+  if(allocated(harmonics_terms%strain_coupling))then
+    ABI_DEALLOCATE(harmonics_terms%strain_coupling)
   end if
    
 ! 2-allocate and copy the new array
-  ABI_ALLOCATE(harmonics_terms%internal_strain,(6,3,natom))
-  harmonics_terms%internal_strain(:,:,:) = internal_strain(:,:,:)
+  ABI_ALLOCATE(harmonics_terms%strain_coupling,(6,3,natom))
+  harmonics_terms%strain_coupling(:,:,:) = strain_coupling(:,:,:)
 
 end subroutine harmonics_terms_setInternalStrain
 !!***

@@ -130,7 +130,7 @@ subroutine multipoles_fftr(arraysp,dipole,nfft,ngfft,nspden,rprimd,origin,&
 !$OMP SINGLE
      dipole_tmp=zero
 !$OMP END SINGLE
-!$OMP DO COLLAPSE(2), REDUCTION(+:dipole_tmp)
+!$OMP DO COLLAPSE(2) REDUCTION(+:dipole_tmp)
      do ifft2=1,n2
        do ifft1=1,n1
          i2=mod(ifft2-1+ishift*n2,n2)

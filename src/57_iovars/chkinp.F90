@@ -55,6 +55,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
  use m_profiling_abi
  use m_errors
  use m_xmpi
+ use m_xomp
  use libxc_functionals
 
  use m_numeric_tools,  only : iseven
@@ -1556,6 +1557,14 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
      cond_string(2)='pawmixdg' ; cond_values(2)=dt%pawmixdg
      call chkint_eq(1,2,cond_string,cond_values,ierr,'npfft',dt%npfft,1,(/1/),iout)
    end if
+#ifdef HAVE_OPENMP
+   if ( xomp_get_num_threads(.true.) > 1 .and. dt%npfft > 1 ) then
+     write(message,'(4a,i4,a,i4,a)') "When compilied with OpenMP, the FFT parallelization is not ",& 
+       & "compatible with multiple threads.",ch10,"Please set npfft to 1 (currently npfft=",&
+       & dt%npfft, ") or export OMP_NUM_THREADS=1 (currently ",xomp_get_num_threads(.true.),")"
+     MSG_ERROR(message)
+   end if
+#endif
 
 !  npimage
 !  Must be greater or equal to 1
@@ -1586,6 +1595,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
 !    nprojmax(ilang)=maxval(pspheads(1:npsp)%nproj(ilang)) ! Likely problems with HP compiler
      nprojmax(ilang)=pspheads(1)%nproj(ilang)
      if(npsp>=2)then
+
        do ii=2,npsp
          nprojmax(ilang)=max(pspheads(ii)%nproj(ilang),nprojmax(ilang))
        end do
