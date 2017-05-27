@@ -129,7 +129,7 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
  use m_pawcprj,       only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_copy, paw_overlap
  use m_wfd,           only : wfd_t, wfd_get_ur, wfd_get_cprj, wfd_change_ngfft, wfd_paw_get_aeur, wfd_get_many_ur,&
 &                            wfd_sym_ur
- use m_sigma,         only : sigma_t
+ use m_sigma,         only : sigma_t, sigma_distribute_bks
  use m_oscillators,   only : rho_tw_g
  use m_esymm,         only : esymm_t, esymm_symmetrize_mels, esymm_failed
  use m_ptgroups,      only : sum_irreps
@@ -141,7 +141,6 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
  use interfaces_14_hidewrite
  use interfaces_18_timing
  use interfaces_65_paw
- use interfaces_70_gw, except_this_one => calc_sigx_me
 !End of the abilint section
 
  implicit none

@@ -127,7 +127,7 @@ subroutine cohsex_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,Cryst,QP_BSt,Si
  use m_oscillators,   only : rho_tw_g, calc_wfwfg
  use m_screening,     only : epsm1_symmetrizer, get_epsm1, epsilonm1_results
  use m_esymm,         only : esymm_t, esymm_symmetrize_mels, esymm_failed
- use m_sigma,         only : sigma_t
+ use m_sigma,         only : sigma_t, sigma_distribute_bks
  use m_pawang,        only : pawang_type
  use m_pawtab,        only : pawtab_type
  use m_pawcprj,       only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_copy, paw_overlap

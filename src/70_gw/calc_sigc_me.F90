@@ -149,7 +149,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
  use m_oscillators,   only : rho_tw_g, calc_wfwfg
  use m_screening,     only : epsilonm1_results, epsm1_symmetrizer, epsm1_symmetrizer_inplace, get_epsm1
  use m_ppmodel,       only : setup_ppmodel, ppm_get_qbz, ppmodel_t, calc_sig_ppm
- use m_sigma,         only : sigma_t
+ use m_sigma,         only : sigma_t, sigma_distribute_bks
  use m_esymm,         only : esymm_t, esymm_symmetrize_mels, esymm_failed
  use m_pawang,        only : pawang_type
  use m_pawtab,        only : pawtab_type

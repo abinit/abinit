@@ -121,7 +121,7 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
 &                            wfd_paw_get_aeur, wfd_sym_ur
  use m_oscillators,   only : rho_tw_g, calc_wfwfg
  use m_chi0,          only : hilbert_transform, setup_spectral, assemblychi0_sym, assemblychi0sf, symmetrize_afm_chi0,&
-&                            approxdelta, completechi0_deltapart, accumulate_chi0sumrule
+&                            approxdelta, completechi0_deltapart, accumulate_chi0sumrule, make_transitions, chi0_bbp_mask
 
  use m_pawang,        only : pawang_type
  use m_pawtab,        only : pawtab_type

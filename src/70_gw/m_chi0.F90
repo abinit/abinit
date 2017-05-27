@@ -29,15 +29,18 @@ MODULE m_chi0
  use defs_basis
  use m_profiling_abi
  use m_errors
+ use m_xmpi
  use m_xomp
  use m_sort
+ use m_wfd
 
+ use defs_datatypes, only : ebands_t
  use m_gwdefs,   only : GW_TOL_DOCC, czero_gw, cone_gw, em1params_t, j_gw
  use m_fstrings, only : sjoin, itoa
  use m_blas,     only : xgerc, xgemm
  use m_crystal,  only : crystal_t
  use m_gsphere,  only : gsphere_t, gsph_gmg_idx, gsph_gmg_fftidx
- use m_bz_mesh,  only : littlegroup_t
+ use m_bz_mesh,  only : littlegroup_t, kmesh_t, has_BZ_item
 
  implicit none
 
@@ -55,6 +58,8 @@ MODULE m_chi0
  public :: completechi0_deltapart
  public :: output_chi0sumrule
  public :: accumulate_chi0sumrule
+ public :: make_transitions
+ public :: chi0_bbp_mask
 !!***
 
 CONTAINS  !=======================================================================================================
@@ -2120,6 +2125,7 @@ end subroutine hilbert_transform_headwings
 subroutine completechi0_deltapart(ik_bz,qzero,symchi,npwe,npwvec,nomega,nspinor,&
 & nfftot,ngfft,igfft0,Gsph_FFT,Ltg_q,green_enhigh_w,wfwfg,chi0)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -2249,6 +2255,7 @@ end subroutine completechi0_deltapart
 
 subroutine output_chi0sumrule(qeq0,iq,npwe,omegaplasma,chi0sumrule,epsm1_w0,vc_sqrt)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -2343,6 +2350,7 @@ end subroutine output_chi0sumrule
 subroutine accumulate_chi0sumrule(ik_bz,symchi,npwe,factor,delta_ene,&
 & Ltg_q,Gsph_epsG0,npwepG0,rhotwg,chi0sumrule)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -2408,6 +2416,303 @@ subroutine accumulate_chi0sumrule(ik_bz,symchi,npwe,factor,delta_ene,&
  END SELECT
 
 end subroutine accumulate_chi0sumrule
+!!***
+
+!!****f* m_chi0/make_transitions
+!! NAME
+!! make_transitions
+!!
+!! FUNCTION
+!!  Calculate transition energies entering the espression for the irreducible polarizability.
+!!
+!! INPUTS
+!!  nsspol=1 for spin unpolarized, 2 for spin polarized calculations
+!!  nbnds=total number of bands
+!!  kmesh<kmesh_t>=datatype gathering info on the k-mesh:
+!!   | %nbz=number of k-points in the full BZ
+!!   | %nibz=number of k-points in the IBZ
+!!   | %tab(nkbz)=table giving for each k-point in the BZ, the corresponding irreducible point in the IBZ array
+!!   | %bz(3,nkbz)=reduced coordinated of k-points
+!!  TOL_DELTA_OCC=tolerance on the difference of the occupation numbers
+!!  gw_energy(nbnds,kmesh%nkibz,nsppol)=quasi-particle energies energies
+!!  occ(nbnds,kmesh%nkibz,nsppol)=occupation numbers
+!!  chi0alg=integer defining the method used to calculate chi0
+!!   0 ==> calculate chi0 using the Adler-Wiser expression
+!!   1 ==> use spectral method
+!!  timrev=if 2, time-reversal symmetry is considered; 1 otherwise
+!!
+!! OUTPUT
+!! my_max_rest,my_min_rest=Maximum and minimum resonant (posite) transition energy.
+!! max_rest,min_rest=Maximun and minimum resonant (posite) transition energy treated by this node.
+!!
+!! PARENTS
+!!      cchi0,cchi0q0
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine make_transitions(Wfd,chi0alg,nbnds,nbvw,nsppol,symchi,timrev,TOL_DELTA_OCC,&
+& max_rest,min_rest,my_max_rest,my_min_rest,Kmesh,Ltg_q,gw_energy,occ,qpoint,bbp_ks_distrb)
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'make_transitions'
+ use interfaces_14_hidewrite
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: chi0alg,nbnds,nbvw,nsppol,symchi,timrev
+ real(dp),intent(in) :: TOL_DELTA_OCC
+ real(dp),intent(out) :: max_rest,min_rest
+ real(dp),intent(out) :: my_max_rest,my_min_rest
+ type(kmesh_t),intent(in) :: Kmesh
+ type(littlegroup_t),intent(in) :: Ltg_q
+ type(wfd_t),intent(in) :: Wfd
+!arrays
+ real(dp),intent(in) :: gw_energy(nbnds,Kmesh%nibz,nsppol)
+ real(dp),intent(in) :: occ(nbnds,Kmesh%nibz,nsppol),qpoint(3)
+ integer,intent(in) :: bbp_ks_distrb(Wfd%mband,Wfd%mband,Kmesh%nbz,Wfd%nsppol)
+
+!Local variables-------------------------------
+!scalars
+ integer :: ib1,ib2,ii,ik_bz,ik_ibz,ikmq_bz,ikmq_ibz,is,nt,ntrans,my_ntrans,iloop
+ real(dp) :: delta_ene,delta_occ,spin_fact
+ character(len=500) :: msg
+!arrays
+ integer :: G0(3)
+ real(dp) :: kmq(3)
+
+!************************************************************************
+
+ DBG_ENTER("COLL")
+
+ if (chi0alg<0 .or. chi0alg>=2) then
+   write(msg,'(a,i3,a)')' chi0alg = ',chi0alg,' not allowed '
+   MSG_BUG(msg)
+ end if
+ if (timrev/=1 .and. timrev/=2) then
+   write(msg,'(a,i3,a)')' timrev = ',timrev,' not allowed'
+   MSG_BUG(msg)
+ end if
+
+ ABI_UNUSED(nbvw)
+ !
+ ! In the first loop calculate total number of transitions for this q-point
+ ! as well min and max transition without taking into account distribution of bands.
+ ! In the second iteration calculate min and Max transition for this processor.
+ !
+ spin_fact=half; if (nsppol==2) spin_fact=one
+ my_max_rest=smallest_real; my_min_rest=greatest_real
+    max_rest=smallest_real;    min_rest=greatest_real
+
+ do iloop=1,2
+   nt=0
+   do ik_bz=1,Kmesh%nbz
+     ik_ibz=Kmesh%tab(ik_bz)
+     kmq(:)=Kmesh%bz(:,ik_bz)-qpoint(:)
+
+     if (symchi==1) then
+       if (Ltg_q%ibzq(ik_bz)/=1) cycle ! This point does not belong to the IBZ defined by the little group
+     end if
+     !
+     ! Find kp=k-q-G0 and also G0 where kp is in the first BZ
+     if (.not.has_BZ_item(Kmesh,kmq,ikmq_bz,g0)) then ! Stop as the weight 1.0/nkbz is wrong.
+       write(msg,'(4a,2(2a,3f12.6),2a)')ch10,&
+&        ' make_transitions : ERROR - ',ch10,&
+&        ' kp  = k-q-G0 not found in the BZ mesh',ch10,&
+&        ' k   = ',(Kmesh%bz(ii,ik_bz),ii=1,3),ch10,&
+&        ' k-q = ',(kmq(ii),ii=1,3),ch10,&
+&        ' weight in cchi0/cchi0q is wrong '
+       MSG_ERROR(msg)
+     end if
+
+     ikmq_ibz=Kmesh%tab(ikmq_bz)
+     do is=1,nsppol
+       do ib1=1,nbnds
+         do ib2=1,nbnds
+
+           if (iloop==2) then
+             if (bbp_ks_distrb(ib1,ib2,ik_bz,is)/=Wfd%my_rank) cycle
+           end if
+
+           if (timrev==2 .and. ib1<ib2) cycle ! Thanks to time-reversal we gain a factor ~2.
+
+           delta_occ=spin_fact*(occ(ib1,ikmq_ibz,is)-occ(ib2,ik_ibz,is))
+           delta_ene=gw_energy(ib1,ikmq_ibz,is)-gw_energy(ib2,ik_ibz,is)
+
+           if (chi0alg==0)  then
+             ! Adler-Wiser expression. Skip only if factor due to occupation number is smaller than TOL_DELTA_OCC
+             if (abs(delta_occ) < abs(TOL_DELTA_OCC)) cycle
+           else if (chi0alg==1) then
+             ! Spectral method with time-reversal, only resonant transitions
+             ! This has to changed to include spectral method without time-reversal
+             if (delta_ene < -abs(TOL_DELTA_OCC) .or. abs(delta_occ) < abs(TOL_DELTA_OCC)) cycle
+           end if
+           !
+           ! We have a new transition
+           nt=nt+1
+
+           if (iloop==1) then
+             max_rest=MAX(max_rest,zero,delta_ene)
+             if (delta_ene>=-tol6) min_rest=MIN(min_rest,delta_ene)
+           end if
+           if (iloop==2) then
+             my_max_rest=MAX(my_max_rest,zero,delta_ene)
+             if (delta_ene>=-tol6) my_min_rest=MIN(my_min_rest,delta_ene)
+           end if
+
+         end do
+       end do
+     end do
+   end do
+   if (iloop==1) ntrans=nt
+   if (iloop==2) my_ntrans=nt
+ end do !iloop
+
+ write(msg,'(2a,i9,2a,f8.3,3a,f8.3,a)')ch10,&
+&  ' Total number of transitions = ',ntrans,ch10,&
+&  ' min resonant     = ',min_rest*Ha_eV,' [eV] ',ch10,&
+&  ' Max resonant     = ',max_rest*Ha_eV,' [eV] '
+ call wrtout(std_out,msg,'COLL')
+
+ if (Wfd%nproc/=1) then
+   write(msg,'(2a,i9,2a,f8.3,3a,f8.3,a)')ch10,&
+&    ' Total number of transitions for this processor= ',my_ntrans,ch10,&
+&    ' min resonant     = ',my_min_rest*Ha_eV,' [eV] ',ch10,&
+&    ' Max resonant     = ',my_max_rest*Ha_eV,' [eV] '
+   call wrtout(std_out,msg,'PERS')
+ end if
+
+ DBG_EXIT("COLL")
+
+end subroutine make_transitions
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_chi0/chi0_bbp_mask
+!! NAME
+!!  chi0_bbp_mask
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!      cchi0,cchi0q0
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine chi0_bbp_mask(Ep,use_tr,QP_BSt,mband,ikmq_ibz,ik_ibz,spin,spin_fact,bbp_mask)
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'chi0_bbp_mask'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: spin,ik_ibz,ikmq_ibz,mband
+ real(dp),intent(in) :: spin_fact
+ logical,intent(in) :: use_tr
+ type(em1params_t),intent(in) :: Ep
+ type(ebands_t),target,intent(in) :: QP_BSt
+!arrays
+ logical,intent(out) :: bbp_mask(mband,mband)
+
+!Local variables-------------------------------
+!scalars
+ integer :: ib1,ib2
+ real(dp) :: deltaeGW_b1kmq_b2k,deltaf_b1kmq_b2k,e_b1_kmq,f_b1_kmq
+ character(len=500) :: msg
+!arrays
+ real(dp), ABI_CONTIGUOUS pointer :: qp_energy(:,:,:),qp_occ(:,:,:)
+
+!************************************************************************
+
+ qp_energy => QP_BSt%eig; qp_occ => QP_BSt%occ
+ bbp_mask=.FALSE.
+
+ !use_tr = (Ep%awtr==1)
+ SELECT CASE (Ep%gwcomp)
+ CASE (0)
+   do ib1=1,Ep%nbnds
+     ! Loop over "conduction" states.
+     e_b1_kmq = qp_energy(ib1,ikmq_ibz,spin)
+     f_b1_kmq =    qp_occ(ib1,ikmq_ibz,spin)
+
+     do ib2=1,Ep%nbnds ! Loop over "valence" states.
+       deltaf_b1kmq_b2k   = spin_fact*(f_b1_kmq-qp_occ(ib2,ik_ibz,spin))
+       deltaeGW_b1kmq_b2k = e_b1_kmq-qp_energy(ib2,ik_ibz,spin)
+
+       SELECT CASE (Ep%spmeth)
+       CASE (0)
+         ! Standard Adler-Wiser expression.
+         if (ABS(deltaf_b1kmq_b2k) >= GW_TOL_DOCC) then
+           bbp_mask(ib1,ib2)=.TRUE.
+           if (use_tr .and. ib1<ib2) bbp_mask(ib1,ib2)=.FALSE. ! GAIN a factor ~2 thanks to time-reversal.
+         end if
+
+       CASE (1,2) ! Spectral method, WARNING time-reversal here is always assumed!
+         if (ABS(deltaf_b1kmq_b2k) >= GW_TOL_DOCC) then
+           bbp_mask(ib1,ib2)=.TRUE.
+           if (deltaeGW_b1kmq_b2k<zero) bbp_mask(ib1,ib2)=.FALSE. ! Only positive frequencies are needed for the Hilbert transform.
+           !$if (use_tr .and. ib1<ib2) bbp_mask(ib1,ib2)=.FALSE. ! GAIN a factor ~2 thanks to time-reversal.
+         end if
+
+       CASE DEFAULT
+         write(msg,'(a,i0)')" Wrong value for spmeth: ",Ep%spmeth
+         MSG_ERROR(msg)
+       END SELECT
+       !write(std_out,*) "bbp_mask(ib1,ib2)",bbp_mask(ib1,ib2)
+     end do !ib2
+   end do !ib1
+
+ CASE (1)
+   ! Extrapolar technique
+   ABI_CHECK(Ep%spmeth==0,"Hilbert transform and extrapolar method are not compatible")
+
+   ! Loop over "conduction" states.
+   do ib1=1,Ep%nbnds
+     e_b1_kmq=qp_energy(ib1,ikmq_ibz,spin)
+     f_b1_kmq=   qp_occ(ib1,ikmq_ibz,spin)
+
+     ! Loop over "valence" states.
+     do ib2=1,Ep%nbnds
+       deltaf_b1kmq_b2k  =spin_fact*(f_b1_kmq-qp_occ(ib2,ik_ibz,spin))
+       deltaeGW_b1kmq_b2k=e_b1_kmq-qp_energy(ib2,ik_ibz,spin)
+
+       ! When the completeness correction is used,
+       ! we need to also consider transitions with vanishing deltaf
+       !
+       ! Rangel: This is to compute chi in metals correctly with the extrapolar method.
+       bbp_mask(ib1,ib2)=.TRUE.
+       !if (qp_occ(ib2,ik_ibz,is) < GW_TOL_DOCC) CYCLE
+       if (qp_occ(ib2,ik_ibz,spin) < GW_TOL_DOCC .and. (ABS(deltaf_b1kmq_b2k) < GW_TOL_DOCC .or. ib1<ib2)) then
+         bbp_mask(ib1,ib2)=.FALSE.
+       end if
+
+     end do
+   end do
+
+  CASE DEFAULT
+    write(msg,'(a,i0)')" Wrong value of gwcomp: ",Ep%gwcomp
+    MSG_ERROR(msg)
+  END SELECT
+
+end subroutine chi0_bbp_mask
 !!***
 
 END MODULE m_chi0

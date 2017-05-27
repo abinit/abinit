@@ -51,7 +51,6 @@ sources = [
  "gwls_Projected_BT.F90",
  "gwls_ComputePoles.F90",
  "gwls_ComputeCorrelationEnergy.F90",
- "gw_tools.F90",
  "my_calc_wfwfg.F90",
  "mlwfovlp_qp.F90",
  "m_chi0.F90",
