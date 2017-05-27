@@ -57,7 +57,8 @@ subroutine calc_coh(nspinor,nsig_ab,nfftot,ngfft,npwc,gvec,wfg2_jk,epsm1q_o,vc_s
  use m_profiling_abi
  use m_errors
 
- use m_gwdefs, only : czero_gw
+ use m_fstrings,  only : sjoin, itoa
+ use m_gwdefs,    only : czero_gw
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -82,9 +83,7 @@ subroutine calc_coh(nspinor,nsig_ab,nfftot,ngfft,npwc,gvec,wfg2_jk,epsm1q_o,vc_s
 !Local variables-------------------------------
 !scalars
  integer,save :: enough=0
- integer :: ig,ig4,ig4x,ig4y,ig4z,igp,igmin,ispinor
- integer :: spad,outofbox
- character(len=500) :: msg
+ integer :: ig,ig4,ig4x,ig4y,ig4z,igp,igmin,ispinor,spad,outofbox
 !arrays
  integer :: g2mg1(3)
 
@@ -137,11 +136,9 @@ subroutine calc_coh(nspinor,nsig_ab,nfftot,ngfft,npwc,gvec,wfg2_jk,epsm1q_o,vc_s
  if (outofbox/=0) then
    enough=enough+1
    if (enough<=50) then
-     write(msg,'(a,i5)')' Number of G1-G2 pairs outside the G-sphere for Wfns = ',outofbox
-     MSG_WARNING(msg)
+     MSG_WARNING(sjoin(' Number of G1-G2 pairs outside the G-sphere for Wfns:', itoa(outofbox)))
      if (enough==50) then
-       write(msg,'(a)')' ========== Stop writing Warnings =========='
-       call wrtout(std_out,msg,'COLL')
+       call wrtout(std_out,' ========== Stop writing Warnings ==========')
      end if
    end if
  end if
@@ -200,10 +197,6 @@ end subroutine calc_coh
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
 subroutine calc_coh_comp(iqibz,i_sz,same_band,nspinor,nsig_ab,ediff,npwc,gvec,&
 &  ngfft,nfftot,wfg2_jk,vc_sqrt,botsq,otq,sigcohme)
 
@@ -211,7 +204,8 @@ subroutine calc_coh_comp(iqibz,i_sz,same_band,nspinor,nsig_ab,ediff,npwc,gvec,&
  use m_profiling_abi
  use m_errors
 
- use m_gwdefs, only : czero_gw
+ use m_fstrings,  only : sjoin, itoa
+ use m_gwdefs,    only : czero_gw
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -237,9 +231,7 @@ subroutine calc_coh_comp(iqibz,i_sz,same_band,nspinor,nsig_ab,ediff,npwc,gvec,&
 !Local variables-------------------------------
 !scalars
  integer,save :: enough=0
- integer :: ig,ig4,ig4x,ig4y,ig4z,igp,igmin,ispinor,ngfft1,ngfft2,ngfft3
- integer :: spad,outofbox
- character(len=500) :: msg
+ integer :: ig,ig4,ig4x,ig4y,ig4z,igp,igmin,ispinor,ngfft1,ngfft2,ngfft3,spad,outofbox
 !arrays
  integer :: g2mg1(3)
 
@@ -258,10 +250,8 @@ subroutine calc_coh_comp(iqibz,i_sz,same_band,nspinor,nsig_ab,ediff,npwc,gvec,&
  !  diagonal in spin-space and only diagonal matrix elements have to be calculated.
  ! MG  TODO wfg2_jk should be calculated on an augmented FFT box to avoid spurious wrapping of G1-G2.
  !
- ngfft1 =ngfft(1)
- ngfft2 =ngfft(2)
- ngfft3 =ngfft(3)
- sigcohme(:)=czero_gw
+ ngfft1 = ngfft(1); ngfft2 = ngfft(2); ngfft3 = ngfft(3)
+ sigcohme(:) = czero_gw
 
  do ispinor=1,nspinor
   spad=(ispinor-1)*nfftot
@@ -294,11 +284,9 @@ subroutine calc_coh_comp(iqibz,i_sz,same_band,nspinor,nsig_ab,ediff,npwc,gvec,&
  if (outofbox/=0) then
    enough=enough+1
    if (enough<=50) then
-     write(msg,'(a,i5)')' Number of G1-G2 pairs outside the G-sphere for Wfns = ',outofbox
-     MSG_WARNING(msg)
+     MSG_WARNING(sjoin('Number of G1-G2 pairs outside the G-sphere for Wfns: ',itoa(outofbox)))
      if (enough==50) then
-       write(msg,'(a)')' ========== Stop writing Warnings =========='
-       call wrtout(std_out,msg,'COLL')
+       call wrtout(std_out,' ========== Stop writing Warnings ==========')
      end if
    end if
  end if

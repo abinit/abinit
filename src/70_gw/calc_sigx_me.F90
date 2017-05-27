@@ -237,7 +237,7 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
  jk_bz = Sigp%kptgw2bz(ikcalc)
  call get_BZ_item(Kmesh,jk_bz,kgw,jk_ibz,isym_kgw,jik,ph_mkgwt)
 
- ! TODO: the new version based of get_uug won't suppporte kptgw vectors that are not in
+ ! TODO: the new version based of get_uug won't support kptgw vectors that are not in
  ! the IBZ since one should perform the rotation before entering the band loop
  ! In the old version, the rotation was done in rho_tw_g
  !ABI_CHECK(jik==1,"jik!=1")
@@ -333,9 +333,9 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
  ! * Note the size MAX(npwx, Sigp%npwc).
  ABI_MALLOC(igfftxg0, (Gsph_x%ng))
  !
- ! === Precalculate the FFT index of $ R^{-1}(r-\tau) $ ===
- ! * S=\transpose R^{-1} and k_BZ = S k_IBZ
- ! * irottb is the FFT index of $R^{-1} (r-\tau)$ used to symmetrize u_Sk.
+ ! Precalculate the FFT index of $ R^{-1}(r-\tau)$
+ ! S = \transpose R^{-1} and k_BZ = S k_IBZ
+ ! irottb is the FFT index of $R^{-1} (r-\tau)$ used to symmetrize u_Sk.
  gwx_nfftot = PRODUCT(gwx_ngfft(1:3))
  ABI_MALLOC(irottb,(gwx_nfftot,Cryst%nsym))
  call rotate_FFT_mesh(Cryst%nsym,Cryst%symrel,Cryst%tnons,gwx_ngfft,irottb,iscompatibleFFT)
@@ -519,8 +519,8 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
      end if
 
      ! Get Fourier components of the Coulomb interaction in the BZ
-     ! * In 3D systems, neglecting umklapp,  vc(Sq,sG)=vc(q,G)=4pi/|q+G|
-     ! * The same relation holds for 0-D systems, but not in 1-D or 2D systems. It depends on S.
+     ! In 3D systems, neglecting umklapp,  vc(Sq,sG)=vc(q,G)=4pi/|q+G|
+     ! The same relation holds for 0-D systems, but not in 1-D or 2D systems. It depends on S.
      do ig=1,npwx
        ig_rot = Gsph_x%rottb(ig,itim_q,isym_q)
        vc_sqrt_qbz(ig_rot)=Vcp%vc_sqrt(ig,iq_ibz)
@@ -605,31 +605,6 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
              !rhotwg_ki(1,jb) = czero_gw ! DEBUG
            else
              npw_k  = Wfd%npwarr(ik_ibz)
-#if 0
-             ! TODO Recheck this, moreover it wont work if k-centered G-spheres are used.!
-             cg_sum => Wfd%Wave(ib_sum,ik_ibz,spin)%ug
-             cg_jb  => Wfd%Wave(jb,jk_ibz,spin)%ug
-             ctmp = xdotc(Wfd%nspinor*npw_k, cg_sum, 1, cg_jb, 1)
-             ovlp(1) = REAL(ctmp); ovlp(2) = AIMAG(ctmp)
-
-             if (Psps%usepaw==1) then
-               i2=(2*jb-1)
-               ovlp = ovlp + paw_overlap(Cprj_ksum,Cprj_kgw(:,i2:i2+1),Cryst%typat,Pawtab)
-             end if
-             !ovlp(2) = -ovlp(1); if (ib_sum==jb) ovlp(2)=cone_gw-ovlp(1)
-             if (ib_sum==jb) then
-               norm=DBLE(ovlp(1)+ovlp(2))
-               ovlp(1)=DBLE(ovlp(1)/norm)
-               ovlp(2)=DBLE(ovlp(2)/norm)
-             else
-               scprod=ovlp(1)+ovlp(2)
-               ovlp(1)=ovlp(1)-scprod*half
-               ovlp(2)=ovlp(2)-scprod*half
-             end if
-             rhotwg_ki(1, jb) = CMPLX(SQRT(Vcp%i_sz),0.0_gwp)*ovlp(1)
-             rhotwg_ki(npwx+1, jb) = CMPLX(SQRT(Vcp%i_sz),0.0_gwp)*ovlp(2)
-#else
-             ! DEBUG
              rhotwg_ki(1, jb) = zero; rhotwg_ki(npwx+1, jb) = zero
              if (ib_sum == jb) then
                cg_sum => Wfd%Wave(ib_sum,ik_ibz,spin)%ug
@@ -642,7 +617,7 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
                !rhotwg_ki(npwx+1,jb) = CMPLX(SQRT(Vcp%i_sz),0.0_gwp) * sqrt(half)
              end if
              !rhotwg_ki(1, jb) = zero; rhotwg_ki(npwx+1, jb) = zero
-#endif
+             ! PAW is missing
            end if
          end if
        end do !jb Got all matrix elements from minbnd up to maxbnd.

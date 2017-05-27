@@ -162,11 +162,9 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,gsqcutf_eff,nfftf,ngfftf,&
  type(MPI_type) :: MPI_enreg_seq
  type(Dataset_type) :: Dtset_dummy
 !arrays
- integer,parameter :: spinor_idxs(2,4)=RESHAPE((/1,1,2,2,1,2,2,1/),(/2,4/))
+ integer,parameter :: spinor_idxs(2,4)=RESHAPE([1,1,2,2,1,2,2,1], [2,4])
  integer :: got(Wfd%nproc)
- integer,allocatable :: kcalc2ibz(:)
- integer,allocatable :: dimlmn(:)
- integer,allocatable :: bbp_ks_distrb(:,:,:,:)
+ integer,allocatable :: kcalc2ibz(:),dimlmn(:),bbp_ks_distrb(:,:,:,:)
  integer,ABI_CONTIGUOUS pointer :: kg_k(:,:)
  real(dp) :: tmp_xc(2,Wfd%nspinor**2),tmp_xcval(2,Wfd%nspinor**2)
  real(dp) :: tmp_H(2,Wfd%nspinor**2),tmp_U(2,Wfd%nspinor**2)
@@ -175,9 +173,7 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,gsqcutf_eff,nfftf,ngfftf,&
  real(dp),allocatable :: kxc_(:,:),vh_(:),xccc3d_(:),vxc_val(:,:),vxc_val_hybrid(:,:)
  real(dp),allocatable :: kinpw(:),veffh0(:,:)
  complex(dpc) :: tmp(3)
- complex(gwpc),ABI_CONTIGUOUS pointer :: ur1_up(:),ur1_dwn(:)
- complex(gwpc),ABI_CONTIGUOUS pointer :: ur2_up(:),ur2_dwn(:)
- complex(gwpc),ABI_CONTIGUOUS pointer :: cg1(:),cg2(:)
+ complex(gwpc),ABI_CONTIGUOUS pointer :: ur1_up(:),ur1_dwn(:),ur2_up(:),ur2_dwn(:),cg1(:),cg2(:)
  complex(gwpc),target,allocatable :: ur1(:),ur2(:)
  complex(dpc),allocatable :: vxcab(:),vxcab_val(:),vxcab_val_hybrid(:),u1cjg_u2dpc(:),kinwf2(:),veffh0_ab(:)
  logical,allocatable :: bbp_mask(:,:)
@@ -201,28 +197,25 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,gsqcutf_eff,nfftf,ngfftf,&
  master = Wfd%master
  nprocs = Wfd%nproc
 
- ! * Fake MPI_type for sequential part
+ ! Fake MPI_type for sequential part
  call initmpi_seq(MPI_enreg_seq)
  call init_distribfft_seq(MPI_enreg_seq%distribfft,'f',ngfftf(2),ngfftf(3),'all')
 
- nspinor=Wfd%nspinor
- nsppol =Wfd%nsppol
- nspden =Wfd%nspden
- if (nspinor == 1) MSG_WARNING("Remember to ADD SO")
- !
- !    TODO not used for the time being but it should be a standard input of the routine.
+ nspinor=Wfd%nspinor; nsppol =Wfd%nsppol; nspden =Wfd%nspden
+ if (nspinor == 2) MSG_WARNING("Remember to ADD SO")
+
+ ! TODO not used for the time being but it should be a standard input of the routine.
  !  bbks_mask(Wfd%mband,Wfd%mband,Wfd%nkibz,Wfd%nsppol)=Logical mask used to select
- !    the matrix elements to be calculated.
+ !  the matrix elements to be calculated.
  ABI_MALLOC(kcalc2ibz,(Wfd%nkibz))
  kcalc2ibz=0
- !
- ! === Index in the IBZ of the GW k-points ===
- ! * Only these points will be considered.
+
+ ! Index in the IBZ of the GW k-points.
+ ! Only these points will be considered.
  nk_calc=0
  do ik_ibz=1,Wfd%nkibz
    if ( ALL(kstab(1,ik_ibz,:)/=0) .and. ALL(kstab(2,ik_ibz,:)/=0) ) then
-     nk_calc=nk_calc+1
-     kcalc2ibz(nk_calc) = ik_ibz
+     nk_calc=nk_calc+1; kcalc2ibz(nk_calc) = ik_ibz
    end if
  end do
 
@@ -231,21 +224,17 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,gsqcutf_eff,nfftf,ngfftf,&
  if (Mflags%has_lexexch==1) then
    MSG_ERROR("Local EXX not coded!")
  end if
- !
- ! === Evaluate $v_\xc$ using only the valence charge ====
- msg = ' calc_vhxc_braket : calculating v_xc[n_val] (excluding non-linear core corrections) '
- call wrtout(std_out,msg,'COLL')
+
+ ! Evaluate $v_\xc$ using only the valence charge.
+ call wrtout(std_out," calc_vhxc_braket : calculating v_xc[n_val] (excluding non-linear core corrections)")
 
  do isppol=1,nsppol
-   write(msg,'(a,i2,a,e16.6)')&
-&    ' For spin ',isppol,' Min density rhor = ',MINVAL(rhor(:,isppol))
+   write(msg,'(a,i2,a,e16.6)')' For spin ',isppol,' Min density rhor = ',MINVAL(rhor(:,isppol))
    call wrtout(std_out,msg,'COLL')
    if (Wfd%usepaw==1) then
-     write(msg,'(a,i2,a,e16.6)')&
-&      ' For spin ',isppol,' Min density nhat = ',MINVAL(nhat(:,isppol))
+     write(msg,'(a,i2,a,e16.6)')' For spin ',isppol,' Min density nhat = ',MINVAL(nhat(:,isppol))
      call wrtout(std_out,msg,'COLL')
-     write(msg,'(a,i2,a,e16.6)')&
-&      ' For spin ',isppol,' Min density trho-nhat = ',MINVAL(rhor(:,isppol)-nhat(:,isppol))
+     write(msg,'(a,i2,a,e16.6)')' For spin ',isppol,' Min density trho-nhat = ',MINVAL(rhor(:,isppol)-nhat(:,isppol))
      call wrtout(std_out,msg,'COLL')
      write(msg,'(a,i2)')' using usexcnhat = ',usexcnhat
      call wrtout(std_out,msg,'COLL')
@@ -267,17 +256,15 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,gsqcutf_eff,nfftf,ngfftf,&
 & nhat,Wfd%usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,nspden,n3xccc_,option,rhog,rhor,Cryst%rprimd,&
 & strsxc,usexcnhat,vh_,vxc_val,vxcval_avg,xccc3d_,taug=taug,taur=taur)
 
- !
  ! FABIEN's development
  ! Hybrid functional treatment
  if(Mflags%has_vxcval_hybrid==1) then
    if(libxc_functionals_check()) then
 
      call wrtout(std_out,' Hybrid functional xc potential is being set')
-     !
      ! copy the Dtset into the temporary Dtset_dummy
      call dtset_copy(Dtset_dummy,Dtset)
-     !
+
      ! then override the variables: xclevel, ixc
      Dtset_dummy%xclevel=2
      if(Dtset%gwcalctyp<200) then
@@ -287,7 +274,7 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,gsqcutf_eff,nfftf,ngfftf,&
      else ! Dtset%gwcalctyp > 300
        Dtset_dummy%ixc=-402         ! B3LYP
      end if
-     !
+
      ! reinitialize the libxc module with the overriden values
      if(Dtset%ixc<0) then
        call libxc_functionals_end()
@@ -313,7 +300,7 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,gsqcutf_eff,nfftf,ngfftf,&
 &     strsxc,usexcnhat,vh_,vxc_val_hybrid,vxcval_hybrid_avg,xccc3d_)
 
      call dtset_free(Dtset_dummy)
-     !
+
      ! Fix the libxc module with the original settings
      call libxc_functionals_end()
      if(Dtset%ixc<0) then
@@ -334,23 +321,23 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,gsqcutf_eff,nfftf,ngfftf,&
 &  '<V_xc[n_val]> = ',vxcval_avg,' [Ha]. '
  call wrtout(std_out,msg,'COLL')
 
- ! === If PAW and qp-SCGW then update Paw_ij and calculate the matrix elements ===
- ! * We cannot simply rely on gwcalctyp because I need KS vxc in sigma.
+ ! If PAW and qp-SCGW then update Paw_ij and calculate the matrix elements ===
+ ! We cannot simply rely on gwcalctyp because I need KS vxc in sigma.
  if (Wfd%usepaw==1.and.Mflags%has_hbare==1) then
    ABI_CHECK(Mflags%only_diago==0,"Wrong only_diago")
 
    call paw_mknewh0(Cryst%natom,nsppol,nspden,nfftf,Dtset%pawspnorb,Dtset%pawprtvol,Cryst,&
 &    Pawtab,Paw_an,Paw_ij,Pawang,Pawfgrtab,vxc,vxc_val,vtrial)
 
-   ! * Effective potential of the bare Hamiltonian: valence term is subtracted.
+   ! Effective potential of the bare Hamiltonian: valence term is subtracted.
    ABI_MALLOC(veffh0,(nfftf,nspden))
    veffh0=vtrial-vxc_val
    !veffh0=vtrial !this is to retrieve the KS Hamiltonian
  end if
 
- ! === Setup of the hermitian operator vxcab ===
- ! * if nspden==4 vxc contains (v^11, v^22, Re[V^12], Im[V^12].
- ! * Cannot use directly Re and Im since we also need off-diagonal elements.
+ ! Setup of the hermitian operator vxcab ===
+ ! if nspden==4 vxc contains (v^11, v^22, Re[V^12], Im[V^12].
+ ! Cannot use directly Re and Im since we also need off-diagonal elements.
  if (nspinor==2) then
    ABI_MALLOC(vxcab,(nfftf))
    ABI_MALLOC(vxcab_val,(nfftf))
@@ -377,9 +364,8 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,gsqcutf_eff,nfftf,ngfftf,&
  ABI_MALLOC(u1cjg_u2dpc,(nfftf))
 
  ! === Create distribution table for tasks ===
- ! * This section is parallelized inside MPI_COMM_WORLD
- !   as all processors are calling the routine with all GW wavefunctions
-
+ ! This section is parallelized inside MPI_COMM_WORLD
+ ! as all processors are calling the routine with all GW wavefunctions
  ! TODO the table can be calculated at each (k,s) to save some memory.
  got=0; my_nmels=0
  ABI_MALLOC(bbp_ks_distrb,(Wfd%mband,Wfd%mband,nk_calc,nsppol))
@@ -406,7 +392,7 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,gsqcutf_eff,nfftf,ngfftf,&
 
  write(msg,'(a,i0,a)')" Will calculate ",my_nmels," <b,k,s|O|b',k,s> matrix elements in calc_vhxc_me."
  call wrtout(std_out,msg,'PERS')
- !
+
  ! =====================================
  ! ==== Loop over required k-points ====
  ! =====================================
@@ -414,7 +400,6 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,gsqcutf_eff,nfftf,ngfftf,&
 
  do is=1,nsppol
    if (ALL(bbp_ks_distrb(:,:,:,is)/=rank)) CYCLE
-
    do ikc=1,nk_calc
      if (ALL(bbp_ks_distrb(:,:,ikc,is)/=rank)) CYCLE
 
@@ -454,11 +439,10 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,gsqcutf_eff,nfftf,ngfftf,&
        do ib=b_start,jb
 
          if (bbp_ks_distrb(ib,jb,ikc,is)/=rank) CYCLE
-         ! * Off-diagonal elements only for QPSCGW.
+         ! Off-diagonal elements only for QPSCGW.
          if (Mflags%only_diago==1.and.ib/=jb) CYCLE
 
          call wfd_get_ur(Wfd,ib,ik_ibz,is,ur1)
-
          u1cjg_u2dpc(1:nfftf)=CONJG(ur1(1:nfftf))*ur2(1:nfftf)
 
          if (Mflags%has_vxc==1) &
@@ -556,18 +540,17 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,gsqcutf_eff,nfftf,ngfftf,&
      ABI_FREE(veffh0_ab)
    end if
  end if
- !
+
  ! ====================================
  ! ===== Additional terms for PAW =====
  ! ====================================
  if (Wfd%usepaw==1) then
-
-   ! * Tests if needed pointers in Paw_ij are allocated.
+   ! Tests if needed pointers in Paw_ij are allocated.
    ltest=(allocated(Paw_ij(1)%dijxc).and.allocated(Paw_ij(1)%dijxc_hat).and.allocated(Paw_ij(1)%dijxc_val))
    ABI_CHECK(ltest,"dijxc, dijxc_hat or dijxc_val not allocated")
    ABI_CHECK(nspinor == 1, "PAW with nspinor not tested")
 
-   !* For LDA+U
+   ! For LDA+U
    do iat=1,Cryst%natom
      itypat=Cryst%typat(iat)
      if (Pawtab(itypat)%usepawu>0) then
@@ -609,7 +592,7 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,gsqcutf_eff,nfftf,ngfftf,&
    do is=1,nsppol
      if (ALL(bbp_ks_distrb(:,:,:,is)/=rank)) CYCLE
 
-     ! === Loop over required k-points ===
+     ! Loop over required k-points
      do ikc=1,nk_calc
        if (ALL(bbp_ks_distrb(:,:,ikc,is)/=rank)) CYCLE
        ik_ibz=kcalc2ibz(ikc)
@@ -620,8 +603,8 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,gsqcutf_eff,nfftf,ngfftf,&
        do jb=b_start,b_stop
          if (ALL(bbp_ks_distrb(:,jb,ikc,is)/=rank)) CYCLE
 
-         ! === Load projected wavefunctions for this k-point, spin and band ===
-         ! * Cprj are unsorted, full correspondence with xred. See ctocprj.F90!!
+         ! Load projected wavefunctions for this k-point, spin and band ===
+         ! Cprj are unsorted, full correspondence with xred. See ctocprj.F90!!
          call wfd_get_cprj(Wfd,jb,ik_ibz,is,Cryst,Cprj_b2ks,sorted=.FALSE.)
 
          !do ib=b1,jb ! Upper triangle
@@ -636,12 +619,7 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,gsqcutf_eff,nfftf,ngfftf,&
            ! === Get onsite matrix elements summing over atoms and channels ===
            ! * Spin is external and fixed (1,2) if collinear.
            ! * if noncollinear loop internally over the four components ab.
-           tmp_xc   =zero
-           tmp_xcval=zero
-           tmp_H    =zero
-           tmp_U    =zero
-           tmp_h0ij =zero
-           tmp_sigcx=zero
+           tmp_xc = zero; tmp_xcval = zero; tmp_H = zero; tmp_U = zero; tmp_h0ij = zero; tmp_sigcx = zero
 
            do iat=1,Cryst%natom
              itypat   =Cryst%typat(iat)
@@ -657,11 +635,10 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,gsqcutf_eff,nfftf,ngfftf,&
                  ! should check the spin-orbit case!
                  fact=one; if (ilmn==jlmn) fact=half
 
-                 ! === Loop over four components if nspinor==2 ===
-                 ! * If collinear nsploop==1
+                 ! Loop over four components if nspinor==2 ===
+                 ! If collinear nsploop==1
                  do iab=1,nsploop
-                   isp1=spinor_idxs(1,iab)
-                   isp2=spinor_idxs(2,iab)
+                   isp1=spinor_idxs(1,iab); isp2=spinor_idxs(2,iab)
 
                    re_p=  Cprj_b1ks(iat,isp1)%cp(1,ilmn) * Cprj_b2ks(iat,isp2)%cp(1,jlmn) &
 &                        +Cprj_b1ks(iat,isp1)%cp(2,ilmn) * Cprj_b2ks(iat,isp2)%cp(2,jlmn) &
@@ -750,7 +727,8 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,gsqcutf_eff,nfftf,ngfftf,&
                      ! TODO "ADD LDA+U and SO"
                      ! check this part
                      if (Mflags%has_vu==1) then
-                       if (Pawtab(itypat)%usepawu>0) then ! * Accumulate the U term of the PAW Hamiltonian (only onsite AE contribution)
+                       if (Pawtab(itypat)%usepawu>0) then
+                         ! Accumulate the U term of the PAW Hamiltonian (only onsite AE contribution)
                          dijU(1)=Paw_ij(iat)%dijU(klmn1  ,iab)
                          dijU(2)=Paw_ij(iat)%dijU(klmn1+1,iab)
                          tmp_U(1,iab) = tmp_U(1,iab) + (dijU(1)*re_p - dijU(2)*im_p)*fact
@@ -766,7 +744,7 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,gsqcutf_eff,nfftf,ngfftf,&
                end do !ilmn
              end do !jlmn
            end do !iat
-           !
+
            ! ========================================
            ! ==== Add to plane wave contribution ====
            ! ========================================
@@ -829,11 +807,11 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,gsqcutf_eff,nfftf,ngfftf,&
 
  ABI_FREE(bbp_ks_distrb)
 
- ! === Sum up contributions on each node ===
- ! * Set the corresponding has_* flags to 2.
+ ! Sum up contributions on each node ===
+ ! Set the corresponding has_* flags to 2.
  call melements_mpisum(Mels,comm)
 
- ! * Reconstruct lower triangle.
+ ! Reconstruct lower triangle.
  call melements_herm(Mels)
 
  ABI_FREE(kcalc2ibz)

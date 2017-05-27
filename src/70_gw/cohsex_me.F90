@@ -189,7 +189,6 @@ subroutine cohsex_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,Cryst,QP_BSt,Si
  real(dp) :: ksum(3),kgw(3),kgw_m_ksum(3),q0(3),tsec(2),qbz(3),spinrot_kbz(4),spinrot_kgw(4)
  real(dp),ABI_CONTIGUOUS pointer :: qp_ene(:,:,:),qp_occ(:,:,:)
  complex(gwpc) :: sigcohme(Sigp%nsig_ab)
- complex(dpc) :: ovlp(2)
  complex(gwpc),allocatable :: vc_sqrt_qbz(:),rhotwg(:),rhotwgp(:),sigsex(:)
  complex(gwpc),allocatable :: epsm1_qbz(:,:,:)
  complex(gwpc),allocatable :: sigc_ket(:,:)
@@ -593,45 +592,19 @@ subroutine cohsex_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,Cryst,QP_BSt,Si
              if (ib==jb) rhotwg_ki(1, jb)=CMPLX(SQRT(Vcp%i_sz),0.0_gwp)
            else
              npw_k = Wfd%npwarr(ik_ibz)
-#if 0
-             ! TODO Recheck this, moreover it wont work if k-centered G-spheres are used.!
-             cg_sum  => Wfd%Wave(ib,ik_ibz,spin)%ug
-             cg_jb   => Wfd%Wave(jb,jk_ibz,spin)%ug
-             ctmp = xdotc(npw_k*nspinor, cg_sum, 1, cg_jb, 1)
-             ovlp(1) = REAL(ctmp); ovlp(2) = AIMAG(ctmp)
-
-             if (Psps%usepaw==1) then
-               i2=(2*jb-1)
-               ovlp = ovlp + paw_overlap(Cprj_ksum,Cprj_kgw(:,i2:i2+1),Cryst%typat,Pawtab,&
-&                                        spinor_comm=Wfd%MPI_enreg%comm_spinor)
-             end if
-             !ovlp(2) = -ovlp(1); if (ib==jb) ovlp(2)=cone_gw-ovlp(1)
-             if (ib==jb) then
-               norm=DBLE(ovlp(1)+ovlp(2))
-               ovlp(1)=DBLE(ovlp(1)/norm)
-               ovlp(2)=DBLE(ovlp(2)/norm)
-             else
-               scprod=ovlp(1)+ovlp(2)
-               ovlp(1)=ovlp(1)-scprod*half
-               ovlp(2)=ovlp(2)-scprod*half
-             end if
-             rhotwg_ki(1     ,jb) = CMPLX(SQRT(Vcp%i_sz),0.0_gwp)*ovlp(1)
-             rhotwg_ki(npwc+1,jb) = CMPLX(SQRT(Vcp%i_sz),0.0_gwp)*ovlp(2)
-#else
-             ! DEBUG
              rhotwg_ki(1, jb) = zero; rhotwg_ki(npwc+1, jb) = zero
              if (ib == jb) then
                cg_sum => Wfd%Wave(ib, ik_ibz, spin)%ug
                cg_jb  => Wfd%Wave(jb, jk_ibz, spin)%ug
                ctmp = xdotc(npw_k, cg_sum(1:), 1, cg_jb(1:), 1)
-               rhotwg_ki(1,jb)=CMPLX(SQRT(Vcp%i_sz),0.0_gwp) * real(ctmp)
+               rhotwg_ki(1,jb) = CMPLX(SQRT(Vcp%i_sz),0.0_gwp) * real(ctmp)
                ctmp = xdotc(npw_k, cg_sum(npw_k+1:), 1, cg_jb(npw_k+1:), 1)
                rhotwg_ki(npwc+1,jb) = CMPLX(SQRT(Vcp%i_sz),0.0_gwp) * real(ctmp)
+               ! PAW is missing
 
                !rhotwg_ki(1,jb)=CMPLX(SQRT(Vcp%i_sz),0.0_gwp) * sqrt(half)
                !rhotwg_ki(npwc+1,jb) = CMPLX(SQRT(Vcp%i_sz),0.0_gwp) * sqrt(half)
              end if
-#endif
            end if
          end if
        end do !jb  Got all matrix elements from minbnd up to maxbnd.
