@@ -650,9 +650,6 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
        if (dt%gwcomp /= 0) then
          MSG_ERROR_NOSTOP("gwcomp /= 0 with nspinor 2 not implemented", ierr)
        end if
-       if (dt%nspden == 1) then
-         MSG_ERROR_NOSTOP("nspden 1 with screening or sigma not implemented", ierr)
-       end if
      end if ! nspinor 2
 
      ! Avoid wasting CPUs if nsppol==2.

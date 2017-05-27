@@ -101,14 +101,12 @@ subroutine wfd_mkrho(Wfd,Cryst,Psps,Kmesh,Bands,ngfftf,nfftf,rhor,&
 !scalars
  integer,parameter :: ndat1=1
  integer :: cplex,ib,ib_iter,ierr,ik,ir,is,n1,n2,n3,nfftotf
- integer :: alpha,nalpha,ipw!,ipwsp
- integer :: myoptcalc
+ integer :: alpha,nalpha,ipw,myoptcalc
  real(dp) :: kpt_cart,kg_k_cart,gp2pi1,gp2pi2,gp2pi3,cwftmp,bks_weight
  character(len=500) :: msg
 !arrays
  integer,allocatable :: irrzon(:,:,:)
- real(dp),allocatable :: phnons(:,:,:),rhog(:,:),rhor_down(:),rhor_mx(:),rhor_my(:)
- real(dp),allocatable :: cwavef(:,:)
+ real(dp),allocatable :: phnons(:,:,:),rhog(:,:),rhor_down(:),rhor_mx(:),rhor_my(:),cwavef(:,:)
  complex(dpc),allocatable :: wfr_x(:),wfr_y(:)
  complex(gwpc),allocatable :: gradug(:),work(:)
  complex(gwpc),allocatable,target :: wfr(:)
@@ -120,25 +118,20 @@ subroutine wfd_mkrho(Wfd,Cryst,Psps,Kmesh,Bands,ngfftf,nfftf,rhor,&
  DBG_ENTER("COLL")
 
  ! Consistency check.
- ABI_CHECK(Wfd%nsppol == Bands%nsppol, "mismatch in nspppol")
+ ABI_CHECK(Wfd%nsppol == Bands%nsppol, "Mismatch in nsppol")
 
  if (ANY(ngfftf(1:3) /= Wfd%ngfft(1:3))) call wfd_change_ngfft(Wfd,Cryst,Psps,ngfftf)
 
  ! Calculate IBZ contribution to the charge density.
- ABI_MALLOC(wfr,(nfftf*Wfd%nspinor))
+ ABI_MALLOC(wfr, (nfftf*Wfd%nspinor))
 
- if (Wfd%nspinor==2) then
+ if (wfd%nspden == 4) then
    ABI_MALLOC(wfr_x, (nfftf))
    ABI_MALLOC(wfr_y, (nfftf))
-   if (Wfd%nspden==4) then
-     ABI_MALLOC(rhor_down, (nfftf))
-     ABI_MALLOC(rhor_mx, (nfftf))
-     ABI_MALLOC(rhor_my, (nfftf))
-     rhor_down = zero; rhor_mx = zero; rhor_my = zero
-   else
-     !TODO
-     MSG_ERROR('nspden==1 and nspinor==2 not implemented')
-   end if
+   ABI_MALLOC(rhor_down, (nfftf))
+   ABI_MALLOC(rhor_mx, (nfftf))
+   ABI_MALLOC(rhor_my, (nfftf))
+   rhor_down = zero; rhor_mx = zero; rhor_my = zero
  end if
 
  ! Update the (b,k,s) distribution table.
@@ -196,11 +189,18 @@ subroutine wfd_mkrho(Wfd,Cryst,Psps,Kmesh,Bands,ngfftf,nfftf,rhor,&
 
 !$OMP PARALLEL DO
          do ir=1,nfftf
-           rhor(ir,is)=rhor(ir,is) + CONJG(cwavef1(ir))*cwavef1(ir)*bks_weight
+           rhor(ir,is) = rhor(ir,is) + CONJG(cwavef1(ir)) * cwavef1(ir) * bks_weight
          end do
          !call cplx_addtorho(n1,n2,n3,n4,n5,n6,ndat,weight_r,ur,rho)
 
-         if (Wfd%nspinor==2) then
+         if (wfd%nspinor == 2 .and. wfd%nspden == 1) then
+           cwavef2 => wfr(1+nfftf:2*nfftf)
+           do ir=1,nfftf
+             rhor(ir, 1) = rhor(ir, 1) + CONJG(cwavef2(ir)) * cwavef2(ir) * bks_weight
+           end do
+         end if
+
+         if (wfd%nspinor == 2 .and. wfd%nspden == 4) then
            cwavef2 => wfr(1+nfftf:2*nfftf)
            wfr_x(:) = cwavef1(:) + cwavef2(:)       ! $(\Psi^{1}+\Psi^{2})$
            wfr_y(:) = cwavef1(:) -j_dpc*cwavef2(:)  ! $(\Psi^{1}-i\Psi^{2})$
@@ -223,7 +223,7 @@ subroutine wfd_mkrho(Wfd,Cryst,Psps,Kmesh,Bands,ngfftf,nfftf,rhor,&
  select case (myoptcalc)
  case (0)
    ! density
-   if (wfd%nspinor == 2) then
+   if (wfd%nspden == 4) then
      rhor(:, 2) = rhor_mx
      rhor(:, 3) = rhor_my
      rhor(:, 4) = rhor_down
@@ -275,14 +275,12 @@ subroutine wfd_mkrho(Wfd,Cryst,Psps,Kmesh,Bands,ngfftf,nfftf,rhor,&
 
  ABI_FREE(wfr)
 
- if (Wfd%nspinor==2) then
+ if (Wfd%nspden == 4) then
    ABI_FREE(wfr_x)
    ABI_FREE(wfr_y)
-   if (Wfd%nspden==4)  then
-     ABI_FREE(rhor_down)
-     ABI_FREE(rhor_mx)
-     ABI_FREE(rhor_my)
-   end if
+   ABI_FREE(rhor_down)
+   ABI_FREE(rhor_mx)
+   ABI_FREE(rhor_my)
  end if
 
  DBG_EXIT("COLL")

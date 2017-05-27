@@ -152,8 +152,7 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,gsqcutf_eff,nfftf,ngfftf,&
  integer :: iat,ikc,ik_ibz,ib,jb,is,b_start,b_stop
  integer :: itypat,lmn_size,j0lmn,jlmn,ilmn,klmn,klmn1,lmn2_size_max
  integer :: isppol,izero,cplex_dij,npw_k
- integer :: nspinor,nsppol,nspden,nk_calc
- integer :: rank,comm,master,nprocs
+ integer :: nspinor,nsppol,nspden,nk_calc,rank
  integer :: isp1,isp2,iab,nsploop,nkxc,option,n3xccc_,nk3xc,my_nbbp,my_nmels
  real(dp) :: nfftfm1,fact,DijH,enxc_val,enxc_hybrid_val,vxcval_avg,vxcval_hybrid_avg,h0dij,vxc1,vxc1_val,re_p,im_p,dijsigcx
  real(dp) :: omega ! HSE Fock exchange screening parameter
@@ -188,16 +187,10 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,gsqcutf_eff,nfftf,ngfftf,&
  ! Usually FFT meshes for wavefunctions and potentials are not equal. Two approaches are possible:
  ! Either we Fourier interpolate potentials on the coarse WF mesh or we FFT the wfs on the dense mesh.
  ! The later approach is used, more CPU demanding but more accurate.
- if ( ANY(ngfftf(1:3) /= Wfd%ngfft(1:3)) ) then
-   call wfd_change_ngfft(Wfd,Cryst,Psps,ngfftf)
- end if
-
- comm   = Wfd%comm
- rank   = Wfd%my_rank
- master = Wfd%master
- nprocs = Wfd%nproc
+ if ( ANY(ngfftf(1:3) /= Wfd%ngfft(1:3)) ) call wfd_change_ngfft(Wfd,Cryst,Psps,ngfftf)
 
  ! Fake MPI_type for sequential part
+ rank = Wfd%my_rank
  call initmpi_seq(MPI_enreg_seq)
  call init_distribfft_seq(MPI_enreg_seq%distribfft,'f',ngfftf(2),ngfftf(3),'all')
 
@@ -316,9 +309,7 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,gsqcutf_eff,nfftf,ngfftf,&
  ABI_FREE(vh_)
  ABI_FREE(kxc_)
 
- write(msg,'(a,f8.4,2a,f8.4,a)')&
-&  ' E_xc[n_val]  = ',enxc_val,  ' [Ha]. ',&
-&  '<V_xc[n_val]> = ',vxcval_avg,' [Ha]. '
+ write(msg,'(a,f8.4,2a,f8.4,a)')' E_xc[n_val]  = ',enxc_val,  ' [Ha]. ','<V_xc[n_val]> = ',vxcval_avg,' [Ha]. '
  call wrtout(std_out,msg,'COLL')
 
  ! If PAW and qp-SCGW then update Paw_ij and calculate the matrix elements ===
@@ -338,12 +329,12 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,gsqcutf_eff,nfftf,ngfftf,&
  ! Setup of the hermitian operator vxcab ===
  ! if nspden==4 vxc contains (v^11, v^22, Re[V^12], Im[V^12].
  ! Cannot use directly Re and Im since we also need off-diagonal elements.
- if (nspinor==2) then
-   ABI_MALLOC(vxcab,(nfftf))
-   ABI_MALLOC(vxcab_val,(nfftf))
-   vxcab    (:) = DCMPLX(vxc    (:,3),vxc    (:,4))
-   vxcab_val(:) = DCMPLX(vxc_val(:,3),vxc_val(:,4))
-   if(Mflags%has_vxcval_hybrid==1) then
+ if (wfd%nspden == 4) then
+   ABI_MALLOC(vxcab, (nfftf))
+   ABI_MALLOC(vxcab_val, (nfftf))
+   vxcab    (:) = DCMPLX(vxc    (:,3), vxc    (:,4))
+   vxcab_val(:) = DCMPLX(vxc_val(:,3), vxc_val(:,4))
+   if (Mflags%has_vxcval_hybrid==1) then
      ABI_MALLOC(vxcab_val_hybrid,(nfftf))
      vxcab_val_hybrid(:)=DCMPLX(vxc_val_hybrid(:,3),vxc_val_hybrid(:,4))
    end if
@@ -352,19 +343,13 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,gsqcutf_eff,nfftf,ngfftf,&
      veffh0_ab(:)=DCMPLX(veffh0(:,3),veffh0(:,4))
    end if
  end if
- !
- ! === Allocate matrix elements of vxc[n], vxc_val[n_v], vH and vU ===
- ! * hbareme contains the matrix element of the new bare Hamiltonian h0.
- !if (Mflags%has_hbare==1) then
- !  allocate(kinpw(Wfd%npwwfn),kinwf2(Wfd%npwwfn*nspinor))
- !end if
 
- ABI_MALLOC(ur1,(nspinor*nfftf))
- ABI_MALLOC(ur2,(nspinor*nfftf))
- ABI_MALLOC(u1cjg_u2dpc,(nfftf))
+ ABI_MALLOC(ur1, (nfftf * nspinor))
+ ABI_MALLOC(ur2, (nfftf * nspinor))
+ ABI_MALLOC(u1cjg_u2dpc, (nfftf * nspinor))
 
- ! === Create distribution table for tasks ===
- ! This section is parallelized inside MPI_COMM_WORLD
+ ! Create distribution table for tasks ===
+ ! This section is parallelized inside wfd%comm
  ! as all processors are calling the routine with all GW wavefunctions
  ! TODO the table can be calculated at each (k,s) to save some memory.
  got=0; my_nmels=0
@@ -403,11 +388,11 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,gsqcutf_eff,nfftf,ngfftf,&
    do ikc=1,nk_calc
      if (ALL(bbp_ks_distrb(:,:,ikc,is)/=rank)) CYCLE
 
-     ik_ibz=kcalc2ibz(ikc)
-     b_start=kstab(1,ik_ibz,is)
-     b_stop =kstab(2,ik_ibz,is)
+     ik_ibz = kcalc2ibz(ikc)
+     b_start = kstab(1,ik_ibz,is)
+     b_stop  = kstab(2,ik_ibz,is)
      npw_k = Wfd%Kdata(ik_ibz)%npw
-     kpt=Wfd%kibz(:,ik_ibz)
+     kpt = Wfd%kibz(:,ik_ibz)
      kg_k => Wfd%kdata(ik_ibz)%kg_k
 
      ! Calculate |k+G|^2 needed by hbareme
@@ -416,7 +401,6 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,gsqcutf_eff,nfftf,ngfftf,&
      if (Mflags%has_hbare==1) then
        ABI_MALLOC(kinpw,(npw_k))
        ABI_MALLOC(kinwf2,(npw_k*nspinor))
-!       call mkkin(Dtset%ecutwfn+0.1_dp,Dtset%ecutsm,Dtset%effmass,Cryst%gmet,kg_k,kinpw,kpt,Wfd%npwwfn)
        call mkkin(Dtset%ecutwfn+0.1_dp,Dtset%ecutsm,Dtset%effmass,Cryst%gmet,kg_k,kinpw,kpt,Wfd%npwwfn,0,0)
        where (kinpw>HUGE(zero)*1.d-11)
          kinpw=zero
@@ -437,34 +421,46 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,gsqcutf_eff,nfftf,ngfftf,&
 
        !do ib=b1,jb ! Upper triangle
        do ib=b_start,jb
-
          if (bbp_ks_distrb(ib,jb,ikc,is)/=rank) CYCLE
          ! Off-diagonal elements only for QPSCGW.
          if (Mflags%only_diago==1.and.ib/=jb) CYCLE
 
          call wfd_get_ur(Wfd,ib,ik_ibz,is,ur1)
-         u1cjg_u2dpc(1:nfftf)=CONJG(ur1(1:nfftf))*ur2(1:nfftf)
+         u1cjg_u2dpc(:) = CONJG(ur1) *ur2
 
-         if (Mflags%has_vxc==1) &
-&          Mels%vxc(ib,jb,ik_ibz,is) = SUM(u1cjg_u2dpc(1:nfftf)*vxc(1:nfftf,is))*nfftfm1
-
-         if (Mflags%has_vxcval==1)  &
-&          Mels%vxcval(ib,jb,ik_ibz,is) = SUM(u1cjg_u2dpc(1:nfftf)*vxc_val(1:nfftf,is))*nfftfm1
-
-         if (Mflags%has_vxcval_hybrid==1) &
-&          Mels%vxcval_hybrid(ib,jb,ik_ibz,is) = SUM(u1cjg_u2dpc(1:nfftf)*vxc_val_hybrid(1:nfftf,is))*nfftfm1
-
-         if (Mflags%has_vhartree==1) &
-&          Mels%vhartree(ib,jb,ik_ibz,is) = SUM(u1cjg_u2dpc(1:nfftf)*vhartr (1:nfftf))*nfftfm1
-
-         if (Mflags%has_hbare==1) then
-           cg1 => Wfd%Wave(ib,ik_ibz,is)%ug(1:npw_k)
-           Mels%hbare(ib,jb,ik_ibz,is)=  &
-&            DOT_PRODUCT(cg1,kinwf2(1:npw_k)) + SUM(u1cjg_u2dpc(1:nfftf)*veffh0(1:nfftf,is))*nfftfm1
-!&            xdotc(Wfd%npwwfn,cg1(1:),1,kinwf2(1:),1) + SUM(u1cjg_u2dpc(1:nfftf)*veffh0(1:nfftf,is))*nfftfm1
+         if (Mflags%has_vxc == 1) then
+           Mels%vxc(ib, jb, ik_ibz, is) = sum(u1cjg_u2dpc(1:nfftf) * vxc(1:nfftf, is)) * nfftfm1
+           if (wfd%nspinor == 2 .and. wfd%nspden == 1) &
+             Mels%vxc(ib, jb, ik_ibz, 2) = sum(u1cjg_u2dpc(nfftf+1:) * vxc(1:nfftf, is)) * nfftfm1
+         end if
+         if (Mflags%has_vxcval == 1) then
+           Mels%vxcval(ib, jb, ik_ibz, is) = SUM(u1cjg_u2dpc(1:nfftf) * vxc_val(1:nfftf, is)) * nfftfm1
+           if (wfd%nspinor == 2 .and. wfd%nspden == 1) &
+             Mels%vxcval(ib, jb, ik_ibz, 2) = SUM(u1cjg_u2dpc(nfftf+1:) * vxc_val(1:nfftf, is)) * nfftfm1
+         end if
+         if (Mflags%has_vxcval_hybrid == 1) then
+           Mels%vxcval_hybrid(ib, jb, ik_ibz, is) = SUM(u1cjg_u2dpc(1:nfftf) * vxc_val_hybrid(1:nfftf, is)) * nfftfm1
+           if (wfd%nspinor == 2 .and. wfd%nspden == 1) &
+             Mels%vxcval_hybrid(ib, jb, ik_ibz, 2) = SUM(u1cjg_u2dpc(nfftf+1) * vxc_val_hybrid(1:nfftf, is)) * nfftfm1
+         end if
+         if (Mflags%has_vhartree==1) then
+           Mels%vhartree(ib, jb, ik_ibz, is) = SUM(u1cjg_u2dpc(1:nfftf) * vhartr(1:nfftf)) * nfftfm1
+           if (wfd%nspinor == 2 .and. wfd%nspden == 1) &
+             Mels%vhartree(ib, jb, ik_ibz, 2) = SUM(u1cjg_u2dpc(nfftf+1:) * vhartr(1:nfftf)) * nfftfm1
          end if
 
-         if (nspinor==2) then
+         if (Mflags%has_hbare==1) then
+           cg1 => Wfd%Wave(ib, ik_ibz, is)%ug(1:npw_k)
+           Mels%hbare(ib, jb, ik_ibz, is) = &
+             DOT_PRODUCT(cg1, kinwf2(1:npw_k)) + SUM(u1cjg_u2dpc(1:nfftf) * veffh0(1:nfftf, is)) * nfftfm1
+           if (wfd%nspinor == 2 .and. wfd%nspden == 1) then
+             cg1 => Wfd%Wave(ib, ik_ibz, is)%ug(npw_k+1:)
+             Mels%hbare(ib, jb, ik_ibz, 2) = &
+               DOT_PRODUCT(cg1, kinwf2(npw_k+1:)) + SUM(u1cjg_u2dpc(nfftf+1:) * veffh0(1:nfftf, is)) * nfftfm1
+           end if
+         end if
+
+         if (nspinor == 2 .and. wfd%nspden == 4) then
            ! Here I can skip 21 if ib==jb
            ur1_up  => ur1(1:nfftf)
            ur1_dwn => ur1(nfftf+1:2*nfftf)
@@ -478,34 +474,29 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,gsqcutf_eff,nfftf,ngfftf,&
              tmp(3)=SUM(CONJG(ur1_dwn)*CONJG(veffh0_ab(:))*ur2_dwn)*nfftfm1
              Mels%hbare(ib,jb,ik_ibz,2:4)=tmp(:)
            end if
-
            if (Mflags%has_vxc==1) then
              tmp(1) = SUM(CONJG(ur1_dwn)*      vxc(:,2) *ur2_dwn)*nfftfm1
              tmp(2) = SUM(CONJG(ur1_up )*      vxcab(:) *ur2_dwn)*nfftfm1
              tmp(3) = SUM(CONJG(ur1_dwn)*CONJG(vxcab(:))*ur2_up )*nfftfm1
              Mels%vxc(ib,jb,ik_ibz,2:4)=tmp(:)
            end if
-
            if (Mflags%has_vxcval==1) then
              tmp(1) = SUM(CONJG(ur1_dwn)*      vxc_val(:,2) *ur2_dwn)*nfftfm1
              tmp(2) = SUM(CONJG(ur1_up )*      vxcab_val(:) *ur2_dwn)*nfftfm1
              tmp(3) = SUM(CONJG(ur1_dwn)*CONJG(vxcab_val(:))*ur2_up )*nfftfm1
              Mels%vxcval(ib,jb,ik_ibz,2:4)=tmp(:)
            end if
-
            if (Mflags%has_vxcval_hybrid==1) then
              tmp(1) = SUM(CONJG(ur1_dwn)*      vxc_val_hybrid(:,2) *ur2_dwn)*nfftfm1
              tmp(2) = SUM(CONJG(ur1_up )*      vxcab_val_hybrid(:) *ur2_dwn)*nfftfm1
              tmp(3) = SUM(CONJG(ur1_dwn)*CONJG(vxcab_val_hybrid(:))*ur2_up )*nfftfm1
              Mels%vxcval_hybrid(ib,jb,ik_ibz,2:4)=tmp(:)
            end if
-
            if (Mflags%has_vhartree==1) then
              tmp(1) = SUM(CONJG(ur1_dwn)*vhartr(:)*ur2_dwn)*nfftfm1
              Mels%vhartree(ib,jb,ik_ibz,2  )=tmp(1)
              Mels%vhartree(ib,jb,ik_ibz,3:4)=czero
            end if
-
          end if !nspinor==2
 
        end do !ib
@@ -522,11 +513,11 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,gsqcutf_eff,nfftf,ngfftf,&
  ABI_FREE(ur1)
  ABI_FREE(ur2)
  ABI_FREE(vxc_val)
+ ABI_FREE(u1cjg_u2dpc)
  if(Mflags%has_vxcval_hybrid==1) then
    ABI_FREE(vxc_val_hybrid)
  end if
- ABI_FREE(u1cjg_u2dpc)
- if (nspinor==2)  then
+ if (wfd%nspden == 4)  then
    ABI_FREE(vxcab)
    ABI_FREE(vxcab_val)
    if(Mflags%has_vxcval_hybrid==1) then
@@ -809,7 +800,7 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,gsqcutf_eff,nfftf,ngfftf,&
 
  ! Sum up contributions on each node ===
  ! Set the corresponding has_* flags to 2.
- call melements_mpisum(Mels,comm)
+ call melements_mpisum(Mels, wfd%comm)
 
  ! Reconstruct lower triangle.
  call melements_herm(Mels)
