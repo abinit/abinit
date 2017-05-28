@@ -941,14 +941,8 @@ subroutine rhohxc(dtset,enxc,gsqcut,izero,kxc,mpi_enreg,nfft,ngfft, &
          end if
        end if
 
-<<<<<<< HEAD
 !      Transfer the xc kernel (if this must be done, and has not yet been done)
        if (nkxc_eff>0.and.ndvxc>0 .and. ixc_fallbackkxc_hyb==dtset%ixc) then
-         kxc(ifft:ifft+npts-1,1:nkxc_eff)=zero
-=======
-!      Transfer the xc kernel
-       if (nkxc_eff>0.and.ndvxc>0) then
->>>>>>> develop
          if (nkxc_eff==1.and.ndvxc==15) then
            kxc(ifft:ifft+npts-1,1)=half*(dvxc_b(1:npts,1)+dvxc_b(1:npts,9)+dvxc_b(1:npts,10))
          else if (nkxc_eff==3.and.ndvxc==15) then
