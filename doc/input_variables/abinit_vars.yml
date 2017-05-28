@@ -27326,8 +27326,7 @@
     section: vardev
     text: |-
         <p>
-         Allows to choose the algorithm
-        for the optimisation of the wavefunctions.
+         Allows one to choose the algorithm for the optimisation of the wavefunctions.
          <br />
          The different possibilities are :
          <ul>
@@ -27359,8 +27358,7 @@
         Journal on Scientific Computing 23, pp517-541 (2001)
            </a>
            .
-        The implementation rests
-        on the
+        The implementation rests on the
            <a href="http://www.mathworks.com/matlabcentral/fileexchange/48-lobpcg-m">
             matlab program by Knyazev
            </a>
@@ -27372,8 +27370,7 @@
         25(5): 2224-2239
            </a>
            .
-        For more
-        information see
+        For more information see
            <a href="http://dx.doi.org/10.1016/j.commatsci.2007.07.019">
             F. Bottin, S. Leroux, A. Knyazev, G. Zerah, Large scale
         ab initio calculations based on three levels of parallelization. (2008).
@@ -27397,7 +27394,7 @@
           </li>
         <li>
            [[wfoptalg]]=114 :
-        A new version of [[wfoptalg]]=14 which is more efficient for few blocks and can take advance of OpenMP if abinit is compiled with a multithreaded linear algebra library.
+        A new version of [[wfoptalg]]=14 which is more efficient for few blocks and can take advantage of OpenMP if abinit is compiled with a multithreaded linear algebra library.
         With more than 1 thread [[npfft]] shoud NOT be used for the time being.
           </li>
           <li>
