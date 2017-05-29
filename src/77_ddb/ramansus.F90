@@ -183,11 +183,11 @@ subroutine ramansus(d2cart,dchide,dchidt,displ,mpert,&
    end if
 
  else
-  if (iwrite) then
-    write(ab_out,*) ch10
-    write(ab_out,*)' Raman susceptibilities of transverse zone-center phonon modes'
-    write(ab_out,*)' -------------------------------------------------------------'
-    write(ab_out,*) ch10
+   if (iwrite) then
+     write(ab_out,*) ch10
+     write(ab_out,*)' Raman susceptibilities of transverse zone-center phonon modes'
+     write(ab_out,*)' -------------------------------------------------------------'
+     write(ab_out,*) ch10
    end if
  end if
 

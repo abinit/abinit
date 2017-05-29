@@ -56,9 +56,10 @@
 !!      predict_pimd
 !!
 !! CHILDREN
-!!      matr3inv,pimd_energies,pimd_forces,pimd_initvel,pimd_langevin_forces
-!!      pimd_langevin_random,pimd_langevin_random_bar,pimd_langevin_random_init
-!!      pimd_mass_spring,pimd_print,pimd_stresses,xcart2xred,xred2xcart
+!!      matr3inv,pimd_apply_constraint,pimd_energies,pimd_forces,pimd_initvel
+!!      pimd_langevin_forces,pimd_langevin_random,pimd_langevin_random_bar
+!!      pimd_langevin_random_init,pimd_mass_spring,pimd_print,pimd_stresses
+!!      xcart2xred,xred2xcart
 !!
 !! SOURCE
 
@@ -213,7 +214,7 @@ subroutine pimd_langevin_npt(etotal,forces,itimimage,natom,pimd_param,prtvolimg,
    call pimd_forces(forces,natom,spring,0,trotter,xcart)
    call pimd_langevin_forces(alea,forces,forces_pimd,friction,langev,mass,natom,trotter,hxredpoint)
    call pimd_apply_constraint(pimd_param%constraint,constraint_output,forces_pimd,&
-&                             mass,natom,trotter,pimd_param%wtatcon,xcart)
+&   mass,natom,trotter,pimd_param%wtatcon,xcart)
    tmp=matmul(invrprimd,ddh)
    pg=wg*matmul(ddh,invrprimd)
    tracepg=pg(1,1)+pg(2,2)+pg(3,3)
@@ -310,7 +311,7 @@ subroutine pimd_langevin_npt(etotal,forces,itimimage,natom,pimd_param,prtvolimg,
    call pimd_forces(forces,natom,spring,0,trotter,xcart)
    call pimd_langevin_forces(alea,forces,forces_pimd,friction,langev,mass,natom,trotter,hxredpoint)
    call pimd_apply_constraint(pimd_param%constraint,constraint_output,forces_pimd,&
-&                             mass,natom,trotter,pimd_param%wtatcon,xcart)
+&   mass,natom,trotter,pimd_param%wtatcon,xcart)
 
 !  Compute difference between instantaneous stress and imposed stress (barostat)
    call pimd_stresses(mass,natom,quantummass,stress_pimd,stressin,thermtemp,thermtemp,trotter,hxredpoint,volume,xcart)
@@ -357,7 +358,7 @@ subroutine pimd_langevin_npt(etotal,forces,itimimage,natom,pimd_param,prtvolimg,
 !    Reestimate the forces
      call pimd_langevin_forces(alea,forces,forces_pimd,friction,langev,mass,natom,trotter,hxredpoint)
      call pimd_apply_constraint(pimd_param%constraint,constraint_output,forces_pimd,&
-&                               mass,natom,trotter,pimd_param%wtatcon,xcart)
+&     mass,natom,trotter,pimd_param%wtatcon,xcart)
 !    Compute variation of temperature (to check convergence of SC loop)
      temperature2=pimd_temperature(mass,xredpoint)*rescale_temp
      tol=dabs(temperature2-temp2_prev)/dabs(temp2_prev)

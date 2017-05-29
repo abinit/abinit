@@ -89,6 +89,9 @@ _ WF disk file :      0.021 Mbytes ; DEN or POT disk file :      0.024 Mbytes.
 -       accesswff3          1
             acell      1.8000000000E+01  1.8000000000E+01  1.8000000000E+01 Bohr
               amu      2.80855000E+01  1.00794000E+00
+     densfor_pred1          2
+     densfor_pred2          2
+     densfor_pred3          6
              ecut      1.00000000E+00 Hartree
 -          fftalg         312
            getden1          0
@@ -106,9 +109,6 @@ _ WF disk file :      0.021 Mbytes ; DEN or POT disk file :      0.024 Mbytes.
          icutcoul1          6
          icutcoul2          6
          icutcoul3          0
-     densfor_pred1          2
-     densfor_pred2          2
-     densfor_pred3          6
              iscf1          7
              iscf2         -2
              iscf3         -2
@@ -558,6 +558,9 @@ _setup2: Arith. and geom. avg. npw (full set) are     257.000     257.000
 -       accesswff3          1
             acell      1.8000000000E+01  1.8000000000E+01  1.8000000000E+01 Bohr
               amu      2.80855000E+01  1.00794000E+00
+     densfor_pred1          2
+     densfor_pred2          2
+     densfor_pred3          6
              ecut      1.00000000E+00 Hartree
            etotal1    -5.2557005545E+00
             fcart1    -8.3266726847E-18 -0.0000000000E+00  2.7755575616E-18
@@ -581,9 +584,6 @@ _setup2: Arith. and geom. avg. npw (full set) are     257.000     257.000
          icutcoul1          6
          icutcoul2          6
          icutcoul3          0
-     densfor_pred1          2
-     densfor_pred2          2
-     densfor_pred3          6
              iscf1          7
              iscf2         -2
              iscf3         -2

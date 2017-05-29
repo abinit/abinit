@@ -282,33 +282,33 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,&
  call wrtout(std_out,message,'COLL')
 
  !if (dtset%paral_rf == -1) then
-   write(std_out,'(a)')"--- !IrredPerts"
-   write(std_out,'(a)')'# List of irreducible perturbations for nonlinear'
-   write(std_out,'(a)')'irred_perts:'
+ write(std_out,'(a)')"--- !IrredPerts"
+ write(std_out,'(a)')'# List of irreducible perturbations for nonlinear'
+ write(std_out,'(a)')'irred_perts:'
 
-   n1 = 0
-   do i1pert = 1, natom + 2
-     do i1dir = 1, 3
-       do i2pert = 1, natom + 2
-         do i2dir = 1, 3
-           do i3pert = 1, natom + 2
-             do i3dir = 1,3
-               if (rfpert(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)==1) then
-                 n1 = n1 + 1
-                 write(std_out,'(a,i0)')"   - i1pert: ",i1pert
-                 write(std_out,'(a,i0)')"     i1dir: ",i1dir
-                 write(std_out,'(a,i0)')"     i2pert: ",i2pert
-                 write(std_out,'(a,i0)')"     i2dir: ",i2dir
-                 write(std_out,'(a,i0)')"     i3pert: ",i3pert
-                 write(std_out,'(a,i0)')"     i3dir: ",i3dir
-               end if
-             end do
+ n1 = 0
+ do i1pert = 1, natom + 2
+   do i1dir = 1, 3
+     do i2pert = 1, natom + 2
+       do i2dir = 1, 3
+         do i3pert = 1, natom + 2
+           do i3dir = 1,3
+             if (rfpert(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)==1) then
+               n1 = n1 + 1
+               write(std_out,'(a,i0)')"   - i1pert: ",i1pert
+               write(std_out,'(a,i0)')"     i1dir: ",i1dir
+               write(std_out,'(a,i0)')"     i2pert: ",i2pert
+               write(std_out,'(a,i0)')"     i2dir: ",i2dir
+               write(std_out,'(a,i0)')"     i3pert: ",i3pert
+               write(std_out,'(a,i0)')"     i3dir: ",i3dir
+             end if
            end do
          end do
        end do
      end do
    end do
-   write(std_out,'(a)')"..."
+ end do
+ write(std_out,'(a)')"..."
    !MSG_ERROR_NODUMP("aborting now")
  !end if
 
@@ -419,9 +419,10 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,&
 
 !Comput kxc (second- and third-order exchange-correlation kernel)
  option=3
- nkxc=2*nspden-1
+ nkxc=2*nspden-1 ! LDA
+ if(dtset%xclevel==2.and.nspden==1) nkxc=7  ! non-polarized GGA
+ if(dtset%xclevel==2.and.nspden==2) nkxc=19 ! polarized GGA
  nk3xc=3*nspden-2
- if(dtset%xclevel==2) nkxc=23
  ABI_ALLOCATE(kxc,(nfft,nkxc))
  ABI_ALLOCATE(k3xc,(nfft,nk3xc))
 

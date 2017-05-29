@@ -62,12 +62,16 @@ module m_multibinit_dataset
   integer :: asr
   integer :: brav
   integer :: chneut
+  integer :: confinement
+  integer :: conf_power_disp
+  integer :: conf_power_strain
   integer :: dipdip
   integer :: eivec
   integer :: elphflag
   integer :: enunit
   integer :: fit_coeff
   integer :: fit_option
+  integer :: fit_ncycle
   integer :: ifcana
   integer :: ifcflag
   integer :: ifcout
@@ -88,8 +92,8 @@ module m_multibinit_dataset
   integer :: prt_ifc
   integer :: strcpling  ! Print the 3rd order in xml file
   integer :: prtsrlr  ! print the short-range/long-range decomposition of phonon freq.
-  integer :: qrefine
   integer :: rfmeth
+  integer :: restarxf
   integer :: symdynmat
 
   integer :: fit_grid(3)
@@ -98,21 +102,25 @@ module m_multibinit_dataset
   integer :: ng2qpt(3)
   integer :: kptrlatt(3,3)
   integer :: kptrlatt_fine(3,3)
+  integer :: qrefine(3)
 
 ! Real(dp)
   real(dp) :: bmass
+  real(dp) :: conf_power_fact_disp
+  real(dp) :: conf_power_fact_strain
   real(dp) :: delta_df
   real(dp) :: energy_reference
   real(dp) :: fit_cutoff
   real(dp) :: temperature
   real(dp) :: rifcsph
-
+  real(dp) :: conf
   real(dp) :: acell(3)
   real(dp) :: strain(6)
   real(dp) :: strtarget(6)
+  real(dp) :: conf_cutoff_strain(6)
   real(dp) :: rprim(3,3)
   real(dp) :: q1shft(3,4)
-
+ 
 ! Integer arrays
   integer, allocatable :: atifc(:)
    ! atifc(natom)
@@ -122,7 +130,10 @@ module m_multibinit_dataset
 ! Real arrays
   real(dp), allocatable :: coefficients(:) 
   ! coefficients(ncoeff)
- 
+
+  real(dp), allocatable :: conf_cutoff_disp(:) 
+  ! conf_cuttoff(natom)
+
   real(dp), allocatable :: qnrml1(:) 
   ! qnrml1(nph1l)
 
@@ -180,6 +191,9 @@ subroutine multibinit_dtset_free(multibinit_dtset)
  
  if (allocated(multibinit_dtset%atifc))  then
    ABI_DEALLOCATE(multibinit_dtset%atifc)
+ end if
+ if (allocated(multibinit_dtset%conf_cutoff_disp))  then
+   ABI_DEALLOCATE(multibinit_dtset%conf_cutoff_disp)
  end if
  if (allocated(multibinit_dtset%qmass))  then
    ABI_DEALLOCATE(multibinit_dtset%qmass)
@@ -332,6 +346,47 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
    MSG_ERROR(message)
  end if
 
+ multibinit_dtset%confinement=0
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'confinement',tread,'INT')
+ if(tread==1) multibinit_dtset%confinement=intarr(1)
+ if(multibinit_dtset%confinement<0.or.multibinit_dtset%confinement>2)then
+   write(message, '(a,i8,a,a,a,a,a)' )&
+&   'confinement is',multibinit_dtset%confinement,', but the only allowed values',ch10,&
+&   'are 0, 1 or 2 .',ch10,&
+&   'Action: correct confinement in your input file.'
+   MSG_ERROR(message)
+ end if
+ 
+ multibinit_dtset%conf_power_disp=0
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'conf_power_disp',tread,'INT')
+ if(tread==1) multibinit_dtset%conf_power_disp=intarr(1)
+ if(multibinit_dtset%conf_power_disp<0)then
+   write(message, '(a,i8,a,a,a,a,a)' )&
+&   'conf_power_disp is',multibinit_dtset%conf_power_disp,', but the only allowed values',ch10,&
+&   'positive .',ch10,&
+&   'Action: correct conf_power_disp in your input file.'
+   MSG_ERROR(message)
+ end if
+
+ multibinit_dtset%conf_power_strain=0
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'conf_power_strain',tread,'INT')
+ if(tread==1) multibinit_dtset%conf_power_strain=intarr(1)
+ if(multibinit_dtset%conf_power_strain<0)then
+   write(message, '(a,i8,a,a,a,a,a)' )&
+&   'conf_power_strain is',multibinit_dtset%conf_power_strain,', but the only allowed values',ch10,&
+&   'are positive .',ch10,&
+&   'Action: correct conf_power_strain in your input file.'
+   MSG_ERROR(message)
+ end if
+
+ multibinit_dtset%conf_power_fact_disp=100
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'conf_power_fact_disp',tread,'DPR')
+ if(tread==1) multibinit_dtset%conf_power_fact_disp=dprarr(1)
+
+ multibinit_dtset%conf_power_fact_strain=100
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'conf_power_fact_strain',tread,'DPR')
+ if(tread==1) multibinit_dtset%conf_power_fact_strain=dprarr(1)
+
 !D
  multibinit_dtset%dipdip=1
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dipdip',tread,'INT')
@@ -366,6 +421,7 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
    MSG_ERROR(message)
  end if
 
+!E
  multibinit_dtset%energy_reference= zero
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'energy_reference',tread,'DPR')
  if(tread==1) multibinit_dtset%energy_reference=dprarr(1)
@@ -380,6 +436,32 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
 &   'Action: correct enunit in your input file.'
    MSG_ERROR(message)
  end if
+
+!F
+ multibinit_dtset%fit_option=0
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'fit_option',tread,'INT')
+ if(tread==1) multibinit_dtset%fit_option=intarr(1)
+! No test for now
+! if(multibinit_dtset%fit_option=0.or.multibinit_dtset%fit_option/=1)then
+!   write(message, '(a,i8,a,a,a,a,a)' )&
+!&   'fit_option is',multibinit_dtset%fit_option,', but the only allowed values',ch10,&
+!&   'are 0 or 1 for multibinit.',ch10,&
+!&   'Action: correct fit_option in your input file.'
+!   MSG_ERROR(message)
+! end if
+
+
+ multibinit_dtset%fit_ncycle=0
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'fit_ncycle',tread,'INT')
+ if(tread==1) multibinit_dtset%fit_ncycle=intarr(1)
+ if(multibinit_dtset%fit_ncycle<0)then
+   write(message, '(a,i8,a,a,a,a,a)' )&
+&   'fit_ncycle is',multibinit_dtset%fit_ncycle,', but the only allowed values',ch10,&
+&   'are positives for multibinit.',ch10,&
+&   'Action: correct fit_ncycle in your input file.'
+   MSG_ERROR(message)
+ end if
+
 
  multibinit_dtset%ifcana=0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'ifcana',tread,'INT')
@@ -628,17 +710,30 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
 
 !Q
  multibinit_dtset%qrefine=1 ! default is no refinement
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'qrefine',tread,'INT')
- if(tread==1) multibinit_dtset%qrefine = intarr(1)
- if(multibinit_dtset%qrefine < 1) then
-   write(message, '(a,i0,a,a,a,a,a)' )&
-&   'qrefine is',multibinit_dtset%qrefine,' The only allowed values',ch10,&
-&   'are integers >= 1 giving the refinement of the ngqpt grid',ch10,&
-&   'Action: correct qrefine in your input file.'
+ call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'qrefine',tread,'INT')
+ if(tread==1) multibinit_dtset%qrefine = intarr(1:3)
+ do ii=1,3
+   if(multibinit_dtset%qrefine(ii) < 1) then
+     write(message, '(a,3i0,a,a,a,a,a)' )&
+&     'qrefine is',multibinit_dtset%qrefine,' The only allowed values',ch10,&
+&     'are integers >= 1 giving the refinement of the ngqpt grid',ch10,&
+&     'Action: correct qrefine in your input file.'
+     MSG_ERROR(message)
+   end if
+ end do
+
+!R
+ multibinit_dtset%restarxf=0
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'restarxf',tread,'INT')
+ if(tread==1) multibinit_dtset%restarxf=intarr(1)
+ if(multibinit_dtset%restarxf < -3 .or. multibinit_dtset%restarxf > 0)then
+   write(message, '(a,i8,a,a,a,a,a)' )&
+&   'restarxf is',multibinit_dtset%restarxf,', but the only allowed values',ch10,&
+&   'is -2 or 0.',ch10,&
+&   'Action: correct restarxf in your input file.'
    MSG_ERROR(message)
  end if
 
-!R
  multibinit_dtset%rfmeth=1
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'rfmeth',tread,'INT')
  if(tread==1) multibinit_dtset%rfmeth=intarr(1)
@@ -791,6 +886,49 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
      end do
    end if
  end if
+
+ ABI_ALLOCATE(multibinit_dtset%conf_cutoff_disp,(multibinit_dtset%natom))
+ if (multibinit_dtset%natom/=0)then
+   if(multibinit_dtset%natom>marr)then
+     marr=multibinit_dtset%natom
+     ABI_DEALLOCATE(intarr)
+     ABI_DEALLOCATE(dprarr)
+     ABI_ALLOCATE(intarr,(marr))
+     ABI_ALLOCATE(dprarr,(marr))
+   end if
+   multibinit_dtset%conf_cutoff_disp(:)=zero
+   call intagm(dprarr,intarr,jdtset,marr,multibinit_dtset%natom,&
+&              string(1:lenstr),'conf_cutoff_disp',tread,'DPR')
+   if(tread==1)then
+     do ii=1,multibinit_dtset%natom
+       multibinit_dtset%conf_cutoff_disp(ii)=dprarr(ii)
+     end do
+   end if
+   if(any(multibinit_dtset%conf_cutoff_disp<zero))then
+     write(message, '(3a)' )&
+&       'There is negative value for conf_cutoff_disp ',ch10,&
+&       'Action: change acell in your input file.'
+     MSG_ERROR(message) 
+   end if
+ end if
+
+ if(6>marr)then
+   marr=6
+   ABI_DEALLOCATE(intarr)
+   ABI_DEALLOCATE(dprarr)
+   ABI_ALLOCATE(intarr,(marr))
+   ABI_ALLOCATE(dprarr,(marr))
+ end if
+ multibinit_dtset%conf_cutoff_strain(1:6) = zero
+ call intagm(dprarr,intarr,jdtset,marr,6,string(1:lenstr),'conf_cutoff_strain',tread,'DPR')
+ if(tread==1) multibinit_dtset%conf_cutoff_strain(1:6)=dprarr(1:6)
+ if(any(multibinit_dtset%conf_cutoff_disp<zero))then
+   write(message, '(3a)' )&
+&     'There is negative value for conf_cutoff_strain ',ch10,&
+&     'Action: change acell in your input file.'
+   MSG_ERROR(message) 
+ end if
+
 !D
 
 !E
@@ -827,18 +965,6 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
 &   'Action: correct fit_cutoff in your input file.'
    MSG_ERROR(message)
  end if
-
- multibinit_dtset%fit_option=0
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'fit_option',tread,'INT')
- if(tread==1) multibinit_dtset%fit_option=intarr(1)
-! No test for now
-! if(multibinit_dtset%fit_option=0.or.multibinit_dtset%fit_option/=1)then
-!   write(message, '(a,i8,a,a,a,a,a)' )&
-!&   'fit_option is',multibinit_dtset%fit_option,', but the only allowed values',ch10,&
-!&   'are 0 or 1 for multibinit.',ch10,&
-!&   'Action: correct fit_option in your input file.'
-!   MSG_ERROR(message)
-! end if
 
  multibinit_dtset%fit_grid(:)= one
  call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'fit_grid',tread,'INT')
@@ -1037,8 +1163,9 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
  end if
 
 !check that q-grid refinement is a divisor of ngqpt in each direction
- if(multibinit_dtset%qrefine > 1 .and. sum(abs(dmod(multibinit_dtset%ngqpt/dble(multibinit_dtset%qrefine),one))) > tol10) then
-   write(message, '(a,i0,a,a,a,3i8,a,a)' )&
+ if(any(multibinit_dtset%qrefine(:) > 1) .and. &
+&    any(abs(dmod(dble(multibinit_dtset%ngqpt(1:3))/dble(multibinit_dtset%qrefine(:)),one)) > tol10)) then
+   write(message, '(a,3i0,a,a,a,3i8,a,a)' )&
 &   'qrefine is',multibinit_dtset%qrefine,' The only allowed values',ch10,&
 &   'are integers which are divisors of the ngqpt grid', multibinit_dtset%ngqpt,ch10,&
 &   'Action: correct qrefine in your input file.'
@@ -1129,6 +1256,9 @@ subroutine outvars_multibinit (multibinit_dtset,nunit)
    write(nunit,'(3x,a9,3I10.1)')'    ntime',multibinit_dtset%ntime
    write(nunit,'(3x,a9,3i10)')  '    ncell',multibinit_dtset%n_cell
    write(nunit,'(3x,a9,3i10)')  '    dtion',multibinit_dtset%dtion
+   if (multibinit_dtset%restarxf /= zero ) then
+     write(nunit,'(3x,a9,3i10)')  ' restarxf',multibinit_dtset%restarxf
+   end if
    if(multibinit_dtset%dynamics==13)then
      write(nunit,'(3x,a9,3i10)')'  optcell',multibinit_dtset%optcell
      write(nunit,'(3x,a9,3F12.1)')'    bmass',multibinit_dtset%bmass
@@ -1136,13 +1266,25 @@ subroutine outvars_multibinit (multibinit_dtset,nunit)
      write(nunit,'(3x,a12)',advance='no')'    qmass  '
      write(nunit,'(3x,15i10)') (multibinit_dtset%qmass(ii),ii=1,multibinit_dtset%nnos)
    end if
+ end if
 
+ if(multibinit_dtset%confinement==1)then
+   write(nunit,'(a)')' Confinement information :'
+   write(nunit,'(1x,a22,I5.1)')'       conf_power_disp',multibinit_dtset%conf_power_disp
+   write(nunit,'(1x,a22,I5.1)')'     conf_power_strain',multibinit_dtset%conf_power_strain
+   write(nunit,'(1x,a22,3es16.8)')'  conf_power_fact_disp',multibinit_dtset%conf_power_fact_disp
+   write(nunit,'(1x,a22,3es16.8)')'conf_power_fact_strain',multibinit_dtset%conf_power_fact_strain
+   write(nunit,'(1x,a22)')'     conf_cutoff_disp'
+   write(nunit,'(19x,3es16.8)') (multibinit_dtset%conf_cutoff_disp(ii),ii=1,multibinit_dtset%natom)
+   write(nunit,'(1x,a22)')'    conf_cutoff_strain'
+   write(nunit,'(19x,3es16.8)') (multibinit_dtset%conf_cutoff_strain(ii),ii=1,6)
  end if
 
  if(multibinit_dtset%fit_coeff/=0)then
    write(nunit,'(a)')' Fit the coefficients :'
    write(nunit,'(3x,a10,I10.1)')'fit_coeff ',multibinit_dtset%fit_coeff
    write(nunit,'(3x,a10,I10.1)')'fit_option',multibinit_dtset%fit_option
+   write(nunit,'(3x,a10,I10.1)')'fit_ncycle',multibinit_dtset%fit_ncycle
    write(nunit,'(3x,a10,3i10)') '  fit_grid',multibinit_dtset%fit_grid
  end if
 
@@ -1185,8 +1327,8 @@ subroutine outvars_multibinit (multibinit_dtset,nunit)
        write(nunit,'(19x,4es16.8)') (multibinit_dtset%q1shft(ii,iqshft),ii=1,3)
      end do
    end if
-   if (multibinit_dtset%qrefine > 1) then
-     write(nunit,'(3x,a9,i10)')'  qrefine', multibinit_dtset%qrefine
+   if (any(multibinit_dtset%qrefine(:) > 1)) then
+     write(nunit,'(3x,a9,3i10)')'  qrefine', multibinit_dtset%qrefine
    end if
  end if
 

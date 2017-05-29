@@ -2701,7 +2701,7 @@ end subroutine pimd_force_transform
 !!  forces(3,natom,trotter)=array containing forces
 !!
 !! PARENTS
-!!      pimd_langevin_nvt,pimd_nosehoover_nvt
+!!      pimd_langevin_npt,pimd_langevin_nvt,pimd_nosehoover_nvt
 !!
 !! CHILDREN
 !!
@@ -2799,6 +2799,7 @@ subroutine pimd_apply_constraint(constraint,constraint_output,forces,mass,natom,
        constraint_output(1)=constraint_output(1)+xcart_centroid*wtatcon(ii,iatom)
      end do
    end do
+   constraint_output(1)=constraint_output(1)/dble(trotter)
    !2-Force on reaction coordinate
    constraint_output(2)=-lambda_cst
 

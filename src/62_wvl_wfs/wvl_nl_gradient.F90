@@ -21,7 +21,7 @@
 !! NOTES
 !!
 !! PARENTS
-!!      afterscfloop,vtorho
+!!      forstr,vtorho
 !!
 !! CHILDREN
 !!      nonlocal_forces,wrtout,xmpi_sum
@@ -108,8 +108,8 @@ subroutine wvl_nl_gradient(grnl, mpi_enreg, natom, rprimd, wvl, xcart)
  do ia = 1, natom, 1
    do igeo = 1, 3, 1
      grnl(igeo, ia) = - rprimd(1, igeo) * gxyz(1, ia) - &
-&                       rprimd(2, igeo) * gxyz(2, ia) - &
-&                       rprimd(3, igeo) * gxyz(3, ia)
+&     rprimd(2, igeo) * gxyz(2, ia) - &
+&     rprimd(3, igeo) * gxyz(3, ia)
    end do
  end do
  ABI_DEALLOCATE(gxyz)

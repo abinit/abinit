@@ -348,6 +348,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  type(crystal_t) :: cryst_struc
  integer :: idum1(0),idum3(0,0,0)
  real(dp) :: rdum2(0,0),rdum4(0,0,0,0)
+
 !Variables for BigDFT
 #if defined HAVE_BIGDFT
  integer :: occopt_bigdft
@@ -571,7 +572,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 &     dtset%nsppol,occ,dtset%wtk)
    else
      energies%e_eigenvalues = energies%e_kinetic + energies%e_localpsp &
-&            + energies%e_xcdc  + two*energies%e_hartree +energies%e_nonlocalpsp
+&     + energies%e_xcdc  + two*energies%e_hartree +energies%e_nonlocalpsp
    end if
 
    if (optforces == 1) then ! not compatible with iscf=0 and wvlbigdftcomp=1 + PAW
@@ -815,8 +816,8 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 &         kinpw_k  =my_bandfft_kpt%kinpw_gather, &
 &         kg_k     =my_bandfft_kpt%kg_k_gather, &
 &         kpg_k    =my_bandfft_kpt%kpg_k_gather, &
-          ffnl_k   =my_bandfft_kpt%ffnl_gather, &
-          ph3d_k   =my_bandfft_kpt%ph3d_gather)
+         ffnl_k   =my_bandfft_kpt%ffnl_gather, &
+         ph3d_k   =my_bandfft_kpt%ph3d_gather)
        end if
 
 !      Build inverse of overlap matrix for chebfi
@@ -831,8 +832,8 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
          if (istep <= 1) then
            !Init the arrays
            call make_gemm_nonlop(my_ikpt,gs_hamk%npw_fft_k,gs_hamk%lmnmax, &
-&          gs_hamk%ntypat, gs_hamk%indlmn, gs_hamk%nattyp, gs_hamk%istwf_k, gs_hamk%ucvol, gs_hamk%ffnl_k,&
-&          gs_hamk%ph3d_k)
+&           gs_hamk%ntypat, gs_hamk%indlmn, gs_hamk%nattyp, gs_hamk%istwf_k, gs_hamk%ucvol, gs_hamk%ffnl_k,&
+&           gs_hamk%ph3d_k)
          end if
        end if
 
@@ -920,7 +921,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 !        Calculate Fock contribution to the total energy if required
          if ((psps%usepaw==1).and.(usefock)) then
            if (fock%optfor) then
-              call fock_calc_ene(dtset,fock,energies%e_exactX,ikpt,nband_k,occ_k)
+             call fock_calc_ene(dtset,fock,energies%e_exactX,ikpt,nband_k,occ_k)
            end if
          end if
        end if
@@ -1065,6 +1066,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        if (optforces>0) then
          grnlnk(:,:)=reshape(buffer1(index1+1:index1+3*natom*mbdkpsp),(/3*natom,mbdkpsp/) )
        end if
+       if (usefock) focknk(:)=buffer1(1+index1:index1+mbdkpsp)
        if(paw_dmft%use_dmft==1) then
          nnn=0
          do ikpt=1,dtset%nkpt
@@ -1366,7 +1368,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
          buffer1(index1+2) = energies%e_eigenvalues
          buffer1(index1+3) = energies%e_nonlocalpsp
          index1=index1+3
-!        * If Hartree-Fock calculation, save e_exactX in buffer1
+!        * If Hartree-Fock calculation, save e_fock in buffer1
          if (dtset%usefock==1) then
            buffer1(index1+1) = energies%e_fock
            index1=index1+1
@@ -1406,7 +1408,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
          energies%e_eigenvalues = buffer1(index1+2)
          energies%e_nonlocalpsp = buffer1(index1+3)
          index1=index1+3
-!        * If Hartree-Fock calculation, save e_exactX in buffer1
+!        * If Hartree-Fock calculation, save e_fock in buffer1
          if (dtset%usefock==1) then
            energies%e_fock = buffer1(index1+1)
            index1=index1+1
@@ -1768,11 +1770,11 @@ subroutine wvl_nscf_loop()
    if(nnsclo_now>0) then
      do inonsc=1,nnsclo_now
        call wvl_psitohpsi(dtset%diemix,eexctx,exc,eh,ekin,eloc,enl,esicdc,&
-&                         istep,inonsc,iscf_,mpi_enreg%me_wvl,dtset%natom,&
-&                         nfftf,mpi_enreg%nproc_wvl,dtset%nspden,&
-&                         dum,do_scf,evxc,wvl,wvlbigdft,xcart,strsxc)
+&       istep,inonsc,iscf_,mpi_enreg%me_wvl,dtset%natom,&
+&       nfftf,mpi_enreg%nproc_wvl,dtset%nspden,&
+&       dum,do_scf,evxc,wvl,wvlbigdft,xcart,strsxc)
        call wvl_hpsitopsi(cprj,dtset,energies,inonsc,mcprj_local,mpi_enreg, &
-&                         residm,wvl,xcart)
+&       residm,wvl,xcart)
        if(residm<dtset%tolwfr) exit !Exit loop if converged
      end do
 
@@ -1780,11 +1782,11 @@ subroutine wvl_nscf_loop()
      do ii=1, dtset%nline
 !      Direct minimization technique: no diagonalization
        call wvl_psitohpsi(dtset%diemix,eexctx,exc,eh,ekin,eloc,enl,esicdc,&
-&                         istep,ii,iscf_,mpi_enreg%me_wvl,dtset%natom,&
-&                         nfftf,mpi_enreg%nproc_wvl,dtset%nspden,&
-&                         dum,do_scf,evxc,wvl,wvlbigdft,xcart,strsxc)
+&       istep,ii,iscf_,mpi_enreg%me_wvl,dtset%natom,&
+&       nfftf,mpi_enreg%nproc_wvl,dtset%nspden,&
+&       dum,do_scf,evxc,wvl,wvlbigdft,xcart,strsxc)
        call wvl_hpsitopsi(cprj,dtset,energies,ii,mcprj_local,mpi_enreg, &
-&                         residm,wvl,xcart)
+&       residm,wvl,xcart)
        if(residm<dtset%tolwfr) exit !Exit loop if converged
      end do
    end if
@@ -1798,8 +1800,8 @@ subroutine wvl_nscf_loop()
 !  Eventually update energies depending on density
    if (dtset%iscf<10) then
      energies%e_localpsp=eloc
-      energies%e_hartree=eh
-      energies%e_xc=exc ; energies%e_xcdc=evxc
+     energies%e_hartree=eh
+     energies%e_xc=exc ; energies%e_xcdc=evxc
    else if (nnsclo_now==0) then
      energies%e_localpsp=eloc
    end if
@@ -1809,9 +1811,9 @@ subroutine wvl_nscf_loop()
 !    !Don't update energies (nscf cycle has been done); just recompute potential
      inonsc=nnsclo_now;if (nnsclo_now==0) inonsc=dtset%nline
      call wvl_psitohpsi(dtset%diemix,eexctx,exc,eh,ekin,eloc,enl,esicdc,&
-&                       istep,inonsc,iscf_,mpi_enreg%me_wvl,dtset%natom,&
-&                       nfftf,mpi_enreg%nproc_wvl,dtset%nspden,&
-&                       dum,do_scf,evxc,wvl,wvlbigdft,xcart,strsxc)
+&     istep,inonsc,iscf_,mpi_enreg%me_wvl,dtset%natom,&
+&     nfftf,mpi_enreg%nproc_wvl,dtset%nspden,&
+&     dum,do_scf,evxc,wvl,wvlbigdft,xcart,strsxc)
    end if
 
    DBG_EXIT("COLL")
@@ -1902,18 +1904,18 @@ subroutine wvl_nscf_loop_bigdft()
    DBG_ENTER("COLL")
 
    call wvl_hpsitopsi(cprj,dtset, energies, istep, mcprj_local,mpi_enreg, &
-&                     residm, wvl,xcart)
+&   residm, wvl,xcart)
 
    if (nnsclo_now>2) then
      do inonsc = 2, nnsclo_now-1
        call wvl_psitohpsi(dtset%diemix, energies%e_exactX, energies%e_xc, &
-&            energies%e_hartree, energies%e_kinetic, energies%e_localpsp, &
-&            energies%e_nonlocalpsp, energies%e_sicdc, istep, inonsc, iscf_, &
-&           mpi_enreg%me_wvl, dtset%natom, nfftf, mpi_enreg%nproc_wvl,&
-&            dtset%nspden, nres2, do_scf,energies%e_xcdc, &
-&            wvl, wvlbigdft, xcart, strsxc)
+&       energies%e_hartree, energies%e_kinetic, energies%e_localpsp, &
+&       energies%e_nonlocalpsp, energies%e_sicdc, istep, inonsc, iscf_, &
+&       mpi_enreg%me_wvl, dtset%natom, nfftf, mpi_enreg%nproc_wvl,&
+&       dtset%nspden, nres2, do_scf,energies%e_xcdc, &
+&       wvl, wvlbigdft, xcart, strsxc)
        call wvl_hpsitopsi(cprj,dtset, energies, inonsc, mcprj_local,mpi_enreg, &
-&                         residm, wvl,xcart)
+&       residm, wvl,xcart)
      end do
    end if
 
@@ -1921,17 +1923,17 @@ subroutine wvl_nscf_loop_bigdft()
    if (do_last_ortho.and.nnsclo_now<=1) then
 !    !Don't update energies (nscf cycle has been done); just recompute potential
      call wvl_psitohpsi(dtset%diemix,eexctx,exc,eh,ekin,eloc,enl,esicdc, &
-&          istep, 1, iscf_, mpi_enreg%me_wvl, dtset%natom, nfftf, &
-&          mpi_enreg%nproc_wvl,dtset%nspden, nres2, do_scf,evxc, &
-&          wvl, wvlbigdft, xcart, strsxc)
+&     istep, 1, iscf_, mpi_enreg%me_wvl, dtset%natom, nfftf, &
+&     mpi_enreg%nproc_wvl,dtset%nspden, nres2, do_scf,evxc, &
+&     wvl, wvlbigdft, xcart, strsxc)
    else if (do_last_ortho.and.nnsclo_now>1) then
 !    !Update energies and potential (nscf cycles are not finished)
      call wvl_psitohpsi(dtset%diemix, energies%e_exactX, energies%e_xc, &
-&          energies%e_hartree,energies%e_kinetic, energies%e_localpsp, &
-&          energies%e_nonlocalpsp, energies%e_sicdc, istep, nnsclo_now, iscf_, &
-&          mpi_enreg%me_wvl, dtset%natom, nfftf, mpi_enreg%nproc_wvl,&
-&          dtset%nspden, nres2, do_scf,energies%e_xcdc, &
-&          wvl, wvlbigdft, xcart, strsxc)
+&     energies%e_hartree,energies%e_kinetic, energies%e_localpsp, &
+&     energies%e_nonlocalpsp, energies%e_sicdc, istep, nnsclo_now, iscf_, &
+&     mpi_enreg%me_wvl, dtset%natom, nfftf, mpi_enreg%nproc_wvl,&
+&     dtset%nspden, nres2, do_scf,energies%e_xcdc, &
+&     wvl, wvlbigdft, xcart, strsxc)
    end if
 
    DBG_EXIT("COLL")

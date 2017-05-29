@@ -32,11 +32,10 @@ module m_polynomial_coeff
  implicit none
 
  public :: polynomial_coeff_broadcast
- public :: polynomial_coeff_dot
  public :: polynomial_coeff_free
  public :: polynomial_coeff_init
- public :: polynomial_coeff_chksym
  public :: polynomial_coeff_getName
+ public :: polynomial_coeff_setName
  public :: polynomial_coeff_setCoefficient
  public :: polynomial_coeff_writeXML
 !!***
@@ -96,10 +95,12 @@ CONTAINS  !=====================================================================
 !! polynomial_coeff = polynomial_coeff structure to be initialized
 !!
 !! PARENTS
-!!      m_anharmonics_terms,m_effective_potential_file
+!!      m_anharmonics_terms,m_effective_potential_file,m_fit_polynomial_coeff
+!!      m_polynomial_coeff
 !!
 !! CHILDREN
-!!      isfile,wrtout
+!!      polynomial_coeff_getname,polynomial_coeff_init,polynomial_term_free
+!!      polynomial_term_init
 !!
 !! SOURCE
 
@@ -212,10 +213,12 @@ end subroutine polynomial_coeff_init
 !! polynomial_coeff = polynomial_coeff structure to be free
 !!
 !! PARENTS
-!!      m_anharmonics_terms,m_effective_potential_file,m_polynomial_coeff
+!!      m_anharmonics_terms,m_effective_potential_file,m_fit_polynomial_coeff
+!!      m_polynomial_coeff
 !!
 !! CHILDREN
-!!      isfile,wrtout
+!!      polynomial_coeff_getname,polynomial_coeff_init,polynomial_term_free
+!!      polynomial_term_init
 !!
 !! SOURCE
 
@@ -272,7 +275,8 @@ end subroutine polynomial_coeff_free
 !!      m_effective_potential_file
 !!
 !! CHILDREN
-!!      isfile,wrtout
+!!      polynomial_coeff_getname,polynomial_coeff_init,polynomial_term_free
+!!      polynomial_term_init
 !!
 !! SOURCE
 
@@ -302,6 +306,52 @@ subroutine polynomial_coeff_setCoefficient(coefficient,polynomial_coeff)
 end subroutine polynomial_coeff_setCoefficient
 !!***
 
+!!****f* m_polynomial_coeff/polynomial_coeff_setName
+!!
+!! NAME
+!! polynomial_coeff_setName
+!!
+!! FUNCTION
+!! set the name for this  polynomial_coeff type
+!!
+!! INPUTS
+!! name = name of the coeff
+!! 
+!! OUTPUT
+!! polynomial_coeff = polynomial_coeff structure to be free
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine polynomial_coeff_setName(name,polynomial_coeff)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'polynomial_coeff_setName'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+!arrays
+ character(len=200),intent(in) :: name
+ type(polynomial_coeff_type), intent(inout) :: polynomial_coeff
+!Local variables-------------------------------
+!scalar
+!arrays
+! *************************************************************************
+
+ polynomial_coeff%name = name
+
+end subroutine polynomial_coeff_setName
+!!***
+
 
 !!****f* m_polynomial_coeff/polynomial_coeff_getName
 !!
@@ -312,20 +362,25 @@ end subroutine polynomial_coeff_setCoefficient
 !! set the coefficient for this  polynomial_coeff type
 !!
 !! INPUTS
-!! coefficient = coefficient of this coefficient 
+!! natom = number of atoms
+!! polynomial_coeff = coefficient  type
+!! symbols(natom)  =  array with the atomic symbol:["Sr","Ru","O1","O2","O3"]
+!! recompute = (optional) flag to set if the name has to be recomputed
+!! iterm = (optional) number of the term used for the name
 !! 
 !! OUTPUT
-!! polynomial_coeff = polynomial_coeff structure to be free
+!! name = name xof the coefficients
 !!
 !! PARENTS
-!!      m_effective_potential_file
+!!      m_fit_polynomial_coeff,m_polynomial_coeff
 !!
 !! CHILDREN
-!!      isfile,wrtout
+!!      polynomial_coeff_getname,polynomial_coeff_init,polynomial_term_free
+!!      polynomial_term_init
 !!
 !! SOURCE
 
-subroutine polynomial_coeff_getName(name,atm1,atm2,dir,power,polynomial_coeff,cell_atm1,cell_atm2)
+subroutine polynomial_coeff_getName(name,natom,polynomial_coeff,symbols,recompute,iterm)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -338,47 +393,103 @@ subroutine polynomial_coeff_getName(name,atm1,atm2,dir,power,polynomial_coeff,ce
 
 !Arguments ------------------------------------
 !scalars
+ integer,intent(in) :: natom
+ integer,optional,intent(in) :: iterm
 !arrays
- character(len=1),optional,intent(in) :: dir,power
- character(len=5),optional,intent(in) :: atm1,atm2
- character(len=100),optional,intent(out):: name
+ character(len=5),intent(in) :: symbols(:)
+ character(len=100),intent(out):: name
  type(polynomial_coeff_type),optional, intent(in) :: polynomial_coeff
- integer,optional,intent(in) :: cell_atm1(3),cell_atm2(3)
+ logical,optional,intent(in) :: recompute
 !Local variables-------------------------------
 !scalar
+ integer :: ii,idisp,iterm_in
+ logical :: need_recompute = .FALSE.
 !arrays
+ integer :: cell_atm1(3),cell_atm2(3)
+ character(len=1) :: mutodir(9) = (/"x","y","z","1","2","3","4","5","6"/)
+ character(len=1) :: dir,power,powerchar
+ character(len=5) :: atm1,atm2
  character(len=100):: atm1_tmp,atm2_tmp
-
+ character(len=200):: text
+ character(len=500):: message
 ! *************************************************************************
+
+!Reset output
  name=""
- if (present(polynomial_coeff)) then
-   name = polynomial_coeff%name
+
+!Set the optional arguments 
+ if(present(recompute)) need_recompute = recompute
+ if(present(iterm)) then
+   iterm_in = iterm
  else
-   if (present(dir).and.present(power).and.present(atm1).and.present(atm2)) then
-     if(present(cell_atm1))then
-       if (any(cell_atm1(:) /= zero) )then
-         write(atm1_tmp,'(4a,I0,a,I0,a,I0,a)')  trim(atm1),"_",dir,"[",cell_atm1(1)," ",&
-&                                      cell_atm1(2)," ",cell_atm1(3),"]"
-       else
-         atm1_tmp = trim(atm1)//"_"//dir
+   if(need_recompute)then
+     iterm_in = 1
+     do ii=1,polynomial_coeff%nterm
+!      Find the index of the ref 
+       if(iterm_in==1) then !Need to find the reference term
+         do idisp=1,polynomial_coeff%terms(ii)%ndisp
+           if(polynomial_coeff%terms(ii)%direction(idisp) > zero) then
+             iterm_in = ii
+             if(any(polynomial_coeff%terms(ii)%cell(:,1,idisp) /= zero).or.&
+&               any(polynomial_coeff%terms(ii)%cell(:,2,idisp) /= zero)) then
+               iterm_in = 1
+               exit
+             end if
+           end if
+         end do!end do disp
        end if
-     else
-       atm1_tmp = trim(atm1)//"_"//dir
-     end if
-     if(present(cell_atm2))then
-       if(any(cell_atm2(:) /= zero))then
-         write(atm2_tmp,'(4a,I0,a,I0,a,I0,a)')  trim(atm2),"_",dir,"[",cell_atm2(1)," ",&
-&                                      cell_atm2(2)," ",cell_atm2(3),"]"
-       else
-         atm2_tmp = trim(atm2)//"_"//dir
-       end if
-     else
-       atm2_tmp = trim(atm2)//"_"//dir
-     end if
-     name="("//trim(atm1_tmp)//"-"//trim(atm2_tmp)//")^"//power
+     end do!end do term
    end if
  end if
 
+!Do check
+ if(iterm_in > polynomial_coeff%nterm.or.iterm_in < zero) then
+   write(message, '(5a)')&
+&      ' The number of the requested term for the generation of',ch10,&
+&      'the name of the coefficient is not possible.',ch10,&
+&      'Action: Contact Abinit group.'
+   MSG_BUG(message)
+ end if
+
+ if(polynomial_coeff%name /= "".and..not.need_recompute)then
+   name = polynomial_coeff%name
+ else
+!  Nedd to recompute
+   do idisp=1,polynomial_coeff%terms(iterm_in)%ndisp
+     text = ""
+     !Fill variables for this displacement
+     write(powerchar,'(I0)') polynomial_coeff%terms(iterm_in)%power(idisp)
+     power=trim(powerchar)
+     if(polynomial_coeff%terms(iterm_in)%direction(idisp)>zero) then
+       atm1=symbols(polynomial_coeff%terms(iterm_in)%atindx(1,idisp))
+       atm2=symbols(polynomial_coeff%terms(iterm_in)%atindx(2,idisp))
+       dir=mutodir(polynomial_coeff%terms(iterm_in)%direction(idisp))
+       cell_atm1=polynomial_coeff%terms(iterm_in)%cell(:,1,idisp)
+       cell_atm2=polynomial_coeff%terms(iterm_in)%cell(:,2,idisp)
+!      Construct ATM1
+       if (any(cell_atm1(:) /= zero) )then
+         write(atm1_tmp,'(4a,I0,a,I0,a,I0,a)')  trim(atm1),"_",dir,"[",cell_atm1(1)," ",&
+&                                               cell_atm1(2)," ",cell_atm1(3),"]"
+       else
+         atm1_tmp = trim(atm1)//"_"//dir
+       end if
+!      Construct ATM2
+       if(any(cell_atm2(:) /= zero))then
+         write(atm2_tmp,'(4a,I0,a,I0,a,I0,a)')  trim(atm2),"_",dir,"[",cell_atm2(1)," ",&
+ &                                              cell_atm2(2)," ",cell_atm2(3),"]"
+       else
+         atm2_tmp = trim(atm2)//"_"//dir
+       end if
+
+       text="("//trim(atm1_tmp)//"-"//trim(atm2_tmp)//")^"//power
+     else
+       !Strain case
+      dir=mutodir(3+abs(polynomial_coeff%terms(iterm_in)%direction(idisp)))
+      text="("//"eta_"//trim(dir)//")^"//power
+     end if     
+     name = trim(name)//trim(text)
+   end do
+ end if
 
 end subroutine polynomial_coeff_getName
 !!***
@@ -402,7 +513,8 @@ end subroutine polynomial_coeff_getName
 !!      m_effective_potential_file
 !!
 !! CHILDREN
-!!      isfile,wrtout
+!!      polynomial_coeff_getname,polynomial_coeff_init,polynomial_term_free
+!!      polynomial_term_init
 !!
 !! SOURCE
 
@@ -498,10 +610,11 @@ end subroutine polynomial_coeff_broadcast
 !! OUTPUT
 !!
 !! PARENTS
-!!      m_effective_potential
+!!      m_effective_potential,m_fit_polynomial_coeff
 !!
 !! CHILDREN
-!!      isfile,wrtout
+!!      polynomial_coeff_getname,polynomial_coeff_init,polynomial_term_free
+!!      polynomial_term_init
 !!
 !! SOURCE
 
@@ -572,8 +685,8 @@ subroutine polynomial_coeff_writeXML(coeffs,ncoeff,filename)
 
 !   Close header
     do icoeff = 1, ncoeff
-      WRITE(unit_xml,'("  <coefficient number=""",I0,""" text=""",a,""">")') &
-        icoeff,trim(coeffs(icoeff)%name)
+      WRITE(unit_xml,'("  <coefficient number=""",I0,""" value=""",E19.10,""" text=""",a,""">")') &
+         icoeff,coeffs(icoeff)%coefficient,trim(coeffs(icoeff)%name)
       do iterm = 1,coeffs(icoeff)%nterm
         WRITE(unit_xml,'("    <term weight=""",F9.6,""">")') &
           coeffs(icoeff)%terms(iterm)%weight
@@ -625,164 +738,18 @@ subroutine polynomial_coeff_writeXML(coeffs,ncoeff,filename)
 end subroutine polynomial_coeff_writeXML
 !!***
 
-!!****f* m_polynomial_coeff/polynomial_coeff_chksym
-!! NAME
-!!  polynomial_coeff_chksym
+!! PARENTS
 !!
-!! FUNCTION
-!!  return the multiplication of two coefficients
+!! CHILDREN
+!!      polynomial_coeff_getname,polynomial_coeff_init,polynomial_term_free
+!!      polynomial_term_init
 !!
-!! INPUTS
 !!
-!! OUTPUT
+!! PARENTS
 !!
-!! SOURCE
-
-subroutine polynomial_coeff_chksym(coeffs,ncoeff)
-!Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'polynomial_coeff_chksym'
-!End of the abilint section
-
- implicit none
-
-!Arguments ------------------------------------
-!scalar
- integer, intent(in) :: ncoeff
-!arrays
- type(polynomial_coeff_type), intent(inout) :: coeffs
-!local variables------------------------------
-!scalar
-!arrays
-
-! *************************************************************************
-
-end subroutine polynomial_coeff_chksym
-!!***
-
-!!****f* m_polynomial_coeff/polynomial_coeff_dot
-!! NAME
-!!  polynomial_coeff_dot
-!!
-!! FUNCTION
-!!  return the multiplication of two coefficients
-!!
-!! INPUTS
-!!
-!! OUTPUT
-!!
-!! SOURCE
-
-subroutine polynomial_coeff_dot(coeff1_in,coeff2_in,coeffs_out,natom,power,symbols)
-!Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'polynomial_coeff_dot'
-!End of the abilint section
-
- implicit none
-
-!Arguments ------------------------------------
-!scalar
- integer, intent(in) :: natom,power
-!arrays
- type(polynomial_coeff_type), intent(in) :: coeff1_in,coeff2_in
- type(polynomial_coeff_type), intent(out) :: coeffs_out(power)
- character(len=5), intent(in) :: symbols(natom)
-!local variables------------------------------
-!scalar
- integer :: idisp1,ipower,iterm1,iterm2
- integer :: jpower,kpower,mu,ndisp,nterm_max
- real(dp):: weight
- logical :: res
-!arrays
- integer,allocatable :: atindx(:,:),cell(:,:,:),dir_int(:),powers(:)
- character(len=1) :: powerchar
- character(len=1) :: mutodir(3) = (/"x","y","z"/)
- character(len=100):: name,text
- type(polynomial_term_type),dimension(:),allocatable :: terms
-
-! *************************************************************************
-  res = .false.
-
-
-! Get the number of term for the new coefficient
-! and allocate the new array terms
-
-! case 1 : the two coefficients are identical
-  if(coeff1_in==coeff2_in)then
-
-    do ipower=1,power
-      do jpower=1,ipower
-        
-        kpower = power - ipower + 1
-
-        nterm_max = coeff1_in%nterm
-        ABI_DATATYPE_ALLOCATE(terms,(nterm_max))
-
-        do mu=1,3
-          ndisp = coeff1_in%terms(1)%ndisp
-
-!       Allocation of the new array for this term
-        ABI_ALLOCATE(atindx,(2,ndisp))
-        ABI_ALLOCATE(cell,(3,2,ndisp))
-        ABI_ALLOCATE(dir_int,(ndisp))
-        ABI_ALLOCATE(powers,(ndisp))
-    
-        do iterm1=1,coeff1_in%nterm
-          do iterm2=iterm1,coeff1_in%nterm
-!       1-copy the displacement from the first coefficient
-            do idisp1=1,coeff1_in%terms(iterm1)%ndisp
-              atindx(:,idisp1) = coeff1_in%terms(iterm1)%atindx(:,idisp1)
-              cell(:,:,idisp1) = coeff1_in%terms(iterm1)%cell(:,:,idisp1)
-              dir_int( idisp1) = coeff1_in%terms(iterm1)%direction(idisp1)
-              powers( idisp1)  = coeff1_in%terms(iterm1)%power(idisp1) +&
-&                                coeff2_in%terms(iterm1)%power(idisp1)
-              weight           = coeff1_in%terms(iterm1)%weight
-            end do!end loop disp
-            call polynomial_term_init(atindx,cell,dir_int,ndisp,terms(iterm1),powers,weight)
-          end do
-        end do
-      end do
-
-!   Deallocation of the  array
-        ABI_DEALLOCATE(atindx)
-        ABI_DEALLOCATE(cell)
-        ABI_DEALLOCATE(dir_int)
-        ABI_DEALLOCATE(powers)
-
-        name=''
-        do idisp1=1,terms(1)%ndisp
-          write(powerchar,'(I0)') terms(1)%power(idisp1)
-          call polynomial_coeff_getName(text,&
-&                                      atm1=symbols(terms(1)%atindx(1,idisp1)),&
-&                                      atm2=symbols(terms(1)%atindx(2,idisp1)),&
-&                                      dir=mutodir(terms(1)%direction(idisp1)),&
-&                                      power=trim(powerchar))
-          
-          name = trim(name)//trim(text)
-        end do
-        call polynomial_coeff_init(one,nterm_max,coeffs_out(1),terms,name=name)
-    
-        do iterm1=1,nterm_max
-          call polynomial_term_free(terms(iterm1))
-        end do
-    
-        ABI_DEALLOCATE(terms)
-        
-      end do
-    end do
-  end if
-
-end subroutine polynomial_coeff_dot
-!!***
-
-
+!! CHILDREN
+!!      polynomial_coeff_getname,polynomial_coeff_init,polynomial_term_free
+!!      polynomial_term_init
 !!****f* m_polynomial_coeff/coeffs_compare
 !! NAME
 !!  equal

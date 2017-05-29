@@ -147,6 +147,7 @@ subroutine indefo1(dtset)
  dtset%optdriver=0
 !P
  dtset%paral_rf=0
+!dtset%paral_kgb ! Is even initialized earlier.
  dtset%pawspnorb=0  ! will be changed to 1 as soon as usepaw==1 and nspinor==2
  dtset%pimass(:)=-one
 !Q

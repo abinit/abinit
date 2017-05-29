@@ -294,7 +294,7 @@ end subroutine derfcf
 !! SIDE EFFECTS
 !!
 !! PARENTS
-!!      mklocl_realspace
+!!      mklocl_realspace,mklocl_wavelets
 !!
 !! CHILDREN
 !!

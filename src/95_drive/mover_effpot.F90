@@ -72,7 +72,6 @@ subroutine mover_effpot(inp,filnam,effective_potential,comm)
 #undef ABI_FUNC
 #define ABI_FUNC 'mover_effpot'
  use interfaces_14_hidewrite
- use interfaces_28_numeric_noabirule
  use interfaces_41_geometry
  use interfaces_95_drive, except_this_one => mover_effpot
 !End of the abilint section
@@ -88,8 +87,8 @@ implicit none
  character(len=fnlen),intent(in) :: filnam(15)
 !Local variables-------------------------------
 !scalar
- integer :: ii,jj,nproc,my_rank
- real(dp):: qmass,bmass
+ integer :: ii,jj,nproc,my_rank,option_fit = zero
+ real(dp):: freq_q,freq_b,qmass,bmass
  logical :: iam_master
  integer, parameter:: master = 0
 !TEST_AM
@@ -107,7 +106,6 @@ implicit none
  type(ab_xfh_type) :: ab_xfh
  type(results_gs_type),target :: results_gs
  type(pseudopotential_type),target :: psps
- type(strain_type) :: strain
 !arrays
 !no_abirules
  integer,pointer :: indsym(:,:,:)
@@ -120,9 +118,9 @@ implicit none
  real(dp),allocatable :: fred(:,:),fcart(:,:)
  real(dp),allocatable :: vel(:,:)
  real(dp) :: vel_cell(3,3),rprimd(3,3)
- real(dp) :: mat_strain(3,3)
  type(supercell_type) :: supercell
 !TEST_AM
+ !real(dp) :: tsec(2),tcpu,tcpui,twall,twalli
  !real(dp),allocatable :: energy(:)
  !integer :: option
  !integer :: funit = 1,ii,kk
@@ -198,14 +196,12 @@ implicit none
 !Store the information of the supercell of the reference structure into effective potential
  call copy_supercell(supercell,effective_potential%supercell)
 !Set new MPI for the new supercell 
- call effective_potential_initmpi_supercell(effective_potential,comm)
+ call effective_potential_initmpi(effective_potential,comm)
 !Deallocation of useless array
  call destroy_supercell(supercell)   
 
  ABI_DEALLOCATE(xred)
  ABI_DEALLOCATE(xcart)
-
- call effective_potential_printSupercell(effective_potential)
 
  if(inp%dynamics==12.or.inp%dynamics==13) then
 !***************************************************************
@@ -221,23 +217,17 @@ implicit none
    dtset%nctime = 0     ! NetCdf TIME between output of molecular dynamics informations 
    dtset%delayperm = 0  ! DELAY between trials to PERMUTE atoms
    dtset%dilatmx = 1.0  ! DILATation : MaXimal value
-   dtset%dtion = inp%dtion  ! Delta Time for IONs
    dtset%diismemory = 8 ! Direct Inversion in the Iterative Subspace MEMORY
    dtset%friction = 0.0001 ! internal FRICTION coefficient
    dtset%goprecon = 0   ! Geometry Optimization PREconditioner equations
-   dtset%ionmov = inp%dynamics  ! Number for the dynamic
    dtset%jellslab = 0   ! include a JELLium SLAB in the cell
    dtset%mdwall = 10000 ! Molecular Dynamics WALL location
    dtset%natom = effective_potential%supercell%natom_supercell
    dtset%ntypat = effective_potential%crystal%ntypat
    dtset%nconeq = 0     ! Number of CONstraint EQuations
    dtset%noseinert = 1.d-5 ! NOSE INERTia factor
-   dtset%nnos = inp%nnos       ! Number of nose masses Characteristic
-   dtset%ntime = inp%ntime  ! Number of TIME steps 
    dtset%nsym = 1       ! Number of SYMmetry operations
    dtset%prtxml = 0     ! print the xml
-   dtset%optcell = inp%optcell    ! OPTimize the CELL shape and dimensions Characteristic
-   dtset%restartxf = 0  ! RESTART from (X,F) history
    dtset%signperm = 1   ! SIGN of PERMutation potential      
    dtset%strprecon = 1  ! STRess PRECONditioner
    dtset%tolmxf = 2.0d-5
@@ -250,34 +240,76 @@ implicit none
    ABI_ALLOCATE(dtset%iatfix,(3,dtset%natom)) ! Indices of AToms that are FIXed
    dtset%iatfix = zero
    dtset%goprecprm(:) = zero !Geometry Optimization PREconditioner PaRaMeters equations
-   dtset%mdtemp(1) = inp%temperature   !Molecular Dynamics Temperatures 
-   dtset%mdtemp(2) = inp%temperature   !Molecular Dynamics Temperatures 
    ABI_ALLOCATE(dtset%prtatlist,(dtset%natom)) !PRinT by ATom LIST of ATom
    dtset%prtatlist(:) = zero
+
+
+   if(option_fit==0)then
+     dtset%dtion = inp%dtion  ! Delta Time for IONs
+     dtset%ionmov = inp%dynamics  ! Number for the dynamic
+     dtset%nnos = inp%nnos       ! Number of nose masses Characteristic
+     dtset%ntime = inp%ntime  ! Number of TIME steps 
+     dtset%optcell = inp%optcell    ! OPTimize the CELL shape and dimensions Characteristic
+     dtset%restartxf = inp%restarxf  ! RESTART from (X,F) history
+     dtset%mdtemp(1) = inp%temperature   !Molecular Dynamics Temperatures 
+     dtset%mdtemp(2) = inp%temperature   !Molecular Dynamics Temperatures 
+
+   else
+!    Set default for the fit
+     dtset%restartxf = 0  ! RESTART from (X,F) history
+     dtset%dtion = 100  ! Delta Time for IONs
+     dtset%ionmov = 13  ! Number for the dynamic
+     dtset%nnos = 1       ! Number of nose masses Characteristic
+     dtset%ntime = 2000  ! Number of TIME steps 
+     dtset%optcell = 2    ! OPTimize the CELL shape and dimensions Characteristic 
+     dtset%mdtemp(1) = 5   !Molecular Dynamics Temperatures 
+     dtset%mdtemp(2) = 0.1 !Molecular Dynamics Temperatures 
+
+   end if
 
 
 !  Set the barostat and thermonstat if ionmov == 13
    if(dtset%ionmov == 13)then
 
-     qmass = (abs(1+product(inp%strtarget(1:3)/3))*dtset%natom* kb_THzK * dtset%mdtemp(1)) / (0.1**2)
-     bmass = (abs(1+product(inp%strtarget(1:3)/3))*dtset%natom* kb_THzK * dtset%mdtemp(1)) / (0.01**2)
+!    Select frequency of the barostat as a function of temperature
+!    For small temperature, we need huge barostat and inversely
+     if(dtset%mdtemp(1) <= 10) then
+       freq_q = 0.002
+       freq_b = 0.0002
+     else  if(dtset%mdtemp(1) <= 50) then
+       freq_q = 0.02
+       freq_b = 0.002 
+     else  if(dtset%mdtemp(1) > 50.and.dtset%mdtemp(1) < 300) then
+       freq_q = 0.1
+       freq_b = 0.01 
+     else
+       freq_q = 0.2
+       freq_b = 0.02
+     end if
+
+!TEST_AM
+     freq_q = 0.1
+     freq_b = 0.01
+!TEST_AM
+     qmass = (abs(1+product(inp%strtarget(1:3)/3))*dtset%natom* kb_THzK * dtset%mdtemp(1)) / (freq_q**2)
+     bmass = (abs(1+product(inp%strtarget(1:3)/3))*dtset%natom* kb_THzK * dtset%mdtemp(1)) / (freq_b**2)
 
      if(dtset%nnos==0) then
        dtset%nnos = 1
        ABI_ALLOCATE(dtset%qmass,(dtset%nnos))
        dtset%qmass(:)  = qmass
        write(message,'(3a,F20.1,a)')&
-&      ' WARNING: nnos is set to zero in the input',ch10,&
-&      '          value by default for qmass: ',dtset%qmass(:),ch10
+&       ' WARNING: nnos is set to zero in the input',ch10,&
+&       '          value by default for qmass: ',dtset%qmass(:),ch10
        call wrtout(std_out,message,"COLL")
      else
        ABI_ALLOCATE(dtset%qmass,(dtset%nnos)) ! Q thermostat mass
-        dtset%qmass(:) = inp%qmass(:)
+       dtset%qmass(:) = inp%qmass(:)
      end if
      if (inp%bmass == zero) then
        dtset%bmass = bmass
        write(message,'(3a,F20.4,a)')&
-&      ' WARNING: bmass is set to zero in the input',ch10,&
+&       ' WARNING: bmass is set to zero in the input',ch10,&
 &       '          value by default for bmass: ',dtset%bmass,ch10
        call wrtout(std_out,message,"COLL")
      else
@@ -291,7 +323,6 @@ implicit none
    call alloc_copy(symrel,dtset%symrel)
    ABI_ALLOCATE(tnons,(3,dtset%nsym))
    tnons = zero
-   dtset%tnons = tnons
    call alloc_copy(tnons,dtset%tnons)
    call alloc_copy(effective_potential%supercell%typat_supercell,dtset%typat)
    call alloc_copy(effective_potential%crystal%znucl,dtset%znucl)   
@@ -338,8 +369,8 @@ implicit none
    ABI_ALLOCATE(ab_xfh%xfhist,(3,dtset%natom+4,2,ab_xfh%mxfh))
    if (any((/2,3,10,11,22/)==dtset%ionmov)) then
      write(message, '(3a)' )&
-&   ' This dynamics can not be used with effective potential',ch10,&
-&   'Action: correct dynamics input'
+&     ' This dynamics can not be used with effective potential',ch10,&
+&     'Action: correct dynamics input'
      MSG_BUG(message)
    end if
 
@@ -360,26 +391,6 @@ implicit none
    ABI_ALLOCATE(vel,(3,dtset%natom))
    ABI_ALLOCATE(fred,(3,dtset%natom))
    ABI_ALLOCATE(fcart,(3,dtset%natom))
-
-! Fill the strain from input file
-   call strain_init(strain)
-   if (any(inp%strain /= zero)) then
-     write(message,'(2a)') ch10, ' Strain is imposed during the simulation'
-     call wrtout(std_out,message,'COLL')
-     call wrtout(ab_out,message,'COLL')
-!    convert strain into matrix
-     mat_strain(1,1) = inp%strain(1); mat_strain(2,2) = inp%strain(2); mat_strain(3,3) = inp%strain(3)
-     mat_strain(3,2) = half * inp%strain(4) ; mat_strain(2,3) = half * inp%strain(4) 
-     mat_strain(3,1) = half * inp%strain(5) ; mat_strain(1,3) = half * inp%strain(5)
-     mat_strain(1,2) = half * inp%strain(6) ; mat_strain(2,1) = half * inp%strain(6)
-     call strain_get(strain,mat_delta = mat_strain)
-     effective_potential%strain = strain
-     effective_potential%has_strain = .FALSE.
-     call strain_print(effective_potential%strain)
-     call strain_apply(effective_potential%supercell%rprimd_supercell,dtset%rprimd_orig(:,:,1),&
-&     effective_potential%strain)
-   end if
-   
    
    call xcart2xred(dtset%natom,effective_potential%supercell%rprimd_supercell,&
 &   effective_potential%supercell%xcart_supercell,xred)
@@ -387,39 +398,6 @@ implicit none
    xred_old = xred
    vel_cell(:,:) = zero
    vel(:,:)      = zero
-
-!TEST_AM
-!  Random initilisation of the velocitie and scale to the temperature 
-!  with Maxwell-Boltzman distribution
-!     do ia=1,dtset%natom
-!       do mu=1,3
-!         vel(mu,ia)=sqrt(kb_HaK*dtset%mdtemp(1)/amass(ia))*cos(two_pi*uniformrandom(rand_seed))
-!         vel(mu,ia)=vel(mu,ia)*sqrt(-2._dp*log(uniformrandom(rand_seed)))
-!       end do
-!     end do
-
-! ! !  Get rid of center-of-mass velocity
-!     sum_mass=sum(amass(:))
-!     do mu=1,3
-!       mass_ia=sum(amass(:)*vel(mu,:))
-!       vel(mu,:)=vel(mu,:)-mass_ia/sum_mass
-!     end do
-
-! ! !  Compute v2gauss
-!     v2gauss = zero
-!     do ia=1,dtset%natom
-!       do mu=1,3
-!         v2gauss=v2gauss+vel(mu,ia)*vel(mu,ia)*amass(ia)
-!       end do
-!     end do
-!  !  Now rescale the velocities to give the exact temperature
-!     rescale_vel=sqrt(3._dp*dtset%natom*kb_HaK*dtset%mdtemp(1)/v2gauss)
-!     vel(:,:)=vel(:,:)*rescale_vel
-
-   vel_cell(:,:) = zero
-   vel(:,:)      = zero
-
-!TEST_AM
 
 !*********************************************************
 !3   Call main routine for monte carlo / molecular dynamics
@@ -429,6 +407,21 @@ implicit none
    call wrtout(ab_out,message,'COLL')
    call wrtout(std_out,message,'COLL')
 
+!TEST_AM
+!    do ii=1,dtset%ntime
+!      xred(:,:) = xred(:,:) + 0.02
+!      rprimd(1,1) = rprimd(1,1) + 0.02
+
+!      call timein(tcpui,twalli)
+!      call effective_potential_evaluate(effective_potential,scfcv_args%results_gs%etotal,&
+! &               scfcv_args%results_gs%fcart,scfcv_args%results_gs%fred,&
+! &               scfcv_args%results_gs%strten,dtset%natom,rprimd,xred)
+!      call timein(tcpu,twall)
+!      tsec(1)=tcpu-tcpui
+!      tsec(2)=twall-twalli
+!      if(my_rank==0)print*,"TIME FOR 1 STEP FOR CPU ",my_rank,":",tsec
+!    end do
+!TEST_AM
    call mover(scfcv_args,ab_xfh,acell,amass,dtfil,electronpositron,&
 &   rhog,rhor,dtset%rprimd_orig,vel,vel_cell,xred,xred_old,effective_potential)
    
