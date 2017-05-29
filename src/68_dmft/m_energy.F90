@@ -685,6 +685,10 @@ end subroutine compute_band_energy
 
 subroutine compute_migdal_energy(cryst_struc,e_hu_migdal,e_hu_migdal_tot,green,paw_dmft,pawprtvol,self)
 
+#if defined HAVE_AVX_SAFE_MODE
+!DEC$ NOOPTIMIZE
+#endif
+
  use defs_basis
  use m_crystal, only : crystal_t
  use m_green, only : green_type
