@@ -6,7 +6,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 2006-2016 ABINIT group (BAmadon)
+!! Copyright (C) 2006-2017 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2479,7 +2479,7 @@ end subroutine compa_occup_ks
 !! Do integration in matsubara space
 !!
 !! COPYRIGHT
-!! Copyright (C) 2006-2016 ABINIT group (BAmadon)
+!! Copyright (C) 2006-2017 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2580,7 +2580,7 @@ end subroutine add_int_fct
 !! Do integration in matsubara space
 !!
 !! COPYRIGHT
-!! Copyright (C) 2006-2016 ABINIT group (BAmadon)
+!! Copyright (C) 2006-2017 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2718,7 +2718,7 @@ end subroutine int_fct
 !! (A spline is performed )
 !!
 !! COPYRIGHT
-!! Copyright (C) 2006-2016 ABINIT group (BAmadon)
+!! Copyright (C) 2006-2017 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2870,7 +2870,7 @@ end subroutine fourier_fct
 !! (A spline is performed )
 !!
 !! COPYRIGHT
-!! Copyright (C) 2006-2016 ABINIT group (BAmadon)
+!! Copyright (C) 2006-2017 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -3194,7 +3194,7 @@ end subroutine occup_green_tau
 !! Compute levels for ctqmc
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2016 ABINIT group (BAmadon)
+!! Copyright (C) 1999-2017 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

@@ -10,7 +10,7 @@
 !! 3rd derivatives, 1st derivatives
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2016 ABINIT group (XG,MT,SP)
+!! Copyright (C) 1999-2017 ABINIT group (XG,MT,SP)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

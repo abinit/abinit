@@ -7,7 +7,7 @@
 !!  Print band structure energies in XCrysDen format.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2006-2016 ABINIT group (MVerstraete,MG)
+!!  Copyright (C) 2006-2017 ABINIT group (MVerstraete,MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .

@@ -9,7 +9,7 @@
 !! and close the file. The output rate and shift are governed by istat
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (XG,TD)
+!! Copyright (C) 1998-2017 ABINIT group (XG,TD)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

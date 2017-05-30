@@ -8,7 +8,7 @@
 !!  code, version of code, platform, and starting date.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2016 ABINIT group (DCA, XG, GMR, LSI, MM, MT)
+!!  Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR, LSI, MM, MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -74,7 +74,7 @@ subroutine herald(code_name,code_version,iout)
 
 !RELEASE TIME FROM ABIRULES
  year_rel=2017
- mm_rel=01
+ mm_rel=05
 !END OF RELEASE TIME
 
 !The technique used hereafter is the only one that we have found to obtain
@@ -88,7 +88,7 @@ subroutine herald(code_name,code_version,iout)
 
 !GNU GPL license
  write(iout, '(a,/,a,a,a,/,a,/,a,/,a,/)' ) &
-& '.Copyright (C) 1998-2016 ABINIT group . ',&
+& '.Copyright (C) 1998-2017 ABINIT group . ',&
 & ' ',trim(code_name),' comes with ABSOLUTELY NO WARRANTY.',&
 & ' It is free software, and you are welcome to redistribute it',&
 & ' under certain conditions (GNU General Public License,',&

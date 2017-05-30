@@ -6,7 +6,7 @@
 !! Loop over perturbations
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2016 ABINIT group (XG, DRH, MB, XW, MT)
+!! Copyright (C) 1999-2017 ABINIT group (XG, DRH, MB, XW, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -995,8 +995,18 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 !  Initialize GS wavefunctions at k
    ireadwf0=1; formeig=0 ; ask_accurate=1 ; optorth=0
    mcg=mpw*dtset%nspinor*dtset%mband*mkmem_rbz*dtset%nsppol
+   if (one*mpw*dtset%nspinor*dtset%mband*mkmem_rbz*dtset%nsppol > huge(1)) then
+     write (message,'(4a, 5(a,i0), 2a)')&
+&     "Default integer is not wide enough to store the size of the GS wavefunction array (WF0, mcg).",ch10,&
+&     "Action: increase the number of processors. Consider also OpenMP threads.",ch10,&
+&     "nspinor: ",dtset%nspinor, "mpw: ",mpw, "mband: ",dtset%mband, "mkmem_rbz: ",&
+&     mkmem_rbz, "nsppol: ",dtset%nsppol,ch10,&
+&     'Note: Compiling with large int (int64) requires a full software stack (MPI/FFTW/BLAS/LAPACK...) compiled in int64 mode'
+     MSG_ERROR(message)
+   end if
    ABI_STAT_ALLOCATE(cg,(2,mcg), ierr)
    ABI_CHECK(ierr==0, "out-of-memory in cg")
+
    ABI_ALLOCATE(eigen0,(dtset%mband*nkpt_rbz*dtset%nsppol))
    call timab(144,1,tsec)
    call status(0,dtfil%filstat,iexit,level,'call inwffil-k')
@@ -1106,6 +1116,16 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 !  MG: Here it is possible to avoid the extra reading if the same k mesh can be used.
    ireadwf0=1 ; formeig=0 ; ask_accurate=1 ; optorth=0
    mcgq=mpw1*dtset%nspinor*dtset%mband*mkqmem_rbz*dtset%nsppol
+   if (one*mpw1*dtset%nspinor*dtset%mband*mkqmem_rbz*dtset%nsppol > huge(1)) then
+     write (message,'(4a, 5(a,i0), 2a)')&
+&     "Default integer is not wide enough to store the size of the GS wavefunction array (WFKQ, mcgq).",ch10,&
+&     "Action: increase the number of processors. Consider also OpenMP threads.",ch10,&
+&     "nspinor: ",dtset%nspinor, "mpw1: ",mpw1, "mband: ",dtset%mband, "mkqmem_rbz: ",&
+&     mkqmem_rbz, "nsppol: ",dtset%nsppol,ch10,&
+&     'Note: Compiling with large int (int64) requires a full software stack (MPI/FFTW/BLAS/LAPACK...) compiled in int64 mode'
+     MSG_ERROR(message)
+   end if
+
    ABI_STAT_ALLOCATE(cgq,(2,mcgq), ierr)
    ABI_CHECK(ierr==0, "out-of-memory in cgq")
    ABI_ALLOCATE(eigenq,(dtset%mband*nkpt_rbz*dtset%nsppol))
@@ -1248,8 +1268,18 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
      dim_eig2rf=1
    end if
    mcg1=mpw1*dtset%nspinor*dtset%mband*mk1mem_rbz*dtset%nsppol
+   if (one*mpw1*dtset%nspinor*dtset%mband*mk1mem_rbz*dtset%nsppol > huge(1)) then
+     write (message,'(4a, 5(a,i0), 2a)')&
+&     "Default integer is not wide enough to store the size of the GS wavefunction array (WFK1, mcg1).",ch10,&
+&     "Action: increase the number of processors. Consider also OpenMP threads.",ch10,&
+&     "nspinor: ",dtset%nspinor, "mpw1: ",mpw1, "mband: ",dtset%mband, "mk1mem_rbz: ",&
+&     mk1mem_rbz, "nsppol: ",dtset%nsppol,ch10,&
+&     'Note: Compiling with large int (int64) requires a full software stack (MPI/FFTW/BLAS/LAPACK...) compiled in int64 mode'
+     MSG_ERROR(message)
+   end if
    ABI_STAT_ALLOCATE(cg1,(2,mcg1), ierr)
    ABI_CHECK(ierr==0, "out of memory in cg1")
+
    ABI_ALLOCATE(cg1_active,(2,mpw1*dtset%nspinor*dtset%mband*mk1mem_rbz*dtset%nsppol*dim_eig2rf))
    ABI_ALLOCATE(gh1c_set,(2,mpw1*dtset%nspinor*dtset%mband*mk1mem_rbz*dtset%nsppol*dim_eig2rf))
    ABI_ALLOCATE(gh0c1_set,(2,mpw1*dtset%nspinor*dtset%mband*mk1mem_rbz*dtset%nsppol*dim_eig2rf))

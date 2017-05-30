@@ -7,7 +7,7 @@
 !! this routine is driver for using mover with effective potential
 !! 
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (AM)
+!! Copyright (C) 1998-2017 ABINIT group (AM)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -266,7 +266,6 @@ implicit none
    call alloc_copy(symrel,dtset%symrel)
    ABI_ALLOCATE(tnons,(3,dtset%nsym))
    tnons = zero
-   dtset%tnons = tnons
    call alloc_copy(tnons,dtset%tnons)
    call alloc_copy(effective_potential%supercell%typat_supercell,dtset%typat)
    call alloc_copy(effective_potential%crystal%znucl,dtset%znucl)   

@@ -7,7 +7,7 @@
 !! Primary routine for conducting DFT calculations by CG minimization.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (DCA, XG, GMR, JYR, MKV, MT, FJ, MB)
+!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR, JYR, MKV, MT, FJ, MB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -240,6 +240,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  integer :: nblok,nfftf,nfftot,npwmin
  integer :: openexit,option,optorth,psp_gencond,conv_retcode
  integer :: pwind_alloc,rdwrpaw,comm,tim_mkrho,use_sc_dmft
+ integer :: cnt,spin,band,ikpt
  real(dp) :: cpus,ecore,ecut_eff,ecutdg_eff,etot,fermie
  real(dp) :: gsqcut_eff,gsqcut_shp,gsqcutc_eff,hyb_range,residm,tolwfr,ucvol
  logical :: read_wf_or_den,has_to_init,call_pawinit,write_wfk
@@ -605,14 +606,37 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 !###########################################################
 !### 05. Calls inwffil
 
+ ! if paral_kgb == 0, it may happen that some processors are idle (no entry in proc_distrb)
+ ! but mkmem == nkpt and this can cause integer overflow in mcg or allocation error.
+ ! Here we count the number of states treated by the proc. if cnt == 0, mcg is then set to 0.
+ cnt = 0
+ do spin=1,dtset%nsppol
+   do ikpt=1,dtset%nkpt
+     do band=1,dtset%nband(ikpt + (spin-1) * dtset%nkpt)
+       if (.not. proc_distrb_cycle(mpi_enreg%proc_distrb, ikpt, band, band, spin, mpi_enreg%me_kpt)) cnt = cnt + 1
+     end do
+   end do
+ end do
+
  my_nspinor=max(1,dtset%nspinor/mpi_enreg%nproc_spinor)
  mcg=dtset%mpw*my_nspinor*dtset%mband*dtset%mkmem*dtset%nsppol
+ if (cnt == 0) then
+   mcg = 0
+   write(message,"(2(a,i0))")"rank: ",mpi_enreg%me, "does not have wavefunctions to treat. Setting mcg to: ",mcg
+   MSG_WARNING(message)
+ end if
 
- if (dtset%usewvl == 0 .and. dtset%mpw > 0)then
+ if (dtset%usewvl == 0 .and. dtset%mpw > 0 .and. cnt /= 0)then
    if (my_nspinor*dtset%mband*dtset%mkmem*dtset%nsppol > floor(real(HUGE(0))/real(dtset%mpw) )) then
-     write (message,'(2a)') 'Error: overflow of mcg integer for size of the full wf.',&
-&     ' Recompile with large int or reduce system size'
-     MSG_BUG(message)
+     write (message,'(10a, 5(a,i0), 2a)')&
+&     "Default integer is not wide enough to store the size of the wavefunction array (mcg).",ch10,&
+&     "This usually happens when paral_kgb == 0 and there are not enough procs to distribute kpts and spins",ch10,&
+&     "Action: if paral_kgb == 0, use nprocs = nkpt * nsppol to reduce the memory per node.",ch10,&
+&     "If this does not solve the problem, use paral_kgb 1 with nprocs > nkpt * nsppol and use npfft/npband/npspinor",ch10,&
+&     "to decrease the memory requirements. Consider also OpenMP threads.",ch10,&
+&     "my_nspinor: ",my_nspinor, "mpw: ",dtset%mpw, "mband: ",dtset%mband, "mkmem: ",dtset%mkmem, "nsppol: ",dtset%nsppol,ch10,&
+&     'Note: Compiling with large int (int64) requires a full software stack (MPI/FFTW/BLAS/LAPACK...) compiled in int64 mode'
+     MSG_ERROR(message)
    end if
  end if
 

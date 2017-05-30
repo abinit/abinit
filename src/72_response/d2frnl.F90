@@ -8,7 +8,7 @@
 !! (strain and/or phonon)
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (DCA, XG, GM, AR, MB, MT, AM)
+!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GM, AR, MB, MT, AM)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnuC.org/copyleft/gpl.txt .
@@ -385,7 +385,7 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
 !  For each atom and for electric field direction k:
 !  becij(k)=<Phi_i|r_k-R_k|Phi_j>-<tPhi_i|r_k-R_k|tPhi_j> + sij.R_k
    if (need_becfr.or.need_piezofr) then
-     ABI_ALLOCATE(becij,(gs_ham%dimekb1,gs_ham%dimekb1,dtset%nspinor**2,3))
+     ABI_ALLOCATE(becij,(gs_ham%dimekb1,gs_ham%dimekb2,dtset%nspinor**2,3))
      becij=zero
      ABI_DATATYPE_ALLOCATE(paw_ij_tmp,(my_natom))
      ABI_DATATYPE_ALLOCATE(pawfgrtab_tmp,(my_natom))

@@ -9,7 +9,7 @@
 !! to the product of two wavefunctions n_{12}(r) = \Psi_1* \Psi_2. Based on pawmknhat.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (MG, FJ, MT)
+!! Copyright (C) 1998-2017 ABINIT group (MG, FJ, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
