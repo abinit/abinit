@@ -816,6 +816,18 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
      end if
    end if
 
+!  call calcdensph(gmet,mpi_enreg,dtset%natom,nfftf,ngfftf,nspden,&
+!&   dtset%ntypat,ab_out,dtset%ratsph,rhor1,rprimd,dtset%typat,ucvol,xred,&
+!&   idir+1,cplex,intgden=intgden,dentot=dentot) !SPr remove
+!     write(*,*) 'SPr: n (Cr 1,2)',intgden(1,1),' ',intgden(1,2)
+!     write(*,*) 'SPr: mx(Cr 1,2)',intgden(2,1),' ',intgden(2,2)
+!     write(*,*) 'SPr: my(Cr 1,2)',intgden(3,1),' ',intgden(3,2)
+!     write(*,*) 'SPr: mz(Cr 1,2)',intgden(4,1),' ',intgden(4,2)
+!  call dfpt_etot(dtset%berryopt,deltae,eberry,edocc,eeig0,eew,efrhar,efrkin,&
+!&     efrloc,efrnl,efrx1,efrx2,ehart1,ek0,ek1,eii,elast,eloc0,elpsp1,&
+!&     enl0,enl1,epaw1,etotal,evar,evdw,exc1,elmag1,ipert,dtset%natom,optene)
+!     write(*,*) 'SPr: ek1=',ek1,'  exc1=',exc1,' elmag1=',elmag1!SPr remove
+ 
    !if (ipert==dtset%natom+5) then
    !calculate 1st order magnetic potential contribution to the energy
    !  call dfpt_e1mag(e1mag,rhor1,rhog1);
@@ -838,7 +850,6 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
      call dfpt_etot(dtset%berryopt,deltae,eberry,edocc,eeig0,eew,efrhar,efrkin,&
 &     efrloc,efrnl,efrx1,efrx2,ehart1,ek0,ek1,eii,elast,eloc0,elpsp1,&
 &     enl0,enl1,epaw1,etotal,evar,evdw,exc1,elmag1,ipert,dtset%natom,optene)
-
      call timab(152,1,tsec)
      choice=2
      call scprqt(choice,cpus,deltae,diffor,dtset,eigen0,&
@@ -1198,15 +1209,14 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 !- core charge is excluded from the charge density;
 !- the potential is the INPUT vtrial.
 
- if(ipert==dtset%natom+5)then
+ if(ipert==dtset%natom+5.or.ipert<=dtset%natom)then
   !debug: write out the vtk first-order density components
   call appdig(pertcase,dtfil%fnameabo_den,fi1o_vtk)
-  call printmagvtk(mpi_enreg,nspden,nfftf,ngfftf,rhor1,rprimd,adjustl(adjustr(fi1o_vtk)//".vtk"))
+  call printmagvtk(mpi_enreg,cplex,nspden,nfftf,ngfftf,rhor1,rprimd,adjustl(adjustr(fi1o_vtk)//".vtk"))
   !compute the contributions to susceptibility from different attomic spheres:
   call calcdensph(gmet,mpi_enreg,dtset%natom,nfftf,ngfftf,nspden,&
 &   dtset%ntypat,ab_out,dtset%ratsph,rhor1,rprimd,dtset%typat,ucvol,xred,&
-&   idir+1,intgden,dentot)
-
+&   idir+1,cplex,intgden=intgden,dentot=dentot)
  endif
 
  if (iwrite_fftdatar(mpi_enreg)) then

@@ -226,10 +226,11 @@ subroutine dfpt_mkvxc_noncoll(cplex,ixc,kxc,bxc,mpi_enreg,nfft,ngfft,nhat1,nhat1
            mx1=rhor1(ifft,2); mdirx=rhor(ifft,2)/m_norm(ifft);
            my1=rhor1(ifft,3); mdiry=rhor(ifft,3)/m_norm(ifft);
            mz1=rhor1(ifft,4); mdirz=rhor(ifft,4)/m_norm(ifft);
-          vxc1(ifft,1) = vxc1(ifft,1)+ bxc(ifft)*( mz1 - mdirz*m_dot_m1 )
-          vxc1(ifft,2) = vxc1(ifft,2)+ bxc(ifft)*(-mz1 + mdirz*m_dot_m1 )
-          vxc1(ifft,3) = vxc1(ifft,3)+ bxc(ifft)*( mx1 - mdirx*m_dot_m1 )
-          vxc1(ifft,4) = vxc1(ifft,4)+ bxc(ifft)*(-my1 + mdiry*m_dot_m1 )
+         
+           vxc1(ifft,1) = vxc1(ifft,1)+ bxc(ifft)*( mz1 - mdirz*m_dot_m1 )
+           vxc1(ifft,2) = vxc1(ifft,2)+ bxc(ifft)*(-mz1 + mdirz*m_dot_m1 )
+           vxc1(ifft,3) = vxc1(ifft,3)+ bxc(ifft)*( mx1 - mdirx*m_dot_m1 )
+           vxc1(ifft,4) = vxc1(ifft,4)+ bxc(ifft)*(-my1 + mdiry*m_dot_m1 )
 !          write(*,*) m_dot_m1/m_norm(ifft)
 !          write(*,*)   ( mx1 - mdirx*m_dot_m1 )*rhor(ifft,2) + &
 !&                       ( my1 - mdiry*m_dot_m1 )*rhor(ifft,3) + &
