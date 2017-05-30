@@ -420,7 +420,7 @@ AC_DEFUN([_ABI_LINALG_FIND_ELPA_VERSION],[
     real*8 :: a(lda,nrow),ev(na),q(ldq,nrow)
     complex*16 :: ac(lda,nrow)
     success1=solve_evp_real_1stage(na,nev,a,lda,ev,q,ldq,nblk,nrow,comm_r,comm_c)
-    call cholesky_complex(na,ac,lda,nblk,nrow,comm_r,comm_c,debug,success1)
+    success1=cholesky_complex(na,ac,lda,nblk,nrow,comm_r,comm_c,debug)
     success2=get_elpa_communicators(comm_g,na,na,comm_r,comm_c)
     ])], [abi_linalg_has_elpa_2016="yes"], [abi_linalg_has_elpa_2016="no"])
   if test "${abi_linalg_has_elpa_2016}" = "yes"; then
