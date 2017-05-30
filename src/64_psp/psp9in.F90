@@ -239,13 +239,13 @@ subroutine psp9in(filpsp,ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
 !    Find the number of projectors per angular momentum shell
  nproj(:)=0
  if (ps_Number_Of_Projectors(psxml,SET_NONREL) > 0) then
-   call ps_Get_Projector_Indexes(psxml,SET_NONREL,idx_sr)
+   idx_sr = ps_Projector_Indexes(psxml,SET_NONREL)
    do iproj = 1, ps_Number_Of_Projectors(psxml,SET_NONREL)
      il = ps_Projector_L(psxml, idx_sr(iproj))
      nproj(il+1) = nproj(il+1) + 1
    end do
  else if (ps_Number_Of_Projectors(psxml,SET_SREL) > 0) then
-   call ps_Get_Projector_Indexes(psxml,SET_SREL,idx_sr)
+   idx_sr = ps_Projector_Indexes(psxml,SET_SREL)
    do iproj = 1, ps_Number_Of_Projectors(psxml,SET_SREL)
      il = ps_Projector_L(psxml, idx_sr(iproj))
      nproj(il+1) = nproj(il+1) + 1
@@ -256,7 +256,7 @@ subroutine psp9in(filpsp,ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
 
  irelt = 0
  if (nso == 2) then
-   call ps_Get_Projector_Indexes(psxml,SET_SO,idx_so)
+   idx_so = ps_Projector_Indexes(psxml,SET_SO)
    do iproj = 1, ps_Number_Of_Projectors(psxml,SET_SO)
      il = ps_Projector_L(psxml, idx_so(iproj))
      nproj(il+lmax+2) = nproj(il+lmax+2) + 1
