@@ -632,6 +632,12 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
 !    Check for GW calculations that are not implemented.
      !cond_string(1)='optdriver' ; cond_values(1)=optdriver
      !call chkint_eq(1,1,cond_string,cond_values,ierr,'nspinor',dt%nspinor,1,(/1/),iout)
+
+     if (maxval(abs(dt%istwfk(1:nkpt))) > 1 .and. mod(dt%gwcalctyp, 100) >= 20) then
+       write(msg, "(3a)")"Self-consistent GW with istwfk > 1 not supported.",ch10, &
+         "Please regenerate your WFK file with istwfk *1"
+       MSG_ERROR_NOSTOP(msg, ierr)
+     end if
 !
 !    Avoid wasting CPUs if nsppol==2.
      if (dt%nsppol==2.and..not.iseven(nproc).and.nproc>1) then
