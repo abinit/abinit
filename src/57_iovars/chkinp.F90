@@ -3018,8 +3018,9 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
        if(dt%ixc/=11.and.dt%ixc/=-101130.and.dt%ixc/=-130101.and. &
 &       dt%ixc/=18.and.dt%ixc/=-106131.and.dt%ixc/=-131106.and. &
 &       dt%ixc/=19.and.dt%ixc/=-106132.and.dt%ixc/=-132106.and. &
-&       dt%ixc/=-202231.and.dt%ixc/=-231202.and.dt%ixc/=-170.and.&
-&       dt%ixc/=41) then
+&       dt%ixc/=-202231.and.dt%ixc/=-231202.and.&
+&       dt%ixc/=14.and.dt%ixc/=-102130.and.dt%ixc/=-130102.and. &
+&       dt%ixc/=-170.and.dt%ixc/=41.and.dt%ixc/=-406) then
          write(message,'(4a,i2,5a)') ch10,&
 &         ' chkinp : ERROR -',ch10,&
 &         '  Van der Waals DFT-D correction (vdw_xc=',dt%vdw_xc,') only available for the following XC functionals:',ch10,&
