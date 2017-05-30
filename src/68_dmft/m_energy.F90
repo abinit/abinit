@@ -685,7 +685,7 @@ end subroutine compute_band_energy
 
 subroutine compute_migdal_energy(cryst_struc,e_hu_migdal,e_hu_migdal_tot,green,paw_dmft,pawprtvol,self)
 
-#if defined HAVE_AVX_SAFE_MODE
+#ifdef FC_INTEL
 !DEC$ NOOPTIMIZE
 #endif
 
