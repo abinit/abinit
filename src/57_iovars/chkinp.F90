@@ -274,7 +274,9 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
    end if
 !  Non-zero berryopt and usepaw==1 and kptopt/=3 cannot be done unless symmorphi=0
 !  (that is, nonsymmorphic symmetries do not work yet
-   if (usepaw==1.and.dt%berryopt/=0.and.dt%kptopt/=3) then
+!  Update MT 2017-05-31: nonsymmorphic symmetries seem also to be an issue for NCPP
+!  if (usepaw==1.and.dt%berryopt/=0.and.dt%kptopt/=3) then
+   if (dt%berryopt/=0.and.dt%kptopt/=3) then
      cond_string(1)='usepaw'; cond_values(1)=1
      cond_string(2)='berryopt'; cond_values(2)=dt%berryopt
      cond_string(3)='kptopt'; cond_values(3)=dt%kptopt
