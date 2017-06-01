@@ -19,9 +19,8 @@ are relative to modifications/improvements of ABINITv8.4 with respect to v8.2.
 
 The list of contributors includes :
 F. Altvater, G. Antonius, L. Baguet, J.-M. Beuken, J. Bieder, E. Bousquet, 
-W. Chen, G. Geneste, M. Giantomassi, Y. Gillet, X. Gonze, F. Jollet, A. Marton, 
-F. Naccarato, G. Petretto, S. Prokhorenko, F. Ricci,
-M. Torrent , M. Verstraete, J. Zwanziger
+W. Chen, G. Geneste, M. Giantomassi, Y. Gillet, X. Gonze, F. Jollet, A. Martin, 
+F. Naccarato, G. Petretto, S. Prokhorenko, F. Ricci, M. Torrent , M. Verstraete, J. Zwanziger
 
 It is worth to read carefully all the modifications that are mentioned in the present file,
 and examine the links to help files or test cases ...
@@ -31,18 +30,18 @@ Xavier
 
 __________________________________________________________________
 
-Version 8.4, released on May 25, 2017.
+Version 8.4, released on June 2, 2017.
 
 Changes with respect to version 8.2 :
 
-A. WARNINGS.
+A. Warnings and important remarks 
 B. Most noticeable achievements (for users)
 C. Changes in the package, for developers
 D. Other changes (or on-going developments, not finalized)
 
 __________________________________________________________________
 
-A.  WARNINGS AND IMPORTANT REMARKS
+A.  Warnings and important remarks
 
 A.1 The Github ABINIT Web page, at https://github.com/abinit, allows one to
     access the mirror of the repository of ABINIT, as well as some other projects
@@ -100,8 +99,8 @@ B.8 New algorithms for the displacement of nuclei (ionmov) :
     Tests and doc TO BE PROVIDED. 
     Work by S. Prokhorenko
 
-B.9 Refactoring of ANADDB for the production of DOS and other thermodynamic quantities.
-    As well as the mean square displacement and mean square velocity.
+B.9 Refactoring of ANADDB for the production of DOS and other thermodynamic quantities,
+    also the mean square displacement and mean square velocity.
     The DOS is obtained using usual DOS methods, instead of the histogram method,
     and converges much faster with ng2qpt. Activated with prtdos 1 or 2 in anaddb.
     Work by M. Verstraete.
@@ -110,7 +109,9 @@ __________________________________________________________________
 
 C. Changes for the developers (also compilers)
 
-C.1 Management of the test farm : replacement of shiva_gnu_6.3_py3k by inca_gnu_6.3_py3k,
+C.1 Management of the test farm : the new bot ubu_intel_17_openmpi 
+    has been activated, so that Intel 17 is now supported.
+    Also, replacement of shiva_gnu_6.3_py3k by inca_gnu_6.3_py3k,
     update of graphene (MacPorts) to gcc6.3 + scalapack.
     By J.M. Beuken.
 
@@ -169,8 +170,8 @@ D.12 Ongoing work on the electron-phonon postprocessor ElectronPhononCoupling.
      Fix bug affecting MPI runs. 
      By G. Antonius.
 
-D.13. Improvement of zheevd using MAGMA (from a msg on the forum)
-      By M. Torrent
+D.13 Improvement of zheevd using MAGMA (from a msg on the forum)
+     By M. Torrent
 
 D.14 Implemented KSS.nc output with netcdf primitives
      By M. Giantomassi
