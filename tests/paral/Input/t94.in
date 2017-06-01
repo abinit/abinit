@@ -71,7 +71,7 @@ nphf2  2           # Number of processors for occupied states parallelization
 #%% files_to_test = t94_MPI4.out, tolnlines=0, tolabs=0.000e+00, tolrel=0.000e+00
 #%% [extra_info]
 #%% authors = C. Martins
-#%% keywords = PBE0
+#%% keywords = HF, PBE0
 #%% description = 
 #%%   Test of PBE0-1/3 in parallel
 #%%   NB: HF does not support MPI-IO. gmatteo will add support for HDF5 when this test

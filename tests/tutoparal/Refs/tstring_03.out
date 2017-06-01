@@ -67,12 +67,12 @@ P This job should need less than                      47.456 Mbytes of memory.
       acell_12img      1.8897261329E+01  9.4486306644E+00  9.4486306644E+00
               amu      1.59994000E+01  1.40067400E+01  1.00794000E+00
            charge      1.00000000E+00
+     densfor_pred           6
          dynimage        0    1    1    1    1    1    1    1    1    1
                          1    0
              ecut      2.00000000E+01 Hartree
            iatfix        1    4
            imgmov           2
-           densfor_pred           6
            istwfk        2
               ixc       -1009
            kptopt           0
@@ -470,6 +470,7 @@ P           mkmem           1
       acell_12img      1.8897261329E+01  9.4486306644E+00  9.4486306644E+00
               amu      1.59994000E+01  1.40067400E+01  1.00794000E+00
            charge      1.00000000E+00
+     densfor_pred           6
          dynimage        0    1    1    1    1    1    1    1    1    1
                          1    0
              ecut      2.00000000E+01 Hartree
@@ -565,7 +566,6 @@ P           mkmem           1
                        6.4014804256E-02 -2.5238286399E-03  5.9100252393E-03
            iatfix        1    4
            imgmov           2
-           densfor_pred           6
            istwfk        2
               ixc       -1009
            kptopt           0
