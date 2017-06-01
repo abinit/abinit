@@ -828,9 +828,8 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  end if
 
  call timab(405,2,tsec) ! Init2
-
  call timab(406,1,tsec) ! make_vhxc
- !
+
  !===========================
  !=== COMPUTE THE DENSITY ===
  !===========================
@@ -843,7 +842,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  if (Dtset%usekden==1) then
    call wfd_mkrho(Wfd,Cryst,Psps,Kmesh,KS_BSt,ngfftf,nfftf,ks_taur,optcalc=1)
  end if
- !
+
  !========================================
  !==== Additional computation for PAW ====
  !========================================
@@ -1123,7 +1122,8 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  ABI_MALLOC(qp_taur,(nfftf,Dtset%nspden*Dtset%usekden))
  QP_sym => KS_sym
 
- if (mod100<10) then  ! one-shot GW, just do a copy of the KS density.
+ if (mod100<10) then
+   ! one-shot GW, just do a copy of the KS density.
    qp_rhor=ks_rhor
    if(Dtset%usekden==1)qp_taur=ks_taur
    QP_sym => KS_sym
@@ -1173,11 +1173,12 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
    if (nscf==0) prev_rhor=ks_rhor
    if (nscf==0 .and. Dtset%usekden==1) prev_taur=ks_taur
 
-   if (nscf>0.and.mod100>=20.and.wfd_iam_master(Wfd)) then ! Print the unitary transformation on std_out.
+   if (nscf>0.and.mod100>=20.and.wfd_iam_master(Wfd)) then
+     ! Print the unitary transformation on std_out.
      call show_QP(QP_BSt,Sr%m_lda_to_qp,fromb=Sigp%minbdgw,tob=Sigp%maxbdgw,unit=std_out,tolmat=0.001_dp)
    end if
 
-   !  === Compute QP wfg as linear combination of KS states ===
+   ! Compute QP wfg as linear combination of KS states ===
    !  * Wfd%ug is modified inside calc_wf_qp
    !  * For PAW, update also the on-site projections.
    !  * WARNING the first dimension of MPI_enreg MUST be Kmesh%nibz
@@ -1185,13 +1186,15 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
 
    call wfd_rotate(Wfd,Cryst,Sr%m_lda_to_qp)
 
-   ! * Reinit the storage mode of Wfd as ug have been changed ===
-   ! * Update also the wavefunctions for GW corrections on each processor
+   ! Reinit the storage mode of Wfd as ug have been changed ===
+   ! Update also the wavefunctions for GW corrections on each processor
    call wfd_reset_ur_cprj(Wfd)
+
+   ! This test has been disabled (too expensive!)
+   if (.False.) call wfd_test_ortho(Wfd, Cryst, Pawtab, unit=std_out)
 
    ! Compute QP occupation numbers.
    call wrtout(std_out,'sigma: calculating QP occupation numbers:','COLL')
-
    call ebands_update_occ(QP_BSt,Dtset%spinmagntarget,prtvol=0)
    qp_vbik(:,:) = get_valence_idx(QP_BSt)
 
@@ -1221,7 +1224,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
 
    ! Compute QP density using the updated wfg.
    call wfd_mkrho(Wfd,Cryst,Psps,Kmesh,QP_BSt,ngfftf,nfftf,qp_rhor)
-   if(Dtset%usekden==1) then
+   if (Dtset%usekden==1) then
      call wfd_mkrho(Wfd,Cryst,Psps,Kmesh,QP_BSt,ngfftf,nfftf,qp_taur,optcalc=1)
    end if
 
@@ -1229,7 +1232,6 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
    ! ==== QP self-consistent GW with PAW ====
    ! ========================================
    if (Dtset%usepaw==1) then
-
      ABI_MALLOC(qp_nhat,(nfftf,Dtset%nspden))
      nhatgrdim=0; if (Dtset%xclevel==2) nhatgrdim=usexcnhat
      ABI_MALLOC(qp_nhatgr,(nfftf,Dtset%nspden,3*nhatgrdim))
@@ -1237,8 +1239,8 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
      ABI_DT_MALLOC(QP_pawrhoij,(Cryst%natom))
      ABI_DT_MALLOC(QP_paw_ij,(Cryst%natom))
      ABI_DT_MALLOC(QP_paw_an,(Cryst%natom))
-!
-!    Calculate new QP quantities: nhat, nhatgr, rho_ij, paw_ij, and paw_an.
+
+     ! Calculate new QP quantities: nhat, nhatgr, rho_ij, paw_ij, and paw_an.
      call paw_qpscgw(Wfd,nscf,nfftf,ngfftf,Dtset,Cryst,Kmesh,Psps,QP_BSt,&
 &     Pawang,Pawrad,Pawtab,Pawfgrtab,prev_Pawrhoij,&
 &     QP_pawrhoij,QP_paw_ij,QP_paw_an,QP_energies,qp_nhat,nhatgrdim,qp_nhatgr,compch_sph,compch_fft)
@@ -1342,14 +1344,14 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
 &   Cryst%ucvol,usexcnhat,qp_vhartr,vpsp,qp_vtrial,qp_vxc,vxcavg_qp,Wvl,&
 &   xccc3d,Cryst%xred,taug=qp_taug,taur=qp_taur)
 
-   if (allocated(qp_kxc))  then
+   if (allocated(qp_kxc)) then
      ABI_FREE(qp_kxc)
    end if
 
    if (Dtset%usepaw==1) then
      call timab(561,1,tsec)
 
-     ! === Compute QP Dij ===
+     ! Compute QP Dij
      ipert=0; idir=0
      call pawdij(cplex,Dtset%enunit,Cryst%gprimd,ipert,&
 &     Cryst%natom,Cryst%natom,nfftf,ngfftf(1)*ngfftf(2)*ngfftf(3),&
@@ -1358,7 +1360,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
 &     k0,Dtset%spnorbscl,Cryst%ucvol,dtset%charge,qp_vtrial,qp_vxc,Cryst%xred,&
 &     nucdipmom=Dtset%nucdipmom)
 
-     ! === Symmetrize total Dij ===
+     ! Symmetrize total Dij
      option_dij=0
 
 #if 0
@@ -1461,15 +1463,16 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
 !=== Initialize Sigma results ===
 !TODO it is better if we use ragged arrays indexed by the k-point
  call sigma_init(Sigp,Kmesh%nibz,Dtset%usepawu,Sr)
- !
- !=== Setup of the bare Hamiltonian := T + v_{loc} + v_{nl} + v_H ===
- !* The representation depends wheter we are updating the wfs or not.
- !* ks_vUme is zero unless we are using LDA+U as starting point, see calc_vHxc_braket
- !* Note that vH matrix elements are calculated using the true uncutted interaction.
 
- if (mod100<10) then  ! * For one-shot GW use the KS representation.
+ ! Setup of the bare Hamiltonian := T + v_{loc} + v_{nl} + v_H.
+ ! * The representation depends wheter we are updating the wfs or not.
+ ! * ks_vUme is zero unless we are using LDA+U as starting point, see calc_vHxc_braket
+ ! * Note that vH matrix elements are calculated using the true uncutted interaction.
+
+ if (mod100<10) then
+   ! For one-shot GW use the KS representation.
    Sr%hhartree=hlda-KS_me%vxcval
-   !=== Additional goodies for PAW ===
+   ! Additional goodies for PAW
    !  * LDA +U Hamiltonian
    !  * LEXX.
    !  * Core contribution estimated using Fock exchange.
@@ -1491,8 +1494,8 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
    if (Dtset%usepaw==0) then
      ABI_MALLOC(hbare,(b1gw:b2gw,b1gw:b2gw,Kmesh%nibz,Sigp%nsppol*Sigp%nsig_ab))
      hbare=hlda-KS_me%vhartree-KS_me%vxcval
-!
-!    * Change basis from KS to QP, hbare is overwritten: A_{QP} = U^\dagger A_{KS} U
+
+     ! Change basis from KS to QP, hbare is overwritten: A_{QP} = U^\dagger A_{KS} U
      ABI_MALLOC(htmp,(b1gw:b2gw,b1gw:b2gw,Kmesh%nibz,Sigp%nsppol*Sigp%nsig_ab))
      ABI_MALLOC(ctmp,(b1gw:b2gw,b1gw:b2gw))
      ABI_MALLOC(uks2qp,(b1gw:b2gw,b1gw:b2gw))
@@ -1513,9 +1516,9 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
      ABI_FREE(uks2qp)
    end if ! usepaw==0
 
-   !=== Calculate the QP matrix elements===
-   !  * This part is parallelized within MPI_COMM_WORD since each node has all GW wavefunctions.
-   !  * For PAW, we have to construct the new bare Hamiltonian.
+   ! Calculate the QP matrix elements
+   ! This part is parallelized within MPI_COMM_WORD since each node has all GW wavefunctions.
+   ! For PAW, we have to construct the new bare Hamiltonian.
    call wrtout(std_out,ch10//' *************** QP Energies *******************','COLL')
 
    call melflags_reset(QP_mflags)

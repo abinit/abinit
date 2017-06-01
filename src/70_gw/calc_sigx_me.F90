@@ -603,7 +603,7 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
              if (ib_sum == jb) rhotwg_ki(1,jb) = CMPLX(SQRT(Vcp%i_sz), 0.0_gwp)
              !rhotwg_ki(1,jb) = czero_gw ! DEBUG
            else
-             npw_k  = Wfd%npwarr(ik_ibz)
+             npw_k = Wfd%npwarr(ik_ibz)
              rhotwg_ki(1, jb) = zero; rhotwg_ki(npwx+1, jb) = zero
              if (ib_sum == jb) then
                cg_sum => Wfd%Wave(ib_sum,ik_ibz,spin)%ug
@@ -636,7 +636,7 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
            jb = Sigxij_tab(spin)%col(kb)%bidx(irow)
            rhotwg = rhotwg_ki(:,jb)
 
-           ! Calculate bare exchange <phi_j|Sigma_x|phi_k> ===
+           ! Calculate bare exchange <phi_j|Sigma_x|phi_k>.
            ! Do the scalar product only if ib_sum is occupied.
            if (theta_mu_minus_esum/fact_sp >= tol_empty) then
              do iab=1,Sigp%nsig_ab
@@ -736,10 +736,13 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
 
  if (mod100>=20) then
    ! Reconstruct the full sigma_x matrix from the upper triangle.
-   ABI_CHECK(nspinor==1, "Cannot hermitianize non-collinear sigma!")
-   do spin=1,nsppol
-     call hermitianize(sigxme_tmp(:,:,spin), "Upper")
-   end do
+   if (nspinor == 1) then
+     do spin=1,nsppol
+       call hermitianize(sigxme_tmp(:,:,spin), "Upper")
+     end do
+   else
+     MSG_WARNING("Should hermitianize non-collinear sigma!")
+   end if
  end if
 
  ! Save diagonal elements or ab components of Sigma_x (hermitian)
@@ -747,7 +750,7 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
  do spin=1,nsppol
    do jb=ib1,ib2
      do iab=1,Sigp%nsig_ab
-       is_idx = spin; if (Sigp%nsig_ab>1) is_idx = iab
+       is_idx = spin; if (Sigp%nsig_ab > 1) is_idx = iab
        if (is_idx <= 2) then
          Sr%sigxme(jb,jk_ibz,is_idx) = DBLE(sigxme_tmp(jb,jb,is_idx))
        else

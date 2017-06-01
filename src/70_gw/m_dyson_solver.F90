@@ -276,10 +276,10 @@ subroutine solve_dyson(ikcalc,minbnd,maxbnd,nomega_sigc,Sigp,Kmesh,sigcme_tmp,qp
          ABI_CHECK(ABS(Sigp%mbpt_sciss)<0.1d-4,'Scissor with spinor not coded')
          !TODO this should be allocated with nsppol, recheck this part
 
-         ! === Evaluate renormalization factor and QP correction ===
-         ! * Z=(1-dSigma/domega(E0))^-1
-         ! * DeltaE_GW=E-E0= (Sigma(E0)-V_xc)/(1-dSigma/domega)
-         write(std_out,'(a,i2,10f8.3)')' Correlation',jb,Sr%sigcmee0(jb,sk_ibz,:)*Ha_eV,SUM(Sr%sigcmee0(jb,sk_ibz,:))*Ha_eV
+         ! Evaluate renormalization factor and QP correction.
+         ! Z=(1-dSigma/domega(E0))^-1
+         ! DeltaE_GW=E-E0= (Sigma(E0)-V_xc)/(1-dSigma/domega)
+         !write(std_out,'(a,i2,10f8.3)')' Correlation',jb,Sr%sigcmee0(jb,sk_ibz,:)*Ha_eV,SUM(Sr%sigcmee0(jb,sk_ibz,:))*Ha_eV
 
          Sr%ze0 (jb,sk_ibz,1) = one/(one-SUM(Sr%dsigmee0(jb,sk_ibz,:)))
 

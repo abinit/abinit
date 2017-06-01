@@ -1605,7 +1605,6 @@ subroutine approxdelta(nomegasf,omegasf,egwdiff_re,smear,iomegal,iomegar,wl,wr,s
  iomegar=iomegal+1; omegar=omegasf(iomegar)
 
  SELECT CASE (spmeth)
-
  CASE (1)
    ! Weights for triangular shaped function
    wr=  (egwdiff_re-omegal)/(omegar-omegal)
@@ -2153,7 +2152,7 @@ subroutine completechi0_deltapart(ik_bz,qzero,symchi,npwe,npwvec,nomega,nspinor,
  integer :: iSm1_g1mg2,iSm1_g1mg2_fft,ig,gmg_sph,gmg_fft
  integer :: igp,igstart,isym,itim,outofbox_wfn
  complex(gwpc) :: phmGt
- character(len=500) :: msg
+ !character(len=500) :: msg
 
 !************************************************************************
 
@@ -2219,8 +2218,7 @@ subroutine completechi0_deltapart(ik_bz,qzero,symchi,npwe,npwvec,nomega,nspinor,
  if (outofbox_wfn/=0) then
    enough=enough+1
    if (enough<=50) then
-     write(msg,'(a,i0)')' Number of G1-G2 pairs outside the G-sphere for Wfns = ',outofbox_wfn
-     MSG_WARNING(msg)
+     MSG_WARNING(sjoin(' Number of G1-G2 pairs outside the G-sphere for Wfns: ', itoa(outofbox_wfn)))
      if (enough==50) then
        call wrtout(std_out,' ========== Stop writing Warnings ==========','COLL')
      end if
@@ -2372,7 +2370,7 @@ subroutine accumulate_chi0sumrule(ik_bz,symchi,npwe,factor,delta_ene,&
 !Local variables-------------------------------
 !scalars
  integer :: isym,itim
- character(len=500) :: msg
+ !character(len=500) :: msg
 !arrays
  integer,allocatable :: Sm1_gmG0(:)
  integer, ABI_CONTIGUOUS pointer :: gmG0(:)
@@ -2384,20 +2382,20 @@ subroutine accumulate_chi0sumrule(ik_bz,symchi,npwe,factor,delta_ene,&
  ! Eq.(5.284) in G. D. Mahan Many-Particle Physics 3rd edition
 
  SELECT CASE (symchi)
-
- CASE (0) ! Do not use symmetries, sum is performed in the full BZ.
+ CASE (0)
+   ! Do not use symmetries, sum is performed in the full BZ.
    chi0sumrule(:)=chi0sumrule(:) + factor*delta_ene*ABS(rhotwg(1:npwe))**2
 
- CASE (1) ! Symmetrize the contribution in the full BZ.
+ CASE (1)
+   ! Symmetrize the contribution in the full BZ.
    ABI_ALLOCATE(rhotwg_sym,(npwe))
    ABI_ALLOCATE(Sm1_gmG0,(npwe))
 
    do itim=1,Ltg_q%timrev
      do isym=1,Ltg_q%nsym_sg
        if (Ltg_q%wtksym(itim,isym,ik_bz)==1) then
-        ! === This operation belongs to the little group and has to be used to reconstruct the BZ ===
-        ! * In the following 2 lines mind the slicing (1:npwe)
-        !
+        ! This operation belongs to the little group and has to be used to reconstruct the BZ ===
+        ! In the following 2 lines mind the slicing (1:npwe)
         gmG0  => Ltg_q%igmG0(1:npwe,itim,isym)
         Sm1_gmG0(1:npwe)=Gsph_epsG0%rottbm1(gmG0(1:npwe),itim,isym)
         rhotwg_sym(1:npwe)=rhotwg(Sm1_gmG0)
@@ -2411,8 +2409,7 @@ subroutine accumulate_chi0sumrule(ik_bz,symchi,npwe,factor,delta_ene,&
    ABI_DEALLOCATE(Sm1_gmG0)
 
  CASE DEFAULT
-   write(msg,'(a,i3)')'Wrong value for symchi= ',symchi
-   MSG_BUG(msg)
+   MSG_BUG(sjoin('Wrong value for symchi:', itoa(symchi)))
  END SELECT
 
 end subroutine accumulate_chi0sumrule
@@ -2492,12 +2489,10 @@ subroutine make_transitions(Wfd,chi0alg,nbnds,nbvw,nsppol,symchi,timrev,TOL_DELT
  DBG_ENTER("COLL")
 
  if (chi0alg<0 .or. chi0alg>=2) then
-   write(msg,'(a,i3,a)')' chi0alg = ',chi0alg,' not allowed '
-   MSG_BUG(msg)
+   MSG_BUG(sjoin('chi0alg:', itoa(chi0alg),' not allowed'))
  end if
  if (timrev/=1 .and. timrev/=2) then
-   write(msg,'(a,i3,a)')' timrev = ',timrev,' not allowed'
-   MSG_BUG(msg)
+   MSG_BUG(sjoin('timrev:', itoa(timrev),' not allowed'))
  end if
 
  ABI_UNUSED(nbvw)
@@ -2519,7 +2514,7 @@ subroutine make_transitions(Wfd,chi0alg,nbnds,nbvw,nsppol,symchi,timrev,TOL_DELT
      if (symchi==1) then
        if (Ltg_q%ibzq(ik_bz)/=1) cycle ! This point does not belong to the IBZ defined by the little group
      end if
-     !
+
      ! Find kp=k-q-G0 and also G0 where kp is in the first BZ
      if (.not.has_BZ_item(Kmesh,kmq,ikmq_bz,g0)) then ! Stop as the weight 1.0/nkbz is wrong.
        write(msg,'(4a,2(2a,3f12.6),2a)')ch10,&
@@ -2553,7 +2548,7 @@ subroutine make_transitions(Wfd,chi0alg,nbnds,nbvw,nsppol,symchi,timrev,TOL_DELT
              ! This has to changed to include spectral method without time-reversal
              if (delta_ene < -abs(TOL_DELTA_OCC) .or. abs(delta_occ) < abs(TOL_DELTA_OCC)) cycle
            end if
-           !
+
            ! We have a new transition
            nt=nt+1
 
@@ -2665,7 +2660,8 @@ subroutine chi0_bbp_mask(Ep,use_tr,QP_BSt,mband,ikmq_ibz,ik_ibz,spin,spin_fact,b
            if (use_tr .and. ib1<ib2) bbp_mask(ib1,ib2)=.FALSE. ! GAIN a factor ~2 thanks to time-reversal.
          end if
 
-       CASE (1,2) ! Spectral method, WARNING time-reversal here is always assumed!
+       CASE (1,2)
+         ! Spectral method, WARNING time-reversal here is always assumed!
          if (ABS(deltaf_b1kmq_b2k) >= GW_TOL_DOCC) then
            bbp_mask(ib1,ib2)=.TRUE.
            if (deltaeGW_b1kmq_b2k<zero) bbp_mask(ib1,ib2)=.FALSE. ! Only positive frequencies are needed for the Hilbert transform.
@@ -2673,8 +2669,7 @@ subroutine chi0_bbp_mask(Ep,use_tr,QP_BSt,mband,ikmq_ibz,ik_ibz,spin,spin_fact,b
          end if
 
        CASE DEFAULT
-         write(msg,'(a,i0)')" Wrong value for spmeth: ",Ep%spmeth
-         MSG_ERROR(msg)
+         MSG_ERROR(sjoin(" Wrong value for spmeth:", itoa(Ep%spmeth)))
        END SELECT
        !write(std_out,*) "bbp_mask(ib1,ib2)",bbp_mask(ib1,ib2)
      end do !ib2
@@ -2696,7 +2691,6 @@ subroutine chi0_bbp_mask(Ep,use_tr,QP_BSt,mband,ikmq_ibz,ik_ibz,spin,spin_fact,b
 
        ! When the completeness correction is used,
        ! we need to also consider transitions with vanishing deltaf
-       !
        ! Rangel: This is to compute chi in metals correctly with the extrapolar method.
        bbp_mask(ib1,ib2)=.TRUE.
        !if (qp_occ(ib2,ik_ibz,is) < GW_TOL_DOCC) CYCLE
@@ -2708,8 +2702,7 @@ subroutine chi0_bbp_mask(Ep,use_tr,QP_BSt,mband,ikmq_ibz,ik_ibz,spin,spin_fact,b
    end do
 
   CASE DEFAULT
-    write(msg,'(a,i0)')" Wrong value of gwcomp: ",Ep%gwcomp
-    MSG_ERROR(msg)
+    MSG_ERROR(sjoin("Wrong value of gwcomp:", itoa(Ep%gwcomp)))
   END SELECT
 
 end subroutine chi0_bbp_mask

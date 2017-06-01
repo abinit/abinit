@@ -149,13 +149,14 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,gsqcutf_eff,nfftf,ngfftf,&
 
 !Local variables-------------------------------
 !scalars
- integer :: iat,ikc,ik_ibz,ib,jb,is,b_start,b_stop
+ integer :: iat,ikc,ik_ibz,ib,jb,is,b_start,b_stop,istwf_k
  integer :: itypat,lmn_size,j0lmn,jlmn,ilmn,klmn,klmn1,lmn2_size_max
  integer :: isppol,izero,cplex_dij,npw_k
  integer :: nspinor,nsppol,nspden,nk_calc,rank
  integer :: isp1,isp2,iab,nsploop,nkxc,option,n3xccc_,nk3xc,my_nbbp,my_nmels
  real(dp) :: nfftfm1,fact,DijH,enxc_val,enxc_hybrid_val,vxcval_avg,vxcval_hybrid_avg,h0dij,vxc1,vxc1_val,re_p,im_p,dijsigcx
  real(dp) :: omega ! HSE Fock exchange screening parameter
+ complex(dpc) :: cdot
  logical :: ltest
  character(len=500) :: msg
  type(MPI_type) :: MPI_enreg_seq
@@ -394,6 +395,7 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,gsqcutf_eff,nfftf,ngfftf,&
      npw_k = Wfd%Kdata(ik_ibz)%npw
      kpt = Wfd%kibz(:,ik_ibz)
      kg_k => Wfd%kdata(ik_ibz)%kg_k
+     istwf_k = wfd%istwfk(ik_ibz)
 
      ! Calculate |k+G|^2 needed by hbareme
      !FIXME Here I have a problem if I use ecutwfn there is a bug somewhere in setshell or invars2m!
@@ -451,8 +453,11 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,gsqcutf_eff,nfftf,ngfftf,&
 
          if (Mflags%has_hbare==1) then
            cg1 => Wfd%Wave(ib, ik_ibz, is)%ug(1:npw_k)
-           Mels%hbare(ib, jb, ik_ibz, is) = &
-             DOT_PRODUCT(cg1, kinwf2(1:npw_k)) + SUM(u1cjg_u2dpc(1:nfftf) * veffh0(1:nfftf, is)) * nfftfm1
+           cdot = DOT_PRODUCT(cg1, kinwf2(1:npw_k))
+           !if (istwf_k /= 1) then
+           !  cdot = two * cdot; if (istwf_k == 2) cdot = cdot - GWPC_CONJG(cg1(1)) * kinwf2(1)
+           !end if
+           Mels%hbare(ib, jb, ik_ibz, is) = cdot + SUM(u1cjg_u2dpc(1:nfftf) * veffh0(1:nfftf, is)) * nfftfm1
            if (wfd%nspinor == 2 .and. wfd%nspden == 1) then
              cg1 => Wfd%Wave(ib, ik_ibz, is)%ug(npw_k+1:)
              Mels%hbare(ib, jb, ik_ibz, 2) = &

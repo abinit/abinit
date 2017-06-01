@@ -173,9 +173,9 @@ MODULE m_melemts
  public :: melements_free      ! Free memory
  public :: melements_herm      ! Construct the lower triangle from the upper triangle
  public :: melements_mpisum    ! Perform a collective SUM within the MPI communicator comm
- public :: melements_print     ! Printout the object
+ public :: melements_print     ! Print matrix elements
  public :: melements_zero      ! Set matrix elements connecting states with different irrep to zero.
- !public :: mels_get_exene_core !
+ !public :: mels_get_exene_core
 !!***
 
  integer,parameter,private :: NNAMES=8
@@ -880,6 +880,9 @@ subroutine melements_print(Mels,names_list,header,unit,prtvol,mode_paral)
  write(msg,'(2a)')ch10,' === Matrix Elements stored in Mels% [eV] === '
  if (PRESENT(header)) write(msg,'(4a)')ch10,' === '//TRIM(ADJUSTL(header))//' [eV] === '
  call wrtout(my_unt,msg,my_mode)
+ if (Mels%nspinor == 2) then
+   call wrtout(my_unt, "Sum_ab M_ab, M_11, M_22, Re(M_12), IM(Re_12)" ,my_mode)
+ end if
 
  if (my_nkeys==0) GOTO 10
  write(fmt,'(a,i4,a)')'(1x,i3,',my_nkeys,'(1x,f9.5))' ! width of 10 chars
@@ -899,10 +902,24 @@ subroutine melements_print(Mels,names_list,header,unit,prtvol,mode_paral)
       write(msg,'(a)')str
       call wrtout(my_unt,msg,my_mode)
       do ib=b1,b2
-        do iab=1,Mels%nspinor**2
-          write(msg,fmt)ib,(REAL(data_p(tab(ikey))%arr_p(ib,ib,ikibz,iab))*Ha_eV, ikey=1,my_nkeys)
+        if (Mels%nspinor == 1) then
+          write(msg,fmt)ib,(REAL(data_p(tab(ikey))%arr_p(ib,ib,ikibz,1))*Ha_eV, ikey=1,my_nkeys)
           call wrtout(my_unt,msg,my_mode)
-        end do
+        else
+          ! Write sum_ab, then diagonal elements, finally Re_12, Im_12
+          write(msg,fmt)ib,(real(sum(data_p(tab(ikey))%arr_p(ib,ib,ikibz,:)))*Ha_eV, ikey=1,my_nkeys)
+          call wrtout(my_unt,msg,my_mode)
+          if (my_prtvol > 0) then
+            write(msg,fmt)ib,(real(data_p(tab(ikey))%arr_p(ib,ib,ikibz,1))*Ha_eV, ikey=1,my_nkeys)
+            call wrtout(my_unt,msg,my_mode)
+            write(msg,fmt)ib,(real(data_p(tab(ikey))%arr_p(ib,ib,ikibz,2))*Ha_eV, ikey=1,my_nkeys)
+            call wrtout(my_unt,msg,my_mode)
+            write(msg,fmt)ib,(real(data_p(tab(ikey))%arr_p(ib,ib,ikibz,3))*Ha_eV, ikey=1,my_nkeys)
+            call wrtout(my_unt,msg,my_mode)
+            write(msg,fmt)ib,(aimag(data_p(tab(ikey))%arr_p(ib,ib,ikibz,3))*Ha_eV, ikey=1,my_nkeys)
+            call wrtout(my_unt,msg,my_mode)
+          end if
+        end if
       end do
 
     else
@@ -1027,7 +1044,6 @@ end subroutine melements_zero
 !!***
 
 !----------------------------------------------------------------------
-
 
 !!****f* m_sigma/mels_get_exene_core
 !! NAME

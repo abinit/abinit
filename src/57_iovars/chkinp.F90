@@ -645,9 +645,9 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
            any(mod(dt%gwcalctyp, 10) == [SIG_GW_AC, SIG_QPGW_PPM, SIG_QPGW_CD])) then
          MSG_ERROR_NOSTOP("analytic-continuation, model GW with nspinor 2 are not implemented", ierr)
        end if
-       if (optdriver == RUNL_SIGMA .and. mod(dt%gwcalctyp, 100) >= 10) then
-         MSG_ERROR_NOSTOP("Self-consistent GW with nspinor == 2 not implemented", ierr)
-       end if
+       !if (optdriver == RUNL_SIGMA .and. mod(dt%gwcalctyp, 100) >= 10) then
+       !  MSG_ERROR_NOSTOP("Self-consistent GW with nspinor == 2 not implemented", ierr)
+       !end if
        if (dt%gwcomp /= 0) then
          MSG_ERROR_NOSTOP("gwcomp /= 0 with nspinor 2 not implemented", ierr)
        end if
