@@ -622,6 +622,8 @@ complex(dpc), allocatable :: eps(:)
      do ist1=1,nstval
        e1=KSBSt%eig(ist1,ik,isp)
        e1_ep=EPBSt%eig(ist1,ik,isp)
+! TODO: unless memory is a real issue, should set lifetimes to 0 and do this sum systematically
+! instead of putting an if statement in a loop!
        if(do_lifetime) then
          e1_ep = e1_ep + EPBSt%lifetime(ist1,ik,isp)*(0.0_dp,1.0_dp)
        end if
@@ -675,12 +677,21 @@ complex(dpc), allocatable :: eps(:)
  call xmpi_sum(chi,comm,ierr)
 
  if(my_rank == master) then
+! calculate epsilon
+   eps(:)=0._dp
+   deltav1v2=zero
+   if(v1==v2)deltav1v2=one
+   do iw=2,nmesh
+     ene=(iw-1)*de
+     ene=ene*ha2ev
+     eps(iw)=deltav1v2+4._dp*pi*chi(iw)
+   end do
+
 !  open the output files
    if (open_file(fnam1,msg,newunit=fout1,action='WRITE',form='FORMATTED') /= 0) then
      MSG_ERROR(msg)
    end if
 !  write the output
-   write(fout1, '(a)' ) ' # Energy(eV)         Im(eps(w))'
    write(fout1, '(a,2i3,a)' )' #calculated the component:',v1,v2,'  of dielectric function'
    write(std_out,*) 'calculated the component:',v1,v2,'  of dielectric function'
    write(fout1, '(a,2es16.6)' ) ' #broadening:', real(ieta),aimag(ieta)
@@ -689,16 +700,13 @@ complex(dpc), allocatable :: eps(:)
    write(std_out,*) 'and scissors shift:',sc
    write(fout1, '(a,es16.6,a,es16.6,a)' ) ' #energy window:',(emax-emin)*ha2ev,'eV',(emax-emin),'Ha'
    write(std_out,*) 'energy window:',(emax-emin)*ha2ev,'eV',(emax-emin),'Ha'
-   eps(:)=0._dp
-   deltav1v2=zero
-   if(v1==v2)deltav1v2=one
+   write(fout1,*)
+   write(fout1, '(a)' ) ' # Energy(eV)         Im(eps(w))'
    do iw=2,nmesh
      ene=(iw-1)*de
      ene=ene*ha2ev
-     eps(iw)=deltav1v2+4._dp*pi*chi(iw)
      write(fout1, '(2es16.6)' ) ene,aimag(eps(iw))
    end do
-   write(fout1,*)
    write(fout1,*)
    write(fout1, '(a)' ) ' # Energy(eV)         Re(eps(w))'
    do iw=2,nmesh
