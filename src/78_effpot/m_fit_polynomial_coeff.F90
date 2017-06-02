@@ -1921,11 +1921,11 @@ subroutine fit_polynomial_coeff_fit(cut_off,eff_pot,hist,ncycle_in,comm)
 !Local variables-------------------------------
 !scalar
  integer :: ii,icoeff,icycle,info,index_min,itime
- integer :: ncoeff_max,natom_sc,ncell,ncycle,ncycle_tot,nproc,ntime
- integer :: ntime_alone,my_rank,my_ntime
+ integer :: my_rank,my_ntime,ncoeff_max,natom_sc,ncell,ncycle
+ integer :: ncycle_tot,nproc,ntime,ntime_alone
  real(dp) :: energy,ffact,sfact,mse,msef,mses
  real(dp),parameter :: HaBohr_meVAng = 27.21138386 / 0.529177249
- logical :: iam_master
+ logical :: iam_master,found
 !arrays
  real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3),strain_mat_inv(3,3)
  real(dp) :: mingf(4)
@@ -2151,6 +2151,50 @@ subroutine fit_polynomial_coeff_fit(cut_off,eff_pot,hist,ncycle_in,comm)
 
  end do
 
+!Free space
+ ABI_DEALLOCATE(strten_fixed)
+ ABI_DEALLOCATE(fred_fixed)
+
+
+!Check if the initial stresses of the reference is set to the potential
+ if(all(eff_pot%strten(:)==zero))then
+   ii = zero
+!  Try to find if any snapshot corresponding to the reference, 
+!  in order to fill the initial stresses...
+   found = .FALSE.
+   do itime=1,ntime
+     if(all(abs(strain(:,itime)) < tol15) .and. all(abs(displacement(:,:,itime)) < tol15)) then
+       write(message, '(6a,I0,6a)' )ch10,&
+&          ' --- !WARNING',ch10,&
+&          '     The initial stress tensor is not included in the effective potential.',ch10,&
+&          '     The iteration ',itime,' corresponding to the reference,',ch10,&
+&          '     thus the stress tensor for the reference will be set with this iteration',ch10,&
+&          ' ---',ch10       
+       ii = itime
+       found = .TRUE.
+     else
+       write(message, '(11a)' )ch10,&
+&          ' --- !WARNING',ch10,&
+&          '     The initial stress tensor is not included in the effective potential.',ch10,&
+&          '     No iteration of the hist file corresponds to the reference,',ch10,&
+&          '     Please make sure than the stress tensor of the reference is 0.0 Ha/bohr**3',ch10,&
+&          ' ---',ch10
+     end if
+     exit
+   end do
+   call wrtout(std_out,message,"COLL")
+   if (found) then
+     if( ii < zero .and. ii > ntime)then
+       write(message,'(a)') 'ii is not correct'
+       MSG_BUG(message)
+     else 
+       do itime=1,ntime
+         strten_diff(:,itime)  = strten_diff(:,itime)  - hist%strten(:,ii)
+       end do
+     end if
+   end if
+ end if
+
 !Get the decomposition for each coefficients of the forces,stresses and energy for 
 !each atoms and each step  (see equations 11 & 12 of  PRB95,094115(2017))
  call fit_polynomial_coeff_getFS(eff_pot%anharmonics_terms%coefficients,du_delta,displacement,&
@@ -2187,10 +2231,6 @@ subroutine fit_polynomial_coeff_fit(cut_off,eff_pot,hist,ncycle_in,comm)
  write(message,'(4x,a,6x,a,8x,a,8x,a,8x,a)') "Coefficient","(meV/f.u.)","(eV^2/A^2)","(eV^2/A^2)",&
 &                                          "(eV^2/A^2)"
  call wrtout(ab_out,message,'COLL') 
-
-!Free space
- ABI_DEALLOCATE(strten_fixed)
- ABI_DEALLOCATE(fred_fixed)
 
 !Start fit process
  do icycle=1,ncycle
