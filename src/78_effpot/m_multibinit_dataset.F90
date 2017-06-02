@@ -439,7 +439,8 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dynamics',tread,'INT')
  if(tread==1) multibinit_dtset%dynamics=intarr(1)
  if(multibinit_dtset%dynamics/=0.and.&
-&   multibinit_dtset%dynamics/=12.and.multibinit_dtset%dynamics/=13) then
+&   multibinit_dtset%dynamics/=12.and.multibinit_dtset%dynamics/=13&
+&   .and.multibinit_dtset%dynamics/=24.and.multibinit_dtset%dynamics/=25) then
    write(message, '(a,i8,a,a,a,a,a)' )&
 &   'dynamics is',multibinit_dtset%dynamics,', but the only allowed values',ch10,&
 &   'are 12 or  13 (see ionmov in abinit documentation).',ch10,&

@@ -259,7 +259,7 @@ subroutine pred_velverlet(ab_mover,hist,itime,ntime,zDEBUG,iexit,hmcflag,icycle,
        ekin_tmp=ekin_tmp+0.5_dp*ab_mover%amass(ii)*vel_prev(jj,ii)**2
      end do
    end do
-   write(238,*) itime,icycle,ekin_tmp,ekin,epot,factor 
+   !write(238,*) itime,icycle,ekin_tmp,ekin,epot,factor 
 
  end if
 

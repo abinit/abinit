@@ -207,7 +207,7 @@ implicit none
 
  call effective_potential_printSupercell(effective_potential)
 
- if(inp%dynamics==12.or.inp%dynamics==13) then
+ if(inp%dynamics==12.or.inp%dynamics==13.or.inp%dynamics==24.or.inp%dynamics==25) then
 !***************************************************************
 !1 Convert some parameters into the structures used by mover.F90
 !***************************************************************
@@ -332,7 +332,6 @@ implicit none
 !  Not yet implemented for ionmov 2 3 10 11 22 (memory problem...)
 !   ab_xfh%mxfh=(ab_xfh%nxfh-dtset%restartxf+1)+dtset%ntime+5 
    ab_xfh%nxfh = 0
-
    ab_xfh%mxfh = 1
    ABI_ALLOCATE(ab_xfh%xfhist,(3,dtset%natom+4,2,ab_xfh%mxfh))
    if (any((/2,3,10,11,22/)==dtset%ionmov)) then
