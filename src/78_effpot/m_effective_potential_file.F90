@@ -345,7 +345,7 @@ subroutine effective_potential_file_read(filename,eff_pot,inp,comm,hist)
 &      ' --- !WARNING',ch10,&
 &      '     The values of the coefficients are set to 0',&
 &      ' in the input file.',ch10,&
-&      '     The values of the coefficient will be read in the XML',ch10,&
+&      '     The values of the coefficients will be read in the XML',ch10,&
 &      '     or might be fitted',ch10,&
 &      ' ---',ch10
         call wrtout(std_out,message,'COLL')

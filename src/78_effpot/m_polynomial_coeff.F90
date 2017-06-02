@@ -87,10 +87,11 @@ CONTAINS  !=====================================================================
 !!
 !! INPUTS
 !!  name     = Name of the polynomial_coeff (Sr_y-O1_y)^3) for example
-!!  nterm   = Number of terms (short range interaction) for this polynomial_coeff
+!!  nterm    = Number of terms (short range interaction) for this polynomial_coeff
 !!  coefficient  = Value of the coefficient of this term
 !!  termstype(nterm) = Polynomial_term_type contains all the displacements for this coefficient 
-!!
+!!  check    = TRUE if the term has to be check for exemple:
+!!                       ((Sr_y-O1_y)^1(Sr_y-O1_y)^1 => (Sr_y-O1_y)^2)
 !! OUTPUT
 !! polynomial_coeff = polynomial_coeff structure to be initialized
 !!
@@ -416,6 +417,7 @@ subroutine polynomial_coeff_getName(name,natom,polynomial_coeff,symbols,recomput
 
 !Reset output
  name=""
+ iterm_in = 1
 
 !Set the optional arguments 
  if(present(recompute)) need_recompute = recompute
@@ -439,6 +441,8 @@ subroutine polynomial_coeff_getName(name,natom,polynomial_coeff,symbols,recomput
          end do!end do disp
        end if
      end do!end do term
+   else
+     iterm_in = 1
    end if
  end if
 

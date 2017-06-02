@@ -156,6 +156,7 @@ end subroutine fit_polynomial_coeff_init
 !! Free polynomial_coeff
 !!
 !! INPUTS
+!! polynomial_coeff = polynomial_coeff structure to be free
 !!
 !! OUTPUT
 !! polynomial_coeff = polynomial_coeff structure to be free
@@ -527,8 +528,6 @@ subroutine fit_polynomial_coeff_getList(cell,cut_off,dist,eff_pot,list_symcoeff,
      irpt_ref = irpt
 !     exit
    end if
-!TEST_AM
-!   write(100,*) irpt,":",cell(:,irpt)
  end do
 
 !Obtain a list of rotated atom labels:
@@ -1876,12 +1875,21 @@ end subroutine fit_polynomial_coeff_getOrder5
 !! fit_polynomial_coeff_fit
 !!
 !! FUNCTION
-!! Free polynomial_coeff
+!! Fit the list of coefficients included in eff_pot, 
+!! if the coefficients are not set in eff_pot, this routine will genenerate
+!! a list of coefficients by taking into acount the symmetries of the system 
+!! and the cutoff
 !!
 !! INPUTS
+!! eff_pot<type(effective_potential)> = effective potential
+!! hist<type(abihist)> = The history of the MD (or snapshot of DFT)
+!! ncycle_in = number of maximum cycle (maximum coefficient to be fitted)
+!! comm = MPI communicator
+!! cut_off = optional,cut off to apply to the range of interation if 
+!!           the coefficient are genereted in this routine
 !!
 !! OUTPUT
-!! polynomial_coeff = polynomial_coeff structure to be free
+!! eff_pot = effective potential structure with new fitted coefficients
 !!
 !! PARENTS
 !!      m_fit_polynomial_coeff
@@ -1906,32 +1914,39 @@ subroutine fit_polynomial_coeff_fit(cut_off,eff_pot,hist,ncycle_in,comm)
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ncycle_in,comm
- real(dp),intent(in) :: cut_off
 !arrays
  type(effective_potential_type),intent(inout) :: eff_pot
- type(abihist),intent(in) :: hist
+ type(abihist),intent(inout) :: hist
+ real(dp),optional,intent(in) :: cut_off
 !Local variables-------------------------------
 !scalar
  integer :: ii,icoeff,icycle,info,index_min,itime
- integer :: ncoeff_max,natom_sc,ncycle,ncycle_tot,ntime
+ integer :: ncoeff_max,natom_sc,ncell,ncycle,ncycle_tot,nproc,ntime
+ integer :: ntime_alone,my_rank,my_ntime
  real(dp) :: energy,ffact,sfact,mse,msef,mses
  real(dp),parameter :: HaBohr_meVAng = 27.21138386 / 0.529177249
+ logical :: iam_master
 !arrays
  real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3),strain_mat_inv(3,3)
- real(dp) :: mingf(3)
+ real(dp) :: mingf(4)
  integer :: ipiv(3)
- integer,allocatable  :: list_coeffs(:),singular_coeffs(:)
+ integer,allocatable  :: list_coeffs(:),my_time(:),singular_coeffs(:)
  real(dp),allocatable :: coeff_values(:)
- real(dp),allocatable :: du_delta(:,:,:,:),displacement(:,:,:),fcart_fixed(:,:,:)
- real(dp),allocatable :: fred_fixed(:,:,:),fcart_HIST(:,:,:)
+ real(dp),allocatable :: du_delta(:,:,:,:),displacement(:,:,:),energy_coeffs(:,:)
+ real(dp),allocatable :: energy_diff(:),fcart_fixed(:,:,:)
+ real(dp),allocatable :: fcart_diff(:,:,:),fred_fixed(:,:,:)
  real(dp),allocatable :: fcart_coeffs(:,:,:,:),gf_values(:,:),strain(:,:),strten_coeffs(:,:,:)
- real(dp),allocatable :: strten_fixed(:,:),strten_HIST(:,:),sqomega(:),ucvol(:)
+ real(dp),allocatable :: strten_diff(:,:),strten_fixed(:,:),sqomega(:),ucvol(:)
  real(dp),allocatable :: work(:),work2(:,:)
  type(polynomial_coeff_type),allocatable :: coeffs_tmp(:),coeffs_in(:)
  type(strain_type) :: strain_t
  character(len=500) :: message
  character(len=5)   :: i_char,j_char
 ! *************************************************************************
+
+!MPI variables
+ nproc = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
+ iam_master = (my_rank == 0)
 
  write(message,'(a,(80a))') ch10,('=',ii=1,80)
  call wrtout(ab_out,message,'COLL')
@@ -1961,19 +1976,44 @@ subroutine fit_polynomial_coeff_fit(cut_off,eff_pot,hist,ncycle_in,comm)
  end if
 
 
+!if the number of atoms in reference supercell into effpot is not corret,
+!wrt to the number of atom in the hist, we set map the hist and set the good 
+!supercell
+ if (size(hist%xred,2) /= eff_pot%supercell%natom_supercell) then
+   call fit_polynomial_coeff_mapHistToRef(eff_pot,hist,comm)
+ end if
+
 !Initialisation of constants
  ncoeff_max = eff_pot%anharmonics_terms%ncoeff
  ntime      = hist%mxhist
  natom_sc   = eff_pot%supercell%natom_supercell
 
+!Set the number of cpu for each time
+ ntime_alone = mod(ntime,nproc)
+ my_ntime = aint(real(ntime,sp)/(nproc))
+
+ if(my_rank >= (nproc-ntime_alone)) then
+   my_ntime = my_ntime  + 1
+ end if
+
+ ABI_ALLOCATE(my_time,(my_ntime))
+
+ do itime=1,my_ntime
+   if(my_rank >= (nproc-ntime_alone))then
+     my_time(itime)=(aint(real(ntime,sp)/nproc))*(my_rank)+&
+&                              (my_rank - (nproc-ntime_alone)) + itime
+   else
+     my_time(itime)=(my_ntime)*(my_rank)  + itime
+  end if
+ end do
+
 !Check if ncycle_in is not zero or superior to ncoeff_max
  if(ncycle_in<=0.or. ncycle_in > ncoeff_max) then
-
-   write(message, '(6a,I0,2a)' )ch10,&
+   write(message, '(6a,I0,3a)' )ch10,&
 &        ' --- !WARNING',ch10,&
-&        '     The number of cycle requests as input is not correct ,',ch10,&
-&        '     This number will be set to the maximum of coefficients:',ncoeff_max,ch10,&
-&        ' ---'
+&        '     The number of cycle requested in the input is not correct.',ch10,&
+&        '     This number will be set to the maximum of coefficients: ',ncoeff_max,ch10,&
+&        ' ---',ch10
      call wrtout(std_out,message,"COLL")
    end if
 
@@ -1998,14 +2038,16 @@ subroutine fit_polynomial_coeff_fit(cut_off,eff_pot,hist,ncycle_in,comm)
  ABI_ALLOCATE(coeff_values,(ncoeff_max))
  ABI_ALLOCATE(displacement,(3,natom_sc,ntime))
  ABI_ALLOCATE(du_delta,(6,3,natom_sc,ntime))
- ABI_ALLOCATE(gf_values,(3,ncoeff_max))
+ ABI_ALLOCATE(energy_coeffs,(ncoeff_max,ntime))
+ ABI_ALLOCATE(energy_diff,(ntime))
+ ABI_ALLOCATE(gf_values,(4,ncoeff_max))
  ABI_ALLOCATE(strain,(6,ntime))
  ABI_ALLOCATE(fcart_fixed,(3,natom_sc,ntime))
+ ABI_ALLOCATE(fcart_diff,(3,natom_sc,ntime))
  ABI_ALLOCATE(fred_fixed,(3,natom_sc,ntime))
  ABI_ALLOCATE(strten_fixed,(6,ntime))
- ABI_ALLOCATE(fcart_HIST,(3,natom_sc,ntime))
- ABI_ALLOCATE(strten_HIST,(6,ntime))
- ABI_ALLOCATE(fcart_coeffs,(3,natom_sc,ntime,ncoeff_max))
+ ABI_ALLOCATE(strten_diff,(6,ntime))
+ ABI_ALLOCATE(fcart_coeffs,(ncoeff_max,3,natom_sc,ntime))
  ABI_ALLOCATE(strten_coeffs,(6,ntime,ncoeff_max))
  ABI_ALLOCATE(sqomega,(ntime))
  ABI_ALLOCATE(ucvol,(ntime))
@@ -2024,10 +2066,12 @@ subroutine fit_polynomial_coeff_fit(cut_off,eff_pot,hist,ncycle_in,comm)
  fcart_fixed  = zero
  fred_fixed   = zero
  strten_fixed = zero
- fcart_HIST   = zero
- strten_HIST  = zero
  sqomega      = zero
 
+!Get the decomposition for each coefficients of the forces and stresses for 
+!each atoms and each step  equations 11 & 12 of  PRB95,094115(2017) 
+ write(message, '(a)' ) ' Initialisation of the fit process...'
+ call wrtout(std_out,message,'COLL')
 
 !Before the fit, compute constants
 !Conpute the strain of each configuration
@@ -2036,20 +2080,16 @@ subroutine fit_polynomial_coeff_fit(cut_off,eff_pot,hist,ncycle_in,comm)
 !Compute fixed forces and stresse and get the standard deviation
 !Compute Shepard and al Factors  \Omega^{2} see J.Chem Phys 136, 074103 (2012)
  do itime=1,ntime
-
-!  Get dft values
-   fcart_HIST(:,:,itime) = hist%fcart(:,:,itime)
-   strten_HIST(:,itime)  = hist%strten(:,itime)
-
 !  Get strain
-   call strain_get(strain_t,rprim=eff_pot%supercell%rprimd_supercell,rprim_def=hist%rprimd(:,:,itime))
+   call strain_get(strain_t,rprim=eff_pot%supercell%rprimd_supercell,&
+&                  rprim_def=hist%rprimd(:,:,itime),symmetrized=.FALSE.)
     if (strain_t%name /= "reference")  then
       do ii=1,3
         strain(ii,itime) = strain_t%strain(ii,ii)
       end do
-      strain(4,itime) = (strain_t%strain(2,3) + strain_t%strain(3,2)) / 2
-      strain(5,itime) = (strain_t%strain(3,1) + strain_t%strain(1,3)) / 2
-      strain(6,itime) = (strain_t%strain(2,1) + strain_t%strain(1,2)) / 2
+      strain(4,itime) = (strain_t%strain(2,3) + strain_t%strain(3,2)) 
+      strain(5,itime) = (strain_t%strain(3,1) + strain_t%strain(1,3)) 
+      strain(6,itime) = (strain_t%strain(2,1) + strain_t%strain(1,2)) 
     else
       strain(:,itime) = zero
     end if
@@ -2067,6 +2107,7 @@ subroutine fit_polynomial_coeff_fit(cut_off,eff_pot,hist,ncycle_in,comm)
      strain_mat_inv(ii,ii) = strain_mat_inv(ii,ii) + one
      ipiv(ii) = ii
    end do
+
    ABI_ALLOCATE(work,(3))
    ABI_ALLOCATE(work2,(3,natom_sc))
 
@@ -2081,6 +2122,7 @@ subroutine fit_polynomial_coeff_fit(cut_off,eff_pot,hist,ncycle_in,comm)
       du_delta(5,:,ii,itime) = (/work2(3,ii),zero,work2(1,ii)/)
       du_delta(6,:,ii,itime) = (/work2(2,ii),work2(1,ii),zero/)
     end do
+
     ABI_DEALLOCATE(work)
     ABI_DEALLOCATE(work2)
     
@@ -2090,7 +2132,6 @@ subroutine fit_polynomial_coeff_fit(cut_off,eff_pot,hist,ncycle_in,comm)
 &                                    displacement=displacement(:,:,itime),&
 &                                    du_delta=du_delta(:,:,:,itime),strain=strain(:,itime),&
 &                                    compute_anharmonic=.FALSE.,verbose=.FALSE.)
-   mse = mse + abs(hist%etot(itime) - energy)
 
 !  Compute \Omega^{2} and ucvol for each time
    call metric(gmet,gprimd,-1,rmet,hist%rprimd(:,:,itime),ucvol(itime))
@@ -2101,31 +2142,36 @@ subroutine fit_polynomial_coeff_fit(cut_off,eff_pot,hist,ncycle_in,comm)
 !  Compute also normalisation factors
    ffact      = 1.0/(ntime*natom_sc*3)
    sfact      = 1.0/(ntime*6)
+   ncell      = product(eff_pot%supercell%qphon(:))
+
+!  Compute the difference between History and model (fixed part)
+   fcart_diff(:,:,itime) =  hist%fcart(:,:,itime) - fcart_fixed(:,:,itime) 
+   strten_diff(:,itime)  =  hist%strten(:,itime)  - strten_fixed(:,itime)
+   energy_diff(itime)    =  hist%etot(itime) - energy
 
  end do
 
-!Get the decomposition for each coefficients of the forces and stresses for 
-!each atoms and each step  equations 11 & 12 of  PRB95,094115(2017) 
- write(message, '(a)' ) ' Initialisation of the fit process...'
- call wrtout(std_out,message,'COLL')
- call fit_polynomial_coeff_getFS(eff_pot%anharmonics_terms%coefficients,du_delta,displacement,ffact,&
-&                                fcart_coeffs,natom_sc,eff_pot%crystal%natom,ncoeff_max,ntime,&
-&                                int(eff_pot%supercell%qphon(:)),strain,strten_coeffs,sfact,ucvol,&
-&                                eff_pot%mpi_coeff%my_cells,eff_pot%mpi_coeff%my_ncell,&
-&                                eff_pot%mpi_coeff%my_index_cells,eff_pot%mpi_coeff%comm)
+!Get the decomposition for each coefficients of the forces,stresses and energy for 
+!each atoms and each step  (see equations 11 & 12 of  PRB95,094115(2017))
+ call fit_polynomial_coeff_getFS(eff_pot%anharmonics_terms%coefficients,du_delta,displacement,&
+&                                energy_coeffs,fcart_coeffs,natom_sc,eff_pot%crystal%natom,&
+&                                ncoeff_max,ntime,int(eff_pot%supercell%qphon(:)),strain,&
+&                                strten_coeffs,ucvol,eff_pot%mpi_coeff%my_cells,&
+&                                eff_pot%mpi_coeff%my_ncell,eff_pot%mpi_coeff%my_index_cells,&
+&                                eff_pot%mpi_coeff%comm)
 
 !Compute GF, coeff_values,strten_coeffs and fcart_coeffs are set to zero
 !it means that only the harmonic part wiil be computed
- call fit_polynomial_coeff_computeGF(coeff_values,du_delta,fcart_coeffs,fcart_fixed,fcart_HIST,&
-&                                    ffact,gf_values(:,1),int((/1/)),natom_sc,&
-&                                    1,ncoeff_max,ntime,strten_coeffs,strten_fixed,&
-&                                    strten_HIST,sfact,sqomega,ucvol)
+ call fit_polynomial_coeff_computeGF(coeff_values,du_delta,energy_coeffs,energy_diff,fcart_coeffs,&
+&                                    fcart_diff,ffact,gf_values(:,1),int((/1/)),natom_sc,&
+&                                    1,ncoeff_max,ntime,strten_coeffs,strten_diff,sfact,&
+&                                    sqomega,ucvol)
 
 !Print the standard deviation before the fit
  write(message,'(3a,ES24.16,4a,ES24.16,2a,ES24.16,2a,ES24.16,a)' )&
 &                    ' Mean Standard Deviation values at the begining of the fit process (meV/f.u.):',&
 &               ch10,'   Energy          : ',&
-&               mse* 27.21138386 * 1000/ ntime / product(eff_pot%supercell%qphon(:)),ch10,&
+&               gf_values(4,1)*Ha_EV*1000/ ncell ,ch10,&
 &                    ' Goal function values at the begining of the fit process (eV^2/A^2):',ch10,&
 &                    '   Forces+Stresses : ',&
 &               gf_values(1,1)*(HaBohr_meVAng)**2,ch10,&
@@ -2136,18 +2182,24 @@ subroutine fit_polynomial_coeff_fit(cut_off,eff_pot,hist,ncycle_in,comm)
  call wrtout(ab_out,message,'COLL')
  call wrtout(std_out,message,'COLL')
 
- write(message,'(a,3x,a,10x,a,14x,a,14x,a,14x,a)') " N","Selecting","MSE","MSEFS","MSEF","MSES"
+ write(message,'(a,3x,a,10x,a,14x,a,14x,a,14x,a)') " N","Selecting","MSEE","MSEFS","MSEF","MSES"
  call wrtout(ab_out,message,'COLL') 
  write(message,'(4x,a,6x,a,8x,a,8x,a,8x,a)') "Coefficient","(meV/f.u.)","(eV^2/A^2)","(eV^2/A^2)",&
 &                                          "(eV^2/A^2)"
  call wrtout(ab_out,message,'COLL') 
 
+!Free space
+ ABI_DEALLOCATE(strten_fixed)
+ ABI_DEALLOCATE(fred_fixed)
+
 !Start fit process
  do icycle=1,ncycle
 
-!  Fill the coeffs list with the previous coeffs
+   write(message, '(4a,I0,a)')ch10,'--',ch10,' Try to find the best model with ',icycle,' coefficient'
+   if(icycle > 1)  write(message, '(2a)') trim(message),'s'
+   call wrtout(std_out,message,'COLL')
    if(icycle > 1) then
-     write(message, '(5a)')'--',ch10,' Coefficient numbers from the previous cycle:',ch10,' ['
+     write(message, '(3a)') ' The coefficient numbers from the previous cycle are:',ch10,' ['
      do ii=1,icycle-1
        if(ii<icycle-1)then
          write(message, '(a,I0,a)') trim(message),list_coeffs(ii),','
@@ -2155,50 +2207,56 @@ subroutine fit_polynomial_coeff_fit(cut_off,eff_pot,hist,ncycle_in,comm)
          write(message, '(a,I0)') trim(message),list_coeffs(ii)
        end if
      end do
-     write(message, '(2a)') trim(message),']'
+     write(message, '(3a)') trim(message),']',ch10
      call wrtout(std_out,message,'COLL')
    else
-     write(message, '(4a)')'--',ch10,' No coefficient numbers from the previous cycle.',&
-&                                    ' Start from scratch.'
+     write(message, '(4a)')' There is no coefficient imposed from the input.',ch10,&
+&                                    ' Start from scratch...',ch10
      call wrtout(std_out,message,'COLL')
    end if
-   
+
+   write(message,'(2x,a,12x,a,14x,a,13x,a,14x,a)') " Testing","MSEE","MSEFS","MSEF","MSES"
+   call wrtout(std_out,message,'COLL') 
+   write(message,'(a,7x,a,8x,a,8x,a,8x,a)') " Coefficient","(meV/f.u.)","(eV^2/A^2)","(eV^2/A^2)",&
+&                                          "(eV^2/A^2)"
+   call wrtout(std_out,message,'COLL')
+
 !  Reset gf_values
    gf_values(:,:) = zero
 
-   write(message, '(a,6x,a,10x,a,14x,a)')' Goal Functions (eV^2/A^2):','MSESF','MSEF','MSES'  
-   call wrtout(std_out,message,'COLL')
    do icoeff=1,ncoeff_max
      if(any(list_coeffs==icoeff).or. singular_coeffs(icoeff) == 1) cycle
      list_coeffs(icycle) = icoeff
 
-     write(message, '(a,I0,a)')' Testing coefficient ',icoeff,': '
-
 !    call the fit process routine
 !    This routine solves the linear system proposed by C.Escorihuela-Sayalero see PRB95,094115(2017)
-     call fit_polynomial_coeff_solve(coeff_values(1:icycle),du_delta,fcart_coeffs,fcart_fixed,&
-&                                    fcart_HIST,ffact,info,list_coeffs(1:icycle),natom_sc,icycle,&
-&                                    ncoeff_max,ntime,strten_coeffs,strten_fixed,strten_HIST,sfact,&
-&                                    sqomega,ucvol)
+     call fit_polynomial_coeff_solve(coeff_values(1:icycle),du_delta,fcart_coeffs,fcart_diff,&
+&                                    info,list_coeffs(1:icycle),natom_sc,icycle,&
+&                                    ncoeff_max,ntime,strten_coeffs,strten_diff,sqomega,ucvol)
 
      if(info==0)then
-       call fit_polynomial_coeff_computeGF(coeff_values(1:icycle),du_delta,fcart_coeffs,fcart_fixed,&
-&                                         fcart_HIST,ffact,gf_values(:,icoeff),list_coeffs(1:icycle),&
-&                                         natom_sc,icycle,ncoeff_max,ntime,strten_coeffs,strten_fixed,&
-&                                         strten_HIST,sfact,sqomega,ucvol)
+       call fit_polynomial_coeff_computeGF(coeff_values(1:icycle),du_delta,energy_coeffs,energy_diff,&
+&                                         fcart_coeffs,fcart_diff,ffact,gf_values(:,icoeff),&
+&                                         list_coeffs(1:icycle),natom_sc,icycle,ncoeff_max,ntime,&
+&                                         strten_coeffs,strten_diff,sfact,sqomega,ucvol)
 
-       write(message, '(a,3ES18.10)') trim(message),&
-&                                    gf_values(1,icoeff)*HaBohr_meVAng**2,&
-&                                    gf_values(2,icoeff)*HaBohr_meVAng**2,&
-&                                    gf_values(3,icoeff)*HaBohr_meVAng**2
+       write (j_char, '(i5)') icoeff
+       write(message, '(6x,a,3x,4ES18.10)') adjustl(j_char),&
+&                                 gf_values(4,icoeff)* 1000*Ha_ev / ncell,&
+&                                 gf_values(1,icoeff)*HaBohr_meVAng**2,&
+&                                 gf_values(2,icoeff)*HaBohr_meVAng**2,&
+&                                 gf_values(3,icoeff)*HaBohr_meVAng**2
 
      else!In this case the matrix is singular
        gf_values(:,icoeff) = zero
        singular_coeffs(icoeff) = 1
-       write(message, '(2a)') trim(message),' The matrix is singular...'
+       write(message, '(a)') ' The matrix is singular...'
      end if
      call wrtout(std_out,message,'COLL')
    end do
+
+!  Check if there is still coefficient
+   if(all(singular_coeffs==1)) exit
 
 !  Find a way to keep the bestStore the best coeff for the next step
    mingf(:)    = 9D99
@@ -2217,11 +2275,6 @@ subroutine fit_polynomial_coeff_fit(cut_off,eff_pot,hist,ncycle_in,comm)
    write(message, '(a,I0)' )' Selecting the coefficient number ',list_coeffs(icycle)
    call wrtout(std_out,message,'COLL')
 
-!  Fit the best model for this iteration in order to compute the Goal function
-   call fit_polynomial_coeff_solve(coeff_values(1:icycle),du_delta,fcart_coeffs,fcart_fixed,fcart_HIST,&
-&                                  ffact,info,list_coeffs(1:icycle),natom_sc,icycle,ncoeff_max,ntime,&
-&                                  strten_coeffs,strten_fixed,strten_HIST,sfact,sqomega,ucvol)
-
 !  Fill the coeffs_tmp with the new model
    do ii=1,icycle
      call polynomial_coeff_free(coeffs_tmp(ii))
@@ -2233,19 +2286,15 @@ subroutine fit_polynomial_coeff_fit(cut_off,eff_pot,hist,ncycle_in,comm)
 &                               check=.false.)
    end do
 
-!  Set the new set of coefficients into the eff_pot type
-   call effective_potential_setCoeffs(coeffs_tmp(1:icycle),eff_pot,icycle)
-   
-!  Compute the MSE,MSEF,MSES for this new anharmonic part
-   call fit_polynomial_coeff_computeMSE(eff_pot,hist,mse,msef,mses,natom_sc,compute_anharmonic=.TRUE.)
-   write(message, '(2a,I0,a,ES24.16)' )' Standard deviation of the energy for',&
+    write(message, '(2a,I0,a,ES24.16)' )' Standard deviation of the energy for',&
 &                                      ' the iteration ',icycle,' (meV/f.u.): ',&
-&                        mse* 1000*27.21138386 / product(eff_pot%supercell%qphon(:))
-   call wrtout(std_out,message,'COLL')
+&                         mingf(4)* Ha_eV *1000 / ncell
+    call wrtout(std_out,message,'COLL')
+
    write (i_char, '(i5)') icycle
    write (j_char, '(i5)') list_coeffs(icycle)
    write(message, '(a,a,2x,a,3x,4ES18.10)') " ",adjustl(i_char),adjustl(j_char),&
-&                                    mse* 1000*27.21138386 / product(eff_pot%supercell%qphon(:)),&
+&                                    mingf(4)* 1000*Ha_eV / ncell,&
 &                                    mingf(1)*HaBohr_meVAng**2,&
 &                                    mingf(2)*HaBohr_meVAng**2,&
 &                                    mingf(3)*HaBohr_meVAng**2
@@ -2256,12 +2305,10 @@ subroutine fit_polynomial_coeff_fit(cut_off,eff_pot,hist,ncycle_in,comm)
 !  Need to define stopping criteria
  end do
 
-
 !This routine solves the linear system proposed by C.Escorihuela-Sayalero see PRB95,094115(2017)
- call fit_polynomial_coeff_solve(coeff_values(1:ncycle_tot),du_delta,fcart_coeffs,fcart_fixed,&
-&                                fcart_HIST,ffact,info,list_coeffs(1:ncycle_tot),natom_sc,ncycle_tot,&
-&                                ncoeff_max,ntime,strten_coeffs,strten_fixed,strten_HIST,&
-&                                sfact,sqomega,ucvol)
+ call fit_polynomial_coeff_solve(coeff_values(1:ncycle_tot),du_delta,fcart_coeffs,fcart_diff,&
+&                                info,list_coeffs(1:ncycle_tot),natom_sc,ncycle_tot,&
+&                                ncoeff_max,ntime,strten_coeffs,strten_diff,sqomega,ucvol)
 
 !Fill the coeffs_tmp with the last model
  do icycle=1,ncycle_tot
@@ -2307,14 +2354,15 @@ subroutine fit_polynomial_coeff_fit(cut_off,eff_pot,hist,ncycle_in,comm)
  ABI_DEALLOCATE(coeff_values)
  ABI_DEALLOCATE(displacement)
  ABI_DEALLOCATE(du_delta)
+ ABI_DEALLOCATE(energy_coeffs)
+ ABI_DEALLOCATE(energy_diff)
  ABI_DEALLOCATE(fcart_fixed)
- ABI_DEALLOCATE(fred_fixed)
- ABI_DEALLOCATE(fcart_HIST)
+ ABI_DEALLOCATE(fcart_diff)
  ABI_DEALLOCATE(fcart_coeffs)
+ ABI_DEALLOCATE(my_time)
  ABI_DEALLOCATE(singular_coeffs)
  ABI_DEALLOCATE(strain)
- ABI_DEALLOCATE(strten_HIST)
- ABI_DEALLOCATE(strten_fixed)
+ ABI_DEALLOCATE(strten_diff)
  ABI_DEALLOCATE(strten_coeffs)
  ABI_DEALLOCATE(list_coeffs)
  ABI_DEALLOCATE(sqomega)
@@ -2329,12 +2377,37 @@ end subroutine fit_polynomial_coeff_fit
 !! fit_polynomial_coeff_solve
 !!
 !! FUNCTION
-!!
+!! Build and the solve the system to get the values of the coefficients
+!! This routine solves the linear system proposed by C.Escorihuela-Sayalero see PRB95,094115(2017)
 !!
 !! INPUTS
+!! du_delta(6,3,natom_sc,ntime)  = Variation to displacements wrt to the strain (Bohr)
+!! fcart_coeffs(3,natom_sc,ntime,ncoeff_max) = List of the values of the contribution to the
+!!                                             cartesian forces for all coefficients 
+!!                                             for each direction and each time
+!! fcart_diff(3,natom,ntime) = Difference of cartesian forces between DFT calculation and 
+!!                             fixed part of the model (more often harmonic part)
+!! list_coeffs(ncoeff_fit) = List with the index of the coefficients used for this model
+!! natom = Number of atoms
+!! ncoeff_fit = Number of coeff for the fit (dimension of the system)
+!! ncoeff_max = Maximum number of coeff in the list
+!! ntime = Number of time (number of snapshot, number of md step...)
+!! strten_coeffs(6,ntime,ncoeff_max) = List of the values of the contribution to the stress tensor
+!!                                      of  the coefficients for each direction,time
+!! strten_diff(6,natom) = Difference of stress tensor between DFT calculation and 
+!!                        fixed part of the model (more often harmonic part)
+!! sqomega(ntime) =  Shepard and al Factors \Omega^{2} see J.Chem Phys 136, 074103 (2012)
+!! ucvol(ntime) = Volume of the system for each time
 !!
 !! OUTPUT
-!!
+!! coefficients(ncoeff_fit) = Values of the coefficients
+!! info_out = 0:  successful exit
+!!          < 0:  if INFO = -i, the i-th argument had an illegal value
+!!          > 0:  if INFO = i, U(i,i) computed in DOUBLE PRECISION is
+!!                exactly zero.  The factorization has been completed,
+!!                but the factor U is exactly singular, so the solution
+!!                could not be computed.  = 0:  successful exit
+!!          information from the subroutine dsgesv in LAPACK 
 !!
 !! PARENTS
 !!      m_fit_polynomial_coeff
@@ -2343,9 +2416,9 @@ end subroutine fit_polynomial_coeff_fit
 !!
 !! SOURCE
 
-subroutine fit_polynomial_coeff_solve(coefficients,du_delta,fcart_coeffs,fcart_fixed,fcart_HIST,&
-&                                     ffact,info_out,list_coeffs,natom,ncoeff_fit,ncoeff_max,ntime,&
-&                                     strten_coeffs,strten_fixed,strten_HIST,sfact,sqomega,ucvol)
+subroutine fit_polynomial_coeff_solve(coefficients,du_delta,fcart_coeffs,fcart_diff,&
+&                                     info_out,list_coeffs,natom,ncoeff_fit,ncoeff_max,ntime,&
+&                                     strten_coeffs,strten_diff,sqomega,ucvol)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -2359,31 +2432,36 @@ subroutine fit_polynomial_coeff_solve(coefficients,du_delta,fcart_coeffs,fcart_f
 !Arguments ------------------------------------
 !scalars
  integer,intent(in)  :: natom,ncoeff_fit,ncoeff_max,ntime
- real(dp),intent(in) :: ffact,sfact
  integer,intent(out) :: info_out
 !arrays
  integer,intent(in)  :: list_coeffs(ncoeff_fit)
- real(dp),intent(in) :: du_delta(6,3,natom,ntime),fcart_coeffs(3,natom,ntime,ncoeff_max)
- real(dp),intent(in) :: fcart_fixed(3,natom,ntime),fcart_HIST(3,natom,ntime)
- real(dp),intent(in) :: strten_coeffs(6,ntime,ncoeff_max),strten_fixed(6,ntime)
- real(dp),intent(in) :: strten_HIST(6,ntime),sqomega(ntime),ucvol(ntime)
+ real(dp),intent(in) :: du_delta(6,3,natom,ntime),fcart_coeffs(ncoeff_max,3,natom,ntime)
+ real(dp),intent(in) :: fcart_diff(3,natom,ntime)
+ real(dp),intent(in) :: strten_coeffs(6,ntime,ncoeff_max)
+ real(dp),intent(in) :: strten_diff(6,ntime),sqomega(ntime),ucvol(ntime)
  real(dp),intent(out):: coefficients(ncoeff_fit)
 !Local variables-------------------------------
 !scalar
  integer :: ia,itime,icoeff,jcoeff,icoeff_tmp,jcoeff_tmp,mu,LDA,LDB,LDX,LDAF,N,NRHS
- real(dp):: ftmpA,stmpA,ftmpB,stmpB,fmu,fnu,smu,snu
+ real(dp):: ffact,sfact,ftmpA,stmpA,ftmpB,stmpB,fmu,fnu,smu,snu
  integer :: INFO,ITER
  real(dp):: RCOND
+ real(dp):: fcart_coeffs_tmp(3,natom,ntime)
  real(dp),allocatable:: AF(:,:),BERR(:),FERR(:),WORK(:),C(:),R(:)
  integer,allocatable :: IPIV(:),IWORK(:),SWORK(:)
 !arrays
  real(dp),allocatable :: A(:,:),B(:,:)
+ character(len=1) :: FACT,EQUED,TRANS
 ! character(len=500) :: message
 ! *************************************************************************
 
 !0-Set variables for the 
  N    = ncoeff_fit; NRHS = 1; LDA  = ncoeff_fit; LDB  = ncoeff_fit; LDX  = ncoeff_fit
- LDAF = ncoeff_fit;  RCOND = zero; INFO  = zero
+ LDAF = ncoeff_fit;  RCOND = zero; INFO  = zero; TRANS='N'; EQUED='N'; FACT='N'
+
+!Set the factors
+ ffact = one/(3*natom*ntime)
+ sfact = one/(6*ntime)
 
 !0-Allocation
  ABI_ALLOCATE(A,(LDA,N))
@@ -2409,6 +2487,7 @@ subroutine fit_polynomial_coeff_solve(coefficients,du_delta,fcart_coeffs,fcart_f
 !  See equation 17 of PRB95 094115 (2017)
  do icoeff=1,ncoeff_fit
    icoeff_tmp = list_coeffs(icoeff)
+   fcart_coeffs_tmp(:,:,:) = fcart_coeffs(icoeff_tmp,:,:,:)
    ftmpA= zero; ftmpB = zero
    stmpA= zero; stmpB = zero  
 !  loop over the configuration
@@ -2416,14 +2495,14 @@ subroutine fit_polynomial_coeff_solve(coefficients,du_delta,fcart_coeffs,fcart_f
 !    Fill forces
      do ia=1,natom
        do mu=1,3       
-         fmu = fcart_coeffs(mu,ia,itime,icoeff_tmp)
+         fmu = fcart_coeffs_tmp(mu,ia,itime)
          do jcoeff=1,ncoeff_fit
            jcoeff_tmp = list_coeffs(jcoeff)
-           fnu = fcart_coeffs(mu,ia,itime,jcoeff_tmp)
+           fnu = fcart_coeffs(jcoeff_tmp,mu,ia,itime)
            ftmpA =  fmu*fnu
            A(icoeff,jcoeff) = A(icoeff,jcoeff) + ffact*ftmpA
          end do
-         ftmpB = ftmpB + (fcart_HIST(mu,ia,itime)-fcart_fixed(mu,ia,itime))*fmu 
+         ftmpB = ftmpB + fcart_diff(mu,ia,itime)*fmu 
        end do !End loop dir
      end do !End loop natom
 !    Fill stresses
@@ -2435,7 +2514,7 @@ subroutine fit_polynomial_coeff_solve(coefficients,du_delta,fcart_coeffs,fcart_f
          stmpA =  sqomega(itime)*smu*snu
          A(icoeff,jcoeff) = A(icoeff,jcoeff) + sfact*stmpA
        end do
-       stmpB = stmpB + sqomega(itime)*(strten_HIST(mu,itime)-strten_fixed(mu,itime))*smu
+       stmpB = stmpB + sqomega(itime)*strten_diff(mu,itime)*smu
      end do !End loop stress dir
    end do ! End loop time
    B(icoeff,1) = B(icoeff,1) + ffact*ftmpB + sfact*stmpB
@@ -2443,14 +2522,18 @@ subroutine fit_polynomial_coeff_solve(coefficients,du_delta,fcart_coeffs,fcart_f
 
 !2-Solve Ax=B
 !OLD VERSION..
-! call dgesvx('N','N',N,NRHS,A,LDA,AF,LDAF,IPIV,'N',R,C,B,LDB,coefficients,LDX,&
+! call dgesvx(FACT,TRANS,N,NRHS,A,LDA,AF,LDAF,IPIV,EQUED,R,C,B,LDB,coefficients,LDX,&
 !             RCOND,FERR,BERR,WORK,IWORK,INFO)
-!NEW VERSION..
+!U is nonsingular
+! if (INFO==N+1) then
+!   coefficients = zero
+! end if
  call dsgesv(N,NRHS,A,LDA,IPIV,B,LDB,coefficients,LDX,WORK,SWORK,ITER,INFO)
 !U is nonsingular
  if (INFO==N+2) then
    coefficients = zero
  end if
+
  info_out = INFO
 
  ABI_DEALLOCATE(AF)
@@ -2474,12 +2557,35 @@ end subroutine fit_polynomial_coeff_solve
 !! fit_polynomial_coeff_computeGF
 !!
 !! FUNCTION
-!!
+!! Compute the values of the goal function (Mean squared error) for 
+!!   gf_value(1) = forces (Ha/Bohr)**2
+!!   gf_value(2) = stresses (Ha/Bohr)**2
+!!   gf_value(3) = stresses+forces (Ha/Bohr)**2
+!!   gf_value(4) = energy (Ha)
 !!
 !! INPUTS
+!! coefficients(ncoeff)          = type(polynomial_coeff_type)
+!! du_delta(6,3,natom_sc,ntime)  = Variation to displacements wrt to the strain (Bohr)
+!! displacement(3,natom_sc,ntime)= Atomic displacement wrt to the reference (Bohr)
+!! energy_coeffs(ncoeff,ntime)   = value of the energy for each  coefficient (Ha)
+!! fcart_coeffs(ncoeff,3,natom,ntime) = value of the forces for each coefficient
+!!                                      (-1 factor is taking into acount) (Ha/Bohr) 
+!! fcart_diff(3,natom,ntime) = Difference of cartesian forces between DFT calculation and 
+!!                             fixed part of the model (more often harmonic part)
+!! list_coeffs(ncoeff_fit) = List with the indexes of the coefficients used for this model
+!! natom = Number of atoms 
+!! ncoeff_fit = Number of coefficients fitted
+!! ncoeff_max = Maximum number of coeff in the list
+!! ntime = Number of time in the history
+!! strten_coeffs(ncoeff,3,natom,ntime)= value of the stresses for each coefficient
+!!                                      (1/ucvol factor is taking into acount) (Ha/Bohr^3) 
+!! strten_diff(6,natom) = Difference of stress tensor between DFT calculation and 
+!!                        fixed part of the model (more often harmonic part)
+!! sqomega =  Shepard and al Factors \Omega^{2} see J.Chem Phys 136, 074103 (2012)
+!! ucvol(ntime) = Volume of the supercell for each time (Bohr^3)
 !!
 !! OUTPUT
-!!
+!! gf_value(4) = Goal function 
 !!
 !! PARENTS
 !!      m_fit_polynomial_coeff
@@ -2488,10 +2594,10 @@ end subroutine fit_polynomial_coeff_solve
 !!
 !! SOURCE
 
-subroutine fit_polynomial_coeff_computeGF(coefficients,du_delta,fcart_coeffs,fcart_fixed,&
-&                                         fcart_HIST,ffact,gf_value,list_coeffs,natom,&
-&                                         ncoeff_fit,ncoeff_max,ntime,strten_coeffs,strten_fixed,&
-&                                         strten_HIST,sfact,sqomega,ucvol)
+subroutine fit_polynomial_coeff_computeGF(coefficients,du_delta,energy_coeffs,energy_diff,fcart_coeffs,&
+&                                         fcart_diff,ffact,gf_value,list_coeffs,natom,ncoeff_fit,&
+&                                         ncoeff_max,ntime,strten_coeffs,strten_diff,sfact,sqomega,&
+&                                         ucvol)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -2509,37 +2615,47 @@ subroutine fit_polynomial_coeff_computeGF(coefficients,du_delta,fcart_coeffs,fca
 !arrays
  integer,intent(in)  :: list_coeffs(ncoeff_fit)
  real(dp),intent(in) :: du_delta(6,3,natom,ntime)
- real(dp),intent(in) :: fcart_coeffs(3,natom,ntime,ncoeff_max)
- real(dp),intent(in) :: fcart_fixed(3,natom,ntime),fcart_HIST(3,natom,ntime)
- real(dp),intent(in) :: strten_coeffs(6,ntime,ncoeff_max),strten_fixed(6,ntime)
- real(dp),intent(in) :: strten_HIST(6,ntime),sqomega(ntime)
+ real(dp),intent(in) :: energy_coeffs(ncoeff_max,ntime)
+ real(dp),intent(in) :: energy_diff(ntime)
+ real(dp),intent(in) :: fcart_coeffs(ncoeff_max,3,natom,ntime)
+ real(dp),intent(in) :: fcart_diff(3,natom,ntime)
+ real(dp),intent(in) :: strten_coeffs(6,ntime,ncoeff_max)
+ real(dp),intent(in) :: strten_diff(6,ntime),sqomega(ntime)
  real(dp),intent(in) :: coefficients(ncoeff_fit)
  real(dp),intent(in) :: ucvol(ntime)
- real(dp),intent(out) :: gf_value(3)
+ real(dp),intent(out) :: gf_value(4)
 !Local variables-------------------------------
 !scalar
- integer :: ia,itime,icoeff,icoeff_tmp,mu
- real(dp):: fmu,ftmp,smu,stmp
+ integer :: ia,icoeff,icoeff_tmp,itime,mu
+ real(dp):: etmp,emu,fmu,ftmp,smu,stmp
 !arrays
 ! *************************************************************************
 
 !1-Compute the value of the goal function
-! see equation 9 of PRB 95 094115(2017
+! see equation 9 of PRB 95 094115(2017)
  gf_value = zero
+ etmp     = zero
  ftmp     = zero
  stmp     = zero
- 
+
 ! loop over the configuration
  do itime=1,ntime
-!   Fill forces
+! Fill energy
+   emu = zero
+   do icoeff=1,ncoeff_fit
+     icoeff_tmp = list_coeffs(icoeff)
+     emu = emu + coefficients(icoeff)*energy_coeffs(icoeff_tmp,itime)
+   end do
+   etmp = etmp + abs(energy_diff(itime)-emu)
+!  Fill forces
    do ia=1,natom
      do mu=1,3          
        fmu  = zero
        do icoeff=1,ncoeff_fit
          icoeff_tmp = list_coeffs(icoeff)
-         fmu =  fmu + coefficients(icoeff)*fcart_coeffs(mu,ia,itime,icoeff_tmp)
+         fmu =  fmu + coefficients(icoeff)*fcart_coeffs(icoeff_tmp,mu,ia,itime)
        end do
-       ftmp = ftmp + (fcart_HIST(mu,ia,itime)-fcart_fixed(mu,ia,itime)-fmu)**2
+       ftmp = ftmp + (fcart_diff(mu,ia,itime)-fmu)**2
      end do !End loop dir
    end do !End loop natom
    do mu=1,6
@@ -2548,14 +2664,14 @@ subroutine fit_polynomial_coeff_computeGF(coefficients,du_delta,fcart_coeffs,fca
        icoeff_tmp = list_coeffs(icoeff)
        smu = smu + coefficients(icoeff)*strten_coeffs(mu,itime,icoeff_tmp)
      end do
-     stmp = stmp + sqomega(itime)*(strten_HIST(mu,itime)-strten_fixed(mu,itime)-smu)**2 
+     stmp = stmp + sqomega(itime)*(strten_diff(mu,itime)-smu)**2 
    end do !End loop stress dir
  end do ! End loop time
- 
+
  gf_value(1)   =  ffact*ftmp + sfact*stmp !Stresses + Forces
  gf_value(2)   =  ffact*ftmp ! only Forces
  gf_value(3)   =  sfact*stmp ! only Stresses
-
+ gf_value(4)   =  etmp / ntime ! abs(Energy)
  
 end subroutine fit_polynomial_coeff_computeGF
 !!***
@@ -2567,16 +2683,31 @@ end subroutine fit_polynomial_coeff_computeGF
 !! fit_polynomial_coeff_getFS
 !!
 !! FUNCTION
-!! Get all the 
-!!
+!! Compute all the matrix elements of eq.11 and 12 in PRB95,094115 (2017)
+!! 
 !! INPUTS
+!! coefficients(ncoeff)          = type(polynomial_coeff_type)
+!! du_delta(6,3,natom_sc,ntime)  = Variation to displacements wrt to the strain (Bohr)
+!! displacement(3,natom_sc,ntime)= Atomic displacement wrt to the reference (Bohr)
+!! natom_sc = Number of atoms in the supercell
+!! natom_uc = Number of atoms in the unit cell
+!! ncoeff = Number of coefficients 
+!! ntime = Number of time in the history
+!! sc_size(3) = Size of the supercell
+!! strain(6,ntime) = Strain
+!! ucvol(ntime) = Volume of the supercell for each time (Bohr^3)
+!! cells(ncell) = Indexes of the cell treat by this CPU
+!! ncell = Number of cell treat by this CPU
+!! index_cells(ncell,3) = Indexes of the cells (1 1 1, 0 0 0 for instance) treat by this CPU
+!! comm  = MPI communicator
 !!
 !! OUTPUT
-!!   fcart_out(3,natom,ntime,ncoeff) = value of the forces for each term of the coefficient
-!!                                     (-1 factor is taking into acount)
-!!   strten_out(3,natom,ntime,ncoeff) = value of the stresses for each term of the coefficient
-!!                                     (1/ucvol factor is taking into acount)
-!!                                     
+!! fcart_out(ncoeff,3,natom,ntime) = value of the forces for each coefficient
+!!                                   (-1 factor is taking into acount) (Ha/Bohr)
+!! strten_out(ncoeff,3,natom,ntime)= value of the stresses for each coefficient
+!!                                   (1/ucvol factor is taking into acount) (Ha/Bohr^3)
+!! energy_out(ncoeff,ntime)        = value of the energy for each  coefficient (Ha)
+!!
 !! PARENTS
 !!      m_fit_polynomial_coeff
 !!
@@ -2584,8 +2715,8 @@ end subroutine fit_polynomial_coeff_computeGF
 !!
 !! SOURCE
 
-subroutine fit_polynomial_coeff_getFS(coefficients,du_delta,displacement,ffact,fcart_out,&
-&                                     natom_sc,natom_uc,ncoeff,ntime,sc_size,strain,strten_out,sfact,&
+subroutine fit_polynomial_coeff_getFS(coefficients,du_delta,displacement,energy_out,fcart_out,&
+&                                     natom_sc,natom_uc,ncoeff,ntime,sc_size,strain,strten_out,&
 &                                     ucvol,cells,ncell,index_cells,comm)
 
 
@@ -2599,7 +2730,6 @@ subroutine fit_polynomial_coeff_getFS(coefficients,du_delta,displacement,ffact,f
 
 !Arguments ------------------------------------
 !scalars
- real(dp),intent(in) :: ffact,sfact
  integer,intent(in) :: natom_sc,natom_uc,ncoeff,ntime
  integer,intent(in) :: comm,ncell
 !arrays
@@ -2608,14 +2738,15 @@ subroutine fit_polynomial_coeff_getFS(coefficients,du_delta,displacement,ffact,f
  real(dp),intent(in) :: du_delta(6,3,natom_sc,ntime)
  real(dp),intent(in) :: displacement(3,natom_sc,ntime)
  real(dp),intent(in) :: strain(6,ntime),ucvol(ntime)
- real(dp),intent(out) :: fcart_out(3,natom_sc,ntime,ncoeff)
+ real(dp),intent(out):: energy_out(ncoeff,ntime)
+ real(dp),intent(out) :: fcart_out(ncoeff,3,natom_sc,ntime)
  real(dp),intent(out) :: strten_out(6,ntime,ncoeff)
  type(polynomial_coeff_type), intent(in) :: coefficients(ncoeff)
 !Local variables-------------------------------
 !scalar
  integer :: i1,i2,i3,ia1,ia2,ib1,ib2,ii,icell,icoeff
  integer :: idir1,idir2,idisp1,idisp2,ierr,iterm,itime,power
- real(dp):: disp1,disp2,tmp2,tmp3,weight
+ real(dp):: disp1,disp2,ffact,sfact,tmp1,tmp2,tmp3,weight
 !arrays
  integer :: cell_atoma1(3),cell_atoma2(3)
  integer :: cell_atomb1(3),cell_atomb2(3)
@@ -2627,6 +2758,9 @@ subroutine fit_polynomial_coeff_getFS(coefficients,du_delta,displacement,ffact,f
 ! Initialisation of variables
  fcart_out(:,:,:,:) = zero
  strten_out(:,:,:)  = zero
+ energy_out(:,:)    = zero
+ ffact = one/(3*natom_sc*ntime)
+ sfact = one/(6*ntime)
 
  do icell = 1,ncell
    ii = (cells(icell)-1)*natom_uc
@@ -2639,6 +2773,7 @@ subroutine fit_polynomial_coeff_getFS(coefficients,du_delta,displacement,ffact,f
        do iterm=1,coefficients(icoeff)%nterm
 !        Set the weight of this term
          weight =coefficients(icoeff)%terms(iterm)%weight
+         tmp1 = one
 !        Loop over displacement and strain
          do idisp1=1,coefficients(icoeff)%terms(iterm)%ndisp
 
@@ -2654,13 +2789,15 @@ subroutine fit_polynomial_coeff_getFS(coefficients,du_delta,displacement,ffact,f
 
 !          Strain case idir => -6, -5, -4, -3, -2 or -1
            if (idir1 < zero)then
-
              if(abs(strain(abs(idir1),itime)) > tol10)then
+!              Accumulate energy fo each displacement (\sum ((A_x-O_x)^Y(A_y-O_c)^Z))
+               tmp1 = tmp1 * (strain(abs(idir1),itime))**power
                if(power > 1) then
 !                Accumulate stress for each strain (\sum (Y(eta_2)^Y-1(eta_2)^Z+...))
                  tmp3 = tmp3 *  power*(strain(abs(idir1),itime))**(power-1)
                end if
              else
+               tmp1 = zero
                if(power > 1) then
                  tmp3 = zero
                end if
@@ -2708,19 +2845,21 @@ subroutine fit_polynomial_coeff_getFS(coefficients,du_delta,displacement,ffact,f
              disp2 = displacement(idir1,ib1,itime)
 
              if(abs(disp1) > tol10 .or. abs(disp2)> tol10)then
+!              Accumulate energy fo each displacement (\sum ((A_x-O_x)^Y(A_y-O_c)^Z))
+               tmp1 = tmp1 * (disp1-disp2)**power
                if(power > 1) then
 !                Accumulate forces for each displacement (\sum (Y(A_x-O_x)^Y-1(A_y-O_c)^Z+...))
                  tmp2 = tmp2 * power*(disp1-disp2)**(power-1)
                end if
              else
+               tmp1 = zero
                if(power > 1) then
                  tmp2 = zero
                end if
              end if
            end if
              
-           do idisp2=1,coefficients(icoeff)%terms(iterm)%ndisp
-               
+           do idisp2=1,coefficients(icoeff)%terms(iterm)%ndisp               
              if(idisp2 /= idisp1) then
                idir2 = coefficients(icoeff)%terms(iterm)%direction(idisp2)
                if (idir2 < zero)then
@@ -2786,27 +2925,31 @@ subroutine fit_polynomial_coeff_getFS(coefficients,du_delta,displacement,ffact,f
 &                                                  weight * tmp3 / ucvol(itime)
            else
 !            Accumule  forces
-             fcart_out(idir1,ia1,itime,icoeff) = fcart_out(idir1,ia1,itime,icoeff) + weight * tmp2
-             fcart_out(idir1,ib1,itime,icoeff) = fcart_out(idir1,ib1,itime,icoeff) - weight * tmp2
+             fcart_out(icoeff,idir1,ia1,itime) = fcart_out(icoeff,idir1,ia1,itime) + weight * tmp2
+             fcart_out(icoeff,idir1,ib1,itime) = fcart_out(icoeff,idir1,ib1,itime) - weight * tmp2
            end if
-         end do        
+         end do
+
+!        accumule energy
+         energy_out(icoeff,itime) = energy_out(icoeff,itime) +  weight * tmp1
        end do!End do iterm
      end do!End do coeff
    end do!End time
  end do!End do cell
 
 !MPI_SUM
+ call xmpi_sum(energy_out, comm, ierr)
  call xmpi_sum(fcart_out, comm, ierr)
  call xmpi_sum(strten_out, comm, ierr)
 
 !ADD variation of the atomic displacement due to the strain
  do icoeff=1,ncoeff
    do itime=1,ntime
-     do ia1 = 1,natom_sc
-       do idir1 = 1,3
+     do ia1=1,natom_sc
+       do idir1=1,3
          do idir2=1,6
            strten_out(idir2,itime,icoeff) = strten_out(idir2,itime,icoeff) + &
-&                       du_delta(idir2,idir1,ia1,itime)*fcart_out(idir1,ia1,itime,icoeff)/ucvol(itime)
+&                     du_delta(idir2,idir1,ia1,itime)*fcart_out(icoeff,idir1,ia1,itime)/ucvol(itime)
          end do
        end do
      end do
@@ -2826,11 +2969,21 @@ end subroutine fit_polynomial_coeff_getFS
 !! fit_polynomial_coeff_computeMSE
 !!
 !! FUNCTION
-
+!! Compute the Mean square error of the energy, forces and stresses
 !!
 !! INPUTS
+!! eff_pot<type(effective_potential)> = effective potential
+!! hist<type(abihist)> = The history of the MD
+!! natom = number of atom
+!! ntime = number of time in the hist
+!! sqomega =  Shepard and al Factors \Omega^{2} see J.Chem Phys 136, 074103 (2012)
+!! compute_anharmonic = TRUE if the anharmonic part of the effective potential 
+!!                           has to be taking into acount
 !!
 !! OUTPUT
+!! mse  =  Mean square error of the energy   (Hatree) 
+!! msef =  Mean square error of the forces   (Hatree/Bohr)**2
+!! mses =  Mean square error of the stresses (Hatree/Bohr)**2
 !!
 !! PARENTS
 !!
@@ -2838,7 +2991,8 @@ end subroutine fit_polynomial_coeff_getFS
 !!
 !! SOURCE
 
-subroutine fit_polynomial_coeff_computeMSE(eff_pot,hist,mse,msef,mses,natom,compute_anharmonic)
+subroutine fit_polynomial_coeff_computeMSE(eff_pot,hist,mse,msef,mses,natom,ntime,sqomega,&
+&                                          compute_anharmonic)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -2851,44 +3005,63 @@ subroutine fit_polynomial_coeff_computeMSE(eff_pot,hist,mse,msef,mses,natom,comp
 
 !Arguments ------------------------------------
 !scalars
- integer, intent(in) :: natom
+ integer, intent(in) :: natom,ntime
  real(dp),intent(out):: mse,msef,mses
  logical,optional,intent(in) :: compute_anharmonic
 !arrays
+ real(dp) :: sqomega(ntime)
  type(effective_potential_type),intent(in) :: eff_pot
  type(abihist),intent(in) :: hist
 !Local variables-------------------------------
 !scalar
- integer :: ii,nstep,ntime
+ integer :: ii,ia,mu
  real(dp):: energy
  logical :: need_anharmonic = .TRUE.
 !arrays
  real(dp):: fcart(3,natom),fred(3,natom),strten(6),rprimd(3,3),xred(3,natom)
-
+ character(len=500) :: msg
 ! *************************************************************************
 
- mse  = zero
- msef = zero
- mses = zero
+!Do some checks
+ if(ntime /= hist%mxhist)then
+   write(msg,'(a)')'ntime is not correct'
+   MSG_BUG(msg)
+ end if
 
- nstep= 1
- ntime = hist%mxhist
+ if(natom /= size(hist%xred,2)) then
+   write(msg,'(a)')'natom is not correct'
+   MSG_BUG(msg)
+ end if
 
  if(present(compute_anharmonic))then
    need_anharmonic = compute_anharmonic
  end if
 
+
+ mse  = zero
+ msef = zero
+ mses = zero
+
  do ii=1,ntime
    xred(:,:)   = hist%xred(:,:,ii)
    rprimd(:,:) = hist%rprimd(:,:,ii)
    call effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,rprimd,&
-&                                    xred=xred,compute_anharmonic=need_anharmonic,verbose=.FALSE.)
+&                                    xred=xred,compute_anharmonic=need_anharmonic,verbose=.false.)
 
-   mse = mse + abs(hist%etot(ii) - energy)
-  
+   mse  = mse  + abs(hist%etot(ii) - energy)
+   do ia=1,natom
+     do mu=1,3
+       msef = msef + (hist%fcart(mu,ia,ii)  - fcart(mu,ia))**2
+     end do
+   end do
+   do mu=1,6
+     mses = mses + sqomega(ii)*(hist%strten(mu,ii) - strten(mu))**2
+   end do
  end do
 
- mse = mse  / ntime 
+ mse  = mse  /  ntime 
+ msef = msef / (3*natom*ntime)
+ mses = mses / (6*ntime)
 
 end subroutine fit_polynomial_coeff_computeMSE
 !!***
@@ -2905,8 +3078,12 @@ end subroutine fit_polynomial_coeff_computeMSE
 !! If not, the hist file is reordering 
 !!
 !! INPUTS
+!! eff_pot<type(effective_potential)> = effective potential
+!! hist<type(abihist)> = The history of the MD
+!! comm = MPI communicator
 !!
 !! OUTPUT
+!! hist<type(abihist)> = The history of the MD
 !!
 !! PARENTS
 !!
@@ -3216,16 +3393,16 @@ subroutine fit_polynomial_printSystemFiles(eff_pot,hist)
  write(unit_ref,'("")')
  write(unit_ref,'("Cell vectors")')
  write(unit_ref,'("============")')
- write(unit_ref,'(3(F23.14))') (hist%rprimd(:,:,1))
+ do jj=1,3
+   write(unit_ref,'(3(F22.14))') (supercell%rprimd_supercell(:,jj))
+ end do
+
  write(unit_ref,'("")')
  write(unit_ref,'("Atomic positions (Bohr radius)")')
  write(unit_ref,'("==============================")')
 
- call xred2xcart(supercell%natom_supercell,supercell%rprimd_supercell,&
-&                  xcart,hist%xred(:,:,1))
-
  do ia=1,supercell%natom_supercell
-   write(unit_ref,'(3(F23.14))') xcart(:,typat_order(ia))
+   write(unit_ref,'(3(F23.14))') supercell%xcart_supercell(:,typat_order(ia))
  end do
 
 !Harmonic XML file
@@ -3292,10 +3469,11 @@ subroutine fit_polynomial_printSystemFiles(eff_pot,hist)
  do ii=1,nstep
    write(unit_md,'(I5)') ii-1
    write(unit_md,'(F22.14)') hist%etot(ii)/nshift
-   write(unit_md,'(3(F22.14))') (hist%rprimd(:,:,ii))
-
+   do jj=1,3
+     write(unit_md,'(3(F22.14))') (hist%rprimd(:,jj,ii))
+   end do
 !  Set xcart and fcart for this step
-   call xred2xcart(supercell%natom_supercell,supercell%rprimd_supercell,&
+   call xred2xcart(supercell%natom_supercell,hist%rprimd(:,:,ii),&
 &                  xcart,hist%xred(:,:,ii))
 
    fcart(:,:) = hist%fcart(:,:,ii)
