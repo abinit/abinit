@@ -52,12 +52,12 @@ P This job should need less than                       1.590 Mbytes of memory.
             acell      7.1287592924E+00  7.1287592924E+00  7.1287592924E+00 Bohr
               amu      4.00260200E+00
         boxcutmin      1.00000000E+00
+     densfor_pred           0
             dtion      5.00000000E+01
              ecut      5.00000000E+00 Hartree
            enunit           2
            fftalg         401
            ionmov          12
-           densfor_pred           0
            istwfk        1
            kptopt           0
            mdtemp      1.00000000E+06  1.00000000E+06
@@ -396,6 +396,7 @@ fine grid =   12 12 12
             acell      7.1287592924E+00  7.1287592924E+00  7.1287592924E+00 Bohr
               amu      4.00260200E+00
         boxcutmin      1.00000000E+00
+     densfor_pred           0
             dtion      5.00000000E+01
              ecut      5.00000000E+00 Hartree
            enunit           2
@@ -406,7 +407,6 @@ fine grid =   12 12 12
                        1.8638004022E-01 -6.0380147103E-01  1.3828606992E-01
            fftalg         401
            ionmov          12
-           densfor_pred           0
            istwfk        1
            kptopt           0
            mdtemp      1.00000000E+06  1.00000000E+06

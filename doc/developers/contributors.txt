@@ -31,6 +31,7 @@ Coming now to individuals,
 recent direct contributors to ABINIT (versions 8.0 to 8.2) are :
 name                      email
 Flavio Abreu Araujo       flavio.abreuaraujo@uclouvain.be
+Florian Altvater          altvater@berkeley.edu
 Bernard Amadon            bernard.amadon@cea.fr
 Gabriel Antonius          gabriel.antonius@gmail.com
 Frederic Arnardi          frederic.arnardi@student.ecp.fr
@@ -46,6 +47,7 @@ Michel Cote               Michel.Cote@umontreal.ca
 Jean-Francois Danel       jean-francois.danel@cea.fr
 Muriel Delaveau           muriel.delaveau@cea.fr
 Camilo Espejo             utadeocespejo@gmail.com
+Gregory Geneste           gregory.geneste@cea.fr
 Alexis Gerossier          alexis.gerossier@supelec.fr
 Matteo Giantomassi        matteo.giantomassi@uclouvain.be
 Yannick Gillet            yannick.gillet@uclouvain.be
@@ -55,11 +57,13 @@ Jonathan Laflamme Janssen laflammejanssenjonathan@gmail.com
 R. Laasner
 Alexandre Martin          alexandre.martin@ulg.ac.be
 Cyril Martins             cyril.martins@cea.fr
+Francesco Naccarato       fnaccarato89@gmail.com
 Alfredo Pasquarello       Alfredo.Pasquarello@epfl.ch
 Guido Petretto            guido.petretto@uclouvain.be
 Valentin Planes           valentinplanes@live.fr
 Samuel Ponce              samuel.ponce@uclouvain.be
 Yann Pouillon             yann.pouillon@materialsevolution.es
+Serguei Prokhorenko       prokhorenko.s@gmail.com
 Tonatiuh Rangel           tonatiuh_rangel@hotmail.com
 Vanina Recoules           vanina.recoules@cea.fr
 Fabio Ricci               fabio.ricci@ulg.ac.be

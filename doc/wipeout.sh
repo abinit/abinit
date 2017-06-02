@@ -46,7 +46,7 @@ find . -name Makefile.am -exec rm {} \;
 rm -f config/m4/auto-*.m4
 
 # Remove compiled files
-echo "[docclean]   Removing compiled files and auxilliary data"
+echo "[docclean]   Removing compiled files and auxiliary data"
 for ext in aux blg dvi fdb_latexmk fls ilg log nav snm tmp toc vrb; do
   find . -name "*.${ext}" -exec rm {} \;
 done
