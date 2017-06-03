@@ -86,6 +86,7 @@ ndtset 3 jdtset 1 2 3
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
+#%% exclude_builders = ubu_intel_17.0_openmpi
 #%% test_chain = t07.in,t08.in,t09.in,t10.in,t11.in
 #%% [files]
 #%% files_to_test = 
