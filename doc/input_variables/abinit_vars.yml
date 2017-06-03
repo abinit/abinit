@@ -9834,6 +9834,26 @@
            [[dtion]], [[lotf_classic]], [[lotf_nitex]], [[lotf_nneigx]], [[lotf_version]].  <br /> <br />
           </li>
           <li>
+          24=&gt; Simple constant energy molecular dynamics using the velocity Verlet symplectic algorithm (second order), see e.g. [E. Hairer et al. Acta Numerica. 12, 399 (2003)].
+        The only related parameter is the time step ([[dtion]]).  <br />
+           <b> Purpose: </b>
+           Molecular dynamics <br />
+           <b> Cell optimization: </b>
+           No (Use [[optcell]]=0 only) <br />
+           <b> Related variables: </b>
+           time step [[dtion]] <br /> <br />
+          </li>
+          <li>
+          25=&gt; Hybrid Monte Carlo sampling of the ionic positions at fixed temperature and unit cell geometry (NVT ensemle). The underlying molecular dynamics corresponds to ionmov=24.
+        The related parameters are the time step ([[dtion]]) and thermostat temperature ([[mdtemp]]).  <br />
+           <b> Purpose: </b>
+           Monte Carlo sampling <br />
+           <b> Cell optimization: </b>
+           No (Use [[optcell]]=0 only) <br />
+           <b> Related variables: </b>
+           time step [[dtion]], thermostat temperature [[mdtemp]], <br /> <br />
+          </li>
+          <li>
            30=&gt; Using a supercell, calculate a self consistent phonon structure
         as in PRL 100 095901 (2008). The initial phonon eigenvectors and
         eigenvalues are read in, and then atoms are displaced according
