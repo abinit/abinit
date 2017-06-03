@@ -4297,7 +4297,7 @@
          </ul>
          <br />
          The CT Hyb algorithm is described in
-           <a href="http://journals.aps.org/prl/abstract/10.1103/PhysRevLett.97.076405">
+           <a href="https://journals.aps.org/prl/abstract/10.1103/PhysRevLett.97.076405">
             Phys. Rev. Lett 97, 076405, (2006) </a>.
             For a discussion  of density-density approximation with respect
             with the rotationnally invariant formulation, see e.g.
@@ -27041,7 +27041,7 @@
          </ul>
          For [[vdw_xc]]=1 and [[vdw_xc]]=2, the implementation follows the strategy devised
         in the article of Rom&aacute;n-P&eacute;rez and Soler
-        (<a href="http://dx.doi.org/10.1103/PhysRevLett.103.096102">doi:10.1103/PhysRevLett.103.096102</a>)
+        (<a href="https://dx.doi.org/10.1103/PhysRevLett.103.096102">doi:10.1103/PhysRevLett.103.096102</a>)
         </p>
     varname: vdw_xc
     vartype: integer
