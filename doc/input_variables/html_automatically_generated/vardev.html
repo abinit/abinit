@@ -256,7 +256,6 @@ exact exchange contribution only for the initial guess (not for the gradient dir
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#develop">DEVELOP</a></font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 6 if <a href="varpar.html#paral_kgb">paral_kgb</a>==1,
-3 if <a href="varrlx.html#ionmov">ionmov</a>==4 and <a href="varbas.html#iscf">iscf</a>==5,
 2 otherwise.
 </font>
 <br><br><font id="requires">
@@ -296,24 +295,25 @@ Only relevant if <a href="varbas.html#iscf">iscf</a> >0
    6 =&gt; density changed using D. Alfe 2nd-order algorithm (**) and forces corrected with the use of Harris functional formula (*)
   </li>
  </ul>
+Similar negative values are also allowed (see the meaning later), for development purposes only.
  No meaning for RF calculations.
  <br />
  <br />
  For the time being,
  <br />
- - the choice 3 must be used with <a href="varrlx.html#ionmov">ionmov</a>=4
+ - <b>densfor_pred</b>=3 must be used with <a href="varrlx.html#ionmov">ionmov</a>=4
 and <a href="varbas.html#iscf">iscf</a>=5.
  <br />
- - the choices 4, 5 or 6 must be used when band-FFT parallelism is selected.
+ - <b>densfor_pred</b>=4, 5 or 6 must be used when band-FFT parallelism is selected.
  <br />
- Otherwise, use the choice 2.
+ Otherwise, use <b>densfor_pred</b>=2
  <br />
  <br />
  <b>
   (*)
  </b>
  <u>
- Note concerning the use of <b>densfor_pred</b>=4 or 6 (correction of forces)
+ Note concerning the correction of forces (use of <b>densfor_pred</b>=1, 2, 3, 4 or 6)
  </u>
  :
  <br />
@@ -336,9 +336,9 @@ is obtained from the density residual with the first order formula
  <i>
   dVxc/drho=Kxc
  </i>
- which computation is time-consuming for GGA functionals.
-By default the LDA exchange-correlation kernel is used (even for GGA, for which it seems to give a reasonable accuracy).
-Using the exact GGA exchange correlation kernel is always possible by giving a negative value to <b>densfor_pred</b>.
+ whose computation is time-consuming for GGA functionals.
+By default (positive values of <b>densfor_pred</b>), the local-density part of the GGA exchange-correlation kernel is used (even for GGA, for which it seems to give a reasonable accuracy).
+Using the full GGA exchange correlation kernel (so, including derivatives with respect to the gradient of the density) is always possible by giving a negative value to <b>densfor_pred</b>. In case of hybrid functionals, a similar correction term is added, although in the density mixing scheme, the related GGA kernel is used instead of the hybrid functional kernel.
  <br />
  <br />
  <b>
