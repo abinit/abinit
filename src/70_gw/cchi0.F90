@@ -315,6 +315,8 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
    ! Special care has to be taken in metals and/or spin dependent systems
    ! as Wfs_val might contain unoccupied states.
    call wrtout(std_out,' Using faster algorithm based on time reversal symmetry.','COLL')
+ else
+   call wrtout(std_out,' Using slow algorithm without time reversal symmetry.')
  end if
 
  ! TODO this table can be calculated for each k-point
@@ -380,18 +382,13 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
    end if
 
    memreq = two*gwpc*Ep%npwe**2*(my_wr-my_wl+1)*b2Gb
-   write(msg,'(a,f10.4,a)')' memory required per spectral point: ',2.0*gwpc*Ep%npwe**2*b2Mb,' [Mb]'
+   write(msg,'(a,f10.4,a)')' memory required per spectral point: ',two*gwpc*Ep%npwe**2*b2Mb,' [Mb]'
    call wrtout(std_out,msg,'PERS')
    write(msg,'(a,f10.4,a)')' memory required by sf_chi0: ',memreq,' [Gb]'
    call wrtout(std_out,msg,'PERS')
    if (memreq > two) then
      MSG_WARNING(' Memory required for sf_chi0 is larger than 2.0 Gb!')
    end if
-   if ((Dtset%userre > zero).and.(memreq > Dtset%userre)) then
-     write(msg,'(a,f8.3,a)')' Memory required by sf_chi0 is larger than userre:',Dtset%userre,'[Gb]'
-     MSG_ERROR(msg)
-   end if
-
    ABI_STAT_MALLOC(sf_chi0,(Ep%npwe,Ep%npwe,my_wl:my_wr), ierr)
    ABI_CHECK(ierr==0, 'out-of-memory in sf_chi0')
    sf_chi0=czero_gw

@@ -1183,8 +1183,8 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
      call wrtout(std_out,msg,'COLL')
      call wrtout(ab_out,msg,'COLL')
    end if
-   !
-   !  === Write chi0 on _SUSC file ===
+
+   ! Write chi0 to _SUSC file
    ! Master creates and write the header if this is the first q-point calculated.
    if (Dtset%prtsuscep>0 .and. my_rank==master) then
      title(1)='CHI0 file: chi0'

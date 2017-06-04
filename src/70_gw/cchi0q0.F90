@@ -258,15 +258,11 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
  gw_mgfft = MAXVAL(ngfft_gw(1:3)); gw_fftalga = ngfft_gw(7)/100 !; gw_fftalgc=MOD(ngfft_gw(7),10)
  if (Dtset%pawcross==1) mgfftf = MAXVAL(ngfftf(1:3))
 
- ! Copy some values
- comm   = Wfd%comm
- nspinor= Wfd%nspinor
- nsppol = Wfd%nsppol
- mband  = Wfd%mband
- nfft   = Wfd%nfft
+ ! Copy important variables.
+ comm = Wfd%comm; nsppol = Wfd%nsppol; nspinor = Wfd%nspinor; mband = Wfd%mband
+ nfft = Wfd%nfft
  ABI_CHECK(Wfd%nfftot==nfftot_gw,"Wrong nfftot_gw")
-
- dim_rtwg=1; if (nspinor==2) dim_rtwg=2 !can reduce size depending on Ep%nI and Ep%nj
+ dim_rtwg=1; if (nspinor==2) dim_rtwg=2 ! Can reduce size depending on Ep%nI and Ep%nj
 
  ucrpa_bands(1)=dtset%ucrpa_bands(1)
  ucrpa_bands(2)=dtset%ucrpa_bands(2)
@@ -275,7 +271,7 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
    luwindow=.true.
  endif
 
-!  For cRPA calculation of U: read forlb.ovlp
+ ! For cRPA calculation of U: read forlb.ovlp
  if(dtset%ucrpa>=1) then
    call read_plowannier(Cryst,bandinf,bandsup,coeffW_BZ,itypatcor,Kmesh,lcor,luwindow,&
 & nspinor,nsppol,pawang,dtset%prtvol,ucrpa_bands)
@@ -287,12 +283,14 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
  chi0_lwing = czero; chi0_uwing= czero; chi0_head = czero
 
  if (Psps%usepaw==0) then
-   if (Ep%inclvkb/=0) then ! Include the term <n,k|[Vnl,iqr]|n"k>' for q->0.
+   if (Ep%inclvkb/=0) then
+     ! Include the term <n,k|[Vnl,iqr]|n"k>' for q->0.
      ABI_CHECK(nspinor==1,"nspinor+inclvkb not coded")
    else
      MSG_WARNING('Neglecting <n,k|[Vnl,iqr]|m,k>')
    end if
- else ! For PAW+LDA+U, precalculate <\phi_i|[Hu,r]|phi_j\> ===
+ else
+   ! For PAW+LDA+U, precalculate <\phi_i|[Hu,r]|phi_j\>
    ABI_DT_MALLOC(HUr,(Cryst%natom))
    if (Dtset%usepawu/=0) then
      call pawhur_init(hur,nsppol,Dtset%pawprtvol,Cryst,Pawtab,Pawang,Pawrad,Paw_ij)
@@ -310,15 +308,14 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
    ABI_MALLOC(wfwfg,(nfft*nspinor**2))
 
    ! Init the largest G-sphere contained in the FFT box for the wavefunctions.
-   call gsph_in_fftbox(Gsph_FFT,Cryst,Wfd%ngfft)  ! TODO not used yet.
-
+   call gsph_in_fftbox(Gsph_FFT,Cryst,Wfd%ngfft)
    call print_gsphere(Gsph_FFT,unit=std_out,prtvol=10)
 
    ABI_MALLOC(gspfft_igfft,(Gsph_FFT%ng))
    ABI_MALLOC(dummy_gbound,(2*gw_mgfft+8,2))
 
    ! Mapping between G-sphere and FFT box.
-   call gsph_fft_tabs(Gsph_FFT,(/0,0,0/),Wfd%mgfft,Wfd%ngfft,dummy,dummy_gbound,gspfft_igfft)
+   call gsph_fft_tabs(Gsph_FFT, [0, 0, 0],Wfd%mgfft,Wfd%ngfft,dummy,dummy_gbound,gspfft_igfft)
    ABI_FREE(dummy_gbound)
 
    if (Psps%usepaw==1) then
@@ -331,7 +328,7 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
    end if
  end if
 
- ! Setup weight (2 for spin unpolarized systems, 1 for polarized) ===
+ ! Setup weight (2 for spin unpolarized systems, 1 for polarized).
  ! spin_fact is used to normalize the occupation factors to one.
  ! Consider also the AFM case.
  SELECT CASE (nsppol)
@@ -376,11 +373,12 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
  if (use_tr) then
    ! Special care has to be taken in metals and/or spin dependent systems
    ! as Wfs_val might contain unoccupied states.
-   call wrtout(std_out,' Using faster algorithm based on time reversal symmetry.','COLL')
+   call wrtout(std_out,' Using faster algorithm based on time reversal symmetry.')
+ else
+   call wrtout(std_out,' Using slow algorithm without time reversal symmetry.')
  end if
- !
- ! === Evaluate oscillator matrix elements btw partial waves ===
- ! * Note that we set q=Gamma
+
+ ! Evaluate oscillator matrix elements btw partial waves. Note q=Gamma
  if (Psps%usepaw==1) then
    ABI_DT_MALLOC(Pwij,(Psps%ntypat))
    call pawpwij_init(Pwij,Ep%npwepG0,(/zero,zero,zero/),Gsph_epsG0%gvec,Cryst%rprimd,Psps,Pawtab,Paw_pwff)
@@ -469,7 +467,7 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
    call wrtout(std_out,' Calculating chi0(q=(0,0,0),omega,G,G")',"COLL")
    ABI_MALLOC(green_w,(Ep%nomega))
 
- CASE (1,2)
+ CASE (1, 2)
    call wrtout(std_out,' Calculating Im chi0(q=(0,0,0),omega,G,G")','COLL')
    !
    ! === Find max and min resonant transitions for this q, report values for this processor ===
@@ -498,18 +496,13 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
    sf_head=czero; sf_lwing=czero; sf_uwing=czero
 
    memreq = two*gwpc*Ep%npwe**2*(my_wr-my_wl+1)*b2Gb
-   write(msg,'(a,f10.4,a)')' memory required per spectral point: ',2.0*gwpc*Ep%npwe**2*b2Mb,' [Mb]'
+   write(msg,'(a,f10.4,a)')' memory required per spectral point: ',two*gwpc*Ep%npwe**2*b2Mb,' [Mb]'
    call wrtout(std_out,msg,'PERS')
    write(msg,'(a,f10.4,a)')' memory required by sf_chi0q0:       ',memreq,' [Gb]'
    call wrtout(std_out,msg,'PERS')
    if (memreq > two) then
      MSG_WARNING(' Memory required for sf_chi0q0 is larger than 2.0 Gb!')
    end if
-   if ((Dtset%userre > zero) .and. (memreq > Dtset%userre)) then
-     write(msg,'(a,f8.3,a)')' Memory required by sf_chi0 is larger than userre:',Dtset%userre,'[Gb]'
-     MSG_ERROR(msg)
-   end if
-
    ABI_STAT_MALLOC(sf_chi0,(Ep%npwe,Ep%npwe,my_wl:my_wr), ierr)
    ABI_CHECK(ierr==0, 'out-of-memory in sf_chi0q0')
    sf_chi0=czero_gw
@@ -537,11 +530,10 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
 
  ! Loop on spin to calculate $\chi_{\up,\up} + \chi_{\down,\down}$
  do spin=1,nsppol
-
    if (ALL(bbp_ks_distrb(:,:,:,spin) /= Wfd%my_rank)) CYCLE
 
-   do ik_bz=1,Kmesh%nbz ! Loop over k-points in the BZ.
-
+   ! Loop over k-points in the BZ.
+   do ik_bz=1,Kmesh%nbz
      if (Ep%symchi==1) then
        if (Ltg_q%ibzq(ik_bz)/=1) CYCLE ! Only IBZ_q
      end if
@@ -561,7 +553,8 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
      npw_k   =  Wfd%npwarr(ik_ibz)
      kg_k    => Wfd%Kdata(ik_ibz)%kg_k
 
-     if (Psps%usepaw==0.and.Ep%inclvkb/=0.and.gradk_not_done(ik_ibz)) then ! Include term <n,k|[Vnl,iqr]|n"k>' for q->0.
+     if (Psps%usepaw==0.and.Ep%inclvkb/=0.and.gradk_not_done(ik_ibz)) then
+       ! Include term <n,k|[Vnl,iqr]|n"k>' for q->0.
        call vkbr_init(vkbr(ik_ibz),Cryst,Psps,Ep%inclvkb,istwf_k,npw_k,Kmesh%ibz(:,ik_ibz),kg_k)
        gradk_not_done(ik_ibz)=.FALSE.
      end if
@@ -827,7 +820,8 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
          call accumulate_chi0sumrule(ik_bz,Ep%symchi,Ep%npwe,factor,deltaeGW_b1b2,&
 &          Ltg_q,Gsph_epsG0,Ep%npwepG0,rhotwg,chi0_sumrule)
 
-         if (Ep%gwcomp==1) then ! Include also the completeness correction in the sum rule.
+         if (Ep%gwcomp==1) then
+           ! Include also the completeness correction in the sum rule.
            factor=-spin_fact*qp_occ(band2,ik_ibz,spin)
            call accumulate_chi0sumrule(ik_bz,Ep%symchi,Ep%npwe,factor,deltaeGW_enhigh_b2,&
 &            Ltg_q,Gsph_epsG0,Ep%npwepG0,rhotwg,chi0_sumrule)

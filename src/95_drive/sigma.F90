@@ -387,7 +387,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
 !XG090617 Please, do not remove this write, unless you have checked
 !that the code executes correctly on max+g95 (especially, Tv5#70).
 !It is one more a silly write, perhaps needed because the compiler does not treat correctly non-nullified pointers.
- if ( sigma_needs_w(Sigp) .and. my_rank==master) then
+ if (sigma_needs_w(Sigp) .and. my_rank==master) then
    write(std_out,*)' screening after setup_sigma : Er%Hscr%headform=',Er%Hscr%headform
  end if
 !END XG090617
@@ -710,7 +710,6 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  ABI_FREE(keep_ur)
 
  call timab(402,2,tsec) ! sigma(Init1)
-
  call timab(404,1,tsec) ! rdkss
 
  call wfd_read_wfk(Wfd,wfk_fname,iomode_from_fname(wfk_fname))
@@ -724,7 +723,6 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  if (.False.) call wfd_test_ortho(Wfd,Cryst,Pawtab,unit=ab_out,mode_paral="COLL")
 
  call timab(404,2,tsec) ! rdkss
-
  call timab(405,1,tsec) ! Init2
 
 !Debugging section.
@@ -923,7 +921,6 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
    call fourdp(1,ks_taug,ks_taur(:,1),-1,MPI_enreg_seq,nfftf,ngfftf,Dtset%paral_kgb,tim_fourdp)
  end if
 
- !
  !The following steps have been gathered in the setvtr routine:
  !- get Ewald energy and Ewald forces
  !- compute local ionic pseudopotential vpsp

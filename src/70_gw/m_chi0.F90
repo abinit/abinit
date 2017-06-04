@@ -1640,7 +1640,7 @@ end subroutine approxdelta
 !!  Calculate frequency dependent weights needed to perform the Hilbert transform
 !!
 !!  Subroutine needed to implement the calculation
-!!  of the polarizability using the spectral representation as proposed in :
+!!  of the polarizability using the spectral representation as proposed in:
 !!  PRB 74, 035101 (2006) and PRB 61, 7172 (1999)
 !!
 !! INPUTS

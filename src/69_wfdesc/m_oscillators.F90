@@ -626,7 +626,7 @@ end subroutine usur_kkp_bz
 !!
 !! SOURCE
 
-pure subroutine gw_box2gsph(nr,ndat,npw,igfftg0,iarrbox,oarrsph)
+subroutine gw_box2gsph(nr,ndat,npw,igfftg0,iarrbox,oarrsph)
 
 
 !This section has been created automatically by the script Abilint (TD).
