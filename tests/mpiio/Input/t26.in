@@ -49,7 +49,7 @@ npband3 4 npkpt3 1 npfft3 1
 getwfk4 0
 getden4 -1
 npband4 2 npkpt4 1 npfft4 2
-nstep4 5     Improves the portability of the test
+nstep4 5  #   Improves the portability of the test
 
 # Dataset 5
 # Read previous WFK file with the simple band-by-band CG solver.
