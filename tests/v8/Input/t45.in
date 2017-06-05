@@ -13,8 +13,8 @@ gruns_ddbs
 asr 1
 dipdip 1
 #dipdip 0
-vs_qrad_tolms 0.001 300
-#vs_qrad_tolms 0.01 50
+vs_qrad_tolkms 0.001 0.3
+#vs_qrad_tolkms 0.01 0.05
 
 # Q-mesh for DOSes
 #prtdos 2

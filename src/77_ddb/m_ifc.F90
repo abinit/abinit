@@ -1082,10 +1082,10 @@ end subroutine ifc_get_dwdq
 !! INPUTS
 !! ifc<ifc_type>=Object containing the dynamical matrix and the IFCs.
 !! crystal<crystal_t> = Information on the crystalline structure.
-!! qrad_tolms(2):
+!! qrad_tolkms(2):
 !!   qrad=Radius of the sphere in reciprocal space
-!!   atols_ms=Absolute tolerance in meter/second. The code generates spherical meshes
-!!     until the results are converged twice within atols_ms.
+!!   atols_kms=Absolute tolerance in kilometer/second. The code generates spherical meshes
+!!     until the results are converged twice within atols_kms.
 !! ncid=the id of the open NetCDF file. Use nctk_noid to disable netcdf output.
 !! comm=MPI communicator.
 !!
@@ -1099,7 +1099,7 @@ end subroutine ifc_get_dwdq
 !!
 !! SOURCE
 
-subroutine ifc_speedofsound(ifc, crystal, qrad_tolms, ncid, comm)
+subroutine ifc_speedofsound(ifc, crystal, qrad_tolkms, ncid, comm)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -1117,7 +1117,7 @@ subroutine ifc_speedofsound(ifc, crystal, qrad_tolms, ncid, comm)
  type(ifc_type),intent(in) :: ifc
  type(crystal_t),intent(in) :: crystal
 !arrays
- real(dp),intent(in) :: qrad_tolms(2)
+ real(dp),intent(in) :: qrad_tolkms(2)
 
 !Local variables -------------------------
 !scalars
@@ -1125,7 +1125,7 @@ subroutine ifc_speedofsound(ifc, crystal, qrad_tolms, ncid, comm)
  integer :: ii,nu,igrid,my_rank,nprocs,ierr,converged,npts,num_negw,vs_ierr,ncerr
  integer :: iatom,iatref,num_acoustic,isacoustic
  real(dp) :: min_negw,cpu,wall,gflops
- real(dp) :: qrad,tolms
+ real(dp) :: qrad,tolkms
  character(len=500) :: msg
  type(lebedev_t) :: lgrid
 !arrays
@@ -1139,9 +1139,9 @@ subroutine ifc_speedofsound(ifc, crystal, qrad_tolms, ncid, comm)
  my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
 
  if (ifc%asr == 0) MSG_WARNING("Computing speed of sound with asr == 0! Use asr > 0")
- qrad = qrad_tolms(1); tolms = qrad_tolms(2)
+ qrad = qrad_tolkms(1); tolkms = qrad_tolkms(2)
  ABI_CHECK(qrad > zero, "vs_qrad <= 0")
- ABI_CHECK(tolms > zero, "vs_tolms <= 0")
+ ABI_CHECK(tolkms > zero, "vs_tolkms <= 0")
 
  call cwtime(cpu, wall, gflops, "start")
 
@@ -1235,7 +1235,7 @@ subroutine ifc_speedofsound(ifc, crystal, qrad_tolms, ncid, comm)
      " Lebedev-Laikov grid: ",igrid,", npts: ", npts, " vs_sphavg(ac_modes): ",quad, " <vs>: ",sum(quad)/3
 
    if (igrid > 1) then
-     if (abs(sum(quad - prev_quad)/3) < tolms) then
+     if (abs(sum(quad - prev_quad)/3) < tolkms) then
         converged = converged + 1; if (converged == 2) exit
      else
         converged = 0
@@ -1252,11 +1252,11 @@ subroutine ifc_speedofsound(ifc, crystal, qrad_tolms, ncid, comm)
      write(ab_out,"(a,3es12.4,a,i1)")" Speed of sound:",vs(ii,:)," [km/s] along reduced direction: ",ii
    end do
    write(ab_out,'(2(a,es12.4),a,i0)') &
-     " Lebedev-Laikov integration with qradius: ", qrad, " tolms: ",tolms, " [km/s], npts: ", npts
+     " Lebedev-Laikov integration with qradius: ", qrad, " tolkms: ",tolkms, " [km/s], npts: ", npts
    write(ab_out,"(a,3es12.4,a,es12.4)")" Spherical average:",vs(7,:)," [km/s], ",sum(vs(7,:))/3
    if (converged /= 2) then
      vs_ierr = 1
-     write(msg,'(a,es12.4,a)')" WARNING: Results are not converged within: ",tolms, " [km/s]"
+     write(msg,'(a,es12.4,a)')" WARNING: Results are not converged within: ",tolkms, " [km/s]"
      call wrtout(ab_out, msg)
      MSG_WARNING(msg)
    end if
@@ -1276,7 +1276,7 @@ subroutine ifc_speedofsound(ifc, crystal, qrad_tolms, ncid, comm)
      NCF_CHECK(ncerr)
      ncerr = nctk_def_iscalars(ncid, [character(len=nctk_slen) :: "vsound_ierr"])
      NCF_CHECK(ncerr)
-     ncerr = nctk_def_dpscalars(ncid, [character(len=nctk_slen) :: "vsound_qrad", "vsound_tolms"])
+     ncerr = nctk_def_dpscalars(ncid, [character(len=nctk_slen) :: "vsound_qrad", "vsound_tolkms"])
      NCF_CHECK(ncerr)
      ncerr = nctk_def_arrays(ncid, [nctkarr_t("asnu", "i", "three")], defmode=.True.)
      NCF_CHECK(ncerr)
@@ -1284,7 +1284,7 @@ subroutine ifc_speedofsound(ifc, crystal, qrad_tolms, ncid, comm)
      NCF_CHECK(nctk_set_datamode(ncid))
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "vsound_ierr"), vs_ierr))
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "vsound_qrad"), qrad))
-     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "vsound_tolms"), tolms))
+     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "vsound_tolkms"), tolkms))
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "vsound"), vs))
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "asnu"), asnu))
 #endif

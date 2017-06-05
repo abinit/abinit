@@ -37,7 +37,7 @@
       nqshft         1
       q1shft
                      0.00000000E+00  0.00000000E+00  0.00000000E+00
-vs_qrad_tolms  1.00000000E-03  3.00000000E+02
+vs_qrad_tolkms  1.00000000E-03  3.00000000E-01
 Will compute Gruneisen parameters with finite difference method. DDB files:
     t45_Mg2Si_k666_q888_-0.01_DDB
     t45_Mg2Si_k666_q888_DDB
@@ -251,11 +251,11 @@ Computation of Gruneisen parameter with central finite difference:
 
  The interatomic forces have been obtained
  Average Gruneisen parameter: 1.38600
- Speed of sound:  1.7626E+03  1.7628E+03  9.9437E+03 [m/s] along reduced direction: 1
- Speed of sound:  1.7628E+03  1.7626E+03  9.9437E+03 [m/s] along reduced direction: 2
- Speed of sound:  1.7629E+03  1.7625E+03  9.9437E+03 [m/s] along reduced direction: 3
- Lebedev-Laikov integration with qradius:   1.0000E-03 tolms:   3.0000E+02 [m/s], npts: 38
- Spherical average:  5.5118E+03  4.8207E+03  8.9716E+03 [m/s],   6.4347E+03
+ Speed of sound:  1.7626E+00  1.7628E+00  9.9437E+00 [km/s] along reduced direction: 1
+ Speed of sound:  1.7628E+00  1.7626E+00  9.9437E+00 [km/s] along reduced direction: 2
+ Speed of sound:  1.7629E+00  1.7625E+00  9.9437E+00 [km/s] along reduced direction: 3
+ Lebedev-Laikov integration with qradius:   1.0000E-03 tolms:   3.0000E-0.1[km/s], npts: 38
+ Spherical average:  5.5118E+00  4.8207E+00  8.9716E+00 [km/s],   6.4347E+00
 -
 - Proc.   0 individual time (sec): cpu=        125.2  wall=        125.1
 
