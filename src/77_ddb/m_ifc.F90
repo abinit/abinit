@@ -1186,19 +1186,19 @@ subroutine ifc_speedofsound(ifc, crystal, qrad_tolms, ncid, comm)
    call ifc_fourq(ifc, crystal, qred, phfrqs, displ_cart, dwdq=dwdq)
 
    do nu=1,3
-     vs(ii, nu) = sqrt(sum(dwdq(1:3,asnu(nu)) ** 2)) * Bohr_meter / Time_Sec
+     vs(ii, nu) = sqrt(sum(dwdq(1:3,asnu(nu)) ** 2)) * Bohr_meter * 0.001_dp / Time_Sec
    end do
-   write(std_out,"(a,3es12.4,a)")" ||vs(nu)||:",vs(ii,:), " [m/s]"
+   write(std_out,"(a,3es12.4,a)")" ||vs(nu)||:",vs(ii,:), " [km/s]"
 
    qvers_cart = matmul(crystal%gprimd, qvers_red) * two_pi
    do nu=1,3
-     vs(ii, nu) = dot_product(dwdq(1:3,asnu(nu)), qvers_cart) * Bohr_meter / Time_Sec
+     vs(ii, nu) = dot_product(dwdq(1:3,asnu(nu)), qvers_cart) * Bohr_meter * 0.001_dp / Time_Sec
    end do
-   write(std_out,"(a,3es12.4,a)")" <q|vs(nu)>:",vs(ii,:), " [m/s]"
+   write(std_out,"(a,3es12.4,a)")" <q|vs(nu)>:",vs(ii,:), " [km/s]"
 
    !do nu=1,3
    !  write(std_out,"(a,3es12.4,a)")" vs(nu)_vect_red:",&
-   !     matmul(crystal%gprimd, dwdq(1:3,asnu(nu))) * Bohr_meter / Time_Sec, " [m/s]"
+   !     matmul(crystal%gprimd, dwdq(1:3,asnu(nu))) * Bohr_meter * 0.001_dp / Time_Sec, " [km/s]"
    !end do
  end do
 
@@ -1225,7 +1225,8 @@ subroutine ifc_speedofsound(ifc, crystal, qrad_tolms, ncid, comm)
      end do
    end do
 
-   quad = quad * Bohr_meter / Time_Sec
+!  Will use km/sec unit for echo purposes
+   quad = quad * Bohr_meter * 0.001_dp / Time_Sec
    call xmpi_sum(quad, comm, ierr)
    call xmpi_sum(num_negw, comm, ierr)
    call lebedev_free(lgrid)
@@ -1248,14 +1249,14 @@ subroutine ifc_speedofsound(ifc, crystal, qrad_tolms, ncid, comm)
    ! vs_err: 1 if not converged, < 0 if negative freqs, == 0 if success.
    vs_ierr = 0
    do ii=1,3
-     write(ab_out,"(a,3es12.4,a,i1)")" Speed of sound:",vs(ii,:)," [m/s] along reduced direction: ",ii
+     write(ab_out,"(a,3es12.4,a,i1)")" Speed of sound:",vs(ii,:)," [km/s] along reduced direction: ",ii
    end do
    write(ab_out,'(2(a,es12.4),a,i0)') &
-     " Lebedev-Laikov integration with qradius: ", qrad, " tolms: ",tolms, " [m/s], npts: ", npts
-   write(ab_out,"(a,3es12.4,a,es12.4)")" Spherical average:",vs(7,:)," [m/s], ",sum(vs(7,:))/3
+     " Lebedev-Laikov integration with qradius: ", qrad, " tolms: ",tolms, " [km/s], npts: ", npts
+   write(ab_out,"(a,3es12.4,a,es12.4)")" Spherical average:",vs(7,:)," [km/s], ",sum(vs(7,:))/3
    if (converged /= 2) then
      vs_ierr = 1
-     write(msg,'(a,es12.4,a)')" WARNING: Results are not converged within: ",tolms, " [m/s]"
+     write(msg,'(a,es12.4,a)')" WARNING: Results are not converged within: ",tolms, " [km/s]"
      call wrtout(ab_out, msg)
      MSG_WARNING(msg)
    end if
