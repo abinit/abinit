@@ -55,10 +55,10 @@ P This job should need less than                      47.456 Mbytes of memory.
             acell      1.8897261329E+01  9.4486306644E+00  9.4486306644E+00 Bohr
               amu      1.59994000E+01  1.40067400E+01  1.00794000E+00
            charge      1.00000000E+00
+     densfor_pred           6
              ecut      2.00000000E+01 Hartree
            iatfix        1    4
            ionmov           3
-           densfor_pred           6
            istwfk        2
               ixc       -1009
            kptopt           0
@@ -1081,6 +1081,7 @@ P newkpt: treating     10 bands with npw=     182 for ikpt=   1 by node    0
             acell      1.8897261329E+01  9.4486306644E+00  9.4486306644E+00 Bohr
               amu      1.59994000E+01  1.40067400E+01  1.00794000E+00
            charge      1.00000000E+00
+     densfor_pred           6
              ecut      2.00000000E+01 Hartree
            etotal     -2.9444510657E+01
             fcart      1.3843675678E-02 -1.7583359915E-04 -2.7373010104E-04
@@ -1093,7 +1094,6 @@ P newkpt: treating     10 bands with npw=     182 for ikpt=   1 by node    0
                        8.5017898113E-07 -3.3823094027E-05 -3.7607162620E-05
            iatfix        1    4
            ionmov           3
-           densfor_pred           6
            istwfk        2
               ixc       -1009
            kptopt           0

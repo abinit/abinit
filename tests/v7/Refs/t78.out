@@ -17,10 +17,10 @@
 .Starting date : Mon  4 Apr 2016.
 - ( at 12h04 )
   
-- input  file    -> t68.in
-- output file    -> t68.out
-- root for input  files -> t68i
-- root for output files -> t68o
+- input  file    -> t78.in
+- output file    -> t78.out
+- root for input  files -> t78i
+- root for output files -> t78o
 
 
  DATASET    1 : space group Pm -3 m (#221); Bravais cP (primitive cubic)
@@ -724,7 +724,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     117.926     117.783
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales=  6.760500000000  6.760500000000  6.760500000000 bohr
               =  3.577502518673  3.577502518673  3.577502518673 angstroms
- prteigrs : about to open file t68o_DS1_EIG
+ prteigrs : about to open file t78o_DS1_EIG
  Fermi (or HOMO) energy (hartree) =   0.57565   Average Vxc (hartree)=  -0.50844
  Eigenvalues (hartree) for nkpt=   4  k points:
  kpt#   1, nband= 25, wtk=  0.29630, kpt=  0.1667  0.1667  0.1667 (reduced coord)
@@ -1028,7 +1028,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     117.926     117.783
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales=  6.760500000000  6.760500000000  6.760500000000 bohr
               =  3.577502518673  3.577502518673  3.577502518673 angstroms
- prteigrs : about to open file t68o_DS2_EIG
+ prteigrs : about to open file t78o_DS2_EIG
  Fermi (or HOMO) energy (hartree) =   0.57565   Average Vxc (hartree)=  -0.50844
  Eigenvalues (hartree) for nkpt=   4  k points:
  kpt#   1, nband= 25, wtk=  0.29630, kpt=  0.1667  0.1667  0.1667 (reduced coord)
@@ -1127,7 +1127,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     117.926     117.783
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t68o_DS2_WFK
+-inwffil : will read wavefunctions from disk file t78o_DS2_WFK
 P newkpt: treating     25 bands with npw=     111 for ikpt=   1 by node    0
 P newkpt: treating     25 bands with npw=     118 for ikpt=   2 by node    0
 P newkpt: treating     25 bands with npw=     124 for ikpt=   3 by node    0
@@ -1335,7 +1335,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     117.926     117.783
     5      0.00000000000000     0.00000000000000     1.78875125933635
  length scales=  6.760500000000  6.760500000000  6.760500000000 bohr
               =  3.577502518673  3.577502518673  3.577502518673 angstroms
- prteigrs : about to open file t68o_DS3_EIG
+ prteigrs : about to open file t78o_DS3_EIG
  Fermi (or HOMO) energy (hartree) =   0.57565   Average Vxc (hartree)=  -0.50844
  Eigenvalues (hartree) for nkpt=   4  k points:
  kpt#   1, nband= 25, wtk=  0.29630, kpt=  0.1667  0.1667  0.1667 (reduced coord)

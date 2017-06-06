@@ -75,9 +75,9 @@ _ WF disk file :      0.533 Mbytes ; DEN or POT disk file :      0.152 Mbytes.
  -outvars: echo values of preprocessed input variables --------
             acell      9.0000000000E+00  9.0000000000E+00  9.0000000000E+00 Bohr
               amu      2.08980370E+02
+     densfor_pred           6
              ecut      5.00000000E+00 Hartree
 -          fftalg         401
-     densfor_pred           6
               ixc           7
            jdtset        1    2
               kpt1     2.50000000E-01  2.50000000E-01  2.50000000E-01
@@ -1431,6 +1431,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.750     127.664
  -outvars: echo values of variables after computation  --------
             acell      9.0000000000E+00  9.0000000000E+00  9.0000000000E+00 Bohr
               amu      2.08980370E+02
+     densfor_pred           6
              ecut      5.00000000E+00 Hartree
            etotal1    -1.4419641102E+02
            etotal2    -1.4419641106E+02
@@ -1439,7 +1440,6 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.750     127.664
             fcart2    -3.4766602400E-06  2.2944875935E-06 -1.8413960901E-03
                        3.4766602400E-06 -2.2944875935E-06  1.8413960901E-03
 -          fftalg         401
-     densfor_pred           6
               ixc           7
            jdtset        1    2
               kpt1     2.50000000E-01  2.50000000E-01  2.50000000E-01
