@@ -173,7 +173,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
 !Local variables ------------------------------
  character(len=4) :: ctype='RPA '
 !scalars
- integer,parameter :: level=30,tim_fourdp=4,NOMEGA_PRINTED=15,localrdwf0=0,master=0
+ integer,parameter :: level30=30,tim_fourdp4=4,NOMEGA_PRINTED=15,master=0
  integer :: spin,ik_ibz,my_nbks
  integer :: choice,cplex,dim_kxcg,dim_wing,ount,omp_ncpus
  integer :: fform_chi0,fform_em1,gnt_option,iat,ider,idir,ierr,band
@@ -316,7 +316,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
 !=============================================
 !==== Open and read pseudopotential files ====
 !=============================================
- call pspini(Dtset,Dtfil,ecore,psp_gencond,gsqcutc_eff,gsqcutf_eff,level,Pawrad,Pawtab,Psps,rprimd,comm_mpi=comm)
+ call pspini(Dtset,Dtfil,ecore,psp_gencond,gsqcutc_eff,gsqcutf_eff,level30,Pawrad,Pawtab,Psps,rprimd,comm_mpi=comm)
 
 !=== Initialize dimensions and basic objects ===
  call setup_screening(codvsn,acell,rprim,ngfftf,wfk_fname,dtfil,Dtset,Psps,Pawtab,&
@@ -861,9 +861,9 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
 
  ABI_MALLOC(rhog,(2,nfftf))
  ABI_MALLOC(taug,(2,nfftf*Dtset%usekden))
- call fourdp(1,rhog,rhor(:,1),-1,MPI_enreg_seq,nfftf,ngfftf,Dtset%paral_kgb,tim_fourdp)
+ call fourdp(1,rhog,rhor(:,1),-1,MPI_enreg_seq,nfftf,ngfftf,Dtset%paral_kgb,tim_fourdp4)
  if(Dtset%usekden==1)then
-   call fourdp(1,taug,taur(:,1),-1,MPI_enreg_seq,nfftf,ngfftf,Dtset%paral_kgb,tim_fourdp)
+   call fourdp(1,taug,taur(:,1),-1,MPI_enreg_seq,nfftf,ngfftf,Dtset%paral_kgb,tim_fourdp4)
  end if
 
 !The following steps have been gathered in the setvtr routine:
@@ -1233,8 +1233,8 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
 !  ==========================================================
 !  === Calculate RPA \tilde\epsilon^{-1} overwriting chi0 ===
 !  ==========================================================
-   approx_type=0 !RPA
-   option_test=0 !TESTPARTICLE
+   approx_type=0 ! RPA
+   option_test=0 ! TESTPARTICLE
    dim_wing=0; if (is_qeq0==1) dim_wing=3
 
    if (dim_wing==0) then

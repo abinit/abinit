@@ -288,7 +288,7 @@ subroutine solve_dyson(ikcalc,minbnd,maxbnd,nomega_sigc,Sigp,Kmesh,sigcme_tmp,qp
 
          Sr%egw(jb,sk_ibz,1)=Sr%e0(jb,sk_ibz,1)+Sr%degw(jb,sk_ibz,1)
 
-         ! === Estimate Sigma at the QP-energy ===
+         ! Estimate Sigma at the QP-energy.
          do iab=1,Sr%nsig_ab
           Sr%sigmee(jb,sk_ibz,iab)= &
 &           Sr%sigxme(jb,sk_ibz,iab)+Sr%sigcmee0(jb,sk_ibz,iab)+Sr%degw(jb,sk_ibz,1)*Sr%dsigmee0(jb,sk_ibz,iab)
@@ -463,7 +463,7 @@ subroutine solve_dyson(ikcalc,minbnd,maxbnd,nomega_sigc,Sigp,Kmesh,sigcme_tmp,qp
    htotal(:,:,4) = h_tmp2
  end if
 
- ! === Solve Herm(htotal)*U = E*U ===
+ ! Solve Herm(htotal)*U = E*U
  ld_matrix=ib2-ib1+1
  ABI_MALLOC(hdp,(ld_matrix,ld_matrix))
  ABI_MALLOC(eig,(ld_matrix))

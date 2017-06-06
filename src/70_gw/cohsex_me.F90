@@ -196,7 +196,7 @@ subroutine cohsex_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,Cryst,QP_BSt,Si
  complex(gwpc),allocatable :: sigctmp(:,:)
  complex(gwpc),allocatable :: wfr_bdgw(:,:),ur_sum(:),wf1swf2_g(:)
  complex(gwpc),ABI_CONTIGUOUS pointer :: cg_jb(:),cg_sum(:)
- complex(dpc),allocatable :: sym_cme(:,:,:),sigc(:,:,:,:,:)
+ complex(dpc),allocatable :: sym_cme(:,:,:,:),sigc(:,:,:,:,:)
  logical :: rank_mask(Wfd%nproc),can_symmetrize(Wfd%nsppol)
  logical,allocatable :: bks_mask(:,:,:)
  type(sigijtab_t),pointer :: Sigcij_tab(:)
@@ -246,7 +246,7 @@ subroutine cohsex_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,Cryst,QP_BSt,Si
    can_symmetrize = .TRUE.
    if (Sigp%gwcalctyp >= 20) then
     do spin=1,Wfd%nsppol
-      can_symmetrize(spin) = .not.esymm_failed(QP_sym(spin))
+      can_symmetrize(spin) = .not. esymm_failed(QP_sym(spin))
       if (.not.can_symmetrize(spin)) then
         write(msg,'(a,i0,4a)')" Symmetrization cannot be performed for spin: ",spin,ch10,&
 &         " band classification encountered the following problem: ",ch10,TRIM(QP_sym(spin)%err_msg)
@@ -254,10 +254,8 @@ subroutine cohsex_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,Cryst,QP_BSt,Si
       end if
     end do
    end if
-   ABI_CHECK(nspinor==1,'Symmetrization with nspinor=2 not implemented')
+   if (nspinor == 2) MSG_WARNING('Symmetrization with nspinor=2 not implemented')
  end if
-
- ABI_UNUSED(Pawang%l_max)
 
  mod10=MOD(Sigp%gwcalctyp, 10)
 
@@ -728,7 +726,7 @@ subroutine cohsex_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,Cryst,QP_BSt,Si
  ! TODO it does not work if nspinor==2.
  do spin=1,nsppol
    if (can_symmetrize(spin)) then
-     ABI_MALLOC(sym_cme,(nomega_tot,ib1:ib2,ib1:ib2))
+     ABI_MALLOC(sym_cme, (nomega_tot, ib1:ib2, ib1:ib2, sigp%nsig_ab))
      sym_cme=czero
 
      ! Average over degenerate diagonal elements.
@@ -738,21 +736,32 @@ subroutine cohsex_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,Cryst,QP_BSt,Si
        ndegs=0
        do jb=ib1,ib2
          if (degtab(ib,jb,spin)==1) then
-           sym_cme(:,ib,ib)=sym_cme(:,ib,ib)+SUM(sigc(:,:,jb,jb,spin),DIM=1)
+           if (nspinor == 1) then
+             sym_cme(:, ib, ib, 1) = sym_cme(:, ib, ib, 1) + SUM(sigc(:, :, jb, jb, spin), dim=1)
+           else
+             do ii=1,sigp%nsig_ab
+               sym_cme(:, ib, ib, ii) = sym_cme(:, ib, ib, ii) + SUM(sigc(:, :, jb, jb, ii), dim=1)
+             end do
+           end if
+
          end if
-         ndegs=ndegs+degtab(ib,jb,spin)
+         ndegs = ndegs + degtab(ib,jb,spin)
        end do
-       sym_cme(:,ib,ib)=sym_cme(:,ib,ib)/ndegs
+       sym_cme(:,ib,ib,:) = sym_cme(:,ib,ib,:) / ndegs
      end do
 
      if (Sigp%gwcalctyp >= 20) then
-       call esymm_symmetrize_mels(QP_sym(spin),ib1,ib2,sigc(:,1,:,:,spin),sym_cme(1,:,:))
+       call esymm_symmetrize_mels(QP_sym(spin),ib1,ib2,sigc(:,1,:,:,spin),sym_cme(1,:,:,1))
      end if
 
      ! Copy symmetrized values.
      do ib=ib1,ib2
        do jb=ib1,ib2
-         sigcme_tmp(:,ib,jb,spin)=sym_cme(:,ib,jb)
+         if (nspinor == 1) then
+           sigcme_tmp(:,ib,jb,spin) = sym_cme(:,ib,jb,1)
+         else
+           sigcme_tmp(:,ib,jb,:) = sym_cme(:,ib,jb,:)
+         end if
        end do
      end do
      ABI_FREE(sym_cme)

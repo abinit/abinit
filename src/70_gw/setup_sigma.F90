@@ -958,9 +958,6 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
    if (Sigp%gwcalctyp/=1) MSG_ERROR("Self-consistency with AC not implemented")
    if (Sigp%gwcomp==1) MSG_ERROR("AC with extrapolar technique not implemented")
  end if
- if (Sigp%nspinor==2) then
-   ABI_CHECK(Sigp%symsigma==0,'symsigma=1 and nspinor=2 not implemented')
- end if
 
  call gaps_free(gaps)
 

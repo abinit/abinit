@@ -238,7 +238,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
  complex(gwpc),allocatable :: ur_ae_bdgw(:,:),ur_ae_onsite_bdgw(:,:),ur_ps_onsite_bdgw(:,:)
  complex(gwpc),allocatable :: otq_transp(:,:)
  complex(gwpc),ABI_CONTIGUOUS pointer :: cg_jb(:),cg_sum(:)
- complex(dpc),allocatable :: sym_cme(:,:,:),sigc(:,:,:,:,:)
+ complex(dpc),allocatable :: sym_cme(:,:,:,:),sigc(:,:,:,:,:)
  logical :: rank_mask(Wfd%nproc),can_symmetrize(Wfd%nsppol)
 !logical :: me_calc_poles(Sr%nomega_r+Sr%nomega4sd)
  type(sigijtab_t),pointer :: Sigcij_tab(:)
@@ -301,7 +301,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
    can_symmetrize = .TRUE.
    if (Sigp%gwcalctyp >= 20) then
     do spin=1,Wfd%nsppol
-      can_symmetrize(spin) = .not.esymm_failed(QP_sym(spin))
+      can_symmetrize(spin) = .not. esymm_failed(QP_sym(spin))
       if (.not.can_symmetrize(spin)) then
         write(msg,'(a,i0,4a)')&
 &         " Symmetrization cannot be performed for spin: ",spin,ch10,&
@@ -310,7 +310,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
       end if
     end do
    end if
-   ABI_CHECK(Wfd%nspinor==1,'Symmetrization with nspinor=2 not implemented')
+   if (wfd%nspinor == 2) MSG_WARNING("Symmetrization with nspinor=2 not implemented")
  end if
 
  ABI_UNUSED(Pawang%l_max)
@@ -1167,9 +1167,9 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
  do spin=1,Wfd%nsppol
    if (can_symmetrize(spin)) then
      if (mod10==SIG_GW_AC) then ! FIXME here there is a problem in case of AC with symmetries
-       ABI_MALLOC(sym_cme,(Sr%nomega_i,ib1:ib2,ib1:ib2))
+       ABI_MALLOC(sym_cme, (Sr%nomega_i, ib1:ib2, ib1:ib2, sigp%nsig_ab))
      else
-       ABI_MALLOC(sym_cme,(nomega_tot,ib1:ib2,ib1:ib2))
+       ABI_MALLOC(sym_cme, (nomega_tot, ib1:ib2, ib1:ib2, sigp%nsig_ab))
      end if
      sym_cme=czero
 
@@ -1180,16 +1180,22 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
        ndegs=0
        do jb=ib1,ib2
          if (degtab(ib,jb,spin)==1) then
-           sym_cme(:,ib,ib)=sym_cme(:,ib,ib)+SUM(sigc(:,:,jb,jb,spin),DIM=1)
+           if (nspinor == 1) then
+             sym_cme(:, ib, ib, 1) = sym_cme(:, ib, ib, 1) + SUM(sigc(:,:,jb,jb,spin), DIM=1)
+           else
+             do ii=1,sigp%nsig_ab
+               sym_cme(:, ib, ib, ii) = sym_cme(:, ib, ib, ii) + SUM(sigc(:,:,jb,jb,ii), dim=1)
+             end do
+           end if
          end if
-         ndegs=ndegs+degtab(ib,jb,spin)
+         ndegs = ndegs + degtab(ib,jb,spin)
        end do
-       sym_cme(:,ib,ib)=sym_cme(:,ib,ib)/ndegs
+       sym_cme(:,ib,ib,:) = sym_cme(:,ib,ib,:) / ndegs
      end do
 
      if (Sigp%gwcalctyp >= 20) then
        do iwc=1,nomega_sigc
-         call esymm_symmetrize_mels(QP_sym(spin),ib1,ib2,sigc(:,iwc,:,:,spin),sym_cme(iwc,:,:))
+         call esymm_symmetrize_mels(QP_sym(spin),ib1,ib2,sigc(:,iwc,:,:,spin),sym_cme(iwc,:,:,1))
        end do
      end if
 
@@ -1197,7 +1203,13 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
      do ib=ib1,ib2
        do jb=ib1,ib2
          !if (mod10==SIG_GW_AC.and.average_real) CYCLE ! this is to check another scheme in case of AC
-         sigcme_tmp(:,ib,jb,spin)=sym_cme(:,ib,jb)
+         if (nspinor == 1) then
+           sigcme_tmp(:,ib,jb,spin) = sym_cme(:,ib,jb,1)
+         else
+           do ii=1,sigp%nsig_ab
+             sigcme_tmp(:,ib,jb,ii) = sym_cme(:,ib,jb,ii)
+           end do
+         end if
        end do
      end do
      ABI_FREE(sym_cme)

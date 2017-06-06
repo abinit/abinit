@@ -979,9 +979,9 @@ subroutine sigma_init(Sigp,nkibz,usepawu,Sr)
 ! *************************************************************************
 
  !@sigma_t
- ! === Copy important dimensions ===
  mod10=MOD(Sigp%gwcalctyp,10)
 
+ ! Copy important dimensions
  Sr%nkptgw     =Sigp%nkptgw
  Sr%gwcalctyp  =Sigp%gwcalctyp
  Sr%deltae     =Sigp%deltae
@@ -1018,9 +1018,8 @@ subroutine sigma_init(Sigp,nkibz,usepawu,Sr)
  ! hhartree(b1,b2,k,s)= <b1,k,s|T+v_{loc}+v_{nl}+v_{H}|b2,k,s>
  ABI_CALLOC(Sr%hhartree,(b1gw:b2gw,b1gw:b2gw,Sr%nkibz,Sr%nsppol*Sr%nsig_ab))
 
- ! QP amplitudes and energies ===
+ ! QP amplitudes and energies
  ABI_CALLOC(Sr%en_qp_diago,(Sr%nbnds,Sr%nkibz,Sr%nsppol))
-
  ABI_CALLOC(Sr%eigvec_qp,(Sr%nbnds,Sr%nbnds,Sr%nkibz,Sr%nsppol))
 
  ! Dont know if it is better to do this here or in the sigma
@@ -1046,7 +1045,7 @@ subroutine sigma_init(Sigp,nkibz,usepawu,Sr)
  ABI_CALLOC(Sr%e0gap,(Sr%nkibz,Sr%nsppol))
  ABI_CALLOC(Sr%degwgap,(Sr%nkibz,Sr%nsppol))
  ABI_CALLOC(Sr%egwgap,(Sr%nkibz,Sr%nsppol))
- !
+
  ! These quantities are used to evaluate $\Sigma(E)$ around the KS\QP eigenvalue
  ABI_CALLOC(Sr%omega4sd,(b1gw:b2gw,Sr%nkibz,Sr%nomega4sd,Sr%nsppol))
  ABI_CALLOC(Sr%sigcme4sd,(b1gw:b2gw,Sr%nkibz,Sr%nomega4sd,Sr%nsppol*Sr%nsig_ab))
@@ -1059,9 +1058,9 @@ subroutine sigma_init(Sigp,nkibz,usepawu,Sr)
    Sr%omega_r(:)=Sigp%omega_r(:)
  end if
 
- ! === Analytical Continuation ===
+ ! Analytical Continuation
+ ! FIXME omegasi should not be in Sigp% here we should construct the mesh
  if (mod10==1) then
-   ! FIXME omegasi should not be in Sigp% here we should construct the mesh
    ABI_MALLOC(Sr%omega_i,(Sr%nomega_i))
    Sr%omega_i=Sigp%omegasi
    ABI_MALLOC(Sr%sigcmesi ,(b1gw:b2gw,Sr%nkibz,Sr%nomega_i,Sr%nsppol*Sr%nsig_ab))

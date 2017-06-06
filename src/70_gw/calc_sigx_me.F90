@@ -202,7 +202,7 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
  complex(gwpc),allocatable :: wfr_bdgw(:,:),ur_ibz(:),usr_bz(:)
  complex(gwpc),allocatable :: ur_ae_sum(:),ur_ae_onsite_sum(:),ur_ps_onsite_sum(:)
  complex(gwpc),allocatable :: ur_ae_bdgw(:,:),ur_ae_onsite_bdgw(:,:),ur_ps_onsite_bdgw(:,:)
- complex(dpc),allocatable :: sigxme_tmp(:,:,:),sym_sigx(:,:),sigx(:,:,:,:)
+ complex(dpc),allocatable :: sigxme_tmp(:,:,:),sym_sigx(:,:,:),sigx(:,:,:,:)
  complex(gwpc),ABI_CONTIGUOUS pointer :: cg_jb(:),cg_sum(:)
  logical :: can_symmetrize(Wfd%nsppol)
  logical,allocatable :: bks_mask(:,:,:)
@@ -282,7 +282,9 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
        end if
      end do
    end if
-   ABI_CHECK(nspinor==1, 'Symmetrization with nspinor=2 not implemented')
+   if (nspinor == 2) then
+     MSG_WARNING('Symmetrization with nspinor=2 not implemented')
+   end if
  end if
 
  ABI_MALLOC(rhotwg_ki, (npwx*nspinor, minbnd:maxbnd))
@@ -692,7 +694,7 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
  call xmpi_sum(sigx, wfd%comm, ierr)
 
  ! Multiply by constants
- ! For 3D systems sqrt(4pi) is included in vc_sqrt_qbz ===
+ ! For 3D systems sqrt(4pi) is included in vc_sqrt_qbz.
  sigxme_tmp = (one/(Cryst%ucvol*Kmesh%nbz)) * sigxme_tmp * alpha_hybrid
  sigx       = (one/(Cryst%ucvol*Kmesh%nbz)) * sigx       * alpha_hybrid
  !
@@ -702,8 +704,8 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
  ! * TODO it does not work if spinor==2.
  do spin=1,nsppol
    if (can_symmetrize(spin)) then
-     ABI_MALLOC(sym_sigx,(ib1:ib2,ib1:ib2))
-     sym_sigx=czero
+     ABI_MALLOC(sym_sigx, (ib1:ib2, ib1:ib2, sigp%nsig_ab))
+     sym_sigx = czero
 
      ! Average over degenerate diagonal elements.
      ! NOTE: frequencies for \Sigma_c(\omega) should be equal to avoid spurious results.
@@ -712,21 +714,33 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
        ndegs=0
        do jb=ib1,ib2
          if (degtab(ib,jb,spin)==1) then
-           sym_sigx(ib,ib)=sym_sigx(ib,ib) +SUM(sigx(:,jb,jb,spin))
+           if (nspinor == 1) then
+             sym_sigx(ib, ib, 1) = sym_sigx(ib, ib, 1) + SUM(sigx(:,jb,jb,spin))
+           else
+             do ii=1,sigp%nsig_ab
+               sym_sigx(ib, ib, ii) = sym_sigx(ib, ib, ii) + SUM(sigx(:,jb,jb,ii))
+             end do
+           end if
          end if
-         ndegs=ndegs+degtab(ib,jb,spin)
+         ndegs = ndegs + degtab(ib,jb,spin)
        end do
-       sym_sigx(ib,ib)=sym_sigx(ib,ib)/ndegs
+       sym_sigx(ib,ib,:) = sym_sigx(ib,ib,:) / ndegs
      end do
 
      if (mod100 >= 20) then
-       call esymm_symmetrize_mels(QP_sym(spin),ib1,ib2,sigx(:,:,:,spin),sym_sigx)
+       call esymm_symmetrize_mels(QP_sym(spin),ib1,ib2,sigx(:,:,:,spin),sym_sigx(:,:,1))
      end if
 
      ! Copy symmetrized values.
      do ib=ib1,ib2
        do jb=ib1,ib2
-         sigxme_tmp(ib,jb,spin)=sym_sigx(ib,jb)
+         if (nspinor == 1) then
+           sigxme_tmp(ib,jb,spin) = sym_sigx(ib,jb,1)
+         else
+           do ii=1,sigp%nsig_ab
+             sigxme_tmp(ib,jb,ii) = sym_sigx(ib,jb,ii)
+           end do
+         end if
        end do
      end do
 

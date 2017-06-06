@@ -751,6 +751,7 @@ subroutine accumulate_chi0_q0(ik_bz,isym_kbz,itim_kbz,gwcomp,nspinor,npwepG0,Ep,
  complex(dpc) :: mir_kbz(3)
  complex(gwpc),allocatable :: rhotwg_sym(:),rhotwg_I(:),rhotwg_J(:)
  complex(gwpc), ABI_CONTIGUOUS pointer :: phmGt(:)
+ !complex(gwpc) :: rhotwx(3,nspinor**2)
 
 !************************************************************************
 
@@ -778,7 +779,7 @@ subroutine accumulate_chi0_q0(ik_bz,isym_kbz,itim_kbz,gwcomp,nspinor,npwepG0,Ep,
      ! FIXME extrapolar method should be checked!!
 
      ! Symmetrize <r> in full BZ: <Sk b|r|Sk b'> = R <k b|r|k b'> + \tau \delta_{bb'}
-     mir_kbz =(3-2*itim_kbz) * MATMUL(Cryst%symrec(:,:,isym_kbz),rhotwx(:,1))
+     mir_kbz = (3-2*itim_kbz) * MATMUL(Cryst%symrec(:,:,isym_kbz),rhotwx(:,1))
      if (itim_kbz==2) mir_kbz=CONJG(mir_kbz)
 
      ! here we might take advantage of Hermiticity along Im axis in RPA (see mkG0w)
@@ -823,13 +824,11 @@ subroutine accumulate_chi0_q0(ik_bz,isym_kbz,itim_kbz,gwcomp,nspinor,npwepG0,Ep,
       s_jj=1; if (jj==4) s_jj=-1
       pad_jj = (jj-1)*Ep%npwe
       call mkrhotwg_sigma(jj, nspinor, Ep%npwe, rhotwg, rhotwg_J)
-      !if (itim_kbz==2) rhotwg_J(1)=-CONJG(rhotwg_J(1))
 
       do ii=1,Ep%nI
         pad_ii=(ii-1)*Ep%npwe
         if (ii/=jj) then
           call mkrhotwg_sigma(ii,nspinor,Ep%npwe,rhotwg,rhotwg_I)
-          !if (itim_kbz==2) rhotwg_I(1)=-CONJG(rhotwg_I(1))
         else
           rhotwg_I(:) = rhotwg_J(:)
         end if
@@ -843,49 +842,46 @@ subroutine accumulate_chi0_q0(ik_bz,isym_kbz,itim_kbz,gwcomp,nspinor,npwepG0,Ep,
       end do !ii
     end do !jj
 
-    ABI_FREE(rhotwg_I)
-    ABI_FREE(rhotwg_J)
-
     ! This part copied from previous block
     ! === Accumulate heads and wings for each small q ===
     ! FIXME extrapolar method should be checked!!
 
-    do ii=1,2
-      pad_ii = (ii-1) * npwepG0
-      ! Symmetrize <r> in full BZ: <Sk b|r|Sk b'> = R <k b|r|k b'> + \tau \delta_{bb'}
-      mir_kbz =(3-2*itim_kbz) * MATMUL(Cryst%symrec(:,:,isym_kbz),rhotwx(:,ii))
-      if (itim_kbz==2) mir_kbz=CONJG(mir_kbz)
+    ! Symmetrize <r> in full BZ: <Sk b|r|Sk b'> = R <k b|r|k b'> + \tau \delta_{bb'}
+    mir_kbz = (3-2*itim_kbz) * MATMUL(Cryst%symrec(:,:,isym_kbz), sum(rhotwx(:,1:2), dim=2))
+    if (itim_kbz==2) mir_kbz=CONJG(mir_kbz)
 
-      ! here we might take advantage of Hermiticity along Im axis in RPA (see mkG0w)
-      do idir=1,3
-        do io=1,Ep%nomega
-          chi0_uwing(:,io,idir) = chi0_uwing(:,io,idir) + green_w(io) * mir_kbz(idir) * CONJG(rhotwg(pad_ii+1:pad_ii+Ep%npwe))
-          chi0_lwing(:,io,idir) = chi0_lwing(:,io,idir) + green_w(io) * rhotwg(pad_ii+1:pad_ii+Ep%npwe) * CONJG(mir_kbz(idir))
+    call mkrhotwg_sigma(ii,nspinor,Ep%npwe,rhotwg,rhotwg_I)
+
+    ! here we might take advantage of Hermiticity along Im axis in RPA (see mkG0w)
+    do idir=1,3
+      do io=1,Ep%nomega
+        chi0_uwing(:,io,idir) = chi0_uwing(:,io,idir) + green_w(io) * mir_kbz(idir) * CONJG(rhotwg_I)
+        chi0_lwing(:,io,idir) = chi0_lwing(:,io,idir) + green_w(io) * rhotwg_I * CONJG(mir_kbz(idir))
+        ! Add contribution due to extrapolar technique.
+        !if (gwcomp==1.and.ABS(deltaf_b1b2) >= GW_TOL_DOCC) then
+        if (gwcomp==1) then
+          chi0_uwing(:,io,idir) = chi0_uwing(:,io,idir) + green_enhigh_w(io) * mir_kbz(idir)*CONJG(rhotwg_I)
+          chi0_lwing(:,io,idir) = chi0_lwing(:,io,idir) + green_enhigh_w(io) * rhotwg_I * CONJG(mir_kbz(idir))
+        end if
+      end do
+    end do
+
+    ! Accumulate the head.
+    do io=1,Ep%nomega
+      do jdir=1,3
+        do idir=1,3
+          chi0_head(idir,jdir,io) = chi0_head(idir,jdir,io) + green_w(io) * mir_kbz(idir)*CONJG(mir_kbz(jdir))
           ! Add contribution due to extrapolar technique.
           !if (gwcomp==1.and.ABS(deltaf_b1b2) >= GW_TOL_DOCC) then
           if (gwcomp==1) then
-            chi0_uwing(:,io,idir) = chi0_uwing(:,io,idir) + green_enhigh_w(io) * &
-              mir_kbz(idir)*CONJG(rhotwg(pad_ii+1:pad_ii+Ep%npwe))
-            chi0_lwing(:,io,idir) = chi0_lwing(:,io,idir) + green_enhigh_w(io) * &
-              rhotwg(pad_ii+1:pad_ii+Ep%npwe)*CONJG(mir_kbz(idir))
+            chi0_head(idir,jdir,io) = chi0_head(idir,jdir,io) + green_enhigh_w(io) * mir_kbz(idir)*CONJG(mir_kbz(jdir))
           end if
         end do
       end do
+    end do
 
-      ! Accumulate the head.
-      do io=1,Ep%nomega
-        do jdir=1,3
-          do idir=1,3
-            chi0_head(idir,jdir,io) = chi0_head(idir,jdir,io) + green_w(io) * mir_kbz(idir)*CONJG(mir_kbz(jdir))
-            ! Add contribution due to extrapolar technique.
-            !if (gwcomp==1.and.ABS(deltaf_b1b2) >= GW_TOL_DOCC) then
-            if (gwcomp==1) then
-              chi0_head(idir,jdir,io) = chi0_head(idir,jdir,io) + green_enhigh_w(io) * mir_kbz(idir)*CONJG(mir_kbz(jdir))
-            end if
-          end do
-        end do
-      end do
-    end do ! ii
+    ABI_FREE(rhotwg_I)
+    ABI_FREE(rhotwg_J)
   end if
 
  CASE (1)
