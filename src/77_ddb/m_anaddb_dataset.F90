@@ -158,7 +158,7 @@ module m_anaddb_dataset
   real(dp) :: q1shft(3,4)
   real(dp) :: q2shft(3)
   real(dp) :: targetpol(3)
-  real(dp) :: vs_qrad_tolms(2) = 0
+  real(dp) :: vs_qrad_tolkms(2) = 0
 
 ! Integer arrays
   integer, allocatable :: atifc(:)
@@ -1346,12 +1346,12 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
 
 
 !V
- anaddb_dtset%vs_qrad_tolms(:) = zero
- call intagm(dprarr,intarr,jdtset,marr,2,string(1:lenstr),'vs_qrad_tolms',tread,'DPR')
+ anaddb_dtset%vs_qrad_tolkms(:) = zero
+ call intagm(dprarr,intarr,jdtset,marr,2,string(1:lenstr),'vs_qrad_tolkms',tread,'DPR')
  if (tread==1) then
-    anaddb_dtset%vs_qrad_tolms(:) = dprarr(1:2)
+    anaddb_dtset%vs_qrad_tolkms(:) = dprarr(1:2)
     ABI_CHECK(dprarr(1) >= zero, "vs_qrad must be >= 0")
-    ABI_CHECK(dprarr(2) > zero, "vs_tolms must be > zero")
+    ABI_CHECK(dprarr(2) > zero, "vs_tolkms must be > zero")
  end if
 !W
 
@@ -1648,7 +1648,7 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
    MSG_ERROR("ifcflag must be 1 for Grunesein calculation")
  end if
 
- if (anaddb_dtset%vs_qrad_tolms(1) /= zero .and. anaddb_dtset%ifcflag /=1) then
+ if (anaddb_dtset%vs_qrad_tolkms(1) /= zero .and. anaddb_dtset%ifcflag /=1) then
    MSG_ERROR("ifcflag must be 1 to calculate speed of sound")
  end if
 
@@ -1835,8 +1835,8 @@ subroutine outvars_anaddb (anaddb_dtset,nunit)
      write(nunit,'(3x,a9,3i10)')'  qrefine', anaddb_dtset%qrefine
    end if
    ! Speed of sound
-   if (anaddb_dtset%vs_qrad_tolms(1) > zero) then
-      write(nunit,'(a,2es16.8)')"vs_qrad_tolms", (anaddb_dtset%vs_qrad_tolms(:))
+   if (anaddb_dtset%vs_qrad_tolkms(1) > zero) then
+      write(nunit,'(a,2es16.8)')"vs_qrad_tolkms", (anaddb_dtset%vs_qrad_tolkms(:))
    end if
  end if
 
@@ -2202,7 +2202,7 @@ subroutine anaddb_chkvars(string)
 !U
  list_vars=trim(list_vars)//' use_k_fine'
 !V
- list_vars=trim(list_vars)//' vs_qrad_tolms'
+ list_vars=trim(list_vars)//' vs_qrad_tolkms'
 !W
 !X
 !Y
