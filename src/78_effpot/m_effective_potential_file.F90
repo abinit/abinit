@@ -519,7 +519,7 @@ end subroutine effective_potential_file_getType
 !! FUNCTION
 !! This routine test the xml or ddb file
 !! Return the number of atoms/ntypat in the unit cell from ddb and xml
-!! Return nqpt ans nrpt if the file is XML file
+!! Return natom/ntypat/nqpt and nrpt if the file is XML file
 !! In case of DDB file, you have to run bigbx9 to get nrpt
 !!
 !! INPUTS
@@ -587,14 +587,6 @@ subroutine effective_potential_file_getDimSystem(filename,natom,ntypat,nqpt,nrpt
 
    call ddb_getdims(dimekb,filename,lmnmax,mband,mtyp,msym,natom,nblok,&
 &                  nkpt,ntypat,ddbun,usepaw,DDB_VERSION,comm)
-
-   write(message, '(a,a,a,a)' )&
-&   ' WARNING: Unable to read the number of cell (nrpt) in ddb file, nrpt is set to 0',ch10
-   call wrtout(std_out,message,'COLL')
-
-   write(message, '(a,a,a,a)' )&
-&   ' WARNING: Unable to read the number of qpoint (nqpt) in ddb file (not implemented)',ch10
-   call wrtout(std_out,message,'COLL')
 
 !  Must read some value to initialze  array (nprt for ifc)
 !   call bigbx9(inp%brav,dummy_cell,0,1,inp%ngqpt,inp%nqshft,nrpt,ddb%rprim,dummy_rpt)
@@ -2273,10 +2265,13 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
    call wrtout(std_out,  message,'COLL')
 
  else
-    write(message,'(2a)')ch10,&
-&    ' Warning : Stress Tensor and forces are set to zero (not available in the DDB)'
-    call wrtout(std_out,message,'COLL')
-    call wrtout(ab_out,message,'COLL')
+   write(message, '(7a)' )ch10,&
+&          ' --- !WARNING',ch10,&
+&          '     Stress Tensor and forces are set to zero (not available in the DDB)',ch10,&
+&          ' ---',ch10
+
+   call wrtout(std_out,message,'COLL')
+   call wrtout(ab_out,message,'COLL')
   end if
 
 !**********************************************************************

@@ -72,6 +72,7 @@ module m_multibinit_dataset
   integer :: fit_coeff
   integer :: fit_option
   integer :: fit_ncycle
+  integer :: fit_nfixcoeff
   integer :: ifcana
   integer :: ifcflag
   integer :: ifcout
@@ -123,7 +124,10 @@ module m_multibinit_dataset
  
 ! Integer arrays
   integer, allocatable :: atifc(:)
-   ! atifc(natom)
+  ! atifc(natom)
+  integer, allocatable :: fit_fixcoeff(:)
+  ! fit_fixcoeffs(fit_nfixcoeff)
+
   integer, allocatable :: qmass(:)
   ! qmass(nnos)
 
@@ -194,6 +198,9 @@ subroutine multibinit_dtset_free(multibinit_dtset)
  end if
  if (allocated(multibinit_dtset%conf_cutoff_disp))  then
    ABI_DEALLOCATE(multibinit_dtset%conf_cutoff_disp)
+ end if
+ if (allocated(multibinit_dtset%fit_fixcoeff))  then
+   ABI_DEALLOCATE(multibinit_dtset%fit_fixcoeff)
  end if
  if (allocated(multibinit_dtset%qmass))  then
    ABI_DEALLOCATE(multibinit_dtset%qmass)
@@ -274,7 +281,7 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
 !Set routine version number here:
 !scalars
  integer,parameter :: vrsddb=100401
- integer :: iatifc,ii,iph1,iph2,jdtset,marr,tread
+ integer :: iatifc,ii,iph1,iph2,jdtset,jj,marr,tread
  character(len=500) :: message
 !arrays
  integer,allocatable :: intarr(:)
@@ -462,6 +469,16 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
    MSG_ERROR(message)
  end if
 
+ multibinit_dtset%fit_nfixcoeff=0
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'fit_nfixcoeff',tread,'INT')
+ if(tread==1) multibinit_dtset%fit_nfixcoeff=intarr(1)
+ if(multibinit_dtset%fit_nfixcoeff<-1)then
+   write(message, '(a,i8,a,a,a,a,a)' )&
+&   'fit_nfixcoeff is',multibinit_dtset%fit_nfixcoeff,', but the only allowed values',ch10,&
+&   'are -1 or positives for multibinit.',ch10,&
+&   'Action: correct fit_nfixcoeff in your input file.'
+   MSG_ERROR(message)
+ end if
 
  multibinit_dtset%ifcana=0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'ifcana',tread,'INT')
@@ -995,6 +1012,22 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
 !M
 
 !N
+ ABI_ALLOCATE(multibinit_dtset%fit_fixcoeff,(multibinit_dtset%fit_nfixcoeff))
+ if (multibinit_dtset%fit_nfixcoeff >0)then
+   if(multibinit_dtset%fit_nfixcoeff>marr)then
+     marr=multibinit_dtset%fit_nfixcoeff
+     ABI_DEALLOCATE(intarr)
+     ABI_ALLOCATE(intarr,(marr))
+   end if
+   multibinit_dtset%fit_fixcoeff(:)=zero
+   call intagm(dprarr,intarr,jdtset,marr,multibinit_dtset%fit_nfixcoeff,&
+&              string(1:lenstr),'fit_fixcoeff',tread,'INT')
+   if(tread==1)then
+     do ii=1,multibinit_dtset%fit_nfixcoeff
+       multibinit_dtset%fit_fixcoeff(ii)=intarr(ii)
+     end do
+   end if
+ end if
 
 !O
 
@@ -1181,6 +1214,19 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
  end if
 
 
+!check the fit_fixcoeff
+ do ii=1,multibinit_dtset%fit_nfixcoeff
+   do jj=ii+1,multibinit_dtset%fit_nfixcoeff
+     if (multibinit_dtset%fit_fixcoeff(ii) == multibinit_dtset%fit_fixcoeff(jj))then     
+       write(message, '(a,I0,a,I0,2a)' )&
+&           ' There is two similar numbers for fit_fixcoeff: ',multibinit_dtset%fit_fixcoeff(ii),&
+&           ' and ', multibinit_dtset%fit_fixcoeff(jj),ch10,&
+&            'Action: change fit_fixcoeff'
+       MSG_BUG(message)
+     end if
+   end do
+ end do
+
 end subroutine invars10
 !!***
 
@@ -1282,10 +1328,13 @@ subroutine outvars_multibinit (multibinit_dtset,nunit)
 
  if(multibinit_dtset%fit_coeff/=0)then
    write(nunit,'(a)')' Fit the coefficients :'
-   write(nunit,'(3x,a10,I10.1)')'fit_coeff ',multibinit_dtset%fit_coeff
-   write(nunit,'(3x,a10,I10.1)')'fit_option',multibinit_dtset%fit_option
-   write(nunit,'(3x,a10,I10.1)')'fit_ncycle',multibinit_dtset%fit_ncycle
-   write(nunit,'(3x,a10,3i10)') '  fit_grid',multibinit_dtset%fit_grid
+   write(nunit,'(3x,a13,I10.1)')'    fit_coeff',multibinit_dtset%fit_coeff
+   write(nunit,'(3x,a13,I10.1)')'   fit_option',multibinit_dtset%fit_option
+   write(nunit,'(3x,a13,I10.1)')'   fit_ncycle',multibinit_dtset%fit_ncycle
+   write(nunit,'(3x,a13,3i10)') '     fit_grid',multibinit_dtset%fit_grid
+   write(nunit,'(3x,a13,I10)')  'fit_nfixcoeff',multibinit_dtset%fit_nfixcoeff
+   write(nunit,'(3x,a13)',advance='no')'fit_fixcoeff'
+   write(nunit,'(4x,15i6)') (multibinit_dtset%fit_fixcoeff(ii),ii=1,multibinit_dtset%fit_nfixcoeff)
  end if
 
 !Write the general information

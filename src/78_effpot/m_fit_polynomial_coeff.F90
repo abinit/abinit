@@ -1898,7 +1898,7 @@ end subroutine fit_polynomial_coeff_getOrder5
 !!
 !! SOURCE
 
-subroutine fit_polynomial_coeff_fit(cut_off,eff_pot,hist,ncycle_in,comm)
+subroutine fit_polynomial_coeff_fit(cut_off,eff_pot,fixcoeff,hist,ncycle_in,nfixcoeff,comm)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -1913,16 +1913,17 @@ subroutine fit_polynomial_coeff_fit(cut_off,eff_pot,hist,ncycle_in,comm)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: ncycle_in,comm
+ integer,intent(in) :: ncycle_in,nfixcoeff,comm
 !arrays
+ integer,intent(in) :: fixcoeff(nfixcoeff)
  type(effective_potential_type),intent(inout) :: eff_pot
  type(abihist),intent(inout) :: hist
  real(dp),optional,intent(in) :: cut_off
 !Local variables-------------------------------
 !scalar
- integer :: ii,icoeff,icycle,info,index_min,itime
+ integer :: ii,icoeff,icycle,icycle_tmp,info,index_min,itime
  integer :: my_rank,my_ntime,ncoeff_max,natom_sc,ncell,ncycle
- integer :: ncycle_tot,nproc,ntime,ntime_alone
+ integer :: ncycle_tot,ncycle_max,nproc,ntime,ntime_alone
  real(dp) :: energy,ffact,sfact,mse,msef,mses
  real(dp),parameter :: HaBohr_meVAng = 27.21138386 / 0.529177249
  logical :: iam_master,found
@@ -1983,6 +1984,7 @@ subroutine fit_polynomial_coeff_fit(cut_off,eff_pot,hist,ncycle_in,comm)
    call fit_polynomial_coeff_mapHistToRef(eff_pot,hist,comm)
  end if
 
+
 !Initialisation of constants
  ncoeff_max = eff_pot%anharmonics_terms%ncoeff
  ntime      = hist%mxhist
@@ -2008,7 +2010,7 @@ subroutine fit_polynomial_coeff_fit(cut_off,eff_pot,hist,ncycle_in,comm)
  end do
 
 !Check if ncycle_in is not zero or superior to ncoeff_max
- if(ncycle_in<=0.or. ncycle_in > ncoeff_max) then
+ if((ncycle_in > ncoeff_max).or.(ncycle_in<=0.and.nfixcoeff /= -1)) then
    write(message, '(6a,I0,3a)' )ch10,&
 &        ' --- !WARNING',ch10,&
 &        '     The number of cycle requested in the input is not correct.',ch10,&
@@ -2016,9 +2018,6 @@ subroutine fit_polynomial_coeff_fit(cut_off,eff_pot,hist,ncycle_in,comm)
 &        ' ---',ch10
      call wrtout(std_out,message,"COLL")
    end if
-
- ncycle = ncycle_in
- ncycle = min(ncycle,ncoeff_max)
 
 !Copy the initial coefficients
  ABI_DATATYPE_ALLOCATE(coeffs_in,(ncoeff_max))
@@ -2031,9 +2030,60 @@ subroutine fit_polynomial_coeff_fit(cut_off,eff_pot,hist,ncycle_in,comm)
 &                             check=.false.) 
  end do
 
-!Initialisation of arrays
- ABI_DATATYPE_ALLOCATE(coeffs_tmp,(ncycle))
+!Use fixcoeff
  ABI_ALLOCATE(list_coeffs,(ncoeff_max))
+!ncycle_tot store the curent number of coefficient in the model
+!Do not reset this variable...
+ ncycle_tot = zero
+ list_coeffs     = zero
+ if (nfixcoeff == -1)then
+   write(message, '(2a)')' nfixcoeff is set to -1, so all the coefficients are imposed.',ch10
+   do ii=1,ncoeff_max
+     list_coeffs(ii) = ii
+     ncycle_tot = ncycle_tot + 1
+   end do
+ else
+   if (nfixcoeff > zero)then
+     if(maxval(fixcoeff(:)) > ncoeff_max) then
+       write(message, '(4a,I0,6a)' )ch10,&
+&        ' --- !WARNING',ch10,&
+&        '     The value ',maxval(fixcoeff(:)),' is not in the list.',ch10,&
+&        '     Start from scratch...',ch10,&
+&        ' ---',ch10
+     else
+       do ii=1,nfixcoeff
+         list_coeffs(ii) = fixcoeff(ii)
+         ncycle_tot = ncycle_tot + 1
+       end do
+       write(message, '(2a)')' Some coefficients are imposed from the input.',ch10
+     end if
+   else
+     write(message, '(4a)')' There is no coefficient imposed from the input.',ch10,&
+&                        ' Start from scratch...',ch10
+   end if
+ end if
+ call wrtout(std_out,message,'COLL')
+
+!Compute the number of cycle:
+ ncycle     = ncycle_in
+!Compute the maximum number of cycle
+ ncycle_max = ncycle_in + ncycle_tot
+!Check if the number of request cycle + the initial number of coeff is superior to 
+!the maximum number of coefficient allowed
+ if(ncycle_max > ncoeff_max) then
+   ncycle = ncoeff_max - ncycle_tot
+   ncycle_max = ncoeff_max
+   write(message, '(4a,I0,2a,I0,2a,I0,3a)' )ch10,&
+&      ' --- !WARNING',ch10,&
+&      '     The number of cycle + the number of imposed coefficients: ',ncycle_max,ch10,&
+&      '     is superior to the maximum number of coefficients in the initial list: ',ncoeff_max,ch10,&
+&      '     The number of cycle is set to ',ncycle,ch10,&
+&      ' ---',ch10
+   call wrtout(std_out,message,'COLL')
+ end if
+
+!Initialisation of arrays
+ ABI_DATATYPE_ALLOCATE(coeffs_tmp,(ncycle_max))
  ABI_ALLOCATE(singular_coeffs,(ncoeff_max))
  ABI_ALLOCATE(coeff_values,(ncoeff_max))
  ABI_ALLOCATE(displacement,(3,natom_sc,ntime))
@@ -2055,9 +2105,7 @@ subroutine fit_polynomial_coeff_fit(cut_off,eff_pot,hist,ncycle_in,comm)
  mse  = zero
  msef = zero
  mses = zero
- ncycle_tot = zero
  coeff_values = zero
- list_coeffs     = zero
  singular_coeffs = zero
  displacement = zero
  strain       = zero
@@ -2087,9 +2135,9 @@ subroutine fit_polynomial_coeff_fit(cut_off,eff_pot,hist,ncycle_in,comm)
       do ii=1,3
         strain(ii,itime) = strain_t%strain(ii,ii)
       end do
-      strain(4,itime) = (strain_t%strain(2,3) + strain_t%strain(3,2)) 
-      strain(5,itime) = (strain_t%strain(3,1) + strain_t%strain(1,3)) 
-      strain(6,itime) = (strain_t%strain(2,1) + strain_t%strain(1,2)) 
+      strain(4,itime) = (strain_t%strain(2,3) + strain_t%strain(3,2))
+      strain(5,itime) = (strain_t%strain(3,1) + strain_t%strain(1,3))
+      strain(6,itime) = (strain_t%strain(2,1) + strain_t%strain(1,2))
     else
       strain(:,itime) = zero
     end if
@@ -2182,6 +2230,7 @@ subroutine fit_polynomial_coeff_fit(cut_off,eff_pot,hist,ncycle_in,comm)
      end if
      exit
    end do
+
    call wrtout(std_out,message,"COLL")
    if (found) then
      if( ii < zero .and. ii > ntime)then
@@ -2233,12 +2282,13 @@ subroutine fit_polynomial_coeff_fit(cut_off,eff_pot,hist,ncycle_in,comm)
  call wrtout(ab_out,message,'COLL') 
 
 !Start fit process
- do icycle=1,ncycle
+ do icycle_tmp = 1,ncycle
+   icycle = ncycle_tot + 1
 
    write(message, '(4a,I0,a)')ch10,'--',ch10,' Try to find the best model with ',icycle,' coefficient'
    if(icycle > 1)  write(message, '(2a)') trim(message),'s'
    call wrtout(std_out,message,'COLL')
-   if(icycle > 1) then
+   if(icycle>1 .or. any(list_coeffs(:) > zero))then
      write(message, '(3a)') ' The coefficient numbers from the previous cycle are:',ch10,' ['
      do ii=1,icycle-1
        if(ii<icycle-1)then
@@ -2248,10 +2298,6 @@ subroutine fit_polynomial_coeff_fit(cut_off,eff_pot,hist,ncycle_in,comm)
        end if
      end do
      write(message, '(3a)') trim(message),']',ch10
-     call wrtout(std_out,message,'COLL')
-   else
-     write(message, '(4a)')' There is no coefficient imposed from the input.',ch10,&
-&                                    ' Start from scratch...',ch10
      call wrtout(std_out,message,'COLL')
    end if
 
@@ -2314,22 +2360,11 @@ subroutine fit_polynomial_coeff_fit(cut_off,eff_pot,hist,ncycle_in,comm)
 
    write(message, '(a,I0)' )' Selecting the coefficient number ',list_coeffs(icycle)
    call wrtout(std_out,message,'COLL')
-
-!  Fill the coeffs_tmp with the new model
-   do ii=1,icycle
-     call polynomial_coeff_free(coeffs_tmp(ii))
-     call polynomial_coeff_init(coeff_values(ii),&
-&                               coeffs_in(list_coeffs(ii))%nterm,&
-&                               coeffs_tmp(ii),&
-&                               coeffs_in(list_coeffs(ii))%terms,&
-&                               coeffs_in(list_coeffs(ii))%name,&
-&                               check=.false.)
-   end do
-
-    write(message, '(2a,I0,a,ES24.16)' )' Standard deviation of the energy for',&
+   
+   write(message, '(2a,I0,a,ES24.16)' )' Standard deviation of the energy for',&
 &                                      ' the iteration ',icycle,' (meV/f.u.): ',&
 &                         mingf(4)* Ha_eV *1000 / ncell
-    call wrtout(std_out,message,'COLL')
+   call wrtout(std_out,message,'COLL')
 
    write (i_char, '(i5)') icycle
    write (j_char, '(i5)') list_coeffs(icycle)
@@ -2351,7 +2386,7 @@ subroutine fit_polynomial_coeff_fit(cut_off,eff_pot,hist,ncycle_in,comm)
 &                                ncoeff_max,ntime,strten_coeffs,strten_diff,sqomega,ucvol)
 
 !Fill the coeffs_tmp with the last model
- do icycle=1,ncycle_tot
+ do icycle=1,ncycle_max
    call polynomial_coeff_free(coeffs_tmp(icycle))
    call polynomial_coeff_init(coeff_values(icycle),&
 &                             coeffs_in(list_coeffs(icycle))%nterm,&
@@ -2381,7 +2416,7 @@ subroutine fit_polynomial_coeff_fit(cut_off,eff_pot,hist,ncycle_in,comm)
 
 !Deallocation of arrays
 !Deallocate the temporary coefficient
- do ii=1,ncycle
+ do ii=1,ncycle_max
    call polynomial_coeff_free(coeffs_tmp(ii))
  end do
  do ii=1,ncoeff_max

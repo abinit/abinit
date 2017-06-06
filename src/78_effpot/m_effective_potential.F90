@@ -673,18 +673,24 @@ subroutine effective_potential_generateDipDip(eff_pot,n_cell,option,asr,comm)
  if(option==0) then
    if(((max1-min1+1)/=n_cell(1).and.&
 &    (max2-min2+1)/=n_cell(2).and.(max3-min3+1)/=n_cell(3))) then
-     write(msg, '(88a,3I3,5a,3I3,a)' )ch10,('-',i1=1,80),ch10,ch10,&
-&      ' WARNING: dipdip is set to zero, the longe range interation might be wrong',ch10,&
-&      '          because it is not recompute.',ch10,&
-&      '          The previous harmonic part is build for ',(max1-min1+1),(max2-min2+1),(max3-min3+1)&
-&,     ' cell.',ch10,'          Be sure than the dipole-dipole interation ',ch10,&
-&      '          is correct for the supercell: ',n_cell(:),' or set dipdip to 1'
+     write(msg, '(90a,3I3,5a,3I3,3a)' )ch10,('-',i1=1,80),ch10,ch10,&
+&      ' --- !WARNING:',ch10,&
+&      '     dipdip is set to zero, the longe range interation might be wrong',ch10,&
+&      '     because it is not recompute.',ch10,&
+&      '     The previous harmonic part is build for ',(max1-min1+1),(max2-min2+1),(max3-min3+1)&
+&,     ' cell.',ch10,&
+&      '     Be sure than the dipole-dipole interation is correct ',ch10,&
+&      '     for the supercell: ',n_cell(:),' or set dipdip to 1',ch10,&
+&      ' ---'
      call wrtout(std_out,msg,"COLL")
    else
-     write(msg,'(84a)')ch10,('-',i1=1,80),ch10,ch10,&
-&    ' WARNING: dipdip is set to zero, the longe range interation is not recompute'
+     write(msg,'(89a)')ch10,('-',i1=1,80),ch10,ch10,&
+&          ' --- !WARNING:',ch10,&
+&          '     dipdip is set to zero, the longe range interation is not recompute.',ch10,&
+&          ' ---',ch10
      call wrtout(std_out,msg,"COLL")
    end if
+
 
    write(msg,'(a,(80a))') ch10,('=',i1=1,80)
    call wrtout(ab_out,msg,'COLL')
@@ -2567,7 +2573,7 @@ end subroutine effective_potential_writeAbiInput
 !! eff_pot <type(effective_potential_type)> = effective potential structure
 !! natom = number of atoms in the supercell
 !! rprimd(3,3)   = dimensional primitive translations for real space
-!!               of the structure
+!!                 of the perturbed structure
 !! xred(3,natom) = optional, reduced coordinates of the atoms of the structure
 !! strain(6) = optional, strain apply wrt to the reference in eff_pot
 !! displacement(3,natom) = optional, atomic displacement wrt to the reference in eff_pot

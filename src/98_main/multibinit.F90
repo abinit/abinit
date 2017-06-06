@@ -328,8 +328,9 @@ program multibinit
        end if
      case (1)
 !    option = 1
-       call fit_polynomial_coeff_fit(inp%fit_cutoff,reference_effective_potential,hist,&
-&                                    inp%fit_ncycle,comm)
+       call fit_polynomial_coeff_fit(inp%fit_cutoff,reference_effective_potential,&
+&                                    inp%fit_fixcoeff,hist,inp%fit_ncycle,&
+&                                    inp%fit_nfixcoeff,comm)
      end select
    else
      write(message, '(3a)' )&
