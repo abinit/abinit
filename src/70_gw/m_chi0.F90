@@ -2452,6 +2452,7 @@ end subroutine accumulate_chi0sumrule
 subroutine make_transitions(Wfd,chi0alg,nbnds,nbvw,nsppol,symchi,timrev,TOL_DELTA_OCC,&
 & max_rest,min_rest,my_max_rest,my_min_rest,Kmesh,Ltg_q,gw_energy,occ,qpoint,bbp_ks_distrb)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -2608,6 +2609,7 @@ end subroutine make_transitions
 !! SOURCE
 
 subroutine chi0_bbp_mask(Ep,use_tr,QP_BSt,mband,ikmq_ibz,ik_ibz,spin,spin_fact,bbp_mask)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

@@ -593,7 +593,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  ! ==== Read KS band structure from the KSS file ====
  ! ==================================================
  !
- ! * Initialize Wfd, allocate wavefunctions and precalculate tables to do the FFT using the coarse gwc_ngfft.
+ ! Initialize Wfd, allocate wavefunctions and precalculate tables to do the FFT using the coarse gwc_ngfft.
  mband=Sigp%nbnds
  ABI_MALLOC(bks_mask,(mband,Kmesh%nibz,Sigp%nsppol))
  ABI_MALLOC(keep_ur ,(mband,Kmesh%nibz,Sigp%nsppol))
@@ -647,14 +647,11 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
 
        ! Memory needed for Fourier components ug.
        ug_mem = two*gwpc*Dtset%nspinor*Sigp%npwwfn*my_nbks*b2Mb
-
        ! Memory needed for real space ur (use gwc_nfft, instead of gwx_nfft)
        ur_mem = two*gwpc*Dtset%nspinor*gwc_nfft*COUNT(keep_ur)*b2Mb
-
        ! Memory needed for PAW projections Cprj
        cprj_mem = zero
        if (Dtset%usepaw==1) cprj_mem = dp*Dtset%nspinor*SUM(nlmn_atm)*my_nbks*b2Mb
-
        max_wfsmem_mb = MAX(max_wfsmem_mb, ug_mem + ur_mem + cprj_mem)
      end do
      if (ierr /= 0) cycle
@@ -669,7 +666,6 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
        write(ount,"(a,f12.2)")"      mem_per_cpu: ",mempercpu_mb
      end do
    end do
-
    write(ount,'(a)')"..."
 
    ABI_FREE(nlmn_atm)

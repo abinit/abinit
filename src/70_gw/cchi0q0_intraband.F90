@@ -62,7 +62,7 @@
 !!      screening
 !!
 !! CHILDREN
-!!      assemblychi0_sym,clib_progress_bar,get_bz_item,getnel,gsph_fft_tabs
+!!      assemblychi0_sym,get_bz_item,getnel,gsph_fft_tabs
 !!      kmesh_free,kmesh_init,littlegroup_free,littlegroup_init
 !!      littlegroup_print,pack_eneocc,paw_rho_tw_g,paw_symcprj,pawcprj_alloc
 !!      pawcprj_copy,pawcprj_free,pawhur_free,pawhur_init,pawpwij_free
@@ -106,7 +106,7 @@ subroutine chi0q0_intraband(Wfd,Cryst,Ep,Psps,BSt,Gsph_epsG0,Pawang,Pawrad,Pawta
  use m_pawtab,          only : pawtab_type
  use m_paw_ij,          only : paw_ij_type
  use m_pawcprj,         only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_copy
- use m_pawpwij,        only : pawpwff_t, pawpwij_t, pawpwij_init, pawpwij_free, paw_rho_tw_g
+ use m_pawpwij,         only : pawpwff_t, pawpwij_t, pawpwij_init, pawpwij_free, paw_rho_tw_g
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -198,7 +198,7 @@ subroutine chi0q0_intraband(Wfd,Cryst,Ep,Psps,BSt,Gsph_epsG0,Pawang,Pawrad,Pawta
 
  gw_mgfft = MAXVAL(ngfft_gw(1:3))
  gw_fftalga = ngfft_gw(7)/100 !; gw_fftalgc=MOD(ngfft_gw(7),10)
- !
+
  ! Calculate <k,b1|i[H,r]|k',b2>.
  inclvkb=2; if (Wfd%usepaw==1) inclvkb=0
  ABI_MALLOC(ihr_comm,(3,nspinor**2,Wfd%mband,Wfd%nkibz,nsppol))
@@ -219,10 +219,9 @@ subroutine chi0q0_intraband(Wfd,Cryst,Ep,Psps,BSt,Gsph_epsG0,Pawang,Pawrad,Pawta
      nband_k=  Wfd%nband(ik_ibz,spin)
      kpt    =  Wfd%kibz(:,ik_ibz)
      kg_k   => Wfd%Kdata(ik_ibz)%kg_k
-
      istwf_k = Wfd%istwfk(ik_ibz)
      ABI_CHECK(istwf_k==1,"istwf_k/=1 not coded")
-     !
+
      ! Distribute bands.
      bmask=.FALSE.; bmask(1:nband_k)=.TRUE. ! TODO only bands around EF should be included.
      call wfd_distribute_bands(Wfd,ik_ibz,spin,my_nband,my_band_list,bmask=bmask)
@@ -337,9 +336,7 @@ subroutine chi0q0_intraband(Wfd,Cryst,Ep,Psps,BSt,Gsph_epsG0,Pawang,Pawrad,Pawta
  ABI_FREE(ihr_comm)
  ABI_FREE(qlwl)
 
- if ( ANY(ngfft_gw(1:3) /= Wfd%ngfft(1:3)) ) then
-   call wfd_change_ngfft(Wfd,Cryst,Psps,ngfft_gw)
- end if
+ if ( ANY(ngfft_gw(1:3) /= Wfd%ngfft(1:3)) ) call wfd_change_ngfft(Wfd,Cryst,Psps,ngfft_gw)
 
  ! TODO take into account the case of random k-meshes.
  kptopt=3
@@ -363,8 +360,8 @@ subroutine chi0q0_intraband(Wfd,Cryst,Ep,Psps,BSt,Gsph_epsG0,Pawang,Pawrad,Pawta
  ABI_FREE(irottb)
  !
  ! === Setup weight (2 for spin unpolarized systems, 1 for polarized) ===
- ! * spin_fact is used to normalize the occupation factors to one.
- ! * Consider also the AFM case.
+ ! spin_fact is used to normalize the occupation factors to one.
+ ! Consider also the AFM case.
  SELECT CASE (nsppol)
  CASE (1)
    weight=two/Kmesh%nbz; spin_fact=half
@@ -374,10 +371,8 @@ subroutine chi0q0_intraband(Wfd,Cryst,Ep,Psps,BSt,Gsph_epsG0,Pawang,Pawrad,Pawta
    if (nspinor==2) then
      weight=one/Kmesh%nbz; spin_fact=one
    end if
-
  CASE (2)
    weight=one/Kmesh%nbz; spin_fact=one
-
  CASE DEFAULT
    MSG_BUG("Wrong nsppol")
  END SELECT
@@ -391,7 +386,7 @@ subroutine chi0q0_intraband(Wfd,Cryst,Ep,Psps,BSt,Gsph_epsG0,Pawang,Pawrad,Pawta
  ! === Evaluate oscillator matrix elements btw partial waves. Note that q=Gamma is used.
  if (Psps%usepaw==1) then
    ABI_DT_MALLOC(Pwij,(Psps%ntypat))
-   call pawpwij_init(Pwij,Ep%npwepG0,(/zero,zero,zero/),Gsph_epsG0%gvec,Cryst%rprimd,Psps,Pawtab,Paw_pwff)
+   call pawpwij_init(Pwij,Ep%npwepG0, [zero,zero,zero], Gsph_epsG0%gvec,Cryst%rprimd,Psps,Pawtab,Paw_pwff)
 
    ABI_DT_MALLOC(Cprj1_bz ,(Cryst%natom,nspinor))
    call pawcprj_alloc(Cprj1_bz, 0,Wfd%nlmn_atm)
@@ -409,8 +404,8 @@ subroutine chi0q0_intraband(Wfd,Cryst,Ep,Psps,BSt,Gsph_epsG0,Pawang,Pawrad,Pawta
  ABI_MALLOC(gw_gbound,(2*gw_mgfft+8,2))
  ABI_MALLOC(igffteps0,(Gsph_epsG0%ng))
 
- call gsph_fft_tabs(Gsph_epsG0,(/0,0,0/),gw_mgfft,ngfft_gw,use_padfft,gw_gbound,igffteps0)
- if ( ANY(gw_fftalga == (/2,4/)) ) use_padfft=0 ! Pad-FFT is not coded in rho_tw_g
+ call gsph_fft_tabs(Gsph_epsG0, [0, 0, 0], gw_mgfft,ngfft_gw,use_padfft,gw_gbound,igffteps0)
+ if ( ANY(gw_fftalga == [2, 4]) ) use_padfft=0 ! Pad-FFT is not coded in rho_tw_g
  if (use_padfft==0) then
    ABI_FREE(gw_gbound)
    ABI_MALLOC(gw_gbound,(2*gw_mgfft+8,2*use_padfft))
@@ -421,36 +416,32 @@ subroutine chi0q0_intraband(Wfd,Cryst,Ep,Psps,BSt,Gsph_epsG0,Pawang,Pawrad,Pawta
    nkpt_summed=Ltg_q%nibz_ltg
    call littlegroup_print(Ltg_q,std_out,Wfd%prtvol,'COLL')
  end if
-
- call clib_progress_bar(-1,Kmesh%nbz)
-
  !
  ! ============================================
  ! === Begin big fat loop over transitions ====
  ! ============================================
- chi0      =czero_gw
- chi0_head =czero_gw
- chi0_lwing=czero_gw
- chi0_uwing=czero_gw
- dim_rtwg=1; if (nspinor==2) dim_rtwg=4 !can reduce size depending on Ep%nI and Ep%nj
+ chi0 = czero_gw
+ chi0_head = czero_gw; chi0_lwing = czero_gw; chi0_uwing = czero_gw
+ dim_rtwg=1; if (nspinor==2) dim_rtwg=2 !can reduce size depending on Ep%nI and Ep%nj
 
  zcut = Ep%zcut
  zcut = 0.1/Ha_eV
  write(std_out,*)" using zcut ",zcut*Ha_eV," [eV]"
 
- ! === Loop on spin to calculate $ \chi_{\up,\up} + \chi_{\down,\down} $ ===
+ ! Loop on spin to calculate $ \chi_{\up,\up} + \chi_{\down,\down}
  do spin=1,nsppol
-   do ik_bz=1,Kmesh%nbz ! Loop over k-points in the BZ.
+   ! Loop over k-points in the BZ.
+   do ik_bz=1,Kmesh%nbz
      if (Ep%symchi==1) then
        if (Ltg_q%ibzq(ik_bz)/=1) CYCLE ! Only IBZ_q
      end if
-     !
-     ! * Get ik_ibz, non-symmorphic phase and symmetries from ik_bz.
+
+     ! Get ik_ibz, non-symmorphic phase and symmetries from ik_bz.
      call get_BZ_item(Kmesh,ik_bz,kbz,ik_ibz,isym_k,itim_k,ph_mkt)
      tabr_k=ktabr(:,ik_bz) ! Table for rotated FFT points
      spinrot_kbz(:)=Cryst%spinrot(:,isym_k)
      nband_k=Wfd%nband(ik_ibz,spin)
-     !
+
      ! Distribute bands.
      bmask=.FALSE.; bmask(1:nband_k)=.TRUE. ! TODO only bands around EF should be included.
      call wfd_distribute_bands(Wfd,ik_ibz,spin,my_nband,my_band_list,bmask=bmask)
@@ -459,9 +450,9 @@ subroutine chi0q0_intraband(Wfd,Cryst,Ep,Psps,BSt,Gsph_epsG0,Pawang,Pawrad,Pawta
      write(msg,'(2(a,i4),a,i2,a,i3)')' ik = ',ik_bz,' / ',Kmesh%nbz,' spin = ',spin,' done by processor ',Wfd%my_rank
      call wrtout(std_out,msg,'PERS')
 
-     do lbidx=1,my_nband  ! Loop over bands treated by this node.
+     do lbidx=1,my_nband
+       ! Loop over bands treated by this node.
        band=my_band_list(lbidx)
-
        call wfd_get_ur(Wfd,band,ik_ibz,spin,ur1)
 
        if (Psps%usepaw==1) then
@@ -485,39 +476,34 @@ subroutine chi0q0_intraband(Wfd,Cryst,Ep,Psps,BSt,Gsph_epsG0,Pawang,Pawrad,Pawta
            green_w(io) = half * g0g0w(Ep%omega(io),deltaf_b1b2,deltaeGW_b1b2,zcut,GW_TOL_W0,two_poles)
          end do !io
        end if ! use_tr
-       !
+
        ! FFT of u^*_{b1,k}(r) u_{b2,k}(r).
        call rho_tw_g(nspinor,Ep%npwe,Wfd%nfft,ndat1,ngfft_gw,1,use_padfft,igffteps0,gw_gbound,&
 &        ur1,itim_k,tabr_k,ph_mkt,spinrot_kbz,&
 &        ur1,itim_k,tabr_k,ph_mkt,spinrot_kbz,&
 &        dim_rtwg,rhotwg)
 
-       if (Psps%usepaw==1) then  ! Add PAW onsite contribution, projectors are already in the BZ.
+       if (Psps%usepaw==1) then
+         ! Add PAW onsite contribution, projectors are already in the BZ.
          call paw_rho_tw_g(Ep%npwe,dim_rtwg,nspinor,Cryst%natom,Cryst%ntypat,Cryst%typat,Cryst%xred,Gsph_epsG0%gvec,&
 &          Cprj1_bz,Cprj1_bz,Pwij,rhotwg)
        end if
 
        ! ==== Adler-Wiser expression, to be consistent here we use the KS eigenvalues (?) ====
-!       gw_eet=-1
-!       call accumulate_chi0_q0(ik_bz,isym_k,itim_k,Ep%gwcomp,gw_eet,nspinor,Ep%npwepG0,Ep,&
-!&        Cryst,Ltg_q,Gsph_epsG0,chi0,rhotwx(:,1),rhotwg,green_w,green_enhigh_w,deltaf_b1b2,chi0_head,chi0_lwing,chi0_uwing)
-
        call assemblychi0_sym(ik_bz,nspinor,Ep,Ltg_q,green_w,Ep%npwepG0,rhotwg,Gsph_epsG0,chi0)
      end do !band
-
    end do !ik_bz
  end do !spin
- !
+
  ! Collect body, heads and wings within comm
  comm=Wfd%comm
  do io=1,Ep%nomega
    call xmpi_sum(chi0(:,:,io),comm,ierr)
  end do
- !
  call xmpi_sum(chi0_head,comm,ierr)
  call xmpi_sum(chi0_lwing,comm,ierr)
  call xmpi_sum(chi0_uwing,comm,ierr)
- !
+
  ! Divide by the volume
  chi0       = chi0       * weight/Cryst%ucvol
  chi0_head  = chi0_head  * weight/Cryst%ucvol
@@ -549,8 +535,7 @@ subroutine chi0q0_intraband(Wfd,Cryst,Ep,Psps,BSt,Gsph_epsG0,Pawang,Pawrad,Pawta
  !  chq = MATMUL(chi0_head(:,:,io), Ep%qlwl(:,1))
  !  chi0(1,1,io) = vdotw(Ep%qlwl(:,1),chq,Cryst%gmet,"G")  ! Use user-defined small q
  !end do
-
- call wfd_barrier(Wfd)
+ !call wfd_barrier(Wfd)
 
  ! Impose Hermiticity (valid only for zero or purely imaginary frequencies)
  ! MG what about metals, where we have poles around zero?
@@ -571,7 +556,7 @@ subroutine chi0q0_intraband(Wfd,Cryst,Ep,Psps,BSt,Gsph_epsG0,Pawang,Pawrad,Pawta
    call wrtout(std_out,msg,'COLL')
    call print_arr(chi0(:,:,iomega),unit=std_out)
  end do
- !
+
  ! =====================
  ! ==== Free memory ====
  ! =====================
@@ -582,8 +567,9 @@ subroutine chi0q0_intraband(Wfd,Cryst,Ep,Psps,BSt,Gsph_epsG0,Pawang,Pawrad,Pawta
  ABI_FREE(ktabr)
  ABI_FREE(igffteps0)
 
- if (Psps%usepaw==1) then ! deallocation for PAW.
-   call pawcprj_free(Cprj1_bz )
+ ! deallocation for PAW.
+ if (Psps%usepaw==1) then
+   call pawcprj_free(Cprj1_bz)
    ABI_DT_FREE(Cprj1_bz)
    call pawcprj_free(Cprj1_ibz)
    ABI_DT_FREE(Cprj1_ibz)
