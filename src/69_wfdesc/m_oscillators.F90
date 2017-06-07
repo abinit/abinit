@@ -66,8 +66,8 @@ CONTAINS  !=====================================================================
 !!   === for nspinor==1 ===
 !!    dim_rtwg=1
 !!   === for nspinor==2 ===
-!!    dim_rtwg=2 if only <up|up>, <dwn|dwn> matrix elements are required
-!!    dim_rtwg=4 for <up|up>, <dwn|dwn>, <up|dwn> and <dwn|up>.
+!!    dim_rtwg=1 if the sum of the matrix elements is wanted.
+!!    dim_rtwg=2 if <up|up>, <dwn|dwn> matrix elements are required
 !! map2sphere= 1 to retrieve Fourier components indexed according to igfftg0.
 !!             0 to retrieve Fourier components indexed according to the FFT box.
 !!            NOTE: If map2sphere==0 npwvec must be equal to nr
@@ -158,7 +158,8 @@ subroutine rho_tw_g(nspinor,npwvec,nr,ndat,ngfft,map2sphere,use_padfft,igfftg0,g
    ABI_MALLOC(u12prod, (nr))
 
    spinor_pad = reshape([0, 0, nr, nr, 0, nr, nr, 0], [2, 4])
-   do iab=1,dim_rtwg
+   rhotwg = czero_gw
+   do iab=1,2
      spad1 = spinor_pad(1,iab); spad2=spinor_pad(2,iab)
 
      u12prod = GWPC_CONJG(cwavef1(spad1+1:spad1+nr)) * cwavef2(spad2+1:spad2+nr)
@@ -171,7 +172,12 @@ subroutine rho_tw_g(nspinor,npwvec,nr,ndat,ngfft,map2sphere,use_padfft,igfftg0,g
        ! Need results on the full FFT box thus cannot use zero-padded FFT.
        call fftbox_plan3_many(plan,ndat,ngfft(1:3),ngfft(1:3),ngfft(7),-1)
        call fftbox_execute(plan,u12prod)
-       rhotwg(spad0+1:spad0+npwvec) = u12prod
+       if (dim_rtwg == 1) then
+         rhotwg(1:npwvec) = rhotwg(1:npwvec) + u12prod
+       else
+         rhotwg(spad0+1:spad0+npwvec) = u12prod
+       end if
+
      CASE (1)
        ! Need results on the G-sphere. Call zero-padded FFT routines if required.
        if (use_padfft == 1) then
@@ -184,14 +190,19 @@ subroutine rho_tw_g(nspinor,npwvec,nr,ndat,ngfft,map2sphere,use_padfft,igfftg0,g
        end if
 
        ! Have to map FFT to G-sphere.
-       do ig=1,npwvec
-         igfft = igfftg0(ig)
-         if (igfft /= 0) then
-           rhotwg(ig+spad0) = u12prod(igfft) ! G-G0 belong to the FFT mesh.
-         else
-           rhotwg(ig+spad0) = czero_gw  ! Set this component to zero
-         end if
-       end do
+       if (dim_rtwg == 1) then
+         do ig=1,npwvec
+           igfft = igfftg0(ig)
+           ! G-G0 belong to the FFT mesh.
+           if (igfft /= 0) rhotwg(ig) = rhotwg(ig) + u12prod(igfft)
+         end do
+       else
+         do ig=1,npwvec
+           igfft = igfftg0(ig)
+           ! G-G0 belong to the FFT mesh.
+           if (igfft /= 0) rhotwg(ig+spad0) = u12prod(igfft)
+         end do
+       end if
 
      CASE DEFAULT
        MSG_BUG("Wrong map2sphere")

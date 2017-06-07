@@ -151,7 +151,7 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
  use m_paw_ij,          only : paw_ij_type
  use m_pawfgrtab,       only : pawfgrtab_type
  use m_pawcprj,         only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_copy
- use m_pawpwij,        only : pawpwff_t, pawpwij_t, pawpwij_init, pawpwij_free, paw_rho_tw_g, paw_cross_rho_tw_g
+ use m_pawpwij,         only : pawpwff_t, pawpwij_t, pawpwij_init, pawpwij_free, paw_rho_tw_g, paw_cross_rho_tw_g
  use m_paw_pwaves_lmn,  only : paw_pwaves_lmn_t
  use m_pawhr,           only : pawhur_t, pawhur_free, pawhur_init, paw_ihr, paw_cross_ihr_comm
 
@@ -262,7 +262,7 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
  comm = Wfd%comm; nsppol = Wfd%nsppol; nspinor = Wfd%nspinor; mband = Wfd%mband
  nfft = Wfd%nfft
  ABI_CHECK(Wfd%nfftot==nfftot_gw,"Wrong nfftot_gw")
- dim_rtwg=1; if (nspinor==2) dim_rtwg=2 ! Can reduce size depending on Ep%nI and Ep%nj
+ dim_rtwg=1 !; if (nspinor==2) dim_rtwg=2 ! Can reduce size depending on Ep%nI and Ep%nj
 
  ucrpa_bands(1)=dtset%ucrpa_bands(1)
  ucrpa_bands(2)=dtset%ucrpa_bands(2)
@@ -404,7 +404,7 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
    end if
  end if
 
- ABI_MALLOC(rhotwg,(Ep%npwe*nspinor**2))
+ ABI_MALLOC(rhotwg,(Ep%npwe*dim_rtwg))
  ABI_MALLOC(tabr_k,(nfft))
  ABI_MALLOC(ur1_kibz,(nfft*nspinor))
  ABI_MALLOC(ur2_kibz,(nfft*nspinor))
@@ -417,8 +417,8 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
  !  b) gw_gbound table for the zero-padded FFT performed in rhotwg.
  ABI_MALLOC(igffteps0,(Gsph_epsG0%ng))
  ABI_MALLOC(gw_gbound,(2*gw_mgfft+8,2))
- call gsph_fft_tabs(Gsph_epsG0,(/0,0,0/),gw_mgfft,ngfft_gw,use_padfft,gw_gbound,igffteps0)
- if ( ANY(gw_fftalga == (/2,4/)) ) use_padfft=0 ! Pad-FFT is not coded in rho_tw_g
+ call gsph_fft_tabs(Gsph_epsG0, [0, 0, 0], gw_mgfft,ngfft_gw,use_padfft,gw_gbound,igffteps0)
+ if ( ANY(gw_fftalga == [2, 4]) ) use_padfft=0 ! Pad-FFT is not coded in rho_tw_g
 #ifdef FC_IBM
  ! XLF does not deserve this optimization (problem with [v67mbpt][t03])
  use_padfft = 0

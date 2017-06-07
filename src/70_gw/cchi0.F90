@@ -215,8 +215,7 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
  call timab(331,1,tsec) ! cchi0
  call cwtime(cpu_time,wall_time,gflops,"start")
 
- nsppol  = Wfd%nsppol
- nspinor = Wfd%nspinor
+ nsppol = Wfd%nsppol; nspinor = Wfd%nspinor
  ucrpa_bands(1)=dtset%ucrpa_bands(1)
  ucrpa_bands(2)=dtset%ucrpa_bands(2)
  luwindow=.false.
@@ -246,7 +245,7 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
  nfft    = Wfd%nfft
  ABI_CHECK(Wfd%nfftot==nfftot_gw,"Wrong nfftot_gw")
 
- dim_rtwg=1; if (nspinor==2) dim_rtwg=2  ! can reduce size depending on Ep%nI and Ep%nj
+ dim_rtwg=1 !; if (nspinor==2) dim_rtwg=2  ! can reduce size depending on Ep%nI and Ep%nj
  size_chi0 = Ep%npwe*Ep%nI*Ep%npwe*Ep%nJ*Ep%nomega
 
  qp_energy => QP_BSt%eig; qp_occ => QP_BSt%occ
@@ -444,7 +443,7 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
      end if
    end if
 
-   ABI_MALLOC(rhotwg,(Ep%npwepG0*nspinor**2))
+   ABI_MALLOC(rhotwg,(Ep%npwepG0*dim_rtwg))
    ABI_MALLOC(tabr_k,(nfft))
    ABI_MALLOC(tabr_kmq,(nfft))
    ABI_MALLOC(ur1_kmq_ibz,(nfft*nspinor))
@@ -737,18 +736,16 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
            call assemblychi0_sym(ik_bz,nspinor,Ep,Ltg_q,green_w,Ep%npwepG0,rhotwg,Gsph_epsG0,chi0)
 
          CASE (1, 2)
-           ! Spectral method ! TODO Does not work with spinor
+           ! Spectral method
            call assemblychi0sf(ik_bz,nspinor,Ep%symchi,Ltg_q,Ep%npwepG0,Ep%npwe,rhotwg,Gsph_epsG0,&
 &            deltaf_b1kmq_b2k,my_wl,iomegal,wl,my_wr,iomegar,wr,Ep%nomegasf,sf_chi0)
 
          CASE DEFAULT
            MSG_BUG("Wrong spmeth")
          END SELECT
-         !
-         ! === Accumulating the sum rule on chi0 ===
-         ! *Eq. (5.284) in G.D. Mahan Many-Particle Physics 3rd edition.
-         ! TODO Does not work with spinor
 
+         ! Accumulating the sum rule on chi0. Eq. (5.284) in G.D. Mahan Many-Particle Physics 3rd edition.
+         ! TODO Does not work with spinor
          factor=spin_fact*qp_occ(band2,ik_ibz,spin)
          call accumulate_chi0sumrule(ik_bz,Ep%symchi,Ep%npwe,factor,deltaeGW_b1kmq_b2k,&
 &          Ltg_q,Gsph_epsG0,Ep%npwepG0,rhotwg,chi0_sumrule)

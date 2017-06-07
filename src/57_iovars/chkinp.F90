@@ -635,9 +635,9 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
        if (dt%usepaw == 1) then
          MSG_ERROR_NOSTOP("GW with PAW and nspinor 2 not implemented", ierr)
        end if
-       if (optdriver == RUNL_SCREENING .and. dt%symchi == 1) then
-         MSG_ERROR_NOSTOP("Screening with symchi 1 and nspinor 2 not implemented", ierr)
-       end if
+       !if (optdriver == RUNL_SCREENING .and. dt%symchi == 1) then
+       !  MSG_ERROR_NOSTOP("Screening with symchi 1 and nspinor 2 not implemented", ierr)
+       !end if
        !if (optdriver == RUNL_SIGMA .and. dt%symsigma == 1) then
        !  MSG_ERROR_NOSTOP("Self-energy with symsigma 1 and nspinor 2 not implemented", ierr)
        !end if
@@ -2694,11 +2694,8 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
    call chkorthsy(gprimd,iexit,dt%nsym,rmet,rprimd,dt%symrel)
 
 !  symchi
-   if (dt%symchi/=0.and.dt%symchi/=1.and.dt%symchi/=2) then
-     write(message, '(a,i0,a,a,a,a)' )&
-&     'symchi  was input as ',dt%symchi,ch10,&
-&     'Input value must be 0, 1, or 2.',ch10,&
-&     'Action: modify value of symchi in input file.'
+   if (all(dt%symchi /= [0, 1])) then
+     write(message, '(a,i0,2a)' )'symchi  was input as ',dt%symchi,ch10,'Input value must be 0, 1.'
      MSG_ERROR_NOSTOP(message, ierr)
    end if
 

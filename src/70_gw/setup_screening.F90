@@ -543,7 +543,7 @@ subroutine setup_screening(codvsn,acell,rprim,ngfftf,wfk_fname,dtfil,Dtset,Psps,
    ! For spin-spin interaction
    ! Ep%nI=4; Ep%nJ=4
    ABI_CHECK(Ep%npwepG0 == Ep%npwe, "npwepG0 must be == npwe if spinor==2")
-   ABI_CHECK(Ep%symchi == 0, "symchi/=0 and nspinor=2 not available")
+   !ABI_CHECK(Ep%symchi == 0, "symchi/=0 and nspinor=2 not available")
  end if
 
  ! === Enable the calculations of chi0 on user-specified q-points ===
