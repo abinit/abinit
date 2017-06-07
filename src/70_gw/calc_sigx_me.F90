@@ -199,7 +199,7 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
  complex(dpc) :: ovlp(2)
  complex(gwpc),allocatable :: vc_sqrt_qbz(:),rhotwg(:),rhotwgp(:)
  complex(gwpc),allocatable :: rhotwg_ki(:,:)
- complex(gwpc),allocatable :: wfr_bdgw(:,:),ur_ibz(:),usr_bz(:)
+ complex(gwpc),allocatable :: wfr_bdgw(:,:),ur_ibz(:)
  complex(gwpc),allocatable :: ur_ae_sum(:),ur_ae_onsite_sum(:),ur_ps_onsite_sum(:)
  complex(gwpc),allocatable :: ur_ae_bdgw(:,:),ur_ae_onsite_bdgw(:,:),ur_ps_onsite_bdgw(:,:)
  complex(dpc),allocatable :: sigxme_tmp(:,:,:),sym_sigx(:,:,:),sigx(:,:,:,:)
@@ -220,7 +220,7 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
 
  ! Initialize some values.
  mod100=MOD(Sigp%gwcalctyp,100)
- nspinor = Wfd%nspinor; nsppol  = Wfd%nsppol; npwx = sigp%npwx
+ nspinor = Wfd%nspinor; nsppol = Wfd%nsppol; npwx = sigp%npwx
  dim_rtwg = 1; if (nspinor == 2) dim_rtwg = 2
  spinor_padx = RESHAPE([0, 0, npwx, npwx, 0, npwx, npwx, 0], [2, 4])
  ABI_CHECK(Sigp%npwx==Gsph_x%ng,"")
@@ -272,7 +272,7 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
    can_symmetrize = .TRUE.
    if (mod100 >= 20) then
      do spin=1,Wfd%nsppol
-       can_symmetrize(spin) = .not.esymm_failed(QP_sym(spin))
+       can_symmetrize(spin) = .not. esymm_failed(QP_sym(spin))
        if (.not.can_symmetrize(spin)) then
          write(msg,'(a,i0,4a)')&
 &          "Symmetrization cannot be performed for spin: ",spin,ch10,&
@@ -328,7 +328,7 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
  ABI_FREE(bks_mask)
  write(msg,'(2(a,i4),a)')" Will sum ",my_nbks ," (b, k, s) occupied states in Sigma_x."
  call wrtout(std_out,msg)
- !
+
  ! The index of G-G0 in the FFT mesh the oscillators
  ! Sigp%mG0 gives the MAX G0 component to account for umklapp.
  ! Note the size MAX(npwx, Sigp%npwc).
@@ -409,8 +409,6 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
  call wrtout(std_out,msg,'COLL')
 
  ABI_MALLOC(ur_ibz,(gwx_nfftot*nspinor))
- ABI_MALLOC(usr_bz,(gwx_nfftot*nspinor))
-
  if (pawcross==1) then
    ABI_MALLOC(ur_ae_sum,(nfftf*nspinor))
    ABI_MALLOC(ur_ae_onsite_sum,(nfftf*nspinor))
@@ -529,7 +527,6 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
 
      ! Sum over (occupied) bands.
      do ib_sum=1,Sigp%nbnds
-
        ! Parallelism over bands
        ! This processor has this k-point but what about spin?
        if (proc_distrb(ib_sum,ik_bz,spin)/=Wfd%my_rank) CYCLE
@@ -614,19 +611,17 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
                rhotwg_ki(1, jb) = CMPLX(SQRT(Vcp%i_sz), 0.0_gwp) * real(ctmp)
                ctmp = xdotc(npw_k, cg_sum(npw_k+1:), 1, cg_jb(npw_k+1:), 1)
                rhotwg_ki(npwx+1, jb) = CMPLX(SQRT(Vcp%i_sz), 0.0_gwp) * real(ctmp)
-               !rhotwg_ki(1,jb)=CMPLX(SQRT(Vcp%i_sz),0.0_gwp) * sqrt(half)
-               !rhotwg_ki(npwx+1,jb) = CMPLX(SQRT(Vcp%i_sz),0.0_gwp) * sqrt(half)
              end if
              !rhotwg_ki(1, jb) = zero; rhotwg_ki(npwx+1, jb) = zero
              ! PAW is missing
            end if
          end if
-       end do !jb Got all matrix elements from minbnd up to maxbnd.
+       end do ! jb Got all matrix elements from minbnd up to maxbnd.
 
        theta_mu_minus_esum = fact_sp * qp_occ(ib_sum,ik_ibz,spin)
 
        do kb=ib1,ib2
-         ! The ket Sigma|phi_{k,kb}>.
+         ! Compute the ket Sigma_x |phi_{k,kb}>.
          rhotwgp(:) = rhotwg_ki(:,kb)
 
          ! Loop over the non-zero row elements of this column.
@@ -693,15 +688,14 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
  call xmpi_sum(sigxme_tmp, wfd%comm, ierr)
  call xmpi_sum(sigx, wfd%comm, ierr)
 
- ! Multiply by constants
- ! For 3D systems sqrt(4pi) is included in vc_sqrt_qbz.
+ ! Multiply by constants. For 3D systems sqrt(4pi) is included in vc_sqrt_qbz.
  sigxme_tmp = (one/(Cryst%ucvol*Kmesh%nbz)) * sigxme_tmp * alpha_hybrid
  sigx       = (one/(Cryst%ucvol*Kmesh%nbz)) * sigx       * alpha_hybrid
  !
- ! === If we have summed over the IBZ_q now we have to average over complexes ===
- ! * Presently only diagonal terms are considered
- ! * TODO QP-SCGW required a more involved approach, there is a check in sigma
- ! * TODO it does not work if spinor==2.
+ ! If we have summed over the IBZ_q now we have to average over degenerate states.
+ ! NOTE: Presently only diagonal terms are considered
+ ! TODO QP-SCGW required a more involved approach, there is a check in sigma
+ ! TODO it does not work if spinor==2.
  do spin=1,nsppol
    if (can_symmetrize(spin)) then
      ABI_MALLOC(sym_sigx, (ib1:ib2, ib1:ib2, sigp%nsig_ab))
@@ -807,7 +801,6 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
  end if
 
  ABI_FREE(ur_ibz)
- ABI_FREE(usr_bz)
  ABI_FREE(rhotwg_ki)
  ABI_FREE(rhotwg)
  ABI_FREE(rhotwgp)

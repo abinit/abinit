@@ -677,7 +677,7 @@ function nc_ihr_comm(vkbr,cryst,psps,npw,nspinor,istwfk,inclvkb,kpoint,ug1,ug2,g
    end do
  end if
 
- ! Add second term $i <c,k|[Vnl,r]|v,k> in$ reduced cordinates.
+ ! Add second term $i <c,k|[Vnl,r]|v,k> $ in reduced cordinates.
  if (inclvkb /= 0) then
    ABI_CHECK(istwfk == vkbr%istwfk, "input istwfk /= vkbr%istwfk")
    call add_vnlr_commutator(vkbr,cryst,psps,npw,nspinor,ug1,ug2,ihr_comm)

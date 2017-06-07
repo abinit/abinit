@@ -2356,11 +2356,10 @@ end subroutine cqratio
 !! OUTPUT
 !!  sigcme(nomega) (to be described), only relevant if ppm3 or ppm4
 !!  ket(npwc,nomega):
-!!   === model==1,2 ====
-!!
-!!   ket(G,omega) = Sum_G2       conjg(rhotw(G)) * Omega(G,G2) * rhotw(G2)
-!!                          ---------------------------------------------------
-!!                            2 omegatw(G,G2) (omega-E_i + omegatw(G,G2)(2f-1))
+!!  === model==1,2 ====
+!!    ket(G,omega) = Sum_G2       conjg(rhotw(G)) * Omega(G,G2) * rhotw(G2)
+!!                            ---------------------------------------------------
+!!                             2 omegatw(G,G2) (omega-E_i + omegatw(G,G2)(2f-1))
 !!
 !! PARENTS
 !!      calc_sigc_me
@@ -2407,14 +2406,11 @@ subroutine calc_sig_ppm(PPm,nspinor,npwc,nomega,rhotwgp,botsq,otq,&
 
  SELECT CASE (PPm%model)
  CASE (PPM_GODBY_NEEDS, PPM_HYBERTSEN_LOUIE)
-
    fully_occupied =(ABS(theta_mu_minus_e0i-one)<0.001)
    totally_empty  =(ABS(theta_mu_minus_e0i    )<0.001)
 
    do ispinor=1,nspinor
-
-     spadx=(ispinor-1)*npwx
-     spadc=(ispinor-1)*npwc
+     spadx=(ispinor-1)*npwx; spadc=(ispinor-1)*npwc
 
      if (.not.totally_empty) then
        ! \Bomega^2_{G1G2}/\omegat_{G1G2} M_{G1,G2}. \theta(\mu-e_s) / (\omega+\omegat_{G1G2}-e_s-i\delta)
@@ -2422,7 +2418,6 @@ subroutine calc_sig_ppm(PPm,nspinor,npwc,nomega,rhotwgp,botsq,otq,&
 !$omp parallel do private(omegame0i_io, rhotwgdp_igp, otw, num, den)
        do ios=1,nomega
          omegame0i_io=omegame0i(ios)
-         !
          do igp=1,npwc
            rhotwgdp_igp=rhotwgp(spadx+igp)
            do ig=1,npwc
@@ -2437,7 +2432,6 @@ subroutine calc_sig_ppm(PPm,nspinor,npwc,nomega,rhotwgp,botsq,otq,&
              end if
            end do !ig
          end do !igp
-         !
        end do !ios
      end if !not totally empty
 
@@ -2447,7 +2441,6 @@ subroutine calc_sig_ppm(PPm,nspinor,npwc,nomega,rhotwgp,botsq,otq,&
 !$omp parallel do private(omegame0i_io, rhotwgdp_igp, otw, num, den)
        do ios=1,nomega
          omegame0i_io=omegame0i(ios)
-         !
          do igp=1,npwc
            rhotwgdp_igp=rhotwgp(spadx+igp)
            do ig=1,npwc
@@ -2473,7 +2466,7 @@ subroutine calc_sig_ppm(PPm,nspinor,npwc,nomega,rhotwgp,botsq,otq,&
  CASE (PPM_LINDEN_HORSH,PPM_ENGEL_FARID)
    ABI_CHECK(nspinor == 1, "nspinor/=1 not allowed")
 
-   ! * rho-twiddle(G) is formed, introduce rhotwgdpcc, for speed reason
+   ! rho-twiddle(G) is formed, introduce rhotwgdpcc, for speed reason
    ABI_MALLOC(rhotwgdpcc,(npwx))
 
    ff=theta_mu_minus_e0i      ! occupation number f (include poles if ...)
@@ -2488,8 +2481,8 @@ subroutine calc_sig_ppm(PPm,nspinor,npwc,nomega,rhotwgp,botsq,otq,&
        num=czero_gw
 
        SELECT CASE (PPm%model)
-
-       CASE (PPM_LINDEN_HORSH) ! * Calculate \beta (eq. 106 pag 47)
+       CASE (PPM_LINDEN_HORSH)
+         ! Calculate \beta (eq. 106 pag 47)
          do ig=1,npwc
            num=num+rhotwgdpcc(ig)*eig(ig,ii)
          end do

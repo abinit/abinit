@@ -594,6 +594,9 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
 !  ecuteps
    if( ANY(optdriver == [RUNL_SCREENING]) )then
      call chkdpr(0,0,cond_string,cond_values,ierr,'ecuteps',dt%ecuteps,1,0.0_dp,iout)
+     if (dt%ecuteps <= 0) then
+       MSG_ERROR_NOSTOP("ecutesp must be > 0 if optdriver == 3", ierr)
+     end if
      if(dt%fftgw<20 .and. dt%fftgw/=0)then
        if(dt%ecutwfn<dt%ecuteps-tol8)then
          write(message,'(a,es16.6,a,es16.6,a,6a)')&

@@ -331,6 +331,7 @@ subroutine setup_screening(codvsn,acell,rprim,ngfftf,wfk_fname,dtfil,Dtset,Psps,
  end do
 
  ecutepspG0 = Dtset%ecuteps
+ ABI_CHECK(ecutepspG0 > zero, "ecuteps must be > 0")
  if (Ep%symchi/=0) then
    ecutepspG0=MAXVAL(Ltg_q(:)%max_kin_gmG0)+tol6; npwepG0=0; nshepspG0=0
    write(std_out,*)" Due to umklapp processes : ecutepspg0= ",ecutepspG0

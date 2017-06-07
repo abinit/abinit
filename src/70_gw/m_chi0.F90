@@ -83,7 +83,7 @@ CONTAINS  !=====================================================================
 !!  nspinor=Number of spinorial components.
 !!  ik_bz=Index of the k-point in the BZ array whose contribution has to be symmetrized and added to cchi0
 !!  npwepG0=Maximum number of G vectors taking into account possible umklapp G0, ie enlarged sphere G-G0
-!!  rhotwg(npwe*nspinor**2)=Oscillator matrix elements for this k-point and the transition that has to be summed
+!!  rhotwg(npwe)=Oscillator matrix elements for this k-point and the transition that has to be summed
 !!  green_w(nomega)=frequency dependent part coming from the green function
 !!  Gsph_epsG0<gsphere_t> Information on the "enlarged" G-sphere used for chi0, it contains umklapp G0 vectors
 !!    %ng=number of G vectors in the enlarged sphere, actually MUST be equal to the size of rhotwg
@@ -620,7 +620,7 @@ end subroutine symmetrize_afm_chi0
 !!  isym_kbz=Index of the symmetry such that k_bz = IS k_ibz
 !!  itim_kbz=2 if time-reversal has to be used to obtain k_bz, 1 otherwise.
 !!  npwepG0=Maximum number of G vectors
-!!  rhotwg(npwepG0*nspinor**2)=Oscillator matrix elements corresponding to an occupied-unoccupied pair of states.
+!!  rhotwg(npwepG0)=Oscillator matrix elements corresponding to an occupied-unoccupied pair of states.
 !!  rhotwx(3,nspinor**2)=Matrix element of the operator $-i[H,r]/(e1-e2) = -i r$ in reciprocal lattice units.
 !!  green_w(nomega)=Frequency dependent part of the Green function.
 !!  Ltg_q<littlegroup_t_type>=Info on the little group associated to the external q-point.
@@ -884,7 +884,7 @@ end subroutine accumulate_chi0_q0
 !!  npwe=Number of plane waves used to describe chi0.
 !!  npwepG0=Maximum number of G vectors to account for umklapps.
 !!  nomega=Number of frequencies in the imaginary part.
-!!  rhotwg(npwepG0*nspinor**2)=Oscillator matrix elements corresponding to an occupied-unoccupied pair of states.
+!!  rhotwg(npwepG0)=Oscillator matrix elements corresponding to an occupied-unoccupied pair of states.
 !!  rhotwx(3,nspinor**2)=Matrix elements of the gradient and of the commutator of the non-local operator with
 !!    the position operator. The second term is present only if inclvkb=1,2.
 !!  Gsph_epsG0<gsphere_t> Information on the "enlarged" G-sphere used for chi0, it contains umklapp G0 vectors
@@ -939,7 +939,7 @@ subroutine accumulate_sfchi0_q0(ikbz,isym_kbz,itim_kbz,nspinor,symchi,npwepG0,np
  type(gsphere_t),target,intent(in) :: Gsph_epsG0
  type(crystal_t),intent(in) :: Cryst
 !arrays
- complex(gwpc),intent(in) :: rhotwg(npwepG0*nspinor**2)
+ complex(gwpc),intent(in) :: rhotwg(npwepG0)
  complex(gwpc),intent(in) :: rhotwx(3,nspinor**2)
  complex(gwpc),intent(inout) :: sf_chi0(npwe,npwe,my_wl:my_wr)
  complex(dpc),intent(inout) :: sf_head(3,3,my_wl:my_wr)
@@ -991,7 +991,7 @@ subroutine accumulate_sfchi0_q0(ikbz,isym_kbz,itim_kbz,nspinor,symchi,npwepG0,np
 
    ! Symmetrize <r> in full BZ: <Sk b|r|Sk b'> = R <k b|r|k b'> + \tau \delta_{bb'}
    if (nspinor == 1) then
-     mir_kbz =(3-2*itim_kbz) * MATMUL(Cryst%symrec(:,:,isym_kbz),rhotwx(:,1))
+      mir_kbz =(3-2*itim_kbz) * MATMUL(Cryst%symrec(:,:,isym_kbz),rhotwx(:,1))
     else
       mir_kbz = (3-2*itim_kbz) * MATMUL(Cryst%symrec(:,:,isym_kbz), sum(rhotwx(:,1:2), dim=2))
     end if
@@ -1133,7 +1133,7 @@ end subroutine accumulate_sfchi0_q0
 !!  nomegasf=Number of frequencies for the spectral function.
 !!  nspinor=Number of spinorial components.
 !!  symchi=1 if symmetries are used, 0 otherwise
-!!  rhotwg(npwepG0*nspinor**2)=Oscillator matrix elements corresponding to an occupied-unoccupied pair of states.
+!!  rhotwg(npwepG0)=Oscillator matrix elements corresponding to an occupied-unoccupied pair of states.
 !!  timrev=if 2, time reversal has to be used to obtain k_bz; 1 otherwise.
 !!  Gsph_epsG0<gsphere_t> Information on the "enlarged" G-sphere used for chi0, it contains umklapp G0 vectors
 !!    %ng=number of G vectors in the enlarged sphere, actually MUST be equal to the size of rhotwg

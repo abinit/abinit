@@ -340,7 +340,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
  ! Get important dimensions from the WFK header
  Sigp%nsppol =Hdr_wfk%nsppol
  Sigp%nspinor=Hdr_wfk%nspinor
- Sigp%nsig_ab=Hdr_wfk%nspinor**2  !FIXME Is it useful calculating only diagonal terms?
+ Sigp%nsig_ab=Hdr_wfk%nspinor**2  ! TODO Is it useful calculating only diagonal terms?
 
  if (Sigp%nbnds>mband) then
    Sigp%nbnds    =mband

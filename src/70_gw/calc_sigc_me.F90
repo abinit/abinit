@@ -834,7 +834,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
              if (ib==jb) rhotwg_ki(1,jb)=CMPLX(SQRT(Vcp%i_sz),0.0_gwp)
 
            else
-             npw_k  = Wfd%npwarr(ik_ibz)
+             npw_k = Wfd%npwarr(ik_ibz)
              rhotwg_ki(1, jb) = zero; rhotwg_ki(npwc+1, jb) = zero
              if (ib==jb) then
                cg_sum => Wfd%Wave(ib,ik_ibz,spin)%ug
@@ -844,9 +844,6 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
                ctmp = xdotc(npw_k, cg_sum(npw_k+1:), 1, cg_jb(npw_k+1:), 1)
                rhotwg_ki(npwc+1,jb) = CMPLX(SQRT(Vcp%i_sz),0.0_gwp) * real(ctmp)
                ! PAW is missing
-
-               !rhotwg_ki(1,jb)=CMPLX(SQRT(Vcp%i_sz),0.0_gwp) * sqrt(half)
-               !rhotwg_ki(npwc+1,jb) = CMPLX(SQRT(Vcp%i_sz),0.0_gwp) * sqrt(half)
              end if
            end if
          end if
@@ -924,7 +921,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
            end do
 
            ! Check memory saving
-           if (Er%mqmem==0) then
+           if (Er%mqmem == 0) then
              call calc_sigc_cd(npwc,npwc,nspinor,nomega_tot,Er%nomega,Er%nomega_r,Er%nomega_i,rhotwgp,&
 &             Er%omega,Er%epsm1(:,:,:,1),omegame0i,theta_mu_minus_e0i,sigc_ket,Dtset%ppmfrq,npoles_missing(kb),&
 &              method=Dtset%cd_frqim_method)
@@ -1124,7 +1121,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
        ABI_DT_FREE(Pwij_qg)
      end if
 
-   end do !ik_bz
+   end do ! ik_bz
 
    ABI_FREE(wfr_bdgw)
    if (Wfd%usepaw==1) then
@@ -1136,7 +1133,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
        ABI_FREE(ur_ps_onsite_bdgw)
      end if
    end if
- end do !spin
+ end do ! spin
 
  ABI_FREE(sigcme2)
  ABI_FREE(sigcme_3)
