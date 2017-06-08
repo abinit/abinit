@@ -134,19 +134,18 @@
 !!      afterscfloop,build_vxc,check_kxc,chkpawovlp,cprj_clean,cprj_paw_alloc
 !!      ctocprj,destroy_distribfft,destroy_mpi_enreg,energies_init,energy
 !!      etotfor,extraprho,fftdatar_write_from_hdr,first_rec,fock_destroy
-!!      fock_init,fock_update_exc,fock_updatecwaveocc,fourdp,fresid,getcut
-!!      getmpw,getng,getph,gshgg_mkncwrite,hdr_update,init_distribfft
-!!      init_distribfft_seq,init_metricrec,initmpi_seq,initylmg,int2char4,kpgio
-!!      metric,newrho,newvtr,nhatgrid,odamix,out_geometry_xml,out_resultsgs_xml
-!!      outscfcv,paw2wvl_ij,paw_an_free,paw_an_init,paw_an_nullify
-!!      paw_an_reset_flags,paw_ij_free,paw_ij_init,paw_ij_nullify
-!!      paw_ij_reset_flags,pawcprj_alloc,pawcprj_free,pawcprj_getdim
-!!      pawcprj_reorder,pawdenpot,pawdij,pawfgrtab_free,pawfgrtab_init
-!!      pawmknhat,pawtab_get_lsize,pawuj_red,prc_mem_free,prtene,psolver_rhohxc
-!!      rhohxc,rhotov,scprqt,setnoccmmp,setrhoijpbe0,setsym,setup_positron
-!!      setvtr,sphereboundary,status,symdij,symmetrize_xred,timab
-!!      update_e_field_vars,vtorho,vtorhorec,vtorhotf,wrtout,wvl_cprjreorder
-!!      wvl_nhatgrid,xmpi_isum,xmpi_sum,xmpi_wait
+!!      fock_init,fock_updatecwaveocc,fourdp,fresid,getcut,getmpw,getng,getph
+!!      gshgg_mkncwrite,hdr_update,init_distribfft,init_distribfft_seq
+!!      init_metricrec,initmpi_seq,initylmg,int2char4,kpgio,metric,newrho
+!!      newvtr,nhatgrid,odamix,out_geometry_xml,out_resultsgs_xml,outscfcv
+!!      paw2wvl_ij,paw_an_free,paw_an_init,paw_an_nullify,paw_an_reset_flags
+!!      paw_ij_free,paw_ij_init,paw_ij_nullify,paw_ij_reset_flags,pawcprj_alloc
+!!      pawcprj_free,pawcprj_getdim,pawcprj_reorder,pawdenpot,pawdij
+!!      pawfgrtab_free,pawfgrtab_init,pawmknhat,pawtab_get_lsize,pawuj_red
+!!      prc_mem_free,prtene,psolver_rhohxc,rhohxc,rhotov,scprqt,setnoccmmp
+!!      setrhoijpbe0,setsym,setup_positron,setvtr,sphereboundary,status,symdij
+!!      symmetrize_xred,timab,update_e_field_vars,vtorho,vtorhorec,vtorhotf
+!!      wrtout,wvl_cprjreorder,wvl_nhatgrid,xmpi_isum,xmpi_sum,xmpi_wait
 !!
 !! SOURCE
 
@@ -673,10 +672,11 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
      ncpgr=0
      if (usefock==1) then
        ctocprj_choice = 1
-       if (dtset%optforces /= 0 .and. dtset%optstress == 0) then
+       if (dtset%optforces /= 0) then
          ncpgr = 3 ; ctocprj_choice = 2
- !        else if (dtset%optstress /= 0) then
- !       ncpgr = 9 ; ctocprj_choice = 23
+       end if
+       if (dtset%optstress /= 0) then
+         ncpgr = 6 ; ctocprj_choice = 3
        end if
      end if
      call pawcprj_alloc(cprj,ncpgr,dimcprj_srt)
@@ -881,12 +881,13 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
  if (dtset%iscf==-1 .and. dtset%nspden==1) nkxc=2
  if (dtset%iscf==-1 .and. dtset%nspden==2) nkxc=3
 !Eventually need kxc-LDA when susceptibility matrix has to be computed
- if (dtset%iscf>0.and.modulo(dtset%iprcel,100)>=61.and.(dtset%iprcel<71.or.dtset%iprcel>79)) nkxc=min(2*dtset%nspden-1,3)
+ if (dtset%iscf>0.and.modulo(dtset%iprcel,100)>=61.and.(dtset%iprcel<71.or.dtset%iprcel>79)) nkxc=2*min(dtset%nspden,2)-1
 !Eventually need kxc-LDA for residual forces (when density mixing is selected)
  if (dtset%iscf>=10.and.dtset%usewvl==0.and.forces_needed>0 .and. &
 & abs(dtset%densfor_pred)>=1.and.abs(dtset%densfor_pred)<=6.and.abs(dtset%densfor_pred)/=5) then
-   if (dtset%xclevel==1.or.dtset%densfor_pred>=0) nkxc=min(2*dtset%nspden-1,3)
-   if (dtset%xclevel==2.and.dtset%nspden==2.and.dtset%densfor_pred<0) nkxc=23
+   if (dtset%xclevel==1.or.dtset%densfor_pred>=0) nkxc=2*min(dtset%nspden,2)-1
+   if (dtset%xclevel==2.and.dtset%nspden==1.and.dtset%densfor_pred<0) nkxc=7
+   if (dtset%xclevel==2.and.dtset%nspden==2.and.dtset%densfor_pred<0) nkxc=19
  end if
  if (nkxc>0) then
    call check_kxc(dtset%ixc,dtset%optdriver)
@@ -1575,7 +1576,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
 &     dtset%iscf<10.and. &
 &     (dtset%iprcel>=100.or.istep==1.or.istep==dielstrt)) optxc=2
      if (dtset%iscf>=10.and.dtset%densfor_pred/=0.and.abs(dtset%densfor_pred)/=5) optxc=2
-     if (optxc==2.and.dtset%xclevel==2.and.nkxc==3-2*mod(dtset%nspden,2)) optxc=12
+     if (optxc==2.and.dtset%xclevel==2.and.nkxc==2*min(dtset%nspden,2)-1) optxc=12
    end if
 
    if (dtset%iscf/=22) then

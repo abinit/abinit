@@ -1,0 +1,66 @@
+
+#====== Basis set =====================#
+ ecut 10.0
+
+#====== Bands =========================#
+ nband 8
+
+#====== k-point grid ==================#
+ kptopt 3
+ ngkpt 1 1 1
+ nshiftk 1
+ shiftk    0.0    0.0    0.0
+
+#====== Models ========================#
+ ixc 1
+
+#====== SCF procedure =================#
+ iscf -2
+ tolwfr 1e-18
+
+#====== Response function =============#
+ bdeigrf -1
+ elph2_imagden 0.05 eV
+ ieig2rf 5
+ rfatpol 1 2
+ rfdir 1 1 1
+ rfphon 1
+
+#====== Parallelisation ===============#
+ npfft 1
+
+#====== Unit cell =====================#
+ acell    1.0    1.0    1.0
+ natom 2
+ ntypat 2
+ rprim
+    0.000000000000    3.851503974437    3.851503974437
+    3.851503974437    0.000000000000    3.851503974437
+    3.851503974437    3.851503974437    0.000000000000
+ typat 1 2
+ xred
+    0.0000000000    0.0000000000    0.0000000000
+    0.5000000000    0.5000000000    0.5000000000
+ znucl 3 9
+
+#====== Symmetries ====================#
+ nsym 1
+
+#====== Printing ======================#
+ enunit 2
+
+#====== Files =========================#
+ ird1den 1
+ irdwfk 1
+ irdwfq 1
+
+#====== Unsorted ======================#
+ autoparal 1
+ diemac 9.0
+ istwfk *1
+ nnsclo 40
+ nqpt 1
+ optforces 1
+ qpt    0.2500000000    0.0000000000    0.0000000000
+ qptopt 0
+

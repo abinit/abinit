@@ -57,6 +57,7 @@ subroutine mka2f(Cryst,ifc,a2f_1d,dos_phon,elph_ds,kptrlatt,mustar)
  use defs_elphon
  use m_errors
  use m_profiling_abi
+ use m_special_funcs
 
  use m_io_tools,        only : open_file
  use m_numeric_tools,   only : simpson_int, simpson
@@ -89,6 +90,8 @@ subroutine mka2f(Cryst,ifc,a2f_1d,dos_phon,elph_ds,kptrlatt,mustar)
 !scalars
  integer :: natom,iFSqpt,ibranch,iomega,nbranch,na2f,nsppol,nkpt,nrpt
  integer :: isppol,jbranch,unit_a2f,unit_phdos,ep_scalprod
+ integer :: itemp, ntemp = 100
+ real(dp) :: temp, intlinewidth
  real(dp) :: a2fprefactor,avgelphg,avglambda,avgomlog,diagerr
  real(dp) :: lambda_2,lambda_3,lambda_4,lambda_5
  real(dp) :: spinfact
@@ -120,6 +123,8 @@ subroutine mka2f(Cryst,ifc,a2f_1d,dos_phon,elph_ds,kptrlatt,mustar)
  real(dp),allocatable :: a2flogmom_int(:)
  real(dp),allocatable :: coskr(:,:)
  real(dp),allocatable :: sinkr(:,:)
+ real(dp),allocatable :: linewidth_of_t(:)
+ real(dp),allocatable :: linewidth_integrand(:,:)
 
 ! *********************************************************************
 !calculate a2f for frequencies between 0 and elph_ds%omega_max
@@ -425,10 +430,13 @@ subroutine mka2f(Cryst,ifc,a2f_1d,dos_phon,elph_ds,kptrlatt,mustar)
    ABI_ALLOCATE(a2f2mom,(na2f))
    ABI_ALLOCATE(a2f3mom,(na2f))
    ABI_ALLOCATE(a2f4mom,(na2f))
+   ABI_ALLOCATE(linewidth_integrand,(na2f,ntemp))
+   ABI_ALLOCATE(linewidth_of_t,(ntemp))
 
    a2f_1mom=zero
    a2f1mom=zero;  a2f2mom=zero
    a2f3mom=zero;  a2f4mom=zero
+   linewidth_integrand = zero
    
    omega = omega_min
    do iomega=1,na2f
@@ -438,6 +446,15 @@ subroutine mka2f(Cryst,ifc,a2f_1d,dos_phon,elph_ds,kptrlatt,mustar)
        a2f2mom(iomega)  =     a2f1mom(iomega)*abs(omega)  ! second positive moment of alpha2F
        a2f3mom(iomega)  =     a2f2mom(iomega)*abs(omega)  ! third positive moment of alpha2F
        a2f4mom(iomega)  =     a2f3mom(iomega)*abs(omega)  ! fourth positive moment of alpha2F
+!
+!  electron lifetimes eq 4.48 in Grimvall electron phonon coupling in Metals (with T dependency). Also 5.69-5.72, 5.125, section 3.4
+!  phonon lifetimes eq 19 in Savrasov PhysRevB.54.16487 (T=0)
+!  a first T dependent expression in Allen PRB 6 2577 eq 10. Not sure about the units though
+!
+       do itemp = 1, ntemp
+         temp = (itemp-1)*10._dp*kb_HaK
+         linewidth_integrand(iomega, itemp) = a2f_1d(iomega) * (fermi_dirac(omega,zero,temp) + bose_einstein(omega,temp))
+       end do
      end if
      omega=omega + domega
    end do
@@ -450,6 +467,13 @@ subroutine mka2f(Cryst,ifc,a2f_1d,dos_phon,elph_ds,kptrlatt,mustar)
    lambda_3 = simpson(domega,a2f2mom)
    lambda_4 = simpson(domega,a2f3mom)
    lambda_5 = simpson(domega,a2f4mom)
+   do itemp = 1, ntemp
+     linewidth_of_t(itemp) = simpson(domega,linewidth_integrand(:,itemp))
+! print out gamma(T) here
+     temp = (itemp-1)*10._dp*kb_HaK
+     write (std_out,*) 'mka2f: T, average linewidth', temp, linewidth_of_t(itemp)
+   end do
+
 
    ABI_DEALLOCATE(phfrq)
    ABI_DEALLOCATE(pheigvec)
@@ -458,6 +482,8 @@ subroutine mka2f(Cryst,ifc,a2f_1d,dos_phon,elph_ds,kptrlatt,mustar)
    ABI_DEALLOCATE(a2f2mom)
    ABI_DEALLOCATE(a2f3mom)
    ABI_DEALLOCATE(a2f4mom)
+   ABI_DEALLOCATE(linewidth_integrand)
+   ABI_DEALLOCATE(linewidth_of_t)
 
    write (std_out,*) 'mka2f: elphon coupling lambdas for spin = ', isppol
    write (std_out,*) 'mka2f: isotropic lambda', lambda_iso(isppol)
@@ -529,6 +555,8 @@ subroutine mka2f(Cryst,ifc,a2f_1d,dos_phon,elph_ds,kptrlatt,mustar)
    end if
 
  end do ! isppol
+
+
 
 !also print out spin-summed quantities
  lambda_2 = sum(lambda_iso(1:elph_ds%nsppol))

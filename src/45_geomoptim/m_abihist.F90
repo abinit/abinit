@@ -179,7 +179,7 @@ contains  !=============================================================
 !! SIDE EFFECTS
 !!
 !! PARENTS
-!!      m_abihist,mover
+!!      m_abihist
 !!
 !! CHILDREN
 !!
@@ -262,7 +262,6 @@ end subroutine abihist_init_0D
 !! SIDE EFFECTS
 !!
 !! PARENTS
-!!      gstateimg
 !!
 !! CHILDREN
 !!
@@ -315,7 +314,7 @@ end subroutine abihist_init_1D
 !!  hist <type(abihist)> = The hist to deallocate
 !!
 !! PARENTS
-!!      m_abihist,m_abiimages,mover,multibinit
+!!      m_abihist
 !!
 !! CHILDREN
 !!
@@ -404,7 +403,6 @@ end subroutine abihist_free_0D
 !!  hist(:) <type(abihist)> = The hist to deallocate
 !!
 !! PARENTS
-!!      gstateimg
 !!
 !! CHILDREN
 !!
@@ -457,7 +455,7 @@ end subroutine abihist_free_1D
 !!  hist <type(abihist)> = The hist to broadcast
 !!
 !! PARENTS
-!!      mover
+!!      m_abihist
 !!
 !! CHILDREN
 !!
@@ -667,7 +665,6 @@ end subroutine abihist_bcast_0D
 !!  hist(:) <type(abihist)> = The hist to broadcast
 !!
 !! PARENTS
-!!      gstateimg
 !!
 !! CHILDREN
 !!
@@ -729,9 +726,10 @@ end subroutine abihist_bcast_1D
 !!      |                    acell, stresses, and energies,
 !!
 !! PARENTS
-!!      m_pred_lotf,mover,pred_bfgs,pred_delocint,pred_diisrelax
-!!      pred_isokinetic,pred_isothermal,pred_langevin,pred_moldyn,pred_nose
-!!      pred_srkna14,pred_steepdesc,pred_verlet
+!!      gstateimg,m_monte_carlo,m_pred_lotf,mover,pred_bfgs,pred_delocint
+!!      pred_diisrelax,pred_hmc,pred_isokinetic,pred_isothermal,pred_langevin
+!!      pred_lbfgs,pred_moldyn,pred_nose,pred_srkna14,pred_steepdesc
+!!      pred_velverlet,pred_verlet
 !!
 !! CHILDREN
 !!
@@ -811,9 +809,10 @@ end subroutine var2hist
 !! SIDE EFFECTS
 !!
 !! PARENTS
-!!      m_pred_lotf,mover,pred_bfgs,pred_delocint,pred_diisrelax
-!!      pred_isokinetic,pred_isothermal,pred_langevin,pred_moldyn,pred_nose
-!!      pred_srkna14,pred_steepdesc,pred_verlet
+!!      m_monte_carlo,m_pred_lotf,mover,pred_bfgs,pred_delocint,pred_diisrelax
+!!      pred_hmc,pred_isokinetic,pred_isothermal,pred_langevin,pred_lbfgs
+!!      pred_moldyn,pred_nose,pred_srkna14,pred_steepdesc,pred_velverlet
+!!      pred_verlet
 !!
 !! CHILDREN
 !!
@@ -968,7 +967,7 @@ end subroutine vel2hist
 !!  hist_out <type(abihist)>
 !!
 !! PARENTS
-!!
+!!      gstateimg
 !!
 !! CHILDREN
 !!
@@ -1056,6 +1055,7 @@ subroutine abihist_compare_and_copy(hist_in,hist_out,natom,similar,tolerance)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'abihist_compare_and_copy'
+ use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1073,14 +1073,16 @@ type(abihist),intent(inout) :: hist_out
 integer :: kk,jj
 real(dp) :: maxdiff,diff
 real(dp) :: x,y
-
+!array
+character(len= 500) :: msg
 ! ***************************************************************
 
  similar=1
 
- write(std_out,*) 'Using values from history, iteration:',hist_in%ihist
- write(std_out,*) 'Differences between present history and values stored'
- write(std_out,*) 'on the previous history.(Relative difference)'
+ write(msg,'(a,I0,4a)')  'Using values from history, iteration:',hist_in%ihist,ch10,&
+&                     'Differences between present history and values stored',ch10,&    
+&                     'on the previous history.(Relative difference)'
+ call wrtout(std_out,msg,'COLL')
 
  x=hist_out%xred(1,1,hist_out%ihist)
  y=hist_in%xred(1,1,hist_in%ihist)
@@ -1093,7 +1095,9 @@ real(dp) :: x,y
      if (diff>maxdiff) maxdiff=diff
    end do
  end do
- write(std_out,'(a,e12.5)') 'xred:     ',maxdiff
+ write(msg,'(a,e12.5)') 'xred:     ',maxdiff
+ call wrtout(std_out,msg,'COLL')
+
  if (maxdiff>tolerance) similar=0
 
 
@@ -1108,7 +1112,8 @@ real(dp) :: x,y
      if (diff>maxdiff) maxdiff=diff
    end do
  end do
- write(std_out,'(a,e12.5)') 'rprimd:   ',maxdiff
+ write(msg,'(a,e12.5)') 'rprimd:   ',maxdiff
+ call wrtout(std_out,msg,'COLL')
  if (maxdiff>tolerance) similar=0
 
 
@@ -1121,7 +1126,8 @@ real(dp) :: x,y
    diff=2*abs(x-y)/(abs(x)+abs(y))
    if (diff>maxdiff) maxdiff=diff
  end do
- write(std_out,'(a,e12.5)') 'acell:    ',maxdiff
+ write(msg,'(a,e12.5)') 'acell:    ',maxdiff
+ call wrtout(std_out,msg,'COLL')
  if (maxdiff>tolerance) similar=0
 
  if (similar==1) then
@@ -1448,13 +1454,13 @@ end subroutine write_md_hist_img
 !!                     cell dims and energies,
 !!
 !! PARENTS
-!!      mover
+!!      mover,multibinit
 !!
 !! CHILDREN
 !!
 !! SOURCE
 
-subroutine read_md_hist(filename,hist,isVUsed,isARUsed)
+subroutine read_md_hist(filename,hist,isVUsed,isARUsed,readOnlyLast)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -1467,7 +1473,7 @@ implicit none
 
 !Arguments ------------------------------------
 !scalars
- logical,intent(in) :: isVUsed,isARUsed
+ logical,intent(in) :: isVUsed,isARUsed,readOnlyLast
  character(len=*),intent(in) :: filename
 !arrays
  type(abihist),intent(inout),target :: hist
@@ -1475,7 +1481,7 @@ implicit none
 !Local variables-------------------------------
 #if defined HAVE_NETCDF
 !scalars
- integer :: ncerr,ncid,nimage,natom,time
+ integer :: ncerr,ncid,nimage,natom,time,start_time
  integer :: nimage_id,natom_id,xyz_id,time_id,six_id
  integer :: xcart_id,xred_id,fcart_id,fred_id,ekin_id,entropy_id
  integer :: mdtime_id,vel_id,vel_cell_id,etotal_id
@@ -1504,6 +1510,14 @@ implicit none
  call get_dims_hist(ncid,natom,nimage,time,&
 &     natom_id,nimage_id,time_id,xyz_id,six_id,has_nimage)
 
+!If only the last step is needing (restarxf==-3 for example)
+ if(readOnlyLast)then
+   start_time = time
+   time = 1
+ else
+   start_time = 1
+ end if
+
 !Allocate hist structure
  call abihist_init(hist,natom,time,isVused,isARused)
 
@@ -1512,7 +1526,7 @@ implicit none
 &     rprimd_id,acell_id,strten_id,etotal_id,ekin_id,entropy_id,mdtime_id)
 
 !Read variables from the dataset and write them into hist
- call read_vars_hist(ncid,hist,natom,time,has_nimage,1,&
+ call read_vars_hist(ncid,hist,natom,time,has_nimage,1,start_time,&
 &     xred_id,fcart_id,vel_id,vel_cell_id,rprimd_id,acell_id,&
 &     strten_id,etotal_id,ekin_id,entropy_id,mdtime_id)
 
@@ -1640,7 +1654,7 @@ implicit none
 &       rprimd_id,acell_id,strten_id,etotal_id,ekin_id,entropy_id,mdtime_id)
 
 !  Read variables from the dataset and write them into hist
-   call read_vars_hist(ncid,hist_,natom,time,has_nimage,iimg,&
+   call read_vars_hist(ncid,hist_,natom,time,has_nimage,iimg,1,&
 &       xred_id,fcart_id,vel_id,vel_cell_id,rprimd_id,acell_id,&
 &       strten_id,etotal_id,ekin_id,entropy_id,mdtime_id)
 
@@ -1671,6 +1685,7 @@ end subroutine read_md_hist_img
 !! OUTPUT
 !!
 !! PARENTS
+!!      m_abihist
 !!
 !! CHILDREN
 !!
@@ -1875,6 +1890,7 @@ end subroutine def_file_hist
 !! OUTPUT
 !!
 !! PARENTS
+!!      m_abihist
 !!
 !! CHILDREN
 !!
@@ -1909,7 +1925,6 @@ implicit none
 ! *************************************************************************
 
 #if defined HAVE_NETCDF
-
 !Inquire dimensions IDs
 
  ncerr = nf90_inq_dimid(ncid,"natom",natom_id)
@@ -1960,6 +1975,7 @@ end subroutine get_dims_hist
 !! OUTPUT
 !!
 !! PARENTS
+!!      m_abihist
 !!
 !! CHILDREN
 !!
@@ -2052,6 +2068,7 @@ end subroutine get_varid_hist
 !! OUTPUT
 !!
 !! PARENTS
+!!      m_abihist
 !!
 !! CHILDREN
 !!
@@ -2140,6 +2157,7 @@ end subroutine write_csts_hist
 !! OUTPUT
 !!
 !! PARENTS
+!!      m_abihist
 !!
 !! CHILDREN
 !!
@@ -2316,12 +2334,13 @@ end subroutine write_vars_hist
 !! OUTPUT
 !!
 !! PARENTS
+!!      m_abihist
 !!
 !! CHILDREN
 !!
 !! SOURCE
 
-subroutine read_vars_hist(ncid,hist,natom,time,has_nimage,iimg,&
+subroutine read_vars_hist(ncid,hist,natom,time,has_nimage,iimg,start_time,&
 &          xred_id,fcart_id,vel_id,vel_cell_id,rprimd_id,acell_id,&
 &          strten_id,etotal_id,ekin_id,entropy_id,mdtime_id)
 
@@ -2340,6 +2359,7 @@ implicit none
  integer,intent(in) :: xred_id,fcart_id,vel_id,vel_cell_id,rprimd_id
  integer,intent(in) :: acell_id,strten_id
  integer,intent(in) :: etotal_id,ekin_id,entropy_id,mdtime_id
+ integer,intent(in) :: start_time
  logical,intent(in) :: has_nimage
  type(abihist),intent(inout),target :: hist
 
@@ -2359,7 +2379,7 @@ implicit none
 !Variables not depending on imes
 
 !mdtime
- start1=(/1/);count1=(/time/)
+ start1=(/start_time/);count1=(/time/)
  ncerr = nf90_get_var(ncid,mdtime_id,hist%time(:),count=count1,start=start1)
  NCF_CHECK_MSG(ncerr," read variable mdtime")
 
@@ -2367,7 +2387,7 @@ implicit none
 
 !xred,fcart,vel
  if (has_nimage) then
-   start4=(/1,1,iimg,1/);count4=(/3,natom,1,time/)
+   start4=(/1,1,iimg,start_time/);count4=(/3,natom,1,time/)
    ncerr = nf90_get_var(ncid,xred_id  ,hist%xred(:,:,:),count=count4,start=start4)
    NCF_CHECK_MSG(ncerr," read variable xred")
    ncerr = nf90_get_var(ncid,fcart_id ,hist%fcart(:,:,:),count=count4,start=start4)
@@ -2375,7 +2395,7 @@ implicit none
    ncerr = nf90_get_var(ncid,vel_id,hist%vel(:,:,:),count=count4,start=start4)
    NCF_CHECK_MSG(ncerr," read variable vel")
  else
-   start3=(/1,1,1/);count3=(/3,natom,time/)
+   start3=(/1,1,start_time/);count3=(/3,natom,time/)
    ncerr = nf90_get_var(ncid,xred_id  ,hist%xred(:,:,:),count=count3,start=start3)
    NCF_CHECK_MSG(ncerr," read variable xred")
    ncerr = nf90_get_var(ncid,fcart_id ,hist%fcart(:,:,:),count=count3,start=start3)
@@ -2386,13 +2406,13 @@ implicit none
 
 !rprimd,vel_cell
  if (has_nimage) then
-   start4=(/1,1,iimg,1/);count4=(/3,3,1,time/)
+   start4=(/1,1,iimg,start_time/);count4=(/3,3,start_time,time/)
    ncerr = nf90_get_var(ncid,rprimd_id,hist%rprimd(:,:,:),count=count4,start=start4)
    NCF_CHECK_MSG(ncerr," read variable rprimd")
    ncerr = nf90_get_var(ncid,vel_cell_id,hist%vel_cell(:,:,:),count=count4,start=start4)
    NCF_CHECK_MSG(ncerr," read variable vel_cell")
  else
-   start3=(/1,1,1/);count3=(/3,3,time/)
+   start3=(/1,1,start_time/);count3=(/3,3,time/)
    ncerr = nf90_get_var(ncid,rprimd_id,hist%rprimd(:,:,:),count=count3,start=start3)
    NCF_CHECK_MSG(ncerr," read variable rprimd")
    ncerr = nf90_get_var(ncid,vel_cell_id,hist%vel_cell(:,:,:),count=count3,start=start3)
@@ -2401,29 +2421,29 @@ implicit none
 
 !acell
  if (has_nimage) then
-   start3=(/1,iimg,1/);count3=(/3,1,time/)
+   start3=(/1,iimg,start_time/);count3=(/3,1,time/)
    ncerr = nf90_get_var(ncid,acell_id,hist%acell(:,:),count=count3,start=start3)
    NCF_CHECK_MSG(ncerr," read variable acell")
  else
-   start2=(/1,1/);count2=(/3,time/)
+   start2=(/1,start_time/);count2=(/3,time/)
    ncerr = nf90_get_var(ncid,acell_id,hist%acell(:,:),count=count2,start=start2)
    NCF_CHECK_MSG(ncerr," read variable acell")
  end if
 
 !strten
  if (has_nimage) then
-   start3=(/1,iimg,1/);count3=(/6,1,time/)
+   start3=(/1,iimg,start_time/);count3=(/6,1,time/)
    ncerr = nf90_get_var(ncid, strten_id,hist%strten(:,:),count=count3,start=start3)
    NCF_CHECK_MSG(ncerr," read variable strten")
  else
-   start2=(/1,1/);count2=(/6,time/)
+   start2=(/1,start_time/);count2=(/6,time/)
    ncerr = nf90_get_var(ncid, strten_id,hist%strten(:,:),count=count2,start=start2)
    NCF_CHECK_MSG(ncerr," read variable strten")
  end if
 
 !etotal,ekin,entropy
  if (has_nimage) then
-   start2=(/1,1/);count2=(/1,time/)
+   start2=(/1,start_time/);count2=(/1,time/)
    ncerr = nf90_get_var(ncid,etotal_id,hist%etot(:),count=count2,start=start2)
    NCF_CHECK_MSG(ncerr," read variable etotal")
    ncerr = nf90_get_var(ncid,ekin_id ,hist%ekin(:),count=count2,start=start2)
@@ -2431,7 +2451,7 @@ implicit none
    ncerr = nf90_get_var(ncid,entropy_id,hist%entropy(:),count=count2,start=start2)
    NCF_CHECK_MSG(ncerr," read variable entropy")
  else
-   start1=(/1/);count1=(/time/)
+   start1=(/start_time/);count1=(/time/)
    ncerr = nf90_get_var(ncid,etotal_id,hist%etot(:),count=count1,start=start1)
    NCF_CHECK_MSG(ncerr," read variable etotal")
    ncerr = nf90_get_var(ncid,ekin_id,hist%ekin(:),count=count1,start=start1)

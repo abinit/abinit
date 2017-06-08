@@ -114,7 +114,7 @@ subroutine clnup2(n1xccc,fred,grchempottn,gresid,grewtn,grvdw,grxc,iscf,natom,ng
          write(message,format01020) iatom,(grchempottn(mu,iatom),mu=1,3)
          call wrtout(ab_out,message,'COLL')
        end do
-     endif
+     end if
 
      write(message, '(a)' ) ' nonlocal contribution to red. grads'
      call wrtout(ab_out,message,'COLL')

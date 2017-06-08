@@ -76,7 +76,7 @@
 !!  nfftprc=size of FFT grid on which the potential residual will be preconditionned
 !!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
 !!  ngfftprc(18)=contain all needed information about 3D FFT for the grid corresponding to nfftprc
-!!  nkxc=second dimension of the array kxc, see rhohxc.f for a description
+!!  nkxc=second dimension of the array kxc, see rhohxc.F90 for a description
 !!  npawmix=-PAW only- number of spherical part elements to be mixed
 !!  npwdiel=number of planewaves for dielectric matrix
 !!  ntypat=number of types of atoms in cell.
@@ -583,8 +583,8 @@ subroutine prcref(atindx,dielar,dielinv,&
        ABI_ALLOCATE(dyfrx2,(3,3,dtset%natom))
        ABI_ALLOCATE(grxc_indx,(3,dtset%natom))
        call mkcore(dummy6,dyfrx2,grxc_indx,mpi_enreg,dtset%natom,nfft,dtset%nspden,ntypat,&
-&         n1,n1xccc,n2,n3,option,rprimd,dtset%typat,ucvol,vxc,psps%xcccrc,&
-&         psps%xccc1d,xccc3d,xred_wk)
+&       n1,n1xccc,n2,n3,option,rprimd,dtset%typat,ucvol,vxc,psps%xcccrc,&
+&       psps%xccc1d,xccc3d,xred_wk)
        ABI_DEALLOCATE(dyfrx2)
        ABI_DEALLOCATE(grxc_indx)
      end if

@@ -77,7 +77,7 @@
 !!                                       Usually ncprj=natom
 !!
 !! PARENTS
-!!      dfpt_looppert,extrapwf,scfcv,update_e_field_vars,vtorho
+!!      dfpt_looppert,extrapwf,forstr,scfcv,update_e_field_vars,vtorho
 !!
 !! CHILDREN
 !!      getcprj,mkffnl,mkkpg,pawcprj_alloc,pawcprj_free,pawcprj_mpi_sum
@@ -140,7 +140,7 @@
 !scalars
  integer :: blocksz,cg_bandpp,counter,cpopt,cprj_bandpp,dimffnl,ia,iatm,iatom1,iatom2
  integer :: iband_max,iband_min,iband_start,ibg,ibgb,iblockbd,ibp,icg,icgb,icp1,icp2
- integer :: ider,idir0,ierr,ig,ii,ikg,ikpt,ilm,ipw,isize,isppol,istwf_k,itypat,iwf1,iwf2
+ integer :: ider,idir0,iend,ierr,ig,ii,ikg,ikpt,ilm,ipw,isize,isppol,istart,istwf_k,itypat,iwf1,iwf2,jdir
  integer :: matblk,mband_cprj,me_distrb,my_nspinor,n1,n1_2p1,n2,n2_2p1,n3,n3_2p1
  integer :: nband_k,nband_cprj_k,nblockbd,ncpgr,nkpg,npband_bandfft,npws,npw_k,npw_nk,ntypat0
  integer :: shift1,shift1b,shift2,shift2b,shift3,shift3b
@@ -237,7 +237,7 @@
  n1=ngfft(1);n2=ngfft(2);n3=ngfft(3)
  n1_2p1=2*n1+1;n2_2p1=2*n2+1;n3_2p1=2*n3+1
  ibg=0;icg=0;cpopt=0
- ider=0;idir0=0
+ ider=0;idir0=0;istart=idir;iend=idir
  if (choice==3.or.choice==5.or.choice==23) ider=1
  if (idir>0) then
    if (choice==3) idir0=-idir
@@ -253,6 +253,9 @@
    dimffnl=1+ider
  else
    dimffnl=1+6*ider
+   if(choice==3)then
+     istart=ider;iend=6*ider
+   end if
  end if
  nkpg=0
  if (choice==3.or.choice==2.or.choice==23) nkpg=3*nloalg(3)
@@ -531,10 +534,12 @@
        do ibp=1,cg_bandpp   ! Note: we suppose cp_bandpp=cprj_bandpp
          iwf1=1+(ibp-1)*npw_nk*my_nspinor;iwf2=ibp*npw_nk*my_nspinor
          icp1=1+(ibp-1)*my_nspinor;icp2=ibp*my_nspinor
-         call getcprj(choice,cpopt,cwavef(:,iwf1:iwf2),cwaveprj(:,icp1:icp2),&
-&         ffnl,idir,indlmn_atm,istwf_k,kg_k,kpg_k,kpoint,psps%lmnmax,&
-&         mgfft,mpi_enreg,ncprj,nattyp_atm,ngfft,nloalg,&
-&         npw_nk,my_nspinor,ntypat0,phkxred,ph1d_atm,ph3d,ucvol,psps%useylm)
+         do jdir=istart,iend
+           call getcprj(choice,cpopt,cwavef(:,iwf1:iwf2),cwaveprj(:,icp1:icp2),&
+&           ffnl,jdir,indlmn_atm,istwf_k,kg_k,kpg_k,kpoint,psps%lmnmax,&
+&           mgfft,mpi_enreg,ncprj,nattyp_atm,ngfft,nloalg,&
+&           npw_nk,my_nspinor,ntypat0,phkxred,ph1d_atm,ph3d,ucvol,psps%useylm)
+         end do
        end do
 
 !      Export cwaveprj to big array cprj

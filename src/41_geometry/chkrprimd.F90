@@ -24,7 +24,6 @@
 !!  (only writing)
 !!
 !! PARENTS
-!!      m_abihist
 !!
 !! CHILDREN
 !!

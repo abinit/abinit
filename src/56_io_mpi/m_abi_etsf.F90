@@ -302,7 +302,7 @@ end subroutine abi_etsf_dims_init
 !!  Data written in file whose name is filapp//'-etsf.nc'
 !!
 !! PARENTS
-!!      m_io_kss,m_iowf
+!!      m_iowf
 !!
 !! CHILDREN
 !!
