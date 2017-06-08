@@ -626,7 +626,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
    call paw_an_nullify(paw_an)
    call paw_ij_nullify(paw_ij)
    has_dijhat=0;if (dtset%iscf==22) has_dijhat=1
-   has_vhartree=0; if (dtset%prtvha > 0) has_vhartree=1
+   has_vhartree=0; if (dtset%prtvha > 0 .or. dtset%prtvclmb > 0) has_vhartree=1
    has_dijfock=0; if (usefock==1) has_dijfock=1
    has_dijnd=0; req_cplex_dij=1
    if(any(abs(dtset%nucdipmom)>tol8)) then

@@ -152,14 +152,16 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
 !scalars
  integer :: cplex,cplex_dij,has_kxc,iatom,iatom_tot,idum,ierr,ipositron,irhoij,ispden,itypat,itypat0
  integer :: jrhoij,kklmn,klmn,lm_size,lmn2_size,mesh_size,my_comm_atom,ndij,nkxc1,nspdiag,nsppol,opt_compch
- integer :: usecore,usepawu,usetcore,usexcnhat,usefock
+ integer :: usecore,usepawu,usetcore,usexcnhat,usenhat,usefock
  logical :: keep_vhartree,my_atmtab_allocated,need_kxc,paral_atom,temp_vxc
  real(dp) :: e1t10,e1xc,e1xcdc,efock,efockdc,eexc,eexcdc,eexdctemp
  real(dp) :: eexc_val,eexcdc_val,eexex,eexexdc,eextemp,eh2
  real(dp) :: eldaumdc,eldaumdcdc,enucdip,espnorb,etild1xc,etild1xcdc
  real(dp) :: exccore,exchmix,hyb_mixing_,hyb_mixing_sr_,rdum
+ real(dp) :: vhfactor
  character(len=3) :: pertstrg
  character(len=500) :: msg
+ character(len=fnlen) :: fname
 !arrays
  integer :: idum1(0),idum3(0,0,0)
  integer,pointer :: my_atmtab(:)
@@ -169,6 +171,7 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
  real(dp) :: rdum2(0,0),rdum3(0,0,0),rdum3a(0,0,0),rdum4(0,0,0,0)
  real(dp),allocatable :: rho(:),rho1(:,:,:),rho1_ep(:,:,:),rho1xx(:,:,:)
  real(dp),allocatable :: trho1(:,:,:),trho1_ep(:,:,:),vxc_tmp(:,:,:)
+ real(dp),allocatable :: tmp_vh(:)
 
 ! *************************************************************************
 
@@ -250,6 +253,9 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
  hyb_mixing_sr_=zero ; if(present(hyb_mixing_sr)) hyb_mixing_sr_=hyb_mixing_sr
  usefock=0;if (abs(hyb_mixing_)>tol8.or.abs(hyb_mixing_sr_)>tol8) usefock=1
  usexcnhat=maxval(pawtab(1:ntypat)%usexcnhat)
+ usenhat = usexcnhat
+ keep_vhartree=(maxval(paw_an(:)%has_vhartree)>0)
+ if(keep_vhartree) usenhat = 1
  usepawu=maxval(pawtab(1:ntypat)%usepawu)
  compch_sph=-1.d5
  opt_compch=0;if (option/=1.and.ipert<=0) opt_compch=1
@@ -324,12 +330,12 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
 !  Allocations of "on-site" densities
    ABI_ALLOCATE(rho1 ,(cplex*mesh_size,lm_size,nspden))
    ABI_ALLOCATE(trho1,(cplex*mesh_size,lm_size,nspden))
-   ABI_ALLOCATE(nhat1,(cplex*mesh_size,lm_size,nspden*usexcnhat))
+   ABI_ALLOCATE(nhat1,(cplex*mesh_size,lm_size,nspden*usenhat))
    rho1(:,:,:)=zero;trho1(:,:,:)=zero;nhat1(:,:,:)=zero
    if (ipositron/=0) then ! Additional allocation for the electron-positron case
      ABI_ALLOCATE(rho1_ep ,(cplex*mesh_size,lm_size,nspden))
      ABI_ALLOCATE(trho1_ep,(cplex*mesh_size,lm_size,nspden))
-     ABI_ALLOCATE(nhat1_ep,(cplex*mesh_size,lm_size,nspden*usexcnhat))
+     ABI_ALLOCATE(nhat1_ep,(cplex*mesh_size,lm_size,nspden*usenhat))
    end if
    ABI_ALLOCATE(lmselect_cur,(lm_size))
    lmselect_cur(:)=.true.
@@ -369,7 +375,7 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
 !  ==========================================================
 
    call pawdensities(compch_sph,cplex,iatom_tot,lmselect_cur,paw_an(iatom)%lmselect,lm_size,&
-&   nhat1,nspden,nzlmopt,opt_compch,1-usexcnhat,-1,1,pawang,pawprtvol,pawrad(itypat),&
+&   nhat1,nspden,nzlmopt,opt_compch,1-usenhat,-1,1,pawang,pawprtvol,pawrad(itypat),&
 &   pawrhoij(iatom),pawtab(itypat),rho1,trho1,one_over_rad2=one_over_rad2)
 
    if (ipositron/=0) then
@@ -382,7 +388,7 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
      if (nzlmopt==1) lmselect_cur_ep(:)=electronpositron%lmselect_ep(1:lm_size,iatom)
 
      call pawdensities(rdum,cplex,iatom_tot,lmselect_cur_ep,lmselect_ep,&
-&     lm_size,nhat1_ep,nspden,nzlmopt,0,1-usexcnhat,-1,0,pawang,0,pawrad(itypat),&
+&     lm_size,nhat1_ep,nspden,nzlmopt,0,1-usenhat,-1,0,pawang,0,pawrad(itypat),&
 &     electronpositron%pawrhoij_ep(iatom),pawtab(itypat),&
 &     rho1_ep,trho1_ep,one_over_rad2=one_over_rad2)
 
@@ -719,16 +725,106 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
 !  Compute 1st moment of total Hartree potential VH(n_Z+n_core+n1)
    keep_vhartree=(paw_an(iatom)%has_vhartree>0)
    if ((pawspnorb>0.and.ipert==0.and.ipositron/=1).or.keep_vhartree) then
+     ! in the first clause case, would it not be simpler just to turn on has_vhartree?
      if (paw_an(iatom)%has_vhartree==0)  then
        ABI_ALLOCATE(paw_an(iatom)%vh1,(mesh_size,1,1))
+       ABI_ALLOCATE(paw_an(iatom)%vht1,(mesh_size,1,1))
      end if
+
+print *, 'has_vhtnzc ', pawtab(itypat)%has_vhtnzc
+print *, 'has_vhnzc  ', pawtab(itypat)%has_vhnzc
+! construct vh1
      ABI_ALLOCATE(rho,(mesh_size))
-     rho(1:mesh_size)=(rho1(1:mesh_size,1,1)+sqrt(four_pi)*pawtab(itypat)%coredens(1:mesh_size)) &
-&     *four_pi*pawrad(itypat)%rad(1:mesh_size)**2
+!     rho(1:mesh_size)=(rho1(1:mesh_size,1,1) + sqrt(four_pi)*pawtab(itypat)%coredens(1:mesh_size)) &
+!&       *four_pi*pawrad(itypat)%rad(1:mesh_size)**2
+     rho(1:mesh_size)=rho1(1:mesh_size,1,1)*four_pi*pawrad(itypat)%rad(1:mesh_size)**2
      call poisson(rho,0,pawrad(itypat),paw_an(iatom)%vh1(:,1,1))
-     paw_an(iatom)%vh1(2:mesh_size,1,1)=(paw_an(iatom)%vh1(2:mesh_size,1,1) &
-&     -sqrt(four_pi)*znucl(itypat))/pawrad(itypat)%rad(2:mesh_size)
+!     paw_an(iatom)%vh1(2:mesh_size,1,1)=(paw_an(iatom)%vh1(2:mesh_size,1,1) &
+!&       -sqrt(four_pi)*znucl(itypat))/pawrad(itypat)%rad(2:mesh_size)
+     paw_an(iatom)%vh1(2:mesh_size,1,1)=paw_an(iatom)%vh1(2:mesh_size,1,1)/pawrad(itypat)%rad(2:mesh_size) &
+&       + pawtab(itypat)%VHnZC(2:mesh_size)
      call pawrad_deducer0(paw_an(iatom)%vh1(:,1,1),mesh_size,pawrad(itypat))
+
+!pawtab(itypat)%vhtnzc(:)
+!pawtab(itypat)%VHnZC(:)
+
+! same for vht1
+     rho = zero
+     if (usenhat /= 0) then
+       rho(1:mesh_size)=nhat1(1:mesh_size,1,1)
+     end if
+!     rho(1:mesh_size)=(rho(1:mesh_size) + trho1(1:mesh_size,1,1) + sqrt(four_pi)*pawtab(itypat)%tcoredens(1:mesh_size,1)) &
+     rho(1:mesh_size)=(rho(1:mesh_size) + trho1(1:mesh_size,1,1)) &
+&       *four_pi*pawrad(itypat)%rad(1:mesh_size)**2
+     call poisson(rho,0,pawrad(itypat),paw_an(iatom)%vht1(:,1,1))
+!     paw_an(iatom)%vht1(2:mesh_size,1,1)=(paw_an(iatom)%vht1(2:mesh_size,1,1) &
+!&       -sqrt(four_pi)*znucl(itypat))/pawrad(itypat)%rad(2:mesh_size)
+     paw_an(iatom)%vht1(2:mesh_size,1,1)=paw_an(iatom)%vht1(2:mesh_size,1,1)/pawrad(itypat)%rad(2:mesh_size) &
+&        + pawtab(itypat)%vhtnzc(2:mesh_size)
+     call pawrad_deducer0(paw_an(iatom)%vht1(:,1,1),mesh_size,pawrad(itypat))
+
+!DEBUG stuff
+ABI_ALLOCATE(tmp_vh,(mesh_size))
+fname='rho1.dat'
+rho(:) = rho1(:,1,1)
+
+open (unit=98, file=fname)
+write ( 98,'(2E20.10)') (pawrad(itypat)%rad(irhoij), rho(irhoij), irhoij=1,mesh_size); write (98,*); close(98)
+
+fname='VH_rho1.dat'
+
+rho(:) = rho(:)*four_pi*pawrad(itypat)%rad(1:mesh_size)**2
+call poisson(rho,0,pawrad(itypat),tmp_vh);
+tmp_vh(2:mesh_size) = tmp_vh(2:mesh_size)/pawrad(itypat)%rad(2:mesh_size);
+call pawrad_deducer0(tmp_vh,mesh_size,pawrad(itypat))
+open (unit=98, file=fname); write ( 98,'(2E20.10)') (pawrad(itypat)%rad(irhoij), tmp_vh(irhoij), irhoij=1,mesh_size); write (98,*); close(98)
+
+open (unit=99, file='coredens.dat')
+write ( 99,'(2E20.10)') (pawrad(itypat)%rad(irhoij), pawtab(itypat)%coredens(irhoij), irhoij=1,mesh_size)
+write ( 99,*)
+close(99)
+open (unit=100, file='rho.dat')
+rho(1:mesh_size)=rho1(1:mesh_size,1,1) + sqrt(four_pi)*pawtab(itypat)%coredens(1:mesh_size)
+write (100,'(2E20.10)') (pawrad(itypat)%rad(irhoij), rho(irhoij), irhoij=1,mesh_size)
+write (100,*)
+close(100)
+open (unit=101, file='vh1.dat')
+write (101,'(2E20.10)') (pawrad(itypat)%rad(irhoij), paw_an(iatom)%vh1(irhoij,1,1), irhoij=1,mesh_size)
+write (101,*)
+close(101)
+open (unit=198, file='trho1.dat')
+write (198,'(2E20.10)') (pawrad(itypat)%rad(irhoij), trho1(irhoij,1,1), irhoij=1,mesh_size)
+write (198,*)
+close(198)
+open (unit=199, file='tcoredens.dat')
+write (199,'(2E20.10)') (pawrad(itypat)%rad(irhoij), pawtab(itypat)%tcoredens(irhoij,1), irhoij=1,mesh_size)
+write (199,*)
+close(199)
+open (unit=200, file='t_rho.dat')
+rho(1:mesh_size)=nhat1(1:mesh_size,1,1) + trho1(1:mesh_size,1,1) + sqrt(four_pi)*pawtab(itypat)%tcoredens(1:mesh_size,1)
+write (200,'(2E20.10)') (pawrad(itypat)%rad(irhoij), rho(irhoij), irhoij=1,mesh_size)
+write (200,*)
+close(200)
+open (unit=201, file='vht1.dat')
+write (201,'(2E20.10)') (pawrad(itypat)%rad(irhoij), paw_an(iatom)%vht1(irhoij,1,1), irhoij=1,mesh_size)
+write (201,*)
+close(201)
+write (*,*) '# usexcnhat usenhat ', usexcnhat, usenhat
+if (usenhat /= 0) then
+  open (unit=202, file='nhat1.dat')
+  write (202,'(2E20.10)') (pawrad(itypat)%rad(irhoij), nhat1(irhoij,1,1), irhoij=1,mesh_size)
+  write (202,*)
+  close(202)
+end if
+! test/debug: impose constant shift on vht1 to match vh1 at last point
+!    vhfactor = paw_an(iatom)%vh1(mesh_size,1,1)-paw_an(iatom)%vht1(mesh_size,1,1)
+!print *, ' vhfactor vh1, vht1 ', vhfactor, paw_an(iatom)%vh1(mesh_size,1,1),paw_an(iatom)%vht1(mesh_size,1,1)
+!    paw_an(iatom)%vht1(1:mesh_size,1,1) = paw_an(iatom)%vht1(1:mesh_size,1,1) + vhfactor
+ABI_DEALLOCATE(tmp_vh)
+!END DEBUG
+
+
+! done 
      paw_an(iatom)%has_vhartree=2
      ABI_DEALLOCATE(rho)
    end if
