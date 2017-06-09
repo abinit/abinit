@@ -241,6 +241,7 @@ MODULE m_dvdb
  public :: dvdb_ftinterp_setup    ! Prepare the internal tables for Fourier interpolation.
  public :: dvdb_ftinterp_qpt      ! Fourier interpolation of potentials for given q-point
  public :: dvdb_merge_files       ! Merge a list of POT1 files.
+ public :: v1r_long_range         ! Long-range part of the phonon potential
 
 ! Debugging tools.
  public :: dvdb_test_v1rsym       ! Check symmetries of the DFPT potentials.
@@ -3466,7 +3467,10 @@ end subroutine dvdb_test_ftinterp
 !! INPUTS
 !!  qpt = the q-point reduced coordinate.
 !!  gmet = reciprocal lattice vectors.
+!!  gprimd = matrix of reciprocal space primitive vectors.
+!!  rprimd = matrix of real space primitive vectors.
 !!  vol = volume of the unit cell.
+!!  xred = reduced coordinates of the atoms.
 !!  dielt = dielectric tensor in cartesian coordinates
 !!  zeff = Born effective charges
 !!  nfft = number of fft points.
@@ -3480,9 +3484,11 @@ end subroutine dvdb_test_ftinterp
 !!
 !!
 !! PARENTS
-!!      m_dvdb
+!!      m_dvdb, dvdb_ftinterp_setup, dvdb_ftinterp_qpt
 !!
 !! CHILDREN
+!!      initmpi_seq, init_distribfft_seq, destroy_mpi_enreg,
+!!      get_gftt, fourdp, times_eikr
 !!
 !! SOURCE
 
