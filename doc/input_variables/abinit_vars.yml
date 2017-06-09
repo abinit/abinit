@@ -3299,7 +3299,6 @@
     commentdefault: null
     commentdims: null
     defaultval: !valuewithconditions
-        '[[ionmov]]==4 and [[iscf]]==5': '3'
         '[[paral_kgb]]==1': '6'
         defaultval: 2
     definition: DENSity and FORces PREDictor
@@ -3340,24 +3339,25 @@
            6 =&gt; density changed using D. Alfe 2nd-order algorithm (**) and forces corrected with the use of Harris functional formula (*)
           </li>
          </ul>
+        Similar negative values are also allowed (see the meaning later), for development purposes only.
          No meaning for RF calculations.
          <br />
          <br />
          For the time being,
          <br />
-         - the choice 3 must be used with [[ionmov]]=4
+         - [[densfor_pred]]=3 must be used with [[ionmov]]=4
         and [[iscf]]=5.
          <br />
-         - the choices 4, 5 or 6 must be used when band-FFT parallelism is selected.
+         - [[densfor_pred]]=4, 5 or 6 must be used when band-FFT parallelism is selected.
          <br />
-         Otherwise, use the choice 2.
+         Otherwise, use [[densfor_pred]]=2
          <br />
          <br />
          <b>
           (*)
          </b>
          <u>
-         Note concerning the use of [[densfor_pred]]=4 or 6 (correction of forces)
+         Note concerning the correction of forces (use of [[densfor_pred]]=1, 2, 3, 4 or 6)
          </u>
          :
          <br />
@@ -3380,9 +3380,9 @@
          <i>
           dVxc/drho=Kxc
          </i>
-         which computation is time-consuming for GGA functionals.
-        By default the LDA exchange-correlation kernel is used (even for GGA, for which it seems to give a reasonable accuracy).
-        Using the exact GGA exchange correlation kernel is always possible by giving a negative value to [[densfor_pred]].
+         whose computation is time-consuming for GGA functionals.
+        By default (positive values of [[densfor_pred]]), the local-density part of the GGA exchange-correlation kernel is used (even for GGA, for which it seems to give a reasonable accuracy).
+        Using the full GGA exchange correlation kernel (so, including derivatives with respect to the gradient of the density) is always possible by giving a negative value to [[densfor_pred]]. In case of hybrid functionals, a similar correction term is added, although in the density mixing scheme, the related GGA kernel is used instead of the hybrid functional kernel.
          <br />
          <br />
          <b>
@@ -4297,7 +4297,7 @@
          </ul>
          <br />
          The CT Hyb algorithm is described in
-           <a href="http://journals.aps.org/prl/abstract/10.1103/PhysRevLett.97.076405">
+           <a href="https://journals.aps.org/prl/abstract/10.1103/PhysRevLett.97.076405">
             Phys. Rev. Lett 97, 076405, (2006) </a>.
             For a discussion  of density-density approximation with respect
             with the rotationnally invariant formulation, see e.g.
@@ -4709,7 +4709,7 @@
          <br />
          Specify the number of Legendre polynomials used for the calculation of Green's function in CTQMC code from the library TRIQS.
          Default is 30. The value of coefficients are given in file whose name ending is "Legendre_coefficient.dat".
-         (see also <a href="http://journals.aps.org/prb/abstract/10.1103/PhysRevB.84.075145"> Phys. Rev. B 84, 075145 (2010))
+         (see also <a href="https://journals.aps.org/prb/abstract/10.1103/PhysRevB.84.075145"> Phys. Rev. B 84, 075145 (2010))
          </a>
         </p>
     varname: dmftctqmc_triqs_nleg
@@ -5303,7 +5303,7 @@
         <p>
         Activate (==1) or not (==0) the treatment of degenerate bands (within a criterion [[efmas_deg_tol]])
         using the transport equivalent effective mass idea
-        (see <a href="http://doi.org/10.1103/PhysRevB.89.155131">PRB 89 155131 (2014)</a>).
+        (see <a href="https://doi.org/10.1103/PhysRevB.89.155131">PRB 89 155131 (2014)</a>).
         </p>
     varname: efmas_deg
     vartype: integer
@@ -5443,7 +5443,7 @@
         <ul>
         <li> 0 --> No interpolation (default) </li>
         <li> 1 --> Star-function interpolation (Shankland-Koelling-Wood Fourier interpolation scheme,
-            see <a href="http://journals.aps.org/prb/abstract/10.1103/PhysRevB.38.2721"> PRB 38 2721</a>
+            see <a href="https://journals.aps.org/prb/abstract/10.1103/PhysRevB.38.2721"> PRB 38 2721</a>
         </li>
         <li> 2 --> B-spline interpolation. </li>
         </ul>
@@ -5456,7 +5456,7 @@
         <ul>
         <li> einterp(2): Number of star-functions per ab-initio k-point </li>
         <li> einterp(3): If non-zero, activate Fourier filtering according to Eq 9 of
-        <a href="http://journals.aps.org/prb/abstract/10.1103/PhysRevB.61.1639"> PRB 61 1639</a>.
+        <a href="https://journals.aps.org/prb/abstract/10.1103/PhysRevB.61.1639"> PRB 61 1639</a>.
         In this case, rcut is given by einterp(2) * Rmax where Rmax is the maximum length of the lattice vectors included in the star expansion </li>
         <li> einterp(4): Used if einterp(2) /= 0. It defines rsigma in Eq 9</li>
         </ul>
@@ -9834,6 +9834,26 @@
            [[dtion]], [[lotf_classic]], [[lotf_nitex]], [[lotf_nneigx]], [[lotf_version]].  <br /> <br />
           </li>
           <li>
+          24=&gt; Simple constant energy molecular dynamics using the velocity Verlet symplectic algorithm (second order), see e.g. [E. Hairer et al. Acta Numerica. 12, 399 (2003)].
+        The only related parameter is the time step ([[dtion]]).  <br />
+           <b> Purpose: </b>
+           Molecular dynamics <br />
+           <b> Cell optimization: </b>
+           No (Use [[optcell]]=0 only) <br />
+           <b> Related variables: </b>
+           time step [[dtion]] <br /> <br />
+          </li>
+          <li>
+          25=&gt; Hybrid Monte Carlo sampling of the ionic positions at fixed temperature and unit cell geometry (NVT ensemle). The underlying molecular dynamics corresponds to ionmov=24.
+        The related parameters are the time step ([[dtion]]) and thermostat temperature ([[mdtemp]]).  <br />
+           <b> Purpose: </b>
+           Monte Carlo sampling <br />
+           <b> Cell optimization: </b>
+           No (Use [[optcell]]=0 only) <br />
+           <b> Related variables: </b>
+           time step [[dtion]], thermostat temperature [[mdtemp]], <br /> <br />
+          </li>
+          <li>
            30=&gt; Using a supercell, calculate a self consistent phonon structure
         as in PRL 100 095901 (2008). The initial phonon eigenvectors and
         eigenvalues are read in, and then atoms are displaced according
@@ -12384,6 +12404,38 @@
           <li>
            232=&gt; XC_MGGA_C_VSXC !  VSxc from Van Voorhis and Scuseria (correlation part)
         [T Van Voorhis and GE Scuseria, JCP 109, 400 (1998)
+        ]
+          </li>
+         </ul>
+        </p>
+        <p>
+         Hybrid functionals (do not forget to add a minus sign, as discussed above).
+        </p>
+        <p>
+         <ul>
+          <li>
+           402=&gt; XC_HYB_GGA_XC_B3LYP !  The (in)famous B3LYP
+        [PJ Stephens, FJ Devlin, CF Chabalowski, MJ Frisch, J. Phys. Chem. 98 11623 (1994)
+        ]
+          </li>
+          <li>
+           406=&gt; XC_HYB_GGA_XC_PBEH !  PBEH (PBE0)
+        [C Adamo and V Barone, J. Chem. Phys. 110, 6158 (1999);
+         M. Ernzerhof, G. E. Scuseria, J. Chem. Phys. 110, 5029 (1999)
+        ]
+          </li>
+          <li>
+           427=&gt; XC_HYB_GGA_XC_HSE03 !  The 2003 version of the screened hybrid HSE (in this case one should use omega^HF = 0.15/sqrt(2) and omega^PBE = 0.15*(2.0)**1/3)
+           <br>
+           428=&gt; XC_HYB_GGA_XC_HSE06 !  The 2006 version of the screened hybrid HSE (in this case one should use omega^HF = omega^PBE = 0.11)
+           <br>
+           (The following section is taken from the LibXC sources. In ABINIT, we stick to the LibXC choice.)
+           Note that there is an enormous mess in the literature concerning the values of omega in HSE. This is due to an error in the original paper that stated that they had used omega=0.15. This was in fact not true, and the real value used was omega^HF = 0.15/sqrt(2) ~ 0.1061 and omega^PBE = 0.15*(2.0)**1/3 ~ 0.1890. In 2006 Krukau et al [JCP 125, 224106 (2006)] tried to clarify the situation, and called HSE03 to the above choice of parameters, and called HSE06 to the functional where omega^HF=omega^PBE. By testing several properties for atoms they reached the conclusion that the best value for omega=0.11.  Of course, codes are just as messy as the papers. In espresso HSE06 has the value omega=0.106. VASP, on the other hand, uses for HSE03 the same value omega^HF = omega^PBE = 0.3 (A^-1) ~ 0.1587 and for HSE06 omega^HF = omega^PBE = 0.2 (A^-1) ~ 0.1058.  [J Heyd, GE Scuseria, and M Ernzerhof, J. Chem. Phys. 118, 8207 (2003); J Heyd, GE Scuseria, and M Ernzerhof, J. Chem. Phys. 124, 219906 (2006); AV Krukau, OA Vydrov, AF Izmaylov, and GE Scuseria, J. Chem. Phys. 125, 224106 (2006)
+        ]
+          </li>
+          <li>
+           456=&gt; XC_HYB_GGA_XC_PBE0_13 !  PBE0-1/3
+        [P Cortona, J. Chem. Phys. 136, 086101 (2012)
         ]
           </li>
          </ul>
@@ -19284,7 +19336,7 @@
 
         (The calculation of projections is
         detailed in
-         <a href="http://journals.aps.org/prb/abstract/10.1103/PhysRevB.77.205112">
+         <a href="https://journals.aps.org/prb/abstract/10.1103/PhysRevB.77.205112">
           Phys. Rev. B 77, 205112, (2008)
          </a>
          )
@@ -20021,7 +20073,7 @@
     text: |-
         <p>
          Print out geometry (_BLZTRP_GEOM) and eigenenergy (_BLZTRP_EIGEN) files for the
-         <a href="http://www.icams.de/content/research/software-development/boltztrap/"> BoltzTraP code</a>
+         <a href="https://www.imc.tuwien.ac.at/forschungsbereich_theoretische_chemie/forschungsgruppen/prof_dr_gkh_madsen_theoretical_materials_chemistry/boltztrap/"> BoltzTraP code</a>
          by Georg Madsen.
         </p>
     varname: prtbltztrp
@@ -22251,7 +22303,7 @@
          Truncation of the Coulomb interaction in real space. The meaning of [[rcut]] is governed by the cutoff shape option [[icutcoul]].
         </p>
         <p>
-         If [[rcut]] is negative, the cutoff is automatically calculated so to enclose the same volume inside the cutoff as the volume of the solid.
+         If [[rcut]] is negative, the cutoff is automatically calculated so to enclose the same volume inside the cutoff as the volume of the primitive cell.
         </p>
     varname: rcut
     vartype: real
@@ -25297,7 +25349,7 @@
         </p>
         <p>
         A short presentation of the method and some aspect of the implementation can be found in Section II and Appendix A of
-         <a href="http://journals.aps.org/prb/abstract/10.1103/PhysRevB.89.125110">
+         <a href="https://journals.aps.org/prb/abstract/10.1103/PhysRevB.89.125110">
           B. Amadon, T. Applencourt and F. Bruneval Phys. Rev. B 89, 125110 (2014)
          </a>
          .
@@ -25586,7 +25638,7 @@
         </p>
         <p>
          The current implementation uses Wannier functions obtained from
-         <a href="http://journals.aps.org/prb/abstract/10.1103/PhysRevB.77.205112">
+         <a href="https://journals.aps.org/prb/abstract/10.1103/PhysRevB.77.205112">
           projected local orbitals
          </a>
          as correlated orbitals (see [[dmftbandi]]  and [[dmftbandf]] input variables to define them).
@@ -25621,7 +25673,7 @@
         </p>
         <p>
          For details of the implementation see,
-         <a href="http://journals.aps.org/prb/abstract/10.1103/PhysRevB.77.205112">
+         <a href="https://journals.aps.org/prb/abstract/10.1103/PhysRevB.77.205112">
           B. Amadon, F. Lechermann, A. Georges, F.  Jollet, T. O.  Wehling, and A. I.  Lichtenstein, Phys. Rev. B 77(20), (2008)
          </a>
          , for Wannier functions and
@@ -26989,7 +27041,7 @@
          </ul>
          For [[vdw_xc]]=1 and [[vdw_xc]]=2, the implementation follows the strategy devised
         in the article of Rom&aacute;n-P&eacute;rez and Soler
-        (<a href="http://dx.doi.org/10.1103/PhysRevLett.103.096102">doi:10.1103/PhysRevLett.103.096102</a>)
+        (<a href="https://dx.doi.org/10.1103/PhysRevLett.103.096102">doi:10.1103/PhysRevLett.103.096102</a>)
         </p>
     varname: vdw_xc
     vartype: integer
@@ -27326,8 +27378,7 @@
     section: vardev
     text: |-
         <p>
-         Allows to choose the algorithm
-        for the optimisation of the wavefunctions.
+         Allows one to choose the algorithm for the optimisation of the wavefunctions.
          <br />
          The different possibilities are :
          <ul>
@@ -27359,8 +27410,7 @@
         Journal on Scientific Computing 23, pp517-541 (2001)
            </a>
            .
-        The implementation rests
-        on the
+        The implementation rests on the
            <a href="http://www.mathworks.com/matlabcentral/fileexchange/48-lobpcg-m">
             matlab program by Knyazev
            </a>
@@ -27372,8 +27422,7 @@
         25(5): 2224-2239
            </a>
            .
-        For more
-        information see
+        For more information see
            <a href="http://dx.doi.org/10.1016/j.commatsci.2007.07.019">
             F. Bottin, S. Leroux, A. Knyazev, G. Zerah, Large scale
         ab initio calculations based on three levels of parallelization. (2008).
@@ -27397,7 +27446,7 @@
           </li>
         <li>
            [[wfoptalg]]=114 :
-        A new version of [[wfoptalg]]=14 which is more efficient for few blocks and can take advance of OpenMP if abinit is compiled with a multithreaded linear algebra library.
+        A new version of [[wfoptalg]]=14 which is more efficient for few blocks and can take advantage of OpenMP if abinit is compiled with a multithreaded linear algebra library.
         With more than 1 thread [[npfft]] shoud NOT be used for the time being.
           </li>
           <li>

@@ -406,7 +406,7 @@ implicit none
 
  avgspeedofsound = (ucvol / 2 / pi**2 / avgom2dos)**third
  write (msg,'(a,E20.10,3a,F16.4,2a)') ' Average speed of sound: ', avgspeedofsound, ' (at units) ',ch10,&
-&             '-                      = ', avgspeedofsound * Bohr_Ang * 1.d-10 / Time_Sec, ' (m/s)',ch10
+&             '-                      = ', avgspeedofsound * Bohr_Ang * 1.d-13 / Time_Sec, ' [km/s]',ch10
  call wrtout (ab_out,msg,"COLL")
  call wrtout (std_out,msg,"COLL")
 
@@ -1024,7 +1024,7 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,&
      speedofsound = speedofsound/nsmallq
 
      write (msg,'(a,E20.10,3a,F16.4,2a)') ' Average speed of sound partial sums: ', third*sum(speedofsound), ' (at units)',ch10,&
-&               '-                                   = ', third*sum(speedofsound) * Bohr_Ang * 1.d-10 / Time_Sec, ' (m/s)',ch10
+&               '-                                   = ', third*sum(speedofsound) * Bohr_Ang * 1.d-13 / Time_Sec, ' [km/s]',ch10
      call wrtout (ab_out,msg,"COLL")
      call wrtout (std_out,msg,"COLL")
 
@@ -1968,7 +1968,7 @@ subroutine phdos_print_vsound(iunit,ucvol,speedofsound)
    write (msg, '(2a,a,E20.10,a,a,F20.5)') &
 &   ' Speed of sound for this q and mode:',ch10,&
 &   '   in atomic units: ', speedofsound(imode_acoustic), ch10,&
-&   '   in SI units m/s: ', speedofsound(imode_acoustic) * Bohr_Ang * 1.d-10 / Time_Sec
+&   '   in units km/s: ', speedofsound(imode_acoustic) * Bohr_Ang * 1.d-13 / Time_Sec
    call wrtout(iunit,msg,'COLL')
    call wrtout(std_out,msg,'COLL')
 
