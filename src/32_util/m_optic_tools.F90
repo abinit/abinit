@@ -708,6 +708,7 @@ complex(dpc), allocatable :: eps(:)
      write(fout1, '(2es16.6)' ) ene,aimag(eps(iw))
    end do
    write(fout1,*)
+   write(fout1,*)
    write(fout1, '(a)' ) ' # Energy(eV)         Re(eps(w))'
    do iw=2,nmesh
      ene=(iw-1)*de
