@@ -151,7 +151,7 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
      MSG_WARNING(message)
    end if
 
-   if ( ALL(optdriver /= [RUNL_GSTATE, RUNL_RESPFN, RUNL_GWLS]) .and. dtsets(idtset)%paral_kgb/=0) then
+   if ( ALL(optdriver /= [RUNL_GSTATE, RUNL_GWLS]) .and. dtsets(idtset)%paral_kgb/=0) then
      dtsets(idtset)%paral_kgb=0
      write(message, '(a,i0,a)') &
 &     "paral_kgb != 0 is not available in optdriver ",optdriver,". Setting paral_kgb to 0"
