@@ -723,8 +723,10 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
    keep_vhartree=(paw_an(iatom)%has_vhartree>0)
    if ((pawspnorb>0.and.ipert==0.and.ipositron/=1).or.keep_vhartree) then
      ! in the first clause case, would it not be simpler just to turn on has_vhartree?
-     if (paw_an(iatom)%has_vhartree==0)  then
+     if (.not. allocated(paw_an(iatom)%vh1)) then
        ABI_ALLOCATE(paw_an(iatom)%vh1,(mesh_size,1,1))
+     end if
+     if (.not. allocated(paw_an(iatom)%vht1)) then
        ABI_ALLOCATE(paw_an(iatom)%vht1,(mesh_size,1,1))
      end if
 
