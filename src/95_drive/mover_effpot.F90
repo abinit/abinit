@@ -392,26 +392,6 @@ implicit none
    ABI_ALLOCATE(fred,(3,dtset%natom))
    ABI_ALLOCATE(fcart,(3,dtset%natom))
 
-! Fill the strain from input file
-   call strain_init(strain)
-   if (any(inp%strain /= zero)) then
-     write(message,'(2a)') ch10, ' Strain is imposed during the simulation'
-     call wrtout(std_out,message,'COLL')
-     call wrtout(ab_out,message,'COLL')
-!    convert strain into matrix
-     mat_strain(1,1) = inp%strain(1); mat_strain(2,2) = inp%strain(2); mat_strain(3,3) = inp%strain(3)
-     mat_strain(3,2) = half * inp%strain(4) ; mat_strain(2,3) = half * inp%strain(4) 
-     mat_strain(3,1) = half * inp%strain(5) ; mat_strain(1,3) = half * inp%strain(5)
-     mat_strain(1,2) = half * inp%strain(6) ; mat_strain(2,1) = half * inp%strain(6)
-     call strain_get(strain,mat_delta = mat_strain)
-     effective_potential%strain = strain
-     effective_potential%has_strain = .FALSE.
-     call strain_print(effective_potential%strain)
-     call strain_apply(effective_potential%supercell%rprimd,dtset%rprimd_orig(:,:,1),&
-&     effective_potential%strain)
-   end if
-   
-   
    call xcart2xred(dtset%natom,effective_potential%supercell%rprimd,&
 &   effective_potential%supercell%xcart,xred)
 

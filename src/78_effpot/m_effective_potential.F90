@@ -414,8 +414,10 @@ subroutine effective_potential_initmpi(eff_pot,comm)
 !Local variables-------------------------------
 !scalars
  integer :: ndiv
+ integer :: ncell
 !array
  integer :: cell_number(3)
+ character(len=500) :: msg
 ! ***********************************************************************
 
 !Set the number of cell in the supercell
@@ -779,7 +781,7 @@ subroutine effective_potential_generateDipDip(eff_pot,n_cell,option,asr,comm)
    ABI_ALLOCATE(bufdisp,(nproc))
 
    nrpt_alone = mod(ifc_tmp%nrpt,nproc)
-   my_nrpt = aint(real(ifc_tmp%nrpt,sp)/nproc)
+   my_nrpt = int(real(ifc_tmp%nrpt,sp)/nproc)
    if(my_rank >= (nproc-nrpt_alone)) then
      my_nrpt = my_nrpt  + 1
    end if
@@ -802,7 +804,7 @@ subroutine effective_potential_generateDipDip(eff_pot,n_cell,option,asr,comm)
 !  Allocation of array
    do irpt = 1,my_nrpt
      if(my_rank >= (nproc-nrpt_alone))then
-       my_irpt(irpt)=(aint(real(ifc_tmp%nrpt,sp)/nproc))*(my_rank)+&
+       my_irpt(irpt)=(int(real(ifc_tmp%nrpt,sp)/nproc))*(my_rank)+&
 &                       (my_rank - (nproc-nrpt_alone)) + irpt
      else
        my_irpt(irpt)=(my_nrpt)*(my_rank) + irpt
@@ -889,7 +891,7 @@ subroutine effective_potential_generateDipDip(eff_pot,n_cell,option,asr,comm)
 
 !  Set the bufsize for mpi allgather
    do ii = 1,nproc
-     bufsize(ii) = aint(real(ifc_tmp%nrpt,sp)/nproc)*2*3*eff_pot%crystal%natom*3*eff_pot%crystal%natom
+     bufsize(ii) = int(real(ifc_tmp%nrpt,sp)/nproc)*2*3*eff_pot%crystal%natom*3*eff_pot%crystal%natom
      if(ii > (nproc-nrpt_alone)) then
        bufsize(ii) = bufsize(ii) + 2*3*eff_pot%crystal%natom*3*eff_pot%crystal%natom
      end if
@@ -1505,9 +1507,9 @@ subroutine effective_potential_setSupercell(eff_pot,comm,n_cell,supercell)
  if(present(supercell))then
    call copy_supercell(supercell,eff_pot%supercell)
  else
-   call init_supercell(eff_pot%crystal%natom, 0, real((/n_cell(1),n_cell(2),n_cell(3)/),dp), &
+   call init_supercell(eff_pot%crystal%natom, (/n_cell(1),0,0,  0,n_cell(2),0,  0,0,n_cell(3)/), &
 &                      eff_pot%crystal%rprimd,eff_pot%crystal%typat,eff_pot%crystal%xcart,&
-&                      eff_pot%supercell)
+&                      eff_pot%crystal%znucl, eff_pot%supercell)
  end if
 
 !Initialisation of new mpi over supercell
@@ -1712,7 +1714,7 @@ subroutine effective_potential_printSupercell(eff_pot,supercell)
  end if
 
  if(supercell_tmp%natom/= eff_pot%supercell%natom) then
-   write(message, '(3a)' )&
+   write(msg, '(3a)' )&
 &  ' There is not the same numbers of atoms in the two supercell',ch10,&
 &   'Action: modify the code'
    MSG_BUG(msg)
@@ -1724,10 +1726,10 @@ subroutine effective_potential_printSupercell(eff_pot,supercell)
 ! Write basics values
 !**********************************************************************
 
- write (message, '(4a,I8,a)') ' Structure parameters of the supercell :',ch10,ch10,&
+ write (msg, '(4a,I8,a)') ' Structure parameters of the supercell :',ch10,ch10,&
                        '  natom ', supercell_tmp%natom,ch10
- call wrtout(ab_out,message,'COLL')
- call wrtout(std_out,message,'COLL')
+ call wrtout(ab_out,msg,'COLL')
+ call wrtout(std_out,msg,'COLL')
 
  write (msg, '(a)') '  znucl '
  call wrtout(ab_out,msg,'COLL')
@@ -1751,7 +1753,7 @@ subroutine effective_potential_printSupercell(eff_pot,supercell)
  write(msg,*) ''
  do iatom = 1, supercell_tmp%natom
    write (msg, '(a,I5)') trim(msg),&
-&         supercell_tmp%typat_supercell(supercell_tmp%atom_indexing_supercell(iatom))
+&         supercell_tmp%typat(supercell_tmp%atom_indexing(iatom))
    if (mod(iatom,12) == 0)then
      call wrtout(ab_out,msg,'COLL')
      call wrtout(std_out,msg,'COLL')
@@ -1767,30 +1769,30 @@ subroutine effective_potential_printSupercell(eff_pot,supercell)
  call wrtout(std_out,msg,'COLL')
 
  do ii = 1,3
-   write(message,'(3E23.14,3E23.14,3E23.14)') supercell_tmp%rprimd(1,ii),&
+   write(msg,'(3E23.14,3E23.14,3E23.14)') supercell_tmp%rprimd(1,ii),&
 &                                             supercell_tmp%rprimd(2,ii),&
 &                                             supercell_tmp%rprimd(3,ii)
-   call wrtout(ab_out,message,'COLL')
-   call wrtout(std_out,message,'COLL')
+   call wrtout(ab_out,msg,'COLL')
+   call wrtout(std_out,msg,'COLL')
  end do
 
-  write (message, '(2a)') ch10,'  xcart'
-  call wrtout(ab_out,message,'COLL')
-  call wrtout(std_out,message,'COLL')
+  write (msg, '(2a)') ch10,'  xcart'
+  call wrtout(ab_out,msg,'COLL')
+  call wrtout(std_out,msg,'COLL')
   do iatom = 1, supercell_tmp%natom
-    write (message, '(3E23.14)') supercell_tmp%xcart(1,iatom),&
+    write (msg, '(3E23.14)') supercell_tmp%xcart(1,iatom),&
 &                                supercell_tmp%xcart(2,iatom),&
 &                                supercell_tmp%xcart(3,iatom)
-    call wrtout(ab_out,message,'COLL')
-    call wrtout(std_out,message,'COLL')
+    call wrtout(ab_out,msg,'COLL')
+    call wrtout(std_out,msg,'COLL')
   end do
   call xcart2xred(supercell_tmp%natom,supercell_tmp%rprimd,&
  &                supercell_tmp%xcart,xred)
-  write (message, '(2a)') ch10,'  xred'
-  call wrtout(ab_out,message,'COLL')
-  call wrtout(std_out,message,'COLL')
+  write (msg, '(2a)') ch10,'  xred'
+  call wrtout(ab_out,msg,'COLL')
+  call wrtout(std_out,msg,'COLL')
   do iatom = 1, supercell_tmp%natom
-    write (message, '(3E23.14)') xred(1,iatom),&
+    write (msg, '(3E23.14)') xred(1,iatom),&
 &                                xred(2,iatom),&
 &                                xred(3,iatom)
     call wrtout(ab_out,msg,'COLL')
@@ -2193,7 +2195,7 @@ subroutine effective_potential_writeNETCDF(eff_pot,option,filename)
  character(len=500) :: msg
  character(len=fnlen) :: namefile
 !arrays
- real :: strain(9,6)
+ real(dp) :: strain(9,6)
 
 ! *************************************************************************
 
@@ -3713,7 +3715,8 @@ subroutine coefficients_contribution(coefficients,disp,energy,fcart,sc_natom,nco
  !Local variables-------------------------------
 ! scalar
   integer :: i1,i2,i3,ia1,ib1,ia2,ib2,idir1,idir2,ierr,ii
-  integer :: icoeff,iterm,idisp1,idisp2,icell,power,weight
+  integer :: icoeff,iterm,idisp1,idisp2,icell,power
+  real(dp) :: weight
   real(dp):: coeff,disp1,disp2,tmp1,tmp2,tmp3
 ! array
   integer :: cell_atoma1(3),cell_atoma2(3)

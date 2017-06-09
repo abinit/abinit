@@ -269,9 +269,9 @@ subroutine fit_polynomial_coeff_get(cut_off,coefficients,eff_pot,ncoeff,option)
  xred(:,:)  = eff_pot%crystal%xred(:,:)
 
 !Set the size of the interaction
- ncell = (/anint(cut_off/rprimd(1,1))+1,&
-&          anint(cut_off/rprimd(2,2))+1,&
-&          anint(cut_off/rprimd(3,3))+1/)
+ ncell = (/nint(cut_off/rprimd(1,1))+1,&
+&          nint(cut_off/rprimd(2,2))+1,&
+&          nint(cut_off/rprimd(3,3))+1/)
 
  lim1=((ncell(1)/2))
  lim2=((ncell(2)/2))
@@ -1964,7 +1964,7 @@ subroutine fit_polynomial_coeff_fit(cut_off,eff_pot,hist,ncycle_in,comm)
 !Initialisation of constants
  ncoeff_max = eff_pot%anharmonics_terms%ncoeff
  ntime      = hist%mxhist
- natom_sc   = eff_pot%supercell%natom_supercell
+ natom_sc   = eff_pot%supercell%natom
 
 !Check if ncycle_in is not zero or superior to ncoeff_max
  if(ncycle_in<=0.or. ncycle_in > ncoeff_max) then
@@ -2042,7 +2042,7 @@ subroutine fit_polynomial_coeff_fit(cut_off,eff_pot,hist,ncycle_in,comm)
    strten_HIST(:,itime)  = hist%strten(:,itime)
 
 !  Get strain
-   call strain_get(strain_t,rprim=eff_pot%supercell%rprimd_supercell,rprim_def=hist%rprimd(:,:,itime))
+   call strain_get(strain_t,rprim=eff_pot%supercell%rprimd,rprim_def=hist%rprimd(:,:,itime))
     if (strain_t%name /= "reference")  then
       do ii=1,3
         strain(ii,itime) = strain_t%strain(ii,ii)
@@ -2056,9 +2056,9 @@ subroutine fit_polynomial_coeff_fit(cut_off,eff_pot,hist,ncycle_in,comm)
 
 !  Get displacement
    call effective_potential_getDisp(displacement(:,:,itime),natom_sc,hist%rprimd(:,:,itime),&
-&                                   eff_pot%supercell%rprimd_supercell,&
+&                                   eff_pot%supercell%rprimd,&
 &                                   xred_hist=hist%xred(:,:,itime),&
-&                                   xcart_ref=eff_pot%supercell%xcart_supercell)
+&                                   xcart_ref=eff_pot%supercell%xcart)
 
 !  Get the variation of the displacmeent wr to strain
 !  See formula A4  in PRB 95,094115
@@ -2990,8 +2990,8 @@ subroutine fit_polynomial_coeff_mapHistToRef(eff_pot,hist,comm)
  ABI_ALLOCATE(xred_ref,(3,natom_hist))
  blkval = one
  list   = zero
- call xcart2xred(eff_pot%supercell%natom_supercell,eff_pot%supercell%rprimd_supercell,&
-&                eff_pot%supercell%xcart_supercell,xred_ref)
+ call xcart2xred(eff_pot%supercell%natom,eff_pot%supercell%rprimd,&
+&                eff_pot%supercell%xcart,xred_ref)
 
  xred_hist = hist%xred(:,:,1)
 
