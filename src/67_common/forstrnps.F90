@@ -917,6 +917,9 @@ use m_cgtools
    if (nsym>1) then
      call stresssym(gs_hamk%gprimd,nsym,kinstr,symrec)
      call stresssym(gs_hamk%gprimd,nsym,npsstr,symrec)
+     if ((usefock_loc).and.(fock%optstr)) then
+       call stresssym(gs_hamk%gprimd,nsym,fock%stress,symrec)
+     end if
    end if
  end if
 !need to reorder cprj=<p_lmn|Cnk> (from atom-sorted to unsorted)

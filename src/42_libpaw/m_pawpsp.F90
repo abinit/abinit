@@ -3631,7 +3631,7 @@ subroutine pawpsp_17in(epsatm,ffspl,icoulomb,ipsp,ixc,lmax,&
  if (vlocopt>0) then
    LIBPAW_ALLOCATE(pawtab%dij0,(pawtab%lmn2_size))
    call atompaw_dij0(pawtab%indlmn,kij,pawtab%lmn_size,ncore,0,pawtab,pawrad,core_mesh,&
-&                    vloc_mesh,vlocr,znucl)
+&                    vloc_mesh,vlocr,znucl,v_minushalf)
  end if
 
 !Keep eventualy Kij in memory

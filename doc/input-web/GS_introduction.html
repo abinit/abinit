@@ -1,0 +1,133 @@
+<html>
+<head>
+<title>Building an input file </title>
+<body bgcolor="#ffffff">
+<p>
+<hr>
+<h1>Building an input file</h1>
+<h3>This file explains how to build an input file for a ground state calculation in ABINIT.
+<hr>
+
+<h5>Copyright (C) 1998-2017 ABINIT group (FJ)
+<br> This file is distributed under the terms of the GNU General Public License, see
+~abinit/COPYING or <a href="http://www.gnu.org/copyleft/gpl.txt">http://www.gnu.org/copyleft/gpl.txt</a>.
+<br> For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
+</h5>
+
+<script type="text/javascript" src="../users/list_internal_links.js"> </script>
+
+<h3><b>Contents of ABINIT features: </b></h3>
+<ul>
+<li><a href="GS_introduction.html#1">1.</a> Context.
+<li><a href="GS_introduction.html#2">2.</a> Input variable settings.
+<li><a href="GS_introduction.html#3">3.</a> Tutorial and examples.
+
+</ul>
+
+
+<HR ALIGN=left>
+
+<p><a name="1">&nbsp;</a> </p>
+<h3><b>1. Context</b></h3>
+
+The computation of the ground state energy of an assembly of nuclei and electrons
+placed in a repeated cell can be done using (1) plane waves and norm-conserving
+pseudopotentials, or, (2) so-called
+"Projector-Augmented Waves" (PAW method), with appropriate pseudoatomic data,
+or (3) wavelets.The wavelet framework is described <a href="wavelets.html#here">here</a>.
+
+<br/>In the plane wave framework, the program admits many different types of pseudopotentials.
+There are several complete sets of norm-conserving pseudopotentials available for
+most elements of the periodic table. The recommended one (GGA) comes from the ONCVPSP generator (with spin-orbit coupling).
+For PAW calculation,the recommended one (GGA and LDA) is the JTH table in the PAW XML format. The choice between norm-conserving pseudopotentials or PAW is deduced automatically by the choice of the pseudopotential in the "files" file.
+
+<p>&nbsp;
+<HR ALIGN=left>
+<p> <a name="2">&nbsp;</a>
+<h3><b>2. Input variable settings. </b></h3>
+
+An input file must specify the following items:
+
+<p>
+- the <a href="general_settings.html#general">general settings</a> depending on the system under study
+<br/>- the <a href="crystal.html#crystal">crystalline structure and symmetries</a>.
+<br/>- the set of <a href="k_points.html#k_points">k_points</a> used.
+<br/>- the <a href="xc.html#xc">exchange and correlation </a> functional.
+<br/>- <a href="convergency.html#convergency">convergency settings </a>.
+<br/>- possibly, <a href="PAW_settings.html#PAW_settings">PAW</a> special settings.
+<br/>- possibly, input variables for <a href="polar_settings.html#polar_settings">spin-polarized systems and spin orbit coupling</a> calculations.
+<br/>- possibly, <a href="other_settings.html#other_settings">other</a> special settings.
+
+
+<p>&nbsp;
+<HR ALIGN=left>
+<p> <a name="3">&nbsp;</a>
+<h3><b>3. Tutorials and examples.</b></h3>
+ <li><a href="../tutorial/lesson_base1.html">The lesson 1</a> deals with the H2
+  molecule : get the total energy, the electronic energies, the charge
+  density, the bond length, the atomisation energy </li>
+  <li><a href="../tutorial/lesson_base2.html">The lesson 2</a> deals again with the H2
+  molecule: convergence studies, LDA versus GGA </li>
+  <li><a href="../tutorial/lesson_base3.html">The lesson 3</a> deals with crystalline
+  silicon (an insulator): the definition of a k-point grid, the smearing
+  of the cut-off energy, the computation of a band structure, and again,
+  convergence studies ...</li>
+  <li><a href="../tutorial/lesson_base4.html">The lesson 4</a> deals with crystalline
+  aluminum (a metal), and its surface: occupation numbers, smearing the
+  Fermi-Dirac distribution, the surface energy, and again, convergence
+  studies ...</li>
+
+
+<p>The reader can find many examples of input files in the directory /tests of the ABINIT package.
+
+<p> An example of a minimal input file to calculate the ground state of crystalline aluminium is given here:
+
+<pre>
+    # Crystalline aluminum. Calculation of the total energy
+    # at fixed number of k points and broadening.
+
+    #Definition of occupation numbers
+    occopt 4
+    tsmear 0.05
+
+    #Definition of the unit cell
+    acell 3*7.60           # This is equivalent to   7.60 7.60 7.60
+    rprim  0.0  0.5  0.5   # FCC primitive vectors (to be scaled by acell)
+           0.5  0.0  0.5
+           0.5  0.5  0.0
+
+    #Definition of the atom types
+    ntypat 1          # There is only one type of atom
+    znucl 13          # The keyword "znucl" refers to the atomic number of the
+                      # possible type(s) of atom. The pseudopotential(s)
+                      # mentioned in the "files" file must correspond
+                      # to the type(s) of atom. Here, the only type is Aluminum
+
+    #Definition of the atoms
+    natom 1           # There is only one atom per cell
+    typat 1           # This atom is of type 1, that is, Aluminum
+    xred  0.0  0.0  0.0 # This keyword indicate that the location of the atoms
+                        # will follow, one triplet of number for each atom
+                        # Triplet giving the REDUCED coordinate of atom 1.
+
+    #Definition of the planewave basis set
+    ecut  6.0         # Maximal kinetic energy cut-off, in Hartree
+    pawecutdg  10.0   #Maximal kinetic energy cut-off, in Hartree for the fine grid in case of PAW calculation
+
+    #Definition of the k-point grid
+    ngkpt 2 2 2       # This is a 2x2x2 FCC grid, based on the primitive vectors
+    chksymbreak 0
+    #Definition of the SCF procedure
+    nstep 10          # Maximal number of SCF cycles
+    toldfe 1.0d-6     # Will stop when, twice in a row, the difference
+                      # between two consecutive evaluations of total energy
+                      # differ by less than toldfe (in Hartree)
+                      # This value is way too large for most realistic studies of materials       
+ 
+</pre>
+
+
+<script type="text/javascript" src="../users/list_internal_links.js"> </script>
+
+</body>
+</html>
