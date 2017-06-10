@@ -2974,7 +2974,10 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
     energy_part = zero
     fcart_part(:,:)  = zero
     strten_part(:) = zero
-    num_cells(ii) = eff_pot%supercell%rlatt(ii,ii)
+
+    do ii = 1, 3
+      num_cells(ii) = eff_pot%supercell%rlatt(ii,ii)
+    end do
 
     call coefficients_contribution(eff_pot%anharmonics_terms%coefficients,disp_tmp,&
 &                                  energy_part,fcart_part,eff_pot%supercell%natom,&
