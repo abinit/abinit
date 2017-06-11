@@ -2178,7 +2178,7 @@ subroutine dvdb_ftinterp_qpt(db, qpt, nfft, ngfft, ov1r, comm)
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nfft,comm
- type(dvdb_t),intent(in),target :: db
+ type(dvdb_t),intent(in) :: db
 !arrays
  integer,intent(in) :: ngfft(18)
  real(dp),intent(in) :: qpt(3)
