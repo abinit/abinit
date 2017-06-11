@@ -162,6 +162,9 @@ subroutine littlegroup_pert(gprimd,idir,indsym,iout,ipert,natom,nsym,nsym1, &
 &     symq(2,1,isym)==0 .and.&
 &     symq(3,1,isym)==0          )then
 !      Check that the symmetry operation preserves the atom
+       ! BEGIN DEBUG
+       write(*,*)' Symmetry operation preserves the wavevector: isym=',isym
+       ! END DEBUG
        if(ipert==indsym(4,isym,ipert))then
 !        Check if the direction is preserved
          tok=1
