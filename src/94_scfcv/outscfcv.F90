@@ -606,12 +606,8 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
        ABI_ALLOCATE(radii,(pawfgrtab(iatom)%nfgd))
        ABI_ALLOCATE(isort,(pawfgrtab(iatom)%nfgd))
        vh1_corrector(:) = paw_an(iatom)%vh1(:,1,ispden)-paw_an(iatom)%vht1(:,1,ispden)
-open (unit=300, file="vhcorrector")
-write (300, '(2E20.10)') (pawrad(itypat)%rad(ifgd), vh1_corrector(ifgd), ifgd=1,paw_an(iatom)%mesh_size)
-write (300, *) 
        ! get end point derivatives
        call bound_deriv(vh1_corrector, pawrad(itypat), pawrad(itypat)%mesh_size, yp1, ypn)
-write (300, *) '# bound derivs ', yp1, ypn
        ! spline the vh1 function
        ! NB for second argument of vh1: only first moment lm_size appears to be used
        ! NB2: vh1 can in principle be complex - not sure what to do with the imaginary part. Ignored for now.
