@@ -2248,6 +2248,9 @@ subroutine dvdb_ftinterp_qpt(db, qpt, nfft, ngfft, ov1r, comm)
 
    ! Be careful with gamma and cplex!
    if (db%symv1) then
+     ! BEGIN DEBUG
+     write(*,*) 'dvdb_ftinterp_qpt: Calling v1phq_symmetrize'
+     ! END DEBUG
      call v1phq_symmetrize(db%cryst,idir,ipert,symq,ngfft,cplex2,nfft,db%nspden,db%nsppol,db%mpi_enreg,ov1r(:,:,:,mu))
    end if
  end do ! mu
