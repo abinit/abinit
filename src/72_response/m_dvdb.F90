@@ -2012,7 +2012,6 @@ subroutine dvdb_ftinterp_setup(db,ngqpt,nqshift,qshift,nfft,ngfft,comm,cryst_op)
        do mu=1,db%natom3
          do ispden=1,db%nspden
            v1r_qibz(1, :, ispden, mu) = v1r_qibz(1, :, ispden, mu) - v1r_lr(1, :, mu)
-           v1r_qibz(2, :, ispden, mu) = v1r_qibz(2, :, ispden, mu) - v1r_lr(2, :, mu)
          end do
        end do
 
