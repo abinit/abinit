@@ -176,9 +176,11 @@ subroutine littlegroup_pert(gprimd,idir,indsym,iout,ipert,natom,nsym,nsym1, &
              tok=0
            end if
          end do
-         if (isym == 1) then
-           write(*,*)' littlegroup_pert: isym, tok =',isym,tok
-         end if
+         ! BEGIN DEBUG
+         !if (isym == 1) then
+         !  write(*,*)' littlegroup_pert: isym, tok =',isym,tok
+         !end if
+         ! END DEBUG
          if(tok==1)then
 !          All the tests have been successful !
            nsym1=nsym1+1
@@ -195,6 +197,9 @@ subroutine littlegroup_pert(gprimd,idir,indsym,iout,ipert,natom,nsym,nsym1, &
      end if
    end do
  end if
+ ! BEGIN DEBUG
+ write(*,*)' littlegroup_pert: nsym =',nsym1
+ ! END DEBUG
 
  if (nsym1<1) then
    write(msg,'(a,i0,a)')&
