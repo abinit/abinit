@@ -2189,7 +2189,6 @@ subroutine dvdb_ftinterp_qpt(db, qpt, nfft, ngfft, ov1r, comm)
  integer,parameter :: cplex2=2
  integer :: ir,ispden,ifft,mu,idir,ipert,timerev_q,nproc,my_rank,cnt,ierr
  real(dp) :: wr,wi
- type(crystal_t),pointer :: cryst
 !arrays
  integer :: symq(4,2,db%cryst%nsym)
  real(dp),allocatable :: eiqr(:,:), v1r_lr(:,:,:)
@@ -2200,12 +2199,10 @@ subroutine dvdb_ftinterp_qpt(db, qpt, nfft, ngfft, ov1r, comm)
 
  my_rank = xmpi_comm_rank(comm); nproc = xmpi_comm_size(comm)
 
- cryst => db%cryst
-
  ABI_MALLOC(v1r_lr, (2,nfft,db%natom3))
 
  ! Examine the symmetries of the q wavevector
- call littlegroup_q(cryst%nsym,qpt,symq,cryst%symrec,cryst%symafm,timerev_q,prtvol=db%prtvol)
+ call littlegroup_q(db%cryst%nsym,qpt,symq,db%cryst%symrec,db%cryst%symafm,timerev_q,prtvol=db%prtvol)
 
  ! Compute FT phases for this q-point.
  ABI_MALLOC(eiqr, (2,db%nrpt))
@@ -2217,8 +2214,8 @@ subroutine dvdb_ftinterp_qpt(db, qpt, nfft, ngfft, ov1r, comm)
    do mu=1,db%natom3
      cnt = cnt + 1; if (mod(cnt, nproc) /= my_rank) cycle ! MPI-parallelism
      idir = mod(mu-1, 3) + 1; ipert = (mu - idir) / 3 + 1
-     call v1r_long_range(qpt,cryst%gmet,cryst%gprimd,cryst%rprimd,cryst%ucvol,cryst%xred, &
-                         db%dielt,db%zeff,nfft,ngfft,cryst%natom,ipert,idir,v1r_lr(:,:,mu))
+     call v1r_long_range(qpt,db%cryst%gmet,db%cryst%gprimd,db%cryst%rprimd,db%cryst%ucvol,db%cryst%xred, &
+                         db%dielt,db%zeff,nfft,ngfft,db%cryst%natom,ipert,idir,v1r_lr(:,:,mu))
    end do
    call xmpi_sum(v1r_lr, comm, ierr)
  end if
@@ -2251,7 +2248,7 @@ subroutine dvdb_ftinterp_qpt(db, qpt, nfft, ngfft, ov1r, comm)
 
    ! Be careful with gamma and cplex!
    if (db%symv1) then
-     call v1phq_symmetrize(cryst,idir,ipert,symq,ngfft,cplex2,nfft,db%nspden,db%nsppol,db%mpi_enreg,ov1r(:,:,:,mu))
+     call v1phq_symmetrize(db%cryst,idir,ipert,symq,ngfft,cplex2,nfft,db%nspden,db%nsppol,db%mpi_enreg,ov1r(:,:,:,mu))
    end if
  end do ! mu
 
