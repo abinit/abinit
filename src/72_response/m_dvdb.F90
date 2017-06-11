@@ -618,6 +618,9 @@ subroutine dvdb_free(db)
  if (allocated(db%rhog1_g0)) then
    ABI_FREE(db%rhog1_g0)
  end if
+ if (allocated(db%zeff)) then
+   ABI_FREE(db%zeff)
+ end if
 
  ! types
  call crystal_free(db%cryst)
