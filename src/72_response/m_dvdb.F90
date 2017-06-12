@@ -3499,6 +3499,7 @@ subroutine dvdb_v1r_long_range(db,qpt,iatom,idir,nfft,ngfft,v1r_lr)
 
 !Arguments ------------------------------------
 !scalars
+ type(dvdb_t),intent(in) :: db
  integer,intent(in) :: iatom, idir
  integer,intent(in) :: nfft
 !arrays
