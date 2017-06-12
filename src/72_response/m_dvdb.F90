@@ -1611,6 +1611,9 @@ subroutine v1phq_symmetrize(cryst,idir,ipert,symq,ngfft,cplex,nfft,nspden,nsppol
 
  ! Symmetrize (copied from dfpt_looppert)
  ! Determines the set of symmetries that leaves the perturbation invariant.
+ ! BEGIN DEBUG
+ write(*,*) 'v1phq_symmetrize: Calling littlegroup_pert'
+ ! END DEBUG
  call littlegroup_pert(cryst%gprimd,idir,cryst%indsym,dev_null,ipert,cryst%natom,cryst%nsym,nsym1,rfmeth2,&
    cryst%symafm,symafm1,symq,cryst%symrec,cryst%symrel,symrel1,syuse0,cryst%tnons,tnons1,unit=dev_null)
 
@@ -1619,6 +1622,10 @@ subroutine v1phq_symmetrize(cryst,idir,ipert,symq,ngfft,cplex,nfft,nspden,nsppol
  ABI_MALLOC(phnons1, (2,nfft**(1-1/nsym1),(nspden/nsppol)-3*(nspden/4)))
  ABI_MALLOC(indsy1,(4,nsym1,cryst%natom))
 
+ 
+ ! BEGIN DEBUG
+ write(*,*) 'v1phq_symmetrize: Calling setsym'
+ ! END DEBUG
  call setsym(indsy1,irrzon1,iscf1,cryst%natom,nfft,ngfft,nspden,nsppol,&
    nsym1,phnons1,symafm1,symrc1,symrel1,tnons1,cryst%typat,cryst%xred)
 
@@ -1632,6 +1639,9 @@ subroutine v1phq_symmetrize(cryst,idir,ipert,symq,ngfft,cplex,nfft,nspden,nsppol
  ABI_CHECK(nsppol == 1 .and. nspden == 1, "symrhg was written for densities, not for potentials")
 
  ABI_MALLOC(v1g, (2,nfft))
+ ! BEGIN DEBUG
+ write(*,*) 'v1phq_symmetrize: Calling symrhg'
+ ! END DEBUG
  call symrhg(cplex,cryst%gprimd,irrzon1,mpi_enreg,nfft,nfftot,ngfft,nspden,nsppol,nsym1,&
     mpi_enreg%paral_kgb,phnons1,v1g,v1r,cryst%rprimd,symafm1,symrel1)
 
