@@ -2234,6 +2234,7 @@ subroutine dvdb_ftinterp_qpt(db, qpt, nfft, ngfft, ov1r, comm)
  ! perturbations and then rotate ...
  ov1r = zero; cnt = 0
  do mu=1,db%natom3
+   idir = mod(mu-1, 3) + 1; ipert = (mu - idir) / 3 + 1
 
    do ispden=1,db%nspden
      do ifft=1,nfft
