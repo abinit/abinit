@@ -241,7 +241,7 @@ MODULE m_dvdb
  public :: dvdb_ftinterp_setup    ! Prepare the internal tables for Fourier interpolation.
  public :: dvdb_ftinterp_qpt      ! Fourier interpolation of potentials for given q-point
  public :: dvdb_merge_files       ! Merge a list of POT1 files.
- public :: v1r_long_range         ! Long-range part of the phonon potential
+ public :: dvdb_v1r_long_range    ! Long-range part of the phonon potential
 
 ! Debugging tools.
  public :: dvdb_test_v1rsym       ! Check symmetries of the DFPT potentials.
@@ -1611,9 +1611,6 @@ subroutine v1phq_symmetrize(cryst,idir,ipert,symq,ngfft,cplex,nfft,nspden,nsppol
 
  ! Symmetrize (copied from dfpt_looppert)
  ! Determines the set of symmetries that leaves the perturbation invariant.
- ! BEGIN DEBUG
- write(*,*) 'v1phq_symmetrize: Calling littlegroup_pert'
- ! END DEBUG
  call littlegroup_pert(cryst%gprimd,idir,cryst%indsym,dev_null,ipert,cryst%natom,cryst%nsym,nsym1,rfmeth2,&
    cryst%symafm,symafm1,symq,cryst%symrec,cryst%symrel,symrel1,syuse0,cryst%tnons,tnons1,unit=dev_null)
 
@@ -1623,9 +1620,6 @@ subroutine v1phq_symmetrize(cryst,idir,ipert,symq,ngfft,cplex,nfft,nspden,nsppol
  ABI_MALLOC(indsy1,(4,nsym1,cryst%natom))
 
  
- ! BEGIN DEBUG
- write(*,*) 'v1phq_symmetrize: Calling setsym'
- ! END DEBUG
  call setsym(indsy1,irrzon1,iscf1,cryst%natom,nfft,ngfft,nspden,nsppol,&
    nsym1,phnons1,symafm1,symrc1,symrel1,tnons1,cryst%typat,cryst%xred)
 
@@ -1639,9 +1633,6 @@ subroutine v1phq_symmetrize(cryst,idir,ipert,symq,ngfft,cplex,nfft,nspden,nsppol
  ABI_CHECK(nsppol == 1 .and. nspden == 1, "symrhg was written for densities, not for potentials")
 
  ABI_MALLOC(v1g, (2,nfft))
- ! BEGIN DEBUG
- write(*,*) 'v1phq_symmetrize: Calling symrhg'
- ! END DEBUG
  call symrhg(cplex,cryst%gprimd,irrzon1,mpi_enreg,nfft,nfftot,ngfft,nspden,nsppol,nsym1,&
     mpi_enreg%paral_kgb,phnons1,v1g,v1r,cryst%rprimd,symafm1,symrel1)
 
@@ -2010,8 +2001,7 @@ subroutine dvdb_ftinterp_setup(db,ngqpt,nqshift,qshift,nfft,ngfft,comm,cryst_op)
        do mu=1,db%natom3
          cnt = cnt + 1; if (mod(cnt, nproc) /= my_rank) cycle ! MPI parallelism.
          idir = mod(mu-1, 3) + 1; ipert = (mu - idir) / 3 + 1
-         call v1r_long_range(qpt_bz,cryst%gmet,cryst%gprimd,cryst%rprimd,cryst%ucvol,cryst%xred, &
-                             db%dielt,db%zeff,nfft,ngfft,cryst%natom,ipert,idir,v1r_lr(:,:,mu))
+         call dvdb_v1r_long_range(db,qpt_bz,ipert,idir,nfft,ngfft,v1r_lr(:,:,mu))
        end do
        call xmpi_sum(v1r_lr, comm, ierr)
      end if
@@ -2224,8 +2214,7 @@ subroutine dvdb_ftinterp_qpt(db, qpt, nfft, ngfft, ov1r, comm)
    do mu=1,db%natom3
      cnt = cnt + 1; if (mod(cnt, nproc) /= my_rank) cycle ! MPI-parallelism
      idir = mod(mu-1, 3) + 1; ipert = (mu - idir) / 3 + 1
-     call v1r_long_range(qpt,db%cryst%gmet,db%cryst%gprimd,db%cryst%rprimd,db%cryst%ucvol,db%cryst%xred, &
-                         db%dielt,db%zeff,nfft,ngfft,db%cryst%natom,ipert,idir,v1r_lr(:,:,mu))
+     call dvdb_v1r_long_range(db,qpt,ipert,idir,nfft,ngfft,v1r_lr(:,:,mu))
    end do
    call xmpi_sum(v1r_lr, comm, ierr)
  end if
@@ -2259,9 +2248,6 @@ subroutine dvdb_ftinterp_qpt(db, qpt, nfft, ngfft, ov1r, comm)
 
    ! Be careful with gamma and cplex!
    if (db%symv1) then
-     ! BEGIN DEBUG
-     write(*,*) 'dvdb_ftinterp_qpt: Calling v1phq_symmetrize'
-     ! END DEBUG
      call v1phq_symmetrize(db%cryst,idir,ipert,symq,ngfft,cplex2,nfft,db%nspden,db%nsppol,db%mpi_enreg,ov1r(:,:,:,mu))
    end if
  end do ! mu
@@ -3465,9 +3451,9 @@ end subroutine dvdb_test_ftinterp
 
 !----------------------------------------------------------------------
 
-!!****f* m_dvdb/v1r_long_range
+!!****f* m_dvdb/dvdb_v1r_long_range
 !! NAME
-!!  v1r_long_range
+!!  dvdb_v1r_long_range
 !!
 !! FUNCTION
 !!  Compute the long-range part of the phonon potential
@@ -3476,21 +3462,16 @@ end subroutine dvdb_test_ftinterp
 !!    V^L_{iatom,idir}(r) = i (4pi/vol) sum_G (q+G) . Zeff_{iatom,idir}
 !!                           e^{i (q + G) . (r - tau_{iatom})} / ((q + G) . dielt . (q + G))
 !!
+!!  where Zeff and dielt are the Born effective charge tensor and the dielectric tensor,
+!!  tau is the atom position, and vol is the volume of the unit cell.
 !!                                               
 !! INPUTS
-!!  qpt = the q-point reduced coordinate.
-!!  gmet = reciprocal lattice vectors.
-!!  gprimd = matrix of reciprocal space primitive vectors.
-!!  rprimd = matrix of real space primitive vectors.
-!!  vol = volume of the unit cell.
-!!  xred = reduced coordinates of the atoms.
-!!  dielt = dielectric tensor in cartesian coordinates
-!!  zeff = Born effective charges
-!!  nfft = number of fft points.
-!!  ngfft(18) = FFT mesh.
-!!  natom = number of atoms.
+!!  db = the DVDB object.
+!!  qpt = the q-point in reduced coordinates.
 !!  iatom = atom index.
 !!  idir = direction index.
+!!  nfft = number of fft points.
+!!  ngfft(18) = FFT mesh.
 !!
 !! OUTPUT
 !!  v1r_lr = dipole potential 
@@ -3505,43 +3486,39 @@ end subroutine dvdb_test_ftinterp
 !!
 !! SOURCE
 
-subroutine v1r_long_range(qpt,gmet,gprimd,rprimd,vol,xred,dielt,zeff,nfft,ngfft, &
-                          natom,iatom,idir,v1r_lr)
+subroutine dvdb_v1r_long_range(db,qpt,iatom,idir,nfft,ngfft,v1r_lr)
 
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'v1r_long_range'
+#define ABI_FUNC 'dvdb_v1r_long_range'
 !End of the abilint section
 
  implicit none
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: nfft, natom
  integer,intent(in) :: iatom, idir
- real(dp),intent(in) :: vol
+ integer,intent(in) :: nfft
 !arrays
  integer,intent(in) :: ngfft(18)
- real(dp),intent(in) :: dielt(3,3)
- real(dp),intent(in) :: zeff(3,3,natom)
  real(dp),intent(in) :: qpt(3)
- real(dp),intent(in) :: gmet(3,3), gprimd(3,3), rprimd(3,3)
- real(dp),intent(in) :: xred(3,natom)
  real(dp),intent(out) :: v1r_lr(2,nfft)
 
 !Local variables-------------------------------
 !scalars
- integer :: n1,n2,n3,nfftot,ig
+ integer :: n1, n2, n3, nfftot, ig
  real(dp) :: fac, qGZ, denom, denom_inv, qtau
  real(dp) :: re, im, phre, phim
  real(dp) :: dummy
  type(MPI_type) :: MPI_enreg_seq
 !arrays
  integer, allocatable :: gfft(:,:)
+ real(dp) :: gprimd(3,3), rprimd(3,3)
+ real(dp) :: dielt(3,3), zeff(3,3), dielt_red(3,3)
+ real(dp) :: qG(3), Zstar(3), tau(3)
  real(dp), allocatable :: v1G_lr(:,:)
- real(dp) :: qG(3), Zstar(3), dielt_red(3,3)
 
 
 ! *************************************************************************
@@ -3554,20 +3531,31 @@ subroutine v1r_long_range(qpt,gmet,gprimd,rprimd,vol,xred,dielt,zeff,nfft,ngfft,
  call initmpi_seq(MPI_enreg_seq)
  call init_distribfft_seq(MPI_enreg_seq%distribfft,'c',ngfft(2),ngfft(3),'all')
 
+ ! Allocate memory
  ABI_MALLOC(gfft, (3, nfft))
  ABI_MALLOC(v1G_lr, (2,nfft))
 
- !Prefactor
- fac = four_pi / vol
+ ! Reciprocal and real space primitive vectors
+ gprimd = db%cryst%gprimd
+ rprimd = db%cryst%rprimd
 
- ! Transform Zstar from Cartesian to reduced coordinates and select the relevant direction.
- Zstar = matmul(transpose(gprimd), matmul(zeff(:,:, iatom), rprimd(:,idir))) * two_pi
+ !Prefactor
+ fac = four_pi / db%cryst%ucvol
+
+ ! Transform the Born effective charge tensor from Cartesian to reduced coordinates
+ ! and select the relevant direction.
+ zeff = db%zeff(:,:,iatom)
+ Zstar = matmul(transpose(gprimd), matmul(zeff, rprimd(:,idir))) * two_pi
 
  ! Transform the dielectric tensor from Cartesian to reduced coordinates.
+ dielt = db%dielt
  dielt_red = matmul(transpose(gprimd), matmul(dielt, gprimd)) * two_pi ** 2
 
+ ! Atom position
+ tau = db%cryst%xred(:,iatom)
+
  ! Get the set of G vectors
- call get_gftt(ngfft,qpt,gmet,dummy,gfft)
+ call get_gftt(ngfft,qpt,db%cryst%gmet,dummy,gfft)
 
  ! Compute the long-range potential in G-space
  v1G_lr = zero
@@ -3586,7 +3574,7 @@ subroutine v1r_long_range(qpt,gmet,gprimd,rprimd,vol,xred,dielt,zeff,nfft,ngfft,
    denom_inv = denom / (denom ** 2 + tol10 ** 2)
 
    ! Phase factor exp(-i (q+G) . tau)
-   qtau = - two_pi * dot_product(qG, xred(:,iatom))
+   qtau = - two_pi * dot_product(qG, tau)
    phre = cos(qtau); phim = sin(qtau)
 
    re = zero
@@ -3597,6 +3585,7 @@ subroutine v1r_long_range(qpt,gmet,gprimd,rprimd,vol,xred,dielt,zeff,nfft,ngfft,
 
  end do
 
+ ! Free memory
  ABI_FREE(gfft)
 
  ! FFT to get the long-range potential in r space
@@ -3606,11 +3595,12 @@ subroutine v1r_long_range(qpt,gmet,gprimd,rprimd,vol,xred,dielt,zeff,nfft,ngfft,
  ! Multiply by  exp(i q . r)
  call times_eikr(qpt,ngfft,nfft,1,v1r_lr)
 
+ ! Free memory
  ABI_FREE(v1G_lr)
 
  call destroy_mpi_enreg(MPI_enreg_seq)
 
-end subroutine v1r_long_range
+end subroutine dvdb_v1r_long_range
 !!***
 
 END MODULE m_dvdb

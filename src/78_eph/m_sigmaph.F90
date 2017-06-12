@@ -616,9 +616,6 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
          if (dtset%prtvol > 0) call wrtout(std_out, sjoin("Found:", ktoa(qpt), "in DVDB with index", itoa(db_iqpt)))
          ! Read or reconstruct the dvscf potentials for all 3*natom perturbations.
          ! This call allocates v1scf(cplex, nfftf, nspden, 3*natom))
-         ! BEGIN DEBUG
-         write(*,*) ' sigmaph: calling dvdb_readsym_allv1 '
-         ! END DEBUG
          call dvdb_readsym_allv1(dvdb, db_iqpt, cplex, nfftf, ngfftf, v1scf, xmpi_comm_self)
        else
          if (dtset%prtvol > 0) call wrtout(std_out, sjoin("Could not find:", ktoa(qpt), "in DVDB - interpolating"))
@@ -626,9 +623,6 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
          ABI_CHECK(any(abs(qpt) > tol12), "qpt cannot be zero if Fourier interpolation is used")
          cplex = 2
          ABI_MALLOC(v1scf, (cplex,nfftf,nspden,natom3))
-         ! BEGIN DEBUG
-         write(*,*) ' sigmaph: calling dvdb_ftinterp_qpt '
-         ! END DEBUG
          call dvdb_ftinterp_qpt(dvdb, qpt, nfftf, ngfftf, v1scf, xmpi_comm_self)
          !v1scf = zero
        end if
