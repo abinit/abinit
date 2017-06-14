@@ -505,6 +505,13 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
      call dvdb_print(dvdb)
      call dvdb_list_perts(dvdb, [-1,-1,-1], unit=ab_out)
    end if
+
+   if (iblock /= 0) then
+     dvdb%dielt = dielt
+     dvdb%zeff = zeff
+     dvdb%has_dielt_zeff = .True.
+   end if
+
    ! TODO: Routine to compute \delta V_{q,nu)(r) and dump the results in XSF format/netcdf.
  end if
 
