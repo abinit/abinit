@@ -139,6 +139,11 @@ _ WF disk file :      0.449 Mbytes ; DEN or POT disk file :      0.358 Mbytes.
 -          iomode5          0
             acell      7.0000000000E+00  7.0000000000E+00  7.0000000000E+00 Bohr
               amu      1.20110000E+01
+     densfor_pred1          6
+     densfor_pred2          6
+     densfor_pred3          6
+     densfor_pred4          6
+     densfor_pred5          2
            diemac      1.20000000E+01
              ecut      1.50000000E+01 Hartree
 -          fftalg         312
@@ -155,11 +160,6 @@ _ WF disk file :      0.449 Mbytes ; DEN or POT disk file :      0.358 Mbytes.
            iatsph1       2
            iatsph2       2
            iatsph5       2
-     densfor_pred1          6
-     densfor_pred2          6
-     densfor_pred3          6
-     densfor_pred4          6
-     densfor_pred5          2
               ixc           2
            jdtset        1    2    3    4    5
               kpt     -1.25000000E-01 -2.50000000E-01  0.00000000E+00
@@ -1420,6 +1420,11 @@ _setup2: Arith. and geom. avg. npw (full set) are     238.094     238.088
 -          iomode5          0
             acell      7.0000000000E+00  7.0000000000E+00  7.0000000000E+00 Bohr
               amu      1.20110000E+01
+     densfor_pred1          6
+     densfor_pred2          6
+     densfor_pred3          6
+     densfor_pred4          6
+     densfor_pred5          2
            diemac      1.20000000E+01
              ecut      1.50000000E+01 Hartree
            etotal1    -1.1500937192E+01
@@ -1451,11 +1456,6 @@ _setup2: Arith. and geom. avg. npw (full set) are     238.094     238.088
            iatsph1       2
            iatsph2       2
            iatsph5       2
-     densfor_pred1          6
-     densfor_pred2          6
-     densfor_pred3          6
-     densfor_pred4          6
-     densfor_pred5          2
               ixc           2
            jdtset        1    2    3    4    5
               kpt     -1.25000000E-01 -2.50000000E-01  0.00000000E+00

@@ -413,6 +413,18 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
      end do
    end if
 
+!  densfor_pred
+   if(dt%iscf>0)then
+     cond_string(1)='iscf';cond_values(1)=dt%iscf
+     call chkint_le(0,1,cond_string,cond_values,ierr,'densfor_pred',dt%densfor_pred,6,iout)
+     call chkint_ge(0,1,cond_string,cond_values,ierr,'densfor_pred',dt%densfor_pred,-6,iout)
+     if (dt%densfor_pred<0.and.mod(dt%iprcel,100)>=61.and.(dt%iprcel<71.or.dt%iprcel>79)) then
+       cond_string(1)='iscf';cond_values(1)=dt%iscf
+       cond_string(2)='iprcel';cond_values(2)=dt%iprcel
+       call chkint_ge(1,2,cond_string,cond_values,ierr,'densfor_pred',dt%densfor_pred,0,iout)
+     end if
+   end if
+
 !  diecut
    if(dt%iscf==-1)then
      cond_string(1)='iscf' ; cond_values(1)=-1
@@ -976,21 +988,6 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
      cond_string(1)='ionmov' ; cond_values(1)=dt%ionmov
 !    Make sure that nnos is not null
      call chkint_ge(1,1,cond_string,cond_values,ierr,'nnos',dt%nnos,1,iout)
-   end if
-
-!  densfor_pred
-!  if (abs(dt%densfor_pred)>=1.and.dt%iscf>=10.and.nspden==4) then
-!  write(message,'(8a)')ch10,&
-!  &   ' chkinp : ERROR -',ch10,&
-!  &   '  When non-collinear magnetism is activated (nspden=4),',ch10,&
-!  &   '  densfor_pred/=0 is not compatible with SCF mixing on density (iscf>=10) !',ch10,&
-!  &   '  Action : choose SCF mixing on potential (iscf<10) or change densfor_pred value.'
-!  call wrtout(std_out,message,'COLL')
-!  ierr=ierr+1
-!  end if
-   if (dt%densfor_pred<0.and.mod(dt%iprcel,100)>=61.and.(dt%iprcel<71.or.dt%iprcel>79)) then
-     cond_string(1)='iprcel';cond_values(1)=dt%iprcel
-     call chkint_ge(0,2,cond_string,cond_values,ierr,'densfor_pred',dt%densfor_pred,0,iout)
    end if
 
 !  iprcel
@@ -1667,7 +1664,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
 !  When ionmov=4 and iscf>10, nspden must be 1 or 2
    if(dt%ionmov==4.and.dt%iscf>10)then
      cond_string(1)='ionmov' ; cond_values(1)=dt%ionmov
-     cond_string(1)='iscf' ; cond_values(1)=dt%densfor_pred
+     cond_string(1)='iscf' ; cond_values(1)=dt%iscf
      call chkint_eq(1,2,cond_string,cond_values,ierr,'nspden',nspden,2,(/1,2/),iout)
    end if
 !  When iprcel>49, nspden must be 1 or 2

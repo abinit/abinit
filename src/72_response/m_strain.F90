@@ -587,14 +587,14 @@ subroutine strain_print(strain)
      call wrtout(std_out,message,'COLL')
      call wrtout(ab_out,message,'COLL')
      do ii = 1,3
-       write(message,'(3es12.2)') strain%strain(ii,1),strain%strain(ii,2),strain%strain(ii,3)
+       write(message,'(3es17.8)') strain%strain(ii,1),strain%strain(ii,2),strain%strain(ii,3)
        call wrtout(std_out,message,'COLL')
      end do
    else
      write(message,'(a)') ' Strain does not correspond to standard strain:'
      call wrtout(std_out,message,'COLL')
      do ii = 1,3
-       write(message,'(3es12.2)') strain%strain(ii,1),strain%strain(ii,2),strain%strain(ii,3)
+       write(message,'(3es17.8)') strain%strain(ii,1),strain%strain(ii,2),strain%strain(ii,3)
        call wrtout(std_out,message,'COLL')
      end do
    end if
