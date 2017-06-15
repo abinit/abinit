@@ -835,11 +835,10 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
    qlwl(:,:)=Dtset%gw_qlwl(:,1:nqlwl)
  end if
 
+ rcut = Dtset%rcut
  if ((Dtset%gwcalctyp < 200) .and. (Dtset%gwcalctyp > 100)) then
     if (Dtset%rcut < tol6) then
-      rcut = 9.090909
-    else
-      rcut = Dtset%rcut
+      rcut = 9.090909 ! default value for HSE06
     end if
  end if
 
