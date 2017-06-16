@@ -4297,7 +4297,7 @@
          </ul>
          <br />
          The CT Hyb algorithm is described in
-           <a href="http://journals.aps.org/prl/abstract/10.1103/PhysRevLett.97.076405">
+           <a href="https://journals.aps.org/prl/abstract/10.1103/PhysRevLett.97.076405">
             Phys. Rev. Lett 97, 076405, (2006) </a>.
             For a discussion  of density-density approximation with respect
             with the rotationnally invariant formulation, see e.g.
@@ -4709,7 +4709,7 @@
          <br />
          Specify the number of Legendre polynomials used for the calculation of Green's function in CTQMC code from the library TRIQS.
          Default is 30. The value of coefficients are given in file whose name ending is "Legendre_coefficient.dat".
-         (see also <a href="http://journals.aps.org/prb/abstract/10.1103/PhysRevB.84.075145"> Phys. Rev. B 84, 075145 (2010))
+         (see also <a href="https://journals.aps.org/prb/abstract/10.1103/PhysRevB.84.075145"> Phys. Rev. B 84, 075145 (2010))
          </a>
         </p>
     varname: dmftctqmc_triqs_nleg
@@ -5303,7 +5303,7 @@
         <p>
         Activate (==1) or not (==0) the treatment of degenerate bands (within a criterion [[efmas_deg_tol]])
         using the transport equivalent effective mass idea
-        (see <a href="http://doi.org/10.1103/PhysRevB.89.155131">PRB 89 155131 (2014)</a>).
+        (see <a href="https://doi.org/10.1103/PhysRevB.89.155131">PRB 89 155131 (2014)</a>).
         </p>
     varname: efmas_deg
     vartype: integer
@@ -5443,7 +5443,7 @@
         <ul>
         <li> 0 --> No interpolation (default) </li>
         <li> 1 --> Star-function interpolation (Shankland-Koelling-Wood Fourier interpolation scheme,
-            see <a href="http://journals.aps.org/prb/abstract/10.1103/PhysRevB.38.2721"> PRB 38 2721</a>
+            see <a href="https://journals.aps.org/prb/abstract/10.1103/PhysRevB.38.2721"> PRB 38 2721</a>
         </li>
         <li> 2 --> B-spline interpolation. </li>
         </ul>
@@ -5456,7 +5456,7 @@
         <ul>
         <li> einterp(2): Number of star-functions per ab-initio k-point </li>
         <li> einterp(3): If non-zero, activate Fourier filtering according to Eq 9 of
-        <a href="http://journals.aps.org/prb/abstract/10.1103/PhysRevB.61.1639"> PRB 61 1639</a>.
+        <a href="https://journals.aps.org/prb/abstract/10.1103/PhysRevB.61.1639"> PRB 61 1639</a>.
         In this case, rcut is given by einterp(2) * Rmax where Rmax is the maximum length of the lattice vectors included in the star expansion </li>
         <li> einterp(4): Used if einterp(2) /= 0. It defines rsigma in Eq 9</li>
         </ul>
@@ -9832,6 +9832,26 @@
            No (Use [[optcell]]=0 only) <br />
            <b> Related variables: </b>
            [[dtion]], [[lotf_classic]], [[lotf_nitex]], [[lotf_nneigx]], [[lotf_version]].  <br /> <br />
+          </li>
+          <li>
+          24=&gt; Simple constant energy molecular dynamics using the velocity Verlet symplectic algorithm (second order), see e.g. [E. Hairer et al. Acta Numerica. 12, 399 (2003)].
+        The only related parameter is the time step ([[dtion]]).  <br />
+           <b> Purpose: </b>
+           Molecular dynamics <br />
+           <b> Cell optimization: </b>
+           No (Use [[optcell]]=0 only) <br />
+           <b> Related variables: </b>
+           time step [[dtion]] <br /> <br />
+          </li>
+          <li>
+          25=&gt; Hybrid Monte Carlo sampling of the ionic positions at fixed temperature and unit cell geometry (NVT ensemle). The underlying molecular dynamics corresponds to ionmov=24.
+        The related parameters are the time step ([[dtion]]) and thermostat temperature ([[mdtemp]]).  <br />
+           <b> Purpose: </b>
+           Monte Carlo sampling <br />
+           <b> Cell optimization: </b>
+           No (Use [[optcell]]=0 only) <br />
+           <b> Related variables: </b>
+           time step [[dtion]], thermostat temperature [[mdtemp]], <br /> <br />
           </li>
           <li>
            30=&gt; Using a supercell, calculate a self consistent phonon structure
@@ -19316,7 +19336,7 @@
 
         (The calculation of projections is
         detailed in
-         <a href="http://journals.aps.org/prb/abstract/10.1103/PhysRevB.77.205112">
+         <a href="https://journals.aps.org/prb/abstract/10.1103/PhysRevB.77.205112">
           Phys. Rev. B 77, 205112, (2008)
          </a>
          )
@@ -20053,7 +20073,7 @@
     text: |-
         <p>
          Print out geometry (_BLZTRP_GEOM) and eigenenergy (_BLZTRP_EIGEN) files for the
-         <a href="http://www.icams.de/content/research/software-development/boltztrap/"> BoltzTraP code</a>
+         <a href="https://www.imc.tuwien.ac.at/forschungsbereich_theoretische_chemie/forschungsgruppen/prof_dr_gkh_madsen_theoretical_materials_chemistry/boltztrap/"> BoltzTraP code</a>
          by Georg Madsen.
         </p>
     varname: prtbltztrp
@@ -25329,7 +25349,7 @@
         </p>
         <p>
         A short presentation of the method and some aspect of the implementation can be found in Section II and Appendix A of
-         <a href="http://journals.aps.org/prb/abstract/10.1103/PhysRevB.89.125110">
+         <a href="https://journals.aps.org/prb/abstract/10.1103/PhysRevB.89.125110">
           B. Amadon, T. Applencourt and F. Bruneval Phys. Rev. B 89, 125110 (2014)
          </a>
          .
@@ -25618,7 +25638,7 @@
         </p>
         <p>
          The current implementation uses Wannier functions obtained from
-         <a href="http://journals.aps.org/prb/abstract/10.1103/PhysRevB.77.205112">
+         <a href="https://journals.aps.org/prb/abstract/10.1103/PhysRevB.77.205112">
           projected local orbitals
          </a>
          as correlated orbitals (see [[dmftbandi]]  and [[dmftbandf]] input variables to define them).
@@ -25653,7 +25673,7 @@
         </p>
         <p>
          For details of the implementation see,
-         <a href="http://journals.aps.org/prb/abstract/10.1103/PhysRevB.77.205112">
+         <a href="https://journals.aps.org/prb/abstract/10.1103/PhysRevB.77.205112">
           B. Amadon, F. Lechermann, A. Georges, F.  Jollet, T. O.  Wehling, and A. I.  Lichtenstein, Phys. Rev. B 77(20), (2008)
          </a>
          , for Wannier functions and
@@ -27021,7 +27041,7 @@
          </ul>
          For [[vdw_xc]]=1 and [[vdw_xc]]=2, the implementation follows the strategy devised
         in the article of Rom&aacute;n-P&eacute;rez and Soler
-        (<a href="http://dx.doi.org/10.1103/PhysRevLett.103.096102">doi:10.1103/PhysRevLett.103.096102</a>)
+        (<a href="https://dx.doi.org/10.1103/PhysRevLett.103.096102">doi:10.1103/PhysRevLett.103.096102</a>)
         </p>
     varname: vdw_xc
     vartype: integer

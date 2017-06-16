@@ -274,7 +274,9 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
    end if
 !  Non-zero berryopt and usepaw==1 and kptopt/=3 cannot be done unless symmorphi=0
 !  (that is, nonsymmorphic symmetries do not work yet
+!  Update MT 2017-05-31: nonsymmorphic symmetries seem also to be an issue for NCPP
    if (usepaw==1.and.dt%berryopt/=0.and.dt%kptopt/=3) then
+  !if (dt%berryopt/=0.and.dt%kptopt/=3) then
      cond_string(1)='usepaw'; cond_values(1)=1
      cond_string(2)='berryopt'; cond_values(2)=dt%berryopt
      cond_string(3)='kptopt'; cond_values(3)=dt%kptopt
@@ -644,6 +646,12 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
 !    Check for GW calculations that are not implemented.
      !cond_string(1)='optdriver' ; cond_values(1)=optdriver
      !call chkint_eq(1,1,cond_string,cond_values,ierr,'nspinor',dt%nspinor,1,(/1/),iout)
+
+     if (maxval(abs(dt%istwfk(1:nkpt))) > 1 .and. mod(dt%gwcalctyp, 100) >= 20) then
+       write(msg, "(3a)")"Self-consistent GW with istwfk > 1 not supported.",ch10, &
+         "Please regenerate your WFK file with istwfk *1"
+       MSG_ERROR_NOSTOP(msg, ierr)
+     end if
 !
 !    Avoid wasting CPUs if nsppol==2.
      if (dt%nsppol==2.and..not.iseven(nproc).and.nproc>1) then
@@ -3015,8 +3023,9 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
        if(dt%ixc/=11.and.dt%ixc/=-101130.and.dt%ixc/=-130101.and. &
 &       dt%ixc/=18.and.dt%ixc/=-106131.and.dt%ixc/=-131106.and. &
 &       dt%ixc/=19.and.dt%ixc/=-106132.and.dt%ixc/=-132106.and. &
-&       dt%ixc/=-202231.and.dt%ixc/=-231202.and.dt%ixc/=-170.and.&
-&       dt%ixc/=41) then
+&       dt%ixc/=-202231.and.dt%ixc/=-231202.and.&
+&       dt%ixc/=14.and.dt%ixc/=-102130.and.dt%ixc/=-130102.and. &
+&       dt%ixc/=-170.and.dt%ixc/=41.and.dt%ixc/=-406) then
          write(message,'(4a,i2,5a)') ch10,&
 &         ' chkinp : ERROR -',ch10,&
 &         '  Van der Waals DFT-D correction (vdw_xc=',dt%vdw_xc,') only available for the following XC functionals:',ch10,&
