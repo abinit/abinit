@@ -1,0 +1,275 @@
+<html>
+<head><title>BASIC variables.</title>
+<link rel=stylesheet type="text/css" href="../formabinit.css">
+</head>
+<body bgcolor="#ffffff">
+
+<hr>
+<a name="top"></a>
+
+<h1>ABINIT, basic input variables:</h1>
+<h2>List and description.</h2>
+
+<hr>
+
+<p>This document lists and provides the description
+of the name (keywords) of the "basic" input
+variables to be used in the main input file of the abinit code.
+
+<script type="text/javascript" src="../generic_advice.js"> </script>
+<script type="text/javascript" src="../copyright.js"> </script>
+<script type="text/javascript" src="../list_internal_links.js"> </script>
+<script type="text/javascript" src="../list_htmlfiles_input_variables.js"> </script>
+
+<a name="list"></a>
+<h3><b> Content of the file : alphabetical list of "basic" variables.</b></h3>
+ <br>A.
+ <a href="#acell">acell</a>&nbsp;&nbsp;
+ <br>B.
+ <br>C.
+ <br>D.
+ <br>E.
+ <br>F.
+ <br>G.
+ <br>H.
+ <br>I.
+ <br>J.
+ <br>K.
+ <br>L.
+ <br>M.
+ <br>N.
+ <br>O.
+ <br>P.
+ <br>Q.
+ <br>R.
+ <a href="#rprim">rprim</a>&nbsp;&nbsp;
+ <a href="#rprimd">rprimd</a>&nbsp;&nbsp;
+ <br>S.
+ <a href="#scalecart">scalecart</a>&nbsp;&nbsp;
+
+<br><br><br><br><hr>
+<br><font id="title"><a name="acell">acell</a></font>
+<br><font id="definition">Mnemonics: CELL lattice vector scaling</font>
+<br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#evolving">EVOLVING</a>, <a href="../../users/abinit_help.html#length">LENGTH</a></font>
+<br><font id="vartype">Variable type: real(3) (Comment: represented internally as acell(3,<a href="#">[[FAKE LINK:nimage]]</a>))</font>
+<br><font id="default">Default is 3*1</font>
+<br><font id="text">
+<p>
+<p>
+ Gives the length scales by which
+dimensionless primitive translations (in <a href="varbas.html#rprim">rprim</a>) are
+to be multiplied.  By default, given in Bohr atomic units
+(1 Bohr=0.5291772108 Angstroms), although Angstrom can be specified,
+if preferred, since <b>acell</b> has the
+'<a href="../../users/abinit_help.html#length">LENGTH</a>' characteristics.
+See further description of <b>acell</b> related to the
+<a href="varbas.html#rprim">rprim</a> input variable,
+the <a href="varbas.html#scalecart">scalecart</a> input variable,
+and the associated internal <a href="varbas.html#rprimd">rprimd</a> input variable.
+</p>
+<p>
+ Note that <b>acell</b> is NOT the length of the conventional orthogonal basis vectors, but the scaling factors of the primitive vectors.
+Use <a href="varbas.html#scalecart">scalecart</a> to scale the cartesian coordinates.
+</p>
+</font>
+
+<br><br><br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="rprim">rprim</a></font>
+<br><font id="definition">Mnemonics: Real space PRIMitive translations</font>
+<br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#evolving">EVOLVING</a></font>
+<br><font id="vartype">Variable type: real(3,3) (Comment: Internally, it is represented as rprim(3,3,<a href="#">[[FAKE LINK:nimage]]</a>))</font>
+<br><font id="default">Default is [[1, 0, 0], [0, 1, 0], [0, 0, 1]]</font>
+<br><font id="text">
+<p>
+<p>
+ Give, in columnwise entry,
+the three dimensionless primitive translations in real space, to be rescaled by
+<a href="varbas.html#acell">acell</a> and <a href="varbas.html#scalecart">scalecart</a>.
+<br />
+It is <a href="../../users/abinit_help.html#evolving">EVOLVING</a> only if <a href="#">[[FAKE LINK:ionmov]]</a>==2 and <a href="#">[[FAKE LINK:optcell]]</a>/=0, otherwise it is fixed.
+<br />
+ If the Default is used, that is, <b>rprim</b> is the unity matrix,
+the three dimensionless primitive vectors are three
+unit vectors in cartesian coordinates. Each will be (possibly) multiplied
+by the corresponding <a href="varbas.html#acell">acell</a> value, then (possibly)
+stretched along the cartesian coordinates by the corresponding <a href="varbas.html#scalecart">scalecart</a> value,
+to give the dimensional primitive vectors, called <a href="varbas.html#rprimd">rprimd</a>.
+ <br />
+ In the general case, the dimensional cartesian
+coordinates of the crystal primitive translations R1p, R2p and R3p, see
+<a href="varbas.html#rprimd">rprimd</a>, are
+ <ul>
+  <li>
+   R1p(i)=<a href="varbas.html#scalecart">scalecart</a>(i)<b>rprim</b>(i,1)*<a href="varbas.html#acell">acell</a>(1)
+  </li>
+  <li>
+   R2p(i)=<a href="varbas.html#scalecart">scalecart</a>(i)<b>rprim</b>(i,2)*<a href="varbas.html#acell">acell</a>(2)
+  </li>
+  <li>
+   R3p(i)=<a href="varbas.html#scalecart">scalecart</a>(i)<b>rprim</b>(i,3)*<a href="varbas.html#acell">acell</a>(3)
+  </li>
+ </ul>
+ where i=1,2,3 is the component of the primitive translation (i.e. x, y, and z).
+ <br />
+ <br />
+ The <b>rprim</b> variable, scaled by <a href="varbas.html#scalecart">scalecart</a>, is thus used to define directions
+of the primitive vectors, that will be multiplied (so keeping the direction unchanged) by
+the appropriate length scale <a href="varbas.html#acell">acell</a>(1), <a href="varbas.html#acell">acell</a>(2),
+or <a href="varbas.html#acell">acell</a>(3),
+respectively to give the dimensional primitive translations
+in real space in cartesian coordinates.
+ <br />
+ Presently, it is requested that the mixed product
+(R1xR2).R3 is positive. If this is not the case,
+simply exchange a pair of vectors.
+ <br />
+ To be more specific, keeping the default value of <a href="varbas.html#scalecart">scalecart</a>=1 to simplify the matter,
+<b>rprim</b> 1 2 3 4 5 6 7 8 9 corresponds to input of the
+three primitive translations R1=(1,2,3) (to be multiplied by <a href="varbas.html#acell">acell</a>(1)), R2=(4,5,6) (to be multiplied by
+<a href="varbas.html#acell">acell</a>(2)), and R3=(7,8,9) (to be multiplied by [[acell](3)).
+ <br />
+ Note carefully that the first
+three numbers input are the first column of <b>rprim</b>, the next
+three are the second, and the final three are the third.
+This corresponds with the usual Fortran order for arrays.
+The matrix whose columns are the reciprocal space primitive
+translations is the inverse transpose of the matrix whose
+columns are the direct space primitive translations.
+</p>
+<p>
+ Alternatively to <b>rprim</b>, directions of dimensionless primitive
+vectors can be specified by using the input variable <a href="#">[[FAKE LINK:angdeg]]</a>.
+This is especially useful for hexagonal lattices (with 120 or 60 degrees angles).
+Indeed, in order for symmetries to be recognized, rprim must be symmetric up to
+<a href="#">[[FAKE LINK:tolsym]]</a> (10 digits by default),
+inducing a specification such as
+ <pre>
+  rprim  0.86602540378  0.5  0.0
+        -0.86602540378  0.5  0.0
+         0.0            0.0  1.0
+ </pre>
+ that can be avoided thanks to <a href="#">[[FAKE LINK:angdeg]]</a>:
+ <pre>
+  angdeg 90 90 120
+ </pre>
+ <br />
+ Although the use of <a href="varbas.html#scalecart">scalecart</a> or <a href="varbas.html#acell">acell</a> is
+rather equivalent when the primitive vectors are aligned with the cartesian directions, it is not the case for
+non-orthogonal primitive vectors. In particular, beginners often make the error of trying to use <a href="varbas.html#acell">acell</a>
+to define primitive vectors in face-centered tetragonal lattice, or body-centered tetragonal lattice, or similarly
+in face or body-centered orthorhombic lattices. Let us take the example of a body-centered tetragonal lattice, that
+might be defined using the following ("a" and "c" have to be replaced by the appropriate conventional cell vector length):
+ <pre>
+  rprim  "a"      0        0
+          0      "a"       0
+         "a/2"   "a/2"    "c/2"
+acell 3*1     scalecart 3*1    !  ( These are default values)
+ </pre>
+ The following is a valid, alternative way to define  the same primitive vectors :
+ <pre>
+  rprim   1        0       0
+          0        1       0
+          1/2      1/2     1/2
+scalecart  "a"  "a"  "c"
+acell 3*1    !  ( These are default values)
+ </pre>
+ Indeed, the cell has been stretched along the cartesian coordinates, by "a", "a" and "c" factors.
+</p>
+<p>
+ At variance, the following is WRONG :
+ <pre>
+  rprim   1       0       0
+          0       1       0
+          1/2     1/2     1/2
+acell  "a"  "a"  "c"    !   THIS IS WRONG
+scalecart 3*1    !  ( These are default values)
+ </pre>
+ Indeed, the latter would correspond to :
+ <pre>
+  rprim  "a"      0       0
+          0      "a"      0
+         "c/2"   "c/2"   "c/2"
+acell 3*1     scalecart 3*1    !  ( These are default values)
+ </pre>
+ Namely, the third vector has been rescaled by "c". It is not at all in the center of the tetragonal cell whose basis vectors
+are defined by the scaling factor "a".
+ <br />
+ As another difference between <a href="varbas.html#scalecart">scalecart</a> or <a href="varbas.html#acell">acell</a>,
+note that <a href="varbas.html#scalecart">scalecart</a> is <a href="../../users/abinit_help.html#input_only">INPUT_ONLY</a> :
+its content will be immediately applied to rprim, at parsing time,
+and then scalecart will be set to the default values (3*1). So, in case <a href="varbas.html#scalecart">scalecart</a> is used,
+the echo of <b>rprim</b> in the output file is not the value contained in the input file,
+but the value rescaled by <a href="varbas.html#scalecart">scalecart</a>.
+</p>
+</font>
+
+<br><br><br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="rprimd">rprimd</a></font>
+<br><font id="definition">Mnemonics: Real space PRIMitive translations, Dimensional</font>
+<br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#internal_only">INTERNAL_ONLY</a>, <a href="../../users/abinit_help.html#evolving">EVOLVING</a></font>
+<br><font id="vartype">Variable type: real(3,3) (Comment: Internally, it is represented as rprimd(3,3,<a href="#">[[FAKE LINK:nimage]]</a>).)</font>
+<br><font id="default">No default</font>
+<br><font id="text">
+<p>
+<p>
+ This internal variable gives the dimensional real space primitive
+vectors, computed from <a href="varbas.html#acell">acell</a>,
+<a href="varbas.html#scalecart">scalecart</a>,
+and <a href="varbas.html#rprim">rprim</a>.
+ <ul>
+  <li>
+   R1p(i)=<b>rprimd</b>(i,1)=<a href="varbas.html#scalecart">scalecart</a>(i)*<a href="varbas.html#rprim">rprim</a>(i,1)*<a href="varbas.html#acell">acell</a>(1) for i=1,2,3 (x,y,and z)
+  </li>
+  <li>
+   R2p(i)=<b>rprimd</b>(i,2)=<a href="varbas.html#scalecart">scalecart</a>(i)*<a href="varbas.html#rprim">rprim</a>(i,2)*<a href="varbas.html#acell">acell</a>(2) for i=1,2,3
+  </li>
+  <li>
+   R3p(i)=<b>rprimd</b>(i,3)=<a href="varbas.html#scalecart">scalecart</a>(i)*<a href="varbas.html#rprim">rprim</a>(i,3)*<a href="varbas.html#acell">acell</a>(3) for i=1,2,3
+  </li>
+ </ul>
+</p>
+It is <a href="../../users/abinit_help.html#evolving">EVOLVING</a> only if <a href="#">[[FAKE LINK:ionmov]]</a>==2 and <a href="#">[[FAKE LINK:optcell]]</a>/=0, otherwise it is fixed.
+<br />
+</font>
+
+<br><br><br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="scalecart">scalecart</a></font>
+<br><font id="definition">Mnemonics: SCALE CARTesian coordinates</font>
+<br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#input_only">INPUT_ONLY</a></font>
+<br><font id="vartype">Variable type: real(3)</font>
+<br><font id="default">Default is 3*1</font>
+<br><font id="text">
+<p>
+<p>
+ Gives the scaling factors of cartesian coordinates by which
+dimensionless primitive translations (in "<a href="varbas.html#rprim">rprim</a>") are
+to be multiplied.
+<a href="varbas.html#rprim">rprim</a> input variable,
+the <a href="varbas.html#acell">acell</a> input variable,
+and the associated internal <a href="varbas.html#rprimd">rprimd</a> internal variable.
+ <br />
+ Especially useful for body-centered and face-centered tetragonal lattices, as well as
+body-centered and face-centered orthorhombic lattices, see <a href="varbas.html#rprimd">rprimd</a>.
+ <br />
+ Note that this input variable is <a href="../../users/abinit_help.html#input_only">INPUT_ONLY</a> : its content will be immediately applied to rprim, at parsing time,
+and then scalecart will be set to the default values. So, it will not be echoed.
+</p>
+</font>
+
+<br><br><br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
+
+
+<script type="text/javascript" src="../list_internal_links.js"> </script>
+
+</body>
+</html>
