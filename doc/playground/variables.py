@@ -22,6 +22,12 @@ list_specials = [
     ('SEQUENTIAL', 'True if the code is compiled without MPI'),
 ]
 
+list_topics_class = [
+    ('compulsory', 'Compulsory input variables:'),
+    ('useful', 'Useful input variables:'),
+    ('expert', 'Input variables for experts:'),
+    ('internal', 'Relevant internal variables:'),
+]
 
 class literal(str): pass
 

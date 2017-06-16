@@ -215,7 +215,7 @@
         </p>
         It is [[EVOLVING]] only if [[ionmov]]==2 and [[optcell]]/=0, otherwise it is fixed.
         <br />
-    topic_class: information
+    topic_class: internal
     topic_name: crystal
     varname: rprimd
     vartype: real

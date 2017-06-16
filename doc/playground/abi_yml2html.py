@@ -267,32 +267,48 @@ f_html.close()
 
 ################################################################################
 # Constitute the body of information for all variables, stored for the appropriate topic_names in all_contents_topics[topic_name]
-all_contents_topics = dict()
+topic_content = dict()
+topic_class_content = dict()
+found = dict()
 for i, var in enumerate(variables):
-  if debug==1 :
-    print(var)
-  varname = var.varname
-  if var.characteristics is not None and '[[INTERNAL_ONLY]]' in var.characteristics:
-    varname = '%'+varname
-  topic_name = var.topic_name
+  if var.topic_name not in topic_content.keys():
+    topic_name = var.topic_name
+    topic_class_content[topic_name] = ""
+    topic_content[topic_name] = ""
+    found[topic_name] = 0
 
-  # Constitute the line of information related to one input variable
-  cur_content = "<a href=\""+var.section+".html#"+var.varname+"\">"+varname+"</a>   "
-  cur_content += "["+var.definition+"]<br>\n"
+print(topic_class_content)
 
-  if debug==1 :
-    print(cur_content)
+for (tclasskey, tclassval) in list_topics_class:
+  for topic_name, value in topic_class_content.items():
+    topic_class_content[topic_name] = "<p>"+tclassval+"<p>"
+  for i, var in enumerate(variables):
+    if tclasskey==var.topic_class : 
+      if debug==1 :
+        print(var)
+      topic_name = var.topic_name
+      found[topic_name] = 1
+      varname = var.varname
+      if var.characteristics is not None and '[[INTERNAL_ONLY]]' in var.characteristics:
+        varname = '%'+varname
 
-  if topic_name not in all_contents_topics.keys():
-    all_contents_topics[topic_name] = "" 
+      # Constitute the line of information related to one input variable
+      topic_class_content[topic_name] += "... <a href=\""+var.section+".html#"+var.varname+"\">"+varname+"</a>   "
+      topic_class_content[topic_name] += "["+var.definition+"]<br>\n"
 
-  all_contents_topics[topic_name] = all_contents_topics[topic_name] + cur_content 
+      if debug==1 :
+        print(topic_class_content)
+
+  for topic_name, value in found.items():
+    if found[topic_name] == 1:
+      topic_content[topic_name] = topic_content[topic_name] + topic_class_content[topic_name]
+      found[topic_name] = 0
 
 ################################################################################
 # Generate the "topic" files
 
 # For each "topic" file 
-for topic_name, content_topic in all_contents_topics.items():
+for topic_name, content in topic_content.items():
   file_topic = 'html_automatically_generated/'+topic_name+'.html'
   f_topic = open(file_topic,'w')
 
@@ -302,11 +318,11 @@ for topic_name, content_topic in all_contents_topics.items():
   topic_header_varX = header_varX.replace("__JS_PATH__",js_path)
 
   f_topic.write(topic_header_varX)
-  content_topic += "<br>"
-  content_topic += "<script type=\"text/javascript\" src=\""+js_path+"list_internal_links.js\"> </script>\n\n"
-  content_topic += "</body>\n"
-  content_topic += "</html>"
-  f_topic.write(content_topic)
+  content += "<br>"
+  content += "<script type=\"text/javascript\" src=\""+js_path+"list_internal_links.js\"> </script>\n\n"
+  content += "</body>\n"
+  content += "</html>"
+  f_topic.write(content)
   f_topic.write("\n")
   f_topic.close()
 
