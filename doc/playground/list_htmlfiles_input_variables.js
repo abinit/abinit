@@ -17,5 +17,6 @@ document.write(' <li> Structure optimization variables, <A href="varrlx.html">VA
 document.write(' <li> Wannier90 interface variables, <A href="varw90.html">VARW90</a></li> ');
 document.write(' </ul>');
 document.write(' See also the <a href="../../users/spacegrouphelpfile.html">Space group table</a> and the <a href="specials.html">list of special parameters.</a> ');
+document.write(' <br> PLAYGROUND. Topics : <a href="crystal.html">Crystal</a>, <a href="crystal2.html">Crystal2</a>, ');
 document.write(' <hr> ');
 document.write(' ');

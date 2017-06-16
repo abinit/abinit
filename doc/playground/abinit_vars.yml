@@ -30,9 +30,8 @@
          Note that [[acell]] is NOT the length of the conventional orthogonal basis vectors, but the scaling factors of the primitive vectors.
         Use [[scalecart]] to scale the cartesian coordinates.
         </p>
-    topics: 
-    - { topic_name: crystal, topic_level: basic }
-    - { topic_name: crystal2, topic_level: compulsory }
+    topic_class: compulsory
+    topic_name: crystal 
     varname: acell
     vartype: real
 - !variable
@@ -178,8 +177,8 @@
         the echo of [[rprim]] in the output file is not the value contained in the input file,
         but the value rescaled by [[scalecart]].
         </p>
-    topics:
-    - { topic_name: crystal, topic_level: basic}
+    topic_class: compulsory
+    topic_name: crystal
     varname: rprim
     vartype: real
 - !variable
@@ -216,8 +215,8 @@
         </p>
         It is [[EVOLVING]] only if [[ionmov]]==2 and [[optcell]]/=0, otherwise it is fixed.
         <br />
-    topics:
-    - { topic_name: crystal, topic_level: info}
+    topic_class: information
+    topic_name: crystal
     varname: rprimd
     vartype: real
 - !variable
@@ -249,8 +248,8 @@
          Note that this input variable is [[INPUT_ONLY]] : its content will be immediately applied to rprim, at parsing time,
         and then scalecart will be set to the default values. So, it will not be echoed.
         </p>
-    topics:
-    - { topic_name: crystal, topic_level: useful}
+    topic_class: useful
+    topic_name: crystal
     varname: scalecart
     vartype: real
 - !variable
@@ -273,8 +272,8 @@
         <p>
          Notes: do not quote the file name in the abinit input file, simply leave a space after xyzfile. The xyz format is the number of atoms on the first line, a comment line, then one line per atom, with the element as a 2 letter symbol ("As" "O" or "Pu") and the three cartesian coordinates in Angstrom.
         </p>
-    topics:
-    - { topic_name: crystal, topic_level: useful}
+    topic_class: expert
+    topic_name: crystal
     varname: xyzfile
     vartype: string
 

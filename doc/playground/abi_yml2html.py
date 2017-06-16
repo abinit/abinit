@@ -5,7 +5,7 @@ import re
 import argparse
 from variables import *
 
-debug = 0
+debug = 1
 
 # Path relative from HTML files
 js_path = "../"
@@ -110,12 +110,6 @@ with open('html_template/temp_specials.html') as f:
 
 header_all = header_all.replace("__JS_PATH__",js_path)
 
-# Initialize the output
-output = ''
-output = output + header_all + "<br />\n"
-cur_let = 'A'
-output = output + "<p>"+cur_let+".&nbsp;\n"
-
 all_contents = dict()
 all_vars = dict()
 
@@ -133,6 +127,13 @@ for (specialkey,specialval) in list_specials:
 
 ################################################################################
 # Constitute the body of information for all variables, stored for the appropriate section in all_contents[section]
+
+# Initialize the all variable file output
+output = ''
+output = output + header_all + "<br />\n"
+cur_let = 'A'
+output = output + "<p>"+cur_let+".&nbsp;\n"
+
 for i, var in enumerate(variables):
   if debug==1 :
     print(var)
@@ -190,6 +191,8 @@ for i, var in enumerate(variables):
     print('For variable : ',varname)
 
 ################################################################################
+# Generate the files that document all the variables.
+
 # For each "normal" section file : generate the header, generate the alphabetical list, write these,
 # then complete the content (that was previously gathered), then write the file and close it
 for section, content in all_contents.items():
@@ -261,3 +264,47 @@ file_html = 'html_automatically_generated/allvariables.html'
 f_html = open(file_html,'w')
 f_html.write(output)
 f_html.close()
+
+################################################################################
+# Constitute the body of information for all variables, stored for the appropriate topic_names in all_contents_topics[topic_name]
+all_contents_topics = dict()
+for i, var in enumerate(variables):
+  if debug==1 :
+    print(var)
+  varname = var.varname
+  topic_name = var.topic_name
+
+  # Constitute the line of information related to one input variable
+  cur_content = "<a href=\""+var.section+".html#"+var.varname+"\">"+varname+"</a>   "
+  cur_content += "["+var.definition+"]<br>\n"
+
+  if debug==1 :
+    print(cur_content)
+
+  if topic_name not in all_contents_topics.keys():
+    all_contents_topics[topic_name] = "" 
+
+  all_contents_topics[topic_name] = all_contents_topics[topic_name] + cur_content 
+
+################################################################################
+# Generate the "topic" files
+
+# For each "topic" file 
+for topic_name, content_topic in all_contents_topics.items():
+  file_topic = 'html_automatically_generated/'+topic_name+'.html'
+  f_topic = open(file_topic,'w')
+
+  with open('html_template/temp_'+topic_name+'.html') as f:
+    header_varX = f.read()
+
+  topic_header_varX = header_varX.replace("__JS_PATH__",js_path)
+
+  f_topic.write(topic_header_varX)
+  content_topic += "<br>"
+  content_topic += "<script type=\"text/javascript\" src=\""+js_path+"list_internal_links.js\"> </script>\n\n"
+  content_topic += "</body>\n"
+  content_topic += "</html>"
+  f_topic.write(content_topic)
+  f_topic.write("\n")
+  f_topic.close()
+
