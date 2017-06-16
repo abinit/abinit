@@ -16,7 +16,7 @@
 # make it a Unix-formatted file.
 
 # Usage :
-# dos_to_unix file1 file2 ...
+# suppress_windows_ctrl-M.csh file1 file2 ...
 
 # Count the number of files
 set number_arg=$#argv

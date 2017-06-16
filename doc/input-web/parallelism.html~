@@ -1,0 +1,174 @@
+<html>
+<head>
+<title>Parallelism </title>
+<body bgcolor="#ffffff">
+<p>
+<hr>
+<h1>2- Parallelism</h1>
+<h3>This file gives the settings to manage the parallelism in ABINIT.
+<hr>
+
+<h5>Copyright (C) 1998-2017 ABINIT group (FJ)
+<br> This file is distributed under the terms of the GNU General Public License, see
+~abinit/COPYING or <a href="http://www.gnu.org/copyleft/gpl.txt">http://www.gnu.org/copyleft/gpl.txt</a>.
+<br> For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
+</h5>
+
+<script type="text/javascript" src="../users/list_internal_links.js"> </script>
+
+<h3><b>Contents of ABINIT features: </b></h3>
+<ul>
+<li><a href="parallelism.html#1">1.</a> Introduction.
+<li><a href="parallelism.html#2">2.</a> Input variable settings.
+<li><a href="parallelism.html#3">3.</a> Tutorial and examples.
+
+</ul>
+
+
+<HR ALIGN=left>
+
+<p><a name="1">&nbsp;</a> </p>
+<h3><b>1. Introduction</b></h3>
+<li>
+For ground-state calculations, 
+the code has been parallelized (MPI-based parallelism)
+on the k-points, on the spins, on the spinor components, on the bands,
+and on the FFT grid and plane wave coefficients.
+For the k-point and spin parallelisations (using MPI), the communication
+load is generally very small. This allows it to be used on a cluster of workstations.
+However, the number of nodes that can be used in parallel might
+be small, and depends strongly on the physics of the problem.
+A combined FFT / band parallelisation (LOBPCG)is available, and has shown
+very large speed up (>1000) on powerful computers with a large number of processors
+and high-speed interconnect. The combination of FFT / band / k point and spin
+parallelism is also available, and quite efficient for such computers.
+Available for norm-conserving as well as PAW cases.
+Automatic determination of the best combination of parallelism levels is available.
+Use of MPIIO is mandatory for the largest speed ups to be observed.
+</li>
+<li>
+Chebyshev filtering (Chebfi) is a method to solve the linear
+eigenvalue problem, and can be used as a SCF solver in Abinit. It is
+implemented in Abinit. The design goal is for Chebfi to replace LOBPCG as the solver of
+choice for large-scale computations in Abinit. By performing less
+orthogonalizations and diagonalizations than LOBPCG, scaling to higher
+processor counts is possible. A manual to use Chebfi is available <a href="howto_chebfi.pdf">here</a>. 
+</li>
+<li>
+For ground-state calculations, with a set of images (e.g. nudged elastic band method,
+the string method, the path-integral molecular dynamics, the genetic algorithm), MPI-based parallelism is used.
+The work load for the different images has been distributed, and this parallelism can be 
+combined with the parallelism described in point hereabove, leading to speed-up beyond 5000.
+</li>
+<li>
+For ground-state calculations, GPU can be used. This is based on CUDA+MAGMA.
+</li>
+<br>
+<li>
+For ground-state calculations, the wavelet part of ABINIT (BigDFT) is also very well parallelized :
+MPI band parallelism, combined with GPUs.
+</li>
+<li>
+For response calculations, the code has been parallelized (MPI-based parallelism)
+on k-points, spins, bands, as well as on perturbations.
+For the k-points, spins and bands parallelisation,
+the communication load is rather
+small also, and, unlike for the GS calculations, the number
+of nodes that can be used in parallel will be large,
+nearly independently of the physics of the problem.
+Parallelism on perturbations is very similar to the parallelism on images in the ground state case (so, very efficient),
+although the load balancing problem for perturbations with different number of k points is not adressed at present.
+Use of MPIIO is mandatory for the largest speed ups to be observed.
+</li>
+<br>
+<li>
+GW calculations are MPI-parallelized over k-points.
+They are also parallelized over transitions (valence to conduction band pairs), but the two parallelisation
+cannot be used currently at present.
+The transition parallelism has been show to allow speed ups as large as 300.
+</li>
+<br>
+<li>
+Ground state, response function, and GW parallel calculations 
+can be done also by using OpenMP parallelism, even combined with MPI parallelism. 
+</li>
+ <p> 
+
+<p>&nbsp;
+<HR ALIGN=left>
+<p> <a name="2">&nbsp;</a>
+<h3><b>2.Input variable settings. </b></h3>
+ use_gemm_nonlop,
+
+<p>Important input variables:
+<p> 
+<a href="../input_variables/html_automatically_generated/varpar.html#autoparal" target="kwimg">autoparal</a>
+<a href="../input_variables/html_automatically_generated/varpar.html#paral_atom" target="kwimg">paral_atom</a>
+<a href="../input_variables/html_automatically_generated/varpar.html#paral_kgb" target="kwimg">paral_kgb</a>
+<a href="../input_variables/html_automatically_generated/varpar.html#paral_rf" target="kwimg">paral_rf</a>
+<p>Useful input variables:
+
+<p>
+<a href="../input_variables/html_automatically_generated/varpar.html#bandpp" target="kwimg">bandpp</a>
+<a href="../input_variables/html_automatically_generated/varpar.html#gwpara" target="kwimg">gwpara</a>
+<a href="../input_variables/html_automatically_generated/varpar.html#npband" target="kwimg">npband</a>
+<a href="../input_variables/html_automatically_generated/varpar.html#npfft" target="kwimg">npfft</a>
+<a href="../input_variables/html_automatically_generated/varpar.html#nphf" target="kwimg">nphf</a>
+<a href="../input_variables/html_automatically_generated/varpar.html#npimage" target="kwimg">npimage</a>
+<a href="../input_variables/html_automatically_generated/varpar.html#npkpt" target="kwimg">npkpt</a>
+<a href="../input_variables/html_automatically_generated/varpar.html#nppert" target="kwimg">nppert</a>
+<a href="../input_variables/html_automatically_generated/varpar.html#npspinor" target="kwimg">npspinor</a>
+<a href="../input_variables/html_automatically_generated/varpar.html#max_ncpus" target="kwimg">max_ncpus</a>
+<p>Input variables for experts:
+<p>
+<a href="../input_variables/html_automatically_generated/varpar.html#gpu_devices" target="kwimg">gpu_devices</a>
+<a href="../input_variables/html_automatically_generated/varpar.html#gpu_linalg_limit" target="kwimg">gpu_linalg_limit</a>
+<a href="../input_variables/html_automatically_generated/vardev.html#iomode" target="kwimg">iomode</a>
+<a href="../input_variables/html_automatically_generated/varpar.html#localrdwf" target="kwimg">localrdwf</a>
+<a href="../input_variables/html_automatically_generated/varpar.html#np_slk" target="kwimg">np_slk</a>
+<a href="../input_variables/html_automatically_generated/varpar.html#pw_unbal_thresh" target="kwimg">pw_unbal_thresh</a>
+<a href="../input_variables/html_automatically_generated/vardev.html#use_gemm_nonlop" target="kwimg">use_gemm_nonlop</a>
+<a href="../input_variables/html_automatically_generated/varpar.html#use_gpu_cuda" target="kwimg">use_gpu_cuda</a>
+
+
+
+
+<p>&nbsp;
+<HR ALIGN=left>
+<p> <a name="3">&nbsp;</a>
+<h3><b>3. Tutorials and examples.</b></h3>
+  <li><a href="lesson_basepar.html">An introduction on ABINIT in
+  Parallel</a> should be read before going to the next lessons about
+  parallelism. One simple example of parallelism in ABINIT will be
+  shown.</li>
+  <li><a href="lesson_paral_gspw.html">Parallelism for ground-state
+  calculations, with plane waves</a> presents the combined k-point (K),
+  plane-wave (G), band (B), spin/spinor parallelism of ABINIT (so, the
+  "KGB" parallelism), for the computation of total energy, density, and
+  ground state properties </li>
+  <li><a href="lesson_paral_moldyn.html">Parallelism for molecular
+  dynamics calculations</a></li>
+  <li><a href="lesson_paral_string.html">Parallelism based on "images",
+  e.g. for the determination of transitions paths (string method)</a>,
+  that can be activated on top of the "KGB" parallelism for force
+  calculations.</li>
+  <li><a href="lesson_paral_gswvl.html">Parallelism for ground-state
+  calculations, with wavelets</a> presents the parallelism of ABINIT,
+  when wavelets are used as a basis function instead of planewaves, for
+  the computation of total energy, density, and ground state properties</li>
+  <li><a href="lesson_paral_dfpt.html">Parallelism of response-function
+  calculations</a> - you need to be familiarized with the calculation of
+  linear-response properties within ABINIT, see the tutorial <a
+  href="lesson_rf1.html"> Response-Function 1 (RF1)</a></li>
+  <li><a href="lesson_paral_mbt.html">Parallelism of Many-Body
+  Perturbation calculations (GW)</a> allows to speed up the calculation of
+  accurate electronic structures (quasi-particle band structure,
+  including many-body effects).</li>
+
+
+<p>The reader can find many examples of input files in the directory /tests/paral of the ABINIT package.
+<p>
+<script type="text/javascript" src="../users/list_internal_links.js"> </script>
+
+</body>
+</html>

@@ -1,0 +1,114 @@
+<html>
+<head>
+<title>k-points </title>
+<body bgcolor="#ffffff">
+<p>
+<hr>
+<h1>k-points</h1>
+<h3>This file gives the settings related to k-points to build an input file for ABINIT.
+<hr>
+
+<h5>Copyright (C) 1998-2017 ABINIT group (FJ,BA)
+<br> This file is distributed under the terms of the GNU General Public License, see
+~abinit/COPYING or <a href="http://www.gnu.org/copyleft/gpl.txt">http://www.gnu.org/copyleft/gpl.txt</a>.
+<br> For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
+</h5>
+
+<script type="text/javascript" src="../users/list_internal_links.js"> </script>
+
+<h3><b>Contents of ABINIT features: </b></h3>
+<ul>
+<li><a href="k_points.html#1">1.</a> Introduction.
+<li><a href="k_points.html#2">2.</a> Input variable settings.
+<li><a href="k_points.html#3">3.</a> Tutorial and examples.
+
+</ul>
+
+
+<HR ALIGN=left>
+
+<p><a name="1">&nbsp;</a> </p>
+<h3><b>1. Introduction</b></h3>
+
+
+ <p> Any kind of symmetries and corresponding sets of k-point can be input,
+and taken into account in the computation.
+<br/>Since ABINIT is based on periodic boundary conditions, the Brillouin
+zone must be sampled adequately. The number of k-points to be used
+for this sampling, in the full Brillouin zone, is inversely
+proportional to ucvol, but may also
+vary a lot from system to system. As a rule of thumb, a system
+with a large band gap will need few k-points, while metals will need
+lot of k-points to produce converged results.
+For large systems, the inverse scale with respect to ucvol
+is unfortunately stopped because at least one k-point must be
+used. The effective number of k-points to be used will be strongly
+influenced by the symmetries of the system, since only the
+irreducible part of the Brillouin zone must be sampled. Moreover
+the time-reversal symmetry (k equivalent to -k) can be used for
+ground-state calculations,
+to reduce sometimes even further the portion of the brillouin zone
+to be sampled. The number of k points to be used in a calculation
+is named nkpt. There is another way to take advantage of the
+time-reversal symmetry, in the specific case of k-points that are
+invariant under k => -k , or are sent to another vector distant
+of the original one by some vector of the reciprocal lattice.
+See below for more explanation about the advantages of using
+these k-points.
+
+<br/>As a rule of thumb, for homogeneous systems, a reasonable accuracy may be
+reached when the product of the number of atoms by the number of k-points
+in the full Brillouin zone is on the order of 50 or larger, for wide gap
+insulators, on the order of 250 for small gap semiconductors like Si,
+and beyond 500 for metals, depending on the value of the input variable
+tsmear. As soon as there is some vacuum in the system, the product
+natom * nkpt can be much smaller than this (for an isolated molecule
+in a sufficiently large supercell, one k-point is enough).
+
+<p>&nbsp;
+<HR ALIGN=left>
+<p> <a name="2">&nbsp;</a>
+<h3><b>2.Input variable settings. </b></h3>
+
+<p>Important input variables:
+<p>
+<a href="../input_variables/html_automatically_generated/vargs.html#chksymbreak" target="kwimg">chksymbreak</a>
+<a href="../input_variables/html_automatically_generated/varbas.html#kptopt" target="kwimg">kptopt</a>
+<a href="../input_variables/html_automatically_generated/varbas.html#ngkpt" target="kwimg">ngkpt</a>
+
+<p>Useful input variables:
+<p>
+<a href="../input_variables/html_automatically_generated/vardev.html#istwfk" target="kwimg">istwfk</a>
+<a href="../input_variables/html_automatically_generated/varbas.html#kpt" target="kwimg">kpt</a>
+<a href="../input_variables/html_automatically_generated/varbas.html#kptnrm" target="kwimg">kptnrm</a>
+<a href="../input_variables/html_automatically_generated/vargs.html#kptrlatt" target="kwimg">kptrlatt</a>
+<a href="../input_variables/html_automatically_generated/vargs.html#kptrlen" target="kwimg">kptrlen</a>
+<a href="../input_variables/html_automatically_generated/varbas.html#nkpt" target="kwimg">nkpt</a> 
+<a href="../input_variables/html_automatically_generated/varbas.html#nshiftk" target="kwimg">nshiftk</a> 
+<a href="../input_variables/html_automatically_generated/varbas.html#shiftk" target="kwimg">shiftk</a> 
+<a href="../input_variables/html_automatically_generated/varbas.html#wtk" target="kwimg">wtk</a> 
+  
+<p>Input variables for experts:
+<p>
+<a href="../input_variables/html_automatically_generated/vargs.html#kptbounds" target="kwimg">kptbounds</a>
+<a href="../input_variables/html_automatically_generated/vargs.html#ndivk" target="kwimg">ndivk</a>
+<a href="../input_variables/html_automatically_generated/vargs.html#ndivsm" target="kwimg">ndivsm</a> 
+<a href="../input_variables/html_automatically_generated/vargs.html#vacuum" target="kwimg">vacuum</a>
+<a href="../input_variables/html_automatically_generated/vargs.html#vacwidth" target="kwimg">vacwidth</a>
+
+<p>&nbsp;
+<HR ALIGN=left>
+<p> <a name="3">&nbsp;</a>
+<h3><b>3. Tutorials and examples.</b></h3>
+
+  <li><a href="../tutorial/lesson_base3.html">The lesson 3</a> deals with crystalline
+  silicon (an insulator): the definition of a k-point grid, the smearing
+  of the cut-off energy, the computation of a band structure, and again,
+  convergence studies ...</li>
+
+<p>The reader can find many examples of input files in the directory /tests of the ABINIT package.
+<p>
+<script type="text/javascript" src="../users/list_internal_links.js"> </script>
+
+</body>
+</html>

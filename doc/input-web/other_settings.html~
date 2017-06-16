@@ -1,0 +1,105 @@
+<html>
+<head>
+<title>Other general settings </title>
+<body bgcolor="#ffffff">
+<p>
+<hr>
+<h1>Other general settings</h1>
+<h3>This file gives some other less important settings to build an input file for ABINIT.
+<hr>
+
+<h5>Copyright (C) 1998-2017 ABINIT group (FJ)
+<br> This file is distributed under the terms of the GNU General Public License, see
+~abinit/COPYING or <a href="http://www.gnu.org/copyleft/gpl.txt">http://www.gnu.org/copyleft/gpl.txt</a>.
+<br> For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
+</h5>
+
+<script type="text/javascript" src="../users/list_internal_links.js"> </script>
+
+<h3><b>Contents of ABINIT features: </b></h3>
+<ul>
+<li><a href="other_settings.html#1">1.</a> Introduction.
+<li><a href="other_settings.html#2">2.</a> Input variable settings.
+<li><a href="other_settings.html#3">3.</a> Tutorial and examples.
+
+</ul>
+
+
+<HR ALIGN=left>
+
+<p><a name="1">&nbsp;</a> </p>
+<h3><b>1. Introduction</b></h3>
+
+
+ <p> In this section, some very specific input variables are gathered, either to perform alchemical calculations, to build slabs, to control job time limits or for expert developpers.
+
+
+<p>&nbsp;
+<HR ALIGN=left>
+<p> <a name="2">&nbsp;</a>
+<h3><b>2.Input variable settings. </b></h3>
+
+<p>Input variables related to alchemical mixing:
+<p>
+<a href="../input_variables/html_automatically_generated/vargs.html#algalch" target="kwimg">algalch</a>
+<a href="../input_variables/html_automatically_generated/vargs.html#mixalch" target="kwimg">mixalch</a>
+<a href="../input_variables/html_automatically_generated/vargs.html#npsp" target="kwimg">npsp</a>
+<a href="../input_variables/html_automatically_generated/vargs.html#npspalch" target="kwimg">npspalch</a>
+<a href="../input_variables/html_automatically_generated/vargs.html#ntypalch" target="kwimg">ntypalch</a>
+<a href="../input_variables/html_automatically_generated/vargs.html#ntyppure" target="kwimg">ntyppure</a>
+
+<p>Input variables for job time limits:
+<p>
+<a href="../input_variables/html_automatically_generated/vargs.html#cpuh" target="kwimg">cpuh</a>
+<a href="../input_variables/html_automatically_generated/vargs.html#cpum" target="kwimg">cpum</a>
+<a href="../input_variables/html_automatically_generated/vargs.html#cpus" target="kwimg">cpus</a>
+
+<p>Input variables to insert a slab:
+<p>
+<a href="../input_variables/html_automatically_generated/vargs.html#jellslab" target="kwimg">jellslab</a>
+<a href="../input_variables/html_automatically_generated/vargs.html#slabwsrad" target="kwimg">slabwsrad</a>
+<a href="../input_variables/html_automatically_generated/vargs.html#slabzbeg" target="kwimg">slabzbeg</a>
+<a href="../input_variables/html_automatically_generated/vargs.html#slabzend" target="kwimg">slabzend</a>
+
+<p>Input variables for experts:
+<p>
+<a href="../input_variables/html_automatically_generated/vardev.html#eshift" target="kwimg">eshift</a>
+<a href="../input_variables/html_automatically_generated/vardev.html#nloc_alg" target="kwimg">nloc_alg</a>
+<a href="../input_variables/html_automatically_generated/vardev.html#nloc_mem" target="kwimg">nloc_mem</a>
+<a href="../input_variables/html_automatically_generated/vardev.html#papiopt" target="kwimg">papiopt</a>
+<a href="../input_variables/html_automatically_generated/varrlx.html#random_atpos" target="kwimg">random_atpos</a>
+<a href="../input_variables/html_automatically_generated/varpaw.html#usepotzero" target="kwimg">usepotzero</a>
+
+
+<p>Input variables for expert developpers:
+<p>
+
+<a href="../input_variables/html_automatically_generated/vardev.html#mem_test" target="kwimg">mem_test</a>
+<a href="../input_variables/html_automatically_generated/vardev.html#builtintest" target="kwimg">builtintest</a>
+<a href="../input_variables/html_automatically_generated/vardev.html#fftcache" target="kwimg">fftcache</a>
+<a href="../input_variables/html_automatically_generated/vardev.html#istatr" target="kwimg">istatr</a>
+<a href="../input_variables/html_automatically_generated/vardev.html#istatshft" target="kwimg">istatshft</a>
+<a href="../input_variables/html_automatically_generated/vardev.html#useria" target="kwimg">useria</a>
+<a href="../input_variables/html_automatically_generated/vardev.html#userib" target="kwimg">userib</a>
+<a href="../input_variables/html_automatically_generated/vardev.html#useric" target="kwimg">useric</a>
+<a href="../input_variables/html_automatically_generated/vardev.html#userid" target="kwimg">userid</a>
+<a href="../input_variables/html_automatically_generated/vardev.html#userie" target="kwimg">userie</a>
+<a href="../input_variables/html_automatically_generated/vardev.html#userra" target="kwimg">userra</a>
+<a href="../input_variables/html_automatically_generated/vardev.html#userrb" target="kwimg">userrb</a>
+<a href="../input_variables/html_automatically_generated/vardev.html#userrc" target="kwimg">userrc</a>
+<a href="../input_variables/html_automatically_generated/vardev.html#userrd" target="kwimg">userrd</a>
+<a href="../input_variables/html_automatically_generated/vardev.html#userre" target="kwimg">userre</a>
+
+
+<p>&nbsp;
+<HR ALIGN=left>
+<p> <a name="3">&nbsp;</a>
+<h3><b>3. Tutorials and examples.</b></h3>
+
+ 
+<p>The reader can find many examples of input files in the directory /tests of the ABINIT package.
+<p>
+<script type="text/javascript" src="../users/list_internal_links.js"> </script>
+
+</body>
+</html>

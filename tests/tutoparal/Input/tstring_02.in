@@ -77,11 +77,13 @@
 #%% [setup]
 #%% executable = abinit
 #%% [files]
+#%% psp_files = 8o_hard.paw, 7n.paw, 1h.paw
+#%% [NCPU_20]
 #%% files_to_test = 
 #%%   tstring_02.out, tolnlines = 0, tolabs = 1.100e-03, tolrel = 3.000e-03
-#%% psp_files = 8o_hard.paw, 7n.paw, 1h.paw
 #%% [paral_info]
 #%% nprocs_to_test = 20
+#%% max_nprocs = 20
 #%% [extra_info]
 #%% authors = 
 #%% keywords = 

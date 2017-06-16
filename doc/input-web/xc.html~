@@ -1,0 +1,128 @@
+<html>
+<head>
+<title>Exchange and correlation functionals </title>
+<body bgcolor="#ffffff">
+<p>
+<hr>
+<h1>Exchange and correlation functionals</h1>
+<h3>This file give the settings for the exchange and correlation functionals to build an input file for ABINIT.
+<hr>
+
+<h5>Copyright (C) 1998-2017 ABINIT group (FJ,BA)
+<br> This file is distributed under the terms of the GNU General Public License, see
+~abinit/COPYING or <a href="http://www.gnu.org/copyleft/gpl.txt">http://www.gnu.org/copyleft/gpl.txt</a>.
+<br> For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
+</h5>
+
+<script type="text/javascript" src="../users/list_internal_links.js"> </script>
+
+<h3><b>Contents of ABINIT features: </b></h3>
+<ul>
+<li><a href="xc.html#1">1.</a> Introduction.
+<li><a href="xc.html#2">2.</a> Input variable settings.
+<li><a href="xc.html#4">3.</a> Tutorial and exemples.
+<li><a href="xc.html#4">4.</a> Local exact exchange.
+<li><a href="xc.html#5">5.</a> Hybrid functionals.
+<li><a href="xc.html#6">6.</a> Van der Waals functionals.
+</ul>
+
+
+<HR ALIGN=left>
+
+<p><a name="1">&nbsp;</a> </p>
+<h3><b>1. Introduction</b></h3>
+
+The total energy computation is done according to the Density Functional
+Theory. 
+<br/>Many exchange-correlation functionals are available,
+through two different implementations : one is the native ABINIT implementation,
+the other is the ETSF library of XC functionals (LibXC is a plug-in to ABINIT).
+In the native ABINIT set,
+most of the important local approximations (LDA) are
+available, including the Perdew-Zunger one. Two different local spin density
+(LSD) are available, including the Perdew Wang 92, and one due to M. Teter.
+The Perdew-Burke-Ernzerhof,  the revPBE, the RPBE
+and the HCTH GGAs (spin unpolarized as well as polarized)
+are also available.
+
+<br/>In the LibXC 2.0 library, as interfaced with ABINIT,
+there are 24 functional forms of the 3D LDA type, and over 80 functional forms of the GGA type.
+They can be used with norm-conserving pseudopotentials as well as PAW atomic data.
+Also, some metaGGA can be used with ABINIT (norm-conserving case only).
+For response-function type calculations, the native ABINIT LDA and GGA kernels 
+can be used as well as the LibXC ones.
+
+<br/>The exchange can also be computed on the basis of the Fock expression (exact exchange), and the correlation
+can be computed on the basis of the RPA approximation (see the GW section).
+Hybrid functionals calculations (HSE06, PBE0, B3LYP) can be performed.
+The implementation of the exact exchange, correlation and hybrid does not deliver the forces and stresses at present,
+at the exception of forces with norm-conserving pseudopotentials.
+
+<br/>Several Van Der Waals functionals are available : Grimme (D2, D3, D3(Becke-Johnson)), Silvestrelli.
+
+
+<p>&nbsp;
+<HR ALIGN=left>
+<p> <a name="2">&nbsp;</a>
+<h3><b>2.Input variable settings. </b></h3>
+
+<p>Important input variables:
+<p>
+<a href="../input_variables/html_automatically_generated/varbas.html#ixc" target="kwimg">ixc</a>
+
+   
+<p>Input variables for experts:
+<p>
+<a href="../input_variables/html_automatically_generated/vardev.html#densty" target="kwimg">densty</a>
+<a href="../input_variables/html_automatically_generated/vardev.html#intxc" target="kwimg">intxc</a>
+<a href="../input_variables/html_automatically_generated/vardev.html#optnlxccc" target="kwimg">optnlxccc</a>
+<a href="../input_variables/html_automatically_generated/vargs.html#usekden" target="kwimg">usekden</a>
+<a href="../input_variables/html_automatically_generated/vardev.html#xc_denpos" target="kwimg">xc_denpos</a>
+<a href="../input_variables/html_automatically_generated/vardev.html#xc_tb09_c" target="kwimg">xc_tb09_c</a>
+
+
+<p>&nbsp;
+<HR ALIGN=left>
+<p> <a name="3">&nbsp;</a>
+<h3><b>3. Tutorials and exemples.</b></h3>
+
+<li><a href="../tutorial/lesson_base2.html">The lesson 2</a> deals again with the H2
+  molecule: convergence studies, LDA versus GGA </li>
+
+<p>The reader can find many examples of input files in the directory /tests of the ABINIT package.
+
+
+<p>&nbsp;
+<HR ALIGN=left>
+<p> <a name="4">&nbsp;</a>
+<h3><b>4. Local exact exchange.</b></h3>
+<p>
+When useexexch=1, the hybrid functional PBE0 is used in PAW, inside PAW spheres only, and only for correlated orbitals given by lexexch. To change the ratio of exact exchange, see also exchmix. The implementation of local exact exchange in ABINIT is provided in [1].
+<p><br/>
+[1]F. Jollet, G. Jomard, B. Amadon, J.P. Crocombette, D. Torumba, Hybrid functional for correlated electrons in the projector augmented-wave formalism: Study of multiple minima for actinide oxides, Phys. Rev. B 80, 235109 (2009)
+
+<p>
+<a href="../input_variables/html_automatically_generated/vardev.html#exchmix" target="kwimg">exchmix</a>
+<a href="../input_variables/html_automatically_generated/varpaw.html#lexexch" target="kwimg">lexexch</a>
+<a href="../input_variables/html_automatically_generated/varpaw.html#useexexch" target="kwimg">useexexch</a>
+<br/>
+<p>The reader can find an example in the ABINIT package in the directory /tests/v5/Input: t18.in
+
+
+<p>&nbsp;
+<HR ALIGN=left>
+<p> <a name="5">&nbsp;</a>
+<h3><b>5. <a href="hf.html#hybrid functionals">Hybrid functionals</a>.</b></h3>
+<p>
+
+<p>&nbsp;
+<HR ALIGN=left>
+<p> <a name="6">&nbsp;</a>
+<h3><b>5. <a href="vdw.html#Vander Waals functionals">Van der Waals functionals</a>.</b></h3>
+<p>
+<br/>
+
+<script type="text/javascript" src="../users/list_internal_links.js"> </script>
+
+</body>
+</html>
