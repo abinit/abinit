@@ -438,8 +438,8 @@ program anaddb
    call ifc_print(ifc, unit=std_out)
 
    ! Compute speed of sound.
-   if (inp%vs_qrad_tolms(1) > zero) then
-     call ifc_speedofsound(ifc, crystal, inp%vs_qrad_tolms, ana_ncid, comm)
+   if (inp%vs_qrad_tolkms(1) > zero) then
+     call ifc_speedofsound(ifc, crystal, inp%vs_qrad_tolkms, ana_ncid, comm)
      !call ifc_test_phinterp(ifc, crystal, [8,8,8], 1, [zero,zero,zero], [3,3,3], comm, test_dwdq=.True.)
      !stop
    end if

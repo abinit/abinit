@@ -923,7 +923,7 @@ with_linalg_libs="-L/usr/local/OpenBLAS/lib -lopenblas -lpthread"
 #
 # You may specify any combination, using '+' as a separator
 #
-with_dft_flavor="atompaw+libxc+wannier90+bigdft"
+with_dft_flavor="atompaw+libxc+wannier90"
 
                        # ------------------------------ #
 
