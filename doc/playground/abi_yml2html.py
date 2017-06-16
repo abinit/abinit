@@ -5,7 +5,7 @@ import re
 import argparse
 from variables import *
 
-debug = 0
+debug = 1
 
 # Path relative from HTML files
 js_path = "../"
@@ -110,12 +110,6 @@ with open('html_template/temp_specials.html') as f:
 
 header_all = header_all.replace("__JS_PATH__",js_path)
 
-# Initialize the output
-output = ''
-output = output + header_all + "<br />\n"
-cur_let = 'A'
-output = output + "<p>"+cur_let+".&nbsp;\n"
-
 all_contents = dict()
 all_vars = dict()
 
@@ -131,7 +125,15 @@ cur_specials = []
 for (specialkey,specialval) in list_specials:
   cur_specials.append(specialkey)
 
-# Recompute groups
+################################################################################
+# Constitute the body of information for all variables, stored for the appropriate section in all_contents[section]
+
+# Initialize the all variable file output
+output = ''
+output = output + header_all + "<br />\n"
+cur_let = 'A'
+output = output + "<p>"+cur_let+".&nbsp;\n"
+
 for i, var in enumerate(variables):
   if debug==1 :
     print(var)
@@ -150,7 +152,7 @@ for i, var in enumerate(variables):
 
   all_vars[section].append([var.varname,var.definition])
 
-  # Constitute the body of information related to one input variable, store it in all_contents[section]
+  # Constitute the body of information related to one input variable
   cur_content = ""
 
   try:
@@ -187,6 +189,9 @@ for i, var in enumerate(variables):
   except AttributeError as e:
     print(e)
     print('For variable : ',varname)
+
+################################################################################
+# Generate the files that document all the variables.
 
 # For each "normal" section file : generate the header, generate the alphabetical list, write these,
 # then complete the content (that was previously gathered), then write the file and close it
@@ -259,3 +264,66 @@ file_html = 'html_automatically_generated/allvariables.html'
 f_html = open(file_html,'w')
 f_html.write(output)
 f_html.close()
+
+################################################################################
+# Constitute the body of information for all variables, stored for the appropriate topic_names in all_contents_topics[topic_name]
+topic_content = dict()
+topic_class_content = dict()
+found = dict()
+for i, var in enumerate(variables):
+  if var.topic_name not in topic_content.keys():
+    topic_name = var.topic_name
+    topic_class_content[topic_name] = ""
+    topic_content[topic_name] = ""
+    found[topic_name] = 0
+
+print(topic_class_content)
+
+for (tclasskey, tclassval) in list_topics_class:
+  for topic_name, value in topic_class_content.items():
+    topic_class_content[topic_name] = "<p>"+tclassval+"<p>"
+  for i, var in enumerate(variables):
+    if tclasskey==var.topic_class : 
+      if debug==1 :
+        print(var)
+      topic_name = var.topic_name
+      found[topic_name] = 1
+      varname = var.varname
+      if var.characteristics is not None and '[[INTERNAL_ONLY]]' in var.characteristics:
+        varname = '%'+varname
+
+      # Constitute the line of information related to one input variable
+      topic_class_content[topic_name] += "... <a href=\""+var.section+".html#"+var.varname+"\">"+varname+"</a>   "
+      topic_class_content[topic_name] += "["+var.definition+"]<br>\n"
+
+      if debug==1 :
+        print(topic_class_content)
+
+  for topic_name, value in found.items():
+    if found[topic_name] == 1:
+      topic_content[topic_name] = topic_content[topic_name] + topic_class_content[topic_name]
+      found[topic_name] = 0
+
+################################################################################
+# Generate the "topic" files
+
+# For each "topic" file 
+for topic_name, content in topic_content.items():
+  file_topic = 'html_automatically_generated/'+topic_name+'.html'
+  f_topic = open(file_topic,'w')
+
+  with open('html_template/temp_'+topic_name+'.html') as f:
+    header_varX = f.read()
+
+  topic_header_varX = header_varX.replace("__JS_PATH__",js_path)
+  topic_header_varX += "<script type=\"text/javascript\" src=\""+js_path+"related_input_variables.js\"> </script>\n\n"
+
+  f_topic.write(topic_header_varX)
+  content += "<br>"
+  content += "<script type=\"text/javascript\" src=\""+js_path+"list_internal_links.js\"> </script>\n\n"
+  content += "</body>\n"
+  content += "</html>"
+  f_topic.write(content)
+  f_topic.write("\n")
+  f_topic.close()
+

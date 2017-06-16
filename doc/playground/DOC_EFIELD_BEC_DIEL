@@ -1,0 +1,34 @@
+Born effective charge and dielectric constant calculation in finite electric field:
+
+References :
+<li>Responses in the presence of an applied electric field
+<br><cite> XJ Wang and D. Vanderbilt, Phys. Rev. B 75, 115116 (2007).</cite>
+<br><cite> XJ Wang and D. Vanderbilt, Phys. Rev. B 74, 054304 (2006).</cite>
+
+The calculations require three steps:
+
+1. run a scf ground-state calculation at zero electric field
+   to get wave functions for the ground-state calculation in finite electric
+   fields.
+
+2. run a scf ground-state calculation in finite electric field. The
+   electric field is controlled by the input variable 'efield'. And
+   'berryopt' should be 4. The input variable 'kptopt' should be set
+   to be 2.
+
+3. Based on the ground-state wave functions obtained in step (2), linear response
+   calculations of phonon perturbation and electric field perturbation are performed.
+   The critical input variables are:
+  rfphon30   1
+ rfatpol30   1 2
+   rfdir30   1 1 1
+  rfelfd30   3      #turn on electric field perturbation in finite electric field.
+    nqpt30   1
+  kptopt30   3
+berryopt30   4
+    nsym30   1      #use no symmetry
+     qpt30   0.0 0.0 0.0
+
+   The choice of k-point sampling N x N x N should be the same in the three steps
+   and N is restricted to the even integers (2,4,6,8...).
+
