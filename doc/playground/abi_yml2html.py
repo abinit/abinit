@@ -272,6 +272,8 @@ for i, var in enumerate(variables):
   if debug==1 :
     print(var)
   varname = var.varname
+  if var.characteristics is not None and '[[INTERNAL_ONLY]]' in var.characteristics:
+    varname = '%'+varname
   topic_name = var.topic_name
 
   # Constitute the line of information related to one input variable
