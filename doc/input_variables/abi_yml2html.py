@@ -12,6 +12,8 @@ js_path = "../"
 users_path = "../../users/"
 
 
+# Definitions
+
 def format_dimensions(dimensions):
 
   if dimensions is None:
@@ -80,6 +82,9 @@ def make_links(text,cur_varname,variables,characteristics,specials):
 
   return new_text
 
+############################################################################################"
+# Parse the yml file -> variables
+
 file='abinit_vars.yml'
 
 parser = argparse.ArgumentParser(description='Tool for eigenvalue analysis')
@@ -94,7 +99,8 @@ print("Will use "+str(file)+" as input file")
 with open(file, 'r') as f:
     variables = yaml.load(f);
 
-output = ''
+
+# Parse the headers of allvariables and special variables files also replace the JS_PATH.
 
 with open('html_template/temp_allvariables.html') as f:
     header_all = f.read()
@@ -104,19 +110,23 @@ with open('html_template/temp_specs.html') as f:
 
 header_all = header_all.replace("__JS_PATH__",js_path)
 
+# Initialize the output
+output = ''
 output = output + header_all + "<br />\n"
+cur_let = 'A'
+output = output + "<p>"+cur_let+".&nbsp;\n"
 
 all_contents = dict()
 all_vars = dict()
+
+# Create a dictionary that gives the section for each varname
 
 list_all_vars = dict()
 
 for var in variables:
   list_all_vars[var.varname] = var.section
 
-cur_let = 'A'
-output = output + "<p>"+cur_let+".&nbsp;\n"
-
+#
 cur_specials = []
 for (specialkey,specialval) in list_specials:
   cur_specials.append(specialkey)
@@ -219,14 +229,13 @@ for (speckey, specval) in list_specials:
   curlink = "<a href=\"#"+speckey+"\">"+speckey+"</a>&nbsp;&nbsp;\n"
   f_sp.write(curlink)
 
-for (speckey, specval) in list_specials:
- cur_content = "<br><br><br><br><a href=#top>Go to the top</a><hr>\n"
- cur_content += "<br><font id=\"title\"><a name=\""+speckey+"\">"+speckey+"</a></font>\n"
- cur_content += "<br><font id=\"text\">\n"
- cur_content += "<p>\n"+doku2html(make_links(specval,speckey,list_all_vars,list_chars,cur_specials))+"\n"
- cur_content += "</font>"
+  cur_content = "<br><br><br><br><a href=#top>Go to the top</a><hr>\n"
+  cur_content += "<br><font id=\"title\"><a name=\""+speckey+"\">"+speckey+"</a></font>\n"
+  cur_content += "<br><font id=\"text\">\n"
+  cur_content += "<p>\n"+doku2html(make_links(specval,speckey,list_all_vars,list_chars,cur_specials))+"\n"
+  cur_content += "</font>"
 
- f_sp.write(cur_content)
+  f_sp.write(cur_content)
 
 
 cur_content = "\n<script type=\"text/javascript\" src=\""+js_path+"list_internal_links.js\"> </script>\n\n"
