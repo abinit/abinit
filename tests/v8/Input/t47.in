@@ -134,5 +134,5 @@ nbdbuf 0
 #%%     AlAs, zinc-blende structure.
 #%%     Code abinit (gstate+respfn+nonlinear)
 #%%     Generate the linear and non-linear coefficients, in two DDBs,
-#%%     to be merged and analysed in the tests 53 and 54.
+#%%     to be merged and analysed in the tests 48, 49 and 50.
 #%%<END TEST_INFO>
