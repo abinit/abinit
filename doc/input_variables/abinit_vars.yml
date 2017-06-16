@@ -1,6 +1,5 @@
 - !variable
     characteristics:
-    - '[[ENERGY]]'
     commentdefault: null
     commentdims: null
     defaultval: 0
