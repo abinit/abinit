@@ -316,6 +316,7 @@ for topic_name, content in topic_content.items():
     header_varX = f.read()
 
   topic_header_varX = header_varX.replace("__JS_PATH__",js_path)
+  topic_header_varX += "<script type=\"text/javascript\" src=\""+js_path+"related_input_variables.js\"> </script>\n\n"
 
   f_topic.write(topic_header_varX)
   content += "<br>"

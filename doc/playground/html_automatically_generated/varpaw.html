@@ -1,0 +1,90 @@
+<html>
+<head><title>PAW variables.</title>
+<link rel=stylesheet type="text/css" href="../formabinit.css">
+</head>
+<body bgcolor="#ffffff">
+
+<hr>
+<a name="top"></a>
+
+<h1>ABINIT, PAW input variables:</h1>
+<h2>List and description.</h2>
+
+<hr>
+
+<p>This document lists and provides the description
+of the name (keywords) of the input
+variables for runs based on the Projector Augmented Waves methodology,
+to be used in the
+main input file of the abinit code.
+
+<script type="text/javascript" src="../generic_advice.js"> </script>
+<script type="text/javascript" src="../copyright.js"> </script>
+<script type="text/javascript" src="../list_internal_links.js"> </script>
+<script type="text/javascript" src="../list_htmlfiles_input_variables.js"> </script>
+
+<a name="list"></a>
+<h3><b> Content of the file : alphabetical list of PAW input variables.</b></h3>
+ <br>A.
+ <br>B.
+ <br>C.
+ <br>D.
+ <br>E.
+ <br>F.
+ <br>G.
+ <br>H.
+ <br>I.
+ <br>J.
+ <br>K.
+ <br>L.
+ <br>M.
+ <br>N.
+ <br>O.
+ <br>P.
+ <br>Q.
+ <br>R.
+ <br>S.
+ <br>T.
+ <br>U.
+ <a href="#usedmatpu">usedmatpu</a>&nbsp;&nbsp;
+
+<br><br><br><br><hr>
+<br><font id="title"><a name="usedmatpu">usedmatpu</a></font>
+<br><font id="definition">Mnemonics: USE of an initial Density MATrix in Paw+U</font>
+<br><font id="characteristic">Characteristic: </font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><br><font id="requires">
+Only relevant if <a href="#">[[FAKE LINK:usepaw]]</a>==1 and <a href="#">[[FAKE LINK:usepawu]]</a>==1
+</font>
+<br><font id="text">
+<p>
+<p>
+ When <b>usedmatpu</b>/=0, an initial density matrix (given by <a href="#">[[FAKE LINK:dmatpawu]]</a>
+keyword) is used and kept fixed during the first ABS(<b>usedmatpu</b>) SCF steps.
+ <br />
+ This starting value of the density matrix can be useful to find the correct ground state.
+Within LDA+U formalism, finding the minimal energy of the system is tricky; thus it is advised to test several values
+of the initial density matrix.
+ <br />
+ Note also that the density matrix has to respect some symmetry rules determined by the space group.
+If the symmetry is not respected in the input, the matrix is however automatically symmetrised.
+ <br />
+ <br />
+ The sign of <b>usedmatpu</b> has influence only when <a href="#">[[FAKE LINK:ionmov]]</a>/=0 (dynamics or relaxation):
+ <br />
+ - When <b>usedmatpu</b>&gt;0, the density matrix is kept constant only at first ionic step
+ <br />
+ - When <b>usedmatpu</b>&lt;0, the density matrix is kept constant at each ionic step
+ <br />
+</p>
+</font>
+
+<br><br><br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
+
+
+<script type="text/javascript" src="../list_internal_links.js"> </script>
+
+</body>
+</html>

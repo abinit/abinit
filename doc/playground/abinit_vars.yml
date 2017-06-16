@@ -253,6 +253,40 @@
     varname: scalecart
     vartype: real
 - !variable
+    characteristics: null
+    commentdefault: null
+    commentdims: null
+    defaultval: 0
+    definition: USE of an initial Density MATrix in Paw+U
+    dimensions: scalar
+    excludes: null
+    requires: '[[usepaw]]==1 and [[usepawu]]==1'
+    section: varpaw
+    text: |-
+        <p>
+         When [[usedmatpu]]/=0, an initial density matrix (given by [[dmatpawu]]
+        keyword) is used and kept fixed during the first ABS([[usedmatpu]]) SCF steps.
+         <br />
+         This starting value of the density matrix can be useful to find the correct ground state.
+        Within LDA+U formalism, finding the minimal energy of the system is tricky; thus it is advised to test several values
+        of the initial density matrix.
+         <br />
+         Note also that the density matrix has to respect some symmetry rules determined by the space group.
+        If the symmetry is not respected in the input, the matrix is however automatically symmetrised.
+         <br />
+         <br />
+         The sign of [[usedmatpu]] has influence only when [[ionmov]]/=0 (dynamics or relaxation):
+         <br />
+         - When [[usedmatpu]]&gt;0, the density matrix is kept constant only at first ionic step
+         <br />
+         - When [[usedmatpu]]&lt;0, the density matrix is kept constant at each ionic step
+         <br />
+        </p>
+    topic_class: useful
+    topic_name: DFT+U
+    varname: usedmatpu
+    vartype: integer
+- !variable
     characteristics:
     - '[[INPUT_ONLY]]'
     commentdefault: null

@@ -24,6 +24,7 @@ list_specials = [
 
 list_topics_class = [
     ('compulsory', 'Compulsory input variables:'),
+    ('basic', 'Basic input variables:'),
     ('useful', 'Useful input variables:'),
     ('expert', 'Input variables for experts:'),
     ('internal', 'Relevant internal variables:'),
