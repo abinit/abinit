@@ -131,7 +131,8 @@ cur_specials = []
 for (specialkey,specialval) in list_specials:
   cur_specials.append(specialkey)
 
-# Recompute groups
+################################################################################
+# Constitute the body of information for all variables, stored for the appropriate section in all_contents[section]
 for i, var in enumerate(variables):
   if debug==1 :
     print(var)
@@ -150,7 +151,7 @@ for i, var in enumerate(variables):
 
   all_vars[section].append([var.varname,var.definition])
 
-  # Constitute the body of information related to one input variable, store it in all_contents[section]
+  # Constitute the body of information related to one input variable
   cur_content = ""
 
   try:
@@ -188,6 +189,7 @@ for i, var in enumerate(variables):
     print(e)
     print('For variable : ',varname)
 
+################################################################################
 # For each "normal" section file : generate the header, generate the alphabetical list, write these,
 # then complete the content (that was previously gathered), then write the file and close it
 for section, content in all_contents.items():

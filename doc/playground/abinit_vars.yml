@@ -31,8 +31,8 @@
         Use [[scalecart]] to scale the cartesian coordinates.
         </p>
     topics: 
-    - { topic_name: crystal, topic_level: basic}
-    - { topic_name: crystal2, topic_level: compulsory}
+    - { topic_name: crystal, topic_level: basic }
+    - { topic_name: crystal2, topic_level: compulsory }
     varname: acell
     vartype: real
 - !variable
