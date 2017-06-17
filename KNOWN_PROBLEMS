@@ -6,7 +6,7 @@ at the time a version of ABINIT is released.
 Note that bugs discovered later than the
 release are NOT described here...
 
-The present release 8.4.0 is for production
+The present release ABINITv8.5.1 is for development
 0. List of platforms
 1. Batteries of tests
 2. List of known problems
@@ -14,7 +14,7 @@ The present release 8.4.0 is for production
 ================================================================
 0. Platforms
 
-For version 8.4.0, list closed on 2017 05 24
+For ABINITv8.5.1, list closed on 2017 06 30
 after installation and successful tests for the standard set of platforms,
 as mentioned on 
 https://bbportal.abinit.org/#/status
@@ -26,19 +26,30 @@ Supported compilers : gfortran, intel fortran, NAG, IBM XLF.
 The following compilers are either obsolete, or considered too unstable/buggy for ABINIT :
 g95, pathscale, open64, PGI . This does not mean that ABINIT will not work, but there is no guarantee for ABINIT to run correctly.
 
-Versions of compilers known to be too buggy for ABINIT 
+Status, for the different versions of compilers that are supported (or might become soon).
 
-intel12.0 or intel 12.1.X with X lower than 4   (=> use intel 12.1.4 instead, or intel 13.1.3)
-Versions 13 and 14 of intel compilo are OK.
-Version 15 is mostly OK, except for one test paral#30 (on ubu).
-Version 16 is mostly OK, except for one test paral#30 (on ubu).
-
-With gcc 4.7, it has been observed that the option fast-math causes troubles : it gives numerically
+GNU Fortran compiler (presently tested : v4.7, v4.9, v5.3, v5.4, v6.1, v6.3)
+With gnu 4.7, it has been observed that the option fast-math causes troubles : it gives numerically
 erroneous results for the test v67mbpt#16. Disactivating it for directory 71_bse (especially routine m_exc_itdiago.F90)
 allows to get correct results. 
+For all gnu versions, v67mbpt#11 is disactivated on shiva.
+For all gnu versions, bigdft#14 is disactivated on abiref.
+Version gnu 5.3 : bigdft#14 is disactivated on ubu_gnu_5.3_openmpi
 
-The automatic generation of binaries for the production machine Green has been disabled in 2015,
-as this machine had become obsolete.
+Intel ifort compiler (presently tested : 13.1, 14.0, 15.0, 16.0, 17.0)
+Ifort 13.1 might show some problem with parallelisation (MPI IO, KGB, or calculations with exact exchange)
+Ifort 14.0 is OK.
+Ifort 15.0 is mostly OK, except for one test paral#30 (on ubu). Paral KGB.
+Ifort 16.0 is mostly OK, except for one test paral#30 (on ubu). Paral KGB.
+Ifort 17.0 is mostly OK, except for Multibinit, for some tests with BigDFT, and for the strain perturbation with PAW.
+
+NAG Compilo
+Nag 5.3 is mostly OK (Tv6#67 is excluded)
+Nag 6.1, there are some problems with paral tests. Not yet in the nightly pool.
+
+IBM
+IBM 15.1 is mostly OK, except for the computation of U in cRPA (tests v7#23,24,25).
+
 
 =============================================================
 1. Batteries of tests

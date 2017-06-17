@@ -1,5 +1,5 @@
-# Crystalline diamond : computation of the total energy
-#
+# Crystalline silicon : computation of the total energy using PBE0 functional
+# Norm-conserving
 
 ndtset 2         # Two datasets : 1) LDA 2) PBE0
 

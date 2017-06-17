@@ -40,13 +40,14 @@
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
+#%% exclude_builders = ubu_intel_13.1_openmpi
 #%% [files]
 #%% psp_files = 6c_lda.paw
 #%% [paral_info]
 #%% nprocs_to_test = 4
 #%% max_nprocs = 4
 #%% [NCPU_4]
-#%% files_to_test = t29_MPI4.out, tolnlines=   16,   tolabs=  4.0e-7,      tolrel= 2.0e-2
+#%% files_to_test = t29_MPI4.out, tolnlines=   35,   tolabs=  1.1e-5,      tolrel= 2.0e-2
 #%% [extra_info]
 #%% keywords = PAW
 #%% authors = M. Giantomassi

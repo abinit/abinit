@@ -1178,6 +1178,7 @@ end function g2ifft
 !!
 !! PARENTS
 !!      bethe_salpeter,calc_sigc_me,cchi0,cchi0q0,cohsex_me,screening,sigma
+!!      m_dvdb
 !!
 !! CHILDREN
 !!      xcopy
@@ -1627,6 +1628,7 @@ end subroutine times_eigr
 !!  ur(2,nfft)= contains u(r) in input. output: u(r) e^{ig.r} on the real-space FFT mesh.
 !!
 !! PARENTS
+!!  m_dvdb
 !!
 !! CHILDREN
 !!

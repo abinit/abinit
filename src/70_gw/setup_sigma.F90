@@ -124,7 +124,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
  integer :: gwc_nfftot,gwx_nfftot,nqlwl,test_npwkss,my_rank,nprocs,ik,nk_found,ifo,timrev
  integer :: iqbz,isym,iq_ibz,itim,ic,pinv,ig1,ng_sigx,spin,gw_qprange
  real(dp),parameter :: OMEGASIMIN=0.01d0,tol_enediff=0.001_dp*eV_Ha
- real(dp) :: domegas,domegasi,ucvol
+ real(dp) :: domegas,domegasi,ucvol,rcut
  logical,parameter :: linear_imag_mesh=.TRUE.
  logical :: ltest,remove_inv,changed,found
  character(len=500) :: msg
@@ -833,16 +833,23 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
    qlwl(:,:)=Dtset%gw_qlwl(:,1:nqlwl)
  end if
 
+ rcut = Dtset%rcut
+ if ((Dtset%gwcalctyp < 200) .and. (Dtset%gwcalctyp > 100)) then
+    if (Dtset%rcut < tol6) then
+      rcut = 9.090909 ! default value for HSE06
+    end if
+ end if
+
 #if 1
  if (Gsph_x%ng > Gsph_c%ng) then
-   call vcoul_init(Vcp,Gsph_x,Cryst,Qmesh,Kmesh,Dtset%rcut,Dtset%icutcoul,Dtset%vcutgeo,&
+   call vcoul_init(Vcp,Gsph_x,Cryst,Qmesh,Kmesh,rcut,Dtset%icutcoul,Dtset%vcutgeo,&
 &    Dtset%ecutsigx,Gsph_x%ng,nqlwl,qlwl,ngfftf,comm)
  else
-   call vcoul_init(Vcp,Gsph_c,Cryst,Qmesh,Kmesh,Dtset%rcut,Dtset%icutcoul,Dtset%vcutgeo,&
+   call vcoul_init(Vcp,Gsph_c,Cryst,Qmesh,Kmesh,rcut,Dtset%icutcoul,Dtset%vcutgeo,&
 &    Dtset%ecutsigx,Gsph_c%ng,nqlwl,qlwl,ngfftf,comm)
  end if
 #else
-   call vcoul_init(Vcp,Gsph_Max,Cryst,Qmesh,Kmesh,Dtset%rcut,Dtset%icutcoul,Dtset%vcutgeo,&
+   call vcoul_init(Vcp,Gsph_Max,Cryst,Qmesh,Kmesh,rcut,Dtset%icutcoul,Dtset%vcutgeo,&
 &  Dtset%ecutsigx,Sigp%npwx,nqlwl,qlwl,ngfftf,comm)
 #endif
 
