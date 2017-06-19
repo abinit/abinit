@@ -365,8 +365,8 @@ cur_let = 'A'
 toutput = toutput + "<p>"+cur_let+".&nbsp;\n"
 
 # DEBUG Test the content of topics
-for topic in topics:
-  print("topic: "+topic.topic_name)
+# for topic in topics:
+#  print("topic: "+topic.topic_name)
 
 print("Will enter loop on topics")
 for i, topic in enumerate(topics):
@@ -378,7 +378,7 @@ for i, topic in enumerate(topics):
     cur_let = chr(ord(cur_let)+1)
     toutput = toutput + "<p>"+cur_let+".\n"
   topic_name = topic.topic_name
-  toutput = toutput + "<a href=\""+ topic_name + ".html\">" + topic_name + "</a>&nbsp;&nbsp;\n"
+  toutput = toutput + "<br><a href=\""+ topic_name + ".html\">" + topic_name + "</a> [How to "+topic.howto+"] &nbsp;&nbsp;\n"
 
 # Alltopics file : complete the content, then write the file and close it
 toutput += "<script type=\"text/javascript\" src=\""+js_path+"list_internal_links.js\"> </script>\n\n"
