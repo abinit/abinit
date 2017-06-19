@@ -166,6 +166,8 @@ for i, var in enumerate(variables):
       cur_content += "<br><font id=\"characteristic\">Characteristic: "+make_links(chars,var.varname,list_all_vars,list_chars,cur_specials)+"</font>\n"
     else:
       cur_content += "<br><font id=\"characteristic\">Characteristic: </font>\n"
+    if var.topic_name is not None:
+      cur_content += "<br><font id=\"characteristic\">Mentioned in \"How to\": "+"<a href=\""+var.topic_name+".html\">"+var.topic_name+"</a></font>\n"
     cur_content += "<br><font id=\"vartype\">Variable type: "+var.vartype
     if var.dimensions is not None:
       cur_content += make_links(format_dimensions(var.dimensions),var.varname,list_all_vars,list_chars,cur_specials)
@@ -329,4 +331,65 @@ for topic_name, content in topic_content.items():
   f_topic.write(content)
   f_topic.write("\n")
   f_topic.close()
+
+################################################################################
+# Generate the file with the list of names of "Howto" topic files.
+
+# Parse the yml file -> topics
+
+file='topics.yml'
+
+parser = argparse.ArgumentParser(description='Tool for eigenvalue analysis')
+parser.add_argument('-f','--file',help='YML file to be read')
+args = parser.parse_args()
+args_dict = vars(args)
+if args_dict['file']:
+  file = args_dict['file']
+
+print("Will use "+str(file)+" as input file")
+
+with open(file, 'r') as f:
+    topics = yaml.load(f);
+
+# Parse the header of allvariables and special variables files also replace the JS_PATH.
+
+with open('html_template/temp_alltopics.html') as f:
+    header_alltopics = f.read()
+
+header_alltopics = header_alltopics.replace("__JS_PATH__",js_path)
+
+print("header_alltopics: ")
+print(header_alltopics)
+
+# Initialize the alltopics file output
+toutput = ''
+toutput = toutput + header_alltopics + "<br />\n"
+cur_let = 'A'
+toutput = toutput + "<p>"+cur_let+".&nbsp;\n"
+
+# DEBUG Test the content of topics
+for topic in topics:
+  print("topic: "+topic.topic_name)
+
+print("Will enter loop on topics")
+for i, topic in enumerate(topics):
+  if debug==1 :
+    print("topic: "+topic.topic_name)
+    print("cur_let: "+cur_let)
+  while not (topic.topic_name.startswith(cur_let.lower()) or topic.topic_name.startswith(cur_let.upper())):
+    print("cur_let: "+cur_let)
+    cur_let = chr(ord(cur_let)+1)
+    toutput = toutput + "<p>"+cur_let+".\n"
+  topic_name = topic.topic_name
+  toutput = toutput + "<a href=\""+ topic_name + ".html\">" + topic_name + "</a>&nbsp;&nbsp;\n"
+
+# Alltopics file : complete the content, then write the file and close it
+toutput += "<script type=\"text/javascript\" src=\""+js_path+"list_internal_links.js\"> </script>\n\n"
+toutput += "</body>\n"
+toutput += "</html>"
+
+file_html = 'html_automatically_generated/alltopics.html'
+f_html = open(file_html,'w')
+f_html.write(toutput)
+f_html.close()
 
