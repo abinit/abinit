@@ -5,7 +5,7 @@ import re
 import argparse
 from variables import *
 
-debug = 1
+debug = 0
 
 # Path relative from HTML files
 js_path = "../"
@@ -277,11 +277,13 @@ for i, var in enumerate(variables):
     topic_content[topic_name] = ""
     found[topic_name] = 0
 
-print(topic_class_content)
+#print(topic_class_content)
+#print(topic_content)
 
 for (tclasskey, tclassval) in list_topics_class:
   for topic_name, value in topic_class_content.items():
     topic_class_content[topic_name] = "<p>"+tclassval+"<p>"
+  print(topic_class_content)
   for i, var in enumerate(variables):
     if tclasskey==var.topic_class : 
       if debug==1 :
@@ -309,6 +311,7 @@ for (tclasskey, tclassval) in list_topics_class:
 
 # For each "topic" file 
 for topic_name, content in topic_content.items():
+  print(content)
   file_topic = 'html_automatically_generated/'+topic_name+'.html'
   f_topic = open(file_topic,'w')
 
