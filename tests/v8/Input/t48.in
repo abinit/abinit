@@ -11,7 +11,7 @@ t47o_DS5_DDB
 #%% test_chain = t47.in, t48.in, t49.in, t50.in
 #%% [files]
 #%% files_to_test =
-#%%   t48.ddb.out, tolnlines = 39, tolabs = 6.0e-9, tolrel = 2.0e-10
+#%%   t48.ddb.out, tolnlines = 40, tolabs = 6.0e-9, tolrel = 2.0e-10
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]
