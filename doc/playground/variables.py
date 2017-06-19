@@ -88,6 +88,18 @@ class Variable(yaml.YAMLObject):
     def __str__(self):
         return "Variable " + str(self.varname) + " (default = " + str(self.defaultval) + ")"
 
+class Topic(yaml.YAMLObject):
+    topic_name = None  # String containing the "How to ?" topic name
+    howto = ''     # String containing the description of the topics, to be echoed after "How to" ...
+
+    yaml_tag = u'!topic'
+
+    def attrs(self):
+        return ['topic_name', 'howto']
+
+    def __init__(self, topic_name=None, howto=None):
+        self.topic_name = topic_name
+        self.howto = howto
 
 class ValueWithUnit(yaml.YAMLObject):
     value = None
