@@ -242,8 +242,10 @@ for i, var in enumerate(variables):
       cur_content += "<br><font id=\"characteristic\">Characteristic: "+make_links(chars,var.varname,list_all_vars,list_chars,cur_specials)+"</font>\n"
     else:
       cur_content += "<br><font id=\"characteristic\">Characteristic: </font>\n"
-    if var.topic_name is not None:
+    try:
       cur_content += "<br><font id=\"characteristic\">Mentioned in \"How to\": "+"<a href=\""+var.topic_name+".html\">"+var.topic_name+"</a></font>\n"
+    except:
+      print(" No topic_class for varname "+var.varname)
     cur_content += "<br><font id=\"vartype\">Variable type: "+var.vartype
     if var.dimensions is not None:
       cur_content += make_links(format_dimensions(var.dimensions),var.varname,list_all_vars,list_chars,cur_specials)
@@ -368,15 +370,17 @@ for (tclasskey, tclassval) in list_topics_class:
     if tclasskey==var.topic_class : 
       if debug==1 :
         print(var)
-      topic_name = var.topic_name
-      found[topic_name] = 1
-      varname = var.varname
-      if var.characteristics is not None and '[[INTERNAL_ONLY]]' in var.characteristics:
-        varname = '%'+varname
-
-      # Constitute the line of information related to one input variable
-      topic_class_sec3[topic_name] += "... <a href=\""+var.section+".html#"+var.varname+"\">"+varname+"</a>   "
-      topic_class_sec3[topic_name] += "["+var.definition+"]<br>\n"
+      try:
+        topic_name = var.topic_name
+        found[topic_name] = 1
+        varname = var.varname
+        if var.characteristics is not None and '[[INTERNAL_ONLY]]' in var.characteristics:
+          varname = '%'+varname
+        # Constitute the line of information related to one input variable
+        topic_class_sec3[topic_name] += "... <a href=\""+var.section+".html#"+var.varname+"\">"+varname+"</a>   "
+        topic_class_sec3[topic_name] += "["+var.definition+"]<br>\n"
+      except:
+        print(" No topic_class for varname "+var.varname) 
 
       if debug==1 :
         print(topic_class_sec3)
