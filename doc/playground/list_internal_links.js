@@ -7,6 +7,8 @@ document.write(' <A href="'+docpath+'users/acknowledgments.html"><B>Suggested ac
 document.write(' <B> | </B> ');
 document.write(' <A href="'+docpath+'playground/html_automatically_generated/allvariables.html"><B>List of input variables</B></A> ');
 document.write(' <B> | </B> ');
+document.write(' <A href="'+docpath+'playground/html_template/what_ABINIT_does.html"><B>What ABINIT does</B></A> ');
+document.write(' <B> | </B> ');
 document.write(' <A href="'+docpath+'playground/html_automatically_generated/alltopics.html"><B>List of "How to"</B></A> ');
 document.write(' <B> | </B> ');
 document.write(' <A href="'+docpath+'tutorial/welcome.html"><B>Tutorial home page</B></A> ');

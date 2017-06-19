@@ -310,4 +310,109 @@
     topic_name: crystal
     varname: xyzfile
     vartype: string
-
+- !variable
+    characteristics: null
+    commentdefault: null
+    commentdims: null
+    defaultval: !valuewithconditions
+        '[[nspden]]==4': 4
+        defaultval: 1
+    definition: KPoinTs OPTion
+    dimensions: scalar
+    excludes: null
+    requires: null
+    section: varbas
+    text: |-
+        <p>
+         Controls the set up of the k-points list.
+        The aim will be to initialize, by straight reading
+        or by a preprocessing approach based on other input variables,
+        the following input variables, giving the k points, their number,
+        and their weight:
+        [[kpt]],
+        [[kptnrm]],
+        [[nkpt]],
+        and, for [[iscf]]/=-2,
+        [[wtk]].
+        </p>
+        <p>
+         Often, the k points will form a lattice in reciprocal space. In this case,
+        one will also aim at initializing input variables that give
+        the reciprocal of this k-point lattice, as well as its shift with respect
+        to the origin:
+        [[ngkpt]] or
+        [[kptrlatt]],
+        as well as on [[nshiftk]] and
+        [[shiftk]].
+        </p>
+        <p>
+         A global additional shift can be provided by [[qptn]]
+         <ul>
+          <li>
+           0=&gt; read directly [[nkpt]], [[kpt]],
+        [[kptnrm]] and [[wtk]].
+          </li>
+          <li>
+           1=&gt; rely on [[ngkpt]] or
+        [[kptrlatt]], as well as on
+        [[nshiftk]] and
+        [[shiftk]] to set up the k points.
+        Take fully into account the symmetry to generate the
+        k points in the Irreducible Brillouin Zone only, with the appropriate weights.
+           <br />
+           (This is the usual mode for GS calculations)
+          </li>
+          <li>
+           2=&gt; rely on
+        [[ngkpt]] or
+        [[kptrlatt]], as well as on
+        [[nshiftk]] and
+        [[shiftk]] to set up the k points.
+        Take into account only the time-reversal symmetry :
+        k points will be generated in half the Brillouin zone, with the appropriate weights.
+           <br />
+           (This is to be used when preparing or executing a
+        RF calculation at q=(0 0 0) )
+          </li>
+          <li>
+           3=&gt; rely on [[ngkpt]] or
+        [[kptrlatt]], as well as on
+        [[nshiftk]] and
+        [[shiftk]] to set up the k points.
+        Do not take into account any symmetry :
+        k points will be generated in the full Brillouin zone, with the appropriate weights.
+           <br />
+           (This is to be used when preparing or executing a
+        RF calculation at non-zero q )
+          </li>
+          <li>
+           4=&gt; rely on [[ngkpt]] or
+        [[kptrlatt]], as well as on
+        [[nshiftk]] and
+        [[shiftk]] to set up the k points.
+        Take into account all the symmetries EXCEPT the time-reversal symmetry
+        to generate the k points in the Irreducible Brillouin Zone, with the appropriate weights.
+           <br />
+           This has to be used when performing calculations with non-collinear magnetism allowed
+           ([[nspden]]=4)
+          </li>
+          <li>
+           A negative value =&gt;
+        rely on [[kptbounds]],
+        and [[ndivk]]
+        to set up a band structure calculation along different lines
+        (allowed only for [[iscf]]==-2).
+        The absolute value of [[kptopt]] gives the number of segments
+        of the band structure. Weights are usually irrelevant with this option, and will be left to their default value.
+          </li>
+         </ul>
+         In the case of a grid of k points, the auxiliary variables
+        [[kptrlen]],
+        [[ngkpt]]  and
+        [[prtkpt]] might help
+        you to select the optimal grid.
+        </p>
+    topic_class: 
+    topic_name: todo
+    varname: kptopt
+    vartype: integer

@@ -272,13 +272,14 @@ f_html.close()
 topic_content = dict()
 topic_class_content = dict()
 found = dict()
+print("coucou0")
 for i, var in enumerate(variables):
   if var.topic_name not in topic_content.keys():
     topic_name = var.topic_name
     topic_class_content[topic_name] = ""
     topic_content[topic_name] = ""
     found[topic_name] = 0
-
+print("coucou1")
 #print(topic_class_content)
 #print(topic_content)
 
@@ -316,9 +317,9 @@ for topic_name, content in topic_content.items():
   print(content)
   file_topic = 'html_automatically_generated/'+topic_name+'.html'
   f_topic = open(file_topic,'w')
-
-  with open('html_template/temp_'+topic_name+'.html') as f:
-    header_varX = f.read()
+  if var.topic_name is not " todo" in var.topic_name:
+    with open('html_template/temp_'+topic_name+'.html') as f:
+      header_varX = f.read()
 
   topic_header_varX = header_varX.replace("__JS_PATH__",js_path)
   topic_header_varX += "<script type=\"text/javascript\" src=\""+js_path+"related_input_variables.js\"> </script>\n\n"

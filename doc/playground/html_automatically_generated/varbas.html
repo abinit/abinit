@@ -46,6 +46,31 @@ variables to be used in the main input file of the abinit code.
  <a href="#rprimd">rprimd</a>&nbsp;&nbsp;
  <br>S.
  <a href="#scalecart">scalecart</a>&nbsp;&nbsp;
+ <br>T.
+ <br>U.
+ <br>V.
+ <br>W.
+ <br>X.
+ <br>Y.
+ <br>Z.
+ <br>[.
+ <br>\.
+ <br>].
+ <br>^.
+ <br>_.
+ <br>`.
+ <br>a.
+ <br>b.
+ <br>c.
+ <br>d.
+ <br>e.
+ <br>f.
+ <br>g.
+ <br>h.
+ <br>i.
+ <br>j.
+ <br>k.
+ <a href="#kptopt">kptopt</a>&nbsp;&nbsp;
 
 <br><br><br><br><hr>
 <br><font id="title"><a name="acell">acell</a></font>
@@ -266,6 +291,111 @@ body-centered and face-centered orthorhombic lattices, see <a href="varbas.html#
  <br />
  Note that this input variable is <a href="../../users/abinit_help.html#input_only">INPUT_ONLY</a> : its content will be immediately applied to rprim, at parsing time,
 and then scalecart will be set to the default values. So, it will not be echoed.
+</p>
+</font>
+
+<br><br><br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="kptopt">kptopt</a></font>
+<br><font id="definition">Mnemonics: KPoinTs OPTion</font>
+<br><font id="characteristic">Characteristic: </font>
+<br><font id="characteristic">Mentioned in "How to": <a href="todo.html">todo</a></font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 4 if <a href="#">[[FAKE LINK:nspden]]</a>==4,
+1 otherwise.
+</font>
+<br><font id="text">
+<p>
+<p>
+ Controls the set up of the k-points list.
+The aim will be to initialize, by straight reading
+or by a preprocessing approach based on other input variables,
+the following input variables, giving the k points, their number,
+and their weight:
+<a href="#">[[FAKE LINK:kpt]]</a>,
+<a href="#">[[FAKE LINK:kptnrm]]</a>,
+<a href="#">[[FAKE LINK:nkpt]]</a>,
+and, for <a href="#">[[FAKE LINK:iscf]]</a>/=-2,
+<a href="#">[[FAKE LINK:wtk]]</a>.
+</p>
+<p>
+ Often, the k points will form a lattice in reciprocal space. In this case,
+one will also aim at initializing input variables that give
+the reciprocal of this k-point lattice, as well as its shift with respect
+to the origin:
+<a href="#">[[FAKE LINK:ngkpt]]</a> or
+<a href="#">[[FAKE LINK:kptrlatt]]</a>,
+as well as on <a href="#">[[FAKE LINK:nshiftk]]</a> and
+<a href="#">[[FAKE LINK:shiftk]]</a>.
+</p>
+<p>
+ A global additional shift can be provided by <a href="#">[[FAKE LINK:qptn]]</a>
+ <ul>
+  <li>
+   0=&gt; read directly <a href="#">[[FAKE LINK:nkpt]]</a>, <a href="#">[[FAKE LINK:kpt]]</a>,
+<a href="#">[[FAKE LINK:kptnrm]]</a> and <a href="#">[[FAKE LINK:wtk]]</a>.
+  </li>
+  <li>
+   1=&gt; rely on <a href="#">[[FAKE LINK:ngkpt]]</a> or
+<a href="#">[[FAKE LINK:kptrlatt]]</a>, as well as on
+<a href="#">[[FAKE LINK:nshiftk]]</a> and
+<a href="#">[[FAKE LINK:shiftk]]</a> to set up the k points.
+Take fully into account the symmetry to generate the
+k points in the Irreducible Brillouin Zone only, with the appropriate weights.
+   <br />
+   (This is the usual mode for GS calculations)
+  </li>
+  <li>
+   2=&gt; rely on
+<a href="#">[[FAKE LINK:ngkpt]]</a> or
+<a href="#">[[FAKE LINK:kptrlatt]]</a>, as well as on
+<a href="#">[[FAKE LINK:nshiftk]]</a> and
+<a href="#">[[FAKE LINK:shiftk]]</a> to set up the k points.
+Take into account only the time-reversal symmetry :
+k points will be generated in half the Brillouin zone, with the appropriate weights.
+   <br />
+   (This is to be used when preparing or executing a
+RF calculation at q=(0 0 0) )
+  </li>
+  <li>
+   3=&gt; rely on <a href="#">[[FAKE LINK:ngkpt]]</a> or
+<a href="#">[[FAKE LINK:kptrlatt]]</a>, as well as on
+<a href="#">[[FAKE LINK:nshiftk]]</a> and
+<a href="#">[[FAKE LINK:shiftk]]</a> to set up the k points.
+Do not take into account any symmetry :
+k points will be generated in the full Brillouin zone, with the appropriate weights.
+   <br />
+   (This is to be used when preparing or executing a
+RF calculation at non-zero q )
+  </li>
+  <li>
+   4=&gt; rely on <a href="#">[[FAKE LINK:ngkpt]]</a> or
+<a href="#">[[FAKE LINK:kptrlatt]]</a>, as well as on
+<a href="#">[[FAKE LINK:nshiftk]]</a> and
+<a href="#">[[FAKE LINK:shiftk]]</a> to set up the k points.
+Take into account all the symmetries EXCEPT the time-reversal symmetry
+to generate the k points in the Irreducible Brillouin Zone, with the appropriate weights.
+   <br />
+   This has to be used when performing calculations with non-collinear magnetism allowed
+   (<a href="#">[[FAKE LINK:nspden]]</a>=4)
+  </li>
+  <li>
+   A negative value =&gt;
+rely on <a href="#">[[FAKE LINK:kptbounds]]</a>,
+and <a href="#">[[FAKE LINK:ndivk]]</a>
+to set up a band structure calculation along different lines
+(allowed only for <a href="#">[[FAKE LINK:iscf]]</a>==-2).
+The absolute value of <b>kptopt</b> gives the number of segments
+of the band structure. Weights are usually irrelevant with this option, and will be left to their default value.
+  </li>
+ </ul>
+ In the case of a grid of k points, the auxiliary variables
+<a href="#">[[FAKE LINK:kptrlen]]</a>,
+<a href="#">[[FAKE LINK:ngkpt]]</a>  and
+<a href="#">[[FAKE LINK:prtkpt]]</a> might help
+you to select the optimal grid.
 </p>
 </font>
 

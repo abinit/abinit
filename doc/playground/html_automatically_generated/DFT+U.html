@@ -1,81 +1,30 @@
 <html>
-<head>
-<title>DFT+U </title>
+<head><title>PAW variables.</title>
+<link rel=stylesheet type="text/css" href="../formabinit.css">
+</head>
 <body bgcolor="#ffffff">
-<p>
+
 <hr>
-<h1>2- The DFT+U approximation</h1>
-<h3>This file explains how to perform a DFT+U calculation with the ABINIT package.
+<a name="top"></a>
+
+<h1>ABINIT, PAW input variables:</h1>
+<h2>List and description.</h2>
+
 <hr>
 
-<h5>Copyright (C) 1998-2017 ABINIT group (FJ,BA)
-<br> This file is distributed under the terms of the GNU General Public License, see
-~abinit/COPYING or <a href="http://www.gnu.org/copyleft/gpl.txt">http://www.gnu.org/copyleft/gpl.txt</a>.
-<br> For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
-</h5>
+<p>This document lists and provides the description
+of the name (keywords) of the input
+variables for runs based on the Projector Augmented Waves methodology,
+to be used in the
+main input file of the abinit code.
 
-<script type="text/javascript" src="../users/list_internal_links.js"> </script>
+<script type="text/javascript" src="../generic_advice.js"> </script>
+<script type="text/javascript" src="../copyright.js"> </script>
+<script type="text/javascript" src="../list_internal_links.js"> </script>
+<script type="text/javascript" src="../list_htmlfiles_input_variables.js"> </script>
 
-<h3><b>Contents of ABINIT features: </b></h3>
-<ul>
-<li><a href="DFT+U.html#1">1.</a> Introduction.
-<li><a href="DFT+U.html#3">2.</a> Tutorial and examples.
-<li><a href="DFT+U.html#2">3.</a> Related input variables.
-
-</ul>
-
-
-<HR ALIGN=left>
-
-<p><a name="1">&nbsp;</a> </p>
-<h3><b>1. Introduction</b></h3>
-
-
- <p> This feature is available only in PAW. The DFT+U framework is described in
-the paper [1] and [2]. In ABINIT, the DFT+U approximation is implemented inside the PAW atomic spheres only.
-Two choices of double counting are provided: the Full Localized limit
-and the Around Mean Field approximation.
-Our implementation is described in [5].
-It follows the main lines of the paper [4].
-Forces and stress are implemented.
-For details on keywords (lpawu,upawu,jpawu,usedmatpu,dmatpuopt,dmatudiag) see keyword usepawu in input variables.
-
- <p> In both the output and log files, we can find:
-<p>- The DFT+U contribution of energy which is contained inside the PAW Spherical terms in the output file.
-<p>- The Decomposition of the LDA+U energy is given (Interaction energy, Double
-  counting term, and sum of the two) in the log file.
-<p>- The orbital density matrix (n_{m,m'}^{\sigma}), also called occupation
-  matrix (corresponding to eq 9 of ref [4]  and eq 1 of ref [2], see also
-  [5] and variable dmapuopt) is also
-  given for each atom in the basis of real spherical harmonics.
-  It is given at each SCF step in the log file: one can thus check the
-  convergency of the calculation.
-
- <p> Consistency between total energy and forces in DFT+U have been checked.
-
- <p> The reader can find somes examples in the directory Test_v5 (t08.in, t19.in, t11.in, t53.in..)
-<p>
-[1] V. I. Anisimov, J. Zaanen, and O. K. Andersen PRB 44, 943 (1991) <br>
-[2] A.I. Lichtenstein, V.I. Anisimov and J. Zaanen  PRB 52, 5467 (1995) <br>
-[3] M. T. Czyzyk and G.  A. Sawatzky PRB 49, 14211 (1994) <br>
-[4] O. Bengone, M. Alouani, P. Blöchl, and J. Hugel PRB 62, 16392 (2000) <br>
-[5] B. Amadon, F. Jollet and M. Torrent Phys. Rev. B 77, 155104 (2008).
-
-
-<p>&nbsp;
-<HR ALIGN=left>
-
-<p> <a name="2">&nbsp;</a>
-<h3><b>2. Tutorials and examples.</b></h3>
-
-<li><a href="../tutorial/lesson_ldau.html">The lesson on DFT+U</a> shows
-  how to perform a DFT+U calculation using ABINIT, and will lead to
-  compute the projected DOS of NiO. Prerequisite : PAW1.</li>
-
-
-<p>The reader can find somes examples in the ABINIT package in the directory /tests:
-<p>- v5/Input: t08.in, t14.in, t15.in, t16.int, t19.in, t20.in, t33.in, t37.in, t38.in, t39.in, t40.in.
-<p>- v7/Input: t21.in, t22.in, t44.in.
+<a name="list"></a>
+<h3><b> Content of the file : alphabetical list of PAW input variables.</b></h3>
 <script type="text/javascript" src="../related_input_variables.js"> </script>
 
 <p>Useful input variables:<p>... <a href="varpaw.html#usedmatpu">usedmatpu</a>   [USE of an initial Density MATrix in Paw+U]<br>
