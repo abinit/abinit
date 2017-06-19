@@ -151,7 +151,7 @@ subroutine setup_screening(codvsn,acell,rprim,ngfftf,wfk_fname,dtfil,Dtset,Psps,
 
  ! Check for calculations that are not implemented
  ltest = ALL(Dtset%nband(1:Dtset%nkpt*Dtset%nsppol) == Dtset%nband(1))
- ABI_CHECK(ltest, 'dtset%nband(:) must be constantin GW code.')
+ ABI_CHECK(ltest, 'dtset%nband(:) must be constant in the GW code.')
 
  my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
 
@@ -456,23 +456,23 @@ subroutine setup_screening(codvsn,acell,rprim,ngfftf,wfk_fname,dtfil,Dtset,Psps,
    end if
  end if
 
- ! === Range and total number of real frequencies ===
+ ! Range and total number of real frequencies.
  Ep%omegaermin = zero
  if (Ep%contour_deformation) then
    Ep%nomegaer=Dtset%nfreqre; Ep%omegaermin=Dtset%freqremin; Ep%omegaermax=Dtset%freqremax
    if (Dtset%gw_frqre_tangrid==1) then
      Ep%omegaermax=Dtset%cd_max_freq
-     MSG_WARNING(' Tangent transfom grid will be used for real frequency grid')
+     MSG_WARNING('Tangent transfom grid will be used for real frequency grid')
    end if
    if (Dtset%gw_frqre_tangrid==1) then
-     MSG_WARNING(' Tangent transfom grid will be used for real frequency grid')
+     MSG_WARNING('Tangent transfom grid will be used for real frequency grid')
    end if
    if (Ep%nomegaer==-1) then
      Ep%nomegaer=NOMEGAREAL
-     MSG_WARNING(sjoin(' Number of real frequencies set to default= ',itoa(NOMEGAREAL)))
+     MSG_WARNING(sjoin('Number of real frequencies set to default= ',itoa(NOMEGAREAL)))
    end if
    if (Ep%nomegaer==0) then
-     MSG_WARNING('  nfreqre = 0 ! Assuming experienced user.')
+     MSG_WARNING('nfreqre = 0 ! Assuming experienced user.')
    end if
    if (ABS(Ep%omegaermin)<TOL16) then
      Ep%omegaermin=zero
@@ -480,7 +480,7 @@ subroutine setup_screening(codvsn,acell,rprim,ngfftf,wfk_fname,dtfil,Dtset,Psps,
      MSG_WARNING(msg)
    end if
    if (Ep%omegaermin>Ep%omegaermax) then
-     MSG_ERROR(' freqremin > freqremax !')
+     MSG_ERROR('freqremin > freqremax !')
    end if
    if (Ep%omegaermax<TOL16) then
      Ep%omegaermax=OMEGAERMAX
@@ -510,10 +510,9 @@ subroutine setup_screening(codvsn,acell,rprim,ngfftf,wfk_fname,dtfil,Dtset,Psps,
 
  ! Check full grid calculations
  if (Dtset%cd_full_grid/=0) then
-   MSG_WARNING(' FULL GRID IN COMPLEX PLANE CALCULATED.')
-   MSG_WARNING(' YOU MIGHT NOT BE ABLE TO USE SCREENING FILES!')
+   MSG_WARNING("FULL GRID IN COMPLEX PLANE CALCULATED. YOU MIGHT NOT BE ABLE TO USE SCREENING FILES!")
    if (Dtset%cd_subset_freq(1)/=0) then
-     MSG_ERROR(' cd_subset_freq cannot be used with cd_full_grid!')
+     MSG_ERROR('cd_subset_freq cannot be used with cd_full_grid!')
    end if
    Ep%nomegaec = Ep%nomegaei*(Ep%nomegaer-1)
  end if
@@ -521,9 +520,7 @@ subroutine setup_screening(codvsn,acell,rprim,ngfftf,wfk_fname,dtfil,Dtset,Psps,
  Ep%nomega=Ep%nomegaer+Ep%nomegaei+Ep%nomegaec ! Total number of frequencies.
 
  ! ==== Setup of the spectral method ====
- Ep%spmeth  =Dtset%spmeth
- Ep%nomegasf=Dtset%nomegasf
- Ep%spsmear =Dtset%spbroad
+ Ep%spmeth  =Dtset%spmeth; Ep%nomegasf=Dtset%nomegasf; Ep%spsmear =Dtset%spbroad
 
  if (Ep%spmeth/=0) then
    write(msg,'(2a,i3,2a,i8)')ch10,&
@@ -601,7 +598,6 @@ subroutine setup_screening(codvsn,acell,rprim,ngfftf,wfk_fname,dtfil,Dtset,Psps,
  ! === Initialize the band structure datatype ===
  ! * Copy KSS energies and occupations up to Ep%nbnds==Dtset%nband(:)
  ! TODO Recheck symmorphy and inversion
-
  bantot=SUM(Dtset%nband(1:Dtset%nkpt*Dtset%nsppol))
 
  ABI_MALLOC(doccde,(bantot))
@@ -666,22 +662,21 @@ subroutine setup_screening(codvsn,acell,rprim,ngfftf,wfk_fname,dtfil,Dtset,Psps,
  ABI_DT_FREE(Pawrhoij)
 
  ! ==== Setup of extrapolar technique ====
- Ep%gwcomp   = Dtset%gwcomp
- Ep%gwencomp = Dtset%gwencomp
- if (Ep%gwcomp==1) then
+ Ep%gwcomp = Dtset%gwcomp; Ep%gwencomp = Dtset%gwencomp
+ if (Ep%gwcomp == 1) then
    write(msg,'(a,f8.2,a)')' Using the completeness correction with gwencomp ',Ep%gwencomp*Ha_eV,' [eV] '
    call wrtout(std_out,msg,'COLL')
  end if
 
- ! === Final compatibility tests ===
+ ! Final compatibility tests
  if (ANY(KS_BSt%istwfk /= 1)) then
    MSG_WARNING('istwfk/=1 is still under development')
  end if
 
- ltest=(KS_BSt%mband == Ep%nbnds .and. ALL(KS_BSt%nband == Ep%nbnds))
+ ltest = (KS_BSt%mband == Ep%nbnds .and. ALL(KS_BSt%nband == Ep%nbnds))
  ABI_CHECK(ltest,'BUG in definition of KS_BSt%nband')
 
- if (Ep%gwcomp==1.and.Ep%spmeth>0) then
+ if (Ep%gwcomp==1 .and. Ep%spmeth>0) then
    MSG_ERROR("Hilbert transform and extrapolar method are not compatible")
  end if
 

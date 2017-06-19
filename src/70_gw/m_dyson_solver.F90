@@ -474,6 +474,7 @@ subroutine solve_dyson(ikcalc,minbnd,maxbnd,nomega_sigc,Sigp,Kmesh,sigcme_tmp,qp
    else
      hdp=SUM(htotal(ib1:ib2,ib1:ib2,:),DIM=3)
    end if
+   if (spin == 3) write(std_out,*) hdp  ! This to work around a compiler bug on tikal_gnu_5.4_mpich
 
    call xheev("Vectors","Upper",ld_matrix,hdp,eig)
 

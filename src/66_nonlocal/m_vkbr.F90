@@ -502,7 +502,7 @@ subroutine calc_vkb(cryst,psps,kpoint,npw_k,kg_k,vkbsign,vkb,vkbd)
  end do
 
  ! Allocate KB form factor and derivative wrt k+G
- ! * Here we do not use correct ordering for dimensions
+ ! Here we do not use correct ordering for dimensions
  idir=0; nkpg=0; ider=1; dimffnl=2 ! To retrieve the first derivative.
 
  ! Quantities used only if useylm==1
