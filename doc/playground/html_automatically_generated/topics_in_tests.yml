@@ -1,0 +1,14 @@
+- tests/v5/Input/t08.in:#%% topics = DFT+U
+- tests/v5/Input/t14.in:#%% topics = DFT+U, crystal
+- tests/v5/Input/t15.in:#%% topics = DFT+U
+- tests/v5/Input/t16.in:#%% topics = DFT+U
+- tests/v5/Input/t19.in:#%% topics = DFT+U
+- tests/v5/Input/t20.in:#%% topics = DFT+U
+- tests/v5/Input/t33.in:#%% topics = DFT+U
+- tests/v5/Input/t37.in:#%% topics = DFT+U
+- tests/v5/Input/t38.in:#%% topics = DFT+U
+- tests/v5/Input/t39.in:#%% topics = DFT+U
+- tests/v5/Input/t40.in:#%% topics = DFT+U
+- tests/v7/Input/t21.in:#%% topics = DFT+U
+- tests/v7/Input/t22.in:#%% topics = DFT+U
+- tests/v7/Input/t44.in:#%% topics = DFT+U
