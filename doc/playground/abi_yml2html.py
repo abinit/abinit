@@ -1,5 +1,7 @@
 #! /usr/bin/env python
 
+import sys
+import os
 import yaml
 import re
 import argparse
@@ -83,7 +85,12 @@ def make_links(text,cur_varname,variables,characteristics,specials):
   return new_text
 
 ################################################################################
-# Parse the yml file -> variables
+################################################################################
+
+# Parsing section
+
+################################################################################
+# Parse the abinit_vars.yml file -> variables
 
 file='abinit_vars.yml'
 
@@ -99,7 +106,76 @@ print("Will use "+str(file)+" as input file")
 with open(file, 'r') as f:
     variables = yaml.load(f);
 
+################################################################################
+# Parse the topics.yml file -> topics
 
+file='topics.yml'
+
+parser = argparse.ArgumentParser(description='Tool for eigenvalue analysis')
+parser.add_argument('-f','--file',help='YML file to be read')
+args = parser.parse_args()
+args_dict = vars(args)
+if args_dict['file']:
+  file = args_dict['file']
+
+print("Will use "+str(file)+" as input file")
+
+with open(file, 'r') as f:
+    topics = yaml.load(f);
+
+################################################################################
+# Parse the tests_dirs.yml file -> tests_dirs
+
+file='tests_dirs.yml'
+
+parser = argparse.ArgumentParser(description='Tool for eigenvalue analysis')
+parser.add_argument('-f','--file',help='YML file to be read')
+args = parser.parse_args()
+args_dict = vars(args)
+if args_dict['file']:
+  file = args_dict['file']
+
+print("Will use "+str(file)+" as input file")
+
+with open(file, 'r') as f:
+    tests_dirs = yaml.load(f);
+
+################################################################################
+# Parse the ABINIT input files, in order to find the possible topics to which they are linked -> topics_in_tests
+
+try :
+  rm_cmd = "rm html_automatically_generated/topics_in_tests.yml"
+  retcode = os.system(rm_cmd)
+except :
+  if debug==1 :
+    print("rm html_automatically_generated/topics_in_tests.yml failed")
+    print("the file was likely non existent")
+
+for tests_dir in tests_dirs :
+  grep_cmd = "grep topics tests/%s/Input/*.in > html_automatically_generated/topics_in_tests.txt" % (tests_dir)
+  retcode = os.system(grep_cmd)
+  if retcode == 0 :
+    sed_cmd = "sed -e 's/^/- /' html_automatically_generated/topics_in_tests.txt >> html_automatically_generated/topics_in_tests.yml "
+    retcode = os.system(sed_cmd)
+
+file='html_automatically_generated/topics_in_tests.yml'
+
+parser = argparse.ArgumentParser(description='Tool for eigenvalue analysis')
+parser.add_argument('-f','--file',help='YML file to be read')
+args = parser.parse_args()
+args_dict = vars(args)
+if args_dict['file']:
+  file = args_dict['file']
+
+print("Will use "+str(file)+" as list of input files relevant for each topic")
+
+with open(file, 'r') as f:
+    topics_in_tests = yaml.load(f);
+
+print(" topics_in_tests :")
+print(topics_in_tests)
+
+################################################################################
 # Parse the headers of allvariables and special variables files also replace the JS_PATH.
 
 with open('html_template/temp_allvariables.html') as f:
@@ -268,22 +344,26 @@ f_html.write(output)
 f_html.close()
 
 ################################################################################
-# Constitute the body of information for all variables, stored for the appropriate topic_names in all_contents_topics[topic_name]
-topic_content = dict()
-topic_class_content = dict()
-found = dict()
-for i, var in enumerate(variables):
-  if var.topic_name not in topic_content.keys():
-    topic_name = var.topic_name
-    topic_class_content[topic_name] = ""
-    topic_content[topic_name] = ""
-    found[topic_name] = 0
+################################################################################
 
-print(topic_class_content)
+# Generate the different "topic" files
+
+################################################################################
+# Constitute the section 3 "Related input variables" for all topic files. 
+# This sec3 is stored, for each topic_name in topic_sec3[topic_name]
+
+topic_sec3 = dict()
+topic_class_sec3 = dict()
+found = dict()
+for i, var in enumerate(topics):
+  topic_name = var.topic_name
+  topic_class_sec3[topic_name] = ""
+  topic_sec3[topic_name] = ""
+  found[topic_name] = 0
 
 for (tclasskey, tclassval) in list_topics_class:
-  for topic_name, value in topic_class_content.items():
-    topic_class_content[topic_name] = "<p>"+tclassval+"<p>"
+  for topic_name, value in topic_class_sec3.items():
+    topic_class_sec3[topic_name] = "<p>"+tclassval+"<p>"
   for i, var in enumerate(variables):
     if tclasskey==var.topic_class : 
       if debug==1 :
@@ -295,59 +375,102 @@ for (tclasskey, tclassval) in list_topics_class:
         varname = '%'+varname
 
       # Constitute the line of information related to one input variable
-      topic_class_content[topic_name] += "... <a href=\""+var.section+".html#"+var.varname+"\">"+varname+"</a>   "
-      topic_class_content[topic_name] += "["+var.definition+"]<br>\n"
+      topic_class_sec3[topic_name] += "... <a href=\""+var.section+".html#"+var.varname+"\">"+varname+"</a>   "
+      topic_class_sec3[topic_name] += "["+var.definition+"]<br>\n"
 
       if debug==1 :
-        print(topic_class_content)
+        print(topic_class_sec3)
 
   for topic_name, value in found.items():
     if found[topic_name] == 1:
-      topic_content[topic_name] = topic_content[topic_name] + topic_class_content[topic_name]
+      topic_sec3[topic_name] = topic_sec3[topic_name] + topic_class_sec3[topic_name]
       found[topic_name] = 0
 
 ################################################################################
-# Generate the "topic" files
+# Constitute the section 4 "Selected input files" for all topic files.
+# This sec4 is stored, for each topic_name in topic_sec4[topic_name]
+
+topic_sec4 = dict()
+topic_class_sec4 = dict()
+found = dict()
+for i, var in enumerate(topics):
+  topic_name = var.topic_name
+  topic_class_sec4[topic_name] = ""
+  topic_sec4[topic_name] = ""
+  found[topic_name] = 0
+ 
+topic_header_sec4="<p>&nbsp; <HR ALIGN=left> <p> <a name=\"4\">&nbsp;</a> <h3><b>4. Selected input files.</b></h3>"
+topic_header_sec4+="The user can find somes examples in the ABINIT package in the directory /tests, or on the Web:"
+
+# Create a dictionary to contain the list of tests for each topics
+inputs_for_topic = dict()
+for str in topics_in_tests:
+  print("str :",str)
+  print(" ")
+  str2 = str.split(':')
+  listt=str2[1]
+  str_topics = listt[listt.index('=')+1:]
+  print("str2[0] : ",str2[0])
+  print("str_topics : ",str_topics)
+  print(" ")
+  list_topics = str_topics.split(',')
+  for topic in list_topics:
+    topic = topic.strip()
+    if topic not in inputs_for_topic.keys():
+      inputs_for_topic[topic] = []
+    inputs_for_topic[topic].append(str2[0])
+
+print(inputs_for_topic)
+
+for i, topic_name in enumerate(inputs_for_topic):
+  found[topic_name] = 1
+  tests=inputs_for_topic[topic_name]
+  for test in tests:
+    topic_class_sec4[topic_name]+= "<p> <a href=\"../"+test+"\">"+test+"</a>" 
+
+for topic_name, value in found.items():
+  if found[topic_name] == 1:
+    topic_sec4[topic_name] = topic_header_sec4 + topic_class_sec4[topic_name]
+
+################################################################################
+# Assemble the "topic" files : secs 1, 2, 3 and then possibly 4 and 5
 
 # For each "topic" file 
-for topic_name, content in topic_content.items():
+for topic_name, content in topic_sec3.items():
+  file_template = 'html_template/temp_'+topic_name+'.html'
+  try:
+    with open(file_template) as f:
+      header_varX = f.read()
+  except:
+    print("Tried to open the file "+file_template+" , but failed.")
+
   file_topic = 'html_automatically_generated/'+topic_name+'.html'
-  f_topic = open(file_topic,'w')
-
-  with open('html_template/temp_'+topic_name+'.html') as f:
-    header_varX = f.read()
-
   topic_header_varX = header_varX.replace("__JS_PATH__",js_path)
   topic_header_varX += "<script type=\"text/javascript\" src=\""+js_path+"related_input_variables.js\"> </script>\n\n"
-
+  f_topic = open(file_topic,'w')
   f_topic.write(topic_header_varX)
-  content += "<br>"
+
+# Write Sec. 3 
+  f_topic.write(topic_sec3[topic_name])
+
+# Write Sec. 4
+  f_topic.write(topic_sec4[topic_name])
+
+# Write final lines
+  content = "<br>"
   content += "<script type=\"text/javascript\" src=\""+js_path+"list_internal_links.js\"> </script>\n\n"
   content += "</body>\n"
   content += "</html>"
+  content += "\n"
   f_topic.write(content)
-  f_topic.write("\n")
   f_topic.close()
 
 ################################################################################
-# Generate the file with the list of names of "Howto" topic files.
+################################################################################
 
-# Parse the yml file -> topics
+# Generate the file with the list of names of different "topic" files
 
-file='topics.yml'
-
-parser = argparse.ArgumentParser(description='Tool for eigenvalue analysis')
-parser.add_argument('-f','--file',help='YML file to be read')
-args = parser.parse_args()
-args_dict = vars(args)
-if args_dict['file']:
-  file = args_dict['file']
-
-print("Will use "+str(file)+" as input file")
-
-with open(file, 'r') as f:
-    topics = yaml.load(f);
-
+################################################################################
 # Parse the header of allvariables and special variables files also replace the JS_PATH.
 
 with open('html_template/temp_alltopics.html') as f:
@@ -380,6 +503,7 @@ for i, topic in enumerate(topics):
   topic_name = topic.topic_name
   toutput = toutput + "<br><a href=\""+ topic_name + ".html\">" + topic_name + "</a> [How to "+topic.howto+"] &nbsp;&nbsp;\n"
 
+################################################################################
 # Alltopics file : complete the content, then write the file and close it
 toutput += "<script type=\"text/javascript\" src=\""+js_path+"list_internal_links.js\"> </script>\n\n"
 toutput += "</body>\n"
@@ -390,3 +514,4 @@ f_html = open(file_html,'w')
 f_html.write(toutput)
 f_html.close()
 
+################################################################################
