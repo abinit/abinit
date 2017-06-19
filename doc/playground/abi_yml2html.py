@@ -350,7 +350,7 @@ f_html.close()
 
 ################################################################################
 # Constitute the section 3 "Related input variables" for all topic files. 
-# This sec3 is stored, for each topic_name in topic_sec3[topic_name]
+# This sec3 is stored, for each topic_name, in topic_sec3[topic_name]
 
 topic_sec3 = dict()
 topic_class_sec3 = dict()
@@ -388,7 +388,7 @@ for (tclasskey, tclassval) in list_topics_class:
 
 ################################################################################
 # Constitute the section 4 "Selected input files" for all topic files.
-# This sec4 is stored, for each topic_name in topic_sec4[topic_name]
+# This sec4 is stored, for each topic_name, in topic_sec4[topic_name]
 
 topic_sec4 = dict()
 topic_class_sec4 = dict()
@@ -425,8 +425,20 @@ print(inputs_for_topic)
 for i, topic_name in enumerate(inputs_for_topic):
   found[topic_name] = 1
   tests=inputs_for_topic[topic_name]
+# Constitute a dictionary for each directory of tests
+  dir = dict()
   for test in tests:
-    topic_class_sec4[topic_name]+= "<p> <a href=\"../"+test+"\">"+test+"</a>\n" 
+    file_split=test.split('/')
+    dirname=file_split[1] 
+    testname=file_split[3] 
+    if dirname not in dir.keys():
+      dir[dirname] = []
+    dir[dirname].append(testname)
+  for dirname, testnames in dir.items():
+    line="<p> tests/"+dirname+"/Input: "
+    for testname in testnames:
+      line+="<a href=\"../tests/"+dirname+"/Input/"+testname+"\">"+testname+"</a> \n"
+    topic_class_sec4[topic_name]+= line
 
 for topic_name, value in found.items():
   if found[topic_name] == 1:
