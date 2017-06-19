@@ -899,8 +899,8 @@ subroutine gruns_anaddb(inp, prefix, comm)
  end if
 
  ! Compute speed of sound for V0.
- if (inp%vs_qrad_tolms(1) > zero) then
-   call ifc_speedofsound(gruns%ifc_vol(iv0), gruns%cryst_vol(iv0), inp%vs_qrad_tolms, ncid, comm)
+ if (inp%vs_qrad_tolkms(1) > zero) then
+   call ifc_speedofsound(gruns%ifc_vol(iv0), gruns%cryst_vol(iv0), inp%vs_qrad_tolkms, ncid, comm)
  end if
 
  ! Now treat the second list of vectors (only at the Gamma point, but can include non-analyticities)

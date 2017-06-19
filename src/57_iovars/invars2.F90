@@ -1314,7 +1314,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
  if( 20<=dtset%ixc .and. dtset%ixc<=22 )dtset%xclevel=3 ! ixc for TDDFT kernel tests
  if( dtset%ixc>=40 .and. dtset%ixc<=42 )dtset%usefock=1 ! Hartree-Fock or internal hybrid functionals
  if( dtset%ixc>=41 .and. dtset%ixc<=42) dtset%xclevel=2 ! ixc for internal hybrids using GGA
- if (dtset%ixc<0) then                                  ! libXC: metaGGA and hybrifd functionals
+ if (dtset%ixc<0) then                                  ! libXC: metaGGA and hybrid functionals
    dtset%xclevel=1
    do isiz=1,2
      if (isiz==1) ii=-dtset%ixc/1000

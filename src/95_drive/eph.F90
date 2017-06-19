@@ -481,6 +481,12 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
      call dvdb_list_perts(dvdb, [-1,-1,-1], unit=ab_out)
    end if
 
+   if (iblock /= 0) then
+     dvdb%dielt = dielt
+     dvdb%zeff = zeff
+     dvdb%has_dielt_zeff = .True.
+   end if
+
    ! Compute \delta V_{q,nu)(r) and dump results to netcdf file.
    if (.False. .and. my_rank == master) then
      call ncwrite_v1qnu(dvdb, cryst, ifc, dvdb%nqpt, dvdb%qpts, dtset%prtvol, strcat(dtfil%filnam_ds(4), "_V1QNU.nc"))

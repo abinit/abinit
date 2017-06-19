@@ -39,6 +39,7 @@ module m_libpaw_defs
  real(dp), parameter :: half=0.50_dp
  real(dp), parameter :: third=one/three
  real(dp), parameter :: quarter=0.25_dp
+ real(dp), parameter :: eighth=0.125_dp
  real(dp), parameter :: sqrt2=1.4142135623730950488016887242096939_dp
  real(dp), parameter :: sqrt3=1.7320508075688772935274463415058739_dp
  real(dp), parameter :: sqrthalf=0.70710678118654752440084436210484697_dp
