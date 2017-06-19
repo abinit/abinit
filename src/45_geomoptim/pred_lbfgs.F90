@@ -100,13 +100,13 @@ real(dp) :: etotal
 real(dp) :: favg,alpha0
 
 !arrays
-integer,allocatable :: ipiv(:)
+!integer,allocatable :: ipiv(:)
 real(dp),allocatable :: diag(:)
 real(dp),allocatable,save :: hessin(:,:),vin(:),vin_prev(:)
 real(dp),allocatable,save :: vout(:),vout_prev(:)
 real(dp),allocatable,save ::vinres(:,:),vin1(:,:)
-real(dp),allocatable ::  amat(:,:),amatinv(:,:),alpha(:,:)
-real(dp),allocatable :: rwork(:)
+!real(dp),allocatable ::  amat(:,:),amatinv(:,:),alpha(:,:)
+!real(dp),allocatable :: rwork(:)
 real(dp),save :: acell0(3) ! Initial acell
 real(dp),save :: rprimd0(3,3) ! Initial rprimd
 real(dp) :: acell(3)
