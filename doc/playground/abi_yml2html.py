@@ -399,8 +399,8 @@ for i, var in enumerate(topics):
   topic_sec4[topic_name] = ""
   found[topic_name] = 0
  
-topic_header_sec4="<p>&nbsp; <HR ALIGN=left> <p> <a name=\"4\">&nbsp;</a> <h3><b>4. Selected input files.</b></h3>"
-topic_header_sec4+="The user can find some related example input files in the ABINIT package in the directory /tests, or on the Web:"
+topic_header_sec4="\n\n<p>&nbsp; \n<HR ALIGN=left> \n<p> <a name=\"4\">&nbsp;</a>\n<h3><b> 4. Selected input files.</b></h3>\n\n\n"
+topic_header_sec4+="The user can find some related example input files in the ABINIT package in the directory /tests, or on the Web:\n"
 
 # Create a dictionary to contain the list of tests for each topics
 inputs_for_topic = dict()
@@ -426,7 +426,7 @@ for i, topic_name in enumerate(inputs_for_topic):
   found[topic_name] = 1
   tests=inputs_for_topic[topic_name]
   for test in tests:
-    topic_class_sec4[topic_name]+= "<p> <a href=\"../"+test+"\">"+test+"</a>" 
+    topic_class_sec4[topic_name]+= "<p> <a href=\"../"+test+"\">"+test+"</a>\n" 
 
 for topic_name, value in found.items():
   if found[topic_name] == 1:
