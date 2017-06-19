@@ -1,4 +1,5 @@
-#! /usr/bin/env python
+#! /usr/bin/env python 
+from __future__ import print_function
 
 import sys
 import os
@@ -7,7 +8,7 @@ import re
 import argparse
 from variables import *
 
-debug = 1
+debug = 0
 
 # Path relative from HTML files
 js_path = "../"
@@ -93,6 +94,7 @@ def make_links(text,cur_varname,variables,characteristics,specials):
 # Parse the abinit_vars.yml file -> variables
 
 file='abinit_vars.yml'
+print("Will use "+str(file)+" as database input file for the input variables and their characteristics ...")
 
 parser = argparse.ArgumentParser(description='Tool for eigenvalue analysis')
 parser.add_argument('-f','--file',help='YML file to be read')
@@ -100,8 +102,6 @@ args = parser.parse_args()
 args_dict = vars(args)
 if args_dict['file']:
   file = args_dict['file']
-
-print("Will use "+str(file)+" as input file")
 
 with open(file, 'r') as f:
     variables = yaml.load(f);
@@ -110,6 +110,7 @@ with open(file, 'r') as f:
 # Parse the topics.yml file -> topics
 
 file='topics.yml'
+print("Will use "+str(file)+" as database input file for the list of topics ...")
 
 parser = argparse.ArgumentParser(description='Tool for eigenvalue analysis')
 parser.add_argument('-f','--file',help='YML file to be read')
@@ -117,8 +118,6 @@ args = parser.parse_args()
 args_dict = vars(args)
 if args_dict['file']:
   file = args_dict['file']
-
-print("Will use "+str(file)+" as input file")
 
 with open(file, 'r') as f:
     topics = yaml.load(f);
@@ -127,6 +126,7 @@ with open(file, 'r') as f:
 # Parse the tests_dirs.yml file -> tests_dirs
 
 file='tests_dirs.yml'
+print("Will use "+str(file)+" as database input file for the list of directories in which automatic test input files are present ...")
 
 parser = argparse.ArgumentParser(description='Tool for eigenvalue analysis')
 parser.add_argument('-f','--file',help='YML file to be read')
@@ -134,8 +134,6 @@ args = parser.parse_args()
 args_dict = vars(args)
 if args_dict['file']:
   file = args_dict['file']
-
-print("Will use "+str(file)+" as input file")
 
 with open(file, 'r') as f:
     tests_dirs = yaml.load(f);
@@ -159,6 +157,7 @@ for tests_dir in tests_dirs :
     retcode = os.system(sed_cmd)
 
 file='html_automatically_generated/topics_in_tests.yml'
+print("Generated file named "+str(file)+", to contain the list of automatic test input files relevant for each topic ...")
 
 parser = argparse.ArgumentParser(description='Tool for eigenvalue analysis')
 parser.add_argument('-f','--file',help='YML file to be read')
@@ -167,22 +166,23 @@ args_dict = vars(args)
 if args_dict['file']:
   file = args_dict['file']
 
-print("Will use "+str(file)+" as list of input files relevant for each topic")
-
 with open(file, 'r') as f:
-    topics_in_tests = yaml.load(f);
+  topics_in_tests = yaml.load(f);
 
-print(" topics_in_tests :")
-print(topics_in_tests)
+if debug==1 :
+  print(" topics_in_tests :")
+  print(topics_in_tests)
 
 ################################################################################
 # Parse the headers of allvariables and special variables files also replace the JS_PATH.
 
 with open('html_template/temp_allvariables.html') as f:
     header_all = f.read()
+print("Will use file named temp_allvariables.html as template for allvariables.html...")
 
 with open('html_template/temp_specials.html') as f:
     header_specials = f.read()
+print("Will use file named temp_specials.html as template for specials.html...")
 
 header_all = header_all.replace("__JS_PATH__",js_path)
 
@@ -245,7 +245,8 @@ for i, var in enumerate(variables):
     try:
       cur_content += "<br><font id=\"characteristic\">Mentioned in \"How to\": "+"<a href=\""+var.topic_name+".html\">"+var.topic_name+"</a></font>\n"
     except:
-      print(" No topic_class for varname "+var.varname)
+      if debug==1 :
+        print(" No topic_class for varname "+var.varname)
     cur_content += "<br><font id=\"vartype\">Variable type: "+var.vartype
     if var.dimensions is not None:
       cur_content += make_links(format_dimensions(var.dimensions),var.varname,list_all_vars,list_chars,cur_specials)
@@ -281,6 +282,7 @@ for section, content in all_contents.items():
 
   with open('html_template/temp_'+section+'.html') as f:
     header_varX = f.read()
+  print("Will use file named temp_"+section+", as template for "+section+".html... ", end='')
 
   cur_header_varX = header_varX.replace("__JS_PATH__",js_path)
  
@@ -302,6 +304,7 @@ for section, content in all_contents.items():
   f_cur.write(content)
   f_cur.write("\n")
   f_cur.close()
+  print("File "+section+".html has been written ...")
 
 # Special file : complete the content, then write the file and close it
 file_specials = 'html_automatically_generated/specials.html'
@@ -334,6 +337,7 @@ cur_content += "</html>"
 
 f_sp.write(cur_content)
 f_sp.close()
+print("File specials.html has been written ...")
 
 # Allvariables file : complete the content, then write the file and close it
 output += "<script type=\"text/javascript\" src=\""+js_path+"list_internal_links.js\"> </script>\n\n"
@@ -344,6 +348,7 @@ file_html = 'html_automatically_generated/allvariables.html'
 f_html = open(file_html,'w')
 f_html.write(output)
 f_html.close()
+print("File allvariables.html has been written ...")
 
 ################################################################################
 ################################################################################
@@ -380,7 +385,8 @@ for (tclasskey, tclassval) in list_topics_class:
         topic_class_sec3[topic_name] += "... <a href=\""+var.section+".html#"+var.varname+"\">"+varname+"</a>   "
         topic_class_sec3[topic_name] += "["+var.definition+"]<br>\n"
       except:
-        print(" No topic_class for varname "+var.varname) 
+        if debug==1 :
+          print(" No topic_class for varname "+var.varname) 
 
       if debug==1 :
         print(topic_class_sec3)
@@ -409,14 +415,9 @@ topic_header_sec4+="The user can find some related example input files in the AB
 # Create a dictionary to contain the list of tests for each topics
 inputs_for_topic = dict()
 for str in topics_in_tests:
-  print("str :",str)
-  print(" ")
   str2 = str.split(':')
   listt=str2[1]
   str_topics = listt[listt.index('=')+1:]
-  print("str2[0] : ",str2[0])
-  print("str_topics : ",str_topics)
-  print(" ")
   list_topics = str_topics.split(',')
   for topic in list_topics:
     topic = topic.strip()
@@ -424,7 +425,8 @@ for str in topics_in_tests:
       inputs_for_topic[topic] = []
     inputs_for_topic[topic].append(str2[0])
 
-print(inputs_for_topic)
+if debug==1 :
+  print(inputs_for_topic)
 
 for i, topic_name in enumerate(inputs_for_topic):
   found[topic_name] = 1
@@ -455,11 +457,12 @@ for topic_name, value in found.items():
 # For each "topic" file 
 for topic_name, content in topic_sec3.items():
   file_template = 'html_template/temp_'+topic_name+'.html'
+  print("Will use file named temp_"+topic_name+", as template for "+topic_name+".html... ", end='')
   try:
     with open(file_template) as f:
       header_varX = f.read()
   except:
-    print("Tried to open the file "+file_template+" , but failed.")
+    print("Tried to open the file temp_"+tomic_name+" , but failed.")
 
   file_topic = 'html_automatically_generated/'+topic_name+'.html'
   topic_header_varX = header_varX.replace("__JS_PATH__",js_path)
@@ -481,6 +484,7 @@ for topic_name, content in topic_sec3.items():
   content += "\n"
   f_topic.write(content)
   f_topic.close()
+  print("File "+topic_name+".html has been written ...")
 
 ################################################################################
 ################################################################################
@@ -492,11 +496,9 @@ for topic_name, content in topic_sec3.items():
 
 with open('html_template/temp_alltopics.html') as f:
     header_alltopics = f.read()
+print("Will use file named temp_alltopics.html, as template for alltopics.html... ", end='')
 
 header_alltopics = header_alltopics.replace("__JS_PATH__",js_path)
-
-print("header_alltopics: ")
-print(header_alltopics)
 
 # Initialize the alltopics file output
 toutput = ''
@@ -508,13 +510,14 @@ toutput = toutput + "<p>"+cur_let+".&nbsp;\n"
 # for topic in topics:
 #  print("topic: "+topic.topic_name)
 
-print("Will enter loop on topics")
+if debug==1 :
+  print("Will enter loop on topics")
+
 for i, topic in enumerate(topics):
   if debug==1 :
     print("topic: "+topic.topic_name)
     print("cur_let: "+cur_let)
   while not (topic.topic_name.startswith(cur_let.lower()) or topic.topic_name.startswith(cur_let.upper())):
-    print("cur_let: "+cur_let)
     cur_let = chr(ord(cur_let)+1)
     toutput = toutput + "<p>"+cur_let+".\n"
   topic_name = topic.topic_name
@@ -530,5 +533,7 @@ file_html = 'html_automatically_generated/alltopics.html'
 f_html = open(file_html,'w')
 f_html.write(toutput)
 f_html.close()
+print("File alltopics.html has been written ...")
+print("Work done !")
 
 ################################################################################
