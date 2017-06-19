@@ -307,7 +307,6 @@
          Notes: do not quote the file name in the abinit input file, simply leave a space after xyzfile. The xyz format is the number of atoms on the first line, a comment line, then one line per atom, with the element as a 2 letter symbol ("As" "O" or "Pu") and the three cartesian coordinates in Angstrom.
         </p>
     topic_class: expert
-    topic_name: crystal
     varname: xyzfile
     vartype: string
 
