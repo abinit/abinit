@@ -369,13 +369,14 @@ for i, var in enumerate(topics):
   found[topic_name] = 0
 
 for (tclasskey, tclassval) in list_topics_class:
+
   for topic_name, value in topic_class_sec3.items():
     topic_class_sec3[topic_name] = "<p>"+tclassval+"<p>"
   for i, var in enumerate(variables):
     if tclasskey==var.topic_class : 
       if debug==1 :
         print(var)
-      try:
+      if var.topic_name is not None:
         topic_name = var.topic_name
         found[topic_name] = 1
         varname = var.varname
@@ -384,9 +385,9 @@ for (tclasskey, tclassval) in list_topics_class:
         # Constitute the line of information related to one input variable
         topic_class_sec3[topic_name] += "... <a href=\""+var.section+".html#"+var.varname+"\">"+varname+"</a>   "
         topic_class_sec3[topic_name] += "["+var.definition+"]<br>\n"
-      except:
+      else:
         if debug==1 :
-          print(" No topic_class for varname "+var.varname) 
+          print(" No topic_name for varname "+var.varname) 
 
       if debug==1 :
         print(topic_class_sec3)

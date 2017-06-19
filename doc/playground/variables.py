@@ -54,17 +54,19 @@ class Variable(yaml.YAMLObject):
     range = None
     requires = None
     excludes = None
+    topic_name = None
+    topic_class = None
 
     yaml_tag = u'!variable'
 
     def attrs(self):
         return ['vartype', 'characteristic', 'definition', 'dimensions', 'defaultval', 'text',
-                'varname', 'section']
+                'varname', 'section', 'topic_name', 'topic_class']
 
     def __init__(self, vartype=None, characteristic=None,
                  definition=None, dimensions=None, default=None,
                  text=None, varname=None, section=None, range=None,
-                 commentdefault=None, commentdims=None):
+                 commentdefault=None, commentdims=None, topic_name=None, topic_class=None):
         self.vartype = vartype
         self.characteristic = characteristic
         self.definition = definition
@@ -76,6 +78,8 @@ class Variable(yaml.YAMLObject):
         self.commentdefault = commentdefault
         self.commentdims = commentdims
         self.range = range
+        self.topic_name = topic_name
+        self.topic_class = topic_class
 
     @classmethod
     def from_array(cls, array):
@@ -83,7 +87,7 @@ class Variable(yaml.YAMLObject):
                         definition=array["definition"], dimensions=array["dimensions"],
                         default=array["default"], text=array["text"], varname=array["varname"],
                         section=array["section"], range=array["range"], commentdefault=array["commentdefault"],
-                        commentdims=array["commentdims"])
+                        commentdims=array["commentdims"], topic_name=array["topic_name"], topic_class=array["topic_class"])
 
     def __str__(self):
         return "Variable " + str(self.varname) + " (default = " + str(self.defaultval) + ")"
