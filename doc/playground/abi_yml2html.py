@@ -385,11 +385,8 @@ for (tclasskey, tclassval) in list_topics_class:
   for topic_name, value in topic_class_sec3.items():
     topic_class_sec3[topic_name] = "<p>"+tclassval+"<p>"
 
-#debug
-  print(" ")   
-  print(" Work on "+tclasskey)
-  print(" ")   
-#enddebug
+  if debug == 1:
+    print("\nWork on "+tclasskey+"\n")
 
   for i, var in enumerate(variables):
     foundvar[topic_name] = 0
@@ -427,15 +424,13 @@ for (tclasskey, tclassval) in list_topics_class:
           print("topic_class_sec3[topic_name]:")
           print(topic_class_sec3[topic_name])
 
+  if debug == 1:
+    print("found:",found)
+
   for topic_name, value in found.items():
     if found[topic_name] == 1:
       found[topic_name]=0
       topic_sec3[topic_name] = topic_sec3[topic_name] + topic_class_sec3[topic_name]
-
-  print(" ")
-  print("found")
-  print(found)
-  print(" ")
 
 ################################################################################
 # Constitute the section 4 "Selected input files" for all topic files.
