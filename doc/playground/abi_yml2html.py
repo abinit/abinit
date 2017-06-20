@@ -8,7 +8,7 @@ import re
 import argparse
 from variables import *
 
-debug = 0
+debug = 1
 
 # Path relative from HTML files
 js_path = "../"
@@ -93,7 +93,7 @@ def make_links(text,cur_varname,variables,characteristics,specials):
 ################################################################################
 # Parse the abinit_vars.yml file -> variables
 
-file='abinit_vars.yml'
+file='abinit_vars_out_play.yml'
 print("Will use "+str(file)+" as database input file for the input variables and their characteristics ...")
 
 parser = argparse.ArgumentParser(description='Tool for eigenvalue analysis')
