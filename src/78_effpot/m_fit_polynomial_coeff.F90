@@ -1362,7 +1362,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,fixcoeff,hist,ncycle_in,nfixcoeff,po
  gf_values(:,:) = zero
 
 !Set mpi buffer
-!  Set the bufsize for mpi allgather
+!Set the bufsize for mpi allgather
  ABI_ALLOCATE(buffsize,(nproc))
  ABI_ALLOCATE(buffdisp,(nproc))
  ABI_ALLOCATE(buffGF,(5,1))
@@ -1383,7 +1383,13 @@ subroutine fit_polynomial_coeff_fit(eff_pot,fixcoeff,hist,ncycle_in,nfixcoeff,po
 
    write(message, '(4a,I0,a)')ch10,'--',ch10,' Try to find the best model with ',icycle,' coefficient'
    if(icycle > 1)  write(message, '(2a)') trim(message),'s'
-   if(nproc > 1)  write(message, '(2a,I0,a)')trim(message), ' (only the ',my_ncoeff,' first are printed)'
+   if(nproc > 1)  then
+     if(my_ncoeff>=1) then
+       write(message, '(2a,I0,a)')trim(message), ' (only the ',my_ncoeff,' first are printed)'
+     else
+       write(message, '(2a)')trim(message), ' (no coefficient treated by this CPU)'
+     end if
+   end if
    call wrtout(std_out,message,'COLL')
    if(icycle>1 .or. any(list_coeffs(:) > zero))then
      write(message, '(3a)') ' The coefficient numbers from the previous cycle are:',ch10,' ['
@@ -1398,17 +1404,19 @@ subroutine fit_polynomial_coeff_fit(eff_pot,fixcoeff,hist,ncycle_in,nfixcoeff,po
      call wrtout(std_out,message,'COLL')
    end if
 
-   write(message,'(2x,a,12x,a,14x,a,13x,a,14x,a)') " Testing","MSEE","MSEFS","MSEF","MSES"
-   call wrtout(std_out,message,'COLL') 
-   write(message,'(a,7x,a,8x,a,8x,a,8x,a)') " Coefficient","(meV/f.u.)","(eV^2/A^2)","(eV^2/A^2)",&
+   if(my_ncoeff>=1) then
+     write(message,'(2x,a,12x,a,14x,a,13x,a,14x,a)') " Testing","MSEE","MSEFS","MSEF","MSES"
+     call wrtout(std_out,message,'COLL') 
+     write(message,'(a,7x,a,8x,a,8x,a,8x,a)') " Coefficient","(meV/f.u.)","(eV^2/A^2)","(eV^2/A^2)",&
 &                                          "(eV^2/A^2)"
-   call wrtout(std_out,message,'COLL')
+     call wrtout(std_out,message,'COLL')
+   end if
 
 !  Reset gf_values
    gf_values(:,:) = zero
 
    do icoeff=1,my_ncoeff
-     if(any(list_coeffs==icoeff).or. singular_coeffs(icoeff) == 1) cycle
+     if(any(list_coeffs==my_coeff(icoeff)).or. singular_coeffs(my_coeff(icoeff)) == 1) cycle
      list_coeffs(icycle) = my_coeff(icoeff)
 
 !    call the fit process routine
@@ -1423,7 +1431,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,fixcoeff,hist,ncycle_in,nfixcoeff,po
 &                                         list_coeffs(1:icycle),natom_sc,icycle,ncoeff_max,ntime,&
 &                                         strten_coeffs,strten_diff,sfact,sqomega,ucvol)
 
-       write (j_char, '(i5)') icoeff
+       write (j_char, '(i5)') my_coeff(icoeff)
        write(message, '(6x,a,3x,4ES18.10)') adjustl(j_char),&
 &                                 gf_values(4,icoeff)* 1000*Ha_ev / ncell,&
 &                                 gf_values(1,icoeff)*HaBohr_meVAng**2,&
@@ -1432,7 +1440,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,fixcoeff,hist,ncycle_in,nfixcoeff,po
 
      else!In this case the matrix is singular
        gf_values(:,icoeff) = zero
-       singular_coeffs(icoeff) = 1
+       singular_coeffs(my_coeff(icoeff)) = 1
        write(message, '(a)') ' The matrix is singular...'
      end if
      call wrtout(std_out,message,'COLL')
@@ -1453,7 +1461,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,fixcoeff,hist,ncycle_in,nfixcoeff,po
      end if
    end do
 
-!  MPI GATHER
+!  MPI GATHER THE BEST COEFF ON EACH CPU
    buffGF(1,1) = index_min
    buffGF(2:5,1) =  mingf(:)
    call xmpi_allgatherv(buffGF,5,gf_mpi,buffsize,buffdisp, comm, ierr)
@@ -1803,10 +1811,10 @@ end subroutine fit_polynomial_coeff_solve
 !!
 !! SOURCE
 
-subroutine fit_polynomial_coeff_computeGF(coefficients,du_delta,energy_coeffs,energy_diff,fcart_coeffs,&
-&                                         fcart_diff,ffact,gf_value,list_coeffs,natom,ncoeff_fit,&
-&                                         ncoeff_max,ntime,strten_coeffs,strten_diff,sfact,sqomega,&
-&                                         ucvol)
+subroutine fit_polynomial_coeff_computeGF(coefficients,du_delta,energy_coeffs,energy_diff,&
+&                                         fcart_coeffs,fcart_diff,ffact,gf_value,list_coeffs,&
+&                                         natom,ncoeff_fit,ncoeff_max,ntime,strten_coeffs,&
+&                                         strten_diff,sfact,sqomega,ucvol)
 
 
 !This section has been created automatically by the script Abilint (TD).
