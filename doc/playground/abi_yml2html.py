@@ -390,11 +390,9 @@ for (tclasskey, tclassval) in list_topics_class:
 
   for i, var in enumerate(variables):
     foundvar[topic_name] = 0
-    if tclasskey==var.topic_class : 
-      if debug==1 :
-        print("var:")
-        print(var)
-      if var.topic_name is not None:
+    # This whole section should be much better coded ... Avoid duplication of code sections ...
+    if var.topic_name is not None:
+      if tclasskey==var.topic_class : 
         topic_name=var.topic_name
         found[topic_name] = 1
         foundvar[topic_name] = 1
@@ -404,9 +402,19 @@ for (tclasskey, tclassval) in list_topics_class:
           varname2_dic[topic_name] = '%'+var.varname
         section_dic[topic_name]=var.section
         definition_dic[topic_name]=var.definition
-      else:
-        if debug==1 :
-          print(" No topic_name for varname "+var.varname)
+    else if var.topics is not None:
+      for topics in var.topics:
+        topic_class=topics.topic_class
+        if tclasskey==var.topic_class : 
+          topic_name=topics.topic_name
+          found[topic_name] = 1
+          foundvar[topic_name] = 1
+          varname_dic[topic_name]=var.varname
+          varname2_dic[topic_name]=var.varname
+          if var.characteristics is not None and '[[INTERNAL_ONLY]]' in var.characteristics:
+            varname2_dic[topic_name] = '%'+var.varname
+          section_dic[topic_name]=var.section
+          definition_dic[topic_name]=var.definition
 
     for topic_name, value in found.items():
       if foundvar[topic_name] == 1:
