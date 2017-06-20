@@ -8,7 +8,7 @@ import re
 import argparse
 from variables import *
 
-debug = 0
+debug = 1
 
 # Path relative from HTML files
 js_path = "../"
@@ -362,40 +362,80 @@ print("File allvariables.html has been written ...")
 topic_sec3 = dict()
 topic_class_sec3 = dict()
 found = dict()
-for i, var in enumerate(topics):
-  topic_name = var.topic_name
+foundvar = dict()
+varname_dic = dict()
+varname2_dic = dict()
+section_dic = dict()
+definition_dic = dict()
+
+for i, topic in enumerate(topics):
+  topic_name = topic.topic_name
+
   topic_class_sec3[topic_name] = ""
   topic_sec3[topic_name] = ""
   found[topic_name] = 0
+  foundvar[topic_name] = 0
+  varname_dic[topic_name] = ""
+  varname2_dic[topic_name] = ""
+  section_dic[topic_name] = ""
+  definition_dic[topic_name] = ""
 
 for (tclasskey, tclassval) in list_topics_class:
 
   for topic_name, value in topic_class_sec3.items():
     topic_class_sec3[topic_name] = "<p>"+tclassval+"<p>"
+
+#debug
+  print(" ")   
+  print(" Work on "+tclasskey)
+  print(" ")   
+#enddebug
+
   for i, var in enumerate(variables):
+    foundvar[topic_name] = 0
     if tclasskey==var.topic_class : 
       if debug==1 :
+        print("var:")
         print(var)
       if var.topic_name is not None:
-        topic_name = var.topic_name
+        topic_name=var.topic_name
         found[topic_name] = 1
-        varname = var.varname
+        foundvar[topic_name] = 1
+        varname_dic[topic_name]=var.varname
+        varname2_dic[topic_name]=var.varname
         if var.characteristics is not None and '[[INTERNAL_ONLY]]' in var.characteristics:
-          varname = '%'+varname
-        # Constitute the line of information related to one input variable
-        topic_class_sec3[topic_name] += "... <a href=\""+var.section+".html#"+var.varname+"\">"+varname+"</a>   "
-        topic_class_sec3[topic_name] += "["+var.definition+"]<br>\n"
+          varname2_dic[topic_name] = '%'+var.varname
+        section_dic[topic_name]=var.section
+        definition_dic[topic_name]=var.definition
       else:
         if debug==1 :
-          print(" No topic_name for varname "+var.varname) 
+          print(" No topic_name for varname "+var.varname)
 
-      if debug==1 :
-        print(topic_class_sec3)
+    for topic_name, value in found.items():
+      if foundvar[topic_name] == 1:
+        # Constitute the line of information related to one input variable
+        foundvar[topic_name]=0
+        varname=varname_dic[topic_name]
+        varname2=varname_dic[topic_name]
+        section=section_dic[topic_name]
+        definition=definition_dic[topic_name]
+        topic_class_sec3[topic_name] += "... <a href=\""+section+".html#"+varname+"\">"+varname2+"</a>   "
+        topic_class_sec3[topic_name] += "["+definition+"]<br>\n"
+
+        if debug==1 :
+          print("topic_name:"+topic_name)
+          print("topic_class_sec3[topic_name]:")
+          print(topic_class_sec3[topic_name])
 
   for topic_name, value in found.items():
     if found[topic_name] == 1:
+      found[topic_name]=0
       topic_sec3[topic_name] = topic_sec3[topic_name] + topic_class_sec3[topic_name]
-      found[topic_name] = 0
+
+  print(" ")
+  print("found")
+  print(found)
+  print(" ")
 
 ################################################################################
 # Constitute the section 4 "Selected input files" for all topic files.

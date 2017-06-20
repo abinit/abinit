@@ -308,6 +308,7 @@
         </p>
     topics:
     - {topic_name: crystal, topic_class: expert}
+    - {topic_name: DFT+U, topic_class: basic}
     varname: xyzfile
     vartype: string
 
