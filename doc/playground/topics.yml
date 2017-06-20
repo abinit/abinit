@@ -6,3 +6,7 @@
     topic_name: DFT+U
     howto: |-
       perform a DFT+U calculation
+- !topic
+    topic_name: PAW_settings
+    howto: |-
+      set parameters for a PAW calculation
