@@ -94,9 +94,8 @@ program multibinit
  type(abihist) :: hist
  type(args_t) :: args
 !TEST_AM
- integer :: natom_sp
- real(dp) :: mse,msef,mses
- real(dp),allocatable :: dynmat(:,:,:,:,:)
+! integer :: natom_sp
+! real(dp),allocatable :: dynmat(:,:,:,:,:)
 !TEST_AM
 !******************************************************************
 
@@ -206,7 +205,7 @@ program multibinit
 ! Read and treat the reference structure 
 !****************************************************************************************
 
-!Read the harmonics parts
+!Read the model (from DDB or XML)
  call effective_potential_file_read(filnam(3),reference_effective_potential,inp,comm)
 
 !Read the coefficient from fit
@@ -256,6 +255,7 @@ program multibinit
      call wrtout(std_out,message,'COLL') 
      call wrtout(ab_out,message,'COLL') 
      if(filnam(5)/=''.and.filnam(5)/='no')then
+!       call fit_polynomial_readMDfile(filnam(5),hist,40,(/2,2,2/))
        call read_md_hist(filnam(5),hist,.FALSE.,.FALSE.,.FALSE.)
        if (hist%mxhist == 0)then
          write(message, '(5a)' )&
@@ -328,9 +328,9 @@ program multibinit
        end if
      case (1)
 !    option = 1
-       call fit_polynomial_coeff_fit(inp%fit_cutoff,reference_effective_potential,&
-&                                    inp%fit_fixcoeff,hist,inp%fit_ncycle,&
-&                                    inp%fit_nfixcoeff,comm)
+       call fit_polynomial_coeff_fit(reference_effective_potential,&
+&                                    inp%fit_fixcoeff,hist,inp%fit_ncycle,inp%fit_nfixcoeff,&
+&                                    inp%fit_rangePower,comm,cut_off=inp%fit_cutoff)
      end select
    else
      write(message, '(3a)' )&
@@ -344,18 +344,19 @@ program multibinit
 
 !****************************************************************************************
 !Print the effective potential system + coefficients (only master CPU)
- if(iam_master.and.(inp%prt_effpot<=-1.or.inp%prt_effpot>=3)) then
-   select case(inp%prt_effpot)
-   case (-1) 
+ if(iam_master) then
+   if (inp%prt_model >= 1) then
+     write(message, '(a,(80a),a)' ) ch10,&
+&    ('=',ii=1,80)
+     call wrtout(ab_out,message,'COLL')
+     call wrtout(std_out,message,'COLL')
      name = replace(trim(filnam(2)),".out","")
-     call effective_potential_writeXML(reference_effective_potential,-1,filename=name)
-   case(-2)
+     call effective_potential_writeXML(reference_effective_potential,inp%prt_model,filename=name)
+   else if (inp%prt_model == -2)then
+!    NetCDF case, in progress
      name = trim(filnam(2))//"_sys.nc"
      call effective_potential_writeNETCDF(reference_effective_potential,1,filename=name)
-   case (3)  
-     name = replace(trim(filnam(2)),".out","")
-     call effective_potential_writeXML(reference_effective_potential,1,filename=name)
-   end select
+   end if
  end if
 !****************************************************************************************
 

@@ -387,6 +387,7 @@ subroutine anharmonics_terms_setElastic3rd(anharmonics_terms,elastics)
 
 ! 1-reinitialise the previous value
   anharmonics_terms%elastic3rd(:,:,:) = zero
+  anharmonics_terms%has_elastic3rd = .FALSE. 
 
 ! 2-Allocation of the new array
   anharmonics_terms%elastic3rd(:,:,:) = elastics(:,:,:)
@@ -444,6 +445,7 @@ subroutine anharmonics_terms_setElastic4rd(anharmonics_terms,elastics)
 
 ! 1-reinitialise the previous value
   anharmonics_terms%elastic4rd(:,:,:,:) = zero
+  anharmonics_terms%has_elastic4rd = .FALSE. 
 
 ! 2-Allocation of the new array
   anharmonics_terms%elastic4rd(:,:,:,:) = elastics(:,:,:,:)
@@ -514,6 +516,7 @@ subroutine anharmonics_terms_setStrainPhononCoupling(anharmonics_terms,natom,pho
   end do
 
 ! 1-reinitialise the previous value
+  anharmonics_terms%has_strain_coupling  = .FALSE.
   if(allocated(anharmonics_terms%phonon_strain))then
     do ii = 1,6
        call ifc_free(anharmonics_terms%phonon_strain(ii))
@@ -537,13 +540,11 @@ subroutine anharmonics_terms_setStrainPhononCoupling(anharmonics_terms,natom,pho
 !  If there is no value inside the array,
 !  We don't need to store it
    else
-     anharmonics_terms%has_strain_coupling  = .FALSE.
      ABI_DEALLOCATE(anharmonics_terms%phonon_strain(ii)%atmfrc)
      ABI_DEALLOCATE(anharmonics_terms%phonon_strain(ii)%cell)
      anharmonics_terms%phonon_strain(ii)%nrpt = zero
    end if
  end do
-
 
 end subroutine anharmonics_terms_setStrainPhononCoupling
 !!***
@@ -601,6 +602,7 @@ subroutine anharmonics_terms_setElasticDispCoupling(anharmonics_terms,natom,elas
   end if
 
 ! 1-reinitialise the previous value
+  anharmonics_terms%has_elastic_displ = .FALSE.
   if(allocated(anharmonics_terms%elastic_displacement))then
     ABI_DATATYPE_DEALLOCATE(anharmonics_terms%elastic_displacement)
   end if
@@ -615,7 +617,6 @@ subroutine anharmonics_terms_setElasticDispCoupling(anharmonics_terms,natom,elas
   else
 !   If there is no value inside the array,
 !   We don't need to store it
-    anharmonics_terms%has_elastic_displ = .FALSE.
     ABI_DEALLOCATE(anharmonics_terms%elastic_displacement)
   end if
 

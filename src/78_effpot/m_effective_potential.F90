@@ -310,7 +310,8 @@ subroutine effective_potential_init(crystal,eff_pot,energy,ifcs,ncoeff,nqpt,comm
 
 !Allocation of phonon strain coupling array (3rd order)
  if(present(phonon_strain).and.has_strainCoupling) then
-   call anharmonics_terms_setStrainPhononCoupling(eff_pot%anharmonics_terms,crystal%natom,phonon_strain)
+   call anharmonics_terms_setStrainPhononCoupling(eff_pot%anharmonics_terms,crystal%natom,&
+&                                                phonon_strain)
  end if
 
 !Set the 3rd order elastic tensor
@@ -1549,11 +1550,7 @@ end subroutine effective_potential_setSupercell
 !! INPUTS
 !! eff_pot = effective potential structure
 !! option  =  0 no output
-!! option  = -1 only generate xml file
 !! option  =  1 only useful information
-!! option  =  2 all informations including ifc
-!! option  =  3 only useful information + xml file
-!! option  =  4 only all informations including ifc + xml file
 !!
 !! OUTPUT
 !!
@@ -1669,9 +1666,6 @@ subroutine effective_potential_print(eff_pot,option,filename)
     end do
   end if
 
-  if (option >= 3) then
-!   to do
-  end if
 end subroutine effective_potential_print
 !!***
 
@@ -1847,11 +1841,16 @@ end subroutine effective_potential_printSupercell
 !! INPUTS
 !! filename = the name of output file
 !! eff_pot  = structure contains the effective potential
-!! option   = option for the format of the xml file
-!!           -1 print both system.xml and coefficients from fitted polynomial
-!!            1 print the xml for a system
-!!            2 print the coefficients from the fitted polynomial
-!!
+!! option   = 0 Do nothing
+!!          = 1 Generate the XML file with:
+!!                - The system definition and the model (Harmonic + Anharmonic)
+!!          = 2 Generate two XML files with:
+!!                - The system definition and the model (Harmonic)
+!!                - The model (Anharmonic)
+!!          = 3 Generate one XML files with:
+!!                - The system definition and the model (Harmonic)
+!!          = 4 Generate one XML files with:
+!!                - The model (Anharmonic)
 !!
 !! OUTPUT
 !!
@@ -1896,6 +1895,7 @@ subroutine effective_potential_writeXML(eff_pot,option,filename)
  character(len=500) :: msg
  character(len=fnlen) :: namefile
  character(len=10) :: natom
+ logical :: new_file = .FALSE.
 !arrays
  real :: strain(9,6)
 
@@ -1909,13 +1909,22 @@ subroutine effective_potential_writeXML(eff_pot,option,filename)
  strain(:,6) = half*(/0,1,0,1,0,0,0,0,0/)
 
 !Print only the reference system in xml format
- if (option==  -1 .or. option == 1) then
+ if (option ==  1 .or. option == 2 .or. option ==3) then
 
 !  convert natom in character
    write (natom,'(I9)') eff_pot%crystal%natom
+
+!  Compute the name of the XML file
    if(present(filename)) then
      namefile=replace(trim(filename),".out","")
-     namefile=trim(namefile)//"_sys.xml"
+     select case(option)
+     case(1)
+       namefile=trim(namefile)//"_model.xml"
+     case(2)
+       namefile=trim(namefile)//"_sys.xml"
+     case(3)
+       namefile=trim(namefile)//"_sys.xml"
+     end select
    else
      namefile='system.xml'
    end if
@@ -1927,13 +1936,8 @@ subroutine effective_potential_writeXML(eff_pot,option,filename)
      MSG_ERROR(msg)
    end if
 
-   write(msg, '(a,(80a),a)' ) ch10,&
-&    ('=',ii=1,80)
-   call wrtout(ab_out,msg,'COLL')
-   call wrtout(std_out,msg,'COLL')
-
    write(msg,'(a,a,a)')ch10,&
- &       ' Generation of the xml file for the reference structure in ',trim(namefile)
+ &       ' Generation of the xml file for the model in ',trim(namefile)
 
    call wrtout(ab_out,msg,'COLL')
    call wrtout(std_out,msg,'COLL')
@@ -2061,7 +2065,6 @@ subroutine effective_potential_writeXML(eff_pot,option,filename)
      WRITE(unit_xml,'("    </dynamical_matrix>")')
      WRITE(unit_xml,'("  </phonon>")')
    end do
-
 ! if phonon/forces strain is computed
    jj = 1
    do ii = 1,6
@@ -2078,68 +2081,94 @@ subroutine effective_potential_writeXML(eff_pot,option,filename)
        WRITE(unit_xml,'(a)')''
      end do
      WRITE(unit_xml,'("    </correction_force>")')
-     if (eff_pot%anharmonics_terms%has_elastic3rd) then
-       WRITE(unit_xml,'("  <elastic3rd units=""hartree"">")')
-       WRITE(unit_xml,'(6(E23.14))') (eff_pot%anharmonics_terms%elastic3rd(ii,:,:))
-       WRITE(unit_xml,'("  </elastic3rd>")')
-     end if
-     if (eff_pot%anharmonics_terms%has_elastic_displ) then
-       WRITE(unit_xml,'("    <correction_strain_force units=""hartree/bohrradius"">")')
-       do ia=1,eff_pot%crystal%natom
-         do mu=1,3
-           do nu=1,6
-             WRITE(unit_xml,'(e22.14)', advance="no")&
-&                 (eff_pot%anharmonics_terms%elastic_displacement(ii,nu,mu,ia))
-           end do
-         end do
-         WRITE(unit_xml,'(a)')''
-       end do
-     end if
-     if (eff_pot%anharmonics_terms%has_strain_coupling) then
-       WRITE(unit_xml,'("    </correction_strain_force>")')
-       do irpt=1,eff_pot%anharmonics_terms%phonon_strain(ii)%nrpt
-         WRITE(unit_xml,'("    <correction_force_constant units=""hartree/bohrradius**2"">")')
-         WRITE(unit_xml,'("      <data>")')
+     if (eff_pot%has_strainCoupling)then
+       if (eff_pot%anharmonics_terms%has_elastic3rd) then
+         WRITE(unit_xml,'("  <elastic3rd units=""hartree"">")')
+         WRITE(unit_xml,'(6(E23.14))') (eff_pot%anharmonics_terms%elastic3rd(ii,:,:))
+         WRITE(unit_xml,'("  </elastic3rd>")')
+       end if
+       if (eff_pot%anharmonics_terms%has_elastic_displ) then
+         WRITE(unit_xml,'("    <correction_strain_force units=""hartree/bohrradius"">")')
          do ia=1,eff_pot%crystal%natom
            do mu=1,3
-             do ib=1,eff_pot%crystal%natom
-               do  nu=1,3
-                 WRITE(unit_xml,'(e22.14)', advance="no")&
-&                    (eff_pot%anharmonics_terms%phonon_strain(ii)%atmfrc(1,mu,ia,nu,ib,irpt))
-               end do
+             do nu=1,6
+               WRITE(unit_xml,'(e22.14)', advance="no")&
+&                   (eff_pot%anharmonics_terms%elastic_displacement(ii,nu,mu,ia))
              end do
-             WRITE(unit_xml,'(a)')''
            end do
+           WRITE(unit_xml,'(a)')''
          end do
-         WRITE(unit_xml,'("      </data>")')
-         WRITE(unit_xml,'("      <cell>")')
-         WRITE(unit_xml,'(3(I4))') (eff_pot%anharmonics_terms%phonon_strain(ii)%cell(:,irpt))
-         WRITE(unit_xml,'("      </cell>")')
-         WRITE(unit_xml,'("    </correction_force_constant>")')
-       end do
-     end if
+       end if
+       WRITE(unit_xml,'("    </correction_strain_force>")')
+       if (eff_pot%anharmonics_terms%has_strain_coupling) then
+         do irpt=1,eff_pot%anharmonics_terms%phonon_strain(ii)%nrpt
+           WRITE(unit_xml,'("    <correction_force_constant units=""hartree/bohrradius**2"">")')
+           WRITE(unit_xml,'("      <data>")')
+           do ia=1,eff_pot%crystal%natom
+             do mu=1,3
+               do ib=1,eff_pot%crystal%natom
+                 do  nu=1,3
+                   WRITE(unit_xml,'(e22.14)', advance="no")&
+&                      (eff_pot%anharmonics_terms%phonon_strain(ii)%atmfrc(1,mu,ia,nu,ib,irpt))
+                 end do
+               end do
+               WRITE(unit_xml,'(a)')''
+             end do
+           end do
+           WRITE(unit_xml,'("      </data>")')
+           WRITE(unit_xml,'("      <cell>")')
+           WRITE(unit_xml,'(3(I4))') (eff_pot%anharmonics_terms%phonon_strain(ii)%cell(:,irpt))
+           WRITE(unit_xml,'("      </cell>")')
+           WRITE(unit_xml,'("    </correction_force_constant>")')
+         end do
+       end if!End if has_straincouplitn
+     end if!end Hasstrain_coupling
      WRITE(unit_xml,'("    </strain_coupling>")')
      jj = jj + 1
-   end do
-   WRITE(unit_xml,'("</System_definition>")')
+   end do!end mu
 
-! Close file
+   if(option /=1)  WRITE(unit_xml,'("</System_definition>")')
+!  Close file
    CLOSE(unit_xml)
+
  end if!end option
 
-!Print only the coefficients into XML file
- if (option==  -1 .or. option == 2) then
+!Print the coefficients into XML file
+ if (option==1 .or. option == 2 .or. option==4) then
+!   Compute the name of the XML file
    if(present(filename)) then
      namefile=replace(trim(filename),".out","")
-     namefile=trim(namefile)//"_coeffs.xml"
+     select case(option)
+     case(1)
+       new_file = .FALSE.
+       namefile=trim(namefile)//"_model.xml"
+     case(2)
+       new_file = .TRUE.
+       namefile=trim(namefile)//"_coeffs.xml"
+     case(4)
+       new_file = .TRUE.
+       namefile=trim(namefile)//"_coeffs.xml"
+     end select
    else
      namefile='coeffs.xml'
    end if
+
    if(eff_pot%anharmonics_terms%ncoeff > 0) then
      call polynomial_coeff_writeXML(eff_pot%anharmonics_terms%coefficients,&
-&                                 eff_pot%anharmonics_terms%ncoeff,namefile)
+&                                   eff_pot%anharmonics_terms%ncoeff,namefile,unit=unit_xml,&
+&                                   newfile=new_file)
    end if
  end if!end option
+
+ if(option==1)then
+   if (open_file(namefile,msg,unit=unit_xml,access='APPEND',form="formatted",&
+&    status="old",action="write") /= 0) then
+     MSG_ERROR(msg)
+   end if
+   if(option == 1)  WRITE(unit_xml,'("</System_definition>")')
+!  Close file
+   CLOSE(unit_xml)
+ end if
 
 end subroutine effective_potential_writeXML
 !!***

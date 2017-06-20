@@ -415,11 +415,11 @@
  end if
 
 !DEBUG
- write(std_out,*)' symfind : exit, nsym=',nsym
- write(std_out,*)'   symrel matrices, symafm and tnons are :'
- do isym=1,nsym
-   write(std_out,'(i4,4x,3i4,2x,3i4,2x,3i4,4x,i4,4x,3f8.4)' )isym,symrel(:,:,isym),symafm(isym),tnons(:,isym)
- end do
+! write(std_out,*)' symfind : exit, nsym=',nsym
+! write(std_out,*)'   symrel matrices, symafm and tnons are :'
+! do isym=1,nsym
+!   write(std_out,'(i4,4x,3i4,2x,3i4,2x,3i4,4x,i4,4x,3f8.4)' )isym,symrel(:,:,isym),symafm(isym),tnons(:,isym)
+! end do
 !stop
 !ENDDEBUG
 

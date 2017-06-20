@@ -425,22 +425,26 @@ subroutine polynomial_coeff_getName(name,natom,polynomial_coeff,symbols,recomput
    iterm_in = iterm
  else
    if(need_recompute)then
-     iterm_in = 1
+     iterm_in = -1
      do ii=1,polynomial_coeff%nterm
 !      Find the index of the ref 
-       if(iterm_in==1) then !Need to find the reference term
+       if(iterm_in==-1) then !Need to find the reference term
          do idisp=1,polynomial_coeff%terms(ii)%ndisp
            if(polynomial_coeff%terms(ii)%direction(idisp) > zero) then
              iterm_in = ii
              if(any(polynomial_coeff%terms(ii)%cell(:,1,idisp) /= zero).or.&
 &               any(polynomial_coeff%terms(ii)%cell(:,2,idisp) /= zero)) then
-               iterm_in = 1
+               iterm_in = -1
                exit
              end if
            end if
          end do!end do disp
+       else
+         exit             
        end if
      end do!end do term
+!    If not find, we set to the first element
+     if(iterm_in==-1) iterm_in = 1
    else
      iterm_in = 1
    end if
@@ -622,7 +626,7 @@ end subroutine polynomial_coeff_broadcast
 !!
 !! SOURCE
 
-subroutine polynomial_coeff_writeXML(coeffs,ncoeff,filename)
+subroutine polynomial_coeff_writeXML(coeffs,ncoeff,filename,unit,newfile)
 
  use defs_basis
  use m_errors
@@ -641,52 +645,73 @@ subroutine polynomial_coeff_writeXML(coeffs,ncoeff,filename)
 !Arguments ------------------------------------
 !scalars
   integer, intent(in) :: ncoeff
+  integer,optional,intent(in) :: unit
+  logical,optional,intent(in) :: newfile
 !arrays
   type(polynomial_coeff_type), intent(in) :: coeffs(ncoeff)
   character(len=fnlen),optional,intent(in) :: filename
 !Local variables-------------------------------
 !scalar
  integer :: icoeff,idisp,iterm
- integer :: unit_xml=22
+ integer :: unit_xml=23
+ logical :: need_header = .TRUE.
+ character(len=3)  :: status_file="new"
+ character(len=10) :: access_file=""
  character(len=500) :: message
  character(len=fnlen) :: namefile
  character(len=1)  :: direction
+
 !arrays
 
 ! *************************************************************************
 
 !Check the inputs 
-  if (size(coeffs) /= ncoeff) then
-    write(message,'(a,a)')' The number of coeffs does not correspond to ncoeff' 
-    MSG_ERROR(message)
-  end if
+ if(present(filename))then
+   namefile=trim(filename)
+ else
+   namefile='coefficients.xml'
+ end if
+
+ if(present(newfile))then
+   if (newfile) then
+     need_header = .TRUE.
+     status_file = "new"
+     access_file= ""
+     call isfile(namefile,'new')
+   else
+     if(.not.present(unit))then
+       write(message,'(a,a)')' You  need to specified the unit' 
+       MSG_ERROR(message)
+     else
+       need_header = .FALSE.
+       unit_xml = unit
+       status_file = "old"
+       access_file="APPEND"
+     end if
+   end if
+ end if
+ if (size(coeffs) /= ncoeff) then
+   write(message,'(a,a)')' The number of coeffs does not correspond to ncoeff' 
+   MSG_ERROR(message)
+ end if
 
 !Print the coefficients into XML file
-  if(ncoeff>0)then
-!   convert natom in character
-    if(present(filename)) then
-      namefile=trim(filename)
-    else
-      namefile='coefficients.xml'
-    end if
+ if(ncoeff>0)then
+   if (open_file(namefile,message,unit=unit_xml,access="APPEND",form="formatted",&
+&         status=status_file,action="write") /= 0) then
+     MSG_ERROR(message)
+   end if
 
-    call isfile(namefile,'new')
-
-    if (open_file(namefile,message,unit=unit_xml,form="formatted",&
-&       status="new",action="write") /= 0) then
-      MSG_ERROR(message)
-    end if
-
-    write(message,'(a,a,a)')ch10,&
-&       ' Generation of the xml file for the polynomial fitting in ',namefile
-
-    call wrtout(ab_out,message,'COLL')
-    call wrtout(std_out,message,'COLL')
-
-!   Write header
-    WRITE(unit_xml,'("<?xml version=""1.0"" ?>")')
-    WRITE(unit_xml,'("<Heff_definition>")')
-
+!  Write header
+   if (need_header)then
+     write(message,'(a,a,a)')ch10,&
+&         ' Generation of the xml file for the fitted polynomial in ',namefile
+   
+     call wrtout(ab_out,message,'COLL')
+     call wrtout(std_out,message,'COLL')
+     WRITE(unit_xml,'("<?xml version=""1.0"" ?>")')
+   end if
+   WRITE(unit_xml,'("<Heff_definition>")')
 !   Close header
     do icoeff = 1, ncoeff
       WRITE(unit_xml,'("  <coefficient number=""",I0,""" value=""",E19.10,""" text=""",a,""">")') &
@@ -735,7 +760,7 @@ subroutine polynomial_coeff_writeXML(coeffs,ncoeff,filename)
       WRITE(unit_xml,'("  </coefficient>")') 
     end do
     WRITE(unit_xml,'("</Heff_definition>")')
-!   Close file
+!    Close file
     CLOSE(unit_xml)
   end if
 

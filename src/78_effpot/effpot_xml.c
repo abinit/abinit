@@ -761,6 +761,9 @@ void effpot_xml_readCoeff(char *filename,int*ncoeff,int*ndisp,int*nterm,
 
   cur = cur->xmlChildrenNode;
   while (cur != NULL) {
+    if (!xmlStrcmp(cur->name, (const  xmlChar *) "Heff_definition")) {
+      cur = cur->xmlChildrenNode;
+    }
     if (!xmlStrcmp(cur->name, (const  xmlChar *) "coefficient")) {
       //Get the name of the coefficient, need to be debug..
       uri = xmlGetProp(cur, (const  xmlChar *) "text");
@@ -885,9 +888,11 @@ void effpot_xml_getDimCoeff(char *filename,int*ncoeff,char *nterm_max,int*ndisp_
     xmlFreeDoc(doc);
     return;
   }
-  
   cur = cur->xmlChildrenNode;
   while (cur != NULL) {
+    if (!xmlStrcmp(cur->name, (const  xmlChar *) "Heff_definition")) {
+      cur = cur->xmlChildrenNode;
+    }
     if (!xmlStrcmp(cur->name, (const  xmlChar *) "coefficient")) {
       icoeff ++;
       cur2 = cur->xmlChildrenNode;

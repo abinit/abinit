@@ -88,7 +88,7 @@ module m_multibinit_dataset
   integer :: nqshft
   integer :: nsphere
   integer :: optcell
-  integer :: prt_effpot
+  integer :: prt_model
   integer :: prt_phfrq
   integer :: prt_ifc
   integer :: strcpling  ! Print the 3rd order in xml file
@@ -98,6 +98,7 @@ module m_multibinit_dataset
   integer :: symdynmat
 
   integer :: fit_grid(3)
+  integer :: fit_rangePower(2)
   integer :: n_cell(3)
   integer :: ngqpt(9)             ! ngqpt(9) instead of ngqpt(3) is needed in wght9.f
   integer :: ng2qpt(3)
@@ -121,7 +122,7 @@ module m_multibinit_dataset
   real(dp) :: conf_cutoff_strain(6)
   real(dp) :: rprim(3,3)
   real(dp) :: q1shft(3,4)
- 
+
 ! Integer arrays
   integer, allocatable :: atifc(:)
   ! atifc(natom)
@@ -678,14 +679,14 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
 
 
 !P
- multibinit_dtset%prt_effpot=1
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prt_effpot',tread,'INT')
- if(tread==1) multibinit_dtset%prt_effpot=intarr(1)
- if(multibinit_dtset%prt_effpot<-2.or.multibinit_dtset%prt_effpot>3)then
+ multibinit_dtset%prt_model=0
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prt_model',tread,'INT')
+ if(tread==1) multibinit_dtset%prt_model=intarr(1)
+ if(multibinit_dtset%prt_model<0.or.multibinit_dtset%prt_model>4)then
    write(message, '(a,i8,a,a,a,a,a)' )&
-&   'prt_effpot is',multibinit_dtset%prtsrlr,', but the only allowed values',ch10,&
+&   'prt_model is',multibinit_dtset%prtsrlr,', but the only allowed values',ch10,&
 &   'are 0, 1 or 2.',ch10,&
-&   'Action: correct prt_effpot in your input file.'
+&   'Action: correct prt_model in your input file.'
    MSG_ERROR(message)
  end if
 
@@ -996,6 +997,19 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
    end if
  end do
 
+ multibinit_dtset%fit_rangePower(:)= (/3,4/)
+ call intagm(dprarr,intarr,jdtset,marr,2,string(1:lenstr),'fit_rangePower',tread,'INT')
+ if(tread==1) multibinit_dtset%fit_rangePower(1:2)=intarr(1:2)
+ do ii=1,2
+   if(multibinit_dtset%fit_rangePower(ii)<0.or.multibinit_dtset%fit_rangePower(ii)>20)then
+     write(message, '(a,i0,a,i0,a,a,a,i0,a)' )&
+&     'fit_rangePower(',ii,') is ',multibinit_dtset%fit_rangePower(ii),', which is lower',&
+&     ' than 0 of superior than 20.',&
+&     ch10,'Action: correct fit_rangePower(',ii,') in your input file.'
+     MSG_ERROR(message)
+   end if
+ end do
+
 !G
 
 !H
@@ -1290,7 +1304,7 @@ subroutine outvars_multibinit (multibinit_dtset,nunit)
  if(multibinit_dtset%ifcflag/=0)then
    write(nunit,'(a)')' Flags :'
    if(multibinit_dtset%ifcflag/=0)write(nunit,'(3x,a9,3i10)')'  ifcflag',multibinit_dtset%ifcflag
-   if(multibinit_dtset%prt_effpot/=0)write(nunit,'(3x,a9,3i10)')'prt_effpot',multibinit_dtset%prt_effpot
+   if(multibinit_dtset%prt_model/=0)write(nunit,'(3x,a9,3i10)')'prt_model',multibinit_dtset%prt_model
    if(multibinit_dtset%prt_phfrq/=0)write(nunit,'(3x,a9,3i10)')'prt_phfrq',multibinit_dtset%prt_phfrq
    if(multibinit_dtset%strcpling/=0)write(nunit,'(3x,a9,3i10)')'  strcpling',multibinit_dtset%strcpling
    if(multibinit_dtset%strcpling==2)write(nunit,'(3x,a9,3es8.2)')'delta_df',multibinit_dtset%delta_df
@@ -1328,13 +1342,14 @@ subroutine outvars_multibinit (multibinit_dtset,nunit)
 
  if(multibinit_dtset%fit_coeff/=0)then
    write(nunit,'(a)')' Fit the coefficients :'
-   write(nunit,'(3x,a13,I10.1)')'    fit_coeff',multibinit_dtset%fit_coeff
-   write(nunit,'(3x,a13,I10.1)')'   fit_option',multibinit_dtset%fit_option
-   write(nunit,'(3x,a13,I10.1)')'   fit_ncycle',multibinit_dtset%fit_ncycle
-   write(nunit,'(3x,a13,3i10)') '     fit_grid',multibinit_dtset%fit_grid
-   write(nunit,'(3x,a13,I10)')  'fit_nfixcoeff',multibinit_dtset%fit_nfixcoeff
-   write(nunit,'(3x,a13)',advance='no')'fit_fixcoeff'
-   write(nunit,'(4x,15i6)') (multibinit_dtset%fit_fixcoeff(ii),ii=1,multibinit_dtset%fit_nfixcoeff)
+   write(nunit,'(3x,a14,I10.1)')'     fit_coeff',multibinit_dtset%fit_coeff
+   write(nunit,'(3x,a14,I10.1)')'    fit_option',multibinit_dtset%fit_option
+   write(nunit,'(3x,a14,I10.1)')'    fit_ncycle',multibinit_dtset%fit_ncycle
+   write(nunit,'(3x,a14,3i10)') '      fit_grid',multibinit_dtset%fit_grid
+   write(nunit,'(3x,a14,2i10)') 'fit_rangePower',multibinit_dtset%fit_rangePower
+   write(nunit,'(3x,a14,I10)')  ' fit_nfixcoeff',multibinit_dtset%fit_nfixcoeff
+   write(nunit,'(3x,a14)',advance='no')' fit_fixcoeff'
+   write(nunit,'(4x,9i6)') (multibinit_dtset%fit_fixcoeff(ii),ii=1,multibinit_dtset%fit_nfixcoeff)
  end if
 
 !Write the general information

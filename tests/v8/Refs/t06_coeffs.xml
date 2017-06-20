@@ -1,6 +1,6 @@
 <?xml version="1.0" ?>
 <Heff_definition>
-  <coefficient number="1" value="   0.4576470000E-01" text="(O2_z-O3_z)^1(O2_y-O3_y)^1(eta_2)^1">
+  <coefficient number="1" value="   0.4576470000E-01" text="(O1_x-O2_x)^1(O1_y-O2_y)^1(eta_2)^1">
     <term weight=" 1.000000">
       <displacement_diff atom_a="2" atom_b="3" direction="x" power="1">
         <cell_a>0 0 0</cell_a>

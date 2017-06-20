@@ -159,7 +159,7 @@ subroutine compute_anharmonics(eff_pot,filenames,inp,comm)
       !Read and Intialisation of the effective potential type
       call effective_potential_file_read(filenames(jj),eff_pots(ii),inp,comm)
       !Eventualy print the xml file
-      if(inp%prt_effpot==-1.or.inp%prt_effpot>=3) then
+      if(inp%prt_model==-1.or.inp%prt_model>=3) then
         call int2char4(ii,message)
         name = 'structure_'//trim(itoa(ii-1))//'.xml'
         call isfile(name,'new')

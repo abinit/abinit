@@ -32,6 +32,7 @@ module m_fit_polynomial_coeff
  use m_xmpi
  use m_sort
  use m_phonon_supercell
+ use m_special_funcs,only : factorial
  use m_crystal,only : symbols_crystal
  use m_strain,only : strain_type,strain_get
  use m_effective_potential, only : effective_potential_type,effective_potential_evaluate
@@ -46,10 +47,9 @@ module m_fit_polynomial_coeff
  public :: fit_polynomial_coeff_computeGF
  public :: fit_polynomial_coeff_computeMSE
  public :: fit_polynomial_coeff_fit
- public :: fit_polynomial_coeff_free
- public :: fit_polynomial_coeff_init
  public :: fit_polynomial_coeff_getList
  public :: fit_polynomial_coeff_get
+ public :: fit_polynomial_coeff_getNorder
  public :: fit_polynomial_coeff_getFS
  public :: fit_polynomial_coeff_getOrder1
  public :: fit_polynomial_coeff_getOrder2
@@ -59,387 +59,13 @@ module m_fit_polynomial_coeff
  public :: fit_polynomial_coeff_mapHistToRef
  public :: fit_polynomial_coeff_solve
  public :: fit_polynomial_printSystemFiles
+ private :: computeNorder
 !TEST_AM
  public :: fit_polynomial_readMDfile
 !TEST_AM
 !!***
 
-!!****t* m_fit_polynomial_coeff/fit_polynomial_coeff_type
-!! NAME
-!! fit_polynomial_coeff_type
-!!
-!! FUNCTION
-!! structure for a polynomial coefficient
-!! contains the value of the coefficient and a 
-!! list of terms (displacement) relating to the coefficient
-!!
-!! SOURCE
-
- type, public :: fit_polynomial_coeff_type
-
-   character(200) :: name
-!     Name of the polynomial_coeff (Sr_y-O1_y)^3) for example
-
-   type(polynomial_coeff_type),dimension(:),allocatable :: coefficients
-!     terms(nterm)
-!     contains all the displacements for this coefficient      
-
- end type fit_polynomial_coeff_type
-!!***
-
 CONTAINS  !===========================================================================================
-
-
-!!****f* m_fit_polynomial_coeff/fit_polynomial_coeff_init
-!!
-!! NAME
-!! fit_polynomial_coeff_init
-!!
-!! FUNCTION
-!! Initialize scell structure, from unit cell vectors, qpoint chosen, and atoms
-!!
-!! INPUTS
-!!  name     = Name of the polynomial_coeff (Sr_y-O1_y)^3) for example
-!!  nterm   = Number of terms (short range interaction) for this polynomial_coeff
-!!  coefficient  = Value of the coefficient of this term
-!!  termstype(nterm) = Polynomial_term_type contains all the displacements for this coefficient 
-!!
-!! OUTPUT
-!! polynomial_coeff = polynomial_coeff structure to be initialized
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      destroy_supercell,init_supercell,xred2xcart
-!!
-!! SOURCE
-
-subroutine fit_polynomial_coeff_init(coefficient,name,nterm,polynomial_coeff,terms)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fit_polynomial_coeff_init'
-!End of the abilint section
-
- implicit none
-
-!Arguments ------------------------------------
-!scalars
- integer, intent(in) :: nterm
- real(dp),intent(in) :: coefficient
-!arrays
- character(200),intent(in) :: name
- type(polynomial_term_type),intent(in) :: terms(nterm)
- type(fit_polynomial_coeff_type), intent(out) :: polynomial_coeff
-!Local variables-------------------------------
-!scalar
-!arrays
-
-! *************************************************************************
- 
-!First free before initilisation
- call fit_polynomial_coeff_free(polynomial_coeff)
-
-!Initilisation
-
-end subroutine fit_polynomial_coeff_init
-!!***
-
-!!****f* m_fit_polynomial_coeff/fit_polynomial_coeff_free
-!!
-!! NAME
-!! fit_polynomial_coeff_free
-!!
-!! FUNCTION
-!! Free polynomial_coeff
-!!
-!! INPUTS
-!! polynomial_coeff = polynomial_coeff structure to be free
-!!
-!! OUTPUT
-!! polynomial_coeff = polynomial_coeff structure to be free
-!!
-!! PARENTS
-!!      m_fit_polynomial_coeff
-!!
-!! CHILDREN
-!!      destroy_supercell,init_supercell,xred2xcart
-!!
-!! SOURCE
-
-subroutine fit_polynomial_coeff_free(polynomial_coeff)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fit_polynomial_coeff_free'
-!End of the abilint section
-
- implicit none
-
-!Arguments ------------------------------------
-!scalars
-!arrays
- type(fit_polynomial_coeff_type), intent(inout) :: polynomial_coeff
-!Local variables-------------------------------
-!scalar
-!arrays
-
-! *************************************************************************
-
-end subroutine fit_polynomial_coeff_free
-!!***
-
-!!****f* m_fit_polynomial_coeff/fit_polynomial_coeff_get
-!!
-!! NAME
-!! fit_polynomial_coeff_get
-!!
-!! FUNCTION
-!! Get the list of the coefficient of the polynome
-!!
-!! INPUTS
-!!
-!! OUTPUT
-!! polynomial_coeff = polynomial_coeff structure to be free
-!!
-!! PARENTS
-!!      multibinit
-!!
-!! CHILDREN
-!!      destroy_supercell,init_supercell,xred2xcart
-!!
-!! SOURCE
-
-subroutine fit_polynomial_coeff_get(cut_off,coefficients,eff_pot,ncoeff,option)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fit_polynomial_coeff_get'
-!End of the abilint section
-
- implicit none
-
-!Arguments ------------------------------------
-!scalars
- integer,intent(in) :: option
- integer,intent(out):: ncoeff
- real(dp),intent(in):: cut_off
-!arrays
- type(effective_potential_type), intent(inout) :: eff_pot
- type(polynomial_coeff_type),allocatable :: coefficients(:)
-!Local variables-------------------------------
-!scalar
- integer :: ia,ib,icoeff,icoeff2,ii,irpt,irpt_ref
- integer :: lim1,lim2,lim3
- integer :: natom,ncoeff1,ncoeff2,ncoeff3,ncoeff4,ncoeff5,ncoeff_sym,nrpt,nsym
- integer :: r1,r2,r3
-!arrays
- integer :: ncell(3)
- integer,allocatable :: cell(:,:)
- integer,allocatable :: list_symcoeff(:,:,:)
- real(dp) :: rprimd(3,3)
- real(dp),allocatable :: dist(:,:,:),rpt(:,:)
- real(dp),allocatable :: xcart(:,:),xred(:,:)
- character(len=5),allocatable :: symbols(:)
- type(polynomial_coeff_type),dimension(:),allocatable :: coeffs1,coeffs2,coeffs3
- type(polynomial_coeff_type),dimension(:),allocatable :: coeffs4,coeffs5
-
-! *************************************************************************
-!Free the output
-  if(allocated(coefficients))then
-    do ii =1,size(coefficients)
-      call polynomial_coeff_free(coefficients(ii))
-    end do
-    ABI_DEALLOCATE(coefficients)
-  end if
-
-!Initialisation of variables
- natom  = eff_pot%crystal%natom
- nsym   = eff_pot%crystal%nsym
- rprimd = eff_pot%crystal%rprimd
-
- ABI_ALLOCATE(xcart,(3,natom))
- ABI_ALLOCATE(xred,(3,natom))
- xcart(:,:) = eff_pot%crystal%xcart(:,:)
- xred(:,:)  = eff_pot%crystal%xred(:,:)
-
-!Set the size of the interaction
- ncell = (/anint(cut_off/rprimd(1,1))+1,&
-&          anint(cut_off/rprimd(2,2))+1,&
-&          anint(cut_off/rprimd(3,3))+1/)
-
- lim1=((ncell(1)/2))
- lim2=((ncell(2)/2))
- lim3=((ncell(3)/2))
- if(mod(ncell(1),2)/=0) lim1=lim1+1
- if(mod(ncell(2),2)/=0) lim2=lim2+1
- if(mod(ncell(3),2)/=0) lim3=lim3+1
- nrpt=(2*lim1+1)*(2*lim2+1)*(2*lim3+1)
-
-!compute new ncell
- ncell(1) = 2*lim1+1
- ncell(2) = 2*lim2+1
- ncell(3) = 2*lim3+1
-
-!Build the rpt point 
- ABI_ALLOCATE(rpt,(3,nrpt))
- ABI_ALLOCATE(cell,(3,nrpt))
- 
-!WARNING:
-!Put the reference cell into the first element
-!the code will first deal with the atoms of the first cell
- irpt = one
- irpt_ref = one 
- rpt(:,1) = zero
- cell(:,irpt)=zero
-!Fill other rpt:
- do r1=lim1,-lim1,-1
-   do r2=lim2,-lim2,-1
-     do r3=lim3,-lim3,-1
-       if(r1==0.and.r2==0.and.r3==0) then
-         cycle
-       end if
-       irpt=irpt+1
-       rpt(1,irpt)=r1*rprimd(1,1)+r2*rprimd(1,2)+r3*rprimd(1,3)
-       rpt(2,irpt)=r1*rprimd(2,1)+r2*rprimd(2,2)+r3*rprimd(2,3)
-       rpt(3,irpt)=r1*rprimd(3,1)+r2*rprimd(3,2)+r3*rprimd(3,3)
-       cell(1,irpt)=r1;cell(2,irpt)=r2;cell(3,irpt)=r3
-     end do
-   end do
- end do
-
- ABI_ALLOCATE(symbols,(natom))
- call symbols_crystal(eff_pot%crystal%natom,eff_pot%crystal%ntypat,eff_pot%crystal%npsp,&
-&                     symbols,eff_pot%crystal%typat,eff_pot%crystal%znucl)
-
-!Compute the distances between atoms
-!Now dist(ia,ib,irpt) contains the distance from atom ia to atom ib in unit cell irpt.
- ABI_ALLOCATE(dist,(natom,natom,nrpt))
- do ia=1,natom
-   do ib=1,natom
-     do irpt=1,nrpt
-       dist(ia,ib,irpt) = ((xcart(1,ib)-xcart(1,ia)+rpt(1,irpt))**2+&
-&                          (xcart(2,ib)-xcart(2,ia)+rpt(2,irpt))**2+&
-&                          (xcart(3,ib)-xcart(3,ia)+rpt(3,irpt))**2)**0.5
-     end do
-   end do
- end do
-
-
- call fit_polynomial_coeff_getList(cell,cut_off,dist,eff_pot,list_symcoeff,&
-&                                  natom,ncoeff_sym,nrpt)
-
-! call fit_polynomial_coeff_getOrder1(cell,coeffs1,cut_off,list_symcoeff,natom,ncoeff1,ncoeff_sym,&
-!&                              nrpt,nsym,rprimd,symbols,xcart)
-
-! call fit_polynomial_coeff_getOrder2(cell,coeffs2,cut_off,list_symcoeff,natom,ncoeff2,ncoeff_sym,&
-!&                              nrpt,nsym,rprimd,symbols,xcart)
-
- call fit_polynomial_coeff_getOrder3(cell,coeffs3,cut_off,list_symcoeff,natom,ncoeff3,ncoeff_sym,&
-&                              nrpt,nsym,rprimd,symbols,xcart)
-
- call fit_polynomial_coeff_getOrder4(cell,coeffs4,cut_off,list_symcoeff,natom,ncoeff4,ncoeff_sym,&
-&                              nrpt,nsym,rprimd,symbols,xcart)
-
- call fit_polynomial_coeff_getOrder5(cell,coeffs5,cut_off,list_symcoeff,natom,ncoeff5,ncoeff_sym,&
-&                              nrpt,nsym,rprimd,symbols,xcart)
-
-!Final tranfert
-!1- count the total number of coefficient
- ncoeff = zero
- ! do icoeff=1,ncoeff3
- !   if (coeffs3(icoeff)%coefficient /= zero) then
- !     ncoeff = ncoeff + 1
- !   end if
- ! end do
- do icoeff=1,ncoeff4
-   if (coeffs4(icoeff)%coefficient /= zero) then
-     ncoeff = ncoeff + 1
-   end if
- end do
-  do icoeff=1,ncoeff5
-    if (coeffs5(icoeff)%coefficient /= zero) then
-      ncoeff = ncoeff + 1
-    end if
-  end do
-
-!2- Transfer
- ABI_ALLOCATE(coefficients,(ncoeff))
- icoeff2 = zero
-!  do icoeff=1,ncoeff3
-!    if (coeffs3(icoeff)%coefficient /= zero) then
-!      icoeff2 = icoeff2 + 1
-!      call polynomial_coeff_init(one,coeffs3(icoeff)%nterm,coefficients(icoeff2),coeffs3(icoeff)%terms,&
-! &                               name=coeffs3(icoeff)%name)
-!    end if
-!  end do
- do icoeff=1,ncoeff4
-   if (coeffs4(icoeff)%coefficient /= zero) then
-     icoeff2 = icoeff2 + 1
-     call polynomial_coeff_init(one,coeffs4(icoeff)%nterm,coefficients(icoeff2),coeffs4(icoeff)%terms,&
-&                               name=coeffs4(icoeff)%name)
-   end if
- end do
-  do icoeff=1,ncoeff5
-    if (coeffs5(icoeff)%coefficient /= zero) then
-      icoeff2 = icoeff2 + 1
-      call polynomial_coeff_init(one,coeffs5(icoeff)%nterm,coefficients(icoeff2),coeffs5(icoeff)%terms,&
-&                                name=coeffs5(icoeff)%name)
-    end if
-  end do
-
-!Free them all
- do icoeff=1,ncoeff1
-   call polynomial_coeff_free(coeffs1(icoeff))
- end do
- if(allocated(coeffs1)) then
-   ABI_DEALLOCATE(coeffs1)
- end if
-
- do icoeff=1,ncoeff2
-   call polynomial_coeff_free(coeffs2(icoeff))
- end do
- if(allocated(coeffs2)) then
-   ABI_DEALLOCATE(coeffs2)
- end if
-
- do icoeff=1,ncoeff3
-   call polynomial_coeff_free(coeffs3(icoeff))
- end do
- if(allocated(coeffs3)) then
-   ABI_DEALLOCATE(coeffs3)
- end if
-
- do icoeff=1,ncoeff4
-   call polynomial_coeff_free(coeffs4(icoeff))
- end do
- if(allocated(coeffs4)) then
-   ABI_DEALLOCATE(coeffs4)
- end if
-
- do icoeff=1,ncoeff5
-   call polynomial_coeff_free(coeffs5(icoeff))
- end do
- if(allocated(coeffs5)) then
-   ABI_DEALLOCATE(coeffs5)
- end if
-
- ABI_DEALLOCATE(cell)
- ABI_DEALLOCATE(dist)
- ABI_DEALLOCATE(list_symcoeff)
- ABI_DEALLOCATE(rpt)
- ABI_DEALLOCATE(symbols)
- ABI_DEALLOCATE(xcart)
- ABI_DEALLOCATE(xred)
-
-end subroutine fit_polynomial_coeff_get
-!!***
 
 
 !!****f* m_fit_polynomial_coeff/fit_polynomial_coeff_getList
@@ -463,8 +89,8 @@ end subroutine fit_polynomial_coeff_get
 !!
 !! SOURCE
 
-subroutine fit_polynomial_coeff_getList(cell,cut_off,dist,eff_pot,list_symcoeff,&
-&                                       natom,ncoeff_sym,nrpt)
+subroutine fit_polynomial_coeff_getList(cell,cut_off,dist,eff_pot,list_symcoeff,list_symstr,&
+&                                       natom,nstr_sym,ncoeff_sym,nrpt)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -480,18 +106,18 @@ subroutine fit_polynomial_coeff_getList(cell,cut_off,dist,eff_pot,list_symcoeff,
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: natom,nrpt
- integer,intent(out) :: ncoeff_sym
+ integer,intent(out) :: ncoeff_sym,nstr_sym
  real(dp),intent(in):: cut_off
 !arrays
  integer,intent(in) :: cell(3,nrpt)
  real(dp),intent(in):: dist(natom,natom,nrpt)
  type(effective_potential_type), intent(in) :: eff_pot
- integer,allocatable,intent(out) :: list_symcoeff(:,:,:)
+ integer,allocatable,intent(out) :: list_symcoeff(:,:,:),list_symstr(:,:)
 !Local variables-------------------------------
 !scalar
  integer :: ia,ib,icoeff,icoeff2,icoeff_tot,icoeff_tmp,idisy1,idisy2,ii
  integer :: ipesy1,ipesy2,isym,irpt,irpt3,irpt_ref,irpt_sym
- integer :: jj,mu
+ integer :: jj,jsym,mu
  integer :: ncoeff,ncoeff2,ncoeff_max,nu
  integer :: nsym,shift_atm1(3)
  integer :: shift_atm2(3)
@@ -501,7 +127,7 @@ subroutine fit_polynomial_coeff_getList(cell,cut_off,dist,eff_pot,list_symcoeff,
  integer :: sym(3,3)
  integer :: transl(3)
  integer,allocatable :: list(:),list_symcoeff_tmp(:,:,:),list_symcoeff_tmp2(:,:,:)
- integer,allocatable :: indsym(:,:,:) ,symrec(:,:,:)
+ integer,allocatable :: list_symstr_tmp(:,:),indsym(:,:,:) ,symrec(:,:,:)
  real(dp),allocatable :: blkval(:,:,:,:,:),tnons(:,:)
  real(dp),allocatable :: wkdist(:),xcart(:,:),xred(:,:)
  real(dp) :: difmin(3)
@@ -540,31 +166,95 @@ subroutine fit_polynomial_coeff_getList(cell,cut_off,dist,eff_pot,list_symcoeff,
  tolsym8=tol8 
  call symatm(indsym,natom,nsym,symrec,tnons,&
 &            tolsym8,eff_pot%crystal%typat,eff_pot%crystal%xred)
-
-
  ABI_ALLOCATE(blkval,(3,natom,3,natom,nrpt))
  ABI_ALLOCATE(list,(natom*nrpt))
  ABI_ALLOCATE(list_symcoeff_tmp,(5,ncoeff_max,nsym))
  ABI_ALLOCATE(wkdist,(natom*nrpt))
 
- write(message,'(a,F6.3,a)') " Cut-off of ",cut_off," Angstrom is imposed"
- call wrtout(std_out,message,'COLL') 
+!1-Fill strain list
+ ABI_ALLOCATE(list_symstr_tmp,(6,nsym))
+ list_symstr_tmp = one
+ do ia=1,6
+   if(list_symstr_tmp(ia,1)==0)cycle
+!  Transform the voigt notation
+   if(ia<=3)then
+     mu=ia;nu=ia
+   else
+     select case(ia)
+     case(4)
+       mu=2;nu=3
+     case(5)
+       mu=1;nu=3
+     case(6)
+       mu=1;nu=2
+     end select
+   end if
+   do isym=1,nsym
+!  Get the symmetry matrix 
+     sym(:,:) = eff_pot%crystal%symrel(:,:,isym)
+     do idisy1=1,3
+       do idisy2=1,3
+         if((sym(mu,idisy1)/=0.and.sym(nu,idisy2)/=0).or.&
+&           (sym(mu,idisy2)/=0.and.sym(nu,idisy1)/=0))then
+!          Transform to the voig notation
+           if(idisy1==idisy2)then
+             list_symstr_tmp(ia,isym) = idisy1
+           else
+             if(idisy1==1.or.idisy2==1)then
+               if(idisy1==2.or.idisy2==2)then
+                  list_symstr_tmp(ia,isym) = 6
+                end if
+               if(idisy1==3.or.idisy2==3)then
+                  list_symstr_tmp(ia,isym) = 5
+                end if
+              else
+                list_symstr_tmp(ia,isym) = 4
+              end if
+            end if
+          end if
+        end do
+      end do
+!     Remove the symetric
+      if(list_symstr_tmp(ia,isym) > ia) then
+        list_symstr_tmp(list_symstr_tmp(ia,isym),:) = zero
+      end if
+    end do
+  end do
 
- 
+!Count the number of strain and transfert into the final array
+  nstr_sym = zero
+  do ia=1,6
+    if(list_symstr_tmp(ia,1)/=zero) nstr_sym = nstr_sym + 1
+  end do
+
+ if(allocated(list_symstr))then
+   ABI_DEALLOCATE(list_symstr)
+ end if
+ ABI_ALLOCATE(list_symstr,(nstr_sym,nsym))
+
+ icoeff_tmp = 1
+ do ia=1,6
+   if(list_symstr_tmp(ia,1)/=zero) then
+     list_symstr(icoeff_tmp,:) = list_symstr_tmp(ia,:)
+     icoeff_tmp = icoeff_tmp + 1
+   end if
+ end do
+!END STRAIN
+
 !Set to one blkval, all the coeff have to be compute
  blkval = one 
  icoeff = one
  icoeff_tot = one
  list_symcoeff_tmp = zero
 
+!2-Fill atom list
 !Big loop over generic atom 
  do ia=1,natom
    wkdist(:)=reshape(dist(ia,:,:),(/natom*nrpt/))
    do ii=1,natom*nrpt
      list(ii)=ii
    end do
-   call sort_dp(natom*nrpt,wkdist,list,tol14)
-   
+   call sort_dp(natom*nrpt,wkdist,list,tol8)
    do ii=1,natom*nrpt
 !    Get the irpt and ib
      irpt=(list(ii)-1)/natom+1     
@@ -598,7 +288,6 @@ subroutine fit_polynomial_coeff_getList(cell,cut_off,dist,eff_pot,list_symcoeff,
            do isym=1,nsym
 !            Get the symmetry matrix 
              sym(:,:) = eff_pot%crystal%symrel(:,:,isym)
-
 !            Get the corresponding atom and shift with the symetries 
 !            For atom 1
              ipesy1 = indsym(4,isym,ia)
@@ -775,15 +464,17 @@ subroutine fit_polynomial_coeff_getList(cell,cut_off,dist,eff_pot,list_symcoeff,
      if (icoeff2> icoeff)then
        list_symcoeff_tmp2(:,icoeff2,1) = zero
      end if
-     icoeff2 = getCoeffFromList(list_symcoeff_tmp2(:,:,1),&
-&                               list_symcoeff_tmp2(3,icoeff,isym),&
-&                               list_symcoeff_tmp2(2,icoeff,isym),&
-&                               list_symcoeff_tmp2(4,icoeff,isym),&
-&                               list_symcoeff_tmp2(1,icoeff,isym),&
-&                               real(list_symcoeff_tmp2(5,icoeff,isym),dp),ncoeff)
-     if (icoeff2> icoeff)then
-      list_symcoeff_tmp2(:,icoeff2,1) = zero
-     end if
+     do jsym=1,nsym
+       icoeff2 = getCoeffFromList(list_symcoeff_tmp2(:,:,jsym),&
+&                                 list_symcoeff_tmp2(3,icoeff,isym),&
+&                                 list_symcoeff_tmp2(2,icoeff,isym),&
+&                                 list_symcoeff_tmp2(4,icoeff,isym),&
+&                                 list_symcoeff_tmp2(1,icoeff,isym),&
+&                                 real(list_symcoeff_tmp2(5,icoeff,isym),dp),ncoeff)
+       if (icoeff2> icoeff)then
+         list_symcoeff_tmp2(:,icoeff2,1) = zero
+       end if
+     end do
    end do
  end do
 
@@ -821,7 +512,6 @@ subroutine fit_polynomial_coeff_getList(cell,cut_off,dist,eff_pot,list_symcoeff,
 !6/ reset the dimension six of list_symcoeff_tmp2(6,icoeffs,1)
 !   and check is a symetric coeff is not coresspondig to an other
 !   one, in this case we set this coeff to 0
-
  do icoeff = 1,ncoeff2
 !  found the index of each coeff in list_fullcoeff
    do isym = 1,nsym
@@ -834,7 +524,6 @@ subroutine fit_polynomial_coeff_getList(cell,cut_off,dist,eff_pot,list_symcoeff,
      list_symcoeff(6,icoeff,isym) = icoeff2
    end do
  end do
-
 !Set the max number of coeff inside list_symcoeff
  ncoeff_sym = ncoeff2
 
@@ -843,6 +532,7 @@ subroutine fit_polynomial_coeff_getList(cell,cut_off,dist,eff_pot,list_symcoeff,
  ABI_DEALLOCATE(list)
  ABI_DEALLOCATE(list_symcoeff_tmp)
  ABI_DEALLOCATE(list_symcoeff_tmp2)
+ ABI_DEALLOCATE(list_symstr_tmp)
  ABI_DEALLOCATE(indsym) 
  ABI_DEALLOCATE(symrec)
  ABI_DEALLOCATE(tnons)
@@ -850,17 +540,17 @@ subroutine fit_polynomial_coeff_getList(cell,cut_off,dist,eff_pot,list_symcoeff,
  ABI_DEALLOCATE(xred )
  ABI_DEALLOCATE(wkdist)
 
- close(100)
 end subroutine fit_polynomial_coeff_getList
 !!***
 
-!!****f* m_fit_polynomial_coeff/fit_polynomial_coeff_getOrder1
+
+!!****f* m_fit_polynomial_coeff/fit_polynomial_coeff_getNorder
 !!
 !! NAME
-!! fit_polynomial_coeff_getOrder1
+!! fit_polynomial_coeff_getNorder
 !!
 !! FUNCTION
-!! Free polynomial_coeff
+!! Get the list of the coefficient of the polynome
 !!
 !! INPUTS
 !!
@@ -868,22 +558,20 @@ end subroutine fit_polynomial_coeff_getList
 !! polynomial_coeff = polynomial_coeff structure to be free
 !!
 !! PARENTS
-!!      m_fit_polynomial_coeff
+!!      multibinit
 !!
 !! CHILDREN
 !!      destroy_supercell,init_supercell,xred2xcart
 !!
 !! SOURCE
 
-subroutine fit_polynomial_coeff_getOrder1(cell,coeffs_out,cut_off,list_symcoeff,&
-&                                   natom,ncoeff_out,ncoeff,nrpt,nsym,&
-&                                   rprimd,symbols,xcart)
+subroutine fit_polynomial_coeff_getNorder(cut_off,coefficients,eff_pot,ncoeff,powers,option)
 
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'fit_polynomial_coeff_getOrder1'
+#define ABI_FUNC 'fit_polynomial_coeff_getNorder'
  use interfaces_14_hidewrite
 !End of the abilint section
 
@@ -891,277 +579,298 @@ subroutine fit_polynomial_coeff_getOrder1(cell,coeffs_out,cut_off,list_symcoeff,
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in)  :: natom,ncoeff,nsym,nrpt
- integer,intent(out) :: ncoeff_out
- real(dp),intent(in) :: cut_off
+ integer,intent(in) :: option
+ integer,intent(out):: ncoeff
+ real(dp),intent(in):: cut_off
 !arrays
- integer,intent(in) :: cell(3,nrpt)
- integer,intent(in) :: list_symcoeff(6,ncoeff,nsym)
- real(dp),intent(in) :: xcart(3,natom),rprimd(3,3)
- character(len=5),intent(in) :: symbols(natom)
- type(polynomial_coeff_type),allocatable,intent(inout) :: coeffs_out(:)
+ integer,intent(in) :: powers(2)
+ type(effective_potential_type), intent(inout) :: eff_pot
+ type(polynomial_coeff_type),allocatable :: coefficients(:)
 !Local variables-------------------------------
 !scalar
- integer :: ia,ib,icoeff,icoeff1_opp,icoeff_tmp,irpt,irpt_ref
- integer :: isym,iterm,mu,ncoeff_max,ndisp,nterm_max
- real(dp):: coefficient,weight
+ integer :: ia,ib,icoeff,icoeff2,ii,irpt,irpt_ref
+ integer :: lim1,lim2,lim3
+ integer :: natom,ncoeff_max,ncoeff_sym,nrpt,nsym,nstr_sym
+ integer :: r1,r2,r3
 !arrays
- integer,allocatable :: atindx(:,:),blkval(:),cells(:,:,:),dir_int(:)
- integer,allocatable :: powers(:)
- character(len=1) :: dir_char(3)
- character(len=1) :: mutodir(9) = (/"x","y","z","1","2","3","4","5","6"/)
- character(len=100):: name
+ integer :: ncell(3)
+ integer,allocatable :: cell(:,:),compatibleCoeffs(:,:)
+ integer,allocatable :: list_symcoeff(:,:,:),list_symstr(:,:),list_coeff(:)
+ real(dp) :: rprimd(3,3)
+ real(dp),allocatable :: dist(:,:,:),rpt(:,:)
+ real(dp),allocatable :: xcart(:,:),xred(:,:)
+ character(len=5),allocatable :: symbols(:)
+ type(polynomial_coeff_type),dimension(:),allocatable :: coeffs_tmp
  character(len=500) :: message
- character(len=fnlen) :: filename
- type(polynomial_term_type),dimension(:),allocatable :: terms
- type(polynomial_coeff_type),allocatable :: coeffs_tmp(:)
-
 ! *************************************************************************
+!Free the output
+  if(allocated(coefficients))then
+    do ii =1,size(coefficients)
+      call polynomial_coeff_free(coefficients(ii))
+    end do
+    ABI_DEALLOCATE(coefficients)
+  end if
 
 !Initialisation of variables
- nterm_max  = nsym
- ncoeff_max = ncoeff
- ndisp = 1
+ natom  = eff_pot%crystal%natom
+ nsym   = eff_pot%crystal%nsym
+ rprimd = eff_pot%crystal%rprimd
 
- ABI_ALLOCATE(blkval,(ncoeff_max))
- blkval = one
-!  do icoeff=1,ncoeff
-!    do isym=1,nsym
-!      if(list_symcoeff(6,icoeff,isym) > 0.and.&
-! &       list_symcoeff(6,icoeff,isym) > icoeff.and.&
-! &       list_symcoeff(6,icoeff,isym) < ncoeff) blkval(list_symcoeff(6,icoeff,isym)) = zero
-!    end do
-!  end do
+ ABI_ALLOCATE(xcart,(3,natom))
+ ABI_ALLOCATE(xred,(3,natom))
+ xcart(:,:) = eff_pot%crystal%xcart(:,:)
+ xred(:,:)  = eff_pot%crystal%xred(:,:)
+
+!Set the size of the interaction
+ ncell = (/anint(cut_off/rprimd(1,1))+1,&
+&          anint(cut_off/rprimd(2,2))+1,&
+&          anint(cut_off/rprimd(3,3))+1/)
+
+ lim1=((ncell(1)/2))
+ lim2=((ncell(2)/2))
+ lim3=((ncell(3)/2))
+ if(mod(ncell(1),2)/=0) lim1=lim1+1
+ if(mod(ncell(2),2)/=0) lim2=lim2+1
+ if(mod(ncell(3),2)/=0) lim3=lim3+1
+ nrpt=(2*lim1+1)*(2*lim2+1)*(2*lim3+1)
+
+!compute new ncell
+ ncell(1) = 2*lim1+1
+ ncell(2) = 2*lim2+1
+ ncell(3) = 2*lim3+1
+
+!Build the rpt point 
+ ABI_ALLOCATE(rpt,(3,nrpt))
+ ABI_ALLOCATE(cell,(3,nrpt))
  
- ABI_ALLOCATE(coeffs_tmp,(ncoeff_max))
- ABI_ALLOCATE(terms,(nterm_max))
-
-
- icoeff_tmp = zero 
- icoeff1_opp = zero
- ABI_ALLOCATE(atindx,(2,ndisp))
- ABI_ALLOCATE(cells,(3,2,ndisp))
- ABI_ALLOCATE(dir_int,(ndisp))
- ABI_ALLOCATE(powers,(ndisp))
-
-!Found the ref cell
+!WARNING:
+!Put the reference cell into the first element
+!the code will first deal with the atoms of the first cell
+ irpt = one
  irpt_ref = one 
- do irpt=1,nrpt
-   if(all(cell(:,irpt)==0))then
-     irpt_ref = irpt
-     exit
-   end if
- end do
-
-
- write(message,'(a)') " Irreductible coefficient and associated atom 1, atom 2 and direction:"
- call wrtout(std_out,message,'COLL') 
-
-  do icoeff=1,ncoeff
-    if(blkval(icoeff)==zero)cycle
-!   Reset counter
-    iterm = zero
-    coefficient = one
-    do isym=1,nsym
-!     Get index of this displacement term
-      mu   = list_symcoeff(1,icoeff,isym)
-      ia   = list_symcoeff(2,icoeff,isym)
-      ib   = list_symcoeff(3,icoeff,isym)
-      irpt = list_symcoeff(4,icoeff,isym)
-      weight = list_symcoeff(5,icoeff,isym)
-!     And fill arrays for the initialisation
-      atindx(1,:) = ia; atindx(2,:) = ib; dir_char(:) = mutodir(mu);
-      dir_int(:)  = mu
-      ndisp  = 1 
-      powers(:)   = one
-      cells(:,1,1) = (/0,0,0/)
-      cells(:,2,1) = cell(:,irpt)
-      iterm = iterm + 1
-      call polynomial_term_init(atindx,cells,dir_int,ndisp,terms(iterm),powers,weight,check=.true.)
-    end do!end do sym
-
-    if(iterm > 0)then
-!   increase coefficients and set it
-      icoeff_tmp = icoeff_tmp + 1
-      call polynomial_coeff_init(coefficient,iterm,coeffs_tmp(icoeff_tmp),terms(1:iterm),check=.true.)
-    end if
-
-!   Deallocate the terms
-    do iterm=1,nterm_max
-      call polynomial_term_free(terms(iterm))
-    end do
-  end do!end do coeff_sym
-
- ABI_DEALLOCATE(terms)
- ABI_DEALLOCATE(atindx)
- ABI_DEALLOCATE(cells)
- ABI_DEALLOCATE(dir_int)
- ABI_DEALLOCATE(powers)
- ABI_DEALLOCATE(blkval)
-
-!Count the number of terms
- ncoeff_out = zero
- do icoeff_tmp=1,ncoeff_max
-   if (coeffs_tmp(icoeff_tmp)%coefficient/=zero)then
-     ncoeff_out = ncoeff_out + 1
-   end if
- end do
-
-!Transfer in the final array
- ABI_ALLOCATE(coeffs_out,(ncoeff_out))
- icoeff = zero
- do icoeff_tmp=1,ncoeff_max
-   if (coeffs_tmp(icoeff_tmp)%coefficient/=zero)then
-!    Get the name of this coefficient
-     call polynomial_coeff_getName(name,natom,coeffs_tmp(icoeff_tmp),symbols)
-!    Increase icoeff and fill the coeffs_out array
-     icoeff = icoeff + 1
-      call polynomial_coeff_init(one,coeffs_tmp(icoeff_tmp)%nterm,&
- &                               coeffs_out(icoeff),coeffs_tmp(icoeff_tmp)%terms,name=name)
-
-     write(message,'(2a)')' ',trim(name)
-     call wrtout(std_out,message,'COLL') 
-     
-     do iterm = 1,coeffs_tmp(icoeff_tmp)%nterm
-       write(message,'(a,I0,a,I0,2a)') '    Atom ',coeffs_tmp(icoeff_tmp)%terms(iterm)%atindx(1,1),&
-&                       ' and atom ',coeffs_tmp(icoeff_tmp)%terms(iterm)%atindx(2,1),&
-&                       ' in the direction ',mutodir(coeffs_tmp(icoeff_tmp)%terms(iterm)%direction(1))
-       if(any(coeffs_tmp(icoeff_tmp)%terms(iterm)%cell(:,2,1)/=zero))then
-         write(message,'(2a,I0,a,I0,a,I0,a)') trim(message),' in the cell ',&
-&                                       coeffs_tmp(icoeff_tmp)%terms(iterm)%cell(1,2,1),' ',&
-&                                       coeffs_tmp(icoeff_tmp)%terms(iterm)%cell(2,2,1),' ',&
-&                                       coeffs_tmp(icoeff_tmp)%terms(iterm)%cell(3,2,1),'.'
+ rpt(:,1) = zero
+ cell(:,irpt)=zero
+!Fill other rpt:
+ do r1=lim1,-lim1,-1
+   do r2=lim2,-lim2,-1
+     do r3=lim3,-lim3,-1
+       if(r1==0.and.r2==0.and.r3==0) then
+         cycle
        end if
-       call wrtout(std_out,message,'COLL') 
+       irpt=irpt+1
+       rpt(1,irpt)=r1*rprimd(1,1)+r2*rprimd(1,2)+r3*rprimd(1,3)
+       rpt(2,irpt)=r1*rprimd(2,1)+r2*rprimd(2,2)+r3*rprimd(2,3)
+       rpt(3,irpt)=r1*rprimd(3,1)+r2*rprimd(3,2)+r3*rprimd(3,3)
+       cell(1,irpt)=r1;cell(2,irpt)=r2;cell(3,irpt)=r3
      end do
+   end do
+ end do
+
+ ABI_ALLOCATE(symbols,(natom))
+ call symbols_crystal(eff_pot%crystal%natom,eff_pot%crystal%ntypat,eff_pot%crystal%npsp,&
+&                     symbols,eff_pot%crystal%typat,eff_pot%crystal%znucl)
+
+!Compute the distances between atoms
+!Now dist(ia,ib,irpt) contains the distance from atom ia to atom ib in unit cell irpt.
+ ABI_ALLOCATE(dist,(natom,natom,nrpt))
+ dist = zero
+ do ia=1,natom
+   do ib=1,natom
+     do irpt=1,nrpt
+       dist(ia,ib,irpt) = ((xcart(1,ib)-xcart(1,ia)+rpt(1,irpt))**2+&
+&                          (xcart(2,ib)-xcart(2,ia)+rpt(2,irpt))**2+&
+&                          (xcart(3,ib)-xcart(3,ia)+rpt(3,irpt))**2)**0.5
+     end do
+   end do
+ end do
+
+
+ call fit_polynomial_coeff_getList(cell,cut_off,dist,eff_pot,list_symcoeff,list_symstr,&
+&                                  natom,nstr_sym,ncoeff_sym,nrpt)
+
+!Check the distanceance bewteen coefficients and store integer:
+! 0: the mix between these coefficient is not possible 
+! 1: the mix between these coefficient is possible 
+ ABI_ALLOCATE(compatibleCoeffs,(ncoeff_sym,ncoeff_sym))
+ compatibleCoeffs(:,:) = one
+ do icoeff=1,ncoeff_sym
+   do icoeff2=1,ncoeff_sym
+       if(distance(xcart(:,list_symcoeff(2,icoeff,1)),&
+&                  xcart(:,list_symcoeff(2,icoeff2,1)),rprimd,&
+&                  cell(:,1),cell(:,1))>cut_off.or.&
+&         distance(xcart(:,list_symcoeff(2,icoeff,1)),&
+&              xcart(:,list_symcoeff(3,icoeff2,1)),rprimd,&
+&              cell(:,1),cell(:,list_symcoeff(4,icoeff2,1)))>cut_off.or.&
+&         distance(xcart(:,list_symcoeff(3,icoeff,1)),&
+&              xcart(:,list_symcoeff(2,icoeff2,1)),rprimd,&
+&              cell(:,list_symcoeff(4,icoeff,1)),cell(:,1))> cut_off.or.&
+&         distance(xcart(:,list_symcoeff(3,icoeff,1)),&
+&              xcart(:,list_symcoeff(3,icoeff2,1)),rprimd,&
+&              cell(:,list_symcoeff(4,icoeff,1)),&
+&              cell(:,list_symcoeff(4,icoeff2,1)))>cut_off)then
+         compatibleCoeffs(icoeff,icoeff2) = zero
+       end if
+   end do
+ end do
+
+!Set to the maximum of possible coefficients
+ ncoeff_max = one
+ do ii=powers(1),powers(2)
+   ncoeff_max = ncoeff_max + factorial(ncoeff_sym)/(ii*factorial(ncoeff_sym-ii))
+ end do
+ print*,"toto",ncoeff_max,ncoeff_sym
+ icoeff2 = 1
+ ABI_ALLOCATE(list_coeff,(0))
+ ABI_ALLOCATE(coeffs_tmp,(ncoeff_max))
+ call computeNorder(cell,coeffs_tmp,compatibleCoeffs,cut_off,list_symcoeff,list_coeff,1,icoeff2,&
+&                   natom,ncoeff_sym,ncoeff_max,nrpt,nsym,1,powers(1),powers(2),rprimd,symbols,xcart)
+
+ ABI_DEALLOCATE(list_coeff)
+
+!Final tranfert
+!1- Count the total number of coefficient
+ ncoeff = zero
+ do icoeff=1,ncoeff_max
+   if (coeffs_tmp(icoeff)%coefficient /= zero) then
+     ncoeff = ncoeff + 1
    end if
  end do
 
- filename = "terms_1st_order.xml"
-! call polynomial_coeff_writeXML(coeffs_out,ncoeff_out,filename=filename)
- write(message,'(a,1x,I0,a)') ch10,&
-&       ncoeff_out,' fitted coefficients for the 1st order '
- call wrtout(ab_out,message,'COLL')
- call wrtout(std_out,message,'COLL') 
+!2- Transfer
+ ABI_ALLOCATE(coefficients,(ncoeff))
+ icoeff2 = zero
+ do icoeff=1,ncoeff_max
+   if (coeffs_tmp(icoeff)%coefficient /= zero) then
+     icoeff2 = icoeff2 + 1
+     call polynomial_coeff_init(one,coeffs_tmp(icoeff)%nterm,coefficients(icoeff2),&
+&                               coeffs_tmp(icoeff)%terms,&
+&                               name=coeffs_tmp(icoeff)%name)
+   end if
+ end do
 
-!Deallocation
+!Free them all
  do icoeff=1,ncoeff_max
    call polynomial_coeff_free(coeffs_tmp(icoeff))
  end do
- ABI_DEALLOCATE(coeffs_tmp)
+ if(allocated(coeffs_tmp)) then
+   ABI_DEALLOCATE(coeffs_tmp)
+ end if
 
-end subroutine fit_polynomial_coeff_getOrder1
+ write(message,'(1x,I0,a)')&
+&       ncoeff,' coefficients generated '
+ call wrtout(ab_out,message,'COLL')
+ call wrtout(std_out,message,'COLL') 
+
+ ABI_DEALLOCATE(cell)
+ ABI_DEALLOCATE(dist)
+ ABI_DEALLOCATE(compatibleCoeffs)
+ ABI_DEALLOCATE(list_symcoeff)
+ ABI_DEALLOCATE(list_symstr)
+ ABI_DEALLOCATE(rpt)
+ ABI_DEALLOCATE(symbols)
+ ABI_DEALLOCATE(xcart)
+ ABI_DEALLOCATE(xred)
+
+end subroutine fit_polynomial_coeff_getNorder
 !!***
 
-!!****f* m_fit_polynomial_coeff/fit_polynomial_coeff_getOrder2
-!!
+!!****f* m_fit_polynomial_coeff/computeNorder
 !! NAME
-!! fit_polynomial_coeff_getOrder2
+!! computeNorder
 !!
 !! FUNCTION
-!! Free polynomial_coeff
 !!
 !! INPUTS
 !!
 !! OUTPUT
-!! polynomial_coeff = polynomial_coeff structure to be free
 !!
 !! PARENTS
-!!      m_fit_polynomial_coeff
 !!
 !! CHILDREN
-!!      destroy_supercell,init_supercell,xred2xcart
 !!
 !! SOURCE
 
-subroutine fit_polynomial_coeff_getOrder2(cell,coeffs_out,cut_off,list_coeff,&
-&                                   natom,ncoeff_out,ncoeff,nrpt,nsym,&
-&                                   rprimd,symbols,xcart)
+recursive subroutine computeNorder(cell,coeffs_out,compatibleCoeffs,cut_off,list_coeff,index_coeff_in,&
+&                                  icoeff,icoeff_tot,natom,ncoeff,ncoeff_out,&
+&                                  nrpt,nsym,power,power_min,power_max,rprimd,symbols,xcart)
 
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'fit_polynomial_coeff_getOrder2'
- use interfaces_14_hidewrite
+#define ABI_FUNC 'computeNorder'
 !End of the abilint section
 
  implicit none
 
-!Arguments ------------------------------------
-!scalars
- integer,intent(in)  :: natom,ncoeff,nsym,nrpt
- integer,intent(out) :: ncoeff_out
+!Arguments ---------------------------------------------
+!scalar 
+ integer,intent(in) :: icoeff,natom,ncoeff,power,power_min,power_max,nsym,nrpt
+ integer,intent(inout) :: icoeff_tot,ncoeff_out
  real(dp),intent(in) :: cut_off
 !arrays
- integer,intent(in) :: cell(3,nrpt)
  integer,intent(in) :: list_coeff(6,ncoeff,nsym)
+ integer,intent(in) :: index_coeff_in(power-1)
+ integer,intent(in) :: cell(3,nrpt),compatibleCoeffs(ncoeff,ncoeff)
  real(dp),intent(in) :: xcart(3,natom),rprimd(3,3)
+ type(polynomial_coeff_type),intent(inout) :: coeffs_out(ncoeff_out)
  character(len=5),intent(in) :: symbols(natom)
- type(polynomial_coeff_type),allocatable,intent(inout) :: coeffs_out(:)
-!Local variables-------------------------------
+!Local variables ---------------------------------------
 !scalar
- integer :: ia,ib,icoeff1,icoeff2,icoeff_tmp
- integer :: ii,jj,kk,idisp,irpt,irpt_ref,isym,iterm
- integer :: mu,ncoeff_max,ndisp,nterm_max,power
+ integer :: ia,ib,icoeff1,icoeff_tmp
+ integer :: irpt,isym,idisp,iterm,mu,ncoeff_max,ndisp
+ integer :: nterm_max
  real(dp):: coefficient,weight
- logical :: compatible
 !arrays
- integer,allocatable :: atindx(:,:),coeffs(:)
+ integer,allocatable :: index_coeff(:)
+ integer,allocatable :: atindx(:,:)
  integer,allocatable :: cells(:,:,:),dir_int(:)
  integer,allocatable :: powers(:)
- character(len=1) :: dir_char(3)
- character(len=1) :: mutodir(9) = (/"x","y","z","1","2","3","4","5","6"/)
  character(len=100):: name
- character(len=500) :: message
- character(len=fnlen) :: filename
+ character(len=1),allocatable :: dir_char(:)
+ character(len=1) :: mutodir(9) = (/"x","y","z","1","2","3","4","5","6"/)
  type(polynomial_term_type),dimension(:),allocatable :: terms
  type(polynomial_coeff_type),allocatable :: coeffs_tmp(:)
-
 ! *************************************************************************
 
-!Initialisation of variables
- power = 2
- nterm_max  = nsym
- ncoeff_max = ncoeff**power
- ndisp = power
+ if(power <= power_max)then   
 
- ABI_ALLOCATE(coeffs_tmp,(ncoeff_max))
- ABI_ALLOCATE(terms,(nterm_max))
- ABI_ALLOCATE(atindx,(2,ndisp))
- ABI_ALLOCATE(cells,(3,2,ndisp))
- ABI_ALLOCATE(coeffs,(ndisp))
- ABI_ALLOCATE(dir_int,(ndisp))
- ABI_ALLOCATE(powers,(ndisp))
+!  Initialisation of variables
+   nterm_max  = nsym
+   ncoeff_max = ncoeff**power
+   ndisp = power
+   icoeff_tmp = zero
+   ABI_ALLOCATE(coeffs_tmp,(ncoeff_max))
+   ABI_ALLOCATE(terms,(nterm_max))
+   ABI_ALLOCATE(atindx,(2,ndisp))
+   ABI_ALLOCATE(cells,(3,2,ndisp))
+   ABI_ALLOCATE(dir_int,(ndisp))
+   ABI_ALLOCATE(dir_char,(ndisp))
+   ABI_ALLOCATE(powers,(ndisp))
 
+   ABI_ALLOCATE(index_coeff,(power))
 
- icoeff_tmp = zero 
+   index_coeff(1:power-1) = index_coeff_in(:)
+   do icoeff1=icoeff,ncoeff
+!    If the distance between the 2 coefficients is superior than the cut-off,
+!    we cycle
+     if(compatibleCoeffs(icoeff,icoeff1)==0) cycle
 
-!Found the ref cell
- irpt_ref = one 
- do irpt=1,nrpt
-   if(all(cell(:,irpt)==0))then
-     irpt_ref = irpt
-     exit
-   end if
- end do 
-
- do icoeff1=1,ncoeff
-   do icoeff2=icoeff1,ncoeff
+     index_coeff(power) = icoeff1   
      iterm = zero
      coefficient = one
-!    Set the coeffs
-     coeffs(:) = (/icoeff1,icoeff2/)     
+
+!    Loop over symetries
      do isym=1,nsym
 !      Treat this coeff
        weight = 1
        do idisp=1,ndisp
-!      Get index of this displacement term
-         mu   = list_coeff(1,coeffs(idisp),isym)
-         ia   = list_coeff(2,coeffs(idisp),isym)
-         ib   = list_coeff(3,coeffs(idisp),isym)
-         irpt = list_coeff(4,coeffs(idisp),isym)
-         weight = weight*list_coeff(5,coeffs(idisp),isym)
+!        Get index of this displacement term
+         mu   = list_coeff(1,index_coeff(idisp),isym)
+         ia   = list_coeff(2,index_coeff(idisp),isym)
+         ib   = list_coeff(3,index_coeff(idisp),isym)
+         irpt = list_coeff(4,index_coeff(idisp),isym)
+         weight = weight*list_coeff(5,index_coeff(idisp),isym)
 !        Fill First term arrays 
          atindx(1,idisp) = ia; atindx(2,idisp) = ib;
          dir_char(idisp) = mutodir(mu); dir_int(idisp) = mu
@@ -1169,34 +878,14 @@ subroutine fit_polynomial_coeff_getOrder2(cell,coeffs_out,cut_off,list_coeff,&
          cells(:,1,idisp) = (/0,0,0/)
          cells(:,2,idisp) = cell(:,irpt)
        end do
-       compatible = .true.
-!      Check the cut off and if the coeff is valid
-       do ii=1,power
-         do jj=ii+1,power
-           do kk=2,3
-             if(dist(xcart(:,list_coeff(kk,icoeff1,1)),&
-&                    xcart(:,list_coeff(2,icoeff2,1)),rprimd,&
-&                    cell(:,list_coeff(4,icoeff1,1)),&
-&                    cell(:,list_coeff(4,icoeff2,1)))>cut_off.or.&
-&               dist(xcart(:,list_coeff(kk,icoeff1,1)),&
-&                    xcart(:,list_coeff(3,icoeff2,1)),rprimd,&
-&                    cell(:,list_coeff(4,icoeff1,1)),&
-&                    cell(:,list_coeff(4,icoeff2,1)))>cut_off)then
-               compatible =.false.
-             end if
-           end do
-         end do
-       end do
 
-       if(compatible)then
-         iterm = iterm + 1
-         call polynomial_term_init(atindx,cells,dir_int,ndisp,terms(iterm),powers,&
+       iterm = iterm + 1
+       call polynomial_term_init(atindx,cells,dir_int,ndisp,terms(iterm),powers,&
 &                                  weight,check=.true.)
-       end if
      end do!end do sym
-
-     if(iterm > 0)then
-!    increase coefficients and set it
+   
+     if(iterm > 0.and.power >= power_min)then
+!      increase coefficients and set it
        icoeff_tmp = icoeff_tmp + 1
        call polynomial_coeff_init(coefficient,iterm,coeffs_tmp(icoeff_tmp),terms(1:iterm),check=.true.)
      end if
@@ -1205,669 +894,46 @@ subroutine fit_polynomial_coeff_getOrder2(cell,coeffs_out,cut_off,list_coeff,&
      do iterm=1,nterm_max
        call polynomial_term_free(terms(iterm))
      end do
-   end do!end do coeff_sym1
- end do!end do coeff_sym2
 
- ABI_DEALLOCATE(terms)
+     icoeff_tot = icoeff_tot + icoeff_tmp
+     call computeNorder(cell,coeffs_out,compatibleCoeffs,cut_off,list_coeff,index_coeff,&
+&                       icoeff1,icoeff_tot,natom,ncoeff,ncoeff_out,nrpt,nsym,power+1,&
+&                       power_min,power_max,rprimd,symbols,xcart)
+   end do
 
- ABI_DEALLOCATE(coeffs)
- ABI_DEALLOCATE(atindx)
- ABI_DEALLOCATE(cells)
- ABI_DEALLOCATE(dir_int)
- ABI_DEALLOCATE(powers)
-  
-!Count the number of terms
- ncoeff_out = zero
- do icoeff_tmp=1,ncoeff_max
-   if (coeffs_tmp(icoeff_tmp)%coefficient/=zero)then
-     ncoeff_out = ncoeff_out + 1
-   end if
- end do
+   ABI_DEALLOCATE(terms)
+   ABI_DEALLOCATE(atindx)
+   ABI_DEALLOCATE(cells)
+   ABI_DEALLOCATE(dir_char)
+   ABI_DEALLOCATE(dir_int)
+   ABI_DEALLOCATE(index_coeff)
+   ABI_DEALLOCATE(powers)
 
-!Transfer in the final array
- ABI_ALLOCATE(coeffs_out,(ncoeff_out))
- icoeff1 = zero
- do icoeff_tmp=1,ncoeff_max
-   if (coeffs_tmp(icoeff_tmp)%coefficient/=zero)then
-     name = ''
-!    Get the name of this coefficient
-     call polynomial_coeff_getName(name,natom,coeffs_tmp(icoeff_tmp),symbols)
-!    Increase icoeff and fill the coeffs_out array
-     icoeff1 = icoeff1 + 1
-     call polynomial_coeff_init(one,coeffs_tmp(icoeff_tmp)%nterm,&
-&                               coeffs_out(icoeff1),coeffs_tmp(icoeff_tmp)%terms,&
-&                               name=name)
-    end if
- end do
+!  Transfer in the final array
+   icoeff1 = zero
+   do icoeff_tmp=1,ncoeff_max
+     if (coeffs_tmp(icoeff_tmp)%coefficient/=zero)then
+       name = ''
+!      Get the name of this coefficient
+       call polynomial_coeff_getName(name,natom,coeffs_tmp(icoeff_tmp),symbols,recompute=.TRUE.)
+!      Increase icoeff and fill the coeffs_out array
+       icoeff_tot = icoeff_tot + 1
+       call polynomial_coeff_init(one,coeffs_tmp(icoeff_tmp)%nterm,&
+&                                 coeffs_out(icoeff_tot),coeffs_tmp(icoeff_tmp)%terms,&
+&                                 name=name)
+     end if
+   end do
 
- filename = "terms_2nd_order.xml"
-! call polynomial_coeff_writeXML(coeffs_out,ncoeff_out,filename=filename)
- write(message,'(1x,I0,a)')&
-&       ncoeff_out,' fitted coefficients for the 2st order '
- call wrtout(ab_out,message,'COLL')
- call wrtout(std_out,message,'COLL') 
+!  Deallocation
+   do icoeff1=1,ncoeff_max
+     call polynomial_coeff_free(coeffs_tmp(icoeff1))
+   end do
+   ABI_DEALLOCATE(coeffs_tmp)
+ end if
 
-!Deallocation
- do icoeff1=1,ncoeff_max
-   call polynomial_coeff_free(coeffs_tmp(icoeff1))
- end do
- ABI_DEALLOCATE(coeffs_tmp)
-
-end subroutine fit_polynomial_coeff_getOrder2
+end subroutine computeNorder
 !!***
 
-!!****f* m_fit_polynomial_coeff/fit_polynomial_coeff_getOrder3
-!!
-!! NAME
-!! fit_polynomial_coeff_getOrder3
-!!
-!! FUNCTION
-!! Free polynomial_coeff
-!!
-!! INPUTS
-!!
-!! OUTPUT
-!! polynomial_coeff = polynomial_coeff structure to be free
-!!
-!! PARENTS
-!!      m_fit_polynomial_coeff
-!!
-!! CHILDREN
-!!
-!! SOURCE
-
-subroutine fit_polynomial_coeff_getOrder3(cell,coeffs_out,cut_off,list_coeff,&
-&                                   natom,ncoeff_out,ncoeff,nrpt,nsym,&
-&                                   rprimd,symbols,xcart)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fit_polynomial_coeff_getOrder3'
- use interfaces_14_hidewrite
-!End of the abilint section
-
- implicit none
-
-!Arguments ------------------------------------
-!scalars
- integer,intent(in)  :: natom,ncoeff,nsym,nrpt
- integer,intent(out) :: ncoeff_out
- real(dp),intent(in) :: cut_off
-!arrays
- integer,intent(in) :: cell(3,nrpt)
- integer,intent(in) :: list_coeff(6,ncoeff,nsym)
- real(dp),intent(in) :: xcart(3,natom),rprimd(3,3)
- character(len=5),intent(in) :: symbols(natom)
- type(polynomial_coeff_type),allocatable,intent(inout) :: coeffs_out(:)
-!Local variables-------------------------------
-!scalar
- integer :: ia,ib,icoeff1,icoeff2,icoeff3,icoeff_tmp
- integer :: ii,jj,kk,idisp,irpt,irpt_ref,isym,iterm
- integer :: mu,ncoeff_max,ndisp,nterm_max,power
- real(dp):: coefficient,weight
- logical :: compatible
-!arrays
- integer,allocatable :: atindx(:,:),coeffs(:)
- integer,allocatable :: cells(:,:,:),dir_int(:)
- integer,allocatable :: powers(:)
- character(len=1) :: dir_char(3)
- character(len=1) :: mutodir(9) = (/"x","y","z","1","2","3","4","5","6"/)
- character(len=100):: name
- character(len=500) :: message
- character(len=fnlen) :: filename
- type(polynomial_term_type),dimension(:),allocatable :: terms
- type(polynomial_coeff_type),allocatable :: coeffs_tmp(:)
-
-! *************************************************************************
-
-!Initialisation of variables
- power = 3
- nterm_max  = nsym
- ncoeff_max = ncoeff**power
- ndisp = power
- ABI_ALLOCATE(coeffs_tmp,(ncoeff_max))
- ABI_ALLOCATE(terms,(nterm_max))
- ABI_ALLOCATE(atindx,(2,ndisp))
- ABI_ALLOCATE(cells,(3,2,ndisp))
- ABI_ALLOCATE(coeffs,(ndisp))
- ABI_ALLOCATE(dir_int,(ndisp))
- ABI_ALLOCATE(powers,(ndisp))
-
- icoeff_tmp = zero 
-
-!Found the ref cell
- irpt_ref = one 
- do irpt=1,nrpt
-   if(all(cell(:,irpt)==0))then
-     irpt_ref = irpt
-     exit
-   end if
- end do 
-
- do icoeff1=1,ncoeff
-   do icoeff2=icoeff1,ncoeff
-     do icoeff3=icoeff2,ncoeff
-       iterm = zero
-       coefficient = one
-!      Set the coeffs
-       coeffs(:) = (/icoeff1,icoeff2,icoeff3/) 
-       do isym=1,nsym
-!        Treat this coeff
-         weight = 1
-         do idisp=1,ndisp
-!          Get index of this displacement term
-           mu   = list_coeff(1,coeffs(idisp),isym)
-           ia   = list_coeff(2,coeffs(idisp),isym)
-           ib   = list_coeff(3,coeffs(idisp),isym)
-           irpt = list_coeff(4,coeffs(idisp),isym)
-           weight = weight*list_coeff(5,coeffs(idisp),isym)
-!          Fill First term arrays 
-           atindx(1,idisp) = ia; atindx(2,idisp) = ib;
-           dir_char(idisp) = mutodir(mu); dir_int(idisp) = mu
-           powers(idisp)   = 1
-           cells(:,1,idisp) = (/0,0,0/)
-           cells(:,2,idisp) = cell(:,irpt)
-         end do
-         compatible = .true.
-!      Check the cut off and if the coeff is valid
-         do ii=1,power
-           do jj=ii+1,power
-             do kk=2,3
-               if(dist(xcart(:,list_coeff(kk,coeffs(ii),1)),&
-&                      xcart(:,list_coeff(2,coeffs(jj),1)),rprimd,&
-&                      cell(:,list_coeff(4,coeffs(ii),1)),&
-&                      cell(:,list_coeff(4,coeffs(jj),1)))>cut_off.or.&
-&                 dist(xcart(:,list_coeff(kk,coeffs(ii),1)),&
-&                      xcart(:,list_coeff(3,coeffs(jj),1)),rprimd,&
-&                      cell(:,list_coeff(4,coeffs(ii),1)),&
-&                      cell(:,list_coeff(4,coeffs(jj),1)))>cut_off)then
-                 compatible =.false.
-               end if
-             end do
-           end do
-         end do
-           
-         if(compatible)then
-           iterm = iterm + 1
-           call polynomial_term_init(atindx,cells,dir_int,ndisp,terms(iterm),powers,&
-&                                    weight,check=.true.)
-         end if
-       end do!end do sym
-
-       if(iterm > 0)then
-!        increase coefficients and set it
-         icoeff_tmp = icoeff_tmp + 1         
-         call polynomial_coeff_init(coefficient,iterm,coeffs_tmp(icoeff_tmp),terms(1:iterm),check=.true.)
-       end if
-
-!      Deallocate the terms
-       do iterm=1,nterm_max
-         call polynomial_term_free(terms(iterm))
-       end do
-     end do!end do coeff_sym1
-   end do!end do coeff_sym2
- end do!end do coeff_sym3
-
- ABI_DEALLOCATE(terms)
- ABI_DEALLOCATE(coeffs)
- ABI_DEALLOCATE(atindx)
- ABI_DEALLOCATE(cells)
- ABI_DEALLOCATE(dir_int)
- ABI_DEALLOCATE(powers)
-  
-!Count the number of terms
- ncoeff_out = zero
- do icoeff_tmp=1,ncoeff_max
-   if (coeffs_tmp(icoeff_tmp)%coefficient/=zero)then
-     ncoeff_out = ncoeff_out + 1
-   end if
- end do
-
-!Transfer in the final array
- ABI_ALLOCATE(coeffs_out,(ncoeff_out))
- icoeff1 = zero
- do icoeff_tmp=1,ncoeff_max
-   if (coeffs_tmp(icoeff_tmp)%coefficient/=zero)then
-     name = ''
-!    Get the name of this coefficient
-     call polynomial_coeff_getName(name,natom,coeffs_tmp(icoeff_tmp),symbols)
-!    Increase icoeff and fill the coeffs_out array
-     icoeff1 = icoeff1 + 1
-     call polynomial_coeff_init(one,coeffs_tmp(icoeff_tmp)%nterm,&
-&                               coeffs_out(icoeff1),coeffs_tmp(icoeff_tmp)%terms,&
-&                               name=name)
-    end if
- end do
-
- filename = "terms_3rd_order.xml"
-! call polynomial_coeff_writeXML(coeffs_out,ncoeff_out,filename=filename)
- write(message,'(1x,I0,a)')&
-&       ncoeff_out,' coefficients for the 3rd order '
- call wrtout(ab_out,message,'COLL')
- call wrtout(std_out,message,'COLL') 
-
-!Deallocation
- do icoeff1=1,ncoeff_max
-   call polynomial_coeff_free(coeffs_tmp(icoeff1))
- end do
- ABI_DEALLOCATE(coeffs_tmp)
-
-end subroutine fit_polynomial_coeff_getOrder3
-!!***
-
-
-!!****f* m_fit_polynomial_coeff/fit_polynomial_coeff_getOrder4
-!!
-!! NAME
-!! fit_polynomial_coeff_getOrder4
-!!
-!! FUNCTION
-!! Free polynomial_coeff
-!!
-!! INPUTS
-!!
-!! OUTPUT
-!! polynomial_coeff = polynomial_coeff structure to be free
-!!
-!! PARENTS
-!!      m_fit_polynomial_coeff
-!!
-!! CHILDREN
-!!
-!! SOURCE
-
-subroutine fit_polynomial_coeff_getOrder4(cell,coeffs_out,cut_off,list_coeff,&
-&                                   natom,ncoeff_out,ncoeff,nrpt,nsym,&
-&                                   rprimd,symbols,xcart)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fit_polynomial_coeff_getOrder4'
- use interfaces_14_hidewrite
-!End of the abilint section
-
- implicit none
-
-!Arguments ------------------------------------
-!scalars
- integer,intent(in)  :: natom,ncoeff,nsym,nrpt
- integer,intent(out) :: ncoeff_out
- real(dp),intent(in) :: cut_off
-!arrays
- integer,intent(in) :: cell(3,nrpt)
- integer,intent(in) :: list_coeff(6,ncoeff,nsym)
- real(dp),intent(in) :: xcart(3,natom),rprimd(3,3)
- character(len=5),intent(in) :: symbols(natom)
- type(polynomial_coeff_type),allocatable,intent(inout) :: coeffs_out(:)
-!Local variables-------------------------------
-!scalar
- integer :: ia,ib,icoeff1,icoeff2,icoeff3,icoeff4,icoeff_tmp
- integer :: ii,jj,kk,idisp,irpt,irpt_ref,isym,iterm
- integer :: mu,ncoeff_max,ndisp,nterm_max,power
- real(dp):: coefficient,weight
- logical :: compatible
-!arrays
- integer,allocatable :: atindx(:,:),coeffs(:)
- integer,allocatable :: cells(:,:,:),dir_int(:)
- integer,allocatable :: powers(:)
- character(len=1),allocatable :: dir_char(:)
- character(len=1) :: mutodir(9) = (/"x","y","z","1","2","3","4","5","6"/)
- character(len=100):: name
- character(len=500) :: message
- character(len=fnlen) :: filename
- type(polynomial_term_type),dimension(:),allocatable :: terms
- type(polynomial_coeff_type),allocatable :: coeffs_tmp(:)
-
-! *************************************************************************
-
-!Initialisation of variables
- power = 4
- nterm_max  = nsym
- ncoeff_max = ncoeff**power
- ndisp = power
- ABI_ALLOCATE(coeffs_tmp,(ncoeff_max))
- ABI_ALLOCATE(terms,(nterm_max))
- ABI_ALLOCATE(atindx,(2,ndisp))
- ABI_ALLOCATE(cells,(3,2,ndisp))
- ABI_ALLOCATE(coeffs,(ndisp))
- ABI_ALLOCATE(dir_int,(ndisp))
- ABI_ALLOCATE(powers,(ndisp))
- ABI_ALLOCATE(dir_char,(ndisp))
-
- icoeff_tmp = zero 
-
-!Found the ref cell
- irpt_ref = one 
- do irpt=1,nrpt
-   if(all(cell(:,irpt)==0))then
-     irpt_ref = irpt
-     exit
-   end if
- end do 
-
- do icoeff1=1,ncoeff
-   do icoeff2=icoeff1,ncoeff
-     do icoeff3=icoeff2,ncoeff
-       do icoeff4=icoeff3,ncoeff
-         iterm = zero
-         coefficient = one
-!        Set the coeffs
-         coeffs(:) = (/icoeff1,icoeff2,icoeff3,icoeff4/) 
-         do isym=1,nsym
-!          Treat this coeff
-           weight = 1
-           do idisp=1,ndisp
-!            Get index of this displacement term
-             mu   = list_coeff(1,coeffs(idisp),isym)
-             ia   = list_coeff(2,coeffs(idisp),isym)
-             ib   = list_coeff(3,coeffs(idisp),isym)
-             irpt = list_coeff(4,coeffs(idisp),isym)
-             weight = weight*list_coeff(5,coeffs(idisp),isym)
-!            Fill First term arrays 
-             atindx(1,idisp) = ia; atindx(2,idisp) = ib;
-             dir_char(idisp) = mutodir(mu); dir_int(idisp) = mu
-             powers(idisp)   = 1
-             cells(:,1,idisp) = (/0,0,0/)
-             cells(:,2,idisp) = cell(:,irpt)
-           end do
-           compatible = .true.
-!        Check the cut off and if the coeff is valid
-           do ii=1,power
-             do jj=ii+1,power
-               do kk=2,3
-                 if(dist(xcart(:,list_coeff(kk,coeffs(ii),1)),&
-&                        xcart(:,list_coeff(2,coeffs(jj),1)),rprimd,&
-&                        cell(:,list_coeff(4,coeffs(ii),1)),&
-&                        cell(:,list_coeff(4,coeffs(jj),1)))>cut_off.or.&
-&                   dist(xcart(:,list_coeff(kk,coeffs(ii),1)),&
-&                        xcart(:,list_coeff(3,coeffs(jj),1)),rprimd,&
-&                        cell(:,list_coeff(4,coeffs(ii),1)),&
-&                        cell(:,list_coeff(4,coeffs(jj),1)))>cut_off)then
-                   compatible =.false.
-                 end if
-               end do
-             end do
-           end do
-           
-           if(compatible)then
-             iterm = iterm + 1
-             call polynomial_term_init(atindx,cells,dir_int,ndisp,terms(iterm),powers,&
-&                                    weight,check=.true.)
-           end if
-         end do!end do sym
-
-         if(iterm > 0)then
-!        increase coefficients and set it
-           icoeff_tmp = icoeff_tmp + 1         
-           call polynomial_coeff_init(coefficient,iterm,coeffs_tmp(icoeff_tmp),terms(1:iterm),&
-&                                     check=.true.)
-         end if
-
-!      Deallocate the terms
-         do iterm=1,nterm_max
-           call polynomial_term_free(terms(iterm))
-         end do
-       end do!end do coeff_sym1
-     end do!end do coeff_sym2
-   end do!end do coeff_sym3
- end do!end do coeff4
- ABI_DEALLOCATE(terms)
- ABI_DEALLOCATE(coeffs)
- ABI_DEALLOCATE(atindx)
- ABI_DEALLOCATE(cells)
- ABI_DEALLOCATE(dir_int)
- ABI_DEALLOCATE(dir_char)
- ABI_DEALLOCATE(powers)
-  
-!Count the number of terms
- ncoeff_out = zero
- do icoeff_tmp=1,ncoeff_max
-   if (coeffs_tmp(icoeff_tmp)%coefficient/=zero)then
-     ncoeff_out = ncoeff_out + 1
-   end if
- end do
-
-!Transfer in the final array
- ABI_ALLOCATE(coeffs_out,(ncoeff_out))
- icoeff1 = zero
- do icoeff_tmp=1,ncoeff_max
-   if (coeffs_tmp(icoeff_tmp)%coefficient/=zero)then
-     name = ''
-!    Get the name of this coefficient
-     call polynomial_coeff_getName(name,natom,coeffs_tmp(icoeff_tmp),symbols)
-!    Increase icoeff and fill the coeffs_out array
-     icoeff1 = icoeff1 + 1
-     call polynomial_coeff_init(one,coeffs_tmp(icoeff_tmp)%nterm,&
-&                               coeffs_out(icoeff1),coeffs_tmp(icoeff_tmp)%terms,&
-&                               name=name)
-   end if
- end do
-
- filename = "terms_4th_order.xml"
-! call polynomial_coeff_writeXML(coeffs_out,ncoeff_out,filename=filename)
- write(message,'(1x,I0,a)')&
-&       ncoeff_out,' coefficients for the 4th order '
- call wrtout(ab_out,message,'COLL')
- call wrtout(std_out,message,'COLL') 
-
-!Deallocation
- do icoeff1=1,ncoeff_max
-   call polynomial_coeff_free(coeffs_tmp(icoeff1))
- end do
- ABI_DEALLOCATE(coeffs_tmp)
-
-end subroutine fit_polynomial_coeff_getOrder4
-!!***
-
-!!****f* m_fit_polynomial_coeff/fit_polynomial_coeff_getOrder5
-!!
-!! NAME
-!! fit_polynomial_coeff_getOrder5
-!!
-!! FUNCTION
-!! Free polynomial_coeff
-!!
-!! INPUTS
-!!
-!! OUTPUT
-!! polynomial_coeff = polynomial_coeff structure to be free
-!!
-!! PARENTS
-!!      m_fit_polynomial_coeff
-!!
-!! CHILDREN
-!!
-!! SOURCE
-
-subroutine fit_polynomial_coeff_getOrder5(cell,coeffs_out,cut_off,list_coeff,&
-&                                   natom,ncoeff_out,ncoeff,nrpt,nsym,&
-&                                   rprimd,symbols,xcart)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fit_polynomial_coeff_getOrder5'
- use interfaces_14_hidewrite
-!End of the abilint section
-
- implicit none
-
-!Arguments ------------------------------------
-!scalars
- integer,intent(in)  :: natom,ncoeff,nsym,nrpt
- integer,intent(out) :: ncoeff_out
- real(dp),intent(in) :: cut_off
-!arrays
- integer,intent(in) :: cell(3,nrpt)
- integer,intent(in) :: list_coeff(6,ncoeff,nsym)
- real(dp),intent(in) :: xcart(3,natom),rprimd(3,3)
- character(len=5),intent(in) :: symbols(natom)
- type(polynomial_coeff_type),allocatable,intent(inout) :: coeffs_out(:)
-!Local variables-------------------------------
-!scalar
- integer :: ia,ib,icoeff1,icoeff2,icoeff3,icoeff4,icoeff5,icoeff_tmp
- integer :: ii,jj,kk,idisp,irpt,irpt_ref,isym,iterm
- integer :: mu,ncoeff_max,ndisp,nterm_max,power
- real(dp):: coefficient,weight
- logical :: compatible
-!arrays
- integer,allocatable :: atindx(:,:),coeffs(:)
- integer,allocatable :: cells(:,:,:),dir_int(:)
- integer,allocatable :: powers(:)
- character(len=1),allocatable :: dir_char(:)
- character(len=1) :: mutodir(9) = (/"x","y","z","1","2","3","4","5","6"/)
- character(len=100):: name
- character(len=500) :: message
- character(len=fnlen) :: filename
- type(polynomial_term_type),dimension(:),allocatable :: terms
- type(polynomial_coeff_type),allocatable :: coeffs_tmp(:)
-
-! *************************************************************************
-
-!Initialisation of variables
- power = 5
- nterm_max  = nsym
- ncoeff_max = ncoeff**power
- ndisp = power
- ABI_ALLOCATE(coeffs_tmp,(ncoeff_max))
- ABI_ALLOCATE(terms,(nterm_max))
- ABI_ALLOCATE(atindx,(2,ndisp))
- ABI_ALLOCATE(cells,(3,2,ndisp))
- ABI_ALLOCATE(coeffs,(ndisp))
- ABI_ALLOCATE(dir_int,(ndisp))
- ABI_ALLOCATE(powers,(ndisp))
- ABI_ALLOCATE(dir_char,(ndisp))
-
- icoeff_tmp = zero 
-
-!Found the ref cell
- irpt_ref = one 
- do irpt=1,nrpt
-   if(all(cell(:,irpt)==0))then
-     irpt_ref = irpt
-     exit
-   end if
- end do 
-
- do icoeff1=1,ncoeff
-   do icoeff2=icoeff1,ncoeff
-     do icoeff3=icoeff2,ncoeff
-       do icoeff4=icoeff3,ncoeff
-         do icoeff5=icoeff4,ncoeff
-           iterm = zero
-           coefficient = one
-!          Set the coeffs
-           coeffs(:) = (/icoeff1,icoeff2,icoeff3,icoeff4,icoeff5/) 
-           do isym=1,nsym
-!            Treat this coeff
-             weight = 1
-             do idisp=1,ndisp
-!            Get index of this displacement term
-               mu   = list_coeff(1,coeffs(idisp),isym)
-               ia   = list_coeff(2,coeffs(idisp),isym)
-               ib   = list_coeff(3,coeffs(idisp),isym)
-               irpt = list_coeff(4,coeffs(idisp),isym)
-               weight = weight*list_coeff(5,coeffs(idisp),isym)
-!            Fill First term arrays 
-               atindx(1,idisp) = ia; atindx(2,idisp) = ib;
-               dir_char(idisp) = mutodir(mu); dir_int(idisp) = mu
-               powers(idisp)   = 1
-               cells(:,1,idisp) = (/0,0,0/)
-               cells(:,2,idisp) = cell(:,irpt)
-             end do
-             compatible = .true.
-!            Check the cut off and if the coeff is valid
-             do ii=1,power
-               do jj=ii+1,power
-                 do kk=2,3
-                   if(dist(xcart(:,list_coeff(kk,coeffs(ii),1)),&
-&                          xcart(:,list_coeff(2,coeffs(jj),1)),rprimd,&
-&                          cell(:,list_coeff(4,coeffs(ii),1)),&
-&                          cell(:,list_coeff(4,coeffs(jj),1)))>cut_off.or.&
-&                     dist(xcart(:,list_coeff(kk,coeffs(ii),1)),&
-&                          xcart(:,list_coeff(3,coeffs(jj),1)),rprimd,&
-&                          cell(:,list_coeff(4,coeffs(ii),1)),&
-&                          cell(:,list_coeff(4,coeffs(jj),1)))>cut_off)then
-                     compatible =.false.
-                   end if
-                 end do
-               end do
-             end do
-           
-             if(compatible)then
-               iterm = iterm + 1
-               call polynomial_term_init(atindx,cells,dir_int,ndisp,terms(iterm),powers,&
-&                                        weight,check=.true.)
-             end if
-           end do!end do sym
-
-           if(iterm > 0)then
-!          increase coefficients and set it
-             icoeff_tmp = icoeff_tmp + 1         
-             call polynomial_coeff_init(coefficient,iterm,coeffs_tmp(icoeff_tmp),terms(1:iterm),&
-&                                       check=.true.)
-           end if
-
-!          Deallocate the terms
-           do iterm=1,nterm_max
-             call polynomial_term_free(terms(iterm))
-           end do
-         end do!end do coeff_1
-       end do!end do coeff_2
-     end do!end do coeff_3
-   end do!end do coeff4
- end do!end do coeff5
- ABI_DEALLOCATE(terms)
- ABI_DEALLOCATE(coeffs)
- ABI_DEALLOCATE(atindx)
- ABI_DEALLOCATE(cells)
- ABI_DEALLOCATE(dir_int)
- ABI_DEALLOCATE(dir_char)
- ABI_DEALLOCATE(powers)
-  
-!Count the number of terms
- ncoeff_out = zero
- do icoeff_tmp=1,ncoeff_max
-   if (coeffs_tmp(icoeff_tmp)%coefficient/=zero)then
-     ncoeff_out = ncoeff_out + 1
-   end if
- end do
-
-!Transfer in the final array
- ABI_ALLOCATE(coeffs_out,(ncoeff_out))
- icoeff1 = zero
- do icoeff_tmp=1,ncoeff_max
-   if (coeffs_tmp(icoeff_tmp)%coefficient/=zero)then
-!    Get the name of this coefficient
-     call polynomial_coeff_getName(name,natom,coeffs_tmp(icoeff_tmp),symbols)
-!     Increase icoeff and fill the coeffs_out array
-      icoeff1 = icoeff1 + 1
-      call polynomial_coeff_init(one,coeffs_tmp(icoeff_tmp)%nterm,&
-&                               coeffs_out(icoeff1),coeffs_tmp(icoeff_tmp)%terms,&
-&                               name=name)
-    end if
- end do
-
- filename = "terms_5th_order.xml"
-! call polynomial_coeff_writeXML(coeffs_out,ncoeff_out,filename=filename)
- write(message,'(1x,I0,a)')&
-&       ncoeff_out,' coefficients for the 5th order '
- call wrtout(ab_out,message,'COLL')
- call wrtout(std_out,message,'COLL') 
-
-!Deallocation
- do icoeff1=1,ncoeff_max
-   call polynomial_coeff_free(coeffs_tmp(icoeff1))
- end do
- ABI_DEALLOCATE(coeffs_tmp)
-
-end subroutine fit_polynomial_coeff_getOrder5
-!!***
 
 !!****f* m_fit_polynomial_coeff/fit_polynomial_coeff_fit
 !!
@@ -1883,7 +949,10 @@ end subroutine fit_polynomial_coeff_getOrder5
 !! INPUTS
 !! eff_pot<type(effective_potential)> = effective potential
 !! hist<type(abihist)> = The history of the MD (or snapshot of DFT)
+!! fixcoeff(nfixcoeff) = list of fixed coefficient, these coefficients will be 
+!!                       imposed during the fit process
 !! ncycle_in = number of maximum cycle (maximum coefficient to be fitted)
+!! nfixcoeff = Number of coefficients imposed during the fit process
 !! comm = MPI communicator
 !! cut_off = optional,cut off to apply to the range of interation if 
 !!           the coefficient are genereted in this routine
@@ -1898,7 +967,7 @@ end subroutine fit_polynomial_coeff_getOrder5
 !!
 !! SOURCE
 
-subroutine fit_polynomial_coeff_fit(cut_off,eff_pot,fixcoeff,hist,ncycle_in,nfixcoeff,comm)
+subroutine fit_polynomial_coeff_fit(eff_pot,fixcoeff,hist,ncycle_in,nfixcoeff,powers,comm,cut_off)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -1915,15 +984,15 @@ subroutine fit_polynomial_coeff_fit(cut_off,eff_pot,fixcoeff,hist,ncycle_in,nfix
 !scalars
  integer,intent(in) :: ncycle_in,nfixcoeff,comm
 !arrays
- integer,intent(in) :: fixcoeff(nfixcoeff)
+ integer,intent(in) :: fixcoeff(nfixcoeff),powers(2)
  type(effective_potential_type),intent(inout) :: eff_pot
  type(abihist),intent(inout) :: hist
  real(dp),optional,intent(in) :: cut_off
 !Local variables-------------------------------
 !scalar
- integer :: ii,icoeff,icycle,icycle_tmp,info,index_min,itime
- integer :: my_rank,my_ntime,ncoeff_max,natom_sc,ncell,ncycle
- integer :: ncycle_tot,ncycle_max,nproc,ntime,ntime_alone
+ integer :: ii,icoeff,icycle,icycle_tmp,ierr,info,index_min,itime
+ integer :: my_rank,my_ncoeff,ncoeff_max,natom_sc,ncell,ncycle
+ integer :: ncycle_tot,ncycle_max,nproc,ntime,ncoeff_alone,size_mpi
  real(dp) :: energy,ffact,sfact,mse,msef,mses
  real(dp),parameter :: HaBohr_meVAng = 27.21138386 / 0.529177249
  logical :: iam_master,found
@@ -1931,12 +1000,14 @@ subroutine fit_polynomial_coeff_fit(cut_off,eff_pot,fixcoeff,hist,ncycle_in,nfix
  real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3),strain_mat_inv(3,3)
  real(dp) :: mingf(4)
  integer :: ipiv(3)
- integer,allocatable  :: list_coeffs(:),my_time(:),singular_coeffs(:)
- real(dp),allocatable :: coeff_values(:)
+ integer,allocatable  :: buffsize(:),buffdisp(:)
+ integer,allocatable  :: list_coeffs(:),my_coeff(:),singular_coeffs(:)
+ real(dp),allocatable :: buffGF(:,:),coeff_values(:)
  real(dp),allocatable :: du_delta(:,:,:,:),displacement(:,:,:),energy_coeffs(:,:)
  real(dp),allocatable :: energy_diff(:),fcart_fixed(:,:,:)
  real(dp),allocatable :: fcart_diff(:,:,:),fred_fixed(:,:,:)
- real(dp),allocatable :: fcart_coeffs(:,:,:,:),gf_values(:,:),strain(:,:),strten_coeffs(:,:,:)
+ real(dp),allocatable :: fcart_coeffs(:,:,:,:),gf_values(:,:),gf_mpi(:,:)
+ real(dp),allocatable :: strain(:,:),strten_coeffs(:,:,:)
  real(dp),allocatable :: strten_diff(:,:),strten_fixed(:,:),sqomega(:),ucvol(:)
  real(dp),allocatable :: work(:),work2(:,:)
  type(polynomial_coeff_type),allocatable :: coeffs_tmp(:),coeffs_in(:)
@@ -1972,8 +1043,11 @@ subroutine fit_polynomial_coeff_fit(cut_off,eff_pot,fixcoeff,hist,ncycle_in,nfix
    call wrtout(std_out,message,'COLL')
    call wrtout(ab_out,message,'COLL')
 
-   call fit_polynomial_coeff_get(cut_off,eff_pot%anharmonics_terms%coefficients,&
-&                                eff_pot,eff_pot%anharmonics_terms%ncoeff,1)
+   write(message,'(a,F6.3,a)') " Cut-off of ",cut_off," Angstrom is imposed"
+   call wrtout(std_out,message,'COLL') 
+   
+   call fit_polynomial_coeff_getNorder(cut_off,eff_pot%anharmonics_terms%coefficients,&
+                                       eff_pot,eff_pot%anharmonics_terms%ncoeff,powers,1)
  end if
 
 
@@ -1991,21 +1065,21 @@ subroutine fit_polynomial_coeff_fit(cut_off,eff_pot,fixcoeff,hist,ncycle_in,nfix
  natom_sc   = eff_pot%supercell%natom_supercell
 
 !Set the number of cpu for each time
- ntime_alone = mod(ntime,nproc)
- my_ntime = aint(real(ntime,sp)/(nproc))
+ ncoeff_alone = mod(ncoeff_max,nproc)
+ my_ncoeff = aint(real(ncoeff_max,sp)/(nproc))
 
- if(my_rank >= (nproc-ntime_alone)) then
-   my_ntime = my_ntime  + 1
+ if(my_rank >= (nproc-ncoeff_alone)) then
+   my_ncoeff = my_ncoeff  + 1
  end if
 
- ABI_ALLOCATE(my_time,(my_ntime))
+ ABI_ALLOCATE(my_coeff,(my_ncoeff))
 
- do itime=1,my_ntime
-   if(my_rank >= (nproc-ntime_alone))then
-     my_time(itime)=(aint(real(ntime,sp)/nproc))*(my_rank)+&
-&                              (my_rank - (nproc-ntime_alone)) + itime
+ do icoeff=1,my_ncoeff
+   if(my_rank >= (nproc-ncoeff_alone))then
+     my_coeff(icoeff)=(aint(real(ncoeff_max,sp)/nproc))*(my_rank)+&
+&                              (my_rank - (nproc-ncoeff_alone)) + icoeff
    else
-     my_time(itime)=(my_ntime)*(my_rank)  + itime
+     my_coeff(icoeff)=(my_ncoeff)*(my_rank)  + icoeff
   end if
  end do
 
@@ -2127,6 +1201,7 @@ subroutine fit_polynomial_coeff_fit(cut_off,eff_pot,fixcoeff,hist,ncycle_in,nfix
 !Compute the variation of the displacement due to strain of each configurations.
 !Compute fixed forces and stresse and get the standard deviation
 !Compute Shepard and al Factors  \Omega^{2} see J.Chem Phys 136, 074103 (2012)
+
  do itime=1,ntime
 !  Get strain
    call strain_get(strain_t,rprim=eff_pot%supercell%rprimd_supercell,&
@@ -2275,11 +1350,33 @@ subroutine fit_polynomial_coeff_fit(cut_off,eff_pot,fixcoeff,hist,ncycle_in,nfix
  call wrtout(ab_out,message,'COLL')
  call wrtout(std_out,message,'COLL')
 
- write(message,'(a,3x,a,10x,a,14x,a,14x,a,14x,a)') " N","Selecting","MSEE","MSEFS","MSEF","MSES"
- call wrtout(ab_out,message,'COLL') 
- write(message,'(4x,a,6x,a,8x,a,8x,a,8x,a)') "Coefficient","(meV/f.u.)","(eV^2/A^2)","(eV^2/A^2)",&
-&                                          "(eV^2/A^2)"
- call wrtout(ab_out,message,'COLL') 
+ if(ncycle > zero)then
+   write(message,'(a,3x,a,10x,a,14x,a,14x,a,14x,a)') " N","Selecting","MSEE","MSEFS","MSEF","MSES"
+   call wrtout(ab_out,message,'COLL') 
+   write(message,'(4x,a,6x,a,8x,a,8x,a,8x,a)') "Coefficient","(meV/f.u.)","(eV^2/A^2)","(eV^2/A^2)",&
+&                                            "(eV^2/A^2)"
+   call wrtout(ab_out,message,'COLL') 
+ else
+ end if
+
+!Reset gf_values
+ gf_values(:,:) = zero
+
+!Set mpi buffer
+!  Set the bufsize for mpi allgather
+ ABI_ALLOCATE(buffsize,(nproc))
+ ABI_ALLOCATE(buffdisp,(nproc))
+ ABI_ALLOCATE(buffGF,(5,1))
+ ABI_ALLOCATE(gf_mpi,(5,nproc))
+ buffsize(:) = zero
+ buffdisp(1) = zero
+ do ii= 1,nproc
+   buffsize(ii) =  5
+ end do
+ do ii = 2,nproc 
+   buffdisp(ii) = buffdisp(ii-1) + buffsize(ii-1)
+ end do
+ size_mpi = 5*nproc
 
 !Start fit process
  do icycle_tmp = 1,ncycle
@@ -2287,6 +1384,7 @@ subroutine fit_polynomial_coeff_fit(cut_off,eff_pot,fixcoeff,hist,ncycle_in,nfix
 
    write(message, '(4a,I0,a)')ch10,'--',ch10,' Try to find the best model with ',icycle,' coefficient'
    if(icycle > 1)  write(message, '(2a)') trim(message),'s'
+   if(nproc > 1)  write(message, '(2a,I0,a)')trim(message), ' (only the ',my_ncoeff,' first are printed)'
    call wrtout(std_out,message,'COLL')
    if(icycle>1 .or. any(list_coeffs(:) > zero))then
      write(message, '(3a)') ' The coefficient numbers from the previous cycle are:',ch10,' ['
@@ -2310,9 +1408,9 @@ subroutine fit_polynomial_coeff_fit(cut_off,eff_pot,fixcoeff,hist,ncycle_in,nfix
 !  Reset gf_values
    gf_values(:,:) = zero
 
-   do icoeff=1,ncoeff_max
+   do icoeff=1,my_ncoeff
      if(any(list_coeffs==icoeff).or. singular_coeffs(icoeff) == 1) cycle
-     list_coeffs(icycle) = icoeff
+     list_coeffs(icycle) = my_coeff(icoeff)
 
 !    call the fit process routine
 !    This routine solves the linear system proposed by C.Escorihuela-Sayalero see PRB95,094115(2017)
@@ -2345,14 +1443,31 @@ subroutine fit_polynomial_coeff_fit(cut_off,eff_pot,fixcoeff,hist,ncycle_in,nfix
    if(all(singular_coeffs==1)) exit
 
 !  Find a way to keep the bestStore the best coeff for the next step
-   mingf(:)    = 9D99
+   mingf(:) = 9D99
    index_min= one
    do icoeff=1,ncoeff_max
      if(gf_values(1,icoeff) < zero) cycle
      if(gf_values(1,icoeff) == zero) cycle
      if(gf_values(1,icoeff) < mingf(1) ) then
        mingf(:) = gf_values(:,icoeff)
-       index_min = icoeff
+       index_min = my_coeff(icoeff)
+     end if
+   end do
+
+!  MPI GATHER
+   buffGF(1,1) = index_min
+   buffGF(2:5,1) =  mingf(:)
+   call xmpi_allgatherv(buffGF,5,gf_mpi,buffsize,buffdisp, comm, ierr)
+
+!  Find a way to keep the bestStore the best coeff for the next step
+   mingf(:)    = 9D99
+   index_min= one
+   do icoeff=1,nproc
+     if(gf_mpi(2,icoeff) < zero) cycle
+     if(gf_mpi(2,icoeff) == zero) cycle
+     if(gf_mpi(2,icoeff) < mingf(1) ) then
+       mingf(:) = gf_mpi(2:5,icoeff)
+       index_min = gf_mpi(1,icoeff)
      end if
    end do
 
@@ -2362,7 +1477,7 @@ subroutine fit_polynomial_coeff_fit(cut_off,eff_pot,fixcoeff,hist,ncycle_in,nfix
    call wrtout(std_out,message,'COLL')
    
    write(message, '(2a,I0,a,ES24.16)' )' Standard deviation of the energy for',&
-&                                      ' the iteration ',icycle,' (meV/f.u.): ',&
+&                                      ' the iteration ',icycle_tmp,' (meV/f.u.): ',&
 &                         mingf(4)* Ha_eV *1000 / ncell
    call wrtout(std_out,message,'COLL')
 
@@ -2399,7 +1514,7 @@ subroutine fit_polynomial_coeff_fit(cut_off,eff_pot,fixcoeff,hist,ncycle_in,nfix
 !Set the final set of coefficients into the eff_pot type
  call effective_potential_setCoeffs(coeffs_tmp(1:ncycle_tot),eff_pot,ncycle_tot)
 
- write(message, '(2a)') ch10,' Fitted coefficients at the end of the fit process: '
+ write(message, '(3a)') ch10,' Fitted coefficients at the end of the fit process: '
  call wrtout(ab_out,message,'COLL')
  call wrtout(std_out,message,'COLL')
  do ii = 1,ncoeff_max   
@@ -2410,9 +1525,25 @@ subroutine fit_polynomial_coeff_fit(cut_off,eff_pot,fixcoeff,hist,ncycle_in,nfix
    call wrtout(std_out,message,'COLL')
  end do
 
+ call fit_polynomial_coeff_computeGF(coeff_values(1:ncycle_max),du_delta,energy_coeffs,energy_diff,&
+&                                    fcart_coeffs,fcart_diff,ffact,gf_values(:,1),&
+&                                    list_coeffs(1:ncycle_max),natom_sc,ncycle_max,ncoeff_max,ntime,&
+&                                    strten_coeffs,strten_diff,sfact,sqomega,ucvol)
 
-!Set the new set of coefficients into the eff_pot type
- call effective_potential_setCoeffs(coeffs_tmp(1:ncycle_tot),eff_pot,ncycle_tot)
+!Print the standard deviation after the fit
+ write(message,'(4a,ES24.16,4a,ES24.16,2a,ES24.16,2a,ES24.16,a)' )ch10,&
+&                    ' Mean Standard Deviation values at the end of the fit process (meV/f.u.):',&
+&               ch10,'   Energy          : ',&
+&               gf_values(4,1)*Ha_EV*1000/ ncell ,ch10,&
+&                    ' Goal function values at the end of the fit process (eV^2/A^2):',ch10,&
+&                    '   Forces+Stresses : ',&
+&               gf_values(1,1)*(HaBohr_meVAng)**2,ch10,&
+&                    '   Forces          : ',&
+&               gf_values(2,1)*(HaBohr_meVAng)**2,ch10,&
+&                    '   Stresses        : ',&
+&               gf_values(3,1)*(HaBohr_meVAng)**2,ch10
+ call wrtout(ab_out,message,'COLL')
+ call wrtout(std_out,message,'COLL')
 
 !Deallocation of arrays
 !Deallocate the temporary coefficient
@@ -2425,6 +1556,10 @@ subroutine fit_polynomial_coeff_fit(cut_off,eff_pot,fixcoeff,hist,ncycle_in,nfix
 
  ABI_DATATYPE_DEALLOCATE(coeffs_tmp)
  ABI_DATATYPE_DEALLOCATE(coeffs_in)
+ ABI_DEALLOCATE(buffsize)
+ ABI_DEALLOCATE(buffdisp)
+ ABI_DEALLOCATE(buffGF)
+ ABI_DEALLOCATE(gf_mpi)
  ABI_DEALLOCATE(gf_values)
  ABI_DEALLOCATE(coeff_values)
  ABI_DEALLOCATE(displacement)
@@ -2434,7 +1569,7 @@ subroutine fit_polynomial_coeff_fit(cut_off,eff_pot,fixcoeff,hist,ncycle_in,nfix
  ABI_DEALLOCATE(fcart_fixed)
  ABI_DEALLOCATE(fcart_diff)
  ABI_DEALLOCATE(fcart_coeffs)
- ABI_DEALLOCATE(my_time)
+ ABI_DEALLOCATE(my_coeff)
  ABI_DEALLOCATE(singular_coeffs)
  ABI_DEALLOCATE(strain)
  ABI_DEALLOCATE(strten_diff)
@@ -3700,7 +2835,7 @@ end subroutine fit_polynomial_readMDfile
 !!
 !! SOURCE
 
-function dist(xcart1,xcart2,rprimd,cell1,cell2) result(distance)
+function distance(xcart1,xcart2,rprimd,cell1,cell2) result(dist)
 
 !Arguments ------------------------------------
 !scalar
@@ -3715,7 +2850,7 @@ function dist(xcart1,xcart2,rprimd,cell1,cell2) result(distance)
   real(dp),intent(in):: rprimd(3,3)
   real(dp),intent(in):: xcart1(3),xcart2(3)
   integer,intent(in) :: cell1(3),cell2(3)
-  real(dp) :: distance
+  real(dp) :: dist
 !Local variables -------------------------------
   real(dp) :: rpt1(3),rpt2(3)
   integer  :: mu
@@ -3724,12 +2859,12 @@ function dist(xcart1,xcart2,rprimd,cell1,cell2) result(distance)
     rpt1(mu) = cell1(1)*rprimd(mu,1)+cell1(2)*rprimd(mu,2)+cell1(3)*rprimd(mu,3)
     rpt2(mu) = cell2(1)*rprimd(mu,1)+cell2(2)*rprimd(mu,2)+cell2(3)*rprimd(mu,3)
   end do
-  
-  distance = ((xcart2(1)+rpt2(1)-xcart1(1)-rpt1(1))**2+&
-&             (xcart2(2)+rpt2(2)-xcart1(2)-rpt1(2))**2+&
-&             (xcart2(3)+rpt2(3)-xcart1(3)-rpt1(3))**2)**0.5
 
-end function dist
+  dist = ((xcart2(1)+rpt2(1)-xcart1(1)-rpt1(1))**2+&
+&         (xcart2(2)+rpt2(2)-xcart1(2)-rpt1(2))**2+&
+&         (xcart2(3)+rpt2(3)-xcart1(3)-rpt1(3))**2)**0.5
+
+end function distance
 !!***
 
 !!****f* m_fit_polynomial_coeff/getCoeffFromList
@@ -3790,5 +2925,1304 @@ function getCoeffFromList(list_coeff,ia,ib,irpt,mu,weight,ncoeff) result(coeff)
 end function getCoeffFromList
 !!***
 
+!!****f* m_fit_polynomial_coeff/fit_polynomial_coeff_getOrder1
+!!
+!! NAME
+!! fit_polynomial_coeff_getOrder1
+!!
+!! FUNCTION
+!! Free polynomial_coeff
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!! polynomial_coeff = polynomial_coeff structure to be free
+!!
+!! PARENTS
+!!      m_fit_polynomial_coeff
+!!
+!! CHILDREN
+!!      destroy_supercell,init_supercell,xred2xcart
+!!
+!! SOURCE
+
+subroutine fit_polynomial_coeff_getOrder1(cell,coeffs_out,cut_off,list_symcoeff,list_symstr,&
+&                                         natom,ncoeff_out,ncoeff,nrpt,nsym,&
+&                                         rprimd,symbols,xcart)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'fit_polynomial_coeff_getOrder1'
+ use interfaces_14_hidewrite
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in)  :: natom,ncoeff,nsym,nrpt
+ integer,intent(out) :: ncoeff_out
+ real(dp),intent(in) :: cut_off
+!arrays
+ integer,intent(in) :: cell(3,nrpt)
+ integer,intent(in) :: list_symcoeff(6,ncoeff,nsym),list_symstr(6,nsym)
+ real(dp),intent(in) :: xcart(3,natom),rprimd(3,3)
+ character(len=5),intent(in) :: symbols(natom)
+ type(polynomial_coeff_type),allocatable,intent(inout) :: coeffs_out(:)
+!Local variables-------------------------------
+!scalar
+ integer :: ia,ib,icoeff,icoeff_tmp,irpt,irpt_ref
+ integer :: isym,iterm,mu,ncoeff_max,ndisp,nterm_max
+ real(dp):: coefficient,weight
+!arrays
+ integer,allocatable :: atindx(:,:),cells(:,:,:),dir_int(:)
+ integer,allocatable :: powers(:)
+ character(len=1) :: dir_char(3)
+ character(len=1) :: mutodir(9) = (/"x","y","z","1","2","3","4","5","6"/)
+ character(len=100):: name
+ character(len=500) :: message
+ character(len=fnlen) :: filename
+ type(polynomial_term_type),dimension(:),allocatable :: terms
+ type(polynomial_coeff_type),allocatable :: coeffs_tmp(:)
+
+! *************************************************************************
+
+!Initialisation of variables
+ nterm_max  = nsym
+ ncoeff_max = ncoeff*6
+ ndisp = 1
+ 
+ ABI_ALLOCATE(coeffs_tmp,(ncoeff_max))
+ ABI_ALLOCATE(terms,(nterm_max))
+
+
+ icoeff_tmp = zero 
+ ABI_ALLOCATE(atindx,(2,ndisp))
+ ABI_ALLOCATE(cells,(3,2,ndisp))
+ ABI_ALLOCATE(dir_int,(ndisp))
+ ABI_ALLOCATE(powers,(ndisp))
+
+!Found the ref cell
+ irpt_ref = one 
+ do irpt=1,nrpt
+   if(all(cell(:,irpt)==0))then
+     irpt_ref = irpt
+     exit
+   end if
+ end do
+
+ write(message,'(a)') " Irreductible coefficient and associated atom 1, atom 2 and direction:"
+ call wrtout(std_out,message,'COLL') 
+
+ do icoeff=1,ncoeff
+!  Reset counter
+   iterm = zero
+   coefficient = one
+   do isym=1,nsym
+!    Get index of this displacement term
+     mu   = list_symcoeff(1,icoeff,isym)
+     ia   = list_symcoeff(2,icoeff,isym)
+     ib   = list_symcoeff(3,icoeff,isym)
+     irpt = list_symcoeff(4,icoeff,isym)
+     weight = list_symcoeff(5,icoeff,isym)
+!    And fill arrays for the initialisation
+     atindx(1,1) = ia; atindx(2,1) = ib; dir_char(1) = mutodir(mu);
+     dir_int(1)  = mu
+     ndisp  = 1
+     powers(:)   = one
+     cells(:,1,1) = (/0,0,0/)
+     cells(:,2,1) = cell(:,irpt)
+     iterm = iterm + 1
+     call polynomial_term_init(atindx,cells,dir_int,ndisp,terms(iterm),powers,weight,check=.true.)
+   end do!end do sym
+
+   if(iterm > 0)then
+!  increase coefficients and set it
+     icoeff_tmp = icoeff_tmp + 1
+     call polynomial_coeff_init(coefficient,iterm,coeffs_tmp(icoeff_tmp),terms(1:iterm),check=.true.)
+   end if
+
+!  Deallocate the terms
+   do iterm=1,nterm_max
+     call polynomial_term_free(terms(iterm))
+   end do
+ end do!end do coeff_sym
+
+ ABI_DEALLOCATE(terms)
+ ABI_DEALLOCATE(atindx)
+ ABI_DEALLOCATE(cells)
+ ABI_DEALLOCATE(dir_int)
+ ABI_DEALLOCATE(powers)
+
+!Count the number of terms
+ ncoeff_out = zero
+ do icoeff_tmp=1,ncoeff_max
+   if (coeffs_tmp(icoeff_tmp)%coefficient/=zero)then
+     ncoeff_out = ncoeff_out + 1
+   end if
+ end do
+
+!Transfer in the final array
+ ABI_ALLOCATE(coeffs_out,(ncoeff_out))
+ icoeff = zero
+ do icoeff_tmp=1,ncoeff_max
+   if (coeffs_tmp(icoeff_tmp)%coefficient/=zero)then
+!    Get the name of this coefficient
+     call polynomial_coeff_getName(name,natom,coeffs_tmp(icoeff_tmp),symbols,recompute=.TRUE.)
+!    Increase icoeff and fill the coeffs_out array
+     icoeff = icoeff + 1
+      call polynomial_coeff_init(one,coeffs_tmp(icoeff_tmp)%nterm,&
+ &                               coeffs_out(icoeff),coeffs_tmp(icoeff_tmp)%terms,name=name)
+
+     write(message,'(2a)')' ',trim(name)
+     call wrtout(std_out,message,'COLL') 
+     
+     do iterm = 1,coeffs_tmp(icoeff_tmp)%nterm
+       write(message,'(a,I0,a,I0,2a)') '    Atom ',coeffs_tmp(icoeff_tmp)%terms(iterm)%atindx(1,1),&
+&                       ' and atom ',coeffs_tmp(icoeff_tmp)%terms(iterm)%atindx(2,1),&
+&                       ' in the direction ',mutodir(coeffs_tmp(icoeff_tmp)%terms(iterm)%direction(1))
+       if(any(coeffs_tmp(icoeff_tmp)%terms(iterm)%cell(:,2,1)/=zero))then
+         write(message,'(2a,I0,a,I0,a,I0,a)') trim(message),' in the cell ',&
+&                                       coeffs_tmp(icoeff_tmp)%terms(iterm)%cell(1,2,1),' ',&
+&                                       coeffs_tmp(icoeff_tmp)%terms(iterm)%cell(2,2,1),' ',&
+&                                       coeffs_tmp(icoeff_tmp)%terms(iterm)%cell(3,2,1),'.'
+       end if
+       call wrtout(std_out,message,'COLL') 
+     end do
+   end if
+ end do
+
+ filename = "terms_1st_order.xml"
+ call polynomial_coeff_writeXML(coeffs_out,ncoeff_out,filename=filename)
+ write(message,'(a,1x,I0,a)') ch10,&
+&       ncoeff_out,' fitted coefficients for the 1st order '
+ call wrtout(ab_out,message,'COLL')
+ call wrtout(std_out,message,'COLL') 
+
+!Deallocation
+ do icoeff=1,ncoeff_max
+   call polynomial_coeff_free(coeffs_tmp(icoeff))
+ end do
+ ABI_DEALLOCATE(coeffs_tmp)
+
+end subroutine fit_polynomial_coeff_getOrder1
+!!***
+
+!!****f* m_fit_polynomial_coeff/fit_polynomial_coeff_getOrder2
+!!
+!! NAME
+!! fit_polynomial_coeff_getOrder2
+!!
+!! FUNCTION
+!! Free polynomial_coeff
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!! polynomial_coeff = polynomial_coeff structure to be free
+!!
+!! PARENTS
+!!      m_fit_polynomial_coeff
+!!
+!! CHILDREN
+!!      destroy_supercell,init_supercell,xred2xcart
+!!
+!! SOURCE
+
+subroutine fit_polynomial_coeff_getOrder2(cell,coeffs_out,cut_off,list_coeff,&
+&                                   natom,ncoeff_out,ncoeff,nrpt,nstr_sym,nsym,&
+&                                   rprimd,symbols,xcart)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'fit_polynomial_coeff_getOrder2'
+ use interfaces_14_hidewrite
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in)  :: natom,ncoeff,nsym,nrpt,nstr_sym
+ integer,intent(out) :: ncoeff_out
+ real(dp),intent(in) :: cut_off
+!arrays
+ integer,intent(in) :: cell(3,nrpt)
+ integer,intent(in) :: list_coeff(6,ncoeff,nsym)
+ real(dp),intent(in) :: xcart(3,natom),rprimd(3,3)
+ character(len=5),intent(in) :: symbols(natom)
+ type(polynomial_coeff_type),allocatable,intent(inout) :: coeffs_out(:)
+!Local variables-------------------------------
+!scalar
+ integer :: ia,ib,icoeff1,icoeff2,icoeff_tmp
+ integer :: ii,jj,kk,idisp,irpt,isym,iterm
+ integer :: mu,ncoeff_max,ndisp,nterm_max,power
+ real(dp):: coefficient,weight
+ logical :: compatible
+!arrays
+ integer,allocatable :: atindx(:,:),coeffs(:)
+ integer,allocatable :: cells(:,:,:),dir_int(:)
+ integer,allocatable :: powers(:)
+ character(len=1) :: dir_char(3)
+ character(len=1) :: mutodir(9) = (/"x","y","z","1","2","3","4","5","6"/)
+ character(len=100):: name
+ character(len=500) :: message
+ character(len=fnlen) :: filename
+ type(polynomial_term_type),dimension(:),allocatable :: terms
+ type(polynomial_coeff_type),allocatable :: coeffs_tmp(:)
+
+! *************************************************************************
+
+!Initialisation of variables
+ power = 2
+ nterm_max  = nsym
+ ncoeff_max = ncoeff**power
+ ndisp = power
+
+ ABI_ALLOCATE(coeffs_tmp,(ncoeff_max))
+ ABI_ALLOCATE(terms,(nterm_max))
+ ABI_ALLOCATE(atindx,(2,ndisp))
+ ABI_ALLOCATE(cells,(3,2,ndisp))
+ ABI_ALLOCATE(coeffs,(ndisp))
+ ABI_ALLOCATE(dir_int,(ndisp))
+ ABI_ALLOCATE(powers,(ndisp))
+
+
+ icoeff_tmp = zero 
+
+ do icoeff1=1,ncoeff
+   do icoeff2=icoeff1,ncoeff
+     iterm = zero
+     coefficient = one
+!    Set the coeffs
+     coeffs(:) = (/icoeff1,icoeff2/)     
+     do isym=1,nsym
+!      Treat this coeff
+       weight = 1
+       do idisp=1,ndisp
+!      Get index of this displacement term
+         mu   = list_coeff(1,coeffs(idisp),isym)
+         ia   = list_coeff(2,coeffs(idisp),isym)
+         ib   = list_coeff(3,coeffs(idisp),isym)
+         irpt = list_coeff(4,coeffs(idisp),isym)
+         weight = weight*list_coeff(5,coeffs(idisp),isym)
+!        Fill First term arrays 
+         atindx(1,idisp) = ia; atindx(2,idisp) = ib;
+         dir_char(idisp) = mutodir(mu); dir_int(idisp) = mu
+         powers(idisp)   = 1
+         cells(:,1,idisp) = (/0,0,0/)
+         cells(:,2,idisp) = cell(:,irpt)
+       end do
+       compatible = .true.
+!      Check the cut off and if the coeff is valid
+       do ii=1,power
+         do jj=ii+1,power
+           do kk=2,3
+             if(distance(xcart(:,list_coeff(kk,icoeff1,1)),&
+&                    xcart(:,list_coeff(2,icoeff2,1)),rprimd,&
+&                    cell(:,list_coeff(4,icoeff1,1)),&
+&                    cell(:,list_coeff(4,icoeff2,1)))>cut_off.or.&
+&               distance(xcart(:,list_coeff(kk,icoeff1,1)),&
+&                    xcart(:,list_coeff(3,icoeff2,1)),rprimd,&
+&                    cell(:,list_coeff(4,icoeff1,1)),&
+&                    cell(:,list_coeff(4,icoeff2,1)))>cut_off)then
+               compatible =.false.
+             end if
+           end do
+         end do
+       end do
+
+       if(compatible)then
+         iterm = iterm + 1
+         call polynomial_term_init(atindx,cells,dir_int,ndisp,terms(iterm),powers,&
+&                                  weight,check=.true.)
+       end if
+     end do!end do sym
+
+     if(iterm > 0)then
+!    increase coefficients and set it
+       icoeff_tmp = icoeff_tmp + 1
+       call polynomial_coeff_init(coefficient,iterm,coeffs_tmp(icoeff_tmp),terms(1:iterm),check=.true.)
+     end if
+
+!    Deallocate the terms
+     do iterm=1,nterm_max
+       call polynomial_term_free(terms(iterm))
+     end do
+   end do!end do coeff_sym1
+ end do!end do coeff_sym2
+
+ ABI_DEALLOCATE(terms)
+
+ ABI_DEALLOCATE(coeffs)
+ ABI_DEALLOCATE(atindx)
+ ABI_DEALLOCATE(cells)
+ ABI_DEALLOCATE(dir_int)
+ ABI_DEALLOCATE(powers)
+  
+!Count the number of terms
+ ncoeff_out = zero
+ do icoeff_tmp=1,ncoeff_max
+   if (coeffs_tmp(icoeff_tmp)%coefficient/=zero)then
+     ncoeff_out = ncoeff_out + 1
+   end if
+ end do
+
+!Transfer in the final array
+ ABI_ALLOCATE(coeffs_out,(ncoeff_out))
+ icoeff1 = zero
+ do icoeff_tmp=1,ncoeff_max
+   if (coeffs_tmp(icoeff_tmp)%coefficient/=zero)then
+     name = ''
+!    Get the name of this coefficient
+     call polynomial_coeff_getName(name,natom,coeffs_tmp(icoeff_tmp),symbols,recompute=.TRUE.)
+!    Increase icoeff and fill the coeffs_out array
+     icoeff1 = icoeff1 + 1
+     call polynomial_coeff_init(one,coeffs_tmp(icoeff_tmp)%nterm,&
+&                               coeffs_out(icoeff1),coeffs_tmp(icoeff_tmp)%terms,&
+&                               name=name)
+    end if
+ end do
+
+ filename = "terms_2nd_order.xml"
+ call polynomial_coeff_writeXML(coeffs_out,ncoeff_out,filename=filename)
+ write(message,'(1x,I0,a)')&
+&       ncoeff_out,' fitted coefficients for the 2st order '
+ call wrtout(ab_out,message,'COLL')
+ call wrtout(std_out,message,'COLL') 
+
+!Deallocation
+ do icoeff1=1,ncoeff_max
+   call polynomial_coeff_free(coeffs_tmp(icoeff1))
+ end do
+ ABI_DEALLOCATE(coeffs_tmp)
+
+end subroutine fit_polynomial_coeff_getOrder2
+!!***
+
+!!****f* m_fit_polynomial_coeff/fit_polynomial_coeff_getOrder3
+!!
+!! NAME
+!! fit_polynomial_coeff_getOrder3
+!!
+!! FUNCTION
+!! Free polynomial_coeff
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!! polynomial_coeff = polynomial_coeff structure to be free
+!!
+!! PARENTS
+!!      m_fit_polynomial_coeff
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine fit_polynomial_coeff_getOrder3(cell,coeffs_out,cut_off,list_coeff,list_str,&
+&                                   natom,ncoeff_out,ncoeff,nrpt,nstr_sym,nsym,&
+&                                   rprimd,symbols,xcart)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'fit_polynomial_coeff_getOrder3'
+ use interfaces_14_hidewrite
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in)  :: natom,ncoeff,nsym,nrpt,nstr_sym
+ integer,intent(out) :: ncoeff_out
+ real(dp),intent(in) :: cut_off
+!arrays
+ integer,intent(in) :: cell(3,nrpt)
+ integer,intent(in) :: list_coeff(6,ncoeff,nsym),list_str(6,nsym)
+ real(dp),intent(in) :: xcart(3,natom),rprimd(3,3)
+ character(len=5),intent(in) :: symbols(natom)
+ type(polynomial_coeff_type),allocatable,intent(inout) :: coeffs_out(:)
+!Local variables-------------------------------
+!scalar
+ integer :: ia,ib,icoeff1,icoeff2,icoeff3,icoeff_tmp
+ integer :: ii,jj,kk,idisp,irpt,irpt_ref,isym,iterm
+ integer :: mu,ncoeff_max,ndisp,nterm_max,power
+ real(dp):: coefficient,weight
+ logical :: compatible
+!arrays
+ integer,allocatable :: atindx(:,:),coeffs(:)
+ integer,allocatable :: cells(:,:,:),dir_int(:)
+ integer,allocatable :: powers(:)
+ character(len=1) :: dir_char(3)
+ character(len=1) :: mutodir(9) = (/"x","y","z","1","2","3","4","5","6"/)
+ character(len=100):: name
+ character(len=500) :: message
+ character(len=fnlen) :: filename
+ type(polynomial_term_type),dimension(:),allocatable :: terms
+ type(polynomial_coeff_type),allocatable :: coeffs_tmp(:)
+
+! *************************************************************************
+
+!Initialisation of variables
+ power = 3
+ nterm_max  = nsym
+ ncoeff_max = ncoeff**power + (ncoeff+6)**(power-1)
+ ndisp = power
+ ABI_ALLOCATE(coeffs_tmp,(ncoeff_max))
+ ABI_ALLOCATE(terms,(nterm_max))
+ ABI_ALLOCATE(atindx,(2,ndisp))
+ ABI_ALLOCATE(cells,(3,2,ndisp))
+ ABI_ALLOCATE(coeffs,(ndisp))
+ ABI_ALLOCATE(dir_int,(ndisp))
+ ABI_ALLOCATE(powers,(ndisp))
+
+ icoeff_tmp = zero 
+
+!Found the ref cell
+ irpt_ref = one 
+ do irpt=1,nrpt
+   if(all(cell(:,irpt)==0))then
+     irpt_ref = irpt
+     exit
+   end if
+ end do 
+
+ do icoeff1=1,ncoeff
+   do icoeff2=icoeff1,ncoeff
+!    Fill strain
+!      do icoeff3=1,nstr_sym
+!        iterm = zero
+!        coefficient = one
+! !    Set the coeffs
+!        coeffs(:) = (/icoeff1,icoeff2/)     
+!        do isym=1,nsym
+! !      Treat this coeff
+!          weight = 1
+!          do idisp=1,ndisp-1
+! !      Get index of this displacement term
+!            mu   = list_coeff(1,coeffs(idisp),isym)
+!            ia   = list_coeff(2,coeffs(idisp),isym)
+!            ib   = list_coeff(3,coeffs(idisp),isym)
+!            irpt = list_coeff(4,coeffs(idisp),isym)
+!            weight = weight*list_coeff(5,coeffs(idisp),isym)
+! !        Fill First term arrays 
+!            atindx(1,idisp) = ia; atindx(2,idisp) = ib;
+!            dir_char(idisp) = mutodir(mu); dir_int(idisp) = mu
+!            powers(idisp)   = 1
+!            cells(:,1,idisp) = (/0,0,0/)
+!            cells(:,2,idisp) = cell(:,irpt)
+!          end do
+!          dir_int(ndisp) = -1 * list_str(icoeff3,isym)
+!          powers(ndisp)   = 1
+!          compatible = .true.
+! !      Check the cut off and if the coeff is valid
+!          do ii=1,power-1
+!            do jj=ii+1,power-1
+!              do kk=2,3
+!                if(distance(xcart(:,list_coeff(kk,icoeff1,1)),&
+! &                      xcart(:,list_coeff(2,icoeff2,1)),rprimd,&
+! &                      cell(:,list_coeff(4,icoeff1,1)),&
+! &                      cell(:,list_coeff(4,icoeff2,1)))>cut_off.or.&
+! &                 distance(xcart(:,list_coeff(kk,icoeff1,1)),&
+! &                      xcart(:,list_coeff(3,icoeff2,1)),rprimd,&
+! &                      cell(:,list_coeff(4,icoeff1,1)),&
+! &                      cell(:,list_coeff(4,icoeff2,1)))>cut_off)then
+!                  compatible =.false.
+!                end if
+!              end do
+!            end do
+!          end do
+
+!          if(compatible)then
+!            iterm = iterm + 1
+!            call polynomial_term_init(atindx,cells,dir_int,ndisp,terms(iterm),powers,&
+! &                                  weight,check=.true.)
+!          end if
+!        end do!end do sym
+       
+!        if(iterm > 0)then
+! !      increase coefficients and set it
+!          icoeff_tmp = icoeff_tmp + 1
+!          call polynomial_coeff_init(coefficient,iterm,coeffs_tmp(icoeff_tmp),terms(1:iterm),check=.true.)
+!        end if
+
+! !      Deallocate the terms
+!        do iterm=1,nterm_max
+!          call polynomial_term_free(terms(iterm))
+!        end do
+!      end do!end strain
+     do icoeff3=icoeff2,ncoeff
+       iterm = zero
+       coefficient = one
+!      Set the coeffs
+       coeffs(:) = (/icoeff1,icoeff2,icoeff3/) 
+       do isym=1,nsym
+!        Treat this coeff
+         weight = 1
+         do idisp=1,ndisp
+!          Get index of this displacement term
+           mu   = list_coeff(1,coeffs(idisp),isym)
+           ia   = list_coeff(2,coeffs(idisp),isym)
+           ib   = list_coeff(3,coeffs(idisp),isym)
+           irpt = list_coeff(4,coeffs(idisp),isym)
+           weight = weight*list_coeff(5,coeffs(idisp),isym)
+!          Fill First term arrays 
+           atindx(1,idisp) = ia; atindx(2,idisp) = ib;
+           dir_char(idisp) = mutodir(mu); dir_int(idisp) = mu
+           powers(idisp)   = 1
+           cells(:,1,idisp) = (/0,0,0/)
+           cells(:,2,idisp) = cell(:,irpt)
+         end do
+         compatible = .true.
+!        Check the cut off and if the coeff is valid
+         do ii=1,power
+           do jj=ii+1,power
+             do kk=2,3
+               if(distance(xcart(:,list_coeff(kk,coeffs(ii),isym)),&
+&                      xcart(:,list_coeff(2,coeffs(jj),isym)),rprimd,&
+&                      cells(:,kk-1,ii),cells(:,1,jj))>cut_off.or.&
+&                 distance(xcart(:,list_coeff(kk,coeffs(ii),isym)),&
+&                      xcart(:,list_coeff(3,coeffs(jj),isym)),rprimd,&
+&                      cells(:,kk-1,ii),cells(:,2,jj))>cut_off)then
+                 compatible =.false.
+               end if
+             end do
+           end do
+         end do
+           
+         if(compatible)then
+           iterm = iterm + 1
+           call polynomial_term_init(atindx,cells,dir_int,ndisp,terms(iterm),powers,&
+&                                    weight,check=.true.)
+         end if
+       end do!end do sym
+
+       if(iterm > 0)then
+!        increase coefficients and set it
+         icoeff_tmp = icoeff_tmp + 1         
+         call polynomial_coeff_init(coefficient,iterm,coeffs_tmp(icoeff_tmp),terms(1:iterm),check=.true.)
+       end if
+
+!      Deallocate the terms
+       do iterm=1,nterm_max
+         call polynomial_term_free(terms(iterm))
+       end do
+     end do!end do coeff_sym3
+   end do!end do coeff_sym2
+ end do!end do coeff_sym1
+
+ ABI_DEALLOCATE(terms)
+ ABI_DEALLOCATE(coeffs)
+ ABI_DEALLOCATE(atindx)
+ ABI_DEALLOCATE(cells)
+ ABI_DEALLOCATE(dir_int)
+ ABI_DEALLOCATE(powers)
+  
+!Count the number of terms
+ ncoeff_out = zero
+ do icoeff_tmp=1,ncoeff_max
+   if (coeffs_tmp(icoeff_tmp)%coefficient/=zero)then
+     ncoeff_out = ncoeff_out + 1
+   end if
+ end do
+
+!Transfer in the final array
+ ABI_ALLOCATE(coeffs_out,(ncoeff_out))
+ icoeff1 = zero
+ do icoeff_tmp=1,ncoeff_max
+   if (coeffs_tmp(icoeff_tmp)%coefficient/=zero)then
+     name = ''
+!    Get the name of this coefficient
+     call polynomial_coeff_getName(name,natom,coeffs_tmp(icoeff_tmp),symbols,recompute=.TRUE.)
+!    Increase icoeff and fill the coeffs_out array
+     icoeff1 = icoeff1 + 1
+     call polynomial_coeff_init(one,coeffs_tmp(icoeff_tmp)%nterm,&
+&                               coeffs_out(icoeff1),coeffs_tmp(icoeff_tmp)%terms,&
+&                               name=name)
+    end if
+ end do
+
+ filename = "terms_3rd_order.xml"
+ call polynomial_coeff_writeXML(coeffs_out,ncoeff_out,filename=filename)
+ write(message,'(1x,I0,a)')&
+&       ncoeff_out,' coefficients for the 3rd order '
+ call wrtout(ab_out,message,'COLL')
+ call wrtout(std_out,message,'COLL') 
+
+!Deallocation
+ do icoeff1=1,ncoeff_max
+   call polynomial_coeff_free(coeffs_tmp(icoeff1))
+ end do
+ ABI_DEALLOCATE(coeffs_tmp)
+
+end subroutine fit_polynomial_coeff_getOrder3
+!!***
+
+
+!!****f* m_fit_polynomial_coeff/fit_polynomial_coeff_getOrder4
+!!
+!! NAME
+!! fit_polynomial_coeff_getOrder4
+!!
+!! FUNCTION
+!! Free polynomial_coeff
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!! polynomial_coeff = polynomial_coeff structure to be free
+!!
+!! PARENTS
+!!      m_fit_polynomial_coeff
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine fit_polynomial_coeff_getOrder4(cell,coeffs_out,cut_off,list_coeff,&
+&                                   natom,ncoeff_out,ncoeff,nrpt,nsym,&
+&                                   rprimd,symbols,xcart)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'fit_polynomial_coeff_getOrder4'
+ use interfaces_14_hidewrite
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in)  :: natom,ncoeff,nsym,nrpt
+ integer,intent(out) :: ncoeff_out
+ real(dp),intent(in) :: cut_off
+!arrays
+ integer,intent(in) :: cell(3,nrpt)
+ integer,intent(in) :: list_coeff(6,ncoeff,nsym)
+ real(dp),intent(in) :: xcart(3,natom),rprimd(3,3)
+ character(len=5),intent(in) :: symbols(natom)
+ type(polynomial_coeff_type),allocatable,intent(inout) :: coeffs_out(:)
+!Local variables-------------------------------
+!scalar
+ integer :: ia,ib,icoeff1,icoeff2,icoeff3,icoeff4,icoeff_tmp
+ integer :: ii,jj,kk,idisp,irpt,irpt_ref,isym,iterm
+ integer :: mu,ncoeff_max,ndisp,nterm_max,power
+ real(dp):: coefficient,weight
+ logical :: compatible
+!arrays
+ integer,allocatable :: atindx(:,:),coeffs(:)
+ integer,allocatable :: cells(:,:,:),dir_int(:)
+ integer,allocatable :: powers(:)
+ character(len=1),allocatable :: dir_char(:)
+ character(len=1) :: mutodir(9) = (/"x","y","z","1","2","3","4","5","6"/)
+ character(len=100):: name
+ character(len=500) :: message
+ character(len=fnlen) :: filename
+ type(polynomial_term_type),dimension(:),allocatable :: terms
+ type(polynomial_coeff_type),allocatable :: coeffs_tmp(:)
+
+! *************************************************************************
+
+!Initialisation of variables
+ power = 4
+ nterm_max  = nsym
+ ncoeff_max = ncoeff**power
+ ndisp = power
+ ABI_ALLOCATE(coeffs_tmp,(ncoeff_max))
+ ABI_ALLOCATE(terms,(nterm_max))
+ ABI_ALLOCATE(atindx,(2,ndisp))
+ ABI_ALLOCATE(cells,(3,2,ndisp))
+ ABI_ALLOCATE(coeffs,(ndisp))
+ ABI_ALLOCATE(dir_int,(ndisp))
+ ABI_ALLOCATE(powers,(ndisp))
+ ABI_ALLOCATE(dir_char,(ndisp))
+
+ icoeff_tmp = zero 
+
+!Found the ref cell
+ irpt_ref = one 
+ do irpt=1,nrpt
+   if(all(cell(:,irpt)==0))then
+     irpt_ref = irpt
+     exit
+   end if
+ end do 
+
+ do icoeff1=1,ncoeff
+   do icoeff2=icoeff1,ncoeff
+     do icoeff3=icoeff2,ncoeff
+       do icoeff4=icoeff3,ncoeff
+         iterm = zero
+         coefficient = one
+!        Set the coeffs
+         coeffs(:) = (/icoeff1,icoeff2,icoeff3,icoeff4/) 
+         do isym=1,nsym
+!          Treat this coeff
+           weight = 1
+           do idisp=1,ndisp
+!            Get index of this displacement term
+             mu   = list_coeff(1,coeffs(idisp),isym)
+             ia   = list_coeff(2,coeffs(idisp),isym)
+             ib   = list_coeff(3,coeffs(idisp),isym)
+             irpt = list_coeff(4,coeffs(idisp),isym)
+             weight = weight*list_coeff(5,coeffs(idisp),isym)
+!            Fill First term arrays 
+             atindx(1,idisp) = ia; atindx(2,idisp) = ib;
+             dir_char(idisp) = mutodir(mu); dir_int(idisp) = mu
+             powers(idisp)   = 1
+             cells(:,1,idisp) = (/0,0,0/)
+             cells(:,2,idisp) = cell(:,irpt)
+           end do
+           compatible = .true.
+!        Check the cut off and if the coeff is valid
+           do ii=1,power
+             do jj=ii+1,power
+               do kk=2,3
+               if(distance(xcart(:,list_coeff(kk,coeffs(ii),1)),&
+&                      xcart(:,list_coeff(2,coeffs(jj),1)),rprimd,&
+&                      cells(:,kk-1,ii),cells(:,1,jj))>cut_off.or.&
+&                 distance(xcart(:,list_coeff(kk,coeffs(ii),1)),&
+&                      xcart(:,list_coeff(3,coeffs(jj),1)),rprimd,&
+&                      cells(:,kk-1,ii),cells(:,2,jj))>cut_off)then
+                   compatible =.false.
+                 end if
+               end do
+             end do
+           end do
+           
+           if(compatible)then
+             iterm = iterm + 1
+             call polynomial_term_init(atindx,cells,dir_int,ndisp,terms(iterm),powers,&
+&                                    weight,check=.true.)
+           end if
+         end do!end do sym
+
+         if(iterm > 0)then
+!        increase coefficients and set it
+           icoeff_tmp = icoeff_tmp + 1         
+           call polynomial_coeff_init(coefficient,iterm,coeffs_tmp(icoeff_tmp),terms(1:iterm),&
+&                                     check=.true.)
+         end if
+
+!      Deallocate the terms
+         do iterm=1,nterm_max
+           call polynomial_term_free(terms(iterm))
+         end do
+       end do!end do coeff_sym1
+     end do!end do coeff_sym2
+   end do!end do coeff_sym3
+ end do!end do coeff4
+ ABI_DEALLOCATE(terms)
+ ABI_DEALLOCATE(coeffs)
+ ABI_DEALLOCATE(atindx)
+ ABI_DEALLOCATE(cells)
+ ABI_DEALLOCATE(dir_int)
+ ABI_DEALLOCATE(dir_char)
+ ABI_DEALLOCATE(powers)
+  
+!Count the number of terms
+ ncoeff_out = zero
+ do icoeff_tmp=1,ncoeff_max
+   if (coeffs_tmp(icoeff_tmp)%coefficient/=zero)then
+     ncoeff_out = ncoeff_out + 1
+   end if
+ end do
+
+!Transfer in the final array
+ ABI_ALLOCATE(coeffs_out,(ncoeff_out))
+ icoeff1 = zero
+ do icoeff_tmp=1,ncoeff_max
+   if (coeffs_tmp(icoeff_tmp)%coefficient/=zero)then
+     name = ''
+!    Get the name of this coefficient
+     call polynomial_coeff_getName(name,natom,coeffs_tmp(icoeff_tmp),symbols,recompute=.TRUE.)
+!    Increase icoeff and fill the coeffs_out array
+     icoeff1 = icoeff1 + 1
+     call polynomial_coeff_init(one,coeffs_tmp(icoeff_tmp)%nterm,&
+&                               coeffs_out(icoeff1),coeffs_tmp(icoeff_tmp)%terms,&
+&                               name=name)
+   end if
+ end do
+
+ filename = "terms_4th_order.xml"
+ call polynomial_coeff_writeXML(coeffs_out,ncoeff_out,filename=filename)
+ write(message,'(1x,I0,a)')&
+&       ncoeff_out,' coefficients for the 4th order '
+ call wrtout(ab_out,message,'COLL')
+ call wrtout(std_out,message,'COLL') 
+
+!Deallocation
+ do icoeff1=1,ncoeff_max
+   call polynomial_coeff_free(coeffs_tmp(icoeff1))
+ end do
+ ABI_DEALLOCATE(coeffs_tmp)
+
+end subroutine fit_polynomial_coeff_getOrder4
+!!***
+
+!!****f* m_fit_polynomial_coeff/fit_polynomial_coeff_getOrder5
+!!
+!! NAME
+!! fit_polynomial_coeff_getOrder5
+!!
+!! FUNCTION
+!! Free polynomial_coeff
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!! polynomial_coeff = polynomial_coeff structure to be free
+!!
+!! PARENTS
+!!      m_fit_polynomial_coeff
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine fit_polynomial_coeff_getOrder5(cell,coeffs_out,cut_off,list_coeff,&
+&                                   natom,ncoeff_out,ncoeff,nrpt,nsym,&
+&                                   rprimd,symbols,xcart)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'fit_polynomial_coeff_getOrder5'
+ use interfaces_14_hidewrite
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in)  :: natom,ncoeff,nsym,nrpt
+ integer,intent(out) :: ncoeff_out
+ real(dp),intent(in) :: cut_off
+!arrays
+ integer,intent(in) :: cell(3,nrpt)
+ integer,intent(in) :: list_coeff(6,ncoeff,nsym)
+ real(dp),intent(in) :: xcart(3,natom),rprimd(3,3)
+ character(len=5),intent(in) :: symbols(natom)
+ type(polynomial_coeff_type),allocatable,intent(inout) :: coeffs_out(:)
+!Local variables-------------------------------
+!scalar
+ integer :: ia,ib,icoeff1,icoeff2,icoeff3,icoeff4,icoeff5,icoeff_tmp
+ integer :: ii,jj,kk,idisp,irpt,irpt_ref,isym,iterm
+ integer :: mu,ncoeff_max,ndisp,nterm_max,power
+ real(dp):: coefficient,weight
+ logical :: compatible
+!arrays
+ integer,allocatable :: atindx(:,:),coeffs(:)
+ integer,allocatable :: cells(:,:,:),dir_int(:)
+ integer,allocatable :: powers(:)
+ character(len=1),allocatable :: dir_char(:)
+ character(len=1) :: mutodir(9) = (/"x","y","z","1","2","3","4","5","6"/)
+ character(len=100):: name
+ character(len=500) :: message
+ character(len=fnlen) :: filename
+ type(polynomial_term_type),dimension(:),allocatable :: terms
+ type(polynomial_coeff_type),allocatable :: coeffs_tmp(:)
+
+! *************************************************************************
+
+!Initialisation of variables
+ power = 5
+ nterm_max  = nsym
+ ncoeff_max = ncoeff**power
+ ndisp = power
+ ABI_ALLOCATE(coeffs_tmp,(ncoeff_max))
+ ABI_ALLOCATE(terms,(nterm_max))
+ ABI_ALLOCATE(atindx,(2,ndisp))
+ ABI_ALLOCATE(cells,(3,2,ndisp))
+ ABI_ALLOCATE(coeffs,(ndisp))
+ ABI_ALLOCATE(dir_int,(ndisp))
+ ABI_ALLOCATE(powers,(ndisp))
+ ABI_ALLOCATE(dir_char,(ndisp))
+
+ icoeff_tmp = zero 
+
+!Found the ref cell
+ irpt_ref = one 
+ do irpt=1,nrpt
+   if(all(cell(:,irpt)==0))then
+     irpt_ref = irpt
+     exit
+   end if
+ end do 
+
+ do icoeff1=1,ncoeff
+   do icoeff2=icoeff1,ncoeff
+     do icoeff3=icoeff2,ncoeff
+       do icoeff4=icoeff3,ncoeff
+         do icoeff5=icoeff4,ncoeff
+           iterm = zero
+           coefficient = one
+!          Set the coeffs
+           coeffs(:) = (/icoeff1,icoeff2,icoeff3,icoeff4,icoeff5/) 
+           do isym=1,nsym
+!            Treat this coeff
+             weight = 1
+             do idisp=1,ndisp
+!            Get index of this displacement term
+               mu   = list_coeff(1,coeffs(idisp),isym)
+               ia   = list_coeff(2,coeffs(idisp),isym)
+               ib   = list_coeff(3,coeffs(idisp),isym)
+               irpt = list_coeff(4,coeffs(idisp),isym)
+               weight = weight*list_coeff(5,coeffs(idisp),isym)
+!            Fill First term arrays 
+               atindx(1,idisp) = ia; atindx(2,idisp) = ib;
+               dir_char(idisp) = mutodir(mu); dir_int(idisp) = mu
+               powers(idisp)   = 1
+               cells(:,1,idisp) = (/0,0,0/)
+               cells(:,2,idisp) = cell(:,irpt)
+             end do
+             compatible = .true.
+!            Check the cut off and if the coeff is valid
+             do ii=1,power
+               do jj=ii+1,power
+                 do kk=2,3
+                   if(distance(xcart(:,list_coeff(kk,coeffs(ii),1)),&
+&                          xcart(:,list_coeff(2,coeffs(jj),1)),rprimd,&
+&                          cell(:,list_coeff(4,coeffs(ii),1)),&
+&                          cell(:,list_coeff(4,coeffs(jj),1)))>cut_off.or.&
+&                     distance(xcart(:,list_coeff(kk,coeffs(ii),1)),&
+&                          xcart(:,list_coeff(3,coeffs(jj),1)),rprimd,&
+&                          cell(:,list_coeff(4,coeffs(ii),1)),&
+&                          cell(:,list_coeff(4,coeffs(jj),1)))>cut_off)then
+                     compatible =.false.
+                   end if
+                 end do
+               end do
+             end do
+           
+             if(compatible)then
+               iterm = iterm + 1
+               call polynomial_term_init(atindx,cells,dir_int,ndisp,terms(iterm),powers,&
+&                                        weight,check=.true.)
+             end if
+           end do!end do sym
+
+           if(iterm > 0)then
+!          increase coefficients and set it
+             icoeff_tmp = icoeff_tmp + 1         
+             call polynomial_coeff_init(coefficient,iterm,coeffs_tmp(icoeff_tmp),terms(1:iterm),&
+&                                       check=.true.)
+           end if
+
+!          Deallocate the terms
+           do iterm=1,nterm_max
+             call polynomial_term_free(terms(iterm))
+           end do
+         end do!end do coeff_1
+       end do!end do coeff_2
+     end do!end do coeff_3
+   end do!end do coeff4
+ end do!end do coeff5
+ ABI_DEALLOCATE(terms)
+ ABI_DEALLOCATE(coeffs)
+ ABI_DEALLOCATE(atindx)
+ ABI_DEALLOCATE(cells)
+ ABI_DEALLOCATE(dir_int)
+ ABI_DEALLOCATE(dir_char)
+ ABI_DEALLOCATE(powers)
+  
+!Count the number of terms
+ ncoeff_out = zero
+ do icoeff_tmp=1,ncoeff_max
+   if (coeffs_tmp(icoeff_tmp)%coefficient/=zero)then
+     ncoeff_out = ncoeff_out + 1
+   end if
+ end do
+
+!Transfer in the final array
+ ABI_ALLOCATE(coeffs_out,(ncoeff_out))
+ icoeff1 = zero
+ do icoeff_tmp=1,ncoeff_max
+   if (coeffs_tmp(icoeff_tmp)%coefficient/=zero)then
+!    Get the name of this coefficient
+     call polynomial_coeff_getName(name,natom,coeffs_tmp(icoeff_tmp),symbols,recompute=.TRUE.)
+!     Increase icoeff and fill the coeffs_out array
+      icoeff1 = icoeff1 + 1
+      call polynomial_coeff_init(one,coeffs_tmp(icoeff_tmp)%nterm,&
+&                               coeffs_out(icoeff1),coeffs_tmp(icoeff_tmp)%terms,&
+&                               name=name)
+    end if
+ end do
+
+ filename = "terms_5th_order.xml"
+! call polynomial_coeff_writeXML(coeffs_out,ncoeff_out,filename=filename)
+ write(message,'(1x,I0,a)')&
+&       ncoeff_out,' coefficients for the 5th order '
+ call wrtout(ab_out,message,'COLL')
+ call wrtout(std_out,message,'COLL') 
+
+!Deallocation
+ do icoeff1=1,ncoeff_max
+   call polynomial_coeff_free(coeffs_tmp(icoeff1))
+ end do
+ ABI_DEALLOCATE(coeffs_tmp)
+
+end subroutine fit_polynomial_coeff_getOrder5
+!!***
+
+!!****f* m_fit_polynomial_coeff/fit_polynomial_coeff_get
+!!
+!! NAME
+!! fit_polynomial_coeff_get
+!!
+!! FUNCTION
+!! Get the list of the coefficient of the polynome
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!! polynomial_coeff = polynomial_coeff structure to be free
+!!
+!! PARENTS
+!!      multibinit
+!!
+!! CHILDREN
+!!      destroy_supercell,init_supercell,xred2xcart
+!!
+!! SOURCE
+
+subroutine fit_polynomial_coeff_get(cut_off,coefficients,eff_pot,ncoeff,option)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'fit_polynomial_coeff_get'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: option
+ integer,intent(out):: ncoeff
+ real(dp),intent(in):: cut_off
+!arrays
+ type(effective_potential_type), intent(inout) :: eff_pot
+ type(polynomial_coeff_type),allocatable :: coefficients(:)
+!Local variables-------------------------------
+!scalar
+ integer :: ia,ib,icoeff,icoeff2,ii,irpt,irpt_ref
+ integer :: lim1,lim2,lim3
+ integer :: natom,ncoeff1,ncoeff2,ncoeff3,ncoeff4,ncoeff5,ncoeff_sym,nrpt,nsym,nstr_sym
+ integer :: r1,r2,r3
+!arrays
+ integer :: ncell(3)
+ integer,allocatable :: cell(:,:)
+ integer,allocatable :: list_symcoeff(:,:,:),list_symstr(:,:)
+ real(dp) :: rprimd(3,3)
+ real(dp),allocatable :: dist(:,:,:),rpt(:,:)
+ real(dp),allocatable :: xcart(:,:),xred(:,:)
+ character(len=5),allocatable :: symbols(:)
+ type(polynomial_coeff_type),dimension(:),allocatable :: coeffs1,coeffs2,coeffs3
+ type(polynomial_coeff_type),dimension(:),allocatable :: coeffs4,coeffs5
+
+! *************************************************************************
+!Free the output
+  if(allocated(coefficients))then
+    do ii =1,size(coefficients)
+      call polynomial_coeff_free(coefficients(ii))
+    end do
+    ABI_DEALLOCATE(coefficients)
+  end if
+
+!Initialisation of variables
+ natom  = eff_pot%crystal%natom
+ nsym   = eff_pot%crystal%nsym
+ rprimd = eff_pot%crystal%rprimd
+
+ ABI_ALLOCATE(xcart,(3,natom))
+ ABI_ALLOCATE(xred,(3,natom))
+ xcart(:,:) = eff_pot%crystal%xcart(:,:)
+ xred(:,:)  = eff_pot%crystal%xred(:,:)
+
+!Set the size of the interaction
+ ncell = (/anint(cut_off/rprimd(1,1))+1,&
+&          anint(cut_off/rprimd(2,2))+1,&
+&          anint(cut_off/rprimd(3,3))+1/)
+
+ lim1=((ncell(1)/2))
+ lim2=((ncell(2)/2))
+ lim3=((ncell(3)/2))
+ if(mod(ncell(1),2)/=0) lim1=lim1+1
+ if(mod(ncell(2),2)/=0) lim2=lim2+1
+ if(mod(ncell(3),2)/=0) lim3=lim3+1
+ nrpt=(2*lim1+1)*(2*lim2+1)*(2*lim3+1)
+
+!compute new ncell
+ ncell(1) = 2*lim1+1
+ ncell(2) = 2*lim2+1
+ ncell(3) = 2*lim3+1
+
+!Build the rpt point 
+ ABI_ALLOCATE(rpt,(3,nrpt))
+ ABI_ALLOCATE(cell,(3,nrpt))
+ 
+!WARNING:
+!Put the reference cell into the first element
+!the code will first deal with the atoms of the first cell
+ irpt = one
+ irpt_ref = one 
+ rpt(:,1) = zero
+ cell(:,irpt)=zero
+!Fill other rpt:
+ do r1=lim1,-lim1,-1
+   do r2=lim2,-lim2,-1
+     do r3=lim3,-lim3,-1
+       if(r1==0.and.r2==0.and.r3==0) then
+         cycle
+       end if
+       irpt=irpt+1
+       rpt(1,irpt)=r1*rprimd(1,1)+r2*rprimd(1,2)+r3*rprimd(1,3)
+       rpt(2,irpt)=r1*rprimd(2,1)+r2*rprimd(2,2)+r3*rprimd(2,3)
+       rpt(3,irpt)=r1*rprimd(3,1)+r2*rprimd(3,2)+r3*rprimd(3,3)
+       cell(1,irpt)=r1;cell(2,irpt)=r2;cell(3,irpt)=r3
+     end do
+   end do
+ end do
+
+ ABI_ALLOCATE(symbols,(natom))
+ call symbols_crystal(eff_pot%crystal%natom,eff_pot%crystal%ntypat,eff_pot%crystal%npsp,&
+&                     symbols,eff_pot%crystal%typat,eff_pot%crystal%znucl)
+
+!Compute the distances between atoms
+!Now dist(ia,ib,irpt) contains the distance from atom ia to atom ib in unit cell irpt.
+ ABI_ALLOCATE(dist,(natom,natom,nrpt))
+ dist = zero
+ do ia=1,natom
+   do ib=1,natom
+     do irpt=1,nrpt
+       dist(ia,ib,irpt) = ((xcart(1,ib)-xcart(1,ia)+rpt(1,irpt))**2+&
+&                          (xcart(2,ib)-xcart(2,ia)+rpt(2,irpt))**2+&
+&                          (xcart(3,ib)-xcart(3,ia)+rpt(3,irpt))**2)**0.5
+     end do
+   end do
+ end do
+
+
+ call fit_polynomial_coeff_getList(cell,cut_off,dist,eff_pot,list_symcoeff,list_symstr,&
+&                                  natom,nstr_sym,ncoeff_sym,nrpt)
+
+! call fit_polynomial_coeff_getOrder1(cell,coeffs1,cut_off,list_symcoeff,list_symstr,natom,ncoeff1,&
+!&                                    ncoeff_sym,nrpt,nsym,rprimd,symbols,xcart)
+
+! call fit_polynomial_coeff_getOrder2(cell,coeffs2,cut_off,list_symcoeff,natom,ncoeff2,ncoeff_sym,&
+!&                                    nrpt,nstr_sym,nsym,rprimd,symbols,xcart)
+
+ call fit_polynomial_coeff_getOrder3(cell,coeffs3,cut_off,list_symcoeff,list_symstr,natom,ncoeff3,&
+&                                   ncoeff_sym,nrpt,nstr_sym,nsym,rprimd,symbols,xcart)
+
+ call fit_polynomial_coeff_getOrder4(cell,coeffs4,cut_off,list_symcoeff,natom,ncoeff4,ncoeff_sym,&
+&                              nrpt,nsym,rprimd,symbols,xcart)
+
+! call fit_polynomial_coeff_getOrder5(cell,coeffs5,cut_off,list_symcoeff,natom,ncoeff5,ncoeff_sym,&
+!&                              nrpt,nsym,rprimd,symbols,xcart)
+
+!Final tranfert
+!1- count the total number of coefficient
+ ncoeff = zero
+ do icoeff=1,ncoeff3
+   if (coeffs3(icoeff)%coefficient /= zero) then
+     ncoeff = ncoeff + 1
+   end if
+ end do
+ do icoeff=1,ncoeff4
+   if (coeffs4(icoeff)%coefficient /= zero) then
+     ncoeff = ncoeff + 1
+   end if
+ end do
+  do icoeff=1,ncoeff5
+    if (coeffs5(icoeff)%coefficient /= zero) then
+      ncoeff = ncoeff + 1
+    end if
+  end do
+
+!2- Transfer
+ ABI_ALLOCATE(coefficients,(ncoeff))
+ icoeff2 = zero
+ do icoeff=1,ncoeff3
+   if (coeffs3(icoeff)%coefficient /= zero) then
+     icoeff2 = icoeff2 + 1
+     call polynomial_coeff_init(one,coeffs3(icoeff)%nterm,coefficients(icoeff2),coeffs3(icoeff)%terms,&
+&                               name=coeffs3(icoeff)%name)
+   end if
+ end do
+ do icoeff=1,ncoeff4
+   if (coeffs4(icoeff)%coefficient /= zero) then
+     icoeff2 = icoeff2 + 1
+     call polynomial_coeff_init(one,coeffs4(icoeff)%nterm,coefficients(icoeff2),coeffs4(icoeff)%terms,&
+&                               name=coeffs4(icoeff)%name)
+   end if
+ end do
+  do icoeff=1,ncoeff5
+    if (coeffs5(icoeff)%coefficient /= zero) then
+      icoeff2 = icoeff2 + 1
+      call polynomial_coeff_init(one,coeffs5(icoeff)%nterm,coefficients(icoeff2),coeffs5(icoeff)%terms,&
+&                                name=coeffs5(icoeff)%name)
+    end if
+  end do
+
+!Free them all
+ do icoeff=1,ncoeff1
+   call polynomial_coeff_free(coeffs1(icoeff))
+ end do
+ if(allocated(coeffs1)) then
+   ABI_DEALLOCATE(coeffs1)
+ end if
+
+ do icoeff=1,ncoeff2
+   call polynomial_coeff_free(coeffs2(icoeff))
+ end do
+ if(allocated(coeffs2)) then
+   ABI_DEALLOCATE(coeffs2)
+ end if
+
+ do icoeff=1,ncoeff3
+   call polynomial_coeff_free(coeffs3(icoeff))
+ end do
+ if(allocated(coeffs3)) then
+   ABI_DEALLOCATE(coeffs3)
+ end if
+
+ do icoeff=1,ncoeff4
+   call polynomial_coeff_free(coeffs4(icoeff))
+ end do
+ if(allocated(coeffs4)) then
+   ABI_DEALLOCATE(coeffs4)
+ end if
+
+ do icoeff=1,ncoeff5
+   call polynomial_coeff_free(coeffs5(icoeff))
+ end do
+ if(allocated(coeffs5)) then
+   ABI_DEALLOCATE(coeffs5)
+ end if
+
+ ABI_DEALLOCATE(cell)
+ ABI_DEALLOCATE(dist)
+ ABI_DEALLOCATE(list_symcoeff)
+ ABI_DEALLOCATE(list_symstr)
+ ABI_DEALLOCATE(rpt)
+ ABI_DEALLOCATE(symbols)
+ ABI_DEALLOCATE(xcart)
+ ABI_DEALLOCATE(xred)
+
+end subroutine fit_polynomial_coeff_get
+!!***
 end module m_fit_polynomial_coeff
 !!***

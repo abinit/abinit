@@ -206,8 +206,9 @@ subroutine polynomial_term_init(atindx,cell,direction,ndisp,polynomial_term,powe
  do idisp1=1,ndisp
    if(power_tmp(idisp1) > zero)then
      idisp2 =  idisp2 + 1
-     polynomial_term%atindx(:,idisp2) = atindx(:,idisp1) 
      polynomial_term%direction(idisp2) = direction(idisp1)
+     polynomial_term%power(idisp2) = power_tmp(idisp1)
+     polynomial_term%atindx(:,idisp2) = atindx(:,idisp1) 
      polynomial_term%cell(:,:,idisp2) = cell(:,:,idisp1)
      polynomial_term%power(idisp2) = power_tmp(idisp1)
    end if
