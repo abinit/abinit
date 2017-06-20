@@ -402,11 +402,20 @@ for (tclasskey, tclassval) in list_topics_class:
           varname2_dic[topic_name] = '%'+var.varname
         section_dic[topic_name]=var.section
         definition_dic[topic_name]=var.definition
-    else if var.topics is not None:
-      for topics in var.topics:
-        topic_class=topics.topic_class
-        if tclasskey==var.topic_class : 
-          topic_name=topics.topic_name
+    elif var.topics is not None:
+
+#debug
+      print("\nvarname:",var.varname)  
+      print("topics:",var.topics)  
+
+      for vartopics in var.topics:
+
+#debug
+        print("\nvarname:",var.varname)
+        print("vartopics:",vartopics)  
+
+        if tclasskey==vartopics["topic_class"] : 
+          topic_name=vartopics["topic_name"]
           found[topic_name] = 1
           foundvar[topic_name] = 1
           varname_dic[topic_name]=var.varname
@@ -416,7 +425,12 @@ for (tclasskey, tclassval) in list_topics_class:
           section_dic[topic_name]=var.section
           definition_dic[topic_name]=var.definition
 
-    for topic_name, value in found.items():
+    for i, topic in enumerate(topics):
+      topic_name=topic.topic_name
+
+#debug
+      print("topic_name: "+topic_name,"foundvar: ",foundvar[topic_name])
+
       if foundvar[topic_name] == 1:
         # Constitute the line of information related to one input variable
         foundvar[topic_name]=0
@@ -432,10 +446,8 @@ for (tclasskey, tclassval) in list_topics_class:
           print("topic_class_sec3[topic_name]:")
           print(topic_class_sec3[topic_name])
 
-  if debug == 1:
-    print("found:",found)
-
-  for topic_name, value in found.items():
+  for i, topic in enumerate(topics):
+    topic_name=topic.topic_name
     if found[topic_name] == 1:
       found[topic_name]=0
       topic_sec3[topic_name] = topic_sec3[topic_name] + topic_class_sec3[topic_name]
