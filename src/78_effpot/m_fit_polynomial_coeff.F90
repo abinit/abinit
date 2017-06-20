@@ -718,7 +718,6 @@ subroutine fit_polynomial_coeff_getNorder(cut_off,coefficients,eff_pot,ncoeff,po
  do ii=powers(1),powers(2)
    ncoeff_max = ncoeff_max + factorial(ncoeff_sym)/(ii*factorial(ncoeff_sym-ii))
  end do
- print*,"toto",ncoeff_max,ncoeff_sym
  icoeff2 = 1
  ABI_ALLOCATE(list_coeff,(0))
  ABI_ALLOCATE(coeffs_tmp,(ncoeff_max))

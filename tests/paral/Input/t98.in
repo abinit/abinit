@@ -2,7 +2,7 @@
 #Test for multibinit, just read xml and generate the effective potential into XML file
 #without the regeneration of the dipole-dipole interaction
 ##############################################################################
-prt_effpot = 1
+prt_model = 1
 
 dipdip = 0
 n_cell =   2 2 2

@@ -422,6 +422,7 @@ implicit none
 !      if(my_rank==0)print*,"TIME FOR 1 STEP FOR CPU ",my_rank,":",tsec
 !    end do
 !TEST_AM
+
    call mover(scfcv_args,ab_xfh,acell,amass,dtfil,electronpositron,&
 &   rhog,rhor,dtset%rprimd_orig,vel,vel_cell,xred,xred_old,effective_potential)
    

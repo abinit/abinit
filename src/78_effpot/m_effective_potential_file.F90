@@ -1387,11 +1387,11 @@ end subroutine system_getDimFromXML
            call rdfromline_value('unit_cell',line,strg)
            if (strg/="") then
              strg1=trim(strg)
-             read(strg1,*) (rprimd(mu,1),mu=1,3)
-             read(funit,*) (rprimd(mu,2),mu=1,3)
+             read(strg1,*) (rprimd(1,mu),mu=1,3)
+             read(funit,*) (rprimd(2,mu),mu=1,3)
            else
              do nu=1,2
-               read(funit,*) (rprimd(mu,nu),mu=1,3)
+               read(funit,*) (rprimd(nu,mu),mu=1,3)
              end do
            end if
            read(funit,'(a)',iostat=ios) readline
@@ -1403,7 +1403,7 @@ end subroutine system_getDimFromXML
            else
              strg1=trim(line)
            end if
-           read(strg1,*) (rprimd(mu,3),mu=1,3)
+           read(strg1,*) (rprimd(3,mu),mu=1,3)
            cycle
          end if
 

@@ -1,7 +1,7 @@
 ##############################################################################
 #Test for multibinit, just read xml and generate the effective potential into XML file
 ##############################################################################
-prt_effpot = 1
+prt_model = 1
 
 n_cell =   2 2 2
 dynamics =  12

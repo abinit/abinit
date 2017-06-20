@@ -1951,7 +1951,9 @@ subroutine effective_potential_writeXML(eff_pot,option,filename)
    WRITE(unit_xml,'("  </energy>")')
 
    WRITE(unit_xml,'("  <unit_cell units=""bohrradius"">")')
-   WRITE(unit_xml,'(3(E23.14))') (eff_pot%crystal%rprimd)
+   do mu=1,3
+     WRITE(unit_xml,'(3(E23.14))') (eff_pot%crystal%rprimd(mu,nu),nu=1,3)
+   end do
    WRITE(unit_xml,'("  </unit_cell>")')
 
    WRITE(unit_xml,'("  <epsilon_inf units=""epsilon0"">")')

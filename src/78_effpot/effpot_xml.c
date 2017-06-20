@@ -208,7 +208,7 @@ void effpot_xml_readSystem(char *filename,int *natom,int *ntypat,int *nrpt,int *
       for(mu=0;mu<3;mu++){
         for(nu=0;nu<3;nu++){
           if (pch != NULL){
-            rprimd[mu][nu]=strtod(pch,NULL);
+            rprimd[nu][mu]=strtod(pch,NULL);
             pch = strtok(NULL,"\t \n");
           }
         }
