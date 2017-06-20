@@ -787,11 +787,21 @@ subroutine dfptnl_pert(atindx,atindx1,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,ei
 
 !          Compute < psi^(0) | H_KV^(pert1pert3) | psi^(pert2) > + < psi^(pert2) | H_KV^(pert1pert3) | psi^(0) >
            cwavef2(:,:) = cg2(:,1+offset_cgj:size_wf+offset_cgj)
-           sij_opt = 0
-           usevnl = 1
-           opt_gvnl2 = 1
-           optnl = 1
-           optlocal = 0
+!           sij_opt = 0
+!           usevnl = 1
+!           opt_gvnl2 = 1
+!           optnl = 1
+!           optlocal = 0
+!          Read dkk file (for tests only)
+           if (print_info/=0) then
+             if(idir_elfd==i2dir) then
+               call wfk_read_bks(ddk_f(2), jband, ikpt, isppol, xmpio_single, cg_bks=iddk)
+             else
+               call wfk_read_bks(ddk_f(4), jband, ikpt, isppol, xmpio_single, cg_bks=iddk)
+             end if
+             cg_jband(1,1+size_wf*(jband-1):size_wf*jband,2) = -iddk(2,1:size_wf)
+             cg_jband(2,1+size_wf*(jband-1):size_wf*jband,2) =  iddk(1,1:size_wf)
+           end if
 !          Read dkde file
            if(idir_elfd==i2dir) then
              call wfk_read_bks(ddk_f(3), jband, ikpt, isppol, xmpio_single, cg_bks=iddk)
@@ -802,8 +812,28 @@ subroutine dfptnl_pert(atindx,atindx1,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,ei
            iddk(1,:) = -s_cwave(2,:)
            iddk(2,:) =  s_cwave(1,:)
            call rf2_getidir(idir_phon,idir_elfd,idir_getgh2c)
-           call getgh2c(cwavef2,cwaveprj0,s_cwave,dummy_array2,gs_hamkq,iddk,idir_getgh2c,ipert_phon+natom+11,zero,&
-&                  mpi_enreg,optlocal,optnl,opt_gvnl2,rf_hamkq_i2pert,sij_opt,tim_getgh2c,usevnl,enl=chi_ij)
+!           call getgh2c(cwavef2,cprj_empty,s_cwave,dummy_array2,gs_hamkq,iddk,idir_getgh2c,ipert_phon+natom+11,zero,&
+!&                  mpi_enreg,optlocal,optnl,opt_gvnl2,rf_hamkq_i2pert,sij_opt,tim_getgh2c,usevnl,enl=chi_ij)
+
+!!          Read dkde file
+!           if(idir_elfd==i2dir) then
+!             call wfk_read_bks(ddk_f(3), jband, ikpt, isppol, xmpio_single, cg_bks=iddk)
+!           else
+!             call wfk_read_bks(ddk_f(5), jband, ikpt, isppol, xmpio_single, cg_bks=iddk)
+!           end if
+!           h_cwave = iddk
+!           iddk(1,:) = -h_cwave(2,:)
+!           iddk(2,:) =  h_cwave(1,:)
+           call rf2_apply_hamiltonian(cg_jband,cprj_jband,cwavef2,cprj_empty,s_cwave,dummy_array2,eig0_k,eig1_k_i2pert,&
+&                                jband,gs_hamkq,iddk,idir_getgh2c,ipert_phon+natom+11,ikpt,isppol,mkmem,mpi_enreg,nband_k,nsppol,&
+                                 print_info,dtset%prtvol,rf_hamkq_i2pert,size_cprj,size_wf,enl=chi_ij)
+!LTEST
+!           write(msg,'(4(a,i4))') 'DFPTNL PERT TEST rf2_apply_hamiltonian ipert = ',ipert_phon+natom+11,' idir =',idir_getgh2c,&
+!     & ' ikpt = ',ikpt,' jband = ',jband
+!           call wrtout(std_out,msg,'COLL')
+!           write(msg,'(a,es17.8E3)') ' test = ',sum(abs(h_cwave-s_cwave))
+!           call wrtout(std_out,msg,'COLL')
+!LTEST
            call dotprod_g(enlout1(1),enlout1(2),gs_hamkq%istwf_k,npw_k*nspinor,2,cgj,s_cwave,&
 &                 mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
            sum_psi0H2psi1a = sum_psi0H2psi1a + dtset%wtk(ikpt)*occ_k(jband)*enlout1(1)
@@ -818,8 +848,11 @@ subroutine dfptnl_pert(atindx,atindx1,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,ei
            s_cwave = iddk
            iddk(1,:) = -s_cwave(2,:)
            iddk(2,:) =  s_cwave(1,:)
-           call getgh2c(cgj,cwaveprj0,s_cwave,dummy_array2,gs_hamkq,iddk,idir_getgh2c,ipert_phon+natom+11,zero,&
-&                  mpi_enreg,optlocal,optnl,opt_gvnl2,rf_hamkq_i2pert,sij_opt,tim_getgh2c,usevnl,enl=chi_ij)
+!           call getgh2c(cgj,cwaveprj0,s_cwave,dummy_array2,gs_hamkq,iddk,idir_getgh2c,ipert_phon+natom+11,zero,&
+!&                  mpi_enreg,optlocal,optnl,opt_gvnl2,rf_hamkq_i2pert,sij_opt,tim_getgh2c,usevnl,enl=chi_ij)
+           call rf2_apply_hamiltonian(cg_jband,cprj_jband,cgj,cprj_empty,s_cwave,dummy_array2,eig0_k,eig1_k_i2pert,&
+&                                jband,gs_hamkq,iddk,idir_getgh2c,ipert_phon+natom+11,ikpt,isppol,mkmem,mpi_enreg,nband_k,nsppol,&
+                                 print_info,dtset%prtvol,rf_hamkq_i2pert,size_cprj,size_wf,enl=chi_ij)
            call dotprod_g(enlout2(1),enlout2(2),gs_hamkq%istwf_k,npw_k*nspinor,2,cwavef2,s_cwave,&
 &                 mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
            sum_psi0H2psi1b = sum_psi0H2psi1b + dtset%wtk(ikpt)*occ_k(jband)*enlout2(1)

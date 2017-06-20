@@ -282,7 +282,7 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,gs_hamkq,ibg,icg,idir,
          end if ! idir<=3
        end do ! jband
      end if ! print_info
-!Read ddk for idir2
+!    Read ddk for idir2
      if (idir>3) then
        call wfk_read_bks(ddk_f(4),iband,ikpt,isppol,xmpio_single,cg_bks=ddk_read,eig1_bks=eig1_read)
        dudk_dir2(:,1+shift_band1:size_wf+shift_band1)=ddk_read(:,:)

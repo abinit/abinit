@@ -594,6 +594,12 @@
  ia1=1;iatm=0
  do itypat=1,ntypat
 
+!LTEST
+   if(choice==8) then
+     write(99,'(a,i2)') ' itypat = ',itypat
+   end if
+!LTEST
+
 !  Get atom loop indices for different types:
    ia2=ia1+nattyp(itypat)-1;ia5=1
 
@@ -762,6 +768,25 @@
 &         ia3,idir,indlmn_typ,istwf_k,kpgin_,matblk,mpi_enreg,nd2gxdt,ndgxdt,nincat,nkpgin_,nlmn,&
 &         nloalg,npwin,nspinor,ph3din,signs,ucvol,vectin)
        end if
+!LTEST
+       if(choice==8) then
+         write(99,'(a,i3)')       '     choice_a = ',choice_a
+         write(99,'(a,i3)')       '        cplex = ',cplex
+         write(99,'(a,i3)')       '    dimffnlin = ',dimffnlin
+         write(99,'(a,es17.8E3)') '       |gx(:,:,:,:)| = ',sum(abs(gx(:,:,:,:)))
+         if(signs==1) then
+           idir1=(idir-1)/3+1; idir2=mod((idir-1),3)+1
+           write(99,'(a,es17.8E3)') '  |dgxdt(:,1,:,:,:)| = ',sum(abs(dgxdt(:,idir1,:,:,:)))
+           write(99,'(a,es17.8E3)') '  |dgxdt(:,2,:,:,:)| = ',sum(abs(dgxdt(:,idir2,:,:,:)))
+         else
+           write(99,'(a,es17.8E3)') '  |dgxdt(:,1,:,:,:)| = ',sum(abs(dgxdt(:,1,:,:,:)))
+           write(99,'(a,es17.8E3)') '  |dgxdt(:,2,:,:,:)| = ',sum(abs(dgxdt(:,2,:,:,:)))
+         end if
+
+!         write(99,'(a,es17.8E3)') '  |dgxdt(:,2,:,:,:)| = ',sum(abs(dgxdt(:,2,:,:,:)))
+!         write(99,'(a,es17.8E3)') ' |d2gxdt(:,1,:,:,:)| = ',sum(abs(d2gxdt(:,1,:,:,:)))
+       end if
+!LTEST
 
 !      Transfer result to output variable cprj (if requested)
 !      cprj(:)%cp receive the <p_i|Psi> factors (p_i: non-local projector)
@@ -816,6 +841,20 @@
          else
            gxfac_sij=gx
          end if
+
+!LTEST
+         if(choice==8) then
+           write(99,'(a,es17.8E3)') '       |gxfac(:,:,:,:)| = ',sum(abs(gxfac(:,:,:,:)))
+           if(signs==1) then
+             idir1=(idir-1)/3+1; idir2=mod((idir-1),3)+1
+             write(99,'(a,es17.8E3)') '  |dgxdtfac(:,1,:,:,:)| = ',sum(abs(dgxdtfac(:,idir1,:,:,:)))
+             write(99,'(a,es17.8E3)') '  |dgxdtfac(:,2,:,:,:)| = ',sum(abs(dgxdtfac(:,idir2,:,:,:)))
+           else
+             write(99,'(a,es17.8E3)') '  |dgxdtfac(:,1,:,:,:)| = ',sum(abs(dgxdtfac(:,1,:,:,:)))
+             write(99,'(a,es17.8E3)') '  |dgxdtfac(:,2,:,:,:)| = ',sum(abs(dgxdtfac(:,2,:,:,:)))
+           end if
+         end if
+!LTEST
 
 !        Operate with the non-local potential on the projected scalars,
 !        in order to get contributions to energy/forces/stress/dyn.mat
@@ -1075,46 +1114,48 @@
 
 !2nd derivative wrt to 2 k wave vectors (effective mass):
 ! - convert from cartesian to reduced coordinates
- if ((choice==8.or.choice==81).and.signs==1.and.paw_opt<=3) then
-   mu0=0 ! Shift to be applied in enlout array
-   ABI_ALLOCATE(work3,(3,3))
-   ABI_ALLOCATE(work4,(3,3))
-   mua=1;if (choice==81) mua=2
-   do ii=1,mua ! Loop Re,Im
-     if (choice==8) then ! enlout is real in Voigt notation
-       work3(1,1)=enlout(mu0+1) ; work3(1,2)=enlout(mu0+6) ; work3(1,3)=enlout(mu0+5)
-       work3(2,1)=enlout(mu0+6) ; work3(2,2)=enlout(mu0+2) ; work3(2,3)=enlout(mu0+4)
-       work3(3,1)=enlout(mu0+5) ; work3(3,2)=enlout(mu0+4) ; work3(3,3)=enlout(mu0+3)
-     else                ! enlout is complex in matrix notation
-       work3(1,1)=enlout(mu0+1 ) ; work3(1,2)=enlout(mu0+3 ) ; work3(1,3)=enlout(mu0+5 )
-       work3(2,1)=enlout(mu0+7 ) ; work3(2,2)=enlout(mu0+9 ) ; work3(2,3)=enlout(mu0+11)
-       work3(3,1)=enlout(mu0+13) ; work3(3,2)=enlout(mu0+15) ; work3(3,3)=enlout(mu0+17)
-     end if
-     do mu=1,3
-       work4(:,mu)=gprimd(:,1)*work3(mu,1)+gprimd(:,2)*work3(mu,2)+gprimd(:,3)*work3(mu,3)
-     end do
-     do mu=1,3
-       work3(:,mu)=gprimd(:,1)*work4(mu,1)+gprimd(:,2)*work4(mu,2)+gprimd(:,3)*work4(mu,3)
-     end do
-     do mu=1,3
-       work4(:,mu)=gprimd(1,:)*work3(mu,1)+gprimd(2,:)*work3(mu,2)+gprimd(3,:)*work3(mu,3)
-     end do
-     do mu=1,3
-       work3(:,mu)=gprimd(1,:)*work4(mu,1)+gprimd(2,:)*work4(mu,2)+gprimd(3,:)*work4(mu,3)
-     end do
-     if (choice==8) then ! enlout is real in Voigt notation
-       enlout(mu0+1) = work3(1,1) ; enlout(mu0+2) = work3(2,2) ; enlout(mu0+3) = work3(3,3)
-       enlout(mu0+4) = work3(3,2) ; enlout(mu0+5) = work3(1,3) ; enlout(mu0+6) = work3(2,1)
-     else                ! enlout is complex in matrix notation
-       enlout(mu0+1 )=work3(1,1) ; enlout(mu0+3 )=work3(1,2) ; enlout(mu0+5 )=work3(1,3)
-       enlout(mu0+7 )=work3(2,1) ; enlout(mu0+9 )=work3(2,2) ; enlout(mu0+11)=work3(2,3)
-       enlout(mu0+13)=work3(3,1) ; enlout(mu0+15)=work3(3,2) ; enlout(mu0+17)=work3(3,3)
-     end if
-     mu0=mu0+1
-   end do
-   ABI_DEALLOCATE(work3)
-   ABI_DEALLOCATE(work4)
- end if
+!LTEST
+! if ((choice==8.or.choice==81).and.signs==1.and.paw_opt<=3) then
+!   mu0=0 ! Shift to be applied in enlout array
+!   ABI_ALLOCATE(work3,(3,3))
+!   ABI_ALLOCATE(work4,(3,3))
+!   mua=1;if (choice==81) mua=2
+!   do ii=1,mua ! Loop Re,Im
+!     if (choice==8) then ! enlout is real in Voigt notation
+!       work3(1,1)=enlout(mu0+1) ; work3(1,2)=enlout(mu0+6) ; work3(1,3)=enlout(mu0+5)
+!       work3(2,1)=enlout(mu0+6) ; work3(2,2)=enlout(mu0+2) ; work3(2,3)=enlout(mu0+4)
+!       work3(3,1)=enlout(mu0+5) ; work3(3,2)=enlout(mu0+4) ; work3(3,3)=enlout(mu0+3)
+!     else                ! enlout is complex in matrix notation
+!       work3(1,1)=enlout(mu0+1 ) ; work3(1,2)=enlout(mu0+3 ) ; work3(1,3)=enlout(mu0+5 )
+!       work3(2,1)=enlout(mu0+7 ) ; work3(2,2)=enlout(mu0+9 ) ; work3(2,3)=enlout(mu0+11)
+!       work3(3,1)=enlout(mu0+13) ; work3(3,2)=enlout(mu0+15) ; work3(3,3)=enlout(mu0+17)
+!     end if
+!     do mu=1,3
+!       work4(:,mu)=gprimd(:,1)*work3(mu,1)+gprimd(:,2)*work3(mu,2)+gprimd(:,3)*work3(mu,3)
+!     end do
+!     do mu=1,3
+!       work3(:,mu)=gprimd(:,1)*work4(mu,1)+gprimd(:,2)*work4(mu,2)+gprimd(:,3)*work4(mu,3)
+!     end do
+!     do mu=1,3
+!       work4(:,mu)=gprimd(1,:)*work3(mu,1)+gprimd(2,:)*work3(mu,2)+gprimd(3,:)*work3(mu,3)
+!     end do
+!     do mu=1,3
+!       work3(:,mu)=gprimd(1,:)*work4(mu,1)+gprimd(2,:)*work4(mu,2)+gprimd(3,:)*work4(mu,3)
+!     end do
+!     if (choice==8) then ! enlout is real in Voigt notation
+!       enlout(mu0+1) = work3(1,1) ; enlout(mu0+2) = work3(2,2) ; enlout(mu0+3) = work3(3,3)
+!       enlout(mu0+4) = work3(3,2) ; enlout(mu0+5) = work3(1,3) ; enlout(mu0+6) = work3(2,1)
+!     else                ! enlout is complex in matrix notation
+!       enlout(mu0+1 )=work3(1,1) ; enlout(mu0+3 )=work3(1,2) ; enlout(mu0+5 )=work3(1,3)
+!       enlout(mu0+7 )=work3(2,1) ; enlout(mu0+9 )=work3(2,2) ; enlout(mu0+11)=work3(2,3)
+!       enlout(mu0+13)=work3(3,1) ; enlout(mu0+15)=work3(3,2) ; enlout(mu0+17)=work3(3,3)
+!     end if
+!     mu0=mu0+1
+!   end do
+!   ABI_DEALLOCATE(work3)
+!   ABI_DEALLOCATE(work4)
+! end if
+!LTEST
 
 !2nd derivative wrt to 2 strains (elastic tensor):
 ! - convert from reduced to cartesian coordinates

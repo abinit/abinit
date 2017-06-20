@@ -229,6 +229,17 @@ subroutine getgh2c(cwavef,cwaveprj,gh2c,gs2c,gs_hamkq,gvnl2,idir,ipert,lambda,&
  compute_conjugate = .false.
  if(present(conj)) compute_conjugate = conj
 
+!LTEST
+! write(msg,'(a,7i3)') ' getgh2c inputs : ',idir,ipert,optlocal,optnl,opt_gvnl2,sij_opt,usevnl
+! call wrtout(std_out,msg,'COLL')
+! write(msg,'(2(a,es17.8E3))') ' getgh2c inputs (1) : ',sum(abs(cwavef)),',',sum(abs(gvnl2))
+! call wrtout(std_out,msg,'COLL')
+! if (present(enl)) then
+!   write(msg,'(a,es17.8E3)') ' getgh2c inputs (2) : ',sum(abs(enl))
+!   call wrtout(std_out,msg,'COLL')
+! end if
+!LTEST
+
 !======================================================================
 !== Apply the 2nd-order local potential to the wavefunction
 !======================================================================
