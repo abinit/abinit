@@ -8,7 +8,7 @@ import re
 import argparse
 from variables import *
 
-debug = 1
+debug = 0
 
 # Path relative from HTML files
 js_path = "../"
@@ -402,34 +402,36 @@ for (tclasskey, tclassval) in list_topics_class:
           varname2_dic[topic_name] = '%'+var.varname
         section_dic[topic_name]=var.section
         definition_dic[topic_name]=var.definition
-    elif var.topics is not None:
+    else:
+      try:
+        if var.topics is not None:
 
-#debug
-      print("\nvarname:",var.varname)  
-      print("topics:",var.topics)  
+          #print("\nvarname:",var.varname)  
+          #print("topics:",var.topics)  
 
-      for vartopics in var.topics:
+          for vartopics in var.topics:
 
-#debug
-        print("\nvarname:",var.varname)
-        print("vartopics:",vartopics)  
+            #print("\nvarname:",var.varname)
+            #print("vartopics:",vartopics)  
 
-        if tclasskey==vartopics["topic_class"] : 
-          topic_name=vartopics["topic_name"]
-          found[topic_name] = 1
-          foundvar[topic_name] = 1
-          varname_dic[topic_name]=var.varname
-          varname2_dic[topic_name]=var.varname
-          if var.characteristics is not None and '[[INTERNAL_ONLY]]' in var.characteristics:
-            varname2_dic[topic_name] = '%'+var.varname
-          section_dic[topic_name]=var.section
-          definition_dic[topic_name]=var.definition
+            if tclasskey==vartopics["topic_class"] : 
+              topic_name=vartopics["topic_name"]
+              found[topic_name] = 1
+              foundvar[topic_name] = 1
+              varname_dic[topic_name]=var.varname
+              varname2_dic[topic_name]=var.varname
+              if var.characteristics is not None and '[[INTERNAL_ONLY]]' in var.characteristics:
+                varname2_dic[topic_name] = '%'+var.varname
+              section_dic[topic_name]=var.section
+              definition_dic[topic_name]=var.definition
+      except:
+        if debug==1 :
+         print(" No topic_name (neither topics) for varname "+var.varname) 
 
     for i, topic in enumerate(topics):
       topic_name=topic.topic_name
 
-#debug
-      print("topic_name: "+topic_name,"foundvar: ",foundvar[topic_name])
+      #print("topic_name: "+topic_name,"foundvar: ",foundvar[topic_name])
 
       if foundvar[topic_name] == 1:
         # Constitute the line of information related to one input variable
