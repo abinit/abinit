@@ -1,9 +1,9 @@
     varname: accuracy
-    topic_class: compulsory
-    topic_name: crystal
-    varname: acell
     topic_class:
     topic_name:
+    varname: acell
+    topic_class: compulsory
+    topic_name: crystal
     varname: adpimd
     topic_class:
     topic_name:
@@ -23,8 +23,8 @@
     topic_class:
     topic_name:
     varname: atvshift
-    topic_class:
-    topic_name:
+    topic_class: expert
+    topic_name: DFT+U
     varname: autoparal
     topic_class:
     topic_name:
@@ -125,8 +125,8 @@
     topic_class:
     topic_name:
     varname: bxctmindg
-    topic_class:
-    topic_name:
+    topic_class: expert
+    topic_name: PAW_settings
     varname: cd_customnimfrqs
     topic_class:
     topic_name:
@@ -272,14 +272,14 @@
     topic_class:
     topic_name:
     varname: dmatpawu
-    topic_class:
-    topic_name:
+    topic_class: useful
+    topic_name: DFT+U
     varname: dmatpuopt
-    topic_class:
-    topic_name:
+    topic_class: expert
+    topic_name: DFT+U
     varname: dmatudiag
-    topic_class:
-    topic_name:
+    topic_class: expert
+    topic_name: DFT+U
     varname: dmft_dc
     topic_class:
     topic_name:
@@ -479,11 +479,11 @@
     topic_class:
     topic_name:
     varname: f4of2_sla
-    topic_class:
-    topic_name:
+    topic_class: expert
+    topic_name: DFT+U
     varname: f6of2_sla
-    topic_class:
-    topic_name:
+    topic_class: expert
+    topic_name: DFT+U
     varname: fband
     topic_class:
     topic_name:
@@ -872,8 +872,8 @@
     topic_class:
     topic_name:
     varname: jpawu
-    topic_class:
-    topic_name:
+    topic_class: compulsory
+    topic_name: DFT+U
     varname: kberry
     topic_class:
     topic_name:
@@ -923,11 +923,11 @@
     topic_class:
     topic_name:
     varname: lpawu
-    topic_class:
-    topic_name:
+    topic_class: compulsory
+    topic_name: DFT+U
     varname: macro_uj
-    topic_class:
-    topic_name:
+    topic_class: expert
+    topic_name: DFT+U
     varname: magcon_lambda
     topic_class:
     topic_name:
@@ -983,8 +983,8 @@
     topic_class:
     topic_name:
     varname: mqgriddg
-    topic_class:
-    topic_name:
+    topic_class: expert
+    topic_name: PAW_settings
     varname: natcon
     topic_class:
     topic_name:
@@ -1016,8 +1016,8 @@
     topic_class:
     topic_name:
     varname: natvshift
-    topic_class:
-    topic_name:
+    topic_class: expert
+    topic_name: DFT+U
     varname: nband
     topic_class:
     topic_name:
@@ -1088,8 +1088,8 @@
     topic_class:
     topic_name:
     varname: ngfftdg
-    topic_class:
-    topic_name:
+    topic_class: useful
+    topic_name: PAW_settings
     varname: ngkpt
     topic_class:
     topic_name:
@@ -1328,89 +1328,89 @@
     topic_class:
     topic_name:
     varname: pawcpxocc
-    topic_class:
-    topic_name:
+    topic_class: expert
+    topic_name: PAW_settings
     varname: pawcross
     topic_class:
     topic_name:
     varname: pawecutdg
-    topic_class:
-    topic_name:
+    topic_class: compulsory
+    topic_name: PAW_settings
     varname: pawfatbnd
-    topic_class:
-    topic_name:
+    topic_class: useful
+    topic_name: PAW_settings
     varname: pawlcutd
-    topic_class:
-    topic_name:
+    topic_class: expert
+    topic_name: PAW_settings
     varname: pawlmix
-    topic_class:
-    topic_name:
+    topic_class: expert
+    topic_name: PAW_settings
     varname: pawmixdg
-    topic_class:
-    topic_name:
+    topic_class: expert
+    topic_name: PAW_settings
     varname: pawnhatxc
-    topic_class:
-    topic_name:
+    topic_class: expert
+    topic_name: PAW_settings
     varname: pawnphi
-    topic_class:
-    topic_name:
+    topic_class: expert
+    topic_name: PAW_settings
     varname: pawntheta
-    topic_class:
-    topic_name:
+    topic_class: expert
+    topic_name: PAW_settings
     varname: pawnzlm
-    topic_class:
-    topic_name:
+    topic_class: expert
+    topic_name: PAW_settings
     varname: pawoptmix
-    topic_class:
-    topic_name:
+    topic_class: expert
+    topic_name: PAW_settings
     varname: pawoptosc
     topic_class:
     topic_name:
     varname: pawovlp
-    topic_class:
-    topic_name:
+    topic_class: expert
+    topic_name: PAW_settings
     varname: pawprt_b
-    topic_class:
-    topic_name:
+    topic_class: useful
+    topic_name: PAW_settings
     varname: pawprt_k
-    topic_class:
-    topic_name:
+    topic_class: useful
+    topic_name: PAW_settings
     varname: pawprtden
-    topic_class:
-    topic_name:
+    topic_class: useful
+    topic_name: PAW_settings
     varname: pawprtdos
-    topic_class:
-    topic_name:
+    topic_class: useful
+    topic_name: PAW_settings
     varname: pawprtvol
-    topic_class:
-    topic_name:
+    topic_class: useful
+    topic_name: PAW_settings
     varname: pawprtwf
-    topic_class:
-    topic_name:
+    topic_class: useful
+    topic_name: PAW_settings
     varname: pawspnorb
-    topic_class:
-    topic_name:
+    topic_class: useful
+    topic_name: PAW_settings
     varname: pawstgylm
-    topic_class:
-    topic_name:
+    topic_class: expert
+    topic_name: PAW_settings
     varname: pawsushat
-    topic_class:
-    topic_name:
+    topic_class: expert
+    topic_name: PAW_settings
     varname: pawujat
-    topic_class:
-    topic_name:
+    topic_class: expert
+    topic_name: DFT+U
     varname: pawujrad
-    topic_class:
-    topic_name:
+    topic_class: expert
+    topic_name: DFT+U
     varname: pawujv
-    topic_class:
-    topic_name:
+    topic_class: expert
+    topic_name: DFT+U
     varname: pawusecp
-    topic_class:
-    topic_name:
+    topic_class: expert
+    topic_name: PAW_settings
     varname: pawxcdev
-    topic_class:
-    topic_name:
+    topic_class: expert
+    topic_name: PAW_settings
     varname: ph_intmeth
     topic_class:
     topic_name:
@@ -1841,8 +1841,8 @@
     topic_class:
     topic_name:
     varname: spnorbscl
-    topic_class:
-    topic_name:
+    topic_class: useful
+    topic_name: PAW_settings
     varname: stmbias
     topic_class:
     topic_name:
@@ -1952,8 +1952,8 @@
     topic_class:
     topic_name:
     varname: upawu
-    topic_class:
-    topic_name:
+    topic_class: compulsory
+    topic_name: DFT+U
     varname: use_gemm_nonlop
     topic_class:
     topic_name:
@@ -1967,8 +1967,8 @@
     topic_class:
     topic_name:
     varname: usedmatpu
-    topic_class:
-    topic_name:
+    topic_class: useful
+    topic_name: DFT+U
     varname: usedmft
     topic_class:
     topic_name:
@@ -1985,8 +1985,8 @@
     topic_class:
     topic_name:
     varname: usepawu
-    topic_class:
-    topic_name:
+    topic_class: compulsory
+    topic_name: DFT+U
     varname: usepotzero
     topic_class:
     topic_name:
@@ -2027,8 +2027,8 @@
     topic_class:
     topic_name:
     varname: usexcnhat
-    topic_class:
-    topic_name:
+    topic_class: useful
+    topic_name: PAW_settings
     varname: useylm
     topic_class:
     topic_name:
@@ -2201,8 +2201,9 @@
     topic_class:
     topic_name:
     varname: xyzfile
-    topic_class: expert
-    topic_name: crystal
+    topics:
+    - {topic_name: crystal, topic_class: expert}
+    - {topic_name: DFT+U, topic_class: basic}
     varname: zcut
     topic_class:
     topic_name:
