@@ -585,7 +585,7 @@ subroutine fit_polynomial_coeff_getNorder(cut_off,coefficients,eff_pot,ncoeff,po
 !arrays
  integer,intent(in) :: powers(2)
  type(effective_potential_type), intent(inout) :: eff_pot
- type(polynomial_coeff_type),allocatable :: coefficients(:)
+ type(polynomial_coeff_type),allocatable,intent(inout) :: coefficients(:)
 !Local variables-------------------------------
 !scalar
  integer :: ia,ib,icoeff,icoeff2,ii,irpt,irpt_ref
@@ -602,6 +602,7 @@ subroutine fit_polynomial_coeff_getNorder(cut_off,coefficients,eff_pot,ncoeff,po
  character(len=5),allocatable :: symbols(:)
  type(polynomial_coeff_type),dimension(:),allocatable :: coeffs_tmp
  character(len=500) :: message
+ character(len=fnlen) :: filename
 ! *************************************************************************
 !Free the output
   if(allocated(coefficients))then
@@ -684,7 +685,6 @@ subroutine fit_polynomial_coeff_getNorder(cut_off,coefficients,eff_pot,ncoeff,po
    end do
  end do
 
-
  call fit_polynomial_coeff_getList(cell,cut_off,dist,eff_pot,list_symcoeff,list_symstr,&
 &                                  natom,nstr_sym,ncoeff_sym,nrpt)
 
@@ -699,15 +699,15 @@ subroutine fit_polynomial_coeff_getNorder(cut_off,coefficients,eff_pot,ncoeff,po
 &                  xcart(:,list_symcoeff(2,icoeff2,1)),rprimd,&
 &                  cell(:,1),cell(:,1))>cut_off.or.&
 &         distance(xcart(:,list_symcoeff(2,icoeff,1)),&
-&              xcart(:,list_symcoeff(3,icoeff2,1)),rprimd,&
-&              cell(:,1),cell(:,list_symcoeff(4,icoeff2,1)))>cut_off.or.&
+&                  xcart(:,list_symcoeff(3,icoeff2,1)),rprimd,&
+&                  cell(:,1),cell(:,list_symcoeff(4,icoeff2,1)))>cut_off.or.&
 &         distance(xcart(:,list_symcoeff(3,icoeff,1)),&
-&              xcart(:,list_symcoeff(2,icoeff2,1)),rprimd,&
-&              cell(:,list_symcoeff(4,icoeff,1)),cell(:,1))> cut_off.or.&
+&                  xcart(:,list_symcoeff(2,icoeff2,1)),rprimd,&
+&                  cell(:,list_symcoeff(4,icoeff,1)),cell(:,1))> cut_off.or.&
 &         distance(xcart(:,list_symcoeff(3,icoeff,1)),&
-&              xcart(:,list_symcoeff(3,icoeff2,1)),rprimd,&
-&              cell(:,list_symcoeff(4,icoeff,1)),&
-&              cell(:,list_symcoeff(4,icoeff2,1)))>cut_off)then
+&                  xcart(:,list_symcoeff(3,icoeff2,1)),rprimd,&
+&                  cell(:,list_symcoeff(4,icoeff,1)),&
+&                  cell(:,list_symcoeff(4,icoeff2,1)))>cut_off)then
          compatibleCoeffs(icoeff,icoeff2) = zero
        end if
    end do
@@ -755,8 +755,12 @@ subroutine fit_polynomial_coeff_getNorder(cut_off,coefficients,eff_pot,ncoeff,po
    ABI_DEALLOCATE(coeffs_tmp)
  end if
 
+
  write(message,'(1x,I0,a)')&
 &       ncoeff,' coefficients generated '
+ filename = "terms_set.xml"
+ call polynomial_coeff_writeXML(coefficients,ncoeff,filename=filename,newfile=.true.)
+
  call wrtout(ab_out,message,'COLL')
  call wrtout(std_out,message,'COLL') 
 

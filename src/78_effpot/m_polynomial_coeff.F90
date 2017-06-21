@@ -676,7 +676,7 @@ subroutine polynomial_coeff_writeXML(coeffs,ncoeff,filename,unit,newfile)
    if (newfile) then
      need_header = .TRUE.
      status_file = "new"
-     access_file= ""
+     access_file= "SEQUENTIAL"
      call isfile(namefile,'new')
    else
      if(.not.present(unit))then
@@ -697,7 +697,7 @@ subroutine polynomial_coeff_writeXML(coeffs,ncoeff,filename,unit,newfile)
 
 !Print the coefficients into XML file
  if(ncoeff>0)then
-   if (open_file(namefile,message,unit=unit_xml,access="APPEND",form="formatted",&
+   if (open_file(namefile,message,unit=unit_xml,access=access_file,form="formatted",&
 &         status=status_file,action="write") /= 0) then
      MSG_ERROR(message)
    end if
