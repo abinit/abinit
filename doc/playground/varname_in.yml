@@ -1,6 +1,6 @@
     varname: accuracy
-    topic_class:
-    topic_name:
+    topic_class: basic
+    topic_name: convergency
     varname: acell
     topic_class: compulsory
     topic_name: crystal
@@ -14,8 +14,8 @@
     topic_class:
     topic_name:
     varname: amu
-    topic_class:
-    topic_name:
+    topic_class: useful
+    topic_name: general_settings
     varname: angdeg
     topic_class: useful
     topic_name: crystal
@@ -62,8 +62,8 @@
     topic_class:
     topic_name:
     varname: boxcutmin
-    topic_class:
-    topic_name:
+    topic_class: expert
+    topic_name: convergency
     varname: brvltt
     topic_class: expert
     topic_name: crystal
@@ -149,11 +149,11 @@
     topic_class:
     topic_name:
     varname: cgtyphf
-    topic_class:
-    topic_name:
+    topic_class: expert
+    topic_name: hf
     varname: charge
-    topic_class:
-    topic_name:
+    topic_class: useful
+    topic_name: general_settings
     varname: chempot
     topic_class:
     topic_name:
@@ -164,8 +164,8 @@
     topic_class: useful
     topic_name: crystal
     varname: chksymbreak
-    topic_class:
-    topic_name:
+    topic_class: basic
+    topic_name: k_points
     varname: chneut
     topic_class:
     topic_name:
@@ -230,11 +230,11 @@
     topic_class:
     topic_name:
     varname: densfor_pred
-    topic_class:
-    topic_name:
+    topic_class: expert
+    topic_name: convergency
     varname: densty
-    topic_class:
-    topic_name:
+    topic_class: expert
+    topic_name: xc
     varname: dfield
     topic_class:
     topic_name:
@@ -242,26 +242,26 @@
     topic_class:
     topic_name:
     varname: diecut
-    topic_class:
-    topic_name:
+    topic_class: useful
+    topic_name: convergency
     varname: diegap
-    topic_class:
-    topic_name:
+    topic_class: useful
+    topic_name: convergency
     varname: dielam
-    topic_class:
-    topic_name:
+    topic_class: useful
+    topic_name: convergency
     varname: dielng
-    topic_class:
-    topic_name:
+    topic_class: useful
+    topic_name: convergency
     varname: diemac
-    topic_class:
-    topic_name:
+    topic_class: useful
+    topic_name: convergency
     varname: diemix
-    topic_class:
-    topic_name:
+    topic_class: useful
+    topic_name: convergency
     varname: diemixmag
-    topic_class:
-    topic_name:
+    topic_class: useful
+    topic_name: polar_settings
     varname: diismemory
     topic_class:
     topic_name:
@@ -380,8 +380,8 @@
     topic_class:
     topic_name:
     varname: ecut
-    topic_class:
-    topic_name:
+    topic_class: compulsory
+    topic_name: convergency
     varname: ecuteps
     topic_class:
     topic_name:
@@ -389,14 +389,14 @@
     topic_class:
     topic_name:
     varname: ecutsm
-    topic_class:
-    topic_name:
+    topic_class: basic
+    topic_name: convergency
     varname: ecutwfn
     topic_class:
     topic_name:
     varname: effmass
-    topic_class:
-    topic_name:
+    topic_class: expert
+    topic_name: general_settings
     varname: efield
     topic_class:
     topic_name:
@@ -434,8 +434,8 @@
     topic_class:
     topic_name:
     varname: enunit
-    topic_class:
-    topic_name:
+    topic_class: useful
+    topic_name: general_settings
     varname: eph_extrael
     topic_class:
     topic_name:
@@ -470,14 +470,14 @@
     topic_class:
     topic_name:
     varname: exchmix
-    topic_class:
-    topic_name:
+    topic_class: useful
+    topic_name: xc
     varname: exchn2n3d
-    topic_class:
-    topic_name:
+    topic_class: expert
+    topic_name: convergency
     varname: extrapwf
-    topic_class:
-    topic_name:
+    topic_class: expert
+    topic_name: convergency
     varname: f4of2_sla
     topic_class: expert
     topic_name: DFT+U
@@ -485,14 +485,14 @@
     topic_class: expert
     topic_name: DFT+U
     varname: fband
-    topic_class:
-    topic_name:
+    topic_class: useful
+    topic_name: general_settings
     varname: fermie_nest
     topic_class:
     topic_name:
     varname: fftalg
-    topic_class:
-    topic_name:
+    topic_class: expert
+    topic_name: convergency
     varname: fftcache
     topic_class:
     topic_name:
@@ -539,8 +539,8 @@
     topic_class:
     topic_name:
     varname: genafm
-    topic_class:
-    topic_name:
+    topic_class: useful
+    topic_name: polar_settings
     varname: get1den
     topic_class:
     topic_name:
@@ -752,11 +752,11 @@
     topic_class:
     topic_name:
     varname: iboxcut
-    topic_class:
-    topic_name:
+    topic_class: expert
+    topic_name: convergency
     varname: icoulomb
-    topic_class:
-    topic_name:
+    topic_class: expert
+    topic_name: convergency
     varname: icutcoul
     topic_class:
     topic_name:
@@ -770,8 +770,8 @@
     topic_class:
     topic_name:
     varname: intxc
-    topic_class:
-    topic_name:
+    topic_class: expert
+    topic_name: xc
     varname: iomode
     topic_class:
     topic_name:
@@ -779,11 +779,11 @@
     topic_class:
     topic_name:
     varname: iprcel
-    topic_class:
-    topic_name:
+    topic_class: useful
+    topic_name: convergency
     varname: iprcfc
-    topic_class:
-    topic_name:
+    topic_class: expert
+    topic_name: convergency
     varname: iqpt
     topic_class:
     topic_name:
@@ -812,8 +812,8 @@
     topic_class:
     topic_name:
     varname: irdden
-    topic_class:
-    topic_name:
+    topic_class: useful
+    topic_name: general_settings
     varname: irdhaydock
     topic_class:
     topic_name:
@@ -830,20 +830,20 @@
     topic_class:
     topic_name:
     varname: irdwfk
-    topic_class:
-    topic_name:
+    topic_class: useful
+    topic_name: general_settings
     varname: irdwfkfine
-    topic_class:
-    topic_name:
+    topic_class: useful
+    topic_name: general_settings
     varname: irdwfq
     topic_class:
     topic_name:
     varname: iscf
-    topic_class:
-    topic_name:
+    topic_class: useful
+    topic_name: convergency
     varname: isecur
-    topic_class:
-    topic_name:
+    topic_class: expert
+    topic_name: convergency
     varname: istatimg
     topic_class:
     topic_name:
@@ -854,11 +854,12 @@
     topic_class:
     topic_name:
     varname: istwfk
-    topic_class:
-    topic_name:
+    topic_class: useful
+    topic_name: k_points
     varname: ixc
-    topic_class:
-    topic_name:
+    topics:
+    - {topic_name: xc, topic_class: basic}
+    - {topic_name: hf, topic_class: compulsory}
     varname: ixcpositron
     topic_class:
     topic_name:
@@ -878,35 +879,35 @@
     topic_class:
     topic_name:
     varname: kpt
-    topic_class:
-    topic_name:
+    topic_class: useful
+    topic_name: k_points
     varname: kptbounds
-    topic_class:
-    topic_name:
+    topic_class: expert
+    topic_name: k_points
     varname: kptgw
     topic_class:
     topic_name:
     varname: kptnrm
-    topic_class:
-    topic_name:
+    topic_class: useful
+    topic_name: k_points
     varname: kptns
     topic_class:
     topic_name:
     varname: kptopt
-    topic_class:
-    topic_name:
+    topic_class: basic
+    topic_name: k_points
     varname: kptrlatt
-    topic_class:
-    topic_name:
+    topic_class: useful
+    topic_name: k_points
     varname: kptrlen
-    topic_class:
-    topic_name:
+    topic_class: useful
+    topic_name: k_points
     varname: kssform
     topic_class:
     topic_name:
     varname: lexexch
-    topic_class:
-    topic_name:
+    topic_class: useful
+    topic_name: xc
     varname: localrdwf
     topic_class:
     topic_name:
@@ -929,11 +930,11 @@
     topic_class: expert
     topic_name: DFT+U
     varname: magcon_lambda
-    topic_class:
-    topic_name:
+    topic_class: useful
+    topic_name: polar_settings
     varname: magconon
-    topic_class:
-    topic_name:
+    topic_class: useful
+    topic_name: polar_settings
     varname: max_ncpus
     topic_class:
     topic_name:
@@ -980,8 +981,8 @@
     topic_class:
     topic_name:
     varname: mqgrid
-    topic_class:
-    topic_name:
+    topic_class: expert
+    topic_name: convergency
     varname: mqgriddg
     topic_class: expert
     topic_name: PAW_settings
@@ -1001,8 +1002,8 @@
     topic_class:
     topic_name:
     varname: natom
-    topic_class:
-    topic_name:
+    topic_class: basic
+    topic_name: general_settings
     varname: natpawu
     topic_class:
     topic_name:
@@ -1019,26 +1020,26 @@
     topic_class: expert
     topic_name: DFT+U
     varname: nband
-    topic_class:
-    topic_name:
+    topic_class: basic
+    topic_name: general_settings
     varname: nbandhf
-    topic_class:
-    topic_name:
+    topic_class: useful
+    topic_name: hf
     varname: nbandkss
     topic_class:
     topic_name:
     varname: nbdblock
-    topic_class:
-    topic_name:
+    topic_class: expert
+    topic_name: convergency
     varname: nbdbuf
-    topic_class:
-    topic_name:
+    topic_class: expert
+    topic_name: convergency
     varname: nberry
     topic_class:
     topic_name:
     varname: nc_xccc_gspace
-    topic_class:
-    topic_name:
+    topic_class: expert
+    topic_name: convergency
     varname: nconeq
     topic_class:
     topic_name:
@@ -1046,11 +1047,11 @@
     topic_class:
     topic_name:
     varname: ndivk
-    topic_class:
-    topic_name:
+    topic_class: expert
+    topic_name: k_points
     varname: ndivsm
-    topic_class:
-    topic_name:
+    topic_class: expert
+    topic_name: k_points
     varname: ndtset
     topic_class:
     topic_name:
@@ -1085,14 +1086,14 @@
     topic_class:
     topic_name:
     varname: ngfft
-    topic_class:
-    topic_name:
+    topic_class: basic
+    topic_name: convergency
     varname: ngfftdg
     topic_class: useful
     topic_name: PAW_settings
     varname: ngkpt
-    topic_class:
-    topic_name:
+    topic_class: basic
+    topic_name: k_points
     varname: ngqpt
     topic_class:
     topic_name:
@@ -1103,17 +1104,17 @@
     topic_class:
     topic_name:
     varname: nkpt
-    topic_class:
-    topic_name:
+    topic_class: useful
+    topic_name: k_points
     varname: nkptgw
     topic_class:
     topic_name:
     varname: nkpthf
-    topic_class:
-    topic_name:
+    topic_class: expert
+    topic_name: hf
     varname: nline
-    topic_class:
-    topic_name:
+    topic_class: expert
+    topic_name: convergency
     varname: nloc_alg
     topic_class:
     topic_name:
@@ -1124,11 +1125,11 @@
     topic_class:
     topic_name:
     varname: nnsclo
-    topic_class:
-    topic_name:
+    topic_class: expert
+    topic_name: convergency
     varname: nnsclohf
-    topic_class:
-    topic_name:
+    topic_class: expert
+    topic_name: hf
     varname: nobj
     topic_class:
     topic_name:
@@ -1157,8 +1158,8 @@
     topic_class:
     topic_name:
     varname: nphf
-    topic_class:
-    topic_name:
+    topic_class: useful
+    topic_name: hf
     varname: npimage
     topic_class:
     topic_name:
@@ -1178,8 +1179,8 @@
     topic_class:
     topic_name:
     varname: npulayit
-    topic_class:
-    topic_name:
+    topic_class: useful
+    topic_name: convergency
     varname: npvel
     topic_class:
     topic_name:
@@ -1202,26 +1203,26 @@
     topic_class:
     topic_name:
     varname: nscforder
-    topic_class:
-    topic_name:
+    topic_class: expert
+    topic_name: convergency
     varname: nshiftk
-    topic_class:
-    topic_name:
+    topic_class: useful
+    topic_name: k_points
     varname: nshiftq
     topic_class:
     topic_name:
     varname: nspden
-    topic_class:
-    topic_name:
+    topic_class: basic
+    topic_name: polar_settings
     varname: nspinor
-    topic_class:
-    topic_name:
+    topic_class: basic
+    topic_name: polar_settings
     varname: nsppol
-    topic_class:
-    topic_name:
+    topic_class: basic
+    topic_name: polar_settings
     varname: nstep
-    topic_class:
-    topic_name:
+    topic_class: basic
+    topic_name: convergency
     varname: nsym
     topic_class: useful
     topic_name: crystal
@@ -1235,14 +1236,14 @@
     topic_class:
     topic_name:
     varname: ntypat
-    topic_class:
-    topic_name:
+    topic_class: basic
+    topic_name: general_settings
     varname: ntyppure
     topic_class:
     topic_name:
     varname: nucdipmom
-    topic_class:
-    topic_name:
+    topic_class: expert
+    topic_name: polar_settings
     varname: nwfshist
     topic_class:
     topic_name:
@@ -1286,11 +1287,11 @@
     topic_class:
     topic_name:
     varname: occ
-    topic_class:
-    topic_name:
+    topic_class: basic
+    topic_name: general_settings
     varname: occopt
-    topic_class:
-    topic_name:
+    topic_class: basic
+    topic_name: general_settings
     varname: omegasimax
     topic_class:
     topic_name:
@@ -1304,17 +1305,17 @@
     topic_class:
     topic_name:
     varname: optforces
-    topic_class:
-    topic_name:
+    topic_class: basic
+    topic_name: general_settings
     varname: optnlxccc
-    topic_class:
-    topic_name:
+    topic_class: expert
+    topic_name: xc
     varname: optstress
-    topic_class:
-    topic_name:
+    topic_class: basic
+    topic_name: general_settings
     varname: ortalg
-    topic_class:
-    topic_name:
+    topic_class: expert
+    topic_name: convergency
     varname: papiopt
     topic_class:
     topic_name:
@@ -1334,8 +1335,9 @@
     topic_class:
     topic_name:
     varname: pawecutdg
-    topic_class: compulsory
-    topic_name: PAW_settings
+    topics:
+    - {topic_name: convergency, topic_class: compulsory}
+    - {topic_name: PAW_settings, topic_class: compulsory}
     varname: pawfatbnd
     topic_class: useful
     topic_name: PAW_settings
@@ -1658,8 +1660,8 @@
     topic_class:
     topic_name:
     varname: ptgroupma
-    topic_class:
-    topic_name:
+    topic_class: useful
+    topic_name: polar_settings
     varname: pvelmax
     topic_class:
     topic_name:
@@ -1793,8 +1795,8 @@
     topic_class:
     topic_name:
     varname: shiftk
-    topic_class:
-    topic_name:
+    topic_class: useful
+    topic_name: k_points
     varname: shiftq
     topic_class:
     topic_name:
@@ -1814,8 +1816,8 @@
     topic_class:
     topic_name:
     varname: so_psp
-    topic_class:
-    topic_name:
+    topic_class: basic
+    topic_name: polar_settings
     varname: spbroad
     topic_class:
     topic_name:
@@ -1829,14 +1831,14 @@
     topic_class: expert
     topic_name: crystal
     varname: spgroupma
-    topic_class:
-    topic_name:
+    topic_class: useful
+    topic_name: polar_settings
     varname: spinat
-    topic_class:
-    topic_name:
+    topic_class: basic
+    topic_name: polar_settings
     varname: spinmagntarget
-    topic_class:
-    topic_name:
+    topic_class: useful
+    topic_name: polar_settings
     varname: spmeth
     topic_class:
     topic_name:
@@ -1844,8 +1846,8 @@
     topic_class: useful
     topic_name: PAW_settings
     varname: stmbias
-    topic_class:
-    topic_name:
+    topic_class: useful
+    topic_name: general_settings
     varname: strfact
     topic_class:
     topic_name:
@@ -1853,14 +1855,14 @@
     topic_class:
     topic_name:
     varname: strprecon
-    topic_class:
-    topic_name:
+    topic_class: useful
+    topic_name: general_settings
     varname: strtarget
-    topic_class:
-    topic_name:
+    topic_class: useful
+    topic_name: general_settings
     varname: symafm
-    topic_class:
-    topic_name:
+    topic_class: useful
+    topic_name: polar_settings
     varname: symchi
     topic_class:
     topic_name:
@@ -1889,8 +1891,8 @@
     topic_class:
     topic_name:
     varname: timopt
-    topic_class:
-    topic_name:
+    topic_class: expert
+    topic_name: general_settings
     varname: tl_nprccg
     topic_class:
     topic_name:
@@ -1901,11 +1903,11 @@
     topic_class: useful
     topic_name: crystal
     varname: toldfe
-    topic_class:
-    topic_name:
+    topic_class: basic
+    topic_name: convergency
     varname: toldff
-    topic_class:
-    topic_name:
+    topic_class: useful
+    topic_name: general_settings
     varname: tolimg
     topic_class:
     topic_name:
@@ -1916,29 +1918,30 @@
     topic_class:
     topic_name:
     varname: tolrde
-    topic_class:
-    topic_name:
+    topic_class: expert
+    topic_name: convergency
     varname: tolrff
-    topic_class:
-    topic_name:
+    topics:
+    - {topic_name: convergency, topic_class: basic}
+    - {topic_name: general_settings, topic_class: useful}
     varname: tolsym
     topic_class:
     topic_name:
     varname: tolvrs
-    topic_class:
-    topic_name:
+    topic_class: basic
+    topic_name: convergency
     varname: tolwfr
-    topic_class:
-    topic_name:
+    topic_class: basic
+    topic_name: convergency
     varname: tphysel
-    topic_class:
-    topic_name:
+    topic_class: useful
+    topic_name: general_settings
     varname: tsmear
-    topic_class:
-    topic_name:
+    topic_class: basic
+    topic_name: general_settings
     varname: typat
-    topic_class:
-    topic_name:
+    topic_class: basic
+    topic_name: general_settings
     varname: ucrpa
     topic_class:
     topic_name:
@@ -1973,14 +1976,14 @@
     topic_class:
     topic_name:
     varname: useexexch
-    topic_class:
-    topic_name:
+    topic_class: useful
+    topic_name: xc
     varname: usefock
     topic_class:
     topic_name:
     varname: usekden
-    topic_class:
-    topic_name:
+    topic_class: expert
+    topic_name: xc
     varname: usepaw
     topic_class:
     topic_name:
@@ -2030,8 +2033,8 @@
     topic_class: useful
     topic_name: PAW_settings
     varname: useylm
-    topic_class:
-    topic_name:
+    topic_class: expert
+    topic_name: general_settings
     varname: vaclst
     topic_class:
     topic_name:
@@ -2039,11 +2042,11 @@
     topic_class:
     topic_name:
     varname: vacuum
-    topic_class:
-    topic_name:
+    topic_class: expert
+    topic_name: k_points
     varname: vacwidth
-    topic_class:
-    topic_name:
+    topic_class: expert
+    topic_name: k_points
     varname: vcutgeo
     topic_class:
     topic_name:
@@ -2156,8 +2159,8 @@
     topic_class:
     topic_name:
     varname: wtk
-    topic_class:
-    topic_name:
+    topic_class: useful
+    topic_name: k_points
     varname: wtq
     topic_class:
     topic_name:
@@ -2183,11 +2186,11 @@
     topic_class: compulsory
     topic_name: crystal
     varname: xc_denpos
-    topic_class:
-    topic_name:
+    topic_class: expert
+    topic_name: xc
     varname: xc_tb09_c
-    topic_class:
-    topic_name:
+    topic_class: expert
+    topic_name: xc
     varname: xcart
     topic_class: compulsory
     topic_name: crystal
@@ -2201,9 +2204,8 @@
     topic_class:
     topic_name:
     varname: xyzfile
-    topics:
-    - {topic_name: crystal, topic_class: expert}
-    - {topic_name: DFT+U, topic_class: basic}
+    topic_class: crystal
+    topic_name: expert
     varname: zcut
     topic_class:
     topic_name:
@@ -2214,5 +2216,5 @@
     topic_class:
     topic_name:
     varname: znucl
-    topic_class:
-    topic_name:
+    topic_class: basic
+    topic_name: general_settings

@@ -8,7 +8,7 @@ import re
 import argparse
 from variables import *
 
-debug = 1
+debug = 0
 
 # Path relative from HTML files
 js_path = "../"
@@ -105,6 +105,7 @@ if args_dict['file']:
 
 with open(file, 'r') as f:
     variables = yaml.load(f);
+
 
 ################################################################################
 # Parse the topics.yml file -> topics
@@ -509,6 +510,7 @@ for topic_name, value in found.items():
     topic_sec4[topic_name] = topic_header_sec4 + topic_class_sec4[topic_name]
     topic_sec4[topic_name] += "<br>\n"
 
+
 ################################################################################
 # Assemble the "topic" files : secs 1, 2, 3 and then possibly 4 and 5
 
@@ -520,12 +522,15 @@ for topic_name, content in topic_sec3.items():
     with open(file_template) as f:
       header_varX = f.read()
   except:
-    print("Tried to open the file temp_"+tomic_name+" , but failed.")
+    print("Tried to open the file temp_"+topic_name+" , but failed.")
 
   file_topic = 'html_automatically_generated/'+topic_name+'.html'
   topic_header_varX = header_varX.replace("__JS_PATH__",js_path)
-  topic_header_varX += "<script type=\"text/javascript\" src=\""+js_path+"related_input_variables.js\"> </script>\n\n"
+  if topic_name not in "GS_introduction":
+    topic_header_varX += "<script type=\"text/javascript\" src=\""+js_path+"related_input_variables.js\"> </script>\n\n"
+
   f_topic = open(file_topic,'w')
+
   f_topic.write(topic_header_varX)
 
 # Write Sec. 3 

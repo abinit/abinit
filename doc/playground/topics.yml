@@ -1,4 +1,8 @@
 - !topic
+    topic_name: convergency
+    howto: |-
+      set parameters to tune the convergency of a calculation
+- !topic
     topic_name: crystal
     howto: |-
       specify a crystal
@@ -7,6 +11,31 @@
     howto: |-
       perform a DFT+U calculation
 - !topic
+    topic_name: general_settings
+    howto: |-
+      set general settings for a ground-state calculation
+- !topic
+    topic_name: GS_introduction
+    howto: |-
+      perform a ground-state calculation
+- !topic
+    topic_name: hf
+    howto: |-
+      perform a calculation with hybrid functionals
+- !topic
+    topic_name: k_points
+    howto: |-
+      set parameters related to the k-points
+- !topic
     topic_name: PAW_settings
     howto: |-
       set parameters for a PAW calculation
+- !topic
+    topic_name: polar_settings
+    howto: |-
+      set parameters for a spin-polarized calculation
+- !topic
+    topic_name: xc
+    howto: |-
+      set parameters related to the exchange and correlation functionals
+

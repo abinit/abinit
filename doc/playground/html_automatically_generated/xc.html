@@ -1,0 +1,78 @@
+<html>
+<head>
+<title>5- Exchange and correlation functionals </title>
+<body bgcolor="#ffffff">
+<p>
+<hr>
+<h1>5- Exchange and correlation functionals</h1>
+<h3>This file give the settings for the exchange and correlation functionals to build an input file for ABINIT.
+<hr>
+
+
+<script type="text/javascript" src="../copyright.js"> </script>
+<script type="text/javascript" src="../list_internal_links.js"> </script>
+<script type="text/javascript" src="../topics_table_of_content.js"> </script>
+
+The total energy computation is done according to the Density Functional
+Theory. 
+<br/>Many exchange-correlation functionals are available,
+through two different implementations : one is the native ABINIT implementation,
+the other is the ETSF library of XC functionals (LibXC is a plug-in to ABINIT).
+In the native ABINIT set,
+most of the important local approximations (LDA) are
+available, including the Perdew-Zunger one. Two different local spin density
+(LSD) are available, including the Perdew Wang 92, and one due to M. Teter.
+The Perdew-Burke-Ernzerhof,  the revPBE, the RPBE
+and the HCTH GGAs (spin unpolarized as well as polarized)
+are also available.
+
+<br/>In the LibXC 2.0 library, as interfaced with ABINIT,
+there are 24 functional forms of the 3D LDA type, and over 80 functional forms of the GGA type.
+They can be used with norm-conserving pseudopotentials as well as PAW atomic data.
+Also, some metaGGA can be used with ABINIT (norm-conserving case only).
+For response-function type calculations, the native ABINIT LDA and GGA kernels 
+can be used as well as the LibXC ones.
+<br/>
+<h4><b>Hybrid functionals:</b></h4>
+<br/>The exchange can also be computed on the basis of the Fock expression (exact exchange), and the correlation
+can be computed on the basis of the RPA approximation (see the GW section).
+<a href="hf.html#hybrid functionals">Hybrid functionals</a> calculations (HSE06, PBE0, B3LYP) can be performed.
+The implementation of the exact exchange, correlation and hybrid does not deliver the forces and stresses at present,
+at the exception of forces with norm-conserving pseudopotentials.
+
+<h4><b>Local exact exchange:</b></h4>
+<p>
+When useexexch=1, the hybrid functional PBE0 is used in PAW, inside PAW spheres only, and only for correlated orbitals given by lexexch. To change the ratio of exact exchange, see also exchmix. The implementation of local exact exchange in ABINIT is provided in [1]. See useful input variables exchmix, lexexch and useexexch.
+<br/>
+[1]F. Jollet, G. Jomard, B. Amadon, J.P. Crocombette, D. Torumba, Hybrid functional for correlated electrons in the projector augmented-wave formalism: Study of multiple minima for actinide oxides, Phys. Rev. B 80, 235109 (2009)
+
+<br/>
+<h4><b>Van der Waals functionals:</b></h4>
+<br/>Several <a href="vdw.html#Van der Waals functionals">Van der Waals functionals</a> are available : Grimme (D2, D3, D3(Becke-Johnson)), Silvestrelli.
+
+
+<p>&nbsp;
+<HR ALIGN=left>
+<p> <a name="2">&nbsp;</a>
+<h3><b>2. Tutorials.</b></h3>
+
+<li><a href="../../tutorial/lesson_base2.html">The lesson 2</a> deals again with the H2
+  molecule: convergence studies, LDA versus GGA </li>
+
+
+<script type="text/javascript" src="../related_input_variables.js"> </script>
+
+<p>Basic input variables:<p>... <a href="varbas.html#ixc">ixc</a>   [Integer for eXchange-Correlation choice]<br>
+<p>Useful input variables:<p>... <a href="vardev.html#exchmix">exchmix</a>   [EXCHange MIXing]<br>
+... <a href="varpaw.html#lexexch">lexexch</a>   [value of angular momentum L for EXact EXCHange]<br>
+... <a href="varpaw.html#useexexch">useexexch</a>   [USE of EXact EXCHange]<br>
+<p>Input variables for experts:<p>... <a href="vardev.html#densty">densty</a>   [initial DENSity for each TYpe of atom]<br>
+... <a href="vardev.html#intxc">intxc</a>   [INTerpolation for eXchange-Correlation]<br>
+... <a href="vardev.html#optnlxccc">optnlxccc</a>   [OPTion for the calculation of Non-Linear eXchange-Correlation Core Correction]<br>
+... <a href="vargs.html#usekden">usekden</a>   [USE Kinetic energy DENsity]<br>
+... <a href="vardev.html#xc_denpos">xc_denpos</a>   [eXchange-Correlation - DENsity POSitivity value]<br>
+... <a href="vardev.html#xc_tb09_c">xc_tb09_c</a>   [Value of the c parameter in the eXchange-Correlation TB09 functional]<br>
+<br><script type="text/javascript" src="../list_internal_links.js"> </script>
+
+</body>
+</html>

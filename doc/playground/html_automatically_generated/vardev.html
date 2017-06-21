@@ -231,6 +231,7 @@ At present, <b>builtintest</b>=1 ... 7 are allowed. See more information in test
 <br><font id="title"><a name="cgtyphf">cgtyphf</a></font>
 <br><font id="definition">Mnemonics: Conjugate Gradient TYpe used for Hartree Fock exact exchange</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#develop">DEVELOP</a></font>
+<br><font id="characteristic">Mentioned in "How to": <a href="hf.html">hf</a></font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 2 if <a href="varint.html#usefock">usefock</a> == 1,
 0 otherwise.
@@ -254,6 +255,7 @@ exact exchange contribution only for the initial guess (not for the gradient dir
 <br><font id="title"><a name="densfor_pred">densfor_pred</a></font>
 <br><font id="definition">Mnemonics: DENSity and FORces PREDictor</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#develop">DEVELOP</a></font>
+<br><font id="characteristic">Mentioned in "How to": <a href="convergency.html">convergency</a></font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 6 if <a href="varpar.html#paral_kgb">paral_kgb</a>==1,
 2 otherwise.
@@ -381,6 +383,7 @@ Typically, vres2 (or nres2) has to be small enough (10
 <br><font id="title"><a name="densty">densty</a></font>
 <br><font id="definition">Mnemonics: initial DENSity for each TYpe of atom</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#develop">DEVELOP</a></font>
+<br><font id="characteristic">Mentioned in "How to": <a href="xc.html">xc</a></font>
 <br><font id="vartype">Variable type: real(<a href="varbas.html#ntypat">ntypat</a>)</font>
 <br><font id="default">Default is 0.0</font>
 <br><font id="text">
@@ -1122,6 +1125,7 @@ Only relevant if <a href="vardev.html#dmft_solv">dmft_solv</a>==5
 <br><font id="title"><a name="effmass">effmass</a></font>
 <br><font id="definition">Mnemonics: EFFective MASS</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#develop">DEVELOP</a></font>
+<br><font id="characteristic">Mentioned in "How to": <a href="general_settings.html">general_settings</a></font>
 <br><font id="vartype">Variable type: real</font>
 <br><font id="default">Default is 1</font>
 <br><font id="text">
@@ -1170,6 +1174,7 @@ on <b>eshift</b>.
 <br><font id="title"><a name="exchmix">exchmix</a></font>
 <br><font id="definition">Mnemonics: EXCHange MIXing</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#develop">DEVELOP</a></font>
+<br><font id="characteristic">Mentioned in "How to": <a href="xc.html">xc</a></font>
 <br><font id="vartype">Variable type: real</font>
 <br><font id="default">Default is 0.25</font>
 <br><br><font id="requires">
@@ -1190,6 +1195,7 @@ Only relevant if <a href="varpaw.html#useexexch">useexexch</a> == 1
 <br><font id="title"><a name="exchn2n3d">exchn2n3d</a></font>
 <br><font id="definition">Mnemonics: EXCHange N2 and N3 Dimensions</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#develop">DEVELOP</a></font>
+<br><font id="characteristic">Mentioned in "How to": <a href="convergency.html">convergency</a></font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
 <br><font id="text">
@@ -1209,6 +1215,7 @@ third dimensions have been switched. This is to allow to be coherent with the
 <br><font id="title"><a name="extrapwf">extrapwf</a></font>
 <br><font id="definition">Mnemonics: flag - EXTRAPolation of the Wave-Functions</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#develop">DEVELOP</a></font>
+<br><font id="characteristic">Mentioned in "How to": <a href="convergency.html">convergency</a></font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
 <br><br><font id="requires">
@@ -1250,6 +1257,7 @@ ABINIT 7.10: this option is <b>under development</b> and might give wrong result
 <br><font id="title"><a name="fftalg">fftalg</a></font>
 <br><font id="definition">Mnemonics: Fast Fourier Transform ALGorithm</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#develop">DEVELOP</a></font>
+<br><font id="characteristic">Mentioned in "How to": <a href="convergency.html">convergency</a></font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 401 if <a href="varpar.html#paral_kgb">paral_kgb</a>==1,
 312 if <a href="specials.html#FFTW3">FFTW3</a> and <a href="vardev.html#usedmft">usedmft</a>==0,
@@ -1481,6 +1489,7 @@ previous ground state calculation (see the
 <br><font id="title"><a name="intxc">intxc</a></font>
 <br><font id="definition">Mnemonics: INTerpolation for eXchange-Correlation</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#develop">DEVELOP</a></font>
+<br><font id="characteristic">Mentioned in "How to": <a href="xc.html">xc</a></font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
 <br><font id="text">
@@ -1604,6 +1613,7 @@ Comput. Physics Communications 179, 748 (2008)
 <br><font id="title"><a name="iprcfc">iprcfc</a></font>
 <br><font id="definition">Mnemonics: Integer for PReConditioner of Force Constants</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#develop">DEVELOP</a></font>
+<br><font id="characteristic">Mentioned in "How to": <a href="convergency.html">convergency</a></font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
 <br><font id="text">
@@ -1706,6 +1716,7 @@ Supported values:
 <br><font id="title"><a name="irdwfkfine">irdwfkfine</a></font>
 <br><font id="definition">Mnemonics: Integer that governs the ReaDing of the fine grid _WFK files</font>
 <br><font id="characteristic">Characteristic: </font>
+<br><font id="characteristic">Mentioned in "How to": <a href="general_settings.html">general_settings</a></font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
 <br><font id="text">
@@ -1782,6 +1793,7 @@ previous ground state calculation (see the
 <br><font id="title"><a name="isecur">isecur</a></font>
 <br><font id="definition">Mnemonics: Integer for level of SECURity choice</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#develop">DEVELOP</a></font>
+<br><font id="characteristic">Mentioned in "How to": <a href="convergency.html">convergency</a></font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
 <br><font id="text">
@@ -1871,6 +1883,7 @@ and the 10th call.
 <br><font id="title"><a name="istwfk">istwfk</a></font>
 <br><font id="definition">Mnemonics: Integer for choice of STorage of WaveFunction at each k point</font>
 <br><font id="characteristic">Characteristic: </font>
+<br><font id="characteristic">Mentioned in "How to": <a href="k_points.html">k_points</a></font>
 <br><font id="vartype">Variable type: integer(<a href="varbas.html#nkpt">nkpt</a>)</font>
 <br><font id="default">Default is *0 (Comment: For RF calculations, the Default is not used : <b>istwfk</b> is forced to be 1 deep inside the code, for all k points. For spin-orbit calculations (<a href="vargs.html#nspinor">nspinor</a>=2), <b>istwfk</b> is also forced to be 1, for all k points.)</font>
 <br><font id="text">
@@ -2101,6 +2114,7 @@ an estimation of the available memory.
 <br><font id="title"><a name="mqgrid">mqgrid</a></font>
 <br><font id="definition">Mnemonics: Maximum number of Q-space GRID points for pseudopotentials</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#develop">DEVELOP</a></font>
+<br><font id="characteristic">Mentioned in "How to": <a href="convergency.html">convergency</a></font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 3001</font>
 <br><font id="text">
@@ -2119,6 +2133,7 @@ potentials, or projector functions.
 <br><font id="title"><a name="nbdblock">nbdblock</a></font>
 <br><font id="definition">Mnemonics: Number of BanDs in a BLOCK</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#develop">DEVELOP</a></font>
+<br><font id="characteristic">Mentioned in "How to": <a href="convergency.html">convergency</a></font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 1</font>
 <br><font id="text">
@@ -2144,6 +2159,7 @@ then <a href="varbas.html#nband">nband</a>/<b>nbdblock</b> ).
 <br><font id="title"><a name="nc_xccc_gspace">nc_xccc_gspace</a></font>
 <br><font id="definition">Mnemonics: use XC Core-Correction in G-space</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#develop">DEVELOP</a></font>
+<br><font id="characteristic">Mentioned in "How to": <a href="convergency.html">convergency</a></font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0 if <a href="varint.html#usepaw">usepaw</a>==0,
 1 if <a href="varint.html#usepaw">usepaw</a>==1,
@@ -2297,6 +2313,7 @@ inside nonlop is somehow time-consuming.
 <br><font id="title"><a name="nnsclo">nnsclo</a></font>
 <br><font id="definition">Mnemonics: Number of Non-Self Consistent LOops</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#develop">DEVELOP</a></font>
+<br><font id="characteristic">Mentioned in "How to": <a href="convergency.html">convergency</a></font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
 <br><font id="text">
@@ -2326,6 +2343,7 @@ then the next ones with 1 non-self consistent loop.
 <br><font id="title"><a name="nnsclohf">nnsclohf</a></font>
 <br><font id="definition">Mnemonics: Number of Non-Self Consistent LOops for Fock exact exchange</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#develop">DEVELOP</a></font>
+<br><font id="characteristic">Mentioned in "How to": <a href="hf.html">hf</a></font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 1 if <a href="varint.html#usefock">usefock</a>==1,
 0 otherwise.
@@ -2374,6 +2392,7 @@ within PAW sphere.
 <br><font id="title"><a name="npulayit">npulayit</a></font>
 <br><font id="definition">Mnemonics: Number of PULAY ITerations for SC mixing</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#develop">DEVELOP</a></font>
+<br><font id="characteristic">Mentioned in "How to": <a href="convergency.html">convergency</a></font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 7</font>
 <br><br><font id="requires">
@@ -2394,6 +2413,7 @@ during electronic SC iterations).
 <br><font id="title"><a name="nscforder">nscforder</a></font>
 <br><font id="definition">Mnemonics: SCaling Function ORDER</font>
 <br><font id="characteristic">Characteristic: </font>
+<br><font id="characteristic">Mentioned in "How to": <a href="convergency.html">convergency</a></font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 16</font>
 <br><font id="text">
@@ -2410,6 +2430,7 @@ during electronic SC iterations).
 <br><font id="title"><a name="optforces">optforces</a></font>
 <br><font id="definition">Mnemonics: OPTions for the calculation of FORCES</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#develop">DEVELOP</a></font>
+<br><font id="characteristic">Mentioned in "How to": <a href="general_settings.html">general_settings</a></font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 1 if <a href="varbas.html#toldff">toldff</a> or <a href="varbas.html#tolrff">tolrff</a> != 0,
 2 otherwise.
@@ -2442,6 +2463,7 @@ to use forces as criterion to stop the SCF cycles
 <br><font id="title"><a name="optnlxccc">optnlxccc</a></font>
 <br><font id="definition">Mnemonics: OPTion for the calculation of Non-Linear eXchange-Correlation Core Correction</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#develop">DEVELOP</a></font>
+<br><font id="characteristic">Mentioned in "How to": <a href="xc.html">xc</a></font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 1</font>
 <br><font id="text">
@@ -2467,6 +2489,7 @@ At present, only relevant for the FHI type of pseudopotentials, with pspcod=6 .
 <br><font id="title"><a name="ortalg">ortalg</a></font>
 <br><font id="definition">Mnemonics: ORThogonalisation ALGorithm</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#develop">DEVELOP</a></font>
+<br><font id="characteristic">Mentioned in "How to": <a href="convergency.html">convergency</a></font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is -2 if <a href="vardev.html#wfoptalg">wfoptalg</a> >= 10 ,
 2 otherwise.
@@ -3287,6 +3310,7 @@ Can be specified in Ha (the default), Ry, eV or Kelvin, since it has the 'ENERGY
 <br><font id="title"><a name="tolrde">tolrde</a></font>
 <br><font id="definition">Mnemonics: TOLerance on the Relative Difference of Eigenenergies</font>
 <br><font id="characteristic">Characteristic: </font>
+<br><font id="characteristic">Mentioned in "How to": <a href="convergency.html">convergency</a></font>
 <br><font id="vartype">Variable type: real</font>
 <br><font id="default">Default is 0.005</font>
 <br><font id="text">
@@ -3627,6 +3651,7 @@ e.g. dtset%useria .
 <br><font id="title"><a name="useylm">useylm</a></font>
 <br><font id="definition">Mnemonics: USE YLM (the spherical harmonics)</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#develop">DEVELOP</a></font>
+<br><font id="characteristic">Mentioned in "How to": <a href="general_settings.html">general_settings</a></font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 1 if <a href="vardev.html#tfkinfunc">tfkinfunc</a>==1,
 1 if <a href="varint.html#usepaw">usepaw</a>==1,
@@ -4466,6 +4491,7 @@ new algorithm based on Chebyshev filtering, designed for very large number of pr
 <br><font id="title"><a name="xc_denpos">xc_denpos</a></font>
 <br><font id="definition">Mnemonics: eXchange-Correlation - DENsity POSitivity value</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#develop">DEVELOP</a></font>
+<br><font id="characteristic">Mentioned in "How to": <a href="xc.html">xc</a></font>
 <br><font id="vartype">Variable type: real</font>
 <br><font id="default">Default is 1e-14</font>
 <br><font id="text">
@@ -4496,6 +4522,7 @@ a bit with this value to avoid incorrect calculations.
 <br><font id="title"><a name="xc_tb09_c">xc_tb09_c</a></font>
 <br><font id="definition">Mnemonics: Value of the c parameter in the eXchange-Correlation TB09 functional</font>
 <br><font id="characteristic">Characteristic: </font>
+<br><font id="characteristic">Mentioned in "How to": <a href="xc.html">xc</a></font>
 <br><font id="vartype">Variable type: real</font>
 <br><font id="default">Default is 99.99</font>
 <br><font id="text">

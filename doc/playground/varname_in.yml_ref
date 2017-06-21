@@ -14,8 +14,8 @@
     topic_class:
     topic_name:
     varname: amu
-    topic_class:
-    topic_name:
+    topic_class: useful
+    topic_name: general_settings
     varname: angdeg
     topic_class: useful
     topic_name: crystal
@@ -152,8 +152,8 @@
     topic_class:
     topic_name:
     varname: charge
-    topic_class:
-    topic_name:
+    topic_class: useful
+    topic_name: general_settings
     varname: chempot
     topic_class:
     topic_name:
@@ -395,8 +395,8 @@
     topic_class:
     topic_name:
     varname: effmass
-    topic_class:
-    topic_name:
+    topic_class: expert
+    topic_name: general_settings
     varname: efield
     topic_class:
     topic_name:
@@ -434,8 +434,8 @@
     topic_class:
     topic_name:
     varname: enunit
-    topic_class:
-    topic_name:
+    topic_class: useful
+    topic_name: general_settings
     varname: eph_extrael
     topic_class:
     topic_name:
@@ -485,8 +485,8 @@
     topic_class: expert
     topic_name: DFT+U
     varname: fband
-    topic_class:
-    topic_name:
+    topic_class: useful
+    topic_name: general_settings
     varname: fermie_nest
     topic_class:
     topic_name:
@@ -812,8 +812,8 @@
     topic_class:
     topic_name:
     varname: irdden
-    topic_class:
-    topic_name:
+    topic_class: useful
+    topic_name: general_settings
     varname: irdhaydock
     topic_class:
     topic_name:
@@ -830,11 +830,11 @@
     topic_class:
     topic_name:
     varname: irdwfk
-    topic_class:
-    topic_name:
+    topic_class: useful
+    topic_name: general_settings
     varname: irdwfkfine
-    topic_class:
-    topic_name:
+    topic_class: useful
+    topic_name: general_settings
     varname: irdwfq
     topic_class:
     topic_name:
@@ -1001,8 +1001,8 @@
     topic_class:
     topic_name:
     varname: natom
-    topic_class:
-    topic_name:
+    topic_class: basic
+    topic_name: general_settings
     varname: natpawu
     topic_class:
     topic_name:
@@ -1019,8 +1019,8 @@
     topic_class: expert
     topic_name: DFT+U
     varname: nband
-    topic_class:
-    topic_name:
+    topic_class: basic
+    topic_name: general_settings
     varname: nbandhf
     topic_class:
     topic_name:
@@ -1235,8 +1235,8 @@
     topic_class:
     topic_name:
     varname: ntypat
-    topic_class:
-    topic_name:
+    topic_class: basic
+    topic_name: general_settings
     varname: ntyppure
     topic_class:
     topic_name:
@@ -1286,11 +1286,11 @@
     topic_class:
     topic_name:
     varname: occ
-    topic_class:
-    topic_name:
+    topic_class: basic
+    topic_name: general_settings
     varname: occopt
-    topic_class:
-    topic_name:
+    topic_class: basic
+    topic_name: general_settings
     varname: omegasimax
     topic_class:
     topic_name:
@@ -1304,14 +1304,14 @@
     topic_class:
     topic_name:
     varname: optforces
-    topic_class:
-    topic_name:
+    topic_class: basic
+    topic_name: general_settings
     varname: optnlxccc
     topic_class:
     topic_name:
     varname: optstress
-    topic_class:
-    topic_name:
+    topic_class: basic
+    topic_name: general_settings
     varname: ortalg
     topic_class:
     topic_name:
@@ -1844,8 +1844,8 @@
     topic_class: useful
     topic_name: PAW_settings
     varname: stmbias
-    topic_class:
-    topic_name:
+    topic_class: useful
+    topic_name: general_settings
     varname: strfact
     topic_class:
     topic_name:
@@ -1853,11 +1853,11 @@
     topic_class:
     topic_name:
     varname: strprecon
-    topic_class:
-    topic_name:
+    topic_class: useful
+    topic_name: general_settings
     varname: strtarget
-    topic_class:
-    topic_name:
+    topic_class: useful
+    topic_name: general_settings
     varname: symafm
     topic_class:
     topic_name:
@@ -1889,8 +1889,8 @@
     topic_class:
     topic_name:
     varname: timopt
-    topic_class:
-    topic_name:
+    topic_class: expert
+    topic_name: general_settings
     varname: tl_nprccg
     topic_class:
     topic_name:
@@ -1904,8 +1904,8 @@
     topic_class:
     topic_name:
     varname: toldff
-    topic_class:
-    topic_name:
+    topic_class: useful
+    topic_name: general_settings
     varname: tolimg
     topic_class:
     topic_name:
@@ -1919,8 +1919,8 @@
     topic_class:
     topic_name:
     varname: tolrff
-    topic_class:
-    topic_name:
+    topic_class: useful
+    topic_name: general_settings
     varname: tolsym
     topic_class:
     topic_name:
@@ -1931,14 +1931,14 @@
     topic_class:
     topic_name:
     varname: tphysel
-    topic_class:
-    topic_name:
+    topic_class: useful
+    topic_name: general_settings
     varname: tsmear
-    topic_class:
-    topic_name:
+    topic_class: basic
+    topic_name: general_settings
     varname: typat
-    topic_class:
-    topic_name:
+    topic_class: basic
+    topic_name: general_settings
     varname: ucrpa
     topic_class:
     topic_name:
@@ -2030,8 +2030,8 @@
     topic_class: useful
     topic_name: PAW_settings
     varname: useylm
-    topic_class:
-    topic_name:
+    topic_class: expert
+    topic_name: general_settings
     varname: vaclst
     topic_class:
     topic_name:
@@ -2214,5 +2214,5 @@
     topic_class:
     topic_name:
     varname: znucl
-    topic_class:
-    topic_name:
+    topic_class: basic
+    topic_name: general_settings
