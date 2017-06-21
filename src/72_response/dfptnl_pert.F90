@@ -73,7 +73,7 @@ subroutine dfptnl_pert(atindx,atindx1,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,ei
 & nspden,nspinor,nsppol,nsym1,npwarr,occ,pawang,pawang1,pawfgrtab,pawrad,pawtab,&
 & pawrhoij0,pawrhoij1_i1pert,pawrhoij1_i2pert,pawrhoij1_i3pert,&
 & paw_an0,paw_an1_i2pert,paw_ij0,paw_ij1_i2pert,pawfgr,ph1d,psps,rho1r1,rho2r1,rho3r1,rprimd,symaf1,symrc1,&
-& ucvol,vtrial,vtrial1_i2pert,ddk_f,xccc3d1,xccc3d2,xccc3d3,xred)
+& ucvol,vtrial,vhartr1_i2pert,vtrial1_i2pert,vxc1_i2pert,ddk_f,xccc3d1,xccc3d2,xccc3d3,xred)
 
  use defs_basis
  use defs_datatypes
@@ -144,6 +144,7 @@ subroutine dfptnl_pert(atindx,atindx1,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,ei
  real(dp),intent(in) :: vtrial(cplex*nfftf,nspden)
  real(dp),intent(in) :: xccc3d1(cplex*nfftf),xccc3d2(cplex*nfftf),xccc3d3(cplex*nfftf),xred(3,natom)
  real(dp),intent(inout) :: vtrial1_i2pert(cplex*nfftf,nspden),d3etot(2,3,mpert,3,mpert,3,mpert)
+ real(dp),intent(in) :: vxc1_i2pert(cplex*nfftf,nspden),vhartr1_i2pert(cplex*nfftf)
  type(pawfgrtab_type),intent(inout) :: pawfgrtab(natom*psps%usepaw)
  type(pawrad_type),intent(inout) :: pawrad(psps%ntypat*psps%usepaw)
  type(pawrhoij_type),intent(in) :: pawrhoij0(natom*psps%usepaw)
@@ -186,7 +187,7 @@ subroutine dfptnl_pert(atindx,atindx1,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,ei
  real(dp),allocatable :: ffnl1(:,:,:,:),ffnl1_idir_elfd(:,:,:,:),ffnlk(:,:,:,:),gh0(:,:),gh1(:,:),gvnl(:,:)
  real(dp),allocatable :: h_cwave(:,:),iddk(:,:),kinpw1(:),kpg_k(:,:),kpg1_k(:,:),nhat21(:,:),nhatfr21(:,:),occ_k(:)
  real(dp),allocatable :: phkxred(:,:),ph3d(:,:,:),ph3d1(:,:,:),rho1r1_tot(:,:),s_cwave(:,:)
- real(dp),allocatable :: vlocal(:,:,:,:),vlocal1_i2pert(:,:,:,:),wfraug(:,:,:,:)
+ real(dp),allocatable :: vlocal(:,:,:,:),vlocal1_i2pert(:,:,:,:),v_i2pert(:,:),wfraug(:,:,:,:)
  real(dp),allocatable :: ylm(:,:),ylm1(:,:),ylmgr(:,:,:),ylmgr1(:,:,:)
  real(dp),allocatable :: ylm_k(:,:),ylm1_k(:,:),ylmgr1_k(:,:,:)
  real(dp),allocatable :: xc_tmp(:,:)
@@ -1106,8 +1107,20 @@ subroutine dfptnl_pert(atindx,atindx1,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,ei
 !&   mpi_atmtab=my_atmtab,comm_atom=my_comm_atom
    sumi = sumi + half*eHxc21_paw(2)
 
-   call dotprod_vn(cplex,nhat21,eHxc21_nhat(1),eHxc21_nhat(2),nfftf,nfftotf,nspden,2,vtrial1_i2pert,ucvol,mpi_comm_sphgrid=mpi_enreg%comm_fft)
+   ABI_ALLOCATE(v_i2pert,(cplex*nfftf,nspden))
+   v_i2pert(:,1) = vhartr1_i2pert(:)
+   if(nspden>1) then
+     v_i2pert(:,2) = vhartr1_i2pert(:)
+   end if
+   write(msg,'(2(a,i6)))') ' DFPTNL_PERT : pawtab(',ipert_phon,')%usexcnhat = ',pawtab(ipert_phon)%usexcnhat
+   call wrtout(std_out,msg,'COLL')
+   if (pawtab(ipert_phon)%usexcnhat>0) then
+     v_i2pert(:,:) = v_i2pert(:,:) + vxc1_i2pert(:,:)
+   end if
 
+   call dotprod_vn(cplex,nhat21,eHxc21_nhat(1),eHxc21_nhat(2),nfftf,nfftotf,nspden,2,v_i2pert,ucvol,mpi_comm_sphgrid=mpi_enreg%comm_fft)
+
+   ABI_DEALLOCATE(v_i2pert)
    ABI_DEALLOCATE(nhat21)
 
  end if
