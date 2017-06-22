@@ -32,7 +32,7 @@ module m_effective_potential
  use m_profiling_abi
  use m_strain
  use m_ifc
- use m_io_tools, only : open_file
+ use m_io_tools, only : open_file,get_unit
  use m_phonon_supercell
  use m_phonons
  use m_ddb
@@ -1891,7 +1891,7 @@ subroutine effective_potential_writeXML(eff_pot,option,filename)
 !scalar
  integer :: ii,ia,ib,jj
  integer :: iqpt,irpt,mu,nu
- integer :: unit_xml=22
+ integer :: unit_xml
  character(len=500) :: msg
  character(len=fnlen) :: namefile
  character(len=10) :: natom
@@ -1908,6 +1908,7 @@ subroutine effective_potential_writeXML(eff_pot,option,filename)
  strain(:,5) = half*(/0,0,1,0,0,0,1,0,0/)
  strain(:,6) = half*(/0,1,0,1,0,0,0,0,0/)
 
+ unit_xml = get_unit()
 !Print only the reference system in xml format
  if (option ==  1 .or. option == 2 .or. option ==3) then
 
@@ -2163,11 +2164,9 @@ subroutine effective_potential_writeXML(eff_pot,option,filename)
  end if!end option
 
  if(option==1)then
-   if (open_file(namefile,msg,unit=unit_xml,access='APPEND',form="formatted",&
-&    status="old",action="write") /= 0) then
-     MSG_ERROR(msg)
-   end if
-   if(option == 1)  WRITE(unit_xml,'("</System_definition>")')
+!  add the end of the file in the case option==1
+   open(unit=unit_xml,file=namefile,position="append")
+   WRITE(unit_xml,'("</System_definition>")')
 !  Close file
    CLOSE(unit_xml)
  end if

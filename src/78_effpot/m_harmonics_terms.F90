@@ -6,8 +6,7 @@
 !!
 !! FUNCTION
 !! Module with structure and tools for the harmonics terms
-!! Compute strain phonon coupling by finite differences
-!! Return the effective_potential with the third order
+!!
 !! COPYRIGHT
 !! Copyright (C) 2010-2017 ABINIT group (AM)
 !! This file is distributed under the terms of the

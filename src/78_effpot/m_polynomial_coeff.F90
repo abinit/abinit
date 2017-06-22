@@ -630,7 +630,7 @@ subroutine polynomial_coeff_writeXML(coeffs,ncoeff,filename,unit,newfile)
 
  use defs_basis
  use m_errors
- use m_io_tools, only : open_file
+ use m_io_tools, only : open_file,get_unit
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -653,10 +653,9 @@ subroutine polynomial_coeff_writeXML(coeffs,ncoeff,filename,unit,newfile)
 !Local variables-------------------------------
 !scalar
  integer :: icoeff,idisp,iterm
- integer :: unit_xml=23
+ integer :: unit_xml
  logical :: need_header = .TRUE.
  character(len=3)  :: status_file="new"
- character(len=10) :: access_file=""
  character(len=500) :: message
  character(len=fnlen) :: namefile
  character(len=1)  :: direction
@@ -664,6 +663,10 @@ subroutine polynomial_coeff_writeXML(coeffs,ncoeff,filename,unit,newfile)
 !arrays
 
 ! *************************************************************************
+
+!fill the default
+ unit_xml = get_unit()
+ status_file="new"
 
 !Check the inputs 
  if(present(filename))then
@@ -674,9 +677,9 @@ subroutine polynomial_coeff_writeXML(coeffs,ncoeff,filename,unit,newfile)
 
  if(present(newfile))then
    if (newfile) then
+     unit_xml = get_unit()
      need_header = .TRUE.
      status_file = "new"
-     access_file= "SEQUENTIAL"
      call isfile(namefile,'new')
    else
      if(.not.present(unit))then
@@ -686,7 +689,6 @@ subroutine polynomial_coeff_writeXML(coeffs,ncoeff,filename,unit,newfile)
        need_header = .FALSE.
        unit_xml = unit
        status_file = "old"
-       access_file="APPEND"
      end if
    end if
  end if
@@ -697,9 +699,15 @@ subroutine polynomial_coeff_writeXML(coeffs,ncoeff,filename,unit,newfile)
 
 !Print the coefficients into XML file
  if(ncoeff>0)then
-   if (open_file(namefile,message,unit=unit_xml,access=access_file,form="formatted",&
+   if(need_header)then
+!    open new file
+     if (open_file(namefile,message,unit=unit_xml,form="formatted",&
 &         status=status_file,action="write") /= 0) then
-     MSG_ERROR(message)
+       MSG_ERROR(message)
+     else
+!      just open the file to append the coefficient
+       open(unit=unit_xml,file=namefile,position="append")
+     end if
    end if
 
 !  Write header
@@ -760,7 +768,7 @@ subroutine polynomial_coeff_writeXML(coeffs,ncoeff,filename,unit,newfile)
       WRITE(unit_xml,'("  </coefficient>")') 
     end do
     WRITE(unit_xml,'("</Heff_definition>")')
-!    Close file
+!   Close file
     CLOSE(unit_xml)
   end if
 

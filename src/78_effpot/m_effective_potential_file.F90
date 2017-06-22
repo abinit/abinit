@@ -2434,7 +2434,7 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
 &   inp%nsphere,inp%rifcsph,inp%prtsrlr,inp%enunit,comm)
 
 !***************************************************************************
-! Dynamical matrix calculation for each qpoint for ifc
+! Interpolation of the dynamical matrix for each qpoint from ifc, maybe useless...
 !***************************************************************************
 
   ABI_ALLOCATE(d2cart,(2,3,mpert,3,mpert))
