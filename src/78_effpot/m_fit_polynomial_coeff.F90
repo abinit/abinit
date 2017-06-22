@@ -977,7 +977,8 @@ subroutine fit_polynomial_coeff_fit(eff_pot,fixcoeff,hist,ncycle_in,nfixcoeff,po
 !scalars
  integer,intent(in) :: ncycle_in,nfixcoeff,comm
 !arrays
- integer,intent(in) :: fixcoeff(nfixcoeff),powers(2)
+ integer,intent(in) :: fixcoeff(nfixcoeff)
+ integer,intent(in) :: powers(2)
  type(effective_potential_type),intent(inout) :: eff_pot
  type(abihist),intent(inout) :: hist
  real(dp),optional,intent(in) :: cut_off
@@ -2030,7 +2031,7 @@ subroutine fit_polynomial_coeff_getFS(coefficients,du_delta,displacement,energy_
 !Local variables-------------------------------
 !scalar
  integer :: i1,i2,i3,ia1,ia2,ib1,ib2,ii,icell,icoeff,icoeff_tmp
- integer :: idir1,idir2,idisp1,idisp2,ierr,iterm,itime,power
+ integer :: idir1,idir2,idisp1,idisp2,iterm,itime,power
  real(dp):: disp1,disp2,ffact,sfact,tmp1,tmp2,tmp3,weight
 !arrays
  integer :: cell_atoma1(3),cell_atoma2(3)

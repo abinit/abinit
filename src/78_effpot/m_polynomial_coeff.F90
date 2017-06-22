@@ -655,7 +655,6 @@ subroutine polynomial_coeff_writeXML(coeffs,ncoeff,filename,unit,newfile)
  integer :: icoeff,idisp,iterm
  integer :: unit_xml
  logical :: need_header = .TRUE.
- character(len=3)  :: status_file="new"
  character(len=500) :: message
  character(len=fnlen) :: namefile
  character(len=1)  :: direction
@@ -666,7 +665,6 @@ subroutine polynomial_coeff_writeXML(coeffs,ncoeff,filename,unit,newfile)
 
 !fill the default
  unit_xml = get_unit()
- status_file="new"
 
 !Check the inputs 
  if(present(filename))then
@@ -679,7 +677,6 @@ subroutine polynomial_coeff_writeXML(coeffs,ncoeff,filename,unit,newfile)
    if (newfile) then
      unit_xml = get_unit()
      need_header = .TRUE.
-     status_file = "new"
      call isfile(namefile,'new')
    else
      if(.not.present(unit))then
@@ -688,7 +685,6 @@ subroutine polynomial_coeff_writeXML(coeffs,ncoeff,filename,unit,newfile)
      else
        need_header = .FALSE.
        unit_xml = unit
-       status_file = "old"
      end if
    end if
  end if
@@ -702,12 +698,12 @@ subroutine polynomial_coeff_writeXML(coeffs,ncoeff,filename,unit,newfile)
    if(need_header)then
 !    open new file
      if (open_file(namefile,message,unit=unit_xml,form="formatted",&
-&         status=status_file,action="write") /= 0) then
+&         status="new",action="write") /= 0) then
        MSG_ERROR(message)
-     else
-!      just open the file to append the coefficient
-       open(unit=unit_xml,file=namefile,position="append")
      end if
+   else
+!     just open the file to append the coefficient
+     open(unit=unit_xml,file=namefile,position="append")
    end if
 
 !  Write header
