@@ -1,6 +1,6 @@
     varname: accuracy
-    topic_class:
-    topic_name:
+    topic_class: basic
+    topic_name: convergency
     varname: acell
     topic_class: compulsory
     topic_name: crystal
@@ -11,8 +11,8 @@
     topic_class:
     topic_name:
     varname: algalch
-    topic_class:
-    topic_name:
+    topic_class: alch
+    topic_name: other_settings
     varname: amu
     topic_class: useful
     topic_name: general_settings
@@ -26,14 +26,14 @@
     topic_class: expert
     topic_name: DFT+U
     varname: autoparal
-    topic_class:
-    topic_name:
+    topic_class: basic
+    topic_name: parallelism
     varname: awtr
     topic_class:
     topic_name:
     varname: bandpp
-    topic_class:
-    topic_name:
+    topic_class: useful
+    topic_name: parallelism
     varname: bdberry
     topic_class:
     topic_name:
@@ -62,8 +62,8 @@
     topic_class:
     topic_name:
     varname: boxcutmin
-    topic_class:
-    topic_name:
+    topic_class: expert
+    topic_name: convergency
     varname: brvltt
     topic_class: expert
     topic_name: crystal
@@ -122,8 +122,8 @@
     topic_class:
     topic_name:
     varname: builtintest
-    topic_class:
-    topic_name:
+    topic_class: expert
+    topic_name: other_settings
     varname: bxctmindg
     topic_class: expert
     topic_name: PAW_settings
@@ -149,8 +149,8 @@
     topic_class:
     topic_name:
     varname: cgtyphf
-    topic_class:
-    topic_name:
+    topic_class: expert
+    topic_name: hf
     varname: charge
     topic_class: useful
     topic_name: general_settings
@@ -164,8 +164,8 @@
     topic_class: useful
     topic_name: crystal
     varname: chksymbreak
-    topic_class:
-    topic_name:
+    topic_class: basic
+    topic_name: k_points
     varname: chneut
     topic_class:
     topic_name:
@@ -173,14 +173,14 @@
     topic_class:
     topic_name:
     varname: cpuh
-    topic_class:
-    topic_name:
+    topic_class: job
+    topic_name: other_settings
     varname: cpum
-    topic_class:
-    topic_name:
+    topic_class: job
+    topic_name: other_settings
     varname: cpus
-    topic_class:
-    topic_name:
+    topic_class: job
+    topic_name: other_settings
     varname: d3e_pert1_atpol
     topic_class:
     topic_name:
@@ -230,11 +230,11 @@
     topic_class:
     topic_name:
     varname: densfor_pred
-    topic_class:
-    topic_name:
+    topic_class: expert
+    topic_name: convergency
     varname: densty
-    topic_class:
-    topic_name:
+    topic_class: expert
+    topic_name: xc
     varname: dfield
     topic_class:
     topic_name:
@@ -242,26 +242,26 @@
     topic_class:
     topic_name:
     varname: diecut
-    topic_class:
-    topic_name:
+    topic_class: useful
+    topic_name: convergency
     varname: diegap
-    topic_class:
-    topic_name:
+    topic_class: useful
+    topic_name: convergency
     varname: dielam
-    topic_class:
-    topic_name:
+    topic_class: useful
+    topic_name: convergency
     varname: dielng
-    topic_class:
-    topic_name:
+    topic_class: useful
+    topic_name: convergency
     varname: diemac
-    topic_class:
-    topic_name:
+    topic_class: useful
+    topic_name: convergency
     varname: diemix
-    topic_class:
-    topic_name:
+    topic_class: useful
+    topic_name: convergency
     varname: diemixmag
-    topic_class:
-    topic_name:
+    topic_class: useful
+    topic_name: polar_settings
     varname: diismemory
     topic_class:
     topic_name:
@@ -371,8 +371,8 @@
     topic_class:
     topic_name:
     varname: dosdeltae
-    topic_class:
-    topic_name:
+    topic_class: prdos
+    topic_name: printing_settings
     varname: dtion
     topic_class:
     topic_name:
@@ -380,8 +380,8 @@
     topic_class:
     topic_name:
     varname: ecut
-    topic_class:
-    topic_name:
+    topic_class: compulsory
+    topic_name: convergency
     varname: ecuteps
     topic_class:
     topic_name:
@@ -389,8 +389,8 @@
     topic_class:
     topic_name:
     varname: ecutsm
-    topic_class:
-    topic_name:
+    topic_class: basic
+    topic_name: convergency
     varname: ecutwfn
     topic_class:
     topic_name:
@@ -464,20 +464,20 @@
     topic_class:
     topic_name:
     varname: eshift
-    topic_class:
-    topic_name:
+    topic_class: expert
+    topic_name: other_settings
     varname: esmear
     topic_class:
     topic_name:
     varname: exchmix
-    topic_class:
-    topic_name:
+    topic_class: useful
+    topic_name: xc
     varname: exchn2n3d
-    topic_class:
-    topic_name:
+    topic_class: expert
+    topic_name: convergency
     varname: extrapwf
-    topic_class:
-    topic_name:
+    topic_class: expert
+    topic_name: convergency
     varname: f4of2_sla
     topic_class: expert
     topic_name: DFT+U
@@ -488,14 +488,14 @@
     topic_class: useful
     topic_name: general_settings
     varname: fermie_nest
-    topic_class:
-    topic_name:
+    topic_class: prfermi
+    topic_name: printing_settings
     varname: fftalg
-    topic_class:
-    topic_name:
+    topic_class: expert
+    topic_name: convergency
     varname: fftcache
-    topic_class:
-    topic_name:
+    topic_class: expert
+    topic_name: other_settings
     varname: fftgw
     topic_class:
     topic_name:
@@ -539,71 +539,71 @@
     topic_class:
     topic_name:
     varname: genafm
-    topic_class:
-    topic_name:
+    topic_class: useful
+    topic_name: polar_settings
     varname: get1den
     topic_class:
     topic_name:
     varname: get1wf
-    topic_class:
-    topic_name:
+    topic_class: useful
+    topic_name: multi_dtset
     varname: getbscoup
-    topic_class:
-    topic_name:
+    topic_class: useful
+    topic_name: multi_dtset
     varname: getbseig
-    topic_class:
-    topic_name:
+    topic_class: useful
+    topic_name: multi_dtset
     varname: getbsreso
-    topic_class:
-    topic_name:
+    topic_class: useful
+    topic_name: multi_dtset
     varname: getcell
-    topic_class:
-    topic_name:
+    topic_class: useful
+    topic_name: multi_dtset
     varname: getddb
     topic_class:
     topic_name:
     varname: getddk
-    topic_class:
-    topic_name:
+    topic_class: useful
+    topic_name: multi_dtset
     varname: getden
-    topic_class:
-    topic_name:
+    topic_class: useful
+    topic_name: multi_dtset
     varname: getgam_eig2nkq
-    topic_class:
-    topic_name:
+    topic_class: useful
+    topic_name: multi_dtset
     varname: gethaydock
-    topic_class:
-    topic_name:
+    topic_class: useful
+    topic_name: multi_dtset
     varname: getocc
-    topic_class:
-    topic_name:
+    topic_class: useful
+    topic_name: multi_dtset
     varname: getqps
-    topic_class:
-    topic_name:
+    topic_class: useful
+    topic_name: multi_dtset
     varname: getscr
-    topic_class:
-    topic_name:
+    topic_class: useful
+    topic_name: multi_dtset
     varname: getsuscep
-    topic_class:
-    topic_name:
+    topic_class: useful
+    topic_name: multi_dtset
     varname: getvel
-    topic_class:
-    topic_name:
+    topic_class: useful
+    topic_name: multi_dtset
     varname: getwfk
-    topic_class:
-    topic_name:
+    topic_class: useful
+    topic_name: multi_dtset
     varname: getwfkfine
-    topic_class:
-    topic_name:
+    topic_class: useful
+    topic_name: multi_dtset
     varname: getwfq
-    topic_class:
-    topic_name:
+    topic_class: useful
+    topic_name: multi_dtset
     varname: getxcart
-    topic_class:
-    topic_name:
+    topic_class: useful
+    topic_name: multi_dtset
     varname: getxred
-    topic_class:
-    topic_name:
+    topic_class: useful
+    topic_name: multi_dtset
     varname: goprecon
     topic_class:
     topic_name:
@@ -611,11 +611,11 @@
     topic_class:
     topic_name:
     varname: gpu_devices
-    topic_class:
-    topic_name:
+    topic_class: expert
+    topic_name: parallelism
     varname: gpu_linalg_limit
-    topic_class:
-    topic_name:
+    topic_class: expert
+    topic_name: parallelism
     varname: gw_customnfreqsp
     topic_class:
     topic_name:
@@ -728,8 +728,8 @@
     topic_class:
     topic_name:
     varname: gwpara
-    topic_class:
-    topic_name:
+    topic_class: useful
+    topic_name: parallelism
     varname: gwrpacorr
     topic_class:
     topic_name:
@@ -749,14 +749,14 @@
     topic_class:
     topic_name:
     varname: iatsph
-    topic_class:
-    topic_name:
+    topic_class: prdos
+    topic_name: printing_settings
     varname: iboxcut
-    topic_class:
-    topic_name:
+    topic_class: expert
+    topic_name: convergency
     varname: icoulomb
-    topic_class:
-    topic_name:
+    topic_class: expert
+    topic_name: convergency
     varname: icutcoul
     topic_class:
     topic_name:
@@ -770,20 +770,20 @@
     topic_class:
     topic_name:
     varname: intxc
-    topic_class:
-    topic_name:
+    topic_class: expert
+    topic_name: xc
     varname: iomode
-    topic_class:
-    topic_name:
+    topic_class: expert
+    topic_name: parallelism
     varname: ionmov
     topic_class:
     topic_name:
     varname: iprcel
-    topic_class:
-    topic_name:
+    topic_class: useful
+    topic_name: convergency
     varname: iprcfc
-    topic_class:
-    topic_name:
+    topic_class: expert
+    topic_name: convergency
     varname: iqpt
     topic_class:
     topic_name:
@@ -839,35 +839,36 @@
     topic_class:
     topic_name:
     varname: iscf
-    topic_class:
-    topic_name:
+    topic_class: useful
+    topic_name: convergency
     varname: isecur
-    topic_class:
-    topic_name:
+    topic_class: expert
+    topic_name: convergency
     varname: istatimg
     topic_class:
     topic_name:
     varname: istatr
-    topic_class:
-    topic_name:
+    topic_class: expert
+    topic_name: other_settings
     varname: istatshft
-    topic_class:
-    topic_name:
+    topic_class: expert
+    topic_name: other_settings
     varname: istwfk
-    topic_class:
-    topic_name:
+    topic_class: useful
+    topic_name: k_points
     varname: ixc
-    topic_class:
-    topic_name:
+    topics:
+    - {topic_name: xc, topic_class: basic}
+    - {topic_name: hf, topic_class: compulsory}
     varname: ixcpositron
     topic_class:
     topic_name:
     varname: jdtset
-    topic_class:
-    topic_name:
+    topic_class: basic
+    topic_name: multi_dtset
     varname: jellslab
-    topic_class:
-    topic_name:
+    topic_class: sla
+    topic_name: other_settings
     varname: jfielddir
     topic_class:
     topic_name:
@@ -878,38 +879,38 @@
     topic_class:
     topic_name:
     varname: kpt
-    topic_class:
-    topic_name:
+    topic_class: useful
+    topic_name: k_points
     varname: kptbounds
-    topic_class:
-    topic_name:
+    topic_class: expert
+    topic_name: k_points
     varname: kptgw
     topic_class:
     topic_name:
     varname: kptnrm
-    topic_class:
-    topic_name:
+    topic_class: useful
+    topic_name: k_points
     varname: kptns
-    topic_class:
-    topic_name:
+    topic_class: internal
+    topic_name: k_points
     varname: kptopt
-    topic_class:
-    topic_name:
+    topic_class: basic
+    topic_name: k_points
     varname: kptrlatt
-    topic_class:
-    topic_name:
+    topic_class: useful
+    topic_name: k_points
     varname: kptrlen
-    topic_class:
-    topic_name:
+    topic_class: useful
+    topic_name: k_points
     varname: kssform
     topic_class:
     topic_name:
     varname: lexexch
-    topic_class:
-    topic_name:
+    topic_class: useful
+    topic_name: xc
     varname: localrdwf
-    topic_class:
-    topic_name:
+    topic_class: expert
+    topic_name: parallelism
     varname: lotf_classic
     topic_class:
     topic_name:
@@ -929,14 +930,14 @@
     topic_class: expert
     topic_name: DFT+U
     varname: magcon_lambda
-    topic_class:
-    topic_name:
+    topic_class: useful
+    topic_name: polar_settings
     varname: magconon
-    topic_class:
-    topic_name:
+    topic_class: useful
+    topic_name: polar_settings
     varname: max_ncpus
-    topic_class:
-    topic_name:
+    topic_class: useful
+    topic_name: parallelism
     varname: maxestep
     topic_class:
     topic_name:
@@ -944,8 +945,8 @@
     topic_class: expert
     topic_name: crystal
     varname: mband
-    topic_class:
-    topic_name:
+    topic_class: internal
+    topic_name: general_settings
     varname: mbpt_sciss
     topic_class:
     topic_name:
@@ -959,8 +960,8 @@
     topic_class:
     topic_name:
     varname: mem_test
-    topic_class:
-    topic_name:
+    topic_class: expert
+    topic_name: other_settings
     varname: mep_mxstep
     topic_class:
     topic_name:
@@ -968,20 +969,20 @@
     topic_class:
     topic_name:
     varname: mgfft
-    topic_class:
-    topic_name:
+    topic_class: internal
+    topic_name: convergency
     varname: mgfftdg
-    topic_class:
-    topic_name:
+    topic_class: internal
+    topic_name: convergency
     varname: mixalch
-    topic_class:
-    topic_name:
+    topic_class: alch
+    topic_name: other_settings
     varname: mpw
-    topic_class:
-    topic_name:
+    topic_class: internal
+    topic_name: convergency
     varname: mqgrid
-    topic_class:
-    topic_name:
+    topic_class: expert
+    topic_name: convergency
     varname: mqgriddg
     topic_class: expert
     topic_name: PAW_settings
@@ -1004,17 +1005,17 @@
     topic_class: basic
     topic_name: general_settings
     varname: natpawu
-    topic_class:
-    topic_name:
+    topic_class: internal
+    topic_name: DFT+U
     varname: natrd
     topic_class:
     topic_name:
     varname: natsph
-    topic_class:
-    topic_name:
+    topic_class: prdos
+    topic_name: printing_settings
     varname: natsph_extra
-    topic_class:
-    topic_name:
+    topic_class: prdos
+    topic_name: printing_settings
     varname: natvshift
     topic_class: expert
     topic_name: DFT+U
@@ -1022,23 +1023,23 @@
     topic_class: basic
     topic_name: general_settings
     varname: nbandhf
-    topic_class:
-    topic_name:
+    topic_class: useful
+    topic_name: hf
     varname: nbandkss
     topic_class:
     topic_name:
     varname: nbdblock
-    topic_class:
-    topic_name:
+    topic_class: expert
+    topic_name: convergency
     varname: nbdbuf
-    topic_class:
-    topic_name:
+    topic_class: expert
+    topic_name: convergency
     varname: nberry
     topic_class:
     topic_name:
     varname: nc_xccc_gspace
-    topic_class:
-    topic_name:
+    topic_class: expert
+    topic_name: convergency
     varname: nconeq
     topic_class:
     topic_name:
@@ -1046,14 +1047,14 @@
     topic_class:
     topic_name:
     varname: ndivk
-    topic_class:
-    topic_name:
+    topic_class: expert
+    topic_name: k_points
     varname: ndivsm
-    topic_class:
-    topic_name:
+    topic_class: expert
+    topic_name: k_points
     varname: ndtset
-    topic_class:
-    topic_name:
+    topic_class: compulsory
+    topic_name: multi_dtset
     varname: ndynimage
     topic_class:
     topic_name:
@@ -1064,14 +1065,14 @@
     topic_class:
     topic_name:
     varname: nelect
-    topic_class:
-    topic_name:
+    topic_class: internal
+    topic_name: general_settings
     varname: nfft
-    topic_class:
-    topic_name:
+    topic_class: internal
+    topic_name: convergency
     varname: nfftdg
-    topic_class:
-    topic_name:
+    topic_class: internal
+    topic_name: convergency
     varname: nfreqim
     topic_class:
     topic_name:
@@ -1085,14 +1086,14 @@
     topic_class:
     topic_name:
     varname: ngfft
-    topic_class:
-    topic_name:
+    topic_class: basic
+    topic_name: convergency
     varname: ngfftdg
     topic_class: useful
     topic_name: PAW_settings
     varname: ngkpt
-    topic_class:
-    topic_name:
+    topic_class: basic
+    topic_name: k_points
     varname: ngqpt
     topic_class:
     topic_name:
@@ -1103,32 +1104,32 @@
     topic_class:
     topic_name:
     varname: nkpt
-    topic_class:
-    topic_name:
+    topic_class: useful
+    topic_name: k_points
     varname: nkptgw
     topic_class:
     topic_name:
     varname: nkpthf
-    topic_class:
-    topic_name:
+    topic_class: expert
+    topic_name: hf
     varname: nline
-    topic_class:
-    topic_name:
+    topic_class: expert
+    topic_name: convergency
     varname: nloc_alg
-    topic_class:
-    topic_name:
+    topic_class: expert
+    topic_name: other_settings
     varname: nloc_mem
-    topic_class:
-    topic_name:
+    topic_class: expert
+    topic_name: other_settings
     varname: nnos
     topic_class:
     topic_name:
     varname: nnsclo
-    topic_class:
-    topic_name:
+    topic_class: expert
+    topic_name: convergency
     varname: nnsclohf
-    topic_class:
-    topic_name:
+    topic_class: expert
+    topic_name: hf
     varname: nobj
     topic_class:
     topic_name:
@@ -1148,38 +1149,39 @@
     topic_class:
     topic_name:
     varname: np_slk
-    topic_class:
-    topic_name:
+    topic_class: expert
+    topic_name: parallelism
     varname: npband
-    topic_class:
-    topic_name:
+    topic_class: useful
+    topic_name: parallelism
     varname: npfft
-    topic_class:
-    topic_name:
+    topic_class: useful
+    topic_name: parallelism
     varname: nphf
-    topic_class:
-    topic_name:
+    topics:
+    - {topic_name: hf, topic_class: useful}
+    - {topic_name: parallelism, topic_class: useful}
     varname: npimage
-    topic_class:
-    topic_name:
+    topic_class: useful
+    topic_name: parallelism
     varname: npkpt
-    topic_class:
-    topic_name:
+    topic_class: useful
+    topic_name: parallelism
     varname: nppert
-    topic_class:
-    topic_name:
+    topic_class: useful
+    topic_name: parallelism
     varname: npsp
-    topic_class:
-    topic_name:
+    topic_class: alch
+    topic_name: other_settings
     varname: npspalch
-    topic_class:
-    topic_name:
+    topic_class: alch
+    topic_name: other_settings
     varname: npspinor
-    topic_class:
-    topic_name:
+    topic_class: useful
+    topic_name: parallelism
     varname: npulayit
-    topic_class:
-    topic_name:
+    topic_class: useful
+    topic_name: convergency
     varname: npvel
     topic_class:
     topic_name:
@@ -1202,26 +1204,26 @@
     topic_class:
     topic_name:
     varname: nscforder
-    topic_class:
-    topic_name:
+    topic_class: expert
+    topic_name: convergency
     varname: nshiftk
-    topic_class:
-    topic_name:
+    topic_class: useful
+    topic_name: k_points
     varname: nshiftq
     topic_class:
     topic_name:
     varname: nspden
-    topic_class:
-    topic_name:
+    topic_class: basic
+    topic_name: polar_settings
     varname: nspinor
-    topic_class:
-    topic_name:
+    topic_class: basic
+    topic_name: polar_settings
     varname: nsppol
-    topic_class:
-    topic_name:
+    topic_class: basic
+    topic_name: polar_settings
     varname: nstep
-    topic_class:
-    topic_name:
+    topic_class: basic
+    topic_name: convergency
     varname: nsym
     topic_class: useful
     topic_name: crystal
@@ -1232,17 +1234,17 @@
     topic_class:
     topic_name:
     varname: ntypalch
-    topic_class:
-    topic_name:
+    topic_class: alch
+    topic_name: other_settings
     varname: ntypat
     topic_class: basic
     topic_name: general_settings
     varname: ntyppure
-    topic_class:
-    topic_name:
+    topic_class: alch
+    topic_name: other_settings
     varname: nucdipmom
-    topic_class:
-    topic_name:
+    topic_class: expert
+    topic_name: polar_settings
     varname: nwfshist
     topic_class:
     topic_name:
@@ -1307,26 +1309,26 @@
     topic_class: basic
     topic_name: general_settings
     varname: optnlxccc
-    topic_class:
-    topic_name:
+    topic_class: expert
+    topic_name: xc
     varname: optstress
     topic_class: basic
     topic_name: general_settings
     varname: ortalg
-    topic_class:
-    topic_name:
+    topic_class: expert
+    topic_name: convergency
     varname: papiopt
-    topic_class:
-    topic_name:
+    topic_class: expert
+    topic_name: other_settings
     varname: paral_atom
-    topic_class:
-    topic_name:
+    topic_class: basic
+    topic_name: parallelism
     varname: paral_kgb
-    topic_class:
-    topic_name:
+    topic_class: basic
+    topic_name: parallelism
     varname: paral_rf
-    topic_class:
-    topic_name:
+    topic_class: basic
+    topic_name: parallelism
     varname: pawcpxocc
     topic_class: expert
     topic_name: PAW_settings
@@ -1334,8 +1336,9 @@
     topic_class:
     topic_name:
     varname: pawecutdg
-    topic_class: compulsory
-    topic_name: PAW_settings
+    topics:
+    - {topic_name: convergency, topic_class: compulsory}
+    - {topic_name: PAW_settings, topic_class: compulsory}
     varname: pawfatbnd
     topic_class: useful
     topic_name: PAW_settings
@@ -1514,158 +1517,158 @@
     topic_class:
     topic_name:
     varname: prepscphon
-    topic_class:
-    topic_name:
+    topic_class: prngs
+    topic_name: printing_settings
     varname: prt1dm
-    topic_class:
-    topic_name:
+    topic_class: prgs
+    topic_name: printing_settings
     varname: prtatlist
-    topic_class:
-    topic_name:
+    topic_class: prgeo
+    topic_name: printing_settings
     varname: prtbbb
-    topic_class:
-    topic_name:
+    topic_class: prngs
+    topic_name: printing_settings
     varname: prtbltztrp
-    topic_class:
-    topic_name:
+    topic_class: prgs
+    topic_name: printing_settings
     varname: prtcif
-    topic_class:
-    topic_name:
+    topic_class: prgeo
+    topic_name: printing_settings
     varname: prtden
-    topic_class:
-    topic_name:
+    topic_class: prden
+    topic_name: printing_settings
     varname: prtdensph
-    topic_class:
-    topic_name:
+    topic_class: prden
+    topic_name: printing_settings
     varname: prtdipole
-    topic_class:
-    topic_name:
+    topic_class: prgs
+    topic_name: printing_settings
     varname: prtdos
-    topic_class:
-    topic_name:
+    topic_class: prdos
+    topic_name: printing_settings
     varname: prtdosm
-    topic_class:
-    topic_name:
+    topic_class: prdos
+    topic_name: printing_settings
     varname: prtebands
-    topic_class:
-    topic_name:
+    topic_class: prden
+    topic_name: printing_settings
     varname: prtefg
-    topic_class:
-    topic_name:
+    topic_class: prngs
+    topic_name: printing_settings
     varname: prteig
-    topic_class:
-    topic_name:
+    topic_class: prden
+    topic_name: printing_settings
     varname: prtelf
-    topic_class:
-    topic_name:
+    topic_class: prgs
+    topic_name: printing_settings
     varname: prtfc
-    topic_class:
-    topic_name:
+    topic_class: prfermi
+    topic_name: printing_settings
     varname: prtfsurf
-    topic_class:
-    topic_name:
+    topic_class: prfermi
+    topic_name: printing_settings
     varname: prtgden
-    topic_class:
-    topic_name:
+    topic_class: prden
+    topic_name: printing_settings
     varname: prtgeo
-    topic_class:
-    topic_name:
+    topic_class: prgeo
+    topic_name: printing_settings
     varname: prtgkk
-    topic_class:
-    topic_name:
+    topic_class: prngs
+    topic_name: printing_settings
     varname: prtgsr
-    topic_class:
-    topic_name:
+    topic_class: prgs
+    topic_name: printing_settings
     varname: prtkden
-    topic_class:
-    topic_name:
+    topic_class: prden
+    topic_name: printing_settings
     varname: prtkpt
-    topic_class:
-    topic_name:
+    topic_class: prden
+    topic_name: printing_settings
     varname: prtlden
-    topic_class:
-    topic_name:
+    topic_class: prden
+    topic_name: printing_settings
     varname: prtnabla
-    topic_class:
-    topic_name:
+    topic_class: prgs
+    topic_name: printing_settings
     varname: prtnest
-    topic_class:
-    topic_name:
+    topic_class: prfermi
+    topic_name: printing_settings
     varname: prtphbands
-    topic_class:
-    topic_name:
+    topic_class: prngs
+    topic_name: printing_settings
     varname: prtphdos
-    topic_class:
-    topic_name:
+    topic_class: prngs
+    topic_name: printing_settings
     varname: prtphsurf
-    topic_class:
-    topic_name:
+    topic_class: prngs
+    topic_name: printing_settings
     varname: prtposcar
-    topic_class:
-    topic_name:
+    topic_class: prgeo
+    topic_name: printing_settings
     varname: prtpot
-    topic_class:
-    topic_name:
+    topic_class: prpot
+    topic_name: printing_settings
     varname: prtpsps
-    topic_class:
-    topic_name:
+    topic_class: prgs
+    topic_name: printing_settings
     varname: prtspcur
-    topic_class:
-    topic_name:
+    topic_class: prgs
+    topic_name: printing_settings
     varname: prtstm
-    topic_class:
-    topic_name:
+    topic_class: prgs
+    topic_name: printing_settings
     varname: prtsuscep
-    topic_class:
-    topic_name:
+    topic_class: prngs
+    topic_name: printing_settings
     varname: prtvclmb
-    topic_class:
-    topic_name:
+    topic_class: prpot
+    topic_name: printing_settings
     varname: prtvdw
-    topic_class:
-    topic_name:
+    topic_class: prgs
+    topic_name: printing_settings
     varname: prtvha
-    topic_class:
-    topic_name:
+    topic_class: prpot
+    topic_name: printing_settings
     varname: prtvhxc
-    topic_class:
-    topic_name:
+    topic_class: prpot
+    topic_name: printing_settings
     varname: prtvol
-    topic_class:
-    topic_name:
+    topic_class: prgs
+    topic_name: printing_settings
     varname: prtvolimg
-    topic_class:
-    topic_name:
+    topic_class: prgs
+    topic_name: printing_settings
     varname: prtvpsp
-    topic_class:
-    topic_name:
+    topic_class: prpot
+    topic_name: printing_settings
     varname: prtvxc
-    topic_class:
-    topic_name:
+    topic_class: prpot
+    topic_name: printing_settings
     varname: prtwant
-    topic_class:
-    topic_name:
+    topic_class: prgs
+    topic_name: printing_settings
     varname: prtwf
-    topic_class:
-    topic_name:
+    topic_class: prden
+    topic_name: printing_settings
     varname: prtwf_full
-    topic_class:
-    topic_name:
+    topic_class: prden
+    topic_name: printing_settings
     varname: prtxml
-    topic_class:
-    topic_name:
+    topic_class: prgs
+    topic_name: printing_settings
     varname: ptcharge
     topic_class:
     topic_name:
     varname: ptgroupma
-    topic_class:
-    topic_name:
+    topic_class: useful
+    topic_name: polar_settings
     varname: pvelmax
     topic_class:
     topic_name:
     varname: pw_unbal_thresh
-    topic_class:
-    topic_name:
+    topic_class: expert
+    topic_name: parallelism
     varname: qmass
     topic_class:
     topic_name:
@@ -1694,14 +1697,14 @@
     topic_class:
     topic_name:
     varname: random_atpos
-    topic_class:
-    topic_name:
+    topic_class: expert
+    topic_name: other_settings
     varname: ratsph
-    topic_class:
-    topic_name:
+    topic_class: prdos
+    topic_name: printing_settings
     varname: ratsph_extra
-    topic_class:
-    topic_name:
+    topic_class: prdos
+    topic_name: printing_settings
     varname: rcut
     topic_class:
     topic_name:
@@ -1793,8 +1796,8 @@
     topic_class:
     topic_name:
     varname: shiftk
-    topic_class:
-    topic_name:
+    topic_class: useful
+    topic_name: k_points
     varname: shiftq
     topic_class:
     topic_name:
@@ -1802,20 +1805,20 @@
     topic_class:
     topic_name:
     varname: slabwsrad
-    topic_class:
-    topic_name:
+    topic_class: slab
+    topic_name: other_settings
     varname: slabzbeg
-    topic_class:
-    topic_name:
+    topic_class: slab
+    topic_name: other_settings
     varname: slabzend
-    topic_class:
-    topic_name:
+    topic_class: slab
+    topic_name: other_settings
     varname: smdelta
     topic_class:
     topic_name:
     varname: so_psp
-    topic_class:
-    topic_name:
+    topic_class: basic
+    topic_name: polar_settings
     varname: spbroad
     topic_class:
     topic_name:
@@ -1829,14 +1832,14 @@
     topic_class: expert
     topic_name: crystal
     varname: spgroupma
-    topic_class:
-    topic_name:
+    topic_class: useful
+    topic_name: polar_settings
     varname: spinat
-    topic_class:
-    topic_name:
+    topic_class: basic
+    topic_name: polar_settings
     varname: spinmagntarget
-    topic_class:
-    topic_name:
+    topic_class: useful
+    topic_name: polar_settings
     varname: spmeth
     topic_class:
     topic_name:
@@ -1859,8 +1862,8 @@
     topic_class: useful
     topic_name: general_settings
     varname: symafm
-    topic_class:
-    topic_name:
+    topic_class: useful
+    topic_name: polar_settings
     varname: symchi
     topic_class:
     topic_name:
@@ -1901,8 +1904,8 @@
     topic_class: useful
     topic_name: crystal
     varname: toldfe
-    topic_class:
-    topic_name:
+    topic_class: basic
+    topic_name: convergency
     varname: toldff
     topic_class: useful
     topic_name: general_settings
@@ -1916,20 +1919,21 @@
     topic_class:
     topic_name:
     varname: tolrde
-    topic_class:
-    topic_name:
+    topic_class: expert
+    topic_name: convergency
     varname: tolrff
-    topic_class: useful
-    topic_name: general_settings
+    topics:
+    - {topic_name: convergency, topic_class: basic}
+    - {topic_name: general_settings, topic_class: useful}
     varname: tolsym
     topic_class:
     topic_name:
     varname: tolvrs
-    topic_class:
-    topic_name:
+    topic_class: basic
+    topic_name: convergency
     varname: tolwfr
-    topic_class:
-    topic_name:
+    topic_class: basic
+    topic_name: convergency
     varname: tphysel
     topic_class: useful
     topic_name: general_settings
@@ -1949,17 +1953,17 @@
     topic_class:
     topic_name:
     varname: udtset
-    topic_class:
-    topic_name:
+    topic_class: basic
+    topic_name: multi_dtset
     varname: upawu
     topic_class: compulsory
     topic_name: DFT+U
     varname: use_gemm_nonlop
-    topic_class:
-    topic_name:
+    topic_class: expert
+    topic_name: parallelism
     varname: use_gpu_cuda
-    topic_class:
-    topic_name:
+    topic_class: expert
+    topic_name: parallelism
     varname: use_nonscf_gkk
     topic_class:
     topic_name:
@@ -1973,56 +1977,56 @@
     topic_class:
     topic_name:
     varname: useexexch
-    topic_class:
-    topic_name:
+    topic_class: useful
+    topic_name: xc
     varname: usefock
-    topic_class:
-    topic_name:
+    topic_class: internal
+    topic_name: hf
     varname: usekden
-    topic_class:
-    topic_name:
+    topic_class: expert
+    topic_name: xc
     varname: usepaw
-    topic_class:
-    topic_name:
+    topic_class: internal
+    topic_name: PAW_settings
     varname: usepawu
     topic_class: compulsory
     topic_name: DFT+U
     varname: usepotzero
-    topic_class:
-    topic_name:
+    topic_class: expert
+    topic_name: other_settings
     varname: userec
     topic_class:
     topic_name:
     varname: useria
-    topic_class:
-    topic_name:
+    topic_class: expert
+    topic_name: other_settings
     varname: userib
-    topic_class:
-    topic_name:
+    topic_class: expert
+    topic_name: other_settings
     varname: useric
-    topic_class:
-    topic_name:
+    topic_class: expert
+    topic_name: other_settings
     varname: userid
-    topic_class:
-    topic_name:
+    topic_class: expert
+    topic_name: other_settings
     varname: userie
-    topic_class:
-    topic_name:
+    topic_class: expert
+    topic_name: other_settings
     varname: userra
-    topic_class:
-    topic_name:
+    topic_class: expert
+    topic_name: other_settings
     varname: userrb
-    topic_class:
-    topic_name:
+    topic_class: expert
+    topic_name: other_settings
     varname: userrc
-    topic_class:
-    topic_name:
+    topic_class: expert
+    topic_name: other_settings
     varname: userrd
-    topic_class:
-    topic_name:
+    topic_class: expert
+    topic_name: other_settings
     varname: userre
-    topic_class:
-    topic_name:
+    topic_class: expert
+    topic_name: other_settings
     varname: usewvl
     topic_class:
     topic_name:
@@ -2039,11 +2043,11 @@
     topic_class:
     topic_name:
     varname: vacuum
-    topic_class:
-    topic_name:
+    topic_class: expert
+    topic_name: k_points
     varname: vacwidth
-    topic_class:
-    topic_name:
+    topic_class: expert
+    topic_name: k_points
     varname: vcutgeo
     topic_class:
     topic_name:
@@ -2156,8 +2160,8 @@
     topic_class:
     topic_name:
     varname: wtk
-    topic_class:
-    topic_name:
+    topic_class: useful
+    topic_name: k_points
     varname: wtq
     topic_class:
     topic_name:
@@ -2183,11 +2187,11 @@
     topic_class: compulsory
     topic_name: crystal
     varname: xc_denpos
-    topic_class:
-    topic_name:
+    topic_class: expert
+    topic_name: xc
     varname: xc_tb09_c
-    topic_class:
-    topic_name:
+    topic_class: expert
+    topic_name: xc
     varname: xcart
     topic_class: compulsory
     topic_name: crystal
@@ -2198,12 +2202,11 @@
     topic_class: compulsory
     topic_name: crystal
     varname: xredsph_extra
-    topic_class:
-    topic_name:
+    topic_class: prdos
+    topic_name: printing_settings
     varname: xyzfile
-    topics:
-    - {topic_name: crystal, topic_class: expert}
-    - {topic_name: DFT+U, topic_class: basic}
+    topic_class: crystal
+    topic_name: expert
     varname: zcut
     topic_class:
     topic_name:
@@ -2211,8 +2214,8 @@
     topic_class:
     topic_name:
     varname: ziontypat
-    topic_class:
-    topic_name:
+    topic_class: internal
+    topic_name: general_settings
     varname: znucl
     topic_class: basic
     topic_name: general_settings

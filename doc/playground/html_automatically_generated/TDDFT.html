@@ -1,0 +1,39 @@
+<html>
+<head>
+<title>TDDFT </title>
+<body bgcolor="#ffffff">
+<p>
+<hr>
+<h1>3- TDDFT</h1>
+<h3>This file explains how to perform TDDFT calculation with the ABINIT package.
+<hr>
+
+<script type="text/javascript" src="../copyright.js"> </script>
+<script type="text/javascript" src="../list_internal_links.js"> </script>
+<script type="text/javascript" src="../topics_table_of_content.js"> </script>
+
+<p> 
+For finite systems (atoms and molecules), excited states 
+can be computed within TDDFT (Casida approach - only norm-conserving
+pseudopotentials). See the explanations given in the tutorial. The iscf input variable must be set to -1.
+
+
+<p>&nbsp;
+<HR ALIGN=left>
+
+<p> <a name="2">&nbsp;</a>
+<h3><b>2. Tutorials.</b></h3>
+
+ <li><a href="../../tutorial/lesson_tddft.html">The lesson on TDDFT</a> deals with the
+  computation of the excitation spectrum of finite systems, thanks to
+  the Time-Dependent Density Functional Theory approach, in the
+  Cassida formalism.</li><script type="text/javascript" src="../related_input_variables.js"> </script>
+
+<p>Compulsory input variables:<p>... <a href="varbas.html#iscf">iscf</a>   [Integer for Self-Consistent-Field cycles]<br>
+<p>Basic input variables:<p>... <a href="vargs.html#boxcenter">boxcenter</a>   [BOX CENTER]<br>
+<p>Useful input variables:<p>... <a href="varrf.html#td_maxene">td_maxene</a>   [Time-Dependent dft : MAXimal kohn-sham ENErgy difference]<br>
+... <a href="varrf.html#td_mexcit">td_mexcit</a>   [Time-Dependent dft : Maximal number of EXCITations]<br>
+<br><script type="text/javascript" src="../list_internal_links.js"> </script>
+
+</body>
+</html>
