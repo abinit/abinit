@@ -440,9 +440,9 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
        narrm(idtset)=3*dtsets(idtset)%nzchempot*dtsets(idtset)%ntypat
        if(narrm(idtset)/=0)&
 &       dprarr(1:narrm(idtset),idtset)=&
-&        reshape(dtsets(idtset)%chempot(1:3,1:dtsets(idtset)%nzchempot,&
-&        1:dtsets(idtset)%ntypat),&
-&        (/ narrm(idtset) /) )
+&       reshape(dtsets(idtset)%chempot(1:3,1:dtsets(idtset)%nzchempot,&
+&       1:dtsets(idtset)%ntypat),&
+&       (/ narrm(idtset) /) )
      else
        narrm(idtset)=3*mxvals%nzchempot*mxvals%ntypat
        if(narrm(idtset)/=0)&
@@ -453,7 +453,7 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
    end do
    call prttagm(dprarr,intarr,iout,jdtset_,1,marr,narr,&
 &   narrm,ncid,ndtset_alloc,'chempot','DPR',1) 
- endif
+ end if
  
  intarr(1,:)=dtsets(:)%chkexit
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'chkexit','INT',0)
@@ -490,6 +490,9 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
 
  intarr(1,:)=dtsets(:)%delayperm
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'delayperm','INT',0)
+
+ intarr(1,:)=dtsets(:)%densfor_pred
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'densfor_pred','INT',0)
 
 !densty
  narr=mxvals%ntypat              ! default size for all datasets

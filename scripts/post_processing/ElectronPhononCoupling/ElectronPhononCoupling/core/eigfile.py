@@ -20,6 +20,7 @@ class EigFile(EpcFile):
 
     def __init__(self, *args, **kwargs):
         super(EigFile, self).__init__(*args, **kwargs)
+        self.EIG = None
         self.degen = None
 
     def read_nc(self, fname=None):
@@ -33,19 +34,15 @@ class EigFile(EpcFile):
             self.EIG = root.variables['Eigenvalues'][:,:,:] 
             self.Kptns = root.variables['Kptns'][:,:]
 
-            self.nspin, self.nkpt, self.nband = self.EIG.shape
-
     @mpi_watch
     def broadcast(self):
         """Broadcast the data from master to all workers."""
         comm.Barrier()
 
         if rank == 0:
-            nspin, nkpt, nband = self.EIG.shape
-            dim = np.array([nspin, nkpt, nband], dtype=np.int)
+            dim = np.array([self.nspin, self.nkpt, self.nband], dtype=np.int)
         else:
             dim = np.empty(3, dtype=np.int)
-            self.nspin, self.nkpt, self.nband = dim
 
         comm.Bcast([dim, MPI.INT])
 
@@ -55,6 +52,18 @@ class EigFile(EpcFile):
 
         comm.Bcast([self.EIG, MPI.DOUBLE])
         comm.Bcast([self.Kptns, MPI.DOUBLE])
+
+    @property
+    def nspin(self):
+        return self.EIG.shape[0] if self.EIG is not None else None
+
+    @property
+    def nkpt(self):
+        return self.EIG.shape[1] if self.EIG is not None else None
+
+    @property
+    def nband(self):
+        return self.EIG.shape[2] if self.EIG is not None else None
 
     def iter_spin_band_eig(self, ikpt):
         """

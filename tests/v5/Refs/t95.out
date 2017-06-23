@@ -177,10 +177,19 @@
 
  Calculation of phonon density of states 
 
-- Average speed of sound:     0.2707241185E-03 (at units) =         592.2608 (m/s)
+ Average speed of sound partial sums:    -0.5828742794E-03 (at units)
+-                                   =       -1275.1490 (m/s)
 
- Debye frequency from DOS:     0.2233414569E-03 (Ha) =     0.1469516193E+01 (THz)
- Debye temperature from DOS:     0.7052557038E+02 (K)
+ Debye frequency from partial sums:    -0.4808584897E-03 (Ha)
+-                                 =    -0.3163896873E+01 (THz)
+-Debye temperature from partial sums:    -0.1518429213E+03 (K)
+
+ Average speed of sound:     0.2707241185E-03 (at units)
+-                      =         592.2608 (m/s)
+
+ Debye frequency from DOS:     0.2233414569E-03 (Ha)
+-                        =     0.1469516193E+01 (THz)
+-Debye temperature from DOS:     0.7052557038E+02 (K)
 
 
 ================================================================================

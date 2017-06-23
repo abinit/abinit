@@ -55,9 +55,10 @@
 !!      mover
 !!
 !! CHILDREN
-!!      brdene,calc_prim_int,deloc2xcart,fred2fdeloc,hessupdt,hist2var
-!!      make_prim_internals,metric,mkrdim,var2hist,wrtout,xcart2deloc
+!!      brdene,calc_prim_int,deloc2xcart,fcart2fred,fred2fdeloc,hessupdt
+!!      hist2var,make_prim_internals,metric,var2hist,wrtout,xcart2deloc
 !!      xcart2xred,xfh_recover_deloc,xfpack_f2vout,xfpack_vin2x,xfpack_x2vin
+!!      xred2xcart
 !!
 !! SOURCE
 

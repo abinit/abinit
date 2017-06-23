@@ -342,9 +342,6 @@ subroutine outvar_i_n (dtsets,iout,&
  intarr(1,:)=dtsets(:)%ionmov
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'ionmov','INT',0)
 
- intarr(1,:)=dtsets(:)%densfor_pred
- call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'densfor_pred','INT',0)
-
  intarr(1,:)=dtsets(:)%iprcel
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'iprcel','INT',0)
 

@@ -108,12 +108,14 @@
 !!      driver,gwls_sternheimer
 !!
 !! CHILDREN
-!!      args_gs_free,args_gs_init,copy_results_img,destroy_results_img
-!!      dtfil_init,ga_destroy,ga_init,gstate,init_results_img
-!!      libpaw_spmsg_mpisum,localfilnam,localrdfile,localredirect,localwrfile
-!!      mep_destroy,mep_init,pimd_destroy,pimd_init,predictimg,prtimg
-!!      scf_history_free,scf_history_nullify,specialmsg_mpisum,status,timab
-!!      wrtout,xmpi_barrier,xmpi_sum
+!!      abihist_bcast,abihist_copy,abihist_free,abihist_init,args_gs_free
+!!      args_gs_init,copy_results_img,destroy_results_img,dtfil_init,fcart2fred
+!!      ga_destroy,ga_init,gstate,init_results_img,libpaw_spmsg_mpisum
+!!      localfilnam,localrdfile,localredirect,localwrfile,mep_destroy,mep_init
+!!      mkradim,mkrdim,pimd_destroy,pimd_init,pimd_skip_qtb,predictimg,prtimg
+!!      read_md_hist_img,scf_history_free,scf_history_nullify,specialmsg_mpisum
+!!      status,timab,var2hist,vel2hist,write_md_hist_img,wrtout,xmpi_barrier
+!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -293,7 +295,7 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
      ABI_DATATYPE_ALLOCATE(hist_prev,(nimage))
      if (mpi_enreg%me_cell==0) then
        call read_md_hist_img(hist_filename,hist_prev,isVused,isARused,&
-&                            imgtab=mpi_enreg%my_imgtab)
+&       imgtab=mpi_enreg%my_imgtab)
      end if
      call abihist_bcast(hist_prev,0,mpi_enreg%comm_cell)
      if (nimage>0) then
@@ -324,7 +326,7 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
  do itimimage=1,ntimimage_stored
    res_img => results_img_timimage(:,itimimage)
    call init_results_img(dtset%natom,dtset%npspalch,dtset%nsppol,dtset%ntypalch,&
-&                        dtset%ntypat,res_img)
+&   dtset%ntypat,res_img)
    do iimage=1,nimage
      res_img(iimage)%acell(:)     =acell_img(:,iimage)
      res_img(iimage)%amu(:)       =amu_img(:,iimage)
@@ -418,7 +420,7 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
          res_img(iimage)%results_gs%etotal=hist_prev(iimage)%etot(ih)
          res_img(iimage)%results_gs%energies%entropy=hist_prev(iimage)%entropy(ih)
          call fcart2fred(res_img(iimage)%results_gs%fcart,res_img(iimage)%results_gs%fred,&
-&                        hist_prev(iimage)%rprimd(:,:,ih),dtset%natom)
+&         hist_prev(iimage)%rprimd(:,:,ih),dtset%natom)
          hist_prev(iimage)%ihist=hist_prev(iimage)%ihist+1
        end do
        !PI-QTB: skip a record in random force file
@@ -541,7 +543,7 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
        itimimage_prev=itimimage_eff-1
        if (itimimage_prev<1) itimimage_prev=ntimimage_stored
        call copy_results_img(results_img_timimage(iimage,itimimage_prev), &
-&                            results_img_timimage(iimage,itimimage_eff ))
+&       results_img_timimage(iimage,itimimage_eff ))
      end if
 
 !    Store results in hist datastructure
@@ -549,9 +551,9 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
        ih=hist(iimage)%ihist
        call mkrdim(res_img(iimage)%acell(:),res_img(iimage)%rprim(:,:),rprimd)
        call var2hist(res_img(iimage)%acell(:),hist(iimage),dtset%natom,&
-&                    rprimd,res_img(iimage)%xred(:,:),.FALSE.)
+&       rprimd,res_img(iimage)%xred(:,:),.FALSE.)
        call vel2hist(amass(:,iimage),hist(iimage),res_img(iimage)%vel(:,:),&
-&                    res_img(iimage)%vel_cell(:,:))
+&       res_img(iimage)%vel_cell(:,:))
        hist(iimage)%fcart(:,:,ih)=res_img(iimage)%results_gs%fcart(:,:)
        hist(iimage)%strten(:,ih)=res_img(iimage)%results_gs%strten(:)
        hist(iimage)%etot(ih)=res_img(iimage)%results_gs%etotal
@@ -587,9 +589,9 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
    if (use_hist.and.mpi_enreg%me_cell==0) then
      ifirst=merge(0,1,itimimage>1)
      call write_md_hist_img(hist,hist_filename,ifirst,dtset%natom,dtset%ntypat,&
-&                           dtset%typat,amu_img(:,1),dtset%znucl,dtion,&
-&                           nimage=dtset%nimage,comm_img=mpi_enreg%comm_img,&
-&                           imgtab=mpi_enreg%my_imgtab)
+&     dtset%typat,amu_img(:,1),dtset%znucl,dtion,&
+&     nimage=dtset%nimage,imgmov=dtset%imgmov,comm_img=mpi_enreg%comm_img,&
+&     imgtab=mpi_enreg%my_imgtab)
    end if
 #endif
 
@@ -607,7 +609,7 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
        iimage=list_dynimage(idynimage)
        delta_energy=delta_energy &
 &       +abs(results_img_timimage(iimage,itimimage)%results_gs%etotal &
-&           -results_img_timimage(iimage,itimimage-idelta)%results_gs%etotal)
+&       -results_img_timimage(iimage,itimimage-idelta)%results_gs%etotal)
      end do
      if (mpi_enreg%paral_img==1) then
        call xmpi_sum(delta_energy,mpi_enreg%comm_img,ierr)
@@ -636,7 +638,7 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
    end if
 
 !Temporary statement
-110 continue
+    110 continue
 
 !  Dont call the predictor at last time step
    if (itimimage>=ntimimage_max) call_predictor=(call_predictor.and.is_pimd)

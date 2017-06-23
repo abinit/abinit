@@ -76,7 +76,7 @@ Debugging mode:
     runtests.py v3[30] -V "memcheck" ==> Run test v3[30] with valgrind memcheck
     runtests.py v3[30] --pedantic    ==> Mark test as failed if stderr is not empty
     runtests.py --rerun=failed       ==> Rerun only the tests that failed in a previous run.
-    runtests.py -k GW --looponfail   ==> Excecute e.g. the GW tests and enter a busy loop that will
+    runtests.py -k GW --looponfail   ==> Execute e.g. the GW tests and enter a busy loop that will
                                          recompile the code upon change in the source files and rerun
                                          the failing tests. Exit when all tests are OK.
 
@@ -281,7 +281,7 @@ def main():
                       help="Rerun previous tests. Example: `--rerun failed`. Same syntax as patch option.")
 
     parser.add_option("--looponfail", default=False, action="store_true",
-                      help=("Excecute the tests and enter a busy loop that will "
+                      help=("Execute the tests and enter a busy loop that will "
                             "recompile the code upon change in the source files and rerun "
                             "the failing tests. Exit when all tests are OK."))
 

@@ -85,8 +85,8 @@
 !!      vtorho
 !!
 !! CHILDREN
-!!      build_h,cgwf,chebfi,dsymm,fourwf,fxphas,lobpcgwf,meanvalue_g,nonlop
-!!      pawcprj_alloc,pawcprj_copy,pawcprj_free,pawcprj_put,prep_fourwf
+!!      build_h,cgwf,chebfi,dsymm,fourwf,fxphas,lobpcgwf,lobpcgwf2,meanvalue_g
+!!      nonlop,pawcprj_alloc,pawcprj_copy,pawcprj_free,pawcprj_put,prep_fourwf
 !!      prep_nonlop,pw_orthon,subdiago,timab,wrtout,xmpi_sum,zhemm
 !!
 !! NOTES
@@ -230,7 +230,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 
 !Parallelism over FFT and/or bands: define sizes and tabs
  !if (mpi_enreg%paral_kgb==1) then
-   nblockbd=nband_k/(mpi_enreg%nproc_band*mpi_enreg%bandpp)
+ nblockbd=nband_k/(mpi_enreg%nproc_band*mpi_enreg%bandpp)
  !else
  !  nblockbd=nband_k/mpi_enreg%nproc_fft
  !  if (nband_k/=nblockbd*mpi_enreg%nproc_fft) nblockbd=nblockbd+1
@@ -364,7 +364,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
            if (use_subovl==1) call xmpi_sum(subovl,spaceComm,ierr)
          else
            call lobpcgwf2(cg(:,icg+1:),dtset,eig_k,enl_k,gs_hamk,kinpw,mpi_enreg,&
-&                        nband_k,npw_k,my_nspinor,prtvol,resid_k)
+&           nband_k,npw_k,my_nspinor,prtvol,resid_k)
          end if
 !        In case of FFT parallelism, exchange subspace arrays
 

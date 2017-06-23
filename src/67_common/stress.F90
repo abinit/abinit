@@ -112,8 +112,8 @@
 !!      forstr
 !!
 !! CHILDREN
-!!      atm2fft,ewald2,fourdp,metric,mkcore,mklocl_recipspace,stresssym,strhar
-!!      timab,vdw_dftd2,vdw_dftd3,wrtout,zerosym
+!!      atm2fft,ewald2,fourdp,metric,mkcore,mkcore_alt,mklocl_recipspace
+!!      stresssym,strhar,timab,vdw_dftd2,vdw_dftd3,wrtout,zerosym
 !!
 !! SOURCE
 
@@ -290,13 +290,13 @@
 &         xcccrc,xccc1d,xccc3d,xred)
        else
          call mkcore(corstr,dyfr_dum,gr_dum,mpi_enreg,natom,nfft,nspden,ntypat,ngfft(1),&
-&        n1xccc,ngfft(2),ngfft(3),option,rprimd,typat,ucvol,vxc_hf,&
-&        xcccrc,xccc1d,xccc3d,xred)
+&         n1xccc,ngfft(2),ngfft(3),option,rprimd,typat,ucvol,vxc_hf,&
+&         xcccrc,xccc1d,xccc3d,xred)
        end if
      else if (psps%usewvl==0.and.(usepaw==1.or.icoulomb==1)) then
        call mkcore_alt(atindx1,corstr,dyfr_dum,gr_dum,icoulomb,mpi_enreg,natom,nfft,&
-&           nspden,nattyp,ntypat,ngfft(1),n1xccc,ngfft(2),ngfft(3),option,rprimd,&
-&           ucvol,vxc,xcccrc,xccc1d,xccc3d,xred,pawrad,pawtab,usepaw)
+&       nspden,nattyp,ntypat,ngfft(1),n1xccc,ngfft(2),ngfft(3),option,rprimd,&
+&       ucvol,vxc,xcccrc,xccc1d,xccc3d,xred,pawrad,pawtab,usepaw)
      end if
      ABI_DEALLOCATE(dyfr_dum)
      ABI_DEALLOCATE(gr_dum)

@@ -31,15 +31,15 @@
 !!
 !! CHILDREN
 !!      add_matlu,checkreal_matlu,compute_levels,copy_green,copy_matlu
-!!      ctqmc_printgreen,ctqmc_triqs_run,ctqmcinterface_finalize
-!!      ctqmcinterface_init,ctqmcinterface_run,ctqmcinterface_setopts
-!!      data4entropydmft_setdocc,destroy_green,destroy_matlu,destroy_oper
-!!      diag_matlu,diff_matlu,fac_matlu,flush_unit,fourier_green
-!!      hybridization_asymptotic_coefficient,identity_matlu,init_green
-!!      init_matlu,init_oper,int_fct,inverse_oper,jbessel,occup_green_tau
-!!      print_green,print_matlu,printocc_green,printplot_matlu,prod_matlu
-!!      rotate_matlu,rotatevee_hu,sbf8,shift_matlu,slm2ylm_matlu,sym_matlu
-!!      testcode_ctqmc,vee_ndim2tndim_hu_r,wrtout,xginv,xmpi_barrier,xmpi_bcast
+!!      ctqmc_triqs_run,ctqmcinterface_finalize,ctqmcinterface_init
+!!      ctqmcinterface_run,ctqmcinterface_setopts,data4entropydmft_setdocc
+!!      destroy_green,destroy_matlu,destroy_oper,diag_matlu,diff_matlu
+!!      fac_matlu,flush_unit,fourier_green,hybridization_asymptotic_coefficient
+!!      identity_matlu,init_green,init_matlu,init_oper,int_fct,inverse_oper
+!!      jbessel,occup_green_tau,print_green,print_matlu,printocc_green
+!!      printplot_matlu,prod_matlu,rotate_matlu,rotatevee_hu,sbf8,shift_matlu
+!!      slm2ylm_matlu,sym_matlu,testcode_ctqmc,vee_ndim2tndim_hu_r,wrtout,xginv
+!!      xmpi_barrier,xmpi_bcast
 !!
 !! SOURCE
 
@@ -1757,7 +1757,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
            write(unt,'(29f21.14)') float(itau-1)/float(paw_dmft%dmftqmc_l)/paw_dmft%temp,&
            (gtmp(itau,iflavor), iflavor=1, nflavor) 
          end do
-           write(unt,'(29f21.14)') 1/paw_dmft%temp, (-1_dp-gtmp(1,iflavor), iflavor=1, nflavor) 
+         write(unt,'(29f21.14)') 1/paw_dmft%temp, (-1_dp-gtmp(1,iflavor), iflavor=1, nflavor) 
          close(unt)
          !open(unit=4243, file=trim(paw_dmft%filapp)//"_atom_"//iatomnb//"_F_"//gtau_iter//".dat")
          !call BathOperator_printF(paw_dmft%hybrid(iatom)%hybrid%bath,4243) !Already comment here

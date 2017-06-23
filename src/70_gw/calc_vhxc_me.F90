@@ -68,10 +68,11 @@
 !!
 !! CHILDREN
 !!      destroy_mpi_enreg,dtset_copy,dtset_free,init_distribfft_seq,initmpi_seq
-!!      libxc_functionals_end,libxc_functionals_init,melements_herm
-!!      melements_init,melements_mpisum,mkkin,paw_mknewh0,pawcprj_alloc
-!!      pawcprj_free,rhohxc,wfd_change_ngfft,wfd_distribute_bbp,wfd_get_cprj
-!!      wfd_get_ur,wrtout
+!!      libxc_functionals_end,libxc_functionals_get_hybridparams
+!!      libxc_functionals_init,libxc_functionals_set_hybridparams
+!!      melements_herm,melements_init,melements_mpisum,mkkin,paw_mknewh0
+!!      pawcprj_alloc,pawcprj_free,rhohxc,wfd_change_ngfft,wfd_distribute_bbp
+!!      wfd_get_cprj,wfd_get_ur,wrtout
 !!
 !! SOURCE
 
@@ -293,13 +294,16 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,gsqcutf_eff,nfftf,ngfftf,&
        call libxc_functionals_end()
      end if
      call libxc_functionals_init(Dtset_dummy%ixc,Dtset_dummy%nspden)
-     if (Dtset_dummy%ixc==-428) then !HSE06
-       if (Dtset_dummy%rcut>tol8) then
+     if (Dtset_dummy%ixc==-406) then !PBE0
+       call libxc_functionals_set_hybridparams(hyb_mixing=Dtset_dummy%gwfockmix)
+     else if (Dtset_dummy%ixc==-428) then !HSE06
+       if (Dtset_dummy%rcut>tol6) then
          omega = one/Dtset_dummy%rcut
-         call libxc_functionals_set_hybridparams(hyb_range=omega,hyb_mixing_sr=Dtset_dummy%gwfockmix)
        else
-         call libxc_functionals_get_hybridparams(hyb_range=omega)
+         omega = 0.11_dp
+         !call libxc_functionals_get_hybridparams(hyb_range=omega)
        end if
+       call libxc_functionals_set_hybridparams(hyb_range=omega,hyb_mixing_sr=Dtset_dummy%gwfockmix)
      end if
      write(msg, '(a, f4.2)') ' Fock fraction = ', Dtset_dummy%gwfockmix
      call wrtout(std_out,msg,'COLL')

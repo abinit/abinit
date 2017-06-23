@@ -53,9 +53,9 @@
 !!
 !! PARENTS
 !!      dfpt_dyfro,forces,nonlinear,prcref,prcref_PMA,respfn,setvtr,stress
+!!      xchybrid_ncpp_cc
 !!
 !! CHILDREN
-!!      ptabs_fourdp,strconv,timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -611,7 +611,6 @@ end subroutine mkcore
 !!      forces,setvtr,stress
 !!
 !! CHILDREN
-!!      ptabs_fourdp,strconv,timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -776,8 +775,8 @@ subroutine mkcore_alt(atindx1,corstr,dyfrx2,grxc,icoulomb,mpi_enreg,natom,nfft,n
 !  PAW: create mesh for core density
    if (usepaw==1) then
      call pawrad_init(core_mesh,mesh_size=pawtab(itypat)%core_mesh_size,&
-&                     mesh_type=pawrad(itypat)%mesh_type,&
-&                     rstep=pawrad(itypat)%rstep,lstep=pawrad(itypat)%lstep)
+&     mesh_type=pawrad(itypat)%mesh_type,&
+&     rstep=pawrad(itypat)%rstep,lstep=pawrad(itypat)%lstep)
    end if
 
 !  Loop over atoms of the type
@@ -861,7 +860,7 @@ subroutine mkcore_alt(atindx1,corstr,dyfrx2,grxc,icoulomb,mpi_enreg,natom,nfft,n
        do ishift2=1,ishiftmax(2)
          i2=ii(ishift2,2) ; rdiff2=rrdiff(ishift2,2)
          rnorm2_part=rmet(3,3)*rdiff3**2+rmet(2,2)*rdiff2**2 &
-&                   +2.0d0*rmet(3,2)*rdiff3*rdiff2
+&         +2.0d0*rmet(3,2)*rdiff3*rdiff2
          rnorm2_fact=2.0d0*(rmet(3,1)*rdiff3+rmet(2,1)*rdiff2)
          do ishift1=1,ishiftmax(1)
            i1=ii(ishift1,1) ; rdiff1=rrdiff(ishift1,1)
@@ -887,23 +886,23 @@ subroutine mkcore_alt(atindx1,corstr,dyfrx2,grxc,icoulomb,mpi_enreg,natom,nfft,n
          if (option==1.or.option==3) then
 !          Evaluate fit of core density
            call paw_splint(core_mesh%mesh_size,core_mesh%rad, &
-&                          pawtab(itypat)%tcoredens(:,1), &
-&                          pawtab(itypat)%tcoredens(:,3),&
-&                          npts,rnorm(1:npts),tcore(1:npts))
+&           pawtab(itypat)%tcoredens(:,1), &
+&           pawtab(itypat)%tcoredens(:,3),&
+&           npts,rnorm(1:npts),tcore(1:npts))
          end if
          if (option>=2) then
 !          Evaluate fit of 1-der of core density
            call paw_splint(core_mesh%mesh_size,core_mesh%rad, &
-&                          pawtab(itypat)%tcoredens(:,2), &
-&                          pawtab(itypat)%tcoredens(:,4),&
-&                          npts,rnorm(1:npts),dtcore(1:npts))
+&           pawtab(itypat)%tcoredens(:,2), &
+&           pawtab(itypat)%tcoredens(:,4),&
+&           npts,rnorm(1:npts),dtcore(1:npts))
          end if
          if (option==4) then
 !          Evaluate fit of 2nd-der of core density
            call paw_splint(core_mesh%mesh_size,core_mesh%rad, &
-&                          pawtab(itypat)%tcoredens(:,3), &
-&                          pawtab(itypat)%tcoredens(:,5),&
-&                          npts,rnorm(1:npts),d2tcore(1:npts))
+&           pawtab(itypat)%tcoredens(:,3), &
+&           pawtab(itypat)%tcoredens(:,5),&
+&           npts,rnorm(1:npts),d2tcore(1:npts))
          end if
        else
 !        Norm-conserving PP:
@@ -919,15 +918,15 @@ subroutine mkcore_alt(atindx1,corstr,dyfrx2,grxc,icoulomb,mpi_enreg,natom,nfft,n
            dd = bb*(bb**2-one)*delta2div6
            if (option==1.or.option==3) then
              tcore(ipts)=aa*xccc1d(jj,1,itypat)+bb*xccc1d(jj+1,1,itypat) +&
-&                        cc*xccc1d(jj,3,itypat)+dd*xccc1d(jj+1,3,itypat)
+&             cc*xccc1d(jj,3,itypat)+dd*xccc1d(jj+1,3,itypat)
            end if
            if (option>=2) then
              dtcore(ipts)=aa*xccc1d(jj,2,itypat)+bb*xccc1d(jj+1,2,itypat) +&
-&                         cc*xccc1d(jj,4,itypat)+dd*xccc1d(jj+1,4,itypat)
+&             cc*xccc1d(jj,4,itypat)+dd*xccc1d(jj+1,4,itypat)
            end if
            if (option==4) then
              d2tcore(ipts)=aa*xccc1d(jj,3,itypat)+bb*xccc1d(jj+1,3,itypat) +&
-&                          cc*xccc1d(jj,5,itypat)+dd*xccc1d(jj+1,5,itypat)
+&             cc*xccc1d(jj,5,itypat)+dd*xccc1d(jj+1,5,itypat)
            end if
          end do
        end if
@@ -982,8 +981,8 @@ subroutine mkcore_alt(atindx1,corstr,dyfrx2,grxc,icoulomb,mpi_enreg,natom,nfft,n
              do mu=1,3
                do nu=1,3
                  dyfrx2(mu,nu,iatom)=dyfrx2(mu,nu,iatom)&
-&                      +(term2-term1/difmag**2)*tt(mu)*tt(nu)&
-&                      +term1*rmet(mu,nu)
+&                 +(term2-term1/difmag**2)*tt(mu)*tt(nu)&
+&                 +term1*rmet(mu,nu)
                end do
              end do
            else
@@ -1101,8 +1100,8 @@ subroutine mkcore_alt(atindx1,corstr,dyfrx2,grxc,icoulomb,mpi_enreg,natom,nfft,n
     real(dp) :: cross_mkcore_alt
     real(dp),intent(in) :: xx,yy,zz,aa,bb,cc
 ! *************************************************************************
-    cross_mkcore_alt=sqrt((yy*cc-zz*bb)**2+(zz*aa-xx*cc)**2+(xx*bb-yy*aa)**2)
-   end function cross_mkcore_alt
+   cross_mkcore_alt=sqrt((yy*cc-zz*bb)**2+(zz*aa-xx*cc)**2+(xx*bb-yy*aa)**2)
+ end function cross_mkcore_alt
 !!***
 
 !--------------------------------------------------------------
@@ -1116,6 +1115,8 @@ subroutine mkcore_alt(atindx1,corstr,dyfrx2,grxc,icoulomb,mpi_enreg,natom,nfft,n
 !!  Determine also whether the index is inside or outside the box for free BC
 !!
 !! PARENTS
+!!      mkcore
+!!
 !! CHILDREN
 !!
 !! SOURCE
@@ -1135,12 +1136,12 @@ subroutine mkcore_alt(atindx1,corstr,dyfrx2,grxc,icoulomb,mpi_enreg,natom,nfft,n
     logical, intent(in) :: periodic
     logical, intent(out) :: inside
 ! *************************************************************************
-    if (periodic) then
-      inside=.true. ; jj=modulo(ii-1,nn)+1
-    else
-      jj=ii ; inside=(ii>=1.and.ii<=nn)
-    end if
-   end subroutine indpos_mkcore_alt
+   if (periodic) then
+     inside=.true. ; jj=modulo(ii-1,nn)+1
+   else
+     jj=ii ; inside=(ii>=1.and.ii<=nn)
+   end if
+ end subroutine indpos_mkcore_alt
 
 end subroutine mkcore_alt
 !!***

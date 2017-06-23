@@ -237,7 +237,7 @@ end subroutine splfit
 !!
 !! PARENTS
 !!      atomden,calc_sigc_cd,calc_sigc_pole_cd,cc_derivatives,denfgr,get_tau_k
-!!      init_occ_ent,integrho,m_atom,m_dens,m_entropyDMFT,m_paw_slater
+!!      init_occ_ent,integrho,m_atom,m_dens,m_entropyDMFT,m_ewald,m_paw_slater
 !!      m_special_funcs,m_splines,outscfcv,pawinit,predict_string,psp10in
 !!      psp10nl,psp11nl,psp1cc,psp1in,psp1nl,psp2in,psp2nl,psp3in,psp3nl,psp4cc
 !!      psp5in,psp5nl,psp6cc,psp6in,psp8in,psp8lo,psp8nl,psp9in
@@ -717,9 +717,8 @@ end subroutine spline_complex
 !! PARENTS
 !!      atomden,calc_sigc_cd,calc_sigc_pole_cd,cc_derivatives,denfgr,get_tau_k
 !!      m_atom,m_cut3d,m_entropyDMFT,m_paw_slater,m_special_funcs,m_splines
-!!      mkcore_inner,mklocl_realspace,outscfcv,partial_dos_fractions
-!!      predict_string,psp6cc,random_stopping_power,spline_paw_fncs
-!!      vso_realspace_local,wvl_initro
+!!      outscfcv,partial_dos_fractions,predict_string,psp6cc
+!!      random_stopping_power,spline_paw_fncs,vso_realspace_local,wvl_initro
 !!
 !! CHILDREN
 !!

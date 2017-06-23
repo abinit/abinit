@@ -30,7 +30,8 @@
 !!    on all atoms is zero.
 !!
 !! PARENTS
-!!      m_effective_potential,m_mep,mover,prec_simple
+!!      gstateimg,m_abihist,m_effective_potential,m_mep,mover,prec_simple
+!!      pred_bfgs,pred_delocint,pred_lbfgs,pred_verlet,prtxfase
 !!
 !! CHILDREN
 !!
