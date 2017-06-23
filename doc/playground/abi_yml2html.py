@@ -438,7 +438,7 @@ for (tclasskey, tclassval) in list_topics_class:
         # Constitute the line of information related to one input variable
         foundvar[topic_name]=0
         varname=varname_dic[topic_name]
-        varname2=varname_dic[topic_name]
+        varname2=varname2_dic[topic_name]
         section=section_dic[topic_name]
         definition=definition_dic[topic_name]
         topic_class_sec3[topic_name] += "... <a href=\""+section+".html#"+varname+"\">"+varname2+"</a>   "
@@ -555,7 +555,7 @@ for topic_name, content in topic_sec3.items():
 # Generate the file with the list of names of different "topic" files
 
 ################################################################################
-# Parse the header of allvariables and special variables files also replace the JS_PATH.
+# Parse the header of alltopics file and also replace the JS_PATH.
 
 with open('html_template/temp_alltopics.html') as f:
     header_alltopics = f.read()
