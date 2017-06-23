@@ -2208,8 +2208,8 @@
     topic_class: prdos
     topic_name: printing_settings
     varname: xyzfile
-    topic_class: crystal
-    topic_name: expert
+    topic_class: expert
+    topic_name: crystal
     varname: zcut
     topic_class:
     topic_name:
