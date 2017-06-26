@@ -214,7 +214,6 @@ output = output + "<p>"+cur_let+".&nbsp;\n"
 for i, var in enumerate(variables):
   if debug==1 :
     print(var)
-  #output = output + "<a href=\""+var.section+".html#"+var.abivarname+"\">"+var.abivarname+"</a> : "+var.mnemonics+"<br />\n" 
   while not var.abivarname.startswith(cur_let.lower()):
     cur_let = chr(ord(cur_let)+1)
     output = output + "<p>"+cur_let+".\n"
@@ -244,7 +243,14 @@ for i, var in enumerate(variables):
     else:
       cur_content += "<br><font id=\"characteristic\">Characteristic: </font>\n"
     try:
-      cur_content += "<br><font id=\"characteristic\">Mentioned in \"How to\": "+"<a href=\""+var.topic_name+".html\">"+var.topic_name+"</a></font>\n"
+      if var.topics is not None:
+        cur_content += "<br><font id=\"characteristic\">Mentioned in \"How to\": "
+        vartopics=var.topics
+        topics_name_class = vartopics.split(',')
+        for i, topic_name_class in enumerate(topics_name_class):
+          name_class = topic_name_class.split('_')
+          cur_content += "<a href=\""+name_class[0]+".html\">"+name_class[0]+"</a> "
+        cur_content += "</font>\n"
     except:
       if debug==1 :
         print(" No topic_class for abivarname "+var.abivarname)
@@ -391,43 +397,28 @@ for (tclasskey, tclassval) in list_topics_class:
 
   for i, var in enumerate(variables):
     foundvar[topic_name] = 0
-    # This whole section should be much better coded ... Avoid duplication of code sections ...
-    if var.topic_name is not None:
-      if tclasskey==var.topic_class : 
-        topic_name=var.topic_name
-        found[topic_name] = 1
-        foundvar[topic_name] = 1
-        abivarname_dic[topic_name]=var.abivarname
-        abivarname2_dic[topic_name]=var.abivarname
-        if var.characteristics is not None and '[[INTERNAL_ONLY]]' in var.characteristics:
-          abivarname2_dic[topic_name] = '%'+var.abivarname
-        section_dic[topic_name]=var.section
-        mnemonics_dic[topic_name]=var.mnemonics
-    else:
-      try:
-        if var.topics is not None:
-
-          #print("\nabivarname:",var.abivarname)  
-          #print("topics:",var.topics)  
-
-          for vartopics in var.topics:
-
-            #print("\nabivarname:",var.abivarname)
-            #print("vartopics:",vartopics)  
-
-            if tclasskey==vartopics["topic_class"] : 
-              topic_name=vartopics["topic_name"]
-              found[topic_name] = 1
-              foundvar[topic_name] = 1
-              abivarname_dic[topic_name]=var.abivarname
-              abivarname2_dic[topic_name]=var.abivarname
-              if var.characteristics is not None and '[[INTERNAL_ONLY]]' in var.characteristics:
-                abivarname2_dic[topic_name] = '%'+var.abivarname
-              section_dic[topic_name]=var.section
-              mnemonics_dic[topic_name]=var.mnemonics 
-      except:
-        if debug==1 :
-         print(" No topic_name (neither topics) for abivarname "+var.abivarname) 
+    try:
+      if var.topics is not None:
+        #print("\nabivarname:",var.abivarname)  
+        #print("topics:",var.topics)  
+        vartopics=var.topics
+        topics_name_class = vartopics.split(',')
+        for i, topic_name_class in enumerate(topics_name_class):
+          name_class = topic_name_class.split('_')
+          #print("tclasskey,name_class[1].strip()",tclasskey,name_class[1].strip()) 
+          if tclasskey==name_class[1].strip() :
+            topic_name=name_class[0].strip()
+            found[topic_name] = 1
+            foundvar[topic_name] = 1
+            abivarname_dic[topic_name]=var.abivarname
+            abivarname2_dic[topic_name]=var.abivarname
+            if var.characteristics is not None and '[[INTERNAL_ONLY]]' in var.characteristics:
+              abivarname2_dic[topic_name] = '%'+var.abivarname
+            section_dic[topic_name]=var.section
+            mnemonics_dic[topic_name]=var.mnemonics
+    except:
+      if debug==1 :
+       print(" No topics for abivarname "+var.abivarname) 
 
     for i, topic in enumerate(topics):
       topic_name=topic.topic_name

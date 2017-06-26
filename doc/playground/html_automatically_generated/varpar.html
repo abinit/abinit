@@ -70,7 +70,6 @@ variables to be used in the main input file of the abinit code.
 <br><font id="title"><a name="autoparal">autoparal</a></font>
 <br><font id="mnemonics">Mnemonics: AUTOmatisation of the PARALlelism</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#develop">DEVELOP</a></font>
-<br><font id="characteristic">Mentioned in "How to": <a href="parallelism.html">parallelism</a></font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
 <br><font id="text">
@@ -157,7 +156,6 @@ After having printed out the weights, the code stops.
 <br><font id="title"><a name="bandpp">bandpp</a></font>
 <br><font id="mnemonics">Mnemonics: BAND Per Processor</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#develop">DEVELOP</a></font>
-<br><font id="characteristic">Mentioned in "How to": <a href="parallelism.html">parallelism</a></font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 1</font>
 <br><br><font id="requires">
@@ -208,7 +206,6 @@ Put <b>bandpp</b>=2 when <a href="vardev.html#istwfk">istwfk</a>=2 (the time spe
 <br><font id="title"><a name="gpu_devices">gpu_devices</a></font>
 <br><font id="mnemonics">Mnemonics: GPU: choice of DEVICES on one node</font>
 <br><font id="characteristic">Characteristic: </font>
-<br><font id="characteristic">Mentioned in "How to": <a href="parallelism.html">parallelism</a></font>
 <br><font id="vartype">Variable type: integer(5)</font>
 <br><font id="default">Default is [-1, -1, -1, -1, -1]</font>
 <br><br><font id="requires">
@@ -238,7 +235,6 @@ GPU card are numbered starting from 0; to get the GPU devices list, type "nvidia
 <br><font id="title"><a name="gpu_linalg_limit">gpu_linalg_limit</a></font>
 <br><font id="mnemonics">Mnemonics: GPU (Cuda): LINear ALGebra LIMIT</font>
 <br><font id="characteristic">Characteristic: </font>
-<br><font id="characteristic">Mentioned in "How to": <a href="parallelism.html">parallelism</a></font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 2000000</font>
 <br><br><font id="requires">
@@ -271,7 +267,6 @@ automatically set to 14 which corresponds to the use of LOBPCG algorithm for the
 <br><font id="title"><a name="gwpara">gwpara</a></font>
 <br><font id="mnemonics">Mnemonics: GW PARAllelization level</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#gw">GW</a></font>
-<br><font id="characteristic">Mentioned in "How to": <a href="parallelism.html">parallelism</a></font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 2 (Comment: The default value has been changed in v8. From 1 to 2 )</font>
 <br><br><font id="requires">
@@ -309,7 +304,6 @@ irrespectively of the number of CPUs used.
 <br><font id="title"><a name="localrdwf">localrdwf</a></font>
 <br><font id="mnemonics">Mnemonics: LOCAL ReaD WaveFunctions</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#develop">DEVELOP</a></font>
-<br><font id="characteristic">Mentioned in "How to": <a href="parallelism.html">parallelism</a></font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 1</font>
 <br><font id="text">
@@ -348,7 +342,6 @@ master node if <b>localrdwf</b>=0.
 <br><font id="title"><a name="max_ncpus">max_ncpus</a></font>
 <br><font id="mnemonics">Mnemonics: MAXimum Number of CPUS</font>
 <br><font id="characteristic">Characteristic: </font>
-<br><font id="characteristic">Mentioned in "How to": <a href="parallelism.html">parallelism</a></font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
 <br><font id="text">
@@ -368,7 +361,6 @@ After having printed out the efficiency, the code stops.
 <br><font id="title"><a name="np_slk">np_slk</a></font>
 <br><font id="mnemonics">Mnemonics: Number of mpi Processors used for ScaLapacK calls</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#develop">DEVELOP</a></font>
-<br><font id="characteristic">Mentioned in "How to": <a href="parallelism.html">parallelism</a></font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 1000000</font>
 <br><br><font id="requires">
@@ -397,7 +389,6 @@ Linear Algebra calls.
 <br><font id="title"><a name="npband">npband</a></font>
 <br><font id="mnemonics">Mnemonics: Number of Processors at the BAND level</font>
 <br><font id="characteristic">Characteristic: </font>
-<br><font id="characteristic">Mentioned in "How to": <a href="parallelism.html">parallelism</a></font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 1</font>
 <br><br><font id="requires">
@@ -431,7 +422,6 @@ band/FFT/k-point parallelisation.
 <br><font id="title"><a name="npfft">npfft</a></font>
 <br><font id="mnemonics">Mnemonics: Number of Processors at the FFT level</font>
 <br><font id="characteristic">Characteristic: </font>
-<br><font id="characteristic">Mentioned in "How to": <a href="parallelism.html">parallelism</a></font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 1</font>
 <br><br><font id="requires">
@@ -470,7 +460,7 @@ If the number of processor is changed from a calculation to another one,
 <br><font id="title"><a name="nphf">nphf</a></font>
 <br><font id="mnemonics">Mnemonics: Number of Processors for Fock exact exchange</font>
 <br><font id="characteristic">Characteristic: </font>
-<br><font id="vartype">Variable type: integer</font>
+<br><font id="characteristic">Mentioned in "How to": <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 1</font>
 <br><font id="text">
 <p>
@@ -499,7 +489,6 @@ in order to have the better load-balancing and efficiency.
 <br><font id="title"><a name="npimage">npimage</a></font>
 <br><font id="mnemonics">Mnemonics: Number of Processors at the IMAGE level</font>
 <br><font id="characteristic">Characteristic: </font>
-<br><font id="characteristic">Mentioned in "How to": <a href="parallelism.html">parallelism</a></font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 1</font>
 <br><font id="text">
@@ -527,7 +516,6 @@ and <a href="varpar.html#npspinor">npspinor</a> for the additional information o
 <br><font id="title"><a name="npkpt">npkpt</a></font>
 <br><font id="mnemonics">Mnemonics: Number of Processors at the K-Point Level</font>
 <br><font id="characteristic">Characteristic: </font>
-<br><font id="characteristic">Mentioned in "How to": <a href="parallelism.html">parallelism</a></font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 1</font>
 <br><br><font id="requires">
@@ -564,7 +552,6 @@ in order to have the better load-balancing and efficiency.
 <br><font id="title"><a name="nppert">nppert</a></font>
 <br><font id="mnemonics">Mnemonics: Number of Processors at the PERTurbation level</font>
 <br><font id="characteristic">Characteristic: </font>
-<br><font id="characteristic">Mentioned in "How to": <a href="parallelism.html">parallelism</a></font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 1</font>
 <br><br><font id="requires">
@@ -587,7 +574,6 @@ It can even be specified separately for each dataset.
 <br><font id="title"><a name="npspinor">npspinor</a></font>
 <br><font id="mnemonics">Mnemonics: Number of Processors at the SPINOR level</font>
 <br><font id="characteristic">Characteristic: </font>
-<br><font id="characteristic">Mentioned in "How to": <a href="parallelism.html">parallelism</a></font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 1</font>
 <br><br><font id="requires">
@@ -624,7 +610,6 @@ band/FFT/k-point parallelisation.</i>
 <br><font id="title"><a name="paral_atom">paral_atom</a></font>
 <br><font id="mnemonics">Mnemonics: activate PARALelization over (paw) ATOMic sites</font>
 <br><font id="characteristic">Characteristic: </font>
-<br><font id="characteristic">Mentioned in "How to": <a href="parallelism.html">parallelism</a></font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 1</font>
 <br><font id="text">
@@ -646,7 +631,6 @@ also distributed using the "kpt-band" communicator.
 <br><font id="title"><a name="paral_kgb">paral_kgb</a></font>
 <br><font id="mnemonics">Mnemonics: activate PARALelization over K-point, G-vectors and Bands</font>
 <br><font id="characteristic">Characteristic: </font>
-<br><font id="characteristic">Mentioned in "How to": <a href="parallelism.html">parallelism</a></font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
 <br><font id="text">
@@ -742,7 +726,6 @@ He must put again paral_kgb=1 in the input file and put the corresponding values
 <br><font id="title"><a name="paral_rf">paral_rf</a></font>
 <br><font id="mnemonics">Mnemonics: activate PARALlelization over Response Function perturbations</font>
 <br><font id="characteristic">Characteristic: </font>
-<br><font id="characteristic">Mentioned in "How to": <a href="parallelism.html">parallelism</a></font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
 <br><font id="text">
@@ -770,7 +753,6 @@ q-point in the log file (YAML format) and then stops.
 <br><font id="title"><a name="pw_unbal_thresh">pw_unbal_thresh</a></font>
 <br><font id="mnemonics">Mnemonics: Plane Wave UNBALancing: THRESHold for balancing procedure</font>
 <br><font id="characteristic">Characteristic: </font>
-<br><font id="characteristic">Mentioned in "How to": <a href="parallelism.html">parallelism</a></font>
 <br><font id="vartype">Variable type: real</font>
 <br><font id="default">Default is 40%</font>
 <br><br><font id="requires">
@@ -792,7 +774,6 @@ Only relevant if <a href="varpar.html#paral_kgb">paral_kgb</a>==1
 <br><font id="title"><a name="use_gpu_cuda">use_gpu_cuda</a></font>
 <br><font id="mnemonics">Mnemonics: activate USE of GPU accelerators with CUDA (nvidia)</font>
 <br><font id="characteristic">Characteristic: </font>
-<br><font id="characteristic">Mentioned in "How to": <a href="parallelism.html">parallelism</a></font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 1 if <a href="vargs.html#optdriver">optdriver</a>==0 and <a href="specials.html#CUDA">CUDA</a>,
 0 otherwise.
