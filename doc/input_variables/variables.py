@@ -36,11 +36,11 @@ yaml.add_representer(literal, literal_unicode_representer)
 class Variable(yaml.YAMLObject):
     vartype = ''  # String containing the type
     characteristic = None  # String containing the characteristics
-    definition = None  # String containing the mnemonics
+    mnemonics = None  # String containing the mnemonics
     dimensions = None  # Array containing either int, formula or another variable
     defaultval = None  # Either constant number, formula or another variable
     text = None  # Description (str)
-    varname = None  # Name of the variable (str)
+    abivarname = None  # Name of the variable (str)
     commentdefault = None
     commentdims = None
     section = None
@@ -51,20 +51,20 @@ class Variable(yaml.YAMLObject):
     yaml_tag = u'!variable'
 
     def attrs(self):
-        return ['vartype', 'characteristic', 'definition', 'dimensions', 'defaultval', 'text',
-                'varname', 'section']
+        return ['vartype', 'characteristic', 'mnemonics', 'dimensions', 'defaultval', 'text',
+                'abivarname', 'section']
 
     def __init__(self, vartype=None, characteristic=None,
-                 definition=None, dimensions=None, default=None,
-                 text=None, varname=None, section=None, range=None,
+                 mnemonics=None, dimensions=None, default=None,
+                 text=None, abivarname=None, section=None, range=None,
                  commentdefault=None, commentdims=None):
         self.vartype = vartype
         self.characteristic = characteristic
-        self.definition = definition
+        self.mnemonics = mnemonics
         self.dimensions = dimensions
         self.defaultval = default
         self.text = literal(text)
-        self.varname = varname
+        self.abivarname = abivarname
         self.section = section
         self.commentdefault = commentdefault
         self.commentdims = commentdims
@@ -73,13 +73,13 @@ class Variable(yaml.YAMLObject):
     @classmethod
     def from_array(cls, array):
         return Variable(vartype=array["vartype"], characteristic=array["characteristic"],
-                        definition=array["definition"], dimensions=array["dimensions"],
-                        default=array["default"], text=array["text"], varname=array["varname"],
+                        mnemonics=array["mnemonics"], dimensions=array["dimensions"],
+                        default=array["default"], text=array["text"], abivarname=array["abivarname"],
                         section=array["section"], range=array["range"], commentdefault=array["commentdefault"],
                         commentdims=array["commentdims"])
 
     def __str__(self):
-        return "Variable " + str(self.varname) + " (default = " + str(self.defaultval) + ")"
+        return "Variable " + str(self.abivarname) + " (default = " + str(self.defaultval) + ")"
 
 
 class ValueWithUnit(yaml.YAMLObject):
