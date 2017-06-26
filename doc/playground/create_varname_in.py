@@ -11,10 +11,10 @@ Input= file(filnam,'r')
 outfile = open(filnam1, "wb+")
 
 for oline in Input:
-  if oline[0:11] in "    varname":
+  if oline[0:14] in "    abivarname":
     outfile.write(oline)
-    outfile.write("    topic_class:"+"\n")
-    outfile.write("    topic_name:"+"\n")
+    outfile.write("    topics:"+"\n")
+
 
 
 outfile.close()
