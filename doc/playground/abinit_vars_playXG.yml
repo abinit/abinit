@@ -7,7 +7,7 @@
     defaultval: !multiplevalue
         number: 3
         value: 1
-    definition: CELL lattice vector scaling
+    mnemonics: CELL lattice vector scaling
     dimensions:
     - 3
     excludes: null
@@ -32,7 +32,7 @@
         </p>
     topic_class: compulsory
     topic_name: crystal 
-    varname: acell
+    abivarname: acell
     vartype: real
 - !variable
     characteristics:
@@ -49,7 +49,7 @@
     -   - 0
         - 0
         - 1
-    definition: Real space PRIMitive translations
+    mnemonics: Real space PRIMitive translations
     dimensions:
     - 3
     - 3
@@ -179,7 +179,7 @@
         </p>
     topic_class: compulsory
     topic_name: crystal
-    varname: rprim
+    abivarname: rprim
     vartype: real
 - !variable
     characteristics:
@@ -188,7 +188,7 @@
     commentdefault: null
     commentdims: Internally, it is represented as rprimd(3,3,[[nimage]]).
     defaultval: null
-    definition: Real space PRIMitive translations, Dimensional
+    mnemonics: Real space PRIMitive translations, Dimensional
     dimensions:
     - 3
     - 3
@@ -217,7 +217,7 @@
         <br />
     topic_class: internal
     topic_name: crystal
-    varname: rprimd
+    abivarname: rprimd
     vartype: real
 - !variable
     characteristics:
@@ -227,7 +227,7 @@
     defaultval: !multiplevalue
         number: 3
         value: 1
-    definition: SCALE CARTesian coordinates
+    mnemonics: SCALE CARTesian coordinates
     dimensions:
     - 3
     excludes: null
@@ -250,14 +250,14 @@
         </p>
     topic_class: useful
     topic_name: crystal
-    varname: scalecart
+    abivarname: scalecart
     vartype: real
 - !variable
     characteristics: null
     commentdefault: null
     commentdims: null
     defaultval: 0
-    definition: USE of an initial Density MATrix in Paw+U
+    mnemonics: USE of an initial Density MATrix in Paw+U
     dimensions: scalar
     excludes: null
     requires: '[[usepaw]]==1 and [[usepawu]]==1'
@@ -284,7 +284,7 @@
         </p>
     topic_class: useful
     topic_name: DFT+U
-    varname: usedmatpu
+    abivarname: usedmatpu
     vartype: integer
 - !variable
     characteristics:
@@ -292,7 +292,7 @@
     commentdefault: null
     commentdims: null
     defaultval: null
-    definition: XYZ FILE input for geometry
+    mnemonics: XYZ FILE input for geometry
     dimensions: scalar
     excludes: null
     requires: null
@@ -307,6 +307,6 @@
          Notes: do not quote the file name in the abinit input file, simply leave a space after xyzfile. The xyz format is the number of atoms on the first line, a comment line, then one line per atom, with the element as a 2 letter symbol ("As" "O" or "Pu") and the three cartesian coordinates in Angstrom.
         </p>
     topic_class: expert
-    varname: xyzfile
+    abivarname: xyzfile
     vartype: string
 
