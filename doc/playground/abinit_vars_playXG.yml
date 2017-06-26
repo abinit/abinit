@@ -30,10 +30,39 @@
          Note that [[acell]] is NOT the length of the conventional orthogonal basis vectors, but the scaling factors of the primitive vectors.
         Use [[scalecart]] to scale the cartesian coordinates.
         </p>
-    topic_class: compulsory
-    topic_name: crystal 
+    topics: crystal_compulsory 
     abivarname: acell
     vartype: real
+- !variable
+    characteristics: null
+    commentdefault: null
+    commentdims: null
+    defaultval: 1
+    mnemonics: Number of Processors for Fock exact exchange
+    dimensions: scalar
+    excludes: null
+    requires: null
+    section: varpar
+    text: |-
+        <p>
+         Relevant only for the k-point/fock parallelisation
+        (option [[paral_kgb]] input variable).
+         <br />
+         [[nphf]] gives the number of processors among
+        which the work load over the occupied states level is shared.
+        [[nphf]] and [[npkpt]] are combined to give the total number
+        of processors (nproc) working on the parallelisation.
+         <br />
+        </p>
+        <p>
+         Note : [[nphf]] should be a divisor or equal to the number of k-point times the number of bands for
+        exact exchange ([[nkpthf]]*[[nbandhf]])
+        in order to have the better load-balancing and efficiency.
+         <br />
+        </p>
+    topics: hf_useful, parallelism_useful
+    abivarname: nphf
+    vartype: integer
 - !variable
     characteristics:
     - '[[EVOLVING]]'
@@ -177,8 +206,7 @@
         the echo of [[rprim]] in the output file is not the value contained in the input file,
         but the value rescaled by [[scalecart]].
         </p>
-    topic_class: compulsory
-    topic_name: crystal
+    topics: crystal_compulsory
     abivarname: rprim
     vartype: real
 - !variable
@@ -215,8 +243,7 @@
         </p>
         It is [[EVOLVING]] only if [[ionmov]]==2 and [[optcell]]/=0, otherwise it is fixed.
         <br />
-    topic_class: internal
-    topic_name: crystal
+    topics: crystal_internal
     abivarname: rprimd
     vartype: real
 - !variable
@@ -248,8 +275,7 @@
          Note that this input variable is [[INPUT_ONLY]] : its content will be immediately applied to rprim, at parsing time,
         and then scalecart will be set to the default values. So, it will not be echoed.
         </p>
-    topic_class: useful
-    topic_name: crystal
+    topics: crystal_useful
     abivarname: scalecart
     vartype: real
 - !variable
@@ -282,8 +308,7 @@
          - When [[usedmatpu]]&lt;0, the density matrix is kept constant at each ionic step
          <br />
         </p>
-    topic_class: useful
-    topic_name: DFT+U
+    topics: DFT+U_useful
     abivarname: usedmatpu
     vartype: integer
 - !variable
