@@ -1,2224 +1,1478 @@
     abivarname: accuracy
-    topic_class: basic
-    topic_name: convergency
+    topics: convergency_basic
     abivarname: acell
-    topic_class: compulsory
-    topic_name: crystal
+    topics: crystal_compulsory
     abivarname: adpimd
-    topic_class:
-    topic_name:
+    topics:
     abivarname: adpimd_gamma
-    topic_class:
-    topic_name:
+    topics:
     abivarname: algalch
-    topic_class: alch
-    topic_name: other_settings
+    topics: otherGS_alch
     abivarname: amu
-    topic_class: useful
-    topic_name: general_settings
+    topics: GSgeneral_useful
     abivarname: angdeg
-    topic_class: useful
-    topic_name: crystal
+    topics: crystal_useful
     abivarname: asr
-    topic_class:
-    topic_name:
+    topics:
     abivarname: atvshift
-    topic_class: expert
-    topic_name: DFT+U
+    topics: DFT+U_expert
     abivarname: autoparal
-    topic_class: basic
-    topic_name: parallelism
+    topics: parallelism_basic
     abivarname: awtr
-    topic_class:
-    topic_name:
+    topics:
     abivarname: bandpp
-    topic_class: useful
-    topic_name: parallelism
+    topics: parallelism_useful
     abivarname: bdberry
-    topic_class:
-    topic_name:
+    topics:
     abivarname: bdeigrf
-    topic_class:
-    topic_name:
+    topics:
     abivarname: bdgw
-    topic_class:
-    topic_name:
+    topics:
     abivarname: berryopt
-    topic_class:
-    topic_name:
+    topics:
     abivarname: berrysav
-    topic_class:
-    topic_name:
+    topics:
     abivarname: berrystep
-    topic_class:
-    topic_name:
+    topics:
     abivarname: bfield
-    topic_class:
-    topic_name:
+    topics:
     abivarname: bmass
-    topic_class:
-    topic_name:
+    topics:
     abivarname: boxcenter
-    topic_class: basic
-    topic_name: TDDFT
+    topics: TDDFT_basic
     abivarname: boxcutmin
-    topic_class: expert
-    topic_name: convergency
+    topics: convergency_expert
     abivarname: brvltt
-    topic_class: expert
-    topic_name: crystal
+    topics: crystal_expert
     abivarname: bs_algorithm
-    topic_class:
-    topic_name:
+    topics:
     abivarname: bs_calctype
-    topic_class:
-    topic_name:
+    topics:
     abivarname: bs_coulomb_term
-    topic_class:
-    topic_name:
+    topics:
     abivarname: bs_coupling
-    topic_class:
-    topic_name:
+    topics:
     abivarname: bs_eh_cutoff
-    topic_class:
-    topic_name:
+    topics:
     abivarname: bs_exchange_term
-    topic_class:
-    topic_name:
+    topics:
     abivarname: bs_freq_mesh
-    topic_class:
-    topic_name:
+    topics:
     abivarname: bs_hayd_term
-    topic_class:
-    topic_name:
+    topics:
     abivarname: bs_haydock_niter
-    topic_class:
-    topic_name:
+    topics:
     abivarname: bs_haydock_tol
-    topic_class:
-    topic_name:
+    topics:
     abivarname: bs_interp_kmult
-    topic_class:
-    topic_name:
+    topics:
     abivarname: bs_interp_m3_width
-    topic_class:
-    topic_name:
+    topics:
     abivarname: bs_interp_method
-    topic_class:
-    topic_name:
+    topics:
     abivarname: bs_interp_mode
-    topic_class:
-    topic_name:
+    topics:
     abivarname: bs_interp_prep
-    topic_class:
-    topic_name:
+    topics:
     abivarname: bs_interp_rl_nb
-    topic_class:
-    topic_name:
+    topics:
     abivarname: bs_loband
-    topic_class:
-    topic_name:
+    topics:
     abivarname: bs_nstates
-    topic_class:
-    topic_name:
+    topics:
     abivarname: builtintest
-    topic_class: expert
-    topic_name: other_settings
+    topics: otherGS_expert
     abivarname: bxctmindg
-    topic_class: expert
-    topic_name: PAW_settings
+    topics: PAW_expert
     abivarname: cd_customnimfrqs
-    topic_class:
-    topic_name:
+    topics:
     abivarname: cd_frqim_method
-    topic_class:
-    topic_name:
+    topics:
     abivarname: cd_full_grid
-    topic_class:
-    topic_name:
+    topics:
     abivarname: cd_halfway_freq
-    topic_class:
-    topic_name:
+    topics:
     abivarname: cd_imfrqs
-    topic_class:
-    topic_name:
+    topics:
     abivarname: cd_max_freq
-    topic_class:
-    topic_name:
+    topics:
     abivarname: cd_subset_freq
-    topic_class:
-    topic_name:
+    topics:
     abivarname: cgtyphf
-    topic_class: expert
-    topic_name: hf
+    topics: hf_expert
     abivarname: charge
-    topic_class: useful
-    topic_name: general_settings
+    topics: GSgeneral_useful
     abivarname: chempot
-    topic_class:
-    topic_name:
+    topics:
     abivarname: chkexit
-    topic_class:
-    topic_name:
+    topics:
     abivarname: chkprim
-    topic_class: useful
-    topic_name: crystal
+    topics: crystal_useful
     abivarname: chksymbreak
-    topic_class: basic
-    topic_name: k_points
+    topics: k-points_basic
     abivarname: chneut
-    topic_class:
-    topic_name:
+    topics:
     abivarname: cineb_start
-    topic_class:
-    topic_name:
+    topics:
     abivarname: cpuh
-    topic_class: job
-    topic_name: other_settings
+    topics: otherGS_job
     abivarname: cpum
-    topic_class: job
-    topic_name: other_settings
+    topics: otherGS_job
     abivarname: cpus
-    topic_class: job
-    topic_name: other_settings
+    topics: otherGS_job
     abivarname: d3e_pert1_atpol
-    topic_class:
-    topic_name:
+    topics:
     abivarname: d3e_pert1_dir
-    topic_class:
-    topic_name:
+    topics:
     abivarname: d3e_pert1_elfd
-    topic_class:
-    topic_name:
+    topics:
     abivarname: d3e_pert1_phon
-    topic_class:
-    topic_name:
+    topics:
     abivarname: d3e_pert2_atpol
-    topic_class:
-    topic_name:
+    topics:
     abivarname: d3e_pert2_dir
-    topic_class:
-    topic_name:
+    topics:
     abivarname: d3e_pert2_elfd
-    topic_class:
-    topic_name:
+    topics:
     abivarname: d3e_pert2_phon
-    topic_class:
-    topic_name:
+    topics:
     abivarname: d3e_pert3_atpol
-    topic_class:
-    topic_name:
+    topics:
     abivarname: d3e_pert3_dir
-    topic_class:
-    topic_name:
+    topics:
     abivarname: d3e_pert3_elfd
-    topic_class:
-    topic_name:
+    topics:
     abivarname: d3e_pert3_phon
-    topic_class:
-    topic_name:
+    topics:
     abivarname: ddamp
-    topic_class:
-    topic_name:
+    topics:
     abivarname: ddb_ngqpt
-    topic_class:
-    topic_name:
+    topics:
     abivarname: ddb_shiftq
-    topic_class:
-    topic_name:
+    topics:
     abivarname: delayperm
-    topic_class:
-    topic_name:
+    topics:
     abivarname: densfor_pred
-    topic_class: expert
-    topic_name: convergency
+    topics: convergency_expert
     abivarname: densty
-    topic_class: expert
-    topic_name: xc
+    topics: xc_expert
     abivarname: dfield
-    topic_class:
-    topic_name:
+    topics:
     abivarname: dfpt_sciss
-    topic_class:
-    topic_name:
+    topics:
     abivarname: diecut
-    topic_class: useful
-    topic_name: convergency
+    topics: convergency_useful
     abivarname: diegap
-    topic_class: useful
-    topic_name: convergency
+    topics: convergency_useful
     abivarname: dielam
-    topic_class: useful
-    topic_name: convergency
+    topics: convergency_useful
     abivarname: dielng
-    topic_class: useful
-    topic_name: convergency
+    topics: convergency_useful
     abivarname: diemac
-    topic_class: useful
-    topic_name: convergency
+    topics: convergency_useful
     abivarname: diemix
-    topic_class: useful
-    topic_name: convergency
+    topics: convergency_useful
     abivarname: diemixmag
-    topic_class: useful
-    topic_name: polar_settings
+    topics: spinpolarisation_useful
     abivarname: diismemory
-    topic_class:
-    topic_name:
+    topics:
     abivarname: dilatmx
-    topic_class:
-    topic_name:
+    topics:
     abivarname: dipdip
-    topic_class:
-    topic_name:
+    topics:
     abivarname: dmatpawu
-    topic_class: useful
-    topic_name: DFT+U
+    topics: DFT+U_useful
     abivarname: dmatpuopt
-    topic_class: expert
-    topic_name: DFT+U
+    topics: DFT+U_expert
     abivarname: dmatudiag
-    topic_class: expert
-    topic_name: DFT+U
+    topics: DFT+U_expert
     abivarname: dmft_dc
-    topic_class:
-    topic_name:
+    topics:
     abivarname: dmft_entropy
-    topic_class:
-    topic_name:
+    topics:
     abivarname: dmft_iter
-    topic_class:
-    topic_name:
+    topics:
     abivarname: dmft_mxsf
-    topic_class:
-    topic_name:
+    topics:
     abivarname: dmft_nlambda
-    topic_class:
-    topic_name:
+    topics:
     abivarname: dmft_nwli
-    topic_class:
-    topic_name:
+    topics:
     abivarname: dmft_nwlo
-    topic_class:
-    topic_name:
+    topics:
     abivarname: dmft_read_occnd
-    topic_class:
-    topic_name:
+    topics:
     abivarname: dmft_rslf
-    topic_class:
-    topic_name:
+    topics:
     abivarname: dmft_solv
-    topic_class:
-    topic_name:
+    topics:
     abivarname: dmft_t2g
-    topic_class:
-    topic_name:
+    topics:
     abivarname: dmft_tolfreq
-    topic_class:
-    topic_name:
+    topics:
     abivarname: dmft_tollc
-    topic_class:
-    topic_name:
+    topics:
     abivarname: dmftbandf
-    topic_class:
-    topic_name:
+    topics:
     abivarname: dmftbandi
-    topic_class:
-    topic_name:
+    topics:
     abivarname: dmftcheck
-    topic_class:
-    topic_name:
+    topics:
     abivarname: dmftctqmc_basis
-    topic_class:
-    topic_name:
+    topics:
     abivarname: dmftctqmc_check
-    topic_class:
-    topic_name:
+    topics:
     abivarname: dmftctqmc_correl
-    topic_class:
-    topic_name:
+    topics:
     abivarname: dmftctqmc_gmove
-    topic_class:
-    topic_name:
+    topics:
     abivarname: dmftctqmc_grnns
-    topic_class:
-    topic_name:
+    topics:
     abivarname: dmftctqmc_meas
-    topic_class:
-    topic_name:
+    topics:
     abivarname: dmftctqmc_mov
-    topic_class:
-    topic_name:
+    topics:
     abivarname: dmftctqmc_mrka
-    topic_class:
-    topic_name:
+    topics:
     abivarname: dmftctqmc_order
-    topic_class:
-    topic_name:
+    topics:
     abivarname: dmftctqmc_triqs_nleg
-    topic_class:
-    topic_name:
+    topics:
     abivarname: dmftqmc_l
-    topic_class:
-    topic_name:
+    topics:
     abivarname: dmftqmc_n
-    topic_class:
-    topic_name:
+    topics:
     abivarname: dmftqmc_seed
-    topic_class:
-    topic_name:
+    topics:
     abivarname: dmftqmc_therm
-    topic_class:
-    topic_name:
+    topics:
     abivarname: dosdeltae
-    topic_class: prdos
-    topic_name: printing_settings
+    topics: printing_prdos
     abivarname: dtion
-    topic_class:
-    topic_name:
+    topics:
     abivarname: dynimage
-    topic_class:
-    topic_name:
+    topics:
     abivarname: ecut
-    topic_class: compulsory
-    topic_name: convergency
+    topics: convergency_compulsory
     abivarname: ecuteps
-    topic_class:
-    topic_name:
+    topics:
     abivarname: ecutsigx
-    topic_class:
-    topic_name:
+    topics:
     abivarname: ecutsm
-    topic_class: basic
-    topic_name: convergency
+    topics: convergency_basic
     abivarname: ecutwfn
-    topic_class:
-    topic_name:
+    topics:
     abivarname: effmass
-    topic_class: expert
-    topic_name: general_settings
+    topics: GSgeneral_expert
     abivarname: efield
-    topic_class:
-    topic_name:
+    topics:
     abivarname: efmas
-    topic_class:
-    topic_name:
+    topics:
     abivarname: efmas_bands
-    topic_class:
-    topic_name:
+    topics:
     abivarname: efmas_calc_dirs
-    topic_class:
-    topic_name:
+    topics:
     abivarname: efmas_deg
-    topic_class:
-    topic_name:
+    topics:
     abivarname: efmas_deg_tol
-    topic_class:
-    topic_name:
+    topics:
     abivarname: efmas_dim
-    topic_class:
-    topic_name:
+    topics:
     abivarname: efmas_dirs
-    topic_class:
-    topic_name:
+    topics:
     abivarname: efmas_n_dirs
-    topic_class:
-    topic_name:
+    topics:
     abivarname: efmas_ntheta
-    topic_class:
-    topic_name:
+    topics:
     abivarname: einterp
-    topic_class:
-    topic_name:
+    topics:
     abivarname: elph2_imagden
-    topic_class:
-    topic_name:
+    topics:
     abivarname: enunit
-    topic_class: useful
-    topic_name: general_settings
+    topics: GSgeneral_useful
     abivarname: eph_extrael
-    topic_class:
-    topic_name:
+    topics:
     abivarname: eph_fermie
-    topic_class:
-    topic_name:
+    topics:
     abivarname: eph_fsewin
-    topic_class:
-    topic_name:
+    topics:
     abivarname: eph_fsmear
-    topic_class:
-    topic_name:
+    topics:
     abivarname: eph_intmeth
-    topic_class:
-    topic_name:
+    topics:
     abivarname: eph_mustar
-    topic_class:
-    topic_name:
+    topics:
     abivarname: eph_ngqpt_fine
-    topic_class:
-    topic_name:
+    topics:
     abivarname: eph_task
-    topic_class:
-    topic_name:
+    topics:
     abivarname: eph_transport
-    topic_class:
-    topic_name:
+    topics:
     abivarname: eshift
-    topic_class: expert
-    topic_name: other_settings
+    topics: otherGS_expert
     abivarname: esmear
-    topic_class:
-    topic_name:
+    topics:
     abivarname: exchmix
-    topic_class: useful
-    topic_name: xc
+    topics: xc_useful
     abivarname: exchn2n3d
-    topic_class: expert
-    topic_name: convergency
+    topics: convergency_expert
     abivarname: extrapwf
-    topic_class: expert
-    topic_name: convergency
+    topics: convergency_expert
     abivarname: f4of2_sla
-    topic_class: expert
-    topic_name: DFT+U
+    topics: DFT+U_expert
     abivarname: f6of2_sla
-    topic_class: expert
-    topic_name: DFT+U
+    topics: DFT+U_expert
     abivarname: fband
-    topic_class: useful
-    topic_name: general_settings
+    topics: GSgeneral_useful
     abivarname: fermie_nest
-    topic_class: prfermi
-    topic_name: printing_settings
+    topics: printing_prfermi
     abivarname: fftalg
-    topic_class: expert
-    topic_name: convergency
+    topics: convergency_expert
     abivarname: fftcache
-    topic_class: expert
-    topic_name: other_settings
+    topics: otherGS_expert
     abivarname: fftgw
-    topic_class:
-    topic_name:
+    topics:
     abivarname: freqim_alpha
-    topic_class:
-    topic_name:
+    topics:
     abivarname: freqremax
-    topic_class:
-    topic_name:
+    topics:
     abivarname: freqremin
-    topic_class:
-    topic_name:
+    topics:
     abivarname: freqspmax
-    topic_class:
-    topic_name:
+    topics:
     abivarname: freqspmin
-    topic_class:
-    topic_name:
+    topics:
     abivarname: friction
-    topic_class:
-    topic_name:
+    topics:
     abivarname: frzfermi
-    topic_class:
-    topic_name:
+    topics:
     abivarname: fxcartfactor
-    topic_class:
-    topic_name:
+    topics:
     abivarname: ga_algor
-    topic_class:
-    topic_name:
+    topics:
     abivarname: ga_fitness
-    topic_class:
-    topic_name:
+    topics:
     abivarname: ga_n_rules
-    topic_class:
-    topic_name:
+    topics:
     abivarname: ga_opt_percent
-    topic_class:
-    topic_name:
+    topics:
     abivarname: ga_rules
-    topic_class:
-    topic_name:
+    topics:
     abivarname: genafm
-    topic_class: useful
-    topic_name: polar_settings
+    topics: spinpolarisation_useful
     abivarname: get1den
-    topic_class:
-    topic_name:
+    topics:
     abivarname: get1wf
-    topic_class: useful
-    topic_name: multi_dtset
+    topics: multidtset_useful
     abivarname: getbscoup
-    topic_class: useful
-    topic_name: multi_dtset
+    topics: multidtset_useful
     abivarname: getbseig
-    topic_class: useful
-    topic_name: multi_dtset
+    topics: multidtset_useful
     abivarname: getbsreso
-    topic_class: useful
-    topic_name: multi_dtset
+    topics: multidtset_useful
     abivarname: getcell
-    topic_class: useful
-    topic_name: multi_dtset
+    topics: multidtset_useful
     abivarname: getddb
-    topic_class:
-    topic_name:
+    topics:
     abivarname: getddk
-    topic_class: useful
-    topic_name: multi_dtset
+    topics: multidtset_useful
     abivarname: getden
-    topic_class: useful
-    topic_name: multi_dtset
+    topics: multidtset_useful
     abivarname: getgam_eig2nkq
-    topic_class: useful
-    topic_name: multi_dtset
+    topics: multidtset_useful
     abivarname: gethaydock
-    topic_class: useful
-    topic_name: multi_dtset
+    topics: multidtset_useful
     abivarname: getocc
-    topic_class: useful
-    topic_name: multi_dtset
+    topics: multidtset_useful
     abivarname: getqps
-    topic_class: useful
-    topic_name: multi_dtset
+    topics: multidtset_useful
     abivarname: getscr
-    topic_class: useful
-    topic_name: multi_dtset
+    topics: multidtset_useful
     abivarname: getsuscep
-    topic_class: useful
-    topic_name: multi_dtset
+    topics: multidtset_useful
     abivarname: getvel
-    topic_class: useful
-    topic_name: multi_dtset
+    topics: multidtset_useful
     abivarname: getwfk
-    topic_class: useful
-    topic_name: multi_dtset
+    topics: multidtset_useful
     abivarname: getwfkfine
-    topic_class: useful
-    topic_name: multi_dtset
+    topics: multidtset_useful
     abivarname: getwfq
-    topic_class: useful
-    topic_name: multi_dtset
+    topics: multidtset_useful
     abivarname: getxcart
-    topic_class: useful
-    topic_name: multi_dtset
+    topics: multidtset_useful
     abivarname: getxred
-    topic_class: useful
-    topic_name: multi_dtset
+    topics: multidtset_useful
     abivarname: goprecon
-    topic_class:
-    topic_name:
+    topics:
     abivarname: goprecprm
-    topic_class:
-    topic_name:
+    topics:
     abivarname: gpu_devices
-    topic_class: expert
-    topic_name: parallelism
+    topics: parallelism_expert
     abivarname: gpu_linalg_limit
-    topic_class: expert
-    topic_name: parallelism
+    topics: parallelism_expert
     abivarname: gw_customnfreqsp
-    topic_class:
-    topic_name:
+    topics:
     abivarname: gw_freqsp
-    topic_class:
-    topic_name:
+    topics:
     abivarname: gw_frqim_inzgrid
-    topic_class:
-    topic_name:
+    topics:
     abivarname: gw_frqre_inzgrid
-    topic_class:
-    topic_name:
+    topics:
     abivarname: gw_frqre_tangrid
-    topic_class:
-    topic_name:
+    topics:
     abivarname: gw_invalid_freq
-    topic_class:
-    topic_name:
+    topics:
     abivarname: gw_nqlwl
-    topic_class:
-    topic_name:
+    topics:
     abivarname: gw_nstep
-    topic_class:
-    topic_name:
+    topics:
     abivarname: gw_qlwl
-    topic_class:
-    topic_name:
+    topics:
     abivarname: gw_qprange
-    topic_class:
-    topic_name:
+    topics:
     abivarname: gw_sctype
-    topic_class:
-    topic_name:
+    topics:
     abivarname: gw_sigxcore
-    topic_class:
-    topic_name:
+    topics:
     abivarname: gw_toldfeig
-    topic_class:
-    topic_name:
+    topics:
     abivarname: gwcalctyp
-    topic_class:
-    topic_name:
+    topics:
     abivarname: gwcomp
-    topic_class:
-    topic_name:
+    topics:
     abivarname: gwencomp
-    topic_class:
-    topic_name:
+    topics:
     abivarname: gwfockmix
-    topic_class:
-    topic_name:
+    topics:
     abivarname: gwgamma
-    topic_class:
-    topic_name:
+    topics:
     abivarname: gwls_band_index
-    topic_class:
-    topic_name:
+    topics:
     abivarname: gwls_correlation
-    topic_class:
-    topic_name:
+    topics:
     abivarname: gwls_dielectric_model
-    topic_class:
-    topic_name:
+    topics:
     abivarname: gwls_exchange
-    topic_class:
-    topic_name:
+    topics:
     abivarname: gwls_first_seed
-    topic_class:
-    topic_name:
+    topics:
     abivarname: gwls_kmax_analytic
-    topic_class:
-    topic_name:
+    topics:
     abivarname: gwls_kmax_complement
-    topic_class:
-    topic_name:
+    topics:
     abivarname: gwls_kmax_numeric
-    topic_class:
-    topic_name:
+    topics:
     abivarname: gwls_kmax_poles
-    topic_class:
-    topic_name:
+    topics:
     abivarname: gwls_list_proj_freq
-    topic_class:
-    topic_name:
+    topics:
     abivarname: gwls_model_parameter
-    topic_class:
-    topic_name:
+    topics:
     abivarname: gwls_n_proj_freq
-    topic_class:
-    topic_name:
+    topics:
     abivarname: gwls_npt_gauss_quad
-    topic_class:
-    topic_name:
+    topics:
     abivarname: gwls_nseeds
-    topic_class:
-    topic_name:
+    topics:
     abivarname: gwls_print_debug
-    topic_class:
-    topic_name:
+    topics:
     abivarname: gwls_recycle
-    topic_class:
-    topic_name:
+    topics:
     abivarname: gwls_second_model_parameter
-    topic_class:
-    topic_name:
+    topics:
     abivarname: gwls_sternheimer_kmax
-    topic_class:
-    topic_name:
+    topics:
     abivarname: gwmem
-    topic_class:
-    topic_name:
+    topics:
     abivarname: gwpara
-    topic_class: useful
-    topic_name: parallelism
+    topics: parallelism_useful
     abivarname: gwrpacorr
-    topic_class:
-    topic_name:
+    topics:
     abivarname: iatcon
-    topic_class:
-    topic_name:
+    topics:
     abivarname: iatfix
-    topic_class:
-    topic_name:
+    topics:
     abivarname: iatfixx
-    topic_class:
-    topic_name:
+    topics:
     abivarname: iatfixy
-    topic_class:
-    topic_name:
+    topics:
     abivarname: iatfixz
-    topic_class:
-    topic_name:
+    topics:
     abivarname: iatsph
-    topic_class: prdos
-    topic_name: printing_settings
+    topics: printing_prdos
     abivarname: iboxcut
-    topic_class: expert
-    topic_name: convergency
+    topics: convergency_expert
     abivarname: icoulomb
-    topic_class: expert
-    topic_name: convergency
+    topics: convergency_expert
     abivarname: icutcoul
-    topic_class:
-    topic_name:
+    topics:
     abivarname: ieig2rf
-    topic_class:
-    topic_name:
+    topics:
     abivarname: imgmov
-    topic_class:
-    topic_name:
+    topics:
     abivarname: inclvkb
-    topic_class:
-    topic_name:
+    topics:
     abivarname: intxc
-    topic_class: expert
-    topic_name: xc
+    topics: xc_expert
     abivarname: iomode
-    topic_class: expert
-    topic_name: parallelism
+    topics: parallelism_expert
     abivarname: ionmov
-    topic_class:
-    topic_name:
+    topics:
     abivarname: iprcel
-    topic_class: useful
-    topic_name: convergency
+    topics: convergency_useful
     abivarname: iprcfc
-    topic_class: expert
-    topic_name: convergency
+    topics: convergency_expert
     abivarname: iqpt
-    topic_class:
-    topic_name:
+    topics:
     abivarname: irandom
-    topic_class:
-    topic_name:
+    topics:
     abivarname: ird1den
-    topic_class:
-    topic_name:
+    topics:
     abivarname: ird1wf
-    topic_class:
-    topic_name:
+    topics:
     abivarname: irdbscoup
-    topic_class:
-    topic_name:
+    topics:
     abivarname: irdbseig
-    topic_class:
-    topic_name:
+    topics:
     abivarname: irdbsreso
-    topic_class:
-    topic_name:
+    topics:
     abivarname: irdddb
-    topic_class:
-    topic_name:
+    topics:
     abivarname: irdddk
-    topic_class:
-    topic_name:
+    topics:
     abivarname: irdden
-    topic_class: useful
-    topic_name: general_settings
+    topics: GSgeneral_useful
     abivarname: irdhaydock
-    topic_class:
-    topic_name:
+    topics:
     abivarname: irdqps
-    topic_class:
-    topic_name:
+    topics:
     abivarname: irdscr
-    topic_class:
-    topic_name:
+    topics:
     abivarname: irdsuscep
-    topic_class:
-    topic_name:
+    topics:
     abivarname: irdvdw
-    topic_class:
-    topic_name:
+    topics:
     abivarname: irdwfk
-    topic_class: useful
-    topic_name: general_settings
+    topics: GSgeneral_useful
     abivarname: irdwfkfine
-    topic_class: useful
-    topic_name: general_settings
+    topics: GSgeneral_useful
     abivarname: irdwfq
-    topic_class:
-    topic_name:
+    topics:
     abivarname: iscf
-    topics:
-    - {topic_name: convergency, topic_class: useful}
-    - {topic_name: TDDFT, topic_class: compulsory}
-    topic_class: useful
-    topic_name: convergency
+    topics: convergency_useful, TDDFT_compulsory
     abivarname: isecur
-    topic_class: expert
-    topic_name: convergency
+    topics: convergency_expert
     abivarname: istatimg
-    topic_class:
-    topic_name:
+    topics:
     abivarname: istatr
-    topic_class: expert
-    topic_name: other_settings
+    topics: otherGS_expert
     abivarname: istatshft
-    topic_class: expert
-    topic_name: other_settings
+    topics: otherGS_expert
     abivarname: istwfk
-    topic_class: useful
-    topic_name: k_points
+    topics: k-points_useful
     abivarname: ixc
-    topics:
-    - {topic_name: xc, topic_class: basic}
-    - {topic_name: hf, topic_class: compulsory}
+    topics: xc_basic, hf_compulsory
     abivarname: ixcpositron
-    topic_class: basic
-    topic_name: positron
+    topics: positron_basic
     abivarname: jdtset
-    topic_class: basic
-    topic_name: multi_dtset
+    topics: multidtset_basic
     abivarname: jellslab
-    topic_class: sla
-    topic_name: other_settings
+    topics: otherGS_sla
     abivarname: jfielddir
-    topic_class:
-    topic_name:
+    topics:
     abivarname: jpawu
-    topic_class: compulsory
-    topic_name: DFT+U
+    topics: DFT+U_compulsory
     abivarname: kberry
-    topic_class:
-    topic_name:
+    topics:
     abivarname: kpt
-    topic_class: useful
-    topic_name: k_points
+    topics: k-points_useful
     abivarname: kptbounds
-    topic_class: expert
-    topic_name: k_points
+    topics: k-points_expert
     abivarname: kptgw
-    topic_class:
-    topic_name:
+    topics:
     abivarname: kptnrm
-    topic_class: useful
-    topic_name: k_points
+    topics: k-points_useful
     abivarname: kptns
-    topic_class: internal
-    topic_name: k_points
+    topics: k-points_internal
     abivarname: kptopt
-    topic_class: basic
-    topic_name: k_points
+    topics: k-points_basic
     abivarname: kptrlatt
-    topic_class: useful
-    topic_name: k_points
+    topics: k-points_useful
     abivarname: kptrlen
-    topic_class: useful
-    topic_name: k_points
+    topics: k-points_useful
     abivarname: kssform
-    topic_class:
-    topic_name:
+    topics:
     abivarname: lexexch
-    topic_class: useful
-    topic_name: xc
+    topics: xc_useful
     abivarname: localrdwf
-    topic_class: expert
-    topic_name: parallelism
+    topics: parallelism_expert
     abivarname: lotf_classic
-    topic_class: lotf
-    topic_name: other_settings
+    topics: otherGS_lotf
     abivarname: lotf_nitex
-    topic_class: lotf
-    topic_name: other_settings
+    topics: otherGS_lotf
     abivarname: lotf_nneigx
-    topic_class: lotf
-    topic_name: other_settings
+    topics: otherGS_lotf
     abivarname: lotf_version
-    topic_class: lotf
-    topic_name: other_settings
+    topics: otherGS_lotf
     abivarname: lpawu
-    topic_class: compulsory
-    topic_name: DFT+U
+    topics: DFT+U_compulsory
     abivarname: macro_uj
-    topic_class: expert
-    topic_name: DFT+U
+    topics: DFT+U_expert
     abivarname: magcon_lambda
-    topic_class: useful
-    topic_name: polar_settings
+    topics: spinpolarisation_useful
     abivarname: magconon
-    topic_class: useful
-    topic_name: polar_settings
+    topics: spinpolarisation_useful
     abivarname: max_ncpus
-    topic_class: useful
-    topic_name: parallelism
+    topics: parallelism_useful
     abivarname: maxestep
-    topic_class:
-    topic_name:
+    topics:
     abivarname: maxnsym
-    topic_class: expert
-    topic_name: crystal
+    topics: crystal_expert
     abivarname: mband
-    topic_class: internal
-    topic_name: general_settings
+    topics: GSgeneral_internal
     abivarname: mbpt_sciss
-    topic_class:
-    topic_name:
+    topics:
     abivarname: mdf_epsinf
-    topic_class:
-    topic_name:
+    topics:
     abivarname: mdtemp
-    topic_class:
-    topic_name:
+    topics:
     abivarname: mdwall
-    topic_class:
-    topic_name:
+    topics:
     abivarname: mem_test
-    topic_class: expert
-    topic_name: other_settings
+    topics: otherGS_expert
     abivarname: mep_mxstep
-    topic_class:
-    topic_name:
+    topics:
     abivarname: mep_solver
-    topic_class:
-    topic_name:
+    topics:
     abivarname: mgfft
-    topic_class: internal
-    topic_name: convergency
+    topics: convergency_internal
     abivarname: mgfftdg
-    topic_class: internal
-    topic_name: convergency
+    topics: convergency_internal
     abivarname: mixalch
-    topic_class: alch
-    topic_name: other_settings
+    topics: otherGS_alch
     abivarname: mpw
-    topic_class: internal
-    topic_name: convergency
+    topics: convergency_internal
     abivarname: mqgrid
-    topic_class: expert
-    topic_name: convergency
+    topics: convergency_expert
     abivarname: mqgriddg
-    topic_class: expert
-    topic_name: PAW_settings
+    topics: PAW_expert
     abivarname: natcon
-    topic_class:
-    topic_name:
+    topics:
     abivarname: natfix
-    topic_class:
-    topic_name:
+    topics:
     abivarname: natfixx
-    topic_class:
-    topic_name:
+    topics:
     abivarname: natfixy
-    topic_class:
-    topic_name:
+    topics:
     abivarname: natfixz
-    topic_class:
-    topic_name:
+    topics:
     abivarname: natom
-    topic_class: basic
-    topic_name: general_settings
+    topics: GSgeneral_basic
     abivarname: natpawu
-    topic_class: internal
-    topic_name: DFT+U
+    topics: DFT+U_internal
     abivarname: natrd
-    topic_class:
-    topic_name:
+    topics:
     abivarname: natsph
-    topic_class: prdos
-    topic_name: printing_settings
+    topics: printing_prdos
     abivarname: natsph_extra
-    topic_class: prdos
-    topic_name: printing_settings
+    topics: printing_prdos
     abivarname: natvshift
-    topic_class: expert
-    topic_name: DFT+U
+    topics: DFT+U_expert
     abivarname: nband
-    topic_class: basic
-    topic_name: general_settings
+    topics: GSgeneral_basic
     abivarname: nbandhf
-    topic_class: useful
-    topic_name: hf
+    topics: hf_useful
     abivarname: nbandkss
-    topic_class:
-    topic_name:
+    topics:
     abivarname: nbdblock
-    topic_class: expert
-    topic_name: convergency
+    topics: convergency_expert
     abivarname: nbdbuf
-    topic_class: expert
-    topic_name: convergency
+    topics: convergency_expert
     abivarname: nberry
-    topic_class:
-    topic_name:
+    topics:
     abivarname: nc_xccc_gspace
-    topic_class: expert
-    topic_name: convergency
+    topics: convergency_expert
     abivarname: nconeq
-    topic_class:
-    topic_name:
+    topics:
     abivarname: nctime
-    topic_class:
-    topic_name:
+    topics:
     abivarname: ndivk
-    topic_class: expert
-    topic_name: k_points
+    topics: k-points_expert
     abivarname: ndivsm
-    topic_class: expert
-    topic_name: k_points
+    topics: k-points_expert
     abivarname: ndtset
-    topic_class: compulsory
-    topic_name: multi_dtset
+    topics: multidtset_compulsory
     abivarname: ndynimage
-    topic_class:
-    topic_name:
+    topics:
     abivarname: neb_algo
-    topic_class:
-    topic_name:
+    topics:
     abivarname: neb_spring
-    topic_class:
-    topic_name:
+    topics:
     abivarname: nelect
-    topic_class: internal
-    topic_name: general_settings
+    topics: GSgeneral_internal
     abivarname: nfft
-    topic_class: internal
-    topic_name: convergency
+    topics: convergency_internal
     abivarname: nfftdg
-    topic_class: internal
-    topic_name: convergency
+    topics: convergency_internal
     abivarname: nfreqim
-    topic_class:
-    topic_name:
+    topics:
     abivarname: nfreqmidm
-    topic_class:
-    topic_name:
+    topics:
     abivarname: nfreqre
-    topic_class:
-    topic_name:
+    topics:
     abivarname: nfreqsp
-    topic_class:
-    topic_name:
+    topics:
     abivarname: ngfft
-    topic_class: basic
-    topic_name: convergency
+    topics: convergency_basic
     abivarname: ngfftdg
-    topic_class: useful
-    topic_name: PAW_settings
+    topics: PAW_useful
     abivarname: ngkpt
-    topic_class: basic
-    topic_name: k_points
+    topics: k-points_basic
     abivarname: ngqpt
-    topic_class:
-    topic_name:
+    topics:
     abivarname: nimage
-    topic_class:
-    topic_name:
+    topics:
     abivarname: nkpath
-    topic_class:
-    topic_name:
+    topics:
     abivarname: nkpt
-    topic_class: useful
-    topic_name: k_points
+    topics: k-points_useful
     abivarname: nkptgw
-    topic_class:
-    topic_name:
+    topics:
     abivarname: nkpthf
-    topic_class: expert
-    topic_name: hf
+    topics: hf_expert
     abivarname: nline
-    topic_class: expert
-    topic_name: convergency
+    topics: convergency_expert
     abivarname: nloc_alg
-    topic_class: expert
-    topic_name: other_settings
+    topics: otherGS_expert
     abivarname: nloc_mem
-    topic_class: expert
-    topic_name: other_settings
+    topics: otherGS_expert
     abivarname: nnos
-    topic_class:
-    topic_name:
+    topics:
     abivarname: nnsclo
-    topic_class: expert
-    topic_name: convergency
+    topics: convergency_expert
     abivarname: nnsclohf
-    topic_class: expert
-    topic_name: hf
+    topics: hf_expert
     abivarname: nobj
-    topic_class:
-    topic_name:
+    topics:
     abivarname: nomegasf
-    topic_class:
-    topic_name:
+    topics:
     abivarname: nomegasi
-    topic_class:
-    topic_name:
+    topics:
     abivarname: nomegasrd
-    topic_class:
-    topic_name:
+    topics:
     abivarname: normpawu
-    topic_class:
-    topic_name:
+    topics:
     abivarname: noseinert
-    topic_class:
-    topic_name:
+    topics:
     abivarname: np_slk
-    topic_class: expert
-    topic_name: parallelism
+    topics: parallelism_expert
     abivarname: npband
-    topic_class: useful
-    topic_name: parallelism
+    topics: parallelism_useful
     abivarname: npfft
-    topic_class: useful
-    topic_name: parallelism
+    topics: parallelism_useful
     abivarname: nphf
-    topics:
-    - {topic_name: hf, topic_class: useful}
-    - {topic_name: parallelism, topic_class: useful}
+    topics: hf_useful, parallelism_useful
     abivarname: npimage
-    topic_class: useful
-    topic_name: parallelism
+    topics: parallelism_useful
     abivarname: npkpt
-    topic_class: useful
-    topic_name: parallelism
+    topics: parallelism_useful
     abivarname: nppert
-    topic_class: useful
-    topic_name: parallelism
+    topics: parallelism_useful
     abivarname: npsp
-    topic_class: alch
-    topic_name: other_settings
+    topics: otherGS_alch
     abivarname: npspalch
-    topic_class: alch
-    topic_name: other_settings
+    topics: otherGS_alch
     abivarname: npspinor
-    topic_class: useful
-    topic_name: parallelism
+    topics: parallelism_useful
     abivarname: npulayit
-    topic_class: useful
-    topic_name: convergency
+    topics: convergency_useful
     abivarname: npvel
-    topic_class:
-    topic_name:
+    topics:
     abivarname: npweps
-    topic_class:
-    topic_name:
+    topics:
     abivarname: npwkss
-    topic_class:
-    topic_name:
+    topics:
     abivarname: npwsigx
-    topic_class:
-    topic_name:
+    topics:
     abivarname: npwwfn
-    topic_class:
-    topic_name:
+    topics:
     abivarname: nqpt
-    topic_class:
-    topic_name:
+    topics:
     abivarname: nqptdm
-    topic_class:
-    topic_name:
+    topics:
     abivarname: nscforder
-    topic_class: expert
-    topic_name: convergency
+    topics: convergency_expert
     abivarname: nshiftk
-    topic_class: useful
-    topic_name: k_points
+    topics: k-points_useful
     abivarname: nshiftq
-    topic_class:
-    topic_name:
+    topics:
     abivarname: nspden
-    topic_class: basic
-    topic_name: polar_settings
+    topics: spinpolarisation_basic
     abivarname: nspinor
-    topic_class: basic
-    topic_name: polar_settings
+    topics: spinpolarisation_basic
     abivarname: nsppol
-    topic_class: basic
-    topic_name: polar_settings
+    topics: spinpolarisation_basic
     abivarname: nstep
-    topic_class: basic
-    topic_name: convergency
+    topics: convergency_basic
     abivarname: nsym
-    topic_class: useful
-    topic_name: crystal
+    topics: crystal_useful
     abivarname: ntime
-    topic_class:
-    topic_name:
+    topics:
     abivarname: ntimimage
-    topic_class:
-    topic_name:
+    topics:
     abivarname: ntypalch
-    topic_class: alch
-    topic_name: other_settings
+    topics: otherGS_alch
     abivarname: ntypat
-    topic_class: basic
-    topic_name: general_settings
+    topics: GSgeneral_basic
     abivarname: ntyppure
-    topic_class: alch
-    topic_name: other_settings
+    topics: otherGS_alch
     abivarname: nucdipmom
-    topic_class: expert
-    topic_name: polar_settings
+    topics: spinpolarisation_expert
     abivarname: nwfshist
-    topic_class:
-    topic_name:
+    topics:
     abivarname: nzchempot
-    topic_class:
-    topic_name:
+    topics:
     abivarname: objaat
-    topic_class:
-    topic_name:
+    topics:
     abivarname: objaax
-    topic_class:
-    topic_name:
+    topics:
     abivarname: objan
-    topic_class:
-    topic_name:
+    topics:
     abivarname: objarf
-    topic_class:
-    topic_name:
+    topics:
     abivarname: objaro
-    topic_class:
-    topic_name:
+    topics:
     abivarname: objatr
-    topic_class:
-    topic_name:
+    topics:
     abivarname: objbat
-    topic_class:
-    topic_name:
+    topics:
     abivarname: objbax
-    topic_class:
-    topic_name:
+    topics:
     abivarname: objbn
-    topic_class:
-    topic_name:
+    topics:
     abivarname: objbrf
-    topic_class:
-    topic_name:
+    topics:
     abivarname: objbro
-    topic_class:
-    topic_name:
+    topics:
     abivarname: objbtr
-    topic_class:
-    topic_name:
+    topics:
     abivarname: occ
-    topic_class: basic
-    topic_name: general_settings
+    topics: GSgeneral_basic
     abivarname: occopt
-    topic_class: basic
-    topic_name: general_settings
+    topics: GSgeneral_basic
     abivarname: omegasimax
-    topic_class:
-    topic_name:
+    topics:
     abivarname: omegasrdmax
-    topic_class:
-    topic_name:
+    topics:
     abivarname: optcell
-    topic_class:
-    topic_name:
+    topics:
     abivarname: optdriver
-    topic_class:
-    topic_name:
+    topics:
     abivarname: optforces
-    topic_class: basic
-    topic_name: general_settings
+    topics: GSgeneral_basic
     abivarname: optnlxccc
-    topic_class: expert
-    topic_name: xc
+    topics: xc_expert
     abivarname: optstress
-    topic_class: basic
-    topic_name: general_settings
+    topics: GSgeneral_basic
     abivarname: ortalg
-    topic_class: expert
-    topic_name: convergency
+    topics: convergency_expert
     abivarname: papiopt
-    topic_class: expert
-    topic_name: other_settings
+    topics: otherGS_expert
     abivarname: paral_atom
-    topic_class: basic
-    topic_name: parallelism
+    topics: parallelism_basic
     abivarname: paral_kgb
-    topic_class: basic
-    topic_name: parallelism
+    topics: parallelism_basic
     abivarname: paral_rf
-    topic_class: basic
-    topic_name: parallelism
+    topics: parallelism_basic
     abivarname: pawcpxocc
-    topic_class: expert
-    topic_name: PAW_settings
+    topics: PAW_expert
     abivarname: pawcross
-    topic_class:
-    topic_name:
+    topics:
     abivarname: pawecutdg
-    topics:
-    - {topic_name: convergency, topic_class: compulsory}
-    - {topic_name: PAW_settings, topic_class: compulsory}
+    topics: convergency_compulsory, PAW_compulsory
     abivarname: pawfatbnd
-    topic_class: useful
-    topic_name: PAW_settings
+    topics: PAW_useful
     abivarname: pawlcutd
-    topic_class: expert
-    topic_name: PAW_settings
+    topics: PAW_expert
     abivarname: pawlmix
-    topic_class: expert
-    topic_name: PAW_settings
+    topics: PAW_expert
     abivarname: pawmixdg
-    topic_class: expert
-    topic_name: PAW_settings
+    topics: PAW_expert
     abivarname: pawnhatxc
-    topic_class: expert
-    topic_name: PAW_settings
+    topics: PAW_expert
     abivarname: pawnphi
-    topic_class: expert
-    topic_name: PAW_settings
+    topics: PAW_expert
     abivarname: pawntheta
-    topic_class: expert
-    topic_name: PAW_settings
+    topics: PAW_expert
     abivarname: pawnzlm
-    topic_class: expert
-    topic_name: PAW_settings
+    topics: PAW_expert
     abivarname: pawoptmix
-    topic_class: expert
-    topic_name: PAW_settings
+    topics: PAW_expert
     abivarname: pawoptosc
-    topic_class:
-    topic_name:
-    abivarname: pawovlp
-    topic_class: expert
-    topic_name: PAW_settings
-    abivarname: pawprt_b
-    topic_class: useful
-    topic_name: PAW_settings
-    abivarname: pawprt_k
-    topic_class: useful
-    topic_name: PAW_settings
-    abivarname: pawprtden
-    topic_class: useful
-    topic_name: PAW_settings
-    abivarname: pawprtdos
-    topic_class: useful
-    topic_name: PAW_settings
-    abivarname: pawprtvol
-    topic_class: useful
-    topic_name: PAW_settings
-    abivarname: pawprtwf
-    topic_class: useful
-    topic_name: PAW_settings
-    abivarname: pawspnorb
-    topic_class: useful
-    topic_name: PAW_settings
-    abivarname: pawstgylm
-    topic_class: expert
-    topic_name: PAW_settings
-    abivarname: pawsushat
-    topic_class: expert
-    topic_name: PAW_settings
-    abivarname: pawujat
-    topic_class: expert
-    topic_name: DFT+U
-    abivarname: pawujrad
-    topic_class: expert
-    topic_name: DFT+U
-    abivarname: pawujv
-    topic_class: expert
-    topic_name: DFT+U
-    abivarname: pawusecp
-    topic_class: expert
-    topic_name: PAW_settings
-    abivarname: pawxcdev
-    topic_class: expert
-    topic_name: PAW_settings
-    abivarname: ph_intmeth
-    topic_class:
-    topic_name:
-    abivarname: ph_ndivsm
-    topic_class:
-    topic_name:
-    abivarname: ph_ngqpt
-    topic_class:
-    topic_name:
-    abivarname: ph_nqpath
-    topic_class:
-    topic_name:
-    abivarname: ph_nqshift
-    topic_class:
-    topic_name:
-    abivarname: ph_qpath
-    topic_class:
-    topic_name:
-    abivarname: ph_qshift
-    topic_class:
-    topic_name:
-    abivarname: ph_smear
-    topic_class:
-    topic_name:
-    abivarname: ph_wstep
-    topic_class:
-    topic_name:
-    abivarname: pimass
-    topic_class:
-    topic_name:
-    abivarname: pimd_constraint
-    topic_class:
-    topic_name:
-    abivarname: pitransform
-    topic_class:
-    topic_name:
-    abivarname: plowan_bandf
-    topic_class:
-    topic_name:
-    abivarname: plowan_bandi
-    topic_class:
-    topic_name:
-    abivarname: plowan_compute
-    topic_class:
-    topic_name:
-    abivarname: plowan_iatom
-    topic_class:
-    topic_name:
-    abivarname: plowan_it
-    topic_class:
-    topic_name:
-    abivarname: plowan_lcalc
-    topic_class:
-    topic_name:
-    abivarname: plowan_natom
-    topic_class:
-    topic_name:
-    abivarname: plowan_nbl
-    topic_class:
-    topic_name:
-    abivarname: plowan_nt
-    topic_class:
-    topic_name:
-    abivarname: plowan_projcalc
-    topic_class:
-    topic_name:
-    abivarname: plowan_realspace
-    topic_class:
-    topic_name:
-    abivarname: polcen
-    topic_class:
-    topic_name:
-    abivarname: posdoppler
-    topic_class: basic
-    topic_name: positron
-    abivarname: positron
-    topic_class: compulsory
-    topic_name: positron
-    abivarname: posnstep
-    topic_class: basic
-    topic_name: positron
-    abivarname: posocc
-    topic_class: basic
-    topic_name: positron
-    abivarname: postoldfe
-    topic_class: basic
-    topic_name: positron
-    abivarname: postoldff
-    topic_class: basic
-    topic_name: positron
-    abivarname: ppmfrq
-    topic_class:
-    topic_name:
-    abivarname: ppmodel
-    topic_class:
-    topic_name:
-    abivarname: prepanl
-    topic_class:
-    topic_name:
-    abivarname: prepgkk
-    topic_class:
-    topic_name:
-    abivarname: prepscphon
-    topic_class: prngs
-    topic_name: printing_settings
-    abivarname: prt1dm
-    topic_class: prgs
-    topic_name: printing_settings
-    abivarname: prtatlist
-    topic_class: prgeo
-    topic_name: printing_settings
-    abivarname: prtbbb
-    topic_class: prngs
-    topic_name: printing_settings
-    abivarname: prtbltztrp
-    topic_class: prgs
-    topic_name: printing_settings
-    abivarname: prtcif
-    topic_class: prgeo
-    topic_name: printing_settings
-    abivarname: prtden
-    topic_class: prden
-    topic_name: printing_settings
-    abivarname: prtdensph
-    topic_class: prden
-    topic_name: printing_settings
-    abivarname: prtdipole
-    topic_class: prgs
-    topic_name: printing_settings
-    abivarname: prtdos
-    topic_class: prdos
-    topic_name: printing_settings
-    abivarname: prtdosm
-    topic_class: prdos
-    topic_name: printing_settings
-    abivarname: prtebands
-    topic_class: prden
-    topic_name: printing_settings
-    abivarname: prtefg
-    topic_class: prngs
-    topic_name: printing_settings
-    abivarname: prteig
-    topic_class: prden
-    topic_name: printing_settings
-    abivarname: prtelf
-    topic_class: prgs
-    topic_name: printing_settings
-    abivarname: prtfc
-    topic_class: prfermi
-    topic_name: printing_settings
-    abivarname: prtfsurf
-    topic_class: prfermi
-    topic_name: printing_settings
-    abivarname: prtgden
-    topic_class: prden
-    topic_name: printing_settings
-    abivarname: prtgeo
-    topic_class: prgeo
-    topic_name: printing_settings
-    abivarname: prtgkk
-    topic_class: prngs
-    topic_name: printing_settings
-    abivarname: prtgsr
-    topic_class: prgs
-    topic_name: printing_settings
-    abivarname: prtkden
-    topic_class: prden
-    topic_name: printing_settings
-    abivarname: prtkpt
-    topic_class: prden
-    topic_name: printing_settings
-    abivarname: prtlden
-    topic_class: prden
-    topic_name: printing_settings
-    abivarname: prtnabla
-    topic_class: prgs
-    topic_name: printing_settings
-    abivarname: prtnest
-    topic_class: prfermi
-    topic_name: printing_settings
-    abivarname: prtphbands
-    topic_class: prngs
-    topic_name: printing_settings
-    abivarname: prtphdos
-    topic_class: prngs
-    topic_name: printing_settings
-    abivarname: prtphsurf
-    topic_class: prngs
-    topic_name: printing_settings
-    abivarname: prtposcar
-    topic_class: prgeo
-    topic_name: printing_settings
-    abivarname: prtpot
-    topic_class: prpot
-    topic_name: printing_settings
-    abivarname: prtpsps
-    topic_class: prgs
-    topic_name: printing_settings
-    abivarname: prtspcur
-    topic_class: prgs
-    topic_name: printing_settings
-    abivarname: prtstm
-    topic_class: prgs
-    topic_name: printing_settings
-    abivarname: prtsuscep
-    topic_class: prngs
-    topic_name: printing_settings
-    abivarname: prtvclmb
-    topic_class: prpot
-    topic_name: printing_settings
-    abivarname: prtvdw
-    topic_class: prgs
-    topic_name: printing_settings
-    abivarname: prtvha
-    topic_class: prpot
-    topic_name: printing_settings
-    abivarname: prtvhxc
-    topic_class: prpot
-    topic_name: printing_settings
-    abivarname: prtvol
-    topic_class: prgs
-    topic_name: printing_settings
-    abivarname: prtvolimg
-    topic_class: prgs
-    topic_name: printing_settings
-    abivarname: prtvpsp
-    topic_class: prpot
-    topic_name: printing_settings
-    abivarname: prtvxc
-    topic_class: prpot
-    topic_name: printing_settings
-    abivarname: prtwant
-    topic_class: prgs
-    topic_name: printing_settings
-    abivarname: prtwf
-    topic_class: prden
-    topic_name: printing_settings
-    abivarname: prtwf_full
-    topic_class: prden
-    topic_name: printing_settings
-    abivarname: prtxml
-    topic_class: prgs
-    topic_name: printing_settings
-    abivarname: ptcharge
-    topic_class:
-    topic_name:
-    abivarname: ptgroupma
-    topic_class: useful
-    topic_name: polar_settings
-    abivarname: pvelmax
-    topic_class:
-    topic_name:
-    abivarname: pw_unbal_thresh
-    topic_class: expert
-    topic_name: parallelism
-    abivarname: qmass
-    topic_class:
-    topic_name:
-    abivarname: qprtrb
-    topic_class:
-    topic_name:
-    abivarname: qpt
-    topic_class:
-    topic_name:
-    abivarname: qptdm
-    topic_class:
-    topic_name:
-    abivarname: qptn
-    topic_class:
-    topic_name:
-    abivarname: qptnrm
-    topic_class:
-    topic_name:
-    abivarname: qptopt
-    topic_class:
-    topic_name:
-    abivarname: qptrlatt
-    topic_class:
-    topic_name:
-    abivarname: quadmom
-    topic_class:
-    topic_name:
-    abivarname: random_atpos
-    topic_class: expert
-    topic_name: other_settings
-    abivarname: ratsph
-    topic_class: prdos
-    topic_name: printing_settings
-    abivarname: ratsph_extra
-    topic_class: prdos
-    topic_name: printing_settings
-    abivarname: rcut
-    topic_class:
-    topic_name:
-    abivarname: recefermi
-    topic_class:
-    topic_name:
-    abivarname: recgratio
-    topic_class:
-    topic_name:
-    abivarname: recnpath
-    topic_class:
-    topic_name:
-    abivarname: recnrec
-    topic_class:
-    topic_name:
-    abivarname: recptrott
-    topic_class:
-    topic_name:
-    abivarname: recrcut
-    topic_class:
-    topic_name:
-    abivarname: rectesteg
-    topic_class:
-    topic_name:
-    abivarname: rectolden
-    topic_class:
-    topic_name:
-    abivarname: red_dfield
-    topic_class:
-    topic_name:
-    abivarname: red_efield
-    topic_class:
-    topic_name:
-    abivarname: red_efieldbar
-    topic_class:
-    topic_name:
-    abivarname: restartxf
-    topic_class:
-    topic_name:
-    abivarname: rf2_dkdk
-    topic_class:
-    topic_name:
-    abivarname: rfasr
-    topic_class:
-    topic_name:
-    abivarname: rfatpol
-    topic_class:
-    topic_name:
-    abivarname: rfddk
-    topic_class:
-    topic_name:
-    abivarname: rfdir
-    topic_class:
-    topic_name:
-    abivarname: rfelfd
-    topic_class:
-    topic_name:
-    abivarname: rfmagn
-    topic_class:
-    topic_name:
-    abivarname: rfmeth
-    topic_class:
-    topic_name:
-    abivarname: rfphon
-    topic_class:
-    topic_name:
-    abivarname: rfstrs
-    topic_class:
-    topic_name:
-    abivarname: rfuser
-    topic_class:
-    topic_name:
-    abivarname: rhoqpmix
-    topic_class:
-    topic_name:
-    abivarname: rprim
-    topic_class: compulsory
-    topic_name: crystal
-    abivarname: rprimd
-    topic_class:
-    topic_name:
-    abivarname: scalecart
-    topic_class: useful
-    topic_name: crystal
-    abivarname: scphon_supercell
-    topic_class:
-    topic_name:
-    abivarname: scphon_temp
-    topic_class:
-    topic_name:
-    abivarname: shiftk
-    topic_class: useful
-    topic_name: k_points
-    abivarname: shiftq
-    topic_class:
-    topic_name:
-    abivarname: signperm
-    topic_class:
-    topic_name:
-    abivarname: slabwsrad
-    topic_class: slab
-    topic_name: other_settings
-    abivarname: slabzbeg
-    topic_class: slab
-    topic_name: other_settings
-    abivarname: slabzend
-    topic_class: slab
-    topic_name: other_settings
-    abivarname: smdelta
-    topic_class:
-    topic_name:
-    abivarname: so_psp
-    topic_class: basic
-    topic_name: polar_settings
-    abivarname: spbroad
-    topic_class:
-    topic_name:
-    abivarname: spgaxor
-    topic_class: expert
-    topic_name: crystal
-    abivarname: spgorig
-    topic_class: expert
-    topic_name: crystal
-    abivarname: spgroup
-    topic_class: expert
-    topic_name: crystal
-    abivarname: spgroupma
-    topic_class: useful
-    topic_name: polar_settings
-    abivarname: spinat
-    topic_class: basic
-    topic_name: polar_settings
-    abivarname: spinmagntarget
-    topic_class: useful
-    topic_name: polar_settings
-    abivarname: spmeth
-    topic_class:
-    topic_name:
-    abivarname: spnorbscl
-    topic_class: useful
-    topic_name: PAW_settings
-    abivarname: stmbias
-    topic_class: useful
-    topic_name: general_settings
-    abivarname: strfact
-    topic_class:
-    topic_name:
-    abivarname: string_algo
-    topic_class:
-    topic_name:
-    abivarname: strprecon
-    topic_class: useful
-    topic_name: general_settings
-    abivarname: strtarget
-    topic_class: useful
-    topic_name: general_settings
-    abivarname: symafm
-    topic_class: useful
-    topic_name: polar_settings
-    abivarname: symchi
-    topic_class:
-    topic_name:
-    abivarname: symdynmat
-    topic_class:
-    topic_name:
-    abivarname: symmorphi
-    topic_class: expert
-    topic_name: crystal
-    abivarname: symrel
-    topic_class: useful
-    topic_name: crystal
-    abivarname: symsigma
-    topic_class:
-    topic_name:
-    abivarname: td_maxene
-    topic_class: useful
-    topic_name: TDDFT
-    abivarname: td_mexcit
-    topic_class: useful
-    topic_name: TDDFT
-    abivarname: tfkinfunc
-    topic_class:
-    topic_name:
-    abivarname: tfw_toldfe
-    topic_class:
-    topic_name:
-    abivarname: timopt
-    topic_class: expert
-    topic_name: general_settings
-    abivarname: tl_nprccg
-    topic_class:
-    topic_name:
-    abivarname: tl_radius
-    topic_class:
-    topic_name:
-    abivarname: tnons
-    topic_class: useful
-    topic_name: crystal
-    abivarname: toldfe
-    topic_class: basic
-    topic_name: convergency
-    abivarname: toldff
-    topic_class: useful
-    topic_name: general_settings
-    abivarname: tolimg
-    topic_class:
-    topic_name:
-    abivarname: tolmxde
-    topic_class:
-    topic_name:
-    abivarname: tolmxf
-    topic_class:
-    topic_name:
-    abivarname: tolrde
-    topic_class: expert
-    topic_name: convergency
-    abivarname: tolrff
     topics:
-    - {topic_name: convergency, topic_class: basic}
-    - {topic_name: general_settings, topic_class: useful}
+    abivarname: pawovlp
+    topics: PAW_expert
+    abivarname: pawprt_b
+    topics: PAW_useful
+    abivarname: pawprt_k
+    topics: PAW_useful
+    abivarname: pawprtden
+    topics: PAW_useful
+    abivarname: pawprtdos
+    topics: PAW_useful
+    abivarname: pawprtvol
+    topics: PAW_useful
+    abivarname: pawprtwf
+    topics: PAW_useful
+    abivarname: pawspnorb
+    topics: PAW_useful
+    abivarname: pawstgylm
+    topics: PAW_expert
+    abivarname: pawsushat
+    topics: PAW_expert
+    abivarname: pawujat
+    topics: DFT+U_expert
+    abivarname: pawujrad
+    topics: DFT+U_expert
+    abivarname: pawujv
+    topics: DFT+U_expert
+    abivarname: pawusecp
+    topics: PAW_expert
+    abivarname: pawxcdev
+    topics: PAW_expert
+    abivarname: ph_intmeth
+    topics:
+    abivarname: ph_ndivsm
+    topics:
+    abivarname: ph_ngqpt
+    topics:
+    abivarname: ph_nqpath
+    topics:
+    abivarname: ph_nqshift
+    topics:
+    abivarname: ph_qpath
+    topics:
+    abivarname: ph_qshift
+    topics:
+    abivarname: ph_smear
+    topics:
+    abivarname: ph_wstep
+    topics:
+    abivarname: pimass
+    topics:
+    abivarname: pimd_constraint
+    topics:
+    abivarname: pitransform
+    topics:
+    abivarname: plowan_bandf
+    topics:
+    abivarname: plowan_bandi
+    topics:
+    abivarname: plowan_compute
+    topics:
+    abivarname: plowan_iatom
+    topics:
+    abivarname: plowan_it
+    topics:
+    abivarname: plowan_lcalc
+    topics:
+    abivarname: plowan_natom
+    topics:
+    abivarname: plowan_nbl
+    topics:
+    abivarname: plowan_nt
+    topics:
+    abivarname: plowan_projcalc
+    topics:
+    abivarname: plowan_realspace
+    topics:
+    abivarname: polcen
+    topics:
+    abivarname: posdoppler
+    topics: positron_basic
+    abivarname: positron
+    topics: positron_compulsory
+    abivarname: posnstep
+    topics: positron_basic
+    abivarname: posocc
+    topics: positron_basic
+    abivarname: postoldfe
+    topics: positron_basic
+    abivarname: postoldff
+    topics: positron_basic
+    abivarname: ppmfrq
+    topics:
+    abivarname: ppmodel
+    topics:
+    abivarname: prepanl
+    topics:
+    abivarname: prepgkk
+    topics:
+    abivarname: prepscphon
+    topics: printing_prngs
+    abivarname: prt1dm
+    topics: printing_prgs
+    abivarname: prtatlist
+    topics: printing_prgeo
+    abivarname: prtbbb
+    topics: printing_prngs
+    abivarname: prtbltztrp
+    topics: printing_prgs
+    abivarname: prtcif
+    topics: printing_prgeo
+    abivarname: prtden
+    topics: printing_prden
+    abivarname: prtdensph
+    topics: printing_prden
+    abivarname: prtdipole
+    topics: printing_prgs
+    abivarname: prtdos
+    topics: printing_prdos
+    abivarname: prtdosm
+    topics: printing_prdos
+    abivarname: prtebands
+    topics: printing_prden
+    abivarname: prtefg
+    topics: printing_prngs
+    abivarname: prteig
+    topics: printing_prden
+    abivarname: prtelf
+    topics: printing_prgs
+    abivarname: prtfc
+    topics: printing_prfermi
+    abivarname: prtfsurf
+    topics: printing_prfermi
+    abivarname: prtgden
+    topics: printing_prden
+    abivarname: prtgeo
+    topics: printing_prgeo
+    abivarname: prtgkk
+    topics: printing_prngs
+    abivarname: prtgsr
+    topics: printing_prgs
+    abivarname: prtkden
+    topics: printing_prden
+    abivarname: prtkpt
+    topics: printing_prden
+    abivarname: prtlden
+    topics: printing_prden
+    abivarname: prtnabla
+    topics: printing_prgs
+    abivarname: prtnest
+    topics: printing_prfermi
+    abivarname: prtphbands
+    topics: printing_prngs
+    abivarname: prtphdos
+    topics: printing_prngs
+    abivarname: prtphsurf
+    topics: printing_prngs
+    abivarname: prtposcar
+    topics: printing_prgeo
+    abivarname: prtpot
+    topics: printing_prpot
+    abivarname: prtpsps
+    topics: printing_prgs
+    abivarname: prtspcur
+    topics: printing_prgs
+    abivarname: prtstm
+    topics: printing_prgs
+    abivarname: prtsuscep
+    topics: printing_prngs
+    abivarname: prtvclmb
+    topics: printing_prpot
+    abivarname: prtvdw
+    topics: printing_prgs
+    abivarname: prtvha
+    topics: printing_prpot
+    abivarname: prtvhxc
+    topics: printing_prpot
+    abivarname: prtvol
+    topics: printing_prgs
+    abivarname: prtvolimg
+    topics: printing_prgs
+    abivarname: prtvpsp
+    topics: printing_prpot
+    abivarname: prtvxc
+    topics: printing_prpot
+    abivarname: prtwant
+    topics: printing_prgs
+    abivarname: prtwf
+    topics: printing_prden
+    abivarname: prtwf_full
+    topics: printing_prden
+    abivarname: prtxml
+    topics: printing_prgs
+    abivarname: ptcharge
+    topics:
+    abivarname: ptgroupma
+    topics: spinpolarisation_useful
+    abivarname: pvelmax
+    topics:
+    abivarname: pw_unbal_thresh
+    topics: parallelism_expert
+    abivarname: qmass
+    topics:
+    abivarname: qprtrb
+    topics:
+    abivarname: qpt
+    topics:
+    abivarname: qptdm
+    topics:
+    abivarname: qptn
+    topics:
+    abivarname: qptnrm
+    topics:
+    abivarname: qptopt
+    topics:
+    abivarname: qptrlatt
+    topics:
+    abivarname: quadmom
+    topics:
+    abivarname: random_atpos
+    topics: otherGS_expert
+    abivarname: ratsph
+    topics: printing_prdos
+    abivarname: ratsph_extra
+    topics: printing_prdos
+    abivarname: rcut
+    topics:
+    abivarname: recefermi
+    topics:
+    abivarname: recgratio
+    topics:
+    abivarname: recnpath
+    topics:
+    abivarname: recnrec
+    topics:
+    abivarname: recptrott
+    topics:
+    abivarname: recrcut
+    topics:
+    abivarname: rectesteg
+    topics:
+    abivarname: rectolden
+    topics:
+    abivarname: red_dfield
+    topics:
+    abivarname: red_efield
+    topics:
+    abivarname: red_efieldbar
+    topics:
+    abivarname: restartxf
+    topics:
+    abivarname: rf2_dkdk
+    topics:
+    abivarname: rfasr
+    topics:
+    abivarname: rfatpol
+    topics:
+    abivarname: rfddk
+    topics:
+    abivarname: rfdir
+    topics:
+    abivarname: rfelfd
+    topics:
+    abivarname: rfmagn
+    topics:
+    abivarname: rfmeth
+    topics:
+    abivarname: rfphon
+    topics:
+    abivarname: rfstrs
+    topics:
+    abivarname: rfuser
+    topics:
+    abivarname: rhoqpmix
+    topics:
+    abivarname: rprim
+    topics: crystal_compulsory
+    abivarname: rprimd
+    topics:
+    abivarname: scalecart
+    topics: crystal_useful
+    abivarname: scphon_supercell
+    topics:
+    abivarname: scphon_temp
+    topics:
+    abivarname: shiftk
+    topics: k-points_useful
+    abivarname: shiftq
+    topics:
+    abivarname: signperm
+    topics:
+    abivarname: slabwsrad
+    topics: otherGS_slab
+    abivarname: slabzbeg
+    topics: otherGS_slab
+    abivarname: slabzend
+    topics: otherGS_slab
+    abivarname: smdelta
+    topics:
+    abivarname: so_psp
+    topics: spinpolarisation_basic
+    abivarname: spbroad
+    topics:
+    abivarname: spgaxor
+    topics: crystal_expert
+    abivarname: spgorig
+    topics: crystal_expert
+    abivarname: spgroup
+    topics: crystal_expert
+    abivarname: spgroupma
+    topics: spinpolarisation_useful
+    abivarname: spinat
+    topics: spinpolarisation_basic
+    abivarname: spinmagntarget
+    topics: spinpolarisation_useful
+    abivarname: spmeth
+    topics:
+    abivarname: spnorbscl
+    topics: PAW_useful
+    abivarname: stmbias
+    topics: GSgeneral_useful
+    abivarname: strfact
+    topics:
+    abivarname: string_algo
+    topics:
+    abivarname: strprecon
+    topics: GSgeneral_useful
+    abivarname: strtarget
+    topics: GSgeneral_useful
+    abivarname: symafm
+    topics: spinpolarisation_useful
+    abivarname: symchi
+    topics:
+    abivarname: symdynmat
+    topics:
+    abivarname: symmorphi
+    topics: crystal_expert
+    abivarname: symrel
+    topics: crystal_useful
+    abivarname: symsigma
+    topics:
+    abivarname: td_maxene
+    topics: TDDFT_useful
+    abivarname: td_mexcit
+    topics: TDDFT_useful
+    abivarname: tfkinfunc
+    topics:
+    abivarname: tfw_toldfe
+    topics:
+    abivarname: timopt
+    topics: GSgeneral_expert
+    abivarname: tl_nprccg
+    topics:
+    abivarname: tl_radius
+    topics:
+    abivarname: tnons
+    topics: crystal_useful
+    abivarname: toldfe
+    topics: convergency_basic
+    abivarname: toldff
+    topics: GSgeneral_useful
+    abivarname: tolimg
+    topics:
+    abivarname: tolmxde
+    topics:
+    abivarname: tolmxf
+    topics:
+    abivarname: tolrde
+    topics: convergency_expert
+    abivarname: tolrff
+    topics: convergency_basic, GSgeneral_useful
     abivarname: tolsym
-    topic_class:
-    topic_name:
+    topics:
     abivarname: tolvrs
-    topic_class: basic
-    topic_name: convergency
+    topics: convergency_basic
     abivarname: tolwfr
-    topic_class: basic
-    topic_name: convergency
+    topics: convergency_basic
     abivarname: tphysel
-    topic_class: useful
-    topic_name: general_settings
+    topics: GSgeneral_useful
     abivarname: tsmear
-    topic_class: basic
-    topic_name: general_settings
+    topics: GSgeneral_basic
     abivarname: typat
-    topic_class: basic
-    topic_name: general_settings
+    topics: GSgeneral_basic
     abivarname: ucrpa
-    topic_class:
-    topic_name:
+    topics:
     abivarname: ucrpa_bands
-    topic_class:
-    topic_name:
+    topics:
     abivarname: ucrpa_window
-    topic_class:
-    topic_name:
+    topics:
     abivarname: udtset
-    topic_class: basic
-    topic_name: multi_dtset
+    topics: multidtset_basic
     abivarname: upawu
-    topic_class: compulsory
-    topic_name: DFT+U
+    topics: DFT+U_compulsory
     abivarname: use_gemm_nonlop
-    topic_class: expert
-    topic_name: parallelism
+    topics: parallelism_expert
     abivarname: use_gpu_cuda
-    topic_class: expert
-    topic_name: parallelism
+    topics: parallelism_expert
     abivarname: use_nonscf_gkk
-    topic_class:
-    topic_name:
+    topics:
     abivarname: use_slk
-    topic_class:
-    topic_name:
+    topics:
     abivarname: usedmatpu
-    topic_class: useful
-    topic_name: DFT+U
+    topics: DFT+U_useful
     abivarname: usedmft
-    topic_class:
-    topic_name:
+    topics:
     abivarname: useexexch
-    topic_class: useful
-    topic_name: xc
+    topics: xc_useful
     abivarname: usefock
-    topic_class: internal
-    topic_name: hf
+    topics: hf_internal
     abivarname: usekden
-    topic_class: expert
-    topic_name: xc
+    topics: xc_expert
     abivarname: usepaw
-    topic_class: internal
-    topic_name: PAW_settings
+    topics: PAW_internal
     abivarname: usepawu
-    topic_class: compulsory
-    topic_name: DFT+U
+    topics: DFT+U_compulsory
     abivarname: usepotzero
-    topic_class: expert
-    topic_name: other_settings
+    topics: otherGS_expert
     abivarname: userec
-    topic_class:
-    topic_name:
+    topics:
     abivarname: useria
-    topic_class: expert
-    topic_name: other_settings
+    topics: otherGS_expert
     abivarname: userib
-    topic_class: expert
-    topic_name: other_settings
+    topics: otherGS_expert
     abivarname: useric
-    topic_class: expert
-    topic_name: other_settings
+    topics: otherGS_expert
     abivarname: userid
-    topic_class: expert
-    topic_name: other_settings
+    topics: otherGS_expert
     abivarname: userie
-    topic_class: expert
-    topic_name: other_settings
+    topics: otherGS_expert
     abivarname: userra
-    topic_class: expert
-    topic_name: other_settings
+    topics: otherGS_expert
     abivarname: userrb
-    topic_class: expert
-    topic_name: other_settings
+    topics: otherGS_expert
     abivarname: userrc
-    topic_class: expert
-    topic_name: other_settings
+    topics: otherGS_expert
     abivarname: userrd
-    topic_class: expert
-    topic_name: other_settings
+    topics: otherGS_expert
     abivarname: userre
-    topic_class: expert
-    topic_name: other_settings
+    topics: otherGS_expert
     abivarname: usewvl
-    topic_class:
-    topic_name:
+    topics:
     abivarname: usexcnhat
-    topic_class: useful
-    topic_name: PAW_settings
+    topics: PAW_useful
     abivarname: useylm
-    topic_class: expert
-    topic_name: general_settings
+    topics: GSgeneral_expert
     abivarname: vaclst
-    topic_class:
-    topic_name:
+    topics:
     abivarname: vacnum
-    topic_class:
-    topic_name:
+    topics:
     abivarname: vacuum
-    topic_class: expert
-    topic_name: k_points
+    topics: k-points_expert
     abivarname: vacwidth
-    topic_class: expert
-    topic_name: k_points
+    topics: k-points_expert
     abivarname: vcutgeo
-    topic_class:
-    topic_name:
+    topics:
     abivarname: vdw_df_acutmin
-    topic_class:
-    topic_name:
+    topics:
     abivarname: vdw_df_aratio
-    topic_class:
-    topic_name:
+    topics:
     abivarname: vdw_df_damax
-    topic_class:
-    topic_name:
+    topics:
     abivarname: vdw_df_damin
-    topic_class:
-    topic_name:
+    topics:
     abivarname: vdw_df_dcut
-    topic_class:
-    topic_name:
+    topics:
     abivarname: vdw_df_dratio
-    topic_class:
-    topic_name:
+    topics:
     abivarname: vdw_df_dsoft
-    topic_class:
-    topic_name:
+    topics:
     abivarname: vdw_df_gcut
-    topic_class:
-    topic_name:
+    topics:
     abivarname: vdw_df_ndpts
-    topic_class:
-    topic_name:
+    topics:
     abivarname: vdw_df_ngpts
-    topic_class:
-    topic_name:
+    topics:
     abivarname: vdw_df_nqpts
-    topic_class:
-    topic_name:
+    topics:
     abivarname: vdw_df_nrpts
-    topic_class:
-    topic_name:
+    topics:
     abivarname: vdw_df_nsmooth
-    topic_class:
-    topic_name:
+    topics:
     abivarname: vdw_df_phisoft
-    topic_class:
-    topic_name:
+    topics:
     abivarname: vdw_df_qcut
-    topic_class:
-    topic_name:
+    topics:
     abivarname: vdw_df_qratio
-    topic_class:
-    topic_name:
+    topics:
     abivarname: vdw_df_rcut
-    topic_class:
-    topic_name:
+    topics:
     abivarname: vdw_df_rsoft
-    topic_class:
-    topic_name:
+    topics:
     abivarname: vdw_df_threshold
-    topic_class:
-    topic_name:
+    topics:
     abivarname: vdw_df_tolerance
-    topic_class:
-    topic_name:
+    topics:
     abivarname: vdw_df_tweaks
-    topic_class:
-    topic_name:
+    topics:
     abivarname: vdw_df_zab
-    topic_class:
-    topic_name:
+    topics:
     abivarname: vdw_nfrag
-    topic_class:
-    topic_name:
+    topics:
     abivarname: vdw_supercell
-    topic_class:
-    topic_name:
+    topics:
     abivarname: vdw_tol
-    topic_class:
-    topic_name:
+    topics:
     abivarname: vdw_tol_3bt
-    topic_class:
-    topic_name:
+    topics:
     abivarname: vdw_typfrag
-    topic_class:
-    topic_name:
+    topics:
     abivarname: vdw_xc
-    topic_class:
-    topic_name:
+    topics:
     abivarname: vel
-    topic_class:
-    topic_name:
+    topics:
     abivarname: vel_cell
-    topic_class:
-    topic_name:
+    topics:
     abivarname: vis
-    topic_class:
-    topic_name:
+    topics:
     abivarname: vprtrb
-    topic_class:
-    topic_name:
+    topics:
     abivarname: w90iniprj
-    topic_class:
-    topic_name:
+    topics:
     abivarname: w90prtunk
-    topic_class:
-    topic_name:
+    topics:
     abivarname: wfoptalg
-    topic_class:
-    topic_name:
+    topics:
     abivarname: wtatcon
-    topic_class:
-    topic_name:
+    topics:
     abivarname: wtk
-    topic_class: useful
-    topic_name: k_points
+    topics: k-points_useful
     abivarname: wtq
-    topic_class:
-    topic_name:
+    topics:
     abivarname: wvl_bigdft_comp
-    topic_class:
-    topic_name:
+    topics:
     abivarname: wvl_crmult
-    topic_class:
-    topic_name:
+    topics:
     abivarname: wvl_frmult
-    topic_class:
-    topic_name:
+    topics:
     abivarname: wvl_hgrid
-    topic_class:
-    topic_name:
+    topics:
     abivarname: wvl_ngauss
-    topic_class:
-    topic_name:
+    topics:
     abivarname: wvl_nprccg
-    topic_class:
-    topic_name:
+    topics:
     abivarname: xangst
-    topic_class: compulsory
-    topic_name: crystal
+    topics: crystal_compulsory
     abivarname: xc_denpos
-    topic_class: expert
-    topic_name: xc
+    topics: xc_expert
     abivarname: xc_tb09_c
-    topic_class: expert
-    topic_name: xc
+    topics: xc_expert
     abivarname: xcart
-    topic_class: compulsory
-    topic_name: crystal
+    topics: crystal_compulsory
     abivarname: xclevel
-    topic_class:
-    topic_name:
+    topics:
     abivarname: xred
-    topic_class: compulsory
-    topic_name: crystal
+    topics: crystal_compulsory
     abivarname: xredsph_extra
-    topic_class: prdos
-    topic_name: printing_settings
+    topics: printing_prdos
     abivarname: xyzfile
-    topic_class: expert
-    topic_name: crystal
+    topics: crystal_expert
     abivarname: zcut
-    topic_class:
-    topic_name:
+    topics:
     abivarname: zeemanfield
-    topic_class:
-    topic_name:
+    topics:
     abivarname: ziontypat
-    topic_class: internal
-    topic_name: general_settings
+    topics: GSgeneral_internal
     abivarname: znucl
-    topic_class: basic
-    topic_name: general_settings
+    topics: GSgeneral_basic

@@ -11,11 +11,11 @@
     howto: |-
       perform a DFT+U calculation
 - !topic
-    topic_name: general_settings
+    topic_name: GSgeneral
     howto: |-
       set general settings for a ground-state calculation
 - !topic
-    topic_name: GS_introduction
+    topic_name: GSintroduction
     howto: |-
       perform a ground-state calculation
 - !topic
@@ -23,15 +23,15 @@
     howto: |-
       perform a calculation with hybrid functionals
 - !topic
-    topic_name: k_points
+    topic_name: k-points
     howto: |-
       set parameters related to the k-points
 - !topic
-    topic_name: multi_dtset
+    topic_name: multidtset
     howto: |-
       set parameters for a multi dataset calculation
 - !topic
-    topic_name: other_settings
+    topic_name: otherGS
     howto: |-
       set other parameters for ground state calculations
 - !topic
@@ -39,21 +39,21 @@
     howto: |-
       set parameters for a parallel calculation
 - !topic
-    topic_name: PAW_settings
+    topic_name: PAW
     howto: |-
       set parameters for a PAW calculation
-- !topic
-    topic_name: polar_settings
-    howto: |-
-      set parameters for a spin-polarized calculation
 - !topic
     topic_name: positron
     howto: |-
       set parameters for a calculation with a positron in the system.
 - !topic
-    topic_name: printing_settings
+    topic_name: printing
     howto: |-
       set parameters to print some useful quantities
+- !topic
+    topic_name: spinpolarisation
+    howto: |-
+      set parameters for a spin-polarized calculation
 - !topic
     topic_name: TDDFT
     howto: |-

@@ -728,7 +728,7 @@
          Note that alchemical mixing cannot be used with PAW.
         </p>
     topic_class: alch
-    topic_name: other_settings
+    topic_name: otherGS
     abivarname: algalch
     vartype: integer
 - !variable
@@ -791,7 +791,7 @@
         and can be made to evolve, e.g. with a genetic algorithm (not coded in v7.0.0 though).
         </p>
     topic_class: useful
-    topic_name: general_settings
+    topic_name: GSgeneral
     abivarname: amu
     vartype: real
 - !variable
@@ -2145,7 +2145,7 @@
         At present, [[builtintest]]=1 ... 7 are allowed. See more information in tests/built-in/README .
         </p>
     topic_class: expert
-    topic_name: other_settings
+    topic_name: otherGS
     abivarname: builtintest
     vartype: integer
 - !variable
@@ -2177,7 +2177,7 @@
         required level of accuracy.
         </p>
     topic_class: expert
-    topic_name: PAW_settings
+    topic_name: PAW
     abivarname: bxctmindg
     vartype: real
 - !variable
@@ -2771,7 +2771,7 @@
         per unit cell, set [[charge]]=+1.
         </p>
     topic_class: useful
-    topic_name: general_settings
+    topic_name: GSgeneral
     abivarname: charge
     vartype: real
 - !variable
@@ -2929,7 +2929,7 @@
         appears as the most symmetric point ; or ignore the problem, and set [[chksymbreak]]=0 .
         </p>
     topic_class: basic
-    topic_name: k_points
+    topic_name: k-points
     abivarname: chksymbreak
     vartype: integer
 - !variable
@@ -3000,7 +3000,7 @@
         A zero value has no action of the job.
         </p>
     topic_class: job
-    topic_name: other_settings
+    topic_name: otherGS
     abivarname: cpuh
     vartype: real
 - !variable
@@ -3027,7 +3027,7 @@
         A zero value has no action of the job.
         </p>
     topic_class: job
-    topic_name: other_settings
+    topic_name: otherGS
     abivarname: cpum
     vartype: real
 - !variable
@@ -3054,7 +3054,7 @@
         A zero value has no action of the job.
         </p>
     topic_class: job
-    topic_name: other_settings
+    topic_name: otherGS
     abivarname: cpus
     vartype: real
 - !variable
@@ -3947,7 +3947,7 @@
         (i.e. diemixmag=4, no other preconditionner on magnetization).
         </p>
     topic_class: useful
-    topic_name: polar_settings
+    topic_name: spinpolarisation
     abivarname: diemixmag
     vartype: real
 - !variable
@@ -5063,7 +5063,7 @@
         tetrahedron method, [[prtdos]]=2, is rapidly varying.
         </p>
     topic_class: prdos
-    topic_name: printing_settings
+    topic_name: printing
     abivarname: dosdeltae
     vartype: real
 - !variable
@@ -5411,7 +5411,7 @@
         experimental value.
         </p>
     topic_class: expert
-    topic_name: general_settings
+    topic_name: GSgeneral
     abivarname: effmass
     vartype: real
 - !variable
@@ -5828,7 +5828,7 @@
          </ul>
         </p>
     topic_class: useful
-    topic_name: general_settings
+    topic_name: GSgeneral
     abivarname: enunit
     vartype: integer
 - !variable
@@ -6042,7 +6042,7 @@
         (1 Ha=27.2113845 eV)
         </p>
     topic_class: expert
-    topic_name: other_settings
+    topic_name: otherGS
     abivarname: eshift
     vartype: real
 - !variable
@@ -6232,7 +6232,7 @@
         this, so a fixed default value has been chosen.
         </p>
     topic_class: useful
-    topic_name: general_settings
+    topic_name: GSgeneral
     abivarname: fband
     vartype: real
 - !variable
@@ -6250,7 +6250,7 @@
          This input variable is only effective when [[prtnest]]=1. The energy is relative to the calculated fermi energy.
         </p>
     topic_class: prfermi
-    topic_name: printing_settings
+    topic_name: printing
     abivarname: fermie_nest
     vartype: real
 - !variable
@@ -6366,7 +6366,7 @@
          Internal representation as [[ngfft]](8).
         </p>
     topic_class: expert
-    topic_name: other_settings
+    topic_name: otherGS
     abivarname: fftcache
     vartype: integer
 - !variable
@@ -6906,7 +6906,7 @@
         [[tnons]] and [[symafm]]
         </p>
     topic_class: useful
-    topic_name: polar_settings
+    topic_name: spinpolarisation
     abivarname: genafm
     vartype: real
 - !variable
@@ -7051,7 +7051,7 @@
          refers to dataset 2 when dataset 4 is initialized.
         </p>
     topic_class: useful
-    topic_name: multi_dtset
+    topic_name: multidtset
     abivarname: get1wf
     vartype: integer
 - !variable
@@ -7084,7 +7084,7 @@
         a disk file, so that it is as if [[getbscoup]]=0 for that initialisation.
         </p>
     topic_class: useful
-    topic_name: multi_dtset
+    topic_name: multidtset
     abivarname: getbscoup
     vartype: integer
 - !variable
@@ -7119,7 +7119,7 @@
         a disk file, so that it is as if [[getbseig]]=0 for that initialisation.
         </p>
     topic_class: useful
-    topic_name: multi_dtset
+    topic_name: multidtset
     abivarname: getbseig
     vartype: integer
 - !variable
@@ -7152,7 +7152,7 @@
         a disk file, so that it is as if [[getbsreso]]=0 for that initialisation.
         </p>
     topic_class: useful
-    topic_name: multi_dtset
+    topic_name: multidtset
     abivarname: getbsreso
     vartype: integer
 - !variable
@@ -7195,7 +7195,7 @@
         to using a null get variable).
         </p>
     topic_class: useful
-    topic_name: multi_dtset
+    topic_name: multidtset
     abivarname: getcell
     vartype: integer
 - !variable
@@ -7366,7 +7366,7 @@
          refers to dataset 2 when dataset 4 is initialized.
         </p>
     topic_class: useful
-    topic_name: multi_dtset
+    topic_name: multidtset
     abivarname: getddk
     vartype: integer
 - !variable
@@ -7425,7 +7425,7 @@
          refers to dataset 2 when dataset 4 is initialized.
         </p>
     topic_class: useful
-    topic_name: multi_dtset
+    topic_name: multidtset
     abivarname: getden
     vartype: integer
 - !variable
@@ -7451,7 +7451,7 @@
         for other wavevectors.
         </p>
     topic_class: useful
-    topic_name: multi_dtset
+    topic_name: multidtset
     abivarname: getgam_eig2nkq
     vartype: integer
 - !variable
@@ -7482,7 +7482,7 @@
         a disk file, so that it is as if [[gethaydock]]=0 for that initialisation.
         </p>
     topic_class: useful
-    topic_name: multi_dtset
+    topic_name: multidtset
     abivarname: gethaydock
     vartype: integer
 - !variable
@@ -7533,7 +7533,7 @@
          refers to dataset 2 when dataset 4 is initialized.
         </p>
     topic_class: useful
-    topic_name: multi_dtset
+    topic_name: multidtset
     abivarname: getocc
     vartype: integer
 - !variable
@@ -7566,7 +7566,7 @@
          refers to dataset 2 when dataset 4 is initialized.
         </p>
     topic_class: useful
-    topic_name: multi_dtset
+    topic_name: multidtset
     abivarname: getqps
     vartype: integer
 - !variable
@@ -7616,7 +7616,7 @@
          refers to dataset 2 when dataset 4 is initialized.
         </p>
     topic_class: useful
-    topic_name: multi_dtset
+    topic_name: multidtset
     abivarname: getscr
     vartype: integer
 - !variable
@@ -7670,7 +7670,7 @@
          refers to dataset 2 when dataset 4 is initialized.
         </p>
     topic_class: useful
-    topic_name: multi_dtset
+    topic_name: multidtset
     abivarname: getsuscep
     vartype: integer
 - !variable
@@ -7741,7 +7741,7 @@
         coordinate system.
         </p>
     topic_class: useful
-    topic_name: multi_dtset
+    topic_name: multidtset
     abivarname: getvel
     vartype: integer
 - !variable
@@ -7832,7 +7832,7 @@
          refers to dataset 2 when dataset 4 is initialized.
         </p>
     topic_class: useful
-    topic_name: multi_dtset
+    topic_name: multidtset
     abivarname: getwfk
     vartype: integer
 - !variable
@@ -7928,7 +7928,7 @@
          This variable is experimental. In development.
         </b>
     topic_class: useful
-    topic_name: multi_dtset
+    topic_name: multidtset
     abivarname: getwfkfine
     vartype: integer
 - !variable
@@ -8043,7 +8043,7 @@
          refers to dataset 2 when dataset 4 is initialized.
         </p>
     topic_class: useful
-    topic_name: multi_dtset
+    topic_name: multidtset
     abivarname: getwfq
     vartype: integer
 - !variable
@@ -8109,7 +8109,7 @@
         coordinate system.
         </p>
     topic_class: useful
-    topic_name: multi_dtset
+    topic_name: multidtset
     abivarname: getxcart
     vartype: integer
 - !variable
@@ -8171,7 +8171,7 @@
         coordinate system.
         </p>
     topic_class: useful
-    topic_name: multi_dtset
+    topic_name: multidtset
     abivarname: getxred
     vartype: integer
 - !variable
@@ -9721,7 +9721,7 @@
          If [[pawfatbnd]]=1 or 2, it gives the number of the [[natsph]] atoms around which atom-projected band structure will be built.
         </p>
     topic_class: prdos
-    topic_name: printing_settings
+    topic_name: printing
     abivarname: iatsph
     vartype: integer
 - !variable
@@ -11107,7 +11107,7 @@
          <br />
         </p>
     topic_class: useful
-    topic_name: general_settings
+    topic_name: GSgeneral
     abivarname: irdden
     vartype: integer
 - !variable
@@ -11380,7 +11380,7 @@
          </ul>
         </p>
     topic_class: useful
-    topic_name: general_settings
+    topic_name: GSgeneral
     abivarname: irdwfk
     vartype: integer
 - !variable
@@ -11458,7 +11458,7 @@
          This variable is experimental. In development.
         </b>
     topic_class: useful
-    topic_name: general_settings
+    topic_name: GSgeneral
     abivarname: irdwfkfine
     vartype: integer
 - !variable
@@ -11883,7 +11883,7 @@
         When '[[istatr]]'=0, there is no writing of a status file (which is the default).
         </p>
     topic_class: expert
-    topic_name: other_settings
+    topic_name: otherGS
     abivarname: istatr
     vartype: integer
 - !variable
@@ -11917,7 +11917,7 @@
         and the 10th call.
         </p>
     topic_class: expert
-    topic_name: other_settings
+    topic_name: otherGS
     abivarname: istatshft
     vartype: integer
 - !variable
@@ -11998,7 +11998,7 @@
          </ul>
         </p>
     topic_class: useful
-    topic_name: k_points
+    topic_name: k-points
     abivarname: istwfk
     vartype: integer
 - !variable
@@ -13185,7 +13185,7 @@
         be used.
         </p>
     topic_class: basic
-    topic_name: multi_dtset
+    topic_name: multidtset
     abivarname: jdtset
     vartype: integer
 - !variable
@@ -13219,7 +13219,7 @@
         the input variables [[slabzbeg]] and [[slabzend]].
         </p>
     topic_class: sla
-    topic_name: other_settings
+    topic_name: otherGS
     abivarname: jellslab
     vartype: integer
 - !variable
@@ -13407,7 +13407,7 @@
          Not read if [[kptopt]]/=0 .
         </p>
     topic_class: useful
-    topic_name: k_points
+    topic_name: k-points
     abivarname: kpt
     vartype: real
 - !variable
@@ -13674,7 +13674,7 @@
         <p>
         </p>
     topic_class: expert
-    topic_name: k_points
+    topic_name: k-points
     abivarname: kptbounds
     vartype: real
 - !variable
@@ -13736,7 +13736,7 @@
          It cannot be smaller than 1.0d0
         </p>
     topic_class: useful
-    topic_name: k_points
+    topic_name: k-points
     abivarname: kptnrm
     vartype: real
 - !variable
@@ -13778,7 +13778,7 @@
         by [[qptn]](1:3).
         </p>
     topic_class: internal
-    topic_name: k_points
+    topic_name: k-points
     abivarname: kptns
     vartype: real
 - !variable
@@ -13884,7 +13884,7 @@
         you to select the optimal grid.
         </p>
     topic_class: basic
-    topic_name: k_points
+    topic_name: k-points
     abivarname: kptopt
     vartype: integer
 - !variable
@@ -13927,7 +13927,7 @@
         procedure.
         </p>
     topic_class: useful
-    topic_name: k_points
+    topic_name: k-points
     abivarname: kptrlatt
     vartype: integer
 - !variable
@@ -13994,7 +13994,7 @@
         For a cluster, this procedure will only generate the Gamma point.
         </p>
     topic_class: useful
-    topic_name: k_points
+    topic_name: k-points
     abivarname: kptrlen
     vartype: real
 - !variable
@@ -14118,7 +14118,7 @@
          For the moment it is imposed to be 5.
         </p>
     topic_class: lotf
-    topic_name: other_settings
+    topic_name: otherGS
     abivarname: lotf_classic
     vartype: integer
 - !variable
@@ -14137,7 +14137,7 @@
          Set the number of Molecular Dynamics iterations which are computed by LOTF.
         </p>
     topic_class: lotf
-    topic_name: other_settings
+    topic_name: otherGS
     abivarname: lotf_nitex
     vartype: integer
 - !variable
@@ -14158,7 +14158,7 @@
          For the moment it is imposed to be 40.
         </p>
     topic_class: lotf
-    topic_name: other_settings
+    topic_name: otherGS
     abivarname: lotf_nneigx
     vartype: integer
 - !variable
@@ -14179,7 +14179,7 @@
          For the moment it is imposed to be 2.
         </p>
     topic_class: lotf
-    topic_name: other_settings
+    topic_name: otherGS
     abivarname: lotf_version
     vartype: integer
 - !variable
@@ -14270,7 +14270,7 @@
          This variable gives the amplitude of the constraint imposed on the magnetization vectors on each atom (turned on with flag variable [[magconon]]). Typical values for lambda are 10 to a few hundred. The energy will vary strongly and convergence will be difficult if lambda is too large. The constraint will be weak and the magnetization will not be close to [[spinat]] if lambda is too small. See variable [[magconon]] for more details.
         </p>
     topic_class: useful
-    topic_name: polar_settings
+    topic_name: spinpolarisation
     abivarname: magcon_lambda
     vartype: real
 - !variable
@@ -14288,7 +14288,7 @@
          Turns on the imposition of a Lagrangian constraint on the magnetization. For each atom, the magnetization is calculated in a sphere (radius [[ratsph]]) and a constraint is applied to bring it closer to the input values of [[spinat]]. The constraint can be either on the direction only (magconon 1) or on the full vector (magconon 2). The Lagrangian constraint has an amplitude [[magcon_lambda]] which should be neither too big (bad or impossible convergence) nor too small (no effect).
         </p>
     topic_class: useful
-    topic_name: polar_settings
+    topic_name: spinpolarisation
     abivarname: magconon
     vartype: integer
 - !variable
@@ -14372,7 +14372,7 @@
         [[nband]](1:nkpt*nsppol).
         </p>
     topic_class: internal
-    topic_name: general_settings
+    topic_name: GSgeneral
     abivarname: mband
     vartype: integer
 - !variable
@@ -14514,7 +14514,7 @@
          </ul>
         </p>
     topic_class: expert
-    topic_name: other_settings
+    topic_name: otherGS
     abivarname: mem_test
     vartype: integer
 - !variable
@@ -14787,7 +14787,7 @@
         identical.
         </p>
     topic_class: alch
-    topic_name: other_settings
+    topic_name: otherGS
     abivarname: mixalch
     vartype: real
 - !variable
@@ -14854,7 +14854,7 @@
         See also [[mqgrid]]
         </p>
     topic_class: expert
-    topic_name: PAW_settings
+    topic_name: PAW
     abivarname: mqgriddg
     vartype: integer
 - !variable
@@ -15010,7 +15010,7 @@
         symmetriser, see the input variable [[natrd]].
         </p>
     topic_class: basic
-    topic_name: general_settings
+    topic_name: GSgeneral
     abivarname: natom
     vartype: integer
 - !variable
@@ -15086,7 +15086,7 @@
         built (the indices of these atoms are given by  [[iatsph]]).
         </p>
     topic_class: prdos
-    topic_name: printing_settings
+    topic_name: printing
     abivarname: natsph
     vartype: integer
 - !variable
@@ -15115,7 +15115,7 @@
          variable.
         </p>
     topic_class: prdos
-    topic_name: printing_settings
+    topic_name: printing
     abivarname: natsph_extra
     vartype: integer
 - !variable
@@ -15188,7 +15188,7 @@
         the relevant number of bands is given by [[nbandkss]].
         </p>
     topic_class: basic
-    topic_name: general_settings
+    topic_name: GSgeneral
     abivarname: nband
     vartype: integer
 - !variable
@@ -15558,7 +15558,7 @@
         See the related input variable [[ndivsm]].
         </p>
     topic_class: expert
-    topic_name: k_points
+    topic_name: k-points
     abivarname: ndivk
     vartype: integer
 - !variable
@@ -15589,7 +15589,7 @@
         [[kptopt]] is the number of such segments.
         </p>
     topic_class: expert
-    topic_name: k_points
+    topic_name: k-points
     abivarname: ndivsm
     vartype: integer
 - !variable
@@ -15616,7 +15616,7 @@
         Otherwise, [[ndtset]]=0 is equivalent to [[ndtset]]=1.
         </p>
     topic_class: compulsory
-    topic_name: multi_dtset
+    topic_name: multidtset
     abivarname: ndtset
     vartype: integer
 - !variable
@@ -15771,7 +15771,7 @@
          [[nelect]]=zion-[[charge]].
         </p>
     topic_class: internal
-    topic_name: general_settings
+    topic_name: GSgeneral
     abivarname: nelect
     vartype: real
 - !variable
@@ -16053,7 +16053,7 @@
         grid" only used for PAW calculations.
         </p>
     topic_class: useful
-    topic_name: PAW_settings
+    topic_name: PAW
     abivarname: ngfftdg
     vartype: integer
 - !variable
@@ -16109,7 +16109,7 @@
         [[kptrlen]].
         </p>
     topic_class: basic
-    topic_name: k_points
+    topic_name: k-points
     abivarname: ngkpt
     vartype: integer
 - !variable
@@ -16351,7 +16351,7 @@
         10+12+17+1(for the final point)=40.
         </p>
     topic_class: useful
-    topic_name: k_points
+    topic_name: k-points
     abivarname: nkpt
     vartype: integer
 - !variable
@@ -16462,7 +16462,7 @@
          . See also [[nloc_mem]] for the tuning of the memory used in the non-local operator application.
         </p>
     topic_class: expert
-    topic_name: other_settings
+    topic_name: otherGS
     abivarname: nloc_alg
     vartype: integer
 - !variable
@@ -16512,7 +16512,7 @@
          . See also [[nloc_alg]] for the algorithm for the non-local operator application.
         </p>
     topic_class: expert
-    topic_name: other_settings
+    topic_name: otherGS
     abivarname: nloc_mem
     vartype: integer
 - !variable
@@ -17052,7 +17052,7 @@
         to use alchemical potentials in ABINIT.
         </p>
     topic_class: alch
-    topic_name: other_settings
+    topic_name: otherGS
     abivarname: npsp
     vartype: integer
 - !variable
@@ -17074,7 +17074,7 @@
          [[npspalch]]=[[npsp]]-[[ntyppure]]
         </p>
     topic_class: alch
-    topic_name: other_settings
+    topic_name: otherGS
     abivarname: npspalch
     vartype: integer
 - !variable
@@ -17363,7 +17363,7 @@
         The values of the shifts are given by [[shiftk]].
         </p>
     topic_class: useful
-    topic_name: k_points
+    topic_name: k-points
     abivarname: nshiftk
     vartype: integer
 - !variable
@@ -17437,7 +17437,7 @@
         does not suit the case of vector magnetization.
         </p>
     topic_class: basic
-    topic_name: polar_settings
+    topic_name: spinpolarisation
     abivarname: nspden
     vartype: integer
 - !variable
@@ -17471,7 +17471,7 @@
         should be even.
         </p>
     topic_class: basic
-    topic_name: polar_settings
+    topic_name: spinpolarisation
     abivarname: nspinor
     vartype: integer
 - !variable
@@ -17524,7 +17524,7 @@
         the spin-polarization.
         </p>
     topic_class: basic
-    topic_name: polar_settings
+    topic_name: spinpolarisation
     abivarname: nsppol
     vartype: integer
 - !variable
@@ -17752,7 +17752,7 @@
         to use alchemical potentials in ABINIT.
         </p>
     topic_class: alch
-    topic_name: other_settings
+    topic_name: otherGS
     abivarname: ntypalch
     vartype: integer
 - !variable
@@ -17777,7 +17777,7 @@
         on ...
         </p>
     topic_class: basic
-    topic_name: general_settings
+    topic_name: GSgeneral
     abivarname: ntypat
     vartype: integer
 - !variable
@@ -17799,7 +17799,7 @@
          [[ntyppure]]=[[ntypat]]-[[ntypalch]]
         </p>
     topic_class: alch
-    topic_name: other_settings
+    topic_name: otherGS
     abivarname: ntyppure
     vartype: integer
 - !variable
@@ -17817,7 +17817,7 @@
     text: |-
         Places an array of nuclear magnetic dipole moments on the atomic positions, useful for computing the magnetization in the presence of nuclear dipoles and thus the chemical shielding by the converse method. The presence of these dipoles breaks time reversal symmetry and lowers the overall spatial symmetry.
     topic_class: expert
-    topic_name: polar_settings
+    topic_name: spinpolarisation
     abivarname: nucdipmom
     vartype: real
 - !variable
@@ -18390,7 +18390,7 @@
         that is, [[occopt]] &ge; 3 .
         </p>
     topic_class: basic
-    topic_name: general_settings
+    topic_name: GSgeneral
     abivarname: occ
     vartype: real
 - !variable
@@ -18531,7 +18531,7 @@
         bissection algorithm find one or the other.
         </p>
     topic_class: basic
-    topic_name: general_settings
+    topic_name: GSgeneral
     abivarname: occopt
     vartype: integer
 - !variable
@@ -18718,7 +18718,7 @@
          </ul>
         </p>
     topic_class: basic
-    topic_name: general_settings
+    topic_name: GSgeneral
     abivarname: optforces
     vartype: integer
 - !variable
@@ -18773,7 +18773,7 @@
         for some PAW calculations.
         </p>
     topic_class: basic
-    topic_name: general_settings
+    topic_name: GSgeneral
     abivarname: optstress
     vartype: integer
 - !variable
@@ -18857,7 +18857,7 @@
         give also access to the flops of the calculation.
         </p>
     topic_class: expert
-    topic_name: other_settings
+    topic_name: otherGS
     abivarname: papiopt
     vartype: integer
 - !variable
@@ -19057,7 +19057,7 @@
          </b>
         </p>
     topic_class: expert
-    topic_name: PAW_settings
+    topic_name: PAW
     abivarname: pawcpxocc
     vartype: integer
 - !variable
@@ -19116,7 +19116,7 @@
         </p>
     topics:
     - {topic_name: convergency, topic_class: compulsory}
-    - {topic_name: PAW_settings, topic_class: compulsory}
+    - {topic_name: PAW, topic_class: compulsory}
     abivarname: pawecutdg
     vartype: real
 - !variable
@@ -19159,7 +19159,7 @@
          </ul>
         </p>
     topic_class: useful
-    topic_name: PAW_settings
+    topic_name: PAW
     abivarname: pawfatbnd
     vartype: integer
 - !variable
@@ -19192,7 +19192,7 @@
         "Compensation charge inside spheres", a quantity written in the log file.
         </p>
     topic_class: expert
-    topic_name: PAW_settings
+    topic_name: PAW
     abivarname: pawlcutd
     vartype: integer
 - !variable
@@ -19218,7 +19218,7 @@
          This option is useful to save CPU time but DOES have a bearing on the numerical accuracy of the results.
         </p>
     topic_class: expert
-    topic_name: PAW_settings
+    topic_name: PAW
     abivarname: pawlmix
     vartype: integer
 - !variable
@@ -19284,7 +19284,7 @@
          - Density/potential is mixed in REAL space (Here only one grid is used).
         </p>
     topic_class: expert
-    topic_name: PAW_settings
+    topic_name: PAW
     abivarname: pawmixdg
     vartype: integer
 - !variable
@@ -19311,7 +19311,7 @@
         by this choice. It is recommended to test the validity of this approximation before use.
         </p>
     topic_class: expert
-    topic_name: PAW_settings
+    topic_name: PAW
     abivarname: pawnhatxc
     vartype: integer
 - !variable
@@ -19332,7 +19332,7 @@
         and [[pawntheta]].
         </p>
     topic_class: expert
-    topic_name: PAW_settings
+    topic_name: PAW
     abivarname: pawnphi
     vartype: integer
 - !variable
@@ -19353,7 +19353,7 @@
         and [[pawnphi]].
         </p>
     topic_class: expert
-    topic_name: PAW_settings
+    topic_name: PAW
     abivarname: pawntheta
     vartype: integer
 - !variable
@@ -19379,7 +19379,7 @@
         those found to be non-zero will be computed ; thus the first iteration is more cpu intensive)
         </p>
     topic_class: expert
-    topic_name: PAW_settings
+    topic_name: PAW
     abivarname: pawnzlm
     vartype: integer
 - !variable
@@ -19423,7 +19423,7 @@
         the Kerker mixing: [[diemix]], [[diemac]], etc...
         </p>
     topic_class: expert
-    topic_name: PAW_settings
+    topic_name: PAW
     abivarname: pawoptmix
     vartype: integer
 - !variable
@@ -19490,7 +19490,7 @@
          </div>
         </p>
     topic_class: expert
-    topic_name: PAW_settings
+    topic_name: PAW
     abivarname: pawovlp
     vartype: real
 - !variable
@@ -19518,7 +19518,7 @@
         and goes up from there.
         </p>
     topic_class: useful
-    topic_name: PAW_settings
+    topic_name: PAW
     abivarname: pawprt_b
     vartype: integer
 - !variable
@@ -19550,7 +19550,7 @@
          in the beginning of the run.
         </p>
     topic_class: useful
-    topic_name: PAW_settings
+    topic_name: PAW
     abivarname: pawprt_k
     vartype: integer
 - !variable
@@ -19571,7 +19571,7 @@
         <p>
         </p>
     topic_class: useful
-    topic_name: PAW_settings
+    topic_name: PAW
     abivarname: pawprtden
     vartype: integer
 - !variable
@@ -19624,7 +19624,7 @@
          - In that case, the [[ratsph]] variable is automatically set to the PAW radius.
         </p>
     topic_class: useful
-    topic_name: PAW_settings
+    topic_name: PAW
     abivarname: pawprtdos
     vartype: integer
 - !variable
@@ -19659,7 +19659,7 @@
          <br />
         </p>
     topic_class: useful
-    topic_name: PAW_settings
+    topic_name: PAW
     abivarname: pawprtvol
     vartype: integer
 - !variable
@@ -19696,7 +19696,7 @@
         [[pawprt_b]] and [[pawprt_k]].
         </p>
     topic_class: useful
-    topic_name: PAW_settings
+    topic_name: PAW
     abivarname: pawprtwf
     vartype: integer
 - !variable
@@ -19759,7 +19759,7 @@
          An artificial scaling of the spin-orbit can be introduced thanks to the [[spnorbscl]] input variable.
         </p>
     topic_class: useful
-    topic_name: PAW_settings
+    topic_name: PAW
     abivarname: pawspnorb
     vartype: integer
 - !variable
@@ -19800,7 +19800,7 @@
          </div>
         </p>
     topic_class: expert
-    topic_name: PAW_settings
+    topic_name: PAW
     abivarname: pawstgylm
     vartype: integer
 - !variable
@@ -19836,7 +19836,7 @@
          </div>
         </p>
     topic_class: expert
-    topic_name: PAW_settings
+    topic_name: PAW
     abivarname: pawsushat
     vartype: integer
 - !variable
@@ -19930,7 +19930,7 @@
          <br />
         </p>
     topic_class: expert
-    topic_name: PAW_settings
+    topic_name: PAW
     abivarname: pawusecp
     vartype: integer
 - !variable
@@ -19963,7 +19963,7 @@
          Be careful: GGA requires [[pawxcdev]] &gt; 0
         </p>
     topic_class: expert
-    topic_name: PAW_settings
+    topic_name: PAW
     abivarname: pawxcdev
     vartype: integer
 - !variable
@@ -21009,7 +21009,7 @@
         variable is destined to someday bypass the use of anaddb for scphon calculations.
         </p>
     topic_class: prngs
-    topic_name: printing_settings
+    topic_name: printing
     abivarname: prepscphon
     vartype: integer
 - !variable
@@ -21030,7 +21030,7 @@
         or the density on bi-dimensional slices of the FFT grid.
         </p>
     topic_class: prgs
-    topic_name: printing_settings
+    topic_name: printing
     abivarname: prt1dm
     vartype: integer
 - !variable
@@ -21056,7 +21056,7 @@
         all the atoms.
         </p>
     topic_class: prgeo
-    topic_name: printing_settings
+    topic_name: printing
     abivarname: prtatlist
     vartype: integer
 - !variable
@@ -21077,7 +21077,7 @@
         See Ph. Ghosez and X. Gonze, J. Phys.: Condens. Matter 12, 9179 (2000).
         </p>
     topic_class: prngs
-    topic_name: printing_settings
+    topic_name: printing
     abivarname: prtbbb
     vartype: integer
 - !variable
@@ -21098,7 +21098,7 @@
          by Georg Madsen.
         </p>
     topic_class: prgs
-    topic_name: printing_settings
+    topic_name: printing
     abivarname: prtbltztrp
     vartype: integer
 - !variable
@@ -21117,7 +21117,7 @@
          If set to 1, a CIF file is output with the crystallographic data for the present run (cell size shape and atomic positions).
         </p>
     topic_class: prgeo
-    topic_name: printing_settings
+    topic_name: printing
     abivarname: prtcif
     vartype: integer
 - !variable
@@ -21270,7 +21270,7 @@
         calculation as the input to another, use the _DEN file for that.
         </p>
     topic_class: prden
-    topic_name: printing_settings
+    topic_name: printing
     abivarname: prtden
     vartype: integer
 - !variable
@@ -21303,7 +21303,7 @@
         of the density within a sphere, you should use the cut3d postprocessor.
         </p>
     topic_class: prden
-    topic_name: printing_settings
+    topic_name: printing
     abivarname: prtdensph
     vartype: integer
 - !variable
@@ -21322,7 +21322,7 @@
          Print out dipole of unit cell, calculated in real space for the primitive cell only. Under development.
         </p>
     topic_class: prgs
-    topic_name: printing_settings
+    topic_name: printing
     abivarname: prtdipole
     vartype: integer
 - !variable
@@ -21431,7 +21431,7 @@
          [[prtdos]]=5 delivers the spin-spin DOS in the [[nspinor]]==2 case, using the tetrahedron method (as [[prtdos]]=2).
         </p>
     topic_class: prdos
-    topic_name: printing_settings
+    topic_name: printing
     abivarname: prtdos
     vartype: integer
 - !variable
@@ -21460,7 +21460,7 @@
         in the same basis as the LDA+U occupation matrix.
         </p>
     topic_class: prdos
-    topic_name: printing_settings
+    topic_name: printing
     abivarname: prtdosm
     vartype: integer
 - !variable
@@ -21487,7 +21487,7 @@
         Use `gnuplot file_EBANDS.gnuplot` to visualize the band energies.</li>
         </ul>
     topic_class: prden
-    topic_name: printing_settings
+    topic_name: printing
     abivarname: prtebands
     vartype: integer
 - !variable
@@ -21520,7 +21520,7 @@
          </ul>
         </p>
     topic_class: prngs
-    topic_name: printing_settings
+    topic_name: printing
     abivarname: prtefg
     vartype: integer
 - !variable
@@ -21541,7 +21541,7 @@
         k-points and one-electron eigenvalues is printed.
         </p>
     topic_class: prden
-    topic_name: printing_settings
+    topic_name: printing
     abivarname: prteig
     vartype: integer
 - !variable
@@ -21581,7 +21581,7 @@
          yet implemented in the case of PAW ([[usepaw]]=1) calculations.
         </p>
     topic_class: prgs
-    topic_name: printing_settings
+    topic_name: printing
     abivarname: prtelf
     vartype: integer
 - !variable
@@ -21606,7 +21606,7 @@
          </ul>
         </p>
     topic_class: prfermi
-    topic_name: printing_settings
+    topic_name: printing
     abivarname: prtfc
     vartype: integer
 - !variable
@@ -21638,7 +21638,7 @@
         Note, however, that the mesh must be homogeneous and centered on gamma (multiple shifts are not supported by Xcrysden)
         </p>
     topic_class: prfermi
-    topic_name: printing_settings
+    topic_name: printing
     abivarname: prtfsurf
     vartype: integer
 - !variable
@@ -21663,7 +21663,7 @@
         described below, see section 6).
         </p>
     topic_class: prden
-    topic_name: printing_settings
+    topic_name: printing
     abivarname: prtgden
     vartype: integer
 - !variable
@@ -21712,7 +21712,7 @@
          If [[prtgeo]]&gt;0, the maximum number of atoms ([[natom]]) is 9999.
         </p>
     topic_class: prgeo
-    topic_name: printing_settings
+    topic_name: printing
     abivarname: prtgeo
     vartype: integer
 - !variable
@@ -21735,7 +21735,7 @@
         ~abinit/doc/tutorial/lesson_eph.html and in ~abinit/doc/users/elphon_manual.ps
         </p>
     topic_class: prngs
-    topic_name: printing_settings
+    topic_name: printing
     abivarname: prtgkk
     vartype: integer
 - !variable
@@ -21757,7 +21757,7 @@
         unless [[prtden]] is set to 0.
         </p>
     topic_class: prgs
-    topic_name: printing_settings
+    topic_name: printing
     abivarname: prtgsr
     vartype: integer
 - !variable
@@ -21791,7 +21791,7 @@
          yet implemented in the case of PAW ([[usepaw]]=1) calculations.
         </p>
     topic_class: prden
-    topic_name: printing_settings
+    topic_name: printing
     abivarname: prtkden
     vartype: integer
 - !variable
@@ -21851,7 +21851,7 @@
         a file named kpts.nc with the list of the k-points and the corresponding weights is produced
         </p>
     topic_class: prden
-    topic_name: printing_settings
+    topic_name: printing
     abivarname: prtkpt
     vartype: integer
 - !variable
@@ -21878,7 +21878,7 @@
          </a>).
         </p>
     topic_class: prden
-    topic_name: printing_settings
+    topic_name: printing
     abivarname: prtlden
     vartype: integer
 - !variable
@@ -21900,7 +21900,7 @@
          </ul>
         </p>
     topic_class: prgs
-    topic_name: printing_settings
+    topic_name: printing
     abivarname: prtnabla
     vartype: integer
 - !variable
@@ -21919,7 +21919,7 @@
          If set to 1, the nesting function for the k-point grid is printed. For the moment the path in q space for the nesting function is fixed, but will become an input as well.
         </p>
     topic_class: prfermi
-    topic_name: printing_settings
+    topic_name: printing
     abivarname: prtnest
     vartype: integer
 - !variable
@@ -21946,7 +21946,7 @@
         Use `gnuplot file_PHBANDS.gnuplot` to visualize the phonon band structure.</li>
         </ul>
     topic_class: prngs
-    topic_name: printing_settings
+    topic_name: printing
     abivarname: prtphbands
     vartype: integer
 - !variable
@@ -21966,7 +21966,7 @@
         It is activated by default when [[optdriver]]==7.
         </p>
     topic_class: prngs
-    topic_name: printing_settings
+    topic_name: printing
     abivarname: prtphdos
     vartype: integer
 - !variable
@@ -21985,7 +21985,7 @@
         Note that the (dense) q-mesh must be Gamma-centered, shifted meshs are not supported by Xcrysden.
         This variable requires [[optdriver]]==7.
     topic_class: prngs
-    topic_name: printing_settings
+    topic_name: printing
     abivarname: prtphsurf
     vartype: integer
 - !variable
@@ -22006,7 +22006,7 @@
         with PHON, PHONOPY, etc...
         </p>
     topic_class: prgeo
-    topic_name: printing_settings
+    topic_name: printing
     abivarname: prtposcar
     vartype: integer
 - !variable
@@ -22049,7 +22049,7 @@
         No output is provided by a negative value of this variable.
         </p>
     topic_class: prpot
-    topic_name: printing_settings
+    topic_name: printing
     abivarname: prtpot
     vartype: integer
 - !variable
@@ -22066,7 +22066,7 @@
         If set to 1, the code produces a netcdf file (PSPS.nc) with the internal tables used by Abinit to apply the pseudopotential part of the KS Hamiltonian. The data can be visualized with AbiPy.
         if prtpsps is set to -1, the code will exit after the output of the PSPS.nc file.
     topic_class: prgs
-    topic_name: printing_settings
+    topic_name: printing
     abivarname: prtpsps
     vartype: integer
 - !variable
@@ -22086,7 +22086,7 @@
          = 2. Experimental: this does not work yet.
         </p>
     topic_class: prgs
-    topic_name: printing_settings
+    topic_name: printing
     abivarname: prtspcur
     vartype: integer
 - !variable
@@ -22161,7 +22161,7 @@
          No other printing variables for density or potentials should be activated (e.g. [[prtden]] has to be set to zero).
         </p>
     topic_class: prgs
-    topic_name: printing_settings
+    topic_name: printing
     abivarname: prtstm
     vartype: integer
 - !variable
@@ -22180,7 +22180,7 @@
         only the _SCR file will be output.
         </p>
     topic_class: prngs
-    topic_name: printing_settings
+    topic_name: printing
     abivarname: prtsuscep
     vartype: integer
 - !variable
@@ -22202,7 +22202,7 @@
         If <b>prtvclmb=2</b>, only the smooth part of the Coulomb potential is output.
         <p>
     topic_class: prpot
-    topic_name: printing_settings
+    topic_name: printing
     abivarname: prtvclmb
     vartype: integer
 - !variable
@@ -22221,7 +22221,7 @@
         <!-- See the associated script in
         ~abinit/extras/post_processing/vdw_check_kernel for further details. -->
     topic_class: prgs
-    topic_name: printing_settings
+    topic_name: printing
     abivarname: prtvdw
     vartype: integer
 - !variable
@@ -22265,7 +22265,7 @@
         No output is provided by a negative value of this variable.
         </p>
     topic_class: prpot
-    topic_name: printing_settings
+    topic_name: printing
     abivarname: prtvha
     vartype: integer
 - !variable
@@ -22309,7 +22309,7 @@
         No output is provided by a negative value of this variable.
         </p>
     topic_class: prpot
-    topic_name: printing_settings
+    topic_name: printing
     abivarname: prtvhxc
     vartype: integer
 - !variable
@@ -22381,7 +22381,7 @@
         This debugging feature is not yet activated in the RF routines.
         Note that [[fftalg]] offers another option for debugging.</p>
     topic_class: prgs
-    topic_name: printing_settings
+    topic_name: printing
     abivarname: prtvol
     vartype: integer
 - !variable
@@ -22418,7 +22418,7 @@
         is reduced to total energy and convergence residuals only.
         </p>
     topic_class: prgs
-    topic_name: printing_settings
+    topic_name: printing
     abivarname: prtvolimg
     vartype: integer
 - !variable
@@ -22462,7 +22462,7 @@
         No output is provided by a negative value of this variable.
         </p>
     topic_class: prpot
-    topic_name: printing_settings
+    topic_name: printing
     abivarname: prtvpsp
     vartype: integer
 - !variable
@@ -22506,7 +22506,7 @@
         No output is provided by a negative value of this variable.
         </p>
     topic_class: prpot
-    topic_name: printing_settings
+    topic_name: printing
     abivarname: prtvxc
     vartype: integer
 - !variable
@@ -22678,7 +22678,7 @@
          </ul>
         </p>
     topic_class: prgs
-    topic_name: printing_settings
+    topic_name: printing
     abivarname: prtwant
     vartype: integer
 - !variable
@@ -22793,7 +22793,7 @@
         probably something set wrong in the input file.
         </p>
     topic_class: prden
-    topic_name: printing_settings
+    topic_name: printing
     abivarname: prtwf
     vartype: integer
 - !variable
@@ -22813,7 +22813,7 @@
         calculation done on a homogeneous k-mesh (see [[ngkpt]] and [[shiftk]]).
         The tetrahedron table is produced only if the number of k-points in the irreducible zone ([[nkpt]]) is greater than 3.
     topic_class: prden
-    topic_name: printing_settings
+    topic_name: printing
     abivarname: prtwf_full
     vartype: integer
 - !variable
@@ -22834,7 +22834,7 @@
         (and derivative such as geometry optimisation).
         </p>
     topic_class: prgs
-    topic_name: printing_settings
+    topic_name: printing
     abivarname: prtxml
     vartype: integer
 - !variable
@@ -22905,7 +22905,7 @@
         [[genafm]]
         </p>
     topic_class: useful
-    topic_name: polar_settings
+    topic_name: spinpolarisation
     abivarname: ptgroupma
     vartype: integer
 - !variable
@@ -23336,7 +23336,7 @@
         [[ntypat]] differs from [[npsp]])
         </p>
     topic_class: expert
-    topic_name: other_settings
+    topic_name: otherGS
     abivarname: random_atpos
     vartype: integer
 - !variable
@@ -23402,7 +23402,7 @@
         PAW radius of considered atom type (which is read from the PAW dataset file; see rc_sph or r_paw).
         </p>
     topic_class: prdos
-    topic_name: printing_settings
+    topic_name: printing
     abivarname: ratsph
     vartype: real
 - !variable
@@ -23423,7 +23423,7 @@
         and [[xredsph_extra]]
         for the number and positions of the spheres.
     topic_class: prdos
-    topic_name: printing_settings
+    topic_name: printing
     abivarname: ratsph_extra
     vartype: real
 - !variable
@@ -24651,7 +24651,7 @@
         symmetry axis.
         </p>
     topic_class: useful
-    topic_name: k_points
+    topic_name: k-points
     abivarname: shiftk
     vartype: real
 - !variable
@@ -24730,7 +24730,7 @@
         By default, given in Bohr atomic units (1 Bohr=0.5291772108 Angstroms).
         </p>
     topic_class: slab
-    topic_name: other_settings
+    topic_name: otherGS
     abivarname: slabwsrad
     vartype: real
 - !variable
@@ -24759,7 +24759,7 @@
         so the positive charge density is invariant along the xy plane as well as the electrostatic potential generated by it.
         </p>
     topic_class: slab
-    topic_name: other_settings
+    topic_name: otherGS
     abivarname: slabzbeg
     vartype: real
 - !variable
@@ -24788,7 +24788,7 @@
         so the positive charge density is invariant along the xy plane as well as the electrostatic potential generated by it.
         </p>
     topic_class: slab
-    topic_name: other_settings
+    topic_name: otherGS
     abivarname: slabzend
     vartype: real
 - !variable
@@ -24876,7 +24876,7 @@
         between [[so_psp]] and so_typat, it was dangerous to continue to allow the use of so_typat.
         </p>
     topic_class: basic
-    topic_name: polar_settings
+    topic_name: spinpolarisation
     abivarname: so_psp
     vartype: integer
 - !variable
@@ -25126,7 +25126,7 @@
         [[tnons]] and [[symafm]].
         </p>
     topic_class: useful
-    topic_name: polar_settings
+    topic_name: spinpolarisation
     abivarname: spgroupma
     vartype: integer
 - !variable
@@ -25217,7 +25217,7 @@
          </li>
         </p>
     topic_class: basic
-    topic_name: polar_settings
+    topic_name: spinpolarisation
     abivarname: spinat
     vartype: real
 - !variable
@@ -25258,7 +25258,7 @@
         spin up Fermi energy.
         </p>
     topic_class: useful
-    topic_name: polar_settings
+    topic_name: spinpolarisation
     abivarname: spinmagntarget
     vartype: real
 - !variable
@@ -25344,7 +25344,7 @@
         but are not expected to correspond to any physical situation.
         </p>
     topic_class: useful
-    topic_name: PAW_settings
+    topic_name: PAW
     abivarname: spnorbscl
     vartype: real
 - !variable
@@ -25381,7 +25381,7 @@
         one has also to specify an independent broadening [[tsmear]].
         </p>
     topic_class: useful
-    topic_name: general_settings
+    topic_name: GSgeneral
     abivarname: stmbias
     vartype: real
 - !variable
@@ -25504,7 +25504,7 @@
         default value, e.g. set it to 0.1 .
         </p>
     topic_class: useful
-    topic_name: general_settings
+    topic_name: GSgeneral
     abivarname: strprecon
     vartype: real
 - !variable
@@ -25534,7 +25534,7 @@
         <br />
         Not used if [[optcell]]==0.
     topic_class: useful
-    topic_name: general_settings
+    topic_name: GSgeneral
     abivarname: strtarget
     vartype: real
 - !variable
@@ -25580,7 +25580,7 @@
          In other cases they are not used.
         </p>
     topic_class: useful
-    topic_name: polar_settings
+    topic_name: spinpolarisation
     abivarname: symafm
     vartype: integer
 - !variable
@@ -25953,7 +25953,7 @@
         The sum of the independent parts is closer to 100% than for [[timopt]]=-3.
         </p>
     topic_class: expert
-    topic_name: general_settings
+    topic_name: GSgeneral
     abivarname: timopt
     vartype: integer
 - !variable
@@ -26132,7 +26132,7 @@
         input variable defined generically.
         </p>
     topic_class: useful
-    topic_name: general_settings
+    topic_name: GSgeneral
     abivarname: toldff
     vartype: real
 - !variable
@@ -26302,7 +26302,7 @@
         </p>
     topics:
     - {topic_name: convergency, topic_class: basic}
-    - {topic_name: general_settings, topic_class: useful}
+    - {topic_name: GSgeneral, topic_class: useful}
     abivarname: tolrff
     vartype: real
 - !variable
@@ -26510,7 +26510,7 @@
         to define the entropy contribution to the free energy.
         </p>
     topic_class: useful
-    topic_name: general_settings
+    topic_name: GSgeneral
     abivarname: tphysel
     vartype: real
 - !variable
@@ -26552,7 +26552,7 @@
         by M. Verstraete and X. Gonze, Phys. Rev. B (2002).
         </p>
     topic_class: basic
-    topic_name: general_settings
+    topic_name: GSgeneral
     abivarname: tsmear
     vartype: real
 - !variable
@@ -26607,7 +26607,7 @@
         user, while keeping efficiency.
         </p>
     topic_class: basic
-    topic_name: general_settings
+    topic_name: GSgeneral
     abivarname: typat
     vartype: integer
 - !variable
@@ -26743,7 +26743,7 @@
          If [[udtset]] is used, the input variable [[jdtset]] cannot be used.
         </p>
     topic_class: basic
-    topic_name: multi_dtset
+    topic_name: multidtset
     abivarname: udtset
     vartype: integer
 - !variable
@@ -27098,7 +27098,7 @@
         with either type of calculation.
         </p>
     topic_class: internal
-    topic_name: PAW_settings
+    topic_name: PAW
     abivarname: usepaw
     vartype: integer
 - !variable
@@ -27212,7 +27212,7 @@
          </ul>
         </p>
     topic_class: expert
-    topic_name: other_settings
+    topic_name: otherGS
     abivarname: usepotzero
     vartype: integer
 - !variable
@@ -27258,7 +27258,7 @@
         e.g. dtset%useria .
         </p>
     topic_class: expert
-    topic_name: other_settings
+    topic_name: otherGS
     abivarname: useria
     vartype: integer
 - !variable
@@ -27284,7 +27284,7 @@
         e.g. dtset%useria .
         </p>
     topic_class: expert
-    topic_name: other_settings
+    topic_name: otherGS
     abivarname: userib
     vartype: integer
 - !variable
@@ -27310,7 +27310,7 @@
         e.g. dtset%useria .
         </p>
     topic_class: expert
-    topic_name: other_settings
+    topic_name: otherGS
     abivarname: useric
     vartype: integer
 - !variable
@@ -27336,7 +27336,7 @@
         e.g. dtset%useria .
         </p>
     topic_class: expert
-    topic_name: other_settings
+    topic_name: otherGS
     abivarname: userid
     vartype: integer
 - !variable
@@ -27362,7 +27362,7 @@
         e.g. dtset%useria .
         </p>
     topic_class: expert
-    topic_name: other_settings
+    topic_name: otherGS
     abivarname: userie
     vartype: integer
 - !variable
@@ -27380,7 +27380,7 @@
          These are user-definable with the same purpose as [[useria]] and cie.
         </p>
     topic_class: expert
-    topic_name: other_settings
+    topic_name: otherGS
     abivarname: userra
     vartype: real
 - !variable
@@ -27398,7 +27398,7 @@
          These are user-definable with the same purpose as [[useria]] and cie.
         </p>
     topic_class: expert
-    topic_name: other_settings
+    topic_name: otherGS
     abivarname: userrb
     vartype: real
 - !variable
@@ -27416,7 +27416,7 @@
          These are user-definable with the same purpose as [[useria]] and cie.
         </p>
     topic_class: expert
-    topic_name: other_settings
+    topic_name: otherGS
     abivarname: userrc
     vartype: real
 - !variable
@@ -27434,7 +27434,7 @@
          These are user-definable with the same purpose as [[useria]] and cie.
         </p>
     topic_class: expert
-    topic_name: other_settings
+    topic_name: otherGS
     abivarname: userrd
     vartype: real
 - !variable
@@ -27452,7 +27452,7 @@
          These are user-definable with the same purpose as [[useria]] and cie.
         </p>
     topic_class: expert
-    topic_name: other_settings
+    topic_name: otherGS
     abivarname: userre
     vartype: real
 - !variable
@@ -27518,7 +27518,7 @@
         run, the code stops.
         </p>
     topic_class: useful
-    topic_name: PAW_settings
+    topic_name: PAW
     abivarname: usexcnhat
     vartype: integer
 - !variable
@@ -27559,7 +27559,7 @@
          When [[useylm]]=0, the sum over Y_lm can be reduced to a Legendre polynomial form.
         </p>
     topic_class: expert
-    topic_name: general_settings
+    topic_name: GSgeneral
     abivarname: useylm
     vartype: integer
 - !variable
@@ -27647,7 +27647,7 @@
         presence or absence of vacuum.
         </p>
     topic_class: expert
-    topic_name: k_points
+    topic_name: k-points
     abivarname: vacuum
     vartype: integer
 - !variable
@@ -27679,7 +27679,7 @@
         investigated direction, must be empty of atoms.
         </p>
     topic_class: expert
-    topic_name: k_points
+    topic_name: k-points
     abivarname: vacwidth
     vartype: real
 - !variable
@@ -29034,7 +29034,7 @@
         except if [[iscf]]=-3.
         </p>
     topic_class: useful
-    topic_name: k_points
+    topic_name: k-points
     abivarname: wtk
     vartype: real
 - !variable
@@ -29453,7 +29453,7 @@
         See [[natsph_extra]] for a more complete description.
         </p>
     topic_class: prdos
-    topic_name: printing_settings
+    topic_name: printing
     abivarname: xredsph_extra
     vartype: real
 - !variable
@@ -29555,7 +29555,7 @@
         that are needed to screen exactly the pseudopotential).
         </p>
     topic_class: internal
-    topic_name: general_settings
+    topic_name: GSgeneral
     abivarname: ziontypat
     vartype: real
 - !variable
@@ -29587,7 +29587,7 @@
         with only a jellium surface, ABINIT sets arbitrarily the covalent radius to one.
         </p>
     topic_class: basic
-    topic_name: general_settings
+    topic_name: GSgeneral
     abivarname: znucl
     vartype: real
 
