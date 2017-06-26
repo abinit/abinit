@@ -37,8 +37,8 @@ def format_dimensions(dimensions):
 def doku2html(text):
 
   def replace_link(mymatch):
-    varname = mymatch.group()[2:-2]
-    return "<b>"+varname+"</b>"
+    abivarname = mymatch.group()[2:-2]
+    return "<b>"+abivarname+"</b>"
 
   p = re.compile("\*\*([a-zA-Z0-9_ */<>]*)\*\*")
   text2 = p.sub(replace_link,text)
@@ -54,21 +54,21 @@ def format_default(defaultval):
  
   return s
 
-def make_links(text,cur_varname,variables,characteristics,specials):
+def make_links(text,cur_abivarname,variables,characteristics,specials):
 
   def replace_link(mymatch):
-    varname = mymatch.group()[2:-2]
-    if varname == cur_varname:
-      return "<b>"+cur_varname+"</b>"
-    elif varname in variables.keys():
-      section = variables[varname]
-      return "<a href=\""+section+".html#"+varname+"\">"+varname+"</a>"
-    elif varname in characteristics:
-      return "<a href=\""+users_path+"abinit_help.html#"+str.replace(varname.lower()," ","_")+"\">"+varname+"</a>"
-    elif varname in specials:
-      return "<a href=\"specials.html#"+varname+"\">"+varname+"</a>"
+    abivarname = mymatch.group()[2:-2]
+    if abivarname == cur_abivarname:
+      return "<b>"+cur_abivarname+"</b>"
+    elif abivarname in variables.keys():
+      section = variables[abivarname]
+      return "<a href=\""+section+".html#"+abivarname+"\">"+abivarname+"</a>"
+    elif abivarname in characteristics:
+      return "<a href=\""+users_path+"abinit_help.html#"+str.replace(abivarname.lower()," ","_")+"\">"+abivarname+"</a>"
+    elif abivarname in specials:
+      return "<a href=\"specials.html#"+abivarname+"\">"+abivarname+"</a>"
     else:
-      return "<a href=\"#\">[[FAKE LINK:"+varname+"]]</a>"
+      return "<a href=\"#\">[[FAKE LINK:"+abivarname+"]]</a>"
     return mymatch.group()
 
   p=re.compile("\\[\\[([a-zA-Z0-9_ */<>]*)\\]\\]")
@@ -119,12 +119,12 @@ output = output + "<p>"+cur_let+".&nbsp;\n"
 all_contents = dict()
 all_vars = dict()
 
-# Create a dictionary that gives the section for each varname
+# Create a dictionary that gives the section for each abivarname
 
 list_all_vars = dict()
 
 for var in variables:
-  list_all_vars[var.varname] = var.section
+  list_all_vars[var.abivarname] = var.section
 
 #
 cur_specials = []
@@ -135,58 +135,58 @@ for (specialkey,specialval) in list_specials:
 for i, var in enumerate(variables):
   if debug==1 :
     print(var)
-  #output = output + "<a href=\""+var.section+".html#"+var.varname+"\">"+var.varname+"</a> : "+var.definition+"<br />\n" 
-  while not var.varname.startswith(cur_let.lower()):
+  #output = output + "<a href=\""+var.section+".html#"+var.abivarname+"\">"+var.abivarname+"</a> : "+var.mnemonics+"<br />\n" 
+  while not var.abivarname.startswith(cur_let.lower()):
     cur_let = chr(ord(cur_let)+1)
     output = output + "<p>"+cur_let+".\n"
-  varname = var.varname
+  abivarname = var.abivarname
   if var.characteristics is not None and '[[INTERNAL_ONLY]]' in var.characteristics:
-    varname = '%'+varname
-  output = output + "<a href=\""+var.section+".html#"+var.varname+"\">"+varname+"</a>&nbsp;&nbsp;\n" 
+    abivarname = '%'+abivarname
+  output = output + "<a href=\""+var.section+".html#"+var.abivarname+"\">"+abivarname+"</a>&nbsp;&nbsp;\n" 
   section = var.section
   if section not in all_contents.keys():
     all_contents[section] = "<br><br><br><br><hr>\n"
     all_vars[section] = []
 
-  all_vars[section].append([var.varname,var.definition])
+  all_vars[section].append([var.abivarname,var.mnemonics])
 
   # Constitute the body of information related to one input variable, store it in all_contents[section]
   cur_content = ""
 
   try:
-    cur_content += "<br><font id=\"title\"><a name=\""+var.varname+"\">"+var.varname+"</a></font>\n"
-    cur_content += "<br><font id=\"definition\">Mnemonics: "+var.definition+"</font>\n"
+    cur_content += "<br><font id=\"title\"><a name=\""+var.abivarname+"\">"+var.abivarname+"</a></font>\n"
+    cur_content += "<br><font id=\"mnemonics\">Mnemonics: "+var.mnemonics+"</font>\n"
     if var.characteristics is not None:
       chars = ""
       for chs in var.characteristics:
         chars += chs+", "
       chars = chars[:-2]
-      cur_content += "<br><font id=\"characteristic\">Characteristic: "+make_links(chars,var.varname,list_all_vars,list_chars,cur_specials)+"</font>\n"
+      cur_content += "<br><font id=\"characteristic\">Characteristic: "+make_links(chars,var.abivarname,list_all_vars,list_chars,cur_specials)+"</font>\n"
     else:
       cur_content += "<br><font id=\"characteristic\">Characteristic: </font>\n"
     cur_content += "<br><font id=\"vartype\">Variable type: "+var.vartype
     if var.dimensions is not None:
-      cur_content += make_links(format_dimensions(var.dimensions),var.varname,list_all_vars,list_chars,cur_specials)
+      cur_content += make_links(format_dimensions(var.dimensions),var.abivarname,list_all_vars,list_chars,cur_specials)
     if var.commentdims is not None and var.commentdims != "":
-      cur_content += " (Comment: "+make_links(var.commentdims,var.varname,list_all_vars,list_chars,cur_specials)+")"
+      cur_content += " (Comment: "+make_links(var.commentdims,var.abivarname,list_all_vars,list_chars,cur_specials)+")"
     cur_content += "</font>\n" 
-    cur_content += "<br><font id=\"default\">"+make_links(format_default(var.defaultval),var.varname,list_all_vars,list_chars,cur_specials)
+    cur_content += "<br><font id=\"default\">"+make_links(format_default(var.defaultval),var.abivarname,list_all_vars,list_chars,cur_specials)
     if var.commentdefault is not None and var.commentdefault != "":
-      cur_content += " (Comment: "+make_links(var.commentdefault,var.varname,list_all_vars,list_chars,cur_specials)+")"
+      cur_content += " (Comment: "+make_links(var.commentdefault,var.abivarname,list_all_vars,list_chars,cur_specials)+")"
     cur_content += "</font>\n" 
     if var.requires is not None and var.requires != "":
-      cur_content += "<br><br><font id=\"requires\">\nOnly relevant if "+doku2html(make_links(var.requires,var.varname,list_all_vars,list_chars,cur_specials))+"\n</font>\n"
+      cur_content += "<br><br><font id=\"requires\">\nOnly relevant if "+doku2html(make_links(var.requires,var.abivarname,list_all_vars,list_chars,cur_specials))+"\n</font>\n"
     if var.excludes is not None and var.excludes != "":
-      cur_content += "<br><br><font id=\"excludes\">\nThe use of this variable forbids the use of "+doku2html(make_links(var.excludes,var.varname,list_all_vars,list_chars,cur_specials))+"\n</font>\n"
+      cur_content += "<br><br><font id=\"excludes\">\nThe use of this variable forbids the use of "+doku2html(make_links(var.excludes,var.abivarname,list_all_vars,list_chars,cur_specials))+"\n</font>\n"
     cur_content += "<br><font id=\"text\">\n"
-    cur_content += "<p>\n"+doku2html(make_links(var.text,var.varname,list_all_vars,list_chars,cur_specials))+"\n"
+    cur_content += "<p>\n"+doku2html(make_links(var.text,var.abivarname,list_all_vars,list_chars,cur_specials))+"\n"
     cur_content += "</font>\n\n"
     cur_content += "<br><br><br><br><a href=#top>Go to the top</a>\n"
     cur_content += "<B> | </B><a href=\"allvariables.html#top\">Complete list of input variables</a><hr>\n"
     all_contents[section] = all_contents[section] + cur_content + "\n\n"
   except AttributeError as e:
     print(e)
-    print('For variable : ',varname)
+    print('For variable : ',abivarname)
 
 # For each "normal" section file : generate the header, generate the alphabetical list, write these,
 # then complete the content (that was previously gathered), then write the file and close it
@@ -202,12 +202,12 @@ for section, content in all_contents.items():
   f_cur.write(cur_header_varX)
   cur_let = 'A'
   f_cur.write(" <br>"+cur_let+".\n")
-  for varname,defi in all_vars[section]:
-    #curlink = "<br /><a href=\"#"+varname+"\">"+varname+"</a> : "+defi+"\n"
-    while not varname.startswith(cur_let.lower()):
+  for abivarname,defi in all_vars[section]:
+    #curlink = "<br /><a href=\"#"+abivarname+"\">"+abivarname+"</a> : "+defi+"\n"
+    while not abivarname.startswith(cur_let.lower()):
       cur_let = chr(ord(cur_let)+1)
       f_cur.write(" <br>"+cur_let+".\n")
-    curlink = " <a href=\"#"+varname+"\">"+varname+"</a>&nbsp;&nbsp;\n"
+    curlink = " <a href=\"#"+abivarname+"\">"+abivarname+"</a>&nbsp;&nbsp;\n"
     f_cur.write(curlink)
     #f_cur.write("<br /><br />\n")
   f_cur.write("\n")
@@ -227,7 +227,7 @@ cur_let = 'A'
 cur_content = "<br><br><a href=#top>Go to the top</a><hr>\n"
 f_sp.write("<br>"+cur_let+".&nbsp;\n")
 for (speckey, specval) in list_specials:
-  #curlink = "<br /><a href=\"#"+varname+"\">"+varname+"</a> : "+defi+"\n"
+  #curlink = "<br /><a href=\"#"+abivarname+"\">"+abivarname+"</a> : "+defi+"\n"
   while not speckey.lower().startswith(cur_let.lower()):
     cur_let = chr(ord(cur_let)+1)
     f_sp.write("<br>"+cur_let+".&nbsp;\n")
