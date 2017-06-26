@@ -7,7 +7,7 @@
     defaultval: !multiplevalue
         number: 3
         value: 1
-    definition: CELL lattice vector scaling
+    mnemonics: CELL lattice vector scaling
     dimensions:
     - 3
     excludes: null
@@ -30,10 +30,39 @@
          Note that [[acell]] is NOT the length of the conventional orthogonal basis vectors, but the scaling factors of the primitive vectors.
         Use [[scalecart]] to scale the cartesian coordinates.
         </p>
-    topic_class: compulsory
-    topic_name: crystal 
-    varname: acell
+    topics: crystal_compulsory 
+    abivarname: acell
     vartype: real
+- !variable
+    characteristics: null
+    commentdefault: null
+    commentdims: null
+    defaultval: 1
+    mnemonics: Number of Processors for Fock exact exchange
+    dimensions: scalar
+    excludes: null
+    requires: null
+    section: varpar
+    text: |-
+        <p>
+         Relevant only for the k-point/fock parallelisation
+        (option [[paral_kgb]] input variable).
+         <br />
+         [[nphf]] gives the number of processors among
+        which the work load over the occupied states level is shared.
+        [[nphf]] and [[npkpt]] are combined to give the total number
+        of processors (nproc) working on the parallelisation.
+         <br />
+        </p>
+        <p>
+         Note : [[nphf]] should be a divisor or equal to the number of k-point times the number of bands for
+        exact exchange ([[nkpthf]]*[[nbandhf]])
+        in order to have the better load-balancing and efficiency.
+         <br />
+        </p>
+    topics: hf_useful, parallelism_useful
+    abivarname: nphf
+    vartype: integer
 - !variable
     characteristics:
     - '[[EVOLVING]]'
@@ -49,7 +78,7 @@
     -   - 0
         - 0
         - 1
-    definition: Real space PRIMitive translations
+    mnemonics: Real space PRIMitive translations
     dimensions:
     - 3
     - 3
@@ -177,9 +206,8 @@
         the echo of [[rprim]] in the output file is not the value contained in the input file,
         but the value rescaled by [[scalecart]].
         </p>
-    topic_class: compulsory
-    topic_name: crystal
-    varname: rprim
+    topics: crystal_compulsory
+    abivarname: rprim
     vartype: real
 - !variable
     characteristics:
@@ -188,7 +216,7 @@
     commentdefault: null
     commentdims: Internally, it is represented as rprimd(3,3,[[nimage]]).
     defaultval: null
-    definition: Real space PRIMitive translations, Dimensional
+    mnemonics: Real space PRIMitive translations, Dimensional
     dimensions:
     - 3
     - 3
@@ -215,9 +243,8 @@
         </p>
         It is [[EVOLVING]] only if [[ionmov]]==2 and [[optcell]]/=0, otherwise it is fixed.
         <br />
-    topic_class: internal
-    topic_name: crystal
-    varname: rprimd
+    topics: crystal_internal
+    abivarname: rprimd
     vartype: real
 - !variable
     characteristics:
@@ -227,7 +254,7 @@
     defaultval: !multiplevalue
         number: 3
         value: 1
-    definition: SCALE CARTesian coordinates
+    mnemonics: SCALE CARTesian coordinates
     dimensions:
     - 3
     excludes: null
@@ -248,16 +275,15 @@
          Note that this input variable is [[INPUT_ONLY]] : its content will be immediately applied to rprim, at parsing time,
         and then scalecart will be set to the default values. So, it will not be echoed.
         </p>
-    topic_class: useful
-    topic_name: crystal
-    varname: scalecart
+    topics: crystal_useful
+    abivarname: scalecart
     vartype: real
 - !variable
     characteristics: null
     commentdefault: null
     commentdims: null
     defaultval: 0
-    definition: USE of an initial Density MATrix in Paw+U
+    mnemonics: USE of an initial Density MATrix in Paw+U
     dimensions: scalar
     excludes: null
     requires: '[[usepaw]]==1 and [[usepawu]]==1'
@@ -282,9 +308,8 @@
          - When [[usedmatpu]]&lt;0, the density matrix is kept constant at each ionic step
          <br />
         </p>
-    topic_class: useful
-    topic_name: DFT+U
-    varname: usedmatpu
+    topics: DFT+U_useful
+    abivarname: usedmatpu
     vartype: integer
 - !variable
     characteristics:
@@ -292,7 +317,7 @@
     commentdefault: null
     commentdims: null
     defaultval: null
-    definition: XYZ FILE input for geometry
+    mnemonics: XYZ FILE input for geometry
     dimensions: scalar
     excludes: null
     requires: null
@@ -307,6 +332,6 @@
          Notes: do not quote the file name in the abinit input file, simply leave a space after xyzfile. The xyz format is the number of atoms on the first line, a comment line, then one line per atom, with the element as a 2 letter symbol ("As" "O" or "Pu") and the three cartesian coordinates in Angstrom.
         </p>
     topic_class: expert
-    varname: xyzfile
+    abivarname: xyzfile
     vartype: string
 

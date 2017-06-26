@@ -40,8 +40,8 @@ def format_dimensions(dimensions):
 def doku2html(text):
 
   def replace_link(mymatch):
-    varname = mymatch.group()[2:-2]
-    return "<b>"+varname+"</b>"
+    abivarname = mymatch.group()[2:-2]
+    return "<b>"+abivarname+"</b>"
 
   p = re.compile("\*\*([a-zA-Z0-9_ */<>]*)\*\*")
   text2 = p.sub(replace_link,text)
@@ -57,21 +57,21 @@ def format_default(defaultval):
  
   return s
 
-def make_links(text,cur_varname,variables,characteristics,specials):
+def make_links(text,cur_abivarname,variables,characteristics,specials):
 
   def replace_link(mymatch):
-    varname = mymatch.group()[2:-2]
-    if varname == cur_varname:
-      return "<b>"+cur_varname+"</b>"
-    elif varname in variables.keys():
-      section = variables[varname]
-      return "<a href=\""+section+".html#"+varname+"\">"+varname+"</a>"
-    elif varname in characteristics:
-      return "<a href=\""+users_path+"abinit_help.html#"+str.replace(varname.lower()," ","_")+"\">"+varname+"</a>"
-    elif varname in specials:
-      return "<a href=\"specials.html#"+varname+"\">"+varname+"</a>"
+    abivarname = mymatch.group()[2:-2]
+    if abivarname == cur_abivarname:
+      return "<b>"+cur_abivarname+"</b>"
+    elif abivarname in variables.keys():
+      section = variables[abivarname]
+      return "<a href=\""+section+".html#"+abivarname+"\">"+abivarname+"</a>"
+    elif abivarname in characteristics:
+      return "<a href=\""+users_path+"abinit_help.html#"+str.replace(abivarname.lower()," ","_")+"\">"+abivarname+"</a>"
+    elif abivarname in specials:
+      return "<a href=\"specials.html#"+abivarname+"\">"+abivarname+"</a>"
     else:
-      return "<a href=\"#\">[[FAKE LINK:"+varname+"]]</a>"
+      return "<a href=\"#\">[[FAKE LINK:"+abivarname+"]]</a>"
     return mymatch.group()
 
   p=re.compile("\\[\\[([a-zA-Z0-9_ */<>]*)\\]\\]")
@@ -93,7 +93,7 @@ def make_links(text,cur_varname,variables,characteristics,specials):
 ################################################################################
 # Parse the abinit_vars.yml file -> variables
 
-file='abinit_vars_out_play.yml'
+file='abinit_vars.yml'
 print("Will use "+str(file)+" as database input file for the input variables and their characteristics ...")
 
 parser = argparse.ArgumentParser(description='Tool for eigenvalue analysis')
@@ -190,12 +190,12 @@ header_all = header_all.replace("__JS_PATH__",js_path)
 all_contents = dict()
 all_vars = dict()
 
-# Create a dictionary that gives the section for each varname
+# Create a dictionary that gives the section for each abivarname
 
 list_all_vars = dict()
 
 for var in variables:
-  list_all_vars[var.varname] = var.section
+  list_all_vars[var.abivarname] = var.section
 
 #
 cur_specials = []
@@ -214,63 +214,69 @@ output = output + "<p>"+cur_let+".&nbsp;\n"
 for i, var in enumerate(variables):
   if debug==1 :
     print(var)
-  #output = output + "<a href=\""+var.section+".html#"+var.varname+"\">"+var.varname+"</a> : "+var.definition+"<br />\n" 
-  while not var.varname.startswith(cur_let.lower()):
+  while not var.abivarname.startswith(cur_let.lower()):
     cur_let = chr(ord(cur_let)+1)
     output = output + "<p>"+cur_let+".\n"
-  varname = var.varname
+  abivarname = var.abivarname
   if var.characteristics is not None and '[[INTERNAL_ONLY]]' in var.characteristics:
-    varname = '%'+varname
-  output = output + "<a href=\""+var.section+".html#"+var.varname+"\">"+varname+"</a>&nbsp;&nbsp;\n" 
+    abivarname = '%'+abivarname
+  output = output + "<a href=\""+var.section+".html#"+var.abivarname+"\">"+abivarname+"</a>&nbsp;&nbsp;\n" 
   section = var.section
   if section not in all_contents.keys():
     all_contents[section] = "<br><br><br><br><hr>\n"
     all_vars[section] = []
 
-  all_vars[section].append([var.varname,var.definition])
+  all_vars[section].append([var.abivarname,var.mnemonics])
 
   # Constitute the body of information related to one input variable
   cur_content = ""
 
   try:
-    cur_content += "<br><font id=\"title\"><a name=\""+var.varname+"\">"+var.varname+"</a></font>\n"
-    cur_content += "<br><font id=\"definition\">Mnemonics: "+var.definition+"</font>\n"
+    cur_content += "<br><font id=\"title\"><a name=\""+var.abivarname+"\">"+var.abivarname+"</a></font>\n"
+    cur_content += "<br><font id=\"mnemonics\">Mnemonics: "+var.mnemonics+"</font>\n"
     if var.characteristics is not None:
       chars = ""
       for chs in var.characteristics:
         chars += chs+", "
       chars = chars[:-2]
-      cur_content += "<br><font id=\"characteristic\">Characteristic: "+make_links(chars,var.varname,list_all_vars,list_chars,cur_specials)+"</font>\n"
+      cur_content += "<br><font id=\"characteristic\">Characteristic: "+make_links(chars,var.abivarname,list_all_vars,list_chars,cur_specials)+"</font>\n"
     else:
       cur_content += "<br><font id=\"characteristic\">Characteristic: </font>\n"
     try:
-      cur_content += "<br><font id=\"characteristic\">Mentioned in \"How to\": "+"<a href=\""+var.topic_name+".html\">"+var.topic_name+"</a></font>\n"
+      if var.topics is not None:
+        cur_content += "<br><font id=\"characteristic\">Mentioned in \"How to\": "
+        vartopics=var.topics
+        topics_name_class = vartopics.split(',')
+        for i, topic_name_class in enumerate(topics_name_class):
+          name_class = topic_name_class.split('_')
+          cur_content += "<a href=\""+name_class[0]+".html\">"+name_class[0]+"</a> "
+        cur_content += "</font>\n"
     except:
       if debug==1 :
-        print(" No topic_class for varname "+var.varname)
+        print(" No topic_class for abivarname "+var.abivarname)
     cur_content += "<br><font id=\"vartype\">Variable type: "+var.vartype
     if var.dimensions is not None:
-      cur_content += make_links(format_dimensions(var.dimensions),var.varname,list_all_vars,list_chars,cur_specials)
+      cur_content += make_links(format_dimensions(var.dimensions),var.abivarname,list_all_vars,list_chars,cur_specials)
     if var.commentdims is not None and var.commentdims != "":
-      cur_content += " (Comment: "+make_links(var.commentdims,var.varname,list_all_vars,list_chars,cur_specials)+")"
+      cur_content += " (Comment: "+make_links(var.commentdims,var.abivarname,list_all_vars,list_chars,cur_specials)+")"
     cur_content += "</font>\n" 
-    cur_content += "<br><font id=\"default\">"+make_links(format_default(var.defaultval),var.varname,list_all_vars,list_chars,cur_specials)
+    cur_content += "<br><font id=\"default\">"+make_links(format_default(var.defaultval),var.abivarname,list_all_vars,list_chars,cur_specials)
     if var.commentdefault is not None and var.commentdefault != "":
-      cur_content += " (Comment: "+make_links(var.commentdefault,var.varname,list_all_vars,list_chars,cur_specials)+")"
+      cur_content += " (Comment: "+make_links(var.commentdefault,var.abivarname,list_all_vars,list_chars,cur_specials)+")"
     cur_content += "</font>\n" 
     if var.requires is not None and var.requires != "":
-      cur_content += "<br><br><font id=\"requires\">\nOnly relevant if "+doku2html(make_links(var.requires,var.varname,list_all_vars,list_chars,cur_specials))+"\n</font>\n"
+      cur_content += "<br><br><font id=\"requires\">\nOnly relevant if "+doku2html(make_links(var.requires,var.abivarname,list_all_vars,list_chars,cur_specials))+"\n</font>\n"
     if var.excludes is not None and var.excludes != "":
-      cur_content += "<br><br><font id=\"excludes\">\nThe use of this variable forbids the use of "+doku2html(make_links(var.excludes,var.varname,list_all_vars,list_chars,cur_specials))+"\n</font>\n"
+      cur_content += "<br><br><font id=\"excludes\">\nThe use of this variable forbids the use of "+doku2html(make_links(var.excludes,var.abivarname,list_all_vars,list_chars,cur_specials))+"\n</font>\n"
     cur_content += "<br><font id=\"text\">\n"
-    cur_content += "<p>\n"+doku2html(make_links(var.text,var.varname,list_all_vars,list_chars,cur_specials))+"\n"
+    cur_content += "<p>\n"+doku2html(make_links(var.text,var.abivarname,list_all_vars,list_chars,cur_specials))+"\n"
     cur_content += "</font>\n\n"
     cur_content += "<br><br><br><br><a href=#top>Go to the top</a>\n"
     cur_content += "<B> | </B><a href=\"allvariables.html#top\">Complete list of input variables</a><hr>\n"
     all_contents[section] = all_contents[section] + cur_content + "\n\n"
   except AttributeError as e:
     print(e)
-    print('For variable : ',varname)
+    print('For variable : ',abivarname)
 
 ################################################################################
 # Generate the files that document all the variables.
@@ -290,12 +296,12 @@ for section, content in all_contents.items():
   f_cur.write(cur_header_varX)
   cur_let = 'A'
   f_cur.write(" <br>"+cur_let+".\n")
-  for varname,defi in all_vars[section]:
-    #curlink = "<br /><a href=\"#"+varname+"\">"+varname+"</a> : "+defi+"\n"
-    while not varname.startswith(cur_let.lower()):
+  for abivarname,defi in all_vars[section]:
+    #curlink = "<br /><a href=\"#"+abivarname+"\">"+abivarname+"</a> : "+defi+"\n"
+    while not abivarname.startswith(cur_let.lower()):
       cur_let = chr(ord(cur_let)+1)
       f_cur.write(" <br>"+cur_let+".\n")
-    curlink = " <a href=\"#"+varname+"\">"+varname+"</a>&nbsp;&nbsp;\n"
+    curlink = " <a href=\"#"+abivarname+"\">"+abivarname+"</a>&nbsp;&nbsp;\n"
     f_cur.write(curlink)
     #f_cur.write("<br /><br />\n")
   f_cur.write("\n")
@@ -316,7 +322,7 @@ cur_let = 'A'
 cur_content = "<br><br><a href=#top>Go to the top</a><hr>\n"
 f_sp.write("<br>"+cur_let+".&nbsp;\n")
 for (speckey, specval) in list_specials:
-  #curlink = "<br /><a href=\"#"+varname+"\">"+varname+"</a> : "+defi+"\n"
+  #curlink = "<br /><a href=\"#"+abivarname+"\">"+abivarname+"</a> : "+defi+"\n"
   while not speckey.lower().startswith(cur_let.lower()):
     cur_let = chr(ord(cur_let)+1)
     f_sp.write("<br>"+cur_let+".&nbsp;\n")
@@ -364,10 +370,10 @@ topic_sec3 = dict()
 topic_class_sec3 = dict()
 found = dict()
 foundvar = dict()
-varname_dic = dict()
-varname2_dic = dict()
+abivarname_dic = dict()
+abivarname2_dic = dict()
 section_dic = dict()
-definition_dic = dict()
+mnemonics_dic = dict()
 
 for i, topic in enumerate(topics):
   topic_name = topic.topic_name
@@ -376,10 +382,10 @@ for i, topic in enumerate(topics):
   topic_sec3[topic_name] = ""
   found[topic_name] = 0
   foundvar[topic_name] = 0
-  varname_dic[topic_name] = ""
-  varname2_dic[topic_name] = ""
+  abivarname_dic[topic_name] = ""
+  abivarname2_dic[topic_name] = ""
   section_dic[topic_name] = ""
-  definition_dic[topic_name] = ""
+  mnemonics_dic[topic_name] = ""
 
 for (tclasskey, tclassval) in list_topics_class:
 
@@ -391,43 +397,28 @@ for (tclasskey, tclassval) in list_topics_class:
 
   for i, var in enumerate(variables):
     foundvar[topic_name] = 0
-    # This whole section should be much better coded ... Avoid duplication of code sections ...
-    if var.topic_name is not None:
-      if tclasskey==var.topic_class : 
-        topic_name=var.topic_name
-        found[topic_name] = 1
-        foundvar[topic_name] = 1
-        varname_dic[topic_name]=var.varname
-        varname2_dic[topic_name]=var.varname
-        if var.characteristics is not None and '[[INTERNAL_ONLY]]' in var.characteristics:
-          varname2_dic[topic_name] = '%'+var.varname
-        section_dic[topic_name]=var.section
-        definition_dic[topic_name]=var.definition
-    else:
-      try:
-        if var.topics is not None:
-
-          #print("\nvarname:",var.varname)  
-          #print("topics:",var.topics)  
-
-          for vartopics in var.topics:
-
-            #print("\nvarname:",var.varname)
-            #print("vartopics:",vartopics)  
-
-            if tclasskey==vartopics["topic_class"] : 
-              topic_name=vartopics["topic_name"]
-              found[topic_name] = 1
-              foundvar[topic_name] = 1
-              varname_dic[topic_name]=var.varname
-              varname2_dic[topic_name]=var.varname
-              if var.characteristics is not None and '[[INTERNAL_ONLY]]' in var.characteristics:
-                varname2_dic[topic_name] = '%'+var.varname
-              section_dic[topic_name]=var.section
-              definition_dic[topic_name]=var.definition
-      except:
-        if debug==1 :
-         print(" No topic_name (neither topics) for varname "+var.varname) 
+    try:
+      if var.topics is not None:
+        #print("\nabivarname:",var.abivarname)  
+        #print("topics:",var.topics)  
+        vartopics=var.topics
+        topics_name_class = vartopics.split(',')
+        for i, topic_name_class in enumerate(topics_name_class):
+          name_class = topic_name_class.split('_')
+          #print("tclasskey,name_class[1].strip()",tclasskey,name_class[1].strip()) 
+          if tclasskey==name_class[1].strip() :
+            topic_name=name_class[0].strip()
+            found[topic_name] = 1
+            foundvar[topic_name] = 1
+            abivarname_dic[topic_name]=var.abivarname
+            abivarname2_dic[topic_name]=var.abivarname
+            if var.characteristics is not None and '[[INTERNAL_ONLY]]' in var.characteristics:
+              abivarname2_dic[topic_name] = '%'+var.abivarname
+            section_dic[topic_name]=var.section
+            mnemonics_dic[topic_name]=var.mnemonics
+    except:
+      if debug==1 :
+       print(" No topics for abivarname "+var.abivarname) 
 
     for i, topic in enumerate(topics):
       topic_name=topic.topic_name
@@ -437,12 +428,12 @@ for (tclasskey, tclassval) in list_topics_class:
       if foundvar[topic_name] == 1:
         # Constitute the line of information related to one input variable
         foundvar[topic_name]=0
-        varname=varname_dic[topic_name]
-        varname2=varname2_dic[topic_name]
+        abivarname=abivarname_dic[topic_name]
+        abivarname2=abivarname2_dic[topic_name]
         section=section_dic[topic_name]
-        definition=definition_dic[topic_name]
-        topic_class_sec3[topic_name] += "... <a href=\""+section+".html#"+varname+"\">"+varname2+"</a>   "
-        topic_class_sec3[topic_name] += "["+definition+"]<br>\n"
+        mnemonics=mnemonics_dic[topic_name]
+        topic_class_sec3[topic_name] += "... <a href=\""+section+".html#"+abivarname+"\">"+abivarname2+"</a>   "
+        topic_class_sec3[topic_name] += "["+mnemonics+"]<br>\n"
 
         if debug==1 :
           print("topic_name:"+topic_name)

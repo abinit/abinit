@@ -136,6 +136,7 @@ MODULE m_ddb
  public :: ddb_copy                 ! Copy the object.
  public :: ddb_get_etotal           ! Read the GS total energy.
  public :: ddb_get_dielt_zeff       ! Reads the Dielectric Tensor and the Effective Charges
+ public :: ddb_get_dielt            ! Reads the Dielectric Tensor
  public :: ddb_get_dchidet          ! Reads the non-linear optical susceptibility tensor and the
                                     ! first-order change in the linear dielectric susceptibility
  public :: ddb_diagoq               ! Compute the phonon frequencies at the specified q-point by performing
@@ -4223,6 +4224,100 @@ integer function ddb_get_dielt_zeff(ddb,crystal,rftyp,chneut,selectz,dielt,zeff)
  end if ! iblok not found
 
 end function ddb_get_dielt_zeff
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_ddb/ddb_get_dielt
+!!
+!! NAME
+!!  ddb_get_dielt
+!!
+!! FUNCTION
+!! Reads the Dielectric Tensor from the DDB file
+!!
+!! INPUTS
+!!  ddb<type(ddb_type)>=Derivative database.
+!!  rftyp  = 1 if non-stationary block
+!!           2 if stationary block
+!!           3 if third order derivatives
+!!
+!! OUTPUT
+!!  dielt(3,3) = Macroscopic dielectric tensor
+!!  iblok=Index of the block containing the data. 0 if block is not found.
+!!
+!! NOTES
+!!  dielt is initialized to one_3D if the derivatives are not available in the DDB file.
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+integer function ddb_get_dielt(ddb,rftyp,dielt) result(iblok)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'ddb_get_dielt'
+ use interfaces_14_hidewrite
+!End of the abilint section
+
+ implicit none
+
+!Arguments -------------------------------
+!scalars
+ integer,intent(in) :: rftyp
+ type(ddb_type),intent(in) :: ddb
+!arrays
+ real(dp),intent(out) :: dielt(3,3)
+
+!Local variables -------------------------
+!scalars
+ integer :: ii,mpert
+ character(len=1000) :: message
+!arrays
+ integer :: rfelfd(4),rfphon(4),rfstrs(4)
+ real(dp) :: qphnrm(3),qphon(3,3)
+ real(dp),allocatable :: tmpval(:,:,:,:)
+
+! *********************************************************************
+
+ ! Look for the Gamma Block in the DDB
+ qphon(:,1)=zero
+ qphnrm(1)=zero
+ rfphon(1:2)=0
+ rfelfd(1:2)=2
+ rfstrs(1:2)=0
+
+ call gtblk9(ddb,iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,rftyp)
+
+ ! Read the dielectric tensor only if the Gamma-block was found in the DDB
+ ! In case it was not found, iblok = 0
+ dielt=zero; dielt(1,1)=one; dielt(2,2)=one; dielt(3,3)=one
+
+ if (iblok/=0) then
+   !Extration of dielectric tensor
+   mpert = ddb%mpert
+
+   ABI_MALLOC(tmpval,(3,mpert,3,mpert))
+   tmpval(:,:,:,:) = reshape(ddb%val(1,:,iblok), shape = (/3,mpert,3,mpert/))
+   dielt=tmpval(1:3,ddb%natom+2,1:3,ddb%natom+2)
+
+   write(message,'(a,3es16.6,3es16.6,3es16.6)' )&
+&   ' Dielectric Tensor ',&
+&   dielt(1,1),dielt(1,2),dielt(1,3),&
+&   dielt(2,1),dielt(2,2),dielt(2,3),&
+&   dielt(3,1),dielt(3,2),dielt(3,3)
+
+   call wrtout(std_out,message,'COLL')
+   
+   ABI_FREE(tmpval)
+ end if ! iblok not found
+
+end function ddb_get_dielt
 !!***
 
 !----------------------------------------------------------------------
