@@ -55,7 +55,7 @@ class Variable(yaml.YAMLObject):
                 'abivarname', 'section']
 
     def __init__(self, vartype=None, characteristic=None,
-                 mnemonics None, dimensions=None, default=None,
+                 mnemonics=None, dimensions=None, default=None,
                  text=None, abivarname=None, section=None, range=None,
                  commentdefault=None, commentdims=None):
         self.vartype = vartype
