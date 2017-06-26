@@ -243,16 +243,13 @@ for i, var in enumerate(variables):
     else:
       cur_content += "<br><font id=\"characteristic\">Characteristic: </font>\n"
     try:
-      if var.topic_name is not None or var.topics is not None:
+      if var.topics is not None:
         cur_content += "<br><font id=\"characteristic\">Mentioned in \"How to\": "
-        if var.topic_name is not None:
-          cur_content += "<a href=\""+var.topic_name+".html\">"+var.topic_name+"</a> "
-        if var.topics is not None:
-          vartopics=var.topics
-          topics_name_class = vartopics.split(',')
-          for i, topic_name_class in enumerate(topics_name_class):
-            name_class = topic_name_class.split('_')
-            cur_content += "<a href=\""+name_class[0]+".html\">"+name_class[0]+"</a> "
+        vartopics=var.topics
+        topics_name_class = vartopics.split(',')
+        for i, topic_name_class in enumerate(topics_name_class):
+          name_class = topic_name_class.split('_')
+          cur_content += "<a href=\""+name_class[0]+".html\">"+name_class[0]+"</a> "
         cur_content += "</font>\n"
     except:
       if debug==1 :
@@ -400,54 +397,28 @@ for (tclasskey, tclassval) in list_topics_class:
 
   for i, var in enumerate(variables):
     foundvar[topic_name] = 0
-    # This whole section should be much better coded ... Avoid duplication of code sections ...
-    if var.topic_name is not None:
-      if tclasskey==var.topic_class : 
-        topic_name=var.topic_name
-        found[topic_name] = 1
-        foundvar[topic_name] = 1
-        abivarname_dic[topic_name]=var.abivarname
-        abivarname2_dic[topic_name]=var.abivarname
-        if var.characteristics is not None and '[[INTERNAL_ONLY]]' in var.characteristics:
-          abivarname2_dic[topic_name] = '%'+var.abivarname
-        section_dic[topic_name]=var.section
-        mnemonics_dic[topic_name]=var.mnemonics
-    else:
-      try:
-        if var.topics is not None:
-          #print("\nabivarname:",var.abivarname)  
-          #print("topics:",var.topics)  
-          vartopics=var.topics
-          topics_name_class = vartopics.split(',')
-          for i, topic_name_class in enumerate(topics_name_class):
-            name_class = topic_name_class.split('_')
-            #print("tclasskey,name_class[1].strip()",tclasskey,name_class[1].strip()) 
-            if tclasskey==name_class[1].strip() :
-              topic_name=name_class[0].strip()
-              found[topic_name] = 1
-              foundvar[topic_name] = 1
-              abivarname_dic[topic_name]=var.abivarname
-              abivarname2_dic[topic_name]=var.abivarname
-              if var.characteristics is not None and '[[INTERNAL_ONLY]]' in var.characteristics:
-                abivarname2_dic[topic_name] = '%'+var.abivarname
-              section_dic[topic_name]=var.section
-              mnemonics_dic[topic_name]=var.mnemonics
-
-           #if tclasskey==vartopics["topic_class"] : 
-           #  topic_name=vartopics["topic_name"]
-           # if tclasskey in vartopics["topic_class"] : 
-           #   topic_name=vartopics["topic_name"]
-           #   found[topic_name] = 1
-           #   foundvar[topic_name] = 1
-           #   abivarname_dic[topic_name]=var.abivarname
-           #   abivarname2_dic[topic_name]=var.abivarname
-           #  if var.characteristics is not None and '[[INTERNAL_ONLY]]' in var.characteristics:
-           #    abivarname2_dic[topic_name] = '%'+var.abivarname
-           #  section_dic[topic_name]=var.section
-           #  mnemonics_dic[topic_name]=var.mnemonics 
-      except:
-        if debug==1 :
-         print(" No topic_name (neither topics) for abivarname "+var.abivarname) 
+    try:
+      if var.topics is not None:
+        #print("\nabivarname:",var.abivarname)  
+        #print("topics:",var.topics)  
+        vartopics=var.topics
+        topics_name_class = vartopics.split(',')
+        for i, topic_name_class in enumerate(topics_name_class):
+          name_class = topic_name_class.split('_')
+          #print("tclasskey,name_class[1].strip()",tclasskey,name_class[1].strip()) 
+          if tclasskey==name_class[1].strip() :
+            topic_name=name_class[0].strip()
+            found[topic_name] = 1
+            foundvar[topic_name] = 1
+            abivarname_dic[topic_name]=var.abivarname
+            abivarname2_dic[topic_name]=var.abivarname
+            if var.characteristics is not None and '[[INTERNAL_ONLY]]' in var.characteristics:
+              abivarname2_dic[topic_name] = '%'+var.abivarname
+            section_dic[topic_name]=var.section
+            mnemonics_dic[topic_name]=var.mnemonics
+    except:
+      if debug==1 :
+       print(" No topics for abivarname "+var.abivarname) 
 
     for i, topic in enumerate(topics):
       topic_name=topic.topic_name
