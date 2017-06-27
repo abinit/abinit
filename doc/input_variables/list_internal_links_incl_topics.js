@@ -1,13 +1,17 @@
 var docpath="../../"
 document.write(' <HR ALIGN=left> ');
 document.write(' Goto :          ');
-document.write(' <A href="http://www.abinit.org"><B>ABINIT home Page</B></A>          ');
+document.write(' <A href="http://www.abinit.org"><B>ABINIT home page</B></A>          ');
 document.write(' <B> | </B> ');
 document.write(' <A href="'+docpath+'users/acknowledgments.html"><B>Suggested acknowledgments</B></A> ');
 document.write(' <B> | </B> ');
-document.write(' <A href="'+docpath+'input_variables/html_automatically_generated/allvariables.html"><B>List of input variables</B></A> ');
+document.write(' <A href="'+docpath+'playground/html_automatically_generated/allvariables.html"><B>Input variable list</B></A> ');
 document.write(' <B> | </B> ');
-document.write(' <A href="'+docpath+'tutorial/welcome.html"><B>Tutorial home page</B></A> ');
+document.write(' <A href="'+docpath+'playground/html_template/what_ABINIT_does.html"><B>What ABINIT does</B></A> ');
+document.write(' <B> | </B> ');
+document.write(' <A href="'+docpath+'playground/html_automatically_generated/alltopics.html"><B>"How to" list</B></A> ');
+document.write(' <B> | </B> ');
+document.write(' <A href="'+docpath+'tutorial/welcome.html"><B>Tutorial</B></A> ');
 document.write(' <B> | </B> ');
 document.write(' <A href="'+docpath+'users/bibliography.html"><B>Bibliography</B></A> ');
 document.write(' <HR ALIGN=left> ');

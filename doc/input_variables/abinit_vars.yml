@@ -576,6 +576,7 @@
         [[accuracy]]=0 means that this input variable is desactivated.
 
         <p>
+    topics: convergency_basic
     vartype: integer
 - !variable
     abivarname: acell
@@ -610,6 +611,7 @@
          Note that [[acell]] is NOT the length of the conventional orthogonal basis vectors, but the scaling factors of the primitive vectors.
         Use [[scalecart]] to scale the cartesian coordinates.
         </p>
+    topics: crystal_compulsory
     vartype: real
 - !variable
     abivarname: adpimd
@@ -644,6 +646,7 @@
          <br />
          NOT YET USABLE
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: adpimd_gamma
@@ -662,6 +665,7 @@
          <br />
          NOT YET USABLE
         </p>
+    topics: null
     vartype: real
 - !variable
     abivarname: algalch
@@ -720,6 +724,7 @@
         <p>
          Note that alchemical mixing cannot be used with PAW.
         </p>
+    topics: otherGS_alch
     vartype: integer
 - !variable
     abivarname: amu
@@ -781,6 +786,7 @@
         cells with different atomic characteristics can thus be considered,
         and can be made to evolve, e.g. with a genetic algorithm (not coded in v7.0.0 though).
         </p>
+    topics: GSgeneral_useful
     vartype: real
 - !variable
     abivarname: angdeg
@@ -849,6 +855,7 @@
          where each of the vectors is normalized,
         and form the desired angles with the others.
         </p>
+    topics: crystal_useful
     vartype: real
 - !variable
     abivarname: asr
@@ -863,6 +870,7 @@
     section: vareph
     text: |-
         Govern the imposition of the Acoustic Sum Rule (ASR) in phonon calculations. Same meaning as the corresponding anaddb variable.
+    topics: null
     vartype: integer
 - !variable
     abivarname: atvshift
@@ -903,6 +911,7 @@
          [[usepawu]] should be non-zero,
         [[lpawu]] should be 2 or 3.
         </p>
+    topics: DFT+U_expert
     vartype: real
 - !variable
     abivarname: autoparal
@@ -990,6 +999,7 @@
         A weight is associated to each distribution and the higher this weight is the better the distribution is.
         After having printed out the weights, the code stops.
         </p>
+    topics: parallelism_basic
     vartype: integer
 - !variable
     abivarname: awtr
@@ -1024,6 +1034,7 @@
          Note that the parallel algorithm [[gwpara]]=2 is not compatible with
         the choice [[awtr]]=0.
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: bandpp
@@ -1072,6 +1083,7 @@
         performed by using [[bandpp]]*[[npband]]=[[nband]].
         Put [[bandpp]]=2 when [[istwfk]]=2 (the time spent in FFTs is divided by two).
         </p>
+    topics: parallelism_useful
     vartype: integer
 - !variable
     abivarname: bdberry
@@ -1106,6 +1118,7 @@
         in case of a Berry phase calculation with [[berryopt]] = 1, 2, or 3: the above-mentioned
         default will cause an early exit.
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: bdeigrf
@@ -1129,6 +1142,7 @@
          <br />
          If [[bdeigrf]] is set to -1, the code will automatically set [[bdeigrf]] equal to nband.
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: bdgw
@@ -1190,6 +1204,7 @@
         wavefunctions should include all the degenerate states belonging to the same irreducible
         representation. Only in this case, indeed, the initial symmetries and energy degenerations are preserved.
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: berryopt
@@ -1320,6 +1335,7 @@
         [[red_dfield]], [[red_efield]],
         [[ddamp]]
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: berrysav
@@ -1344,6 +1360,7 @@
           </li>
          </ul>
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: berrystep
@@ -1369,6 +1386,7 @@
         [[berrystep]]-step, and use the large-step values of berry phase to correct the single-step berry phase.
         Use with care: while experience is still to be gained with this procedure, the outlook is promising.
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: bfield
@@ -1388,6 +1406,7 @@
         <p>
          Perform finite magnetic field calculation. <br><b>THIS CODE IS UNDER DEVELOPMENT AND IS NOT READY FOR USE.</b>
         </p>
+    topics: null
     vartype: real
 - !variable
     abivarname: bmass
@@ -1405,6 +1424,7 @@
          bmass is the mass of the barostat when
         [[ionmov]]=13 (constant pressure molecular dynamics)
         </p>
+    topics: null
     vartype: real
 - !variable
     abivarname: boxcenter
@@ -1432,6 +1452,7 @@
         On the contrary, when the cluster or molecule is close to
         the origin, it is better to take [[boxcenter]]=(0 0 0).
         </p>
+    topics: TDDFT_basic
     vartype: real
 - !variable
     abivarname: boxcutmin
@@ -1456,6 +1477,7 @@
         the wavefunctions that are obtained CANNOT be used for starting response function
         calculation.
         </p>
+    topics: convergency_expert
     vartype: real
 - !variable
     abivarname: brvltt
@@ -1544,6 +1566,7 @@
          </a>
          .
         </p>
+    topics: crystal_expert
     vartype: integer
 - !variable
     abivarname: bs_algorithm
@@ -1589,6 +1612,7 @@
           </li>
          </ul>
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: bs_calctype
@@ -1621,6 +1645,7 @@
           </li>
          </ul>
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: bs_coulomb_term
@@ -1671,6 +1696,7 @@
           </li>
          </ul>
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: bs_coupling
@@ -1702,6 +1728,7 @@
           </li>
          </ul>
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: bs_eh_cutoff
@@ -1724,6 +1751,7 @@
         energy is between bs_eh_window(1) and bs_eh_window(2) will be considered during
         the construction of the e-h Hamiltonian.
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: bs_exchange_term
@@ -1743,6 +1771,7 @@
         in the macroscopic dielectric function.</li>
         <li>1 =&gt;The exchange term is calculated and added to the excitonic Hamiltonian.
          </li></ul></p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: bs_freq_mesh
@@ -1770,6 +1799,7 @@
         <p>
         <b>bs_freq_mesh(3)</b> gives the step of the linear mesh used for evaluating the macroscopic dielectric function.
         </p>
+    topics: null
     vartype: real
 - !variable
     abivarname: bs_hayd_term
@@ -1802,6 +1832,7 @@
           </li>
          </ul>
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: bs_haydock_niter
@@ -1821,6 +1852,7 @@
         The iterative algorithm stops when the difference between two consecutive evaluations of the optical
         spectra is less than [[bs_haydock_tol]].
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: bs_haydock_tol
@@ -1869,6 +1901,7 @@
           </li>
          </ul>
         </p>
+    topics: null
     vartype: real
 - !variable
     abivarname: bs_interp_kmult
@@ -1895,6 +1928,7 @@
          </b>
          * [[ngkpt]] of the coarse mesh.
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: bs_interp_m3_width
@@ -1910,6 +1944,7 @@
     section: vargw
     text: |-
         Defines the width of the region where divergence treatment is applied for BSE interpolation
+    topics: null
     vartype: real
 - !variable
     abivarname: bs_interp_method
@@ -1935,6 +1970,7 @@
           </li>
          </ul>
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: bs_interp_mode
@@ -1966,6 +2002,7 @@
           </li>
          </ul>
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: bs_interp_prep
@@ -1984,6 +2021,7 @@
          [[bs_interp_prep]] allows to trigger the preparation of the interpolation with method 2 or method 3.
         It generates the decomposition of BSR in a,b,c coefficients used for the interpolation.
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: bs_interp_rl_nb
@@ -2000,6 +2038,7 @@
     section: vargw
     text: |-
         Gives the index of the neighbour that is used for Rohlfing & Louie method
+    topics: null
     vartype: integer
 - !variable
     abivarname: bs_loband
@@ -2020,6 +2059,7 @@
         For spin polarized calculations, one must provide two separated indices for spin up and spin down.
         An additional cutoff energy can be applied by means of the bs_eh_window input variable.
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: bs_nstates
@@ -2040,6 +2080,7 @@
         The number of states should be sufficiently large
         for a correct description of the optical properties in the frequency range of interest.
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: builtintest
@@ -2063,6 +2104,7 @@
         whether ABINIT fallbacks have been connected or not (bigdft, etsf_io, libxc, wannier90).
         At present, [[builtintest]]=1 ... 7 are allowed. See more information in tests/built-in/README .
         </p>
+    topics: otherGS_expert
     vartype: integer
 - !variable
     abivarname: bxctmindg
@@ -2093,6 +2135,7 @@
         much larger than two for the computation to be converged at the
         required level of accuracy.
         </p>
+    topics: PAW_expert
     vartype: real
 - !variable
     abivarname: cd_customnimfrqs
@@ -2111,6 +2154,7 @@
          [[cd_customnimfrqs]] lets the user define the grid points along the imaginary axis by hand. Set this
         to the number of frequencies you want. The frequencies are specified with [[cd_imfrqs]].
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: cd_frqim_method
@@ -2446,6 +2490,7 @@
          on the dense mesh for a given convergence study. One can also use the utility to
         merge independent screening calculations over q-points and frequency sections.
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: cd_full_grid
@@ -2482,6 +2527,7 @@
          </b>
          utility.
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: cd_halfway_freq
@@ -2504,6 +2550,7 @@
         [[nfreqre]] are used up. The tangent transformed grid is approximately
         linear up to this point. To be used in conjunction with [[gw_frqre_tangrid]].
         </p>
+    topics: null
     vartype: real
 - !variable
     abivarname: cd_imfrqs
@@ -2548,6 +2595,7 @@
         </p>
         <p>
         </p>
+    topics: null
     vartype: real
 - !variable
     abivarname: cd_max_freq
@@ -2570,6 +2618,7 @@
         [[nfreqre]] are used up. To be used in conjunction with
         [[gw_frqre_tangrid]].
         </p>
+    topics: null
     vartype: real
 - !variable
     abivarname: cd_subset_freq
@@ -2605,6 +2654,7 @@
          </b>
          utility.
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: cgtyphf
@@ -2629,6 +2679,7 @@
         exact exchange contribution each time in the conjugate gradient. The value 1 corresponds to calculate the Fock
         exact exchange contribution only for the initial guess (not for the gradient direction) in the conjugate gradient
         </p>
+    topics: hf_expert
     vartype: integer
 - !variable
     abivarname: charge
@@ -2669,6 +2720,7 @@
         use [[charge]]=0.  To treat a system missing one electron
         per unit cell, set [[charge]]=+1.
         </p>
+    topics: GSgeneral_useful
     vartype: real
 - !variable
     abivarname: chempot
@@ -2696,6 +2748,7 @@
         When the spatial chemical potential is defined only for one type of atom (and no chemical potential is present for the other atoms), simply set the related values to *0.0 in the [[chempot]] array.
 
         In the present input array, reduced positions, energies and derivatives of energies are mixed. Hence, although the chemical potential is an energy, one cannot use the usual energy definitions (i.e. the chemical potential is always to be input in Hartree atomic units).
+    topics: null
     vartype: real
 - !variable
     abivarname: chkexit
@@ -2732,6 +2785,7 @@
         <p>
          In all cases, the check is performed at most every 2 seconds of CPU time.
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: chkprim
@@ -2759,6 +2813,7 @@
         generate a PRIMITIVE cell using
         [[brvltt]]=-1 .
         </p>
+    topics: crystal_useful
     vartype: integer
 - !variable
     abivarname: chksymbreak
@@ -2819,6 +2874,7 @@
          If you encounter a problem outlined above, you have two choices : change your atomic positions (translate them) such that the origin
         appears as the most symmetric point ; or ignore the problem, and set [[chksymbreak]]=0 .
         </p>
+    topics: k-points_basic
     vartype: integer
 - !variable
     abivarname: chneut
@@ -2834,6 +2890,7 @@
     text: |-
         Set the treatment of the Charge Neutrality requirement for the effective charges.
         Same meaning as the corresponding anaddb variable.
+    topics: null
     vartype: integer
 - !variable
     abivarname: cineb_start
@@ -2859,6 +2916,7 @@
           See: J. Chem. Phys. 113, 9901 (2000).
          </i>
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: cpuh
@@ -2884,6 +2942,7 @@
          <br />
         A zero value has no action of the job.
         </p>
+    topics: otherGS_job
     vartype: real
 - !variable
     abivarname: cpum
@@ -2909,6 +2968,7 @@
          <br />
         A zero value has no action of the job.
         </p>
+    topics: otherGS_job
     vartype: real
 - !variable
     abivarname: cpus
@@ -2934,6 +2994,7 @@
          <br />
         A zero value has no action of the job.
         </p>
+    topics: otherGS_job
     vartype: real
 - !variable
     abivarname: d3e_pert1_atpol
@@ -2959,6 +3020,7 @@
         <b>d3e_pert1_atpol</b>(1)&lt;=<b>d3e_pert1_atpol</b>(2).<br />
         See [[rfatpol]] for additional details.
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: d3e_pert1_dir
@@ -2985,6 +3047,7 @@
         or in reciprocal space (electric field perturbation).<br />
         See [[rfdir]] for additional details.
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: d3e_pert1_elfd
@@ -3005,6 +3068,7 @@
         of derivatives with respect to k, independently of the electric field perturbation itself.<br />
         See [[rfelfd]] for additional details.
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: d3e_pert1_phon
@@ -3023,6 +3087,7 @@
         Turns on atomic displacement perturbation in non-linear computation, as 1st perturbation.<br />
         See [[rfphon]] for additional details.
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: d3e_pert2_atpol
@@ -3048,6 +3113,7 @@
         <b>d3e_pert2_atpol</b>(1)&lt;=<b>d3e_pert2_atpol</b>(2).<br />
         See [[rfatpol]] for additional details.
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: d3e_pert2_dir
@@ -3074,6 +3140,7 @@
         or in reciprocal space (electric field perturbation).<br />
         See [[rfdir]] for additional details.
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: d3e_pert2_elfd
@@ -3094,6 +3161,7 @@
         of derivatives with respect to k, independently of the electric field perturbation itself.<br />
         See [[rfelfd]] for additional details.
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: d3e_pert2_phon
@@ -3112,6 +3180,7 @@
         Turns on atomic displacement perturbation in non-linear computation, as 2nd perturbation.<br />
         See [[rfphon]] for additional details.
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: d3e_pert3_atpol
@@ -3137,6 +3206,7 @@
         <b>d3e_pert3_atpol</b>(1)&lt;=<b>d3e_pert3_atpol</b>(2).<br />
         See [[rfatpol]] for additional details.
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: d3e_pert3_dir
@@ -3163,6 +3233,7 @@
         or in reciprocal space (electric field perturbation).<br />
         See [[rfdir]] for additional details.
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: d3e_pert3_elfd
@@ -3183,6 +3254,7 @@
         of derivatives with respect to k, independently of the electric field perturbation itself.<br />
         See [[rfelfd]] for additional details.
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: d3e_pert3_phon
@@ -3201,6 +3273,7 @@
         Turns on atomic displacement perturbation in non-linear computation, as 3rd perturbation.<br />
         See [[rfphon]] for additional details.
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: ddamp
@@ -3227,6 +3300,7 @@
          If you have difficulty getting convergence, try to reduce this value or reduce maxestep.
         This parameter is used in finite electric displacement field calculations (berryopt=6,16,17).
         </p>
+    topics: null
     vartype: real
 - !variable
     abivarname: ddb_ngqpt
@@ -3247,6 +3321,7 @@
         This variable is mandatory when [[optdriver]]==7.
         It defines the number of divisions in the (homogeneous) q-mesh
         used to generate the DDB file. See also the description of the [[getddb]] input variable.
+    topics: null
     vartype: integer
 - !variable
     abivarname: ddb_shiftq
@@ -3268,6 +3343,7 @@
         It defines the shift in the q-mesh used to generate the DDB file,
         which is defined by the [[ddb_ngqpt]] input variable.
         See [[shiftk]] for more information on the definition.
+    topics: null
     vartype: real
 - !variable
     abivarname: delayperm
@@ -3288,6 +3364,7 @@
         routine moldyn.F90. See also [[signperm]].
         When [[delayperm]] is zero, there is not permutation trials.
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: densfor_pred
@@ -3413,6 +3490,7 @@
          </sup>
          ).
         </p>
+    topics: convergency_expert
     vartype: integer
 - !variable
     abivarname: densty
@@ -3440,6 +3518,7 @@
          <br />
          No meaning for RF calculations.
         </p>
+    topics: xc_expert
     vartype: real
 - !variable
     abivarname: dfield
@@ -3460,6 +3539,7 @@
          In case [[berryopt]]=6,
         [[dfield]] specifies the (unreduced) finite electric displacement field vector, in atomic units, that is to be imposed as a constraint during the calculation.
         </p>
+    topics: null
     vartype: real
 - !variable
     abivarname: dfpt_sciss
@@ -3491,6 +3571,7 @@
          Typical use is for response to electric field ([[rfelfd]]=3),
         but NOT for d/dk ([[rfelfd]]=2) and phonon responses.
         </p>
+    topics: null
     vartype: real
 - !variable
     abivarname: diecut
@@ -3535,6 +3616,7 @@
          <br />
          No meaning for RF calculations yet.
         </p>
+    topics: convergency_useful
     vartype: real
 - !variable
     abivarname: diegap
@@ -3562,6 +3644,7 @@
          <br />
          No meaning for RF calculations yet.
         </p>
+    topics: convergency_useful
     vartype: real
 - !variable
     abivarname: dielam
@@ -3582,6 +3665,7 @@
          <br />
          No meaning for RF calculations yet.
         </p>
+    topics: convergency_useful
     vartype: real
 - !variable
     abivarname: dielng
@@ -3641,6 +3725,7 @@
          <br />
          This works for GS and RF calculations.
         </p>
+    topics: convergency_useful
     vartype: real
 - !variable
     abivarname: diemac
@@ -3694,6 +3779,7 @@
         values as for GS. The improvement in speed can be considerable
         for small (but non-zero) values of the wavevector.
         </p>
+    topics: convergency_useful
     vartype: real
 - !variable
     abivarname: diemix
@@ -3734,6 +3820,7 @@
          Also note that a different value of diemix can be used for the magnetization
         (see [[diemixmag]]).
         </p>
+    topics: convergency_useful
     vartype: real
 - !variable
     abivarname: diemixmag
@@ -3770,6 +3857,7 @@
          In particular [[diemixmag]]=-4 is a good choice
         (i.e. diemixmag=4, no other preconditionner on magnetization).
         </p>
+    topics: spinpolarisation_useful
     vartype: real
 - !variable
     abivarname: diismemory
@@ -3789,6 +3877,7 @@
         DIIS algorithm ([[ionmov]]=20)
         to find zero-force and stress configurations.
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: dilatmx
@@ -3841,6 +3930,7 @@
         [[optcell]] =0, but
         a value larger than 1.0 will be a waste.
         </p>
+    topics: null
     vartype: real
 - !variable
     abivarname: dipdip
@@ -3856,6 +3946,7 @@
     text: |-
         This variable defines the treatment of the dipole-dipole interaction.
         Same meaning as the corresponding anaddb variable
+    topics: null
     vartype: integer
 - !variable
     abivarname: dmatpawu
@@ -4002,6 +4093,7 @@
          </ul>
          <br />
         </p>
+    topics: DFT+U_useful
     vartype: real
 - !variable
     abivarname: dmatpuopt
@@ -4041,6 +4133,7 @@
         is restricted to PAW datasets in which the first
         atomic wavefunction of the correlated subspace is a normalized atomic eigenfunction.
         </p>
+    topics: DFT+U_expert
     vartype: integer
 - !variable
     abivarname: dmatudiag
@@ -4074,6 +4167,7 @@
           </li>
          </ul>
         </p>
+    topics: DFT+U_expert
     vartype: integer
 - !variable
     abivarname: dmft_dc
@@ -4092,6 +4186,7 @@
          <br />
          Value of double counting used for DMFT. Only value 1 is activated for the moment and is the FLL double counting.
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: dmft_entropy
@@ -4108,6 +4203,7 @@
         If 1, enable the calculation of the entropy  within the DMFT framework and so allows the calculation of the total energy (free energy).
         In the current implementation, this is only possible with [[dmft_solv]]=5 (Continuous Time Quantum Monte Carlo).
         See also the input variable [[dmft_nlambda]].
+    topics: null
     vartype: integer
 - !variable
     abivarname: dmft_iter
@@ -4126,6 +4222,7 @@
          <br />
          Number of iterations for the DMFT inner loop.
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: dmft_mxsf
@@ -4145,6 +4242,7 @@
          <br />
          Mixing parameter for the simple mixing of the self-energy.
         </p>
+    topics: null
     vartype: real
 - !variable
     abivarname: dmft_nlambda
@@ -4161,6 +4259,7 @@
     text: |-
         [[dmft_nlambda]] gives the number of integration points for the thermodynamical integration in case of free energy calculation within DMFT.
         Its value must be greater or equal to 3.
+    topics: null
     vartype: integer
 - !variable
     abivarname: dmft_nwli
@@ -4180,6 +4279,7 @@
          <br />
          Number of Matsubara frequencies (linear  mesh)
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: dmft_nwlo
@@ -4199,6 +4299,7 @@
          <br />
          Number of frequencies in the log mesh.
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: dmft_read_occnd
@@ -4234,6 +4335,7 @@
          An alternative and more simple way to restart a DFT+DMFT calculation is to use the density file (obtained with [[prtden]]=1
         or [[prtden]]=-1) and the self-energy (see [[dmft_rslf]]).
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: dmft_rslf
@@ -4251,6 +4353,7 @@
         <p>
          Flag to read/write Self-Energy. If put to one, self-energy is written and read at each DFT iteration.
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: dmft_solv
@@ -4329,6 +4432,7 @@
         [[dmftqmc_seed]],
         [[dmftqmc_therm]]
         </p>
+    topics: null
     vartype: real
 - !variable
     abivarname: dmft_t2g
@@ -4347,6 +4451,7 @@
          <br />
          Can be set to 1 only if in cubic symmetry. It enables one to carry a DFT+DMFT calculations only on t2g orbitals.
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: dmft_tolfreq
@@ -4368,6 +4473,7 @@
          a projection over correlated orbitals.
          Because the Matsubara grid is finite, the two quantities differ. If this difference is larger than dmft_tolfreq, then the code stops and an error message is given.
         </p>
+    topics: null
     vartype: real
 - !variable
     abivarname: dmft_tollc
@@ -4390,6 +4496,7 @@
          The default value is good for fast calculations. However, to obtain good convergence of the DFT Loop,
         the DMFT Loop needs a better convergence criterion.
         </p>
+    topics: null
     vartype: real
 - !variable
     abivarname: dmftbandf
@@ -4409,6 +4516,7 @@
         Orbitals scheme of DFT+DMFT. With [[dmftbandi]], they define the energy window used to define Wannier Functions.
         (see  Amadon, B., Lechermann, F., Georges, A., Jollet, F., Wehling, T. O., and Lichtenstein, A. I. Phys. Rev. B 77(20), (2008).)
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: dmftbandi
@@ -4428,6 +4536,7 @@
         Orbitals scheme of LDA+DMFT. With [[dmftbandf]], they define the energy window used to define Wannier Functions.
         (see  Amadon, B., Lechermann, F., Georges, A., Jollet, F., Wehling, T. O., and Lichtenstein, A. I. Phys. Rev. B 77(20), (2008).)
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: dmftcheck
@@ -4447,6 +4556,7 @@
         Only for developer purposes.
          (Introduced by B. Amadon, v6.1.0)
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: dmftctqmc_basis
@@ -4479,6 +4589,7 @@
           </li>
          </ul>
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: dmftctqmc_check
@@ -4513,6 +4624,7 @@
           </li>
          </ul>
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: dmftctqmc_correl
@@ -4541,6 +4653,7 @@
           </li>
          </ul>
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: dmftctqmc_gmove
@@ -4562,6 +4675,7 @@
         The value of this variable is the modulo used to try a global move.
         A value of 5000 means that a global move is tried every 5000 Monte Carlo sweep.
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: dmftctqmc_grnns
@@ -4590,6 +4704,7 @@
           </li>
          </ul>
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: dmftctqmc_meas
@@ -4610,6 +4725,7 @@
          The modulo used to measure the interaction energy and the number of electrons.
         Example : 2 means the measure is perform every two sweeps.
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: dmftctqmc_mov
@@ -4638,6 +4754,7 @@
           </li>
          </ul>
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: dmftctqmc_mrka
@@ -4666,6 +4783,7 @@
           </li>
          </ul>
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: dmftctqmc_order
@@ -4687,6 +4805,7 @@
         The maximal order taken into account [[dmftctqmc_order]] : 50 means that we have the statistic distribution from 0 to 50 segments.
         The result is written in the "Perturbation.dat" file.
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: dmftctqmc_triqs_nleg
@@ -4709,6 +4828,7 @@
          (see also <a href="https://journals.aps.org/prb/abstract/10.1103/PhysRevB.84.075145"> Phys. Rev. B 84, 075145 (2010))
          </a>
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: dmftqmc_l
@@ -4728,6 +4848,7 @@
          Number of time slices used to represent the time green function.
         This value should be carefully chosen according to Niquist frequency and the [[tsmear]] value.
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: dmftqmc_n
@@ -4746,6 +4867,7 @@
          <br />
          Number of Monte Carlo sweeps. Should be at least 10^6.
         </p>
+    topics: null
     vartype: real
 - !variable
     abivarname: dmftqmc_seed
@@ -4768,6 +4890,7 @@
          <br />
          NOTE : If the CT-QMC ([[dmft_solv]]=5) is used on many CPUs, each CPU initializes its random number generator with dmftqmc_seed+rank where rank is the rank of the cpu in the MPI communicator.
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: dmftqmc_therm
@@ -4786,6 +4909,7 @@
          <br />
          Number of Monte Carlo sweeps for the thermalization
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: dosdeltae
@@ -4812,6 +4936,7 @@
         based on a smearing technique, gives a quite smooth DOS, while the DOS from the
         tetrahedron method, [[prtdos]]=2, is rapidly varying.
         </p>
+    topics: printing_prdos
     vartype: real
 - !variable
     abivarname: dtion
@@ -4859,6 +4984,7 @@
          <br />
          No meaning for RF calculations.
         </p>
+    topics: null
     vartype: real
 - !variable
     abivarname: dynimage
@@ -4885,6 +5011,7 @@
          <br />
          In order to save CPU time, the computation of properties of static images ([[dynimage]](iimage)=0)
         can be avoided: see [[istatimg]] keyword.
+    topics: null
     vartype: integer
 - !variable
     abivarname: ecut
@@ -4946,6 +5073,7 @@
          See the input variable [[ecutsm]], for the
         smoothing of the kinetic energy, needed to optimize unit cell parameters.
         </p>
+    topics: convergency_compulsory
     vartype: real
 - !variable
     abivarname: ecuteps
@@ -4971,6 +5099,7 @@
         between 5 and 10 Hartree often (but not always) leads to converged results (at the level of 0.01 eV for the energy gap).
         In any case, a convergence study is worth.
         </p>
+    topics: null
     vartype: real
 - !variable
     abivarname: ecutsigx
@@ -4995,6 +5124,7 @@
         values. If you want to spare some CPU time, you might try to use a value between [[ecut]] and these
         upper limits.
         </p>
+    topics: null
     vartype: real
 - !variable
     abivarname: ecutsm
@@ -5092,6 +5222,7 @@
         to get smooth curves. It is likely that this value is OK
         as soon as [[ecut]] is larger than 4Ha.
         </p>
+    topics: convergency_basic
     vartype: real
 - !variable
     abivarname: ecutwfn
@@ -5125,6 +5256,7 @@
         <p>
          The size of this set of planewaves is [[npwwfn]].
         </p>
+    topics: null
     vartype: real
 - !variable
     abivarname: effmass
@@ -5144,6 +5276,7 @@
          This parameter allows to change the electron mass, with respect to its
         experimental value.
         </p>
+    topics: GSgeneral_expert
     vartype: real
 - !variable
     abivarname: efield
@@ -5194,6 +5327,7 @@
         eps0 is the electric constant (8.854187817d-12 F/m), and a0 is the Bohr radius
         in meter (0.5291772108e-10).
         </p>
+    topics: null
     vartype: real
 - !variable
     abivarname: efmas
@@ -5230,6 +5364,7 @@
         (i.e. spin-orbit (SO) calculations) is supported. NC SO calculations are NOT currently
         supported. Also, for both NC and PAW, [[nspden]]/=1 and [[nsppol]]/=1 are NOT supported.
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: efmas_bands
@@ -5251,6 +5386,7 @@
         If a band is degenerate, all other bands of the degenerate group will automatically be treated,
         even if they were not part of the user specified range.
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: efmas_calc_dirs
@@ -5283,6 +5419,7 @@
         cartesian, reduced or angular (theta,phi) coordinates, respectively. In the case [[efmas_calc_dirs]]==3,
         2 real values per directions are read, whereas 3 real values are read in the two other cases.
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: efmas_deg
@@ -5302,6 +5439,7 @@
         using the transport equivalent effective mass idea
         (see <a href="https://doi.org/10.1103/PhysRevB.89.155131">PRB 89 155131 (2014)</a>).
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: efmas_deg_tol
@@ -5321,6 +5459,7 @@
         (and treated using the formalism activated with [[efmas_deg]]==1).
         [[efmas_deg_tol]] has the '[[ENERGY]]' characteristics.
         </p>
+    topics: null
     vartype: real
 - !variable
     abivarname: efmas_dim
@@ -5353,6 +5492,7 @@
         once determined from the 'transport equivatlent' effective mass tensor is output separately on
         the line immediately after the effective mass.
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: efmas_dirs
@@ -5374,6 +5514,7 @@
         The directions are specified by 3 real values if [[efmas_calc_dirs]]==1 or 2 and by
         2 real values if [[efmas_calc_dirs]]==3.
         </p>
+    topics: null
     vartype: real
 - !variable
     abivarname: efmas_n_dirs
@@ -5391,6 +5532,7 @@
         <p>
         Number of directions in [[efmas_dirs]], to be considered according to [[efmas_calc_dirs]].
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: efmas_ntheta
@@ -5412,6 +5554,7 @@
         To obtain this tensor, an integration over the solid sphere is required.
         The default value gives a tensor accurate to the 4th decimal in Ge.
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: einterp
@@ -5462,6 +5605,7 @@
         For B-spline interpolation:
 
         einterp(2:4): Order of B-spline for the three reduced directions. Cubic spline (3) is the recomended value.
+    topics: null
     vartype: real
 - !variable
     abivarname: elph2_imagden
@@ -5495,6 +5639,7 @@
         '[[ENERGY]]' characteristics.
         (1 Ha=27.2113845 eV)
         </p>
+    topics: null
     vartype: real
 - !variable
     abivarname: enunit
@@ -5535,6 +5680,7 @@
           </li>
          </ul>
         </p>
+    topics: GSgeneral_useful
     vartype: integer
 - !variable
     abivarname: eph_extrael
@@ -5548,6 +5694,7 @@
     requires: null
     section: vareph
     text: null
+    topics: null
     vartype: real
 - !variable
     abivarname: eph_fermie
@@ -5566,6 +5713,7 @@
         when performing electron-phonon calculations with [[optdriver]]==7.
         This variable has effect only if set to a non-zero value.
         See also [[eph_extrael]].
+    topics: null
     vartype: real
 - !variable
     abivarname: eph_fsewin
@@ -5588,6 +5736,7 @@
         <p>
         Related input variables: [[eph_intmeth]], [[eph_fsmear]], [[eph_extrael]] and [[eph_fermie]].
         </p>
+    topics: null
     vartype: real
 - !variable
     abivarname: eph_fsmear
@@ -5604,6 +5753,7 @@
     text: |-
         This variable defines the gaussian broadening used for the
         integration over the Fermi surface when [[eph_intmeth]] == 1.
+    topics: null
     vartype: real
 - !variable
     abivarname: eph_intmeth
@@ -5624,6 +5774,7 @@
         </p>
 
         See also [[eph_fsewin]], [[eph_extrael]] and [[eph_fermie]].
+    topics: null
     vartype: integer
 - !variable
     abivarname: eph_mustar
@@ -5638,6 +5789,7 @@
     section: vareph
     text: |-
         Average electron-electron interaction strength, for the computation of the superconducting Tc using Mc-Millan's formula.
+    topics: null
     vartype: real
 - !variable
     abivarname: eph_ngqpt_fine
@@ -5661,6 +5813,7 @@
         the DDB file. This approach is similar to the one used
         to interpolate the interatomic force constants in q-space.
         If eph_ngqpt_fine is not given, the EPH code uses the list of irreducible q-points reported in the DDB file (default behavior).
+    topics: null
     vartype: integer
 - !variable
     abivarname: eph_task
@@ -5683,6 +5836,7 @@
          <br />
          [[eph_task]]=2 : electron-phonon coupling elements
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: eph_transport
@@ -5700,6 +5854,7 @@
         This variable can be used to turn on the calculation of transport
         quantities in the eph module of abinit. Value of 1 corresponds to
         elastic LOVA as in the PRB by Savrasov and Savrasov
+    topics: null
     vartype: integer
 - !variable
     abivarname: eshift
@@ -5729,6 +5884,7 @@
         '[[ENERGY]]' characteristics.
         (1 Ha=27.2113845 eV)
         </p>
+    topics: otherGS_expert
     vartype: real
 - !variable
     abivarname: esmear
@@ -5759,6 +5915,7 @@
         '[[ENERGY]]' characteristics.
         (1 Ha=27.2113845 eV)
         </p>
+    topics: null
     vartype: real
 - !variable
     abivarname: exchmix
@@ -5777,6 +5934,7 @@
          [[exchmix]] allows to tune the ratio of exact exchange when
         [[useexexch]] is used. The default value of 0.25 corresponds to PBE0.
         </p>
+    topics: xc_useful
     vartype: real
 - !variable
     abivarname: exchn2n3d
@@ -5797,6 +5955,7 @@
         third dimensions have been switched. This is to allow to be coherent with the
         [[exchn2n3d]]=4xx FFT treatment.
         </p>
+    topics: convergency_expert
     vartype: integer
 - !variable
     abivarname: extrapwf
@@ -5820,6 +5979,7 @@
          if a consistent density extrapolation is activated (see [[densfor_pred]]).<br>
         ABINIT 7.10: this option is <b>under development</b> and might give wrong results.
         </p>
+    topics: convergency_expert
     vartype: integer
 - !variable
     abivarname: f4of2_sla
@@ -5840,6 +6000,7 @@
         It is used in DFT+U or DFT+DMFT for the calculation of the orbital
         dependent screened coulomb interaction.
         </p>
+    topics: DFT+U_expert
     vartype: real
 - !variable
     abivarname: f6of2_sla
@@ -5857,6 +6018,7 @@
         Gives the ratio of Slater Integrals F6 and F2.
         It is used with [[f4of2_sla]]==3 in DFT+U or DFT+DMFT for the calculation of the orbital dependent screened coulomb interaction.
         </p>
+    topics: DFT+U_expert
     vartype: real
 - !variable
     abivarname: fband
@@ -5905,6 +6067,7 @@
         neglect higher bands. It is difficult to automate
         this, so a fixed default value has been chosen.
         </p>
+    topics: GSgeneral_useful
     vartype: real
 - !variable
     abivarname: fermie_nest
@@ -5921,6 +6084,7 @@
         <p>
          This input variable is only effective when [[prtnest]]=1. The energy is relative to the calculated fermi energy.
         </p>
+    topics: printing_prfermi
     vartype: real
 - !variable
     abivarname: fftalg
@@ -6013,6 +6177,7 @@
          </ul>
          Internal representation as [[ngfft]](7).
         </p>
+    topics: convergency_expert
     vartype: integer
 - !variable
     abivarname: fftcache
@@ -6033,6 +6198,7 @@
          <br />
          Internal representation as [[ngfft]](8).
         </p>
+    topics: otherGS_expert
     vartype: integer
 - !variable
     abivarname: fftgw
@@ -6129,6 +6295,7 @@
          </ul>
          The behaviour of ABINIT before v5.5 corresponds to the default value 11.
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: freqim_alpha
@@ -6174,6 +6341,7 @@
          is the plasma frequency
         determined by the average density of the system (this can be set by hand by using the variable [[ppmfrq]]). See the section on grids in the descriptive text for [[cd_frqim_method]] for a detailed description of the formula.
         </p>
+    topics: null
     vartype: real
 - !variable
     abivarname: freqremax
@@ -6198,6 +6366,7 @@
         [[freqremax]], [[freqremin]] and [[nfreqre]]
         define the spacing of the frequency mesh along the real axis.
         </p>
+    topics: null
     vartype: real
 - !variable
     abivarname: freqremin
@@ -6231,6 +6400,7 @@
         Note that [[freqremax]], [[freqremin]]
         and [[nfreqre]] define the spacing of the frequency mesh along the real axis.
         </p>
+    topics: null
     vartype: real
 - !variable
     abivarname: freqspmax
@@ -6253,6 +6423,7 @@
         the real axis. Alternatively, the variables [[gw_customnfreqsp]] and
         [[gw_freqsp]] can be used to make a user-defined grid.
         </p>
+    topics: null
     vartype: real
 - !variable
     abivarname: freqspmin
@@ -6276,6 +6447,7 @@
         the real axis. Alternatively, the variables [[gw_customnfreqsp]] and
         [[gw_freqsp]] can be used to make a user-defined grid.
         </p>
+    topics: null
     vartype: real
 - !variable
     abivarname: friction
@@ -6350,6 +6522,7 @@
          . See J.
         Chelikowsky, J. Phys. D : Appl Phys. 33(2000)R33.
         </p>
+    topics: null
     vartype: real
 - !variable
     abivarname: frzfermi
@@ -6371,6 +6544,7 @@
         The input variable [[frzfermi]],
         if set to 1, allows to suppress this contribution, but this is incorrect.
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: fxcartfactor
@@ -6398,6 +6572,7 @@
         [[tolmxf]] relates to these scaled
         stresses.
         </p>
+    topics: null
     vartype: real
 - !variable
     abivarname: ga_algor
@@ -6416,6 +6591,7 @@
         plan to include, energy, electronic band gap and alchemical potentials. Right now only value of 1 (enthalpy)
         works.
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: ga_fitness
@@ -6440,6 +6616,7 @@
          <br />
          3. F = (1/n_i) / Sum (1/n_i). Where n_i is the position in the ordered list of enthalpies
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: ga_n_rules
@@ -6458,6 +6635,7 @@
         Right now we have 4 rules. See
         [[ga_rules]]
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: ga_opt_percent
@@ -6475,6 +6653,7 @@
          Percentage of the population that according to the fitness function passes
         to the following iteration.
         </p>
+    topics: null
     vartype: real
 - !variable
     abivarname: ga_rules
@@ -6508,6 +6687,7 @@
          4) Coordinates mutation of 1/4 of the whole coordinates.
          <br />
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: genafm
@@ -6543,6 +6723,7 @@
         or define by hand the set of symmetries, using [[symrel]],
         [[tnons]] and [[symafm]]
         </p>
+    topics: spinpolarisation_useful
     vartype: real
 - !variable
     abivarname: get1den
@@ -6571,6 +6752,7 @@
          </pre>
          refers to dataset 2 when dataset 4 is initialized.
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: get1wf
@@ -6684,6 +6866,7 @@
          </pre>
          refers to dataset 2 when dataset 4 is initialized.
         </p>
+    topics: multidtset_useful
     vartype: integer
 - !variable
     abivarname: getbscoup
@@ -6715,6 +6898,7 @@
         In this case, if one refers to a non existent data set (prior to the first), the coupling block is not initialised from
         a disk file, so that it is as if [[getbscoup]]=0 for that initialisation.
         </p>
+    topics: multidtset_useful
     vartype: integer
 - !variable
     abivarname: getbseig
@@ -6748,6 +6932,7 @@
         In this case, if one refers to a non existent data set (prior to the first), the eigenstates are not initialised from
         a disk file, so that it is as if [[getbseig]]=0 for that initialisation.
         </p>
+    topics: multidtset_useful
     vartype: integer
 - !variable
     abivarname: getbsreso
@@ -6779,6 +6964,7 @@
         In this case, if one refers to a non existent data set (prior to the first), the resonant block is not initialised from
         a disk file, so that it is as if [[getbsreso]]=0 for that initialisation.
         </p>
+    topics: multidtset_useful
     vartype: integer
 - !variable
     abivarname: getcell
@@ -6820,6 +7006,7 @@
         (once again, going back beyond the first dataset is equivalent
         to using a null get variable).
         </p>
+    topics: multidtset_useful
     vartype: integer
 - !variable
     abivarname: getddb
@@ -6870,6 +7057,7 @@
          </pre>
          refers to dataset 2 when dataset 4 is initialized.
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: getddk
@@ -6987,6 +7175,7 @@
          </pre>
          refers to dataset 2 when dataset 4 is initialized.
         </p>
+    topics: multidtset_useful
     vartype: integer
 - !variable
     abivarname: getden
@@ -7044,6 +7233,7 @@
          </pre>
          refers to dataset 2 when dataset 4 is initialized.
         </p>
+    topics: multidtset_useful
     vartype: integer
 - !variable
     abivarname: getgam_eig2nkq
@@ -7068,6 +7258,7 @@
         eigenvalues for q=Gamma from the dataset where the calculation at Gamma was done, to the datasets
         for other wavevectors.
         </p>
+    topics: multidtset_useful
     vartype: integer
 - !variable
     abivarname: gethaydock
@@ -7097,6 +7288,7 @@
         In this case, if one refers to a non existent data set (prior to the first), the coupling block is not initialised from
         a disk file, so that it is as if [[gethaydock]]=0 for that initialisation.
         </p>
+    topics: multidtset_useful
     vartype: integer
 - !variable
     abivarname: getocc
@@ -7146,6 +7338,7 @@
          </pre>
          refers to dataset 2 when dataset 4 is initialized.
         </p>
+    topics: multidtset_useful
     vartype: integer
 - !variable
     abivarname: getqps
@@ -7177,6 +7370,7 @@
          </pre>
          refers to dataset 2 when dataset 4 is initialized.
         </p>
+    topics: multidtset_useful
     vartype: integer
 - !variable
     abivarname: getscr
@@ -7225,6 +7419,7 @@
          </pre>
          refers to dataset 2 when dataset 4 is initialized.
         </p>
+    topics: multidtset_useful
     vartype: integer
 - !variable
     abivarname: getsuscep
@@ -7277,6 +7472,7 @@
          </pre>
          refers to dataset 2 when dataset 4 is initialized.
         </p>
+    topics: multidtset_useful
     vartype: integer
 - !variable
     abivarname: getvel
@@ -7346,6 +7542,7 @@
          is allowed, despite the different
         coordinate system.
         </p>
+    topics: multidtset_useful
     vartype: integer
 - !variable
     abivarname: getwfk
@@ -7435,6 +7632,7 @@
          </pre>
          refers to dataset 2 when dataset 4 is initialized.
         </p>
+    topics: multidtset_useful
     vartype: integer
 - !variable
     abivarname: getwfkfine
@@ -7529,6 +7727,7 @@
         <b>
          This variable is experimental. In development.
         </b>
+    topics: multidtset_useful
     vartype: integer
 - !variable
     abivarname: getwfq
@@ -7642,6 +7841,7 @@
          </pre>
          refers to dataset 2 when dataset 4 is initialized.
         </p>
+    topics: multidtset_useful
     vartype: integer
 - !variable
     abivarname: getxcart
@@ -7706,6 +7906,7 @@
          is allowed, despite the different
         coordinate system.
         </p>
+    topics: multidtset_useful
     vartype: integer
 - !variable
     abivarname: getxred
@@ -7766,6 +7967,7 @@
          with [[getxred]] is allowed, despite the different
         coordinate system.
         </p>
+    topics: multidtset_useful
     vartype: integer
 - !variable
     abivarname: goprecon
@@ -7796,6 +7998,7 @@
          </ul>
          <br />
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: goprecprm
@@ -7816,6 +8019,7 @@
          <br />
          (Note : Under development now (2011.06.06))
         </p>
+    topics: null
     vartype: real
 - !variable
     abivarname: gpu_devices
@@ -7848,6 +8052,7 @@
         </ul>
         GPU card are numbered starting from 0; to get the GPU devices list, type "nvidia-smi" or "lspci | grep -i nvidia".
         </p>
+    topics: parallelism_expert
     vartype: integer
 - !variable
     abivarname: gpu_linalg_limit
@@ -7877,6 +8082,7 @@
          When SIZE&gt;=[[gpu_linalg_limit]], [[wfoptalg]] parameter is
         automatically set to 14 which corresponds to the use of LOBPCG algorithm for the calculation of the eigenstates.
         </p>
+    topics: parallelism_expert
     vartype: integer
 - !variable
     abivarname: gw_customnfreqsp
@@ -7896,6 +8102,7 @@
         for the calculation of the self-energy along the real axis. Set this to the number of frequencies
         you want. The frequencies are specified with [[gw_freqsp]].
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: gw_freqsp
@@ -7927,6 +8134,7 @@
          If [[nfreqsp]] is not equal to
         [[gw_customnfreqsp]] a warning will be issued.
         </p>
+    topics: null
     vartype: real
 - !variable
     abivarname: gw_frqim_inzgrid
@@ -7973,6 +8181,7 @@
         The equidistant grid in z is determined uniquely by [[nfreqim]]) and
         the points are distributed so that half of them lie below the plasma frequency.
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: gw_frqre_inzgrid
@@ -8045,6 +8254,7 @@
         origin is required. The maximum value needed along the real frequency axis is output in the
         logfile during Contour Deformation sigma calculations.
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: gw_frqre_tangrid
@@ -8067,6 +8277,7 @@
         [[cd_max_freq]] and [[cd_halfway_freq]]
          which determine the parameters of the transformed grid.
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: gw_invalid_freq
@@ -8095,6 +8306,7 @@
             </li>
           </ul>
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: gw_nqlwl
@@ -8150,6 +8362,7 @@
         By default the [[BETHE_SALPETER]] code calculates the macroscopic dielectric function using six different
         directions in q-space (the three basis vectors of the reciprocal lattice and the three Cartesian axis).
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: gw_nstep
@@ -8171,6 +8384,7 @@
         [[gwcalctyp]] and [[gw_sctype]] are
         used to define the type of self-consistency.
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: gw_qlwl
@@ -8198,6 +8412,7 @@
         </p>
         <p>
         </p>
+    topics: null
     vartype: real
 - !variable
     abivarname: gw_qprange
@@ -8248,6 +8463,7 @@
         If you want to select manually the list of k-points and bands, you have
         to provide the three variables [[nkptgw]], [[kptgw]], and [[bdgw]].
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: gw_sctype
@@ -8296,6 +8512,7 @@
         [[getqps]] can be used to read a previous QPS file thus initializing
         the Green functions to be used in the first self-consistent iteration.
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: gw_sigxcore
@@ -8339,6 +8556,7 @@
         </p>
         <p>
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: gw_toldfeig
@@ -8366,6 +8584,7 @@
          has the '[[ENERGY]]' characteristics (1 Ha=27.2113845 eV)
          <br />
         </p>
+    topics: null
     vartype: real
 - !variable
     abivarname: gwcalctyp
@@ -8464,6 +8683,7 @@
           </li>
          </ul>
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: gwcomp
@@ -8486,6 +8706,7 @@
         needed in the extrapolar approximation is set by [[gwencomp]].
         See F. Bruneval, X. Gonze, Phys. Rev. B 78, 085125 (2008) for a description of the methodology.
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: gwencomp
@@ -8507,6 +8728,7 @@
         <p>
          See F. Bruneval, X. Gonze, Phys. Rev. B 78, 085125 (2008) for a description of the methodology.
         </p>
+    topics: null
     vartype: real
 - !variable
     abivarname: gwfockmix
@@ -8522,6 +8744,7 @@
     section: vargw
     text: |-
         Mixing parameter of Fock exchange for PBE0 and HSE hybrid-functional calculations via the GW self-energy subroutine. [[gwfockmix]] ranges from 0 (essentially PBE) to 1.
+    topics: null
     vartype: real
 - !variable
     abivarname: gwgamma
@@ -8551,6 +8774,7 @@
         [[gwgamma]]=-8 uses the RPA bootstrap-like kernel (one-shot) [Phys. Rev.  Lett. 115, 137402 (2015), ibid. 114, 146402 (2015)].
         </p>
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: gwls_band_index
@@ -8569,6 +8793,7 @@
         Governs the DFT eigenstate |e> in which the self-energy will be evaluated, as shown in eq. (7) of  Phys. Rev. B 91, 125120 (2015).
         That is, it is the state to be corrected in the G0W0 scheme.
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: gwls_correlation
@@ -8599,6 +8824,7 @@
         The default, ([[gwls_correlation]] == 3), is the most performant option and should be kept by the user.
         Option 1, 2 and 5 are deprecated and will be removed.
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: gwls_dielectric_model
@@ -8614,6 +8840,7 @@
     section: vargw
     text: |-
         Not used yet.
+    topics: null
     vartype: integer
 - !variable
     abivarname: gwls_exchange
@@ -8631,6 +8858,7 @@
         <p>
         Governs whether the exact exchange for the state to be corrected ([[gwls_band_index]]) is calculated ([[gwls_exchange]]==1) or not ([[gwls_exchange]]==0).
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: gwls_first_seed
@@ -8655,6 +8883,7 @@
         The default [[gwls_first_seed]]==[[gwls_band_index]] and [[gwls_nseeds]]==1 has been touroughly tested and seems to be the most performant.
         Users should therefore keep the default value.
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: gwls_kmax_analytic
@@ -8673,6 +8902,7 @@
         Governs the number of iterations to be done in the shift Lanczos solution of eq. (35) of Phys. Rev. B 91, 125120 (2015) to solve it at all external frequencies requested by the user ([[gw_freqsp]]).
         The default value is converged to a few 10s of meV for all molecules studied so far.
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: gwls_kmax_complement
@@ -8697,6 +8927,7 @@
         <p>
         For more information on the exact role of these bases and on the model dielectric operator used, see section V of  Phys. Rev. B 91, 125120 (2015).
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: gwls_kmax_numeric
@@ -8715,6 +8946,7 @@
         Governs the number of iterations to be done in the shift Lanczos solution of eq. (30) of  Phys. Rev. B 91, 125120 (2015) to solve it simultaneously at all integration frequencies (generated automatically by the number of points [[gwls_npt_gauss_quad]] to use in the gaussian quadrature) and all external frequencies requested by the user ([[gw_freqsp]]).
         The default value is converged to a few 10s of meV for all molecules studied so far.
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: gwls_kmax_poles
@@ -8739,6 +8971,7 @@
         <p>
         For more information on the Lanczos basis constructed for the calculation of the residues, see section IV of Phys. Rev. B 91, 125120 (2015).
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: gwls_list_proj_freq
@@ -8757,6 +8990,7 @@
         This variable sets the frequencies to be used to construct the basis in which the Hamiltonian is projected to accelerate the solution of the Sternheimer equations involved by the construction of the dielectric matrix at finite frequencies.
         See section VI of Phys. Rev. B 91, 125120 (2015).
         For most cases, since the frequencies \Infty and (if [[gwls_recycle]]>0) 0.0 are used at no computational cost, [[gwls_n_proj_freq]]==0 (which means no ADDITIONAL frequency is to be used) is fine and no frequencies need to be picked up.
+    topics: null
     vartype: real
 - !variable
     abivarname: gwls_model_parameter
@@ -8784,6 +9018,7 @@
         The value of the associated parameter has thus an impact on the convergence rate of the GWLS calculation with respect to the number of frequencies of integration ([[gwls_npt_gauss_quad]]), but no impact on the converged result of the GWLS calculation.
         Typically, the default ([[gwls_model_parameter]]==1.0) is optimal.
         </p>
+    topics: null
     vartype: real
 - !variable
     abivarname: gwls_n_proj_freq
@@ -8801,6 +9036,7 @@
         This variable sets the number of frequencies, on top of \Infty and (if [[gwls_recycle]]>0) 0.0, to be used for the construction of the basis in which the hamiltonian is projected to accelerate the solution of the Sternheimer equations involved in the construction of the dielectric matrix at finite frequencies.
         See section VI of  Phys. Rev. B 91, 125120 (2015).
         For most cases, the default ([[gwls_n_proj_freq]]==0) is fine.
+    topics: null
     vartype: integer
 - !variable
     abivarname: gwls_npt_gauss_quad
@@ -8818,6 +9054,7 @@
         This variable defines the number of points used for the numerical integration of the self-energy over frequencies in GWLS computations
         (see eq. (12) of  Phys. Rev. B 91, 125120 (2015)).
         The default is fine for most cases.
+    topics: null
     vartype: integer
 - !variable
     abivarname: gwls_nseeds
@@ -8835,6 +9072,7 @@
         This variable sets the number of seed vectors to be used in the construction of the Lanczos basis for the (static) dielectric matrix in a GWLS calculation.
         See section IV of  Phys. Rev. B 91, 125120 (2015).
         Only [[gwls_nseeds]]==1 has been tested for now and users should keep this value.
+    topics: null
     vartype: integer
 - !variable
     abivarname: gwls_print_debug
@@ -8850,6 +9088,7 @@
     section: vargw
     text: |-
         Influences the level of verbosity for debugging purposes in a GWLS calculation. Users should keep its value at the default.
+    topics: null
     vartype: integer
 - !variable
     abivarname: gwls_recycle
@@ -8881,6 +9120,7 @@
         This is when it becomes interesting to store them on disk.
         It is particularly efficient to choose the path of the file to be on disk space local to the processor in large MPI calculations, since each processor need only his own solutions in the construction of the basis.
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: gwls_second_model_parameter
@@ -8897,6 +9137,7 @@
     section: vargw
     text: |-
         Not used yet.
+    topics: null
     vartype: real
 - !variable
     abivarname: gwls_sternheimer_kmax
@@ -8913,6 +9154,7 @@
     text: |-
         This variable sets the dimension of the dielectric matrix used in a GWLS calculation (see section IV of  Phys. Rev. B 91, 125120 (2015)).
         Typically converged at a value of a few hundreds to a few thousands for a convergence criterion of 50meV on the  eigenenergies.
+    topics: null
     vartype: integer
 - !variable
     abivarname: gwmem
@@ -8950,6 +9192,7 @@
         </p>
         <p>
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: gwpara
@@ -8985,6 +9228,7 @@
          Using [[gwpara]]=1, indeed, requires the same amount of memory as a sequential run,
         irrespectively of the number of CPUs used.
         </p>
+    topics: parallelism_useful
     vartype: integer
 - !variable
     abivarname: gwrpacorr
@@ -9027,6 +9271,7 @@
         </p>
         <p>
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: iatcon
@@ -9055,6 +9300,7 @@
          (Note : combined with wtatcon to give internal representation of the
         latter - this should be described)
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: iatfix
@@ -9119,6 +9365,7 @@
         geometry builder. The user must thus foresee the effect
         of this geometry builder (see [[objarf]]).
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: iatfixx
@@ -9144,6 +9391,7 @@
         x, y or z directions, or a combination of these.
         See the variable [[iatfix]] for more information.
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: iatfixy
@@ -9169,6 +9417,7 @@
         x, y or z directions, or a combination of these.
         See the variable [[iatfix]] for more information.
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: iatfixz
@@ -9194,6 +9443,7 @@
         x, y or z directions, or a combination of these.
         See the variable [[iatfix]] for more information.
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: iatsph
@@ -9218,6 +9468,7 @@
          <br />
          If [[pawfatbnd]]=1 or 2, it gives the number of the [[natsph]] atoms around which atom-projected band structure will be built.
         </p>
+    topics: printing_prdos
     vartype: integer
 - !variable
     abivarname: iboxcut
@@ -9245,6 +9496,7 @@
           </li>
          </ul>
         </p>
+    topics: convergency_expert
     vartype: integer
 - !variable
     abivarname: icoulomb
@@ -9269,6 +9521,7 @@
           [[icoulomb]]=1 : free boundary conditions are used when the Hartree potential is computed, real space expressions of pseudo-potentials are involved (restricted to GTH pseudo-potentials) and simple coulomb interaction gives the ion-ion energy.
          </li>
         </ul>
+    topics: convergency_expert
     vartype: integer
 - !variable
     abivarname: icutcoul
@@ -9334,6 +9587,7 @@
         In the latter case, use a negative value for the cutoff radius of the sphere ([[rcut]]&lt;0),
         which is automatically calculated so that the volume enclosed in the sphere is equal to the volume of the solid.
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: ieig2rf
@@ -9372,6 +9626,7 @@
          Related variables : [[bdeigrf]],[[elph2_imagden]],[[getgam_eig2nkq]],[[smdelta]]
          Related variables : [[bdeigrf]],[[elph2_imagden]],[[getgam_eig2nkq]],[[smdelta]]
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: imgmov
@@ -9453,6 +9708,7 @@
           </ul>
           No meaning for RF calculations.
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: inclvkb
@@ -9482,6 +9738,7 @@
         <p>
         The use of [[inclvkb]]=2 is strongly recommended for the calculation of optical properties.
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: intxc
@@ -9522,6 +9779,7 @@
         You will notice that many automatic tests use [[intxc]]=1. Please,
         do not follow this historical choice for your production runs.
         </p>
+    topics: xc_expert
     vartype: integer
 - !variable
     abivarname: iomode
@@ -9607,6 +9865,7 @@
           </li>
          </ul>
         </p>
+    topics: parallelism_expert
     vartype: integer
 - !variable
     abivarname: ionmov
@@ -9868,6 +10127,7 @@
          <br />
          No meaning for RF calculations.
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: iprcel
@@ -9981,6 +10241,7 @@
           </li>
          </ul>
         </p>
+    topics: convergency_useful
     vartype: integer
 - !variable
     abivarname: iprcfc
@@ -10024,6 +10285,7 @@
          </ul>
          No meaning for RF calculations.
         </p>
+    topics: convergency_expert
     vartype: integer
 - !variable
     abivarname: iqpt
@@ -10066,6 +10328,7 @@
          </b>
          ).
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: irandom
@@ -10102,6 +10365,7 @@
          </ul>
          [[irandom]]=3 is strongly advised when performing Molecular Dynamics restarts (avoids bias).
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: ird1den
@@ -10139,6 +10403,7 @@
          of abinit_help.
          <br />
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: ird1wf
@@ -10290,6 +10555,7 @@
           </li>
          </ul>
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: irdbscoup
@@ -10306,6 +10572,7 @@
         <p>
          Start the Bethe-Salpeter calculation from the BSC file containing the coupling block produced in a previous run.
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: irdbseig
@@ -10322,6 +10589,7 @@
         <p>
          Start the Bethe-Salpeter calculation from the BS_EIG contining the exciton eigenvectors produced in a previous run.
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: irdbsreso
@@ -10338,6 +10606,7 @@
         <p>
          Start the Bethe-Salpeter calculation from the BSR file containing the resonat block produced in a previous run.
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: irdddb
@@ -10380,6 +10649,7 @@
          <br />
          <br />
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: irdddk
@@ -10532,6 +10802,7 @@
           </li>
          </ul>
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: irdden
@@ -10562,6 +10833,7 @@
          <br />
          <br />
         </p>
+    topics: GSgeneral_useful
     vartype: integer
 - !variable
     abivarname: irdhaydock
@@ -10578,6 +10850,7 @@
         <p>
          Used to re-start the Haydock iterative technique from the HAYDR_SAVE file produced in a previous run.
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: irdqps
@@ -10598,6 +10871,7 @@
         in order to achieve a self-consistent quasiparticle calculations.
         See also [[getqps]]
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: irdscr
@@ -10631,6 +10905,7 @@
          </a>
          of abinit_help.
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: irdsuscep
@@ -10664,6 +10939,7 @@
          </a>
          of abinit_help.
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: irdvdw
@@ -10690,6 +10966,7 @@
           1 =&gt; read vdW-DF variables
          </li>
         </ul>
+    topics: null
     vartype: integer
 - !variable
     abivarname: irdwfk
@@ -10823,6 +11100,7 @@
           </li>
          </ul>
         </p>
+    topics: GSgeneral_useful
     vartype: integer
 - !variable
     abivarname: irdwfkfine
@@ -10899,6 +11177,7 @@
         <b>
          This variable is experimental. In development.
         </b>
+    topics: GSgeneral_useful
     vartype: integer
 - !variable
     abivarname: irdwfq
@@ -11051,6 +11330,7 @@
           </li>
          </ul>
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: iscf
@@ -11226,6 +11506,7 @@
           </li>
          </ul>
         </p>
+    topics: convergency_useful, TDDFT_compulsory
     vartype: integer
 - !variable
     abivarname: isecur
@@ -11262,6 +11543,7 @@
          <br />
          No meaning for RF calculations yet.
         </p>
+    topics: convergency_expert
     vartype: integer
 - !variable
     abivarname: istatimg
@@ -11287,6 +11569,7 @@
          <br />
          If [[istatimg]]=1, the total energy of static images is computed.
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: istatr
@@ -11313,6 +11596,7 @@
         it is written once every '[[istatr]]' call.
         When '[[istatr]]'=0, there is no writing of a status file (which is the default).
         </p>
+    topics: otherGS_expert
     vartype: integer
 - !variable
     abivarname: istatshft
@@ -11345,6 +11629,7 @@
         There is also a writing for each of the 5 first calls,
         and the 10th call.
         </p>
+    topics: otherGS_expert
     vartype: integer
 - !variable
     abivarname: istwfk
@@ -11424,6 +11709,7 @@
           </li>
          </ul>
         </p>
+    topics: k-points_useful
     vartype: integer
 - !variable
     abivarname: ixc
@@ -12437,6 +12723,7 @@
           </li>
          </ul>
         </p>
+    topics: xc_basic, hf_compulsory
     vartype: integer
 - !variable
     abivarname: ixcpositron
@@ -12555,6 +12842,7 @@
           <br />
          </ul>
         </p>
+    topics: positron_basic
     vartype: integer
 - !variable
     abivarname: jdtset
@@ -12604,6 +12892,7 @@
         the input variable [[udtset]]. In this case, [[jdtset]] cannot
         be used.
         </p>
+    topics: multidtset_basic
     vartype: integer
 - !variable
     abivarname: jellslab
@@ -12636,6 +12925,7 @@
         while the position of the slab edges along z is defined through
         the input variables [[slabzbeg]] and [[slabzend]].
         </p>
+    topics: otherGS_sla
     vartype: integer
 - !variable
     abivarname: jfielddir
@@ -12674,6 +12964,7 @@
         Then do another single run for fixed ebar calculation ([[red_efieldbar]]=(0 0 0)),
         from the final results you will have d_1,d_2, these are good guesses for b, c.
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: jpawu
@@ -12699,6 +12990,7 @@
          In the case where [[lpawu]] =-1,
         the value is not used.
         </p>
+    topics: DFT+U_compulsory
     vartype: real
 - !variable
     abivarname: kberry
@@ -12751,6 +13043,7 @@
         in the entire Brillouin zone, by reading them to initialize
         the [[kptopt]]=3 computation.
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: kpt
@@ -12816,6 +13109,7 @@
          <br />
          Not read if [[kptopt]]/=0 .
         </p>
+    topics: k-points_useful
     vartype: real
 - !variable
     abivarname: kptbounds
@@ -13081,6 +13375,7 @@
         </p>
         <p>
         </p>
+    topics: k-points_expert
     vartype: real
 - !variable
     abivarname: kptgw
@@ -13111,6 +13406,7 @@
         [[kptrlatt]], or [[ngkpt]]
          ) than the GS one, but WITHOUT any shift, are allowed.
         </p>
+    topics: null
     vartype: real
 - !variable
     abivarname: kptnrm
@@ -13139,6 +13435,7 @@
          <br />
          It cannot be smaller than 1.0d0
         </p>
+    topics: k-points_useful
     vartype: real
 - !variable
     abivarname: kptns
@@ -13179,6 +13476,7 @@
         [[kptnrm]], then shifted
         by [[qptn]](1:3).
         </p>
+    topics: k-points_internal
     vartype: real
 - !variable
     abivarname: kptopt
@@ -13283,6 +13581,7 @@
         [[prtkpt]] might help
         you to select the optimal grid.
         </p>
+    topics: k-points_basic
     vartype: integer
 - !variable
     abivarname: kptrlatt
@@ -13324,6 +13623,7 @@
         See this latter variable for a complete description of this
         procedure.
         </p>
+    topics: k-points_useful
     vartype: integer
 - !variable
     abivarname: kptrlen
@@ -13389,6 +13689,7 @@
         a one-dimensional k point grid will be generated.
         For a cluster, this procedure will only generate the Gamma point.
         </p>
+    topics: k-points_useful
     vartype: real
 - !variable
     abivarname: kssform
@@ -13429,6 +13730,7 @@
          Very important : for the time being, [[istwfk]]
         must be 1 for all the k-points.
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: lexexch
@@ -13447,6 +13749,7 @@
          Give for each species the value of the angular momentum (only values 2 or 3 are allowed)
         on which to apply the exact exchange correction.
         </p>
+    topics: xc_useful
     vartype: integer
 - !variable
     abivarname: localrdwf
@@ -13486,6 +13789,7 @@
         nodes if [[localrdwf]]=1, while it is needed only for the
         master node if [[localrdwf]]=0.
         </p>
+    topics: parallelism_expert
     vartype: integer
 - !variable
     abivarname: lotf_classic
@@ -13505,6 +13809,7 @@
          <br />
          For the moment it is imposed to be 5.
         </p>
+    topics: otherGS_lotf
     vartype: integer
 - !variable
     abivarname: lotf_nitex
@@ -13522,6 +13827,7 @@
         <p>
          Set the number of Molecular Dynamics iterations which are computed by LOTF.
         </p>
+    topics: otherGS_lotf
     vartype: integer
 - !variable
     abivarname: lotf_nneigx
@@ -13541,6 +13847,7 @@
          <br />
          For the moment it is imposed to be 40.
         </p>
+    topics: otherGS_lotf
     vartype: integer
 - !variable
     abivarname: lotf_version
@@ -13560,6 +13867,7 @@
          <br />
          For the moment it is imposed to be 2.
         </p>
+    topics: otherGS_lotf
     vartype: integer
 - !variable
     abivarname: lpawu
@@ -13591,6 +13899,7 @@
           </li>
          </ul>
         </p>
+    topics: DFT+U_compulsory
     vartype: integer
 - !variable
     abivarname: macro_uj
@@ -13629,6 +13938,7 @@
          </ul>
          Determination of U and J can be done only if the symmetry of the atomic arrangement is reduced and the atom pawujat is not connected to any other atom by symmetry relations (either input reduced symmetries manually, define concerned atom as a separate atomic species or shift concerned atom from ideal position).
         </p>
+    topics: DFT+U_expert
     vartype: integer
 - !variable
     abivarname: magcon_lambda
@@ -13645,6 +13955,7 @@
         <p>
          This variable gives the amplitude of the constraint imposed on the magnetization vectors on each atom (turned on with flag variable [[magconon]]). Typical values for lambda are 10 to a few hundred. The energy will vary strongly and convergence will be difficult if lambda is too large. The constraint will be weak and the magnetization will not be close to [[spinat]] if lambda is too small. See variable [[magconon]] for more details.
         </p>
+    topics: spinpolarisation_useful
     vartype: real
 - !variable
     abivarname: magconon
@@ -13661,6 +13972,7 @@
         <p>
          Turns on the imposition of a Lagrangian constraint on the magnetization. For each atom, the magnetization is calculated in a sphere (radius [[ratsph]]) and a constraint is applied to bring it closer to the input values of [[spinat]]. The constraint can be either on the direction only (magconon 1) or on the full vector (magconon 2). The Lagrangian constraint has an amplitude [[magcon_lambda]] which should be neither too big (bad or impossible convergence) nor too small (no effect).
         </p>
+    topics: spinpolarisation_useful
     vartype: integer
 - !variable
     abivarname: max_ncpus
@@ -13680,6 +13992,7 @@
         from 2 to [[max_ncpus]].
         After having printed out the efficiency, the code stops.
         </p>
+    topics: parallelism_useful
     vartype: integer
 - !variable
     abivarname: maxestep
@@ -13698,6 +14011,7 @@
         When the calculation is difficult to converge, try reducing this value or reducing [[ddamp]].
         This variable is used in finite electric displacement field calculations ([[berryopt]]=6,16,17).
         </p>
+    topics: null
     vartype: real
 - !variable
     abivarname: maxnsym
@@ -13717,6 +14031,7 @@
          <br />
          The default value is sufficient for most applications; it has to be increase in the case of the use of a supercell (unit cell identically repeated).
         </p>
+    topics: crystal_expert
     vartype: integer
 - !variable
     abivarname: mband
@@ -13737,6 +14052,7 @@
         over all k-points and spin-polarisation from
         [[nband]](1:nkpt*nsppol).
         </p>
+    topics: GSgeneral_internal
     vartype: integer
 - !variable
     abivarname: mbpt_sciss
@@ -13756,6 +14072,7 @@
          The Scissors operator energy added to the conductions states.
         In some cases, it mimics a second iteration self-consistent [[GW]] calculation.
         </p>
+    topics: null
     vartype: real
 - !variable
     abivarname: mdf_epsinf
@@ -13777,6 +14094,7 @@
         The proper spatial symmetry of the screening W(r,r_prime) is enforced using Eq. (7) of Phys. Rev. B <b>37</b>, (1988)
          <br />
         </p>
+    topics: null
     vartype: real
 - !variable
     abivarname: mdtemp
@@ -13810,6 +14128,7 @@
          at the end of the
         [[ntime]] timesteps.
         </p>
+    topics: null
     vartype: real
 - !variable
     abivarname: mdwall
@@ -13838,6 +14157,7 @@
         '[[LENGTH]]'
         characteristics.
         </p>
+    topics: null
     vartype: real
 - !variable
     abivarname: mem_test
@@ -13869,6 +14189,7 @@
           </li>
          </ul>
         </p>
+    topics: otherGS_expert
     vartype: integer
 - !variable
     abivarname: mep_mxstep
@@ -13905,6 +14226,7 @@
          are the positions of
         the atoms in the cell.
         </p>
+    topics: null
     vartype: real
 - !variable
     abivarname: mep_solver
@@ -14012,6 +14334,7 @@
          </ul>
          All of the optimizers can be constrained with a maximum allowed step size for each image; see [[mep_mxstep]]. This is by default the case of the Nudged Elastic Band ([[imgmov]]=5).
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: mgfft
@@ -14030,6 +14353,7 @@
          This internal variable contains the maximum of
         [[ngfft]](1:3).
         </p>
+    topics: convergency_internal
     vartype: integer
 - !variable
     abivarname: mgfftdg
@@ -14048,6 +14372,7 @@
          This internal variable contains the maximum of
         [[ngfftdg]](1:3).
         </p>
+    topics: convergency_internal
     vartype: integer
 - !variable
     abivarname: mixalch
@@ -14132,6 +14457,7 @@
         There is one restriction to this possibility : the value of [[ziontypat]] for the atoms that are mixed should be
         identical.
         </p>
+    topics: otherGS_alch
     vartype: real
 - !variable
     abivarname: mpw
@@ -14155,6 +14481,7 @@
         [[rprim]], and/or
         [[angdeg]].
         </p>
+    topics: convergency_internal
     vartype: integer
 - !variable
     abivarname: mqgrid
@@ -14174,6 +14501,7 @@
         related to pseudopotentials, in reciprocal space :
         potentials, or projector functions.
         </p>
+    topics: convergency_expert
     vartype: integer
 - !variable
     abivarname: mqgriddg
@@ -14193,6 +14521,7 @@
         Actually referred to as mqgrid_vl internally. Should change name to the latter ...
         See also [[mqgrid]]
         </p>
+    topics: PAW_expert
     vartype: integer
 - !variable
     abivarname: natcon
@@ -14218,6 +14547,7 @@
          , [[iatcon]],
         and [[wtatcon]]).
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: natfix
@@ -14246,6 +14576,7 @@
         [[iatfix]]
          .
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: natfixx
@@ -14269,6 +14600,7 @@
          When [[natfixx]] &gt; 0, [[natfixx]] entries should be provided
         in array [[iatfixx]].
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: natfixy
@@ -14291,6 +14623,7 @@
          <br />
          When [[natfixy]] &gt; 0, [[natfixy]] entries should be provided in array [[iatfixy]]
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: natfixz
@@ -14313,6 +14646,7 @@
          <br />
          When [[natfixz]] &gt; 0, [[natfixz]] entries should be provided in array [[iatfixz]].
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: natom
@@ -14337,6 +14671,7 @@
         to specify only the irreducible set of atoms, use the
         symmetriser, see the input variable [[natrd]].
         </p>
+    topics: GSgeneral_basic
     vartype: integer
 - !variable
     abivarname: natpawu
@@ -14355,6 +14690,7 @@
          This internal variable gives the number of atoms on which the LDA/GGA+U method
         is applied. This value is determined from [[lpawu]].
         </p>
+    topics: DFT+U_internal
     vartype: integer
 - !variable
     abivarname: natrd
@@ -14384,6 +14720,7 @@
          <br />
          Despite possible vacancies, cannot be bigger than [[natom]].
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: natsph
@@ -14407,6 +14744,7 @@
          If [[pawfatbnd]]=1 or 2, it gives the number of atoms around which atom-projected band structure will be
         built (the indices of these atoms are given by  [[iatsph]]).
         </p>
+    topics: printing_prdos
     vartype: integer
 - !variable
     abivarname: natsph_extra
@@ -14434,6 +14772,7 @@
          [[xredsph_extra]]
          variable.
         </p>
+    topics: printing_prdos
     vartype: integer
 - !variable
     abivarname: natvshift
@@ -14458,6 +14797,7 @@
         [[lpawu]] and
         [[atvshift]].
         </p>
+    topics: DFT+U_expert
     vartype: integer
 - !variable
     abivarname: nband
@@ -14503,6 +14843,7 @@
         file (see [[kssform]])
         the relevant number of bands is given by [[nbandkss]].
         </p>
+    topics: GSgeneral_basic
     vartype: integer
 - !variable
     abivarname: nbandhf
@@ -14520,6 +14861,7 @@
         <p>
          Gives the maximum number of occupied bands with which Fock exact exchange is being computed for the wavefunctions.
         </p>
+    topics: hf_useful
     vartype: integer
 - !variable
     abivarname: nbandkss
@@ -14573,6 +14915,7 @@
          Very important : for the time being, [[istwfk]] must be 1 for all the k-points
         in order to generate a _KSS file.
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: nbdblock
@@ -14599,6 +14942,7 @@
           </li>
          </ul>
         </p>
+    topics: convergency_expert
     vartype: integer
 - !variable
     abivarname: nbdbuf
@@ -14671,6 +15015,7 @@
          Also, the number of active bands, in all cases, is imposed
         to be at least 1, irrespective of the value of [[nbdbuf]].
         </p>
+    topics: convergency_expert
     vartype: integer
 - !variable
     abivarname: nberry
@@ -14709,6 +15054,7 @@
         <p>
          For the [[berryopt]] = 1, 2, and 3 cases, spinor wavefunctions are not allowed, nor are parallel computations.
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: nc_xccc_gspace
@@ -14734,6 +15080,7 @@
         should be used only in conjunction with NC pseudos whose model core charge that decays quickly in
         G-space. Several NC pseudos available in the Abinit table are not optimized for the G-space formalism and users are strongly invited to perform
         convergence studies with respect to ecut before using this option.
+    topics: convergency_expert
     vartype: integer
 - !variable
     abivarname: nconeq
@@ -14756,6 +15103,7 @@
          , [[iatcon]],
         and [[wtatcon]]).
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: nctime
@@ -14801,6 +15149,7 @@
         }
          </pre>
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: ndivk
@@ -14855,6 +15204,7 @@
         by just specifying the number of divisions for the smallest segment.
         See the related input variable [[ndivsm]].
         </p>
+    topics: k-points_expert
     vartype: integer
 - !variable
     abivarname: ndivsm
@@ -14884,6 +15234,7 @@
         In this case, the absolute value of
         [[kptopt]] is the number of such segments.
         </p>
+    topics: k-points_expert
     vartype: integer
 - !variable
     abivarname: ndtset
@@ -14909,6 +15260,7 @@
         and also that input names with a dataset index are not allowed.
         Otherwise, [[ndtset]]=0 is equivalent to [[ndtset]]=1.
         </p>
+    topics: multidtset_compulsory
     vartype: integer
 - !variable
     abivarname: ndynimage
@@ -14930,6 +15282,7 @@
         It is used to dimension many memory-consuming arrays (one copy for each image),
         e.g. the wavefunction array (cg), the density array (rho), etc .
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: neb_algo
@@ -15002,6 +15355,7 @@
         [[neb_spring]], keeping it constant or allowing it
         to vary between 2 values (to have higher resolution close to the saddle point).
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: neb_spring
@@ -15033,6 +15387,7 @@
           See: J. Chem. Phys. 113, 9901 (2000).
          </i>
         </p>
+    topics: null
     vartype: real
 - !variable
     abivarname: nelect
@@ -15056,6 +15411,7 @@
          <br />
          [[nelect]]=zion-[[charge]].
         </p>
+    topics: GSgeneral_internal
     vartype: real
 - !variable
     abivarname: nfft
@@ -15083,6 +15439,7 @@
         but a number usually close to this product divided by the
         number of processors on which the space is shared.
         </p>
+    topics: convergency_internal
     vartype: integer
 - !variable
     abivarname: nfftdg
@@ -15110,6 +15467,7 @@
         but a number usually close to this product divided by the
         number of processors on which the space is shared.
         </p>
+    topics: convergency_internal
     vartype: integer
 - !variable
     abivarname: nfreqim
@@ -15127,6 +15485,7 @@
          [[nfreqim]] sets the number of pure imaginary frequencies used to calculate
         the dielectric matrix in order to perform the numerical integration of the [[GW]] self-energy.
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: nfreqmidm
@@ -15153,6 +15512,7 @@
 
         see M. Taut, J. Phys. C: Solid State Phys. 18 (1985) 2677-2690.
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: nfreqre
@@ -15188,6 +15548,7 @@
         to use this input variable.
         Using the default values, one must be able to get a screening file that can be used with any ppmodel.
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: nfreqsp
@@ -15205,6 +15566,7 @@
          [[nfreqsp]] defines the number of real frequencies used to calculate the spectral function
         of the [[GW]] Green's function.
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: ngfft
@@ -15299,6 +15661,7 @@
          The number of points stored by this processor in real space is n1*n2*n3proc, while in reciprocal
         space, it is n1*n2proc*n3.
         </p>
+    topics: convergency_basic
     vartype: integer
 - !variable
     abivarname: ngfftdg
@@ -15322,6 +15685,7 @@
         transform (fft) grid in three dimensions) but concerns the "double
         grid" only used for PAW calculations.
         </p>
+    topics: PAW_useful
     vartype: integer
 - !variable
     abivarname: ngkpt
@@ -15376,6 +15740,7 @@
         For a measure of the efficiency, see the input variable
         [[kptrlen]].
         </p>
+    topics: k-points_basic
     vartype: integer
 - !variable
     abivarname: ngqpt
@@ -15410,6 +15775,7 @@
         <p>
          For more information on Monkhorst-Pack grids, see [[ngkpt]].
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: nimage
@@ -15521,6 +15887,7 @@
         symmetry. By contrast, there is no problem if some other image has more symmetries
         than those of the second image.
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: nkpath
@@ -15546,6 +15913,7 @@
         also [[einterp]])
         In a nutshell, nkpath replaces [[kptopt]] when we are not performing a NSCF calculation.
         Note that, unlike [[kptopt]], nkpath represents the total number of points in the [[kptbounds]] array.
+    topics: null
     vartype: integer
 - !variable
     abivarname: nkpt
@@ -15610,6 +15978,7 @@
         the total number of k points of the circuit will be
         10+12+17+1(for the final point)=40.
         </p>
+    topics: k-points_useful
     vartype: integer
 - !variable
     abivarname: nkptgw
@@ -15628,6 +15997,7 @@
          [[nkptgw]] gives the number of k-points for which the [[GW]] calculation must be done.
         It is used to dimension [[kptgw]]
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: nkpthf
@@ -15645,6 +16015,7 @@
         <p>
          [[nkpthf]] gives the number of k points used to sample the full Brillouin zone for the Fock exact exchange contribution.
         </p>
+    topics: hf_expert
     vartype: integer
 - !variable
     abivarname: nline
@@ -15674,6 +16045,7 @@
          Note that [[nline]]=0 can be used to diagonalize the Hamiltonian
         matrix in the subspace spanned by the input wavefunctions.
         </p>
+    topics: convergency_expert
     vartype: integer
 - !variable
     abivarname: nloc_alg
@@ -15713,6 +16085,7 @@
          </i>
          . See also [[nloc_mem]] for the tuning of the memory used in the non-local operator application.
         </p>
+    topics: otherGS_expert
     vartype: integer
 - !variable
     abivarname: nloc_mem
@@ -15761,6 +16134,7 @@
          </i>
          . See also [[nloc_alg]] for the algorithm for the non-local operator application.
         </p>
+    topics: otherGS_expert
     vartype: integer
 - !variable
     abivarname: nnos
@@ -15779,6 +16153,7 @@
          The thermostat chains can be used either to perform Molecular Dynamics (MD) ([[ionmov]]=13) or to perform Path Integral Molecular Dynamics (PIMD) ([[imgmov]]=13). <br />
          The mass of these thermostats is given by [[qmass]].  <br />
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: nnsclo
@@ -15809,6 +16184,7 @@
         2 steps with 3 non-self consistent loops , 2 steps with 2 non-self consistent loops,
         then the next ones with 1 non-self consistent loop.
         </p>
+    topics: convergency_expert
     vartype: integer
 - !variable
     abivarname: nnsclohf
@@ -15833,6 +16209,7 @@
         Default value is 1 when [[usefock]] = 1 and correspond to update occupied
         wavefunctions at each self-consistent loop.
         </p>
+    topics: hf_expert
     vartype: integer
 - !variable
     abivarname: nobj
@@ -15918,6 +16295,7 @@
         Go to [[objan]], for example.
          <br />
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: nomegasf
@@ -15946,6 +16324,7 @@
         requires an extremely dense frequency mesh. It should be kept in mind, however, that the memory required
         grows fast with the value of [[nomegasf]].
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: nomegasi
@@ -15965,6 +16344,7 @@
         imaginary axis. The frequency mesh is linear and covers the interval between OMEGASIMIN=0.01 Hartree and
         [[omegasimax]].
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: nomegasrd
@@ -15983,6 +16363,7 @@
          The number of real frequencies around the KS energy where the self-energy Sigma is evaluated.
         From these values, the derivative of Sigma at the KS energy is numerically estimated through linear interpolation.
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: normpawu
@@ -16010,6 +16391,7 @@
           </li>
          </ul>
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: noseinert
@@ -16030,6 +16412,7 @@
         WT d2X/dt2= Sum(I) MI (dRI/dt)2 - 3NkBT
         where I represent each nucleus, MI is the mass of each nucleus (see [[amu]]), RI is the coordinate of each nucleus (see [[xcart]]), dX/dt is a dynamical friction coefficient, and T is the temperature of the thermostat (see [[mdtemp]]).
         </p>
+    topics: null
     vartype: real
 - !variable
     abivarname: np_slk
@@ -16057,6 +16440,7 @@
          np_slk must divide the number of processors involved in diagonalizations ([[npband]]*[[npfft]]*[[npspinor]]).
         <br>Note: an optimal value for this parameter can be automatically found by using the [[autoparal]] input keyword.
         </p>
+    topics: parallelism_expert
     vartype: integer
 - !variable
     abivarname: npband
@@ -16087,6 +16471,7 @@
         [[npband]] has to be a divisor or equal to [[nband]]
         <br>Note: an optimal value for this parameter can be automatically found by using the [[autoparal]] input keyword.
         </p>
+    topics: parallelism_useful
     vartype: integer
 - !variable
     abivarname: npfft
@@ -16122,6 +16507,7 @@
         [[npfft]] may change, and then [[ngfft]] also.
         <br>Note: an optimal value for this parameter can be automatically found by using the [[autoparal]] input keyword.
         </p>
+    topics: parallelism_useful
     vartype: integer
 - !variable
     abivarname: nphf
@@ -16151,6 +16537,7 @@
         in order to have the better load-balancing and efficiency.
          <br />
         </p>
+    topics: hf_useful, parallelism_useful
     vartype: integer
 - !variable
     abivarname: npimage
@@ -16178,6 +16565,7 @@
         and [[npspinor]] for the additional information on the use of k-point/band/FFT parallelisation.
          </i>
         </p>
+    topics: parallelism_useful
     vartype: integer
 - !variable
     abivarname: npkpt
@@ -16211,6 +16599,7 @@
         in order to have the better load-balancing and efficiency.
         <br>Note: an optimal value for this parameter can be automatically found by using the [[autoparal]] input keyword.
         </p>
+    topics: parallelism_useful
     vartype: integer
 - !variable
     abivarname: nppert
@@ -16230,6 +16619,7 @@
         [[nppert]] gives the number of processors among which the work load over the perturbation level is shared.
         It can even be specified separately for each dataset.
         </p>
+    topics: parallelism_useful
     vartype: integer
 - !variable
     abivarname: npsp
@@ -16266,6 +16656,7 @@
         [[mixalch]], to understand how
         to use alchemical potentials in ABINIT.
         </p>
+    topics: otherGS_alch
     vartype: integer
 - !variable
     abivarname: npspalch
@@ -16286,6 +16677,7 @@
         <p>
          [[npspalch]]=[[npsp]]-[[ntyppure]]
         </p>
+    topics: otherGS_alch
     vartype: integer
 - !variable
     abivarname: npspinor
@@ -16319,6 +16711,7 @@
         band/FFT/k-point parallelisation.</i>
          <br />
         </p>
+    topics: parallelism_useful
     vartype: integer
 - !variable
     abivarname: npulayit
@@ -16337,6 +16730,7 @@
          Gives the  number of previous iterations involved in Pulay mixing (mixing
         during electronic SC iterations).
         </p>
+    topics: convergency_useful
     vartype: integer
 - !variable
     abivarname: npvel
@@ -16360,6 +16754,7 @@
          The direction and the velocity maximum are set with the input variable [[pvelmax]].
         Note that the results are output for a Z=1 impinging ion, i.e. a proton.
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: npweps
@@ -16381,6 +16776,7 @@
          <br />
         It is an internal variable, determined from [[ecuteps]].
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: npwkss
@@ -16415,6 +16811,7 @@
         <p>
          Very important : for the time being, [[istwfk]] must be 1 for all the k-points.
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: npwsigx
@@ -16436,6 +16833,7 @@
          <br />
         It is an internal variable, determed from [[ecutsigx]].
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: npwwfn
@@ -16456,6 +16854,7 @@
         in the formula that generates the independent-particle susceptibility $\chi^{(0)}_{KS}$.
         It is an internal variable, determined from [[ecutwfn]].
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: nqpt
@@ -16487,6 +16886,7 @@
         Also, if 1 and a RF calculation is done, defines the
         wavevector of the perturbation.
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: nqptdm
@@ -16513,6 +16913,7 @@
          utility.
         If [[nqptdm]] is equal to -1, the code reports the list of q-points in the log file (YAML format) and then stops.
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: nscforder
@@ -16529,6 +16930,7 @@
         <p>
          This variable controls the order of used scaling functions when the Hartree potential is computed using the Poisson solver (see [[icoulomb]] imput variable). This variable is of seldom use since the default value is large enough. Nonetheless, possible values are 8, 14, 16, 20, 24, 30, 40, 50, 60, 100. Values greater than 20 are included in ABINIT for test purposes only.
         </p>
+    topics: convergency_expert
     vartype: integer
 - !variable
     abivarname: nshiftk
@@ -16553,6 +16955,7 @@
         The maximum allowed value of [[nshiftk]] is 8.
         The values of the shifts are given by [[shiftk]].
         </p>
+    topics: k-points_useful
     vartype: integer
 - !variable
     abivarname: nshiftq
@@ -16578,6 +16981,7 @@
         The maximum allowed value of [[nshiftq]] is 8.
         The values of the shifts are given by [[shiftq]].
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: nspden
@@ -16623,6 +17027,7 @@
          The default ([[nspden]]=[[nsppol]])
         does not suit the case of vector magnetization.
         </p>
+    topics: spinpolarisation_basic
     vartype: integer
 - !variable
     abivarname: nspinor
@@ -16655,6 +17060,7 @@
         are automatically set to 1. Also, the number of bands, for each k-point,
         should be even.
         </p>
+    topics: spinpolarisation_basic
     vartype: integer
 - !variable
     abivarname: nsppol
@@ -16706,6 +17112,7 @@
         for the components of the density matrix with respect to
         the spin-polarization.
         </p>
+    topics: spinpolarisation_basic
     vartype: integer
 - !variable
     abivarname: nstep
@@ -16759,6 +17166,7 @@
          <br />
          The forces and stress tensor are computed with [[nstep]]=0.
         </p>
+    topics: convergency_basic
     vartype: integer
 - !variable
     abivarname: nsym
@@ -16828,6 +17236,7 @@
         is zero. This can be done with the help of the input variable
         [[symmorphi]]
         </p>
+    topics: crystal_useful
     vartype: integer
 - !variable
     abivarname: ntime
@@ -16858,6 +17267,7 @@
          <br />
          [[ntime]] is ignored if [[ionmov]]=0.
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: ntimimage
@@ -16880,6 +17290,7 @@
         input variables, and then the next positions and velocities for each image
         are determined from the set of results obtained for all images.
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: ntypalch
@@ -16924,6 +17335,7 @@
         [[mixalch]], to understand how
         to use alchemical potentials in ABINIT.
         </p>
+    topics: otherGS_alch
     vartype: integer
 - !variable
     abivarname: ntypat
@@ -16947,6 +17359,7 @@
          The first pseudopotential is assigned type number 1, and so
         on ...
         </p>
+    topics: GSgeneral_basic
     vartype: integer
 - !variable
     abivarname: ntyppure
@@ -16967,6 +17380,7 @@
         <p>
          [[ntyppure]]=[[ntypat]]-[[ntypalch]]
         </p>
+    topics: otherGS_alch
     vartype: integer
 - !variable
     abivarname: nucdipmom
@@ -16983,6 +17397,7 @@
     section: vargs
     text: |-
         Places an array of nuclear magnetic dipole moments on the atomic positions, useful for computing the magnetization in the presence of nuclear dipoles and thus the chemical shielding by the converse method. The presence of these dipoles breaks time reversal symmetry and lowers the overall spatial symmetry.
+    topics: spinpolarisation_expert
     vartype: real
 - !variable
     abivarname: nwfshist
@@ -17011,6 +17426,7 @@
         memory required by the program since N previous wavefunctions
         are stored during the electronic minimisation.
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: nzchempot
@@ -17025,6 +17441,7 @@
     section: vargeo
     text: |-
         Defines the number of z reduced coordinates that defines the spatially varying chemical potential. See the input variable [[chempot]], of which [[nzchempot]] is the second dimension.
+    topics: null
     vartype: integer
 - !variable
     abivarname: objaat
@@ -17052,6 +17469,7 @@
          Look at [[objarf]] for further explanations.
         <br />
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: objaax
@@ -17091,6 +17509,7 @@
         toward point 2 (coordinates 4:6).
          <br />
         </p>
+    topics: null
     vartype: real
 - !variable
     abivarname: objan
@@ -17113,6 +17532,7 @@
         variables [[objaat]].
          <br />
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: objarf
@@ -17166,6 +17586,7 @@
         simply use 1 1 1, which is also the Default value.
          <br />
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: objaro
@@ -17206,6 +17627,7 @@
         different rotation angles.
          <br />
         </p>
+    topics: null
     vartype: real
 - !variable
     abivarname: objatr
@@ -17251,6 +17673,7 @@
          <br />
          Not present in the dtset array (no internal).
         </p>
+    topics: null
     vartype: real
 - !variable
     abivarname: objbat
@@ -17280,6 +17703,7 @@
          Look at [[objbrf]] for further explanations.
          <br />
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: objbax
@@ -17319,6 +17743,7 @@
         toward point 2 (coordinates 4:6).
          <br />
         </p>
+    topics: null
     vartype: real
 - !variable
     abivarname: objbn
@@ -17340,6 +17765,7 @@
         variables [[objbat]].
          <br />
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: objbrf
@@ -17392,6 +17818,7 @@
         simply use 1 1 1, which is also the Default value.
          <br />
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: objbro
@@ -17432,6 +17859,7 @@
         different rotation angles.
          <br />
         </p>
+    topics: null
     vartype: real
 - !variable
     abivarname: objbtr
@@ -17476,6 +17904,7 @@
         which case, only rotations are needed.
          <br />
         </p>
+    topics: null
     vartype: real
 - !variable
     abivarname: occ
@@ -17526,6 +17955,7 @@
          The occupation numbers evolve only for metallic occupations,
         that is, [[occopt]] &ge; 3 .
         </p>
+    topics: GSgeneral_basic
     vartype: real
 - !variable
     abivarname: occopt
@@ -17665,6 +18095,7 @@
         three possible values of the Fermi energy, and the
         bissection algorithm find one or the other.
         </p>
+    topics: GSgeneral_basic
     vartype: integer
 - !variable
     abivarname: omegasimax
@@ -17688,6 +18119,7 @@
         In conjunction with [[nomegasi]],
         [[omegasimax]] uniquely defines the linear mesh employed to sample the self-energy along the imaginary axis.
         </p>
+    topics: null
     vartype: real
 - !variable
     abivarname: omegasrdmax
@@ -17710,6 +18142,7 @@
          The maximum distance from the KS energy where to evaluate Sigma. Sigma is evaluated at
         [KS_energy - [[omegasrdmax]], KS_energy + [[omegasrdmax]]] sampled [[nomegasrd]] times.
         </p>
+    topics: null
     vartype: real
 - !variable
     abivarname: optcell
@@ -17755,6 +18188,7 @@
         (x,f) history of another run with a different non-zero [[optcell]]
         value. There
         are still a few problems at that level.
+    topics: null
     vartype: integer
 - !variable
     abivarname: optdriver
@@ -17809,6 +18243,7 @@
         and [[rfstrs]]) must be
         zero if [[optdriver]] is not set to 1.
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: optforces
@@ -17842,6 +18277,7 @@
           </li>
          </ul>
         </p>
+    topics: GSgeneral_basic
     vartype: integer
 - !variable
     abivarname: optnlxccc
@@ -17868,6 +18304,7 @@
           </li>
          </ul>
         </p>
+    topics: xc_expert
     vartype: integer
 - !variable
     abivarname: optstress
@@ -17893,6 +18330,7 @@
         one can skip the computation of stresses. The CPU time saving might be interesting
         for some PAW calculations.
         </p>
+    topics: GSgeneral_basic
     vartype: integer
 - !variable
     abivarname: ortalg
@@ -17937,6 +18375,7 @@
          Tests have shown that [[ortalg]]=2 or -2 is suitable for
         use on the available platforms.
         </p>
+    topics: convergency_expert
     vartype: integer
 - !variable
     abivarname: papiopt
@@ -17973,6 +18412,7 @@
         then done with PAPI values. The measurements are more accurate and
         give also access to the flops of the calculation.
         </p>
+    topics: otherGS_expert
     vartype: integer
 - !variable
     abivarname: paral_atom
@@ -17994,6 +18434,7 @@
           Compatible with ground-state calculations and response function calculations
          <br />
         </p>
+    topics: parallelism_basic
     vartype: integer
 - !variable
     abivarname: paral_kgb
@@ -18089,6 +18530,7 @@
         He must put again paral_kgb=1 in the input file and put the corresponding values for
         [[npkpt]], [[npfft]], [[npband]],[[bandpp]] and eventually [[npspinor]] in the input file.
         </p>
+    topics: parallelism_basic
     vartype: integer
 - !variable
     abivarname: paral_rf
@@ -18116,6 +18558,7 @@
         q-point in the log file (YAML format) and then stops.
         </p>
         <p> [[paral_rf]] can be specified separately for each dataset. </p>
+    topics: parallelism_basic
     vartype: integer
 - !variable
     abivarname: pawcpxocc
@@ -18165,6 +18608,7 @@
           1
          </b>
         </p>
+    topics: PAW_expert
     vartype: integer
 - !variable
     abivarname: pawcross
@@ -18186,6 +18630,7 @@
          , the overlap between the plane-wave part of one band and the on-site part of an other
         is taken into account in the computation of the oscillator strengths. Hence, the completeness of the on-site basis is no longer assumed.
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: pawecutdg
@@ -18219,6 +18664,7 @@
         or derived quantities, like forces, but also on the two values of the
         "Compensation charge inside spheres", a quantity written in the log file.
         </p>
+    topics: convergency_compulsory, PAW_compulsory
     vartype: real
 - !variable
     abivarname: pawfatbnd
@@ -18260,6 +18706,7 @@
           </li>
          </ul>
         </p>
+    topics: PAW_useful
     vartype: integer
 - !variable
     abivarname: pawlcutd
@@ -18291,6 +18738,7 @@
         or derived quantities, like forces, but also on the two values of the
         "Compensation charge inside spheres", a quantity written in the log file.
         </p>
+    topics: PAW_expert
     vartype: integer
 - !variable
     abivarname: pawlmix
@@ -18315,6 +18763,7 @@
          <br />
          This option is useful to save CPU time but DOES have a bearing on the numerical accuracy of the results.
         </p>
+    topics: PAW_expert
     vartype: integer
 - !variable
     abivarname: pawmixdg
@@ -18379,6 +18828,7 @@
          <br />
          - Density/potential is mixed in REAL space (Here only one grid is used).
         </p>
+    topics: PAW_expert
     vartype: integer
 - !variable
     abivarname: pawnhatxc
@@ -18404,6 +18854,7 @@
         it is possible to bypass it with [[pawnhatxc]]=0; but the numerical accuracy can be affected
         by this choice. It is recommended to test the validity of this approximation before use.
         </p>
+    topics: PAW_expert
     vartype: integer
 - !variable
     abivarname: pawnphi
@@ -18423,6 +18874,7 @@
         defined by [[pawnphi]]
         and [[pawntheta]].
         </p>
+    topics: PAW_expert
     vartype: integer
 - !variable
     abivarname: pawntheta
@@ -18442,6 +18894,7 @@
         defined by [[pawntheta]]
         and [[pawnphi]].
         </p>
+    topics: PAW_expert
     vartype: integer
 - !variable
     abivarname: pawnzlm
@@ -18466,6 +18919,7 @@
         at each electronic iteration (they are all computed at the first iteration then only
         those found to be non-zero will be computed ; thus the first iteration is more cpu intensive)
         </p>
+    topics: PAW_expert
     vartype: integer
 - !variable
     abivarname: pawoptmix
@@ -18508,6 +18962,7 @@
         (see [[npulayit]]). Then it is also possible to play with the parameters of
         the Kerker mixing: [[diemix]], [[diemac]], etc...
         </p>
+    topics: PAW_expert
     vartype: integer
 - !variable
     abivarname: pawoptosc
@@ -18536,6 +18991,7 @@
          If [[pawoptosc]]=2  the matrix elements are computed with the approximated expression proposed by Shishkin and
         Kresse in PRB 74. 035101
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: pawovlp
@@ -18571,6 +19027,7 @@
           - [[pawovlp]]&gt;0. and &lt;100. : overlap is allowed only if it is less than [[pawovlp]] %
          </div>
         </p>
+    topics: PAW_expert
     vartype: real
 - !variable
     abivarname: pawprt_b
@@ -18597,6 +19054,7 @@
         The indexing of the bands start with one for the lowest occupied band
         and goes up from there.
         </p>
+    topics: PAW_useful
     vartype: integer
 - !variable
     abivarname: pawprt_k
@@ -18627,6 +19085,7 @@
          </b>
          in the beginning of the run.
         </p>
+    topics: PAW_useful
     vartype: integer
 - !variable
     abivarname: pawprtden
@@ -18646,6 +19105,7 @@
         See the [[prtden]].
         <p>
         </p>
+    topics: PAW_useful
     vartype: integer
 - !variable
     abivarname: pawprtdos
@@ -18697,6 +19157,7 @@
          <br />
          - In that case, the [[ratsph]] variable is automatically set to the PAW radius.
         </p>
+    topics: PAW_useful
     vartype: integer
 - !variable
     abivarname: pawprtvol
@@ -18730,6 +19191,7 @@
          When [[pawprtvol]]&lt;0, all components of rho_ij and D_ij matrices for all atoms are printed.
          <br />
         </p>
+    topics: PAW_useful
     vartype: integer
 - !variable
     abivarname: pawprtwf
@@ -18765,6 +19227,7 @@
         ouput, but a single band and k-point index can be requested by using the variables
         [[pawprt_b]] and [[pawprt_k]].
         </p>
+    topics: PAW_useful
     vartype: integer
 - !variable
     abivarname: pawspnorb
@@ -18826,6 +19289,7 @@
          <br />
          An artificial scaling of the spin-orbit can be introduced thanks to the [[spnorbscl]] input variable.
         </p>
+    topics: PAW_useful
     vartype: integer
 - !variable
     abivarname: pawstgylm
@@ -18865,6 +19329,7 @@
           Y_lm(r) are real spherical harmonics
          </div>
         </p>
+    topics: PAW_expert
     vartype: integer
 - !variable
     abivarname: pawsushat
@@ -18899,6 +19364,7 @@
           <br />
          </div>
         </p>
+    topics: PAW_expert
     vartype: integer
 - !variable
     abivarname: pawujat
@@ -18916,6 +19382,7 @@
         <p>
          Determines the atom for which U (or J) should be determined. See also [[macro_uj]].
         </p>
+    topics: DFT+U_expert
     vartype: integer
 - !variable
     abivarname: pawujrad
@@ -18938,6 +19405,7 @@
         As most projector functions are localized within r_paw to &asymp;80%,
         20 a.u. contains &asymp;100% of the wavefunction and corresponds to r_paw &rarr; &infin;.
         </p>
+    topics: DFT+U_expert
     vartype: real
 - !variable
     abivarname: pawujv
@@ -18957,6 +19425,7 @@
         <p>
          Amplitude of the potential shift for the determination of U (or J). See also [[macro_uj]].
         </p>
+    topics: DFT+U_expert
     vartype: real
 - !variable
     abivarname: pawusecp
@@ -18985,6 +19454,7 @@
          For the time being, only activated for RF calculations.
          <br />
         </p>
+    topics: PAW_expert
     vartype: integer
 - !variable
     abivarname: pawxcdev
@@ -19016,6 +19486,7 @@
          <br />
          Be careful: GGA requires [[pawxcdev]] &gt; 0
         </p>
+    topics: PAW_expert
     vartype: integer
 - !variable
     abivarname: ph_intmeth
@@ -19038,6 +19509,7 @@
         2 for tetrahedron method (no other input is needed but requires at least 4 q-points in the BZ)
         </br>
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: ph_ndivsm
@@ -19053,6 +19525,7 @@
     section: vareph
     text: |-
         This variable is used in conjunction with [[ph_nqpath]] and [[ph_qpath]] to define the q-path used for phonon band structures and phonon linewidths. It gives the number of points used to sample the smallest segment in the q-path specified by [[ph_qpath]].
+    topics: null
     vartype: integer
 - !variable
     abivarname: ph_ngqpt
@@ -19072,6 +19545,7 @@
     text: |-
         This variable defines the q-mesh used to compute the phonon DOS and the Eliashberg function via Fourier interpolation.
         Related input variables: [[ph_qshift]] and [[ph_nqshift]].
+    topics: null
     vartype: integer
 - !variable
     abivarname: ph_nqpath
@@ -19086,6 +19560,7 @@
     section: vareph
     text: |-
         This integer defines the number of points in the [[ph_qpath]] array.
+    topics: null
     vartype: integer
 - !variable
     abivarname: ph_nqshift
@@ -19103,6 +19578,7 @@
         for the phonon DOS and for the Eliashberg functions (see [[ph_ngqpt]]).
         If not given, the code assumes a Gamma-centered mesh. The shifts
         are specified by [[ph_qshift]].
+    topics: null
     vartype: integer
 - !variable
     abivarname: ph_qpath
@@ -19120,6 +19596,7 @@
     text: |-
         This array contains the list of special q-points used to construct the q-path for phonon band structures and phonon linewidths.
         See also [[ph_nqpath]] and [[[ph_ndivsm]].
+    topics: null
     vartype: real
 - !variable
     abivarname: ph_qshift
@@ -19140,6 +19617,7 @@
     text: |-
         This array gives the shifts to be used to construct the q-mesh for
         computing the phonon DOS and the Eliashberg functions (see also [[ph_nqshift]]. If not given, a Gamma-centered mesh is used.
+    topics: null
     vartype: real
 - !variable
     abivarname: ph_smear
@@ -19156,6 +19634,7 @@
     text: |-
         The gaussian broadening used for the integration of the phonon
         DOS and the Eliashberg function. See also [[ph_intmeth]] and [[ph_ngqpt]].
+    topics: null
     vartype: real
 - !variable
     abivarname: ph_wstep
@@ -19172,6 +19651,7 @@
     text: |-
         The step used to generate the (linear) frequency mesh for the phonon DOS and the Eliashberg function.
         The extrema of the mesh are automatically computed by the code.
+    topics: null
     vartype: real
 - !variable
     abivarname: pimass
@@ -19200,6 +19680,7 @@
          If [[pitransform]]=1 (normal mode transformation), or [[pitransform]]=2 (staging transformation), [[pimass]] is automatically set to its optimal value.
          <br />
         </p>
+    topics: null
     vartype: real
 - !variable
     abivarname: pimd_constraint
@@ -19226,6 +19707,7 @@
         More details on the implementation in: <a href="http://doi.org/10.1273/cbij.7.12">Y. Komeiji,Chem-Bio Informatics Journal 7, 12-23 (2007)</a>.
         </li>
         </ul>
+    topics: null
     vartype: integer
 - !variable
     abivarname: pitransform
@@ -19252,6 +19734,7 @@
          <br />
          If equal to 2, staging transformation.
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: plowan_bandf
@@ -19270,6 +19753,7 @@
          <br />
          Gives the upper band to include in the calculation of Wannier functions
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: plowan_bandi
@@ -19288,6 +19772,7 @@
          <br />
          Gives the lower band to include in the calculation of Wannier functions
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: plowan_compute
@@ -19338,6 +19823,7 @@
          </a>
          )
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: plowan_iatom
@@ -19356,6 +19842,7 @@
          <br />
          Gives the indices of the [[plowan_natom]] atoms on which the projections will be done.
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: plowan_it
@@ -19380,6 +19867,7 @@
         These atoms are used to define Wannier functions in real space. These real space
         Wannier functions are used as a basis to compute the Hamiltonian.
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: plowan_lcalc
@@ -19400,6 +19888,7 @@
          Gives the [[plowan_nbl]] values of angular momenta for each atom, in the order of the atoms
         as given in [[plowan_iatom]].
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: plowan_natom
@@ -19418,6 +19907,7 @@
          <br />
          Gives the number of atoms on which the projection will be done
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: plowan_nbl
@@ -19437,6 +19927,7 @@
          <br />
          Gives the total number of angular momenta (over all atoms) to compute the projections.
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: plowan_nt
@@ -19459,6 +19950,7 @@
         Gives a number of selected atoms. These atoms are used to define Wannier functions in real space. These real space
         Wannier functions are used as a basis to compute the Hamiltonian.
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: plowan_projcalc
@@ -19480,6 +19972,7 @@
         as given in [[plowan_iatom]]. The index i for the projectors refers to the  ith number on line
         orbitals of the PAW atomic data file.
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: plowan_realspace
@@ -19509,6 +20002,7 @@
           </li>
          </ul>
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: polcen
@@ -19531,6 +20025,7 @@
         this non-zero polarization should be specified as [[polcen]] (in REDUCED coordinates, in atomic units) in the input file.
         See Eq.(24) in the Suppl. of Nat. Phys. (M. Stengel, N.A. Spaldin and D. Vanderbilt, Nat. Phys. 5,304 (2009))
         </p>
+    topics: null
     vartype: real
 - !variable
     abivarname: posdoppler
@@ -19555,6 +20050,7 @@
          or 'corewf.abinit&lt;ityp&gt;' (where &lt;ityp&gt; is the index of the atom type).
          Core WF files can be obtained with the atompaw tool by the use of 'prtcorewf' keyword.
         </p>
+    topics: positron_basic
     vartype: integer
 - !variable
     abivarname: positron
@@ -19687,6 +20183,7 @@
         <b>[4]</b> M.J. Puska, A.P. Seitsonen and R.M. Nieminen, Phys. Rev. B 52, 10947 (1994).<br>
         <b>[5]</b> B. Barbiellini, M.J. Puska, T. Torsti and R.M.Nieminen, Phys. Rev. B 51, 7341 (1994)<br>
         </ul>
+    topics: positron_compulsory
     vartype: integer
 - !variable
     abivarname: posnstep
@@ -19712,6 +20209,7 @@
         or the number of electronic/positronic steps is [[posnstep]].
          <br />
         </p>
+    topics: positron_basic
     vartype: integer
 - !variable
     abivarname: posocc
@@ -19733,6 +20231,7 @@
          Changing [[posocc]] is only useful for bulk calculation when one wants to perform lifetime computations using a small simulation cell (can avoid the use of a supercell). It simulates the dispersion of the positron in the whole crystal.
          <br />
         </p>
+    topics: positron_basic
     vartype: real
 - !variable
     abivarname: postoldfe
@@ -19770,6 +20269,7 @@
         <br />
         Only one and only one of [[postoldfe]] or [[postoldff]] can be set.
         </p>
+    topics: positron_basic
     vartype: real
 - !variable
     abivarname: postoldff
@@ -19797,6 +20297,7 @@
          Only one and only one of [[postoldfe]] or [[postoldff]] can be set.
          <br />
         </p>
+    topics: positron_basic
     vartype: real
 - !variable
     abivarname: ppmfrq
@@ -19865,6 +20366,7 @@
         real frequency axes. See
         [[cd_frqim_method]], [[gw_frqim_inzgrid]] and [[gw_frqre_inzgrid]] for more details.
         </p>
+    topics: null
     vartype: real
 - !variable
     abivarname: ppmodel
@@ -19916,6 +20418,7 @@
         Thus the calculated plasmon band structure (plasmon energy vs q vector) is reported in the output file for the
         lowest 10 bands.
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: prepanl
@@ -19951,6 +20454,7 @@
         to force ABINIT (i) to compute the electric field perturbation
         along the three directions explicitly, and (ii) to keep the full number of k-points.
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: prepgkk
@@ -19972,6 +20476,7 @@
         symmetry to reduce the number of perturbations, set [[prepgkk]] to 1.
         Use in conjunction with [[prtgkk]].
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: prepscphon
@@ -19992,6 +20497,7 @@
         or merge these files, so use anaddb instead (with prtscphon input variable). The abinit input
         variable is destined to someday bypass the use of anaddb for scphon calculations.
         </p>
+    topics: printing_prngs
     vartype: integer
 - !variable
     abivarname: prt1dm
@@ -20011,6 +20517,7 @@
         This corresponds to averaging the potential
         or the density on bi-dimensional slices of the FFT grid.
         </p>
+    topics: printing_prgs
     vartype: integer
 - !variable
     abivarname: prtatlist
@@ -20035,6 +20542,7 @@
         "HIST.nc", those are NetCDF files containing the information about
         all the atoms.
         </p>
+    topics: printing_prgeo
     vartype: integer
 - !variable
     abivarname: prtbbb
@@ -20054,6 +20562,7 @@
         Born effective charges and localization tensor, in case they are computed.
         See Ph. Ghosez and X. Gonze, J. Phys.: Condens. Matter 12, 9179 (2000).
         </p>
+    topics: printing_prngs
     vartype: integer
 - !variable
     abivarname: prtbltztrp
@@ -20073,6 +20582,7 @@
          <a href="https://www.imc.tuwien.ac.at/forschungsbereich_theoretische_chemie/forschungsgruppen/prof_dr_gkh_madsen_theoretical_materials_chemistry/boltztrap/"> BoltzTraP code</a>
          by Georg Madsen.
         </p>
+    topics: printing_prgs
     vartype: integer
 - !variable
     abivarname: prtcif
@@ -20090,6 +20600,7 @@
         <p>
          If set to 1, a CIF file is output with the crystallographic data for the present run (cell size shape and atomic positions).
         </p>
+    topics: printing_prgeo
     vartype: integer
 - !variable
     abivarname: prtden
@@ -20241,6 +20752,7 @@
          use _PAWDEN or _ATMDEN_xxx files produced by prtden &gt; 1 to chain the density output from one
         calculation as the input to another, use the _DEN file for that.
         </p>
+    topics: printing_prden
     vartype: integer
 - !variable
     abivarname: prtdensph
@@ -20272,6 +20784,7 @@
         this is not a real problem. If you are interested in a more accurate estimation
         of the density within a sphere, you should use the cut3d postprocessor.
         </p>
+    topics: printing_prden
     vartype: integer
 - !variable
     abivarname: prtdipole
@@ -20289,6 +20802,7 @@
         <p>
          Print out dipole of unit cell, calculated in real space for the primitive cell only. Under development.
         </p>
+    topics: printing_prgs
     vartype: integer
 - !variable
     abivarname: prtdos
@@ -20396,6 +20910,7 @@
         <p>
          [[prtdos]]=5 delivers the spin-spin DOS in the [[nspinor]]==2 case, using the tetrahedron method (as [[prtdos]]=2).
         </p>
+    topics: printing_prdos
     vartype: integer
 - !variable
     abivarname: prtdosm
@@ -20423,6 +20938,7 @@
          In this case, [[prtdosm]] computes the M-resolved partial dos for real spherical harmonics
         in the same basis as the LDA+U occupation matrix.
         </p>
+    topics: printing_prdos
     vartype: integer
 - !variable
     abivarname: prtebands
@@ -20448,6 +20964,7 @@
         <li>2 Write eigenvalues in gnuplot format. The code produces a `EBANDS.dat` file with the eigenvalues and a `EBANDS.gnuplot` script.
         Use `gnuplot file_EBANDS.gnuplot` to visualize the band energies.</li>
         </ul>
+    topics: printing_prden
     vartype: integer
 - !variable
     abivarname: prtefg
@@ -20479,6 +20996,7 @@
           </li>
          </ul>
         </p>
+    topics: printing_prngs
     vartype: integer
 - !variable
     abivarname: prteig
@@ -20498,6 +21016,7 @@
          If set to 1, a file *_EIG, containing the
         k-points and one-electron eigenvalues is printed.
         </p>
+    topics: printing_prden
     vartype: integer
 - !variable
     abivarname: prtelf
@@ -20536,6 +21055,7 @@
          </b>
          yet implemented in the case of PAW ([[usepaw]]=1) calculations.
         </p>
+    topics: printing_prgs
     vartype: integer
 - !variable
     abivarname: prtfc
@@ -20559,6 +21079,7 @@
           </li>
          </ul>
         </p>
+    topics: printing_prfermi
     vartype: integer
 - !variable
     abivarname: prtfsurf
@@ -20589,6 +21110,7 @@
         variables [[ngkpt]], ([[shiftk]], and [[nshiftk]].
         Note, however, that the mesh must be homogeneous and centered on gamma (multiple shifts are not supported by Xcrysden)
         </p>
+    topics: printing_prfermi
     vartype: integer
 - !variable
     abivarname: prtgden
@@ -20612,6 +21134,7 @@
          Like a _DEN file, it can be analyzed by cut3d. The file structure of the unformatted output file is
         described below, see section 6).
         </p>
+    topics: printing_prden
     vartype: integer
 - !variable
     abivarname: prtgeo
@@ -20659,6 +21182,7 @@
          <br />
          If [[prtgeo]]&gt;0, the maximum number of atoms ([[natom]]) is 9999.
         </p>
+    topics: printing_prgeo
     vartype: integer
 - !variable
     abivarname: prtgkk
@@ -20680,6 +21204,7 @@
         information on electron-phonon treatment in ABINIT is given in the tutorial
         ~abinit/doc/tutorial/lesson_eph.html and in ~abinit/doc/users/elphon_manual.ps
         </p>
+    topics: printing_prngs
     vartype: integer
 - !variable
     abivarname: prtgsr
@@ -20700,6 +21225,7 @@
         <br> Note that, by default, the GSR file contains the electronic density
         unless [[prtden]] is set to 0.
         </p>
+    topics: printing_prgs
     vartype: integer
 - !variable
     abivarname: prtkden
@@ -20732,6 +21258,7 @@
          </b>
          yet implemented in the case of PAW ([[usepaw]]=1) calculations.
         </p>
+    topics: printing_prden
     vartype: integer
 - !variable
     abivarname: prtkpt
@@ -20790,6 +21317,7 @@
         if set to -2, the code stops in invars1 after the computation of the irreducible set and
         a file named kpts.nc with the list of the k-points and the corresponding weights is produced
         </p>
+    topics: printing_prden
     vartype: integer
 - !variable
     abivarname: prtlden
@@ -20815,6 +21343,7 @@
           section 6
          </a>).
         </p>
+    topics: printing_prden
     vartype: integer
 - !variable
     abivarname: prtnabla
@@ -20835,6 +21364,7 @@
           </li>
          </ul>
         </p>
+    topics: printing_prgs
     vartype: integer
 - !variable
     abivarname: prtnest
@@ -20852,6 +21382,7 @@
         <p>
          If set to 1, the nesting function for the k-point grid is printed. For the moment the path in q space for the nesting function is fixed, but will become an input as well.
         </p>
+    topics: printing_prfermi
     vartype: integer
 - !variable
     abivarname: prtphbands
@@ -20877,6 +21408,7 @@
         <li>2 Write frequencies in gnuplot format. The code produces a `PHBANDS.dat` file with the eigenvalues and a `PHBANDS.gnuplot` script.
         Use `gnuplot file_PHBANDS.gnuplot` to visualize the phonon band structure.</li>
         </ul>
+    topics: printing_prngs
     vartype: integer
 - !variable
     abivarname: prtphdos
@@ -20895,6 +21427,7 @@
         Print the phonon density of states.
         It is activated by default when [[optdriver]]==7.
         </p>
+    topics: printing_prngs
     vartype: integer
 - !variable
     abivarname: prtphsurf
@@ -20912,6 +21445,7 @@
         phonon frequencies computed of the q-mesh determined by [[ph_ngqpt]]. The file can be use to visualize isosurfaces with Xcrysden or other similar tools supporting the bxsf format.
         Note that the (dense) q-mesh must be Gamma-centered, shifted meshs are not supported by Xcrysden.
         This variable requires [[optdriver]]==7.
+    topics: printing_prngs
     vartype: integer
 - !variable
     abivarname: prtposcar
@@ -20931,6 +21465,7 @@
         See the associated script in ~abinit/extras/post_processing/phondisp2abi.py for further details on interfacing
         with PHON, PHONOPY, etc...
         </p>
+    topics: printing_prgeo
     vartype: integer
 - !variable
     abivarname: prtpot
@@ -20972,6 +21507,7 @@
          of abinit_help.
         No output is provided by a negative value of this variable.
         </p>
+    topics: printing_prpot
     vartype: integer
 - !variable
     abivarname: prtpsps
@@ -20987,6 +21523,7 @@
     text: |-
         If set to 1, the code produces a netcdf file (PSPS.nc) with the internal tables used by Abinit to apply the pseudopotential part of the KS Hamiltonian. The data can be visualized with AbiPy.
         if prtpsps is set to -1, the code will exit after the output of the PSPS.nc file.
+    topics: printing_prgs
     vartype: integer
 - !variable
     abivarname: prtspcur
@@ -21005,6 +21542,7 @@
         different direction spins (x,y,z) in the whole unit cell. Should require spinorial wave functions [[nspinor]]
          = 2. Experimental: this does not work yet.
         </p>
+    topics: printing_prgs
     vartype: integer
 - !variable
     abivarname: prtstm
@@ -21078,6 +21616,7 @@
          <br />
          No other printing variables for density or potentials should be activated (e.g. [[prtden]] has to be set to zero).
         </p>
+    topics: printing_prgs
     vartype: integer
 - !variable
     abivarname: prtsuscep
@@ -21095,6 +21634,7 @@
          If set to 0, no _SUSC file will be produced after the screening calculation,
         only the _SCR file will be output.
         </p>
+    topics: printing_prngs
     vartype: integer
 - !variable
     abivarname: prtvclmb
@@ -21115,6 +21655,7 @@
         <p>
         If <b>prtvclmb=2</b>, only the smooth part of the Coulomb potential is output.
         <p>
+    topics: printing_prpot
     vartype: integer
 - !variable
     abivarname: prtvdw
@@ -21132,6 +21673,7 @@
         Print out a NetCDF file containing a vdW-DF kernel.
         <!-- See the associated script in
         ~abinit/extras/post_processing/vdw_check_kernel for further details. -->
+    topics: printing_prgs
     vartype: integer
 - !variable
     abivarname: prtvha
@@ -21174,6 +21716,7 @@
          of abinit_help.
         No output is provided by a negative value of this variable.
         </p>
+    topics: printing_prpot
     vartype: integer
 - !variable
     abivarname: prtvhxc
@@ -21216,6 +21759,7 @@
          of abinit_help.
         No output is provided by a negative value of this variable.
         </p>
+    topics: printing_prpot
     vartype: integer
 - !variable
     abivarname: prtvol
@@ -21286,6 +21830,7 @@
         </ul>
         This debugging feature is not yet activated in the RF routines.
         Note that [[fftalg]] offers another option for debugging.</p>
+    topics: printing_prgs
     vartype: integer
 - !variable
     abivarname: prtvolimg
@@ -21321,6 +21866,7 @@
          , the printing volume, for each image,
         is reduced to total energy and convergence residuals only.
         </p>
+    topics: printing_prgs
     vartype: integer
 - !variable
     abivarname: prtvpsp
@@ -21363,6 +21909,7 @@
          of abinit_help.
         No output is provided by a negative value of this variable.
         </p>
+    topics: printing_prpot
     vartype: integer
 - !variable
     abivarname: prtvxc
@@ -21405,6 +21952,7 @@
          of abinit_help.
         No output is provided by a negative value of this variable.
         </p>
+    topics: printing_prpot
     vartype: integer
 - !variable
     abivarname: prtwant
@@ -21575,6 +22123,7 @@
           </li>
          </ul>
         </p>
+    topics: printing_prgs
     vartype: integer
 - !variable
     abivarname: prtwf
@@ -21688,6 +22237,7 @@
         incorrectly normalized orbitals or non-integer occupation numbers there is
         probably something set wrong in the input file.
         </p>
+    topics: printing_prden
     vartype: integer
 - !variable
     abivarname: prtwf_full
@@ -21706,6 +22256,7 @@
         Note that prtwf_full requires [[prtwf]] == 1 and a ground-state
         calculation done on a homogeneous k-mesh (see [[ngkpt]] and [[shiftk]]).
         The tetrahedron table is produced only if the number of k-points in the irreducible zone ([[nkpt]]) is greater than 3.
+    topics: printing_prden
     vartype: integer
 - !variable
     abivarname: prtxml
@@ -21725,6 +22276,7 @@
         yet implemented and this one is currently restricted to ground-state computations
         (and derivative such as geometry optimisation).
         </p>
+    topics: printing_prgs
     vartype: integer
 - !variable
     abivarname: ptcharge
@@ -21756,6 +22308,7 @@
           </li>
          </ul>
         </p>
+    topics: null
     vartype: real
 - !variable
     abivarname: ptgroupma
@@ -21792,6 +22345,7 @@
         [[spgroupma]],
         [[genafm]]
         </p>
+    topics: spinpolarisation_useful
     vartype: integer
 - !variable
     abivarname: pvelmax
@@ -21815,6 +22369,7 @@
          The vector [[pvelmax]] defines both the direction and the maximum velocity.
         [[pvelmax]] is input in Cartesian coordinates.
         </p>
+    topics: null
     vartype: real
 - !variable
     abivarname: pw_unbal_thresh
@@ -21833,6 +22388,7 @@
          over MPI processes is not optimal. The balancing procedure is activated when the ratio between the
          number of plane waves treated by a processor and the ideal one is higher than <i>pw_unbal_thresh</i> %.
         </p>
+    topics: parallelism_expert
     vartype: real
 - !variable
     abivarname: qmass
@@ -21862,6 +22418,7 @@
         [[optcell]] =0 (NVT ensemble) or 2 (fully flexible NPT ensemble).
         In that case, [[optcell]]=2 iS NOT USABLE yet.
         </p>
+    topics: null
     vartype: real
 - !variable
     abivarname: qprtrb
@@ -21886,6 +22443,7 @@
         of a perturbing potential of strength [[vprtrb]].  See [[vprtrb]]
         for more explanation.
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: qpt
@@ -21917,6 +22475,7 @@
         instead), but is used to echo the value of [[qptn]](1:3),
         with renormalisation factor one.
         </p>
+    topics: null
     vartype: real
 - !variable
     abivarname: qptdm
@@ -21941,6 +22500,7 @@
         These q points are given in terms of reciprocal space primitive translations (NOT in cartesian coordinates!).
         For further explanation, see the input variable [[nqptdm]].
         </p>
+    topics: null
     vartype: real
 - !variable
     abivarname: qptn
@@ -21996,6 +22556,7 @@
         other q points might be allowed (perhaps with some
         modification of the code).
         </p>
+    topics: null
     vartype: real
 - !variable
     abivarname: qptnrm
@@ -22021,6 +22582,7 @@
         [[qptn]](1:3)=
         [[qpt]](1:3)/[[qptnrm]].
         </p>
+    topics: null
     vartype: real
 - !variable
     abivarname: qptopt
@@ -22105,6 +22667,7 @@
         [[prtkpt]] might help
         you to select the optimal grid, similarly to the case of the K point grid.
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: qptrlatt
@@ -22147,6 +22710,7 @@
         See this latter variable for a complete description of this
         procedure.
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: quadmom
@@ -22174,6 +22738,7 @@
           </li>
          </ul>
         </p>
+    topics: null
     vartype: real
 - !variable
     abivarname: random_atpos
@@ -22199,6 +22764,7 @@
         sum of the covalent bonds between the atoms (note : this is incompatible with the definition of alchemical mixing, in which
         [[ntypat]] differs from [[npsp]])
         </p>
+    topics: otherGS_expert
     vartype: integer
 - !variable
     abivarname: ratsph
@@ -22263,6 +22829,7 @@
          In case of PAW, [[ratsph]] radius has to be greater or equal to
         PAW radius of considered atom type (which is read from the PAW dataset file; see rc_sph or r_paw).
         </p>
+    topics: printing_prdos
     vartype: real
 - !variable
     abivarname: ratsph_extra
@@ -22282,6 +22849,7 @@
         Radius for extra spheres the DOS is projected into. See [[natsph_extra]]
         and [[xredsph_extra]]
         for the number and positions of the spheres.
+    topics: printing_prdos
     vartype: real
 - !variable
     abivarname: rcut
@@ -22302,6 +22870,7 @@
         <p>
          If [[rcut]] is negative, the cutoff is automatically calculated so to enclose the same volume inside the cutoff as the volume of the primitive cell.
         </p>
+    topics: null
     vartype: real
 - !variable
     abivarname: recefermi
@@ -22320,6 +22889,7 @@
          Used in Recursion method ([[tfkinfunc]]=2).
         In the first  SCF calculation it fixes the initial guess for the Fermi energy.
         </p>
+    topics: null
     vartype: real
 - !variable
     abivarname: recgratio
@@ -22345,6 +22915,7 @@
         FFT interpolation.  Note that ngfft/recgratio=number of points of the
         coarse grid has to be compatible with the parallelization parameters.
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: recnpath
@@ -22366,6 +22937,7 @@
         compute the entropy and the eigenvalues energy. during the latest SFC
         cycles.
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: recnrec
@@ -22387,6 +22959,7 @@
         [[rectolden]] is reached before that order, the recursion method
         automatically stops.
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: recptrott
@@ -22414,6 +22987,7 @@
         error of the green kernel exp((recptrott/beta*|r|^2)) on the ngfft
         grid.
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: recrcut
@@ -22435,6 +23009,7 @@
         cell: the density at a point will be computed with taking account only of
         a sphere of radius [[recrcut]].
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: rectesteg
@@ -22454,6 +23029,7 @@
         It is used to test an electron gas by putting the ion potential
         equal to zero.
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: rectolden
@@ -22475,6 +23051,7 @@
         density difference is computed in the infinity norm (that is, it is
         computed point-by-point, and then the maximum difference is computed).
         </p>
+    topics: null
     vartype: real
 - !variable
     abivarname: red_dfield
@@ -22500,6 +23077,7 @@
         <p>
          [[red_dfield]] is defined via Eq.(26) in the Supplement of M. Stengel, N.A. Spaldin and D. Vanderbilt, Nat. Phys. 5,304 (2009).
         </p>
+    topics: null
     vartype: real
 - !variable
     abivarname: red_efield
@@ -22524,6 +23102,7 @@
         <p>
          [[red_efield]] is defined via Eq.(25) in the Supplement of M. Stengel, N.A. Spaldin and D. Vanderbilt, Nat. Phys. 5,304 (2009).
         </p>
+    topics: null
     vartype: real
 - !variable
     abivarname: red_efieldbar
@@ -22548,6 +23127,7 @@
         <p>
          [[red_efieldbar]] is defined via Eq.(28) in the Supplement of M. Stengel, N.A. Spaldin and D. Vanderbilt, Nat. Phys. 5,304 (2009).
         </p>
+    topics: null
     vartype: real
 - !variable
     abivarname: restartxf
@@ -22659,6 +23239,7 @@
          to get a good wave function
         to continue your job.
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: rf2_dkdk
@@ -22697,6 +23278,7 @@
           </li>
          </ul>
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: rfasr
@@ -22741,6 +23323,7 @@
          </a>
          .
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: rfatpol
@@ -22788,6 +23371,7 @@
          </a>
          ).
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: rfddk
@@ -22819,6 +23403,7 @@
           </li>
          </ul>
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: rfdir
@@ -22859,6 +23444,7 @@
         for the corresponding direction. If 0, this direction
         should not be considered.
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: rfelfd
@@ -22911,6 +23497,7 @@
         also, in case a scissor shift is to be used,
         it is usually not applied for the d/dk response).
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: rfmagn
@@ -22931,6 +23518,7 @@
          Currently, orbital magnetism is not taken into account and the perturbing potential
          has Zeeman form.
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: rfmeth
@@ -22950,6 +23538,7 @@
         response function calculations. Presently, only 1
         is allowed.
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: rfphon
@@ -22968,6 +23557,7 @@
          It must be equal to 1
         to run phonon response function calculations.
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: rfstrs
@@ -23006,6 +23596,7 @@
          </a>
          .
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: rfuser
@@ -23052,6 +23643,7 @@
         attention to the rfpert array, defined in the routine respfn.F90 ,
         as well as to the ipert local variable.
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: rhoqpmix
@@ -23073,6 +23665,7 @@
         [[rhoqpmix]] is meaningful only when doing self-consistency on the wavefunctions with
         [[gwcalctyp]] &#62;&#61; 20.
         </p>
+    topics: null
     vartype: real
 - !variable
     abivarname: rprim
@@ -23218,6 +23811,7 @@
         the echo of [[rprim]] in the output file is not the value contained in the input file,
         but the value rescaled by [[scalecart]].
         </p>
+    topics: crystal_compulsory
     vartype: real
 - !variable
     abivarname: rprimd
@@ -23254,6 +23848,7 @@
         </p>
         It is [[EVOLVING]] only if [[ionmov]]==2 and [[optcell]]/=0, otherwise it is fixed.
         <br />
+    topics: null
     vartype: real
 - !variable
     abivarname: scalecart
@@ -23285,6 +23880,7 @@
          Note that this input variable is [[INPUT_ONLY]] : its content will be immediately applied to rprim, at parsing time,
         and then scalecart will be set to the default values. So, it will not be echoed.
         </p>
+    topics: crystal_useful
     vartype: real
 - !variable
     abivarname: scphon_supercell
@@ -23310,6 +23906,7 @@
 
         TO BE IMPROVED : should contain a tutorial on how to do self-consistent phonon calculations, David Waroquiers 090831
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: scphon_temp
@@ -23333,6 +23930,7 @@
          , 095901. Determines the extent of the finite displacements
         used, and consequent anharmonic effects. Experimental.
         </p>
+    topics: null
     vartype: real
 - !variable
     abivarname: shiftk
@@ -23448,6 +24046,7 @@
         this corresponds to [[shiftk]]  0.5 0.5 0.5, to keep the shift along the
         symmetry axis.
         </p>
+    topics: k-points_useful
     vartype: real
 - !variable
     abivarname: shiftq
@@ -23483,6 +24082,7 @@
          See [[shiftk]] for more information on the definition,
         use, and suitable values for these shifts.
         </p>
+    topics: null
     vartype: real
 - !variable
     abivarname: signperm
@@ -23498,6 +24098,7 @@
     text: |-
         +1 favors alternation of species
         -1 favors segregation
+    topics: null
     vartype: integer
 - !variable
     abivarname: slabwsrad
@@ -23521,6 +24122,7 @@
         <br />
         By default, given in Bohr atomic units (1 Bohr=0.5291772108 Angstroms).
         </p>
+    topics: otherGS_slab
     vartype: real
 - !variable
     abivarname: slabzbeg
@@ -23548,6 +24150,7 @@
          </pre>
         so the positive charge density is invariant along the xy plane as well as the electrostatic potential generated by it.
         </p>
+    topics: otherGS_slab
     vartype: real
 - !variable
     abivarname: slabzend
@@ -23575,6 +24178,7 @@
          </pre>
         so the positive charge density is invariant along the xy plane as well as the electrostatic potential generated by it.
         </p>
+    topics: otherGS_slab
     vartype: real
 - !variable
     abivarname: smdelta
@@ -23610,6 +24214,7 @@
           </li>
          </ul>
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: so_psp
@@ -23659,6 +24264,7 @@
          was used, in place of [[so_psp]]. Because the values 0 and 1 have been switched
         between [[so_psp]] and so_typat, it was dangerous to continue to allow the use of so_typat.
         </p>
+    topics: spinpolarisation_basic
     vartype: integer
 - !variable
     abivarname: spbroad
@@ -23677,6 +24283,7 @@
         When a screening calculation ([[optdriver]]==3) uses a spectral representation of the irreducible polarizability in which
         the delta function is replaced by the gaussian approximant ([[spmeth]]==2), the standard deviation of the gaussian
         is given by [[spbroad]].
+    topics: null
     vartype: real
 - !variable
     abivarname: spgaxor
@@ -23778,6 +24385,7 @@
           </li>
          </ol>
         </p>
+    topics: crystal_expert
     vartype: integer
 - !variable
     abivarname: spgorig
@@ -23807,6 +24415,7 @@
          </a>
          .
         </p>
+    topics: crystal_expert
     vartype: integer
 - !variable
     abivarname: spgroup
@@ -23853,6 +24462,7 @@
          </a>
          .
         </p>
+    topics: crystal_expert
     vartype: integer
 - !variable
     abivarname: spgroupma
@@ -23899,6 +24509,7 @@
         define by hand the set of symmetries, using [[symrel]],
         [[tnons]] and [[symafm]].
         </p>
+    topics: spinpolarisation_useful
     vartype: integer
 - !variable
     abivarname: spinat
@@ -23988,6 +24599,7 @@
         also used to determine the direction of the integrated magnetization matrix.
          </li>
         </p>
+    topics: spinpolarisation_basic
     vartype: real
 - !variable
     abivarname: spinmagntarget
@@ -24027,6 +24639,7 @@
         magnetic moment case, it differs from the
         spin up Fermi energy.
         </p>
+    topics: spinpolarisation_useful
     vartype: real
 - !variable
     abivarname: spmeth
@@ -24091,6 +24704,7 @@
           </li>
          </ul>
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: spnorbscl
@@ -24109,6 +24723,7 @@
         other values are used for the analysis of the effect of the spin-orbit interaction,
         but are not expected to correspond to any physical situation.
         </p>
+    topics: PAW_useful
     vartype: real
 - !variable
     abivarname: stmbias
@@ -24144,6 +24759,7 @@
         With [[occopt]]=7,
         one has also to specify an independent broadening [[tsmear]].
         </p>
+    topics: GSgeneral_useful
     vartype: real
 - !variable
     abivarname: strfact
@@ -24168,6 +24784,7 @@
         [[tolmxf]] relates to these scaled
         stresses.
         </p>
+    topics: null
     vartype: real
 - !variable
     abivarname: string_algo
@@ -24242,6 +24859,7 @@
           </li>
          </ul>
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: strprecon
@@ -24261,6 +24879,7 @@
         of the unit cell). In case there is an instability, decrease the
         default value, e.g. set it to 0.1 .
         </p>
+    topics: GSgeneral_useful
     vartype: real
 - !variable
     abivarname: strtarget
@@ -24289,6 +24908,7 @@
         between Ha/Bohr**3 and GPa is : 1 Ha/Bohr**3 = 29421.033d0 GPa.
         <br />
         Not used if [[optcell]]==0.
+    topics: GSgeneral_useful
     vartype: real
 - !variable
     abivarname: symafm
@@ -24333,6 +24953,7 @@
          <br />
          In other cases they are not used.
         </p>
+    topics: spinpolarisation_useful
     vartype: integer
 - !variable
     abivarname: symchi
@@ -24364,6 +24985,7 @@
           </li>
          </ul>
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: symdynmat
@@ -24379,6 +25001,7 @@
     text: |-
         If symdynmat is equal to 1, the dynamical matrix is symmetrized before the diagonalization (same meaning as the corresponding anaddb variable).
         Note that symdynmat==1 will automatically enable the symmetrization of the electron-phonon linewidths.
+    topics: null
     vartype: integer
 - !variable
     abivarname: symmorphi
@@ -24409,6 +25032,7 @@
         to the IBZ. In order to prepare [[GW]] calculations, and to perform [[GW]] calculations,
         [[symmorphi]]=0 was to be used, together with [[nsym]]=0.
         </p>
+    topics: crystal_expert
     vartype: integer
 - !variable
     abivarname: symrel
@@ -24465,6 +25089,7 @@
          When the symmetry finder is used (see [[nsym]]), [[symrel]]
         will be computed automatically.
         </p>
+    topics: crystal_useful
     vartype: integer
 - !variable
     abivarname: symsigma
@@ -24499,6 +25124,7 @@
         since [[GW]] calculations performed with [[symsigma]]=1 will not be able to remove
         the initial accidental degeneracy.
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: td_maxene
@@ -24530,6 +25156,7 @@
          See [[td_mexcit]] for an alternative
         way to decrease N.
         </p>
+    topics: TDDFT_useful
     vartype: real
 - !variable
     abivarname: td_mexcit
@@ -24562,6 +25189,7 @@
          for an alternative
         way to decrease N.
         </p>
+    topics: TDDFT_useful
     vartype: real
 - !variable
     abivarname: tfkinfunc
@@ -24621,6 +25249,7 @@
           </li>
          </ul>
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: tfw_toldfe
@@ -24640,6 +25269,7 @@
         It sets a tolerance for absolute differences of total energy that, reached TWICE successively, will cause the
         initialization steps (without gradient correction) to stop and the gradient correction to be added.<br/>
         Can be specified in Ha (the default), Ry, eV or Kelvin, since it has the 'ENERGY' characteristics.
+    topics: null
     vartype: real
 - !variable
     abivarname: timopt
@@ -24686,6 +25316,7 @@
         (this takes time, and is discouraged for too small runs - the timing would take more time than the run !). The timer is timed.
         The sum of the independent parts is closer to 100% than for [[timopt]]=-3.
         </p>
+    topics: GSgeneral_expert
     vartype: integer
 - !variable
     abivarname: tl_nprccg
@@ -24708,6 +25339,7 @@
 
         TO BE IMPROVED : all tl_* and wvl_* variables should contain a link to a tutorial, David Waroquiers 090831.
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: tl_radius
@@ -24732,6 +25364,7 @@
         correspond to a length in atomic units being the spacial expansion
         with the exponential decay around the grid.
         </p>
+    topics: null
     vartype: real
 - !variable
     abivarname: tnons
@@ -24762,6 +25395,7 @@
          When the symmetry finder is used (see [[nsym]]), [[tnons]]
         is computed automatically.
         </p>
+    topics: crystal_useful
     vartype: real
 - !variable
     abivarname: toldfe
@@ -24810,6 +25444,7 @@
         However, a non-zero value for one such variable for one dataset will have precedence on the non-zero value for another
         input variable defined generically.
         </p>
+    topics: convergency_basic
     vartype: real
 - !variable
     abivarname: toldff
@@ -24855,6 +25490,7 @@
         However, a non-zero value for one such variable for one dataset will have precedence on the non-zero value for another
         input variable defined generically.
         </p>
+    topics: GSgeneral_useful
     vartype: real
 - !variable
     abivarname: tolimg
@@ -24883,6 +25519,7 @@
          <br />
          No meaning for RF calculations.
         </p>
+    topics: null
     vartype: real
 - !variable
     abivarname: tolmxde
@@ -24908,6 +25545,7 @@
          <br />
          No meaning for RF calculations.
         </p>
+    topics: null
     vartype: real
 - !variable
     abivarname: tolmxf
@@ -24942,6 +25580,7 @@
          <br />
          No meaning for RF calculations.
         </p>
+    topics: null
     vartype: real
 - !variable
     abivarname: tolrde
@@ -24970,6 +25609,7 @@
         In RF calculations, [[tolrde]] is actually doubled before comparing with the above-mentioned
         ratio, for historical reasons.
         </p>
+    topics: convergency_expert
     vartype: real
 - !variable
     abivarname: tolrff
@@ -25014,6 +25654,7 @@
         However, a non-zero value for one such variable for one dataset will have precedence on the non-zero value for another
         input variable defined generically.
         </p>
+    topics: convergency_basic, GSgeneral_useful
     vartype: real
 - !variable
     abivarname: tolsym
@@ -25038,6 +25679,7 @@
         If [[tolsym]] is set to a larger value than 1.e-8, then the input atomic coordinates
         will be automatically symmetrized by the symmetry operations that will have been found.
         </p>
+    topics: null
     vartype: real
 - !variable
     abivarname: tolvrs
@@ -25087,6 +25729,7 @@
         However, a non-zero value for one such variable for one dataset will have precedence on the non-zero value for another
         input variable defined generically.
         </p>
+    topics: convergency_basic
     vartype: real
 - !variable
     abivarname: tolwfr
@@ -25180,6 +25823,7 @@
         have non-zero values for the same dataset, or generically (for all datasets).
         However, a non-zero value for one such variable for one dataset will have precedence on the non-zero value for another
         input variable defined generically.
+    topics: convergency_basic
     vartype: real
 - !variable
     abivarname: tphysel
@@ -25214,6 +25858,7 @@
         [[tsmear]] as a prefactor of the entropy,
         to define the entropy contribution to the free energy.
         </p>
+    topics: GSgeneral_useful
     vartype: real
 - !variable
     abivarname: tsmear
@@ -25254,6 +25899,7 @@
         [[tphysel]]. See the paper
         by M. Verstraete and X. Gonze, Phys. Rev. B (2002).
         </p>
+    topics: GSgeneral_basic
     vartype: real
 - !variable
     abivarname: typat
@@ -25307,6 +25953,7 @@
         together. This should be transparent to the
         user, while keeping efficiency.
         </p>
+    topics: GSgeneral_basic
     vartype: integer
 - !variable
     abivarname: ucrpa
@@ -25353,6 +26000,7 @@
         </p>
         <p>
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: ucrpa_bands
@@ -25375,6 +26023,7 @@
         </p>
         <p>
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: ucrpa_window
@@ -25399,6 +26048,7 @@
         The lower bound and the upper bound energies must be specified (two real numbers) with respect to the position of the Fermi level.
         <p>
         </p>
+    topics: null
     vartype: real
 - !variable
     abivarname: udtset
@@ -25435,6 +26085,7 @@
          <br />
          If [[udtset]] is used, the input variable [[jdtset]] cannot be used.
         </p>
+    topics: multidtset_basic
     vartype: integer
 - !variable
     abivarname: upawu
@@ -25486,6 +26137,7 @@
         uldau4   5.5 eV   ! This is for the screening calculation
          </pre>
         </p>
+    topics: DFT+U_compulsory
     vartype: real
 - !variable
     abivarname: use_gemm_nonlop
@@ -25509,6 +26161,7 @@
         <p>
          The performance depends crucially on having a good BLAS installed. Provided the BLAS supports OpenMP, this option also yields very good scaling for the nonlocal operator.
         </p>
+    topics: parallelism_expert
     vartype: integer
 - !variable
     abivarname: use_gpu_cuda
@@ -25539,6 +26192,7 @@
         step of ABINIT compilation process). If MAGMA is not used, ABINIT performances on GPUs
         can be poor.
         </p>
+    topics: parallelism_expert
     vartype: integer
 - !variable
     abivarname: use_nonscf_gkk
@@ -25559,6 +26213,7 @@
         <p>
          Caveat: Note that very tight convergence of ground state and phonon calculations is necessary to get good GKK matrix elements! [[tolwfr]] = 1.e-24 or so is recommended everywhere. There may be problems using use_nonscf_gkk = 1 with non-symmorphic symmetries - please check (at least) that lifetimes for phonons go to 0 for acoustic modes at Gamma.
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: use_slk
@@ -25576,6 +26231,7 @@
         <p>
          If set to 1, enable the use of ScaLapack within LOBPCG.
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: usedmatpu
@@ -25608,6 +26264,7 @@
          - When [[usedmatpu]]&lt;0, the density matrix is kept constant at each ionic step
          <br />
         </p>
+    topics: DFT+U_useful
     vartype: integer
 - !variable
     abivarname: usedmft
@@ -25680,6 +26337,7 @@
         If [[usedmft]]=1 and [[nbandkss]]/=0, then, the DFT+DMFT calculation is not done and only projections are computed at the end
         of the calculation. They can be used by an external code or used to compute the screened interaction (see variable [[ucrpa]]).
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: useexexch
@@ -25698,6 +26356,7 @@
         in PAW, inside PAW spheres only, and only for correlated orbitals given by
         [[lexexch]]. To change the ratio of exact exchange, see also [[exchmix]].
         </p>
+    topics: xc_useful
     vartype: integer
 - !variable
     abivarname: usefock
@@ -25723,6 +26382,7 @@
           </li>
          </ul>
         </p>
+    topics: hf_internal
     vartype: integer
 - !variable
     abivarname: usekden
@@ -25742,6 +26402,7 @@
         This is needed if a meta-GGA is to be used as XC functional. Otherwise ([[usekden]]=0), the kinetic energy
         density is not computed during the self-consistency loop.
         </p>
+    topics: xc_expert
     vartype: integer
 - !variable
     abivarname: usepaw
@@ -25768,6 +26429,7 @@
         pseudopotential input files. Most functionalities in ABINIT are available
         with either type of calculation.
         </p>
+    topics: PAW_internal
     vartype: integer
 - !variable
     abivarname: usepawu
@@ -25852,6 +26514,7 @@
          - B. Amadon, F. Jollet and M. Torrent, Phys. Rev. B 77, 155104 (2008).
          <br />
         </p>
+    topics: DFT+U_compulsory
     vartype: integer
 - !variable
     abivarname: usepotzero
@@ -25878,6 +26541,7 @@
           </li>
          </ul>
         </p>
+    topics: otherGS_expert
     vartype: integer
 - !variable
     abivarname: userec
@@ -25896,6 +26560,7 @@
          This internal variable is set to 1 when the recursion method is
         activated (see [[tfkinfunc]]).
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: useria
@@ -25920,6 +26585,7 @@
          Internally, they are available in the dtset structured datatype,
         e.g. dtset%useria .
         </p>
+    topics: otherGS_expert
     vartype: integer
 - !variable
     abivarname: userib
@@ -25944,6 +26610,7 @@
          Internally, they are available in the dtset structured datatype,
         e.g. dtset%useria .
         </p>
+    topics: otherGS_expert
     vartype: integer
 - !variable
     abivarname: useric
@@ -25968,6 +26635,7 @@
          Internally, they are available in the dtset structured datatype,
         e.g. dtset%useria .
         </p>
+    topics: otherGS_expert
     vartype: integer
 - !variable
     abivarname: userid
@@ -25992,6 +26660,7 @@
          Internally, they are available in the dtset structured datatype,
         e.g. dtset%useria .
         </p>
+    topics: otherGS_expert
     vartype: integer
 - !variable
     abivarname: userie
@@ -26016,6 +26685,7 @@
          Internally, they are available in the dtset structured datatype,
         e.g. dtset%useria .
         </p>
+    topics: otherGS_expert
     vartype: integer
 - !variable
     abivarname: userra
@@ -26032,6 +26702,7 @@
         <p>
          These are user-definable with the same purpose as [[useria]] and cie.
         </p>
+    topics: otherGS_expert
     vartype: real
 - !variable
     abivarname: userrb
@@ -26048,6 +26719,7 @@
         <p>
          These are user-definable with the same purpose as [[useria]] and cie.
         </p>
+    topics: otherGS_expert
     vartype: real
 - !variable
     abivarname: userrc
@@ -26064,6 +26736,7 @@
         <p>
          These are user-definable with the same purpose as [[useria]] and cie.
         </p>
+    topics: otherGS_expert
     vartype: real
 - !variable
     abivarname: userrd
@@ -26080,6 +26753,7 @@
         <p>
          These are user-definable with the same purpose as [[useria]] and cie.
         </p>
+    topics: otherGS_expert
     vartype: real
 - !variable
     abivarname: userre
@@ -26096,6 +26770,7 @@
         <p>
          These are user-definable with the same purpose as [[useria]] and cie.
         </p>
+    topics: otherGS_expert
     vartype: real
 - !variable
     abivarname: usewvl
@@ -26131,6 +26806,7 @@
          The spin computation is not currently possible with wavelets and
         metalic systems may be slow to converge.
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: usexcnhat
@@ -26158,6 +26834,7 @@
         (pseudopotential file). When PAW datasets with different treatment of Vxc are used in the same
         run, the code stops.
         </p>
+    topics: PAW_useful
     vartype: integer
 - !variable
     abivarname: useylm
@@ -26197,6 +26874,7 @@
          <br />
          When [[useylm]]=0, the sum over Y_lm can be reduced to a Legendre polynomial form.
         </p>
+    topics: GSgeneral_expert
     vartype: integer
 - !variable
     abivarname: vaclst
@@ -26220,6 +26898,7 @@
          <br />
          Useful to created vacancies.
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: vacnum
@@ -26240,6 +26919,7 @@
         and repetitions have been done. The list of these
         atoms is contained in [[vaclst]].
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: vacuum
@@ -26279,6 +26959,7 @@
         distance between atoms is sufficient to have the
         presence or absence of vacuum.
         </p>
+    topics: k-points_expert
     vartype: integer
 - !variable
     abivarname: vacwidth
@@ -26309,6 +26990,7 @@
         planes of constant reduced coordinates in the
         investigated direction, must be empty of atoms.
         </p>
+    topics: k-points_expert
     vartype: real
 - !variable
     abivarname: vcutgeo
@@ -26385,6 +27067,7 @@
 
         defines ....
         </p>
+    topics: null
     vartype: real
 - !variable
     abivarname: vdw_df_acutmin
@@ -26402,6 +27085,7 @@
         Used when [[vdw_xc]]&gt;0,
         to build angular meshes for the vdW-DF kernel.
         <br />
+    topics: null
     vartype: real
 - !variable
     abivarname: vdw_df_aratio
@@ -26421,6 +27105,7 @@
         Used when [[vdw_xc]]&gt;0,
         to build angular meshes for the vdW-DF kernel.
         <br />
+    topics: null
     vartype: real
 - !variable
     abivarname: vdw_df_damax
@@ -26438,6 +27123,7 @@
         Used when [[vdw_xc]]&gt;0,
         to build angular meshes for the vdW-DF kernel.
         <br />
+    topics: null
     vartype: real
 - !variable
     abivarname: vdw_df_damin
@@ -26455,6 +27141,7 @@
         Used when [[vdw_xc]]&gt;0,
         to build angular meshes for the vdW-DF kernel.
         <br />
+    topics: null
     vartype: real
 - !variable
     abivarname: vdw_df_dcut
@@ -26472,6 +27159,7 @@
         Used when [[vdw_xc]]&gt;0,
         to build the vdW-DF kernel.
         <br />
+    topics: null
     vartype: real
 - !variable
     abivarname: vdw_df_dratio
@@ -26491,6 +27179,7 @@
         Used when [[vdw_xc]]&gt;0,
         to build the vdW-DF kernel.
         <br />
+    topics: null
     vartype: real
 - !variable
     abivarname: vdw_df_dsoft
@@ -26508,6 +27197,7 @@
         Used when [[vdw_xc]]&gt;0,
         to build the vdW-DF kernel.
         <br />
+    topics: null
     vartype: real
 - !variable
     abivarname: vdw_df_gcut
@@ -26525,6 +27215,7 @@
         Used when [[vdw_xc]]&gt;0,
         to filter the vdW-DF kernel in reciprocal space.
         <br />
+    topics: null
     vartype: real
 - !variable
     abivarname: vdw_df_ndpts
@@ -26542,6 +27233,7 @@
         Used when [[vdw_xc]]&gt;0,
         to build the vdW-DF kernel.
         <br />
+    topics: null
     vartype: integer
 - !variable
     abivarname: vdw_df_ngpts
@@ -26559,6 +27251,7 @@
         Used when [[vdw_xc]]&gt;0,
         to build the vdW-DF kernel.
         <br />
+    topics: null
     vartype: integer
 - !variable
     abivarname: vdw_df_nqpts
@@ -26576,6 +27269,7 @@
         Used when [[vdw_xc]]&gt;0,
         to build the vdW-DF kernel.
         <br />
+    topics: null
     vartype: integer
 - !variable
     abivarname: vdw_df_nrpts
@@ -26593,6 +27287,7 @@
         Used when [[vdw_xc]]&gt;0,
         to define the sampling of the vdW-DF-kernel in real-space.
         <br />
+    topics: null
     vartype: integer
 - !variable
     abivarname: vdw_df_nsmooth
@@ -26610,6 +27305,7 @@
         Used when [[vdw_xc]]&gt;0,
         to exponentially smoothen q near q0.
         <br />
+    topics: null
     vartype: integer
 - !variable
     abivarname: vdw_df_phisoft
@@ -26627,6 +27323,7 @@
         Used when [[vdw_xc]]&gt;0,
         to build the vdW-DF kernel.
         <br />
+    topics: null
     vartype: real
 - !variable
     abivarname: vdw_df_qcut
@@ -26644,6 +27341,7 @@
         Used when [[vdw_xc]]&gt;0,
         to build the vdW-DF kernel.
         <br />
+    topics: null
     vartype: real
 - !variable
     abivarname: vdw_df_qratio
@@ -26663,6 +27361,7 @@
         Used when [[vdw_xc]]&gt;0,
         .
         <br />
+    topics: null
     vartype: real
 - !variable
     abivarname: vdw_df_rcut
@@ -26680,6 +27379,7 @@
         Used when [[vdw_xc]]&gt;0,
         to define the vdW-DF kernel cut-off radius.
         <br />
+    topics: null
     vartype: real
 - !variable
     abivarname: vdw_df_rsoft
@@ -26697,6 +27397,7 @@
         Used when [[vdw_xc]]&gt;0,
         to build the vdW-DF kernel.
         <br />
+    topics: null
     vartype: real
 - !variable
     abivarname: vdw_df_threshold
@@ -26719,6 +27420,7 @@
         calculation. Too small values, as well as negative values, will result
         in the vdW-DF energy contributions never being calculated.
         </p>
+    topics: null
     vartype: real
 - !variable
     abivarname: vdw_df_tolerance
@@ -26736,6 +27438,7 @@
         Used when [[vdw_xc]]&gt;0,
         to build the vdW-DF kernel.
         <br />
+    topics: null
     vartype: real
 - !variable
     abivarname: vdw_df_tweaks
@@ -26759,6 +27462,7 @@
          </i>
         </b>
         <br />
+    topics: null
     vartype: integer
 - !variable
     abivarname: vdw_df_zab
@@ -26780,6 +27484,7 @@
         </a>
         .
         <br />
+    topics: null
     vartype: real
 - !variable
     abivarname: vdw_nfrag
@@ -26803,6 +27508,7 @@
         later is usually correct if some atoms are located at the corners or at limiting
         faces of the unit cell.
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: vdw_supercell
@@ -26832,6 +27538,7 @@
         is normal to the layers.
 
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: vdw_tol
@@ -26851,6 +27558,7 @@
         The number of pairs of atoms contributing to the potential is necessarily limited. To be included
         in the potential a pair of atom must have contribution to the energy larger than [[vdw_tol]].
         </p>
+    topics: null
     vartype: real
 - !variable
     abivarname: vdw_tol_3bt
@@ -26883,6 +27591,7 @@
         </li>
         </ul>
         The last term has been predicted to have an important effect for large molecules (see for e.g. <i> Grimme S.,  J. Chem. Phys. 132, 154104 (2010) </i>). It is however quite costly in computational time for periodic systems and seems to lead to an overestimation of lattice parameters for weakly bound systems (see for e.g. <i> Reckien W., J. Chem. Phys. 132, 154104(2010) </i>). Still, its contribution to energy, to forces and to stress is available (not planned for elastic constants, dynamical matrix and internal strains)
+    topics: null
     vartype: real
 - !variable
     abivarname: vdw_typfrag
@@ -26912,6 +27621,7 @@
         the same fragment as their nearest atom. The resulting set of MLWFs in each interacting fragment
         can be found in the output file in xyz format for easy visualization.
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: vdw_xc
@@ -27040,6 +27750,7 @@
         in the article of Rom&aacute;n-P&eacute;rez and Soler
         (<a href="https://dx.doi.org/10.1103/PhysRevLett.103.096102">doi:10.1103/PhysRevLett.103.096102</a>)
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: vel
@@ -27075,6 +27786,7 @@
          <br />
          Velocities evolve is [[ionmov]]==1.
         </p>
+    topics: null
     vartype: real
 - !variable
     abivarname: vel_cell
@@ -27105,6 +27817,7 @@
         units (atomic time units given where [[dtion]]
         is described).
         </p>
+    topics: null
     vartype: real
 - !variable
     abivarname: vis
@@ -27161,6 +27874,7 @@
         <br />
         <br />
         In the case of Path-Integral Molecular Dynamics using the Langevin Thermostat ([[imgmov]]=9), [[vis]] defines the friction coefficient, in atomic units. Typical value range is 0.00001-0.001.
+    topics: null
     vartype: real
 - !variable
     abivarname: vprtrb
@@ -27199,6 +27913,7 @@
           </li>
          </ul>
         </p>
+    topics: null
     vartype: real
 - !variable
     abivarname: w90iniprj
@@ -27257,6 +27972,7 @@
           </li>
          </ul>
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: w90prtunk
@@ -27360,6 +28076,7 @@
         with XCrysDen will also be on the coarse grid.  When this does not produce an
         acceptable plot, prtunk can be set to 1 to output every grid point.
         (You should try spline interpolation in XCrysDen first.)
+    topics: null
     vartype: integer
 - !variable
     abivarname: wfoptalg
@@ -27464,6 +28181,7 @@
           </li>
          </ul>
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: wtatcon
@@ -27557,6 +28275,7 @@
          </sub>
          = constant.
         </p>
+    topics: null
     vartype: real
 - !variable
     abivarname: wtk
@@ -27588,6 +28307,7 @@
          [[wtk]] is ignored if [[iscf]] is not positive,
         except if [[iscf]]=-3.
         </p>
+    topics: k-points_useful
     vartype: real
 - !variable
     abivarname: wtq
@@ -27604,6 +28324,7 @@
         <p>
          Gives the current q-point weight.
         </p>
+    topics: null
     vartype: real
 - !variable
     abivarname: wvl_bigdft_comp
@@ -27624,6 +28345,7 @@
         with those obtained with BigDFT stand-alone.
         When it is set to 1, ABINIT will follow the workflow as in BigDFT stand-alone.
         Therefore, the results must be exactly the same with the two codes.
+    topics: null
     vartype: integer
 - !variable
     abivarname: wvl_crmult
@@ -27647,6 +28369,7 @@
          <br />
          This factor is responsible for the amount of used memory (see also [[wvl_hgrid]]).
         </p>
+    topics: null
     vartype: real
 - !variable
     abivarname: wvl_frmult
@@ -27674,6 +28397,7 @@
          <br />
          This factor is responsible for the amount of used memory (see also [[wvl_hgrid]]).
         </p>
+    topics: null
     vartype: real
 - !variable
     abivarname: wvl_hgrid
@@ -27694,6 +28418,7 @@
         responsible for the memory occupation in the wavelet
         computation. The value is a length in atomic units.
         </p>
+    topics: null
     vartype: real
 - !variable
     abivarname: wvl_ngauss
@@ -27715,6 +28440,7 @@
         fitted to a sum of complex Gaussians.
         The fit is done for wvl_ngauss(1), wvl_ngauss(1)+1 ... up to wvl_ngauss(2) Gaussians.
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: wvl_nprccg
@@ -27735,6 +28461,7 @@
         defines a boundary for the number of conjugate gradient
         iterations on each wavefunction convergence step.
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: xangst
@@ -27776,6 +28503,7 @@
         In constrast with [[xred]] and
         [[xcart]], [[xangst]] is not internal.
         </p>
+    topics: crystal_compulsory
     vartype: real
 - !variable
     abivarname: xc_denpos
@@ -27807,6 +28535,7 @@
         to allow good convergence. Of course, this will affect the numerical results somehow, and one should play
         a bit with this value to avoid incorrect calculations.
         </p>
+    topics: xc_expert
     vartype: real
 - !variable
     abivarname: xc_tb09_c
@@ -27839,6 +28568,7 @@
          The c parameter is evaluated thanks to the previous equation when xc_tb09_c is equal to the "magic" default value 99.99.
         The c parameter can also be fixed to some (property-optimized or material-optimized) value by using this variable.
         </p>
+    topics: xc_expert
     vartype: real
 - !variable
     abivarname: xcart
@@ -27880,6 +28610,7 @@
          <br />
          Atomic positions evolve if [[ionmov]]/=0 .
         </p>
+    topics: crystal_compulsory
     vartype: real
 - !variable
     abivarname: xclevel
@@ -27911,6 +28642,7 @@
           </li>
          </ul>
         </p>
+    topics: null
     vartype: integer
 - !variable
     abivarname: xred
@@ -27958,6 +28690,7 @@
          <br />
          Atomic positions evolve if [[ionmov]]/=0 .
         </p>
+    topics: crystal_compulsory
     vartype: real
 - !variable
     abivarname: xredsph_extra
@@ -27979,6 +28712,7 @@
          The positions in reduced coordinates of extra spheres used in the DOS projection, simulating an STS signal.
         See [[natsph_extra]] for a more complete description.
         </p>
+    topics: printing_prdos
     vartype: real
 - !variable
     abivarname: xyzfile
@@ -28001,6 +28735,7 @@
         <p>
          Notes: do not quote the file name in the abinit input file, simply leave a space after xyzfile. The xyz format is the number of atoms on the first line, a comment line, then one line per atom, with the element as a 2 letter symbol ("As" "O" or "Pu") and the three cartesian coordinates in Angstrom.
         </p>
+    topics: crystal_expert
     vartype: string
 - !variable
     abivarname: zcut
@@ -28035,6 +28770,7 @@
          <br />
          Ideally, one should make a convergence study decreasing the value of [[zcut]] for increasing number of k-points.
         </p>
+    topics: null
     vartype: real
 - !variable
     abivarname: zeemanfield
@@ -28055,6 +28791,7 @@
         Note that Tesla are admitted. This sets the magnitude of mu_0*H, in Tesla,
         with H in Amperes/metre.
         </p>
+    topics: null
     vartype: real
 - !variable
     abivarname: ziontypat
@@ -28073,6 +28810,7 @@
          Charge of the pseudo-ion (=number of valence electrons
         that are needed to screen exactly the pseudopotential).
         </p>
+    topics: GSgeneral_internal
     vartype: real
 - !variable
     abivarname: znucl
@@ -28103,5 +28841,6 @@
          For a "dummy" atom, with znucl=0 , as used in the case of calculations
         with only a jellium surface, ABINIT sets arbitrarily the covalent radius to one.
         </p>
+    topics: GSgeneral_basic
     vartype: real
 
