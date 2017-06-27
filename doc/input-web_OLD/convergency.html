@@ -1,0 +1,117 @@
+<html>
+<head>
+<title>6- Convergency settings </title>
+<body bgcolor="#ffffff">
+<p>
+<hr>
+<h1>6- Convergency settings</h1>
+<h3>This file gives the input variables that govern the convergency of ground state calculations in ABINIT.
+<hr>
+
+<h5>Copyright (C) 1998-2017 ABINIT group (FJ)
+<br> This file is distributed under the terms of the GNU General Public License, see
+~abinit/COPYING or <a href="http://www.gnu.org/copyleft/gpl.txt">http://www.gnu.org/copyleft/gpl.txt</a>.
+<br> For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
+</h5>
+
+<script type="text/javascript" src="../users/list_internal_links.js"> </script>
+
+<h3><b>Contents of ABINIT features: </b></h3>
+<ul>
+<li><a href="convergency.html#1">1.</a> Introduction.
+<li><a href="convergency.html#2">2.</a> Input variable settings.
+<li><a href="convergency.html#3">3.</a> Tutorial and examples.
+
+</ul>
+
+
+<HR ALIGN=left>
+
+<p><a name="1">&nbsp;</a> </p>
+<h3><b>1. Introduction</b></h3>
+<p> The convergency of the energy must be tested towards the plane wave convergency and the k-point convergency according to tolerance criteria. The convergency of the Self-Consistent cycle is governed by the way densities or potentials are mixed between each iteration.
+<br/> The "accuracy" variable enables to tune the accuracy of a calculation by setting automatically up to seventeen variables.
+
+<p>&nbsp;
+<HR ALIGN=left>
+<p> <a name="2">&nbsp;</a>
+<h3><b>2.Input variable settings. </b></h3>
+
+<p>Global convergency input variable:
+
+<a href="../input_variables/html_automatically_generated/varbas.html#accuracy" target="kwimg">accuracy</a>
+<p> 
+Plane wave convergency input variables:
+<a href="../input_variables/html_automatically_generated/varbas.html#ecut" target="kwimg">ecut</a>
+<a href="../input_variables/html_automatically_generated/varrlx.html#ecutsm" target="kwimg">ecutsm</a>
+<a href="../input_variables/html_automatically_generated/vargs.html#ngfft" target="kwimg">ngfft</a>
+
+
+
+
+<p> Self-Consistent-Field convergency and mixing input variables:
+<a href="../input_variables/html_automatically_generated/vargs.html#diecut" target="kwimg">diecut</a>
+<a href="../input_variables/html_automatically_generated/vargs.html#diegap" target="kwimg">diegap</a>
+<a href="../input_variables/html_automatically_generated/vargs.html#dielam" target="kwimg">dielam</a>
+<a href="../input_variables/html_automatically_generated/vargs.html#dielng" target="kwimg">dielng</a>
+<a href="../input_variables/html_automatically_generated/vargs.html#diemac" target="kwimg">diemac</a>
+<a href="../input_variables/html_automatically_generated/vargs.html#diemix" target="kwimg">diemix</a>
+<a href="../input_variables/html_automatically_generated/vargs.html#iprcel" target="kwimg">iprcel</a>
+<a href="../input_variables/html_automatically_generated/varbas.html#iscf" target="kwimg">iscf</a>
+<a href="../input_variables/html_automatically_generated/vardev.html#npulayit" target="kwimg">npulayit</a>
+
+<p> Tolerance criterium for convergency input variables:
+<a href="../input_variables/html_automatically_generated/varbas.html#nstep" target="kwimg">nstep</a>
+<a href="../input_variables/html_automatically_generated/varbas.html#toldfe" target="kwimg">toldfe</a>
+<a href="../input_variables/html_automatically_generated/varbas.html#toldff" target="kwimg">toldff</a>
+<a href="../input_variables/html_automatically_generated/varbas.html#tolrff" target="kwimg">tolrff</a>
+<a href="../input_variables/html_automatically_generated/varbas.html#tolvrs" target="kwimg">tolvrs</a>
+<a href="../input_variables/html_automatically_generated/varbas.html#tolwfr" target="kwimg">tolwfr</a>
+
+
+<p>Input variables for experts:
+<p>
+
+<a href="../input_variables/html_automatically_generated/vargs.html#boxcutmin" target="kwimg">boxcutmin</a>
+<a href="../input_variables/html_automatically_generated/vardev.html#densfor_pred" target="kwimg">densfor_pred</a>
+<a href="../input_variables/html_automatically_generated/vardev.html#exchn2n3d" target="kwimg">exchn2n3d</a>
+<a href="../input_variables/html_automatically_generated/vardev.html#extrapwf" target="kwimg">extrapwf</a>
+<a href="../input_variables/html_automatically_generated/vardev.html#fftalg" target="kwimg">fftalg</a>
+<a href="../input_variables/html_automatically_generated/varpaw.html#iboxcut" target="kwimg">iboxcut</a>
+<a href="../input_variables/html_automatically_generated/vargs.html#icoulomb" target="kwimg">icoulomb</a>
+<a href="../input_variables/html_automatically_generated/vardev.html#iprcfc" target="kwimg">iprcfc</a>
+<a href="../input_variables/html_automatically_generated/vardev.html#isecur" target="kwimg">isecur</a>
+<a href="../input_variables/html_automatically_generated/vardev.html#mqgrid" target="kwimg">mqgrid</a>
+<a href="../input_variables/html_automatically_generated/vardev.html#nc_xccc_gspace" target="kwimg">nc_xccc_gspace</a>
+<a href="../input_variables/html_automatically_generated/vardev.html#nbdblock" target="kwimg">nbdblock</a>
+<a href="../input_variables/html_automatically_generated/vargs.html#nbdbuf" target="kwimg">nbdbuf</a>
+<a href="../input_variables/html_automatically_generated/vargs.html#nline" target="kwimg">nline</a>
+<a href="../input_variables/html_automatically_generated/vardev.html#nscforder" target="kwimg">nscforder</a>
+<a href="../input_variables/html_automatically_generated/vardev.html#nnsclo" target="kwimg">nnsclo</a>
+<a href="../input_variables/html_automatically_generated/vardev.html#ortalg" target="kwimg">ortalg</a>
+<a href="../input_variables/html_automatically_generated/vardev.html#tolrde" target="kwimg">tolrde</a>
+<a href="../input_variables/html_automatically_generated/vargeo.html#tolsym" target="kwimg">tolsym</a>
+<a href="../input_variables/html_automatically_generated/vardev.html#wfoptalg" target="kwimg">wfoptalg</a>
+
+
+<p>&nbsp;
+<HR ALIGN=left>
+<p> <a name="3">&nbsp;</a>
+<h3><b>3. Tutorials and examples.</b></h3>
+
+
+  <li><a href="../tutorial/lesson_base2.html">The lesson 2</a> deals again with the H2
+  molecule: convergence studies, LDA versus GGA </li>
+  <li><a href="../tutorial/lesson_base3.html">The lesson 3</a> deals with crystalline
+  silicon (an insulator): the definition of a k-point grid, the smearing
+  of the cut-off energy, the computation of a band structure, and again,
+  convergence studies ...</li>
+
+<p>The reader can find many examples of input files in the directory /tests of the ABINIT package.
+
+
+<p>
+<script type="text/javascript" src="../users/list_internal_links.js"> </script>
+
+</body>
+</html>
