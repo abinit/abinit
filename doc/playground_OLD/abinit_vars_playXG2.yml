@@ -1,0 +1,307 @@
+- !variable
+    abivarname: acell
+    characteristics:
+    - '[[EVOLVING]]'
+    - '[[LENGTH]]'
+    commentdefault: null
+    commentdims: represented internally as acell(3,[[nimage]])
+    defaultval: !multiplevalue
+        number: 3
+        value: 1
+    dimensions:
+    - 3
+    excludes: null
+    mnemonics: CELL lattice vector scaling
+    requires: null
+    section: varbas
+    text: |-
+        <p>
+         Gives the length scales by which
+        dimensionless primitive translations (in [[rprim]]) are
+        to be multiplied.  By default, given in Bohr atomic units
+        (1 Bohr=0.5291772108 Angstroms), although Angstrom can be specified,
+        if preferred, since [[acell]] has the
+        '[[LENGTH]]' characteristics.
+        See further description of [[acell]] related to the
+        [[rprim]] input variable,
+        the [[scalecart]] input variable,
+        and the associated internal [[rprimd]] input variable.
+        </p>
+        <p>
+         Note that [[acell]] is NOT the length of the conventional orthogonal basis vectors, but the scaling factors of the primitive vectors.
+        Use [[scalecart]] to scale the cartesian coordinates.
+        </p>
+    topics: crystal_compulsory
+    vartype: real
+- !variable
+    abivarname: rprim
+    characteristics:
+    - '[[EVOLVING]]'
+    commentdefault: null
+    commentdims: Internally, it is represented as rprim(3,3,[[nimage]])
+    defaultval:
+    -   - 1
+        - 0
+        - 0
+    -   - 0
+        - 1
+        - 0
+    -   - 0
+        - 0
+        - 1
+    dimensions:
+    - 3
+    - 3
+    excludes: null
+    mnemonics: Real space PRIMitive translations
+    requires: null
+    section: varbas
+    text: |-
+        <p>
+         Give, in columnwise entry,
+        the three dimensionless primitive translations in real space, to be rescaled by
+        [[acell]] and [[scalecart]].
+        <br />
+        It is [[EVOLVING]] only if [[ionmov]]==2 and [[optcell]]/=0, otherwise it is fixed.
+        <br />
+         If the Default is used, that is, [[rprim]] is the unity matrix,
+        the three dimensionless primitive vectors are three
+        unit vectors in cartesian coordinates. Each will be (possibly) multiplied
+        by the corresponding [[acell]] value, then (possibly)
+        stretched along the cartesian coordinates by the corresponding [[scalecart]] value,
+        to give the dimensional primitive vectors, called [[rprimd]].
+         <br />
+         In the general case, the dimensional cartesian
+        coordinates of the crystal primitive translations R1p, R2p and R3p, see
+        [[rprimd]], are
+         <ul>
+          <li>
+           R1p(i)=[[scalecart]](i)[[rprim]](i,1)*[[acell]](1)
+          </li>
+          <li>
+           R2p(i)=[[scalecart]](i)[[rprim]](i,2)*[[acell]](2)
+          </li>
+          <li>
+           R3p(i)=[[scalecart]](i)[[rprim]](i,3)*[[acell]](3)
+          </li>
+         </ul>
+         where i=1,2,3 is the component of the primitive translation (i.e. x, y, and z).
+         <br />
+         <br />
+         The [[rprim]] variable, scaled by [[scalecart]], is thus used to define directions
+        of the primitive vectors, that will be multiplied (so keeping the direction unchanged) by
+        the appropriate length scale [[acell]](1), [[acell]](2),
+        or [[acell]](3),
+        respectively to give the dimensional primitive translations
+        in real space in cartesian coordinates.
+         <br />
+         Presently, it is requested that the mixed product
+        (R1xR2).R3 is positive. If this is not the case,
+        simply exchange a pair of vectors.
+         <br />
+         To be more specific, keeping the default value of [[scalecart]]=1 to simplify the matter,
+        [[rprim]] 1 2 3 4 5 6 7 8 9 corresponds to input of the
+        three primitive translations R1=(1,2,3) (to be multiplied by [[acell]](1)), R2=(4,5,6) (to be multiplied by
+        [[acell]](2)), and R3=(7,8,9) (to be multiplied by [[acell](3)).
+         <br />
+         Note carefully that the first
+        three numbers input are the first column of [[rprim]], the next
+        three are the second, and the final three are the third.
+        This corresponds with the usual Fortran order for arrays.
+        The matrix whose columns are the reciprocal space primitive
+        translations is the inverse transpose of the matrix whose
+        columns are the direct space primitive translations.
+        </p>
+        <p>
+         Alternatively to [[rprim]], directions of dimensionless primitive
+        vectors can be specified by using the input variable [[angdeg]].
+        This is especially useful for hexagonal lattices (with 120 or 60 degrees angles).
+        Indeed, in order for symmetries to be recognized, rprim must be symmetric up to
+        [[tolsym]] (10 digits by default),
+        inducing a specification such as
+         <pre>
+          rprim  0.86602540378  0.5  0.0
+                -0.86602540378  0.5  0.0
+                 0.0            0.0  1.0
+         </pre>
+         that can be avoided thanks to [[angdeg]]:
+         <pre>
+          angdeg 90 90 120
+         </pre>
+         <br />
+         Although the use of [[scalecart]] or [[acell]] is
+        rather equivalent when the primitive vectors are aligned with the cartesian directions, it is not the case for
+        non-orthogonal primitive vectors. In particular, beginners often make the error of trying to use [[acell]]
+        to define primitive vectors in face-centered tetragonal lattice, or body-centered tetragonal lattice, or similarly
+        in face or body-centered orthorhombic lattices. Let us take the example of a body-centered tetragonal lattice, that
+        might be defined using the following ("a" and "c" have to be replaced by the appropriate conventional cell vector length):
+         <pre>
+          rprim  "a"      0        0
+                  0      "a"       0
+                 "a/2"   "a/2"    "c/2"
+        acell 3*1     scalecart 3*1    !  ( These are default values)
+         </pre>
+         The following is a valid, alternative way to define  the same primitive vectors :
+         <pre>
+          rprim   1        0       0
+                  0        1       0
+                  1/2      1/2     1/2
+        scalecart  "a"  "a"  "c"
+        acell 3*1    !  ( These are default values)
+         </pre>
+         Indeed, the cell has been stretched along the cartesian coordinates, by "a", "a" and "c" factors.
+        </p>
+        <p>
+         At variance, the following is WRONG :
+         <pre>
+          rprim   1       0       0
+                  0       1       0
+                  1/2     1/2     1/2
+        acell  "a"  "a"  "c"    !   THIS IS WRONG
+        scalecart 3*1    !  ( These are default values)
+         </pre>
+         Indeed, the latter would correspond to :
+         <pre>
+          rprim  "a"      0       0
+                  0      "a"      0
+                 "c/2"   "c/2"   "c/2"
+        acell 3*1     scalecart 3*1    !  ( These are default values)
+         </pre>
+         Namely, the third vector has been rescaled by "c". It is not at all in the center of the tetragonal cell whose basis vectors
+        are defined by the scaling factor "a".
+         <br />
+         As another difference between [[scalecart]] or [[acell]],
+        note that [[scalecart]] is [[INPUT_ONLY]] :
+        its content will be immediately applied to rprim, at parsing time,
+        and then scalecart will be set to the default values (3*1). So, in case [[scalecart]] is used,
+        the echo of [[rprim]] in the output file is not the value contained in the input file,
+        but the value rescaled by [[scalecart]].
+        </p>
+    topics: null
+    vartype: real
+- !variable
+    abivarname: rprimd
+    characteristics:
+    - '[[INTERNAL_ONLY]]'
+    - '[[EVOLVING]]'
+    commentdefault: null
+    commentdims: Internally, it is represented as rprimd(3,3,[[nimage]]).
+    defaultval: null
+    dimensions:
+    - 3
+    - 3
+    excludes: null
+    mnemonics: Real space PRIMitive translations, Dimensional
+    requires: null
+    section: varbas
+    text: |-
+        <p>
+         This internal variable gives the dimensional real space primitive
+        vectors, computed from [[acell]],
+        [[scalecart]],
+        and [[rprim]].
+         <ul>
+          <li>
+           R1p(i)=[[rprimd]](i,1)=[[scalecart]](i)*[[rprim]](i,1)*[[acell]](1) for i=1,2,3 (x,y,and z)
+          </li>
+          <li>
+           R2p(i)=[[rprimd]](i,2)=[[scalecart]](i)*[[rprim]](i,2)*[[acell]](2) for i=1,2,3
+          </li>
+          <li>
+           R3p(i)=[[rprimd]](i,3)=[[scalecart]](i)*[[rprim]](i,3)*[[acell]](3) for i=1,2,3
+          </li>
+         </ul>
+        </p>
+        It is [[EVOLVING]] only if [[ionmov]]==2 and [[optcell]]/=0, otherwise it is fixed.
+        <br />
+    topics: null
+    vartype: real
+- !variable
+    abivarname: scalecart
+    characteristics:
+    - '[[INPUT_ONLY]]'
+    commentdefault: null
+    commentdims: null
+    defaultval: !multiplevalue
+        number: 3
+        value: 1
+    dimensions:
+    - 3
+    excludes: null
+    mnemonics: SCALE CARTesian coordinates
+    requires: null
+    section: varbas
+    text: |-
+        <p>
+         Gives the scaling factors of cartesian coordinates by which
+        dimensionless primitive translations (in "[[rprim]]") are
+        to be multiplied.
+        [[rprim]] input variable,
+        the [[acell]] input variable,
+        and the associated internal [[rprimd]] internal variable.
+         <br />
+         Especially useful for body-centered and face-centered tetragonal lattices, as well as
+        body-centered and face-centered orthorhombic lattices, see [[rprimd]].
+         <br />
+         Note that this input variable is [[INPUT_ONLY]] : its content will be immediately applied to rprim, at parsing time,
+        and then scalecart will be set to the default values. So, it will not be echoed.
+        </p>
+    topics: null
+    vartype: real
+- !variable
+    abivarname: usedmatpu
+    characteristics: null
+    commentdefault: null
+    commentdims: null
+    defaultval: 0
+    dimensions: scalar
+    excludes: null
+    mnemonics: USE of an initial Density MATrix in Paw+U
+    requires: '[[usepaw]]==1 and [[usepawu]]==1'
+    section: varpaw
+    text: |-
+        <p>
+         When [[usedmatpu]]/=0, an initial density matrix (given by [[dmatpawu]]
+        keyword) is used and kept fixed during the first ABS([[usedmatpu]]) SCF steps.
+         <br />
+         This starting value of the density matrix can be useful to find the correct ground state.
+        Within LDA+U formalism, finding the minimal energy of the system is tricky; thus it is advised to test several values
+        of the initial density matrix.
+         <br />
+         Note also that the density matrix has to respect some symmetry rules determined by the space group.
+        If the symmetry is not respected in the input, the matrix is however automatically symmetrised.
+         <br />
+         <br />
+         The sign of [[usedmatpu]] has influence only when [[ionmov]]/=0 (dynamics or relaxation):
+         <br />
+         - When [[usedmatpu]]&gt;0, the density matrix is kept constant only at first ionic step
+         <br />
+         - When [[usedmatpu]]&lt;0, the density matrix is kept constant at each ionic step
+         <br />
+        </p>
+    topics: null
+    vartype: integer
+- !variable
+    abivarname: xyzfile
+    characteristics:
+    - '[[INPUT_ONLY]]'
+    commentdefault: null
+    commentdims: null
+    defaultval: null
+    dimensions: scalar
+    excludes: null
+    mnemonics: XYZ FILE input for geometry
+    requires: null
+    section: vargeo
+    text: |-
+        <p>
+         Gives the name of a xyz format file, to take
+        [[natom]], [[ntypat]], [[typat]], [[znucl]],
+        and [[xangst]] from. This input can not be mixed with normal atom specifications for other datasets.
+        </p>
+        <p>
+         Notes: do not quote the file name in the abinit input file, simply leave a space after xyzfile. The xyz format is the number of atoms on the first line, a comment line, then one line per atom, with the element as a 2 letter symbol ("As" "O" or "Pu") and the three cartesian coordinates in Angstrom.
+        </p>
+    topics: null
+    vartype: string
+

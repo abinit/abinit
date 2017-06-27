@@ -79,4 +79,5 @@ znucl 28
 #%%   becomes negative, due to Bragg oscillations, the xc kernel can be extremely large, and when
 #%%   use for the prediction of the residual of the forces, the differences between machines
 #%%   can be extremely large. IN order to see this effect, put ecut 7 and npulayit 7 (its default value).
+#%% topics = DFT+U
 #%%<END TEST_INFO>

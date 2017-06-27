@@ -22,6 +22,24 @@ list_specials = [
     ('SEQUENTIAL', 'True if the code is compiled without MPI'),
 ]
 
+list_topics_class = [
+    ('compulsory', 'Compulsory input variables:'),
+    ('basic', 'Basic input variables:'),
+    ('useful', 'Useful input variables:'),
+    ('internal', 'Relevant internal variables:'),
+    ('prpot', 'Printing input variables for potentials:'),
+    ('prfermi', 'Printing input variables for fermi level or surfaces:'),
+    ('prden', 'Printing input variables for density, eigenenergies k-points and wavefunctions:'),
+    ('prgeo', 'Printing input variables for geometry:'),
+    ('prdos', 'Printing DOS-related input variables:'),
+    ('prgs', 'Printing other ground-state input variables:'),
+    ('prngs', 'Printing non-ground-state input variables:'),
+    ('alch', 'Input variables related to alchemical mixing:'),
+    ('job', 'Input variables for job time limits:'),
+    ('slab', 'Input variables to insert a slab:'),
+    ('lotf', 'Input variables for Learn On The Fly calculations:'),
+    ('expert', 'Input variables for experts:'),
+]
 
 class literal(str): pass
 
@@ -47,17 +65,19 @@ class Variable(yaml.YAMLObject):
     range = None
     requires = None
     excludes = None
+    topic_name = None
+    topic_class = None
 
     yaml_tag = u'!variable'
 
     def attrs(self):
         return ['vartype', 'characteristic', 'mnemonics', 'dimensions', 'defaultval', 'text',
-                'abivarname', 'section']
+                'abivarname', 'section', 'topic_name', 'topic_class']
 
     def __init__(self, vartype=None, characteristic=None,
                  mnemonics=None, dimensions=None, default=None,
                  text=None, abivarname=None, section=None, range=None,
-                 commentdefault=None, commentdims=None):
+                 commentdefault=None, commentdims=None, topic_name=None, topic_class=None):
         self.vartype = vartype
         self.characteristic = characteristic
         self.mnemonics = mnemonics
@@ -69,6 +89,8 @@ class Variable(yaml.YAMLObject):
         self.commentdefault = commentdefault
         self.commentdims = commentdims
         self.range = range
+        self.topic_name = topic_name
+        self.topic_class = topic_class
 
     @classmethod
     def from_array(cls, array):
@@ -76,11 +98,26 @@ class Variable(yaml.YAMLObject):
                         mnemonics=array["mnemonics"], dimensions=array["dimensions"],
                         default=array["default"], text=array["text"], abivarname=array["abivarname"],
                         section=array["section"], range=array["range"], commentdefault=array["commentdefault"],
-                        commentdims=array["commentdims"])
+                        commentdims=array["commentdims"], topic_name=array["topic_name"], topic_class=array["topic_class"])
 
     def __str__(self):
         return "Variable " + str(self.abivarname) + " (default = " + str(self.defaultval) + ")"
+<<<<<<< HEAD
+=======
 
+class Topic(yaml.YAMLObject):
+    topic_name = None  # String containing the "How to ?" topic name
+    howto = ''     # String containing the description of the topics, to be echoed after "How to" ...
+
+    yaml_tag = u'!topic'
+
+    def attrs(self):
+        return ['topic_name', 'howto']
+>>>>>>> remotes/origin/input-web
+
+    def __init__(self, topic_name=None, howto=None):
+        self.topic_name = topic_name
+        self.howto = howto
 
 class ValueWithUnit(yaml.YAMLObject):
     value = None
