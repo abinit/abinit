@@ -115,7 +115,7 @@ used to generate the DDB file. See also the description of the <a href="varfil.h
 
 
 <br><font id="title"><a name="ddb_shiftq">ddb_shiftq</a></font>
-<br><font id="mnemonics">Mnemonics: Derivative DatabBase: SHIFT of the Q-points </font>
+<br><font id="mnemonics">Mnemonics: Derivative DataBase: SHIFT of the Q-points </font>
 <br><font id="characteristic">Characteristic: </font>
 <br><font id="vartype">Variable type: real(3)</font>
 <br><font id="default">Default is [0.0, 0.0, 0.0]</font>
@@ -161,7 +161,7 @@ Same meaning as the corresponding anaddb variable
 
 
 <br><font id="title"><a name="eph_fermie">eph_fermie</a></font>
-<br><font id="mnemonics">Mnemonics: Electron-PHonon: Fermi Energy</font>
+<br><font id="mnemonics">Mnemonics: Electron-PHonon: FERMI Energy</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#energy">ENERGY</a></font>
 <br><font id="vartype">Variable type: real</font>
 <br><font id="default">Default is 0.0</font>
@@ -237,7 +237,7 @@ See also <a href="vareph.html#eph_fsewin">eph_fsewin</a>, <a href="vareph.html#e
 
 
 <br><font id="title"><a name="eph_mustar">eph_mustar</a></font>
-<br><font id="mnemonics">Mnemonics: MU STAR</font>
+<br><font id="mnemonics">Mnemonics: Electron-PHonon : MU STAR (electron-electron interaction strength)</font>
 <br><font id="characteristic">Characteristic: </font>
 <br><font id="vartype">Variable type: real</font>
 <br><font id="default">Default is 0.1</font>
@@ -251,7 +251,7 @@ Average electron-electron interaction strength, for the computation of the super
 
 
 <br><font id="title"><a name="eph_ngqpt_fine">eph_ngqpt_fine</a></font>
-<br><font id="mnemonics">Mnemonics: Number of Grid Q-Points in FINE grid.</font>
+<br><font id="mnemonics">Mnemonics: Electron-PHonon : Number of Grid Q-PoinTs in FINE grid.</font>
 <br><font id="characteristic">Characteristic: </font>
 <br><font id="vartype">Variable type: integer(3)</font>
 <br><font id="default">Default is [0, 0, 0]</font>
@@ -287,7 +287,7 @@ elastic LOVA as in the PRB by Savrasov and Savrasov
 
 
 <br><font id="title"><a name="ph_intmeth">ph_intmeth</a></font>
-<br><font id="mnemonics">Mnemonics: PHonon: INTegration METHod</font>
+<br><font id="mnemonics">Mnemonics: PHonons: INTegration METHod</font>
 <br><font id="characteristic">Characteristic: </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 2</font>
@@ -309,7 +309,7 @@ Select the integration technique for computing the phonon DOS and the Eliashberg
 
 
 <br><font id="title"><a name="ph_ndivsm">ph_ndivsm</a></font>
-<br><font id="mnemonics">Mnemonics: PHonon: number of divisions for sampling the smallest segment</font>
+<br><font id="mnemonics">Mnemonics: PHonons: Number of DIVisions for sampling the SMallest segment</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#respfn">RESPFN</a></font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 20</font>
@@ -323,7 +323,7 @@ This variable is used in conjunction with <a href="vareph.html#ph_nqpath">ph_nqp
 
 
 <br><font id="title"><a name="ph_nqpath">ph_nqpath</a></font>
-<br><font id="mnemonics">Mnemonics: PHonon: numer of Q-points defining the PATH</font>
+<br><font id="mnemonics">Mnemonics: PHonons: Number of Q-points defining the PATH</font>
 <br><font id="characteristic">Characteristic: </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
@@ -337,7 +337,7 @@ This integer defines the number of points in the <a href="varrf.html#ph_qpath">p
 
 
 <br><font id="title"><a name="ph_nqshift">ph_nqshift</a></font>
-<br><font id="mnemonics">Mnemonics: PHonons: Number of q-SHIFTs</font>
+<br><font id="mnemonics">Mnemonics: PHonons: Number of Q-SHIFTs</font>
 <br><font id="characteristic">Characteristic: </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 1</font>
@@ -354,7 +354,7 @@ are specified by <a href="vareph.html#ph_qshift">ph_qshift</a>.
 
 
 <br><font id="title"><a name="ph_qshift">ph_qshift</a></font>
-<br><font id="mnemonics">Mnemonics: PHONONS: Q-SHIFTs for mesh.</font>
+<br><font id="mnemonics">Mnemonics: PHonons: Q-SHIFTs for mesh.</font>
 <br><font id="characteristic">Characteristic: </font>
 <br><font id="vartype">Variable type: real(3,ph_nqshift)</font>
 <br><font id="default">Default is [0, 0, 0]</font>
@@ -372,7 +372,7 @@ computing the phonon DOS and the Eliashberg functions (see also <a href="vareph.
 
 
 <br><font id="title"><a name="ph_smear">ph_smear</a></font>
-<br><font id="mnemonics">Mnemonics: PHonon: SMEARing factor</font>
+<br><font id="mnemonics">Mnemonics: PHonons: SMEARing factor</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#energy">ENERGY</a></font>
 <br><font id="vartype">Variable type: real</font>
 <br><font id="default">Default is 0.00002 Hartree</font>
@@ -390,7 +390,7 @@ DOS and the Eliashberg function. See also <a href="vareph.html#ph_intmeth">ph_in
 
 
 <br><font id="title"><a name="ph_wstep">ph_wstep</a></font>
-<br><font id="mnemonics">Mnemonics: PHonons: frequency STEP.</font>
+<br><font id="mnemonics">Mnemonics: PHonons: frequency(W)  STEP.</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#energy">ENERGY</a></font>
 <br><font id="vartype">Variable type: real</font>
 <br><font id="default">Default is 0.1 meV</font>

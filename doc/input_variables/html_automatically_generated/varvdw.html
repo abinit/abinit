@@ -42,6 +42,7 @@ main input file of the abinit code.
  <br>N.
  <br>O.
  <br>P.
+ <a href="#prtvdw">prtvdw</a>&nbsp;&nbsp;
  <br>Q.
  <br>R.
  <br>S.
@@ -103,6 +104,22 @@ Supported values:
 <B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
 
 
+<br><font id="title"><a name="prtvdw">prtvdw</a></font>
+<br><font id="mnemonics">Mnemonics: PRinT Van Der Waals file</font>
+<br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#develop">DEVELOP</a></font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><font id="text">
+<p>
+Print out a NetCDF file containing a vdW-DF kernel.
+<!-- See the associated script in
+~abinit/extras/post_processing/vdw_check_kernel for further details. -->
+</font>
+
+<br><br><br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
+
+
 <br><font id="title"><a name="vdw_df_acutmin">vdw_df_acutmin</a></font>
 <br><font id="mnemonics">Mnemonics: vdW-DF MINimum Angular CUT-off</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#develop">DEVELOP</a></font>
@@ -123,8 +140,8 @@ to build angular meshes for the vdW-DF kernel.
 
 
 <br><font id="title"><a name="vdw_df_aratio">vdw_df_aratio</a></font>
-<br><font id="mnemonics">Mnemonics: vdW-DF RATIO between the highest and
-lowest Angle.</font>
+<br><font id="mnemonics">Mnemonics: vdW-DF Angle RATIO between the highest and
+lowest angles.</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#develop">DEVELOP</a></font>
 <br><font id="vartype">Variable type: real</font>
 <br><font id="default">Default is 30</font>
@@ -143,7 +160,7 @@ to build angular meshes for the vdW-DF kernel.
 
 
 <br><font id="title"><a name="vdw_df_damax">vdw_df_damax</a></font>
-<br><font id="mnemonics">Mnemonics: vdW-DF MAXimum Angular Delta</font>
+<br><font id="mnemonics">Mnemonics: vdW-DF Delta for Angles, MAXimum </font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#develop">DEVELOP</a></font>
 <br><font id="vartype">Variable type: real</font>
 <br><font id="default">Default is 0.5</font>
@@ -162,7 +179,7 @@ to build angular meshes for the vdW-DF kernel.
 
 
 <br><font id="title"><a name="vdw_df_damin">vdw_df_damin</a></font>
-<br><font id="mnemonics">Mnemonics: vdW-DF MINimum Angular Delta</font>
+<br><font id="mnemonics">Mnemonics: vdW-DF Delta for Angles, MINimum</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#develop">DEVELOP</a></font>
 <br><font id="vartype">Variable type: real</font>
 <br><font id="default">Default is 0.01</font>
@@ -200,8 +217,8 @@ to build the vdW-DF kernel.
 
 
 <br><font id="title"><a name="vdw_df_dratio">vdw_df_dratio</a></font>
-<br><font id="mnemonics">Mnemonics: vdW-DF RATIO between the highest and
-lowest D.</font>
+<br><font id="mnemonics">Mnemonics: vdW-DF, between the highest and
+lowest D, RATIO.</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#develop">DEVELOP</a></font>
 <br><font id="vartype">Variable type: real</font>
 <br><font id="default">Default is 20</font>
@@ -220,7 +237,7 @@ to build the vdW-DF kernel.
 
 
 <br><font id="title"><a name="vdw_df_dsoft">vdw_df_dsoft</a></font>
-<br><font id="mnemonics">Mnemonics: vdW-DF SOFTening distance.</font>
+<br><font id="mnemonics">Mnemonics: vdW-DF Distance for SOFTening.</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#develop">DEVELOP</a></font>
 <br><font id="vartype">Variable type: real</font>
 <br><font id="default">Default is 1.0</font>
@@ -239,7 +256,7 @@ to build the vdW-DF kernel.
 
 
 <br><font id="title"><a name="vdw_df_gcut">vdw_df_gcut</a></font>
-<br><font id="mnemonics">Mnemonics: vdW-DF K-space CUT-off</font>
+<br><font id="mnemonics">Mnemonics: vdW-DF G-space CUT-off</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#develop">DEVELOP</a></font>
 <br><font id="vartype">Variable type: real</font>
 <br><font id="default">Default is 5</font>
@@ -353,7 +370,7 @@ to exponentially smoothen q near q0.
 
 
 <br><font id="title"><a name="vdw_df_phisoft">vdw_df_phisoft</a></font>
-<br><font id="mnemonics">Mnemonics: vdW-DF SOFTening PHI value.</font>
+<br><font id="mnemonics">Mnemonics: vdW-DF PHI value SOFTening.</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#develop">DEVELOP</a></font>
 <br><font id="vartype">Variable type: real</font>
 <br><font id="default">Default is -1.0</font>
@@ -391,8 +408,7 @@ to build the vdW-DF kernel.
 
 
 <br><font id="title"><a name="vdw_df_qratio">vdw_df_qratio</a></font>
-<br><font id="mnemonics">Mnemonics: vdW-DF RATIO between highest and
-lowest Q</font>
+<br><font id="mnemonics">Mnemonics: vdW-DF, between highest and lowest Q, RATIO .</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#develop">DEVELOP</a></font>
 <br><font id="vartype">Variable type: real</font>
 <br><font id="default">Default is 20</font>
@@ -430,7 +446,7 @@ to define the vdW-DF kernel cut-off radius.
 
 
 <br><font id="title"><a name="vdw_df_rsoft">vdw_df_rsoft</a></font>
-<br><font id="mnemonics">Mnemonics: vdW-DF SOFTening radius.</font>
+<br><font id="mnemonics">Mnemonics: vdW-DF radius SOFTening.</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#develop">DEVELOP</a></font>
 <br><font id="vartype">Variable type: real</font>
 <br><font id="default">Default is 0.0</font>
@@ -449,7 +465,7 @@ to build the vdW-DF kernel.
 
 
 <br><font id="title"><a name="vdw_df_threshold">vdw_df_threshold</a></font>
-<br><font id="mnemonics">Mnemonics: vdW-DF energy calculation threshold</font>
+<br><font id="mnemonics">Mnemonics: vdW-DF energy calculation THRESHOLD</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#develop">DEVELOP</a></font>
 <br><font id="vartype">Variable type: real</font>
 <br><font id="default">Default is 0.01</font>
@@ -492,7 +508,7 @@ to build the vdW-DF kernel.
 
 
 <br><font id="title"><a name="vdw_df_tweaks">vdw_df_tweaks</a></font>
-<br><font id="mnemonics">Mnemonics: vdW-DF tweaks.</font>
+<br><font id="mnemonics">Mnemonics: vdW-DF TWEAKS.</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#develop">DEVELOP</a></font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
@@ -517,7 +533,7 @@ to build the vdW-DF kernel.
 
 
 <br><font id="title"><a name="vdw_df_zab">vdw_df_zab</a></font>
-<br><font id="mnemonics">Mnemonics: vdW-DF Zab parameter</font>
+<br><font id="mnemonics">Mnemonics: vdW-DF ZAB parameter</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#develop">DEVELOP</a></font>
 <br><font id="vartype">Variable type: real</font>
 <br><font id="default">Default is -0.8491</font>
@@ -540,7 +556,7 @@ as introduced in
 
 
 <br><font id="title"><a name="vdw_nfrag">vdw_nfrag</a></font>
-<br><font id="mnemonics">Mnemonics: van der Waals Number of interacting FRAGments</font>
+<br><font id="mnemonics">Mnemonics: Van Der Waals Number of interacting FRAGments</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#develop">DEVELOP</a></font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 1</font>
@@ -592,7 +608,7 @@ is normal to the layers.
 
 
 <br><font id="title"><a name="vdw_tol">vdw_tol</a></font>
-<br><font id="mnemonics">Mnemonics: van der Waals TOLerance</font>
+<br><font id="mnemonics">Mnemonics: Van Der Waals TOLerance</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#develop">DEVELOP</a></font>
 <br><font id="vartype">Variable type: real</font>
 <br><font id="default">Default is 1e-10</font>
@@ -613,7 +629,7 @@ in the potential a pair of atom must have contribution to the energy larger than
 
 
 <br><font id="title"><a name="vdw_tol_3bt">vdw_tol_3bt</a></font>
-<br><font id="mnemonics">Mnemonics: van der Waals TOLerance for 3-Body Term</font>
+<br><font id="mnemonics">Mnemonics: Van Der Waals TOLerance for 3-Body Term</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#develop">DEVELOP</a></font>
 <br><font id="vartype">Variable type: real</font>
 <br><font id="default">Default is -1 (Comment: Do include the 3-body term in the correction)</font>
@@ -647,7 +663,7 @@ The last term has been predicted to have an important effect for large molecules
 
 
 <br><font id="title"><a name="vdw_typfrag">vdw_typfrag</a></font>
-<br><font id="mnemonics">Mnemonics: van der Waals TYPe of FRAGment</font>
+<br><font id="mnemonics">Mnemonics: Van Der Waals TYPe of FRAGment</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#develop">DEVELOP</a></font>
 <br><font id="vartype">Variable type: integer(<a href="varbas.html#natom">natom</a>)</font>
 <br><font id="default">Default is 1*<a href="varbas.html#natom">natom</a></font>
@@ -675,7 +691,7 @@ can be found in the output file in xyz format for easy visualization.
 
 
 <br><font id="title"><a name="vdw_xc">vdw_xc</a></font>
-<br><font id="mnemonics">Mnemonics: van der Waals eXchange-Correlation functional</font>
+<br><font id="mnemonics">Mnemonics: Van Der Waals eXchange-Correlation functional</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#develop">DEVELOP</a></font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
@@ -725,7 +741,7 @@ to control convergency
    6: apply vdw-DFT-D3 as proposed by S. Grimme (refined version of DFT-D2)
    <br />
    Available only for ground-state calculations and response functions except strain; see <a href="varvdw.html#vdw_tol">vdw_tol</a> variable
-to control convergency and <a href="#">[[FAKE LINK:vdw_dftd3_3bt]]</a> variable to include 3-body corrections
+to control convergency and <a href="varvdw.html#vdw_tol_3bt">vdw_tol_3bt</a> variable to include 3-body corrections
    <br />
    <i>
     J. Chem. Phys. 132, 154104 (2010)
