@@ -44,7 +44,6 @@ variables to be used in the main input file of the abinit code.
  <a href="#awtr">awtr</a>&nbsp;&nbsp;
  <br>B.
  <a href="#bdgw">bdgw</a>&nbsp;&nbsp;
- <a href="#bs_algorithm">bs_algorithm</a>&nbsp;&nbsp;
  <a href="#bs_calctype">bs_calctype</a>&nbsp;&nbsp;
  <a href="#bs_coulomb_term">bs_coulomb_term</a>&nbsp;&nbsp;
  <a href="#bs_coupling">bs_coupling</a>&nbsp;&nbsp;
@@ -270,53 +269,6 @@ representation. Only in this case, indeed, the initial symmetries and energy deg
 <B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
 
 
-<br><font id="title"><a name="bs_algorithm">bs_algorithm</a></font>
-<br><font id="mnemonics">Mnemonics: Bethe-Salpeter ALGORITHM</font>
-<br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#bethe_salpeter">BETHE_SALPETER</a></font>
-<br><font id="vartype">Variable type: integer</font>
-<br><font id="default">Default is 2</font>
-<br><br><font id="requires">
-Only relevant if <a href="vargs.html#optdriver">optdriver</a> == 99
-</font>
-<br><font id="text">
-<p>
-<p>
- The bs_algorithm input variable defines the algorithm employed to calculate the macroscopic dielectric function.
-Possible values are 1, 2 or 3:
- <ul>
-  <li>
-   1 =&gt;
-The macroscopic dielectric is obtained by performing a direct diagonalization of the excitonic Hamiltonian.
-Advantages: It gives direct access to the excitonic eigenvalues as well as to the oscillator strengths.
-Drawbacks: It is a very CPU- and memory-consuming approach as the size of the Hamiltonian scales as (nk*nc*nv)**2.
-where nk is the number of k-point in the FULL Brillouin zone, and nc and nv are the number of
-conduction and valence states, respectively.
-Pros: It can be used both for resonant-only and resonant+coupling calculations (non Tamm-Dancoff approximation).
-  </li>
-  <li>
-   2 =&gt;
-Haydock iterative method. The macroscopic dielectric function
-is obtained by iterative applications of the Hamiltonian on a set of vectors in the electron-hole space.
-Advantages: It is less memory demanding and usually faster
-than the direct diagonalization provided that <a href="vargw.html#zcut">zcut</a> is larger than the typical
-energy spacing of the eigenvalues. Drawbacks: It is an iterative method therefore
-the convergence with respect to bs_haydock_niter should be checked.
-It is not possible to have direct information on the exciton spectrum, oscillator strengths and excitonic wave functions.
-For the time being <b>bs_algorithm</b>=2 cannot be used for calculations in which the coupling term is included (Tamm-Dancoff approximation).
-  </li>
-  <li>
-   3 =&gt;
-Conjugate-gradient method. This method allows to find the few first excitonic eigenvalues.
-Only available for resonant calculations (Tamm-Dancoff approximation).
-  </li>
- </ul>
-</p>
-</font>
-
-<br><br><br><br><a href=#top>Go to the top</a>
-<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
-
-
 <br><font id="title"><a name="bs_calctype">bs_calctype</a></font>
 <br><font id="mnemonics">Mnemonics: Bethe-Salpeter CALCulation TYPE</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#bethe_salpeter">BETHE_SALPETER</a></font>
@@ -508,7 +460,7 @@ If zero, <b>bs_freq_mesh(2)</b> is set automatically to MAX(resonant_energy) + 1
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 1</font>
 <br><br><font id="requires">
-Only relevant if <a href="vargs.html#optdriver">optdriver</a> == 99 and <a href="vargw.html#bs_algorithm">bs_algorithm</a>==2
+Only relevant if <a href="vargs.html#optdriver">optdriver</a> == 99 and <a href="varbse.html#bs_algorithm">bs_algorithm</a>==2
 </font>
 <br><font id="text">
 <p>
@@ -542,7 +494,7 @@ Even the coupling block is included, the terminator function described in D. Roc
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 100</font>
 <br><br><font id="requires">
-Only relevant if <a href="vargs.html#optdriver">optdriver</a> == 99 and <a href="vargw.html#bs_algorithm">bs_algorithm</a>==2
+Only relevant if <a href="vargs.html#optdriver">optdriver</a> == 99 and <a href="varbse.html#bs_algorithm">bs_algorithm</a>==2
 </font>
 <br><font id="text">
 <p>
@@ -563,7 +515,7 @@ spectra is less than <a href="vargw.html#bs_haydock_tol">bs_haydock_tol</a>.
 <br><font id="vartype">Variable type: real(2)</font>
 <br><font id="default">Default is [0.02, 0]</font>
 <br><br><font id="requires">
-Only relevant if <a href="vargs.html#optdriver">optdriver</a> == 99 and <a href="vargw.html#bs_algorithm">bs_algorithm</a>==2
+Only relevant if <a href="vargs.html#optdriver">optdriver</a> == 99 and <a href="varbse.html#bs_algorithm">bs_algorithm</a>==2
 </font>
 <br><font id="text">
 <p>
@@ -610,7 +562,7 @@ by averaging over the entire frequency range (mild criterion).
 <br><font id="vartype">Variable type: integer(3)</font>
 <br><font id="default">Default is [0, 0, 0]</font>
 <br><br><font id="requires">
-Only relevant if <a href="vargw.html#bs_interp_mode">bs_interp_mode</a> > 0 and <a href="vargw.html#bs_algorithm">bs_algorithm</a>==2 and <a href="vargw.html#bs_coupling">bs_coupling</a>==0
+Only relevant if <a href="vargw.html#bs_interp_mode">bs_interp_mode</a> > 0 and <a href="varbse.html#bs_algorithm">bs_algorithm</a>==2 and <a href="vargw.html#bs_coupling">bs_coupling</a>==0
 </font>
 <br><font id="text">
 <p>
@@ -634,7 +586,7 @@ Only relevant if <a href="vargw.html#bs_interp_mode">bs_interp_mode</a> > 0 and 
 <br><font id="vartype">Variable type: real</font>
 <br><font id="default">Default is 1.0</font>
 <br><br><font id="requires">
-Only relevant if <a href="vargw.html#bs_interp_mode">bs_interp_mode</a>==3 and <a href="vargw.html#bs_algorithm">bs_algorithm</a>==2 and <a href="vargw.html#bs_coupling">bs_coupling</a>==0
+Only relevant if <a href="vargw.html#bs_interp_mode">bs_interp_mode</a>==3 and <a href="varbse.html#bs_algorithm">bs_algorithm</a>==2 and <a href="vargw.html#bs_coupling">bs_coupling</a>==0
 </font>
 <br><font id="text">
 <p>
@@ -651,7 +603,7 @@ Defines the width of the region where divergence treatment is applied for BSE in
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 1</font>
 <br><br><font id="requires">
-Only relevant if <a href="vargw.html#bs_interp_mode">bs_interp_mode</a> > 0 and <a href="vargw.html#bs_algorithm">bs_algorithm</a>==2 and <a href="vargw.html#bs_coupling">bs_coupling</a>==0
+Only relevant if <a href="vargw.html#bs_interp_mode">bs_interp_mode</a> > 0 and <a href="varbse.html#bs_algorithm">bs_algorithm</a>==2 and <a href="vargw.html#bs_coupling">bs_coupling</a>==0
 </font>
 <br><font id="text">
 <p>
@@ -678,7 +630,7 @@ Only relevant if <a href="vargw.html#bs_interp_mode">bs_interp_mode</a> > 0 and 
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
 <br><br><font id="requires">
-Only relevant if <b>bs_interp_mode</b> > 0 and <a href="vargw.html#bs_algorithm">bs_algorithm</a>==2 and <a href="vargw.html#bs_coupling">bs_coupling</a>==0
+Only relevant if <b>bs_interp_mode</b> > 0 and <a href="varbse.html#bs_algorithm">bs_algorithm</a>==2 and <a href="vargw.html#bs_coupling">bs_coupling</a>==0
 </font>
 <br><font id="text">
 <p>
@@ -711,7 +663,7 @@ Only relevant if <b>bs_interp_mode</b> > 0 and <a href="vargw.html#bs_algorithm"
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
 <br><br><font id="requires">
-Only relevant if <a href="vargw.html#bs_interp_mode">bs_interp_mode</a> > 0 and <a href="vargw.html#bs_algorithm">bs_algorithm</a>==2 and <a href="vargw.html#bs_coupling">bs_coupling</a>==0
+Only relevant if <a href="vargw.html#bs_interp_mode">bs_interp_mode</a> > 0 and <a href="varbse.html#bs_algorithm">bs_algorithm</a>==2 and <a href="vargw.html#bs_coupling">bs_coupling</a>==0
 </font>
 <br><font id="text">
 <p>
@@ -731,7 +683,7 @@ It generates the decomposition of BSR in a,b,c coefficients used for the interpo
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 1</font>
 <br><br><font id="requires">
-Only relevant if <a href="vargw.html#bs_interp_mode">bs_interp_mode</a> > 0 and <a href="vargw.html#bs_algorithm">bs_algorithm</a>==2 and <a href="vargw.html#bs_interp_method">bs_interp_method</a> == 1 and <a href="vargw.html#bs_coupling">bs_coupling</a>==0
+Only relevant if <a href="vargw.html#bs_interp_mode">bs_interp_mode</a> > 0 and <a href="varbse.html#bs_algorithm">bs_algorithm</a>==2 and <a href="vargw.html#bs_interp_method">bs_interp_method</a> == 1 and <a href="vargw.html#bs_coupling">bs_coupling</a>==0
 </font>
 <br><font id="text">
 <p>
@@ -769,7 +721,7 @@ An additional cutoff energy can be applied by means of the bs_eh_window input va
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
 <br><br><font id="requires">
-Only relevant if <a href="vargs.html#optdriver">optdriver</a> == 99 and <a href="vargw.html#bs_algorithm">bs_algorithm</a> in [2,3]
+Only relevant if <a href="vargs.html#optdriver">optdriver</a> == 99 and <a href="varbse.html#bs_algorithm">bs_algorithm</a> in [2,3]
 </font>
 <br><font id="text">
 <p>

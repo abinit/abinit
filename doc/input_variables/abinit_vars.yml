@@ -1579,7 +1579,7 @@
     excludes: null
     mnemonics: Bethe-Salpeter ALGORITHM
     requires: '[[optdriver]] == 99'
-    section: vargw
+    section: varbse
     text: |-
         <p>
          The bs_algorithm input variable defines the algorithm employed to calculate the macroscopic dielectric function.
@@ -4180,7 +4180,7 @@
     excludes: null
     mnemonics: 'Dynamical Mean Fied Theory: Double Counting'
     requires: null
-    section: vardev
+    section: vardmft
     text: |-
         <p>
          <br />
@@ -10952,7 +10952,7 @@
     excludes: null
     mnemonics: Integer that governs the ReaDing of _VDW files
     requires: null
-    section: vardev
+    section: varvdw
     text: |-
         Used when [[vdw_xc]]&gt;0,
         to read previously calculated vdW-DF variables.

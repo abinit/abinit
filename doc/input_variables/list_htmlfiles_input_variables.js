@@ -16,8 +16,8 @@ document.write(' <li> Parallelisation variables, <A href="varpar.html">VARPAR</a
 document.write(' <li> Projector-Augmented Wave variables, <A href="varpaw.html">VARPAW</a></li> ');
 document.write(' <li> Response Function variables, <A href="varrf.html">VARRF</a></li> ');
 document.write(' <li> Structure optimization variables, <A href="varrlx.html">VARRLX</a></li> ');
-document.write(' <li> Wannier90 interface variables, <A href="varw90.html">VARW90</a></li> ');
 document.write(' <li> Van der Waals functional variables, <A href="varvdw.html">VARVDW</a></li> ');
+document.write(' <li> Wannier90 interface variables, <A href="varw90.html">VARW90</a></li> ');
 document.write(' </ul>');
 document.write(' See also the <a href="../../users/spacegrouphelpfile.html">Space group table</a> and the <a href="specials.html">list of special parameters</a>. [Possibly see the <a href="alltopics.html">How to</a>, in development.]');
 document.write(' <hr> ');

@@ -32,7 +32,6 @@ main input file of the abinit code.
  <br>D.
  <a href="#densfor_pred">densfor_pred</a>&nbsp;&nbsp;
  <a href="#densty">densty</a>&nbsp;&nbsp;
- <a href="#dmft_dc">dmft_dc</a>&nbsp;&nbsp;
  <a href="#dmft_entropy">dmft_entropy</a>&nbsp;&nbsp;
  <a href="#dmft_iter">dmft_iter</a>&nbsp;&nbsp;
  <a href="#dmft_mxsf">dmft_mxsf</a>&nbsp;&nbsp;
@@ -81,7 +80,6 @@ main input file of the abinit code.
  <a href="#iomode">iomode</a>&nbsp;&nbsp;
  <a href="#iprcfc">iprcfc</a>&nbsp;&nbsp;
  <a href="#irandom">irandom</a>&nbsp;&nbsp;
- <a href="#irdvdw">irdvdw</a>&nbsp;&nbsp;
  <a href="#irdwfkfine">irdwfkfine</a>&nbsp;&nbsp;
  <a href="#isecur">isecur</a>&nbsp;&nbsp;
  <a href="#istatr">istatr</a>&nbsp;&nbsp;
@@ -396,23 +394,6 @@ radius (a.u.) of the density, and is used to generate
 a gaussian density. If set to 0.0d0, an optimized value is used.
  <br />
  No meaning for RF calculations.
-</p>
-</font>
-
-<br><br><br><br><a href=#top>Go to the top</a>
-<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
-
-
-<br><font id="title"><a name="dmft_dc">dmft_dc</a></font>
-<br><font id="mnemonics">Mnemonics: Dynamical Mean Fied Theory: Double Counting</font>
-<br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#develop">DEVELOP</a></font>
-<br><font id="vartype">Variable type: integer</font>
-<br><font id="default">Default is 1</font>
-<br><font id="text">
-<p>
-<p>
- <br />
- Value of double counting used for DMFT. Only value 1 is activated for the moment and is the FLL double counting.
 </p>
 </font>
 
@@ -1672,31 +1653,6 @@ is derived from a change of atomic position.
  </ul>
  <b>irandom</b>=3 is strongly advised when performing Molecular Dynamics restarts (avoids bias).
 </p>
-</font>
-
-<br><br><br><br><a href=#top>Go to the top</a>
-<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
-
-
-<br><font id="title"><a name="irdvdw">irdvdw</a></font>
-<br><font id="mnemonics">Mnemonics: Integer that governs the ReaDing of _VDW files</font>
-<br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#develop">DEVELOP</a></font>
-<br><font id="vartype">Variable type: integer</font>
-<br><font id="default">Default is 0</font>
-<br><font id="text">
-<p>
-Used when <a href="vardev.html#vdw_xc">vdw_xc</a>&gt;0,
-to read previously calculated vdW-DF variables.
-<br />
-Supported values:
-<ul>
- <li>
-  0 =&gt; do not read vdW-DF variables
- </li>
- <li>
-  1 =&gt; read vdW-DF variables
- </li>
-</ul>
 </font>
 
 <br><br><br><br><a href=#top>Go to the top</a>

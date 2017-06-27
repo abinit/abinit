@@ -1,0 +1,83 @@
+<html>
+<head><title>BSE variables.</title>
+<link rel=stylesheet type="text/css" href="../formabinit.css">
+</head>
+<body bgcolor="#ffffff">
+
+<hr>
+<a name="top"></a>
+
+<h1>ABINIT, BSE input variables:</h1>
+<h2>List and description.</h2>
+
+<hr>
+
+<p>This document lists and provides the description
+of the name (keywords) of the input
+variables for runs based on the Bethe-Salpeter Equation (BSE) methodology,
+to be used in the
+main input file of the abinit code.
+
+<script type="text/javascript" src="../generic_advice.js"> </script>
+<script type="text/javascript" src="../copyright.js"> </script>
+<script type="text/javascript" src="../list_internal_links.js"> </script>
+<script type="text/javascript" src="../list_htmlfiles_input_variables.js"> </script>
+
+<a name="list"></a>
+<h3><b> Content of the file : alphabetical list of BSE input variables.</b></h3>
+ <br>A.
+ <br>B.
+ <a href="#bs_algorithm">bs_algorithm</a>&nbsp;&nbsp;
+
+<br><br><br><br><hr>
+<br><font id="title"><a name="bs_algorithm">bs_algorithm</a></font>
+<br><font id="mnemonics">Mnemonics: Bethe-Salpeter ALGORITHM</font>
+<br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#bethe_salpeter">BETHE_SALPETER</a></font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 2</font>
+<br><br><font id="requires">
+Only relevant if <a href="vargs.html#optdriver">optdriver</a> == 99
+</font>
+<br><font id="text">
+<p>
+<p>
+ The bs_algorithm input variable defines the algorithm employed to calculate the macroscopic dielectric function.
+Possible values are 1, 2 or 3:
+ <ul>
+  <li>
+   1 =&gt;
+The macroscopic dielectric is obtained by performing a direct diagonalization of the excitonic Hamiltonian.
+Advantages: It gives direct access to the excitonic eigenvalues as well as to the oscillator strengths.
+Drawbacks: It is a very CPU- and memory-consuming approach as the size of the Hamiltonian scales as (nk*nc*nv)**2.
+where nk is the number of k-point in the FULL Brillouin zone, and nc and nv are the number of
+conduction and valence states, respectively.
+Pros: It can be used both for resonant-only and resonant+coupling calculations (non Tamm-Dancoff approximation).
+  </li>
+  <li>
+   2 =&gt;
+Haydock iterative method. The macroscopic dielectric function
+is obtained by iterative applications of the Hamiltonian on a set of vectors in the electron-hole space.
+Advantages: It is less memory demanding and usually faster
+than the direct diagonalization provided that <a href="vargw.html#zcut">zcut</a> is larger than the typical
+energy spacing of the eigenvalues. Drawbacks: It is an iterative method therefore
+the convergence with respect to bs_haydock_niter should be checked.
+It is not possible to have direct information on the exciton spectrum, oscillator strengths and excitonic wave functions.
+For the time being <b>bs_algorithm</b>=2 cannot be used for calculations in which the coupling term is included (Tamm-Dancoff approximation).
+  </li>
+  <li>
+   3 =&gt;
+Conjugate-gradient method. This method allows to find the few first excitonic eigenvalues.
+Only available for resonant calculations (Tamm-Dancoff approximation).
+  </li>
+ </ul>
+</p>
+</font>
+
+<br><br><br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
+
+
+<script type="text/javascript" src="../list_internal_links.js"> </script>
+
+</body>
+</html>
