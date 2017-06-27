@@ -3493,6 +3493,8 @@ subroutine dvdb_v1r_long_range(db,qpt,iatom,idir,nfft,ngfft,v1r_lr)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dvdb_v1r_long_range'
+ use interfaces_51_manage_mpi
+ use interfaces_53_ffts
 !End of the abilint section
 
  implicit none
