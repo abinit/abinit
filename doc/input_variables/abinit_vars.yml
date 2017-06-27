@@ -1579,7 +1579,7 @@
     excludes: null
     mnemonics: Bethe-Salpeter ALGORITHM
     requires: '[[optdriver]] == 99'
-    section: vargw
+    section: varbse
     text: |-
         <p>
          The bs_algorithm input variable defines the algorithm employed to calculate the macroscopic dielectric function.
@@ -1625,7 +1625,7 @@
     excludes: null
     mnemonics: Bethe-Salpeter CALCulation TYPE
     requires: '[[optdriver]] == 99'
-    section: vargw
+    section: varbse
     text: |-
         <p>
          Possible values are 1,2,3.
@@ -1658,7 +1658,7 @@
     excludes: null
     mnemonics: Bethe-Salpeter COULOMB TERM
     requires: '[[optdriver]] == 99'
-    section: vargw
+    section: varbse
     text: |-
         <p>
         This variable governs the choice among the different options that are available for the treatment
@@ -1709,7 +1709,7 @@
     excludes: null
     mnemonics: Bethe-Salpeter COUPLING
     requires: '[[optdriver]] == 99'
-    section: vargw
+    section: varbse
     text: |-
         <p>
          The [[bs_coupling]] input variable defines the treatment of the coupling block of the
@@ -1744,7 +1744,7 @@
     excludes: null
     mnemonics: Bethe-Salpeter Electron-Hole CUTOFF
     requires: '[[optdriver]] == 99'
-    section: vargw
+    section: varbse
     text: |-
         <p>
          It is used to define a cutoff in the e-h basis set. Only those transitions whose
@@ -1764,7 +1764,7 @@
     excludes: null
     mnemonics: Bethe-Salpeter EXCHANGE TERM
     requires: '[[optdriver]] == 99'
-    section: vargw
+    section: varbse
     text: |-
         <p><ul>
         <li>0 =&gt;The exchange term is not calculated. This is equivalent to neglecting local field effects
@@ -1789,7 +1789,7 @@
     excludes: null
     mnemonics: Bethe-Salpeter FREQuency MESH
     requires: '[[optdriver]] == 99'
-    section: vargw
+    section: varbse
     text: |-
         <p>
         <b>bs_freq_mesh(1)</b> defines the first frequency for the calculation of the macroscopic dielectric function.
@@ -1812,7 +1812,7 @@
     excludes: null
     mnemonics: Bethe-Salpeter HAYdock TERMinator
     requires: '[[optdriver]] == 99 and [[bs_algorithm]]==2'
-    section: vargw
+    section: varbse
     text: |-
         <p>
          Defines how to terminate the continued fraction expression for the dielectric function.
@@ -1843,9 +1843,9 @@
     defaultval: 100
     dimensions: scalar
     excludes: null
-    mnemonics: Bethe-Salpeter HAYDOCK Number of Iterations
+    mnemonics: Bethe-Salpeter HAYDOCK Number of ITERations
     requires: '[[optdriver]] == 99 and [[bs_algorithm]]==2'
-    section: vargw
+    section: varbse
     text: |-
         <p>
          [[bs_haydock_niter]] defines the maximum number of iterations used to calculate the macroscopic dielectric function.
@@ -1868,7 +1868,7 @@
     excludes: null
     mnemonics: Bethe-Salpeter HAYDOCK TOLerance
     requires: '[[optdriver]] == 99 and [[bs_algorithm]]==2'
-    section: vargw
+    section: varbse
     text: |-
         <p>
          Defines the convergence criterion for the Haydock iterative method.
@@ -1918,7 +1918,7 @@
     excludes: null
     mnemonics: Bethe-Salpeter INTERPolation K-point MULTiplication factors
     requires: '[[bs_interp_mode]] > 0 and [[bs_algorithm]]==2 and [[bs_coupling]]==0'
-    section: vargw
+    section: varbse
     text: |-
         <p>
          [[bs_interp_kmult]] defines the number of divisions used to generate the dense mesh in the interpolation.
@@ -1941,7 +1941,7 @@
     excludes: null
     mnemonics: Bethe-Salpeter INTERPolation Method3 WIDTH
     requires: '[[bs_interp_mode]]==3 and [[bs_algorithm]]==2 and [[bs_coupling]]==0'
-    section: vargw
+    section: varbse
     text: |-
         Defines the width of the region where divergence treatment is applied for BSE interpolation
     topics: null
@@ -1957,7 +1957,7 @@
     excludes: null
     mnemonics: Bethe-Salpeter INTERPolation METHOD
     requires: '[[bs_interp_mode]] > 0 and [[bs_algorithm]]==2 and [[bs_coupling]]==0'
-    section: vargw
+    section: varbse
     text: |-
         <p>
          [[bs_interp_method]] selects the method of interpolation:
@@ -1983,7 +1983,7 @@
     excludes: null
     mnemonics: Bethe-Salpeter INTERPolation MODE
     requires: '[[bs_interp_mode]] > 0 and [[bs_algorithm]]==2 and [[bs_coupling]]==0'
-    section: vargw
+    section: varbse
     text: |-
         <p>
          [[bs_interp_mode]] selects the mode of interpolation:
@@ -2015,7 +2015,7 @@
     excludes: null
     mnemonics: Bethe-Salpeter INTERPolation PREParation
     requires: '[[bs_interp_mode]] > 0 and [[bs_algorithm]]==2 and [[bs_coupling]]==0'
-    section: vargw
+    section: varbse
     text: |-
         <p>
          [[bs_interp_prep]] allows to trigger the preparation of the interpolation with method 2 or method 3.
@@ -2035,7 +2035,7 @@
     mnemonics: Bethe-Salpeter INTERPolation Rohlfing & Louie NeighBour
     requires: '[[bs_interp_mode]] > 0 and [[bs_algorithm]]==2 and [[bs_interp_method]]
         == 1 and [[bs_coupling]]==0'
-    section: vargw
+    section: varbse
     text: |-
         Gives the index of the neighbour that is used for Rohlfing & Louie method
     topics: null
@@ -2052,7 +2052,7 @@
     excludes: null
     mnemonics: Bethe-Salpeter Lowest Occupied BAND
     requires: '[[optdriver]] == 99'
-    section: vargw
+    section: varbse
     text: |-
         <p>
          This variable defines the index of the lowest occupied band used for the construction of the electron-hole basis set.
@@ -2070,9 +2070,9 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    mnemonics: Bethe-Salpeter Number of States
+    mnemonics: Bethe-Salpeter Number of STATES
     requires: '[[optdriver]] == 99 and [[bs_algorithm]] in [2,3]'
-    section: vargw
+    section: varbse
     text: |-
         <p>
          [[bs_nstates]] defines the maximum number of excitonic states calculated in
@@ -2146,7 +2146,7 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    mnemonics: Contour Deformation Custom Imaginary Frequencies
+    mnemonics: Contour Deformation CUSTOM IMaginary FReQuencieS
     requires: ([[optdriver]]==3 or [[optdriver]]==4) and [[gwcalctyp]] in [2,9,12,19,22,29]
     section: vargw
     text: |-
@@ -2165,7 +2165,7 @@
     defaultval: 1
     dimensions: scalar
     excludes: null
-    mnemonics: Contour Deformation Imaginary Frequency integration Method
+    mnemonics: Contour Deformation FReQuency integration on IMaginary axis Method
     requires: '[[optdriver]]==4  and [[gwcalctyp]] in [2,9,12,19,22,29]'
     section: vargw
     text: |-
@@ -2501,7 +2501,7 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    mnemonics: Contour Deformation Full Grid in complex plane
+    mnemonics: Contour Deformation FULL GRID in complex plane
     requires: '[[optdriver]]==3 and [[gwcalctyp]] in [2,9,12,19,22,29]'
     section: vargw
     text: |-
@@ -2541,7 +2541,7 @@
         value: 100.0
     dimensions: scalar
     excludes: null
-    mnemonics: Contour Deformation tangent grid Halfway Frequency
+    mnemonics: Contour Deformation tangent grid HALFWAY FREQuency
     requires: ([[optdriver]]==3 or [[optdriver]]==4) and [[gwcalctyp]] in [2,9,12,19,22,29]
     section: vargw
     text: |-
@@ -2562,7 +2562,7 @@
     dimensions:
     - '[[cd_customnimfrqs]]'
     excludes: null
-    mnemonics: Contour Deformation Imaginary Frequencies
+    mnemonics: Contour Deformation IMaginary FReQuencieS
     requires: '[[optdriver]]==3 and [[gwcalctyp]] in [2,9,12,19,22,29] and
         [[cd_customnimfrqs]] != 0'
     section: vargw
@@ -2609,7 +2609,7 @@
         value: 1000.0
     dimensions: scalar
     excludes: null
-    mnemonics: Contour Deformation grid Maximum Frequency
+    mnemonics: Contour Deformation grid MAXimum FREQuency
     requires: ([[optdriver]]==3 or [[optdriver]]==4) and [[gwcalctyp]] in [2,9,12,19,22,29]
     section: vargw
     text: |-
@@ -2632,7 +2632,7 @@
     dimensions:
     - 2
     excludes: null
-    mnemonics: Contour Deformation grid calculate Subset of Frequencies
+    mnemonics: Contour Deformation grid calculate SUBSET of FREQuencies
     requires: '[[optdriver]]==3 and [[gwcalctyp]] in [2,9,12,19,22,29] and  [[gw_frqre_tangrid]]==0'
     section: vargw
     text: |-
@@ -2667,7 +2667,7 @@
         defaultval: 0
     dimensions: scalar
     excludes: null
-    mnemonics: Conjugate Gradient TYpe used for Hartree Fock exact exchange
+    mnemonics: Conjugate Gradient TYPe used for Hartree Fock exact exchange
     requires: null
     section: vardev
     text: |-
@@ -3335,7 +3335,7 @@
     dimensions:
     - 3
     excludes: null
-    mnemonics: 'Derivative DatabBase: SHIFT of the Q-points '
+    mnemonics: 'Derivative DataBase: SHIFT of the Q-points '
     requires: null
     section: vareph
     text: |-
@@ -3582,7 +3582,7 @@
     defaultval: 2.2
     dimensions: scalar
     excludes: null
-    mnemonics: DIElectric matrix Energy CUToff
+    mnemonics: DIElectric matrix energy CUToff
     requires: null
     section: vargs
     text: |-
@@ -3887,7 +3887,7 @@
     defaultval: 1.0
     dimensions: scalar
     excludes: null
-    mnemonics: 'DILATation : MaXimal value'
+    mnemonics: 'lattice DILATation : MaXimal value'
     requires: null
     section: varrlx
     text: |-
@@ -4180,7 +4180,7 @@
     excludes: null
     mnemonics: 'Dynamical Mean Fied Theory: Double Counting'
     requires: null
-    section: vardev
+    section: vardmft
     text: |-
         <p>
          <br />
@@ -4198,7 +4198,7 @@
     excludes: null
     mnemonics: 'Dynamical Mean Fied Theory: ENTROPY'
     requires: '[[usedmft]]==1 and [[dmft_solv]]==5'
-    section: vardev
+    section: vardmft
     text: |-
         If 1, enable the calculation of the entropy  within the DMFT framework and so allows the calculation of the total energy (free energy).
         In the current implementation, this is only possible with [[dmft_solv]]=5 (Continuous Time Quantum Monte Carlo).
@@ -4216,7 +4216,7 @@
     excludes: null
     mnemonics: 'Dynamical Mean Fied Theory: number of ITERation'
     requires: null
-    section: vardev
+    section: vardmft
     text: |-
         <p>
          <br />
@@ -4236,7 +4236,7 @@
     mnemonics: 'Dynamical Mean Fied Theory: MiXing parameter for the SelF
         energy'
     requires: null
-    section: vardev
+    section: vardmft
     text: |-
         <p>
          <br />
@@ -4255,7 +4255,7 @@
     excludes: null
     mnemonics: 'Dynamical Mean Fied Theory: Number of LAMBDA points'
     requires: '[[usedmft]]==1 and [[dmft_entropy]]==1'
-    section: vardev
+    section: vardmft
     text: |-
         [[dmft_nlambda]] gives the number of integration points for the thermodynamical integration in case of free energy calculation within DMFT.
         Its value must be greater or equal to 3.
@@ -4273,7 +4273,7 @@
     mnemonics: 'Dynamical Mean Fied Theory: Number of frequency omega (W)
         in the LInear mesh'
     requires: null
-    section: vardev
+    section: vardmft
     text: |-
         <p>
          <br />
@@ -4291,9 +4291,9 @@
     dimensions: scalar
     excludes: null
     mnemonics: 'Dynamical Mean Fied Theory: Number of frequency omega (W)
-        in the log mesh'
+        in the LOg mesh'
     requires: null
-    section: vardev
+    section: vardmft
     text: |-
         <p>
          <br />
@@ -4310,7 +4310,7 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    mnemonics: 'Dynamical Mean Fied Theory: Read Occupations (Non Diagonal)'
+    mnemonics: 'Dynamical Mean Fied Theory: READ OCCupations (Non Diagonal)'
     requires: null
     section: vardev
     text: |-
@@ -4348,7 +4348,7 @@
     excludes: null
     mnemonics: 'Dynamical Mean Fied Theory: Read SeLF energy'
     requires: null
-    section: vardev
+    section: vardmft
     text: |-
         <p>
          Flag to read/write Self-Energy. If put to one, self-energy is written and read at each DFT iteration.
@@ -4366,7 +4366,7 @@
     excludes: null
     mnemonics: 'Dynamical Mean Fied Theory: choice of SOLVer'
     requires: null
-    section: vardev
+    section: vardmft
     text: |-
         <p>
          <br />
@@ -4445,7 +4445,7 @@
     excludes: null
     mnemonics: 'Dynamical Mean Fied Theory: t2g orbitals'
     requires: null
-    section: vardev
+    section: vardmft
     text: |-
         <p>
          <br />
@@ -4462,10 +4462,10 @@
     defaultval: 1.0E-4
     dimensions: scalar
     excludes: null
-    mnemonics: 'Dynamical Mean Fied Theory: Tolerance on LDA correlated electron
-        occupation matrix for the definition of the frequency grid'
+    mnemonics: 'Dynamical Mean Fied Theory: TOLerance on DFT correlated electron
+        occupation matrix for the definition of the FREQuency grid'
     requires: null
-    section: vardev
+    section: vardmft
     text: |-
         <p>
          <br />
@@ -4484,10 +4484,10 @@
     defaultval: 1.0E-5
     dimensions: scalar
     excludes: null
-    mnemonics: 'Dynamical Mean Fied Theory: Tolerance on Local Charge for
+    mnemonics: 'Dynamical Mean Fied Theory: TOLerance on Local Charge for
         convergence of the DMFT loop'
     requires: null
-    section: vardev
+    section: vardmft
     text: |-
         <p>
          <br />
@@ -4509,7 +4509,7 @@
     excludes: null
     mnemonics: 'Dynamical Mean Field Theory: BAND: Final'
     requires: null
-    section: vardev
+    section: vardmft
     text: |-
         <p>
          [[dmftbandf]] is the last band taken into account in the Projected Local
@@ -4529,7 +4529,7 @@
     excludes: null
     mnemonics: 'Dynamical Mean Field Theory: BAND: Initial'
     requires: null
-    section: vardev
+    section: vardmft
     text: |-
         <p>
          [[dmftbandi]] is the first band taken into account in the Projected Local
@@ -4549,7 +4549,7 @@
     excludes: null
     mnemonics: 'Dynamical Mean Fied Theory: CHECKs'
     requires: null
-    section: vardev
+    section: vardmft
     text: |-
         <p>
          <br />
@@ -4568,7 +4568,7 @@
     dimensions: scalar
     excludes: null
     mnemonics: 'Dynamical Mean Fied Theory: Continuous Time Quantum Monte
-        Carlo basis'
+        Carlo BASIS'
     requires: '[[dmft_solv]]==5'
     section: vardev
     text: |-
@@ -4601,9 +4601,9 @@
     dimensions: scalar
     excludes: null
     mnemonics: 'Dynamical Mean Fied Theory: Continuous Time Quantum Monte
-        Carlo check'
+        Carlo CHECK'
     requires: '[[dmft_solv]]==5'
-    section: vardev
+    section: vardmft
     text: |-
         <p>
          <br />
@@ -4636,9 +4636,9 @@
     dimensions: scalar
     excludes: null
     mnemonics: 'Dynamical Mean Fied Theory: Continuous Time Quantum Monte
-        Carlo CORRelations'
+        Carlo CORRELations'
     requires: '[[dmft_solv]]==5'
-    section: vardev
+    section: vardmft
     text: |-
         <p>
          <br />
@@ -4667,7 +4667,7 @@
     mnemonics: 'Dynamical Mean Fied Theory: Continuous Time Quantum Monte
         Carlo Global MOVEs'
     requires: '[[dmft_solv]]==5'
-    section: vardev
+    section: vardmft
     text: |-
         <p>
          <br />
@@ -4689,7 +4689,7 @@
     mnemonics: 'Dynamical Mean Fied Theory: Continuous Time Quantum Monte
         Carlo GReeNs NoiSe'
     requires: '[[dmft_solv]]==5'
-    section: vardev
+    section: vardmft
     text: |-
         <p>
          <br />
@@ -4718,7 +4718,7 @@
     mnemonics: 'Dynamical Mean Fied Theory: Continuous Time Quantum Monte
         Carlo MEASurements'
     requires: '[[dmft_solv]]==5'
-    section: vardev
+    section: vardmft
     text: |-
         <p>
          <br />
@@ -4739,7 +4739,7 @@
     mnemonics: 'Dynamical Mean Fied Theory: Continuous Time Quantum Monte
         Carlo MOVie'
     requires: '[[dmft_solv]]==5'
-    section: vardev
+    section: vardmft
     text: |-
         <p>
          <br />
@@ -4768,7 +4768,7 @@
     mnemonics: 'Dynamical Mean Fied Theory: Continuous Time Quantum Monte
         Carlo MARKov Analysis'
     requires: '[[dmft_solv]]==5'
-    section: vardev
+    section: vardmft
     text: |-
         <p>
          <br />
@@ -4797,7 +4797,7 @@
     mnemonics: 'Dynamical Mean Fied Theory: Continuous Time Quantum Monte
         Carlo perturbation ORDER'
     requires: '[[dmft_solv]]==5'
-    section: vardev
+    section: vardmft
     text: |-
         <p>
          <br />
@@ -4819,7 +4819,7 @@
     mnemonics: 'Dynamical Mean Fied Theory: Continuous Time Quantum Monte
         Carlo perturbation of TRIQS, Number of LEGendre polynomials'
     requires: '[[dmft_solv]]==6 or 7'
-    section: vardev
+    section: vardmft
     text: |-
         <p>
          <br />
@@ -4841,7 +4841,7 @@
     excludes: null
     mnemonics: 'Dynamical Mean Fied Theory: Quantum Monte Carlo time sLices'
     requires: '[[dmft_solv]]>=4'
-    section: vardev
+    section: vardmft
     text: |-
         <p>
          <br />
@@ -4859,9 +4859,10 @@
     defaultval: 0.0
     dimensions: scalar
     excludes: null
-    mnemonics: 'Dynamical Mean Fied Theory: Quantum Monte Carlo sweeps'
+    mnemonics: 'Dynamical Mean Fied Theory: Quantum Monte Carlo Number of
+        sweeps'
     requires: '[[dmft_solv]]>=4'
-    section: vardev
+    section: vardmft
     text: |-
         <p>
          <br />
@@ -4878,9 +4879,9 @@
     defaultval: '[[jdtset]]'
     dimensions: scalar
     excludes: null
-    mnemonics: 'Dynamical Mean Fied Theory: Quantum Monte Carlo seed'
+    mnemonics: 'Dynamical Mean Fied Theory: Quantum Monte Carlo SEED'
     requires: '[[dmft_solv]]>=4'
-    section: vardev
+    section: vardmft
     text: |-
         <p>
          <br />
@@ -4903,7 +4904,7 @@
     excludes: null
     mnemonics: 'Dynamical Mean Fied Theory: Quantum Monte Carlo THERMalization'
     requires: '[[dmft_solv]]==5'
-    section: vardev
+    section: vardmft
     text: |-
         <p>
          <br />
@@ -4920,7 +4921,7 @@
     defaultval: 0.0
     dimensions: scalar
     excludes: null
-    mnemonics: DOS Delta in Energy
+    mnemonics: DOS DELTA in Energy
     requires: null
     section: vargs
     text: |-
@@ -5236,7 +5237,7 @@
         defaultval: 0.0
     dimensions: scalar
     excludes: null
-    mnemonics: Energy CUT-off for WaveFunctions
+    mnemonics: Energy CUT-off for WaveFunctioNs
     requires: ' [[optdriver]]==3 or [[optdriver]]==4'
     section: vargw
     text: |-
@@ -5569,7 +5570,7 @@
     dimensions:
     - 4
     excludes: null
-    mnemonics: Electron bands INTERPOolation
+    mnemonics: Electron bands INTERPolation
     requires: null
     section: varbas
     text: |-
@@ -5617,7 +5618,7 @@
     defaultval: 0.0
     dimensions: scalar
     excludes: null
-    mnemonics: 'ELectron-PHonon interaction at 2nd order : IMAGina y shoft
+    mnemonics: 'ELectron-PHonon interaction at 2nd order : IMAGinary shift
         of the DENominator'
     requires: '[[ieig2rf]] != 0'
     section: varrf
@@ -5705,7 +5706,7 @@
     defaultval: 0.0
     dimensions: scalar
     excludes: null
-    mnemonics: 'Electron-PHonon: Fermi Energy'
+    mnemonics: 'Electron-PHonon: FERMI Energy'
     requires: null
     section: vareph
     text: |-
@@ -5784,7 +5785,7 @@
     defaultval: 0.1
     dimensions: scalar
     excludes: null
-    mnemonics: MU STAR
+    mnemonics: 'Electron-PHonon : MU STAR (electron-electron interaction strength)'
     requires: null
     section: vareph
     text: |-
@@ -5803,7 +5804,7 @@
     dimensions:
     - 3
     excludes: null
-    mnemonics: Number of Grid Q-Points in FINE grid.
+    mnemonics: 'Electron-PHonon : Number of Grid Q-PoinTs in FINE grid.'
     requires: null
     section: vareph
     text: |-
@@ -6582,7 +6583,7 @@
     defaultval: 1
     dimensions: scalar
     excludes: null
-    mnemonics: Genetic Algorithm selection
+    mnemonics: Genetic Algorithm - ALGOrithm selection
     requires: null
     section: varrlx
     text: |-
@@ -6645,7 +6646,7 @@
     defaultval: 0.2
     dimensions: scalar
     excludes: null
-    mnemonics: Genetic Algorithm OPTIMAL PERCENT
+    mnemonics: Genetic Algorithm OPTimal PERCENT
     requires: null
     section: varrlx
     text: |-
@@ -6733,7 +6734,7 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    mnemonics: GET the first-order density from _DEN file
+    mnemonics: GET the first-order density from _1DEN file
     requires: null
     section: varfil
     text: |-
@@ -7067,7 +7068,7 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    mnemonics: GET the ddk wavefunctions from _1WF file
+    mnemonics: GET the DDK wavefunctions from _1WF file
     requires: null
     section: varfil
     text: |-
@@ -7268,7 +7269,7 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    mnemonics: GET the Haydock restart file from ...
+    mnemonics: GET the HAYDOCK restart file from ...
     requires: null
     section: varfil
     text: |-
@@ -7552,7 +7553,7 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    mnemonics: 'Integer that governs the ReaDing of _1WF files '
+    mnemonics: 'GET the wavefunctions from _WFK file '
     requires: null
     section: varfil
     text: |-
@@ -8093,7 +8094,7 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    mnemonics: GW CUSTOM SPectral FREQuencies
+    mnemonics: GW CUSTOM FREQuencies for SPectral function
     requires: '[[optdriver]]==4 and [[gwcalctyp]] in [2,9,12,19,22,29]'
     section: vargw
     text: |-
@@ -8145,7 +8146,7 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    mnemonics: Contour Deformation Imaginary Frequencies Inverse Z Grid
+    mnemonics: GW Contour Deformation FReQuencies on IMaginary axis Inverse Z Grid
     requires: '[[optdriver]] in [3,4] and [[gwcalctyp]] in [2,9,12,19,22,29]'
     section: vargw
     text: |-
@@ -8192,7 +8193,7 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    mnemonics: Contour Deformation Real Frequencies Inverse Z Grid
+    mnemonics: GW Contour Deformation FReQuencies on REal axis Inverse Z Grid
     requires: '[[optdriver]] in [3,4] and [[gwcalctyp]] in [2,9,12,19,22,29]'
     section: vargw
     text: |-
@@ -8265,7 +8266,7 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    mnemonics: Contour Deformation Use Tangent Grid
+    mnemonics: GW Contour Deformation FReQencies on REal axis - Use Tangent Grid
     requires: '[[optdriver]] in [3,4] and [[gwcalctyp]] in [2,9,12,19,22,29]'
     section: vargw
     text: |-
@@ -8288,7 +8289,7 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    mnemonics: Invalid Frequency for Hybertsen-Louie PPM
+    mnemonics: GW treatment of INVALID FREQuency for Hybertsen-Louie PPM
     requires: '[[optdriver]] in [3,4] and [[ppmodel]] in [2]'
     section: vargw
     text: |-
@@ -8373,7 +8374,7 @@
     defaultval: 30
     dimensions: scalar
     excludes: null
-    mnemonics: GW Number of self-consistent STEPS
+    mnemonics: GW Number of self-consistent STEPs
     requires: '[[optdriver]]==8'
     section: vargw
     text: |-
@@ -8400,7 +8401,7 @@
     - 3
     - '[[gw_nqlwl]]'
     excludes: null
-    mnemonics: GW, Q-points for the Long Wave-Length Limit
+    mnemonics: GW, Q-points for the Long Wave-Length limit
     requires: '[[optdriver]]==3'
     section: vargw
     text: |-
@@ -8423,7 +8424,7 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    mnemonics: GW Policy for K-point and Bands selection
+    mnemonics: GW QuasiParticle RANGE policy
     requires: '[[optdriver]]==4'
     section: vargw
     text: |-
@@ -8523,7 +8524,7 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    mnemonics: GW, treatment of the ...
+    mnemonics: GW, SIGma (self-energy) for the CORE contribution
     requires: '[[optdriver]]==4 and [[usepaw]]==1'
     section: vargw
     text: |-
@@ -8694,7 +8695,7 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    mnemonics: GW COMPletness
+    mnemonics: GW COMPleteness
     requires: '[[optdriver]] in [3,4]'
     section: vargw
     text: |-
@@ -8717,7 +8718,7 @@
     defaultval: 2.0
     dimensions: scalar
     excludes: null
-    mnemonics: GW Energy for COMPletness
+    mnemonics: GW ENergy for COMPleteness
     requires: '[[optdriver]] in [3,4] and [[gwcomp]]==1'
     section: vargw
     text: |-
@@ -8755,7 +8756,7 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    mnemonics: GW Gamma
+    mnemonics: GW GAMMA
     requires: '[[optdriver]]=3 or 4 (Sigma calculations)'
     section: vargw
     text: |-
@@ -9002,7 +9003,7 @@
     defaultval: 1.0
     dimensions: scalar
     excludes: null
-    mnemonics: GWLS model parameter
+    mnemonics: GWLS MODEL PARAMETER
     requires: '[[optdriver]]==66'
     section: vargw
     text: |-
@@ -9132,7 +9133,7 @@
     defaultval: 0.0
     dimensions: scalar
     excludes: null
-    mnemonics: GWLS second model parameter
+    mnemonics: GWLS SECOND MODEL PARAMETER
     requires: '[[optdriver]]==66'
     section: vargw
     text: |-
@@ -9506,7 +9507,7 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    mnemonics: Coulomb TReaTMenT
+    mnemonics: Index for the Coulomb TReaTMenT
     requires: null
     section: vargs
     text: |-
@@ -9792,7 +9793,7 @@
         defaultval: 0
     dimensions: scalar
     excludes: null
-    mnemonics: IO MODE
+    mnemonics: Input-Output MODE
     requires: null
     section: vardev
     text: |-
@@ -10952,7 +10953,7 @@
     excludes: null
     mnemonics: Integer that governs the ReaDing of _VDW files
     requires: null
-    section: vardev
+    section: varvdw
     text: |-
         Used when [[vdw_xc]]&gt;0,
         to read previously calculated vdW-DF variables.
@@ -11110,7 +11111,7 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    mnemonics: Integer that governs the ReaDing of the fine grid _WFK files
+    mnemonics: Integer that governs the ReaDing of the grid _WFK file on the FINE grid
     requires: null
     section: vardev
     text: |-
@@ -11581,7 +11582,7 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    mnemonics: Integer for STATus file SHiFT
+    mnemonics: Integer for STATus file rate
     requires: null
     section: vardev
     text: |-
@@ -13122,7 +13123,7 @@
     - 3
     - abs([[kptopt]])+1)
     excludes: null
-    mnemonics: K PoinTs BOUNDarieS
+    mnemonics: K PoinT BOUNDarieS
     requires: null
     section: vargs
     text: |-
@@ -13800,7 +13801,7 @@
     defaultval: 5
     dimensions: scalar
     excludes: null
-    mnemonics: LOTF classic model for Glue model
+    mnemonics: LOTF CLASSIC model for glue model
     requires: null
     section: vardev
     text: |-
@@ -13820,7 +13821,7 @@
     defaultval: 10
     dimensions: scalar
     excludes: null
-    mnemonics: LOTF number of iterations
+    mnemonics: LOTF Number of ITerations
     requires: null
     section: vardev
     text: |-
@@ -13838,7 +13839,7 @@
     defaultval: 5
     dimensions: scalar
     excludes: null
-    mnemonics: LOTF max number of neighbours
+    mnemonics: LOTF max Number of NEIGhbours
     requires: null
     section: vardev
     text: |-
@@ -13858,7 +13859,7 @@
     defaultval: 2
     dimensions: scalar
     excludes: null
-    mnemonics: LOTF version of MD algorithm
+    mnemonics: LOTF VERSION of MD algorithm
     requires: null
     section: vardev
     text: |-
@@ -13910,7 +13911,7 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    mnemonics: Macro variable that activates the determination of the U and J parameter (for the PAW+U calculations)
+    mnemonics: MACRO variable that activates the determination of the U and J parameter (for the PAW+U calculations)
     requires: null
     section: vardev
     text: |-
@@ -14083,7 +14084,7 @@
     defaultval: 0.0
     dimensions: scalar
     excludes: null
-    mnemonics: Model dielectric function, epsilon infinity
+    mnemonics: Model Dielectric Function, EPSilon INFinity
     requires: '[[optdriver]]==99 and [[bs_coulomb_term]] in [20,21] (Bethe-Salpeter
         calculas with a model dielectric function'
     section: vargw
@@ -14107,7 +14108,7 @@
     dimensions:
     - 2
     excludes: null
-    mnemonics: Molecular Dynamics Temperatures
+    mnemonics: Molecular Dynamics TEMPeratures
     requires: null
     section: varrlx
     text: |-
@@ -14854,7 +14855,7 @@
     defaultval: null
     dimensions: scalar
     excludes: null
-    mnemonics: Number of BANDs for Fock exact exchange
+    mnemonics: Number of BANDs for (Hartree)-Fock exact exchange
     requires: null
     section: varbas
     text: |-
@@ -15068,7 +15069,7 @@
         defaultval: 0
     dimensions: scalar
     excludes: null
-    mnemonics: use XC Core-Correction in G-space
+    mnemonics: Norm-Conserving pseudopotentials - use XC Core-Correction in G-SPACE
     requires: null
     section: vardev
     text: |-
@@ -15495,7 +15496,7 @@
     defaultval: null
     dimensions: scalar
     excludes: null
-    mnemonics: Nth FREQuencey Moment of the Imaginary part of the Dielectric Matrix
+    mnemonics: Nth FREQuency Moment of the Imaginary part of the Dielectric Matrix
     requires: '[[optdriver]]==4'
     section: vargw
     text: |-
@@ -16008,7 +16009,7 @@
     defaultval: null
     dimensions: scalar
     excludes: null
-    mnemonics: Number of K - Points for Fock exact exchange
+    mnemonics: Number of K - Points for (Hartree) Fock exact exchange
     requires: null
     section: varbas
     text: |-
@@ -16144,7 +16145,7 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    mnemonics: Number of nose masses
+    mnemonics: Number of NOSe masses
     requires: null
     section: varrlx
     text: |-
@@ -16197,7 +16198,7 @@
         defaultval: 0
     dimensions: scalar
     excludes: null
-    mnemonics: Number of Non-Self Consistent LOops for Fock exact exchange
+    mnemonics: Number of Non-Self Consistent LOops for (Hartree)-Fock exact exchange
     requires: null
     section: vardev
     text: |-
@@ -16517,7 +16518,7 @@
     defaultval: 1
     dimensions: scalar
     excludes: null
-    mnemonics: Number of Processors for Fock exact exchange
+    mnemonics: Number of Processors for (Hartree)-Fock exact exchange
     requires: null
     section: varpar
     text: |-
@@ -16923,7 +16924,7 @@
     defaultval: 16
     dimensions: scalar
     excludes: null
-    mnemonics: SCaling Function ORDER
+    mnemonics: Nth - SCaling Function ORDER
     requires: null
     section: vardev
     text: |-
@@ -17346,7 +17347,7 @@
     defaultval: 1
     dimensions: scalar
     excludes: null
-    mnemonics: Number of TYPEs of atoms
+    mnemonics: Number of TYPes of AToms
     requires: null
     section: varbas
     text: |-
@@ -17454,7 +17455,7 @@
     dimensions:
     - '[[objan]]'
     excludes: null
-    mnemonics: 'OBJect A : list of AToms, OBJect B : list of AToms'
+    mnemonics: 'OBJect A : list of AToms'
     requires: |
         '[[nobj]]==1'
     section: vargeo
@@ -17484,7 +17485,7 @@
     defaultval: null
     dimensions: null
     excludes: null
-    mnemonics: 'OBJect A : AXis, OBJect B : AXis'
+    mnemonics: 'OBJect A : AXis'
     requires: null
     section: vargeo
     text: |-
@@ -17523,7 +17524,7 @@
     defaultval: null
     dimensions: scalar
     excludes: null
-    mnemonics: 'OBJect A : Number of atoms, OBJect B : Number of atoms'
+    mnemonics: 'OBJect A : Number of atoms'
     requires: null
     section: vargeo
     text: |-
@@ -17547,7 +17548,7 @@
     - 1
     dimensions: null
     excludes: null
-    mnemonics: 'OBJect A : Repetition Factors, OBJect B : Repetition Factors'
+    mnemonics: 'OBJect A : Repetition Factors'
     requires: null
     section: vargeo
     text: |-
@@ -17600,7 +17601,7 @@
         value: 0.0d0
     dimensions: null
     excludes: null
-    mnemonics: 'OBJect A : ROtations, OBJect B : ROtations'
+    mnemonics: 'OBJect A : ROtations'
     requires: null
     section: vargeo
     text: |-
@@ -17642,7 +17643,7 @@
         value: 0.0d0
     dimensions: null
     excludes: null
-    mnemonics: 'OBJect A : TRanslations, OBJect B : TRanslations'
+    mnemonics: 'OBJect A : TRanslations'
     requires: null
     section: vargeo
     text: |-
@@ -17685,7 +17686,7 @@
     defaultval: null
     dimensions: null
     excludes: null
-    mnemonics: 'OBJect A : list of AToms, OBJect B : list of AToms'
+    mnemonics: 'OBJect B : list of AToms'
     requires: '[[nobj]]==2'
     section: vargeo
     text: |-
@@ -17718,7 +17719,7 @@
     defaultval: null
     dimensions: null
     excludes: null
-    mnemonics: 'OBJect A : AXis, OBJect B : AXis'
+    mnemonics: 'OBJect B : AXis'
     requires: null
     section: vargeo
     text: |-
@@ -17755,7 +17756,7 @@
     defaultval: null
     dimensions: scalar
     excludes: null
-    mnemonics: 'OBJect A : Number of atoms, OBJect B : Number of atoms'
+    mnemonics: 'OBJect B : Number of atoms'
     requires: null
     section: vargeo
     text: |-
@@ -17780,7 +17781,7 @@
     - 1
     dimensions: null
     excludes: null
-    mnemonics: 'OBJect A : Repetition Factors, OBJect B : Repetition Factors'
+    mnemonics: 'OBJect B : Repetition Factors'
     requires: null
     section: vargeo
     text: |-
@@ -17832,7 +17833,7 @@
         value: 0.0d0
     dimensions: null
     excludes: null
-    mnemonics: 'OBJect A : ROtations, OBJect B : ROtations'
+    mnemonics: 'OBJect B : ROtations'
     requires: null
     section: vargeo
     text: |-
@@ -17874,7 +17875,7 @@
         value: 0.0d0
     dimensions: null
     excludes: null
-    mnemonics: 'OBJect A : TRanslations, OBJect B : TRanslations'
+    mnemonics: 'OBJect B : TRanslations'
     requires: null
     section: vargeo
     text: |-
@@ -18314,7 +18315,7 @@
     defaultval: 1
     dimensions: scalar
     excludes: null
-    mnemonics: OPTion for the computation of STRess
+    mnemonics: OPTion for the computation of STRESS
     requires: null
     section: vargs
     text: |-
@@ -19001,7 +19002,7 @@
     defaultval: 5.0
     dimensions: scalar
     excludes: null
-    mnemonics: PAW - spheres OVerLap allowed (in percentage)
+    mnemonics: PAW - spheres OVerLaP allowed (in percentage)
     requires: '[[usepaw]]==1'
     section: varpaw
     text: |-
@@ -19038,7 +19039,7 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    mnemonics: PAW print band
+    mnemonics: PAW PRinT band
     requires: null
     section: vardev
     text: |-
@@ -19065,7 +19066,7 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    mnemonics: PAW print k-point
+    mnemonics: PAW PRinT K-point
     requires: null
     section: vardev
     text: |-
@@ -19496,7 +19497,7 @@
     defaultval: 2
     dimensions: scalar
     excludes: null
-    mnemonics: 'PHonon: INTegration METHod'
+    mnemonics: 'PHonons: INTegration METHod'
     requires: null
     section: vareph
     text: |-
@@ -19520,7 +19521,7 @@
     defaultval: 20
     dimensions: scalar
     excludes: null
-    mnemonics: 'PHonon: number of divisions for sampling the smallest segment'
+    mnemonics: 'PHonons: Number of DIVisions for sampling the SMallest segment'
     requires: null
     section: vareph
     text: |-
@@ -19539,7 +19540,7 @@
     dimensions:
     - 3
     excludes: null
-    mnemonics: 'PHonon: Number of Grid points for Q-PoinT mesh.'
+    mnemonics: 'PHonons: Number of Grid points for Q-PoinT mesh.'
     requires: null
     section: varrf
     text: |-
@@ -19555,7 +19556,7 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    mnemonics: 'PHonon: numer of Q-points defining the PATH'
+    mnemonics: 'PHonons: Number of Q-points defining the PATH'
     requires: null
     section: vareph
     text: |-
@@ -19570,7 +19571,7 @@
     defaultval: 1
     dimensions: scalar
     excludes: null
-    mnemonics: 'PHonons: Number of q-SHIFTs'
+    mnemonics: 'PHonons: Number of Q-SHIFTs'
     requires: null
     section: vareph
     text: |-
@@ -19590,7 +19591,7 @@
     - 3
     - ph_nqpath
     excludes: null
-    mnemonics: 'Phonon: Q-PATH'
+    mnemonics: 'Phonons: Q-PATH'
     requires: specified([[pq_nqpath]])
     section: varrf
     text: |-
@@ -19611,7 +19612,7 @@
     - 3
     - ph_nqshift
     excludes: null
-    mnemonics: 'PHONONS: Q-SHIFTs for mesh.'
+    mnemonics: 'PHonons: Q-SHIFTs for mesh.'
     requires: '[[ph_nqshift]]'
     section: vareph
     text: |-
@@ -19628,7 +19629,7 @@
     defaultval: 0.00002 Hartree
     dimensions: scalar
     excludes: null
-    mnemonics: 'PHonon: SMEARing factor'
+    mnemonics: 'PHonons: SMEARing factor'
     requires: '[[ph_intmeth]]==1'
     section: vareph
     text: |-
@@ -19645,7 +19646,7 @@
     defaultval: 0.1 meV
     dimensions: scalar
     excludes: null
-    mnemonics: 'PHonons: frequency STEP.'
+    mnemonics: 'PHonons: frequency(W)  STEP.'
     requires: null
     section: vareph
     text: |-
@@ -19745,7 +19746,7 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    mnemonics: Projected Local Orbital WANnier functions Initial BAND
+    mnemonics: Projected Local Orbital WANnier functions BAND Final
     requires: null
     section: vardev
     text: |-
@@ -19764,7 +19765,7 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    mnemonics: Projected Local Orbital WANnier functions Initial BAND
+    mnemonics: Projected Local Orbital WANnier functions BAND Initial
     requires: null
     section: vardev
     text: |-
@@ -19834,7 +19835,7 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    mnemonics: Projected Local Orbital WANnier functions,  ATOM Index
+    mnemonics: Projected Local Orbital WANnier functions, Index of ATOM
     requires: null
     section: vardev
     text: |-
@@ -20015,7 +20016,7 @@
     dimensions:
     - 3
     excludes: null
-    mnemonics: POLarization for Centrosymmetric geometry
+    mnemonics: POLarization for CENtrosymmetric geometry
     requires: null
     section: varff
     text: |-
@@ -20244,7 +20245,7 @@
         defaultval: 0.0
     dimensions: scalar
     excludes: null
-    mnemonics: 'POSITRON calculation: TOLerance on the DiFference of total
+    mnemonics: 'POSitron calculation: TOLerance on the DiFference of total
         Energy'
     requires: null
     section: vargs
@@ -21475,7 +21476,7 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    mnemonics: PRinT V_XC
+    mnemonics: PRinT total POTential
     requires: null
     section: varfil
     text: |-
@@ -21668,7 +21669,7 @@
     excludes: null
     mnemonics: PRinT Van Der Waals file
     requires: null
-    section: vardev
+    section: varvdw
     text: |-
         Print out a NetCDF file containing a vdW-DF kernel.
         <!-- See the associated script in
@@ -22401,7 +22402,7 @@
     dimensions:
     - '[[nnos]]'
     excludes: null
-    mnemonics: Q thermostat mass
+    mnemonics: Q thermostat MASS
     requires: null
     section: varrlx
     text: |-
@@ -22900,7 +22901,7 @@
     defaultval: 1
     dimensions: scalar
     excludes: null
-    mnemonics: RECursion - Grid Ratio
+    mnemonics: RECursion - Grid RATIO
     requires: null
     section: vardev
     text: |-
@@ -22970,7 +22971,7 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    mnemonics: RECursion - TROTTer P parameter
+    mnemonics: RECursion - TROTTer parameter
     requires: null
     section: vardev
     text: |-
@@ -25013,7 +25014,7 @@
     defaultval: 1
     dimensions: scalar
     excludes: null
-    mnemonics: SYMMORPHIc symmetry operations
+    mnemonics: SYMMORPHIc symmetry operation selection
     requires: null
     section: vardev
     text: |-
@@ -25917,7 +25918,7 @@
         - 3
         - '[[natom]]'
     excludes: null
-    mnemonics: TYPE of atoms
+    mnemonics: TYPe of AToms
     requires: null
     section: varbas
     text: |-
@@ -27080,7 +27081,7 @@
     excludes: null
     mnemonics: vdW-DF MINimum Angular CUT-off
     requires: '[[vdw_xc]]>0'
-    section: vardev
+    section: varvdw
     text: |-
         Used when [[vdw_xc]]&gt;0,
         to build angular meshes for the vdW-DF kernel.
@@ -27097,10 +27098,10 @@
     dimensions: scalar
     excludes: null
     mnemonics: |-
-        vdW-DF RATIO between the highest and
-        lowest Angle.
+        vdW-DF Angle RATIO between the highest and
+        lowest angles.
     requires: '[[vdw_xc]]>0'
-    section: vardev
+    section: varvdw
     text: |-
         Used when [[vdw_xc]]&gt;0,
         to build angular meshes for the vdW-DF kernel.
@@ -27116,9 +27117,9 @@
     defaultval: 0.5
     dimensions: scalar
     excludes: null
-    mnemonics: vdW-DF MAXimum Angular Delta
+    mnemonics: 'vdW-DF Delta for Angles, MAXimum '
     requires: '[[vdw_xc]]>0'
-    section: vardev
+    section: varvdw
     text: |-
         Used when [[vdw_xc]]&gt;0,
         to build angular meshes for the vdW-DF kernel.
@@ -27134,9 +27135,9 @@
     defaultval: 0.01
     dimensions: scalar
     excludes: null
-    mnemonics: vdW-DF MINimum Angular Delta
+    mnemonics: vdW-DF Delta for Angles, MINimum
     requires: '[[vdw_xc]]>0'
-    section: vardev
+    section: varvdw
     text: |-
         Used when [[vdw_xc]]&gt;0,
         to build angular meshes for the vdW-DF kernel.
@@ -27154,7 +27155,7 @@
     excludes: null
     mnemonics: vdW-DF D-mesh CUT-off
     requires: '[[vdw_xc]]>0'
-    section: vardev
+    section: varvdw
     text: |-
         Used when [[vdw_xc]]&gt;0,
         to build the vdW-DF kernel.
@@ -27171,10 +27172,10 @@
     dimensions: scalar
     excludes: null
     mnemonics: |-
-        vdW-DF RATIO between the highest and
-        lowest D.
+        vdW-DF, between the highest and
+        lowest D, RATIO.
     requires: '[[vdw_xc]]>0'
-    section: vardev
+    section: varvdw
     text: |-
         Used when [[vdw_xc]]&gt;0,
         to build the vdW-DF kernel.
@@ -27190,9 +27191,9 @@
     defaultval: 1.0
     dimensions: scalar
     excludes: null
-    mnemonics: vdW-DF SOFTening distance.
+    mnemonics: vdW-DF Distance for SOFTening.
     requires: '[[vdw_xc]]>0'
-    section: vardev
+    section: varvdw
     text: |-
         Used when [[vdw_xc]]&gt;0,
         to build the vdW-DF kernel.
@@ -27208,9 +27209,9 @@
     defaultval: 5
     dimensions: scalar
     excludes: null
-    mnemonics: vdW-DF K-space CUT-off
+    mnemonics: vdW-DF G-space CUT-off
     requires: '[[vdw_xc]]>0'
-    section: vardev
+    section: varvdw
     text: |-
         Used when [[vdw_xc]]&gt;0,
         to filter the vdW-DF kernel in reciprocal space.
@@ -27228,7 +27229,7 @@
     excludes: null
     mnemonics: vdW-DF Number of D-mesh PoinTS
     requires: '[[vdw_xc]]>0'
-    section: vardev
+    section: varvdw
     text: |-
         Used when [[vdw_xc]]&gt;0,
         to build the vdW-DF kernel.
@@ -27246,7 +27247,7 @@
     excludes: null
     mnemonics: vdW-DF Number of G-mesh PoinTS
     requires: '[[vdw_xc]]>0'
-    section: vardev
+    section: varvdw
     text: |-
         Used when [[vdw_xc]]&gt;0,
         to build the vdW-DF kernel.
@@ -27264,7 +27265,7 @@
     excludes: null
     mnemonics: vdW-DF Number of Q-mesh PoinTS
     requires: '[[vdw_xc]]>0'
-    section: vardev
+    section: varvdw
     text: |-
         Used when [[vdw_xc]]&gt;0,
         to build the vdW-DF kernel.
@@ -27282,7 +27283,7 @@
     excludes: null
     mnemonics: vdW-DF Number of R-PoinTS
     requires: '[[vdw_xc]]>0'
-    section: vardev
+    section: varvdw
     text: |-
         Used when [[vdw_xc]]&gt;0,
         to define the sampling of the vdW-DF-kernel in real-space.
@@ -27300,7 +27301,7 @@
     excludes: null
     mnemonics: vdW-DF Number of SMOOTHening iterations
     requires: '[[vdw_xc]]>0'
-    section: vardev
+    section: varvdw
     text: |-
         Used when [[vdw_xc]]&gt;0,
         to exponentially smoothen q near q0.
@@ -27316,9 +27317,9 @@
     defaultval: -1.0
     dimensions: scalar
     excludes: null
-    mnemonics: vdW-DF SOFTening PHI value.
+    mnemonics: vdW-DF PHI value SOFTening.
     requires: '[[vdw_xc]]>0'
-    section: vardev
+    section: varvdw
     text: |-
         Used when [[vdw_xc]]&gt;0,
         to build the vdW-DF kernel.
@@ -27336,7 +27337,7 @@
     excludes: null
     mnemonics: vdW-DF Q-mesh CUT-off
     requires: '[[vdw_xc]]>0'
-    section: vardev
+    section: varvdw
     text: |-
         Used when [[vdw_xc]]&gt;0,
         to build the vdW-DF kernel.
@@ -27352,11 +27353,9 @@
     defaultval: 20
     dimensions: scalar
     excludes: null
-    mnemonics: |-
-        vdW-DF RATIO between highest and
-        lowest Q
+    mnemonics: vdW-DF, between highest and lowest Q, RATIO .
     requires: '[[vdw_xc]]>0'
-    section: vardev
+    section: varvdw
     text: |-
         Used when [[vdw_xc]]&gt;0,
         .
@@ -27374,7 +27373,7 @@
     excludes: null
     mnemonics: vdW-DF Real-space CUT-off
     requires: '[[vdw_xc]]>0'
-    section: vardev
+    section: varvdw
     text: |-
         Used when [[vdw_xc]]&gt;0,
         to define the vdW-DF kernel cut-off radius.
@@ -27390,9 +27389,9 @@
     defaultval: 0.0
     dimensions: scalar
     excludes: null
-    mnemonics: vdW-DF SOFTening radius.
+    mnemonics: vdW-DF radius SOFTening.
     requires: '[[vdw_xc]]>0'
-    section: vardev
+    section: varvdw
     text: |-
         Used when [[vdw_xc]]&gt;0,
         to build the vdW-DF kernel.
@@ -27408,9 +27407,9 @@
     defaultval: 0.01
     dimensions: scalar
     excludes: null
-    mnemonics: vdW-DF energy calculation threshold
+    mnemonics: vdW-DF energy calculation THRESHOLD
     requires: '[[vdw_xc]]>0'
-    section: vardev
+    section: varvdw
     text: |-
         <p>
         Sets a threshold for the energy gradient that,
@@ -27433,7 +27432,7 @@
     excludes: null
     mnemonics: vdW-DF global TOLERANCE.
     requires: '[[vdw_xc]]>0'
-    section: vardev
+    section: varvdw
     text: |-
         Used when [[vdw_xc]]&gt;0,
         to build the vdW-DF kernel.
@@ -27449,9 +27448,9 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    mnemonics: vdW-DF tweaks.
+    mnemonics: vdW-DF TWEAKS.
     requires: '[[vdw_xc]]>0'
-    section: vardev
+    section: varvdw
     text: |-
         Used when [[vdw_xc]]&gt;0,
         to build the vdW-DF kernel.
@@ -27473,9 +27472,9 @@
     defaultval: -0.8491
     dimensions: scalar
     excludes: null
-    mnemonics: vdW-DF Zab parameter
+    mnemonics: vdW-DF ZAB parameter
     requires: '[[vdw_xc]]>0'
-    section: vardev
+    section: varvdw
     text: |-
         Used when [[vdw_xc]]&gt;0,
         as introduced in
@@ -27495,9 +27494,9 @@
     defaultval: 1
     dimensions: scalar
     excludes: null
-    mnemonics: van der Waals Number of interacting FRAGments
+    mnemonics: Van Der Waals Number of interacting FRAGments
     requires: '[[vdw_xc]] in [10,11]'
-    section: vardev
+    section: varvdw
     text: |-
         <p>
          The absolute value of vdw_nfrag is the number of vdW interacting
@@ -27525,7 +27524,7 @@
     excludes: null
     mnemonics: Van Der Waals correction from Wannier functions in SUPERCELL
     requires: '[[vdw_xc]] in [10,11]'
-    section: vardev
+    section: varvdw
     text: |-
         <p>
          Set of dimensionless positive numbers which define the maximum multiples
@@ -27549,9 +27548,9 @@
     defaultval: 1.0E-10
     dimensions: scalar
     excludes: null
-    mnemonics: van der Waals TOLerance
+    mnemonics: Van Der Waals TOLerance
     requires: '[[vdw_xc]]==5'
-    section: vardev
+    section: varvdw
     text: |-
         <p>
          The DFT-D methods (S. Grimme approach) dispersion potentials, [[vdw_xc]]==5 or 6 or 7, include a pair potential.
@@ -27569,9 +27568,9 @@
     defaultval: -1
     dimensions: scalar
     excludes: null
-    mnemonics: van der Waals TOLerance for 3-Body Term
+    mnemonics: Van Der Waals TOLerance for 3-Body Term
     requires: '[[vdw_xc]] == 6'
-    section: vardev
+    section: varvdw
     text: |-
         Control the computation of the 3-body correction inside DFT-D3 dispersion correction (Grimme approach) to the total energy:
         <br />
@@ -27605,9 +27604,9 @@
     dimensions:
     - '[[natom]]'
     excludes: null
-    mnemonics: van der Waals TYPe of FRAGment
+    mnemonics: Van Der Waals TYPe of FRAGment
     requires: '[[vdw_xc]] in [10,11]'
-    section: vardev
+    section: varvdw
     text: |-
         <p>
          This array defines the interacting fragments by assigning to each atom an
@@ -27632,9 +27631,9 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    mnemonics: van der Waals eXchange-Correlation functional
+    mnemonics: Van Der Waals eXchange-Correlation functional
     requires: null
-    section: vardev
+    section: varvdw
     text: |-
         <p>
          Selects a van-der-Waals density functional to
@@ -27680,7 +27679,7 @@
            6: apply vdw-DFT-D3 as proposed by S. Grimme (refined version of DFT-D2)
            <br />
            Available only for ground-state calculations and response functions except strain; see [[vdw_tol]] variable
-        to control convergency and [[vdw_dftd3_3bt]] variable to include 3-body corrections
+        to control convergency and [[vdw_tol_3bt]] variable to include 3-body corrections
            <br />
            <i>
             J. Chem. Phys. 132, 154104 (2010)
@@ -28621,9 +28620,9 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    mnemonics: eXchange Correlation functional level
+    mnemonics: eXchange Correlation functional LEVEL
     requires: null
-    section: vargs
+    section: varint
     text: |-
         <p>
          Automatically determined from the value of [[ixc]].

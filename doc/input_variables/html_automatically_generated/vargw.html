@@ -44,24 +44,6 @@ variables to be used in the main input file of the abinit code.
  <a href="#awtr">awtr</a>&nbsp;&nbsp;
  <br>B.
  <a href="#bdgw">bdgw</a>&nbsp;&nbsp;
- <a href="#bs_algorithm">bs_algorithm</a>&nbsp;&nbsp;
- <a href="#bs_calctype">bs_calctype</a>&nbsp;&nbsp;
- <a href="#bs_coulomb_term">bs_coulomb_term</a>&nbsp;&nbsp;
- <a href="#bs_coupling">bs_coupling</a>&nbsp;&nbsp;
- <a href="#bs_eh_cutoff">bs_eh_cutoff</a>&nbsp;&nbsp;
- <a href="#bs_exchange_term">bs_exchange_term</a>&nbsp;&nbsp;
- <a href="#bs_freq_mesh">bs_freq_mesh</a>&nbsp;&nbsp;
- <a href="#bs_hayd_term">bs_hayd_term</a>&nbsp;&nbsp;
- <a href="#bs_haydock_niter">bs_haydock_niter</a>&nbsp;&nbsp;
- <a href="#bs_haydock_tol">bs_haydock_tol</a>&nbsp;&nbsp;
- <a href="#bs_interp_kmult">bs_interp_kmult</a>&nbsp;&nbsp;
- <a href="#bs_interp_m3_width">bs_interp_m3_width</a>&nbsp;&nbsp;
- <a href="#bs_interp_method">bs_interp_method</a>&nbsp;&nbsp;
- <a href="#bs_interp_mode">bs_interp_mode</a>&nbsp;&nbsp;
- <a href="#bs_interp_prep">bs_interp_prep</a>&nbsp;&nbsp;
- <a href="#bs_interp_rl_nb">bs_interp_rl_nb</a>&nbsp;&nbsp;
- <a href="#bs_loband">bs_loband</a>&nbsp;&nbsp;
- <a href="#bs_nstates">bs_nstates</a>&nbsp;&nbsp;
  <br>C.
  <a href="#cd_customnimfrqs">cd_customnimfrqs</a>&nbsp;&nbsp;
  <a href="#cd_frqim_method">cd_frqim_method</a>&nbsp;&nbsp;
@@ -270,523 +252,8 @@ representation. Only in this case, indeed, the initial symmetries and energy deg
 <B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
 
 
-<br><font id="title"><a name="bs_algorithm">bs_algorithm</a></font>
-<br><font id="mnemonics">Mnemonics: Bethe-Salpeter ALGORITHM</font>
-<br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#bethe_salpeter">BETHE_SALPETER</a></font>
-<br><font id="vartype">Variable type: integer</font>
-<br><font id="default">Default is 2</font>
-<br><br><font id="requires">
-Only relevant if <a href="vargs.html#optdriver">optdriver</a> == 99
-</font>
-<br><font id="text">
-<p>
-<p>
- The bs_algorithm input variable defines the algorithm employed to calculate the macroscopic dielectric function.
-Possible values are 1, 2 or 3:
- <ul>
-  <li>
-   1 =&gt;
-The macroscopic dielectric is obtained by performing a direct diagonalization of the excitonic Hamiltonian.
-Advantages: It gives direct access to the excitonic eigenvalues as well as to the oscillator strengths.
-Drawbacks: It is a very CPU- and memory-consuming approach as the size of the Hamiltonian scales as (nk*nc*nv)**2.
-where nk is the number of k-point in the FULL Brillouin zone, and nc and nv are the number of
-conduction and valence states, respectively.
-Pros: It can be used both for resonant-only and resonant+coupling calculations (non Tamm-Dancoff approximation).
-  </li>
-  <li>
-   2 =&gt;
-Haydock iterative method. The macroscopic dielectric function
-is obtained by iterative applications of the Hamiltonian on a set of vectors in the electron-hole space.
-Advantages: It is less memory demanding and usually faster
-than the direct diagonalization provided that <a href="vargw.html#zcut">zcut</a> is larger than the typical
-energy spacing of the eigenvalues. Drawbacks: It is an iterative method therefore
-the convergence with respect to bs_haydock_niter should be checked.
-It is not possible to have direct information on the exciton spectrum, oscillator strengths and excitonic wave functions.
-For the time being <b>bs_algorithm</b>=2 cannot be used for calculations in which the coupling term is included (Tamm-Dancoff approximation).
-  </li>
-  <li>
-   3 =&gt;
-Conjugate-gradient method. This method allows to find the few first excitonic eigenvalues.
-Only available for resonant calculations (Tamm-Dancoff approximation).
-  </li>
- </ul>
-</p>
-</font>
-
-<br><br><br><br><a href=#top>Go to the top</a>
-<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
-
-
-<br><font id="title"><a name="bs_calctype">bs_calctype</a></font>
-<br><font id="mnemonics">Mnemonics: Bethe-Salpeter CALCulation TYPE</font>
-<br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#bethe_salpeter">BETHE_SALPETER</a></font>
-<br><font id="vartype">Variable type: integer</font>
-<br><font id="default">Default is 1</font>
-<br><br><font id="requires">
-Only relevant if <a href="vargs.html#optdriver">optdriver</a> == 99
-</font>
-<br><font id="text">
-<p>
-<p>
- Possible values are 1,2,3.
- <ul>
-  <li>
-   1 =&gt; use the KS eigenvalues and wave functions stored in the KSS file
-to construct the transition space
-  </li>
-  <li>
-   2 =&gt; The transition space is constructed with Kohn-Sham orbitals
-but the energies are read from the external <a href="../../users/abinit_help.html#gw">GW</a> file
-  </li>
-  <li>
-   3 =&gt; QP amplitudes and energies will be read from the QPS file and used to construct H_ex.
-Not coded yet because &lt;\psi|r|\psj&gt;^QP should be calculated taking into account the non-locality of
-the self-energy in the commutator [H,r].
-  </li>
- </ul>
-</p>
-</font>
-
-<br><br><br><br><a href=#top>Go to the top</a>
-<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
-
-
-<br><font id="title"><a name="bs_coulomb_term">bs_coulomb_term</a></font>
-<br><font id="mnemonics">Mnemonics: Bethe-Salpeter COULOMB TERM</font>
-<br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#bethe_salpeter">BETHE_SALPETER</a></font>
-<br><font id="vartype">Variable type: integer</font>
-<br><font id="default">Default is 11</font>
-<br><br><font id="requires">
-Only relevant if <a href="vargs.html#optdriver">optdriver</a> == 99
-</font>
-<br><font id="text">
-<p>
-<p>
-This variable governs the choice among the different options that are available for the treatment
-of Coulomb term of the <a href="../../users/abinit_help.html#bethe_salpeter">BETHE_SALPETER</a> Hamiltonian.
-<b>bs_coulomb_term</b> is the concatenation of two digits, labelled (A) and (B).
-</p>
-<p>
- The first digit (A) can assume the values 0,1,2:
- <ul>
-  <li>
-   0 =&gt; The Coulomb term is not computed. This choice is equivalent to computing the RPA
-spectrum but using the representation in transition space instead of the
-more efficient approach based on the sum over states.
-  </li>
-  <li>
-   1 =&gt; The Coulomb term is computed using the screened interaction read from an external SCR file
-(standard excitonic calculation).
-  </li>
-  <li>
-   2 =&gt; The Coulomb term is computed using a model screening function
-(useful for convergence studies or for reproducing published results).
-  </li>
- </ul>
-</p>
-<p>
- The second digit (B) can assume the values 0,1:
- <ul>
-  <li>
-   0 =&gt;
-Use a diagonal approximation for W_GG' (mainly used for accelerating convergence studies).
-  </li>
-  <li>
-   1 =&gt;
-The Coulomb term is correctly evaluated using the truly non-local W(r,r').
-  </li>
- </ul>
-</p>
-</font>
-
-<br><br><br><br><a href=#top>Go to the top</a>
-<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
-
-
-<br><font id="title"><a name="bs_coupling">bs_coupling</a></font>
-<br><font id="mnemonics">Mnemonics: Bethe-Salpeter COUPLING</font>
-<br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#bethe_salpeter">BETHE_SALPETER</a></font>
-<br><font id="vartype">Variable type: integer</font>
-<br><font id="default">Default is 0</font>
-<br><br><font id="requires">
-Only relevant if <a href="vargs.html#optdriver">optdriver</a> == 99
-</font>
-<br><font id="text">
-<p>
-<p>
- The <b>bs_coupling</b> input variable defines the treatment of the coupling block of the
-<a href="../../users/abinit_help.html#bethe_salpeter">BETHE_SALPETER</a> Hamiltonian. Possible values are 0,1.
- <ul>
-  <li>
-   0 =&gt;
-The coupling block is neglected (the so-called Tamm-Dancoff approximation). The code runs faster and the Hamiltonian matrix requires
-less memory (factor 4). It is a good approximation for the absorption spectrum
-which only requires the knowledge of Im(\epsilon). The reliability of this
-approximation should be tested in the case of EELF calculations.
-  </li>
-  <li>
-   1 =&gt;
-The coupling term is included (non Tamm-Dancoff approxmation).
-  </li>
- </ul>
-</p>
-</font>
-
-<br><br><br><br><a href=#top>Go to the top</a>
-<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
-
-
-<br><font id="title"><a name="bs_eh_cutoff">bs_eh_cutoff</a></font>
-<br><font id="mnemonics">Mnemonics: Bethe-Salpeter Electron-Hole CUTOFF</font>
-<br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#bethe_salpeter">BETHE_SALPETER</a></font>
-<br><font id="vartype">Variable type: integer(2)</font>
-<br><font id="default">Default is [-inf, inf]</font>
-<br><br><font id="requires">
-Only relevant if <a href="vargs.html#optdriver">optdriver</a> == 99
-</font>
-<br><font id="text">
-<p>
-<p>
- It is used to define a cutoff in the e-h basis set. Only those transitions whose
-energy is between bs_eh_window(1) and bs_eh_window(2) will be considered during
-the construction of the e-h Hamiltonian.
-</p>
-</font>
-
-<br><br><br><br><a href=#top>Go to the top</a>
-<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
-
-
-<br><font id="title"><a name="bs_exchange_term">bs_exchange_term</a></font>
-<br><font id="mnemonics">Mnemonics: Bethe-Salpeter EXCHANGE TERM</font>
-<br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#bethe_salpeter">BETHE_SALPETER</a></font>
-<br><font id="vartype">Variable type: integer</font>
-<br><font id="default">Default is 1</font>
-<br><br><font id="requires">
-Only relevant if <a href="vargs.html#optdriver">optdriver</a> == 99
-</font>
-<br><font id="text">
-<p>
-<p><ul>
-<li>0 =&gt;The exchange term is not calculated. This is equivalent to neglecting local field effects
-in the macroscopic dielectric function.</li>
-<li>1 =&gt;The exchange term is calculated and added to the excitonic Hamiltonian.
- </li></ul></p>
-</font>
-
-<br><br><br><br><a href=#top>Go to the top</a>
-<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
-
-
-<br><font id="title"><a name="bs_freq_mesh">bs_freq_mesh</a></font>
-<br><font id="mnemonics">Mnemonics: Bethe-Salpeter FREQuency MESH</font>
-<br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#bethe_salpeter">BETHE_SALPETER</a>, <a href="../../users/abinit_help.html#energy">ENERGY</a></font>
-<br><font id="vartype">Variable type: real(3)</font>
-<br><font id="default">Default is [0.0, 0.0, 0.01]</font>
-<br><br><font id="requires">
-Only relevant if <a href="vargs.html#optdriver">optdriver</a> == 99
-</font>
-<br><font id="text">
-<p>
-<p>
-<b>bs_freq_mesh(1)</b> defines the first frequency for the calculation of the macroscopic dielectric function.
-<p>
-<b>bs_freq_mesh(2)</b> gives the last frequency for the calculation of the macroscopic dielectric function.
-If zero, <b>bs_freq_mesh(2)</b> is set automatically to MAX(resonant_energy) + 10%.
-<p>
-<b>bs_freq_mesh(3)</b> gives the step of the linear mesh used for evaluating the macroscopic dielectric function.
-</p>
-</font>
-
-<br><br><br><br><a href=#top>Go to the top</a>
-<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
-
-
-<br><font id="title"><a name="bs_hayd_term">bs_hayd_term</a></font>
-<br><font id="mnemonics">Mnemonics: Bethe-Salpeter HAYdock TERMinator</font>
-<br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#bethe_salpeter">BETHE_SALPETER</a></font>
-<br><font id="vartype">Variable type: integer</font>
-<br><font id="default">Default is 1</font>
-<br><br><font id="requires">
-Only relevant if <a href="vargs.html#optdriver">optdriver</a> == 99 and <a href="vargw.html#bs_algorithm">bs_algorithm</a>==2
-</font>
-<br><font id="text">
-<p>
-<p>
- Defines how to terminate the continued fraction expression for the dielectric function.
-The terminator reduces the number of iterations needed to converge by smoothing the oscillation
-in the high energy part of the spectrum
- <ul>
-  <li>
-   0 =&gt;
-No terminator. The contribution given by the terms missing in the Lanczos chain are set to zero.
-  </li>
-  <li>
-   1 =&gt; Use the terminator function. The particular expression depends on the type of calculation:
-In the resonant-only case, the a_i and b_i coefficients for i &gt; niter,
-are replaced by their values at i=niter.
-Even the coupling block is included, the terminator function described in D. Rocca, R. Gebauer, Y. Saad, S. Baroni, J. Chem. Phys.
-128, 154105 (2008) is used.
-  </li>
- </ul>
-</p>
-</font>
-
-<br><br><br><br><a href=#top>Go to the top</a>
-<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
-
-
-<br><font id="title"><a name="bs_haydock_niter">bs_haydock_niter</a></font>
-<br><font id="mnemonics">Mnemonics: Bethe-Salpeter HAYDOCK Number of Iterations</font>
-<br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#bethe_salpeter">BETHE_SALPETER</a></font>
-<br><font id="vartype">Variable type: integer</font>
-<br><font id="default">Default is 100</font>
-<br><br><font id="requires">
-Only relevant if <a href="vargs.html#optdriver">optdriver</a> == 99 and <a href="vargw.html#bs_algorithm">bs_algorithm</a>==2
-</font>
-<br><font id="text">
-<p>
-<p>
- <b>bs_haydock_niter</b> defines the maximum number of iterations used to calculate the macroscopic dielectric function.
-The iterative algorithm stops when the difference between two consecutive evaluations of the optical
-spectra is less than <a href="vargw.html#bs_haydock_tol">bs_haydock_tol</a>.
-</p>
-</font>
-
-<br><br><br><br><a href=#top>Go to the top</a>
-<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
-
-
-<br><font id="title"><a name="bs_haydock_tol">bs_haydock_tol</a></font>
-<br><font id="mnemonics">Mnemonics: Bethe-Salpeter HAYDOCK TOLerance</font>
-<br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#bethe_salpeter">BETHE_SALPETER</a></font>
-<br><font id="vartype">Variable type: real(2)</font>
-<br><font id="default">Default is [0.02, 0]</font>
-<br><br><font id="requires">
-Only relevant if <a href="vargs.html#optdriver">optdriver</a> == 99 and <a href="vargw.html#bs_algorithm">bs_algorithm</a>==2
-</font>
-<br><font id="text">
-<p>
-<p>
- Defines the convergence criterion for the Haydock iterative method.
-The iterative algorithm stops when the difference between two consecutive evaluations of the
-macroscopic dielectric function is less than
- <b>
-  bs_haydock_tol(1)
- </b>
- .
-The sign of
- <b>
-  bs_haydock_tol(1)
- </b>
- defines how to estimate the convergence error.
-A negative value signals that the converge should be reached for each frequency (strict criterion),
-while a positive value indicates that the converge error is estimated
-by averaging over the entire frequency range (mild criterion).
-</p>
-<p>
-<b>bs_haydock_tol(2)</b> defines the quantity that will be checked for convergence:
- <ul>
-  <li>
-   0 &rarr; both the real and the imaginary part must converge
-  </li>
-  <li>
-   1 &rarr; only the real part
-  </li>
-  <li>
-   2 &rarr; only the imaginary part
-  </li>
- </ul>
-</p>
-</font>
-
-<br><br><br><br><a href=#top>Go to the top</a>
-<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
-
-
-<br><font id="title"><a name="bs_interp_kmult">bs_interp_kmult</a></font>
-<br><font id="mnemonics">Mnemonics: Bethe-Salpeter INTERPolation K-point MULTiplication factors</font>
-<br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#bethe_salpeter">BETHE_SALPETER</a></font>
-<br><font id="vartype">Variable type: integer(3)</font>
-<br><font id="default">Default is [0, 0, 0]</font>
-<br><br><font id="requires">
-Only relevant if <a href="vargw.html#bs_interp_mode">bs_interp_mode</a> > 0 and <a href="vargw.html#bs_algorithm">bs_algorithm</a>==2 and <a href="vargw.html#bs_coupling">bs_coupling</a>==0
-</font>
-<br><font id="text">
-<p>
-<p>
- <b>bs_interp_kmult</b> defines the number of divisions used to generate the dense mesh in the interpolation.
-<a href="varbas.html#ngkpt">ngkpt</a> of the dense mesh =
- <b>
-  bs_interp_kmult(:)
- </b>
- * <a href="varbas.html#ngkpt">ngkpt</a> of the coarse mesh.
-</p>
-</font>
-
-<br><br><br><br><a href=#top>Go to the top</a>
-<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
-
-
-<br><font id="title"><a name="bs_interp_m3_width">bs_interp_m3_width</a></font>
-<br><font id="mnemonics">Mnemonics: Bethe-Salpeter INTERPolation Method3 WIDTH</font>
-<br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#bethe_salpeter">BETHE_SALPETER</a></font>
-<br><font id="vartype">Variable type: real</font>
-<br><font id="default">Default is 1.0</font>
-<br><br><font id="requires">
-Only relevant if <a href="vargw.html#bs_interp_mode">bs_interp_mode</a>==3 and <a href="vargw.html#bs_algorithm">bs_algorithm</a>==2 and <a href="vargw.html#bs_coupling">bs_coupling</a>==0
-</font>
-<br><font id="text">
-<p>
-Defines the width of the region where divergence treatment is applied for BSE interpolation
-</font>
-
-<br><br><br><br><a href=#top>Go to the top</a>
-<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
-
-
-<br><font id="title"><a name="bs_interp_method">bs_interp_method</a></font>
-<br><font id="mnemonics">Mnemonics: Bethe-Salpeter INTERPolation METHOD</font>
-<br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#bethe_salpeter">BETHE_SALPETER</a></font>
-<br><font id="vartype">Variable type: integer</font>
-<br><font id="default">Default is 1</font>
-<br><br><font id="requires">
-Only relevant if <a href="vargw.html#bs_interp_mode">bs_interp_mode</a> > 0 and <a href="vargw.html#bs_algorithm">bs_algorithm</a>==2 and <a href="vargw.html#bs_coupling">bs_coupling</a>==0
-</font>
-<br><font id="text">
-<p>
-<p>
- <b>bs_interp_method</b> selects the method of interpolation:
- <ul>
-  <li>
-   0 =&gt; Interpolate using Y. Gillet technique with 8 neighbours (see Comput. Phys. Commun. 203, 83 (2016))
-  </li>
-  <li>
-   1 =&gt; Interpolation using Rohlfing & Louie technique (see above-mentioned article and Phys. Rev. B 62, 4927 (2000))
-  </li>
- </ul>
-</p>
-</font>
-
-<br><br><br><br><a href=#top>Go to the top</a>
-<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
-
-
-<br><font id="title"><a name="bs_interp_mode">bs_interp_mode</a></font>
-<br><font id="mnemonics">Mnemonics: Bethe-Salpeter INTERPolation MODE</font>
-<br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#bethe_salpeter">BETHE_SALPETER</a></font>
-<br><font id="vartype">Variable type: integer</font>
-<br><font id="default">Default is 0</font>
-<br><br><font id="requires">
-Only relevant if <b>bs_interp_mode</b> > 0 and <a href="vargw.html#bs_algorithm">bs_algorithm</a>==2 and <a href="vargw.html#bs_coupling">bs_coupling</a>==0
-</font>
-<br><font id="text">
-<p>
-<p>
- <b>bs_interp_mode</b> selects the mode of interpolation:
- <ul>
-  <li>
-   0 =&gt; No interpolation. Standard <a href="../../users/abinit_help.html#bethe_salpeter">BETHE_SALPETER</a> computation is performed
-  </li>
-  <li>
-   1 =&gt; Simple interpolation
-  </li>
-  <li>
-   2 =&gt; Treatment of the divergence on the whole set of dense k-points
-  </li>
-  <li>
-   3 =&gt; Treatment of the divergence along the diagonal in k-space and simple interpolation elsewhere.
-  </li>
- </ul>
-</p>
-</font>
-
-<br><br><br><br><a href=#top>Go to the top</a>
-<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
-
-
-<br><font id="title"><a name="bs_interp_prep">bs_interp_prep</a></font>
-<br><font id="mnemonics">Mnemonics: Bethe-Salpeter INTERPolation PREParation</font>
-<br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#bethe_salpeter">BETHE_SALPETER</a></font>
-<br><font id="vartype">Variable type: integer</font>
-<br><font id="default">Default is 0</font>
-<br><br><font id="requires">
-Only relevant if <a href="vargw.html#bs_interp_mode">bs_interp_mode</a> > 0 and <a href="vargw.html#bs_algorithm">bs_algorithm</a>==2 and <a href="vargw.html#bs_coupling">bs_coupling</a>==0
-</font>
-<br><font id="text">
-<p>
-<p>
- <b>bs_interp_prep</b> allows to trigger the preparation of the interpolation with method 2 or method 3.
-It generates the decomposition of BSR in a,b,c coefficients used for the interpolation.
-</p>
-</font>
-
-<br><br><br><br><a href=#top>Go to the top</a>
-<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
-
-
-<br><font id="title"><a name="bs_interp_rl_nb">bs_interp_rl_nb</a></font>
-<br><font id="mnemonics">Mnemonics: Bethe-Salpeter INTERPolation Rohlfing & Louie NeighBour</font>
-<br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#bethe_salpeter">BETHE_SALPETER</a></font>
-<br><font id="vartype">Variable type: integer</font>
-<br><font id="default">Default is 1</font>
-<br><br><font id="requires">
-Only relevant if <a href="vargw.html#bs_interp_mode">bs_interp_mode</a> > 0 and <a href="vargw.html#bs_algorithm">bs_algorithm</a>==2 and <a href="vargw.html#bs_interp_method">bs_interp_method</a> == 1 and <a href="vargw.html#bs_coupling">bs_coupling</a>==0
-</font>
-<br><font id="text">
-<p>
-Gives the index of the neighbour that is used for Rohlfing & Louie method
-</font>
-
-<br><br><br><br><a href=#top>Go to the top</a>
-<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
-
-
-<br><font id="title"><a name="bs_loband">bs_loband</a></font>
-<br><font id="mnemonics">Mnemonics: Bethe-Salpeter Lowest Occupied BAND</font>
-<br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#bethe_salpeter">BETHE_SALPETER</a></font>
-<br><font id="vartype">Variable type: integer(<a href="varbas.html#nsppol">nsppol</a>)</font>
-<br><font id="default">Default is 0</font>
-<br><br><font id="requires">
-Only relevant if <a href="vargs.html#optdriver">optdriver</a> == 99
-</font>
-<br><font id="text">
-<p>
-<p>
- This variable defines the index of the lowest occupied band used for the construction of the electron-hole basis set.
-For spin polarized calculations, one must provide two separated indices for spin up and spin down.
-An additional cutoff energy can be applied by means of the bs_eh_window input variable.
-</p>
-</font>
-
-<br><br><br><br><a href=#top>Go to the top</a>
-<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
-
-
-<br><font id="title"><a name="bs_nstates">bs_nstates</a></font>
-<br><font id="mnemonics">Mnemonics: Bethe-Salpeter Number of States</font>
-<br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#bethe_salpeter">BETHE_SALPETER</a></font>
-<br><font id="vartype">Variable type: integer</font>
-<br><font id="default">Default is 0</font>
-<br><br><font id="requires">
-Only relevant if <a href="vargs.html#optdriver">optdriver</a> == 99 and <a href="vargw.html#bs_algorithm">bs_algorithm</a> in [2,3]
-</font>
-<br><font id="text">
-<p>
-<p>
- <b>bs_nstates</b> defines the maximum number of excitonic states calculated in
-the direct diagonalization of the excitonic matrix or in the conjugate-gradient method.
-The number of states should be sufficiently large
-for a correct description of the optical properties in the frequency range of interest.
-</p>
-</font>
-
-<br><br><br><br><a href=#top>Go to the top</a>
-<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
-
-
 <br><font id="title"><a name="cd_customnimfrqs">cd_customnimfrqs</a></font>
-<br><font id="mnemonics">Mnemonics: Contour Deformation Custom Imaginary Frequencies</font>
+<br><font id="mnemonics">Mnemonics: Contour Deformation CUSTOM IMaginary FReQuencieS</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#gw">GW</a></font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
@@ -806,7 +273,7 @@ to the number of frequencies you want. The frequencies are specified with <a hre
 
 
 <br><font id="title"><a name="cd_frqim_method">cd_frqim_method</a></font>
-<br><font id="mnemonics">Mnemonics: Contour Deformation Imaginary Frequency integration Method</font>
+<br><font id="mnemonics">Mnemonics: Contour Deformation FReQuency integration on IMaginary axis Method</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#gw">GW</a></font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 1</font>
@@ -1143,7 +610,7 @@ merge independent screening calculations over q-points and frequency sections.
 
 
 <br><font id="title"><a name="cd_full_grid">cd_full_grid</a></font>
-<br><font id="mnemonics">Mnemonics: Contour Deformation Full Grid in complex plane</font>
+<br><font id="mnemonics">Mnemonics: Contour Deformation FULL GRID in complex plane</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#gw">GW</a></font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
@@ -1181,7 +648,7 @@ analysis with the
 
 
 <br><font id="title"><a name="cd_halfway_freq">cd_halfway_freq</a></font>
-<br><font id="mnemonics">Mnemonics: Contour Deformation tangent grid Halfway Frequency</font>
+<br><font id="mnemonics">Mnemonics: Contour Deformation tangent grid HALFWAY FREQuency</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#gw">GW</a>, <a href="../../users/abinit_help.html#energy">ENERGY</a></font>
 <br><font id="vartype">Variable type: real</font>
 <br><font id="default">Default is 100.0 eV</font>
@@ -1202,7 +669,7 @@ linear up to this point. To be used in conjunction with <a href="vargw.html#gw_f
 
 
 <br><font id="title"><a name="cd_imfrqs">cd_imfrqs</a></font>
-<br><font id="mnemonics">Mnemonics: Contour Deformation Imaginary Frequencies</font>
+<br><font id="mnemonics">Mnemonics: Contour Deformation IMaginary FReQuencieS</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#gw">GW</a></font>
 <br><font id="vartype">Variable type: real(<a href="vargw.html#cd_customnimfrqs">cd_customnimfrqs</a>)</font>
 <br><font id="default">No default</font>
@@ -1246,7 +713,7 @@ the grid along the real axis. The calculation of that point should be controlled
 
 
 <br><font id="title"><a name="cd_max_freq">cd_max_freq</a></font>
-<br><font id="mnemonics">Mnemonics: Contour Deformation grid Maximum Frequency</font>
+<br><font id="mnemonics">Mnemonics: Contour Deformation grid MAXimum FREQuency</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#gw">GW</a>, <a href="../../users/abinit_help.html#energy">ENERGY</a></font>
 <br><font id="vartype">Variable type: real</font>
 <br><font id="default">Default is 1000.0 eV</font>
@@ -1267,7 +734,7 @@ Only relevant if (<a href="vargs.html#optdriver">optdriver</a>==3 or <a href="va
 
 
 <br><font id="title"><a name="cd_subset_freq">cd_subset_freq</a></font>
-<br><font id="mnemonics">Mnemonics: Contour Deformation grid calculate Subset of Frequencies</font>
+<br><font id="mnemonics">Mnemonics: Contour Deformation grid calculate SUBSET of FREQuencies</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#gw">GW</a></font>
 <br><font id="vartype">Variable type: integer(2)</font>
 <br><font id="default">Default is [1, '<a href="vargw.html#nfreqre">nfreqre</a>']</font>
@@ -1352,7 +819,7 @@ upper limits.
 
 
 <br><font id="title"><a name="ecutwfn">ecutwfn</a></font>
-<br><font id="mnemonics">Mnemonics: Energy CUT-off for WaveFunctions</font>
+<br><font id="mnemonics">Mnemonics: Energy CUT-off for WaveFunctioNs</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#gw">GW</a>, <a href="../../users/abinit_help.html#energy">ENERGY</a></font>
 <br><font id="vartype">Variable type: real</font>
 <br><font id="default">Default is <a href="varbas.html#ecut">ecut</a> if <a href="vargs.html#optdriver">optdriver</a> in [3, 4],
@@ -1637,7 +1104,7 @@ the real axis. Alternatively, the variables <a href="vargw.html#gw_customnfreqsp
 
 
 <br><font id="title"><a name="gw_customnfreqsp">gw_customnfreqsp</a></font>
-<br><font id="mnemonics">Mnemonics: GW CUSTOM SPectral FREQuencies</font>
+<br><font id="mnemonics">Mnemonics: GW CUSTOM FREQuencies for SPectral function</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#gw">GW</a></font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
@@ -1688,7 +1155,7 @@ gw_freqsp         -0.5  -0.1  0.0  1.0  10.0 eV
 
 
 <br><font id="title"><a name="gw_frqim_inzgrid">gw_frqim_inzgrid</a></font>
-<br><font id="mnemonics">Mnemonics: Contour Deformation Imaginary Frequencies Inverse Z Grid</font>
+<br><font id="mnemonics">Mnemonics: GW Contour Deformation FReQuencies on IMaginary axis Inverse Z Grid</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#gw">GW</a></font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
@@ -1736,7 +1203,7 @@ the points are distributed so that half of them lie below the plasma frequency.
 
 
 <br><font id="title"><a name="gw_frqre_inzgrid">gw_frqre_inzgrid</a></font>
-<br><font id="mnemonics">Mnemonics: Contour Deformation Real Frequencies Inverse Z Grid</font>
+<br><font id="mnemonics">Mnemonics: GW Contour Deformation FReQuencies on REal axis Inverse Z Grid</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#gw">GW</a></font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
@@ -1810,7 +1277,7 @@ logfile during Contour Deformation sigma calculations.
 
 
 <br><font id="title"><a name="gw_frqre_tangrid">gw_frqre_tangrid</a></font>
-<br><font id="mnemonics">Mnemonics: Contour Deformation Use Tangent Grid</font>
+<br><font id="mnemonics">Mnemonics: GW Contour Deformation FReQencies on REal axis - Use Tangent Grid</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#gw">GW</a></font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
@@ -1834,7 +1301,7 @@ of a function which decays as 1/x^2. To be used in conjunction with <a href="var
 
 
 <br><font id="title"><a name="gw_invalid_freq">gw_invalid_freq</a></font>
-<br><font id="mnemonics">Mnemonics: Invalid Frequency for Hybertsen-Louie PPM</font>
+<br><font id="mnemonics">Mnemonics: GW treatment of INVALID FREQuency for Hybertsen-Louie PPM</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#gw">GW</a></font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
@@ -1921,7 +1388,7 @@ directions in q-space (the three basis vectors of the reciprocal lattice and the
 
 
 <br><font id="title"><a name="gw_nstep">gw_nstep</a></font>
-<br><font id="mnemonics">Mnemonics: GW Number of self-consistent STEPS</font>
+<br><font id="mnemonics">Mnemonics: GW Number of self-consistent STEPs</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#gw">GW</a></font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 30</font>
@@ -1944,7 +1411,7 @@ used to define the type of self-consistency.
 
 
 <br><font id="title"><a name="gw_qlwl">gw_qlwl</a></font>
-<br><font id="mnemonics">Mnemonics: GW, Q-points for the Long Wave-Length Limit</font>
+<br><font id="mnemonics">Mnemonics: GW, Q-points for the Long Wave-Length limit</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#gw">GW</a></font>
 <br><font id="vartype">Variable type: real(3,<a href="vargw.html#gw_nqlwl">gw_nqlwl</a>)</font>
 <br><font id="default">Default is [1e-05, 2e-05, 3e-05]</font>
@@ -1968,7 +1435,7 @@ non-local field effects) are evaluated for each direction specified by <b>gw_qlw
 
 
 <br><font id="title"><a name="gw_qprange">gw_qprange</a></font>
-<br><font id="mnemonics">Mnemonics: GW Policy for K-point and Bands selection</font>
+<br><font id="mnemonics">Mnemonics: GW QuasiParticle RANGE policy</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#gw">GW</a></font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
@@ -2070,7 +1537,7 @@ the Green functions to be used in the first self-consistent iteration.
 
 
 <br><font id="title"><a name="gw_sigxcore">gw_sigxcore</a></font>
-<br><font id="mnemonics">Mnemonics: GW, treatment of the ...</font>
+<br><font id="mnemonics">Mnemonics: GW, SIGma (self-energy) for the CORE contribution</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#gw">GW</a></font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
@@ -2241,7 +1708,7 @@ following S. Faleev
 
 
 <br><font id="title"><a name="gwcomp">gwcomp</a></font>
-<br><font id="mnemonics">Mnemonics: GW COMPletness</font>
+<br><font id="mnemonics">Mnemonics: GW COMPleteness</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#gw">GW</a></font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
@@ -2265,7 +1732,7 @@ See F. Bruneval, X. Gonze, Phys. Rev. B 78, 085125 (2008) for a description of t
 
 
 <br><font id="title"><a name="gwencomp">gwencomp</a></font>
-<br><font id="mnemonics">Mnemonics: GW Energy for COMPletness</font>
+<br><font id="mnemonics">Mnemonics: GW ENergy for COMPleteness</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#gw">GW</a></font>
 <br><font id="vartype">Variable type: real</font>
 <br><font id="default">Default is 2.0</font>
@@ -2305,7 +1772,7 @@ Mixing parameter of Fock exchange for PBE0 and HSE hybrid-functional calculation
 
 
 <br><font id="title"><a name="gwgamma">gwgamma</a></font>
-<br><font id="mnemonics">Mnemonics: GW Gamma</font>
+<br><font id="mnemonics">Mnemonics: GW GAMMA</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#gw">GW</a></font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
@@ -2561,7 +2028,7 @@ For most cases, since the frequencies \Infty and (if <a href="vargw.html#gwls_re
 
 
 <br><font id="title"><a name="gwls_model_parameter">gwls_model_parameter</a></font>
-<br><font id="mnemonics">Mnemonics: GWLS model parameter</font>
+<br><font id="mnemonics">Mnemonics: GWLS MODEL PARAMETER</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#gw">GW</a>, <a href="../../users/abinit_help.html#energy">ENERGY</a></font>
 <br><font id="vartype">Variable type: real</font>
 <br><font id="default">Default is 1.0</font>
@@ -2696,7 +2163,7 @@ It is particularly efficient to choose the path of the file to be on disk space 
 
 
 <br><font id="title"><a name="gwls_second_model_parameter">gwls_second_model_parameter</a></font>
-<br><font id="mnemonics">Mnemonics: GWLS second model parameter</font>
+<br><font id="mnemonics">Mnemonics: GWLS SECOND MODEL PARAMETER</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#gw">GW</a>, <a href="../../users/abinit_help.html#energy">ENERGY</a></font>
 <br><font id="vartype">Variable type: real</font>
 <br><font id="default">Default is 0.0</font>
@@ -2960,12 +2427,12 @@ In some cases, it mimics a second iteration self-consistent <a href="../../users
 
 
 <br><font id="title"><a name="mdf_epsinf">mdf_epsinf</a></font>
-<br><font id="mnemonics">Mnemonics: Model dielectric function, epsilon infinity</font>
+<br><font id="mnemonics">Mnemonics: Model Dielectric Function, EPSilon INFinity</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#bethe_salpeter">BETHE_SALPETER</a></font>
 <br><font id="vartype">Variable type: real</font>
 <br><font id="default">Default is 0.0</font>
 <br><br><font id="requires">
-Only relevant if <a href="vargs.html#optdriver">optdriver</a>==99 and <a href="vargw.html#bs_coulomb_term">bs_coulomb_term</a> in [20,21] (Bethe-Salpeter calculas with a model dielectric function
+Only relevant if <a href="vargs.html#optdriver">optdriver</a>==99 and <a href="varbse.html#bs_coulomb_term">bs_coulomb_term</a> in [20,21] (Bethe-Salpeter calculas with a model dielectric function
 </font>
 <br><font id="text">
 <p>
@@ -3055,7 +2522,7 @@ the dielectric matrix in order to perform the numerical integration of the <a hr
 
 
 <br><font id="title"><a name="nfreqmidm">nfreqmidm</a></font>
-<br><font id="mnemonics">Mnemonics: Nth FREQuencey Moment of the Imaginary part of the Dielectric Matrix</font>
+<br><font id="mnemonics">Mnemonics: Nth FREQuency Moment of the Imaginary part of the Dielectric Matrix</font>
 <br><font id="characteristic">Characteristic: </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">No default</font>
@@ -3743,7 +3210,7 @@ inside this window will not be taken into account in
 the polarisability calculation.
 </p>
 <p>
- For <b>ucrpa</b> = 2, the ucrpa_bands should be equal to the <a href="vardev.html#dmftbandi">dmftbandi</a> and <a href="vardev.html#dmftbandf">dmftbandf</a>
+ For <b>ucrpa</b> = 2, the ucrpa_bands should be equal to the <a href="vardmft.html#dmftbandi">dmftbandi</a> and <a href="vardmft.html#dmftbandf">dmftbandf</a>
 values, and the polarisability of the correlated subspace
 is constructed with a band and k-point dependent weight.
 </p>
