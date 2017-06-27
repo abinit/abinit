@@ -65,19 +65,18 @@ class Variable(yaml.YAMLObject):
     range = None
     requires = None
     excludes = None
-    topic_name = None
-    topic_class = None
+    topics = None
 
     yaml_tag = u'!variable'
 
     def attrs(self):
         return ['vartype', 'characteristic', 'mnemonics', 'dimensions', 'defaultval', 'text',
-                'abivarname', 'section', 'topic_name', 'topic_class']
+                'abivarname', 'section', 'topics']
 
     def __init__(self, vartype=None, characteristic=None,
                  mnemonics=None, dimensions=None, default=None,
                  text=None, abivarname=None, section=None, range=None,
-                 commentdefault=None, commentdims=None, topic_name=None, topic_class=None):
+                 commentdefault=None, commentdims=None, topics=None):
         self.vartype = vartype
         self.characteristic = characteristic
         self.mnemonics = mnemonics
@@ -89,8 +88,7 @@ class Variable(yaml.YAMLObject):
         self.commentdefault = commentdefault
         self.commentdims = commentdims
         self.range = range
-        self.topic_name = topic_name
-        self.topic_class = topic_class
+        self.topics = topics
 
     @classmethod
     def from_array(cls, array):
@@ -98,22 +96,19 @@ class Variable(yaml.YAMLObject):
                         mnemonics=array["mnemonics"], dimensions=array["dimensions"],
                         default=array["default"], text=array["text"], abivarname=array["abivarname"],
                         section=array["section"], range=array["range"], commentdefault=array["commentdefault"],
-                        commentdims=array["commentdims"], topic_name=array["topic_name"], topic_class=array["topic_class"])
+                        commentdims=array["commentdims"], topics=array["topics"])
 
     def __str__(self):
         return "Variable " + str(self.abivarname) + " (default = " + str(self.defaultval) + ")"
-<<<<<<< HEAD
-=======
 
 class Topic(yaml.YAMLObject):
-    topic_name = None  # String containing the "How to ?" topic name
+    topic_name = None  # String containing the "How to ?" topic name 
     howto = ''     # String containing the description of the topics, to be echoed after "How to" ...
 
     yaml_tag = u'!topic'
 
     def attrs(self):
         return ['topic_name', 'howto']
->>>>>>> remotes/origin/input-web
 
     def __init__(self, topic_name=None, howto=None):
         self.topic_name = topic_name
