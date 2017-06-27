@@ -5,7 +5,7 @@ document.write(' <A href="http://www.abinit.org"><B>ABINIT home page</B></A>    
 document.write(' <B> | </B> ');
 document.write(' <A href="'+docpath+'users/acknowledgments.html"><B>Suggested acknowledgments</B></A> ');
 document.write(' <B> | </B> ');
-document.write(' <A href="'+docpath+'playground/html_automatically_generated/allvariables.html"><B>Input variable list</B></A> ');
+document.write(' <A href="'+docpath+'input_variables/html_automatically_generated/allvariables.html"><B>Input variable list</B></A> ');
 document.write(' <B> | </B> ');
 document.write(' <A href="'+docpath+'tutorial/welcome.html"><B>Tutorial</B></A> ');
 document.write(' <B> | </B> ');
