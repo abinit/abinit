@@ -9,6 +9,7 @@ import argparse
 from variables import *
 
 debug = 0
+make_topics_visible=1
 
 # Path relative from HTML files
 js_path = "../"
@@ -243,7 +244,7 @@ for i, var in enumerate(variables):
     else:
       cur_content += "<br><font id=\"characteristic\">Characteristic: </font>\n"
     try:
-      if var.topics is not None:
+      if var.topics is not None and make_topics_visible==1 :
         cur_content += "<br><font id=\"characteristic\">Mentioned in \"How to\": "
         vartopics=var.topics
         topics_name_class = vartopics.split(',')
@@ -305,7 +306,10 @@ for section, content in all_contents.items():
     f_cur.write(curlink)
     #f_cur.write("<br /><br />\n")
   f_cur.write("\n")
-  content += "<script type=\"text/javascript\" src=\""+js_path+"list_internal_links.js\"> </script>\n\n"
+  if make_topics_visible==0:
+    content += "<script type=\"text/javascript\" src=\""+js_path+"list_internal_links.js\"> </script>\n\n"
+  else:
+    content += "<script type=\"text/javascript\" src=\""+js_path+"list_internal_links_incl_topics.js\"> </script>\n\n"
   content += "</body>\n"
   content += "</html>"
   f_cur.write(content)
@@ -337,8 +341,10 @@ for (speckey, specval) in list_specials:
 
 f_sp.write(cur_content)
 
-
-cur_content = "\n<script type=\"text/javascript\" src=\""+js_path+"list_internal_links.js\"> </script>\n\n"
+if make_topics_visible==0:
+  cur_content += "<script type=\"text/javascript\" src=\""+js_path+"list_internal_links.js\"> </script>\n\n"
+else:
+  cur_content += "<script type=\"text/javascript\" src=\""+js_path+"list_internal_links_incl_topics.js\"> </script>\n\n"
 cur_content += "</body>\n"
 cur_content += "</html>"
 
@@ -347,7 +353,10 @@ f_sp.close()
 print("File specials.html has been written ...")
 
 # Allvariables file : complete the content, then write the file and close it
-output += "<script type=\"text/javascript\" src=\""+js_path+"list_internal_links.js\"> </script>\n\n"
+if make_topics_visible==0:
+  output += "<script type=\"text/javascript\" src=\""+js_path+"list_internal_links.js\"> </script>\n\n"
+else:
+  output += "<script type=\"text/javascript\" src=\""+js_path+"list_internal_links_incl_topics.js\"> </script>\n\n"
 output += "</body>\n"
 output += "</html>"
 
@@ -532,7 +541,7 @@ for topic_name, content in topic_sec3.items():
 
 # Write final lines
   content = "<br>"
-  content += "<script type=\"text/javascript\" src=\""+js_path+"list_internal_links.js\"> </script>\n\n"
+  content += "<script type=\"text/javascript\" src=\""+js_path+"list_internal_links_incl_topics.js\"> </script>\n\n"
   content += "</body>\n"
   content += "</html>"
   content += "\n"
@@ -579,7 +588,7 @@ for i, topic in enumerate(topics):
 
 ################################################################################
 # Alltopics file : complete the content, then write the file and close it
-toutput += "<script type=\"text/javascript\" src=\""+js_path+"list_internal_links.js\"> </script>\n\n"
+toutput += "<script type=\"text/javascript\" src=\""+js_path+"list_internal_links_incl_topics.js\"> </script>\n\n"
 toutput += "</body>\n"
 toutput += "</html>"
 
