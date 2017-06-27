@@ -5,11 +5,11 @@ from sys import argv, exit
 import numpy as np
 import os
 
-filnam="abinit_vars_play.yml"
+filnam="abinit_vars_orig.yml"
 filnam1="varname_in.yml"
 Input= file(filnam,'r')
 Input1= file(filnam1,'r')
-outfile = open("abinit_vars_out_play.yml", "wb+")
+outfile = open("abinit_vars.yml", "wb+")
 
 for oline in Input:
   if oline[0:11] not in "    abivarname":

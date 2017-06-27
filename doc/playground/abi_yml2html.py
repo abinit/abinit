@@ -93,7 +93,7 @@ def make_links(text,cur_abivarname,variables,characteristics,specials):
 ################################################################################
 # Parse the abinit_vars.yml file -> variables
 
-file='abinit_vars_out_play.yml'
+file='abinit_vars.yml'
 print("Will use "+str(file)+" as database input file for the input variables and their characteristics ...")
 
 parser = argparse.ArgumentParser(description='Tool for eigenvalue analysis')
