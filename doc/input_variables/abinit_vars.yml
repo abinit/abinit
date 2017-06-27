@@ -1625,7 +1625,7 @@
     excludes: null
     mnemonics: Bethe-Salpeter CALCulation TYPE
     requires: '[[optdriver]] == 99'
-    section: vargw
+    section: varbse
     text: |-
         <p>
          Possible values are 1,2,3.
@@ -1658,7 +1658,7 @@
     excludes: null
     mnemonics: Bethe-Salpeter COULOMB TERM
     requires: '[[optdriver]] == 99'
-    section: vargw
+    section: varbse
     text: |-
         <p>
         This variable governs the choice among the different options that are available for the treatment
@@ -1709,7 +1709,7 @@
     excludes: null
     mnemonics: Bethe-Salpeter COUPLING
     requires: '[[optdriver]] == 99'
-    section: vargw
+    section: varbse
     text: |-
         <p>
          The [[bs_coupling]] input variable defines the treatment of the coupling block of the
@@ -1744,7 +1744,7 @@
     excludes: null
     mnemonics: Bethe-Salpeter Electron-Hole CUTOFF
     requires: '[[optdriver]] == 99'
-    section: vargw
+    section: varbse
     text: |-
         <p>
          It is used to define a cutoff in the e-h basis set. Only those transitions whose
@@ -1764,7 +1764,7 @@
     excludes: null
     mnemonics: Bethe-Salpeter EXCHANGE TERM
     requires: '[[optdriver]] == 99'
-    section: vargw
+    section: varbse
     text: |-
         <p><ul>
         <li>0 =&gt;The exchange term is not calculated. This is equivalent to neglecting local field effects
@@ -1789,7 +1789,7 @@
     excludes: null
     mnemonics: Bethe-Salpeter FREQuency MESH
     requires: '[[optdriver]] == 99'
-    section: vargw
+    section: varbse
     text: |-
         <p>
         <b>bs_freq_mesh(1)</b> defines the first frequency for the calculation of the macroscopic dielectric function.
@@ -1812,7 +1812,7 @@
     excludes: null
     mnemonics: Bethe-Salpeter HAYdock TERMinator
     requires: '[[optdriver]] == 99 and [[bs_algorithm]]==2'
-    section: vargw
+    section: varbse
     text: |-
         <p>
          Defines how to terminate the continued fraction expression for the dielectric function.
@@ -1845,7 +1845,7 @@
     excludes: null
     mnemonics: Bethe-Salpeter HAYDOCK Number of Iterations
     requires: '[[optdriver]] == 99 and [[bs_algorithm]]==2'
-    section: vargw
+    section: varbse
     text: |-
         <p>
          [[bs_haydock_niter]] defines the maximum number of iterations used to calculate the macroscopic dielectric function.
@@ -1868,7 +1868,7 @@
     excludes: null
     mnemonics: Bethe-Salpeter HAYDOCK TOLerance
     requires: '[[optdriver]] == 99 and [[bs_algorithm]]==2'
-    section: vargw
+    section: varbse
     text: |-
         <p>
          Defines the convergence criterion for the Haydock iterative method.
@@ -1918,7 +1918,7 @@
     excludes: null
     mnemonics: Bethe-Salpeter INTERPolation K-point MULTiplication factors
     requires: '[[bs_interp_mode]] > 0 and [[bs_algorithm]]==2 and [[bs_coupling]]==0'
-    section: vargw
+    section: varbse
     text: |-
         <p>
          [[bs_interp_kmult]] defines the number of divisions used to generate the dense mesh in the interpolation.
@@ -1941,7 +1941,7 @@
     excludes: null
     mnemonics: Bethe-Salpeter INTERPolation Method3 WIDTH
     requires: '[[bs_interp_mode]]==3 and [[bs_algorithm]]==2 and [[bs_coupling]]==0'
-    section: vargw
+    section: varbse
     text: |-
         Defines the width of the region where divergence treatment is applied for BSE interpolation
     topics: null
@@ -1957,7 +1957,7 @@
     excludes: null
     mnemonics: Bethe-Salpeter INTERPolation METHOD
     requires: '[[bs_interp_mode]] > 0 and [[bs_algorithm]]==2 and [[bs_coupling]]==0'
-    section: vargw
+    section: varbse
     text: |-
         <p>
          [[bs_interp_method]] selects the method of interpolation:
@@ -1983,7 +1983,7 @@
     excludes: null
     mnemonics: Bethe-Salpeter INTERPolation MODE
     requires: '[[bs_interp_mode]] > 0 and [[bs_algorithm]]==2 and [[bs_coupling]]==0'
-    section: vargw
+    section: varbse
     text: |-
         <p>
          [[bs_interp_mode]] selects the mode of interpolation:
@@ -2015,7 +2015,7 @@
     excludes: null
     mnemonics: Bethe-Salpeter INTERPolation PREParation
     requires: '[[bs_interp_mode]] > 0 and [[bs_algorithm]]==2 and [[bs_coupling]]==0'
-    section: vargw
+    section: varbse
     text: |-
         <p>
          [[bs_interp_prep]] allows to trigger the preparation of the interpolation with method 2 or method 3.
@@ -2035,7 +2035,7 @@
     mnemonics: Bethe-Salpeter INTERPolation Rohlfing & Louie NeighBour
     requires: '[[bs_interp_mode]] > 0 and [[bs_algorithm]]==2 and [[bs_interp_method]]
         == 1 and [[bs_coupling]]==0'
-    section: vargw
+    section: varbse
     text: |-
         Gives the index of the neighbour that is used for Rohlfing & Louie method
     topics: null
@@ -2052,7 +2052,7 @@
     excludes: null
     mnemonics: Bethe-Salpeter Lowest Occupied BAND
     requires: '[[optdriver]] == 99'
-    section: vargw
+    section: varbse
     text: |-
         <p>
          This variable defines the index of the lowest occupied band used for the construction of the electron-hole basis set.
@@ -2072,7 +2072,7 @@
     excludes: null
     mnemonics: Bethe-Salpeter Number of States
     requires: '[[optdriver]] == 99 and [[bs_algorithm]] in [2,3]'
-    section: vargw
+    section: varbse
     text: |-
         <p>
          [[bs_nstates]] defines the maximum number of excitonic states calculated in
@@ -4198,7 +4198,7 @@
     excludes: null
     mnemonics: 'Dynamical Mean Fied Theory: ENTROPY'
     requires: '[[usedmft]]==1 and [[dmft_solv]]==5'
-    section: vardev
+    section: vardmft
     text: |-
         If 1, enable the calculation of the entropy  within the DMFT framework and so allows the calculation of the total energy (free energy).
         In the current implementation, this is only possible with [[dmft_solv]]=5 (Continuous Time Quantum Monte Carlo).
@@ -4216,7 +4216,7 @@
     excludes: null
     mnemonics: 'Dynamical Mean Fied Theory: number of ITERation'
     requires: null
-    section: vardev
+    section: vardmft
     text: |-
         <p>
          <br />
@@ -4236,7 +4236,7 @@
     mnemonics: 'Dynamical Mean Fied Theory: MiXing parameter for the SelF
         energy'
     requires: null
-    section: vardev
+    section: vardmft
     text: |-
         <p>
          <br />
@@ -4255,7 +4255,7 @@
     excludes: null
     mnemonics: 'Dynamical Mean Fied Theory: Number of LAMBDA points'
     requires: '[[usedmft]]==1 and [[dmft_entropy]]==1'
-    section: vardev
+    section: vardmft
     text: |-
         [[dmft_nlambda]] gives the number of integration points for the thermodynamical integration in case of free energy calculation within DMFT.
         Its value must be greater or equal to 3.
@@ -4273,7 +4273,7 @@
     mnemonics: 'Dynamical Mean Fied Theory: Number of frequency omega (W)
         in the LInear mesh'
     requires: null
-    section: vardev
+    section: vardmft
     text: |-
         <p>
          <br />
@@ -4293,7 +4293,7 @@
     mnemonics: 'Dynamical Mean Fied Theory: Number of frequency omega (W)
         in the log mesh'
     requires: null
-    section: vardev
+    section: vardmft
     text: |-
         <p>
          <br />
@@ -4348,7 +4348,7 @@
     excludes: null
     mnemonics: 'Dynamical Mean Fied Theory: Read SeLF energy'
     requires: null
-    section: vardev
+    section: vardmft
     text: |-
         <p>
          Flag to read/write Self-Energy. If put to one, self-energy is written and read at each DFT iteration.
@@ -4366,7 +4366,7 @@
     excludes: null
     mnemonics: 'Dynamical Mean Fied Theory: choice of SOLVer'
     requires: null
-    section: vardev
+    section: vardmft
     text: |-
         <p>
          <br />
@@ -4445,7 +4445,7 @@
     excludes: null
     mnemonics: 'Dynamical Mean Fied Theory: t2g orbitals'
     requires: null
-    section: vardev
+    section: vardmft
     text: |-
         <p>
          <br />
@@ -4465,7 +4465,7 @@
     mnemonics: 'Dynamical Mean Fied Theory: Tolerance on LDA correlated electron
         occupation matrix for the definition of the frequency grid'
     requires: null
-    section: vardev
+    section: vardmft
     text: |-
         <p>
          <br />
@@ -4487,7 +4487,7 @@
     mnemonics: 'Dynamical Mean Fied Theory: Tolerance on Local Charge for
         convergence of the DMFT loop'
     requires: null
-    section: vardev
+    section: vardmft
     text: |-
         <p>
          <br />
@@ -4509,7 +4509,7 @@
     excludes: null
     mnemonics: 'Dynamical Mean Field Theory: BAND: Final'
     requires: null
-    section: vardev
+    section: vardmft
     text: |-
         <p>
          [[dmftbandf]] is the last band taken into account in the Projected Local
@@ -4529,7 +4529,7 @@
     excludes: null
     mnemonics: 'Dynamical Mean Field Theory: BAND: Initial'
     requires: null
-    section: vardev
+    section: vardmft
     text: |-
         <p>
          [[dmftbandi]] is the first band taken into account in the Projected Local
@@ -4549,7 +4549,7 @@
     excludes: null
     mnemonics: 'Dynamical Mean Fied Theory: CHECKs'
     requires: null
-    section: vardev
+    section: vardmft
     text: |-
         <p>
          <br />
@@ -4603,7 +4603,7 @@
     mnemonics: 'Dynamical Mean Fied Theory: Continuous Time Quantum Monte
         Carlo check'
     requires: '[[dmft_solv]]==5'
-    section: vardev
+    section: vardmft
     text: |-
         <p>
          <br />
@@ -4638,7 +4638,7 @@
     mnemonics: 'Dynamical Mean Fied Theory: Continuous Time Quantum Monte
         Carlo CORRelations'
     requires: '[[dmft_solv]]==5'
-    section: vardev
+    section: vardmft
     text: |-
         <p>
          <br />
@@ -4667,7 +4667,7 @@
     mnemonics: 'Dynamical Mean Fied Theory: Continuous Time Quantum Monte
         Carlo Global MOVEs'
     requires: '[[dmft_solv]]==5'
-    section: vardev
+    section: vardmft
     text: |-
         <p>
          <br />
@@ -4689,7 +4689,7 @@
     mnemonics: 'Dynamical Mean Fied Theory: Continuous Time Quantum Monte
         Carlo GReeNs NoiSe'
     requires: '[[dmft_solv]]==5'
-    section: vardev
+    section: vardmft
     text: |-
         <p>
          <br />
@@ -4718,7 +4718,7 @@
     mnemonics: 'Dynamical Mean Fied Theory: Continuous Time Quantum Monte
         Carlo MEASurements'
     requires: '[[dmft_solv]]==5'
-    section: vardev
+    section: vardmft
     text: |-
         <p>
          <br />
@@ -4739,7 +4739,7 @@
     mnemonics: 'Dynamical Mean Fied Theory: Continuous Time Quantum Monte
         Carlo MOVie'
     requires: '[[dmft_solv]]==5'
-    section: vardev
+    section: vardmft
     text: |-
         <p>
          <br />
@@ -4768,7 +4768,7 @@
     mnemonics: 'Dynamical Mean Fied Theory: Continuous Time Quantum Monte
         Carlo MARKov Analysis'
     requires: '[[dmft_solv]]==5'
-    section: vardev
+    section: vardmft
     text: |-
         <p>
          <br />
@@ -4797,7 +4797,7 @@
     mnemonics: 'Dynamical Mean Fied Theory: Continuous Time Quantum Monte
         Carlo perturbation ORDER'
     requires: '[[dmft_solv]]==5'
-    section: vardev
+    section: vardmft
     text: |-
         <p>
          <br />
@@ -4819,7 +4819,7 @@
     mnemonics: 'Dynamical Mean Fied Theory: Continuous Time Quantum Monte
         Carlo perturbation of TRIQS, Number of LEGendre polynomials'
     requires: '[[dmft_solv]]==6 or 7'
-    section: vardev
+    section: vardmft
     text: |-
         <p>
          <br />
@@ -4841,7 +4841,7 @@
     excludes: null
     mnemonics: 'Dynamical Mean Fied Theory: Quantum Monte Carlo time sLices'
     requires: '[[dmft_solv]]>=4'
-    section: vardev
+    section: vardmft
     text: |-
         <p>
          <br />
@@ -4861,7 +4861,7 @@
     excludes: null
     mnemonics: 'Dynamical Mean Fied Theory: Quantum Monte Carlo sweeps'
     requires: '[[dmft_solv]]>=4'
-    section: vardev
+    section: vardmft
     text: |-
         <p>
          <br />
@@ -4880,7 +4880,7 @@
     excludes: null
     mnemonics: 'Dynamical Mean Fied Theory: Quantum Monte Carlo seed'
     requires: '[[dmft_solv]]>=4'
-    section: vardev
+    section: vardmft
     text: |-
         <p>
          <br />
@@ -4903,7 +4903,7 @@
     excludes: null
     mnemonics: 'Dynamical Mean Fied Theory: Quantum Monte Carlo THERMalization'
     requires: '[[dmft_solv]]==5'
-    section: vardev
+    section: vardmft
     text: |-
         <p>
          <br />
@@ -27080,7 +27080,7 @@
     excludes: null
     mnemonics: vdW-DF MINimum Angular CUT-off
     requires: '[[vdw_xc]]>0'
-    section: vardev
+    section: varvdw
     text: |-
         Used when [[vdw_xc]]&gt;0,
         to build angular meshes for the vdW-DF kernel.
@@ -27100,7 +27100,7 @@
         vdW-DF RATIO between the highest and
         lowest Angle.
     requires: '[[vdw_xc]]>0'
-    section: vardev
+    section: varvdw
     text: |-
         Used when [[vdw_xc]]&gt;0,
         to build angular meshes for the vdW-DF kernel.
@@ -27118,7 +27118,7 @@
     excludes: null
     mnemonics: vdW-DF MAXimum Angular Delta
     requires: '[[vdw_xc]]>0'
-    section: vardev
+    section: varvdw
     text: |-
         Used when [[vdw_xc]]&gt;0,
         to build angular meshes for the vdW-DF kernel.
@@ -27136,7 +27136,7 @@
     excludes: null
     mnemonics: vdW-DF MINimum Angular Delta
     requires: '[[vdw_xc]]>0'
-    section: vardev
+    section: varvdw
     text: |-
         Used when [[vdw_xc]]&gt;0,
         to build angular meshes for the vdW-DF kernel.
@@ -27154,7 +27154,7 @@
     excludes: null
     mnemonics: vdW-DF D-mesh CUT-off
     requires: '[[vdw_xc]]>0'
-    section: vardev
+    section: varvdw
     text: |-
         Used when [[vdw_xc]]&gt;0,
         to build the vdW-DF kernel.
@@ -27174,7 +27174,7 @@
         vdW-DF RATIO between the highest and
         lowest D.
     requires: '[[vdw_xc]]>0'
-    section: vardev
+    section: varvdw
     text: |-
         Used when [[vdw_xc]]&gt;0,
         to build the vdW-DF kernel.
@@ -27192,7 +27192,7 @@
     excludes: null
     mnemonics: vdW-DF SOFTening distance.
     requires: '[[vdw_xc]]>0'
-    section: vardev
+    section: varvdw
     text: |-
         Used when [[vdw_xc]]&gt;0,
         to build the vdW-DF kernel.
@@ -27210,7 +27210,7 @@
     excludes: null
     mnemonics: vdW-DF K-space CUT-off
     requires: '[[vdw_xc]]>0'
-    section: vardev
+    section: varvdw
     text: |-
         Used when [[vdw_xc]]&gt;0,
         to filter the vdW-DF kernel in reciprocal space.
@@ -27228,7 +27228,7 @@
     excludes: null
     mnemonics: vdW-DF Number of D-mesh PoinTS
     requires: '[[vdw_xc]]>0'
-    section: vardev
+    section: varvdw
     text: |-
         Used when [[vdw_xc]]&gt;0,
         to build the vdW-DF kernel.
@@ -27246,7 +27246,7 @@
     excludes: null
     mnemonics: vdW-DF Number of G-mesh PoinTS
     requires: '[[vdw_xc]]>0'
-    section: vardev
+    section: varvdw
     text: |-
         Used when [[vdw_xc]]&gt;0,
         to build the vdW-DF kernel.
@@ -27264,7 +27264,7 @@
     excludes: null
     mnemonics: vdW-DF Number of Q-mesh PoinTS
     requires: '[[vdw_xc]]>0'
-    section: vardev
+    section: varvdw
     text: |-
         Used when [[vdw_xc]]&gt;0,
         to build the vdW-DF kernel.
@@ -27282,7 +27282,7 @@
     excludes: null
     mnemonics: vdW-DF Number of R-PoinTS
     requires: '[[vdw_xc]]>0'
-    section: vardev
+    section: varvdw
     text: |-
         Used when [[vdw_xc]]&gt;0,
         to define the sampling of the vdW-DF-kernel in real-space.
@@ -27300,7 +27300,7 @@
     excludes: null
     mnemonics: vdW-DF Number of SMOOTHening iterations
     requires: '[[vdw_xc]]>0'
-    section: vardev
+    section: varvdw
     text: |-
         Used when [[vdw_xc]]&gt;0,
         to exponentially smoothen q near q0.
@@ -27318,7 +27318,7 @@
     excludes: null
     mnemonics: vdW-DF SOFTening PHI value.
     requires: '[[vdw_xc]]>0'
-    section: vardev
+    section: varvdw
     text: |-
         Used when [[vdw_xc]]&gt;0,
         to build the vdW-DF kernel.
@@ -27336,7 +27336,7 @@
     excludes: null
     mnemonics: vdW-DF Q-mesh CUT-off
     requires: '[[vdw_xc]]>0'
-    section: vardev
+    section: varvdw
     text: |-
         Used when [[vdw_xc]]&gt;0,
         to build the vdW-DF kernel.
@@ -27356,7 +27356,7 @@
         vdW-DF RATIO between highest and
         lowest Q
     requires: '[[vdw_xc]]>0'
-    section: vardev
+    section: varvdw
     text: |-
         Used when [[vdw_xc]]&gt;0,
         .
@@ -27374,7 +27374,7 @@
     excludes: null
     mnemonics: vdW-DF Real-space CUT-off
     requires: '[[vdw_xc]]>0'
-    section: vardev
+    section: varvdw
     text: |-
         Used when [[vdw_xc]]&gt;0,
         to define the vdW-DF kernel cut-off radius.
@@ -27392,7 +27392,7 @@
     excludes: null
     mnemonics: vdW-DF SOFTening radius.
     requires: '[[vdw_xc]]>0'
-    section: vardev
+    section: varvdw
     text: |-
         Used when [[vdw_xc]]&gt;0,
         to build the vdW-DF kernel.
@@ -27410,7 +27410,7 @@
     excludes: null
     mnemonics: vdW-DF energy calculation threshold
     requires: '[[vdw_xc]]>0'
-    section: vardev
+    section: varvdw
     text: |-
         <p>
         Sets a threshold for the energy gradient that,
@@ -27433,7 +27433,7 @@
     excludes: null
     mnemonics: vdW-DF global TOLERANCE.
     requires: '[[vdw_xc]]>0'
-    section: vardev
+    section: varvdw
     text: |-
         Used when [[vdw_xc]]&gt;0,
         to build the vdW-DF kernel.
@@ -27451,7 +27451,7 @@
     excludes: null
     mnemonics: vdW-DF tweaks.
     requires: '[[vdw_xc]]>0'
-    section: vardev
+    section: varvdw
     text: |-
         Used when [[vdw_xc]]&gt;0,
         to build the vdW-DF kernel.
@@ -27475,7 +27475,7 @@
     excludes: null
     mnemonics: vdW-DF Zab parameter
     requires: '[[vdw_xc]]>0'
-    section: vardev
+    section: varvdw
     text: |-
         Used when [[vdw_xc]]&gt;0,
         as introduced in
@@ -27497,7 +27497,7 @@
     excludes: null
     mnemonics: van der Waals Number of interacting FRAGments
     requires: '[[vdw_xc]] in [10,11]'
-    section: vardev
+    section: varvdw
     text: |-
         <p>
          The absolute value of vdw_nfrag is the number of vdW interacting
@@ -27525,7 +27525,7 @@
     excludes: null
     mnemonics: Van Der Waals correction from Wannier functions in SUPERCELL
     requires: '[[vdw_xc]] in [10,11]'
-    section: vardev
+    section: varvdw
     text: |-
         <p>
          Set of dimensionless positive numbers which define the maximum multiples
@@ -27551,7 +27551,7 @@
     excludes: null
     mnemonics: van der Waals TOLerance
     requires: '[[vdw_xc]]==5'
-    section: vardev
+    section: varvdw
     text: |-
         <p>
          The DFT-D methods (S. Grimme approach) dispersion potentials, [[vdw_xc]]==5 or 6 or 7, include a pair potential.
@@ -27571,7 +27571,7 @@
     excludes: null
     mnemonics: van der Waals TOLerance for 3-Body Term
     requires: '[[vdw_xc]] == 6'
-    section: vardev
+    section: varvdw
     text: |-
         Control the computation of the 3-body correction inside DFT-D3 dispersion correction (Grimme approach) to the total energy:
         <br />
@@ -27607,7 +27607,7 @@
     excludes: null
     mnemonics: van der Waals TYPe of FRAGment
     requires: '[[vdw_xc]] in [10,11]'
-    section: vardev
+    section: varvdw
     text: |-
         <p>
          This array defines the interacting fragments by assigning to each atom an
@@ -27634,7 +27634,7 @@
     excludes: null
     mnemonics: van der Waals eXchange-Correlation functional
     requires: null
-    section: vardev
+    section: varvdw
     text: |-
         <p>
          Selects a van-der-Waals density functional to
