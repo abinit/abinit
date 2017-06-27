@@ -1,5 +1,10 @@
+- tests/paral/Input/t05.in:#%% topics = TDDFT
 - tests/paral/Input/t93.in:#%% topics = hf
 - tests/paral/Input/t94.in:#%% topics = hf
+- tests/v1/Input/t69.in:#%% topics = TDDFT
+- tests/v1/Input/t70.in:#%% topics = TDDFT
+- tests/v2/Input/t42.in:#%% topics = TDDFT
+- tests/v3/Input/t55.in:#%% topics = TDDFT
 - tests/v4/Input/t95.in:#%% topics = positron
 - tests/v4/Input/t96.in:#%% topics = positron
 - tests/v5/Input/t07.in:#%% topics = positron
@@ -14,6 +19,8 @@
 - tests/v5/Input/t38.in:#%% topics = DFT+U
 - tests/v5/Input/t39.in:#%% topics = DFT+U
 - tests/v5/Input/t40.in:#%% topics = DFT+U
+- tests/v5/Input/t61.in:#%% topics = TDDFT
+- tests/v5/Input/t62.in:#%% topics = TDDFT
 - tests/v7/Input/t21.in:#%% topics = DFT+U
 - tests/v7/Input/t22.in:#%% topics = DFT+U
 - tests/v7/Input/t35.in:#%% topics = positron
