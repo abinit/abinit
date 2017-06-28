@@ -154,7 +154,7 @@ if args_dict['file']:
   file = args_dict['file']
 
 with open(file, 'r') as f:
-    varhtml = yaml.load(f);
+    tempvarhtml = yaml.load(f);
 
 ################################################################################
 # Parse the ABINIT input files, in order to find the possible topics to which they are linked -> topics_in_tests
@@ -342,35 +342,44 @@ for section, content in all_contents.items():
   content += "</html>"
   f_cur.write(content)
  else:
-  with open('yml_template/'+section+'.yml') as f:
-    varfile_yml = f.read()
-  print("Will rely on file named yml_template/"+section+".yml, to generate"+section+".html... ", end='')
-  varhtml1=varhtml.replace("__JS_PATH__",js_path)
-  cur_varhtml=varhtml1.replace("__KEYWORD__",varfile_yml.keyword)
-  f_cur.write(cur_varhtml.header)
-  f_cur.write(cur_varhtml.title)
-  f_cur.write(cur_varhtml.subtitle)
-  f_cur.write(cur_varhtml.purpose)
-  f_cur.write(cur_varhtml.advice)
-  f_cur.write(cur_varhtml.copyright)
-  f_cur.write(cur_varhtml.links)
-  f_cur.write(cur_varhtml.menu)
-  f_cur.write(cur_varhtml.tofcontent)
-  # Generation of the table of content
+
+  file='yml_templates/'+section+'.yml'
+  print("Will rely on file named yml_template/"+section+".yml, to generate "+section+".html... ", end='')
+
+  parser = argparse.ArgumentParser(description='Tool for eigenvalue analysis')
+  parser.add_argument('-f','--file',help='YML file to be read')
+  args = parser.parse_args()
+  args_dict = vars(args)
+  if args_dict['file']:
+    file = args_dict['file']
+
+  with open(file, 'r') as f:
+    varfile_yml = yaml.load(f);
+
+  print("\n",varfile_yml)
+
+  sectionhtml=""
+  for i in ["header","title","subtitle","purpose","advice","copyright","links","menu","tofcontent_header"]:
+    sectionhtml += tempvarhtml[i]+ "\n"
+  # Generation of the table of content body
   cur_let = 'A'
-  f_cur.write(" <br>"+cur_let+".\n")
+  sectionhtml += " <br>"+cur_let+".\n"
   for abivarname,defi in all_vars[section]:
     while not abivarname.startswith(cur_let.lower()):
       cur_let = chr(ord(cur_let)+1)
-      f_cur.write(" <br>"+cur_let+".\n")
+      sectionhtml += " <br>"+cur_let+".\n"
     curlink = " <a href=\"#"+abivarname+"\">"+abivarname+"</a>&nbsp;&nbsp;\n"
-    f_cur.write(curlink)
-  f_cur.write("\n")
+    sectionhtml += curlink
+  sectionhtml += "\n"
   # Here comes the writing of all input variable descriptions
-  f_cur.write(content)
+  sectionhtml += content
   # Once more the links
-  f_cur.write(cur_varhtml.links)   
-  f_cur.write(cur_varhtml.end)   
+  sectionhtml += tempvarhtml["links"]+ "\n" 
+  sectionhtml += tempvarhtml["end"]+ "\n"
+  sectionhtml=sectionhtml.replace("__JS_PATH__",js_path)
+  sectionhtml=sectionhtml.replace("__KEYWORD__",varfile_yml["keyword"])
+  sectionhtml = doku2html(make_links(sectionhtml,None,list_all_vars,list_chars,cur_specials))
+  f_cur.write(sectionhtml)
  f_cur.write("\n")
  f_cur.close()
  print("File "+section+".html has been written ...")
@@ -473,7 +482,6 @@ for (tclasskey, tclassval) in list_topics_class:
         topics_name_class = vartopics.split(',')
         for i, topic_name_class in enumerate(topics_name_class):
           name_class = topic_name_class.split('_')
-          #print("tclasskey,name_class[1].strip()",tclasskey,name_class[1].strip()) 
           if tclasskey==name_class[1].strip() :
             topic_name=name_class[0].strip()
             found[topic_name] = 1
