@@ -27678,7 +27678,7 @@
         <li>
            6: apply vdw-DFT-D3 as proposed by S. Grimme (refined version of DFT-D2)
            <br />
-           Available only for ground-state calculations and response functions except strain; see [[vdw_tol]] variable
+           Available only for ground-state calculations and response functions; see [[vdw_tol]] variable
         to control convergency and [[vdw_tol_3bt]] variable to include 3-body corrections
            <br />
            <i>
@@ -27688,7 +27688,7 @@
            <li>
            7: apply vdw-DFT-D3(BJ) as proposed by Grimme (based on Becke-Jonhson method J. Chem. Phys. 2004-2006)
            <br />
-           Available only for ground-state calculations and response functions except strain; see [[vdw_tol]] variable
+           Available only for ground-state calculations and response functions; see [[vdw_tol]] variable
         to control convergency
            <br />
            <i>
