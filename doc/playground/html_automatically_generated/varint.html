@@ -1,0 +1,530 @@
+<html>
+<head><title>INTERNAL variables</title>
+<link rel=stylesheet type="text/css" href="../formabinit.css">
+</head>
+<body bgcolor="#ffffff">
+
+<hr>
+<a name="top"></a>
+
+<h1>ABINIT internal variables:</h1>
+<h2>List and description.</h2>
+
+<hr>
+
+<p>This document describes several important internal variables, to which
+the user has no direct access through a keyword,
+but that are derived from the input variables at the time
+of their processing and used internally. Their
+value is fixed for a specific dataset.
+They are present in the
+dtset array, in addition to the input variables that can be
+directly addressed by the user.
+
+<script type="text/javascript" src="../generic_advice.js"> </script>
+<script type="text/javascript" src="../copyright.js"> </script>
+<script type="text/javascript" src="../list_internal_links.js"> </script>
+<script type="text/javascript" src="../list_htmlfiles_input_variables.js"> </script>
+
+<a name="list"></a>
+<h3><b> Content of the file : alphabetical list of internals.</b></h3>
+ <br>A.
+ <br>B.
+ <br>C.
+ <br>D.
+ <br>E.
+ <br>F.
+ <br>G.
+ <br>H.
+ <br>I.
+ <br>J.
+ <br>K.
+ <a href="#kptns">kptns</a>&nbsp;&nbsp;
+ <br>L.
+ <br>M.
+ <a href="#mband">mband</a>&nbsp;&nbsp;
+ <a href="#mgfft">mgfft</a>&nbsp;&nbsp;
+ <a href="#mgfftdg">mgfftdg</a>&nbsp;&nbsp;
+ <a href="#mpw">mpw</a>&nbsp;&nbsp;
+ <br>N.
+ <a href="#natpawu">natpawu</a>&nbsp;&nbsp;
+ <a href="#ndynimage">ndynimage</a>&nbsp;&nbsp;
+ <a href="#nelect">nelect</a>&nbsp;&nbsp;
+ <a href="#nfft">nfft</a>&nbsp;&nbsp;
+ <a href="#nfftdg">nfftdg</a>&nbsp;&nbsp;
+ <a href="#npweps">npweps</a>&nbsp;&nbsp;
+ <a href="#npwsigx">npwsigx</a>&nbsp;&nbsp;
+ <a href="#npwwfn">npwwfn</a>&nbsp;&nbsp;
+ <br>O.
+ <br>P.
+ <br>Q.
+ <a href="#qptn">qptn</a>&nbsp;&nbsp;
+ <br>R.
+ <br>S.
+ <br>T.
+ <br>U.
+ <a href="#usefock">usefock</a>&nbsp;&nbsp;
+ <a href="#usepaw">usepaw</a>&nbsp;&nbsp;
+ <a href="#userec">userec</a>&nbsp;&nbsp;
+ <br>V.
+ <br>W.
+ <br>X.
+ <a href="#xclevel">xclevel</a>&nbsp;&nbsp;
+ <br>Y.
+ <br>Z.
+ <a href="#ziontypat">ziontypat</a>&nbsp;&nbsp;
+
+<br><br><br><br><hr>
+<br><font id="title"><a name="kptns">kptns</a></font>
+<br><font id="mnemonics">Mnemonics: K-PoinTs re-Normalized and Shifted</font>
+<br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#internal_only">INTERNAL_ONLY</a></font>
+<br><font id="vartype">Variable type: real(3,<a href="varbas.html#nkpt">nkpt</a>)</font>
+<br><font id="default">No default</font>
+<br><font id="text">
+<p>
+<p>
+ If <a href="vargs.html#nqpt">nqpt</a>=0, or if one is
+doing a reponse calculation,
+this internal variable is derived from
+<a href="varbas.html#kpt">kpt</a> and <a href="varbas.html#kptnrm">kptnrm</a>:
+<b>kptns</b>(1:3,:)=
+<a href="varbas.html#kpt">kpt</a>(1:3,:)/
+<a href="varbas.html#kptnrm">kptnrm</a>, so that
+it is <a href="varbas.html#kpt">kpt</a> renormalized by
+<a href="varbas.html#kptnrm">kptnrm</a>.
+ <br />
+ If <a href="vargs.html#nqpt">nqpt</a>=1 and one is
+not doing a ground-state calculation,
+this internal variable is derived from
+<a href="varbas.html#kpt">kpt</a>,<a href="varbas.html#kptnrm">kptnrm</a>
+and <a href="varint.html#qptn">qptn</a>
+<b>kptns</b>(1:3,:)=
+<a href="varbas.html#kpt">kpt</a>(1:3,:)/
+<a href="varbas.html#kptnrm">kptnrm</a>+
+<a href="varint.html#qptn">qptn</a>(1:3), so that
+it is <a href="varbas.html#kpt">kpt</a> renormalized by
+<a href="varbas.html#kptnrm">kptnrm</a>, then shifted
+by <a href="varint.html#qptn">qptn</a>(1:3).
+</p>
+</font>
+
+<br><br><br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="mband">mband</a></font>
+<br><font id="mnemonics">Mnemonics: Maximum number of BANDs</font>
+<br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#internal_only">INTERNAL_ONLY</a></font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">No default</font>
+<br><font id="text">
+<p>
+<p>
+ This internal variable derives
+the maximum number of bands
+over all k-points and spin-polarisation from
+<a href="varbas.html#nband">nband</a>(1:nkpt*nsppol).
+</p>
+</font>
+
+<br><br><br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="mgfft">mgfft</a></font>
+<br><font id="mnemonics">Mnemonics: Maximum of nGFFT</font>
+<br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#internal_only">INTERNAL_ONLY</a></font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">No default</font>
+<br><font id="text">
+<p>
+<p>
+ This internal variable contains the maximum of
+<a href="vargs.html#ngfft">ngfft</a>(1:3).
+</p>
+</font>
+
+<br><br><br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="mgfftdg">mgfftdg</a></font>
+<br><font id="mnemonics">Mnemonics: Maximum of nGFFT for the Double Grid</font>
+<br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#internal_only">INTERNAL_ONLY</a></font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">No default</font>
+<br><font id="text">
+<p>
+<p>
+ This internal variable contains the maximum of
+<a href="varpaw.html#ngfftdg">ngfftdg</a>(1:3).
+</p>
+</font>
+
+<br><br><br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="mpw">mpw</a></font>
+<br><font id="mnemonics">Mnemonics: Maximum number of Plane Waves</font>
+<br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#internal_only">INTERNAL_ONLY</a></font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">No default</font>
+<br><font id="text">
+<p>
+<p>
+ This internal variable gives the maximum of the number of
+plane waves over all k-points. It is computed
+from <a href="varbas.html#ecut">ecut</a> and the description
+of the cell, provided by
+<a href="varbas.html#acell">acell</a>,
+<a href="varbas.html#rprim">rprim</a>, and/or
+<a href="varbas.html#angdeg">angdeg</a>.
+</p>
+</font>
+
+<br><br><br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="natpawu">natpawu</a></font>
+<br><font id="mnemonics">Mnemonics: Number of AToms on which PAW+U is applied</font>
+<br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#internal_only">INTERNAL_ONLY</a></font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">No default</font>
+<br><br><font id="requires">
+Only relevant if <a href="varpaw.html#usepawu">usepawu</a>==1
+</font>
+<br><font id="text">
+<p>
+<p>
+ This internal variable gives the number of atoms on which the LDA/GGA+U method
+is applied. This value is determined from <a href="varpaw.html#lpawu">lpawu</a>.
+</p>
+</font>
+
+<br><br><br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="ndynimage">ndynimage</a></font>
+<br><font id="mnemonics">Mnemonics: Number of DYNamical IMAGEs</font>
+<br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#internal_only">INTERNAL_ONLY</a></font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">No default</font>
+<br><font id="text">
+<p>
+<p>
+ This internal variable gives the number of dynamical images,
+immediately deduced from the number of non-zero values present in
+<a href="varrlx.html#dynimage">dynimage</a>.
+It is used to dimension many memory-consuming arrays (one copy for each image),
+e.g. the wavefunction array (cg), the density array (rho), etc .
+</p>
+</font>
+
+<br><br><br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="nelect">nelect</a></font>
+<br><font id="mnemonics">Mnemonics: Number of ELECTrons</font>
+<br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#internal_only">INTERNAL_ONLY</a></font>
+<br><font id="vartype">Variable type: real</font>
+<br><font id="default">Default is <a href="specials.html#AUTO_FROM_PSP">AUTO_FROM_PSP</a></font>
+<br><font id="text">
+<p>
+<p>
+ This internal variable gives the number of electrons per unit
+cell, as computed from the sum of the valence electrons
+related to each atom (given in the pseudopotential, where it is called
+"zion"), and the input variable
+<a href="vargs.html#charge">charge</a>:
+ <br />
+ <b>nelect</b>=zion-<a href="vargs.html#charge">charge</a>.
+</p>
+</font>
+
+<br><br><br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="nfft">nfft</a></font>
+<br><font id="mnemonics">Mnemonics: Number of FFT points</font>
+<br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#internal_only">INTERNAL_ONLY</a></font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">No default</font>
+<br><font id="text">
+<p>
+<p>
+ If space parallelisation is not used (that is, if <a href="varpar.html#paral_kgb">paral_kgb</a>==0),
+this internal variable gives the number of Fast Fourier Transform
+points in the grid generated by
+<a href="vargs.html#ngfft">ngfft</a>(1:3). It is simply the
+product of the three components of <a href="vargs.html#ngfft">ngfft</a>.
+ <br />
+ If space parallelisation is used (that is, if <a href="varpar.html#paral_kgb">paral_kgb</a>==1), then it becomes the
+number of Fast Fourier Transform points attributed to the
+particular processor. It is no longer the above-mentioned simple product,
+but a number usually close to this product divided by the
+number of processors on which the space is shared.
+</p>
+</font>
+
+<br><br><br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="nfftdg">nfftdg</a></font>
+<br><font id="mnemonics">Mnemonics: Number of FFT points for the Double Grid</font>
+<br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#internal_only">INTERNAL_ONLY</a></font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">No default</font>
+<br><font id="text">
+<p>
+<p>
+ If space parallelisation is not used (that is, if <a href="varpar.html#paral_kgb">paral_kgb</a>==0),
+this internal variable gives the number of Fast Fourier Transform
+points in the (double) grid generated by
+<a href="varpaw.html#ngfftdg">ngfftdg</a>(1:3). It is simply the
+product of the three components of <a href="varpaw.html#ngfftdg">ngfftdg</a>.
+ <br />
+ If space parallelisation is used (that is, if <a href="varpar.html#paral_kgb">paral_kgb</a>==1), then it becomes the
+number of Fast Fourier Transform points attributed to the
+particular processor. It is no longer the above-mentioned simple product,
+but a number usually close to this product divided by the
+number of processors on which the space is shared.
+</p>
+</font>
+
+<br><br><br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="npweps">npweps</a></font>
+<br><font id="mnemonics">Mnemonics: Number of PlaneWaves for EPSilon (the dielectric matrix)</font>
+<br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#gw">GW</a>, <a href="../../users/abinit_help.html#internal_only">INTERNAL_ONLY</a></font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">No default</font>
+<br><font id="text">
+<p>
+<p>
+ <b>npweps</b> determines the size of the planewave set used to represent the independent-particle
+susceptibility $\chi^{(0)}_{KS}$, the dielectric matrix $\epsilon$ and its inverse.
+ <br />
+It is an internal variable, determined from <a href="vargw.html#ecuteps">ecuteps</a>.
+</p>
+</font>
+
+<br><br><br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="npwsigx">npwsigx</a></font>
+<br><font id="mnemonics">Mnemonics: Number of PlaneWaves for SIGma eXchange</font>
+<br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#gw">GW</a>, <a href="../../users/abinit_help.html#internal_only">INTERNAL_ONLY</a></font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">No default</font>
+<br><font id="text">
+<p>
+<p>
+ <b>npwsigx</b> determines the cut-off energy of the planewave set used to generate the
+exchange part of the self-energy operator.
+ <br />
+It is an internal variable, determed from <a href="vargw.html#ecutsigx">ecutsigx</a>.
+</p>
+</font>
+
+<br><br><br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="npwwfn">npwwfn</a></font>
+<br><font id="mnemonics">Mnemonics: Number of PlaneWaves for WaveFunctioNs</font>
+<br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#gw">GW</a>, <a href="../../users/abinit_help.html#internal_only">INTERNAL_ONLY</a></font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">No default</font>
+<br><font id="text">
+<p>
+<p>
+ <b>npwwfn</b> is the size of the planewave set used to represent the wavefunctions
+in the formula that generates the independent-particle susceptibility $\chi^{(0)}_{KS}$.
+It is an internal variable, determined from <a href="vargw.html#ecutwfn">ecutwfn</a>.
+</p>
+</font>
+
+<br><br><br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="qptn">qptn</a></font>
+<br><font id="mnemonics">Mnemonics: Q-PoinT re-Normalized</font>
+<br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#internal_only">INTERNAL_ONLY</a></font>
+<br><font id="vartype">Variable type: real(3)</font>
+<br><font id="default">Default is 3*0</font>
+<br><br><font id="requires">
+Only relevant if <a href="vargs.html#nqpt">nqpt</a>==1
+</font>
+<br><font id="text">
+<p>
+<p>
+ Only used if <a href="vargs.html#nqpt">nqpt</a>=1.
+ <br />
+ In ground-state calculation,
+the vector <b>qptn</b>(1:3) is added to
+each renormalized k point (whatever the value of
+<a href="varbas.html#kptopt">kptopt</a> that was used)
+to generate the normalized, shifted, set of k-points
+<a href="varint.html#kptns">kptns</a>(1:3,1:
+ <b>
+  nkpt
+ </b>
+ ).
+ <br />
+ In response-function calculations,
+<b>qptn</b>(1:3)
+is the wavevector of the phonon-type calculation.
+ <br />
+ <b>qptn</b>(1:3) can be produced on the basis of
+the different methods described in <a href="vargs.html#qptopt">qptopt</a>,
+like using <a href="vargs.html#qpt">qpt</a>(1:3)
+with renormalisation provided by <a href="vargs.html#qptnrm">qptnrm</a>,
+or using the other possibilities defined by
+<a href="vargs.html#iqpt">iqpt</a>,
+<a href="vargs.html#ngqpt">ngqpt</a>,
+<a href="vargs.html#nshiftq">nshiftq</a>,
+<a href="vargs.html#qptrlatt">qptrlatt</a>,
+<a href="vargs.html#shiftq">shiftq</a>,
+ <br />
+ For insulators, there is no restriction on the
+q-points to be used for the perturbations. By contrast,
+for metals, for the time being, it is advised to take
+q points for which the k and k+q grids are the same
+(when the periodicity in reciprocal space is taken
+into account). Tests remain to be done to see whether
+other q points might be allowed (perhaps with some
+modification of the code).
+</p>
+</font>
+
+<br><br><br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="usefock">usefock</a></font>
+<br><font id="mnemonics">Mnemonics: USE FOCK exact exchange</font>
+<br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#internal_only">INTERNAL_ONLY</a></font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><font id="text">
+<p>
+<p>
+ This internal variable is automatically set to 1 when the value of <a href="varbas.html#ixc">ixc</a>  refers to an Hartree-Fock calculation or hybrid functionals.
+ <ul>
+  <li>
+   0 =&gt; No use of exact exchange.
+  </li>
+  <li>
+   1 =&gt; exact exchange is required for the calculation.
+  </li>
+ </ul>
+</p>
+</font>
+
+<br><br><br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="usepaw">usepaw</a></font>
+<br><font id="mnemonics">Mnemonics: USE Projector Augmented Waves method</font>
+<br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#internal_only">INTERNAL_ONLY</a></font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is <a href="specials.html#AUTO_FROM_PSP">AUTO_FROM_PSP</a></font>
+<br><font id="text">
+<p>
+<p>
+ This variable is determined by the pseudopotentials files.
+PAW calculations (see
+ <a href="varpaw.html">
+  PAW variables
+ </a>
+ ) can only
+be performed with PAW atomic data input files, while
+pseudopotential calculations are performed in ABINIT with norm-conserving
+pseudopotential input files. Most functionalities in ABINIT are available
+with either type of calculation.
+</p>
+</font>
+
+<br><br><br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="userec">userec</a></font>
+<br><font id="mnemonics">Mnemonics: USE RECursion</font>
+<br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#internal_only">INTERNAL_ONLY</a></font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><font id="text">
+<p>
+<p>
+ This internal variable is set to 1 when the recursion method is
+activated (see <a href="vardev.html#tfkinfunc">tfkinfunc</a>).
+</p>
+</font>
+
+<br><br><br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="xclevel">xclevel</a></font>
+<br><font id="mnemonics">Mnemonics: eXchange Correlation functional LEVEL</font>
+<br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#internal_only">INTERNAL_ONLY</a></font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><font id="text">
+<p>
+<p>
+ Automatically determined from the value of <a href="varbas.html#ixc">ixc</a>.
+ <ul>
+  <li>
+   0 =&gt; No XC contribution.
+  </li>
+  <li>
+   1 =&gt; LDA functional.
+  </li>
+  <li>
+   2 =&gt; GGA functional or hybrid functional based on GGA.
+  </li>
+  <li>
+   3 =&gt; Functional for <a href="../../users/abinit_help.html#tddft">TDDFT</a>.
+  </li>
+ </ul>
+</p>
+</font>
+
+<br><br><br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="ziontypat">ziontypat</a></font>
+<br><font id="mnemonics">Mnemonics: Z (charge) of the IONs for the different TYPes of AToms</font>
+<br><font id="characteristic">Characteristic: </font>
+<br><font id="vartype">Variable type: real(<a href="varbas.html#ntypat">ntypat</a>)</font>
+<br><font id="default">Default is <a href="specials.html#AUTO_FROM_PSP">AUTO_FROM_PSP</a></font>
+<br><font id="text">
+<p>
+<p>
+ Charge of the pseudo-ion (=number of valence electrons
+that are needed to screen exactly the pseudopotential).
+</p>
+</font>
+
+<br><br><br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
+
+
+<script type="text/javascript" src="../list_internal_links.js"> </script>
+
+</body>
+</html>

@@ -233,8 +233,11 @@ for i, var in enumerate(variables):
   cur_content = ""
 
   try:
+    # Title
     cur_content += "<br><font id=\"title\"><a name=\""+var.abivarname+"\">"+var.abivarname+"</a></font>\n"
+    # Mnemonics
     cur_content += "<br><font id=\"mnemonics\">Mnemonics: "+var.mnemonics+"</font>\n"
+    # Characteristics
     if var.characteristics is not None:
       chars = ""
       for chs in var.characteristics:
@@ -243,6 +246,7 @@ for i, var in enumerate(variables):
       cur_content += "<br><font id=\"characteristic\">Characteristic: "+make_links(chars,var.abivarname,list_all_vars,list_chars,cur_specials)+"</font>\n"
     else:
       cur_content += "<br><font id=\"characteristic\">Characteristic: </font>\n"
+    # Topics
     try:
       if var.topics is not None and make_topics_visible==1 :
         cur_content += "<br><font id=\"characteristic\">Mentioned in \"How to\": "
@@ -255,25 +259,32 @@ for i, var in enumerate(variables):
     except:
       if debug==1 :
         print(" No topic_class for abivarname "+var.abivarname)
+    # Variable type, including dimensions
     cur_content += "<br><font id=\"vartype\">Variable type: "+var.vartype
     if var.dimensions is not None:
       cur_content += make_links(format_dimensions(var.dimensions),var.abivarname,list_all_vars,list_chars,cur_specials)
     if var.commentdims is not None and var.commentdims != "":
       cur_content += " (Comment: "+make_links(var.commentdims,var.abivarname,list_all_vars,list_chars,cur_specials)+")"
     cur_content += "</font>\n" 
+    # Default
     cur_content += "<br><font id=\"default\">"+make_links(format_default(var.defaultval),var.abivarname,list_all_vars,list_chars,cur_specials)
     if var.commentdefault is not None and var.commentdefault != "":
       cur_content += " (Comment: "+make_links(var.commentdefault,var.abivarname,list_all_vars,list_chars,cur_specials)+")"
     cur_content += "</font>\n" 
+    # Requires
     if var.requires is not None and var.requires != "":
       cur_content += "<br><br><font id=\"requires\">\nOnly relevant if "+doku2html(make_links(var.requires,var.abivarname,list_all_vars,list_chars,cur_specials))+"\n</font>\n"
+    # Excludes
     if var.excludes is not None and var.excludes != "":
       cur_content += "<br><br><font id=\"excludes\">\nThe use of this variable forbids the use of "+doku2html(make_links(var.excludes,var.abivarname,list_all_vars,list_chars,cur_specials))+"\n</font>\n"
+    # Text
     cur_content += "<br><font id=\"text\">\n"
     cur_content += "<p>\n"+doku2html(make_links(var.text,var.abivarname,list_all_vars,list_chars,cur_specials))+"\n"
+    # End the section for one variable
     cur_content += "</font>\n\n"
     cur_content += "<br><br><br><br><a href=#top>Go to the top</a>\n"
     cur_content += "<B> | </B><a href=\"allvariables.html#top\">Complete list of input variables</a><hr>\n"
+    #
     all_contents[section] = all_contents[section] + cur_content + "\n\n"
   except AttributeError as e:
     print(e)
@@ -531,7 +542,9 @@ for topic_name, content in topic_sec3.items():
 
   f_topic = open(file_topic,'w')
 
-  f_topic.write(topic_header_varX)
+  topic_header_varX2 = doku2html(make_links(topic_header_varX,None,list_all_vars,list_chars,cur_specials))
+
+  f_topic.write(topic_header_varX2)
 
 # Write Sec. 3 
   f_topic.write(topic_sec3[topic_name])
