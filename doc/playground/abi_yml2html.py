@@ -141,6 +141,22 @@ with open(file, 'r') as f:
     tests_dirs = yaml.load(f);
 
 ################################################################################
+# Parse the template_varhtml.yml file -> varhtml
+
+file='yml_templates/template_varhtml.yml'
+print("Will use "+str(file)+" as template to generate all var*.html files ...")
+
+parser = argparse.ArgumentParser(description='Tool for eigenvalue analysis')
+parser.add_argument('-f','--file',help='YML file to be read')
+args = parser.parse_args()
+args_dict = vars(args)
+if args_dict['file']:
+  file = args_dict['file']
+
+with open(file, 'r') as f:
+    varhtml = yaml.load(f);
+
+################################################################################
 # Parse the ABINIT input files, in order to find the possible topics to which they are linked -> topics_in_tests
 
 try :
