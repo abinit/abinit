@@ -307,14 +307,15 @@ for i, var in enumerate(variables):
     print('For variable : ',abivarname)
 
 ################################################################################
-# Generate the files that document all the variables.
+# Generate the files that document all the variables (all such files : var* as well as all and special). 
 
 # For each "normal" section file : generate the header, generate the alphabetical list, write these,
 # then complete the content (that was previously gathered), then write the file and close it
 for section, content in all_contents.items():
-  file_cur = 'html_automatically_generated/'+section+'.html'
-  f_cur = open(file_cur,'w')
+ file_cur = 'html_automatically_generated/'+section+'.html'
+ f_cur = open(file_cur,'w')
 
+ if section != "varbas":
   with open('html_template/temp_'+section+'.html') as f:
     header_varX = f.read()
   print("Will use file named temp_"+section+", as template for "+section+".html... ", end='')
@@ -340,9 +341,40 @@ for section, content in all_contents.items():
   content += "</body>\n"
   content += "</html>"
   f_cur.write(content)
+ else:
+  with open('yml_template/'+section+'.yml') as f:
+    varfile_yml = f.read()
+  print("Will rely on file named yml_template/"+section+".yml, to generate"+section+".html... ", end='')
+  varhtml1=varhtml.replace("__JS_PATH__",js_path)
+  cur_varhtml=varhtml1.replace("__KEYWORD__",varfile_yml.keyword)
+  f_cur.write(cur_varhtml.header)
+  f_cur.write(cur_varhtml.title)
+  f_cur.write(cur_varhtml.subtitle)
+  f_cur.write(cur_varhtml.purpose)
+  f_cur.write(cur_varhtml.advice)
+  f_cur.write(cur_varhtml.copyright)
+  f_cur.write(cur_varhtml.links)
+  f_cur.write(cur_varhtml.menu)
+  f_cur.write(cur_varhtml.tofcontent)
+  # Generation of the table of content
+  cur_let = 'A'
+  f_cur.write(" <br>"+cur_let+".\n")
+  for abivarname,defi in all_vars[section]:
+    while not abivarname.startswith(cur_let.lower()):
+      cur_let = chr(ord(cur_let)+1)
+      f_cur.write(" <br>"+cur_let+".\n")
+    curlink = " <a href=\"#"+abivarname+"\">"+abivarname+"</a>&nbsp;&nbsp;\n"
+    f_cur.write(curlink)
   f_cur.write("\n")
-  f_cur.close()
-  print("File "+section+".html has been written ...")
+  # Here comes the writing of all input variable descriptions
+  f_cur.write(content)
+  # Once more the links
+  f_cur.write(cur_varhtml.links)   
+  f_cur.write(cur_varhtml.end)   
+ f_cur.write("\n")
+ f_cur.close()
+ print("File "+section+".html has been written ...")
+
 
 # Special file : complete the content, then write the file and close it
 file_specials = 'html_automatically_generated/specials.html'
