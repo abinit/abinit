@@ -112,7 +112,7 @@ we can finally proceed to analyze the screening computation performed in the las
 The SCR file is calculated in dataset 4 using 
 <a href="../input_variables/html_automatically_generated/varbas.html#nband" target="kwimg">nband</a>=100
 and
-<a href="../input_variables/html_automatically_generated/varbse.html#ecuteps" target="kwimg">ecuteps</a> 6.0 Ha.
+<a href="../input_variables/html_automatically_generated/vargw.html#ecuteps" target="kwimg">ecuteps</a> 6.0 Ha.
 In the <a href="lesson_gw1.html">first lesson</a> of the GW tutorial,
 these values were found to give QP energies converged within 0.01 eV, 
 so we are confident that our SCR file is well converged and it can be safely used for performing 
@@ -129,7 +129,7 @@ of the screened interaction is needed to construct the Coulomb term of the BS Ha
 Using a single frequency allows us to save some CPU time in the screening part, but keep in mind
 that this SCR file can only be used either for Bethe-Salpeter computations or for 
 GW calculations employing the plasmon-pole models corresponding to 
-<a href="../input_variables/html_automatically_generated/varbse.html#ppmodel" target="kwimg">ppmodel</a>=3,4.
+<a href="../input_variables/html_automatically_generated/vargw.html#ppmodel" target="kwimg">ppmodel</a>=3,4.
 <!--
 <p>
 Note also that the k point grid is quite rough, 
@@ -231,7 +231,7 @@ bs_coupling       0       # Tamm-Dancoff approximation.
 The value <a href="../input_variables/html_automatically_generated/varbse.html#bs_calctype" target="kwimg">bs_calctype</a>=1 specifies that
 the independent-particle polarizability should be costructed with the Kohn-Sham orbitals and energies read from the WFK file.
 To simulate the self-energy correction, the KS energies are corrected with a scissors operator 
-of energy <a href="../input_variables/html_automatically_generated/varbse.html#mbpt_sciss" target="kwimg">mbpt_sciss</a>= 0.8 eV.
+of energy <a href="../input_variables/html_automatically_generated/vargw.html#mbpt_sciss" target="kwimg">mbpt_sciss</a>= 0.8 eV.
 This permits us to avoid a cumbersome GW calculation for each state 
 included in our transition space. The use of the scissors operator is a reasonable approximation for silicon but 
 it might fail in more complicated systems in which the GW corrections cannot be simulated in terms of a simple 
@@ -288,13 +288,13 @@ In this case we use the iterative Haydock technique whose maximum number of
 iterations is given by <a href="../input_variables/html_automatically_generated/varbse.html#bs_haydock_niter" target="kwimg">bs_haydock_niter</a>.
 The iterative algorithm stops when the difference between two consecutive evaluations of the optical 
 spectra is less than <a href="../input_variables/html_automatically_generated/varbse.html#bs_haydock_tol">bs_haydock_tol</a>.
-The input variable <a href="../input_variables/html_automatically_generated/varbse.html#zcut" target="kwimg">zcut</a> gives the complex shift to avoid divergences 
+The input variable <a href="../input_variables/html_automatically_generated/vargw.html#zcut" target="kwimg">zcut</a> gives the complex shift to avoid divergences 
 in the continued fraction. 
 From a physical point of view, this parameters mimics the experimental broadening of the absorption peaks.
 In this test, due to the coarseness of the k-mesh, we have to use a value slightly larger than the default one (0.1 eV) 
 in order to facilitate the convergence of the Haydock algorithm.
 Ideally, one should make a convergence study decreasing 
-the value of <a href="../input_variables/html_automatically_generated/varbse.html#zcut" target="kwimg">zcut</a> for increasing number of k-points.
+the value of <a href="../input_variables/html_automatically_generated/vargw.html#zcut" target="kwimg">zcut</a> for increasing number of k-points.
 <p>
 
 The k-point sampling is specified by the set of variables.
@@ -379,7 +379,7 @@ The BSR file can be used to restart the run from a previous computation using th
 or <a href="../input_variables/html_automatically_generated/varfil.html#irdbsreso" target="kwimg">irdbsreso</a>.
 This restart capability is useful for restarting the Haydock method if convergence was not achieved 
 or to execute Haydock computations with different values of 
-<a href="../input_variables/html_automatically_generated/varbse.html#zcut" target="kwimg">zcut</a>.
+<a href="../input_variables/html_automatically_generated/vargw.html#zcut" target="kwimg">zcut</a>.
 <a href="../input_variables/html_automatically_generated/varfil.html#getbsreso" target="kwimg">getbsreso</a>
 and <a href="../input_variables/html_automatically_generated/varfil.html#irdbsreso" target="kwimg">irdbsreso</a>
 are also handy if one wants to include the coupling on top of a pre-existing TDA calculation
@@ -442,8 +442,8 @@ then the list of q-points giving the direction of the incident photon:
 By default the code calculates the macroscopic dielectric function considering six different 
 directions in q-space (the three basis vectors of the reciprocal lattice and the three Cartesian
 axis). It is possible to specify custom directions using the input variables
-<a href="../input_variables/html_automatically_generated/varbse.html#gw_nqlwl" target="kwimg">gw_nqlwl</a> and 
-<a href="../input_variables/html_automatically_generated/varbse.html#gw_qlwl" target="kwimg">gw_qlwl</a>. 
+<a href="../input_variables/html_automatically_generated/vargw.html#gw_nqlwl" target="kwimg">gw_nqlwl</a> and 
+<a href="../input_variables/html_automatically_generated/vargw.html#gw_qlwl" target="kwimg">gw_qlwl</a>. 
 <p>
 Then comes the section with the real and the imaginary part of the macroscopic dielectric as a
 function of frequency for the different directions:
@@ -519,7 +519,7 @@ nevertheless this unconverged calculation is already able to capture the most im
   <li>
   <p>
   Use the appropriate values for <a href="../input_variables/html_automatically_generated/varbse.html#bs_exchange_term" target="kwimg">bs_exchange_term</a> and
-  <a href="../input_variables/html_automatically_generated/vabsew.html#bs_coulomb_term" target="kwimg">bs_coulomb_term</a> 
+  <a href="../input_variables/html_automatically_generated/varbse.html#bs_coulomb_term" target="kwimg">bs_coulomb_term</a> 
   to calculate the BS spectrum without local field effects.
   Compare the results obtained with and without local field effects.
   <li>
