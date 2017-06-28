@@ -291,8 +291,8 @@ implicit none
      freq_q = 0.1
      freq_b = 0.01
 !TEST_AM
-     qmass = (abs(1+product(inp%strtarget(1:3)/3))*dtset%natom* kb_THzK * dtset%mdtemp(1)) / (freq_q**2)
-     bmass = (abs(1+product(inp%strtarget(1:3)/3))*dtset%natom* kb_THzK * dtset%mdtemp(1)) / (freq_b**2)
+     qmass=(abs(1+product(inp%strtarget(1:3)/3))*dtset%natom* kb_THzK * dtset%mdtemp(1)) / (freq_q**2)
+     bmass=(abs(1+product(inp%strtarget(1:3)/3))*dtset%natom* kb_THzK * dtset%mdtemp(1)) / (freq_b**2)
 
      if(dtset%nnos==0) then
        dtset%nnos = 1
@@ -419,7 +419,7 @@ implicit none
 !      call timein(tcpu,twall)
 !      tsec(1)=tcpu-tcpui
 !      tsec(2)=twall-twalli
-!      if(my_rank==0)print*,"TIME FOR 1 STEP FOR CPU ",my_rank,":",tsec
+!      if(my_rank==0)write(std_out,*)"TIME FOR 1 STEP FOR CPU ",my_rank,":",tsec
 !    end do
 !TEST_AM
 

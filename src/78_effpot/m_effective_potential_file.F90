@@ -1993,7 +1993,7 @@ end subroutine system_getDimFromXML
  call symlatt(bravais,msym,nptsym,ptsymrel,rprimd,tolsym)
  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
  call symfind(0,(/zero,zero,zero/),gprimd,0,msym,natom,0,nptsym,nsym,&
-&  0,ptsymrel,spinat,symafm,symrel,tnons,tol8,typat,use_inversion,xred)
+&  0,ptsymrel,spinat,symafm,symrel,tnons,tolsym,typat,use_inversion,xred)
 
 !Initialisation of crystal
  npsp = ntypat; timrev = 1
@@ -2509,7 +2509,7 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
   cell_number(3) = max3 - min3 + 1
 
 ! set the new number of cell, sometimes, in canonical coordinates,
-! somme cell are delete but they exist in reduced coordinates.
+! some cell are delete but they exist in reduced coordinates.
   nrpt_new = product(cell_number(:))
 
 ! Allocate temporary array
@@ -2523,10 +2523,10 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
     do ia=1,natom
       do ib=1,natom
 
-!      Simple Lattice
+!       Simple Lattice
         if (inp%brav==1) then
-!      In this case, it is better to work in reduced coordinates
-!      As rcan is in canonical coordinates, => multiplication by gprim
+!          In this case, it is better to work in reduced coordinates
+!          As rcan is in canonical coordinates, => multiplication by gprim
            do ii=1,3
              red(1,ii)=  ifc%rcan(1,ia)*ddb%gprim(1,ii) + &
  &                       ifc%rcan(2,ia)*ddb%gprim(2,ii) + &

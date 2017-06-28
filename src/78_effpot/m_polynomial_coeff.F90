@@ -35,6 +35,8 @@ module m_polynomial_coeff
  public :: polynomial_coeff_free
  public :: polynomial_coeff_init
  public :: polynomial_coeff_getName
+ public :: polynomial_coeff_MPIrecv
+ public :: polynomial_coeff_MPIsend
  public :: polynomial_coeff_setName
  public :: polynomial_coeff_setCoefficient
  public :: polynomial_coeff_writeXML
@@ -510,11 +512,11 @@ end subroutine polynomial_coeff_getName
 !!  MPI broadcast all types for the polynomial_coefficent structure
 !!
 !! INPUTS
-!!   master=Rank of Master
+!!   source=Rank of Source
 !!   comm=MPI communicator
 !!
 !! SIDE EFFECTS
-!!   coefficent<type(polynomial_coefficent_type)>= Input if node is master, 
+!!   coefficent<type(polynomial_coefficent_type)>= Input if node is source, 
 !!                              other nodes returns with a completely initialized instance.
 !!
 !! PARENTS
@@ -526,7 +528,7 @@ end subroutine polynomial_coeff_getName
 !!
 !! SOURCE
 
-subroutine polynomial_coeff_broadcast(coefficients, master, comm)
+subroutine polynomial_coeff_broadcast(coefficients, source, comm)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -540,7 +542,7 @@ subroutine polynomial_coeff_broadcast(coefficients, master, comm)
 !Arguments ------------------------------------
 !array
  type(polynomial_coeff_type),intent(inout) :: coefficients
- integer, intent(in) :: master,comm
+ integer, intent(in) :: source,comm
 
 !Local variables-------------------------------
 !scalars
@@ -553,13 +555,18 @@ subroutine polynomial_coeff_broadcast(coefficients, master, comm)
 
  DBG_ENTER("COLL")
 
+! Free the output
+ if (xmpi_comm_rank(comm) /= source) then
+   call polynomial_coeff_free(coefficients)
+ end if
+
  ! Transmit variables
-  call xmpi_bcast(coefficients%name, master, comm, ierr)
-  call xmpi_bcast(coefficients%nterm, master, comm, ierr)
-  call xmpi_bcast(coefficients%coefficient, master, comm, ierr)
+  call xmpi_bcast(coefficients%name, source, comm, ierr)
+  call xmpi_bcast(coefficients%nterm, source, comm, ierr)
+  call xmpi_bcast(coefficients%coefficient, source, comm, ierr)
  
  !Allocate arrays on the other nodes.
-  if (xmpi_comm_rank(comm) /= master) then
+  if (xmpi_comm_rank(comm) /= source) then
     ABI_DATATYPE_ALLOCATE(coefficients%terms,(coefficients%nterm))
     do ii=1,1,coefficients%nterm
       call polynomial_term_free(coefficients%terms(ii))
@@ -567,11 +574,11 @@ subroutine polynomial_coeff_broadcast(coefficients, master, comm)
   end if
 ! Set the number of term on each node (needed for allocations of array)
   do ii = 1,coefficients%nterm
-    call xmpi_bcast(coefficients%terms(ii)%ndisp, master, comm, ierr)
+    call xmpi_bcast(coefficients%terms(ii)%ndisp, source, comm, ierr)
   end do
 
 ! Allocate arrays on the other nodes
-  if (xmpi_comm_rank(comm) /= master) then
+  if (xmpi_comm_rank(comm) /= source) then
     do ii = 1,coefficients%nterm
       ABI_ALLOCATE(coefficients%terms(ii)%atindx,(2,coefficients%terms(ii)%ndisp))
       coefficients%terms(ii)%atindx = zero
@@ -583,16 +590,187 @@ subroutine polynomial_coeff_broadcast(coefficients, master, comm)
 
 ! Transfert value
   do ii = 1,coefficients%nterm
-      call xmpi_bcast(coefficients%terms(ii)%weight, master, comm, ierr)
-      call xmpi_bcast(coefficients%terms(ii)%atindx, master, comm, ierr)
-      call xmpi_bcast(coefficients%terms(ii)%direction, master, comm, ierr)
-      call xmpi_bcast(coefficients%terms(ii)%cell, master, comm, ierr)
-      call xmpi_bcast(coefficients%terms(ii)%power, master, comm, ierr)
+      call xmpi_bcast(coefficients%terms(ii)%weight, source, comm, ierr)
+      call xmpi_bcast(coefficients%terms(ii)%atindx, source, comm, ierr)
+      call xmpi_bcast(coefficients%terms(ii)%direction, source, comm, ierr)
+      call xmpi_bcast(coefficients%terms(ii)%cell, source, comm, ierr)
+      call xmpi_bcast(coefficients%terms(ii)%power, source, comm, ierr)
   end do
 
  DBG_EXIT("COLL")
 
 end subroutine polynomial_coeff_broadcast
+!!***
+
+!!****f* m_polynomial_coeff/polynomial_coeff_MPIsend
+!! NAME
+!! polynomial_coeff_MPIsend
+!!
+!! FUNCTION
+!!  MPI send the polynomial_coefficent structure
+!!
+!! INPUTS
+!!   tag = Tag of the message to send
+!!   dest= Rank of Dest
+!!   comm= MPI communicator
+!!
+!! SIDE EFFECTS
+!!   coefficent<type(polynomial_coefficent_type)>= Input if node is dest, 
+!!                              other nodes returns with a completely initialized instance.
+!!
+!! PARENTS
+!!      m_effective_potential_file
+!!
+!! CHILDREN
+!!      polynomial_coeff_getname,polynomial_coeff_init,polynomial_term_free
+!!      polynomial_term_init
+!!
+!! SOURCE
+
+subroutine polynomial_coeff_MPIsend(coefficients, tag, dest, comm)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'polynomial_coeff_MPIsend'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!array
+ type(polynomial_coeff_type),intent(inout) :: coefficients
+ integer, intent(in) :: dest,comm,tag
+
+!Local variables-------------------------------
+!scalars
+ integer :: ierr,ii
+ integer :: my_rank
+!arrays
+
+! *************************************************************************
+
+ if (xmpi_comm_size(comm) == 1) return
+ DBG_ENTER("COLL")
+
+  my_rank = xmpi_comm_rank(comm)
+! Transmit variables
+  call xmpi_send(coefficients%name, dest, 9*tag+0, comm, ierr)
+  call xmpi_send(coefficients%nterm, dest, 9*tag+1, comm, ierr)
+  call xmpi_send(coefficients%coefficient, dest, 9*tag+2, comm, ierr)
+ 
+! Set the number of term on each node (needed for allocations of array)
+  do ii = 1,coefficients%nterm
+    call xmpi_send(coefficients%terms(ii)%ndisp, dest, 9*tag+3, comm, ierr)
+  end do
+
+! Transfert value
+  do ii = 1,coefficients%nterm
+      call xmpi_send(coefficients%terms(ii)%weight, dest, 9*tag+4, comm, ierr)
+      call xmpi_send(coefficients%terms(ii)%atindx, dest, 9*tag+5, comm, ierr)
+      call xmpi_send(coefficients%terms(ii)%direction, dest, 9*tag+6, comm, ierr)
+      call xmpi_send(coefficients%terms(ii)%cell, dest, 9*tag+7, comm, ierr)
+      call xmpi_send(coefficients%terms(ii)%power, dest, 9*tag+8, comm, ierr)
+  end do
+
+ DBG_EXIT("COLL")
+
+end subroutine polynomial_coeff_MPIsend
+!!***
+
+!!****f* m_polynomial_coeff/polynomial_coeff_MPIrecv
+!! NAME
+!! polynomial_coeff_MPIrecv
+!!
+!! FUNCTION
+!!  MPI receive all types for the polynomial_coefficent structure
+!!
+!! INPUTS
+!!   tag = Tag of the message to receive
+!!   source = Rank of Source
+!!   comm = MPI communicator
+!!
+!! SIDE EFFECTS
+!!   coefficent<type(polynomial_coefficent_type)>= Input if node is source, 
+!!                              other nodes returns with a completely initialized instance.
+!!
+!! PARENTS
+!!      m_effective_potential_file
+!!
+!! CHILDREN
+!!      polynomial_coeff_getname,polynomial_coeff_init,polynomial_term_free
+!!      polynomial_term_init
+!!
+!! SOURCE
+
+subroutine polynomial_coeff_MPIrecv(coefficients, tag, source, comm)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'polynomial_coeff_MPIrecv'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!array
+ type(polynomial_coeff_type),intent(inout) :: coefficients
+ integer, intent(in) :: source,comm,tag
+
+!Local variables-------------------------------
+!scalars
+ integer :: ierr,ii
+!arrays
+
+! *************************************************************************
+
+ if (xmpi_comm_size(comm) == 1) return
+
+ DBG_ENTER("COLL")
+
+! Free the output
+  call polynomial_coeff_free(coefficients)
+
+ ! Transmit variables
+  call xmpi_recv(coefficients%name, source, 9*tag+0, comm, ierr)
+  call xmpi_recv(coefficients%nterm, source, 9*tag+1, comm, ierr)
+  call xmpi_recv(coefficients%coefficient, source, 9*tag+2, comm, ierr)
+ 
+ !Allocate arrays on the other nodes.
+  ABI_DATATYPE_ALLOCATE(coefficients%terms,(coefficients%nterm))
+  do ii=1,1,coefficients%nterm
+    call polynomial_term_free(coefficients%terms(ii))
+  end do
+
+! Set the number of term on each node (needed for allocations of array)
+  do ii = 1,coefficients%nterm
+    call xmpi_recv(coefficients%terms(ii)%ndisp, source, 9*tag+3, comm, ierr)
+  end do
+
+! Allocate arrays on the other nodes
+  do ii = 1,coefficients%nterm
+    ABI_ALLOCATE(coefficients%terms(ii)%atindx,(2,coefficients%terms(ii)%ndisp))
+    coefficients%terms(ii)%atindx = zero
+    ABI_ALLOCATE(coefficients%terms(ii)%direction,(coefficients%terms(ii)%ndisp))
+    ABI_ALLOCATE(coefficients%terms(ii)%cell,(3,2,coefficients%terms(ii)%ndisp))      
+    ABI_ALLOCATE(coefficients%terms(ii)%power,(coefficients%terms(ii)%ndisp))
+  end do
+
+! Transfert value
+  do ii = 1,coefficients%nterm
+    call xmpi_recv(coefficients%terms(ii)%weight, source, 9*tag+4, comm, ierr)
+    call xmpi_recv(coefficients%terms(ii)%atindx, source, 9*tag+5, comm, ierr)
+    call xmpi_recv(coefficients%terms(ii)%direction, source, 9*tag+6, comm, ierr)
+    call xmpi_recv(coefficients%terms(ii)%cell, source, 9*tag+7, comm, ierr)
+    call xmpi_recv(coefficients%terms(ii)%power, source, 9*tag+8, comm, ierr)
+  end do
+
+ DBG_EXIT("COLL")
+
+end subroutine polynomial_coeff_MPIrecv
 !!***
 
 !!****f*m_polynomial_coeff/polynomial_coeff_writeXML

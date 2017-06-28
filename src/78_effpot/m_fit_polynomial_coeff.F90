@@ -35,10 +35,7 @@ module m_fit_polynomial_coeff
  use m_special_funcs,only : factorial
  use m_crystal,only : symbols_crystal
  use m_strain,only : strain_type,strain_get
- use m_effective_potential, only : effective_potential_type,effective_potential_evaluate
- use m_effective_potential, only : effective_potential_setSupercell,effective_potential_getDisp
- use m_effective_potential, only : effective_potential_GetIndexPeriodic,effective_potential_setCoeffs
- use m_effective_potential, only : effective_potential_computeGradient
+ use m_effective_potential
  use m_io_tools,   only : open_file
  use m_abihist, only : abihist,abihist_init,abihist_free,abihist_copy
 
@@ -89,7 +86,7 @@ CONTAINS  !=====================================================================
 !!
 !! SOURCE
 
-subroutine fit_polynomial_coeff_getList(cell,cut_off,dist,eff_pot,list_symcoeff,list_symstr,&
+subroutine fit_polynomial_coeff_getList(cell,cutoff,dist,eff_pot,list_symcoeff,list_symstr,&
 &                                       natom,nstr_sym,ncoeff_sym,nrpt)
 
 
@@ -97,7 +94,6 @@ subroutine fit_polynomial_coeff_getList(cell,cut_off,dist,eff_pot,list_symcoeff,
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'fit_polynomial_coeff_getList'
- use interfaces_14_hidewrite
  use interfaces_41_geometry
 !End of the abilint section
 
@@ -107,7 +103,7 @@ subroutine fit_polynomial_coeff_getList(cell,cut_off,dist,eff_pot,list_symcoeff,
 !scalars
  integer,intent(in) :: natom,nrpt
  integer,intent(out) :: ncoeff_sym,nstr_sym
- real(dp),intent(in):: cut_off
+ real(dp),intent(in):: cutoff
 !arrays
  integer,intent(in) :: cell(3,nrpt)
  real(dp),intent(in):: dist(natom,natom,nrpt)
@@ -163,7 +159,7 @@ subroutine fit_polynomial_coeff_getList(cell,cut_off,dist,eff_pot,list_symcoeff,
  symrec = eff_pot%crystal%symrec
  tnons  = eff_pot%crystal%tnons
 
- tolsym8=tol8 
+ tolsym8=tol8
  call symatm(indsym,natom,nsym,symrec,tnons,&
 &            tolsym8,eff_pot%crystal%typat,eff_pot%crystal%xred)
  ABI_ALLOCATE(blkval,(3,natom,3,natom,nrpt))
@@ -202,23 +198,25 @@ subroutine fit_polynomial_coeff_getList(cell,cut_off,dist,eff_pot,list_symcoeff,
            else
              if(idisy1==1.or.idisy2==1)then
                if(idisy1==2.or.idisy2==2)then
-                  list_symstr_tmp(ia,isym) = 6
-                end if
+                 list_symstr_tmp(ia,isym) = 6
+               end if
                if(idisy1==3.or.idisy2==3)then
-                  list_symstr_tmp(ia,isym) = 5
-                end if
-              else
-                list_symstr_tmp(ia,isym) = 4
-              end if
-            end if
-          end if
-        end do
-      end do
+                 list_symstr_tmp(ia,isym) = 5
+               end if
+             else
+               list_symstr_tmp(ia,isym) = 4
+             end if
+           end if
+         end if
+       end do
+     end do
 !     Remove the symetric
-      if(list_symstr_tmp(ia,isym) > ia) then
-        list_symstr_tmp(list_symstr_tmp(ia,isym),:) = zero
-      end if
-    end do
+!TEST_AM
+!      if(list_symstr_tmp(ia,isym) > ia) then
+!        list_symstr_tmp(list_symstr_tmp(ia,isym),:) = zero
+!      end if
+!TEST_AM
+   end do
   end do
 
 !Count the number of strain and transfert into the final array
@@ -259,7 +257,7 @@ subroutine fit_polynomial_coeff_getList(cell,cut_off,dist,eff_pot,list_symcoeff,
 !    Get the irpt and ib
      irpt=(list(ii)-1)/natom+1     
      ib=list(ii)-natom*(irpt-1)
-     if(dist(ia,ib,irpt) > cut_off ) then
+     if(dist(ia,ib,irpt) > cutoff ) then
 !      If this distance is superior to the cutoff, we don't compute
        blkval(:,ia,:,ib,irpt)= zero
        if(irpt==irpt_ref)blkval(:,ib,:,ia,irpt)= zero 
@@ -524,6 +522,7 @@ subroutine fit_polynomial_coeff_getList(cell,cut_off,dist,eff_pot,list_symcoeff,
      list_symcoeff(6,icoeff,isym) = icoeff2
    end do
  end do
+
 !Set the max number of coeff inside list_symcoeff
  ncoeff_sym = ncoeff2
 
@@ -565,23 +564,22 @@ end subroutine fit_polynomial_coeff_getList
 !!
 !! SOURCE
 
-subroutine fit_polynomial_coeff_getNorder(cut_off,coefficients,eff_pot,ncoeff,powers,option)
+subroutine fit_polynomial_coeff_getNorder(cutoff,coefficients,eff_pot,ncoeff,powers,option,comm)
 
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'fit_polynomial_coeff_getNorder'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: option
+ integer,intent(in) :: option,comm
  integer,intent(out):: ncoeff
- real(dp),intent(in):: cut_off
+ real(dp),intent(in):: cutoff
 !arrays
  integer,intent(in) :: powers(2)
  type(effective_potential_type), intent(inout) :: eff_pot
@@ -590,8 +588,9 @@ subroutine fit_polynomial_coeff_getNorder(cut_off,coefficients,eff_pot,ncoeff,po
 !scalar
  integer :: ia,ib,icoeff,icoeff2,ii,irpt,irpt_ref
  integer :: lim1,lim2,lim3
- integer :: natom,ncoeff_max,ncoeff_sym,nrpt,nsym,nstr_sym
+ integer :: natom,ncoeff_max,ncoeff_sym,ncoeff_tot,nrpt,nsym,nstr_sym
  integer :: r1,r2,r3
+ logical :: need_anhstr
 !arrays
  integer :: ncell(3)
  integer,allocatable :: cell(:,:),compatibleCoeffs(:,:)
@@ -601,8 +600,9 @@ subroutine fit_polynomial_coeff_getNorder(cut_off,coefficients,eff_pot,ncoeff,po
  real(dp),allocatable :: xcart(:,:),xred(:,:)
  character(len=5),allocatable :: symbols(:)
  type(polynomial_coeff_type),dimension(:),allocatable :: coeffs_tmp
-
+ 
 ! *************************************************************************
+
 !Free the output
   if(allocated(coefficients))then
     do ii =1,size(coefficients)
@@ -615,6 +615,7 @@ subroutine fit_polynomial_coeff_getNorder(cut_off,coefficients,eff_pot,ncoeff,po
  natom  = eff_pot%crystal%natom
  nsym   = eff_pot%crystal%nsym
  rprimd = eff_pot%crystal%rprimd
+ need_anhstr = .false.
 
  ABI_ALLOCATE(xcart,(3,natom))
  ABI_ALLOCATE(xred,(3,natom))
@@ -622,9 +623,9 @@ subroutine fit_polynomial_coeff_getNorder(cut_off,coefficients,eff_pot,ncoeff,po
  xred(:,:)  = eff_pot%crystal%xred(:,:)
 
 !Set the size of the interaction
- ncell = (/anint(cut_off/rprimd(1,1))+1,&
-&          anint(cut_off/rprimd(2,2))+1,&
-&          anint(cut_off/rprimd(3,3))+1/)
+ ncell = (/anint(cutoff/rprimd(1,1))+1,&
+&          anint(cutoff/rprimd(2,2))+1,&
+&          anint(cutoff/rprimd(3,3))+1/)
 
  lim1=((ncell(1)/2))
  lim2=((ncell(2)/2))
@@ -684,44 +685,73 @@ subroutine fit_polynomial_coeff_getNorder(cut_off,coefficients,eff_pot,ncoeff,po
    end do
  end do
 
- call fit_polynomial_coeff_getList(cell,cut_off,dist,eff_pot,list_symcoeff,list_symstr,&
+ call fit_polynomial_coeff_getList(cell,cutoff,dist,eff_pot,list_symcoeff,list_symstr,&
 &                                  natom,nstr_sym,ncoeff_sym,nrpt)
+ ncoeff_tot = ncoeff_sym+nstr_sym
+
+ call fit_polynomial_coeff_getOrder1(cell,coeffs_tmp,cutoff,list_symcoeff,list_symstr,natom,ncoeff_max,&
+&                                    ncoeff_sym,nrpt,nsym,rprimd,symbols,xcart)
+!Free them all
+ do icoeff=1,ncoeff_max
+   call polynomial_coeff_free(coeffs_tmp(icoeff))
+ end do
+ if(allocated(coeffs_tmp)) ABI_DEALLOCATE(coeffs_tmp)
 
 !Check the distanceance bewteen coefficients and store integer:
 ! 0: the mix between these coefficient is not possible 
 ! 1: the mix between these coefficient is possible 
- ABI_ALLOCATE(compatibleCoeffs,(ncoeff_sym,ncoeff_sym))
+ ABI_ALLOCATE(compatibleCoeffs,(ncoeff_tot,ncoeff_tot))
  compatibleCoeffs(:,:) = one
- do icoeff=1,ncoeff_sym
-   do icoeff2=1,ncoeff_sym
+
+ do icoeff=1,ncoeff_tot
+   do icoeff2=1,ncoeff_tot     
+!    Select case:
+!    if both icoeff are displacement => check the distance
+!    if both icoeff are strain => check the flag
+!    Otherwise cycle (we keep the term)
+     if(icoeff>ncoeff_sym.and.icoeff2<=ncoeff_sym)cycle
+     if(icoeff2<=ncoeff_sym.and.icoeff2>ncoeff_sym)cycle
+     if(icoeff>ncoeff_sym.and.icoeff2>ncoeff_sym.and..not.need_anhstr) then
+       compatibleCoeffs(icoeff,icoeff2) = zero       
+     end if
+     if(icoeff2<=ncoeff_sym.and.icoeff2<=ncoeff_sym)then
        if(distance(xcart(:,list_symcoeff(2,icoeff,1)),&
 &                  xcart(:,list_symcoeff(2,icoeff2,1)),rprimd,&
-&                  cell(:,1),cell(:,1))>cut_off.or.&
+&                  cell(:,1),cell(:,1))>=cutoff.or.&
 &         distance(xcart(:,list_symcoeff(2,icoeff,1)),&
 &                  xcart(:,list_symcoeff(3,icoeff2,1)),rprimd,&
-&                  cell(:,1),cell(:,list_symcoeff(4,icoeff2,1)))>cut_off.or.&
+&                  cell(:,1),cell(:,list_symcoeff(4,icoeff2,1)))>=cutoff.or.&
 &         distance(xcart(:,list_symcoeff(3,icoeff,1)),&
 &                  xcart(:,list_symcoeff(2,icoeff2,1)),rprimd,&
-&                  cell(:,list_symcoeff(4,icoeff,1)),cell(:,1))> cut_off.or.&
+&                  cell(:,list_symcoeff(4,icoeff,1)),cell(:,1))>=cutoff.or.&
 &         distance(xcart(:,list_symcoeff(3,icoeff,1)),&
 &                  xcart(:,list_symcoeff(3,icoeff2,1)),rprimd,&
 &                  cell(:,list_symcoeff(4,icoeff,1)),&
-&                  cell(:,list_symcoeff(4,icoeff2,1)))>cut_off)then
+&                  cell(:,list_symcoeff(4,icoeff2,1)))>=cutoff)then
          compatibleCoeffs(icoeff,icoeff2) = zero
        end if
+     end if
    end do
  end do
 
-!Set to the maximum of possible coefficients
- ncoeff_max = one
- do ii=powers(1),powers(2)
-   ncoeff_max = ncoeff_max + factorial(ncoeff_sym)/(ii*factorial(ncoeff_sym-ii))
- end do
+!first call to this routine in order to count the number of maximum coefficients
+ icoeff  = 1
  icoeff2 = 1
+ call computeNorder(cell,coeffs_tmp,compatibleCoeffs,cutoff,list_symcoeff,list_symstr,list_coeff,&
+&                   icoeff,icoeff2,natom,ncoeff_sym,nstr_sym,icoeff,nrpt,nsym,1,powers(1),powers(2),&
+&                   rprimd,symbols,xcart,compute=.false.)
+
+!Set to the maximum of possible coefficients
+ ncoeff_max =  icoeff2
+
+!Second call to this routine in order to compute the coefficients
  ABI_ALLOCATE(list_coeff,(0))
  ABI_ALLOCATE(coeffs_tmp,(ncoeff_max))
- call computeNorder(cell,coeffs_tmp,compatibleCoeffs,cut_off,list_symcoeff,list_coeff,1,icoeff2,&
-&                   natom,ncoeff_sym,ncoeff_max,nrpt,nsym,1,powers(1),powers(2),rprimd,symbols,xcart)
+ icoeff  = 1
+ icoeff2 = 1
+ call computeNorder(cell,coeffs_tmp,compatibleCoeffs,cutoff,list_symcoeff,list_symstr,list_coeff,&
+&                   icoeff,icoeff2,natom,ncoeff_sym,nstr_sym,ncoeff_max,nrpt,nsym,1,powers(1),powers(2),&
+&                   rprimd,symbols,xcart,compute=.true.)
 
  ABI_DEALLOCATE(list_coeff)
 
@@ -783,9 +813,9 @@ end subroutine fit_polynomial_coeff_getNorder
 !!
 !! SOURCE
 
-recursive subroutine computeNorder(cell,coeffs_out,compatibleCoeffs,cut_off,list_coeff,index_coeff_in,&
-&                                  icoeff,icoeff_tot,natom,ncoeff,ncoeff_out,&
-&                                  nrpt,nsym,power,power_min,power_max,rprimd,symbols,xcart)
+recursive subroutine computeNorder(cell,coeffs_out,compatibleCoeffs,cutoff,list_coeff,list_str,&
+&                                  index_coeff_in,icoeff,icoeff_tot,natom,ncoeff,nstr,ncoeff_out,&
+&                                  nrpt,nsym,power,power_min,power_max,rprimd,symbols,xcart,compute)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -798,39 +828,42 @@ recursive subroutine computeNorder(cell,coeffs_out,compatibleCoeffs,cut_off,list
 
 !Arguments ---------------------------------------------
 !scalar 
- integer,intent(in) :: icoeff,natom,ncoeff,power,power_min,power_max,nsym,nrpt
- integer,intent(inout) :: icoeff_tot,ncoeff_out
- real(dp),intent(in) :: cut_off
+ integer,intent(in) :: natom,ncoeff,power,power_min,power_max,nsym,nrpt,nstr
+ integer,intent(inout) :: icoeff,icoeff_tot,ncoeff_out
+ real(dp),intent(in) :: cutoff
+ logical,optional,intent(in) :: compute
 !arrays
- integer,intent(in) :: list_coeff(6,ncoeff,nsym)
+ integer,intent(in) :: cell(3,nrpt),compatibleCoeffs(ncoeff+nstr,ncoeff+nstr)
+ integer,intent(in) :: list_coeff(6,ncoeff,nsym),list_str(nstr,nsym)
  integer,intent(in) :: index_coeff_in(power-1)
- integer,intent(in) :: cell(3,nrpt),compatibleCoeffs(ncoeff,ncoeff)
  real(dp),intent(in) :: xcart(3,natom),rprimd(3,3)
  type(polynomial_coeff_type),intent(inout) :: coeffs_out(ncoeff_out)
  character(len=5),intent(in) :: symbols(natom)
 !Local variables ---------------------------------------
 !scalar
- integer :: ia,ib,icoeff1,icoeff_tmp
+ integer :: ia,ib,icoeff1,icoeff_tmp,icoeff_str
  integer :: irpt,isym,idisp,iterm,mu,ncoeff_max,ndisp
  integer :: nterm_max
  real(dp):: coefficient,weight
+ logical :: need_compute
 !arrays
  integer,allocatable :: index_coeff(:)
  integer,allocatable :: atindx(:,:)
  integer,allocatable :: cells(:,:,:),dir_int(:)
  integer,allocatable :: powers(:)
  character(len=100):: name
- character(len=1),allocatable :: dir_char(:)
- character(len=1) :: mutodir(9) = (/"x","y","z","1","2","3","4","5","6"/)
  type(polynomial_term_type),dimension(:),allocatable :: terms
  type(polynomial_coeff_type),allocatable :: coeffs_tmp(:)
 ! *************************************************************************
+
+ need_compute = .TRUE.
+ if(present(compute)) need_compute = compute
 
  if(power <= power_max)then   
 
 !  Initialisation of variables
    nterm_max  = nsym
-   ncoeff_max = ncoeff**power
+   ncoeff_max = (ncoeff+nstr)
    ndisp = power
    icoeff_tmp = zero
    ABI_ALLOCATE(coeffs_tmp,(ncoeff_max))
@@ -838,66 +871,80 @@ recursive subroutine computeNorder(cell,coeffs_out,compatibleCoeffs,cut_off,list
    ABI_ALLOCATE(atindx,(2,ndisp))
    ABI_ALLOCATE(cells,(3,2,ndisp))
    ABI_ALLOCATE(dir_int,(ndisp))
-   ABI_ALLOCATE(dir_char,(ndisp))
    ABI_ALLOCATE(powers,(ndisp))
-
    ABI_ALLOCATE(index_coeff,(power))
 
    index_coeff(1:power-1) = index_coeff_in(:)
-   do icoeff1=icoeff,ncoeff
+
+   do icoeff1=icoeff,ncoeff+nstr
 !    If the distance between the 2 coefficients is superior than the cut-off,
 !    we cycle
+!    If the power is one, we need to set icoeff to icoeff1
+     if(power==1) icoeff = icoeff1
+
      if(compatibleCoeffs(icoeff,icoeff1)==0) cycle
 
-     index_coeff(power) = icoeff1   
+     index_coeff(power) = icoeff1
      iterm = zero
      coefficient = one
 
-!    Loop over symetries
-     do isym=1,nsym
-!      Treat this coeff
-       weight = 1
-       do idisp=1,ndisp
-!        Get index of this displacement term
-         mu   = list_coeff(1,index_coeff(idisp),isym)
-         ia   = list_coeff(2,index_coeff(idisp),isym)
-         ib   = list_coeff(3,index_coeff(idisp),isym)
-         irpt = list_coeff(4,index_coeff(idisp),isym)
-         weight = weight*list_coeff(5,index_coeff(idisp),isym)
-!        Fill First term arrays 
-         atindx(1,idisp) = ia; atindx(2,idisp) = ib;
-         dir_char(idisp) = mutodir(mu); dir_int(idisp) = mu
-         powers(idisp)   = 1
-         cells(:,1,idisp) = (/0,0,0/)
-         cells(:,2,idisp) = cell(:,irpt)
+     if(power >= power_min) then
+!      Loop over symetries
+       do isym=1,nsym
+!        Treat this coeff
+         weight = 1
+         do idisp=1,ndisp
+!          Get index of this displacement term
+           if(index_coeff(idisp)<=ncoeff)then
+             mu   = list_coeff(1,index_coeff(idisp),isym)
+             ia   = list_coeff(2,index_coeff(idisp),isym)
+             ib   = list_coeff(3,index_coeff(idisp),isym)
+             irpt = list_coeff(4,index_coeff(idisp),isym)
+             weight = weight*list_coeff(5,index_coeff(idisp),isym)
+!            Fill First term arrays 
+             atindx(1,idisp) = ia; atindx(2,idisp) = ib;
+             dir_int(idisp) = mu
+             powers(idisp)   = 1
+             cells(:,1,idisp) = (/0,0,0/)
+             cells(:,2,idisp) = cell(:,irpt)
+           else
+             icoeff_str = index_coeff(idisp)-ncoeff
+             atindx(1,idisp) = 0; atindx(2,idisp) = 0;
+             dir_int(idisp) = -1 * list_str(icoeff_str,isym)
+             powers(idisp)   = 1
+             cells(:,1,idisp) = (/0,0,0/)
+             cells(:,2,idisp) = (/0,0,0/)
+           end if
+         end do
+         
+         iterm = iterm + 1
+         call polynomial_term_init(atindx,cells,dir_int,ndisp,terms(iterm),powers,&
+&                                  weight,check=.true.)
+       end do!end do sym
+   
+       if(iterm > 0)then
+!        increase coefficients and set it
+         icoeff_tmp = icoeff_tmp + 1
+         icoeff_tot = icoeff_tot + 1
+         call polynomial_coeff_init(coefficient,iterm,coeffs_tmp(icoeff_tmp),&
+&                                   terms(1:iterm),check=.true.)
+       end if
+
+!      Deallocate the terms
+       do iterm=1,nterm_max
+         call polynomial_term_free(terms(iterm))
        end do
 
-       iterm = iterm + 1
-       call polynomial_term_init(atindx,cells,dir_int,ndisp,terms(iterm),powers,&
-&                                  weight,check=.true.)
-     end do!end do sym
-   
-     if(iterm > 0.and.power >= power_min)then
-!      increase coefficients and set it
-       icoeff_tmp = icoeff_tmp + 1
-       call polynomial_coeff_init(coefficient,iterm,coeffs_tmp(icoeff_tmp),terms(1:iterm),check=.true.)
-     end if
+     end if!end if power < power_min
 
-!    Deallocate the terms
-     do iterm=1,nterm_max
-       call polynomial_term_free(terms(iterm))
-     end do
-
-     icoeff_tot = icoeff_tot + icoeff_tmp
-     call computeNorder(cell,coeffs_out,compatibleCoeffs,cut_off,list_coeff,index_coeff,&
-&                       icoeff1,icoeff_tot,natom,ncoeff,ncoeff_out,nrpt,nsym,power+1,&
-&                       power_min,power_max,rprimd,symbols,xcart)
+     call computeNorder(cell,coeffs_out,compatibleCoeffs,cutoff,list_coeff,list_str,index_coeff,&
+&                       icoeff1,icoeff_tot,natom,ncoeff,nstr,ncoeff_out,nrpt,nsym,power+1,&
+&                       power_min,power_max,rprimd,symbols,xcart,compute=need_compute)
    end do
 
    ABI_DEALLOCATE(terms)
    ABI_DEALLOCATE(atindx)
    ABI_DEALLOCATE(cells)
-   ABI_DEALLOCATE(dir_char)
    ABI_DEALLOCATE(dir_int)
    ABI_DEALLOCATE(index_coeff)
    ABI_DEALLOCATE(powers)
@@ -906,17 +953,18 @@ recursive subroutine computeNorder(cell,coeffs_out,compatibleCoeffs,cut_off,list
    icoeff1 = zero
    do icoeff_tmp=1,ncoeff_max
      if (coeffs_tmp(icoeff_tmp)%coefficient/=zero)then
-       name = ''
-!      Get the name of this coefficient
-       call polynomial_coeff_getName(name,natom,coeffs_tmp(icoeff_tmp),symbols,recompute=.TRUE.)
 !      Increase icoeff and fill the coeffs_out array
        icoeff_tot = icoeff_tot + 1
-       call polynomial_coeff_init(one,coeffs_tmp(icoeff_tmp)%nterm,&
-&                                 coeffs_out(icoeff_tot),coeffs_tmp(icoeff_tmp)%terms,&
-&                                 name=name)
+       if(need_compute)then
+         name = ''
+!        Get the name of this coefficient
+         call polynomial_coeff_getName(name,natom,coeffs_tmp(icoeff_tmp),symbols,recompute=.TRUE.)
+         call polynomial_coeff_init(one,coeffs_tmp(icoeff_tmp)%nterm,&
+&                                     coeffs_out(icoeff_tot),coeffs_tmp(icoeff_tmp)%terms,&
+&                                     name=name)
+       end if
      end if
    end do
-
 !  Deallocation
    do icoeff1=1,ncoeff_max
      call polynomial_coeff_free(coeffs_tmp(icoeff1))
@@ -947,7 +995,7 @@ end subroutine computeNorder
 !! ncycle_in = number of maximum cycle (maximum coefficient to be fitted)
 !! nfixcoeff = Number of coefficients imposed during the fit process
 !! comm = MPI communicator
-!! cut_off = optional,cut off to apply to the range of interation if 
+!! cutoff_in = optional,cut off to apply to the range of interation if 
 !!           the coefficient are genereted in this routine
 !!
 !! OUTPUT
@@ -960,7 +1008,7 @@ end subroutine computeNorder
 !!
 !! SOURCE
 
-subroutine fit_polynomial_coeff_fit(eff_pot,fixcoeff,hist,ncycle_in,nfixcoeff,powers,comm,cut_off)
+subroutine fit_polynomial_coeff_fit(eff_pot,fixcoeff,hist,ncycle_in,nfixcoeff,powers,comm,cutoff_in)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -981,14 +1029,14 @@ subroutine fit_polynomial_coeff_fit(eff_pot,fixcoeff,hist,ncycle_in,nfixcoeff,po
  integer,intent(in) :: powers(2)
  type(effective_potential_type),intent(inout) :: eff_pot
  type(abihist),intent(inout) :: hist
- real(dp),optional,intent(in) :: cut_off
+ real(dp),optional,intent(in) :: cutoff_in
 !Local variables-------------------------------
 !scalar
  integer :: ii,icoeff,icycle,icycle_tmp,ierr,info,index_min,itime
- integer :: my_rank,my_ncoeff,ncoeff_max,natom_sc,ncell,ncycle
+ integer :: master,my_rank,my_ncoeff,ncoeff_max,natom_sc,ncell,ncycle
  integer :: ncycle_tot,ncycle_max,nproc,ntime,ncoeff_alone,size_mpi
  integer :: rank_to_send
- real(dp) :: energy,ffact,sfact,mse,msef,mses
+ real(dp) :: cutoff,energy,ffact,sfact
  real(dp),parameter :: HaBohr_meVAng = 27.21138386 / 0.529177249
  logical :: iam_master,found
 !arrays
@@ -996,7 +1044,8 @@ subroutine fit_polynomial_coeff_fit(eff_pot,fixcoeff,hist,ncycle_in,nfixcoeff,po
  real(dp) :: mingf(4)
  integer :: ipiv(3)
  integer,allocatable  :: buffsize(:),buffdisp(:)
- integer,allocatable  :: list_coeffs(:),list_coeffs_tmp(:),my_coeff(:),singular_coeffs(:)
+ integer,allocatable  :: list_coeffs(:),list_coeffs_tmp(:),my_coeffindexes(:),singular_coeffs(:)
+ integer,allocatable  :: my_coefflist(:) 
  real(dp),allocatable :: buffGF(:,:),coeff_values(:)
  real(dp),allocatable :: du_delta(:,:,:,:),displacement(:,:,:),energy_coeffs(:,:)
  real(dp),allocatable :: energy_coeffs_tmp(:,:),energy_diff(:),fcart_fixed(:,:,:)
@@ -1006,7 +1055,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,fixcoeff,hist,ncycle_in,nfixcoeff,po
  real(dp),allocatable :: strain(:,:),strten_coeffs(:,:,:)
  real(dp),allocatable :: strten_diff(:,:),strten_fixed(:,:),sqomega(:),ucvol(:)
  real(dp),allocatable :: work(:),work2(:,:)
- type(polynomial_coeff_type),allocatable :: coeffs_tmp(:),coeffs_in(:)
+ type(polynomial_coeff_type),allocatable :: coeffs_tmp(:),coeffs_in(:),my_coeffs(:)
  type(strain_type) :: strain_t
  character(len=500) :: message
  character(len=fnlen) :: filename
@@ -1014,8 +1063,25 @@ subroutine fit_polynomial_coeff_fit(eff_pot,fixcoeff,hist,ncycle_in,nfixcoeff,po
 ! *************************************************************************
 
 !MPI variables
+ master = 0
  nproc = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
- iam_master = (my_rank == 0)
+ iam_master = (my_rank == master)
+
+!Initialisation of constants
+ ntime      = hist%mxhist
+ natom_sc   = eff_pot%supercell%natom_supercell
+
+!if the cutoff_in == zero,
+!we set to the lenght of the cell parameters
+ if(cutoff_in==zero)then
+   cutoff = tol10
+   do ii=1,3
+     cutoff = cutoff + eff_pot%crystal%rprimd(ii,ii)
+   end do
+   cutoff = cutoff / 3.0
+ else
+   cutoff = cutoff_in
+ end if
 
  write(message,'(a,(80a))') ch10,('=',ii=1,80)
  call wrtout(ab_out,message,'COLL')
@@ -1027,27 +1093,43 @@ subroutine fit_polynomial_coeff_fit(eff_pot,fixcoeff,hist,ncycle_in,nfixcoeff,po
  call wrtout(ab_out,message,'COLL')
  call wrtout(std_out,message,'COLL')
 
- if(eff_pot%anharmonics_terms%ncoeff > zero)then
-   write(message, '(4a)' )ch10,' The coefficients present in the effective',&
+!Get the list of coefficients to fit:
+! get from the eff_pot type (from the input)
+! or
+! regenerate the list
+ if(iam_master)then
+   if(eff_pot%anharmonics_terms%ncoeff > zero)then
+     write(message, '(4a)' )ch10,' The coefficients present in the effective',&
 &      ' potential will be used for the fit'
-   call wrtout(std_out,message,'COLL')
-   call wrtout(ab_out,message,'COLL')
- else
+     call wrtout(std_out,message,'COLL')
+     call wrtout(ab_out,message,'COLL')
 
-!  Fit the coefficients, need MD file...
-   write(message, '(4a)' )ch10,' The coefficients for the fit must',&
+!  Copy the initial coefficients from the model
+     ncoeff_max = eff_pot%anharmonics_terms%ncoeff
+     ABI_DATATYPE_ALLOCATE(coeffs_in,(ncoeff_max))
+     do ii=1,ncoeff_max
+       call polynomial_coeff_init(eff_pot%anharmonics_terms%coefficients(ii)%coefficient,&
+&                                 eff_pot%anharmonics_terms%coefficients(ii)%nterm,&
+&                                 coeffs_in(ii),&
+&                                 eff_pot%anharmonics_terms%coefficients(ii)%terms,&
+&                                 eff_pot%anharmonics_terms%coefficients(ii)%name,&
+&                                 check=.false.) 
+     end do
+   else
+!  Or we need to regerate them
+     write(message, '(4a)' )ch10,' The coefficients for the fit must',&
 &                              ' be generate... ',ch10
-   call wrtout(std_out,message,'COLL')
-   call wrtout(ab_out,message,'COLL')
+     call wrtout(std_out,message,'COLL')
+     call wrtout(ab_out,message,'COLL')
 
-   write(message,'(a,F6.3,a)') " Cut-off of ",cut_off," Angstrom is imposed"
-   call wrtout(std_out,message,'COLL') 
-   
-   call fit_polynomial_coeff_getNorder(cut_off,eff_pot%anharmonics_terms%coefficients,&
-                                       eff_pot,eff_pot%anharmonics_terms%ncoeff,powers,1)
+     write(message,'(a,F6.3,a)') " Cut-off of ",cutoff," Angstrom is imposed"
+     call wrtout(std_out,message,'COLL') 
+     
+     call fit_polynomial_coeff_getNorder(cutoff,coeffs_in,eff_pot,ncoeff_max,powers,1,comm)
 
-   write(message,'(1x,I0,a)') eff_pot%anharmonics_terms%ncoeff,' coefficients generated '
-   if(iam_master)then
+
+     write(message,'(1x,I0,a)') ncoeff_max,' coefficients generated '
+
      filename = "terms_set.xml"
      call polynomial_coeff_writeXML(eff_pot%anharmonics_terms%coefficients,&
 &                                   eff_pot%anharmonics_terms%ncoeff,filename=filename,&
@@ -1056,8 +1138,10 @@ subroutine fit_polynomial_coeff_fit(eff_pot,fixcoeff,hist,ncycle_in,nfixcoeff,po
      call wrtout(ab_out,message,'COLL')
      call wrtout(std_out,message,'COLL') 
    end if
- end if
+ end if!End iam_master
 
+!Reset the output (we free the memory)
+ call effective_potential_freeCoeffs(eff_pot)
 
 !if the number of atoms in reference supercell into effpot is not corret,
 !wrt to the number of atom in the hist, we set map the hist and set the good 
@@ -1066,13 +1150,10 @@ subroutine fit_polynomial_coeff_fit(eff_pot,fixcoeff,hist,ncycle_in,nfixcoeff,po
    call fit_polynomial_coeff_mapHistToRef(eff_pot,hist,comm)
  end if
 
-
-!Initialisation of constants
- ncoeff_max = eff_pot%anharmonics_terms%ncoeff
- ntime      = hist%mxhist
- natom_sc   = eff_pot%supercell%natom_supercell
-
-!Set the number of cpu for each time
+!Set the MPI, we need to distribute the list of coeffiecients in
+!order  to recude de memory...
+!1:broadcast the number of coeff max
+ call xmpi_bcast(ncoeff_max, master, comm, ierr)
  ncoeff_alone = mod(ncoeff_max,nproc)
  my_ncoeff = aint(real(ncoeff_max,sp)/(nproc))
 
@@ -1080,16 +1161,52 @@ subroutine fit_polynomial_coeff_fit(eff_pot,fixcoeff,hist,ncycle_in,nfixcoeff,po
    my_ncoeff = my_ncoeff  + 1
  end if
 
- ABI_ALLOCATE(my_coeff,(my_ncoeff))
-
+ ABI_ALLOCATE(my_coeffindexes,(my_ncoeff))
+ ABI_ALLOCATE(my_coefflist,(my_ncoeff))
+!2:compute the number of coefficients and the list of the corresponding
+!  coefficients for each CPU.
  do icoeff=1,my_ncoeff
    if(my_rank >= (nproc-ncoeff_alone))then
-     my_coeff(icoeff)=(aint(real(ncoeff_max,sp)/nproc))*(my_rank)+&
+     my_coeffindexes(icoeff)=(aint(real(ncoeff_max,sp)/nproc))*(my_rank)+&
 &                              (my_rank - (nproc-ncoeff_alone)) + icoeff
+     my_coefflist(icoeff) = icoeff
    else
-     my_coeff(icoeff)=(my_ncoeff)*(my_rank)  + icoeff
+     my_coeffindexes(icoeff)=(my_ncoeff)*(my_rank)  + icoeff
+     my_coefflist(icoeff) = icoeff
   end if
  end do
+
+!3:MPI SEND the datas to the other CPUs
+ ABI_DATATYPE_ALLOCATE(my_coeffs,(my_ncoeff)) 
+ ii = 1
+ do icoeff = 1, ncoeff_max
+!  Need to send the rank with the chosen coefficient
+   rank_to_send = zero
+   if (any(my_coeffindexes(:)==icoeff)) rank_to_send = my_rank
+   call xmpi_sum(rank_to_send, comm, ierr)
+
+   if (iam_master) then
+     if(any(my_coeffindexes(:)==icoeff))then
+       call polynomial_coeff_init(coeffs_in(icoeff)%coefficient,coeffs_in(icoeff)%nterm,my_coeffs(ii),&
+&                                 coeffs_in(icoeff)%terms,coeffs_in(icoeff)%name,check=.false.) 
+       ii = ii + 1
+     else
+       call polynomial_coeff_MPIsend(coeffs_in(icoeff), icoeff, rank_to_send, comm)
+     end if
+   else
+     if(any(my_coeffindexes(:)==icoeff))then
+       call polynomial_coeff_MPIrecv(my_coeffs(ii), icoeff, master, comm)
+       ii = ii + 1
+     end if
+   end if
+   !Free memory on master CPU 
+   if (iam_master) call polynomial_coeff_free(coeffs_in(icoeff))
+ end do
+
+!Free memory on master CPU 
+ if (iam_master) then
+   ABI_DATATYPE_DEALLOCATE(coeffs_in)
+ end if
 
 !Check if ncycle_in is not zero or superior to ncoeff_max
  if((ncycle_in > ncoeff_max).or.(ncycle_in<=0.and.nfixcoeff /= -1)) then
@@ -1101,29 +1218,13 @@ subroutine fit_polynomial_coeff_fit(eff_pot,fixcoeff,hist,ncycle_in,nfixcoeff,po
      call wrtout(std_out,message,"COLL")
    end if
 
-!Copy the initial coefficients
- ABI_DATATYPE_ALLOCATE(coeffs_in,(ncoeff_max))
- do ii=1,ncoeff_max
-   call polynomial_coeff_init(eff_pot%anharmonics_terms%coefficients(ii)%coefficient,&
-&                             eff_pot%anharmonics_terms%coefficients(ii)%nterm,&
-&                             coeffs_in(ii),&
-&                             eff_pot%anharmonics_terms%coefficients(ii)%terms,&
-&                             eff_pot%anharmonics_terms%coefficients(ii)%name,&
-&                             check=.false.) 
- end do
-
 !Use fixcoeff
- ABI_ALLOCATE(list_coeffs,(ncoeff_max))
 !ncycle_tot store the curent number of coefficient in the model
 !Do not reset this variable...
  ncycle_tot = zero
- list_coeffs     = zero
  if (nfixcoeff == -1)then
    write(message, '(2a)')' nfixcoeff is set to -1, so all the coefficients are imposed.',ch10
-   do ii=1,ncoeff_max
-     list_coeffs(ii) = ii
-     ncycle_tot = ncycle_tot + 1
-   end do
+     ncycle_tot = ncycle_tot + ncoeff_max
  else
    if (nfixcoeff > zero)then
      if(maxval(fixcoeff(:)) > ncoeff_max) then
@@ -1133,10 +1234,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,fixcoeff,hist,ncycle_in,nfixcoeff,po
 &        '     Start from scratch...',ch10,&
 &        ' ---',ch10
      else
-       do ii=1,nfixcoeff
-         list_coeffs(ii) = fixcoeff(ii)
-         ncycle_tot = ncycle_tot + 1
-       end do
+       ncycle_tot = ncycle_tot + nfixcoeff
        write(message, '(2a)')' Some coefficients are imposed from the input.',ch10
      end if
    else
@@ -1150,6 +1248,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,fixcoeff,hist,ncycle_in,nfixcoeff,po
  ncycle     = ncycle_in
 !Compute the maximum number of cycle
  ncycle_max = ncycle_in + ncycle_tot
+
 !Check if the number of request cycle + the initial number of coeff is superior to 
 !the maximum number of coefficient allowed
  if(ncycle_max > ncoeff_max) then
@@ -1164,18 +1263,14 @@ subroutine fit_polynomial_coeff_fit(eff_pot,fixcoeff,hist,ncycle_in,nfixcoeff,po
    call wrtout(std_out,message,'COLL')
  end if
 
-!Initialisation of arrays
- ABI_DATATYPE_ALLOCATE(coeffs_tmp,(ncycle_max))
- ABI_ALLOCATE(singular_coeffs,(ncoeff_max))
- ABI_ALLOCATE(coeff_values,(ncoeff_max))
+!Initialisation of arrays:
  ABI_ALLOCATE(displacement,(3,natom_sc,ntime))
  ABI_ALLOCATE(du_delta,(6,3,natom_sc,ntime))
  ABI_ALLOCATE(energy_coeffs_tmp,(ncycle_max,ntime))
- ABI_ALLOCATE(fcart_coeffs_tmp,(ncycle_max,3,natom_sc,ntime))
- ABI_ALLOCATE(list_coeffs_tmp,(ncycle_max))
+ ABI_ALLOCATE(list_coeffs,(ncycle_max))
+ ABI_ALLOCATE(fcart_coeffs_tmp,(3,natom_sc,ncycle_max,ntime))
  ABI_ALLOCATE(strten_coeffs_tmp,(6,ntime,ncycle_max))
  ABI_ALLOCATE(energy_diff,(ntime))
- ABI_ALLOCATE(gf_values,(4,ncoeff_max))
  ABI_ALLOCATE(strain,(6,ntime))
  ABI_ALLOCATE(fcart_fixed,(3,natom_sc,ntime))
  ABI_ALLOCATE(fcart_diff,(3,natom_sc,ntime))
@@ -1185,19 +1280,24 @@ subroutine fit_polynomial_coeff_fit(eff_pot,fixcoeff,hist,ncycle_in,nfixcoeff,po
  ABI_ALLOCATE(sqomega,(ntime))
  ABI_ALLOCATE(ucvol,(ntime))
 
- mse  = zero
- msef = zero
- mses = zero
- coeff_values = zero
- singular_coeffs = zero
  displacement = zero
+ list_coeffs  = zero
  strain       = zero
- fcart_coeffs = zero
- strten_coeffs= zero
  fcart_fixed  = zero
  fred_fixed   = zero
  strten_fixed = zero
  sqomega      = zero
+
+!if ncycle_tot > 0 fill list_coeffs with the fixed coefficients
+ if(ncycle_tot > zero)then
+   do ii = 1,ncycle_tot
+     if(nfixcoeff == -1)then
+       list_coeffs(ii) = ii
+     else
+       list_coeffs(ii) = fixcoeff(ii)
+     end if
+   end do
+ end if
 
 !Get the decomposition for each coefficients of the forces and stresses for 
 !each atoms and each step  equations 11 & 12 of  PRB95,094115(2017) 
@@ -1322,23 +1422,82 @@ subroutine fit_polynomial_coeff_fit(eff_pot,fixcoeff,hist,ncycle_in,nfixcoeff,po
    end if
  end if
 
-!Get the decomposition for each coefficients of the forces,stresses and energy for 
-!each atoms and each step  (see equations 11 & 12 of  PRB95,094115(2017)) + allocation
- ABI_ALLOCATE(energy_coeffs,(my_ncoeff,ntime))
- ABI_ALLOCATE(fcart_coeffs,(my_ncoeff,3,natom_sc,ntime))
- ABI_ALLOCATE(strten_coeffs,(6,ntime,my_ncoeff))
-
- call fit_polynomial_coeff_getFS(eff_pot%anharmonics_terms%coefficients,du_delta,displacement,&
-&                                energy_coeffs,fcart_coeffs,natom_sc,eff_pot%crystal%natom,&
-&                                ncoeff_max,ntime,int(eff_pot%supercell%qphon(:)),strain,&
-&                                strten_coeffs,ucvol,my_coeff,my_ncoeff)
-
 !Free space
  ABI_DEALLOCATE(fred_fixed)
+ ABI_DEALLOCATE(strten_fixed)
+
+!Get the decomposition for each coefficients of the forces,stresses and energy for 
+!each atoms and each step  (see equations 11 & 12 of  PRB95,094115(2017)) + allocatio
+
+ ABI_ALLOCATE(energy_coeffs,(my_ncoeff,ntime))
+ ABI_ALLOCATE(fcart_coeffs,(3,natom_sc,my_ncoeff,ntime))
+ ABI_ALLOCATE(strten_coeffs,(6,ntime,my_ncoeff))
+
+ call fit_polynomial_coeff_getFS(my_coeffs,du_delta,displacement,&
+&                                energy_coeffs,fcart_coeffs,natom_sc,eff_pot%crystal%natom,&
+&                                ncoeff_max,ntime,int(eff_pot%supercell%qphon(:)),strain,&
+&                                strten_coeffs,ucvol,my_coefflist,my_ncoeff)
+
+!Free space
  ABI_DEALLOCATE(displacement)
  ABI_DEALLOCATE(du_delta)
  ABI_DEALLOCATE(strain)
- ABI_DEALLOCATE(strten_fixed)
+
+
+!Allocation of arrays
+ ABI_DATATYPE_ALLOCATE(coeffs_tmp,(ncycle_max))
+ ABI_ALLOCATE(singular_coeffs,(ncoeff_max))
+ ABI_ALLOCATE(coeff_values,(ncycle_max))
+ ABI_ALLOCATE(gf_values,(4,ncoeff_max))
+ ABI_ALLOCATE(list_coeffs_tmp,(ncycle_max))
+ coeff_values = zero
+ singular_coeffs = zero
+ 
+!Set mpi buffer
+!Set the bufsize for mpi allgather
+ ABI_ALLOCATE(buffsize,(nproc))
+ ABI_ALLOCATE(buffdisp,(nproc))
+ ABI_ALLOCATE(buffGF,(5,1))
+ ABI_ALLOCATE(gf_mpi,(5,nproc))
+ buffsize(:) = zero
+ buffdisp(1) = zero
+ do ii= 1,nproc
+   buffsize(ii) =  5
+ end do
+ do ii = 2,nproc 
+   buffdisp(ii) = buffdisp(ii-1) + buffsize(ii-1)
+ end do
+ size_mpi = 5*nproc
+
+!If some coeff are imposed by the input:
+ if(ncycle_tot>=1)then
+   do icycle = 1,ncycle_tot
+     list_coeffs_tmp(icycle) = icycle
+     rank_to_send = zero
+     do icoeff=1,my_ncoeff
+       if((my_coeffindexes(icoeff)==list_coeffs(icycle)))then
+         energy_coeffs_tmp(icycle,:)    = energy_coeffs(icoeff,:)
+         fcart_coeffs_tmp(:,:,icycle,:) = fcart_coeffs(:,:,icoeff,:) 
+         strten_coeffs_tmp(:,:,icycle)  = strten_coeffs(:,:,icoeff)
+         rank_to_send = my_rank      
+         exit
+       end if
+     end do
+!    Need to send the rank with the chosen coefficient
+     call xmpi_sum(rank_to_send, comm, ierr)
+!    Boadcast the coefficient
+     call xmpi_bcast(energy_coeffs_tmp(icycle,:), rank_to_send, comm, ierr)
+     call xmpi_bcast(fcart_coeffs_tmp(:,:,icycle,:) , rank_to_send, comm, ierr)
+     call xmpi_bcast(strten_coeffs_tmp(:,:,icycle), rank_to_send, comm, ierr)
+   end do
+ end if
+
+!Waiting for all 
+ if(nproc > 1)  then
+   write(message, '(a)') 'Initialisation done... waiting for all the CPU'
+   call wrtout(std_out,message,'COLL')
+   call xmpi_barrier(comm)
+ end if
 
 !Compute GF, coeff_values,strten_coeffs and fcart_coeffs are set to zero
 !it means that only the harmonic part wiil be computed
@@ -1367,46 +1526,6 @@ subroutine fit_polynomial_coeff_fit(eff_pot,fixcoeff,hist,ncycle_in,nfixcoeff,po
 !We need to store the values of the coefficients
 !Reset gf_values
  gf_values(:,:) = zero
-
-!Set mpi buffer
-!Set the bufsize for mpi allgather
- ABI_ALLOCATE(buffsize,(nproc))
- ABI_ALLOCATE(buffdisp,(nproc))
- ABI_ALLOCATE(buffGF,(5,1))
- ABI_ALLOCATE(gf_mpi,(5,nproc))
- buffsize(:) = zero
- buffdisp(1) = zero
- do ii= 1,nproc
-   buffsize(ii) =  5
- end do
- do ii = 2,nproc 
-   buffdisp(ii) = buffdisp(ii-1) + buffsize(ii-1)
- end do
- size_mpi = 5*nproc
-
-
-!If some coeff are imposed by the input:
- if(ncycle_tot>=1)then
-   do icycle = 1,ncycle_tot
-     list_coeffs_tmp(icycle) = icycle
-     rank_to_send = zero
-     do icoeff=1,my_ncoeff
-       if((my_coeff(icoeff)==list_coeffs(icycle)))then
-         energy_coeffs_tmp(icycle,:)    = energy_coeffs(icoeff,:)
-         fcart_coeffs_tmp(icycle,:,:,:) = fcart_coeffs(icoeff,:,:,:) 
-         strten_coeffs_tmp(:,:,icycle)  = strten_coeffs(:,:,icoeff)
-         rank_to_send = my_rank      
-         exit
-       end if
-     end do
-!    Need to send the rank with the chosen coefficient
-     call xmpi_sum(rank_to_send, comm, ierr)
-!    Boadcast the coefficient
-     call xmpi_bcast(energy_coeffs_tmp(icycle,:), rank_to_send, comm, ierr)
-     call xmpi_bcast(fcart_coeffs_tmp(icycle,:,:,:) , rank_to_send, comm, ierr)
-     call xmpi_bcast(strten_coeffs_tmp(:,:,icycle), rank_to_send, comm, ierr)
-   end do
- end if
 
  if(ncycle > zero)then
    write(message,'(a,3x,a,10x,a,14x,a,14x,a,14x,a)') " N","Selecting","MSEE","MSEFS","MSEF","MSES"
@@ -1457,12 +1576,12 @@ subroutine fit_polynomial_coeff_fit(eff_pot,fixcoeff,hist,ncycle_in,nfixcoeff,po
    gf_values(:,:) = zero
 
    do icoeff=1,my_ncoeff
-     if(any(list_coeffs==my_coeff(icoeff)).or. singular_coeffs(my_coeff(icoeff)) == 1) cycle
-     list_coeffs(icycle) = my_coeff(icoeff)
+     if(any(list_coeffs==my_coeffindexes(icoeff)).or.singular_coeffs(my_coeffindexes(icoeff)) == 1) cycle
+     list_coeffs(icycle) = my_coeffindexes(icoeff)
 
 !    Fill the temporary arrays
      energy_coeffs_tmp(icycle,:)    = energy_coeffs(icoeff,:)
-     fcart_coeffs_tmp(icycle,:,:,:) = fcart_coeffs(icoeff,:,:,:) 
+     fcart_coeffs_tmp(:,:,icycle,:) = fcart_coeffs(:,:,icoeff,:) 
      strten_coeffs_tmp(:,:,icycle)  = strten_coeffs(:,:,icoeff)
 
 !    call the fit process routine
@@ -1478,7 +1597,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,fixcoeff,hist,ncycle_in,nfixcoeff,po
 &                                         icycle,ncycle_max,ntime,&
 &                                         strten_coeffs_tmp,strten_diff,sfact,sqomega,ucvol)
 
-       write (j_char, '(i5)') my_coeff(icoeff)
+       write (j_char, '(i5)') my_coeffindexes(icoeff)
        write(message, '(6x,a,3x,4ES18.10)') adjustl(j_char),&
 &                                 gf_values(4,icoeff)* 1000*Ha_ev / ncell,&
 &                                 gf_values(1,icoeff)*HaBohr_meVAng**2,&
@@ -1487,7 +1606,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,fixcoeff,hist,ncycle_in,nfixcoeff,po
 
      else!In this case the matrix is singular
        gf_values(:,icoeff) = zero
-       singular_coeffs(my_coeff(icoeff)) = 1
+       singular_coeffs(my_coeffindexes(icoeff)) = 1
        write(message, '(a)') ' The matrix is singular...'
      end if
      call wrtout(std_out,message,'COLL')
@@ -1504,15 +1623,15 @@ subroutine fit_polynomial_coeff_fit(eff_pot,fixcoeff,hist,ncycle_in,nfixcoeff,po
      if(gf_values(1,icoeff) == zero) cycle
      if(gf_values(1,icoeff) < mingf(1) ) then
        mingf(:) = gf_values(:,icoeff)
-       index_min = my_coeff(icoeff)
+       index_min = my_coeffindexes(icoeff)
      end if
    end do
 
 !  MPI GATHER THE BEST COEFF ON EACH CPU
    buffGF(1,1) = index_min
    buffGF(2:5,1) =  mingf(:)
-   call xmpi_allgatherv(buffGF,5,gf_mpi,buffsize,buffdisp, comm, ierr)
 
+   call xmpi_allgatherv(buffGF,5,gf_mpi,buffsize,buffdisp, comm, ierr)
 !  Find a way to keep the bestStore the best coeff for the next step
    mingf(:)    = 9D99
    index_min= one
@@ -1531,22 +1650,28 @@ subroutine fit_polynomial_coeff_fit(eff_pot,fixcoeff,hist,ncycle_in,nfixcoeff,po
 !  temporary array before broadcast
    rank_to_send = zero
    do icoeff=1,my_ncoeff
-     if((my_coeff(icoeff)==list_coeffs(icycle)))then
+     if((my_coeffindexes(icoeff)==list_coeffs(icycle)))then
        energy_coeffs_tmp(icycle,:)    = energy_coeffs(icoeff,:)
-       fcart_coeffs_tmp(icycle,:,:,:) = fcart_coeffs(icoeff,:,:,:) 
+       fcart_coeffs_tmp(:,:,icycle,:) = fcart_coeffs(:,:,icoeff,:) 
        strten_coeffs_tmp(:,:,icycle)  = strten_coeffs(:,:,icoeff)
+       call polynomial_coeff_free(coeffs_tmp(icycle))
+       call polynomial_coeff_init(coeff_values(icycle),my_coeffs(icoeff)%nterm,&
+&                                 coeffs_tmp(icycle),my_coeffs(icoeff)%terms,&
+&                                 my_coeffs(icoeff)%name,&
+&                                 check=.false.)
+
        rank_to_send = my_rank      
        exit
      end if
    end do
-   
+
 !  Need to send the rank with the chosen coefficient
    call xmpi_sum(rank_to_send, comm, ierr)
-
 !  Boadcast the coefficient
    call xmpi_bcast(energy_coeffs_tmp(icycle,:), rank_to_send, comm, ierr)
-   call xmpi_bcast(fcart_coeffs_tmp(icycle,:,:,:) , rank_to_send, comm, ierr)
+   call xmpi_bcast(fcart_coeffs_tmp(:,:,icycle,:) , rank_to_send, comm, ierr)
    call xmpi_bcast(strten_coeffs_tmp(:,:,icycle), rank_to_send, comm, ierr)
+   call polynomial_coeff_broadcast(coeffs_tmp(icycle), rank_to_send, comm) 
 
    write(message, '(a,I0)' )' Selecting the coefficient number ',list_coeffs(icycle)
    call wrtout(std_out,message,'COLL')
@@ -1571,42 +1696,34 @@ subroutine fit_polynomial_coeff_fit(eff_pot,fixcoeff,hist,ncycle_in,nfixcoeff,po
  end do
 
 !This routine solves the linear system proposed by C.Escorihuela-Sayalero see PRB95,094115(2017)
- call fit_polynomial_coeff_solve(coeff_values(1:ncycle_tot),du_delta,fcart_coeffs_tmp,fcart_diff,&
-&                                info,list_coeffs_tmp(1:ncycle_tot),natom_sc,ncycle_tot,&
-&                                ncycle_max,ntime,strten_coeffs_tmp,strten_diff,sqomega,ucvol)
+ if(ncycle_tot > zero)then
 
-!Fill the coeffs_tmp with the last model
- do icycle=1,ncycle_max
-   call polynomial_coeff_free(coeffs_tmp(icycle))
-   call polynomial_coeff_init(coeff_values(icycle),&
-&                             coeffs_in(list_coeffs(icycle))%nterm,&
-&                             coeffs_tmp(icycle),&
-&                             coeffs_in(list_coeffs(icycle))%terms,&
-&                             coeffs_in(list_coeffs(icycle))%name,&
-&                             check=.false.)
- end do
+   call fit_polynomial_coeff_solve(coeff_values(1:ncycle_tot),du_delta,fcart_coeffs_tmp,fcart_diff,&
+&                                  info,list_coeffs_tmp(1:ncycle_tot),natom_sc,ncycle_tot,&
+&                                  ncycle_max,ntime,strten_coeffs_tmp,strten_diff,sqomega,ucvol)
 
-!Set the final set of coefficients into the eff_pot type
- call effective_potential_setCoeffs(coeffs_tmp(1:ncycle_tot),eff_pot,ncycle_tot)
 
- write(message, '(3a)') ch10,' Fitted coefficients at the end of the fit process: '
- call wrtout(ab_out,message,'COLL')
- call wrtout(std_out,message,'COLL')
- do ii = 1,ncoeff_max   
-   if(list_coeffs(ii) ==0) cycle
-   write(message, '(a,I0,a,ES19.10,2a)') " ",list_coeffs(ii)," =>",coeff_values(ii),&
-&                              " ",trim(coeffs_tmp(ii)%name)
+!  Set the final set of coefficients into the eff_pot type
+   call effective_potential_setCoeffs(coeffs_tmp(1:ncycle_tot),eff_pot,ncycle_tot)
+   
+   write(message, '(3a)') ch10,' Fitted coefficients at the end of the fit process: '
    call wrtout(ab_out,message,'COLL')
    call wrtout(std_out,message,'COLL')
- end do
+   do ii = 1,ncycle_max
+     if(list_coeffs(ii) ==0) cycle
+     write(message, '(a,I0,a,ES19.10,2a)') " ",list_coeffs(ii)," =>",coeff_values(ii),&
+&                                " ",trim(coeffs_tmp(ii)%name)
+     call wrtout(ab_out,message,'COLL')
+     call wrtout(std_out,message,'COLL')
+   end do
 
- call fit_polynomial_coeff_computeGF(coeff_values(1:ncycle_max),du_delta,energy_coeffs_tmp,energy_diff,&
-&                                    fcart_coeffs_tmp,fcart_diff,ffact,gf_values(:,1),&
-&                                    list_coeffs_tmp(1:ncycle_max),natom_sc,ncycle_max,ncycle_max,ntime,&
-&                                    strten_coeffs_tmp,strten_diff,sfact,sqomega,ucvol)
+   call fit_polynomial_coeff_computeGF(coeff_values(1:ncycle_max),du_delta,energy_coeffs_tmp,&
+&                                      energy_diff,fcart_coeffs_tmp,fcart_diff,ffact,gf_values(:,1),&
+&                                      list_coeffs_tmp(1:ncycle_max),natom_sc,ncycle_max,ncycle_max,&
+&                                      ntime,strten_coeffs_tmp,strten_diff,sfact,sqomega,ucvol)
 
-!Print the standard deviation after the fit
- write(message,'(4a,ES24.16,4a,ES24.16,2a,ES24.16,2a,ES24.16,a)' )ch10,&
+!  Print the standard deviation after the fit
+   write(message,'(4a,ES24.16,4a,ES24.16,2a,ES24.16,2a,ES24.16,a)' )ch10,&
 &                    ' Mean Standard Deviation values at the end of the fit process (meV/f.u.):',&
 &               ch10,'   Energy          : ',&
 &               gf_values(4,1)*Ha_EV*1000/ ncell ,ch10,&
@@ -1617,20 +1734,29 @@ subroutine fit_polynomial_coeff_fit(eff_pot,fixcoeff,hist,ncycle_in,nfixcoeff,po
 &               gf_values(2,1)*(HaBohr_meVAng)**2,ch10,&
 &                    '   Stresses        : ',&
 &               gf_values(3,1)*(HaBohr_meVAng)**2,ch10
- call wrtout(ab_out,message,'COLL')
- call wrtout(std_out,message,'COLL')
+   call wrtout(ab_out,message,'COLL')
+   call wrtout(std_out,message,'COLL')
 
+ else
+   write(message, '(9a)' )ch10,&
+&          ' --- !WARNING',ch10,&
+&          '     The fit process does not provide possible terms.',ch10,&
+&          '     Please make sure than the terms set is correct',ch10,&
+&          ' ---',ch10
+   call wrtout(ab_out,message,'COLL')
+   call wrtout(std_out,message,'COLL')
+ end if
 !Deallocation of arrays
 !Deallocate the temporary coefficient
  do ii=1,ncycle_max
    call polynomial_coeff_free(coeffs_tmp(ii))
  end do
- do ii=1,ncoeff_max
-   call polynomial_coeff_free(coeffs_in(ii))
- end do
-
  ABI_DATATYPE_DEALLOCATE(coeffs_tmp)
- ABI_DATATYPE_DEALLOCATE(coeffs_in)
+ do ii=1,my_ncoeff
+   call polynomial_coeff_free(my_coeffs(ii))
+ end do
+ ABI_DATATYPE_DEALLOCATE(my_coeffs)
+
  ABI_DEALLOCATE(buffsize)
  ABI_DEALLOCATE(buffdisp)
  ABI_DEALLOCATE(buffGF)
@@ -1646,7 +1772,8 @@ subroutine fit_polynomial_coeff_fit(eff_pot,fixcoeff,hist,ncycle_in,nfixcoeff,po
  ABI_DEALLOCATE(gf_values)
  ABI_DEALLOCATE(list_coeffs)
  ABI_DEALLOCATE(list_coeffs_tmp)
- ABI_DEALLOCATE(my_coeff)
+ ABI_DEALLOCATE(my_coeffindexes)
+ ABI_DEALLOCATE(my_coefflist)
  ABI_DEALLOCATE(singular_coeffs)
  ABI_DEALLOCATE(strten_diff)
  ABI_DEALLOCATE(strten_coeffs)
@@ -1668,7 +1795,7 @@ end subroutine fit_polynomial_coeff_fit
 !!
 !! INPUTS
 !! du_delta(6,3,natom_sc,ntime)  = Variation to displacements wrt to the strain (Bohr)
-!! fcart_coeffs(3,natom_sc,ntime,ncoeff_max) = List of the values of the contribution to the
+!! fcart_coeffs(3,natom_sc,ncoeff_max,ntime) = List of the values of the contribution to the
 !!                                             cartesian forces for all coefficients 
 !!                                             for each direction and each time
 !! fcart_diff(3,natom,ntime) = Difference of cartesian forces between DFT calculation and 
@@ -1721,7 +1848,7 @@ subroutine fit_polynomial_coeff_solve(coefficients,du_delta,fcart_coeffs,fcart_d
  integer,intent(out) :: info_out
 !arrays
  integer,intent(in)  :: list_coeffs(ncoeff_fit)
- real(dp),intent(in) :: du_delta(6,3,natom,ntime),fcart_coeffs(ncoeff_max,3,natom,ntime)
+ real(dp),intent(in) :: du_delta(6,3,natom,ntime),fcart_coeffs(3,natom,ncoeff_max,ntime)
  real(dp),intent(in) :: fcart_diff(3,natom,ntime)
  real(dp),intent(in) :: strten_coeffs(6,ntime,ncoeff_max)
  real(dp),intent(in) :: strten_diff(6,ntime),sqomega(ntime),ucvol(ntime)
@@ -1773,7 +1900,7 @@ subroutine fit_polynomial_coeff_solve(coefficients,du_delta,fcart_coeffs,fcart_d
 !  See equation 17 of PRB95 094115 (2017)
  do icoeff=1,ncoeff_fit
    icoeff_tmp = list_coeffs(icoeff)
-   fcart_coeffs_tmp(:,:,:) = fcart_coeffs(icoeff_tmp,:,:,:)
+   fcart_coeffs_tmp(:,:,:) = fcart_coeffs(:,:,icoeff_tmp,:)
    ftmpA= zero; ftmpB = zero
    stmpA= zero; stmpB = zero  
 !  loop over the configuration
@@ -1784,7 +1911,7 @@ subroutine fit_polynomial_coeff_solve(coefficients,du_delta,fcart_coeffs,fcart_d
          fmu = fcart_coeffs_tmp(mu,ia,itime)
          do jcoeff=1,ncoeff_fit
            jcoeff_tmp = list_coeffs(jcoeff)
-           fnu = fcart_coeffs(jcoeff_tmp,mu,ia,itime)
+           fnu = fcart_coeffs(mu,ia,jcoeff_tmp,itime)
            ftmpA =  fmu*fnu
            A(icoeff,jcoeff) = A(icoeff,jcoeff) + ffact*ftmpA
          end do
@@ -1814,7 +1941,9 @@ subroutine fit_polynomial_coeff_solve(coefficients,du_delta,fcart_coeffs,fcart_d
 ! if (INFO==N+1) then
 !   coefficients = zero
 ! end if
+
  call dsgesv(N,NRHS,A,LDA,IPIV,B,LDB,coefficients,LDX,WORK,SWORK,ITER,INFO)
+
 !U is nonsingular
  if (INFO==N+2) then
    coefficients = zero
@@ -1903,7 +2032,7 @@ subroutine fit_polynomial_coeff_computeGF(coefficients,du_delta,energy_coeffs,en
  real(dp),intent(in) :: du_delta(6,3,natom,ntime)
  real(dp),intent(in) :: energy_coeffs(ncoeff_max,ntime)
  real(dp),intent(in) :: energy_diff(ntime)
- real(dp),intent(in) :: fcart_coeffs(ncoeff_max,3,natom,ntime)
+ real(dp),intent(in) :: fcart_coeffs(3,natom,ncoeff_max,ntime)
  real(dp),intent(in) :: fcart_diff(3,natom,ntime)
  real(dp),intent(in) :: strten_coeffs(6,ntime,ncoeff_max)
  real(dp),intent(in) :: strten_diff(6,ntime),sqomega(ntime)
@@ -1939,7 +2068,7 @@ subroutine fit_polynomial_coeff_computeGF(coefficients,du_delta,energy_coeffs,en
        fmu  = zero
        do icoeff=1,ncoeff_fit
          icoeff_tmp = list_coeffs(icoeff)
-         fmu =  fmu + coefficients(icoeff)*fcart_coeffs(icoeff_tmp,mu,ia,itime)
+         fmu =  fmu + coefficients(icoeff)*fcart_coeffs(mu,ia,icoeff_tmp,itime)
        end do
        ftmp = ftmp + (fcart_diff(mu,ia,itime)-fmu)**2
      end do !End loop dir
@@ -2025,7 +2154,7 @@ subroutine fit_polynomial_coeff_getFS(coefficients,du_delta,displacement,energy_
  real(dp),intent(in) :: displacement(3,natom_sc,ntime)
  real(dp),intent(in) :: strain(6,ntime),ucvol(ntime)
  real(dp),intent(out):: energy_out(ncoeff,ntime)
- real(dp),intent(out) :: fcart_out(ncoeff,3,natom_sc,ntime)
+ real(dp),intent(out) :: fcart_out(3,natom_sc,ncoeff,ntime)
  real(dp),intent(out) :: strten_out(6,ntime,ncoeff)
  type(polynomial_coeff_type), intent(in) :: coefficients(ncoeff_max)
 !Local variables-------------------------------
@@ -2041,14 +2170,13 @@ subroutine fit_polynomial_coeff_getFS(coefficients,du_delta,displacement,energy_
 
 
 !1-Get forces and stresses from the model
-! Initialisation of variables
+!  Initialisation of variables
  fcart_out(:,:,:,:) = zero
  strten_out(:,:,:)  = zero
  energy_out(:,:)    = zero
  ffact = one/(3*natom_sc*ntime)
  sfact = one/(6*ntime)
 
-! do icell = 1,ncell
  icell = 0
  do i1=1,sc_size(1)
    do i2=1,sc_size(2)
@@ -2216,8 +2344,8 @@ subroutine fit_polynomial_coeff_getFS(coefficients,du_delta,displacement,energy_
 &                                                      weight * tmp3 / ucvol(itime)
                else
 !                Accumule  forces
-                 fcart_out(icoeff_tmp,idir1,ia1,itime)=fcart_out(icoeff_tmp,idir1,ia1,itime)+weight*tmp2
-                 fcart_out(icoeff_tmp,idir1,ib1,itime)=fcart_out(icoeff_tmp,idir1,ib1,itime)-weight*tmp2
+                 fcart_out(idir1,ia1,icoeff_tmp,itime)=fcart_out(idir1,ia1,icoeff_tmp,itime)+weight*tmp2
+                 fcart_out(idir1,ib1,icoeff_tmp,itime)=fcart_out(idir1,ib1,icoeff_tmp,itime)-weight*tmp2
                end if
              end do
 
@@ -2238,7 +2366,7 @@ subroutine fit_polynomial_coeff_getFS(coefficients,du_delta,displacement,energy_
        do idir1=1,3
          do idir2=1,6
            strten_out(idir2,itime,icoeff) = strten_out(idir2,itime,icoeff) + &
-&                     du_delta(idir2,idir1,ia1,itime)*fcart_out(icoeff,idir1,ia1,itime)/ucvol(itime)
+&                     du_delta(idir2,idir1,ia1,itime)*fcart_out(idir1,ia1,icoeff,itime)/ucvol(itime)
          end do
        end do
      end do
@@ -2923,7 +3051,7 @@ function distance(xcart1,xcart2,rprimd,cell1,cell2) result(dist)
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'dist'
+#define ABI_FUNC 'distance'
 !End of the abilint section
 
   real(dp),intent(in):: rprimd(3,3)
@@ -3025,7 +3153,7 @@ end function getCoeffFromList
 !!
 !! SOURCE
 
-subroutine fit_polynomial_coeff_getOrder1(cell,coeffs_out,cut_off,list_symcoeff,list_symstr,&
+subroutine fit_polynomial_coeff_getOrder1(cell,coeffs_out,cutoff_in,list_symcoeff,list_symstr,&
 &                                         natom,ncoeff_out,ncoeff,nrpt,nsym,&
 &                                         rprimd,symbols,xcart)
 
@@ -3043,7 +3171,7 @@ subroutine fit_polynomial_coeff_getOrder1(cell,coeffs_out,cut_off,list_symcoeff,
 !scalars
  integer,intent(in)  :: natom,ncoeff,nsym,nrpt
  integer,intent(out) :: ncoeff_out
- real(dp),intent(in) :: cut_off
+ real(dp),intent(in) :: cutoff_in
 !arrays
  integer,intent(in) :: cell(3,nrpt)
  integer,intent(in) :: list_symcoeff(6,ncoeff,nsym),list_symstr(6,nsym)
@@ -3062,15 +3190,16 @@ subroutine fit_polynomial_coeff_getOrder1(cell,coeffs_out,cut_off,list_symcoeff,
  character(len=1) :: mutodir(9) = (/"x","y","z","1","2","3","4","5","6"/)
  character(len=100):: name
  character(len=500) :: message
- character(len=fnlen) :: filename
  type(polynomial_term_type),dimension(:),allocatable :: terms
  type(polynomial_coeff_type),allocatable :: coeffs_tmp(:)
-
+!TEST_AM
+! character(len=fnlen) :: filename
+!TEST_AM
 ! *************************************************************************
 
 !Initialisation of variables
  nterm_max  = nsym
- ncoeff_max = ncoeff*6
+ ncoeff_max = ncoeff
  ndisp = 1
  
  ABI_ALLOCATE(coeffs_tmp,(ncoeff_max))
@@ -3092,7 +3221,8 @@ subroutine fit_polynomial_coeff_getOrder1(cell,coeffs_out,cut_off,list_symcoeff,
    end if
  end do
 
- write(message,'(a)') " Irreductible coefficient and associated atom 1, atom 2 and direction:"
+ write(message,'(3a)') " Irreductible coefficient and associated atom 1, atom 2 and direction:",ch10,&
+&                     " for the 1st order"
  call wrtout(std_out,message,'COLL') 
 
  do icoeff=1,ncoeff
@@ -3173,8 +3303,11 @@ subroutine fit_polynomial_coeff_getOrder1(cell,coeffs_out,cut_off,list_symcoeff,
    end if
  end do
 
- filename = "terms_1st_order.xml"
- call polynomial_coeff_writeXML(coeffs_out,ncoeff_out,filename=filename)
+!TEST_AM
+! filename = "terms_1st_order.xml"
+! call polynomial_coeff_writeXML(coeffs_out,ncoeff_out,filename=filename)
+!TEST_AM
+
  write(message,'(a,1x,I0,a)') ch10,&
 &       ncoeff_out,' fitted coefficients for the 1st order '
  call wrtout(ab_out,message,'COLL')
@@ -3210,7 +3343,7 @@ end subroutine fit_polynomial_coeff_getOrder1
 !!
 !! SOURCE
 
-subroutine fit_polynomial_coeff_getOrder2(cell,coeffs_out,cut_off,list_coeff,&
+subroutine fit_polynomial_coeff_getOrder2(cell,coeffs_out,cutoff_in,list_coeff,&
 &                                   natom,ncoeff_out,ncoeff,nrpt,nstr_sym,nsym,&
 &                                   rprimd,symbols,xcart)
 
@@ -3228,7 +3361,7 @@ subroutine fit_polynomial_coeff_getOrder2(cell,coeffs_out,cut_off,list_coeff,&
 !scalars
  integer,intent(in)  :: natom,ncoeff,nsym,nrpt,nstr_sym
  integer,intent(out) :: ncoeff_out
- real(dp),intent(in) :: cut_off
+ real(dp),intent(in) :: cutoff_in
 !arrays
  integer,intent(in) :: cell(3,nrpt)
  integer,intent(in) :: list_coeff(6,ncoeff,nsym)
@@ -3304,11 +3437,11 @@ subroutine fit_polynomial_coeff_getOrder2(cell,coeffs_out,cut_off,list_coeff,&
              if(distance(xcart(:,list_coeff(kk,icoeff1,1)),&
 &                    xcart(:,list_coeff(2,icoeff2,1)),rprimd,&
 &                    cell(:,list_coeff(4,icoeff1,1)),&
-&                    cell(:,list_coeff(4,icoeff2,1)))>cut_off.or.&
+&                    cell(:,list_coeff(4,icoeff2,1)))>cutoff_in.or.&
 &               distance(xcart(:,list_coeff(kk,icoeff1,1)),&
 &                    xcart(:,list_coeff(3,icoeff2,1)),rprimd,&
 &                    cell(:,list_coeff(4,icoeff1,1)),&
-&                    cell(:,list_coeff(4,icoeff2,1)))>cut_off)then
+&                    cell(:,list_coeff(4,icoeff2,1)))>cutoff_in)then
                compatible =.false.
              end if
            end do
@@ -3403,7 +3536,7 @@ end subroutine fit_polynomial_coeff_getOrder2
 !!
 !! SOURCE
 
-subroutine fit_polynomial_coeff_getOrder3(cell,coeffs_out,cut_off,list_coeff,list_str,&
+subroutine fit_polynomial_coeff_getOrder3(cell,coeffs_out,cutoff_in,list_coeff,list_str,&
 &                                   natom,ncoeff_out,ncoeff,nrpt,nstr_sym,nsym,&
 &                                   rprimd,symbols,xcart)
 
@@ -3421,7 +3554,7 @@ subroutine fit_polynomial_coeff_getOrder3(cell,coeffs_out,cut_off,list_coeff,lis
 !scalars
  integer,intent(in)  :: natom,ncoeff,nsym,nrpt,nstr_sym
  integer,intent(out) :: ncoeff_out
- real(dp),intent(in) :: cut_off
+ real(dp),intent(in) :: cutoff_in
 !arrays
  integer,intent(in) :: cell(3,nrpt)
  integer,intent(in) :: list_coeff(6,ncoeff,nsym),list_str(6,nsym)
@@ -3508,11 +3641,11 @@ subroutine fit_polynomial_coeff_getOrder3(cell,coeffs_out,cut_off,list_coeff,lis
 !                if(distance(xcart(:,list_coeff(kk,icoeff1,1)),&
 ! &                      xcart(:,list_coeff(2,icoeff2,1)),rprimd,&
 ! &                      cell(:,list_coeff(4,icoeff1,1)),&
-! &                      cell(:,list_coeff(4,icoeff2,1)))>cut_off.or.&
+! &                      cell(:,list_coeff(4,icoeff2,1)))>cutoff_in.or.&
 ! &                 distance(xcart(:,list_coeff(kk,icoeff1,1)),&
 ! &                      xcart(:,list_coeff(3,icoeff2,1)),rprimd,&
 ! &                      cell(:,list_coeff(4,icoeff1,1)),&
-! &                      cell(:,list_coeff(4,icoeff2,1)))>cut_off)then
+! &                      cell(:,list_coeff(4,icoeff2,1)))>cutoff_in)then
 !                  compatible =.false.
 !                end if
 !              end do
@@ -3566,10 +3699,10 @@ subroutine fit_polynomial_coeff_getOrder3(cell,coeffs_out,cut_off,list_coeff,lis
              do kk=2,3
                if(distance(xcart(:,list_coeff(kk,coeffs(ii),isym)),&
 &                      xcart(:,list_coeff(2,coeffs(jj),isym)),rprimd,&
-&                      cells(:,kk-1,ii),cells(:,1,jj))>cut_off.or.&
+&                      cells(:,kk-1,ii),cells(:,1,jj))>cutoff_in.or.&
 &                 distance(xcart(:,list_coeff(kk,coeffs(ii),isym)),&
 &                      xcart(:,list_coeff(3,coeffs(jj),isym)),rprimd,&
-&                      cells(:,kk-1,ii),cells(:,2,jj))>cut_off)then
+&                      cells(:,kk-1,ii),cells(:,2,jj))>cutoff_in)then
                  compatible =.false.
                end if
              end do
@@ -3665,7 +3798,7 @@ end subroutine fit_polynomial_coeff_getOrder3
 !!
 !! SOURCE
 
-subroutine fit_polynomial_coeff_getOrder4(cell,coeffs_out,cut_off,list_coeff,&
+subroutine fit_polynomial_coeff_getOrder4(cell,coeffs_out,cutoff_in,list_coeff,&
 &                                   natom,ncoeff_out,ncoeff,nrpt,nsym,&
 &                                   rprimd,symbols,xcart)
 
@@ -3683,7 +3816,7 @@ subroutine fit_polynomial_coeff_getOrder4(cell,coeffs_out,cut_off,list_coeff,&
 !scalars
  integer,intent(in)  :: natom,ncoeff,nsym,nrpt
  integer,intent(out) :: ncoeff_out
- real(dp),intent(in) :: cut_off
+ real(dp),intent(in) :: cutoff_in
 !arrays
  integer,intent(in) :: cell(3,nrpt)
  integer,intent(in) :: list_coeff(6,ncoeff,nsym)
@@ -3768,10 +3901,10 @@ subroutine fit_polynomial_coeff_getOrder4(cell,coeffs_out,cut_off,list_coeff,&
                do kk=2,3
                if(distance(xcart(:,list_coeff(kk,coeffs(ii),1)),&
 &                      xcart(:,list_coeff(2,coeffs(jj),1)),rprimd,&
-&                      cells(:,kk-1,ii),cells(:,1,jj))>cut_off.or.&
+&                      cells(:,kk-1,ii),cells(:,1,jj))>cutoff_in.or.&
 &                 distance(xcart(:,list_coeff(kk,coeffs(ii),1)),&
 &                      xcart(:,list_coeff(3,coeffs(jj),1)),rprimd,&
-&                      cells(:,kk-1,ii),cells(:,2,jj))>cut_off)then
+&                      cells(:,kk-1,ii),cells(:,2,jj))>cutoff_in)then
                    compatible =.false.
                  end if
                end do
@@ -3868,7 +4001,7 @@ end subroutine fit_polynomial_coeff_getOrder4
 !!
 !! SOURCE
 
-subroutine fit_polynomial_coeff_getOrder5(cell,coeffs_out,cut_off,list_coeff,&
+subroutine fit_polynomial_coeff_getOrder5(cell,coeffs_out,cutoff_in,list_coeff,&
 &                                   natom,ncoeff_out,ncoeff,nrpt,nsym,&
 &                                   rprimd,symbols,xcart)
 
@@ -3886,7 +4019,7 @@ subroutine fit_polynomial_coeff_getOrder5(cell,coeffs_out,cut_off,list_coeff,&
 !scalars
  integer,intent(in)  :: natom,ncoeff,nsym,nrpt
  integer,intent(out) :: ncoeff_out
- real(dp),intent(in) :: cut_off
+ real(dp),intent(in) :: cutoff_in
 !arrays
  integer,intent(in) :: cell(3,nrpt)
  integer,intent(in) :: list_coeff(6,ncoeff,nsym)
@@ -3973,11 +4106,11 @@ subroutine fit_polynomial_coeff_getOrder5(cell,coeffs_out,cut_off,list_coeff,&
                    if(distance(xcart(:,list_coeff(kk,coeffs(ii),1)),&
 &                          xcart(:,list_coeff(2,coeffs(jj),1)),rprimd,&
 &                          cell(:,list_coeff(4,coeffs(ii),1)),&
-&                          cell(:,list_coeff(4,coeffs(jj),1)))>cut_off.or.&
+&                          cell(:,list_coeff(4,coeffs(jj),1)))>cutoff_in.or.&
 &                     distance(xcart(:,list_coeff(kk,coeffs(ii),1)),&
 &                          xcart(:,list_coeff(3,coeffs(jj),1)),rprimd,&
 &                          cell(:,list_coeff(4,coeffs(ii),1)),&
-&                          cell(:,list_coeff(4,coeffs(jj),1)))>cut_off)then
+&                          cell(:,list_coeff(4,coeffs(jj),1)))>cutoff_in)then
                      compatible =.false.
                    end if
                  end do
@@ -4075,7 +4208,7 @@ end subroutine fit_polynomial_coeff_getOrder5
 !!
 !! SOURCE
 
-subroutine fit_polynomial_coeff_get(cut_off,coefficients,eff_pot,ncoeff,option)
+subroutine fit_polynomial_coeff_get(cutoff_in,coefficients,eff_pot,ncoeff,option)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -4090,7 +4223,7 @@ subroutine fit_polynomial_coeff_get(cut_off,coefficients,eff_pot,ncoeff,option)
 !scalars
  integer,intent(in) :: option
  integer,intent(out):: ncoeff
- real(dp),intent(in):: cut_off
+ real(dp),intent(in):: cutoff_in
 !arrays
  type(effective_potential_type), intent(inout) :: eff_pot
  type(polynomial_coeff_type),allocatable :: coefficients(:)
@@ -4131,9 +4264,9 @@ subroutine fit_polynomial_coeff_get(cut_off,coefficients,eff_pot,ncoeff,option)
  xred(:,:)  = eff_pot%crystal%xred(:,:)
 
 !Set the size of the interaction
- ncell = (/anint(cut_off/rprimd(1,1))+1,&
-&          anint(cut_off/rprimd(2,2))+1,&
-&          anint(cut_off/rprimd(3,3))+1/)
+ ncell = (/anint(cutoff_in/rprimd(1,1))+1,&
+&          anint(cutoff_in/rprimd(2,2))+1,&
+&          anint(cutoff_in/rprimd(3,3))+1/)
 
  lim1=((ncell(1)/2))
  lim2=((ncell(2)/2))
@@ -4194,22 +4327,22 @@ subroutine fit_polynomial_coeff_get(cut_off,coefficients,eff_pot,ncoeff,option)
  end do
 
 
- call fit_polynomial_coeff_getList(cell,cut_off,dist,eff_pot,list_symcoeff,list_symstr,&
+ call fit_polynomial_coeff_getList(cell,cutoff_in,dist,eff_pot,list_symcoeff,list_symstr,&
 &                                  natom,nstr_sym,ncoeff_sym,nrpt)
 
-! call fit_polynomial_coeff_getOrder1(cell,coeffs1,cut_off,list_symcoeff,list_symstr,natom,ncoeff1,&
+! call fit_polynomial_coeff_getOrder1(cell,coeffs1,cutoff_in,list_symcoeff,list_symstr,natom,ncoeff1,&
 !&                                    ncoeff_sym,nrpt,nsym,rprimd,symbols,xcart)
 
-! call fit_polynomial_coeff_getOrder2(cell,coeffs2,cut_off,list_symcoeff,natom,ncoeff2,ncoeff_sym,&
+! call fit_polynomial_coeff_getOrder2(cell,coeffs2,cutoff_in,list_symcoeff,natom,ncoeff2,ncoeff_sym,&
 !&                                    nrpt,nstr_sym,nsym,rprimd,symbols,xcart)
 
- call fit_polynomial_coeff_getOrder3(cell,coeffs3,cut_off,list_symcoeff,list_symstr,natom,ncoeff3,&
+ call fit_polynomial_coeff_getOrder3(cell,coeffs3,cutoff_in,list_symcoeff,list_symstr,natom,ncoeff3,&
 &                                   ncoeff_sym,nrpt,nstr_sym,nsym,rprimd,symbols,xcart)
 
- call fit_polynomial_coeff_getOrder4(cell,coeffs4,cut_off,list_symcoeff,natom,ncoeff4,ncoeff_sym,&
+ call fit_polynomial_coeff_getOrder4(cell,coeffs4,cutoff_in,list_symcoeff,natom,ncoeff4,ncoeff_sym,&
 &                              nrpt,nsym,rprimd,symbols,xcart)
 
-! call fit_polynomial_coeff_getOrder5(cell,coeffs5,cut_off,list_symcoeff,natom,ncoeff5,ncoeff_sym,&
+! call fit_polynomial_coeff_getOrder5(cell,coeffs5,cutoff_in,list_symcoeff,natom,ncoeff5,ncoeff_sym,&
 !&                              nrpt,nsym,rprimd,symbols,xcart)
 
 !Final tranfert

@@ -73,6 +73,7 @@
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'symfind'
+ use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -415,11 +416,15 @@
  end if
 
 !DEBUG
-! write(std_out,*)' symfind : exit, nsym=',nsym
-! write(std_out,*)'   symrel matrices, symafm and tnons are :'
-! do isym=1,nsym
-!   write(std_out,'(i4,4x,3i4,2x,3i4,2x,3i4,4x,i4,4x,3f8.4)' )isym,symrel(:,:,isym),symafm(isym),tnons(:,isym)
-! end do
+ write(message,'(a,I0,a)')' symfind : exit, nsym=',nsym,ch10
+ write(message,'(2a)') trim(message),'   symrel matrices, symafm and tnons are :'
+ call wrtout(std_out,message,'COLL')
+ do isym=1,nsym
+   write(message,'(i4,4x,3i4,2x,3i4,2x,3i4,4x,i4,4x,3f8.4)' ) isym,symrel(:,:,isym),&
+&                                                               symafm(isym),tnons(:,isym)
+   call wrtout(std_out,message,'COLL')
+ end do
+
 !stop
 !ENDDEBUG
 

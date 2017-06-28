@@ -36,6 +36,7 @@ module m_anharmonics_terms
 
  public :: anharmonics_terms_init
  public :: anharmonics_terms_free
+ public :: anharmonics_terms_freeCoeffs
  public :: anharmonics_terms_setCoeffs
  public :: anharmonics_terms_setElastic3rd
  public :: anharmonics_terms_setElastic4rd
@@ -252,6 +253,57 @@ subroutine anharmonics_terms_free(anharmonics_terms)
     ABI_DATATYPE_DEALLOCATE(anharmonics_terms%phonon_strain)
   end if
 
+  call anharmonics_terms_freeCoeffs(anharmonics_terms)
+
+  anharmonics_terms%elastic3rd = zero
+
+
+end subroutine anharmonics_terms_free
+!!***
+
+!****f* m_anharmonics_terms/anharmonics_terms_freeCoeffs
+!!
+!! NAME
+!! anharmonics_terms_freeCoeffs
+!!
+!! FUNCTION
+!! deallocate all dynamic memory for the coefficients 
+!! of this  anharmonics_terms structure
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!! anharmonics_terms = structure with anharmonics terms
+!!
+!! PARENTS
+!!      m_anharmonics_terms,m_effective_potential
+!!
+!! CHILDREN
+!!
+!! SOURCE
+ 
+subroutine anharmonics_terms_freeCoeffs(anharmonics_terms)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'anharmonics_terms_freeCoeffs'
+!End of the abilint section
+
+  implicit none
+
+!Arguments ------------------------------------
+!scalars
+!array
+  type(anharmonics_terms_type), intent(inout) :: anharmonics_terms
+!Local variables-------------------------------
+!scalars
+  integer :: ii
+!array
+
+! *************************************************************************
+
   if(allocated(anharmonics_terms%coefficients))then
     do ii=1,anharmonics_terms%ncoeff
       call polynomial_coeff_free(anharmonics_terms%coefficients(ii))
@@ -261,10 +313,7 @@ subroutine anharmonics_terms_free(anharmonics_terms)
 
   anharmonics_terms%ncoeff = zero
 
-  anharmonics_terms%elastic3rd = zero
-
-
-end subroutine anharmonics_terms_free
+end subroutine anharmonics_terms_freeCoeffs
 !!***
 
 !****f* m_anharmonics_terms/anharmonics_terms_setCoeffs

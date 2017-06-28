@@ -54,6 +54,7 @@ module m_effective_potential
  public :: effective_potential_effpot2ddb
  public :: effective_potential_computeGradient
  public :: effective_potential_free
+ public :: effective_potential_freeCoeffs
  public :: effective_potential_freempi
  public :: effective_potential_generateDipDip
  public :: effective_potential_getDisp
@@ -502,6 +503,55 @@ subroutine effective_potential_free(eff_pot)
 end subroutine effective_potential_free
 !!***
 
+!****f* m_effective_potential/effective_potential_freeCoeffs
+!!
+!! NAME
+!! effective_potential_freeCoeffs
+!!
+!! FUNCTION
+!! deallocate all dynamic memory for the coefficients of 
+!! the anharmonic part of the effective potential structure
+!!
+!! INPUTS
+!! eff_pot<type(effective_potential_type)>  = effective_potential structure
+!!
+!! OUTPUT
+!! eff_pot<type(effective_potential_type)>  = effective_potential structure
+!!
+!! PARENTS
+!!      compute_anharmonics,m_effective_potential,m_effective_potential_file
+!!      multibinit
+!!
+!! CHILDREN
+!!      asrq0_free,effective_potential_effpot2ddb,invars9,mkphbs
+!!
+!! SOURCE
+
+subroutine effective_potential_freeCoeffs(eff_pot)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'effective_potential_freeCoeffs'
+!End of the abilint section
+
+  implicit none
+
+!Arguments ------------------------------------
+!scalars
+!array
+  type(effective_potential_type), intent(inout) :: eff_pot
+!Local variables-------------------------------
+!scalars
+!array
+! *************************************************************************
+
+  call anharmonics_terms_freeCoeffs(eff_pot%anharmonics_terms)
+
+end subroutine effective_potential_freeCoeffs
+!!***
+
 !****f* m_effective_potential/effective_potential_freempi
 !!
 !! NAME
@@ -550,7 +600,6 @@ subroutine effective_potential_freempi(eff_pot)
 
 end subroutine effective_potential_freempi
 !!***
-
 
 !****f* m_effective_potential/effective_potential_generateDipDip
 !!
@@ -4343,15 +4392,15 @@ subroutine effective_potential_effpot2ddb(ddb,crystal,eff_pot,n_cell,nph1l,optio
 
    end if
 !TEST_AM
-    !print*,"natom ",ddb%natom
-    !print*,"ntypat",ddb%ntypat
-    !print*,"mpert",ddb%mpert
-    !print*,"msize",ddb%msize
-    !print*,"occopt",ddb%occopt
-    !print*,"prtvol",ddb%prtvol
-    !print*,"rprim",ddb%rprim
-    !print*,"gprim",ddb%gprim
-    !print*,"acell",ddb%acell
+    !write(std_out,*)"natom ",ddb%natom
+    !write(std_out,*)"ntypat",ddb%ntypat
+    !write(std_out,*)"mpert",ddb%mpert
+    !write(std_out,*)"msize",ddb%msize
+    !write(std_out,*)"occopt",ddb%occopt
+    !write(std_out,*)"prtvol",ddb%prtvol
+    !write(std_out,*)"rprim",ddb%rprim
+    !write(std_out,*)"gprim",ddb%gprim
+    !write(std_out,*)"acell",ddb%acell
 !TEST_AM
 
  end subroutine effective_potential_effpot2ddb

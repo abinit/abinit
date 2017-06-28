@@ -973,7 +973,7 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
    MSG_ERROR(message)
  end if
 
- multibinit_dtset%fit_cutoff=15
+ multibinit_dtset%fit_cutoff=0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'fit_cutoff',tread,'DPR')
  if(tread==1) multibinit_dtset%fit_cutoff=dprarr(1)
  if(multibinit_dtset%fit_cutoff<0)then
