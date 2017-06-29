@@ -47,7 +47,7 @@ Look at presentation, theory (doc/make presentation theory)
 E. For the second and other merges of a production version
 -----------------------------------------------
 Prepare the release, which means (send a letter to JMB) :
-E.1 Make available the files tar.gz, infos.html, robodoc (from shiva)
+E.1 Make available the files tar.gz, infos.html, robodoc (from abiref*debug)
 E.2 Also update install notes, features. 
 (The delivery of binary packages has been disabled, as of v7.11.5)
 *******************************************************************

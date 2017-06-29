@@ -1215,6 +1215,7 @@ subroutine write_md_hist(hist,filename,ifirst,natom,ntypat,&
  integer :: ntypat_id,npsp_id,typat_id,znucl_id
  integer :: ekin_id,entropy_id,mdtime_id,amu_id,dtion_id
  logical :: has_nimage=.false.
+ integer, parameter :: imgmov=0
 !arrays
 #endif
 
@@ -1238,7 +1239,7 @@ subroutine write_md_hist(hist,filename,ifirst,natom,ntypat,&
 
 !  Write variables that do not change
 !  (they are not read in a hist structure).
-   call write_csts_hist(ncid,dtion,typat,znucl,amu)
+   call write_csts_hist(ncid,dtion,imgmov,typat,znucl,amu)
 
  else
 !##### itime>2 access: just open NetCDF file
@@ -1314,7 +1315,7 @@ end subroutine write_md_hist
 
 subroutine write_md_hist_img(hist,filename,ifirst,natom,ntypat,&
 &                            typat,amu,znucl,dtion,&
-&                            nimage,comm_img,imgtab) ! optional arguments
+&                            nimage,imgmov,comm_img,imgtab) ! optional arguments
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -1328,7 +1329,7 @@ subroutine write_md_hist_img(hist,filename,ifirst,natom,ntypat,&
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ifirst,natom,ntypat
- integer,intent(in),optional :: nimage,comm_img
+ integer,intent(in),optional :: nimage,imgmov,comm_img
  real(dp),intent(in) :: dtion
  character(len=*),intent(in) :: filename
 !arrays
@@ -1341,13 +1342,13 @@ subroutine write_md_hist_img(hist,filename,ifirst,natom,ntypat,&
 #if defined HAVE_NETCDF
 !scalars
  integer :: ii,iimage,iimg,me_img,my_comm_img,my_nimage,ncerr
- integer :: ncid,nimage_,nproc_img,npsp
+ integer :: ncid,nimage_,nproc_img,npsp,imgmov_
  integer :: xcart_id,xred_id,fcart_id,fred_id
  integer :: vel_id,vel_cell_id,etotal_id
  integer :: acell_id,rprimd_id,strten_id
  integer :: ntypat_id,npsp_id,typat_id,znucl_id
  integer :: ekin_id,entropy_id,mdtime_id,amu_id,dtion_id
- logical :: has_nimage
+ logical :: has_nimage, has_imgmov
  character(len=500) :: msg
  type(abihist),pointer :: hist_
 !arrays
@@ -1360,7 +1361,9 @@ subroutine write_md_hist_img(hist,filename,ifirst,natom,ntypat,&
 
 !Manage multiple images of the cell
  has_nimage=present(nimage)
+ has_imgmov=present(imgmov)
  nimage_=merge(nimage,1,has_nimage)
+ imgmov_=merge(imgmov,0,has_imgmov)
  my_nimage=size(hist) ; if (my_nimage==0) return
  my_comm_img=xmpi_comm_self;if(present(comm_img)) my_comm_img=comm_img
  nproc_img=xmpi_comm_size(my_comm_img)
@@ -1391,7 +1394,7 @@ subroutine write_md_hist_img(hist,filename,ifirst,natom,ntypat,&
        call def_file_hist(ncid,filename,natom,nimage_,ntypat,npsp,has_nimage)
 !      Write variables that do not change
 !      (they are not read in a hist structure).
-       call write_csts_hist(ncid,dtion,typat,znucl,amu)
+       call write_csts_hist(ncid,dtion,imgmov_,typat,znucl,amu)
      end if
 
 !    ##### itime>2 access: just open NetCDF file
@@ -1714,7 +1717,7 @@ implicit none
  integer :: xcart_id,xred_id,fcart_id,fred_id,vel_id,vel_cell_id
  integer :: rprimd_id,acell_id,strten_id
  integer :: etotal_id,ekin_id,entropy_id,mdtime_id
- integer :: typat_id,znucl_id,amu_id,dtion_id
+ integer :: typat_id,znucl_id,amu_id,dtion_id,imgmov_id
  character(len=500) :: msg
 !arrays
  integer :: dim0(0),dim1(1),dim2(2),dim3(3),dim4(4)
@@ -1780,6 +1783,8 @@ implicit none
 
 !xcart,xred,fcart,fred,vel
  if (has_nimage) then
+   call ab_define_var(ncid,dim0,imgmov_id,NF90_INT,&
+  &  "imgmov","Image mover","Not relevant" )
    dim4=(/xyz_id,natom_id,nimage_id,time_id/)
    call ab_define_var(ncid,dim4,xcart_id,NF90_DOUBLE,&
 &   "xcart","vectors (X) of atom positions in CARTesian coordinates","bohr" )
@@ -2071,7 +2076,7 @@ end subroutine get_varid_hist
 !!
 !! SOURCE
 
-subroutine write_csts_hist(ncid,dtion,typat,znucl,amu)
+subroutine write_csts_hist(ncid,dtion,imgmov,typat,znucl,amu)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -2086,6 +2091,7 @@ implicit none
 !scalars
  integer,intent(in) :: ncid
  real(dp),intent(in) :: dtion
+ integer,intent(in) :: imgmov
 !arrays
  integer,intent(in) :: typat(:)
  real(dp),intent(in) :: amu(:),znucl(:)
@@ -2094,7 +2100,7 @@ implicit none
 #if defined HAVE_NETCDF
 !scalars
  integer :: ncerr
- integer :: typat_id,znucl_id,amu_id,dtion_id
+ integer :: typat_id,znucl_id,amu_id,dtion_id, imgmov_id
 #endif
 
 ! *************************************************************************
@@ -2114,6 +2120,11 @@ implicit none
 
  ncerr = nf90_inq_varid(ncid, "dtion", dtion_id)
  NCF_CHECK_MSG(ncerr," get the id for dtion")
+
+ if ( nf90_noerr == nf90_inq_varid(ncid, "imgmov", imgmov_id) ) then
+   ncerr = nf90_put_var(ncid, imgmov_id, imgmov)
+   NCF_CHECK_MSG(ncerr," write variable imgmov")
+ end if
 
 !2.Write the constants
 

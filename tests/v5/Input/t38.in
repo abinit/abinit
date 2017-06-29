@@ -79,4 +79,5 @@
 #%%   This test is done within GGA and magnetism in PAW formalism.
 #%%   Wavefunction printed to be used in v5#39  test.
 #%%   Density is printed out to prepare v5#40 test.
+#%% topics = DFT+U
 #%%<END TEST_INFO>
