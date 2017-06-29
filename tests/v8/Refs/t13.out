@@ -1,0 +1,253 @@
+
+.Version 8.5.0 of MULTIBINIT 
+.(MPI version, prepared for a x86_64_linux_gnu4.8 computer) 
+
+.Copyright (C) 1998-2017 ABINIT group . 
+ MULTIBINIT comes with ABSOLUTELY NO WARRANTY.
+ It is free software, and you are welcome to redistribute it
+ under certain conditions (GNU General Public License,
+ see ~abinit/COPYING or http://www.gnu.org/copyleft/gpl.txt).
+
+ ABINIT is a project of the Universite Catholique de Louvain,
+ Corning Inc. and other collaborators, see ~abinit/doc/developers/contributors.txt .
+ Please read ~abinit/doc/users/acknowledgments.html for suggested
+ acknowledgments of the ABINIT effort.
+ For more information, see http://www.abinit.org .
+
+.Starting date : Thu 29 Jun 2017.
+- ( at 09h30 )
+  
+-  nproc =    1
+
+================================================================================
+
+ Read the information in the reference structure in 
+-/home/alex/Desktop/dev/abinit/abinit_git_dev/tests/v8/Input/t13_ddb.in
+ to initialize the multibinit input
+
+================================================================================
+
+ -outvars_multibinit: echo values of input variables ----------------------
+
+ Flags :
+     ifcflag         1
+   prt_model         2
+     strcpli        -1
+ Fit the coefficients :
+        fit_coeff         1
+       fit_option         0
+       fit_ncycle         4
+         fit_grid         1         1         1
+   fit_rangePower         3         4
+    fit_nfixcoeff         0
+     fit_fixcoeff
+ Miscellaneous information :
+         asr         2
+ Interatomic Force Constants Inputs :
+      dipdip         0
+      ifcana         0
+      ifcout   2000000
+      natifc         5
+       atifc         1   2   3   4   5
+ Description of grid 1 :
+        brav         1
+       ngqpt         1         1         1
+      nqshft         1
+      q1shft
+                     0.00000000E+00  0.00000000E+00  0.00000000E+00
+ First list of wavevector (reduced coord.) :
+       nph1l         1
+       qph1l
+                     0.00000000E+00  0.00000000E+00  0.00000000E+00    0.000E+00
+
+================================================================================
+
+ Read the DDB information of the reference system and perform some checks
+
+ Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
+ R(1)=  7.4265196  0.0000000  0.0000000  G(1)=  0.1346526  0.0000000  0.0000000
+ R(2)=  0.0000000  7.4265196  0.0000000  G(2)=  0.0000000  0.1346526  0.0000000
+ R(3)=  0.0000000  0.0000000  7.4265196  G(3)=  0.0000000  0.0000000  0.1346526
+ Unit cell volume ucvol=  4.0959627E+02 bohr^3
+ Angles (23,13,12)=  9.00000000E+01  9.00000000E+01  9.00000000E+01 degrees
+ Now the whole DDB is in central memory
+
+================================================================================
+
+ Extraction of the energy of the structure (unit: Hartree)
+
+ Energy  =       -1.735221724034E+02
+
+================================================================================
+
+ Extraction of the stress tensor (unit: GPa) and forces (unit: Ha/bohr)
+
+ --- !WARNING
+     Stress Tensor and forces are set to zero (not available in the DDB)
+ ---
+
+
+================================================================================
+
+ Extraction of the clamped elastic tensor (unit:10^2GPa)
+
+   3.1281435   1.0182533   1.0182548  -0.0000004  -0.0000033  -0.0000014
+   1.0182569   3.1281493   1.0182548  -0.0000007  -0.0000003  -0.0000014
+   1.0182569   1.0182533   3.1281273  -0.0000007  -0.0000033   0.0000003
+   0.0000000   0.0000000  -0.0000000   0.6540901   0.0000000   0.0000000
+   0.0000000   0.0000000  -0.0000000   0.0000000   0.6540918   0.0000000
+   0.0000000  -0.0000000  -0.0000000   0.0000000   0.0000000   0.6540936
+
+================================================================================
+
+ Calculation of acoustic sum rule
+
+
+================================================================================
+
+ Calculation of the interatomic forces from DDB
+
+       Homogeneous q point set in the B.Z.
+ Grid q points  :        1
+  1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
+
+ The interatomic forces have been obtained
+
+================================================================================
+
+ Calculation of dynamical matrix for each ph1l points
+
+  Phonon at Gamma, with non-analyticity in the
+  direction (cartesian coordinates)  0.00000  0.00000  0.00000
+ Phonon energies in Hartree :
+   0.000000E+00  0.000000E+00  0.000000E+00  4.398082E-04  4.398082E-04
+   4.398082E-04  5.833102E-04  5.833102E-04  5.833102E-04  8.700324E-04
+   8.700324E-04  8.700324E-04  2.744572E-03  2.744572E-03  2.744572E-03
+ Phonon frequencies in cm-1    :
+-  0.000000E+00  0.000000E+00  0.000000E+00  9.652673E+01  9.652673E+01
+-  9.652673E+01  1.280218E+02  1.280218E+02  1.280218E+02  1.909500E+02
+-  1.909500E+02  1.909500E+02  6.023639E+02  6.023639E+02  6.023639E+02
+
+================================================================================
+
+ Calculation of the internal-strain  tensor
+
+ Force-response internal strain tensor(Unit:Hartree/bohr)
+
+ Atom dir   strainxx    strainyy    strainzz    strainyz    strainxz    strainxy
+  1  x     0.0000000  -0.0000000  -0.0000000   0.0000000  -0.0000000  -0.0000000
+  1  y     0.0000000  -0.0000000  -0.0000000  -0.0000000   0.0000000   0.0000000
+  1  z     0.0000000  -0.0000000  -0.0000000  -0.0000000   0.0000000   0.0000000
+  2  x    -0.0000000  -0.0000000  -0.0000000  -0.0000000   0.0000000   0.0000000
+  2  y     0.0000000   0.0000000   0.0000000   0.0000000  -0.0000000  -0.0000000
+  2  z     0.0000000   0.0000000   0.0000000   0.0000000  -0.0000000  -0.0000000
+  3  x     0.0000000   0.0000000   0.0000000   0.0000000  -0.0000000  -0.0000000
+  3  y    -0.0000000   0.0000000   0.0000000   0.0000000   0.0000000   0.0000000
+  3  z    -0.0000000   0.0000000   0.0000000   0.0000000   0.0000000   0.0000000
+  4  x     0.0000000   0.0000000   0.0000000  -0.0000000   0.0000000  -0.0000000
+  4  y    -0.0000000  -0.0000000  -0.0000000  -0.0000000  -0.0000000   0.0000000
+  4  z     0.0000000  -0.0000000  -0.0000000  -0.0000000   0.0000000  -0.0000000
+  5  x     0.0000000   0.0000000   0.0000000  -0.0000000  -0.0000000  -0.0000000
+  5  y     0.0000000   0.0000000  -0.0000000  -0.0000000  -0.0000000   0.0000000
+  5  z    -0.0000000  -0.0000000  -0.0000000  -0.0000000   0.0000000  -0.0000000
+
+ Displacement-response internal strain tensor (Unit:Bohr)
+
+ Atom dir   strainxx    strainyy    strainzz    strainyz    strainxz    strainxy
+  1  x    -0.0000000  -0.0000000  -0.0000000   0.0000000   0.0000000   0.0000000
+  1  y     0.0000000  -0.0000000   0.0000000  -0.0000000   0.0000000  -0.0000000
+  1  z     0.0000000  -0.0000000  -0.0000000  -0.0000000  -0.0000000   0.0000000
+  2  x    -0.0000000  -0.0000000  -0.0000000  -0.0000000   0.0000000   0.0000000
+  2  y     0.0000000   0.0000000   0.0000000   0.0000000  -0.0000000  -0.0000000
+  2  z     0.0000000   0.0000000   0.0000000   0.0000000  -0.0000000  -0.0000000
+  3  x    -0.0000000  -0.0000000  -0.0000000  -0.0000000   0.0000000   0.0000000
+  3  y    -0.0000000   0.0000000   0.0000000   0.0000000   0.0000000   0.0000000
+  3  z    -0.0000000   0.0000000   0.0000000   0.0000000   0.0000000   0.0000000
+  4  x     0.0000000   0.0000000   0.0000000  -0.0000000   0.0000000  -0.0000000
+  4  y    -0.0000000   0.0000000   0.0000000   0.0000000  -0.0000000  -0.0000000
+  4  z     0.0000000  -0.0000000   0.0000000  -0.0000000   0.0000000  -0.0000000
+  5  x     0.0000000   0.0000000   0.0000000  -0.0000000  -0.0000000   0.0000000
+  5  y     0.0000000   0.0000000  -0.0000000  -0.0000000  -0.0000000   0.0000000
+  5  z    -0.0000000   0.0000000   0.0000000   0.0000000  -0.0000000  -0.0000000
+
+
+
+================================================================================
+
+ Impose acoustic sum rule on total ifc
+
+================================================================================
+
+================================================================================
+
+ There is no file for the coefficients from polynomial fitting
+
+================================================================================
+
+-Reading the file /home/alex/Desktop/dev/abinit/abinit_git_dev/tests/v8/Input/t13_HIST
+ with NetCDF in order to fit the polynomial coefficients
+
+ The size of the supercell for the fit is  2  2  2
+
+ --- !WARNING
+     The ordering of the atoms in the hist file is different,
+     of the one built by multibinit. The hist file will be map,
+     on the ordering of multibinit.
+ ---
+
+
+================================================================================
+
+ Starting Fit process
+
+--------------------------------------------------------------------------------
+
+ The coefficients for the fit must be generate... 
+
+
+ 8 fitted coefficients for the 1st order
+ 1576 coefficients generated
+ Mean Standard Deviation values at the begining of the fit process (meV/f.u.):
+   Energy          :   3.7052089149349636E+00
+ Goal function values at the begining of the fit process (eV^2/A^2):
+   Forces+Stresses :   7.5063892046377629E-03
+   Forces          :   7.3678364726205139E-03
+   Stresses        :   1.3855273201724902E-04
+
+ N   Selecting          MSEE              MSEFS              MSEF              MSES
+    Coefficient      (meV/f.u.)        (eV^2/A^2)        (eV^2/A^2)        (eV^2/A^2)
+ 1      1377      2.7808923527E+00  3.8671068693E-03  3.7201069324E-03  1.4699993682E-04
+ 2      1370      2.6157530909E+00  3.3577595869E-03  3.2089346772E-03  1.4882490972E-04
+ 3      814       2.4731330624E+00  2.8538307591E-03  2.7039819933E-03  1.4984876579E-04
+ 4      840       2.0364516362E+00  2.6352935160E-03  2.4806962853E-03  1.5459723071E-04
+
+ Fitted coefficients at the end of the fit process:
+ 1377 =>   9.7393064132E-01 (Ru_x-Ru_x[1 0 0])^2(Ru_y-Ru_y[1 0 0])^2
+ 1370 =>   2.6183161625E-01 (Ru_x-Ru_x[1 0 0])^4
+ 814 =>   4.1092336572E-01 (Sr_x-Ru_x)^2(Sr_x-Sr_x[1 0 0])^1(Sr_y-Sr_y[1 0 0])^1
+ 840 =>   1.3589794302E-01 (Sr_x-Ru_x)^2(Ru_y-O1_y)^2
+
+ Mean Standard Deviation values at the end of the fit process (meV/f.u.):
+   Energy          :   2.0364516362264178E+00
+ Goal function values at the end of the fit process (eV^2/A^2):
+   Forces+Stresses :   2.6352935160035844E-03
+   Forces          :   2.4806962852919282E-03
+   Stresses        :   1.5459723071165627E-04
+
+
+================================================================================
+
+ Generation of the xml file for the model in t13_sys.xml
+
+ Generation of the xml file for the fitted polynomial in t13_coeffs.xml
+
+================================================================================
+
+-
+- Proc.   0 individual time (sec): cpu=          6.8  wall=          7.7
+
+================================================================================
+
++Total cpu time      6.799  and wall time      7.730 sec
+
+ multibinit : the run completed succesfully.

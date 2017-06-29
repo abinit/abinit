@@ -963,7 +963,7 @@ subroutine effective_potential_generateDipDip(eff_pot,n_cell,option,asr,comm)
          if(eff_pot%harmonics_terms%ifcs%cell(1,irpt2)==ifc_tmp%cell(1,irpt).and.&
 &           eff_pot%harmonics_terms%ifcs%cell(2,irpt2)==ifc_tmp%cell(2,irpt).and.&
 &           eff_pot%harmonics_terms%ifcs%cell(3,irpt2)==ifc_tmp%cell(3,irpt).and.&
-&           any(eff_pot%harmonics_terms%ifcs%short_atmfrc(:,:,:,:,:,irpt2) > tol20)) then
+&           any(abs(eff_pot%harmonics_terms%ifcs%short_atmfrc(:,:,:,:,:,irpt2)) > tol20)) then
            ifc_tmp%short_atmfrc(:,:,:,:,:,irpt) = &
 &                               eff_pot%harmonics_terms%ifcs%short_atmfrc(:,:,:,:,:,irpt2)
          end if
@@ -971,7 +971,7 @@ subroutine effective_potential_generateDipDip(eff_pot,n_cell,option,asr,comm)
      end do
    end if
 
-   call xmpi_bcast (ifc_tmp%short_atmfrc, master, comm, ierr)
+   call xmpi_bcast(ifc_tmp%short_atmfrc, master, comm, ierr)
 
 !  Compute total ifc
    ifc_tmp%atmfrc = ifc_tmp%short_atmfrc + ifc_tmp%ewald_atmfrc

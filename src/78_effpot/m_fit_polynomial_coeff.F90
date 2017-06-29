@@ -1469,7 +1469,8 @@ subroutine fit_polynomial_coeff_fit(eff_pot,fixcoeff,hist,ncycle_in,nfixcoeff,po
  end do
  size_mpi = 5*nproc
 
-!If some coeff are imposed by the input:
+!If some coeff are imposed by the input, we need to fill the arrays 
+!with this coeffs :
  if(ncycle_tot>=1)then
    do icycle = 1,ncycle_tot
      list_coeffs_tmp(icycle) = icycle
@@ -1479,7 +1480,12 @@ subroutine fit_polynomial_coeff_fit(eff_pot,fixcoeff,hist,ncycle_in,nfixcoeff,po
          energy_coeffs_tmp(icycle,:)    = energy_coeffs(icoeff,:)
          fcart_coeffs_tmp(:,:,icycle,:) = fcart_coeffs(:,:,icoeff,:) 
          strten_coeffs_tmp(:,:,icycle)  = strten_coeffs(:,:,icoeff)
-         rank_to_send = my_rank      
+         rank_to_send = my_rank
+         call polynomial_coeff_free(coeffs_tmp(icycle))
+         call polynomial_coeff_init(coeff_values(icycle),my_coeffs(icoeff)%nterm,&
+&                                   coeffs_tmp(icycle),my_coeffs(icoeff)%terms,&
+&                                   my_coeffs(icoeff)%name,&
+&                                   check=.false.)
          exit
        end if
      end do
@@ -1489,6 +1495,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,fixcoeff,hist,ncycle_in,nfixcoeff,po
      call xmpi_bcast(energy_coeffs_tmp(icycle,:), rank_to_send, comm, ierr)
      call xmpi_bcast(fcart_coeffs_tmp(:,:,icycle,:) , rank_to_send, comm, ierr)
      call xmpi_bcast(strten_coeffs_tmp(:,:,icycle), rank_to_send, comm, ierr)
+     call polynomial_coeff_broadcast(coeffs_tmp(icycle), rank_to_send, comm) 
    end do
  end if
 
