@@ -99,7 +99,7 @@ def make_links(text,cur_abivarname,variables,characteristics,specials):
 ################################################################################
 
 def read_yaml_file(ymlfile):
-  """ Read the file 'ymlfile', containing yml data, and store all such data in the object 'ymlstructure' """
+  """ Read the file 'ymlfile', containing yml data, and store all such data in the returned object"""
 
   if ymlfile== "abinit_vars.yml":
     print("Will use abinit_vars.yml as database input file for the input variables and their characteristics ...")
@@ -276,33 +276,38 @@ for i, var in enumerate(variables):
 ################################################################################
 # Generate the files that document all the variables (all such files : var* as well as all and special). 
 
-# For each "normal" section file : generate the header, generate the alphabetical list, write these,
-# then complete the content (that was previously gathered), then write the file and close it
+# Generate each "normal" section file : build the missing information (table of content), assemble the content, apply global transformations, then write.
 for i, section_info in enumerate(sections):
   section = section_info.name
 
-  sectionhtml=""
-  for i in ["header","title","subtitle","purpose","advice","copyright","links","menu","tofcontent_header"]:
-    sectionhtml += tempvarhtml[i]+ "\n"
-  # Generation of the table of content body
+  #Generate the body of the table of content 
   cur_let = 'A'
-  sectionhtml += " <br>"+cur_let+".\n"
+  toc_body = " <br>"+cur_let+".\n"
   for abivarname,defi in all_vars[section]:
     while not abivarname.startswith(cur_let.lower()):
       cur_let = chr(ord(cur_let)+1)
-      sectionhtml += " <br>"+cur_let+".\n"
+      toc_body += " <br>"+cur_let+".\n"
     curlink = " <a href=\"#"+abivarname+"\">"+abivarname+"</a>&nbsp;&nbsp;\n"
-    sectionhtml += curlink
-  sectionhtml += "\n"
-  # Here comes the writing of all input variable descriptions
-  sectionhtml += all_contents[section]
-  # Once more the links
-  sectionhtml += tempvarhtml["links"]+ "\n" 
-  sectionhtml += tempvarhtml["end"]+ "\n"
+    toc_body += curlink
+  toc_body += "\n"
+
+  #Write a first version of the html file, in the order "header" ... up to the "end"
+  sectionhtml=""
+  for i in ["header","title","subtitle","purpose","advice","copyright","links","menu","tofcontent_header","tofcontent_body","content","links","end"]:
+    if i == "tofcontent_body":
+      sectionhtml += toc_body
+    elif i == "content":
+      sectionhtml += all_contents[section]
+    else:
+      sectionhtml += tempvarhtml[i]
+    sectionhtml += "\n"
+
+  #Global operations on the tentative html file.
   sectionhtml=sectionhtml.replace("__JS_PATH__",js_path)
   sectionhtml=sectionhtml.replace("__KEYWORD__",section_info.keyword)
   sectionhtml = doku2html(make_links(sectionhtml,None,list_all_vars,list_chars,cur_specials))
 
+  #Write the finalized html file.
   file_cur = 'html_automatically_generated/'+section+'.html'
   f_cur = open(file_cur,'w')
   f_cur.write(sectionhtml)
