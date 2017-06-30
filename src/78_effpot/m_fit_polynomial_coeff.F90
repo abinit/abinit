@@ -1710,16 +1710,14 @@ subroutine fit_polynomial_coeff_fit(eff_pot,fixcoeff,hist,ncycle_in,nfixcoeff,po
    call fit_polynomial_coeff_solve(coeff_values(1:ncycle_tot),fcart_coeffs_tmp,fcart_diff,&
 &                                  info,list_coeffs_tmp(1:ncycle_tot),natom_sc,ncycle_tot,&
 &                                  ncycle_max,ntime,strten_coeffs_tmp,strten_diff,sqomega,ucvol)
-
-
-!  Set the final set of coefficients into the eff_pot type
-   call effective_potential_setCoeffs(coeffs_tmp(1:ncycle_tot),eff_pot,ncycle_tot)
    
    write(message, '(3a)') ch10,' Fitted coefficients at the end of the fit process: '
    call wrtout(ab_out,message,'COLL')
    call wrtout(std_out,message,'COLL')
    do ii = 1,ncycle_max
      if(list_coeffs(ii) ==0) cycle
+!    Set the value of the coefficient
+     coeffs_tmp(ii)%coefficient = coeff_values(ii)
      write(message, '(a,I0,a,ES19.10,2a)') " ",list_coeffs(ii)," =>",coeff_values(ii),&
 &                                " ",trim(coeffs_tmp(ii)%name)
      call wrtout(ab_out,message,'COLL')
@@ -1745,6 +1743,9 @@ subroutine fit_polynomial_coeff_fit(eff_pot,fixcoeff,hist,ncycle_in,nfixcoeff,po
 &               gf_values(3,1)*(HaBohr_meVAng)**2,ch10
    call wrtout(ab_out,message,'COLL')
    call wrtout(std_out,message,'COLL')
+
+!  Set the final set of coefficients into the eff_pot type
+   call effective_potential_setCoeffs(coeffs_tmp(1:ncycle_tot),eff_pot,ncycle_tot)
 
  else
    write(message, '(9a)' )ch10,&

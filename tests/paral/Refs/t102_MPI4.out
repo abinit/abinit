@@ -1,0 +1,213 @@
+
+.Version 8.5.1 of MULTIBINIT 
+.(MPI version, prepared for a x86_64_linux_gnu4.8 computer) 
+
+.Copyright (C) 1998-2017 ABINIT group . 
+ MULTIBINIT comes with ABSOLUTELY NO WARRANTY.
+ It is free software, and you are welcome to redistribute it
+ under certain conditions (GNU General Public License,
+ see ~abinit/COPYING or http://www.gnu.org/copyleft/gpl.txt).
+
+ ABINIT is a project of the Universite Catholique de Louvain,
+ Corning Inc. and other collaborators, see ~abinit/doc/developers/contributors.txt .
+ Please read ~abinit/doc/users/acknowledgments.html for suggested
+ acknowledgments of the ABINIT effort.
+ For more information, see http://www.abinit.org .
+
+.Starting date : Thu 29 Jun 2017.
+- ( at 10h44 )
+  
+-  nproc =    4
+
+================================================================================
+
+ Read the information in the reference structure in 
+-/home/alex/Desktop/dev/abinit/abinit_git_dev/tests/v8/Input/t14_sys.xml
+ to initialize the multibinit input
+
+================================================================================
+
+ -outvars_multibinit: echo values of input variables ----------------------
+
+ Flags :
+     ifcflag         1
+   prt_model         1
+     strcpli        -1
+ Fit the coefficients :
+        fit_coeff         1
+       fit_cutoff       0.0
+       fit_option         0
+       fit_ncycle         2
+         fit_grid         1         1         1
+   fit_rangePower         3         4
+    fit_nfixcoeff         2
+     fit_fixcoeff         1     2
+ Miscellaneous information :
+         asr         2
+ Interatomic Force Constants Inputs :
+      dipdip         1
+      ifcana         0
+      ifcout   2000000
+      natifc         5
+       atifc         1   2   3   4   5
+ Description of grid 1 :
+        brav         1
+       ngqpt         1         1         1
+      nqshft         1
+      q1shft
+                     0.00000000E+00  0.00000000E+00  0.00000000E+00
+ First list of wavevector (reduced coord.) :
+       nph1l         1
+       qph1l
+                     0.00000000E+00  0.00000000E+00  0.00000000E+00    0.000E+00
+
+================================================================================
+
+-Opening the file /home/alex/Desktop/dev/abinit/abinit_git_dev/tests/v8/Input/t14_sys.xml
+-Reading the file /home/alex/Desktop/dev/abinit/abinit_git_dev/tests/v8/Input/t14_sys.xml with LibXML library
+
+================================================================================
+ Generation of new ifc
+
+ dipdip is set to one, the dipole-dipole interation is recompute.
+
+ New bound for ifc (long+short):
+
+ x=[ -1  1], y=[ -1  1] and z=[ -1  1]
+
+ Computation of new dipole-dipole interaction.
+
+ Impose acoustic sum rule on total ifc
+
+================================================================================
+
+ This effective potential contains :
+  - Reference energy:       -173.5221724034
+  - Number of types of atoms:    3
+  - Number of atoms:     5
+  - Number of cells:    21
+  - Number of qpoints:    1
+  - Primitive vectors (unit:Bohr):
+    7.426520    0.000000    0.000000
+    0.000000    7.426520    0.000000
+    0.000000    0.000000    7.426520
+  - acell (unit:Bohr):
+    1.000000    1.000000    1.000000
+  - Dielectric tensor:
+    1.000000    0.000000    0.000000
+    0.000000    1.000000    0.000000
+    0.000000    0.000000    1.000000
+  - Elastic tensor (unit:10^2GPa):
+    3.128144    1.018257    1.018257    0.000000    0.000000    0.000000
+    1.018253    3.128149    1.018253    0.000000    0.000000   -0.000000
+    1.018255    1.018255    3.128127   -0.000000   -0.000000   -0.000000
+   -0.000000   -0.000001   -0.000001    0.654090    0.000000    0.000000
+   -0.000003   -0.000000   -0.000003    0.000000    0.654092    0.000000
+   -0.000001   -0.000001    0.000000    0.000000    0.000000    0.654094
+  - Atoms   1
+    - atomic number:   38.0000
+    - atomic mass:   87.6200
+    - cartesian position:    0.000000    0.000000    0.000000
+    - Effective charges:
+      0.000000    0.000000    0.000000
+      0.000000    0.000000    0.000000
+      0.000000    0.000000    0.000000
+  - Atoms   2
+    - atomic number:   44.0000
+    - atomic mass:  101.0700
+    - cartesian position:    3.713260    3.713260    3.713260
+    - Effective charges:
+      0.000000    0.000000    0.000000
+      0.000000    0.000000    0.000000
+      0.000000    0.000000    0.000000
+  - Atoms   3
+    - atomic number:    8.0000
+    - atomic mass:   15.9994
+    - cartesian position:    0.000000    3.713260    3.713260
+    - Effective charges:
+      0.000000    0.000000    0.000000
+      0.000000    0.000000    0.000000
+      0.000000    0.000000    0.000000
+  - Atoms   4
+    - atomic number:    8.0000
+    - atomic mass:   15.9994
+    - cartesian position:    3.713260    0.000000    3.713260
+    - Effective charges:
+      0.000000    0.000000    0.000000
+      0.000000    0.000000    0.000000
+      0.000000    0.000000    0.000000
+  - Atoms   5
+    - atomic number:    8.0000
+    - atomic mass:   15.9994
+    - cartesian position:    3.713260    3.713260    0.000000
+    - Effective charges:
+      0.000000    0.000000    0.000000
+      0.000000    0.000000    0.000000
+      0.000000    0.000000    0.000000
+
+ Read the coefficients of the polynomial fit from XML and perform some checks
+
+-Opening the file /home/alex/Desktop/dev/abinit/abinit_git_dev/tests/v8/Input/t14_coeffs.xml
+-Reading the file /home/alex/Desktop/dev/abinit/abinit_git_dev/tests/v8/Input/t14_coeffs.xml with LibXML library
+
+================================================================================
+
+-Reading the file /home/alex/Desktop/dev/abinit/abinit_git_dev/tests/v8/Input/t13_HIST
+ with NetCDF in order to fit the polynomial coefficients
+
+ The size of the supercell for the fit is  2  2  2
+
+ --- !WARNING
+     The ordering of the atoms in the hist file is different,
+     of the one built by multibinit. The hist file will be map,
+     on the ordering of multibinit.
+ ---
+
+
+================================================================================
+
+ Starting Fit process
+
+--------------------------------------------------------------------------------
+
+ The coefficients present in the effective potential will be used for the fit
+ Mean Standard Deviation values at the begining of the fit process (meV/f.u.):
+   Energy          :   3.7052088257134135E+00
+ Goal function values at the begining of the fit process (eV^2/A^2):
+   Forces+Stresses :   7.5063892046370942E-03
+   Forces          :   7.3678364726198617E-03
+   Stresses        :   1.3855273201723232E-04
+
+ N   Selecting          MSEE              MSEFS              MSEF              MSES
+    Coefficient      (meV/f.u.)        (eV^2/A^2)        (eV^2/A^2)        (eV^2/A^2)
+ 3      3         1.9687718710E+00  4.0002876127E-03  3.8455540654E-03  1.5473354726E-04
+ 4      4         2.0033066296E+00  3.7875226129E-03  3.6336181883E-03  1.5390442456E-04
+
+ Fitted coefficients at the end of the fit process:
+ 1 =>   1.8766945024E+00 (Ru_x-O1_x)^2(Ru_y-O1_y)^2
+ 2 =>   1.2507790346E-01 (Sr_x-Ru_x)^4
+ 3 =>  -5.8319599017E-01 (Sr_x-O1_x)^1(Sr_y-O1_y)^1(Ru_x-O1_x)^1(Ru_y-O1_y)^1
+ 4 =>   9.0370877256E-02 (Ru_x-O1_x)^1(Ru_y-O1_y)^1(O1_x-O2_x)^1
+
+ Mean Standard Deviation values at the end of the fit process (meV/f.u.):
+   Energy          :   2.0033066296352717E+00
+ Goal function values at the end of the fit process (eV^2/A^2):
+   Forces+Stresses :   3.7875226128532198E-03
+   Forces          :   3.6336181882901937E-03
+   Stresses        :   1.5390442456302621E-04
+
+
+================================================================================
+
+ Generation of the xml file for the model in t14_model.xml
+
+================================================================================
+
+-
+- Proc.   0 individual time (sec): cpu=          0.0  wall=          0.0
+
+================================================================================
+
++Total cpu time      0.045  and wall time      0.045 sec
+
+ multibinit : the run completed succesfully.
