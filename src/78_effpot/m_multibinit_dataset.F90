@@ -1344,6 +1344,7 @@ subroutine outvars_multibinit (multibinit_dtset,nunit)
  if(multibinit_dtset%fit_coeff/=0)then
    write(nunit,'(a)')' Fit the coefficients :'
    write(nunit,'(3x,a14,I10.1)')'     fit_coeff',multibinit_dtset%fit_coeff
+   write(nunit,'(3x,a14,F10.1)')'    fit_cutoff',multibinit_dtset%fit_cutoff
    write(nunit,'(3x,a14,I10.1)')'    fit_option',multibinit_dtset%fit_option
    write(nunit,'(3x,a14,I10.1)')'    fit_ncycle',multibinit_dtset%fit_ncycle
    write(nunit,'(3x,a14,3i10)') '      fit_grid',multibinit_dtset%fit_grid

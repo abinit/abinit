@@ -2897,16 +2897,17 @@ subroutine coeffs_xml2effpot(eff_pot,filename,comm)
 !    Try to find the index of the term corresponding to the interation in the 
 !    reference cell (000) in order to compute the name correctly...
 !    If this coeff is not in the ref cell, take by default the first term
-     call polynomial_coeff_getName(name,eff_pot%crystal%natom,coeffs(icoeff),&
-&                                  symbols,recompute=.true.)
-     call polynomial_coeff_setName(name,coeffs(icoeff))
+     if(coeffs(icoeff)%nterm > zero)then
+       call polynomial_coeff_getName(name,eff_pot%crystal%natom,coeffs(icoeff),&
+&                                    symbols,recompute=.true.)
+       call polynomial_coeff_setName(name,coeffs(icoeff))
+     end if
 
-!  Free them all
-   do iterm=1,nterm_max
-     call polynomial_term_free(terms(icoeff,iterm))
+!    Free them all
+     do iterm=1,nterm_max
+       call polynomial_term_free(terms(icoeff,iterm))
+     end do
    end do
- end do
-
 
 #else
    ABI_DATATYPE_ALLOCATE(terms,(1,nterm_max))

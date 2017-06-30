@@ -76,7 +76,7 @@ CONTAINS  !=====================================================================
 !! INPUTS
 !!
 !! OUTPUT
-!! polynomial_coeff = polynomial_coeff structure to be free
+!!
 !!
 !! PARENTS
 !!      m_fit_polynomial_coeff
@@ -735,17 +735,19 @@ subroutine fit_polynomial_coeff_getNorder(cutoff,coefficients,eff_pot,ncoeff,pow
  end do
 
 !first call to this routine in order to count the number of maximum coefficients
+ ABI_ALLOCATE(list_coeff,(0))
+ ABI_ALLOCATE(coeffs_tmp,(0))
  icoeff  = 1
  icoeff2 = 1
  call computeNorder(cell,coeffs_tmp,compatibleCoeffs,cutoff,list_symcoeff,list_symstr,list_coeff,&
 &                   icoeff,icoeff2,natom,ncoeff_sym,nstr_sym,icoeff,nrpt,nsym,1,powers(1),powers(2),&
 &                   rprimd,symbols,xcart,compute=.false.)
+ ABI_DEALLOCATE(coeffs_tmp)
 
 !Set to the maximum of possible coefficients
  ncoeff_max =  icoeff2
 
 !Second call to this routine in order to compute the coefficients
- ABI_ALLOCATE(list_coeff,(0))
  ABI_ALLOCATE(coeffs_tmp,(ncoeff_max))
  icoeff  = 1
  icoeff2 = 1
@@ -1033,7 +1035,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,fixcoeff,hist,ncycle_in,nfixcoeff,po
 !Local variables-------------------------------
 !scalar
  integer :: ii,icoeff,icycle,icycle_tmp,ierr,info,index_min,itime
- integer :: master,my_rank,my_ncoeff,ncoeff_max,natom_sc,ncell,ncycle
+ integer :: master,my_rank,my_ncoeff,ncoeff_tot,natom_sc,ncell,ncycle
  integer :: ncycle_tot,ncycle_max,nproc,ntime,ncoeff_alone,size_mpi
  integer :: rank_to_send
  real(dp) :: cutoff,energy,ffact,sfact
@@ -1105,9 +1107,9 @@ subroutine fit_polynomial_coeff_fit(eff_pot,fixcoeff,hist,ncycle_in,nfixcoeff,po
      call wrtout(ab_out,message,'COLL')
 
 !  Copy the initial coefficients from the model
-     ncoeff_max = eff_pot%anharmonics_terms%ncoeff
-     ABI_DATATYPE_ALLOCATE(coeffs_in,(ncoeff_max))
-     do ii=1,ncoeff_max
+     ncoeff_tot = eff_pot%anharmonics_terms%ncoeff
+     ABI_DATATYPE_ALLOCATE(coeffs_in,(ncoeff_tot))
+     do ii=1,ncoeff_tot
        call polynomial_coeff_init(eff_pot%anharmonics_terms%coefficients(ii)%coefficient,&
 &                                 eff_pot%anharmonics_terms%coefficients(ii)%nterm,&
 &                                 coeffs_in(ii),&
@@ -1118,22 +1120,20 @@ subroutine fit_polynomial_coeff_fit(eff_pot,fixcoeff,hist,ncycle_in,nfixcoeff,po
    else
 !  Or we need to regerate them
      write(message, '(4a)' )ch10,' The coefficients for the fit must',&
-&                              ' be generate... ',ch10
+&                              ' be generate... '
      call wrtout(std_out,message,'COLL')
      call wrtout(ab_out,message,'COLL')
 
      write(message,'(a,F6.3,a)') " Cut-off of ",cutoff," Angstrom is imposed"
      call wrtout(std_out,message,'COLL') 
      
-     call fit_polynomial_coeff_getNorder(cutoff,coeffs_in,eff_pot,ncoeff_max,powers,1,comm)
+     call fit_polynomial_coeff_getNorder(cutoff,coeffs_in,eff_pot,ncoeff_tot,powers,1,comm)
 
 
-     write(message,'(1x,I0,a)') ncoeff_max,' coefficients generated '
+     write(message,'(1x,I0,2a)') ncoeff_tot,' coefficients generated ',ch10
 
-     filename = "terms_set.xml"
-     call polynomial_coeff_writeXML(eff_pot%anharmonics_terms%coefficients,&
-&                                   eff_pot%anharmonics_terms%ncoeff,filename=filename,&
-&                                   newfile=.true.)
+!     filename = "terms_set.xml"
+!     call polynomial_coeff_writeXML(coeffs_in,ncoeff_tot,filename=filename,newfile=.true.)
 
      call wrtout(ab_out,message,'COLL')
      call wrtout(std_out,message,'COLL') 
@@ -1153,9 +1153,9 @@ subroutine fit_polynomial_coeff_fit(eff_pot,fixcoeff,hist,ncycle_in,nfixcoeff,po
 !Set the MPI, we need to distribute the list of coeffiecients in
 !order  to recude de memory...
 !1:broadcast the number of coeff max
- call xmpi_bcast(ncoeff_max, master, comm, ierr)
- ncoeff_alone = mod(ncoeff_max,nproc)
- my_ncoeff = aint(real(ncoeff_max,sp)/(nproc))
+ call xmpi_bcast(ncoeff_tot, master, comm, ierr)
+ ncoeff_alone = mod(ncoeff_tot,nproc)
+ my_ncoeff = aint(real(ncoeff_tot,sp)/(nproc))
 
  if(my_rank >= (nproc-ncoeff_alone)) then
    my_ncoeff = my_ncoeff  + 1
@@ -1167,7 +1167,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,fixcoeff,hist,ncycle_in,nfixcoeff,po
 !  coefficients for each CPU.
  do icoeff=1,my_ncoeff
    if(my_rank >= (nproc-ncoeff_alone))then
-     my_coeffindexes(icoeff)=(aint(real(ncoeff_max,sp)/nproc))*(my_rank)+&
+     my_coeffindexes(icoeff)=(aint(real(ncoeff_tot,sp)/nproc))*(my_rank)+&
 &                              (my_rank - (nproc-ncoeff_alone)) + icoeff
      my_coefflist(icoeff) = icoeff
    else
@@ -1179,7 +1179,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,fixcoeff,hist,ncycle_in,nfixcoeff,po
 !3:MPI SEND the datas to the other CPUs
  ABI_DATATYPE_ALLOCATE(my_coeffs,(my_ncoeff)) 
  ii = 1
- do icoeff = 1, ncoeff_max
+ do icoeff = 1, ncoeff_tot
 !  Need to send the rank with the chosen coefficient
    rank_to_send = zero
    if (any(my_coeffindexes(:)==icoeff)) rank_to_send = my_rank
@@ -1208,12 +1208,12 @@ subroutine fit_polynomial_coeff_fit(eff_pot,fixcoeff,hist,ncycle_in,nfixcoeff,po
    ABI_DATATYPE_DEALLOCATE(coeffs_in)
  end if
 
-!Check if ncycle_in is not zero or superior to ncoeff_max
- if((ncycle_in > ncoeff_max).or.(ncycle_in<=0.and.nfixcoeff /= -1)) then
+!Check if ncycle_in is not zero or superior to ncoeff_tot
+ if((ncycle_in > ncoeff_tot).or.(ncycle_in<=0.and.nfixcoeff /= -1)) then
    write(message, '(6a,I0,3a)' )ch10,&
 &        ' --- !WARNING',ch10,&
 &        '     The number of cycle requested in the input is not correct.',ch10,&
-&        '     This number will be set to the maximum of coefficients: ',ncoeff_max,ch10,&
+&        '     This number will be set to the maximum of coefficients: ',ncoeff_tot,ch10,&
 &        ' ---',ch10
      call wrtout(std_out,message,"COLL")
    end if
@@ -1224,10 +1224,10 @@ subroutine fit_polynomial_coeff_fit(eff_pot,fixcoeff,hist,ncycle_in,nfixcoeff,po
  ncycle_tot = zero
  if (nfixcoeff == -1)then
    write(message, '(2a)')' nfixcoeff is set to -1, so all the coefficients are imposed.',ch10
-     ncycle_tot = ncycle_tot + ncoeff_max
+     ncycle_tot = ncycle_tot + ncoeff_tot
  else
    if (nfixcoeff > zero)then
-     if(maxval(fixcoeff(:)) > ncoeff_max) then
+     if(maxval(fixcoeff(:)) > ncoeff_tot) then
        write(message, '(4a,I0,6a)' )ch10,&
 &        ' --- !WARNING',ch10,&
 &        '     The value ',maxval(fixcoeff(:)),' is not in the list.',ch10,&
@@ -1251,13 +1251,13 @@ subroutine fit_polynomial_coeff_fit(eff_pot,fixcoeff,hist,ncycle_in,nfixcoeff,po
 
 !Check if the number of request cycle + the initial number of coeff is superior to 
 !the maximum number of coefficient allowed
- if(ncycle_max > ncoeff_max) then
-   ncycle = ncoeff_max - ncycle_tot
-   ncycle_max = ncoeff_max
+ if(ncycle_max > ncoeff_tot) then
+   ncycle = ncoeff_tot - ncycle_tot
+   ncycle_max = ncoeff_tot
    write(message, '(4a,I0,2a,I0,2a,I0,3a)' )ch10,&
 &      ' --- !WARNING',ch10,&
 &      '     The number of cycle + the number of imposed coefficients: ',ncycle_max,ch10,&
-&      '     is superior to the maximum number of coefficients in the initial list: ',ncoeff_max,ch10,&
+&      '     is superior to the maximum number of coefficients in the initial list: ',ncoeff_tot,ch10,&
 &      '     The number of cycle is set to ',ncycle,ch10,&
 &      ' ---',ch10
    call wrtout(std_out,message,'COLL')
@@ -1435,7 +1435,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,fixcoeff,hist,ncycle_in,nfixcoeff,po
 
  call fit_polynomial_coeff_getFS(my_coeffs,du_delta,displacement,&
 &                                energy_coeffs,fcart_coeffs,natom_sc,eff_pot%crystal%natom,&
-&                                ncoeff_max,ntime,int(eff_pot%supercell%qphon(:)),strain,&
+&                                my_ncoeff,ntime,int(eff_pot%supercell%qphon(:)),strain,&
 &                                strten_coeffs,ucvol,my_coefflist,my_ncoeff)
 
 !Free space
@@ -1446,9 +1446,9 @@ subroutine fit_polynomial_coeff_fit(eff_pot,fixcoeff,hist,ncycle_in,nfixcoeff,po
 
 !Allocation of arrays
  ABI_DATATYPE_ALLOCATE(coeffs_tmp,(ncycle_max))
- ABI_ALLOCATE(singular_coeffs,(ncoeff_max))
+ ABI_ALLOCATE(singular_coeffs,(my_ncoeff))
  ABI_ALLOCATE(coeff_values,(ncycle_max))
- ABI_ALLOCATE(gf_values,(4,ncoeff_max))
+ ABI_ALLOCATE(gf_values,(4,my_ncoeff))
  ABI_ALLOCATE(list_coeffs_tmp,(ncycle_max))
  coeff_values = zero
  singular_coeffs = zero
@@ -1470,7 +1470,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,fixcoeff,hist,ncycle_in,nfixcoeff,po
  size_mpi = 5*nproc
 
 !If some coeff are imposed by the input, we need to fill the arrays 
-!with this coeffs :
+!with this coeffs and broadcast to the others CPUs :
  if(ncycle_tot>=1)then
    do icycle = 1,ncycle_tot
      list_coeffs_tmp(icycle) = icycle
@@ -1509,7 +1509,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,fixcoeff,hist,ncycle_in,nfixcoeff,po
 !Compute GF, coeff_values,strten_coeffs and fcart_coeffs are set to zero
 !it means that only the harmonic part wiil be computed
  coeff_values = zero
- call fit_polynomial_coeff_computeGF(coeff_values,du_delta,energy_coeffs,energy_diff,fcart_coeffs,&
+ call fit_polynomial_coeff_computeGF(coeff_values,energy_coeffs,energy_diff,fcart_coeffs,&
 &                                    fcart_diff,ffact,gf_values(:,1),int((/1/)),natom_sc,&
 &                                    1,my_ncoeff,ntime,strten_coeffs,strten_diff,sfact,&
 &                                    sqomega,ucvol)
@@ -1583,7 +1583,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,fixcoeff,hist,ncycle_in,nfixcoeff,po
    gf_values(:,:) = zero
 
    do icoeff=1,my_ncoeff
-     if(any(list_coeffs==my_coeffindexes(icoeff)).or.singular_coeffs(my_coeffindexes(icoeff)) == 1) cycle
+     if(any(list_coeffs==my_coeffindexes(icoeff)).or.singular_coeffs(icoeff) == 1) cycle
      list_coeffs(icycle) = my_coeffindexes(icoeff)
 
 !    Fill the temporary arrays
@@ -1593,12 +1593,12 @@ subroutine fit_polynomial_coeff_fit(eff_pot,fixcoeff,hist,ncycle_in,nfixcoeff,po
 
 !    call the fit process routine
 !    This routine solves the linear system proposed by C.Escorihuela-Sayalero see PRB95,094115(2017)
-     call fit_polynomial_coeff_solve(coeff_values(1:icycle),du_delta,fcart_coeffs_tmp,fcart_diff,&
+     call fit_polynomial_coeff_solve(coeff_values(1:icycle),fcart_coeffs_tmp,fcart_diff,&
 &                                    info,list_coeffs_tmp(1:icycle),natom_sc,icycle,&
 &                                    ncycle_max,ntime,strten_coeffs_tmp,strten_diff,sqomega,ucvol)
 
      if(info==0)then
-       call fit_polynomial_coeff_computeGF(coeff_values(1:icycle),du_delta,energy_coeffs_tmp,&
+       call fit_polynomial_coeff_computeGF(coeff_values(1:icycle),energy_coeffs_tmp,&
 &                                         energy_diff,fcart_coeffs_tmp,fcart_diff,ffact,&
 &                                         gf_values(:,icoeff),list_coeffs_tmp(1:icycle),natom_sc,&
 &                                         icycle,ncycle_max,ntime,&
@@ -1613,7 +1613,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,fixcoeff,hist,ncycle_in,nfixcoeff,po
 
      else!In this case the matrix is singular
        gf_values(:,icoeff) = zero
-       singular_coeffs(my_coeffindexes(icoeff)) = 1
+       singular_coeffs(icoeff) = 1
        write(message, '(a)') ' The matrix is singular...'
      end if
      call wrtout(std_out,message,'COLL')
@@ -1625,7 +1625,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,fixcoeff,hist,ncycle_in,nfixcoeff,po
 !  Find a way to keep the bestStore the best coeff for the next step
    mingf(:) = 9D99
    index_min= one
-   do icoeff=1,ncoeff_max
+   do icoeff=1,my_ncoeff
      if(gf_values(1,icoeff) < zero) cycle
      if(gf_values(1,icoeff) == zero) cycle
      if(gf_values(1,icoeff) < mingf(1) ) then
@@ -1635,21 +1635,23 @@ subroutine fit_polynomial_coeff_fit(eff_pot,fixcoeff,hist,ncycle_in,nfixcoeff,po
    end do
 
 !  MPI GATHER THE BEST COEFF ON EACH CPU
-   buffGF(1,1) = index_min
-   buffGF(2:5,1) =  mingf(:)
+   if(nproc > 1)then
+     buffGF(1,1) = index_min
+     buffGF(2:5,1) =  mingf(:)
 
-   call xmpi_allgatherv(buffGF,5,gf_mpi,buffsize,buffdisp, comm, ierr)
+     call xmpi_allgatherv(buffGF,5,gf_mpi,buffsize,buffdisp, comm, ierr)
 !  Find a way to keep the bestStore the best coeff for the next step
-   mingf(:)    = 9D99
-   index_min= one
-   do icoeff=1,nproc
-     if(gf_mpi(2,icoeff) < zero) cycle
-     if(gf_mpi(2,icoeff) == zero) cycle
-     if(gf_mpi(2,icoeff) < mingf(1) ) then
-       mingf(:) = gf_mpi(2:5,icoeff)
-       index_min = gf_mpi(1,icoeff)
-     end if
-   end do
+     mingf(:)    = 9D99
+     index_min= one
+     do icoeff=1,nproc
+       if(gf_mpi(2,icoeff) < zero) cycle
+       if(gf_mpi(2,icoeff) == zero) cycle
+       if(gf_mpi(2,icoeff) < mingf(1) ) then
+         mingf(:) = gf_mpi(2:5,icoeff)
+         index_min = gf_mpi(1,icoeff)
+       end if
+     end do
+   end if
 
    list_coeffs(icycle) = index_min
 
@@ -1705,7 +1707,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,fixcoeff,hist,ncycle_in,nfixcoeff,po
 !This routine solves the linear system proposed by C.Escorihuela-Sayalero see PRB95,094115(2017)
  if(ncycle_tot > zero)then
 
-   call fit_polynomial_coeff_solve(coeff_values(1:ncycle_tot),du_delta,fcart_coeffs_tmp,fcart_diff,&
+   call fit_polynomial_coeff_solve(coeff_values(1:ncycle_tot),fcart_coeffs_tmp,fcart_diff,&
 &                                  info,list_coeffs_tmp(1:ncycle_tot),natom_sc,ncycle_tot,&
 &                                  ncycle_max,ntime,strten_coeffs_tmp,strten_diff,sqomega,ucvol)
 
@@ -1724,7 +1726,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,fixcoeff,hist,ncycle_in,nfixcoeff,po
      call wrtout(std_out,message,'COLL')
    end do
 
-   call fit_polynomial_coeff_computeGF(coeff_values(1:ncycle_max),du_delta,energy_coeffs_tmp,&
+   call fit_polynomial_coeff_computeGF(coeff_values(1:ncycle_max),energy_coeffs_tmp,&
 &                                      energy_diff,fcart_coeffs_tmp,fcart_diff,ffact,gf_values(:,1),&
 &                                      list_coeffs_tmp(1:ncycle_max),natom_sc,ncycle_max,ncycle_max,&
 &                                      ntime,strten_coeffs_tmp,strten_diff,sfact,sqomega,ucvol)
@@ -1801,7 +1803,6 @@ end subroutine fit_polynomial_coeff_fit
 !! This routine solves the linear system proposed by C.Escorihuela-Sayalero see PRB95,094115(2017)
 !!
 !! INPUTS
-!! du_delta(6,3,natom_sc,ntime)  = Variation to displacements wrt to the strain (Bohr)
 !! fcart_coeffs(3,natom_sc,ncoeff_max,ntime) = List of the values of the contribution to the
 !!                                             cartesian forces for all coefficients 
 !!                                             for each direction and each time
@@ -1836,7 +1837,7 @@ end subroutine fit_polynomial_coeff_fit
 !!
 !! SOURCE
 
-subroutine fit_polynomial_coeff_solve(coefficients,du_delta,fcart_coeffs,fcart_diff,&
+subroutine fit_polynomial_coeff_solve(coefficients,fcart_coeffs,fcart_diff,&
 &                                     info_out,list_coeffs,natom,ncoeff_fit,ncoeff_max,ntime,&
 &                                     strten_coeffs,strten_diff,sqomega,ucvol)
 
@@ -1855,7 +1856,7 @@ subroutine fit_polynomial_coeff_solve(coefficients,du_delta,fcart_coeffs,fcart_d
  integer,intent(out) :: info_out
 !arrays
  integer,intent(in)  :: list_coeffs(ncoeff_fit)
- real(dp),intent(in) :: du_delta(6,3,natom,ntime),fcart_coeffs(3,natom,ncoeff_max,ntime)
+ real(dp),intent(in) :: fcart_coeffs(3,natom,ncoeff_max,ntime)
  real(dp),intent(in) :: fcart_diff(3,natom,ntime)
  real(dp),intent(in) :: strten_coeffs(6,ntime,ncoeff_max)
  real(dp),intent(in) :: strten_diff(6,ntime),sqomega(ntime),ucvol(ntime)
@@ -1987,7 +1988,6 @@ end subroutine fit_polynomial_coeff_solve
 !!
 !! INPUTS
 !! coefficients(ncoeff)          = type(polynomial_coeff_type)
-!! du_delta(6,3,natom_sc,ntime)  = Variation to displacements wrt to the strain (Bohr)
 !! displacement(3,natom_sc,ntime)= Atomic displacement wrt to the reference (Bohr)
 !! energy_coeffs(ncoeff,ntime)   = value of the energy for each  coefficient (Ha)
 !! fcart_coeffs(ncoeff,3,natom,ntime) = value of the forces for each coefficient
@@ -2016,7 +2016,7 @@ end subroutine fit_polynomial_coeff_solve
 !!
 !! SOURCE
 
-subroutine fit_polynomial_coeff_computeGF(coefficients,du_delta,energy_coeffs,energy_diff,&
+subroutine fit_polynomial_coeff_computeGF(coefficients,energy_coeffs,energy_diff,&
 &                                         fcart_coeffs,fcart_diff,ffact,gf_value,list_coeffs,&
 &                                         natom,ncoeff_fit,ncoeff_max,ntime,strten_coeffs,&
 &                                         strten_diff,sfact,sqomega,ucvol)
@@ -2036,7 +2036,6 @@ subroutine fit_polynomial_coeff_computeGF(coefficients,du_delta,energy_coeffs,en
  real(dp),intent(in) :: ffact,sfact
 !arrays
  integer,intent(in)  :: list_coeffs(ncoeff_fit)
- real(dp),intent(in) :: du_delta(6,3,natom,ntime)
  real(dp),intent(in) :: energy_coeffs(ncoeff_max,ntime)
  real(dp),intent(in) :: energy_diff(ntime)
  real(dp),intent(in) :: fcart_coeffs(3,natom,ncoeff_max,ntime)
@@ -2287,15 +2286,19 @@ subroutine fit_polynomial_coeff_getFS(coefficients,du_delta,displacement,energy_
              
                do idisp2=1,coefficients(icoeff)%terms(iterm)%ndisp               
                  if(idisp2 /= idisp1) then
+
+!                 Set the power of the displacement:
+                   power = coefficients(icoeff)%terms(iterm)%power(idisp2)
+!                  Set the direction of the displacement:
                    idir2 = coefficients(icoeff)%terms(iterm)%direction(idisp2)
+
+!                  Strain case
                    if (idir2 < zero)then
-!                    Strain case
-!                    Set the power of the strain:
-                     power = coefficients(icoeff)%terms(iterm)%power(idisp2)
 !                    Accumulate energy forces
                      tmp2 = tmp2 * (strain(abs(idir2),itime))**power
 !                    Accumulate stress for each strain (\sum (Y(eta_2)^Y-1(eta_2)^Z+...))
                      tmp3 = tmp3 * (strain(abs(idir2),itime))**power
+!                  Atomic displacement case
                    else
                      cell_atoma2=coefficients(icoeff)%terms(iterm)%cell(:,1,idisp2)
                      if(cell_atoma2(1)/=0.or.cell_atoma2(2)/=0.or.cell_atoma2(3)/=0) then
@@ -2334,9 +2337,6 @@ subroutine fit_polynomial_coeff_getFS(coefficients,du_delta,displacement,energy_
 
                      disp1 = displacement(idir2,ia2,itime)
                      disp2 = displacement(idir2,ib2,itime)
-
-!                    Set the power of the displacement:
-                     power = coefficients(icoeff)%terms(iterm)%power(idisp2)
                    
                      tmp2 = tmp2 * (disp1-disp2)**power
                      tmp3 = tmp3 * (disp1-disp2)**power
