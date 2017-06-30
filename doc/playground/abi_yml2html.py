@@ -16,7 +16,11 @@ js_path = "../"
 users_path = "../../users/"
 
 ################################################################################
+###############################################################################
+ 
 # Definitions
+
+###############################################################################
 
 def format_dimensions(dimensions):
 
@@ -38,6 +42,8 @@ def format_dimensions(dimensions):
  
   return s
 
+################################################################################
+
 def doku2html(text):
 
   def replace_link(mymatch):
@@ -49,6 +55,8 @@ def doku2html(text):
 
   return text2
 
+################################################################################
+
 def format_default(defaultval):
 
   if defaultval is None:
@@ -57,6 +65,8 @@ def format_default(defaultval):
     s = "Default is "+str(defaultval)
  
   return s
+
+################################################################################
 
 def make_links(text,cur_abivarname,variables,characteristics,specials):
 
@@ -87,90 +97,43 @@ def make_links(text,cur_abivarname,variables,characteristics,specials):
   return new_text
 
 ################################################################################
+
+def read_yaml_file(ymlfile):
+  """ Read the file 'ymlfile', containing yml data, and store all such data in the object 'ymlstructure' """
+
+  if ymlfile== "abinit_vars.yml":
+    print("Will use abinit_vars.yml as database input file for the input variables and their characteristics ...")
+  elif ymlfile== "topics.yml":
+    print("Will use topics.yml as database input file for the list of topics ...")
+  elif ymlfile== "sections.yml":
+    print("Will use sections.yml as database input file for the list of sections ...")
+  elif ymlfile== "tests_dirs.yml":
+    print("Will use tests_dirs.yml as database input file for the list of directories in which automatic test input files are present ...")
+  elif ymlfile== "yml_templates/template_varhtml.yml":
+    print("Will use yml_templates/template_varhtml.yml as template to generate all var*.html files ...")
+  elif ymlfile== "html_automatically_generated/topics_in_tests.yml":
+    print("Generated file named html_automatically_generated/topics_in_tests.yml, to contain the list of automatic test input files relevant for each topic ...")
+  else:
+    print ("Error : The ymlfile "+ymlfile+" cannot be treated at present.")
+    raise
+
+  with open(ymlfile, 'r') as f:
+    ymlstructure = yaml.load(f);
+
+  return ymlstructure
+
+################################################################################
 ################################################################################
 
 # Parsing section
 
 ################################################################################
-# Parse the abinit_vars.yml file -> variables
-
-file='abinit_vars.yml'
-print("Will use "+str(file)+" as database input file for the input variables and their characteristics ...")
-
-parser = argparse.ArgumentParser(description='Tool for eigenvalue analysis')
-parser.add_argument('-f','--file',help='YML file to be read')
-args = parser.parse_args()
-args_dict = vars(args)
-if args_dict['file']:
-  file = args_dict['file']
-
-with open(file, 'r') as f:
-    variables = yaml.load(f);
-
-
-################################################################################
-# Parse the topics.yml file -> topics
-
-file='topics.yml'
-print("Will use "+str(file)+" as database input file for the list of topics ...")
-
-parser = argparse.ArgumentParser(description='Tool for eigenvalue analysis')
-parser.add_argument('-f','--file',help='YML file to be read')
-args = parser.parse_args()
-args_dict = vars(args)
-if args_dict['file']:
-  file = args_dict['file']
-
-with open(file, 'r') as f:
-    topics = yaml.load(f);
-
-################################################################################
-# Parse the sections.yml file -> sections
-
-file='sections.yml'
-print("Will use "+str(file)+" as database input file for the list of sections ...")
-
-parser = argparse.ArgumentParser(description='Tool for eigenvalue analysis')
-parser.add_argument('-f','--file',help='YML file to be read')
-args = parser.parse_args()
-args_dict = vars(args)
-if args_dict['file']:
-  file = args_dict['file']
-
-with open(file, 'r') as f:
-    sections = yaml.load(f);
-
-################################################################################
-# Parse the tests_dirs.yml file -> tests_dirs
-
-file='tests_dirs.yml'
-print("Will use "+str(file)+" as database input file for the list of directories in which automatic test input files are present ...")
-
-parser = argparse.ArgumentParser(description='Tool for eigenvalue analysis')
-parser.add_argument('-f','--file',help='YML file to be read')
-args = parser.parse_args()
-args_dict = vars(args)
-if args_dict['file']:
-  file = args_dict['file']
-
-with open(file, 'r') as f:
-    tests_dirs = yaml.load(f);
-
-################################################################################
-# Parse the template_varhtml.yml file -> varhtml
-
-file='yml_templates/template_varhtml.yml'
-print("Will use "+str(file)+" as template to generate all var*.html files ...")
-
-parser = argparse.ArgumentParser(description='Tool for eigenvalue analysis')
-parser.add_argument('-f','--file',help='YML file to be read')
-args = parser.parse_args()
-args_dict = vars(args)
-if args_dict['file']:
-  file = args_dict['file']
-
-with open(file, 'r') as f:
-    tempvarhtml = yaml.load(f);
+ 
+variables=read_yaml_file("abinit_vars.yml")
+topics=read_yaml_file("topics.yml")
+sections=read_yaml_file("sections.yml")
+tests_dirs=read_yaml_file("tests_dirs.yml")
+tempvarhtml=read_yaml_file("yml_templates/template_varhtml.yml")
 
 ################################################################################
 # Parse the ABINIT input files, in order to find the possible topics to which they are linked -> topics_in_tests
@@ -190,19 +153,7 @@ for tests_dir in tests_dirs :
     sed_cmd = "sed -e 's/^/- /' html_automatically_generated/topics_in_tests.txt >> html_automatically_generated/topics_in_tests.yml "
     retcode = os.system(sed_cmd)
 
-file='html_automatically_generated/topics_in_tests.yml'
-print("Generated file named "+str(file)+", to contain the list of automatic test input files relevant for each topic ...")
-
-parser = argparse.ArgumentParser(description='Tool for eigenvalue analysis')
-parser.add_argument('-f','--file',help='YML file to be read')
-args = parser.parse_args()
-args_dict = vars(args)
-if args_dict['file']:
-  file = args_dict['file']
-
-with open(file, 'r') as f:
-  topics_in_tests = yaml.load(f);
-
+topics_in_tests=read_yaml_file("html_automatically_generated/topics_in_tests.yml")
 if debug==1 :
   print(" topics_in_tests :")
   print(topics_in_tests)
@@ -329,19 +280,6 @@ for i, var in enumerate(variables):
 # then complete the content (that was previously gathered), then write the file and close it
 for i, section_info in enumerate(sections):
   section = section_info.name
-
-#  file='yml_templates/'+section+'.yml'
-#  print("Will rely on file named yml_template/"+section+".yml, to generate "+section+".html... ", end='')
-
-  parser = argparse.ArgumentParser(description='Tool for eigenvalue analysis')
-  parser.add_argument('-f','--file',help='YML file to be read')
-  args = parser.parse_args()
-  args_dict = vars(args)
-  if args_dict['file']:
-    file = args_dict['file']
-
-  with open(file, 'r') as f:
-    varfile_yml = yaml.load(f);
 
   sectionhtml=""
   for i in ["header","title","subtitle","purpose","advice","copyright","links","menu","tofcontent_header"]:
