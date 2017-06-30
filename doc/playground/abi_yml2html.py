@@ -279,6 +279,8 @@ for i, var in enumerate(variables):
 # Generate each "normal" section file : build the missing information (table of content), assemble the content, apply global transformations, then write.
 for i, section_info in enumerate(sections):
   section = section_info.name
+  if section=="default":
+    break
 
   #Generate the body of the table of content 
   cur_let = 'A'
