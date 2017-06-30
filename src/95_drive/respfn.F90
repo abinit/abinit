@@ -1350,27 +1350,6 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
    call wrtout(std_out,message,'COLL')
    call wrtout(ab_out,message,'COLL')
 
-!  Open the formatted derivative database file, and write the
-!  preliminary information
-   call status(0,dtfil%filstat,iexit,level,'call ddb_io_out')
-   dscrpt=' Note : temporary (transfer) database '
-!  tolwfr must be initialized here, but it is a dummy value
-   tolwfr=1.0_dp
-   call ddb_io_out (dscrpt,dtfil%fnameabo_ddb,natom,dtset%mband,&
-&   dtset%nkpt,dtset%nsym,ntypat,dtfil%unddb,DDB_VERSION,&
-&   dtset%acell_orig(1:3,1),dtset%amu_orig(:,1),dtset%dilatmx,dtset%ecut,dtset%ecutsm,&
-&   dtset%intxc,iscf,dtset%ixc,dtset%kpt,dtset%kptnrm,&
-&   natom,dtset%nband,ngfft,dtset%nkpt,dtset%nspden,dtset%nspinor,&
-&   dtset%nsppol,dtset%nsym,ntypat,occ,dtset%occopt,dtset%pawecutdg,&
-&   dtset%rprim_orig(1:3,1:3,1),dtset%dfpt_sciss,dtset%spinat,dtset%symafm,dtset%symrel,&
-&   dtset%tnons,tolwfr,dtset%tphysel,dtset%tsmear,&
-&   dtset%typat,dtset%usepaw,dtset%wtk,xred,psps%ziontypat,dtset%znucl)
-
-   nblok=1 ; fullinit=1 ; choice=2
-   call psddb8 (choice,psps%dimekb,psps%ekb,fullinit,psps%indlmn,&
-&   psps%lmnmax,nblok,ntypat,dtfil%unddb,pawtab,&
-&   psps%pspso,psps%usepaw,psps%useylm,DDB_VERSION)
-
 !  In the RESPFN code, dfpt_nstdy and stady3 were called here
    d2nfr(:,:,:,:,:)=d2lo(:,:,:,:,:)+d2nl(:,:,:,:,:)
    if (psps%usepaw==1) d2nfr(:,:,:,:,:)=d2nfr(:,:,:,:,:)+d2ovl(:,:,:,:,:)
@@ -1432,6 +1411,28 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 &   eltcore,elteew,eltfrhar,eltfrkin,eltfrloc,eltfrnl,eltfrxc,eltvdw,&
 &   gprimd,dtset%mband,mpert,natom,ntypat,outd2,pawbec,pawpiezo,piezofrnl,dtset%prtbbb,&
 &   rfasr,rfpert,rprimd,dtset%typat,ucvol,usevdw,psps%ziontypat)
+
+!  Open the formatted derivative database file, and write the
+!  preliminary information
+   call status(0,dtfil%filstat,iexit,level,'call ddb_io_out')
+   dscrpt=' Note : temporary (transfer) database '
+!  tolwfr must be initialized here, but it is a dummy value
+   tolwfr=1.0_dp
+   call ddb_io_out (dscrpt,dtfil%fnameabo_ddb,natom,dtset%mband,&
+&   dtset%nkpt,dtset%nsym,ntypat,dtfil%unddb,DDB_VERSION,&
+&   dtset%acell_orig(1:3,1),dtset%amu_orig(:,1),dtset%dilatmx,dtset%ecut,dtset%ecutsm,&
+&   dtset%intxc,iscf,dtset%ixc,dtset%kpt,dtset%kptnrm,&
+&   natom,dtset%nband,ngfft,dtset%nkpt,dtset%nspden,dtset%nspinor,&
+&   dtset%nsppol,dtset%nsym,ntypat,occ,dtset%occopt,dtset%pawecutdg,&
+&   dtset%rprim_orig(1:3,1:3,1),dtset%dfpt_sciss,dtset%spinat,dtset%symafm,dtset%symrel,&
+&   dtset%tnons,tolwfr,dtset%tphysel,dtset%tsmear,&
+&   dtset%typat,dtset%usepaw,dtset%wtk,xred,psps%ziontypat,dtset%znucl)
+
+   nblok=1 ; fullinit=1 ; choice=2
+   call psddb8 (choice,psps%dimekb,psps%ekb,fullinit,psps%indlmn,&
+&   psps%lmnmax,nblok,ntypat,dtfil%unddb,pawtab,&
+&   psps%pspso,psps%usepaw,psps%useylm,DDB_VERSION)
+
 !  Output of the dynamical matrix
 !  (Note : remember, previously, the processor me=0 has been selected)
    call status(0,dtfil%filstat,iexit,level,'call dfpt_dyout   ')
