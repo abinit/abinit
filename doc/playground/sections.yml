@@ -1,17 +1,51 @@
-- varbas
-- varbse
-- vardev
-- vardmft
-- vareph
-- varff
-- varfil
-- vargeo
-- vargs
-- vargw
-- varint
-- varpar
-- varpaw
-- varrf
-- varrlx
-- varvdw
-- varw90
+- !section 
+    name : varbas
+    keyword : basic
+- !section
+    name : varbse
+    keyword : BSE
+- !section
+    name : vardev
+    keyword : developer
+- !section
+    name : vardmft
+    keyword : DMFT
+- !section
+    name : vareph
+    keyword : electron-phonon calculation
+- !section
+    name : varff
+    keyword : applied finite field calculation
+- !section
+    name : varfil
+    keyword : file handling
+- !section
+    name : vargeo
+    keyword : geometry builder and symmetry related
+- !section
+    name : vargs
+    keyword : ground state calculations
+- !section
+    name : vargw
+    keyword : GW
+- !section
+    name : varint
+    keyword : internal
+- !section
+    name : varpar
+    keyword : parallelisation
+- !section
+    name : varpaw
+    keyword : PAW
+- !section
+    name : varrf
+    keyword : response function
+- !section
+    name : varrlx
+    keyword : structural optimization
+- !section
+    name : varvdw
+    keyword : Van der Waals
+- !section
+    name : varw90
+    keyword : Wannier90 interface

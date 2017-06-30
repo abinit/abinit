@@ -125,6 +125,22 @@ with open(file, 'r') as f:
     topics = yaml.load(f);
 
 ################################################################################
+# Parse the sections.yml file -> sections
+
+file='sections.yml'
+print("Will use "+str(file)+" as database input file for the list of sections ...")
+
+parser = argparse.ArgumentParser(description='Tool for eigenvalue analysis')
+parser.add_argument('-f','--file',help='YML file to be read')
+args = parser.parse_args()
+args_dict = vars(args)
+if args_dict['file']:
+  file = args_dict['file']
+
+with open(file, 'r') as f:
+    sections = yaml.load(f);
+
+################################################################################
 # Parse the tests_dirs.yml file -> tests_dirs
 
 file='tests_dirs.yml'
@@ -311,40 +327,11 @@ for i, var in enumerate(variables):
 
 # For each "normal" section file : generate the header, generate the alphabetical list, write these,
 # then complete the content (that was previously gathered), then write the file and close it
-for section, content in all_contents.items():
- file_cur = 'html_automatically_generated/'+section+'.html'
- f_cur = open(file_cur,'w')
+for i, section_info in enumerate(sections):
+  section = section_info.name
 
- if section != "varbas":
-  with open('html_template/temp_'+section+'.html') as f:
-    header_varX = f.read()
-  print("Will use file named temp_"+section+", as template for "+section+".html... ", end='')
-
-  cur_header_varX = header_varX.replace("__JS_PATH__",js_path)
- 
-  f_cur.write(cur_header_varX)
-  cur_let = 'A'
-  f_cur.write(" <br>"+cur_let+".\n")
-  for abivarname,defi in all_vars[section]:
-    #curlink = "<br /><a href=\"#"+abivarname+"\">"+abivarname+"</a> : "+defi+"\n"
-    while not abivarname.startswith(cur_let.lower()):
-      cur_let = chr(ord(cur_let)+1)
-      f_cur.write(" <br>"+cur_let+".\n")
-    curlink = " <a href=\"#"+abivarname+"\">"+abivarname+"</a>&nbsp;&nbsp;\n"
-    f_cur.write(curlink)
-    #f_cur.write("<br /><br />\n")
-  f_cur.write("\n")
-  if make_topics_visible==0:
-    content += "<script type=\"text/javascript\" src=\""+js_path+"list_internal_links.js\"> </script>\n\n"
-  else:
-    content += "<script type=\"text/javascript\" src=\""+js_path+"list_internal_links_incl_topics.js\"> </script>\n\n"
-  content += "</body>\n"
-  content += "</html>"
-  f_cur.write(content)
- else:
-
-  file='yml_templates/'+section+'.yml'
-  print("Will rely on file named yml_template/"+section+".yml, to generate "+section+".html... ", end='')
+#  file='yml_templates/'+section+'.yml'
+#  print("Will rely on file named yml_template/"+section+".yml, to generate "+section+".html... ", end='')
 
   parser = argparse.ArgumentParser(description='Tool for eigenvalue analysis')
   parser.add_argument('-f','--file',help='YML file to be read')
@@ -355,8 +342,6 @@ for section, content in all_contents.items():
 
   with open(file, 'r') as f:
     varfile_yml = yaml.load(f);
-
-  print("\n",varfile_yml)
 
   sectionhtml=""
   for i in ["header","title","subtitle","purpose","advice","copyright","links","menu","tofcontent_header"]:
@@ -372,18 +357,20 @@ for section, content in all_contents.items():
     sectionhtml += curlink
   sectionhtml += "\n"
   # Here comes the writing of all input variable descriptions
-  sectionhtml += content
+  sectionhtml += all_contents[section]
   # Once more the links
   sectionhtml += tempvarhtml["links"]+ "\n" 
   sectionhtml += tempvarhtml["end"]+ "\n"
   sectionhtml=sectionhtml.replace("__JS_PATH__",js_path)
-  sectionhtml=sectionhtml.replace("__KEYWORD__",varfile_yml["keyword"])
+  sectionhtml=sectionhtml.replace("__KEYWORD__",section_info.keyword)
   sectionhtml = doku2html(make_links(sectionhtml,None,list_all_vars,list_chars,cur_specials))
-  f_cur.write(sectionhtml)
- f_cur.write("\n")
- f_cur.close()
- print("File "+section+".html has been written ...")
 
+  file_cur = 'html_automatically_generated/'+section+'.html'
+  f_cur = open(file_cur,'w')
+  f_cur.write(sectionhtml)
+  f_cur.write("\n")
+  f_cur.close()
+  print("File "+section+".html has been written ...")
 
 # Special file : complete the content, then write the file and close it
 file_specials = 'html_automatically_generated/specials.html'
@@ -476,8 +463,6 @@ for (tclasskey, tclassval) in list_topics_class:
     foundvar[topic_name] = 0
     try:
       if var.topics is not None:
-        #print("\nabivarname:",var.abivarname)  
-        #print("topics:",var.topics)  
         vartopics=var.topics
         topics_name_class = vartopics.split(',')
         for i, topic_name_class in enumerate(topics_name_class):

@@ -8,9 +8,6 @@ except ImportError:
 with open('characteristics.yml', 'r') as f:
     list_chars = yaml.load(f)
 
-with open('sections.yml', 'r') as f:
-    list_sections = yaml.load(f)
-
 list_specials = [
     ('AUTO_FROM_PSP', 'Means that the value is read from the PSP file'),
     ('CUDA', 'True if CUDA is enabled (compilation)'),
@@ -113,6 +110,19 @@ class Topic(yaml.YAMLObject):
     def __init__(self, topic_name=None, howto=None):
         self.topic_name = topic_name
         self.howto = howto
+
+class Section(yaml.YAMLObject):
+    name = None  # String containing section name
+    keyword = ''     # String containing the short description of the topics, to be echoed in the title of the section file.
+
+    yaml_tag = u'!section'
+
+    def attrs(self):
+        return ['name', 'keyword']
+
+    def __init__(self, name=None, keyword=None):
+        self.name = name
+        self.keyword = keyword
 
 class ValueWithUnit(yaml.YAMLObject):
     value = None
