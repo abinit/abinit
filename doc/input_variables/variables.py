@@ -22,6 +22,24 @@ list_specials = [
     ('SEQUENTIAL', 'True if the code is compiled without MPI'),
 ]
 
+list_topics_class = [
+    ('compulsory', 'Compulsory input variables:'),
+    ('basic', 'Basic input variables:'),
+    ('useful', 'Useful input variables:'),
+    ('internal', 'Relevant internal variables:'),
+    ('prpot', 'Printing input variables for potentials:'),
+    ('prfermi', 'Printing input variables for fermi level or surfaces:'),
+    ('prden', 'Printing input variables for density, eigenenergies k-points and wavefunctions:'),
+    ('prgeo', 'Printing input variables for geometry:'),
+    ('prdos', 'Printing DOS-related input variables:'),
+    ('prgs', 'Printing other ground-state input variables:'),
+    ('prngs', 'Printing non-ground-state input variables:'),
+    ('alch', 'Input variables related to alchemical mixing:'),
+    ('job', 'Input variables for job time limits:'),
+    ('slab', 'Input variables to insert a slab:'),
+    ('lotf', 'Input variables for Learn On The Fly calculations:'),
+    ('expert', 'Input variables for experts:'),
+]
 
 class literal(str): pass
 
@@ -36,51 +54,65 @@ yaml.add_representer(literal, literal_unicode_representer)
 class Variable(yaml.YAMLObject):
     vartype = ''  # String containing the type
     characteristic = None  # String containing the characteristics
-    definition = None  # String containing the mnemonics
+    mnemonics = None  # String containing the mnemonics
     dimensions = None  # Array containing either int, formula or another variable
     defaultval = None  # Either constant number, formula or another variable
     text = None  # Description (str)
-    varname = None  # Name of the variable (str)
+    abivarname = None  # Name of the variable (str)
     commentdefault = None
     commentdims = None
     section = None
     range = None
     requires = None
     excludes = None
+    topics = None
 
     yaml_tag = u'!variable'
 
     def attrs(self):
-        return ['vartype', 'characteristic', 'definition', 'dimensions', 'defaultval', 'text',
-                'varname', 'section']
+        return ['vartype', 'characteristic', 'mnemonics', 'dimensions', 'defaultval', 'text',
+                'abivarname', 'section', 'topics']
 
     def __init__(self, vartype=None, characteristic=None,
-                 definition=None, dimensions=None, default=None,
-                 text=None, varname=None, section=None, range=None,
-                 commentdefault=None, commentdims=None):
+                 mnemonics=None, dimensions=None, default=None,
+                 text=None, abivarname=None, section=None, range=None,
+                 commentdefault=None, commentdims=None, topics=None):
         self.vartype = vartype
         self.characteristic = characteristic
-        self.definition = definition
+        self.mnemonics = mnemonics
         self.dimensions = dimensions
         self.defaultval = default
         self.text = literal(text)
-        self.varname = varname
+        self.abivarname = abivarname
         self.section = section
         self.commentdefault = commentdefault
         self.commentdims = commentdims
         self.range = range
+        self.topics = topics
 
     @classmethod
     def from_array(cls, array):
         return Variable(vartype=array["vartype"], characteristic=array["characteristic"],
-                        definition=array["definition"], dimensions=array["dimensions"],
-                        default=array["default"], text=array["text"], varname=array["varname"],
+                        mnemonics=array["mnemonics"], dimensions=array["dimensions"],
+                        default=array["default"], text=array["text"], abivarname=array["abivarname"],
                         section=array["section"], range=array["range"], commentdefault=array["commentdefault"],
-                        commentdims=array["commentdims"])
+                        commentdims=array["commentdims"], topics=array["topics"])
 
     def __str__(self):
-        return "Variable " + str(self.varname) + " (default = " + str(self.defaultval) + ")"
+        return "Variable " + str(self.abivarname) + " (default = " + str(self.defaultval) + ")"
 
+class Topic(yaml.YAMLObject):
+    topic_name = None  # String containing the "How to ?" topic name 
+    howto = ''     # String containing the description of the topics, to be echoed after "How to" ...
+
+    yaml_tag = u'!topic'
+
+    def attrs(self):
+        return ['topic_name', 'howto']
+
+    def __init__(self, topic_name=None, howto=None):
+        self.topic_name = topic_name
+        self.howto = howto
 
 class ValueWithUnit(yaml.YAMLObject):
     value = None

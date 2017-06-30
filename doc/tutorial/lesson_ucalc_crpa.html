@@ -101,8 +101,8 @@ and <a href="lesson_dmft.html#2">there</a>)
 The first part of the tutorial is similar to the DMFT tutorial and explains the electronic structure
 of SrVO<SUB>3</SUB> and will be used to understand the definition of Wannier orbitals with various extensions.
 Wannier functions are unitarily related to a selected set of Kohn Sham (KS) wavefunctions, specified in ABINIT by band index 
-<a href="../input_variables/html_automatically_generated/vardev.html#dmftbandi" target="dmftbandi">dmftbandi</a>, and
-<a href="../input_variables/html_automatically_generated/vardev.html#dmftbandf" target="dmftbandf">dmftbandf</a>.
+<a href="../input_variables/html_automatically_generated/vardmft.html#dmftbandi" target="dmftbandi">dmftbandi</a>, and
+<a href="../input_variables/html_automatically_generated/vardmft.html#dmftbandf" target="dmftbandf">dmftbandf</a>.
 	Thus, as empty bands are necessary to build Wannier functions, it is required in DMFT or cRPA calculations
 	that the KS Hamiltonian is correctly diagonalized: use high values for  
 <a href="../input_variables/html_automatically_generated/vardev.html#nnsclo" target="nnsclo">nnsclo</a>, 
@@ -246,12 +246,14 @@ To clarify this definition, we give below some examples:
 <i>t<SUB>2g</SUB></i>-like bands (bands 21, 22 and 23). The screening inside these bands is not taken into account to built
 the constrained polarizability.
 Note that if this case (and in the (<i>d-d</i>) and (<i>dp-dp</i>) models), using ucrpa=1 or 2 give the same results,
-provided one uses ucrpa_bands equal to (<a href="../input_variables/html_automatically_generated/vardev.html#dmftbandi" target="dmftbandi">dmftbandi</a> <a href="../input_variables/html_automatically_generated/vardev.html#dmftbandf" target="dmftbandf">dmftbandf</a> ).
+provided one uses ucrpa_bands equal to (<a href="../input_variables/html_automatically_generated/vardmft.html#dmftbandi" target="dmftbandi">dmftbandi</a> 
+<a href="../input_variables/html_automatically_generated/vardmft.html#dmftbandf" target="dmftbandf">dmftbandf</a> ).
 <li> <span style="color:rgb(200, 100, 000); font-style: italic">(<i>d-d</i>) model (or d model) </span>: The correlated orbitals are defined with only
 <i>d</i>-like bands (bands 21 to 25). The screening inside these bands is not taken into account.
 <li> <span style="color:rgb(200, 100, 000); font-style: italic">(<i>dp-dp</i>) model (or dp model)</span>: The correlated orbitals are defined with only
 <i>d</i>-like and Op-like bands (bands 12 to 23). The screening inside these bands is not taken into account.
-<li> <span style="color:rgb(200, 100, 000); font-style: italic">(<i>d-dp</i>(a)) model</span>: In this scheme the Wannier orbitals are constructed as in the (<i>dp-dp</i>) model. However,
+<li> <span style="color:rgb(200, 100, 000); font-style: italic">(<i>d-dp</i>(a)) model</span>: 
+In this scheme the Wannier orbitals are constructed as in the (<i>dp-dp</i>) model. However,
 in this scheme, one only supresses the screening inside <i>d</i>-like bands 
 (<a href="../input_variables/html_automatically_generated/vargw.html#ucrpa" target="ucrpa">ucrpa</a>=1).
 It is coherent with the fact that the DMFT will
@@ -311,9 +313,15 @@ polarizability.  For this reason we choose a very low value of
 in the input file tucrpa_1.in.
 
 <li> <span style="color: #101010; font-style: italic; font-weight: 500"> Wannier functions </span>: Once the calculation is converged, we compute Wannier functions, as in a DFT+DMFT calculation. To
-do this, we only precise that we are using the DFT+DMFT implementation (usedmft=0), but only with the Wannier keywords (<a href="../input_variables/html_automatically_generated/vardev.html#dmftbandi" target="dmftbandi">dmftbandi</a> and <a href="../input_variables/html_automatically_generated/vardev.html#dmftbandf" target="dmftbandf">dmftbandf</a>). We emphasize that with respect to the discussion on models on section <a href="#3.1">3.1</a>, <a href="../input_variables/html_automatically_generated/vardev.html#dmftbandi" target="dmftbandi">dmftbandi</a> and <a href="../input_variables/html_automatically_generated/vardev.html#dmftbandf" target="dmftbandf">dmftbandf</a>  are used to define the so called A bands. We will see in dataset 2 how B bands are defined.
+do this, we only precise that we are using the DFT+DMFT implementation (usedmft=0), but only with the Wannier keywords 
+(<a href="../input_variables/html_automatically_generated/vardmft.html#dmftbandi" target="dmftbandi">dmftbandi</a> 
+and <a href="../input_variables/html_automatically_generated/vardmft.html#dmftbandf" target="dmftbandf">dmftbandf</a>). 
+We emphasize that with respect to the discussion on models on section <a href="#3.1">3.1</a>, 
+<a href="../input_variables/html_automatically_generated/vardmft.html#dmftbandi" target="dmftbandi">dmftbandi</a> 
+and <a href="../input_variables/html_automatically_generated/vardmft.html#dmftbandf" target="dmftbandf">dmftbandf</a>  are used to define the so called A bands. We will see in dataset 2 how B bands are defined.
 In our case, as we are in the  <i>d-d</i> model, we choose only the <i>d</i>-like bands as a starting point 
-and <a href="../input_variables/html_automatically_generated/vardev.html#dmftbandi" target="dmftbandi">dmftbandi</a>  and <a href="../input_variables/html_automatically_generated/vardev.html#dmftbandf" target="dmftbandf">dmftbandf</a>  are thus equal to the first and last  <i>d</i>-like bands, namely 21 and 25.
+and <a href="../input_variables/html_automatically_generated/vardmft.html#dmftbandi" target="dmftbandi">dmftbandi</a>  
+and <a href="../input_variables/html_automatically_generated/vardmft.html#dmftbandf" target="dmftbandf">dmftbandf</a>  are thus equal to the first and last  <i>d</i>-like bands, namely 21 and 25.
 </ul>
 <!--
 <div style="background: #ffffff; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;">
@@ -645,7 +653,7 @@ In this section, we compute, using the converged values of parameters, the
 value of effective interactions for the models discussed in section
 and <a href="lesson_ucalc_crpa.html#3.1">3.1</a>. The table
 below gives for each model, the values
-of <a href="../input_variables/html_automatically_generated/vardev.html#dmftbandi" target="dmftbandi">dmftbandi</a>, <a href="../input_variables/html_automatically_generated/vardev.html#dmftbandf" target="dmftbandf">dmftbandf</a>  and <a href="../input_variables/html_automatically_generated/vargw.html#ucrpa_bands" target="ucrpa_bands">ucrpa_bands</a>  that must be used, and it sums up
+of <a href="../input_variables/html_automatically_generated/vardmft.html#dmftbandi" target="dmftbandi">dmftbandi</a>, <a href="../input_variables/html_automatically_generated/vardmft.html#dmftbandf" target="dmftbandf">dmftbandf</a>  and <a href="../input_variables/html_automatically_generated/vargw.html#ucrpa_bands" target="ucrpa_bands">ucrpa_bands</a>  that must be used, and it sums up
 the value of bare and effective interactions.
 
 <pre><span style="color: #000000">
@@ -736,14 +744,14 @@ orbitals and the definition of constrained polarizability.
 
 <h4><b><a name="8"></a> References </b></h4>
 <font id="title"><a name="Aryasetiawan2004"> [Aryasetiawan2004] 
-F. Aryasetiawan, M. Imada, A. Georges, G. Kotliar, S. Biermann, and A. I. Lichtenstein </a></font> <a href="http://journals.aps.org/prb/abstract/10.1103/PhysRevB.70.195104">Phys. Rev. B 70, 195104 (2004)</a> 
-<br><font id="title"><a name="Amadon2008"> [Amadon2008] B. Amadon, F. Lechermann, A. Georges, F. Jollet, T. O. Wehling, and A. I. Lichtenstein</a></font> <a href="http://journals.aps.org/prb/abstract/10.1103/PhysRevB.77.205112"> Phys. Rev. B 77, 205112 (2008)</a>
-<br><font id="title"><a name="Amadon2008a"> [Amadon2008a] </a></font> B. Amadon, F. Jollet, and M. Torrent <a href="http://journals.aps.org/prb/abstract/10.1103/PhysRevB.77.155104"> Phys. Rev. B 77, 155104 (2008)</a>
-<br><font id="title"><a name="Vaugier2012"> [Vaugier2012] Loig Vaugier, Hong Jiang, and Silke Biermann  </a></font> <a href="http://journals.aps.org/prb/abstract/10.1103/PhysRevB.86.165105"> Phys. Rev. B 86, 165105 (2012)</a>
-<br><font id="title"><a name="Sakuma2013"> [Sakuma2013] R. Sakuma and F. Aryasetiawan </a></font> <a href="http://journals.aps.org/prb/abstract/10.1103/PhysRevB.87.165118"> Phys. Rev. B 87, 165118 (2013)</a>
-<br><font id="title"><a name="Amadon2014"> [Amadon2014] </a></font> Bernard Amadon, Thomas Applencourt, and Fabien Bruneval <a href="http://journals.aps.org/prb/abstract/10.1103/PhysRevB.89.125110">Phys. Rev. B 89, 125110 (2014)</a>.
+F. Aryasetiawan, M. Imada, A. Georges, G. Kotliar, S. Biermann, and A. I. Lichtenstein </a></font> <a href="https://journals.aps.org/prb/abstract/10.1103/PhysRevB.70.195104">Phys. Rev. B 70, 195104 (2004)</a> 
+<br><font id="title"><a name="Amadon2008"> [Amadon2008] B. Amadon, F. Lechermann, A. Georges, F. Jollet, T. O. Wehling, and A. I. Lichtenstein</a></font> <a href="https://journals.aps.org/prb/abstract/10.1103/PhysRevB.77.205112"> Phys. Rev. B 77, 205112 (2008)</a>
+<br><font id="title"><a name="Amadon2008a"> [Amadon2008a] </a></font> B. Amadon, F. Jollet, and M. Torrent <a href="https://journals.aps.org/prb/abstract/10.1103/PhysRevB.77.155104"> Phys. Rev. B 77, 155104 (2008)</a>
+<br><font id="title"><a name="Vaugier2012"> [Vaugier2012] Loig Vaugier, Hong Jiang, and Silke Biermann  </a></font> <a href="https://journals.aps.org/prb/abstract/10.1103/PhysRevB.86.165105"> Phys. Rev. B 86, 165105 (2012)</a>
+<br><font id="title"><a name="Sakuma2013"> [Sakuma2013] R. Sakuma and F. Aryasetiawan </a></font> <a href="https://journals.aps.org/prb/abstract/10.1103/PhysRevB.87.165118"> Phys. Rev. B 87, 165118 (2013)</a>
+<br><font id="title"><a name="Amadon2014"> [Amadon2014] </a></font> Bernard Amadon, Thomas Applencourt, and Fabien Bruneval <a href="https://journals.aps.org/prb/abstract/10.1103/PhysRevB.89.125110">Phys. Rev. B 89, 125110 (2014)</a>.
 <br><font id="title"><a name="Geneste2016"> [Geneste2016] </a></font> G. Geneste, B. Amadon, M. Torrent and G. Dezanneau (unpublished)
-<br><font id="title"><a name="Aryasetiawan2006"> [Aryasetiawan2006] </a></font> F. Aryasetiawan, K. Karlsson, O. Jepsen, and U. Schönberger, <a href="http://journals.aps.org/prb/abstract/10.1103/PhysRevB.74.125106">Phys. Rev. B 74, 125106 (2006)</a>.
+<br><font id="title"><a name="Aryasetiawan2006"> [Aryasetiawan2006] </a></font> F. Aryasetiawan, K. Karlsson, O. Jepsen, and U. Schönberger, <a href="https://journals.aps.org/prb/abstract/10.1103/PhysRevB.74.125106">Phys. Rev. B 74, 125106 (2006)</a>.
 
 
 

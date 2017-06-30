@@ -92,4 +92,5 @@ jpawu   0.6   0.0  eV
 #%%    27-electron PAW pseudo (4f and 5d are explicitly treated : 4d10 4f7 5s2 5p6 (5d0) 6s2 )
 #%%    Test of initialisation using occopt=1 (the default) with non-zero spinmagntarget,
 #%%    and also metallic occopt. Also test pawxcdev=0
+#%% topics = DFT+U
 #%%<END TEST_INFO>

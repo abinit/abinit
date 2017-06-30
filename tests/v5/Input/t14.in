@@ -58,4 +58,5 @@ znucl 28
 #%%   Ni atom in a big box.
 #%%   Test the use of the atvshift variable :
 #%%   change the potential of the d orbitals.
+#%% topics = DFT+U, crystal
 #%%<END TEST_INFO>
