@@ -274,13 +274,18 @@ for i, var in enumerate(variables):
     print('For variable : ',abivarname)
 
 ################################################################################
-# Generate the files that document all the variables (all such files : var* as well as all and special). 
+# Generate the files that document all the variables (all such files : var* as well as all and special).
+
+# Store the default informations
+for i, section_info in enumerate(sections):
+  if section_info.name.strip()=="default":
+    section_info_default=section_info
 
 # Generate each "normal" section file : build the missing information (table of content), assemble the content, apply global transformations, then write.
 for i, section_info in enumerate(sections):
   section = section_info.name
   if section=="default":
-    break
+    continue
 
   #Generate the body of the table of content 
   cur_let = 'A'
@@ -294,14 +299,19 @@ for i, section_info in enumerate(sections):
   toc_body += "\n"
 
   #Write a first version of the html file, in the order "header" ... up to the "end"
+  #Take the info from the section "default" if there is no information on the specific section provided in the yml file.
   sectionhtml=""
-  for i in ["header","title","subtitle","purpose","advice","copyright","links","menu","tofcontent_header","tofcontent_body","content","links","end"]:
-    if i == "tofcontent_body":
+  for j in ["header","title","subtitle","purpose","advice","copyright","links","menu","tofcontent_header","tofcontent_body","content","links","end"]:
+    if j == "tofcontent_body":
       sectionhtml += toc_body
-    elif i == "content":
+    elif j == "content":
       sectionhtml += all_contents[section]
     else:
-      sectionhtml += tempvarhtml[i]
+      extract_j=extract_from_section(section_info,j) 
+      if extract_j.strip() == "":
+        sectionhtml += extract_from_section(section_info_default,j) 
+      else:
+        sectionhtml += extract_j
     sectionhtml += "\n"
 
   #Global operations on the tentative html file.
@@ -553,7 +563,7 @@ for topic_name, content in topic_sec3.items():
 
 # Generate the file with the list of names of different "topic" files
 
-################################################################################
+#Generate the files that document all the variables (all such files : var* as well as all and special).
 # Parse the header of alltopics file and also replace the JS_PATH.
 
 with open('html_template/temp_alltopics.html') as f:
