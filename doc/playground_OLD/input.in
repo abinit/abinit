@@ -24,11 +24,5 @@ chneut, eph_extrael ,  eph_fermie ,  eph_fsewin ,  eph_fsmear ,  eph_intmeth  , 
 # Wannier
  plowan_bandf ,  plowan_bandi , plowan_compute ,  plowan_iatom  , plowan_it  , plowan_lcalc ,  plowan_natom ,  plowan_nbl ,  plowan_nt ,  plowan_projcalc ,  plowan_realspace  ,prtwant, w90iniprj,w90prtunk
 
-# Wavelets
- nwfshist,tl_nprccg, tl_radius, usewvl, wvl_bigdft_comp, wvl_crmult, wvl_frmult, wvl_hgrid,wvl_ngauss, wvl_nprccg
-
-# recursion method
- recefermi, recgratio, recnpath, recnrec, recptrott, recrcut, rectesteg, rectolden, tfkinfunc,tfw_toldfe, %userec
-
 # van der waals
  irdvdw, prtvdw, vdw_df_acutmin, vdw_df_aratio, vdw_df_damax, vdw_df_damin,vdw_df_dcut, vdw_df_dratio, vdw_df_dsoft, vdw_df_gcut, vdw_df_ndpts, vdw_df_ngpts,vdw_df_nqpts, vdw_df_nrpts, vdw_df_nsmooth,vdw_df_phisoft, vdw_df_qcut, vdw_df_qratio, vdw_df_rcut,  vdw_df_rsoft,vdw_df_threshold, vdw_df_tolerance,vdw_df_tweak,vdw_df_zab, vdw_supercell, vdw_nfrag, vdw_tol,vdw_tol_3bt, vdw_typfrag, vdw_xc

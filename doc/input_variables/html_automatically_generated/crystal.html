@@ -16,6 +16,9 @@ The cell may be orthogonal or non-orthogonal.
 Any kind of symmetries and corresponding sets of k-point can be input,
 and taken into account in the computation. The crystal structure and the position of the atoms in the unit cell must be specified.
 Details about the way the crystal structure is defined in ABINIT can be found <a href="../documents/geometry.pdf">here</a>.
+<br/>The code can automatically generate symmetries from the primitive cell and the position of atoms. In this case, it identifies automatically the Bravais lattice, point group and space group.
+Alternatively, it can start from the symmetries and generate the atomic positions from the irreducible set. Also, a database of the 230 spatial groups of symmetry
+is built inside ABINIT.
 
 <p>&nbsp;
 <HR ALIGN=left>

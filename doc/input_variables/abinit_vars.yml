@@ -17427,7 +17427,7 @@
         memory required by the program since N previous wavefunctions
         are stored during the electronic minimisation.
         </p>
-    topics: null
+    topics: Wavelets_useful
     vartype: integer
 - !variable
     abivarname: nzchempot
@@ -22890,7 +22890,7 @@
          Used in Recursion method ([[tfkinfunc]]=2).
         In the first  SCF calculation it fixes the initial guess for the Fermi energy.
         </p>
-    topics: null
+    topics: recursion_useful
     vartype: real
 - !variable
     abivarname: recgratio
@@ -22916,7 +22916,7 @@
         FFT interpolation.  Note that ngfft/recgratio=number of points of the
         coarse grid has to be compatible with the parallelization parameters.
         </p>
-    topics: null
+    topics: recursion_useful
     vartype: integer
 - !variable
     abivarname: recnpath
@@ -22938,7 +22938,7 @@
         compute the entropy and the eigenvalues energy. during the latest SFC
         cycles.
         </p>
-    topics: null
+    topics: recursion_expert
     vartype: integer
 - !variable
     abivarname: recnrec
@@ -22960,7 +22960,7 @@
         [[rectolden]] is reached before that order, the recursion method
         automatically stops.
         </p>
-    topics: null
+    topics: recursion_expert
     vartype: integer
 - !variable
     abivarname: recptrott
@@ -22988,7 +22988,7 @@
         error of the green kernel exp((recptrott/beta*|r|^2)) on the ngfft
         grid.
         </p>
-    topics: null
+    topics: recursion_expert
     vartype: integer
 - !variable
     abivarname: recrcut
@@ -23010,7 +23010,7 @@
         cell: the density at a point will be computed with taking account only of
         a sphere of radius [[recrcut]].
         </p>
-    topics: null
+    topics: recursion_useful
     vartype: integer
 - !variable
     abivarname: rectesteg
@@ -23030,7 +23030,7 @@
         It is used to test an electron gas by putting the ion potential
         equal to zero.
         </p>
-    topics: null
+    topics: recursion_expert
     vartype: integer
 - !variable
     abivarname: rectolden
@@ -23052,7 +23052,7 @@
         density difference is computed in the infinity norm (that is, it is
         computed point-by-point, and then the maximum difference is computed).
         </p>
-    topics: null
+    topics: recursion_basic
     vartype: real
 - !variable
     abivarname: red_dfield
@@ -25250,7 +25250,7 @@
           </li>
          </ul>
         </p>
-    topics: null
+    topics: recursion_compulsory
     vartype: integer
 - !variable
     abivarname: tfw_toldfe
@@ -25270,7 +25270,7 @@
         It sets a tolerance for absolute differences of total energy that, reached TWICE successively, will cause the
         initialization steps (without gradient correction) to stop and the gradient correction to be added.<br/>
         Can be specified in Ha (the default), Ry, eV or Kelvin, since it has the 'ENERGY' characteristics.
-    topics: null
+    topics: recursion_useful
     vartype: real
 - !variable
     abivarname: timopt
@@ -25340,7 +25340,7 @@
 
         TO BE IMPROVED : all tl_* and wvl_* variables should contain a link to a tutorial, David Waroquiers 090831.
         </p>
-    topics: null
+    topics: Wavelets_expert
     vartype: integer
 - !variable
     abivarname: tl_radius
@@ -25365,7 +25365,7 @@
         correspond to a length in atomic units being the spacial expansion
         with the exponential decay around the grid.
         </p>
-    topics: null
+    topics: Wavelets_useful
     vartype: real
 - !variable
     abivarname: tnons
@@ -26561,7 +26561,7 @@
          This internal variable is set to 1 when the recursion method is
         activated (see [[tfkinfunc]]).
         </p>
-    topics: null
+    topics: recursion_internal
     vartype: integer
 - !variable
     abivarname: useria
@@ -26807,7 +26807,7 @@
          The spin computation is not currently possible with wavelets and
         metalic systems may be slow to converge.
         </p>
-    topics: null
+    topics: Wavelets_compulsory
     vartype: integer
 - !variable
     abivarname: usexcnhat
@@ -28180,7 +28180,7 @@
           </li>
          </ul>
         </p>
-    topics: null
+    topics: convergency_expert
     vartype: integer
 - !variable
     abivarname: wtatcon
@@ -28344,7 +28344,7 @@
         with those obtained with BigDFT stand-alone.
         When it is set to 1, ABINIT will follow the workflow as in BigDFT stand-alone.
         Therefore, the results must be exactly the same with the two codes.
-    topics: null
+    topics: Wavelets_expert
     vartype: integer
 - !variable
     abivarname: wvl_crmult
@@ -28368,7 +28368,7 @@
          <br />
          This factor is responsible for the amount of used memory (see also [[wvl_hgrid]]).
         </p>
-    topics: null
+    topics: Wavelets_basic
     vartype: real
 - !variable
     abivarname: wvl_frmult
@@ -28396,7 +28396,7 @@
          <br />
          This factor is responsible for the amount of used memory (see also [[wvl_hgrid]]).
         </p>
-    topics: null
+    topics: Wavelets_basic
     vartype: real
 - !variable
     abivarname: wvl_hgrid
@@ -28417,7 +28417,7 @@
         responsible for the memory occupation in the wavelet
         computation. The value is a length in atomic units.
         </p>
-    topics: null
+    topics: Wavelets_basic
     vartype: real
 - !variable
     abivarname: wvl_ngauss
@@ -28439,7 +28439,7 @@
         fitted to a sum of complex Gaussians.
         The fit is done for wvl_ngauss(1), wvl_ngauss(1)+1 ... up to wvl_ngauss(2) Gaussians.
         </p>
-    topics: null
+    topics: Wavelets_expert
     vartype: integer
 - !variable
     abivarname: wvl_nprccg
@@ -28460,7 +28460,7 @@
         defines a boundary for the number of conjugate gradient
         iterations on each wavefunction convergence step.
         </p>
-    topics: null
+    topics: Wavelets_expert
     vartype: integer
 - !variable
     abivarname: xangst
