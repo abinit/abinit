@@ -30,8 +30,9 @@ MODULE m_ddb_hdr
  use defs_abitypes
  use m_xmpi
 
+ use m_pawtab,  only : pawtab_type, pawtab_nullify, pawtab_copy, pawtab_free
+ use m_psps,    only : psps_copy, psps_free
  use m_ddb,     only : psddb8
- use m_pawtab
 
  implicit none
 
@@ -178,10 +179,11 @@ subroutine ddb_hdr_init(ddb_hdr, dtset, psps, pawtab, ddb_version, &
 
 ! ************************************************************************
 
- ddb_hdr%psps = psps
  ddb_hdr%ddb_version = ddb_version
  ddb_hdr%dscrpt = dscrpt
  ddb_hdr%ngfft = ngfft
+
+ call psps_copy(psps, ddb_hdr%psps)
 
  ! Copy scalars from dtset
  ddb_hdr%matom = dtset%natom
@@ -234,7 +236,8 @@ subroutine ddb_hdr_init(ddb_hdr, dtset, psps, pawtab, ddb_version, &
 
  ddb_hdr%xred = xred
  ddb_hdr%occ = occ
- ddb_hdr%pawtab = pawtab
+
+ call pawtab_copy(pawtab, ddb_hdr%pawtab)
 
 end subroutine ddb_hdr_init
 !!***
@@ -349,6 +352,8 @@ subroutine ddb_hdr_free(ddb_hdr)
  ABI_FREE(ddb_hdr%znucl)
 
  ! types
+ call psps_free(ddb_hdr%psps)
+
  if (allocated(ddb_hdr%pawtab)) then
    call pawtab_free(ddb_hdr%pawtab)
    ABI_DATATYPE_DEALLOCATE(ddb_hdr%pawtab)

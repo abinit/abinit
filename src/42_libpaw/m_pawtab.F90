@@ -24,10 +24,12 @@
 
 MODULE m_pawtab
 
- USE_DEFS
- USE_MSG_HANDLING
- USE_MPI_WRAPPERS
- USE_MEMORY_PROFILING
+ use defs_basis
+ use m_errors, only : msg_hndl, netcdf_check
+ use m_xmpi
+ use m_profiling_abi
+
+ use m_copy
 
  implicit none
 
@@ -531,6 +533,7 @@ MODULE m_pawtab
  public :: pawtab_set_flags    ! Set the value of the internal flags
  public :: pawtab_print        ! Printout of the object.
  public :: pawtab_bcast        ! MPI broadcast the object
+ public :: pawtab_copy         ! Copy object
 
  interface pawtab_nullify
    module procedure pawtab_nullify_0D
@@ -546,6 +549,11 @@ MODULE m_pawtab
    module procedure pawtab_set_flags_0D
    module procedure pawtab_set_flags_1D
  end interface pawtab_set_flags
+
+ interface pawtab_copy
+   module procedure pawtab_copy_0D
+   module procedure pawtab_copy_1D
+ end interface pawtab_copy
 !!***
 
 CONTAINS !===========================================================
@@ -935,6 +943,201 @@ subroutine pawtab_free_1D(Pawtab)
  end do
 
 end subroutine pawtab_free_1D
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_pawtab/pawtab_copy_0D
+!! NAME
+!!  pawtab_copy_0D
+!!
+!! FUNCTION
+!!  Copy a pawtab structure
+!!
+!! SIDE EFFECTS
+!!
+!! PARENTS
+!!      m_pawtab
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine pawtab_copy_0D(Pawtabin, Pawtabout)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'pawtab_copy_0D'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!arrays
+ type(Pawtab_type),intent(in) :: Pawtabin
+ type(Pawtab_type),intent(out) :: Pawtabout
+
+! *************************************************************************
+
+ !@Pawtab_type
+
+ ! integer
+ Pawtabout%basis_size             = Pawtabin%basis_size
+ Pawtabout%has_fock               = Pawtabin%has_fock
+ Pawtabout%has_kij                = Pawtabin%has_kij
+ Pawtabout%has_shapefncg          = Pawtabin%has_shapefncg
+ Pawtabout%has_nabla              = Pawtabin%has_nabla
+ Pawtabout%has_tproj              = Pawtabin%has_tproj
+ Pawtabout%has_tvale              = Pawtabin%has_tvale
+ Pawtabout%has_vhtnzc             = Pawtabin%has_vhtnzc
+ Pawtabout%has_vhnzc              = Pawtabin%has_vhnzc
+ Pawtabout%has_wvl                = Pawtabin%has_wvl
+ Pawtabout%ij_proj                = Pawtabin%ij_proj
+ Pawtabout%ij_size                = Pawtabin%ij_size
+ Pawtabout%lcut_size              = Pawtabin%lcut_size
+ Pawtabout%l_size                 = Pawtabin%l_size
+ Pawtabout%lexexch                = Pawtabin%lexexch
+ Pawtabout%lmn_size               = Pawtabin%lmn_size
+ Pawtabout%lmn2_size              = Pawtabin%lmn2_size
+ Pawtabout%lmnmix_sz              = Pawtabin%lmnmix_sz
+ Pawtabout%lpawu                  = Pawtabin%lpawu
+ Pawtabout%nproju                 = Pawtabin%nproju
+ Pawtabout%mesh_size              = Pawtabin%mesh_size
+ Pawtabout%core_mesh_size         = Pawtabin%core_mesh_size
+ Pawtabout%partialwave_mesh_size  = Pawtabin%partialwave_mesh_size
+ Pawtabout%tnvale_mesh_size       = Pawtabin%tnvale_mesh_size
+ Pawtabout%mqgrid                 = Pawtabin%mqgrid
+ Pawtabout%mqgrid_shp             = Pawtabin%mqgrid_shp
+ Pawtabout%shape_lambda           = Pawtabin%shape_lambda
+ Pawtabout%shape_type             = Pawtabin%shape_type
+ Pawtabout%useexexch              = Pawtabin%useexexch
+ Pawtabout%usepawu                = Pawtabin%usepawu
+ Pawtabout%usepotzero             = Pawtabin%usepotzero
+ Pawtabout%usetcore               = Pawtabin%usetcore
+
+ ! real
+ Pawtabout%beta                   = Pawtabin%beta
+ Pawtabout%dncdq0                 = Pawtabin%dncdq0
+ Pawtabout%d2ncdq0                = Pawtabin%d2ncdq0
+ Pawtabout%dnvdq0                 = Pawtabin%dnvdq0
+ Pawtabout%ex_cc                  = Pawtabin%ex_cc
+ Pawtabout%exccore                = Pawtabin%exccore
+ Pawtabout%exchmix                = Pawtabin%exchmix
+ Pawtabout%f4of2_sla              = Pawtabin%f4of2_sla
+ Pawtabout%f6of2_sla              = Pawtabin%f6of2_sla
+ Pawtabout%jpawu                  = Pawtabin%jpawu
+ Pawtabout%rpaw                   = Pawtabin%rpaw
+ Pawtabout%rshp                   = Pawtabin%rshp
+ Pawtabout%rcore                  = Pawtabin%rcore
+ Pawtabout%shape_sigma            = Pawtabin%shape_sigma
+ Pawtabout%upawu                  = Pawtabin%upawu
+
+ ! objects (pointer)
+ Pawtabout%wvl                    = Pawtabin%wvl
+
+
+ ! integer allocatable
+ call alloc_copy( Pawtabin%indklmn, Pawtabout%indklmn)
+ call alloc_copy( Pawtabin%indlmn, Pawtabout%indlmn)
+ call alloc_copy( Pawtabin%klmntomn, Pawtabout%klmntomn)
+ call alloc_copy( Pawtabin%kmix, Pawtabout%kmix)
+ call alloc_copy( Pawtabin%lnproju, Pawtabout%lnproju)
+ call alloc_copy( Pawtabin%orbitals, Pawtabout%orbitals)
+
+ ! real allocatable
+ call alloc_copy( Pawtabin%coredens, Pawtabout%coredens)
+ call alloc_copy( Pawtabin%dij0, Pawtabout%dij0)
+ call alloc_copy( Pawtabin%dltij, Pawtabout%dltij)
+ call alloc_copy( Pawtabin%dshpfunc, Pawtabout%dshpfunc)
+ call alloc_copy( Pawtabin%eijkl, Pawtabout%eijkl)
+ call alloc_copy( Pawtabin%eijkl_sr, Pawtabout%eijkl_sr)
+ call alloc_copy( Pawtabin%ex_cvij, Pawtabout%ex_cvij)
+ call alloc_copy( Pawtabin%fk, Pawtabout%fk)
+ call alloc_copy( Pawtabin%gammaij, Pawtabout%gammaij)
+ call alloc_copy( Pawtabin%gnorm, Pawtabout%gnorm)
+ call alloc_copy( Pawtabin%kij, Pawtabout%kij)
+ call alloc_copy( Pawtabin%nabla_ij, Pawtabout%nabla_ij)
+ call alloc_copy( Pawtabin%phi, Pawtabout%phi)
+ call alloc_copy( Pawtabin%nabla_ij, Pawtabout%nabla_ij)
+ call alloc_copy( Pawtabin%phi, Pawtabout%phi)
+ call alloc_copy( Pawtabin%phiphj, Pawtabout%phiphj)
+ call alloc_copy( Pawtabin%phiphjint, Pawtabout%phiphjint)
+ call alloc_copy( Pawtabin%ph0phiint, Pawtabout%ph0phiint)
+ call alloc_copy( Pawtabin%qgrid_shp, Pawtabout%qgrid_shp)
+ call alloc_copy( Pawtabin%qijl, Pawtabout%qijl)
+ call alloc_copy( Pawtabin%rad_for_spline, Pawtabout%rad_for_spline)
+ call alloc_copy( Pawtabin%rhoij0, Pawtabout%rhoij0)
+ call alloc_copy( Pawtabin%shape_alpha, Pawtabout%shape_alpha)
+ call alloc_copy( Pawtabin%shape_q, Pawtabout%shape_q)
+ call alloc_copy( Pawtabin%shapefunc, Pawtabout%shapefunc)
+ call alloc_copy( Pawtabin%shapefncg, Pawtabout%shapefncg)
+ call alloc_copy( Pawtabin%sij, Pawtabout%sij)
+ call alloc_copy( Pawtabin%tcoredens, Pawtabout%tcoredens)
+ call alloc_copy( Pawtabin%tcorespl, Pawtabout%tcorespl)
+ call alloc_copy( Pawtabin%tphi, Pawtabout%tphi)
+ call alloc_copy( Pawtabin%tphitphj, Pawtabout%tphitphj)
+ call alloc_copy( Pawtabin%tproj, Pawtabout%tproj)
+ call alloc_copy( Pawtabin%tvalespl, Pawtabout%tvalespl)
+ call alloc_copy( Pawtabin%Vee, Pawtabout%Vee)
+ call alloc_copy( Pawtabin%Vex, Pawtabout%Vex)
+ call alloc_copy( Pawtabin%vhtnzc, Pawtabout%vhtnzc)
+ call alloc_copy( Pawtabin%VHnZC, Pawtabout%VHnZC)
+ call alloc_copy( Pawtabin%zioneff, Pawtabout%zioneff)
+ 
+end subroutine pawtab_copy_0D
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_pawtab/pawtab_copy_1D
+!! NAME
+!!  pawtab_copy_1D
+!!
+!! FUNCTION
+!!  Copy a pawtab structure
+!!
+!! SIDE EFFECTS
+!!
+!! PARENTS
+!!      m_pawtab
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine pawtab_copy_1D(Pawtabin, Pawtabout)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'pawtab_copy_1D'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!arrays
+ type(Pawtab_type),intent(in) :: Pawtabin(:)
+ type(Pawtab_type),intent(out) :: Pawtabout(:)
+
+!Local variables-------------------------------
+ integer :: ii,nn
+
+! *************************************************************************
+
+ !@pawtab_type
+
+ nn=size(Pawtabin)
+ if (nn==0) return
+
+ do ii=1,nn
+   call pawtab_copy_0D(Pawtabin(ii), Pawtabout(ii))
+ end do
+
+end subroutine pawtab_copy_1D
 !!***
 
 !----------------------------------------------------------------------
