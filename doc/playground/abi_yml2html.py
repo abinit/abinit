@@ -307,9 +307,9 @@ for i, section_info in enumerate(sections):
     elif j == "content":
       sectionhtml += all_contents[section]
     else:
-      extract_j=extract_from_section(section_info,j) 
+      extract_j=getattr(section_info,j) 
       if extract_j.strip() == "":
-        sectionhtml += extract_from_section(section_info_default,j) 
+        sectionhtml += getattr(section_info_default,j) 
       else:
         sectionhtml += extract_j
     sectionhtml += "\n"

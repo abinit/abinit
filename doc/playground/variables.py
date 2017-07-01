@@ -157,30 +157,6 @@ class Section(yaml.YAMLObject):
         self.tofcontent_header = tofcontent_header
         self.end      = end
 
-def extract_from_section(object,item):
-  """ Fake function, to be modified when I will understand better Python ..."""
-  if item=="header":
-    found=object.header
-  elif item=="title":
-    found=object.title
-  elif item=="subtitle":
-    found=object.subtitle
-  elif item=="purpose":
-    found=object.purpose
-  elif item=="advice":
-    found=object.advice
-  elif item=="copyright":
-    found=object.copyright
-  elif item=="links":
-    found=object.links
-  elif item=="menu":
-    found=object.menu
-  elif item=="tofcontent_header":
-    found=object.tofcontent_header
-  elif item=="end":
-    found=object.end
-  return found
-
 ####################################################################################################
 
 class ValueWithUnit(yaml.YAMLObject):
