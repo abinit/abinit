@@ -84,4 +84,5 @@ prtwf 0      # Don't output the wave-functions
 #%% authors = D. Caliste
 #%% keywords = 
 #%% description = Hypothetical NaTi molecule. Test the diagonalisation scheme with wavelets
+#%% topics = Wavelets
 #%%<END TEST_INFO>

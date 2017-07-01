@@ -68,4 +68,5 @@ prteig 0
 #%% authors = T. Rangel
 #%% keywords =  PAW
 #%% description = H in a box (PAW). PAW projectors are fitted to Gaussians.
+#%% topics = Wavelets
 #%%<END TEST_INFO>
