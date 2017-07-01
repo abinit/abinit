@@ -53,7 +53,7 @@
 - !topic
     topic_name: recursion
     howto: |-
-      orbital-free calculations
+      perform orbital-free calculations
 - !topic
     topic_name: spinpolarisation
     howto: |-
@@ -70,4 +70,3 @@
     topic_name: xc
     howto: |-
       set parameters related to the exchange and correlation functionals
-

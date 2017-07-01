@@ -51,6 +51,10 @@
     howto: |-
       set parameters to print some useful quantities
 - !topic
+    topic_name: recursion
+    howto: |-
+      perform orbital-free calculations
+- !topic
     topic_name: spinpolarisation
     howto: |-
       set parameters for a spin-polarized calculation
@@ -59,7 +63,10 @@
     howto: |-
       perform TDDFT calculations.
 - !topic
+    topic_name: Wavelets
+    howto: |-
+      perform calculations on a wavelet basis.
+- !topic
     topic_name: xc
     howto: |-
       set parameters related to the exchange and correlation functionals
-
