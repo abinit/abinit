@@ -26,6 +26,8 @@
 MODULE m_ddb_hdr
 
  use defs_basis
+ use defs_datatypes
+ use defs_abitypes
  use m_xmpi
 
  use m_ddb,     only : psddb8
@@ -91,22 +93,22 @@ MODULE m_ddb_hdr
    real(dp),allocatable :: amu(:)
    ! amu(mtypat)
 
-   real(dp),allocatable :: kpt(:)
+   real(dp),allocatable :: kpt(:,:)
    ! kpt(3,mkpt)
 
    real(dp),allocatable :: occ(:)
    ! occ(mband*mkpt)
 
-   real(dp),allocatable :: spinat(:)
+   real(dp),allocatable :: spinat(:,:)
    ! spinat(3,matom)
 
-   real(dp),allocatable :: tnons(:)
+   real(dp),allocatable :: tnons(:,:)
    ! tnons(3,msym)
 
    real(dp),allocatable :: wtk(:)
    ! wtk(mkpt)
 
-   real(dp),allocatable :: xred(:)
+   real(dp),allocatable :: xred(:,:)
    ! xred(3,matom)
 
    real(dp),allocatable :: zion(:)
@@ -151,7 +153,14 @@ CONTAINS  !===========================================================
 !! SOURCE
 
 subroutine ddb_hdr_init(ddb_hdr, dtset, psps, pawtab, ddb_version, &
-&                        ngfft, occ, xred, dscrpt)
+&                       ngfft, occ, xred, dscrpt)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'ddb_hdr_init'
+!End of the abilint section
 
  implicit none
 
@@ -169,6 +178,7 @@ subroutine ddb_hdr_init(ddb_hdr, dtset, psps, pawtab, ddb_version, &
 
 ! ************************************************************************
 
+ ddb_hdr%psps = psps
  ddb_hdr%ddb_version = ddb_version
  ddb_hdr%dscrpt = dscrpt
  ddb_hdr%ngfft = ngfft
@@ -250,6 +260,12 @@ end subroutine ddb_hdr_init
 subroutine ddb_hdr_malloc(ddb_hdr)
 
 
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'ddb_hdr_malloc'
+!End of the abilint section
+
  implicit none
 
 !Arguments ------------------------------------
@@ -275,7 +291,8 @@ subroutine ddb_hdr_malloc(ddb_hdr)
  ABI_MALLOC(ddb_hdr%znucl,(ddb_hdr%mtypat))
 
  ! types
- ABI_MALLOC(ddb_hdr%pawtab,(ddb_hdr%psps%ntypat*ddb_hdr%psps%usepaw))
+ ABI_DATATYPE_ALLOCATE(ddb_hdr%pawtab,(ddb_hdr%psps%ntypat*ddb_hdr%psps%usepaw))
+ call pawtab_nullify(ddb_hdr%pawtab)
 
 end subroutine ddb_hdr_malloc
 !!***
@@ -300,6 +317,12 @@ end subroutine ddb_hdr_malloc
 
 subroutine ddb_hdr_free(ddb_hdr)
 
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'ddb_hdr_free'
+!End of the abilint section
 
  implicit none
 
@@ -327,6 +350,7 @@ subroutine ddb_hdr_free(ddb_hdr)
 
  ! types
  call pawtab_free(ddb_hdr%pawtab)
+ ABI_DATATYPE_DEALLOCATE(ddb_hdr%pawtab)
 
 end subroutine ddb_hdr_free
 !!***
@@ -353,10 +377,17 @@ end subroutine ddb_hdr_free
 subroutine ddb_hdr_open_write(ddb_hdr, filnam, unddb)
 
 
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'ddb_hdr_open_write'
+ use interfaces_72_response
+!End of the abilint section
+
  implicit none
 
 !Arguments ------------------------------------
- type(ddb_hdr_type),intent(in) :: ddb_hdr
+ type(ddb_hdr_type),intent(inout) :: ddb_hdr
  character(len=fnlen),intent(in) :: filnam
  integer,intent(in) :: unddb
 
