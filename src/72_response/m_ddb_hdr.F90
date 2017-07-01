@@ -349,8 +349,10 @@ subroutine ddb_hdr_free(ddb_hdr)
  ABI_FREE(ddb_hdr%znucl)
 
  ! types
- call pawtab_free(ddb_hdr%pawtab)
- ABI_DATATYPE_DEALLOCATE(ddb_hdr%pawtab)
+ if (allocated(pawtab)) then
+   call pawtab_free(ddb_hdr%pawtab)
+   ABI_DATATYPE_DEALLOCATE(ddb_hdr%pawtab)
+ end if
 
 end subroutine ddb_hdr_free
 !!***
