@@ -1447,8 +1447,12 @@ subroutine nctab_copy(nctabin, nctabout)
  nctabout%d2ncdq0    = nctabin%d2ncdq0
  nctabout%dnvdq0     = nctabin%dnvdq0
 
- call alloc_copy( nctabin%tvalespl, nctabout%tvalespl)
- call alloc_copy( nctabin%tcorespl, nctabout%tcorespl)
+ if (allocated(nctabin%tvalespl)) then
+   call alloc_copy( nctabin%tvalespl, nctabout%tvalespl)
+ end if
+ if (allocated(nctabin%tcorespl)) then
+   call alloc_copy( nctabin%tcorespl, nctabout%tcorespl)
+ end if
 
 end subroutine nctab_copy
 !!***
