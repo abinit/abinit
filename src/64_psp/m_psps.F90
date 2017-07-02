@@ -712,28 +712,70 @@ subroutine psps_copy(pspsin, pspsout)
  pspsout%vlspl_recipSpace = pspsin%vlspl_recipSpace
 
  ! integer allocatable
- call alloc_copy( pspsin%algalch, pspsout%algalch)
- call alloc_copy( pspsin%indlmn, pspsout%indlmn)
- call alloc_copy( pspsin%pspdat, pspsout%pspdat)
- call alloc_copy( pspsin%pspcod, pspsout%pspcod)
- call alloc_copy( pspsin%pspso, pspsout%pspso)
- call alloc_copy( pspsin%pspxc, pspsout%pspxc)
+ if (allocated(pspsin%algalch)) then
+   call alloc_copy( pspsin%algalch, pspsout%algalch)
+ end if
+ if (allocated(pspsin%indlmn)) then
+   call alloc_copy( pspsin%indlmn, pspsout%indlmn)
+ end if
+ if (allocated(pspsin%pspdat)) then
+   call alloc_copy( pspsin%pspdat, pspsout%pspdat)
+ end if
+ if (allocated(pspsin%pspcod)) then
+   call alloc_copy( pspsin%pspcod, pspsout%pspcod)
+ end if
+ if (allocated(pspsin%pspso)) then
+   call alloc_copy( pspsin%pspso, pspsout%pspso)
+ end if
+ if (allocated(pspsin%pspxc)) then
+   call alloc_copy( pspsin%pspxc, pspsout%pspxc)
+ end if
 
  ! real allocatable
- call alloc_copy( pspsin%ekb, pspsout%ekb)
- call alloc_copy( pspsin%ffspl, pspsout%ffspl)
- call alloc_copy( pspsin%mixalch, pspsout%mixalch)
- call alloc_copy( pspsin%qgrid_ff, pspsout%qgrid_ff)
- call alloc_copy( pspsin%qgrid_vl, pspsout%qgrid_vl)
- call alloc_copy( pspsin%vlspl, pspsout%vlspl)
- call alloc_copy( pspsin%dvlspl, pspsout%dvlspl)
- call alloc_copy( pspsin%xcccrc, pspsout%xcccrc)
- call alloc_copy( pspsin%xccc1d, pspsout%xccc1d)
- call alloc_copy( pspsin%zionpsp, pspsout%zionpsp)
- call alloc_copy( pspsin%ziontypat, pspsout%ziontypat)
- call alloc_copy( pspsin%znuclpsp, pspsout%znuclpsp)
- call alloc_copy( pspsin%znucltypat, pspsout%znucltypat)
+ if (allocated(pspsin%ekb)) then
+   call alloc_copy( pspsin%ekb, pspsout%ekb)
+ end if
+ if (allocated(pspsin%ffspl)) then
+   call alloc_copy( pspsin%ffspl, pspsout%ffspl)
+ end if
+ if (allocated(pspsin%mixalch)) then
+   call alloc_copy( pspsin%mixalch, pspsout%mixalch)
+ end if
+ if (allocated(pspsin%qgrid_ff)) then
+   call alloc_copy( pspsin%qgrid_ff, pspsout%qgrid_ff)
+ end if
+ if (allocated(pspsin%qgrid_vl)) then
+   call alloc_copy( pspsin%qgrid_vl, pspsout%qgrid_vl)
+ end if
+ if (allocated(pspsin%vlspl)) then
+   call alloc_copy( pspsin%vlspl, pspsout%vlspl)
+ end if
+ if (allocated(pspsin%dvlspl)) then
+   call alloc_copy( pspsin%dvlspl, pspsout%dvlspl)
+ end if
+ if (allocated(pspsin%xcccrc)) then
+   call alloc_copy( pspsin%xcccrc, pspsout%xcccrc)
+ end if
+ if (allocated(pspsin%xccc1d)) then
+   call alloc_copy( pspsin%xccc1d, pspsout%xccc1d)
+ end if
+ if (allocated(pspsin%zionpsp)) then
+   call alloc_copy( pspsin%zionpsp, pspsout%zionpsp)
+ end if
+ if (allocated(pspsin%ziontypat)) then
+   call alloc_copy( pspsin%ziontypat, pspsout%ziontypat)
+ end if
+ if (allocated(pspsin%znuclpsp)) then
+   call alloc_copy( pspsin%znuclpsp, pspsout%znuclpsp)
+ end if
+ if (allocated(pspsin%znucltypat)) then
+   call alloc_copy( pspsin%znucltypat, pspsout%znucltypat)
+ end if
 
+ ! BEGIN DEBUG
+ write(*,*) 'psps_init: will copy characters'
+ call flush()
+ ! END DEBUG
  ! allocate and copy character strings
  ABI_ALLOCATE(pspsout%filpsp,(pspsout%npsp))
  ABI_ALLOCATE(pspsout%title,(pspsout%npsp))

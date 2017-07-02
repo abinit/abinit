@@ -183,8 +183,16 @@ subroutine ddb_hdr_init(ddb_hdr, dtset, psps, pawtab, ddb_version, &
  ddb_hdr%dscrpt = dscrpt
  ddb_hdr%ngfft = ngfft
 
+ ! BEGIN DEBUG
+ write(*,*) 'ddb_hdr_init: calling psps_copy'
+ call flush()
+ ! END DEBUG
  call psps_copy(psps, ddb_hdr%psps)
 
+ ! BEGIN DEBUG
+ write(*,*) 'ddb_hdr_init: will copy scalars'
+ call flush()
+ ! END DEBUG
  ! Copy scalars from dtset
  ddb_hdr%matom = dtset%natom
  ddb_hdr%natom = dtset%natom
@@ -237,7 +245,15 @@ subroutine ddb_hdr_init(ddb_hdr, dtset, psps, pawtab, ddb_version, &
  ddb_hdr%xred = xred
  ddb_hdr%occ = occ
 
+ ! BEGIN DEBUG
+ write(*,*) 'ddb_hdr_init: calling pawtab_copy'
+ call flush()
+ ! END DEBUG
  call pawtab_copy(pawtab, ddb_hdr%pawtab)
+ ! BEGIN DEBUG
+ write(*,*) 'ddb_hdr_init: done'
+ call flush()
+ ! END DEBUG
 
 end subroutine ddb_hdr_init
 !!***
