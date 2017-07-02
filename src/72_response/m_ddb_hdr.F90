@@ -179,6 +179,10 @@ subroutine ddb_hdr_init(ddb_hdr, dtset, psps, pawtab, ddb_version, &
 
 ! ************************************************************************
 
+ ! BEGIN DEBUG
+ write(*,*) 'ddb_hdr_init: enter'
+ call flush()
+ ! END DEBUG
  ddb_hdr%ddb_version = ddb_version
  ddb_hdr%dscrpt = dscrpt
  ddb_hdr%ngfft = ngfft
