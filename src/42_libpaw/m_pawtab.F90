@@ -1036,9 +1036,9 @@ subroutine pawtab_copy_0D(Pawtabin, Pawtabout)
 
  ! objects (pointer)
  nullify(Pawtabout%wvl)
- if (associated(Pawtabin%wvl)) then
-   Pawtabout%wvl = Pawtabin%wvl
- end if
+ !if (associated(Pawtabin%wvl)) then
+ !  Pawtabout%wvl = Pawtabin%wvl
+ !end if
 
  ! integer allocatable
  if (allocated(Pawtabin%indklmn)) then

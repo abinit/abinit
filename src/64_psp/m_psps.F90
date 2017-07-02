@@ -772,10 +772,6 @@ subroutine psps_copy(pspsin, pspsout)
    call alloc_copy( pspsin%znucltypat, pspsout%znucltypat)
  end if
 
- ! BEGIN DEBUG
- write(*,*) 'psps_init: will copy characters'
- call flush()
- ! END DEBUG
  ! allocate and copy character strings
  ABI_ALLOCATE(pspsout%filpsp,(pspsout%npsp))
  ABI_ALLOCATE(pspsout%title,(pspsout%npsp))
@@ -788,7 +784,7 @@ subroutine psps_copy(pspsin, pspsout)
 
  ! allocate and copy objects
  if (allocated(pspsin%nctab)) then
-   ABI_ALLOCATE(pspsout%nctab,(pspsout%ntypat))
+   ABI_DATATYPE_ALLOCATE(pspsout%nctab,(pspsout%ntypat))
    do ii=1,pspsout%ntypat
      call nctab_copy(pspsin%nctab(ii), pspsout%nctab(ii))
    end do
