@@ -354,10 +354,18 @@ subroutine ddb_hdr_free(ddb_hdr)
  ! types
  call psps_free(ddb_hdr%psps)
 
+ ! BEGIN DEBUG
+ write(*,*) 'ddb_hdr_free: calling pawtab_free'
+ call flush()
+ ! END DEBUG
  if (allocated(ddb_hdr%pawtab)) then
    call pawtab_free(ddb_hdr%pawtab)
    ABI_DATATYPE_DEALLOCATE(ddb_hdr%pawtab)
  end if
+ ! BEGIN DEBUG
+ write(*,*) 'ddb_hdr_free: done'
+ call flush()
+ ! END DEBUG
 
 end subroutine ddb_hdr_free
 !!***

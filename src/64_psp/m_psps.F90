@@ -745,10 +745,12 @@ subroutine psps_copy(pspsin, pspsout)
  end do
 
  ! allocate and copy objects
- ABI_ALLOCATE(pspsout%nctab,(pspsout%ntypat))
- do ii=1,pspsout%ntypat
-   call nctab_copy(pspsin%nctab(ii), pspsout%nctab(ii))
- end do
+ if (allocated(pspsin%nctab)) then
+   ABI_ALLOCATE(pspsout%nctab,(pspsout%ntypat))
+   do ii=1,pspsout%ntypat
+     call nctab_copy(pspsin%nctab(ii), pspsout%nctab(ii))
+   end do
+ end if
 
  call psp2params_copy(pspsin%gth_params, pspsout%gth_params)
 
@@ -1231,11 +1233,21 @@ subroutine psp2params_copy(gth_paramsin, gth_paramsout)
 
 ! *********************************************************************
 
- call alloc_copy( gth_paramsin%psppar, gth_paramsout%psppar)
- call alloc_copy( gth_paramsin%radii_cf, gth_paramsout%radii_cf)
- call alloc_copy( gth_paramsin%psp_k_par, gth_paramsout%psp_k_par)
- call alloc_copy( gth_paramsin%hasGeometry, gth_paramsout%hasGeometry)
- call alloc_copy( gth_paramsin%set, gth_paramsout%set)
+ if (allocated(gth_paramsin%psppar)) then
+   call alloc_copy( gth_paramsin%psppar, gth_paramsout%psppar)
+ end if
+ if (allocated(gth_paramsin%radii_cf)) then
+   call alloc_copy( gth_paramsin%radii_cf, gth_paramsout%radii_cf)
+ end if
+ if (allocated(gth_paramsin%psp_k_par)) then
+   call alloc_copy( gth_paramsin%psp_k_par, gth_paramsout%psp_k_par)
+ end if
+ if (allocated(gth_paramsin%hasGeometry)) then
+   call alloc_copy( gth_paramsin%hasGeometry, gth_paramsout%hasGeometry)
+ end if
+ if (allocated(gth_paramsin%set)) then
+   call alloc_copy( gth_paramsin%set, gth_paramsout%set)
+ end if
 
 end subroutine psp2params_copy
 !!***

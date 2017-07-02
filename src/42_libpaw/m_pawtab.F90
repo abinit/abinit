@@ -1035,57 +1035,147 @@ subroutine pawtab_copy_0D(Pawtabin, Pawtabout)
  Pawtabout%upawu                  = Pawtabin%upawu
 
  ! objects (pointer)
- Pawtabout%wvl                    = Pawtabin%wvl
-
+ nullify(Pawtabout%wvl)
+ if (associated(Pawtabin%wvl)) then
+   Pawtabout%wvl = Pawtabin%wvl
+ end if
 
  ! integer allocatable
- call alloc_copy( Pawtabin%indklmn, Pawtabout%indklmn)
- call alloc_copy( Pawtabin%indlmn, Pawtabout%indlmn)
- call alloc_copy( Pawtabin%klmntomn, Pawtabout%klmntomn)
- call alloc_copy( Pawtabin%kmix, Pawtabout%kmix)
- call alloc_copy( Pawtabin%lnproju, Pawtabout%lnproju)
- call alloc_copy( Pawtabin%orbitals, Pawtabout%orbitals)
+ if (allocated(Pawtabin%indklmn)) then
+   call alloc_copy( Pawtabin%indklmn, Pawtabout%indklmn)
+ end if
+ if (allocated(Pawtabin%indlmn)) then
+   call alloc_copy( Pawtabin%indlmn, Pawtabout%indlmn)
+ end if
+ if (allocated(Pawtabin%klmntomn)) then
+   call alloc_copy( Pawtabin%klmntomn, Pawtabout%klmntomn)
+ end if
+ if (allocated(Pawtabin%kmix)) then
+   call alloc_copy( Pawtabin%kmix, Pawtabout%kmix)
+ end if
+ if (allocated(Pawtabin%lnproju)) then
+   call alloc_copy( Pawtabin%lnproju, Pawtabout%lnproju)
+ end if
+ if (allocated(Pawtabin%orbitals)) then
+   call alloc_copy( Pawtabin%orbitals, Pawtabout%orbitals)
+ end if
 
  ! real allocatable
- call alloc_copy( Pawtabin%coredens, Pawtabout%coredens)
- call alloc_copy( Pawtabin%dij0, Pawtabout%dij0)
- call alloc_copy( Pawtabin%dltij, Pawtabout%dltij)
- call alloc_copy( Pawtabin%dshpfunc, Pawtabout%dshpfunc)
- call alloc_copy( Pawtabin%eijkl, Pawtabout%eijkl)
- call alloc_copy( Pawtabin%eijkl_sr, Pawtabout%eijkl_sr)
- call alloc_copy( Pawtabin%ex_cvij, Pawtabout%ex_cvij)
- call alloc_copy( Pawtabin%fk, Pawtabout%fk)
- call alloc_copy( Pawtabin%gammaij, Pawtabout%gammaij)
- call alloc_copy( Pawtabin%gnorm, Pawtabout%gnorm)
- call alloc_copy( Pawtabin%kij, Pawtabout%kij)
- call alloc_copy( Pawtabin%nabla_ij, Pawtabout%nabla_ij)
- call alloc_copy( Pawtabin%phi, Pawtabout%phi)
- call alloc_copy( Pawtabin%nabla_ij, Pawtabout%nabla_ij)
- call alloc_copy( Pawtabin%phi, Pawtabout%phi)
- call alloc_copy( Pawtabin%phiphj, Pawtabout%phiphj)
- call alloc_copy( Pawtabin%phiphjint, Pawtabout%phiphjint)
- call alloc_copy( Pawtabin%ph0phiint, Pawtabout%ph0phiint)
- call alloc_copy( Pawtabin%qgrid_shp, Pawtabout%qgrid_shp)
- call alloc_copy( Pawtabin%qijl, Pawtabout%qijl)
- call alloc_copy( Pawtabin%rad_for_spline, Pawtabout%rad_for_spline)
- call alloc_copy( Pawtabin%rhoij0, Pawtabout%rhoij0)
- call alloc_copy( Pawtabin%shape_alpha, Pawtabout%shape_alpha)
- call alloc_copy( Pawtabin%shape_q, Pawtabout%shape_q)
- call alloc_copy( Pawtabin%shapefunc, Pawtabout%shapefunc)
- call alloc_copy( Pawtabin%shapefncg, Pawtabout%shapefncg)
- call alloc_copy( Pawtabin%sij, Pawtabout%sij)
- call alloc_copy( Pawtabin%tcoredens, Pawtabout%tcoredens)
- call alloc_copy( Pawtabin%tcorespl, Pawtabout%tcorespl)
- call alloc_copy( Pawtabin%tphi, Pawtabout%tphi)
- call alloc_copy( Pawtabin%tphitphj, Pawtabout%tphitphj)
- call alloc_copy( Pawtabin%tproj, Pawtabout%tproj)
- call alloc_copy( Pawtabin%tvalespl, Pawtabout%tvalespl)
- call alloc_copy( Pawtabin%Vee, Pawtabout%Vee)
- call alloc_copy( Pawtabin%Vex, Pawtabout%Vex)
- call alloc_copy( Pawtabin%vhtnzc, Pawtabout%vhtnzc)
- call alloc_copy( Pawtabin%VHnZC, Pawtabout%VHnZC)
- call alloc_copy( Pawtabin%zioneff, Pawtabout%zioneff)
- 
+ if (allocated(Pawtabin%coredens)) then
+   call alloc_copy( Pawtabin%coredens, Pawtabout%coredens)
+ end if
+ if (allocated(Pawtabin%dij0)) then
+   call alloc_copy( Pawtabin%dij0, Pawtabout%dij0)
+ end if
+ if (allocated(Pawtabin%dltij)) then
+   call alloc_copy( Pawtabin%dltij, Pawtabout%dltij)
+ end if
+ if (allocated(Pawtabin%dshpfunc)) then
+   call alloc_copy( Pawtabin%dshpfunc, Pawtabout%dshpfunc)
+ end if
+ if (allocated(Pawtabin%eijkl)) then
+   call alloc_copy( Pawtabin%eijkl, Pawtabout%eijkl)
+ end if
+ if (allocated(Pawtabin%eijkl_sr)) then
+   call alloc_copy( Pawtabin%eijkl_sr, Pawtabout%eijkl_sr)
+ end if
+ if (allocated(Pawtabin%ex_cvij)) then
+   call alloc_copy( Pawtabin%ex_cvij, Pawtabout%ex_cvij)
+ end if
+ if (allocated(Pawtabin%fk)) then
+   call alloc_copy( Pawtabin%fk, Pawtabout%fk)
+ end if
+ if (allocated(Pawtabin%gammaij)) then
+   call alloc_copy( Pawtabin%gammaij, Pawtabout%gammaij)
+ end if
+ if (allocated(Pawtabin%gnorm)) then
+   call alloc_copy( Pawtabin%gnorm, Pawtabout%gnorm)
+ end if
+ if (allocated(Pawtabin%kij)) then
+   call alloc_copy( Pawtabin%kij, Pawtabout%kij)
+ end if
+ if (allocated(Pawtabin%nabla_ij)) then
+   call alloc_copy( Pawtabin%nabla_ij, Pawtabout%nabla_ij)
+ end if
+ if (allocated(Pawtabin%phi)) then
+   call alloc_copy( Pawtabin%phi, Pawtabout%phi)
+ end if
+ if (allocated(Pawtabin%nabla_ij)) then
+   call alloc_copy( Pawtabin%nabla_ij, Pawtabout%nabla_ij)
+ end if
+ if (allocated(Pawtabin%phi)) then
+   call alloc_copy( Pawtabin%phi, Pawtabout%phi)
+ end if
+ if (allocated(Pawtabin%phiphj)) then
+   call alloc_copy( Pawtabin%phiphj, Pawtabout%phiphj)
+ end if
+ if (allocated(Pawtabin%phiphjint)) then
+   call alloc_copy( Pawtabin%phiphjint, Pawtabout%phiphjint)
+ end if
+ if (allocated(Pawtabin%ph0phiint)) then
+   call alloc_copy( Pawtabin%ph0phiint, Pawtabout%ph0phiint)
+ end if
+ if (allocated(Pawtabin%qgrid_shp)) then
+   call alloc_copy( Pawtabin%qgrid_shp, Pawtabout%qgrid_shp)
+ end if
+ if (allocated(Pawtabin%qijl)) then
+   call alloc_copy( Pawtabin%qijl, Pawtabout%qijl)
+ end if
+ if (allocated(Pawtabin%rad_for_spline)) then
+   call alloc_copy( Pawtabin%rad_for_spline, Pawtabout%rad_for_spline)
+ end if
+ if (allocated(Pawtabin%rhoij0)) then
+   call alloc_copy( Pawtabin%rhoij0, Pawtabout%rhoij0)
+ end if
+ if (allocated(Pawtabin%shape_alpha)) then
+   call alloc_copy( Pawtabin%shape_alpha, Pawtabout%shape_alpha)
+ end if
+ if (allocated(Pawtabin%shape_q)) then
+   call alloc_copy( Pawtabin%shape_q, Pawtabout%shape_q)
+ end if
+ if (allocated(Pawtabin%shapefunc)) then
+   call alloc_copy( Pawtabin%shapefunc, Pawtabout%shapefunc)
+ end if
+ if (allocated(Pawtabin%shapefncg)) then
+   call alloc_copy( Pawtabin%shapefncg, Pawtabout%shapefncg)
+ end if
+ if (allocated(Pawtabin%sij)) then
+   call alloc_copy( Pawtabin%sij, Pawtabout%sij)
+ end if
+ if (allocated(Pawtabin%tcoredens)) then
+   call alloc_copy( Pawtabin%tcoredens, Pawtabout%tcoredens)
+ end if
+ if (allocated(Pawtabin%tcorespl)) then
+   call alloc_copy( Pawtabin%tcorespl, Pawtabout%tcorespl)
+ end if
+ if (allocated(Pawtabin%tphi)) then
+   call alloc_copy( Pawtabin%tphi, Pawtabout%tphi)
+ end if
+ if (allocated(Pawtabin%tphitphj)) then
+   call alloc_copy( Pawtabin%tphitphj, Pawtabout%tphitphj)
+ end if
+ if (allocated(Pawtabin%tproj)) then
+   call alloc_copy( Pawtabin%tproj, Pawtabout%tproj)
+ end if
+ if (allocated(Pawtabin%tvalespl)) then
+   call alloc_copy( Pawtabin%tvalespl, Pawtabout%tvalespl)
+ end if
+ if (allocated(Pawtabin%Vee)) then
+   call alloc_copy( Pawtabin%Vee, Pawtabout%Vee)
+ end if
+ if (allocated(Pawtabin%Vex)) then
+   call alloc_copy( Pawtabin%Vex, Pawtabout%Vex)
+ end if
+ if (allocated(Pawtabin%vhtnzc)) then
+   call alloc_copy( Pawtabin%vhtnzc, Pawtabout%vhtnzc)
+ end if
+ if (allocated(Pawtabin%VHnZC)) then
+   call alloc_copy( Pawtabin%VHnZC, Pawtabout%VHnZC)
+ end if
+ if (allocated(Pawtabin%zioneff)) then
+   call alloc_copy( Pawtabin%zioneff, Pawtabout%zioneff)
+ end if
+
 end subroutine pawtab_copy_0D
 !!***
 
