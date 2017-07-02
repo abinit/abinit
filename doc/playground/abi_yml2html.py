@@ -159,32 +159,45 @@ if debug==1 :
   print(topics_in_tests)
 
 ################################################################################
-# Parse the headers of allvariables and special variables files also replace the JS_PATH.
+# Parse the headers of allvariables file, also replace the JS_PATH.
 
 with open('html_template/temp_allvariables.html') as f:
     header_all = f.read()
 print("Will use file named temp_allvariables.html as template for allvariables.html...")
 
-with open('html_template/temp_specials.html') as f:
-    header_specials = f.read()
-print("Will use file named temp_specials.html as template for specials.html...")
-
 header_all = header_all.replace("__JS_PATH__",js_path)
 
-all_contents = dict()
+################################################################################
+# Initialization to constitute the body of the specials and var*.html files
+
 all_vars = dict()
+all_contents = dict()
+for i, section_info in enumerate(sections):
+  section = section_info.name
+  all_vars[section] = []
+  all_contents[section]= "<br><br><br><br><hr>\n"
 
 # Create a dictionary that gives the section for each abivarname
-
 list_all_vars = dict()
-
 for var in variables:
   list_all_vars[var.abivarname] = var.section
 
-#
+################################################################################
+# Constitute the body of information for the special parameters, stored for the appropriate section in all_contents[section]
+
 cur_specials = []
 for (specialkey,specialval) in list_specials:
   cur_specials.append(specialkey)
+
+for (speckey, specval) in list_specials:
+  cur_content = "<br><font id=\"title\"><a name=\""+speckey+"\">"+speckey+"</a></font>\n"
+  cur_content += "<br><font id=\"text\">\n"
+  cur_content += "<p>\n"+doku2html(make_links(specval,speckey,list_all_vars,list_chars,cur_specials))+"\n"
+  cur_content += "</font>"
+  cur_content += "<br><br><a href=#top>Go to the top</a>\n"
+  cur_content += "<B> | </B><a href=\"allvariables.html#top\">Complete list of input variables</a><hr>\n"
+  #
+  all_contents["specials"] = all_contents["specials"] + cur_content + "\n\n"
 
 ################################################################################
 # Constitute the body of information for all variables, stored for the appropriate section in all_contents[section]
@@ -206,10 +219,6 @@ for i, var in enumerate(variables):
     abivarname = '%'+abivarname
   output = output + "<a href=\""+var.section+".html#"+var.abivarname+"\">"+abivarname+"</a>&nbsp;&nbsp;\n" 
   section = var.section
-  if section not in all_contents.keys():
-    all_contents[section] = "<br><br><br><br><hr>\n"
-    all_vars[section] = []
-
   all_vars[section].append([var.abivarname,var.mnemonics])
 
   # Constitute the body of information related to one input variable
@@ -290,12 +299,20 @@ for i, section_info in enumerate(sections):
   #Generate the body of the table of content 
   cur_let = 'A'
   toc_body = " <br>"+cur_let+".\n"
-  for abivarname,defi in all_vars[section]:
-    while not abivarname.startswith(cur_let.lower()):
-      cur_let = chr(ord(cur_let)+1)
-      toc_body += " <br>"+cur_let+".\n"
-    curlink = " <a href=\"#"+abivarname+"\">"+abivarname+"</a>&nbsp;&nbsp;\n"
-    toc_body += curlink
+  if (section != "specials"):
+    for abivarname,defi in all_vars[section]:
+      while not abivarname.startswith(cur_let.lower()):
+        cur_let = chr(ord(cur_let)+1)
+        toc_body += " <br>"+cur_let+".\n"
+      curlink = " <a href=\"#"+abivarname+"\">"+abivarname+"</a>&nbsp;&nbsp;\n"
+      toc_body += curlink
+  else:
+    for (speckey, specval) in list_specials:
+      while not speckey.lower().startswith(cur_let.lower()):
+        cur_let = chr(ord(cur_let)+1)
+        toc_body += " <br>"+cur_let+".\n"
+      curlink = " <a href=\"#"+speckey+"\">"+speckey+"</a>&nbsp;&nbsp;\n"
+      toc_body += curlink
   toc_body += "\n"
 
   #Write a first version of the html file, in the order "header" ... up to the "end"
@@ -328,39 +345,38 @@ for i, section_info in enumerate(sections):
   print("File "+section+".html has been written ...")
 
 # Special file : complete the content, then write the file and close it
-file_specials = 'html_automatically_generated/specials.html'
-f_sp = open(file_specials,'w')
-header_specials = header_specials.replace("__JS_PATH__",js_path)
-f_sp.write(header_specials)
-cur_let = 'A'
-cur_content = "<br><br><a href=#top>Go to the top</a><hr>\n"
-f_sp.write("<br>"+cur_let+".&nbsp;\n")
-for (speckey, specval) in list_specials:
-  #curlink = "<br /><a href=\"#"+abivarname+"\">"+abivarname+"</a> : "+defi+"\n"
-  while not speckey.lower().startswith(cur_let.lower()):
-    cur_let = chr(ord(cur_let)+1)
-    f_sp.write("<br>"+cur_let+".&nbsp;\n")
-  curlink = "<a href=\"#"+speckey+"\">"+speckey+"</a>&nbsp;&nbsp;\n"
-  f_sp.write(curlink)
-
-  cur_content += "<br><font id=\"title\"><a name=\""+speckey+"\">"+speckey+"</a></font>\n"
-  cur_content += "<br><font id=\"text\">\n"
-  cur_content += "<p>\n"+doku2html(make_links(specval,speckey,list_all_vars,list_chars,cur_specials))+"\n"
-  cur_content += "</font>"
-  cur_content += "<br><br><a href=#top>Go to the top</a><hr>\n"
-
-f_sp.write(cur_content)
-
-if make_topics_visible==0:
-  cur_content += "<script type=\"text/javascript\" src=\""+js_path+"list_internal_links.js\"> </script>\n\n"
-else:
-  cur_content += "<script type=\"text/javascript\" src=\""+js_path+"list_internal_links_incl_topics.js\"> </script>\n\n"
-cur_content += "</body>\n"
-cur_content += "</html>"
-
-f_sp.write(cur_content)
-f_sp.close()
-print("File specials.html has been written ...")
+#file_specials = 'html_automatically_generated/specials.html'
+#f_sp = open(file_specials,'w')
+#header_specials = header_specials.replace("__JS_PATH__",js_path)
+#f_sp.write(header_specials)
+#cur_let = 'A'
+#cur_content = "<br><br><a href=#top>Go to the top</a><hr>\n"
+#f_sp.write("<br>"+cur_let+".&nbsp;\n")
+#for (speckey, specval) in list_specials:
+#  while not speckey.lower().startswith(cur_let.lower()):
+#    cur_let = chr(ord(cur_let)+1)
+#    f_sp.write("<br>"+cur_let+".&nbsp;\n")
+#  curlink = "<a href=\"#"+speckey+"\">"+speckey+"</a>&nbsp;&nbsp;\n"
+#  f_sp.write(curlink)
+#
+#  cur_content += "<br><font id=\"title\"><a name=\""+speckey+"\">"+speckey+"</a></font>\n"
+#  cur_content += "<br><font id=\"text\">\n"
+#  cur_content += "<p>\n"+doku2html(make_links(specval,speckey,list_all_vars,list_chars,cur_specials))+"\n"
+#  cur_content += "</font>"
+#  cur_content += "<br><br><a href=#top>Go to the top</a><hr>\n"
+#
+#f_sp.write(cur_content)
+#
+#if make_topics_visible==0:
+#  cur_content += "<script type=\"text/javascript\" src=\""+js_path+"list_internal_links.js\"> </script>\n\n"
+#else:
+#  cur_content += "<script type=\"text/javascript\" src=\""+js_path+"list_internal_links_incl_topics.js\"> </script>\n\n"
+#cur_content += "</body>\n"
+#cur_content += "</html>"
+#
+#f_sp.write(cur_content)
+#f_sp.close()
+#print("File specials.html has been written ...")
 
 # Allvariables file : complete the content, then write the file and close it
 if make_topics_visible==0:

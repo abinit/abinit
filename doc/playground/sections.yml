@@ -1,3 +1,31 @@
+# This file provides the information needed to generate the documentation files that describes the input variables,
+# the "var*.html files (each being a "section"), as well as related parameters ("special"). 
+# Each paragraph of such documentation file will have a mixing of formatting html information and real content.
+# The default html formatting is presented in the section "default", at the bootom of the file. 
+# For most of the var*.html files, the default html formatting is hardly changed, so only minimal information
+# is needed to generate them. For the "special" parameters, some minor adjustments are needed, so that the default list
+# is less adequate.
+- !section
+    name : specials
+    keyword : special
+    header : |
+      <html>
+      <head><title>Description of special parameters.</title>
+      <link rel=stylesheet type="text/css" href="../formabinit.css">
+      </head>
+      <body bgcolor="#ffffff">
+
+      <hr>
+      <a name="top"></a>
+    title : |
+      <h1>ABINIT, special parameters:</h1>
+    purpose : |
+      <p>This document lists and provides the description of the name (keywords) of some parameters
+      that are used in the documentation of other variables.
+      <p> You can change these parameters at compile time usually.
+    tofcontent_header : |
+      <a name="list"></a>
+      <h3><b> Content of the file : alphabetical list of special parameters.</b></h3>
 - !section 
     name : varbas
     keyword : basic
