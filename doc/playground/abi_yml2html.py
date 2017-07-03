@@ -378,18 +378,13 @@ for (tclasskey, tclassval) in list_topics_class:
 # This sec4 is stored, for each topic_name, in topic_sec4[topic_name]
 
 topic_sec4 = dict()
-topic_class_sec4 = dict()
-found = dict()
 for i, var in enumerate(topics):
-  topic_name = var.topic_name
-  topic_class_sec4[topic_name] = ""
-  topic_sec4[topic_name] = ""
-  found[topic_name] = 0
+  topic_sec4[var.topic_name] = ""
  
 topic_header_sec4="\n\n<p>&nbsp; \n<HR ALIGN=left> \n<p> <a name=\"4\">&nbsp;</a>\n<h3><b> 4. Selected input files.</b></h3>\n\n\n"
 topic_header_sec4+="The user can find some related example input files in the ABINIT package in the directory /tests, or on the Web:\n"
 
-# Create a dictionary to contain the list of tests for each topics
+# Create a dictionary to contain the list of tests for each topic
 inputs_for_topic = dict()
 for str in topics_in_tests:
   str2 = str.split(':')
