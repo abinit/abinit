@@ -88,11 +88,7 @@ def make_links(text,cur_abivarname,variables,characteristics,specials):
   p=re.compile("\\[\\[([a-zA-Z0-9_ */<>]*)\\]\\]")
   if text is None:
     return ""
-  #try:
   new_text=p.sub(replace_link,text)
-  #except:
-  #  print("Trying to compile :"+str(text))
-
 
   return new_text
 
