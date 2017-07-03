@@ -1163,6 +1163,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,fixcoeff,hist,ncycle_in,nfixcoeff,po
 
  ABI_ALLOCATE(my_coeffindexes,(my_ncoeff))
  ABI_ALLOCATE(my_coefflist,(my_ncoeff))
+
 !2:compute the number of coefficients and the list of the corresponding
 !  coefficients for each CPU.
  do icoeff=1,my_ncoeff
@@ -1446,9 +1447,9 @@ subroutine fit_polynomial_coeff_fit(eff_pot,fixcoeff,hist,ncycle_in,nfixcoeff,po
 
 !Allocation of arrays
  ABI_DATATYPE_ALLOCATE(coeffs_tmp,(ncycle_max))
- ABI_ALLOCATE(singular_coeffs,(my_ncoeff))
+ ABI_ALLOCATE(singular_coeffs,(max(1,my_ncoeff)))
  ABI_ALLOCATE(coeff_values,(ncycle_max))
- ABI_ALLOCATE(gf_values,(4,my_ncoeff))
+ ABI_ALLOCATE(gf_values,(4,max(1,my_ncoeff)))
  ABI_ALLOCATE(list_coeffs_tmp,(ncycle_max))
  coeff_values = zero
  singular_coeffs = zero
@@ -1511,7 +1512,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,fixcoeff,hist,ncycle_in,nfixcoeff,po
  coeff_values = zero
  call fit_polynomial_coeff_computeGF(coeff_values,energy_coeffs,energy_diff,fcart_coeffs,&
 &                                    fcart_diff,ffact,gf_values(:,1),int((/1/)),natom_sc,&
-&                                    1,my_ncoeff,ntime,strten_coeffs,strten_diff,sfact,&
+&                                    0,my_ncoeff,ntime,strten_coeffs,strten_diff,sfact,&
 &                                    sqomega,ucvol)
 
 !Print the standard deviation before the fit
@@ -1571,13 +1572,11 @@ subroutine fit_polynomial_coeff_fit(eff_pot,fixcoeff,hist,ncycle_in,nfixcoeff,po
      call wrtout(std_out,message,'COLL')
    end if
 
-   if(my_ncoeff>=1) then
-     write(message,'(2x,a,12x,a,14x,a,13x,a,14x,a)') " Testing","MSEE","MSEFS","MSEF","MSES"
-     call wrtout(std_out,message,'COLL') 
-     write(message,'(a,7x,a,8x,a,8x,a,8x,a)') " Coefficient","(meV/f.u.)","(eV^2/A^2)","(eV^2/A^2)",&
+   write(message,'(2x,a,12x,a,14x,a,13x,a,14x,a)') " Testing","MSEE","MSEFS","MSEF","MSES"
+   call wrtout(std_out,message,'COLL') 
+   write(message,'(a,7x,a,8x,a,8x,a,8x,a)') " Coefficient","(meV/f.u.)","(eV^2/A^2)","(eV^2/A^2)",&
 &                                          "(eV^2/A^2)"
-     call wrtout(std_out,message,'COLL')
-   end if
+   call wrtout(std_out,message,'COLL')
 
 !  Reset gf_values
    gf_values(:,:) = zero
