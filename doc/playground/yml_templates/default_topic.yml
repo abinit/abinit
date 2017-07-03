@@ -21,7 +21,7 @@
     title : |
       Default tile ... this is an error
     subtitle : |
-      <h3>This file explains how to __HOWTO__ with the ABINIT package.
+      <h3>This file gives hints on how to __HOWTO__ with the ABINIT package.
       <hr>
     copyright : |
       <script type="text/javascript" src="__JS_PATH__copyright.js"> </script>

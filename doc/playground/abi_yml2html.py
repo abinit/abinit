@@ -333,7 +333,7 @@ for i, section_info in enumerate(sections):
 # Generate the different "topic" files
 
 ################################################################################
-# Constitute the section 3 "Related input variables" for all topic files. 
+# Constitute the section "Related input variables" for all topic files. 
 # This sec3 is stored, for each topic_name, in topic_sec3[topic_name]
 
 topic_sec3 = dict()
@@ -416,37 +416,6 @@ for i, topic_name in enumerate(inputs_for_topic):
   topic_sec4[topic_name] += "<br>\n"
 
 ################################################################################
-# Generate the body of the table of content
-  cur_let = 'A'
-  toc_body = " <br>"+cur_let+".\n"
-  if section=="allvariables":
-    for i, var in enumerate(variables):
-      while not var.abivarname.startswith(cur_let.lower()):
-        cur_let = chr(ord(cur_let)+1)
-        toc_body += " <p>"+cur_let+".\n"
-      abivarname=var.abivarname
-      if var.characteristics is not None and '[[INTERNAL_ONLY]]' in var.characteristics:
-        abivarname = '%'+abivarname
-      curlink = " <a href=\""+var.section+".html#"+var.abivarname+"\">"+abivarname+"</a>&nbsp;&nbsp;\n"
-      toc_body += curlink
-  elif section == "specials":
-    for (speckey, specval) in list_specials:
-      while not speckey.lower().startswith(cur_let.lower()):
-        cur_let = chr(ord(cur_let)+1)
-        toc_body += " <br>"+cur_let+".\n"
-      curlink = " <a href=\"#"+speckey+"\">"+speckey+"</a>&nbsp;&nbsp;\n"
-      toc_body += curlink
-  else:
-    for abivarname,defi in all_vars[section]:
-      while not abivarname.startswith(cur_let.lower()):
-        cur_let = chr(ord(cur_let)+1)
-        toc_body += " <br>"+cur_let+".\n"
-      curlink = " <a href=\"#"+abivarname+"\">"+abivarname+"</a>&nbsp;&nbsp;\n"
-      toc_body += curlink
-  toc_body += "\n"
-
-
-################################################################################
 # Assemble the "topic" files 
 
 print("NEW : Will use file yml_templates/default_topic.yml as default for all topic files ... ")
@@ -467,11 +436,15 @@ for topic_name in list_of_topics:
   sec_number={ "introduction":"0" , "tutorials":"0" , "input_variables":"0" , "input_files":"0"}
   toc=" <h3><b>Table of content: </b></h3> \n <ul> "
   for j in ["introduction","tutorials","input_variables","input_files"]:
-    extract_j=getattr(newtopic,j).strip()
-    if extract_j != "" and extract_j!= "default" :
+    try :
+      extract_j=getattr(newtopic,j).strip()
+    except :
+      pass
+    if (extract_j != "" and extract_j!= "default") or j in ["input_variables","input_files"]:
       item_toc += 1
-      sec_number[j]=str(item_toc)
-      toc += '<li><a href="'+topic_name+'.html#'+str(item_toc)+'">'+str(item_toc)+'.</a>'+title[j]
+      item_num="%d" % item_toc
+      sec_number[j]=item_num
+      toc += '<li><a href="topic_'+topic_name+'.html#'+item_num+'">'+item_num+'</a>. '+title[j]
   toc+= "</ul>"
 
   #Generate a first version of the html file, in the order "header" ... up to the "end"
@@ -490,7 +463,7 @@ for topic_name in list_of_topics:
         topic_html += getattr(default_topic,j)
       else:
         if j in title.keys():
-          topic_html+= '\n\n<p>&nbsp; \n<HR ALIGN=left> \n<p> <a name=\"'+sec_number[j]+'\">&nbsp;</a>\n<h3><b>'+sec_number[j]+'.'+title[j]+'</b></h3>\n\n\n'
+          topic_html+= '\n&nbsp; \n<HR ALIGN=left> \n<a name=\"'+sec_number[j]+'\">&nbsp;</a>\n<h3><b>'+sec_number[j]+'. '+title[j]+'</b></h3>\n\n\n'
         topic_html += extract_j
     topic_html += "\n"
 
