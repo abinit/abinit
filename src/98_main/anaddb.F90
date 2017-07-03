@@ -88,7 +88,7 @@ program anaddb
 !Define input and output unit numbers (some are defined in defs_basis -all should be there ...):
  integer,parameter :: ddbun=2,master=0 ! FIXME: these should not be reserved unit numbers!
  integer,parameter :: rftyp4=4
- integer :: dimekb,comm,iatom,iblok,iblok_stress,idir,ii,index
+ integer :: dimekb,comm,iatom,iblok,iblok_stress,iblok_tmp,idir,ii,index
  integer :: ierr,iphl2,lenstr,lmnmax,mband,mtyp,mpert,msize,natom,nblok,nblok2
  integer :: nkpt,nsym,ntypat,option,usepaw,nproc,my_rank,ana_ncid
  logical :: iam_master
@@ -263,6 +263,11 @@ program anaddb
  ! Get Dielectric Tensor and Effective Charges
  ! (initialized to one_3D and zero if the derivatives are not available in the DDB file)
  iblok = ddb_get_dielt_zeff(ddb,crystal,inp%rfmeth,inp%chneut,inp%selectz,dielt,zeff)
+ ! Try to get dielt, in case just the DDE are present
+ if (iblok == 0) then
+   iblok_tmp = ddb_get_dielt(ddb,inp%rfmeth,dielt)
+ end if
+
  !if (iblok == 0) then
  !  call wrtout(std_out, sjoin("- Cannot find dielectric tensor and Born effective charges in DDB file:", filnam(3)))
  !  call wrtout(std_out, "Values initialized with zeros")
