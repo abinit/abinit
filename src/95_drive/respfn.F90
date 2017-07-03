@@ -1420,25 +1420,25 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
    dscrpt=' Note : temporary (transfer) database '
 
    ! BEGIN DEBUG
-   write(*,*) 'respfn: calling ddb_hdr_init'
-   call flush()
+   !write(*,*) 'respfn: calling ddb_hdr_init'
+   !call flush()
    ! END DEBUG
    call ddb_hdr_init(ddb_hdr,dtset,psps,pawtab,DDB_VERSION,&
 &                    ngfft,occ,xred,dscrpt)
    ! BEGIN DEBUG
-   write(*,*) 'respfn: calling ddb_hdr_open_write'
-   call flush()
+   !write(*,*) 'respfn: calling ddb_hdr_open_write'
+   !call flush()
    ! END DEBUG
    call ddb_hdr_open_write(ddb_hdr, dtfil%fnameabo_ddb, dtfil%unddb)
 
    ! BEGIN DEBUG
-   write(*,*) 'respfn: calling ddb_hdr_free'
-   call flush()
+   !write(*,*) 'respfn: calling ddb_hdr_free'
+   !call flush()
    ! END DEBUG
    call ddb_hdr_free(ddb_hdr)
    ! BEGIN DEBUG
-   write(*,*) 'respfn: done with ddb_hdr'
-   call flush()
+   !write(*,*) 'respfn: done with ddb_hdr'
+   !call flush()
    ! END DEBUG
 
 

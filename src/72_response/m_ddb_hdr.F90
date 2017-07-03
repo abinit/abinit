@@ -180,16 +180,16 @@ subroutine ddb_hdr_init(ddb_hdr, dtset, psps, pawtab, ddb_version, &
 ! ************************************************************************
 
  ! BEGIN DEBUG
- write(*,*) 'ddb_hdr_init: enter'
- call flush()
+ !write(*,*) 'ddb_hdr_init: enter'
+ !call flush()
  ! END DEBUG
  ddb_hdr%ddb_version = ddb_version
  ddb_hdr%dscrpt = dscrpt
  ddb_hdr%ngfft = ngfft
 
  ! BEGIN DEBUG
- write(*,*) 'ddb_hdr_init: calling psps_copy'
- call flush()
+ !write(*,*) 'ddb_hdr_init: calling psps_copy'
+ !call flush()
  ! END DEBUG
  call psps_copy(psps, ddb_hdr%psps)
 
@@ -252,13 +252,13 @@ subroutine ddb_hdr_init(ddb_hdr, dtset, psps, pawtab, ddb_version, &
  !call flush()
  ! END DEBUG
  ! BEGIN DEBUG
- write(*,*) 'ddb_hdr_init: calling pawtab_copy'
- call flush()
+ !write(*,*) 'ddb_hdr_init: calling pawtab_copy'
+ !call flush()
  ! END DEBUG
  call pawtab_copy(pawtab, ddb_hdr%pawtab)
  ! BEGIN DEBUG
- write(*,*) 'ddb_hdr_init: done'
- call flush()
+ !write(*,*) 'ddb_hdr_init: done'
+ !call flush()
  ! END DEBUG
 
 end subroutine ddb_hdr_init
