@@ -98,7 +98,7 @@ MODULE m_ddb_hdr
    ! kpt(3,mkpt)
 
    real(dp),allocatable :: occ(:)
-   ! occ(mband*mkpt)
+   ! occ(mband*mkpt*nsppol)
 
    real(dp),allocatable :: spinat(:,:)
    ! spinat(3,matom)
@@ -193,16 +193,14 @@ subroutine ddb_hdr_init(ddb_hdr, dtset, psps, pawtab, ddb_version, &
  ! END DEBUG
  call psps_copy(psps, ddb_hdr%psps)
 
- ! BEGIN DEBUG
- write(*,*) 'ddb_hdr_init: will copy scalars'
- call flush()
- ! END DEBUG
  ! Copy scalars from dtset
  ddb_hdr%matom = dtset%natom
  ddb_hdr%natom = dtset%natom
  ddb_hdr%mband = dtset%mband
+ !ddb_hdr%mkpt = dtset%maxnkpt
  ddb_hdr%mkpt = dtset%nkpt
  ddb_hdr%nkpt = dtset%nkpt
+ !ddb_hdr%msym = dtset%maxnsym
  ddb_hdr%msym = dtset%nsym
  ddb_hdr%nsym = dtset%nsym
  ddb_hdr%mtypat = dtset%ntypat
@@ -232,23 +230,27 @@ subroutine ddb_hdr_init(ddb_hdr, dtset, psps, pawtab, ddb_version, &
  call ddb_hdr_malloc(ddb_hdr)
 
  ! Copy arrays from dtset
- ddb_hdr%acell = dtset%acell_orig(1:3,1)
- ddb_hdr%rprim = dtset%rprim_orig(1:3,1:3,1)
- ddb_hdr%amu = dtset%amu_orig(:,1)
- ddb_hdr%nband = dtset%nband
- ddb_hdr%symafm = dtset%symafm
- ddb_hdr%symrel = dtset%symrel
- ddb_hdr%typat = dtset%typat
- ddb_hdr%kpt = dtset%kpt
- ddb_hdr%wtk = dtset%wtk
- ddb_hdr%spinat = dtset%spinat
- ddb_hdr%tnons = dtset%tnons
- ddb_hdr%zion = dtset%ziontypat
- ddb_hdr%znucl = dtset%znucl
+ ddb_hdr%acell(:) = dtset%acell_orig(1:3,1)
+ ddb_hdr%rprim(:,:) = dtset%rprim_orig(1:3,1:3,1)
+ ddb_hdr%amu(:) = dtset%amu_orig(:,1)
+ ddb_hdr%nband(:) = dtset%nband(1:ddb_hdr%mkpt*ddb_hdr%nsppol)
+ ddb_hdr%symafm(:) = dtset%symafm(1:ddb_hdr%msym)
+ ddb_hdr%symrel(:,:,:) = dtset%symrel(1:3,1:3,1:ddb_hdr%msym)
+ ddb_hdr%typat(:) = dtset%typat(1:ddb_hdr%matom)
+ ddb_hdr%kpt(:,:) = dtset%kpt(1:3,1:ddb_hdr%mkpt)
+ ddb_hdr%wtk(:) = dtset%wtk(1:ddb_hdr%mkpt)
+ ddb_hdr%spinat(:,:) = dtset%spinat(1:3,1:ddb_hdr%matom)
+ ddb_hdr%tnons(:,:) = dtset%tnons(1:3,1:ddb_hdr%msym)
+ ddb_hdr%zion(:) = dtset%ziontypat(1:ddb_hdr%mtypat)
+ ddb_hdr%znucl(:) = dtset%znucl(1:ddb_hdr%mtypat)
 
- ddb_hdr%xred = xred
- ddb_hdr%occ = occ
+ ddb_hdr%xred(:,:) = xred(1:3,1:ddb_hdr%matom)
+ ddb_hdr%occ(:) = occ(1:ddb_hdr%mband*ddb_hdr%mkpt*ddb_hdr%nsppol)
 
+ ! BEGIN(:) DEBUG
+ !write(*,*) 'ddb_hdr_init: shape(ddb_hdr%nband)=', int(shape(ddb_hdr%nband), kind=8)
+ !call flush()
+ ! END DEBUG
  ! BEGIN DEBUG
  write(*,*) 'ddb_hdr_init: calling pawtab_copy'
  call flush()
@@ -297,7 +299,7 @@ subroutine ddb_hdr_malloc(ddb_hdr)
 ! ************************************************************************
 
  ! integer
- ABI_MALLOC(ddb_hdr%nband,(ddb_hdr%mkpt))
+ ABI_MALLOC(ddb_hdr%nband,(ddb_hdr%mkpt*ddb_hdr%nsppol))
  ABI_MALLOC(ddb_hdr%symafm,(ddb_hdr%msym))
  ABI_MALLOC(ddb_hdr%symrel,(3,3,ddb_hdr%msym))
  ABI_MALLOC(ddb_hdr%typat,(ddb_hdr%matom))
@@ -305,7 +307,7 @@ subroutine ddb_hdr_malloc(ddb_hdr)
  ! real
  ABI_MALLOC(ddb_hdr%amu,(ddb_hdr%mtypat))
  ABI_MALLOC(ddb_hdr%kpt,(3, ddb_hdr%mkpt))
- ABI_MALLOC(ddb_hdr%occ,(ddb_hdr%mband*ddb_hdr%mkpt))
+ ABI_MALLOC(ddb_hdr%occ,(ddb_hdr%mband*ddb_hdr%mkpt*ddb_hdr%nsppol))
  ABI_MALLOC(ddb_hdr%spinat,(3, ddb_hdr%matom))
  ABI_MALLOC(ddb_hdr%tnons,(3, ddb_hdr%msym))
  ABI_MALLOC(ddb_hdr%wtk,(ddb_hdr%mkpt))
@@ -374,18 +376,10 @@ subroutine ddb_hdr_free(ddb_hdr)
  ! types
  call psps_free(ddb_hdr%psps)
 
- ! BEGIN DEBUG
- write(*,*) 'ddb_hdr_free: calling pawtab_free'
- call flush()
- ! END DEBUG
  if (allocated(ddb_hdr%pawtab)) then
    call pawtab_free(ddb_hdr%pawtab)
    ABI_DATATYPE_DEALLOCATE(ddb_hdr%pawtab)
  end if
- ! BEGIN DEBUG
- write(*,*) 'ddb_hdr_free: done'
- call flush()
- ! END DEBUG
 
 end subroutine ddb_hdr_free
 !!***
@@ -431,6 +425,7 @@ subroutine ddb_hdr_open_write(ddb_hdr, filnam, unddb)
 
 ! ************************************************************************
 
+
  call ddb_io_out(ddb_hdr%dscrpt,filnam,ddb_hdr%matom,ddb_hdr%mband,&
 &  ddb_hdr%mkpt,ddb_hdr%msym,ddb_hdr%mtypat,unddb,ddb_hdr%ddb_version,&
 &  ddb_hdr%acell,ddb_hdr%amu,ddb_hdr%dilatmx,ddb_hdr%ecut,ddb_hdr%ecutsm,&
@@ -441,6 +436,7 @@ subroutine ddb_hdr_open_write(ddb_hdr, filnam, unddb)
 &  ddb_hdr%spinat,ddb_hdr%symafm,ddb_hdr%symrel,ddb_hdr%tnons,ddb_hdr%tolwfr,&
 &  ddb_hdr%tphysel,ddb_hdr%tsmear,ddb_hdr%typat,ddb_hdr%usepaw,ddb_hdr%wtk,&
 &  ddb_hdr%xred,ddb_hdr%zion,ddb_hdr%znucl)
+
 
  nblok=1 ; fullinit=1 ; choice=2
  call psddb8(choice,ddb_hdr%psps%dimekb,ddb_hdr%psps%ekb,fullinit,&
