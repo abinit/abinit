@@ -18,7 +18,7 @@ users_path = "../../users/"
 ################################################################################
 ###############################################################################
  
-# Definitions
+# Function definitions
 
 ###############################################################################
 
@@ -168,6 +168,11 @@ print("Will use file named temp_allvariables.html as template for allvariables.h
 header_all = header_all.replace("__JS_PATH__",js_path)
 
 ################################################################################
+################################################################################
+
+# Generate the different "section" files (var*.html, specials.html, allvariables.html)
+
+################################################################################
 # Initialization to constitute the body of the specials and var*.html files
 
 all_vars = dict()
@@ -202,26 +207,10 @@ for (speckey, specval) in list_specials:
 ################################################################################
 # Constitute the body of information for all variables, stored for the appropriate section in all_contents[section]
 
-# Initialize the all variable file output
-output = ''
-output = output + header_all + "<br />\n"
-cur_let = 'A'
-output = output + "<p>"+cur_let+".&nbsp;\n"
-
 for i, var in enumerate(variables):
-  if debug==1 :
-    print(var)
-  while not var.abivarname.startswith(cur_let.lower()):
-    cur_let = chr(ord(cur_let)+1)
-    output = output + "<p>"+cur_let+".\n"
-  abivarname = var.abivarname
-  if var.characteristics is not None and '[[INTERNAL_ONLY]]' in var.characteristics:
-    abivarname = '%'+abivarname
-  output = output + "<a href=\""+var.section+".html#"+var.abivarname+"\">"+abivarname+"</a>&nbsp;&nbsp;\n" 
+  # Constitute the body of information related to one input variable
   section = var.section
   all_vars[section].append([var.abivarname,var.mnemonics])
-
-  # Constitute the body of information related to one input variable
   cur_content = ""
 
   try:
@@ -299,19 +288,29 @@ for i, section_info in enumerate(sections):
   #Generate the body of the table of content 
   cur_let = 'A'
   toc_body = " <br>"+cur_let+".\n"
-  if (section != "specials"):
-    for abivarname,defi in all_vars[section]:
-      while not abivarname.startswith(cur_let.lower()):
+  if section=="allvariables":
+    for i, var in enumerate(variables):
+      while not var.abivarname.startswith(cur_let.lower()):
         cur_let = chr(ord(cur_let)+1)
-        toc_body += " <br>"+cur_let+".\n"
-      curlink = " <a href=\"#"+abivarname+"\">"+abivarname+"</a>&nbsp;&nbsp;\n"
+        toc_body += " <p>"+cur_let+".\n"
+      abivarname=var.abivarname
+      if var.characteristics is not None and '[[INTERNAL_ONLY]]' in var.characteristics:
+        abivarname = '%'+abivarname
+      curlink = " <a href=\""+var.section+".html#"+var.abivarname+"\">"+abivarname+"</a>&nbsp;&nbsp;\n"
       toc_body += curlink
-  else:
+  elif section == "specials":
     for (speckey, specval) in list_specials:
       while not speckey.lower().startswith(cur_let.lower()):
         cur_let = chr(ord(cur_let)+1)
         toc_body += " <br>"+cur_let+".\n"
       curlink = " <a href=\"#"+speckey+"\">"+speckey+"</a>&nbsp;&nbsp;\n"
+      toc_body += curlink
+  else:
+    for abivarname,defi in all_vars[section]:
+      while not abivarname.startswith(cur_let.lower()):
+        cur_let = chr(ord(cur_let)+1)
+        toc_body += " <br>"+cur_let+".\n"
+      curlink = " <a href=\"#"+abivarname+"\">"+abivarname+"</a>&nbsp;&nbsp;\n"
       toc_body += curlink
   toc_body += "\n"
 
@@ -343,54 +342,6 @@ for i, section_info in enumerate(sections):
   f_cur.write("\n")
   f_cur.close()
   print("File "+section+".html has been written ...")
-
-# Special file : complete the content, then write the file and close it
-#file_specials = 'html_automatically_generated/specials.html'
-#f_sp = open(file_specials,'w')
-#header_specials = header_specials.replace("__JS_PATH__",js_path)
-#f_sp.write(header_specials)
-#cur_let = 'A'
-#cur_content = "<br><br><a href=#top>Go to the top</a><hr>\n"
-#f_sp.write("<br>"+cur_let+".&nbsp;\n")
-#for (speckey, specval) in list_specials:
-#  while not speckey.lower().startswith(cur_let.lower()):
-#    cur_let = chr(ord(cur_let)+1)
-#    f_sp.write("<br>"+cur_let+".&nbsp;\n")
-#  curlink = "<a href=\"#"+speckey+"\">"+speckey+"</a>&nbsp;&nbsp;\n"
-#  f_sp.write(curlink)
-#
-#  cur_content += "<br><font id=\"title\"><a name=\""+speckey+"\">"+speckey+"</a></font>\n"
-#  cur_content += "<br><font id=\"text\">\n"
-#  cur_content += "<p>\n"+doku2html(make_links(specval,speckey,list_all_vars,list_chars,cur_specials))+"\n"
-#  cur_content += "</font>"
-#  cur_content += "<br><br><a href=#top>Go to the top</a><hr>\n"
-#
-#f_sp.write(cur_content)
-#
-#if make_topics_visible==0:
-#  cur_content += "<script type=\"text/javascript\" src=\""+js_path+"list_internal_links.js\"> </script>\n\n"
-#else:
-#  cur_content += "<script type=\"text/javascript\" src=\""+js_path+"list_internal_links_incl_topics.js\"> </script>\n\n"
-#cur_content += "</body>\n"
-#cur_content += "</html>"
-#
-#f_sp.write(cur_content)
-#f_sp.close()
-#print("File specials.html has been written ...")
-
-# Allvariables file : complete the content, then write the file and close it
-if make_topics_visible==0:
-  output += "<script type=\"text/javascript\" src=\""+js_path+"list_internal_links.js\"> </script>\n\n"
-else:
-  output += "<script type=\"text/javascript\" src=\""+js_path+"list_internal_links_incl_topics.js\"> </script>\n\n"
-output += "</body>\n"
-output += "</html>"
-
-file_html = 'html_automatically_generated/allvariables.html'
-f_html = open(file_html,'w')
-f_html.write(output)
-f_html.close()
-print("File allvariables.html has been written ...")
 
 ################################################################################
 ################################################################################

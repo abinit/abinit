@@ -26,6 +26,28 @@
     tofcontent_header : |
       <a name="list"></a>
       <h3><b> Content of the file : alphabetical list of special parameters.</b></h3>
+- !section
+    name : allvariables
+    keyword : allvariable
+    header : |
+      <html>
+      <head><title>Input variables</title>
+      <link rel=stylesheet type="text/css" href="../formabinit.css">
+      </head>
+      <body bgcolor="#ffffff">
+
+      <hr>
+      <a name="top"></a>
+    title : |
+      <h1>Main ABINIT code, input variables:</h1>
+    subtitle : |
+      <h2>Complete list.</h2>
+      <hr>
+    purpose : |
+      This document lists the names of all input variables to be used in the main input file of the abinit code.
+    tofcontent_header : |
+      <a name="list"></a>
+      <h3><b> Alphabetical list of all input variables of the main ABINIT code.</b></h3>
 - !section 
     name : varbas
     keyword : basic
