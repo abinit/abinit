@@ -341,52 +341,37 @@ for i, section_info in enumerate(sections):
 # This sec3 is stored, for each topic_name, in topic_sec3[topic_name]
 
 topic_sec3 = dict()
-topic_class_sec3 = dict()
 found = dict()
-foundvar = dict()
 
 for i, topic in enumerate(topics):
-  topic_name = topic.topic_name
-
-  topic_class_sec3[topic_name] = ""
-  topic_sec3[topic_name] = ""
-  found[topic_name] = 0
-  foundvar[topic_name] = 0
+  topic_sec3[topic.topic_name] = ""
 
 for (tclasskey, tclassval) in list_topics_class:
 
-  for topic_name, value in topic_class_sec3.items():
-    topic_class_sec3[topic_name] = "<p>"+tclassval+"<p>"
-
   if debug == 1:
     print("\nWork on "+tclasskey+"\n")
+  for i, topic in enumerate(topics):
+    found[topic.topic_name] = 0
 
   for i, var in enumerate(variables):
-    foundvar[topic_name] = 0
     try:
       if var.topics is not None:
-        vartopics=var.topics
-        topics_name_class = vartopics.split(',')
+        topics_name_class = var.topics.split(',')
         for i, topic_name_class in enumerate(topics_name_class):
           name_class = topic_name_class.split('_')
           if tclasskey==name_class[1].strip() :
             topic_name=name_class[0].strip()
-            found[topic_name] = 1
-            foundvar[topic_name] = 1
+            if found[topic_name]==0 :
+              topic_sec3[topic_name] += "<p>"+tclassval+"<p>"
+              found[topic_name] = 1
             abivarname=var.abivarname
             if var.characteristics is not None and '[[INTERNAL_ONLY]]' in var.characteristics:
               abivarname = '%'+abivarname
-            topic_class_sec3[topic_name] += "... <a href=\""+var.section+".html#"+var.abivarname+"\">"+abivarname+"</a>   "
-            topic_class_sec3[topic_name] += "["+var.mnemonics+"]<br>\n"
+            topic_sec3[topic_name] += "... <a href=\""+var.section+".html#"+var.abivarname+"\">"+abivarname+"</a>   "
+            topic_sec3[topic_name] += "["+var.mnemonics+"]<br>\n"
     except:
       if debug==1 :
        print(" No topics for abivarname "+var.abivarname) 
-
-  for i, topic in enumerate(topics):
-    topic_name=topic.topic_name
-    if found[topic_name] == 1:
-      found[topic_name]=0
-      topic_sec3[topic_name] = topic_sec3[topic_name] + topic_class_sec3[topic_name]
 
 ################################################################################
 # Constitute the section 4 "Selected input files" for all topic files.
