@@ -109,8 +109,6 @@ def read_yaml_file(ymlfile):
     print("Will use sections.yml as database input file for the list of sections ...")
   elif ymlfile== "tests_dirs.yml":
     print("Will use tests_dirs.yml as database input file for the list of directories in which automatic test input files are present ...")
-  elif ymlfile== "yml_templates/template_varhtml.yml":
-    print("Will use yml_templates/template_varhtml.yml as template to generate all var*.html files ...")
   elif ymlfile== "html_automatically_generated/topics_in_tests.yml":
     print("Generated file named html_automatically_generated/topics_in_tests.yml, to contain the list of automatic test input files relevant for each topic ...")
   else:
@@ -133,7 +131,6 @@ variables=read_yaml_file("abinit_vars.yml")
 topics=read_yaml_file("topics.yml")
 sections=read_yaml_file("sections.yml")
 tests_dirs=read_yaml_file("tests_dirs.yml")
-tempvarhtml=read_yaml_file("yml_templates/template_varhtml.yml")
 
 ################################################################################
 # Parse the ABINIT input files, in order to find the possible topics to which they are linked -> topics_in_tests
@@ -157,15 +154,6 @@ topics_in_tests=read_yaml_file("html_automatically_generated/topics_in_tests.yml
 if debug==1 :
   print(" topics_in_tests :")
   print(topics_in_tests)
-
-################################################################################
-# Parse the headers of allvariables file, also replace the JS_PATH.
-
-with open('html_template/temp_allvariables.html') as f:
-    header_all = f.read()
-print("Will use file named temp_allvariables.html as template for allvariables.html...")
-
-header_all = header_all.replace("__JS_PATH__",js_path)
 
 ################################################################################
 ################################################################################
