@@ -373,30 +373,14 @@ for (tclasskey, tclassval) in list_topics_class:
             topic_name=name_class[0].strip()
             found[topic_name] = 1
             foundvar[topic_name] = 1
+            abivarname=var.abivarname
             if var.characteristics is not None and '[[INTERNAL_ONLY]]' in var.characteristics:
-              abivarname2_dic[topic_name] = '%'+var.abivarname
+              abivarname = '%'+abivarname
+            topic_class_sec3[topic_name] += "... <a href=\""+var.section+".html#"+var.abivarname+"\">"+abivarname+"</a>   "
+            topic_class_sec3[topic_name] += "["+var.mnemonics+"]<br>\n"
     except:
       if debug==1 :
        print(" No topics for abivarname "+var.abivarname) 
-
-    for i, topic in enumerate(topics):
-      topic_name=topic.topic_name
-
-      #print("topic_name: "+topic_name,"foundvar: ",foundvar[topic_name])
-
-      if foundvar[topic_name] == 1:
-        # Constitute the line of information related to one input variable
-        foundvar[topic_name]=0
-        abivarname=var.abivarname
-        if var.characteristics is not None and '[[INTERNAL_ONLY]]' in var.characteristics:
-          abivarname = '%'+abivarname
-        topic_class_sec3[topic_name] += "... <a href=\""+var.section+".html#"+var.abivarname+"\">"+abivarname+"</a>   "
-        topic_class_sec3[topic_name] += "["+var.mnemonics+"]<br>\n"
-
-        if debug==1 :
-          print("topic_name:"+topic_name)
-          print("topic_class_sec3[topic_name]:")
-          print(topic_class_sec3[topic_name])
 
   for i, topic in enumerate(topics):
     topic_name=topic.topic_name
