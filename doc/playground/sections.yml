@@ -1,10 +1,13 @@
 # This file provides the information needed to generate the documentation files that describes the input variables,
-# the "var*.html files (each being a "section"), as well as related parameters ("special"). 
-# Each paragraph of such documentation file will have a mixing of formatting html information and real content.
-# The default html formatting is presented in the section "default", at the bootom of the file. 
+# the "var*.html files (each being a "section"), as well as related parameters ("special"), and the list of all input variables. 
+# Each paragraph of such documentation file has a mix of formatting html information and real content.
+
+# The present file contains the html information.
+# The "default" html information is presented in the section "default", at the bottom of the file. 
 # For most of the var*.html files, the default html formatting is hardly changed, so only minimal information
-# is needed to generate them. For the "special" parameters, some minor adjustments are needed, so that the default list
-# is less adequate.
+# is needed to generate them. For the "special" parameters and for the list of all input variables,
+# some minor adjustments are needed, so that the default list # is less adequate.
+
 - !section
     name : specials
     keyword : special
@@ -26,6 +29,7 @@
     tofcontent_header : |
       <a name="list"></a>
       <h3><b> Content of the file : alphabetical list of special parameters.</b></h3>
+
 - !section
     name : allvariables
     keyword : allvariable
@@ -48,57 +52,75 @@
     tofcontent_header : |
       <a name="list"></a>
       <h3><b> Alphabetical list of all input variables of the main ABINIT code.</b></h3>
+
 - !section 
     name : varbas
     keyword : basic
+
 - !section
     name : varbse
     keyword : BSE
+
 - !section
     name : vardev
     keyword : developer
+
 - !section
     name : vardmft
     keyword : DMFT
+
 - !section
     name : vareph
     keyword : electron-phonon calculation
+
 - !section
     name : varff
     keyword : applied finite field calculation
+
 - !section
     name : varfil
     keyword : file handling
+
 - !section
     name : vargeo
     keyword : geometry builder and symmetry related
+
 - !section
     name : vargs
     keyword : ground state calculations
+
 - !section
     name : vargw
     keyword : GW
+
 - !section
     name : varint
     keyword : internal
+
 - !section
     name : varpar
     keyword : parallelisation
+
 - !section
     name : varpaw
     keyword : PAW
+
 - !section
     name : varrf
     keyword : response function
+
 - !section
     name : varrlx
     keyword : structural optimization
+
 - !section
     name : varvdw
     keyword : Van der Waals
+
 - !section
     name : varw90
     keyword : Wannier90 interface
+
 - !section
     name : default
     keyword : Default keyword ... this is an error
