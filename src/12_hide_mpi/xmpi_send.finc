@@ -250,7 +250,7 @@ subroutine xmpi_send_int2d(xval,dest,tag,spaceComm,ier)
  if (spaceComm /= MPI_COMM_SELF .and. spaceComm /= MPI_COMM_NULL) then
    n1=size(xval,dim=1)
    n2=size(xval,dim=2)
-   my_tag = MOD(tag,xmpi_tag_ub+1)
+   my_tag = MOD(tag,xmpi_tag_ub)
    call MPI_SEND(xval,n1*n2,MPI_INTEGER,dest,my_tag,spaceComm,ier)
  end if
 #endif
@@ -321,7 +321,7 @@ subroutine xmpi_send_int3d(xval,dest,tag,spaceComm,ier)
    n1=size(xval,dim=1)
    n2=size(xval,dim=2)
    n3=size(xval,dim=3)
-   my_tag = MOD(tag,xmpi_tag_ub+1)
+   my_tag = MOD(tag,xmpi_tag_ub)
    call MPI_SEND(xval,n1*n2*n3,MPI_INTEGER,dest,my_tag,spaceComm,ier)
  end if
 #endif

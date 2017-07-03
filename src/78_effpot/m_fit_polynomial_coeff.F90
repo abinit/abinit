@@ -1106,7 +1106,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,fixcoeff,hist,ncycle_in,nfixcoeff,po
      call wrtout(std_out,message,'COLL')
      call wrtout(ab_out,message,'COLL')
 
-!  Copy the initial coefficients from the model
+!    Copy the initial coefficients from the model
      ncoeff_tot = eff_pot%anharmonics_terms%ncoeff
      ABI_DATATYPE_ALLOCATE(coeffs_in,(ncoeff_tot))
      do ii=1,ncoeff_tot
@@ -1118,7 +1118,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,fixcoeff,hist,ncycle_in,nfixcoeff,po
 &                                 check=.false.) 
      end do
    else
-!  Or we need to regerate them
+!    Or we need to regerate them
      write(message, '(4a)' )ch10,' The coefficients for the fit must',&
 &                              ' be generate... '
      call wrtout(std_out,message,'COLL')
