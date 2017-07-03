@@ -99,6 +99,8 @@ def read_yaml_file(ymlfile):
 
   if ymlfile== "abinit_vars.yml":
     print("Will use abinit_vars.yml as database input file for the input variables and their characteristics ...")
+  elif ymlfile== "list_of_topics.yml":
+    print("Will use list_of_topics.yml as database input file for the list of topics ...")
   elif ymlfile== "topics.yml":
     print("Will use topics.yml as database input file for the list of topics ...")
   elif ymlfile== "sections.yml":
@@ -107,9 +109,6 @@ def read_yaml_file(ymlfile):
     print("Will use tests_dirs.yml as database input file for the list of directories in which automatic test input files are present ...")
   elif ymlfile== "html_automatically_generated/topics_in_tests.yml":
     print("Generated file named html_automatically_generated/topics_in_tests.yml, to contain the list of automatic test input files relevant for each topic ...")
-  else:
-    print ("Error : The ymlfile "+ymlfile+" cannot be treated at present.")
-    raise
 
   with open(ymlfile, 'r') as f:
     ymlstructure = yaml.load(f);
@@ -124,6 +123,7 @@ def read_yaml_file(ymlfile):
 ################################################################################
  
 variables=read_yaml_file("abinit_vars.yml")
+list_of_topics=read_yaml_file("list_of_topics.yml")
 topics=read_yaml_file("topics.yml")
 sections=read_yaml_file("sections.yml")
 tests_dirs=read_yaml_file("tests_dirs.yml")
@@ -340,7 +340,7 @@ topic_sec3 = dict()
 found = dict()
 
 for i, topic in enumerate(topics):
-  topic_sec3[topic.topic_name] = ""
+  topic_sec3[topic.topic_name] = "\n\n<p>&nbsp; \n<HR ALIGN=left> \n<p> <a name=\"3\">&nbsp;</a>\n<h3><b> 3. Related input variables.</b></h3>\n\n\n"
 
 for (tclasskey, tclassval) in list_topics_class:
 
@@ -415,6 +415,99 @@ for i, topic_name in enumerate(inputs_for_topic):
     topic_sec4[topic_name]+= line
   topic_sec4[topic_name] += "<br>\n"
 
+################################################################################
+# Generate the body of the table of content
+  cur_let = 'A'
+  toc_body = " <br>"+cur_let+".\n"
+  if section=="allvariables":
+    for i, var in enumerate(variables):
+      while not var.abivarname.startswith(cur_let.lower()):
+        cur_let = chr(ord(cur_let)+1)
+        toc_body += " <p>"+cur_let+".\n"
+      abivarname=var.abivarname
+      if var.characteristics is not None and '[[INTERNAL_ONLY]]' in var.characteristics:
+        abivarname = '%'+abivarname
+      curlink = " <a href=\""+var.section+".html#"+var.abivarname+"\">"+abivarname+"</a>&nbsp;&nbsp;\n"
+      toc_body += curlink
+  elif section == "specials":
+    for (speckey, specval) in list_specials:
+      while not speckey.lower().startswith(cur_let.lower()):
+        cur_let = chr(ord(cur_let)+1)
+        toc_body += " <br>"+cur_let+".\n"
+      curlink = " <a href=\"#"+speckey+"\">"+speckey+"</a>&nbsp;&nbsp;\n"
+      toc_body += curlink
+  else:
+    for abivarname,defi in all_vars[section]:
+      while not abivarname.startswith(cur_let.lower()):
+        cur_let = chr(ord(cur_let)+1)
+        toc_body += " <br>"+cur_let+".\n"
+      curlink = " <a href=\"#"+abivarname+"\">"+abivarname+"</a>&nbsp;&nbsp;\n"
+      toc_body += curlink
+  toc_body += "\n"
+
+
+################################################################################
+# Assemble the "topic" files 
+
+print("NEW : Will use file yml_templates/default_topic.yml as default for all topic files ... ")
+default_topic_yml=read_yaml_file("yml_templates/default_topic.yml")
+default_topic=default_topic_yml[0]
+
+# For each "topic" file
+for topic_name in list_of_topics:
+  f_newtopic="yml_templates/topic_"+topic_name+".yml"
+  print("NEW : Will use file "+f_newtopic+" to initiate the topic "+topic_name+" ... ")
+  newtopic_yml=read_yaml_file("yml_templates/topic_"+topic_name+".yml")
+  newtopic=newtopic_yml[0]
+
+  #Generate the table of content
+  item_toc=0
+  item_list=[]
+  title={ "introduction":"Introduction." , "tutorials":"Related tutorials." , "input_variables":"Related input variables." , "input_files":"Selected input files."}
+  sec_number={ "introduction":"0" , "tutorials":"0" , "input_variables":"0" , "input_files":"0"}
+  toc=" <h3><b>Table of content: </b></h3> \n <ul> "
+  for j in ["introduction","tutorials","input_variables","input_files"]:
+    extract_j=getattr(newtopic,j).strip()
+    if extract_j != "" and extract_j!= "default" :
+      item_toc += 1
+      sec_number[j]=str(item_toc)
+      toc += '<li><a href="'+topic_name+'.html#'+str(item_toc)+'">'+str(item_toc)+'.</a>'+title[j]
+  toc+= "</ul>"
+
+  #Generate a first version of the html file, in the order "header" ... up to the "end"
+  #Take the info from the section "default" if there is no information on the specific section provided in the yml file.
+  topic_html=""
+  for j in ["header","title","subtitle","copyright","links","toc","introduction","tutorials","input_variables","input_files","links","end"]:
+    if j == "toc":
+      topic_html += toc
+    elif j == "input_variables":
+      topic_html += topic_sec3[topic_name]
+    elif j == "input_files":
+      topic_html += topic_sec4[topic_name]
+    else:
+      extract_j=getattr(newtopic,j).strip()
+      if extract_j == "" or extract_j== "default" :
+        topic_html += getattr(default_topic,j)
+      else:
+        if j in title.keys():
+          topic_html+= '\n\n<p>&nbsp; \n<HR ALIGN=left> \n<p> <a name=\"'+sec_number[j]+'\">&nbsp;</a>\n<h3><b>'+sec_number[j]+'.'+title[j]+'</b></h3>\n\n\n'
+        topic_html += extract_j
+    topic_html += "\n"
+
+  #Global operations on the tentative html file.
+  topic_html=topic_html.replace("__JS_PATH__",js_path)
+  topic_html=topic_html.replace("__HOWTO__",newtopic.howto)
+  topic_html=topic_html.replace("__KEYWORD__",newtopic.keyword)
+  topic_html = doku2html(make_links(topic_html,None,list_all_vars,list_chars,cur_specials))
+
+  # Open, write and close the file
+  file_topic = 'html_automatically_generated/topic_'+topic_name+'.html'
+  f_newtopic = open(file_topic,'w')
+  f_newtopic.write(topic_html)
+  f_newtopic.close()
+  print("File topic_"+topic_name+".html has been written ...")
+
+  
 ################################################################################
 # Assemble the "topic" files : secs 1, 2, 3 and then possibly 4 and 5
 

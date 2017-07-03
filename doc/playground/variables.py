@@ -159,6 +159,42 @@ class Section(yaml.YAMLObject):
 
 ####################################################################################################
 
+class Newtopic(yaml.YAMLObject):
+    name = None  # String containing section name
+    keyword = '' # String containing the short description of the topics, to be echoed in the title of the section file.
+    howto  = ''  # Should complete the sentence beginning with "How to" 
+    header = ''  # Header of the file, possibly the 'default' one
+    title  = ''  # Title  of the file, possibly the 'default' one
+    subtitle  = ''  # Subtitle  of the file, possibly the 'default' one
+    copyright = ''  # Copyright of the file, possibly the 'default' one
+    links     = ''  # Links of the file, possibly the 'default' one
+    tofcontent_header      = ''  # Header of the table of content of the file, possibly the 'default' one
+    introduction = '' # Introduction to the topic
+    tutorials    = '' # List of relevant tutorials
+    end       = ''  # End of the file, possibly the 'default' one
+
+    yaml_tag = u'!newtopic'
+
+    def attrs(self):
+        return ['name', 'keyword', 'howto', 'header', 'title', 'subtitle', 'copyright', 'links', 'tofcontent_header', 'introduction', 'tutorials', 'end']
+
+    #Note that the default values are actually not initialized here, but in the data file, in order to ease the maintenance.
+    def __init__(self, name=None, keyword=None, howto=None, header=None, title=None, subtitle=None, copyright=None, links=None, tofcontent_header=None, introduction=None, tutorials=None, end=None):
+        self.name = name
+        self.keyword = keyword
+        self.header = header
+        self.howto  = howto 
+        self.title  = title
+        self.subtitle = subtitle
+        self.copyright= copyright
+        self.links    = links
+        self.tofcontent_header = tofcontent_header
+        self.introduction = introduction
+        self.tutorials = tutorials
+        self.end      = end
+
+####################################################################################################
+
 class ValueWithUnit(yaml.YAMLObject):
     value = None
     units = None
