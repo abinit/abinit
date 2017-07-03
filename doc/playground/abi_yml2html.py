@@ -358,7 +358,6 @@ found = dict()
 foundvar = dict()
 abivarname_dic = dict()
 abivarname2_dic = dict()
-section_dic = dict()
 mnemonics_dic = dict()
 
 for i, topic in enumerate(topics):
@@ -370,7 +369,6 @@ for i, topic in enumerate(topics):
   foundvar[topic_name] = 0
   abivarname_dic[topic_name] = ""
   abivarname2_dic[topic_name] = ""
-  section_dic[topic_name] = ""
   mnemonics_dic[topic_name] = ""
 
 for (tclasskey, tclassval) in list_topics_class:
@@ -397,7 +395,6 @@ for (tclasskey, tclassval) in list_topics_class:
             abivarname2_dic[topic_name]=var.abivarname
             if var.characteristics is not None and '[[INTERNAL_ONLY]]' in var.characteristics:
               abivarname2_dic[topic_name] = '%'+var.abivarname
-            section_dic[topic_name]=var.section
             mnemonics_dic[topic_name]=var.mnemonics
     except:
       if debug==1 :
@@ -413,9 +410,8 @@ for (tclasskey, tclassval) in list_topics_class:
         foundvar[topic_name]=0
         abivarname=abivarname_dic[topic_name]
         abivarname2=abivarname2_dic[topic_name]
-        section=section_dic[topic_name]
         mnemonics=mnemonics_dic[topic_name]
-        topic_class_sec3[topic_name] += "... <a href=\""+section+".html#"+abivarname+"\">"+abivarname2+"</a>   "
+        topic_class_sec3[topic_name] += "... <a href=\""+var.section+".html#"+abivarname+"\">"+abivarname2+"</a>   "
         topic_class_sec3[topic_name] += "["+mnemonics+"]<br>\n"
 
         if debug==1 :
