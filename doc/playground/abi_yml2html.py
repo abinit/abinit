@@ -340,7 +340,7 @@ topic_sec3 = dict()
 found = dict()
 
 for i, topic in enumerate(topics):
-  topic_sec3[topic.topic_name] = "\n\n<p>&nbsp; \n<HR ALIGN=left> \n<p> <a name=\"3\">&nbsp;</a>\n<h3><b> 3. Related input variables.</b></h3>\n\n\n"
+  topic_sec3[topic.topic_name] = ""
 
 for (tclasskey, tclassval) in list_topics_class:
 
@@ -377,9 +377,6 @@ topic_sec4 = dict()
 for i, var in enumerate(topics):
   topic_sec4[var.topic_name] = ""
  
-topic_header_sec4="\n\n<p>&nbsp; \n<HR ALIGN=left> \n<p> <a name=\"4\">&nbsp;</a>\n<h3><b> 4. Selected input files.</b></h3>\n\n\n"
-topic_header_sec4+="The user can find some related example input files in the ABINIT package in the directory /tests, or on the Web:\n"
-
 # Create a dictionary to contain the list of tests for each topic
 inputs_for_topic = dict()
 for str in topics_in_tests:
@@ -397,7 +394,6 @@ if debug==1 :
   print(inputs_for_topic)
 
 for i, topic_name in enumerate(inputs_for_topic):
-  topic_sec4[topic_name] = topic_header_sec4
   tests=inputs_for_topic[topic_name]
 # Constitute a dictionary for each directory of tests
   dir = dict()
@@ -439,7 +435,7 @@ for topic_name in list_of_topics:
     try :
       extract_j=getattr(newtopic,j).strip()
     except :
-      pass
+      extract_j=""
     if (extract_j != "" and extract_j!= "default") or j in ["input_variables","input_files"]:
       item_toc += 1
       item_num="%d" % item_toc
@@ -454,8 +450,11 @@ for topic_name in list_of_topics:
     if j == "toc":
       topic_html += toc
     elif j == "input_variables":
-      topic_html += topic_sec3[topic_name]
+      topic_html+= '\n&nbsp; \n<HR ALIGN=left> \n<a name=\"'+sec_number[j]+'\">&nbsp;</a>\n<h3><b>'+sec_number[j]+'. '+title[j]+'</b></h3>\n\n\n'
+      topic_html+= topic_sec3[topic_name]
     elif j == "input_files":
+      topic_html+= '\n&nbsp; \n<HR ALIGN=left> \n<a name=\"'+sec_number[j]+'\">&nbsp;</a>\n<h3><b>'+sec_number[j]+'. '+title[j]+'</b></h3>\n\n\n'
+      topic_html+= "The user can find some related example input files in the ABINIT package in the directory /tests, or on the Web:\n"
       topic_html += topic_sec4[topic_name]
     else:
       extract_j=getattr(newtopic,j).strip()
@@ -480,7 +479,6 @@ for topic_name in list_of_topics:
   f_newtopic.close()
   print("File topic_"+topic_name+".html has been written ...")
 
-  
 ################################################################################
 # Assemble the "topic" files : secs 1, 2, 3 and then possibly 4 and 5
 
@@ -506,9 +504,12 @@ for topic_name, content in topic_sec3.items():
   f_topic.write(topic_header_varX2)
 
 # Write Sec. 3 
+  f_topic.write("\n\n<p>&nbsp; \n<HR ALIGN=left> \n<p> <a name=\"3\">&nbsp;</a>\n<h3><b> 3. Related input variables.</b></h3>\n\n\n")
   f_topic.write(topic_sec3[topic_name])
 
 # Write Sec. 4
+  f_topic.write("\n\n<p>&nbsp; \n<HR ALIGN=left> \n<p> <a name=\"4\">&nbsp;</a>\n<h3><b> 4. Selected input files.</b></h3>\n\n\n")
+  f_topic.write("The user can find some related example input files in the ABINIT package in the directory /tests, or on the Web:\n")
   f_topic.write(topic_sec4[topic_name])
 
 # Write final lines
