@@ -17,6 +17,7 @@ fit_fixcoeff  = 1 2
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = multibinit
+#%% need_cpp_vars = HAVE_NETCDF
 #%% test_chain = t102.in
 #%% [files]
 #%% [paral_info]
