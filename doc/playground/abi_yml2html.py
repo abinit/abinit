@@ -344,9 +344,6 @@ topic_sec3 = dict()
 topic_class_sec3 = dict()
 found = dict()
 foundvar = dict()
-abivarname_dic = dict()
-abivarname2_dic = dict()
-mnemonics_dic = dict()
 
 for i, topic in enumerate(topics):
   topic_name = topic.topic_name
@@ -355,9 +352,6 @@ for i, topic in enumerate(topics):
   topic_sec3[topic_name] = ""
   found[topic_name] = 0
   foundvar[topic_name] = 0
-  abivarname_dic[topic_name] = ""
-  abivarname2_dic[topic_name] = ""
-  mnemonics_dic[topic_name] = ""
 
 for (tclasskey, tclassval) in list_topics_class:
 
@@ -379,11 +373,8 @@ for (tclasskey, tclassval) in list_topics_class:
             topic_name=name_class[0].strip()
             found[topic_name] = 1
             foundvar[topic_name] = 1
-            abivarname_dic[topic_name]=var.abivarname
-            abivarname2_dic[topic_name]=var.abivarname
             if var.characteristics is not None and '[[INTERNAL_ONLY]]' in var.characteristics:
               abivarname2_dic[topic_name] = '%'+var.abivarname
-            mnemonics_dic[topic_name]=var.mnemonics
     except:
       if debug==1 :
        print(" No topics for abivarname "+var.abivarname) 
@@ -396,11 +387,11 @@ for (tclasskey, tclassval) in list_topics_class:
       if foundvar[topic_name] == 1:
         # Constitute the line of information related to one input variable
         foundvar[topic_name]=0
-        abivarname=abivarname_dic[topic_name]
-        abivarname2=abivarname2_dic[topic_name]
-        mnemonics=mnemonics_dic[topic_name]
-        topic_class_sec3[topic_name] += "... <a href=\""+var.section+".html#"+abivarname+"\">"+abivarname2+"</a>   "
-        topic_class_sec3[topic_name] += "["+mnemonics+"]<br>\n"
+        abivarname=var.abivarname
+        if var.characteristics is not None and '[[INTERNAL_ONLY]]' in var.characteristics:
+          abivarname = '%'+abivarname
+        topic_class_sec3[topic_name] += "... <a href=\""+var.section+".html#"+var.abivarname+"\">"+abivarname+"</a>   "
+        topic_class_sec3[topic_name] += "["+var.mnemonics+"]<br>\n"
 
         if debug==1 :
           print("topic_name:"+topic_name)
