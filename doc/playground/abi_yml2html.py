@@ -406,7 +406,7 @@ if debug==1 :
   print(inputs_for_topic)
 
 for i, topic_name in enumerate(inputs_for_topic):
-  found[topic_name] = 1
+  topic_sec4[topic_name] = topic_header_sec4
   tests=inputs_for_topic[topic_name]
 # Constitute a dictionary for each directory of tests
   dir = dict()
@@ -421,13 +421,8 @@ for i, topic_name in enumerate(inputs_for_topic):
     line="<p> tests/"+dirname+"/Input: "
     for testname in testnames:
       line+="<a href=\"../tests/"+dirname+"/Input/"+testname+"\">"+testname+"</a> \n"
-    topic_class_sec4[topic_name]+= line
-
-for topic_name, value in found.items():
-  if found[topic_name] == 1:
-    topic_sec4[topic_name] = topic_header_sec4 + topic_class_sec4[topic_name]
-    topic_sec4[topic_name] += "<br>\n"
-
+    topic_sec4[topic_name]+= line
+  topic_sec4[topic_name] += "<br>\n"
 
 ################################################################################
 # Assemble the "topic" files : secs 1, 2, 3 and then possibly 4 and 5
