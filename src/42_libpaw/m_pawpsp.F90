@@ -2505,8 +2505,9 @@ subroutine pawpsp_calc(core_mesh,epsatm,ffspl,imainmesh,ixc,lnmax,&
 !==================================================
 !Compute atomic contribution to Dij (Dij0)
 !if not already in memory
-
+write(80,*) "coucou0"
  if ((.not.has_dij0).and.(pawtab%has_kij==2.or.pawtab%has_kij==-1)) then
+write(80,*) "coucou1"
    LIBPAW_ALLOCATE(pawtab%dij0,(pawtab%lmn2_size))
    if (reduced_vloc) then
      call atompaw_dij0(pawtab%indlmn,pawtab%kij,pawtab%lmn_size,ncore,0,pawtab,pawrad,core_mesh,&
@@ -2517,7 +2518,7 @@ subroutine pawpsp_calc(core_mesh,epsatm,ffspl,imainmesh,ixc,lnmax,&
    end if
    has_dij0=.true.
  end if
-
+write(80,*) "coucou2"
 !==================================================
 !Compute kinetic operator contribution to Dij
 
@@ -3509,7 +3510,7 @@ subroutine pawpsp_17in(epsatm,ffspl,icoulomb,ipsp,ixc,lmax,&
    call wrtout(std_out,  msg,'COLL')
  else
    has_v_minushalf=0
-   LIBPAW_ALLOCATE(v_minushalf,(0))
+!   LIBPAW_ALLOCATE(v_minushalf,(0))
  end if
 !---------------------------------
 !Eventually read "numeric" shapefunctions (if shape_type=-1)
@@ -3630,13 +3631,17 @@ subroutine pawpsp_17in(epsatm,ffspl,icoulomb,ipsp,ixc,lmax,&
 
  if (vlocopt>0) then
    LIBPAW_ALLOCATE(pawtab%dij0,(pawtab%lmn2_size))
+!   if (allocated(v_minushalf)) then
 !   call atompaw_dij0(pawtab%indlmn,kij,pawtab%lmn_size,ncore,0,pawtab,pawrad,core_mesh,&
-!&                    vloc_mesh,vlocr,znucl)
+!&                    vloc_mesh,vlocr,znucl,v_minushalf)
+!   else
    call atompaw_dij0(pawtab%indlmn,kij,pawtab%lmn_size,ncore,0,pawtab,pawrad,core_mesh,&
-&                    vloc_mesh,vlocr,znucl,v_minushalf)
+&                    vloc_mesh,vlocr,znucl)
+!   end if
+
  end if
  if (allocated(v_minushalf)) then
-!   vlocr(1:vloc_mesh%mesh_size)=vlocr(1:vloc_mesh%mesh_size)+v_minushalf(1:vloc_mesh%mesh_size)/sqrt(fourpi)
+   vlocr(1:vloc_mesh%mesh_size)=vlocr(1:vloc_mesh%mesh_size)+v_minushalf(1:vloc_mesh%mesh_size)/sqrt(fourpi)
    LIBPAW_DEALLOCATE(v_minushalf)
  end if
 !Keep eventualy Kij in memory
