@@ -46,7 +46,7 @@
        aluminum (a metal), and its surface: occupation numbers, smearing the
        Fermi-Dirac distribution, the surface energy, and again, convergence
         studies ...</li>
-
+    examples  : |-
        <p> An example of a minimal input file to calculate the ground state of crystalline aluminium is given here:
 
        <pre>

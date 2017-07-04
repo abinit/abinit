@@ -30,7 +30,8 @@
     tofcontent_header : |
       <script type="text/javascript" src="__JS_PATH__topics_table_of_content.js"> </script>
     introduction : Default introduction ... this is an error
-    tutorials : Default tutorials ... this is an error
+    tutorials : 
+    examples : 
     end : |
       </body>
       </html>

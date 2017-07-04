@@ -428,10 +428,11 @@ for topic_name in list_of_topics:
   #Generate the table of content
   item_toc=0
   item_list=[]
-  title={ "introduction":"Introduction." , "tutorials":"Related tutorials." , "input_variables":"Related input variables." , "input_files":"Selected input files."}
-  sec_number={ "introduction":"0" , "tutorials":"0" , "input_variables":"0" , "input_files":"0"}
+  title={ "introduction":"Introduction." , "examples":"Example(s)", "tutorials":"Related tutorials." , "input_variables":"Related input variables." , "input_files":"Selected input files."}
+  sec_number={}
   toc=" <h3><b>Table of content: </b></h3> \n <ul> "
-  for j in ["introduction","tutorials","input_variables","input_files"]:
+  for j in ["introduction","examples","tutorials","input_variables","input_files"] :
+    sec_number[j]="0"
     try :
       extract_j=getattr(newtopic,j).strip()
     except :
@@ -447,7 +448,7 @@ for topic_name in list_of_topics:
   #Generate a first version of the html file, in the order "header" ... up to the "end"
   #Take the info from the section "default" if there is no information on the specific section provided in the yml file.
   topic_html=""
-  for j in ["header","title","subtitle","copyright","links","toc","introduction","tutorials","input_variables","input_files","links","end"]:
+  for j in ["header","title","subtitle","copyright","links","toc","introduction","examples","tutorials","input_variables","input_files","links","end"]:
     if j == "toc":
       topic_html += toc
     elif j == "input_variables":
@@ -462,7 +463,10 @@ for topic_name in list_of_topics:
     else:
       extract_j=getattr(newtopic,j).strip()
       if extract_j == "" or extract_j== "default" :
-        topic_html+= getattr(default_topic,j)
+        try:
+          topic_html+= getattr(default_topic,j)
+        except:
+          pass
       else:
         if j in title.keys():
           topic_html+= '\n&nbsp; \n<HR ALIGN=left> \n<a name=\"'+sec_number[j]+'\">&nbsp;</a>\n<h3><b>'+sec_number[j]+'. '+title[j]+'</b></h3>\n\n\n'
