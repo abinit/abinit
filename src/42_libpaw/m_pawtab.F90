@@ -531,6 +531,7 @@ MODULE m_pawtab
  public :: pawtab_set_flags    ! Set the value of the internal flags
  public :: pawtab_print        ! Printout of the object.
  public :: pawtab_bcast        ! MPI broadcast the object
+ public :: pawtab_copy         ! Copy structure
 
  interface pawtab_nullify
    module procedure pawtab_nullify_0D
@@ -546,6 +547,12 @@ MODULE m_pawtab
    module procedure pawtab_set_flags_0D
    module procedure pawtab_set_flags_1D
  end interface pawtab_set_flags
+
+ interface pawtab_copy
+   module procedure pawtab_copy_0D
+   module procedure pawtab_copy_1D
+ end interface pawtab_copy
+
 !!***
 
 CONTAINS !===========================================================
@@ -935,6 +942,82 @@ subroutine pawtab_free_1D(Pawtab)
  end do
 
 end subroutine pawtab_free_1D
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_pawtab/pawtab_copy_0D
+!! NAME
+!!  pawtab_copy_0D
+!!
+!! FUNCTION
+!!
+!! SIDE EFFECTS
+!!
+!! PARENTS
+!!      m_pawtab
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine pawtab_copy_0D(Pawtabin, Pawtabout)
+
+
+ implicit none
+
+!Arguments ------------------------------------
+!arrays
+ type(Pawtab_type),intent(in) :: Pawtabin
+ type(Pawtab_type),intent(out) :: Pawtabout
+
+!Local variables-------------------------------
+
+! *************************************************************************
+
+ !@Pawtab_type
+
+end subroutine pawtab_copy_0D
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_pawtab/pawtab_copy_1D
+!! NAME
+!!  pawtab_copy_1D
+!!
+!! FUNCTION
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine pawtab_copy_1D(Pawtabin, Pawtabout)
+
+
+ implicit none
+
+!Arguments ------------------------------------
+ type(pawtab_type),intent(in) :: Pawtabin(:)
+ type(pawtab_type),intent(out) :: Pawtabout(:)
+
+!Local variables-------------------------------
+ integer :: ii,nn
+
+! *************************************************************************
+
+ !@pawtab_type
+
+ nn=size(Pawtab)
+ if (nn==0) return
+
+ do ii=1,nn
+   call pawtab_copy_0D(Pawtabin(ii), Pawtabout(ii))
+ end do
+
+end subroutine pawtab_copy_1D
 !!***
 
 !----------------------------------------------------------------------
