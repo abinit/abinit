@@ -355,7 +355,7 @@ for (tclasskey, tclassval) in list_topics_class:
           if tclasskey==name_class[1].strip() :
             topic_name=name_class[0].strip()
             if found[topic_name]==0 :
-              topic_invars[topic_name] += "<p>"+tclassval+"<p>"
+              topic_invars[topic_name] += "<p>"+tclassval+":<p>"
               found[topic_name] = 1
             abivarname=var.abivarname
             if var.characteristics is not None and '[[INTERNAL_ONLY]]' in var.characteristics:

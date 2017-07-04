@@ -11,24 +11,8 @@ with open('yml_files/characteristics.yml', 'r') as f:
 with open('yml_files/list_specials.yml', 'r') as f:
     list_specials = yaml.load(f)
 
-list_topics_class = [
-    ('compulsory', 'Compulsory input variables:'),
-    ('basic', 'Basic input variables:'),
-    ('useful', 'Useful input variables:'),
-    ('internal', 'Relevant internal variables:'),
-    ('prpot', 'Printing input variables for potentials:'),
-    ('prfermi', 'Printing input variables for fermi level or surfaces:'),
-    ('prden', 'Printing input variables for density, eigenenergies k-points and wavefunctions:'),
-    ('prgeo', 'Printing input variables for geometry:'),
-    ('prdos', 'Printing DOS-related input variables:'),
-    ('prgs', 'Printing other ground-state input variables:'),
-    ('prngs', 'Printing non-ground-state input variables:'),
-    ('alch', 'Input variables related to alchemical mixing:'),
-    ('job', 'Input variables for job time limits:'),
-    ('slab', 'Input variables to insert a slab:'),
-    ('lotf', 'Input variables for Learn On The Fly calculations:'),
-    ('expert', 'Input variables for experts:'),
-]
+with open('yml_files/list_topics_class.yml', 'r') as f:
+    list_topics_class = yaml.load(f)
 
 class literal(str): pass
 
