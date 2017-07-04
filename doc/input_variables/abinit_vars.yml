@@ -28680,11 +28680,7 @@
         may work entirely with "[[xcart]]" or "[[xangst]]" and ignore [[xred]], in
         which case [[xred]] must be absent from the input file.
          <br />
-         One and only one of [[xred]], [[xcart]]
-        and
-         <b>
-          xangst
-         </b>
+         One and only one of [[xred]], [[xcart]] and [[xangst]]
          must be provided.
          <br />
          Atomic positions evolve if [[ionmov]]/=0 .
@@ -28837,7 +28833,7 @@
          N.B. : In the pseudopotential files, [[znucl]] is called "zatom".
         </p>
         <p>
-         For a "dummy" atom, with znucl=0 , as used in the case of calculations
+         For a "dummy" atom, with [[znucl]]=0 , as used in the case of calculations
         with only a jellium surface, ABINIT sets arbitrarily the covalent radius to one.
         </p>
     topics: GSgeneral_basic

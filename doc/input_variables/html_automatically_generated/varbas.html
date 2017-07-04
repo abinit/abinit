@@ -3906,11 +3906,7 @@ primitive vectors array "<a href="varbas.html#rprimd">rprimd</a>" in Bohr.
 may work entirely with "<a href="varbas.html#xcart">xcart</a>" or "<a href="varbas.html#xangst">xangst</a>" and ignore <b>xred</b>, in
 which case <b>xred</b> must be absent from the input file.
  <br />
- One and only one of <b>xred</b>, <a href="varbas.html#xcart">xcart</a>
-and
- <b>
-  xangst
- </b>
+ One and only one of <b>xred</b>, <a href="varbas.html#xcart">xcart</a> and <a href="varbas.html#xangst">xangst</a>
  must be provided.
  <br />
  Atomic positions evolve if <a href="varrlx.html#ionmov">ionmov</a>/=0 .
@@ -3941,7 +3937,7 @@ an error message and stops.
  N.B. : In the pseudopotential files, <b>znucl</b> is called "zatom".
 </p>
 <p>
- For a "dummy" atom, with znucl=0 , as used in the case of calculations
+ For a "dummy" atom, with <b>znucl</b>=0 , as used in the case of calculations
 with only a jellium surface, ABINIT sets arbitrarily the covalent radius to one.
 </p>
 </font>
