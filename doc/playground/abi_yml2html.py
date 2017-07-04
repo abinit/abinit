@@ -215,7 +215,7 @@ for i, var in enumerate(variables):
         topics_name_class = vartopics.split(',')
         for i, topic_name_class in enumerate(topics_name_class):
           name_class = topic_name_class.split('_')
-          cur_content += "<a href=\"topic_"+name_class[0]+".html\">"+name_class[0]+"</a> "
+          cur_content += "<a href=\"topic_"+name_class[0].strip()+".html\">"+name_class[0].strip()+"</a> "
         cur_content += "</font>\n"
     except:
       if debug==1 :
