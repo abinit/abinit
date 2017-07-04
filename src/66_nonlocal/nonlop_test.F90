@@ -7,7 +7,7 @@
 !! This routine is supposed to be used only for testing purpose.
 !! It tests the "nonlop" routine application (non-local operator) with respect to Finite Differences.
 !! It is not supposed to be used standalone, but via the nonlop_dfpt_test.py script to be found
-!! in ~abinit/scripts/postprocessing/nonlop_dfpt_test directory. This Python script
+!! in ~abinit/scripts/post_processing/nonlop_dfpt_test directory. This Python script
 !! launches Abinit (several datasets) and analyse the result, in order to compare
 !!  <Psi_i|H^(i)|Psi_j> compute with DFPT or Finite Differences.
 !! H^(i) is the ith derivative of the Hamiltonian with respect to one or several perturbation(s).
