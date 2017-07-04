@@ -548,11 +548,6 @@ MODULE m_pawtab
    module procedure pawtab_set_flags_1D
  end interface pawtab_set_flags
 
- interface pawtab_copy
-   module procedure pawtab_copy_0D
-   module procedure pawtab_copy_1D
- end interface pawtab_copy
-
 !!***
 
 CONTAINS !===========================================================
@@ -946,9 +941,9 @@ end subroutine pawtab_free_1D
 
 !----------------------------------------------------------------------
 
-!!****f* m_pawtab/pawtab_copy_0D
+!!****f* m_pawtab/pawtab_copy
 !! NAME
-!!  pawtab_copy_0D
+!!  pawtab_copy
 !!
 !! FUNCTION
 !!
@@ -961,7 +956,7 @@ end subroutine pawtab_free_1D
 !!
 !! SOURCE
 
-subroutine pawtab_copy_0D(Pawtabin, Pawtabout)
+subroutine pawtab_copy(Pawtabin, Pawtabout)
 
 
  implicit none
@@ -977,47 +972,7 @@ subroutine pawtab_copy_0D(Pawtabin, Pawtabout)
 
  !@Pawtab_type
 
-end subroutine pawtab_copy_0D
-!!***
-
-!----------------------------------------------------------------------
-
-!!****f* m_pawtab/pawtab_copy_1D
-!! NAME
-!!  pawtab_copy_1D
-!!
-!! FUNCTION
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!
-!! SOURCE
-
-subroutine pawtab_copy_1D(Pawtabin, Pawtabout)
-
-
- implicit none
-
-!Arguments ------------------------------------
- type(pawtab_type),intent(in) :: Pawtabin(:)
- type(pawtab_type),intent(out) :: Pawtabout(:)
-
-!Local variables-------------------------------
- integer :: ii,nn
-
-! *************************************************************************
-
- !@pawtab_type
-
- nn=size(Pawtabin)
- if (nn==0) return
-
- do ii=1,nn
-   call pawtab_copy_0D(Pawtabin(ii), Pawtabout(ii))
- end do
-
-end subroutine pawtab_copy_1D
+end subroutine pawtab_copy
 !!***
 
 !----------------------------------------------------------------------
