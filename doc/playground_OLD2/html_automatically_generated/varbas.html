@@ -1,0 +1,3917 @@
+<html>
+<head><title>Description of basic variables.</title>
+<link rel=stylesheet type="text/css" href="../formabinit.css">
+</head>
+<body bgcolor="#ffffff">
+
+<hr>
+<a name="top"></a>
+
+<h1>ABINIT, basic input variables:</h1>
+
+<h2>List and description.</h2>
+<hr>
+
+<p>This document lists and provides the description
+of the name (keywords) of the "basic" input
+variables to be used in the main input file of the abinit code.
+
+<script type="text/javascript" src="../generic_advice.js"> </script>
+
+<script type="text/javascript" src="../copyright.js"> </script>
+
+<script type="text/javascript" src="../list_internal_links.js"> </script>
+
+<script type="text/javascript" src="../list_htmlfiles_input_variables.js"> </script>
+
+<a name="list"></a>
+<h3><b> Content of the file : alphabetical list of "basic" variables.</b></h3>
+
+ <br>A.
+ <a href="#accuracy">accuracy</a>&nbsp;&nbsp;
+ <a href="#acell">acell</a>&nbsp;&nbsp;
+ <a href="#angdeg">angdeg</a>&nbsp;&nbsp;
+ <br>B.
+ <br>C.
+ <br>D.
+ <br>E.
+ <a href="#ecut">ecut</a>&nbsp;&nbsp;
+ <a href="#einterp">einterp</a>&nbsp;&nbsp;
+ <br>F.
+ <br>G.
+ <br>H.
+ <br>I.
+ <a href="#iscf">iscf</a>&nbsp;&nbsp;
+ <a href="#ixc">ixc</a>&nbsp;&nbsp;
+ <br>J.
+ <a href="#jdtset">jdtset</a>&nbsp;&nbsp;
+ <br>K.
+ <a href="#kpt">kpt</a>&nbsp;&nbsp;
+ <a href="#kptnrm">kptnrm</a>&nbsp;&nbsp;
+ <a href="#kptopt">kptopt</a>&nbsp;&nbsp;
+ <br>L.
+ <br>M.
+ <br>N.
+ <a href="#natom">natom</a>&nbsp;&nbsp;
+ <a href="#nband">nband</a>&nbsp;&nbsp;
+ <a href="#nbandhf">nbandhf</a>&nbsp;&nbsp;
+ <a href="#ndtset">ndtset</a>&nbsp;&nbsp;
+ <a href="#ngkpt">ngkpt</a>&nbsp;&nbsp;
+ <a href="#nkpath">nkpath</a>&nbsp;&nbsp;
+ <a href="#nkpt">nkpt</a>&nbsp;&nbsp;
+ <a href="#nkpthf">nkpthf</a>&nbsp;&nbsp;
+ <a href="#nshiftk">nshiftk</a>&nbsp;&nbsp;
+ <a href="#nsppol">nsppol</a>&nbsp;&nbsp;
+ <a href="#nstep">nstep</a>&nbsp;&nbsp;
+ <a href="#nsym">nsym</a>&nbsp;&nbsp;
+ <a href="#ntypat">ntypat</a>&nbsp;&nbsp;
+ <br>O.
+ <a href="#occopt">occopt</a>&nbsp;&nbsp;
+ <br>P.
+ <br>Q.
+ <br>R.
+ <a href="#rprim">rprim</a>&nbsp;&nbsp;
+ <a href="#rprimd">rprimd</a>&nbsp;&nbsp;
+ <br>S.
+ <a href="#scalecart">scalecart</a>&nbsp;&nbsp;
+ <a href="#shiftk">shiftk</a>&nbsp;&nbsp;
+ <a href="#symrel">symrel</a>&nbsp;&nbsp;
+ <br>T.
+ <a href="#tnons">tnons</a>&nbsp;&nbsp;
+ <a href="#toldfe">toldfe</a>&nbsp;&nbsp;
+ <a href="#toldff">toldff</a>&nbsp;&nbsp;
+ <a href="#tolrff">tolrff</a>&nbsp;&nbsp;
+ <a href="#tolvrs">tolvrs</a>&nbsp;&nbsp;
+ <a href="#tolwfr">tolwfr</a>&nbsp;&nbsp;
+ <a href="#typat">typat</a>&nbsp;&nbsp;
+ <br>U.
+ <a href="#udtset">udtset</a>&nbsp;&nbsp;
+ <a href="#usewvl">usewvl</a>&nbsp;&nbsp;
+ <br>V.
+ <br>W.
+ <a href="#wtk">wtk</a>&nbsp;&nbsp;
+ <a href="#wvl_hgrid">wvl_hgrid</a>&nbsp;&nbsp;
+ <br>X.
+ <a href="#xangst">xangst</a>&nbsp;&nbsp;
+ <a href="#xcart">xcart</a>&nbsp;&nbsp;
+ <a href="#xred">xred</a>&nbsp;&nbsp;
+ <br>Y.
+ <br>Z.
+ <a href="#znucl">znucl</a>&nbsp;&nbsp;
+
+
+<br><br><br><br><hr>
+<br><font id="title"><a name="accuracy">accuracy</a></font>
+<br><font id="mnemonics">Mnemonics: ACCURACY</font>
+<br><font id="characteristic">Characteristic: </font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><font id="text">
+<p>
+<p>
+Allows to tune the accuracy of a calculation by setting automatically the variables <a href="varbas.html#ecut">ecut</a>,  <a href="vargs.html#boxcutmin">boxcutmin</a>, <a href="vargs.html#fband">fband</a>,
+ <a href="varbas.html#tolvrs">tolvrs</a>, <a href="varrlx.html#tolmxf">tolmxf</a>,
+ <a href="vardev.html#optforces">optforces</a>, <a href="vargs.html#timopt">timopt</a>, <a href="vardev.html#npulayit">npulayit</a>,
+ <a href="varbas.html#nstep">nstep</a>, <a href="varfil.html#prteig">prteig</a>, <a href="varfil.html#prtden">prtden</a>, and if <a href="varint.html#usepaw">usepaw</a>=1,  <a href="varpaw.html#pawecutdg">pawecutdg</a>,
+ <a href="varpaw.html#bxctmindg">bxctmindg</a>, <a href="varpaw.html#pawxcdev">pawxcdev</a>, <a href="varpaw.html#pawmixdg">pawmixdg</a>,
+ <a href="varpaw.html#pawovlp">pawovlp</a>, <a href="varpaw.html#pawnhatxc">pawnhatxc</a>, according to the following table:
+
+ <p style="margin-left: 40px;">
+  <table style="border: medium none ; border-collapse: collapse; width: 549px; height: 102px;" summary="Input file examples">
+    <tbody>
+      <tr style="height: 33.45pt;">
+
+        <td style="border-style: solid solid solid solid;  border-width: 2.25pt 2.25pt 2.25pt medium; padding: 0cm 3.5pt; width: 164.3pt; height: 33.45pt; font-weight: bold">
+        <p style="margin: 0cm 0cm 0.0001pt; font-weight: normal;" class="MsoBodyTextIndent" ><small>accuracy</small></p>
+        </td>
+
+        <td style="border-style: solid solid solid none;  border-width: 2.25pt 2.25pt 2.25pt medium; padding: 0cm 3.5pt; width: 164.3pt; height: 33.45pt; ">
+        <p style="margin: 0cm 0cm 0.0001pt; text-align: center;" class="MsoBodyTextIndent" align="center"><small> 1 </small></p>
+        </td>
+
+        <td style="border-style: solid solid solid none;  border-width: 2.25pt 2.25pt 2.25pt medium; padding: 0cm 3.5pt; width: 163.15pt; height: 33.45pt; ">
+        <p style="margin: 0cm 0cm 0.0001pt; text-align: center;" class="MsoBodyTextIndent" align="center"><small> 2 </small></p>
+         </td>
+
+       <td style="border-style: solid solid solid none;  border-width: 2.25pt 2.25pt 2.25pt medium; padding: 0cm 3.5pt; width: 163.15pt; height: 33.45pt; ">
+        <p style="margin: 0cm 0cm 0.0001pt; text-align: center;" class="MsoBodyTextIndent" align="center"><small> 3 </small></p>
+        </td>
+
+       <td style="border-style: solid solid solid none;  border-width: 2.25pt 2.25pt 2.25pt medium; padding: 0cm 3.5pt; width: 163.15pt; height: 33.45pt; ">
+        <p style="margin: 0cm 0cm 0.0001pt; text-align: center;" class="MsoBodyTextIndent" align="center"><small> 4 </small></p>
+        </td>
+
+       <td style="border-style: solid solid solid none;  border-width: 2.25pt 2.25pt 2.25pt medium; padding: 0cm 3.5pt; width: 163.15pt; height: 33.45pt; ">
+        <p style="margin: 0cm 0cm 0.0001pt; text-align: center;" class="MsoBodyTextIndent" align="center"><small> 5 </small></p>
+        </td>
+
+       <td style="border-style: solid solid solid none;  border-width: 2.25pt 2.25pt 2.25pt medium; padding: 0cm 3.5pt; width: 163.15pt; height: 33.45pt; ">
+        <p style="margin: 0cm 0cm 0.0001pt; text-align: center;" class="MsoBodyTextIndent" align="center"><small> 6 </small></p>
+        </td>
+      </tr>
+
+      <tr style="height: 33.45pt;">
+        <td style="border-style: none solid solid;  border-width: medium 2.25pt 2.25pt; padding: 0cm 3.5pt; width: 90pt; height: 33.45pt; font-weight: bold;">
+        <p style="margin: 0cm 0cm 0.0001pt; font-weight: normal;" class="MsoBodyTextIndent"><small>ecut</small></p>
+        </td>
+
+        <td style="border-style: none solid solid none;  border-width: medium 2.25pt 2.25pt medium; padding: 0cm 3.5pt; width: 164.3pt; height: 33.45pt;">
+        <p style="margin: 0cm 0cm 0.0001pt; text-align: center;" class="MsoBodyTextIndent" align="center"><small>E_min</small></p>
+        </td>
+
+        <td style="border-style: none solid solid none;  border-width: medium 2.25pt 2.25pt medium; padding: 0cm 3.5pt; width: 163.15pt; height: 33.45pt;">
+        <p style="margin: 0cm 0cm 0.0001pt; text-align: center;" class="MsoBodyTextIndent" align="center"><small>E_med</small></p>
+        </td>
+
+       <td style="border-style: none solid solid none;  border-width: medium 2.25pt 2.25pt medium; padding: 0cm 3.5pt; width: 163.15pt; height: 33.45pt;">
+        <p style="margin: 0cm 0cm 0.0001pt; text-align: center;" class="MsoBodyTextIndent" align="center"><small>E_med</small></p>
+        </td>
+
+       <td style="border-style: none solid solid none;  border-width: medium 2.25pt 2.25pt medium; padding: 0cm 3.5pt; width: 163.15pt; height: 33.45pt;">
+        <p style="margin: 0cm 0cm 0.0001pt; text-align: center;" class="MsoBodyTextIndent" align="center"><small><b>E_max</b></small></p>
+        </td>
+
+       <td style="border-style: none solid solid none;  border-width: medium 2.25pt 2.25pt medium; padding: 0cm 3.5pt; width: 163.15pt; height: 33.45pt;">
+        <p style="margin: 0cm 0cm 0.0001pt; text-align: center;" class="MsoBodyTextIndent" align="center"><small><b>E_max</b></small></p>
+        </td>
+
+       <td style="border-style: none solid solid none;  border-width: medium 2.25pt 2.25pt medium; padding: 0cm 3.5pt; width: 163.15pt; height: 33.45pt;">
+        <p style="margin: 0cm 0cm 0.0001pt; text-align: center;" class="MsoBodyTextIndent" align="center"><small><b>E_max</b></small></p>
+        </td>
+      </tr>
+
+      <tr style="height: 33.3pt;">
+        <td style="border-style: none solid solid;  border-width: medium 2.25pt 2.25pt; padding: 0cm 3.5pt; width: 90pt; height: 33.3pt; font-weight: bold;">
+        <p style="margin: 0cm 0cm 0.0001pt; font-weight: normal;" class="MsoBodyTextIndent"><small>pawecutdg</small></p>
+        </small></td>
+
+        <td style="border-style: none solid solid none; border-width: medium 2.25pt 2.25pt medium; padding: 0cm 3.5pt; width: 164.3pt; height: 33.3pt;">
+        <p style="margin: 0cm 0cm 0.0001pt; text-align: center;" class="MsoBodyTextIndent" align="center"><small>ecut</small></p>
+        </td>
+
+        <td style="border-style: none solid solid none;  border-width: medium 2.25pt 2.25pt medium; padding: 0cm 3.5pt; width: 163.15pt; height: 33.3pt;">
+        <p style="margin: 0cm 0cm 0.0001pt; text-align: center;" class="MsoBodyTextIndent" align="center"><small>ecut</small></p>
+        </td>
+
+        <td style="border-style: none solid solid none;  border-width: medium 2.25pt 2.25pt medium; padding: 0cm 3.5pt; width: 163.15pt; height: 33.3pt;">
+        <p style="margin: 0cm 0cm 0.0001pt; text-align: center;" class="MsoBodyTextIndent" align="center"><small>1.2*ecut</small></p>
+        </td>
+
+        <td style="border-style: none solid solid none;  border-width: medium 2.25pt 2.25pt medium; padding: 0cm 3.5pt; width: 163.15pt; height: 33.3pt;">
+        <p style="margin: 0cm 0cm 0.0001pt; text-align: center;" class="MsoBodyTextIndent" align="center"><small><b>1.5*ecut</b></small></p>
+        </td>
+
+        <td style="border-style: none solid solid none;  border-width: medium 2.25pt 2.25pt medium; padding: 0cm 3.5pt; width: 163.15pt; height: 33.3pt;">
+        <p style="margin: 0cm 0cm 0.0001pt; text-align: center;" class="MsoBodyTextIndent" align="center"><small>2*ecut</small></p>
+        </td>
+
+        <td style="border-style: none solid solid none;  border-width: medium 2.25pt 2.25pt medium; padding: 0cm 3.5pt; width: 163.15pt; height: 33.3pt;">
+        <p style="margin: 0cm 0cm 0.0001pt; text-align: center;" class="MsoBodyTextIndent" align="center"><small>2*ecut</small></p>
+        </td>
+      </tr>
+
+      <tr style="height: 33.3pt;">
+        <td style="border-style: none solid solid;  border-width: medium 2.25pt 2.25pt; padding: 0cm 3.5pt; width: 90pt; height: 33.3pt; font-weight: bold;">
+        <p style="margin: 0cm 0cm 0.0001pt; font-weight: normal;" class="MsoBodyTextIndent"><small>fband</small></p>
+        </td>
+
+        <td style="border-style: none solid solid none; border-width: medium 2.25pt 2.25pt medium; padding: 0cm 3.5pt; width: 164.3pt; height: 33.3pt;">
+        <p style="margin: 0cm 0cm 0.0001pt; text-align: center;" class="MsoBodyTextIndent" align="center"><small><b>0.5</b></small></p>
+        </td>
+
+        <td style="border-style: none solid solid none;  border-width: medium 2.25pt 2.25pt medium; padding: 0cm 3.5pt; width: 163.15pt; height: 33.3pt;">
+        <p style="margin: 0cm 0cm 0.0001pt; text-align: center;" class="MsoBodyTextIndent" align="center"><small><b>0.5</b></small></p>
+        </td>
+
+        <td style="border-style: none solid solid none;  border-width: medium 2.25pt 2.25pt medium; padding: 0cm 3.5pt; width: 163.15pt; height: 33.3pt;">
+        <p style="margin: 0cm 0cm 0.0001pt; text-align: center;" class="MsoBodyTextIndent" align="center"><small><b>0.5</b></small></p>
+        </td>
+
+        <td style="border-style: none solid solid none;  border-width: medium 2.25pt 2.25pt medium; padding: 0cm 3.5pt; width: 163.15pt; height: 33.3pt;">
+        <p style="margin: 0cm 0cm 0.0001pt; text-align: center;" class="MsoBodyTextIndent" align="center"><small><b>0.5</b></small></p>
+        </td>
+
+        <td style="border-style: none solid solid none;  border-width: medium 2.25pt 2.25pt medium; padding: 0cm 3.5pt; width: 163.15pt; height: 33.3pt;">
+        <p style="margin: 0cm 0cm 0.0001pt; text-align: center;" class="MsoBodyTextIndent" align="center"><small>0.75</small></p>
+        </td>
+
+        <td style="border-style: none solid solid none;  border-width: medium 2.25pt 2.25pt medium; padding: 0cm 3.5pt; width: 163.15pt; height: 33.3pt;">
+        <p style="margin: 0cm 0cm 0.0001pt; text-align: center;" class="MsoBodyTextIndent" align="center"><small>0.75</small></p>
+        </td>
+      </tr>
+
+      <tr style="height: 33.3pt;">
+        <td style="border-style: none solid solid;  border-width: medium 2.25pt 2.25pt; padding: 0cm 3.5pt; width: 90pt; height: 33.3pt; font-weight: bold;">
+        <p style="margin: 0cm 0cm 0.0001pt; font-weight: normal;" class="MsoBodyTextIndent"><small>boxcutmin</small></p>
+        </td>
+
+        <td style="border-style: none solid solid none; border-width: medium 2.25pt 2.25pt medium; padding: 0cm 3.5pt; width: 164.3pt; height: 33.3pt;">
+        <p style="margin: 0cm 0cm 0.0001pt; text-align: center;" class="MsoBodyTextIndent" align="center"><small>1.5</small></p>
+        </td>
+
+        <td style="border-style: none solid solid none;  border-width: medium 2.25pt 2.25pt medium; padding: 0cm 3.5pt; width: 163.15pt; height: 33.3pt;">
+        <p style="margin: 0cm 0cm 0.0001pt; text-align: center;" class="MsoBodyTextIndent" align="center"><small>1.8</small></p>
+        </td>
+
+        <td style="border-style: none solid solid none;  border-width: medium 2.25pt 2.25pt medium; padding: 0cm 3.5pt; width: 163.15pt; height: 33.3pt;">
+        <p style="margin: 0cm 0cm 0.0001pt; text-align: center;" class="MsoBodyTextIndent" align="center"><small>1.8</small></p>
+        </td>
+
+        <td style="border-style: none solid solid none;  border-width: medium 2.25pt 2.25pt medium; padding: 0cm 3.5pt; width: 163.15pt; height: 33.3pt;">
+        <p style="margin: 0cm 0cm 0.0001pt; text-align: center;" class="MsoBodyTextIndent" align="center"><small><b>2.0</b></small></p>
+        </td>
+
+        <td style="border-style: none solid solid none;  border-width: medium 2.25pt 2.25pt medium; padding: 0cm 3.5pt; width: 163.15pt; height: 33.3pt;">
+        <p style="margin: 0cm 0cm 0.0001pt; text-align: center;" class="MsoBodyTextIndent" align="center"><small><b>2.0</b></small></p>
+        </td>
+
+        <td style="border-style: none solid solid none;  border-width: medium 2.25pt 2.25pt medium; padding: 0cm 3.5pt; width: 163.15pt; height: 33.3pt;">
+        <p style="margin: 0cm 0cm 0.0001pt; text-align: center;" class="MsoBodyTextIndent" align="center"><small><b>2.0</b></small></p>
+        </td>
+      </tr>
+
+      <tr style="height: 33.3pt;">
+        <td style="border-style: none solid solid;  border-width: medium 2.25pt 2.25pt; padding: 0cm 3.5pt; width: 90pt; height: 33.3pt; font-weight: bold;">
+        <p style="margin: 0cm 0cm 0.0001pt; font-weight: normal;" class="MsoBodyTextIndent"><small>bxctmindg</small></p>
+        </td>
+
+        <td style="border-style: none solid solid none; border-width: medium 2.25pt 2.25pt medium; padding: 0cm 3.5pt; width: 164.3pt; height: 33.3pt;">
+        <p style="margin: 0cm 0cm 0.0001pt; text-align: center;" class="MsoBodyTextIndent" align="center"><small>1.5</small></p>
+        </td>
+
+        <td style="border-style: none solid solid none;  border-width: medium 2.25pt 2.25pt medium; padding: 0cm 3.5pt; width: 163.15pt; height: 33.3pt;">
+        <p style="margin: 0cm 0cm 0.0001pt; text-align: center;" class="MsoBodyTextIndent" align="center"><small>1.8</small></p>
+        </td>
+
+        <td style="border-style: none solid solid none;  border-width: medium 2.25pt 2.25pt medium; padding: 0cm 3.5pt; width: 163.15pt; height: 33.3pt;">
+        <p style="margin: 0cm 0cm 0.0001pt; text-align: center;" class="MsoBodyTextIndent" align="center"><small>1.8</small></p>
+        </td>
+
+        <td style="border-style: none solid solid none;  border-width: medium 2.25pt 2.25pt medium; padding: 0cm 3.5pt; width: 163.15pt; height: 33.3pt;">
+        <p style="margin: 0cm 0cm 0.0001pt; text-align: center;" class="MsoBodyTextIndent" align="center"><small><b>2.0</b></small></p>
+        </td>
+
+        <td style="border-style: none solid solid none;  border-width: medium 2.25pt 2.25pt medium; padding: 0cm 3.5pt; width: 163.15pt; height: 33.3pt;">
+        <p style="margin: 0cm 0cm 0.0001pt; text-align: center;" class="MsoBodyTextIndent" align="center"><small><b>2.0</b></small></p>
+        </td>
+
+        <td style="border-style: none solid solid none;  border-width: medium 2.25pt 2.25pt medium; padding: 0cm 3.5pt; width: 163.15pt; height: 33.3pt;">
+        <p style="margin: 0cm 0cm 0.0001pt; text-align: center;" class="MsoBodyTextIndent" align="center"><small><b>2.0</b></small></p>
+        </td>
+      </tr>
+
+      <tr style="height: 33.3pt;">
+        <td style="border-style: none solid solid;  border-width: medium 2.25pt 2.25pt; padding: 0cm 3.5pt; width: 90pt; height: 33.3pt; font-weight: bold;">
+        <p style="margin: 0cm 0cm 0.0001pt; font-weight: normal;" class="MsoBodyTextIndent"><small>pawxcdev</small></p>
+        </td>
+
+        <td style="border-style: none solid solid none; border-width: medium 2.25pt 2.25pt medium; padding: 0cm 3.5pt; width: 164.3pt; height: 33.3pt;">
+        <p style="margin: 0cm 0cm 0.0001pt; text-align: center;" class="MsoBodyTextIndent" align="center"><small><b>1</b></small></p>
+        </td>
+
+        <td style="border-style: none solid solid none;  border-width: medium 2.25pt 2.25pt medium; padding: 0cm 3.5pt; width: 163.15pt; height: 33.3pt;">
+        <p style="margin: 0cm 0cm 0.0001pt; text-align: center;" class="MsoBodyTextIndent" align="center"><small><b>1</b></small></p>
+        </td>
+
+        <td style="border-style: none solid solid none;  border-width: medium 2.25pt 2.25pt medium; padding: 0cm 3.5pt; width: 163.15pt; height: 33.3pt;">
+        <p style="margin: 0cm 0cm 0.0001pt; text-align: center;" class="MsoBodyTextIndent" align="center"><small><b>1</b></small></p>
+        </td>
+
+        <td style="border-style: none solid solid none;  border-width: medium 2.25pt 2.25pt medium; padding: 0cm 3.5pt; width: 163.15pt; height: 33.3pt;">
+        <p style="margin: 0cm 0cm 0.0001pt; text-align: center;" class="MsoBodyTextIndent" align="center"><small><b>1</b></small></p>
+        </td>
+
+        <td style="border-style: none solid solid none;  border-width: medium 2.25pt 2.25pt medium; padding: 0cm 3.5pt; width: 163.15pt; height: 33.3pt;">
+        <p style="margin: 0cm 0cm 0.0001pt; text-align: center;" class="MsoBodyTextIndent" align="center"><small>2</small></p>
+        </td>
+
+        <td style="border-style: none solid solid none;  border-width: medium 2.25pt 2.25pt medium; padding: 0cm 3.5pt; width: 163.15pt; height: 33.3pt;">
+        <p style="margin: 0cm 0cm 0.0001pt; text-align: center;" class="MsoBodyTextIndent" align="center"><small>2</small></p>
+        </td>
+      </tr>
+
+      <tr style="height: 33.3pt;">
+        <td style="border-style: none solid solid;  border-width: medium 2.25pt 2.25pt; padding: 0cm 3.5pt; width: 90pt; height: 33.3pt; font-weight: bold;">
+        <p style="margin: 0cm 0cm 0.0001pt; font-weight: normal;" class="MsoBodyTextIndent"><small>pawmixdg</small></p>
+        </td>
+
+        <td style="border-style: none solid solid none; border-width: medium 2.25pt 2.25pt medium; padding: 0cm 3.5pt; width: 164.3pt; height: 33.3pt;">
+        <p style="margin: 0cm 0cm 0.0001pt; text-align: center;" class="MsoBodyTextIndent" align="center"><small><b>0</b></small></p>
+        </td>
+
+        <td style="border-style: none solid solid none;  border-width: medium 2.25pt 2.25pt medium; padding: 0cm 3.5pt; width: 163.15pt; height: 33.3pt;">
+        <p style="margin: 0cm 0cm 0.0001pt; text-align: center;" class="MsoBodyTextIndent" align="center"><small><b>0</b></small></p>
+        </td>
+
+        <td style="border-style: none solid solid none;  border-width: medium 2.25pt 2.25pt medium; padding: 0cm 3.5pt; width: 163.15pt; height: 33.3pt;">
+        <p style="margin: 0cm 0cm 0.0001pt; text-align: center;" class="MsoBodyTextIndent" align="center"><small><b>0</b></small></p>
+        </td>
+
+        <td style="border-style: none solid solid none;  border-width: medium 2.25pt 2.25pt medium; padding: 0cm 3.5pt; width: 163.15pt; height: 33.3pt;">
+        <p style="margin: 0cm 0cm 0.0001pt; text-align: center;" class="MsoBodyTextIndent" align="center"><small><b>0</b></small></p>
+        </td>
+
+        <td style="border-style: none solid solid none;  border-width: medium 2.25pt 2.25pt medium; padding: 0cm 3.5pt; width: 163.15pt; height: 33.3pt;">
+        <p style="margin: 0cm 0cm 0.0001pt; text-align: center;" class="MsoBodyTextIndent" align="center"><small>1</small></p>
+        </td>
+
+        <td style="border-style: none solid solid none;  border-width: medium 2.25pt 2.25pt medium; padding: 0cm 3.5pt; width: 163.15pt; height: 33.3pt;">
+        <p style="margin: 0cm 0cm 0.0001pt; text-align: center;" class="MsoBodyTextIndent" align="center"><small>1</small></p>
+        </td>
+      </tr>
+
+      <tr style="height: 33.3pt;">
+        <td style="border-style: none solid solid;  border-width: medium 2.25pt 2.25pt; padding: 0cm 3.5pt; width: 90pt; height: 33.3pt; font-weight: bold;">
+        <p style="margin: 0cm 0cm 0.0001pt; font-weight: normal;" class="MsoBodyTextIndent"><small>pawovlp</small></p>
+        </td>
+
+        <td style="border-style: none solid solid none; border-width: medium 2.25pt 2.25pt medium; padding: 0cm 3.5pt; width: 164.3pt; height: 33.3pt;">
+        <p style="margin: 0cm 0cm 0.0001pt; text-align: center;" class="MsoBodyTextIndent" align="center"><small>10</small></p>
+        </td>
+
+        <td style="border-style: none solid solid none;  border-width: medium 2.25pt 2.25pt medium; padding: 0cm 3.5pt; width: 163.15pt; height: 33.3pt;">
+        <p style="margin: 0cm 0cm 0.0001pt; text-align: center;" class="MsoBodyTextIndent" align="center"><small>7</small></p>
+        </td>
+
+        <td style="border-style: none solid solid none;  border-width: medium 2.25pt 2.25pt medium; padding: 0cm 3.5pt; width: 163.15pt; height: 33.3pt;">
+        <p style="margin: 0cm 0cm 0.0001pt; text-align: center;" class="MsoBodyTextIndent" align="center"><small>7</small></p>
+        </td>
+
+        <td style="border-style: none solid solid none;  border-width: medium 2.25pt 2.25pt medium; padding: 0cm 3.5pt; width: 163.15pt; height: 33.3pt;">
+        <p style="margin: 0cm 0cm 0.0001pt; text-align: center;" class="MsoBodyTextIndent" align="center"><small><b>5</b></small></p>
+        </td>
+
+        <td style="border-style: none solid solid none;  border-width: medium 2.25pt 2.25pt medium; padding: 0cm 3.5pt; width: 163.15pt; height: 33.3pt;">
+        <p style="margin: 0cm 0cm 0.0001pt; text-align: center;" class="MsoBodyTextIndent" align="center"><small><b>5</b></small></p>
+        </td>
+
+        <td style="border-style: none solid solid none;  border-width: medium 2.25pt 2.25pt medium; padding: 0cm 3.5pt; width: 163.15pt; height: 33.3pt;">
+        <p style="margin: 0cm 0cm 0.0001pt; text-align: center;" class="MsoBodyTextIndent" align="center"><small><b>5</b></small></p>
+        </td>
+      </tr>
+
+      <tr style="height: 33.3pt;">
+        <td style="border-style: none solid solid;  border-width: medium 2.25pt 2.25pt; padding: 0cm 3.5pt; width: 90pt; height: 33.3pt; font-weight: bold;">
+        <p style="margin: 0cm 0cm 0.0001pt; font-weight: normal;" class="MsoBodyTextIndent"><small>pawnhatxc</small></p>
+        </td>
+
+        <td style="border-style: none solid solid none; border-width: medium 2.25pt 2.25pt medium; padding: 0cm 3.5pt; width: 164.3pt; height: 33.3pt;">
+        <p style="margin: 0cm 0cm 0.0001pt; text-align: center;" class="MsoBodyTextIndent" align="center"><small>0</small></p>
+        </td>
+
+        <td style="border-style: none solid solid none;  border-width: medium 2.25pt 2.25pt medium; padding: 0cm 3.5pt; width: 163.15pt; height: 33.3pt;">
+        <p style="margin: 0cm 0cm 0.0001pt; text-align: center;" class="MsoBodyTextIndent" align="center"><small><b>1</b></small></p>
+        </td>
+
+        <td style="border-style: none solid solid none;  border-width: medium 2.25pt 2.25pt medium; padding: 0cm 3.5pt; width: 163.15pt; height: 33.3pt;">
+        <p style="margin: 0cm 0cm 0.0001pt; text-align: center;" class="MsoBodyTextIndent" align="center"><small><b>1</b></small></p>
+        </td>
+
+        <td style="border-style: none solid solid none;  border-width: medium 2.25pt 2.25pt medium; padding: 0cm 3.5pt; width: 163.15pt; height: 33.3pt;">
+        <p style="margin: 0cm 0cm 0.0001pt; text-align: center;" class="MsoBodyTextIndent" align="center"><small><b>1</b></small></p>
+        </td>
+
+        <td style="border-style: none solid solid none;  border-width: medium 2.25pt 2.25pt medium; padding: 0cm 3.5pt; width: 163.15pt; height: 33.3pt;">
+        <p style="margin: 0cm 0cm 0.0001pt; text-align: center;" class="MsoBodyTextIndent" align="center"><small><b>1</b></small></p>
+        </td>
+
+        <td style="border-style: none solid solid none;  border-width: medium 2.25pt 2.25pt medium; padding: 0cm 3.5pt; width: 163.15pt; height: 33.3pt;">
+        <p style="margin: 0cm 0cm 0.0001pt; text-align: center;" class="MsoBodyTextIndent" align="center"><small><b>1</b></small></p>
+        </td>
+      </tr>
+
+
+     <tr style="height: 33.3pt;">
+        <td style="border-style: none solid solid;  border-width: medium 2.25pt 2.25pt; padding: 0cm 3.5pt; width: 90pt; height: 33.3pt; font-weight: bold;">
+        <p style="margin: 0cm 0cm 0.0001pt; font-weight: normal;" class="MsoBodyTextIndent"><small>tolvrs</small></p>
+        </td>
+
+        <td style="border-style: none solid solid none; border-width: medium 2.25pt 2.25pt medium; padding: 0cm 3.5pt; width: 164.3pt; height: 33.3pt;">
+        <p style="margin: 0cm 0cm 0.0001pt; text-align: center;" class="MsoBodyTextIndent" align="center"><small>1.0d-3</small></p>
+        </td>
+
+        <td style="border-style: none solid solid none;  border-width: medium 2.25pt 2.25pt medium; padding: 0cm 3.5pt; width: 163.15pt; height: 33.3pt;">
+        <p style="margin: 0cm 0cm 0.0001pt; text-align: center;" class="MsoBodyTextIndent" align="center"><small>1.0d-5</small></p>
+        </td>
+
+        <td style="border-style: none solid solid none;  border-width: medium 2.25pt 2.25pt medium; padding: 0cm 3.5pt; width: 163.15pt; height: 33.3pt;">
+        <p style="margin: 0cm 0cm 0.0001pt; text-align: center;" class="MsoBodyTextIndent" align="center"><small>1.0d-7</small></p>
+        </td>
+
+        <td style="border-style: none solid solid none;  border-width: medium 2.25pt 2.25pt medium; padding: 0cm 3.5pt; width: 163.15pt; height: 33.3pt;">
+        <p style="margin: 0cm 0cm 0.0001pt; text-align: center;" class="MsoBodyTextIndent" align="center"><small>1.0d-9</small></p>
+        </td>
+
+        <td style="border-style: none solid solid none;  border-width: medium 2.25pt 2.25pt medium; padding: 0cm 3.5pt; width: 163.15pt; height: 33.3pt;">
+        <p style="margin: 0cm 0cm 0.0001pt; text-align: center;" class="MsoBodyTextIndent" align="center"><small>1.0d-10</small></p>
+        </td>
+
+        <td style="border-style: none solid solid none;  border-width: medium 2.25pt 2.25pt medium; padding: 0cm 3.5pt; width: 163.15pt; height: 33.3pt;">
+        <p style="margin: 0cm 0cm 0.0001pt; text-align: center;" class="MsoBodyTextIndent" align="center"><small>1.0d-12</small></p>
+        </td>
+      </tr>
+
+     <tr style="height: 33.3pt;">
+        <td style="border-style: none solid solid;  border-width: medium 2.25pt 2.25pt; padding: 0cm 3.5pt; width: 90pt; height: 33.3pt; font-weight: bold;">
+        <p style="margin: 0cm 0cm 0.0001pt; font-weight: normal;" class="MsoBodyTextIndent"><small>tolmxf</small></p>
+        </td>
+
+        <td style="border-style: none solid solid none; border-width: medium 2.25pt 2.25pt medium; padding: 0cm 3.5pt; width: 164.3pt; height: 33.3pt;">
+        <p style="margin: 0cm 0cm 0.0001pt; text-align: center;" class="MsoBodyTextIndent" align="center"><small>1.0d-3</small></p>
+        </td>
+
+        <td style="border-style: none solid solid none;  border-width: medium 2.25pt 2.25pt medium; padding: 0cm 3.5pt; width: 163.15pt; height: 33.3pt;">
+        <p style="margin: 0cm 0cm 0.0001pt; text-align: center;" class="MsoBodyTextIndent" align="center"><small>5.0d-4</small></p>
+        </td>
+
+        <td style="border-style: none solid solid none;  border-width: medium 2.25pt 2.25pt medium; padding: 0cm 3.5pt; width: 163.15pt; height: 33.3pt;">
+        <p style="margin: 0cm 0cm 0.0001pt; text-align: center;" class="MsoBodyTextIndent" align="center"><small>1.0d-4</small></p>
+        </td>
+
+        <td style="border-style: none solid solid none;  border-width: medium 2.25pt 2.25pt medium; padding: 0cm 3.5pt; width: 163.15pt; height: 33.3pt;">
+        <p style="margin: 0cm 0cm 0.0001pt; text-align: center;" class="MsoBodyTextIndent" align="center"><small><b>5.0d-5</b></small></p>
+        </td>
+
+        <td style="border-style: none solid solid none;  border-width: medium 2.25pt 2.25pt medium; padding: 0cm 3.5pt; width: 163.15pt; height: 33.3pt;">
+        <p style="margin: 0cm 0cm 0.0001pt; text-align: center;" class="MsoBodyTextIndent" align="center"><small>1.0d-6</small></p>
+        </td>
+
+        <td style="border-style: none solid solid none;  border-width: medium 2.25pt 2.25pt medium; padding: 0cm 3.5pt; width: 163.15pt; height: 33.3pt;">
+        <p style="margin: 0cm 0cm 0.0001pt; text-align: center;" class="MsoBodyTextIndent" align="center"><small>1.0d-6</small></p>
+        </td>
+      </tr>
+
+
+     <tr style="height: 33.3pt;">
+        <td style="border-style: none solid solid;  border-width: medium 2.25pt 2.25pt; padding: 0cm 3.5pt; width: 90pt; height: 33.3pt; font-weight: bold;">
+        <p style="margin: 0cm 0cm 0.0001pt; font-weight: normal;" class="MsoBodyTextIndent"><small>optforces</small></p>
+        </td>
+
+        <td style="border-style: none solid solid none; border-width: medium 2.25pt 2.25pt medium; padding: 0cm 3.5pt; width: 164.3pt; height: 33.3pt;">
+        <p style="margin: 0cm 0cm 0.0001pt; text-align: center;" class="MsoBodyTextIndent" align="center"><small> 1</small></p>
+        </td>
+
+        <td style="border-style: none solid solid none;  border-width: medium 2.25pt 2.25pt medium; padding: 0cm 3.5pt; width: 163.15pt; height: 33.3pt;">
+        <p style="margin: 0cm 0cm 0.0001pt; text-align: center;" class="MsoBodyTextIndent" align="center"><small>1</small></p>
+        </td>
+
+        <td style="border-style: none solid solid none;  border-width: medium 2.25pt 2.25pt medium; padding: 0cm 3.5pt; width: 163.15pt; height: 33.3pt;">
+        <p style="margin: 0cm 0cm 0.0001pt; text-align: center;" class="MsoBodyTextIndent" align="center"><small><b>2</b></small></p>
+        </td>
+
+        <td style="border-style: none solid solid none;  border-width: medium 2.25pt 2.25pt medium; padding: 0cm 3.5pt; width: 163.15pt; height: 33.3pt;">
+        <p style="margin: 0cm 0cm 0.0001pt; text-align: center;" class="MsoBodyTextIndent" align="center"><small><b>2</b></small></p>
+        </td>
+
+        <td style="border-style: none solid solid none;  border-width: medium 2.25pt 2.25pt medium; padding: 0cm 3.5pt; width: 163.15pt; height: 33.3pt;">
+        <p style="margin: 0cm 0cm 0.0001pt; text-align: center;" class="MsoBodyTextIndent" align="center"><small><b>2</b></small></p>
+        </td>
+
+        <td style="border-style: none solid solid none;  border-width: medium 2.25pt 2.25pt medium; padding: 0cm 3.5pt; width: 163.15pt; height: 33.3pt;">
+        <p style="margin: 0cm 0cm 0.0001pt; text-align: center;" class="MsoBodyTextIndent" align="center"><small><b>2</b></small></p>
+        </td>
+      </tr>
+
+
+    <tr style="height: 33.3pt;">
+        <td style="border-style: none solid solid;  border-width: medium 2.25pt 2.25pt; padding: 0cm 3.5pt; width: 90pt; height: 33.3pt; font-weight: bold;">
+        <p style="margin: 0cm 0cm 0.0001pt; font-weight: normal;" class="MsoBodyTextIndent"><small>timopt</small></p>
+        </td>
+
+        <td style="border-style: none solid solid none; border-width: medium 2.25pt 2.25pt medium; padding: 0cm 3.5pt; width: 164.3pt; height: 33.3pt;">
+        <p style="margin: 0cm 0cm 0.0001pt; text-align: center;" class="MsoBodyTextIndent" align="center"><small> 0</small></p>
+        </td>
+
+        <td style="border-style: none solid solid none;  border-width: medium 2.25pt 2.25pt medium; padding: 0cm 3.5pt; width: 163.15pt; height: 33.3pt;">
+        <p style="margin: 0cm 0cm 0.0001pt; text-align: center;" class="MsoBodyTextIndent" align="center"><small>0</small></p>
+        </td>
+
+        <td style="border-style: none solid solid none;  border-width: medium 2.25pt 2.25pt medium; padding: 0cm 3.5pt; width: 163.15pt; height: 33.3pt;">
+        <p style="margin: 0cm 0cm 0.0001pt; text-align: center;" class="MsoBodyTextIndent" align="center"><small><b>1</b></small></p>
+        </td>
+
+        <td style="border-style: none solid solid none;  border-width: medium 2.25pt 2.25pt medium; padding: 0cm 3.5pt; width: 163.15pt; height: 33.3pt;">
+        <p style="margin: 0cm 0cm 0.0001pt; text-align: center;" class="MsoBodyTextIndent" align="center"><small><b>1</b></small></p>
+        </td>
+
+        <td style="border-style: none solid solid none;  border-width: medium 2.25pt 2.25pt medium; padding: 0cm 3.5pt; width: 163.15pt; height: 33.3pt;">
+        <p style="margin: 0cm 0cm 0.0001pt; text-align: center;" class="MsoBodyTextIndent" align="center"><small><b>1</b></small></p>
+        </td>
+
+        <td style="border-style: none solid solid none;  border-width: medium 2.25pt 2.25pt medium; padding: 0cm 3.5pt; width: 163.15pt; height: 33.3pt;">
+        <p style="margin: 0cm 0cm 0.0001pt; text-align: center;" class="MsoBodyTextIndent" align="center"><small><b>1</b></small></p>
+        </td>
+      </tr>
+
+      <tr style="height: 33.3pt;">
+        <td style="border-style: none solid solid;  border-width: medium 2.25pt 2.25pt; padding: 0cm 3.5pt; width: 90pt; height: 33.3pt; font-weight: bold;">
+        <p style="margin: 0cm 0cm 0.0001pt; font-weight: normal;" class="MsoBodyTextIndent"><small>npulayit</small></p>
+        </td>
+
+        <td style="border-style: none solid solid none; border-width: medium 2.25pt 2.25pt medium; padding: 0cm 3.5pt; width: 164.3pt; height: 33.3pt;">
+        <p style="margin: 0cm 0cm 0.0001pt; text-align: center;" class="MsoBodyTextIndent" align="center"><small> 4</small></p>
+        </td>
+
+        <td style="border-style: none solid solid none;  border-width: medium 2.25pt 2.25pt medium; padding: 0cm 3.5pt; width: 163.15pt; height: 33.3pt;">
+        <p style="margin: 0cm 0cm 0.0001pt; text-align: center;" class="MsoBodyTextIndent" align="center"><small><b>7</b></small></p>
+        </td>
+
+        <td style="border-style: none solid solid none;  border-width: medium 2.25pt 2.25pt medium; padding: 0cm 3.5pt; width: 163.15pt; height: 33.3pt;">
+        <p style="margin: 0cm 0cm 0.0001pt; text-align: center;" class="MsoBodyTextIndent" align="center"><small><b>7</b></small></p>
+        </td>
+
+        <td style="border-style: none solid solid none;  border-width: medium 2.25pt 2.25pt medium; padding: 0cm 3.5pt; width: 163.15pt; height: 33.3pt;">
+        <p style="margin: 0cm 0cm 0.0001pt; text-align: center;" class="MsoBodyTextIndent" align="center"><small><b>7</b></small></p>
+        </td>
+
+        <td style="border-style: none solid solid none;  border-width: medium 2.25pt 2.25pt medium; padding: 0cm 3.5pt; width: 163.15pt; height: 33.3pt;">
+        <p style="margin: 0cm 0cm 0.0001pt; text-align: center;" class="MsoBodyTextIndent" align="center"><small>15</small></p>
+        </td>
+
+        <td style="border-style: none solid solid none;  border-width: medium 2.25pt 2.25pt medium; padding: 0cm 3.5pt; width: 163.15pt; height: 33.3pt;">
+        <p style="margin: 0cm 0cm 0.0001pt; text-align: center;" class="MsoBodyTextIndent" align="center"><small>15</small></p>
+        </td>
+      </tr>
+
+      <tr style="height: 33.3pt;">
+        <td style="border-style: none solid solid;  border-width: medium 2.25pt 2.25pt; padding: 0cm 3.5pt; width: 90pt; height: 33.3pt; font-weight: bold;">
+        <p style="margin: 0cm 0cm 0.0001pt; font-weight: normal;" class="MsoBodyTextIndent"><small>nstep</small></p>
+        </td>
+
+        <td style="border-style: none solid solid none; border-width: medium 2.25pt 2.25pt medium; padding: 0cm 3.5pt; width: 164.3pt; height: 33.3pt;">
+        <p style="margin: 0cm 0cm 0.0001pt; text-align: center;" class="MsoBodyTextIndent" align="center"><small> <b>30</b></small></p>
+        </td>
+
+        <td style="border-style: none solid solid none;  border-width: medium 2.25pt 2.25pt medium; padding: 0cm 3.5pt; width: 163.15pt; height: 33.3pt;">
+        <p style="margin: 0cm 0cm 0.0001pt; text-align: center;" class="MsoBodyTextIndent" align="center"><small><b>30</b></small></p>
+        </td>
+
+        <td style="border-style: none solid solid none;  border-width: medium 2.25pt 2.25pt medium; padding: 0cm 3.5pt; width: 163.15pt; height: 33.3pt;">
+        <p style="margin: 0cm 0cm 0.0001pt; text-align: center;" class="MsoBodyTextIndent" align="center"><small><b>30</b></small></p>
+        </td>
+
+        <td style="border-style: none solid solid none;  border-width: medium 2.25pt 2.25pt medium; padding: 0cm 3.5pt; width: 163.15pt; height: 33.3pt;">
+        <p style="margin: 0cm 0cm 0.0001pt; text-align: center;" class="MsoBodyTextIndent" align="center"><small><b>30</b></small></p>
+        </td>
+
+        <td style="border-style: none solid solid none;  border-width: medium 2.25pt 2.25pt medium; padding: 0cm 3.5pt; width: 163.15pt; height: 33.3pt;">
+        <p style="margin: 0cm 0cm 0.0001pt; text-align: center;" class="MsoBodyTextIndent" align="center"><small>50</small></p>
+        </td>
+
+        <td style="border-style: none solid solid none;  border-width: medium 2.25pt 2.25pt medium; padding: 0cm 3.5pt; width: 163.15pt; height: 33.3pt;">
+        <p style="margin: 0cm 0cm 0.0001pt; text-align: center;" class="MsoBodyTextIndent" align="center"><small>50</small></p>
+        </td>
+      </tr>
+
+      <tr style="height: 33.3pt;">
+        <td style="border-style: none solid solid;  border-width: medium 2.25pt 2.25pt; padding: 0cm 3.5pt; width: 90pt; height: 33.3pt; font-weight: bold;">
+        <p style="margin: 0cm 0cm 0.0001pt; font-weight: normal;" class="MsoBodyTextIndent"><small>prteig</small></p>
+        </td>
+
+        <td style="border-style: none solid solid none; border-width: medium 2.25pt 2.25pt medium; padding: 0cm 3.5pt; width: 164.3pt; height: 33.3pt;">
+        <p style="margin: 0cm 0cm 0.0001pt; text-align: center;" class="MsoBodyTextIndent" align="center"><small> 0</small></p>
+        </td>
+
+        <td style="border-style: none solid solid none;  border-width: medium 2.25pt 2.25pt medium; padding: 0cm 3.5pt; width: 163.15pt; height: 33.3pt;">
+        <p style="margin: 0cm 0cm 0.0001pt; text-align: center;" class="MsoBodyTextIndent" align="center"><small>0</small></p>
+        </td>
+
+        <td style="border-style: none solid solid none;  border-width: medium 2.25pt 2.25pt medium; padding: 0cm 3.5pt; width: 163.15pt; height: 33.3pt;">
+        <p style="margin: 0cm 0cm 0.0001pt; text-align: center;" class="MsoBodyTextIndent" align="center"><small><b>1</b></small></p>
+        </td>
+
+        <td style="border-style: none solid solid none;  border-width: medium 2.25pt 2.25pt medium; padding: 0cm 3.5pt; width: 163.15pt; height: 33.3pt;">
+        <p style="margin: 0cm 0cm 0.0001pt; text-align: center;" class="MsoBodyTextIndent" align="center"><small><b>1</b></small></p>
+        </td>
+
+        <td style="border-style: none solid solid none;  border-width: medium 2.25pt 2.25pt medium; padding: 0cm 3.5pt; width: 163.15pt; height: 33.3pt;">
+        <p style="margin: 0cm 0cm 0.0001pt; text-align: center;" class="MsoBodyTextIndent" align="center"><small><b>1</b></small></p>
+        </td>
+
+        <td style="border-style: none solid solid none;  border-width: medium 2.25pt 2.25pt medium; padding: 0cm 3.5pt; width: 163.15pt; height: 33.3pt;">
+        <p style="margin: 0cm 0cm 0.0001pt; text-align: center;" class="MsoBodyTextIndent" align="center"><small><b>1</b></small></p>
+        </td>
+      </tr>
+
+      <tr style="height: 33.3pt;">
+        <td style="border-style: none solid solid;  border-width: medium 2.25pt 2.25pt; padding: 0cm 3.5pt; width: 90pt; height: 33.3pt; font-weight: bold;">
+        <p style="margin: 0cm 0cm 0.0001pt; font-weight: normal;" class="MsoBodyTextIndent"><small>prtden</small></p>
+        </td>
+
+        <td style="border-style: none solid solid none; border-width: medium 2.25pt 2.25pt medium; padding: 0cm 3.5pt; width: 164.3pt; height: 33.3pt;">
+        <p style="margin: 0cm 0cm 0.0001pt; text-align: center;" class="MsoBodyTextIndent" align="center"><small> 0</small></p>
+        </td>
+
+        <td style="border-style: none solid solid none;  border-width: medium 2.25pt 2.25pt medium; padding: 0cm 3.5pt; width: 163.15pt; height: 33.3pt;">
+        <p style="margin: 0cm 0cm 0.0001pt; text-align: center;" class="MsoBodyTextIndent" align="center"><small>0</small></p>
+        </td>
+
+        <td style="border-style: none solid solid none;  border-width: medium 2.25pt 2.25pt medium; padding: 0cm 3.5pt; width: 163.15pt; height: 33.3pt;">
+        <p style="margin: 0cm 0cm 0.0001pt; text-align: center;" class="MsoBodyTextIndent" align="center"><small><b>1</b></small></p>
+        </td>
+
+        <td style="border-style: none solid solid none;  border-width: medium 2.25pt 2.25pt medium; padding: 0cm 3.5pt; width: 163.15pt; height: 33.3pt;">
+        <p style="margin: 0cm 0cm 0.0001pt; text-align: center;" class="MsoBodyTextIndent" align="center"><small><b>1</b></small></p>
+        </td>
+
+        <td style="border-style: none solid solid none;  border-width: medium 2.25pt 2.25pt medium; padding: 0cm 3.5pt; width: 163.15pt; height: 33.3pt;">
+        <p style="margin: 0cm 0cm 0.0001pt; text-align: center;" class="MsoBodyTextIndent" align="center"><small><b>1</b></small></p>
+        </td>
+
+        <td style="border-style: none solid solid none;  border-width: medium 2.25pt 2.25pt medium; padding: 0cm 3.5pt; width: 163.15pt; height: 33.3pt;">
+        <p style="margin: 0cm 0cm 0.0001pt; text-align: center;" class="MsoBodyTextIndent" align="center"><small><b>1</b></small></p>
+        </td>
+      </tr>
+
+    </tbody>
+  </table>
+  </p>
+<br>For a parallel calculation, <a href="vargs.html#timopt">timopt</a> is enforced to be 0.
+<br>E_min, E_med and E_max may be read from the pseudopotential file (available only for XML PAW atomic data files). If E_min, E_med and E_max are not given in the pseudopotential file, <a href="varbas.html#ecut">ecut</a> must be given in the input file and E_max=E_med=E_max=ecut.
+<br>The values in bold font are the default values of ABINIT. <b>accuracy</b>=4 corresponds to the default tuning of ABINIT. It is already a very accurate tuning.
+<br>If the user wants to modify one of the input variable automatically tuned by <b>accuracy</b>, he must put it in the input file. The other input variables automatically tuned by <b>accuracy</b> will not be affected.
+<br />
+<b>accuracy</b>=0 means that this input variable is desactivated.
+
+<p>
+</font>
+
+<br><br><br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="acell">acell</a></font>
+<br><font id="mnemonics">Mnemonics: CELL lattice vector scaling</font>
+<br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#evolving">EVOLVING</a>, <a href="../../users/abinit_help.html#length">LENGTH</a></font>
+<br><font id="vartype">Variable type: real(3) (Comment: represented internally as acell(3,<a href="varrlx.html#nimage">nimage</a>))</font>
+<br><font id="default">Default is 3*1</font>
+<br><font id="text">
+<p>
+<p>
+ Gives the length scales by which
+dimensionless primitive translations (in <a href="varbas.html#rprim">rprim</a>) are
+to be multiplied.  By default, given in Bohr atomic units
+(1 Bohr=0.5291772108 Angstroms), although Angstrom can be specified,
+if preferred, since <b>acell</b> has the
+'<a href="../../users/abinit_help.html#length">LENGTH</a>' characteristics.
+See further description of <b>acell</b> related to the
+<a href="varbas.html#rprim">rprim</a> input variable,
+the <a href="varbas.html#scalecart">scalecart</a> input variable,
+and the associated internal <a href="varbas.html#rprimd">rprimd</a> input variable.
+</p>
+<p>
+ Note that <b>acell</b> is NOT the length of the conventional orthogonal basis vectors, but the scaling factors of the primitive vectors.
+Use <a href="varbas.html#scalecart">scalecart</a> to scale the cartesian coordinates.
+</p>
+</font>
+
+<br><br><br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="angdeg">angdeg</a></font>
+<br><font id="mnemonics">Mnemonics: ANGles in DEGrees</font>
+<br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#input_only">INPUT_ONLY</a></font>
+<br><font id="vartype">Variable type: real(3)</font>
+<br><font id="default">No default (Comment: deduced from '<a href="varbas.html#rprim">rprim</a>')</font>
+<br><font id="text">
+<p>
+<p>
+ Gives the angles between directions of
+primitive vectors of the unit cell (in degrees),
+as an alternative to the input array <a href="varbas.html#rprim">rprim</a> .
+Will be used to set up <a href="varbas.html#rprim">rprim</a>,
+that, together with the array <a href="varbas.html#acell">acell</a>, will be used to define the
+primitive vectors.
+ <ul>
+  <li>
+   <b>angdeg</b>(1) is the angle between the 2nd and 3rd vectors,
+  </li>
+  <li>
+   <b>angdeg</b>(2) is the angle between the 1st and 3rd vectors,
+  </li>
+  <li>
+   <b>angdeg</b>(3) is the angle between the 1st and 2nd vectors,
+  </li>
+ </ul>
+ If the three angles are equal within 1.0d-12 (except if they are exactly 90 degrees),
+the three primitive
+vectors are chosen so that the trigonal symmetry that exchange
+them is along the z cartesian axis :
+ <pre>
+R1=( a , 0,c)
+R2=(-a/2, sqrt(3)/2*a,c)
+R3=(-a/2,-sqrt(3)/2*a,c)
+ </pre>
+ where a
+ <sup>
+  2
+ </sup>
+ +c
+ <sup>
+  2
+ </sup>
+ =1.0d0
+ <br />
+ If the angles are not all equal (or if they are all 90 degrees), one will have the following
+generic form :
+ <ul>
+  <li>
+   R1=(1,0,0)
+  </li>
+  <li>
+   R2=(a,b,0)
+  </li>
+  <li>
+   R3=(c,d,e)
+  </li>
+ </ul>
+ where each of the vectors is normalized,
+and form the desired angles with the others.
+</p>
+</font>
+
+<br><br><br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="ecut">ecut</a></font>
+<br><font id="mnemonics">Mnemonics: Energy CUToff</font>
+<br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#energy">ENERGY</a></font>
+<br><font id="vartype">Variable type: real</font>
+<br><font id="default">No default</font>
+<br><font id="text">
+<p>
+<p>
+ Used for kinetic energy cutoff
+which controls number
+of planewaves at given k point by:
+ <br />
+ (1/2)[(2 Pi)*(k+Gmax)]
+ <sup>
+  2
+ </sup>
+ =<b>ecut</b> for Gmax.
+ <br />
+ All planewaves inside this "basis sphere" centered
+at k are included in the basis (except if <a href="varrlx.html#dilatmx">dilatmx</a>
+is defined).
+ <br />
+ Can be specified in Ha (the default), Ry, eV or Kelvin, since
+<b>ecut</b> has the
+'<a href="../../users/abinit_help.html#energy">ENERGY</a>' characteristics.
+(1 Ha=27.2113845 eV)
+ <br />
+ This is the single parameter which can have an enormous
+effect on the quality of a calculation; basically the larger
+<b>ecut</b> is, the better converged the calculation is.  For fixed
+geometry, the total energy MUST always decrease as <b>ecut</b> is
+raised because of the variational nature of the problem.
+</p>
+<p>
+ <i>
+  Usually one runs at least several calculations at various <b>ecut</b>
+to investigate the convergence needed for reliable results.
+ </i>
+</p>
+<p>
+ For k-points whose coordinates are build from 0 or 1/2,
+the implementation of time-reversal symmetry that links
+coefficients of the wavefunctions in reciprocal space
+has been realized. See the input variable <a href="vardev.html#istwfk">istwfk</a>.
+If activated (which corresponds to the Default mode),
+this input variable <a href="vardev.html#istwfk">istwfk</a> will allow to
+divide the number of plane wave (npw) treated explicitly
+by a factor of two. Still, the final result should be identical with
+the 'full' set of plane waves.
+</p>
+<p>
+ See the input variable <a href="varrlx.html#ecutsm">ecutsm</a>, for the
+smoothing of the kinetic energy, needed to optimize unit cell parameters.
+</p>
+</font>
+
+<br><br><br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="einterp">einterp</a></font>
+<br><font id="mnemonics">Mnemonics: Electron bands INTERPolation</font>
+<br><font id="characteristic">Characteristic: </font>
+<br><font id="vartype">Variable type: real(4)</font>
+<br><font id="default">Default is [0, 0, 0, 0]</font>
+<br><font id="text">
+<p>
+This variable activates the interpolation of the electronic eigenvalues.
+It can be used to interpolate KS eigenvalues at the end of the GS run or to interpolate GW energies in sigma calculations (<a href="vargs.html#optdriver">optdriver</a> = 4).
+The k-path can be specified with <a href="vargs.html#kptbounds">kptbounds</a> and <a href="varbas.html#nkpath">nkpath</a>.
+
+einterp consists of 4 entries.
+The first element specificies the interpolation method.
+
+<ul>
+<li> 0 --> No interpolation (default) </li>
+<li> 1 --> Star-function interpolation (Shankland-Koelling-Wood Fourier interpolation scheme,
+    see <a href="https://journals.aps.org/prb/abstract/10.1103/PhysRevB.38.2721"> PRB 38 2721</a>
+</li>
+<li> 2 --> B-spline interpolation. </li>
+</ul>
+
+The meaning of the other entries depend on the interpolation technique selected.
+<br>
+
+In the case of star-function interpolation:
+
+<ul>
+<li> einterp(2): Number of star-functions per ab-initio k-point </li>
+<li> einterp(3): If non-zero, activate Fourier filtering according to Eq 9 of
+<a href="https://journals.aps.org/prb/abstract/10.1103/PhysRevB.61.1639"> PRB 61 1639</a>.
+In this case, rcut is given by einterp(2) * Rmax where Rmax is the maximum length of the lattice vectors included in the star expansion </li>
+<li> einterp(4): Used if einterp(2) /= 0. It defines rsigma in Eq 9</li>
+</ul>
+<br>
+
+For B-spline interpolation:
+
+einterp(2:4): Order of B-spline for the three reduced directions. Cubic spline (3) is the recomended value.
+</font>
+
+<br><br><br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="iscf">iscf</a></font>
+<br><font id="mnemonics">Mnemonics: Integer for Self-Consistent-Field cycles</font>
+<br><font id="characteristic">Characteristic: </font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0 if <a href="varbas.html#usewvl">usewvl</a>==1,
+17 if <a href="varint.html#usepaw">usepaw</a>==1,
+7 otherwise.
+</font>
+<br><font id="text">
+<p>
+<p>
+ Controls the self-consistency.
+ <br />
+ Positive values =&gt;
+this is the usual choice for doing the usual ground state (GS)
+calculations or for structural relaxation, where
+the potential has to be determined self-consistently.
+The choice between different algorithms for SCF is possible :
+ <ul>
+  <li>
+   =0 =&gt; SCF cycle, direct minimization scheme on the gradient of the wavefunctions. This algorithm is faster than diagonalisation and mixing but is working only for systems with a gap. It is implemented only on the wavelet basis set, when <a href="varbas.html#usewvl">usewvl</a>=1.
+  </li>
+  <li>
+   =1 =&gt; get the largest eigenvalue of the SCF cycle
+   <br />
+   (<a href="../../users/abinit_help.html#develop">DEVELOP</a> option, used with
+<a href="varfil.html#irdwfk">irdwfk</a>=1 or
+   <a href="varfil.html#irdwfq">irdwfq</a>=1)
+  </li>
+  <li>
+   =2 =&gt; SCF cycle, simple mixing of the potential
+  </li>
+  <li>
+   =3 =&gt; SCF cycle, Anderson mixing of the potential
+  </li>
+  <li>
+   =4 =&gt; SCF cycle, Anderson mixing of the potential based on the two previous iterations
+  </li>
+  <li>
+   =5 =&gt; SCF cycle, CG based on the minim. of the energy with respect to the potential
+  </li>
+  <li>
+   =7 =&gt; SCF cycle, Pulay mixing of the potential based on the <a href="vardev.html#npulayit">npulayit</a> previous iterations
+  </li>
+  <li>
+   =12 =&gt; SCF cycle, simple mixing of the density
+  </li>
+  <li>
+   =13 =&gt; SCF cycle, Anderson mixing of the density
+  </li>
+  <li>
+   =14 =&gt; SCF cycle, Anderson mixing of the density based on the two previous iterations
+  </li>
+  <li>
+   =15 =&gt; SCF cycle, CG based on the minim. of the energy with respect to the density
+  </li>
+  <li>
+   =17 =&gt; SCF cycle, Pulay mixing of the density based on the <a href="vardev.html#npulayit">npulayit</a> previous iterations
+  </li>
+  <li>
+   Other positive values, including zero ones, are not allowed.
+  </li>
+ </ul>
+</p>
+<p>
+ Such algorithms for treating the "SCF iteration history" should be coupled with accompanying algorithms
+for the SCF "preconditioning". See the input variable <a href="vargs.html#iprcel">iprcel</a>.
+The default value <a href="vargs.html#iprcel">iprcel</a>=0 is often a good choice, but
+for inhomogeneous systems, you might gain a lot with <a href="vargs.html#iprcel">iprcel</a>=45.
+</p>
+<p>
+ (Warning : if <b>iscf</b>&gt;10, at present (v4.6), the energy printed at each SCF cycle is not variational -
+this should not affect the other properties, and at convergence, all values are OK)
+</p>
+<p>
+ - In the norm-conserving case,
+the default option is <b>iscf</b>=7, which is a compromise between speed and reliability.
+The value <b>iscf</b>= 2 is safer but slower.
+ <br />
+ - In the PAW case, default option is <b>iscf</b>=17.
+In PAW you have the possibility to mix density/potential on the fine or coarse FFT grid (see <a href="varpaw.html#pawmixdg">pawmixdg</a>).
+ <br />
+ - Note that a Pulay mixing (<b>iscf</b>=7 or 17) with <a href="vardev.html#npulayit">npulayit</a>
+=1 (resp. 2) is equivalent to an Anderson mixing with <b>iscf</b>=3 or 13 (resp. 4 or 14).
+ <br />
+ - Also note that:
+ <br />
+ * when mixing is done on potential (iscf
+ &lt;10), total energy is computed by "direct" decomposition.
+ <br />
+ * when mixing is done on density (iscf
+ &gt;=10), total energy is computed by "double counting" decomposition.
+ <br />
+ "Direct" and "double counting" decomposition of energy are equal when SCF cycle is converged. Note that,
+when using GGA XC functionals, these decompositions of energy can be slightly different due
+to imprecise computation of density gradients on FFT grid (difference decreases as size of FFT grid increases -
+see <a href="varbas.html#ecut">ecut</a> for NC pseudopotentials, <a href="varpaw.html#pawecutdg">pawecutdg</a> for PAW).
+ <br />
+ <br />
+ Other (negative) options:
+ <ul>
+  <li>
+   = -2 =&gt;
+a non-self-consistent calculation is to be done;
+in this case an electron density rho(r) on a real space grid
+(produced in a previous calculation) will be read from a
+disk file (automatically if <a href="varbas.html#ndtset">ndtset</a>=0, or
+according to the value of <a href="varfil.html#getden">getden</a>
+if <a href="varbas.html#ndtset">ndtset</a>/=0).
+   <br />
+   The name of the density file must be given as indicated
+in the
+   <a href="../../users/abinit_help.html#4">
+    section 4
+   </a>
+   of abinit_help.
+<b>iscf</b>=-2 would be used for
+band structure calculations, to permit computation of
+the eigenvalues of occupied and unoccupied states at
+arbitrary k points in the fixed self consistent potential
+produced by some integration grid of k points.
+Due to this typical use, ABINIT insist that either
+<a href="varfil.html#prtvol">prtvol</a>&gt;2 or
+<a href="varfil.html#prteig">prteig</a> does not vanish
+when there are more than 50 k points.
+   <br />
+   To compute the eigenvalues
+(and wavefunctions) of unoccupied states in a separate
+(non-selfconsistent) run, the user should
+save the self-consistent rho(r)
+and then run <b>iscf</b>=-2 for the intended set of k-points and bands.
+   <br />
+   To prepare a run with <b>iscf</b>=-2, a density file
+can be produced using the
+parameter <a href="varfil.html#prtden">prtden</a> (see its description).
+When a self-consistent set of wavefunctions is already available,
+abinit can be used with
+<a href="varbas.html#nstep">nstep</a>=0 (see Test_v2/t47.in),
+and the adequate value of <a href="varfil.html#prtden">prtden</a>.
+  </li>
+  <li>
+   = -3 =&gt;
+like -2, but initialize <a href="vargs.html#occ">occ</a> and <a href="varbas.html#wtk">wtk</a>,
+directly or indirectly (using <a href="varbas.html#ngkpt">ngkpt</a> or
+<a href="vargs.html#kptrlatt">kptrlatt</a>)
+depending on the value of <a href="varbas.html#occopt">occopt</a>.
+   <br />
+   For GS, this option
+might be used to generate Density-of-states
+(thanks to <a href="varfil.html#prtdos">prtdos</a>),
+or to produce STM charge density map (thanks to <a href="varfil.html#prtstm">prtstm</a>).
+   <br />
+   For RF, this option is needed to compute the response to ddk perturbation.
+  </li>
+  <li>
+   = -1 =&gt; like -2, but the non-self-consistent calculation
+is followed by the determination of excited states
+within <a href="../../users/abinit_help.html#tddft">TDDFT</a>. This is only possible for <a href="varbas.html#nkpt">nkpt</a>=1,
+with <a href="varbas.html#kpt">kpt</a>=0 0 0.
+Note that the oscillator strength needs to be defined with respect to
+an origin of coordinate, thanks to the input variable
+<a href="vargs.html#boxcenter">boxcenter</a>. The maximal
+number of Kohn-Sham excitations to be used to build the
+excited state <a href="../../users/abinit_help.html#tddft">TDDFT</a> matrix can be defined by <a href="varrf.html#td_mexcit">td_mexcit</a>,
+or indirectly by the maximum Kohn-Sham excitation energy
+<a href="varrf.html#td_maxene">td_maxene</a>.
+  </li>
+ </ul>
+</p>
+</font>
+
+<br><br><br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="ixc">ixc</a></font>
+<br><font id="mnemonics">Mnemonics: Integer for eXchange-Correlation choice</font>
+<br><font id="characteristic">Characteristic: </font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 1 (Comment: Default corresponds to Teter parametrization. However, if all the pseudopotentials have the same value of pspxc, the initial value of ixc will be that common value)</font>
+<br><font id="text">
+<p>
+<p>
+ Controls the choice of exchange and correlation (xc). The list of XC functionals is given
+below. Positive values are for ABINIT native library of XC functionals, while negative values are for calling
+the much wider set of functionals from the ETSF LibXC library (by M. Marques), also available at the
+ <a href="http://www.etsf.eu/resources/software/libraries_and_tools">
+  ETSF library Web page
+ </a>
+ <br />
+ Note that the choice made here should agree with the choice
+made in generating the original pseudopotential, except
+for <b>ixc</b>=0 (usually only used for debugging).
+A warning is issued if this is not the case.
+However, the choices <b>ixc</b>=1, 2, 3 and 7 are fits to the same data, from
+Ceperley-Alder, and are rather similar, at least for spin-unpolarized systems.
+ <br />
+ The choice between the non-spin-polarized and spin-polarized case
+is governed by the value of <a href="varbas.html#nsppol">nsppol</a> (see below).
+</p>
+<p>
+</p>
+<p>
+ <b>
+  Native ABINIT XC functionals
+ </b>
+</p>
+<p>
+ <br />
+ NOTE : in the implementation of the spin-dependence of these
+functionals, and in order to avoid divergences in their
+derivatives, the interpolating function between spin-unpolarized
+and fully-spin-polarized function has been slightly modified,
+by including a zeta rescaled by 1.d0-1.d-6. This should affect
+total energy at the level of 1.d-6Ha, and should
+have an even smaller effect on differences of energies, or derivatives.
+ <br />
+ The value <b>ixc</b>=10 is used internally : gives the difference between <b>ixc</b>=7 and
+<b>ixc</b>=9, for use with an accurate RPA correlation energy.
+</p>
+<p>
+ <ul>
+  <li>
+   0=&gt; NO xc;
+  </li>
+ </ul>
+ <ul>
+  <li>
+   1=&gt; LDA or LSD, Teter Pade parametrization (4/93, published in S. Goedecker, M. Teter, J. Huetter, Phys.Rev.B54, 1703 (1996)), which
+reproduces Perdew-Wang (which reproduces Ceperley-Alder!).
+  </li>
+  <li>
+   2=&gt; LDA, Perdew-Zunger-Ceperley-Alder (no spin-polarization)
+  </li>
+  <li>
+   3=&gt; LDA, old Teter rational polynomial parametrization (4/91)
+fit to Ceperley-Alder data (no spin-polarization)
+  </li>
+  <li>
+   4=&gt; LDA, Wigner functional (no spin-polarization)
+  </li>
+  <li>
+   5=&gt; LDA, Hedin-Lundqvist functional (no spin-polarization)
+  </li>
+  <li>
+   6=&gt; LDA, "X-alpha" functional (no spin-polarization)
+  </li>
+  <li>
+   7=&gt; LDA or LSD, Perdew-Wang 92 functional
+  </li>
+  <li>
+   8=&gt; LDA or LSD, x-only part of the Perdew-Wang 92 functional
+  </li>
+  <li>
+   9=&gt; LDA or LSD, x- and RPA correlation part of the Perdew-Wang 92 functional
+  </li>
+ </ul>
+ <ul>
+  <li>
+   11=&gt; GGA, Perdew-Burke-Ernzerhof GGA functional
+  </li>
+  <li>
+   12=&gt; GGA, x-only part of Perdew-Burke-Ernzerhof GGA functional
+  </li>
+  <li>
+   13=&gt; GGA potential of van Leeuwen-Baerends, while for energy, Perdew-Wang 92 functional
+  </li>
+  <li>
+   14=&gt; GGA, revPBE of Y. Zhang and W. Yang, Phys. Rev. Lett. 80, 890 (1998)
+  </li>
+  <li>
+   15=&gt; GGA, RPBE of B. Hammer, L.B. Hansen and J.K. Norskov, Phys. Rev. B 59, 7413 (1999)
+  </li>
+  <li>
+   16=&gt; GGA, HTCH93 of F.A. Hamprecht, A.J. Cohen, D.J. Tozer, N.C. Handy, J. Chem. Phys. 109, 6264 (1998)
+  </li>
+  <li>
+   17=&gt; GGA, HTCH120 of A.D. Boese, N.L. Doltsinis, N.C. Handy, and M. Sprik, J. Chem. Phys 112, 1670 (1998) - The usual HCTH functional.
+  </li>
+  <li>
+   18=&gt; (NOT AVAILABLE : used internally for GGA BLYP pseudopotentials from
+M. Krack, see Theor. Chem. Acc. 114, 145 (2005),
+available from the
+   <a href="https://github.com/cp2k/cp2k/tree/master/potentials/Goedecker/abinit/blyp">
+    CP2K repository
+   </a>
+   - use the LibXC instead, with <b>ixc</b>=-106131.
+  </li>
+  <li>
+   19=&gt; (NOT AVAILABLE : used internally for GGA BP86 pseudopotentials from
+M. Krack, see Theor. Chem. Acc. 114, 145 (2005),
+available from the
+   <a href="https://github.com/cp2k/cp2k/tree/master/potentials/Goedecker/abinit/bp">
+    CP2K repository
+   </a>
+   - use the LibXC instead, with <b>ixc</b>=-106132.
+  </li>
+ </ul>
+ <ul>
+  <li>
+   20=&gt; Fermi-Amaldi xc ( -1/N Hartree energy, where N is the
+number of electrons per cell ; G=0 is not taken
+into account however), for <a href="../../users/abinit_help.html#tddft">TDDFT</a> tests.
+No spin-pol. Does not work for RF.
+  </li>
+  <li>
+   21=&gt; same as 20, except that the xc-kernel is the LDA (<b>ixc</b>=1) one,
+for <a href="../../users/abinit_help.html#tddft">TDDFT</a> tests.
+  </li>
+  <li>
+   22=&gt; same as 20, except that the xc-kernel is the Burke-Petersilka-Gross
+hybrid, for <a href="../../users/abinit_help.html#tddft">TDDFT</a> tests.
+  </li>
+  <li>
+   23=&gt; GGA of Z. Wu and R.E. Cohen, Phys. Rev. 73, 235116 (2006).
+  </li>
+  <li>
+   24=&gt; GGA, C09x exchange of V. R. Cooper, PRB 81, 161104(R) (2010).
+  </li>
+  <li>
+   26=&gt; GGA, HTCH147 of A.D. Boese, N.L. Doltsinis, N.C. Handy, and M. Sprik, J. Chem. Phys 112, 1670 (1998).
+  </li>
+  <li>
+   27=&gt; GGA, HTCH407 of A.D. Boese, and N.C. Handy, J. Chem. Phys 114, 5497 (2001).
+  </li>
+  <li>
+   28=&gt; (NOT AVAILABLE : used internally for GGA OLYP pseudopotentials from
+M. Krack, see Theor. Chem. Acc. 114, 145 (2005),
+available from the
+   <a href="https://github.com/cp2k/cp2k/tree/master/potentials/Goedecker/abinit/olyp">
+    CP2K repository
+   </a>
+   - use the LibXC instead, with <b>ixc</b>=-110131.
+  </li>
+ </ul>
+ <ul>
+  <li>
+   40=&gt; Hartree-Fock
+  </li>
+  <li>
+   41=&gt; PBE0, J.P. Perdew, M. Ernzerhof and K. Burke, J. Chem. Phys. 105, 9982 (1996)
+  </li>
+  <li>
+   42=&gt; PBE0-1/3, C.A. Guido, E. Bremond, C. Adamo and P. Cortona, J. Chem. Phys. 138, 021104 (2013)
+  </li>
+ </ul>
+</p>
+<p>
+ <b>
+  ETSF Lib XC functionals
+ </b>
+</p>
+<p>
+ Note that you must compile ABINIT with the LibXC plug-in in order to be able to access these functionals.
+ <br />
+ The LibXC functionals are accessed by
+ <b>
+  negative values
+ </b>
+ of <b>ixc</b>.
+The LibXC contains functional forms for either exchange-only functionals, correlation-only functionals,
+or combined exchange and correlation functionals. Each of them is to be specified by a three-digit number.
+In case of a combined exchange and correlation functional, only one such three-digit number has to be specified as value of <b>ixc</b>,
+with a minus sign (to indicate that it comes from the LibXC).
+In the case of separate exchange functional (let us represent its identifier by XXX) and
+correlation functional (let us represent its identified by CCC),
+a six-digit number will have to be specified for <b>ixc</b>, by concatenation, be it XXXCCC or CCCXXX.
+As an example, <b>ixc</b>=-020 gives access to the Teter93 LDA, while
+<b>ixc</b>=-101130 gives access to the PBE GGA.
+In version 0.9 of LibXC (December 2008), there are 16 three-dimensional (S)LDA functionals (1 for X, 14 for C, 1 for combined XC),
+and there are 41 three-dimensional GGA (23 for X, 8 for C, 10 for combined XC).
+Note that for a meta-GGA, the kinetic energy density is needed. This means having <a href="vargs.html#usekden">usekden</a>=1 .
+</p>
+<p>
+</p>
+<p>
+ (S)LDA functionals (do not forget to add a minus sign, as discussed above)
+</p>
+<p>
+ <ul>
+  <li>
+   001=&gt; XC_LDA_X
+[PAM Dirac, Proceedings of the Cambridge Philosophical Society 26, 376 (1930);
+F Bloch, Zeitschrift fuer Physik 57, 545 (1929)
+]
+  </li>
+  <li>
+   002=&gt; XC_LDA_C_WIGNER Wigner parametrization
+[EP Wigner, Trans. Faraday Soc. 34, 678 (1938)
+]
+  </li>
+  <li>
+   003=&gt; XC_LDA_C_RPA Random Phase Approximation
+[M Gell-Mann and KA Brueckner, Phys. Rev. 106, 364 (1957)
+]
+  </li>
+  <li>
+   004=&gt; XC_LDA_C_HL Hedin &amp; Lundqvist
+[L Hedin and BI Lundqvist, J. Phys. C 4, 2064 (1971)
+]
+  </li>
+  <li>
+   005=&gt; XC_LDA_C_GL !  Gunnarson &amp; Lundqvist
+[O Gunnarsson and BI Lundqvist, PRB 13, 4274 (1976)
+]
+  </li>
+  <li>
+   006=&gt; XC_LDA_C_XALPHA  !  Slater's Xalpha
+]
+  </li>
+  <li>
+   007=&gt; XC_LDA_C_VWN !  Vosko, Wilk, &amp; Nussair
+[SH Vosko, L Wilk, and M Nusair, Can. J. Phys. 58, 1200 (1980)
+]
+  </li>
+  <li>
+   008=&gt; XC_LDA_C_VWN_RPA !  Vosko, Wilk, &amp; Nussair (RPA)
+[SH Vosko, L Wilk, and M Nusair, Can. J. Phys. 58, 1200 (1980)
+]
+  </li>
+  <li>
+   009=&gt; XC_LDA_C_PZ !  Perdew &amp; Zunger
+[Perdew and Zunger, Phys. Rev. B 23, 5048 (1981)
+]
+  </li>
+  <li>
+   010=&gt; XC_LDA_C_PZ_MOD !  Perdew &amp; Zunger (Modified)
+[Perdew and Zunger, Phys. Rev. B 23, 5048 (1981)
+Modified to improve the matching between the low and high rs part
+]
+  </li>
+  <li>
+   011=&gt; XC_LDA_C_OB_PZ !  Ortiz &amp; Ballone (PZ)
+[G Ortiz and P Ballone, Phys. Rev. B 50, 1391 (1994) ;
+G Ortiz and P Ballone, Phys. Rev. B 56, 9970(E) (1997) ;
+Perdew and Zunger, Phys. Rev. B 23, 5048 (1981)
+]
+  </li>
+  <li>
+   012=&gt; XC_LDA_C_PW !  Perdew &amp; Wang
+[JP Perdew and Y Wang, Phys. Rev. B 45, 13244 (1992)
+]
+  </li>
+  <li>
+   013=&gt; XC_LDA_C_PW_MOD !  Perdew &amp; Wang (Modified)
+[JP Perdew and Y Wang, Phys. Rev. B 45, 13244 (1992) ;
+Added extra digits to some constants as in the PBE routine
+see
+   <a href="https://www.chem.uci.edu/~kieron/dftold2/pbe.php">
+    https://www.chem.uci.edu/~kieron/dftold2/pbe.php
+   </a>
+   (at some point it was available at http://dft.uci.edu/pbe.php)
+]
+  </li>
+  <li>
+   014=&gt; XC_LDA_C_OB_PW !  Ortiz &amp; Ballone (PW)
+[G Ortiz and P Ballone, Phys. Rev. B 50, 1391 (1994) ;
+G Ortiz and P Ballone, Phys. Rev. B 56, 9970(E) (1997) ;
+JP Perdew and Y Wang, Phys. Rev. B 45, 13244 (1992)
+]
+  </li>
+  <li>
+   017=&gt; XC_LDA_C_vBH !  von Barth &amp; Hedin
+[U von Barth and L Hedin, J. Phys. C: Solid State Phys. 5, 1629 (1972)
+]
+  </li>
+  <li>
+   020=&gt; XC_LDA_XC_TETER93 !  Teter 93 parametrization
+[S Goedecker, M Teter, J Hutter, PRB 54, 1703 (1996)
+]
+  </li>
+  <li>
+   022=&gt; XC_LDA_C_ML1 !  Modified LSD (version 1) of Proynov and Salahub
+[EI Proynov and D Salahub, Phys. Rev. B 49, 7874 (1994)
+]
+  </li>
+  <li>
+   023=&gt; XC_LDA_C_ML2 !  Modified LSD (version 2) of Proynov and Salahub
+[EI Proynov and D Salahub, Phys. Rev. B 49, 7874 (1994)
+]
+  </li>
+  <li>
+   024=&gt; XC_LDA_C_GOMBAS !  Gombas parametrization
+[P. Gombas, Pseudopotentials (Springer-Verlag, New York, 1967)
+]
+  </li>
+  <li>
+   025=&gt; XC_LDA_C_PW_RPA !  Perdew &amp; Wang fit of the RPA
+[JP Perdew and Y Wang, Phys. Rev. B 45, 13244 (1992)
+]
+  </li>
+  <li>
+   027=&gt; XC_LDA_C_RC04 !  Ragot-Cortona
+[S Ragot and P Cortona, J. Chem. Phys. 121, 7671 (2004)
+]
+  </li>
+  <li>
+   028=&gt; XC_LDA_C_VWN_1 !  Vosko, Wilk, &amp; Nussair (1)
+[SH Vosko, L Wilk, and M Nusair, Can. J. Phys. 58, 1200 (1980)
+]
+  </li>
+  <li>
+   029=&gt; XC_LDA_C_VWN_2 !  Vosko, Wilk, &amp; Nussair (2)
+[SH Vosko, L Wilk, and M Nusair, Can. J. Phys. 58, 1200 (1980)
+]
+  </li>
+  <li>
+   030=&gt; XC_LDA_C_VWN_3 !  Vosko, Wilk, &amp; Nussair (3)
+[SH Vosko, L Wilk, and M Nusair, Can. J. Phys. 58, 1200 (1980)
+]
+  </li>
+  <li>
+   031=&gt; XC_LDA_C_VWN_4 !  Vosko, Wilk, &amp; Nussair (4)
+[SH Vosko, L Wilk, and M Nusair, Can. J. Phys. 58, 1200 (1980)
+]
+  </li>
+ </ul>
+</p>
+<p>
+ GGA functionals (do not forget to add a minus sign, as discussed above)
+</p>
+<p>
+ <ul>
+  <li>
+   84=&gt; XC_GGA_C_OP_XALPHA !  one-parameter progressive functional (G96 version)
+[T Tsuneda, T Suzumura, and K Hirao, J. Chem. Phys. 111, 5656 (1999)
+]
+  </li>
+  <li>
+   85=&gt; XC_GGA_C_OP_G96 !  one-parameter progressive functional (G96 version)
+[T Tsuneda, T Suzumura, and K Hirao, J. Chem. Phys. 111, 5656 (1999)
+]
+  </li>
+  <li>
+   86=&gt; XC_GGA_C_OP_PBE !  one-parameter progressive functional (PBE version)
+[T Tsuneda, T Suzumura, and K Hirao, J. Chem. Phys. 111, 5656 (1999)
+]
+  </li>
+  <li>
+   87=&gt; XC_GGA_C_OP_B88 !  one-parameter progressive functional (B88 version)
+[T Tsuneda, T Suzumura, and K Hirao, J. Chem. Phys. 111, 5656 (1999)
+]
+  </li>
+  <li>
+   88=&gt; XC_GGA_C_FT97 !  Filatov &amp; Thiel correlation
+[M Filatov &amp; W Thiel, Int. J. Quant. Chem. 62, 603-616 (1997) ; M Filatov &amp; W Thiel, Mol Phys 91, 847 (1997)
+]  WARNING : this functional is not tested. Use at your own risks.
+  </li>
+  <li>
+   89=&gt; XC_GGA_C_SPBE !  PBE correlation to be used with the SSB exchange
+[M Swart, M Sola, and FM Bickelhaupt, J. Chem. Phys. 131, 094103 (2009)
+]
+  </li>
+  <li>
+   90=&gt; XC_GGA_X_SSB_SW  !  Swarta, Sola and Bickelhaupt correction to PBE
+[M Swart, M Sola, and FM Bickelhaupt, J. Comp. Meth. Sci. Engin. 9, 69 (2009)
+]
+  </li>
+  <li>
+   91=&gt; XC_GGA_X_SSB   !  WARNING : This functional gives NaN on IBM (XG20130608).  Swarta, Sola and Bickelhaupt
+[M Swart, M Sola, and FM Bickelhaupt, J. Chem. Phys. 131, 094103 (2009)
+]
+  </li>
+  <li>
+   92=&gt; XC_GGA_X_SSB_D  !  WARNING : This functional gives NaN on IBM (XG20130608).  Swarta, Sola and Bickelhaupt dispersion
+[M Swart, M Sola, and FM Bickelhaupt, J. Chem. Phys. 131, 094103 (2009)
+]
+  </li>
+  <li>
+   93=&gt; XC_GGA_XC_HCTH_407P  !   HCTH/407+
+[AD Boese, A Chandra, JML Martin, and Dominik Marx, J. Chem. Phys. 119, 5965 (2003)
+]
+  </li>
+  <li>
+   94=&gt; XC_GGA_XC_HCTH_P76  !   HCTH p=7/6
+[G Menconi, PJ Wilson, and DJ Tozer, J. Chem. Phys. 114, 3958 (2001)
+]
+  </li>
+  <li>
+   95=&gt; XC_GGA_XC_HCTH_P14  !   HCTH p=1/4
+[G Menconi, PJ Wilson, and DJ Tozer, J. Chem. Phys. 114, 3958 (2001)
+]
+  </li>
+  <li>
+   96=&gt; XC_GGA_XC_B97_GGA1  !  Becke 97 GGA-1
+[AJ Cohen and NC Handy, Chem. Phys. Lett. 316, 160-166 (2000)
+]
+  </li>
+  <li>
+   97=&gt; XC_GGA_XC_HCTH_A  !  HCTH-A
+[FA Hamprecht, AJ Cohen, DJ Tozer, and NC Handy, J. Chem. Phys. 109, 6264 (1998)
+]
+  </li>
+  <li>
+   98=&gt; XC_GGA_X_BPCCAC  !  BPCCAC (GRAC for the energy)
+[E Bremond, D Pilard, I Ciofini, H Chermette, C Adamo, and P Cortona, Theor Chem Acc 131, 1184 (2012)
+]
+  </li>
+  <li>
+   99=&gt; XC_GGA_C_REVTCA  !  Tognetti, Cortona, Adamo (revised)
+[V Tognetti, P Cortona, and C Adamo, Chem. Phys. Lett. 460, 536-539 (2008)
+]
+  </li>
+  <li>
+   100=&gt; XC_GGA_C_TCA  ! Tognetti, Cortona, Adamo
+[V Tognetti, P Cortona, and C Adamo, J. Chem. Phys. 128, 034101 (2008)
+]
+  </li>
+  <li>
+   101=&gt; XC_GGA_X_PBE !  Perdew, Burke &amp; Ernzerhof exchange
+[JP Perdew, K Burke, and M Ernzerhof, Phys. Rev. Lett. 77, 3865 (1996) ;
+JP Perdew, K Burke, and M Ernzerhof, Phys. Rev. Lett. 78, 1396(E) (1997)
+]
+  </li>
+  <li>
+   102=&gt; XC_GGA_X_PBE_R !  Perdew, Burke &amp; Ernzerhof exchange (revised)
+[Y Zhang and W Yang, Phys. Rev. Lett 80, 890 (1998)
+]
+  </li>
+  <li>
+   103=&gt; XC_GGA_X_B86 !  Becke 86 Xalfa,beta,gamma
+[AD Becke, J. Chem. Phys 84, 4524 (1986)
+]
+  </li>
+  <li>
+   104=&gt; XC_GGA_X_HERMAN !  Herman Xalphabeta GGA
+[F Herman, JP Van Dyke, and IB Ortenburger, Phys. Rev. Lett. 22, 807 (1969) ;
+F Herman, IB Ortenburger, and JP Van Dyke, Int. J. Quantum Chem. Symp. 3, 827 (1970)
+]
+  </li>
+  <li>
+   105=&gt; XC_GGA_X_B86_MGC !  Becke 86 Xalfa,beta,gamma (with mod. grad. correction)
+[AD Becke, J. Chem. Phys 84, 4524 (1986) ;
+AD Becke, J. Chem. Phys 85, 7184 (1986)
+]
+  </li>
+  <li>
+   106=&gt; XC_GGA_X_B88 !  Becke 88
+[AD Becke, Phys. Rev. A 38, 3098 (1988)
+]
+  </li>
+  <li>
+   107=&gt; XC_GGA_X_G96 !  Gill 96
+[PMW Gill, Mol. Phys. 89, 433 (1996)
+]
+  </li>
+  <li>
+   108=&gt; XC_GGA_X_PW86 !  Perdew &amp; Wang 86
+[JP Perdew and Y Wang, Phys. Rev. B 33, 8800 (1986)
+]
+  </li>
+  <li>
+   109=&gt; XC_GGA_X_PW91 !  Perdew &amp; Wang 91
+[JP Perdew, in Proceedings of the 21st Annual International Symposium on the Electronic Structure of Solids, ed. by P Ziesche and H
+Eschrig (Akademie Verlag, Berlin, 1991), p. 11. ;
+JP Perdew, JA Chevary, SH Vosko, KA Jackson, MR Pederson, DJ Singh, and C Fiolhais, Phys. Rev. B 46, 6671 (1992) ;
+JP Perdew, JA Chevary, SH Vosko, KA Jackson, MR Pederson, DJ Singh, and C Fiolhais, Phys. Rev. B 48, 4978(E) (1993)
+]
+  </li>
+  <li>
+   110=&gt; XC_GGA_X_OPTX !  Handy &amp; Cohen OPTX 01
+[NC Handy and AJ Cohen, Mol. Phys. 99, 403 (2001)
+]
+  </li>
+  <li>
+   111=&gt; XC_GGA_X_DK87_R1 !  dePristo &amp; Kress 87 (version R1)
+[AE DePristo and JD Kress, J. Chem. Phys. 86, 1425 (1987)
+]
+  </li>
+  <li>
+   112=&gt; XC_GGA_X_DK87_R2 !  dePristo &amp; Kress 87 (version R2)
+[AE DePristo and JD Kress, J. Chem. Phys. 86, 1425 (1987)
+]
+  </li>
+  <li>
+   113=&gt; XC_GGA_X_LG93 !  Lacks &amp; Gordon 93
+[DJ Lacks and RG Gordon, Phys. Rev. A 47, 4681 (1993)
+]
+  </li>
+  <li>
+   114=&gt; XC_GGA_X_FT97_A !  Filatov &amp; Thiel 97 (version A)
+[M Filatov and W Thiel, Mol. Phys 91, 847 (1997)
+]
+  </li>
+  <li>
+   115=&gt; XC_GGA_X_FT97_B !  Filatov &amp; Thiel 97 (version B)
+[M Filatov and W Thiel, Mol. Phys 91, 847 (1997)
+]
+  </li>
+  <li>
+   116=&gt; XC_GGA_X_PBE_SOL !  Perdew, Burke &amp; Ernzerhof exchange (solids)
+[JP Perdew, et al, Phys. Rev. Lett. 100, 136406 (2008)
+]
+  </li>
+  <li>
+   117=&gt; XC_GGA_X_RPBE !  Hammer, Hansen &amp; Norskov (PBE-like)
+[B Hammer, LB Hansen and JK Norskov, Phys. Rev. B 59, 7413 (1999)
+]
+  </li>
+  <li>
+   118=&gt; XC_GGA_X_WC !  Wu &amp; Cohen
+[Z Wu and RE Cohen, Phys. Rev. B 73, 235116 (2006)
+]
+  </li>
+  <li>
+   119=&gt; XC_GGA_X_mPW91 !  Modified form of PW91 by Adamo &amp; Barone
+[C Adamo and V Barone, J. Chem. Phys. 108, 664 (1998)
+]
+  </li>
+  <li>
+   120=&gt; XC_GGA_X_AM05 !  Armiento &amp; Mattsson 05 exchange
+[R Armiento and AE Mattsson, Phys. Rev. B 72, 085108 (2005) ;
+AE Mattsson, R Armiento, J Paier, G Kresse, JM Wills, and TR Mattsson, J. Chem. Phys. 128, 084714 (2008)
+]
+  </li>
+  <li>
+   121=&gt; XC_GGA_X_PBEA !  Madsen (PBE-like)
+[G Madsen, Phys. Rev. B 75, 195108 (2007)
+]
+  </li>
+  <li>
+   122=&gt; XC_GGA_X_MPBE !  Adamo &amp; Barone modification to PBE
+[C Adamo and V Barone, J. Chem. Phys. 116, 5933 (2002)
+]
+  </li>
+  <li>
+   123=&gt; XC_GGA_X_XPBE !  xPBE reparametrization by Xu &amp; Goddard
+[X Xu and WA Goddard III, J. Chem. Phys. 121, 4068 (2004)
+]
+  </li>
+  <li>
+   125=&gt; XC_GGA_X_BAYESIAN !  Bayesian best fit for the enhancement factor
+[JJ Mortensen, K Kaasbjerg, SL Frederiksen, JK Norskov, JP Sethna, and KW Jacobsen, Phys. Rev. Lett. 95, 216401 (2005)
+]
+  </li>
+  <li>
+   126=&gt; XC_GGA_X_PBE_JSJR !  PBE JSJR reparametrization by Pedroza, Silva &amp; Capelle
+[LS Pedroza, AJR da Silva, and K. Capelle, Phys. Rev. B 79, 201106(R) (2009)
+]
+  </li>
+  <li>
+   130=&gt; XC_GGA_C_PBE !  Perdew, Burke &amp; Ernzerhof correlation
+[JP Perdew, K Burke, and M Ernzerhof, Phys. Rev. Lett. 77, 3865 (1996) ;
+JP Perdew, K Burke, and M Ernzerhof, Phys. Rev. Lett. 78, 1396(E) (1997)
+]
+  </li>
+  <li>
+   131=&gt; XC_GGA_C_LYP !  Lee, Yang &amp; Parr
+[C Lee, W Yang and RG Parr, Phys. Rev. B 37, 785 (1988)
+B Miehlich, A Savin, H Stoll and H Preuss, Chem. Phys. Lett. 157, 200 (1989)
+]
+  </li>
+  <li>
+   132=&gt; XC_GGA_C_P86 !  Perdew 86
+[JP Perdew, Phys. Rev. B 33, 8822 (1986)
+]
+  </li>
+  <li>
+   133=&gt; XC_GGA_C_PBE_SOL !  Perdew, Burke &amp; Ernzerhof correlation SOL
+[JP Perdew, et al, Phys. Rev. Lett. 100, 136406 (2008)
+]
+  </li>
+  <li>
+   134=&gt; XC_GGA_C_PW91 !  Perdew &amp; Wang 91
+[JP Perdew, JA Chevary, SH Vosko, KA Jackson, MR Pederson, DJ Singh, and C Fiolhais, Phys. Rev. B 46, 6671 (1992)
+]
+  </li>
+  <li>
+   135=&gt; XC_GGA_C_AM05 !  Armiento &amp; Mattsson 05 correlation
+[ R Armiento and AE Mattsson, Phys. Rev. B 72, 085108 (2005) ;
+AE Mattsson, R Armiento, J Paier, G Kresse, JM Wills, and TR Mattsson, J. Chem. Phys. 128, 084714 (2008)
+]
+  </li>
+  <li>
+   136=&gt; XC_GGA_C_XPBE !  xPBE reparametrization by Xu &amp; Goddard
+[X Xu and WA Goddard III, J. Chem. Phys. 121, 4068 (2004)
+]
+  </li>
+  <li>
+   137=&gt; XC_GGA_C_LM !  Langreth and Mehl correlation
+[DC Langreth and MJ Mehl, Phys. Rev. Lett. 47, 446 (1981)
+]
+  </li>
+  <li>
+   138=&gt; XC_GGA_C_PBE_JRGX !  JRGX reparametrization by Pedroza, Silva &amp; Capelle
+[LS Pedroza, AJR da Silva, and K. Capelle, Phys. Rev. B 79, 201106(R) (2009)
+]
+  </li>
+  <li>
+   139=&gt; XC_GGA_X_OPTB88_VDW !  Becke 88 reoptimized to be used with vdW functional of Dion et al
+[J Klimes, DR Bowler, and A Michaelides, J. Phys.: Condens. Matter 22, 022201 (2010)
+]
+  </li>
+  <li>
+   140=&gt; XC_GGA_X_PBEK1_VDW !  PBE reparametrization for vdW
+[J Klimes, DR Bowler, and A Michaelides, J. Phys.: Condens. Matter 22, 022201 (2010)
+]
+  </li>
+  <li>
+   141=&gt; XC_GGA_X_OPTPBE_VDW !  PBE reparametrization for vdW
+[J Klimes, DR Bowler, and A Michaelides, J. Phys.: Condens. Matter 22, 022201 (2010)
+]
+  </li>
+  <li>
+   142=&gt; XC_GGA_X_RGE2 !  Regularized PBE
+[A Ruzsinszky, GI Csonka, and G Scuseria, J. Chem. Theory Comput. 5, 763 (2009)
+]
+  </li>
+  <li>
+   143=&gt; XC_GGA_C_RGE2 !  Regularized PBE
+[A Ruzsinszky, GI Csonka, and G Scuseria, J. Chem. Theory Comput. 5, 763 (2009)
+]
+  </li>
+  <li>
+   144=&gt; XC_GGA_X_RPW86 !  refitted Perdew &amp; Wang 86
+[ED Murray, K Lee and DC Langreth, J. Chem. Theory Comput. 5, 2754-2762 (2009)
+]
+  </li>
+  <li>
+   145=&gt; XC_GGA_X_KT1 !  Keal and Tozer version 1
+[TW Keal and DJ Tozer, J. Chem. Phys. 119, 3015 (2003)
+]
+  </li>
+  <li>
+   146=&gt; XC_GGA_XC_KT2 !  WARNING : This functional gives NaN on IBM (XG20130608).  Keal and Tozer version 2
+[TW Keal and DJ Tozer, J. Chem. Phys. 119, 3015 (2003)
+]
+  </li>
+  <li>
+   147=&gt; XC_GGA_C_WL !  Wilson &amp; Levy
+[LC Wilson and M Levy, Phys. Rev. B 41, 12930 (1990)
+]
+  </li>
+  <li>
+   148=&gt; XC_GGA_C_WI !  Wilson &amp; Ivanov
+[LC Wilson &amp; S Ivanov, Int. J. Quantum Chem. 69, 523-532 (1998)
+]
+  </li>
+  <li>
+   149=&gt; XC_GGA_X_MB88 !  Modified Becke 88 for proton transfer
+[V Tognetti and C Adamo, J. Phys. Chem. A 113, 14415-14419 (2009)
+]
+  </li>
+  <li>
+   150=&gt; XC_GGA_X_SOGGA ! Second-order generalized gradient approximation
+[Y Zhao and DG Truhlar, J. Chem. Phys. 128, 184109 (2008) ; http://comp.chem.umn.edu/mfm/index.html
+]
+  </li>
+  <li>
+   151=&gt; XC_GGA_X_SOGGA11 !  Second-order generalized gradient approximation 2011
+[R Peverati, Y Zhao, and DG Truhlar, J. Phys. Chem. Lett. 2, 1911-1997 (2011); http://comp.chem.umn.edu/mfm/index.html
+]
+  </li>
+  <li>
+   152=&gt; XC_GGA_C_SOGGA11 ! Second-order generalized gradient approximation 2011
+[R Peverati, Y Zhao, and DG Truhlar, J. Phys. Chem. Lett. 2, 1911-1997 (2011); http://comp.chem.umn.edu/mfm/index.html
+]
+  </li>
+  <li>
+   153=&gt; XC_GGA_C_WI0 !  Wilson &amp; Ivanov initial version
+[LC Wilson &amp; S Ivanov, Int. J. Quantum Chem. 69, 523-532 (1998)
+]
+  </li>
+  <li>
+   154=&gt; XC_GGA_XC_TH1 !  Tozer and Handy v. 1
+[DJ Tozer and NC Handy, J. Chem. Phys. 108, 2545 (1998)
+]  WARNING : this functional is not tested. Use at your own risks.
+  </li>
+  <li>
+   155=&gt; XC_GGA_XC_TH2 ! Tozer and Handy v. 2
+[DJ Tozer and NC Handy, J. Phys. Chem. A 102, 3162 (1998)
+]
+  </li>
+  <li>
+   156=&gt; XC_GGA_XC_TH3 !  Tozer and Handy v. 3
+[DJ Tozer and NC Handy, Mol. Phys. 94, 707 (1998)
+]
+  </li>
+  <li>
+   157=&gt; XC_GGA_XC_TH4 !  Tozer and Handy v. 4
+[DJ Tozer and NC Handy, Mol. Phys. 94, 707 (1998)
+]
+  </li>
+  <li>
+   158=&gt; XC_GGA_X_C09X !  C09x to be used with the VdW of Rutgers-Chalmers
+[VR Cooper, PRB 81, 161104(R) (2010)
+]
+  </li>
+  <li>
+   159=&gt; XC_GGA_C_SOGGA11_X !  To be used with hyb_gga_x_SOGGA11-X
+[R Peverati and DG Truhlar, J. Chem. Phys. 135, 191102 (2011); http://comp.chem.umn.edu/mfm/index.html
+]
+  </li>
+  <!-- The following functional is untested in ABINIT
+&lt;li&gt;160=&gt; XC_GGA_XC_LB !  van Leeuwen &amp; Baerends
+[R van Leeuwen and EJ Baerends, Phys. Rev. A. 49, 2421 (1994)
+]&lt;/li&gt;
+-->
+  <li>
+   161=&gt; XC_GGA_XC_HCTH_93 !  HCTH functional fitted to  93 molecules
+[FA Hamprecht, AJ Cohen, DJ Tozer, and NC Handy, J. Chem. Phys. 109, 6264 (1998)
+]
+  </li>
+  <li>
+   162=&gt; XC_GGA_XC_HCTH_120 !  HCTH functional fitted to 120 molecules
+[AD Boese, NL Doltsinis, NC Handy, and M Sprik, J. Chem. Phys. 112, 1670 (2000)
+]
+  </li>
+  <li>
+   163=&gt; XC_GGA_XC_HCTH_147 !  HCTH functional fitted to 147 molecules
+[AD Boese, NL Doltsinis, NC Handy, and M Sprik, J. Chem. Phys. 112, 1670 (2000)
+]
+  </li>
+  <li>
+   164=&gt; XC_GGA_XC_HCTH_407 !  HCTH functional fitted to 407 molecules
+[AD Boese, and NC Handy, J. Chem. Phys. 114, 5497 (2001)
+]
+  </li>
+  <li>
+   165=&gt; XC_GGA_XC_EDF1 !  Empirical functionals from Adamson, Gill, and Pople
+[RD Adamson, PMW Gill, and JA Pople, Chem. Phys. Lett. 284 6 (1998)
+]
+  </li>
+  <li>
+   166=&gt; XC_GGA_XC_XLYP !  XLYP functional
+[X Xu and WA Goddard, III, PNAS 101, 2673 (2004)
+]
+  </li>
+  <li>
+   167=&gt; XC_GGA_XC_B97 !  Becke 97
+[AD Becke, J. Chem. Phys. 107, 8554-8560 (1997)
+]
+  </li>
+  <li>
+   168=&gt; XC_GGA_XC_B97_1 !  Becke 97-1
+[FA Hamprecht, AJ Cohen, DJ Tozer, and NC Handy, J. Chem. Phys. 109, 6264 (1998);
+AD Becke, J. Chem. Phys. 107, 8554-8560 (1997)
+]
+  </li>
+  <li>
+   169=&gt; XC_GGA_XC_B97_2 !  Becke 97-2
+[AD Becke, J. Chem. Phys. 107, 8554-8560 (1997)
+]
+  </li>
+  <li>
+   170=&gt; XC_GGA_XC_B97_D !  Grimme functional to be used with C6 vdW term
+[S Grimme, J. Comput. Chem. 27, 1787 (2006)
+]
+  </li>
+  <li>
+   171=&gt; XC_GGA_XC_B97_K !  Boese-Martin for Kinetics
+[AD Boese and JML Martin, J. Chem. Phys., Vol. 121, 3405 (2004)
+]
+  </li>
+  <li>
+   172=&gt; XC_GGA_XC_B97_3 !  Becke 97-3
+[TW Keal and DJ Tozer, J. Chem. Phys. 123, 121103 (2005)
+]
+  </li>
+  <li>
+   173=&gt; XC_GGA_XC_PBE1W !  Functionals fitted for water
+[EE Dahlke and DG Truhlar, J. Phys. Chem. B 109, 15677 (2005)
+]
+  </li>
+  <li>
+   174=&gt; XC_GGA_XC_MPWLYP1W !  Functionals fitted for water
+[EE Dahlke and DG Truhlar, J. Phys. Chem. B 109, 15677 (2005)
+]
+  </li>
+  <li>
+   175=&gt; XC_GGA_XC_PBELYP1W !  Functionals fitted for water
+[EE Dahlke and DG Truhlar, J. Phys. Chem. B 109, 15677 (2005)
+]
+  </li>
+  <li>
+   176=&gt; XC_GGA_XC_SB98_1a !  Schmider-Becke 98 parameterization 1a
+[HL Schmider and AD Becke, J. Chem. Phys. 108, 9624 (1998)
+]
+  </li>
+  <li>
+   177=&gt; XC_GGA_XC_SB98_1b !  Schmider-Becke 98 parameterization 1b
+[HL Schmider and AD Becke, J. Chem. Phys. 108, 9624 (1998)
+]
+  </li>
+  <li>
+   178=&gt; XC_GGA_XC_SB98_1c !  Schmider-Becke 98 parameterization 1c
+[HL Schmider and AD Becke, J. Chem. Phys. 108, 9624 (1998)
+]
+  </li>
+  <li>
+   179=&gt; XC_GGA_XC_SB98_2a !  Schmider-Becke 98 parameterization 2a
+[HL Schmider and AD Becke, J. Chem. Phys. 108, 9624 (1998)
+]
+  </li>
+  <li>
+   180=&gt; XC_GGA_XC_SB98_2b !  Schmider-Becke 98 parameterization 2b
+[HL Schmider and AD Becke, J. Chem. Phys. 108, 9624 (1998)
+]
+  </li>
+  <li>
+   181=&gt; XC_GGA_XC_SB98_2c !  Schmider-Becke 98 parameterization 2c
+[HL Schmider and AD Becke, J. Chem. Phys. 108, 9624 (1998)
+]
+  </li>
+  <li>
+   183=&gt; XC_GGA_X_OL2 !  Exchange form based on Ou-Yang and Levy v.2
+[P Fuentealba and O Reyes, Chem. Phys. Lett. 232, 31-34 (1995) ; H Ou-Yang, M Levy, Int. J. of Quant. Chem. 40, 379-388 (1991)
+]
+  </li>
+  <li>
+   184=&gt; XC_GGA_X_APBE !  mu fixed from the semiclassical neutral atom
+[LA Constantin, E Fabiano, S Laricchia, and F Della Sala, Phys. Rev. Lett. 106, 186406 (2011)
+]
+  </li>
+  <li>
+   186=&gt; XC_GGA_C_APBE !  mu fixed from the semiclassical neutral atom
+[LA Constantin, E Fabiano, S Laricchia, and F Della Sala, Phys. Rev. Lett. 106, 186406 (2011)
+]
+  </li>
+  <li>
+   191=&gt; XC_GGA_X_HTBS!  Haas, Tran, Blaha, and Schwarz
+[P Haas, F Tran, P Blaha, and K Schwarz, Phys. Rev. B 83, 205117 (2011)
+]
+  </li>
+  <li>
+   192=&gt; XC_GGA_X_AIRY !  Constantin et al based on the Airy gas
+[LA Constantin, A Ruzsinszky, and JP Perdew, Phys. Rev. B 80, 035125 (2009)
+]
+  </li>
+  <li>
+   193=&gt; XC_GGA_X_LAG !  Local Airy Gas
+[L Vitos, B Johansson, J Kollar, and HL Skriver, Phys. Rev. B 62, 10046-10050 (2000)
+]
+  </li>
+  <li>
+   194=&gt; XC_GGA_XC_MOHLYP  ! Functional for organometallic chemistry
+[NE Schultz, Y Zhao, DGJ Truhlar, Phys. Chem. A, 109, 11127 (2005)
+]
+  </li>
+  <li>
+   195=&gt; XC_GGA_XC_MOHLYP2 !  Functional for barrier heights
+[J Zheng, Y Zhao, DGJ Truhlar, Chem. Theory. Comput. 5, 808 (2009)
+]
+  </li>
+  <li>
+   196=&gt; XC_GGA_XC_TH_FL !  Tozer and Handy v. FL
+[DJ Tozer, NC Handy, amd WH Green, Chem. Phys. Lett. 273, 183-194 (1997)
+]
+  </li>
+  <li>
+   197=&gt; XC_GGA_XC_TH_FC !  Tozer and Handy v. FC
+[DJ Tozer, NC Handy, amd WH Green, Chem. Phys. Lett. 273, 183-194 (1997)
+]
+  </li>
+  <li>
+   198=&gt; XC_GGA_XC_TH_FCFO  !  Tozer and Handy v. FCFO
+[DJ Tozer, NC Handy, amd WH Green, Chem. Phys. Lett. 273, 183-194 (1997)
+]
+  </li>
+  <li>
+   199=&gt; XC_GGA_XC_TH_FCO  !  Tozer and Handy v. FCO
+[DJ Tozer, NC Handy, amd WH Green, Chem. Phys. Lett. 273, 183-194 (1997)
+]
+  </li>
+  <li>
+   200=&gt; XC_GGA_C_OPTC  !  Optimized correlation functional of Cohen and Handy
+[AJ Cohen and NC Handy, Mol. Phys. 99, 607-615 (2001)
+]
+  </li>
+  <li>
+   524=&gt; XC_GGA_X_WPBEH  !  short-range version of the PBE
+[J Heyd, GE Scuseria, and M Ernzerhof, J. Chem. Phys. 118, 8207 (2003)
+]
+  </li>
+  <li>
+   525=&gt; XC_GGA_X_HJS_PBE  !  HJS screened exchange PBE version
+[TM Henderson, BG Janesko, and GE Scuseria, J. Chem. Phys. 128, 194105 (2008)
+]
+  </li>
+  <li>
+   526=&gt; XC_GGA_X_HJS_PBE_SOL !  HJS screened exchange PBE_SOL version
+[TM Henderson, BG Janesko, and GE Scuseria, J. Chem. Phys. 128, 194105 (2008)
+]
+  </li>
+  <li>
+   527=&gt; XC_GGA_X_HJS_B88 ! HJS screened exchange B88 version
+[TM Henderson, BG Janesko, and GE Scuseria, J. Chem. Phys. 128, 194105 (2008)
+]   WARNING : this functional is not tested. Use at your own risks.
+  </li>
+  <li>
+   528=&gt; XC_GGA_X_HJS_B97X  !  HJS screened exchange B97x version
+[TM Henderson, BG Janesko, and GE Scuseria, J. Chem. Phys. 128, 194105 (2008)
+]
+  </li>
+  <li>
+   529=&gt; XC_GGA_X_ITYH  ! short-range recipe for exchange GGA functionals
+[H Iikura, T Tsuneda, T Yanai, and K Hirao, J. Chem. Phys. 115, 3540 (2001)
+]  WARNING : this functional is not tested. Use at your own risks.
+  </li>
+ </ul>
+</p>
+<p>
+ MetaGGA functionals (do not forget to add a minus sign, as discussed above). See Sun et al, PRB 84, 035117 (2011) for the formulas.
+</p>
+<p>
+ <ul>
+  <li>
+   202=&gt; XC_MGGA_X_TPSS !  Tao, Perdew, Staroverov &amp; Scuseria
+[J Tao, JP Perdew, VN Staroverov, and G Scuseria, Phys. Rev. Lett. 91, 146401 (2003) ;
+JP Perdew, J Tao, VN Staroverov, and G Scuseria, J. Chem. Phys. 120, 6898 (2004)
+]
+  </li>
+  <li>
+   203=&gt; XC_MGGA_X_M06L !  Zhao, Truhlar exchange
+[Y Zhao and DG Truhlar, JCP 125, 194101 (2006);
+Y Zhao and DG Truhlar, Theor. Chem. Account 120, 215 (2008)
+]
+  </li>
+  <li>
+   204=&gt; XC_MGGA_X_GVT4 !  GVT4 (X part of VSXC) from van Voorhis and Scuseria
+[T Van Voorhis and GE Scuseria, JCP 109, 400 (1998)
+]
+  </li>
+  <li>
+   205=&gt; XC_MGGA_X_TAU_HCTH ! tau-HCTH from Boese and Handy
+[AD Boese and NC Handy, JCP 116, 9559 (2002)
+]
+  </li>
+  <li>
+   207=&gt; XC_MGGA_X_BJ06 !  Becke &amp; Johnson correction to Becke-Roussel 89
+[AD Becke and ER Johnson, J. Chem. Phys. 124, 221101 (2006)
+] WARNING : this Vxc-only mGGA can only be used with a LDA correlation, typically Perdew-Wang 92.
+  </li>
+  <li>
+   208=&gt; XC_MGGA_X_TB09 !  Tran-blaha - correction to Becke &amp; Johnson correction to Becke-Roussel 89
+[F Tran and P Blaha, Phys. Rev. Lett. 102, 226401 (2009)
+] WARNING : this Vxc-only mGGA can only be used with a LDA correlation, typically Perdew-Wang 92.
+  </li>
+  <li>
+   209=&gt; XC_MGGA_X_RPP09 !  Rasanen, Pittalis, and Proetto correction to Becke &amp; Johnson
+[E Rasanen, S Pittalis &amp; C Proetto, arXiv:0909.1477 (2009)
+] WARNING : this Vxc-only mGGA can only be used with a LDA correlation, typically Perdew-Wang 92.
+  </li>
+  <li>
+   232=&gt; XC_MGGA_C_VSXC !  VSxc from Van Voorhis and Scuseria (correlation part)
+[T Van Voorhis and GE Scuseria, JCP 109, 400 (1998)
+]
+  </li>
+ </ul>
+</p>
+<p>
+ Hybrid functionals (do not forget to add a minus sign, as discussed above).
+</p>
+<p>
+ <ul>
+  <li>
+   402=&gt; XC_HYB_GGA_XC_B3LYP !  The (in)famous B3LYP
+[PJ Stephens, FJ Devlin, CF Chabalowski, MJ Frisch, J. Phys. Chem. 98 11623 (1994)
+]
+  </li>
+  <li>
+   406=&gt; XC_HYB_GGA_XC_PBEH !  PBEH (PBE0)
+[C Adamo and V Barone, J. Chem. Phys. 110, 6158 (1999);
+ M. Ernzerhof, G. E. Scuseria, J. Chem. Phys. 110, 5029 (1999)
+]
+  </li>
+  <li>
+   427=&gt; XC_HYB_GGA_XC_HSE03 !  The 2003 version of the screened hybrid HSE (in this case one should use omega^HF = 0.15/sqrt(2) and omega^PBE = 0.15*(2.0)**1/3)
+   <br>
+   428=&gt; XC_HYB_GGA_XC_HSE06 !  The 2006 version of the screened hybrid HSE (in this case one should use omega^HF = omega^PBE = 0.11)
+   <br>
+   (The following section is taken from the LibXC sources. In ABINIT, we stick to the LibXC choice.)
+   Note that there is an enormous mess in the literature concerning the values of omega in HSE. This is due to an error in the original paper that stated that they had used omega=0.15. This was in fact not true, and the real value used was omega^HF = 0.15/sqrt(2) ~ 0.1061 and omega^PBE = 0.15*(2.0)**1/3 ~ 0.1890. In 2006 Krukau et al [JCP 125, 224106 (2006)] tried to clarify the situation, and called HSE03 to the above choice of parameters, and called HSE06 to the functional where omega^HF=omega^PBE. By testing several properties for atoms they reached the conclusion that the best value for omega=0.11.  Of course, codes are just as messy as the papers. In espresso HSE06 has the value omega=0.106. VASP, on the other hand, uses for HSE03 the same value omega^HF = omega^PBE = 0.3 (A^-1) ~ 0.1587 and for HSE06 omega^HF = omega^PBE = 0.2 (A^-1) ~ 0.1058.  [J Heyd, GE Scuseria, and M Ernzerhof, J. Chem. Phys. 118, 8207 (2003); J Heyd, GE Scuseria, and M Ernzerhof, J. Chem. Phys. 124, 219906 (2006); AV Krukau, OA Vydrov, AF Izmaylov, and GE Scuseria, J. Chem. Phys. 125, 224106 (2006)
+]
+  </li>
+  <li>
+   456=&gt; XC_HYB_GGA_XC_PBE0_13 !  PBE0-1/3
+[P Cortona, J. Chem. Phys. 136, 086101 (2012)
+]
+  </li>
+ </ul>
+</p>
+</font>
+
+<br><br><br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="jdtset">jdtset</a></font>
+<br><font id="mnemonics">Mnemonics: index -J- for DaTaSETs</font>
+<br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#no_multi">NO_MULTI</a></font>
+<br><font id="vartype">Variable type: integer(<a href="varbas.html#ndtset">ndtset</a>)</font>
+<br><font id="default">Default is [1 .. <a href="varbas.html#ndtset">ndtset</a>]</font>
+<br><font id="text">
+<p>
+<p>
+ Gives the dataset index
+of each of the datasets. This index will be used :
+ <ul>
+  <li>
+   to determine which input variables are specific to each
+dataset, since the variable names for this
+dataset will be made from the bare variable
+name concatenated with this index, and only if
+such a composite variable name does not exist,
+the code will consider the bare variable name,
+or even, the Default;
+  </li>
+  <li>
+   to characterize output variable names, if their
+content differs from dataset to dataset;
+  </li>
+  <li>
+   to characterize output files ( root names appended with _DSx
+where 'x' is the dataset index ).
+  </li>
+ </ul>
+ The allowed index values are between 1 and 9999.
+ <br />
+ An input variable name appended with 0 is not allowed.
+ <br />
+ When <a href="varbas.html#ndtset">ndtset</a>==0, this array is not used, and moreover,
+no input variable name appended with a digit is allowed.
+This array might be initialized thanks to the use of
+the input variable <a href="varbas.html#udtset">udtset</a>. In this case, <b>jdtset</b> cannot
+be used.
+</p>
+</font>
+
+<br><br><br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="kpt">kpt</a></font>
+<br><font id="mnemonics">Mnemonics: K - PoinTs</font>
+<br><font id="characteristic">Characteristic: </font>
+<br><font id="vartype">Variable type: real(3,<a href="varbas.html#nkpt">nkpt</a>)</font>
+<br><font id="default">Default is [0, 0, 0] (Comment: Adequate for one molecule in a supercell)</font>
+<br><font id="text">
+<p>
+<p>
+ Contains the k points in terms
+of reciprocal space primitive translations (NOT in
+cartesian coordinates!).
+ <br />
+ Needed ONLY
+if <a href="varbas.html#kptopt">kptopt</a>=0, otherwise
+deduced from other input variables.
+</p>
+<p>
+ It contains dimensionless numbers in terms of which
+the cartesian coordinates would be:
+ <br />
+ <tele>
+  k_cartesian = k1*G1+k2*G2+k3*G3
+ </tele>
+ <br />
+ where
+ <tele>
+  (k1,k2,k3)
+ </tele>
+ represent the dimensionless "reduced
+coordinates" and
+ <tele>
+  G1, G2, G3
+ </tele>
+ are the cartesian coordinates
+of the primitive translation vectors.  G1,G2,G3 are related
+to the choice of direct space primitive translation vectors
+made in <a href="varbas.html#rprim">rprim</a>.
+Note that an overall norm for the k
+points is supplied by <a href="varbas.html#kptnrm">kptnrm</a>.  This allows
+one to avoid supplying many digits for the k points to
+represent such points as (1,1,1)/3.
+ <br />
+ Note: one of the algorithms used to set up the sphere
+of G vectors for the basis needs components of k-points
+in the range [-1,1], so the
+remapping is easily done by adding or subtracting 1 from
+each component until it is in the range [-1,1].  That is,
+given the k point normalization <a href="varbas.html#kptnrm">kptnrm</a> described below,
+each component must lie in [-<a href="varbas.html#kptnrm">kptnrm</a>,<a href="varbas.html#kptnrm">kptnrm</a>].
+ <br />
+ Note: a global shift can be provided by <a href="varint.html#qptn">qptn</a>
+ <br />
+ Not read if <a href="varbas.html#kptopt">kptopt</a>/=0 .
+</p>
+</font>
+
+<br><br><br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="kptnrm">kptnrm</a></font>
+<br><font id="mnemonics">Mnemonics: K - PoinTs NoRMalization</font>
+<br><font id="characteristic">Characteristic: </font>
+<br><font id="vartype">Variable type: real</font>
+<br><font id="default">Default is 1</font>
+<br><font id="text">
+<p>
+<p>
+ Establishes a normalizing denominator
+for each k point.
+Needed only
+if <a href="varbas.html#kptopt">kptopt</a>&lt;=0, otherwise
+deduced from other input variables.
+ <br />
+ The k point coordinates as fractions
+of reciprocal lattice translations are therefore
+<a href="varbas.html#kpt">kpt</a>(mu,ikpt)/<b>kptnrm</b>.  <b>kptnrm</b> defaults to 1 and can
+be ignored by the user.  It is introduced to avoid
+the need for many digits in representing numbers such as 1/3.
+ <br />
+ It cannot be smaller than 1.0d0
+</p>
+</font>
+
+<br><br><br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="kptopt">kptopt</a></font>
+<br><font id="mnemonics">Mnemonics: KPoinTs OPTion</font>
+<br><font id="characteristic">Characteristic: </font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 4 if <a href="vargs.html#nspden">nspden</a>==4,
+1 otherwise.
+</font>
+<br><font id="text">
+<p>
+<p>
+ Controls the set up of the k-points list.
+The aim will be to initialize, by straight reading
+or by a preprocessing approach based on other input variables,
+the following input variables, giving the k points, their number,
+and their weight:
+<a href="varbas.html#kpt">kpt</a>,
+<a href="varbas.html#kptnrm">kptnrm</a>,
+<a href="varbas.html#nkpt">nkpt</a>,
+and, for <a href="varbas.html#iscf">iscf</a>/=-2,
+<a href="varbas.html#wtk">wtk</a>.
+</p>
+<p>
+ Often, the k points will form a lattice in reciprocal space. In this case,
+one will also aim at initializing input variables that give
+the reciprocal of this k-point lattice, as well as its shift with respect
+to the origin:
+<a href="varbas.html#ngkpt">ngkpt</a> or
+<a href="vargs.html#kptrlatt">kptrlatt</a>,
+as well as on <a href="varbas.html#nshiftk">nshiftk</a> and
+<a href="varbas.html#shiftk">shiftk</a>.
+</p>
+<p>
+ A global additional shift can be provided by <a href="varint.html#qptn">qptn</a>
+ <ul>
+  <li>
+   0=&gt; read directly <a href="varbas.html#nkpt">nkpt</a>, <a href="varbas.html#kpt">kpt</a>,
+<a href="varbas.html#kptnrm">kptnrm</a> and <a href="varbas.html#wtk">wtk</a>.
+  </li>
+  <li>
+   1=&gt; rely on <a href="varbas.html#ngkpt">ngkpt</a> or
+<a href="vargs.html#kptrlatt">kptrlatt</a>, as well as on
+<a href="varbas.html#nshiftk">nshiftk</a> and
+<a href="varbas.html#shiftk">shiftk</a> to set up the k points.
+Take fully into account the symmetry to generate the
+k points in the Irreducible Brillouin Zone only, with the appropriate weights.
+   <br />
+   (This is the usual mode for GS calculations)
+  </li>
+  <li>
+   2=&gt; rely on
+<a href="varbas.html#ngkpt">ngkpt</a> or
+<a href="vargs.html#kptrlatt">kptrlatt</a>, as well as on
+<a href="varbas.html#nshiftk">nshiftk</a> and
+<a href="varbas.html#shiftk">shiftk</a> to set up the k points.
+Take into account only the time-reversal symmetry :
+k points will be generated in half the Brillouin zone, with the appropriate weights.
+   <br />
+   (This is to be used when preparing or executing a
+RF calculation at q=(0 0 0) )
+  </li>
+  <li>
+   3=&gt; rely on <a href="varbas.html#ngkpt">ngkpt</a> or
+<a href="vargs.html#kptrlatt">kptrlatt</a>, as well as on
+<a href="varbas.html#nshiftk">nshiftk</a> and
+<a href="varbas.html#shiftk">shiftk</a> to set up the k points.
+Do not take into account any symmetry :
+k points will be generated in the full Brillouin zone, with the appropriate weights.
+   <br />
+   (This is to be used when preparing or executing a
+RF calculation at non-zero q )
+  </li>
+  <li>
+   4=&gt; rely on <a href="varbas.html#ngkpt">ngkpt</a> or
+<a href="vargs.html#kptrlatt">kptrlatt</a>, as well as on
+<a href="varbas.html#nshiftk">nshiftk</a> and
+<a href="varbas.html#shiftk">shiftk</a> to set up the k points.
+Take into account all the symmetries EXCEPT the time-reversal symmetry
+to generate the k points in the Irreducible Brillouin Zone, with the appropriate weights.
+   <br />
+   This has to be used when performing calculations with non-collinear magnetism allowed
+   (<a href="vargs.html#nspden">nspden</a>=4)
+  </li>
+  <li>
+   A negative value =&gt;
+rely on <a href="vargs.html#kptbounds">kptbounds</a>,
+and <a href="vargs.html#ndivk">ndivk</a>
+to set up a band structure calculation along different lines
+(allowed only for <a href="varbas.html#iscf">iscf</a>==-2).
+The absolute value of <b>kptopt</b> gives the number of segments
+of the band structure. Weights are usually irrelevant with this option, and will be left to their default value.
+  </li>
+ </ul>
+ In the case of a grid of k points, the auxiliary variables
+<a href="vargs.html#kptrlen">kptrlen</a>,
+<a href="varbas.html#ngkpt">ngkpt</a>  and
+<a href="varfil.html#prtkpt">prtkpt</a> might help
+you to select the optimal grid.
+</p>
+</font>
+
+<br><br><br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="natom">natom</a></font>
+<br><font id="mnemonics">Mnemonics: Number of ATOMs</font>
+<br><font id="characteristic">Characteristic: </font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 1</font>
+<br><font id="text">
+<p>
+<p>
+ Gives the total number of atoms in the unit cell.
+Default is 1 but you will obviously want to input this
+value explicitly.
+ <br />
+ Note that <b>natom</b> refers to all atoms in the unit cell, not
+only to the irreducible set of atoms in the unit cell (using symmetry operations,
+this set allows to recover all atoms). If you want
+to specify only the irreducible set of atoms, use the
+symmetriser, see the input variable <a href="vargeo.html#natrd">natrd</a>.
+</p>
+</font>
+
+<br><br><br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="nband">nband</a></font>
+<br><font id="mnemonics">Mnemonics: Number of BANDs</font>
+<br><font id="characteristic">Characteristic: </font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">No default (Comment:  the estimated number of occupied bands +1 (TODO provide the mathematical formulation))</font>
+<br><font id="text">
+<p>
+<p>
+ Gives number of bands, occupied plus
+possibly unoccupied, for which wavefunctions are being computed
+along with eigenvalues.
+ <br />
+ Note : if the parameter
+<a href="varbas.html#occopt">occopt</a> (see below) is not set to 2,
+<b>nband</b> is a scalar integer, but
+if the parameter <a href="varbas.html#occopt">occopt</a> is set to 2,
+then <b>nband</b> must be an array <b>nband</b>(<a href="varbas.html#nkpt">nkpt</a>*
+<a href="varbas.html#nsppol">nsppol</a>) giving the
+number of bands explicitly for each k point.  This
+option is provided in order to allow the number of
+bands treated to vary from k point to k point.
+ <br />
+ For the values of <a href="varbas.html#occopt">occopt</a> not equal to 0 or 2, <b>nband</b>
+can be omitted. The number of bands will be set up
+thanks to the use of the variable <a href="vargs.html#fband">fband</a>. The present Default
+will not be used.
+</p>
+<p>
+ If <a href="vargs.html#nspinor">nspinor</a> is 2, nband must be even for
+each k point.
+</p>
+<p>
+ In the case of a <a href="../../users/abinit_help.html#gw">GW</a> calculation (<a href="vargs.html#optdriver">optdriver</a>=3 or 4),
+<b>nband</b> gives the number of bands to be treated to generate the screening (susceptibility
+and dielectric matrix), as well as the self-energy. However, to generate the _KSS
+file (see <a href="varfil.html#kssform">kssform</a>)
+the relevant number of bands is given by <a href="vargw.html#nbandkss">nbandkss</a>.
+</p>
+</font>
+
+<br><br><br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="nbandhf">nbandhf</a></font>
+<br><font id="mnemonics">Mnemonics: Number of BANDs for (Hartree)-Fock exact exchange</font>
+<br><font id="characteristic">Characteristic: </font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">No default (Comment: the estimated number of occupied bands (TODO : provide the mathematical formulation))</font>
+<br><font id="text">
+<p>
+<p>
+ Gives the maximum number of occupied bands with which Fock exact exchange is being computed for the wavefunctions.
+</p>
+</font>
+
+<br><br><br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="ndtset">ndtset</a></font>
+<br><font id="mnemonics">Mnemonics: Number of DaTaSETs</font>
+<br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#no_multi">NO_MULTI</a></font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><font id="text">
+<p>
+<p>
+ Gives the number of data sets to be
+treated.
+ <br />
+ If 0, means that the multi-data set treatment is not used,
+so that the root filenames will not be appended with _DSx,
+where 'x' is the dataset index defined
+by the input variable <a href="varbas.html#jdtset">jdtset</a>,
+and also that input names with a dataset index are not allowed.
+Otherwise, <b>ndtset</b>=0 is equivalent to <b>ndtset</b>=1.
+</p>
+</font>
+
+<br><br><br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="ngkpt">ngkpt</a></font>
+<br><font id="mnemonics">Mnemonics: Number of Grid points for K PoinTs generation</font>
+<br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#input_only">INPUT_ONLY</a></font>
+<br><font id="vartype">Variable type: integer(3)</font>
+<br><font id="default">Default is [0, 0, 0]</font>
+<br><br><font id="requires">
+Only relevant if <a href="varbas.html#kptopt">kptopt</a> >=0, 
+</font>
+<br><br><font id="excludes">
+The use of this variable forbids the use of specified(<a href="vargs.html#kptrlatt">kptrlatt</a>)
+</font>
+<br><font id="text">
+<p>
+<p>
+ Used when <a href="varbas.html#kptopt">kptopt</a>&gt;=0,
+if <a href="vargs.html#kptrlatt">kptrlatt</a>
+has not been defined (<a href="vargs.html#kptrlatt">kptrlatt</a>
+and <b>ngkpt</b> are exclusive of each other).
+ <br />
+ Its three positive components
+give the number of k points of Monkhorst-Pack grids
+(defined with respect to primitive axis in reciprocal space)
+in each of the three dimensions.
+<b>ngkpt</b> will be used to generate the
+corresponding <a href="vargs.html#kptrlatt">kptrlatt</a>
+input variable.
+The use of <a href="varbas.html#nshiftk">nshiftk</a>
+and <a href="varbas.html#shiftk">shiftk</a>, allows to generate
+shifted grids, or Monkhorst-Pack grids defined
+with respect to conventional unit cells.
+</p>
+<p>
+ When <a href="varbas.html#nshiftk">nshiftk</a>=1,
+<a href="vargs.html#kptrlatt">kptrlatt</a> is initialized
+as a diagonal (3x3) matrix, whose diagonal elements
+are the three values <b>ngkpt</b>(1:3). When
+<a href="varbas.html#nshiftk">nshiftk</a> is greater than 1,
+ABINIT will try to generate <a href="vargs.html#kptrlatt">kptrlatt</a>
+on the basis of the primitive vectors of the k-lattice:
+the number of shifts might be reduced, in which case
+<a href="vargs.html#kptrlatt">kptrlatt</a> will not be diagonal
+anymore.
+</p>
+<p>
+ Monkhorst-Pack grids are usually the most efficient when
+their defining integer numbers are even.
+For a measure of the efficiency, see the input variable
+<a href="vargs.html#kptrlen">kptrlen</a>.
+</p>
+</font>
+
+<br><br><br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="nkpath">nkpath</a></font>
+<br><font id="mnemonics">Mnemonics: Number of K-points defining the PATH</font>
+<br><font id="characteristic">Characteristic: </font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><font id="text">
+<p>
+This variable is used to define the number of high-symmetry k-points in the <a href="vargs.html#kptbounds">kptbounds</a> array when <a href="varbas.html#kptopt">kptopt</a> > 0.
+Historically, <a href="vargs.html#kptbounds">kptbounds</a> is used in conjuction with a negative
+value of <a href="varbas.html#kptopt">kptopt</a> when performing a NSCF band structure calculation. In this case, the number of k-points in kptbounds
+is given by abs(kptopt) + 1.
+
+There are, however, other cases in which one has to specify a k-path in the input file in order to activate some kind of post-processing tool.
+Typical examples are the interpolation of
+the GW corrections at the end of the sigma run or the interpolation
+of the KS eigenvalues along a path at the end of the SCF run (see
+also <a href="varbas.html#einterp">einterp</a>)
+In a nutshell, nkpath replaces <a href="varbas.html#kptopt">kptopt</a> when we are not performing a NSCF calculation.
+Note that, unlike <a href="varbas.html#kptopt">kptopt</a>, nkpath represents the total number of points in the <a href="vargs.html#kptbounds">kptbounds</a> array.
+</font>
+
+<br><br><br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="nkpt">nkpt</a></font>
+<br><font id="mnemonics">Mnemonics: Number of K - Points</font>
+<br><font id="characteristic">Characteristic: </font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 1 if <a href="varbas.html#kptopt">kptopt</a>==0,
+0 otherwise.
+</font>
+<br><font id="text">
+<p>
+<p>
+ If non-zero,
+<b>nkpt</b>
+gives the number of k points in the k point array
+<a href="varbas.html#kpt">kpt</a>. These points
+are used either to sample the Brillouin zone, or to
+build a band structure along specified lines.
+</p>
+<p>
+ If <b>nkpt</b> is zero, the code deduces from other input variables
+(see the list in the description of <a href="varbas.html#kptopt">kptopt</a>)
+the number of k points, which is possible only
+when <a href="varbas.html#kptopt">kptopt</a>/=0.
+If <a href="varbas.html#kptopt">kptopt</a>/=0 and
+the input value of <b>nkpt</b>/=0,
+then ABINIT will check that the number of k points
+generated from the other input variables
+is exactly the same than <b>nkpt</b>.
+</p>
+<p>
+ If <a href="varbas.html#kptopt">kptopt</a> is positive,
+<b>nkpt</b> must be coherent with the values
+of <a href="vargs.html#kptrlatt">kptrlatt</a>,
+<a href="varbas.html#nshiftk">nshiftk</a>
+and <a href="varbas.html#shiftk">shiftk</a>.
+ <br />
+ For ground state calculations, one should select the
+k point in the irreducible Brillouin Zone (obtained
+by taking into account point symmetries and the time-reversal
+symmetry).
+ <br />
+ For response function calculations, one should
+select k points in the full Brillouin zone, if the wavevector
+of the perturbation does not vanish, or in a half of
+the Brillouin Zone if q=0. The code will automatically decrease
+the number of k points to the minimal set needed for
+each particular perturbation.
+</p>
+<p>
+ If <a href="varbas.html#kptopt">kptopt</a> is negative,
+<b>nkpt</b> will be the sum of the number of points on
+the different lines of the band structure.
+For example,
+if <a href="varbas.html#kptopt">kptopt</a>=-3, one
+will have three segments; supposing
+<a href="vargs.html#ndivk">ndivk</a> is 10 12 17,
+the total number of k points of the circuit will be
+10+12+17+1(for the final point)=40.
+</p>
+</font>
+
+<br><br><br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="nkpthf">nkpthf</a></font>
+<br><font id="mnemonics">Mnemonics: Number of K - Points for (Hartree) Fock exact exchange</font>
+<br><font id="characteristic">Characteristic: </font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">No default (Comment:  the total number of k-point in the full Brillouin zone (TODO : provide the mathematical formulation))</font>
+<br><font id="text">
+<p>
+<p>
+ <b>nkpthf</b> gives the number of k points used to sample the full Brillouin zone for the Fock exact exchange contribution.
+</p>
+</font>
+
+<br><br><br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="nshiftk">nshiftk</a></font>
+<br><font id="mnemonics">Mnemonics: Number of SHIFTs for K point grids</font>
+<br><font id="characteristic">Characteristic: </font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 1</font>
+<br><font id="text">
+<p>
+<p>
+ This parameter
+gives the number of shifted grids
+to be used concurrently to generate the full grid of k points.
+It can be used with primitive grids defined either from
+<a href="varbas.html#ngkpt">ngkpt</a>
+or
+<a href="vargs.html#kptrlatt">kptrlatt</a>.
+The maximum allowed value of <b>nshiftk</b> is 8.
+The values of the shifts are given by <a href="varbas.html#shiftk">shiftk</a>.
+</p>
+</font>
+
+<br><br><br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="nsppol">nsppol</a></font>
+<br><font id="mnemonics">Mnemonics: Number of SPin POLarization</font>
+<br><font id="characteristic">Characteristic: </font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 1</font>
+<br><font id="text">
+<p>
+<p>
+ Give the number of INDEPENDENT
+spin polarisations, for which there are non-related wavefunctions. Can take the values
+1 or 2.
+</p>
+<p>
+ If <b>nsppol</b>=1, one has an unpolarized calculation
+(<a href="vargs.html#nspinor">nspinor</a>=1,
+<a href="vargs.html#nspden">nspden</a>=1) or
+an antiferromagnetic system
+(<a href="vargs.html#nspinor">nspinor</a>=1,
+<a href="vargs.html#nspden">nspden</a>=2), or
+a calculation in which spin up and spin down cannot be disentangled
+(<a href="vargs.html#nspinor">nspinor</a>=2), that is, either
+non-collinear magnetism or presence of spin-orbit coupling,
+for which one needs spinor wavefunctions.
+</p>
+<p>
+ If <b>nsppol</b>=2, one has a spin-polarized (collinear) calculation
+with separate and different wavefunctions for up and
+down spin electrons for each band and k point.
+Compatible only with <a href="vargs.html#nspinor">nspinor</a>=1,
+<a href="vargs.html#nspden">nspden</a>=2. If <b>nsppol</b>=2, one usually uses a metallic value for <a href="varbas.html#occopt">occopt</a>, in order to let ABINIT find the magnetization.
+On the contrary, if <a href="varbas.html#occopt">occopt</a>==1 is used, the user has to impose the magnetization, using <a href="varff.html#spinmagntarget">spinmagntarget</a>,
+except for the case of a single isolated Hydrogen atom.
+</p>
+<p>
+ In the present status of development,
+with <b>nsppol</b>=1,
+all values of <a href="varbas.html#ixc">ixc</a> are allowed, while
+with <b>nsppol</b>=2,
+some values of <a href="varbas.html#ixc">ixc</a> might not be allowed (e.g. 2, 3, 4, 5, 6, 20, 21, 22 are not allowed).
+</p>
+<p>
+ See also the input variable <a href="vargs.html#nspden">nspden</a>
+for the components of the density matrix with respect to
+the spin-polarization.
+</p>
+</font>
+
+<br><br><br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="nstep">nstep</a></font>
+<br><font id="mnemonics">Mnemonics: Number of (non-)self-consistent field STEPS</font>
+<br><font id="characteristic">Characteristic: </font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 30</font>
+<br><font id="text">
+<p>
+<p>
+ Gives the maximum number of cycles (or "iterations") in a SCF or non-SCF run.
+ <br />
+ Full convergence from random numbers is usually achieved in
+12-20 SCF iterations. Each can take from minutes to hours.
+In certain difficult cases, usually related to a small or
+zero bandgap or magnetism, convergence performance may be much worse.
+When the convergence tolerance <a href="varbas.html#tolwfr">tolwfr</a> on the wavefunctions
+is satisfied, iterations will stop, so for well converged
+calculations you should set <b>nstep</b> to a value larger than
+you think will be needed for full convergence, e.g.
+if using 20 steps usually converges the system, set <b>nstep</b> to 30.
+ <br />
+ For non-self-consistent runs (
+ <a href="varbas.html#iscf">iscf</a> &lt; 0) nstep governs
+the number of cycles of convergence for the wavefunctions for a fixed density
+and Hamiltonian.
+</p>
+<p>
+ NOTE that a choice of <b>nstep</b>=0 is permitted; this will
+either read wavefunctions from disk (with <a href="varfil.html#irdwfk">irdwfk</a>=1
+or  <a href="varfil.html#irdwfq">irdwfq</a>=1,
+or non-zero <a href="varfil.html#getwfk">getwfk</a>
+or <a href="varfil.html#getwfq">getwfq</a> in the case
+of multi-dataset) and
+compute the density, the total energy and stop, or else
+(with all of the above vanishing) will initialize
+randomly the wavefunctions and
+compute the resulting density and total energy.
+This is provided for testing purposes.
+ <br />
+ Also NOTE that <b>nstep</b>=0
+with <a href="varfil.html#irdwfk">irdwfk</a>=1 will exactly give the same result as
+the previous run only if the latter is done with <a href="varbas.html#iscf">iscf</a>&lt;10
+(potential mixing).
+ <br />
+ One can output the density by using <a href="varfil.html#prtden">prtden</a>.
+ <br />
+ The forces and stress tensor are computed with <b>nstep</b>=0.
+</p>
+</font>
+
+<br><br><br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="nsym">nsym</a></font>
+<br><font id="mnemonics">Mnemonics: Number of SYMmetry operations</font>
+<br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#symmetry_finder">SYMMETRY_FINDER</a></font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><font id="text">
+<p>
+<p>
+ Gives number of space group symmetries
+to be applied in this problem.  Symmetries will be input in
+array "<a href="varbas.html#symrel">symrel</a>" and (nonsymmorphic) translations vectors
+will be input
+in array "<a href="varbas.html#tnons">tnons</a>".  If there is no symmetry in the problem
+then set <b>nsym</b> to 1, because the identity is still a symmetry.
+ <br />
+ In case of a RF calculation, the code is able to use
+the symmetries of the system to decrease the number of
+perturbations to be calculated, and to decrease of the
+number of special k points to be used for the sampling of
+the Brillouin zone.
+After the response to the perturbations have been calculated,
+the symmetries are used to generate as many as
+possible elements of the 2DTE from those already
+computed.
+</p>
+<p>
+ <a href="../../users/abinit_help.html#symmetry_finder">SYMMETRY_FINDER</a> mode (Default mode).
+If <b>nsym</b> is 0, all the atomic coordinates must be
+explicitely given (one cannot use the geometry builder
+and the symmetrizer): the code will then find automatically
+the symmetry operations that leave the lattice and each
+atomic sublattice invariant. It also checks whether the
+cell is primitive (see <a href="vargs.html#chkprim">chkprim</a>).
+ <br />
+ Note that the tolerance on symmetric atomic positions and
+lattice is rather stringent :
+for a symmetry operation to be admitted,
+the lattice and atomic positions must map on themselves
+within 1.0e-8 .
+</p>
+<p>
+ The user is allowed to set up systems with non-primitive unit cells (i.e.
+conventional FCC or BCC cells, or supercells without any distortion).
+In this case, pure translations will be identified as symmetries
+of the system by the symmetry finder.
+Then, the combined "pure translation + usual rotation and inversion" symmetry
+operations can be very numerous. For example, a conventional FCC cell
+has 192 symmetry operations, instead of the 48 ones of the primitive cell.
+A maximum limit of 384 symmetry operations is hard-coded. This
+corresponds to the maximum number of symmetry operations of a 2x2x2
+undistorted supercell. Going beyond
+that number will make the code stop very rapidly. If you want
+nevertheless, for testing purposes, to treat a larger number of symmetries,
+change the initialization of "msym" in the abinit.F90 main routine,
+then recompile the code.
+</p>
+<p>
+ For <a href="../../users/abinit_help.html#gw">GW</a> calculation, the user might want to select only the symmetry operations whose
+non-symmorphic translation vector <a href="varbas.html#tnons">tnons</a>
+is zero. This can be done with the help of the input variable
+<a href="vardev.html#symmorphi">symmorphi</a>
+</p>
+</font>
+
+<br><br><br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="ntypat">ntypat</a></font>
+<br><font id="mnemonics">Mnemonics: Number of TYPes of AToms</font>
+<br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#no_multi">NO_MULTI</a></font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 1</font>
+<br><font id="text">
+<p>
+<p>
+ Gives the number of types of atoms. E.g. for
+a homopolar system (e.g. pure Si) <b>ntypat</b> is 1.
+ <br />
+ The code tries to read the same number of pseudopotential files.
+ <br />
+ The first pseudopotential is assigned type number 1, and so
+on ...
+</p>
+</font>
+
+<br><br><br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="occopt">occopt</a></font>
+<br><font id="mnemonics">Mnemonics: OCCupation OPTion</font>
+<br><font id="characteristic">Characteristic: </font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 1</font>
+<br><font id="text">
+<p>
+<p>
+ Controls how input
+parameters <a href="varbas.html#nband">nband</a>, <a href="vargs.html#occ">occ</a>,
+and <a href="varbas.html#wtk">wtk</a> are handled.
+ <ul>
+  <li>
+   <b>occopt</b>=0:
+   <br />
+   All k points have the same number of bands
+and the same occupancies of bands.  <a href="varbas.html#nband">nband</a> is given as a
+single number, and <a href="vargs.html#occ">occ</a>(<a href="varbas.html#nband">nband</a>)
+is an array of <a href="varbas.html#nband">nband</a>
+elements, read in by the code.
+   <br />
+   The k point weights in array <a href="varbas.html#wtk">wtk</a>(<a href="varbas.html#nkpt">nkpt</a>) are
+automatically normalized by the code to add to 1.
+  </li>
+  <li>
+   <b>occopt</b>=1:
+   <br />
+   Same as <b>occopt</b>=0, except that the array <a href="vargs.html#occ">occ</a> is
+automatically generated by the code, to give a semiconductor.
+   <br />
+   An error occurs when filling cannot be done with
+occupation numbers equal to 2 or 0 in each k-point (non-spin-polarized case),
+or with occupation numbers equal to 1 or 0 in each k-point (spin-polarized case).
+If <a href="varbas.html#nsppol">nsppol</a>=2  and <b>occopt</b>==1 is used, the user has to impose the magnetization, using <a href="varff.html#spinmagntarget">spinmagntarget</a>,
+except for the case of a single isolated Hydrogen atom.
+  </li>
+  <li>
+   <b>occopt</b>=2:
+   <br />
+   k points may optionally have different numbers of
+bands and different occupancies.  <a href="varbas.html#nband">nband</a>(<a href="varbas.html#nkpt">nkpt</a>*<a href="varbas.html#nsppol">nsppol</a>) is given
+explicitly as an array of <a href="varbas.html#nkpt">nkpt</a>*<a href="varbas.html#nsppol">nsppol</a> elements.
+<a href="vargs.html#occ">occ</a>() is given explicitly for all bands at each k point,
+and eventually for each spin --
+the total number of elements is the sum of <a href="varbas.html#nband">nband</a>(ikpt)
+over all k points and spins. The k point weights <a href="varbas.html#wtk">wtk</a>
+(<a href="varbas.html#nkpt">nkpt</a>) are
+NOT automatically normalized under this option.
+  </li>
+  <li>
+   <b>occopt</b>=3, 4, 5, 6 and 7
+   <br />
+   Metallic occupation of levels, using different occupation
+schemes (see below). The corresponding thermal
+broadening, or cold smearing, is defined by
+the input variable <a href="vargs.html#tsmear">tsmear</a> (see below : the variable
+xx is the energy in Ha, divided by <a href="vargs.html#tsmear">tsmear</a>)
+   <br />
+   Like for <b>occopt</b>=1, the variable <a href="vargs.html#occ">occ</a> is not read
+   <br />
+   All k points have the same number of bands,
+<a href="varbas.html#nband">nband</a> is given as a single number, read by the code.
+   <br />
+   The k point weights in array <a href="varbas.html#wtk">wtk</a>(<a href="varbas.html#nkpt">nkpt</a>) are
+automatically normalized by the code to add to 1.
+  </li>
+  <ul>
+   <li>
+    <b>occopt</b>=3:
+    <br />
+    Fermi-Dirac smearing (finite-temperature metal)
+Smeared delta function : 0.25d0/(cosh(xx/2.0d0)**2)
+   </li>
+   <li>
+    <b>occopt</b>=4:
+    <br />
+    "Cold smearing" of N. Marzari (see his thesis work),
+with a=-.5634 (minimization of the bump)
+    <br />
+    Smeared delta function :
+    <br />
+    exp(-xx
+    <sup>
+     2
+    </sup>
+    )/sqrt(pi) * (1.5d0+xx*(-a*1.5d0+xx*(-1.0d0+a*xx)))
+   </li>
+   <li>
+    <b>occopt</b>=5:
+    <br />
+    "Cold smearing" of N. Marzari (see his thesis work),
+with a=-.8165 (monotonic function in the tail)
+    <br />
+    Same smeared delta function as <b>occopt</b>=4, with different a.
+   </li>
+   <li>
+    <b>occopt</b>=6:
+    <br />
+    Smearing of Methfessel and Paxton (PRB40,3616(1989))
+with Hermite polynomial of degree 2, corresponding
+to "Cold smearing" of N. Marzari with a=0
+(so, same smeared delta function as <b>occopt</b>=4, with different a).
+   </li>
+   <li>
+    <b>occopt</b>=7:
+    <br />
+    Gaussian smearing, corresponding to the 0 order
+Hermite polynomial of Methfessel and Paxton.
+    <br />
+    Smeared delta function : 1.0d0*exp(-xx**2)/sqrt(pi)
+   </li>
+   <li>
+    <b>occopt</b>=8:
+    <br />
+    Uniform smearing (the delta function is replaced by a constant function of value one
+over ]-1/2,1/2[ (with one-half value at the boundaries). Used for testing purposes only.
+   </li>
+  </ul>
+ </ul>
+ WARNING : one can use metallic occupation of levels in the
+case of a molecule, in order to avoid any problem with
+degenerate levels. However, it is advised NOT to use
+<b>occopt</b>=6 (and to a lesser extent <b>occopt</b>=4 and 5),
+since the associated number of electron
+versus the Fermi energy is NOT guaranteed to be
+a monotonic function. For true metals, AND a sufficiently
+dense sampling of the Brillouin zone, this should not happen,
+but be cautious ! As an indication of this problem,
+a small variation of input parameters might lead to
+a jump of total energy, because there might be two or even
+three possible values of the Fermi energy, and the
+bissection algorithm find one or the other.
+</p>
+</font>
+
+<br><br><br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="rprim">rprim</a></font>
+<br><font id="mnemonics">Mnemonics: Real space PRIMitive translations</font>
+<br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#evolving">EVOLVING</a></font>
+<br><font id="vartype">Variable type: real(3,3) (Comment: Internally, it is represented as rprim(3,3,<a href="varrlx.html#nimage">nimage</a>))</font>
+<br><font id="default">Default is [[1, 0, 0], [0, 1, 0], [0, 0, 1]]</font>
+<br><font id="text">
+<p>
+<p>
+ Give, in columnwise entry,
+the three dimensionless primitive translations in real space, to be rescaled by
+<a href="varbas.html#acell">acell</a> and <a href="varbas.html#scalecart">scalecart</a>.
+<br />
+It is <a href="../../users/abinit_help.html#evolving">EVOLVING</a> only if <a href="varrlx.html#ionmov">ionmov</a>==2 and <a href="varrlx.html#optcell">optcell</a>/=0, otherwise it is fixed.
+<br />
+ If the Default is used, that is, <b>rprim</b> is the unity matrix,
+the three dimensionless primitive vectors are three
+unit vectors in cartesian coordinates. Each will be (possibly) multiplied
+by the corresponding <a href="varbas.html#acell">acell</a> value, then (possibly)
+stretched along the cartesian coordinates by the corresponding <a href="varbas.html#scalecart">scalecart</a> value,
+to give the dimensional primitive vectors, called <a href="varbas.html#rprimd">rprimd</a>.
+ <br />
+ In the general case, the dimensional cartesian
+coordinates of the crystal primitive translations R1p, R2p and R3p, see
+<a href="varbas.html#rprimd">rprimd</a>, are
+ <ul>
+  <li>
+   R1p(i)=<a href="varbas.html#scalecart">scalecart</a>(i)<b>rprim</b>(i,1)*<a href="varbas.html#acell">acell</a>(1)
+  </li>
+  <li>
+   R2p(i)=<a href="varbas.html#scalecart">scalecart</a>(i)<b>rprim</b>(i,2)*<a href="varbas.html#acell">acell</a>(2)
+  </li>
+  <li>
+   R3p(i)=<a href="varbas.html#scalecart">scalecart</a>(i)<b>rprim</b>(i,3)*<a href="varbas.html#acell">acell</a>(3)
+  </li>
+ </ul>
+ where i=1,2,3 is the component of the primitive translation (i.e. x, y, and z).
+ <br />
+ <br />
+ The <b>rprim</b> variable, scaled by <a href="varbas.html#scalecart">scalecart</a>, is thus used to define directions
+of the primitive vectors, that will be multiplied (so keeping the direction unchanged) by
+the appropriate length scale <a href="varbas.html#acell">acell</a>(1), <a href="varbas.html#acell">acell</a>(2),
+or <a href="varbas.html#acell">acell</a>(3),
+respectively to give the dimensional primitive translations
+in real space in cartesian coordinates.
+ <br />
+ Presently, it is requested that the mixed product
+(R1xR2).R3 is positive. If this is not the case,
+simply exchange a pair of vectors.
+ <br />
+ To be more specific, keeping the default value of <a href="varbas.html#scalecart">scalecart</a>=1 to simplify the matter,
+<b>rprim</b> 1 2 3 4 5 6 7 8 9 corresponds to input of the
+three primitive translations R1=(1,2,3) (to be multiplied by <a href="varbas.html#acell">acell</a>(1)), R2=(4,5,6) (to be multiplied by
+<a href="varbas.html#acell">acell</a>(2)), and R3=(7,8,9) (to be multiplied by [[acell](3)).
+ <br />
+ Note carefully that the first
+three numbers input are the first column of <b>rprim</b>, the next
+three are the second, and the final three are the third.
+This corresponds with the usual Fortran order for arrays.
+The matrix whose columns are the reciprocal space primitive
+translations is the inverse transpose of the matrix whose
+columns are the direct space primitive translations.
+</p>
+<p>
+ Alternatively to <b>rprim</b>, directions of dimensionless primitive
+vectors can be specified by using the input variable <a href="varbas.html#angdeg">angdeg</a>.
+This is especially useful for hexagonal lattices (with 120 or 60 degrees angles).
+Indeed, in order for symmetries to be recognized, rprim must be symmetric up to
+<a href="vargeo.html#tolsym">tolsym</a> (10 digits by default),
+inducing a specification such as
+ <pre>
+  rprim  0.86602540378  0.5  0.0
+        -0.86602540378  0.5  0.0
+         0.0            0.0  1.0
+ </pre>
+ that can be avoided thanks to <a href="varbas.html#angdeg">angdeg</a>:
+ <pre>
+  angdeg 90 90 120
+ </pre>
+ <br />
+ Although the use of <a href="varbas.html#scalecart">scalecart</a> or <a href="varbas.html#acell">acell</a> is
+rather equivalent when the primitive vectors are aligned with the cartesian directions, it is not the case for
+non-orthogonal primitive vectors. In particular, beginners often make the error of trying to use <a href="varbas.html#acell">acell</a>
+to define primitive vectors in face-centered tetragonal lattice, or body-centered tetragonal lattice, or similarly
+in face or body-centered orthorhombic lattices. Let us take the example of a body-centered tetragonal lattice, that
+might be defined using the following ("a" and "c" have to be replaced by the appropriate conventional cell vector length):
+ <pre>
+  rprim  "a"      0        0
+          0      "a"       0
+         "a/2"   "a/2"    "c/2"
+acell 3*1     scalecart 3*1    !  ( These are default values)
+ </pre>
+ The following is a valid, alternative way to define  the same primitive vectors :
+ <pre>
+  rprim   1        0       0
+          0        1       0
+          1/2      1/2     1/2
+scalecart  "a"  "a"  "c"
+acell 3*1    !  ( These are default values)
+ </pre>
+ Indeed, the cell has been stretched along the cartesian coordinates, by "a", "a" and "c" factors.
+</p>
+<p>
+ At variance, the following is WRONG :
+ <pre>
+  rprim   1       0       0
+          0       1       0
+          1/2     1/2     1/2
+acell  "a"  "a"  "c"    !   THIS IS WRONG
+scalecart 3*1    !  ( These are default values)
+ </pre>
+ Indeed, the latter would correspond to :
+ <pre>
+  rprim  "a"      0       0
+          0      "a"      0
+         "c/2"   "c/2"   "c/2"
+acell 3*1     scalecart 3*1    !  ( These are default values)
+ </pre>
+ Namely, the third vector has been rescaled by "c". It is not at all in the center of the tetragonal cell whose basis vectors
+are defined by the scaling factor "a".
+ <br />
+ As another difference between <a href="varbas.html#scalecart">scalecart</a> or <a href="varbas.html#acell">acell</a>,
+note that <a href="varbas.html#scalecart">scalecart</a> is <a href="../../users/abinit_help.html#input_only">INPUT_ONLY</a> :
+its content will be immediately applied to rprim, at parsing time,
+and then scalecart will be set to the default values (3*1). So, in case <a href="varbas.html#scalecart">scalecart</a> is used,
+the echo of <b>rprim</b> in the output file is not the value contained in the input file,
+but the value rescaled by <a href="varbas.html#scalecart">scalecart</a>.
+</p>
+</font>
+
+<br><br><br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="rprimd">rprimd</a></font>
+<br><font id="mnemonics">Mnemonics: Real space PRIMitive translations, Dimensional</font>
+<br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#internal_only">INTERNAL_ONLY</a>, <a href="../../users/abinit_help.html#evolving">EVOLVING</a></font>
+<br><font id="vartype">Variable type: real(3,3) (Comment: Internally, it is represented as rprimd(3,3,<a href="varrlx.html#nimage">nimage</a>).)</font>
+<br><font id="default">No default</font>
+<br><font id="text">
+<p>
+<p>
+ This internal variable gives the dimensional real space primitive
+vectors, computed from <a href="varbas.html#acell">acell</a>,
+<a href="varbas.html#scalecart">scalecart</a>,
+and <a href="varbas.html#rprim">rprim</a>.
+ <ul>
+  <li>
+   R1p(i)=<b>rprimd</b>(i,1)=<a href="varbas.html#scalecart">scalecart</a>(i)*<a href="varbas.html#rprim">rprim</a>(i,1)*<a href="varbas.html#acell">acell</a>(1) for i=1,2,3 (x,y,and z)
+  </li>
+  <li>
+   R2p(i)=<b>rprimd</b>(i,2)=<a href="varbas.html#scalecart">scalecart</a>(i)*<a href="varbas.html#rprim">rprim</a>(i,2)*<a href="varbas.html#acell">acell</a>(2) for i=1,2,3
+  </li>
+  <li>
+   R3p(i)=<b>rprimd</b>(i,3)=<a href="varbas.html#scalecart">scalecart</a>(i)*<a href="varbas.html#rprim">rprim</a>(i,3)*<a href="varbas.html#acell">acell</a>(3) for i=1,2,3
+  </li>
+ </ul>
+</p>
+It is <a href="../../users/abinit_help.html#evolving">EVOLVING</a> only if <a href="varrlx.html#ionmov">ionmov</a>==2 and <a href="varrlx.html#optcell">optcell</a>/=0, otherwise it is fixed.
+<br />
+</font>
+
+<br><br><br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="scalecart">scalecart</a></font>
+<br><font id="mnemonics">Mnemonics: SCALE CARTesian coordinates</font>
+<br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#input_only">INPUT_ONLY</a></font>
+<br><font id="vartype">Variable type: real(3)</font>
+<br><font id="default">Default is 3*1</font>
+<br><font id="text">
+<p>
+<p>
+ Gives the scaling factors of cartesian coordinates by which
+dimensionless primitive translations (in "<a href="varbas.html#rprim">rprim</a>") are
+to be multiplied.
+<a href="varbas.html#rprim">rprim</a> input variable,
+the <a href="varbas.html#acell">acell</a> input variable,
+and the associated internal <a href="varbas.html#rprimd">rprimd</a> internal variable.
+ <br />
+ Especially useful for body-centered and face-centered tetragonal lattices, as well as
+body-centered and face-centered orthorhombic lattices, see <a href="varbas.html#rprimd">rprimd</a>.
+ <br />
+ Note that this input variable is <a href="../../users/abinit_help.html#input_only">INPUT_ONLY</a> : its content will be immediately applied to rprim, at parsing time,
+and then scalecart will be set to the default values. So, it will not be echoed.
+</p>
+</font>
+
+<br><br><br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="shiftk">shiftk</a></font>
+<br><font id="mnemonics">Mnemonics: SHIFT for K points</font>
+<br><font id="characteristic">Characteristic: </font>
+<br><font id="vartype">Variable type: real(3,<a href="varbas.html#nshiftk">nshiftk</a>)</font>
+<br><font id="default">Default is None if <a href="varbas.html#nshiftk">nshiftk</a>>1,
+[0.5, 0.5, 0.5] otherwise.
+</font>
+<br><font id="text">
+<p>
+<p>
+ It is used only when <a href="varbas.html#kptopt">kptopt</a>&gt;=0,
+and must be defined if <a href="varbas.html#nshiftk">nshiftk</a> is larger than 1.
+ <br />
+ <b>shiftk</b>(1:3,1:<a href="varbas.html#nshiftk">nshiftk</a>) defines
+<a href="varbas.html#nshiftk">nshiftk</a> shifts
+of the homogeneous grid of k points
+based on <a href="varbas.html#ngkpt">ngkpt</a> or
+<a href="vargs.html#kptrlatt">kptrlatt</a>.
+ <br />
+ The shifts induced by <b>shiftk</b> corresponds
+to the reduced coordinates in the coordinate system
+defining the k-point lattice. For example,
+if the k point lattice is defined using <a href="varbas.html#ngkpt">ngkpt</a>,
+the point whose reciprocal space reduced coordinates are
+( <b>shiftk</b>(1,ii)/<a href="varbas.html#ngkpt">ngkpt</a>(1)
+<b>shiftk</b>(2,ii)/<a href="varbas.html#ngkpt">ngkpt</a>(2)
+<b>shiftk</b>(3,ii)/<a href="varbas.html#ngkpt">ngkpt</a>(3) )
+belongs to the shifted grid number ii.
+</p>
+<p>
+ The user might rely on ABINIT to suggest suitable and
+efficient combinations of <a href="vargs.html#kptrlatt">kptrlatt</a>
+and <b>shiftk</b>.
+The procedure to be followed is described with the
+input variables <a href="vargs.html#kptrlen">kptrlen</a>.
+In what follows, we suggest some interesting values of the shifts,
+to be used with even values of <a href="varbas.html#ngkpt">ngkpt</a>.
+This list is much less exhaustive than the above-mentioned automatic
+procedure.
+</p>
+<p>
+ 1) When the primitive vectors of the lattice do NOT form
+a FCC or a BCC lattice, the default (shifted) Monkhorst-Pack
+grids are formed by using
+<a href="varbas.html#nshiftk">nshiftk</a>=1 and <b>shiftk</b> 0.5 0.5 0.5 .
+This is often the preferred k point sampling, as the shift improves the sampling efficiency.
+However, it can also break symmetry, if the 111 direction is not an axis of rotation,
+e.g. in tetragonal or hexagonal systems. Abinit will complain about this breaking, and you
+should adapt <b>shiftk</b>.
+For a non-shifted Monkhorst-Pack grid, use
+<a href="varbas.html#nshiftk">nshiftk</a>=1 and <b>shiftk</b> 0.0 0.0 0.0 ,
+which will be compatible with all symmetries, and is necessary for some features such as k-point
+interpolation.
+</p>
+<p>
+ 2) When the primitive vectors of the lattice form a FCC lattice,
+with <a href="varbas.html#rprim">rprim</a>
+ <pre>
+  0.0 0.5 0.5
+  0.5 0.0 0.5
+  0.5 0.5 0.0
+ </pre>
+ the (very efficient) usual Monkhorst-Pack sampling will be generated by using
+<a href="varbas.html#nshiftk">nshiftk</a>= 4  and <b>shiftk</b>
+ <pre>
+  0.5 0.5 0.5
+  0.5 0.0 0.0
+  0.0 0.5 0.0
+  0.0 0.0 0.5
+ </pre>
+</p>
+<p>
+ 3) When the primitive vectors of the lattice form a BCC lattice,
+with <a href="varbas.html#rprim">rprim</a>
+ <pre>
+  -0.5  0.5  0.5
+   0.5 -0.5  0.5
+   0.5  0.5 -0.5
+ </pre>
+ the usual Monkhorst-Pack sampling will be generated by using
+<a href="varbas.html#nshiftk">nshiftk</a>= 2  and <b>shiftk</b>
+ <pre>
+  0.25  0.25  0.25
+ -0.25 -0.25 -0.25
+ </pre>
+ However, the simple sampling
+<a href="varbas.html#nshiftk">nshiftk</a>=1 and <b>shiftk</b> 0.5 0.5 0.5
+is excellent.
+</p>
+<p>
+ 4) For hexagonal lattices with hexagonal axes, e.g. <a href="varbas.html#rprim">rprim</a>
+ <pre>
+  1.0  0.0       0.0
+ -0.5  sqrt(3)/2 0.0
+  0.0  0.0       1.0
+ </pre>
+ one can use
+<a href="varbas.html#nshiftk">nshiftk</a>= 1  and <b>shiftk</b>  0.0 0.0 0.5
+</p>
+<p>
+ In rhombohedral axes, e.g. using <a href="varbas.html#angdeg">angdeg</a> 3*60.,
+this corresponds to <b>shiftk</b>  0.5 0.5 0.5, to keep the shift along the
+symmetry axis.
+</p>
+</font>
+
+<br><br><br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="symrel">symrel</a></font>
+<br><font id="mnemonics">Mnemonics: SYMmetry in REaL space</font>
+<br><font id="characteristic">Characteristic: </font>
+<br><font id="vartype">Variable type: integer(3,3,<a href="varbas.html#nsym">nsym</a>)</font>
+<br><font id="default">Default is [[1, 0, 0], [0, 1, 0], [0, 0, 1]] if <a href="varbas.html#nsym">nsym</a>==1,
+None otherwise.
+</font>
+<br><font id="text">
+<p>
+<p>
+ Gives "<a href="varbas.html#nsym">nsym</a>" 3x3 matrices
+expressing space group symmetries in terms of their action
+on the direct (or real) space primitive translations.
+ <br />
+ It turns out that these can always be expressed as integers.
+ <br />
+ Always give the identity matrix even if no other symmetries
+hold, e.g.
+<b>symrel</b> 1 0 0 0 1 0 0 0 1
+ <br />
+ Also note that for this array as for all others the array
+elements are filled in a columnwise order as is usual for
+Fortran.
+ <br />
+ The relation between the above symmetry matrices <b>symrel</b>,
+expressed in the basis of primitive translations, and
+the same symmetry matrices expressed in cartesian coordinates,
+is as follows.  Denote the matrix whose columns are the
+primitive translations as R, and denote the cartesian
+symmetry matrix as S.  Then
+ <br />
+ <b>symrel</b> = R(inverse) * S * R
+ <br />
+ where matrix multiplication is implied.
+ <br />
+ When the symmetry finder is used (see <a href="varbas.html#nsym">nsym</a>), <b>symrel</b>
+will be computed automatically.
+</p>
+</font>
+
+<br><br><br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="tnons">tnons</a></font>
+<br><font id="mnemonics">Mnemonics: Translation NON-Symmorphic vectors</font>
+<br><font id="characteristic">Characteristic: </font>
+<br><font id="vartype">Variable type: real(3,<a href="varbas.html#nsym">nsym</a>)</font>
+<br><font id="default">No default</font>
+<br><font id="text">
+<p>
+<p>
+ Gives the (nonsymmorphic) translation
+vectors associated with the symmetries expressed
+in "<a href="varbas.html#symrel">symrel</a>".
+ <br />
+ These may all be 0, or may be fractional (nonprimitive)
+translations expressed relative to the real space
+primitive translations (so, using the "reduced" system
+of coordinates, see "<a href="varbas.html#xred">xred</a>").
+If all elements of the space
+group leave 0 0 0 invariant, then these are all 0.
+ <br />
+ When the symmetry finder is used (see <a href="varbas.html#nsym">nsym</a>), <b>tnons</b>
+is computed automatically.
+</p>
+</font>
+
+<br><br><br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="toldfe">toldfe</a></font>
+<br><font id="mnemonics">Mnemonics: TOLerance on the DiFference of total Energy</font>
+<br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#energy">ENERGY</a></font>
+<br><font id="vartype">Variable type: real</font>
+<br><font id="default">Default is 0.0 (Comment: The default value implies that this stopping condition is ignored. For the SCF case, one and only one of the input tolerance criteria <a href="varbas.html#tolwfr">tolwfr</a>, <a href="varbas.html#toldff">toldff</a>, <a href="varbas.html#tolrff">tolrff</a>, <b>toldfe</b> or <a href="varbas.html#tolvrs">tolvrs</a> must differ from zero.)</font>
+<br><br><font id="excludes">
+The use of this variable forbids the use of specified(<a href="varbas.html#tolwfr">tolwfr</a>) or specified(<a href="varbas.html#toldff">toldff</a>) or specified(<a href="varbas.html#tolrff">tolrff</a>) or specified(<a href="varbas.html#tolvrs">tolvrs</a>)
+</font>
+<br><font id="text">
+<p>
+<p>
+ Sets a tolerance for absolute differences
+of total energy that, reached TWICE successively,
+will cause one SCF cycle to stop (and ions to be moved).
+ <br />
+ Can be specified in Ha (the default), Ry, eV or Kelvin, since
+<b>toldfe</b> has the
+'<a href="../../users/abinit_help.html#energy">ENERGY</a>' characteristics.
+(1 Ha=27.2113845 eV)
+ <br />
+ If set to zero, this stopping condition is ignored.
+ <br />
+ Effective only when SCF cycles are done (<a href="varbas.html#iscf">iscf</a>&gt;0).
+ <br />
+ Because of machine precision, it is not worth to try
+to obtain differences in energy that are smaller
+than about 1.0d-12 of the total energy.
+To get accurate stresses may be quite demanding.
+ <br />
+ When the geometry is optimized (relaxation of atomic positions or primitive vectors), the use of
+<b>toldfe</b> is to be avoided. The use of <a href="varbas.html#toldff">toldff</a> or
+<a href="varbas.html#tolrff">tolrff</a> is by far preferable, in order to have a handle on the
+geometry characteristics. When all forces vanish by symmetry (e.g. optimization of the lattice parameters
+of a high-symmetry crystal), then place <b>toldfe</b> to 1.0d-12, or use (better) <a href="varbas.html#tolvrs">tolvrs</a>.
+ <br />
+ Since <b>toldfe</b>, <a href="varbas.html#toldff">toldff</a>,
+<a href="varbas.html#tolrff">tolrff</a>,
+<a href="varbas.html#tolvrs">tolvrs</a> and <a href="varbas.html#tolwfr">tolwfr</a>
+are aimed at the same goal (causing the SCF cycle to stop),
+they are seen as a unique input variable at reading. Hence, it is forbidden that two of these input variables
+have non-zero values for the same dataset, or generically (for all datasets).
+However, a non-zero value for one such variable for one dataset will have precedence on the non-zero value for another
+input variable defined generically.
+</p>
+</font>
+
+<br><br><br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="toldff">toldff</a></font>
+<br><font id="mnemonics">Mnemonics: TOLerance on the DiFference of Forces</font>
+<br><font id="characteristic">Characteristic: </font>
+<br><font id="vartype">Variable type: real</font>
+<br><font id="default">Default is 0.0 (Comment: The default value implies that this stopping condition is ignored. For the SCF case, one and only one of the input tolerance criteria <a href="varbas.html#tolwfr">tolwfr</a>, <b>toldff</b>, <a href="varbas.html#tolrff">tolrff</a>, <a href="varbas.html#toldfe">toldfe</a> or <a href="varbas.html#tolvrs">tolvrs</a> must differ from zero.)</font>
+<br><br><font id="excludes">
+The use of this variable forbids the use of specified(<a href="varbas.html#tolwfr">tolwfr</a>) or specified(<a href="varbas.html#toldfe">toldfe</a>) or specified(<a href="varbas.html#tolrff">tolrff</a>) or specified(<a href="varbas.html#tolvrs">tolvrs</a>)
+</font>
+<br><font id="text">
+<p>
+<p>
+ Sets a tolerance for differences of forces
+(in hartree/Bohr) that, reached TWICE successively,
+will cause one SCF cycle to stop (and ions to be moved).
+ <br />
+ If set to zero, this stopping condition is ignored.
+ <br />
+ Effective only when SCF cycles are done (<a href="varbas.html#iscf">iscf</a>&gt;0).
+This tolerance applies to any particular cartesian
+component of any atom, INCLUDING fixed ones.
+This is to be used when trying to equilibrate a
+structure to its lowest energy configuration (<a href="varrlx.html#ionmov">ionmov</a>=2),
+or in case of molecular dynamics (<a href="varrlx.html#ionmov">ionmov</a>=1)
+ <br />
+ A value ten times smaller
+than <a href="varrlx.html#tolmxf">tolmxf</a> is suggested (for example 5.0d-6 hartree/Bohr).
+ <br />
+ This stopping criterion is not allowed for RF calculations.
+ <br />
+ Since
+ <b>
+  toldfe
+ </b>
+ , <b>toldff</b>,
+<a href="varbas.html#tolrff">tolrff</a>,
+<a href="varbas.html#tolvrs">tolvrs</a> and <a href="varbas.html#tolwfr">tolwfr</a>
+are aimed at the same goal (causing the SCF cycle to stop),
+they are seen as a unique input variable at reading. Hence, it is forbidden that two of these input variables
+have non-zero values for the same dataset, or generically (for all datasets).
+However, a non-zero value for one such variable for one dataset will have precedence on the non-zero value for another
+input variable defined generically.
+</p>
+</font>
+
+<br><br><br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="tolrff">tolrff</a></font>
+<br><font id="mnemonics">Mnemonics: TOLerance on the Relative diFference of Forces</font>
+<br><font id="characteristic">Characteristic: </font>
+<br><font id="vartype">Variable type: real</font>
+<br><font id="default">Default is 0.0 (Comment: The default value implies that this stopping condition is ignored. For the SCF case, one and only one of the input tolerance criteria <a href="varbas.html#tolwfr">tolwfr</a>, <a href="varbas.html#toldff">toldff</a>, <b>tolrff</b>, <a href="varbas.html#toldfe">toldfe</a> or <a href="varbas.html#tolvrs">tolvrs</a> must differ from zero.)</font>
+<br><br><font id="excludes">
+The use of this variable forbids the use of specified(<a href="varbas.html#tolwfr">tolwfr</a>) or specified(<a href="varbas.html#toldfe">toldfe</a>) or specified(<a href="varbas.html#toldff">toldff</a>) or specified(<a href="varbas.html#tolvrs">tolvrs</a>)'
+</font>
+<br><font id="text">
+<p>
+<p>
+ Sets a tolerance for the ratio of differences of forces
+(in hartree/Bohr) to maximum force, that, reached TWICE successively,
+will cause one SCF cycle to stop (and ions to be moved) : diffor &lt; tolrff * maxfor.
+ <br />
+ If set to zero, this stopping condition is ignored.
+ <br />
+ Effective only when SCF cycles are done (<a href="varbas.html#iscf">iscf</a>&gt;0).
+This tolerance applies to any particular cartesian
+component of any atom, INCLUDING fixed ones.
+This is to be used when trying to equilibrate a
+structure to its lowest energy configuration (<a href="varrlx.html#ionmov">ionmov</a>=2),
+or in case of molecular dynamics (<a href="varrlx.html#ionmov">ionmov</a>=1)
+ <br />
+ A value of 0.02 is suggested.
+ <br />
+ This stopping criterion is not allowed for RF calculations.
+ <br />
+ Since
+ <b>
+  toldfe
+ </b>
+ , <a href="varbas.html#toldff">toldff</a>,
+<b>tolrff</b>,
+<a href="varbas.html#tolvrs">tolvrs</a> and <a href="varbas.html#tolwfr">tolwfr</a>
+are aimed at the same goal (causing the SCF cycle to stop),
+they are seen as a unique input variable at reading. Hence, it is forbidden that two of these input variables
+have non-zero values for the same dataset, or generically (for all datasets).
+However, a non-zero value for one such variable for one dataset will have precedence on the non-zero value for another
+input variable defined generically.
+</p>
+</font>
+
+<br><br><br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="tolvrs">tolvrs</a></font>
+<br><font id="mnemonics">Mnemonics: TOLerance on the potential V(r) ReSidual</font>
+<br><font id="characteristic">Characteristic: </font>
+<br><font id="vartype">Variable type: real</font>
+<br><font id="default">Default is 0.0 (Comment: The default value implies that this stopping condition is ignored. For the SCF case, one and only one of the input tolerance criteria <a href="varbas.html#tolwfr">tolwfr</a>, <a href="varbas.html#toldff">toldff</a>, <a href="varbas.html#tolrff">tolrff</a>, <a href="varbas.html#toldfe">toldfe</a> or <b>tolvrs</b> must differ from zero.)</font>
+<br><br><font id="excludes">
+The use of this variable forbids the use of specified(<a href="varbas.html#tolwfr">tolwfr</a>) or specified(<a href="varbas.html#toldfe">toldfe</a>) or specified(<a href="varbas.html#toldff">toldff</a>) or specified(<a href="varbas.html#tolrff">tolrff</a>)'
+</font>
+<br><font id="text">
+<p>
+<p>
+ Sets a tolerance for potential
+residual that, when reached, will cause one SCF cycle
+to stop (and ions to be moved).
+ <br />
+ If set to zero, this stopping condition is ignored.
+ <br />
+ Effective only when SCF cycles are done (<a href="varbas.html#iscf">iscf</a>&gt;0).
+ <br />
+ To get accurate stresses may be quite demanding. For simple materials with internal positions determined by symmetries,
+ a value of <b>tolvrs</b>=10^-12 empirically leads to a very approximate 10^-6 atomic unit accuracy for the optimized lattice parameter.
+</p>
+<p>
+ Additional explanation : the residual of the potential is the difference between the
+input potential and the output potential, when the latter is obtained from the density
+determined from the eigenfunctions of the input potential. When the self-consistency
+loop is achieved, both input and output potentials must be equal, and the residual
+of the potential must be zero. The tolerance on the
+potential residual is imposed by first subtracting the mean of the residual of the potential
+(or the trace of the potential matrix, if the system is spin-polarized),
+then summing the square of this function over all FFT grid points. The result should be
+lower than <b>tolvrs</b>.
+ <br />
+ Since
+ <b>
+  toldfe
+ </b>
+ , <a href="varbas.html#toldff">toldff</a>,
+<a href="varbas.html#tolrff">tolrff</a>,
+<b>tolvrs</b> and <a href="varbas.html#tolwfr">tolwfr</a>
+are aimed at the same goal (causing the SCF cycle to stop),
+they are seen as a unique input variable at reading. Hence, it is forbidden that two of these input variables
+have non-zero values for the same dataset, or generically (for all datasets).
+However, a non-zero value for one such variable for one dataset will have precedence on the non-zero value for another
+input variable defined generically.
+</p>
+</font>
+
+<br><br><br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="tolwfr">tolwfr</a></font>
+<br><font id="mnemonics">Mnemonics: TOLerance on WaveFunction squared Residual</font>
+<br><font id="characteristic">Characteristic: </font>
+<br><font id="vartype">Variable type: real</font>
+<br><font id="default">Default is 0.0 (Comment: The default value implies that this stopping condition is ignored. For the SCF case, one and only one of the input tolerance criteria <b>tolwfr</b>, <a href="varbas.html#toldff">toldff</a>, <a href="varbas.html#tolrff">tolrff</a>, <a href="varbas.html#toldfe">toldfe</a> or <a href="varbas.html#tolvrs">tolvrs</a> must differ from zero.)</font>
+<br><br><font id="excludes">
+The use of this variable forbids the use of specified(<a href="varbas.html#toldfe">toldfe</a>) or specified(<a href="varbas.html#toldff">toldff</a>) or specified(<a href="varbas.html#tolrff">tolrff</a>) or specified(<a href="varbas.html#tolvrs">tolvrs</a>)
+</font>
+<br><font id="text">
+<p>
+<p>
+ The signification of this tolerance depends on
+the basis set. In plane waves, it gives a convergence tolerance for the
+largest squared "residual" (defined below) for any
+given band.  The squared residual is:
+ <br />
+ <pre>
+  &lt; nk|(H-E)<sup>2</sup>|nk &gt;,    E = &lt; nk|H|nk &gt;
+ </pre>
+ <br />
+ which clearly is nonnegative and goes to 0 as
+the iterations converge to an eigenstate.
+With the squared residual expressed in
+Hartrees
+ <sup>
+  2
+ </sup>
+ (Hartrees squared), the largest squared
+residual (called residm) encountered over all bands
+and k points must be less than <b>tolwfr</b> for iterations
+to halt due to successful convergence.
+ <br />
+ Note that if <a href="varbas.html#iscf">iscf</a>&gt;0, this criterion should be replaced
+by those based on <a href="varbas.html#toldfe">toldfe</a> (preferred for <a href="varrlx.html#ionmov">ionmov</a>==0),
+<a href="varbas.html#toldff">toldff</a>
+<a href="varbas.html#tolrff">tolrff</a> (preferred for <a href="varrlx.html#ionmov">ionmov</a>/=0), or
+<a href="varbas.html#tolvrs">tolvrs</a> (preferred for theoretical reasons!).
+ <br />
+ When <b>tolwfr</b> is 0.0, this criterion is ignored,
+and a finite value of <a href="varbas.html#toldfe">toldfe</a>, <a href="varbas.html#toldff">toldff</a>
+or <a href="varbas.html#tolvrs">tolvrs</a> must be specified.
+This also imposes a restriction
+on taking an ion step; ion steps are not permitted
+unless the largest squared residual is less than
+<b>tolwfr</b>, ensuring accurate forces.
+ <br />
+ To get accurate stresses may be quite demanding.
+ <br />
+ Note that the preparatory GS calculations
+before a RF calculations must be highly converged.
+ <br />
+ Typical values for these preparatory runs are <b>tolwfr</b>
+between 1.0d-16 and 1.0d-22.
+</p>
+<p>
+ Note that <b>tolwfr</b> is often used in the test cases, but this is
+ <em>
+  tolwfr
+ </em>
+ purely for historical reasons :
+except when <a href="varbas.html#iscf">iscf</a>&lt;0, other critera
+should be used.
+</p>
+<p>
+ In the wavelet case (see <a href="varbas.html#usewvl">usewvl</a> =
+1), this criterion is the favoured one. It is based on the
+norm 2 of the gradient of the wavefunctions. Typical values
+range from 5*10
+ <sup>
+  -4
+ </sup>
+ to 5*10
+ <sup>
+  -5
+ </sup>
+ .
+</p>
+<br />
+Since
+<b>
+ toldfe
+</b>
+, <a href="varbas.html#toldff">toldff</a>,
+<a href="varbas.html#tolrff">tolrff</a>,
+<a href="varbas.html#tolvrs">tolvrs</a> and <b>tolwfr</b>
+are aimed at the same goal (causing the SCF cycle to stop),
+they are seen as a unique input variable at reading. Hence, it is forbidden that two of these input variables
+have non-zero values for the same dataset, or generically (for all datasets).
+However, a non-zero value for one such variable for one dataset will have precedence on the non-zero value for another
+input variable defined generically.
+</font>
+
+<br><br><br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="typat">typat</a></font>
+<br><font id="mnemonics">Mnemonics: TYPe of AToms</font>
+<br><font id="characteristic">Characteristic: </font>
+<br><font id="vartype">Variable type: integer[3, '<a href="vargeo.html#natrd">natrd</a>'] if <a href="vargeo.html#natrd">natrd</a><<a href="varbas.html#natom">natom</a>,
+[3, '<a href="varbas.html#natom">natom</a>'] otherwise.
+</font>
+<br><font id="default">Default is 1 if <a href="varbas.html#natom">natom</a>==1,
+None otherwise.
+</font>
+<br><font id="text">
+<p>
+<p>
+ Array giving an integer label to every atom in the unit
+cell to denote its type.
+ <br />
+ The different types of atoms
+are constructed from the pseudopotential files.
+There are at most <a href="varbas.html#ntypat">ntypat</a> types of atoms.
+ <br />
+ As an example, for BaTiO3, where the pseudopotential for Ba is number 1,
+the one of Ti is number 2, and the one of O is number 3, the actual
+value of the <b>typat</b> array might be :
+ <pre>
+  typat 1 2 3 3 3
+ </pre>
+ <br />
+ The array <b>typat</b> has to agree with the actual locations
+of atoms given in <a href="varbas.html#xred">xred</a> , <a href="varbas.html#xcart">xcart</a> or
+<a href="varbas.html#xangst">xangst</a>, and the input
+of pseudopotentials has to be ordered to agree with the
+atoms identified in <b>typat</b>.
+ <br />
+ The nuclear charge of the
+elements, given by the array <a href="varbas.html#znucl">znucl</a>, also must agree with
+the type of atoms designated in "<b>typat</b>".
+ <br />
+ The array <b>typat</b> is
+not constrained to be increasing. An
+internal representation of the list of atoms,
+deep in the code (array atindx), groups the atoms of same type
+together. This should be transparent to the
+user, while keeping efficiency.
+</p>
+</font>
+
+<br><br><br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="udtset">udtset</a></font>
+<br><font id="mnemonics">Mnemonics: Upper limit on DaTa SETs</font>
+<br><font id="characteristic">Characteristic: </font>
+<br><font id="vartype">Variable type: integer(2)</font>
+<br><font id="default">No default (Comment: It is not used when it is not defined)</font>
+<br><font id="text">
+<p>
+<p>
+ Used to define the set of indices in the multi-data set
+mode, when a double loop is needed (see later).
+ <br />
+ The values of <b>udtset</b>(1) must be between 1 and 999,
+the values of <b>udtset</b>(2) must be between 1 and 9, and their
+product must be equal to <a href="varbas.html#ndtset">ndtset</a>.
+ <br />
+ The values of <a href="varbas.html#jdtset">jdtset</a> are obtained by
+looping on the two indices defined by <b>udtset</b>(1) and  <b>udtset</b>(2) as follows :
+ <pre>
+  do i1=1,intarr(1)
+   do i2=1,intarr(2)
+    idtset=idtset+1
+    dtsets(idtset)%jdtset=i1*10+i2
+   end do
+  end do
+ </pre>
+ So, <b>udtset</b>(2) sets the largest value for the unity digit, that varies between 1 and <b>udtset</b>(2).
+ <br />
+ If <b>udtset</b> is used, the input variable <a href="varbas.html#jdtset">jdtset</a> cannot be used.
+</p>
+</font>
+
+<br><br><br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="usewvl">usewvl</a></font>
+<br><font id="mnemonics">Mnemonics: Use WaVeLet basis set</font>
+<br><font id="characteristic">Characteristic: </font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0 (Comment: use plane-wave basis set)</font>
+<br><font id="text">
+<p>
+<p>
+ Used to define if the calculation is done on a
+wavelet basis set or not.
+ <br />
+ The values of <b>usewvl</b> must be 0 or 1. Putting <b>usewvl</b>
+to 1, makes <a href="vargs.html#icoulomb">icoulomb</a>
+mandatory to 1. The number of band (<a href="varbas.html#nband">nband</a>) must be set manually to
+the strict number need for an isolator system (
+ <i>
+  i.e.
+ </i>
+ number of electron over two). The cut-off is not relevant in the
+wavelet case, use <a href="varbas.html#wvl_hgrid">wvl_hgrid</a>
+instead.
+ <br />
+ In wavelet case, the system must be isolated systems (molecules or
+clusters). All geometry optimization are available (see <a href="varrlx.html#ionmov">ionmov</a>, especially the geometry
+optimisation and the molecular dynamics).
+ <br />
+ The spin computation is not currently possible with wavelets and
+metalic systems may be slow to converge.
+</p>
+</font>
+
+<br><br><br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="wtk">wtk</a></font>
+<br><font id="mnemonics">Mnemonics: WeighTs for K points</font>
+<br><font id="characteristic">Characteristic: </font>
+<br><font id="vartype">Variable type: real(<a href="varbas.html#nkpt">nkpt</a>)</font>
+<br><font id="default">Default is <a href="varbas.html#nkpt">nkpt</a>*1.0 (Comment: Except when <a href="varbas.html#kptopt">kptopt</a>/=0)</font>
+<br><font id="text">
+<p>
+<p>
+ Gives the k point weights.
+ <br />
+ The
+k point weights will have their sum (re)normalized to 1
+(unless <a href="varbas.html#occopt">occopt</a>=2 and <a href="varbas.html#kptopt">kptopt</a>=0;
+see description of <a href="varbas.html#occopt">occopt</a>)
+within the program and therefore may be input with any
+arbitrary normalization.  This feature helps avoid the
+need for many digits in representing fractional weights
+such as 1/3.
+ <br />
+ <b>wtk</b> is ignored if <a href="varbas.html#iscf">iscf</a> is not positive,
+except if <a href="varbas.html#iscf">iscf</a>=-3.
+</p>
+</font>
+
+<br><br><br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="wvl_hgrid">wvl_hgrid</a></font>
+<br><font id="mnemonics">Mnemonics: WaVeLet H step GRID</font>
+<br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#length">LENGTH</a></font>
+<br><font id="vartype">Variable type: real</font>
+<br><font id="default">Default is 0.5</font>
+<br><font id="text">
+<p>
+<p>
+ It gives the step size in real space for the
+grid resolution in the wavelet basis set. This value is highly
+responsible for the memory occupation in the wavelet
+computation. The value is a length in atomic units.
+</p>
+</font>
+
+<br><br><br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="xangst">xangst</a></font>
+<br><font id="mnemonics">Mnemonics: vectors (X) of atom positions in cartesian coordinates -length in ANGSTrom-</font>
+<br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#input_only">INPUT_ONLY</a></font>
+<br><font id="vartype">Variable type: real(3,min(<a href="varbas.html#natom">natom</a>,<a href="vargeo.html#natrd">natrd</a>))</font>
+<br><font id="default">No default</font>
+<br><font id="text">
+<p>
+<p>
+ Gives the cartesian coordinates
+of atoms within unit cell, in angstrom.  This information is
+redundant with that supplied by array <a href="varbas.html#xred">xred</a> or <a href="varbas.html#xcart">xcart</a>.
+ <br />
+ If <a href="varbas.html#xred">xred</a> and <b>xangst</b> are ABSENT from the input file and
+<a href="varbas.html#xcart">xcart</a> is
+provided, then the values of <a href="varbas.html#xred">xred</a> will be computed from
+the provided <a href="varbas.html#xcart">xcart</a> (i.e. the user may use xangst instead
+of <a href="varbas.html#xred">xred</a> or <a href="varbas.html#xcart">xcart</a> to provide starting coordinates).
+ <br />
+ One and only one of <a href="varbas.html#xred">xred</a>, <a href="varbas.html#xcart">xcart</a>
+and <b>xangst</b> must be provided.
+ <br />
+ The conversion factor between Bohr and Angstrom
+is 1 Bohr=0.5291772108 Angstrom, see the
+ <a href="http://physics.nist.gov/cuu/Constants/index.html">
+  NIST site
+ </a>
+ .
+ <br />
+ Atomic positions evolve if <a href="varrlx.html#ionmov">ionmov</a>/=0 .
+In constrast with <a href="varbas.html#xred">xred</a> and
+<a href="varbas.html#xcart">xcart</a>, <b>xangst</b> is not internal.
+</p>
+</font>
+
+<br><br><br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="xcart">xcart</a></font>
+<br><font id="mnemonics">Mnemonics: vectors (X) of atom positions in CARTesian coordinates</font>
+<br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#evolving">EVOLVING</a>, <a href="../../users/abinit_help.html#length">LENGTH</a></font>
+<br><font id="vartype">Variable type: real(3,min(<a href="varbas.html#natom">natom</a>,<a href="vargeo.html#natrd">natrd</a>))</font>
+<br><font id="default">No default</font>
+<br><font id="text">
+<p>
+<p>
+ Gives the cartesian coordinates
+of atoms within unit cell.  This information is
+redundant with that supplied by array <a href="varbas.html#xred">xred</a> or <a href="varbas.html#xangst">xangst</a>.
+By default, <b>xcart</b> is given in Bohr atomic units
+(1 Bohr=0.5291772108 Angstroms), although Angstrom can be specified,
+if preferred, since <b>xcart</b> has the
+'<a href="../../users/abinit_help.html#length">LENGTH</a>' characteristics.
+ <br />
+ If <a href="varbas.html#xred">xred</a> and <a href="varbas.html#xangst">xangst</a> are
+ABSENT from the input file and <b>xcart</b> is
+provided, then the values of <a href="varbas.html#xred">xred</a> will be computed from
+the provided <b>xcart</b> (i.e. the user may use <b>xcart</b> instead
+of <a href="varbas.html#xred">xred</a> or <a href="varbas.html#xangst">xangst</a> to provide starting coordinates).
+ <br />
+ One and only one of <a href="varbas.html#xred">xred</a>, <b>xcart</b>
+and
+ <b>
+  xangst
+ </b>
+ must be provided.
+ <br />
+ Atomic positions evolve if <a href="varrlx.html#ionmov">ionmov</a>/=0 .
+</p>
+</font>
+
+<br><br><br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="xred">xred</a></font>
+<br><font id="mnemonics">Mnemonics: vectors (X) of atom positions in REDuced coordinates</font>
+<br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#evolving">EVOLVING</a></font>
+<br><font id="vartype">Variable type: real(3,min(<a href="varbas.html#natom">natom</a>,<a href="vargeo.html#natrd">natrd</a>)) (Comment: represented internally as xred(3,<a href="varbas.html#natom">natom</a>,<a href="varrlx.html#nimage">nimage</a>))</font>
+<br><font id="default">Default is *0.0</font>
+<br><font id="text">
+<p>
+<p>
+ Gives the atomic locations within
+unit cell in coordinates relative to real space primitive
+translations (NOT in cartesian coordinates).  Thus these
+are fractional numbers typically between 0 and 1 and
+are dimensionless.  The cartesian coordinates of atoms (in Bohr)
+are given by:
+ <br />
+ <tele>
+  R_cartesian = xred1*rprimd1+xred2*rprimd2+xred3*rprimd3
+ </tele>
+ <br />
+ where (xred1,xred2,xred3) are the "reduced coordinates" given in
+columns of "<b>xred</b>", (rprimd1,rprimd2,rprimd3) are the columns of
+primitive vectors array "<a href="varbas.html#rprimd">rprimd</a>" in Bohr.
+ <br />
+ If you prefer to work only with cartesian coordinates, you
+may work entirely with "<a href="varbas.html#xcart">xcart</a>" or "<a href="varbas.html#xangst">xangst</a>" and ignore <b>xred</b>, in
+which case <b>xred</b> must be absent from the input file.
+ <br />
+ One and only one of <b>xred</b>, <a href="varbas.html#xcart">xcart</a>
+and
+ <b>
+  xangst
+ </b>
+ must be provided.
+ <br />
+ Atomic positions evolve if <a href="varrlx.html#ionmov">ionmov</a>/=0 .
+</p>
+</font>
+
+<br><br><br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="znucl">znucl</a></font>
+<br><font id="mnemonics">Mnemonics: charge -Z- of the NUCLeus</font>
+<br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#no_multi">NO_MULTI</a></font>
+<br><font id="vartype">Variable type: real(<a href="vargs.html#npsp">npsp</a>)</font>
+<br><font id="default">No default</font>
+<br><font id="text">
+<p>
+<p>
+ Gives nuclear charge for each
+type of pseudopotential, in order.
+ <br />
+ If <b>znucl</b> does not agree with nuclear charge,
+as given in pseudopotential files, the program writes
+an error message and stops.
+</p>
+<p>
+ N.B. : In the pseudopotential files, <b>znucl</b> is called "zatom".
+</p>
+<p>
+ For a "dummy" atom, with znucl=0 , as used in the case of calculations
+with only a jellium surface, ABINIT sets arbitrarily the covalent radius to one.
+</p>
+</font>
+
+<br><br><br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
+
+
+
+<script type="text/javascript" src="../list_internal_links.js"> </script>
+
+</body>
+</html>
+
+

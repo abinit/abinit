@@ -11,6 +11,8 @@ document.write(' <A href="'+docpath+'input_variables/html_template/what_ABINIT_d
 document.write(' <B> | </B> ');
 document.write(' <A href="'+docpath+'input_variables/html_automatically_generated/alltopics.html"><B>"How to" list</B></A> ');
 document.write(' <B> | </B> ');
+document.write(' <A href="'+docpath+'input_variables/html_automatically_generated/all_topics.html"><B>"NEW How to" list</B></A> ');
+document.write(' <B> | </B> ');
 document.write(' <A href="'+docpath+'tutorial/welcome.html"><B>Tutorial</B></A> ');
 document.write(' <B> | </B> ');
 document.write(' <A href="'+docpath+'users/bibliography.html"><B>Bibliography</B></A> ');

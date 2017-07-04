@@ -1,0 +1,840 @@
+<html>
+<head><title>Description of applied finite field calculation variables.</title>
+<link rel=stylesheet type="text/css" href="../formabinit.css">
+</head>
+<body bgcolor="#ffffff">
+
+<hr>
+<a name="top"></a>
+
+<h1>ABINIT, applied finite field calculation input variables:</h1>
+
+<h2>List and description.</h2>
+<hr>
+
+<p>This document lists and provides the description
+of the name (keywords) of the "applied finite field calculation" input
+variables to be used in the main input file of the abinit code.
+
+<script type="text/javascript" src="../generic_advice.js"> </script>
+
+<script type="text/javascript" src="../copyright.js"> </script>
+
+<script type="text/javascript" src="../list_internal_links.js"> </script>
+
+<script type="text/javascript" src="../list_htmlfiles_input_variables.js"> </script>
+
+<a name="list"></a>
+<h3><b> Content of the file : alphabetical list of "applied finite field calculation" variables.</b></h3>
+
+ <br>A.
+ <a href="#atvshift">atvshift</a>&nbsp;&nbsp;
+ <br>B.
+ <a href="#bdberry">bdberry</a>&nbsp;&nbsp;
+ <a href="#berryopt">berryopt</a>&nbsp;&nbsp;
+ <a href="#berrysav">berrysav</a>&nbsp;&nbsp;
+ <a href="#berrystep">berrystep</a>&nbsp;&nbsp;
+ <a href="#bfield">bfield</a>&nbsp;&nbsp;
+ <br>C.
+ <br>D.
+ <a href="#ddamp">ddamp</a>&nbsp;&nbsp;
+ <a href="#dfield">dfield</a>&nbsp;&nbsp;
+ <br>E.
+ <a href="#efield">efield</a>&nbsp;&nbsp;
+ <br>F.
+ <br>G.
+ <br>H.
+ <br>I.
+ <br>J.
+ <a href="#jfielddir">jfielddir</a>&nbsp;&nbsp;
+ <br>K.
+ <a href="#kberry">kberry</a>&nbsp;&nbsp;
+ <br>L.
+ <br>M.
+ <a href="#maxestep">maxestep</a>&nbsp;&nbsp;
+ <br>N.
+ <a href="#natvshift">natvshift</a>&nbsp;&nbsp;
+ <a href="#nberry">nberry</a>&nbsp;&nbsp;
+ <br>O.
+ <br>P.
+ <a href="#polcen">polcen</a>&nbsp;&nbsp;
+ <br>Q.
+ <a href="#qprtrb">qprtrb</a>&nbsp;&nbsp;
+ <br>R.
+ <a href="#red_dfield">red_dfield</a>&nbsp;&nbsp;
+ <a href="#red_efield">red_efield</a>&nbsp;&nbsp;
+ <a href="#red_efieldbar">red_efieldbar</a>&nbsp;&nbsp;
+ <br>S.
+ <a href="#spinmagntarget">spinmagntarget</a>&nbsp;&nbsp;
+ <br>T.
+ <br>U.
+ <br>V.
+ <a href="#vprtrb">vprtrb</a>&nbsp;&nbsp;
+ <br>W.
+ <br>X.
+ <br>Y.
+ <br>Z.
+ <a href="#zeemanfield">zeemanfield</a>&nbsp;&nbsp;
+
+
+<br><br><br><br><hr>
+<br><font id="title"><a name="atvshift">atvshift</a></font>
+<br><font id="mnemonics">Mnemonics: ATomic potential (V) energy SHIFTs</font>
+<br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#develop">DEVELOP</a></font>
+<br><font id="vartype">Variable type: real(<a href="varff.html#natvshift">natvshift</a>,<a href="varbas.html#nsppol">nsppol</a>,<a href="varbas.html#natom">natom</a>)</font>
+<br><font id="default">Default is *0.0d0</font>
+<br><br><font id="requires">
+Only relevant if <a href="varpaw.html#usepawu">usepawu</a> /= 0 and <a href="varff.html#natvshift">natvshift</a> in [5,7]
+</font>
+<br><font id="text">
+<p>
+<p>
+ Defines for each atom and each spin channel (at present, can only be used
+with <a href="varbas.html#nsppol">nsppol</a>=1 or 2, like the +U scheme),
+a possible potential shift, for the d
+(with <a href="varpaw.html#lpawu">lpawu</a>=2,
+<a href="varff.html#natvshift">natvshift</a>=5),
+or f states
+(with <a href="varpaw.html#lpawu">lpawu</a>=3,
+<a href="varff.html#natvshift">natvshift</a>=7).
+In the case of d states, and 2 spin channels, a set of 10 numbers for
+each atom must be defined.
+The first set of 5 numbers corresponds to real spherical harmonics
+m=-2 to m=+2 for the spin-up channel,
+the second set of 5 numbers corresponds to real spherical harmonics
+m=-2 to m=+2 for the spin-down channel.
+In the case of f states, the same ordering applies, for sets of 7 numbers,
+corresponding to m=-3 to m=+3.
+ <br />
+ <a href="varpaw.html#usepawu">usepawu</a> should be non-zero,
+<a href="varpaw.html#lpawu">lpawu</a> should be 2 or 3.
+</p>
+</font>
+
+<br><br><br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="bdberry">bdberry</a></font>
+<br><font id="mnemonics">Mnemonics: BanD limits for BERRY phase</font>
+<br><font id="characteristic">Characteristic: </font>
+<br><font id="vartype">Variable type: integer(4)</font>
+<br><font id="default">Default is 4*0</font>
+<br><br><font id="requires">
+Only relevant if <a href="varff.html#berryopt">berryopt</a> in [1, 2, 3] and <a href="varff.html#nberry">nberry</a> > 0
+</font>
+<br><font id="text">
+<p>
+<p>
+ Give the lower band and the upper band of the set of bands
+for which the Berry phase must be computed.
+Irrelevant if <a href="varff.html#nberry">nberry</a> is not positive.
+When <a href="varbas.html#nsppol">nsppol</a> is 1 (no spin-polarisation),
+only the two first numbers, giving the lower and highest
+bands, are significant. Their occupation number is assumed to be 2.
+When <a href="varbas.html#nsppol">nsppol</a> is 2 (spin-polarized calculation),
+the two first numbers give the lowest and highest
+bands for spin up, and the third and fourth numbers
+give the lowest and highest bands for spin down.
+Their occupation number is assumed to be 1 .
+</p>
+<p>
+ Presently, <b>bdberry</b> MUST be initialized by the user
+in case of a Berry phase calculation with <a href="varff.html#berryopt">berryopt</a> = 1, 2, or 3: the above-mentioned
+default will cause an early exit.
+</p>
+</font>
+
+<br><br><br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="berryopt">berryopt</a></font>
+<br><font id="mnemonics">Mnemonics: BERRY phase OPTions</font>
+<br><font id="characteristic">Characteristic: </font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><font id="text">
+<p>
+<p>
+ Specifies the use of Berry phase for the computation
+of either the polarization, the derivatives with respect to the
+wavevector, or finite electric field calculations.
+ <ul>
+  <li>
+   0 =&gt; no computation of expressions relying on a Berry phase (default)
+  </li>
+  <li>
+   1 =&gt; the computation of Berry phases is activated (berryphase routine)
+  </li>
+  <li>
+   2 =&gt; the computation of derivatives with respect to the wavevector,
+thanks to the Berry phase finite-difference formula, is activated (uderiv routine)
+  </li>
+  <li>
+   3 =&gt; same as option 1 and 2 together
+  </li>
+<B>Note that options 1 to 3 require the use of a serial build of Abinit.</B>
+ <li>
+   -1 =&gt; alternative computation of Berry phases (berryphase_new routine)
+  </li>
+  <li>
+   -2 =&gt; alternative computation of derivatives with respect to the wavevector,
+thanks to the Berry phase finite-difference formula (berryphase_new routine)
+  </li>
+  <li>
+   -3 =&gt; same as option -1 and -2 together
+  </li>
+<B>Options -1 to -3 permit use of a parallel build and will be preferred by most users.</B>
+  <li>
+   4 =&gt; finite electric field calculation (unreduced E-field)
+  </li>
+  <li>
+   6 =&gt; finite electric displacement field calculation (unreduced D-field)
+  </li>
+  <li>
+   14 =&gt; finite reduced electric field calculation
+  </li>
+  <li>
+   16 =&gt; finite electric displacement field calculation
+  </li>
+  <li>
+   17 =&gt; mixed electric boundary condition: finite reduced electric field in some directions, finite reduced electric displacement field along other directions. See variable <a href="varff.html#jfielddir">jfielddir</a> for more details.
+  </li>
+
+ </ul>
+</p>
+<p>
+ Other related input variables are :
+ <ul>
+  <li>
+   in case of <b>berryopt</b>=1,2, or 3 : <a href="varff.html#bdberry">bdberry</a>
+and <a href="varff.html#kberry">kberry</a>; also, <a href="varff.html#nberry">nberry</a>
+must be larger than 0;
+  </li>
+  <li>
+   in case of <b>berryopt</b>=-1,-2, or -3 : the variable
+<a href="varrf.html#rfdir">rfdir</a> must be used to specify the primitive
+vector along which the projection of the polarization or the ddk will be computed.
+For example if <b>berryopt</b>=-1 and <a href="varrf.html#rfdir">rfdir</a>=1 0 0,
+the projection of the polarization along the reciprocal lattice vector
+G_1 is computed. In case <a href="varrf.html#rfdir">rfdir</a>=1 1 1,
+ABINIT computes the projection of P along G_1, G_2 and G_3 and transforms the results
+to cartesian coordinates;
+  </li>
+  <li>
+   in cases where <b>berryopt</b> is negative, <a href="varff.html#berrystep">berrystep</a>
+allow a computation of multiple-step Berry phase in order to accelerate the convergence.
+  </li>
+  <li>
+   <a href="varff.html#efield">efield</a> and
+<a href="varrf.html#rfdir">rfdir</a> in case of <b>berryopt</b>=4 ;
+  </li>
+ </ul>
+</p>
+<p>
+ The cases <b>berryopt</b>=-1,-2,-3, 4, 6, 7, 14, 16, and 17 have to be used with <a href="varbas.html#occopt">occopt</a>=1.
+</p>
+<p>
+ The cases <b>berryopt</b>=-1 and 4, 6, 7, 14, 16, 17 are compatible with PAW, howevever, if in these cases one uses
+<a href="varbas.html#kptopt">kptopt</a>/=3, one must also use only symmorphic symmetries (either because the space group is
+symmorphic or the variable <a href="vardev.html#symmorphi">symmorphi</a> is set to zero).
+</p>
+<p>
+ For a phonon calculation under a finite electric field, respect the following procedure.
+ <ul>
+  <li>
+   1. Run a scf ground-state calculation at zero electric field
+to get wavefunctions to initialize the ground-state calculation in finite electric fields.
+  </li>
+  <li>
+   2. Run a scf ground-state calculation in finite electric field. The
+electric field is controlled by the input variable <a href="varff.html#efield">efield</a>.
+<b>berryopt</b> should be 4.
+The input variable <a href="varbas.html#kptopt">kptopt</a> should be set to be 2.
+  </li>
+  <li>
+   3. Based on the wave functions obtained in step (2), perform phonon
+calculation by setting <b>berryopt</b>=4, <a href="varbas.html#kptopt">kptopt</a>=3 and
+The same value of <a href="varff.html#efield">efield</a> than in step 2.
+<a href="varbas.html#nsym">nsym</a> should be set to 1 currently but this restriction may be
+removed later . The other
+parameters are the same as phonon calculation at zero electric field.
+  </li>
+  <li>
+   Note : the choice of k-point sampling N x N x N should be the same in the three runs
+and N should be an even number.
+  </li>
+ </ul>
+</p>
+<p>
+ In case of finite electric and displacement field calculations (<b>berryopt</b>=4,6,7,14,16,17), see also the input variables
+<a href="varff.html#berrysav">berrysav</a>, <a href="varff.html#dfield">dfield</a>,
+<a href="varff.html#red_dfield">red_dfield</a>, <a href="varff.html#red_efield">red_efield</a>,
+<a href="varff.html#ddamp">ddamp</a>
+</p>
+</font>
+
+<br><br><br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="berrysav">berrysav</a></font>
+<br><font id="mnemonics">Mnemonics: BERRY SAVe</font>
+<br><font id="characteristic">Characteristic: </font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><font id="text">
+<p>
+<p>
+ <ul>
+  <li>
+   0 =&gt; for finite electric field calculation (<a href="varff.html#berryopt">berryopt</a>=4/14), the polarization branch will be chosen on each iteration from (-pi, pi);
+for finite electric displacement field calculation(<a href="varff.html#berryopt">berryopt</a>=6/7/16/17), the polarization will be chosen to minimize the internal energy.
+  </li>
+  <li>
+   1 =&gt; the polarization will be kept in the same branch on each iteration. At the end of the run, a file "POLSAVE" will be saved containing the reduced polarization in atomic units. Note: Make sure that "POLSAVE" is empty or it does not exist before the calculation, or else that it specifies the desired polarization branch.
+  </li>
+ </ul>
+</p>
+</font>
+
+<br><br><br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="berrystep">berrystep</a></font>
+<br><font id="mnemonics">Mnemonics: BERRY phase : multiple STEP</font>
+<br><font id="characteristic">Characteristic: </font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 1</font>
+<br><br><font id="requires">
+Only relevant if 0 > <a href="varff.html#berryopt">berryopt</a>
+</font>
+<br><font id="text">
+<p>
+<p>
+ If <a href="varff.html#berryopt">berryopt</a> is negative,
+this variable is used to compute berry phases using multiple discrete steps, in order to accelerate convergence. The single-step berry phase
+is the standard calculation using strings of k-points based on overlap of Bloch function separated by dk, while the two-step
+berry phase use strings use overlaps based on dk and 2*dk, the three-step use overlaps based on dk, 2*dk and 3*dk...
+</p>
+<p>
+ The default value of this variable is 1, meaning that only the single-step berry phase calculation is done.
+If a larger value is set, ABINIT will compute all the multiple-step berry phase from the single-step to the
+<b>berrystep</b>-step, and use the large-step values of berry phase to correct the single-step berry phase.
+Use with care: while experience is still to be gained with this procedure, the outlook is promising.
+</p>
+</font>
+
+<br><br><br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="bfield">bfield</a></font>
+<br><font id="mnemonics">Mnemonics: finite B FIELD calculation</font>
+<br><font id="characteristic">Characteristic: </font>
+<br><font id="vartype">Variable type: real(3)</font>
+<br><font id="default">Default is 3*0.0</font>
+<br><font id="text">
+<p>
+<p>
+ Perform finite magnetic field calculation. <br><b>THIS CODE IS UNDER DEVELOPMENT AND IS NOT READY FOR USE.</b>
+</p>
+</font>
+
+<br><br><br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="ddamp">ddamp</a></font>
+<br><font id="mnemonics">Mnemonics: electric Displacement field DAMPing parameter</font>
+<br><font id="characteristic">Characteristic: </font>
+<br><font id="vartype">Variable type: real</font>
+<br><font id="default">Default is 0.1</font>
+<br><br><font id="requires">
+Only relevant if <a href="varff.html#berryopt">berryopt</a> = 6 or 16
+</font>
+<br><font id="text">
+<p>
+<p>
+ In case <a href="varff.html#berryopt">berryopt</a>=6,
+the electric field is updated after each SCF iteration according to
+E_{n+1}= <b>ddamp</b>*(D - 4*pi*P_{n}) + (1-<b>ddamp</b>)*E_{n}
+where P_{n} and E_{n} are the polarization and electric field after nth SCF iteration.
+<b>ddamp</b> is a damping parameter used to control the convergence speed.
+ <br />
+ In case <a href="varff.html#berryopt">berryopt</a>=16, the electric field is updated after each SCF iteration according to
+e_{n+1}= <b>ddamp</b>*(d - p_{n}) + (1-<b>ddamp</b>)*e_{n}
+ <br />
+ If you have difficulty getting convergence, try to reduce this value or reduce maxestep.
+This parameter is used in finite electric displacement field calculations (berryopt=6,16,17).
+</p>
+</font>
+
+<br><br><br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="dfield">dfield</a></font>
+<br><font id="mnemonics">Mnemonics: Displacement FIELD</font>
+<br><font id="characteristic">Characteristic: </font>
+<br><font id="vartype">Variable type: real(3)</font>
+<br><font id="default">Default is 3*0.0</font>
+<br><br><font id="requires">
+Only relevant if <a href="varff.html#berryopt">berryopt</a> = 6, <a href="varff.html#efield">efield</a>
+</font>
+<br><font id="text">
+<p>
+<p>
+ In case <a href="varff.html#berryopt">berryopt</a>=6,
+<b>dfield</b> specifies the (unreduced) finite electric displacement field vector, in atomic units, that is to be imposed as a constraint during the calculation.
+</p>
+</font>
+
+<br><br><br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="efield">efield</a></font>
+<br><font id="mnemonics">Mnemonics: Electric FIELD</font>
+<br><font id="characteristic">Characteristic: </font>
+<br><font id="vartype">Variable type: real(3)</font>
+<br><font id="default">Default is 3*0.0</font>
+<br><br><font id="requires">
+Only relevant if <a href="varff.html#berryopt">berryopt</a> = 4 or 6
+</font>
+<br><font id="text">
+<p>
+<p>
+ In case <a href="varff.html#berryopt">berryopt</a>=4,
+a finite electric field calculation is performed. The value
+of this electric field, and its direction is determined by <b>efield</b>.
+It must be given in atomic units (1 a.u. of electric field= 514220624373.482 V/m, see note below),
+in cartesian coordinates.
+</p>
+<p>
+ References for the calculation under electric field (based on multi k point Berry phase) :
+ <ul>
+  <li>
+   Nunes and Vanderbilt, PRL 73, 712 (1994) : real-space version of the finite-field Hamiltonian
+  </li>
+  <li>
+   Nunes and Gonze, PRB 63, 155107 (2001) : reciprocal-space version of the finite-field Hamiltonian
+(the one presently implemented), and extensive theoretical analysis
+  </li>
+  <li>
+   Souza, Iniguez and Vanderbilt, PRL 89, 117602 (2003) : implementation of the finite-field Hamiltonian
+(reciprocal-space version)
+  </li>
+  <li>
+   Zwanziger, Galbraith, Kipouros, Torrent, Giantomassi and Gonze, Comp. Mater. Sci. 58, 113 (2012) : extension
+to PAW formalism
+  </li>
+ </ul>
+ See also Umari, Gonze, Pasquarello, PRL 90, 027401 (2003).
+</p>
+<p>
+ The atomic unit of electric field strength is :
+e_Cb/(4 pi eps0 a0**2), where e_Cb is the electronic charge in Coulomb (1.60217653e-19),
+eps0 is the electric constant (8.854187817d-12 F/m), and a0 is the Bohr radius
+in meter (0.5291772108e-10).
+</p>
+</font>
+
+<br><br><br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="jfielddir">jfielddir</a></font>
+<br><font id="mnemonics">Mnemonics: electric/displacement FIELD DIRection</font>
+<br><font id="characteristic">Characteristic: </font>
+<br><font id="vartype">Variable type: integer(3)</font>
+<br><font id="default">Default is 3*0</font>
+<br><br><font id="requires">
+Only relevant if <a href="varff.html#berryopt">berryopt</a> = 17
+</font>
+<br><font id="text">
+<p>
+<p>
+ When specifying mixed electric field boundary conditions ( <a href="varff.html#berryopt">berryopt</a>=17),
+jfielddir controls whether reduced electric field (<b>jfielddir</b>=1)
+or reduced electric displacement field (<b>jfielddir</b>=2) is chosen to be fixed,
+in each of the three lattice directions (i.e., in the reduced, not the Cartesian, frame).
+For example, <b>jfielddir</b>=(1 1 2) tells the code to use fixed ebar_1 and ebar_2
+along the first two lattice directions and fixed d_3 along the third.
+ <br />
+ For the case of mixed electric field boundary conditions,
+<a href="varff.html#red_efieldbar">red_efieldbar</a> and <a href="varff.html#red_dfield">red_dfield</a>
+are used to control ebar and d, respectively.
+For example, for electric boundary conditions corresponding to a material
+in a parallel-plate capacitor, if you want to control d_3=d0,
+while fixing ebar_1=ebar_2=0, then the input files should have
+<a href="varff.html#berryopt">berryopt</a>=17, <b>jfielddir</b>=(1 1 2), <a href="varff.html#red_efieldbar">red_efieldbar</a>=(0.0 0.0 a),
+and <a href="varff.html#red_dfield">red_dfield</a>=(b c d0).
+Here a, b, and c are the starting values.
+They can be chosen in this way: do a single run for fixed d calculation (<a href="varff.html#red_dfield">red_dfield</a>=0,0,d0),
+from the final results you will have ebar_3, which is a good guess for a.
+Then do another single run for fixed ebar calculation (<a href="varff.html#red_efieldbar">red_efieldbar</a>=(0 0 0)),
+from the final results you will have d_1,d_2, these are good guesses for b, c.
+</p>
+</font>
+
+<br><br><br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="kberry">kberry</a></font>
+<br><font id="mnemonics">Mnemonics: K wavevectors for BERRY phase computation</font>
+<br><font id="characteristic">Characteristic: </font>
+<br><font id="vartype">Variable type: integer(3,<a href="varff.html#nberry">nberry</a>)</font>
+<br><font id="default">Default is *0</font>
+<br><br><font id="requires">
+Only relevant if <a href="varff.html#berryopt">berryopt</a> = 1, 2, or 3
+</font>
+<br><font id="text">
+<p>
+<p>
+ Used for values of <a href="varff.html#berryopt">berryopt</a> = 1, 2, or 3.
+</p>
+<p>
+ This array defines, for each Berry phase calculation
+(the number of such calculations is defined by
+<a href="varff.html#nberry">nberry</a>), the
+difference of wavevector between k points for which
+the overlap matrix must be computed.
+The polarisation vector will be projected
+on the direction of that wavevector,
+and the result of the computation will be the magnitude of this
+projection.
+Doing more than one wavevector, with different independent
+direction, allows to find the full polarisation vector.
+However, note that converged results need oriented grids,
+denser along the difference wavevector than usual Monkhorst-Pack
+grids.
+</p>
+<p>
+ The difference of wavevector is computed in the coordinate
+system defined by the k-points grid
+(see <a href="varbas.html#ngkpt">ngkpt</a>
+and <a href="vargs.html#kptrlatt">kptrlatt</a>), so that
+the values of <b>kberry</b> are integers.
+Of course, such a k point grid must exist, and all the
+corresponding wavefunctions must be available, so that the
+computation is allowed only when <a href="varbas.html#kptopt">kptopt</a>
+is equal to 3. In order to save computing time, it is suggested
+to make a preliminary calculation of the wavefunctions on the
+irreducible part of the grid, with <a href="varbas.html#kptopt">kptopt</a>
+equal to 1, and then use these converged wavefunctions
+in the entire Brillouin zone, by reading them to initialize
+the <a href="varbas.html#kptopt">kptopt</a>=3 computation.
+</p>
+</font>
+
+<br><br><br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="maxestep">maxestep</a></font>
+<br><font id="mnemonics">Mnemonics: MAXimum Electric field STEP</font>
+<br><font id="characteristic">Characteristic: </font>
+<br><font id="vartype">Variable type: real</font>
+<br><font id="default">Default is 0.005</font>
+<br><br><font id="requires">
+Only relevant if <a href="varff.html#berryopt">berryopt</a> = 6, 16, or 17
+</font>
+<br><font id="text">
+<p>
+<p>
+ This variable controls the maximum change of electric field when updating the electric field after each SCF iteration.
+When the calculation is difficult to converge, try reducing this value or reducing <a href="varff.html#ddamp">ddamp</a>.
+This variable is used in finite electric displacement field calculations (<a href="varff.html#berryopt">berryopt</a>=6,16,17).
+</p>
+</font>
+
+<br><br><br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="natvshift">natvshift</a></font>
+<br><font id="mnemonics">Mnemonics: Number of ATomic potential (V) energy SHIFTs (per atom)</font>
+<br><font id="characteristic">Characteristic: </font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><br><font id="requires">
+Only relevant if <a href="varpaw.html#usepawu">usepawu</a> /= 0, <a href="varff.html#atvshift">atvshift</a>
+</font>
+<br><font id="text">
+<p>
+<p>
+ Number of atomic potential energy shifts (per atom), to be used to define the
+array <a href="varff.html#atvshift">atvshift</a>.
+If non-zero, only two possibilities exist : 5 for d states
+(with <a href="varpaw.html#lpawu">lpawu</a>=2),
+and 7 for f states (with <a href="varpaw.html#lpawu">lpawu</a>=3).
+If non-zero, one should define
+<a href="varpaw.html#usepawu">usepawu</a>,
+<a href="varpaw.html#lpawu">lpawu</a> and
+<a href="varff.html#atvshift">atvshift</a>.
+</p>
+</font>
+
+<br><br><br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="nberry">nberry</a></font>
+<br><font id="mnemonics">Mnemonics: Number of BERRY phase computations</font>
+<br><font id="characteristic">Characteristic: </font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 1</font>
+<br><br><font id="requires">
+Only relevant if <a href="varff.html#berryopt">berryopt</a> = 1, 2, or 3
+</font>
+<br><font id="text">
+<p>
+<p>
+ Gives the number of Berry phase computations of polarisation,
+or finite-difference estimations of the derivative of wavefunctions
+with respect to the wavevector,
+each of which might be characterized by a different change of
+wavevector <a href="varff.html#kberry">kberry</a>.
+</p>
+<p>
+ When equal to 0, no Berry phase calculation of polarisation
+is performed. The maximal value of <b>nberry</b> is 20.
+</p>
+<p>
+ Note that the computation of the polarisation for a set of bands
+having different occupation numbers is meaningless (although
+in the case of spin-polarized calculations, the spin up bands
+might have an identical occupation number, that might differ
+from the identical occupation number of spin down bands).
+Although meaningless, ABINIT will perform such computation,
+if required by the user. The input variable
+<a href="varff.html#bdberry">bdberry</a> governs the set of bands
+for which a Berry phase is computed.
+</p>
+<p>
+ For the <a href="varff.html#berryopt">berryopt</a> = 1, 2, and 3 cases, spinor wavefunctions are not allowed, nor are parallel computations.
+</p>
+</font>
+
+<br><br><br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="polcen">polcen</a></font>
+<br><font id="mnemonics">Mnemonics: POLarization for CENtrosymmetric geometry</font>
+<br><font id="characteristic">Characteristic: </font>
+<br><font id="vartype">Variable type: real(3)</font>
+<br><font id="default">Default is 3*0</font>
+<br><font id="text">
+<p>
+<p>
+ When doing a finite electric displacement field calculation,
+if the structure is centrosymmetric but the polarization is non-zero (such as for AlAs),
+this non-zero polarization should be specified as <b>polcen</b> (in REDUCED coordinates, in atomic units) in the input file.
+See Eq.(24) in the Suppl. of Nat. Phys. (M. Stengel, N.A. Spaldin and D. Vanderbilt, Nat. Phys. 5,304 (2009))
+</p>
+</font>
+
+<br><br><br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="qprtrb">qprtrb</a></font>
+<br><font id="mnemonics">Mnemonics: Q-wavevector of the PERTurbation</font>
+<br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#develop">DEVELOP</a></font>
+<br><font id="vartype">Variable type: integer(3)</font>
+<br><font id="default">Default is [0, 0, 0]</font>
+<br><br><font id="requires">
+Only relevant if <a href="varff.html#vprtrb">vprtrb</a>
+</font>
+<br><font id="text">
+<p>
+<p>
+ Gives the wavevector,
+in units of reciprocal lattice primitive translations,
+of a perturbing potential of strength <a href="varff.html#vprtrb">vprtrb</a>.  See <a href="varff.html#vprtrb">vprtrb</a>
+for more explanation.
+</p>
+</font>
+
+<br><br><br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="red_dfield">red_dfield</a></font>
+<br><font id="mnemonics">Mnemonics: REDuced Displacement FIELD</font>
+<br><font id="characteristic">Characteristic: </font>
+<br><font id="vartype">Variable type: real(3)</font>
+<br><font id="default">Default is 3*0.0</font>
+<br><br><font id="requires">
+Only relevant if <a href="varff.html#berryopt">berryopt</a> = 16, <a href="varff.html#red_efield">red_efield</a>
+</font>
+<br><font id="text">
+<p>
+<p>
+ In case <a href="varff.html#berryopt">berryopt</a>=16,
+a reduced finite electric displacement field calculation is performed. The value
+of this displacement field, and its direction is determined by <b>red_dfield</b>.
+It must be given in atomic units.
+</p>
+<p>
+ <b>red_dfield</b> is defined via Eq.(26) in the Supplement of M. Stengel, N.A. Spaldin and D. Vanderbilt, Nat. Phys. 5,304 (2009).
+</p>
+</font>
+
+<br><br><br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="red_efield">red_efield</a></font>
+<br><font id="mnemonics">Mnemonics: REDuced Electric FIELD</font>
+<br><font id="characteristic">Characteristic: </font>
+<br><font id="vartype">Variable type: real(3)</font>
+<br><font id="default">Default is 3*0.0</font>
+<br><br><font id="requires">
+Only relevant if <a href="varff.html#berryopt">berryopt</a> = 16
+</font>
+<br><font id="text">
+<p>
+<p>
+ In case <a href="varff.html#berryopt">berryopt</a>=16,
+a reduced finite electric displacement field calculation is performed.
+In this case, the parameter red_efield specifies the initial electric field used on the first iteration, in atomic units.
+</p>
+<p>
+ <b>red_efield</b> is defined via Eq.(25) in the Supplement of M. Stengel, N.A. Spaldin and D. Vanderbilt, Nat. Phys. 5,304 (2009).
+</p>
+</font>
+
+<br><br><br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="red_efieldbar">red_efieldbar</a></font>
+<br><font id="mnemonics">Mnemonics: REDuced Electric FIELD BAR</font>
+<br><font id="characteristic">Characteristic: </font>
+<br><font id="vartype">Variable type: real(3)</font>
+<br><font id="default">Default is 3*0.0</font>
+<br><br><font id="requires">
+Only relevant if <a href="varff.html#berryopt">berryopt</a> = 14
+</font>
+<br><font id="text">
+<p>
+<p>
+ In case <a href="varff.html#berryopt">berryopt</a>=14,
+a reduced finite electric field calculation is performed.
+The magnitude and direction of this electric field are determined by red_efieldbar. It must be given in atomic units.
+</p>
+<p>
+ <b>red_efieldbar</b> is defined via Eq.(28) in the Supplement of M. Stengel, N.A. Spaldin and D. Vanderbilt, Nat. Phys. 5,304 (2009).
+</p>
+</font>
+
+<br><br><br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="spinmagntarget">spinmagntarget</a></font>
+<br><font id="mnemonics">Mnemonics: SPIN-MAGNetization TARGET</font>
+<br><font id="characteristic">Characteristic: </font>
+<br><font id="vartype">Variable type: real</font>
+<br><font id="default">Default is -99.99</font>
+<br><font id="text">
+<p>
+<p>
+ This input variable is active only in the
+<a href="varbas.html#nsppol">nsppol</a>=2 case.
+If <b>spinmagntarget</b> is not the "magic" value of -99.99d0, the
+spin-magnetization of the primitive cell will be fixed (or optimized, if it is not possible to impose it)
+to the value of <b>spinmagntarget</b>, in Bohr magneton units, e.g. for an Hydrogen atom, it is 1.
+ <br />
+If <a href="varbas.html#occopt">occopt</a> is a metallic one, the
+Fermi energies for spin up and spin down are adjusted to give the target
+spin-polarisation (this is equivalent to an exchange splitting).
+If <a href="varbas.html#occopt">occopt</a>=1 and <a href="varbas.html#nsppol">nsppol</a>=2,
+the occupation numbers for spin up and spin down will be adjusted to give the required
+spin-magnetization (occupation numbers are identical for all k-points, with <a href="varbas.html#occopt">occopt</a>=1).
+The definition of <b>spinmagntarget</b> is actually requested in this case, except for the single isolated Hydrogen atom.
+ <br />
+ If <b>spinmagntarget</b> is the default one, the spin-magnetization will not be constrained,
+and will be determined self-consistently, by having the same spin up and spin down
+Fermi energy in the metallic case, while for the other cases, there will be no spin-magnetization,
+except for an odd number of electrons if <a href="varbas.html#occopt">occopt</a>=1 and <a href="varbas.html#nsppol">nsppol</a>=2.
+</p>
+<p>
+ Note : for the time being, only the spin down Fermi energy
+is written out in the main output file. In the fixed
+magnetic moment case, it differs from the
+spin up Fermi energy.
+</p>
+</font>
+
+<br><br><br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="vprtrb">vprtrb</a></font>
+<br><font id="mnemonics">Mnemonics: potential -V- for the PeRTuRBation</font>
+<br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#develop">DEVELOP</a>, <a href="../../users/abinit_help.html#energy">ENERGY</a></font>
+<br><font id="vartype">Variable type: real(2)</font>
+<br><font id="default">Default is [0.0, 0.0]</font>
+<br><br><font id="requires">
+Only relevant if <a href="varff.html#qprtrb">qprtrb</a>
+</font>
+<br><font id="text">
+<p>
+<p>
+ Gives the real and imaginary
+parts of a scalar potential perturbation.
+Can be specified in Ha (the default), Ry, eV or Kelvin, since <b>vprtrb</b> has the
+'<a href="../../users/abinit_help.html#energy">ENERGY</a>' characteristics.
+ <br />
+ This is made
+available for testing responses to such perturbations.
+The form of the perturbation, which is added to the local
+potential, is:
+ <ul>
+  <li>
+   (<b>vprtrb</b>(1)+I*<b>vprtrb</b>(2))/2 at G=<a href="varff.html#qprtrb">qprtrb</a>  and
+  </li>
+  <li>
+   (<b>vprtrb</b>(1)-I*<b>vprtrb</b>(2))/2 at G=-<a href="varff.html#qprtrb">qprtrb</a>
+(see <a href="varff.html#qprtrb">qprtrb</a> also).
+  </li>
+ </ul>
+</p>
+</font>
+
+<br><br><br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="zeemanfield">zeemanfield</a></font>
+<br><font id="mnemonics">Mnemonics: ZEEMAN FIELD</font>
+<br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#magnetic_field">MAGNETIC_FIELD</a></font>
+<br><font id="vartype">Variable type: real(3)</font>
+<br><font id="default">Default is 0</font>
+<br><font id="text">
+<p>
+<p>
+ Give the value of the Zeeman field, H, acting on the spinorial wavefunctions.
+Note that Tesla are admitted. This sets the magnitude of mu_0*H, in Tesla,
+with H in Amperes/metre.
+</p>
+</font>
+
+<br><br><br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
+
+
+
+<script type="text/javascript" src="../list_internal_links.js"> </script>
+
+</body>
+</html>
+
+
