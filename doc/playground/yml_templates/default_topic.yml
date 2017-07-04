@@ -2,7 +2,7 @@
 # and the list of all input variables. 
 # Each paragraph of such documentation file has a mix of formatting html information and real content.
 
-# The present file contains the default html information, also used for the list of all variables..
+# The present file contains the default html information, also used for the list of all variables.
 # For each of the topics file, there is a corresponding yml file, that specifies usually the list of paragraphs.
 
 - !newtopic
@@ -29,9 +29,6 @@
       <script type="text/javascript" src="__JS_PATH__list_internal_links_incl_topics.js"> </script>
     tofcontent_header : |
       <script type="text/javascript" src="__JS_PATH__topics_table_of_content.js"> </script>
-    introduction : Default introduction ... this is an error
-    tutorials : 
-    examples : 
     end : |
       </body>
       </html>

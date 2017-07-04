@@ -99,8 +99,8 @@ def read_yaml_file(ymlfile):
 
   if ymlfile== "abinit_vars.yml":
     print("Will use abinit_vars.yml as database input file for the input variables and their characteristics ...")
-  elif ymlfile== "list_of_topics.yml":
-    print("Will use list_of_topics.yml as database input file for the list of topics ...")
+  elif ymlfile== "yml_templates/list_of_topics.yml":
+    print("Will use yml_templates/list_of_topics.yml as database input file for the list of topics ...")
   elif ymlfile== "topics.yml":
     print("Will use topics.yml as database input file for the list of topics ...")
   elif ymlfile== "sections.yml":
@@ -123,7 +123,7 @@ def read_yaml_file(ymlfile):
 ################################################################################
  
 variables=read_yaml_file("abinit_vars.yml")
-list_of_topics=read_yaml_file("list_of_topics.yml")
+list_of_topics=read_yaml_file("yml_templates/list_of_topics.yml")
 topics=read_yaml_file("topics.yml")
 sections=read_yaml_file("sections.yml")
 tests_dirs=read_yaml_file("tests_dirs.yml")
