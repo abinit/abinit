@@ -31,7 +31,9 @@ and the Around Mean Field approximation.
 Our implementation is described in [5].
 It follows the main lines of the paper [4].
 Forces and stress are implemented.
-For details on keywords (<a href="varpaw.html#lpawu">lpawu</a>,upawu,jpawu,usedmatpu,dmatpuopt,dmatudiag) see keyword usepawu in input variables.
+For details on keywords 
+(<a href="varpaw.html#lpawu">lpawu</a>,<a href="varpaw.html#upawu">upawu</a>,<a href="varpaw.html#jpawu">jpawu</a>,<a href="varpaw.html#usedmatpu">usedmatpu</a>,<a href="varpaw.html#dmatpuopt">dmatpuopt</a>,<a href="varpaw.html#dmatudiag">dmatudiag</a>) 
+see keyword <a href="varpaw.html#usepawu">usepawu</a> in input variables.
 
 <p> In both the output and log files, we can find:
 <p>- The DFT+U contribution of energy which is contained inside the PAW Spherical terms in the output file.
@@ -39,7 +41,7 @@ For details on keywords (<a href="varpaw.html#lpawu">lpawu</a>,upawu,jpawu,usedm
   counting term, and sum of the two) in the log file.
 <p>- The orbital density matrix (n_{m,m'}^{\sigma}), also called occupation
  matrix (corresponding to eq 9 of ref [4]  and eq 1 of ref [2], see also
-  [5] and variable dmapuopt) is also
+  [5] and variable <a href="varpaw.html#dmatpuopt">dmatpuopt</a>) is also
   given for each atom in the basis of real spherical harmonics.
   It is given at each SCF step in the log file: one can thus check the
   convergency of the calculation.

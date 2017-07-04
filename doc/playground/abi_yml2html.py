@@ -480,6 +480,48 @@ for topic_name in list_of_topics:
   print("File topic_"+topic_name+".html has been written ...")
 
 ################################################################################
+# Generate the file with the list of names of different "topic" files
+
+#Constitute first the table of content
+toc = '<a name="list"></a>'
+toc += '<h3><b> Alphabetical list of all "How to ?" documentation topics.</b></h3>'
+
+cur_let = 'A'
+toc += "<p>"+cur_let+".&nbsp;\n"
+for i, topic in enumerate(topics):
+  while not (topic.topic_name.startswith(cur_let.lower()) or topic.topic_name.startswith(cur_let.upper())):
+    cur_let = chr(ord(cur_let)+1)
+    toc = toc + "<p>"+cur_let+".\n"
+  topic_name = topic.topic_name
+  toc = toc + "<br><a href=\""+ topic_name + ".html\">" + topic_name + "</a> [How to "+topic.howto+"] &nbsp;&nbsp;\n"
+
+#Generate a first version of the html file, in the order "header" ... up to the "end"
+#Take the info from the section "default" if there is no information on the specific section provided in the yml file.
+all_topics_html=""
+for j in ["header","title","subtitle","copyright","links","toc","links","end"]:
+  if j == "toc":
+    all_topics_html += toc
+  elif j == "subtitle":
+    all_topics_html += "<h2>Complete list.</h2><hr>"
+    all_topics_html += 'This document lists the names of all "How to ?" documentation topics for the abinit package.'
+    all_topics_html += '<script type="text/javascript" src="../generic_advice.js"> </script>'
+  else:
+    all_topics_html += getattr(default_topic,j)
+
+#Global operations on the tentative html file.
+all_topics_html=all_topics_html.replace("__JS_PATH__",js_path)
+all_topics_html=all_topics_html.replace("__KEYWORD__",default_topic.keyword)
+all_topics_html = doku2html(make_links(all_topics_html,None,list_all_vars,list_chars,cur_specials))
+
+# Open, write and close the file
+file_html = 'html_automatically_generated/all_topics.html'
+f_html = open(file_html,'w')
+f_html.write(all_topics_html)
+f_html.close()
+print("File all_topics.html has been written ...")
+print("Work done !")
+
+################################################################################
 # Assemble the "topic" files : secs 1, 2, 3 and then possibly 4 and 5
 
 # For each "topic" file 

@@ -1,8 +1,8 @@
 #- convergency
 #- crystal
 - DFT+U
-#- GSgeneral 
-#- GSintroduction
+- GSgeneral 
+- GSintroduction
 - hf
 #- k-points
 #- multidtset
