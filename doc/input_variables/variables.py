@@ -8,9 +8,6 @@ except ImportError:
 with open('characteristics.yml', 'r') as f:
     list_chars = yaml.load(f)
 
-with open('sections.yml', 'r') as f:
-    list_sections = yaml.load(f)
-
 list_specials = [
     ('AUTO_FROM_PSP', 'Means that the value is read from the PSP file'),
     ('CUDA', 'True if CUDA is enabled (compilation)'),
@@ -50,6 +47,14 @@ def literal_unicode_representer(dumper, data):
 
 yaml.add_representer(literal, literal_unicode_representer)
 
+def valuewithunit_representer(dumper, data):
+    return dumper.represent_mapping('!valuewithunit', data.__dict__)
+
+####################################################################################################
+
+# Classes
+
+####################################################################################################
 
 class Variable(yaml.YAMLObject):
     vartype = ''  # String containing the type
@@ -101,6 +106,8 @@ class Variable(yaml.YAMLObject):
     def __str__(self):
         return "Variable " + str(self.abivarname) + " (default = " + str(self.defaultval) + ")"
 
+####################################################################################################
+
 class Topic(yaml.YAMLObject):
     topic_name = None  # String containing the "How to ?" topic name 
     howto = ''     # String containing the description of the topics, to be echoed after "How to" ...
@@ -113,6 +120,82 @@ class Topic(yaml.YAMLObject):
     def __init__(self, topic_name=None, howto=None):
         self.topic_name = topic_name
         self.howto = howto
+
+####################################################################################################
+
+class Section(yaml.YAMLObject):
+    name = None  # String containing section name
+    keyword = '' # String containing the short description of the topics, to be echoed in the title of the section file.
+    header = ''  # Header of the file, possibly the 'default' one
+    title  = ''  # Title  of the file, possibly the 'default' one
+    subtitle  = ''  # Subtitle  of the file, possibly the 'default' one
+    purpose   = ''  # Purpose  of the file, possibly the 'default' one
+    advice    = ''  # Advice  of the file, possibly the 'default' one
+    copyright = ''  # Copyright of the file, possibly the 'default' one
+    links     = ''  # Links of the file, possibly the 'default' one
+    menu      = ''  # Menu of the file, possibly the 'default' one
+    tofcontent_header      = ''  # Header of the table of content of the file, possibly the 'default' one
+    end       = ''  # End of the file, possibly the 'default' one
+
+    yaml_tag = u'!section'
+
+    def attrs(self):
+        return ['name', 'keyword', 'header', 'title', 'subtitle', 'purpose', 'advice', 'copyright', 'links', 'menu', 'tofcontent_header', 'end']
+
+    #Note that the default values are actually not initialized here, but in the data file, in order to ease the maintenance.
+    def __init__(self, name=None, keyword=None, header=None, title=None, subtitle=None, purpose=None, advice=None, copyright=None, links=None, menu=None, tofcontent_header=None, end=None):
+        self.name = name
+        self.keyword = keyword
+        self.header = header
+        self.title  = title
+        self.subtitle = subtitle
+        self.purpose  = purpose
+        self.advice   = advice
+        self.copyright= copyright
+        self.links    = links
+        self.menu     = menu
+        self.tofcontent_header = tofcontent_header
+        self.end      = end
+
+####################################################################################################
+
+class Newtopic(yaml.YAMLObject):
+    name = None  # String containing section name
+    keyword = '' # String containing the short description of the topics, to be echoed in the title of the section file.
+    howto  = ''  # Should complete the sentence beginning with "How to" 
+    header = ''  # Header of the file, possibly the 'default' one
+    title  = ''  # Title  of the file, possibly the 'default' one
+    subtitle  = ''  # Subtitle  of the file, possibly the 'default' one
+    copyright = ''  # Copyright of the file, possibly the 'default' one
+    links     = ''  # Links of the file, possibly the 'default' one
+    tofcontent_header      = ''  # Header of the table of content of the file, possibly the 'default' one
+    introduction = '' # Introduction to the topic
+    tutorials    = '' # List of relevant tutorials
+    examples     = '' # Relevant examples
+    end       = ''  # End of the file, possibly the 'default' one
+
+    yaml_tag = u'!newtopic'
+
+    def attrs(self):
+        return ['name', 'keyword', 'howto', 'header', 'title', 'subtitle', 'copyright', 'links', 'tofcontent_header', 'introduction', 'tutorials', 'examples', 'end']
+
+    #Note that the default values are actually not initialized here, but in the data file, in order to ease the maintenance.
+    def __init__(self, name=None, keyword=None, howto=None, header=None, title=None, subtitle=None, copyright=None, links=None, tofcontent_header=None, introduction=None, tutorials=None, examples=None, end=None):
+        self.name = name
+        self.keyword = keyword
+        self.header = header
+        self.howto  = howto 
+        self.title  = title
+        self.subtitle = subtitle
+        self.copyright= copyright
+        self.links    = links
+        self.tofcontent_header = tofcontent_header
+        self.introduction = introduction
+        self.tutorials = tutorials
+        self.examples = examples 
+        self.end      = end
+
+####################################################################################################
 
 class ValueWithUnit(yaml.YAMLObject):
     value = None
@@ -129,10 +212,7 @@ class ValueWithUnit(yaml.YAMLObject):
     def __repr__(self):
         return str(self)
 
-
-def valuewithunit_representer(dumper, data):
-    return dumper.represent_mapping('!valuewithunit', data.__dict__)
-
+####################################################################################################
 
 class Range(yaml.YAMLObject):
     start = None
@@ -162,6 +242,7 @@ class Range(yaml.YAMLObject):
         else:
             return None
 
+####################################################################################################
 
 class ValueWithConditions(yaml.YAMLObject):
     yaml_tag = u'!valuewithconditions'
@@ -177,6 +258,7 @@ class ValueWithConditions(yaml.YAMLObject):
     def __str__(self):
         return self.__repr__()
 
+####################################################################################################
 
 class MultipleValue(yaml.YAMLObject):
     number = None

@@ -99,14 +99,14 @@ def read_yaml_file(ymlfile):
 
   if ymlfile== "abinit_vars.yml":
     print("Will use abinit_vars.yml as database input file for the input variables and their characteristics ...")
-  elif ymlfile== "yml_templates/list_of_topics.yml":
-    print("Will use yml_templates/list_of_topics.yml as database input file for the list of topics ...")
+  elif ymlfile== "yml_files/list_of_topics.yml":
+    print("Will use yml_files/list_of_topics.yml as database input file for the list of topics ...")
   elif ymlfile== "topics.yml":
     print("Will use topics.yml as database input file for the list of topics ...")
   elif ymlfile== "sections.yml":
     print("Will use sections.yml as database input file for the list of sections ...")
-  elif ymlfile== "yml_templates/tests_dirs.yml":
-    print("Will use yml_templates/tests_dirs.yml as database input file for the list of directories in which automatic test input files are present ...")
+  elif ymlfile== "yml_files/tests_dirs.yml":
+    print("Will use yml_files/tests_dirs.yml as database input file for the list of directories in which automatic test input files are present ...")
   elif ymlfile== "html_automatically_generated/topics_in_tests.yml":
     print("Generated file named html_automatically_generated/topics_in_tests.yml, to contain the list of automatic test input files relevant for each topic ...")
 
@@ -123,10 +123,10 @@ def read_yaml_file(ymlfile):
 ################################################################################
  
 variables=read_yaml_file("abinit_vars.yml")
-list_of_topics=read_yaml_file("yml_templates/list_of_topics.yml")
+list_of_topics=read_yaml_file("yml_files/list_of_topics.yml")
 topics=read_yaml_file("topics.yml")
 sections=read_yaml_file("sections.yml")
-tests_dirs=read_yaml_file("yml_templates/tests_dirs.yml")
+tests_dirs=read_yaml_file("yml_files/tests_dirs.yml")
 
 ################################################################################
 # Parse the ABINIT input files, in order to find the possible topics to which they are linked -> topics_in_tests
@@ -414,15 +414,15 @@ for i, topic_name in enumerate(inputs_for_topic):
 ################################################################################
 # Assemble the "topic" files 
 
-print("NEW : Will use file yml_templates/default_topic.yml as default for all topic files ... ")
-default_topic_yml=read_yaml_file("yml_templates/default_topic.yml")
+print("NEW : Will use file yml_files/default_topic.yml as default for all topic files ... ")
+default_topic_yml=read_yaml_file("yml_files/default_topic.yml")
 default_topic=default_topic_yml[0]
 
 # For each "topic" file
 for topic_name in list_of_topics:
-  f_newtopic="yml_templates/topic_"+topic_name+".yml"
+  f_newtopic="yml_files/topic_"+topic_name+".yml"
   print("NEW : Will use file "+f_newtopic+" to initiate the topic "+topic_name+" ... ")
-  newtopic_yml=read_yaml_file("yml_templates/topic_"+topic_name+".yml")
+  newtopic_yml=read_yaml_file("yml_files/topic_"+topic_name+".yml")
   newtopic=newtopic_yml[0]
 
   #Generate the table of content
@@ -553,7 +553,7 @@ for topic_name, content in topic_invars.items():
   f_topic.write(topic_header_varX2)
 
 # Write Sec. 3 
-  f_topic.write("\n\n<p>&nbsp; \n<HR ALIGN=left> \n<p> <a name=\"3\">&nbsp;</a>\n<h3><b> 3. Related input variables.</b></h3>\n\n\n")
+#  f_topic.write("\n\n<p>&nbsp; \n<HR ALIGN=left> \n<p> <a name=\"3\">&nbsp;</a>\n<h3><b> 3. Related input variables.</b></h3>\n\n\n")
   f_topic.write(topic_invars[topic_name])
 
 # Write Sec. 4
