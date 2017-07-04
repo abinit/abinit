@@ -12,7 +12,7 @@ except ImportError:
 
 
 def main():
-    path = 'abinit_vars.yml'
+    path = 'yml_files/abinit_vars.yml'
     with open(path, 'r') as f:
         variables = yaml.load(f)
 
