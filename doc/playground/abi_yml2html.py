@@ -334,13 +334,13 @@ for i, section_info in enumerate(sections):
 
 ################################################################################
 # Constitute the section "Related input variables" for all topic files. 
-# This sec3 is stored, for each topic_name, in topic_sec3[topic_name]
+# This section in input variables is stored, for each topic_name, in topic_invars[topic_name]
 
-topic_sec3 = dict()
+topic_invars = dict()
 found = dict()
 
 for i, topic in enumerate(topics):
-  topic_sec3[topic.topic_name] = ""
+  topic_invars[topic.topic_name] = ""
 
 for (tclasskey, tclassval) in list_topics_class:
 
@@ -358,24 +358,24 @@ for (tclasskey, tclassval) in list_topics_class:
           if tclasskey==name_class[1].strip() :
             topic_name=name_class[0].strip()
             if found[topic_name]==0 :
-              topic_sec3[topic_name] += "<p>"+tclassval+"<p>"
+              topic_invars[topic_name] += "<p>"+tclassval+"<p>"
               found[topic_name] = 1
             abivarname=var.abivarname
             if var.characteristics is not None and '[[INTERNAL_ONLY]]' in var.characteristics:
               abivarname = '%'+abivarname
-            topic_sec3[topic_name] += "... <a href=\""+var.section+".html#"+var.abivarname+"\">"+abivarname+"</a>   "
-            topic_sec3[topic_name] += "["+var.mnemonics+"]<br>\n"
+            topic_invars[topic_name] += "... <a href=\""+var.section+".html#"+var.abivarname+"\">"+abivarname+"</a>   "
+            topic_invars[topic_name] += "["+var.mnemonics+"]<br>\n"
     except:
       if debug==1 :
        print(" No topics for abivarname "+var.abivarname) 
 
 ################################################################################
 # Constitute the section 4 "Selected input files" for all topic files.
-# This sec4 is stored, for each topic_name, in topic_sec4[topic_name]
+# This section on input files in topics  is stored, for each topic_name, in topic_infiles[topic_name]
 
-topic_sec4 = dict()
+topic_infiles = dict()
 for i, var in enumerate(topics):
-  topic_sec4[var.topic_name] = ""
+  topic_infiles[var.topic_name] = ""
  
 # Create a dictionary to contain the list of tests for each topic
 inputs_for_topic = dict()
@@ -408,8 +408,8 @@ for i, topic_name in enumerate(inputs_for_topic):
     line="<p> tests/"+dirname+"/Input: "
     for testname in testnames:
       line+="<a href=\"../tests/"+dirname+"/Input/"+testname+"\">"+testname+"</a> \n"
-    topic_sec4[topic_name]+= line
-  topic_sec4[topic_name] += "<br>\n"
+    topic_infiles[topic_name]+= line
+  topic_infiles[topic_name] += "<br>\n"
 
 ################################################################################
 # Assemble the "topic" files 
@@ -436,7 +436,7 @@ for topic_name in list_of_topics:
       extract_j=getattr(newtopic,j).strip()
     except :
       extract_j=""
-    if (extract_j != "" and extract_j!= "default") or (j=="input_variables" and topic_sec3[topic_name]!="") or (j=="input_files" and topic_sec4[topic_name]!=""):
+    if (extract_j != "" and extract_j!= "default") or (j=="input_variables" and topic_invars[topic_name]!="") or (j=="input_files" and topic_infiles[topic_name]!=""):
       item_toc += 1
       item_num="%d" % item_toc
       sec_number[j]=item_num
@@ -453,12 +453,12 @@ for topic_name in list_of_topics:
     elif j == "input_variables":
       if sec_number[j]!="0" :
         topic_html+= '\n&nbsp; \n<HR ALIGN=left> \n<a name=\"'+sec_number[j]+'\">&nbsp;</a>\n<h3><b>'+sec_number[j]+'. '+title[j]+'</b></h3>\n\n\n'
-        topic_html+= topic_sec3[topic_name]
+        topic_html+= topic_invars[topic_name]
     elif j == "input_files":
       if sec_number[j]!="0" :
         topic_html+= '\n&nbsp; \n<HR ALIGN=left> \n<a name=\"'+sec_number[j]+'\">&nbsp;</a>\n<h3><b>'+sec_number[j]+'. '+title[j]+'</b></h3>\n\n\n'
         topic_html+= "The user can find some related example input files in the ABINIT package in the directory /tests, or on the Web:\n"
-        topic_html+= topic_sec4[topic_name]
+        topic_html+= topic_infiles[topic_name]
     else:
       extract_j=getattr(newtopic,j).strip()
       if extract_j == "" or extract_j== "default" :
@@ -528,7 +528,7 @@ print("Work done !")
 # Assemble the "topic" files : secs 1, 2, 3 and then possibly 4 and 5
 
 # For each "topic" file 
-for topic_name, content in topic_sec3.items():
+for topic_name, content in topic_invars.items():
   file_template = 'html_template/temp_'+topic_name+'.html'
   print("Will use file named temp_"+topic_name+", as template for "+topic_name+".html... ", end='')
   try:
@@ -550,12 +550,12 @@ for topic_name, content in topic_sec3.items():
 
 # Write Sec. 3 
   f_topic.write("\n\n<p>&nbsp; \n<HR ALIGN=left> \n<p> <a name=\"3\">&nbsp;</a>\n<h3><b> 3. Related input variables.</b></h3>\n\n\n")
-  f_topic.write(topic_sec3[topic_name])
+  f_topic.write(topic_invars[topic_name])
 
 # Write Sec. 4
   f_topic.write("\n\n<p>&nbsp; \n<HR ALIGN=left> \n<p> <a name=\"4\">&nbsp;</a>\n<h3><b> 4. Selected input files.</b></h3>\n\n\n")
   f_topic.write("The user can find some related example input files in the ABINIT package in the directory /tests, or on the Web:\n")
-  f_topic.write(topic_sec4[topic_name])
+  f_topic.write(topic_infiles[topic_name])
 
 # Write final lines
   content = "<br>"
