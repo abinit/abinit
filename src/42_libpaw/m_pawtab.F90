@@ -1036,8 +1036,6 @@ subroutine pawtab_copy_0D(Pawtabin, Pawtabout)
 
  ! objects (pointer)
  nullify(Pawtabout%wvl)
- ! BEGIN DEBUG
- ! END DEBUG
  !if (associated(Pawtabin%wvl)) then
  !  Pawtabout%wvl = Pawtabin%wvl
  !end if
