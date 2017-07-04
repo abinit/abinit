@@ -8,16 +8,8 @@ except ImportError:
 with open('yml_files/characteristics.yml', 'r') as f:
     list_chars = yaml.load(f)
 
-list_specials = [
-    ('AUTO_FROM_PSP', 'Means that the value is read from the PSP file'),
-    ('CUDA', 'True if CUDA is enabled (compilation)'),
-    ('ETSF_IO', 'True if ETSF_IO is enabled (compilation)'),
-    ('FFTW3', 'True if FFTW3 is enabled (compilation)'),
-    ('MPI_IO', 'True if MPI_IO is enabled (compilation)'),
-    ('NPROC', 'Number of processors used for Abinit'),
-    ('PARALLEL', 'True if the code is compiled with MPI'),
-    ('SEQUENTIAL', 'True if the code is compiled without MPI'),
-]
+with open('yml_files/list_specials.yml', 'r') as f:
+    list_specials = yaml.load(f)
 
 list_topics_class = [
     ('compulsory', 'Compulsory input variables:'),
