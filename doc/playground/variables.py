@@ -168,7 +168,6 @@ class Newtopic(yaml.YAMLObject):
     subtitle  = ''  # Subtitle  of the file, possibly the 'default' one
     copyright = ''  # Copyright of the file, possibly the 'default' one
     links     = ''  # Links of the file, possibly the 'default' one
-    tofcontent_header      = ''  # Header of the table of content of the file, possibly the 'default' one
     introduction = '' # Introduction to the topic
     tutorials    = '' # List of relevant tutorials
     examples     = '' # Relevant examples
@@ -177,10 +176,10 @@ class Newtopic(yaml.YAMLObject):
     yaml_tag = u'!newtopic'
 
     def attrs(self):
-        return ['name', 'keyword', 'howto', 'header', 'title', 'subtitle', 'copyright', 'links', 'tofcontent_header', 'introduction', 'tutorials', 'examples', 'end']
+        return ['name', 'keyword', 'howto', 'header', 'title', 'subtitle', 'copyright', 'links', 'introduction', 'tutorials', 'examples', 'end']
 
     #Note that the default values are actually not initialized here, but in the data file, in order to ease the maintenance.
-    def __init__(self, name=None, keyword=None, howto=None, header=None, title=None, subtitle=None, copyright=None, links=None, tofcontent_header=None, introduction=None, tutorials=None, examples=None, end=None):
+    def __init__(self, name=None, keyword=None, howto=None, header=None, title=None, subtitle=None, copyright=None, links=None, introduction=None, tutorials=None, examples=None, end=None):
         self.name = name
         self.keyword = keyword
         self.header = header
@@ -189,7 +188,6 @@ class Newtopic(yaml.YAMLObject):
         self.subtitle = subtitle
         self.copyright= copyright
         self.links    = links
-        self.tofcontent_header = tofcontent_header
         self.introduction = introduction
         self.tutorials = tutorials
         self.examples = examples 
