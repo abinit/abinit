@@ -5,9 +5,9 @@ document.write(' <A href="http://www.abinit.org"><B>ABINIT home page</B></A>    
 document.write(' <B> | </B> ');
 document.write(' <A href="'+docpath+'users/acknowledgments.html"><B>Suggested acknowledgments</B></A> ');
 document.write(' <B> | </B> ');
-document.write(' <A href="'+docpath+'input_variables/html_automatically_generated/allvariables.html"><B>Input variable list</B></A> ');
+document.write(' <A href="'+docpath+'playground/html_automatically_generated/allvariables.html"><B>Input variable list</B></A> ');
 document.write(' <B> | </B> ');
-document.write(' <A href="'+docpath+'input_variables/what_ABINIT_does.html"><B>What ABINIT does</B></A> ');
+document.write(' <A href="'+docpath+'playground/what_ABINIT_does.html"><B>What ABINIT does</B></A> ');
 document.write(' <B> | </B> ');
 document.write(' <A href="'+docpath+'playground/html_automatically_generated/all_topics.html"><B>"How to" list</B></A> ');
 document.write(' <B> | </B> ');

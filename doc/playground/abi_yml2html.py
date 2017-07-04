@@ -100,8 +100,8 @@ def read_yaml_file(ymlfile):
     print("Will use abinit_vars.yml as database input file for the input variables and their characteristics ...")
   elif ymlfile== "yml_files/list_of_topics.yml":
     print("Will use yml_files/list_of_topics.yml as database input file for the list of topics ...")
-  elif ymlfile== "sections.yml":
-    print("Will use sections.yml as database input file for the list of sections ...")
+  elif ymlfile== "yml_files/sections.yml":
+    print("Will use yml_files/sections.yml as database input file for the list of sections ...")
   elif ymlfile== "yml_files/tests_dirs.yml":
     print("Will use yml_files/tests_dirs.yml as database input file for the list of directories in which automatic test input files are present ...")
   elif ymlfile== "html_automatically_generated/topics_in_tests.yml":
@@ -121,7 +121,7 @@ def read_yaml_file(ymlfile):
  
 variables=read_yaml_file("abinit_vars.yml")
 list_of_topics=read_yaml_file("yml_files/list_of_topics.yml")
-sections=read_yaml_file("sections.yml")
+sections=read_yaml_file("yml_files/sections.yml")
 tests_dirs=read_yaml_file("yml_files/tests_dirs.yml")
 
 ################################################################################
