@@ -1010,7 +1010,7 @@ subroutine pawtab_copy_1D(Pawtabin, Pawtabout)
 
  !@pawtab_type
 
- nn=size(Pawtab)
+ nn=size(Pawtabin)
  if (nn==0) return
 
  do ii=1,nn
