@@ -9,7 +9,7 @@ import argparse
 from variables import *
 
 debug = 0
-make_topics_visible=0
+make_topics_visible=1
 
 # Path relative from HTML files
 js_path = "../"
