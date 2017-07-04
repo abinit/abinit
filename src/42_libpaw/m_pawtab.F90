@@ -24,12 +24,10 @@
 
 MODULE m_pawtab
 
- use defs_basis
- use m_errors, only : msg_hndl, netcdf_check
- use m_xmpi
- use m_profiling_abi
-
- use m_copy
+ USE_DEFS
+ USE_MSG_HANDLING
+ USE_MPI_WRAPPERS
+ USE_MEMORY_PROFILING
 
  implicit none
 
@@ -533,7 +531,6 @@ MODULE m_pawtab
  public :: pawtab_set_flags    ! Set the value of the internal flags
  public :: pawtab_print        ! Printout of the object.
  public :: pawtab_bcast        ! MPI broadcast the object
- public :: pawtab_copy         ! Copy object
 
  interface pawtab_nullify
    module procedure pawtab_nullify_0D
@@ -549,11 +546,6 @@ MODULE m_pawtab
    module procedure pawtab_set_flags_0D
    module procedure pawtab_set_flags_1D
  end interface pawtab_set_flags
-
- interface pawtab_copy
-   module procedure pawtab_copy_0D
-   module procedure pawtab_copy_1D
- end interface pawtab_copy
 !!***
 
 CONTAINS !===========================================================
@@ -943,87 +935,6 @@ subroutine pawtab_free_1D(Pawtab)
  end do
 
 end subroutine pawtab_free_1D
-!!***
-
-!----------------------------------------------------------------------
-
-!!****f* m_pawtab/pawtab_copy_0D
-!! NAME
-!!  pawtab_copy_0D
-!!
-!! FUNCTION
-!!  Copy a pawtab structure
-!!
-!! SIDE EFFECTS
-!!
-!! PARENTS
-!!      m_pawtab
-!!
-!! CHILDREN
-!!
-!! SOURCE
-
-subroutine pawtab_copy_0D(Pawtabin, Pawtabout)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawtab_copy_0D'
-!End of the abilint section
-
- implicit none
-
-!Arguments ------------------------------------
-!arrays
- type(Pawtab_type),intent(in) :: Pawtabin
- type(Pawtab_type),intent(out) :: Pawtabout
-
-! *************************************************************************
-
-end subroutine pawtab_copy_0D
-!!***
-
-!----------------------------------------------------------------------
-
-!!****f* m_pawtab/pawtab_copy_1D
-!! NAME
-!!  pawtab_copy_1D
-!!
-!! FUNCTION
-!!  Copy a pawtab structure
-!!
-!! SIDE EFFECTS
-!!
-!! PARENTS
-!!      m_pawtab
-!!
-!! CHILDREN
-!!
-!! SOURCE
-
-subroutine pawtab_copy_1D(Pawtabin, Pawtabout)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawtab_copy_1D'
-!End of the abilint section
-
- implicit none
-
-!Arguments ------------------------------------
-!arrays
- type(Pawtab_type),intent(in) :: Pawtabin(:)
- type(Pawtab_type),intent(out) :: Pawtabout(:)
-
-!Local variables-------------------------------
- integer :: ii,nn
-
-! *************************************************************************
-
-end subroutine pawtab_copy_1D
 !!***
 
 !----------------------------------------------------------------------
