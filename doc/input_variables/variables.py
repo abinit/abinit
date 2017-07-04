@@ -5,38 +5,14 @@ try:
 except ImportError:
     raise ImportError("pyyaml package is not installed. Install it with `pip install pyyaml`")
 
-with open('characteristics.yml', 'r') as f:
+with open('yml_files/characteristics.yml', 'r') as f:
     list_chars = yaml.load(f)
 
-list_specials = [
-    ('AUTO_FROM_PSP', 'Means that the value is read from the PSP file'),
-    ('CUDA', 'True if CUDA is enabled (compilation)'),
-    ('ETSF_IO', 'True if ETSF_IO is enabled (compilation)'),
-    ('FFTW3', 'True if FFTW3 is enabled (compilation)'),
-    ('MPI_IO', 'True if MPI_IO is enabled (compilation)'),
-    ('NPROC', 'Number of processors used for Abinit'),
-    ('PARALLEL', 'True if the code is compiled with MPI'),
-    ('SEQUENTIAL', 'True if the code is compiled without MPI'),
-]
+with open('yml_files/list_specials.yml', 'r') as f:
+    list_specials = yaml.load(f)
 
-list_topics_class = [
-    ('compulsory', 'Compulsory input variables:'),
-    ('basic', 'Basic input variables:'),
-    ('useful', 'Useful input variables:'),
-    ('internal', 'Relevant internal variables:'),
-    ('prpot', 'Printing input variables for potentials:'),
-    ('prfermi', 'Printing input variables for fermi level or surfaces:'),
-    ('prden', 'Printing input variables for density, eigenenergies k-points and wavefunctions:'),
-    ('prgeo', 'Printing input variables for geometry:'),
-    ('prdos', 'Printing DOS-related input variables:'),
-    ('prgs', 'Printing other ground-state input variables:'),
-    ('prngs', 'Printing non-ground-state input variables:'),
-    ('alch', 'Input variables related to alchemical mixing:'),
-    ('job', 'Input variables for job time limits:'),
-    ('slab', 'Input variables to insert a slab:'),
-    ('lotf', 'Input variables for Learn On The Fly calculations:'),
-    ('expert', 'Input variables for experts:'),
-]
+with open('yml_files/list_topics_class.yml', 'r') as f:
+    list_topics_class = yaml.load(f)
 
 class literal(str): pass
 
@@ -168,7 +144,6 @@ class Newtopic(yaml.YAMLObject):
     subtitle  = ''  # Subtitle  of the file, possibly the 'default' one
     copyright = ''  # Copyright of the file, possibly the 'default' one
     links     = ''  # Links of the file, possibly the 'default' one
-    tofcontent_header      = ''  # Header of the table of content of the file, possibly the 'default' one
     introduction = '' # Introduction to the topic
     tutorials    = '' # List of relevant tutorials
     examples     = '' # Relevant examples
@@ -177,10 +152,10 @@ class Newtopic(yaml.YAMLObject):
     yaml_tag = u'!newtopic'
 
     def attrs(self):
-        return ['name', 'keyword', 'howto', 'header', 'title', 'subtitle', 'copyright', 'links', 'tofcontent_header', 'introduction', 'tutorials', 'examples', 'end']
+        return ['name', 'keyword', 'howto', 'header', 'title', 'subtitle', 'copyright', 'links', 'introduction', 'tutorials', 'examples', 'end']
 
     #Note that the default values are actually not initialized here, but in the data file, in order to ease the maintenance.
-    def __init__(self, name=None, keyword=None, howto=None, header=None, title=None, subtitle=None, copyright=None, links=None, tofcontent_header=None, introduction=None, tutorials=None, examples=None, end=None):
+    def __init__(self, name=None, keyword=None, howto=None, header=None, title=None, subtitle=None, copyright=None, links=None, introduction=None, tutorials=None, examples=None, end=None):
         self.name = name
         self.keyword = keyword
         self.header = header
@@ -189,7 +164,6 @@ class Newtopic(yaml.YAMLObject):
         self.subtitle = subtitle
         self.copyright= copyright
         self.links    = links
-        self.tofcontent_header = tofcontent_header
         self.introduction = introduction
         self.tutorials = tutorials
         self.examples = examples 
