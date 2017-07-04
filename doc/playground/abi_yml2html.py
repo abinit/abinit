@@ -96,16 +96,16 @@ def make_links(text,cur_abivarname,variables,characteristics,specials):
 def read_yaml_file(ymlfile):
   """ Read the file 'ymlfile', containing yml data, and store all such data in the returned object"""
 
-  if ymlfile== "abinit_vars.yml":
-    print("Will use abinit_vars.yml as database input file for the input variables and their characteristics ...")
+  if ymlfile== "yml_files/abinit_vars.yml":
+    print("Will use "+ymlfile+" as database input file for the input variables and their characteristics ...")
   elif ymlfile== "yml_files/list_of_topics.yml":
-    print("Will use yml_files/list_of_topics.yml as database input file for the list of topics ...")
+    print("Will use "+ymlfile+" as database input file for the list of topics ...")
   elif ymlfile== "yml_files/sections.yml":
-    print("Will use yml_files/sections.yml as database input file for the list of sections ...")
+    print("Will use "+ymlfile+" as database input file for the list of sections ...")
   elif ymlfile== "yml_files/tests_dirs.yml":
-    print("Will use yml_files/tests_dirs.yml as database input file for the list of directories in which automatic test input files are present ...")
+    print("Will use "+ymlfile+" as database input file for the list of directories in which automatic test input files are present ...")
   elif ymlfile== "html_automatically_generated/topics_in_tests.yml":
-    print("Generated file named html_automatically_generated/topics_in_tests.yml, to contain the list of automatic test input files relevant for each topic ...")
+    print("Generated file "+ymlfile+", to contain the list of automatic test input files relevant for each topic ...")
 
   with open(ymlfile, 'r') as f:
     ymlstructure = yaml.load(f);
@@ -119,7 +119,7 @@ def read_yaml_file(ymlfile):
 
 ################################################################################
  
-variables=read_yaml_file("abinit_vars.yml")
+variables=read_yaml_file("yml_files/abinit_vars.yml")
 list_of_topics=read_yaml_file("yml_files/list_of_topics.yml")
 sections=read_yaml_file("yml_files/sections.yml")
 tests_dirs=read_yaml_file("yml_files/tests_dirs.yml")

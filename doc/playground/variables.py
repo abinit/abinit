@@ -5,7 +5,7 @@ try:
 except ImportError:
     raise ImportError("pyyaml package is not installed. Install it with `pip install pyyaml`")
 
-with open('characteristics.yml', 'r') as f:
+with open('yml_files/characteristics.yml', 'r') as f:
     list_chars = yaml.load(f)
 
 list_specials = [
