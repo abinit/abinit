@@ -970,8 +970,6 @@ subroutine pawtab_copy(Pawtabin, Pawtabout)
 
 ! *************************************************************************
 
- !@Pawtab_type
-
 end subroutine pawtab_copy
 !!***
 
