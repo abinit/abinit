@@ -436,11 +436,12 @@ for topic_name in list_of_topics:
       extract_j=getattr(newtopic,j).strip()
     except :
       extract_j=""
-    if (extract_j != "" and extract_j!= "default") or j in ["input_variables","input_files"]:
+    if (extract_j != "" and extract_j!= "default") or (j=="input_variables" and topic_sec3[topic_name]!="") or (j=="input_files" and topic_sec4[topic_name]!=""):
       item_toc += 1
       item_num="%d" % item_toc
       sec_number[j]=item_num
       toc += '<li><a href="topic_'+topic_name+'.html#'+item_num+'">'+item_num+'</a>. '+title[j]
+      
   toc+= "</ul>"
 
   #Generate a first version of the html file, in the order "header" ... up to the "end"
@@ -450,16 +451,18 @@ for topic_name in list_of_topics:
     if j == "toc":
       topic_html += toc
     elif j == "input_variables":
-      topic_html+= '\n&nbsp; \n<HR ALIGN=left> \n<a name=\"'+sec_number[j]+'\">&nbsp;</a>\n<h3><b>'+sec_number[j]+'. '+title[j]+'</b></h3>\n\n\n'
-      topic_html+= topic_sec3[topic_name]
+      if sec_number[j]!="0" :
+        topic_html+= '\n&nbsp; \n<HR ALIGN=left> \n<a name=\"'+sec_number[j]+'\">&nbsp;</a>\n<h3><b>'+sec_number[j]+'. '+title[j]+'</b></h3>\n\n\n'
+        topic_html+= topic_sec3[topic_name]
     elif j == "input_files":
-      topic_html+= '\n&nbsp; \n<HR ALIGN=left> \n<a name=\"'+sec_number[j]+'\">&nbsp;</a>\n<h3><b>'+sec_number[j]+'. '+title[j]+'</b></h3>\n\n\n'
-      topic_html+= "The user can find some related example input files in the ABINIT package in the directory /tests, or on the Web:\n"
-      topic_html += topic_sec4[topic_name]
+      if sec_number[j]!="0" :
+        topic_html+= '\n&nbsp; \n<HR ALIGN=left> \n<a name=\"'+sec_number[j]+'\">&nbsp;</a>\n<h3><b>'+sec_number[j]+'. '+title[j]+'</b></h3>\n\n\n'
+        topic_html+= "The user can find some related example input files in the ABINIT package in the directory /tests, or on the Web:\n"
+        topic_html+= topic_sec4[topic_name]
     else:
       extract_j=getattr(newtopic,j).strip()
       if extract_j == "" or extract_j== "default" :
-        topic_html += getattr(default_topic,j)
+        topic_html+= getattr(default_topic,j)
       else:
         if j in title.keys():
           topic_html+= '\n&nbsp; \n<HR ALIGN=left> \n<a name=\"'+sec_number[j]+'\">&nbsp;</a>\n<h3><b>'+sec_number[j]+'. '+title[j]+'</b></h3>\n\n\n'
