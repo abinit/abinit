@@ -105,8 +105,8 @@ def read_yaml_file(ymlfile):
     print("Will use topics.yml as database input file for the list of topics ...")
   elif ymlfile== "sections.yml":
     print("Will use sections.yml as database input file for the list of sections ...")
-  elif ymlfile== "tests_dirs.yml":
-    print("Will use tests_dirs.yml as database input file for the list of directories in which automatic test input files are present ...")
+  elif ymlfile== "yml_templates/tests_dirs.yml":
+    print("Will use yml_templates/tests_dirs.yml as database input file for the list of directories in which automatic test input files are present ...")
   elif ymlfile== "html_automatically_generated/topics_in_tests.yml":
     print("Generated file named html_automatically_generated/topics_in_tests.yml, to contain the list of automatic test input files relevant for each topic ...")
 
@@ -126,7 +126,7 @@ variables=read_yaml_file("abinit_vars.yml")
 list_of_topics=read_yaml_file("yml_templates/list_of_topics.yml")
 topics=read_yaml_file("topics.yml")
 sections=read_yaml_file("sections.yml")
-tests_dirs=read_yaml_file("tests_dirs.yml")
+tests_dirs=read_yaml_file("yml_templates/tests_dirs.yml")
 
 ################################################################################
 # Parse the ABINIT input files, in order to find the possible topics to which they are linked -> topics_in_tests
