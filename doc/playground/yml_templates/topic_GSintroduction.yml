@@ -1,9 +1,9 @@
 - !newtopic
     name      : GSintroduction
     keyword   : GSintroduction
-    howto     : "build an input file for a ground state calculation"
+    howto     : build an input file for a ground state calculation
     header    : default
-    title     : "<h1>1- Building an input file</h1>"
+    title     : <h1>1- Building an input file</h1>
     subtitle  : default
     copyright : default
     links     : default

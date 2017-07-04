@@ -493,7 +493,7 @@ for i, topic in enumerate(topics):
     cur_let = chr(ord(cur_let)+1)
     toc = toc + "<p>"+cur_let+".\n"
   topic_name = topic.topic_name
-  toc = toc + "<br><a href=\""+ topic_name + ".html\">" + topic_name + "</a> [How to "+topic.howto+"] &nbsp;&nbsp;\n"
+  toc = toc + "<br><a href=\"topic_"+ topic_name + ".html\">" + topic_name + "</a> [How to "+topic.howto+"] &nbsp;&nbsp;\n"
 
 #Generate a first version of the html file, in the order "header" ... up to the "end"
 #Take the info from the section "default" if there is no information on the specific section provided in the yml file.
