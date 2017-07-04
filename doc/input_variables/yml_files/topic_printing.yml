@@ -1,0 +1,10 @@
+- !newtopic 
+    name      : printing 
+    keyword   : printing 
+    howto     : set parameters to print some useful quantities
+    header    : default
+    title     : <h1>General printing options</h1>
+    subtitle  : default
+    copyright : default
+    links     : default
+    end : default 
