@@ -219,7 +219,7 @@ for i, var in enumerate(variables):
         topics_name_class = vartopics.split(',')
         for i, topic_name_class in enumerate(topics_name_class):
           name_class = topic_name_class.split('_')
-          cur_content += "<a href=\""+name_class[0]+".html\">"+name_class[0]+"</a> "
+          cur_content += "<a href=\"topic_"+name_class[0]+".html\">"+name_class[0]+"</a> "
         cur_content += "</font>\n"
     except:
       if debug==1 :
@@ -247,7 +247,7 @@ for i, var in enumerate(variables):
     cur_content += "<p>\n"+doku2html(make_links(var.text,var.abivarname,list_all_vars,list_chars,cur_specials))+"\n"
     # End the section for one variable
     cur_content += "</font>\n\n"
-    cur_content += "<br><br><br><br><a href=#top>Go to the top</a>\n"
+    cur_content += "<br><br><a href=#top>Go to the top</a>\n"
     cur_content += "<B> | </B><a href=\"allvariables.html#top\">Complete list of input variables</a><hr>\n"
     #
     all_contents[section] = all_contents[section] + cur_content + "\n\n"
