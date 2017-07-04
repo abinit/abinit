@@ -100,8 +100,6 @@ def read_yaml_file(ymlfile):
     print("Will use abinit_vars.yml as database input file for the input variables and their characteristics ...")
   elif ymlfile== "yml_files/list_of_topics.yml":
     print("Will use yml_files/list_of_topics.yml as database input file for the list of topics ...")
-  elif ymlfile== "topics.yml":
-    print("Will use topics.yml as database input file for the list of topics ...")
   elif ymlfile== "sections.yml":
     print("Will use sections.yml as database input file for the list of sections ...")
   elif ymlfile== "yml_files/tests_dirs.yml":
@@ -123,7 +121,6 @@ def read_yaml_file(ymlfile):
  
 variables=read_yaml_file("abinit_vars.yml")
 list_of_topics=read_yaml_file("yml_files/list_of_topics.yml")
-topics=read_yaml_file("topics.yml")
 sections=read_yaml_file("sections.yml")
 tests_dirs=read_yaml_file("yml_files/tests_dirs.yml")
 
@@ -338,15 +335,16 @@ for i, section_info in enumerate(sections):
 topic_invars = dict()
 found = dict()
 
-for i, topic in enumerate(topics):
-  topic_invars[topic.topic_name] = ""
+for topic_name in list_of_topics:
+  topic_invars[topic_name] = ""
 
 for (tclasskey, tclassval) in list_topics_class:
 
   if debug == 1:
     print("\nWork on "+tclasskey+"\n")
-  for i, topic in enumerate(topics):
-    found[topic.topic_name] = 0
+
+  for topic_name in list_of_topics:
+    found[topic_name] = 0
 
   for i, var in enumerate(variables):
     try:
@@ -373,8 +371,9 @@ for (tclasskey, tclassval) in list_topics_class:
 # This section on input files in topics  is stored, for each topic_name, in topic_infiles[topic_name]
 
 topic_infiles = dict()
-for i, var in enumerate(topics):
-  topic_infiles[var.topic_name] = ""
+
+for topic_name in list_of_topics:
+  topic_infiles[topic_name] = ""
  
 # Create a dictionary to contain the list of tests for each topic
 inputs_for_topic = dict()
@@ -393,22 +392,32 @@ if debug==1 :
   print(inputs_for_topic)
 
 for i, topic_name in enumerate(inputs_for_topic):
-  tests=inputs_for_topic[topic_name]
-# Constitute a dictionary for each directory of tests
-  dir = dict()
-  for test in tests:
-    file_split=test.split('/')
-    dirname=file_split[1] 
-    testname=file_split[3] 
-    if dirname not in dir.keys():
-      dir[dirname] = []
-    dir[dirname].append(testname)
-  for dirname, testnames in dir.items():
-    line="<p> tests/"+dirname+"/Input: "
-    for testname in testnames:
-      line+="<a href=\"../tests/"+dirname+"/Input/"+testname+"\">"+testname+"</a> \n"
-    topic_infiles[topic_name]+= line
-  topic_infiles[topic_name] += "<br>\n"
+  if topic_name in list_of_topics:
+    tests=inputs_for_topic[topic_name]
+    # Constitute a dictionary for each directory of tests
+    dir = dict()
+    for test in tests:
+      file_split=test.split('/')
+      dirname=file_split[1] 
+      testname=file_split[3] 
+      if dirname not in dir.keys():
+        dir[dirname] = []
+      dir[dirname].append(testname)
+    for dirname, testnames in dir.items():
+      line="<p> tests/"+dirname+"/Input: "
+      for testname in testnames:
+        line+="<a href=\"../tests/"+dirname+"/Input/"+testname+"\">"+testname+"</a> \n"
+      topic_infiles[topic_name]+= line
+    topic_infiles[topic_name] += "<br>\n"
+
+################################################################################
+# Initiate the table of content of the file all_topics.html
+
+toc_all = '<a name="list"></a>'
+toc_all += '<h3><b> Alphabetical list of all "How to ?" documentation topics.</b></h3>'
+
+cur_let_all = 'A'
+toc_all += "<p>"+cur_let_all+".&nbsp;\n"
 
 ################################################################################
 # Assemble the "topic" files 
@@ -423,6 +432,12 @@ for topic_name in list_of_topics:
   print("Will use file "+f_newtopic+" to initiate the topic "+topic_name+" ... ",end="")
   newtopic_yml=read_yaml_file("yml_files/topic_"+topic_name+".yml")
   newtopic=newtopic_yml[0]
+
+  #Mention it in the table of content of the file all_topics.html
+  while not (topic_name.startswith(cur_let_all.lower()) or topic_name.startswith(cur_let_all.upper())):
+    cur_let_all = chr(ord(cur_let_all)+1)
+    toc_all = toc_all + "<p>"+cur_let_all+".\n"
+  toc_all = toc_all + "<br><a href=\"topic_"+ topic_name + ".html\">" + topic_name + "</a> [How to "+newtopic.howto+"] &nbsp;&nbsp;\n"
 
   #Generate the table of content
   item_toc=0
@@ -488,25 +503,12 @@ for topic_name in list_of_topics:
 ################################################################################
 # Generate the file with the list of names of different "topic" files
 
-#Constitute first the table of content
-toc = '<a name="list"></a>'
-toc += '<h3><b> Alphabetical list of all "How to ?" documentation topics.</b></h3>'
-
-cur_let = 'A'
-toc += "<p>"+cur_let+".&nbsp;\n"
-for i, topic in enumerate(topics):
-  while not (topic.topic_name.startswith(cur_let.lower()) or topic.topic_name.startswith(cur_let.upper())):
-    cur_let = chr(ord(cur_let)+1)
-    toc = toc + "<p>"+cur_let+".\n"
-  topic_name = topic.topic_name
-  toc = toc + "<br><a href=\"topic_"+ topic_name + ".html\">" + topic_name + "</a> [How to "+topic.howto+"] &nbsp;&nbsp;\n"
-
 #Generate a first version of the html file, in the order "header" ... up to the "end"
 #Take the info from the section "default" if there is no information on the specific section provided in the yml file.
 all_topics_html=""
-for j in ["header","title","subtitle","copyright","links","toc","links","end"]:
-  if j == "toc":
-    all_topics_html += toc
+for j in ["header","title","subtitle","copyright","links","toc_all","links","end"]:
+  if j == "toc_all":
+    all_topics_html += toc_all
   elif j == "subtitle":
     all_topics_html += "<h2>Complete list.</h2><hr>"
     all_topics_html += 'This document lists the names of all "How to ?" documentation topics for the abinit package.'
