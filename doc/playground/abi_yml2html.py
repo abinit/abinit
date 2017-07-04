@@ -9,7 +9,6 @@ import argparse
 from variables import *
 
 debug = 0
-make_topics_visible=1
 
 # Path relative from HTML files
 js_path = "../"
@@ -213,7 +212,7 @@ for i, var in enumerate(variables):
       cur_content += "<br><font id=\"characteristic\">Characteristic: </font>\n"
     # Topics
     try:
-      if var.topics is not None and make_topics_visible==1 :
+      if var.topics is not None :
         cur_content += "<br><font id=\"characteristic\">Mentioned in \"How to\": "
         vartopics=var.topics
         topics_name_class = vartopics.split(',')
@@ -370,7 +369,7 @@ for (tclasskey, tclassval) in list_topics_class:
        print(" No topics for abivarname "+var.abivarname) 
 
 ################################################################################
-# Constitute the section 4 "Selected input files" for all topic files.
+# Constitute the section "Selected input files" for all topic files.
 # This section on input files in topics  is stored, for each topic_name, in topic_infiles[topic_name]
 
 topic_infiles = dict()
@@ -414,14 +413,14 @@ for i, topic_name in enumerate(inputs_for_topic):
 ################################################################################
 # Assemble the "topic" files 
 
-print("NEW : Will use file yml_files/default_topic.yml as default for all topic files ... ")
+print("Will use file yml_files/default_topic.yml as default for all topic files ... ")
 default_topic_yml=read_yaml_file("yml_files/default_topic.yml")
 default_topic=default_topic_yml[0]
 
 # For each "topic" file
 for topic_name in list_of_topics:
   f_newtopic="yml_files/topic_"+topic_name+".yml"
-  print("NEW : Will use file "+f_newtopic+" to initiate the topic "+topic_name+" ... ")
+  print("Will use file "+f_newtopic+" to initiate the topic "+topic_name+" ... ",end="")
   newtopic_yml=read_yaml_file("yml_files/topic_"+topic_name+".yml")
   newtopic=newtopic_yml[0]
 
@@ -526,99 +525,6 @@ f_html = open(file_html,'w')
 f_html.write(all_topics_html)
 f_html.close()
 print("File all_topics.html has been written ...")
-print("Work done !")
-
-################################################################################
-# Assemble the "topic" files : secs 1, 2, 3 and then possibly 4 and 5
-
-# For each "topic" file 
-for topic_name, content in topic_invars.items():
-  file_template = 'html_template/temp_'+topic_name+'.html'
-  print("Will use file named temp_"+topic_name+", as template for "+topic_name+".html... ", end='')
-  try:
-    with open(file_template) as f:
-      header_varX = f.read()
-  except:
-    print("Tried to open the file temp_"+topic_name+" , but failed.")
-
-  file_topic = 'html_automatically_generated/'+topic_name+'.html'
-  topic_header_varX = header_varX.replace("__JS_PATH__",js_path)
-  if topic_name not in "GS_introduction":
-    topic_header_varX += "<script type=\"text/javascript\" src=\""+js_path+"related_input_variables.js\"> </script>\n\n"
-
-  f_topic = open(file_topic,'w')
-
-  topic_header_varX2 = doku2html(make_links(topic_header_varX,None,list_all_vars,list_chars,cur_specials))
-
-  f_topic.write(topic_header_varX2)
-
-# Write Sec. 3 
-#  f_topic.write("\n\n<p>&nbsp; \n<HR ALIGN=left> \n<p> <a name=\"3\">&nbsp;</a>\n<h3><b> 3. Related input variables.</b></h3>\n\n\n")
-  f_topic.write(topic_invars[topic_name])
-
-# Write Sec. 4
-  f_topic.write("\n\n<p>&nbsp; \n<HR ALIGN=left> \n<p> <a name=\"4\">&nbsp;</a>\n<h3><b> 4. Selected input files.</b></h3>\n\n\n")
-  f_topic.write("The user can find some related example input files in the ABINIT package in the directory /tests, or on the Web:\n")
-  f_topic.write(topic_infiles[topic_name])
-
-# Write final lines
-  content = "<br>"
-  content += "<script type=\"text/javascript\" src=\""+js_path+"list_internal_links_incl_topics.js\"> </script>\n\n"
-  content += "</body>\n"
-  content += "</html>"
-  content += "\n"
-  f_topic.write(content)
-  f_topic.close()
-  print("File "+topic_name+".html has been written ...")
-
-################################################################################
-################################################################################
-
-# Generate the file with the list of names of different "topic" files
-
-#Generate the files that document all the variables (all such files : var* as well as all and special).
-# Parse the header of alltopics file and also replace the JS_PATH.
-
-with open('html_template/temp_alltopics.html') as f:
-    header_alltopics = f.read()
-print("Will use file named temp_alltopics.html, as template for alltopics.html... ", end='')
-
-header_alltopics = header_alltopics.replace("__JS_PATH__",js_path)
-
-# Initialize the alltopics file output
-toutput = ''
-toutput = toutput + header_alltopics + "<br />\n"
-cur_let = 'A'
-toutput = toutput + "<p>"+cur_let+".&nbsp;\n"
-
-# DEBUG Test the content of topics
-# for topic in topics:
-#  print("topic: "+topic.topic_name)
-
-if debug==1 :
-  print("Will enter loop on topics")
-
-for i, topic in enumerate(topics):
-  if debug==1 :
-    print("topic: "+topic.topic_name)
-    print("cur_let: "+cur_let)
-  while not (topic.topic_name.startswith(cur_let.lower()) or topic.topic_name.startswith(cur_let.upper())):
-    cur_let = chr(ord(cur_let)+1)
-    toutput = toutput + "<p>"+cur_let+".\n"
-  topic_name = topic.topic_name
-  toutput = toutput + "<br><a href=\""+ topic_name + ".html\">" + topic_name + "</a> [How to "+topic.howto+"] &nbsp;&nbsp;\n"
-
-################################################################################
-# Alltopics file : complete the content, then write the file and close it
-toutput += "<script type=\"text/javascript\" src=\""+js_path+"list_internal_links_incl_topics.js\"> </script>\n\n"
-toutput += "</body>\n"
-toutput += "</html>"
-
-file_html = 'html_automatically_generated/alltopics.html'
-f_html = open(file_html,'w')
-f_html.write(toutput)
-f_html.close()
-print("File alltopics.html has been written ...")
 print("Work done !")
 
 ################################################################################
