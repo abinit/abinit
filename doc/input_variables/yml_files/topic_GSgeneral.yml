@@ -3,7 +3,7 @@
     keyword   : GSgeneral
     howto     : to build an input file for a ground state calculation
     header    : default
-    title     : <h1>2- General settings</h1>
+    title     : <h1>General settings</h1>
     subtitle  : default
     copyright : default
     links     : default
