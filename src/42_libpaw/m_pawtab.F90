@@ -963,8 +963,8 @@ subroutine pawtab_copy(Pawtabin, Pawtabout)
 
 !Arguments ------------------------------------
 !arrays
- type(Pawtab_type),intent(in) :: Pawtabin
- type(Pawtab_type),intent(out) :: Pawtabout
+ type(Pawtab_type),intent(in) :: Pawtabin(:)
+ type(Pawtab_type),intent(out) :: Pawtabout(:)
 
 !Local variables-------------------------------
 
