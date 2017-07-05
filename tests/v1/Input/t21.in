@@ -59,4 +59,5 @@ prtlden 1 # Test the Laplacian of electronic density.
 #%%   Also additional tests concerning the kinetic energy density calculation,
 #%%   the gradient of electronic density calculation and 
 #%%   the Laplacian of electronic density calculation are performed.
+#%% topics = spinpolarisation, xc
 #%%<END TEST_INFO>

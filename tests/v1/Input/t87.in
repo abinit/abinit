@@ -68,4 +68,5 @@ wtk 1 znucl 1
 #%%   (100,1), then compute the energy with nstep=0 for (112,2) and (112,1).
 #%%   Then again SCF test for (400,1), (401,1), (402,1).
 #%%   For the second dataset, reads the wavefunctions of the first dataset.
+#%% topics = multidtset
 #%%<END TEST_INFO>

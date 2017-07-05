@@ -7,7 +7,7 @@ document.write(' <A href="'+docpath+'users/acknowledgments.html"><B>Suggested ac
 document.write(' <B> | </B> ');
 document.write(' <A href="'+docpath+'input_variables/html_automatically_generated/allvariables.html"><B>Input variable list</B></A> ');
 document.write(' <B> | </B> ');
-document.write(' <A href="'+docpath+'input_variables/what_ABINIT_does.html"><B>What ABINIT does</B></A> ');
+document.write(' <A href="'+docpath+'input_variables/yml_files/what_ABINIT_does.html"><B>What ABINIT does</B></A> ');
 document.write(' <B> | </B> ');
 document.write(' <A href="'+docpath+'input_variables/html_automatically_generated/all_topics.html"><B>"How to" list</B></A> ');
 document.write(' <B> | </B> ');

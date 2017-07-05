@@ -33,4 +33,5 @@
 #%% authors = Unknown
 #%% description = 
 #%%   2D rectangular lattice: test the sets of k points generated automatically
+#%% topics = k-points
 #%%<END TEST_INFO>

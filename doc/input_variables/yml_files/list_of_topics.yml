@@ -9,6 +9,7 @@
 - otherGS
 - parallelism
 - PAW
+- PIMD
 - positron
 - printing
 - recursion
