@@ -142,6 +142,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  use m_hdr
  use m_ebands
 
+ use m_ddb_hdr,          only : ddb_hdr_type, ddb_hdr_init, ddb_hdr_free, ddb_hdr_open_write
  use m_fstrings,         only : strcat, sjoin
  use m_kpts,             only : tetra_from_kptrlatt
  use m_pawang,           only : pawang_type
@@ -242,7 +243,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  integer :: pwind_alloc,rdwrpaw,comm,tim_mkrho,use_sc_dmft
  integer :: cnt,spin,band,ikpt
  real(dp) :: cpus,ecore,ecut_eff,ecutdg_eff,etot,fermie
- real(dp) :: gsqcut_eff,gsqcut_shp,gsqcutc_eff,hyb_range,residm,tolwfr,ucvol
+ real(dp) :: gsqcut_eff,gsqcut_shp,gsqcutc_eff,hyb_range,residm,ucvol
  logical :: read_wf_or_den,has_to_init,call_pawinit,write_wfk
  logical :: wvlbigdft=.false.,wvl_debug=.false.
  character(len=500) :: message
@@ -261,6 +262,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  type(wffile_type) :: wff1,wffnew,wffnow
  type(ab_xfh_type) :: ab_xfh
  type(ddb_type) :: ddb
+ type(ddb_hdr_type) :: ddb_hdr
  type(scfcv_t) :: scfcv_args
 !arrays
  integer :: ngfft(18),ngfftf(18)
@@ -1399,27 +1401,35 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 
    dscrpt=' Note : temporary (transfer) database '
    ddbnm=trim(dtfil%filnam_ds(4))//'_DDB'
-!  tolwfr must be initialized here, but it is a dummy value
-   tolwfr=1.0_dp
-   call ddb_io_out (dscrpt,ddbnm,dtset%natom,dtset%mband,&
-&   dtset%nkpt,dtset%nsym,psps%ntypat,dtfil%unddb,DDB_VERSION,&
-&   acell,args_gs%amu,dtset%dilatmx,dtset%ecut,dtset%ecutsm,&
-&   dtset%intxc,dtset%iscf,dtset%ixc,dtset%kpt,dtset%kptnrm,&
-&   dtset%natom,dtset%nband,ngfft,dtset%nkpt,dtset%nspden,dtset%nspinor,&
-&   dtset%nsppol,dtset%nsym,psps%ntypat,occ,dtset%occopt,dtset%pawecutdg,&
-&   rprim,dtset%dfpt_sciss,dtset%spinat,dtset%symafm,dtset%symrel,&
-&   dtset%tnons,tolwfr,dtset%tphysel,dtset%tsmear,&
-&   dtset%typat,dtset%usepaw,dtset%wtk,xred,psps%ziontypat,dtset%znucl)
 
-   if (dtset%iscf > 0) then
-     nblok = 2          ! 1st blok = energy, 2nd blok = gradients
-   else
-     nblok = 1
-   end if
-   fullinit = 0 ; choice=2
-   call psddb8 (choice,psps%dimekb,psps%ekb,fullinit,psps%indlmn,&
-&   psps%lmnmax,nblok,psps%ntypat,dtfil%unddb,pawtab,&
-&   psps%pspso,psps%usepaw,psps%useylm,DDB_VERSION)
+   call ddb_hdr_init(ddb_hdr,dtset,psps,pawtab,DDB_VERSION,dscrpt,&
+&                    xred=xred,occ=occ,ngfft=ngfft)
+
+   call ddb_hdr_open_write(ddb_hdr, ddbnm, dtfil%unddb)
+
+   call ddb_hdr_free(ddb_hdr)
+
+!!  tolwfr must be initialized here, but it is a dummy value
+!   tolwfr=1.0_dp
+!   call ddb_io_out (dscrpt,ddbnm,dtset%natom,dtset%mband,&
+!&   dtset%nkpt,dtset%nsym,psps%ntypat,dtfil%unddb,DDB_VERSION,&
+!&   acell,args_gs%amu,dtset%dilatmx,dtset%ecut,dtset%ecutsm,&
+!&   dtset%intxc,dtset%iscf,dtset%ixc,dtset%kpt,dtset%kptnrm,&
+!&   dtset%natom,dtset%nband,ngfft,dtset%nkpt,dtset%nspden,dtset%nspinor,&
+!&   dtset%nsppol,dtset%nsym,psps%ntypat,occ,dtset%occopt,dtset%pawecutdg,&
+!&   rprim,dtset%dfpt_sciss,dtset%spinat,dtset%symafm,dtset%symrel,&
+!&   dtset%tnons,tolwfr,dtset%tphysel,dtset%tsmear,&
+!&   dtset%typat,dtset%usepaw,dtset%wtk,xred,psps%ziontypat,dtset%znucl)
+!
+!   if (dtset%iscf > 0) then
+!     nblok = 2          ! 1st blok = energy, 2nd blok = gradients
+!   else
+!     nblok = 1
+!   end if
+!   fullinit = 0 ; choice=2
+!   call psddb8 (choice,psps%dimekb,psps%ekb,fullinit,psps%indlmn,&
+!&   psps%lmnmax,nblok,psps%ntypat,dtfil%unddb,pawtab,&
+!&   psps%pspso,psps%usepaw,psps%useylm,DDB_VERSION)
 
    mpert = dtset%natom + 6   ; msize = 3*mpert
 

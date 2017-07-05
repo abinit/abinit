@@ -125,7 +125,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  use m_hdr
 
  use m_dynmat,      only : chkph3, d2sym3, q0dy3_apply, q0dy3_calc, wings3, dfpt_phfrq, sytens
- use m_ddb,         only : psddb8, DDB_VERSION
+ use m_ddb,         only : DDB_VERSION
  use m_ddb_hdr,     only : ddb_hdr_type, ddb_hdr_init, ddb_hdr_free, ddb_hdr_open_write
  use m_efmas,       only : efmasdeg_free_array, efmasfr_free_array
  use m_wfk,         only : wfk_read_eigenvalues
@@ -1419,27 +1419,12 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
    call status(0,dtfil%filstat,iexit,level,'call ddb_hdr_open_write')
    dscrpt=' Note : temporary (transfer) database '
 
-   ! BEGIN DEBUG
-   !write(*,*) 'respfn: calling ddb_hdr_init'
-   !call flush()
-   ! END DEBUG
-   call ddb_hdr_init(ddb_hdr,dtset,psps,pawtab,DDB_VERSION,&
-&                    ngfft,occ,xred,dscrpt)
-   ! BEGIN DEBUG
-   !write(*,*) 'respfn: calling ddb_hdr_open_write'
-   !call flush()
-   ! END DEBUG
+   call ddb_hdr_init(ddb_hdr,dtset,psps,pawtab,DDB_VERSION,dscrpt,&
+&                    xred=xred,occ=occ,ngfft=ngfft)
+
    call ddb_hdr_open_write(ddb_hdr, dtfil%fnameabo_ddb, dtfil%unddb)
 
-   ! BEGIN DEBUG
-   !write(*,*) 'respfn: calling ddb_hdr_free'
-   !call flush()
-   ! END DEBUG
    call ddb_hdr_free(ddb_hdr)
-   ! BEGIN DEBUG
-   !write(*,*) 'respfn: done with ddb_hdr'
-   !call flush()
-   ! END DEBUG
 
 
 !   call status(0,dtfil%filstat,iexit,level,'call ddb_io_out')

@@ -154,8 +154,8 @@ CONTAINS  !===========================================================
 !!
 !! SOURCE
 
-subroutine ddb_hdr_init(ddb_hdr, dtset, psps, pawtab, ddb_version, &
-&                       ngfft, occ, xred, dscrpt)
+subroutine ddb_hdr_init(ddb_hdr, dtset, psps, pawtab, ddb_version, dscrpt, &
+                        xred, occ, ngfft)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -171,11 +171,11 @@ subroutine ddb_hdr_init(ddb_hdr, dtset, psps, pawtab, ddb_version, &
  type(dataset_type),intent(in) :: dtset
  type(pseudopotential_type),intent(in) :: psps
  type(pawtab_type),intent(in) :: pawtab(psps%ntypat*psps%usepaw)
- integer,intent(in) :: ddb_version
- integer,intent(in) :: ngfft(18)
- real(dp),intent(in) :: occ(dtset%mband*dtset%nkpt*dtset%nsppol)
- real(dp),intent(in) :: xred(3,dtset%natom)
  character(len=fnlen),intent(in) :: dscrpt
+ integer,intent(in) :: ddb_version
+ integer,intent(in),optional :: ngfft(18)
+ real(dp),intent(in),optional :: occ(dtset%mband*dtset%nkpt*dtset%nsppol)
+ real(dp),intent(in),optional :: xred(3,dtset%natom)
 
 !Local variables -------------------------
  integer :: ii, nn
@@ -189,7 +189,11 @@ subroutine ddb_hdr_init(ddb_hdr, dtset, psps, pawtab, ddb_version, &
  ! END DEBUG
  ddb_hdr%ddb_version = ddb_version
  ddb_hdr%dscrpt = dscrpt
- ddb_hdr%ngfft = ngfft
+ if (present(ngfft)) then
+   ddb_hdr%ngfft = ngfft
+ else
+   ddb_hdr%ngfft = dtset%ngfft
+ end if
 
  ! BEGIN DEBUG
  !write(*,*) 'ddb_hdr_init: calling psps_copy'
@@ -248,8 +252,16 @@ subroutine ddb_hdr_init(ddb_hdr, dtset, psps, pawtab, ddb_version, &
  ddb_hdr%zion(:) = dtset%ziontypat(1:ddb_hdr%mtypat)
  ddb_hdr%znucl(:) = dtset%znucl(1:ddb_hdr%mtypat)
 
- ddb_hdr%xred(:,:) = xred(1:3,1:ddb_hdr%matom)
- ddb_hdr%occ(:) = occ(1:ddb_hdr%mband*ddb_hdr%mkpt*ddb_hdr%nsppol)
+ if (present(xred)) then
+   ddb_hdr%xred(:,:) = xred(1:3,1:ddb_hdr%matom)
+ else
+   ddb_hdr%xred(:,:) = dtset%xred_orig(1:3,1:ddb_hdr%matom,1)
+ end if
+ if (present(occ)) then
+   ddb_hdr%occ(:) = occ(1:ddb_hdr%mband*ddb_hdr%mkpt*ddb_hdr%nsppol)
+ else
+   ddb_hdr%occ(:) = dtset%occ_orig(1:ddb_hdr%mband*ddb_hdr%mkpt*ddb_hdr%nsppol)
+ end if
 
  ! BEGIN(:) DEBUG
  !write(*,*) 'ddb_hdr_init: shape(ddb_hdr%nband)=', int(shape(ddb_hdr%nband), kind=8)
