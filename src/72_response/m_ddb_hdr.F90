@@ -30,6 +30,7 @@ MODULE m_ddb_hdr
  use defs_abitypes
  use m_xmpi
 
+ use m_copy,    only : alloc_copy
  use m_pawtab,  only : pawtab_type, pawtab_nullify, pawtab_free!, pawtab_copy  ! DEBUG
  use m_psps,    only : psps_copy, psps_free
  use m_ddb,     only : psddb8
@@ -176,6 +177,9 @@ subroutine ddb_hdr_init(ddb_hdr, dtset, psps, pawtab, ddb_version, &
  real(dp),intent(in) :: xred(3,dtset%natom)
  character(len=fnlen),intent(in) :: dscrpt
 
+!Local variables -------------------------
+ integer :: ii, nn
+
 
 ! ************************************************************************
 
@@ -257,8 +261,24 @@ subroutine ddb_hdr_init(ddb_hdr, dtset, psps, pawtab, ddb_version, &
  ! END DEBUG
 
 
- ! DEBUG
+ ! GA: I had way too much problems implementing pawtab_copy.
+ !     The script check-libpaw would report all sorts of errors.
+ !     Therefore, I do a cheap copy here, copying only the relevant info.
  !call pawtab_copy(pawtab, ddb_hdr%pawtab)
+ nn=size(pawtab)
+ if (nn.gt.0) then
+   do ii=1,nn
+    ddb_hdr%pawtab(ii)%basis_size = pawtab(ii)%basis_size
+    ddb_hdr%pawtab(ii)%lmn_size = pawtab(ii)%lmn_size
+    ddb_hdr%pawtab(ii)%lmn2_size = pawtab(ii)%lmn2_size
+    ddb_hdr%pawtab(ii)%rpaw = pawtab(ii)%rpaw
+    ddb_hdr%pawtab(ii)%rshp = pawtab(ii)%rshp
+    ddb_hdr%pawtab(ii)%shape_type = pawtab(ii)%shape_type
+    if (allocated(pawtab(ii)%dij0)) then
+      call alloc_copy(pawtab(ii)%dij0, ddb_hdr%pawtab(ii)%dij0)
+    end if
+   end do
+ end if
 
  ! BEGIN DEBUG
  !write(*,*) 'ddb_hdr_init: done'
