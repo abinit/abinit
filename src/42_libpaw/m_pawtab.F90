@@ -531,6 +531,7 @@ MODULE m_pawtab
  public :: pawtab_set_flags    ! Set the value of the internal flags
  public :: pawtab_print        ! Printout of the object.
  public :: pawtab_bcast        ! MPI broadcast the object
+ public :: pawtab_copy         ! Copy structure
 
  interface pawtab_nullify
    module procedure pawtab_nullify_0D
@@ -546,6 +547,7 @@ MODULE m_pawtab
    module procedure pawtab_set_flags_0D
    module procedure pawtab_set_flags_1D
  end interface pawtab_set_flags
+
 !!***
 
 CONTAINS !===========================================================
@@ -935,6 +937,40 @@ subroutine pawtab_free_1D(Pawtab)
  end do
 
 end subroutine pawtab_free_1D
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_pawtab/pawtab_copy
+!! NAME
+!!  pawtab_copy
+!!
+!! FUNCTION
+!!
+!! SIDE EFFECTS
+!!
+!! PARENTS
+!!      m_pawtab
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine pawtab_copy(Pawtabin, Pawtabout)
+
+
+ implicit none
+
+!Arguments ------------------------------------
+!arrays
+ type(Pawtab_type),intent(in) :: Pawtabin(:)
+ type(Pawtab_type),intent(out) :: Pawtabout(:)
+
+!Local variables-------------------------------
+
+! *************************************************************************
+
+end subroutine pawtab_copy
 !!***
 
 !----------------------------------------------------------------------
