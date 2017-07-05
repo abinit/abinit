@@ -30,7 +30,7 @@ MODULE m_ddb_hdr
  use defs_abitypes
  use m_xmpi
 
- use m_pawtab,  only : pawtab_type, pawtab_nullify, pawtab_copy, pawtab_free
+ use m_pawtab,  only : pawtab_type, pawtab_nullify, pawtab_free!, pawtab_copy  ! DEBUG
  use m_psps,    only : psps_copy, psps_free
  use m_ddb,     only : psddb8
 
@@ -255,7 +255,11 @@ subroutine ddb_hdr_init(ddb_hdr, dtset, psps, pawtab, ddb_version, &
  !write(*,*) 'ddb_hdr_init: calling pawtab_copy'
  !call flush()
  ! END DEBUG
- call pawtab_copy(pawtab, ddb_hdr%pawtab)
+
+
+ ! DEBUG
+ !call pawtab_copy(pawtab, ddb_hdr%pawtab)
+
  ! BEGIN DEBUG
  !write(*,*) 'ddb_hdr_init: done'
  !call flush()
