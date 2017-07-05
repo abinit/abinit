@@ -67,6 +67,7 @@ module m_phonon_supercell
  public :: freeze_displ_supercell
  public :: prt_supercell
  public :: copy_supercell
+ public :: getPBCIndexes_supercell
  public :: destroy_supercell
 !!***
 
@@ -462,7 +463,50 @@ subroutine copy_supercell (scell_in,scell_copy)
 end subroutine copy_supercell
 !!***
 
+!!****f* m_effective_potential/getPBCIndexes_supercell
+!! NAME
+!!
+!! FUNCTION
+!! Get the index of the cell by using PBC
+!!
+!! INPUTS
+!! index  = index of the cell into the supercell
+!! n_cell = number of total cell
+!!
+!! OUTPUT
+!! index  = index of the cell into the supercell with PBC
+!!
+!! SOURCE
 
+subroutine getPBCIndexes_supercell(index,n_cell)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'getPBCIndexes_supercell'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ---------------------------------------------
+  integer, intent(inout)  :: index(3)
+  integer, intent(in) :: n_cell(3)
+!Local variables ---------------------------------------
+  integer :: ii
+! *********************************************************************
+
+  do ii=1,3
+    do while (index(ii) > n_cell(ii)-1)
+      index(ii) = index(ii) - n_cell(ii)
+    end do
+    do while (index(ii) < 0)
+      index(ii) = index(ii) + n_cell(ii)
+    end do
+  end do
+
+end subroutine getPBCIndexes_supercell
+!!***
 
 !****f* m_phonon_supercell/destroy_supercell
 !!

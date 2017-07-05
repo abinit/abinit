@@ -4,6 +4,7 @@
 !!  m_multibinit_dataset
 !!
 !! FUNCTION
+!!  module with the type for the input of multibinit
 !!
 !! COPYRIGHT
 !!  Copyright (C) 2014-2017 ABINIT group (AM)
@@ -160,20 +161,21 @@ contains
 !!****f* m_multibinit_dataset/multibinit_dtset_free
 !!
 !! NAME
-!!   multibinit_dtset_free
+!!  multibinit_dtset_free
 !!
 !! FUNCTION
-!!   deallocate remaining arrays in the multibinit_dtset datastructure
+!!  deallocate remaining arrays in the multibinit_dtset datastructure
 !!
 !! INPUTS
-!!  multibinit_dtset = multibinit datastructure
+!!  multibinit_dtset <type(multibinit_dataset_type)> = multibinit_dataset structure
+!!
+!! OUTPUTS
+!!  multibinit_dtset <type(multibinit_dataset_type)> = multibinit_dataset structure
 !!
 !! PARENTS
 !!      multibinit
 !!
 !! CHILDREN
-!!
-!! NOTES
 !!
 !! SOURCE
 
@@ -230,7 +232,7 @@ end subroutine multibinit_dtset_free
 !!****f* m_multibinit_dataset/invars10
 !!
 !! NAME
-!! invars9
+!! invars10
 !!
 !! FUNCTION
 !! Open input file for the multibinit code, then reads or echoes the input information.
@@ -241,16 +243,10 @@ end subroutine multibinit_dtset_free
 !! string*(*)=string of characters containing all input variables and data
 !!
 !! OUTPUT
-!! multibinit_dtset= (derived datatype) contains all the input variables
+!! multibinit_dtset <type(multibinit_dataset_type)> = datatype with all the input variables
 !!
 !! NOTES
 !! Should be executed by one processor only.
-!!
-!! 27/01/2009: MJV: I have cleaned this routine extensively, putting all
-!!  variables in alphabetical order, and in a second segment the dependent
-!!  variables which need to be allocated depending on the dimensions read in.
-!!  Could be divided into two routines as in abinit.
-!!    FIXME: move checks to chkin9?
 !!
 !! PARENTS
 !!      multibinit
@@ -1257,7 +1253,7 @@ end subroutine invars10
 !! echoes the input information.
 !!
 !! INPUTS
-!! multibinit_dtset= (derived datatype) contains all the input variables
+!! multibinit_dtset <type(multibinit_dataset_type)> datatype with all the input variables 
 !! nunit=unit number for input or output
 !!
 !! OUTPUT
@@ -1425,8 +1421,6 @@ subroutine outvars_multibinit (multibinit_dtset,nunit)
 
 end subroutine outvars_multibinit
 !!***
-
-!----------------------------------------------------------------------
 
 end module m_multibinit_dataset
 !!***

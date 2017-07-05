@@ -9,12 +9,12 @@
 !! Return the effective_potential with the third order
 !!
 !! INPUTS
-!! filenames = input with all name files
-!! inp  = input of multibinit
+!! filenames(17) = path with all name files
+!! inp <type(multibinit_dataset_type)> = datatype with all the input variables
 !! comm=MPI communicator
 !!
 !! OUTPUT
-!! effective_potantial = effective_potential structure with 3rd orders
+!! eff_pot<type(effective_potential_type)> = effective_potential datatype to be initialized
 !!
 !! PARENTS
 !!      multibinit
@@ -388,7 +388,7 @@ subroutine compute_anharmonics(eff_pot,filenames,inp,comm)
 &    'is possible'
   else
     if (inp%strcpling /= 2) then
-      if(ref_eff_pot%has_strainCoupling)then
+      if(ref_eff_pot%has_anharmonicsTerms)then
         write(message,'(10a)') ch10, ' The computation of the third order derivative ',&
 &        'is not possible',ch10,' somes files are missing please use strcpling 2 to generate',&
 &        ' inputs files',ch10,' usable by abinit. The third order derivatives  present in  ',&
@@ -400,7 +400,7 @@ subroutine compute_anharmonics(eff_pot,filenames,inp,comm)
 &        ' the XML file'
       end if
     else
-      if(ref_eff_pot%has_strainCoupling)then
+      if(ref_eff_pot%has_anharmonicsTerms)then
         write(message,'(10a)') ch10, ' The computation of the third order derivative ',&
 &      'is not possible',ch10,' somes files are missing, the input files usable by abinit have been',&
 &      ' generate.',ch10,' The third order derivatives present in ',trim(filenames(3)),' will be used'
@@ -463,8 +463,8 @@ subroutine compute_anharmonics(eff_pot,filenames,inp,comm)
           end do
 
           if(inp%asr >= 0) then
-            ! Impose sum rule
-            call effective_potential_applySumRule(inp%asr,phonon_strain(ii),&
+!           Impose sum rule
+            call harmonics_terms_applySumRule(inp%asr,phonon_strain(ii),&
 &                                                 eff_pot%crystal%natom)
           end if
 
@@ -479,18 +479,17 @@ subroutine compute_anharmonics(eff_pot,filenames,inp,comm)
 &            (2 * abs(effpot_strain(int(delta1))%delta))
 
 !         Compute elastic constants
-!          elastics4rd(ii,ii,:,:) = (eff_pots(int(delta1))%harmonics_terms%elastic_constants(:,:)&
-!&            - 2*ref_eff_pot%harmonics_terms%elastic_constants(:,:)&
-!&          + eff_pots(int(delta2))%harmonics_terms%elastic_constants(:,:)) / &
-!&            (abs(effpot_strain(int(delta1))%delta)**2)
-
+          elastics4rd(ii,ii,:,:) = (eff_pots(int(delta1))%harmonics_terms%elastic_constants(:,:)&
+&            - 2*ref_eff_pot%harmonics_terms%elastic_constants(:,:)&
+&          + eff_pots(int(delta2))%harmonics_terms%elastic_constants(:,:)) / &
+&            (abs(effpot_strain(int(delta1))%delta)**2)
         end if
 
       end if
     end do
 
 !   Set all the values in the effective potential type
-    call effective_potential_setStrainPhononCoupling(eff_pot,natom,nrpt,phonon_strain)
+    call effective_potential_setStrainPhononCoupling(eff_pot,natom,phonon_strain)
     call effective_potential_setElastic3rd(eff_pot,elastics3rd)
     call effective_potential_setElasticDispCoupling(eff_pot,natom,elastic_displacement)
 

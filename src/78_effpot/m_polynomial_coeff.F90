@@ -5,6 +5,8 @@
 !! m_polynomial_coeff
 !!
 !! FUNCTION
+!! Module with the datatype polynomial coefficients
+!!
 !! COPYRIGHT
 !! Copyright (C) 2010-2017 ABINIT group (AM)
 !! This file is distributed under the terms of the
@@ -27,11 +29,13 @@ module m_polynomial_coeff
  use m_errors
  use m_profiling_abi
  use m_polynomial_term
+ use m_phonon_supercell, only: getPBCIndexes_supercell
  use m_xmpi
 
  implicit none
 
  public :: polynomial_coeff_broadcast
+ public :: polynomial_coeff_evaluate
  public :: polynomial_coeff_free
  public :: polynomial_coeff_init
  public :: polynomial_coeff_getName
@@ -49,7 +53,7 @@ module m_polynomial_coeff
 !! FUNCTION
 !! structure for a polynomial coefficient
 !! contains the value of the coefficient and a 
-!! list of terms (displacement) relating to the coefficient
+!! list of terms (displacements and/or strain) relating to the coefficient by symmetry
 !!
 !! SOURCE
 
@@ -66,7 +70,7 @@ module m_polynomial_coeff
 !     \frac{\partial E^{k}}{\partial \tau^{k}}
 
    type(polynomial_term_type),dimension(:),allocatable :: terms
-!     terms(nterm)
+!     polynomial_term(nterm)<type(polynomial_term)> 
 !     contains all the displacements for this coefficient      
 
  end type polynomial_coeff_type
@@ -85,17 +89,18 @@ CONTAINS  !=====================================================================
 !! polynomial_coeff_init
 !!
 !! FUNCTION
-!! Initialize scell structure, from unit cell vectors, qpoint chosen, and atoms
+!! Initialize a polynomial_coeff datatype
 !!
 !! INPUTS
 !!  name     = Name of the polynomial_coeff (Sr_y-O1_y)^3) for example
 !!  nterm    = Number of terms (short range interaction) for this polynomial_coeff
 !!  coefficient  = Value of the coefficient of this term
-!!  termstype(nterm) = Polynomial_term_type contains all the displacements for this coefficient 
-!!  check    = TRUE if the term has to be check for exemple:
-!!                       ((Sr_y-O1_y)^1(Sr_y-O1_y)^1 => (Sr_y-O1_y)^2)
+!!  terms(nterm)<type(polynomial_term)> = array of polynomial_term_type 
+!!  check   = TRUE if this list of terms has to be check. We remove the symetric of equivalent terms
+!!                  for example:  ((Sr_y-O1_y)^1 and -1*(Sr_y-O1_y)^1 => zero
+!!            FALSE, defaut, do nothing
 !! OUTPUT
-!! polynomial_coeff = polynomial_coeff structure to be initialized
+!!   polynomial_coeff<type(polynomial_coeff)> = polynomial_coeff datatype to be initialized
 !!
 !! PARENTS
 !!      m_anharmonics_terms,m_effective_potential_file,m_fit_polynomial_coeff
@@ -161,7 +166,7 @@ subroutine polynomial_coeff_init(coefficient,nterm,polynomial_coeff,terms,name,c
      if(weights(iterm1)/=0) weights(iterm1)= anint(weights(iterm1)/weights(iterm1))
    end do
 
-!Count the number of terms
+!  Count the number of terms
    nterm_tmp = 0
    do iterm1=1,nterm
      if(weights(iterm1) /= 0) nterm_tmp = nterm_tmp + 1
@@ -208,12 +213,13 @@ end subroutine polynomial_coeff_init
 !! polynomial_coeff_free
 !!
 !! FUNCTION
-!! Free polynomial_coeff
+!! Free polynomial_coeff datatype
 !!
 !! INPUTS
+!! polynomial_coeff<type(polynomial_coeff)> = polynomial_coeff datatype 
 !!
 !! OUTPUT
-!! polynomial_coeff = polynomial_coeff structure to be free
+!! polynomial_coeff<type(polynomial_coeff)> = polynomial_coeff datatype
 !!
 !! PARENTS
 !!      m_anharmonics_terms,m_effective_potential_file,m_fit_polynomial_coeff
@@ -266,13 +272,13 @@ end subroutine polynomial_coeff_free
 !! polynomial_coeff_setCoefficient
 !!
 !! FUNCTION
-!! set the coefficient for this  polynomial_coeff type
+!! set the coefficient for of polynomial_coeff
 !!
 !! INPUTS
 !! coefficient = coefficient of this coefficient 
 !! 
 !! OUTPUT
-!! polynomial_coeff = polynomial_coeff structure to be free
+!! polynomial_coeff<type(polynomial_coeff)> = polynomial_coeff datatype
 !!
 !! PARENTS
 !!      m_effective_potential_file
@@ -315,13 +321,13 @@ end subroutine polynomial_coeff_setCoefficient
 !! polynomial_coeff_setName
 !!
 !! FUNCTION
-!! set the name for this  polynomial_coeff type
+!! set the name of a  polynomial_coeff type
 !!
 !! INPUTS
 !! name = name of the coeff
 !! 
 !! OUTPUT
-!! polynomial_coeff = polynomial_coeff structure to be free
+!! polynomial_coeff<type(polynomial_coeff)> = polynomial_coeff datatype
 !!
 !! PARENTS
 !!
@@ -362,11 +368,11 @@ end subroutine polynomial_coeff_setName
 !! polynomial_coeff_getName
 !!
 !! FUNCTION
-!! set the coefficient for this  polynomial_coeff type
+!! get the name of a polynomial coefficient
 !!
 !! INPUTS
 !! natom = number of atoms
-!! polynomial_coeff = coefficient  type
+!! polynomial_coeff<type(polynomial_coeff)> = polynomial_coeff datatype
 !! symbols(natom)  =  array with the atomic symbol:["Sr","Ru","O1","O2","O3"]
 !! recompute = (optional) flag to set if the name has to be recomputed
 !! iterm = (optional) number of the term used for the name
@@ -509,14 +515,14 @@ end subroutine polynomial_coeff_getName
 !! polynomial_coeff_broadcast
 !!
 !! FUNCTION
-!!  MPI broadcast all types for the polynomial_coefficent structure
+!!  MPI broadcast  polynomial_coefficent datatype
 !!
 !! INPUTS
-!!   source=Rank of Source
-!!   comm=MPI communicator
+!!  source = rank of source
+!!  comm = MPI communicator
 !!
 !! SIDE EFFECTS
-!!   coefficent<type(polynomial_coefficent_type)>= Input if node is source, 
+!!  coefficients<type(polynomial_coefficent_type)>= Input if node is source, 
 !!                              other nodes returns with a completely initialized instance.
 !!
 !! PARENTS
@@ -607,23 +613,21 @@ end subroutine polynomial_coeff_broadcast
 !! polynomial_coeff_MPIsend
 !!
 !! FUNCTION
-!!  MPI send the polynomial_coefficent structure
+!!  MPI send the polynomial_coefficent datatype
 !!
 !! INPUTS
-!!   tag = Tag of the message to send
-!!   dest= Rank of Dest
+!!   tag = tag of the message to send
+!!   dest= rank of Dest
 !!   comm= MPI communicator
 !!
 !! SIDE EFFECTS
-!!   coefficent<type(polynomial_coefficent_type)>= Input if node is dest, 
-!!                              other nodes returns with a completely initialized instance.
+!!   polynomial_coeff<type(polynomial_coeff)> = polynomial_coeff datatype
 !!
 !! PARENTS
 !!      m_effective_potential_file
 !!
 !! CHILDREN
-!!      polynomial_coeff_getname,polynomial_coeff_init,polynomial_term_free
-!!      polynomial_term_init
+!!
 !!
 !! SOURCE
 
@@ -684,23 +688,20 @@ end subroutine polynomial_coeff_MPIsend
 !! polynomial_coeff_MPIrecv
 !!
 !! FUNCTION
-!!  MPI receive all types for the polynomial_coefficent structure
+!!  MPI receive the polynomial_coefficent datatype
 !!
 !! INPUTS
-!!   tag = Tag of the message to receive
-!!   source = Rank of Source
+!!   tag = tag of the message to receive
+!!   source = rank of Source
 !!   comm = MPI communicator
 !!
 !! SIDE EFFECTS
-!!   coefficent<type(polynomial_coefficent_type)>= Input if node is source, 
-!!                              other nodes returns with a completely initialized instance.
+!!   coefficients<type(polynomial_coefficent_type)>=  polynomial_coeff datatype
 !!
 !! PARENTS
 !!      m_effective_potential_file
 !!
 !! CHILDREN
-!!      polynomial_coeff_getname,polynomial_coeff_init,polynomial_term_free
-!!      polynomial_term_init
 !!
 !! SOURCE
 
@@ -778,7 +779,7 @@ end subroutine polynomial_coeff_MPIrecv
 !! polynomial_coeff_writeXML
 !!
 !! FUNCTION
-!! This routine print the coefficents into xml format
+!! This routine print the coefficents into XML format
 !!
 !! COPYRIGHT
 !! Copyright (C) 2000-2017 ABINIT group (AM)
@@ -788,10 +789,13 @@ end subroutine polynomial_coeff_MPIrecv
 !! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! INPUTS
-!! filename = the name of output file
-!! coeffs   = array with all the coefficiens
-!! ncoeff   = number of coeffs to print
-!!
+!! coeffs(ncoeffs)<type(polynomial_coeff)> = array of polynomial_coeff datatype
+!! ncoeff = number of coeffs to print
+!! filename = optional,the name of output file
+!!                     default is coefficients.xml
+!! unit = optional,unit of the output file
+!! newfile = optional, TRUE the coefficients are print in new XML (print the headers)
+!!                     FALSE (requieres unit) will not print the headers
 !!
 !! OUTPUT
 !!
@@ -949,18 +953,269 @@ subroutine polynomial_coeff_writeXML(coeffs,ncoeff,filename,unit,newfile)
 end subroutine polynomial_coeff_writeXML
 !!***
 
+!!****f* m_polynomial_coeff/polynomial_coeff_evaluate
+!! NAME
+!!  polynomial_coeff_evaluate
+!!
+!! FUNCTION
+!!  Compute the energy related to the coefficients from
+!!  fitted polynome
+!!
+!! INPUTS
+!!  coefficients(ncoeff)<type(polynomial_coeff_type)> = list of coefficients
+!!  disp(3,natom_sc) = atomics displacement between configuration and the reference
+!!  natom_sc = number of atoms in the supercell
+!!  natom_uc = number of atoms in the unit cell
+!!  ncoeff   = number of coefficients
+!!  sc_size(3) = size of the supercell (2 2 2 for example)
+!!  strain(6) = strain between configuration and the reference 
+!!  cells(ncell) = number of the cells into the supercell (1,2,3,4,5)
+!!  ncell   = total number of cell to treat by this cpu
+!!  index_cells(3,ncell) = indexes of the cells into  supercell (-1 -1 -1 ,...,1 1 1)
+!!  comm=MPI communicator
+!!
+!! OUTPUT
+!!  energy = contribution to the energy
+!!  fcart(3,natom) = contribution  to the forces
+!!  strten(6) = contribution to the stress tensor
+!!
 !! PARENTS
+!!      m_polynomial_coeff
 !!
 !! CHILDREN
-!!      polynomial_coeff_getname,polynomial_coeff_init,polynomial_term_free
-!!      polynomial_term_init
+!!      asrq0_free,effective_potential_effpot2ddb,invars9,mkphbs
 !!
+!! SOURCE
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      polynomial_coeff_getname,polynomial_coeff_init,polynomial_term_free
-!!      polynomial_term_init
+subroutine polynomial_coeff_evaluate(coefficients,disp,energy,fcart,natom_sc,natom_uc,ncoeff,sc_size,&
+&                                    strain,strten,cells,ncell,index_cells,comm)
+
+!Arguments ------------------------------------
+! scalar
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'polynomial_coeff_evaluate'
+!End of the abilint section
+
+  real(dp),intent(out):: energy
+  integer, intent(in) :: ncell,ncoeff,natom_sc,natom_uc
+  integer, intent(in) :: comm
+! array
+  real(dp),intent(out):: strten(6)
+  real(dp),intent(in) :: strain(6)
+  real(dp),intent(out):: fcart(3,natom_sc)
+  real(dp),intent(in) :: disp(3,natom_sc)
+  integer,intent(in) ::   cells(ncell),index_cells(ncell,3)
+  integer,intent(in) :: sc_size(3)
+  type(polynomial_coeff_type),intent(in) :: coefficients(ncoeff)
+ !Local variables-------------------------------
+! scalar
+  integer :: i1,i2,i3,ia1,ib1,ia2,ib2,idir1,idir2,ierr,ii
+  integer :: icoeff,iterm,idisp1,idisp2,icell,power,weight
+  real(dp):: coeff,disp1,disp2,tmp1,tmp2,tmp3
+! array
+  integer :: cell_atoma1(3),cell_atoma2(3)
+  integer :: cell_atomb1(3),cell_atomb2(3)
+  character(len=500) :: msg
+! *************************************************************************
+
+! Check
+  if (any(sc_size <= 0)) then
+    write(msg,'(a,a)')' No supercell found for getEnergy'
+    MSG_ERROR(msg)
+  end if
+
+! Initialisation of variables
+  energy     = zero
+  fcart(:,:) = zero
+  strten(:)  = zero
+
+  do icell = 1,ncell
+    ii = (cells(icell)-1)*natom_uc
+    i1=index_cells(icell,1); i2=index_cells(icell,2); i3=index_cells(icell,3)
+!   Loop over coefficients
+    do icoeff=1,ncoeff
+!     Set the value of the coefficient
+      coeff = coefficients(icoeff)%coefficient
+!     Loop over terms of this coefficient
+      do iterm=1,coefficients(icoeff)%nterm
+!       Set the weight of this term
+        weight =coefficients(icoeff)%terms(iterm)%weight
+        tmp1 = one
+!       Loop over displacement and strain
+        do idisp1=1,coefficients(icoeff)%terms(iterm)%ndisp
+
+!         Set to one the acculation of forces and strain
+          tmp2 = one
+          tmp3 = one
+
+!         Set the power of the displacement:
+          power = coefficients(icoeff)%terms(iterm)%power(idisp1)
+
+!         Get the direction of the displacement or strain
+          idir1 = coefficients(icoeff)%terms(iterm)%direction(idisp1)
+
+!         Strain case idir => -6, -5, -4, -3, -2 or -1
+          if (idir1 < zero)then
+
+            if(abs(strain(abs(idir1))) > tol10)then
+!             Accumulate energy fo each displacement (\sum ((A_x-O_x)^Y(A_y-O_c)^Z))
+              tmp1 = tmp1 * (strain(abs(idir1)))**power           
+              if(power > 1) then
+!             Accumulate stress for each strain (\sum (Y(eta_2)^Y-1(eta_2)^Z+...))
+                tmp3 = tmp3 *  power*(strain(abs(idir1)))**(power-1)
+              end if
+            else
+              tmp1 = zero
+              if(power > 1) then
+                tmp3 = zero
+              end if
+            end if
+          else
+!           Displacement case idir = 1, 2  or 3
+!           indexes of the cell of the atom a
+            cell_atoma1 = coefficients(icoeff)%terms(iterm)%cell(:,1,idisp1)
+            if(cell_atoma1(1)/=0.or.cell_atoma1(2)/=0.or.cell_atoma1(3)/=0) then
+!             if the cell is not 0 0 0 we apply PBC:
+              cell_atoma1(1) =  (i1-1) + cell_atoma1(1)
+              cell_atoma1(2) =  (i2-1) + cell_atoma1(2)
+              cell_atoma1(3) =  (i3-1) + cell_atoma1(3)
+              call getPBCIndexes_supercell(cell_atoma1(1:3),sc_size(1:3))
+!             index of the first atom (position in the supercell if the cell is not 0 0 0)
+              ia1 = cell_atoma1(1)*sc_size(2)*sc_size(3)*natom_uc+&
+&                   cell_atoma1(2)*sc_size(3)*natom_uc+&
+&                   cell_atoma1(3)*natom_uc+&
+&                   coefficients(icoeff)%terms(iterm)%atindx(1,idisp1)
+            else
+!             index of the first atom (position in the supercell if the cell is 0 0 0)
+              ia1 = ii + coefficients(icoeff)%terms(iterm)%atindx(1,idisp1)
+            end if
+
+!           indexes of the cell of the atom b  (with PBC) same as ia1
+            cell_atomb1 = coefficients(icoeff)%terms(iterm)%cell(:,2,idisp1)
+            if(cell_atomb1(1)/=0.or.cell_atomb1(2)/=0.or.cell_atomb1(3)/=0) then
+              cell_atomb1(1) =  (i1-1) + cell_atomb1(1)
+              cell_atomb1(2) =  (i2-1) + cell_atomb1(2)
+              cell_atomb1(3) =  (i3-1) + cell_atomb1(3)
+              call getPBCIndexes_supercell(cell_atomb1(1:3),sc_size(1:3))
+
+!            index of the second atom in the (position in the supercell  if the cell is not 0 0 0) 
+              ib1 = cell_atomb1(1)*sc_size(2)*sc_size(3)*natom_uc+&
+&                   cell_atomb1(2)*sc_size(3)*natom_uc+&
+&                   cell_atomb1(3)*natom_uc+&
+&                   coefficients(icoeff)%terms(iterm)%atindx(2,idisp1)
+            else
+!             index of the first atom (position in the supercell if the cell is 0 0 0)
+              ib1 = ii + coefficients(icoeff)%terms(iterm)%atindx(2,idisp1)
+            end if
+
+!           Get the displacement for the both atoms
+            disp1 = disp(idir1,ia1)
+            disp2 = disp(idir1,ib1)
+
+            if(abs(disp1) > tol10 .or. abs(disp2)> tol10)then
+!           Accumulate energy fo each displacement (\sum ((A_x-O_x)^Y(A_y-O_c)^Z))
+              tmp1 = tmp1 * (disp1-disp2)**power
+              if(power > 1) then
+!               Accumulate forces for each displacement (\sum (Y(A_x-O_x)^Y-1(A_y-O_c)^Z+...))
+                tmp2 = tmp2 * power*(disp1-disp2)**(power-1)
+              end if
+            else
+              tmp1 = zero
+              if(power > 1) then
+                tmp2 = zero
+              end if
+            end if
+          end if
+
+          do idisp2=1,coefficients(icoeff)%terms(iterm)%ndisp
+
+            if(idisp2 /= idisp1) then
+              idir2 = coefficients(icoeff)%terms(iterm)%direction(idisp2)
+              if (idir2 < zero)then
+!               Strain case
+!               Set the power of the strain:
+                power = coefficients(icoeff)%terms(iterm)%power(idisp2)
+!               Accumulate energy forces
+                tmp2 = tmp2 * (strain(abs(idir2)))**power
+!               Accumulate stress for each strain (\sum (Y(eta_2)^Y-1(eta_2)^Z+...))
+                tmp3 = tmp3 * (strain(abs(idir2)))**power
+              else
+                cell_atoma2=coefficients(icoeff)%terms(iterm)%cell(:,1,idisp2)
+                if(cell_atoma2(1)/=0.or.cell_atoma2(2)/=0.or.cell_atoma2(3)/=0) then
+                  cell_atoma2(1) =  (i1-1) + cell_atoma2(1)
+                  cell_atoma2(2) =  (i2-1) + cell_atoma2(2)
+                  cell_atoma2(3) =  (i3-1) + cell_atoma2(3)
+                  call getPBCIndexes_supercell(cell_atoma2(1:3),sc_size(1:3))
+!                 index of the first atom (position in the supercell and direction)
+!                 if the cell of the atom a is not 0 0 0 (may happen)
+                  ia2 = cell_atoma2(1)*sc_size(2)*sc_size(3)*natom_uc+&
+&                       cell_atoma2(2)*sc_size(3)*natom_uc+&
+&                       cell_atoma2(3)*natom_uc+&
+&                       coefficients(icoeff)%terms(iterm)%atindx(1,idisp2)
+                else
+!                 index of the first atom (position in the supercell and direction)
+                  ia2 = ii + coefficients(icoeff)%terms(iterm)%atindx(1,idisp2)
+                end if
+
+                cell_atomb2= coefficients(icoeff)%terms(iterm)%cell(:,2,idisp2)
+
+                if(cell_atomb2(1)/=0.or.cell_atomb2(2)/=0.or.cell_atomb2(3)/=0) then
+!                 indexes of the cell2 (with PBC)
+                  cell_atomb2(1) =  (i1-1) + cell_atomb2(1)
+                  cell_atomb2(2) =  (i2-1) + cell_atomb2(2)
+                  cell_atomb2(3) =  (i3-1) + cell_atomb2(3)
+                  call getPBCIndexes_supercell(cell_atomb2(1:3),sc_size(1:3))
+
+!                 index of the second atom in the (position in the supercell) 
+                  ib2 = cell_atomb2(1)*sc_size(2)*sc_size(3)*natom_uc+&
+&                       cell_atomb2(2)*sc_size(3)*natom_uc+&
+&                       cell_atomb2(3)*natom_uc+&
+&                       coefficients(icoeff)%terms(iterm)%atindx(2,idisp2)
+                else
+                  ib2 = ii + coefficients(icoeff)%terms(iterm)%atindx(2,idisp2)
+                end if
+
+                disp1 = disp(idir2,ia2)
+                disp2 = disp(idir2,ib2)
+
+!               Set the power of the displacement:
+                power = coefficients(icoeff)%terms(iterm)%power(idisp2)
+
+                tmp2 = tmp2 * (disp1-disp2)**power
+                tmp3 = tmp3 * (disp1-disp2)**power
+
+              end if
+            end if
+          end do
+
+          if(idir1<zero)then
+!           Accumule stress tensor
+            strten(abs(idir1)) = strten(abs(idir1)) + coeff * weight * tmp3
+          else
+!           Accumule  forces
+            fcart(idir1,ia1) =  fcart(idir1,ia1)  + coeff * weight * tmp2
+            fcart(idir1,ib1) =  fcart(idir1,ib1)  - coeff * weight * tmp2
+          end if
+        end do
+        
+!       accumule energy
+        energy = energy +  coeff * weight * tmp1
+
+      end do
+    end do
+  end do
+
+! MPI_SUM
+  call xmpi_sum(energy, comm, ierr)
+  call xmpi_sum(fcart , comm, ierr)
+  call xmpi_sum(strten , comm, ierr)
+
+end subroutine polynomial_coeff_evaluate
+!!***
+
 !!****f* m_polynomial_coeff/coeffs_compare
 !! NAME
 !!  equal
@@ -1002,7 +1257,6 @@ pure function coeffs_compare(c1,c2) result (res)
 
 end function coeffs_compare
 !!***
-
 
 end module m_polynomial_coeff
 !!***

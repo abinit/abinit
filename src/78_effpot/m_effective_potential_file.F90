@@ -4,7 +4,8 @@
 !! m_effective_potential_file
 !!
 !! FUNCTION
-!! This  module contains all routine to get the effective potential from files
+!! This  module contains all routine to read the effective potential from files
+!! Can also read coefficients from XML
 !! (XML or DDB)
 !!
 !! COPYRIGHT
@@ -49,7 +50,6 @@ module m_effective_potential_file
  public :: effective_potential_file_getType
  public :: effective_potential_file_read
  public :: effective_potential_file_readDisplacement
- public :: effective_potential_file_readStrain
 
  private :: coeffs_xml2effpot
  private :: system_getDimFromXML
@@ -211,11 +211,14 @@ CONTAINS  !=====================================================================
 !! Also transfert coefficient from xml file for ahnarmonic part
 !!
 !! INPUTS
+!! filename = path of the file
+!! hist<type(abihist)> = optional,The history of the MD (or snapshot of DFT)
+!! inp<type(multibinit_dataset_type)> = optional,datatype with all the input variables (mantadory to 
+!!                                      read DDB file)
 !! comm=MPI communicator
-!! filename = name of the file
 !!
 !! OUTPUT
-!! eff_pot = supercell structure with data to be output
+!! eff_pot<type(effective_potential_type)> = datatype with all the informations for effective potential 
 !!
 !! PARENTS
 !!      compute_anharmonics,multibinit
@@ -415,7 +418,7 @@ subroutine effective_potential_file_read(filename,eff_pot,inp,comm,hist)
 end subroutine effective_potential_file_read
 !!***
 
-!!****f* m_phonon_effective_potential/effective_potential_file_getType
+!!****f* m_effective_potential_file/effective_potential_file_getType
 !!
 !! NAME
 !! effective_potential_file_getType
@@ -429,8 +432,9 @@ end subroutine effective_potential_file_read
 !! OUTPUT
 !! type_file  = 0 no type found
 !!              1 DDB file
-!!              2 XML file
-!!              3 XML with coefficient
+!!              2 XML file the system definition and harmonic part
+!!              3 XML file with polynomial coefficients
+!!             23 XML file with both system definition and polynomial coefficients
 !!
 !! PARENTS
 !!      m_effective_potential_file,multibinit
@@ -539,7 +543,7 @@ subroutine effective_potential_file_getType(filename,filetype)
 end subroutine effective_potential_file_getType
 !!***
 
-!!****f* m_phonon_effective_potential/effective_potential_file_getDimSystem
+!!****f* m_effective_potential_file/effective_potential_file_getDimSystem
 !!
 !! NAME
 !! effective_potential_file_getDimSystem
@@ -665,26 +669,22 @@ subroutine effective_potential_file_getDimSystem(filename,natom,ntypat,nqpt,nrpt
 end subroutine effective_potential_file_getDimSystem
 !!***
 
-!!****f* m_phonon_effective_potential/effective_potential_file_getDimCoeff
+!!****f* m_effective_potential_file/effective_potential_file_getDimCoeff
 !!
 !! NAME
 !! effective_potential_file_getDimCoeff
 !!
 !! FUNCTION
-!! This routine test the xml or ddb file
-!! Return the number of atoms/ntypat in the unit cell from ddb and xml
-!! Return nqpt ans nrpt if the file is XML file
-!! In case of DDB file, you have to run bigbx9 to get nrpt
+!! This routine test the xml with polynomial coefficients
+!! Return the number of coefficients and the maximum number of displacement/strain
 !!
 !! INPUTS
 !! filename = names of the files
-!! comm=MPI communicator
 !!
 !! OUTPUT
 !! ncoeff = number of coefficient for the polynome
 !! nterm(ncoeff) = number terms per coefficient
 !! ndisp(nterm,ncoeff) = number displacement per term
-!! nrpt  = number of rpt points
 !!
 !! PARENTS
 !!      m_effective_potential_file
@@ -820,7 +820,7 @@ end subroutine effective_potential_file_getDimCoeff
 !!***
 
 
-!!****f* m_phonon_effective_potential/effective_potential_file_getDimStrainCoupling
+!!****f* m_effective_potential_file/effective_potential_file_getDimStrainCoupling
 !!
 !! NAME
 !! effective_potential_file_getDimStrainCoupling
@@ -830,7 +830,7 @@ end subroutine effective_potential_file_getDimCoeff
 !!
 !! INPUTS
 !! filename = names of the files
-!! voigt    =
+!! voigt    = voigt notation of the strain
 !!
 !! OUTPUT
 !! nrpt  = number of rpt points
@@ -1129,12 +1129,13 @@ end subroutine system_getDimFromXML
 !! and store them in effective potentential type
 !!
 !! INPUTS
-!! eff_pot = effective potential type
+!! eff_pot<type(effective_potential_type)> = datatype with all the informations for effective potential 
 !! comm=MPI communicator
 !! character(len=*) filnam: name of input or output file
+!! strcpling = optional,logical to disable the strcpling
 !!
 !! OUTPUT
-!! eff_pot = effective potential type
+!! eff_pot<type(effective_potential_type)> = datatype with all the informations for effective potential 
 !!
 !! PARENTS
 !!      m_effective_potential_file
@@ -2015,6 +2016,7 @@ end subroutine system_getDimFromXML
  ABI_DEALLOCATE(tnons)
  ABI_DEALLOCATE(spinat)
  ABI_DEALLOCATE(ptsymrel)
+
 !if strcpling is set to 0 by the user, need to set the flag to false for
 !the initialisation of the effective potential
  if (present(strcpling))then
@@ -2029,7 +2031,7 @@ end subroutine system_getDimFromXML
 &                              elastic3rd=elastic3rd,elastic_displacement=elastic_displacement,&
 &                              epsilon_inf=epsilon_inf,strain_coupling=strain_coupling,&
 &                              phonon_strain=phonon_strain,phfrq=phfrq,qpoints=qph1l,&
-&                              has_strainCoupling=has_anharmonics,zeff=zeff)
+&                              has_anharmonicsTerms=has_anharmonics,zeff=zeff)
 
 !DEALLOCATION OF ARRAYS
  ABI_DEALLOCATE(all_amu)
@@ -2079,12 +2081,13 @@ end subroutine system_xml2effpot
 !!  Also calculate the IFC
 !!
 !! INPUTS
-!! crystal  = number of atoms in primitive cell
-!! ddb  = number of type of atoms
-!! inp  = input of multibinit
-!! comm=MPI communicator
+!! crytal<type(crystal_t)> = datatype with all the information for the crystal
+!! ddb<type(ddb_type)> = datatype with the ddb
+!! inp<type(multibinit_dataset_type)> = datatype with the input variables of multibinit
+!! comm = MPI communicator
+!!
 !! OUTPUT
-!! effective_potantial = effective_potential structure to be initialized
+!! effective_potantial<type(effective_potential_type)> = effective_potential datatype to be initialized
 !!
 !! PARENTS
 !!      m_effective_potential_file
@@ -2721,12 +2724,11 @@ end subroutine system_ddb2effpot
 !! and store them in effective potentential type
 !!
 !! INPUTS
-!! eff_pot = effective potential type
+!! filename = path of input or output file
 !! comm=MPI communicator
-!! character(len=*) filnam: name of input or output file
 !!
 !! OUTPUT
-!! eff_pot = effective potential type
+!! eff_pot<type(effective_potential_type)> = effective_potential datatype
 !!
 !! PARENTS
 !!      m_effective_potential_file
@@ -3174,15 +3176,15 @@ end subroutine coeffs_xml2effpot
 !! effective_potential_file_readDisplacement
 !!
 !! FUNCTION
-!! Read a strain file
+!! Read a displacement ASCII file
 !!
 !! INPUTS
-!! filename = name of the file
-!! natom    = number of atoms
-!! ntime    = number of time
+!! filename = path of the file
+!! natom = number of atoms in the cell
+!! nstep = number of time step
 !!
 !! OUTPUT
-!! disp = array with all the strain
+!! disp(3,natom_sc) = atomics displacement between configuration and the reference
 !!
 !! PARENTS
 !!
@@ -3241,62 +3243,6 @@ subroutine effective_potential_file_readDisplacement(filename,disp,nstep,natom)
 
 end subroutine effective_potential_file_readDisplacement
 !!***
-
-!****f* m_effective_potential/effective_potential_file_readStrain
-!!
-!! NAME
-!! effective_potential_file_readStrain
-!!
-!! FUNCTION
-!! Read a strain file
-!!
-!! INPUTS
-!! filename = name of the file
-!! natom    = number of atoms
-!! ntime    = number of time
-!!
-!! OUTPUT
-!! disp = array with all the strain
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!
-!! SOURCE
-
- subroutine effective_potential_file_readStrain(filename,disp,ntime,natom)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'effective_potential_file_readStrain'
-!End of the abilint section
-
-  implicit none
-
-!Arguments ------------------------------------
-!scalars
-  integer, intent(in) :: natom,ntime
-  character(len=fnlen),intent(in) :: filename
-!array
-  real(dp),intent(out) :: disp(ntime,3,natom)
-!Local variables------------------------------
-!scalars
-  integer :: funit = 1
-  character(500) :: message
-!array
-
-! *************************************************************************
-
-   if (open_file(filename,message,unit=funit,form="formatted",&
-     status="old",action="read") /= 0) then
-     MSG_ERROR(message)
-   end if
-
-end subroutine effective_potential_file_readStrain
-!!***
-
 
 !!****f* m_effective_potential_file/rdfromline
 !! NAME

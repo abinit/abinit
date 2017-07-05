@@ -329,8 +329,8 @@ program multibinit
      case (1)
 !    option = 1
        call fit_polynomial_coeff_fit(reference_effective_potential,&
-&                                    inp%fit_fixcoeff,hist,inp%fit_ncycle,inp%fit_nfixcoeff,&
-&                                    inp%fit_rangePower,comm,cutoff_in=inp%fit_cutoff)
+&                                    inp%fit_fixcoeff,hist,inp%fit_rangePower,inp%fit_ncycle,&
+&                                    inp%fit_nfixcoeff,comm,cutoff_in=inp%fit_cutoff)
      end select
    else
      write(message, '(3a)' )&
