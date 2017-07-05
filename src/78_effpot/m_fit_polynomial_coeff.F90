@@ -1132,7 +1132,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,fixcoeff,hist,ncycle_in,nfixcoeff,po
 
      write(message,'(1x,I0,2a)') ncoeff_tot,' coefficients generated ',ch10
 
-!     filename = "terms_set.xml"
+     filename = "terms_set.xml"
 !     call polynomial_coeff_writeXML(coeffs_in,ncoeff_tot,filename=filename,newfile=.true.)
 
      call wrtout(ab_out,message,'COLL')
@@ -1618,10 +1618,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,fixcoeff,hist,ncycle_in,nfixcoeff,po
      call wrtout(std_out,message,'COLL')
    end do
 
-!  Check if there is still coefficient
-   if(all(singular_coeffs==1)) exit
-
-!  Find a way to keep the bestStore the best coeff for the next step
+!  find the best coeff on each CPU
    mingf(:) = 9D99
    index_min= one
    do icoeff=1,my_ncoeff
@@ -1639,9 +1636,9 @@ subroutine fit_polynomial_coeff_fit(eff_pot,fixcoeff,hist,ncycle_in,nfixcoeff,po
      buffGF(2:5,1) =  mingf(:)
 
      call xmpi_allgatherv(buffGF,5,gf_mpi,buffsize,buffdisp, comm, ierr)
-!  Find a way to keep the bestStore the best coeff for the next step
+!    find the best coeff
      mingf(:)    = 9D99
-     index_min= one
+     index_min= zero
      do icoeff=1,nproc
        if(gf_mpi(2,icoeff) < zero) cycle
        if(gf_mpi(2,icoeff) == zero) cycle
@@ -1652,7 +1649,12 @@ subroutine fit_polynomial_coeff_fit(eff_pot,fixcoeff,hist,ncycle_in,nfixcoeff,po
      end do
    end if
 
-   list_coeffs(icycle) = index_min
+!  Check if there is still coefficient
+   if(index_min==zero) then
+     exit
+   else
+     list_coeffs(icycle) = index_min
+   end if
 
 !  Check if this coeff is treat by this cpu and fill the  
 !  temporary array before broadcast
@@ -1701,6 +1703,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,fixcoeff,hist,ncycle_in,nfixcoeff,po
 
    ncycle_tot = ncycle_tot + 1
 !  Need to define stopping criteria
+
  end do
 
 !This routine solves the linear system proposed by C.Escorihuela-Sayalero see PRB95,094115(2017)
@@ -1957,6 +1960,11 @@ subroutine fit_polynomial_coeff_solve(coefficients,fcart_coeffs,fcart_diff,&
    coefficients = zero
  end if
 
+ if(any(abs(coefficients)>1.0E10))then
+   INFO = 1
+   coefficients = zero
+ end if
+
  info_out = INFO
 
  ABI_DEALLOCATE(AF)
@@ -2167,7 +2175,7 @@ subroutine fit_polynomial_coeff_getFS(coefficients,du_delta,displacement,energy_
 !scalar
  integer :: i1,i2,i3,ia1,ia2,ib1,ib2,ii,icell,icoeff,icoeff_tmp
  integer :: idir1,idir2,idisp1,idisp2,iterm,itime,power
- real(dp):: disp1,disp2,ffact,sfact,tmp1,tmp2,tmp3,weight
+ real(dp):: disp1,disp2,tmp1,tmp2,tmp3,weight
 !arrays
  integer :: cell_atoma1(3),cell_atoma2(3)
  integer :: cell_atomb1(3),cell_atomb2(3)
@@ -2180,8 +2188,6 @@ subroutine fit_polynomial_coeff_getFS(coefficients,du_delta,displacement,energy_
  fcart_out(:,:,:,:) = zero
  strten_out(:,:,:)  = zero
  energy_out(:,:)    = zero
- ffact = one/(3*natom_sc*ntime)
- sfact = one/(6*ntime)
 
  icell = 0
  do i1=1,sc_size(1)
