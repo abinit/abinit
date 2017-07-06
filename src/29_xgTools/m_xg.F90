@@ -2562,6 +2562,7 @@ module m_xg
     call xgBlock_diagonal(xgBlock,diag%self)
     call xg_free(diag)
   end subroutine xgBlock_diagonalOnly
+!!***
 
 !!****f* m_xg/xgBlock_average
 !!
@@ -2591,6 +2592,7 @@ module m_xg
     end select
 
   end subroutine xgBlock_average
+!!***
 
 !!****f* m_xg/xgBlock_deviation
 !!
@@ -2621,6 +2623,8 @@ module m_xg
       deviation = abs(deviationC)
     end select
   end subroutine xgBlock_deviation
+!!***
+
 !!****f* m_xg/xgBlock_print
 !!
 !! NAME
