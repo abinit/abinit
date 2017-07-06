@@ -1,4 +1,4 @@
-- !newtopic 
+- !topic 
     name      : parallelism 
     keyword   : parallelism 
     howto     : set parameters for a parallel calculation

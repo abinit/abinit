@@ -428,16 +428,16 @@ default_topic=default_topic_yml[0]
 
 # For each "topic" file
 for topic_name in list_of_topics:
-  f_newtopic="yml_files/topic_"+topic_name+".yml"
-  print("Will use file "+f_newtopic+" to initiate the topic "+topic_name+" ... ",end="")
-  newtopic_yml=read_yaml_file("yml_files/topic_"+topic_name+".yml")
-  newtopic=newtopic_yml[0]
+  f_topic="yml_files/topic_"+topic_name+".yml"
+  print("Will use file "+f_topic+" to initiate the topic "+topic_name+" ... ",end="")
+  topic_yml=read_yaml_file("yml_files/topic_"+topic_name+".yml")
+  topic=topic_yml[0]
 
   #Mention it in the table of content of the file all_topics.html
   while not (topic_name.startswith(cur_let_all.lower()) or topic_name.startswith(cur_let_all.upper())):
     cur_let_all = chr(ord(cur_let_all)+1)
     toc_all = toc_all + "<p>"+cur_let_all+".\n"
-  toc_all = toc_all + "<br><a href=\"topic_"+ topic_name + ".html\">" + topic_name + "</a> [How to "+newtopic.howto+"] &nbsp;&nbsp;\n"
+  toc_all = toc_all + "<br><a href=\"topic_"+ topic_name + ".html\">" + topic_name + "</a> [How to "+topic.howto+"] &nbsp;&nbsp;\n"
 
   #Generate the table of content
   item_toc=0
@@ -448,7 +448,7 @@ for topic_name in list_of_topics:
   for j in ["introduction","examples","tutorials","input_variables","input_files"] :
     sec_number[j]="0"
     try :
-      extract_j=getattr(newtopic,j).strip()
+      extract_j=getattr(topic,j).strip()
     except :
       extract_j=""
     if (extract_j != "" and extract_j!= "default") or (j=="input_variables" and topic_invars[topic_name]!="") or (j=="input_files" and topic_infiles[topic_name]!=""):
@@ -475,7 +475,7 @@ for topic_name in list_of_topics:
         topic_html+= "The user can find some related example input files in the ABINIT package in the directory /tests, or on the Web:\n"
         topic_html+= topic_infiles[topic_name]
     else:
-      extract_j=getattr(newtopic,j).strip()
+      extract_j=getattr(topic,j).strip()
       if extract_j == "" or extract_j== "default" :
         try:
           topic_html+= getattr(default_topic,j)
@@ -489,15 +489,15 @@ for topic_name in list_of_topics:
 
   #Global operations on the tentative html file.
   topic_html=topic_html.replace("__JS_PATH__",js_path)
-  topic_html=topic_html.replace("__HOWTO__",newtopic.howto)
-  topic_html=topic_html.replace("__KEYWORD__",newtopic.keyword)
+  topic_html=topic_html.replace("__HOWTO__",topic.howto)
+  topic_html=topic_html.replace("__KEYWORD__",topic.keyword)
   topic_html = doku2html(make_links(topic_html,None,list_all_vars,list_chars,cur_specials))
 
   # Open, write and close the file
   file_topic = 'html_automatically_generated/topic_'+topic_name+'.html'
-  f_newtopic = open(file_topic,'w')
-  f_newtopic.write(topic_html)
-  f_newtopic.close()
+  f_topic = open(file_topic,'w')
+  f_topic.write(topic_html)
+  f_topic.close()
   print("File topic_"+topic_name+".html has been written ...")
 
 ################################################################################

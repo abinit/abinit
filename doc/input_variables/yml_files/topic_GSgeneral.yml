@@ -1,4 +1,4 @@
-- !newtopic
+- !topic
     name      : GSgeneral
     keyword   : GSgeneral
     howto     : to build an input file for a ground state calculation

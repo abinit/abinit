@@ -84,21 +84,6 @@ class Variable(yaml.YAMLObject):
 
 ####################################################################################################
 
-class Topic(yaml.YAMLObject):
-    topic_name = None  # String containing the "How to ?" topic name 
-    howto = ''     # String containing the description of the topics, to be echoed after "How to" ...
-
-    yaml_tag = u'!topic'
-
-    def attrs(self):
-        return ['topic_name', 'howto']
-
-    def __init__(self, topic_name=None, howto=None):
-        self.topic_name = topic_name
-        self.howto = howto
-
-####################################################################################################
-
 class Section(yaml.YAMLObject):
     name = None  # String containing section name
     keyword = '' # String containing the short description of the topics, to be echoed in the title of the section file.
@@ -135,7 +120,7 @@ class Section(yaml.YAMLObject):
 
 ####################################################################################################
 
-class Newtopic(yaml.YAMLObject):
+class Topic(yaml.YAMLObject):
     name = None  # String containing section name
     keyword = '' # String containing the short description of the topics, to be echoed in the title of the section file.
     howto  = ''  # Should complete the sentence beginning with "How to" 
@@ -149,7 +134,7 @@ class Newtopic(yaml.YAMLObject):
     examples     = '' # Relevant examples
     end       = ''  # End of the file, possibly the 'default' one
 
-    yaml_tag = u'!newtopic'
+    yaml_tag = u'!topic'
 
     def attrs(self):
         return ['name', 'keyword', 'howto', 'header', 'title', 'subtitle', 'copyright', 'links', 'introduction', 'tutorials', 'examples', 'end']
