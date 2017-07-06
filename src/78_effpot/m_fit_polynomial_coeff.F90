@@ -1110,7 +1110,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,fixcoeff,hist,powers,ncycle_in,nfixc
  integer :: master,my_rank,my_ncoeff,ncoeff_tot,natom_sc,ncell,ncycle
  integer :: ncycle_tot,ncycle_max,nproc,ntime,ncoeff_alone,size_mpi
  integer :: rank_to_send
- real(dp) :: cutoff,energy,ffact,sfact
+ real(dp) :: cutoff,energy
  real(dp),parameter :: HaBohr_meVAng = 27.21138386 / 0.529177249
  logical :: iam_master,found
 !arrays
@@ -1447,8 +1447,6 @@ subroutine fit_polynomial_coeff_fit(eff_pot,fixcoeff,hist,powers,ncycle_in,nfixc
 !  Compact form:
    sqomega(itime) = ((ucvol(itime)**(4.0/3.0)) / ((natom_sc)**(1/3.0)))
 !  Compute also normalisation factors
-   ffact      = 1.0/(ntime*natom_sc*3)
-   sfact      = 1.0/(ntime*6)
    ncell      = product(eff_pot%supercell%qphon(:))
 
 !  Compute the difference between History and model (fixed part)

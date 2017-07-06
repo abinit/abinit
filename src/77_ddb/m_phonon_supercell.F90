@@ -67,6 +67,7 @@ module m_phonon_supercell
  public :: freeze_displ_supercell
  public :: prt_supercell
  public :: copy_supercell
+ public :: findBound_supercell
  public :: getPBCIndexes_supercell
  public :: destroy_supercell
 !!***
@@ -506,6 +507,55 @@ subroutine getPBCIndexes_supercell(index,n_cell)
   end do
 
 end subroutine getPBCIndexes_supercell
+!!***
+
+!****f* m_phonon_supercell/findBound_supercell
+!! NAME
+!!  findBound_supercell
+!!
+!! FUNCTION
+!!  compute the bound of the supercell by considering the 0 0 0 (reference)
+!!  in the center of the supercell
+!!  for example: (4 4 4) => min = -1 and max = 2
+!! 
+!! INPUTS
+!! n_cell(3) = size of the supercell (for example 3 3 3)   
+!!
+!! OUTPUT
+!! min = minimun of the range
+!! max = maximum of the range
+!!
+!! PARENTS
+!!      m_effective_potential
+!!
+!! CHILDREN
+!!
+!!
+!! SOURCE
+
+subroutine findBound_supercell(min,max,n_cell)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'findBound_supercell'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ---------------------------------------------
+  integer, intent(inout) :: min,max
+  integer, intent(in) :: n_cell
+!Local variables ---------------------------------------
+  if(abs(max)>abs(min)) then
+    max=(n_cell)/2; min=-max;  if(mod(n_cell,2)==0) max = max -1
+  else
+    min=-(n_cell)/2; max=-min; if(mod(n_cell,2)==0)  min= min +1
+  end if
+
+! *********************************************************************
+end subroutine findBound_supercell
 !!***
 
 !****f* m_phonon_supercell/destroy_supercell

@@ -77,8 +77,6 @@ module m_effective_potential
  public :: effective_potential_writeNETCDF
  public :: OPERATOR(==)
  !AM_EXPERIMENTAL
-
- private :: find_bound
 !!***
 
 !!****t* defs_abitypes/effective_potential_type
@@ -124,15 +122,15 @@ module m_effective_potential
 !     Store all the information of the suppercell
 
    logical :: has_anharmonicsTerms
-!     True : the 3rd order derivative is computed
+!     True : the aharmonic part is present
 
 ! ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ! This is for the parallelisation over the supercell
    type(effpot_mpi_type) :: mpi_ifc
-   ! effpot_mpi_type with all the information for the paralellisation over IFC
+!  effpot_mpi_type with all the information for the IFC paralellisation
 
    type(effpot_mpi_type) :: mpi_coeff
-   ! effpot_mpi_type with all the information for the paralellisation over coefficients
+!  effpot_mpi_type with all the information for the polynomial coefficients paralellisation
   
  end type effective_potential_type
 !!***
@@ -354,9 +352,6 @@ subroutine effective_potential_init(crystal,eff_pot,energy,ifcs,ncoeff,nqpt,comm
 &                                          polynomial_conf%need_confinement)
  end if
 
-! call effpot_mpi_init(int((/1,1,1/),sp),eff_pot%mpi_ifc,eff_pot%harmonics_terms%ifcs%nrpt,comm)
-! call effpot_mpi_init(int((/1,1,1/),sp),eff_pot%mpi_coeff,eff_pot%harmonics_terms%ifcs%nrpt,comm)
-
 end subroutine effective_potential_init
 !!***
 
@@ -367,6 +362,8 @@ end subroutine effective_potential_init
 !!
 !! FUNCTION
 !!  Initializes the mpi informations for parallelism over supercell.
+!!  Only the parallelisation over cell is done here.
+!!  The parallelisation over cell and coeff is disable for now (experimental)
 !!
 !! INPUTS
 !!  eff_pot<type(effective_potential_type)> = datatype for the effective potential 
@@ -374,10 +371,10 @@ end subroutine effective_potential_init
 !!
 !! OUTPUT
 !! This is for the parallelisation over the supercell
-!!  eff_pot%me_supercell =  Index of my processor in the comm. over one cell
-!!  eff_pot%my_ncell     =  Number of cell treated by current proc
-!!  eff_pot%my_cells(:)  = Number of the cells in the supercell treat by this CPU
-!!  eff_pot%my_index_cells(:,:) = indexes of the cells in the supercell treat by this CPU
+!!  eff_pot%mpi_ifc%me_supercell =  Index of my processor in the comm. over one cell
+!!  eff_pot%mpi_ifc%my_ncell     =  Number of cell treated by current proc
+!!  eff_pot%mpi_ifc%my_cells(:)  = Number of the cells in the supercell treat by this CPU
+!!  eff_pot%mpi_ifc%my_index_cells(:,:) = indexes of the cells in the supercell treat by this CPU
 !!
 !! PARENTS
 !!      m_effective_potential,mover_effpot
@@ -760,9 +757,9 @@ subroutine effective_potential_generateDipDip(eff_pot,n_cell,option,asr,comm)
    min2_cell = zero; max2_cell = zero
    min3_cell = zero; max3_cell = zero
 
-   call find_bound(min1_cell,max1_cell,n_cell(1))
-   call find_bound(min2_cell,max2_cell,n_cell(2))
-   call find_bound(min3_cell,max3_cell,n_cell(3))
+   call findBound_supercell(min1_cell,max1_cell,n_cell(1))
+   call findBound_supercell(min2_cell,max2_cell,n_cell(2))
+   call findBound_supercell(min3_cell,max3_cell,n_cell(3))
 
    write(msg, '(2a)' )&
 &        ' dipdip is set to one, the dipole-dipole interation is recompute.'
@@ -2972,56 +2969,6 @@ subroutine effective_potential_distributeResidualForces(eff_pot,fcart,natom)
 
 end subroutine effective_potential_distributeResidualForces
 !!***
-
-!!****f* m_effective_potential/find_bound
-!! NAME
-!!  find_bound
-!!
-!! FUNCTION
-!!  compute the bound of the ifc range for specific supercell
-!!  for example: (4 4 4) => min = -1 and max = 2
-!! 
-!! INPUTS
-!! n_cell(3) = size of the supercell (for example 3 3 3)   
-!!
-!! OUTPUT
-!! min = minimun of the range
-!! max = maximum of the range
-!!
-!! PARENTS
-!!      m_effective_potential
-!!
-!! CHILDREN
-!!
-!!
-!! SOURCE
-
-subroutine find_bound(min,max,n_cell)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'find_bound'
-!End of the abilint section
-
- implicit none
-
-!Arguments ---------------------------------------------
-  integer, intent(inout) :: min,max
-  integer, intent(in) :: n_cell
-!Local variables ---------------------------------------
-  if(abs(max)>abs(min)) then
-    max=(n_cell)/2; min=-max;  if(mod(n_cell,2)==0) max = max -1
-  else
-    min=-(n_cell)/2; max=-min; if(mod(n_cell,2)==0)  min= min +1
-  end if
-
-! *********************************************************************
-end subroutine find_bound
-!!***
-
-
 
 !AM_EXPERIMENTAL SECTION
 !!****f* m_effective_potential/equal
