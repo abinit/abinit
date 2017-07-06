@@ -1420,7 +1420,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
    dscrpt=' Note : temporary (transfer) database '
 
    call ddb_hdr_init(ddb_hdr,dtset,psps,pawtab,DDB_VERSION,dscrpt,&
-&                    xred=xred,occ=occ,ngfft=ngfft)
+&                    1,xred=xred,occ=occ,ngfft=ngfft)
 
    call ddb_hdr_open_write(ddb_hdr, dtfil%fnameabo_ddb, dtfil%unddb)
 

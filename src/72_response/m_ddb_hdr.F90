@@ -64,6 +64,8 @@ MODULE m_ddb_hdr
    integer :: occopt
    integer :: usepaw
 
+   integer :: nblok
+
    real(dp) :: dilatmx
    real(dp) :: ecut
    real(dp) :: ecutsm
@@ -155,7 +157,7 @@ CONTAINS  !===========================================================
 !! SOURCE
 
 subroutine ddb_hdr_init(ddb_hdr, dtset, psps, pawtab, ddb_version, dscrpt, &
-                        xred, occ, ngfft)
+                        nblok, xred, occ, ngfft)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -171,11 +173,12 @@ subroutine ddb_hdr_init(ddb_hdr, dtset, psps, pawtab, ddb_version, dscrpt, &
  type(dataset_type),intent(in) :: dtset
  type(pseudopotential_type),intent(in) :: psps
  type(pawtab_type),intent(in) :: pawtab(psps%ntypat*psps%usepaw)
- character(len=fnlen),intent(in) :: dscrpt
+ character(len=*),intent(in) :: dscrpt
  integer,intent(in) :: ddb_version
+ integer,intent(in) :: nblok
  integer,intent(in),optional :: ngfft(18)
- real(dp),intent(in),optional :: occ(dtset%mband*dtset%nkpt*dtset%nsppol)
  real(dp),intent(in),optional :: xred(3,dtset%natom)
+ real(dp),intent(in),optional :: occ(dtset%mband*dtset%nkpt*dtset%nsppol)
 
 !Local variables -------------------------
  integer :: ii, nn
@@ -187,8 +190,9 @@ subroutine ddb_hdr_init(ddb_hdr, dtset, psps, pawtab, ddb_version, dscrpt, &
  !write(*,*) 'ddb_hdr_init: enter'
  !call flush()
  ! END DEBUG
+ ddb_hdr%nblok = nblok
  ddb_hdr%ddb_version = ddb_version
- ddb_hdr%dscrpt = dscrpt
+ ddb_hdr%dscrpt = trim(dscrpt)
  if (present(ngfft)) then
    ddb_hdr%ngfft = ngfft
  else
@@ -439,7 +443,7 @@ end subroutine ddb_hdr_free
 !!
 !! SOURCE
 
-subroutine ddb_hdr_open_write(ddb_hdr, filnam, unddb)
+subroutine ddb_hdr_open_write(ddb_hdr, filnam, unddb, fullinit)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -453,14 +457,17 @@ subroutine ddb_hdr_open_write(ddb_hdr, filnam, unddb)
 
 !Arguments ------------------------------------
  type(ddb_hdr_type),intent(inout) :: ddb_hdr
- character(len=fnlen),intent(in) :: filnam
+ character(len=*),intent(in) :: filnam
  integer,intent(in) :: unddb
+ integer,intent(in),optional :: fullinit
 
 !Local variables -------------------------
- integer :: nblok, fullinit, choice
+ integer :: fullinit_l, choice
 
 ! ************************************************************************
 
+ fullinit_l = 1
+ if (present(fullinit)) fullinit_l = fullinit
 
  call ddb_io_out(ddb_hdr%dscrpt,filnam,ddb_hdr%matom,ddb_hdr%mband,&
 &  ddb_hdr%mkpt,ddb_hdr%msym,ddb_hdr%mtypat,unddb,ddb_hdr%ddb_version,&
@@ -474,9 +481,9 @@ subroutine ddb_hdr_open_write(ddb_hdr, filnam, unddb)
 &  ddb_hdr%xred,ddb_hdr%zion,ddb_hdr%znucl)
 
 
- nblok=1 ; fullinit=1 ; choice=2
- call psddb8(choice,ddb_hdr%psps%dimekb,ddb_hdr%psps%ekb,fullinit,&
-&  ddb_hdr%psps%indlmn,ddb_hdr%psps%lmnmax,nblok,ddb_hdr%ntypat,unddb,&
+ choice=2  ! Write
+ call psddb8(choice,ddb_hdr%psps%dimekb,ddb_hdr%psps%ekb,fullinit_l,&
+&  ddb_hdr%psps%indlmn,ddb_hdr%psps%lmnmax,ddb_hdr%nblok,ddb_hdr%ntypat,unddb,&
 &  ddb_hdr%pawtab,ddb_hdr%psps%pspso,ddb_hdr%psps%usepaw,ddb_hdr%psps%useylm,&
 &  ddb_hdr%ddb_version)
 

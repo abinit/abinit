@@ -243,7 +243,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  integer :: pwind_alloc,rdwrpaw,comm,tim_mkrho,use_sc_dmft
  integer :: cnt,spin,band,ikpt
  real(dp) :: cpus,ecore,ecut_eff,ecutdg_eff,etot,fermie
- real(dp) :: gsqcut_eff,gsqcut_shp,gsqcutc_eff,hyb_range,residm,ucvol
+ real(dp) :: tolwfr,gsqcut_eff,gsqcut_shp,gsqcutc_eff,hyb_range,residm,ucvol
  logical :: read_wf_or_den,has_to_init,call_pawinit,write_wfk
  logical :: wvlbigdft=.false.,wvl_debug=.false.
  character(len=500) :: message
@@ -1399,13 +1399,19 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  if (me==0.and.dtset%nimage==1.and.((dtset%iscf > 0).or.&
 & (dtset%berryopt == -1).or.(dtset%berryopt) == -3)) then
 
+   if (dtset%iscf > 0) then
+     nblok = 2          ! 1st blok = energy, 2nd blok = gradients
+   else
+     nblok = 1
+   end if
+
    dscrpt=' Note : temporary (transfer) database '
    ddbnm=trim(dtfil%filnam_ds(4))//'_DDB'
 
    call ddb_hdr_init(ddb_hdr,dtset,psps,pawtab,DDB_VERSION,dscrpt,&
-&                    xred=xred,occ=occ,ngfft=ngfft)
+&                    nblok,xred=xred,occ=occ,ngfft=ngfft)
 
-   call ddb_hdr_open_write(ddb_hdr, ddbnm, dtfil%unddb)
+   call ddb_hdr_open_write(ddb_hdr,ddbnm,dtfil%unddb,fullinit=0)
 
    call ddb_hdr_free(ddb_hdr)
 
@@ -1421,17 +1427,13 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 !&   dtset%tnons,tolwfr,dtset%tphysel,dtset%tsmear,&
 !&   dtset%typat,dtset%usepaw,dtset%wtk,xred,psps%ziontypat,dtset%znucl)
 !
-!   if (dtset%iscf > 0) then
-!     nblok = 2          ! 1st blok = energy, 2nd blok = gradients
-!   else
-!     nblok = 1
-!   end if
 !   fullinit = 0 ; choice=2
 !   call psddb8 (choice,psps%dimekb,psps%ekb,fullinit,psps%indlmn,&
 !&   psps%lmnmax,nblok,psps%ntypat,dtfil%unddb,pawtab,&
 !&   psps%pspso,psps%usepaw,psps%useylm,DDB_VERSION)
 
-   mpert = dtset%natom + 6   ; msize = 3*mpert
+   choice=2
+   mpert = dtset%natom + 6 ; msize = 3*mpert
 
 !  create a ddb structure with just one blok
    call ddb_malloc(ddb,msize,1,dtset%natom,dtset%ntypat)

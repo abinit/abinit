@@ -524,7 +524,7 @@ subroutine eig2tot(dtfil,xred,psps,pawtab,natom,bdeigrf,clflg,dim_eig2nkq,eigen0
      unitout = dtfil%unddb
 
      call ddb_hdr_init(ddb_hdr,dtset,psps,pawtab,DDB_VERSION,dscrpt,&
-&                      xred=xred,occ=occ_rbz)
+&                      1,xred=xred,occ=occ_rbz)
 
      call ddb_hdr_open_write(ddb_hdr, dtfil%fnameabo_eigr2d, unitout)
 
@@ -632,7 +632,7 @@ subroutine eig2tot(dtfil,xred,psps,pawtab,natom,bdeigrf,clflg,dim_eig2nkq,eigen0
        dscrpt=' Note : temporary (transfer) database '
 
        call ddb_hdr_init(ddb_hdr,dtset,psps,pawtab,DDB_VERSION,dscrpt,&
-&                        xred=xred,occ=occ_rbz)
+&                        1,xred=xred,occ=occ_rbz)
 
        call ddb_hdr_open_write(ddb_hdr, dtfil%fnameabo_eigi2d, unitout)
 
