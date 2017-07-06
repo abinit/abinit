@@ -515,7 +515,7 @@ end subroutine getPBCIndexes_supercell
 !!
 !! FUNCTION
 !!  compute the bound of the supercell by considering the 0 0 0 (reference)
-!!  in the center of the supercell
+!!  in the center of the supercell.
 !!  for example: (4 4 4) => min = -1 and max = 2
 !! 
 !! INPUTS
@@ -534,7 +534,6 @@ end subroutine getPBCIndexes_supercell
 !! SOURCE
 
 subroutine findBound_supercell(min,max,n_cell)
-
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

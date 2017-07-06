@@ -37,7 +37,7 @@ module m_effective_potential_file
  use m_crystal,        only : crystal_t, crystal_init, crystal_free
  use m_ifc
  use m_io_tools, only : open_file
- use m_abihist, only : abihist,read_md_hist
+ use m_abihist, only : abihist,abihist_init,abihist_free,abihist_copy,read_md_hist
 #if defined HAVE_NETCDF
  use netcdf
 #endif
@@ -50,7 +50,7 @@ module m_effective_potential_file
  public :: effective_potential_file_getType
  public :: effective_potential_file_read
  public :: effective_potential_file_readDisplacement
-
+ public :: effective_potential_file_readMDfile
  private :: coeffs_xml2effpot
  private :: system_getDimFromXML
  private :: system_xml2effpot
@@ -60,6 +60,7 @@ module m_effective_potential_file
  private :: rdfromline
  private :: rmtabfromline
  private :: rdfromline_value
+ private :: elementfromline
 #endif
 
 #if defined HAVE_LIBXML
@@ -201,7 +202,7 @@ module m_effective_potential_file
 CONTAINS  !===========================================================================================
 
 
-!****f* m_effective_potential/effective_potential_file_read
+!****f* m_effective_potential_file/effective_potential_file_read
 !!
 !! NAME
 !! effective_potential_file_read
@@ -529,13 +530,9 @@ subroutine effective_potential_file_getType(filename,filetype)
          end do
        end if
      end do
-   else
-     read(ddbun,'(a)') readline
-     line=adjustl(readline)
-     if(line(6:24)=="DERIVATIVE DATABASE") then
-       filetype = 1
-       ios = -1
-     end if
+   else  if(line(6:24)=="DERIVATIVE DATABASE") then
+     filetype = 1
+     ios = -1
    end if
  end do
  close(ddbun)
@@ -3169,8 +3166,186 @@ subroutine coeffs_xml2effpot(eff_pot,filename,comm)
 end subroutine coeffs_xml2effpot
 !!***
 
+!!****f* m_effective_potential_file/effective_potential_file_readMDfile
+!!
+!! NAME
+!! effective_potential_file_readMDfile
+!!
+!! FUNCTION
+!! Read ASCII MD FILE
+!!
+!! INPUTS
+!! filename = path of the file
+!!
+!! OUTPUT
+!! hist<type(abihist)> = datatype with the  history of the MD
+!!
+!! PARENTS
+!!      multibinit
+!!
+!! CHILDREN
+!!      destroy_supercell,init_supercell,xred2xcart
+!!
+!! SOURCE
 
-!****f* m_effective_potential/effective_potential_file_readDisplacement
+subroutine effective_potential_file_readMDfile(filename,hist)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'effective_potential_file_readMDfile'
+ use interfaces_41_geometry
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+!arrays
+ type(abihist),intent(inout) :: hist
+ character(len=fnlen),intent(in) :: filename
+!Local variables-------------------------------
+!scalar
+ integer :: ia,ii,mu,nu,natom,natm_old,natm_new
+ integer :: nstep,nenergy,nrprimd,type
+ integer :: ios=0,ios2=0,ios3=0
+ integer :: unit_md=24
+ logical :: compatible
+!arrays
+ character (len=10000) :: readline,line
+ real(dp) :: tmp(6)
+ real(dp),allocatable :: xcart(:,:)
+ character(len=500) :: msg
+
+! *************************************************************************
+
+ call effective_potential_file_getType(filename,type)
+
+ if(type==4)then
+!  Netcdf type
+   call read_md_hist(filename,hist,.FALSE.,.FALSE.,.FALSE.)
+ else
+!  try to read ASCII file...
+   if (open_file(filename,msg,unit=unit_md,form="formatted",&
+&       status="old",action="read") /= 0) then
+     MSG_ERROR(msg)
+   end if
+
+   ia = (natom+6)
+!  Start a reading loop in fortran to get the dimension of the file
+   rewind(unit=unit_md)
+   ii = -1
+   nstep   = zero
+   nenergy = zero
+   compatible = .TRUE.
+
+   do while ((ios==0))
+!    special treatment of the first step
+     if(nstep==0)then
+       ios2 = zero
+       do while ((ios2==0))
+         read(unit_md,'(a)',iostat=ios) readline
+         line=adjustl(readline)
+         call elementfromline(line,ia)
+         if (ia==1)then
+           nstep = nstep + 1
+           ios2 = 1
+         end if
+       end do
+     end if
+     read(unit_md,'(a)',iostat=ios) readline
+     if(ios == 0)then    
+       line=adjustl(readline)
+       call elementfromline(line,ia)
+       if (ia==1)then
+         nenergy = nenergy + 1
+         nrprimd = zero
+       else if(ia==3)then
+         nrprimd = nrprimd + 1
+       end if
+       if(nrprimd == 3)then
+         ios3 = zero
+         natm_new = zero
+         do while ((ios3==0))        
+           read(unit_md,'(a)',iostat=ios3) readline
+           if(ios3==0)then
+             line=adjustl(readline)         
+             call elementfromline(line,ia)
+             if(ia==1)then
+               if(nstep==1) then
+                 natm_old = natm_new
+               else
+                 if(natm_old /= natm_new) compatible = .FALSE.
+               end if
+               ios3 = 1
+               ios2 = 1
+               nstep = nstep + 1
+             end if
+             if(ia==6)then
+               natm_new = natm_new + 1
+             end if
+           end if!end if ios3
+         end do
+       end if ! end if nrprimd
+     end if! end if os1
+   end do
+   
+   natom = natm_new - 1
+   if(nstep /= nenergy) compatible = .FALSE.
+   if(natom <= zero) compatible = .FALSE.
+   if(nstep <= zero) compatible = .FALSE.
+
+   if (compatible)then
+     ii  = 1
+     ios = 0
+
+     ABI_ALLOCATE(xcart,(3,natom))
+     call abihist_free(hist)
+     call abihist_init(hist,natom,nstep,.FALSE.,.FALSE.)
+
+!  Start a reading loop in fortran
+     rewind(unit=unit_md)
+     do while ((ios==0).and.ii<=nstep)
+       read(unit_md,'(a)',iostat=ios) readline
+       read(unit_md,'(a)',iostat=ios) readline
+       line=adjustl(readline)
+       read(line,*) hist%etot(ii)
+       hist%etot(ii) = hist%etot(ii)
+       do mu=1,3
+         read(unit_md,'(a)',iostat=ios) readline
+         line=adjustl(readline)
+         read(line,*) (hist%rprimd(nu,mu,ii),nu=1,3)
+       end do
+       do ia=1,natom
+         read(unit_md,'(a)',iostat=ios) readline
+         line=adjustl(readline)
+         read(line,*) (tmp(mu),mu=1,6)
+         xcart(:,ia) = tmp(1:3)
+         hist%fcart(:,ia,ii) = tmp(4:6)
+       end do
+       call xcart2xred(natom,hist%rprimd(:,:,ii),xcart(:,:),hist%xred(:,:,ii))
+       read(unit_md,'(a)',iostat=ios) readline
+       line=adjustl(readline)
+       read(line,*) (hist%strten(mu,ii),mu=1,6)
+       ii = ii + 1
+     end do
+     do ii=1,nstep
+       do mu=1,3
+         hist%acell(mu,:) = hist%rprimd(mu,mu,ii)
+       end do
+     end do
+     
+     close(unit_md)
+     ABI_DEALLOCATE(xcart)
+   end if!end compatible
+ end if!end if type
+
+end subroutine effective_potential_file_readMDfile
+!!***
+
+
+!****f* m_effective_potential_file/effective_potential_file_readDisplacement
 !!
 !! NAME
 !! effective_potential_file_readDisplacement
@@ -3242,6 +3417,64 @@ subroutine effective_potential_file_readDisplacement(filename,disp,nstep,natom)
  close(funit)
 
 end subroutine effective_potential_file_readDisplacement
+!!***
+
+!!****f* m_effective_potential_file/elementfromline
+!! NAME
+!! elementfromline
+!!
+!! FUNCTION
+!! Read the number of element of a line
+!!
+!! INPUTS
+!!  line= string from which the data are read 
+!!
+!! OUTPUT
+!!  nelement = number of element in the line
+!!
+!! PARENTS
+!!      m_effective_potential_file
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine elementfromline(line,nelement)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'elementfromline'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ---------------------------------------------
+ character(len=*), intent(in) :: line
+ integer, intent(out) :: nelement
+!Local variables ---------------------------------------
+ integer :: ii,n
+ logical :: element
+! *********************************************************************
+
+!Set the output
+ nelement = zero
+ n = len_trim(line)
+ element = .false.
+ do ii=1,n
+   if(.not.element.and.line(ii:ii) /="")  then
+     element=.true.
+   else
+     if((element.and.line(ii:ii) =="")) then
+       element=.false.
+       nelement = nelement + 1
+     end if
+   end if
+   if((element.and.ii==n)) nelement = nelement + 1
+ end do
+
+ end subroutine elementfromline
 !!***
 
 !!****f* m_effective_potential_file/rdfromline

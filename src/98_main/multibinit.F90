@@ -255,8 +255,7 @@ program multibinit
      call wrtout(std_out,message,'COLL') 
      call wrtout(ab_out,message,'COLL') 
      if(filnam(5)/=''.and.filnam(5)/='no')then
-!       call fit_polynomial_readMDfile(filnam(5),hist,40,(/2,2,2/))
-       call read_md_hist(filnam(5),hist,.FALSE.,.FALSE.,.FALSE.)
+       call effective_potential_file_readMDfile(filnam(5),hist)
        if (hist%mxhist == 0)then
          write(message, '(5a)' )&
 &         'The MD ',trim(filnam(5)),' file is not correct ',ch10,&

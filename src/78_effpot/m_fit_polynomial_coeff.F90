@@ -37,7 +37,7 @@ module m_fit_polynomial_coeff
  use m_strain,only : strain_type,strain_get
  use m_effective_potential
  use m_io_tools,   only : open_file
- use m_abihist, only : abihist,abihist_init,abihist_free,abihist_copy
+ use m_abihist, only : abihist,abihist_free,abihist_init,abihist_copy
 
  implicit none
 
@@ -52,9 +52,6 @@ module m_fit_polynomial_coeff
  public :: fit_polynomial_coeff_solve
  public :: fit_polynomial_printSystemFiles
  private :: computeNorder
-!TEST_AM
- public :: fit_polynomial_readMDfile
-!TEST_AM
 !!***
 
 CONTAINS  !===========================================================================================
@@ -2618,7 +2615,7 @@ subroutine fit_polynomial_coeff_mapHistToRef(eff_pot,hist,comm)
  type(abihist),intent(inout) :: hist
 !Local variables-------------------------------
 !scalar
- integer :: ia,ib,ii,jj,natom_hist,nstep_hist
+ integer :: factE_hist,ia,ib,ii,jj,natom_hist,ncell,nstep_hist
  real(dp):: factor
  logical :: revelant_factor,need_map
 !arrays
@@ -2636,6 +2633,7 @@ subroutine fit_polynomial_coeff_mapHistToRef(eff_pot,hist,comm)
 !Try to set the supercell according to the hist file
  rprimd_ref(:,:)  = eff_pot%crystal%rprimd
  rprimd_hist(:,:) = hist%rprimd(:,:,1)
+
  do ia=1,3
    scale_cell(:) = zero
    do ii=1,3
@@ -2662,6 +2660,28 @@ subroutine fit_polynomial_coeff_mapHistToRef(eff_pot,hist,comm)
      n_cell(ia) = nint(factor)
    end if
  end do
+
+ ncell = product(n_cell)
+ 
+!Check if the energy store in the hist is revelant, sometimes some MD files gives
+!the energy of the unit cell... This is not suppose to happen... But just in case...
+ do ii=1,nstep_hist
+   factE_hist = anint(hist%etot(ii) / eff_pot%energy)
+   if(factE_hist == 1) then
+!    In this case we mutiply the energy of the hist by the number of cell
+     hist%etot(ii) = hist%etot(ii)  * ncell
+   end if
+   if(factE_hist /=1 .and. factE_hist /= ncell)then
+     write(msg, '(4a,I0,a,I0,2a,I0,3a,I0,3a)' )ch10,&
+&          ' --- !WARNING',ch10,&
+&          '     The energy of the step ',ii,' seems to be with multiplicity of ',factE_hist,ch10,&
+&          '     However, the multiplicity of the cell is ',ncell,'.',ch10,&
+&          '     Please check the energy of the step ',ii,ch10,&
+&          ' ---',ch10
+     call wrtout(std_out,msg,'COLL') 
+   end if
+ end do
+
  
 !Set the new supercell datatype into the effective potential reference
  call effective_potential_setSupercell(eff_pot,comm,n_cell)
@@ -3008,119 +3028,6 @@ subroutine fit_polynomial_printSystemFiles(eff_pot,hist)
  call destroy_supercell(supercell)
 
 end subroutine fit_polynomial_printSystemFiles
-!!***
-
-
-!!****f* m_fit_polynomial_coeff/fit_polynomial_readMDfile
-!!
-!! NAME
-!! fit_polynomial_readMDfile
-!!
-!! FUNCTION
-!! Read ASCII MD FILE
-!!
-!! INPUTS
-!! filename = path of the file
-!! natom = number of atoms 
-!! ncell = number of cell into the supercell (for example 2 2 2)
-!!
-!! OUTPUT
-!! hist<type(abihist)> = datatype with the  history of the MD
-!!
-!! PARENTS
-!!      multibinit
-!!
-!! CHILDREN
-!!      destroy_supercell,init_supercell,xred2xcart
-!!
-!! SOURCE
-
-subroutine fit_polynomial_readMDfile(filename,hist,natom,ncell)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fit_polynomial_readMDfile'
- use interfaces_41_geometry
-!End of the abilint section
-
- implicit none
-
-!Arguments ------------------------------------
-!scalars
- integer, intent(in) :: natom
-!arrays
- integer,intent(in) :: ncell(3)
- type(abihist),intent(inout) :: hist
- character(len=fnlen),intent(in) :: filename
-!Local variables-------------------------------
-!scalar
- integer :: ia,ii,mu,nu,nstep
- integer :: ios=0
- integer :: unit_md=24
-!arrays
- character (len=10000) :: readline,line
- real(dp) :: xcart(3,natom),tmp(6)
- character(len=500) :: msg
-
-! *************************************************************************
-
- if (open_file(filename,msg,unit=unit_md,form="formatted",&
-&     status="old",action="read") /= 0) then
-   MSG_ERROR(msg)
- end if
-
- ia = (natom+6)
-!Start a reading loop in fortran
- rewind(unit=unit_md)
- ii = -1
- do while ((ios==0))
-   read(unit_md,'(a)',iostat=ios) readline
-   ii = ii + 1
- end do
- nstep = ii / (natom+6)
-
- ii  = 1
- ios = 0
-
- call abihist_free(hist)
- call abihist_init(hist,natom,nstep,.FALSE.,.FALSE.)
-
-!Start a reading loop in fortran
- rewind(unit=unit_md)
- do while ((ios==0).and.ii<=nstep)
-   read(unit_md,'(a)',iostat=ios) readline
-   read(unit_md,'(a)',iostat=ios) readline
-   line=adjustl(readline)
-   read(line,*) hist%etot(ii)
-   hist%etot(ii) = hist%etot(ii)  * product(ncell(:))
-   do mu=1,3
-     read(unit_md,'(a)',iostat=ios) readline
-     line=adjustl(readline)
-     read(line,*) (hist%rprimd(nu,mu,ii),nu=1,3)
-   end do
-   do ia=1,natom
-     read(unit_md,'(a)',iostat=ios) readline
-     line=adjustl(readline)
-     read(line,*) (tmp(mu),mu=1,6)
-     xcart(:,ia) = tmp(1:3)
-     hist%fcart(:,ia,ii) = tmp(4:6)
-   end do
-   call xcart2xred(natom,hist%rprimd(:,:,ii),xcart(:,:),hist%xred(:,:,ii))
-   read(unit_md,'(a)',iostat=ios) readline
-   line=adjustl(readline)
-   read(line,*) (hist%strten(mu,ii),mu=1,6)
-   ii = ii + 1
- end do
- do ii=1,nstep
-   do mu=1,3
-     hist%acell(mu,:) = hist%rprimd(mu,mu,ii)
-   end do
- end do
-
- close(unit_md)
-end subroutine fit_polynomial_readMDfile
 !!***
 
 !!****f* m_fit_polynomial/fit_polynomial_dist
