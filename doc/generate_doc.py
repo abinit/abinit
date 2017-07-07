@@ -22,7 +22,7 @@ from doc.pymods.variables import *
 debug = 0
 
 # Relative path from HTML files
-js_path = "../"
+js_path = "../../js_files/"
 users_path = "../../users/"
 
 # Path for yml and html files

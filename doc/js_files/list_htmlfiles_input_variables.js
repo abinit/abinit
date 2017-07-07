@@ -19,6 +19,6 @@ document.write(' <li> Structure optimization variables, <A href="varrlx.html">VA
 document.write(' <li> Van der Waals functional variables, <A href="varvdw.html">VARVDW</a></li> ');
 document.write(' <li> Wannier90 interface variables, <A href="varw90.html">VARW90</a></li> ');
 document.write(' </ul>');
-document.write(' See also the <a href="../../users/spacegrouphelpfile.html">Space group table</a> and the <a href="specials.html">list of special parameters</a>. [Possibly see the <a href="alltopics.html">How to</a>, in development.]');
+document.write(' See also the <a href="../../users/spacegrouphelpfile.html">Space group table</a> and the <a href="specials.html">list of special parameters</a>. [Possibly see the <a href="../../topics/html_generated/all_topics.html">How to</a>, in development.]');
 document.write(' <hr> ');
 document.write(' ');
