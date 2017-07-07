@@ -27,10 +27,10 @@ users_path = "../../users/"
 
 # Path for yml and html files
 invars_yml = "input_variables/yml_files"
-invars_html_autom = "input_variables/html_automatically_generated"
-topics_yml = "input_variables/yml_files"
-topics_yml_autom = "input_variables/html_automatically_generated"
-topics_html_autom = "input_variables/html_automatically_generated"
+invars_html_gen = "input_variables/html_generated"
+topics_yml = "topics/yml_files"
+topics_work = "topics/workspace"
+topics_html_gen = "input_variables/html_generated"
 
 ################################################################################
 ###############################################################################
@@ -115,14 +115,14 @@ def read_yaml_file(ymlfile):
   """ Read the file 'ymlfile', containing yml data, and store all such data in the returned object"""
 
   if ymlfile== invars_yml+"/abinit_vars.yml":
-    print("Will use "+ymlfile+" as database input file for the input variables and their characteristics ...")
+    print("Use "+ymlfile+" as database input file for the input variables and their characteristics ...")
   elif ymlfile== topics_yml+"list_of_topics.yml":
-    print("Will use "+ymlfile+" as database input file for the list of topics ...")
+    print("Use "+ymlfile+" as database input file for the list of topics ...")
   elif ymlfile== invars_yml+"/sections.yml":
-    print("Will use "+ymlfile+" as database input file for the list of sections ...")
+    print("Use "+ymlfile+" as database input file for the list of sections ...")
   elif ymlfile== topics_yml+"/tests_dirs.yml":
-    print("Will use "+ymlfile+" as database input file for the list of directories in which automatic test input files are present ...")
-  elif ymlfile== topics_yml_autom+"/topics_in_tests.yml":
+    print("Use "+ymlfile+" as database input file for the list of directories in which automatic test input files are present ...")
+  elif ymlfile== topics_work+"/topics_in_tests.yml":
     print("Generated file "+ymlfile+", to contain the list of automatic test input files relevant for each topic ...")
 
   with open(ymlfile, 'r') as f:
@@ -146,21 +146,21 @@ tests_dirs=read_yaml_file(topics_yml+"/tests_dirs.yml")
 # Parse the ABINIT input files, in order to find the possible topics to which they are linked -> topics_in_tests
 
 try :
-  rm_cmd = "rm "+topics_yml_autom+"/topics_in_tests.yml"
+  rm_cmd = "rm "+topics_work+"/topics_in_tests.yml"
   retcode = os.system(rm_cmd)
 except :
   if debug==1 :
-    print("rm "+topics_yml_autom+"/topics_in_tests.yml failed")
+    print("rm "+topics_work+"/topics_in_tests.yml failed")
     print("the file was likely non existent")
 
 for tests_dir in tests_dirs :
-  grep_cmd = "grep topics input_variables/tests/%s/Input/*.in > %s/topics_in_tests.txt"%(tests_dir,topics_yml_autom)
+  grep_cmd = "grep topics input_variables/tests/%s/Input/*.in > %s/topics_in_tests.txt"%(tests_dir,topics_work)
   retcode = os.system(grep_cmd)
   if retcode == 0 :
-    sed_cmd = "sed -e 's/^/- /' %s/topics_in_tests.txt >> %s/topics_in_tests.yml"%(topics_yml_autom,topics_yml_autom)
+    sed_cmd = "sed -e 's/^/- /' %s/topics_in_tests.txt >> %s/topics_in_tests.yml"%(topics_work,topics_work)
     retcode = os.system(sed_cmd)
 
-topics_in_tests=read_yaml_file(topics_yml_autom+"/topics_in_tests.yml")
+topics_in_tests=read_yaml_file(topics_work+"/topics_in_tests.yml")
 if debug==1 :
   print(" topics_in_tests :")
   print(topics_in_tests)
@@ -334,12 +334,12 @@ for i, section_info in enumerate(sections):
   sectionhtml = doku2html(make_links(sectionhtml,None,list_all_vars,list_chars,cur_specials))
 
   #Write the finalized html file.
-  file_cur = invars_html_autom+'/'+section+'.html'
+  file_cur = invars_html_gen+'/'+section+'.html'
   f_cur = open(file_cur,'w')
   f_cur.write(sectionhtml)
   f_cur.write("\n")
   f_cur.close()
-  print("File "+section+".html has been written ...")
+  print("File %s written ..."%file_cur )
 
 ################################################################################
 ################################################################################
@@ -512,11 +512,11 @@ for topic_name in list_of_topics:
   topic_html = doku2html(make_links(topic_html,None,list_all_vars,list_chars,cur_specials))
 
   # Open, write and close the file
-  file_topic = topics_html_autom+'/topic_'+topic_name+'.html'
+  file_topic = topics_html_gen+'/topic_'+topic_name+'.html'
   f_topic = open(file_topic,'w')
   f_topic.write(topic_html)
   f_topic.close()
-  print("File topic_"+topic_name+".html has been written ...")
+  print("File %s written ..."%file_topic )
 
 ################################################################################
 # Generate the file with the list of names of different "topic" files
@@ -540,11 +540,11 @@ all_topics_html=all_topics_html.replace("__KEYWORD__",default_topic.keyword)
 all_topics_html = doku2html(make_links(all_topics_html,None,list_all_vars,list_chars,cur_specials))
 
 # Open, write and close the file
-file_html = topics_html_autom+'/all_topics.html'
+file_html = topics_html_gen+'/all_topics.html'
 f_html = open(file_html,'w')
 f_html.write(all_topics_html)
 f_html.close()
-print("File all_topics.html has been written ...")
+print("File %s written ..."%file_html )
 print("Work done !")
 
 ################################################################################
