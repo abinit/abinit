@@ -1,21 +1,21 @@
 #! /usr/bin/env python 
 """This script generates part of the ABINIT documentation in html for the Web site"""
 
-debug = 0
-
-from __future__ import print_function
+from __future__ import print_function, division, absolute_import
 
 import sys
 import os
+import platform
 import yaml
 import re
 import argparse
 
+import logging
+logger = logging.getLogger(__name__)
+
 # We don't install with setup.py hence we have to add the directory [...]/abinit/doc to $PYTHONPATH
 # See similar procedure in tests/runtests.py
 pack_dir, x = os.path.split(os.path.abspath(__file__))
-pack_dir, x = os.path.split(pack_dir)
-sys.path.insert(0,pack_dir)
 pack_dir, x = os.path.split(pack_dir)
 sys.path.insert(0,pack_dir)
 
@@ -23,8 +23,10 @@ import doc
 
 from doc.pymods.variables import *
 
+debug = 0
+
 # Path relative from HTML files
-js_path = "../../js_files"
+js_path = "../"
 users_path = "../../users/"
 
 ################################################################################
@@ -411,8 +413,8 @@ for i, topic_name in enumerate(inputs_for_topic):
     dir = dict()
     for test in tests:
       file_split=test.split('/')
-      dirname=file_split[1] 
-      testname=file_split[3] 
+      dirname=file_split[2] 
+      testname=file_split[4] 
       if dirname not in dir.keys():
         dir[dirname] = []
       dir[dirname].append(testname)
@@ -436,14 +438,14 @@ toc_all += "<p>"+cur_let_all+".&nbsp;\n"
 # Assemble the "topic" files 
 
 print("Will use file yml_files/default_topic.yml as default for all topic files ... ")
-default_topic_yml=read_yaml_file("yml_files/default_topic.yml")
+default_topic_yml=read_yaml_file("input_variables/yml_files/default_topic.yml")
 default_topic=default_topic_yml[0]
 
 # For each "topic" file
 for topic_name in list_of_topics:
   f_topic="yml_files/topic_"+topic_name+".yml"
   print("Will use file "+f_topic+" to initiate the topic "+topic_name+" ... ",end="")
-  topic_yml=read_yaml_file("yml_files/topic_"+topic_name+".yml")
+  topic_yml=read_yaml_file("input_variables/yml_files/topic_"+topic_name+".yml")
   topic=topic_yml[0]
 
   #Mention it in the table of content of the file all_topics.html

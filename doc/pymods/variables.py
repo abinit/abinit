@@ -5,13 +5,13 @@ try:
 except ImportError:
     raise ImportError("pyyaml package is not installed. Install it with `pip install pyyaml`")
 
-with open('yml_files/characteristics.yml', 'r') as f:
+with open('input_variables/yml_files/characteristics.yml', 'r') as f:
     list_chars = yaml.load(f)
 
-with open('yml_files/list_specials.yml', 'r') as f:
+with open('input_variables/yml_files/list_specials.yml', 'r') as f:
     list_specials = yaml.load(f)
 
-with open('yml_files/list_topics_class.yml', 'r') as f:
+with open('input_variables/yml_files/list_topics_class.yml', 'r') as f:
     list_topics_class = yaml.load(f)
 
 class literal(str): pass
