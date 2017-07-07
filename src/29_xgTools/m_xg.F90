@@ -2537,6 +2537,14 @@ module m_xg
 !! xgBlock_diagonalOnly
 
   subroutine xgBlock_diagonalOnly(xgBlock)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'xgBlock_diagonalOnly'
+!End of the abilint section
+
     type(xgBlock_t) , intent(inout) :: xgBlock
     type(xg_t) :: diag
     integer :: i
@@ -2570,6 +2578,14 @@ module m_xg
 !! xgBlock_average
 
   subroutine xgBlock_average(xgBlock,average)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'xgBlock_average'
+!End of the abilint section
+
     type(XgBlock_t) , intent(in)  :: xgBlock
     double precision, intent(out) :: average
     complex(kind=8) :: averageC
@@ -2600,6 +2616,14 @@ module m_xg
 !! xgBlock_deviation
 
   subroutine xgBlock_deviation(xgBlock,deviation)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'xgBlock_deviation'
+!End of the abilint section
+
     type(XgBlock_t) , intent(in)  :: xgBlock
     double precision, intent(out) :: deviation
     complex(kind=8) :: deviationC
