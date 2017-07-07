@@ -30,7 +30,7 @@ invars_yml = "input_variables/yml_files"
 invars_html_gen = "input_variables/html_generated"
 topics_yml = "topics/yml_files"
 topics_work = "topics/workspace"
-topics_html_gen = "input_variables/html_generated"
+topics_html_gen = "topics/html_generated"
 
 ################################################################################
 ###############################################################################
@@ -93,13 +93,13 @@ def make_links(text,cur_abivarname,variables,characteristics,specials):
       return "<b>"+cur_abivarname+"</b>"
     elif abivarname in variables.keys():
       section = variables[abivarname]
-      return "<a href=\""+section+".html#"+abivarname+"\">"+abivarname+"</a>"
+      return '<a href="../../input_variables/html_generated/'+section+".html#"+abivarname+"\">"+abivarname+"</a>"
     elif abivarname in characteristics:
-      return "<a href=\""+users_path+"abinit_help.html#"+str.replace(abivarname.lower()," ","_")+"\">"+abivarname+"</a>"
+      return '<a href="'+users_path+'abinit_help.html#'+str.replace(abivarname.lower()," ","_")+"\">"+abivarname+"</a>"
     elif abivarname in specials:
-      return "<a href=\"specials.html#"+abivarname+"\">"+abivarname+"</a>"
+      return '<a href="specials.html#'+abivarname+'">'+abivarname+'</a>'
     else:
-      return "<a href=\"#\">[[FAKE LINK:"+abivarname+"]]</a>"
+      return '<a href="#">[[FAKE LINK:'+abivarname+']]</a>'
     return mymatch.group()
 
   p=re.compile("\\[\\[([a-zA-Z0-9_ */<>]*)\\]\\]")
@@ -233,7 +233,7 @@ for i, var in enumerate(variables):
         topics_name_class = vartopics.split(',')
         for i, topic_name_class in enumerate(topics_name_class):
           name_class = topic_name_class.split('_')
-          cur_content += "<a href=\"topic_"+name_class[0].strip()+".html\">"+name_class[0].strip()+"</a> "
+          cur_content += '<a href="../../'+topics_html_gen+'/topic_'+name_class[0].strip()+'.html">'+name_class[0].strip()+'</a> '
         cur_content += "</font>\n"
     except:
       if debug==1 :
@@ -378,7 +378,7 @@ for (tclasskey, tclassval) in list_topics_class:
             abivarname=var.abivarname
             if var.characteristics is not None and '[[INTERNAL_ONLY]]' in var.characteristics:
               abivarname = '%'+abivarname
-            topic_invars[topic_name] += "... <a href=\""+var.section+".html#"+var.abivarname+"\">"+abivarname+"</a>   "
+            topic_invars[topic_name] += '... <a href="../../'+invars_html_gen+'/'+var.section+'.html#'+var.abivarname+'">'+abivarname+'</a>   '
             topic_invars[topic_name] += "["+var.mnemonics+"]<br>\n"
     except:
       if debug==1 :

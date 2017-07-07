@@ -1,4 +1,4 @@
-var docpath="../"
+var docpath="../../"
 document.write(' <HR ALIGN=left> ');
 document.write(' Goto :          ');
 document.write(' <A href="http://www.abinit.org"><B>ABINIT home page</B></A>          ');

@@ -109,9 +109,9 @@ Same meaning as the corresponding anaddb variable.
 <br><font id="default">Default is [0, 0, 0]</font>
 <br><font id="text">
 <p>
-This variable is mandatory when <a href="vargs.html#optdriver">optdriver</a>==7.
+This variable is mandatory when <a href="../../input_variables/html_generated/vargs.html#optdriver">optdriver</a>==7.
 It defines the number of divisions in the (homogeneous) q-mesh
-used to generate the DDB file. See also the description of the <a href="varfil.html#getddb">getddb</a> input variable.
+used to generate the DDB file. See also the description of the <a href="../../input_variables/html_generated/varfil.html#getddb">getddb</a> input variable.
 </font>
 
 <br><br><a href=#top>Go to the top</a>
@@ -125,10 +125,10 @@ used to generate the DDB file. See also the description of the <a href="varfil.h
 <br><font id="default">Default is [0.0, 0.0, 0.0]</font>
 <br><font id="text">
 <p>
-Only relevant when <a href="vargs.html#optdriver">optdriver</a>==7.
+Only relevant when <a href="../../input_variables/html_generated/vargs.html#optdriver">optdriver</a>==7.
 It defines the shift in the q-mesh used to generate the DDB file,
-which is defined by the <a href="vareph.html#ddb_ngqpt">ddb_ngqpt</a> input variable.
-See <a href="varbas.html#shiftk">shiftk</a> for more information on the definition.
+which is defined by the <a href="../../input_variables/html_generated/vareph.html#ddb_ngqpt">ddb_ngqpt</a> input variable.
+See <a href="../../input_variables/html_generated/varbas.html#shiftk">shiftk</a> for more information on the definition.
 </font>
 
 <br><br><a href=#top>Go to the top</a>
@@ -172,9 +172,9 @@ Same meaning as the corresponding anaddb variable
 <br><font id="text">
 <p>
 This variable can be used to change the value of the Fermi level
-when performing electron-phonon calculations with <a href="vargs.html#optdriver">optdriver</a>==7.
+when performing electron-phonon calculations with <a href="../../input_variables/html_generated/vargs.html#optdriver">optdriver</a>==7.
 This variable has effect only if set to a non-zero value.
-See also <a href="vareph.html#eph_extrael">eph_extrael</a>.
+See also <a href="../../input_variables/html_generated/vareph.html#eph_extrael">eph_extrael</a>.
 </font>
 
 <br><br><a href=#top>Go to the top</a>
@@ -189,12 +189,12 @@ See also <a href="vareph.html#eph_extrael">eph_extrael</a>.
 <br><font id="text">
 <p>
 This variable defines the energy window around the Fermi level
-used for e-ph calculations (<a href="vargs.html#optdriver">optdriver</a> = 7).
+used for e-ph calculations (<a href="../../input_variables/html_generated/vargs.html#optdriver">optdriver</a> = 7).
 Only the states located in the energy range
 [efermi - eph_fsewin, efermi + eph_fsewin] are included in the e-ph calculation.
 
 <p>
-Related input variables: <a href="vareph.html#eph_intmeth">eph_intmeth</a>, <a href="vareph.html#eph_fsmear">eph_fsmear</a>, <a href="vareph.html#eph_extrael">eph_extrael</a> and <a href="vareph.html#eph_fermie">eph_fermie</a>.
+Related input variables: <a href="../../input_variables/html_generated/vareph.html#eph_intmeth">eph_intmeth</a>, <a href="../../input_variables/html_generated/vareph.html#eph_fsmear">eph_fsmear</a>, <a href="../../input_variables/html_generated/vareph.html#eph_extrael">eph_extrael</a> and <a href="../../input_variables/html_generated/vareph.html#eph_fermie">eph_fermie</a>.
 </p>
 </font>
 
@@ -208,12 +208,12 @@ Related input variables: <a href="vareph.html#eph_intmeth">eph_intmeth</a>, <a h
 <br><font id="vartype">Variable type: real</font>
 <br><font id="default">Default is 0.01 Hartree</font>
 <br><br><font id="requires">
-Only relevant if <a href="vareph.html#eph_intmeth">eph_intmeth</a> == 1
+Only relevant if <a href="../../input_variables/html_generated/vareph.html#eph_intmeth">eph_intmeth</a> == 1
 </font>
 <br><font id="text">
 <p>
 This variable defines the gaussian broadening used for the
-integration over the Fermi surface when <a href="vareph.html#eph_intmeth">eph_intmeth</a> == 1.
+integration over the Fermi surface when <a href="../../input_variables/html_generated/vareph.html#eph_intmeth">eph_intmeth</a> == 1.
 </font>
 
 <br><br><a href=#top>Go to the top</a>
@@ -229,11 +229,11 @@ integration over the Fermi surface when <a href="vareph.html#eph_intmeth">eph_in
 <p>
 This variable defines the technique for the integration on the Fermi surface of electron-phonon quantities.
 <p>
-1 for Gaussian technique with broadening factor <a href="vareph.html#eph_fsmear">eph_fsmear</a>.
+1 for Gaussian technique with broadening factor <a href="../../input_variables/html_generated/vareph.html#eph_fsmear">eph_fsmear</a>.
 2 for tetrahedron method.
 </p>
 
-See also <a href="vareph.html#eph_fsewin">eph_fsewin</a>, <a href="vareph.html#eph_extrael">eph_extrael</a> and <a href="vareph.html#eph_fermie">eph_fermie</a>.
+See also <a href="../../input_variables/html_generated/vareph.html#eph_fsewin">eph_fsewin</a>, <a href="../../input_variables/html_generated/vareph.html#eph_extrael">eph_extrael</a> and <a href="../../input_variables/html_generated/vareph.html#eph_fermie">eph_fermie</a>.
 </font>
 
 <br><br><a href=#top>Go to the top</a>
@@ -300,7 +300,7 @@ elastic LOVA as in the PRB by Savrasov and Savrasov
 Select the integration technique for computing the phonon DOS and the Eliashberg function a2fF(w).
 <p>
 <br>
-1 for Gaussian scheme (see also <a href="vareph.html#ph_smear">ph_smear</a>).
+1 for Gaussian scheme (see also <a href="../../input_variables/html_generated/vareph.html#ph_smear">ph_smear</a>).
 <br/>
 <br>
 2 for tetrahedron method (no other input is needed but requires at least 4 q-points in the BZ)
@@ -319,7 +319,7 @@ Select the integration technique for computing the phonon DOS and the Eliashberg
 <br><font id="default">Default is 20</font>
 <br><font id="text">
 <p>
-This variable is used in conjunction with <a href="vareph.html#ph_nqpath">ph_nqpath</a> and <a href="varrf.html#ph_qpath">ph_qpath</a> to define the q-path used for phonon band structures and phonon linewidths. It gives the number of points used to sample the smallest segment in the q-path specified by <a href="varrf.html#ph_qpath">ph_qpath</a>.
+This variable is used in conjunction with <a href="../../input_variables/html_generated/vareph.html#ph_nqpath">ph_nqpath</a> and <a href="../../input_variables/html_generated/varrf.html#ph_qpath">ph_qpath</a> to define the q-path used for phonon band structures and phonon linewidths. It gives the number of points used to sample the smallest segment in the q-path specified by <a href="../../input_variables/html_generated/varrf.html#ph_qpath">ph_qpath</a>.
 </font>
 
 <br><br><a href=#top>Go to the top</a>
@@ -333,7 +333,7 @@ This variable is used in conjunction with <a href="vareph.html#ph_nqpath">ph_nqp
 <br><font id="default">Default is 0</font>
 <br><font id="text">
 <p>
-This integer defines the number of points in the <a href="varrf.html#ph_qpath">ph_qpath</a> array.
+This integer defines the number of points in the <a href="../../input_variables/html_generated/varrf.html#ph_qpath">ph_qpath</a> array.
 </font>
 
 <br><br><a href=#top>Go to the top</a>
@@ -348,9 +348,9 @@ This integer defines the number of points in the <a href="varrf.html#ph_qpath">p
 <br><font id="text">
 <p>
 This variable defines the number of shifts in the q-mesh used
-for the phonon DOS and for the Eliashberg functions (see <a href="varrf.html#ph_ngqpt">ph_ngqpt</a>).
+for the phonon DOS and for the Eliashberg functions (see <a href="../../input_variables/html_generated/varrf.html#ph_ngqpt">ph_ngqpt</a>).
 If not given, the code assumes a Gamma-centered mesh. The shifts
-are specified by <a href="vareph.html#ph_qshift">ph_qshift</a>.
+are specified by <a href="../../input_variables/html_generated/vareph.html#ph_qshift">ph_qshift</a>.
 </font>
 
 <br><br><a href=#top>Go to the top</a>
@@ -363,12 +363,12 @@ are specified by <a href="vareph.html#ph_qshift">ph_qshift</a>.
 <br><font id="vartype">Variable type: real(3,ph_nqshift)</font>
 <br><font id="default">Default is [0, 0, 0]</font>
 <br><br><font id="requires">
-Only relevant if <a href="vareph.html#ph_nqshift">ph_nqshift</a>
+Only relevant if <a href="../../input_variables/html_generated/vareph.html#ph_nqshift">ph_nqshift</a>
 </font>
 <br><font id="text">
 <p>
 This array gives the shifts to be used to construct the q-mesh for
-computing the phonon DOS and the Eliashberg functions (see also <a href="vareph.html#ph_nqshift">ph_nqshift</a>. If not given, a Gamma-centered mesh is used.
+computing the phonon DOS and the Eliashberg functions (see also <a href="../../input_variables/html_generated/vareph.html#ph_nqshift">ph_nqshift</a>. If not given, a Gamma-centered mesh is used.
 </font>
 
 <br><br><a href=#top>Go to the top</a>
@@ -381,12 +381,12 @@ computing the phonon DOS and the Eliashberg functions (see also <a href="vareph.
 <br><font id="vartype">Variable type: real</font>
 <br><font id="default">Default is 0.00002 Hartree</font>
 <br><br><font id="requires">
-Only relevant if <a href="vareph.html#ph_intmeth">ph_intmeth</a>==1
+Only relevant if <a href="../../input_variables/html_generated/vareph.html#ph_intmeth">ph_intmeth</a>==1
 </font>
 <br><font id="text">
 <p>
 The gaussian broadening used for the integration of the phonon
-DOS and the Eliashberg function. See also <a href="vareph.html#ph_intmeth">ph_intmeth</a> and <a href="varrf.html#ph_ngqpt">ph_ngqpt</a>.
+DOS and the Eliashberg function. See also <a href="../../input_variables/html_generated/vareph.html#ph_intmeth">ph_intmeth</a> and <a href="../../input_variables/html_generated/varrf.html#ph_ngqpt">ph_ngqpt</a>.
 </font>
 
 <br><br><a href=#top>Go to the top</a>
@@ -411,7 +411,7 @@ The extrema of the mesh are automatically computed by the code.
 <br><font id="title"><a name="prtphbands">prtphbands</a></font>
 <br><font id="mnemonics">Mnemonics: PRinT PHonon BANDS</font>
 <br><font id="characteristic">Characteristic: </font>
-<br><font id="characteristic">Mentioned in "How to": <a href="topic_printing.html">printing</a> </font>
+<br><font id="characteristic">Mentioned in "How to": <a href="../../topics/html_generated/topic_printing.html">printing</a> </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 1</font>
 <br><font id="text">
@@ -437,14 +437,14 @@ Use `gnuplot file_PHBANDS.gnuplot` to visualize the phonon band structure.</li>
 <br><font id="title"><a name="prtphdos">prtphdos</a></font>
 <br><font id="mnemonics">Mnemonics: PRinT the PHonon Density Of States</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#develop">DEVELOP</a></font>
-<br><font id="characteristic">Mentioned in "How to": <a href="topic_printing.html">printing</a> </font>
+<br><font id="characteristic">Mentioned in "How to": <a href="../../topics/html_generated/topic_printing.html">printing</a> </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 1</font>
 <br><font id="text">
 <p>
 <p>
 Print the phonon density of states.
-It is activated by default when <a href="vargs.html#optdriver">optdriver</a>==7.
+It is activated by default when <a href="../../input_variables/html_generated/vargs.html#optdriver">optdriver</a>==7.
 </p>
 </font>
 
@@ -455,15 +455,15 @@ It is activated by default when <a href="vargs.html#optdriver">optdriver</a>==7.
 <br><font id="title"><a name="prtphsurf">prtphsurf</a></font>
 <br><font id="mnemonics">Mnemonics: PRinT PHonon iso-SURFace</font>
 <br><font id="characteristic">Characteristic: </font>
-<br><font id="characteristic">Mentioned in "How to": <a href="topic_printing.html">printing</a> </font>
+<br><font id="characteristic">Mentioned in "How to": <a href="../../topics/html_generated/topic_printing.html">printing</a> </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
 <br><font id="text">
 <p>
 Print a bxsf file (Xcrysden format) with the (interpolated)
-phonon frequencies computed of the q-mesh determined by <a href="varrf.html#ph_ngqpt">ph_ngqpt</a>. The file can be use to visualize isosurfaces with Xcrysden or other similar tools supporting the bxsf format.
+phonon frequencies computed of the q-mesh determined by <a href="../../input_variables/html_generated/varrf.html#ph_ngqpt">ph_ngqpt</a>. The file can be use to visualize isosurfaces with Xcrysden or other similar tools supporting the bxsf format.
 Note that the (dense) q-mesh must be Gamma-centered, shifted meshs are not supported by Xcrysden.
-This variable requires <a href="vargs.html#optdriver">optdriver</a>==7.
+This variable requires <a href="../../input_variables/html_generated/vargs.html#optdriver">optdriver</a>==7.
 </font>
 
 <br><br><a href=#top>Go to the top</a>

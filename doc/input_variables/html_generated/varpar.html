@@ -75,7 +75,7 @@ variables to be used in the main input file of the abinit code.
 <br><font id="title"><a name="autoparal">autoparal</a></font>
 <br><font id="mnemonics">Mnemonics: AUTOmatisation of the PARALlelism</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#develop">DEVELOP</a></font>
-<br><font id="characteristic">Mentioned in "How to": <a href="topic_parallelism.html">parallelism</a> </font>
+<br><font id="characteristic">Mentioned in "How to": <a href="../../topics/html_generated/topic_parallelism.html">parallelism</a> </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
 <br><font id="text">
@@ -105,9 +105,9 @@ ABINIT can only activate automatically the parallelism over spins and k-points.
 a simple (but relatively efficient) heuristic. A scaling factor is attributed to each level
 and an simple speedup factor is computed. The selected parameters are those giving the best speedup factor.
    <br />
-   Possibly concerned parameters: <a href="varpar.html#npimage">npimage</a>, <a href="varpar.html#npkpt">npkpt</a>,
-<a href="varpar.html#npspinor">npspinor</a>, <a href="varpar.html#npfft">npfft</a>,
-<a href="varpar.html#npband">npband</a>, <a href="varpar.html#bandpp">bandpp</a>.
+   Possibly concerned parameters: <a href="../../input_variables/html_generated/varpar.html#npimage">npimage</a>, <a href="../../input_variables/html_generated/varpar.html#npkpt">npkpt</a>,
+<a href="../../input_variables/html_generated/varpar.html#npspinor">npspinor</a>, <a href="../../input_variables/html_generated/varpar.html#npfft">npfft</a>,
+<a href="../../input_variables/html_generated/varpar.html#npband">npband</a>, <a href="../../input_variables/html_generated/varpar.html#bandpp">bandpp</a>.
   </li>
   <li>
    <b>
@@ -116,12 +116,12 @@ and an simple speedup factor is computed. The selected parameters are those givi
    The number of processors per parallelization level is first determined by mean of
 a simple (but relatively efficient) heuristic (see 1 above). Then the code performs a series
 of small benchmarks using the scheme applied for the LOBPCG algorithm
-(see: <a href="vardev.html#wfoptalg">wfoptalg</a>=4 or 14). The parallel distribution is then
+(see: <a href="../../input_variables/html_generated/vardev.html#wfoptalg">wfoptalg</a>=4 or 14). The parallel distribution is then
 changed according to the benchmarks.
    <br />
-   Possibly concerned parameters: <a href="varpar.html#npimage">npimage</a>, <a href="varpar.html#npkpt">npkpt</a>,
-<a href="varpar.html#npspinor">npspinor</a>, <a href="varpar.html#npfft">npfft</a>,
-<a href="varpar.html#npband">npband</a>, <a href="varpar.html#bandpp">bandpp</a>.
+   Possibly concerned parameters: <a href="../../input_variables/html_generated/varpar.html#npimage">npimage</a>, <a href="../../input_variables/html_generated/varpar.html#npkpt">npkpt</a>,
+<a href="../../input_variables/html_generated/varpar.html#npspinor">npspinor</a>, <a href="../../input_variables/html_generated/varpar.html#npfft">npfft</a>,
+<a href="../../input_variables/html_generated/varpar.html#npband">npband</a>, <a href="../../input_variables/html_generated/varpar.html#bandpp">bandpp</a>.
   </li>
   <li>
    <b>
@@ -134,8 +134,8 @@ changed according to the benchmarks.
 are then changed according to the benchmarks.
    <br />
    Possibly concerned parameters (in addition to those modified for <b>autoparal</b>=1):
-<a href="varpar.html#use_slk">use_slk</a>, <a href="varpar.html#np_slk">np_slk</a>,
-<a href="varpar.html#gpu_linalg_limit">gpu_linalg_limit</a>
+<a href="../../input_variables/html_generated/varpar.html#use_slk">use_slk</a>, <a href="../../input_variables/html_generated/varpar.html#np_slk">np_slk</a>,
+<a href="../../input_variables/html_generated/varpar.html#gpu_linalg_limit">gpu_linalg_limit</a>
   </li>
   <li>
    <b>
@@ -147,9 +147,9 @@ are then changed according to the benchmarks.
  Note that <b>autoparal</b>=1 can be used on every set of processors; <b>autoparal</b> &gt; 1 should be used on a sufficiently large number of MPI process.
  <br />
  Also note that <b>autoparal</b> can be used simultaneously with
-<a href="varpar.html#max_ncpus">max_ncpus</a>; in this case, ABINIT performs
+<a href="../../input_variables/html_generated/varpar.html#max_ncpus">max_ncpus</a>; in this case, ABINIT performs
 an optimization of process distribution for each total number of processors from 2
-to <a href="varpar.html#max_ncpus">max_ncpus</a>.
+to <a href="../../input_variables/html_generated/varpar.html#max_ncpus">max_ncpus</a>.
 A weight is associated to each distribution and the higher this weight is the better the distribution is.
 After having printed out the weights, the code stops.
 </p>
@@ -162,47 +162,47 @@ After having printed out the weights, the code stops.
 <br><font id="title"><a name="bandpp">bandpp</a></font>
 <br><font id="mnemonics">Mnemonics: BAND Per Processor</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#develop">DEVELOP</a></font>
-<br><font id="characteristic">Mentioned in "How to": <a href="topic_parallelism.html">parallelism</a> </font>
+<br><font id="characteristic">Mentioned in "How to": <a href="../../topics/html_generated/topic_parallelism.html">parallelism</a> </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 1</font>
 <br><br><font id="requires">
-Only relevant if <a href="varpar.html#paral_kgb">paral_kgb</a>==1
+Only relevant if <a href="../../input_variables/html_generated/varpar.html#paral_kgb">paral_kgb</a>==1
 </font>
 <br><font id="text">
 <p>
 <p>
  Control the size of the block in the LOBPCG algorithm.
-This keyword works only with <a href="varpar.html#paral_kgb">paral_kgb</a>=1 and has to be either 1 or a multiple of 2.
+This keyword works only with <a href="../../input_variables/html_generated/varpar.html#paral_kgb">paral_kgb</a>=1 and has to be either 1 or a multiple of 2.
  <br />
  <br />
- -- With <a href="varpar.html#npband">npband</a>=1:
+ -- With <a href="../../input_variables/html_generated/varpar.html#npband">npband</a>=1:
  <ul>
   <li>
    1 =&gt; band-per-band algorithm
   </li>
   <li>
-   n =&gt; The minimization is performed using <a href="varbas.html#nband">nband</a>/n blocks of n bands.
+   n =&gt; The minimization is performed using <a href="../../input_variables/html_generated/varbas.html#nband">nband</a>/n blocks of n bands.
   </li>
  </ul>
- Note: <a href="varbas.html#nband">nband</a>/n has to be an integer.
+ Note: <a href="../../input_variables/html_generated/varbas.html#nband">nband</a>/n has to be an integer.
  <br />
  <br />
- -- With <a href="varpar.html#npband">npband</a>/=1:
+ -- With <a href="../../input_variables/html_generated/varpar.html#npband">npband</a>/=1:
  <ul>
   <li>
-   1 =&gt; The minimization is performed using <a href="varbas.html#nband">nband</a>/<a href="varpar.html#npband">npband</a> blocks of <a href="varpar.html#npband">npband</a> bands.
+   1 =&gt; The minimization is performed using <a href="../../input_variables/html_generated/varbas.html#nband">nband</a>/<a href="../../input_variables/html_generated/varpar.html#npband">npband</a> blocks of <a href="../../input_variables/html_generated/varpar.html#npband">npband</a> bands.
   </li>
   <li>
-   n =&gt; The minimization is performed using <a href="varbas.html#nband">nband</a>/(<a href="varpar.html#npband">npband</a>*n) blocks of <a href="varpar.html#npband">npband</a>*n bands.
+   n =&gt; The minimization is performed using <a href="../../input_variables/html_generated/varbas.html#nband">nband</a>/(<a href="../../input_variables/html_generated/varpar.html#npband">npband</a>*n) blocks of <a href="../../input_variables/html_generated/varpar.html#npband">npband</a>*n bands.
   </li>
  </ul>
- Note: <a href="varbas.html#nband">nband</a>/(<a href="varpar.html#npband">npband</a>*n) has to be an integer.
+ Note: <a href="../../input_variables/html_generated/varbas.html#nband">nband</a>/(<a href="../../input_variables/html_generated/varpar.html#npband">npband</a>*n) has to be an integer.
  <br />
  <br />
  By minimizing a larger number of bands together in LOBPCG, we increase the convergency of the residual.
 The better minimization procedure (as concerns the convergency, but not as concerns the speed) is generally
-performed by using <b>bandpp</b>*<a href="varpar.html#npband">npband</a>=<a href="varbas.html#nband">nband</a>.
-Put <b>bandpp</b>=2 when <a href="vardev.html#istwfk">istwfk</a>=2 (the time spent in FFTs is divided by two).
+performed by using <b>bandpp</b>*<a href="../../input_variables/html_generated/varpar.html#npband">npband</a>=<a href="../../input_variables/html_generated/varbas.html#nband">nband</a>.
+Put <b>bandpp</b>=2 when <a href="../../input_variables/html_generated/vardev.html#istwfk">istwfk</a>=2 (the time spent in FFTs is divided by two).
 </p>
 </font>
 
@@ -213,11 +213,11 @@ Put <b>bandpp</b>=2 when <a href="vardev.html#istwfk">istwfk</a>=2 (the time spe
 <br><font id="title"><a name="gpu_devices">gpu_devices</a></font>
 <br><font id="mnemonics">Mnemonics: GPU: choice of DEVICES on one node</font>
 <br><font id="characteristic">Characteristic: </font>
-<br><font id="characteristic">Mentioned in "How to": <a href="topic_parallelism.html">parallelism</a> </font>
+<br><font id="characteristic">Mentioned in "How to": <a href="../../topics/html_generated/topic_parallelism.html">parallelism</a> </font>
 <br><font id="vartype">Variable type: integer(5)</font>
 <br><font id="default">Default is [-1, -1, -1, -1, -1]</font>
 <br><br><font id="requires">
-Only relevant if <a href="varpar.html#use_gpu_cuda">use_gpu_cuda</a>==1 (CUDA functionality)
+Only relevant if <a href="../../input_variables/html_generated/varpar.html#use_gpu_cuda">use_gpu_cuda</a>==1 (CUDA functionality)
 </font>
 <br><font id="text">
 <p>
@@ -243,11 +243,11 @@ GPU card are numbered starting from 0; to get the GPU devices list, type "nvidia
 <br><font id="title"><a name="gpu_linalg_limit">gpu_linalg_limit</a></font>
 <br><font id="mnemonics">Mnemonics: GPU (Cuda): LINear ALGebra LIMIT</font>
 <br><font id="characteristic">Characteristic: </font>
-<br><font id="characteristic">Mentioned in "How to": <a href="topic_parallelism.html">parallelism</a> </font>
+<br><font id="characteristic">Mentioned in "How to": <a href="../../topics/html_generated/topic_parallelism.html">parallelism</a> </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 2000000</font>
 <br><br><font id="requires">
-Only relevant if <a href="varpar.html#use_gpu_cuda">use_gpu_cuda</a>==1 (CUDA functionality)
+Only relevant if <a href="../../input_variables/html_generated/varpar.html#use_gpu_cuda">use_gpu_cuda</a>==1 (CUDA functionality)
 </font>
 <br><font id="text">
 <p>
@@ -259,12 +259,12 @@ are done on the Graphics Processing Unit.
  The considered matrix size is equal to:
  <br />
  <li>
-  SIZE=(<a href="varint.html#mpw">mpw</a>*<a href="vargs.html#nspinor">nspinor</a>/
-<a href="varpar.html#npspinor">npspinor</a>)*
-(<a href="varpar.html#npband">npband</a>*<a href="varpar.html#bandpp">bandpp</a>)**2
+  SIZE=(<a href="../../input_variables/html_generated/varint.html#mpw">mpw</a>*<a href="../../input_variables/html_generated/vargs.html#nspinor">nspinor</a>/
+<a href="../../input_variables/html_generated/varpar.html#npspinor">npspinor</a>)*
+(<a href="../../input_variables/html_generated/varpar.html#npband">npband</a>*<a href="../../input_variables/html_generated/varpar.html#bandpp">bandpp</a>)**2
  </li>
  <br />
- When SIZE&gt;=<b>gpu_linalg_limit</b>, <a href="vardev.html#wfoptalg">wfoptalg</a> parameter is
+ When SIZE&gt;=<b>gpu_linalg_limit</b>, <a href="../../input_variables/html_generated/vardev.html#wfoptalg">wfoptalg</a> parameter is
 automatically set to 14 which corresponds to the use of LOBPCG algorithm for the calculation of the eigenstates.
 </p>
 </font>
@@ -276,11 +276,11 @@ automatically set to 14 which corresponds to the use of LOBPCG algorithm for the
 <br><font id="title"><a name="gwpara">gwpara</a></font>
 <br><font id="mnemonics">Mnemonics: GW PARAllelization level</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#gw">GW</a></font>
-<br><font id="characteristic">Mentioned in "How to": <a href="topic_parallelism.html">parallelism</a> </font>
+<br><font id="characteristic">Mentioned in "How to": <a href="../../topics/html_generated/topic_parallelism.html">parallelism</a> </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 2 (Comment: The default value has been changed in v8. From 1 to 2 )</font>
 <br><br><font id="requires">
-Only relevant if <a href="vargs.html#optdriver">optdriver</a> in [3,4]
+Only relevant if <a href="../../input_variables/html_generated/vargs.html#optdriver">optdriver</a> in [3,4]
 </font>
 <br><font id="text">
 <p>
@@ -314,7 +314,7 @@ irrespectively of the number of CPUs used.
 <br><font id="title"><a name="localrdwf">localrdwf</a></font>
 <br><font id="mnemonics">Mnemonics: LOCAL ReaD WaveFunctions</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#develop">DEVELOP</a></font>
-<br><font id="characteristic">Mentioned in "How to": <a href="topic_parallelism.html">parallelism</a> </font>
+<br><font id="characteristic">Mentioned in "How to": <a href="../../topics/html_generated/topic_parallelism.html">parallelism</a> </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 1</font>
 <br><font id="text">
@@ -328,7 +328,7 @@ broadcast the data to the other processors.
 </p>
 <p>
  The option <b>localrdwf</b>=0 is NOT allowed when parallel I/O are activated (MPI-IO access),
-i.e. when <a href="vardev.html#iomode">iomode</a>==1.
+i.e. when <a href="../../input_variables/html_generated/vardev.html#iomode">iomode</a>==1.
 </p>
 <p>
  In the case of a parallel computer with a unique file system,
@@ -353,13 +353,13 @@ master node if <b>localrdwf</b>=0.
 <br><font id="title"><a name="max_ncpus">max_ncpus</a></font>
 <br><font id="mnemonics">Mnemonics: MAXimum Number of CPUS</font>
 <br><font id="characteristic">Characteristic: </font>
-<br><font id="characteristic">Mentioned in "How to": <a href="topic_parallelism.html">parallelism</a> </font>
+<br><font id="characteristic">Mentioned in "How to": <a href="../../topics/html_generated/topic_parallelism.html">parallelism</a> </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
 <br><font id="text">
 <p>
 <p>
- If <a href="varpar.html#autoparal">autoparal</a> &gt; 1 and <b>max_ncpus</b> is greater than 0,
+ If <a href="../../input_variables/html_generated/varpar.html#autoparal">autoparal</a> &gt; 1 and <b>max_ncpus</b> is greater than 0,
 ABINIT analyzes the efficiency of the process distribution for each possible number of processors
 from 2 to <b>max_ncpus</b>.
 After having printed out the efficiency, the code stops.
@@ -373,11 +373,11 @@ After having printed out the efficiency, the code stops.
 <br><font id="title"><a name="np_slk">np_slk</a></font>
 <br><font id="mnemonics">Mnemonics: Number of mpi Processors used for ScaLapacK calls</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#develop">DEVELOP</a></font>
-<br><font id="characteristic">Mentioned in "How to": <a href="topic_parallelism.html">parallelism</a> </font>
+<br><font id="characteristic">Mentioned in "How to": <a href="../../topics/html_generated/topic_parallelism.html">parallelism</a> </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 1000000</font>
 <br><br><font id="requires">
-Only relevant if <a href="vargs.html#optdriver">optdriver</a>==1 and <a href="varpar.html#paral_kgb">paral_kgb</a>==1 (Ground-state calculations with LOBPCG algorithm)
+Only relevant if <a href="../../input_variables/html_generated/vargs.html#optdriver">optdriver</a>==1 and <a href="../../input_variables/html_generated/varpar.html#paral_kgb">paral_kgb</a>==1 (Ground-state calculations with LOBPCG algorithm)
 </font>
 <br><font id="text">
 <p>
@@ -390,8 +390,8 @@ increases. It is better to use a smaller number of CPU cores for the LINALG call
  A large number for <b>np_slk</b> (i.e. 1000000) means that all cores are used for the
 Linear Algebra calls.
  <br />
- np_slk must divide the number of processors involved in diagonalizations (<a href="varpar.html#npband">npband</a>*<a href="varpar.html#npfft">npfft</a>*<a href="varpar.html#npspinor">npspinor</a>).
-<br>Note: an optimal value for this parameter can be automatically found by using the <a href="varpar.html#autoparal">autoparal</a> input keyword.
+ np_slk must divide the number of processors involved in diagonalizations (<a href="../../input_variables/html_generated/varpar.html#npband">npband</a>*<a href="../../input_variables/html_generated/varpar.html#npfft">npfft</a>*<a href="../../input_variables/html_generated/varpar.html#npspinor">npspinor</a>).
+<br>Note: an optimal value for this parameter can be automatically found by using the <a href="../../input_variables/html_generated/varpar.html#autoparal">autoparal</a> input keyword.
 </p>
 </font>
 
@@ -402,30 +402,30 @@ Linear Algebra calls.
 <br><font id="title"><a name="npband">npband</a></font>
 <br><font id="mnemonics">Mnemonics: Number of Processors at the BAND level</font>
 <br><font id="characteristic">Characteristic: </font>
-<br><font id="characteristic">Mentioned in "How to": <a href="topic_parallelism.html">parallelism</a> </font>
+<br><font id="characteristic">Mentioned in "How to": <a href="../../topics/html_generated/topic_parallelism.html">parallelism</a> </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 1</font>
 <br><br><font id="requires">
-Only relevant if <a href="varpar.html#paral_kgb">paral_kgb</a>==1
+Only relevant if <a href="../../input_variables/html_generated/varpar.html#paral_kgb">paral_kgb</a>==1
 </font>
 <br><font id="text">
 <p>
 <p>
  Relevant only for the band/FFT parallelisation
-(see the <a href="varpar.html#paral_kgb">paral_kgb</a> input variable).
+(see the <a href="../../input_variables/html_generated/varpar.html#paral_kgb">paral_kgb</a> input variable).
  <br />
  <b>npband</b> gives the number of processors among which the work load over the band level is shared.
-<b>npband</b>, <a href="varpar.html#npfft">npfft</a>,
-<a href="varpar.html#npkpt">npkpt</a> and <a href="varpar.html#npspinor">npspinor</a>
+<b>npband</b>, <a href="../../input_variables/html_generated/varpar.html#npfft">npfft</a>,
+<a href="../../input_variables/html_generated/varpar.html#npkpt">npkpt</a> and <a href="../../input_variables/html_generated/varpar.html#npspinor">npspinor</a>
 are combined to give the total number
 of processors (nproc) working on the band/FFT/k-point parallelisation.
  <br />
- See <a href="varpar.html#npfft">npfft</a>, <a href="varpar.html#npkpt">npkpt</a>,
-<a href="varpar.html#npspinor">npspinor</a> and
-<a href="varpar.html#paral_kgb">paral_kgb</a> for the additional information on the use of
+ See <a href="../../input_variables/html_generated/varpar.html#npfft">npfft</a>, <a href="../../input_variables/html_generated/varpar.html#npkpt">npkpt</a>,
+<a href="../../input_variables/html_generated/varpar.html#npspinor">npspinor</a> and
+<a href="../../input_variables/html_generated/varpar.html#paral_kgb">paral_kgb</a> for the additional information on the use of
 band/FFT/k-point parallelisation.
-<b>npband</b> has to be a divisor or equal to <a href="varbas.html#nband">nband</a>
-<br>Note: an optimal value for this parameter can be automatically found by using the <a href="varpar.html#autoparal">autoparal</a> input keyword.
+<b>npband</b> has to be a divisor or equal to <a href="../../input_variables/html_generated/varbas.html#nband">nband</a>
+<br>Note: an optimal value for this parameter can be automatically found by using the <a href="../../input_variables/html_generated/varpar.html#autoparal">autoparal</a> input keyword.
 </p>
 </font>
 
@@ -436,35 +436,35 @@ band/FFT/k-point parallelisation.
 <br><font id="title"><a name="npfft">npfft</a></font>
 <br><font id="mnemonics">Mnemonics: Number of Processors at the FFT level</font>
 <br><font id="characteristic">Characteristic: </font>
-<br><font id="characteristic">Mentioned in "How to": <a href="topic_parallelism.html">parallelism</a> </font>
+<br><font id="characteristic">Mentioned in "How to": <a href="../../topics/html_generated/topic_parallelism.html">parallelism</a> </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 1</font>
 <br><br><font id="requires">
-Only relevant if <a href="varpar.html#paral_kgb">paral_kgb</a>==1
+Only relevant if <a href="../../input_variables/html_generated/varpar.html#paral_kgb">paral_kgb</a>==1
 </font>
 <br><font id="text">
 <p>
 <p>
  Relevant only for the band/FFT/k-point parallelisation
-(see the <a href="varpar.html#paral_kgb">paral_kgb</a> input variable).
+(see the <a href="../../input_variables/html_generated/varpar.html#paral_kgb">paral_kgb</a> input variable).
  <br />
  <b>npfft</b> gives the number of processors among
 which the work load over the FFT level is shared.
-<b>npfft</b>, <a href="varpar.html#npkpt">npkpt</a>,
-<a href="varpar.html#npband">npband</a> and <a href="varpar.html#npspinor">npspinor</a>
+<b>npfft</b>, <a href="../../input_variables/html_generated/varpar.html#npkpt">npkpt</a>,
+<a href="../../input_variables/html_generated/varpar.html#npband">npband</a> and <a href="../../input_variables/html_generated/varpar.html#npspinor">npspinor</a>
 are combined to give the total number
 of processors (nproc) working on the band/FFT/k-point parallelisation.
  <br />
- See <a href="varpar.html#npband">npband</a>, <a href="varpar.html#npkpt">npkpt</a>,
-<a href="varpar.html#npspinor">npspinor</a>, and
-<a href="varpar.html#paral_kgb">paral_kgb</a> for the additional information on the use of
+ See <a href="../../input_variables/html_generated/varpar.html#npband">npband</a>, <a href="../../input_variables/html_generated/varpar.html#npkpt">npkpt</a>,
+<a href="../../input_variables/html_generated/varpar.html#npspinor">npspinor</a>, and
+<a href="../../input_variables/html_generated/varpar.html#paral_kgb">paral_kgb</a> for the additional information on the use of
 band/FFT/k-point parallelisation.
 </p>
 <p>
- Note : <a href="vargs.html#ngfft">ngfft</a> is automatically adjusted to <b>npfft</b>.
+ Note : <a href="../../input_variables/html_generated/vargs.html#ngfft">ngfft</a> is automatically adjusted to <b>npfft</b>.
 If the number of processor is changed from a calculation to another one,
-<b>npfft</b> may change, and then <a href="vargs.html#ngfft">ngfft</a> also.
-<br>Note: an optimal value for this parameter can be automatically found by using the <a href="varpar.html#autoparal">autoparal</a> input keyword.
+<b>npfft</b> may change, and then <a href="../../input_variables/html_generated/vargs.html#ngfft">ngfft</a> also.
+<br>Note: an optimal value for this parameter can be automatically found by using the <a href="../../input_variables/html_generated/varpar.html#autoparal">autoparal</a> input keyword.
 </p>
 </font>
 
@@ -475,24 +475,24 @@ If the number of processor is changed from a calculation to another one,
 <br><font id="title"><a name="nphf">nphf</a></font>
 <br><font id="mnemonics">Mnemonics: Number of Processors for (Hartree)-Fock exact exchange</font>
 <br><font id="characteristic">Characteristic: </font>
-<br><font id="characteristic">Mentioned in "How to": <a href="topic_hf.html">hf</a> <a href="topic_parallelism.html">parallelism</a> </font>
+<br><font id="characteristic">Mentioned in "How to": <a href="../../topics/html_generated/topic_hf.html">hf</a> <a href="../../topics/html_generated/topic_parallelism.html">parallelism</a> </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 1</font>
 <br><font id="text">
 <p>
 <p>
  Relevant only for the k-point/fock parallelisation
-(option <a href="varpar.html#paral_kgb">paral_kgb</a> input variable).
+(option <a href="../../input_variables/html_generated/varpar.html#paral_kgb">paral_kgb</a> input variable).
  <br />
  <b>nphf</b> gives the number of processors among
 which the work load over the occupied states level is shared.
-<b>nphf</b> and <a href="varpar.html#npkpt">npkpt</a> are combined to give the total number
+<b>nphf</b> and <a href="../../input_variables/html_generated/varpar.html#npkpt">npkpt</a> are combined to give the total number
 of processors (nproc) working on the parallelisation.
  <br />
 </p>
 <p>
  Note : <b>nphf</b> should be a divisor or equal to the number of k-point times the number of bands for
-exact exchange (<a href="varbas.html#nkpthf">nkpthf</a>*<a href="varbas.html#nbandhf">nbandhf</a>)
+exact exchange (<a href="../../input_variables/html_generated/varbas.html#nkpthf">nkpthf</a>*<a href="../../input_variables/html_generated/varbas.html#nbandhf">nbandhf</a>)
 in order to have the better load-balancing and efficiency.
  <br />
 </p>
@@ -505,23 +505,23 @@ in order to have the better load-balancing and efficiency.
 <br><font id="title"><a name="npimage">npimage</a></font>
 <br><font id="mnemonics">Mnemonics: Number of Processors at the IMAGE level</font>
 <br><font id="characteristic">Characteristic: </font>
-<br><font id="characteristic">Mentioned in "How to": <a href="topic_parallelism.html">parallelism</a> <a href="topic_PIMD.html">PIMD</a> </font>
+<br><font id="characteristic">Mentioned in "How to": <a href="../../topics/html_generated/topic_parallelism.html">parallelism</a> <a href="../../topics/html_generated/topic_PIMD.html">PIMD</a> </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 1</font>
 <br><font id="text">
 <p>
 <p>
  Relevant only
-when sets of images are activated (see <a href="varrlx.html#imgmov">imgmov</a>
-and <a href="varrlx.html#nimage">nimage</a> ).
+when sets of images are activated (see <a href="../../input_variables/html_generated/varrlx.html#imgmov">imgmov</a>
+and <a href="../../input_variables/html_generated/varrlx.html#nimage">nimage</a> ).
  <br />
  <b>npimage</b> gives the number of processors among
 which the work load over the image level is shared. It is compatible with all other parallelization
 levels available for ground-state calculations.
-<br>Note: an optimal value for this parameter can be automatically found by using the <a href="varpar.html#autoparal">autoparal</a> input keyword.
+<br>Note: an optimal value for this parameter can be automatically found by using the <a href="../../input_variables/html_generated/varpar.html#autoparal">autoparal</a> input keyword.
  <br ><br>
-<i>See <a href="varpar.html#paral_kgb">paral_kgb</a>, <a href="varpar.html#npkpt">npkpt</a>, <a href="varpar.html#npband">npband</a>, <a href="varpar.html#npfft">npfft</a>
-and <a href="varpar.html#npspinor">npspinor</a> for the additional information on the use of k-point/band/FFT parallelisation.
+<i>See <a href="../../input_variables/html_generated/varpar.html#paral_kgb">paral_kgb</a>, <a href="../../input_variables/html_generated/varpar.html#npkpt">npkpt</a>, <a href="../../input_variables/html_generated/varpar.html#npband">npband</a>, <a href="../../input_variables/html_generated/varpar.html#npfft">npfft</a>
+and <a href="../../input_variables/html_generated/varpar.html#npspinor">npspinor</a> for the additional information on the use of k-point/band/FFT parallelisation.
  </i>
 </p>
 </font>
@@ -533,33 +533,33 @@ and <a href="varpar.html#npspinor">npspinor</a> for the additional information o
 <br><font id="title"><a name="npkpt">npkpt</a></font>
 <br><font id="mnemonics">Mnemonics: Number of Processors at the K-Point Level</font>
 <br><font id="characteristic">Characteristic: </font>
-<br><font id="characteristic">Mentioned in "How to": <a href="topic_parallelism.html">parallelism</a> </font>
+<br><font id="characteristic">Mentioned in "How to": <a href="../../topics/html_generated/topic_parallelism.html">parallelism</a> </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 1</font>
 <br><br><font id="requires">
-Only relevant if <a href="varpar.html#paral_kgb">paral_kgb</a>==1
+Only relevant if <a href="../../input_variables/html_generated/varpar.html#paral_kgb">paral_kgb</a>==1
 </font>
 <br><font id="text">
 <p>
 <p>
  Relevant only for the band/FFT/k-point parallelisation
-(see the <a href="varpar.html#paral_kgb">paral_kgb</a> input variable).
+(see the <a href="../../input_variables/html_generated/varpar.html#paral_kgb">paral_kgb</a> input variable).
  <br />
  <b>npkpt</b> gives the number of processors among
 which the work load over the k-point/spin-component level is shared.
-<b>npkpt</b>, <a href="varpar.html#npfft">npfft</a>, <a href="varpar.html#npband">npband</a> and
-<a href="varpar.html#npspinor">npspinor</a> are combined to give the total number
+<b>npkpt</b>, <a href="../../input_variables/html_generated/varpar.html#npfft">npfft</a>, <a href="../../input_variables/html_generated/varpar.html#npband">npband</a> and
+<a href="../../input_variables/html_generated/varpar.html#npspinor">npspinor</a> are combined to give the total number
 of processors (nproc) working on the band/FFT/k-point parallelisation.
  <br />
- See <a href="varpar.html#npband">npband</a>, <a href="varpar.html#npfft">npfft</a>,
-<a href="varpar.html#npspinor">npspinor</a> and
-<a href="varpar.html#paral_kgb">paral_kgb</a> for the additional information on the use of
+ See <a href="../../input_variables/html_generated/varpar.html#npband">npband</a>, <a href="../../input_variables/html_generated/varpar.html#npfft">npfft</a>,
+<a href="../../input_variables/html_generated/varpar.html#npspinor">npspinor</a> and
+<a href="../../input_variables/html_generated/varpar.html#paral_kgb">paral_kgb</a> for the additional information on the use of
 band/FFT/k-point parallelisation.
 </p>
 <b>npkpt</b> should be a divisor or equal to with the number of k-point/spin-components
-(<a href="varbas.html#nkpt">nkpt</a>*<a href="varbas.html#nsppol">nsppol</a>)
+(<a href="../../input_variables/html_generated/varbas.html#nkpt">nkpt</a>*<a href="../../input_variables/html_generated/varbas.html#nsppol">nsppol</a>)
 in order to have the better load-balancing and efficiency.
-<br>Note: an optimal value for this parameter can be automatically found by using the <a href="varpar.html#autoparal">autoparal</a> input keyword.
+<br>Note: an optimal value for this parameter can be automatically found by using the <a href="../../input_variables/html_generated/varpar.html#autoparal">autoparal</a> input keyword.
 </p>
 </font>
 
@@ -570,16 +570,16 @@ in order to have the better load-balancing and efficiency.
 <br><font id="title"><a name="nppert">nppert</a></font>
 <br><font id="mnemonics">Mnemonics: Number of Processors at the PERTurbation level</font>
 <br><font id="characteristic">Characteristic: </font>
-<br><font id="characteristic">Mentioned in "How to": <a href="topic_parallelism.html">parallelism</a> </font>
+<br><font id="characteristic">Mentioned in "How to": <a href="../../topics/html_generated/topic_parallelism.html">parallelism</a> </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 1</font>
 <br><br><font id="requires">
-Only relevant if <a href="varpar.html#paral_rf">paral_rf</a>==1
+Only relevant if <a href="../../input_variables/html_generated/varpar.html#paral_rf">paral_rf</a>==1
 </font>
 <br><font id="text">
 <p>
 <p>
- This parameter is used in connection to the parallelization over perturbations(see <a href="varpar.html#paral_rf">paral_rf</a> ),
+ This parameter is used in connection to the parallelization over perturbations(see <a href="../../input_variables/html_generated/varpar.html#paral_rf">paral_rf</a> ),
 for a linear response calculation.
 <b>nppert</b> gives the number of processors among which the work load over the perturbation level is shared.
 It can even be specified separately for each dataset.
@@ -593,31 +593,31 @@ It can even be specified separately for each dataset.
 <br><font id="title"><a name="npspinor">npspinor</a></font>
 <br><font id="mnemonics">Mnemonics: Number of Processors at the SPINOR level</font>
 <br><font id="characteristic">Characteristic: </font>
-<br><font id="characteristic">Mentioned in "How to": <a href="topic_parallelism.html">parallelism</a> </font>
+<br><font id="characteristic">Mentioned in "How to": <a href="../../topics/html_generated/topic_parallelism.html">parallelism</a> </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 1</font>
 <br><br><font id="requires">
-Only relevant if <a href="varpar.html#paral_kgb">paral_kgb</a>==1
+Only relevant if <a href="../../input_variables/html_generated/varpar.html#paral_kgb">paral_kgb</a>==1
 </font>
 <br><font id="text">
 <p>
 <p>
- Can be 1 or 2 (if <a href="vargs.html#nspinor">nspinor</a>=2).
+ Can be 1 or 2 (if <a href="../../input_variables/html_generated/vargs.html#nspinor">nspinor</a>=2).
  <br />
  Relevant only for the band/FFT/k-point parallelisation
-(see the <a href="varpar.html#paral_kgb">paral_kgb</a> input variable).
+(see the <a href="../../input_variables/html_generated/varpar.html#paral_kgb">paral_kgb</a> input variable).
  <br />
  <b>npspinor</b> gives the number of processors among
 which the work load over the spinorial components of wave-functions is shared.
-<b>npspinor</b>, <a href="varpar.html#npfft">npfft</a>,
-<a href="varpar.html#npband">npband</a> and <a href="varpar.html#npkpt">npkpt</a>
+<b>npspinor</b>, <a href="../../input_variables/html_generated/varpar.html#npfft">npfft</a>,
+<a href="../../input_variables/html_generated/varpar.html#npband">npband</a> and <a href="../../input_variables/html_generated/varpar.html#npkpt">npkpt</a>
 are combined to give the total number of processors (nproc)
 working on the band/FFT/k-point parallelisation.
-<br>Note: an optimal value for this parameter can be automatically found by using the <a href="varpar.html#autoparal">autoparal</a> input keyword.
+<br>Note: an optimal value for this parameter can be automatically found by using the <a href="../../input_variables/html_generated/varpar.html#autoparal">autoparal</a> input keyword.
  <br><br>
-<i>See <a href="varpar.html#npkpt">npkpt</a>, <a href="varpar.html#npband">npband</a>,
-<a href="varpar.html#npfft">npfft</a>, and
-<a href="varpar.html#paral_kgb">paral_kgb</a> for the additional information on the use of
+<i>See <a href="../../input_variables/html_generated/varpar.html#npkpt">npkpt</a>, <a href="../../input_variables/html_generated/varpar.html#npband">npband</a>,
+<a href="../../input_variables/html_generated/varpar.html#npfft">npfft</a>, and
+<a href="../../input_variables/html_generated/varpar.html#paral_kgb">paral_kgb</a> for the additional information on the use of
 band/FFT/k-point parallelisation.</i>
  <br />
 </p>
@@ -630,7 +630,7 @@ band/FFT/k-point parallelisation.</i>
 <br><font id="title"><a name="paral_atom">paral_atom</a></font>
 <br><font id="mnemonics">Mnemonics: activate PARALelization over (paw) ATOMic sites</font>
 <br><font id="characteristic">Characteristic: </font>
-<br><font id="characteristic">Mentioned in "How to": <a href="topic_parallelism.html">parallelism</a> </font>
+<br><font id="characteristic">Mentioned in "How to": <a href="../../topics/html_generated/topic_parallelism.html">parallelism</a> </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 1</font>
 <br><font id="text">
@@ -652,7 +652,7 @@ also distributed using the "kpt-band" communicator.
 <br><font id="title"><a name="paral_kgb">paral_kgb</a></font>
 <br><font id="mnemonics">Mnemonics: activate PARALelization over K-point, G-vectors and Bands</font>
 <br><font id="characteristic">Characteristic: </font>
-<br><font id="characteristic">Mentioned in "How to": <a href="topic_parallelism.html">parallelism</a> </font>
+<br><font id="characteristic">Mentioned in "How to": <a href="../../topics/html_generated/topic_parallelism.html">parallelism</a> </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
 <br><font id="text">
@@ -664,8 +664,8 @@ also distributed using the "kpt-band" communicator.
  ,
 ABINIT automatically detects if the job has been sent in sequential or in parallel.
 In this last case, it detects the number of processors on which the job has been sent and calculates values of
-<a href="varpar.html#npkpt">npkpt</a>, <a href="varpar.html#npfft">npfft</a>,
-<a href="varpar.html#npband">npband</a>, <a href="varpar.html#bandpp">bandpp</a> , <a href="varpar.html#npimage">npimage</a> and <a href="varpar.html#npspinor">npspinor</a> that are compatible with the number of processors. It then set
+<a href="../../input_variables/html_generated/varpar.html#npkpt">npkpt</a>, <a href="../../input_variables/html_generated/varpar.html#npfft">npfft</a>,
+<a href="../../input_variables/html_generated/varpar.html#npband">npband</a>, <a href="../../input_variables/html_generated/varpar.html#bandpp">bandpp</a> , <a href="../../input_variables/html_generated/varpar.html#npimage">npimage</a> and <a href="../../input_variables/html_generated/varpar.html#npspinor">npspinor</a> that are compatible with the number of processors. It then set
 paral_kgb to 0 or 1 (see hereunder) and launches the job.
 </p>
 <b>
@@ -673,30 +673,30 @@ paral_kgb to 0 or 1 (see hereunder) and launches the job.
 </b>
 ,
 the parallelization over k-points only is activated. In this case,
-<a href="varpar.html#npkpt">npkpt</a>, <a href="varpar.html#npspinor">npspinor</a>, <a href="varpar.html#npfft">npfft</a> and
-<a href="varpar.html#npband">npband</a> are ignored. Require compilation option --enable-mpi="yes".
+<a href="../../input_variables/html_generated/varpar.html#npkpt">npkpt</a>, <a href="../../input_variables/html_generated/varpar.html#npspinor">npspinor</a>, <a href="../../input_variables/html_generated/varpar.html#npfft">npfft</a> and
+<a href="../../input_variables/html_generated/varpar.html#npband">npband</a> are ignored. Require compilation option --enable-mpi="yes".
 <p>
  <b>
   If paral_kgb=1
  </b>
  ,
 the parallelization over bands, FFTs, and k-point/spin-components is activated
-(see <a href="varpar.html#npkpt">npkpt</a>, <a href="varpar.html#npfft">npfft</a>
-<a href="varpar.html#npband">npband</a> and eventually <a href="varpar.html#npspinor">npspinor</a>). With this parallelization, the work load is split over
+(see <a href="../../input_variables/html_generated/varpar.html#npkpt">npkpt</a>, <a href="../../input_variables/html_generated/varpar.html#npfft">npfft</a>
+<a href="../../input_variables/html_generated/varpar.html#npband">npband</a> and eventually <a href="../../input_variables/html_generated/varpar.html#npspinor">npspinor</a>). With this parallelization, the work load is split over
 four levels of parallelization (three level of parallelisation (kpt-band-fft )+ spin) The different communications almost occur
 along one dimension only. Require compilation option --enable-mpi="yes".
 </p>
 HOWTO fix the number of processors along one level of parallelisation:
 <br />
 At first, try to parallelise over the k point and spin
-(see <a href="varpar.html#npkpt">npkpt</a>,<a href="varpar.html#npspinor">npspinor</a>).
+(see <a href="../../input_variables/html_generated/varpar.html#npkpt">npkpt</a>,<a href="../../input_variables/html_generated/varpar.html#npspinor">npspinor</a>).
 Otherwise, for unpolarized calculation at the gamma point, parallelise over the
 two other levels: the band and FFT ones. For nproc&lt;=50,
 the best speed-up is achieved for
-<a href="varpar.html#npband">npband</a>=nproc and
-<a href="varpar.html#npfft">npfft</a>=1 (which is not yet the default).
+<a href="../../input_variables/html_generated/varpar.html#npband">npband</a>=nproc and
+<a href="../../input_variables/html_generated/varpar.html#npfft">npfft</a>=1 (which is not yet the default).
 For nproc&gt;=50, the best speed-up is achieved for
-<a href="varpar.html#npband">npband</a> &gt;=4*<a href="varpar.html#npfft">npfft</a>.
+<a href="../../input_variables/html_generated/varpar.html#npband">npband</a> &gt;=4*<a href="../../input_variables/html_generated/varpar.html#npfft">npfft</a>.
 <p>
  For additional information,
 download F. Bottin presentation at the
@@ -720,7 +720,7 @@ Comput. Mat. Science
 also available on arXiv, http://arxiv.org/abs/0707.3405 .
 </p>
 <p>
- If the total number of processors used is compatible with the four levels of parallelization, the values for <a href="varpar.html#npkpt">npkpt</a>, <a href="varpar.html#npspinor">npspinor</a>, <a href="varpar.html#npfft">npfft</a>, <a href="varpar.html#npband">npband</a> and <a href="varpar.html#bandpp">bandpp</a> will be filled automatically, although the repartition may not be optimal. To optimize the repartition use:
+ If the total number of processors used is compatible with the four levels of parallelization, the values for <a href="../../input_variables/html_generated/varpar.html#npkpt">npkpt</a>, <a href="../../input_variables/html_generated/varpar.html#npspinor">npspinor</a>, <a href="../../input_variables/html_generated/varpar.html#npfft">npfft</a>, <a href="../../input_variables/html_generated/varpar.html#npband">npband</a> and <a href="../../input_variables/html_generated/varpar.html#bandpp">bandpp</a> will be filled automatically, although the repartition may not be optimal. To optimize the repartition use:
 </p>
 <p>
  <b>
@@ -737,7 +737,7 @@ A weight is attributed to each possible processors repartition. It is adviced to
 This test can be done as well with a sequential as with a parallel version of the code.
 The user can then choose the adequate number of processor on which he can run his job.
 He must put again paral_kgb=1 in the input file and put the corresponding values for
-<a href="varpar.html#npkpt">npkpt</a>, <a href="varpar.html#npfft">npfft</a>, <a href="varpar.html#npband">npband</a>,<a href="varpar.html#bandpp">bandpp</a> and eventually <a href="varpar.html#npspinor">npspinor</a> in the input file.
+<a href="../../input_variables/html_generated/varpar.html#npkpt">npkpt</a>, <a href="../../input_variables/html_generated/varpar.html#npfft">npfft</a>, <a href="../../input_variables/html_generated/varpar.html#npband">npband</a>,<a href="../../input_variables/html_generated/varpar.html#bandpp">bandpp</a> and eventually <a href="../../input_variables/html_generated/varpar.html#npspinor">npspinor</a> in the input file.
 </p>
 </font>
 
@@ -748,7 +748,7 @@ He must put again paral_kgb=1 in the input file and put the corresponding values
 <br><font id="title"><a name="paral_rf">paral_rf</a></font>
 <br><font id="mnemonics">Mnemonics: activate PARALlelization over Response Function perturbations</font>
 <br><font id="characteristic">Characteristic: </font>
-<br><font id="characteristic">Mentioned in "How to": <a href="topic_parallelism.html">parallelism</a> </font>
+<br><font id="characteristic">Mentioned in "How to": <a href="../../topics/html_generated/topic_parallelism.html">parallelism</a> </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
 <br><font id="text">
@@ -776,11 +776,11 @@ q-point in the log file (YAML format) and then stops.
 <br><font id="title"><a name="pw_unbal_thresh">pw_unbal_thresh</a></font>
 <br><font id="mnemonics">Mnemonics: Plane Wave UNBALancing: THRESHold for balancing procedure</font>
 <br><font id="characteristic">Characteristic: </font>
-<br><font id="characteristic">Mentioned in "How to": <a href="topic_parallelism.html">parallelism</a> </font>
+<br><font id="characteristic">Mentioned in "How to": <a href="../../topics/html_generated/topic_parallelism.html">parallelism</a> </font>
 <br><font id="vartype">Variable type: real</font>
 <br><font id="default">Default is 40%</font>
 <br><br><font id="requires">
-Only relevant if <a href="varpar.html#paral_kgb">paral_kgb</a>==1
+Only relevant if <a href="../../input_variables/html_generated/varpar.html#paral_kgb">paral_kgb</a>==1
 </font>
 <br><font id="text">
 <p>
@@ -798,9 +798,9 @@ Only relevant if <a href="varpar.html#paral_kgb">paral_kgb</a>==1
 <br><font id="title"><a name="use_gpu_cuda">use_gpu_cuda</a></font>
 <br><font id="mnemonics">Mnemonics: activate USE of GPU accelerators with CUDA (nvidia)</font>
 <br><font id="characteristic">Characteristic: </font>
-<br><font id="characteristic">Mentioned in "How to": <a href="topic_parallelism.html">parallelism</a> </font>
+<br><font id="characteristic">Mentioned in "How to": <a href="../../topics/html_generated/topic_parallelism.html">parallelism</a> </font>
 <br><font id="vartype">Variable type: integer</font>
-<br><font id="default">Default is 1 if <a href="vargs.html#optdriver">optdriver</a>==0 and <a href="specials.html#CUDA">CUDA</a>,
+<br><font id="default">Default is 1 if <a href="../../input_variables/html_generated/vargs.html#optdriver">optdriver</a>==0 and <a href="specials.html#CUDA">CUDA</a>,
 0 otherwise.
 </font>
 <br><font id="text">

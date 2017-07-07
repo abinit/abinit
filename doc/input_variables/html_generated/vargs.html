@@ -149,26 +149,26 @@ variables to be used in the main input file of the abinit code.
 <br><font id="title"><a name="algalch">algalch</a></font>
 <br><font id="mnemonics">Mnemonics: ALGorithm for generating ALCHemical pseudopotentials</font>
 <br><font id="characteristic">Characteristic: </font>
-<br><font id="characteristic">Mentioned in "How to": <a href="topic_otherGS.html">otherGS</a> </font>
-<br><font id="vartype">Variable type: integer(<a href="vargs.html#ntypalch">ntypalch</a>)</font>
+<br><font id="characteristic">Mentioned in "How to": <a href="../../topics/html_generated/topic_otherGS.html">otherGS</a> </font>
+<br><font id="vartype">Variable type: integer(<a href="../../input_variables/html_generated/vargs.html#ntypalch">ntypalch</a>)</font>
 <br><font id="default">Default is *1</font>
 <br><font id="text">
 <p>
 <p>
  Used for the generation of alchemical pseudopotentials, that is,
-when <a href="vargs.html#ntypalch">ntypalch</a> is non-zero.
+when <a href="../../input_variables/html_generated/vargs.html#ntypalch">ntypalch</a> is non-zero.
 </p>
 <p>
  Give the algorithm to be used to
-generate the <a href="vargs.html#ntypalch">ntypalch</a> alchemical potentials
-from the different <a href="vargs.html#npspalch">npspalch</a> pseudopotentials
+generate the <a href="../../input_variables/html_generated/vargs.html#ntypalch">ntypalch</a> alchemical potentials
+from the different <a href="../../input_variables/html_generated/vargs.html#npspalch">npspalch</a> pseudopotentials
 dedicated to this use.
 </p>
 <p>
  Presently, <b>algalch</b> can only have the value 1, that is :
  <ul>
   <li>
-   the local potentials are mixed, thanks to the <a href="vargs.html#mixalch">mixalch</a>
+   the local potentials are mixed, thanks to the <a href="../../input_variables/html_generated/vargs.html#mixalch">mixalch</a>
 mixing coefficients
   </li>
   <li>
@@ -177,17 +177,17 @@ to generate the alchemical potential
   </li>
   <li>
    the scalar coefficients of the non-local projectors are multiplied by the proportion
-of the corresponding type of atom that is present in <a href="vargs.html#mixalch">mixalch</a>
+of the corresponding type of atom that is present in <a href="../../input_variables/html_generated/vargs.html#mixalch">mixalch</a>
   </li>
   <li>
    the characteristic radius for the core charge is a
 linear combination of the characteristic radii of the core charges,
-build with the <a href="vargs.html#mixalch">mixalch</a> mixing
+build with the <a href="../../input_variables/html_generated/vargs.html#mixalch">mixalch</a> mixing
 coefficients
   </li>
   <li>
    the core charge function f(r/rc) is a linear combination
-of the core charge functions, build with the <a href="vargs.html#mixalch">mixalch</a>
+of the core charge functions, build with the <a href="../../input_variables/html_generated/vargs.html#mixalch">mixalch</a>
 mixing coefficients
   </li>
  </ul>
@@ -205,7 +205,7 @@ mixing coefficients
 <br><font id="title"><a name="boxcenter">boxcenter</a></font>
 <br><font id="mnemonics">Mnemonics: BOX CENTER</font>
 <br><font id="characteristic">Characteristic: </font>
-<br><font id="characteristic">Mentioned in "How to": <a href="topic_TDDFT.html">TDDFT</a> </font>
+<br><font id="characteristic">Mentioned in "How to": <a href="../../topics/html_generated/topic_TDDFT.html">TDDFT</a> </font>
 <br><font id="vartype">Variable type: real(3)</font>
 <br><font id="default">Default is [0.5, 0.5, 0.5]</font>
 <br><font id="text">
@@ -229,7 +229,7 @@ the origin, it is better to take <b>boxcenter</b>=(0 0 0).
 <br><font id="title"><a name="boxcutmin">boxcutmin</a></font>
 <br><font id="mnemonics">Mnemonics: BOX CUT-off MINimum</font>
 <br><font id="characteristic">Characteristic: </font>
-<br><font id="characteristic">Mentioned in "How to": <a href="topic_convergency.html">convergency</a> </font>
+<br><font id="characteristic">Mentioned in "How to": <a href="../../topics/html_generated/topic_convergency.html">convergency</a> </font>
 <br><font id="vartype">Variable type: real</font>
 <br><font id="default">Default is 2.0</font>
 <br><font id="text">
@@ -254,7 +254,7 @@ calculation.
 <br><font id="title"><a name="charge">charge</a></font>
 <br><font id="mnemonics">Mnemonics: CHARGE</font>
 <br><font id="characteristic">Characteristic: </font>
-<br><font id="characteristic">Mentioned in "How to": <a href="topic_GSgeneral.html">GSgeneral</a> </font>
+<br><font id="characteristic">Mentioned in "How to": <a href="../../topics/html_generated/topic_GSgeneral.html">GSgeneral</a> </font>
 <br><font id="vartype">Variable type: real</font>
 <br><font id="default">Default is 0</font>
 <br><font id="text">
@@ -268,13 +268,13 @@ nominal <b>charge</b> associated with the atomic cores.
 provided by the pseudopotentials of each type
 (call this "zval"), then add <b>charge</b>, to get the
 number of electrons per unit cell,
-<a href="varint.html#nelect">nelect</a>.
+<a href="../../input_variables/html_generated/varint.html#nelect">nelect</a>.
  <br />
- Then, if <a href="varbas.html#iscf">iscf</a> is positive,
+ Then, if <a href="../../input_variables/html_generated/varbas.html#iscf">iscf</a> is positive,
 the code adds up the band occupancies (given in
-array <a href="vargs.html#occ">occ</a>) for all bands at each k point,
+array <a href="../../input_variables/html_generated/vargs.html#occ">occ</a>) for all bands at each k point,
 then multiplies
-by the k point weight <a href="varbas.html#wtk">wtk</a> at each k point.
+by the k point weight <a href="../../input_variables/html_generated/varbas.html#wtk">wtk</a> at each k point.
 Call this sum "nelect_occ" (for the number of electrons
 from occupation numbers).  It is then
 required that:
@@ -331,23 +331,23 @@ named "abinit.exit": see the
 <br><font id="title"><a name="chkprim">chkprim</a></font>
 <br><font id="mnemonics">Mnemonics: CHecK whether the cell is PRIMitive</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#symmetry_finder">SYMMETRY_FINDER</a></font>
-<br><font id="characteristic">Mentioned in "How to": <a href="topic_crystal.html">crystal</a> </font>
+<br><font id="characteristic">Mentioned in "How to": <a href="../../topics/html_generated/topic_crystal.html">crystal</a> </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 1</font>
 <br><font id="text">
 <p>
 <p>
  If the symmetry finder is used
-(see <a href="varbas.html#nsym">nsym</a>), a non-zero
+(see <a href="../../input_variables/html_generated/varbas.html#nsym">nsym</a>), a non-zero
 value of <b>chkprim</b> will make the code stop if a non-primitive
 cell is used. If <b>chkprim</b>=0, a warning is issued, but the run
 does not stop.
 </p>
 <p>
  If you are generating the atomic and cell geometry using
-<a href="vargeo.html#spgroup">spgroup</a>, you might
+<a href="../../input_variables/html_generated/vargeo.html#spgroup">spgroup</a>, you might
 generate a PRIMITIVE cell using
-<a href="vargeo.html#brvltt">brvltt</a>=-1 .
+<a href="../../input_variables/html_generated/vargeo.html#brvltt">brvltt</a>=-1 .
 </p>
 </font>
 
@@ -358,7 +358,7 @@ generate a PRIMITIVE cell using
 <br><font id="title"><a name="chksymbreak">chksymbreak</a></font>
 <br><font id="mnemonics">Mnemonics: CHecK SYMmetry BREAKing</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#input_only">INPUT_ONLY</a></font>
-<br><font id="characteristic">Mentioned in "How to": <a href="topic_k-points.html">k-points</a> </font>
+<br><font id="characteristic">Mentioned in "How to": <a href="../../topics/html_generated/topic_k-points.html">k-points</a> </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 1</font>
 <br><font id="text">
@@ -373,7 +373,7 @@ non-symmorphic translations which might not be coherent with the exchange-correl
  <ul>
   <li>
    (1) The k point grid is non-symmetric, in case
-   <a href="varbas.html#kptopt">kptopt</a> =1, 2, or 4 ;
+   <a href="../../input_variables/html_generated/varbas.html#kptopt">kptopt</a> =1, 2, or 4 ;
   </li>
   <li>
    (2) The non-symmorphic translation part of the symmetry operations has components that are not zero,
@@ -390,7 +390,7 @@ to shift the atomic coordinates such as to obtain symmetry operations with the a
  Explanation :
  <br />
  In the ground-state calculation, such breaking of the symmetry is usually harmless. However, if the user is doing a
-calculation of phonons using DFPT (<a href="varrf.html#rfphon">rfphon</a>=1), the convergence with respect to the number of k points will
+calculation of phonons using DFPT (<a href="../../input_variables/html_generated/varrf.html#rfphon">rfphon</a>=1), the convergence with respect to the number of k points will
 be much worse with a non-symmetric grid than with a symmetric one. Also, if the user is doing a <a href="../../users/abinit_help.html#gw">GW</a> calculation, the
 presence of non-symmorphic translations that are not coherent with the FFT grid might cause
 problems.
@@ -418,16 +418,16 @@ appears as the most symmetric point ; or ignore the problem, and set <b>chksymbr
 <br><font id="title"><a name="cpuh">cpuh</a></font>
 <br><font id="mnemonics">Mnemonics: CPU time limit in Hours</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#input_only">INPUT_ONLY</a></font>
-<br><font id="characteristic">Mentioned in "How to": <a href="topic_otherGS.html">otherGS</a> </font>
+<br><font id="characteristic">Mentioned in "How to": <a href="../../topics/html_generated/topic_otherGS.html">otherGS</a> </font>
 <br><font id="vartype">Variable type: real</font>
 <br><font id="default">Default is 0.0</font>
 <br><br><font id="excludes">
-The use of this variable forbids the use of specified(<a href="vargs.html#cpum">cpum</a>) or specified(<a href="vargs.html#cpus">cpus</a>)
+The use of this variable forbids the use of specified(<a href="../../input_variables/html_generated/vargs.html#cpum">cpum</a>) or specified(<a href="../../input_variables/html_generated/vargs.html#cpus">cpus</a>)
 </font>
 <br><font id="text">
 <p>
 <p>
-Only one of the three real parameters <a href="vargs.html#cpus">cpus</a>, <a href="vargs.html#cpum">cpum</a> and <b>cpuh</b> can be defined in the input file to set up a CPU time limit.
+Only one of the three real parameters <a href="../../input_variables/html_generated/vargs.html#cpus">cpus</a>, <a href="../../input_variables/html_generated/vargs.html#cpum">cpum</a> and <b>cpuh</b> can be defined in the input file to set up a CPU time limit.
 When the job reaches that limit, it will try to end smoothly.
 However, note that this might still take some time.
 If the user want a firm CPU time limit, the present
@@ -446,16 +446,16 @@ A zero value has no action of the job.
 <br><font id="title"><a name="cpum">cpum</a></font>
 <br><font id="mnemonics">Mnemonics: CPU time limit in Minutes</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#input_only">INPUT_ONLY</a></font>
-<br><font id="characteristic">Mentioned in "How to": <a href="topic_otherGS.html">otherGS</a> </font>
+<br><font id="characteristic">Mentioned in "How to": <a href="../../topics/html_generated/topic_otherGS.html">otherGS</a> </font>
 <br><font id="vartype">Variable type: real</font>
 <br><font id="default">Default is 0.0</font>
 <br><br><font id="excludes">
-The use of this variable forbids the use of specified(<b>cpum</b>) or specified(<a href="vargs.html#cpus">cpus</a>)
+The use of this variable forbids the use of specified(<b>cpum</b>) or specified(<a href="../../input_variables/html_generated/vargs.html#cpus">cpus</a>)
 </font>
 <br><font id="text">
 <p>
 <p>
-Only one of the three real parameters <a href="vargs.html#cpus">cpus</a>, <b>cpum</b> and <a href="vargs.html#cpuh">cpuh</a> can be defined in the input file to set up a CPU time limit.
+Only one of the three real parameters <a href="../../input_variables/html_generated/vargs.html#cpus">cpus</a>, <b>cpum</b> and <a href="../../input_variables/html_generated/vargs.html#cpuh">cpuh</a> can be defined in the input file to set up a CPU time limit.
 When the job reaches that limit, it will try to end smoothly.
 However, note that this might still take some time.
 If the user want a firm CPU time limit, the present
@@ -474,16 +474,16 @@ A zero value has no action of the job.
 <br><font id="title"><a name="cpus">cpus</a></font>
 <br><font id="mnemonics">Mnemonics: CPU time limit in seconds</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#no_multi">NO_MULTI</a></font>
-<br><font id="characteristic">Mentioned in "How to": <a href="topic_otherGS.html">otherGS</a> </font>
+<br><font id="characteristic">Mentioned in "How to": <a href="../../topics/html_generated/topic_otherGS.html">otherGS</a> </font>
 <br><font id="vartype">Variable type: real</font>
 <br><font id="default">Default is 0.0</font>
 <br><br><font id="excludes">
-The use of this variable forbids the use of specified(<a href="vargs.html#cpum">cpum</a>) or specified(<b>cpus</b>)
+The use of this variable forbids the use of specified(<a href="../../input_variables/html_generated/vargs.html#cpum">cpum</a>) or specified(<b>cpus</b>)
 </font>
 <br><font id="text">
 <p>
 <p>
- Only one of the three real parameters <b>cpus</b>, <a href="vargs.html#cpum">cpum</a> and <a href="vargs.html#cpuh">cpuh</a> can be defined in the input file to set up a CPU time limit.
+ Only one of the three real parameters <b>cpus</b>, <a href="../../input_variables/html_generated/vargs.html#cpum">cpum</a> and <a href="../../input_variables/html_generated/vargs.html#cpuh">cpuh</a> can be defined in the input file to set up a CPU time limit.
 When the job reaches that limit, it will try to end smoothly.
 However, note that this might still take some time.
 If the user want a firm CPU time limit, the present
@@ -502,7 +502,7 @@ A zero value has no action of the job.
 <br><font id="title"><a name="diecut">diecut</a></font>
 <br><font id="mnemonics">Mnemonics: DIElectric matrix energy CUToff</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#energy">ENERGY</a></font>
-<br><font id="characteristic">Mentioned in "How to": <a href="topic_convergency.html">convergency</a> </font>
+<br><font id="characteristic">Mentioned in "How to": <a href="../../topics/html_generated/topic_convergency.html">convergency</a> </font>
 <br><font id="vartype">Variable type: real</font>
 <br><font id="default">Default is 2.2</font>
 <br><font id="text">
@@ -515,7 +515,7 @@ of planewaves used to represent the dielectric matrix:
  <sup>
   2
  </sup>
- =<a href="varbas.html#ecut">ecut</a> for Gmax.
+ =<a href="../../input_variables/html_generated/varbas.html#ecut">ecut</a> for Gmax.
  <br />
  Can be specified in Ha (the default), Ry, eV or Kelvin, since
 <b>diecut</b> has the
@@ -524,7 +524,7 @@ of planewaves used to represent the dielectric matrix:
  <br />
  All planewaves inside this "basis sphere" centered
 at G=0 are included in the basis.
-This is useful only when <a href="vargs.html#iprcel">iprcel</a>&gt;=21, which means that
+This is useful only when <a href="../../input_variables/html_generated/vargs.html#iprcel">iprcel</a>&gt;=21, which means that
 a preconditioning scheme based on the dielectric matrix
 is used.
  <br />
@@ -546,7 +546,7 @@ gives exactly the same results.
 <br><font id="title"><a name="diegap">diegap</a></font>
 <br><font id="mnemonics">Mnemonics: DIElectric matrix GAP</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#energy">ENERGY</a></font>
-<br><font id="characteristic">Mentioned in "How to": <a href="topic_convergency.html">convergency</a> </font>
+<br><font id="characteristic">Mentioned in "How to": <a href="../../topics/html_generated/topic_convergency.html">convergency</a> </font>
 <br><font id="vartype">Variable type: real</font>
 <br><font id="default">Default is 0.1</font>
 <br><font id="text">
@@ -555,7 +555,7 @@ gives exactly the same results.
  Gives a rough estimation of the dielectric gap
 between the highest energy level computed in the run,
 and the set of bands not represented.
-Used to extrapolate dielectric matrix when <a href="vargs.html#iprcel">iprcel</a> &gt;= 21.
+Used to extrapolate dielectric matrix when <a href="../../input_variables/html_generated/vargs.html#iprcel">iprcel</a> &gt;= 21.
  <br />
  Can be specified in Ha (the default), Ry, eV or Kelvin, since
 <b>diegap</b> has the
@@ -573,11 +573,11 @@ Used to extrapolate dielectric matrix when <a href="vargs.html#iprcel">iprcel</a
 <br><font id="title"><a name="dielam">dielam</a></font>
 <br><font id="mnemonics">Mnemonics: DIElectric matrix LAMbda</font>
 <br><font id="characteristic">Characteristic: </font>
-<br><font id="characteristic">Mentioned in "How to": <a href="topic_convergency.html">convergency</a> </font>
+<br><font id="characteristic">Mentioned in "How to": <a href="../../topics/html_generated/topic_convergency.html">convergency</a> </font>
 <br><font id="vartype">Variable type: real</font>
 <br><font id="default">Default is 0.5</font>
 <br><br><font id="requires">
-Only relevant if <a href="vargs.html#iprcel">iprcel</a> >= 21
+Only relevant if <a href="../../input_variables/html_generated/vargs.html#iprcel">iprcel</a> >= 21
 </font>
 <br><font id="text">
 <p>
@@ -597,7 +597,7 @@ in the extrapolation of the dielectric matrix.
 <br><font id="title"><a name="dielng">dielng</a></font>
 <br><font id="mnemonics">Mnemonics: model DIElectric screening LeNGth</font>
 <br><font id="characteristic">Characteristic: </font>
-<br><font id="characteristic">Mentioned in "How to": <a href="topic_convergency.html">convergency</a> </font>
+<br><font id="characteristic">Mentioned in "How to": <a href="../../topics/html_generated/topic_convergency.html">convergency</a> </font>
 <br><font id="vartype">Variable type: real</font>
 <br><font id="default">Default is 1.0774841d0</font>
 <br><font id="text">
@@ -614,7 +614,7 @@ if preferred, since <b>dielng</b> has the
  <pre>
          (     1        +     <b>dielng</b><sup>2</sup>* K<sup>2</sup>   )
 diel(K)= ------------------------------------
-         ( 1/<a href="vargs.html#diemac">diemac</a> + <b>dielng</b><sup>2</sup> * K<sup>2</sup> ) * <a href="vargs.html#diemix">diemix</a>
+         ( 1/<a href="../../input_variables/html_generated/vargs.html#diemac">diemac</a> + <b>dielng</b><sup>2</sup> * K<sup>2</sup> ) * <a href="../../input_variables/html_generated/vargs.html#diemix">diemix</a>
  </pre>
  The inverse of this model dielectric function will be
 applied to the residual, to give the preconditioned
@@ -628,13 +628,13 @@ The present model dielectric function is excellent for
 rather homogeneous unit cells.
  <br />
  When K-&gt;0 , it tends to the macroscopic dielectric
-constant, eventually divided by the mixing factor <a href="vargs.html#diemix">diemix</a>
+constant, eventually divided by the mixing factor <a href="../../input_variables/html_generated/vargs.html#diemix">diemix</a>
 (or
- <a href="vargs.html#diemixmag">diemixmag</a>
+ <a href="../../input_variables/html_generated/vargs.html#diemixmag">diemixmag</a>
  </a>
  for magnetization).
  <br />
- For metals, simply put <a href="vargs.html#diemac">diemac</a> to a very large value (10^6 is OK)
+ For metals, simply put <a href="../../input_variables/html_generated/vargs.html#diemac">diemac</a> to a very large value (10^6 is OK)
  <br />
  The screening length <b>dielng</b> governs the length scale
 to go from the macroscopic regime to the microscopic
@@ -657,7 +657,7 @@ has to be decreased by a factor of 2-4.
 <br><font id="title"><a name="diemac">diemac</a></font>
 <br><font id="mnemonics">Mnemonics: model DIElectric MACroscopic constant</font>
 <br><font id="characteristic">Characteristic: </font>
-<br><font id="characteristic">Mentioned in "How to": <a href="topic_convergency.html">convergency</a> </font>
+<br><font id="characteristic">Mentioned in "How to": <a href="../../topics/html_generated/topic_convergency.html">convergency</a> </font>
 <br><font id="vartype">Variable type: real</font>
 <br><font id="default">Default is 1000000.0</font>
 <br><font id="text">
@@ -666,7 +666,7 @@ has to be decreased by a factor of 2-4.
  A rough knowledge of the macroscopic dielectric constant <b>diemac</b>
 of the system is a useful help to speed-up the SCF procedure:
 a model dielectric function,
-see the keyword <a href="vargs.html#dielng">dielng</a>, is used for that
+see the keyword <a href="../../input_variables/html_generated/vargs.html#dielng">dielng</a>, is used for that
 purpose.  It is especially
 useful for speeding up the treatment of rather homogeneous unit cells.
 </p>
@@ -692,7 +692,7 @@ other semiconductors
  Systems that combine a highly polarisable part and some vacuum are rather
 badly treated by the model dielectric function. One has to use the
 "extrapolar" technique, activated by the  input variable
-<a href="vargs.html#iprcel">iprcel</a>.
+<a href="../../input_variables/html_generated/vargs.html#iprcel">iprcel</a>.
  <br />
  In sufficiently homogeneous systems, you might have to experiment
 a bit to find the best <b>diemac</b>. If you let <b>diemac</b>
@@ -711,10 +711,10 @@ for small (but non-zero) values of the wavevector.
 <br><font id="title"><a name="diemix">diemix</a></font>
 <br><font id="mnemonics">Mnemonics: model DIElectric MIXing factor</font>
 <br><font id="characteristic">Characteristic: </font>
-<br><font id="characteristic">Mentioned in "How to": <a href="topic_convergency.html">convergency</a> </font>
+<br><font id="characteristic">Mentioned in "How to": <a href="../../topics/html_generated/topic_convergency.html">convergency</a> </font>
 <br><font id="vartype">Variable type: real</font>
-<br><font id="default">Default is 1.0 if <a href="varint.html#usepaw">usepaw</a>==0 or <a href="vargs.html#iprcel">iprcel</a> !=0,
-0.7 if <a href="varint.html#usepaw">usepaw</a>==1 or <a href="vargs.html#iprcel">iprcel</a>==0,
+<br><font id="default">Default is 1.0 if <a href="../../input_variables/html_generated/varint.html#usepaw">usepaw</a>==0 or <a href="../../input_variables/html_generated/vargs.html#iprcel">iprcel</a> !=0,
+0.7 if <a href="../../input_variables/html_generated/varint.html#usepaw">usepaw</a>==1 or <a href="../../input_variables/html_generated/vargs.html#iprcel">iprcel</a>==0,
 None otherwise.
 </font>
 <br><br><font id="requires">
@@ -730,21 +730,21 @@ residual density/potential to be transferred in the SCF cycle.
  <br />
  If the model dielectric function were perfect, <b>diemix</b>
 should be 1.0 . By contrast, if the model dielectric function
-does nothing (when <a href="vargs.html#diemac">diemac</a>=1.0d0 or <a href="vargs.html#dielng">dielng</a>
+does nothing (when <a href="../../input_variables/html_generated/vargs.html#diemac">diemac</a>=1.0d0 or <a href="../../input_variables/html_generated/vargs.html#dielng">dielng</a>
 is larger than the
 size of the cell), <b>diemix</b> can be used
 to damp the amplifying factor inherent to the SCF loop.
  <br />
  For molecules, a value on the order 0.5 or 0.33 is rather usual.
  <br />
- When mod(<a href="varbas.html#iscf">iscf</a>,10)=3, 4 ,5 or 7, <b>diemix</b>
+ When mod(<a href="../../input_variables/html_generated/varbas.html#iscf">iscf</a>,10)=3, 4 ,5 or 7, <b>diemix</b>
 is only important at the
 few first iterations when anharmonic effects are important,
 since these schemes compute their own mixing factor
 for self-consistency.
  <br />
  Also note that a different value of diemix can be used for the magnetization
-(see <a href="vargs.html#diemixmag">diemixmag</a>).
+(see <a href="../../input_variables/html_generated/vargs.html#diemixmag">diemixmag</a>).
 </p>
 </font>
 
@@ -755,22 +755,22 @@ for self-consistency.
 <br><font id="title"><a name="diemixmag">diemixmag</a></font>
 <br><font id="mnemonics">Mnemonics: model DIElectric MIXing factor for the MAGgnetization</font>
 <br><font id="characteristic">Characteristic: </font>
-<br><font id="characteristic">Mentioned in "How to": <a href="topic_spinpolarisation.html">spinpolarisation</a> </font>
+<br><font id="characteristic">Mentioned in "How to": <a href="../../topics/html_generated/topic_spinpolarisation.html">spinpolarisation</a> </font>
 <br><font id="vartype">Variable type: real</font>
-<br><font id="default">Default is <a href="vargs.html#diemix">diemix</a> if 70 < <a href="vargs.html#iprcel">iprcel</a> and <a href="vargs.html#iprcel">iprcel</a> < 80,
-<a href="vargs.html#diemix">diemix</a> if <a href="vargs.html#iprcel">iprcel</a>==0,
-<a href="vargs.html#diemix">diemix</a> if <a href="varbas.html#iscf">iscf</a><10,
--<a href="vargs.html#diemix">diemix</a> otherwise.
+<br><font id="default">Default is <a href="../../input_variables/html_generated/vargs.html#diemix">diemix</a> if 70 < <a href="../../input_variables/html_generated/vargs.html#iprcel">iprcel</a> and <a href="../../input_variables/html_generated/vargs.html#iprcel">iprcel</a> < 80,
+<a href="../../input_variables/html_generated/vargs.html#diemix">diemix</a> if <a href="../../input_variables/html_generated/vargs.html#iprcel">iprcel</a>==0,
+<a href="../../input_variables/html_generated/vargs.html#diemix">diemix</a> if <a href="../../input_variables/html_generated/varbas.html#iscf">iscf</a><10,
+-<a href="../../input_variables/html_generated/vargs.html#diemix">diemix</a> otherwise.
 </font>
 <br><font id="text">
 <p>
 <p>
  Gives overall factor of the preconditioned
 residual magnetization/magnetic field to be transferred in the SCF cycle (see
- <a href="vargs.html#diemix">diemix</a> for further information).
+ <a href="../../input_variables/html_generated/vargs.html#diemix">diemix</a> for further information).
  <br />
  For the time being, apply only when the SCF mixing is done on the density
-(<a href="varbas.html#iscf">iscf</a>&gt;=10).
+(<a href="../../input_variables/html_generated/varbas.html#iscf">iscf</a>&gt;=10).
  <br />
  <br />
  A negative value of diemixmag means that magnetization is only preconditionned by ABS(diemixmag),
@@ -792,22 +792,22 @@ can have a positive effect.
 <br><font id="title"><a name="dosdeltae">dosdeltae</a></font>
 <br><font id="mnemonics">Mnemonics: DOS DELTA in Energy</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#energy">ENERGY</a></font>
-<br><font id="characteristic">Mentioned in "How to": <a href="topic_printing.html">printing</a> </font>
+<br><font id="characteristic">Mentioned in "How to": <a href="../../topics/html_generated/topic_printing.html">printing</a> </font>
 <br><font id="vartype">Variable type: real</font>
 <br><font id="default">Default is 0.0</font>
 <br><font id="text">
 <p>
 <p>
  Defines the linear grid resolution (energy increment) to be used for the
-computation of the Density-Of-States, when <a href="varfil.html#prtdos">prtdos</a>
+computation of the Density-Of-States, when <a href="../../input_variables/html_generated/varfil.html#prtdos">prtdos</a>
 is non-zero.
  <br />
  If <b>dosdeltae</b> is set to zero (the default value), the actual
-increment is 0.001 Ha if <a href="varfil.html#prtdos">prtdos</a>=1, and
-the much smaller value 0.00005 Ha if <a href="varfil.html#prtdos">prtdos</a>=2.
-This different default value arises because the <a href="varfil.html#prtdos">prtdos</a>=1 case,
+increment is 0.001 Ha if <a href="../../input_variables/html_generated/varfil.html#prtdos">prtdos</a>=1, and
+the much smaller value 0.00005 Ha if <a href="../../input_variables/html_generated/varfil.html#prtdos">prtdos</a>=2.
+This different default value arises because the <a href="../../input_variables/html_generated/varfil.html#prtdos">prtdos</a>=1 case,
 based on a smearing technique, gives a quite smooth DOS, while the DOS from the
-tetrahedron method, <a href="varfil.html#prtdos">prtdos</a>=2, is rapidly varying.
+tetrahedron method, <a href="../../input_variables/html_generated/varfil.html#prtdos">prtdos</a>=2, is rapidly varying.
 </p>
 </font>
 
@@ -818,7 +818,7 @@ tetrahedron method, <a href="varfil.html#prtdos">prtdos</a>=2, is rapidly varyin
 <br><font id="title"><a name="enunit">enunit</a></font>
 <br><font id="mnemonics">Mnemonics: ENergy UNITs</font>
 <br><font id="characteristic">Characteristic: </font>
-<br><font id="characteristic">Mentioned in "How to": <a href="topic_GSgeneral.html">GSgeneral</a> </font>
+<br><font id="characteristic">Mentioned in "How to": <a href="../../topics/html_generated/topic_GSgeneral.html">GSgeneral</a> </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
 <br><font id="text">
@@ -859,19 +859,19 @@ output of eigenvalues (and eventual phonon frequencies)
 <br><font id="title"><a name="fband">fband</a></font>
 <br><font id="mnemonics">Mnemonics: Factor for the number of BANDs</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#input_only">INPUT_ONLY</a></font>
-<br><font id="characteristic">Mentioned in "How to": <a href="topic_GSgeneral.html">GSgeneral</a> </font>
+<br><font id="characteristic">Mentioned in "How to": <a href="../../topics/html_generated/topic_GSgeneral.html">GSgeneral</a> </font>
 <br><font id="vartype">Variable type: real</font>
-<br><font id="default">Default is 0.5 if <a href="varbas.html#occopt">occopt</a>>2,
-0.0 if <a href="varbas.html#usewvl">usewvl</a>==1,
-0.125 if <a href="varbas.html#occopt">occopt</a>==1,
+<br><font id="default">Default is 0.5 if <a href="../../input_variables/html_generated/varbas.html#occopt">occopt</a>>2,
+0.0 if <a href="../../input_variables/html_generated/varbas.html#usewvl">usewvl</a>==1,
+0.125 if <a href="../../input_variables/html_generated/varbas.html#occopt">occopt</a>==1,
 0.0 otherwise.
 </font>
 <br><font id="text">
 <p>
 <p>
  Governs the number of bands to be used in the code in the case
-the parameter <a href="varbas.html#nband">nband</a> is not defined in the input file
-(which means that <a href="varbas.html#occopt">occopt</a> is not equal to 0 or 2).
+the parameter <a href="../../input_variables/html_generated/varbas.html#nband">nband</a> is not defined in the input file
+(which means that <a href="../../input_variables/html_generated/varbas.html#occopt">occopt</a> is not equal to 0 or 2).
 </p>
 <p>
  In case <b>fband</b> is 0.0d0, the code computes from
@@ -879,13 +879,13 @@ the pseudopotential files and the geometry data
 contained in the input file, the number of electrons
 present in the system. Then, it computes the minimum
 number of bands that can accommodate them, and use
-that value for <a href="varbas.html#nband">nband</a>.
+that value for <a href="../../input_variables/html_generated/varbas.html#nband">nband</a>.
  <br />
  In case <b>fband</b> differs from
 zero, other bands will be added, just
 larger than <b>fband</b> times the number of atoms.
 This parameter is not echoed in the top of the main
-output file, but only the parameter <a href="varbas.html#nband">nband</a> that it allowed
+output file, but only the parameter <a href="../../input_variables/html_generated/varbas.html#nband">nband</a> that it allowed
 to compute. It is also not present in the dtset array (no internal).
  <br />
  The default values are chosen such as to give naturally some
@@ -907,21 +907,21 @@ this, so a fixed default value has been chosen.
 <br><font id="title"><a name="iatsph">iatsph</a></font>
 <br><font id="mnemonics">Mnemonics: Index for the ATomic SPHeres of the atom-projected density-of-states</font>
 <br><font id="characteristic">Characteristic: </font>
-<br><font id="characteristic">Mentioned in "How to": <a href="topic_printing.html">printing</a> </font>
-<br><font id="vartype">Variable type: integer(<a href="vargs.html#natsph">natsph</a>)</font>
-<br><font id="default">Default is [1 .. <a href="vargs.html#natsph">natsph</a>]</font>
+<br><font id="characteristic">Mentioned in "How to": <a href="../../topics/html_generated/topic_printing.html">printing</a> </font>
+<br><font id="vartype">Variable type: integer(<a href="../../input_variables/html_generated/vargs.html#natsph">natsph</a>)</font>
+<br><font id="default">Default is [1 .. <a href="../../input_variables/html_generated/vargs.html#natsph">natsph</a>]</font>
 <br><br><font id="requires">
-Only relevant if <a href="varfil.html#prtdos">prtdos</a> == 3 or <a href="varpaw.html#pawfatbnd">pawfatbnd</a> in [1,2]
+Only relevant if <a href="../../input_variables/html_generated/varfil.html#prtdos">prtdos</a> == 3 or <a href="../../input_variables/html_generated/varpaw.html#pawfatbnd">pawfatbnd</a> in [1,2]
 </font>
 <br><font id="text">
 <p>
 <p>
- <b>iatsph</b> gives the number of the <a href="vargs.html#natsph">natsph</a> atoms around which the sphere
+ <b>iatsph</b> gives the number of the <a href="../../input_variables/html_generated/vargs.html#natsph">natsph</a> atoms around which the sphere
 for atom-projected density-of-states will be build,
-in the <a href="varfil.html#prtdos">prtdos</a>=3 case.
-The radius of these spheres is given by <a href="vargs.html#ratsph">ratsph</a>.
+in the <a href="../../input_variables/html_generated/varfil.html#prtdos">prtdos</a>=3 case.
+The radius of these spheres is given by <a href="../../input_variables/html_generated/vargs.html#ratsph">ratsph</a>.
  <br />
- If <a href="varpaw.html#pawfatbnd">pawfatbnd</a>=1 or 2, it gives the number of the <a href="vargs.html#natsph">natsph</a> atoms around which atom-projected band structure will be built.
+ If <a href="../../input_variables/html_generated/varpaw.html#pawfatbnd">pawfatbnd</a>=1 or 2, it gives the number of the <a href="../../input_variables/html_generated/vargs.html#natsph">natsph</a> atoms around which atom-projected band structure will be built.
 </p>
 </font>
 
@@ -932,7 +932,7 @@ The radius of these spheres is given by <a href="vargs.html#ratsph">ratsph</a>.
 <br><font id="title"><a name="icoulomb">icoulomb</a></font>
 <br><font id="mnemonics">Mnemonics: Index for the Coulomb TReaTMenT</font>
 <br><font id="characteristic">Characteristic: </font>
-<br><font id="characteristic">Mentioned in "How to": <a href="topic_convergency.html">convergency</a> </font>
+<br><font id="characteristic">Mentioned in "How to": <a href="../../topics/html_generated/topic_convergency.html">convergency</a> </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
 <br><font id="text">
@@ -957,13 +957,13 @@ The radius of these spheres is given by <a href="vargs.html#ratsph">ratsph</a>.
 <br><font id="title"><a name="iprcel">iprcel</a></font>
 <br><font id="mnemonics">Mnemonics: Integer for PReConditioning of ELectron response</font>
 <br><font id="characteristic">Characteristic: </font>
-<br><font id="characteristic">Mentioned in "How to": <a href="topic_convergency.html">convergency</a> </font>
+<br><font id="characteristic">Mentioned in "How to": <a href="../../topics/html_generated/topic_convergency.html">convergency</a> </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
 <br><font id="text">
 <p>
 <p>
- Used when <a href="varbas.html#iscf">iscf</a>&gt;0, to define the SCF preconditioning scheme.
+ Used when <a href="../../input_variables/html_generated/varbas.html#iscf">iscf</a>&gt;0, to define the SCF preconditioning scheme.
 Potential-based preconditioning schemes for the SCF loop
 (electronic part) are still a subject of active research.
 The present parameter (electronic part) describes the way the
@@ -972,14 +972,14 @@ change of potential is derived from the residual.
  The possible values of <b>iprcel</b> correspond to :
  <ul>
   <li>
-   0 =&gt; model dielectric function described by <a href="vargs.html#diemac">diemac</a>,
-<a href="vargs.html#dielng">dielng</a>
-and <a href="vargs.html#diemix">diemix</a>.
+   0 =&gt; model dielectric function described by <a href="../../input_variables/html_generated/vargs.html#diemac">diemac</a>,
+<a href="../../input_variables/html_generated/vargs.html#dielng">dielng</a>
+and <a href="../../input_variables/html_generated/vargs.html#diemix">diemix</a>.
   </li>
   <li>
    larger or equal to 21 =&gt; will compute the dielectric matrix
-according to <a href="vargs.html#diecut">diecut</a>, <a href="vargs.html#dielam">dielam</a>,
-<a href="vargs.html#diegap">diegap</a>. This methodology is described in
+according to <a href="../../input_variables/html_generated/vargs.html#diecut">diecut</a>, <a href="../../input_variables/html_generated/vargs.html#dielam">dielam</a>,
+<a href="../../input_variables/html_generated/vargs.html#diegap">diegap</a>. This methodology is described in
 P.-M. Anglade, X. Gonze, Phys. Rev. B 78, 045126 (2008).
   </li>
   <li>
@@ -990,12 +990,12 @@ and use it as such.
   <li>
    Between 31 and 39 =&gt; for the first few steps
 uses the same as option 0 then compute RPA dielectric function,
-and use it, with the mixing factor <a href="vargs.html#diemix">diemix</a>.
+and use it, with the mixing factor <a href="../../input_variables/html_generated/vargs.html#diemix">diemix</a>.
   </li>
   <li>
    Between 41 and 49 =&gt; compute the RPA dielectric matrix
 at the first step, and recompute it at a later step,
-and take into account the mixing factor <a href="vargs.html#diemix">diemix</a>.
+and take into account the mixing factor <a href="../../input_variables/html_generated/vargs.html#diemix">diemix</a>.
   </li>
   <li>
    Between 51 and 59 =&gt; same as between 41 and 49, but compute
@@ -1006,7 +1006,7 @@ the RPA dielectric matrix by another mean
 the electronic dielectric matrix instead of the RPA one.
   </li>
   <li>
-   Between 71 and 78 =&gt; STILL UNDER DEVELOPMENT -- NOT USABLE ; Use the modified Kerker preconditioner with a real-space formulation (basic formulation is shown at <a href="vargs.html#dielng">dielng</a>). The dielectric matrix is approximated thanks to  <a href="vargs.html#diemac">diemac</a> and <a href="vargs.html#dielng">dielng</a>.  Note that <a href="vargs.html#diemix">diemix</a> is also used.
+   Between 71 and 78 =&gt; STILL UNDER DEVELOPMENT -- NOT USABLE ; Use the modified Kerker preconditioner with a real-space formulation (basic formulation is shown at <a href="../../input_variables/html_generated/vargs.html#dielng">dielng</a>). The dielectric matrix is approximated thanks to  <a href="../../input_variables/html_generated/vargs.html#diemac">diemac</a> and <a href="../../input_variables/html_generated/vargs.html#dielng">dielng</a>.  Note that <a href="../../input_variables/html_generated/vargs.html#diemix">diemix</a> is also used.
   </li>
   <li>
    79 =&gt; STILL UNDER DEVELOPMENT -- NOT USABLE ; same as previous but with an alternate algorithm.
@@ -1020,9 +1020,9 @@ the electronic dielectric matrix instead of the RPA one.
  <b>
   extrapolar
  </b>
- approximation. This approximation can be tuned with <a href="vargs.html#diecut">diecut</a>, <a href="vargs.html#dielam">dielam</a>,
-and <a href="vargs.html#diegap">diegap</a>. Yet its accuracy mainly depends on the number of conduction bands included in the system. Having 2 to 10 empty bands in the calculation is
-usually enough (use <a href="varbas.html#nband">nband</a>).
+ approximation. This approximation can be tuned with <a href="../../input_variables/html_generated/vargs.html#diecut">diecut</a>, <a href="../../input_variables/html_generated/vargs.html#dielam">dielam</a>,
+and <a href="../../input_variables/html_generated/vargs.html#diegap">diegap</a>. Yet its accuracy mainly depends on the number of conduction bands included in the system. Having 2 to 10 empty bands in the calculation is
+usually enough (use <a href="../../input_variables/html_generated/varbas.html#nband">nband</a>).
  <br />
  <br />
  NOTES:
@@ -1037,15 +1037,15 @@ just once in the calculation for <b>iprcel</b> &lt; 100.
 will likely give a large improvement over <b>iprcel</b>=0.
   </li>
   <li>
-   In case of PAW and <b>iprcel</b>&gt;0, see <a href="varpaw.html#pawsushat">pawsushat</a> input variable. By default,
+   In case of PAW and <b>iprcel</b>&gt;0, see <a href="../../input_variables/html_generated/varpaw.html#pawsushat">pawsushat</a> input variable. By default,
 an approximation (which can be suppressed) is done for the computation of susceptibility matrix.
   </li>
   <li>
    For extremely large inhomogeneous cells where computation of the full dielectric matrix takes too many weeks, 70 &lt; <b>iprcel</b> &lt; 80 is advised.
   </li>
   <li>
-   For <a href="varbas.html#nsppol">nsppol</a>=2 or
-<a href="vargs.html#nspinor">nspinor</a>=2 with metallic <a href="varbas.html#occopt">occopt</a>,
+   For <a href="../../input_variables/html_generated/varbas.html#nsppol">nsppol</a>=2 or
+<a href="../../input_variables/html_generated/vargs.html#nspinor">nspinor</a>=2 with metallic <a href="../../input_variables/html_generated/varbas.html#occopt">occopt</a>,
 only
    <b>
     mod(iprcel,100)
@@ -1076,16 +1076,16 @@ unless ones computes this matrix for every step (<b>iprcel</b>=161).
 <br><font id="text">
 <p>
 <p>
- Only used if <a href="vargs.html#nqpt">nqpt</a>=1, and
-<a href="vargs.html#qptopt">qptopt</a>=1 to 4.
+ Only used if <a href="../../input_variables/html_generated/vargs.html#nqpt">nqpt</a>=1, and
+<a href="../../input_variables/html_generated/vargs.html#qptopt">qptopt</a>=1 to 4.
 </p>
 <p>
  Defines the index of the Q point to be selected in the list of q points generated by
-<a href="vargs.html#ngqpt">ngqpt</a>,
-<a href="vargs.html#qptrlatt">qptrlatt</a>,
-<a href="vargs.html#nshiftq">nshiftq</a>,
+<a href="../../input_variables/html_generated/vargs.html#ngqpt">ngqpt</a>,
+<a href="../../input_variables/html_generated/vargs.html#qptrlatt">qptrlatt</a>,
+<a href="../../input_variables/html_generated/vargs.html#nshiftq">nshiftq</a>,
 and
-<a href="vargs.html#shiftq">shiftq</a>.
+<a href="../../input_variables/html_generated/vargs.html#shiftq">shiftq</a>.
 </p>
 <p>
  If <b>iqpt</b>=0, then the q point is Gamma (0 0 0).
@@ -1112,13 +1112,13 @@ and increasing it by one for each dataset (thanks to
 <br><font id="title"><a name="ixcpositron">ixcpositron</a></font>
 <br><font id="mnemonics">Mnemonics: Integer for the eXchange-Correlation applied to the electron-POSITRON interaction</font>
 <br><font id="characteristic">Characteristic: </font>
-<br><font id="characteristic">Mentioned in "How to": <a href="topic_positron.html">positron</a> </font>
+<br><font id="characteristic">Mentioned in "How to": <a href="../../topics/html_generated/topic_positron.html">positron</a> </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 1 (Comment: (Teter parameterization). However, if all the pseudopotentials have the same value of pspxc, the initial value of ixc will be that common value)</font>
 <br><font id="text">
 <p>
 <p>
- Relevant only when <a href="vargs.html#positron">positron</a>/=0.
+ Relevant only when <a href="../../input_variables/html_generated/vargs.html#positron">positron</a>/=0.
  <br />
  Define the type of electron-positron correlation that is used in case
 of a electron-positron two-component DFT calculation.
@@ -1231,7 +1231,7 @@ Sterne and Kaiser [2], with GGA corrections
 <br><font id="title"><a name="jellslab">jellslab</a></font>
 <br><font id="mnemonics">Mnemonics: include a JELLium SLAB in the cell</font>
 <br><font id="characteristic">Characteristic: </font>
-<br><font id="characteristic">Mentioned in "How to": <a href="topic_otherGS.html">otherGS</a> </font>
+<br><font id="characteristic">Mentioned in "How to": <a href="../../topics/html_generated/topic_otherGS.html">otherGS</a> </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
 <br><font id="text">
@@ -1251,9 +1251,9 @@ and zero in the vacuum region if present.
 to have the third crystal primitive lattice vector orthogonal
 to the other ones so that the portion of the cell filled by the jellium slab can be defined through its edges along z.
  <br />
- The bulk-mean positive charge density is fixed by the input variable <a href="vargs.html#slabwsrad">slabwsrad</a>,
+ The bulk-mean positive charge density is fixed by the input variable <a href="../../input_variables/html_generated/vargs.html#slabwsrad">slabwsrad</a>,
 while the position of the slab edges along z is defined through
-the input variables <a href="vargs.html#slabzbeg">slabzbeg</a> and <a href="vargs.html#slabzend">slabzend</a>.
+the input variables <a href="../../input_variables/html_generated/vargs.html#slabzbeg">slabzbeg</a> and <a href="../../input_variables/html_generated/vargs.html#slabzend">slabzend</a>.
 </p>
 </font>
 
@@ -1264,42 +1264,42 @@ the input variables <a href="vargs.html#slabzbeg">slabzbeg</a> and <a href="varg
 <br><font id="title"><a name="kptbounds">kptbounds</a></font>
 <br><font id="mnemonics">Mnemonics: K PoinT BOUNDarieS</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#input_only">INPUT_ONLY</a></font>
-<br><font id="characteristic">Mentioned in "How to": <a href="topic_k-points.html">k-points</a> </font>
-<br><font id="vartype">Variable type: real(3,abs(<a href="varbas.html#kptopt">kptopt</a>)+1))</font>
+<br><font id="characteristic">Mentioned in "How to": <a href="../../topics/html_generated/topic_k-points.html">k-points</a> </font>
+<br><font id="vartype">Variable type: real(3,abs(<a href="../../input_variables/html_generated/varbas.html#kptopt">kptopt</a>)+1))</font>
 <br><font id="default">No default</font>
 <br><font id="text">
 <p>
 <p>
  It is used to generate the circuit to be followed by the band structure,
-when <a href="varbas.html#kptopt">kptopt</a> is negative (it is
-not read if <a href="varbas.html#kptopt">kptopt</a> is zero or positive).
+when <a href="../../input_variables/html_generated/varbas.html#kptopt">kptopt</a> is negative (it is
+not read if <a href="../../input_variables/html_generated/varbas.html#kptopt">kptopt</a> is zero or positive).
 </p>
 <p>
- There are abs(<a href="varbas.html#kptopt">kptopt</a>)
+ There are abs(<a href="../../input_variables/html_generated/varbas.html#kptopt">kptopt</a>)
 segments to be defined, each of which starting from
 the end point of the preceeding one. Thus,
 the number of points to be input is
-abs(<a href="varbas.html#kptopt">kptopt</a>)+1.
+abs(<a href="../../input_variables/html_generated/varbas.html#kptopt">kptopt</a>)+1.
 They form a circuit starting
-at <b>kptbounds</b>(1:3,1)/<a href="varbas.html#kptnrm">kptnrm</a>
+at <b>kptbounds</b>(1:3,1)/<a href="../../input_variables/html_generated/varbas.html#kptnrm">kptnrm</a>
 and ending at
-<b>kptbounds</b>(1:3,abs(<a href="varbas.html#kptopt">kptopt</a>)+1)/<a href="varbas.html#kptnrm">kptnrm</a>.
-The number of divisions of each segment can be defined either using the array <a href="vargs.html#ndivk">ndivk</a>
-or the variable <a href="vargs.html#ndivsm">ndivsm</a> that just defines the number of divisions for the smallest segment
+<b>kptbounds</b>(1:3,abs(<a href="../../input_variables/html_generated/varbas.html#kptopt">kptopt</a>)+1)/<a href="../../input_variables/html_generated/varbas.html#kptnrm">kptnrm</a>.
+The number of divisions of each segment can be defined either using the array <a href="../../input_variables/html_generated/vargs.html#ndivk">ndivk</a>
+or the variable <a href="../../input_variables/html_generated/vargs.html#ndivsm">ndivsm</a> that just defines the number of divisions for the smallest segment
 </p>
 <p>
- As for <a href="varbas.html#kpt">kpt</a>, <b>kptbounds</b> is specified
+ As for <a href="../../input_variables/html_generated/varbas.html#kpt">kpt</a>, <b>kptbounds</b> is specified
 using the primitive vectors in reciprocal space. If your Bravais lattice is simple,
 then it should be quite easy to find the coordinates of the end points.
 On the other hand, for centered, body-centered, face-centered, hexagonal, and rhombohedral
 Bravais lattice,
-the conversion might be more difficult. See the description of <a href="varbas.html#kpt">kpt</a>
+the conversion might be more difficult. See the description of <a href="../../input_variables/html_generated/varbas.html#kpt">kpt</a>
 for an explanation of how to convert data from the "conventional" cartesian coordinates to
 the primitive vectors in the reciprocal space. In order to help a bit, we list below a series
 of typical values, for the FCC, BCC, hexagonal and rhombohedral Bravais lattices. Note : all the data below
 are given in dimensionless units ; they have to be rescaled by the actual lengths defined by the
-<a href="varbas.html#acell">acell</a> values. However, <b>kptbounds</b> values can be used as such,
-if the values of <a href="varbas.html#rprim">rprim</a> given below are adopted.
+<a href="../../input_variables/html_generated/varbas.html#acell">acell</a> values. However, <b>kptbounds</b> values can be used as such,
+if the values of <a href="../../input_variables/html_generated/varbas.html#rprim">rprim</a> given below are adopted.
 </p>
 <p>
  A.
@@ -1463,18 +1463,18 @@ l(Gamma-A)=1/(2*c)=0.5.../c
  Rhombohedral lattices are characterised by two parameters, the length of the primitive
 vectors, that we will denote a0, and the angle they form, alpha.
 These can be directly input of ABINIT, as
-<a href="varbas.html#acell">acell</a> and <a href="varbas.html#angdeg">angdeg</a>
+<a href="../../input_variables/html_generated/varbas.html#acell">acell</a> and <a href="../../input_variables/html_generated/varbas.html#angdeg">angdeg</a>
 </p>
 <p>
  This will generate the primitive vectors in real space , with
  <pre>
-  <a href="varbas.html#acell">acell</a> a0 a0 a0    and      <a href="varbas.html#rprim">rprim</a>  a 0 c    -a/2 a*sqrt(0.75) c    -a/2 -a*sqrt(0.75) c
+  <a href="../../input_variables/html_generated/varbas.html#acell">acell</a> a0 a0 a0    and      <a href="../../input_variables/html_generated/varbas.html#rprim">rprim</a>  a 0 c    -a/2 a*sqrt(0.75) c    -a/2 -a*sqrt(0.75) c
  </pre>
  with a^2+c^2=1, a^2=(1-cos(alpha))*2/3, c^2=(1+2*cos(alpha))*1/3, (a/c)^2=2*(1-cos(alpha))/(1+2*cos(alpha))
 and also cos(alpha)=(1-(a/c)^2/2)/(1+(a/c)^2).
 Alternatively, these values of rprim might directly be the input of ABINIT (then, the balance
 of the scaling factor might be adjusted between
-<a href="varbas.html#acell">acell</a> and <a href="varbas.html#rprim">rprim</a>).
+<a href="../../input_variables/html_generated/varbas.html#acell">acell</a> and <a href="../../input_variables/html_generated/varbas.html#rprim">rprim</a>).
 </p>
 <p>
  Unlike for the simple cubic, FCC, BCC, hexagonal (and some other) Bravais lattice,
@@ -1527,35 +1527,35 @@ l(Gamma-X)=sqrt(1/(a^2)+1/(c^2))*2/3
 <br><font id="title"><a name="kptrlatt">kptrlatt</a></font>
 <br><font id="mnemonics">Mnemonics: K - PoinTs grid : Real space LATTice</font>
 <br><font id="characteristic">Characteristic: </font>
-<br><font id="characteristic">Mentioned in "How to": <a href="topic_k-points.html">k-points</a> </font>
+<br><font id="characteristic">Mentioned in "How to": <a href="../../topics/html_generated/topic_k-points.html">k-points</a> </font>
 <br><font id="vartype">Variable type: integer(3,3)</font>
 <br><font id="default">Default is *0</font>
 <br><br><font id="excludes">
-The use of this variable forbids the use of specified(<a href="varbas.html#ngkpt">ngkpt</a>)
+The use of this variable forbids the use of specified(<a href="../../input_variables/html_generated/varbas.html#ngkpt">ngkpt</a>)
 </font>
 <br><font id="text">
 <p>
 <p>
- This input variable is used only when <a href="varbas.html#kptopt">kptopt</a>
+ This input variable is used only when <a href="../../input_variables/html_generated/varbas.html#kptopt">kptopt</a>
 is positive. It partially defines the k point grid.
 The other piece of information is contained in
-<a href="varbas.html#shiftk">shiftk</a>.
-<b>kptrlatt</b> cannot be used together with <a href="varbas.html#ngkpt">ngkpt</a>.
+<a href="../../input_variables/html_generated/varbas.html#shiftk">shiftk</a>.
+<b>kptrlatt</b> cannot be used together with <a href="../../input_variables/html_generated/varbas.html#ngkpt">ngkpt</a>.
 </p>
 <p>
  The values kptrlatt(1:3,1), kptrlatt(1:3,2), kptrlatt(1:3,3)
 are the coordinates of three vectors in real space, expressed
-in the <a href="varbas.html#rprimd">rprimd</a> coordinate system (reduced coordinates).
+in the <a href="../../input_variables/html_generated/varbas.html#rprimd">rprimd</a> coordinate system (reduced coordinates).
 They defines a super-lattice in real space.
 The k point lattice is the reciprocal of this super-lattice,
-possibly shifted (see <a href="varbas.html#shiftk">shiftk</a>).
+possibly shifted (see <a href="../../input_variables/html_generated/varbas.html#shiftk">shiftk</a>).
 </p>
 <p>
- If neither <a href="varbas.html#ngkpt">ngkpt</a> nor <b>kptrlatt</b>
+ If neither <a href="../../input_variables/html_generated/varbas.html#ngkpt">ngkpt</a> nor <b>kptrlatt</b>
 are defined, ABINIT will automatically generate a set
 of k point grids, and select the best combination
-of <b>kptrlatt</b> and <a href="varbas.html#shiftk">shiftk</a>
-that allows to reach a sufficient value of <a href="vargs.html#kptrlen">kptrlen</a>.
+of <b>kptrlatt</b> and <a href="../../input_variables/html_generated/varbas.html#shiftk">shiftk</a>
+that allows to reach a sufficient value of <a href="../../input_variables/html_generated/vargs.html#kptrlen">kptrlen</a>.
 See this latter variable for a complete description of this
 procedure.
 </p>
@@ -1568,20 +1568,20 @@ procedure.
 <br><font id="title"><a name="kptrlen">kptrlen</a></font>
 <br><font id="mnemonics">Mnemonics: K - PoinTs grid : Real space LENgth</font>
 <br><font id="characteristic">Characteristic: </font>
-<br><font id="characteristic">Mentioned in "How to": <a href="topic_k-points.html">k-points</a> </font>
+<br><font id="characteristic">Mentioned in "How to": <a href="../../topics/html_generated/topic_k-points.html">k-points</a> </font>
 <br><font id="vartype">Variable type: real</font>
 <br><font id="default">Default is 30.0</font>
 <br><font id="text">
 <p>
 <p>
- This input variable is used only when <a href="varbas.html#kptopt">kptopt</a>
+ This input variable is used only when <a href="../../input_variables/html_generated/varbas.html#kptopt">kptopt</a>
 is positive and non-zero.
 </p>
 <p>
  Preliminary explanation :
  <br />
- The k point lattice defined by <a href="varbas.html#ngkpt">ngkpt</a>
-or <a href="vargs.html#kptrlatt">kptrlatt</a> is used to perform integrations
+ The k point lattice defined by <a href="../../input_variables/html_generated/varbas.html#ngkpt">ngkpt</a>
+or <a href="../../input_variables/html_generated/vargs.html#kptrlatt">kptrlatt</a> is used to perform integrations
 of periodic quantities in the Brillouin Zone, like
 the density or the kinetic energy. One can relate the
 error made by replacing the continuous integral by a sum
@@ -1595,29 +1595,29 @@ So, the length of the smallest of these real space vectors
 is a measure of the accuracy of the k point grid.
 </p>
 <p>
- When either <a href="varbas.html#ngkpt">ngkpt</a> or
-<a href="vargs.html#kptrlatt">kptrlatt</a> is defined, <b>kptrlen</b> is not
+ When either <a href="../../input_variables/html_generated/varbas.html#ngkpt">ngkpt</a> or
+<a href="../../input_variables/html_generated/vargs.html#kptrlatt">kptrlatt</a> is defined, <b>kptrlen</b> is not
 used as an input variable, but the length of the
 smallest vector will be placed in this variable, and echoed
 in the output file.
 </p>
 <p>
- On the other hand, when neither <a href="varbas.html#ngkpt">ngkpt</a> nor
-<a href="vargs.html#kptrlatt">kptrlatt</a> are defined, ABINIT will
+ On the other hand, when neither <a href="../../input_variables/html_generated/varbas.html#ngkpt">ngkpt</a> nor
+<a href="../../input_variables/html_generated/vargs.html#kptrlatt">kptrlatt</a> are defined, ABINIT will
 automatically generate a large set of possible k point grids,
 and select among this set, the grids that give
 a length of smallest vector LARGER than <b>kptrlen</b>,
 and among these grids, the one that, when used with
-<a href="varbas.html#kptopt">kptopt</a>=1, reduces to the smallest number
+<a href="../../input_variables/html_generated/varbas.html#kptopt">kptopt</a>=1, reduces to the smallest number
 of k points. Note that this procedure can be time-consuming.
 It is worth doing it once for a given unit cell
 and set of symmetries, but not use this procedure by default.
-The best is then to set <a href="varfil.html#prtkpt">prtkpt</a>=1, in order
+The best is then to set <a href="../../input_variables/html_generated/varfil.html#prtkpt">prtkpt</a>=1, in order
 to get a detailed analysis of the set of grids.
 </p>
 <p>
  If some layer of vacuum is detected in the unit cell
-(see the input variable <a href="vargs.html#vacuum">vacuum</a>), the
+(see the input variable <a href="../../input_variables/html_generated/vargs.html#vacuum">vacuum</a>), the
 computation of <b>kptrlen</b> will ignore the
 dimension related to the direction perpendicular
 to the vacuum layer, and generate a bi-dimensional k point grid.
@@ -1634,13 +1634,13 @@ For a cluster, this procedure will only generate the Gamma point.
 <br><font id="title"><a name="magcon_lambda">magcon_lambda</a></font>
 <br><font id="mnemonics">Mnemonics: MAGnetization CONstraint LAMBDA parameter</font>
 <br><font id="characteristic">Characteristic: </font>
-<br><font id="characteristic">Mentioned in "How to": <a href="topic_spinpolarisation.html">spinpolarisation</a> </font>
+<br><font id="characteristic">Mentioned in "How to": <a href="../../topics/html_generated/topic_spinpolarisation.html">spinpolarisation</a> </font>
 <br><font id="vartype">Variable type: real</font>
 <br><font id="default">Default is 10.0</font>
 <br><font id="text">
 <p>
 <p>
- This variable gives the amplitude of the constraint imposed on the magnetization vectors on each atom (turned on with flag variable <a href="vargs.html#magconon">magconon</a>). Typical values for lambda are 10 to a few hundred. The energy will vary strongly and convergence will be difficult if lambda is too large. The constraint will be weak and the magnetization will not be close to <a href="vargs.html#spinat">spinat</a> if lambda is too small. See variable <a href="vargs.html#magconon">magconon</a> for more details.
+ This variable gives the amplitude of the constraint imposed on the magnetization vectors on each atom (turned on with flag variable <a href="../../input_variables/html_generated/vargs.html#magconon">magconon</a>). Typical values for lambda are 10 to a few hundred. The energy will vary strongly and convergence will be difficult if lambda is too large. The constraint will be weak and the magnetization will not be close to <a href="../../input_variables/html_generated/vargs.html#spinat">spinat</a> if lambda is too small. See variable <a href="../../input_variables/html_generated/vargs.html#magconon">magconon</a> for more details.
 </p>
 </font>
 
@@ -1651,13 +1651,13 @@ For a cluster, this procedure will only generate the Gamma point.
 <br><font id="title"><a name="magconon">magconon</a></font>
 <br><font id="mnemonics">Mnemonics: turn MAGnetization CONstraint ON</font>
 <br><font id="characteristic">Characteristic: </font>
-<br><font id="characteristic">Mentioned in "How to": <a href="topic_spinpolarisation.html">spinpolarisation</a> </font>
+<br><font id="characteristic">Mentioned in "How to": <a href="../../topics/html_generated/topic_spinpolarisation.html">spinpolarisation</a> </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
 <br><font id="text">
 <p>
 <p>
- Turns on the imposition of a Lagrangian constraint on the magnetization. For each atom, the magnetization is calculated in a sphere (radius <a href="vargs.html#ratsph">ratsph</a>) and a constraint is applied to bring it closer to the input values of <a href="vargs.html#spinat">spinat</a>. The constraint can be either on the direction only (magconon 1) or on the full vector (magconon 2). The Lagrangian constraint has an amplitude <a href="vargs.html#magcon_lambda">magcon_lambda</a> which should be neither too big (bad or impossible convergence) nor too small (no effect).
+ Turns on the imposition of a Lagrangian constraint on the magnetization. For each atom, the magnetization is calculated in a sphere (radius <a href="../../input_variables/html_generated/vargs.html#ratsph">ratsph</a>) and a constraint is applied to bring it closer to the input values of <a href="../../input_variables/html_generated/vargs.html#spinat">spinat</a>. The constraint can be either on the direction only (magconon 1) or on the full vector (magconon 2). The Lagrangian constraint has an amplitude <a href="../../input_variables/html_generated/vargs.html#magcon_lambda">magcon_lambda</a> which should be neither too big (bad or impossible convergence) nor too small (no effect).
 </p>
 </font>
 
@@ -1668,26 +1668,26 @@ For a cluster, this procedure will only generate the Gamma point.
 <br><font id="title"><a name="mixalch">mixalch</a></font>
 <br><font id="mnemonics">Mnemonics: MIXing coefficients for ALCHemical potentials</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#evolving">EVOLVING</a></font>
-<br><font id="characteristic">Mentioned in "How to": <a href="topic_otherGS.html">otherGS</a> </font>
-<br><font id="vartype">Variable type: real(<a href="vargs.html#npspalch">npspalch</a>,<a href="vargs.html#ntypalch">ntypalch</a>)</font>
+<br><font id="characteristic">Mentioned in "How to": <a href="../../topics/html_generated/topic_otherGS.html">otherGS</a> </font>
+<br><font id="vartype">Variable type: real(<a href="../../input_variables/html_generated/vargs.html#npspalch">npspalch</a>,<a href="../../input_variables/html_generated/vargs.html#ntypalch">ntypalch</a>)</font>
 <br><font id="default">No default</font>
 <br><font id="text">
 <p>
 <p>
  Used for the generation of alchemical pseudoatoms, that is,
-when <a href="vargs.html#ntypalch">ntypalch</a> is non-zero.
+when <a href="../../input_variables/html_generated/vargs.html#ntypalch">ntypalch</a> is non-zero.
 </p>
 <p>
  This array gives, for each type of alchemical pseudatom (there are
-<a href="vargs.html#ntypalch">ntypalch</a> such pseudoatoms), the mixing coefficients
-of the basic <a href="vargs.html#npspalch">npspalch</a> pseudopotentials for
+<a href="../../input_variables/html_generated/vargs.html#ntypalch">ntypalch</a> such pseudoatoms), the mixing coefficients
+of the basic <a href="../../input_variables/html_generated/vargs.html#npspalch">npspalch</a> pseudopotentials for
 alchemical use. For each type of alchemical pseudoatom, the sum of the
 mixing coefficients must equal 1.
 </p>
 <p>
  The actual use of the mixing coefficients is defined by the input
-variable <a href="vargs.html#algalch">algalch</a>. Note that the masses of the atoms,
-<a href="varrlx.html#amu">amu</a>
+variable <a href="../../input_variables/html_generated/vargs.html#algalch">algalch</a>. Note that the masses of the atoms,
+<a href="../../input_variables/html_generated/varrlx.html#amu">amu</a>
 are also mixed according to the value of <b>mixalch</b>, by default.
 </p>
 <p>
@@ -1738,7 +1738,7 @@ will be as a static (non-evolving) variable. However, the possibility to have
 different values of <b>mixalch</b> for different images has been coded. A population of
 cells with different atomic characteristics can thus be considered,
 and can be made to evolve, e.g. with a genetic algorithm (not coded in v7.0.0 though).
-There is one restriction to this possibility : the value of <a href="varint.html#ziontypat">ziontypat</a> for the atoms that are mixed should be
+There is one restriction to this possibility : the value of <a href="../../input_variables/html_generated/varint.html#ziontypat">ziontypat</a> for the atoms that are mixed should be
 identical.
 </p>
 </font>
@@ -1750,23 +1750,23 @@ identical.
 <br><font id="title"><a name="natsph">natsph</a></font>
 <br><font id="mnemonics">Mnemonics: Number of ATomic SPHeres for the atom-projected density-of-states</font>
 <br><font id="characteristic">Characteristic: </font>
-<br><font id="characteristic">Mentioned in "How to": <a href="topic_printing.html">printing</a> </font>
+<br><font id="characteristic">Mentioned in "How to": <a href="../../topics/html_generated/topic_printing.html">printing</a> </font>
 <br><font id="vartype">Variable type: integer</font>
-<br><font id="default">Default is <a href="varbas.html#natom">natom</a></font>
+<br><font id="default">Default is <a href="../../input_variables/html_generated/varbas.html#natom">natom</a></font>
 <br><br><font id="requires">
-Only relevant if <a href="varfil.html#prtdos">prtdos</a> == 3 or <a href="varpaw.html#pawfatbnd">pawfatbnd</a> in [1,2]
+Only relevant if <a href="../../input_variables/html_generated/varfil.html#prtdos">prtdos</a> == 3 or <a href="../../input_variables/html_generated/varpaw.html#pawfatbnd">pawfatbnd</a> in [1,2]
 </font>
 <br><font id="text">
 <p>
 <p>
 <b>natsph</b> gives the number of atoms around which the sphere
 for atom-projected density-of-states will be built,
-in the <a href="varfil.html#prtdos">prtdos</a>=3 case.
-The indices of these atoms are given by <a href="vargs.html#iatsph">iatsph</a>.
-The radius of these spheres is given by <a href="vargs.html#ratsph">ratsph</a>.
+in the <a href="../../input_variables/html_generated/varfil.html#prtdos">prtdos</a>=3 case.
+The indices of these atoms are given by <a href="../../input_variables/html_generated/vargs.html#iatsph">iatsph</a>.
+The radius of these spheres is given by <a href="../../input_variables/html_generated/vargs.html#ratsph">ratsph</a>.
  <br />
- If <a href="varpaw.html#pawfatbnd">pawfatbnd</a>=1 or 2, it gives the number of atoms around which atom-projected band structure will be
-built (the indices of these atoms are given by  <a href="vargs.html#iatsph">iatsph</a>).
+ If <a href="../../input_variables/html_generated/varpaw.html#pawfatbnd">pawfatbnd</a>=1 or 2, it gives the number of atoms around which atom-projected band structure will be
+built (the indices of these atoms are given by  <a href="../../input_variables/html_generated/vargs.html#iatsph">iatsph</a>).
 </p>
 </font>
 
@@ -1777,26 +1777,26 @@ built (the indices of these atoms are given by  <a href="vargs.html#iatsph">iats
 <br><font id="title"><a name="natsph_extra">natsph_extra</a></font>
 <br><font id="mnemonics">Mnemonics: Number of ATomic SPHeres for the l-projected density-of-states in EXTRA set</font>
 <br><font id="characteristic">Characteristic: </font>
-<br><font id="characteristic">Mentioned in "How to": <a href="topic_printing.html">printing</a> </font>
+<br><font id="characteristic">Mentioned in "How to": <a href="../../topics/html_generated/topic_printing.html">printing</a> </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
 <br><br><font id="requires">
-Only relevant if <a href="varfil.html#prtdos">prtdos</a> == 3 or <a href="varpaw.html#pawfatbnd">pawfatbnd</a> in [1,2]
+Only relevant if <a href="../../input_variables/html_generated/varfil.html#prtdos">prtdos</a> == 3 or <a href="../../input_variables/html_generated/varpaw.html#pawfatbnd">pawfatbnd</a> in [1,2]
 </font>
 <br><font id="text">
 <p>
 <p>
 <b>natsph_extra</b> gives the number of extra spheres
 for which the angular-momentum-projected density-of-states will be built,
-in the <a href="varfil.html#prtdos">prtdos</a>=3 case.
-The radius of these spheres is given by <a href="vargs.html#ratsph_extra">ratsph_extra</a>.
+in the <a href="../../input_variables/html_generated/varfil.html#prtdos">prtdos</a>=3 case.
+The radius of these spheres is given by <a href="../../input_variables/html_generated/vargs.html#ratsph_extra">ratsph_extra</a>.
 This simulates the STS signal for an STM tip atom placed at the sphere position, according to the chemical nature of the tip (s- p- d- wave etc...).
  <br />
- If <a href="varpaw.html#pawfatbnd">pawfatbnd</a>=1 or 2, it gives the number of spheres in which l-projected band structure will be
+ If <a href="../../input_variables/html_generated/varpaw.html#pawfatbnd">pawfatbnd</a>=1 or 2, it gives the number of spheres in which l-projected band structure will be
 built.
  <br />
  The position of the spheres is given by the
- <a href="vargs.html#xredsph_extra">xredsph_extra</a>
+ <a href="../../input_variables/html_generated/vargs.html#xredsph_extra">xredsph_extra</a>
  variable.
 </p>
 </font>
@@ -1808,10 +1808,10 @@ built.
 <br><font id="title"><a name="nbdbuf">nbdbuf</a></font>
 <br><font id="mnemonics">Mnemonics: Number of BanDs for the BUFfer</font>
 <br><font id="characteristic">Characteristic: </font>
-<br><font id="characteristic">Mentioned in "How to": <a href="topic_convergency.html">convergency</a> </font>
+<br><font id="characteristic">Mentioned in "How to": <a href="../../topics/html_generated/topic_convergency.html">convergency</a> </font>
 <br><font id="vartype">Variable type: integer</font>
-<br><font id="default">Default is 2*<a href="vargs.html#nspinor">nspinor</a> if <a href="vargs.html#optdriver">optdriver</a>==0 and <a href="varbas.html#iscf">iscf</a><0,
-2*<a href="vargs.html#nspinor">nspinor</a> if <a href="vargs.html#optdriver">optdriver</a>==1 and 3<=<a href="varbas.html#occopt">occopt</a> and <a href="varbas.html#occopt">occopt</a><= 8,
+<br><font id="default">Default is 2*<a href="../../input_variables/html_generated/vargs.html#nspinor">nspinor</a> if <a href="../../input_variables/html_generated/vargs.html#optdriver">optdriver</a>==0 and <a href="../../input_variables/html_generated/varbas.html#iscf">iscf</a><0,
+2*<a href="../../input_variables/html_generated/vargs.html#nspinor">nspinor</a> if <a href="../../input_variables/html_generated/vargs.html#optdriver">optdriver</a>==1 and 3<=<a href="../../input_variables/html_generated/varbas.html#occopt">occopt</a> and <a href="../../input_variables/html_generated/varbas.html#occopt">occopt</a><= 8,
 0 otherwise.
 </font>
 <br><font id="text">
@@ -1819,7 +1819,7 @@ built.
 <p>
  <b>nbdbuf</b> gives the number of bands, the highest in energy, that,
 among the
-<a href="varbas.html#nband">nband</a> bands, are to be considered
+<a href="../../input_variables/html_generated/varbas.html#nband">nband</a> bands, are to be considered
 as part of a buffer. This concept is useful in three situations:
 in non-self-consistent
 calculations, for the determination of the convergence tolerance ;
@@ -1832,22 +1832,22 @@ as explained in the following.
 The third case is only for implementation convenience.
 </p>
 <p>
- In non-self-consistent GS calculations (<a href="varbas.html#iscf">iscf</a>&lt;0),
+ In non-self-consistent GS calculations (<a href="../../input_variables/html_generated/varbas.html#iscf">iscf</a>&lt;0),
 the highest levels might be
 difficult to converge, if they are degenerate with another level,
 that does not belong to the set of bands treated. Then, it might
-take extremely long to reach <a href="varbas.html#tolwfr">tolwfr</a>, although
+take extremely long to reach <a href="../../input_variables/html_generated/varbas.html#tolwfr">tolwfr</a>, although
 the other bands are already extremely well-converged, and the energy
 of the highest bands (whose residual are not yet good enough), is
 also rather well converged.
  <br />
  In response to this problem, for non-zero <b>nbdbuf</b>, the
-largest residual (residm), to be later compared with <a href="varbas.html#tolwfr">tolwfr</a>,
+largest residual (residm), to be later compared with <a href="../../input_variables/html_generated/varbas.html#tolwfr">tolwfr</a>,
 will be computed only in the set of non-buffer bands (this modification
 applies for non-self-consistent as well as self-consistent calculation,
 for GS as well as RF calculations).
  <br />
- For a GS calculation, with <a href="varbas.html#iscf">iscf</a>&lt;0, supposing
+ For a GS calculation, with <a href="../../input_variables/html_generated/varbas.html#iscf">iscf</a>&lt;0, supposing
 <b>nbdbuf</b> is not initialized in the input file,
 then ABINIT will overcome the default <b>nbdbuf</b> value,
 and automatically set <b>nbdbuf</b> to 2.
@@ -1861,7 +1861,7 @@ untreated eigenenergy at some k+q point.
 If one accepts a buffer of frozen states, this instability can be made to
 disappear. Frozen states receive automatically a residual value of -0.1d0.
  <br />
- For a RF calculation, with 3&lt;=<a href="varbas.html#occopt">occopt</a>&lt;=7,
+ For a RF calculation, with 3&lt;=<a href="../../input_variables/html_generated/varbas.html#occopt">occopt</a>&lt;=7,
 supposing
 <b>nbdbuf</b> is not initialized in the input file, then
 ABINIT will overcome the default <b>nbdbuf</b> value,
@@ -1881,36 +1881,36 @@ to be at least 1, irrespective of the value of <b>nbdbuf</b>.
 <br><font id="title"><a name="ndivk">ndivk</a></font>
 <br><font id="mnemonics">Mnemonics: Number of DIVisions of K lines</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#input_only">INPUT_ONLY</a></font>
-<br><font id="characteristic">Mentioned in "How to": <a href="topic_k-points.html">k-points</a> </font>
-<br><font id="vartype">Variable type: integer(abs(<a href="varbas.html#kptopt">kptopt</a>))</font>
-<br><font id="default">No default (Comment: Will be generated automatically from <a href="vargs.html#ndivsm">ndivsm</a> if the latter is defined.)</font>
+<br><font id="characteristic">Mentioned in "How to": <a href="../../topics/html_generated/topic_k-points.html">k-points</a> </font>
+<br><font id="vartype">Variable type: integer(abs(<a href="../../input_variables/html_generated/varbas.html#kptopt">kptopt</a>))</font>
+<br><font id="default">No default (Comment: Will be generated automatically from <a href="../../input_variables/html_generated/vargs.html#ndivsm">ndivsm</a> if the latter is defined.)</font>
 <br><br><font id="requires">
-Only relevant if <a href="varbas.html#kptopt">kptopt</a> < 0
+Only relevant if <a href="../../input_variables/html_generated/varbas.html#kptopt">kptopt</a> < 0
 </font>
 <br><br><font id="excludes">
-The use of this variable forbids the use of specified(<a href="vargs.html#ndivsm">ndivsm</a>)
+The use of this variable forbids the use of specified(<a href="../../input_variables/html_generated/vargs.html#ndivsm">ndivsm</a>)
 </font>
 <br><font id="text">
 <p>
 <p>
  Gives the number of divisions of each of the segments
 of the band structure, whose path is determined by
-<a href="varbas.html#kptopt">kptopt</a>
+<a href="../../input_variables/html_generated/varbas.html#kptopt">kptopt</a>
 and
-<a href="vargs.html#kptbounds">kptbounds</a>.
+<a href="../../input_variables/html_generated/vargs.html#kptbounds">kptbounds</a>.
 In this case, the absolute value of
-<a href="varbas.html#kptopt">kptopt</a> is the number of such segments.
+<a href="../../input_variables/html_generated/varbas.html#kptopt">kptopt</a> is the number of such segments.
 </p>
 <p>
  For example, suppose that the number of segment is just one
-(<a href="varbas.html#kptopt">kptopt</a>=-1),
+(<a href="../../input_variables/html_generated/varbas.html#kptopt">kptopt</a>=-1),
 a value <b>ndivk</b>=4 will lead to the computation
 of points with relative coordinates 0.0, 0.25, 0.5, 0.75 and 1.0 , along
 the segment in consideration.
 </p>
 <p>
  Now, suppose that there are two segments
-(<a href="varbas.html#kptopt">kptopt</a>=-2), with
+(<a href="../../input_variables/html_generated/varbas.html#kptopt">kptopt</a>=-2), with
 <b>ndivk</b>(1)=4 and <b>ndivk</b>(2)=2, the computation of the
 eigenvalues will be done at 7 points, 5 belonging to the
 first segment, with relative coordinates 0.0, 0.25, 0.5, 0.75 and 1.0,
@@ -1929,7 +1929,7 @@ point is computed along this segment).
 <p>
  Alternatively it is possible to generate automatically the array <b>ndivk</b>
 by just specifying the number of divisions for the smallest segment.
-See the related input variable <a href="vargs.html#ndivsm">ndivsm</a>.
+See the related input variable <a href="../../input_variables/html_generated/vargs.html#ndivsm">ndivsm</a>.
 </p>
 </font>
 
@@ -1940,7 +1940,7 @@ See the related input variable <a href="vargs.html#ndivsm">ndivsm</a>.
 <br><font id="title"><a name="ndivsm">ndivsm</a></font>
 <br><font id="mnemonics">Mnemonics: Number of DIVisions for the SMallest segment</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#input_only">INPUT_ONLY</a></font>
-<br><font id="characteristic">Mentioned in "How to": <a href="topic_k-points.html">k-points</a> </font>
+<br><font id="characteristic">Mentioned in "How to": <a href="../../topics/html_generated/topic_k-points.html">k-points</a> </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">No default</font>
 <br><font id="text">
@@ -1948,17 +1948,17 @@ See the related input variable <a href="vargs.html#ndivsm">ndivsm</a>.
 <p>
 This variable defines the number of divisions used to sample the smallest segment of the circuit employed in a band structure calculations
 (see related input variables
-<a href="varbas.html#kptopt">kptopt</a>
+<a href="../../input_variables/html_generated/varbas.html#kptopt">kptopt</a>
 and
-<a href="vargs.html#kptbounds">kptbounds</a>).
+<a href="../../input_variables/html_generated/vargs.html#kptbounds">kptbounds</a>).
 If <b>ndivsm</b> is given in the input file, there is no need to specify the number of divisions
 to be used for the other segments.
-Indeed <a href="vargs.html#ndivk">ndivk</a> is automatically calculated inside the
+Indeed <a href="../../input_variables/html_generated/vargs.html#ndivk">ndivk</a> is automatically calculated inside the
 code in order to generate a path where the number of divisions in each segment is proportional
 to the length of the segment itself.
-This option is activated only when <a href="varbas.html#kptopt">kptopt</a> is negative.
+This option is activated only when <a href="../../input_variables/html_generated/varbas.html#kptopt">kptopt</a> is negative.
 In this case, the absolute value of
-<a href="varbas.html#kptopt">kptopt</a> is the number of such segments.
+<a href="../../input_variables/html_generated/varbas.html#kptopt">kptopt</a> is the number of such segments.
 </p>
 </font>
 
@@ -1969,7 +1969,7 @@ In this case, the absolute value of
 <br><font id="title"><a name="ngfft">ngfft</a></font>
 <br><font id="mnemonics">Mnemonics: Number of Grid points for Fast Fourier Transform</font>
 <br><font id="characteristic">Characteristic: </font>
-<br><font id="characteristic">Mentioned in "How to": <a href="topic_convergency.html">convergency</a> </font>
+<br><font id="characteristic">Mentioned in "How to": <a href="../../topics/html_generated/topic_convergency.html">convergency</a> </font>
 <br><font id="vartype">Variable type: integer(3)</font>
 <br><font id="default">Default is [0, 0, 0] (Comment: (automatic selection of optimal values))</font>
 <br><font id="text">
@@ -1980,9 +1980,9 @@ In this case, the absolute value of
 composed of the factors 2, 3, and 5 to be consistent with
 the radices available in our fft.  If no <b>ngfft</b> is provided or
 if <b>ngfft</b> is set to 0 0 0, the code will automatically provide
-an optimal set of <b>ngfft</b> values, based on <a href="varbas.html#acell">acell</a>,
-<a href="varbas.html#rprim">rprim</a> and <a href="varbas.html#ecut">ecut</a>
-(see also <a href="vargs.html#boxcutmin">boxcutmin</a> for speed/accuracy concerns).
+an optimal set of <b>ngfft</b> values, based on <a href="../../input_variables/html_generated/varbas.html#acell">acell</a>,
+<a href="../../input_variables/html_generated/varbas.html#rprim">rprim</a> and <a href="../../input_variables/html_generated/varbas.html#ecut">ecut</a>
+(see also <a href="../../input_variables/html_generated/vargs.html#boxcutmin">boxcutmin</a> for speed/accuracy concerns).
 This is the recommended procedure, of course.
  <br />
  The total number of FFT points
@@ -1994,7 +1994,7 @@ is the product:
  .
  <br />
  When <b>ngfft</b> is made smaller
-than recommended values (e.g. by setting <a href="vargs.html#boxcutmin">boxcutmin</a>
+than recommended values (e.g. by setting <a href="../../input_variables/html_generated/vargs.html#boxcutmin">boxcutmin</a>
 to a value smaller than 2.0 or by setting <b>ngfft</b> manually), the code runs faster and the
 equations in effect are approximated by a low pass Fourier
 filter.  The code reports to standard output (unit 06) a
@@ -2007,7 +2007,7 @@ and should be tested against larger values of <b>ngfft</b>.
 When boxcut is larger than 2, <b>ngfft</b> could be reduced without
 loss of accuracy. In this case, the small variations
 that are observed are solely due to the
-xc quadrature, that may be handled with <a href="vardev.html#intxc">intxc</a>=1
+xc quadrature, that may be handled with <a href="../../input_variables/html_generated/vardev.html#intxc">intxc</a>=1
 to even reduce this effect.
 </p>
 <p>
@@ -2019,10 +2019,10 @@ components are stored in <b>ngfft</b>(1:3), while
 modified for efficiency of the FFT
   </li>
   <li>
-   <b>ngfft</b>(7) is <a href="vardev.html#fftalg">fftalg</a>
+   <b>ngfft</b>(7) is <a href="../../input_variables/html_generated/vardev.html#fftalg">fftalg</a>
   </li>
   <li>
-   <b>ngfft</b>(8) is <a href="vardev.html#fftcache">fftcache</a>
+   <b>ngfft</b>(8) is <a href="../../input_variables/html_generated/vardev.html#fftcache">fftcache</a>
   </li>
   <li>
    <b>ngfft</b>(9) is set to 0 if the parallelization of the FFT is not activated,
@@ -2063,28 +2063,28 @@ space, it is n1*n2proc*n3.
 <br><font id="vartype">Variable type: integer(3)</font>
 <br><font id="default">Default is [0, 0, 0]</font>
 <br><br><font id="requires">
-Only relevant if <a href="vargs.html#nqpt">nqpt</a>==1 and <a href="varbas.html#kptopt">kptopt</a>>=0
+Only relevant if <a href="../../input_variables/html_generated/vargs.html#nqpt">nqpt</a>==1 and <a href="../../input_variables/html_generated/varbas.html#kptopt">kptopt</a>>=0
 </font>
 <br><br><font id="excludes">
-The use of this variable forbids the use of specified(<a href="vargs.html#qptrlatt">qptrlatt</a>)
+The use of this variable forbids the use of specified(<a href="../../input_variables/html_generated/vargs.html#qptrlatt">qptrlatt</a>)
 </font>
 <br><font id="text">
 <p>
 <p>
- At variance with <a href="varbas.html#ngkpt">ngkpt</a>, note that only one q point
-is selected per dataset (see <a href="vargs.html#iqpt">iqpt</a>).
+ At variance with <a href="../../input_variables/html_generated/varbas.html#ngkpt">ngkpt</a>, note that only one q point
+is selected per dataset (see <a href="../../input_variables/html_generated/vargs.html#iqpt">iqpt</a>).
  <br />
  Its three positive components
 give the number of q points of Monkhorst-Pack grids
 (defined with respect to primitive axis in reciprocal space)
 in each of the three dimensions.
-The use of <a href="vargs.html#nshiftq">nshiftq</a>
-and <a href="vargs.html#shiftq">shiftq</a>, allows to generate
+The use of <a href="../../input_variables/html_generated/vargs.html#nshiftq">nshiftq</a>
+and <a href="../../input_variables/html_generated/vargs.html#shiftq">shiftq</a>, allows to generate
 shifted grids, or Monkhorst-Pack grids defined
 with respect to conventional unit cells.
 </p>
 <p>
- For more information on Monkhorst-Pack grids, see <a href="varbas.html#ngkpt">ngkpt</a>.
+ For more information on Monkhorst-Pack grids, see <a href="../../input_variables/html_generated/varbas.html#ngkpt">ngkpt</a>.
 </p>
 </font>
 
@@ -2095,7 +2095,7 @@ with respect to conventional unit cells.
 <br><font id="title"><a name="nline">nline</a></font>
 <br><font id="mnemonics">Mnemonics: Number of LINE minimisations</font>
 <br><font id="characteristic">Characteristic: </font>
-<br><font id="characteristic">Mentioned in "How to": <a href="topic_convergency.html">convergency</a> </font>
+<br><font id="characteristic">Mentioned in "How to": <a href="../../topics/html_generated/topic_convergency.html">convergency</a> </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 4</font>
 <br><font id="text">
@@ -2109,7 +2109,7 @@ for each band. The Default, 4, is fine.
 of levels at the Fermi energy may require a larger value of
 <b>nline</b> (5 or 6 ?)
 Line minimizations will be stopped anyway when improvement
-gets small. With the input variable <a href="vardev.html#nnsclo">nnsclo</a>,
+gets small. With the input variable <a href="../../input_variables/html_generated/vardev.html#nnsclo">nnsclo</a>,
 governs the convergence of the wavefunctions
 for fixed potential.
  <br />
@@ -2125,9 +2125,9 @@ matrix in the subspace spanned by the input wavefunctions.
 <br><font id="title"><a name="npsp">npsp</a></font>
 <br><font id="mnemonics">Mnemonics: Number of PSeudoPotentials</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#no_multi">NO_MULTI</a></font>
-<br><font id="characteristic">Mentioned in "How to": <a href="topic_otherGS.html">otherGS</a> </font>
+<br><font id="characteristic">Mentioned in "How to": <a href="../../topics/html_generated/topic_otherGS.html">otherGS</a> </font>
 <br><font id="vartype">Variable type: integer</font>
-<br><font id="default">Default is <a href="varbas.html#ntypat">ntypat</a></font>
+<br><font id="default">Default is <a href="../../input_variables/html_generated/varbas.html#ntypat">ntypat</a></font>
 <br><font id="text">
 <p>
 <p>
@@ -2138,18 +2138,18 @@ often the number of pseudopotentials to be read will not equal the number of typ
 </p>
 <p>
  Alchemical pseudopotentials will be present
-when <a href="vargs.html#ntypalch">ntypalch</a> is non-zero.
-See <a href="vargs.html#ntypalch">ntypalch</a>
+when <a href="../../input_variables/html_generated/vargs.html#ntypalch">ntypalch</a> is non-zero.
+See <a href="../../input_variables/html_generated/vargs.html#ntypalch">ntypalch</a>
 to understand how
 to use alchemical potentials in ABINIT.
 The input variables
-(<a href="vargs.html#ntypalch">ntypalch</a>,
-<a href="vargs.html#algalch">algalch</a>,<a href="vargs.html#mixalch">mixalch</a>)
+(<a href="../../input_variables/html_generated/vargs.html#ntypalch">ntypalch</a>,
+<a href="../../input_variables/html_generated/vargs.html#algalch">algalch</a>,<a href="../../input_variables/html_generated/vargs.html#mixalch">mixalch</a>)
 are active, and generate alchemical potentials from the available
 pseudopotentials. Also, the inner variables
-(<a href="vargs.html#ntyppure">ntyppure</a>,<a href="vargs.html#npspalch">npspalch</a>)
+(<a href="../../input_variables/html_generated/vargs.html#ntyppure">ntyppure</a>,<a href="../../input_variables/html_generated/vargs.html#npspalch">npspalch</a>)
 become active. See these input variables, especially
-<a href="vargs.html#mixalch">mixalch</a>, to understand how
+<a href="../../input_variables/html_generated/vargs.html#mixalch">mixalch</a>, to understand how
 to use alchemical potentials in ABINIT.
 </p>
 </font>
@@ -2161,19 +2161,19 @@ to use alchemical potentials in ABINIT.
 <br><font id="title"><a name="npspalch">npspalch</a></font>
 <br><font id="mnemonics">Mnemonics: Number of PSeudoPotentials that are "ALCHemical"</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#internal_only">INTERNAL_ONLY</a></font>
-<br><font id="characteristic">Mentioned in "How to": <a href="topic_otherGS.html">otherGS</a> </font>
+<br><font id="characteristic">Mentioned in "How to": <a href="../../topics/html_generated/topic_otherGS.html">otherGS</a> </font>
 <br><font id="vartype">Variable type: integer</font>
-<br><font id="default">Default is <a href="vargs.html#npsp">npsp</a>-<a href="vargs.html#ntyppure">ntyppure</a></font>
+<br><font id="default">Default is <a href="../../input_variables/html_generated/vargs.html#npsp">npsp</a>-<a href="../../input_variables/html_generated/vargs.html#ntyppure">ntyppure</a></font>
 <br><br><font id="requires">
-Only relevant if <a href="vargs.html#ntypalch">ntypalch</a>/=0
+Only relevant if <a href="../../input_variables/html_generated/vargs.html#ntypalch">ntypalch</a>/=0
 </font>
 <br><font id="text">
 <p>
 <p>
- Gives the number of pseudopotentials that are used for alchemical mixing (when <a href="vargs.html#ntypalch">ntypalch</a> is non-zero) :
+ Gives the number of pseudopotentials that are used for alchemical mixing (when <a href="../../input_variables/html_generated/vargs.html#ntypalch">ntypalch</a> is non-zero) :
 </p>
 <p>
- <b>npspalch</b>=<a href="vargs.html#npsp">npsp</a>-<a href="vargs.html#ntyppure">ntyppure</a>
+ <b>npspalch</b>=<a href="../../input_variables/html_generated/vargs.html#npsp">npsp</a>-<a href="../../input_variables/html_generated/vargs.html#ntyppure">ntyppure</a>
 </p>
 </font>
 
@@ -2190,7 +2190,7 @@ Only relevant if <a href="vargs.html#ntypalch">ntypalch</a>/=0
 <p>
 <p>
  Determines whether one q point
-must be read (See the variable <a href="varint.html#qptn">qptn</a>).
+must be read (See the variable <a href="../../input_variables/html_generated/varint.html#qptn">qptn</a>).
  <br />
  Can be either 0 or 1.
  <br />
@@ -2224,11 +2224,11 @@ wavevector of the perturbation.
 gives the number of shifted grids
 to be used concurrently to generate the full grid of q points.
 It can be used with primitive grids defined either from
-<a href="vargs.html#ngqpt">ngqpt</a>
+<a href="../../input_variables/html_generated/vargs.html#ngqpt">ngqpt</a>
 or
-<a href="vargs.html#qptrlatt">qptrlatt</a>.
+<a href="../../input_variables/html_generated/vargs.html#qptrlatt">qptrlatt</a>.
 The maximum allowed value of <b>nshiftq</b> is 8.
-The values of the shifts are given by <a href="vargs.html#shiftq">shiftq</a>.
+The values of the shifts are given by <a href="../../input_variables/html_generated/vargs.html#shiftq">shiftq</a>.
 </p>
 </font>
 
@@ -2239,41 +2239,41 @@ The values of the shifts are given by <a href="vargs.html#shiftq">shiftq</a>.
 <br><font id="title"><a name="nspden">nspden</a></font>
 <br><font id="mnemonics">Mnemonics: Number of SPin-DENsity components</font>
 <br><font id="characteristic">Characteristic: </font>
-<br><font id="characteristic">Mentioned in "How to": <a href="topic_spinpolarisation.html">spinpolarisation</a> </font>
+<br><font id="characteristic">Mentioned in "How to": <a href="../../topics/html_generated/topic_spinpolarisation.html">spinpolarisation</a> </font>
 <br><font id="vartype">Variable type: integer</font>
-<br><font id="default">Default is <a href="varbas.html#nsppol">nsppol</a></font>
+<br><font id="default">Default is <a href="../../input_variables/html_generated/varbas.html#nsppol">nsppol</a></font>
 <br><font id="text">
 <p>
 <p>
  If <b>nspden</b>=1, no spin-magnetization : the density matrix is
 diagonal, with same values spin-up and spin-down
-(compatible with <a href="varbas.html#nsppol">nsppol</a>=1 only,
-for both <a href="vargs.html#nspinor">nspinor</a>=1 or 2)
+(compatible with <a href="../../input_variables/html_generated/varbas.html#nsppol">nsppol</a>=1 only,
+for both <a href="../../input_variables/html_generated/vargs.html#nspinor">nspinor</a>=1 or 2)
 </p>
 <p>
  If <b>nspden</b>=2, scalar magnetization (the axis is arbitrarily
 fixed in the z direction) : the density matrix is
 diagonal, with different values for spin-up and spin-down
-(compatible with <a href="vargs.html#nspinor">nspinor</a>=1,
-either with <a href="varbas.html#nsppol">nsppol</a>=2 -general
+(compatible with <a href="../../input_variables/html_generated/vargs.html#nspinor">nspinor</a>=1,
+either with <a href="../../input_variables/html_generated/varbas.html#nsppol">nsppol</a>=2 -general
 collinear magnetization- or
-<a href="varbas.html#nsppol">nsppol</a>=1 -antiferromagnetism)
+<a href="../../input_variables/html_generated/varbas.html#nsppol">nsppol</a>=1 -antiferromagnetism)
 </p>
 <p>
  If <b>nspden</b>=4, vector magnetization : the density matrix is full,
 with allowed x, y and z magnetization
-(useful only with <a href="vargs.html#nspinor">nspinor</a>=2 and
-<a href="varbas.html#nsppol">nsppol</a>=1, either
+(useful only with <a href="../../input_variables/html_generated/vargs.html#nspinor">nspinor</a>=2 and
+<a href="../../input_variables/html_generated/varbas.html#nsppol">nsppol</a>=1, either
 because there is spin-orbit without time-reversal
 symmetry - and thus spontaneous magnetization, or
 with spin-orbit, if one allows for spontaneous
 non-collinear magnetism). Not yet available for response functions. Also note
 that, with <b>nspden</b>=4, time-reversal symmetry is not taken into account
-(at present ; this has to be checked) and thus <a href="varbas.html#kptopt">kptopt</a>
+(at present ; this has to be checked) and thus <a href="../../input_variables/html_generated/varbas.html#kptopt">kptopt</a>
 has to be different from 1 or 2.
 </p>
 <p>
- The default (<b>nspden</b>=<a href="varbas.html#nsppol">nsppol</a>)
+ The default (<b>nspden</b>=<a href="../../input_variables/html_generated/varbas.html#nsppol">nsppol</a>)
 does not suit the case of vector magnetization.
 </p>
 </font>
@@ -2285,27 +2285,27 @@ does not suit the case of vector magnetization.
 <br><font id="title"><a name="nspinor">nspinor</a></font>
 <br><font id="mnemonics">Mnemonics: Number of SPINORial components of the wavefunctions</font>
 <br><font id="characteristic">Characteristic: </font>
-<br><font id="characteristic">Mentioned in "How to": <a href="topic_spinpolarisation.html">spinpolarisation</a> </font>
+<br><font id="characteristic">Mentioned in "How to": <a href="../../topics/html_generated/topic_spinpolarisation.html">spinpolarisation</a> </font>
 <br><font id="vartype">Variable type: integer</font>
-<br><font id="default">Default is 2 if <a href="varpaw.html#pawspnorb">pawspnorb</a>==1,
+<br><font id="default">Default is 2 if <a href="../../input_variables/html_generated/varpaw.html#pawspnorb">pawspnorb</a>==1,
 1 otherwise.
 </font>
 <br><font id="text">
 <p>
 <p>
  If <b>nspinor</b>=1, usual case : scalar wavefunction
-(compatible with (<a href="varbas.html#nsppol">nsppol</a>=1,
-<a href="vargs.html#nspden">nspden</a>=1) as well
-as (<a href="varbas.html#nsppol">nsppol</a>=2, <a href="vargs.html#nspden">nspden</a>=2) )
+(compatible with (<a href="../../input_variables/html_generated/varbas.html#nsppol">nsppol</a>=1,
+<a href="../../input_variables/html_generated/vargs.html#nspden">nspden</a>=1) as well
+as (<a href="../../input_variables/html_generated/varbas.html#nsppol">nsppol</a>=2, <a href="../../input_variables/html_generated/vargs.html#nspden">nspden</a>=2) )
 </p>
 <p>
  If <b>nspinor</b>=2, the wavefunction is a spinor
-(compatible with <a href="varbas.html#nsppol">nsppol</a>=1, with
-<a href="vargs.html#nspden">nspden</a>=1 or 4,
-but not with <a href="varbas.html#nsppol">nsppol</a>=2)
+(compatible with <a href="../../input_variables/html_generated/varbas.html#nsppol">nsppol</a>=1, with
+<a href="../../input_variables/html_generated/vargs.html#nspden">nspden</a>=1 or 4,
+but not with <a href="../../input_variables/html_generated/varbas.html#nsppol">nsppol</a>=2)
 </p>
 <p>
- When <b>nspinor</b> is 2, the values of <a href="vardev.html#istwfk">istwfk</a>
+ When <b>nspinor</b> is 2, the values of <a href="../../input_variables/html_generated/vardev.html#istwfk">istwfk</a>
 are automatically set to 1. Also, the number of bands, for each k-point,
 should be even.
 </p>
@@ -2318,7 +2318,7 @@ should be even.
 <br><font id="title"><a name="ntypalch">ntypalch</a></font>
 <br><font id="mnemonics">Mnemonics: Number of TYPe of atoms that are "ALCHemical"</font>
 <br><font id="characteristic">Characteristic: </font>
-<br><font id="characteristic">Mentioned in "How to": <a href="topic_otherGS.html">otherGS</a> </font>
+<br><font id="characteristic">Mentioned in "How to": <a href="../../topics/html_generated/topic_otherGS.html">otherGS</a> </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
 <br><font id="text">
@@ -2329,7 +2329,7 @@ when <b>ntypalch</b> is non-zero, alchemical mixing
 will be used.
 </p>
 <p>
- Among the <a href="varbas.html#ntypat">ntypat</a> types of atoms, the
+ Among the <a href="../../input_variables/html_generated/varbas.html#ntypat">ntypat</a> types of atoms, the
 last <b>ntypalch</b> will be "alchemical" pseudoatoms, while only
 the first
  <b>
@@ -2343,15 +2343,15 @@ the first
  first of these, actually). The
 <b>ntypalch</b> types of alchemical
 pseudoatoms are to be made
-from the remaining <a href="vargs.html#npspalch">npspalch</a> pseudopotentials.
+from the remaining <a href="../../input_variables/html_generated/vargs.html#npspalch">npspalch</a> pseudopotentials.
 </p>
 <p>
  In this case,
 the input variables
-<a href="vargs.html#algalch">algalch</a>,<a href="vargs.html#mixalch">mixalch</a>
+<a href="../../input_variables/html_generated/vargs.html#algalch">algalch</a>,<a href="../../input_variables/html_generated/vargs.html#mixalch">mixalch</a>
 are active, and generate alchemical potentials from the available
 pseudopotentials.  See these input variables, especially
-<a href="vargs.html#mixalch">mixalch</a>, to understand how
+<a href="../../input_variables/html_generated/vargs.html#mixalch">mixalch</a>, to understand how
 to use alchemical potentials in ABINIT.
 </p>
 </font>
@@ -2363,16 +2363,16 @@ to use alchemical potentials in ABINIT.
 <br><font id="title"><a name="ntyppure">ntyppure</a></font>
 <br><font id="mnemonics">Mnemonics: Number of TYPe of atoms that are "PURe"</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#internal_only">INTERNAL_ONLY</a></font>
-<br><font id="characteristic">Mentioned in "How to": <a href="topic_otherGS.html">otherGS</a> </font>
+<br><font id="characteristic">Mentioned in "How to": <a href="../../topics/html_generated/topic_otherGS.html">otherGS</a> </font>
 <br><font id="vartype">Variable type: integer</font>
-<br><font id="default">Default is <a href="varbas.html#ntypat">ntypat</a>-<a href="vargs.html#ntypalch">ntypalch</a></font>
+<br><font id="default">Default is <a href="../../input_variables/html_generated/varbas.html#ntypat">ntypat</a>-<a href="../../input_variables/html_generated/vargs.html#ntypalch">ntypalch</a></font>
 <br><font id="text">
 <p>
 <p>
- Gives the number of type of atoms that are "pure" when alchemical mixing is used (<a href="vargs.html#ntypalch">ntypalch</a> /= 0) :
+ Gives the number of type of atoms that are "pure" when alchemical mixing is used (<a href="../../input_variables/html_generated/vargs.html#ntypalch">ntypalch</a> /= 0) :
 </p>
 <p>
- <b>ntyppure</b>=<a href="varbas.html#ntypat">ntypat</a>-<a href="vargs.html#ntypalch">ntypalch</a>
+ <b>ntyppure</b>=<a href="../../input_variables/html_generated/varbas.html#ntypat">ntypat</a>-<a href="../../input_variables/html_generated/vargs.html#ntypalch">ntypalch</a>
 </p>
 </font>
 
@@ -2383,11 +2383,11 @@ to use alchemical potentials in ABINIT.
 <br><font id="title"><a name="nucdipmom">nucdipmom</a></font>
 <br><font id="mnemonics">Mnemonics: NUClear DIPole MOMents</font>
 <br><font id="characteristic">Characteristic: </font>
-<br><font id="characteristic">Mentioned in "How to": <a href="topic_spinpolarisation.html">spinpolarisation</a> </font>
-<br><font id="vartype">Variable type: real(3,<a href="varbas.html#natom">natom</a>)</font>
+<br><font id="characteristic">Mentioned in "How to": <a href="../../topics/html_generated/topic_spinpolarisation.html">spinpolarisation</a> </font>
+<br><font id="vartype">Variable type: real(3,<a href="../../input_variables/html_generated/varbas.html#natom">natom</a>)</font>
 <br><font id="default">Default is 0.0</font>
 <br><br><font id="requires">
-Only relevant if <a href="varint.html#usepaw">usepaw</a> = 1; <a href="varpaw.html#pawcpxocc">pawcpxocc</a> = 2; <a href="varbas.html#kptopt">kptopt</a> > 2
+Only relevant if <a href="../../input_variables/html_generated/varint.html#usepaw">usepaw</a> = 1; <a href="../../input_variables/html_generated/varpaw.html#pawcpxocc">pawcpxocc</a> = 2; <a href="../../input_variables/html_generated/varbas.html#kptopt">kptopt</a> > 2
 </font>
 <br><font id="text">
 <p>
@@ -2401,7 +2401,7 @@ Places an array of nuclear magnetic dipole moments on the atomic positions, usef
 <br><font id="title"><a name="nwfshist">nwfshist</a></font>
 <br><font id="mnemonics">Mnemonics: Number of WaveFunctionS HISTory</font>
 <br><font id="characteristic">Characteristic: </font>
-<br><font id="characteristic">Mentioned in "How to": <a href="topic_Wavelets.html">Wavelets</a> </font>
+<br><font id="characteristic">Mentioned in "How to": <a href="../../topics/html_generated/topic_Wavelets.html">Wavelets</a> </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
 <br><font id="text">
@@ -2430,25 +2430,25 @@ are stored during the electronic minimisation.
 <br><font id="title"><a name="occ">occ</a></font>
 <br><font id="mnemonics">Mnemonics: OCCupation numbers</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#evolving">EVOLVING</a></font>
-<br><font id="characteristic">Mentioned in "How to": <a href="topic_GSgeneral.html">GSgeneral</a> </font>
-<br><font id="vartype">Variable type: real(<a href="varbas.html#nband">nband</a>)</font>
+<br><font id="characteristic">Mentioned in "How to": <a href="../../topics/html_generated/topic_GSgeneral.html">GSgeneral</a> </font>
+<br><font id="vartype">Variable type: real(<a href="../../input_variables/html_generated/varbas.html#nband">nband</a>)</font>
 <br><font id="default">Default is *0</font>
 <br><font id="text">
 <p>
 <p>
  Gives occupation numbers for all
-bands in the problem. Needed if <a href="varbas.html#occopt">occopt</a>==0 or
-<a href="varbas.html#occopt">occopt</a>==2.
-Ignored otherwise. Also ignored when <a href="varbas.html#iscf">iscf</a>=-2.
+bands in the problem. Needed if <a href="../../input_variables/html_generated/varbas.html#occopt">occopt</a>==0 or
+<a href="../../input_variables/html_generated/varbas.html#occopt">occopt</a>==2.
+Ignored otherwise. Also ignored when <a href="../../input_variables/html_generated/varbas.html#iscf">iscf</a>=-2.
  <br />
  Typical band occupancy is either
 2 or 0, but can be 1 for half-occupied band or other
 choices in special circumstances.
  <br />
- If <a href="varbas.html#occopt">occopt</a> is not 2,
+ If <a href="../../input_variables/html_generated/varbas.html#occopt">occopt</a> is not 2,
 then the occupancies must be the same for each k point.
  <br />
- If <a href="varbas.html#occopt">occopt</a>=2, then the band occupancies must be
+ If <a href="../../input_variables/html_generated/varbas.html#occopt">occopt</a>=2, then the band occupancies must be
 provided explicitly for each band, EACH k POINT,
 and EACH SPIN-POLARIZATION, in an
 array which runs over all bands, k points,
@@ -2461,12 +2461,12 @@ second k point (spin up), etc, then all k-points spin down.
  The total number of array elements
 which must be provided is
  <br />
- ( <a href="varbas.html#nband">nband</a>(1)+<a href="varbas.html#nband">nband</a>(2)+...+
-<a href="varbas.html#nband">nband</a>(<a href="varbas.html#nkpt">nkpt</a>) ) *
-<a href="varbas.html#nsppol">nsppol</a> .
+ ( <a href="../../input_variables/html_generated/varbas.html#nband">nband</a>(1)+<a href="../../input_variables/html_generated/varbas.html#nband">nband</a>(2)+...+
+<a href="../../input_variables/html_generated/varbas.html#nband">nband</a>(<a href="../../input_variables/html_generated/varbas.html#nkpt">nkpt</a>) ) *
+<a href="../../input_variables/html_generated/varbas.html#nsppol">nsppol</a> .
  <br />
  The occupation numbers evolve only for metallic occupations,
-that is, <a href="varbas.html#occopt">occopt</a> &ge; 3 .
+that is, <a href="../../input_variables/html_generated/varbas.html#occopt">occopt</a> &ge; 3 .
 </p>
 </font>
 
@@ -2496,11 +2496,11 @@ the task to be done, at the level of the "driver" routine.
  <br />
  <b>optdriver</b>=3 : susceptibility and dielectric matrix calculation (SCR), routine "screening"
  <br />
- (see the input variables <a href="vargw.html#ecutwfn">ecutwfn</a>,
-<a href="vargw.html#ecuteps">ecuteps</a>,
-<a href="vargw.html#ppmfrq">ppmfrq</a>,
-<a href="varfil.html#getwfk">getwfk</a>,
-as well as <a href="vargw.html#nbandkss">nbandkss</a> and <a href="varbas.html#nband">nband</a>)
+ (see the input variables <a href="../../input_variables/html_generated/vargw.html#ecutwfn">ecutwfn</a>,
+<a href="../../input_variables/html_generated/vargw.html#ecuteps">ecuteps</a>,
+<a href="../../input_variables/html_generated/vargw.html#ppmfrq">ppmfrq</a>,
+<a href="../../input_variables/html_generated/varfil.html#getwfk">getwfk</a>,
+as well as <a href="../../input_variables/html_generated/vargw.html#nbandkss">nbandkss</a> and <a href="../../input_variables/html_generated/varbas.html#nband">nband</a>)
  <br />
  <b>optdriver</b>=4 : self-energy calculation (SIG), routine "sigma"
  <br />
@@ -2513,13 +2513,13 @@ as well as <a href="vargw.html#nbandkss">nbandkss</a> and <a href="varbas.html#n
  <b>optdriver</b>=99 : Bethe-Salpeter calculation (BSE), routine "bethe_salpeter"
 </p>
 <p>
- If one of <a href="varrf.html#rfphon">rfphon</a>, <a href="varrf.html#rfddk">rfddk</a>,
-<a href="varrf.html#rfelfd">rfelfd</a>,
-or <a href="varrf.html#rfstrs">rfstrs</a> is non-zero, while <b>optdriver</b>
+ If one of <a href="../../input_variables/html_generated/varrf.html#rfphon">rfphon</a>, <a href="../../input_variables/html_generated/varrf.html#rfddk">rfddk</a>,
+<a href="../../input_variables/html_generated/varrf.html#rfelfd">rfelfd</a>,
+or <a href="../../input_variables/html_generated/varrf.html#rfstrs">rfstrs</a> is non-zero, while <b>optdriver</b>
 is not defined in the input file, ABINIT will set <b>optdriver</b> to 1
-automatically. These input variables (<a href="varrf.html#rfphon">rfphon</a>,
-<a href="varrf.html#rfddk">rfddk</a>, <a href="varrf.html#rfelfd">rfelfd</a>,
-and <a href="varrf.html#rfstrs">rfstrs</a>) must be
+automatically. These input variables (<a href="../../input_variables/html_generated/varrf.html#rfphon">rfphon</a>,
+<a href="../../input_variables/html_generated/varrf.html#rfddk">rfddk</a>, <a href="../../input_variables/html_generated/varrf.html#rfelfd">rfelfd</a>,
+and <a href="../../input_variables/html_generated/varrf.html#rfstrs">rfstrs</a>) must be
 zero if <b>optdriver</b> is not set to 1.
 </p>
 </font>
@@ -2531,7 +2531,7 @@ zero if <b>optdriver</b> is not set to 1.
 <br><font id="title"><a name="optstress">optstress</a></font>
 <br><font id="mnemonics">Mnemonics: OPTion for the computation of STRESS</font>
 <br><font id="characteristic">Characteristic: </font>
-<br><font id="characteristic">Mentioned in "How to": <a href="topic_GSgeneral.html">GSgeneral</a> </font>
+<br><font id="characteristic">Mentioned in "How to": <a href="../../topics/html_generated/topic_GSgeneral.html">GSgeneral</a> </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 1</font>
 <br><font id="text">
@@ -2539,10 +2539,10 @@ zero if <b>optdriver</b> is not set to 1.
 <p>
  If set to 1, the computation of stresses is done,
 in the SCF case
-(under the conditions <a href="varbas.html#iscf">iscf</a> &gt; 0 , <a href="varfil.html#prtstm">prtstm</a>==0 ,
-<a href="vargs.html#positron">positron</a>==0,
-and either  <a href="varbas.html#nstep">nstep</a> &gt;0 , or
-<a href="varint.html#usepaw">usepaw</a>==0 or <a href="varfil.html#irdwfk">irdwfk</a>==1).
+(under the conditions <a href="../../input_variables/html_generated/varbas.html#iscf">iscf</a> &gt; 0 , <a href="../../input_variables/html_generated/varfil.html#prtstm">prtstm</a>==0 ,
+<a href="../../input_variables/html_generated/vargs.html#positron">positron</a>==0,
+and either  <a href="../../input_variables/html_generated/varbas.html#nstep">nstep</a> &gt;0 , or
+<a href="../../input_variables/html_generated/varint.html#usepaw">usepaw</a>==0 or <a href="../../input_variables/html_generated/varfil.html#irdwfk">irdwfk</a>==1).
  <br />
  Otherwise, to save CPU time, if no optimization of the cell is required,
 one can skip the computation of stresses. The CPU time saving might be interesting
@@ -2557,13 +2557,13 @@ for some PAW calculations.
 <br><font id="title"><a name="posdoppler">posdoppler</a></font>
 <br><font id="mnemonics">Mnemonics: POSitron computation of DOPPLER broadening</font>
 <br><font id="characteristic">Characteristic: </font>
-<br><font id="characteristic">Mentioned in "How to": <a href="topic_positron.html">positron</a> </font>
+<br><font id="characteristic">Mentioned in "How to": <a href="../../topics/html_generated/topic_positron.html">positron</a> </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
 <br><font id="text">
 <p>
 <p>
- Relevant only when <a href="vargs.html#positron">positron</a>&lt;&gt;0.<br>
+ Relevant only when <a href="../../input_variables/html_generated/vargs.html#positron">positron</a>&lt;&gt;0.<br>
  This input parameter activates the calculation of the Doppler broadening of the electron-positron annihilation radiation.<br>
  An output file containing the momentum distributions
  of annihilating electron-positron pairs is created.<br>
@@ -2582,7 +2582,7 @@ for some PAW calculations.
 <br><font id="title"><a name="positron">positron</a></font>
 <br><font id="mnemonics">Mnemonics: POSITRON calculation</font>
 <br><font id="characteristic">Characteristic: </font>
-<br><font id="characteristic">Mentioned in "How to": <a href="topic_positron.html">positron</a> </font>
+<br><font id="characteristic">Mentioned in "How to": <a href="../../topics/html_generated/topic_positron.html">positron</a> </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
 <br><font id="text">
@@ -2590,8 +2590,8 @@ for some PAW calculations.
 <p>
 This input parameter can be positive or negative.<br>
 Negative values for <b>positron</b> are only relevant for PAW calculations.<br>
-Electron-positron correlation functional is defined by <a href="vargs.html#ixcpositron">ixcpositron</a>.<br>
-Other relevant input parameter: <a href="vargs.html#posocc">posocc</a> (occupation number for the positron).<br>
+Electron-positron correlation functional is defined by <a href="../../input_variables/html_generated/vargs.html#ixcpositron">ixcpositron</a>.<br>
+Other relevant input parameter: <a href="../../input_variables/html_generated/vargs.html#posocc">posocc</a> (occupation number for the positron).<br>
 
 <br><U>Positive values for <b>positron</b>:</U><br>
 <i>For <b><b>positron</b>=1 or 2</b>, will perform the calculation of positron
@@ -2604,7 +2604,7 @@ Starting from a previous electronic GS density (with <b><b>positron</b>=0</b>),
 This is almost correct for a positron in a perfect bulk material.
 But this approximation fails when defects exist in
 the material (for instance: the positron might be trapped by a vacancy).<br>
-The electronic density will be automatically read from a _DEN file (with or without <a href="varfil.html#irdden">irdden</a>
+The electronic density will be automatically read from a _DEN file (with or without <a href="../../input_variables/html_generated/varfil.html#irdden">irdden</a>
 keyword).<br>
 At the end of the SCF cycle, the positron lifetime and annihilation rate
 are printed out.<br><br>
@@ -2622,7 +2622,7 @@ Starting from a previous positronic GS density (with <b>positron=1</b>),
 an electronic ground-state calculation is performed, keeping the positronic
 density constant.<br>
 The positronic density will be automatically read from a _DEN file (with or without
-<a href="varfil.html#getden">getden</a>/<a href="varfil.html#irdden">irdden</a> keyword).<br>
+<a href="../../input_variables/html_generated/varfil.html#getden">getden</a>/<a href="../../input_variables/html_generated/varfil.html#irdden">irdden</a> keyword).<br>
 At the end of the SCF cycle, the positron lifetime and annihilation rate
 are printed out.<br><br>
 <i>Additional information for the use of pseudopotentials:<br><ul>
@@ -2636,18 +2636,18 @@ end, the all-electrons core density generated with FHI98PP.<br>
 <li><b>Typical use</b>:<br>
 The calculation is done in several steps:<br>
 The first one is a normal GS calculation for the electrons, with <b>positron</b>=0.
-The only specific thing to do is to set <a href="varfil.html#prtden">prtden</a>=1 (this is the defaut for ABINIT v6.x+).
+The only specific thing to do is to set <a href="../../input_variables/html_generated/varfil.html#prtden">prtden</a>=1 (this is the defaut for ABINIT v6.x+).
 This will create the associated _DEN file which will be used as input file for the positronic
 GS calculation.<br>
 The second step is the GS calculation of the positron and subsequently its
 lifetime, with <b>positron</b>=1.
-One has to define also <a href="vargs.html#ixcpositron">ixcpositron</a>.<br>
+One has to define also <a href="../../input_variables/html_generated/vargs.html#ixcpositron">ixcpositron</a>.<br>
 Then, it is possible to perform an additional step, computing
 the GS electronic density in presence of the positron, with <b>positron</b>=2.<br>
 and so on...<br>
 This procedure can be automated (for PAW only) by the use of a negative value for <b>positron</b>.<br>
 At the end, a converged value of the positron lifetime (decomposed in several contributions) is printed. <br>
-See also <a href="vargs.html#posdoppler">posdoppler</a> keyword for the calculation of Doppler broadening.<br>
+See also <a href="../../input_variables/html_generated/vargs.html#posdoppler">posdoppler</a> keyword for the calculation of Doppler broadening.<br>
 </ul>
 
 <br><U>Negative values for <b>positron</b>:</U><br>
@@ -2661,16 +2661,16 @@ Then will perform a positronic ground state calculation in presence of the elect
 and ions; then an electronic ground state calculation in presence of the positron and the ions...<br>
 and so on... until the total energy is converged.<br>
 The convergence of the total energy of the ions+electrons+positron system
-is controlled by the use of the <a href="vargs.html#postoldfe">postoldfe</a>, <a href="vargs.html#postoldff">postoldff</a>
-and <a href="vargs.html#posnstep">posnstep</a> input keywords.<br>
+is controlled by the use of the <a href="../../input_variables/html_generated/vargs.html#postoldfe">postoldfe</a>, <a href="../../input_variables/html_generated/vargs.html#postoldff">postoldff</a>
+and <a href="../../input_variables/html_generated/vargs.html#posnstep">posnstep</a> input keywords.<br>
 With <b>positron=-1</b>, at the beginning of each new electronic/positronic step,
 the wave functions are unknown.</ul>
 
 <ul><li><b>positron=-10</b>:<br>
 Same as <b>positron=-1</b> except that the electronic/positronic wave functions
 are stored in memory.<br>
-Consequently, the total number of iterations to reach the convergence (diff_Etotal<<a href="vargs.html#postoldfe">postoldfe</a>
-or diff_Forces<<a href="vargs.html#postoldff">postoldff</a>) is smaller.<br>
+Consequently, the total number of iterations to reach the convergence (diff_Etotal<<a href="../../input_variables/html_generated/vargs.html#postoldfe">postoldfe</a>
+or diff_Forces<<a href="../../input_variables/html_generated/vargs.html#postoldff">postoldff</a>) is smaller.<br>
 But, this can increase the total amount of memory needed by the code.</ul>
 
 <ul><li><b>positron=-2</b>:<br>
@@ -2685,12 +2685,12 @@ is forced to stop at the end of an electronic step.</ul><br>
 There are two typical cases which have to be differently treated:
 <ul><li><b>A positron in a perfect <U>bulk</U> system</b>:<br>
 In that case, the positron is delocalized in the whole crystal. Its density is almost zero.<br>
-Thus, the "zero density positron limit" has to be used. <a href="vargs.html#ixcpositron">ixcpositron</a> has to be choosen accordingly.<br>
+Thus, the "zero density positron limit" has to be used. <a href="../../input_variables/html_generated/vargs.html#ixcpositron">ixcpositron</a> has to be choosen accordingly.<br>
 In order to have the zero density positron limit it is adviced to follow these points:<br>
-1- Put a small positronic charge (by setting a <a href="vargs.html#posocc">posocc</a> to a small value) <b>OR</b> use a big supercell.<br>
+1- Put a small positronic charge (by setting a <a href="../../input_variables/html_generated/vargs.html#posocc">posocc</a> to a small value) <b>OR</b> use a big supercell.<br>
 2- Use only k=gamma wave vector for the positronic calculation.<br>
 3- Use the manual procedure in 2 steps: first <b>positron</b>=0 and then <b>positron</b>=1; avoid the <b>positron=2</b> step and the automatic procedure (<b>positron</b>&lt;0).<br>
-In principle, the positron lifetime should converge with the value of <a href="vargs.html#posocc">posocc</a> or the size of the supercell.<br></ul>
+In principle, the positron lifetime should converge with the value of <a href="../../input_variables/html_generated/vargs.html#posocc">posocc</a> or the size of the supercell.<br></ul>
 
 <ul><li><b>A positron trapped in a <U>default</U> (vacancy...)</b>:<br>
 In that case, the positron is localized in the default. Its density can be localized in the simulation cell (provided that the cell is sufficiently large) and influences the electronic density.<br>
@@ -2715,19 +2715,19 @@ References:<br>
 <br><font id="title"><a name="posnstep">posnstep</a></font>
 <br><font id="mnemonics">Mnemonics: POSitron calculation: max. Number of STEPs for the two-component DFT</font>
 <br><font id="characteristic">Characteristic: </font>
-<br><font id="characteristic">Mentioned in "How to": <a href="topic_positron.html">positron</a> </font>
+<br><font id="characteristic">Mentioned in "How to": <a href="../../topics/html_generated/topic_positron.html">positron</a> </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 50</font>
 <br><font id="text">
 <p>
 <p>
- Relevant only when <a href="vargs.html#positron">positron</a>&lt;0.
+ Relevant only when <a href="../../input_variables/html_generated/vargs.html#positron">positron</a>&lt;0.
  <br />
  Sets the maximum number of electronic/positronic iterations that, when reached, will cause the two-component DFT SCF cycle to stop.
  <br />
  The code will first compute the electronic ground-state, then the positronic ground state in the electronic density, then the electronic ground-state in the positronic density, ...
  <br />
- ...until diff_Etotal&lt;<a href="vargs.html#postoldfe">postoldfe</a> or diff_Forces&lt;<a href="vargs.html#postoldff">postoldff</a>
+ ...until diff_Etotal&lt;<a href="../../input_variables/html_generated/vargs.html#postoldfe">postoldfe</a> or diff_Forces&lt;<a href="../../input_variables/html_generated/vargs.html#postoldff">postoldff</a>
 or the number of electronic/positronic steps is <b>posnstep</b>.
  <br />
 </p>
@@ -2740,13 +2740,13 @@ or the number of electronic/positronic steps is <b>posnstep</b>.
 <br><font id="title"><a name="posocc">posocc</a></font>
 <br><font id="mnemonics">Mnemonics: POSitron calculation: OCCupation number for the positron</font>
 <br><font id="characteristic">Characteristic: </font>
-<br><font id="characteristic">Mentioned in "How to": <a href="topic_positron.html">positron</a> </font>
+<br><font id="characteristic">Mentioned in "How to": <a href="../../topics/html_generated/topic_positron.html">positron</a> </font>
 <br><font id="vartype">Variable type: real</font>
 <br><font id="default">Default is 1</font>
 <br><font id="text">
 <p>
 <p>
- Relevant only when <a href="vargs.html#positron">positron</a>/=0.
+ Relevant only when <a href="../../input_variables/html_generated/vargs.html#positron">positron</a>/=0.
  <br />
  Sets the occupation number for the positron. Has to be &lt;=1.
  <br />
@@ -2762,15 +2762,15 @@ or the number of electronic/positronic steps is <b>posnstep</b>.
 <br><font id="title"><a name="postoldfe">postoldfe</a></font>
 <br><font id="mnemonics">Mnemonics: POSitron calculation: TOLerance on the DiFference of total Energy</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#energy">ENERGY</a></font>
-<br><font id="characteristic">Mentioned in "How to": <a href="topic_positron.html">positron</a> </font>
+<br><font id="characteristic">Mentioned in "How to": <a href="../../topics/html_generated/topic_positron.html">positron</a> </font>
 <br><font id="vartype">Variable type: real</font>
-<br><font id="default">Default is 1e-06 if <a href="vargs.html#postoldff">postoldff</a>=0,
+<br><font id="default">Default is 1e-06 if <a href="../../input_variables/html_generated/vargs.html#postoldff">postoldff</a>=0,
 0.0 otherwise.
 </font>
 <br><font id="text">
 <p>
 <p>
- Relevant only when <a href="vargs.html#positron">positron</a>&lt;0.
+ Relevant only when <a href="../../input_variables/html_generated/vargs.html#positron">positron</a>&lt;0.
  <br />
  Sets a tolerance for absolute difference of total energy (of
  <i>
@@ -2778,7 +2778,7 @@ or the number of electronic/positronic steps is <b>posnstep</b>.
  </i>
  system)
 that, when reached, will cause the SCF cycle to stop before the number of
-steps is <a href="varbas.html#nstep">nstep</a> or the number of electronic/positronic steps is <a href="vargs.html#posnstep">posnstep</a>.
+steps is <a href="../../input_variables/html_generated/varbas.html#nstep">nstep</a> or the number of electronic/positronic steps is <a href="../../input_variables/html_generated/vargs.html#posnstep">posnstep</a>.
  <br />
  <br />
  Can be specified in Ha (the default), Ry, eV or Kelvin, since
@@ -2787,7 +2787,7 @@ steps is <a href="varbas.html#nstep">nstep</a> or the number of electronic/posit
  </b>
  has the '<a href="../../users/abinit_help.html#energy">ENERGY</a>' characteristics.
 <br />
-Only one and only one of <b>postoldfe</b> or <a href="vargs.html#postoldff">postoldff</a> can be set.
+Only one and only one of <b>postoldfe</b> or <a href="../../input_variables/html_generated/vargs.html#postoldff">postoldff</a> can be set.
 </p>
 </font>
 
@@ -2798,13 +2798,13 @@ Only one and only one of <b>postoldfe</b> or <a href="vargs.html#postoldff">post
 <br><font id="title"><a name="postoldff">postoldff</a></font>
 <br><font id="mnemonics">Mnemonics: POSitron calculation: TOLerance on the DiFference of Forces</font>
 <br><font id="characteristic">Characteristic: </font>
-<br><font id="characteristic">Mentioned in "How to": <a href="topic_positron.html">positron</a> </font>
+<br><font id="characteristic">Mentioned in "How to": <a href="../../topics/html_generated/topic_positron.html">positron</a> </font>
 <br><font id="vartype">Variable type: real</font>
 <br><font id="default">Default is 0</font>
 <br><font id="text">
 <p>
 <p>
- Relevant only when <a href="vargs.html#positron">positron</a>&lt;0.
+ Relevant only when <a href="../../input_variables/html_generated/vargs.html#positron">positron</a>&lt;0.
  <br />
  Sets a tolerance for absolute difference of maximum force acting on ions (due to
  <i>
@@ -2812,9 +2812,9 @@ Only one and only one of <b>postoldfe</b> or <a href="vargs.html#postoldff">post
  </i>
  system)
 that, when reached, will cause the SCF cycle to stop before the number of SCF
-steps is <a href="varbas.html#nstep">nstep</a> or the number of electronic/positronic steps is <a href="vargs.html#posnstep">posnstep</a>.
+steps is <a href="../../input_variables/html_generated/varbas.html#nstep">nstep</a> or the number of electronic/positronic steps is <a href="../../input_variables/html_generated/vargs.html#posnstep">posnstep</a>.
  <br />
- Only one and only one of <a href="vargs.html#postoldfe">postoldfe</a> or <b>postoldff</b> can be set.
+ Only one and only one of <a href="../../input_variables/html_generated/vargs.html#postoldfe">postoldfe</a> or <b>postoldff</b> can be set.
  <br />
 </p>
 </font>
@@ -2826,7 +2826,7 @@ steps is <a href="varbas.html#nstep">nstep</a> or the number of electronic/posit
 <br><font id="title"><a name="prtdensph">prtdensph</a></font>
 <br><font id="mnemonics">Mnemonics: PRinT integral of DENsity inside atomic SPHeres</font>
 <br><font id="characteristic">Characteristic: </font>
-<br><font id="characteristic">Mentioned in "How to": <a href="topic_printing.html">printing</a> </font>
+<br><font id="characteristic">Mentioned in "How to": <a href="../../topics/html_generated/topic_printing.html">printing</a> </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 1 otherwise.
 </font>
@@ -2834,7 +2834,7 @@ steps is <a href="varbas.html#nstep">nstep</a> or the number of electronic/posit
 <p>
 <p>
  When this flag is activated, values of integral(s) of total density inside sphere(s) around each atom are printed in output file (for each spin component).
-Spheres around atoms are defined by a radius given by <a href="vargs.html#ratsph">ratsph</a> keyword.
+Spheres around atoms are defined by a radius given by <a href="../../input_variables/html_generated/vargs.html#ratsph">ratsph</a> keyword.
  <br />
  Note: integral of density inside a sphere around an atom
 can be used to determine a rough approximation of the local magnetic moment;
@@ -2858,9 +2858,9 @@ of the density within a sphere, you should use the cut3d postprocessor.
 <br><font id="title"><a name="prtebands">prtebands</a></font>
 <br><font id="mnemonics">Mnemonics: PRinT Electron BANDS</font>
 <br><font id="characteristic">Characteristic: </font>
-<br><font id="characteristic">Mentioned in "How to": <a href="topic_printing.html">printing</a> </font>
+<br><font id="characteristic">Mentioned in "How to": <a href="../../topics/html_generated/topic_printing.html">printing</a> </font>
 <br><font id="vartype">Variable type: integer</font>
-<br><font id="default">Default is 0 if <a href="varrlx.html#nimage">nimage</a> > 1,
+<br><font id="default">Default is 0 if <a href="../../input_variables/html_generated/varrlx.html#nimage">nimage</a> > 1,
 1 otherwise.
 </font>
 <br><font id="text">
@@ -2889,16 +2889,16 @@ Use `gnuplot file_EBANDS.gnuplot` to visualize the band energies.</li>
 <br><font id="text">
 <p>
 <p>
- Only used if <a href="vargs.html#nqpt">nqpt</a>=1.
+ Only used if <a href="../../input_variables/html_generated/vargs.html#nqpt">nqpt</a>=1.
 </p>
 <p>
- Combined with <a href="vargs.html#qptnrm">qptnrm</a>,
-define the q vector <a href="varint.html#qptn">qptn</a>(1:3)
-in the case <a href="vargs.html#qptopt">qptopt</a>=0.
+ Combined with <a href="../../input_variables/html_generated/vargs.html#qptnrm">qptnrm</a>,
+define the q vector <a href="../../input_variables/html_generated/varint.html#qptn">qptn</a>(1:3)
+in the case <a href="../../input_variables/html_generated/vargs.html#qptopt">qptopt</a>=0.
 </p>
 <p>
- This input variable is not internal (<a href="varint.html#qptn">qptn</a>(1:3) is used
-instead), but is used to echo the value of <a href="varint.html#qptn">qptn</a>(1:3),
+ This input variable is not internal (<a href="../../input_variables/html_generated/varint.html#qptn">qptn</a>(1:3) is used
+instead), but is used to echo the value of <a href="../../input_variables/html_generated/varint.html#qptn">qptn</a>(1:3),
 with renormalisation factor one.
 </p>
 </font>
@@ -2915,15 +2915,15 @@ with renormalisation factor one.
 <br><font id="text">
 <p>
 <p>
- Only used if <a href="vargs.html#nqpt">nqpt</a>=1 and <a href="vargs.html#qptopt">qptopt</a>=0
+ Only used if <a href="../../input_variables/html_generated/vargs.html#nqpt">nqpt</a>=1 and <a href="../../input_variables/html_generated/vargs.html#qptopt">qptopt</a>=0
 </p>
 <p>
  Provides re-normalization
-of <a href="vargs.html#qpt">qpt</a>.
+of <a href="../../input_variables/html_generated/vargs.html#qpt">qpt</a>.
 Must be positive, non-zero.
 The actual q vector (renormalized) is
-<a href="varint.html#qptn">qptn</a>(1:3)=
-<a href="vargs.html#qpt">qpt</a>(1:3)/<b>qptnrm</b>.
+<a href="../../input_variables/html_generated/varint.html#qptn">qptn</a>(1:3)=
+<a href="../../input_variables/html_generated/vargs.html#qpt">qpt</a>(1:3)/<b>qptnrm</b>.
 </p>
 </font>
 
@@ -2939,11 +2939,11 @@ The actual q vector (renormalized) is
 <br><font id="text">
 <p>
 <p>
- Only used if <a href="vargs.html#nqpt">nqpt</a>=1.
+ Only used if <a href="../../input_variables/html_generated/vargs.html#nqpt">nqpt</a>=1.
 </p>
 <p>
  Controls the set up to generate the Q point
-<a href="varint.html#qptn">qptn</a>(1:3)
+<a href="../../input_variables/html_generated/varint.html#qptn">qptn</a>(1:3)
 to be used for the specific dataset,
 either as a shift of k-point grid in ground-state calculations,
 or as a stand-alone phonon wavevector.
@@ -2952,29 +2952,29 @@ or as a stand-alone phonon wavevector.
  There are two basic techniques to generate the Q point : either
 by specifying it directly, possibly with a renormalisation factor (<b>qptopt</b>=0),
 or extracting it from a grid a Q points (<b>qptopt</b>=1 to 4), using the
-index <a href="vargs.html#iqpt">iqpt</a>.
+index <a href="../../input_variables/html_generated/vargs.html#iqpt">iqpt</a>.
 At variance with the similar generation of k points, only ONE q point
 can be used per dataset.
 </p>
 <p>
- With <b>qptopt</b>=1 to 4, rely on <a href="vargs.html#ngqpt">ngqpt</a> or
-<a href="vargs.html#qptrlatt">qptrlatt</a>, as well as on
-<a href="vargs.html#nshiftq">nshiftq</a> and
-<a href="vargs.html#shiftq">shiftq</a> to set up a q point
-grid, from which the q point with number <a href="vargs.html#iqpt">iqpt</a> will be selected.
+ With <b>qptopt</b>=1 to 4, rely on <a href="../../input_variables/html_generated/vargs.html#ngqpt">ngqpt</a> or
+<a href="../../input_variables/html_generated/vargs.html#qptrlatt">qptrlatt</a>, as well as on
+<a href="../../input_variables/html_generated/vargs.html#nshiftq">nshiftq</a> and
+<a href="../../input_variables/html_generated/vargs.html#shiftq">shiftq</a> to set up a q point
+grid, from which the q point with number <a href="../../input_variables/html_generated/vargs.html#iqpt">iqpt</a> will be selected.
 The values <b>qptopt</b>=1 to 4 differ by the treatment of symmetries. Note
 that the symmetries are
-recomputed starting from the values of <a href="varbas.html#rprimd">rprimd</a>
-<a href="varbas.html#xred">xred</a> and
-<a href="vargs.html#spinat">spinat</a>. So, the explicit value of
-<a href="varbas.html#symrel">symrel</a> are not used.
-This is to allow doing calculations with <a href="varbas.html#nsym">nsym</a>=1,
+recomputed starting from the values of <a href="../../input_variables/html_generated/varbas.html#rprimd">rprimd</a>
+<a href="../../input_variables/html_generated/varbas.html#xred">xred</a> and
+<a href="../../input_variables/html_generated/vargs.html#spinat">spinat</a>. So, the explicit value of
+<a href="../../input_variables/html_generated/varbas.html#symrel">symrel</a> are not used.
+This is to allow doing calculations with <a href="../../input_variables/html_generated/varbas.html#nsym">nsym</a>=1,
 sometimes needed for T-dependent electronic structure, still decreasing
 the number of q points in the case <b>qptopt</b>=1 or <b>qptopt</b>=3.
  <ul>
   <li>
-   0=&gt; read directly <a href="vargs.html#qpt">qpt</a>,
-and its (eventual) renormalisation factor <a href="vargs.html#qptnrm">qptnrm</a>.
+   0=&gt; read directly <a href="../../input_variables/html_generated/vargs.html#qpt">qpt</a>,
+and its (eventual) renormalisation factor <a href="../../input_variables/html_generated/vargs.html#qptnrm">qptnrm</a>.
   </li>
   <li>
    1=&gt;
@@ -3003,9 +3003,9 @@ to generate the k points in the Irreducible Brillouin Zone.
   </li>
  </ul>
  In the case of a grid of q points, the auxiliary variables
-<a href="vargs.html#kptrlen">kptrlen</a>,
-<a href="varbas.html#ngkpt">ngkpt</a>  and
-<a href="varfil.html#prtkpt">prtkpt</a> might help
+<a href="../../input_variables/html_generated/vargs.html#kptrlen">kptrlen</a>,
+<a href="../../input_variables/html_generated/varbas.html#ngkpt">ngkpt</a>  and
+<a href="../../input_variables/html_generated/varfil.html#prtkpt">prtkpt</a> might help
 you to select the optimal grid, similarly to the case of the K point grid.
 </p>
 </font>
@@ -3020,31 +3020,31 @@ you to select the optimal grid, similarly to the case of the K point grid.
 <br><font id="vartype">Variable type: integer(3,3)</font>
 <br><font id="default">Default is *0</font>
 <br><br><font id="excludes">
-The use of this variable forbids the use of specified(<a href="vargs.html#ngqpt">ngqpt</a>)
+The use of this variable forbids the use of specified(<a href="../../input_variables/html_generated/vargs.html#ngqpt">ngqpt</a>)
 </font>
 <br><font id="text">
 <p>
 <p>
- This input variable is used only when <a href="vargs.html#qptopt">qptopt</a>
+ This input variable is used only when <a href="../../input_variables/html_generated/vargs.html#qptopt">qptopt</a>
 is positive. It partially defines the q point grid.
 The other piece of information is contained in
-<a href="vargs.html#shiftq">shiftq</a>.
-<b>qptrlatt</b> cannot be used together with <a href="vargs.html#ngqpt">ngqpt</a>.
+<a href="../../input_variables/html_generated/vargs.html#shiftq">shiftq</a>.
+<b>qptrlatt</b> cannot be used together with <a href="../../input_variables/html_generated/vargs.html#ngqpt">ngqpt</a>.
 </p>
 <p>
  The values <b>qptrlatt</b>(1:3,1), <b>qptrlatt</b>(1:3,2),  <b>qptrlatt</b>(1:3,3)
 are the coordinates of three vectors in real space, expressed
-in the <a href="varbas.html#rprimd">rprimd</a> coordinate system (reduced coordinates).
+in the <a href="../../input_variables/html_generated/varbas.html#rprimd">rprimd</a> coordinate system (reduced coordinates).
 They defines a super-lattice in real space.
 The k point lattice is the reciprocal of this super-lattice,
-possibly shifted (see <a href="vargs.html#shiftq">shiftq</a>).
+possibly shifted (see <a href="../../input_variables/html_generated/vargs.html#shiftq">shiftq</a>).
 </p>
 <p>
- If neither <a href="vargs.html#ngqpt">ngqpt</a> nor <b>qptrlatt</b>
+ If neither <a href="../../input_variables/html_generated/vargs.html#ngqpt">ngqpt</a> nor <b>qptrlatt</b>
 are defined, ABINIT will automatically generate a set
 of k point grids, and select the best combination
-of <b>qptrlatt</b> and <a href="vargs.html#shiftq">shiftq</a>
-that allows to reach a sufficient value of <a href="vargs.html#kptrlen">kptrlen</a>.
+of <b>qptrlatt</b> and <a href="../../input_variables/html_generated/vargs.html#shiftq">shiftq</a>
+that allows to reach a sufficient value of <a href="../../input_variables/html_generated/vargs.html#kptrlen">kptrlen</a>.
 See this latter variable for a complete description of this
 procedure.
 </p>
@@ -3057,8 +3057,8 @@ procedure.
 <br><font id="title"><a name="ratsph">ratsph</a></font>
 <br><font id="mnemonics">Mnemonics: Radii of the ATomic SPHere(s)</font>
 <br><font id="characteristic">Characteristic: </font>
-<br><font id="characteristic">Mentioned in "How to": <a href="topic_printing.html">printing</a> </font>
-<br><font id="vartype">Variable type: real(<a href="varbas.html#ntypat">ntypat</a>)</font>
+<br><font id="characteristic">Mentioned in "How to": <a href="../../topics/html_generated/topic_printing.html">printing</a> </font>
+<br><font id="vartype">Variable type: real(<a href="../../input_variables/html_generated/varbas.html#ntypat">ntypat</a>)</font>
 <br><font id="default">Default is [['AUTO_FROM_PSP']] if usepaw==1,
 2.0 otherwise.
 </font>
@@ -3066,13 +3066,13 @@ procedure.
 <p>
 <p>
  Relevant only when
-<a href="varfil.html#prtdos">prtdos</a>=3 or <a href="vargs.html#prtdensph">prtdensph</a>=1.
+<a href="../../input_variables/html_generated/varfil.html#prtdos">prtdos</a>=3 or <a href="../../input_variables/html_generated/vargs.html#prtdensph">prtdensph</a>=1.
  <br />
  <br />
- When <a href="varfil.html#prtdos">prtdos</a>=3:
+ When <a href="../../input_variables/html_generated/varfil.html#prtdos">prtdos</a>=3:
  <br />
- Provides the radius of the spheres around the <a href="vargs.html#natsph">natsph</a> atoms
-of indices <a href="vargs.html#iatsph">iatsph</a>, in which the local
+ Provides the radius of the spheres around the <a href="../../input_variables/html_generated/vargs.html#natsph">natsph</a> atoms
+of indices <a href="../../input_variables/html_generated/vargs.html#iatsph">iatsph</a>, in which the local
 DOS and its angular-momentum projections will be analysed.
 The choice of this radius is quite arbitrary. In a plane-wave basis set,
 there is no natural definition of an atomic sphere. However, it might be wise
@@ -3103,7 +3103,7 @@ radius, for the different channels s, p, d. At the limit of very small radii, th
 dominates the charge contained in the sphere ...
  <br />
  <br />
- When <a href="vargs.html#prtdensph">prtdensph</a>=1:
+ When <a href="../../input_variables/html_generated/vargs.html#prtdensph">prtdensph</a>=1:
  <br />
  Provides the radius of the spheres around (all) atoms in which the total charge density will be integrated.
  <br />
@@ -3120,13 +3120,13 @@ PAW radius of considered atom type (which is read from the PAW dataset file; see
 <br><font id="title"><a name="ratsph_extra">ratsph_extra</a></font>
 <br><font id="mnemonics">Mnemonics: Radii of the ATomic SPHere(s) in the EXTRA set</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#length">LENGTH</a></font>
-<br><font id="characteristic">Mentioned in "How to": <a href="topic_printing.html">printing</a> </font>
+<br><font id="characteristic">Mentioned in "How to": <a href="../../topics/html_generated/topic_printing.html">printing</a> </font>
 <br><font id="vartype">Variable type: real</font>
 <br><font id="default">Default is 2.0 Bohr</font>
 <br><font id="text">
 <p>
-Radius for extra spheres the DOS is projected into. See <a href="vargs.html#natsph_extra">natsph_extra</a>
-and <a href="vargs.html#xredsph_extra">xredsph_extra</a>
+Radius for extra spheres the DOS is projected into. See <a href="../../input_variables/html_generated/vargs.html#natsph_extra">natsph_extra</a>
+and <a href="../../input_variables/html_generated/vargs.html#xredsph_extra">xredsph_extra</a>
 for the number and positions of the spheres.
 </font>
 
@@ -3180,24 +3180,24 @@ used, and consequent anharmonic effects. Experimental.
 <br><font id="title"><a name="shiftq">shiftq</a></font>
 <br><font id="mnemonics">Mnemonics: SHIFT for Q points</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#input_only">INPUT_ONLY</a></font>
-<br><font id="vartype">Variable type: real(3,<a href="vargs.html#nshiftq">nshiftq</a>)</font>
-<br><font id="default">Default is None if <a href="vargs.html#nshiftq">nshiftq</a>>1,
+<br><font id="vartype">Variable type: real(3,<a href="../../input_variables/html_generated/vargs.html#nshiftq">nshiftq</a>)</font>
+<br><font id="default">Default is None if <a href="../../input_variables/html_generated/vargs.html#nshiftq">nshiftq</a>>1,
 [0.5, 0.5, 0.5] otherwise.
 </font>
 <br><font id="text">
 <p>
 <p>
- It is used only when <a href="vargs.html#qptopt">qptopt</a>&gt;=0,
-and must be defined if <a href="vargs.html#nshiftq">nshiftq</a> is larger than 1.
+ It is used only when <a href="../../input_variables/html_generated/vargs.html#qptopt">qptopt</a>&gt;=0,
+and must be defined if <a href="../../input_variables/html_generated/vargs.html#nshiftq">nshiftq</a> is larger than 1.
  <br />
- <b>shiftq</b>(1:3,1:<a href="vargs.html#nshiftq">nshiftq</a>) defines
-<a href="vargs.html#nshiftq">nshiftq</a> shifts
+ <b>shiftq</b>(1:3,1:<a href="../../input_variables/html_generated/vargs.html#nshiftq">nshiftq</a>) defines
+<a href="../../input_variables/html_generated/vargs.html#nshiftq">nshiftq</a> shifts
 of the homogeneous grid of q points
-based on <a href="vargs.html#ngqpt">ngqpt</a> or
-<a href="vargs.html#qptrlatt">qptrlatt</a>.
+based on <a href="../../input_variables/html_generated/vargs.html#ngqpt">ngqpt</a> or
+<a href="../../input_variables/html_generated/vargs.html#qptrlatt">qptrlatt</a>.
 </p>
 <p>
- See <a href="varbas.html#shiftk">shiftk</a> for more information on the definition,
+ See <a href="../../input_variables/html_generated/varbas.html#shiftk">shiftk</a> for more information on the definition,
 use, and suitable values for these shifts.
 </p>
 </font>
@@ -3209,13 +3209,13 @@ use, and suitable values for these shifts.
 <br><font id="title"><a name="slabwsrad">slabwsrad</a></font>
 <br><font id="mnemonics">Mnemonics: jellium SLAB Wigner-Seitz RADius</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#length">LENGTH</a></font>
-<br><font id="characteristic">Mentioned in "How to": <a href="topic_otherGS.html">otherGS</a> </font>
+<br><font id="characteristic">Mentioned in "How to": <a href="../../topics/html_generated/topic_otherGS.html">otherGS</a> </font>
 <br><font id="vartype">Variable type: real</font>
 <br><font id="default">Default is 0.0</font>
 <br><font id="text">
 <p>
 <p>
- Fix the bulk-mean positive charge density n<sub>bulk</sub> of a jellium slab (if the latter is employed, e.g. <a href="vargs.html#jellslab">jellslab</a> &ne; 0). Often called "r<sub>s</sub>" [see for example N. D. Lang and W. Kohn PRB 1, 4555 (1970)], <b>slabwsrad</b> is the radius of a sphere which has the same volume as the average volume per particle in a homogeneous electron gas with density n<sub>bulk</sub>, so:
+ Fix the bulk-mean positive charge density n<sub>bulk</sub> of a jellium slab (if the latter is employed, e.g. <a href="../../input_variables/html_generated/vargs.html#jellslab">jellslab</a> &ne; 0). Often called "r<sub>s</sub>" [see for example N. D. Lang and W. Kohn PRB 1, 4555 (1970)], <b>slabwsrad</b> is the radius of a sphere which has the same volume as the average volume per particle in a homogeneous electron gas with density n<sub>bulk</sub>, so:
  <pre>
   1/n<sub>bulk</sub> = 4/3 Pi * <b>slabwsrad</b><sup>3</sup>
  </pre>
@@ -3232,19 +3232,19 @@ By default, given in Bohr atomic units (1 Bohr=0.5291772108 Angstroms).
 <br><font id="title"><a name="slabzbeg">slabzbeg</a></font>
 <br><font id="mnemonics">Mnemonics: jellium SLAB BEGinning edge along the Z direction</font>
 <br><font id="characteristic">Characteristic: </font>
-<br><font id="characteristic">Mentioned in "How to": <a href="topic_otherGS.html">otherGS</a> </font>
+<br><font id="characteristic">Mentioned in "How to": <a href="../../topics/html_generated/topic_otherGS.html">otherGS</a> </font>
 <br><font id="vartype">Variable type: real</font>
 <br><font id="default">Default is [0.0, 0.0]</font>
 <br><font id="text">
 <p>
 <p>
-Define the edges of the jellium slab (if used, so if <a href="vargs.html#jellslab">jellslab</a> &ne; 0) along z, namely the slab starts at a point along z which is expressed in Bohr by <b>slabzbeg</b> and it ends at a point expressed in Bohr by <a href="vargs.html#slabzend">slabzend</a>. The z direction is parallel to the third crystal primitive lattice vector which has to be orthogonal to the other ones, so the length of the cell along z is <a href="varbas.html#rprimd">rprimd</a>(3,3). In addition <b>slabzbeg</b> and <a href="vargs.html#slabzend">slabzend</a> have to be such that:
+Define the edges of the jellium slab (if used, so if <a href="../../input_variables/html_generated/vargs.html#jellslab">jellslab</a> &ne; 0) along z, namely the slab starts at a point along z which is expressed in Bohr by <b>slabzbeg</b> and it ends at a point expressed in Bohr by <a href="../../input_variables/html_generated/vargs.html#slabzend">slabzend</a>. The z direction is parallel to the third crystal primitive lattice vector which has to be orthogonal to the other ones, so the length of the cell along z is <a href="../../input_variables/html_generated/varbas.html#rprimd">rprimd</a>(3,3). In addition <b>slabzbeg</b> and <a href="../../input_variables/html_generated/vargs.html#slabzend">slabzend</a> have to be such that:
  <pre>
-  0 &le; <b>slabzbeg</b> &lt; <a href="vargs.html#slabzend">slabzend</a> &le; <a href="varbas.html#rprimd">rprimd</a>(3,3)
+  0 &le; <b>slabzbeg</b> &lt; <a href="../../input_variables/html_generated/vargs.html#slabzend">slabzend</a> &le; <a href="../../input_variables/html_generated/varbas.html#rprimd">rprimd</a>(3,3)
  </pre>
-Together with <a href="vargs.html#slabwsrad">slabwsrad</a> they define the jellium positive charge density distribution n<sub>+</sub>(x,y,z) in this way:
+Together with <a href="../../input_variables/html_generated/vargs.html#slabwsrad">slabwsrad</a> they define the jellium positive charge density distribution n<sub>+</sub>(x,y,z) in this way:
  <pre>
-  n<sub>+</sub>(x,y,z) = n<sub>bulk</sub>     if <b>slabzbeg</b> &le; z &le; <a href="vargs.html#slabzend">slabzend</a>
+  n<sub>+</sub>(x,y,z) = n<sub>bulk</sub>     if <b>slabzbeg</b> &le; z &le; <a href="../../input_variables/html_generated/vargs.html#slabzend">slabzend</a>
             = 0        otherwise,
  </pre>
 so the positive charge density is invariant along the xy plane as well as the electrostatic potential generated by it.
@@ -3258,19 +3258,19 @@ so the positive charge density is invariant along the xy plane as well as the el
 <br><font id="title"><a name="slabzend">slabzend</a></font>
 <br><font id="mnemonics">Mnemonics: jellium SLAB ENDing edge along the Z direction</font>
 <br><font id="characteristic">Characteristic: </font>
-<br><font id="characteristic">Mentioned in "How to": <a href="topic_otherGS.html">otherGS</a> </font>
+<br><font id="characteristic">Mentioned in "How to": <a href="../../topics/html_generated/topic_otherGS.html">otherGS</a> </font>
 <br><font id="vartype">Variable type: real</font>
 <br><font id="default">Default is [0.0, 0.0]</font>
 <br><font id="text">
 <p>
 <p>
-Define the edges of the jellium slab (if used, so if <a href="vargs.html#jellslab">jellslab</a> &ne; 0) along z, namely the slab starts at a point along z which is expressed in Bohr by <a href="vargs.html#slabzbeg">slabzbeg</a> and it ends at a point expressed in Bohr by <b>slabzend</b>. The z direction is parallel to the third crystal primitive lattice vector which has to be orthogonal to the other ones, so the length of the cell along z is <a href="varbas.html#rprimd">rprimd</a>(3,3). In addition <a href="vargs.html#slabzbeg">slabzbeg</a> and <b>slabzend</b> have to be such that:
+Define the edges of the jellium slab (if used, so if <a href="../../input_variables/html_generated/vargs.html#jellslab">jellslab</a> &ne; 0) along z, namely the slab starts at a point along z which is expressed in Bohr by <a href="../../input_variables/html_generated/vargs.html#slabzbeg">slabzbeg</a> and it ends at a point expressed in Bohr by <b>slabzend</b>. The z direction is parallel to the third crystal primitive lattice vector which has to be orthogonal to the other ones, so the length of the cell along z is <a href="../../input_variables/html_generated/varbas.html#rprimd">rprimd</a>(3,3). In addition <a href="../../input_variables/html_generated/vargs.html#slabzbeg">slabzbeg</a> and <b>slabzend</b> have to be such that:
  <pre>
-  0 &le; <a href="vargs.html#slabzbeg">slabzbeg</a> &lt; <b>slabzend</b> &le; <a href="varbas.html#rprimd">rprimd</a>(3,3)
+  0 &le; <a href="../../input_variables/html_generated/vargs.html#slabzbeg">slabzbeg</a> &lt; <b>slabzend</b> &le; <a href="../../input_variables/html_generated/varbas.html#rprimd">rprimd</a>(3,3)
  </pre>
-Together with <a href="vargs.html#slabwsrad">slabwsrad</a> they define the jellium positive charge density distribution n<sub>+</sub>(x,y,z) in this way:
+Together with <a href="../../input_variables/html_generated/vargs.html#slabwsrad">slabwsrad</a> they define the jellium positive charge density distribution n<sub>+</sub>(x,y,z) in this way:
  <pre>
-  n<sub>+</sub>(x,y,z) = n<sub>bulk</sub>     if <a href="vargs.html#slabzbeg">slabzbeg</a> &le; z &le; <b>slabzend</b>
+  n<sub>+</sub>(x,y,z) = n<sub>bulk</sub>     if <a href="../../input_variables/html_generated/vargs.html#slabzbeg">slabzbeg</a> &le; z &le; <b>slabzend</b>
             = 0        otherwise,
  </pre>
 so the positive charge density is invariant along the xy plane as well as the electrostatic potential generated by it.
@@ -3284,19 +3284,19 @@ so the positive charge density is invariant along the xy plane as well as the el
 <br><font id="title"><a name="so_psp">so_psp</a></font>
 <br><font id="mnemonics">Mnemonics: Spin-Orbit treatment for each PSeudoPotential</font>
 <br><font id="characteristic">Characteristic: </font>
-<br><font id="characteristic">Mentioned in "How to": <a href="topic_spinpolarisation.html">spinpolarisation</a> </font>
-<br><font id="vartype">Variable type: integer(<a href="vargs.html#npsp">npsp</a>)</font>
-<br><font id="default">Default is <a href="vargs.html#npsp">npsp</a>*1</font>
+<br><font id="characteristic">Mentioned in "How to": <a href="../../topics/html_generated/topic_spinpolarisation.html">spinpolarisation</a> </font>
+<br><font id="vartype">Variable type: integer(<a href="../../input_variables/html_generated/vargs.html#npsp">npsp</a>)</font>
+<br><font id="default">Default is <a href="../../input_variables/html_generated/vargs.html#npsp">npsp</a>*1</font>
 <br><br><font id="requires">
-Only relevant if <a href="vargs.html#nspinor">nspinor</a>==2 and <a href="varint.html#usepaw">usepaw</a>==0
+Only relevant if <a href="../../input_variables/html_generated/vargs.html#nspinor">nspinor</a>==2 and <a href="../../input_variables/html_generated/varint.html#usepaw">usepaw</a>==0
 </font>
 <br><font id="text">
 <p>
 <p>
  For each type of atom (each pseudopotential), specify
-the treatment of spin-orbit interaction (if <a href="vargs.html#nspinor">nspinor</a>==2 and Norm-conserving pseudopotentials <a href="varint.html#usepaw">usepaw</a>==0)
+the treatment of spin-orbit interaction (if <a href="../../input_variables/html_generated/vargs.html#nspinor">nspinor</a>==2 and Norm-conserving pseudopotentials <a href="../../input_variables/html_generated/varint.html#usepaw">usepaw</a>==0)
  <br />
- If 0 : no spin-orbit interaction, even if <a href="vargs.html#nspinor">nspinor</a>=2
+ If 0 : no spin-orbit interaction, even if <a href="../../input_variables/html_generated/vargs.html#nspinor">nspinor</a>=2
  <br />
  If 1 : treat spin-orbit as specified in the pseudopotential file.
  <br />
@@ -3308,14 +3308,14 @@ the treatment of spin-orbit interaction (if <a href="vargs.html#nspinor">nspinor
 </p>
 <p>
 For typical usage, the default value is OK. If the spin-orbit needs to be turned off for one atom, 0 might be relevant.
-Note however, that the code will stop if <a href="vargs.html#nspinor">nspinor</a>=2 is used and one of the pseudopotential does not contain the information
+Note however, that the code will stop if <a href="../../input_variables/html_generated/vargs.html#nspinor">nspinor</a>=2 is used and one of the pseudopotential does not contain the information
 about the spin-orbit interaction (this is the case for some old pseudopotentials). Indeed, for spinorial calculations,
 turning off the spin-orbit interaction is unphysical, and also does not save CPU time ... It should only be done for test purposes
 </p>
 <p>
- Note that if <a href="vargs.html#nspinor">nspinor</a>==1, the spin-orbit cannot be treated
+ Note that if <a href="../../input_variables/html_generated/vargs.html#nspinor">nspinor</a>==1, the spin-orbit cannot be treated
 anyhow, so the value of <b>so_psp</b> is irrelevant.
-In case <a href="varint.html#usepaw">usepaw</a>=1, please refer to <a href="varpaw.html#pawspnorb">pawspnorb</a>.
+In case <a href="../../input_variables/html_generated/varint.html#usepaw">usepaw</a>=1, please refer to <a href="../../input_variables/html_generated/varpaw.html#pawspnorb">pawspnorb</a>.
 </p>
 <p>
  Prior to v5.4, the input variable
@@ -3334,9 +3334,9 @@ between <b>so_psp</b> and so_typat, it was dangerous to continue to allow the us
 <br><font id="title"><a name="spinat">spinat</a></font>
 <br><font id="mnemonics">Mnemonics: SPIN for AToms</font>
 <br><font id="characteristic">Characteristic: </font>
-<br><font id="characteristic">Mentioned in "How to": <a href="topic_spinpolarisation.html">spinpolarisation</a> </font>
-<br><font id="vartype">Variable type: real[3, '<a href="vargeo.html#natrd">natrd</a>'] if <a href="vargeo.html#natrd">natrd</a><<a href="varbas.html#natom">natom</a>,
-[3, '<a href="varbas.html#natom">natom</a>'] otherwise.
+<br><font id="characteristic">Mentioned in "How to": <a href="../../topics/html_generated/topic_spinpolarisation.html">spinpolarisation</a> </font>
+<br><font id="vartype">Variable type: real[3, '<a href="../../input_variables/html_generated/vargeo.html#natrd">natrd</a>'] if <a href="../../input_variables/html_generated/vargeo.html#natrd">natrd</a><<a href="../../input_variables/html_generated/varbas.html#natom">natom</a>,
+[3, '<a href="../../input_variables/html_generated/varbas.html#natom">natom</a>'] otherwise.
 </font>
 <br><font id="default">Default is 0.0</font>
 <br><font id="text">
@@ -3346,7 +3346,7 @@ between <b>so_psp</b> and so_typat, it was dangerous to continue to allow the us
 for each atom, in unit of h-bar/2.
 </p>
 <p>
- Note that if <a href="vargs.html#nspden">nspden</a>=2,
+ Note that if <a href="../../input_variables/html_generated/vargs.html#nspden">nspden</a>=2,
 the z-component must be given
 for each atom, in triplets (0 0 z-component).
  <br />
@@ -3359,7 +3359,7 @@ the first exchange and correlation potential,
 and is not used anymore afterwards.
  <br />
  It is not checked against the initial occupation numbers
-<a href="vargs.html#occ">occ</a> for each spin channel.
+<a href="../../input_variables/html_generated/vargs.html#occ">occ</a> for each spin channel.
  <br />
  It is meant to give an easy way to break
 the spin symmetry, and to allow
@@ -3372,42 +3372,42 @@ spin separation of elongated H2 molecule.
   If the geometry builder is used, <b>spinat</b> will be related
 to the preprocessed set of atoms, generated by the
 geometry builder. The user must thus foresee the effect
-of this geometry builder (see <a href="vargeo.html#objarf">objarf</a>).
+of this geometry builder (see <a href="../../input_variables/html_generated/vargeo.html#objarf">objarf</a>).
  </li>
  <br />
  <li>
   If the geometry builder is not used, and the symmetries
-are not specified by the user (<a href="varbas.html#nsym">nsym</a>=0),
+are not specified by the user (<a href="../../input_variables/html_generated/varbas.html#nsym">nsym</a>=0),
 spinat will be used, if present, to determine the anti-ferromagnetic
-characteristics of the symmetry operations, see <a href="vargs.html#symafm">symafm</a>.
+characteristics of the symmetry operations, see <a href="../../input_variables/html_generated/vargs.html#symafm">symafm</a>.
   <br />
   In case of collinear antiferromagnetism
-(<a href="varbas.html#nsppol">nsppol</a>=1,
-<a href="vargs.html#nspinor">nspinor</a>=1,
-<a href="vargs.html#nspden">nspden</a>=2),
+(<a href="../../input_variables/html_generated/varbas.html#nsppol">nsppol</a>=1,
+<a href="../../input_variables/html_generated/vargs.html#nspinor">nspinor</a>=1,
+<a href="../../input_variables/html_generated/vargs.html#nspden">nspden</a>=2),
 these symmetries are used to symmetrize the density.
   <br />
   In case of non-collinear magnetism
-(<a href="varbas.html#nsppol">nsppol</a>=1,
-<a href="vargs.html#nspinor">nspinor</a>=1,
-<a href="vargs.html#nspden">nspden</a>=4),
+(<a href="../../input_variables/html_generated/varbas.html#nsppol">nsppol</a>=1,
+<a href="../../input_variables/html_generated/vargs.html#nspinor">nspinor</a>=1,
+<a href="../../input_variables/html_generated/vargs.html#nspden">nspden</a>=4),
 they are also used to symmetrize the density.
 In the latter case, this strongly constrains the magnetization (imposing its direction).
 If the user want to let all degrees of freedom of the magnetization evolve, it is
-then recommended to put <a href="varbas.html#nsym">nsym</a>=1.
+then recommended to put <a href="../../input_variables/html_generated/varbas.html#nsym">nsym</a>=1.
   <br />
  </li>
  <br />
  <li>
   If the symmetries are specified, and the irreducible set of atoms
 is specified, the anti-ferromagnetic characteristics of the symmetry
-operations <a href="vargs.html#symafm">symafm</a> will be used to generate
+operations <a href="../../input_variables/html_generated/vargs.html#symafm">symafm</a> will be used to generate
 <b>spinat</b> for all the non-irreducible atoms.
  </li>
  <br />
  <li>
-  In the case of PAW+U calculations using the <a href="varpaw.html#dmatpawu">dmatpawu</a>
-initial occupation matrix, and if <a href="vargs.html#nspden">nspden</a>=4, <b>spinat</b> is
+  In the case of PAW+U calculations using the <a href="../../input_variables/html_generated/varpaw.html#dmatpawu">dmatpawu</a>
+initial occupation matrix, and if <a href="../../input_variables/html_generated/vargs.html#nspden">nspden</a>=4, <b>spinat</b> is
 also used to determine the direction of the integrated magnetization matrix.
  </li>
 </p>
@@ -3420,7 +3420,7 @@ also used to determine the direction of the integrated magnetization matrix.
 <br><font id="title"><a name="stmbias">stmbias</a></font>
 <br><font id="mnemonics">Mnemonics: Scanning Tunneling Microscopy BIAS voltage</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#energy">ENERGY</a></font>
-<br><font id="characteristic">Mentioned in "How to": <a href="topic_GSgeneral.html">GSgeneral</a> </font>
+<br><font id="characteristic">Mentioned in "How to": <a href="../../topics/html_generated/topic_GSgeneral.html">GSgeneral</a> </font>
 <br><font id="vartype">Variable type: real</font>
 <br><font id="default">Default is 0.0</font>
 <br><font id="text">
@@ -3430,10 +3430,10 @@ also used to determine the direction of the integrated magnetization matrix.
 bias of the STM tip, with respect to the sample, in order to generate
 the STM density map.
  <br />
- Used with positive <a href="varbas.html#iscf">iscf</a>,
-<a href="varbas.html#occopt">occopt</a>=7 (metallic, gaussian),
-<a href="varbas.html#nstep">nstep</a>=1 ,
-and positive <a href="varfil.html#prtstm">prtstm</a>, this
+ Used with positive <a href="../../input_variables/html_generated/varbas.html#iscf">iscf</a>,
+<a href="../../input_variables/html_generated/varbas.html#occopt">occopt</a>=7 (metallic, gaussian),
+<a href="../../input_variables/html_generated/varbas.html#nstep">nstep</a>=1 ,
+and positive <a href="../../input_variables/html_generated/varfil.html#prtstm">prtstm</a>, this
 value is used to generate a charge density map from electrons
 close to the Fermi energy, in a (positive or negative) energy range.
 Positive <b>stmbias</b> will lead to the inclusion of occupied (valence) states only, while
@@ -3443,8 +3443,8 @@ negative <b>stmbias</b> will lead to the inclusion of unoccupied (conduction) st
 <b>stmbias</b> has the
 '<a href="../../users/abinit_help.html#energy">ENERGY</a>' characteristics
 (0.001 Ha = 27.2113845 meV = 315.773 Kelvin).
-With <a href="varbas.html#occopt">occopt</a>=7,
-one has also to specify an independent broadening <a href="vargs.html#tsmear">tsmear</a>.
+With <a href="../../input_variables/html_generated/varbas.html#occopt">occopt</a>=7,
+one has also to specify an independent broadening <a href="../../input_variables/html_generated/vargs.html#tsmear">tsmear</a>.
 </p>
 </font>
 
@@ -3455,9 +3455,9 @@ one has also to specify an independent broadening <a href="vargs.html#tsmear">ts
 <br><font id="title"><a name="symafm">symafm</a></font>
 <br><font id="mnemonics">Mnemonics: SYMmetries, Anti-FerroMagnetic characteristics</font>
 <br><font id="characteristic">Characteristic: </font>
-<br><font id="characteristic">Mentioned in "How to": <a href="topic_spinpolarisation.html">spinpolarisation</a> </font>
-<br><font id="vartype">Variable type: integer(<a href="varbas.html#nsym">nsym</a>)</font>
-<br><font id="default">Default is <a href="varbas.html#nsym">nsym</a>*1</font>
+<br><font id="characteristic">Mentioned in "How to": <a href="../../topics/html_generated/topic_spinpolarisation.html">spinpolarisation</a> </font>
+<br><font id="vartype">Variable type: integer(<a href="../../input_variables/html_generated/varbas.html#nsym">nsym</a>)</font>
+<br><font id="default">Default is <a href="../../input_variables/html_generated/varbas.html#nsym">nsym</a>*1</font>
 <br><font id="text">
 <p>
 <p>
@@ -3472,19 +3472,19 @@ that do not change the sign of the magnetization, while it should be
 set to -1 for the magnetization-changing symmetries.
  <br />
  If the symmetry operations are not specified by the user
-in the input file, that is, if <a href="varbas.html#nsym">nsym</a>=0,
-then ABINIT will use the values of <a href="vargs.html#spinat">spinat</a>
+in the input file, that is, if <a href="../../input_variables/html_generated/varbas.html#nsym">nsym</a>=0,
+then ABINIT will use the values of <a href="../../input_variables/html_generated/vargs.html#spinat">spinat</a>
 to determine the content of <b>symafm</b>.
  <br />
  The symmetries found as "antiferro magnetic" (<b>symafm</b>=-1) are used to symmetrize density and magnetization in the following cases:
  <br />
- - antiferromagnetism (<a href="varbas.html#nsppol">nsppol</a>=1,
-<a href="vargs.html#nspinor">nspinor</a>=1,
-<a href="vargs.html#nspden">nspden</a>=2)
+ - antiferromagnetism (<a href="../../input_variables/html_generated/varbas.html#nsppol">nsppol</a>=1,
+<a href="../../input_variables/html_generated/vargs.html#nspinor">nspinor</a>=1,
+<a href="../../input_variables/html_generated/vargs.html#nspden">nspden</a>=2)
  <br />
- - non-collinear magnetism (<a href="varbas.html#nsppol">nsppol</a>=1,
-<a href="vargs.html#nspinor">nspinor</a>=1,
-<a href="vargs.html#nspden">nspden</a>=4)
+ - non-collinear magnetism (<a href="../../input_variables/html_generated/varbas.html#nsppol">nsppol</a>=1,
+<a href="../../input_variables/html_generated/vargs.html#nspinor">nspinor</a>=1,
+<a href="../../input_variables/html_generated/vargs.html#nspden">nspden</a>=4)
  <br />
  In other cases they are not used.
 </p>
@@ -3497,7 +3497,7 @@ to determine the content of <b>symafm</b>.
 <br><font id="title"><a name="timopt">timopt</a></font>
 <br><font id="mnemonics">Mnemonics: TIMing OPTion</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#no_multi">NO_MULTI</a></font>
-<br><font id="characteristic">Mentioned in "How to": <a href="topic_GSgeneral.html">GSgeneral</a> </font>
+<br><font id="characteristic">Mentioned in "How to": <a href="../../topics/html_generated/topic_GSgeneral.html">GSgeneral</a> </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 1 if <a href="specials.html#SEQUENTIAL">SEQUENTIAL</a>,
 0 otherwise.
@@ -3543,15 +3543,15 @@ The sum of the independent parts is closer to 100% than for <b>timopt</b>=-3.
 <br><font id="title"><a name="tl_nprccg">tl_nprccg</a></font>
 <br><font id="mnemonics">Mnemonics: TaiL maximum Number of PReConditionner Conjugate Gradient iterations</font>
 <br><font id="characteristic">Characteristic: </font>
-<br><font id="characteristic">Mentioned in "How to": <a href="topic_Wavelets.html">Wavelets</a> </font>
+<br><font id="characteristic">Mentioned in "How to": <a href="../../topics/html_generated/topic_Wavelets.html">Wavelets</a> </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 30</font>
 <br><font id="text">
 <p>
 <p>
- This variable is similar to <a href="vargs.html#wvl_nprccg">wvl_nprccg</a>
+ This variable is similar to <a href="../../input_variables/html_generated/vargs.html#wvl_nprccg">wvl_nprccg</a>
  but for the preconditionner iterations during the tail
-corrections (see <a href="vargs.html#tl_radius">tl_radius</a>
+corrections (see <a href="../../input_variables/html_generated/vargs.html#tl_radius">tl_radius</a>
  </a>
  ).
 
@@ -3566,7 +3566,7 @@ TO BE IMPROVED : all tl_* and wvl_* variables should contain a link to a tutoria
 <br><font id="title"><a name="tl_radius">tl_radius</a></font>
 <br><font id="mnemonics">Mnemonics: TaiL expansion RADIUS</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#length">LENGTH</a></font>
-<br><font id="characteristic">Mentioned in "How to": <a href="topic_Wavelets.html">Wavelets</a> </font>
+<br><font id="characteristic">Mentioned in "How to": <a href="../../topics/html_generated/topic_Wavelets.html">Wavelets</a> </font>
 <br><font id="vartype">Variable type: real</font>
 <br><font id="default">Default is 0.0</font>
 <br><font id="text">
@@ -3590,14 +3590,14 @@ with the exponential decay around the grid.
 <br><font id="title"><a name="tphysel">tphysel</a></font>
 <br><font id="mnemonics">Mnemonics: Temperature (PHYSical) of the ELectrons</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#energy">ENERGY</a></font>
-<br><font id="characteristic">Mentioned in "How to": <a href="topic_GSgeneral.html">GSgeneral</a> </font>
+<br><font id="characteristic">Mentioned in "How to": <a href="../../topics/html_generated/topic_GSgeneral.html">GSgeneral</a> </font>
 <br><font id="vartype">Variable type: real</font>
 <br><font id="default">Default is 0.0</font>
 <br><font id="text">
 <p>
 <p>
  Gives, in Hartree, the physical temperature of the
-system, in case <a href="varbas.html#occopt">occopt</a>=4, 5, 6, or 7.
+system, in case <a href="../../input_variables/html_generated/varbas.html#occopt">occopt</a>=4, 5, 6, or 7.
  <br />
  Can be specified in Ha (the default), Ry, eV or Kelvin, since
  <b>
@@ -3606,13 +3606,13 @@ system, in case <a href="varbas.html#occopt">occopt</a>=4, 5, 6, or 7.
  has the
 '<a href="../../users/abinit_help.html#energy">ENERGY</a>' characteristics
 (0.001 Ha = 27.2113845 meV = 315.773 Kelvin).
-One has to specify an independent broadening <a href="vargs.html#tsmear">tsmear</a>.
+One has to specify an independent broadening <a href="../../input_variables/html_generated/vargs.html#tsmear">tsmear</a>.
 The combination of the two parameters
-<b>tphysel</b> and <a href="vargs.html#tsmear">tsmear</a> is described
+<b>tphysel</b> and <a href="../../input_variables/html_generated/vargs.html#tsmear">tsmear</a> is described
 in a paper by M. Verstraete and X. Gonze, Phys. Rev. B 65, 035111 (2002).
 Note that the signification of the entropy is modified with respect
 to the usual entropy. The choice has been made to use
-<a href="vargs.html#tsmear">tsmear</a> as a prefactor of the entropy,
+<a href="../../input_variables/html_generated/vargs.html#tsmear">tsmear</a> as a prefactor of the entropy,
 to define the entropy contribution to the free energy.
 </p>
 </font>
@@ -3624,15 +3624,15 @@ to define the entropy contribution to the free energy.
 <br><font id="title"><a name="tsmear">tsmear</a></font>
 <br><font id="mnemonics">Mnemonics: Temperature of SMEARing</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#energy">ENERGY</a></font>
-<br><font id="characteristic">Mentioned in "How to": <a href="topic_GSgeneral.html">GSgeneral</a> </font>
+<br><font id="characteristic">Mentioned in "How to": <a href="../../topics/html_generated/topic_GSgeneral.html">GSgeneral</a> </font>
 <br><font id="vartype">Variable type: real</font>
 <br><font id="default">Default is 0.01</font>
 <br><font id="text">
 <p>
 <p>
  Gives the broadening of occupation
-numbers <a href="vargs.html#occ">occ</a>, in the metallic cases
-(<a href="varbas.html#occopt">occopt</a>=3, 4, 5, 6 and 7).
+numbers <a href="../../input_variables/html_generated/vargs.html#occ">occ</a>, in the metallic cases
+(<a href="../../input_variables/html_generated/varbas.html#occopt">occopt</a>=3, 4, 5, 6 and 7).
 Can be specified in Ha (the default), eV, Ry, or Kelvin, since
 <b>tsmear</b> has the
 '<a href="../../users/abinit_help.html#energy">ENERGY</a>' characteristics
@@ -3643,16 +3643,16 @@ Can be specified in Ha (the default), eV, Ry, or Kelvin, since
  <br />
  Always check the convergence of the calculation
 with respect to this parameter, and simultaneously,
-with respect to the sampling of k-points (see <a href="varbas.html#nkpt">nkpt</a>)
+with respect to the sampling of k-points (see <a href="../../input_variables/html_generated/varbas.html#nkpt">nkpt</a>)
  <br />
- If <a href="varbas.html#occopt">occopt</a>=3, <b>tsmear</b> is the
+ If <a href="../../input_variables/html_generated/varbas.html#occopt">occopt</a>=3, <b>tsmear</b> is the
 physical temperature, as the broadening is based on Fermi-Dirac statistics.
 However,
-if <a href="varbas.html#occopt">occopt</a>=4, 5, 6, or 7,
+if <a href="../../input_variables/html_generated/varbas.html#occopt">occopt</a>=4, 5, 6, or 7,
 the broadening is not based on Fermi-Dirac statistics, and
 <b>tsmear</b> is only a convergence parameter. It is still possible
 to define a physical temperature, thanks to the input variable
-<a href="vargs.html#tphysel">tphysel</a>. See the paper
+<a href="../../input_variables/html_generated/vargs.html#tphysel">tphysel</a>. See the paper
 by M. Verstraete and X. Gonze, Phys. Rev. B (2002).
 </p>
 </font>
@@ -3664,7 +3664,7 @@ by M. Verstraete and X. Gonze, Phys. Rev. B (2002).
 <br><font id="title"><a name="usekden">usekden</a></font>
 <br><font id="mnemonics">Mnemonics: USE Kinetic energy DENsity</font>
 <br><font id="characteristic">Characteristic: </font>
-<br><font id="characteristic">Mentioned in "How to": <a href="topic_xc.html">xc</a> </font>
+<br><font id="characteristic">Mentioned in "How to": <a href="../../topics/html_generated/topic_xc.html">xc</a> </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
 <br><font id="text">
@@ -3684,7 +3684,7 @@ density is not computed during the self-consistency loop.
 <br><font id="title"><a name="vacuum">vacuum</a></font>
 <br><font id="mnemonics">Mnemonics: VACUUM identification</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#input_only">INPUT_ONLY</a></font>
-<br><font id="characteristic">Mentioned in "How to": <a href="topic_k-points.html">k-points</a> </font>
+<br><font id="characteristic">Mentioned in "How to": <a href="../../topics/html_generated/topic_k-points.html">k-points</a> </font>
 <br><font id="vartype">Variable type: integer(3)</font>
 <br><font id="default">No default</font>
 <br><font id="text">
@@ -3696,10 +3696,10 @@ primitive axes.
 </p>
 <p>
  This information might be used to generate k-point grids,
-if <a href="varbas.html#kptopt">kptopt</a>=0 and neither
-<a href="varbas.html#ngkpt">ngkpt</a> nor <a href="vargs.html#kptrlatt">kptrlatt</a>
+if <a href="../../input_variables/html_generated/varbas.html#kptopt">kptopt</a>=0 and neither
+<a href="../../input_variables/html_generated/varbas.html#ngkpt">ngkpt</a> nor <a href="../../input_variables/html_generated/vargs.html#kptrlatt">kptrlatt</a>
 are defined (see explanations with the input variable
-<a href="varfil.html#prtkpt">prtkpt</a>).
+<a href="../../input_variables/html_generated/varfil.html#prtkpt">prtkpt</a>).
  <br />
  It will allow to select
 a zero-, one-, two- or three-dimensional
@@ -3708,7 +3708,7 @@ along vacuum directions is automatically set to zero.
 </p>
 <p>
  If <b>vacuum</b> is not defined, the input variable
-<a href="vargs.html#vacwidth">vacwidth</a>
+<a href="../../input_variables/html_generated/vargs.html#vacwidth">vacwidth</a>
 will be used to determine automatically whether the
 distance between atoms is sufficient to have the
 presence or absence of vacuum.
@@ -3722,7 +3722,7 @@ presence or absence of vacuum.
 <br><font id="title"><a name="vacwidth">vacwidth</a></font>
 <br><font id="mnemonics">Mnemonics: VACuum WIDTH</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#input_only">INPUT_ONLY</a>, <a href="../../users/abinit_help.html#length">LENGTH</a></font>
-<br><font id="characteristic">Mentioned in "How to": <a href="topic_k-points.html">k-points</a> </font>
+<br><font id="characteristic">Mentioned in "How to": <a href="../../topics/html_generated/topic_k-points.html">k-points</a> </font>
 <br><font id="vartype">Variable type: real</font>
 <br><font id="default">Default is 10.0</font>
 <br><font id="text">
@@ -3730,7 +3730,7 @@ presence or absence of vacuum.
 <p>
  Give a minimum "projected" distance between
 atoms to be found in order to declare that there
-is some <a href="vargs.html#vacuum">vacuum</a> present for each of the three
+is some <a href="../../input_variables/html_generated/vargs.html#vacuum">vacuum</a> present for each of the three
 directions.
 By default, given in Bohr atomic units
 (1 Bohr=0.5291772108 Angstroms), although Angstrom can be specified,
@@ -3752,7 +3752,7 @@ investigated direction, must be empty of atoms.
 <br><font id="mnemonics">Mnemonics: WeighTs for the current Q-points</font>
 <br><font id="characteristic">Characteristic: </font>
 <br><font id="vartype">Variable type: real</font>
-<br><font id="default">Default is 1 (Comment: Except when <a href="vargs.html#qptopt">qptopt</a>/=0)</font>
+<br><font id="default">Default is 1 (Comment: Except when <a href="../../input_variables/html_generated/vargs.html#qptopt">qptopt</a>/=0)</font>
 <br><font id="text">
 <p>
 <p>
@@ -3767,12 +3767,12 @@ investigated direction, must be empty of atoms.
 <br><font id="title"><a name="wvl_bigdft_comp">wvl_bigdft_comp</a></font>
 <br><font id="mnemonics">Mnemonics: WaVeLet BigDFT Comparison</font>
 <br><font id="characteristic">Characteristic: </font>
-<br><font id="characteristic">Mentioned in "How to": <a href="topic_Wavelets.html">Wavelets</a> </font>
+<br><font id="characteristic">Mentioned in "How to": <a href="../../topics/html_generated/topic_Wavelets.html">Wavelets</a> </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
 <br><font id="text">
 <p>
-This variable is used for the wavelets capabilities of ABINIT (see <a href="varbas.html#usewvl">usewvl</a>
+This variable is used for the wavelets capabilities of ABINIT (see <a href="../../input_variables/html_generated/varbas.html#usewvl">usewvl</a>
 </a>
 ).
 It is used to compare the results obtained with ABINIT
@@ -3788,20 +3788,20 @@ Therefore, the results must be exactly the same with the two codes.
 <br><font id="title"><a name="wvl_crmult">wvl_crmult</a></font>
 <br><font id="mnemonics">Mnemonics: WaVeLet Coarse grid Radius MULTiplier</font>
 <br><font id="characteristic">Characteristic: </font>
-<br><font id="characteristic">Mentioned in "How to": <a href="topic_Wavelets.html">Wavelets</a> </font>
+<br><font id="characteristic">Mentioned in "How to": <a href="../../topics/html_generated/topic_Wavelets.html">Wavelets</a> </font>
 <br><font id="vartype">Variable type: real</font>
 <br><font id="default">Default is 6.0</font>
 <br><font id="text">
 <p>
 <p>
  This factor is used to defined the expansion of the coarse resolution
-grid in the case of wavelets (seea <a href="varbas.html#usewvl">usewvl</a>
+grid in the case of wavelets (seea <a href="../../input_variables/html_generated/varbas.html#usewvl">usewvl</a>
  ). The grid is made of
 points inside spheres centered on atoms. The radius of these
 spheres are the product between this factor and the covalent
 radius of element (read from the pseudo-potential file).
  <br />
- This factor is responsible for the amount of used memory (see also <a href="varbas.html#wvl_hgrid">wvl_hgrid</a>).
+ This factor is responsible for the amount of used memory (see also <a href="../../input_variables/html_generated/varbas.html#wvl_hgrid">wvl_hgrid</a>).
 </p>
 </font>
 
@@ -3812,24 +3812,24 @@ radius of element (read from the pseudo-potential file).
 <br><font id="title"><a name="wvl_frmult">wvl_frmult</a></font>
 <br><font id="mnemonics">Mnemonics: WaVeLet Fine grid Radius MULTiplier</font>
 <br><font id="characteristic">Characteristic: </font>
-<br><font id="characteristic">Mentioned in "How to": <a href="topic_Wavelets.html">Wavelets</a> </font>
+<br><font id="characteristic">Mentioned in "How to": <a href="../../topics/html_generated/topic_Wavelets.html">Wavelets</a> </font>
 <br><font id="vartype">Variable type: real</font>
 <br><font id="default">Default is 10.0</font>
 <br><font id="text">
 <p>
 <p>
  This factor is used to defined the expansion of the fine resolution
-grid in the case of wavelets (see <a href="varbas.html#usewvl">usewvl</a>
+grid in the case of wavelets (see <a href="../../input_variables/html_generated/varbas.html#usewvl">usewvl</a>
  ). This fine resolution
 grid has the same grid step than the coarse one (see
-<a href="vargs.html#wvl_crmult">wvl_crmult</a>
+<a href="../../input_variables/html_generated/vargs.html#wvl_crmult">wvl_crmult</a>
  ), but on each
 point, 8 coefficients are stored instead of one, increasing the
 precision of the calculation in this area. The grid is made of
 points inside spheres centered on atoms. The radius of these
 spheres are the product between this factor and a value read from the pseudo-potential file.
  <br />
- This factor is responsible for the amount of used memory (see also <a href="varbas.html#wvl_hgrid">wvl_hgrid</a>).
+ This factor is responsible for the amount of used memory (see also <a href="../../input_variables/html_generated/varbas.html#wvl_hgrid">wvl_hgrid</a>).
 </p>
 </font>
 
@@ -3840,7 +3840,7 @@ spheres are the product between this factor and a value read from the pseudo-pot
 <br><font id="title"><a name="wvl_ngauss">wvl_ngauss</a></font>
 <br><font id="mnemonics">Mnemonics: WaVeLet Number of GAUSSians</font>
 <br><font id="characteristic">Characteristic: </font>
-<br><font id="characteristic">Mentioned in "How to": <a href="topic_Wavelets.html">Wavelets</a> </font>
+<br><font id="characteristic">Mentioned in "How to": <a href="../../topics/html_generated/topic_Wavelets.html">Wavelets</a> </font>
 <br><font id="vartype">Variable type: integer(2)</font>
 <br><font id="default">Default is [1, 100]</font>
 <br><font id="text">
@@ -3859,7 +3859,7 @@ The fit is done for wvl_ngauss(1), wvl_ngauss(1)+1 ... up to wvl_ngauss(2) Gauss
 <br><font id="title"><a name="wvl_nprccg">wvl_nprccg</a></font>
 <br><font id="mnemonics">Mnemonics: WaVeLet maximum Number of PReConditionner Conjugate Gradient iterations</font>
 <br><font id="characteristic">Characteristic: </font>
-<br><font id="characteristic">Mentioned in "How to": <a href="topic_Wavelets.html">Wavelets</a> </font>
+<br><font id="characteristic">Mentioned in "How to": <a href="../../topics/html_generated/topic_Wavelets.html">Wavelets</a> </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 5</font>
 <br><font id="text">
@@ -3880,17 +3880,17 @@ iterations on each wavefunction convergence step.
 <br><font id="title"><a name="xredsph_extra">xredsph_extra</a></font>
 <br><font id="mnemonics">Mnemonics: X(position) in REDuced coordinates of the SPHeres for dos projection in the EXTRA set</font>
 <br><font id="characteristic">Characteristic: </font>
-<br><font id="characteristic">Mentioned in "How to": <a href="topic_printing.html">printing</a> </font>
-<br><font id="vartype">Variable type: real(3,<a href="vargs.html#natsph_extra">natsph_extra</a>)</font>
+<br><font id="characteristic">Mentioned in "How to": <a href="../../topics/html_generated/topic_printing.html">printing</a> </font>
+<br><font id="vartype">Variable type: real(3,<a href="../../input_variables/html_generated/vargs.html#natsph_extra">natsph_extra</a>)</font>
 <br><font id="default">Default is *0.0</font>
 <br><br><font id="requires">
-Only relevant if <a href="vargs.html#natsph_extra">natsph_extra</a> > 0
+Only relevant if <a href="../../input_variables/html_generated/vargs.html#natsph_extra">natsph_extra</a> > 0
 </font>
 <br><font id="text">
 <p>
 <p>
  The positions in reduced coordinates of extra spheres used in the DOS projection, simulating an STS signal.
-See <a href="vargs.html#natsph_extra">natsph_extra</a> for a more complete description.
+See <a href="../../input_variables/html_generated/vargs.html#natsph_extra">natsph_extra</a> for a more complete description.
 </p>
 </font>
 
