@@ -250,8 +250,9 @@ program multibinit
    if(iam_master) then
 !    Read the MD file
      write(message,'(a,(80a),7a)')ch10,('=',ii=1,80),ch10,ch10,&
-&     '-Reading the file ',trim(filnam(5)),ch10,&
-&     ' with NetCDF in order to fit the polynomial coefficients'
+&     '-Reading the file the HIST file :',ch10,&
+&     '-',trim(filnam(5)),ch10
+
      call wrtout(std_out,message,'COLL') 
      call wrtout(ab_out,message,'COLL') 
      if(filnam(5)/=''.and.filnam(5)/='no')then
@@ -314,14 +315,14 @@ program multibinit
    if(hist%mxhist >0)then
      select case(option)
      case (-1)
-!    option == -1
-!    Print the file in the specific format for the script of carlos
-!    Born_Charges  
-!    Dielectric_Tensor
-!    harmonic.xml
-!    Reference_structure
-!    Strain_Tensor
-!    symmetry_operations (only cubic)
+!      option == -1
+!      Print the file in the specific format for the script of carlos
+!      Born_Charges  
+!      Dielectric_Tensor
+!      harmonic.xml
+!      Reference_structure
+!      Strain_Tensor
+!      symmetry_operations (only cubic)
        if (iam_master) then
          call fit_polynomial_printSystemFiles(reference_effective_potential,hist)
        end if

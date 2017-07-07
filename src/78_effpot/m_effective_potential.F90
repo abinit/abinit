@@ -2341,9 +2341,9 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
   logical,intent(in),optional :: verbose,compute_anharmonic
 !Local variables-------------------------------
 !scalar
-  integer :: alpha,ii,ia,mu,ncell
-  real(dp):: energy_part
-  real(dp):: ucvol
+  integer :: alpha,ii,ia,ib,mu,ncell
+  real(dp):: epsilon,energy_part,fx,fy,fz,fpr
+  real(dp):: dx,dy,dz,dist,fr6,fr2,r2,rcut,sigma,ucvol
   character(len=500) :: msg
   logical :: has_strain = .FALSE.,need_verbose
   logical :: iam_master,need_anharmonic
@@ -2356,7 +2356,7 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
   real(dp) :: fcart_part(3,natom)
   real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3)
   real(dp) :: strain_tmp(6),strten_part(6),strain_mat(3,3),strain_mat_inv(3,3)
-  real(dp),allocatable :: work(:),work2(:,:)
+  real(dp),allocatable :: xcart(:,:),work(:),work2(:,:)
 ! *************************************************************************
 
 ! Set MPI local varibaless
@@ -2451,13 +2451,15 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
   end if
 
 ! Get displacement
+  ABI_ALLOCATE(xcart,(3,natom))
   if (present(displacement)) then
     disp_tmp(:,:) = displacement(:,:)
   else
     if(present(xred))then
 !   Compute the displacement
+      call xred2xcart(natom, rprimd, xcart, xred) 
       call effective_potential_getDisp(disp_tmp,natom,rprimd,eff_pot%supercell%rprimd_supercell,&
-&                                      xred_hist=xred,xcart_ref=eff_pot%supercell%xcart_supercell)
+&                                      xcart_hist=xcart,xcart_ref=eff_pot%supercell%xcart_supercell)
     else
       disp_tmp(:,:) = zero
     end if
@@ -2707,6 +2709,53 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
     strten(:) = strten(:) + strten_part(:)
   end if
 
+!TEST_AM
+!   if(present(xred))then
+!     energy_part = zero
+!     fcart_part(:,:)= zero
+!     strten_part(:) = zero
+
+!     epsilon = 50
+!     sigma = 3
+!     rcut = 400
+
+!     do ia = 1,eff_pot%supercell%natom_supercell
+!       do ib = ia,eff_pot%supercell%natom_supercell
+!         if(ia==ib) cycle
+        
+!         dx = xcart(1,ib) - xcart(1,ia);
+!         dy = xcart(2,ib) - xcart(2,ia); 
+!         dz = xcart(3,ib) - xcart(3,ia);
+!         r2 = dx*dx + dy*dy + dz*dz
+        
+!         if (r2 < rcut) then
+!           fr2 = sigma**2 / r2
+!           fr6 = fr2 * fr2 * fr2
+!           fpr = 48.d0 * epsilon * fr6 * (0.5d0  - fr6 ) / sqrt(r2)
+!           fx = fpr * dx
+!           fy = fpr * dy
+!           fz = fpr * dz
+          
+!           fcart_part(1,ia) = fcart_part(1,ia) + fx; fcart_part(1,ib) = fcart_part(1,ib) - fx
+!           fcart_part(2,ia) = fcart_part(2,ia) + fy; fcart_part(2,ib) = fcart_part(2,ib) - fy
+!           fcart_part(3,ia) = fcart_part(3,ia) + fz; fcart_part(3,ib) = fcart_part(3,ib) - fz
+          
+!           energy_part = energy_part + 4.d0 * epsilon * fr6 * (fr6 - 1.d0)
+!         end if
+!       end do
+!     end do
+  
+!     if(need_verbose)then
+!       write(msg, '(a,1ES24.16,a)' ) ' Energy of the Lennard Jones potential     :',&
+! &                                       energy_part,' Hartree'
+!       call wrtout(ab_out,msg,'COLL')
+!       call wrtout(std_out,msg,'COLL')
+!     end if
+!     energy = energy + energy_part
+!     fcart(:,:)  = fcart(:,:) + fcart_part(:,:)
+!   end if
+!TEST_AM
+
 !---------------------------------
 ! 8 - Apply factors
 !---------------------------------
@@ -2781,6 +2830,8 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
     call wrtout(ab_out,msg,'COLL')
     call wrtout(std_out,msg,'COLL')
   end if
+
+  ABI_DEALLOCATE(xcart)
 
 end subroutine effective_potential_evaluate
 !!***

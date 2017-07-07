@@ -126,10 +126,10 @@
 
  Extraction of the stress tensor (unit: GPa) and forces (unit: Ha/bohr)
 
- --- !WARNING
-     Stress Tensor and forces are set to zero (not available in the DDB)
+ --- !WARNING:
+     The stress tensor of the reference structure is not specify
+     The stress tensor will be set to zero
  ---
-
 
 ================================================================================
 

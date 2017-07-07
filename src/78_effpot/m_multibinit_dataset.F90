@@ -118,7 +118,7 @@ module m_multibinit_dataset
   real(dp) :: rifcsph
   real(dp) :: conf
   real(dp) :: acell(3)
-  real(dp) :: strain(6)
+  real(dp) :: strten_reference(6)
   real(dp) :: strtarget(6)
   real(dp) :: conf_cutoff_strain(6)
   real(dp) :: rprim(3,3)
@@ -1161,9 +1161,9 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
    ABI_ALLOCATE(intarr,(marr))
    ABI_ALLOCATE(dprarr,(marr))
  end if
- multibinit_dtset%strain(:)= zero
- call intagm(dprarr,intarr,jdtset,marr,6,string(1:lenstr),'strain',tread,'DPR')
- if(tread==1) multibinit_dtset%strain(1:6)= dprarr(1:6)
+ multibinit_dtset%strten_reference(:)= zero
+ call intagm(dprarr,intarr,jdtset,marr,6,string(1:lenstr),'strten_reference',tread,'DPR')
+ if(tread==1) multibinit_dtset%strten_reference(1:6)= dprarr(1:6)
 
 !T
 

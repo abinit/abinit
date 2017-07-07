@@ -83,10 +83,10 @@
 
  Extraction of the stress tensor (unit: GPa) and forces (unit: Ha/bohr)
 
- --- !WARNING
-     Stress Tensor and forces are set to zero (not available in the DDB)
+ --- !WARNING:
+     The stress tensor of the reference structure is not specify
+     The stress tensor will be set to zero
  ---
-
 
 ================================================================================
 
@@ -185,8 +185,9 @@
 
 ================================================================================
 
--Reading the file /home/alex/Desktop/dev/abinit/abinit_git_dev/tests/paral/Input/t101_HIST
- with NetCDF in order to fit the polynomial coefficients
+-Reading the file the HIST file :
+-/home/alex/Desktop/dev/abinit/abinit_git_dev/tests/v8/Input/t13_HIST
+
 
  The size of the supercell for the fit is  2  2  2
 

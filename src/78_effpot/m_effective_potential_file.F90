@@ -45,6 +45,7 @@ module m_effective_potential_file
  implicit none
 
  public :: effective_potential_file_getDimCoeff
+ public :: effective_potential_file_getDimMD
  public :: effective_potential_file_getDimSystem
  public :: effective_potential_file_getDimStrainCoupling
  public :: effective_potential_file_getType
@@ -328,6 +329,30 @@ subroutine effective_potential_file_read(filename,eff_pot,inp,comm,hist)
       
       call system_xml2effpot(eff_pot,filename,comm,strcpling=inp%strcpling)
 
+!     Assign the energy of the reference from input
+      if(inp%energy_reference/=zero)then
+        write(message,'(11a)') ch10,&
+&      ' --- !WARNING',ch10,&
+&      '     Energy of the reference structure is specify in ',ch10,&
+&      '     the input file. The energy is set with',ch10,&
+&      '     this value.',ch10,&
+&      ' ---',ch10
+        call wrtout(std_out,message,'COLL')
+        eff_pot%energy = inp%energy_reference
+      end if
+
+!     Assign the stress tensor of the reference from input
+      if(any(inp%strten_reference==zero))then
+        write(message,'(9a)') ch10,&
+&      ' --- !WARNING',ch10,&
+&      '     The stress tensor of the reference structure is no specify in ',ch10,&
+&      '     the input file. The stress tensor is set to zero',ch10,&
+&      ' ---',ch10
+        call wrtout(std_out,message,'COLL')
+      else
+        eff_pot%strten = inp%strten_reference
+      end if
+
 !     Generate long rage interation for the effective potential for both type and generate suppercell
       call effective_potential_generateDipDip(eff_pot,inp%n_cell,inp%dipdip,inp%asr,comm)
 
@@ -396,8 +421,7 @@ subroutine effective_potential_file_read(filename,eff_pot,inp,comm,hist)
 &         ' with NetCDF in order to fit the polynomial coefficients'
         call wrtout(std_out,message,'COLL') 
         call wrtout(ab_out,message,'COLL')
-        
-        call read_md_hist(filename,hist,.FALSE.,.FALSE.,.FALSE.)
+        call effective_potential_file_readMDfile(filename,hist)
       else
        write(message, '(3a)' )&
 &         'There is no hist argument ',ch10,&
@@ -436,6 +460,8 @@ end subroutine effective_potential_file_read
 !!              2 XML file the system definition and harmonic part
 !!              3 XML file with polynomial coefficients
 !!             23 XML file with both system definition and polynomial coefficients
+!!             40 NetCDF file with history of MD or snapshot
+!!             41 ASCII file with history of MD or snapshot
 !!
 !! PARENTS
 !!      m_effective_potential_file,multibinit
@@ -460,43 +486,22 @@ subroutine effective_potential_file_getType(filename,filetype)
  character(len=fnlen),intent(in) :: filename
  integer, intent(out) :: filetype
 !arrays
-
 !Local variables-------------------------------
 !scalar
+ integer :: natom,nstep
  integer :: ddbun = 666,ios=0
  character(len=500) :: message
  character (len=1000) :: line,readline
 #if defined HAVE_NETCDF
- logical :: md_file = .FALSE.
  integer :: natom_id,time_id,xyz_id,six_id
  integer :: ncid,ncerr
+ logical :: md_file
 #endif
+
 !arrays
 ! *************************************************************************
 
  filetype = 0
-
-!try to read netcdf
-#if defined HAVE_NETCDF
-
-!Open netCDF file
- ncerr=nf90_open(path=trim(filename),mode=NF90_NOWRITE,ncid=ncid)
- if(ncerr == NF90_NOERR) then
-   md_file = .TRUE.
-   ncerr = nf90_inq_dimid(ncid,"natom",natom_id)
-   if(ncerr /= NF90_NOERR)  md_file = .FALSE.    
-   ncerr = nf90_inq_dimid(ncid,"xyz",xyz_id)
-   if(ncerr /= NF90_NOERR)  md_file = .FALSE.
-   ncerr = nf90_inq_dimid(ncid,"time",time_id)
-   if(ncerr /= NF90_NOERR)  md_file = .FALSE.
-   ncerr = nf90_inq_dimid(ncid,"six",six_id)
-   if(ncerr /= NF90_NOERR)  md_file = .FALSE.
-   if (md_file) then
-     filetype = 4
-     return
-   end if
- end if
-#endif
 
  if (open_file(filename,message,unit=ddbun,form="formatted",status="old",action="read") /= 0) then
    MSG_ERROR(message)
@@ -536,6 +541,34 @@ subroutine effective_potential_file_getType(filename,filetype)
    end if
  end do
  close(ddbun)
+
+ if(filetype/=0) return
+
+!try to read netcdf HIST file
+#if defined HAVE_NETCDF
+ ncerr=nf90_open(path=trim(filename),mode=NF90_NOWRITE,ncid=ncid)
+ if(ncerr == NF90_NOERR) then
+   md_file = .TRUE.
+   ncerr = nf90_inq_dimid(ncid,"natom",natom_id)
+   if(ncerr /= NF90_NOERR)  md_file = .FALSE.    
+   ncerr = nf90_inq_dimid(ncid,"xyz",xyz_id)
+   if(ncerr /= NF90_NOERR)  md_file = .FALSE.
+   ncerr = nf90_inq_dimid(ncid,"time",time_id)
+   if(ncerr /= NF90_NOERR)  md_file = .FALSE.
+   ncerr = nf90_inq_dimid(ncid,"six",six_id)
+   if(ncerr /= NF90_NOERR)  md_file = .FALSE.
+   if (md_file) then
+     filetype = 40
+     return
+   end if
+ end if
+#endif
+
+ if(filetype/=0) return
+
+!Try to get the dim of MD ASCII file
+ call effective_potential_file_getDimMD(filename,natom,nstep)
+ if(natom /= zero .and. nstep/=0) filetype = 41
 
 end subroutine effective_potential_file_getType
 !!***
@@ -925,6 +958,168 @@ subroutine effective_potential_file_getDimStrainCoupling(filename,nrpt,voigt)
 end subroutine effective_potential_file_getDimStrainCoupling
 !!***
 
+!!****f* m_effective_potential_file/effective_potential_file_getDimMD
+!!
+!! NAME
+!! effective_potential_file_getDimMD
+!!
+!! FUNCTION
+!! Read MD FILE (HIST or ASCII) and return the dimensions
+!! (natom and nstep)
+!!
+!! INPUTS
+!! filename = path of the file
+!!
+!! OUTPUT
+!! natom = number of atoms
+!! nstep = number of MD steps
+!!
+!! PARENTS
+!!      multibinit
+!!
+!! CHILDREN
+!!      destroy_supercell,init_supercell,xred2xcart
+!!
+!! SOURCE
+
+subroutine effective_potential_file_getDimMD(filename,natom,nstep)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'effective_potential_file_getDimMD'
+ use interfaces_41_geometry
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(out) :: natom,nstep
+!arrays
+ character(len=fnlen),intent(in) :: filename
+!Local variables-------------------------------
+!scalar
+ integer :: ia,natm_old,natm_new
+ integer :: nenergy,nrprimd
+ integer :: ios=0,ios2=0,ios3=0
+ integer :: unit_md=24
+ logical :: compatible,netcdf
+#if defined HAVE_NETCDF
+ integer :: natom_id,time_id,xyz_id,six_id
+ integer :: ncid,ncerr
+ character(len=5) :: char_tmp
+#endif
+!arrays
+ character (len=10000) :: readline,line
+ character(len=500) :: msg
+
+! *************************************************************************
+
+ natom = 0
+ nstep = 0
+!try to read netcdf
+ netcdf = .false.
+#if defined HAVE_NETCDF
+ ncerr=nf90_open(path=trim(filename),mode=NF90_NOWRITE,ncid=ncid)
+ if(ncerr == NF90_NOERR) then
+   netcdf = .TRUE.
+   ncerr = nf90_inq_dimid(ncid,"natom",natom_id)
+   if(ncerr /= NF90_NOERR)  netcdf = .FALSE.    
+   ncerr = nf90_inq_dimid(ncid,"xyz",xyz_id)
+   if(ncerr /= NF90_NOERR)  netcdf = .FALSE.
+   ncerr = nf90_inq_dimid(ncid,"time",time_id)
+   if(ncerr /= NF90_NOERR)  netcdf = .FALSE.
+   ncerr = nf90_inq_dimid(ncid,"six",six_id)
+   if(ncerr /= NF90_NOERR)  netcdf = .FALSE.
+   if(netcdf)then
+     ncerr = nf90_inquire_dimension(ncid,natom_id,char_tmp,natom)
+     NCF_CHECK_MSG(ncerr," inquire dimension ID for natom")
+     ncerr = nf90_inquire_dimension(ncid,time_id,char_tmp,nstep)
+     NCF_CHECK_MSG(ncerr," inquire dimension ID for time")
+   end if
+ end if
+#endif
+
+ if(.not.netcdf) then
+!  try to read ASCII file...
+   if (open_file(filename,msg,unit=unit_md,form="formatted",&
+&       status="old",action="read") /= 0) then
+     MSG_ERROR(msg)
+   end if
+
+!  Start a reading loop in fortran to get the dimension of the file
+   rewind(unit=unit_md)
+   ios = zero
+   nstep   = zero
+   nenergy = zero
+   compatible = .TRUE.
+
+   do while ((ios==0))
+!    special treatment of the first step
+     if(nstep==0)then
+       ios2 = zero
+       do while ((ios2==0))
+         read(unit_md,'(a)',iostat=ios) readline
+         line=adjustl(readline)
+         call elementfromline(line,ia)
+         if (ia==1)then
+           nstep = nstep + 1
+           ios2 = 1
+         end if
+       end do
+     end if
+     read(unit_md,'(a)',iostat=ios) readline
+     if(ios == 0)then    
+       line=adjustl(readline)
+       call elementfromline(line,ia)
+       if (ia==1)then
+         nenergy = nenergy + 1
+         nrprimd = zero
+       else if(ia==3)then
+         nrprimd = nrprimd + 1
+       end if
+       if(nrprimd == 3)then
+         ios3 = zero
+         natm_new = zero
+         do while ((ios3==0))        
+           read(unit_md,'(a)',iostat=ios3) readline
+           if(ios3==0)then
+             line=adjustl(readline)         
+             call elementfromline(line,ia)
+             if(ia==1)then
+               if(nstep==1) then
+                 natm_old = natm_new
+               else
+                 if(natm_old /= natm_new) compatible = .FALSE.
+               end if
+               ios3 = 1
+               ios2 = 1
+               nstep = nstep + 1
+             end if
+             if(ia==6)then
+               natm_new = natm_new + 1
+             end if
+           end if!end if ios3
+         end do
+       end if ! end if nrprimd
+     end if! end if os1
+   end do
+   
+   natom = natm_new - 1
+   if(nstep /= nenergy) compatible = .FALSE.
+   if(natom <= zero) compatible = .FALSE.
+   if(nstep <= zero) compatible = .FALSE.
+
+   if(.not.compatible)then
+     natom = zero
+     nstep = zero
+   end if
+ end if! end if not netcdf
+
+end subroutine effective_potential_file_getDimMD
+!!***
 
 !!****f* m_effective_potential_file/system_getDimFromXML
 !! NAME
@@ -2263,19 +2458,45 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
   call gtblk9(ddb,iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,rftyp)
 
   if (iblok /=0) then
-!  firts give the corect stress values store in hartree
-!  diagonal parts
-   effective_potential%strten(1)=blkval(1,1,natom+3,1,1,iblok)
-   effective_potential%strten(2)=blkval(1,2,natom+3,1,1,iblok)
-   effective_potential%strten(3)=blkval(1,3,natom+3,1,1,iblok)
-!  the shear parts
-   effective_potential%strten(4)=blkval(1,1,natom+4,1,1,iblok)
-   effective_potential%strten(5)=blkval(1,2,natom+4,1,1,iblok)
-   effective_potential%strten(6)=blkval(1,3,natom+4,1,1,iblok)
-
+   if(any(inp%strten_reference/=zero))then
+     write(message,'(10a)') ch10,&
+&          ' --- !WARNING:',ch10,&
+&          '     The stress tensor of the reference structure is specify in the',ch10,&
+&          '     input file and in the DDB. The value of the stress tensor is set',ch10,&
+&          '     with the value from the input file',ch10,&
+&          ' ---'
+     call wrtout(std_out,message,'COLL')
+     call wrtout(ab_out,message,'COLL')
+     effective_potential%strten = inp%strten_reference
+   else
+!    firts give the corect stress values store in hartree
+!    diagonal parts
+     effective_potential%strten(1)=blkval(1,1,natom+3,1,1,iblok)
+     effective_potential%strten(2)=blkval(1,2,natom+3,1,1,iblok)
+     effective_potential%strten(3)=blkval(1,3,natom+3,1,1,iblok)
+!    the shear parts
+     effective_potential%strten(4)=blkval(1,1,natom+4,1,1,iblok)
+     effective_potential%strten(5)=blkval(1,2,natom+4,1,1,iblok)
+     effective_potential%strten(6)=blkval(1,3,natom+4,1,1,iblok)
+   end if
 !  Get forces
    effective_potential%fcart(:,1:natom) = blkval(1,:,1:natom,1,1,iblok)
-
+ else
+   if(all(inp%strten_reference(:)==zero))then
+     write(message,'(8a)') ch10,&
+&          ' --- !WARNING:',ch10,&
+&          '     The stress tensor of the reference structure is not specify',ch10,&
+&          '     The stress tensor will be set to zero',ch10,&
+&          ' ---'
+     call wrtout(std_out,message,'COLL')
+     call wrtout(ab_out,message,'COLL')
+     effective_potential%strten = zero
+   else
+     effective_potential%strten = inp%strten_reference
+   end if
+ end if
+ 
+ if(any(effective_potential%strten(:) /= zero))then
    write(message, '(3a)' )ch10,&
 &   ' Cartesian components of forces (hartree/bohr)',ch10
    call wrtout(ab_out,message,'COLL')
@@ -2310,16 +2531,7 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
    write(message, '(a)' ) ' '
    call wrtout(ab_out,message,'COLL')
    call wrtout(std_out,  message,'COLL')
-
- else
-   write(message, '(7a)' )ch10,&
-&          ' --- !WARNING',ch10,&
-&          '     Stress Tensor and forces are set to zero (not available in the DDB)',ch10,&
-&          ' ---',ch10
-
-   call wrtout(std_out,message,'COLL')
-   call wrtout(ab_out,message,'COLL')
-  end if
+ end if
 
 !**********************************************************************
 ! Elastic tensors at Gamma Point
@@ -3172,7 +3384,7 @@ end subroutine coeffs_xml2effpot
 !! effective_potential_file_readMDfile
 !!
 !! FUNCTION
-!! Read ASCII MD FILE
+!! Read MD FILE (HIST or ASCII)
 !!
 !! INPUTS
 !! filename = path of the file
@@ -3207,140 +3419,67 @@ subroutine effective_potential_file_readMDfile(filename,hist)
  character(len=fnlen),intent(in) :: filename
 !Local variables-------------------------------
 !scalar
- integer :: ia,ii,mu,nu,natom,natm_old,natm_new
- integer :: nstep,nenergy,nrprimd,type
- integer :: ios=0,ios2=0,ios3=0
- integer :: unit_md=24
- logical :: compatible
+ integer :: ia,ii,mu,nu,natom,nstep,type
+ integer :: ios=0, unit_md=24
 !arrays
  character (len=10000) :: readline,line
  real(dp) :: tmp(6)
  real(dp),allocatable :: xcart(:,:)
- character(len=500) :: msg
 
 ! *************************************************************************
 
  call effective_potential_file_getType(filename,type)
 
- if(type==4)then
+ if(type==40)then
 !  Netcdf type
    call read_md_hist(filename,hist,.FALSE.,.FALSE.,.FALSE.)
- else
-!  try to read ASCII file...
-   if (open_file(filename,msg,unit=unit_md,form="formatted",&
-&       status="old",action="read") /= 0) then
-     MSG_ERROR(msg)
-   end if
+ else if(type==41)then
 
-   ia = (natom+6)
-!  Start a reading loop in fortran to get the dimension of the file
-   rewind(unit=unit_md)
-   ii = -1
-   nstep   = zero
-   nenergy = zero
-   compatible = .TRUE.
+!  ASCII file
+   call  effective_potential_file_getDimMD(filename,natom,nstep)
 
-   do while ((ios==0))
-!    special treatment of the first step
-     if(nstep==0)then
-       ios2 = zero
-       do while ((ios2==0))
-         read(unit_md,'(a)',iostat=ios) readline
-         line=adjustl(readline)
-         call elementfromline(line,ia)
-         if (ia==1)then
-           nstep = nstep + 1
-           ios2 = 1
-         end if
-       end do
-     end if
-     read(unit_md,'(a)',iostat=ios) readline
-     if(ios == 0)then    
-       line=adjustl(readline)
-       call elementfromline(line,ia)
-       if (ia==1)then
-         nenergy = nenergy + 1
-         nrprimd = zero
-       else if(ia==3)then
-         nrprimd = nrprimd + 1
-       end if
-       if(nrprimd == 3)then
-         ios3 = zero
-         natm_new = zero
-         do while ((ios3==0))        
-           read(unit_md,'(a)',iostat=ios3) readline
-           if(ios3==0)then
-             line=adjustl(readline)         
-             call elementfromline(line,ia)
-             if(ia==1)then
-               if(nstep==1) then
-                 natm_old = natm_new
-               else
-                 if(natm_old /= natm_new) compatible = .FALSE.
-               end if
-               ios3 = 1
-               ios2 = 1
-               nstep = nstep + 1
-             end if
-             if(ia==6)then
-               natm_new = natm_new + 1
-             end if
-           end if!end if ios3
-         end do
-       end if ! end if nrprimd
-     end if! end if os1
-   end do
-   
-   natom = natm_new - 1
-   if(nstep /= nenergy) compatible = .FALSE.
-   if(natom <= zero) compatible = .FALSE.
-   if(nstep <= zero) compatible = .FALSE.
+   ii  = 1
+   ios = 0
 
-   if (compatible)then
-     ii  = 1
-     ios = 0
-
-     ABI_ALLOCATE(xcart,(3,natom))
-     call abihist_free(hist)
-     call abihist_init(hist,natom,nstep,.FALSE.,.FALSE.)
+   ABI_ALLOCATE(xcart,(3,natom))
+   call abihist_free(hist)
+   call abihist_init(hist,natom,nstep,.FALSE.,.FALSE.)
 
 !  Start a reading loop in fortran
-     rewind(unit=unit_md)
-     do while ((ios==0).and.ii<=nstep)
-       read(unit_md,'(a)',iostat=ios) readline
-       read(unit_md,'(a)',iostat=ios) readline
-       line=adjustl(readline)
-       read(line,*) hist%etot(ii)
-       hist%etot(ii) = hist%etot(ii)
-       do mu=1,3
-         read(unit_md,'(a)',iostat=ios) readline
-         line=adjustl(readline)
-         read(line,*) (hist%rprimd(nu,mu,ii),nu=1,3)
-       end do
-       do ia=1,natom
-         read(unit_md,'(a)',iostat=ios) readline
-         line=adjustl(readline)
-         read(line,*) (tmp(mu),mu=1,6)
-         xcart(:,ia) = tmp(1:3)
-         hist%fcart(:,ia,ii) = tmp(4:6)
-       end do
-       call xcart2xred(natom,hist%rprimd(:,:,ii),xcart(:,:),hist%xred(:,:,ii))
+   rewind(unit=unit_md)
+   do while ((ios==0).and.ii<=nstep)
+     read(unit_md,'(a)',iostat=ios) readline
+     read(unit_md,'(a)',iostat=ios) readline
+     line=adjustl(readline)
+     read(line,*) hist%etot(ii)
+     hist%etot(ii) = hist%etot(ii)
+     do mu=1,3
        read(unit_md,'(a)',iostat=ios) readline
        line=adjustl(readline)
-       read(line,*) (hist%strten(mu,ii),mu=1,6)
-       ii = ii + 1
+       read(line,*) (hist%rprimd(nu,mu,ii),nu=1,3)
      end do
-     do ii=1,nstep
-       do mu=1,3
-         hist%acell(mu,:) = hist%rprimd(mu,mu,ii)
-       end do
+     do ia=1,natom
+       read(unit_md,'(a)',iostat=ios) readline
+       line=adjustl(readline)
+       read(line,*) (tmp(mu),mu=1,6)
+       xcart(:,ia) = tmp(1:3)
+       hist%fcart(:,ia,ii) = tmp(4:6)
      end do
-     
-     close(unit_md)
-     ABI_DEALLOCATE(xcart)
-   end if!end compatible
+     call xcart2xred(natom,hist%rprimd(:,:,ii),xcart(:,:),hist%xred(:,:,ii))
+     read(unit_md,'(a)',iostat=ios) readline
+     line=adjustl(readline)
+     read(line,*) (hist%strten(mu,ii),mu=1,6)
+     ii = ii + 1
+   end do
+   do ii=1,nstep
+     do mu=1,3
+       hist%acell(mu,:) = hist%rprimd(mu,mu,ii)
+     end do
+   end do
+   close(unit_md)
+   ABI_DEALLOCATE(xcart)
  end if!end if type
-
+ 
 end subroutine effective_potential_file_readMDfile
 !!***
 

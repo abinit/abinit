@@ -65,6 +65,9 @@
 !!  vel_cell(3,3)=old value of cell parameters velocity; updated on output
 !!  xred(3,natom)=reduced dimensionless atomic coordinates; updated on output
 !!  xred_old(3,natom)=work space for old xred
+!!  eff_pot<type(effective_potential_type)> = optional,effective_potential datatype
+!!  verbose = optional, default is true, flag to disable the verbose mode
+!!  write_HIST = optional, default is true, flag to disble the write of the HIST file
 !!
 !! NOTES
 !! This subroutine uses the arguments natom, xred, vel, amass,
@@ -121,7 +124,7 @@
 
 subroutine mover(scfcv_args,ab_xfh,acell,amass,dtfil,&
 & electronpositron,rhog,rhor,rprimd,vel,vel_cell,xred,xred_old,&
-& effective_potential)
+& effective_potential,verbose,writeHIST)
 
  use defs_basis
  use defs_abitypes
@@ -171,6 +174,8 @@ type(datafiles_type),intent(inout),target :: dtfil
 type(electronpositron_type),pointer :: electronpositron
 type(ab_xfh_type),intent(inout) :: ab_xfh
 type(effective_potential_type),optional,intent(in) :: effective_potential
+logical,optional,intent(in) :: verbose
+logical,optional,intent(in) :: writeHIST
 !arrays
 real(dp),intent(inout) :: acell(3)
 real(dp), intent(in),target :: amass(:) !(scfcv%dtset%natom) cause segfault of g95 on yquem_g95 A check of the dim has been added
@@ -196,7 +201,7 @@ character(len=8) :: stat4xml
 character(len=35) :: fmt
 character(len=fnlen) :: filename
 real(dp) :: favg
-logical :: DEBUG=.FALSE.
+logical :: DEBUG=.FALSE., need_verbose=.TRUE.,need_writeHIST=.TRUE.
 logical :: need_scfcv_cycle = .TRUE.
 logical :: change,useprtxfase
 logical :: skipcycle
@@ -209,7 +214,12 @@ real(dp) :: gprimd(3,3),rprim(3,3),rprimd_prev(3,3)
 real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
 
 ! ***************************************************************
+ need_verbose=.TRUE.
+ if(present(verbose)) need_verbose = verbose
 
+ need_writeHIST=.TRUE.
+ if(present(writeHIST)) need_writeHIST = writeHIST
+ 
  call status(0,dtfil%filstat,iexit,level,'init          ')
 
  if ( size(amass) /= scfcv_args%dtset%natom ) then
@@ -217,7 +227,7 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
  end if
 
  ! enable time limit handler if not done in callers.
- if (enable_timelimit_in(ABI_FUNC) == ABI_FUNC) then
+ if (need_verbose .and. enable_timelimit_in(ABI_FUNC) == ABI_FUNC) then
    write(std_out,*)"Enabling timelimit check in function: ",trim(ABI_FUNC)," with timelimit: ",trim(sec2str(get_timelimit()))
  end if
 
@@ -353,13 +363,13 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
      minE=hist_prev%etot(1)
      minIndex=1
      do ii=1,hist_prev%mxhist
-       write(std_out,*) 'Iteration:',ii,' Total Energy:',hist_prev%etot(ii)
+       if(need_verbose) write(std_out,*) 'Iteration:',ii,' Total Energy:',hist_prev%etot(ii)
        if (minE>hist_prev%etot(ii))then
          minE=hist_prev%etot(ii)
          minIndex=ii
        end if
      end do
-     write(std_out,*) 'The lowest energy occurs at iteration:',minIndex,'etotal=',minE
+     if(need_verbose)write(std_out,*) 'The lowest energy occurs at iteration:',minIndex,'etotal=',minE
      acell(:)   =hist_prev%acell(:,minIndex)
      rprimd(:,:)=hist_prev%rprimd(:,:,minIndex)
      xred(:,:)  =hist_prev%xred(:,:,minIndex)
@@ -395,17 +405,21 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
 !  forces will be compute with it
  if (present(effective_potential)) then
    need_scfcv_cycle = .FALSE.
-   write(message,'(2a,i2,5a,80a)')&
+   if(need_verbose)then
+     write(message,'(2a,i2,5a,80a)')&
 &   ch10,'=== [ionmov=',ab_mover%ionmov,'] ',trim(specs%method),' with effective potential',&
 &   ch10,('=',kk=1,80)
-   call wrtout(ab_out,message,'COLL')
-   call wrtout(std_out,message,'COLL')
+     call wrtout(ab_out,message,'COLL')
+     call wrtout(std_out,message,'COLL')
+   end if
  else
-   write(message,'(a,a,i2,a,a,a,80a)')&
-&   ch10,'=== [ionmov=',ab_mover%ionmov,'] ',specs%method,&
-&   ch10,('=',kk=1,80)
-   call wrtout(ab_out,message,'COLL')
-   call wrtout(std_out,message,'COLL')
+   if(need_verbose)then
+     write(message,'(a,a,i2,a,a,a,80a)')&
+&     ch10,'=== [ionmov=',ab_mover%ionmov,'] ',specs%method,&
+&     ch10,('=',kk=1,80)
+     call wrtout(ab_out,message,'COLL')
+     call wrtout(std_out,message,'COLL')
+   end if
  end if
 
 !Format for printing on each cycle
@@ -464,15 +478,15 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
      wtime_step = now - prev
      prev = now
      write(message,*)sjoin("mover: previous time step took ",sec2str(wtime_step))
-     call wrtout(std_out, message, "COLL")
+     if(need_verbose)call wrtout(std_out, message, "COLL")
      if (have_timelimit_in(ABI_FUNC)) then
        if (itime > 2) then
          call xmpi_wait(quitsum_request,ierr)
          if (quitsum_async > 0) then 
            write(message,"(3a)")"Approaching time limit ",trim(sec2str(get_timelimit())),&
 &           ". Will exit itime loop in mover."
-           MSG_COMMENT(message)
-           call wrtout(ab_out, message, "COLL")
+           if(need_verbose)MSG_COMMENT(message)
+           if(need_verbose)call wrtout(ab_out, message, "COLL")
            timelimit_exit = 1
            exit
          end if
@@ -494,12 +508,12 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
 
 !    ###########################################################
 !    ### 10. Output for each icycle (and itime)
-
-     write(message,fmt)&
+     if(need_verbose)then
+       write(message,fmt)&
 &     ch10,'--- Iteration: (',itime,'/',ntime,') Internal Cycle: (',icycle,'/',ncycle,')',ch10,('-',kk=1,80)
-     call wrtout(ab_out,message,'COLL')
-     call wrtout(std_out,message,'COLL')
-
+       call wrtout(ab_out,message,'COLL')
+       call wrtout(std_out,message,'COLL')
+     end if
      if (useprtxfase) then
        call prtxfase(ab_mover,hist,std_out,mover_BEFORE)
      end if
@@ -516,27 +530,31 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
      change=any(xred(:,:)/=xred_prev(:,:))
      if (change)then
        hist%xred(:,:,hist%ihist)=xred(:,:)
-       write(std_out,*) 'WARNING: ATOMIC COORDINATES WERE SYMMETRIZED'
-       write(std_out,*) 'DIFFERENCES:'
-       do kk=1,ab_mover%natom
-         write(std_out,*) xred(:,kk)-xred_prev(:,kk)
-       end do
+       if(need_verbose) then
+         write(std_out,*) 'WARNING: ATOMIC COORDINATES WERE SYMMETRIZED'
+         write(std_out,*) 'DIFFERENCES:'
+         do kk=1,ab_mover%natom
+           write(std_out,*) xred(:,kk)-xred_prev(:,kk)
+         end do
+       end if
        xred_prev(:,:)=xred(:,:)
      end if
 
 !    ###########################################################
 !    ### 12. => Call to SCFCV routine and fill history with forces
-     if (need_scfcv_cycle) then
-       write(message,'(a,3a,33a,44a)')&
+     if (need_verbose) then
+       if (need_scfcv_cycle) then
+         write(message,'(a,3a,33a,44a)')&
 &       ch10,('-',kk=1,3),&
 &       'SELF-CONSISTENT-FIELD CONVERGENCE',('-',kk=1,44)
-     else
-       write(message,'(a,3a,33a,44a)')&
+       else
+         write(message,'(a,3a,33a,44a)')&
 &       ch10,('-',kk=1,3),&
 &       'EFFECTIVE POTENTIAL CALCULATION',('-',kk=1,44)
+       end if
+       call wrtout(ab_out,message,'COLL')
+       call wrtout(std_out,message,'COLL')
      end if
-     call wrtout(ab_out,message,'COLL')
-     call wrtout(std_out,message,'COLL')
 
      if(hist_prev%mxhist>0.and.ab_mover%restartxf==-1.and.hist_prev%ihist<=hist_prev%mxhist)then
 
@@ -587,11 +605,11 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
            call effective_potential_evaluate( &
 &           effective_potential,scfcv_args%results_gs%etotal,&
 &           scfcv_args%results_gs%fcart,scfcv_args%results_gs%fred,&
-&           scfcv_args%results_gs%strten,ab_mover%natom,rprimd,xred=xred)
+&           scfcv_args%results_gs%strten,ab_mover%natom,rprimd,xred=xred,verbose=need_verbose)
 
 !          Check if the simulation does not diverged...
            if(ABS(scfcv_args%results_gs%etotal - hist%etot(1)) > 1E6)then
-             if(me==master)then
+             if(need_verbose.and.me==master)then
                message = "The simulation is diverging, please check your effective potential"
                MSG_WARNING(message)
              end if
@@ -629,11 +647,13 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
          change=any(xred(:,:)/=xred_prev(:,:))
          if (change)then
            hist%xred(:,:,hist%ihist)=xred(:,:)
-           write(std_out,*) 'WARNING: ATOMIC COORDINATES WERE SYMMETRIZED AFTER SCFCV'
-           write(std_out,*) 'DIFFERENCES:'
-           do kk=1,ab_mover%natom
-             write(std_out,*) xred(:,kk)-xred_prev(:,kk)
-           end do
+           if(need_verbose)then
+             write(std_out,*) 'WARNING: ATOMIC COORDINATES WERE SYMMETRIZED AFTER SCFCV'
+             write(std_out,*) 'DIFFERENCES:'
+             do kk=1,ab_mover%natom
+               write(std_out,*) xred(:,kk)-xred_prev(:,kk)
+             end do
+           end if
          end if !if (change)
        end if
 
@@ -685,7 +705,7 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
 !    ###
 
 #if defined HAVE_NETCDF
-     if (me==master) then
+     if (need_writeHIST.and.me==master) then
        ifirst=merge(0,1,(itime>1.or.icycle>1))
        call write_md_hist(hist,filename,ifirst,ab_mover%natom,ab_mover%ntypat,&
 &       ab_mover%typat,amu,ab_mover%znucl,ab_mover%dtion)
@@ -694,7 +714,7 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
 
 !    ###########################################################
 !    ### 14. Output after SCFCV
-     if(need_scfcv_cycle)then
+     if(need_verbose.and.need_scfcv_cycle)then
        write(message,'(a,3a,a,72a)')&
 &       ch10,('-',kk=1,3),'OUTPUT',('-',kk=1,71)
        call wrtout(ab_out,message,'COLL')
@@ -742,7 +762,7 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
 !    ### 16. => Precondition forces, stress and energy
 
      write(message,*) 'Geometry Optimization Precondition:',ab_mover%goprecon
-     call wrtout(std_out,message,'COLL')
+     if(need_verbose)call wrtout(std_out,message,'COLL')
      if (ab_mover%goprecon>0)then
        call prec_simple(ab_mover,preconforstr,hist,icycle,itime,0)
      end if
@@ -905,14 +925,14 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
 !    from a loop if you change the upper limit
 !    inside
      if (icycle>=ncycle .and. scfcv_args%mpi_enreg%me == 0) then
-       write(std_out,*) 'EXIT:',icycle,ncycle
+       if(need_verbose)write(std_out,*) 'EXIT:',icycle,ncycle
        exit
      end if
 
      write(message,*) 'ICYCLE',icycle,skipcycle
-     call wrtout(std_out,message,'COLL')
+     if(need_verbose)call wrtout(std_out,message,'COLL')
      write(message,*) 'NCYCLE',ncycle
-     call wrtout(std_out,message,'COLL')
+     if(need_verbose)call wrtout(std_out,message,'COLL')
      if (skipcycle) exit
 
 !    ###########################################################

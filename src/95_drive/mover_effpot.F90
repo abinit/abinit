@@ -161,7 +161,7 @@ implicit none
    end do
  end if
 
-! check new rprimd
+!check new rprimd
  if(all(rprimd(1,:)==zero).or.&
 & all(rprimd(2,:)==zero).or.all(rprimd(3,:)==zero)) then
    write(message, '(3a)' )&
@@ -204,6 +204,7 @@ implicit none
  ABI_DEALLOCATE(xcart)
 
  if(inp%dynamics==12.or.inp%dynamics==13.or.inp%dynamics==24.or.inp%dynamics==25) then
+
 !***************************************************************
 !1 Convert some parameters into the structures used by mover.F90
 !***************************************************************
@@ -222,7 +223,7 @@ implicit none
    dtset%goprecon = 0   ! Geometry Optimization PREconditioner equations
    dtset%jellslab = 0   ! include a JELLium SLAB in the cell
    dtset%mdwall = 10000 ! Molecular Dynamics WALL location
-   dtset%natom = effective_potential%supercell%natom_supercell
+   dtset%natom  = effective_potential%supercell%natom_supercell
    dtset%ntypat = effective_potential%crystal%ntypat
    dtset%nconeq = 0     ! Number of CONstraint EQuations
    dtset%noseinert = 1.d-5 ! NOSE INERTia factor
@@ -243,7 +244,6 @@ implicit none
    ABI_ALLOCATE(dtset%prtatlist,(dtset%natom)) !PRinT by ATom LIST of ATom
    dtset%prtatlist(:) = zero
 
-
    if(option_fit==0)then
      dtset%dtion = inp%dtion  ! Delta Time for IONs
      dtset%ionmov = inp%dynamics  ! Number for the dynamic
@@ -253,7 +253,6 @@ implicit none
      dtset%restartxf = inp%restarxf  ! RESTART from (X,F) history
      dtset%mdtemp(1) = inp%temperature   !Molecular Dynamics Temperatures 
      dtset%mdtemp(2) = inp%temperature   !Molecular Dynamics Temperatures 
-
    else
 !    Set default for the fit
      dtset%restartxf = 0  ! RESTART from (X,F) history
@@ -264,7 +263,6 @@ implicit none
      dtset%optcell = 2    ! OPTimize the CELL shape and dimensions Characteristic 
      dtset%mdtemp(1) = 5   !Molecular Dynamics Temperatures 
      dtset%mdtemp(2) = 0.1 !Molecular Dynamics Temperatures 
-
    end if
 
 
@@ -406,25 +404,10 @@ implicit none
    call wrtout(ab_out,message,'COLL')
    call wrtout(std_out,message,'COLL')
 
-!TEST_AM
-!    do ii=1,dtset%ntime
-!      xred(:,:) = xred(:,:) + 0.02
-!      rprimd(1,1) = rprimd(1,1) + 0.02
-
-!      call timein(tcpui,twalli)
-!      call effective_potential_evaluate(effective_potential,scfcv_args%results_gs%etotal,&
-! &               scfcv_args%results_gs%fcart,scfcv_args%results_gs%fred,&
-! &               scfcv_args%results_gs%strten,dtset%natom,rprimd,xred)
-!      call timein(tcpu,twall)
-!      tsec(1)=tcpu-tcpui
-!      tsec(2)=twall-twalli
-!      if(my_rank==0)write(std_out,*)"TIME FOR 1 STEP FOR CPU ",my_rank,":",tsec
-!    end do
-!TEST_AM
-
    call mover(scfcv_args,ab_xfh,acell,amass,dtfil,electronpositron,&
-&   rhog,rhor,dtset%rprimd_orig,vel,vel_cell,xred,xred_old,effective_potential)
-   
+&             rhog,rhor,dtset%rprimd_orig,vel,vel_cell,xred,xred_old,&
+&             effective_potential=effective_potential,verbose=.true.,writeHIST=.false.)
+
 !***************************************************************
 ! 4   Deallocation of array   
 !***************************************************************

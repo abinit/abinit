@@ -152,8 +152,9 @@
 
 ================================================================================
 
--Reading the file /home/alex/Desktop/dev/abinit/abinit_git_dev/tests/v8/Input/t13_HIST
- with NetCDF in order to fit the polynomial coefficients
+-Reading the file the HIST file :
+-/home/alex/Desktop/dev/abinit/abinit_git_dev/tests/v8/Input/t13_HIST
+
 
  The size of the supercell for the fit is  2  2  2
 
