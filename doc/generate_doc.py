@@ -1,17 +1,13 @@
 #! /usr/bin/env python 
 """This script generates part of the ABINIT documentation in html for the Web site"""
 
-from __future__ import print_function, division, absolute_import
+from __future__ import print_function
 
 import sys
 import os
-import platform
 import yaml
 import re
 import argparse
-
-import logging
-logger = logging.getLogger(__name__)
 
 # We don't install with setup.py hence we have to add the directory [...]/abinit/doc to $PYTHONPATH
 # See similar procedure in tests/runtests.py
