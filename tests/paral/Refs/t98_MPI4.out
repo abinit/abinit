@@ -31,7 +31,7 @@
 
  Flags :
      ifcflag         1
-   prt_effpo         3
+   prt_model         1
      strcpli        -1
  Molecular Dynamics :
         temp    1000.0
@@ -130,7 +130,7 @@
 
 ================================================================================
 
- Generation of the xml file for the reference structure in t98_MPI4_sys.xml
+ Generation of the xml file for the model in t98_MPI4_model.xml
 
 ================================================================================
 
