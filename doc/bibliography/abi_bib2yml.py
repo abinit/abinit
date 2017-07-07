@@ -51,18 +51,32 @@ with open('abiref.bib')  as bibtex_file:
 
 bibtex_str=bibtex_str.replace('optdoi','doi')
 bibtex_str=bibtex_str.replace('opturl','url')
+bibtex_str=bibtex_str.replace('optURI','url')
 bibtex_str=bibtex_str.replace('adsurl','url')
+bibtex_str=bibtex_str.replace('href','url')
 
 bibtex_dics=[]
 bibtex_items=bibtex_str.split('@')
 empty=bibtex_items.pop(0)
 
 for item in bibtex_items:
+
+  if 'doi.org' in item:
+    print(" Error : please remove the prefix http://dx.doi.org (or similar), from the doi field.")
+    print(" It should start directly with the DOI information, e.g. 10.1016 ...")
+    print(" This error happended while treating item :")
+    print(item)
+    raise
+
   item_dic={}
   item=item.split('{',1)
+  entrytype=item[0].strip().lower()
+  if not entrytype in ["article","book","incollection","phdthesis","masterthesis"]:
+    print(" Not able to treat the following entrytype:",entrytype)
+    raise
 
   #Find the ENTRYTYPE
-  item_dic={'ENTRYTYPE':item[0].strip().lower()}
+  item_dic={'ENTRYTYPE':entrytype}
 
   #Find the ID
   item=item[1].split(',',1)
@@ -150,6 +164,7 @@ for (i,ref) in enumerate(bibtex_dics):
   eprint=""
   editor=""
   publisher=""
+  school=""
   address=""
   for key in ref.keys():
     if key=='ENTRYTYPE':
@@ -179,6 +194,8 @@ for (i,ref) in enumerate(bibtex_dics):
       editor=ref.values()[position].strip()
     elif key=='publisher':
       publisher=ref.values()[position].strip()
+    elif key=='school':
+      school=ref.values()[position].strip()
     elif key=='address':
       address=ref.values()[position].strip()
     position+=1
@@ -202,19 +219,29 @@ for (i,ref) in enumerate(bibtex_dics):
     formatted=' %s "%s", %s %s (%s).' % (author,title,journal,eprint,year)
   elif ENTRYTYPE=="incollection":
     formatted=' %s "%s", in "%s", Eds. %s (%s, %s, %s), pp. %s.' % (author,title,booktitle,editor,publisher,address,year,pages)
+  elif ENTRYTYPE=="phdthesis":
+    formatted=' %s "%s", PhD thesis (%s, %s, %s).' % (author,title,school,address,year)
+  elif ENTRYTYPE=="masterthesis":
+    formatted=' %s "%s", Master thesis (%s, %s, %s).' % (author,title,school,address,year)
   elif ENTRYTYPE=="book":
     if volume!="":
       formatted=' %s "%s", vol.%s (%s, %s, %s).' % (author,title,volume,publisher,address,year)
     else:
       formatted=' %s "%s" (%s, %s, %s).' % (author,title,publisher,address,year)
 
-  #DOI is added at the end. Note that DOI is optional
+  #DOI or URL is added at the end. Note that this is optional. Also, only one is mentioned, preferentially the DOI.
   try:
     doi=ref["doi"].strip()
     if doi != "":
-      formatted += ' DOI:'+doi+'.'  
+      formatted += ' DOI: '+doi+'.'  
   except:
-    pass
+    try:
+      url=ref["url"].strip()
+      if url != "":
+        formatted += ' '+url+'.'
+    except:
+      pass
+
   reference_dic[ID]=formatted
 
   lines_txt+= ("[%s] %s \n") %(ID,reference_dic[ID])

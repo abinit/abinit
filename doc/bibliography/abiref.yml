@@ -270,7 +270,7 @@
   pages : 16201
   publisher : American Physical Society
   doi : 10.1103/PhysRevB.53.16201
-  href : http://link.aps.org/doi/10.1103/PhysRevB.53.16201
+  url : http://link.aps.org/doi/10.1103/PhysRevB.53.16201
   issue : 24
 -
   ENTRYTYPE : article
@@ -290,7 +290,7 @@
   year : 1990
   volume : 92
   pages : 5397-5403
-  doi : http://dx.doi.org/10.1063/1.458517
+  doi : 10.1063/1.458517
   url : http://scitation.aip.org/content/aip/journal/jcp/92/9/10.1063/1.458517
   number : 9
 -
@@ -352,7 +352,7 @@
   pages : 3820
   publisher : American Physical Society
   doi : 10.1103/PhysRevB.34.3820
-  href : http://link.aps.org/doi/10.1103/PhysRevB.34.3820
+  url : http://link.aps.org/doi/10.1103/PhysRevB.34.3820
   issue : 6
 -
   ENTRYTYPE : article
@@ -532,7 +532,7 @@
   volume : 119
   pages : 67 - 98
   note : 
-  doi : http://dx.doi.org/10.1016/S0010-4655(98)00201-X
+  doi : 10.1016/S0010-4655(98)00201-X
   url : http://www.sciencedirect.com/science/article/pii/S001046559800201X
   issn : 0010-4655
   number : 1
@@ -546,7 +546,7 @@
   volume : 81
   pages : 446 - 452
   note : 
-  doi : http://dx.doi.org/10.1016/j.commatsci.2013.08.053
+  doi : 10.1016/j.commatsci.2013.08.053
   url : http://www.sciencedirect.com/science/article/pii/S0927025613005077
   issn : 0927-0256
   number : 
@@ -611,7 +611,7 @@
   volume : 715
   pages : 3--74
   publisher : AIP
-  url : http://dx.doi.org/10.1063/1.1800733
+  doi : 10.1063/1.1800733
   timestamp : 2012.10.18
   number : 1
   owner : amadonb
@@ -665,7 +665,7 @@
   pages : 83-93
   doi : 10.1016/j.cpc.2016.02.008
   timestamp : 2015.08.27
-  url : http://dx.doi.org/10.1016/j.cpc.2016.02.008}Owner                    = {yannick
+  owner : yannick
 -
   ENTRYTYPE : article
   ID : Goedecker1996
@@ -914,7 +914,7 @@
   volume : 20
   pages : 11 - 16
   note : 
-  doi : http://dx.doi.org/10.1016/0010-4655(80)90101-0
+  doi : 10.1016/0010-4655(80)90101-0
   url : http://www.sciencedirect.com/science/article/pii/0010465580901010
   issn : 0010-4655
   number : 1
@@ -994,7 +994,7 @@
   volume : 9
   pages : 2359
   doi : 10.1088/0305-4608/9/12/009
-  href : http://iopscience.iop.org/0305-4608/9/12/009
+  url : http://iopscience.iop.org/0305-4608/9/12/009
 -
   ENTRYTYPE : article
   ID : Janssen2015
@@ -1240,7 +1240,7 @@
   volume : 68
   pages : 314 - 319
   note : 
-  doi : http://dx.doi.org/10.1016/j.commatsci.2012.10.028
+  doi : 10.1016/j.commatsci.2012.10.028
   url : http://www.sciencedirect.com/science/article/pii/S0927025612006295
   issn : 0927-0256
   number : 0
@@ -1279,7 +1279,7 @@
   title : Quantum mechanical modeling of nano magnetism
   year : 2007
   school : SISSA
-  opturi : http://hdl.handle.net/1963/2511
+  url : http://hdl.handle.net/1963/2511
   address : Trieste Italy
 -
   ENTRYTYPE : article
@@ -1380,7 +1380,7 @@
   pages : 10947
   publisher : American Physical Society
   doi : 10.1103/PhysRevB.52.10947
-  href : http://link.aps.org/doi/10.1103/PhysRevB.52.10947
+  url : http://link.aps.org/doi/10.1103/PhysRevB.52.10947
   issue : 15
 -
   ENTRYTYPE : article
@@ -1393,7 +1393,7 @@
   pages : 841
   publisher : American Physical Society
   doi : 10.1103/RevModPhys.66.841
-  href : http://link.aps.org/doi/10.1103/RevModPhys.66.841
+  url : http://link.aps.org/doi/10.1103/RevModPhys.66.841
   issue : 3
 -
   ENTRYTYPE : article
@@ -1447,7 +1447,7 @@
   journal : App. Phys. Lett.
   year : 2009
   volume : 94
-  doi : http://dx.doi.org/10.1063/1.3147189
+  doi : 10.1063/1.3147189
   url : http://scitation.aip.org/content/aip/journal/apl/94/21/10.1063/1.3147189
   number : 21
   eid : 12103,pages = {
@@ -1487,15 +1487,14 @@
   pages : 096102
   doi : 10.1103/PhysRevLett.103.096102
 -
-  ENTRYTYPE : article
+  ENTRYTYPE : masterthesis
   ID : Rostgaard2006
   author : C. Rostgaard
   title : Exact exchange in density functional calculations
-  journal : M.S. Thesis, Technical University of Denmark
   year : 2006
-  volume : 
-  pages : 
+  school : Technical University of Denmark
   url : https://wiki.fysik.dtu.dk/gpaw/_static/rostgaard_master.pdf
+  address : Lyngby
 -
   ENTRYTYPE : article
   ID : Rubel2014
@@ -1544,7 +1543,6 @@
   pages : 187--188
   publisher : Hüthig & Wepf Verlag
   issn : 1521-3773
-  url : http://dx.doi.org/10.1002/anie.199201871
   number : 2
   doi : 10.1002/anie.199201871
 -
@@ -1693,7 +1691,7 @@
   pages : 1377
   publisher : American Physical Society
   doi : 10.1103/PhysRevB.32.1377
-  href : http://link.aps.org/doi/10.1103/PhysRevB.32.1377
+  url : http://link.aps.org/doi/10.1103/PhysRevB.32.1377
   issue : 2
 -
   ENTRYTYPE : article
@@ -1756,11 +1754,13 @@
   doi : 10.1103/RevModPhys.85.1583
   issue : 4
 -
-  ENTRYTYPE : misc
+  ENTRYTYPE : article
   ID : Vanderbilt1998
   author : D. Vanderbilt and R. D. {King-Smith}
   title : Electronic polarization in the ultrasoft pseudopotential formalism, http://arxiv.org/abs/cond-mat/9801177
+  journal : ArXiv e-prints
   url : http://arxiv.org/abs/cond-mat/9801177
+  eprint : 1507.01012
 -
   ENTRYTYPE : article
   ID : Wang1998
@@ -1860,7 +1860,7 @@
   volume : 327
   pages : 63
   publisher : Elsevier
-  doi : http://dx.doi.org/10.1016/j.nimb.2013.09.050
+  doi : 10.1016/j.nimb.2013.09.050
 -
   ENTRYTYPE : article
   ID : Zhou2006
