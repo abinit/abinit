@@ -21,9 +21,16 @@ from doc.pymods.variables import *
 
 debug = 0
 
-# Path relative from HTML files
+# Relative path from HTML files
 js_path = "../"
 users_path = "../../users/"
+
+# Path for yml and html files
+invars_yml = "input_variables/yml_files"
+invars_html_autom = "input_variables/html_automatically_generated"
+topics_yml = "input_variables/yml_files"
+topics_yml_autom = "input_variables/html_automatically_generated"
+topics_html_autom = "input_variables/html_automatically_generated"
 
 ################################################################################
 ###############################################################################
@@ -107,15 +114,15 @@ def make_links(text,cur_abivarname,variables,characteristics,specials):
 def read_yaml_file(ymlfile):
   """ Read the file 'ymlfile', containing yml data, and store all such data in the returned object"""
 
-  if ymlfile== "input_variables/yml_files/abinit_vars.yml":
+  if ymlfile== invars_yml+"/abinit_vars.yml":
     print("Will use "+ymlfile+" as database input file for the input variables and their characteristics ...")
-  elif ymlfile== "input_variables/yml_files/list_of_topics.yml":
+  elif ymlfile== topics_yml+"list_of_topics.yml":
     print("Will use "+ymlfile+" as database input file for the list of topics ...")
-  elif ymlfile== "input_variables/yml_files/sections.yml":
+  elif ymlfile== invars_yml+"/sections.yml":
     print("Will use "+ymlfile+" as database input file for the list of sections ...")
-  elif ymlfile== "input_variables/yml_files/tests_dirs.yml":
+  elif ymlfile== topics_yml+"/tests_dirs.yml":
     print("Will use "+ymlfile+" as database input file for the list of directories in which automatic test input files are present ...")
-  elif ymlfile== "input_variables/html_automatically_generated/topics_in_tests.yml":
+  elif ymlfile== topics_yml_autom+"/topics_in_tests.yml":
     print("Generated file "+ymlfile+", to contain the list of automatic test input files relevant for each topic ...")
 
   with open(ymlfile, 'r') as f:
@@ -130,30 +137,30 @@ def read_yaml_file(ymlfile):
 
 ################################################################################
  
-variables=read_yaml_file("input_variables/yml_files/abinit_vars.yml")
-list_of_topics=read_yaml_file("input_variables/yml_files/list_of_topics.yml")
-sections=read_yaml_file("input_variables/yml_files/sections.yml")
-tests_dirs=read_yaml_file("input_variables/yml_files/tests_dirs.yml")
+variables=read_yaml_file(invars_yml+"/abinit_vars.yml")
+list_of_topics=read_yaml_file(topics_yml+"/list_of_topics.yml")
+sections=read_yaml_file(invars_yml+"/sections.yml")
+tests_dirs=read_yaml_file(topics_yml+"/tests_dirs.yml")
 
 ################################################################################
 # Parse the ABINIT input files, in order to find the possible topics to which they are linked -> topics_in_tests
 
 try :
-  rm_cmd = "rm input_variables/html_automatically_generated/topics_in_tests.yml"
+  rm_cmd = "rm "+topics_yml_autom+"/topics_in_tests.yml"
   retcode = os.system(rm_cmd)
 except :
   if debug==1 :
-    print("rm input_variables/html_automatically_generated/topics_in_tests.yml failed")
+    print("rm "+topics_yml_autom+"/topics_in_tests.yml failed")
     print("the file was likely non existent")
 
 for tests_dir in tests_dirs :
-  grep_cmd = "grep topics input_variables/tests/%s/Input/*.in > input_variables/html_automatically_generated/topics_in_tests.txt" % (tests_dir)
+  grep_cmd = "grep topics input_variables/tests/%s/Input/*.in > %s/topics_in_tests.txt"%(tests_dir,topics_yml_autom)
   retcode = os.system(grep_cmd)
   if retcode == 0 :
-    sed_cmd = "sed -e 's/^/- /' input_variables/html_automatically_generated/topics_in_tests.txt >> input_variables/html_automatically_generated/topics_in_tests.yml "
+    sed_cmd = "sed -e 's/^/- /' %s/topics_in_tests.txt >> %s/topics_in_tests.yml"%(topics_yml_autom,topics_yml_autom)
     retcode = os.system(sed_cmd)
 
-topics_in_tests=read_yaml_file("input_variables/html_automatically_generated/topics_in_tests.yml")
+topics_in_tests=read_yaml_file(topics_yml_autom+"/topics_in_tests.yml")
 if debug==1 :
   print(" topics_in_tests :")
   print(topics_in_tests)
@@ -327,7 +334,7 @@ for i, section_info in enumerate(sections):
   sectionhtml = doku2html(make_links(sectionhtml,None,list_all_vars,list_chars,cur_specials))
 
   #Write the finalized html file.
-  file_cur = 'input_variables/html_automatically_generated/'+section+'.html'
+  file_cur = invars_html_autom+'/'+section+'.html'
   f_cur = open(file_cur,'w')
   f_cur.write(sectionhtml)
   f_cur.write("\n")
@@ -434,14 +441,14 @@ toc_all += "<p>"+cur_let_all+".&nbsp;\n"
 # Assemble the "topic" files 
 
 print("Will use file yml_files/default_topic.yml as default for all topic files ... ")
-default_topic_yml=read_yaml_file("input_variables/yml_files/default_topic.yml")
+default_topic_yml=read_yaml_file(topics_yml+"/default_topic.yml")
 default_topic=default_topic_yml[0]
 
 # For each "topic" file
 for topic_name in list_of_topics:
   f_topic="yml_files/topic_"+topic_name+".yml"
   print("Will use file "+f_topic+" to initiate the topic "+topic_name+" ... ",end="")
-  topic_yml=read_yaml_file("input_variables/yml_files/topic_"+topic_name+".yml")
+  topic_yml=read_yaml_file(topics_yml+"/topic_"+topic_name+".yml")
   topic=topic_yml[0]
 
   #Mention it in the table of content of the file all_topics.html
@@ -505,7 +512,7 @@ for topic_name in list_of_topics:
   topic_html = doku2html(make_links(topic_html,None,list_all_vars,list_chars,cur_specials))
 
   # Open, write and close the file
-  file_topic = 'input_variables/html_automatically_generated/topic_'+topic_name+'.html'
+  file_topic = topics_html_autom+'/topic_'+topic_name+'.html'
   f_topic = open(file_topic,'w')
   f_topic.write(topic_html)
   f_topic.close()
@@ -533,7 +540,7 @@ all_topics_html=all_topics_html.replace("__KEYWORD__",default_topic.keyword)
 all_topics_html = doku2html(make_links(all_topics_html,None,list_all_vars,list_chars,cur_specials))
 
 # Open, write and close the file
-file_html = 'input_variables/html_automatically_generated/all_topics.html'
+file_html = topics_html_autom+'/all_topics.html'
 f_html = open(file_html,'w')
 f_html.write(all_topics_html)
 f_html.close()
