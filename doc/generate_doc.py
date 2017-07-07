@@ -246,7 +246,16 @@ for item in bibtex_items:
     if not result[0] in ["1","2"]:
       print("The entry %s does not have the proper format, i.e. the four-digit year should start with 1 or 2" % id_upper_lower)
       raise
-  item_dic['ID']=id_lower[0].upper()+id_lower[1:]
+  item_dic['ID']=id_upper_lower
+
+  #Store the remaining, for later possible reordering, without any of the later treatments.
+  item_dic['body']=item[1]
+
+  item[1]=item[1].replace('optdoi','doi')
+  item[1]=item[1].replace('opturl','url')
+  item[1]=item[1].replace('optURI','url')
+  item[1]=item[1].replace('adsurl','url')
+  item[1]=item[1].replace('href','url')
 
   #Take care of other fields : split the different lines to be examined.
   lines=item[1].splitlines()
@@ -419,13 +428,15 @@ print("File %s has been written ..." %file_txt)
 lines_yml=""
 for ref in bibtex_dics:
   lines_yml+='-\n'
-  # Will print in the order ENTRYTYPE, ID, author, title, journal, year, volume, pages, doi, then the remaining ...
+  # Will print in the order ENTRYTYPE, ID, author, title, journal, year, volume, pages, doi, then the remaining (excluding the "body") ...
   list_key={'ENTRYTYPE':0, 'ID':1, 'author':2, 'title':3, 'journal':4, 'year':5, 'volume':6, 'pages':7, 'doi':8}
   remaining=""
   text=[]
   for i in range(0,8):
     text.append("")
   for (i,key) in enumerate(ref):
+    if key=="body":
+      continue
     line="  "+key+" : "+ref[key]+'\n'
     try:
       number=list_key[key]
