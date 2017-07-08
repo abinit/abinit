@@ -754,7 +754,7 @@ subroutine inprep8 (dimekb,filnam,lmnmax,mband,mblktyp,msym,natom,nblok,nkpt,&
    do iline=1,(nband(1)+2)/3
      read (unddb,'(a80)')rdstring
      write(message,*)trim(rdstring)
-     call wrtout(std_out,message,'COLL')
+     call wrtout(std_out,message,'COLL')  ! GA: why are we printing this?
    end do
  end if
 !23. rprim

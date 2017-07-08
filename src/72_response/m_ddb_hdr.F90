@@ -31,9 +31,9 @@ MODULE m_ddb_hdr
  use m_xmpi
 
  use m_copy,    only : alloc_copy
- use m_pawtab,  only : pawtab_type, pawtab_nullify, pawtab_free!, pawtab_copy  ! DEBUG
+ use m_pawtab,  only : pawtab_type, pawtab_nullify, pawtab_free !, pawtab_copy
  use m_psps,    only : psps_copy, psps_free
- use m_ddb,     only : psddb8
+ use m_ddb,     only : psddb8, ioddb8_in, ddb_getdims
 
  implicit none
 
@@ -42,8 +42,7 @@ MODULE m_ddb_hdr
 
  type,public :: ddb_hdr_type
 
-   integer :: ddb_version
-   ! Version of the DDB file
+   integer :: ddb_version   ! Version of the DDB file
 
    integer :: matom
    integer :: mband
@@ -64,7 +63,10 @@ MODULE m_ddb_hdr
    integer :: occopt
    integer :: usepaw
 
-   integer :: nblok
+   integer :: nblok         ! Number of blocks in the ddb
+   integer :: mblktyp       ! Max block type
+   integer :: fullinit      ! Whether the full info on the pseudo is present
+                            ! TODO rename this variable
 
    real(dp) :: dilatmx
    real(dp) :: ecut
@@ -83,7 +85,7 @@ MODULE m_ddb_hdr
    real(dp) :: rprim(3,3)
 
    integer,allocatable :: nband(:)
-   ! nband(mkpt)
+   ! nband(mkpt*nsppol)
 
    integer,allocatable :: symafm(:)
    ! symafm(msym)
@@ -133,6 +135,8 @@ MODULE m_ddb_hdr
  public :: ddb_hdr_malloc          ! Allocate dynamic memory.
  public :: ddb_hdr_free            ! Free dynamic memory.
  public :: ddb_hdr_open_write      ! Open the DDB file and write the header.
+ public :: ddb_hdr_open_read       ! Open the DDB file and read the header.
+ public :: ddb_hdr_compare         ! Compare two DDB headers.
 
 
 CONTAINS  !===========================================================
@@ -186,10 +190,6 @@ subroutine ddb_hdr_init(ddb_hdr, dtset, psps, pawtab, ddb_version, dscrpt, &
 
 ! ************************************************************************
 
- ! BEGIN DEBUG
- !write(*,*) 'ddb_hdr_init: enter'
- !call flush()
- ! END DEBUG
  ddb_hdr%nblok = nblok
  ddb_hdr%ddb_version = ddb_version
  ddb_hdr%dscrpt = trim(dscrpt)
@@ -199,10 +199,6 @@ subroutine ddb_hdr_init(ddb_hdr, dtset, psps, pawtab, ddb_version, dscrpt, &
    ddb_hdr%ngfft = dtset%ngfft
  end if
 
- ! BEGIN DEBUG
- !write(*,*) 'ddb_hdr_init: calling psps_copy'
- !call flush()
- ! END DEBUG
  call psps_copy(psps, ddb_hdr%psps)
 
  ! Copy scalars from dtset
@@ -239,6 +235,8 @@ subroutine ddb_hdr_init(ddb_hdr, dtset, psps, pawtab, ddb_version, dscrpt, &
  ddb_hdr%tphysel = dtset%tphysel
  ddb_hdr%tsmear = dtset%tsmear
 
+ ddb_hdr%fullinit = 1
+
  call ddb_hdr_malloc(ddb_hdr)
 
  ! Copy arrays from dtset
@@ -267,15 +265,6 @@ subroutine ddb_hdr_init(ddb_hdr, dtset, psps, pawtab, ddb_version, dscrpt, &
    ddb_hdr%occ(:) = dtset%occ_orig(1:ddb_hdr%mband*ddb_hdr%mkpt*ddb_hdr%nsppol)
  end if
 
- ! BEGIN(:) DEBUG
- !write(*,*) 'ddb_hdr_init: shape(ddb_hdr%nband)=', int(shape(ddb_hdr%nband), kind=8)
- !call flush()
- ! END DEBUG
- ! BEGIN DEBUG
- !write(*,*) 'ddb_hdr_init: calling pawtab_copy'
- !call flush()
- ! END DEBUG
-
 
  ! GA: I had way too much problems implementing pawtab_copy.
  !     The script check-libpaw would report all sorts of errors.
@@ -295,11 +284,6 @@ subroutine ddb_hdr_init(ddb_hdr, dtset, psps, pawtab, ddb_version, dscrpt, &
     end if
    end do
  end if
-
- ! BEGIN DEBUG
- !write(*,*) 'ddb_hdr_init: done'
- !call flush()
- ! END DEBUG
 
 end subroutine ddb_hdr_init
 !!***
@@ -462,12 +446,11 @@ subroutine ddb_hdr_open_write(ddb_hdr, filnam, unddb, fullinit)
  integer,intent(in),optional :: fullinit
 
 !Local variables -------------------------
- integer :: fullinit_l, choice
+ integer :: choice
 
 ! ************************************************************************
 
- fullinit_l = 1
- if (present(fullinit)) fullinit_l = fullinit
+ if (present(fullinit)) ddb_hdr%fullinit = fullinit
 
  call ddb_io_out(ddb_hdr%dscrpt,filnam,ddb_hdr%matom,ddb_hdr%mband,&
 &  ddb_hdr%mkpt,ddb_hdr%msym,ddb_hdr%mtypat,unddb,ddb_hdr%ddb_version,&
@@ -482,7 +465,7 @@ subroutine ddb_hdr_open_write(ddb_hdr, filnam, unddb, fullinit)
 
 
  choice=2  ! Write
- call psddb8(choice,ddb_hdr%psps%dimekb,ddb_hdr%psps%ekb,fullinit_l,&
+ call psddb8(choice,ddb_hdr%psps%dimekb,ddb_hdr%psps%ekb,ddb_hdr%fullinit,&
 &  ddb_hdr%psps%indlmn,ddb_hdr%psps%lmnmax,ddb_hdr%nblok,ddb_hdr%ntypat,unddb,&
 &  ddb_hdr%pawtab,ddb_hdr%psps%pspso,ddb_hdr%psps%usepaw,ddb_hdr%psps%useylm,&
 &  ddb_hdr%ddb_version)
@@ -493,5 +476,211 @@ end subroutine ddb_hdr_open_write
 
 !----------------------------------------------------------------------
 
+!!****f* m_ddb_hdr/ddb_hdr_open_read
+!! NAME
+!! ddb_hdr_open_read
+!!
+!! FUNCTION
+!!  Open the DDB file and read the header.
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine ddb_hdr_open_read(ddb_hdr, filnam, unddb, ddb_version, &
+&                            matom,mtypat,mband,mkpt,msym,dimekb,lmnmax)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'ddb_hdr_open_read'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+ type(ddb_hdr_type),intent(inout) :: ddb_hdr
+ character(len=*),intent(in) :: filnam
+ integer,intent(in) :: unddb
+ integer,intent(in) :: ddb_version
+ integer,intent(in),optional :: matom,mtypat,mband,mkpt,msym,dimekb,lmnmax
+
+!Local variables -------------------------
+ integer :: mblktyp,nblok,usepaw
+ integer :: matom_l,mtypat_l,mband_l,mkpt_l,msym_l,dimekb_l,lmnmax_l
+ integer :: choice
+
+! ************************************************************************
+
+ ! Read the dimensions from the DDB
+ call ddb_getdims(dimekb_l,filnam,lmnmax_l,mband_l,mblktyp, &
+&                 msym_l,matom_l,nblok,mkpt_l,mtypat_l,unddb,usepaw, &
+&                 ddb_version,xmpi_comm_self)
+
+ close(unddb)
+
+ if (present(matom)) matom_l = matom
+ if (present(mtypat)) mtypat_l = mtypat
+ if (present(mband)) mband_l = mband
+ if (present(mkpt)) mkpt_l = mkpt
+ if (present(msym)) msym_l = msym
+ if (present(dimekb)) dimekb_l = dimekb
+ if (present(lmnmax)) lmnmax_l = lmnmax
+
+ ddb_hdr%ddb_version = ddb_version
+ ddb_hdr%usepaw = usepaw
+ ddb_hdr%mband = mband_l
+ ddb_hdr%matom = matom_l
+ ddb_hdr%msym = msym_l
+ ddb_hdr%mtypat = mtypat_l
+ ddb_hdr%mkpt = mkpt_l
+ ddb_hdr%nsppol = 1     ! GA: Is nsppol not read?? Have to fix this...
+
+ ddb_hdr%mblktyp = mblktyp
+
+ ddb_hdr%psps%dimekb = dimekb_l
+ ddb_hdr%psps%ntypat = mtypat_l
+ ddb_hdr%psps%lmnmax = lmnmax_l
+ ddb_hdr%psps%usepaw = usepaw
+ ddb_hdr%psps%useylm = usepaw
+
+ ! Allocate the memory
+ call ddb_hdr_malloc(ddb_hdr)
+
+ ABI_ALLOCATE(ddb_hdr%psps%indlmn,(6,ddb_hdr%psps%lmnmax,ddb_hdr%mtypat))
+ ABI_ALLOCATE(ddb_hdr%psps%pspso,(ddb_hdr%mtypat))
+ ABI_ALLOCATE(ddb_hdr%psps%ekb,(ddb_hdr%psps%dimekb,ddb_hdr%mtypat))
+
+ ! This is needed to read the DDBs in the old format
+ ! GA : Not sure why this is required
+ ddb_hdr%symafm(:)=1
+ if(ddb_hdr%mtypat>=1)then
+   ddb_hdr%psps%pspso(:)=0
+   ddb_hdr%znucl(:)=zero
+   ddb_hdr%psps%ekb(:,:)=zero
+ end if
+ if(ddb_hdr%matom>=1)then
+   ddb_hdr%spinat(:,:)=zero
+ end if
+
+
+ ! Note: the maximum parameters (matom, mkpt, etc.) are inputs to ioddb8_in
+ !       wile the actual parameters (natom, nkpt, etc.) are outputs
+ call ioddb8_in(filnam,ddb_hdr%matom,ddb_hdr%mband,&
+&       ddb_hdr%mkpt,ddb_hdr%msym,ddb_hdr%mtypat,unddb,ddb_version,&
+&       ddb_hdr%acell,ddb_hdr%amu,ddb_hdr%dilatmx,ddb_hdr%ecut,ddb_hdr%ecutsm,&
+&       ddb_hdr%intxc,ddb_hdr%iscf,ddb_hdr%ixc,ddb_hdr%kpt,ddb_hdr%kptnrm,&
+&       ddb_hdr%natom,ddb_hdr%nband,ddb_hdr%ngfft,ddb_hdr%nkpt,ddb_hdr%nspden,&
+&       ddb_hdr%nspinor,ddb_hdr%nsppol,ddb_hdr%nsym,ddb_hdr%ntypat,&
+&       ddb_hdr%occ,ddb_hdr%occopt,ddb_hdr%pawecutdg,ddb_hdr%rprim,&
+&       ddb_hdr%dfpt_sciss,ddb_hdr%spinat,ddb_hdr%symafm,ddb_hdr%symrel,&
+&       ddb_hdr%tnons,ddb_hdr%tolwfr,ddb_hdr%tphysel,ddb_hdr%tsmear,&
+&       ddb_hdr%typat,ddb_hdr%usepaw,ddb_hdr%wtk,ddb_hdr%xred,ddb_hdr%zion,&
+&       ddb_hdr%znucl)
+
+
+!  Read the psp information of the input DDB
+   choice=1  ! Read
+   call psddb8(choice,ddb_hdr%psps%dimekb,ddb_hdr%psps%ekb,ddb_hdr%fullinit,&
+&       ddb_hdr%psps%indlmn,ddb_hdr%psps%lmnmax,&
+&       ddb_hdr%nblok,ddb_hdr%ntypat,unddb,ddb_hdr%pawtab,ddb_hdr%psps%pspso,&
+&       ddb_hdr%psps%usepaw,ddb_hdr%psps%useylm,ddb_version)
+
+
+end subroutine ddb_hdr_open_read
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_ddb_hdr/ddb_hdr_compare
+!! NAME
+!! ddb_hdr_compare
+!!
+!! FUNCTION
+!!  Compare two DDB headers and raise error if they differ.
+!!  Also, complete psps information if one has more info than the other.
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine ddb_hdr_compare(ddb_hdr1, ddb_hdr2)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'ddb_hdr_compare'
+ use interfaces_72_response
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+ type(ddb_hdr_type),intent(inout) :: ddb_hdr1, ddb_hdr2
+
+!Local variables -------------------------
+
+! ************************************************************************
+
+!    Should also compare indlmn and pspso ... but suppose that
+!    the checking of ekb is enough for the psps.
+!    Should also compare many other variables ... this is still
+!    to be done ...
+ call ddb_compare2 (&
+&     ddb_hdr1%matom, ddb_hdr2%matom,&
+&     ddb_hdr1%mtypat, ddb_hdr2%mtypat,&
+&     ddb_hdr1%mkpt, ddb_hdr2%mkpt,&
+&     ddb_hdr1%mband, ddb_hdr2%mband,&
+&     ddb_hdr1%msym, ddb_hdr2%msym,&
+&     ddb_hdr1%acell, ddb_hdr2%acell,&
+&     ddb_hdr1%amu, ddb_hdr2%amu,&
+&     ddb_hdr1%psps%dimekb,&
+&     ddb_hdr1%ecut, ddb_hdr2%ecut,&
+&     ddb_hdr1%psps%ekb, ddb_hdr2%psps%ekb,&
+&     ddb_hdr1%fullinit, ddb_hdr2%fullinit,&
+&     ddb_hdr1%iscf, ddb_hdr2%iscf,&
+&     ddb_hdr1%ixc, ddb_hdr2%ixc,&
+&     ddb_hdr1%kpt, ddb_hdr2%kpt,&
+&     ddb_hdr1%kptnrm, ddb_hdr2%kptnrm,&
+&     ddb_hdr1%natom, ddb_hdr2%natom,&
+&     ddb_hdr1%nband, ddb_hdr2%nband,&
+&     ddb_hdr1%ngfft, ddb_hdr2%ngfft,&
+&     ddb_hdr1%nkpt, ddb_hdr2%nkpt,&
+&     ddb_hdr1%nsppol, ddb_hdr2%nsppol,&
+&     ddb_hdr1%nsym, ddb_hdr2%nsym,&
+&     ddb_hdr1%ntypat, ddb_hdr2%ntypat,&
+&     ddb_hdr1%occ, ddb_hdr2%occ,&
+&     ddb_hdr1%occopt, ddb_hdr2%occopt,&
+&     ddb_hdr1%pawecutdg, ddb_hdr2%pawecutdg,&
+&     ddb_hdr1%pawtab, ddb_hdr2%pawtab,&
+&     ddb_hdr1%rprim, ddb_hdr2%rprim,&
+&     ddb_hdr1%dfpt_sciss, ddb_hdr2%dfpt_sciss,&
+&     ddb_hdr1%symrel, ddb_hdr2%symrel,&
+&     ddb_hdr1%tnons, ddb_hdr2%tnons,&
+&     ddb_hdr1%tolwfr, ddb_hdr2%tolwfr,&
+&     ddb_hdr1%typat, ddb_hdr2%typat,&
+&     ddb_hdr1%usepaw,&
+&     ddb_hdr1%wtk, ddb_hdr2%wtk,&
+&     ddb_hdr1%xred, ddb_hdr2%xred,&
+&     ddb_hdr1%zion, ddb_hdr2%zion)
+
+end subroutine ddb_hdr_compare
+!!***
+
+!----------------------------------------------------------------------
 END MODULE m_ddb_hdr
 

@@ -1415,23 +1415,6 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 
    call ddb_hdr_free(ddb_hdr)
 
-!!  tolwfr must be initialized here, but it is a dummy value
-!   tolwfr=1.0_dp
-!   call ddb_io_out (dscrpt,ddbnm,dtset%natom,dtset%mband,&
-!&   dtset%nkpt,dtset%nsym,psps%ntypat,dtfil%unddb,DDB_VERSION,&
-!&   acell,args_gs%amu,dtset%dilatmx,dtset%ecut,dtset%ecutsm,&
-!&   dtset%intxc,dtset%iscf,dtset%ixc,dtset%kpt,dtset%kptnrm,&
-!&   dtset%natom,dtset%nband,ngfft,dtset%nkpt,dtset%nspden,dtset%nspinor,&
-!&   dtset%nsppol,dtset%nsym,psps%ntypat,occ,dtset%occopt,dtset%pawecutdg,&
-!&   rprim,dtset%dfpt_sciss,dtset%spinat,dtset%symafm,dtset%symrel,&
-!&   dtset%tnons,tolwfr,dtset%tphysel,dtset%tsmear,&
-!&   dtset%typat,dtset%usepaw,dtset%wtk,xred,psps%ziontypat,dtset%znucl)
-!
-!   fullinit = 0 ; choice=2
-!   call psddb8 (choice,psps%dimekb,psps%ekb,fullinit,psps%indlmn,&
-!&   psps%lmnmax,nblok,psps%ntypat,dtfil%unddb,pawtab,&
-!&   psps%pspso,psps%usepaw,psps%useylm,DDB_VERSION)
-
    choice=2
    mpert = dtset%natom + 6 ; msize = 3*mpert
 

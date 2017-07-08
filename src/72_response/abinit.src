@@ -19,6 +19,7 @@ ABI_SRC_DEP = 2     # The file depends on other files
 sources = [
  "corrmetalwf1.F90",
  "ddb_io_out.F90",
+ "ddb_compare2.F90",
  "ddb_write_blok.F90",
  "dfptff_bec.F90",
  "dfptff_die.F90",

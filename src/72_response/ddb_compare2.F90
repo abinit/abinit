@@ -1,15 +1,15 @@
 !{\src2tex{textfont=tt}}
-!!****f* ABINIT/ddb_compare
+!!****f* ABINIT/ddb_compare2
 !!
 !! NAME
-!! ddb_compare
+!! ddb_compare2
 !!
 !! FUNCTION
 !! Compare the temporary DDB and input DDB preliminary information,
 !! as well as psp information.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2017 ABINIT group (XG,MT)
+!! Copyright (C) 1999-2017 ABINIT group (XG,MT,GA)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -32,12 +32,12 @@
 !!  iscf, iscf8 = SCF algorithm
 !!  ixc, ixc8 = XC functional
 !!  kpt, kpt8 = kpoint array
-!!  kptnrm, kptnr8 = normalization factor for kpt
+!!  kptnrm, kptnrm8 = normalization factor for kpt
 !!  natom, natom8 = number of atoms
 !!  nband, nband8 = number of bands at each kpt
 !!  ngfft, ngfft8 = FFT grid sizes
 !!  nkpt, nkpt8 = number of kpoints
-!!  nsppol, nsppo8 = number of spin polarization (1 or 2)
+!!  nsppol, nsppol8 = number of spin polarization (1 or 2)
 !!  nsym, nsym8 = number of symmetry operations
 !!  ntypat, ntypat8 = number of types of atoms
 !!  occ, occ8 = occupation numbers
@@ -46,9 +46,9 @@
 !!  pawtab,pawtab8= PAW tabulated data (PAW dataset)
 !!  rprim, rprim8 = primitive vectors of unit cell (cartesian coordinates)
 !!  dfpt_sciss, dfpt_sciss8 = scissor correction (Ha)
-!!  symrel, symre8 = symmetry operations in reciprocal space
+!!  symrel, symrel8 = symmetry operations in reciprocal space
 !!  tnons, tnons8 = translations associated to symrel
-!!  tolwfr, tolwf8 = tolerance on convergence of wavefunctions
+!!  tolwfr, tolwfr8 = tolerance on convergence of wavefunctions
 !!  typat, typat8 = array of atom types
 !!  usepaw = flag for utilization of PAW
 !!  wtk, wtk8 = weights of kpoints
@@ -74,13 +74,15 @@
 #include "abi_common.h"
 
 
-subroutine ddb_compare (acell,acell8,amu,amu8,dimekb,ecut,ecut8,ekb,ekb8,&
-& fullinit,fullmrgddb_init,iscf,iscf8,ixc,ixc8,kpt,kpt8,kptnrm,kptnr8,&
+subroutine ddb_compare2 (matom, matom8, mtypat, mtypat8, mkpt, mkpt8,&
+& mband, mband8, msym, msym8,&
+& acell,acell8,amu,amu8,dimekb,ecut,ecut8,ekb,ekb8,&
+& fullinit,fullmrgddb_init,iscf,iscf8,ixc,ixc8,kpt,kpt8,kptnrm,kptnrm8,&
 & natom,natom8,nband,nband8,ngfft,ngfft8,nkpt,nkpt8,&
-& nsppol,nsppo8,nsym,nsym8,ntypat,ntypat8,occ,occ8,&
+& nsppol,nsppol8,nsym,nsym8,ntypat,ntypat8,occ,occ8,&
 & occopt,occop8,pawecutdg,pawecutdg8,pawtab,pawtab8,&
-& rprim,rprim8,dfpt_sciss,dfpt_sciss8,symrel,symre8,&
-& tnons,tnons8,tolwfr,tolwf8,typat,typat8,usepaw,wtk,wtk8,xred,xred8,zion,zion8)
+& rprim,rprim8,dfpt_sciss,dfpt_sciss8,symrel,symrel8,&
+& tnons,tnons8,tolwfr,tolwfr8,typat,typat8,usepaw,wtk,wtk8,xred,xred8,zion,zion8)
 
  use defs_basis
  use m_profiling_abi
@@ -91,28 +93,36 @@ subroutine ddb_compare (acell,acell8,amu,amu8,dimekb,ecut,ecut8,ekb,ekb8,&
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'ddb_compare'
+#define ABI_FUNC 'ddb_compare2'
 !End of the abilint section
 
  implicit none
 
 !Arguments -------------------------------
 !scalars
- integer,intent(in) :: dimekb,fullmrgddb_init,iscf8,ixc8,natom8,nkpt8,nsppo8,nsym8
+ integer,intent(in) :: matom, matom8, mtypat, mtypat8, mkpt, mkpt8
+ integer,intent(in) :: mband, mband8, msym, msym8
+ integer,intent(in) :: dimekb,fullmrgddb_init,iscf8,ixc8,natom8,nkpt8,nsppol8,nsym8
  integer,intent(in) :: ntypat8,occop8,usepaw
  integer,intent(inout) :: fullinit,iscf,ixc,natom,nkpt,nsppol,nsym,ntypat
  integer,intent(inout) :: occopt
- real(dp),intent(in) :: ecut8,kptnr8,pawecutdg8,dfpt_sciss8,tolwf8
+ real(dp),intent(in) :: ecut8,kptnrm8,pawecutdg8,dfpt_sciss8,tolwfr8
  real(dp),intent(inout) :: ecut,kptnrm,pawecutdg,dfpt_sciss,tolwfr
 !arrays
- integer,intent(in) :: nband8(*),ngfft8(18),symre8(3,3,*),typat8(*)
- integer,intent(inout) :: nband(*),ngfft(18),symrel(3,3,*),typat(*)
- real(dp),intent(in) :: acell8(3),amu8(*),ekb8(dimekb,*),kpt8(3,*),occ8(*)
- real(dp),intent(in) :: rprim8(3,3),tnons8(3,*),wtk8(*),xred8(3,*),zion8(*)
- real(dp),intent(inout) :: acell(3),amu(*),ekb(dimekb,*),kpt(3,*),occ(*)
- real(dp),intent(inout) :: rprim(3,3),tnons(3,*),wtk(*),xred(3,*),zion(*)
- type(pawtab_type),intent(in) :: pawtab8(*)
- type(pawtab_type),intent(inout) :: pawtab(*)
+ integer,intent(in) :: nband8(mkpt8*nsppol8),ngfft8(18)
+ integer,intent(inout) :: nband(mkpt*nsppol),ngfft(18)
+ integer,intent(in) :: symrel8(3,3,msym8),typat8(matom8)
+ integer,intent(inout) :: symrel(3,3,msym),typat(matom)
+ real(dp),intent(in) :: acell8(3),amu8(mtypat8),ekb8(dimekb,mtypat8)
+ real(dp),intent(inout) :: acell(3),amu(mtypat),ekb(dimekb,mtypat)
+ real(dp),intent(in) :: kpt8(3,mkpt8),occ8(mband8*mkpt8*nsppol8)
+ real(dp),intent(inout) :: kpt(3,mkpt),occ(mband*mkpt*nsppol)
+ real(dp),intent(in) :: rprim8(3,3),tnons8(3,msym8)
+ real(dp),intent(inout) :: rprim(3,3),tnons(3,msym)
+ real(dp),intent(in) :: wtk8(mkpt8),xred8(3,matom8),zion8(mtypat8)
+ real(dp),intent(inout) :: wtk(mkpt),xred(3,matom),zion(mtypat)
+ type(pawtab_type),intent(in) :: pawtab8(ntypat8*usepaw)
+ type(pawtab_type),intent(inout) :: pawtab(ntypat*usepaw)
 
 !Local variables -------------------------
 !scalars
@@ -123,13 +133,6 @@ subroutine ddb_compare (acell,acell8,amu,amu8,dimekb,ecut,ecut8,ekb,ekb8,&
 
 ! *********************************************************************
 
- ! BEGIN DEBUG
- write(*,*) 'ddb_compare: enter'
- call flush()
- write(*,*) 'amu=',amu(1:2), amu8(1:2)
- write(*,*) 'typat=',typat(1:2), typat8(1:2)
- call flush()
- ! END DEBUG
 !write(std_out,*)' ddb_compare : rprim=',rprim, "rprim8=",rprim8
 
 !Compare all the preliminary information
@@ -181,7 +184,7 @@ subroutine ddb_compare (acell,acell8,amu,amu8,dimekb,ecut,ecut8,ekb,ekb8,&
    end do
  end if
 !9. nsppol
- call chki8(nsppol,nsppo8,'nsppol')
+ call chki8(nsppol,nsppol8,'nsppol')
 !4. nsym
  if(nsym/=1 .and. nsym8/=1)then
    call chki8(nsym,nsym8,'  nsym')
@@ -225,13 +228,13 @@ subroutine ddb_compare (acell,acell8,amu,amu8,dimekb,ecut,ecut8,ekb,ekb8,&
        kpt(ii,ij)=kpt8(ii,ij)
      end do
    end do
-   kptnrm=kptnr8
+   kptnrm=kptnrm8
  else if (nkpt==nkpt8)then
    do ij=1,nkpt
      do ii=1,3
 !      Compares the input and transfer values only if the input
 !      has not been initialized by a ground state input file
-       call chkr8(kpt(ii,ij)/kptnrm,kpt8(ii,ij)/kptnr8,'   kpt',tol)
+       call chkr8(kpt(ii,ij)/kptnrm,kpt8(ii,ij)/kptnrm8,'   kpt',tol)
      end do
    end do
  end if
@@ -280,12 +283,12 @@ subroutine ddb_compare (acell,acell8,amu,amu8,dimekb,ecut,ecut8,ekb,ekb8,&
    do isym=1,nsym
      do ii=1,3
        do ij=1,3
-         call chki8(symrel(ii,ij,isym),symre8(ii,ij,isym),'symrel')
+         call chki8(symrel(ii,ij,isym),symrel8(ii,ij,isym),'symrel')
        end do
      end do
    end do
  else if(nsym8/=1)then
-   symrel(:,:,1:nsym8)=symre8(:,:,1:nsym8)
+   symrel(:,:,1:nsym8)=symrel8(:,:,1:nsym8)
  end if
 !21. tnons (see symrel)
  if(nsym==nsym8)then
@@ -300,7 +303,7 @@ subroutine ddb_compare (acell,acell8,amu,amu8,dimekb,ecut,ecut8,ekb,ekb8,&
  end if
 !22. tolwfr
 !Take the less converged value...
- tolwfr=max(tolwfr,tolwf8)
+ tolwfr=max(tolwfr,tolwfr8)
 !23. typat
  do ii=1,ntypat
    call chki8(typat(ii),typat8(ii),' typat')
@@ -512,5 +515,5 @@ subroutine chki8(inti,intt,name)
  end subroutine chki8
 !!***
 
-end subroutine ddb_compare
+end subroutine ddb_compare2
 !!***

@@ -108,6 +108,7 @@
 !!      pawrhoij_free,pawrhoij_nullify,prteigrs,psddb8,read_rhor,rf2_getidirs
 !!      rotate_rho,set_pert_comm,set_pert_paw,setsym,setsymrhoij,status,symkpt
 !!      timab,transgrid,unset_pert_comm,unset_pert_paw,vlocalstr,wffclose
+!!      ddb_hdr_init, ddb_hdr_free, ddb_hdr_open_write
 !!      wfk_open_read,wfk_read_eigenvalues,wrtout,xmpi_sum
 !!
 !! SOURCE
@@ -2015,21 +2016,6 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 
          call ddb_hdr_open_write(ddb_hdr, dtfil%fnameabo_eigr2d, dtfil%unddb)
 
-!!        tolwfr must be initialized here, but it is a dummy value
-!         tolwfr=1.0_dp
-!         call ddb_io_out (dscrpt,dtfil%fnameabo_eigr2d,dtset%natom,dtset%mband,&
-!&         dtset%nkpt,dtset%nsym,dtset%ntypat,dtfil%unddb,vrsddb,&
-!&         dtset%acell_orig(1:3,1),dtset%amu_orig(:,1),dtset%dilatmx,dtset%ecut,dtset%ecutsm,&
-!&         dtset%intxc,dtset%iscf,dtset%ixc,dtset%kpt,dtset%kptnrm,&
-!&         dtset%natom,dtset%nband,dtset%ngfft,dtset%nkpt,dtset%nspden,dtset%nspinor,&
-!&         dtset%nsppol,dtset%nsym,dtset%ntypat,occ_pert,dtset%occopt,dtset%pawecutdg,&
-!&         dtset%rprim_orig(1:3,1:3,1),dtset%dfpt_sciss,dtset%spinat,dtset%symafm,dtset%symrel,&
-!&         dtset%tnons,tolwfr,dtset%tphysel,dtset%tsmear,&
-!&         dtset%typat,dtset%usepaw,dtset%wtk,xred,psps%ziontypat,dtset%znucl)
-!         nblok=1 ; fullinit=1 ; choice=2
-!         call psddb8 (choice,psps%dimekb,psps%ekb,fullinit,psps%indlmn,&
-!&         psps%lmnmax,nblok,ntypat,dtfil%unddb,pawtab,&
-!&         psps%pspso,psps%usepaw,psps%useylm,vrsddb)
          call outbsd(bdeigrf,dtset,eig2nkq,dtset%natom,nkpt_rbz,unitout)
 !        print _EIGI2D file for this perturbation
          if(smdelta>0) then
@@ -2037,23 +2023,6 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
            unitout = dtfil%unddb
            call ddb_hdr_open_write(ddb_hdr, dtfil%fnameabo_eigi2d, unitout)
 
-!           vrsddb=100401
-!           dscrpt=' Note : temporary (transfer) database '
-!!          tolwfr must be initialized here, but it is a dummy value
-!           tolwfr=1.0_dp
-!           call ddb_io_out (dscrpt,dtfil%fnameabo_eigi2d,dtset%natom,dtset%mband,&
-!&           dtset%nkpt,dtset%nsym,dtset%ntypat,dtfil%unddb,vrsddb,&
-!&           dtset%acell_orig(1:3,1),dtset%amu_orig(:,1),dtset%dilatmx,dtset%ecut,dtset%ecutsm,&
-!&           dtset%intxc,dtset%iscf,dtset%ixc,dtset%kpt,dtset%kptnrm,&
-!&           dtset%natom,dtset%nband,dtset%ngfft,dtset%nkpt,dtset%nspden,dtset%nspinor,&
-!&           dtset%nsppol,dtset%nsym,dtset%ntypat,occ_pert,dtset%occopt,dtset%pawecutdg,&
-!&           dtset%rprim_orig(1:3,1:3,1),dtset%dfpt_sciss,dtset%spinat,dtset%symafm,dtset%symrel,&
-!&           dtset%tnons,tolwfr,dtset%tphysel,dtset%tsmear,&
-!&           dtset%typat,dtset%usepaw,dtset%wtk,xred,psps%ziontypat,dtset%znucl)
-!           nblok=1 ; fullinit=1 ; choice=2
-!           call psddb8 (choice,psps%dimekb,psps%ekb,fullinit,psps%indlmn,&
-!&           psps%lmnmax,nblok,ntypat,dtfil%unddb,pawtab,&
-!&           psps%pspso,psps%usepaw,psps%useylm,vrsddb)
            call outbsd(bdeigrf,dtset,eigbrd,dtset%natom,nkpt_rbz,unitout)
          end if !smdelta
 

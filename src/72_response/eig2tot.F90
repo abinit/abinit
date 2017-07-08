@@ -70,9 +70,10 @@
 !!      respfn
 !!
 !! CHILDREN
-!!      crystal_free,crystal_init,ddb_io_out,distrb2,ebands_free,ebands_init
+!!      crystal_free,crystal_init,distrb2,ebands_free,ebands_init
 !!      eigr2d_free,eigr2d_init,eigr2d_ncwrite,fan_free,fan_init,fan_ncwrite
-!!      gkk_free,gkk_init,gkk_ncwrite,kptfine_av,outbsd,psddb8,smeared_delta
+!!      gkk_free,gkk_init,gkk_ncwrite,kptfine_av,outbsd,smeared_delta
+!!      ddb_hdr_init, ddb_hdr_free, ddb_hdr_open_write
 !!      timab,xmpi_sum
 !!
 !! SOURCE
@@ -530,22 +531,6 @@ subroutine eig2tot(dtfil,xred,psps,pawtab,natom,bdeigrf,clflg,dim_eig2nkq,eigen0
 
      call ddb_hdr_free(ddb_hdr)
 
-!     vrsddb=100401
-!!    tolwfr must be initialized here, but it is a dummy value
-!     tolwfr=1.0_dp
-!     call ddb_io_out (dscrpt,dtfil%fnameabo_eigr2d,dtset%natom,dtset%mband,&
-!&     dtset%nkpt,dtset%nsym,dtset%ntypat,dtfil%unddb,vrsddb,&
-!&     dtset%acell_orig(1:3,1),dtset%amu_orig(:,1),dtset%dilatmx,dtset%ecut,dtset%ecutsm,&
-!&     dtset%intxc,dtset%iscf,dtset%ixc,dtset%kpt,dtset%kptnrm,&
-!&     dtset%natom,dtset%nband,dtset%ngfft,dtset%nkpt,dtset%nspden,dtset%nspinor,&
-!&     dtset%nsppol,dtset%nsym,dtset%ntypat,occ_rbz,dtset%occopt,dtset%pawecutdg,&
-!&     dtset%rprim_orig(1:3,1:3,1),dtset%dfpt_sciss,dtset%spinat,dtset%symafm,dtset%symrel,&
-!&     dtset%tnons,tolwfr,dtset%tphysel,dtset%tsmear,&
-!&     dtset%typat,dtset%usepaw,dtset%wtk,xred,psps%ziontypat,dtset%znucl)
-!     nblok=1 ; fullinit=1 ; choice=2
-!     call psddb8 (choice,psps%dimekb,psps%ekb,fullinit,psps%indlmn,&
-!&     psps%lmnmax,nblok,dtset%ntypat,dtfil%unddb,pawtab,&
-!&     psps%pspso,psps%usepaw,psps%useylm,vrsddb)
    end if
    if(ieig2rf == 3 ) then
      call outbsd(bdeigrf,dtset,eig2nkq,dtset%natom,nkpt_rbz,unitout)
@@ -637,25 +622,6 @@ subroutine eig2tot(dtfil,xred,psps,pawtab,natom,bdeigrf,clflg,dim_eig2nkq,eigen0
        call ddb_hdr_open_write(ddb_hdr, dtfil%fnameabo_eigi2d, unitout)
 
        call ddb_hdr_free(ddb_hdr)
-
-
-!       vrsddb=100401
-!!      tolwfr must be initialized here, but it is a dummy value
-!       tolwfr=1.0_dp
-!       call ddb_io_out (dscrpt,dtfil%fnameabo_eigi2d,dtset%natom,dtset%mband,&
-!&       dtset%nkpt,dtset%nsym,dtset%ntypat,dtfil%unddb,vrsddb,&
-!&       dtset%acell_orig(1:3,1),dtset%amu_orig(:,1),dtset%dilatmx,dtset%ecut,dtset%ecutsm,&
-!&       dtset%intxc,dtset%iscf,dtset%ixc,dtset%kpt,dtset%kptnrm,&
-!&       dtset%natom,dtset%nband,dtset%ngfft,dtset%nkpt,dtset%nspden,dtset%nspinor,&
-!&       dtset%nsppol,dtset%nsym,dtset%ntypat,occ_rbz,dtset%occopt,dtset%pawecutdg,&
-!&       dtset%rprim_orig(1:3,1:3,1),dtset%dfpt_sciss,dtset%spinat,dtset%symafm,dtset%symrel,&
-!&       dtset%tnons,tolwfr,dtset%tphysel,dtset%tsmear,&
-!&       dtset%typat,dtset%usepaw,dtset%wtk,xred,psps%ziontypat,dtset%znucl)
-!
-!       nblok=1 ; fullinit=1 ; choice=2
-!       call psddb8 (choice,psps%dimekb,psps%ekb,fullinit,psps%indlmn,&
-!&       psps%lmnmax,nblok,dtset%ntypat,dtfil%unddb,pawtab,&
-!&       psps%pspso,psps%usepaw,psps%useylm,vrsddb)
 
        call outbsd(bdeigrf,dtset,eigbrd,dtset%natom,nkpt_rbz,unitout)
 

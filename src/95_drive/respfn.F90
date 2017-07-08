@@ -83,7 +83,7 @@
 !!
 !! CHILDREN
 !!      alloc_hamilt_gpu,atm2fft,check_kxc,chkpawovlp,chkph3,d2frnl,d2sym3
-!!      ddb_io_out,dealloc_hamilt_gpu,dfpt_dyfro,dfpt_dyout,dfpt_dyxc1
+!!      dealloc_hamilt_gpu,dfpt_dyfro,dfpt_dyout,dfpt_dyxc1
 !!      dfpt_eltfrhar,dfpt_eltfrkin,dfpt_eltfrloc,dfpt_eltfrxc,dfpt_ewald
 !!      dfpt_gatherdy,dfpt_looppert,dfpt_phfrq,dfpt_prtph,ebands_free
 !!      efmasdeg_free_array,efmasfr_free_array,eig2tot,eigen_meandege
@@ -94,9 +94,10 @@
 !!      paw_ij_nullify,pawdenpot,pawdij,pawexpiqr,pawfgr_destroy,pawfgr_init
 !!      pawfgrtab_free,pawfgrtab_init,pawinit,pawmknhat,pawpuxinit
 !!      pawrhoij_alloc,pawrhoij_bcast,pawrhoij_copy,pawrhoij_free
-!!      pawrhoij_nullify,pawtab_get_lsize,prteigrs,psddb8,pspini,q0dy3_apply
+!!      pawrhoij_nullify,pawtab_get_lsize,prteigrs,pspini,q0dy3_apply
 !!      q0dy3_calc,read_rhor,rhohxc,setsym,setsymrhoij,setup1,status,symdij
 !!      symmetrize_xred,sytens,timab,transgrid,vdw_dftd2,vdw_dftd3,wffclose
+!!      ddb_hdr_init, ddb_hdr_free, ddb_hdr_open_write
 !!      wings3,wrtloctens,wrtout,xmpi_bcast
 !!
 !! SOURCE
@@ -1414,39 +1415,19 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 &   gprimd,dtset%mband,mpert,natom,ntypat,outd2,pawbec,pawpiezo,piezofrnl,dtset%prtbbb,&
 &   rfasr,rfpert,rprimd,dtset%typat,ucvol,usevdw,psps%ziontypat)
 
-!  Open the formatted derivative database file, and write the
-!  preliminary information
-   call status(0,dtfil%filstat,iexit,level,'call ddb_hdr_open_write')
    dscrpt=' Note : temporary (transfer) database '
 
+!  Initialize the header of the DDB file
    call ddb_hdr_init(ddb_hdr,dtset,psps,pawtab,DDB_VERSION,dscrpt,&
 &                    1,xred=xred,occ=occ,ngfft=ngfft)
 
+!  Open the formatted derivative database file, and write the header
+   call status(0,dtfil%filstat,iexit,level,'call ddb_hdr_open_write')
    call ddb_hdr_open_write(ddb_hdr, dtfil%fnameabo_ddb, dtfil%unddb)
 
    call ddb_hdr_free(ddb_hdr)
 
-
-!   call status(0,dtfil%filstat,iexit,level,'call ddb_io_out')
-!!  tolwfr must be initialized here, but it is a dummy value
-!   tolwfr=1.0_dp
-!   call ddb_io_out (dscrpt,dtfil%fnameabo_ddb,natom,dtset%mband,&
-!&   dtset%nkpt,dtset%nsym,ntypat,dtfil%unddb,DDB_VERSION,&
-!&   dtset%acell_orig(1:3,1),dtset%amu_orig(:,1),dtset%dilatmx,dtset%ecut,dtset%ecutsm,&
-!&   dtset%intxc,iscf,dtset%ixc,dtset%kpt,dtset%kptnrm,&
-!&   natom,dtset%nband,ngfft,dtset%nkpt,dtset%nspden,dtset%nspinor,&
-!&   dtset%nsppol,dtset%nsym,ntypat,occ,dtset%occopt,dtset%pawecutdg,&
-!&   dtset%rprim_orig(1:3,1:3,1),dtset%dfpt_sciss,dtset%spinat,dtset%symafm,dtset%symrel,&
-!&   dtset%tnons,tolwfr,dtset%tphysel,dtset%tsmear,&
-!&   dtset%typat,dtset%usepaw,dtset%wtk,xred,psps%ziontypat,dtset%znucl)
-!
-!   nblok=1 ; fullinit=1 ; choice=2
-!   call psddb8 (choice,psps%dimekb,psps%ekb,fullinit,psps%indlmn,&
-!&   psps%lmnmax,nblok,ntypat,dtfil%unddb,pawtab,&
-!&   psps%pspso,psps%usepaw,psps%useylm,DDB_VERSION)
-
-!  Output of the dynamical matrix
-!  (Note : remember, previously, the processor me=0 has been selected)
+!  Output of the dynamical matrix (master only)
    call status(0,dtfil%filstat,iexit,level,'call dfpt_dyout   ')
    call dfpt_dyout(becfrnl,dtset%berryopt,blkflg,carflg,dtfil%unddb,ddkfil,dyew,dyfrlo,&
 &   dyfrnl,dyfrx1,dyfrx2,dyfr_cplex,dyfr_nondiag,dyvdw,d2cart,d2cart_bbb,d2eig0,&
