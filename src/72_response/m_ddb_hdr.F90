@@ -494,7 +494,7 @@ end subroutine ddb_hdr_open_write
 !! SOURCE
 
 subroutine ddb_hdr_open_read(ddb_hdr, filnam, unddb, ddb_version, &
-&                            matom,mtypat,mband,mkpt,msym,dimekb,lmnmax)
+&            matom,mtypat,mband,mkpt,msym,dimekb,lmnmax,usepaw)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -510,19 +510,21 @@ subroutine ddb_hdr_open_read(ddb_hdr, filnam, unddb, ddb_version, &
  character(len=*),intent(in) :: filnam
  integer,intent(in) :: unddb
  integer,intent(in) :: ddb_version
- integer,intent(in),optional :: matom,mtypat,mband,mkpt,msym,dimekb,lmnmax
+ integer,intent(in),optional :: matom,mtypat,mband,mkpt,msym
+ integer,intent(in),optional :: dimekb,lmnmax,usepaw
 
 !Local variables -------------------------
- integer :: mblktyp,nblok,usepaw
- integer :: matom_l,mtypat_l,mband_l,mkpt_l,msym_l,dimekb_l,lmnmax_l
+ integer :: mblktyp,nblok
+ integer :: matom_l,mtypat_l,mband_l,mkpt_l,msym_l
+ integer :: dimekb_l,lmnmax_l,usepaw_l
  integer :: choice
 
 ! ************************************************************************
 
  ! Read the dimensions from the DDB
  call ddb_getdims(dimekb_l,filnam,lmnmax_l,mband_l,mblktyp, &
-&                 msym_l,matom_l,nblok,mkpt_l,mtypat_l,unddb,usepaw, &
-&                 ddb_version,xmpi_comm_self)
+&       msym_l,matom_l,nblok,mkpt_l,mtypat_l,unddb,usepaw_l, &
+&       ddb_version,xmpi_comm_self)
 
  close(unddb)
 
@@ -533,9 +535,10 @@ subroutine ddb_hdr_open_read(ddb_hdr, filnam, unddb, ddb_version, &
  if (present(msym)) msym_l = msym
  if (present(dimekb)) dimekb_l = dimekb
  if (present(lmnmax)) lmnmax_l = lmnmax
+ if (present(usepaw)) usepaw_l = usepaw
 
  ddb_hdr%ddb_version = ddb_version
- ddb_hdr%usepaw = usepaw
+ ddb_hdr%usepaw = usepaw_l
  ddb_hdr%mband = mband_l
  ddb_hdr%matom = matom_l
  ddb_hdr%msym = msym_l
@@ -548,8 +551,8 @@ subroutine ddb_hdr_open_read(ddb_hdr, filnam, unddb, ddb_version, &
  ddb_hdr%psps%dimekb = dimekb_l
  ddb_hdr%psps%ntypat = mtypat_l
  ddb_hdr%psps%lmnmax = lmnmax_l
- ddb_hdr%psps%usepaw = usepaw
- ddb_hdr%psps%useylm = usepaw
+ ddb_hdr%psps%usepaw = usepaw_l
+ ddb_hdr%psps%useylm = usepaw_l  ! yep...
 
  ! Allocate the memory
  call ddb_hdr_malloc(ddb_hdr)

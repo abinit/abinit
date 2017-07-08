@@ -889,7 +889,10 @@ subroutine inprep8 (dimekb,filnam,lmnmax,mband,mblktyp,msym,natom,nblok,nkpt,&
 
    dimekb=0
    lmnmax=0
-   usepaw=0
+   !usepaw=0   ! GA: usepaw is also declared earlier in the header
+               !     and it is that earlier value that usepaw will
+               !     be compared in ioddb8_in, so there is no reason
+               !     to override the value here.
 
  else
    write(message, '(a,a,a,a)' )&

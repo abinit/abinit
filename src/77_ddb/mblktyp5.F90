@@ -68,7 +68,6 @@ subroutine mblktyp5 (chkopt,ddbun,dscrpt,filnam,mddb,msym,nddb,vrsddb)
 #define ABI_FUNC 'mblktyp5'
  use interfaces_14_hidewrite
  use interfaces_72_response
- use interfaces_77_ddb, except_this_one => mblktyp5
 !End of the abilint section
 
  implicit none
@@ -147,6 +146,7 @@ subroutine mblktyp5 (chkopt,ddbun,dscrpt,filnam,mddb,msym,nddb,vrsddb)
    mband=max(mband,ddb_hdr%mband)
    dimekb=max(dimekb,ddb_hdr%psps%dimekb)
    lmnmax=max(lmnmax,ddb_hdr%psps%lmnmax)
+   usepaw=max(usepaw,ddb_hdr%usepaw)
 
 
    call ddb_hdr_free(ddb_hdr)
@@ -170,7 +170,7 @@ subroutine mblktyp5 (chkopt,ddbun,dscrpt,filnam,mddb,msym,nddb,vrsddb)
 
  call ddb_hdr_open_read(ddb_hdr, filnam(2), ddbun, vrsddb, &
 &            matom=matom,mtypat=mtypat,mband=mband,mkpt=mkpt,&
-&            msym=msym,dimekb=dimekb,lmnmax=lmnmax)
+&            msym=msym,dimekb=dimekb,lmnmax=lmnmax,usepaw=usepaw)
 
  ABI_ALLOCATE(blkval2,(2,msize,ddb_hdr%nband(1),mkpt))
  ABI_ALLOCATE(kpnt,(3,mkpt,mblok))
@@ -207,7 +207,7 @@ subroutine mblktyp5 (chkopt,ddbun,dscrpt,filnam,mddb,msym,nddb,vrsddb)
 
    call ddb_hdr_open_read(ddb_hdr8, filnam(iddb+1), ddbun, vrsddb, &
 &            matom=matom,mtypat=mtypat,mband=mband,mkpt=mkpt,&
-&            msym=msym,dimekb=dimekb,lmnmax=lmnmax)
+&            msym=msym,dimekb=dimekb,lmnmax=lmnmax,usepaw=usepaw)
 
    if (chkopt==1)then
 !    Compare the current DDB and input DDB information.
