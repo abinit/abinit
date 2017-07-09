@@ -139,9 +139,9 @@ subroutine mblktyp5 (chkopt,ddbun,dscrpt,filnam,mddb,msym,nddb,vrsddb)
 
    mblok=mblok+ddb_hdr%nblok
    mblktyp=max(mblktyp,ddb_hdr%mblktyp)
-   matom=max(matom,ddb_hdr%natom)
-   mkpt=max(mkpt,ddb_hdr%nkpt)
-   mtypat=max(mtypat,ddb_hdr%ntypat)
+   matom=max(matom,ddb_hdr%matom)
+   mkpt=max(mkpt,ddb_hdr%mkpt)
+   mtypat=max(mtypat,ddb_hdr%mtypat)
    msym=max(msym,ddb_hdr%msym)
    mband=max(mband,ddb_hdr%mband)
    dimekb=max(dimekb,ddb_hdr%psps%dimekb)
