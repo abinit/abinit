@@ -134,8 +134,8 @@ subroutine mblktyp5 (chkopt,ddbun,dscrpt,filnam,mddb,msym,nddb,vrsddb)
  msym=192
 
  do iddb=1,nddb
-   call ddb_hdr_open_read(ddb_hdr, filnam(iddb+1), ddbun, vrsddb)
-   close(ddbun)
+   call ddb_hdr_open_read(ddb_hdr, filnam(iddb+1), ddbun, vrsddb,&
+&                         dimonly=1)
 
    mblok=mblok+ddb_hdr%nblok
    mblktyp=max(mblktyp,ddb_hdr%mblktyp)
@@ -168,6 +168,7 @@ subroutine mblktyp5 (chkopt,ddbun,dscrpt,filnam,mddb,msym,nddb,vrsddb)
 
 !Read the first database
 
+ write(std_out,*)' read the input derivative database information'
  call ddb_hdr_open_read(ddb_hdr, filnam(2), ddbun, vrsddb, &
 &            matom=matom,mtypat=mtypat,mband=mband,mkpt=mkpt,&
 &            msym=msym,dimekb=dimekb,lmnmax=lmnmax,usepaw=usepaw)

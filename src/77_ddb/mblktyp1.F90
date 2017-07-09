@@ -139,13 +139,13 @@ subroutine mblktyp1(chkopt,ddbun,dscrpt,filnam,mddb,msym,nddb,vrsddb)
  do iddb=1,nddb
 !   call ddb_getdims(dimekb_tmp,filnam(iddb+1),lmnmax_tmp,mband_tmp,mblktyp_tmp,&
 !&   msym_tmp,natom,nblok,nkpt,ntypat,ddbun,usepaw_tmp,vrsddb,xmpi_comm_self)
-   call ddb_hdr_open_read(ddb_hdr, filnam(iddb+1), ddbun, vrsddb)
-   close(ddbun)
+   call ddb_hdr_open_read(ddb_hdr, filnam(iddb+1), ddbun, vrsddb,&
+&                         dimonly=1)
 
    mblok=mblok+ddb_hdr%nblok
    mblktyp=max(mblktyp,ddb_hdr%mblktyp)
-   matom=max(matom,ddb_hdr%natom)
-   mkpt=max(mkpt,ddb_hdr%nkpt)
+   matom=max(matom,ddb_hdr%matom)
+   mkpt=max(mkpt,ddb_hdr%mkpt)
    mtypat=max(mtypat,ddb_hdr%ntypat)
    msym=max(msym,ddb_hdr%msym)
    mband=max(mband,ddb_hdr%mband)
@@ -233,6 +233,7 @@ subroutine mblktyp1(chkopt,ddbun,dscrpt,filnam,mddb,msym,nddb,vrsddb)
 
 !Read the first database
 
+ write(std_out,*)' read the input derivative database information'
  call ddb_hdr_open_read(ddb_hdr, filnam(2), ddbun, vrsddb, &
 &            matom=matom,mtypat=mtypat,mband=mband,mkpt=mkpt,&
 &            msym=msym,dimekb=dimekb,lmnmax=lmnmax,usepaw=usepaw)

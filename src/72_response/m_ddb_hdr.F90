@@ -381,21 +381,47 @@ subroutine ddb_hdr_free(ddb_hdr)
 ! ************************************************************************
 
  ! integer
- ABI_FREE(ddb_hdr%nband)
- ABI_FREE(ddb_hdr%symafm)
- ABI_FREE(ddb_hdr%symrel)
- ABI_FREE(ddb_hdr%typat)
+ if (allocated(ddb_hdr%nband)) then
+   ABI_FREE(ddb_hdr%nband)
+ end if
+ if (allocated(ddb_hdr%symafm)) then
+   ABI_FREE(ddb_hdr%symafm)
+ end if
+ if (allocated(ddb_hdr%symrel)) then
+   ABI_FREE(ddb_hdr%symrel)
+ end if
+ if (allocated(ddb_hdr%typat)) then
+   ABI_FREE(ddb_hdr%typat)
+ end if
 
  ! real
- ABI_FREE(ddb_hdr%amu)
- ABI_FREE(ddb_hdr%kpt)
- ABI_FREE(ddb_hdr%occ)
- ABI_FREE(ddb_hdr%spinat)
- ABI_FREE(ddb_hdr%tnons)
- ABI_FREE(ddb_hdr%wtk)
- ABI_FREE(ddb_hdr%xred)
- ABI_FREE(ddb_hdr%zion)
- ABI_FREE(ddb_hdr%znucl)
+ if (allocated(ddb_hdr%amu)) then
+   ABI_FREE(ddb_hdr%amu)
+ end if
+ if (allocated(ddb_hdr%kpt)) then
+   ABI_FREE(ddb_hdr%kpt)
+ end if
+ if (allocated(ddb_hdr%occ)) then
+   ABI_FREE(ddb_hdr%occ)
+ end if
+ if (allocated(ddb_hdr%spinat)) then
+   ABI_FREE(ddb_hdr%spinat)
+ end if
+ if (allocated(ddb_hdr%tnons)) then
+   ABI_FREE(ddb_hdr%tnons)
+ end if
+ if (allocated(ddb_hdr%wtk)) then
+   ABI_FREE(ddb_hdr%wtk)
+ end if
+ if (allocated(ddb_hdr%xred)) then
+   ABI_FREE(ddb_hdr%xred)
+ end if
+ if (allocated(ddb_hdr%zion)) then
+   ABI_FREE(ddb_hdr%zion)
+ end if
+ if (allocated(ddb_hdr%znucl)) then
+   ABI_FREE(ddb_hdr%znucl)
+ end if
 
  ! types
  call psps_free(ddb_hdr%psps)
@@ -494,7 +520,7 @@ end subroutine ddb_hdr_open_write
 !! SOURCE
 
 subroutine ddb_hdr_open_read(ddb_hdr, filnam, unddb, ddb_version, &
-&            matom,mtypat,mband,mkpt,msym,dimekb,lmnmax,usepaw)
+&        matom,mtypat,mband,mkpt,msym,dimekb,lmnmax,usepaw,dimonly)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -512,6 +538,7 @@ subroutine ddb_hdr_open_read(ddb_hdr, filnam, unddb, ddb_version, &
  integer,intent(in) :: ddb_version
  integer,intent(in),optional :: matom,mtypat,mband,mkpt,msym
  integer,intent(in),optional :: dimekb,lmnmax,usepaw
+ integer,intent(in),optional :: dimonly
 
 !Local variables -------------------------
  integer :: mblktyp,nblok
@@ -553,6 +580,8 @@ subroutine ddb_hdr_open_read(ddb_hdr, filnam, unddb, ddb_version, &
  ddb_hdr%psps%lmnmax = lmnmax_l
  ddb_hdr%psps%usepaw = usepaw_l
  ddb_hdr%psps%useylm = usepaw_l  ! yep...
+
+ if (present(dimonly) .and. (dimonly==1)) return
 
  ! Allocate the memory
  call ddb_hdr_malloc(ddb_hdr)
