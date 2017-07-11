@@ -144,14 +144,15 @@
       variables to be used in the main input file of the abinit code.
     advice : |
       <script type="text/javascript" src="__JS_PATH__generic_advice.js"> </script>
+      <hr>
     copyright : |
       <h5>Copyright (C) 1998-2017 ABINIT group (DCA,XG,RC,YG,FJ)
       <script type="text/javascript" src="__JS_PATH__copyright.js"> </script>
-      <h5> 
+      </h5> 
     links : |
-      <script type="text/javascript" src="__JS_PATH__list_internal_links.js"> </script>
+      <script type="text/javascript" src="__JS_PATH__list_internal_links_for_generated_files.js"> </script>
     menu : |
-      <script type="text/javascript" src="__JS_PATH__list_htmlfiles_input_variables_for_generated_files.js"> </script>
+      <script type="text/javascript" src="__JS_PATH__list_htmlfiles_input_variables.js"> </script>
     tofcontent_header : |
       <a name="list"></a>
       <h3><b> Content of the file : alphabetical list of "__KEYWORD__" variables.</b></h3>

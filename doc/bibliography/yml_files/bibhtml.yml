@@ -84,8 +84,8 @@
       <br>
       There are also many articles that are more focused: they describe some specific capability of ABINIT.
       The following list is actually not complete ... More references will be proposed by ABINIT itself (see the end of the output file),
-      in the files explaining <a href="../input_variables/html_automatically_generated/allvariables.html">the input variables</a>,
-      in the <a href="../topics/html_automatically_generated/all_topics.html">"topics" files</a>,
+      in the files explaining <a href="../../input_variables/html_generated/allvariables.html">the input variables</a>,
+      in the <a href="../../topics/html_generated/all_topics.html">"topics" files</a>,
       as well as in the references of the four general papers ...
       <br>
       Use of PAW should refer to Ref.[<a href="acknowledgments.html#6">6</a>].
@@ -122,7 +122,7 @@
       <hr>
       <h5>Copyright (C) 1998-2017 ABINIT group (XG,DCA, RC)
       <script type="text/javascript" src="__JS_PATH__copyright.js"> </script>
-      <h5>
+      </h5>
     links : |
       <script type="text/javascript" src="__JS_PATH__list_internal_links_for_generated_files.js"> </script>
     end : |
