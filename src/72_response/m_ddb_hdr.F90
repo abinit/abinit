@@ -322,16 +322,6 @@ subroutine ddb_hdr_malloc(ddb_hdr)
 
 ! ************************************************************************
 
- ! BEGIN DEBUG
- write(*,*) 'ddb_hdr_malloc: mkpt=', ddb_hdr%mkpt
- write(*,*) 'ddb_hdr_malloc: nsppol=', ddb_hdr%nsppol
- write(*,*) 'ddb_hdr_malloc: mtypat=', ddb_hdr%mtypat
- write(*,*) 'ddb_hdr_malloc: msym=', ddb_hdr%msym
- write(*,*) 'ddb_hdr_malloc: matom=', ddb_hdr%matom
- write(*,*) 'ddb_hdr_malloc: mband=', ddb_hdr%mband
- call flush()
- ! END DEBUG
-
  ! integer
  ABI_MALLOC(ddb_hdr%nband,(ddb_hdr%mkpt*ddb_hdr%nsppol))
  ABI_MALLOC(ddb_hdr%symafm,(ddb_hdr%msym))
