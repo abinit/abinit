@@ -688,7 +688,7 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
      if (me==master) then
        ifirst=merge(0,1,(itime>1.or.icycle>1))
        call write_md_hist(hist,filename,ifirst,ab_mover%natom,ab_mover%ntypat,&
-&       ab_mover%typat,amu,ab_mover%znucl,ab_mover%dtion)
+&       ab_mover%typat,amu,ab_mover%znucl,ab_mover%dtion,scfcv_args%dtset%mdtemp)
      end if
 #endif
 

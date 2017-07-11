@@ -53,7 +53,7 @@ module m_phonons
  use m_kpts,            only : kpts_ibz_from_kptrlatt
  use m_special_funcs,   only : bose_einstein
  use m_sort,            only : sort_dp
- use m_phonon_supercell
+ use m_supercell
 
  implicit none
 

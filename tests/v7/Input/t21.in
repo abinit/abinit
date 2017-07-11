@@ -91,7 +91,6 @@ dmatpawu1 1.0 0.0 0.0 0.0 0.0 0.0 0.0
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% exclude_hosts = 
 #%% [files]
 #%% files_to_test = 
 #%%   t21.out, tolnlines = 50, tolabs = 2.0e-5, tolrel = 2.0e-3, fld_options = -easy
@@ -102,4 +101,5 @@ dmatpawu1 1.0 0.0 0.0 0.0 0.0 0.0 0.0
 #%% authors =  B. Amadon
 #%% keywords =  DMFT
 #%% description = (Apparently the documentation section of this test has been lost)
+#%% topics = DFT+U
 #%%<END TEST_INFO>

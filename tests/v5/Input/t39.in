@@ -101,4 +101,5 @@
 #%% authors = M. Torrent, D.J. Adams
 #%% keywords = 
 #%% description = Compute U in bcc Fe in 2 atomic supercell.
+#%% topics = DFT+U
 #%%<END TEST_INFO>

@@ -39,7 +39,6 @@
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% exclude_hosts = gfortran@vishnu
 #%% [files]
 #%% psp_files = 6c_lda.paw
 #%% [paral_info]

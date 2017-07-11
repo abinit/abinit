@@ -112,7 +112,7 @@ MODULE m_ifc
      ! These values are used to call anaddb routines that don't use rprimd, gprimd
 
    real(dp) :: dielt(3,3)
-     ! Dielectric tensor
+     ! Dielectric tensor (Cartesian coordinates)
 
    real(dp) :: omega_minmax(2)
      ! Min and max frequency obtained on the initial ab-initio q-mesh (-+ 30 cmm1)
@@ -168,6 +168,7 @@ MODULE m_ifc
    real(dp),allocatable :: zeff(:,:,:)
      ! zeff(3,3,natom)
      ! Effective charge on each atom, versus electric field and atomic displacement.
+     ! Cartesian coordinates
 
    real(dp),allocatable :: qibz(:,:)
      ! qibz(3,nqibz))
@@ -725,7 +726,8 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
  if (nsphere == -1) call ifc_autocutoff(ifc, crystal, comm)
 
  call cwtime(cpu, wall, gflops, "stop")
- write(std_out,"(2(a,f6.2))")" ifc_init: cpu: ",cpu,", wall: ",wall
+ write(message,"(2(a,f6.2))")" ifc_init: cpu: ",cpu,", wall: ",wall
+ call wrtout(std_out,message,'COLL')
 
 end subroutine ifc_init
 !!***

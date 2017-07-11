@@ -57,7 +57,7 @@ subroutine freeze_displ_allmodes(displ, freeze_displ, natom, outfile_radix, phfr
 
  use defs_basis
  use m_profiling_abi
- use m_phonon_supercell
+ use m_supercell
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
