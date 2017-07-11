@@ -5545,7 +5545,7 @@
     dimensions: scalar
     excludes: null
     mnemonics: EFfective MASs, Number of points for integration w/r to THETA
-    requires: '[[efmas]]==1 and [[efmas_band]]==(degenerate band index)'
+    requires: '[[efmas]]==1 and [[efmas_bands]]==(degenerate band index)'
     section: varrf
     text: |-
         <p>
@@ -11770,11 +11770,11 @@
          </ul>
          <ul>
           <li>
-           1=&gt; LDA or LSD, Teter Pade parametrization (4/93, published in S. Goedecker, M. Teter, J. Huetter, Phys.Rev.B54, 1703 (1996)), which
+           1=&gt; LDA or LSD, Teter Pade parametrization (4/93, published in [[Goedecker1996]], which
         reproduces Perdew-Wang (which reproduces Ceperley-Alder!).
           </li>
           <li>
-           2=&gt; LDA, Perdew-Zunger-Ceperley-Alder (no spin-polarization)
+           2=&gt; LDA, Perdew-Zunger-Ceperley-Alder (no spin-polarization) [[Perdew1981]]
           </li>
           <li>
            3=&gt; LDA, old Teter rational polynomial parametrization (4/91)
@@ -11964,12 +11964,11 @@
           </li>
           <li>
            009=&gt; XC_LDA_C_PZ !  Perdew &amp; Zunger
-        [Perdew and Zunger, Phys. Rev. B 23, 5048 (1981)
-        ]
+        [[Perdew1981]]
           </li>
           <li>
            010=&gt; XC_LDA_C_PZ_MOD !  Perdew &amp; Zunger (Modified)
-        [Perdew and Zunger, Phys. Rev. B 23, 5048 (1981)
+        [[Perdew1981]]
         Modified to improve the matching between the low and high rs part
         ]
           </li>
@@ -11977,7 +11976,7 @@
            011=&gt; XC_LDA_C_OB_PZ !  Ortiz &amp; Ballone (PZ)
         [G Ortiz and P Ballone, Phys. Rev. B 50, 1391 (1994) ;
         G Ortiz and P Ballone, Phys. Rev. B 56, 9970(E) (1997) ;
-        Perdew and Zunger, Phys. Rev. B 23, 5048 (1981)
+        [[Perdew1981]]
         ]
           </li>
           <li>
@@ -18061,7 +18060,7 @@
            <li>
             [[occopt]]=6:
             <br />
-            Smearing of Methfessel and Paxton (PRB40,3616(1989))
+            Smearing of Methfessel and Paxton [[Methfessel1989]]
         with Hermite polynomial of degree 2, corresponding
         to "Cold smearing" of N. Marzari with a=0
         (so, same smeared delta function as [[occopt]]=4, with different a).
@@ -19592,7 +19591,7 @@
     - ph_nqpath
     excludes: null
     mnemonics: 'Phonons: Q-PATH'
-    requires: specified([[pq_nqpath]])
+    requires: specified([[ph_nqpath]])
     section: varrf
     text: |-
         This array contains the list of special q-points used to construct the q-path for phonon band structures and phonon linewidths.

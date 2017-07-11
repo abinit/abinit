@@ -137,8 +137,8 @@
         and the outer loop will execute from 1 to [[udtset](1).
         Note that the largest value for [[udtset]](1) is presently 999,
         while it is 9 for [[udtset]](2) (so, only the last digit for the inner loop). </p>
-        <p>The value of [[ndtset<]] must
-        be coherent with [[>udtset]] (it
+        <p>The value of [[ndtset]] must
+        be coherent with [[udtset]] (it
         must equal the product <code>udtset(1)*udtset(2)</code> ). </p>
         <p>A dataset index is created by the concatenation of the outer loop index and
         the inner loop index. <br>

@@ -87,7 +87,7 @@ def format_default(defaultval):
 
 ################################################################################
 
-def make_links(text,cur_abivarname,variables,characteristics,specials):
+def make_links(text,cur_abivarname,variables,characteristics,specials,backlinks,backlink):
 
   def replace_link(mymatch):
     abivarname = mymatch.group()[2:-2]
@@ -103,6 +103,7 @@ def make_links(text,cur_abivarname,variables,characteristics,specials):
     else:
       result=get_year(abivarname)
       if result != -9999 :
+        backlinks[abivarname]+=backlink+";"
         return '[<a href="../../bibliography/files_generated/bibliography.html#'+abivarname+'">'+abivarname+'</a>]'
       else:
         return '<a href="#">[[FAKE LINK:'+abivarname+']]</a>'
@@ -181,6 +182,7 @@ def get_year(name):
     result=m.group()
     if not result[0] in ["1","2"]:
       result=-9999
+  return result
 
 ################################################################################
 ################################################################################
@@ -318,10 +320,8 @@ for item in bibtex_items:
 ################################################################################
 ################################################################################
 
-# Treat the bibliography
-
-################################################################################
-# First constitute a dictionary of formatted references.
+# Treat first the bibliography
+# Constitute a dictionary of formatted references.
 # The ID is the key and the formatted reference is the value
 
 reference_dic={}
@@ -419,41 +419,16 @@ for (i,ref) in enumerate(bibtex_dics):
 
 ################################################################################
 # Order the references
+
 bibtex_dics=sorted( bibtex_dics, key= lambda item: item['ID'])
 
 ################################################################################
-# Write an ordered bib file, that allows to update the original one.
-# Constitute also the content of the ABINIT bibtex and bibliography files.
-bib_content=dict()
-bib_content['bibtex']=""
-bib_content['bibliography']=""
-bib_content['acknowledgments']=""
-lines_txt=""
+# Initialize a dictionary of "back"links
+
+backlinks=dict()
 for ref in bibtex_dics:
-  entrytype=ref["ENTRYTYPE"]
   ID=ref["ID"]
-  line=("@%s{%s,%s") %(entrytype,ID,ref['body'])
-  lines_txt+= line 
-  bib_content['bibtex']+= ('<hr><a id="%s">%s</a> \n <pre>' ) %(ID,ID) 
-  bib_content['bibtex']+= line+'</pre> \n'
-  bib_content['bibliography']+= ('<hr><a id="%s">[%s]</a> (<a href="./bibtex.html#%s">bibtex</a>)\n <br> %s \n') %(ID,ID,ID,reference_dic[ID])
-
-# Open, write and close the txt file
-file_txt = bib_gen+'/ordered_abiref.bib'
-f_txt = open(file_txt,'w')
-f_txt.write(lines_txt)
-f_txt.close()
-print("File %s has been written ..." %file_txt)
-
-#Global operations on the tentative html file : conversion from bibtex to html.
-bib_content['bibliography']=bib_content['bibliography'].replace("\'e","&eacute;")
-bib_content['bibliography']=bib_content['bibliography'].replace("\'{e}","&eacute;")
-bib_content['bibliography']=bib_content['bibliography'].replace("\^o","&ocirc;")
-bib_content['bibliography']=bib_content['bibliography'].replace("\^{o}","&ocirc;")
-bib_content['bibliography']=bib_content['bibliography'].replace("\`e","&egrave;")
-bib_content['bibliography']=bib_content['bibliography'].replace("\`{e}","&egrave;")
-bib_content['bibliography']=bib_content['bibliography'].replace("\c c","&ccedil;")
-bib_content['bibliography']=bib_content['bibliography'].replace("\c{c}","&ccedil;")
+  backlinks[ID]=" "
 
 ################################################################################
 # Write a txt file, for checking purposes
@@ -534,9 +509,10 @@ for (specialkey,specialval) in list_specials:
   cur_specials.append(specialkey)
 
 for (speckey, specval) in list_specials:
+  backlink="../../input_variables/invars_html_gen/specials.html#%s" %(speckey)
   cur_content = "<br><font id=\"title\"><a name=\""+speckey+"\">"+speckey+"</a></font>\n"
   cur_content += "<br><font id=\"text\">\n"
-  cur_content += "<p>\n"+doku2html(make_links(specval,speckey,list_all_vars,list_chars,cur_specials))+"\n"
+  cur_content += "<p>\n"+doku2html(make_links(specval,speckey,list_all_vars,list_chars,cur_specials,backlinks,backlink))+"\n"
   cur_content += "</font>"
   cur_content += "<br><br><a href=#top>Go to the top</a>\n"
   cur_content += "<B> | </B><a href=\"allvariables.html#top\">Complete list of input variables</a><hr>\n"
@@ -551,6 +527,7 @@ for i, var in enumerate(variables):
   section = var.section
   all_vars[section].append([var.abivarname,var.mnemonics])
   cur_content = ""
+  backlink="../../input_variables/invars_html_gen/%s.html#%s" %(section,var.abivarname)
 
   try:
     # Title
@@ -563,7 +540,7 @@ for i, var in enumerate(variables):
       for chs in var.characteristics:
         chars += chs+", "
       chars = chars[:-2]
-      cur_content += "<br><font id=\"characteristic\">Characteristic: "+make_links(chars,var.abivarname,list_all_vars,list_chars,cur_specials)+"</font>\n"
+      cur_content += "<br><font id=\"characteristic\">Characteristic: "+make_links(chars,var.abivarname,list_all_vars,list_chars,cur_specials,backlinks,backlink)+"</font>\n"
     else:
       cur_content += "<br><font id=\"characteristic\">Characteristic: </font>\n"
     # Topics
@@ -582,24 +559,24 @@ for i, var in enumerate(variables):
     # Variable type, including dimensions
     cur_content += "<br><font id=\"vartype\">Variable type: "+var.vartype
     if var.dimensions is not None:
-      cur_content += make_links(format_dimensions(var.dimensions),var.abivarname,list_all_vars,list_chars,cur_specials)
+      cur_content += make_links(format_dimensions(var.dimensions),var.abivarname,list_all_vars,list_chars,cur_specials,backlinks,backlink)
     if var.commentdims is not None and var.commentdims != "":
-      cur_content += " (Comment: "+make_links(var.commentdims,var.abivarname,list_all_vars,list_chars,cur_specials)+")"
+      cur_content += " (Comment: "+make_links(var.commentdims,var.abivarname,list_all_vars,list_chars,cur_specials,backlinks,backlink)+")"
     cur_content += "</font>\n" 
     # Default
-    cur_content += "<br><font id=\"default\">"+make_links(format_default(var.defaultval),var.abivarname,list_all_vars,list_chars,cur_specials)
+    cur_content += "<br><font id=\"default\">"+make_links(format_default(var.defaultval),var.abivarname,list_all_vars,list_chars,cur_specials,backlinks,backlink)
     if var.commentdefault is not None and var.commentdefault != "":
-      cur_content += " (Comment: "+make_links(var.commentdefault,var.abivarname,list_all_vars,list_chars,cur_specials)+")"
+      cur_content += " (Comment: "+make_links(var.commentdefault,var.abivarname,list_all_vars,list_chars,cur_specials,backlinks,backlink)+")"
     cur_content += "</font>\n" 
     # Requires
     if var.requires is not None and var.requires != "":
-      cur_content += "<br><br><font id=\"requires\">\nOnly relevant if "+doku2html(make_links(var.requires,var.abivarname,list_all_vars,list_chars,cur_specials))+"\n</font>\n"
+      cur_content += "<br><br><font id=\"requires\">\nOnly relevant if "+doku2html(make_links(var.requires,var.abivarname,list_all_vars,list_chars,cur_specials,backlinks,backlink))+"\n</font>\n"
     # Excludes
     if var.excludes is not None and var.excludes != "":
-      cur_content += "<br><br><font id=\"excludes\">\nThe use of this variable forbids the use of "+doku2html(make_links(var.excludes,var.abivarname,list_all_vars,list_chars,cur_specials))+"\n</font>\n"
+      cur_content += "<br><br><font id=\"excludes\">\nThe use of this variable forbids the use of "+doku2html(make_links(var.excludes,var.abivarname,list_all_vars,list_chars,cur_specials,backlinks,backlink))+"\n</font>\n"
     # Text
     cur_content += "<br><font id=\"text\">\n"
-    cur_content += "<p>\n"+doku2html(make_links(var.text,var.abivarname,list_all_vars,list_chars,cur_specials))+"\n"
+    cur_content += "<p>\n"+doku2html(make_links(var.text,var.abivarname,list_all_vars,list_chars,cur_specials,backlinks,backlink))+"\n"
     # End the section for one variable
     cur_content += "</font>\n\n"
     cur_content += "<br><br><a href=#top>Go to the top</a>\n"
@@ -672,7 +649,8 @@ for i, section_info in enumerate(sections):
   #Global operations on the tentative html file.
   sectionhtml=sectionhtml.replace("__JS_PATH__",js_path)
   sectionhtml=sectionhtml.replace("__KEYWORD__",section_info.keyword)
-  sectionhtml = doku2html(make_links(sectionhtml,None,list_all_vars,list_chars,cur_specials))
+  backlink="../../input_variables/invars_html_gen/%s.html" %(section)
+  sectionhtml = doku2html(make_links(sectionhtml,None,list_all_vars,list_chars,cur_specials,backlinks,backlink))
 
   #Write the finalized html file.
   file_cur = invars_html_gen+'/'+section+'.html'
@@ -850,7 +828,8 @@ for topic_name in list_of_topics:
   topic_html=topic_html.replace("__JS_PATH__",js_path)
   topic_html=topic_html.replace("__HOWTO__",topic.howto)
   topic_html=topic_html.replace("__KEYWORD__",topic.keyword)
-  topic_html = doku2html(make_links(topic_html,None,list_all_vars,list_chars,cur_specials))
+  backlink="../../topics/topics_html_gen/topic_%s.html" %(topic_name)
+  topic_html = doku2html(make_links(topic_html,None,list_all_vars,list_chars,cur_specials,backlinks,backlink))
 
   # Open, write and close the file
   file_topic = topics_html_gen+'/topic_'+topic_name+'.html'
@@ -878,7 +857,8 @@ for j in ["header","title","subtitle","copyright","links","toc_all","links","end
 #Global operations on the tentative html file.
 all_topics_html=all_topics_html.replace("__JS_PATH__",js_path)
 all_topics_html=all_topics_html.replace("__KEYWORD__",default_topic.keyword)
-all_topics_html = doku2html(make_links(all_topics_html,None,list_all_vars,list_chars,cur_specials))
+backlink="../../topics/topics_html_gen/all_topics.html" 
+all_topics_html = doku2html(make_links(all_topics_html,None,list_all_vars,list_chars,cur_specials,backlinks,backlink))
 
 # Open, write and close the file
 file_html = topics_html_gen+'/all_topics.html'
@@ -886,6 +866,47 @@ f_html = open(file_html,'w')
 f_html.write(all_topics_html)
 f_html.close()
 print("File %s written ..."%file_html )
+
+################################################################################
+################################################################################
+
+# Come back to the bibliography
+
+################################################################################
+# Write an ordered bib file, that allows to update the original one.
+# Constitute also the content of the ABINIT bibtex and bibliography files.
+
+bib_content=dict()
+bib_content['bibtex']=""
+bib_content['bibliography']=""
+bib_content['acknowledgments']=""
+lines_txt=""
+for ref in bibtex_dics:
+  entrytype=ref["ENTRYTYPE"]
+  ID=ref["ID"]
+  line=("@%s{%s,%s") %(entrytype,ID,ref['body'])
+  lines_txt+= line
+  bib_content['bibtex']+= ('<hr><a id="%s">%s</a> \n <pre>' ) %(ID,ID)
+  bib_content['bibtex']+= line+'</pre> \n'
+  bib_content['bibliography']+= ('<hr><a id="%s">[%s]</a> (<a href="./bibtex.html#%s">bibtex</a>)\n <br> %s \n') %(ID,ID,ID,reference_dic[ID])
+
+# Open, write and close the txt file
+file_txt = bib_gen+'/ordered_abiref.bib'
+f_txt = open(file_txt,'w')
+f_txt.write(lines_txt)
+f_txt.close()
+print("File %s has been written ..." %file_txt)
+
+#Global operations on the tentative html file : conversion from bibtex to html.
+bib_content['bibliography']=bib_content['bibliography'].replace("\'e","&eacute;")
+bib_content['bibliography']=bib_content['bibliography'].replace("\'{e}","&eacute;")
+bib_content['bibliography']=bib_content['bibliography'].replace("\^o","&ocirc;")
+bib_content['bibliography']=bib_content['bibliography'].replace("\^{o}","&ocirc;")
+bib_content['bibliography']=bib_content['bibliography'].replace("\`e","&egrave;")
+bib_content['bibliography']=bib_content['bibliography'].replace("\`{e}","&egrave;")
+bib_content['bibliography']=bib_content['bibliography'].replace("\c c","&ccedil;")
+bib_content['bibliography']=bib_content['bibliography'].replace("\c{c}","&ccedil;")
+
 
 ################################################################################
 # Generate the html files in the bibliography directory
@@ -918,7 +939,8 @@ for i, bibhtml_info in enumerate(bibhtml):
   #Global operations on the tentative html file.
   bibhtml=bibhtml.replace("__JS_PATH__",js_path)
   bibhtml=bibhtml.replace("__KEYWORD__",bibhtml_info.keyword)
-  bibhtml = doku2html(make_links(bibhtml,None,list_all_vars,list_chars,cur_specials))
+  backlink="../../bibliography/bib_gen/%s.html" %(bibname)
+  bibhtml = doku2html(make_links(bibhtml,None,list_all_vars,list_chars,cur_specials,backlinks,backlink))
 
   #Write the finalized html file.
   file_cur = bib_gen+'/'+bibname+'.html'

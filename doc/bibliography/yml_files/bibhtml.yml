@@ -121,7 +121,7 @@
         (<a href="https://arxiv.org/abs/0707.3405">available on Arxiv.org</a>)</cite>.
         <li><b>B.13<a name="13">.</b> If the LDA+U method as implemented in ABINIT is used, cite [[Amadon2008]].
         <li><b>B.14<a name="14">.</b> If the ONCVPSP pseudopotentials are used, cite [[Hamann2013]].
-        <li><b>B.15<a name="15">.</b> If the Van Der Waals DFT-D (Grimme) functionals are used, cite [[VanTroeye2016]].
+        <li><b>B.15<a name="15">.</b> If the Van Der Waals DFT-D (Grimme) functionals are used, cite [[Vantroeye2016]].
         <li><b>B.16<a name="16">.</b> If the temperature dependence of the electronic structure or the zero-point motion effect 
             on the electronic structure are computed, cite [[Ponce2014]] and [[Ponce2015]].
       </ul>
