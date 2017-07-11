@@ -329,6 +329,7 @@ subroutine ddb_hdr_malloc(ddb_hdr)
  write(*,*) 'ddb_hdr_malloc: msym=', ddb_hdr%msym
  write(*,*) 'ddb_hdr_malloc: matom=', ddb_hdr%matom
  write(*,*) 'ddb_hdr_malloc: mband=', ddb_hdr%mband
+ call flush()
  ! END DEBUG
 
  ! integer
