@@ -101,7 +101,11 @@ def make_links(text,cur_abivarname,variables,characteristics,specials):
     elif abivarname in specials:
       return '<a href="specials.html#'+abivarname+'">'+abivarname+'</a>'
     else:
-      return '<a href="#">[[FAKE LINK:'+abivarname+']]</a>'
+      result=get_year(abivarname)
+      if result != -9999 :
+        return '[<a href="../../bibliography/files_generated/bibliography.html#'+abivarname+'">'+abivarname+'</a>]'
+      else:
+        return '<a href="#">[[FAKE LINK:'+abivarname+']]</a>'
     return mymatch.group()
 
   p=re.compile("\\[\\[([a-zA-Z0-9_ */<>]*)\\]\\]")
@@ -164,6 +168,19 @@ def reformat_namelist(namelist):
         new_name+=', '
   newnamelist=new_name+","
   return newnamelist
+
+################################################################################
+
+def get_year(name):
+  """ Find a substring with four digits, beginning with 1 or 2, in the "name" string, and return it is succesfull. 
+      Otherwise, return -9999 if there is no such string """
+  m=re.search("\d{4}",name,flags=0)
+  if m==None:
+    result=-9999
+  else:
+    result=m.group()
+    if not result[0] in ["1","2"]:
+      result=-9999
 
 ################################################################################
 ################################################################################
@@ -235,15 +252,10 @@ for item in bibtex_items:
   id_lower=item[0].strip().lower()
   id_upper_lower=id_lower[0].upper()+id_lower[1:]
   # Check that there is a four-digit date in the ID
-  m=re.search("\d{4}",id_upper_lower,flags=0)
-  if m==None:
-    print("The entry %s does not have the proper format, i.e. the year should be a four-digit number" % id_upper_lower)
+  result=get_year(id_upper_lower)
+  if result== -9999 :
+    print("The entry %s does not have the proper format, i.e. the year should be a four-digit number starting with 1 or 2" % id_upper_lower)
     raise
-  else:
-    result=m.group()
-    if not result[0] in ["1","2"]:
-      print("The entry %s does not have the proper format, i.e. the four-digit year should start with 1 or 2" % id_upper_lower)
-      raise
   item_dic['ID']=id_upper_lower
 
   #Store the remaining, for later possible reordering, without any of the later treatments.
