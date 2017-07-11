@@ -11,13 +11,14 @@
     name : bibliography
     keyword : bibliography
     purpose : |
-      <p>This document lists all the references mentioned in the ABINIT documentation, with link to the Web pages where such references are mentioned.
+      <p>This document lists all the bibliographical references mentioned in the ABINIT documentation, 
+      with link to the Web pages where such references are mentioned.
 
 - !section
     name : bibtex
     keyword : bibtex
     purpose : |
-      This document gives the bibtex data for all the references mentioned in the ABINIT documentation.
+      This document gives the bibtex data for all the bibliographical references mentioned in the ABINIT documentation.
 
 - !section
     name : acknowledgments

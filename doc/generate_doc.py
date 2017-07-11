@@ -159,7 +159,9 @@ def reformat_namelist(namelist):
       else:
         new_name+=", "
     else:
-      new_name+=one_name
+      new_name+=one_name.strip()
+      if i!=len(names)-1:
+        new_name+=', '
   newnamelist=new_name+","
   return newnamelist
 
@@ -392,12 +394,12 @@ for (i,ref) in enumerate(bibtex_dics):
   try:
     doi=ref["doi"].strip()
     if doi != "":
-      formatted += ' DOI: '+doi+'.'
+      formatted += (' <br> DOI: <a href="https://doi.org/%s">%s</a>.') %(doi,doi)
   except:
     try:
       url=ref["url"].strip()
       if url != "":
-        formatted += ' '+url+'.'
+        formatted += (' <br> URL: <a href="%s"> %s</a>.') %(url,url)
     except:
       pass
 
@@ -409,7 +411,7 @@ bibtex_dics=sorted( bibtex_dics, key= lambda item: item['ID'])
 
 ################################################################################
 # Write an ordered bib file, that allows to update the original one.
-# Constitute also the content of the ABINIT bibtex file.
+# Constitute also the content of the ABINIT bibtex and bibliography files.
 bib_content=dict()
 bib_content['bibtex']=""
 bib_content['bibliography']=""
@@ -418,10 +420,11 @@ lines_txt=""
 for ref in bibtex_dics:
   entrytype=ref["ENTRYTYPE"]
   ID=ref["ID"]
-  bib_content['bibtex']+= ('<a id="%s">%s</a> \n <pre>' ) %(ID,ID) 
   line=("@%s{%s,%s") %(entrytype,ID,ref['body'])
   lines_txt+= line 
+  bib_content['bibtex']+= ('<hr><a id="%s">%s</a> \n <pre>' ) %(ID,ID) 
   bib_content['bibtex']+= line+'</pre> \n'
+  bib_content['bibliography']+= ('<hr><a id="%s">[%s]</a> \n <br> %s \n') %(ID,ID,reference_dic[ID])
 
 # Open, write and close the txt file
 file_txt = bib_gen+'/ordered_abiref.bib'

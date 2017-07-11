@@ -30,7 +30,6 @@
   pages : 3725--3734
   publisher : American Physical Society
   doi : 10.1103/PhysRevB.17.3725
-  url : http://link.aps.org/doi/10.1103/PhysRevB.17.3725
   issue : 10
 -
   ENTRYTYPE : article
@@ -81,7 +80,6 @@
   pages : 066402
   numpages : 4
   doi : 10.1103/PhysRevLett.96.066402
-  url : http://link.aps.org/doi/10.1103/PhysRevLett.96.066402
   publisher : American Physical Society
   file : :/media/disk_iomega/BIBLIO/Cerium/DMFT/PhysRevLett.96.066402.pdf:PDF
   issue : 6
@@ -95,7 +93,7 @@
   volume : 77
   pages : 205112
   publisher : American Physical Society
-  url : http://link.aps.org/doi/10.1103/PhysRevB.77.205112
+  doi : 10.1103/PhysRevB.77.205112
   timestamp : 2012.08.08
   number : 20
   file : :/media/disk_iomega/BIBLIO/DMFT/PhysRevB.77.205112.pdf:PDF
@@ -112,14 +110,13 @@
   pages : 155104
   numpages : 10
   doi : 10.1103/PhysRevB.77.155104
-  url : http://link.aps.org/doi/10.1103/PhysRevB.77.155104
   publisher : American Physical Society
   file : :/media/disk_iomega/BIBLIO/Cerium/PhysRevB.77.155104-1.pdf:PDF
   issue : 15
 -
   ENTRYTYPE : article
   ID : Amadon2012
-  author : Amadon, B
+  author : Amadon, B.
   title : A self-consistent {DFT+DMFT} scheme in the projector augmented wave method: applications to cerium, {Ce$_2$O$_3$} and {Pu$_2$O$_3$} with the {H}ubbard {I} solver and comparison to {DFT+U}
   journal : J. Phys.: Cond. Matt.
   year : 2012
@@ -142,7 +139,6 @@
   pages : 125110
   numpages : 10
   doi : 10.1103/PhysRevB.89.125110
-  url : http://link.aps.org/doi/10.1103/PhysRevB.89.125110
   publisher : American Physical Society
   issue : 12
 -
@@ -156,7 +152,6 @@
   pages : 161103
   numpages : 5
   doi : 10.1103/PhysRevB.91.161103
-  url : http://link.aps.org/doi/10.1103/PhysRevB.91.161103
   publisher : American Physical Society
   issue : 16
 -
@@ -178,7 +173,7 @@
   volume : 43
   pages : 7570--7574
   publisher : American Physical Society
-  url : http://link.aps.org/doi/10.1103/PhysRevB.43.7570
+  doi : 10.1103/PhysRevB.43.7570
   timestamp : 2013.07.03
   number : 10
   owner : amadonb
@@ -211,7 +206,6 @@
   volume : 9
   pages : 2359
   doi : 10.1088/0305-4608/9/12/009
-  url : http://iopscience.iop.org/0305-4608/9/12/009
 -
   ENTRYTYPE : article
   ID : Aryasetiawan2004
@@ -222,7 +216,7 @@
   volume : 70
   pages : 195104--
   publisher : American Physical Society
-  url : http://link.aps.org/doi/10.1103/PhysRevB.70.195104
+  doi : 10.1103/PhysRevB.70.195104
   timestamp : 2013.03.15
   number : 19
   owner : amadonb
@@ -281,7 +275,6 @@
   pages : 16201
   publisher : American Physical Society
   doi : 10.1103/PhysRevB.53.16201
-  url : http://link.aps.org/doi/10.1103/PhysRevB.53.16201
   issue : 24
 -
   ENTRYTYPE : article
@@ -315,7 +308,6 @@
   pages : 4514--4517
   numpages : 0
   doi : 10.1103/PhysRevLett.80.4514
-  url : http://link.aps.org/doi/10.1103/PhysRevLett.80.4514
   publisher : American Physical Society
   issue : 20
 -
@@ -341,7 +333,6 @@
   pages : 195132
   numpages : 7
   doi : 10.1103/PhysRevB.89.195132
-  url : http://link.aps.org/doi/10.1103/PhysRevB.89.195132
   publisher : American Physical Society
   issue : 19
 -
@@ -372,7 +363,6 @@
   pages : 3820
   publisher : American Physical Society
   doi : 10.1103/PhysRevB.34.3820
-  url : http://link.aps.org/doi/10.1103/PhysRevB.34.3820
   issue : 6
 -
   ENTRYTYPE : article
@@ -406,7 +396,6 @@
   pages : 085125
   numpages : 9
   doi : 10.1103/PhysRevB.78.085125
-  url : http://link.aps.org/doi/10.1103/PhysRevB.78.085125
   publisher : American Physical Society
   issue : 8
 -
@@ -420,7 +409,6 @@
   pages : 256403
   numpages : 5
   doi : 10.1103/PhysRevLett.108.256403
-  url : http://link.aps.org/doi/10.1103/PhysRevLett.108.256403
   publisher : American Physical Society
   issue : 25
 -
@@ -434,7 +422,6 @@
   pages : 045116
   numpages : 13
   doi : 10.1103/PhysRevB.89.045116
-  url : http://link.aps.org/doi/10.1103/PhysRevB.89.045116
   publisher : American Physical Society
   issue : 4
 -
@@ -458,7 +445,6 @@
   volume : 58
   pages : 10307 - 10314
   doi : 10.1103/PhysRevB.58.10307
-  url : http://link.aps.org/doi/10.1103/PhysRevB.58.10307
   issue : 16
 -
   ENTRYTYPE : article
@@ -471,7 +457,6 @@
   pages : 9892--9895
   numpages : 0
   doi : 10.1103/PhysRevB.47.9892
-  url : http://link.aps.org/doi/10.1103/PhysRevB.47.9892
   publisher : American Physical Society
   month : Apr
   issue : 15
@@ -485,7 +470,7 @@
   volume : 71
   pages : 035105
   publisher : American Physical Society
-  url : http://link.aps.org/doi/10.1103/PhysRevB.71.035105
+  doi : 10.1103/PhysRevB.71.035105
   timestamp : 2012.06.21
   number : 3
   owner : amadonb
@@ -620,7 +605,6 @@
   pages : 13--125
   publisher : American Physical Society
   doi : 10.1103/RevModPhys.68.13
-  url : http://link.aps.org/doi/10.1103/RevModPhys.68.13
   issue : 1
 -
   ENTRYTYPE : article
@@ -708,7 +692,6 @@
   pages : 8503--8513
   numpages : 0
   doi : 10.1103/PhysRevB.44.8503
-  url : http://link.aps.org/doi/10.1103/PhysRevB.44.8503
   publisher : American Physical Society
   issue : 16
 -
@@ -752,7 +735,7 @@
 -
   ENTRYTYPE : article
   ID : Gonze2005
-  author :  X. Gonze and -M. Rignanese and M. Verstraete and J.-M. Beuken and Y. Pouillon and R. Caracas and F. Jollet and M. Torrent and G. Zerah and M. Mikami and Ph. Ghosez and M. Veithen and J.-Y. Raty and V. Olevano and F. Bruneval and L. Reining and R. Godby and G. Onida and D.R. Hamann an D.C. Allan
+  author : X. Gonze and G.-M. Rignanese and M. Verstraete and J.-M. Beuken and Y. Pouillon and R. Caracas and F. Jollet and M. Torrent and G. Zerah and M. Mikami and Ph. Ghosez and M. Veithen and J.-Y. Raty and V. Olevano and F. Bruneval and L. Reining and R. Godby and G. Onida and D.R. Hamann an D.C. Allan
   title : A brief introduction to the ABINIT software package
   journal : Zeit. Kristallogr
   year : 2005
@@ -834,7 +817,7 @@
   volume : 83
   pages : 349--404
   publisher : American Physical Society
-  url : http://link.aps.org/doi/10.1103/RevModPhys.83.349
+  doi : 10.1103/RevModPhys.83.349
   timestamp : 2012.06.22
   number : 2
   owner : amadonb
@@ -864,7 +847,6 @@
   pages : 2980--2987
   numpages : 0
   doi : 10.1103/PhysRevB.40.2980
-  url : http://link.aps.org/doi/10.1103/PhysRevB.40.2980
   publisher : American Physical Society
   issue : 5
 -
@@ -878,7 +860,6 @@
   pages : 085117
   numpages : 10
   doi : 10.1103/PhysRevB.88.085117
-  url : http://link.aps.org/doi/10.1103/PhysRevB.88.085117
   publisher : American Physical Society
   issue : 8
 -
@@ -902,7 +883,6 @@
   pages : 115126
   numpages : 18
   doi : 10.1103/PhysRevB.81.115126
-  url : http://link.aps.org/doi/10.1103/PhysRevB.81.115126
   publisher : American Physical Society
   issue : 11
 -
@@ -938,7 +918,7 @@
   year : 2014
   volume : 89
   pages : 064305
-  url : http://link.aps.org/doi/10.1103/PhysRevB.89.064305
+  doi : 10.1103/PhysRevB.89.064305
 -
   ENTRYTYPE : article
   ID : Hedin1965
@@ -1002,7 +982,6 @@
   pages : 10751--10763
   publisher : American Physical Society
   doi : 10.1103/PhysRevB.53.10751
-  url : http://link.aps.org/doi/10.1103/PhysRevB.53.10751
   timestamp : 2015.11.12
   owner : yannick
   issue : 16
@@ -1069,7 +1048,7 @@
   volume : 78
   pages : 865--951
   publisher : American Physical Society
-  url : http://link.aps.org/doi/10.1103/RevModPhys.78.865
+  doi : 10.1103/RevModPhys.78.865
   timestamp : 2012.07.13
   number : 3
   file : :/media/disk_iomega/BIBLIO/Review/RMP2006.pdf:PDF
@@ -1122,7 +1101,7 @@
   volume : 52
   pages : R5467--R5470
   publisher : American Physical Society
-  url : http://link.aps.org/doi/10.1103/PhysRevB.52.R5467
+  doi : 10.1103/PhysRevB.52.R5467
   timestamp : 2012.06.14
   number : 8
   owner : amadonb
@@ -1261,7 +1240,6 @@
   pages : 1377
   publisher : American Physical Society
   doi : 10.1103/PhysRevB.32.1377
-  url : http://link.aps.org/doi/10.1103/PhysRevB.32.1377
   issue : 2
 -
   ENTRYTYPE : article
@@ -1299,7 +1277,6 @@
   pages : 601--659
   numpages : 58
   doi : 10.1103/RevModPhys.74.601
-  url : http://prola.aps.org/abstract/RMP/v74/i2/p601_1
   publisher : American Physical Society
 -
   ENTRYTYPE : article
@@ -1312,7 +1289,6 @@
   pages : 1045--1097
   numpages : 0
   doi : 10.1103/RevModPhys.64.1045
-  url : http://link.aps.org/doi/10.1103/RevModPhys.64.1045
   publisher : American Physical Society
   issue : 4
 -
@@ -1380,7 +1356,6 @@
   pages : 841
   publisher : American Physical Society
   doi : 10.1103/RevModPhys.66.841
-  url : http://link.aps.org/doi/10.1103/RevModPhys.66.841
   issue : 3
 -
   ENTRYTYPE : article
@@ -1393,7 +1368,6 @@
   pages : 10947
   publisher : American Physical Society
   doi : 10.1103/PhysRevB.52.10947
-  url : http://link.aps.org/doi/10.1103/PhysRevB.52.10947
   issue : 15
 -
   ENTRYTYPE : article
@@ -1416,7 +1390,6 @@
   pages : 1227--1230
   numpages : 0
   doi : 10.1103/PhysRevB.41.1227
-  url : http://link.aps.org/doi/10.1103/PhysRevB.41.1227
   publisher : American Physical Society
   issue : 2
 -
@@ -1447,10 +1420,11 @@
   journal : App. Phys. Lett.
   year : 2009
   volume : 94
+  pages : 
   doi : 10.1063/1.3147189
   url : http://scitation.aip.org/content/aip/journal/apl/94/21/10.1063/1.3147189
   number : 21
-  eid : 12103,pages = {
+  eid : 212103
 -
   ENTRYTYPE : article
   ID : Rieger1999
@@ -1473,7 +1447,6 @@
   pages : 4927--4944
   publisher : American Physical Society
   doi : 10.1103/PhysRevB.62.4927
-  url : http://link.aps.org/doi/10.1103/PhysRevB.62.4927
   file : Rohlfing2000.pdf:Rohlfing2000.pdf:PDF;Rohlfing2000.pdf:Rohlfing2000.pdf:PDF
   issue : 8
 -
@@ -1525,7 +1498,7 @@
   volume : 87
   pages : 165118
   publisher : American Physical Society
-  url : http://link.aps.org/doi/10.1103/PhysRevB.87.165118
+  doi : 10.1103/PhysRevB.87.165118
   timestamp : 2013.06.04
   number : 16
   owner : amadonb
