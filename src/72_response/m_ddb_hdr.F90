@@ -583,6 +583,7 @@ subroutine ddb_hdr_open_read(ddb_hdr, filnam, unddb, ddb_version, &
  ddb_hdr%mkpt = mkpt_l
  ddb_hdr%nsppol = 1     ! GA: Is nsppol not read?? Have to fix this...
 
+ ddb_hdr%nblok = nblok
  ddb_hdr%mblktyp = mblktyp
 
  ddb_hdr%psps%dimekb = dimekb_l
