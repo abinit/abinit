@@ -51,15 +51,6 @@
   volume : 27
   pages : 4760--4769
 -
-  ENTRYTYPE : article
-  ID : Allen2013
-  author : Allen, P. B. and Berlijn, T. and Casavant, D. A. and Soler, J. M.
-  title : Recovering hidden Bloch character: Unfolding electrons, phonons, and slabs
-  journal : Phys. Rev. B
-  year : 2013
-  volume : 87
-  pages : 085322
--
   ENTRYTYPE : incollection
   ID : Allen1996
   author : Allen, P. B.
@@ -70,6 +61,15 @@
   booktitle : Quantum Theory of Real Materials
   editor : Chelikowsky, J. R. and Louie, S. G.
   address : Boston
+-
+  ENTRYTYPE : article
+  ID : Allen2013
+  author : Allen, P. B. and Berlijn, T. and Casavant, D. A. and Soler, J. M.
+  title : Recovering hidden Bloch character: Unfolding electrons, phonons, and slabs
+  journal : Phys. Rev. B
+  year : 2013
+  volume : 87
+  pages : 085322
 -
   ENTRYTYPE : article
   ID : Amadon2006
@@ -201,6 +201,17 @@
   year : 2015
   volume : 92
   pages : 085137
+-
+  ENTRYTYPE : article
+  ID : Arponen1979
+  author : J. Arponen and E. Pajanne
+  title : Angular correlation in positron annihilation 
+  journal : J. Phys. F
+  year : 1979
+  volume : 9
+  pages : 2359
+  doi : 10.1088/0305-4608/9/12/009
+  url : http://iopscience.iop.org/0305-4608/9/12/009
 -
   ENTRYTYPE : article
   ID : Aryasetiawan2004
@@ -343,6 +354,15 @@
   doi : 10.1103/PhysRevB.50.17953
 -
   ENTRYTYPE : article
+  ID : Bockstedte1997
+  author : Bockstedte, M. and Kley,A. and Neugebauer, J.  and Scheffler, M. 
+  title : Density-functional theory calculations for poly-atomic systems: electronic structure, static and elastic properties and ab initio molecular dynamics
+  journal : Comp. Phys. Comm.
+  year : 1997
+  volume : 107
+  pages : 187
+-
+  ENTRYTYPE : article
   ID : Boronski1986
   author : Boro\'nski, E. and Nieminen, R. M.
   title : Electron-positron density-functional theory
@@ -365,6 +385,16 @@
   pages : 329--336
   publisher : Elsevier
   number : 2
+-
+  ENTRYTYPE : article
+  ID : Bousquet2011
+  author : Bousquet, E. and Spaldin, N. A. and Delaney, K. T.
+  title : Unexpectedly Large Electronic Contribution to Linear Magnetoelectricity
+  journal : Phys. Rev. Lett.
+  year : 2011
+  volume : 106
+  pages : 107202
+  doi : 10.1103/PhysRevLett.106.107202
 -
   ENTRYTYPE : article
   ID : Bruneval2008
@@ -494,15 +524,6 @@
   pages : 480
 -
   ENTRYTYPE : article
-  ID : Bockstedte1997
-  author : Bockstedte, M. and Kley,A. and Neugebauer, J.  and Scheffler, M. 
-  title : Density-functional theory calculations for poly-atomic systems: electronic structure, static and elastic properties and ab initio molecular dynamics
-  journal : Comp. Phys. Comm.
-  year : 1997
-  volume : 107
-  pages : 187
--
-  ENTRYTYPE : article
   ID : Folegati2007
   author : Folegati, P. and Makkonen, I. and Ferragut, R. and Puska, M.J.
   title : Analysis of electron-positron momentum spectra of metallic alloys as supported by first-principles calculations
@@ -571,15 +592,6 @@
   pages : 19104
 -
   ENTRYTYPE : article
-  ID : Genovese2008
-  author : Genovese,L. and Neelov,L. and Goedecker,S. and Deutsch,T. and Alireza Ghasemi,S. and Willand,A. and Caliste,D. and Zilberberg,O. and Rayson,M. and Bergman,A. and Schneider,R.
-  title : Daubechies wavelets as a basis set for density functional pseudopotential calculations
-  journal : J. Chem. Phys.
-  year : 2008
-  volume : 129
-  pages : 014109
--
-  ENTRYTYPE : article
   ID : Genoves2009
   author : Genovese,L. and Ospici,M. and Deutsch,T. and M\'ehaut,J.-F. and Neelov,A. and Goedecker,S.
   title :  Density Functional Theory calculation on many-cores hybrid {CPU-GPU} architectures in hybrid architecture
@@ -588,6 +600,15 @@
   volume : 131
   pages : 034103
   number : 
+-
+  ENTRYTYPE : article
+  ID : Genovese2008
+  author : Genovese,L. and Neelov,L. and Goedecker,S. and Deutsch,T. and Alireza Ghasemi,S. and Willand,A. and Caliste,D. and Zilberberg,O. and Rayson,M. and Bergman,A. and Schneider,R.
+  title : Daubechies wavelets as a basis set for density functional pseudopotential calculations
+  journal : J. Chem. Phys.
+  year : 2008
+  volume : 129
+  pages : 014109
 -
   ENTRYTYPE : article
   ID : Georges1996
@@ -692,6 +713,17 @@
   issue : 16
 -
   ENTRYTYPE : article
+  ID : Gonze1995
+  author : Gonze, X.
+  title : {Adiabatic density-functional perturbation theory}
+  journal : Phys. Rev. A
+  year : 1995
+  volume : 52
+  pages : 1096--1114
+  doi : 10.1103/PhysRevA.52.1096
+  number : 2
+-
+  ENTRYTYPE : article
   ID : Gonze1997
   author : Gonze, X.
   title : First-principles responses of solids to atomic displacements and homogeneous electric fields: Implementation of a conjugate-gradient	algorithm
@@ -708,15 +740,6 @@
   year : 1997
   volume : 55
   pages : 10355
--
-  ENTRYTYPE : article
-  ID : Gonze2011
-  author : Gonze, X. and Boulanger, P. and C\^ot\'e, M.
-  title : Theoretical approaches to the temperature and zero-point motion effects on the electronic band structure.
-  journal : Annalen der Physik
-  year : 2011
-  volume : 523
-  pages : 168
 -
   ENTRYTYPE : article
   ID : Gonze2002
@@ -746,6 +769,15 @@
   pages : 2582-2615
 -
   ENTRYTYPE : article
+  ID : Gonze2011
+  author : Gonze, X. and Boulanger, P. and C\^ot\'e, M.
+  title : Theoretical approaches to the temperature and zero-point motion effects on the electronic band structure.
+  journal : Annalen der Physik
+  year : 2011
+  volume : 523
+  pages : 168
+-
+  ENTRYTYPE : article
   ID : Gonze2016
   author : X.Gonze and F.Jollet and F.Abreu Araujo and D.Adams and B.Amadon and T.Applencourt and C.Audouze and J.-M.Beuken and J.Bieder and A.Bokhanchuk and E.Bousquet and F.Bruneval and D.Caliste and M.Cote and F.Dahm and F.Da Pieve and M.Delaveau and M.Di Gennar and B.Dorado and C.Espejo and G.Geneste and L.Genovese and A.Gerossier and M.Giantomassi and Y.Gillet and D.R.Hamann and L.He and G.Jomard and J.Laflamme Janssen and S.Le Roux and A.Levitt and A.Lherbier and F.Liu and I.Lukacevic and A.Martin and C.Martins and M.J.T.Oliveira and S.Ponce and Y.Pouillon and T.Rangel and G.-M.Rignanese and A.H.Romero and B.Rousseau and O.Rubel and A.A.Shukri and M.Stankovski and M.Torrent and M.J.Van Setten and B.Van Troeye and M.J.Verstraete and D.Waroquier and J.Wiktor and B.Xue and A.Zhou and J.W.Zwanziger
   title : Recent developments in the ABINIT software package
@@ -757,37 +789,6 @@
   url : http://www.sciencedirect.com/science/article/pii/S0010465516300923
   issn : 0010-4655
   keywords : Many-Body Perturbation Theory
--
-  ENTRYTYPE : article
-  ID : Gonze1995
-  author : Gonze, X.
-  title : {Adiabatic density-functional perturbation theory}
-  journal : Phys. Rev. A
-  year : 1995
-  volume : 52
-  pages : 1096--1114
-  doi : 10.1103/PhysRevA.52.1096
-  number : 2
--
-  ENTRYTYPE : article
-  ID : Harju2013
-  author : Harju,A. and Siro,T. and Federici Canova,F. and Hakala,S. and Rantalaiho,T.
-  title : Computational Physics on Graphics Processing Units
-  journal : Lecture Notes in Computer Science
-  year : 2013
-  volume : 7782
-  pages : 3--26
-  number : 
--
-  ENTRYTYPE : article
-  ID : Maintz2012
-  author : Maintz,S. and Eck,B. and Dronskowski,R.
-  title : Speeding up plane-wave electronic-structure calculations using graphics-processing units
-  journal : Comp. Phys. Comm.
-  year : 2012
-  volume : 182
-  pages : 1421--1427
-  number : 7
 -
   ENTRYTYPE : article
   ID : Grimme2006
@@ -882,6 +883,16 @@
   issue : 8
 -
   ENTRYTYPE : article
+  ID : Harju2013
+  author : Harju,A. and Siro,T. and Federici Canova,F. and Hakala,S. and Rantalaiho,T.
+  title : Computational Physics on Graphics Processing Units
+  journal : Lecture Notes in Computer Science
+  year : 2013
+  volume : 7782
+  pages : 3--26
+  number : 
+-
+  ENTRYTYPE : article
   ID : Harl2010
   author : Harl, J. and Schimka, L. and Kresse, G.
   title : Assessing the quality of the random phase approximation for lattice constants and atomization energies of solids
@@ -938,6 +949,17 @@
   volume : 139
   pages : 796
 -
+  ENTRYTYPE : book
+  ID : Hellwege1985
+  author : Hellwege,K.-H. and Olsen,J.L. (Eds.)
+  title : Electrical Resistivity, Thermoelectrical Power and Optical Properties
+  year : 1985
+  volume : 15b
+  publisher : Springer
+  date-modified : 2014-03-04 10:21:33 +0000
+  address : Berlin Heidelberg
+  date-added : 2014-02-21 11:07:18 +0000
+-
   ENTRYTYPE : article
   ID : Henkelman2000
   author : Henkelman, G. and J{\'o}nsson, H.
@@ -984,17 +1006,6 @@
   timestamp : 2015.11.12
   owner : yannick
   issue : 16
--
-  ENTRYTYPE : article
-  ID : Arponen1979
-  author : J. Arponen and E. Pajanne
-  title : Angular correlation in positron annihilation 
-  journal : J. Phys. F
-  year : 1979
-  volume : 9
-  pages : 2359
-  doi : 10.1088/0305-4608/9/12/009
-  url : http://iopscience.iop.org/0305-4608/9/12/009
 -
   ENTRYTYPE : article
   ID : Janssen2015
@@ -1074,17 +1085,6 @@
   volume : 93
   pages : 205147
 -
-  ENTRYTYPE : book
-  ID : Hellwege1985
-  author : Hellwege,K.-H. and Olsen,J.L. (Eds.)
-  title : Electrical Resistivity, Thermoelectrical Power and Optical Properties
-  year : 1985
-  volume : 15b
-  publisher : Springer
-  date-modified : 2014-03-04 10:21:33 +0000
-  address : Berlin Heidelberg
-  date-added : 2014-02-21 11:07:18 +0000
--
   ENTRYTYPE : article
   ID : Lebegue2010
   author : Leb\`egue, S. and Harl, J. and Gould, T. and \'Angy\'an, J. G. and Kresse, G. and Dobson, J. F.
@@ -1149,6 +1149,27 @@
   pages : 869--883
   doi : 10.1103/PhysRev.97.869
   number : 4
+-
+  ENTRYTYPE : article
+  ID : Ma2015
+  author : Ma, Pui-Wai and Dudarev, S. L.
+  title : Constrained density functional for noncollinear magnetism
+  journal : Phys. Rev. B
+  year : 2015
+  volume : 91
+  pages : 054420
+  numpages : 11
+  issue : 5
+-
+  ENTRYTYPE : article
+  ID : Maintz2012
+  author : Maintz,S. and Eck,B. and Dronskowski,R.
+  title : Speeding up plane-wave electronic-structure calculations using graphics-processing units
+  journal : Comp. Phys. Comm.
+  year : 2012
+  volume : 182
+  pages : 1421--1427
+  number : 7
 -
   ENTRYTYPE : article
   ID : Marek2014
@@ -1221,6 +1242,28 @@
   pages : 1272--1276
   number : 6
 -
+  ENTRYTYPE : phdthesis
+  ID : Moscaconte2007
+  author : Mosca Conte,A.
+  title : Quantum mechanical modeling of nano magnetism
+  year : 2007
+  school : SISSA
+  url : http://hdl.handle.net/1963/2511
+  address : Trieste Italy
+-
+  ENTRYTYPE : article
+  ID : Nieminen1985
+  author : Nieminen, R. M. and Boro\'nski, E. and Lantto, L. J.
+  title : Two-component density-functional theory: Application to positron states
+  journal : Phys. Rev. B
+  year : 1985
+  volume : 32
+  pages : 1377
+  publisher : American Physical Society
+  doi : 10.1103/PhysRevB.32.1377
+  url : http://link.aps.org/doi/10.1103/PhysRevB.32.1377
+  issue : 2
+-
   ENTRYTYPE : article
   ID : Nunes2001
   author : Nunes, R. W. and Gonze, X. 
@@ -1272,36 +1315,6 @@
   url : http://link.aps.org/doi/10.1103/RevModPhys.64.1045
   publisher : American Physical Society
   issue : 4
--
-  ENTRYTYPE : phdthesis
-  ID : Moscaconte2007
-  author : Mosca Conte,A.
-  title : Quantum mechanical modeling of nano magnetism
-  year : 2007
-  school : SISSA
-  url : http://hdl.handle.net/1963/2511
-  address : Trieste Italy
--
-  ENTRYTYPE : article
-  ID : Ma2015
-  author : Ma, Pui-Wai and Dudarev, S. L.
-  title : Constrained density functional for noncollinear magnetism
-  journal : Phys. Rev. B
-  year : 2015
-  volume : 91
-  pages : 054420
-  numpages : 11
-  issue : 5
--
-  ENTRYTYPE : article
-  ID : Bousquet2011
-  author : Bousquet, E. and Spaldin, N. A. and Delaney, K. T.
-  title : Unexpectedly Large Electronic Contribution to Linear Magnetoelectricity
-  journal : Phys. Rev. Lett.
-  year : 2011
-  volume : 106
-  pages : 107202
-  doi : 10.1103/PhysRevLett.106.107202
 -
   ENTRYTYPE : article
   ID : Ponce2014
@@ -1358,17 +1371,17 @@
   pages : 62
 -
   ENTRYTYPE : article
-  ID : Xu2014
-  author : Xu, B. and Verstraete, M. J.
-  title : First Principles Explanation of the Positive Seebeck Coefficient of {L}ithium
-  journal : Phys. Rev. Lett.
-  year : 2014
-  volume : 112
-  pages : 196603
-  numpages : 5
-  doi : 10.1103/PhysRevLett.112.196603
+  ID : Puska1994
+  author : Puska, M. J. and Nieminen, R. M.
+  title : Theory of positrons in solids and on solid surfaces
+  journal : Rev. Mod. Phys.
+  year : 1994
+  volume : 66
+  pages : 841
   publisher : American Physical Society
-  issue : 19
+  doi : 10.1103/RevModPhys.66.841
+  url : http://link.aps.org/doi/10.1103/RevModPhys.66.841
+  issue : 3
 -
   ENTRYTYPE : article
   ID : Puska1995
@@ -1382,19 +1395,6 @@
   doi : 10.1103/PhysRevB.52.10947
   url : http://link.aps.org/doi/10.1103/PhysRevB.52.10947
   issue : 15
--
-  ENTRYTYPE : article
-  ID : Puska1994
-  author : Puska, M. J. and Nieminen, R. M.
-  title : Theory of positrons in solids and on solid surfaces
-  journal : Rev. Mod. Phys.
-  year : 1994
-  volume : 66
-  pages : 841
-  publisher : American Physical Society
-  doi : 10.1103/RevModPhys.66.841
-  url : http://link.aps.org/doi/10.1103/RevModPhys.66.841
-  issue : 3
 -
   ENTRYTYPE : article
   ID : Rangel2016
@@ -1556,16 +1556,6 @@
   pages : 16487
 -
   ENTRYTYPE : article
-  ID : Sharma2004
-  author : Sharma, S. and {Ambrosch-Draxl}, C.
-  title : {Second-Harmonic} Optical Response from First Principles
-  journal : Phys. Scripta
-  year : 2004
-  volume : 2004
-  pages : 128
-  url : http://iopscience.iop.org/1402-4896/2004/T109/013
--
-  ENTRYTYPE : article
   ID : Sharma2003
   author : Sharma, S. and Dewhurst, J. K. and Ambrosch-Draxl, C.
   title : Linear and second-order optical response of {III-V} monolayer superlattices
@@ -1576,6 +1566,16 @@
   doi : 10.1103/PhysRevB.67.165332
   url : http://link.aps.org/doi/10.1103/PhysRevB.67.165332
   issue : 16
+-
+  ENTRYTYPE : article
+  ID : Sharma2004
+  author : Sharma, S. and {Ambrosch-Draxl}, C.
+  title : {Second-Harmonic} Optical Response from First Principles
+  journal : Phys. Scripta
+  year : 2004
+  volume : 2004
+  pages : 128
+  url : http://iopscience.iop.org/1402-4896/2004/T109/013
 -
   ENTRYTYPE : article
   ID : Shih2012
@@ -1680,34 +1680,6 @@
   issn : 0927-0256
   number : 2
   keywords : Iron under pressure
--
-  ENTRYTYPE : article
-  ID : Nieminen1985
-  author : Nieminen, R. M. and Boro\'nski, E. and Lantto, L. J.
-  title : Two-component density-functional theory: Application to positron states
-  journal : Phys. Rev. B
-  year : 1985
-  volume : 32
-  pages : 1377
-  publisher : American Physical Society
-  doi : 10.1103/PhysRevB.32.1377
-  url : http://link.aps.org/doi/10.1103/PhysRevB.32.1377
-  issue : 2
--
-  ENTRYTYPE : article
-  ID : Wiktor2015
-  author : Wiktor, J. and Jomard, G. and Torrent, M.
-  title : Two-component density functional theory within the projector augmented-wave approach: Accurate and self-consistent computations of positron lifetimes and momentum distributions
-  journal : Phys. Rev. B
-  year : 2015
-  volume : 92
-  pages : 125113
-  numpages : 15
-  doi : 10.1103/PhysRevB.92.125113
-  url : http://link.aps.org/doi/10.1103/PhysRevB.92.125113
-  publisher : American Physical Society
-  month : Sep
-  issue : 12
 -
   ENTRYTYPE : article
   ID : Tran2009
@@ -1861,6 +1833,34 @@
   pages : 63
   publisher : Elsevier
   doi : 10.1016/j.nimb.2013.09.050
+-
+  ENTRYTYPE : article
+  ID : Wiktor2015
+  author : Wiktor, J. and Jomard, G. and Torrent, M.
+  title : Two-component density functional theory within the projector augmented-wave approach: Accurate and self-consistent computations of positron lifetimes and momentum distributions
+  journal : Phys. Rev. B
+  year : 2015
+  volume : 92
+  pages : 125113
+  numpages : 15
+  doi : 10.1103/PhysRevB.92.125113
+  url : http://link.aps.org/doi/10.1103/PhysRevB.92.125113
+  publisher : American Physical Society
+  month : Sep
+  issue : 12
+-
+  ENTRYTYPE : article
+  ID : Xu2014
+  author : Xu, B. and Verstraete, M. J.
+  title : First Principles Explanation of the Positive Seebeck Coefficient of {L}ithium
+  journal : Phys. Rev. Lett.
+  year : 2014
+  volume : 112
+  pages : 196603
+  numpages : 5
+  doi : 10.1103/PhysRevLett.112.196603
+  publisher : American Physical Society
+  issue : 19
 -
   ENTRYTYPE : article
   ID : Zhou2006

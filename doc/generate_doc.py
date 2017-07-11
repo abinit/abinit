@@ -26,6 +26,7 @@ js_path = "../../js_files/"
 users_path = "../../users/"
 
 # Path for yml and html files
+bib_yml = "bibliography/yml_files"
 bib_gen = "bibliography/files_generated"
 invars_yml = "input_variables/yml_files"
 invars_html_gen = "input_variables/html_generated"
@@ -173,6 +174,7 @@ variables=read_yaml_file(invars_yml+"/abinit_vars.yml")
 list_of_topics=read_yaml_file(topics_yml+"/list_of_topics.yml")
 sections=read_yaml_file(invars_yml+"/sections.yml")
 tests_dirs=read_yaml_file(topics_yml+"/tests_dirs.yml")
+bibhtml=read_yaml_file(bib_yml+"/bibhtml.yml")
 
 with open('bibliography/abiref.bib')  as bibtex_file:
   bibtex_str = bibtex_file.read()
@@ -202,12 +204,6 @@ if debug==1 :
 
 ################################################################################
 # Constitutes a list of bib items, each being a dictionary
-
-bibtex_str=bibtex_str.replace('optdoi','doi')
-bibtex_str=bibtex_str.replace('opturl','url')
-bibtex_str=bibtex_str.replace('optURI','url')
-bibtex_str=bibtex_str.replace('adsurl','url')
-bibtex_str=bibtex_str.replace('href','url')
 
 bibtex_dics=[]
 bibtex_items=bibtex_str.split('@')
@@ -406,6 +402,33 @@ for (i,ref) in enumerate(bibtex_dics):
       pass
 
   reference_dic[ID]=formatted
+
+################################################################################
+# Order the references
+bibtex_dics=sorted( bibtex_dics, key= lambda item: item['ID'])
+
+################################################################################
+# Write an ordered bib file, that allows to update the original one.
+# Constitute also the content of the ABINIT bibtex file.
+bib_content=dict()
+bib_content['bibtex']=""
+bib_content['bibliography']=""
+bib_content['acknowledgments']=""
+lines_txt=""
+for ref in bibtex_dics:
+  entrytype=ref["ENTRYTYPE"]
+  ID=ref["ID"]
+  bib_content['bibtex']+= ('<a id="%s">%s</a> \n <pre>' ) %(ID,ID) 
+  line=("@%s{%s,%s") %(entrytype,ID,ref['body'])
+  lines_txt+= line 
+  bib_content['bibtex']+= line+'</pre> \n'
+
+# Open, write and close the txt file
+file_txt = bib_gen+'/ordered_abiref.bib'
+f_txt = open(file_txt,'w')
+f_txt.write(lines_txt)
+f_txt.close()
+print("File %s has been written ..." %file_txt)
 
 ################################################################################
 # Write a txt file, for checking purposes
@@ -838,6 +861,50 @@ f_html = open(file_html,'w')
 f_html.write(all_topics_html)
 f_html.close()
 print("File %s written ..."%file_html )
+
+################################################################################
+# Generate the html files in the bibliography directory
+
+# Store the default informations
+for i, bibhtml_info in enumerate(bibhtml):
+  if bibhtml_info.name.strip()=="default":
+    bibhtml_info_default=bibhtml_info
+
+# Generate each bibhtml file : build the missing information (table of content), assemble the content, apply global transformations, then write.
+for i, bibhtml_info in enumerate(bibhtml):
+  bibname = bibhtml_info.name
+  if bibname =="default":
+    continue
+
+ #Write a first version of the html file, in the order "header" ... up to the "end"
+  #Take the info from the section "default" if there is no information on the specific section provided in the yml file.
+  bibhtml=""
+  for j in ["header","title","subtitle","purpose","copyright","links","content","links","end"]:
+    if j == "content":
+      bibhtml += bib_content[bibname]
+    else:
+      extract_j=getattr(bibhtml_info,j)
+      if extract_j.strip() == "":
+        bibhtml += getattr(bibhtml_info_default,j)
+      else:
+        bibhtml += extract_j
+    bibhtml += "\n"
+
+  #Global operations on the tentative html file.
+  bibhtml=bibhtml.replace("__JS_PATH__",js_path)
+  bibhtml=bibhtml.replace("__KEYWORD__",bibhtml_info.keyword)
+  bibhtml = doku2html(make_links(bibhtml,None,list_all_vars,list_chars,cur_specials))
+
+  #Write the finalized html file.
+  file_cur = bib_gen+'/'+bibname+'.html'
+  f_cur = open(file_cur,'w')
+  f_cur.write(bibhtml)
+  f_cur.write("\n")
+  f_cur.close()
+  print("File %s written ..."%file_cur )
+
+################################################################################
+
 print("Work done !")
 
 ################################################################################

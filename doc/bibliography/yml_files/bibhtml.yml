@@ -1,0 +1,50 @@
+# This file provides the information needed to generate the documentation files that describes the bibliography
+# Each paragraph of such documentation file has a mix of formatting html information and real content.
+
+# The present file contains the html information.
+# The "default" html information is presented in the section "default", at the bottom of the file. 
+# For most of the var*.html files, the default html formatting is hardly changed, so only minimal information
+# is needed to generate them. For the "special" parameters and for the list of all input variables,
+# some minor adjustments are needed, so that the default list # is less adequate.
+
+- !section
+    name : bibliography
+    keyword : bibliography
+    purpose : |
+      <p>This document lists all the references mentioned in the ABINIT documentation, with link to the Web pages where such references are mentioned.
+
+- !section
+    name : bibtex
+    keyword : bibtex
+    purpose : |
+      This document gives the bibtex data for all the references mentioned in the ABINIT documentation.
+
+- !section
+    name : acknowledgments
+    keyword : acknowledgments
+    purpose : |
+      This file provides a description of suggested acknowledgments and references to be inserted in scientific papers 
+      whose results have been obtained thanks to ABINIT. It discusses also briefly the problem of co-authorship.
+
+- !section
+    name : default
+    keyword : Default keyword ... this is an error
+    header : |
+      <html>
+      <head><title>__KEYWORD__</title>
+      <link rel=stylesheet type="text/css" href="../formabinit.css">
+      </head>
+      <body bgcolor="#ffffff">
+
+      <hr>
+      <a name="top"></a>
+    title : |
+      <h1>ABINIT, __KEYWORD__.</h1>
+    copyright : |
+      <hr>
+      <script type="text/javascript" src="__JS_PATH__copyright.js"> </script>
+    links : |
+      <script type="text/javascript" src="__JS_PATH__list_internal_links.js"> </script>
+    end : |
+      </body>
+      </html>
