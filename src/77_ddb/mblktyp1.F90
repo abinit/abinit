@@ -99,22 +99,10 @@ subroutine mblktyp1(chkopt,ddbun,dscrpt,filnam,mddb,msym,nddb,vrsddb)
  integer,allocatable :: nband(:),nband8(:),pspso(:),typat(:),typat8(:)
  real(dp),parameter :: qtol=2.0d-8
  real(dp) :: diff
- !real(dp) :: dilatmx,dilatmx8,ecut,ecut8,ecutsm,ecutsm8,kptnr8,kptnrm
- !real(dp) :: pawecutdg,pawecutdg8,dfpt_sciss,dfpt_sciss8,tolwf8,tolwfr,tphysel
- !real(dp) :: tphysel8,tsmear,tsmear8
  type(ddb_type) :: ddb
  type(ddb_hdr_type) :: ddb_hdr, ddb_hdr8
 !arrays
- !real(dp) :: acell(3),acell8(3),rprim(3,3),rprim8(3,3)
- !real(dp), allocatable :: tnons(:,:)
- !real(dp), allocatable :: tnons8(:,:)
- !real(dp),allocatable :: amu(:),amu8(:)
- !real(dp),allocatable :: ekb(:,:),ekb8(:,:),kpt(:,:),kpt8(:,:),occ(:),occ8(:)
- !real(dp),allocatable :: spinat(:,:),spinat8(:,:),wtk(:),wtk8(:)!,vel(:,:)
- !real(dp),allocatable :: xred(:,:),xred8(:,:),zion(:),zion8(:)!,xcart(:,:)
- !real(dp),allocatable :: znucl(:),znucl8(:)
  character(len=500) :: message
- !type(pawtab_type),allocatable :: pawtab(:),pawtab8(:)
 
 ! *********************************************************************
 
@@ -137,8 +125,7 @@ subroutine mblktyp1(chkopt,ddbun,dscrpt,filnam,mddb,msym,nddb,vrsddb)
  msym=192
 
  do iddb=1,nddb
-!   call ddb_getdims(dimekb_tmp,filnam(iddb+1),lmnmax_tmp,mband_tmp,mblktyp_tmp,&
-!&   msym_tmp,natom,nblok,nkpt,ntypat,ddbun,usepaw_tmp,vrsddb,xmpi_comm_self)
+
    call ddb_hdr_open_read(ddb_hdr, filnam(iddb+1), ddbun, vrsddb,&
 &                         dimonly=1)
 
@@ -153,81 +140,18 @@ subroutine mblktyp1(chkopt,ddbun,dscrpt,filnam,mddb,msym,nddb,vrsddb)
    lmnmax=max(lmnmax,ddb_hdr%psps%lmnmax)
    usepaw=max(usepaw,ddb_hdr%usepaw)
 
-   !mblok=mblok+nblok
-   !dimekb=max(dimekb,dimekb_tmp)
-   !lmnmax=max(lmnmax,lmnmax_tmp)
-   !matom=max(matom,natom)          ! MG Why this! I dont' understand why we always like to complicate things!
-   !mband=max(mband,mband_tmp)
-   !mblktyp=max(mblktyp,mblktyp_tmp)
-   !mkpt=max(mkpt,nkpt)
-   !mtypat=max(mtypat,ntypat)
-   !usepaw=max(usepaw,usepaw_tmp)
-   !msym=max(msym,msym_tmp)
-
    call ddb_hdr_free(ddb_hdr)
 
  end do
-
-! ABI_ALLOCATE(symafm,(msym))
-! ABI_ALLOCATE(symafm8,(msym))
-! ABI_ALLOCATE(symre8,(3,3,msym))
-! ABI_ALLOCATE(symrel,(3,3,msym))
-! ABI_ALLOCATE(tnons,(3,msym))
-! ABI_ALLOCATE(tnons8,(3,msym))
 
  mpert=matom+6
  msize=3*mpert*3*mpert
  if(mblktyp==3)msize=msize*3*mpert
 
-!write(std_out,*),'msize',msize,'mpert',mpert,'mblktyp',mblktyp
  call ddb_malloc(ddb,msize,mblok,matom,mtypat)
 
 !Allocate arrays
- !ABI_ALLOCATE(lloc,(mtypat))
  ABI_ALLOCATE(mgblok,(mblok))
-
-! ABI_ALLOCATE(nband,(mkpt))
-! ABI_ALLOCATE(nband8,(mkpt))
-! ABI_ALLOCATE(typat,(matom))
-! ABI_ALLOCATE(typat8,(matom))
-! ABI_ALLOCATE(amu,(mtypat))
-! ABI_ALLOCATE(amu8,(mtypat))
-! ABI_ALLOCATE(ekb,(dimekb,mtypat))
-! ABI_ALLOCATE(ekb8,(dimekb,mtypat))
-! ABI_ALLOCATE(kpt,(3,mkpt))
-! ABI_ALLOCATE(kpt8,(3,mkpt))
-! ABI_ALLOCATE(occ,(mband*mkpt))
-! ABI_ALLOCATE(occ8,(mband*mkpt))
-! ABI_ALLOCATE(spinat,(3,matom))
-! ABI_ALLOCATE(spinat8,(3,matom))
-! ABI_ALLOCATE(wtk,(mkpt))
-! ABI_ALLOCATE(wtk8,(mkpt))
-! ABI_ALLOCATE(xred8,(3,matom))
-! ABI_ALLOCATE(xred,(3,matom))
-! ABI_ALLOCATE(znucl,(mtypat))
-! ABI_ALLOCATE(znucl8,(mtypat))
-! ABI_ALLOCATE(zion,(mtypat))
-! ABI_ALLOCATE(zion8,(mtypat))
-! ABI_DATATYPE_ALLOCATE(pawtab,(mtypat*usepaw))
-! ABI_DATATYPE_ALLOCATE(pawtab8,(mtypat*usepaw))
-! call pawtab_nullify(pawtab)
-! call pawtab_nullify(pawtab8)
-
- !ABI_ALLOCATE(xcart,(3,matom))
- !ABI_ALLOCATE(vel,(3,matom))
- !ABI_ALLOCATE(indlmn,(6,lmnmax,mtypat))
- !ABI_ALLOCATE(pspso,(mtypat))
-
-!!This is needed to read the DDBs in the old format
-! symafm(:)=1 ; symafm8(:)=1
-! if(mtypat>=1)then
-!   pspso(:)=0
-!   znucl(:)=zero ; znucl8(:)=zero
-!   ekb(:,:)=zero ; ekb8(:,:)=zero
-! end if
-! if(matom>=1)then
-!   spinat(:,:)=zero ; spinat8(:,:)=zero
-! end if
 
 !**********************************************************************
 
@@ -254,41 +178,6 @@ subroutine mblktyp1(chkopt,ddbun,dscrpt,filnam,mddb,msym,nddb,vrsddb)
  end if
 !Close the first ddb
  close(ddbun)
-
-!!  Open the first derivative database file
-!!  and read the preliminary information
-!   write(std_out,*)' read the input derivative database information'
-!   nunit=ddbun
-!   call ioddb8_in (filnam(2),matom,mband,&
-!&   mkpt,msym,mtypat,nunit,vrsddb,&
-!&   acell,amu,dilatmx,ecut,ecutsm,intxc,iscf,ixc,kpt,kptnrm,&
-!&   natom,nband,ngfft,nkpt,nspden,nspinor,nsppol,nsym,ntypat,occ,occopt,&
-!&   pawecutdg,rprim,dfpt_sciss,spinat,symafm,symrel,tnons,tolwfr,&
-!&   tphysel,tsmear,typat,usepaw,wtk,xred,zion,znucl)
-!
-!
-!!  Read the psp information of the input DDB
-!   useylm=usepaw;choice=1
-!   call psddb8 (choice,dimekb,ekb,fullinit,indlmn,lmnmax,&
-!&   nblok,ntypat,nunit,pawtab,pspso,usepaw,useylm,vrsddb)
-
-! if(nblok>=1)then
-!!  Read the blocks from the input database.
-!   write(message, '(a,i5,a)' ) ' read ',nblok,' blocks from the input DDB '
-!   call wrtout(std_out,message,'COLL')
-!   !choice=1
-!   nunit=ddbun
-!   do iblok=1,nblok
-!     call read_blok8(ddb,iblok,nband(1),mpert,msize,nkpt,nunit)
-!!    Setup merged indicator
-!     mgblok(iblok)=0
-!   end do
-! else
-!   write(message, '(a)' )' No bloks in the first ddb '
-!   call wrtout(std_out,message,'COLL')
-! end if
-!!Close the first ddb
-! close(ddbun)
 
 !*********************************************
 
@@ -365,87 +254,6 @@ subroutine mblktyp1(chkopt,ddbun,dscrpt,filnam,mddb,msym,nddb,vrsddb)
 
  end do
 
-
-!!In case of merging of DDBs, iterate the reading
-! do iddb=2,nddb
-!
-!!  Open the corresponding input DDB,
-!!  and read the database file informations
-!   write(message, '(a,a,i6)' )ch10,' read the input derivative database number',iddb
-!   call wrtout(std_out,message,'COLL')
-!   nunit=ddbun
-!   call ioddb8_in (filnam(iddb+1),matom,mband,&
-!&   mkpt,msym,mtypat,nunit,vrsddb,&
-!&   acell8,amu8,dilatmx8,ecut8,ecutsm8,intxc8,iscf8,ixc8,kpt8,kptnr8,&
-!&   natom8,nband8,ngfft8,nkpt8,nspden8,nspinor8,nsppo8,nsym8,ntypat8,occ8,occop8,&
-!&   pawecutdg8,rprim8,dfpt_sciss8,spinat8,symafm8,symre8,tnons8,tolwf8,&
-!&   tphysel8,tsmear8,typat8,usepaw,wtk8,xred8,zion8,znucl8)
-!
-!!  Read the psp information of the input DDB
-!   choice=1
-!   call psddb8 (choice,dimekb,ekb8,fullmrgddb_init,indlmn,lmnmax,&
-!&   nblok8,ntypat8,nunit,pawtab8,pspso,usepaw,useylm,vrsddb)
-!
-!   if (chkopt==1)then
-!!    Compare the current DDB and input DDB information.
-!!    In case of an inconsistency, halt the execution.
-!     write(message, '(a)' )' compare the current and input DDB information'
-!     call wrtout(std_out,message,'COLL')
-!
-!!    Should also compare indlmn and pspso ... but suppose that
-!!    the checking of ekb is enough for the psps.
-!!    Should also compare many other variables ... this is still
-!!    to be done ...
-!     call ddb_compare (acell,acell8,amu,amu8,dimekb,ecut,ecut8,ekb,ekb8,&
-!&     fullinit,fullmrgddb_init,iscf,iscf8,ixc,ixc8,kpt,kpt8,kptnrm,kptnr8,&
-!&     natom,natom8,nband,nband8,ngfft,ngfft8,nkpt,nkpt8,&
-!&     nsppol,nsppo8,nsym,nsym8,ntypat,ntypat8,occ,occ8,&
-!&     occopt,occop8,pawecutdg,pawecutdg8,pawtab,pawtab8,&
-!&     rprim,rprim8,dfpt_sciss,dfpt_sciss8,symrel,symre8,&
-!&     tnons,tnons8,tolwfr,tolwf8,typat,typat8,&
-!&     usepaw,wtk,wtk8,xred,xred8,zion,zion8)
-!   else if(chkopt==0)then
-!!    No comparison between the current DDB and input DDB information.
-!     write(message, '(a)' )' no comparison between the current and input DDB information'
-!     call wrtout(std_out,message,'COLL')
-!     write(message, '(a,a,a)' )&
-!&     'No comparison/check is performed for the current and input DDB information ',&
-!&     'because argument --nostrict was passed to the command line. ',&
-!&     'Use at your own risk !'
-!     MSG_COMMENT(message)
-!   end if
-!
-!   call wrtout(std_out,' Will try to merge this input DDB with the current one.','COLL')
-!
-!!  First estimate of the total number of bloks, and error
-!!  message if too large
-!   write(message, '(a,i5)' ) ' Current number of bloks =',nblok
-!   call wrtout(std_out,message,'COLL')
-!   write(message, '(a,i5,a)' )' Will read ',nblok8,' blocks from the input DDB '
-!   call wrtout(std_out,message,'COLL')
-!   nblokt=nblok+nblok8
-!   if(nblokt>mblok)then
-!     write(message, '(a,i5,a,a,a,i5,a)' )&
-!&     'The expected number of blocks',nblokt,' is larger than',ch10,&
-!&     'the maximum number of blocks',mblok,'.'
-!     MSG_ERROR(message)
-!   end if
-!
-!!  Read the bloks from the temporary database, and close it.
-!!  Also setup the merging indicator
-!   choice=1
-!   nunit=ddbun
-!   do iblok=nblok+1,nblokt
-!     call read_blok8(ddb,iblok,nband(1),mpert,msize,nkpt8,nunit)
-!     mgblok(iblok)=0
-!   end do
-!   close(ddbun)
-!
-!   nblok=nblokt
-!   write(message, '(a,i5)' ) ' Now, current number of bloks =',nblok
-!   call wrtout(std_out,message,'COLL')
-!
-! end do
 
  call wrtout(std_out,' All DDBs have been read ','COLL')
 
@@ -530,29 +338,6 @@ subroutine mblktyp1(chkopt,ddbun,dscrpt,filnam,mddb,msym,nddb,vrsddb)
 
  call ddb_hdr_open_write(ddb_hdr, filnam(1), ddbun, fullinit=1)
 
-!!Open the output database, then
-!!Write the preliminary informations
-! write(message, '(a,a)' )' open the output database, write the',' preliminary information '
-! call wrtout(std_out,message,'COLL')
-!!write(std_out,*)' occopt=',occopt
-!
-! nunit=ddbun
-! call ddb_io_out (dscrpt,filnam(1),matom,mband,&
-!& mkpt,msym,mtypat,nunit,vrsddb,&
-!& acell,amu,dilatmx,ecut,ecutsm,intxc,iscf,ixc,kpt,kptnrm,&
-!& natom,nband,ngfft,nkpt,nspden,nspinor,nsppol,nsym,ntypat,occ,occopt,&
-!& pawecutdg,rprim,dfpt_sciss,spinat,symafm,symrel,tnons,tolwfr,&
-!& tphysel,tsmear,typat,usepaw,wtk,xred,zion,znucl)
-!
-!!Write the psp information in the output DDB
-!!as well as the value of the number of blocks.
-! call wrtout(std_out,' write the psp information ','COLL')
-!
-! fullinit=1 ; choice=2
-! call psddb8 (choice,dimekb,ekb,fullinit,indlmn,lmnmax,&
-!& nblok,ntypat,nunit,pawtab,pspso,usepaw,useylm,vrsddb)
-
-
  if(nddb>1)then
 
 !  Write the whole database
@@ -563,7 +348,6 @@ subroutine mblktyp1(chkopt,ddbun,dscrpt,filnam,mddb,msym,nddb,vrsddb)
      if(mgblok(iblok)==0)then
        write(std_out,'(a,i4)' ) ' Write bloc number',iblok
        call ddb_write_blok(ddb,iblok,choice,ddb_hdr%nband(1),mpert,msize,ddb_hdr%nkpt,nunit)
-       !call ddb_write_blok(ddb,iblok,choice,nband(1),mpert,msize,nkpt,nunit)
      else
        write(message, '(a,i4,a)' )&
 &       ' Bloc number',iblok,' was merged, so do not write it'
@@ -590,48 +374,9 @@ subroutine mblktyp1(chkopt,ddbun,dscrpt,filnam,mddb,msym,nddb,vrsddb)
 
 !Deallocate arrays
 
- call ddb_hdr_free(ddb_hdr)
-
- !ABI_DEALLOCATE(lloc)
  ABI_DEALLOCATE(mgblok)
 
-! ABI_DEALLOCATE(nband)
-! ABI_DEALLOCATE(nband8)
-! ABI_DEALLOCATE(typat)
-! ABI_DEALLOCATE(typat8)
-! ABI_DEALLOCATE(amu)
-! ABI_DEALLOCATE(amu8)
-! ABI_DEALLOCATE(ekb)
-! ABI_DEALLOCATE(ekb8)
-! ABI_DEALLOCATE(kpt)
-! ABI_DEALLOCATE(kpt8)
-! ABI_DEALLOCATE(indlmn)
-! ABI_DEALLOCATE(pspso)
-! ABI_DEALLOCATE(occ)
-! ABI_DEALLOCATE(occ8)
-! ABI_DEALLOCATE(spinat)
-! ABI_DEALLOCATE(spinat8)
-! !ABI_DEALLOCATE(vel)
-! ABI_DEALLOCATE(wtk)
-! ABI_DEALLOCATE(wtk8)
-! !ABI_DEALLOCATE(xcart)
-! ABI_DEALLOCATE(xred)
-! ABI_DEALLOCATE(xred8)
-! ABI_DEALLOCATE(znucl)
-! ABI_DEALLOCATE(znucl8)
-! ABI_DEALLOCATE(zion)
-! ABI_DEALLOCATE(zion8)
-! ABI_DEALLOCATE(symafm)
-! ABI_DEALLOCATE(symafm8)
-! ABI_DEALLOCATE(symre8)
-! ABI_DEALLOCATE(symrel)
-! ABI_DEALLOCATE(tnons)
-! ABI_DEALLOCATE(tnons8)
-!
-! call pawtab_free(pawtab)
-! ABI_DATATYPE_DEALLOCATE(pawtab)
-! call pawtab_free(pawtab8)
-! ABI_DATATYPE_DEALLOCATE(pawtab8)
+ call ddb_hdr_free(ddb_hdr)
  call ddb_free(ddb)
 
 end subroutine mblktyp1
