@@ -26,7 +26,6 @@ sources = [
  "completeperts.F90",
  "d2c_weights.F90",
  "d2c_wtq.F90",
- "ddb_compare.F90",
  "defs_elphon.F90",
  "ddb_diel.F90",
  "ddb_elast.F90",

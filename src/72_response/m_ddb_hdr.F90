@@ -582,7 +582,9 @@ subroutine ddb_hdr_open_read(ddb_hdr, filnam, unddb, ddb_version, &
  ddb_hdr%psps%usepaw = usepaw_l
  ddb_hdr%psps%useylm = usepaw_l  ! yep...
 
- if (present(dimonly) .and. (dimonly==1)) return
+ if (present(dimonly)) then
+   if (dimonly==1) return
+ end if
 
  ! Allocate the memory
  call ddb_hdr_malloc(ddb_hdr)

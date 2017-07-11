@@ -133,7 +133,6 @@ subroutine ddb_compare2 (matom, matom8, mtypat, mtypat8, mkpt, mkpt8,&
 
 ! *********************************************************************
 
-!write(std_out,*)' ddb_compare : rprim=',rprim, "rprim8=",rprim8
 
 !Compare all the preliminary information
 !1. natom
