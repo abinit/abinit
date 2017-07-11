@@ -884,11 +884,21 @@ lines_txt=""
 for ref in bibtex_dics:
   entrytype=ref["ENTRYTYPE"]
   ID=ref["ID"]
+  list_backlinksID=backlinks[ID].split(";")
+  for (i,link) in enumerate(list_backlinksID):
+     list_backlinksID[i]=link.strip()
+  backlinksID=set(list_backlinksID)
   line=("@%s{%s,%s") %(entrytype,ID,ref['body'])
   lines_txt+= line
   bib_content['bibtex']+= ('<hr><a id="%s">%s</a> \n <pre>' ) %(ID,ID)
   bib_content['bibtex']+= line+'</pre> \n'
   bib_content['bibliography']+= ('<hr><a id="%s">[%s]</a> (<a href="./bibtex.html#%s">bibtex</a>)\n <br> %s \n') %(ID,ID,ID,reference_dic[ID])
+  nlink=0
+  for link in backlinksID:
+    if nlink==0 and len(link)!=0: 
+      bib_content['bibliography']+= "<br> Mentioned in" 
+      nlink=1
+    bib_content['bibliography']+= link
 
 # Open, write and close the txt file
 file_txt = bib_gen+'/ordered_abiref.bib'
