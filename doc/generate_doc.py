@@ -433,6 +433,16 @@ f_txt.write(lines_txt)
 f_txt.close()
 print("File %s has been written ..." %file_txt)
 
+#Global operations on the tentative html file : conversion from bibtex to html.
+bib_content['bibliography']=bib_content['bibliography'].replace("\'e","&eacute;")
+bib_content['bibliography']=bib_content['bibliography'].replace("\'{e}","&eacute;")
+bib_content['bibliography']=bib_content['bibliography'].replace("\^o","&ocirc;")
+bib_content['bibliography']=bib_content['bibliography'].replace("\^{o}","&ocirc;")
+bib_content['bibliography']=bib_content['bibliography'].replace("\`e","&egrave;")
+bib_content['bibliography']=bib_content['bibliography'].replace("\`{e}","&egrave;")
+bib_content['bibliography']=bib_content['bibliography'].replace("\c c","&ccedil;")
+bib_content['bibliography']=bib_content['bibliography'].replace("\c{c}","&ccedil;")
+
 ################################################################################
 # Write a txt file, for checking purposes
 
