@@ -424,7 +424,7 @@ for ref in bibtex_dics:
   lines_txt+= line 
   bib_content['bibtex']+= ('<hr><a id="%s">%s</a> \n <pre>' ) %(ID,ID) 
   bib_content['bibtex']+= line+'</pre> \n'
-  bib_content['bibliography']+= ('<hr><a id="%s">[%s]</a> \n <br> %s \n') %(ID,ID,reference_dic[ID])
+  bib_content['bibliography']+= ('<hr><a id="%s">[%s]</a> (<a href="./bibtex.html#%s">bibtex</a>)\n <br> %s \n') %(ID,ID,ID,reference_dic[ID])
 
 # Open, write and close the txt file
 file_txt = bib_gen+'/ordered_abiref.bib'
@@ -882,7 +882,7 @@ for i, bibhtml_info in enumerate(bibhtml):
  #Write a first version of the html file, in the order "header" ... up to the "end"
   #Take the info from the section "default" if there is no information on the specific section provided in the yml file.
   bibhtml=""
-  for j in ["header","title","subtitle","purpose","copyright","links","content","links","end"]:
+  for j in ["header","title","subtitle","copyright","links","introduction","content","links","end"]:
     if j == "content":
       bibhtml += bib_content[bibname]
     else:
