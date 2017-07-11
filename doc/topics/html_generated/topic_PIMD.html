@@ -27,19 +27,19 @@
 
 
 <p> Path-Integral Molecular Dynamics (PIMD) is a technique allowing to simulate the quantum fluctuations of the nuclei
-at thermodynamic equilibrium ref{Marx96}. It is implemented in ABINIT in the NVT ensemble since v7.8.2.
+at thermodynamic equilibrium [<a href="../../bibliography/files_generated/bibliography.html#Marx1996">Marx1996</a>]. It is implemented in ABINIT in the NVT ensemble since v7.8.2.
 
 
 <p>In the Path-Integral formalism of quantum statistical mechanics, the (quantum) nuclei are replaced by a set of images (beads) treated by means of classical mechanics, and interacting with each other through a specific effective potential. In the limit of an infinite number of beads, the quantum system and this many-beads classicle system have the same partition function, and thus the same static observables. In PIMD, the classical system of beads is simulated by standard Molecular Dynamics. The PIMD equations of motion are integrated by using the Verlet algorithm.
 At each time step, a ground state DFT calculation is performed for each image. PIMD can be used with any XC functional and works in the PAW framework as well as in the norm-conserving pseudopotential (NCPP) case.
 <p>
-<p>PIMD in ABINIT follows the set of numerical schemes developed by several authors in the 90's ref{Marx96,Tuckerman96}. 
+<p>PIMD in ABINIT follows the set of numerical schemes developed by several authors in the 90's [<a href="../../bibliography/files_generated/bibliography.html#Marx1996">Marx1996</a>],[<a href="../../bibliography/files_generated/bibliography.html#Tuckerman1996">Tuckerman1996</a>]. 
 PIMD in the canonical ensemble needs specific thermostats to ensure that the trajectories are ergodic:
 the Nose-Hoover chains are implemented, as well as the Langevin thermostat (controlled by the value of <a href="../../input_variables/html_generated/varrlx.html#imgmov">imgmov</a>).
 Also, it is possible to use coordinate transformations (staging and normal mode), that are controlled by the keyword <a href="../../input_variables/html_generated/varrlx.html#pitransform">pitransform</a>.
 In standard equilibrium PIMD, only static observables are relevant (quantum time-correlation functions are not accessible): the
 masses associated to the motion of the beads are controlled by the keyword <a href="../../input_variables/html_generated/varrlx.html#pimass">pimass</a>, whereas the true masses of the atoms
-are given by <a href="../../input_variables/html_generated/varrlx.html#amu">amu</a>. The values given in <a href="../../input_variables/html_generated/varrlx.html#pimass">pimass</a> are used to fix the so-called fictitious masses ref{Marx96}. In the case
+are given by <a href="../../input_variables/html_generated/varrlx.html#amu">amu</a>. The values given in <a href="../../input_variables/html_generated/varrlx.html#pimass">pimass</a> are used to fix the so-called fictitious masses [<a href="../../bibliography/files_generated/bibliography.html#Marx1996">Marx1996</a>]. In the case
 where a coordinate transformation is used, the fictitious masses are automatically fixed in the code to match the so-called
 staging masses or normal mode masses. 
 The number of time steps of the trajectory is controlled by <a href="../../input_variables/html_generated/varrlx.html#ntimimage">ntimimage</a>, the initial and thermostat temperature by <a href="../../input_variables/html_generated/varrlx.html#mdtemp">mdtemp</a>.
@@ -56,8 +56,8 @@ the primitive and virial estimators, and the pressure tensor as given by the pri
 
 <p>
 <p>PIMD has been used with ABINIT to reproduce the large isotope effect on the phase transition between phase I and phase II of
-dense hydrogen ref{Geneste12}, and also some aspects of diffusion at low and room temperature in
-proton-conducting oxides for fuel cells ref{Geneste15}.
+dense hydrogen [<a href="../../bibliography/files_generated/bibliography.html#Geneste2012">Geneste2012</a>], and also some aspects of diffusion at low and room temperature in
+proton-conducting oxides for fuel cells [<a href="../../bibliography/files_generated/bibliography.html#Geneste2015">Geneste2015</a>].
 PIMD in the NPT ensemble is not available yet.
 
 

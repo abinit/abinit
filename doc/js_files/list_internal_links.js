@@ -3,7 +3,7 @@ document.write(' <HR ALIGN=left> ');
 document.write(' Goto :          ');
 document.write(' <A href="http://www.abinit.org"><B>ABINIT home page</B></A>          ');
 document.write(' <B> | </B> ');
-document.write(' <A href="'+docpath+'users/acknowledgments.html"><B>Suggested acknowledgments</B></A> ');
+document.write(' <A href="'+docpath+'bibliography/files_generated/acknowledgments.html"><B>Suggested acknowledgments</B></A> ');
 document.write(' <B> | </B> ');
 document.write(' <A href="'+docpath+'input_variables/html_generated/allvariables.html"><B>Input variable list</B></A> ');
 document.write(' <B> | </B> ');
@@ -13,7 +13,7 @@ document.write(' <A href="'+docpath+'topics/html_generated/all_topics.html"><B>"
 document.write(' <B> | </B> ');
 document.write(' <A href="'+docpath+'tutorial/welcome.html"><B>Tutorial</B></A> ');
 document.write(' <B> | </B> ');
-document.write(' <A href="'+docpath+'users/bibliography.html"><B>Bibliography</B></A> ');
+document.write(' <A href="'+docpath+'bibliography/files_generated/bibliography.html"><B>Bibliography</B></A> ');
 document.write(' <HR ALIGN=left> ');
 document.write(' Help files : ');
 document.write(' <A href="'+docpath+'users/new_user_guide.html"><B>Guide for new users</B></A> ');
