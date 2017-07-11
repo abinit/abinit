@@ -388,21 +388,33 @@ subroutine freeze_displ_supercell (displ,freeze_displ,scell)
 !Local variables-------------------------------
 !scalar
  integer :: iatom, ipratom
- real(dp) :: qdotr
+ complex(dpc) :: expqdotr
+ complex(dpc) :: phase
+ complex(dpc) :: zdispl(3,scell%natom_primcell)
 ! *************************************************************************
 
- do iatom = 1, scell%natom
-   qdotr = two_pi*(scell%qphon(1)*scell%uc_indexing(1,iatom) &
-&                 +scell%qphon(2)*scell%uc_indexing(2,iatom) &
-&                 +scell%qphon(3)*scell%uc_indexing(3,iatom))
+ zdispl = reshape(cmplx(displ), (3,scell%natom_primcell))
 
-! this is offset in displ vector due to primitive cell atom position
-   ipratom = (scell%atom_indexing(iatom)-1)*3
+ ! fix gauge by imposing real displacement for first atom in first direction 
+ ! multiply by normalized complex conjugate of first element
+ phase = conjg(zdispl(1,1)) / abs(zdispl(1,1))
+ 
+
+ do iatom = 1, scell%natom
+   expqdotr = exp(1.0j*two_pi*(scell%qphon(1)*scell%uc_indexing(1,iatom) &
+&                             +scell%qphon(2)*scell%uc_indexing(2,iatom) &
+&                             +scell%qphon(3)*scell%uc_indexing(3,iatom)))
+
+! this is offset in zdispl vector due to primitive cell atom position
+   ipratom = scell%atom_indexing(iatom)
 
 !add real part of displacement times Bloch phase
    scell%xcart(:,iatom) = scell%xcart(:,iatom) &
-&        + freeze_displ * cos(qdotr) * displ(1,ipratom+1:ipratom+3) &
-&        - freeze_displ * sin(qdotr) * displ(2,ipratom+1:ipratom+3)
+&        + freeze_displ * real(expqdotr * zdispl(:,ipratom) * phase)
+
+!   scell%xcart(:,iatom) = scell%xcart(:,iatom) &
+!&        + freeze_displ * cos(qdotr) * displ(1,ipratom+1:ipratom+3) &
+!&        - freeze_displ * sin(qdotr) * displ(2,ipratom+1:ipratom+3)
  end do
 
 end subroutine freeze_displ_supercell
