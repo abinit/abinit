@@ -44,24 +44,6 @@ variables to be used in the main input file of the abinit code.
  <a href="#awtr">awtr</a>&nbsp;&nbsp;
  <br>B.
  <a href="#bdgw">bdgw</a>&nbsp;&nbsp;
- <a href="#bs_algorithm">bs_algorithm</a>&nbsp;&nbsp;
- <a href="#bs_calctype">bs_calctype</a>&nbsp;&nbsp;
- <a href="#bs_coulomb_term">bs_coulomb_term</a>&nbsp;&nbsp;
- <a href="#bs_coupling">bs_coupling</a>&nbsp;&nbsp;
- <a href="#bs_eh_cutoff">bs_eh_cutoff</a>&nbsp;&nbsp;
- <a href="#bs_exchange_term">bs_exchange_term</a>&nbsp;&nbsp;
- <a href="#bs_freq_mesh">bs_freq_mesh</a>&nbsp;&nbsp;
- <a href="#bs_hayd_term">bs_hayd_term</a>&nbsp;&nbsp;
- <a href="#bs_haydock_niter">bs_haydock_niter</a>&nbsp;&nbsp;
- <a href="#bs_haydock_tol">bs_haydock_tol</a>&nbsp;&nbsp;
- <a href="#bs_interp_kmult">bs_interp_kmult</a>&nbsp;&nbsp;
- <a href="#bs_interp_m3_width">bs_interp_m3_width</a>&nbsp;&nbsp;
- <a href="#bs_interp_method">bs_interp_method</a>&nbsp;&nbsp;
- <a href="#bs_interp_mode">bs_interp_mode</a>&nbsp;&nbsp;
- <a href="#bs_interp_prep">bs_interp_prep</a>&nbsp;&nbsp;
- <a href="#bs_interp_rl_nb">bs_interp_rl_nb</a>&nbsp;&nbsp;
- <a href="#bs_loband">bs_loband</a>&nbsp;&nbsp;
- <a href="#bs_nstates">bs_nstates</a>&nbsp;&nbsp;
  <br>C.
  <a href="#cd_customnimfrqs">cd_customnimfrqs</a>&nbsp;&nbsp;
  <a href="#cd_frqim_method">cd_frqim_method</a>&nbsp;&nbsp;
@@ -177,7 +159,7 @@ variables to be used in the main input file of the abinit code.
 
 <br><br><br><br><hr>
 <br><font id="title"><a name="awtr">awtr</a></font>
-<br><font id="definition">Mnemonics: evaluate the Adler-Wiser expression of $\chi^{0}_{KS}$ assuming Time-Reversal</font>
+<br><font id="mnemonics">Mnemonics: evaluate the Adler-Wiser expression of $\chi^{0}_{KS}$ assuming Time-Reversal</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#gw">GW</a></font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 1</font>
@@ -213,7 +195,7 @@ the choice <b>awtr</b>=0.
 
 
 <br><font id="title"><a name="bdgw">bdgw</a></font>
-<br><font id="definition">Mnemonics: BanDs for GW calculation</font>
+<br><font id="mnemonics">Mnemonics: BanDs for GW calculation</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#gw">GW</a></font>
 <br><font id="vartype">Variable type: integer(2,<a href="vargw.html#nkptgw">nkptgw</a>,<a href="varbas.html#nsppol">nsppol</a>)</font>
 <br><font id="default">Default is *0</font>
@@ -270,523 +252,8 @@ representation. Only in this case, indeed, the initial symmetries and energy deg
 <B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
 
 
-<br><font id="title"><a name="bs_algorithm">bs_algorithm</a></font>
-<br><font id="definition">Mnemonics: Bethe-Salpeter ALGORITHM</font>
-<br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#bethe_salpeter">BETHE_SALPETER</a></font>
-<br><font id="vartype">Variable type: integer</font>
-<br><font id="default">Default is 2</font>
-<br><br><font id="requires">
-Only relevant if <a href="vargs.html#optdriver">optdriver</a> == 99
-</font>
-<br><font id="text">
-<p>
-<p>
- The bs_algorithm input variable defines the algorithm employed to calculate the macroscopic dielectric function.
-Possible values are 1, 2 or 3:
- <ul>
-  <li>
-   1 =&gt;
-The macroscopic dielectric is obtained by performing a direct diagonalization of the excitonic Hamiltonian.
-Advantages: It gives direct access to the excitonic eigenvalues as well as to the oscillator strengths.
-Drawbacks: It is a very CPU- and memory-consuming approach as the size of the Hamiltonian scales as (nk*nc*nv)**2.
-where nk is the number of k-point in the FULL Brillouin zone, and nc and nv are the number of
-conduction and valence states, respectively.
-Pros: It can be used both for resonant-only and resonant+coupling calculations (non Tamm-Dancoff approximation).
-  </li>
-  <li>
-   2 =&gt;
-Haydock iterative method. The macroscopic dielectric function
-is obtained by iterative applications of the Hamiltonian on a set of vectors in the electron-hole space.
-Advantages: It is less memory demanding and usually faster
-than the direct diagonalization provided that <a href="vargw.html#zcut">zcut</a> is larger than the typical
-energy spacing of the eigenvalues. Drawbacks: It is an iterative method therefore
-the convergence with respect to bs_haydock_niter should be checked.
-It is not possible to have direct information on the exciton spectrum, oscillator strengths and excitonic wave functions.
-For the time being <b>bs_algorithm</b>=2 cannot be used for calculations in which the coupling term is included (Tamm-Dancoff approximation).
-  </li>
-  <li>
-   3 =&gt;
-Conjugate-gradient method. This method allows to find the few first excitonic eigenvalues.
-Only available for resonant calculations (Tamm-Dancoff approximation).
-  </li>
- </ul>
-</p>
-</font>
-
-<br><br><br><br><a href=#top>Go to the top</a>
-<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
-
-
-<br><font id="title"><a name="bs_calctype">bs_calctype</a></font>
-<br><font id="definition">Mnemonics: Bethe-Salpeter CALCulation TYPE</font>
-<br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#bethe_salpeter">BETHE_SALPETER</a></font>
-<br><font id="vartype">Variable type: integer</font>
-<br><font id="default">Default is 1</font>
-<br><br><font id="requires">
-Only relevant if <a href="vargs.html#optdriver">optdriver</a> == 99
-</font>
-<br><font id="text">
-<p>
-<p>
- Possible values are 1,2,3.
- <ul>
-  <li>
-   1 =&gt; use the KS eigenvalues and wave functions stored in the KSS file
-to construct the transition space
-  </li>
-  <li>
-   2 =&gt; The transition space is constructed with Kohn-Sham orbitals
-but the energies are read from the external <a href="../../users/abinit_help.html#gw">GW</a> file
-  </li>
-  <li>
-   3 =&gt; QP amplitudes and energies will be read from the QPS file and used to construct H_ex.
-Not coded yet because &lt;\psi|r|\psj&gt;^QP should be calculated taking into account the non-locality of
-the self-energy in the commutator [H,r].
-  </li>
- </ul>
-</p>
-</font>
-
-<br><br><br><br><a href=#top>Go to the top</a>
-<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
-
-
-<br><font id="title"><a name="bs_coulomb_term">bs_coulomb_term</a></font>
-<br><font id="definition">Mnemonics: Bethe-Salpeter COULOMB TERM</font>
-<br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#bethe_salpeter">BETHE_SALPETER</a></font>
-<br><font id="vartype">Variable type: integer</font>
-<br><font id="default">Default is 11</font>
-<br><br><font id="requires">
-Only relevant if <a href="vargs.html#optdriver">optdriver</a> == 99
-</font>
-<br><font id="text">
-<p>
-<p>
-This variable governs the choice among the different options that are available for the treatment
-of Coulomb term of the <a href="../../users/abinit_help.html#bethe_salpeter">BETHE_SALPETER</a> Hamiltonian.
-<b>bs_coulomb_term</b> is the concatenation of two digits, labelled (A) and (B).
-</p>
-<p>
- The first digit (A) can assume the values 0,1,2:
- <ul>
-  <li>
-   0 =&gt; The Coulomb term is not computed. This choice is equivalent to computing the RPA
-spectrum but using the representation in transition space instead of the
-more efficient approach based on the sum over states.
-  </li>
-  <li>
-   1 =&gt; The Coulomb term is computed using the screened interaction read from an external SCR file
-(standard excitonic calculation).
-  </li>
-  <li>
-   2 =&gt; The Coulomb term is computed using a model screening function
-(useful for convergence studies or for reproducing published results).
-  </li>
- </ul>
-</p>
-<p>
- The second digit (B) can assume the values 0,1:
- <ul>
-  <li>
-   0 =&gt;
-Use a diagonal approximation for W_GG' (mainly used for accelerating convergence studies).
-  </li>
-  <li>
-   1 =&gt;
-The Coulomb term is correctly evaluated using the truly non-local W(r,r').
-  </li>
- </ul>
-</p>
-</font>
-
-<br><br><br><br><a href=#top>Go to the top</a>
-<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
-
-
-<br><font id="title"><a name="bs_coupling">bs_coupling</a></font>
-<br><font id="definition">Mnemonics: Bethe-Salpeter COUPLING</font>
-<br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#bethe_salpeter">BETHE_SALPETER</a></font>
-<br><font id="vartype">Variable type: integer</font>
-<br><font id="default">Default is 0</font>
-<br><br><font id="requires">
-Only relevant if <a href="vargs.html#optdriver">optdriver</a> == 99
-</font>
-<br><font id="text">
-<p>
-<p>
- The <b>bs_coupling</b> input variable defines the treatment of the coupling block of the
-<a href="../../users/abinit_help.html#bethe_salpeter">BETHE_SALPETER</a> Hamiltonian. Possible values are 0,1.
- <ul>
-  <li>
-   0 =&gt;
-The coupling block is neglected (the so-called Tamm-Dancoff approximation). The code runs faster and the Hamiltonian matrix requires
-less memory (factor 4). It is a good approximation for the absorption spectrum
-which only requires the knowledge of Im(\epsilon). The reliability of this
-approximation should be tested in the case of EELF calculations.
-  </li>
-  <li>
-   1 =&gt;
-The coupling term is included (non Tamm-Dancoff approxmation).
-  </li>
- </ul>
-</p>
-</font>
-
-<br><br><br><br><a href=#top>Go to the top</a>
-<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
-
-
-<br><font id="title"><a name="bs_eh_cutoff">bs_eh_cutoff</a></font>
-<br><font id="definition">Mnemonics: Bethe-Salpeter Electron-Hole CUTOFF</font>
-<br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#bethe_salpeter">BETHE_SALPETER</a></font>
-<br><font id="vartype">Variable type: integer(2)</font>
-<br><font id="default">Default is [-inf, inf]</font>
-<br><br><font id="requires">
-Only relevant if <a href="vargs.html#optdriver">optdriver</a> == 99
-</font>
-<br><font id="text">
-<p>
-<p>
- It is used to define a cutoff in the e-h basis set. Only those transitions whose
-energy is between bs_eh_window(1) and bs_eh_window(2) will be considered during
-the construction of the e-h Hamiltonian.
-</p>
-</font>
-
-<br><br><br><br><a href=#top>Go to the top</a>
-<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
-
-
-<br><font id="title"><a name="bs_exchange_term">bs_exchange_term</a></font>
-<br><font id="definition">Mnemonics: Bethe-Salpeter EXCHANGE TERM</font>
-<br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#bethe_salpeter">BETHE_SALPETER</a></font>
-<br><font id="vartype">Variable type: integer</font>
-<br><font id="default">Default is 1</font>
-<br><br><font id="requires">
-Only relevant if <a href="vargs.html#optdriver">optdriver</a> == 99
-</font>
-<br><font id="text">
-<p>
-<p><ul>
-<li>0 =&gt;The exchange term is not calculated. This is equivalent to neglecting local field effects
-in the macroscopic dielectric function.</li>
-<li>1 =&gt;The exchange term is calculated and added to the excitonic Hamiltonian.
- </li></ul></p>
-</font>
-
-<br><br><br><br><a href=#top>Go to the top</a>
-<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
-
-
-<br><font id="title"><a name="bs_freq_mesh">bs_freq_mesh</a></font>
-<br><font id="definition">Mnemonics: Bethe-Salpeter FREQuency MESH</font>
-<br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#bethe_salpeter">BETHE_SALPETER</a>, <a href="../../users/abinit_help.html#energy">ENERGY</a></font>
-<br><font id="vartype">Variable type: real(3)</font>
-<br><font id="default">Default is [0.0, 0.0, 0.01]</font>
-<br><br><font id="requires">
-Only relevant if <a href="vargs.html#optdriver">optdriver</a> == 99
-</font>
-<br><font id="text">
-<p>
-<p>
-<b>bs_freq_mesh(1)</b> defines the first frequency for the calculation of the macroscopic dielectric function.
-<p>
-<b>bs_freq_mesh(2)</b> gives the last frequency for the calculation of the macroscopic dielectric function.
-If zero, <b>bs_freq_mesh(2)</b> is set automatically to MAX(resonant_energy) + 10%.
-<p>
-<b>bs_freq_mesh(3)</b> gives the step of the linear mesh used for evaluating the macroscopic dielectric function.
-</p>
-</font>
-
-<br><br><br><br><a href=#top>Go to the top</a>
-<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
-
-
-<br><font id="title"><a name="bs_hayd_term">bs_hayd_term</a></font>
-<br><font id="definition">Mnemonics: Bethe-Salpeter HAYdock TERMinator</font>
-<br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#bethe_salpeter">BETHE_SALPETER</a></font>
-<br><font id="vartype">Variable type: integer</font>
-<br><font id="default">Default is 1</font>
-<br><br><font id="requires">
-Only relevant if <a href="vargs.html#optdriver">optdriver</a> == 99 and <a href="vargw.html#bs_algorithm">bs_algorithm</a>==2
-</font>
-<br><font id="text">
-<p>
-<p>
- Defines how to terminate the continued fraction expression for the dielectric function.
-The terminator reduces the number of iterations needed to converge by smoothing the oscillation
-in the high energy part of the spectrum
- <ul>
-  <li>
-   0 =&gt;
-No terminator. The contribution given by the terms missing in the Lanczos chain are set to zero.
-  </li>
-  <li>
-   1 =&gt; Use the terminator function. The particular expression depends on the type of calculation:
-In the resonant-only case, the a_i and b_i coefficients for i &gt; niter,
-are replaced by their values at i=niter.
-Even the coupling block is included, the terminator function described in D. Rocca, R. Gebauer, Y. Saad, S. Baroni, J. Chem. Phys.
-128, 154105 (2008) is used.
-  </li>
- </ul>
-</p>
-</font>
-
-<br><br><br><br><a href=#top>Go to the top</a>
-<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
-
-
-<br><font id="title"><a name="bs_haydock_niter">bs_haydock_niter</a></font>
-<br><font id="definition">Mnemonics: Bethe-Salpeter HAYDOCK Number of Iterations</font>
-<br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#bethe_salpeter">BETHE_SALPETER</a></font>
-<br><font id="vartype">Variable type: integer</font>
-<br><font id="default">Default is 100</font>
-<br><br><font id="requires">
-Only relevant if <a href="vargs.html#optdriver">optdriver</a> == 99 and <a href="vargw.html#bs_algorithm">bs_algorithm</a>==2
-</font>
-<br><font id="text">
-<p>
-<p>
- <b>bs_haydock_niter</b> defines the maximum number of iterations used to calculate the macroscopic dielectric function.
-The iterative algorithm stops when the difference between two consecutive evaluations of the optical
-spectra is less than <a href="vargw.html#bs_haydock_tol">bs_haydock_tol</a>.
-</p>
-</font>
-
-<br><br><br><br><a href=#top>Go to the top</a>
-<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
-
-
-<br><font id="title"><a name="bs_haydock_tol">bs_haydock_tol</a></font>
-<br><font id="definition">Mnemonics: Bethe-Salpeter HAYDOCK TOLerance</font>
-<br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#bethe_salpeter">BETHE_SALPETER</a></font>
-<br><font id="vartype">Variable type: real(2)</font>
-<br><font id="default">Default is [0.02, 0]</font>
-<br><br><font id="requires">
-Only relevant if <a href="vargs.html#optdriver">optdriver</a> == 99 and <a href="vargw.html#bs_algorithm">bs_algorithm</a>==2
-</font>
-<br><font id="text">
-<p>
-<p>
- Defines the convergence criterion for the Haydock iterative method.
-The iterative algorithm stops when the difference between two consecutive evaluations of the
-macroscopic dielectric function is less than
- <b>
-  bs_haydock_tol(1)
- </b>
- .
-The sign of
- <b>
-  bs_haydock_tol(1)
- </b>
- defines how to estimate the convergence error.
-A negative value signals that the converge should be reached for each frequency (strict criterion),
-while a positive value indicates that the converge error is estimated
-by averaging over the entire frequency range (mild criterion).
-</p>
-<p>
-<b>bs_haydock_tol(2)</b> defines the quantity that will be checked for convergence:
- <ul>
-  <li>
-   0 &rarr; both the real and the imaginary part must converge
-  </li>
-  <li>
-   1 &rarr; only the real part
-  </li>
-  <li>
-   2 &rarr; only the imaginary part
-  </li>
- </ul>
-</p>
-</font>
-
-<br><br><br><br><a href=#top>Go to the top</a>
-<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
-
-
-<br><font id="title"><a name="bs_interp_kmult">bs_interp_kmult</a></font>
-<br><font id="definition">Mnemonics: Bethe-Salpeter INTERPolation K-point MULTiplication factors</font>
-<br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#bethe_salpeter">BETHE_SALPETER</a></font>
-<br><font id="vartype">Variable type: integer(3)</font>
-<br><font id="default">Default is [0, 0, 0]</font>
-<br><br><font id="requires">
-Only relevant if <a href="vargw.html#bs_interp_mode">bs_interp_mode</a> > 0 and <a href="vargw.html#bs_algorithm">bs_algorithm</a>==2 and <a href="vargw.html#bs_coupling">bs_coupling</a>==0
-</font>
-<br><font id="text">
-<p>
-<p>
- <b>bs_interp_kmult</b> defines the number of divisions used to generate the dense mesh in the interpolation.
-<a href="varbas.html#ngkpt">ngkpt</a> of the dense mesh =
- <b>
-  bs_interp_kmult(:)
- </b>
- * <a href="varbas.html#ngkpt">ngkpt</a> of the coarse mesh.
-</p>
-</font>
-
-<br><br><br><br><a href=#top>Go to the top</a>
-<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
-
-
-<br><font id="title"><a name="bs_interp_m3_width">bs_interp_m3_width</a></font>
-<br><font id="definition">Mnemonics: Bethe-Salpeter INTERPolation Method3 WIDTH</font>
-<br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#bethe_salpeter">BETHE_SALPETER</a></font>
-<br><font id="vartype">Variable type: real</font>
-<br><font id="default">Default is 1.0</font>
-<br><br><font id="requires">
-Only relevant if <a href="vargw.html#bs_interp_mode">bs_interp_mode</a>==3 and <a href="vargw.html#bs_algorithm">bs_algorithm</a>==2 and <a href="vargw.html#bs_coupling">bs_coupling</a>==0
-</font>
-<br><font id="text">
-<p>
-Defines the width of the region where divergence treatment is applied for BSE interpolation
-</font>
-
-<br><br><br><br><a href=#top>Go to the top</a>
-<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
-
-
-<br><font id="title"><a name="bs_interp_method">bs_interp_method</a></font>
-<br><font id="definition">Mnemonics: Bethe-Salpeter INTERPolation METHOD</font>
-<br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#bethe_salpeter">BETHE_SALPETER</a></font>
-<br><font id="vartype">Variable type: integer</font>
-<br><font id="default">Default is 1</font>
-<br><br><font id="requires">
-Only relevant if <a href="vargw.html#bs_interp_mode">bs_interp_mode</a> > 0 and <a href="vargw.html#bs_algorithm">bs_algorithm</a>==2 and <a href="vargw.html#bs_coupling">bs_coupling</a>==0
-</font>
-<br><font id="text">
-<p>
-<p>
- <b>bs_interp_method</b> selects the method of interpolation:
- <ul>
-  <li>
-   0 =&gt; Interpolate using Y. Gillet technique with 8 neighbours (see Comput. Phys. Commun. 203, 83 (2016))
-  </li>
-  <li>
-   1 =&gt; Interpolation using Rohlfing & Louie technique (see above-mentioned article and Phys. Rev. B 62, 4927 (2000))
-  </li>
- </ul>
-</p>
-</font>
-
-<br><br><br><br><a href=#top>Go to the top</a>
-<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
-
-
-<br><font id="title"><a name="bs_interp_mode">bs_interp_mode</a></font>
-<br><font id="definition">Mnemonics: Bethe-Salpeter INTERPolation MODE</font>
-<br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#bethe_salpeter">BETHE_SALPETER</a></font>
-<br><font id="vartype">Variable type: integer</font>
-<br><font id="default">Default is 0</font>
-<br><br><font id="requires">
-Only relevant if <b>bs_interp_mode</b> > 0 and <a href="vargw.html#bs_algorithm">bs_algorithm</a>==2 and <a href="vargw.html#bs_coupling">bs_coupling</a>==0
-</font>
-<br><font id="text">
-<p>
-<p>
- <b>bs_interp_mode</b> selects the mode of interpolation:
- <ul>
-  <li>
-   0 =&gt; No interpolation. Standard <a href="../../users/abinit_help.html#bethe_salpeter">BETHE_SALPETER</a> computation is performed
-  </li>
-  <li>
-   1 =&gt; Simple interpolation
-  </li>
-  <li>
-   2 =&gt; Treatment of the divergence on the whole set of dense k-points
-  </li>
-  <li>
-   3 =&gt; Treatment of the divergence along the diagonal in k-space and simple interpolation elsewhere.
-  </li>
- </ul>
-</p>
-</font>
-
-<br><br><br><br><a href=#top>Go to the top</a>
-<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
-
-
-<br><font id="title"><a name="bs_interp_prep">bs_interp_prep</a></font>
-<br><font id="definition">Mnemonics: Bethe-Salpeter INTERPolation PREParation</font>
-<br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#bethe_salpeter">BETHE_SALPETER</a></font>
-<br><font id="vartype">Variable type: integer</font>
-<br><font id="default">Default is 0</font>
-<br><br><font id="requires">
-Only relevant if <a href="vargw.html#bs_interp_mode">bs_interp_mode</a> > 0 and <a href="vargw.html#bs_algorithm">bs_algorithm</a>==2 and <a href="vargw.html#bs_coupling">bs_coupling</a>==0
-</font>
-<br><font id="text">
-<p>
-<p>
- <b>bs_interp_prep</b> allows to trigger the preparation of the interpolation with method 2 or method 3.
-It generates the decomposition of BSR in a,b,c coefficients used for the interpolation.
-</p>
-</font>
-
-<br><br><br><br><a href=#top>Go to the top</a>
-<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
-
-
-<br><font id="title"><a name="bs_interp_rl_nb">bs_interp_rl_nb</a></font>
-<br><font id="definition">Mnemonics: Bethe-Salpeter INTERPolation Rohlfing & Louie NeighBour</font>
-<br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#bethe_salpeter">BETHE_SALPETER</a></font>
-<br><font id="vartype">Variable type: integer</font>
-<br><font id="default">Default is 1</font>
-<br><br><font id="requires">
-Only relevant if <a href="vargw.html#bs_interp_mode">bs_interp_mode</a> > 0 and <a href="vargw.html#bs_algorithm">bs_algorithm</a>==2 and <a href="vargw.html#bs_interp_method">bs_interp_method</a> == 1 and <a href="vargw.html#bs_coupling">bs_coupling</a>==0
-</font>
-<br><font id="text">
-<p>
-Gives the index of the neighbour that is used for Rohlfing & Louie method
-</font>
-
-<br><br><br><br><a href=#top>Go to the top</a>
-<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
-
-
-<br><font id="title"><a name="bs_loband">bs_loband</a></font>
-<br><font id="definition">Mnemonics: Bethe-Salpeter Lowest Occupied BAND</font>
-<br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#bethe_salpeter">BETHE_SALPETER</a></font>
-<br><font id="vartype">Variable type: integer(<a href="varbas.html#nsppol">nsppol</a>)</font>
-<br><font id="default">Default is 0</font>
-<br><br><font id="requires">
-Only relevant if <a href="vargs.html#optdriver">optdriver</a> == 99
-</font>
-<br><font id="text">
-<p>
-<p>
- This variable defines the index of the lowest occupied band used for the construction of the electron-hole basis set.
-For spin polarized calculations, one must provide two separated indices for spin up and spin down.
-An additional cutoff energy can be applied by means of the bs_eh_window input variable.
-</p>
-</font>
-
-<br><br><br><br><a href=#top>Go to the top</a>
-<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
-
-
-<br><font id="title"><a name="bs_nstates">bs_nstates</a></font>
-<br><font id="definition">Mnemonics: Bethe-Salpeter Number of States</font>
-<br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#bethe_salpeter">BETHE_SALPETER</a></font>
-<br><font id="vartype">Variable type: integer</font>
-<br><font id="default">Default is 0</font>
-<br><br><font id="requires">
-Only relevant if <a href="vargs.html#optdriver">optdriver</a> == 99 and <a href="vargw.html#bs_algorithm">bs_algorithm</a> in [2,3]
-</font>
-<br><font id="text">
-<p>
-<p>
- <b>bs_nstates</b> defines the maximum number of excitonic states calculated in
-the direct diagonalization of the excitonic matrix or in the conjugate-gradient method.
-The number of states should be sufficiently large
-for a correct description of the optical properties in the frequency range of interest.
-</p>
-</font>
-
-<br><br><br><br><a href=#top>Go to the top</a>
-<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
-
-
 <br><font id="title"><a name="cd_customnimfrqs">cd_customnimfrqs</a></font>
-<br><font id="definition">Mnemonics: Contour Deformation Custom Imaginary Frequencies</font>
+<br><font id="mnemonics">Mnemonics: Contour Deformation CUSTOM IMaginary FReQuencieS</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#gw">GW</a></font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
@@ -806,7 +273,7 @@ to the number of frequencies you want. The frequencies are specified with <a hre
 
 
 <br><font id="title"><a name="cd_frqim_method">cd_frqim_method</a></font>
-<br><font id="definition">Mnemonics: Contour Deformation Imaginary Frequency integration Method</font>
+<br><font id="mnemonics">Mnemonics: Contour Deformation FReQuency integration on IMaginary axis Method</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#gw">GW</a></font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 1</font>
@@ -1143,7 +610,7 @@ merge independent screening calculations over q-points and frequency sections.
 
 
 <br><font id="title"><a name="cd_full_grid">cd_full_grid</a></font>
-<br><font id="definition">Mnemonics: Contour Deformation Full Grid in complex plane</font>
+<br><font id="mnemonics">Mnemonics: Contour Deformation FULL GRID in complex plane</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#gw">GW</a></font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
@@ -1181,7 +648,7 @@ analysis with the
 
 
 <br><font id="title"><a name="cd_halfway_freq">cd_halfway_freq</a></font>
-<br><font id="definition">Mnemonics: Contour Deformation tangent grid Halfway Frequency</font>
+<br><font id="mnemonics">Mnemonics: Contour Deformation tangent grid HALFWAY FREQuency</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#gw">GW</a>, <a href="../../users/abinit_help.html#energy">ENERGY</a></font>
 <br><font id="vartype">Variable type: real</font>
 <br><font id="default">Default is 100.0 eV</font>
@@ -1202,7 +669,7 @@ linear up to this point. To be used in conjunction with <a href="vargw.html#gw_f
 
 
 <br><font id="title"><a name="cd_imfrqs">cd_imfrqs</a></font>
-<br><font id="definition">Mnemonics: Contour Deformation Imaginary Frequencies</font>
+<br><font id="mnemonics">Mnemonics: Contour Deformation IMaginary FReQuencieS</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#gw">GW</a></font>
 <br><font id="vartype">Variable type: real(<a href="vargw.html#cd_customnimfrqs">cd_customnimfrqs</a>)</font>
 <br><font id="default">No default</font>
@@ -1246,7 +713,7 @@ the grid along the real axis. The calculation of that point should be controlled
 
 
 <br><font id="title"><a name="cd_max_freq">cd_max_freq</a></font>
-<br><font id="definition">Mnemonics: Contour Deformation grid Maximum Frequency</font>
+<br><font id="mnemonics">Mnemonics: Contour Deformation grid MAXimum FREQuency</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#gw">GW</a>, <a href="../../users/abinit_help.html#energy">ENERGY</a></font>
 <br><font id="vartype">Variable type: real</font>
 <br><font id="default">Default is 1000.0 eV</font>
@@ -1267,7 +734,7 @@ Only relevant if (<a href="vargs.html#optdriver">optdriver</a>==3 or <a href="va
 
 
 <br><font id="title"><a name="cd_subset_freq">cd_subset_freq</a></font>
-<br><font id="definition">Mnemonics: Contour Deformation grid calculate Subset of Frequencies</font>
+<br><font id="mnemonics">Mnemonics: Contour Deformation grid calculate SUBSET of FREQuencies</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#gw">GW</a></font>
 <br><font id="vartype">Variable type: integer(2)</font>
 <br><font id="default">Default is [1, '<a href="vargw.html#nfreqre">nfreqre</a>']</font>
@@ -1301,7 +768,7 @@ subset_freq2   51  100
 
 
 <br><font id="title"><a name="ecuteps">ecuteps</a></font>
-<br><font id="definition">Mnemonics: Energy CUT-off for EPSilon (the dielectric matrix)</font>
+<br><font id="mnemonics">Mnemonics: Energy CUT-off for EPSilon (the dielectric matrix)</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#gw">GW</a>, <a href="../../users/abinit_help.html#energy">ENERGY</a></font>
 <br><font id="vartype">Variable type: real</font>
 <br><font id="default">Default is 0.0</font>
@@ -1327,7 +794,7 @@ In any case, a convergence study is worth.
 
 
 <br><font id="title"><a name="ecutsigx">ecutsigx</a></font>
-<br><font id="definition">Mnemonics: Energy CUT-off for SIGma eXchange</font>
+<br><font id="mnemonics">Mnemonics: Energy CUT-off for SIGma eXchange</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#gw">GW</a>, <a href="../../users/abinit_help.html#energy">ENERGY</a></font>
 <br><font id="vartype">Variable type: real</font>
 <br><font id="default">Default is 0.0</font>
@@ -1352,7 +819,7 @@ upper limits.
 
 
 <br><font id="title"><a name="ecutwfn">ecutwfn</a></font>
-<br><font id="definition">Mnemonics: Energy CUT-off for WaveFunctions</font>
+<br><font id="mnemonics">Mnemonics: Energy CUT-off for WaveFunctioNs</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#gw">GW</a>, <a href="../../users/abinit_help.html#energy">ENERGY</a></font>
 <br><font id="vartype">Variable type: real</font>
 <br><font id="default">Default is <a href="varbas.html#ecut">ecut</a> if <a href="vargs.html#optdriver">optdriver</a> in [3, 4],
@@ -1386,7 +853,7 @@ study is needed to choose correctly both values.
 
 
 <br><font id="title"><a name="fftgw">fftgw</a></font>
-<br><font id="definition">Mnemonics: FFT for GW calculation</font>
+<br><font id="mnemonics">Mnemonics: FFT for GW calculation</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#gw">GW</a></font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 21</font>
@@ -1484,7 +951,7 @@ are more accurate since the symmetry properties of the system are preserved.
 
 
 <br><font id="title"><a name="freqim_alpha">freqim_alpha</a></font>
-<br><font id="definition">Mnemonics: FREQuencies along the IMaginary axis ALPHA parameter</font>
+<br><font id="mnemonics">Mnemonics: FREQuencies along the IMaginary axis ALPHA parameter</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#gw">GW</a></font>
 <br><font id="vartype">Variable type: real</font>
 <br><font id="default">Default is 5.0</font>
@@ -1531,7 +998,7 @@ determined by the average density of the system (this can be set by hand by usin
 
 
 <br><font id="title"><a name="freqremax">freqremax</a></font>
-<br><font id="definition">Mnemonics: FREQuencies along the Real axis MAXimum</font>
+<br><font id="mnemonics">Mnemonics: FREQuencies along the Real axis MAXimum</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#gw">GW</a>, <a href="../../users/abinit_help.html#energy">ENERGY</a></font>
 <br><font id="vartype">Variable type: real</font>
 <br><font id="default">Default is 0.0</font>
@@ -1556,7 +1023,7 @@ define the spacing of the frequency mesh along the real axis.
 
 
 <br><font id="title"><a name="freqremin">freqremin</a></font>
-<br><font id="definition">Mnemonics: FREQuencies along the Real axis MINimum</font>
+<br><font id="mnemonics">Mnemonics: FREQuencies along the Real axis MINimum</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#gw">GW</a>, <a href="../../users/abinit_help.html#energy">ENERGY</a></font>
 <br><font id="vartype">Variable type: real</font>
 <br><font id="default">Default is 0.0</font>
@@ -1590,7 +1057,7 @@ and <a href="vargw.html#nfreqre">nfreqre</a> define the spacing of the frequency
 
 
 <br><font id="title"><a name="freqspmax">freqspmax</a></font>
-<br><font id="definition">Mnemonics: FREQuencies for the SPectral function MAXimum</font>
+<br><font id="mnemonics">Mnemonics: FREQuencies for the SPectral function MAXimum</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#gw">GW</a>, <a href="../../users/abinit_help.html#energy">ENERGY</a></font>
 <br><font id="vartype">Variable type: real</font>
 <br><font id="default">Default is 0.0</font>
@@ -1613,7 +1080,7 @@ the real axis. Alternatively, the variables <a href="vargw.html#gw_customnfreqsp
 
 
 <br><font id="title"><a name="freqspmin">freqspmin</a></font>
-<br><font id="definition">Mnemonics: FREQuencies for the SPectral function MINimum</font>
+<br><font id="mnemonics">Mnemonics: FREQuencies for the SPectral function MINimum</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#gw">GW</a>, <a href="../../users/abinit_help.html#energy">ENERGY</a></font>
 <br><font id="vartype">Variable type: real</font>
 <br><font id="default">Default is -<a href="vargw.html#freqspmax">freqspmax</a></font>
@@ -1637,7 +1104,7 @@ the real axis. Alternatively, the variables <a href="vargw.html#gw_customnfreqsp
 
 
 <br><font id="title"><a name="gw_customnfreqsp">gw_customnfreqsp</a></font>
-<br><font id="definition">Mnemonics: GW CUSTOM SPectral FREQuencies</font>
+<br><font id="mnemonics">Mnemonics: GW CUSTOM FREQuencies for SPectral function</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#gw">GW</a></font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
@@ -1658,7 +1125,7 @@ you want. The frequencies are specified with <a href="vargw.html#gw_freqsp">gw_f
 
 
 <br><font id="title"><a name="gw_freqsp">gw_freqsp</a></font>
-<br><font id="definition">Mnemonics: GW SPectral FREQuencies</font>
+<br><font id="mnemonics">Mnemonics: GW SPectral FREQuencies</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#gw">GW</a></font>
 <br><font id="vartype">Variable type: real(<a href="vargw.html#gw_customnfreqsp">gw_customnfreqsp</a>)</font>
 <br><font id="default">Default is [1 .. <a href="vargw.html#gw_customnfreqsp">gw_customnfreqsp</a>]</font>
@@ -1688,7 +1155,7 @@ gw_freqsp         -0.5  -0.1  0.0  1.0  10.0 eV
 
 
 <br><font id="title"><a name="gw_frqim_inzgrid">gw_frqim_inzgrid</a></font>
-<br><font id="definition">Mnemonics: Contour Deformation Imaginary Frequencies Inverse Z Grid</font>
+<br><font id="mnemonics">Mnemonics: GW Contour Deformation FReQuencies on IMaginary axis Inverse Z Grid</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#gw">GW</a></font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
@@ -1736,7 +1203,7 @@ the points are distributed so that half of them lie below the plasma frequency.
 
 
 <br><font id="title"><a name="gw_frqre_inzgrid">gw_frqre_inzgrid</a></font>
-<br><font id="definition">Mnemonics: Contour Deformation Real Frequencies Inverse Z Grid</font>
+<br><font id="mnemonics">Mnemonics: GW Contour Deformation FReQuencies on REal axis Inverse Z Grid</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#gw">GW</a></font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
@@ -1810,7 +1277,7 @@ logfile during Contour Deformation sigma calculations.
 
 
 <br><font id="title"><a name="gw_frqre_tangrid">gw_frqre_tangrid</a></font>
-<br><font id="definition">Mnemonics: Contour Deformation Use Tangent Grid</font>
+<br><font id="mnemonics">Mnemonics: GW Contour Deformation FReQencies on REal axis - Use Tangent Grid</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#gw">GW</a></font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
@@ -1834,7 +1301,7 @@ of a function which decays as 1/x^2. To be used in conjunction with <a href="var
 
 
 <br><font id="title"><a name="gw_invalid_freq">gw_invalid_freq</a></font>
-<br><font id="definition">Mnemonics: Invalid Frequency for Hybertsen-Louie PPM</font>
+<br><font id="mnemonics">Mnemonics: GW treatment of INVALID FREQuency for Hybertsen-Louie PPM</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#gw">GW</a></font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
@@ -1864,7 +1331,7 @@ Only relevant if <a href="vargs.html#optdriver">optdriver</a> in [3,4] and <a hr
 
 
 <br><font id="title"><a name="gw_nqlwl">gw_nqlwl</a></font>
-<br><font id="definition">Mnemonics: GW, Number of Q-points for the Long Wave-Length Limit</font>
+<br><font id="mnemonics">Mnemonics: GW, Number of Q-points for the Long Wave-Length Limit</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#gw">GW</a></font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 1</font>
@@ -1921,7 +1388,7 @@ directions in q-space (the three basis vectors of the reciprocal lattice and the
 
 
 <br><font id="title"><a name="gw_nstep">gw_nstep</a></font>
-<br><font id="definition">Mnemonics: GW Number of self-consistent STEPS</font>
+<br><font id="mnemonics">Mnemonics: GW Number of self-consistent STEPs</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#gw">GW</a></font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 30</font>
@@ -1944,7 +1411,7 @@ used to define the type of self-consistency.
 
 
 <br><font id="title"><a name="gw_qlwl">gw_qlwl</a></font>
-<br><font id="definition">Mnemonics: GW, Q-points for the Long Wave-Length Limit</font>
+<br><font id="mnemonics">Mnemonics: GW, Q-points for the Long Wave-Length limit</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#gw">GW</a></font>
 <br><font id="vartype">Variable type: real(3,<a href="vargw.html#gw_nqlwl">gw_nqlwl</a>)</font>
 <br><font id="default">Default is [1e-05, 2e-05, 3e-05]</font>
@@ -1968,7 +1435,7 @@ non-local field effects) are evaluated for each direction specified by <b>gw_qlw
 
 
 <br><font id="title"><a name="gw_qprange">gw_qprange</a></font>
-<br><font id="definition">Mnemonics: GW Policy for K-point and Bands selection</font>
+<br><font id="mnemonics">Mnemonics: GW QuasiParticle RANGE policy</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#gw">GW</a></font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
@@ -2020,7 +1487,7 @@ to provide the three variables <a href="vargw.html#nkptgw">nkptgw</a>, <a href="
 
 
 <br><font id="title"><a name="gw_sctype">gw_sctype</a></font>
-<br><font id="definition">Mnemonics: GW, Self-Consistency TYPE</font>
+<br><font id="mnemonics">Mnemonics: GW, Self-Consistency TYPE</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#gw">GW</a></font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 1</font>
@@ -2070,7 +1537,7 @@ the Green functions to be used in the first self-consistent iteration.
 
 
 <br><font id="title"><a name="gw_sigxcore">gw_sigxcore</a></font>
-<br><font id="definition">Mnemonics: GW, treatment of the ...</font>
+<br><font id="mnemonics">Mnemonics: GW, SIGma (self-energy) for the CORE contribution</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#gw">GW</a></font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
@@ -2115,7 +1582,7 @@ are strictly localized inside the PAW spheres.
 
 
 <br><font id="title"><a name="gw_toldfeig">gw_toldfeig</a></font>
-<br><font id="definition">Mnemonics: GW TOLerance on the DiFference of the EIGenvalues</font>
+<br><font id="mnemonics">Mnemonics: GW TOLerance on the DiFference of the EIGenvalues</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#gw">GW</a>, <a href="../../users/abinit_help.html#energy">ENERGY</a></font>
 <br><font id="vartype">Variable type: real</font>
 <br><font id="default">Default is 0.1 eV</font>
@@ -2141,7 +1608,7 @@ Only relevant if <a href="vargs.html#optdriver">optdriver</a>==8
 
 
 <br><font id="title"><a name="gwcalctyp">gwcalctyp</a></font>
-<br><font id="definition">Mnemonics: GW CALCulation TYPe</font>
+<br><font id="mnemonics">Mnemonics: GW CALCulation TYPe</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#gw">GW</a></font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
@@ -2241,7 +1708,7 @@ following S. Faleev
 
 
 <br><font id="title"><a name="gwcomp">gwcomp</a></font>
-<br><font id="definition">Mnemonics: GW COMPletness</font>
+<br><font id="mnemonics">Mnemonics: GW COMPleteness</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#gw">GW</a></font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
@@ -2265,7 +1732,7 @@ See F. Bruneval, X. Gonze, Phys. Rev. B 78, 085125 (2008) for a description of t
 
 
 <br><font id="title"><a name="gwencomp">gwencomp</a></font>
-<br><font id="definition">Mnemonics: GW Energy for COMPletness</font>
+<br><font id="mnemonics">Mnemonics: GW ENergy for COMPleteness</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#gw">GW</a></font>
 <br><font id="vartype">Variable type: real</font>
 <br><font id="default">Default is 2.0</font>
@@ -2288,7 +1755,7 @@ completeness and make the convergence against the number of bands much faster.
 
 
 <br><font id="title"><a name="gwfockmix">gwfockmix</a></font>
-<br><font id="definition">Mnemonics: GW FOCK exchange MIXing parameter</font>
+<br><font id="mnemonics">Mnemonics: GW FOCK exchange MIXing parameter</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#gw">GW</a></font>
 <br><font id="vartype">Variable type: real</font>
 <br><font id="default">Default is 0.25</font>
@@ -2305,7 +1772,7 @@ Mixing parameter of Fock exchange for PBE0 and HSE hybrid-functional calculation
 
 
 <br><font id="title"><a name="gwgamma">gwgamma</a></font>
-<br><font id="definition">Mnemonics: GW Gamma</font>
+<br><font id="mnemonics">Mnemonics: GW GAMMA</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#gw">GW</a></font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
@@ -2336,7 +1803,7 @@ Not available for PAW calculations.
 
 
 <br><font id="title"><a name="gwls_band_index">gwls_band_index</a></font>
-<br><font id="definition">Mnemonics: GWLS BAND INDEX</font>
+<br><font id="mnemonics">Mnemonics: GWLS BAND INDEX</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#gw">GW</a></font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 1</font>
@@ -2356,7 +1823,7 @@ That is, it is the state to be corrected in the G0W0 scheme.
 
 
 <br><font id="title"><a name="gwls_correlation">gwls_correlation</a></font>
-<br><font id="definition">Mnemonics: GWLS CORRELATION</font>
+<br><font id="mnemonics">Mnemonics: GWLS CORRELATION</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#gw">GW</a></font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 3</font>
@@ -2388,7 +1855,7 @@ Option 1, 2 and 5 are deprecated and will be removed.
 
 
 <br><font id="title"><a name="gwls_dielectric_model">gwls_dielectric_model</a></font>
-<br><font id="definition">Mnemonics: GWLS dielectric model</font>
+<br><font id="mnemonics">Mnemonics: GWLS dielectric model</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#gw">GW</a></font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 2</font>
@@ -2405,7 +1872,7 @@ Not used yet.
 
 
 <br><font id="title"><a name="gwls_exchange">gwls_exchange</a></font>
-<br><font id="definition">Mnemonics: GWLS exact EXCHANGE</font>
+<br><font id="mnemonics">Mnemonics: GWLS exact EXCHANGE</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#gw">GW</a></font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 1</font>
@@ -2424,7 +1891,7 @@ Governs whether the exact exchange for the state to be corrected (<a href="vargw
 
 
 <br><font id="title"><a name="gwls_first_seed">gwls_first_seed</a></font>
-<br><font id="definition">Mnemonics: GWLS FIRST SEED vector</font>
+<br><font id="mnemonics">Mnemonics: GWLS FIRST SEED vector</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#gw">GW</a></font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is <a href="vargw.html#gwls_band_index">gwls_band_index</a></font>
@@ -2450,7 +1917,7 @@ Users should therefore keep the default value.
 
 
 <br><font id="title"><a name="gwls_kmax_analytic">gwls_kmax_analytic</a></font>
-<br><font id="definition">Mnemonics: GWLS KMAX for the ANALYTIC term</font>
+<br><font id="mnemonics">Mnemonics: GWLS KMAX for the ANALYTIC term</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#gw">GW</a></font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 8</font>
@@ -2470,7 +1937,7 @@ The default value is converged to a few 10s of meV for all molecules studied so 
 
 
 <br><font id="title"><a name="gwls_kmax_complement">gwls_kmax_complement</a></font>
-<br><font id="definition">Mnemonics: GWLS KMAX for the COMPLEMENT space.</font>
+<br><font id="mnemonics">Mnemonics: GWLS KMAX for the COMPLEMENT space.</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#gw">GW</a></font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 1</font>
@@ -2496,7 +1963,7 @@ For more information on the exact role of these bases and on the model dielectri
 
 
 <br><font id="title"><a name="gwls_kmax_numeric">gwls_kmax_numeric</a></font>
-<br><font id="definition">Mnemonics: GWLS KMAX for the NUMERIC term</font>
+<br><font id="mnemonics">Mnemonics: GWLS KMAX for the NUMERIC term</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#gw">GW</a></font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 16</font>
@@ -2516,7 +1983,7 @@ The default value is converged to a few 10s of meV for all molecules studied so 
 
 
 <br><font id="title"><a name="gwls_kmax_poles">gwls_kmax_poles</a></font>
-<br><font id="definition">Mnemonics: GWLS KMAX for the calculation of the POLES residue</font>
+<br><font id="mnemonics">Mnemonics: GWLS KMAX for the calculation of the POLES residue</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#gw">GW</a></font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 4</font>
@@ -2542,7 +2009,7 @@ For more information on the Lanczos basis constructed for the calculation of the
 
 
 <br><font id="title"><a name="gwls_list_proj_freq">gwls_list_proj_freq</a></font>
-<br><font id="definition">Mnemonics: GWLS LIST of the PROJection FREQuencies</font>
+<br><font id="mnemonics">Mnemonics: GWLS LIST of the PROJection FREQuencies</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#gw">GW</a></font>
 <br><font id="vartype">Variable type: real(<a href="vargw.html#gwls_n_proj_freq">gwls_n_proj_freq</a>)</font>
 <br><font id="default">Default is *0.0</font>
@@ -2561,7 +2028,7 @@ For most cases, since the frequencies \Infty and (if <a href="vargw.html#gwls_re
 
 
 <br><font id="title"><a name="gwls_model_parameter">gwls_model_parameter</a></font>
-<br><font id="definition">Mnemonics: GWLS model parameter</font>
+<br><font id="mnemonics">Mnemonics: GWLS MODEL PARAMETER</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#gw">GW</a>, <a href="../../users/abinit_help.html#energy">ENERGY</a></font>
 <br><font id="vartype">Variable type: real</font>
 <br><font id="default">Default is 1.0</font>
@@ -2589,7 +2056,7 @@ Typically, the default (<b>gwls_model_parameter</b>==1.0) is optimal.
 
 
 <br><font id="title"><a name="gwls_n_proj_freq">gwls_n_proj_freq</a></font>
-<br><font id="definition">Mnemonics: GWLS Number of PROJection FREQuencies</font>
+<br><font id="mnemonics">Mnemonics: GWLS Number of PROJection FREQuencies</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#gw">GW</a></font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
@@ -2608,7 +2075,7 @@ For most cases, the default (<b>gwls_n_proj_freq</b>==0) is fine.
 
 
 <br><font id="title"><a name="gwls_npt_gauss_quad">gwls_npt_gauss_quad</a></font>
-<br><font id="definition">Mnemonics: GWLS Number of PoinTs to use for the GAUSSian QUADrature </font>
+<br><font id="mnemonics">Mnemonics: GWLS Number of PoinTs to use for the GAUSSian QUADrature </font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#gw">GW</a></font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 10</font>
@@ -2627,7 +2094,7 @@ The default is fine for most cases.
 
 
 <br><font id="title"><a name="gwls_nseeds">gwls_nseeds</a></font>
-<br><font id="definition">Mnemonics: GWLS Number of SEED vectorS</font>
+<br><font id="mnemonics">Mnemonics: GWLS Number of SEED vectorS</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#gw">GW</a></font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 1</font>
@@ -2646,7 +2113,7 @@ Only <b>gwls_nseeds</b>==1 has been tested for now and users should keep this va
 
 
 <br><font id="title"><a name="gwls_print_debug">gwls_print_debug</a></font>
-<br><font id="definition">Mnemonics: GWLS PRINT level for DEBUGging</font>
+<br><font id="mnemonics">Mnemonics: GWLS PRINT level for DEBUGging</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#gw">GW</a></font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
@@ -2663,7 +2130,7 @@ Influences the level of verbosity for debugging purposes in a GWLS calculation. 
 
 
 <br><font id="title"><a name="gwls_recycle">gwls_recycle</a></font>
-<br><font id="definition">Mnemonics: GWLS RECYCLE</font>
+<br><font id="mnemonics">Mnemonics: GWLS RECYCLE</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#gw">GW</a></font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 2</font>
@@ -2696,7 +2163,7 @@ It is particularly efficient to choose the path of the file to be on disk space 
 
 
 <br><font id="title"><a name="gwls_second_model_parameter">gwls_second_model_parameter</a></font>
-<br><font id="definition">Mnemonics: GWLS second model parameter</font>
+<br><font id="mnemonics">Mnemonics: GWLS SECOND MODEL PARAMETER</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#gw">GW</a>, <a href="../../users/abinit_help.html#energy">ENERGY</a></font>
 <br><font id="vartype">Variable type: real</font>
 <br><font id="default">Default is 0.0</font>
@@ -2713,7 +2180,7 @@ Not used yet.
 
 
 <br><font id="title"><a name="gwls_sternheimer_kmax">gwls_sternheimer_kmax</a></font>
-<br><font id="definition">Mnemonics: GWLS Kmax</font>
+<br><font id="mnemonics">Mnemonics: GWLS Kmax</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#gw">GW</a></font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 1</font>
@@ -2731,7 +2198,7 @@ Typically converged at a value of a few hundreds to a few thousands for a conver
 
 
 <br><font id="title"><a name="gwmem">gwmem</a></font>
-<br><font id="definition">Mnemonics: GW MEMory</font>
+<br><font id="mnemonics">Mnemonics: GW MEMory</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#gw">GW</a></font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 11</font>
@@ -2770,7 +2237,7 @@ The first digit is only meaningful when performing sigma calculations.
 
 
 <br><font id="title"><a name="gwrpacorr">gwrpacorr</a></font>
-<br><font id="definition">Mnemonics: GW RPA CORRelation energy</font>
+<br><font id="mnemonics">Mnemonics: GW RPA CORRelation energy</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#gw">GW</a></font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
@@ -2814,7 +2281,7 @@ Only relevant if <a href="vargs.html#optdriver">optdriver</a>==3 and <a href="va
 
 
 <br><font id="title"><a name="icutcoul">icutcoul</a></font>
-<br><font id="definition">Mnemonics: Integer that governs the CUT-off for COULomb interaction</font>
+<br><font id="mnemonics">Mnemonics: Integer that governs the CUT-off for COULomb interaction</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#gw">GW</a></font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 6</font>
@@ -2881,7 +2348,7 @@ which is automatically calculated so that the volume enclosed in the sphere is e
 
 
 <br><font id="title"><a name="inclvkb">inclvkb</a></font>
-<br><font id="definition">Mnemonics: INCLude VKB</font>
+<br><font id="mnemonics">Mnemonics: INCLude VKB</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#gw">GW</a></font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 2</font>
@@ -2912,7 +2379,7 @@ The use of <b>inclvkb</b>=2 is strongly recommended for the calculation of optic
 
 
 <br><font id="title"><a name="kptgw">kptgw</a></font>
-<br><font id="definition">Mnemonics: K-PoinTs for GW calculations</font>
+<br><font id="mnemonics">Mnemonics: K-PoinTs for GW calculations</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#gw">GW</a></font>
 <br><font id="vartype">Variable type: real(3,<a href="vargw.html#nkptgw">nkptgw</a>)</font>
 <br><font id="default">Default is *0.0</font>
@@ -2940,7 +2407,7 @@ grid defined with the same repetition parameters (
 
 
 <br><font id="title"><a name="mbpt_sciss">mbpt_sciss</a></font>
-<br><font id="definition">Mnemonics: Many Body Perturbation Theory SCISSor operator</font>
+<br><font id="mnemonics">Mnemonics: Many Body Perturbation Theory SCISSor operator</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#gw">GW</a>, <a href="../../users/abinit_help.html#energy">ENERGY</a></font>
 <br><font id="vartype">Variable type: real</font>
 <br><font id="default">Default is 0.0</font>
@@ -2960,12 +2427,12 @@ In some cases, it mimics a second iteration self-consistent <a href="../../users
 
 
 <br><font id="title"><a name="mdf_epsinf">mdf_epsinf</a></font>
-<br><font id="definition">Mnemonics: Model dielectric function, epsilon infinity</font>
+<br><font id="mnemonics">Mnemonics: Model Dielectric Function, EPSilon INFinity</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#bethe_salpeter">BETHE_SALPETER</a></font>
 <br><font id="vartype">Variable type: real</font>
 <br><font id="default">Default is 0.0</font>
 <br><br><font id="requires">
-Only relevant if <a href="vargs.html#optdriver">optdriver</a>==99 and <a href="vargw.html#bs_coulomb_term">bs_coulomb_term</a> in [20,21] (Bethe-Salpeter calculas with a model dielectric function
+Only relevant if <a href="vargs.html#optdriver">optdriver</a>==99 and <a href="varbse.html#bs_coulomb_term">bs_coulomb_term</a> in [20,21] (Bethe-Salpeter calculas with a model dielectric function
 </font>
 <br><font id="text">
 <p>
@@ -2982,7 +2449,7 @@ The proper spatial symmetry of the screening W(r,r_prime) is enforced using Eq. 
 
 
 <br><font id="title"><a name="nbandkss">nbandkss</a></font>
-<br><font id="definition">Mnemonics: Number of BANDs in the KSS file</font>
+<br><font id="mnemonics">Mnemonics: Number of BANDs in the KSS file</font>
 <br><font id="characteristic">Characteristic: </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
@@ -3035,7 +2502,7 @@ in order to generate a _KSS file.
 
 
 <br><font id="title"><a name="nfreqim">nfreqim</a></font>
-<br><font id="definition">Mnemonics: Number of FREQuencies along the IMaginary axis</font>
+<br><font id="mnemonics">Mnemonics: Number of FREQuencies along the IMaginary axis</font>
 <br><font id="characteristic">Characteristic: </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
@@ -3055,7 +2522,7 @@ the dielectric matrix in order to perform the numerical integration of the <a hr
 
 
 <br><font id="title"><a name="nfreqmidm">nfreqmidm</a></font>
-<br><font id="definition">Mnemonics: Nth FREQuencey Moment of the Imaginary part of the Dielectric Matrix</font>
+<br><font id="mnemonics">Mnemonics: Nth FREQuency Moment of the Imaginary part of the Dielectric Matrix</font>
 <br><font id="characteristic">Characteristic: </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">No default</font>
@@ -3084,7 +2551,7 @@ see M. Taut, J. Phys. C: Solid State Phys. 18 (1985) 2677-2690.
 
 
 <br><font id="title"><a name="nfreqre">nfreqre</a></font>
-<br><font id="definition">Mnemonics: Number of FREQuencies along the REal axis</font>
+<br><font id="mnemonics">Mnemonics: Number of FREQuencies along the REal axis</font>
 <br><font id="characteristic">Characteristic: </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
@@ -3122,7 +2589,7 @@ Using the default values, one must be able to get a screening file that can be u
 
 
 <br><font id="title"><a name="nfreqsp">nfreqsp</a></font>
-<br><font id="definition">Mnemonics: Number of FREQuencies for the SPectral function</font>
+<br><font id="mnemonics">Mnemonics: Number of FREQuencies for the SPectral function</font>
 <br><font id="characteristic">Characteristic: </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
@@ -3142,7 +2609,7 @@ of the <a href="../../users/abinit_help.html#gw">GW</a> Green's function.
 
 
 <br><font id="title"><a name="nkptgw">nkptgw</a></font>
-<br><font id="definition">Mnemonics: Number of K-PoinTs for GW corrections</font>
+<br><font id="mnemonics">Mnemonics: Number of K-PoinTs for GW corrections</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#gw">GW</a></font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
@@ -3162,7 +2629,7 @@ It is used to dimension <a href="vargw.html#kptgw">kptgw</a>
 
 
 <br><font id="title"><a name="nomegasf">nomegasf</a></font>
-<br><font id="definition">Mnemonics: Number of OMEGA to evaluate the Spectral Function</font>
+<br><font id="mnemonics">Mnemonics: Number of OMEGA to evaluate the Spectral Function</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#gw">GW</a>, <a href="../../users/abinit_help.html#energy">ENERGY</a></font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
@@ -3191,7 +2658,7 @@ grows fast with the value of <b>nomegasf</b>.
 
 
 <br><font id="title"><a name="nomegasi">nomegasi</a></font>
-<br><font id="definition">Mnemonics: Number of OMEGA(S) along the Imaginary axis</font>
+<br><font id="mnemonics">Mnemonics: Number of OMEGA(S) along the Imaginary axis</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#gw">GW</a></font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 12</font>
@@ -3212,7 +2679,7 @@ imaginary axis. The frequency mesh is linear and covers the interval between OME
 
 
 <br><font id="title"><a name="nomegasrd">nomegasrd</a></font>
-<br><font id="definition">Mnemonics: Number of OMEGA to evaluate the Sigma Real axis Derivative</font>
+<br><font id="mnemonics">Mnemonics: Number of OMEGA to evaluate the Sigma Real axis Derivative</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#gw">GW</a></font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 9</font>
@@ -3232,7 +2699,7 @@ From these values, the derivative of Sigma at the KS energy is numerically estim
 
 
 <br><font id="title"><a name="npvel">npvel</a></font>
-<br><font id="definition">Mnemonics: Number of Particle VELocities</font>
+<br><font id="mnemonics">Mnemonics: Number of Particle VELocities</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#gw">GW</a></font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
@@ -3257,7 +2724,7 @@ Note that the results are output for a Z=1 impinging ion, i.e. a proton.
 
 
 <br><font id="title"><a name="npwkss">npwkss</a></font>
-<br><font id="definition">Mnemonics: Number of PlaneWaves in the KSS file</font>
+<br><font id="mnemonics">Mnemonics: Number of PlaneWaves in the KSS file</font>
 <br><font id="characteristic">Characteristic: </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
@@ -3291,7 +2758,7 @@ Note that this (large) planewave basis is the same for all k-points.
 
 
 <br><font id="title"><a name="nqptdm">nqptdm</a></font>
-<br><font id="definition">Mnemonics: Number of Q-PoinTs for the Dielectric Matrix</font>
+<br><font id="mnemonics">Mnemonics: Number of Q-PoinTs for the Dielectric Matrix</font>
 <br><font id="characteristic">Characteristic: </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
@@ -3320,7 +2787,7 @@ If <b>nqptdm</b> is equal to -1, the code reports the list of q-points in the lo
 
 
 <br><font id="title"><a name="omegasimax">omegasimax</a></font>
-<br><font id="definition">Mnemonics: OMEGA to evaluate Sigma along the Imaginary axis D: MAXimal value</font>
+<br><font id="mnemonics">Mnemonics: OMEGA to evaluate Sigma along the Imaginary axis D: MAXimal value</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#gw">GW</a>, <a href="../../users/abinit_help.html#energy">ENERGY</a></font>
 <br><font id="vartype">Variable type: real</font>
 <br><font id="default">Default is 50 eV</font>
@@ -3341,7 +2808,7 @@ In conjunction with <a href="vargw.html#nomegasi">nomegasi</a>,
 
 
 <br><font id="title"><a name="omegasrdmax">omegasrdmax</a></font>
-<br><font id="definition">Mnemonics: OMEGA to evaluate the Sigma Real axis Derivative : MAXimal value</font>
+<br><font id="mnemonics">Mnemonics: OMEGA to evaluate the Sigma Real axis Derivative : MAXimal value</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#gw">GW</a>, <a href="../../users/abinit_help.html#energy">ENERGY</a></font>
 <br><font id="vartype">Variable type: real</font>
 <br><font id="default">Default is 1.0 eV</font>
@@ -3361,7 +2828,7 @@ Only relevant if <a href="vargs.html#optdriver">optdriver</a>==4
 
 
 <br><font id="title"><a name="ppmfrq">ppmfrq</a></font>
-<br><font id="definition">Mnemonics: Plasmon Pole Model FReQuency</font>
+<br><font id="mnemonics">Mnemonics: Plasmon Pole Model FReQuency</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#gw">GW</a>, <a href="../../users/abinit_help.html#energy">ENERGY</a></font>
 <br><font id="vartype">Variable type: real</font>
 <br><font id="default">Default is 0.0 Ha</font>
@@ -3428,7 +2895,7 @@ real frequency axes. See
 
 
 <br><font id="title"><a name="ppmodel">ppmodel</a></font>
-<br><font id="definition">Mnemonics: Plasmon Pole MODEL</font>
+<br><font id="mnemonics">Mnemonics: Plasmon Pole MODEL</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#gw">GW</a></font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 1</font>
@@ -3481,7 +2948,7 @@ lowest 10 bands.
 
 
 <br><font id="title"><a name="pvelmax">pvelmax</a></font>
-<br><font id="definition">Mnemonics: Particle VELocity MAXimum</font>
+<br><font id="mnemonics">Mnemonics: Particle VELocity MAXimum</font>
 <br><font id="characteristic">Characteristic: </font>
 <br><font id="vartype">Variable type: real(3)</font>
 <br><font id="default">Default is 3*1.0</font>
@@ -3504,7 +2971,7 @@ on a velocity grid along the direction determined by <b>pvelmax</b>.
 
 
 <br><font id="title"><a name="qptdm">qptdm</a></font>
-<br><font id="definition">Mnemonics: Q-PoinTs for the Dielectric Matrix</font>
+<br><font id="mnemonics">Mnemonics: Q-PoinTs for the Dielectric Matrix</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#gw">GW</a></font>
 <br><font id="vartype">Variable type: real(3,<a href="vargw.html#nqptdm">nqptdm</a>)</font>
 <br><font id="default">Default is *0.0</font>
@@ -3526,7 +2993,7 @@ For further explanation, see the input variable <a href="vargw.html#nqptdm">nqpt
 
 
 <br><font id="title"><a name="rcut">rcut</a></font>
-<br><font id="definition">Mnemonics: Radius of the CUT-off for coulomb interaction</font>
+<br><font id="mnemonics">Mnemonics: Radius of the CUT-off for coulomb interaction</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#gw">GW</a></font>
 <br><font id="vartype">Variable type: real</font>
 <br><font id="default">Default is 0.0</font>
@@ -3536,7 +3003,7 @@ For further explanation, see the input variable <a href="vargw.html#nqptdm">nqpt
  Truncation of the Coulomb interaction in real space. The meaning of <b>rcut</b> is governed by the cutoff shape option <a href="vargw.html#icutcoul">icutcoul</a>.
 </p>
 <p>
- If <b>rcut</b> is negative, the cutoff is automatically calculated so to enclose the same volume inside the cutoff as the volume of the solid.
+ If <b>rcut</b> is negative, the cutoff is automatically calculated so to enclose the same volume inside the cutoff as the volume of the primitive cell.
 </p>
 </font>
 
@@ -3545,7 +3012,7 @@ For further explanation, see the input variable <a href="vargw.html#nqptdm">nqpt
 
 
 <br><font id="title"><a name="rhoqpmix">rhoqpmix</a></font>
-<br><font id="definition">Mnemonics: RHO QuasiParticle MIXing</font>
+<br><font id="mnemonics">Mnemonics: RHO QuasiParticle MIXing</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#gw">GW</a></font>
 <br><font id="vartype">Variable type: real</font>
 <br><font id="default">Default is 1.0</font>
@@ -3565,7 +3032,7 @@ This mixing damps the spurious oscillations in the Hartree potential when achiev
 
 
 <br><font id="title"><a name="spbroad">spbroad</a></font>
-<br><font id="definition">Mnemonics: SPectral BROADening</font>
+<br><font id="mnemonics">Mnemonics: SPectral BROADening</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#gw">GW</a>, <a href="../../users/abinit_help.html#energy">ENERGY</a></font>
 <br><font id="vartype">Variable type: real</font>
 <br><font id="default">Default is 0.0</font>
@@ -3584,7 +3051,7 @@ is given by <b>spbroad</b>.
 
 
 <br><font id="title"><a name="spmeth">spmeth</a></font>
-<br><font id="definition">Mnemonics: SPectral METHod</font>
+<br><font id="mnemonics">Mnemonics: SPectral METHod</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#gw">GW</a></font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
@@ -3650,7 +3117,7 @@ as proposed in
 
 
 <br><font id="title"><a name="symchi">symchi</a></font>
-<br><font id="definition">Mnemonics: SYMmetryze \chi_o</font>
+<br><font id="mnemonics">Mnemonics: SYMmetryze \chi_o</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#develop">DEVELOP</a>, <a href="../../users/abinit_help.html#gw">GW</a></font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 1</font>
@@ -3682,7 +3149,7 @@ defined by the little group associated to the external vector q.
 
 
 <br><font id="title"><a name="symsigma">symsigma</a></font>
-<br><font id="definition">Mnemonics: SYMmetrization of SIGMA matrix elements</font>
+<br><font id="mnemonics">Mnemonics: SYMmetrization of SIGMA matrix elements</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#gw">GW</a></font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
@@ -3718,7 +3185,7 @@ the initial accidental degeneracy.
 
 
 <br><font id="title"><a name="ucrpa">ucrpa</a></font>
-<br><font id="definition">Mnemonics: calculation of the screened interaction U with the Constrained RPA method</font>
+<br><font id="mnemonics">Mnemonics: calculation of the screened interaction U with the Constrained RPA method</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#gw">GW</a></font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
@@ -3743,7 +3210,7 @@ inside this window will not be taken into account in
 the polarisability calculation.
 </p>
 <p>
- For <b>ucrpa</b> = 2, the ucrpa_bands should be equal to the <a href="vardev.html#dmftbandi">dmftbandi</a> and <a href="vardev.html#dmftbandf">dmftbandf</a>
+ For <b>ucrpa</b> = 2, the ucrpa_bands should be equal to the <a href="vardmft.html#dmftbandi">dmftbandi</a> and <a href="vardmft.html#dmftbandf">dmftbandf</a>
 values, and the polarisability of the correlated subspace
 is constructed with a band and k-point dependent weight.
 </p>
@@ -3752,7 +3219,7 @@ The implementation is restricted to the case of <a href="vargs.html#nspinor">nsp
 </p>
 <p>
 A short presentation of the method and some aspect of the implementation can be found in Section II and Appendix A of
- <a href="http://journals.aps.org/prb/abstract/10.1103/PhysRevB.89.125110">
+ <a href="https://journals.aps.org/prb/abstract/10.1103/PhysRevB.89.125110">
   B. Amadon, T. Applencourt and F. Bruneval Phys. Rev. B 89, 125110 (2014)
  </a>
  .
@@ -3766,7 +3233,7 @@ A short presentation of the method and some aspect of the implementation can be 
 
 
 <br><font id="title"><a name="ucrpa_bands">ucrpa_bands</a></font>
-<br><font id="definition">Mnemonics: For the calculation of U with the Constrained RPA method, gives correlated BANDS</font>
+<br><font id="mnemonics">Mnemonics: For the calculation of U with the Constrained RPA method, gives correlated BANDS</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#gw">GW</a></font>
 <br><font id="vartype">Variable type: integer(2)</font>
 <br><font id="default">Default is [-1, -1] (Comment: That is, the default includes no band.)</font>
@@ -3784,7 +3251,7 @@ A short presentation of the method and some aspect of the implementation can be 
 
 
 <br><font id="title"><a name="ucrpa_window">ucrpa_window</a></font>
-<br><font id="definition">Mnemonics: For the calculation of U with the Constrained RPA method, gives energy WINDOW</font>
+<br><font id="mnemonics">Mnemonics: For the calculation of U with the Constrained RPA method, gives energy WINDOW</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#gw">GW</a></font>
 <br><font id="vartype">Variable type: real(2)</font>
 <br><font id="default">Default is [-1, -1] (Comment: That is, the energy window is empty by default.)</font>
@@ -3804,7 +3271,7 @@ The lower bound and the upper bound energies must be specified (two real numbers
 
 
 <br><font id="title"><a name="vcutgeo">vcutgeo</a></font>
-<br><font id="definition">Mnemonics: V (potential) CUT-off GEOmetry</font>
+<br><font id="mnemonics">Mnemonics: V (potential) CUT-off GEOmetry</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#gw">GW</a></font>
 <br><font id="vartype">Variable type: real(3)</font>
 <br><font id="default">Default is 3*0.0</font>
@@ -3879,7 +3346,7 @@ defines ....
 
 
 <br><font id="title"><a name="zcut">zcut</a></font>
-<br><font id="definition">Mnemonics: Z-CUT</font>
+<br><font id="mnemonics">Mnemonics: Z-CUT</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#gw">GW</a>, <a href="../../users/abinit_help.html#energy">ENERGY</a></font>
 <br><font id="vartype">Variable type: real</font>
 <br><font id="default">Default is 0.0036749326 (Comment: 0.0036749326 Ha = 0.1 eV)</font>

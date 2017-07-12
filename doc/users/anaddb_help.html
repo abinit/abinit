@@ -175,7 +175,6 @@ you can go back to the tutorial window.</i>
  <br>I.
  <a href="anaddb_help.html#iatfix">iatfix</a>&nbsp;&nbsp;
  <a href="anaddb_help.html#iatprj_bs">iatprj_bs</a>&nbsp;&nbsp;
- <a href="anaddb_help.html#iavfrq">iavfrq</a>&nbsp;&nbsp;
  <a href="anaddb_help.html#ifcana">ifcana</a>&nbsp;&nbsp;
  <a href="anaddb_help.html#ifcflag">ifcflag</a>&nbsp;&nbsp;
  <a href="anaddb_help.html#ifltransport">ifltransport</a>&nbsp;&nbsp;
@@ -251,7 +250,7 @@ you can go back to the tutorial window.</i>
  <br>U.
  <a href="anaddb_help.html#use_k_fine">use_k_fine</a>&nbsp;&nbsp;
  <br>V.
- <a href="anaddb_help.html#vs_qrad_tolms">vs_qrad_tolms</a>&nbsp;&nbsp;
+ <a href="anaddb_help.html#vs_qrad_tolkms">vs_qrad_tolkms</a>&nbsp;&nbsp;
  <br>W.
  <br>X.
  <br>Y.
@@ -1064,30 +1063,6 @@ used for the calculation of the Gruneisen parameters.
 <br><br><br><br><a href=#top>Go to the top</a>
 <B> | </B><a href="anaddb_help.html#list">List of ANADDB input variables</a>
 <hr>
-
-<font id="title"><a name="iavfrq">iavfrq</a></font>
-<br><font id="definition">Mnemonics: Integer for the printing of AVerage FReQuency</font>
-<br><font id="category">Characteristic:  </font>
-<br><font id="vartype">Variable type: integer </font>
-<br><font id="default">Default: 0</font>
-<br><br><font id="text">
-Used only when <a href="anaddb_help.html#thmflag">thmflag</a>=1.<br>
-When this flag is set to 1, the "average frequency" is printed out (as a
-function of temperature, with phonon internal energy, free energy, entropy, ...).
-The average frequency is defined as:<br>
-Omega_average = Sum_over_q_and_i [Cv_iq Omega_iq]/Cv<br>
-where<br>
-- Omega_iq is the frequency of the i-th mode for q-point q<br>
-- Cv is the specific heat<br>
-- Cv_iq is the contribution to the specific heat of the i-th mode for q-point q<br>
-The "average frequency" can be used to have an estimation of the average
-Gruneisen parameter: Gamma_average=-d(log(Omega_average))/d(log(V)).<br>
-</font>
-
-<br><br><br><br><a href=#top>Go to the top</a>
-<B> | </B><a href="anaddb_help.html#list">List of ANADDB input variables</a>
-<hr>
-
 
 <font id="title"><a name="iatfix">iatfix</a></font>
 <br><font id="definition">Mnemonics: Indices of the AToms that are FIXed</font>
@@ -2317,12 +2292,12 @@ variables</a>
 <font id="title"><a name="qrefine">qrefine</a></font>
 <br><font id="definition">Mnemonics: Q-point REFINEment order (experimental)</font>
 <br><font id="category">Characteristic:  </font>
-<br><font id="vartype">Variable type: integer </font>
+<br><font id="vartype">Variable type: integer array <b>qrefine</b>(3) </font>
 <br><font id="default">Default: 0</font>
 <br><br><font id="text">
 If <b>qrefine</b> is superior to 1, attempts to initialize a first set of dynamical matrices
 from the DDB file, with a q-point grid which is <a href="anaddb_help.html#ngqpt">ngqpt</a>
-divided by <b>qrefine</b> (e.g. ngqpt 4 4 4 qrefine 2 starts with a 2x2x2 grid).
+divided by <b>qrefine</b> (e.g. ngqpt 4 4 2 qrefine 2 2 1 starts with a 2x2x2 grid).
 The dynamical matrices are interpolated onto the full <a href="anaddb_help.html#ngqpt">ngqpt</a>
 grid and any additional information found in the DDB file is imposed, before proceeding
 to normal band structure and other interpolations. Should implement Gaal-Nagy's algorithm in
@@ -2758,7 +2733,6 @@ Flag controlling the calculation of thermal quantities.
 <li> the mean-square velocity tensor for each atom, as a function of temperature </li>
 <li> the "average frequency"
               as a function of the temperature
-              (if <a href="anaddb_help.html#iavfrq">iavfrq</a>=1) </li>
 </ul> </li>
 <li>When <b>thmflag</b> == 2, all the phonon frequencies for the
 q points in the second grid are printed. </li>
@@ -2824,8 +2798,8 @@ to the next bigger is smaller than <b>thmtol</b>.
 <B> | </B><a href="anaddb_help.html#list">List of ANADDB input variables</a>
 <hr>
 
-<font id="title"><a name="vs_qrad_tolms">vs_qrad_tolms</a></font>
-<br><font id="definition">Mnemonics: Speed of Sound: Q-radius, TOLerance Meter/Second</font>
+<font id="title"><a name="vs_qrad_tolkms">vs_qrad_tolkms</a></font>
+<br><font id="definition">Mnemonics: Speed of Sound: Q-radius, TOLerance KiloMeter/Second</font>
 <br><font id="category">Characteristic:  </font>
 <br><font id="vartype">Variable type: real array(2) </font>
 <br><font id="default">Default: [0,0] (will not work)</font>
@@ -2833,11 +2807,11 @@ to the next bigger is smaller than <b>thmtol</b>.
 This variable activates the calculation of the speed of sound 
 (requires <a href="anaddb_help.html#ifcflag">ifcflag</a> = 1).
 The first entry of the array defines the radius of the small sphere around the Gamma point (Bohr-1).
-The second entry gives the absolute tolerance in meter/second.
+The second entry gives the absolute tolerance in kilometer/second.
 The speed of sound is evaluated be performing and a spherical average on the small sphere using
 Lebedev-Laikov grids (typical values for q-radius: 0.1 Bohr-1)
 The number of radial points is increased until the integration converges twice withing the tolerance
-specified by the user (typical values for tolms: 50 m/s).
+specified by the user (typical values for tolkms: 0.05 km/s).
 </font>
 
 <br><br><br><br><a href=#top>Go to the top</a>

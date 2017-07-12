@@ -88,6 +88,7 @@ variables to be used in the main input file of the abinit code.
  <a href="#optcell">optcell</a>&nbsp;&nbsp;
  <br>P.
  <a href="#pimass">pimass</a>&nbsp;&nbsp;
+ <a href="#pimd_constraint">pimd_constraint</a>&nbsp;&nbsp;
  <a href="#pitransform">pitransform</a>&nbsp;&nbsp;
  <a href="#prtatlist">prtatlist</a>&nbsp;&nbsp;
  <br>Q.
@@ -115,7 +116,7 @@ variables to be used in the main input file of the abinit code.
 
 <br><br><br><br><hr>
 <br><font id="title"><a name="adpimd">adpimd</a></font>
-<br><font id="definition">Mnemonics: ADiabatic Path-Integral Molecular Dynamics</font>
+<br><font id="mnemonics">Mnemonics: ADiabatic Path-Integral Molecular Dynamics</font>
 <br><font id="characteristic">Characteristic: </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
@@ -152,7 +153,7 @@ Only relevant if <a href="varrlx.html#imgmov">imgmov</a>==9 or <a href="varrlx.h
 
 
 <br><font id="title"><a name="adpimd_gamma">adpimd_gamma</a></font>
-<br><font id="definition">Mnemonics: ADiabatic Path-Integral Molecular Dynamics: GAMMA factor</font>
+<br><font id="mnemonics">Mnemonics: ADiabatic Path-Integral Molecular Dynamics: GAMMA factor</font>
 <br><font id="characteristic">Characteristic: </font>
 <br><font id="vartype">Variable type: real</font>
 <br><font id="default">Default is 1</font>
@@ -173,7 +174,7 @@ Only relevant if <a href="varrlx.html#adpimd">adpimd</a>==1 and <a href="varrlx.
 
 
 <br><font id="title"><a name="amu">amu</a></font>
-<br><font id="definition">Mnemonics: Atomic Mass Units</font>
+<br><font id="mnemonics">Mnemonics: Atomic Mass Units</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#evolving">EVOLVING</a></font>
 <br><font id="vartype">Variable type: real(<a href="varbas.html#ntypat">ntypat</a>)</font>
 <br><font id="default">No default (Comment: provided by a database of atomic masses.)</font>
@@ -232,7 +233,7 @@ and can be made to evolve, e.g. with a genetic algorithm (not coded in v7.0.0 th
 
 
 <br><font id="title"><a name="bmass">bmass</a></font>
-<br><font id="definition">Mnemonics: Barostat MASS</font>
+<br><font id="mnemonics">Mnemonics: Barostat MASS</font>
 <br><font id="characteristic">Characteristic: </font>
 <br><font id="vartype">Variable type: real</font>
 <br><font id="default">Default is 10</font>
@@ -249,7 +250,7 @@ and can be made to evolve, e.g. with a genetic algorithm (not coded in v7.0.0 th
 
 
 <br><font id="title"><a name="cineb_start">cineb_start</a></font>
-<br><font id="definition">Mnemonics: Climbing-Image Nudged Elastic Band: STARTing iteration</font>
+<br><font id="mnemonics">Mnemonics: Climbing-Image Nudged Elastic Band: STARTing iteration</font>
 <br><font id="characteristic">Characteristic: </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 7</font>
@@ -277,7 +278,7 @@ The effective CI-NEB begins at the <b>cineb_start</b> iteration.
 
 
 <br><font id="title"><a name="delayperm">delayperm</a></font>
-<br><font id="definition">Mnemonics: DELAY between trials to PERMUTE atoms</font>
+<br><font id="mnemonics">Mnemonics: DELAY between trials to PERMUTE atoms</font>
 <br><font id="characteristic">Characteristic: </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
@@ -297,7 +298,7 @@ When <b>delayperm</b> is zero, there is not permutation trials.
 
 
 <br><font id="title"><a name="diismemory">diismemory</a></font>
-<br><font id="definition">Mnemonics: Direct Inversion in the Iterative Subspace MEMORY</font>
+<br><font id="mnemonics">Mnemonics: Direct Inversion in the Iterative Subspace MEMORY</font>
 <br><font id="characteristic">Characteristic: </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 8</font>
@@ -316,7 +317,7 @@ to find zero-force and stress configurations.
 
 
 <br><font id="title"><a name="dilatmx">dilatmx</a></font>
-<br><font id="definition">Mnemonics: DILATation : MaXimal value</font>
+<br><font id="mnemonics">Mnemonics: lattice DILATation : MaXimal value</font>
 <br><font id="characteristic">Characteristic: </font>
 <br><font id="vartype">Variable type: real</font>
 <br><font id="default">Default is 1.0</font>
@@ -368,7 +369,7 @@ a value larger than 1.0 will be a waste.
 
 
 <br><font id="title"><a name="dtion">dtion</a></font>
-<br><font id="definition">Mnemonics: Delta Time for IONs</font>
+<br><font id="mnemonics">Mnemonics: Delta Time for IONs</font>
 <br><font id="characteristic">Characteristic: </font>
 <br><font id="vartype">Variable type: real</font>
 <br><font id="default">Default is 100</font>
@@ -415,7 +416,7 @@ be taken, for example 200.
 
 
 <br><font id="title"><a name="dynimage">dynimage</a></font>
-<br><font id="definition">Mnemonics: DYNamics of the IMAGE</font>
+<br><font id="mnemonics">Mnemonics: DYNamics of the IMAGE</font>
 <br><font id="characteristic">Characteristic: </font>
 <br><font id="vartype">Variable type: integer(<a href="varrlx.html#nimage">nimage</a>)</font>
 <br><font id="default">Default is *1 (Comment: if <a href="varrlx.html#imgmov">imgmov</a> in [2,5] (String Method, NEB), <b>dynimage(1)</b>=0 and <b>dynimage(<a href="varrlx.html#nimage">nimage</a>)</b>=0.)</font>
@@ -438,7 +439,7 @@ can be avoided: see <a href="varrlx.html#istatimg">istatimg</a> keyword.
 
 
 <br><font id="title"><a name="ecutsm">ecutsm</a></font>
-<br><font id="definition">Mnemonics: Energy CUToff SMearing</font>
+<br><font id="mnemonics">Mnemonics: Energy CUToff SMearing</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#energy">ENERGY</a></font>
 <br><font id="vartype">Variable type: real</font>
 <br><font id="default">Default is 0.0</font>
@@ -534,7 +535,7 @@ as soon as <a href="varbas.html#ecut">ecut</a> is larger than 4Ha.
 
 
 <br><font id="title"><a name="friction">friction</a></font>
-<br><font id="definition">Mnemonics: internal FRICTION coefficient</font>
+<br><font id="mnemonics">Mnemonics: internal FRICTION coefficient</font>
 <br><font id="characteristic">Characteristic: </font>
 <br><font id="vartype">Variable type: real</font>
 <br><font id="default">Default is 0.001</font>
@@ -608,7 +609,7 @@ Chelikowsky, J. Phys. D : Appl Phys. 33(2000)R33.
 
 
 <br><font id="title"><a name="fxcartfactor">fxcartfactor</a></font>
-<br><font id="definition">Mnemonics: Forces to (X) CARTesian coordinates FACTOR</font>
+<br><font id="mnemonics">Mnemonics: Forces to (X) CARTesian coordinates FACTOR</font>
 <br><font id="characteristic">Characteristic: </font>
 <br><font id="vartype">Variable type: real</font>
 <br><font id="default">Default is 1 (Bohr^2)/Hartree</font>
@@ -633,7 +634,7 @@ stresses.
 
 
 <br><font id="title"><a name="ga_algor">ga_algor</a></font>
-<br><font id="definition">Mnemonics: Genetic Algorithm selection</font>
+<br><font id="mnemonics">Mnemonics: Genetic Algorithm - ALGOrithm selection</font>
 <br><font id="characteristic">Characteristic: </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 1</font>
@@ -651,7 +652,7 @@ works.
 
 
 <br><font id="title"><a name="ga_fitness">ga_fitness</a></font>
-<br><font id="definition">Mnemonics: Genetic Algorithm FITNESS function selection</font>
+<br><font id="mnemonics">Mnemonics: Genetic Algorithm FITNESS function selection</font>
 <br><font id="characteristic">Characteristic: </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 1</font>
@@ -675,7 +676,7 @@ in a roulette-wheel selection can be given through different functions. We consi
 
 
 <br><font id="title"><a name="ga_n_rules">ga_n_rules</a></font>
-<br><font id="definition">Mnemonics: Genetic Algorithm Number of RULES</font>
+<br><font id="mnemonics">Mnemonics: Genetic Algorithm Number of RULES</font>
 <br><font id="characteristic">Characteristic: </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 1</font>
@@ -693,7 +694,7 @@ Right now we have 4 rules. See
 
 
 <br><font id="title"><a name="ga_opt_percent">ga_opt_percent</a></font>
-<br><font id="definition">Mnemonics: Genetic Algorithm OPTIMAL PERCENT</font>
+<br><font id="mnemonics">Mnemonics: Genetic Algorithm OPTimal PERCENT</font>
 <br><font id="characteristic">Characteristic: </font>
 <br><font id="vartype">Variable type: real</font>
 <br><font id="default">Default is 0.2</font>
@@ -710,7 +711,7 @@ to the following iteration.
 
 
 <br><font id="title"><a name="ga_rules">ga_rules</a></font>
-<br><font id="definition">Mnemonics: Genetic Algorithm RULES</font>
+<br><font id="mnemonics">Mnemonics: Genetic Algorithm RULES</font>
 <br><font id="characteristic">Characteristic: </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 1</font>
@@ -743,7 +744,7 @@ pieces of the two parents.
 
 
 <br><font id="title"><a name="getcell">getcell</a></font>
-<br><font id="definition">Mnemonics: GET CELL parameters from ...</font>
+<br><font id="mnemonics">Mnemonics: GET CELL parameters from ...</font>
 <br><font id="characteristic">Characteristic: </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
@@ -784,7 +785,7 @@ to using a null get variable).
 
 
 <br><font id="title"><a name="getvel">getvel</a></font>
-<br><font id="definition">Mnemonics: GET VEL from ...</font>
+<br><font id="mnemonics">Mnemonics: GET VEL from ...</font>
 <br><font id="characteristic">Characteristic: </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
@@ -853,7 +854,7 @@ coordinate system.
 
 
 <br><font id="title"><a name="getxcart">getxcart</a></font>
-<br><font id="definition">Mnemonics: GET XCART from ...</font>
+<br><font id="mnemonics">Mnemonics: GET XCART from ...</font>
 <br><font id="characteristic">Characteristic: </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
@@ -917,7 +918,7 @@ coordinate system.
 
 
 <br><font id="title"><a name="getxred">getxred</a></font>
-<br><font id="definition">Mnemonics: GET XRED from ...</font>
+<br><font id="mnemonics">Mnemonics: GET XRED from ...</font>
 <br><font id="characteristic">Characteristic: </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
@@ -977,7 +978,7 @@ coordinate system.
 
 
 <br><font id="title"><a name="goprecon">goprecon</a></font>
-<br><font id="definition">Mnemonics: Geometry Optimization PRECONditioner equations</font>
+<br><font id="mnemonics">Mnemonics: Geometry Optimization PRECONditioner equations</font>
 <br><font id="characteristic">Characteristic: </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
@@ -1007,7 +1008,7 @@ coordinate system.
 
 
 <br><font id="title"><a name="goprecprm">goprecprm</a></font>
-<br><font id="definition">Mnemonics: Geometry Optimization PREconditioner PaRaMeters equations</font>
+<br><font id="mnemonics">Mnemonics: Geometry Optimization PREconditioner PaRaMeters equations</font>
 <br><font id="characteristic">Characteristic: </font>
 <br><font id="vartype">Variable type: real(3)</font>
 <br><font id="default">Default is 0</font>
@@ -1026,7 +1027,7 @@ used for Geometry Optimization
 
 
 <br><font id="title"><a name="iatcon">iatcon</a></font>
-<br><font id="definition">Mnemonics: Indices of AToms in CONstraint equations</font>
+<br><font id="mnemonics">Mnemonics: Indices of AToms in CONstraint equations</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#no_multi">NO_MULTI</a>, <a href="../../users/abinit_help.html#input_only">INPUT_ONLY</a></font>
 <br><font id="vartype">Variable type: integer(<a href="varrlx.html#natcon">natcon</a>,<a href="varrlx.html#nconeq">nconeq</a>)</font>
 <br><font id="default">Default is 0</font>
@@ -1050,7 +1051,7 @@ latter - this should be described)
 
 
 <br><font id="title"><a name="iatfix">iatfix</a></font>
-<br><font id="definition">Mnemonics: Indices of AToms that are FIXed </font>
+<br><font id="mnemonics">Mnemonics: Indices of AToms that are FIXed </font>
 <br><font id="characteristic">Characteristic: </font>
 <br><font id="vartype">Variable type: integer(<a href="varrlx.html#natfix">natfix</a>)</font>
 <br><font id="default">No default</font>
@@ -1116,7 +1117,7 @@ of this geometry builder (see <a href="vargeo.html#objarf">objarf</a>).
 
 
 <br><font id="title"><a name="iatfixx">iatfixx</a></font>
-<br><font id="definition">Mnemonics: Indices of AToms that are FIXed along the X direction</font>
+<br><font id="mnemonics">Mnemonics: Indices of AToms that are FIXed along the X direction</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#input_only">INPUT_ONLY</a></font>
 <br><font id="vartype">Variable type: integer(<a href="varrlx.html#natfixx">natfixx</a>)</font>
 <br><font id="default">No default</font>
@@ -1142,7 +1143,7 @@ See the variable <a href="varrlx.html#iatfix">iatfix</a> for more information.
 
 
 <br><font id="title"><a name="iatfixy">iatfixy</a></font>
-<br><font id="definition">Mnemonics: Indices of AToms that are FIXed along the Y direction</font>
+<br><font id="mnemonics">Mnemonics: Indices of AToms that are FIXed along the Y direction</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#input_only">INPUT_ONLY</a></font>
 <br><font id="vartype">Variable type: integer(<a href="varrlx.html#natfixy">natfixy</a>)</font>
 <br><font id="default">No default</font>
@@ -1168,7 +1169,7 @@ See the variable <a href="varrlx.html#iatfix">iatfix</a> for more information.
 
 
 <br><font id="title"><a name="iatfixz">iatfixz</a></font>
-<br><font id="definition">Mnemonics: Indices of AToms that are FIXed along the Z direction</font>
+<br><font id="mnemonics">Mnemonics: Indices of AToms that are FIXed along the Z direction</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#input_only">INPUT_ONLY</a></font>
 <br><font id="vartype">Variable type: integer(<a href="varrlx.html#natfixz">natfixz</a>)</font>
 <br><font id="default">No default</font>
@@ -1194,55 +1195,79 @@ See the variable <a href="varrlx.html#iatfix">iatfix</a> for more information.
 
 
 <br><font id="title"><a name="imgmov">imgmov</a></font>
-<br><font id="definition">Mnemonics: IMaGe MOVEs</font>
+<br><font id="mnemonics">Mnemonics: IMaGe MOVEs</font>
 <br><font id="characteristic">Characteristic: </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
 <br><font id="text">
 <p>
-Control the collective changes of images (see <a href="varrlx.html#nimage">nimage</a>, <a href="varpar.html#npimage">npimage</a>, <a href="varrlx.html#dynimage">dynimage</a>, <a href="varrlx.html#ntimimage">ntimimage</a>, <a href="varrlx.html#tolimg">tolimg</a>, <a href="varrlx.html#istatimg">istatimg</a>, <a href="varfil.html#prtvolimg">prtvolimg</a>).
-Similar to <a href="varrlx.html#ionmov">ionmov</a> in spirit, although here, a population of self-consistent calculations for different geometries is managed, while with <a href="varrlx.html#ionmov">ionmov</a>, only one geometry for self-consistent calculation is managed.
+<p> Control the collective changes of images (see <a href="varrlx.html#nimage">nimage</a>,<a href="varpar.html#npimage">npimage</a>, <a href="varrlx.html#dynimage">dynimage</a>,
+<a href="varrlx.html#ntimimage">ntimimage</a>, <a href="varrlx.html#tolimg">tolimg</a>, <a href="varrlx.html#istatimg">istatimg</a>, <a href="varfil.html#prtvolimg">prtvolimg</a>).
+<br> Similar to <a href="varrlx.html#ionmov">ionmov</a> in spirit, although here, a population
+of self-consistent calculations for different geometries is managed, while with <a href="varrlx.html#ionmov">ionmov</a>,
+only one geometry for self-consistent calculation is managed.
+<br> In this respect the maximal number of time step for image propagation is <a href="varrlx.html#ntimimage">ntimimage</a>,
+corresponding to the input variable <a href="varrlx.html#ntime">ntime</a> of the single geometry case.
+Also, the stopping criterion is governed by <a href="varrlx.html#tolimg">tolimg</a>, corresponding to the
+input variable <a href="varbas.html#toldfe">toldfe</a> of the single geometry case.
+The stopping  condition is crude: the image propagation is stopped when the mean value (over dynamic images)
+of the absolute difference of total energy (previous and current time step) is less than <a href="varrlx.html#tolimg">tolimg</a>.
 
-In this respect the maximal number of time step for image propagation is <a href="varrlx.html#ntimimage">ntimimage</a>, corresponding to the input variable <a href="varrlx.html#ntime">ntime</a> of the single geometry case. Also, the stopping criterion is governed by <a href="varrlx.html#tolimg">tolimg</a>, corresponding to the input variable <a href="varbas.html#toldfe">toldfe</a> of the single geometry case.
-
-The stopping  condition is crude: the image propagation is stopped when the mean value (over dynamic images) of the absolute difference of total energy (previous and current time step) is less than <a href="varrlx.html#tolimg">tolimg</a>. Actually, there might be combinations of <a href="varrlx.html#ionmov">ionmov</a> and <b>imgmov</b> in which the two mechanisms are at work. Usually, however, only one mechanism will be activated (so, usually, either <a href="varrlx.html#ntimimage">ntimimage</a> is bigger than one OR <a href="varrlx.html#ntime">ntime</a> is bigger than one).
-
-In order for the user to acquire a mental representation of the interplay between <a href="varrlx.html#ionmov">ionmov</a> and <b>imgmov</b>, here is a F90 pseudo-code presenting the interplay between the different above-mentioned input variables, as well as with the parallelism (see input variable <a href="varpar.html#npimage">npimage</a>).
-
+<p>Actually, there might be combinations of <a href="varrlx.html#ionmov">ionmov</a> and <b>imgmov</b>
+in which the two mechanisms are at work.
+Usually, however, only one mechanism will be activated
+(so, usually, either <a href="varrlx.html#ntimimage">ntimimage</a> is bigger than one OR <a href="varrlx.html#ntime">ntime</a> is bigger than one).
+In order for the user to acquire a mental representation of the interplay between <a href="varrlx.html#ionmov">ionmov</a> and <b>imgmov</b>,
+here is a F90 pseudo-code presenting the interplay between the different above-mentioned input variables,
+as well as with the parallelism (see input variable <a href="varpar.html#npimage">npimage</a>).
+</p>
 <p><pre>
 do itimimage=1,ntimimage
   do iimage=1,nimage
-     (possibly, parallelisation over images)
-     do itime=1,ntime
-        Compute the forces and stresses for image(iimage)
-        Examine whether the stopping criterion defined by tolmxf is fulfilled
-        Predict the next geometry for image(iimage) using ionmov
-      enddo
-   enddo
-
-   Examine whether the stopping criterion defined by tolimg is fulfilled
-   Predict the next geometries for all images using imgmov
+    (possibly, parallelisation over images)
+    do itime=1,ntime
+      Compute the forces and stresses for image(iimage)
+      Examine whether the stopping criterion defined by tolmxf is fulfilled
+      Predict the next geometry for image(iimage) using ionmov
+    enddo
+  enddo
+  Examine whether the stopping criterion defined by tolimg is fulfilled
+  Predict the next geometries for all images using imgmov
 enddo
 </pre></p>
-
 <ul>
-<li> 0  => simply <b> copy </b> images from previous timimage step.</li>
-
-<li> 1  => move images according to <b> Steepest Descent </b> following the (scaled) forces,
-  the scaling factor being <a href="varrlx.html#fxcartfactor">fxcartfactor</a>. </li>
-
-<li> 2  => <b> String Method </b> for finding Minimal Energy Path (MEP) connecting to minima (see PRB 66, 052301 (2002)); the algorithm variant can be selected with the <a href="varrlx.html#string_algo">string_algo</a> keyword (Simplified String Method by default). The solver for the Ordinary Differential Equation (ODE) can be selected with <a href="varrlx.html#mep_solver">mep_solver</a> (steepest-descent by default). See also <a href="varrlx.html#mep_mxstep">mep_mxstep</a> keyword.</li>
-
-<li> 3  => (tentatively, not yet coded) <b> Metadynamics </b>.</li>
-
-<li> 4  => (tentatively, not yet coded) <b> Genetic Algorithm</b>.</li>
-
-<li> 5  => <b> Nudged Elastic Band (NEB) </b> for finding Minimal Energy Path (MEP) connecting two minima; the algorithm variant can be selected with the <a href="varrlx.html#neb_algo">neb_algo</a> keyword (NEB+improved tangent by default). The solver for the Ordinary Differential Equation (ODE) can be selected with <a href="varrlx.html#mep_solver">mep_solver</a> (steepest-descent by default). The spring constant connecting images along the path is defined by <a href="varrlx.html#neb_spring">neb_spring</a>. See also <a href="varrlx.html#mep_mxstep">mep_mxstep</a> keyword.</li>
-
-<li> 9 or 13  => <b> Path-Integral Molecular Dynamics </b> (see e.g. [D. Marx and M. Parrinello, J. Chem. Phys. 104, 4077 (1996)]). Will use 9 for <b>  Langevin thermostat </b> (associated friction coefficient given by <a href="varrlx.html#vis">vis</a>) and 13 for <b>  Nose-Hoover thermostat chains </b> (associated input variables are the number of thermostats in the chains, <a href="varrlx.html#nnos">nnos</a>, and the masses of these thermostats <a href="varrlx.html#qmass">qmass</a>). <a href="varrlx.html#nimage">nimage</a> is the Trotter number (no use of <a href="varrlx.html#dynimage">dynimage</a>); possible transformations of coordinates are defined by <a href="varrlx.html#pitransform">pitransform</a>; Fictitious masses of the atoms (possibly different from the true masses given by <a href="varrlx.html#amu">amu</a>) can be specified by <a href="varrlx.html#pimass">pimass</a>. At present, it is only possible to perform calculations in the (N,V,T) ensemble (<a href="varrlx.html#optcell">optcell</a>=0).</li>
-</ul>
-
-No meaning for RF calculations.
+  <li>    = 0  => simply <b> copy </b> images from previous timimage step.</li>
+  <li>    = 1  => move images according to <b> Steepest Descent </b>
+                 following the (scaled) forces, the scaling factor being <a href="varrlx.html#fxcartfactor">fxcartfactor</a>. </li>
+  <li>    = 2  => <b> String Method </b> for finding Minimal Energy Path (MEP)
+       connecting to minima (see PRB 66, 052301 (2002));
+       the algorithm variant can be selected with the <a href="varrlx.html#string_algo">string_algo</a> keyword
+       (Simplified String Method by default).
+       The solver for the Ordinary Differential Equation (ODE) can be selected with <a href="varrlx.html#mep_solver">mep_solver</a>
+       (steepest-descent by default). See also <a href="varrlx.html#mep_mxstep">mep_mxstep</a> keyword.</li>
+  <li>    = 3  => (tentatively, not yet coded) <b> Metadynamics </b>.</li>
+  <li>    = 4  => (tentatively, not yet coded) <b> Genetic Algorithm</b>.</li>
+  <li>    = 5  => <b> Nudged Elastic Band (NEB) </b> for finding Minimal Energy Path (MEP)
+       connecting two minima;
+       the algorithm variant can be selected with the <a href="varrlx.html#neb_algo">neb_algo</a> keyword
+       (NEB+improved tangent by default).
+       The solver for the Ordinary Differential Equation (ODE) can be selected with <a href="varrlx.html#mep_solver">mep_solver</a>
+       (steepest-descent by default).
+       The spring constant connecting images along the path is defined by <a href="varrlx.html#neb_spring">neb_spring</a>.
+       See also <a href="varrlx.html#mep_mxstep">mep_mxstep</a> keyword.</li>
+  <li>    = 9 or 13  => <b> Path-Integral Molecular Dynamics </b>
+       (see e.g. [D. Marx and M. Parrinello, J. Chem. Phys. 104, 4077 (1996)]).
+       Will use 9 for <b>  Langevin thermostat </b> (associated friction coefficient given by <a href="varrlx.html#vis">vis</a>)
+       and 13 for <b>  Nose-Hoover thermostat chains </b>
+       (associated input variables are the number of thermostats in the chains, <a href="varrlx.html#nnos">nnos</a>,
+       and the masses of these thermostats <a href="varrlx.html#qmass">qmass</a>).
+       <a href="varrlx.html#nimage">nimage</a> is the Trotter number (no use of <a href="varrlx.html#dynimage">dynimage</a>);
+       possible transformations of coordinates are defined by <a href="varrlx.html#pitransform">pitransform</a>;
+       Fictitious masses of the atoms (possibly different from the true masses given by <a href="varrlx.html#amu">amu</a>)
+       can be specified by <a href="varrlx.html#pimass">pimass</a>.
+       At present, it is only possible to perform calculations in the (N,V,T) ensemble (<a href="varrlx.html#optcell">optcell</a>=0).</li>
+  </ul>
+  No meaning for RF calculations.
 </p>
 </font>
 
@@ -1251,7 +1276,7 @@ No meaning for RF calculations.
 
 
 <br><font id="title"><a name="ionmov">ionmov</a></font>
-<br><font id="definition">Mnemonics: IONic MOVEs</font>
+<br><font id="mnemonics">Mnemonics: IONic MOVEs</font>
 <br><font id="characteristic">Characteristic: </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
@@ -1468,6 +1493,26 @@ forces and positions between t=0 and t=lotf_nitex.  <br /> <br />
    <a href="varrlx.html#dtion">dtion</a>, <a href="vardev.html#lotf_classic">lotf_classic</a>, <a href="vardev.html#lotf_nitex">lotf_nitex</a>, <a href="vardev.html#lotf_nneigx">lotf_nneigx</a>, <a href="vardev.html#lotf_version">lotf_version</a>.  <br /> <br />
   </li>
   <li>
+  24=&gt; Simple constant energy molecular dynamics using the velocity Verlet symplectic algorithm (second order), see e.g. [E. Hairer et al. Acta Numerica. 12, 399 (2003)].
+The only related parameter is the time step (<a href="varrlx.html#dtion">dtion</a>).  <br />
+   <b> Purpose: </b>
+   Molecular dynamics <br />
+   <b> Cell optimization: </b>
+   No (Use <a href="varrlx.html#optcell">optcell</a>=0 only) <br />
+   <b> Related variables: </b>
+   time step <a href="varrlx.html#dtion">dtion</a> <br /> <br />
+  </li>
+  <li>
+  25=&gt; Hybrid Monte Carlo sampling of the ionic positions at fixed temperature and unit cell geometry (NVT ensemle). The underlying molecular dynamics corresponds to ionmov=24.
+The related parameters are the time step (<a href="varrlx.html#dtion">dtion</a>) and thermostat temperature (<a href="varrlx.html#mdtemp">mdtemp</a>).  <br />
+   <b> Purpose: </b>
+   Monte Carlo sampling <br />
+   <b> Cell optimization: </b>
+   No (Use <a href="varrlx.html#optcell">optcell</a>=0 only) <br />
+   <b> Related variables: </b>
+   time step <a href="varrlx.html#dtion">dtion</a>, thermostat temperature <a href="varrlx.html#mdtemp">mdtemp</a>, <br /> <br />
+  </li>
+  <li>
    30=&gt; Using a supercell, calculate a self consistent phonon structure
 as in PRL 100 095901 (2008). The initial phonon eigenvectors and
 eigenvalues are read in, and then atoms are displaced according
@@ -1492,7 +1537,7 @@ convergence of the vibrational free energy (or so I hope) <br />
 
 
 <br><font id="title"><a name="istatimg">istatimg</a></font>
-<br><font id="definition">Mnemonics: Integer governing the computation of STATic IMaGes</font>
+<br><font id="mnemonics">Mnemonics: Integer governing the computation of STATic IMaGes</font>
 <br><font id="characteristic">Characteristic: </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 1</font>
@@ -1517,7 +1562,7 @@ used to make the dynamic images evolve). This can be useful to save CPU time.
 
 
 <br><font id="title"><a name="mdtemp">mdtemp</a></font>
-<br><font id="definition">Mnemonics: Molecular Dynamics Temperatures</font>
+<br><font id="mnemonics">Mnemonics: Molecular Dynamics TEMPeratures</font>
 <br><font id="characteristic">Characteristic: </font>
 <br><font id="vartype">Variable type: real(2)</font>
 <br><font id="default">Default is [300, 300]</font>
@@ -1547,7 +1592,7 @@ the final temperature
 
 
 <br><font id="title"><a name="mdwall">mdwall</a></font>
-<br><font id="definition">Mnemonics: Molecular Dynamics WALL location</font>
+<br><font id="mnemonics">Mnemonics: Molecular Dynamics WALL location</font>
 <br><font id="characteristic">Characteristic: </font>
 <br><font id="vartype">Variable type: real</font>
 <br><font id="default">Default is 10000.0 (Comment: the walls are extremely far away)</font>
@@ -1575,7 +1620,7 @@ characteristics.
 
 
 <br><font id="title"><a name="mep_mxstep">mep_mxstep</a></font>
-<br><font id="definition">Mnemonics: Minimal Energy Path search: MaXimum allowed STEP size</font>
+<br><font id="mnemonics">Mnemonics: Minimal Energy Path search: MaXimum allowed STEP size</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#length">LENGTH</a></font>
 <br><font id="vartype">Variable type: real</font>
 <br><font id="default">Default is 0.4 if <a href="varrlx.html#imgmov">imgmov</a>==5,
@@ -1610,7 +1655,7 @@ the atoms in the cell.
 
 
 <br><font id="title"><a name="mep_solver">mep_solver</a></font>
-<br><font id="definition">Mnemonics: Minimal Energy Path ordinary differential equation SOLVER</font>
+<br><font id="mnemonics">Mnemonics: Minimal Energy Path ordinary differential equation SOLVER</font>
 <br><font id="characteristic">Characteristic: </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">No default</font>
@@ -1717,7 +1762,7 @@ and <a href="varrlx.html#string_algo">string_algo</a>=1 or 2).
 
 
 <br><font id="title"><a name="natcon">natcon</a></font>
-<br><font id="definition">Mnemonics: Number of AToms in CONstraint equations</font>
+<br><font id="mnemonics">Mnemonics: Number of AToms in CONstraint equations</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#no_multi">NO_MULTI</a>, <a href="../../users/abinit_help.html#input_only">INPUT_ONLY</a></font>
 <br><font id="vartype">Variable type: integer(<a href="varrlx.html#nconeq">nconeq</a>)</font>
 <br><font id="default">Default is 0</font>
@@ -1739,7 +1784,7 @@ and <a href="varrlx.html#wtatcon">wtatcon</a>).
 
 
 <br><font id="title"><a name="natfix">natfix</a></font>
-<br><font id="definition">Mnemonics: Number of Atoms that are FIXed</font>
+<br><font id="mnemonics">Mnemonics: Number of Atoms that are FIXed</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#input_only">INPUT_ONLY</a></font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0 (Comment: (no atoms held fixed))</font>
@@ -1766,7 +1811,7 @@ optimization or molecular dynamics.
 
 
 <br><font id="title"><a name="natfixx">natfixx</a></font>
-<br><font id="definition">Mnemonics: Number of Atoms that are FIXed along the X direction</font>
+<br><font id="mnemonics">Mnemonics: Number of Atoms that are FIXed along the X direction</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#input_only">INPUT_ONLY</a></font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
@@ -1788,7 +1833,7 @@ in array <a href="varrlx.html#iatfixx">iatfixx</a>.
 
 
 <br><font id="title"><a name="natfixy">natfixy</a></font>
-<br><font id="definition">Mnemonics: Number of Atoms that are FIXed along the Y direction</font>
+<br><font id="mnemonics">Mnemonics: Number of Atoms that are FIXed along the Y direction</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#input_only">INPUT_ONLY</a></font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
@@ -1809,7 +1854,7 @@ optimization or molecular dynamics.
 
 
 <br><font id="title"><a name="natfixz">natfixz</a></font>
-<br><font id="definition">Mnemonics: Number of Atoms that are FIXed along the Z direction</font>
+<br><font id="mnemonics">Mnemonics: Number of Atoms that are FIXed along the Z direction</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#input_only">INPUT_ONLY</a></font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
@@ -1830,7 +1875,7 @@ optimization or molecular dynamics.
 
 
 <br><font id="title"><a name="nconeq">nconeq</a></font>
-<br><font id="definition">Mnemonics: Number of CONstraint EQuations</font>
+<br><font id="mnemonics">Mnemonics: Number of CONstraint EQuations</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#no_multi">NO_MULTI</a></font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
@@ -1851,7 +1896,7 @@ and <a href="varrlx.html#wtatcon">wtatcon</a>).
 
 
 <br><font id="title"><a name="neb_algo">neb_algo</a></font>
-<br><font id="definition">Mnemonics: Nudged Elastic Band ALGOrithm</font>
+<br><font id="mnemonics">Mnemonics: Nudged Elastic Band ALGOrithm</font>
 <br><font id="characteristic">Characteristic: </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 1</font>
@@ -1926,7 +1971,7 @@ to vary between 2 values (to have higher resolution close to the saddle point).
 
 
 <br><font id="title"><a name="neb_spring">neb_spring</a></font>
-<br><font id="definition">Mnemonics: Nudged Elastic Band: SPRING constant</font>
+<br><font id="mnemonics">Mnemonics: Nudged Elastic Band: SPRING constant</font>
 <br><font id="characteristic">Characteristic: </font>
 <br><font id="vartype">Variable type: real(2)</font>
 <br><font id="default">Default is [0.02, 0.15] if <a href="varrlx.html#neb_algo">neb_algo</a>==2,
@@ -1955,7 +2000,7 @@ to have stronger springs close to it.
 
 
 <br><font id="title"><a name="nimage">nimage</a></font>
-<br><font id="definition">Mnemonics: Number of IMAGEs</font>
+<br><font id="mnemonics">Mnemonics: Number of IMAGEs</font>
 <br><font id="characteristic">Characteristic: </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 1</font>
@@ -2066,7 +2111,7 @@ than those of the second image.
 
 
 <br><font id="title"><a name="nnos">nnos</a></font>
-<br><font id="definition">Mnemonics: Number of nose masses</font>
+<br><font id="mnemonics">Mnemonics: Number of NOSe masses</font>
 <br><font id="characteristic">Characteristic: </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
@@ -2084,7 +2129,7 @@ than those of the second image.
 
 
 <br><font id="title"><a name="noseinert">noseinert</a></font>
-<br><font id="definition">Mnemonics: NOSE thermostat INERTia factor</font>
+<br><font id="mnemonics">Mnemonics: NOSE thermostat INERTia factor</font>
 <br><font id="characteristic">Characteristic: </font>
 <br><font id="vartype">Variable type: real</font>
 <br><font id="default">Default is 100000</font>
@@ -2107,7 +2152,7 @@ where I represent each nucleus, MI is the mass of each nucleus (see <a href="var
 
 
 <br><font id="title"><a name="ntime">ntime</a></font>
-<br><font id="definition">Mnemonics: Number of TIME steps</font>
+<br><font id="mnemonics">Mnemonics: Number of TIME steps</font>
 <br><font id="characteristic">Characteristic: </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
@@ -2137,7 +2182,7 @@ SCF call.
 
 
 <br><font id="title"><a name="ntimimage">ntimimage</a></font>
-<br><font id="definition">Mnemonics: Number of TIME steps for IMAGE propagation</font>
+<br><font id="mnemonics">Mnemonics: Number of TIME steps for IMAGE propagation</font>
 <br><font id="characteristic">Characteristic: </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 1</font>
@@ -2159,7 +2204,7 @@ are determined from the set of results obtained for all images.
 
 
 <br><font id="title"><a name="optcell">optcell</a></font>
-<br><font id="definition">Mnemonics: OPTimize the CELL shape and dimensions</font>
+<br><font id="mnemonics">Mnemonics: OPTimize the CELL shape and dimensions</font>
 <br><font id="characteristic">Characteristic: </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
@@ -2204,10 +2249,13 @@ are still a few problems at that level.
 
 
 <br><font id="title"><a name="pimass">pimass</a></font>
-<br><font id="definition">Mnemonics: Path Integral fictitious MASSes</font>
+<br><font id="mnemonics">Mnemonics: Path Integral fictitious MASSes</font>
 <br><font id="characteristic">Characteristic: </font>
 <br><font id="vartype">Variable type: real(<a href="varbas.html#ntypat">ntypat</a>)</font>
 <br><font id="default">Default is <a href="varbas.html#ntypat">ntypat</a></font>
+<br><br><font id="requires">
+Only relevant if <a href="varrlx.html#imgmov">imgmov</a>=9 or 13
+</font>
 <br><font id="text">
 <p>
 <p>
@@ -2231,12 +2279,14 @@ in performing Path Integral Molecular Dynamics (PIMD), they are different from t
 
 
 <br><font id="title"><a name="pimd_constraint">pimd_constraint</a></font>
-<br><font id="definition">Mnemonics: Path-Integral Molecular Dynamics: CONSTRAINT to be applied on a reaction coordinate</font>
-<br><font id="characteristic">Characteristic: scalar</font>
+<br><font id="mnemonics">Mnemonics: Path-Integral Molecular Dynamics: CONSTRAINT to be applied on a reaction coordinate</font>
+<br><font id="characteristic">Characteristic: </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
+<br><br><font id="requires">
+Only relevant if <a href="varrlx.html#imgmov">imgmov</a>=9 or 13
+</font>
 <br><font id="text">
-<p>
 <p>
 Only relevant for Path-Integral Molecular Dynamics.<br/>
 Selects a constraint to be applied during the PIMD trajectory. The constraint is holonomic (it is a relation between the position variables).In practice, the total forces applied to the atomic positions are modified so as to respect the constraint.<br/>
@@ -2246,11 +2296,10 @@ To date, the available constraints are:<br/>
 <li><b>1</b>: <i>"Blue Moon Ensemble" method</i>.<br/>
 The constraint is a linear combination of the positions of atomic centroids (this linear combination is kept constant during the simulation). <br/>
 Sum[W_i * X_i]=constant<br/>
-The X_i are the coordinates of the atomic centroids. The weights W_i have to be specified with the [[wtatcon]](3,[[natcon]],[[nconeq]]), [[iatcon]]([[natcon]]) and [[natcon]] input parameters (where [[nconeq]] is fixed to 1).<br/>
+The X_i are the coordinates of the atomic centroids. The weights W_i have to be specified with the <a href="varrlx.html#wtatcon">wtatcon</a>(3,<a href="varrlx.html#natcon">natcon</a>,<a href="varrlx.html#nconeq">nconeq</a>), <a href="varrlx.html#iatcon">iatcon</a>(<a href="varrlx.html#natcon">natcon</a>) and <a href="varrlx.html#natcon">natcon</a> input parameters (where <a href="varrlx.html#nconeq">nconeq</a> is fixed to 1).<br/>
 More details on the implementation in: <a href="http://doi.org/10.1273/cbij.7.12">Y. Komeiji,Chem-Bio Informatics Journal 7, 12-23 (2007)</a>.
 </li>
 </ul>
-</p>
 </font>
 
 <br><br><br><br><a href=#top>Go to the top</a>
@@ -2258,7 +2307,7 @@ More details on the implementation in: <a href="http://doi.org/10.1273/cbij.7.12
 
 
 <br><font id="title"><a name="pitransform">pitransform</a></font>
-<br><font id="definition">Mnemonics: Path Integral coordinate TRANSFORMation</font>
+<br><font id="mnemonics">Mnemonics: Path Integral coordinate TRANSFORMation</font>
 <br><font id="characteristic">Characteristic: </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
@@ -2284,7 +2333,7 @@ See M. Tuckerman et al, J. Chem. Phys. 104, 5579 (1996).
 
 
 <br><font id="title"><a name="prtatlist">prtatlist</a></font>
-<br><font id="definition">Mnemonics: PRinT by ATom LIST of ATom</font>
+<br><font id="mnemonics">Mnemonics: PRinT by ATom LIST of ATom</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#no_multi">NO_MULTI</a></font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
@@ -2307,7 +2356,7 @@ all the atoms.
 
 
 <br><font id="title"><a name="qmass">qmass</a></font>
-<br><font id="definition">Mnemonics: Q thermostat mass</font>
+<br><font id="mnemonics">Mnemonics: Q thermostat MASS</font>
 <br><font id="characteristic">Characteristic: </font>
 <br><font id="vartype">Variable type: real(<a href="varrlx.html#nnos">nnos</a>)</font>
 <br><font id="default">Default is *10.0</font>
@@ -2333,7 +2382,7 @@ In that case, <a href="varrlx.html#optcell">optcell</a>=2 iS NOT USABLE yet.
 
 
 <br><font id="title"><a name="random_atpos">random_atpos</a></font>
-<br><font id="definition">Mnemonics: RANDOM ATomic POSitions</font>
+<br><font id="mnemonics">Mnemonics: RANDOM ATomic POSitions</font>
 <br><font id="characteristic">Characteristic: </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
@@ -2358,7 +2407,7 @@ sum of the covalent bonds between the atoms (note : this is incompatible with th
 
 
 <br><font id="title"><a name="restartxf">restartxf</a></font>
-<br><font id="definition">Mnemonics: RESTART from (X,F) history</font>
+<br><font id="mnemonics">Mnemonics: RESTART from (X,F) history</font>
 <br><font id="characteristic">Characteristic: </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
@@ -2469,7 +2518,7 @@ to continue your job.
 
 
 <br><font id="title"><a name="signperm">signperm</a></font>
-<br><font id="definition">Mnemonics: SIGN of PERMutation potential</font>
+<br><font id="mnemonics">Mnemonics: SIGN of PERMutation potential</font>
 <br><font id="characteristic">Characteristic: </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 1</font>
@@ -2484,7 +2533,7 @@ to continue your job.
 
 
 <br><font id="title"><a name="strfact">strfact</a></font>
-<br><font id="definition">Mnemonics: STRess FACTor</font>
+<br><font id="mnemonics">Mnemonics: STRess FACTor</font>
 <br><font id="characteristic">Characteristic: </font>
 <br><font id="vartype">Variable type: real</font>
 <br><font id="default">Default is 100</font>
@@ -2508,7 +2557,7 @@ stresses.
 
 
 <br><font id="title"><a name="string_algo">string_algo</a></font>
-<br><font id="definition">Mnemonics: STRING method ALGOrithm</font>
+<br><font id="mnemonics">Mnemonics: STRING method ALGOrithm</font>
 <br><font id="characteristic">Characteristic: </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 1</font>
@@ -2582,7 +2631,7 @@ energy-weight arc-lengths, giving a finer distribution near the saddle point..
 
 
 <br><font id="title"><a name="strprecon">strprecon</a></font>
-<br><font id="definition">Mnemonics: STRess PRECONditioner</font>
+<br><font id="mnemonics">Mnemonics: STRess PRECONditioner</font>
 <br><font id="characteristic">Characteristic: </font>
 <br><font id="vartype">Variable type: real</font>
 <br><font id="default">Default is 1.0</font>
@@ -2601,7 +2650,7 @@ default value, e.g. set it to 0.1 .
 
 
 <br><font id="title"><a name="strtarget">strtarget</a></font>
-<br><font id="definition">Mnemonics: STRess TARGET</font>
+<br><font id="mnemonics">Mnemonics: STRess TARGET</font>
 <br><font id="characteristic">Characteristic: </font>
 <br><font id="vartype">Variable type: real(6)</font>
 <br><font id="default">Default is [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]</font>
@@ -2622,7 +2671,7 @@ Not used if <a href="varrlx.html#optcell">optcell</a>==0.
 
 
 <br><font id="title"><a name="tolimg">tolimg</a></font>
-<br><font id="definition">Mnemonics: TOLerance on the mean total energy for IMaGes</font>
+<br><font id="mnemonics">Mnemonics: TOLerance on the mean total energy for IMaGes</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#energy">ENERGY</a></font>
 <br><font id="vartype">Variable type: real</font>
 <br><font id="default">Default is 5e-05</font>
@@ -2649,7 +2698,7 @@ is suggested (this corresponds to about 3.7d-7 eV).
 
 
 <br><font id="title"><a name="tolmxde">tolmxde</a></font>
-<br><font id="definition">Mnemonics: TOLerance on the MaXimal Difference in Energy</font>
+<br><font id="mnemonics">Mnemonics: TOLerance on the MaXimal Difference in Energy</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#energy">ENERGY</a></font>
 <br><font id="vartype">Variable type: real</font>
 <br><font id="default">Default is 0.0</font>
@@ -2673,7 +2722,7 @@ BFGS structural relaxation iterations will stop.
 
 
 <br><font id="title"><a name="tolmxf">tolmxf</a></font>
-<br><font id="definition">Mnemonics: TOLerance on the MaXimal Force</font>
+<br><font id="mnemonics">Mnemonics: TOLerance on the MaXimal Force</font>
 <br><font id="characteristic">Characteristic: </font>
 <br><font id="vartype">Variable type: real</font>
 <br><font id="default">Default is 5e-05</font>
@@ -2707,7 +2756,7 @@ is suggested (this corresponds to about 2.5d-3 eV/Angstrom).
 
 
 <br><font id="title"><a name="vel">vel</a></font>
-<br><font id="definition">Mnemonics: VELocity</font>
+<br><font id="mnemonics">Mnemonics: VELocity</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#evolving">EVOLVING</a></font>
 <br><font id="vartype">Variable type: real(3,<a href="varbas.html#natom">natom</a>) (Comment: It is represented internally as <b>vel</b>(3,<a href="varbas.html#natom">natom</a>,<a href="varrlx.html#nimage">nimage</a>))</font>
 <br><font id="default">Default is *0</font>
@@ -2740,7 +2789,7 @@ of this geometry builder (see <a href="vargeo.html#objarf">objarf</a>).
 
 
 <br><font id="title"><a name="vel_cell">vel_cell</a></font>
-<br><font id="definition">Mnemonics: VELocity of the CELL parameters</font>
+<br><font id="mnemonics">Mnemonics: VELocity of the CELL parameters</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#evolving">EVOLVING</a></font>
 <br><font id="vartype">Variable type: real(3,3) (Comment: It is represented internally as <b>vel_cell</b>(3,3,<a href="varrlx.html#nimage">nimage</a>) )</font>
 <br><font id="default">Default is *3</font>
@@ -2767,7 +2816,7 @@ is described).
 
 
 <br><font id="title"><a name="vis">vis</a></font>
-<br><font id="definition">Mnemonics: VIScosity</font>
+<br><font id="mnemonics">Mnemonics: VIScosity</font>
 <br><font id="characteristic">Characteristic: </font>
 <br><font id="vartype">Variable type: real</font>
 <br><font id="default">Default is 100</font>
@@ -2823,7 +2872,7 @@ In the case of Path-Integral Molecular Dynamics using the Langevin Thermostat (<
 
 
 <br><font id="title"><a name="wtatcon">wtatcon</a></font>
-<br><font id="definition">Mnemonics: WeighTs for AToms in CONstraint equations</font>
+<br><font id="mnemonics">Mnemonics: WeighTs for AToms in CONstraint equations</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#no_multi">NO_MULTI</a></font>
 <br><font id="vartype">Variable type: real(3,<a href="varrlx.html#natcon">natcon</a>,<a href="varrlx.html#nconeq">nconeq</a>)</font>
 <br><font id="default">Default is 0</font>

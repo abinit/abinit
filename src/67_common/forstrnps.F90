@@ -106,14 +106,14 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass,eigen,electronpositron,fock,&
  use m_errors
  use m_fock
  use m_hamiltonian,      only : init_hamiltonian,destroy_hamiltonian,load_spin_hamiltonian,&
-&                               load_k_hamiltonian,gs_hamiltonian_type
+&                               load_k_hamiltonian,gs_hamiltonian_type,load_kprime_hamiltonian!,K_H_KPRIME
  use m_electronpositron, only : electronpositron_type,electronpositron_calctype
  use m_bandfft_kpt,      only : bandfft_kpt,bandfft_kpt_type,&
 &                               bandfft_kpt_savetabs,bandfft_kpt_restoretabs
  use m_pawtab,           only : pawtab_type
  use m_paw_ij,           only : paw_ij_type
  use m_pawcprj,          only : pawcprj_type,pawcprj_alloc,pawcprj_free,pawcprj_get,pawcprj_reorder
-
+use m_cgtools
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -155,8 +155,8 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass,eigen,electronpositron,fock,&
 !Local variables-------------------------------
 !scalars
  integer,parameter :: tim_rwwf=7
- integer :: bandpp,bdtot_index,choice,cpopt,dimffnl,iband,iband_cprj,iband_last,ibg,icg,ider
- integer :: idir,ierr,ii,ikg,ikpt,ilm,ipositron,ipw,ishift,isppol,istwf_k
+ integer :: bandpp,bdtot_index,choice,cpopt,dimffnl,dimffnl_str,iband,iband_cprj,iband_last,ibg,icg,ider,ider_str
+ integer :: idir,idir_str,ierr,ii,ikg,ikpt,ilm,ipositron,ipw,ishift,isppol,istwf_k
  integer :: mband_cprj,me_distrb,my_ikpt,my_nspinor,nband_k,nband_cprj_k,ndat,nkpg
  integer :: nnlout,npw_k,paw_opt,signs,spaceComm
  integer :: tim_nonlop,tim_nonlop_prep,usecprj_local
@@ -178,6 +178,8 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass,eigen,electronpositron,fock,&
  type(bandfft_kpt_type),pointer :: my_bandfft_kpt => null()
  type(pawcprj_type),target,allocatable :: cwaveprj(:,:)
  type(pawcprj_type),pointer :: cwaveprj_idat(:,:)
+
+
 
 !*************************************************************************
 
@@ -224,10 +226,11 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass,eigen,electronpositron,fock,&
      compute_gbound=.true.
    end if
  end if
-! usecprj_local=0
+
  usecprj_local=usecprj
+
  if ((usefock_loc).and.(psps%usepaw==1)) then
-!   usecprj_local=usecprj
+   usecprj_local=1
    if(optfor==1)then 
      fock%optfor=.true.
      if (.not.allocated(fock%forces_ikpt)) then
@@ -417,6 +420,13 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass,eigen,electronpositron,fock,&
      call mkffnl(psps%dimekb,dimffnl,psps%ekb,ffnl,psps%ffspl,gs_hamk%gmet,gs_hamk%gprimd,&
 &     ider,idir,psps%indlmn,kg_k,kpg_k,kpoint,psps%lmnmax,psps%lnmax,psps%mpsang,psps%mqgrid_ff,&
 &     nkpg,npw_k,ntypat,psps%pspso,psps%qgrid_ff,rmet,psps%usepaw,psps%useylm,ylm_k,ylmgr_k)
+     if ((stress_needed==1).and.(usefock_loc).and.(psps%usepaw==1))then
+       ider_str=1; dimffnl_str=7;idir_str=-7
+       ABI_ALLOCATE(fock%ffnl_str,(npw_k,dimffnl_str,psps%lmnmax,ntypat))
+       call mkffnl(psps%dimekb,dimffnl_str,psps%ekb,fock%ffnl_str,psps%ffspl,gs_hamk%gmet,gs_hamk%gprimd,&
+&       ider_str,idir_str,psps%indlmn,kg_k,kpg_k,kpoint,psps%lmnmax,psps%lnmax,psps%mpsang,psps%mqgrid_ff,&
+&       nkpg,npw_k,ntypat,psps%pspso,psps%qgrid_ff,rmet,psps%usepaw,psps%useylm,ylm_k,ylmgr_k)
+     end if
 
 !    Load k-dependent part in the Hamiltonian datastructure
 !     - Compute 3D phase factors
@@ -553,7 +563,9 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass,eigen,electronpositron,fock,&
              ABI_ALLOCATE(ghc_dum,(0,0))
              do iblocksize=1,blocksize
                fock%ieigen=(iblock-1)*blocksize+iblocksize
-               if (gs_hamk%usepaw==1) cwaveprj_idat => cwaveprj(:,(iblocksize-1)*my_nspinor+1:iblocksize*my_nspinor)
+               if (gs_hamk%usepaw==1) then
+                 cwaveprj_idat => cwaveprj(:,(iblocksize-1)*my_nspinor+1:iblocksize*my_nspinor)
+               end if
                call fock_getghc(cwavef(:,1+(iblocksize-1)*npw_k*my_nspinor:iblocksize*npw_k*my_nspinor),cwaveprj_idat,&
 &               ghc_dum,gs_hamk,mpi_enreg)
                if (fock%optstr) then
@@ -607,9 +619,9 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass,eigen,electronpositron,fock,&
        ABI_DEALLOCATE(kstr5)
        ABI_DEALLOCATE(kstr6)
      end if
-     if (usefock_loc) then
-       if (fock%optstr) then
-         ABI_DEALLOCATE(fock%stress_ikpt)
+     if ((stress_needed==1).and.(usefock_loc).and.(psps%usepaw==1))then
+       ABI_DEALLOCATE(fock%ffnl_str)
+     end if
        end if
      end if
 

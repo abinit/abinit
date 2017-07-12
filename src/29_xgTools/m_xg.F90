@@ -1,3 +1,35 @@
+!{\src2tex{textfont=tt}}
+!!****m* ABINIT/m_xgTools
+!! NAME
+!!  m_xgTools
+!! 
+!! FUNCTION 
+!! This is a module to manage and help developer with 2D arrays for low level routines.
+!! Particularly, it manages memory for allocations and deallocations (see xg_routines),
+!! It handles MPI, complex and real values (*8 kind only) automatically.
+!! It is also possible to build sub-block of an array and work on it very easily (see xgBlock_routines)
+!! Several routines are also available for performing blas/lapack which again
+!! manage the type and MPI (and openmp if needed)
+!! Almost all routines are timed by abinit timers
+!! This is a starting point and has to be improved/developed
+!! An example of how to use those types and routines can be found in
+!! 30_diago/m_lobpcg2.F90. This is a full rewrite of LOBPCG algorithm which uses
+!! only these types to perfom calculations.
+!! 
+!! COPYRIGHT
+!!  Copyright (C) 2016-2017 ABINIT group (J. Bieder)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! NOTES
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
 #if defined HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -149,6 +181,12 @@ module m_xg
 
 
   contains
+!!***
+
+!!****f* m_xg/checkResizeI
+!!
+!! NAME
+!! checkResizeI
 
   subroutine checkResizeI(array,current_dim,asked_dim)
 
@@ -171,6 +209,12 @@ module m_xg
       ABI_MALLOC(array,(asked_dim))
     end if
   end subroutine checkResizeI
+!!***
+
+!!****f* m_xg/checkResizeR
+!!
+!! NAME
+!! checkResizeR
 
   subroutine checkResizeR(array,current_dim,asked_dim)
 
@@ -193,6 +237,12 @@ module m_xg
       ABI_MALLOC(array,(asked_dim))
     end if
   end subroutine checkResizeR
+!!***
+
+!!****f* m_xg/checkResizeC
+!!
+!! NAME
+!! checkResizeC
 
   subroutine checkResizeC(array,current_dim,asked_dim)
 
@@ -215,6 +265,12 @@ module m_xg
       ABI_MALLOC(array,(asked_dim))
     end if
   end subroutine checkResizeC
+!!***
+
+!!****f* m_xg/getClocR
+!!
+!! NAME
+!! getClocR
 
   function getClocR(rows,cols,array) result(cptr)
     use iso_c_binding
@@ -231,6 +287,12 @@ module m_xg
     type(c_ptr) :: cptr
     cptr = c_loc(array)
   end function getClocR
+!!***
+
+!!****f* m_xg/getClocC
+!!
+!! NAME
+!! getClocC
 
   function getClocC(rows,cols,array) result(cptr)
     use iso_c_binding
@@ -247,6 +309,12 @@ module m_xg
     type(c_ptr) :: cptr
     cptr = c_loc(array)
   end function getClocC
+!!***
+
+!!****f* m_xg/xg_init
+!!
+!! NAME
+!! xg_init
 
   subroutine xg_init(xg, space, rows, cols, comm)
 
@@ -299,6 +367,12 @@ module m_xg
     call xg_setBlock(xg,xg%self,1,rows,cols)
 
   end subroutine xg_init
+!!***
+
+!!****f* m_xg/xg_set
+!!
+!! NAME
+!! xg_set
 
   subroutine xg_set(xg,array,shift_col,rows)
 
@@ -353,6 +427,12 @@ module m_xg
     call timab(tim_set,2,tsec)
 
   end subroutine xg_set
+!!***
+
+!!****f* m_xg/xgBlock_set
+!!
+!! NAME
+!! xgBlock_set
 
   subroutine xgBlock_set(xgBlock,array,shift_col,rows)
 
@@ -407,6 +487,12 @@ module m_xg
     call timab(tim_set,2,tsec)
 
   end subroutine xgBlock_set
+!!***
+
+!!****f* m_xg/xgBlock_map
+!!
+!! NAME
+!! xgBlock_map
 
   subroutine xgBlock_map(xgBlock,array,space,rows,cols,comm)
     use iso_c_binding
@@ -452,7 +538,12 @@ module m_xg
     if ( present(comm) ) xgBlock%spacedim_comm = comm
 
   end subroutine xgBlock_map
+!!***
 
+!!****f* m_xg/xgBlock_reverseMap
+!!
+!! NAME
+!! xgBlock_reverseMap
 
   subroutine xgBlock_reverseMap(xgBlock,array,rows,cols)
     use iso_c_binding
@@ -485,7 +576,12 @@ module m_xg
     end select
 
   end subroutine xgBlock_reverseMap
+!!***
 
+!!****f* m_xg/xg_get
+!!
+!! NAME
+!! xg_get
 
   subroutine xg_get(xg,array,shift_col,rows)
 
@@ -540,6 +636,12 @@ module m_xg
     call timab(tim_get,2,tsec)
 
   end subroutine xg_get
+!!***
+
+!!****f* m_xg/xgBlock_get
+!!
+!! NAME
+!! xgBlock_get
 
   subroutine xgBlock_get(xgBlock,array,shift_col,rows)
 
@@ -594,6 +696,12 @@ module m_xg
     call timab(tim_get,2,tsec)
 
   end subroutine xgBlock_get
+!!***
+
+!!****f* m_xg/xg_setBlock
+!!
+!! NAME
+!! xg_setBlock
 
   subroutine xg_setBlock(xg,Xgblock, fcol, rows, cols)
     use iso_c_binding
@@ -636,6 +744,12 @@ module m_xg
     end select
 
   end subroutine xg_setBlock
+!!***
+
+!!****f* m_xg/xgBlock_setBlock
+!!
+!! NAME
+!! xgBlock_setBlock
 
   subroutine xgBlock_setBlock(xgBlock1,xgBlock2, fcol, rows, cols)
     use iso_c_binding
@@ -678,6 +792,12 @@ module m_xg
     end select
 
   end subroutine xgBlock_setBlock
+!!***
+
+!!****f* m_xg/xg_free
+!!
+!! NAME
+!! xg_free
 
   subroutine xg_free(xg)
 
@@ -698,6 +818,12 @@ module m_xg
       ABI_FREE(xg%vecC)
     end if
   end subroutine xg_free
+!!***
+
+!!****f* m_xg/space
+!!
+!! NAME
+!! space
 
   function space(xgBlock)
 
@@ -712,6 +838,12 @@ module m_xg
     integer :: space
     space = xgBlock%space
   end function space
+!!***
+
+!!****f* m_xg/cols
+!!
+!! NAME
+!! cols
 
   function cols(xgBlock)
 
@@ -726,6 +858,12 @@ module m_xg
     integer :: cols
     cols = xgBlock%cols
   end function cols
+!!***
+
+!!****f* m_xg/xgBlock_copy
+!!
+!! NAME
+!! xgBlock_copy
 
   subroutine xgBlock_copy(xgBlock1, xgBlock2, inc1, inc2)
 
@@ -771,6 +909,12 @@ module m_xg
     call timab(tim_copy,2,tsec)
 
   end subroutine xgBlock_copy
+!!***
+
+!!****f* m_xg/xgBlock_pack
+!!
+!! NAME
+!! xgBlock_pack
 
   subroutine xgBlock_pack(xgBlock1,xgBlock2,uplo)
     use iso_c_binding
@@ -863,6 +1007,12 @@ module m_xg
     call timab(tim_pack,2,tsec)
 
   end subroutine xgBlock_pack
+!!***
+
+!!****f* m_xg/xgBlock_gemmR
+!!
+!! NAME
+!! xgBlock_gemmR
 
   subroutine xgBlock_gemmR(transa, transb, alpha, xgBlock1, xgBlock2, beta, xgBlock3)
 
@@ -919,6 +1069,12 @@ module m_xg
     call timab(tim_gemm,2,tsec)
 
   end subroutine xgBlock_gemmR
+!!***
+
+!!****f* m_xg/xgBlock_gemmC
+!!
+!! NAME
+!! xgBlock_gemmC
 
   subroutine xgBlock_gemmC(transa, transb, alpha, xgBlock1, xgBlock2, beta, xgBlock3)
 
@@ -965,6 +1121,12 @@ module m_xg
     call timab(tim_gemm,2,tsec)
 
   end subroutine xgBlock_gemmC
+!!***
+
+!!****f* m_xg/xgBlock_potrf
+!!
+!! NAME
+!! xgBlock_potrf
 
   subroutine xgBlock_potrf(xgBlock,uplo,info)
 
@@ -997,6 +1159,12 @@ module m_xg
     call timab(tim_potrf,2,tsec)
 
   end subroutine xgBlock_potrf
+!!***
+
+!!****f* m_xg/xgBlock_heev
+!!
+!! NAME
+!! xgBlock_heev
 
 
 !===================================================
@@ -1055,6 +1223,12 @@ module m_xg
     call timab(tim_heev,2,tsec)
 
   end subroutine xgBlock_heev
+!!***
+
+!!****f* m_xg/xgBlock_heevd
+!!
+!! NAME
+!! xgBlock_heevd
 
   subroutine xgBlock_heevd(jobz,uplo,xgBlock1,xgBlock3, info)
 
@@ -1120,6 +1294,12 @@ module m_xg
     call timab(tim_heevd,2,tsec)
 
   end subroutine xgBlock_heevd
+!!***
+
+!!****f* m_xg/xgBlock_hpev
+!!
+!! NAME
+!! xgBlock_hpev
 
 !===================================================
 != Hermitian Packed Matrix diago
@@ -1185,6 +1365,12 @@ module m_xg
     call timab(tim_hpev,2,tsec)
 
   end subroutine xgBlock_hpev
+!!***
+
+!!****f* m_xg/xgBlock_hpevd
+!!
+!! NAME
+!! xgBlock_hpevd
 
   subroutine xgBlock_hpevd(jobz,uplo,xgBlock1,xgBlock3,xgBlock4,info)
 
@@ -1253,7 +1439,12 @@ module m_xg
     call timab(tim_hpevd,2,tsec)
 
   end subroutine xgBlock_hpevd
+!!***
 
+!!****f* m_xg/xgBlock_hgev
+!!
+!! NAME
+!! xgBlock_hgev
 
 !===================================================
 != Hermitian Full Generalized Matrix diago
@@ -1319,6 +1510,12 @@ module m_xg
     call timab(tim_hegv,2,tsec)
 
   end subroutine xgBlock_hegv
+!!***
+
+!!****f* m_xg/xgBlock_hegvx
+!!
+!! NAME
+!! xgBlock_hegvx
 
   subroutine xgBlock_hegvx(itype,jobz,range,uplo,xgBlock1,xgBlock2,vl,vu,il,iu,abstol,xgBlock3,xgBlock4,info)
 
@@ -1395,6 +1592,12 @@ module m_xg
     call timab(tim_hegvx,2,tsec)
 
   end subroutine xgBlock_hegvx
+!!***
+
+!!****f* m_xg/xgBlock_hegvd
+!!
+!! NAME
+!! xgBlock_hegvd
 
   subroutine xgBlock_hegvd(itype, jobz, uplo, xgBlock1, xgBlock2, xgBlock3, info)
 
@@ -1465,6 +1668,13 @@ module m_xg
 
   end subroutine xgBlock_hegvd
 
+!!***
+
+!!****f* m_xg/xgBlock_hpgv
+!!
+!! NAME
+!! xgBlock_hpgv
+
 !===================================================
 != Hermitian Full Generalized Matrix diago
 !===================================================
@@ -1530,6 +1740,12 @@ module m_xg
     call timab(tim_hpgv,2,tsec)
 
   end subroutine xgBlock_hpgv
+!!***
+
+!!****f* m_xg/xgBlock_hpgvx
+!!
+!! NAME
+!! xgBlock_hpgvx
  
   subroutine xgBlock_hpgvx(itype,jobz,range,uplo,xgBlock1,xgBlock2,vl,vu,il,iu,abstol,xgBlock3,xgBlock4,info)
 
@@ -1606,6 +1822,12 @@ module m_xg
     call timab(tim_hpgvx,2,tsec)
 
   end subroutine xgBlock_hpgvx
+!!***
+
+!!****f* m_xg/xgBlock_hpgvd
+!!
+!! NAME
+!! xgBlock_hpgvd
  
   subroutine xgBlock_hpgvd(itype, jobz, uplo, xgBlock1, xgBlock2, xgBlock3, xgBlock4, info)
 
@@ -1676,7 +1898,12 @@ module m_xg
     call timab(tim_hpgvd,2,tsec)
 
   end subroutine xgBlock_hpgvd
+!!***
 
+!!****f* m_xg/xgBlock_trsmR
+!!
+!! NAME
+!! xgBlock_trsmR
 
   subroutine xgBlock_trsmR(side,uplo,transa,diag,alpha, xgBlock1,xgBlock2)
 
@@ -1716,6 +1943,12 @@ module m_xg
     call timab(tim_trsm,2,tsec)
 
   end subroutine xgBlock_trsmR
+!!***
+
+!!****f* m_xg/xgBlock_trsmC
+!!
+!! NAME
+!! xgBlock_trsmC
 
   subroutine xgBlock_trsmC(side,uplo,transa,diag,alpha, xgBlock1,xgBlock2)
 
@@ -1748,6 +1981,12 @@ module m_xg
     call timab(tim_trsm,2,tsec)
 
   end subroutine xgBlock_trsmC
+!!***
+
+!!****f* m_xg/xgBlock_colwiseCaxmy
+!!
+!! NAME
+!! xgBlock_colwiseCaxmy
 
   subroutine xgBlock_colwiseCaxmy(xgBlock1, da, xgBlock2,xgBlock3)
 
@@ -1795,6 +2034,12 @@ module m_xg
     end select
 
   end subroutine xgBlock_colwiseCaxmy
+!!***
+
+!!****f* m_xg/xgBlock_colwiseMulR
+!!
+!! NAME
+!! xgBlock_colwiseMulR
 
   subroutine xgBlock_colwiseMulR(xgBlock, vec, shift)
 
@@ -1831,6 +2076,12 @@ module m_xg
     end select
 
   end subroutine xgBlock_colwiseMulR
+!!***
+
+!!****f* m_xg/xgBlock_colwiseMulC
+!!
+!! NAME
+!! xgBlock_colwiseMulC
 
   subroutine xgBlock_colwiseMulC(xgBlock, vec, shift)
 
@@ -1862,6 +2113,12 @@ module m_xg
     end select
 
   end subroutine xgBlock_colwiseMulC
+!!***
+
+!!****f* m_xg/xgBlock_add
+!!
+!! NAME
+!! xgBlock_add
 
   subroutine xgBlock_add(xgBlock1, xgBlock2)
 
@@ -1907,6 +2164,12 @@ module m_xg
     end select
 
   end subroutine xgBlock_add
+!!***
+
+!!****f* m_xg/xgBlock_cshift
+!!
+!! NAME
+!! xgBlock_cshift
 
   subroutine xgBlock_cshift(xgBlock,nshift,shiftdim)
 
@@ -1933,6 +2196,12 @@ module m_xg
     call timab(tim_cshift,2,tsec)
 
   end subroutine xgBlock_cshift
+!!***
+
+!!****f* m_xg/xgBlock_colwiseNorm2
+!!
+!! NAME
+!! xgBlock_colwiseNorm2
 
   subroutine xgBlock_colwiseNorm2(xgBlock,dot,max_val,max_elt,min_val,min_elt)
 
@@ -1992,6 +2261,12 @@ module m_xg
       min_elt = minloc(dot%vecR(1:xgBlock%cols,1),dim=1)
     end if
   end subroutine xgBlock_colwiseNorm2
+!!***
+
+!!****f* m_xg/xgBlock_scaleR
+!!
+!! NAME
+!! xgBlock_scaleR
 
   subroutine xgBlock_scaleR(xgBlock, val, inc)
 
@@ -2030,6 +2305,12 @@ module m_xg
     end if
 
   end subroutine xgBlock_scaleR
+!!***
+
+!!****f* m_xg/xgBlock_scaleC
+!!
+!! NAME
+!! xgBlock_scaleC
 
   subroutine xgBlock_scaleC(xgBlock, val, inc)
 
@@ -2065,6 +2346,12 @@ module m_xg
     end if
 
   end subroutine xgBlock_scaleC
+!!***
+
+!!****f* m_xg/xgBlock_getSize
+!!
+!! NAME
+!! xgBlock_getSize
 
   subroutine xgBlock_getSize(xgBlock, rows, cols)
 
@@ -2082,6 +2369,12 @@ module m_xg
     rows = xgBlock%rows
     cols = xgBlock%cols
   end subroutine xgBlock_getSize
+!!***
+
+!!****f* m_xg/xgBlock_reshape
+!!
+!! NAME
+!! xgBlock_reshape
 
   subroutine xgBlock_reshape(xgBlock,newShape)
     use iso_c_binding
@@ -2112,6 +2405,12 @@ module m_xg
       call c_f_pointer(cptr,xgBlock%vecC,newshape)
     end select
   end subroutine xgBlock_reshape
+!!***
+
+!!****f* m_xg/xgBlock_zero
+!!
+!! NAME
+!! xgBlock_zero
   
   subroutine xgBlock_zero(xgBlock)
 
@@ -2123,15 +2422,28 @@ module m_xg
 !End of the abilint section
 
     type(xgBlock_t), intent(inout) :: xgBlock
+    integer :: i
 
     select case(xgBlock%space)
     case (SPACE_R,SPACE_CR)
-      xgBlock%vecR = 0.d0
+      !$omp parallel do
+      do i = 1, xgBlock%cols
+        xgBlock%vecR(:,i) = 0.d0
+      end do
     case (SPACE_C)
-      xgBlock%vecC = dcmplx(0.d0)
+      !$omp parallel do
+      do i = 1, xgBlock%cols
+        xgBlock%vecC = dcmplx(0.d0)
+      end do
     end select
 
   end subroutine xgBlock_zero
+!!***
+
+!!****f* m_xg/xgBlock_one
+!!
+!! NAME
+!! xgBlock_one
 
   subroutine xgBlock_one(xgBlock)
 
@@ -2147,16 +2459,24 @@ module m_xg
 
     select case(xgBlock%space)
     case (SPACE_R,SPACE_CR)
+      !$omp parallel do
       do i = 1, min(xgBlock%rows,xgBlock%cols)
         xgBlock%vecR(i,i) = 1.d0
       end do
     case (SPACE_C)
+      !$omp parallel do
       do i = 1, min(xgBlock%rows,xgBlock%cols)
         xgBlock%vecC(i,i) = dcmplx(1.d0)
       end do
     end select
 
   end subroutine xgBlock_one
+!!***
+
+!!****f* m_xg/xgBlock_diagonal
+!!
+!! NAME
+!! xgBlock_diagonal
 
   subroutine xgBlock_diagonal(xgBlock,diag)
 
@@ -2179,10 +2499,12 @@ module m_xg
     case (SPACE_R,SPACE_CR)
       select case(diag%space)
       case (SPACE_R,SPACE_CR)
+        !$omp parallel do
         do i = 1, min(xgBlock%rows,xgBlock%cols)
           xgBlock%vecR(i,i) = diag%vecR(i,1)
         end do
       case (SPACE_C)
+        !$omp parallel do
         do i = 1, min(xgBlock%rows,xgBlock%cols)
           xgBlock%vecR(i,i) = dble(diag%vecC(i,1))
         end do
@@ -2190,10 +2512,12 @@ module m_xg
     case (SPACE_C)
       select case(diag%space)
       case (SPACE_R,SPACE_CR)
+        !$omp parallel do
         do i = 1, min(xgBlock%rows,xgBlock%cols)
           xgBlock%vecC(i,i) = dcmplx(diag%vecR(i,1))
         end do
       case (SPACE_C)
+        !$omp parallel do
         do i = 1, min(xgBlock%rows,xgBlock%cols)
           xgBlock%vecC(i,i) = diag%vecR(i,1)
         end do
@@ -2201,6 +2525,12 @@ module m_xg
     end select
 
   end subroutine xgBlock_diagonal
+!!***
+
+!!****f* m_xg/xgBlock_print
+!!
+!! NAME
+!! xgBlock_print
 
   subroutine xgBlock_print(xgBlock,outunit)
 
@@ -2233,6 +2563,12 @@ module m_xg
       end do
     end select
   end subroutine xgBlock_print
+!!***
+
+!!****f* m_xg/xg_finalize
+!!
+!! NAME
+!! xg_finalize
 
   subroutine xg_finalize()
 
@@ -2258,3 +2594,4 @@ module m_xg
   end subroutine xg_finalize
 
 end module m_xg
+!!***

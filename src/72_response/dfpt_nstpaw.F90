@@ -766,7 +766,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
          call pawdij2e1kb(paw_ij10(:,idir1),isppol,my_comm_atom,e1kbfr=e1kb_ptr,mpi_atmtab=my_atmtab)
        end do
      end do
-      if (my_nsppol<nsppol) then
+     if (my_nsppol<nsppol) then
        ABI_DEALLOCATE(work)
      end if
    end if

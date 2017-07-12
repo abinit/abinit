@@ -56,13 +56,13 @@
 !!      crystal_free,crystal_from_hdr,crystal_print,cwtime,ddb_free
 !!      ddb_from_file,ddk_free,ddk_init,destroy_mpi_enreg,dvdb_free,dvdb_init
 !!      dvdb_list_perts,dvdb_print,ebands_free,ebands_print,ebands_prtbltztrp
-!!      ebands_set_fermie,ebands_set_scheme,ebands_update_occ
-!!      edos_free,edos_print,edos_write,eph_gkk
-!!      eph_phgamma,eph_phpi,hdr_free,hdr_vs_dtset,ifc_free,ifc_init
-!!      ifc_outphbtrap,ifc_printbxsf,ifc_test_phinterp,init_distribfft_seq
-!!      initmpi_seq,mkphdos,pawfgr_destroy,pawfgr_init,phdos_free,phdos_ncwrite
-!!      phdos_print,phdos_print_msqd,print_ngfft,pspini,sigmaph,skw_free
-!!      wfk_read_eigenvalues,wrtout,xmpi_bcast
+!!      ebands_set_fermie,ebands_set_scheme,ebands_update_occ,ebands_write
+!!      edos_free,edos_print,edos_write,eph_gkk,eph_phgamma,eph_phpi,hdr_free
+!!      hdr_vs_dtset,ifc_free,ifc_init,ifc_mkphbs,ifc_outphbtrap,ifc_print
+!!      ifc_printbxsf,ifc_test_phinterp,init_distribfft_seq,initmpi_seq,mkphdos
+!!      pawfgr_destroy,pawfgr_init,phdos_free,phdos_ncwrite,phdos_print
+!!      phdos_print_thermo,print_ngfft,pspini,sigmaph,wfk_read_eigenvalues
+!!      wrtout,xmpi_bcast,xmpi_end
 !!
 !! SOURCE
 
@@ -338,24 +338,27 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  call cwtime(cpu,wall,gflops,"start")
 
  ! Compute electron DOS.
- ! TODO: Optimize this part. Really slow if tetra and lots of points
- ! Could just do DOS around efermi
- edos_intmeth = 2; if (dtset%prtdos == 1) edos_intmeth = 1
- !edos_intmeth = 1
- edos_step = dtset%dosdeltae; edos_broad = dtset%tsmear
- edos_step = 0.01 * eV_Ha; edos_broad = 0.3 * eV_Ha
- edos = ebands_get_edos(ebands,cryst,edos_intmeth,edos_step,edos_broad,comm)
+ if (dtset%kptopt>0 .and. dtset%nkpt>1) then
+   ! TODO: Optimize this part. Really slow if tetra and lots of points
+   ! Could just do DOS around efermi
+   edos_intmeth = 2; if (dtset%prtdos == 1) edos_intmeth = 1
+   !edos_intmeth = 1
+   edos_step = dtset%dosdeltae; edos_broad = dtset%tsmear
+   edos_step = 0.01 * eV_Ha; edos_broad = 0.3 * eV_Ha
+   edos = ebands_get_edos(ebands,cryst,edos_intmeth,edos_step,edos_broad,comm)
 
- ! Store DOS per spin channels
- n0(:) = edos%gef(1:edos%nsppol)
- if (my_rank == master) then
-   call edos_print(edos, unit=ab_out)
-   path = strcat(dtfil%filnam_ds(4), "_EDOS")
-   call wrtout(ab_out, sjoin("- Writing electron DOS to file:", path))
-   call edos_write(edos, path)
+   ! Store DOS per spin channels
+   n0(:) = edos%gef(1:edos%nsppol)
+   if (my_rank == master) then
+     call edos_print(edos, unit=ab_out)
+     path = strcat(dtfil%filnam_ds(4), "_EDOS")
+     call wrtout(ab_out, sjoin("- Writing electron DOS to file:", path))
+     call edos_write(edos, path)
+   end if
+
+   call edos_free(edos)
+
  end if
-
- call edos_free(edos)
 
  ! =======================================
  ! Output useful info on electronic bands
@@ -453,6 +456,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
      path = strcat(dtfil%filnam_ds(4), "_PHDOS")
      call wrtout(ab_out, sjoin("- Writing phonon DOS to file:", path))
      call phdos_print(phdos, path)
+
      !call phdos_print_debye(phdos, crystal%ucvol)
 
 !TODO: do we want to pass the temper etc... from anaddb_dtset into the full dtset for abinit?
@@ -460,6 +464,8 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 !MG: Disabled for the time being because of SIGFPE in v8[41]
      path = strcat(dtfil%filnam_ds(4), "_MSQD_T")
      !call phdos_print_msqd(phdos, path, 1000, one, one)
+     path = strcat(dtfil%filnam_ds(4), "_THERMO")
+     call phdos_print_thermo(PHdos, path, 1000, zero, one)
 
 #ifdef HAVE_NETCDF
      path = strcat(dtfil%filnam_ds(4), "_PHDOS.nc")
@@ -492,13 +498,20 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  call wrtout(std_out, msg, do_flush=.True.)
  call cwtime(cpu,wall,gflops,"start")
 
- ! Initialize the object used to read DeltaVscf (required if eph_tash /= 0)
+ ! Initialize the object used to read DeltaVscf (required if eph_task /= 0)
  if (use_dvdb) then
    call dvdb_init(dvdb, dvdb_path, comm)
    if (my_rank == master) then
      call dvdb_print(dvdb)
      call dvdb_list_perts(dvdb, [-1,-1,-1], unit=ab_out)
    end if
+
+   if (iblock /= 0) then
+     dvdb%dielt = dielt
+     dvdb%zeff = zeff
+     dvdb%has_dielt_zeff = .True.
+   end if
+
    ! TODO: Routine to compute \delta V_{q,nu)(r) and dump the results in XSF format/netcdf.
  end if
 

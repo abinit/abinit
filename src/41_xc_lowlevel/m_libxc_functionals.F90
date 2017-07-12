@@ -1522,7 +1522,7 @@ end subroutine libxc_functionals_getvxc
 !!  [hyb_range]    = Range (for separation)
 !!
 !! PARENTS
-!!      gstate,m_fock
+!!      calc_vhxc_me,m_fock
 !!
 !! CHILDREN
 !!

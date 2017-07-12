@@ -59,7 +59,7 @@
 !!      m_ab7_invars_f90
 !!
 !! CHILDREN
-!!      indefo1,invars1,wrtout
+!!      indefo1,invars1
 !!
 !! SOURCE
 

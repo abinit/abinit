@@ -337,22 +337,22 @@ subroutine mlwfovlp_projpaw(A_paw,band_in,cprj,just_augmentation,max_num_bands,m
 !      
 !      radial functions shown in table 3.3 of wannier90 manual
 !      
-       if(proj_radial(iwan,isppol)==1) aux(:) = 2.d0 * proj_zona(iwan,isppol)**(1.5d0) *&
-&       exp(-proj_zona(iwan,isppol)*pawrad(itypat)%rad(:))
-       if(proj_radial(iwan,isppol)==2) aux(:) = 1.d0/(2.d0*sqrt(2.d0))*proj_zona(iwan,isppol)**(1.5d0) *&
-&       (2.d0 - proj_zona(iwan,isppol)*pawrad(itypat)%rad(:)) &
-&       * exp(-proj_zona(iwan,isppol)*pawrad(itypat)%rad(:)/2.d0)
-       if(proj_radial(iwan,isppol)==3) aux(:) = sqrt(4.d0/27.d0)*proj_zona(iwan,isppol)**(1.5d0)&
-&       * (1.d0 - 2.d0*proj_zona(iwan,isppol)*pawrad(itypat)%rad(:)/3.d0 &
-&       + 2.d0*proj_zona(iwan,isppol)**2 *pawrad(itypat)%rad(:)**2/27.d0)&
-&       * exp(-proj_zona(iwan,isppol) * pawrad(itypat)%rad(:)/3.d0)
+       if(proj_radial(iwan,isppol)==1) aux(1:mesh_size) = 2.d0 * proj_zona(iwan,isppol)**(1.5d0) *&
+&       exp(-proj_zona(iwan,isppol)*pawrad(itypat)%rad(1:mesh_size))
+       if(proj_radial(iwan,isppol)==2) aux(1:mesh_size) = 1.d0/(2.d0*sqrt(2.d0))*proj_zona(iwan,isppol)**(1.5d0) *&
+&       (2.d0 - proj_zona(iwan,isppol)*pawrad(itypat)%rad(1:mesh_size)) &
+&       * exp(-proj_zona(iwan,isppol)*pawrad(itypat)%rad(1:mesh_size)/2.d0)
+       if(proj_radial(iwan,isppol)==3) aux(1:mesh_size) = sqrt(4.d0/27.d0)*proj_zona(iwan,isppol)**(1.5d0)&
+&       * (1.d0 - 2.d0*proj_zona(iwan,isppol)*pawrad(itypat)%rad(1:mesh_size)/3.d0 &
+&       + 2.d0*proj_zona(iwan,isppol)**2 *pawrad(itypat)%rad(1:mesh_size)**2/27.d0)&
+&       * exp(-proj_zona(iwan,isppol) * pawrad(itypat)%rad(1:mesh_size)/3.d0)
 !      
 !      ==4: gaussian function
 !      f(x)=\exp(-1/4(x/aa)**2)
 !      
        if(proj_radial(iwan,isppol)==4) then
          aa=1.d0/proj_zona(iwan,isppol)
-         aux(:)= exp(-0.25d0*(pawrad(itypat)%rad(:)*aa)**2) 
+         aux(1:mesh_size)= exp(-0.25d0*(pawrad(itypat)%rad(1:mesh_size)*aa)**2)
        end if
 !      
 !      Normalize aux
@@ -365,11 +365,13 @@ subroutine mlwfovlp_projpaw(A_paw,band_in,cprj,just_augmentation,max_num_bands,m
 !          In this case there is no need to use \tphi
 !          ff= \int R_wan(r) (R_phi(ln;r)/r ) r^2 dr
 !          
-           ff(:)= aux(:) * ( pawtab(itypat)%phi(:,ln))*pawrad(itypat)%rad(:)
+           ff(1:mesh_size)= aux(1:mesh_size) * pawtab(itypat)%phi(1:mesh_size,ln) &
+&           * pawrad(itypat)%rad(1:mesh_size)
          else
 !          Inside sphere contribution = \phi - \tphi
 !          ff= \int R_wan(r) (R_phi(ln;r)/r - R_tphi(ln;r)/r) r^2 dr
-           ff(:)= aux(:) * ( pawtab(itypat)%phi(:,ln)-pawtab(itypat)%tphi(:,ln))*pawrad(itypat)%rad(:)
+           ff(1:mesh_size)= aux(1:mesh_size) * (pawtab(itypat)%phi(1:mesh_size,ln)-pawtab(itypat)%tphi(1:mesh_size,ln)) &
+&           * pawrad(itypat)%rad(1:mesh_size)
          end if
 !        
 !        Integration with simpson routine

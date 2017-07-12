@@ -95,6 +95,9 @@ MODULE m_ddk
   integer :: nspinor
    ! Number of spinor components.
 
+  integer :: nene
+    ! Number of energy points we may need the fsavg at
+
   integer :: nkfs
     ! Number of k-points on the Fermi-surface (FS-BZ).
 
@@ -121,6 +124,10 @@ MODULE m_ddk
    ! (3,maxnb,nkfs,nsppol)
    ! velocity on the FS in cartesian coordinates.
 
+  real(dp), allocatable :: velocity_fsavg (:,:,:)
+   ! (3,nene,nsppol)
+   ! velocity on the FS in cartesian coordinates.
+
   type(crystal_t) :: cryst
    ! Crystal structure read from file
 
@@ -128,6 +135,7 @@ MODULE m_ddk
 
  public :: ddk_init              ! Initialize the object.
  public :: ddk_read_fsvelocities ! Read FS velocities from file.
+ public :: ddk_fs_average_veloc  ! find FS average of velocity squared
  public :: ddk_free              ! Close the file and release the memory allocated.
  public :: ddk_print             ! output values
 !!***
@@ -360,6 +368,90 @@ end subroutine ddk_read_fsvelocities
 
 !----------------------------------------------------------------------
 
+!!****f* m_ddk/ddk_fs_average_veloc
+!! NAME
+!!  ddk_fs_average_veloc
+!!
+!! FUNCTION
+!!  Perform Fermi surface average of velocity squared then square rooted, print and store in ddk object
+!!
+!! INPUTS
+!!   ddk = object with electron band velocities
+!!   fstab(ddk%nsppol)=Tables with the correspondence between points of the Fermi surface (FS)
+!!     and the k-points in the IBZ
+!!   comm=MPI communicator
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!      wrtout
+!!
+!! SOURCE
+
+subroutine ddk_fs_average_veloc(ddk, fstab, comm)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'ddk_fs_average_veloc'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: comm
+ type(ddk_t),intent(inout) :: ddk
+ type(fstab_t),target,intent(in) :: fstab(ddk%nsppol)
+
+!Local variables-------------------------------
+!scalars
+ integer :: idir,ierr,ikfs, ikpt, isppol, ik_ibz, iene
+ integer :: symrankkpt, ikpt_ddk,iband, bd2tot_index
+ integer :: mband,bstart_k, nband_k, nband_in, vdim
+ type(hdr_type) :: hdr1
+ type(kptrank_type) :: kptrank_t
+ type(fstab_t), pointer :: fs
+ character(len=500) :: msg
+!arrays
+
+!************************************************************************
+
+ if (fstab(1)%integ_method == 1) then
+   write (msg,"(a)") "Error: gaussians not added yet, only tetrahedra)"
+   MSG_ERROR(msg)
+ end if
+ ddk%nene = fstab(1)%nene
+ ABI_MALLOC(ddk%velocity_fsavg, (3,ddk%nene,ddk%nsppol))
+
+ do isppol=1,ddk%nsppol
+   fs => fstab(isppol)
+   do iene = 1, fs%nene
+     do idir = 1,3
+       do ikfs=1,fs%nkfs
+         ik_ibz = fs%istg0(1,ikfs)
+         nband_k = fs%bstcnt_ibz(2, ik_ibz)
+  
+         do iband = 1, nband_k
+           ddk%velocity_fsavg(idir, iene, isppol) = ddk%velocity_fsavg(idir, iene, isppol) + &
+&             fs%tetra_wtk_ene(iband,ik_ibz,iene) * ddk%velocity(idir, iband, ikfs, isppol)**2
+         end do
+  
+       end do ! ikfs
+     end do ! idir
+   end do ! iene
+ end do ! isppol
+
+! is sqrt element wise? should be - TODO: check
+ ddk%velocity_fsavg = sqrt(ddk%velocity_fsavg)/dble(fs%nkfs)
+
+end subroutine ddk_fs_average_veloc
+!!***
+
+
+!----------------------------------------------------------------------
+
 !!****f* m_ddk/ddk_free
 !! NAME
 !!  ddk_free
@@ -396,7 +488,10 @@ subroutine ddk_free(ddk)
 
  ! real arrays
  if (allocated(ddk%velocity)) then
-   ABI_FREE(ddk%velocity)
+   ABI_DEALLOCATE(ddk%velocity)
+ end if
+ if (allocated(ddk%velocity_fsavg)) then
+   ABI_DEALLOCATE(ddk%velocity_fsavg)
  end if
 
  ! types

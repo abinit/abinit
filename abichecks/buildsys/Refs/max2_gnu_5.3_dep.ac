@@ -923,7 +923,7 @@ with_linalg_libs="-L/opt/acml6.1.0/lib -lacml"
 #
 # You may specify any combination, using '+' as a separator
 #
-with_dft_flavor="atompaw+bigdft+libxc+wannier90"
+with_dft_flavor="atompaw+libxc+wannier90"
 
                        # ------------------------------ #
 

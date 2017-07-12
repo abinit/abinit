@@ -49,7 +49,7 @@ MODULE m_gruneisen
  use m_kpts,                only : kpts_ibz_from_kptrlatt, tetra_from_kptrlatt
  use m_bz_mesh,             only : kpath_t, kpath_new, kpath_free, kpath_print
  use m_anaddb_dataset,      only : anaddb_dataset_type
- use m_dynmat,              only : massmult_and_breaksym
+ use m_dynmat,              only : massmult_and_breaksym, dfpt_phfrq, gtdyn9
 
  implicit none
 
@@ -236,6 +236,7 @@ end function gruns_new
 !!  wvols(3*natom, nvols) = Phonon frequencies for the different volumen.
 !!  gvals(3*natom)=Gruneisen parameters evaluated at V0.
 !!  dwdq(3,3*natom)=Group velocities at V0 in Cartesian coordinates.
+!!  phdispl_cart(2, natom3, natom3, nvols)=Phonon displacement in Cartesian coordinates for the different volumes
 !!
 !! NOTES
 !!
@@ -250,12 +251,15 @@ end function gruns_new
 !!  The derivative dD/dV is computed via central finite difference.
 !!
 !! PARENTS
+!!      m_gruneisen
 !!
 !! CHILDREN
+!!      cwtime,gruns_free,gruns_qmesh,gruns_qpath,ifc_calcnwrite_nana_terms
+!!      ifc_speedofsound,kpath_free,wrtout
 !!
 !! SOURCE
 
-subroutine gruns_fourq(gruns, qpt, wvols, gvals, dwdq)
+subroutine gruns_fourq(gruns, qpt, wvols, gvals, dwdq, phdispl_cart)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -272,6 +276,7 @@ subroutine gruns_fourq(gruns, qpt, wvols, gvals, dwdq)
 !arrays
  real(dp),intent(in) :: qpt(3)
  real(dp),intent(out) :: wvols(gruns%natom3,gruns%nvols),gvals(gruns%natom3),dwdq(3,gruns%natom3)
+ real(dp),intent(out) :: phdispl_cart(2, gruns%natom3, gruns%natom3, gruns%nvols)
 
 !Local variables-------------------------------
 !scalars
@@ -280,7 +285,7 @@ subroutine gruns_fourq(gruns, qpt, wvols, gvals, dwdq)
 !arrays
  real(dp) :: dot(2)
  real(dp) :: eigvec(2,gruns%natom3,gruns%natom3,gruns%nvols),d2cart(2,gruns%natom3,gruns%natom3,gruns%nvols)
- real(dp) :: dddv(2,gruns%natom3,gruns%natom3),displ_cart(2,gruns%natom3,gruns%natom3)
+ real(dp) :: dddv(2,gruns%natom3,gruns%natom3)
  real(dp) :: omat(2,gruns%natom3, gruns%natom3)
 
 ! ************************************************************************
@@ -289,10 +294,10 @@ subroutine gruns_fourq(gruns, qpt, wvols, gvals, dwdq)
  do ivol=1,gruns%nvols
    if (ivol == gruns%iv0) then
      ! Compute group velocities for V=V0
-     call ifc_fourq(gruns%ifc_vol(ivol), gruns%cryst_vol(ivol), qpt, wvols(:,ivol), displ_cart, &
+     call ifc_fourq(gruns%ifc_vol(ivol), gruns%cryst_vol(ivol), qpt, wvols(:,ivol), phdispl_cart(:,:,:,ivol), &
                     out_d2cart=d2cart(:,:,:,ivol), out_eigvec=eigvec(:,:,:,ivol), dwdq=dwdq)
    else
-     call ifc_fourq(gruns%ifc_vol(ivol), gruns%cryst_vol(ivol), qpt, wvols(:,ivol), displ_cart, &
+     call ifc_fourq(gruns%ifc_vol(ivol), gruns%cryst_vol(ivol), qpt, wvols(:,ivol), phdispl_cart(:,:,:,ivol), &
                     out_d2cart=d2cart(:,:,:,ivol), out_eigvec=eigvec(:,:,:,ivol))
    end if
 
@@ -348,8 +353,11 @@ end subroutine gruns_fourq
 !!  Only writing
 !!
 !! PARENTS
+!!      m_gruneisen
 !!
 !! CHILDREN
+!!      cwtime,gruns_free,gruns_qmesh,gruns_qpath,ifc_calcnwrite_nana_terms
+!!      ifc_speedofsound,kpath_free,wrtout
 !!
 !! SOURCE
 
@@ -379,6 +387,7 @@ subroutine gruns_qpath(gruns, prefix, qpath, ncid, comm)
  character(len=500) :: msg
 !arrays
  real(dp),allocatable :: gvals_qpath(:,:),wvols_qpath(:,:,:),dwdq_qpath(:,:,:)
+ real(dp),allocatable :: phdispl_cart_qpath(:,:,:,:,:)
 
 ! ************************************************************************
 
@@ -392,15 +401,18 @@ subroutine gruns_qpath(gruns, prefix, qpath, ncid, comm)
  ABI_CALLOC(wvols_qpath, (gruns%natom3, gruns%nvols, qpath%npts))
  ABI_CALLOC(gvals_qpath, (gruns%natom3, qpath%npts))
  ABI_CALLOC(dwdq_qpath, (3, gruns%natom3, qpath%npts))
+ ABI_CALLOC(phdispl_cart_qpath, (2, gruns%natom3, gruns%natom3, gruns%nvols, qpath%npts))
 
  do iqpt=1,qpath%npts
    if (mod(iqpt, nprocs) /= my_rank) cycle ! mpi-parallelism
-   call gruns_fourq(gruns, qpath%points(:,iqpt), wvols_qpath(:,:,iqpt), gvals_qpath(:,iqpt), dwdq_qpath(:,:,iqpt))
+   call gruns_fourq(gruns, qpath%points(:,iqpt), wvols_qpath(:,:,iqpt), gvals_qpath(:,iqpt), &
+                    dwdq_qpath(:,:,iqpt), phdispl_cart_qpath(:,:,:,:,iqpt))
  end do
 
  call xmpi_sum(wvols_qpath, comm, ierr)
  call xmpi_sum(gvals_qpath, comm, ierr)
  call xmpi_sum(dwdq_qpath, comm, ierr)
+ call xmpi_sum(phdispl_cart_qpath, comm, ierr)
 
  ! Write text files with phonon frequencies and grunesein on the path.
  if (my_rank == master) then
@@ -424,16 +436,21 @@ subroutine gruns_qpath(gruns, prefix, qpath, ncid, comm)
 
 #ifdef HAVE_NETCDF
  if (my_rank == master .and. ncid /= nctk_noid) then
-   ncerr = nctk_def_dims(ncid, [ &
-     nctkdim_t("gruns_nvols", gruns%nvols), nctkdim_t("gruns_nqpath", qpath%npts), &
-     nctkdim_t('number_of_phonon_modes', gruns%natom3)], defmode=.True.)
+   ncerr = nctk_def_dims(ncid, [nctkdim_t("gruns_nqpath", qpath%npts)], defmode=.True.)
    NCF_CHECK(ncerr)
 
    ncerr = nctk_def_arrays(ncid, [ &
-    nctkarr_t("gruns_qpath", "dp", "three, gruns_nqpath"), &
-    nctkarr_t("gruns_gvals_qpath", "dp", "number_of_phonon_modes, gruns_nqpath"), &
-    nctkarr_t("gruns_wvols_qpath", "dp", "number_of_phonon_modes, gruns_nvols, gruns_nqpath"), &
-    nctkarr_t("gruns_dwdq_qpath", "dp", "three, number_of_phonon_modes, gruns_nqpath") &
+     ! q-points of the path
+     nctkarr_t("gruns_qpath", "dp", "three, gruns_nqpath"), &
+     ! grunesein parameters on the path
+     nctkarr_t("gruns_gvals_qpath", "dp", "number_of_phonon_modes, gruns_nqpath"), &
+     ! phonon frequencies at the different volumes
+     nctkarr_t("gruns_wvols_qpath", "dp", "number_of_phonon_modes, gruns_nvols, gruns_nqpath"), &
+     ! group velocities at V0 in Cartesian coordinates.
+     nctkarr_t("gruns_dwdq_qpath", "dp", "three, number_of_phonon_modes, gruns_nqpath"), &
+     ! displacements for the different volumes.
+     nctkarr_t("gruns_phdispl_cart_qpath", "dp", &
+         "two, number_of_phonon_modes, number_of_phonon_modes, gruns_nvols, gruns_nqpath") &
    ])
    NCF_CHECK(ncerr)
 
@@ -443,12 +460,14 @@ subroutine gruns_qpath(gruns, prefix, qpath, ncid, comm)
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "gruns_gvals_qpath"), gvals_qpath))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "gruns_wvols_qpath"), wvols_qpath))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "gruns_dwdq_qpath"), dwdq_qpath))
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "gruns_phdispl_cart_qpath"), phdispl_cart_qpath))
  end if
 #endif
 
  ABI_FREE(wvols_qpath)
  ABI_FREE(gvals_qpath)
  ABI_FREE(dwdq_qpath)
+ ABI_FREE(phdispl_cart_qpath)
 
 end subroutine gruns_qpath
 !!***
@@ -475,8 +494,11 @@ end subroutine gruns_qpath
 !! OUTPUT
 !!
 !! PARENTS
+!!      m_gruneisen
 !!
 !! CHILDREN
+!!      cwtime,gruns_free,gruns_qmesh,gruns_qpath,ifc_calcnwrite_nana_terms
+!!      ifc_speedofsound,kpath_free,wrtout
 !!
 !! SOURCE
 
@@ -515,6 +537,7 @@ subroutine gruns_qmesh(gruns, prefix, dosdeltae, ngqpt, nshiftq, shiftq, ncid, c
  real(dp),allocatable :: qibz(:,:),qbz(:,:),wtq(:)
  real(dp),allocatable :: wdt(:,:),wdos(:,:),grdos(:,:),gr2dos(:,:),wibz(:),omega_mesh(:)
  real(dp),allocatable :: vdos(:,:),v2dos(:,:)
+ real(dp),allocatable :: phdispl_cart_qibz(:,:,:,:,:)
 
 ! ************************************************************************
 
@@ -542,11 +565,13 @@ subroutine gruns_qmesh(gruns, prefix, dosdeltae, ngqpt, nshiftq, shiftq, ncid, c
  ABI_CALLOC(wvols_qibz, (gruns%natom3, gruns%nvols, nqibz))
  ABI_CALLOC(gvals_qibz, (gruns%natom3, nqibz))
  ABI_CALLOC(dwdq_qibz, (3, gruns%natom3, nqibz))
+ ABI_CALLOC(phdispl_cart_qibz, (2, gruns%natom3, gruns%natom3, gruns%nvols, nqibz))
 
  gavg = zero
  do iqibz=1,nqibz
    if (mod(iqibz, nprocs) /= my_rank) cycle ! mpi-parallelism
-   call gruns_fourq(gruns, qibz(:,iqibz), wvols_qibz(:,:,iqibz), gvals_qibz(:,iqibz), dwdq_qibz(:,:,iqibz))
+   call gruns_fourq(gruns, qibz(:,iqibz), wvols_qibz(:,:,iqibz), gvals_qibz(:,iqibz), &
+                    dwdq_qibz(:,:,iqibz), phdispl_cart_qibz(:,:,:,:,iqibz))
    gavg = gavg + wtq(iqibz) * sum(gvals_qibz(:,iqibz))
  end do
  gavg = gavg / gruns%natom3
@@ -555,6 +580,7 @@ subroutine gruns_qmesh(gruns, prefix, dosdeltae, ngqpt, nshiftq, shiftq, ncid, c
  call xmpi_sum(wvols_qibz, comm, ierr)
  call xmpi_sum(gvals_qibz, comm, ierr)
  call xmpi_sum(dwdq_qibz, comm, ierr)
+ call xmpi_sum(phdispl_cart_qibz, comm, ierr)
 
  omega_min = gruns%ifc_vol(gruns%iv0)%omega_minmax(1)
  omega_max = gruns%ifc_vol(gruns%iv0)%omega_minmax(2)
@@ -620,20 +646,26 @@ subroutine gruns_qmesh(gruns, prefix, dosdeltae, ngqpt, nshiftq, shiftq, ncid, c
  ! Write netcdf files.
  if (my_rank == master .and. ncid /= nctk_noid) then
    ncerr = nctk_def_dims(ncid, [ &
-     nctkdim_t("gruns_nvols", gruns%nvols), nctkdim_t("gruns_nqibz", nqibz), &
-     nctkdim_t('gruns_nshiftq', nshiftq), &
-     nctkdim_t('number_of_phonon_modes', gruns%natom3), &
+     nctkdim_t("gruns_nqibz", nqibz), nctkdim_t('gruns_nshiftq', nshiftq), &
      nctkdim_t('gruns_nomega', nomega)], defmode=.True.)
    NCF_CHECK(ncerr)
 
    ncerr = nctk_def_arrays(ncid, [ &
+    ! q-point sampling in IBZ,
     nctkarr_t("gruns_qptrlatt", "int", "three, three"), &
     nctkarr_t("gruns_shiftq", "dp", "three, gruns_nshiftq"), &
     nctkarr_t("gruns_qibz", "dp", "three, gruns_nqibz"), &
     nctkarr_t("gruns_wtq", "dp", "gruns_nqibz"), &
+    ! grunesein parameters in IBZ
+    ! phonon frequencies at the different volumes,
+    ! group velocities at V0 in Cartesian coordinates.
     nctkarr_t("gruns_gvals_qibz", "dp", "number_of_phonon_modes, gruns_nqibz"), &
     nctkarr_t("gruns_wvols_qibz", "dp", "number_of_phonon_modes, gruns_nvols, gruns_nqibz"), &
     nctkarr_t("gruns_dwdq_qibz", "dp", "three, number_of_phonon_modes, gruns_nqibz"), &
+    ! displacements for the different volumes.
+    nctkarr_t("gruns_phdispl_cart_qibz", "dp", &
+        "two, number_of_phonon_modes, number_of_phonon_modes, gruns_nvols, gruns_nqibz"), &
+    ! DOSes and IDOSes
     nctkarr_t("gruns_omega_mesh", "dp", "gruns_nomega"), &
     nctkarr_t("gruns_wdos", "dp", "gruns_nomega, two"), &
     nctkarr_t("gruns_grdos", "dp", "gruns_nomega, two"), &
@@ -652,6 +684,7 @@ subroutine gruns_qmesh(gruns, prefix, dosdeltae, ngqpt, nshiftq, shiftq, ncid, c
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "gruns_gvals_qibz"), gvals_qibz))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "gruns_wvols_qibz"), wvols_qibz))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "gruns_dwdq_qibz"), dwdq_qibz))
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "gruns_phdispl_cart_qibz"), phdispl_cart_qibz))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "gruns_omega_mesh"), omega_mesh))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "gruns_wdos"), wdos))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "gruns_grdos"), grdos))
@@ -667,6 +700,7 @@ subroutine gruns_qmesh(gruns, prefix, dosdeltae, ngqpt, nshiftq, shiftq, ncid, c
  ABI_FREE(wvols_qibz)
  ABI_FREE(gvals_qibz)
  ABI_FREE(dwdq_qibz)
+ ABI_FREE(phdispl_cart_qibz)
  ABI_FREE(omega_mesh)
  ABI_FREE(wibz)
  ABI_FREE(wdt)
@@ -691,8 +725,11 @@ end subroutine gruns_qmesh
 !!  Free dynamic memory.
 !!
 !! PARENTS
+!!      m_gruneisen
 !!
 !! CHILDREN
+!!      cwtime,gruns_free,gruns_qmesh,gruns_qpath,ifc_calcnwrite_nana_terms
+!!      ifc_speedofsound,kpath_free,wrtout
 !!
 !! SOURCE
 
@@ -748,7 +785,7 @@ end subroutine gruns_free
 !!  gruns_anaddb
 !!
 !! FUNCTION
-!!  Driver routine called in anaddb to computate Gruneisen parameters.
+!!  Driver routine called in anaddb to compute Gruneisen parameters.
 !!
 !! INPUTS
 !!  inp<anaddb_dataset_type: :: anaddb input variables.
@@ -759,8 +796,11 @@ end subroutine gruns_free
 !!  Only writing.
 !!
 !! PARENTS
+!!      anaddb
 !!
 !! CHILDREN
+!!      cwtime,gruns_free,gruns_qmesh,gruns_qpath,ifc_calcnwrite_nana_terms
+!!      ifc_speedofsound,kpath_free,wrtout
 !!
 !! SOURCE
 
@@ -785,14 +825,20 @@ subroutine gruns_anaddb(inp, prefix, comm)
 !scalars
  integer,parameter :: master=0
  integer :: ii,nprocs,my_rank,ncid,iv0
+#ifdef HAVE_NETCDF
+ integer :: ncerr
+#endif
  real(dp) :: cpu,wall,gflops
- type(gruns_t) :: gruns
+ type(gruns_t),target :: gruns
  type(kpath_t) :: qpath
  character(len=500) :: msg
+!arrays
 
 ! ************************************************************************
 
  nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
+
+ ABI_CHECK(inp%ifcflag == 1, "Gruneisen requires ifcflag == 1")
 
  call cwtime(cpu, wall, gflops, "start")
 
@@ -803,10 +849,35 @@ subroutine gruns_anaddb(inp, prefix, comm)
 #ifdef HAVE_NETCDF
  if (my_rank == master) then
    NCF_CHECK_MSG(nctk_open_create(ncid, strcat(prefix, "_GRUNS.nc"), xmpi_comm_self), "Creating _GRUNS.nc")
+
+   ! Write structure corresponding to iv0
    NCF_CHECK(crystal_ncwrite(gruns%cryst_vol(iv0), ncid))
+
+   ! Add important dimensions and additional metadata.
+   ncerr = nctk_def_dims(ncid, [ &
+     nctkdim_t("gruns_nvols", gruns%nvols), &
+     nctkdim_t('number_of_phonon_modes', gruns%natom3)], defmode=.True.)
+   NCF_CHECK(ncerr)
+   ncerr = nctk_def_iscalars(ncid, [character(len=nctk_slen) :: "gruns_iv0"])
+   NCF_CHECK(ncerr)
+
+   ! Add lattice parameters and positions of the `gruns_nvols` structures so
+   ! that we can easily reconstruct structure objects in AbiPy.
+   ncerr = nctk_def_arrays(ncid, [ &
+     nctkarr_t("gruns_rprimd", "dp", "three, three, gruns_nvols"), &
+     nctkarr_t("gruns_xred", "dp", "three, number_of_atoms, gruns_nvols") &
+   ])
+   NCF_CHECK(ncerr)
+
+   ncerr = nctk_write_iscalars(ncid, [character(len=nctk_slen) :: "gruns_iv0"], [iv0], datamode=.True.)
+   NCF_CHECK(ncerr)
+
+   do ii=1,gruns%nvols
+     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "gruns_rprimd"), gruns%cryst_vol(ii)%rprimd, start=[1,1,ii]))
+     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "gruns_xred"), gruns%cryst_vol(ii)%xred, start=[1,1,ii]))
+   end do
+
    !call phonons_ncwrite(ncid,natom,nfineqpath,save_qpoints,weights,save_phfrq,save_phdispl_cart)
-   !NCF_CHECK(nctk_def_arrays(ncid, [nctkarr_t('atomic_mass_units', "dp", "number_of_atom_species")],defmode=.True.))
-   !NCF_CHECK(nctk_set_datamode(ncid))
    !NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, 'atomic_mass_units'), ddb%amu))
  end if
 #endif
@@ -828,17 +899,22 @@ subroutine gruns_anaddb(inp, prefix, comm)
  end if
 
  ! Compute speed of sound for V0.
- if (inp%vs_qrad_tolms(1) > zero) then
-   call ifc_speedofsound(gruns%ifc_vol(iv0), gruns%cryst_vol(iv0), inp%vs_qrad_tolms, ncid, comm)
+ if (inp%vs_qrad_tolkms(1) > zero) then
+   call ifc_speedofsound(gruns%ifc_vol(iv0), gruns%cryst_vol(iv0), inp%vs_qrad_tolkms, ncid, comm)
  end if
 
- call gruns_free(gruns)
+ ! Now treat the second list of vectors (only at the Gamma point, but can include non-analyticities)
+ if (my_rank == master .and. inp%nph2l /= 0 .and. inp%ifcflag == 1) then
+   call ifc_calcnwrite_nana_terms(gruns%ifc_vol(iv0), gruns%cryst_vol(iv0), inp%nph2l, inp%qph2l, inp%qnrml2, ncid)
+ end if
 
 #ifdef HAVE_NETCDF
  if (my_rank == master) then
    NCF_CHECK(nf90_close(ncid))
  end if
 #endif
+
+ call gruns_free(gruns)
 
  call cwtime(cpu,wall,gflops,"stop")
  write(msg,'(2(a,f8.2))')" gruns_anaddb completed. cpu:",cpu,", wall:",wall

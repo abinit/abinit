@@ -135,7 +135,11 @@ subroutine ddb_compare (acell,acell8,amu,amu8,dimekb,ecut,ecut8,ekb,ekb8,&
 !only need half of the number of k points.
  if(fullinit/=0)then
    if(nkpt/=2*nkpt8 .and. 2*nkpt/=nkpt8)then
-     call chki8(nkpt,nkpt8,'  nkpt')
+
+     ! GKA: We don't always need this variable to be consistent
+     !      For example, we might have reduced the number of k-points
+     !      with TRS only for certain q-points.
+     !call chki8(nkpt,nkpt8,'  nkpt')
    else
      write(std_out,*)' compar8 : assume that one of the DDB to be',&
 &     ' merged use Time-Reversal to'

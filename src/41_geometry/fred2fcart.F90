@@ -32,7 +32,7 @@
 !!    on all atoms is zero (except is a slab is used)
 !!
 !! PARENTS
-!!      forces,m_mep,mover
+!!      forces,m_mep
 !!
 !! CHILDREN
 !!
