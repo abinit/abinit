@@ -122,7 +122,7 @@ real(dp), allocatable :: cg(:,:), eig(:),kpts(:,:), weights(:),coefc(:,:), nkval
    MSG_ERROR(msg)
  end if
 
- pos=INDEX(fname,"_")
+ pos=INDEX(fname, "_")
  write(seedname,'(a)') fname(1:pos-1)
 
  write(std_out,*) '         '//achar(27)//'[97m ***********************' !print program header in pearl white
