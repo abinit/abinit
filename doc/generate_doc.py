@@ -921,30 +921,29 @@ print("File %s has been written ..." %file_txt)
 #This should cover most of the cases.
 #Note that the backslash is a special character in Python, so the first string is prepended with 'r' to avoid special treatment.
 list_vowels=["a","e","i","o","u","y"]
-list_signs_in=["'","`","^","~"]
-list_signs_out=["uml","grave","circ","tilde"]
+list_signs_in=['"',"'","`","^","~"]
+list_signs_out=["uml","acute","grave","circ","tilde"]
 for vowel in list_vowels:
-  for i in range(0,3):
-    string_1= """r%s{\"%s}'""" %(list_signs_in[i],vowel)
-    string_2= """r%s\"%s'""" %(list_signs_in[i],vowel)
-    string_3= """r%s\"{%s}'""" %(list_signs_in[i],vowel)
-    string_final= "&%s%s" %(vowel,list_signs_out[i])
+  for i in range(0,4):
+    string_1= "{\\" + list_signs_in[i] + vowel + "}"
+    string_2= "\\" + list_signs_in[i] + vowel
+    string_3= "\\" + list_signs_in[i] + "{" + vowel + "}" 
+    string_final= r"&%s%s;" %(vowel,list_signs_out[i])
     bib_content['bibliography']=bib_content['bibliography'].replace(string_1,string_final)
     bib_content['bibliography']=bib_content['bibliography'].replace(string_2,string_final)
     bib_content['bibliography']=bib_content['bibliography'].replace(string_3,string_final)
-  #This one is quite tricky ! So, a different reatment was made ...
-  string_1= """r\"{\'%s}\"""" %(vowel)
-  string_2= """r\"\'%s\"""" %(vowel)
-  string_3= """r\"\'{%s}\"""" %(vowel)
-  string_final= "%sacute" %(vowel)
-  bib_content['bibliography']=bib_content['bibliography'].replace(string_1,string_final)
-  bib_content['bibliography']=bib_content['bibliography'].replace(string_2,string_final)
-  bib_content['bibliography']=bib_content['bibliography'].replace(string_3,string_final)
+    #DEBUG
+    print("")
+    print(string_1)
+    print(string_2)
+    print(string_3)
+    print(string_final)
+    print("")
+    #ENDDEBUG
 
-
-bib_content['bibliography']=bib_content['bibliography'].replace(r"{\~n}","&ccedil;")
-bib_content['bibliography']=bib_content['bibliography'].replace(r"\~n","&ccedil;")
-bib_content['bibliography']=bib_content['bibliography'].replace(r"\~{n}","&ccedil;")
+bib_content['bibliography']=bib_content['bibliography'].replace(r"{\~n}","&ntilde;")
+bib_content['bibliography']=bib_content['bibliography'].replace(r"\~n","&ntilde;")
+bib_content['bibliography']=bib_content['bibliography'].replace(r"\~{n}","&ntilde;")
 
 bib_content['bibliography']=bib_content['bibliography'].replace(r"{\c c}","&ccedil;")
 bib_content['bibliography']=bib_content['bibliography'].replace(r"\c c","&ccedil;")
@@ -957,7 +956,6 @@ bib_content['bibliography']=bib_content['bibliography'].replace('}"','"')
 #which will not happen in HTML...
 bib_content['bibliography']=bib_content['bibliography'].replace(' {',' ')
 bib_content['bibliography']=bib_content['bibliography'].replace('} ',' ')
-
 
 ################################################################################
 # Generate the html files in the bibliography directory

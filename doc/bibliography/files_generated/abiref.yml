@@ -802,7 +802,7 @@
   ENTRYTYPE : article
   ID : Grimme2006
   author : S. Grimme
-  title : Semiempirical {GGA}-Type Density Functional Constructed with a Long-Range Dispersion Correction
+  title : Semiempirical {GGA-Type} Density Functional Constructed with a Long-Range Dispersion Correction
   journal : J. Comput. Chem.
   year : 2006
   volume : 27
@@ -811,7 +811,7 @@
   ENTRYTYPE : article
   ID : Grimme2010
   author : S. Grimme and J. Anthony and S. Ehrlich and H. Krieg
-  title : A consistent and accurate ab initio parametrization of density functional dispersion correction ({DFT-D}) for the 94 elements {H}-{P}u
+  title : A consistent and accurate ab initio parametrization of density functional dispersion correction {(DFT-D)} for the 94 elements {H-Pu} 
   journal : J. Chem. Phys.
   year : 2010
   volume : 132
