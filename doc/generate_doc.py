@@ -150,7 +150,7 @@ def reformat_namelist(namelist):
     newnamelist=newnamelist.split('(Eds.)')[0]
     flag_editor=1
   new_name=""
-  names=newnamelist.split('and')
+  names=newnamelist.split(' and ')
   numnames=len(names)
   for (i,one_name) in enumerate(names):
     if ',' in one_name:
@@ -509,7 +509,7 @@ for (specialkey,specialval) in list_specials:
   cur_specials.append(specialkey)
 
 for (speckey, specval) in list_specials:
-  backlink="../../input_variables/invars_html_gen/specials.html#%s" %(speckey)
+  backlink= ' <a href="../../%s/specials.html#%s">%s</a> ' %(invars_html_gen,speckey,speckey)
   cur_content = "<br><font id=\"title\"><a name=\""+speckey+"\">"+speckey+"</a></font>\n"
   cur_content += "<br><font id=\"text\">\n"
   cur_content += "<p>\n"+doku2html(make_links(specval,speckey,list_all_vars,list_chars,cur_specials,backlinks,backlink))+"\n"
@@ -527,7 +527,7 @@ for i, var in enumerate(variables):
   section = var.section
   all_vars[section].append([var.abivarname,var.mnemonics])
   cur_content = ""
-  backlink="../../input_variables/invars_html_gen/%s.html#%s" %(section,var.abivarname)
+  backlink=' <a href="../../%s/%s.html#%s">%s</a> ' %(invars_html_gen,section,var.abivarname,var.abivarname)
 
   try:
     # Title
@@ -649,7 +649,7 @@ for i, section_info in enumerate(sections):
   #Global operations on the tentative html file.
   sectionhtml=sectionhtml.replace("__JS_PATH__",js_path)
   sectionhtml=sectionhtml.replace("__KEYWORD__",section_info.keyword)
-  backlink="../../input_variables/invars_html_gen/%s.html" %(section)
+  backlink=' <a href="../../%s/%s.html#%s">%s<\a>' %(invars_html_gen,section,var.abivarname,var.abivarname)
   sectionhtml = doku2html(make_links(sectionhtml,None,list_all_vars,list_chars,cur_specials,backlinks,backlink))
 
   #Write the finalized html file.
@@ -828,7 +828,8 @@ for topic_name in list_of_topics:
   topic_html=topic_html.replace("__JS_PATH__",js_path)
   topic_html=topic_html.replace("__HOWTO__",topic.howto)
   topic_html=topic_html.replace("__KEYWORD__",topic.keyword)
-  backlink="../../topics/topics_html_gen/topic_%s.html" %(topic_name)
+  backlink=' <a href="../../%s/topic_%s.html">%s</a>' %(topics_html_gen,topic_name,topic_name)
+
   topic_html = doku2html(make_links(topic_html,None,list_all_vars,list_chars,cur_specials,backlinks,backlink))
 
   # Open, write and close the file
@@ -857,7 +858,7 @@ for j in ["header","title","subtitle","copyright","links","toc_all","links","end
 #Global operations on the tentative html file.
 all_topics_html=all_topics_html.replace("__JS_PATH__",js_path)
 all_topics_html=all_topics_html.replace("__KEYWORD__",default_topic.keyword)
-backlink="../../topics/topics_html_gen/all_topics.html" 
+backlink='<a href="../../%s/all_topics.html">all_topics.html</a>' %(topics_html_gen)
 all_topics_html = doku2html(make_links(all_topics_html,None,list_all_vars,list_chars,cur_specials,backlinks,backlink))
 
 # Open, write and close the file
@@ -871,6 +872,14 @@ print("File %s written ..."%file_html )
 ################################################################################
 
 # Come back to the bibliography
+
+################################################################################
+# Treat the links within the "introduction" of the acknowledgment section first.
+backlink= ' <a href="../../%s/acknowledgments.html">acknowledgments.html</a> ' %(bib_gen)
+for i, bibhtml_info in enumerate(bibhtml):
+  if bibhtml_info.name.strip()=="acknowledgments":
+    bibhtml_intro=bibhtml_info.introduction
+    bibhtml_ack_intro = doku2html(make_links(bibhtml_intro,None,list_all_vars,list_chars,cur_specials,backlinks,backlink))
 
 ################################################################################
 # Write an ordered bib file, that allows to update the original one.
@@ -895,10 +904,11 @@ for ref in bibtex_dics:
   bib_content['bibliography']+= ('<hr><a id="%s">[%s]</a> (<a href="./bibtex.html#%s">bibtex</a>)\n <br> %s \n') %(ID,ID,ID,reference_dic[ID])
   nlink=0
   for link in backlinksID:
-    if nlink==0 and len(link)!=0: 
-      bib_content['bibliography']+= "<br> Mentioned in" 
-      nlink=1
-    bib_content['bibliography']+= link
+    if len(link)!=0:
+      if nlink==0: 
+        bib_content['bibliography']+= "<br> Referred to in " 
+        nlink=1
+      bib_content['bibliography']+= link
 
 # Open, write and close the txt file
 file_txt = bib_gen+'/ordered_abiref.bib'
@@ -907,15 +917,46 @@ f_txt.write(lines_txt)
 f_txt.close()
 print("File %s has been written ..." %file_txt)
 
-#Global operations on the tentative html file : conversion from bibtex to html.
-bib_content['bibliography']=bib_content['bibliography'].replace("\'e","&eacute;")
-bib_content['bibliography']=bib_content['bibliography'].replace("\'{e}","&eacute;")
-bib_content['bibliography']=bib_content['bibliography'].replace("\^o","&ocirc;")
-bib_content['bibliography']=bib_content['bibliography'].replace("\^{o}","&ocirc;")
-bib_content['bibliography']=bib_content['bibliography'].replace("\`e","&egrave;")
-bib_content['bibliography']=bib_content['bibliography'].replace("\`{e}","&egrave;")
-bib_content['bibliography']=bib_content['bibliography'].replace("\c c","&ccedil;")
-bib_content['bibliography']=bib_content['bibliography'].replace("\c{c}","&ccedil;")
+#Global operation on the bibliography html file : conversion from bibtex notation to html notation.
+#This should cover most of the cases.
+#Note that the backslash is a special character in Python, so the first string is prepended with 'r' to avoid special treatment.
+list_vowels=["a","e","i","o","u","y"]
+list_signs_in=["'","`","^","~"]
+list_signs_out=["uml","grave","circ","tilde"]
+for vowel in list_vowels:
+  for i in range(0,3):
+    string_1= """r%s{\"%s}'""" %(list_signs_in[i],vowel)
+    string_2= """r%s\"%s'""" %(list_signs_in[i],vowel)
+    string_3= """r%s\"{%s}'""" %(list_signs_in[i],vowel)
+    string_final= "&%s%s" %(vowel,list_signs_out[i])
+    bib_content['bibliography']=bib_content['bibliography'].replace(string_1,string_final)
+    bib_content['bibliography']=bib_content['bibliography'].replace(string_2,string_final)
+    bib_content['bibliography']=bib_content['bibliography'].replace(string_3,string_final)
+  #This one is quite tricky ! So, a different reatment was made ...
+  string_1= """r\"{\'%s}\"""" %(vowel)
+  string_2= """r\"\'%s\"""" %(vowel)
+  string_3= """r\"\'{%s}\"""" %(vowel)
+  string_final= "%sacute" %(vowel)
+  bib_content['bibliography']=bib_content['bibliography'].replace(string_1,string_final)
+  bib_content['bibliography']=bib_content['bibliography'].replace(string_2,string_final)
+  bib_content['bibliography']=bib_content['bibliography'].replace(string_3,string_final)
+
+
+bib_content['bibliography']=bib_content['bibliography'].replace(r"{\~n}","&ccedil;")
+bib_content['bibliography']=bib_content['bibliography'].replace(r"\~n","&ccedil;")
+bib_content['bibliography']=bib_content['bibliography'].replace(r"\~{n}","&ccedil;")
+
+bib_content['bibliography']=bib_content['bibliography'].replace(r"{\c c}","&ccedil;")
+bib_content['bibliography']=bib_content['bibliography'].replace(r"\c c","&ccedil;")
+bib_content['bibliography']=bib_content['bibliography'].replace(r"\c{c}","&ccedil;")
+
+bib_content['bibliography']=bib_content['bibliography'].replace('"{','"')
+bib_content['bibliography']=bib_content['bibliography'].replace('}"','"')
+
+#Suppose all remaining parenthesis are present to avoid BibTex to switch automatically from uppercase to lowercase,
+#which will not happen in HTML...
+bib_content['bibliography']=bib_content['bibliography'].replace(' {',' ')
+bib_content['bibliography']=bib_content['bibliography'].replace('} ',' ')
 
 
 ################################################################################
@@ -938,6 +979,8 @@ for i, bibhtml_info in enumerate(bibhtml):
   for j in ["header","title","subtitle","copyright","links","introduction","content","links","end"]:
     if j == "content":
       bibhtml += bib_content[bibname]
+    elif j == "introduction" and bibname =="acknowledgments" :
+      bibhtml += bibhtml_ack_intro
     else:
       extract_j=getattr(bibhtml_info,j)
       if extract_j.strip() == "":
@@ -949,7 +992,7 @@ for i, bibhtml_info in enumerate(bibhtml):
   #Global operations on the tentative html file.
   bibhtml=bibhtml.replace("__JS_PATH__",js_path)
   bibhtml=bibhtml.replace("__KEYWORD__",bibhtml_info.keyword)
-  backlink="../../bibliography/bib_gen/%s.html" %(bibname)
+  backlink= ' <a href="../../%s/specials.html#%s">%s</a> ' %(bib_gen,bibname,bibname)
   bibhtml = doku2html(make_links(bibhtml,None,list_all_vars,list_chars,cur_specials,backlinks,backlink))
 
   #Write the finalized html file.
@@ -959,6 +1002,27 @@ for i, bibhtml_info in enumerate(bibhtml):
   f_cur.write("\n")
   f_cur.close()
   print("File %s written ..."%file_cur )
+
+################################################################################
+#Global operation on the bibliography html file : conversion from bibtex notation to html notation.
+#replace_list=[ "/{\\\'e}/&eacute;/",
+#               "/\\\'e/&eacute;/",
+#               "/\\\'{e}/&eacute;/"]
+#os_cmd= "cp %s/bibliography.html %s/work0" %(bib_gen,bib_gen)
+#retcode = os.system(os_cmd)
+#for (i,item) in enumerate(replace_list):
+#  sed_cmd = "sed -e '%s' %s/work%s > %s/work%s " %(item,bib_gen,i,bib_gen,i+1)
+#  #DEBUG
+#  print("")
+#  print(" Will work on i, item:",i,item)
+#  print(" sed_cmd :",sed_cmd)
+#  print("")
+#  #ENDDEBUG
+#  retcode = os.system(sed_cmd)
+#os_cmd= "cp %s/work%s %s/bibliography.html" %(bib_gen,i+1,bib_gen)
+#retcode = os.system(os_cmd)
+#os_cmd= "rm %s/work*" %(bib_gen)
+#retcode = os.system(os_cmd)
 
 ################################################################################
 

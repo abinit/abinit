@@ -44,7 +44,7 @@
   ENTRYTYPE : article
   ID : Allen1983
   author : Allen, P. B. and Cardona, M.
-  title : Temperature dependence of the direct gap of {S}i and {G}e
+  title : Temperature dependence of the direct gap of {Si} and {Ge} 
   journal : Phys. Rev. B
   year : 1983
   volume : 27
@@ -86,7 +86,7 @@
 -
   ENTRYTYPE : article
   ID : Amadon2008
-  author : Amadon, B. and Lechermann, F. and Georges, A. and Jollet, F. and Wehling, T. O. and Lichtenstein, A. I.
+  author : Amadon, B. and Lechermann, F. and Georges, A. and Jollet, F. and Wehling, T. O. and Liechtenstein, A. I.
   title : Plane-wave based electronic structure calculations for correlated materials using dynamical mean-field theory and projected local orbitals
   journal : Phys. Rev. B
   year : 2008
@@ -209,7 +209,7 @@
 -
   ENTRYTYPE : article
   ID : Aryasetiawan2004
-  author : Aryasetiawan, F. and Imada, M. and Georges, A. and Kotliar, G. and Biermann, S. and Lichtenstein, A. I.
+  author : Aryasetiawan, F. and Imada, M. and Georges, A. and Kotliar, G. and Biermann, S. and Liechtenstein, A. I.
   title : Frequency-dependent local interactions and low-energy effective models from electronic structure calculations
   journal : Phys. Rev. B
   year : 2004
@@ -310,6 +310,15 @@
   doi : 10.1103/PhysRevLett.80.4514
   publisher : American Physical Society
   issue : 20
+-
+  ENTRYTYPE : article
+  ID : Bengone2000
+  author : O. Bengone, M. Alouani, P. Bl\"ochl, and J. Hugel
+  title : Implementation of the projector augmented-wave LDA+U method: Application to the electronic structure of NiO
+  journal : Phys. Rev. B
+  year : 1994}
+  volume : 62
+  pages : 16392
 -
   ENTRYTYPE : article
   ID : Bergeron2015
@@ -486,6 +495,14 @@
   file : :/media/disk_iomega/BIBLIO/Interaction/PhysRevB.71.035105.pdf:PDF
   keywords : DFTU interaction, cRPA
   refid : 10.1103/PhysRevB.71.035105
+-
+  ENTRYTYPE : article
+  ID : Czyzyk1994
+  author : M. T. Czyżyk and G. A. Sawatzky}journal={Phys. Rev. B
+  title : Local-density functional and on-site correlations: The electronic structure of La2CuO4 and LaCuO3
+  year : 1994
+  volume : 49
+  pages : 14211
 -
   ENTRYTYPE : book
   ID : Daubechies1992
@@ -819,7 +836,7 @@
 -
   ENTRYTYPE : article
   ID : Gull2011
-  author : Gull, E. and Millis, A.J. and Lichtenstein, A. I. and Rubtsov, A.N. and Troyer, M. and Werner, P.
+  author : Gull, E. and Millis, A.J. and Liechtenstein, A. I. and Rubtsov, A.N. and Troyer, M. and Werner, P.
   title : Continuous-time Monte Carlo methods for quantum impurity models
   journal : Rev. Mod. Phys.
   year : 2011

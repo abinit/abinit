@@ -27,11 +27,11 @@
 
 
 <p> This feature is available only in PAW. The DFT+U framework is described in
-the paper [1] and [2]. In ABINIT, the DFT+U approximation is implemented inside the PAW atomic spheres only.
+[<a href="../../bibliography/files_generated/bibliography.html#Anisimov1991">Anisimov1991</a>] and [<a href="../../bibliography/files_generated/bibliography.html#Liechtenstein1995">Liechtenstein1995</a>]. In ABINIT, the DFT+U approximation is implemented inside the PAW atomic spheres only.
 Two choices of double counting are provided: the Full Localized limit
 and the Around Mean Field approximation.
-Our implementation is described in [5].
-It follows the main lines of the paper [4].
+Our implementation is described in [<a href="../../bibliography/files_generated/bibliography.html#Amadon2008">Amadon2008</a>].
+It follows the main lines of [<a href="../../bibliography/files_generated/bibliography.html#Bengone2000">Bengone2000</a>]. See als [<a href="../../bibliography/files_generated/bibliography.html#Czyzyk1994">Czyzyk1994</a>].
 Forces and stress are implemented.
 For details on keywords 
 (<a href="../../input_variables/html_generated/varpaw.html#lpawu">lpawu</a>,<a href="../../input_variables/html_generated/varpaw.html#upawu">upawu</a>,<a href="../../input_variables/html_generated/varpaw.html#jpawu">jpawu</a>,<a href="../../input_variables/html_generated/varpaw.html#usedmatpu">usedmatpu</a>,<a href="../../input_variables/html_generated/varpaw.html#dmatpuopt">dmatpuopt</a>,<a href="../../input_variables/html_generated/varpaw.html#dmatudiag">dmatudiag</a>) 
@@ -42,7 +42,7 @@ see keyword <a href="../../input_variables/html_generated/varpaw.html#usepawu">u
 <p>- The Decomposition of the LDA+U energy is given (Interaction energy, Double
   counting term, and sum of the two) in the log file.
 <p>- The orbital density matrix (n_{m,m'}^{\sigma}), also called occupation
- matrix (corresponding to eq 9 of ref [4]  and eq 1 of ref [2], see also
+ matrix (corresponding to Eq.(9) of [<a href="../../bibliography/files_generated/bibliography.html#Bengone2000">Bengone2000</a>] and Eq.(1) of [<a href="../../bibliography/files_generated/bibliography.html#Liechtenstein1995">Liechtenstein1995</a>], see also
   [5] and variable <a href="../../input_variables/html_generated/varpaw.html#dmatpuopt">dmatpuopt</a>) is also
   given for each atom in the basis of real spherical harmonics.
   It is given at each SCF step in the log file: one can thus check the
@@ -51,11 +51,6 @@ see keyword <a href="../../input_variables/html_generated/varpaw.html#usepawu">u
 <p> Consistency between total energy and forces in DFT+U have been checked.
 
 <p>
-[1] V. I. Anisimov, J. Zaanen, and O. K. Andersen PRB 44, 943 (1991) <br>
-[2] A.I. Lichtenstein, V.I. Anisimov and J. Zaanen  PRB 52, 5467 (1995) <br>
-[3] M. T. Czyzyk and G.  A. Sawatzky PRB 49, 14211 (1994) <br>
-[4] O. Bengone, M. Alouani, P. Blochl, and J. Hugel PRB 62, 16392 (2000) <br>
-[5] B. Amadon, F. Jollet and M. Torrent Phys. Rev. B 77, 155104 (2008).
 
 
 &nbsp; 
