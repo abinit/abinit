@@ -42,7 +42,7 @@ module m_effpot_mpi
 !! effective_potential_type
 !!
 !! FUNCTION
-!! structure for a effective potential constructed.
+!! datatype to set the parallelisation
 !!
 !! SOURCE
 
@@ -88,10 +88,16 @@ CONTAINS  !=====================================================================
 !! deallocate all dynamic memory for mpi of supercell
 !!
 !! INPUTS
-!! effpot_mpi = effpot_mpi type
+!! cell_number(3) = size of the supercell, 3 3 3 for example
+!! ndiv = number of division to consider. For example if ndiv==2,
+!!        the mpi will be set over the 2 lvl of parallelisation,
+!!        cell and nrpt by considering nrpt / 2 for each CPU 
+!!        (still experimental, only ndiv=1 available)
+!! nrpt = number of cell to be parallelised for the IFC
+!! comm = MPI communicator
 !!
 !! OUTPUT
-!!
+!! effpot_mpi<type(effpot_mpi_type)()> = effpot_mpi datatype
 !! PARENTS
 !!
 !! CHILDREN
@@ -219,6 +225,7 @@ subroutine effpot_mpi_init(cell_number,effpot_mpi,ndiv,nrpt,comm)
  effpot_mpi%my_nrpt = nprpt
  ABI_ALLOCATE(effpot_mpi%my_rpt,(effpot_mpi%my_nrpt))
  do irpt=1,effpot_mpi%my_nrpt
+!AM_EXPERIMENTAL
 !   if(virt_rank >= (nproc-ncell_alone))then
 !    effpot_mpi%my_rpt(irpt)=(aint(real(nrpt,sp)/nproc))*(virt_rank)+&
 !&                              (virt_rank - (nproc-ncell_alone)) + irpt
@@ -226,6 +233,7 @@ subroutine effpot_mpi_init(cell_number,effpot_mpi,ndiv,nrpt,comm)
 !     effpot_mpi%my_rpt(irpt)=(effpot_mpi%my_nrpt)*(virt_rank)  + irpt
 !   end if
      effpot_mpi%my_rpt(irpt)= irpt
+!AM_EXPERIMENTAL
  end do
 
  ABI_DEALLOCATE(rpt_list)
@@ -242,6 +250,7 @@ end subroutine effpot_mpi_init
 !! deallocate all dynamic memory for mpi
 !!
 !! INPUTS
+!! effpot_mpi<type(effpot_mpi_type)()> = effpot_mpi datatype
 !!
 !! OUTPUT
 !!

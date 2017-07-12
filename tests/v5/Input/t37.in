@@ -81,4 +81,5 @@ prtdensph 1  ratsph 2*2.3 ! Printing of local magnetic moment
 #%%   The aim of this test is to verify:
 #%%   * Antiferromagnetism and PAW+U
 #%%   * Use of an initial and constant density matrix during the first SCF iterations
+#%% topics = DFT+U
 #%%<END TEST_INFO>

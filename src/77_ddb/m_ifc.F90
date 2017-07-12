@@ -726,7 +726,8 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
  if (nsphere == -1) call ifc_autocutoff(ifc, crystal, comm)
 
  call cwtime(cpu, wall, gflops, "stop")
- write(std_out,"(2(a,f6.2))")" ifc_init: cpu: ",cpu,", wall: ",wall
+ write(message,"(2(a,f6.2))")" ifc_init: cpu: ",cpu,", wall: ",wall
+ call wrtout(std_out,message,'COLL')
 
 end subroutine ifc_init
 !!***
