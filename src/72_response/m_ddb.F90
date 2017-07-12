@@ -1219,10 +1219,22 @@ subroutine rdddb9(acell,atifc,amu,ddb,&
  call ddb_hdr_open_read(ddb_hdr, filnam, ddbun, vrsddb, &
 &                       msym=msym, mband=mband)
 
- acell = ddb_hdr%acell
- rprim = ddb_hdr%rprim
  !nkpt = ddb_hdr%nkpt
  !ntypat = ddb_hdr%ntypat
+ nsym = ddb_hdr%nsym
+ acell = ddb_hdr%acell
+ rprim = ddb_hdr%rprim
+
+ amu(:) = ddb_hdr%amu(1:ntypat)
+ typat(:) = ddb_hdr%typat(1:natom)
+ zion(:) = ddb_hdr%zion(1:ntypat)
+ znucl(:) = ddb_hdr%znucl(1:ntypat)
+
+ symafm(:) = ddb_hdr%symafm(:)
+ symrel(:,:,:) = ddb_hdr%symrel(:,:,:)
+ tnons(:,:) = ddb_hdr%tnons(:,:)
+
+ xred(:,:) = ddb_hdr%xred(:,:)
 
  call ddb_hdr_free(ddb_hdr)
 
@@ -1713,6 +1725,7 @@ subroutine ddb_from_file(ddb,filename,brav,natom,natifc,atifc,crystal,comm,prtvo
  ddb_natom = ddb_hdr%natom
  ntypat = ddb_hdr%ntypat
  dimekb = ddb_hdr%psps%dimekb
+ mband = ddb_hdr%mband
 
  call ddb_hdr_free(ddb_hdr)
 
