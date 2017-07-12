@@ -48,4 +48,5 @@ tsmear 5.0d-3
 #%% description = 
 #%%   Al FCC, in conventional cell (4 atoms/cell).
 #%%   Preparation of the positron calculation, test#96.
+#%% topics = positron
 #%%<END TEST_INFO>

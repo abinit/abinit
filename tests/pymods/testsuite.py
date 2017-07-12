@@ -412,6 +412,7 @@ TESTCNF_KEYWORDS = {
 "input_gkk"      : (str       , ""   , "setup", "The input GKK file read by anaddb"),
 "system_xml"     : (str       , ""   , "setup","The system.xml file read by multibinit"),
 "coeff_xml"      : (str       , ""   , "setup","The coeff.xml file read by multibinit"),
+"md_hist"        : (str       , ""   , "setup","The hist file file read by multibinit"),
 # [files]
 "files_to_test"  : (_str2filestotest, "", "files", "List with the output files that are be compared with the reference results. Format:\n" +
                                                    "\t file_name, tolnlines = int, tolabs = float, tolrel = float [,fld_options = -medium]\n" +
@@ -2668,7 +2669,21 @@ class MultibinitTest(BaseTest):
 
             coeffxml_fname = self.cygwin_path(coeffxml_fname)
             t_stdin.write(coeffxml_fname + "\n") # 4) input for coefficients
-            
+        else:
+            coeffxml_fname = "no"
+            t_stdin.write(coeffxml_fname + "\n")
+
+        if self.md_hist:
+            md_hist_fname =  os.path.join(self.inp_dir,self.md_hist)
+            if not os.path.isfile(md_hist_fname):
+                self.exceptions.append(self.Error("%s no such xml file for coeffs: " % md_hist_fname))
+
+            md_hist_fname = self.cygwin_path(md_hist_fname)
+            t_stdin.write(md_hist_fname + "\n") # 5) input for coefficients
+        else:
+            md_hist_fname = "no"
+            t_stdin.write(md_hist_fname + "\n")
+
         return t_stdin.getvalue()
 
 
