@@ -243,6 +243,9 @@ subroutine nonlop_test(cg,eigen,istwfk,kg,kpt,mband,mcg,mgfft,mkmem,mpi_enreg,mp
    if(choice==51.or.choice==52)then
      ider_ffnl=1 ; idir_ffnl=4 ; cplex=2
    end if
+   if(choice==54)then
+     ider_ffnl=2 ; idir_ffnl=4 ; cplex=2
+   end if
    if(choice==8)then
      ider_ffnl=2 ; idir_ffnl=4
    end if

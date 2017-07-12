@@ -85,8 +85,7 @@ if enl!='sij' and enl!='dij':
   print >> sys.stderr, 'Error: wrong value for enl!'
   sys.exit()
 
-if (signsdfpt==2 and (test_type=='54k' or test_type=='54a')) or \
-   (signsdfpt==2 and (test_type=='55k' or test_type=='55s')):
+if (signsdfpt==2 and (test_type=='55k' or test_type=='55s')):
   print >> sys.stderr, 'Error: signsdfpt=%s not allowed with choice=%s!' %(signsdfpt,test_type)
   sys.exit()
 
