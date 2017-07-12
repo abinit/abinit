@@ -105,7 +105,7 @@
 !!      littlegroup_pert,localfilnam,localrdfile,localredirect,localwrfile
 !!      metric,mkrdim,outbsd,outgkk,outwf,pawang_free,pawang_init,pawcprj_alloc
 !!      pawcprj_copy,pawcprj_free,pawcprj_getdim,pawrhoij_alloc,pawrhoij_copy
-!!      pawrhoij_free,pawrhoij_nullify,prteigrs,psddb8,read_rhor,rf2_getidirs
+!!      pawrhoij_free,pawrhoij_nullify,prteigrs,read_rhor,rf2_getidirs
 !!      rotate_rho,set_pert_comm,set_pert_paw,setsym,setsymrhoij,status,symkpt
 !!      timab,transgrid,unset_pert_comm,unset_pert_paw,vlocalstr,wffclose
 !!      ddb_hdr_init, ddb_hdr_free, ddb_hdr_open_write

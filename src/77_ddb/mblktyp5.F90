@@ -39,8 +39,8 @@
 !!      mrgddb
 !!
 !! CHILDREN
-!!      ddb_compare,ddb_free,ddb_getdims,ddb_io_out,ddb_malloc,ddb_write_blok
-!!      ioddb8_in,pawtab_free,pawtab_nullify,psddb8,read_blok8,wrtout
+!!      ddb_free,ddb_malloc,ddb_write_blok
+!!      read_blok8,wrtout
 !!
 !! SOURCE
 
@@ -60,14 +60,11 @@ subroutine mblktyp5 (chkopt,ddbun,dscrpt,filnam,mddb,msym,nddb,vrsddb)
  use m_ddb
  use m_ddb_hdr
 
- use m_pawtab, only : pawtab_type,pawtab_nullify,pawtab_free
-
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'mblktyp5'
  use interfaces_14_hidewrite
- use interfaces_72_response
 !End of the abilint section
 
  implicit none
@@ -82,36 +79,21 @@ subroutine mblktyp5 (chkopt,ddbun,dscrpt,filnam,mddb,msym,nddb,vrsddb)
 !scalars
 !Define input and output unit numbers:
  integer,parameter :: ddbuntmp=3
- integer :: chkopt,choice,dimekb,dimekb_tmp,fullinit,fullmrgddb_init,iblok,iblok1,iblok2
- integer :: iddb,ii,intxc,intxc8,iscf,iscf8,ixc,ixc8,lmnmax,lmnmax_tmp,matom
- integer :: mband,mband_tmp,mblktyp,mblok,mkpt,mpert,msize,mtypat,natom
- integer :: natom8,nblok,nblok8,nblokt,nkpt,nkpt8,nspden,nspden8
- integer :: nspinor,nspinor8,nsppo8,nsppol,nsym,nsym8,ntypat,ntypat8,nunit
- integer :: occop8,occopt,temp,tmerge,usepaw,usepaw_tmp,useylm
- integer :: msym_tmp
+ integer :: chkopt,choice,dimekb,iblok,iblok1,iblok2
+ integer :: iddb,ii,lmnmax,matom
+ integer :: mband,mblktyp,mblok,mkpt,mpert,msize,mtypat
+ integer :: nblok,nblokt
+ integer :: temp,tmerge,usepaw
  integer :: ngfft(18),ngfft8(18)
- integer, allocatable :: symafm(:),symafm8(:)
- integer, allocatable :: symre8(:,:,:),symrel(:,:,:)
- integer,allocatable :: indlmn(:,:,:),lloc(:),mgblok(:)
- integer,allocatable :: nband(:),nband8(:),pspso(:),typat(:),typat8(:)
+ integer,allocatable :: lloc(:),mgblok(:)
  real(dp),parameter :: qtol=2.0d-8
- real(dp) :: diff,dilatmx,dilatmx8,ecut,ecut8,ecutsm,ecutsm8,kptnr8,kptnrm
- real(dp) :: pawecutdg,pawecutdg8,dfpt_sciss,dfpt_sciss8,tolwf8,tolwfr,tphysel
- real(dp) :: tphysel8,tsmear,tsmear8
+ real(dp) :: diff
  type(ddb_type) :: ddb
  type(ddb_hdr_type) :: ddb_hdr, ddb_hdr8
 !arrays
  real(dp) :: acell(3),acell8(3),rprim(3,3),rprim8(3,3)
- real(dp), allocatable :: tnons(:,:)
- real(dp), allocatable :: tnons8(:,:)
- real(dp),allocatable :: amu(:),amu8(:)
- real(dp),allocatable :: blkval2(:,:,:,:)
- real(dp),allocatable :: ekb(:,:),ekb8(:,:),kpt(:,:),kpt8(:,:),kpnt(:,:,:),occ(:),occ8(:)
- real(dp),allocatable :: spinat(:,:),spinat8(:,:),vel(:,:),wtk(:),wtk8(:)
- real(dp),allocatable :: xcart(:,:),xred(:,:),xred8(:,:),zion(:),zion8(:)
- real(dp),allocatable :: znucl(:),znucl8(:)
+ real(dp),allocatable :: blkval2(:,:,:,:),kpnt(:,:,:)
  character(len=500) :: message
- type(pawtab_type),allocatable :: pawtab(:),pawtab8(:)
 
 ! *********************************************************************
 
@@ -324,15 +306,8 @@ subroutine mblktyp5 (chkopt,ddbun,dscrpt,filnam,mddb,msym,nddb,vrsddb)
    ii = 1 !unit indicator of what will be merged
 !  Create a temporary file to decrease memory need.
    do iddb=1,nddb
-      call ddb_hdr_open_read(ddb_hdr8, filnam(iddb+1), ddbuntmp, vrsddb)
-!     choice=1
-!     call ioddb8_in (filnam(iddb+1),matom,mband,mkpt,msym,mtypat,&
-!&     ddbuntmp,vrsddb,acell,amu,dilatmx,ecut,ecutsm,intxc,iscf,ixc,kpt,&
-!&     kptnrm,natom,nband,ngfft,nkpt,nspden,nspinor,nsppol,nsym,ntypat,&
-!&     occ,occopt,pawecutdg,rprim,dfpt_sciss,spinat,symafm,symrel,tnons,tolwfr,&
-!&     tphysel,tsmear,typat,usepaw,wtk,xred,zion,znucl)
-!     call psddb8 (choice,dimekb,ekb,fullinit,indlmn,lmnmax,&
-!&     nblok,ntypat,ddbuntmp,pawtab,pspso,usepaw,useylm,vrsddb)
+     call ddb_hdr_open_read(ddb_hdr8, filnam(iddb+1), ddbuntmp, vrsddb)
+
      do iblok=1,ddb_hdr8%nblok
        if(mgblok(ii)==1) then
          call read_blok8(ddb,ii,ddb_hdr8%nband(1),mpert,&

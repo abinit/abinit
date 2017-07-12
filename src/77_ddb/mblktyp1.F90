@@ -41,8 +41,8 @@
 !!      mrgddb
 !!
 !! CHILDREN
-!!      ddb_compare,ddb_free,ddb_getdims,ddb_io_out,ddb_malloc,ddb_write_blok
-!!      ioddb8_in,pawtab_free,pawtab_nullify,psddb8,read_blok8,wrtout
+!!      ddb_free,ddb_malloc,ddb_write_blok
+!!      read_blok8,wrtout
 !!
 !! SOURCE
 
@@ -63,14 +63,11 @@ subroutine mblktyp1(chkopt,ddbun,dscrpt,filnam,mddb,msym,nddb,vrsddb)
  use m_ddb
  use m_ddb_hdr
 
- use m_pawtab, only : pawtab_type,pawtab_nullify,pawtab_free
-
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'mblktyp1'
  use interfaces_14_hidewrite
- use interfaces_72_response
 !End of the abilint section
 
  implicit none
@@ -85,18 +82,13 @@ subroutine mblktyp1(chkopt,ddbun,dscrpt,filnam,mddb,msym,nddb,vrsddb)
 !Local variables -------------------------
 !scalars
 !Define input and output unit numbers:
- integer :: choice,dimekb,dimekb_tmp,fullinit,fullmrgddb_init,iblok,iblok1,iblok2
- integer :: iddb,ii,intxc,intxc8,iscf,iscf8,ixc,ixc8,lmnmax,lmnmax_tmp,matom
- integer :: mband,mband_tmp,mblktyp,mblktyp_tmp,mblok,mkpt,mpert,msize,mtypat,natom
- integer :: natom8,nblok,nblok8,nblokt,nkpt,nkpt8,nq,nspden,nspden8
- integer :: nspinor,nspinor8,nsppo8,nsppol,nsym,nsym8,ntypat,ntypat8,nunit
- integer :: occop8,occopt,tmerge,usepaw,usepaw_tmp,useylm
- integer :: msym_tmp
+ integer :: choice,dimekb,iblok,iblok1,iblok2
+ integer :: iddb,ii,lmnmax,matom
+ integer :: mband,mblktyp,mblok,mkpt,mpert,msize,mtypat
+ integer :: nblok,nblokt,nq
+ integer :: tmerge,usepaw
  integer :: ngfft(18),ngfft8(18)
- integer, allocatable :: symafm(:),symafm8(:)
- integer, allocatable :: symre8(:,:,:),symrel(:,:,:)
- integer,allocatable :: indlmn(:,:,:),mgblok(:)!,lloc(:)
- integer,allocatable :: nband(:),nband8(:),pspso(:),typat(:),typat8(:)
+ integer,allocatable :: mgblok(:)!,lloc(:)
  real(dp),parameter :: qtol=2.0d-8
  real(dp) :: diff
  type(ddb_type) :: ddb
@@ -343,11 +335,10 @@ subroutine mblktyp1(chkopt,ddbun,dscrpt,filnam,mddb,msym,nddb,vrsddb)
 !  Write the whole database
    call wrtout(std_out,' write the DDB ','COLL')
    choice=2
-   nunit=ddbun
    do iblok=1,nblok+tmerge
      if(mgblok(iblok)==0)then
        write(std_out,'(a,i4)' ) ' Write bloc number',iblok
-       call ddb_write_blok(ddb,iblok,choice,ddb_hdr%nband(1),mpert,msize,ddb_hdr%nkpt,nunit)
+       call ddb_write_blok(ddb,iblok,choice,ddb_hdr%nband(1),mpert,msize,ddb_hdr%nkpt,ddbun)
      else
        write(message, '(a,i4,a)' )&
 &       ' Bloc number',iblok,' was merged, so do not write it'
@@ -358,11 +349,9 @@ subroutine mblktyp1(chkopt,ddbun,dscrpt,filnam,mddb,msym,nddb,vrsddb)
 !  Also write summary of bloks at the end
    write(ddbun, '(/,a)' )' List of bloks and their characteristics '
    choice=3
-   nunit=ddbun
    do iblok=1,nblok+tmerge
      if(mgblok(iblok)==0)then
-       !call ddb_write_blok(ddb,iblok,choice,nband(1),mpert,msize,nkpt,nunit)
-       call ddb_write_blok(ddb,iblok,choice,ddb_hdr%nband(1),mpert,msize,ddb_hdr%nkpt,nunit)
+       call ddb_write_blok(ddb,iblok,choice,ddb_hdr%nband(1),mpert,msize,ddb_hdr%nkpt,ddbun)
      end if
    end do
 

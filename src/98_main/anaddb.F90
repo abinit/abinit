@@ -24,7 +24,7 @@
 !! CHILDREN
 !!      abi_io_redirect,abimem_init,abinit_doctor,anaddb_dtset_free,anaddb_init
 !!      asrq0_apply,asrq0_free,crystal_free,ddb_diel,ddb_elast,ddb_free
-!!      ddb_from_file,ddb_getdims,ddb_internalstr,ddb_piezo,dfpt_phfrq
+!!      ddb_from_file,ddb_internalstr,ddb_piezo,dfpt_phfrq
 !!      dfpt_prtph,dfpt_symph,elast_ncwrite,electrooptic,elphon,flush_unit
 !!      gruns_anaddb,gtblk9,gtdyn9,harmonic_thermo,herald,ifc_free,ifc_init
 !!      ifc_outphbtrap,ifc_print,ifc_speedofsound,ifc_write,instrng,int2char4
@@ -51,6 +51,7 @@ program anaddb
  use m_errors
  use m_ifc
  use m_ddb
+ use m_ddb_hdr
  use m_phonons
  use m_gruneisen
  use iso_c_binding
@@ -117,6 +118,7 @@ program anaddb
  type(phonon_dos_type) :: Phdos
  type(ifc_type) :: Ifc,Ifc_coarse
  type(ddb_type) :: ddb
+ type(ddb_hdr_type) :: ddb_hdr
  type(asrq0_t) :: asrq0
  type(crystal_t) :: Crystal
 #ifdef HAVE_NETCDF
@@ -169,7 +171,14 @@ program anaddb
 !******************************************************************
 
  ! Must read natom from the DDB before being able to allocate some arrays needed for invars9
- call ddb_getdims(dimekb,filnam(3),lmnmax,mband,mtyp,msym,natom,nblok,nkpt,ntypat,ddbun,usepaw,DDB_VERSION,comm)
+ call ddb_hdr_open_read(ddb_hdr,filnam(3),ddbun,DDB_VERSION, &
+&                       dimonly=1)
+
+ natom = ddb_hdr%natom
+ mtyp = ddb_hdr%mblktyp
+ usepaw = ddb_hdr%usepaw
+
+ call ddb_hdr_free(ddb_hdr)
 
  mpert=natom+6
  msize=3*mpert*3*mpert; if (mtyp==3) msize=msize*3*mpert
@@ -216,6 +225,9 @@ program anaddb
  call wrtout(std_out,message,'COLL')
  call wrtout(ab_out,message,'COLL')
 
+ ! DEBUG
+ write(*,*) 'anaddb: natom=', natom
+ ! END DEBUG
  call ddb_from_file(ddb,filnam(3),inp%brav,natom,inp%natifc,inp%atifc,Crystal,comm, prtvol=inp%prtvol)
  nsym = Crystal%nsym
 
@@ -536,7 +548,18 @@ program anaddb
  if (inp%thmflag>=3 .and. inp%thmflag<=8) then
 
 !  Obtain the number of bloks contained in this file.
-   call ddb_getdims(dimekb,filnam(5),lmnmax,mband,mtyp,msym,natom,nblok2,nkpt,ntypat,ddbun,usepaw,DDB_VERSION,comm)
+   call ddb_hdr_open_read(ddb_hdr,filnam(5),ddbun,DDB_VERSION,&
+&                         dimonly=1)
+
+   mband = ddb_hdr%mband
+   msym = ddb_hdr%msym
+   natom = ddb_hdr%natom
+   nblok2 = ddb_hdr%nblok
+   nkpt = ddb_hdr%nkpt
+   ntypat = ddb_hdr%ntypat
+   usepaw = ddb_hdr%usepaw
+
+   call ddb_hdr_free(ddb_hdr)
 
    !write(std_out,*)'Entering thmeig: '
    elph_base_name=trim(filnam(2))//"_ep"
@@ -545,9 +568,9 @@ program anaddb
 &   ntypat,ddb%rprim,inp%telphint,inp%temperinc,&
 &   inp%tempermin,inp%thmflag,Crystal%typat,Crystal%xred,&
 &   ddb,ddbun,dimekb,filnam(5),ab_out,& !new
-&  lmnmax,msym,nblok2,Crystal%nsym,ddb%occopt,Crystal%symrel,Crystal%tnons,usepaw,Crystal%zion,& !new
-&  Crystal%symrec,inp%natifc,Crystal%gmet,ddb%gprim,Crystal%indsym,Crystal%rmet,inp%atifc,& !new
-&  Crystal%ucvol,Crystal%xcart,comm) !new
+&   msym,nblok2,Crystal%nsym,ddb%occopt,Crystal%symrel,Crystal%tnons,usepaw,Crystal%zion,& !new
+&   Crystal%symrec,inp%natifc,Crystal%gmet,ddb%gprim,Crystal%indsym,Crystal%rmet,inp%atifc,& !new
+&   Crystal%ucvol,Crystal%xcart,comm) !new
  end if
 
 !**********************************************************************

@@ -195,7 +195,6 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  use interfaces_64_psp
  use interfaces_65_paw
  use interfaces_67_common
- use interfaces_72_response
  use interfaces_79_seqpar_mpi
  use interfaces_95_drive, except_this_one => gstate
 !End of the abilint section
