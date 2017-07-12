@@ -7,6 +7,7 @@ import sys
 import os
 import yaml
 import re
+import string
 import argparse
 
 # We don't install with setup.py hence we have to add the directory [...]/abinit/doc to $PYTHONPATH
@@ -156,17 +157,15 @@ def reformat_namelist(namelist):
     if ',' in one_name:
       name_initials = one_name.split(',',1)
       new_name+= name_initials[1].strip()+" "+name_initials[0].strip()
-      if i==len(names)-2:
-        new_name+=" and "
-      elif i==len(names)-1:
-        if flag_editor==1:
-          new_name+=" (Eds.)"
-      else:
-        new_name+=", "
     else:
       new_name+=one_name.strip()
-      if i!=len(names)-1:
-        new_name+=', '
+    if i==len(names)-2:
+      new_name+=" and "
+    elif i==len(names)-1:
+      if flag_editor==1:
+        new_name+=" (Eds.)"
+    else:
+      new_name+=", "
   newnamelist=new_name+","
   return newnamelist
 
@@ -285,7 +284,7 @@ for item in bibtex_items:
       flag_parenthesis=0
       newline=prev+','
     else:
-      newline=prev+line.strip()
+      newline=prev+" "+line.strip()
     flag_parenthesis=0
    
     len_new=len(newline)
@@ -917,45 +916,71 @@ f_txt.write(lines_txt)
 f_txt.close()
 print("File %s has been written ..." %file_txt)
 
+################################################################################
 #Global operation on the bibliography html file : conversion from bibtex notation to html notation.
-#This should cover most of the cases.
+#This should cover most of the cases. 
+
+#Subscripts
+for i in string.digits:
+  string_old='$_'+i+'$'
+  string_new="<sub>"+i+"</sub>"
+  bib_content['bibliography']=bib_content['bibliography'].replace(string_old,string_new)
+
+#Greek letters
+list_signs=["alpha","beta","gamma","epsilon","delta","zeta","eta","theta","iota","kappa","lambda","mu","nu","xi","omicron","pi","rho","sigma","tau","upsilon","phi","chi","psi","omega"]
+list_signs_uplower=[]
+for (i,item) in enumerate(list_signs):
+  list_signs_uplower.append(item[0].upper()+item[1:])
+list_signs.extend(list_signs_uplower)
+for i in list_signs:
+  string_old='$\\'+i+'$'  
+  string_new='&'+i+';'  
+  bib_content['bibliography']=bib_content['bibliography'].replace(string_old,string_new)
+
+#Accented characters
 #Note that the backslash is a special character in Python, so the first string is prepended with 'r' to avoid special treatment.
-list_vowels=["a","e","i","o","u","y"]
+list_vowels=["a","e","i","o","u","y","A","E","I","O","U","Y"]
 list_signs_in=['"',"'","`","^","~"]
 list_signs_out=["uml","acute","grave","circ","tilde"]
 for vowel in list_vowels:
-  for i in range(0,4):
-    string_1= "{\\" + list_signs_in[i] + vowel + "}"
-    string_2= "\\" + list_signs_in[i] + vowel
-    string_3= "\\" + list_signs_in[i] + "{" + vowel + "}" 
-    string_final= r"&%s%s;" %(vowel,list_signs_out[i])
+  for (i,item) in enumerate(list_signs_in):
+    string_1= "{\\" + item + vowel + "}"
+    string_2= "\\" + item + vowel
+    string_3= "\\" + item + "{" + vowel + "}" 
+    string_final= r"&%s%s;" %(vowel,item)
     bib_content['bibliography']=bib_content['bibliography'].replace(string_1,string_final)
     bib_content['bibliography']=bib_content['bibliography'].replace(string_2,string_final)
     bib_content['bibliography']=bib_content['bibliography'].replace(string_3,string_final)
-    #DEBUG
-    print("")
-    print(string_1)
-    print(string_2)
-    print(string_3)
-    print(string_final)
-    print("")
-    #ENDDEBUG
 
 bib_content['bibliography']=bib_content['bibliography'].replace(r"{\~n}","&ntilde;")
 bib_content['bibliography']=bib_content['bibliography'].replace(r"\~n","&ntilde;")
 bib_content['bibliography']=bib_content['bibliography'].replace(r"\~{n}","&ntilde;")
+bib_content['bibliography']=bib_content['bibliography'].replace(r"{\'n}","&#324;")
+bib_content['bibliography']=bib_content['bibliography'].replace(r"\'n","&#324;")
+bib_content['bibliography']=bib_content['bibliography'].replace(r"\'{n}","&#324;")
 
 bib_content['bibliography']=bib_content['bibliography'].replace(r"{\c c}","&ccedil;")
 bib_content['bibliography']=bib_content['bibliography'].replace(r"\c c","&ccedil;")
 bib_content['bibliography']=bib_content['bibliography'].replace(r"\c{c}","&ccedil;")
 
-bib_content['bibliography']=bib_content['bibliography'].replace('"{','"')
-bib_content['bibliography']=bib_content['bibliography'].replace('}"','"')
+#Get rid of uneeded parentheses. One is however left with the {XYZ..} case, that should be handled with a regular expression. (TO BE DONE)
+for i in string.letters:
+  string_old='{'+i+'}'
+  string_new=i
+  bib_content['bibliography']=bib_content['bibliography'].replace(string_old,string_new)
+#Here, do it on a case-by-case basis. Very unsatisfactory...
+list_signs=["ABINIT","AIP","ATOMPAW","CPU","DFT","DMFT","ELPA","ESPRESSO","GGA","GPU","GW","III","LDA","MO","PA","PAW","QE","QMR","QUANTUM","RPA","SIAM","VESTA","XML"]
+for i in list_signs:
+  string_old='{'+i+'}'
+  string_new=i
+  bib_content['bibliography']=bib_content['bibliography'].replace(string_old,string_new)
+
+bib_content['bibliography']=bib_content['bibliography'].replace("--","&ndash;")
 
 #Suppose all remaining parenthesis are present to avoid BibTex to switch automatically from uppercase to lowercase,
 #which will not happen in HTML...
-bib_content['bibliography']=bib_content['bibliography'].replace(' {',' ')
-bib_content['bibliography']=bib_content['bibliography'].replace('} ',' ')
+bib_content['bibliography']=bib_content['bibliography'].replace('"{','"')
+bib_content['bibliography']=bib_content['bibliography'].replace('}"','"')
 
 ################################################################################
 # Generate the html files in the bibliography directory
