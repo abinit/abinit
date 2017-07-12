@@ -226,7 +226,7 @@ program anaddb
  call wrtout(ab_out,message,'COLL')
 
  ! DEBUG
- write(*,*) 'anaddb: natom=', natom
+ !write(*,*) 'anaddb: natom=', natom
  ! END DEBUG
  call ddb_from_file(ddb,filnam(3),inp%brav,natom,inp%natifc,inp%atifc,Crystal,comm, prtvol=inp%prtvol)
  nsym = Crystal%nsym

@@ -178,7 +178,24 @@ subroutine thmeig(g2fsmear,acell,amu,anaddb_dtset,d2asr,&
  write(std_out, '(a)' )  '- thmeig: Initialize the second-order electron-phonon file with name :'
  write(std_out, '(a,a)' )'-         ',trim(filnam5)
 
- call ddb_hdr_open_read(ddb_hdr, filnam5, ddbun, DDB_VERSION, msym=msym)
+ call ddb_hdr_open_read(ddb_hdr, filnam5, ddbun, DDB_VERSION, &
+&                       msym=msym)
+
+ !nkpt = ddb_hdr%nkpt
+ !ntypat = ddb_hdr%ntypat
+ nsym = ddb_hdr%nsym
+ acell = ddb_hdr%acell
+ rprim = ddb_hdr%rprim
+
+ amu(:) = ddb_hdr%amu(1:ntypat)
+ typat(:) = ddb_hdr%typat(1:natom)
+ zion(:) = ddb_hdr%zion(1:ntypat)
+
+ symafm(:) = ddb_hdr%symafm(:)
+ symrel(:,:,:) = ddb_hdr%symrel(:,:,:)
+ tnons(:,:) = ddb_hdr%tnons(:,:)
+
+ xred(:,:) = ddb_hdr%xred(:,:)
 
 !Compute different matrices in real and reciprocal space, also
 !checks whether ucvol is positive.
@@ -365,6 +382,9 @@ subroutine thmeig(g2fsmear,acell,amu,anaddb_dtset,d2asr,&
 
 !!Prepare the reading of the EIG2 files
  call ddb_hdr_open_read(ddb_hdr, filnam5, ddbun, DDB_VERSION, msym=msym)
+
+ amu(:) = ddb_hdr%amu(1:ntypat)
+
  call ddb_hdr_free(ddb_hdr)
 
 !iqpt2 will be the index of the q point bloks inside the EIG2 file
