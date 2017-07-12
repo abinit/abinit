@@ -1726,6 +1726,7 @@ subroutine ddb_from_file(ddb,filename,brav,natom,natifc,atifc,crystal,comm,prtvo
  ntypat = ddb_hdr%ntypat
  dimekb = ddb_hdr%psps%dimekb
  mband = ddb_hdr%mband
+ mtyp = ddb_hdr%mblktyp
 
  call ddb_hdr_free(ddb_hdr)
 
