@@ -5,9 +5,8 @@
 !! m_harmonics_term
 !!
 !! FUNCTION
-!! Module with structure and tools for the harmonics terms
-!! Compute strain phonon coupling by finite differences
-!! Return the effective_potential with the third order
+!! Module with datatype and tools for the harmonics terms
+!!
 !! COPYRIGHT
 !! Copyright (C) 2010-2017 ABINIT group (AM)
 !! This file is distributed under the terms of the
@@ -29,13 +28,17 @@ module m_harmonics_terms
  use defs_basis
  use m_errors
  use m_profiling_abi
-
+ use m_phonon_supercell,only: getPBCIndexes_supercell
+ use m_xmpi,only : xmpi_sum
  use m_ifc
 
  implicit none
 
  public :: harmonics_terms_init
  public :: harmonics_terms_free
+ public :: harmonics_terms_applySumRule
+ public :: harmonics_terms_evaluateIFC
+ public :: harmonics_terms_evaluateElastic
  public :: harmonics_terms_setEffectiveCharges
  public :: harmonics_terms_setDynmat
  public :: harmonics_terms_setInternalStrain
@@ -46,45 +49,45 @@ module m_harmonics_terms
 !! harmonics_terms_type
 !!
 !! FUNCTION
-!! structure for harmonic part of effective potential.
+!! datatype for harmonic part of effective potential.
 !!
 !! SOURCE
 
  type, public :: harmonics_terms_type
 
    integer :: nqpt
-!  Number of qpoints
+!   Number of qpoints
 
    real(dp) :: epsilon_inf(3,3)                     
-!     epsilon_inf(3,3)
-!     Dielectric tensor
+!   epsilon_inf(3,3)
+!   Dielectric tensor
 
    real(dp) :: elastic_constants(6,6)
-!     elastic_constant(6,6)
-!     Elastic tensor Hartree
+!   elastic_constant(6,6)
+!   Elastic tensor Hartree
 
    real(dp), allocatable :: strain_coupling(:,:,:)    
-!    strain_coupling(6,3,natom)
-!    internal strain tensor 
+!   strain_coupling(6,3,natom)
+!   internal strain tensor 
 
    real(dp), allocatable :: zeff(:,:,:)             
-!     zeff(3,3,natom) Effective charges
+!   zeff(3,3,natom) Effective charges
 
    type(ifc_type) :: ifcs
-!     type with ifcs constants (short + ewald) 
-!     also contains the number of cell and the indexes
+!   type with ifcs constants (short + ewald) 
+!   also contains the number of cell and the indexes
  
    real(dp), allocatable :: qpoints(:,:) 
-!     qph1l(3,nqpt)
-!     List of qpoints wavevectors
+!   qph1l(3,nqpt)
+!   List of qpoints wavevectors
 
    real(dp), allocatable :: dynmat(:,:,:,:,:,:)
-!     dynmat(2,3,natom,3,natom,nqpt) 
-!     dynamical matrix for each q points
+!   dynmat(2,3,natom,3,natom,nqpt) 
+!   dynamical matrix for each q points
 
    real(dp), allocatable :: phfrq(:,:)
-!     phfrq(3*natom,nqpt)
-!     array with all phonons frequencies for each q points in Hartree/cm
+!   phfrq(3*natom,nqpt)
+!   array with all phonons frequencies for each q points in Hartree/cm
 
  end type harmonics_terms_type
 !!***
@@ -98,14 +101,23 @@ CONTAINS  !=====================================================================
 !! harmonics_terms_init
 !!
 !! FUNCTION
-!! Initialize scell structure, from unit cell vectors, qpoint chosen, and atoms
+!! Initialize harmonics_terms datatype
 !!
 !! INPUTS
-!! natom  = number of atoms in primitive cell
-!! nrpt   = number of cell into ifc
+!! ifc<type(ifc_type)> = interatomic forces constants
+!! natom = number of atoms in primitive cell
+!! nrpt = number rpt (cell) in the ifc 
+!! dynmat(2,3,natom,3,natom,3,nqpt) = optional, dynamical matricies for each q-point
+!! epsilon_inf(3,3) = optional, dielectric tensor
+!! elastic_constant(6,6) = optional, elastic constant
+!! strain_coupling(6,3,natom) = optional, internal strain coupling parameters
+!! nqpt = optional, number of q-points
+!! phfrq(3*natom,nqpt) = optional,phonons frequencies for each q points in Hartree/cm
+!! qpoints(3,nqpt) = list of qpoints wavevectors
+!! zeff(3,3,natom) = optional,effective charges
 !!
 !! OUTPUT
-!! eff_pot = effective_potential structure to be initialized
+!! harmonics_terms<type(harmonics_terms_type)> = harmonics_terms datatype to be initialized
 !!
 !! PARENTS
 !!      m_effective_potential
@@ -235,7 +247,7 @@ subroutine harmonics_terms_init(harmonics_terms,ifcs,natom,nrpt,&
  ABI_ALLOCATE(harmonics_terms%strain_coupling,(6,3,natom))
  harmonics_terms%strain_coupling = zero
  if (present(strain_coupling)) then
-   call harmonics_terms_setInternalStrain(strain_coupling,harmonics_terms,natom)
+   call harmonics_terms_setInternalStrain(harmonics_terms,natom,strain_coupling)
  end if
 
 end subroutine harmonics_terms_init 
@@ -248,12 +260,13 @@ end subroutine harmonics_terms_init
 !! harmonics_terms_free
 !!
 !! FUNCTION
-!! deallocate all dynamic memory for this harmonic structure
+!! deallocate all dynamic memory for this harmonic datatype
 !!
 !! INPUTS
+!! harmonics_terms<type(harmonics_terms_type)> = harmonics_terms datatype to be free
 !!
 !! OUTPUT
-!! harmonics_terms = supercell structure with data to be output
+!! harmonics_terms<type(harmonics_terms_type)> = harmonics_terms datatype to be free
 !!
 !! PARENTS
 !!      m_effective_potential,m_harmonics_terms
@@ -330,7 +343,7 @@ end subroutine harmonics_terms_free
 !! strain_coupling(6,3,natom) = internal strain coupling parameters
 !!
 !! OUTPUT
-!! harmonics_terms = supercell structure with data to be output
+!! harmonics_terms<type(harmonics_terms_type)> = harmonics_terms datatype
 !!
 !! PARENTS
 !!      m_effective_potential,m_harmonics_terms
@@ -339,7 +352,7 @@ end subroutine harmonics_terms_free
 !!
 !! SOURCE
  
-subroutine harmonics_terms_setInternalStrain(strain_coupling,harmonics_terms,natom)
+subroutine harmonics_terms_setInternalStrain(harmonics_terms,natom,strain_coupling)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -396,7 +409,7 @@ end subroutine harmonics_terms_setInternalStrain
 !! zeff(3,natom) = effective charges
 !!
 !! OUTPUT
-!! harmonics_terms = supercell structure with data to be output
+!! harmonics_terms<type(harmonics_terms_type)> = harmonics_terms datatype
 !!
 !! PARENTS
 !!      m_effective_potential,m_harmonics_terms
@@ -454,7 +467,7 @@ end subroutine harmonics_terms_setEffectiveCharges
 !! harmonics_terms_setDynmat
 !!
 !! FUNCTION
-!! Set the effectives charges to the harmonics_terms
+!! Set the dynamical matricies to the harmonics_terms
 !!
 !! INPUTS
 !! natom = number of atoms
@@ -464,7 +477,7 @@ end subroutine harmonics_terms_setEffectiveCharges
 !! qpoints(3,nqpt) = list of qpoints
 !!
 !! OUTPUT
-!! harmonics_terms = supercell structure with data to be output
+!! harmonics_terms<type(harmonics_terms_type)> = harmonics_terms datatype
 !!
 !! PARENTS
 !!      m_effective_potential,m_harmonics_terms
@@ -549,6 +562,355 @@ subroutine harmonics_terms_setDynmat(dynmat,harmonics_terms,natom,nqpt,phfrq,qpo
   harmonics_terms%qpoints(:,:) = qpoints(:,:)
 
 end subroutine harmonics_terms_setDynmat
+!!***
+!!****f* m_harmonics_terms/harmonics_terms_evaluateIFC
+!! NAME
+!!  harmonics_terms_evaluateIFC
+!!
+!! FUNCTION
+!!  This fonction compute the contribution of the ifc harmonic part of 
+!!  the energy and forces.
+!!
+!! INPUTS
+!!  atmfrc(3,natom_uc,3,natom_uc,nrpt) = atomic force constants
+!!  disp(3,natom_sc) = atomics displacement between configuration and the reference
+!!  ncell = total number of cell to treat
+!!  nrpt  = total number of rpt to treat
+!!  cells(ncell) = number of the cells into the supercell (1,2,3,4,5)
+!!  natom_sc = number of atoms in the supercell
+!!  natom_uc = number of atoms in the unit cell
+!!  nrpt  = number of rpt
+!!  rpt(nrpt) = index of rpt in  atmfrc (6th dimension)
+!!  index_cells(3,ncell) = indexes of the cells into  supercell (-1 -1 -1 ,...,1 1 1)
+!!  index_rpt(3,nrpt)  = indexes of the rpt into atmfrc
+!!  comm=MPI communicator
+!!
+!! OUTPUT
+!!   energy = contribution of the ifc to the energy
+!!   fcart(3,natom) = contribution of the ifc to the forces
+!!
+!! PARENT
+!!   effective_potential_evaluate
+!!
+!! CHILDREN
+!!
+!! PARENTS
+!!      m_harmonics_terms
+!!
+!! CHILDREN
+!!      asrq0_free,effective_potential_effpot2ddb,invars9,mkphbs
+!!
+!! SOURCE
+
+subroutine harmonics_terms_evaluateIFC(atmfrc,disp,energy,fcart,cells,natom_sc,natom_uc,ncell,nrpt,&
+&                                      index_cells,index_rpt,sc_size,rpt,comm)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'harmonics_terms_evaluateIFC'
+!End of the abilint section
+
+ implicit none
+
+!Arguments -------------------------------
+! scalars
+  real(dp),intent(out) :: energy
+  integer,intent(in) :: natom_uc,natom_sc,ncell,nrpt
+  integer,intent(in) :: comm
+! array
+  integer,intent(in) :: sc_size(3)
+  integer,intent(in) ::  index_rpt(3,nrpt),cells(ncell),index_cells(ncell,3),rpt(nrpt)
+  real(dp),intent(in) :: atmfrc(3,natom_uc,3,natom_uc,nrpt)
+  real(dp),intent(in) :: disp(3,natom_sc)
+  real(dp),intent(out) :: fcart(3,natom_sc)
+
+!Local variables-------------------------------
+! scalar
+  integer :: i1,i2,i3,ia,ib,icell,ierr,irpt,irpt_tmp,ii,jj,kk,ll
+  integer :: mu,nu
+  real(dp):: disp1,disp2,ifc,tmp,tmp2
+! array
+  integer :: cell_atom2(3)
+  character(500) :: msg
+
+! *************************************************************************
+
+  if (any(sc_size <= 0)) then
+    write(msg,'(a,a)')' sc_size can not be inferior or equal to zero'
+    MSG_ERROR(msg)
+  end if
+
+! Initialisation of variables
+  energy   = zero
+  fcart(:,:) = zero
+  do icell = 1,ncell
+    ii = (cells(icell)-1)*natom_uc
+    i1=index_cells(icell,1); i2=index_cells(icell,2); i3=index_cells(icell,3)
+    do irpt_tmp = 1,nrpt
+      irpt = rpt(irpt_tmp)
+!     do irpt = 1,eff_pot%harmonics_terms%ifcs%nrpt
+!     get the cell of atom2  (0 0 0, 0 0 1...)
+      cell_atom2(1) = (i1-1) + index_rpt(1,irpt)
+      cell_atom2(2) = (i2-1) + index_rpt(2,irpt)
+      cell_atom2(3) = (i3-1) + index_rpt(3,irpt)
+      call getPBCIndexes_supercell(cell_atom2(1:3),sc_size(1:3))
+!     index of the second atom in the displacement array
+      jj = cell_atom2(1)*sc_size(2)*sc_size(3)*natom_uc+&
+&          cell_atom2(2)*sc_size(3)*natom_uc+&
+&          cell_atom2(3)*natom_uc
+      do ib = 1, natom_uc
+        ll = jj + ib
+        do nu=1,3
+          disp2 = disp(nu,ll)
+          do ia = 1, natom_uc
+            kk = ii + ia
+            do mu=1,3
+              disp1 = disp(mu,kk)
+              ifc = atmfrc(mu,ia,nu,ib,irpt)
+              if(abs(ifc) > tol8)then
+                tmp = disp2 * ifc
+!               accumule energy
+                tmp2 = disp1*tmp
+                energy =  energy + tmp2
+!               accumule forces
+                fcart(mu,kk) = fcart(mu,kk) + tmp
+              end if
+            end do
+          end do
+        end do
+      end do
+    end do
+  end do
+
+  energy = half * energy
+
+! MPI_SUM
+  call xmpi_sum(energy, comm, ierr)
+  call xmpi_sum(fcart , comm, ierr)
+
+end subroutine harmonics_terms_evaluateIFC
+!!***
+
+!!****f* m_harmonics_terms/harmonics_terms_evaluateElastic
+!! NAME
+!!  harmonics_terms_evaluateElastic
+!!
+!! FUNCTION
+!! Compute the energy, forces and stresses related to the application of strain
+!!
+!! INPUTS
+!!  elastic_constants(6,6) = elastic constants in Hartree
+!!  disp(3,natom_sc) = atomics displacement between configuration and the reference
+!!  natom = number of atoms in the supercell
+!!  natom_uc = number of atoms in the unit cell
+!!  ncell = total number of cell
+!!  strain_coupling(6,3,natom) = internal strain coupling parameters 
+!!  strain(6) = strain between configuration and the reference 
+!!
+!! OUTPUT
+!!   energy = contribution to the energy
+!!   fcart(3,natom) = contribution to the forces
+!!   strten(6) = contribution to the stress tensor
+!!
+!! PARENTS
+!!      m_harmonics_terms
+!!
+!! CHILDREN
+!!      asrq0_free,effective_potential_effpot2ddb,invars9,mkphbs
+!!
+!! SOURCE
+!!
+subroutine harmonics_terms_evaluateElastic(elastic_constants,disp,energy,fcart,natom,natom_uc,ncell,&
+&                                          strain_coupling,strten,strain)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'harmonics_terms_evaluateElastic'
+!End of the abilint section
+
+ real(dp),intent(out):: energy
+ integer, intent(in) :: natom,natom_uc,ncell
+! array
+ real(dp),intent(in) :: elastic_constants(6,6),strain_coupling(6,3,natom)
+ real(dp),intent(out):: strten(6)
+ real(dp),intent(out):: fcart(3,natom)
+ real(dp),intent(in) :: disp(3,natom)
+ real(dp),intent(in) :: strain(6)
+
+ !Local variables-------------------------------
+! scalar
+ integer :: ia,ii,mu,alpha,beta
+ real(dp):: cij
+! array
+! *************************************************************************
+
+ energy = zero
+ fcart = zero
+ strten = zero
+
+!1- Part due to elastic constants
+ do alpha=1,6
+   do beta=1,6
+     cij = ncell*elastic_constants(alpha,beta)
+     energy = energy + half*cij*strain(alpha)*strain(beta)
+     strten(alpha) = strten(alpha) + cij*strain(beta)
+   end do
+ end do
+ 
+!2-Part due to the internat strain
+ ii = 1
+ do ia = 1,natom
+   do mu = 1,3
+     do alpha=1,6
+       cij = strain_coupling(alpha,mu,ii)
+!      Accumulte for this atom
+       energy = energy + half*cij*strain(alpha)*disp(mu,ia)
+       fcart(mu,ia)  = fcart(mu,ia)  + cij*strain(alpha)
+       strten(alpha) = strten(alpha) + cij*disp(mu,ia)
+     end do
+   end do
+   ii = ii +1
+!  Reset to 1 if the number of atoms is superior than in the initial cell
+   if(ii==natom_uc+1) ii = 1
+ end do
+
+end subroutine  harmonics_terms_evaluateElastic
+!!***
+
+!****f* m_harmonics_terms/harmonics_terms_applySumRule
+!!
+!! NAME
+!! harmonics_terms_applySumRule
+!!
+!! FUNCTION
+!! Apply the acoustic sum rule on the inter-atomic force constants
+!!
+!! INPUTS
+!! ifc<type(ifc_type)> = interatomic forces constants
+!! asr   = acoustic sum rule option (see anaddb help)
+!! natom = number of atoms
+!! option = optional if |no present asr is done on total ifc
+!!                       |present and 1 asr is done on short part
+!!                       |present and 2 asr is done on ewald part
+!!
+!! OUTPUT
+!! ifc<type(ifc_type)> = interatomic forces constants
+!!
+!! PARENTS
+!!      compute_anharmonics,m_harmonics_terms
+!!
+!! CHILDREN
+!!      asrq0_free,effective_potential_effpot2ddb,invars9,mkphbs
+!!
+!! SOURCE
+
+subroutine harmonics_terms_applySumRule(asr,ifc,natom,option)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'harmonics_terms_applySumRule'
+ use interfaces_14_hidewrite
+!End of the abilint section
+
+  implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: asr
+ integer,intent(in) :: natom
+ integer,optional,intent(in) :: option
+!array
+ type(ifc_type),target,intent(inout) :: ifc
+!Local variables-------------------------------
+!scalar
+ integer :: ia,ib,irpt,irpt_ref
+ integer :: mu,nu
+ real(dp) :: sum
+ character(500) :: msg
+!array
+ real(dp),pointer :: atmfrc(:,:,:,:,:,:)
+! *************************************************************************
+
+ irpt_ref = 0
+! Found the cell of reference
+ do irpt = 1,ifc%nrpt
+   if(ifc%cell(1,irpt)==0.and.&
+&     ifc%cell(2,irpt)==0.and.&
+&     ifc%cell(3,irpt)==0) then
+     irpt_ref = irpt
+     cycle
+   end if
+ end do
+
+ if (irpt_ref<=0) then
+   write(msg,'(a,a)')' Unable to find the cell of reference in IFC'
+   MSG_ERROR(msg)
+ end if
+
+ if (present(option)) then
+   if (option == 1) then
+     atmfrc => ifc%short_atmfrc
+     write(msg,'(3a)') ch10," Impose acoustic sum rule on short range"
+   else if (option == 2) then
+     atmfrc => ifc%ewald_atmfrc
+     write(msg,'(3a)') ch10," Impose acoustic sum rule on long range"
+   end if
+ else
+   atmfrc => ifc%atmfrc
+     write(msg,'(3a)') ch10," Impose acoustic sum rule on total ifc"
+ end if
+ call wrtout(ab_out,msg,'COLL')
+ call wrtout(std_out,msg,'COLL')
+
+!impose acoustic sum rule:
+ do mu=1,3
+   do nu=1,3
+     do ia=1,natom
+       sum=zero
+       do ib=1,natom
+!      Get the sum of interatomic forces acting on the atom ia,
+!      either in a symmetrical manner, or an unsymmetrical one.
+         if(asr==1)then
+           do irpt=1, ifc%nrpt
+             sum=sum+atmfrc(1,mu,ia,nu,ib,irpt)
+           end do
+         else if(asr==2)then
+           do irpt=1, ifc%nrpt
+              sum=sum+&
+&                 (atmfrc(1,mu,ia,nu,ib,irpt)+&
+&                  atmfrc(1,nu,ia,mu,ib,irpt))/2
+            end do
+          end if
+        end do
+
+!      Correct the self-interaction in order to fulfill the ASR
+        atmfrc(1,mu,ia,nu,ia,irpt_ref)=&
+&       atmfrc(1,mu,ia,nu,ia,irpt_ref)-sum
+        if(asr==2)then
+          atmfrc(1,nu,ia,mu,ia,irpt_ref)=&
+&         atmfrc(1,mu,ia,nu,ia,irpt_ref)
+        end if
+      end do
+    end do
+  end do
+
+ if (present(option)) then
+   if (option == 1) then
+     ifc%short_atmfrc = atmfrc
+   else if (option == 2) then
+     ifc%ewald_atmfrc = atmfrc
+   end if
+ else
+   ifc%atmfrc = atmfrc
+ end if
+
+ end subroutine harmonics_terms_applySumRule
 !!***
 
 end module m_harmonics_terms

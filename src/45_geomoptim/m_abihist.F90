@@ -1185,7 +1185,7 @@ end subroutine abihist_compare_and_copy
 !! SOURCE
 
 subroutine write_md_hist(hist,filename,ifirst,natom,ntypat,&
-&                        typat,amu,znucl,dtion)
+&                        typat,amu,znucl,dtion,mdtemp)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -1203,7 +1203,7 @@ subroutine write_md_hist(hist,filename,ifirst,natom,ntypat,&
  character(len=*),intent(in) :: filename
 !arrays
  integer,intent(in) :: typat(natom)
- real(dp),intent(in) :: amu(ntypat),znucl(:)
+ real(dp),intent(in) :: amu(ntypat),znucl(:),mdtemp(2)
  type(abihist),intent(inout),target :: hist
 
 !Local variables-------------------------------
@@ -1239,7 +1239,7 @@ subroutine write_md_hist(hist,filename,ifirst,natom,ntypat,&
 
 !  Write variables that do not change
 !  (they are not read in a hist structure).
-   call write_csts_hist(ncid,dtion,imgmov,typat,znucl,amu)
+   call write_csts_hist(ncid,dtion,imgmov,typat,znucl,amu,mdtemp)
 
  else
 !##### itime>2 access: just open NetCDF file
@@ -1255,7 +1255,7 @@ subroutine write_md_hist(hist,filename,ifirst,natom,ntypat,&
 !##### Write variables into the dataset
 !Get the IDs
  call get_varid_hist(ncid,xcart_id,xred_id,fcart_id,fred_id,vel_id,vel_cell_id,&
-&     rprimd_id,acell_id,strten_id,etotal_id,ekin_id,entropy_id,mdtime_id)
+&     rprimd_id,acell_id,strten_id,etotal_id,ekin_id,entropy_id,mdtime_id,has_nimage)
 !Write
  call write_vars_hist(ncid,hist,natom,has_nimage,1,&
 &     xcart_id,xred_id,fcart_id,fred_id,vel_id,vel_cell_id,&
@@ -1315,7 +1315,7 @@ end subroutine write_md_hist
 
 subroutine write_md_hist_img(hist,filename,ifirst,natom,ntypat,&
 &                            typat,amu,znucl,dtion,&
-&                            nimage,imgmov,comm_img,imgtab) ! optional arguments
+&                            nimage,imgmov,mdtemp,comm_img,imgtab) ! optional arguments
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -1335,7 +1335,7 @@ subroutine write_md_hist_img(hist,filename,ifirst,natom,ntypat,&
 !arrays
  integer,intent(in) :: typat(natom)
  integer,intent(in),optional :: imgtab(:)
- real(dp),intent(in) :: amu(ntypat),znucl(:)
+ real(dp),intent(in) :: amu(ntypat),znucl(:),mdtemp(2)
  type(abihist),intent(inout),target :: hist(:)
 
 !Local variables-------------------------------
@@ -1394,7 +1394,7 @@ subroutine write_md_hist_img(hist,filename,ifirst,natom,ntypat,&
        call def_file_hist(ncid,filename,natom,nimage_,ntypat,npsp,has_nimage)
 !      Write variables that do not change
 !      (they are not read in a hist structure).
-       call write_csts_hist(ncid,dtion,imgmov_,typat,znucl,amu)
+       call write_csts_hist(ncid,dtion,imgmov_,typat,znucl,amu,mdtemp)
      end if
 
 !    ##### itime>2 access: just open NetCDF file
@@ -1409,7 +1409,7 @@ subroutine write_md_hist_img(hist,filename,ifirst,natom,ntypat,&
 !    ##### Write variables into the dataset (loop over images)
 !    Get the IDs
      call get_varid_hist(ncid,xcart_id,xred_id,fcart_id,fred_id,vel_id,vel_cell_id,&
-&         rprimd_id,acell_id,strten_id,etotal_id,ekin_id,entropy_id,mdtime_id)
+&         rprimd_id,acell_id,strten_id,etotal_id,ekin_id,entropy_id,mdtime_id,has_nimage)
 
 !    Write
      do iimage=1,my_nimage
@@ -1523,7 +1523,7 @@ implicit none
 
 !Get the ID of a variables from their name
  call get_varid_hist(ncid,xcart_id,xred_id,fcart_id,fred_id,vel_id,vel_cell_id,&
-&     rprimd_id,acell_id,strten_id,etotal_id,ekin_id,entropy_id,mdtime_id)
+&     rprimd_id,acell_id,strten_id,etotal_id,ekin_id,entropy_id,mdtime_id,has_nimage)
 
 !Read variables from the dataset and write them into hist
  call read_vars_hist(ncid,hist,natom,time,has_nimage,1,start_time,&
@@ -1651,7 +1651,7 @@ implicit none
 
 !  Get the ID of a variables from their name
    call get_varid_hist(ncid,xcart_id,xred_id,fcart_id,fred_id,vel_id,vel_cell_id,&
-&       rprimd_id,acell_id,strten_id,etotal_id,ekin_id,entropy_id,mdtime_id)
+&       rprimd_id,acell_id,strten_id,etotal_id,ekin_id,entropy_id,mdtime_id,has_nimage)
 
 !  Read variables from the dataset and write them into hist
    call read_vars_hist(ncid,hist_,natom,time,has_nimage,iimg,1,&
@@ -1717,7 +1717,7 @@ implicit none
  integer :: xcart_id,xred_id,fcart_id,fred_id,vel_id,vel_cell_id
  integer :: rprimd_id,acell_id,strten_id
  integer :: etotal_id,ekin_id,entropy_id,mdtime_id
- integer :: typat_id,znucl_id,amu_id,dtion_id,imgmov_id
+ integer :: typat_id,znucl_id,amu_id,dtion_id,imgmov_id, two_id,mdtemp_id
  character(len=500) :: msg
 !arrays
  integer :: dim0(0),dim1(1),dim2(2),dim3(3),dim4(4)
@@ -1757,6 +1757,9 @@ implicit none
  ncerr = nf90_def_dim(ncid,"time",NF90_UNLIMITED,time_id)
  NCF_CHECK_MSG(ncerr," define dimension time")
 
+ ncerr = nf90_def_dim(ncid,"two",2,two_id)
+ NCF_CHECK_MSG(ncerr," define dimension two")
+
 !2.Define the constant variables
 
  dim1=(/natom_id/)
@@ -1774,12 +1777,17 @@ implicit none
  call ab_define_var(ncid,dim0,dtion_id,NF90_DOUBLE,&
 &  "dtion","time step","atomic units" )
 
-!3.Define the evolving variables
+!mdtemp
+ dim1=(/two_id/)
+ call ab_define_var(ncid,dim1,mdtemp_id,NF90_DOUBLE,&
+&  "mdtemp","Molecular Dynamics Thermostat Temperatures","Kelvin" )
 
 !mdtime
  dim1=(/time_id/)
  call ab_define_var(ncid,dim1,mdtime_id,NF90_DOUBLE,&
 & "mdtime","Molecular Dynamics or Relaxation TIME","hbar/Ha" )
+
+!3.Define the evolving variables
 
 !xcart,xred,fcart,fred,vel
  if (has_nimage) then
@@ -1982,7 +1990,7 @@ end subroutine get_dims_hist
 !! SOURCE
 
 subroutine get_varid_hist(ncid,xcart_id,xred_id,fcart_id,fred_id,vel_id,vel_cell_id,&
-&          rprimd_id,acell_id,strten_id,etotal_id,ekin_id,entropy_id,mdtime_id)
+&          rprimd_id,acell_id,strten_id,etotal_id,ekin_id,entropy_id,mdtime_id,has_nimage)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -1999,7 +2007,7 @@ implicit none
  integer,intent(out) :: xcart_id,xred_id,fcart_id,fred_id,vel_id
  integer,intent(out) :: vel_cell_id,rprimd_id,acell_id,strten_id
  integer,intent(out) :: etotal_id,ekin_id,entropy_id,mdtime_id
-
+ logical,intent(in)  :: has_nimage
 !Local variables-------------------------------
 #if defined HAVE_NETCDF
 !scalars
@@ -2029,7 +2037,9 @@ implicit none
  NCF_CHECK_MSG(ncerr," get the id for vel")
 
  ncerr = nf90_inq_varid(ncid, "vel_cell", vel_cell_id)
- NCF_CHECK_MSG(ncerr," get the id for vel_cell")
+ if(has_nimage) then
+   NCF_CHECK_MSG(ncerr," get the id for vel_cell")
+ end if
 
  ncerr = nf90_inq_varid(ncid, "rprimd", rprimd_id)
  NCF_CHECK_MSG(ncerr," get the id for rprimd")
@@ -2074,7 +2084,7 @@ end subroutine get_varid_hist
 !!
 !! SOURCE
 
-subroutine write_csts_hist(ncid,dtion,imgmov,typat,znucl,amu)
+subroutine write_csts_hist(ncid,dtion,imgmov,typat,znucl,amu,mdtemp)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -2092,13 +2102,13 @@ implicit none
  integer,intent(in) :: imgmov
 !arrays
  integer,intent(in) :: typat(:)
- real(dp),intent(in) :: amu(:),znucl(:)
+ real(dp),intent(in) :: amu(:),znucl(:), mdtemp(2)
 
 !Local variables-------------------------------
 #if defined HAVE_NETCDF
 !scalars
  integer :: ncerr
- integer :: typat_id,znucl_id,amu_id,dtion_id, imgmov_id
+ integer :: typat_id,znucl_id,amu_id,dtion_id, imgmov_id, mdtemp_id
 #endif
 
 ! *************************************************************************
@@ -2122,6 +2132,11 @@ implicit none
  if ( nf90_noerr == nf90_inq_varid(ncid, "imgmov", imgmov_id) ) then
    ncerr = nf90_put_var(ncid, imgmov_id, imgmov)
    NCF_CHECK_MSG(ncerr," write variable imgmov")
+ end if
+
+ if ( nf90_noerr == nf90_inq_varid(ncid, "mdtemp", mdtemp_id) ) then
+   ncerr = nf90_put_var(ncid, mdtemp_id, mdtemp)
+   NCF_CHECK_MSG(ncerr," write variable mdtemp")
  end if
 
 !2.Write the constants
@@ -2265,9 +2280,6 @@ implicit none
    ncerr = nf90_put_var(ncid,rprimd_id,hist%rprimd(:,:,hist%ihist),&
 &                       start = start3,count = count3)
    NCF_CHECK_MSG(ncerr," write variable rprimd")
-   ncerr = nf90_put_var(ncid,vel_cell_id,hist%vel_cell(:,:,hist%ihist),&
-&                       start = start3,count = count3)
-   NCF_CHECK_MSG(ncerr," write variable vel_cell")
  end if
 
 !acell
@@ -2415,8 +2427,6 @@ implicit none
    start3=(/1,1,start_time/);count3=(/3,3,time/)
    ncerr = nf90_get_var(ncid,rprimd_id,hist%rprimd(:,:,:),count=count3,start=start3)
    NCF_CHECK_MSG(ncerr," read variable rprimd")
-   ncerr = nf90_get_var(ncid,vel_cell_id,hist%vel_cell(:,:,:),count=count3,start=start3)
-   NCF_CHECK_MSG(ncerr," read variable vel_cell")
  end if
 
 !acell

@@ -31,7 +31,7 @@
 
  Flags :
      ifcflag         1
-   prt_effpo        -1
+   prt_model         2
      strcpli        -1
  Molecular Dynamics :
         temp    1000.0
@@ -72,6 +72,70 @@
 
 ================================================================================
 
+ This effective potential contains :
+  - Reference energy:         -1.6210112852
+  - Number of types of atoms:    3
+  - Number of atoms:     5
+  - Number of cells:    93
+  - Number of qpoints:    0
+  - Primitive vectors (unit:Bohr):
+    7.302987    0.000000    0.000000
+    0.000000    7.302987    0.000000
+    0.000000    0.000000    7.302987
+  - acell (unit:Bohr):
+    1.000000    1.000000    1.000000
+  - Dielectric tensor:
+    6.352933   -0.000000    0.000000
+    0.000000    6.352933    0.000000
+    0.000000   -0.000000    6.352933
+  - Elastic tensor (unit:10^2GPa):
+    3.883250    1.113471    1.113471    0.000000    0.000000    0.000000
+    1.113471    3.883250    1.113471    0.000000    0.000000    0.000000
+    1.113471    1.113471    3.883250    0.000000    0.000000    0.000000
+    0.000000    0.000000    0.000000    4.750592    0.000000    0.000000
+    0.000000    0.000000    0.000000    0.000000    4.750592    0.000000
+    0.000000    0.000000    0.000000    0.000000    0.000000    4.750592
+  - Atoms   1
+    - atomic number:   22.0000
+    - atomic mass:   47.8670
+    - cartesian position:    3.651500    3.651500    3.651500
+    - Effective charges:
+      7.332640    0.000000    0.000000
+     -0.000000    7.332630   -0.000000
+      0.000000   -0.000000    7.332530
+  - Atoms   2
+    - atomic number:   38.0000
+    - atomic mass:   87.6200
+    - cartesian position:    0.000000    0.000000    0.000000
+    - Effective charges:
+      2.553380   -0.000000    0.000000
+      0.000000    2.554380   -0.000000
+     -0.000000    0.000000    2.554380
+  - Atoms   3
+    - atomic number:    8.0000
+    - atomic mass:   16.0000
+    - cartesian position:    0.000000    3.651500    3.651500
+    - Effective charges:
+     -5.765270    0.000000    0.000000
+     -0.000000   -2.055170   -0.000000
+     -0.000000   -0.000000   -2.056280
+  - Atoms   4
+    - atomic number:    8.0000
+    - atomic mass:   16.0000
+    - cartesian position:    3.651500    0.000000    3.651500
+    - Effective charges:
+     -2.055260   -0.000000    0.000000
+      0.000000   -5.765170    0.000000
+      0.000000    0.000000   -2.056280
+  - Atoms   5
+    - atomic number:    8.0000
+    - atomic mass:   16.0000
+    - cartesian position:    3.651500    3.651500    0.000000
+    - Effective charges:
+     -2.055260    0.000000    0.000000
+      0.000000   -2.055170    0.000000
+      0.000000   -0.000000   -5.766730
+
  Read the coefficients of the polynomial fit from XML and perform some checks
 
 -Opening the file /home/alex/abinit/tests/v8/Input/t06_coeff.xml
@@ -79,9 +143,9 @@
 
 ================================================================================
 
- Generation of the xml file for the reference structure in t100_MPI2_sys.xml
+ Generation of the xml file for the model in t100_MPI2_sys.xml
 
- Generation of the xml file for the polynomial fitting in t100_MPI2_coeffs.xml
+ Generation of the xml file for the fitted polynomial in t100_MPI2_coeffs.xml
 
 ================================================================================
 

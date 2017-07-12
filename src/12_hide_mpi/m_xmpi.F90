@@ -417,9 +417,12 @@ end interface xmpi_min
 !----------------------------------------------------------------------
 
 interface xmpi_recv
+  module procedure xmpi_recv_char
   module procedure xmpi_recv_intv
   module procedure xmpi_recv_int1d
   module procedure xmpi_recv_int2d
+  module procedure xmpi_recv_int3d
+  module procedure xmpi_recv_dp
   module procedure xmpi_recv_dp1d
   module procedure xmpi_recv_dp2d
   module procedure xmpi_recv_dp3d
@@ -454,9 +457,12 @@ end interface xmpi_isend
 !----------------------------------------------------------------------
 
 interface xmpi_send
+  module procedure xmpi_send_char
   module procedure xmpi_send_intv
   module procedure xmpi_send_int1d
   module procedure xmpi_send_int2d
+  module procedure xmpi_send_int3d
+  module procedure xmpi_send_dp
   module procedure xmpi_send_dp1d
   module procedure xmpi_send_dp2d
   module procedure xmpi_send_dp3d
