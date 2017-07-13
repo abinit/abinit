@@ -1,0 +1,126 @@
+<html>
+<head><title>k-points </title>
+<link rel=stylesheet type="text/css" href="../formabinit.css">
+</head>
+<body bgcolor="#ffffff">
+
+<hr>
+<a name="top"></a>
+
+<h1>k-points</h1>
+<h3>This file gives hints on how to set parameters related to the k-points with the ABINIT package.
+<hr>
+
+<h5>Copyright (C) 1998-2017 ABINIT group (FJ,XG,BA)
+<script type="text/javascript" src="../../js_files/copyright.js"> </script>
+</h5>
+
+<script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
+
+ <h3><b>Table of content: </b></h3> 
+ <ul> <li><a href="topic_k-points.html#1">1</a>. Introduction.<li><a href="topic_k-points.html#2">2</a>. Related tutorials.<li><a href="topic_k-points.html#3">3</a>. Related input variables.<li><a href="topic_k-points.html#4">4</a>. Selected input files.</ul>
+
+&nbsp; 
+<HR ALIGN=left> 
+<a name="1">&nbsp;</a>
+<h3><b>1. Introduction.</b></h3>
+
+
+<p> Any kind of symmetries and corresponding sets of k-point can be input,
+and taken into account in the computation.
+<br/>Since ABINIT is based on periodic boundary conditions, the Brillouin
+zone must be sampled adequately. The number of k-points to be used
+for this sampling, in the full Brillouin zone, is inversely
+proportional to ucvol, but may also
+vary a lot from system to system. As a rule of thumb, a system
+with a large band gap will need few k-points, while metals will need
+lot of k-points to produce converged results.
+For large systems, the inverse scale with respect to ucvol
+is unfortunately stopped because at least one k-point must be
+used. The effective number of k-points to be used will be strongly
+influenced by the symmetries of the system, since only the
+irreducible part of the Brillouin zone must be sampled. Moreover
+the time-reversal symmetry (k equivalent to -k) can be used for
+ground-state calculations,
+to reduce sometimes even further the portion of the brillouin zone
+to be sampled. The number of k points to be used in a calculation
+is named nkpt. There is another way to take advantage of the
+time-reversal symmetry, in the specific case of k-points that are
+invariant under k => -k , or are sent to another vector distant
+of the original one by some vector of the reciprocal lattice.
+See below for more explanation about the advantages of using
+these k-points.
+
+<br/>As a rule of thumb, for homogeneous systems, a reasonable accuracy may be
+reached when the product of the number of atoms by the number of k-points
+in the full Brillouin zone is on the order of 50 or larger, for wide gap
+insulators, on the order of 250 for small gap semiconductors like Si,
+and beyond 500 for metals, depending on the value of the input variable
+tsmear. As soon as there is some vacuum in the system, the product
+natom * nkpt can be much smaller than this (for an isolated molecule
+in a sufficiently large supercell, one k-point is enough).
+
+<br/>The generation of special k point sets (Monkhorst-Pack sets)
+and band structure k points can be done directly inside ABINIT.
+A list of interesting k point sets, can be generated automatically,
+including a measure of their accuracy in term of integration
+within the Brillouin Zone.
+
+
+&nbsp; 
+<HR ALIGN=left> 
+<a name="2">&nbsp;</a>
+<h3><b>2. Related tutorials.</b></h3>
+
+
+<li><a href="../../tutorial/lesson_base3.html">The lesson 3</a> deals with crystalline
+silicon (an insulator): the definition of a k-point grid, the smearing
+of the cut-off energy, the computation of a band structure, and again,
+convergence studies ...</li>
+
+&nbsp; 
+<HR ALIGN=left> 
+<a name="3">&nbsp;</a>
+<h3><b>3. Related input variables.</b></h3>
+
+
+<p>Basic input variables:<p>... <a href="../../input_variables/generated_files/vargs.html#chksymbreak">chksymbreak</a>   [CHecK SYMmetry BREAKing]<br>
+... <a href="../../input_variables/generated_files/varbas.html#kptopt">kptopt</a>   [KPoinTs OPTion]<br>
+... <a href="../../input_variables/generated_files/varbas.html#ngkpt">ngkpt</a>   [Number of Grid points for K PoinTs generation]<br>
+<p>Useful input variables:<p>... <a href="../../input_variables/generated_files/vardev.html#istwfk">istwfk</a>   [Integer for choice of STorage of WaveFunction at each k point]<br>
+... <a href="../../input_variables/generated_files/varbas.html#kpt">kpt</a>   [K - PoinTs]<br>
+... <a href="../../input_variables/generated_files/varbas.html#kptnrm">kptnrm</a>   [K - PoinTs NoRMalization]<br>
+... <a href="../../input_variables/generated_files/vargs.html#kptrlatt">kptrlatt</a>   [K - PoinTs grid : Real space LATTice]<br>
+... <a href="../../input_variables/generated_files/vargs.html#kptrlen">kptrlen</a>   [K - PoinTs grid : Real space LENgth]<br>
+... <a href="../../input_variables/generated_files/varbas.html#nkpt">nkpt</a>   [Number of K - Points]<br>
+... <a href="../../input_variables/generated_files/varbas.html#nshiftk">nshiftk</a>   [Number of SHIFTs for K point grids]<br>
+... <a href="../../input_variables/generated_files/varbas.html#shiftk">shiftk</a>   [SHIFT for K points]<br>
+... <a href="../../input_variables/generated_files/varbas.html#wtk">wtk</a>   [WeighTs for K points]<br>
+<p>Relevant internal variables:<p>... <a href="../../input_variables/generated_files/varint.html#kptns">%kptns</a>   [K-PoinTs re-Normalized and Shifted]<br>
+<p>Input variables for experts:<p>... <a href="../../input_variables/generated_files/vargs.html#kptbounds">kptbounds</a>   [K PoinT BOUNDarieS]<br>
+... <a href="../../input_variables/generated_files/vargs.html#ndivk">ndivk</a>   [Number of DIVisions of K lines]<br>
+... <a href="../../input_variables/generated_files/vargs.html#ndivsm">ndivsm</a>   [Number of DIVisions for the SMallest segment]<br>
+... <a href="../../input_variables/generated_files/vargs.html#vacuum">vacuum</a>   [VACUUM identification]<br>
+... <a href="../../input_variables/generated_files/vargs.html#vacwidth">vacwidth</a>   [VACuum WIDTH]<br>
+
+
+&nbsp; 
+<HR ALIGN=left> 
+<a name="4">&nbsp;</a>
+<h3><b>4. Selected input files.</b></h3>
+
+
+The user can find some related example input files in the ABINIT package in the directory /tests, or on the Web:
+<p> tests/v2/Input: <a href="../tests/v2/Input/t43.in">t43.in</a> 
+<a href="../tests/v2/Input/t44.in">t44.in</a> 
+<a href="../tests/v2/Input/t61.in">t61.in</a> 
+<a href="../tests/v2/Input/t62.in">t62.in</a> 
+<a href="../tests/v2/Input/t63.in">t63.in</a> 
+<a href="../tests/v2/Input/t64.in">t64.in</a> 
+<br>
+
+<script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
+
+</body>
+</html>
+

@@ -1,0 +1,78 @@
+<html>
+<head><title>recursion </title>
+<link rel=stylesheet type="text/css" href="../formabinit.css">
+</head>
+<body bgcolor="#ffffff">
+
+<hr>
+<a name="top"></a>
+
+<h1>Recursion</h1>
+<h3>This file gives hints on how to perform orbital-free calculations with the ABINIT package.
+<hr>
+
+<h5>Copyright (C) 1998-2017 ABINIT group (FJ,XG,BA)
+<script type="text/javascript" src="../../js_files/copyright.js"> </script>
+</h5>
+
+<script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
+
+ <h3><b>Table of content: </b></h3> 
+ <ul> <li><a href="topic_recursion.html#1">1</a>. Introduction.<li><a href="topic_recursion.html#2">2</a>. Related input variables.<li><a href="topic_recursion.html#3">3</a>. Selected input files.</ul>
+
+&nbsp; 
+<HR ALIGN=left> 
+<a name="1">&nbsp;</a>
+<h3><b>1. Introduction.</b></h3>
+
+
+<p> 
+It is possible to use Thomas-Fermi kinetic functional (explicit functional of the density) or Thomas-Fermi-Weizsacker kinetic functional (with Gradient Corrections) instead of Kohn-Sham kinetic energy functional (implicit functional of the density through Kohn-Sham wavefunctions).<br/>
+See Perrot F., Phys. Rev. A20,586-594 (1979)).
+
+<br/>
+The Recursion Method may be used in order to compute electronic density, entropy, Fermi energy and eigenvalues energy.
+This method computes the density without computing any orbital, is efficient at high temperature,
+with a efficient parallelization (almost perfect scalability).
+
+
+
+&nbsp; 
+<HR ALIGN=left> 
+<a name="2">&nbsp;</a>
+<h3><b>2. Related input variables.</b></h3>
+
+
+<p>Compulsory input variables:<p>... <a href="../../input_variables/generated_files/vardev.html#tfkinfunc">tfkinfunc</a>   [Thomas-Fermi KINetic energy FUNCtional]<br>
+<p>Basic input variables:<p>... <a href="../../input_variables/generated_files/vardev.html#rectolden">rectolden</a>   [RECursion - TOLerance on the difference of electronic DENsity]<br>
+<p>Useful input variables:<p>... <a href="../../input_variables/generated_files/vardev.html#recefermi">recefermi</a>   [RECursion - initial guess  of the FERMI Energy]<br>
+... <a href="../../input_variables/generated_files/vardev.html#recgratio">recgratio</a>   [RECursion - Grid RATIO]<br>
+... <a href="../../input_variables/generated_files/vardev.html#recrcut">recrcut</a>   [RECursion - CUTing Radius]<br>
+... <a href="../../input_variables/generated_files/vardev.html#tfw_toldfe">tfw_toldfe</a>   [Thomas-Fermi-Weizsacker: TOLerance on the DiFference of total Energy, for initialization steps]<br>
+<p>Relevant internal variables:<p>... <a href="../../input_variables/generated_files/varint.html#userec">%userec</a>   [USE RECursion]<br>
+<p>Input variables for experts:<p>... <a href="../../input_variables/generated_files/vardev.html#recnpath">recnpath</a>   [RECursion - Number of point for PATH integral calculations]<br>
+... <a href="../../input_variables/generated_files/vardev.html#recnrec">recnrec</a>   [RECursion - Number of RECursions]<br>
+... <a href="../../input_variables/generated_files/vardev.html#recptrott">recptrott</a>   [RECursion - TROTTer parameter]<br>
+... <a href="../../input_variables/generated_files/vardev.html#rectesteg">rectesteg</a>   [RECursion - TEST on Electron Gas]<br>
+
+
+&nbsp; 
+<HR ALIGN=left> 
+<a name="3">&nbsp;</a>
+<h3><b>3. Selected input files.</b></h3>
+
+
+The user can find some related example input files in the ABINIT package in the directory /tests, or on the Web:
+<p> tests/v5/Input: <a href="../tests/v5/Input/t75.in">t75.in</a> 
+<a href="../tests/v5/Input/t76.in">t76.in</a> 
+<p> tests/v7/Input: <a href="../tests/v7/Input/t11.in">t11.in</a> 
+<p> tests/v4/Input: <a href="../tests/v4/Input/t97.in">t97.in</a> 
+<p> tests/mpiio/Input: <a href="../tests/mpiio/Input/t42.in">t42.in</a> 
+<p> tests/paral/Input: <a href="../tests/paral/Input/t42.in">t42.in</a> 
+<br>
+
+<script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
+
+</body>
+</html>
+

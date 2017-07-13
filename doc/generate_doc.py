@@ -27,13 +27,12 @@ js_path = "../../js_files/"
 users_path = "../../users/"
 
 # Path for yml and html files
-bib_yml = "bibliography/yml_files"
-bib_gen = "bibliography/files_generated"
-invars_yml = "input_variables/yml_files"
-invars_html_gen = "input_variables/html_generated"
-topics_yml = "topics/yml_files"
-topics_work = "topics/workspace"
-topics_html_gen = "topics/html_generated"
+bib_ini = "bibliography/initial_files"
+bib_gen = "bibliography/generated_files"
+invars_ini = "input_variables/initial_files"
+invars_gen = "input_variables/generated_files"
+topics_ini = "topics/initial_files"
+topics_gen = "topics/generated_files"
 
 ################################################################################
 ###############################################################################
@@ -105,7 +104,7 @@ def make_links(text,cur_abivarname,variables,characteristics,specials,backlinks,
       result=get_year(abivarname)
       if result != -9999 :
         backlinks[abivarname]+=backlink+";"
-        return '[<a href="../../bibliography/files_generated/bibliography.html#'+abivarname+'">'+abivarname+'</a>]'
+        return '[<a href="../../'+bib_gen+'/bibliography.html#'+abivarname+'">'+abivarname+'</a>]'
       else:
         return '<a href="#">[[FAKE LINK:'+abivarname+']]</a>'
     return mymatch.group()
@@ -122,15 +121,15 @@ def make_links(text,cur_abivarname,variables,characteristics,specials,backlinks,
 def read_yaml_file(ymlfile):
   """ Read the file 'ymlfile', containing yml data, and store all such data in the returned object"""
 
-  if ymlfile== invars_yml+"/abinit_vars.yml":
+  if ymlfile== invars_ini+"/abinit_vars.yml":
     print("Use "+ymlfile+" as database input file for the input variables and their characteristics ...")
-  elif ymlfile== topics_yml+"list_of_topics.yml":
+  elif ymlfile== topics_ini+"list_of_topics.yml":
     print("Use "+ymlfile+" as database input file for the list of topics ...")
-  elif ymlfile== invars_yml+"/sections.yml":
+  elif ymlfile== invars_ini+"/sections.yml":
     print("Use "+ymlfile+" as database input file for the list of sections ...")
-  elif ymlfile== topics_yml+"/tests_dirs.yml":
+  elif ymlfile== topics_ini+"/tests_dirs.yml":
     print("Use "+ymlfile+" as database input file for the list of directories in which automatic test input files are present ...")
-  elif ymlfile== topics_work+"/topics_in_tests.yml":
+  elif ymlfile== topics_gen+"/topics_in_tests.yml":
     print("Generated file "+ymlfile+", to contain the list of automatic test input files relevant for each topic ...")
 
   with open(ymlfile, 'r') as f:
@@ -190,34 +189,34 @@ def get_year(name):
 
 ################################################################################
  
-variables=read_yaml_file(invars_yml+"/abinit_vars.yml")
-list_of_topics=read_yaml_file(topics_yml+"/list_of_topics.yml")
-sections=read_yaml_file(invars_yml+"/sections.yml")
-tests_dirs=read_yaml_file(topics_yml+"/tests_dirs.yml")
-bibhtml=read_yaml_file(bib_yml+"/bibhtml.yml")
+variables=read_yaml_file(invars_ini+"/abinit_vars.yml")
+list_of_topics=read_yaml_file(topics_ini+"/list_of_topics.yml")
+sections=read_yaml_file(invars_ini+"/sections.yml")
+tests_dirs=read_yaml_file(topics_ini+"/tests_dirs.yml")
+bibhtml=read_yaml_file(bib_ini+"/bibhtml.yml")
 
-with open('bibliography/abiref.bib')  as bibtex_file:
+with open(bib_ini+'/abiref.bib')  as bibtex_file:
   bibtex_str = bibtex_file.read()
 
 ################################################################################
 # Parse the ABINIT input files, in order to find the possible topics to which they are linked -> topics_in_tests
 
 try :
-  rm_cmd = "rm "+topics_work+"/topics_in_tests.yml"
+  rm_cmd = "rm "+topics_gen+"/topics_in_tests.yml"
   retcode = os.system(rm_cmd)
 except :
   if debug==1 :
-    print("rm "+topics_work+"/topics_in_tests.yml failed")
+    print("rm "+topics_gen+"/topics_in_tests.yml failed")
     print("the file was likely non existent")
 
 for tests_dir in tests_dirs :
-  grep_cmd = "grep topics input_variables/tests/%s/Input/*.in > %s/topics_in_tests.txt"%(tests_dir,topics_work)
+  grep_cmd = "grep topics topics/tests/%s/Input/*.in > %s/topics_in_tests.txt"%(tests_dir,topics_gen)
   retcode = os.system(grep_cmd)
   if retcode == 0 :
-    sed_cmd = "sed -e 's/^/- /' %s/topics_in_tests.txt >> %s/topics_in_tests.yml"%(topics_work,topics_work)
+    sed_cmd = "sed -e 's/^/- /' %s/topics_in_tests.txt >> %s/topics_in_tests.yml"%(topics_gen,topics_gen)
     retcode = os.system(sed_cmd)
 
-topics_in_tests=read_yaml_file(topics_work+"/topics_in_tests.yml")
+topics_in_tests=read_yaml_file(topics_gen+"/topics_in_tests.yml")
 if debug==1 :
   print(" topics_in_tests :")
   print(topics_in_tests)
@@ -508,7 +507,7 @@ for (specialkey,specialval) in list_specials:
   cur_specials.append(specialkey)
 
 for (speckey, specval) in list_specials:
-  backlink= ' <a href="../../%s/specials.html#%s">%s</a> ' %(invars_html_gen,speckey,speckey)
+  backlink= ' <a href="../../%s/specials.html#%s">%s</a> ' %(invars_gen,speckey,speckey)
   cur_content = "<br><font id=\"title\"><a name=\""+speckey+"\">"+speckey+"</a></font>\n"
   cur_content += "<br><font id=\"text\">\n"
   cur_content += "<p>\n"+doku2html(make_links(specval,speckey,list_all_vars,list_chars,cur_specials,backlinks,backlink))+"\n"
@@ -526,7 +525,7 @@ for i, var in enumerate(variables):
   section = var.section
   all_vars[section].append([var.abivarname,var.mnemonics])
   cur_content = ""
-  backlink=' <a href="../../%s/%s.html#%s">%s</a> ' %(invars_html_gen,section,var.abivarname,var.abivarname)
+  backlink=' <a href="../../%s/%s.html#%s">%s</a> ' %(invars_gen,section,var.abivarname,var.abivarname)
 
   try:
     # Title
@@ -550,7 +549,7 @@ for i, var in enumerate(variables):
         topics_name_class = vartopics.split(',')
         for i, topic_name_class in enumerate(topics_name_class):
           name_class = topic_name_class.split('_')
-          cur_content += '<a href="../../'+topics_html_gen+'/topic_'+name_class[0].strip()+'.html">'+name_class[0].strip()+'</a> '
+          cur_content += '<a href="../../'+topics_gen+'/topic_'+name_class[0].strip()+'.html">'+name_class[0].strip()+'</a> '
         cur_content += "</font>\n"
     except:
       if debug==1 :
@@ -648,11 +647,11 @@ for i, section_info in enumerate(sections):
   #Global operations on the tentative html file.
   sectionhtml=sectionhtml.replace("__JS_PATH__",js_path)
   sectionhtml=sectionhtml.replace("__KEYWORD__",section_info.keyword)
-  backlink=' <a href="../../%s/%s.html#%s">%s<\a>' %(invars_html_gen,section,var.abivarname,var.abivarname)
+  backlink=' <a href="../../%s/%s.html#%s">%s<\a>' %(invars_gen,section,var.abivarname,var.abivarname)
   sectionhtml = doku2html(make_links(sectionhtml,None,list_all_vars,list_chars,cur_specials,backlinks,backlink))
 
   #Write the finalized html file.
-  file_cur = invars_html_gen+'/'+section+'.html'
+  file_cur = invars_gen+'/'+section+'.html'
   f_cur = open(file_cur,'w')
   f_cur.write(sectionhtml)
   f_cur.write("\n")
@@ -696,7 +695,7 @@ for (tclasskey, tclassval) in list_topics_class:
             abivarname=var.abivarname
             if var.characteristics is not None and '[[INTERNAL_ONLY]]' in var.characteristics:
               abivarname = '%'+abivarname
-            topic_invars[topic_name] += '... <a href="../../'+invars_html_gen+'/'+var.section+'.html#'+var.abivarname+'">'+abivarname+'</a>   '
+            topic_invars[topic_name] += '... <a href="../../'+invars_gen+'/'+var.section+'.html#'+var.abivarname+'">'+abivarname+'</a>   '
             topic_invars[topic_name] += "["+var.mnemonics+"]<br>\n"
     except:
       if debug==1 :
@@ -759,14 +758,14 @@ toc_all += "<p>"+cur_let_all+".&nbsp;\n"
 # Assemble the "topic" files 
 
 print("Will use file yml_files/default_topic.yml as default for all topic files ... ")
-default_topic_yml=read_yaml_file(topics_yml+"/default_topic.yml")
+default_topic_yml=read_yaml_file(topics_ini+"/default_topic.yml")
 default_topic=default_topic_yml[0]
 
 # For each "topic" file
 for topic_name in list_of_topics:
   f_topic="yml_files/topic_"+topic_name+".yml"
   print("Will use file "+f_topic+" to initiate the topic "+topic_name+" ... ",end="")
-  topic_yml=read_yaml_file(topics_yml+"/topic_"+topic_name+".yml")
+  topic_yml=read_yaml_file(topics_ini+"/topic_"+topic_name+".yml")
   topic=topic_yml[0]
 
   #Mention it in the table of content of the file all_topics.html
@@ -827,12 +826,12 @@ for topic_name in list_of_topics:
   topic_html=topic_html.replace("__JS_PATH__",js_path)
   topic_html=topic_html.replace("__HOWTO__",topic.howto)
   topic_html=topic_html.replace("__KEYWORD__",topic.keyword)
-  backlink=' <a href="../../%s/topic_%s.html">%s</a>' %(topics_html_gen,topic_name,topic_name)
+  backlink=' <a href="../../%s/topic_%s.html">%s</a>' %(topics_gen,topic_name,topic_name)
 
   topic_html = doku2html(make_links(topic_html,None,list_all_vars,list_chars,cur_specials,backlinks,backlink))
 
   # Open, write and close the file
-  file_topic = topics_html_gen+'/topic_'+topic_name+'.html'
+  file_topic = topics_gen+'/topic_'+topic_name+'.html'
   f_topic = open(file_topic,'w')
   f_topic.write(topic_html)
   f_topic.close()
@@ -857,11 +856,11 @@ for j in ["header","title","subtitle","copyright","links","toc_all","links","end
 #Global operations on the tentative html file.
 all_topics_html=all_topics_html.replace("__JS_PATH__",js_path)
 all_topics_html=all_topics_html.replace("__KEYWORD__",default_topic.keyword)
-backlink='<a href="../../%s/all_topics.html">all_topics.html</a>' %(topics_html_gen)
+backlink='<a href="../../%s/all_topics.html">all_topics.html</a>' %(topics_gen)
 all_topics_html = doku2html(make_links(all_topics_html,None,list_all_vars,list_chars,cur_specials,backlinks,backlink))
 
 # Open, write and close the file
-file_html = topics_html_gen+'/all_topics.html'
+file_html = topics_gen+'/all_topics.html'
 f_html = open(file_html,'w')
 f_html.write(all_topics_html)
 f_html.close()
@@ -890,7 +889,7 @@ bib_content['bibliography']=""
 bib_content['acknowledgments']=""
 lines_txt=""
 cur_let = 'A'
-alphalinks="<hr> Goto "
+alphalinks="<hr> Go to "
 for i in string.ascii_uppercase:
   alphalinks+=('<a href=#%s>%s</a> ')%(i,i)
 bib_content['bibliography']+=('<a id="%s"></a>')%(cur_let)+alphalinks+('<hr><hr><h2>%s</h2>')%(cur_let)
