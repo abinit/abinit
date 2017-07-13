@@ -230,6 +230,11 @@ program anaddb
  ! END DEBUG
  call ddb_from_file(ddb,filnam(3),inp%brav,natom,inp%natifc,inp%atifc,Crystal,comm, prtvol=inp%prtvol)
  nsym = Crystal%nsym
+ ! DEBUG
+ !do ii=1,Crystal%ntypat
+ !  write(*,*)'anaddb: amu=', crystal%amu(ii)
+ !end do
+ ! END DEBUG
 
  ! Acoustic Sum Rule
  ! In case the interatomic forces are not calculated, the

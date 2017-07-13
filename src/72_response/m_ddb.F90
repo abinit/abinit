@@ -1717,16 +1717,20 @@ subroutine ddb_from_file(ddb,filename,brav,natom,natifc,atifc,crystal,comm,prtvo
  DBG_ENTER("COLL")
 
 ! Must read natom from the DDB before being able to allocate some arrays needed for invars9
+!call ddb_getdims(dimekb,filename,lmnmax,mband,mtyp,msym,ddb_natom,nblok,nkpt,ntypat,get_unit(),usepaw,DDB_VERSION,comm)
  call ddb_hdr_open_read(ddb_hdr,filename,ddbun,DDB_VERSION, &
 &                       dimonly=1)
 
  nblok = ddb_hdr%nblok
+ mtyp = ddb_hdr%mblktyp
  msym = ddb_hdr%msym
  ddb_natom = ddb_hdr%natom
  ntypat = ddb_hdr%ntypat
- dimekb = ddb_hdr%psps%dimekb
  mband = ddb_hdr%mband
- mtyp = ddb_hdr%mblktyp
+ nkpt = ddb_hdr%nkpt
+ usepaw = ddb_hdr%usepaw
+ dimekb = ddb_hdr%psps%dimekb
+ lmnmax = ddb_hdr%psps%lmnmax
 
  call ddb_hdr_free(ddb_hdr)
 
