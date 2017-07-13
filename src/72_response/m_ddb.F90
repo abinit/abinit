@@ -1842,7 +1842,7 @@ subroutine ddb_from_file(ddb,filename,brav,natom,natifc,atifc,crystal,comm,prtvo
 !Warning znucl is dimension with ntypat = nspsp hence alchemy is not supported here
  call crystal_init(ddb%amu,Crystal,space_group,natom,npsp,ntypat,nsym,rprimd,typat,xred,&
 &  zion,znucl,timrev,use_antiferro,.FALSE.,title,&
-&  symrel=symrel,tnons=tnons,symafm=symafm)
+&  symrel=symrel(:,:,1:nsym),tnons=tnons(:,1:nsym),symafm=symafm(1:nsym))
 
  ABI_FREE(title)
  ABI_FREE(symrel)
