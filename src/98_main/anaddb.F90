@@ -567,10 +567,10 @@ program anaddb
 &   elph_base_name,mband,mpert,msize,natom,nkpt,inp%ntemper,&
 &   ntypat,ddb%rprim,inp%telphint,inp%temperinc,&
 &   inp%tempermin,inp%thmflag,Crystal%typat,Crystal%xred,&
-&   ddb,ddbun,dimekb,filnam(5),ab_out,& !new
+&   ddb,ddbun,filnam(5),ab_out,&
 &   msym,nblok2,Crystal%nsym,ddb%occopt,Crystal%symrel,Crystal%tnons,usepaw,Crystal%zion,& !new
 &   Crystal%symrec,inp%natifc,Crystal%gmet,ddb%gprim,Crystal%indsym,Crystal%rmet,inp%atifc,& !new
-&   Crystal%ucvol,Crystal%xcart,comm) !new
+&   Crystal%ucvol,Crystal%xcart,comm)
  end if
 
 !**********************************************************************

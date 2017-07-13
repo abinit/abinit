@@ -38,9 +38,9 @@ subroutine thmeig(g2fsmear,acell,amu,anaddb_dtset,d2asr,&
 & filnam,mband,mpert,msize,natom,nkpt,ntemper,&
 & ntypat,rprim,telphint,temperinc,&
 & tempermin,thmflag,typat,xred,&
-& ddb,ddbun,dimekb,filnam5,iout,& !new
+& ddb,ddbun,filnam5,iout,&
 & msym,nblok2,nsym,occopt,symrel,tnons,usepaw,zion,&
-& symrec,natifc,gmet,gprim,indsym,rmet,atifc,ucvol,xcart,comm) !new
+& symrec,natifc,gmet,gprim,indsym,rmet,atifc,ucvol,xcart,comm)
 
  use defs_basis
  use m_profiling_abi
@@ -73,26 +73,26 @@ subroutine thmeig(g2fsmear,acell,amu,anaddb_dtset,d2asr,&
  integer,intent(in) :: mband,mpert,msize,ntemper,telphint,thmflag,comm
  real(dp),intent(in) :: g2fsmear,temperinc,tempermin
  character(len=*),intent(in) :: filnam
- real(dp),intent(out) :: ucvol !new
- integer,intent(in) :: ddbun,dimekb,iout,msym
- integer,intent(in) :: usepaw,natifc !new
- character(len=*),intent(in) :: filnam5 !new
- integer,intent(inout) :: natom,nkpt,nsym,ntypat,occopt,nblok2 !new in ==> inout
+ real(dp),intent(out) :: ucvol
+ integer,intent(in) :: ddbun,iout,msym
+ integer,intent(in) :: usepaw,natifc
+ character(len=*),intent(in) :: filnam5
+ integer,intent(inout) :: natom,nkpt,nsym,ntypat,occopt,nblok2
  type(anaddb_dataset_type),intent(in) :: anaddb_dtset
  type(ddb_type),intent(in) :: ddb
 !arrays
  real(dp),intent(inout) :: d2asr(2,3,natom,3,natom)
- integer,intent(out) :: symrel(3,3,msym)
- integer,intent(out) :: indsym(4,nsym,natom),symrec(3,3,msym) !new
- integer,intent(inout) :: typat(natom),atifc(natom)! new in ==> inout
- real(dp),intent(out) :: zion(ntypat),tnons(3,msym),gmet(3,3) !new
- real(dp),intent(out) :: gprim(3,3),rmet(3,3),xcart(3,natom) !new
- real(dp),intent(inout) :: acell(3),amu(ntypat),rprim(3,3),xred(3,natom)! new in ==> inout
+ integer,intent(out) :: symrel(3,3,nsym)
+ integer,intent(out) :: indsym(4,nsym,natom),symrec(3,3,nsym)
+ integer,intent(inout) :: typat(natom),atifc(natom)
+ real(dp),intent(out) :: zion(ntypat),tnons(3,nsym),gmet(3,3)
+ real(dp),intent(out) :: gprim(3,3),rmet(3,3),xcart(3,natom)
+ real(dp),intent(inout) :: acell(3),amu(ntypat),rprim(3,3),xred(3,natom)
 
 !Local variables-------------------------------
 !scalars
  integer,parameter :: msppol=2,master=0,bcorr0=0
- integer :: brav,chksymbreak,found,gqpt,iatom1,iatom2,iband,iblok,iblok2,idir1,idir2,ii,ikpt,ilatt,imod,index
+ integer :: brav,chksymbreak,found,gqpt,iatom1,iatom2,iband,iblok,iblok2,idir1,idir2,ii,jj,ikpt,ilatt,imod,index
  integer :: iomega,iqpt,iqpt1,iqpt2,iqpt2_previous,iqpt3,iscf_fake,itemper
  integer :: mpert_eig2,msize2,nene,ng2f,nqshft,nsym_new,unit_g2f,nqpt,nqpt_computed,qptopt,rftyp
 !integer :: mqpt,nqpt2,option
@@ -133,8 +133,14 @@ subroutine thmeig(g2fsmear,acell,amu,anaddb_dtset,d2asr,&
  real(dp),allocatable :: dedni(:,:,:,:),dednr(:,:,:,:)
  real(dp),allocatable :: eigen_in(:)
  real(dp),allocatable :: qpt_full(:,:),qptnrm(:)
- real(dp),allocatable :: spqpt(:,:),tnons_new(:,:)
+ real(dp),allocatable :: spqpt(:,:),tnons_new(:,:),spinat(:,:)
  real(dp),allocatable :: wghtq(:)
+ ! BEGIN DEBUG
+ !real(dp),allocatable :: wtk(:),occ(:),znucl(:),kpt(:,:),ekb(:,:)
+ !integer,allocatable :: pspso(:),nband(:),indlmn(:,:,:) !new
+ !type(pawtab_type),allocatable :: pawtab(:) !new
+ !integer :: choice, fullinit, nunit, vrsddb
+ ! END DEBUG
 
  integer :: ngfft(18) !new
 
@@ -160,6 +166,22 @@ subroutine thmeig(g2fsmear,acell,amu,anaddb_dtset,d2asr,&
 !0) Initializations
 !=========================================================================
 
+ ABI_ALLOCATE(symafm, (nsym))
+ ABI_ALLOCATE(spinat,(3,natom))
+
+ ! BEGIN DEBUG
+ !ABI_ALLOCATE(ekb,(dimekb,ntypat))
+ !ABI_ALLOCATE(indlmn,(6,lmnmax,ntypat))
+ !ABI_ALLOCATE(pspso,(ntypat))
+ !ABI_DATATYPE_ALLOCATE(pawtab,(ntypat*usepaw))
+ !call pawtab_nullify(pawtab)
+
+ !ABI_ALLOCATE(kpt,(3,nkpt))
+ !ABI_ALLOCATE(nband,(nkpt))
+ !ABI_ALLOCATE(occ,(nkpt*mband*msppol))
+ !ABI_ALLOCATE(wtk,(nkpt))
+ !ABI_ALLOCATE(znucl,(ntypat))
+ ! END DEBUG
 
 !At present, only atom-type perturbations are allowed for eig2 type matrix elements.
  mpert_eig2=natom
@@ -178,24 +200,47 @@ subroutine thmeig(g2fsmear,acell,amu,anaddb_dtset,d2asr,&
  write(std_out, '(a)' )  '- thmeig: Initialize the second-order electron-phonon file with name :'
  write(std_out, '(a,a)' )'-         ',trim(filnam5)
 
+ ! Temporarily commented
  call ddb_hdr_open_read(ddb_hdr, filnam5, ddbun, DDB_VERSION, &
 &                       msym=msym)
 
  !nkpt = ddb_hdr%nkpt
  !ntypat = ddb_hdr%ntypat
- nsym = ddb_hdr%nsym
+ !nsym = ddb_hdr%nsym
  acell = ddb_hdr%acell
  rprim = ddb_hdr%rprim
 
  amu(:) = ddb_hdr%amu(1:ntypat)
  typat(:) = ddb_hdr%typat(1:natom)
  zion(:) = ddb_hdr%zion(1:ntypat)
-
- symafm(:) = ddb_hdr%symafm(:)
- symrel(:,:,:) = ddb_hdr%symrel(:,:,:)
- tnons(:,:) = ddb_hdr%tnons(:,:)
+ symrel(:,:,1:nsym) = ddb_hdr%symrel(:,:,1:nsym)
+ tnons(:,1:nsym) = ddb_hdr%tnons(:,1:nsym)
 
  xred(:,:) = ddb_hdr%xred(:,:)
+
+ symafm(:) = ddb_hdr%symafm(1:nsym)
+ spinat(:,:) = ddb_hdr%spinat(:,1:natom)
+
+ ! BEGIN DEBUG
+! close(ddbun)
+! vrsddb = DDB_VERSION
+! nunit=ddbun ; natom_=natom ; nkpt_=nkpt ; ntypat_=ntypat
+! call ioddb8_in(filnam5,natom_,mband,&
+!& nkpt_,msym,ntypat_,nunit,vrsddb,&
+!& acell,amu,dilatmx,ecut,ecutsm,intxc,iscf,ixc,kpt,kptnrm,&
+!& natom,nband,ngfft,nkpt,nspden,nspinor,nsppol,nsym,ntypat,occ,occopt,&
+!& pawecutdg,rprim,dfpt_sciss,spinat,symafm,symrel,tnons,tolwfr,tphysel,tsmear,&
+!& typat,usepaw,wtk,xred,zion,znucl)
+!
+! useylm=usepaw;choice=1
+! call psddb8 (choice,dimekb,ekb,fullinit,indlmn,lmnmax,&
+!& nblok2,ntypat,nunit,pawtab,pspso,usepaw,useylm,vrsddb)
+ ! END DEBUG
+
+ ! DEBUG
+ !write(*,*)'thmeig: symrel=', symrel(:,:,1)
+ !write(*,*)'thmeig: symafm=', symafm(1)
+ ! END DEBUG
 
 !Compute different matrices in real and reciprocal space, also
 !checks whether ucvol is positive.
@@ -219,7 +264,7 @@ subroutine thmeig(g2fsmear,acell,amu,anaddb_dtset,d2asr,&
 !on which the referenced one is sent and also the translation bringing
 !back this atom to the referenced unit cell
  tolsym8=tol8
- call symatm(indsym,natom,nsym,symrec,tnons,tolsym8,typat,xred)
+ call symatm(indsym,natom,nsym,symrec(:,:,1:nsym),tnons(:,1:nsym),tolsym8,typat,xred)
 
 
 !Check the correctness of some input parameters,
@@ -316,7 +361,7 @@ subroutine thmeig(g2fsmear,acell,amu,anaddb_dtset,d2asr,&
      call symlatt(bravais,msym,nptsym,ptsymrel,rprimd,tolsym)
      use_inversion=1
      call symfind(0,(/zero,zero,zero/),gprimd,0,msym,natom,0,nptsym,nsym_new,0,&
-&     ptsymrel,ddb_hdr%spinat,symafm_new,symrel_new,tnons_new,tolsym,typat,use_inversion,xred)
+&     ptsymrel,spinat,symafm_new,symrel_new,tnons_new,tolsym,typat,use_inversion,xred)
      write(std_out,*)' thmeig : found ',nsym_new,' symmetries ',ch10
      qptopt=1
    else
@@ -382,8 +427,6 @@ subroutine thmeig(g2fsmear,acell,amu,anaddb_dtset,d2asr,&
 
 !!Prepare the reading of the EIG2 files
  call ddb_hdr_open_read(ddb_hdr, filnam5, ddbun, DDB_VERSION, msym=msym)
-
- amu(:) = ddb_hdr%amu(1:ntypat)
 
  call ddb_hdr_free(ddb_hdr)
 
@@ -565,7 +608,6 @@ subroutine thmeig(g2fsmear,acell,amu,anaddb_dtset,d2asr,&
  end do !iqpt
 
  close(ddbun)
-
 
 
 !=============================================================================
@@ -883,6 +925,21 @@ subroutine thmeig(g2fsmear,acell,amu,anaddb_dtset,d2asr,&
    end do
  end do
 
+ ! BEGIN DEBUG
+ !ABI_DEALLOCATE(ekb)
+ !ABI_DEALLOCATE(indlmn)
+ !ABI_DEALLOCATE(kpt)
+ !ABI_DEALLOCATE(nband)
+ !ABI_DEALLOCATE(occ)
+ !ABI_DEALLOCATE(pspso)
+ !ABI_DEALLOCATE(wtk)
+ !ABI_DEALLOCATE(znucl)
+ !call pawtab_free(pawtab)
+ !ABI_DATATYPE_DEALLOCATE(pawtab)
+ ! END DEBUG
+
+ ABI_DEALLOCATE(symafm)
+ ABI_DEALLOCATE(spinat)
 
  ABI_DEALLOCATE(dedni)
  ABI_DEALLOCATE(dednr)
