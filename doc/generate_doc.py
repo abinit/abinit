@@ -889,6 +889,11 @@ bib_content['bibtex']=""
 bib_content['bibliography']=""
 bib_content['acknowledgments']=""
 lines_txt=""
+cur_let = 'A'
+alphalinks="<hr> Goto "
+for i in string.ascii_uppercase:
+  alphalinks+=('<a href=#%s>%s</a> ')%(i,i)
+bib_content['bibliography']+=('<a id="%s"></a>')%(cur_let)+alphalinks+('<hr><hr><h2>%s</h2>')%(cur_let)
 for ref in bibtex_dics:
   entrytype=ref["ENTRYTYPE"]
   ID=ref["ID"]
@@ -900,6 +905,9 @@ for ref in bibtex_dics:
   lines_txt+= line
   bib_content['bibtex']+= ('<hr><a id="%s">%s</a> \n <pre>' ) %(ID,ID)
   bib_content['bibtex']+= line+'</pre> \n'
+  if ID[0]>cur_let:
+    cur_let=ID[0]
+    bib_content['bibliography']+=('<a id="%s"></a>')%(cur_let)+alphalinks+('<hr><hr><h2>%s</h2>')%(cur_let)
   bib_content['bibliography']+= ('<hr><a id="%s">[%s]</a> (<a href="./bibtex.html#%s">bibtex</a>)\n <br> %s \n') %(ID,ID,ID,reference_dic[ID])
   nlink=0
   for link in backlinksID:
