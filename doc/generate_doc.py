@@ -865,6 +865,7 @@ for topic_name in list_of_topics:
   for (i,ID) in enumerate(reflist):
     topic_refs+="<br> [["+ID+"]] "+reference_dic[ID]+"<br> \n"
   topic_refs+="<p>"
+  topic_refs=bibtex2html(topic_refs)
 
   #Generate the table of content
   item_toc=0
