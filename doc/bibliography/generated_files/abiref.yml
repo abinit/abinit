@@ -316,6 +316,7 @@
   author : O. Bengone, M. Alouani, P. Bl\"ochl, and J. Hugel
   title : Implementation of the projector augmented-wave {LDA}+{U} method: Application to the electronic structure of {N}i{O}
   journal : Phys. Rev. B
+  year : 1994
   volume : 62
   pages : 16392
 -
@@ -1081,6 +1082,7 @@
   author : W. Kolos and C.C.J. Roothaan
   title : Accurate Electronic Wave Functions for the H$_2$ Molecule
   journal : Rev. Mod. Phys.
+  year : 1960
   volume : 32
   pages : 219
 -
@@ -1363,6 +1365,15 @@
   year : 1981
   volume : 23
   pages : 5048
+-
+  ENTRYTYPE : article
+  ID : Pickett1988
+  author : Warren E. Pickett, Henry Krakauer, and Philip B. Allen
+  title : Smooth Fourier interpolation of periodic functions
+  journal : Phys. Rev. B
+  year : 1988
+  volume : 38
+  pages : 2721
 -
   ENTRYTYPE : article
   ID : Ponce2014
@@ -1770,6 +1781,15 @@
   doi : 10.1103/RevModPhys.85.1583
   publisher : American Physical Society
   issue : 4
+-
+  ENTRYTYPE : article
+  ID : Uehara2000
+  author : Kentaro Uehara and John S. Tse
+  title : Calculations of transport properties with the linearized augmented plane-wave method
+  journal : Phys. Rev. B
+  year : 2000
+  volume : 61
+  pages : 1639
 -
   ENTRYTYPE : article
   ID : Vanderbilt1998
