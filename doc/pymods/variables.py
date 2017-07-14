@@ -87,6 +87,7 @@ class Variable(yaml.YAMLObject):
 class Section(yaml.YAMLObject):
     name = None  # String containing section name
     keyword = '' # String containing the short description of the topics, to be echoed in the title of the section file.
+    authors = '' # String containing the list of authors.
     header = ''  # Header of the file, possibly the 'default' one
     title  = ''  # Title  of the file, possibly the 'default' one
     subtitle  = ''  # Subtitle  of the file, possibly the 'default' one
@@ -101,12 +102,13 @@ class Section(yaml.YAMLObject):
     yaml_tag = u'!section'
 
     def attrs(self):
-        return ['name', 'keyword', 'header', 'title', 'subtitle', 'purpose', 'advice', 'copyright', 'links', 'menu', 'tofcontent_header', 'end']
+        return ['name', 'keyword', 'authors', 'header', 'title', 'subtitle', 'purpose', 'advice', 'copyright', 'links', 'menu', 'tofcontent_header', 'end']
 
     #Note that the default values are actually not initialized here, but in the data file, in order to ease the maintenance.
-    def __init__(self, name=None, keyword=None, header=None, title=None, subtitle=None, purpose=None, advice=None, copyright=None, links=None, menu=None, tofcontent_header=None, end=None):
+    def __init__(self, name=None, keyword=None, authors=None, header=None, title=None, subtitle=None, purpose=None, advice=None, copyright=None, links=None, menu=None, tofcontent_header=None, end=None):
         self.name = name
         self.keyword = keyword
+        self.authors = authors
         self.header = header
         self.title  = title
         self.subtitle = subtitle

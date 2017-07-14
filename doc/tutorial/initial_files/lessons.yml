@@ -1,0 +1,45 @@
+# This file provides the information needed to generate the documentation files that describes the input variables,
+# the "var*.html files (each being a "section"), as well as related parameters ("special"), and the list of all input variables. 
+# Each paragraph of such documentation file has a mix of formatting html information and real content.
+
+# The present file contains the html information.
+# The "default" html information is presented in the section "default", at the bottom of the file. 
+# For most of the var*.html files, the default html formatting is hardly changed, so only minimal information
+# is needed to generate them. For the "special" parameters and for the list of all input variables,
+# some minor adjustments are needed, so that the default list # is less adequate.
+
+- !section
+    name : base1
+    keyword : First (basic) lesson 
+    authors : XG,RC
+    subtitle : The H<sub>2</sub> molecule, without convergence studies.
+
+- !section
+    name : default
+    keyword : Default keyword ... this is an error
+    authors : Default authors ... this is an error
+    header : |
+      <html>
+      <head><title>__KEYWORD__</title>
+      <link rel=stylesheet type="text/css" href="../formabinit.css">
+      </head>
+      <body bgcolor="#ffffff">
+
+      <hr>
+      <a name="top"></a>
+    title : |
+      <h1>ABINIT tutorial. __KEYWORD__ :</h1>
+    subtitle : |
+      Default subtitle ... this is an error
+    copyright : |
+      <h5>Copyright (C) 2000-2017 ABINIT group (__AUTHORS__)
+      <script type="text/javascript" src="__JS_PATH__copyright.js"> </script>
+      </h5> 
+    links : |
+      <script type="text/javascript" src="__JS_PATH__list_internal_links_for_generated_files.js"> </script>
+    tofcontent_header : |
+      <a name="list"></a>
+      <h3><b> __KEYWORD__ table of content:</b></h3>
+    end : |
+      </body>
+      </html>

@@ -33,6 +33,8 @@ invars_ini = "input_variables/initial_files"
 invars_gen = "input_variables/generated_files"
 topics_ini = "topics/initial_files"
 topics_gen = "topics/generated_files"
+tuto_ini = "tutorial/initial_files"
+tuto_gen = "tutorial/generated_files"
 
 ################################################################################
 ###############################################################################
@@ -127,6 +129,8 @@ def read_yaml_file(ymlfile):
     print("Use "+ymlfile+" as database input file for the list of topics ...")
   elif ymlfile== invars_ini+"/sections.yml":
     print("Use "+ymlfile+" as database input file for the list of sections ...")
+  elif ymlfile== tuto_ini+"/lessons.yml":
+    print("Use "+ymlfile+" as database input file for the list of lessons ...")
   elif ymlfile== topics_ini+"/tests_dirs.yml":
     print("Use "+ymlfile+" as database input file for the list of directories in which automatic test input files are present ...")
   elif ymlfile== topics_gen+"/topics_in_tests.yml":
@@ -261,6 +265,7 @@ def bibtex2html(str_input):
 ################################################################################
  
 variables=read_yaml_file(invars_ini+"/abinit_vars.yml")
+lessons=read_yaml_file(tuto_ini+"/lessons.yml")
 list_of_topics=read_yaml_file(topics_ini+"/list_of_topics.yml")
 sections=read_yaml_file(invars_ini+"/sections.yml")
 tests_dirs=read_yaml_file(topics_ini+"/tests_dirs.yml")
@@ -963,6 +968,61 @@ f_html = open(file_html,'w')
 f_html.write(all_topics_html)
 f_html.close()
 print("File %s written ..."%file_html )
+
+################################################################################
+################################################################################
+# Assemble the "lesson" files
+
+# Store the default informations
+for i, lesson_info in enumerate(lessons):
+  if lesson_info.name.strip()=="default":
+    lesson_info_default=lesson_info
+
+# Generate each "normal" lesson file : assemble the content, apply global transformations, then write.
+for i, lesson_info in enumerate(lessons):
+  lesson = lesson_info.name
+  if lesson=="default":
+    continue
+
+  f_lesson="tutorial/initial_files/lesson_"+lesson+".html"
+  print("Will use file "+f_lesson+" to build the lesson "+lesson+" ... ",end="")
+  lesson_yml=read_yaml_file(tuto_ini+"/lesson_"+lesson+".yml")
+
+  #DEBUG
+  print("")
+  print(" lesson_yml :")
+  print(lesson_yml)
+  print("")
+  #ENDDEBUG
+
+  #Write a first version of the html file, in the order "header" ... up to the "end"
+  #Take the info from the section "default" if there is no information on the specific section provided in the yml file.
+  lessonhtml=""
+  for j in ["header","title","subtitle","intro","copyright","links","menu","body","links","end"]:
+    if j in ["intro","body"] :
+      lessonhtml += lesson_yml[j]
+    else:
+      extract_j=getattr(lesson_info,j)
+      if extract_j.strip() == "":
+        lessonhtml += getattr(lesson_info_default,j)
+      else:
+        lessonhtml += extract_j
+    lessonhtml += "\n"
+
+  #Global operations on the tentative html file.
+  lessonhtml=lessonhtml.replace("__JS_PATH__",js_path)
+  lessonhtml=lessonhtml.replace("__KEYWORD__",lesson_info.keyword)
+  lessonhtml=lessonhtml.replace("__AUTHORS__",lesson_info.authors)
+  backlink=' <a href="../../%s/%s.html">Lesson %s<\a>' %(tuto_gen,lesson,lesson)
+  sectionhtml = doku2html(make_links(lessonhtml,None,list_all_vars,list_chars,cur_specials,backlinks,backlink))
+
+  #Write the finalized html file.
+  file_cur = tuto_gen+'/lesson_'+lesson+'.html'
+  f_cur = open(file_cur,'w')
+  f_cur.write(lessonhtml)
+  f_cur.write("\n")
+  f_cur.close()
+  print("File %s written ..."%file_cur )
 
 ################################################################################
 ################################################################################
