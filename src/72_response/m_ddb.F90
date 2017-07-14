@@ -1209,58 +1209,59 @@ subroutine rdddb9(acell,atifc,amu,ddb,&
  ABI_MALLOC(wtk,(nkpt))
 
 !Open the input derivative database file and read the preliminary information
-!!Note that in this call, mkpt has been replaced by nkpt, mtypat by ntypat, and matom by natom.
-! nunit=ddbun
-!
-!! To avoid aliasing
-! matom = natom
-! mkpt = nkpt
-! mtypat = ntypat
-!
-! call ioddb8_in(filnam,matom,mband,mkpt,msym,mtypat,nunit,vrsddb,&
-!& acell,amu,dilatmx,ecut,ecutsm,intxc,iscf,ixc,kpt,kptnrm,&
-!& natom,nband,ngfft,nkpt,nspden,nspinor,nsppol,nsym,ntypat,occ,occopt,&
-!& pawecutdg,rprim,dfpt_sciss,spinat,symafm,symrel,tnons,tolwfr,tphysel,tsmear,&
-!& typat,usepaw,wtk,xred,zion,znucl)
-!!Read the psp information of the input DDB
-! useylm=usepaw;choice=1
-! call psddb8 (choice,dimekb,ekb,fullinit,indlmn,lmnmax,&
-!& ddb%nblok,ntypat,nunit,pawtab,pspso,usepaw,useylm,vrsddb)
+!Note that in this call, mkpt has been replaced by nkpt, mtypat by ntypat, and matom by natom.
+ nunit=ddbun
+
+! To avoid aliasing
+ matom = natom
+ mkpt = nkpt
+ mtypat = ntypat
+
+ call ioddb8_in(filnam,matom,mband,mkpt,msym,mtypat,nunit,vrsddb,&
+& acell,amu,dilatmx,ecut,ecutsm,intxc,iscf,ixc,kpt,kptnrm,&
+& natom,nband,ngfft,nkpt,nspden,nspinor,nsppol,nsym,ntypat,occ,occopt,&
+& pawecutdg,rprim,dfpt_sciss,spinat,symafm,symrel,tnons,tolwfr,tphysel,tsmear,&
+& typat,usepaw,wtk,xred,zion,znucl)
+
+!Read the psp information of the input DDB
+ useylm=usepaw;choice=1
+ call psddb8 (choice,dimekb,ekb,fullinit,indlmn,lmnmax,&
+& ddb%nblok,ntypat,nunit,pawtab,pspso,usepaw,useylm,vrsddb)
 
 
 
- call ddb_hdr_open_read(ddb_hdr, filnam, ddbun, vrsddb, &
-&                       msym=msym, mband=mband)
+! call ddb_hdr_open_read(ddb_hdr, filnam, ddbun, vrsddb, &
+!&                       msym=msym, mband=mband)
 
  !nkpt = ddb_hdr%nkpt
- !ntypat = ddb_hdr%ntypat
- nsym = ddb_hdr%nsym
- acell = ddb_hdr%acell
- rprim = ddb_hdr%rprim
+! !ntypat = ddb_hdr%ntypat
+! nsym = ddb_hdr%nsym
+! acell = ddb_hdr%acell
+! rprim = ddb_hdr%rprim
+!
+! amu(:) = ddb_hdr%amu(1:ntypat)
+! typat(:) = ddb_hdr%typat(1:natom)
+! zion(:) = ddb_hdr%zion(1:ntypat)
+! znucl(:) = ddb_hdr%znucl(1:ntypat)
 
- amu(:) = ddb_hdr%amu(1:ntypat)
- typat(:) = ddb_hdr%typat(1:natom)
- zion(:) = ddb_hdr%zion(1:ntypat)
- znucl(:) = ddb_hdr%znucl(1:ntypat)
 
-
- do isym = 1,msym
-   symafm(isym) = ddb_hdr%symafm(isym)
-   do jj = 1,3
-     tnons(jj,isym) = ddb_hdr%tnons(jj,isym)
-     do ii = 1,3
-       symrel(ii,jj,isym) = ddb_hdr%symrel(ii,jj,isym)
-     end do
-   end do
- end do
+! do isym = 1,msym
+!   symafm(isym) = ddb_hdr%symafm(isym)
+!   do jj = 1,3
+!     tnons(jj,isym) = ddb_hdr%tnons(jj,isym)
+!     do ii = 1,3
+!       symrel(ii,jj,isym) = ddb_hdr%symrel(ii,jj,isym)
+!     end do
+!   end do
+! end do
 
  !symafm(:) = ddb_hdr%symafm(:)
  !symrel(:,:,:) = ddb_hdr%symrel(:,:,:)
  !tnons(:,:) = ddb_hdr%tnons(:,:)
 
- xred(:,:) = ddb_hdr%xred(:,:)
+! xred(:,:) = ddb_hdr%xred(:,:)
 
- call ddb_hdr_free(ddb_hdr)
+! call ddb_hdr_free(ddb_hdr)
 
 !Compute different matrices in real and reciprocal space, also
 !checks whether ucvol is positive.
