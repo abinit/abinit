@@ -527,7 +527,7 @@ end subroutine ddb_hdr_open_write
 !!
 !! SOURCE
 
-subroutine ddb_hdr_open_read(ddb_hdr, filnam, unddb, ddb_version, comm&
+subroutine ddb_hdr_open_read(ddb_hdr, filnam, unddb, ddb_version, comm, &
 &        matom,mtypat,mband,mkpt,msym,dimekb,lmnmax,usepaw,dimonly)
 
 
