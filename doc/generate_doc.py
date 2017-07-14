@@ -914,10 +914,11 @@ bib_content['bibliography']=""
 bib_content['acknowledgments']=""
 lines_txt=""
 cur_let = 'A'
-alphalinks="<hr> Go to "
+alphalinks="\n \n <hr> Go to "
 for i in string.ascii_uppercase:
   alphalinks+=('<a href=#%s>%s</a> ')%(i,i)
-bib_content['bibliography']+=('<a id="%s"></a>')%(cur_let)+alphalinks+('<hr><hr><h2>%s</h2>')%(cur_let)
+alphalinks+="\n \n"
+bib_content['bibliography']+=('<a id="%s"></a>')%(cur_let)+alphalinks+('<hr><hr><h2>%s</h2> \n \n')%(cur_let)
 for ref in bibtex_dics:
   entrytype=ref["ENTRYTYPE"]
   ID=ref["ID"]
@@ -931,7 +932,7 @@ for ref in bibtex_dics:
   bib_content['bibtex']+= line+'</pre> \n'
   if ID[0]>cur_let:
     cur_let=ID[0]
-    bib_content['bibliography']+=('<a id="%s"></a>')%(cur_let)+alphalinks+('<hr><hr><h2>%s</h2>')%(cur_let)
+    bib_content['bibliography']+=('<a id="%s"></a>')%(cur_let)+alphalinks+('<hr><hr><h2>%s</h2> \n \n')%(cur_let)
   bib_content['bibliography']+= ('<hr><a id="%s">[%s]</a> (<a href="./bibtex.html#%s">bibtex</a>)\n <br> %s \n') %(ID,ID,ID,reference_dic[ID])
   nlink=0
   for link in backlinksID:
@@ -979,7 +980,7 @@ for vowel in list_vowels:
     string_1= "{\\" + item + vowel + "}"
     string_2= "\\" + item + vowel
     string_3= "\\" + item + "{" + vowel + "}" 
-    string_final= r"&%s%s;" %(vowel,item)
+    string_final= r"&%s%s;" %(vowel,list_signs_out[i])
     bib_content['bibliography']=bib_content['bibliography'].replace(string_1,string_final)
     bib_content['bibliography']=bib_content['bibliography'].replace(string_2,string_final)
     bib_content['bibliography']=bib_content['bibliography'].replace(string_3,string_final)
@@ -1057,27 +1058,6 @@ for i, bibhtml_info in enumerate(bibhtml):
   f_cur.write("\n")
   f_cur.close()
   print("File %s written ..."%file_cur )
-
-################################################################################
-#Global operation on the bibliography html file : conversion from bibtex notation to html notation.
-#replace_list=[ "/{\\\'e}/&eacute;/",
-#               "/\\\'e/&eacute;/",
-#               "/\\\'{e}/&eacute;/"]
-#os_cmd= "cp %s/bibliography.html %s/work0" %(bib_gen,bib_gen)
-#retcode = os.system(os_cmd)
-#for (i,item) in enumerate(replace_list):
-#  sed_cmd = "sed -e '%s' %s/work%s > %s/work%s " %(item,bib_gen,i,bib_gen,i+1)
-#  #DEBUG
-#  print("")
-#  print(" Will work on i, item:",i,item)
-#  print(" sed_cmd :",sed_cmd)
-#  print("")
-#  #ENDDEBUG
-#  retcode = os.system(sed_cmd)
-#os_cmd= "cp %s/work%s %s/bibliography.html" %(bib_gen,i+1,bib_gen)
-#retcode = os.system(os_cmd)
-#os_cmd= "rm %s/work*" %(bib_gen)
-#retcode = os.system(os_cmd)
 
 ################################################################################
 
