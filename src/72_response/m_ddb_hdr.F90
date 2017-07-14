@@ -561,7 +561,7 @@ subroutine ddb_hdr_open_read(ddb_hdr, filnam, unddb, ddb_version, comm&
  if (present(comm)) then
    comm_l = comm
  else
-   comm = xmpi_comm_self
+   comm_l = xmpi_comm_self
  end if
 
  ! Read the dimensions from the DDB
@@ -569,7 +569,7 @@ subroutine ddb_hdr_open_read(ddb_hdr, filnam, unddb, ddb_version, comm&
  !     A safer option would be to have comm passed as an input argumet.
  call ddb_getdims(dimekb_l,filnam,lmnmax_l,mband_l,mblktyp, &
 &       msym_l,matom_l,nblok,mkpt_l,mtypat_l,unddb,usepaw_l, &
-&       ddb_version,comm)
+&       ddb_version,comm_l)
 
  close(unddb)
 
