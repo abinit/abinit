@@ -1825,7 +1825,10 @@ subroutine ddb_from_file(ddb,filename,brav,natom,natifc,atifc,crystal,comm,prtvo
    ! 2 is to preserve the old behaviour
    ddb%prtvol = 2; if (present(prtvol)) ddb%prtvol = prtvol
    ddb%occopt = occopt
-   ddb%amu = amu
+   !ddb%amu = amu
+   ! DEBUG
+   ddb%amu(1:ntypat) = amu(1:ntypat)
+   ! END DEBUG
    ABI_FREE(amu)
 
    ! Now the whole DDB is in central memory, contained in the array ddb%val(2,msize,nblok).
@@ -1866,6 +1869,13 @@ subroutine ddb_from_file(ddb,filename,brav,natom,natifc,atifc,crystal,comm,prtvo
  end do
 
  ! BEGIN DEBUG ============================================================== !
+ !
+ ! On abiref_gnu_5.3_openmpi
+ ! These lines make the test v2[13] fail with the error:
+ !
+ !    At line 5633 of file m_dynmat.F90
+ !    Fortran runtime error: Index '1' of dimension 1 of array 'amu'
+ !    above upper bound of -1360580392
  !
  !
  ABI_ALLOCATE(symrel_red, (3,3,nsym))
