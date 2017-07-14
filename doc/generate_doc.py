@@ -89,26 +89,32 @@ def format_default(defaultval):
 
 ################################################################################
 
-def make_links(text,cur_abivarname,variables,characteristics,specials,backlinks,backlink):
+def make_links(text,cur_key,variables,characteristics,specials,backlinks,backlink):
 
   def replace_link(mymatch):
-    abivarname = mymatch.group()[2:-2]
-    if abivarname == cur_abivarname:
-      return "<b>"+cur_abivarname+"</b>"
-    elif abivarname in variables.keys():
-      section = variables[abivarname]
-      return '<a href="../../input_variables/html_generated/'+section+".html#"+abivarname+"\">"+abivarname+"</a>"
-    elif abivarname in characteristics:
-      return '<a href="'+users_path+'abinit_help.html#'+str.replace(abivarname.lower()," ","_")+"\">"+abivarname+"</a>"
-    elif abivarname in specials:
-      return '<a href="specials.html#'+abivarname+'">'+abivarname+'</a>'
+    key = mymatch.group()[2:-2]
+    if key == cur_key:
+      return "<b>"+cur_key+"</b>"
+    elif key in variables.keys():
+      section = variables[key]
+      return '<a href="../../input_variables/generated_files/'+section+".html#"+key+"\">"+key+"</a>"
+    elif key in characteristics:
+      return '<a href="'+users_path+'abinit_help.html#'+str.replace(key.lower()," ","_")+"\">"+key+"</a>"
+    elif key in specials:
+      return '<a href="specials.html#'+key+'">'+key+'</a>'
+    elif key[:3] == "VAR":
+      return '<a href="../../input_variables/generated_files/'+key+".html\">"+key+"</a>"
+    elif key[:7] == "lesson_":
+      return '<a href="../../tutorial/'+key+".html\">"+key+"</a>"
+    elif key[-5:] == "_help":
+      return '<a href="../../users/'+key+".html\">"+key+"</a>"
     else:
-      result=get_year(abivarname)
+      result=get_year(key)
       if result != -9999 :
-        backlinks[abivarname]+=backlink+";"
-        return '[<a href="../../'+bib_gen+'/bibliography.html#'+abivarname+'">'+abivarname+'</a>]'
+        backlinks[key]+=backlink+";;"
+        return '[<a href="../../'+bib_gen+'/bibliography.html#'+key+'">'+key+'</a>]'
       else:
-        return '<a href="#">[[FAKE LINK:'+abivarname+']]</a>'
+        return '<a href="#">[[FAKE LINK:'+key+']]</a>'
     return mymatch.group()
 
   p=re.compile("\\[\\[([a-zA-Z0-9_ */<>]*)\\]\\]")
@@ -583,7 +589,7 @@ for (specialkey,specialval) in list_specials:
   cur_specials.append(specialkey)
 
 for (speckey, specval) in list_specials:
-  backlink= ' <a href="../../%s/specials.html#%s">%s</a> ' %(invars_gen,speckey,speckey)
+  backlink= ' &nbsp; <a href="../../%s/specials.html#%s">%s</a> &nbsp; ' %(invars_gen,speckey,speckey)
   cur_content = "<br><font id=\"title\"><a name=\""+speckey+"\">"+speckey+"</a></font>\n"
   cur_content += "<br><font id=\"text\">\n"
   cur_content += "<p>\n"+doku2html(make_links(specval,speckey,list_all_vars,list_chars,cur_specials,backlinks,backlink))+"\n"
@@ -601,7 +607,7 @@ for i, var in enumerate(variables):
   section = var.section
   all_vars[section].append([var.abivarname,var.mnemonics])
   cur_content = ""
-  backlink=' <a href="../../%s/%s.html#%s">%s</a> ' %(invars_gen,section,var.abivarname,var.abivarname)
+  backlink=' &nbsp; <a href="../../%s/%s.html#%s">%s</a> &nbsp; ' %(invars_gen,section,var.abivarname,var.abivarname)
 
   try:
     # Title
@@ -723,7 +729,7 @@ for i, section_info in enumerate(sections):
   #Global operations on the tentative html file.
   sectionhtml=sectionhtml.replace("__JS_PATH__",js_path)
   sectionhtml=sectionhtml.replace("__KEYWORD__",section_info.keyword)
-  backlink=' <a href="../../%s/%s.html#%s">%s<\a>' %(invars_gen,section,var.abivarname,var.abivarname)
+  backlink=' &nbsp; <a href="../../%s/%s.html#%s">%s<\a> &nbsp; ' %(invars_gen,section,var.abivarname,var.abivarname)
   sectionhtml = doku2html(make_links(sectionhtml,None,list_all_vars,list_chars,cur_specials,backlinks,backlink))
 
   #Write the finalized html file.
@@ -929,7 +935,7 @@ for topic_name in list_of_topics:
   topic_html=topic_html.replace("__JS_PATH__",js_path)
   topic_html=topic_html.replace("__HOWTO__",topic.howto)
   topic_html=topic_html.replace("__KEYWORD__",topic.keyword)
-  backlink=' <a href="../../%s/topic_%s.html">%s</a>' %(topics_gen,topic_name,topic_name)
+  backlink=' &nbsp; <a href="../../%s/topic_%s.html">%s</a> &nbsp; ' %(topics_gen,topic_name,topic_name)
 
   topic_html = doku2html(make_links(topic_html,None,list_all_vars,list_chars,cur_specials,backlinks,backlink))
 
@@ -959,7 +965,7 @@ for j in ["header","title","subtitle","copyright","links","toc_all","links","end
 #Global operations on the tentative html file.
 all_topics_html=all_topics_html.replace("__JS_PATH__",js_path)
 all_topics_html=all_topics_html.replace("__KEYWORD__",default_topic.keyword)
-backlink='<a href="../../%s/all_topics.html">all_topics.html</a>' %(topics_gen)
+backlink=' &nbsp; <a href="../../%s/all_topics.html">all_topics.html</a> &nbsp; ' %(topics_gen)
 all_topics_html = doku2html(make_links(all_topics_html,None,list_all_vars,list_chars,cur_specials,backlinks,backlink))
 
 # Open, write and close the file
@@ -988,13 +994,6 @@ for i, lesson_info in enumerate(lessons):
   print("Will use file "+f_lesson+" to build the lesson "+lesson+" ... ",end="")
   lesson_yml=read_yaml_file(tuto_ini+"/lesson_"+lesson+".yml")
 
-  #DEBUG
-  print("")
-  print(" lesson_yml :")
-  print(lesson_yml)
-  print("")
-  #ENDDEBUG
-
   #Write a first version of the html file, in the order "header" ... up to the "end"
   #Take the info from the section "default" if there is no information on the specific section provided in the yml file.
   lessonhtml=""
@@ -1013,8 +1012,8 @@ for i, lesson_info in enumerate(lessons):
   lessonhtml=lessonhtml.replace("__JS_PATH__",js_path)
   lessonhtml=lessonhtml.replace("__KEYWORD__",lesson_info.keyword)
   lessonhtml=lessonhtml.replace("__AUTHORS__",lesson_info.authors)
-  backlink=' <a href="../../%s/%s.html">Lesson %s<\a>' %(tuto_gen,lesson,lesson)
-  sectionhtml = doku2html(make_links(lessonhtml,None,list_all_vars,list_chars,cur_specials,backlinks,backlink))
+  backlink=' &nbsp; <a href="../../%s/lesson_%s.html">lesson_%s</a> &nbsp; ' %(tuto_gen,lesson,lesson)
+  lessonhtml = doku2html(make_links(lessonhtml,None,list_all_vars,list_chars,cur_specials,backlinks,backlink))
 
   #Write the finalized html file.
   file_cur = tuto_gen+'/lesson_'+lesson+'.html'
@@ -1031,7 +1030,7 @@ for i, lesson_info in enumerate(lessons):
 
 ################################################################################
 # Treat the links within the "introduction" of the acknowledgment section first.
-backlink= ' <a href="../../%s/acknowledgments.html">acknowledgments.html</a> ' %(bib_gen)
+backlink= ' &nbsp; <a href="../../%s/acknowledgments.html">acknowledgments.html</a> &nbsp; ' %(bib_gen)
 for i, bibhtml_info in enumerate(bibhtml):
   if bibhtml_info.name.strip()=="acknowledgments":
     bibhtml_intro=bibhtml_info.introduction
@@ -1055,7 +1054,7 @@ bib_content['bibliography']+=('<a id="%s"></a>')%(cur_let)+alphalinks+('<hr><hr>
 for ref in bibtex_dics:
   entrytype=ref["ENTRYTYPE"]
   ID=ref["ID"]
-  list_backlinksID=backlinks[ID].split(";")
+  list_backlinksID=backlinks[ID].split(";;")
   for (i,link) in enumerate(list_backlinksID):
      list_backlinksID[i]=link.strip()
   backlinksID=set(list_backlinksID)
@@ -1121,7 +1120,7 @@ for i, bibhtml_info in enumerate(bibhtml):
   #Global operations on the tentative html file.
   bibhtml=bibhtml.replace("__JS_PATH__",js_path)
   bibhtml=bibhtml.replace("__KEYWORD__",bibhtml_info.keyword)
-  backlink= ' <a href="../../%s/specials.html#%s">%s</a> ' %(bib_gen,bibname,bibname)
+  backlink= ' &nbsp; <a href="../../%s/specials.html#%s">%s</a> &nbsp; ' %(bib_gen,bibname,bibname)
   bibhtml = doku2html(make_links(bibhtml,None,list_all_vars,list_chars,cur_specials,backlinks,backlink))
 
   #Write the finalized html file.

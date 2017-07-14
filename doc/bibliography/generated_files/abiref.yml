@@ -316,7 +316,6 @@
   author : O. Bengone, M. Alouani, P. Bl\"ochl, and J. Hugel
   title : Implementation of the projector augmented-wave {LDA}+{U} method: Application to the electronic structure of {N}i{O}
   journal : Phys. Rev. B
-  year : 1994}
   volume : 62
   pages : 16392
 -
@@ -1076,6 +1075,14 @@
   publisher : American Physical Society
   doi : 10.1103/PhysRev.140.A1133
   number : 4A
+-
+  ENTRYTYPE : article
+  ID : Kolos1960
+  author : W. Kolos and C.C.J. Roothaan
+  title : Accurate Electronic Wave Functions for the H$_2$ Molecule
+  journal : Rev. Mod. Phys.
+  volume : 32
+  pages : 219
 -
   ENTRYTYPE : article
   ID : Kotliar2006

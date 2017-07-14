@@ -121,7 +121,7 @@ variables to be used in the main input file of the abinit code.
 or for non linear RF calculations (to get mixed higher order derivatives you need several perturbed
 densities and wave functions).
 Indicate the files from which first-order densities must be obtained,
-in multi-dataset mode (in single dataset mode, use <a href="../../input_variables/html_generated/varfil.html#ird1den">ird1den</a>).
+in multi-dataset mode (in single dataset mode, use <a href="../../input_variables/generated_files/varfil.html#ird1den">ird1den</a>).
  <br />
  NOTE : a negative value of a "get" variable indicates the number of datasets to go backwards;
 it is not the number to be subtracted from the current dataset to find the proper dataset.
@@ -146,10 +146,10 @@ As an example :
 <br><font id="text">
 <p>
 <p>
- Eventually used when <a href="../../input_variables/html_generated/varbas.html#ndtset">ndtset</a>&gt;0
+ Eventually used when <a href="../../input_variables/generated_files/varbas.html#ndtset">ndtset</a>&gt;0
 (in the multi-dataset mode), to indicate
-starting wavefunctions, as an alternative to <a href="../../input_variables/html_generated/varfil.html#irdwfk">irdwfk</a>,
-<a href="../../input_variables/html_generated/varfil.html#irdwfq">irdwfq</a>, <a href="../../input_variables/html_generated/varfil.html#ird1wf">ird1wf</a>, <a href="../../input_variables/html_generated/varfil.html#irdddk">irdddk</a>. One should first read the
+starting wavefunctions, as an alternative to <a href="../../input_variables/generated_files/varfil.html#irdwfk">irdwfk</a>,
+<a href="../../input_variables/generated_files/varfil.html#irdwfq">irdwfq</a>, <a href="../../input_variables/generated_files/varfil.html#ird1wf">ird1wf</a>, <a href="../../input_variables/generated_files/varfil.html#irdddk">irdddk</a>. One should first read the
 explanations given for these latter variables.
  <br />
  The
@@ -260,7 +260,7 @@ As an example :
 <br><font id="text">
 <p>
 <p>
- Eventually used when <a href="../../input_variables/html_generated/varbas.html#ndtset">ndtset</a>&gt;0
+ Eventually used when <a href="../../input_variables/generated_files/varbas.html#ndtset">ndtset</a>&gt;0
 (multi-dataset mode) and, in the case of a Bethe-Salpeter
 calculation to indicate that the starting coupling block of the excitonic Hamiltonian will be taken from the output of a previous dataset.
 It is used to chain the calculations, since it describes from which dataset the OUTPUT coupling
@@ -292,7 +292,7 @@ a disk file, so that it is as if <b>getbscoup</b>=0 for that initialisation.
 <br><font id="text">
 <p>
 <p>
- Eventually used when <a href="../../input_variables/html_generated/varbas.html#ndtset">ndtset</a>&gt;0
+ Eventually used when <a href="../../input_variables/generated_files/varbas.html#ndtset">ndtset</a>&gt;0
 (multi-dataset mode) and, in the case of a Bethe-Salpeter
 calculation to indicate that the starting excitonic eigenstates are to be taken from the output of a previous dataset.
 It is used to chain the calculations, since it describes from which dataset the OUTPUT eigenstates
@@ -326,7 +326,7 @@ a disk file, so that it is as if <b>getbseig</b>=0 for that initialisation.
 <br><font id="text">
 <p>
 <p>
- Eventually used when <a href="../../input_variables/html_generated/varbas.html#ndtset">ndtset</a>&gt;0
+ Eventually used when <a href="../../input_variables/generated_files/varbas.html#ndtset">ndtset</a>&gt;0
 (multi-dataset mode) and, in the case of a Bethe-Salpeter
 calculation to indicate that the starting resonant block of the excitonic Hamiltonian will be taken from the output of a previous dataset.
 It is used to chain the calculations, since it describes from which dataset the OUTPUT resonant
@@ -408,9 +408,9 @@ As an example :
 <br><font id="text">
 <p>
 <p>
- Eventually used when <a href="../../input_variables/html_generated/varbas.html#ndtset">ndtset</a>&gt;0
+ Eventually used when <a href="../../input_variables/generated_files/varbas.html#ndtset">ndtset</a>&gt;0
 (in the multi-dataset mode), to indicate
-starting wavefunctions, as an alternative to <a href="../../input_variables/html_generated/varfil.html#irdwfk">irdwfk</a>,<a href="../../input_variables/html_generated/varfil.html#irdwfq">irdwfq</a>,<a href="../../input_variables/html_generated/varfil.html#ird1wf">ird1wf</a>,<a href="../../input_variables/html_generated/varfil.html#irdddk">irdddk</a>.
+starting wavefunctions, as an alternative to <a href="../../input_variables/generated_files/varfil.html#irdwfk">irdwfk</a>,<a href="../../input_variables/generated_files/varfil.html#irdwfq">irdwfq</a>,<a href="../../input_variables/generated_files/varfil.html#ird1wf">ird1wf</a>,<a href="../../input_variables/generated_files/varfil.html#irdddk">irdddk</a>.
  One should first read the
 explanations given for these latter variables.
  <br />
@@ -526,9 +526,9 @@ As an example :
 <br><font id="text">
 <p>
 <p>
- Eventually used when <a href="../../input_variables/html_generated/varbas.html#ndtset">ndtset</a>&gt;0
+ Eventually used when <a href="../../input_variables/generated_files/varbas.html#ndtset">ndtset</a>&gt;0
 (multi-dataset mode) and, in the case of a ground-state
-calculation, if <a href="../../input_variables/html_generated/varbas.html#iscf">iscf</a>&lt;0 (non-SCF calculation),
+calculation, if <a href="../../input_variables/generated_files/varbas.html#iscf">iscf</a>&lt;0 (non-SCF calculation),
 to indicate that the starting density is to be taken
 from the output of a previous dataset.
 It is used to chain the calculations,
@@ -556,10 +556,10 @@ is not initialized by reading a disk file, the output
 density of one dataset is input of the next one.
  <br />
  Be careful : the output density file of a run with
-non-zero <a href="../../input_variables/html_generated/varrlx.html#ionmov">ionmov</a> does not have the proper name (it has a "TIM"
-indication) for use as an input of an <a href="../../input_variables/html_generated/varbas.html#iscf">iscf</a>&lt;0 calculation.
+non-zero <a href="../../input_variables/generated_files/varrlx.html#ionmov">ionmov</a> does not have the proper name (it has a "TIM"
+indication) for use as an input of an <a href="../../input_variables/generated_files/varbas.html#iscf">iscf</a>&lt;0 calculation.
  <br />
- One should use the output density of a <a href="../../input_variables/html_generated/varrlx.html#ionmov">ionmov</a>==0 run.
+ One should use the output density of a <a href="../../input_variables/generated_files/varrlx.html#ionmov">ionmov</a>==0 run.
  <br />
  NOTE : a negative value of a "get" variable indicates the number of datasets to go backwards;
 it is not the number to be subtracted from the current dataset to find the proper dataset.
@@ -584,7 +584,7 @@ As an example :
 <br><font id="text">
 <p>
 <p>
- Eventually used when <a href="../../input_variables/html_generated/varbas.html#ndtset">ndtset</a>&gt;0
+ Eventually used when <a href="../../input_variables/generated_files/varbas.html#ndtset">ndtset</a>&gt;0
 (multi-dataset mode) and, in the case of a Bethe-Salpeter
 calculation to indicate that the Haydock iterative technique will be restarted from the output of a previous dataset.
  <br />
@@ -615,8 +615,8 @@ a disk file, so that it is as if <b>gethaydock</b>=0 for that initialisation.
 <p>
 <p>
  This variable is typically used to chain the calculations,
-in the multi-dataset mode (<a href="../../input_variables/html_generated/varbas.html#ndtset">ndtset</a>&gt;0),
-since it describes from which dataset the array <a href="../../input_variables/html_generated/vargs.html#occ">occ</a>
+in the multi-dataset mode (<a href="../../input_variables/generated_files/varbas.html#ndtset">ndtset</a>&gt;0),
+since it describes from which dataset the array <a href="../../input_variables/generated_files/vargs.html#occ">occ</a>
 is to be taken, as input of the present
 dataset. The occupation numbers are <a href="../../users/abinit_help.html#evolving">EVOLVING</a> variables,
 for which such a chain of calculations is useful.
@@ -635,11 +635,11 @@ must be taken, which is a frequently occurring case.
 of datasets to go backward to find the needed data.
 In this case, if one refers to a non existent data set (prior to the first), the date is not initialised from a disk file, so that it is as if <b>getocc</b>==0 for that initialisation.
  <br />
- NOTE that a non-zero <b>getocc</b> MUST be used with <a href="../../input_variables/html_generated/varbas.html#occopt">occopt</a>==2,
+ NOTE that a non-zero <b>getocc</b> MUST be used with <a href="../../input_variables/generated_files/varbas.html#occopt">occopt</a>==2,
 so that the number of bands has to be initialized for
 each k point. Of course, these numbers of bands must be
 identical to the numbers of bands of the dataset from which
-<a href="../../input_variables/html_generated/vargs.html#occ">occ</a> will be copied. The same is true for the number of k points.
+<a href="../../input_variables/generated_files/vargs.html#occ">occ</a> will be copied. The same is true for the number of k points.
  <br />
  NOTE : a negative value of a "get" variable indicates the number of datasets to go backwards;
 it is not the number to be subtracted from the current dataset to find the proper dataset.
@@ -664,13 +664,13 @@ As an example :
 <br><font id="text">
 <p>
 <p>
- Used when <a href="../../input_variables/html_generated/varbas.html#ndtset">ndtset</a>&gt;0
-(multi-dataset mode) and <a href="../../input_variables/html_generated/vargs.html#optdriver">optdriver</a>=3, or 4
+ Used when <a href="../../input_variables/generated_files/varbas.html#ndtset">ndtset</a>&gt;0
+(multi-dataset mode) and <a href="../../input_variables/generated_files/vargs.html#optdriver">optdriver</a>=3, or 4
 (screening or sigma step of a <a href="../../users/abinit_help.html#gw">GW</a> calculation),
 to indicate that the eigenvalues and possibly the wavefunctions have to be
 taken from a previous quasiparticle calculation (instead of the usual LDA starting
 point). This is to achieve quasiparticle self-consistency.
-See also <a href="../../input_variables/html_generated/varfil.html#irdqps">irdqps</a>
+See also <a href="../../input_variables/generated_files/varfil.html#irdqps">irdqps</a>
  <br />
  NOTE : a negative value of a "get" variable indicates the number of datasets to go backwards;
 it is not the number to be subtracted from the current dataset to find the proper dataset.
@@ -695,8 +695,8 @@ As an example :
 <br><font id="text">
 <p>
 <p>
- Used when <a href="../../input_variables/html_generated/varbas.html#ndtset">ndtset</a>&gt;0
-(multi-dataset mode) and <a href="../../input_variables/html_generated/vargs.html#optdriver">optdriver</a>=4
+ Used when <a href="../../input_variables/generated_files/varbas.html#ndtset">ndtset</a>&gt;0
+(multi-dataset mode) and <a href="../../input_variables/generated_files/vargs.html#optdriver">optdriver</a>=4
 (sigma step of a <a href="../../users/abinit_help.html#gw">GW</a> calculation),
 to indicate that the dielectric matrix (_SCR file) is to be taken
 from the output of a previous dataset.
@@ -743,8 +743,8 @@ As an example :
 <br><font id="text">
 <p>
 <p>
- Used when <a href="../../input_variables/html_generated/varbas.html#ndtset">ndtset</a>&gt;0
-(multi-dataset mode) and <a href="../../input_variables/html_generated/vargs.html#optdriver">optdriver</a>=4
+ Used when <a href="../../input_variables/generated_files/varbas.html#ndtset">ndtset</a>&gt;0
+(multi-dataset mode) and <a href="../../input_variables/generated_files/vargs.html#optdriver">optdriver</a>=4
 (sigma step of a <a href="../../users/abinit_help.html#gw">GW</a> calculation),
 to indicate that the irreducible polarizability (_SUSC file) is to be taken
 from the output of a previous dataset.
@@ -755,7 +755,7 @@ the advantage that starting from the irreducible polarizability, one can calcula
 using different expressions without having to perform a screening calculation from scratch.
 For example, it is possible to apply a cutoff to the Coulomb interaction in order
 to facilitate the convergence of the <a href="../../users/abinit_help.html#gw">GW</a> correction with respect to the size of the supercell
-(see <a href="../../input_variables/html_generated/vargw.html#vcutgeo">vcutgeo</a> and <a href="../../input_variables/html_generated/vargw.html#icutcoul">icutcoul</a>)
+(see <a href="../../input_variables/generated_files/vargw.html#vcutgeo">vcutgeo</a> and <a href="../../input_variables/generated_files/vargw.html#icutcoul">icutcoul</a>)
  <br />
  If <b>getsuscep</b>==0, no such use of previously computed output _SUSC file is done.
  <br />
@@ -795,9 +795,9 @@ As an example :
 <br><font id="text">
 <p>
 <p>
- Eventually used when <a href="../../input_variables/html_generated/varbas.html#ndtset">ndtset</a>&gt;0
+ Eventually used when <a href="../../input_variables/generated_files/varbas.html#ndtset">ndtset</a>&gt;0
 (in the multi-dataset mode), to indicate
-starting wavefunctions, as an alternative to <a href="../../input_variables/html_generated/varfil.html#irdwfk">irdwfk</a>,<a href="../../input_variables/html_generated/varfil.html#irdwfq">irdwfq</a>,<a href="../../input_variables/html_generated/varfil.html#ird1wf">ird1wf</a>, or <a href="../../input_variables/html_generated/varfil.html#irdddk">irdddk</a>.
+starting wavefunctions, as an alternative to <a href="../../input_variables/generated_files/varfil.html#irdwfk">irdwfk</a>,<a href="../../input_variables/generated_files/varfil.html#irdwfq">irdwfq</a>,<a href="../../input_variables/generated_files/varfil.html#ird1wf">ird1wf</a>, or <a href="../../input_variables/generated_files/varfil.html#irdddk">irdddk</a>.
  One should first read the
 explanations given for these latter variables.
  <br />
@@ -885,9 +885,9 @@ As an example :
 <br><font id="text">
 <p>
 <p>
- Eventually used when <a href="../../input_variables/html_generated/varbas.html#ndtset">ndtset</a>&gt;0
+ Eventually used when <a href="../../input_variables/generated_files/varbas.html#ndtset">ndtset</a>&gt;0
 (in the multi-dataset mode), to indicate
-starting wavefunctions, as an alternative to <a href="../../input_variables/html_generated/varfil.html#irdwfk">irdwfk</a>,<a href="../../input_variables/html_generated/varfil.html#irdwfq">irdwfq</a>,<a href="../../input_variables/html_generated/varfil.html#ird1wf">ird1wf</a> or <a href="../../input_variables/html_generated/varfil.html#irdddk">irdddk</a>.
+starting wavefunctions, as an alternative to <a href="../../input_variables/generated_files/varfil.html#irdwfk">irdwfk</a>,<a href="../../input_variables/generated_files/varfil.html#irdwfq">irdwfq</a>,<a href="../../input_variables/generated_files/varfil.html#ird1wf">ird1wf</a> or <a href="../../input_variables/generated_files/varfil.html#irdddk">irdddk</a>.
  One should first read the
 explanations given for these latter variables.
  <br />
@@ -994,7 +994,7 @@ As an example :
 <br><font id="mnemonics">Mnemonics: Integer that governs the ReaDing of 1st-order DEN file</font>
 <br><font id="characteristic">Characteristic: </font>
 <br><font id="vartype">Variable type: integer</font>
-<br><font id="default">Default is 1 if <a href="../../input_variables/html_generated/varbas.html#iscf">iscf</a> < 0,
+<br><font id="default">Default is 1 if <a href="../../input_variables/generated_files/varbas.html#iscf">iscf</a> < 0,
 0 otherwise.
 </font>
 <br><font id="text">
@@ -1003,7 +1003,7 @@ If first order density is needed in single dataset mode
 (for example in nonlinear optical response),
 use <b>ird1den</b>=1 to read first-order densities from _DENx files produced in
 other calculations. In multi-dataset mode use
-<a href="../../input_variables/html_generated/varfil.html#get1den">get1den</a>.
+<a href="../../input_variables/generated_files/varfil.html#get1den">get1den</a>.
 </p>
 When iscf &#60; 0, the reading of a DEN file is always enforced.
 </p>
@@ -1037,9 +1037,9 @@ see the
 <p>
  Indicates eventual starting
 wavefunctions. As alternative, one can use the
-input variables <a href="../../input_variables/html_generated/varfil.html#getwfk">getwfk</a>,
-<a href="../../input_variables/html_generated/varfil.html#getwfq">getwfq</a>, <a href="../../input_variables/html_generated/varfil.html#get1wf">get1wf</a>
-or <a href="../../input_variables/html_generated/varfil.html#getddk">getddk</a>.
+input variables <a href="../../input_variables/generated_files/varfil.html#getwfk">getwfk</a>,
+<a href="../../input_variables/generated_files/varfil.html#getwfq">getwfq</a>, <a href="../../input_variables/generated_files/varfil.html#get1wf">get1wf</a>
+or <a href="../../input_variables/generated_files/varfil.html#getddk">getddk</a>.
  <br />
  <br />
  Ground-state calculation :
@@ -1049,21 +1049,21 @@ or <a href="../../input_variables/html_generated/varfil.html#getddk">getddk</a>.
    <b>
     irdwfk
    </b>
-   and <a href="../../input_variables/html_generated/varfil.html#getwfk">getwfk</a> have a meaning
+   and <a href="../../input_variables/generated_files/varfil.html#getwfk">getwfk</a> have a meaning
   </li>
   <li>
    at most one of
    <b>
     irdwfk
    </b>
-   or <a href="../../input_variables/html_generated/varfil.html#getwfk">getwfk</a> can be non-zero
+   or <a href="../../input_variables/generated_files/varfil.html#getwfk">getwfk</a> can be non-zero
   </li>
   <li>
    if
    <b>
     irdwfk
    </b>
-   and <a href="../../input_variables/html_generated/varfil.html#getwfk">getwfk</a> are both zero,
+   and <a href="../../input_variables/generated_files/varfil.html#getwfk">getwfk</a> are both zero,
 initialize wavefunctions with
 random numbers for ground state calculation.
   </li>
@@ -1088,7 +1088,7 @@ previous ground state calculation (see the
    <b>
     irdwfk
    </b>
-   or <a href="../../input_variables/html_generated/varfil.html#getwfk">getwfk</a> MUST be non-zero
+   or <a href="../../input_variables/generated_files/varfil.html#getwfk">getwfk</a> MUST be non-zero
   </li>
   <li>
    if
@@ -1108,13 +1108,13 @@ previous ground state calculation (see the
    <b>
     irdwfq
    </b>
-   or <a href="../../input_variables/html_generated/varfil.html#getwfq">getwfq</a> can be non-zero,
+   or <a href="../../input_variables/generated_files/varfil.html#getwfq">getwfq</a> can be non-zero,
 if both of them are non-zero,
 use as k + q file the one defined by
    <b>
     irdwfk
    </b>
-   and/or <a href="../../input_variables/html_generated/varfil.html#getwfk">getwfk</a>
+   and/or <a href="../../input_variables/generated_files/varfil.html#getwfk">getwfk</a>
   </li>
   <li>
    if
@@ -1130,7 +1130,7 @@ previous ground state calculation (see the
    of abinit_help).
   </li>
   <li>
-   at most one of <b>ird1wf</b> or <a href="../../input_variables/html_generated/varfil.html#get1wf">get1wf</a> can be non-zero
+   at most one of <b>ird1wf</b> or <a href="../../input_variables/generated_files/varfil.html#get1wf">get1wf</a> can be non-zero
   </li>
   <li>
    if both are zero, initialize first order wavefunctions to zeroes
@@ -1149,7 +1149,7 @@ previous response function calculation (see the
    <b>
     irdddk
    </b>
-   or <a href="../../input_variables/html_generated/varfil.html#getddk">getddk</a> can be non-zero
+   or <a href="../../input_variables/generated_files/varfil.html#getddk">getddk</a> can be non-zero
   </li>
   <li>
    one of them must be non-zero if an homogeneous
@@ -1230,7 +1230,7 @@ previous response function calculation (see the
 <br><font id="mnemonics">Mnemonics: Integer that governs the ReaDing of DDB file</font>
 <br><font id="characteristic">Characteristic: </font>
 <br><font id="vartype">Variable type: integer</font>
-<br><font id="default">Default is 1 if <a href="../../input_variables/html_generated/varbas.html#iscf">iscf</a> < 0,
+<br><font id="default">Default is 1 if <a href="../../input_variables/generated_files/varbas.html#iscf">iscf</a> < 0,
 0 otherwise.
 </font>
 <br><font id="text">
@@ -1278,9 +1278,9 @@ see the
 <p>
  Indicates eventual starting
 wavefunctions. As alternative, one can use the
-input variables <a href="../../input_variables/html_generated/varfil.html#getwfk">getwfk</a>,
-<a href="../../input_variables/html_generated/varfil.html#getwfq">getwfq</a>, <a href="../../input_variables/html_generated/varfil.html#get1wf">get1wf</a>
-or <a href="../../input_variables/html_generated/varfil.html#getddk">getddk</a>.
+input variables <a href="../../input_variables/generated_files/varfil.html#getwfk">getwfk</a>,
+<a href="../../input_variables/generated_files/varfil.html#getwfq">getwfq</a>, <a href="../../input_variables/generated_files/varfil.html#get1wf">get1wf</a>
+or <a href="../../input_variables/generated_files/varfil.html#getddk">getddk</a>.
  <br />
  <br />
  Ground-state calculation :
@@ -1290,21 +1290,21 @@ or <a href="../../input_variables/html_generated/varfil.html#getddk">getddk</a>.
    <b>
     irdwfk
    </b>
-   and <a href="../../input_variables/html_generated/varfil.html#getwfk">getwfk</a> have a meaning
+   and <a href="../../input_variables/generated_files/varfil.html#getwfk">getwfk</a> have a meaning
   </li>
   <li>
    at most one of
    <b>
     irdwfk
    </b>
-   or <a href="../../input_variables/html_generated/varfil.html#getwfk">getwfk</a> can be non-zero
+   or <a href="../../input_variables/generated_files/varfil.html#getwfk">getwfk</a> can be non-zero
   </li>
   <li>
    if
    <b>
     irdwfk
    </b>
-   and <a href="../../input_variables/html_generated/varfil.html#getwfk">getwfk</a> are both zero,
+   and <a href="../../input_variables/generated_files/varfil.html#getwfk">getwfk</a> are both zero,
 initialize wavefunctions with
 random numbers for ground state calculation.
   </li>
@@ -1329,7 +1329,7 @@ previous ground state calculation (see the
    <b>
     irdwfk
    </b>
-   or <a href="../../input_variables/html_generated/varfil.html#getwfk">getwfk</a> MUST be non-zero
+   or <a href="../../input_variables/generated_files/varfil.html#getwfk">getwfk</a> MUST be non-zero
   </li>
   <li>
    if
@@ -1349,13 +1349,13 @@ previous ground state calculation (see the
    <b>
     irdwfq
    </b>
-   or <a href="../../input_variables/html_generated/varfil.html#getwfq">getwfq</a> can be non-zero,
+   or <a href="../../input_variables/generated_files/varfil.html#getwfq">getwfq</a> can be non-zero,
 if both of them are non-zero,
 use as k + q file the one defined by
    <b>
     irdwfk
    </b>
-   and/or <a href="../../input_variables/html_generated/varfil.html#getwfk">getwfk</a>
+   and/or <a href="../../input_variables/generated_files/varfil.html#getwfk">getwfk</a>
   </li>
   <li>
    if
@@ -1375,7 +1375,7 @@ previous ground state calculation (see the
    <b>
     ird1wf
    </b>
-   or <a href="../../input_variables/html_generated/varfil.html#get1wf">get1wf</a> can be non-zero
+   or <a href="../../input_variables/generated_files/varfil.html#get1wf">get1wf</a> can be non-zero
   </li>
   <li>
    if both are zero, initialize first order wavefunctions
@@ -1395,7 +1395,7 @@ previous response function calculation (see the
    of abinit_help).
   </li>
   <li>
-   at most one of <b>irdddk</b> or <a href="../../input_variables/html_generated/varfil.html#getddk">getddk</a> can be non-zero
+   at most one of <b>irdddk</b> or <a href="../../input_variables/generated_files/varfil.html#getddk">getddk</a> can be non-zero
   </li>
   <li>
    one of them must be non-zero if an homogeneous
@@ -1425,7 +1425,7 @@ previous response function calculation (see the
 <br><font id="characteristic">Characteristic: </font>
 <br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_GSgeneral.html">GSgeneral</a> </font>
 <br><font id="vartype">Variable type: integer</font>
-<br><font id="default">Default is 1 if <a href="../../input_variables/html_generated/varbas.html#iscf">iscf</a> < 0,
+<br><font id="default">Default is 1 if <a href="../../input_variables/generated_files/varbas.html#iscf">iscf</a> < 0,
 0 otherwise.
 </font>
 <br><font id="text">
@@ -1475,10 +1475,10 @@ see the
 <br><font id="text">
 <p>
 <p>
- Relevant only when <a href="../../input_variables/html_generated/vargs.html#optdriver">optdriver</a>=3 or 4.
+ Relevant only when <a href="../../input_variables/generated_files/vargs.html#optdriver">optdriver</a>=3 or 4.
 Indicate the file from which the eigenvalues and possibly the wavefunctions must be obtained,
 in order to achieve a self-consistent quasiparticle calculations.
-See also <a href="../../input_variables/html_generated/varfil.html#getqps">getqps</a>
+See also <a href="../../input_variables/generated_files/varfil.html#getqps">getqps</a>
 </p>
 </font>
 
@@ -1494,14 +1494,14 @@ See also <a href="../../input_variables/html_generated/varfil.html#getqps">getqp
 <br><font id="text">
 <p>
 <p>
- Relevant only when <a href="../../input_variables/html_generated/vargs.html#optdriver">optdriver</a>=4.
+ Relevant only when <a href="../../input_variables/generated_files/vargs.html#optdriver">optdriver</a>=4.
 Indicate the file from which the dielectric matrix must be obtained.
 As alternative, one can use the input variable
-<a href="../../input_variables/html_generated/varfil.html#getscr">getscr</a>.
+<a href="../../input_variables/generated_files/varfil.html#getscr">getscr</a>.
  <br />
- When <a href="../../input_variables/html_generated/vargs.html#optdriver">optdriver</a>=4, at least one of
-<b>irdscr</b> or <a href="../../input_variables/html_generated/varfil.html#getscr">getscr</a>
-(alternatively, <a href="../../input_variables/html_generated/varfil.html#irdsuscep">irdsuscep</a> or <a href="../../input_variables/html_generated/varfil.html#getsuscep">getsuscep</a>)
+ When <a href="../../input_variables/generated_files/vargs.html#optdriver">optdriver</a>=4, at least one of
+<b>irdscr</b> or <a href="../../input_variables/generated_files/varfil.html#getscr">getscr</a>
+(alternatively, <a href="../../input_variables/generated_files/varfil.html#irdsuscep">irdsuscep</a> or <a href="../../input_variables/generated_files/varfil.html#getsuscep">getsuscep</a>)
 must be non-zero.
 </p>
 <p>
@@ -1526,14 +1526,14 @@ see the
 <br><font id="text">
 <p>
 <p>
- Relevant only when <a href="../../input_variables/html_generated/vargs.html#optdriver">optdriver</a>=4.
+ Relevant only when <a href="../../input_variables/generated_files/vargs.html#optdriver">optdriver</a>=4.
 Indicate the file from which the irreducible polarizability must be obtained.
 As alternative, one can use the input variable
-<a href="../../input_variables/html_generated/varfil.html#getsuscep">getsuscep</a>.
+<a href="../../input_variables/generated_files/varfil.html#getsuscep">getsuscep</a>.
  <br />
- When <a href="../../input_variables/html_generated/vargs.html#optdriver">optdriver</a>=4, at least one of
-<b>irdsuscep</b> or <a href="../../input_variables/html_generated/varfil.html#getsuscep">getsuscep</a>
-(alternatively, <a href="../../input_variables/html_generated/varfil.html#irdscr">irdscr</a> or <a href="../../input_variables/html_generated/varfil.html#getscr">getscr</a>)
+ When <a href="../../input_variables/generated_files/vargs.html#optdriver">optdriver</a>=4, at least one of
+<b>irdsuscep</b> or <a href="../../input_variables/generated_files/varfil.html#getsuscep">getsuscep</a>
+(alternatively, <a href="../../input_variables/generated_files/varfil.html#irdscr">irdscr</a> or <a href="../../input_variables/generated_files/varfil.html#getscr">getscr</a>)
 must be non-zero.
 </p>
 <p>
@@ -1561,21 +1561,21 @@ see the
 <p>
  Indicates eventual starting
 wavefunctions. As alternative, one can use the
-input variables <a href="../../input_variables/html_generated/varfil.html#getwfk">getwfk</a>,
-<a href="../../input_variables/html_generated/varfil.html#getwfq">getwfq</a>, <a href="../../input_variables/html_generated/varfil.html#get1wf">get1wf</a>
-or <a href="../../input_variables/html_generated/varfil.html#getddk">getddk</a>.
+input variables <a href="../../input_variables/generated_files/varfil.html#getwfk">getwfk</a>,
+<a href="../../input_variables/generated_files/varfil.html#getwfq">getwfq</a>, <a href="../../input_variables/generated_files/varfil.html#get1wf">get1wf</a>
+or <a href="../../input_variables/generated_files/varfil.html#getddk">getddk</a>.
  <br />
  <br />
  Ground-state calculation :
  <ul>
   <li>
-   only <b>irdwfk</b> and <a href="../../input_variables/html_generated/varfil.html#getwfk">getwfk</a> have a meaning
+   only <b>irdwfk</b> and <a href="../../input_variables/generated_files/varfil.html#getwfk">getwfk</a> have a meaning
   </li>
   <li>
-   at most one of <b>irdwfk</b> or <a href="../../input_variables/html_generated/varfil.html#getwfk">getwfk</a> can be non-zero
+   at most one of <b>irdwfk</b> or <a href="../../input_variables/generated_files/varfil.html#getwfk">getwfk</a> can be non-zero
   </li>
   <li>
-   if <b>irdwfk</b> and <a href="../../input_variables/html_generated/varfil.html#getwfk">getwfk</a> are both zero,
+   if <b>irdwfk</b> and <a href="../../input_variables/generated_files/varfil.html#getwfk">getwfk</a> are both zero,
 initialize wavefunctions with
 random numbers for ground state calculation.
   </li>
@@ -1592,7 +1592,7 @@ previous ground state calculation (see the
  Response-function calculation :
  <ul>
   <li>
-   one and only one of <b>irdwfk</b> or <a href="../../input_variables/html_generated/varfil.html#getwfk">getwfk</a> MUST be non-zero
+   one and only one of <b>irdwfk</b> or <a href="../../input_variables/generated_files/varfil.html#getwfk">getwfk</a> MUST be non-zero
   </li>
   <li>
    if <b>irdwfk</b> = 1 : read ground state k -wavefunctions
@@ -1608,10 +1608,10 @@ previous ground state calculation (see the
    <b>
     irdwfq
    </b>
-   or <a href="../../input_variables/html_generated/varfil.html#getwfq">getwfq</a> can be non-zero,
+   or <a href="../../input_variables/generated_files/varfil.html#getwfq">getwfq</a> can be non-zero,
 if both of them are non-zero,
 use as k + q file the one defined by
-<b>irdwfk</b> and/or <a href="../../input_variables/html_generated/varfil.html#getwfk">getwfk</a>
+<b>irdwfk</b> and/or <a href="../../input_variables/generated_files/varfil.html#getwfk">getwfk</a>
   </li>
   <li>
    if
@@ -1631,7 +1631,7 @@ previous ground state calculation (see the
    <b>
     ird1wf
    </b>
-   or <a href="../../input_variables/html_generated/varfil.html#get1wf">get1wf</a> can be non-zero
+   or <a href="../../input_variables/generated_files/varfil.html#get1wf">get1wf</a> can be non-zero
   </li>
   <li>
    if both are zero, initialize first order wavefunctions
@@ -1655,7 +1655,7 @@ previous response function calculation (see the
    <b>
     irdddk
    </b>
-   or <a href="../../input_variables/html_generated/varfil.html#getddk">getddk</a> can be non-zero
+   or <a href="../../input_variables/generated_files/varfil.html#getddk">getddk</a> can be non-zero
   </li>
   <li>
    one of them must be non-zero if an homogeneous
@@ -1694,9 +1694,9 @@ previous response function calculation (see the
 <p>
  Indicates eventual starting
 wavefunctions. As alternative, one can use the
-input variables <a href="../../input_variables/html_generated/varfil.html#getwfk">getwfk</a>,
-<a href="../../input_variables/html_generated/varfil.html#getwfq">getwfq</a>, <a href="../../input_variables/html_generated/varfil.html#get1wf">get1wf</a>
-or <a href="../../input_variables/html_generated/varfil.html#getddk">getddk</a>.
+input variables <a href="../../input_variables/generated_files/varfil.html#getwfk">getwfk</a>,
+<a href="../../input_variables/generated_files/varfil.html#getwfq">getwfq</a>, <a href="../../input_variables/generated_files/varfil.html#get1wf">get1wf</a>
+or <a href="../../input_variables/generated_files/varfil.html#getddk">getddk</a>.
  <br />
  <br />
  Ground-state calculation :
@@ -1706,21 +1706,21 @@ or <a href="../../input_variables/html_generated/varfil.html#getddk">getddk</a>.
    <b>
     irdwfk
    </b>
-   and <a href="../../input_variables/html_generated/varfil.html#getwfk">getwfk</a> have a meaning
+   and <a href="../../input_variables/generated_files/varfil.html#getwfk">getwfk</a> have a meaning
   </li>
   <li>
    at most one of
    <b>
     irdwfk
    </b>
-   or <a href="../../input_variables/html_generated/varfil.html#getwfk">getwfk</a> can be non-zero
+   or <a href="../../input_variables/generated_files/varfil.html#getwfk">getwfk</a> can be non-zero
   </li>
   <li>
    if
    <b>
     irdwfk
    </b>
-   and <a href="../../input_variables/html_generated/varfil.html#getwfk">getwfk</a> are both zero,
+   and <a href="../../input_variables/generated_files/varfil.html#getwfk">getwfk</a> are both zero,
 initialize wavefunctions with
 random numbers for ground state calculation.
   </li>
@@ -1745,7 +1745,7 @@ previous ground state calculation (see the
    <b>
     irdwfk
    </b>
-   or <a href="../../input_variables/html_generated/varfil.html#getwfk">getwfk</a> MUST be non-zero
+   or <a href="../../input_variables/generated_files/varfil.html#getwfk">getwfk</a> MUST be non-zero
   </li>
   <li>
    if
@@ -1761,13 +1761,13 @@ previous ground state calculation (see the
    of abinit_help).
   </li>
   <li>
-   only one of <b>irdwfq</b> or <a href="../../input_variables/html_generated/varfil.html#getwfq">getwfq</a> can be non-zero,
+   only one of <b>irdwfq</b> or <a href="../../input_variables/generated_files/varfil.html#getwfq">getwfq</a> can be non-zero,
 if both of them are non-zero,
 use as k + q file the one defined by
    <b>
     irdwfk
    </b>
-   and/or <a href="../../input_variables/html_generated/varfil.html#getwfk">getwfk</a>
+   and/or <a href="../../input_variables/generated_files/varfil.html#getwfk">getwfk</a>
   </li>
   <li>
    if <b>irdwfq</b> = 1 : read ground state k+q -wavefunctions
@@ -1783,7 +1783,7 @@ previous ground state calculation (see the
    <b>
     ird1wf
    </b>
-   or <a href="../../input_variables/html_generated/varfil.html#get1wf">get1wf</a> can be non-zero
+   or <a href="../../input_variables/generated_files/varfil.html#get1wf">get1wf</a> can be non-zero
   </li>
   <li>
    if both are zero, initialize first order wavefunctions
@@ -1807,7 +1807,7 @@ previous response function calculation (see the
    <b>
     irdddk
    </b>
-   or <a href="../../input_variables/html_generated/varfil.html#getddk">getddk</a> can be non-zero
+   or <a href="../../input_variables/generated_files/varfil.html#getddk">getddk</a> can be non-zero
   </li>
   <li>
    one of them must be non-zero if an homogeneous
@@ -1847,8 +1847,8 @@ previous response function calculation (see the
  Governs the choice of the format for the file that
 contains the Kohn-Sham electronic structure information,
 for use in <a href="../../users/abinit_help.html#gw">GW</a> calculations, see the input variables
-<a href="../../input_variables/html_generated/vargs.html#optdriver">optdriver</a> and
-<a href="../../input_variables/html_generated/vargw.html#nbandkss">nbandkss</a>.
+<a href="../../input_variables/generated_files/vargs.html#optdriver">optdriver</a> and
+<a href="../../input_variables/generated_files/vargw.html#nbandkss">nbandkss</a>.
  <ul>
   <li>
    <b>kssform</b>=1, a single file .kss (double precision) containing
@@ -1867,7 +1867,7 @@ The file has at the beginning the standard abinit header.
  </ul>
 </p>
 <p>
- Very important : for the time being, <a href="../../input_variables/html_generated/vardev.html#istwfk">istwfk</a>
+ Very important : for the time being, <a href="../../input_variables/generated_files/vardev.html#istwfk">istwfk</a>
 must be 1 for all the k-points.
 </p>
 </font>
@@ -1901,7 +1901,7 @@ or the density on bi-dimensional slices of the FFT grid.
 <br><font id="characteristic">Characteristic: </font>
 <br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_printing.html">printing</a> </font>
 <br><font id="vartype">Variable type: integer</font>
-<br><font id="default">Default is 0 if <a href="../../input_variables/html_generated/varrlx.html#nimage">nimage</a>>1,
+<br><font id="default">Default is 0 if <a href="../../input_variables/generated_files/varrlx.html#nimage">nimage</a>>1,
 1 otherwise.
 </font>
 <br><font id="text">
@@ -1910,10 +1910,10 @@ or the density on bi-dimensional slices of the FFT grid.
  If set to 1  or a larger value , provide output of electron density
 in real space rho(r), in units of electrons/Bohr^3.
  <br />
- If <a href="../../input_variables/html_generated/varrlx.html#ionmov">ionmov</a>==0, the name of the density file will be
+ If <a href="../../input_variables/generated_files/varrlx.html#ionmov">ionmov</a>==0, the name of the density file will be
 the root output name, followed by _DEN .
  <br />
- If <a href="../../input_variables/html_generated/varrlx.html#ionmov">ionmov</a>==1 or 2, density files will be output
+ If <a href="../../input_variables/generated_files/varrlx.html#ionmov">ionmov</a>==1 or 2, density files will be output
 at each time step, with the name being made of
  <ul>
   <li>
@@ -1957,7 +1957,7 @@ x is 0000 or 0001 alternatively.
 and also for a dataset different of 0 or the previous one, the option we choose here.
   </li>
  </ul>
- Please note that in the case of PAW (<a href="../../input_variables/html_generated/varint.html#usepaw">usepaw</a>=1) calculations, the _DEN density output
+ Please note that in the case of PAW (<a href="../../input_variables/generated_files/varint.html#usepaw">usepaw</a>=1) calculations, the _DEN density output
 is not the full physical electron density. If what is wanted is the full physical electron density, say
 for post-processing with
  <a href="../../users/aim_help.html">
@@ -1973,7 +1973,7 @@ to use the _DEN files and
  one of the other files produced with prtden &gt; 1, i.e. _PAWDEN, ATMDEN_xxx or else.
 Note that the usual _DEN file is always generated as soon as prtden &gt;= 1.
 
-Options 2 to 6 for prtden are relevant only for <a href="../../input_variables/html_generated/varint.html#usepaw">usepaw</a>=1 and control the output of the
+Options 2 to 6 for prtden are relevant only for <a href="../../input_variables/generated_files/varint.html#usepaw">usepaw</a>=1 and control the output of the
 full electron density in the PAW case :
  <br />
  <br />
@@ -2062,24 +2062,24 @@ Can either use a smearing technique (<b>prtdos</b>=1),
 or the tetrahedron method (<b>prtdos</b>=2).
 If <b>prtdos</b>=3, provide output of Local Density of States inside a sphere centered on an atom,
 as well as the angular-momentum projected DOS, in the same sphere. The resolution of the linear grid of energies
-for which the DOS is computed can be tuned thanks to <a href="../../input_variables/html_generated/vargs.html#dosdeltae">dosdeltae</a>.
+for which the DOS is computed can be tuned thanks to <a href="../../input_variables/generated_files/vargs.html#dosdeltae">dosdeltae</a>.
 </p>
 <p>
  If <b>prtdos</b>=1, the smeared density of states is obtained
 from the eigenvalues, properly weighted at each k point
-using <a href="../../input_variables/html_generated/varbas.html#wtk">wtk</a>, and smeared according to <a href="../../input_variables/html_generated/varbas.html#occopt">occopt</a>
-and <a href="../../input_variables/html_generated/vargs.html#tsmear">tsmear</a>. All levels that are present in the calculation
+using <a href="../../input_variables/generated_files/varbas.html#wtk">wtk</a>, and smeared according to <a href="../../input_variables/generated_files/varbas.html#occopt">occopt</a>
+and <a href="../../input_variables/generated_files/vargs.html#tsmear">tsmear</a>. All levels that are present in the calculation
 are taken into account (occupied and unoccupied).
-Note that <a href="../../input_variables/html_generated/varbas.html#occopt">occopt</a> must be between 3 and 7 .
+Note that <a href="../../input_variables/generated_files/varbas.html#occopt">occopt</a> must be between 3 and 7 .
 Also note that the sampling of the Brillouin Zone that is needed to get a converged DOS
 is usually much finer than the sampling needed to converge the total energy or the geometry of the system,
-unless <a href="../../input_variables/html_generated/vargs.html#tsmear">tsmear</a> is very large (hence the DOS is not obtained properly)..
+unless <a href="../../input_variables/generated_files/vargs.html#tsmear">tsmear</a> is very large (hence the DOS is not obtained properly)..
 A separate convergence study is needed.
  <br />
  In order to compute the DOS of an insulator with <b>prtdos</b>=1, compute its density thanks to
-a self-consistent calculation (with a non-metallic <a href="../../input_variables/html_generated/varbas.html#occopt">occopt</a>
+a self-consistent calculation (with a non-metallic <a href="../../input_variables/generated_files/varbas.html#occopt">occopt</a>
 value, 0, 1 or 2), then use <b>prtdos</b>=1, together
-with <a href="../../input_variables/html_generated/varbas.html#iscf">iscf</a>=-3, and a metallic <a href="../../input_variables/html_generated/varbas.html#occopt">occopt</a>,
+with <a href="../../input_variables/generated_files/varbas.html#iscf">iscf</a>=-3, and a metallic <a href="../../input_variables/generated_files/varbas.html#occopt">occopt</a>,
 between 3 and 7, providing the needed smearing.
 If <b>prtdos</b>=1, the name of the DOS file is the root name for the output
 files, followed by "_DOS" .
@@ -2088,25 +2088,25 @@ files, followed by "_DOS" .
  If <b>prtdos</b>=2, the DOS is computed using the tetrahedron method.
 As in the case of <b>prtdos</b>=1, all levels that are present in the calculation
 are taken into account (occupied and unoccupied). In this case, the
-k-points must have been defined using the input variable <a href="../../input_variables/html_generated/varbas.html#ngkpt">ngkpt</a>
-or the input variable <a href="../../input_variables/html_generated/vargs.html#kptrlatt">kptrlatt</a>. There must be at least
+k-points must have been defined using the input variable <a href="../../input_variables/generated_files/varbas.html#ngkpt">ngkpt</a>
+or the input variable <a href="../../input_variables/generated_files/vargs.html#kptrlatt">kptrlatt</a>. There must be at least
 two non-equivalent points in the Irreducible Brillouin Zone to use  <b>prtdos</b>=2.
 It is strongly advised to use a non-shifted k-point grid
-(<a href="../../input_variables/html_generated/varbas.html#shiftk">shiftk</a> 0 0 0): such grids contain naturally
+(<a href="../../input_variables/generated_files/varbas.html#shiftk">shiftk</a> 0 0 0): such grids contain naturally
 more extremal points (band minima and maxima at Gamma or at the zone-boundaries) than
 shifted grids, and lead to more non-equivalent points than shifted grids, for the same grid spacing.
 
 There is no need to take care of
-the <a href="../../input_variables/html_generated/varbas.html#occopt">occopt</a> or <a href="../../input_variables/html_generated/vargs.html#tsmear">tsmear</a> input variables,
+the <a href="../../input_variables/generated_files/varbas.html#occopt">occopt</a> or <a href="../../input_variables/generated_files/vargs.html#tsmear">tsmear</a> input variables,
 and there is no subtlety to be taken into account for insulators. The computation
 can be done in the self-consistent case as well as in the non-self-consistent case,
-using <a href="../../input_variables/html_generated/varbas.html#iscf">iscf</a>=-3. This allows to refine the DOS at fixed
+using <a href="../../input_variables/generated_files/varbas.html#iscf">iscf</a>=-3. This allows to refine the DOS at fixed
 starting density.
  <br />
- In that case, if <a href="../../input_variables/html_generated/varrlx.html#ionmov">ionmov</a>==0, the name of the potential file will be
+ In that case, if <a href="../../input_variables/generated_files/varrlx.html#ionmov">ionmov</a>==0, the name of the potential file will be
 the root output name, followed by _DOS (like in the <b>prtdos</b>=1 case).
  <br />
- However, if <a href="../../input_variables/html_generated/varrlx.html#ionmov">ionmov</a>==1 or 2, potential files will be output
+ However, if <a href="../../input_variables/generated_files/varrlx.html#ionmov">ionmov</a>==1 or 2, potential files will be output
 at each time step, with the name being made of
  <ul>
   <li>
@@ -2129,26 +2129,26 @@ case, the parameters under which the computation is to be done, and the file
 denomination is similar
 to the <b>prtdos</b>=2 case. However, three additional input variables might be provided,
 describing the atoms that are the center of the sphere (input variables
-<a href="../../input_variables/html_generated/vargs.html#natsph">natsph</a> and  <a href="../../input_variables/html_generated/vargs.html#iatsph">iatsph</a>), as well as the radius of this
-sphere (input variable <a href="../../input_variables/html_generated/vargs.html#ratsph">ratsph</a>).
+<a href="../../input_variables/generated_files/vargs.html#natsph">natsph</a> and  <a href="../../input_variables/generated_files/vargs.html#iatsph">iatsph</a>), as well as the radius of this
+sphere (input variable <a href="../../input_variables/generated_files/vargs.html#ratsph">ratsph</a>).
  <br />
- In case of PAW, <a href="../../input_variables/html_generated/vargs.html#ratsph">ratsph</a> radius has to be greater or equal to
+ In case of PAW, <a href="../../input_variables/generated_files/vargs.html#ratsph">ratsph</a> radius has to be greater or equal to
 largest PAW radius of the atom types considered (which is read from the PAW atomic data file; see rc_sph or r_paw).
-Additional printing and/or approximations in PAW mode can be controlled with <a href="../../input_variables/html_generated/varpaw.html#pawprtdos">pawprtdos</a> keyword
-(in particular,<a href="../../input_variables/html_generated/varpaw.html#pawprtdos">pawprtdos</a>=2 can be used to compute quickly a very good approximation of the DOS).
+Additional printing and/or approximations in PAW mode can be controlled with <a href="../../input_variables/generated_files/varpaw.html#pawprtdos">pawprtdos</a> keyword
+(in particular,<a href="../../input_variables/generated_files/varpaw.html#pawprtdos">pawprtdos</a>=2 can be used to compute quickly a very good approximation of the DOS).
  <br />
  <br />
- Note 1: when <b>prtdos</b>=3, it is possible to output m-decomposed LDOS in _DOS file; simply use <a href="../../input_variables/html_generated/varfil.html#prtdosm">prtdosm</a> keyword.
+ Note 1: when <b>prtdos</b>=3, it is possible to output m-decomposed LDOS in _DOS file; simply use <a href="../../input_variables/generated_files/varfil.html#prtdosm">prtdosm</a> keyword.
  <br />
  Note 2: the integrated total DOS in spheres around atoms can be obtained when
-<a href="../../input_variables/html_generated/vargs.html#prtdensph">prtdensph</a> flag is activated.
+<a href="../../input_variables/generated_files/vargs.html#prtdensph">prtdensph</a> flag is activated.
 It can be compared to the integrated DOS provided in _DOS file when <b>prtdos</b>=3.
 </p>
 <p>
  <b>prtdos</b>=4 delivers the sphere-projected DOS (like <b>prtdos</b>=3), on the basis of a smearing approach (like <b>prtdos</b>=1)
 </p>
 <p>
- <b>prtdos</b>=5 delivers the spin-spin DOS in the <a href="../../input_variables/html_generated/vargs.html#nspinor">nspinor</a>==2 case, using the tetrahedron method (as <b>prtdos</b>=2).
+ <b>prtdos</b>=5 delivers the spin-spin DOS in the <a href="../../input_variables/generated_files/vargs.html#nspinor">nspinor</a>==2 case, using the tetrahedron method (as <b>prtdos</b>=2).
 </p>
 </font>
 
@@ -2165,13 +2165,13 @@ It can be compared to the integrated DOS provided in _DOS file when <b>prtdos</b
 <br><font id="text">
 <p>
 <p>
- Relevant only when <a href="../../input_variables/html_generated/varfil.html#prtdos">prtdos</a>=3.
+ Relevant only when <a href="../../input_variables/generated_files/varfil.html#prtdos">prtdos</a>=3.
  <br />
  If set to 1, the m-decomposed LDOS is delivered in DOS file.
  <br />
  Note that <b>prtdosm</b> computes the M-resolved partial dos for complex spherical harmonics,giving e.g.
 DOS(L,M) == DOS(L,-M) (without spin-orbit). In the contrary, the LDA+U occupation matrix,
-see <a href="../../input_variables/html_generated/varpaw.html#dmatpawu">dmatpawu</a> is in the real spherical harmonics basis.
+see <a href="../../input_variables/generated_files/varpaw.html#dmatpawu">dmatpawu</a> is in the real spherical harmonics basis.
  <br />
  If set to 2, the m-decomposed LDOS is delivered in DOS file.
  <br />
@@ -2189,7 +2189,7 @@ in the same basis as the LDA+U occupation matrix.
 <br><font id="characteristic">Characteristic: </font>
 <br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_printing.html">printing</a> </font>
 <br><font id="vartype">Variable type: integer</font>
-<br><font id="default">Default is 0 if <a href="../../input_variables/html_generated/varrlx.html#nimage">nimage</a> > 1,
+<br><font id="default">Default is 0 if <a href="../../input_variables/generated_files/varrlx.html#nimage">nimage</a> > 1,
 1 otherwise.
 </font>
 <br><font id="text">
@@ -2235,7 +2235,7 @@ Sorry for the inconvenience, this will be fixed in the next release.)
  <b>
   not
  </b>
- yet implemented in the case of PAW (<a href="../../input_variables/html_generated/varint.html#usepaw">usepaw</a>=1) calculations.
+ yet implemented in the case of PAW (<a href="../../input_variables/generated_files/varint.html#usepaw">usepaw</a>=1) calculations.
 </p>
 </font>
 
@@ -2261,11 +2261,11 @@ If <b>prtfsurf</b>=1, a _BXSF file readable by
 be produced at the end of the calculation. The file contains information on the band structure
 of the system and can be used to visualize the Fermi surface or any other energy isosurface.
 <b>prtfsurf</b>=1 is compatible only with SCF calculations
-(<a href="../../input_variables/html_generated/varbas.html#iscf">iscf</a> &gt; 1) or NSCF runs in which the
-occupation factors and Fermi level are recalculated once convergence is achieved (<a href="../../input_variables/html_generated/varbas.html#iscf">iscf</a> = -3).
+(<a href="../../input_variables/generated_files/varbas.html#iscf">iscf</a> &gt; 1) or NSCF runs in which the
+occupation factors and Fermi level are recalculated once convergence is achieved (<a href="../../input_variables/generated_files/varbas.html#iscf">iscf</a> = -3).
 The two methods should produce the same Fermi surface provided that the k-meshes are sufficiently dense.
 The k-mesh used for the sampling of the Fermi surface can be specified using the standard
-variables <a href="../../input_variables/html_generated/varbas.html#ngkpt">ngkpt</a>, (<a href="../../input_variables/html_generated/varbas.html#shiftk">shiftk</a>, and <a href="../../input_variables/html_generated/varbas.html#nshiftk">nshiftk</a>.
+variables <a href="../../input_variables/generated_files/varbas.html#ngkpt">ngkpt</a>, (<a href="../../input_variables/generated_files/varbas.html#shiftk">shiftk</a>, and <a href="../../input_variables/generated_files/varbas.html#nshiftk">nshiftk</a>.
 Note, however, that the mesh must be homogeneous and centered on gamma (multiple shifts are not supported by Xcrysden)
 </p>
 </font>
@@ -2317,10 +2317,10 @@ neighbors accordingly , and compute corresponding bond lengths.
  <br />
  It will compute bond angles for the "nearest" neighbours only.
  <br />
- If <a href="../../input_variables/html_generated/varrlx.html#ionmov">ionmov</a>==0, the name of the file will be
+ If <a href="../../input_variables/generated_files/varrlx.html#ionmov">ionmov</a>==0, the name of the file will be
 the root output name, followed by _GEO .
  <br />
- If <a href="../../input_variables/html_generated/varrlx.html#ionmov">ionmov</a>==1 or 2, one file will be output
+ If <a href="../../input_variables/generated_files/varrlx.html#ionmov">ionmov</a>==1 or 2, one file will be output
 at each time step, with the name being made of
  <ul>
   <li>
@@ -2338,7 +2338,7 @@ x is related to the timestep (see later)
  <br />
  No output is provided by <b>prtgeo</b> is lower than or equal to 0.
  <br />
- If <b>prtgeo</b>&gt;0, the maximum number of atoms (<a href="../../input_variables/html_generated/varbas.html#natom">natom</a>) is 9999.
+ If <b>prtgeo</b>&gt;0, the maximum number of atoms (<a href="../../input_variables/generated_files/varbas.html#natom">natom</a>) is 9999.
 </p>
 </font>
 
@@ -2381,7 +2381,7 @@ calculation. The GSR file contains the most important GS results
 (band structure, forces, stresses, electronic density). The GSR
 file can be read by AbiPy and used for futher postprocessing.
 <br> Note that, by default, the GSR file contains the electronic density
-unless <a href="../../input_variables/html_generated/varfil.html#prtden">prtden</a> is set to 0.
+unless <a href="../../input_variables/generated_files/varfil.html#prtden">prtden</a> is set to 0.
 </p>
 </font>
 
@@ -2408,13 +2408,13 @@ described below (see  <a href="../../users/abinit_help.html#6">
   section 6
  </a>).
  <br />
- Note that the computation of the kinetic energy density must be activate, thanks to the input variable <a href="../../input_variables/html_generated/vargs.html#usekden">usekden</a>.
+ Note that the computation of the kinetic energy density must be activate, thanks to the input variable <a href="../../input_variables/generated_files/vargs.html#usekden">usekden</a>.
  <br />
  Please note that kinetic energy density is
  <b>
   not
  </b>
- yet implemented in the case of PAW (<a href="../../input_variables/html_generated/varint.html#usepaw">usepaw</a>=1) calculations.
+ yet implemented in the case of PAW (<a href="../../input_variables/generated_files/varint.html#usepaw">usepaw</a>=1) calculations.
 </p>
 </font>
 
@@ -2433,42 +2433,42 @@ described below (see  <a href="../../users/abinit_help.html#6">
 <p>
  If set /= 0 , proceeds to a detailed analysis
 of different k point grids. Works only if
-<a href="../../input_variables/html_generated/varbas.html#kptopt">kptopt</a> is positive, and neither
-<a href="../../input_variables/html_generated/vargs.html#kptrlatt">kptrlatt</a>
+<a href="../../input_variables/generated_files/varbas.html#kptopt">kptopt</a> is positive, and neither
+<a href="../../input_variables/generated_files/vargs.html#kptrlatt">kptrlatt</a>
 nor
-<a href="../../input_variables/html_generated/varbas.html#ngkpt">ngkpt</a> are defined.
+<a href="../../input_variables/generated_files/varbas.html#ngkpt">ngkpt</a> are defined.
 ABINIT will stop after this analysis.
 </p>
 <p>
  Different sets of k point grids are defined,
-with common values of <a href="../../input_variables/html_generated/varbas.html#shiftk">shiftk</a>.
+with common values of <a href="../../input_variables/generated_files/varbas.html#shiftk">shiftk</a>.
 In each set, ABINIT increases the length of vectors of the
-supercell (see <a href="../../input_variables/html_generated/vargs.html#kptrlatt">kptrlatt</a>) by integer
+supercell (see <a href="../../input_variables/generated_files/vargs.html#kptrlatt">kptrlatt</a>) by integer
 steps. The different sets are labelled by "iset".
-For each k point grid,  <a href="../../input_variables/html_generated/vargs.html#kptrlen">kptrlen</a>
-and  <a href="../../input_variables/html_generated/varbas.html#nkpt">nkpt</a> are computed (the latter always
-invoking  <a href="../../input_variables/html_generated/varbas.html#kptopt">kptopt</a>=1, that is, full use of
+For each k point grid,  <a href="../../input_variables/generated_files/vargs.html#kptrlen">kptrlen</a>
+and  <a href="../../input_variables/generated_files/varbas.html#nkpt">nkpt</a> are computed (the latter always
+invoking  <a href="../../input_variables/generated_files/varbas.html#kptopt">kptopt</a>=1, that is, full use of
 symmetries). A series is finished when the computed
-<a href="../../input_variables/html_generated/vargs.html#kptrlen">kptrlen</a> is twice larger than the
-input variable <a href="../../input_variables/html_generated/vargs.html#kptrlen">kptrlen</a>.
+<a href="../../input_variables/generated_files/vargs.html#kptrlen">kptrlen</a> is twice larger than the
+input variable <a href="../../input_variables/generated_files/vargs.html#kptrlen">kptrlen</a>.
 After the examination of the different sets,
-ABINIT summarizes, for each <a href="../../input_variables/html_generated/varbas.html#nkpt">nkpt</a>, the
+ABINIT summarizes, for each <a href="../../input_variables/generated_files/varbas.html#nkpt">nkpt</a>, the
 best possible grid, that is, the one with the
-largest computed <a href="../../input_variables/html_generated/vargs.html#kptrlen">kptrlen</a>.
+largest computed <a href="../../input_variables/generated_files/vargs.html#kptrlen">kptrlen</a>.
 </p>
 <p>
  Note that this analysis is also performed when
-<b>prtkpt</b>=0, as soon as neither <a href="../../input_variables/html_generated/vargs.html#kptrlatt">kptrlatt</a>
+<b>prtkpt</b>=0, as soon as neither <a href="../../input_variables/generated_files/vargs.html#kptrlatt">kptrlatt</a>
 nor
-<a href="../../input_variables/html_generated/varbas.html#ngkpt">ngkpt</a> are defined. But, in this case,
+<a href="../../input_variables/generated_files/varbas.html#ngkpt">ngkpt</a> are defined. But, in this case,
 no analysis report is given, and the code selects the grid
-with the smaller <a href="../../input_variables/html_generated/varbas.html#ngkpt">ngkpt</a>
-for the desired <a href="../../input_variables/html_generated/vargs.html#kptrlen">kptrlen</a>. However,
+with the smaller <a href="../../input_variables/generated_files/varbas.html#ngkpt">ngkpt</a>
+for the desired <a href="../../input_variables/generated_files/vargs.html#kptrlen">kptrlen</a>. However,
 this analysis takes some times (well sometimes,
 it is only a few seconds - it depends on the value of
-the input <a href="../../input_variables/html_generated/vargs.html#kptrlen">kptrlen</a>), and it is better
+the input <a href="../../input_variables/generated_files/vargs.html#kptrlen">kptrlen</a>), and it is better
 to examine the full analysis for a given cell and set of symmetries,
-<a href="../../input_variables/html_generated/varbas.html#shiftk">shiftk</a> for all the production runs.
+<a href="../../input_variables/generated_files/varbas.html#shiftk">shiftk</a> for all the production runs.
 </p>
 
 <p>
@@ -2518,10 +2518,10 @@ described below (see  <a href="../../users/abinit_help.html#6">
 <p>
  If set &gt;=1 , provide output of the total (Kohn-Sham) potential (sum of local pseudo-potential, Hartree potential, and xc potential).
 <p>
- If <a href="../../input_variables/html_generated/varrlx.html#ionmov">ionmov</a>==0, the name of the potential file will be
+ If <a href="../../input_variables/generated_files/varrlx.html#ionmov">ionmov</a>==0, the name of the potential file will be
 the root output name, followed by _POT.
  <br />
- If <a href="../../input_variables/html_generated/varrlx.html#ionmov">ionmov</a>==1 or 2, potential file will be output
+ If <a href="../../input_variables/generated_files/varrlx.html#ionmov">ionmov</a>==1 or 2, potential file will be output
 at each time step, with the name being made of
  <ul>
   <li>
@@ -2575,7 +2575,7 @@ if prtpsps is set to -1, the code will exit after the output of the PSPS.nc file
 <p>
 <p>
  If set to 1  or a larger value, provide output of the current density of
-different direction spins (x,y,z) in the whole unit cell. Should require spinorial wave functions <a href="../../input_variables/html_generated/vargs.html#nspinor">nspinor</a>
+different direction spins (x,y,z) in the whole unit cell. Should require spinorial wave functions <a href="../../input_variables/generated_files/vargs.html#nspinor">nspinor</a>
  = 2. Experimental: this does not work yet.
 </p>
 </font>
@@ -2596,7 +2596,7 @@ different direction spins (x,y,z) in the whole unit cell. Should require spinori
  If set to 1  or a larger value, provide output of the electron density
 in real space rho(r), made only from the electrons
 close to the Fermi energy, in a range of energy (positive or negative), determined
-by the (positive or negative, but non-zero) value of the STM bias <a href="../../input_variables/html_generated/vargs.html#stmbias">stmbias</a>.
+by the (positive or negative, but non-zero) value of the STM bias <a href="../../input_variables/generated_files/vargs.html#stmbias">stmbias</a>.
  <br />
  This is a very approximate way to obtain STM profiles : one can choose an equidensity surface,
 and consider that the STM tip will follow this surface. Such equidensity surface might be determined
@@ -2617,40 +2617,40 @@ described in
  <br />
  For the STM charge density to be generated, one must give, as an input file, the
 converged wavefunctions obtained from a previous run, at exactly the same k-points and cut-off energy,
-self-consistently determined, using the occupation numbers from <a href="../../input_variables/html_generated/varbas.html#occopt">occopt</a>=7.
+self-consistently determined, using the occupation numbers from <a href="../../input_variables/generated_files/varbas.html#occopt">occopt</a>=7.
  <br />
  In the run with positive <b>prtstm</b>, one has to use :
  <ul>
   <li>
-   positive <a href="../../input_variables/html_generated/varbas.html#iscf">iscf</a>
+   positive <a href="../../input_variables/generated_files/varbas.html#iscf">iscf</a>
   </li>
   <li>
-   <a href="../../input_variables/html_generated/varbas.html#occopt">occopt</a>=7, with specification of <a href="../../input_variables/html_generated/vargs.html#tsmear">tsmear</a>
+   <a href="../../input_variables/generated_files/varbas.html#occopt">occopt</a>=7, with specification of <a href="../../input_variables/generated_files/vargs.html#tsmear">tsmear</a>
   </li>
   <li>
-   <a href="../../input_variables/html_generated/varbas.html#nstep">nstep</a>=1
+   <a href="../../input_variables/generated_files/varbas.html#nstep">nstep</a>=1
   </li>
   <li>
-   the <a href="../../input_variables/html_generated/varbas.html#tolwfr">tolwfr</a> convergence criterion
+   the <a href="../../input_variables/generated_files/varbas.html#tolwfr">tolwfr</a> convergence criterion
   </li>
   <li>
-   <a href="../../input_variables/html_generated/varrlx.html#ionmov">ionmov</a>=0 (this is the default value)
+   <a href="../../input_variables/generated_files/varrlx.html#ionmov">ionmov</a>=0 (this is the default value)
   </li>
   <li>
-   <a href="../../input_variables/html_generated/vargs.html#optdriver">optdriver</a>=0 (this is the default value)
+   <a href="../../input_variables/generated_files/vargs.html#optdriver">optdriver</a>=0 (this is the default value)
   </li>
  </ul>
  <br />
- Note that you might have to adjust the value of <a href="../../input_variables/html_generated/varbas.html#nband">nband</a>
+ Note that you might have to adjust the value of <a href="../../input_variables/generated_files/varbas.html#nband">nband</a>
 as well, for the treatment of unoccupied states, because the automatic determination
-of <a href="../../input_variables/html_generated/varbas.html#nband">nband</a> will often not include enough unoccupied
+of <a href="../../input_variables/generated_files/varbas.html#nband">nband</a> will often not include enough unoccupied
 states.
  <br />
  When <b>prtstm</b> is non-zero, the stress tensor is set to zero.
  <br />
  No output of _STM file is provided by <b>prtstm</b> lower or equal to 0.
  <br />
- No other printing variables for density or potentials should be activated (e.g. <a href="../../input_variables/html_generated/varfil.html#prtden">prtden</a> has to be set to zero).
+ No other printing variables for density or potentials should be activated (e.g. <a href="../../input_variables/generated_files/varfil.html#prtden">prtden</a> has to be set to zero).
 </p>
 </font>
 
@@ -2687,7 +2687,7 @@ only the _SCR file will be output.
 <p>
 If set >= 0 outputs a file with the Coulomb potential, defined as Hartree + local Pseudopotential.
 <p>
-If <b>prtvclmb=1</b> and in case of PAW (<a href="../../input_variables/html_generated/varint.html#usepaw">usepaw</a> > 0), the full core potential is added for the Hartree part, with the on-site corrections vh1 - vht1.
+If <b>prtvclmb=1</b> and in case of PAW (<a href="../../input_variables/generated_files/varint.html#usepaw">usepaw</a> > 0), the full core potential is added for the Hartree part, with the on-site corrections vh1 - vht1.
 <p>
 If <b>prtvclmb=2</b>, only the smooth part of the Coulomb potential is output.
 <p>
@@ -2709,10 +2709,10 @@ If <b>prtvclmb=2</b>, only the smooth part of the Coulomb potential is output.
  If set &gt;=1 , provide output of the Hartree potential.
  <br />
 <p>
- If <a href="../../input_variables/html_generated/varrlx.html#ionmov">ionmov</a>==0, the name of the potential file will be
+ If <a href="../../input_variables/generated_files/varrlx.html#ionmov">ionmov</a>==0, the name of the potential file will be
 the root output name, followed by _VHA.
  <br />
- If <a href="../../input_variables/html_generated/varrlx.html#ionmov">ionmov</a>==1 or 2, potential files will be output
+ If <a href="../../input_variables/generated_files/varrlx.html#ionmov">ionmov</a>==1 or 2, potential files will be output
 at each time step, with the name being made of
  <ul>
   <li>
@@ -2752,10 +2752,10 @@ No output is provided by a negative value of this variable.
  If set &gt;=1 , provide output of the
 sum of the Hartree potential and xc potential.
  <p>
- If <a href="../../input_variables/html_generated/varrlx.html#ionmov">ionmov</a>==0, the name of the potential file will be
+ If <a href="../../input_variables/generated_files/varrlx.html#ionmov">ionmov</a>==0, the name of the potential file will be
 the root output name, followed by _VHXC.
  <br />
- If <a href="../../input_variables/html_generated/varrlx.html#ionmov">ionmov</a>==1 or 2, potential files will be output
+ If <a href="../../input_variables/generated_files/varrlx.html#ionmov">ionmov</a>==1 or 2, potential files will be output
 at each time step, with the name being made of
  <ul>
   <li>
@@ -2806,7 +2806,7 @@ the code to stop at some point.
 bands and k points are not echoed in the main output file.
 There are exceptions: the eigenvalues of the first k point are printed
 at the end of the SCF loop, and also,
-if <a href="../../input_variables/html_generated/varbas.html#iscf">iscf</a>=-2 and <a href="../../input_variables/html_generated/varbas.html#kptopt">kptopt</a>&lt;=0,
+if <a href="../../input_variables/generated_files/varbas.html#iscf">iscf</a>=-2 and <a href="../../input_variables/generated_files/varbas.html#kptopt">kptopt</a>&lt;=0,
 the eigenvalues for all the k points are printed anyway, for a maximum
 of 50 k-points.  Due to some subtlety, if for
  <b>some</b> dataset <b>prtvol</b> is non-zero, the limit for input
@@ -2847,7 +2847,7 @@ Useful to debug pseudopotentials</li>
  <li>  = -10 =&gt; stop in getghc, after the Hamiltonian is applied once</li>
 </ul>
 This debugging feature is not yet activated in the RF routines.
-Note that <a href="../../input_variables/html_generated/vardev.html#fftalg">fftalg</a> offers another option for debugging.</p>
+Note that <a href="../../input_variables/generated_files/vardev.html#fftalg">fftalg</a> offers another option for debugging.</p>
 </font>
 
 <br><br><a href=#top>Go to the top</a>
@@ -2864,7 +2864,7 @@ Note that <a href="../../input_variables/html_generated/vardev.html#fftalg">ffta
 <p>
 <p>
  Control the volume of printed output
-when an algorithm using images of the cell is used (<a href="../../input_variables/html_generated/varrlx.html#nimage">nimage</a>&gt;1).
+when an algorithm using images of the cell is used (<a href="../../input_variables/generated_files/varrlx.html#nimage">nimage</a>&gt;1).
  <br />
  When such an algorithm is activated, the printing volume (in output file)
 can be large and difficult to read.
@@ -2902,10 +2902,10 @@ is reduced to total energy and convergence residuals only.
  If set &gt;=1 , provide output of the local pseudo potential.
  <br />
 <p>
- If <a href="../../input_variables/html_generated/varrlx.html#ionmov">ionmov</a>==0, the name of the potential file will be
+ If <a href="../../input_variables/generated_files/varrlx.html#ionmov">ionmov</a>==0, the name of the potential file will be
 the root output name, followed by _VPSP.
  <br />
- If <a href="../../input_variables/html_generated/varrlx.html#ionmov">ionmov</a>==1 or 2, potential files will be output
+ If <a href="../../input_variables/generated_files/varrlx.html#ionmov">ionmov</a>==1 or 2, potential files will be output
 at each time step, with the name being made of
  <ul>
   <li>
@@ -2945,10 +2945,10 @@ No output is provided by a negative value of this variable.
  If set &gt;=1 , provide output of the exchange-correlation potential.
 </p>
 <p>
- If <a href="../../input_variables/html_generated/varrlx.html#ionmov">ionmov</a>==0, the name of the potential file will be
+ If <a href="../../input_variables/generated_files/varrlx.html#ionmov">ionmov</a>==0, the name of the potential file will be
 the root output name, followed by _VXC.
  <br />
- If <a href="../../input_variables/html_generated/varrlx.html#ionmov">ionmov</a>==1 or 2, potential files will be output
+ If <a href="../../input_variables/generated_files/varrlx.html#ionmov">ionmov</a>==1 or 2, potential files will be output
 at each time step, with the name being made of
  <ul>
   <li>
@@ -3107,22 +3107,22 @@ run Wannier90 to produce the Maximally-localized Wannier functions
      <li>
       An input file of LDA wave functions is required which is completely
 consistent with the _KSS file used in the self-consistent <a href="../../users/abinit_help.html#gw">GW</a> calculation.
-This means that <a href="../../input_variables/html_generated/varfil.html#kssform">kssform</a> 3 must be used
+This means that <a href="../../input_variables/generated_files/varfil.html#kssform">kssform</a> 3 must be used
 to create the _KSS file and the output _WFK file from the same run must
 be used as input here.
      </li>
      <li>
-      Wannier90 requires <a href="../../input_variables/html_generated/varbas.html#nshiftk">nshiftk</a>=1, and
-<a href="../../input_variables/html_generated/varbas.html#shiftk">shiftk</a>= 0 0 0 is recommended.  The k-point
+      Wannier90 requires <a href="../../input_variables/generated_files/varbas.html#nshiftk">nshiftk</a>=1, and
+<a href="../../input_variables/generated_files/varbas.html#shiftk">shiftk</a>= 0 0 0 is recommended.  The k-point
 set used for the <a href="../../users/abinit_help.html#gw">GW</a> calculation, typically the irreducible BZ set created
-using <a href="../../input_variables/html_generated/varbas.html#kptopt">kptopt</a>=1, and that for the Abinit-
+using <a href="../../input_variables/generated_files/varbas.html#kptopt">kptopt</a>=1, and that for the Abinit-
 Wannier90 interface must be consistent.
      </li>
      <li>
       Full-BZ wavefunctions should be generated in the run calling the
-interface by setting <a href="../../input_variables/html_generated/varbas.html#kptopt">kptopt</a>=3,
-<a href="../../input_variables/html_generated/varbas.html#iscf">iscf</a>=-2, and
-<a href="../../input_variables/html_generated/varbas.html#nstep">nstep</a>=3.  This will simply use symmetry to
+interface by setting <a href="../../input_variables/generated_files/varbas.html#kptopt">kptopt</a>=3,
+<a href="../../input_variables/generated_files/varbas.html#iscf">iscf</a>=-2, and
+<a href="../../input_variables/generated_files/varbas.html#nstep">nstep</a>=3.  This will simply use symmetry to
 transform the input IBZ wavefunctions to the full BZ set, still consistent
 with the <a href="../../users/abinit_help.html#gw">GW</a> _KSS input.
      </li>
@@ -3131,10 +3131,10 @@ with the <a href="../../users/abinit_help.html#gw">GW</a> _KSS input.
 as input.
      </li>
      <li>
-      Any value of <a href="../../input_variables/html_generated/vargw.html#gwcalctyp">gwcalctyp</a> between
+      Any value of <a href="../../input_variables/generated_files/vargw.html#gwcalctyp">gwcalctyp</a> between
 between 20 and 29 should be suitable, so, for example, Hartree-Fock
 maximally-localized Wannier functions could be generated setting
-<a href="../../input_variables/html_generated/vargw.html#gwcalctyp">gwcalctyp</a>=25.
+<a href="../../input_variables/generated_files/vargw.html#gwcalctyp">gwcalctyp</a>=25.
      </li>
     </ul>
    </p>
@@ -3152,7 +3152,7 @@ maximally-localized Wannier functions could be generated setting
 <br><font id="characteristic">Characteristic: </font>
 <br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_printing.html">printing</a> </font>
 <br><font id="vartype">Variable type: integer</font>
-<br><font id="default">Default is 0 if <a href="../../input_variables/html_generated/varrlx.html#nimage">nimage</a> > 1,
+<br><font id="default">Default is 0 if <a href="../../input_variables/generated_files/varrlx.html#nimage">nimage</a> > 1,
 1 otherwise.
 </font>
 <br><font id="text">
@@ -3166,7 +3166,7 @@ and eigenvalue file, as described in
  of the main abinit help file.
  <br />
  For a standard ground-state calculation, the name of the wavefunction file will be
-the root output name, followed by _WFK. If <a href="../../input_variables/html_generated/vargs.html#nqpt">nqpt</a>=1,
+the root output name, followed by _WFK. If <a href="../../input_variables/generated_files/vargs.html#nqpt">nqpt</a>=1,
 the root name will be followed by _WFQ. For response-function calculations,
 the root name will be followed by _1WFx, where x is the number of the perturbation.
 The dataset information will be added as well, if relevant.
@@ -3268,15 +3268,15 @@ probably something set wrong in the input file.
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
 <br><br><font id="requires">
-Only relevant if <a href="../../input_variables/html_generated/varfil.html#prtwf">prtwf</a> == 1
+Only relevant if <a href="../../input_variables/generated_files/varfil.html#prtwf">prtwf</a> == 1
 </font>
 <br><font id="text">
 <p>
 If  set to 1 in a ground-state calculation, the code will output another WFK file (with extension FULL_WFK) containing the wavefunctions in the full BZ as well as a text file with the tables used for the tetrahedron method.
 
-Note that prtwf_full requires <a href="../../input_variables/html_generated/varfil.html#prtwf">prtwf</a> == 1 and a ground-state
-calculation done on a homogeneous k-mesh (see <a href="../../input_variables/html_generated/varbas.html#ngkpt">ngkpt</a> and <a href="../../input_variables/html_generated/varbas.html#shiftk">shiftk</a>).
-The tetrahedron table is produced only if the number of k-points in the irreducible zone (<a href="../../input_variables/html_generated/varbas.html#nkpt">nkpt</a>) is greater than 3.
+Note that prtwf_full requires <a href="../../input_variables/generated_files/varfil.html#prtwf">prtwf</a> == 1 and a ground-state
+calculation done on a homogeneous k-mesh (see <a href="../../input_variables/generated_files/varbas.html#ngkpt">ngkpt</a> and <a href="../../input_variables/generated_files/varbas.html#shiftk">shiftk</a>).
+The tetrahedron table is produced only if the number of k-points in the irreducible zone (<a href="../../input_variables/generated_files/varbas.html#nkpt">nkpt</a>) is greater than 3.
 </font>
 
 <br><br><a href=#top>Go to the top</a>

@@ -91,37 +91,37 @@ variables to be used in the main input file of the abinit code.
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
 <br><br><font id="requires">
-Only relevant if <a href="../../input_variables/html_generated/vargeo.html#spgroup">spgroup</a> != 0
+Only relevant if <a href="../../input_variables/generated_files/vargeo.html#spgroup">spgroup</a> != 0
 </font>
 <br><font id="text">
 <p>
 <p>
  Set the type of Bravais lattice.
-The cell defined by <a href="../../input_variables/html_generated/varbas.html#acell">acell</a>
-and <a href="../../input_variables/html_generated/varbas.html#rprim">rprim</a> or <a href="../../input_variables/html_generated/varbas.html#angdeg">angdeg</a>
+The cell defined by <a href="../../input_variables/generated_files/varbas.html#acell">acell</a>
+and <a href="../../input_variables/generated_files/varbas.html#rprim">rprim</a> or <a href="../../input_variables/generated_files/varbas.html#angdeg">angdeg</a>
 should be the CONVENTIONAL cell.
 </p>
 <p>
  If brvltt=0, the code will assign
 brvltt from the space group information
-<a href="../../input_variables/html_generated/vargeo.html#spgroup">spgroup</a>,
+<a href="../../input_variables/generated_files/vargeo.html#spgroup">spgroup</a>,
 and produce the symmetry operations for the conventional unit cell.
 If the conventional cell is not primitive, the user should
-set <a href="../../input_variables/html_generated/vargs.html#chkprim">chkprim</a>=0.
+set <a href="../../input_variables/generated_files/vargs.html#chkprim">chkprim</a>=0.
 </p>
 <p>
  If brvltt=-1, the code will assign brvltt from
 the space group information, then reduce the unit cell
-to a primitive unit cell. The echo of <a href="../../input_variables/html_generated/varbas.html#acell">acell</a>
-and <a href="../../input_variables/html_generated/varbas.html#rprim">rprim</a> might thus differ from those
+to a primitive unit cell. The echo of <a href="../../input_variables/generated_files/varbas.html#acell">acell</a>
+and <a href="../../input_variables/generated_files/varbas.html#rprim">rprim</a> might thus differ from those
 derived directly from the input variables.
 Also, the input variable
-<a href="../../input_variables/html_generated/varbas.html#xred">xred</a> will refer to the
+<a href="../../input_variables/generated_files/varbas.html#xred">xred</a> will refer to the
 CONVENTIONAL unit cell, but its echo will refer to the
 preprocessed PRIMITIVE unit cell.
 There is of course no problem with
-<a href="../../input_variables/html_generated/varbas.html#xangst">xangst</a> and
-<a href="../../input_variables/html_generated/varbas.html#xcart">xcart</a>, as they are independent
+<a href="../../input_variables/generated_files/varbas.html#xangst">xangst</a> and
+<a href="../../input_variables/generated_files/varbas.html#xcart">xcart</a>, as they are independent
 of the unit cell.
 </p>
 <p>
@@ -155,11 +155,11 @@ associated translations
  </ul>
  The user might also input directly these values, although
 they might not be consistent
-with <a href="../../input_variables/html_generated/vargeo.html#spgroup">spgroup</a>.
+with <a href="../../input_variables/generated_files/vargeo.html#spgroup">spgroup</a>.
 </p>
 <p>
  The space groups 146, 148, 155, 160, 161, 166, 167, when used
-with <a href="../../input_variables/html_generated/vargeo.html#spgaxor">spgaxor</a>=1 (hexagonal axes) will have <b>brvltt</b>=7
+with <a href="../../input_variables/generated_files/vargeo.html#spgaxor">spgaxor</a>=1 (hexagonal axes) will have <b>brvltt</b>=7
 and two associated translations: (2/3, 1/3, 1/3) and
 (1/3, 2/3, 2/3).
  <br />
@@ -181,11 +181,11 @@ and two associated translations: (2/3, 1/3, 1/3) and
 <br><font id="vartype">Variable type: real(3,[['nzchempot']],[['ntype']])</font>
 <br><font id="default">Default is 0.0</font>
 <br><br><font id="requires">
-Only relevant if <a href="../../input_variables/html_generated/vargeo.html#nzchempot">nzchempot</a>/=0
+Only relevant if <a href="../../input_variables/generated_files/vargeo.html#nzchempot">nzchempot</a>/=0
 </font>
 <br><font id="text">
 <p>
-For each type of atoms, from 1 to <a href="../../input_variables/html_generated/varbas.html#ntypat">ntypat</a>, specifies the spatially varying chemical potential, through the specification of <a href="../../input_variables/html_generated/vargeo.html#nzchempot">nzchempot</a> triplets of real numbers. They give data for <a href="../../input_variables/html_generated/vargeo.html#nzchempot">nzchempot</a> delimiting planes, all parallel to each other, each determined by its z reduced coordinate.
+For each type of atoms, from 1 to <a href="../../input_variables/generated_files/varbas.html#ntypat">ntypat</a>, specifies the spatially varying chemical potential, through the specification of <a href="../../input_variables/generated_files/vargeo.html#nzchempot">nzchempot</a> triplets of real numbers. They give data for <a href="../../input_variables/generated_files/vargeo.html#nzchempot">nzchempot</a> delimiting planes, all parallel to each other, each determined by its z reduced coordinate.
 
 The first real number is the z reduced coordinate of the delimiting plane. The second real number is the value of the chemical potential for this type of atom on this plane. The third real number is the derivative of the chemical potential fior this type of atom with respect to the z reduced coordinate, evaluated on this plane.
 
@@ -220,13 +220,13 @@ C.J. Bradley and A.P. Cracknell, Clarendon Press, Oxford."
  A Shubnikov type IV magnetic space group might be defined by its Fedorov space group
 (set of spatial symmetries, that do not change the magnetization), and
 one translation associated with a change of magnetization.
-<b>genafm</b> is precisely this translation, in reduced coordinates (like <a href="../../input_variables/html_generated/varbas.html#xred">xred</a>)
+<b>genafm</b> is precisely this translation, in reduced coordinates (like <a href="../../input_variables/generated_files/varbas.html#xred">xred</a>)
  <br />
  Thus, one way to specify a Shubnikov IV magnetic space group, is to define both
-<a href="../../input_variables/html_generated/vargeo.html#spgroup">spgroup</a> and <b>genafm</b>. Alternatively, one might
-define <a href="../../input_variables/html_generated/vargeo.html#spgroup">spgroup</a> and <a href="../../input_variables/html_generated/vargeo.html#spgroupma">spgroupma</a>,
-or define by hand the set of symmetries, using <a href="../../input_variables/html_generated/varbas.html#symrel">symrel</a>,
-<a href="../../input_variables/html_generated/varbas.html#tnons">tnons</a> and <a href="../../input_variables/html_generated/vargs.html#symafm">symafm</a>
+<a href="../../input_variables/generated_files/vargeo.html#spgroup">spgroup</a> and <b>genafm</b>. Alternatively, one might
+define <a href="../../input_variables/generated_files/vargeo.html#spgroup">spgroup</a> and <a href="../../input_variables/generated_files/vargeo.html#spgroupma">spgroupma</a>,
+or define by hand the set of symmetries, using <a href="../../input_variables/generated_files/varbas.html#symrel">symrel</a>,
+<a href="../../input_variables/generated_files/varbas.html#tnons">tnons</a> and <a href="../../input_variables/generated_files/vargs.html#symafm">symafm</a>
 </p>
 </font>
 
@@ -238,7 +238,7 @@ or define by hand the set of symmetries, using <a href="../../input_variables/ht
 <br><font id="mnemonics">Mnemonics: Number of AToms ReaD</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#geometry_builder">GEOMETRY_BUILDER</a>, <a href="../../users/abinit_help.html#symmetriser">SYMMETRISER</a></font>
 <br><font id="vartype">Variable type: integer</font>
-<br><font id="default">Default is <a href="../../input_variables/html_generated/varbas.html#natom">natom</a></font>
+<br><font id="default">Default is <a href="../../input_variables/generated_files/varbas.html#natom">natom</a></font>
 <br><font id="text">
 <p>
 <p>
@@ -246,14 +246,14 @@ or define by hand the set of symmetries, using <a href="../../input_variables/ht
 read from the input file, in the case the geometry builder
 or the symmetriser is used. In this case,
 <b>natrd</b> is also used to dimension
-the array <a href="../../input_variables/html_generated/varbas.html#typat">typat</a>,
-and the arrays <a href="../../input_variables/html_generated/varbas.html#xred">xred</a>,
-<a href="../../input_variables/html_generated/varbas.html#xangst">xangst</a> and <a href="../../input_variables/html_generated/varbas.html#xcart">xcart</a>.
+the array <a href="../../input_variables/generated_files/varbas.html#typat">typat</a>,
+and the arrays <a href="../../input_variables/generated_files/varbas.html#xred">xred</a>,
+<a href="../../input_variables/generated_files/varbas.html#xangst">xangst</a> and <a href="../../input_variables/generated_files/varbas.html#xcart">xcart</a>.
  <br />
- Must take into account the vacancies (see <a href="../../input_variables/html_generated/vargeo.html#vacnum">vacnum</a> and
-<a href="../../input_variables/html_generated/vargeo.html#vaclst">vaclst</a>).
+ Must take into account the vacancies (see <a href="../../input_variables/generated_files/vargeo.html#vacnum">vacnum</a> and
+<a href="../../input_variables/generated_files/vargeo.html#vaclst">vaclst</a>).
  <br />
- Despite possible vacancies, cannot be bigger than <a href="../../input_variables/html_generated/varbas.html#natom">natom</a>.
+ Despite possible vacancies, cannot be bigger than <a href="../../input_variables/generated_files/varbas.html#natom">natom</a>.
 </p>
 </font>
 
@@ -274,22 +274,22 @@ to be used by the geometry builder in order to find the full
 set of atoms. At present, only one or two objects
 can be defined, identified as objects 'a' and 'b'.
  <br />
- Related variables for object 'a' are : <a href="../../input_variables/html_generated/vargeo.html#objan">objan</a>,
-<a href="../../input_variables/html_generated/vargeo.html#objaat">objaat</a>,
-<a href="../../input_variables/html_generated/vargeo.html#objarf">objarf</a>, <a href="../../input_variables/html_generated/vargeo.html#objatr">objatr</a>,
-<a href="../../input_variables/html_generated/vargeo.html#objaro">objaro</a>, <a href="../../input_variables/html_generated/vargeo.html#objaax">objaax</a>. Related variables
+ Related variables for object 'a' are : <a href="../../input_variables/generated_files/vargeo.html#objan">objan</a>,
+<a href="../../input_variables/generated_files/vargeo.html#objaat">objaat</a>,
+<a href="../../input_variables/generated_files/vargeo.html#objarf">objarf</a>, <a href="../../input_variables/generated_files/vargeo.html#objatr">objatr</a>,
+<a href="../../input_variables/generated_files/vargeo.html#objaro">objaro</a>, <a href="../../input_variables/generated_files/vargeo.html#objaax">objaax</a>. Related variables
 for object 'b' are :
-  <a href="../../input_variables/html_generated/vargeo.html#objbn">objbn</a>
+  <a href="../../input_variables/generated_files/vargeo.html#objbn">objbn</a>
  ,
-  <a href="../../input_variables/html_generated/vargeo.html#objbat">objbat</a>
+  <a href="../../input_variables/generated_files/vargeo.html#objbat">objbat</a>
  ,
-  <a href="../../input_variables/html_generated/vargeo.html#objbrf">objbrf</a>
+  <a href="../../input_variables/generated_files/vargeo.html#objbrf">objbrf</a>
  ,
-  <a href="../../input_variables/html_generated/vargeo.html#objbtr">objbtr</a>
+  <a href="../../input_variables/generated_files/vargeo.html#objbtr">objbtr</a>
  ,
-  <a href="../../input_variables/html_generated/vargeo.html#objbro">objbro</a>
+  <a href="../../input_variables/generated_files/vargeo.html#objbro">objbro</a>
  ,
-  <a href="../../input_variables/html_generated/vargeo.html#objbax">objbax</a>
+  <a href="../../input_variables/generated_files/vargeo.html#objbax">objbax</a>
  .
  <br />
  More detailed explanation : when the geometry builder
@@ -298,44 +298,44 @@ will be given a primitive set of atoms, from which it
 will have to deduce the full set of atoms.
  <br />
  An object will be specified by the number of
-atoms it includes (<a href="../../input_variables/html_generated/vargeo.html#objan">objan</a> or
-  <a href="../../input_variables/html_generated/vargeo.html#objbn">objbn</a>
+atoms it includes (<a href="../../input_variables/generated_files/vargeo.html#objan">objan</a> or
+  <a href="../../input_variables/generated_files/vargeo.html#objbn">objbn</a>
  ),
-and the list of these atoms (<a href="../../input_variables/html_generated/vargeo.html#objaat">objaat</a> or
-  <a href="../../input_variables/html_generated/vargeo.html#objbat">objbat</a>
+and the list of these atoms (<a href="../../input_variables/generated_files/vargeo.html#objaat">objaat</a> or
+  <a href="../../input_variables/generated_files/vargeo.html#objbat">objbat</a>
  ).
  <br />
  Examples of physical realisation of an object can be a molecule,
 or a group of atom to be repeated, or a part of a molecule
 to be rotated.
-The geometry builder can indeed repeat these objects (<a href="../../input_variables/html_generated/vargeo.html#objarf">objarf</a>
+The geometry builder can indeed repeat these objects (<a href="../../input_variables/generated_files/vargeo.html#objarf">objarf</a>
 or
-  <a href="../../input_variables/html_generated/vargeo.html#objbrf">objbrf</a>
- ), rotate them (<a href="../../input_variables/html_generated/vargeo.html#objaro">objaro</a> or
-  <a href="../../input_variables/html_generated/vargeo.html#objbro">objbro</a>
+  <a href="../../input_variables/generated_files/vargeo.html#objbrf">objbrf</a>
+ ), rotate them (<a href="../../input_variables/generated_files/vargeo.html#objaro">objaro</a> or
+  <a href="../../input_variables/generated_files/vargeo.html#objbro">objbro</a>
  ) with respect
-to an axis (<a href="../../input_variables/html_generated/vargeo.html#objaax">objaax</a> or
-  <a href="../../input_variables/html_generated/vargeo.html#objbax">objbax</a>
+to an axis (<a href="../../input_variables/generated_files/vargeo.html#objaax">objaax</a> or
+  <a href="../../input_variables/generated_files/vargeo.html#objbax">objbax</a>
  ), and translate them
-(<a href="../../input_variables/html_generated/vargeo.html#objatr">objatr</a> or
-  <a href="../../input_variables/html_generated/vargeo.html#objbtr">objbtr</a>
+(<a href="../../input_variables/generated_files/vargeo.html#objatr">objatr</a> or
+  <a href="../../input_variables/generated_files/vargeo.html#objbtr">objbtr</a>
  ).
 After having generated a geometry
 thanks to rotation, translation and repetition of objects,
 it is possible to remove some atoms, in order to create
-vacancies (<a href="../../input_variables/html_generated/vargeo.html#vacnum">vacnum</a> and <a href="../../input_variables/html_generated/vargeo.html#vaclst">vaclst</a>).
+vacancies (<a href="../../input_variables/generated_files/vargeo.html#vacnum">vacnum</a> and <a href="../../input_variables/generated_files/vargeo.html#vaclst">vaclst</a>).
 The number of atoms in the primitive
 set, those that will be read from the input file, is
-specified by the variable <a href="../../input_variables/html_generated/vargeo.html#natrd">natrd</a>. It will be always smaller
-than the final number of atoms, given by the variable <a href="../../input_variables/html_generated/varbas.html#natom">natom</a>.
+specified by the variable <a href="../../input_variables/generated_files/vargeo.html#natrd">natrd</a>. It will be always smaller
+than the final number of atoms, given by the variable <a href="../../input_variables/generated_files/varbas.html#natom">natom</a>.
 The code checks whether the primitive number of atoms
 plus those obtained by the repetition operation is
-coherent with the variable <a href="../../input_variables/html_generated/varbas.html#natom">natom</a>, taking into
+coherent with the variable <a href="../../input_variables/generated_files/varbas.html#natom">natom</a>, taking into
 account possible vacancies.
  <br />
  You should look
 at the other variables for more information.
-Go to <a href="../../input_variables/html_generated/vargeo.html#objan">objan</a>, for example.
+Go to <a href="../../input_variables/generated_files/vargeo.html#objan">objan</a>, for example.
  <br />
 </p>
 </font>
@@ -351,7 +351,7 @@ Go to <a href="../../input_variables/html_generated/vargeo.html#objan">objan</a>
 <br><font id="default">No default</font>
 <br><font id="text">
 <p>
-Defines the number of z reduced coordinates that defines the spatially varying chemical potential. See the input variable <a href="../../input_variables/html_generated/vargeo.html#chempot">chempot</a>, of which <b>nzchempot</b> is the second dimension.
+Defines the number of z reduced coordinates that defines the spatially varying chemical potential. See the input variable <a href="../../input_variables/generated_files/vargeo.html#chempot">chempot</a>, of which <b>nzchempot</b> is the second dimension.
 </font>
 
 <br><br><a href=#top>Go to the top</a>
@@ -361,22 +361,22 @@ Defines the number of z reduced coordinates that defines the spatially varying c
 <br><font id="title"><a name="objaat">objaat</a></font>
 <br><font id="mnemonics">Mnemonics: OBJect A : list of AToms</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#geometry_builder">GEOMETRY_BUILDER</a>, <a href="../../users/abinit_help.html#input_only">INPUT_ONLY</a></font>
-<br><font id="vartype">Variable type: integer(<a href="../../input_variables/html_generated/vargeo.html#objan">objan</a>)</font>
+<br><font id="vartype">Variable type: integer(<a href="../../input_variables/generated_files/vargeo.html#objan">objan</a>)</font>
 <br><font id="default">No default</font>
 <br><br><font id="requires">
-Only relevant if '<a href="../../input_variables/html_generated/vargeo.html#nobj">nobj</a>==1'
+Only relevant if '<a href="../../input_variables/generated_files/vargeo.html#nobj">nobj</a>==1'
 
 </font>
 <br><font id="text">
 <p>
 <p>
-Gives the list of atoms in object a. This list is specified by giving, for each atom, its index in the list of coordinates (<a href="../../input_variables/html_generated/varbas.html#xred">xred</a>, <a href="../../input_variables/html_generated/varbas.html#xangst">xangst</a> or <a href="../../input_variables/html_generated/varbas.html#xcart">xcart</a>), that also corresponds to a type of atom (given by the array type).
+Gives the list of atoms in object a. This list is specified by giving, for each atom, its index in the list of coordinates (<a href="../../input_variables/generated_files/varbas.html#xred">xred</a>, <a href="../../input_variables/generated_files/varbas.html#xangst">xangst</a> or <a href="../../input_variables/generated_files/varbas.html#xcart">xcart</a>), that also corresponds to a type of atom (given by the array type).
 These objects can be thought as molecules, or groups
 of atoms, or parts of molecules, to be repeated,
 rotated and translated to generate the full set
 of atoms.
 <br />
- Look at <a href="../../input_variables/html_generated/vargeo.html#objarf">objarf</a> for further explanations.
+ Look at <a href="../../input_variables/generated_files/vargeo.html#objarf">objarf</a> for further explanations.
 <br />
 </p>
 </font>
@@ -389,8 +389,8 @@ of atoms.
 <br><font id="mnemonics">Mnemonics: OBJect A : AXis</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#geometry_builder">GEOMETRY_BUILDER</a>, <a href="../../users/abinit_help.html#input_only">INPUT_ONLY</a>, <a href="../../users/abinit_help.html#length">LENGTH</a></font>
 <br><font id="vartype">Variable type: real</font>
-<br><font id="default">No default (Comment: <b>objaax</b> must be provided if (<a href="../../input_variables/html_generated/vargeo.html#nobj">nobj</a>==1 and one component of <a href="../../input_variables/html_generated/vargeo.html#objaro">objaro</a> != 0). Moreover,
-<b>objaax</b> AND <a href="../../input_variables/html_generated/vargeo.html#objbax">objbax</a> must be provided if ( <a href="../../input_variables/html_generated/vargeo.html#nobj">nobj</a> == 2 and one component of <a href="../../input_variables/html_generated/vargeo.html#objbro">objbro</a> != 0 ).)</font>
+<br><font id="default">No default (Comment: <b>objaax</b> must be provided if (<a href="../../input_variables/generated_files/vargeo.html#nobj">nobj</a>==1 and one component of <a href="../../input_variables/generated_files/vargeo.html#objaro">objaro</a> != 0). Moreover,
+<b>objaax</b> AND <a href="../../input_variables/generated_files/vargeo.html#objbax">objbax</a> must be provided if ( <a href="../../input_variables/generated_files/vargeo.html#nobj">nobj</a> == 2 and one component of <a href="../../input_variables/generated_files/vargeo.html#objbro">objbro</a> != 0 ).)</font>
 <br><font id="text">
 <p>
 <p>
@@ -424,13 +424,13 @@ toward point 2 (coordinates 4:6).
 <br><font id="mnemonics">Mnemonics: OBJect A : Number of atoms</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#geometry_builder">GEOMETRY_BUILDER</a>, <a href="../../users/abinit_help.html#input_only">INPUT_ONLY</a></font>
 <br><font id="vartype">Variable type: integer</font>
-<br><font id="default">No default (Comment:  <b>objan</b> MUST be provided if <a href="../../input_variables/html_generated/vargeo.html#nobj">nobj</a>==1.
- <b>objan</b> and <a href="../../input_variables/html_generated/vargeo.html#objbn">objbn</a> MUST be provided if <a href="../../input_variables/html_generated/vargeo.html#nobj">nobj</a>==2.)</font>
+<br><font id="default">No default (Comment:  <b>objan</b> MUST be provided if <a href="../../input_variables/generated_files/vargeo.html#nobj">nobj</a>==1.
+ <b>objan</b> and <a href="../../input_variables/generated_files/vargeo.html#objbn">objbn</a> MUST be provided if <a href="../../input_variables/generated_files/vargeo.html#nobj">nobj</a>==2.)</font>
 <br><font id="text">
 <p>
 <p>
  Gives the number of atoms in object a. The list of atoms is given by the
-variables <a href="../../input_variables/html_generated/vargeo.html#objaat">objaat</a>.
+variables <a href="../../input_variables/generated_files/vargeo.html#objaat">objaat</a>.
  <br />
 </p>
 </font>
@@ -460,7 +460,7 @@ where 'nrep' is the 1D repetition factor.
  The initial rotation and translation of the object,
 as well as the increment of rotation or translation
 from one object to the next are specified by
-the variables <a href="../../input_variables/html_generated/vargeo.html#objaro">objaro</a> and <a href="../../input_variables/html_generated/vargeo.html#objatr">objatr</a>, for object a,
+the variables <a href="../../input_variables/generated_files/vargeo.html#objaro">objaro</a> and <a href="../../input_variables/generated_files/vargeo.html#objatr">objatr</a>, for object a,
  <br />
  Note that the geometry builder will generate the full set
 of atoms from the primitive set of atoms using the
@@ -499,7 +499,7 @@ simply use 1 1 1, which is also the Default value.
 to be applied to the corresponding object.
  <br />
  The rotation is applied before the translation,
-and the axis is defined by the variables <a href="../../input_variables/html_generated/vargeo.html#objaax">objaax</a> and <a href="../../input_variables/html_generated/vargeo.html#objbax">objbax</a>.
+and the axis is defined by the variables <a href="../../input_variables/generated_files/vargeo.html#objaax">objaax</a> and <a href="../../input_variables/generated_files/vargeo.html#objbax">objbax</a>.
 See the latter variables for the definition of the sign
 of the rotation.
  <br />
@@ -541,7 +541,7 @@ if preferred, since these variables have the
  <br />
  The translation is applied after the rotation.
  <br />
- The first vector <b>objatr</b>(3,1) and <a href="../../input_variables/html_generated/vargeo.html#objbtr">objbtr</a>(3,1) gives
+ The first vector <b>objatr</b>(3,1) and <a href="../../input_variables/generated_files/vargeo.html#objbtr">objbtr</a>(3,1) gives
 the translation to be applied to the first
 instance of the object. The second, third or fourth
 component (resp.) gives the increment of translation
@@ -569,22 +569,22 @@ which case, only rotations are needed.
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">No default</font>
 <br><br><font id="requires">
-Only relevant if <a href="../../input_variables/html_generated/vargeo.html#nobj">nobj</a>==2
+Only relevant if <a href="../../input_variables/generated_files/vargeo.html#nobj">nobj</a>==2
 </font>
 <br><font id="text">
 <p>
 <p>
  Gives the list of atoms in object b. This list is specified
 by giving, for each atom, its index in the list
-of coordinates (<a href="../../input_variables/html_generated/varbas.html#xred">xred</a>, <a href="../../input_variables/html_generated/varbas.html#xangst">xangst</a>
-or <a href="../../input_variables/html_generated/varbas.html#xcart">xcart</a>), that also
+of coordinates (<a href="../../input_variables/generated_files/varbas.html#xred">xred</a>, <a href="../../input_variables/generated_files/varbas.html#xangst">xangst</a>
+or <a href="../../input_variables/generated_files/varbas.html#xcart">xcart</a>), that also
 corresponds to a type of atom (given by the array type).
 These objects can be thought as molecules, or groups
 of atoms, or parts of molecules, to be repeated,
 rotated and translated to generate the full set
 of atoms.
  <br />
- Look at <a href="../../input_variables/html_generated/vargeo.html#objbrf">objbrf</a> for further explanations.
+ Look at <a href="../../input_variables/generated_files/vargeo.html#objbrf">objbrf</a> for further explanations.
  <br />
 </p>
 </font>
@@ -597,8 +597,8 @@ of atoms.
 <br><font id="mnemonics">Mnemonics: OBJect B : AXis</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#geometry_builder">GEOMETRY_BUILDER</a>, <a href="../../users/abinit_help.html#input_only">INPUT_ONLY</a>, <a href="../../users/abinit_help.html#length">LENGTH</a></font>
 <br><font id="vartype">Variable type: real</font>
-<br><font id="default">No default (Comment: <b>objbax</b> must be provided if (<a href="../../input_variables/html_generated/vargeo.html#nobj">nobj</a>==1 and one component of <a href="../../input_variables/html_generated/vargeo.html#objaro">objaro</a> != 0). Moreover,
-<a href="../../input_variables/html_generated/vargeo.html#objaax">objaax</a> AND <b>objbax</b> must be provided if ( <a href="../../input_variables/html_generated/vargeo.html#nobj">nobj</a> == 2 and one component of <a href="../../input_variables/html_generated/vargeo.html#objbro">objbro</a> != 0 ).)</font>
+<br><font id="default">No default (Comment: <b>objbax</b> must be provided if (<a href="../../input_variables/generated_files/vargeo.html#nobj">nobj</a>==1 and one component of <a href="../../input_variables/generated_files/vargeo.html#objaro">objaro</a> != 0). Moreover,
+<a href="../../input_variables/generated_files/vargeo.html#objaax">objaax</a> AND <b>objbax</b> must be provided if ( <a href="../../input_variables/generated_files/vargeo.html#nobj">nobj</a> == 2 and one component of <a href="../../input_variables/generated_files/vargeo.html#objbro">objbro</a> != 0 ).)</font>
 <br><font id="text">
 <p>
 <p>
@@ -632,13 +632,13 @@ toward point 2 (coordinates 4:6).
 <br><font id="mnemonics">Mnemonics: OBJect B : Number of atoms</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#geometry_builder">GEOMETRY_BUILDER</a>, <a href="../../users/abinit_help.html#input_only">INPUT_ONLY</a></font>
 <br><font id="vartype">Variable type: integer</font>
-<br><font id="default">No default (Comment:  <a href="../../input_variables/html_generated/vargeo.html#objan">objan</a> and <b>objbn</b> MUST be provided if <a href="../../input_variables/html_generated/vargeo.html#nobj">nobj</a>==2.)</font>
+<br><font id="default">No default (Comment:  <a href="../../input_variables/generated_files/vargeo.html#objan">objan</a> and <b>objbn</b> MUST be provided if <a href="../../input_variables/generated_files/vargeo.html#nobj">nobj</a>==2.)</font>
 <br><font id="text">
 <p>
 <p>
  Gives the number of atoms in either
 object b. The list of atoms is given by the
-variables <a href="../../input_variables/html_generated/vargeo.html#objbat">objbat</a>.
+variables <a href="../../input_variables/generated_files/vargeo.html#objbat">objbat</a>.
  <br />
 </p>
 </font>
@@ -667,7 +667,7 @@ where nrep is the 1D repetition factor.
  The initial rotation and translation of the object,
 as well as the increment of rotation or translation
 from one object to the next are specified by
-the variables <a href="../../input_variables/html_generated/vargeo.html#objbro">objbro</a> and <a href="../../input_variables/html_generated/vargeo.html#objbtr">objbtr</a>, for object b.
+the variables <a href="../../input_variables/generated_files/vargeo.html#objbro">objbro</a> and <a href="../../input_variables/generated_files/vargeo.html#objbtr">objbtr</a>, for object b.
  <br />
  Note that the geometry builder will generate the full set
 of atoms from the primitive set of atoms using the
@@ -706,11 +706,11 @@ simply use 1 1 1, which is also the Default value.
 to be applied to the corresponding object.
  <br />
  The rotation is applied before the translation,
-and the axis is defined by the variables <a href="../../input_variables/html_generated/vargeo.html#objaax">objaax</a> and <a href="../../input_variables/html_generated/vargeo.html#objbax">objbax</a>.
+and the axis is defined by the variables <a href="../../input_variables/generated_files/vargeo.html#objaax">objaax</a> and <a href="../../input_variables/generated_files/vargeo.html#objbax">objbax</a>.
 See the latter variables for the definition of the sign
 of the rotation.
  <br />
- The first component <a href="../../input_variables/html_generated/vargeo.html#objaro">objaro</a>(1) and
+ The first component <a href="../../input_variables/generated_files/vargeo.html#objaro">objaro</a>(1) and
  <b>
   objbro
  </b>
@@ -748,7 +748,7 @@ if preferred, since these variables have the
  <br />
  The translation is applied after the rotation.
  <br />
- The first vector <a href="../../input_variables/html_generated/vargeo.html#objatr">objatr</a>(3,1) and <b>objbtr</b>(3,1) gives
+ The first vector <a href="../../input_variables/generated_files/vargeo.html#objatr">objatr</a>(3,1) and <b>objbtr</b>(3,1) gives
 the translation to be applied to the first
 instance of the object. The second, third or fourth
 component (resp.) gives the increment of translation
@@ -794,9 +794,9 @@ Magnetic point groups are numbered from 1 to 58.
 </p>
 <p>
  Related input variables :
-<a href="../../input_variables/html_generated/vargeo.html#spgroup">spgroup</a>,
-<a href="../../input_variables/html_generated/vargeo.html#spgroupma">spgroupma</a>,
-<a href="../../input_variables/html_generated/vargeo.html#genafm">genafm</a>
+<a href="../../input_variables/generated_files/vargeo.html#spgroup">spgroup</a>,
+<a href="../../input_variables/generated_files/vargeo.html#spgroupma">spgroupma</a>,
+<a href="../../input_variables/generated_files/vargeo.html#genafm">genafm</a>
 </p>
 </font>
 
@@ -813,7 +813,7 @@ Magnetic point groups are numbered from 1 to 58.
 <br><font id="text">
 <p>
 <p>
- It is taken into account only when <a href="../../input_variables/html_generated/vargeo.html#spgroup">spgroup</a>/=0; it
+ It is taken into account only when <a href="../../input_variables/generated_files/vargeo.html#spgroup">spgroup</a>/=0; it
 allows one to define the axes orientation
 for the specific space groups for which this is needed.
 Trigonal groups (number 146,148,155,160,161,166,167):
@@ -912,7 +912,7 @@ monoclinic groups is for example:
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 1</font>
 <br><br><font id="requires">
-Only relevant if <a href="../../input_variables/html_generated/vargeo.html#spgroup">spgroup</a>!=0
+Only relevant if <a href="../../input_variables/generated_files/vargeo.html#spgroup">spgroup</a>!=0
 </font>
 <br><font id="text">
 <p>
@@ -949,9 +949,9 @@ International Tables of Crystallography.
  Gives the number of the space group.
  <br />
  If <b>spgroup</b> is 0, the code assumes that all the symmetries
-are input through the <a href="../../input_variables/html_generated/varbas.html#symrel">symrel</a> matrices and the <a href="../../input_variables/html_generated/varbas.html#tnons">tnons</a>
+are input through the <a href="../../input_variables/generated_files/varbas.html#symrel">symrel</a> matrices and the <a href="../../input_variables/generated_files/varbas.html#tnons">tnons</a>
 vectors, or obtained from the symmetry finder (the default when
-<a href="../../input_variables/html_generated/varbas.html#nsym">nsym</a>==0).
+<a href="../../input_variables/generated_files/varbas.html#nsym">nsym</a>==0).
  <br />
  It should be between 1 and 230.  This option can be
 used to obtain all the atoms in the unit cell, starting
@@ -1010,17 +1010,17 @@ magnetic space group number <b>spgroupma</b>.
 above-mentioned Bradley and Cracknell textbook.
  <br />
  Thus, one way to specify a Shubnikov IV magnetic space group, is to define both
-<a href="../../input_variables/html_generated/vargeo.html#spgroup">spgroup</a> and <b>spgroupma</b>.
+<a href="../../input_variables/generated_files/vargeo.html#spgroup">spgroup</a> and <b>spgroupma</b>.
  <br />
- For example, the group P2_1/c_prime has <a href="../../input_variables/html_generated/vargeo.html#spgroup">spgroup</a>=14
+ For example, the group P2_1/c_prime has <a href="../../input_variables/generated_files/vargeo.html#spgroup">spgroup</a>=14
 and <b>spgroupma</b>=78.
  <br />
  Alternatively,
 for Shubnikov IV magnetic groups, one might
-define <a href="../../input_variables/html_generated/vargeo.html#spgroup">spgroup</a> and <a href="../../input_variables/html_generated/vargeo.html#genafm">genafm</a>.
+define <a href="../../input_variables/generated_files/vargeo.html#spgroup">spgroup</a> and <a href="../../input_variables/generated_files/vargeo.html#genafm">genafm</a>.
 For both the type III and IV, one might
-define by hand the set of symmetries, using <a href="../../input_variables/html_generated/varbas.html#symrel">symrel</a>,
-<a href="../../input_variables/html_generated/varbas.html#tnons">tnons</a> and <a href="../../input_variables/html_generated/vargs.html#symafm">symafm</a>.
+define by hand the set of symmetries, using <a href="../../input_variables/generated_files/varbas.html#symrel">symrel</a>,
+<a href="../../input_variables/generated_files/varbas.html#tnons">tnons</a> and <a href="../../input_variables/generated_files/vargs.html#symafm">symafm</a>.
 </p>
 </font>
 
@@ -1055,7 +1055,7 @@ will be automatically symmetrized by the symmetry operations that will have been
 <br><font id="title"><a name="vaclst">vaclst</a></font>
 <br><font id="mnemonics">Mnemonics: VACancies LiST</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#geometry_builder">GEOMETRY_BUILDER</a>, <a href="../../users/abinit_help.html#input_only">INPUT_ONLY</a></font>
-<br><font id="vartype">Variable type: integer(<a href="../../input_variables/html_generated/vargeo.html#vacnum">vacnum</a>)</font>
+<br><font id="vartype">Variable type: integer(<a href="../../input_variables/generated_files/vargeo.html#vacnum">vacnum</a>)</font>
 <br><font id="default">No default</font>
 <br><font id="text">
 <p>
@@ -1083,7 +1083,7 @@ after having rotated, translated and repeated the objects.
  Gives the number of atoms to be subtracted
 from the list of atoms after the rotations, translations
 and repetitions have been done. The list of these
-atoms is contained in <a href="../../input_variables/html_generated/vargeo.html#vaclst">vaclst</a>.
+atoms is contained in <a href="../../input_variables/generated_files/vargeo.html#vaclst">vaclst</a>.
 </p>
 </font>
 
@@ -1101,8 +1101,8 @@ atoms is contained in <a href="../../input_variables/html_generated/vargeo.html#
 <p>
 <p>
  Gives the name of a xyz format file, to take
-<a href="../../input_variables/html_generated/varbas.html#natom">natom</a>, <a href="../../input_variables/html_generated/varbas.html#ntypat">ntypat</a>, <a href="../../input_variables/html_generated/varbas.html#typat">typat</a>, <a href="../../input_variables/html_generated/varbas.html#znucl">znucl</a>,
-and <a href="../../input_variables/html_generated/varbas.html#xangst">xangst</a> from. This input can not be mixed with normal atom specifications for other datasets.
+<a href="../../input_variables/generated_files/varbas.html#natom">natom</a>, <a href="../../input_variables/generated_files/varbas.html#ntypat">ntypat</a>, <a href="../../input_variables/generated_files/varbas.html#typat">typat</a>, <a href="../../input_variables/generated_files/varbas.html#znucl">znucl</a>,
+and <a href="../../input_variables/generated_files/varbas.html#xangst">xangst</a> from. This input can not be mixed with normal atom specifications for other datasets.
 </p>
 <p>
  Notes: do not quote the file name in the abinit input file, simply leave a space after xyzfile. The xyz format is the number of atoms on the first line, a comment line, then one line per atom, with the element as a 2 letter symbol ("As" "O" or "Pu") and the three cartesian coordinates in Angstrom.

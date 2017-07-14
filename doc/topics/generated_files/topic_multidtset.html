@@ -41,17 +41,17 @@ potential, then the eigenenergy computation along different lines. </p>
 <p>For that purpose, the <b>multi-dataset mode</b> has been implemented. </p>
 <p>It allows the code to treat, in one run, different sets of data, and to chain
 them. The number of datasets to be treated is specified by the variable
-<a href="../../input_variables/html_generated/varbas.html#ndtset">ndtset</a>,
+<a href="../../input_variables/generated_files/varbas.html#ndtset">ndtset</a>,
 while the indices of the datasets (by default 1, 2, 3,
-and so on) can be eventually provided by the array <a href="../../input_variables/html_generated/varbas.html#jdtset">jdtset</a>.
+and so on) can be eventually provided by the array <a href="../../input_variables/generated_files/varbas.html#jdtset">jdtset</a>.
 </p>
 <p>For each dataset to be treated, characterized by some index, each input variable
 will determined by the following <b>rules</b> (actually, it is easier to understand
 when one looks at examples, see below) : </p>
 <ul>
 <li> (<a name="ref8_1"></a>1) ABINIT looks whether the variable name (e.g.
-<a href="../../input_variables/html_generated/varbas.html#ecut">ecut</a> ), appended with the
-index of the dataset (e.g. <a href="../../input_variables/html_generated/varbas.html#jdtset">jdtset</a>=2),
+<a href="../../input_variables/generated_files/varbas.html#ecut">ecut</a> ), appended with the
+index of the dataset (e.g. <a href="../../input_variables/generated_files/varbas.html#jdtset">jdtset</a>=2),
 exists (e.g. "ecut2" ) . It
 will take the data that follows this keyword, if it exists.</li>
 <li> (<a name="ref8_2"></a>2) If this modified variable name does not exist,
@@ -150,27 +150,27 @@ is equivalent to
 
 <h4><a name="loop"></a> Defining a double loop dataset: </h4>
 <p>To define a double loop dataset, one has first to define the upper limit
-of two loop counters, thanks to the variable <a href="../../input_variables/html_generated/varbas.html#udtset">udtset</a>.
-The inner loop will execute from 1 to <a href="../../input_variables/html_generated/varbas.html#udtset">udtset</a>(2),
+of two loop counters, thanks to the variable <a href="../../input_variables/generated_files/varbas.html#udtset">udtset</a>.
+The inner loop will execute from 1 to <a href="../../input_variables/generated_files/varbas.html#udtset">udtset</a>(2),
 and the outer loop will execute from 1 to [[udtset](1).
-Note that the largest value for <a href="../../input_variables/html_generated/varbas.html#udtset">udtset</a>(1) is presently 999,
-while it is 9 for <a href="../../input_variables/html_generated/varbas.html#udtset">udtset</a>(2) (so, only the last digit for the inner loop). </p>
-<p>The value of <a href="../../input_variables/html_generated/varbas.html#ndtset">ndtset</a> must
-be coherent with <a href="../../input_variables/html_generated/varbas.html#udtset">udtset</a> (it
+Note that the largest value for <a href="../../input_variables/generated_files/varbas.html#udtset">udtset</a>(1) is presently 999,
+while it is 9 for <a href="../../input_variables/generated_files/varbas.html#udtset">udtset</a>(2) (so, only the last digit for the inner loop). </p>
+<p>The value of <a href="../../input_variables/generated_files/varbas.html#ndtset">ndtset</a> must
+be coherent with <a href="../../input_variables/generated_files/varbas.html#udtset">udtset</a> (it
 must equal the product <code>udtset(1)*udtset(2)</code> ). </p>
 <p>A dataset index is created by the concatenation of the outer loop index and
 the inner loop index. <br>
-For example, if <a href="../../input_variables/html_generated/varbas.html#udtset">udtset</a>(1)
-is 2 and <a href="../../input_variables/html_generated/varbas.html#udtset">udtset</a>(2) is 4,
+For example, if <a href="../../input_variables/generated_files/varbas.html#udtset">udtset</a>(1)
+is 2 and <a href="../../input_variables/generated_files/varbas.html#udtset">udtset</a>(2) is 4,
 the index will assume the following values : <code>11, 12, 13, 14, 21, 22,
 23, and 24</code>.
-<p> Independently of the use of <a href="../../input_variables/html_generated/varbas.html#udtset">udtset</a>,
+<p> Independently of the use of <a href="../../input_variables/generated_files/varbas.html#udtset">udtset</a>,
 rules (2a) and (2c) will be used to define the value of an input variable: </p>
 <p><a name="topic_multidtset.html#ref8_2a"></a>(2a) The question mark "<b>?</b>" can be used as a
 metacharacter, replacing any digit from 1 to 9, to define an index of a dataset.
 <br>
 For example, <b>ecut?</b>1 means that the input value that follows it can
-be used for <a href="../../input_variables/html_generated/varbas.html#ecut">ecut</a> for the datasets
+be used for <a href="../../input_variables/generated_files/varbas.html#ecut">ecut</a> for the datasets
 <code>01, 11, 21, 31, 41, 51, 61, 71, 81, and 91</code>. </p>
 <p><a name="topic_multidtset.html#ref8_2c"></a>(2c) If the variable name appended with the index of
 the dataset does not exist, the code looks whether a double-loop series has
