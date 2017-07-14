@@ -281,7 +281,7 @@ except :
     print("the file was likely non existent")
 
 for tests_dir in tests_dirs :
-  grep_cmd = "grep topics topics/tests/%s/Input/*.in > %s/topics_in_tests.txt"%(tests_dir,topics_gen)
+  grep_cmd = "grep topics tests/%s/Input/*.in > %s/topics_in_tests.txt"%(tests_dir,topics_gen)
   retcode = os.system(grep_cmd)
   if retcode == 0 :
     sed_cmd = "sed -e 's/^/- /' %s/topics_in_tests.txt >> %s/topics_in_tests.yml"%(topics_gen,topics_gen)
@@ -804,15 +804,15 @@ for i, topic_name in enumerate(inputs_for_topic):
     dir = dict()
     for test in tests:
       file_split=test.split('/')
-      dirname=file_split[2] 
-      testname=file_split[4] 
+      dirname=file_split[1] 
+      testname=file_split[3] 
       if dirname not in dir.keys():
         dir[dirname] = []
       dir[dirname].append(testname)
     for dirname, testnames in dir.items():
       line="<p> tests/"+dirname+"/Input: "
       for testname in testnames:
-        line+="<a href=\"../tests/"+dirname+"/Input/"+testname+"\">"+testname+"</a> \n"
+        line+="<a href=\"../../tests/"+dirname+"/Input/"+testname+"\">"+testname+"</a> \n"
       topic_infiles[topic_name]+= line
     topic_infiles[topic_name] += "<br>\n"
 
