@@ -774,19 +774,40 @@ for topic_name in list_of_topics:
     toc_all = toc_all + "<p>"+cur_let_all+".\n"
   toc_all = toc_all + "<br><a href=\"topic_"+ topic_name + ".html\">" + topic_name + "</a> [How to "+topic.howto+"] &nbsp;&nbsp;\n"
 
+  #Find the bibliographical references
+  reflist=[]
+  for j in ["introduction","examples"] :
+    try :
+      extract_j=getattr(topic,j).strip()
+    except :
+      extract_j=""
+    linklist=re.findall("\\[\\[([a-zA-Z0-9_ */<>]*)\\]\\]",extract_j,flags=0)
+    reflist=[]
+    for ref in linklist:
+      m=re.search("\d{4}",ref,flags=0)
+      if m!=None:
+        reflist.append(ref)
+  reflist=list(set(reflist))
+  reflist.sort()
+
+  topic_refs=""
+  for (i,ID) in enumerate(reflist):
+    topic_refs="<br> [["+item+"]] "+reference_dic[ID]
+
   #Generate the table of content
   item_toc=0
   item_list=[]
-  title={ "introduction":"Introduction." , "examples":"Example(s)", "tutorials":"Related tutorials." , "input_variables":"Related input variables." , "input_files":"Selected input files."}
+  title={ "introduction":"Introduction." , "examples":"Example(s)", "tutorials":"Related tutorials." , 
+          "input_variables":"Related input variables." , "input_files":"Selected input files." , "references":"References."}
   sec_number={}
   toc=" <h3><b>Table of content: </b></h3> \n <ul> "
-  for j in ["introduction","examples","tutorials","input_variables","input_files"] :
+  for j in ["introduction","examples","tutorials","input_variables","input_files","references"] :
     sec_number[j]="0"
     try :
       extract_j=getattr(topic,j).strip()
     except :
       extract_j=""
-    if (extract_j != "" and extract_j!= "default") or (j=="input_variables" and topic_invars[topic_name]!="") or (j=="input_files" and topic_infiles[topic_name]!=""):
+    if (extract_j != "" and extract_j!= "default") or (j=="input_variables" and topic_invars[topic_name]!="") or (j=="input_files" and topic_infiles[topic_name]!="") or (j=="references" and topic_refs!=""):
       item_toc += 1
       item_num="%d" % item_toc
       sec_number[j]=item_num
@@ -797,7 +818,7 @@ for topic_name in list_of_topics:
   #Generate a first version of the html file, in the order "header" ... up to the "end"
   #Take the info from the section "default" if there is no information on the specific section provided in the yml file.
   topic_html=""
-  for j in ["header","title","subtitle","copyright","links","toc","introduction","examples","tutorials","input_variables","input_files","links","end"]:
+  for j in ["header","title","subtitle","copyright","links","toc","introduction","examples","tutorials","input_variables","input_files","links","references","end"]:
     if j == "toc":
       topic_html += toc
     elif j == "input_variables":
@@ -809,6 +830,10 @@ for topic_name in list_of_topics:
         topic_html+= '\n&nbsp; \n<HR ALIGN=left> \n<a name=\"'+sec_number[j]+'\">&nbsp;</a>\n<h3><b>'+sec_number[j]+'. '+title[j]+'</b></h3>\n\n\n'
         topic_html+= "The user can find some related example input files in the ABINIT package in the directory /tests, or on the Web:\n"
         topic_html+= topic_infiles[topic_name]
+    elif j == "references":
+      if sec_number[j]!="0" :
+        topic_html+= '\n&nbsp; \n<HR ALIGN=left> \n<a name=\"'+sec_number[j]+'\">&nbsp;</a>\n<h3><b>'+sec_number[j]+'. '+title[j]+'</b></h3>\n\n\n'
+        topic_html+= topic_refs
     else:
       extract_j=getattr(topic,j).strip()
       if extract_j == "" or extract_j== "default" :
