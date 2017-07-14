@@ -1720,13 +1720,15 @@ subroutine ddb_from_file(ddb,filename,brav,natom,natifc,atifc,crystal,comm,prtvo
 !Local variables-------------------------------
 !scalars
  integer,parameter :: master=0
- integer :: ierr,ii,msym,dimekb,lmnmax,mband,nkpt,ntypat,nsym,usepaw
+ integer :: ierr,ii,msym,dimekb,lmnmax,mband,nkpt,ntypat,nsym,usepaw,jj,isym
  integer :: mtyp,mpert,msize,ddb_natom,nblok,occopt,timrev,space_group,npsp,ddbun
  real(dp) :: factor,ucvol
  logical :: use_antiferro
  type(ddb_hdr_type) :: ddb_hdr
 !arrays
  integer,allocatable :: symrec(:,:,:),symrel(:,:,:),symafm(:),indsym(:,:,:),typat(:)
+ integer,allocatable :: symrel_red(:,:,:),symafm_red(:)
+ real(dp),allocatable :: tnons_red(:,:)
  real(dp) :: acell(3),gmet(3,3),gprim(3,3),rmet(3,3),rprim(3,3),rprimd(3,3)
  real(dp),allocatable :: amu(:),xcart(:),xred(:,:),zion(:),znucl(:),tnons(:,:)
  character(len=132),allocatable :: title(:)
@@ -1862,6 +1864,61 @@ subroutine ddb_from_file(ddb,filename,brav,natom,natifc,atifc,crystal,comm,prtvo
  do ii=1,ntypat
    write(title(ii),'(a,i0)')"No title for typat ",ii
  end do
+
+ ! BEGIN DEBUG ============================================================== !
+ !
+ !
+ ABI_ALLOCATE(symrel_red, (3,3,nsym))
+ ABI_ALLOCATE(tnons_red, (3,nsym))
+ ABI_ALLOCATE(symafm_red, (nsym))
+ ABI_ALLOCATE(amu, (ntypat))
+
+ do ii = 1,ntypat
+   amu(ii) = ddb%amu(ii)
+ end do
+
+ !symrel_red(:,:,:) = symrel(:,:,1:nsym)
+ !tnons_red(:,:,:) = tnons(:,1:nsym)
+ !symafm_red(:,:,:) = symafm(1:nsym)
+ do isym = 1,nsym
+   symafm_red(isym) = symafm(isym)
+   do jj = 1,3
+     tnons_red(jj,isym) = tnons(jj,isym)
+     do ii = 1,3
+       symrel_red(ii,jj,isym) = symrel(ii,jj,isym)
+     end do
+   end do
+ end do
+
+ ABI_FREE(symrel)
+ ABI_FREE(tnons)
+ ABI_FREE(symafm)
+
+ ABI_ALLOCATE(symrel, (3,3,nsym))
+ ABI_ALLOCATE(tnons, (3,nsym))
+ ABI_ALLOCATE(symafm, (nsym))
+
+ !symrel = symrel_red
+ !tnons = tnons_red
+ !symafm = symafm_red
+
+ do isym = 1,nsym
+   symafm(isym) = symafm_red(isym)
+   do jj = 1,3
+     tnons(jj,isym) = tnons_red(jj,isym)
+     do ii = 1,3
+       symrel(ii,jj,isym) = symrel_red(ii,jj,isym)
+     end do
+   end do
+ end do
+
+ ABI_FREE(amu)
+ ABI_FREE(symrel_red)
+ ABI_FREE(tnons_red)
+ ABI_FREE(symafm_red)
+ !
+ ! END DEBUG ================================================================ !
+
 
 !Warning znucl is dimension with ntypat = nspsp hence alchemy is not supported here
  call crystal_init(ddb%amu,Crystal,space_group,natom,npsp,ntypat,nsym,rprimd,typat,xred,&
