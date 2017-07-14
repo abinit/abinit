@@ -183,6 +183,77 @@ def get_year(name):
   return result
 
 ################################################################################
+
+def bibtex2html(str_input):
+  """ Convert the bibtex notations to html notations inside the string str """
+
+  str=str_input
+
+  #Subscripts
+  for i in string.digits:
+    string_old='$_'+i+'$'
+    string_new="<sub>"+i+"</sub>"
+    str=str.replace(string_old,string_new)
+
+  #Greek letters
+  list_signs=["alpha","beta","gamma","epsilon","delta","zeta","eta","theta","iota","kappa","lambda","mu","nu","xi","omicron","pi","rho","sigma","tau","upsilon","phi","chi","psi","omega"]
+  list_signs_uplower=[]
+  for (i,item) in enumerate(list_signs):
+    list_signs_uplower.append(item[0].upper()+item[1:])
+  list_signs.extend(list_signs_uplower)
+  for i in list_signs:
+    string_old='$\\'+i+'$'
+    string_new='&'+i+';'
+    str=str.replace(string_old,string_new)
+
+  #Accented characters
+  list_vowels=["a","e","i","o","u","y","A","E","I","O","U","Y"]
+  list_signs_in=['"',"'","`","^","~"]
+  list_signs_out=["uml","acute","grave","circ","tilde"]
+  for vowel in list_vowels:
+    for (i,item) in enumerate(list_signs_in):
+      string_1= "{\\" + item + vowel + "}"
+      string_2= "\\" + item + vowel
+      string_3= "\\" + item + "{" + vowel + "}"
+      #Note that the ampersand (like the backslash) is a special character in Python, so the first string is prepended with 'r' to avoid special treatment.
+      string_final= r"&%s%s;" %(vowel,list_signs_out[i])
+      str=str.replace(string_1,string_final)
+      str=str.replace(string_2,string_final)
+      str=str.replace(string_3,string_final)
+
+  str=str.replace(r"{\~n}","&ntilde;")
+  str=str.replace(r"\~n","&ntilde;")
+  str=str.replace(r"\~{n}","&ntilde;")
+  str=str.replace(r"{\'n}","&#324;")
+  str=str.replace(r"\'n","&#324;")
+  str=str.replace(r"\'{n}","&#324;")
+
+  str=str.replace(r"{\c c}","&ccedil;")
+  str=str.replace(r"\c c","&ccedil;")
+  str=str.replace(r"\c{c}","&ccedil;")
+
+  #Get rid of uneeded parentheses. One is however left with the {XYZ..} case, that should be handled with a regular expression. (TO BE DONE)
+  for i in string.letters:
+    string_old='{'+i+'}'
+    string_new=i
+    str=str.replace(string_old,string_new)
+  #Here, do it on a case-by-case basis. Very unsatisfactory...
+  list_signs=["ABINIT","AIP","ATOMPAW","CPU","DFT","DMFT","ELPA","ESPRESSO","GGA","GPU","GW","III","LDA","MO","PA","PAW","QE","QMR","QUANTUM","RPA","SIAM","VESTA","XML"]
+  for i in list_signs:
+    string_old='{'+i+'}'
+    string_new=i
+    str=str.replace(string_old,string_new)
+
+  str=str.replace("--","&ndash;")
+
+  #Suppose all remaining parenthesis are present to avoid BibTex to switch automatically from uppercase to lowercase,
+  #which will not happen in HTML...
+  str=str.replace('"{','"')
+  str=str.replace('}"','"')
+
+  return str
+
+################################################################################
 ################################################################################
 
 # Parsing section, also preliminary treatment of list of topics in tests and bibliography 
@@ -782,17 +853,18 @@ for topic_name in list_of_topics:
     except :
       extract_j=""
     linklist=re.findall("\\[\\[([a-zA-Z0-9_ */<>]*)\\]\\]",extract_j,flags=0)
-    reflist=[]
     for ref in linklist:
       m=re.search("\d{4}",ref,flags=0)
       if m!=None:
         reflist.append(ref)
+
   reflist=list(set(reflist))
   reflist.sort()
 
   topic_refs=""
   for (i,ID) in enumerate(reflist):
-    topic_refs="<br> [["+item+"]] "+reference_dic[ID]
+    topic_refs+="<br> [["+ID+"]] "+reference_dic[ID]+"<br> \n"
+  topic_refs+="<p>"
 
   #Generate the table of content
   item_toc=0
@@ -807,7 +879,7 @@ for topic_name in list_of_topics:
       extract_j=getattr(topic,j).strip()
     except :
       extract_j=""
-    if (extract_j != "" and extract_j!= "default") or (j=="input_variables" and topic_invars[topic_name]!="") or (j=="input_files" and topic_infiles[topic_name]!="") or (j=="references" and topic_refs!=""):
+    if (extract_j != "" and extract_j!= "default") or (j=="input_variables" and topic_invars[topic_name]!="") or (j=="input_files" and topic_infiles[topic_name]!="") or (j=="references" and reflist!=[]):
       item_toc += 1
       item_num="%d" % item_toc
       sec_number[j]=item_num
@@ -818,7 +890,7 @@ for topic_name in list_of_topics:
   #Generate a first version of the html file, in the order "header" ... up to the "end"
   #Take the info from the section "default" if there is no information on the specific section provided in the yml file.
   topic_html=""
-  for j in ["header","title","subtitle","copyright","links","toc","introduction","examples","tutorials","input_variables","input_files","links","references","end"]:
+  for j in ["header","title","subtitle","copyright","links","toc","introduction","examples","tutorials","input_variables","input_files","references","links","end"]:
     if j == "toc":
       topic_html += toc
     elif j == "input_variables":
@@ -952,68 +1024,8 @@ print("File %s has been written ..." %file_txt)
 ################################################################################
 #Global operation on the bibliography html file : conversion from bibtex notation to html notation.
 #This should cover most of the cases. 
-
-#Subscripts
-for i in string.digits:
-  string_old='$_'+i+'$'
-  string_new="<sub>"+i+"</sub>"
-  bib_content['bibliography']=bib_content['bibliography'].replace(string_old,string_new)
-
-#Greek letters
-list_signs=["alpha","beta","gamma","epsilon","delta","zeta","eta","theta","iota","kappa","lambda","mu","nu","xi","omicron","pi","rho","sigma","tau","upsilon","phi","chi","psi","omega"]
-list_signs_uplower=[]
-for (i,item) in enumerate(list_signs):
-  list_signs_uplower.append(item[0].upper()+item[1:])
-list_signs.extend(list_signs_uplower)
-for i in list_signs:
-  string_old='$\\'+i+'$'  
-  string_new='&'+i+';'  
-  bib_content['bibliography']=bib_content['bibliography'].replace(string_old,string_new)
-
-#Accented characters
-#Note that the backslash is a special character in Python, so the first string is prepended with 'r' to avoid special treatment.
-list_vowels=["a","e","i","o","u","y","A","E","I","O","U","Y"]
-list_signs_in=['"',"'","`","^","~"]
-list_signs_out=["uml","acute","grave","circ","tilde"]
-for vowel in list_vowels:
-  for (i,item) in enumerate(list_signs_in):
-    string_1= "{\\" + item + vowel + "}"
-    string_2= "\\" + item + vowel
-    string_3= "\\" + item + "{" + vowel + "}" 
-    string_final= r"&%s%s;" %(vowel,list_signs_out[i])
-    bib_content['bibliography']=bib_content['bibliography'].replace(string_1,string_final)
-    bib_content['bibliography']=bib_content['bibliography'].replace(string_2,string_final)
-    bib_content['bibliography']=bib_content['bibliography'].replace(string_3,string_final)
-
-bib_content['bibliography']=bib_content['bibliography'].replace(r"{\~n}","&ntilde;")
-bib_content['bibliography']=bib_content['bibliography'].replace(r"\~n","&ntilde;")
-bib_content['bibliography']=bib_content['bibliography'].replace(r"\~{n}","&ntilde;")
-bib_content['bibliography']=bib_content['bibliography'].replace(r"{\'n}","&#324;")
-bib_content['bibliography']=bib_content['bibliography'].replace(r"\'n","&#324;")
-bib_content['bibliography']=bib_content['bibliography'].replace(r"\'{n}","&#324;")
-
-bib_content['bibliography']=bib_content['bibliography'].replace(r"{\c c}","&ccedil;")
-bib_content['bibliography']=bib_content['bibliography'].replace(r"\c c","&ccedil;")
-bib_content['bibliography']=bib_content['bibliography'].replace(r"\c{c}","&ccedil;")
-
-#Get rid of uneeded parentheses. One is however left with the {XYZ..} case, that should be handled with a regular expression. (TO BE DONE)
-for i in string.letters:
-  string_old='{'+i+'}'
-  string_new=i
-  bib_content['bibliography']=bib_content['bibliography'].replace(string_old,string_new)
-#Here, do it on a case-by-case basis. Very unsatisfactory...
-list_signs=["ABINIT","AIP","ATOMPAW","CPU","DFT","DMFT","ELPA","ESPRESSO","GGA","GPU","GW","III","LDA","MO","PA","PAW","QE","QMR","QUANTUM","RPA","SIAM","VESTA","XML"]
-for i in list_signs:
-  string_old='{'+i+'}'
-  string_new=i
-  bib_content['bibliography']=bib_content['bibliography'].replace(string_old,string_new)
-
-bib_content['bibliography']=bib_content['bibliography'].replace("--","&ndash;")
-
-#Suppose all remaining parenthesis are present to avoid BibTex to switch automatically from uppercase to lowercase,
-#which will not happen in HTML...
-bib_content['bibliography']=bib_content['bibliography'].replace('"{','"')
-bib_content['bibliography']=bib_content['bibliography'].replace('}"','"')
+ 
+bib_content['bibliography']=bibtex2html(bib_content['bibliography'])
 
 ################################################################################
 # Generate the html files in the bibliography directory
