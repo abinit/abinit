@@ -527,7 +527,7 @@ end subroutine ddb_hdr_open_write
 !!
 !! SOURCE
 
-subroutine ddb_hdr_open_read(ddb_hdr, filnam, unddb, ddb_version, &
+subroutine ddb_hdr_open_read(ddb_hdr, filnam, unddb, ddb_version, comm&
 &        matom,mtypat,mband,mkpt,msym,dimekb,lmnmax,usepaw,dimonly)
 
 
@@ -544,22 +544,32 @@ subroutine ddb_hdr_open_read(ddb_hdr, filnam, unddb, ddb_version, &
  character(len=*),intent(in) :: filnam
  integer,intent(in) :: unddb
  integer,intent(in) :: ddb_version
+ integer,intent(in),optional :: comm
  integer,intent(in),optional :: matom,mtypat,mband,mkpt,msym
  integer,intent(in),optional :: dimekb,lmnmax,usepaw
  integer,intent(in),optional :: dimonly
 
 !Local variables -------------------------
+ integer :: choice
  integer :: mblktyp,nblok
  integer :: matom_l,mtypat_l,mband_l,mkpt_l,msym_l
  integer :: dimekb_l,lmnmax_l,usepaw_l
- integer :: choice
+ integer :: comm_l
 
 ! ************************************************************************
 
+ if (present(comm)) then
+   comm_l = comm
+ else
+   comm = xmpi_comm_self
+ end if
+
  ! Read the dimensions from the DDB
+ ! GA: Not sure if I should use xmpi_comm_self or xmpi_world here.
+ !     A safer option would be to have comm passed as an input argumet.
  call ddb_getdims(dimekb_l,filnam,lmnmax_l,mband_l,mblktyp, &
 &       msym_l,matom_l,nblok,mkpt_l,mtypat_l,unddb,usepaw_l, &
-&       ddb_version,xmpi_comm_self)
+&       ddb_version,comm)
 
  close(unddb)
 
