@@ -135,12 +135,6 @@ subroutine thmeig(g2fsmear,acell,amu,anaddb_dtset,d2asr,&
  real(dp),allocatable :: qpt_full(:,:),qptnrm(:)
  real(dp),allocatable :: spqpt(:,:),tnons_new(:,:),spinat(:,:)
  real(dp),allocatable :: wghtq(:)
- ! BEGIN DEBUG
- !real(dp),allocatable :: wtk(:),occ(:),znucl(:),kpt(:,:),ekb(:,:)
- !integer,allocatable :: pspso(:),nband(:),indlmn(:,:,:) !new
- !type(pawtab_type),allocatable :: pawtab(:) !new
- !integer :: choice, fullinit, nunit, vrsddb
- ! END DEBUG
 
  integer :: ngfft(18) !new
 
@@ -168,20 +162,6 @@ subroutine thmeig(g2fsmear,acell,amu,anaddb_dtset,d2asr,&
 
  ABI_ALLOCATE(symafm, (nsym))
  ABI_ALLOCATE(spinat,(3,natom))
-
- ! BEGIN DEBUG
- !ABI_ALLOCATE(ekb,(dimekb,ntypat))
- !ABI_ALLOCATE(indlmn,(6,lmnmax,ntypat))
- !ABI_ALLOCATE(pspso,(ntypat))
- !ABI_DATATYPE_ALLOCATE(pawtab,(ntypat*usepaw))
- !call pawtab_nullify(pawtab)
-
- !ABI_ALLOCATE(kpt,(3,nkpt))
- !ABI_ALLOCATE(nband,(nkpt))
- !ABI_ALLOCATE(occ,(nkpt*mband*msppol))
- !ABI_ALLOCATE(wtk,(nkpt))
- !ABI_ALLOCATE(znucl,(ntypat))
- ! END DEBUG
 
 !At present, only atom-type perturbations are allowed for eig2 type matrix elements.
  mpert_eig2=natom
@@ -220,27 +200,6 @@ subroutine thmeig(g2fsmear,acell,amu,anaddb_dtset,d2asr,&
 
  symafm(:) = ddb_hdr%symafm(1:nsym)
  spinat(:,:) = ddb_hdr%spinat(:,1:natom)
-
- ! BEGIN DEBUG
-! close(ddbun)
-! vrsddb = DDB_VERSION
-! nunit=ddbun ; natom_=natom ; nkpt_=nkpt ; ntypat_=ntypat
-! call ioddb8_in(filnam5,natom_,mband,&
-!& nkpt_,msym,ntypat_,nunit,vrsddb,&
-!& acell,amu,dilatmx,ecut,ecutsm,intxc,iscf,ixc,kpt,kptnrm,&
-!& natom,nband,ngfft,nkpt,nspden,nspinor,nsppol,nsym,ntypat,occ,occopt,&
-!& pawecutdg,rprim,dfpt_sciss,spinat,symafm,symrel,tnons,tolwfr,tphysel,tsmear,&
-!& typat,usepaw,wtk,xred,zion,znucl)
-!
-! useylm=usepaw;choice=1
-! call psddb8 (choice,dimekb,ekb,fullinit,indlmn,lmnmax,&
-!& nblok2,ntypat,nunit,pawtab,pspso,usepaw,useylm,vrsddb)
- ! END DEBUG
-
- ! DEBUG
- !write(*,*)'thmeig: symrel=', symrel(:,:,1)
- !write(*,*)'thmeig: symafm=', symafm(1)
- ! END DEBUG
 
 !Compute different matrices in real and reciprocal space, also
 !checks whether ucvol is positive.
@@ -315,15 +274,6 @@ subroutine thmeig(g2fsmear,acell,amu,anaddb_dtset,d2asr,&
  end if
 
  close(ddbun)
-
-!DEBUG
-!write(std_out,*)"blkval2gqpt=",blkval2gqpt(1,1,1,1)
-!ENDDEBUG
-
-!DEBUG
-!write(std_out,*)'-thmeig : 2 '
-!call flush(6)
-!ENDDEBUG
 
 !=========================================================================
 !2) Calculation of dE(n,k)/dn(Q,j) : consider all q and modes
@@ -878,10 +828,6 @@ subroutine thmeig(g2fsmear,acell,amu,anaddb_dtset,d2asr,&
          zeropoint(1,1:mband,1:nkpt) = zeropoint(1,1:mband,1:nkpt) + dednr(1:mband,1:nkpt,imod,iqpt)*half
          zeropoint(2,1:mband,1:nkpt) = zeropoint(2,1:mband,1:nkpt) + dedni(1:mband,1:nkpt,imod,iqpt)*half
 
-!        DEBUG
-!        write(std_out,*)' For iqpt,imod=',iqpt,imod
-!        write(std_out,'(a,8f12.5)' )'  contribution to ZPM correction of ikpt=20, 1:mband',dednr(1:mband,20,imod,iqpt)*half*Ha_eV
-!        ENDDEBUG
        end if
      end do ! imod
    end do !iqpt
@@ -924,19 +870,6 @@ subroutine thmeig(g2fsmear,acell,amu,anaddb_dtset,d2asr,&
      write(iout,'(i6,2es20.6)') iband,zeropoint(1,iband,ikpt),slope(1,iband,ikpt)
    end do
  end do
-
- ! BEGIN DEBUG
- !ABI_DEALLOCATE(ekb)
- !ABI_DEALLOCATE(indlmn)
- !ABI_DEALLOCATE(kpt)
- !ABI_DEALLOCATE(nband)
- !ABI_DEALLOCATE(occ)
- !ABI_DEALLOCATE(pspso)
- !ABI_DEALLOCATE(wtk)
- !ABI_DEALLOCATE(znucl)
- !call pawtab_free(pawtab)
- !ABI_DATATYPE_DEALLOCATE(pawtab)
- ! END DEBUG
 
  ABI_DEALLOCATE(symafm)
  ABI_DEALLOCATE(spinat)
