@@ -128,7 +128,9 @@ Change the working directory of windows 2 to "Work":
   Different output files have been created, including a "log" file and the
   output file "tbase1_1.out".
   To check that everything is correct, you
-  can make a diff of tbase1_1.out with a reference file contained in the
+  can make a diff of tbase1_1.out with a reference file 
+  <a href="../../tests/tutorial/Refs/tbase1_1.out">tbase1_1.out</a>
+  contained in the
   ~abinit/tests/tutorial/Refs directory:
  <li><i>diff tbase1_1.out ../../Refs/tbase1_1.out | more</i></li>
 <p>(Perhaps you will need to ignore the blanks, with the command "diff -b" instead of "diff")
@@ -251,12 +253,14 @@ in the first column of the ABINIT output file.
   <a href="../../users/abinit_help.html#logfile" target="helpsimg">section 6.1</a>
   of the abinit_help file.<a name="ref4"></a></p>
 
-<p><b>1.1.i</b> Then, open the "tbase1_1.out" file.
+<p><b>1.1.i</b> Then, open the 
+  <a href="../../tests/tutorial/Refs/tbase1_1.out">~abinit/tests/tutorial/Refs/tbase1_1.out</a>
+  file.
   You find some general information about the output file
   in <a href="../../users/abinit_help.html#outputfile" target="helpsimg"> section 6.2</a>
   of the abinit_help file. You should also:
 <ul>
-    <li> examine the header of "tbase1_1.out"
+    <li> examine the header of <a href="../../tests/tutorial/Refs/tbase1_1.out">~abinit/tests/tutorial/Refs/tbase1_1.out</a>
     <li> examine the report on memory needs (do not read each value of parameters)
     <li> examine the echo of preprocessed input data,
   </ul>
@@ -270,8 +274,8 @@ in the first column of the ABINIT output file.
   details, and read the meaning of each of its variables in the
   corresponding input variables
   file, if it has not yet been done. Then, you should examine some variables
-  that were NOT defined in the input file, but that appear in the echo written
-  in "tbase1_1.out": <br>
+  that were NOT defined in the input file, but that appear in the echo written in 
+   <a href="../../tests/tutorial/Refs/tbase1_1.out">~abinit/tests/tutorial/Refs/tbase1_1.out</a>: <br>
   <br>
   - <a href="../../input_variables/generated_files/varbas.html#nband">nband</a>: its value is 2.
   <br>
@@ -293,7 +297,8 @@ in the first column of the ABINIT output file.
   Well, this is not completely right, as the code took advantage of the time-reversal
   symmetry, valid for the k-point (0 0 0), to decrease the number of planewave
   by about a factor of two. <br>
-  The full set of plane waves is <b>1503</b> (see later in the "tbase1_1.out" file). <br>
+  The full set of plane waves is <b>1503</b> (see later in 
+   <a href="../../tests/tutorial/Refs/tbase1_1.out">~abinit/tests/tutorial/Refs/tbase1_1.out</a>). <br>
   The code indicates the time-reversal symmetry by a value of <a href="../../input_variables/generated_files/vardev.html#istwfk">istwfk</a>=2
   , instead of the usual <a href="../../input_variables/generated_files/vardev.html#istwfk">istwfk</a>=1
   default. <br>
@@ -310,10 +315,11 @@ in the first column of the ABINIT output file.
   are alternative ways to <a href="../../input_variables/generated_files/varbas.html#xcart">xcart</a>
   to specify the positions of atoms within the primitive cell. </p>
   <p>Now, you can start reading the description of the remaining
-  of the tbase1_1.out file, in the <a href="../../users/abinit_help.html#6.3" target="helpsimg"> section 6.3
+  of  <a href="../../tests/tutorial/Refs/tbase1_1.out">~abinit/tests/tutorial/Refs/tbase1_1.out</a>, 
+  in the <a href="../../users/abinit_help.html#6.3" target="helpsimg"> section 6.3
   </a> of the abinit_help file.
-  <a name="ref6"></a>Look at the tbase1_1.out
-  file at the same time. </p>
+  <a name="ref6"></a>Look at <a href="../../tests/tutorial/Refs/tbase1_1.out">~abinit/tests/tutorial/Refs/tbase1_1.out</a> 
+  at the same time. </p>
 
 <p><b><a name=1.1.j> 1.1.j </a> </b> You have read completely an output file! </p>
 <p>Could you answer the following questions? </p>
@@ -390,7 +396,8 @@ in the first column of the ABINIT output file.
   The input file 
   <a href="../../tests/tutorial/Input/tbase1_2.in">~abinit/tests/tutorial/Input/tbase1_2.in</a>    
   is an example of
-  file that will do the job, while ~abinit/tests/tutorial/Refs/tbase1_2.out
+  file that will do the job, while 
+   <a href="../../tests/tutorial/Refs/tbase1_2.out">~abinit/tests/tutorial/Refs/tbase1_2.out</a>
   is an example of output file. If you decide to use the 
   <a href="../../tests/tutorial/Input/tbase1_2.in">~abinit/tests/tutorial/Input/tbase1_2.in</a>
   file do not forget to change the file names in the tbase1_x.files file ... </p>
@@ -473,12 +480,13 @@ The forces vanish also between 1.5 Bohr and
   input variable to ten times smaller than <a href="../../input_variables/generated_files/varrlx.html#tolmxf">tolmxf</a>.
   The input file 
   <a href="../../tests/tutorial/Input/tbase1_3.in">~abinit/tests/tutorial/Input/tbase1_3.in</a>
-  is an example of file that will do the job, while ~abinit/tests/tutorial/Refs/tbase1_3.out
+  is an example of file that will do the job, while 
+   <a href="../../tests/tutorial/Refs/tbase1_3.out">~abinit/tests/tutorial/Refs/tbase1_3.out</a>
   is an example of output file. If you decide to use these files, do not forget
   to change the file names in the "tbase1_x.files"
   file ... So, you run the code with your input file (a few seconds),
   examine quietly this file (which
-  is much smaller than the tbase1_2.out file), and get some significant output data gathered in the
+  is much smaller than  <a href="../../tests/tutorial/Refs/tbase1_2.out">~abinit/tests/tutorial/Refs/tbase1_2.out</a>), and get some significant output data gathered in the
   final echo of variables: </p>
 <pre>
     etotal   -1.1058360644E+00
@@ -491,7 +499,7 @@ The forces vanish also between 1.5 Bohr and
 
 <p> According to these data (see <a href="../../input_variables/generated_files/varbas.html#xcart">xcart</a>),
   the optimal interatomic distance is about 1.522 Bohr, in good agreement
-  with the estimation of tbase1_2.out .
+  with the estimation of  <a href="../../tests/tutorial/Refs/tbase1_2.out">~abinit/tests/tutorial/Refs/tbase1_2.out</a>.
   If you have time (this is to be done at home), you might try to change the
   stopping criteria, and redo the calculation, to see the level of convergence
   of the interatomic distance. </p>
@@ -594,7 +602,8 @@ molecule case (although the latter might not be so important).
 <p>The input file 
   <a href="../../tests/tutorial/Input/tbase1_5.in">~abinit/tests/tutorial/Input/tbase1_5.in</a>
   is an example
-  of file that will do the job, while ~abinit/tests/tutorial/Refs/tbase1_5.out
+  of file that will do the job, while 
+   <a href="../../tests/tutorial/Refs/tbase1_5.out">~abinit/tests/tutorial/Refs/tbase1_5.out</a>
   is an example of output file. If you decide to use the tbase1_5.in file, do not forget
   to change the file names in the tbase1_x.files file. The run lasts a few seconds.
 
