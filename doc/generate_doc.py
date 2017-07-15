@@ -27,15 +27,15 @@ js_path = "../../js_files/"
 users_path = "../../users/"
 
 # Path for yml and html files
-bib_ini = "bibliography/initial_files"
+bib_ori = "bibliography/origin_files"
 bib_gen = "bibliography/generated_files"
-invars_ini = "input_variables/initial_files"
+invars_ori = "input_variables/origin_files"
 invars_gen = "input_variables/generated_files"
-topics_ini = "topics/initial_files"
+topics_ori = "topics/origin_files"
 topics_gen = "topics/generated_files"
-tuto_ini = "tutorial/initial_files"
+tuto_ori = "tutorial/origin_files"
 tuto_gen = "tutorial/generated_files"
-tuto_future = "tutorial/future/initial/_files"
+tuto_future = "tutorial/future_origin_files"
 
 ################################################################################
 ###############################################################################
@@ -130,17 +130,17 @@ def make_links(text,cur_key,variables,characteristics,specials,backlinks,backlin
 def read_yaml_file(ymlfile):
   """ Read the file 'ymlfile', containing yml data, and store all such data in the returned object"""
 
-  if ymlfile== invars_ini+"/abinit_vars.yml":
+  if ymlfile== invars_ori+"/abinit_vars.yml":
     print("Use "+ymlfile+" as database input file for the input variables and their characteristics ...")
-  elif ymlfile== topics_ini+"list_of_topics.yml":
+  elif ymlfile== topics_ori+"list_of_topics.yml":
     print("Use "+ymlfile+" as database input file for the list of topics ...")
-  elif ymlfile== invars_ini+"/sections.yml":
+  elif ymlfile== invars_ori+"/sections.yml":
     print("Use "+ymlfile+" as database input file for the list of sections ...")
-  elif ymlfile== tuto_ini+"/lessons.yml":
+  elif ymlfile== tuto_ori+"/lessons.yml":
     print("Use "+ymlfile+" as database input file for the list of lessons ...")
   elif ymlfile== tuto_future+"/lessons.yml":
     print("Use "+ymlfile+" as database input file for the list of future lessons ...")
-  elif ymlfile== topics_ini+"/tests_dirs.yml":
+  elif ymlfile== topics_ori+"/tests_dirs.yml":
     print("Use "+ymlfile+" as database input file for the list of directories in which automatic test input files are present ...")
   elif ymlfile== topics_gen+"/topics_in_tests.yml":
     print("Generated file "+ymlfile+", to contain the list of automatic test input files relevant for each topic ...")
@@ -273,14 +273,14 @@ def bibtex2html(str_input):
 
 ################################################################################
  
-variables=read_yaml_file(invars_ini+"/abinit_vars.yml")
-lessons=read_yaml_file(tuto_ini+"/lessons.yml")
-list_of_topics=read_yaml_file(topics_ini+"/list_of_topics.yml")
-sections=read_yaml_file(invars_ini+"/sections.yml")
-tests_dirs=read_yaml_file(topics_ini+"/tests_dirs.yml")
-bibhtml=read_yaml_file(bib_ini+"/bibhtml.yml")
+variables=read_yaml_file(invars_ori+"/abinit_vars.yml")
+lessons=read_yaml_file(tuto_ori+"/lessons.yml")
+list_of_topics=read_yaml_file(topics_ori+"/list_of_topics.yml")
+sections=read_yaml_file(invars_ori+"/sections.yml")
+tests_dirs=read_yaml_file(topics_ori+"/tests_dirs.yml")
+bibhtml=read_yaml_file(bib_ori+"/bibhtml.yml")
 
-with open(bib_ini+'/abiref.bib')  as bibtex_file:
+with open(bib_ori+'/abiref.bib')  as bibtex_file:
   bibtex_str = bibtex_file.read()
 
 ################################################################################
@@ -843,14 +843,14 @@ toc_all += "<p>"+cur_let_all+".&nbsp;\n"
 # Assemble the "topic" files 
 
 print("Will use file yml_files/default_topic.yml as default for all topic files ... ")
-default_topic_yml=read_yaml_file(topics_ini+"/default_topic.yml")
+default_topic_yml=read_yaml_file(topics_ori+"/default_topic.yml")
 default_topic=default_topic_yml[0]
 
 # For each "topic" file
 for topic_name in list_of_topics:
   f_topic="yml_files/topic_"+topic_name+".yml"
   print("Will use file "+f_topic+" to initiate the topic "+topic_name+" ... ",end="")
-  topic_yml=read_yaml_file(topics_ini+"/topic_"+topic_name+".yml")
+  topic_yml=read_yaml_file(topics_ori+"/topic_"+topic_name+".yml")
   topic=topic_yml[0]
 
   #Mention it in the table of content of the file all_topics.html
@@ -993,7 +993,7 @@ for i, lesson_info in enumerate(lessons):
   if lesson=="default":
     continue
 
-  f_lesson=tuto_ini+"/lesson_"+lesson+".yml"
+  f_lesson=tuto_ori+"/lesson_"+lesson+".yml"
   print("Will use file "+f_lesson+" to build the lesson "+lesson+" ... ",end="")
   lesson_yml=read_yaml_file(f_lesson)
 
@@ -1023,13 +1023,6 @@ for i, lesson_info in enumerate(lessons):
   #Write the finalized html file.
   file_cur = tuto_gen+'/lesson_'+lesson+'.html'
   f_cur = open(file_cur,'w')
-  #DEBUG
-  print("")
-  position=10200
-  print(" lessonhtml[%s:%s]:"%(position,position+100))
-  print(lessonhtml[position:position+100])
-  print("")
-  #ENDDEBUG
   f_cur.write(lessonhtml)
   f_cur.write("\n")
   f_cur.close()
@@ -1153,7 +1146,7 @@ for i, bibhtml_info in enumerate(bibhtml):
 
 #sys.exit()
 
-tuto_future = "tutorial/future_initial_files"
+tuto_future = "tutorial/future_origin_files"
 lessons_future=read_yaml_file(tuto_future+"/lessons.yml")
 
 for i, lesson_info in enumerate(lessons_future):
