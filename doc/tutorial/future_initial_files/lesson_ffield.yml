@@ -487,7 +487,7 @@ body : |
   This clearly appears in the figure below where the field dependence
   of the force for a larger range of electric fields is plotted.
   <p>
-  <img src="lesson_nlo/image001.gif">
+  <img src="../documents/lesson_nlo/image001.gif">
   <p>
   We can therefore extract with a good accuracy the Born effective charge as :
   <pre>
@@ -545,7 +545,7 @@ body : |
   This clearly appears in the figure below where
   the field dependence of the polarization for a larger range of electric fields is plotted.
   <p>
-  <img src="lesson_ffield/image004.gif">
+  <img src="../documents/lesson_ffield/image004.gif">
   <p>
   We can therefore extract with a good accuracy the linear optical dielectric susceptibility :
   <pre>
@@ -582,7 +582,7 @@ body : |
   [[ecut]]=5,
   you should obtain -0.69088 C/m^2.
   <p>
-  <img src="lesson_ffield/image007.gif">
+  <img src="../documents/lesson_ffield/image007.gif">
   <p>
   Redoing the same kind of finite field calculation
   when allowing the ions to relax

@@ -453,7 +453,7 @@ body : |
   will plot the imaginary part of the macroscopic dielectric function (the absorption spectrum) for the first q-point.
   You should obtain a graphic similar to the one reported below
   
-  <p align="center"><img src=./lesson_bse/tbs2_1.png></p>
+  <p align="center"><img src=../documents/lesson_bse/tbs2_1.png></p>
   
   <p>
   Please note that these results are not converged, we postpone the discussion about convergence tests
@@ -478,7 +478,7 @@ body : |
   to plot the absorption spectrum obtained with the three different approaches.
   The final result is reported in the figure below. 
   
-  <p align="center"><img src=./lesson_bse/tbs2_2.png></p>
+  <p align="center"><img src=../documents/lesson_bse/tbs2_2.png></p>
   
   <p>
   The RPA-KS spectrum underestimates the experimental optical threshold due to the well know band gap problem of DFT.
@@ -663,7 +663,7 @@ body : |
   to plot on the same graphic the absorption spectrum obtained with different transition spaces.
   You should obtain a graphic similar to this one:
   
-  <p align="center"><img src=./lesson_bse/tbs3.png></p>
+  <p align="center"><img src=../documents/lesson_bse/tbs3.png></p>
   
   <p>
   The results obtained with ([[bs_loband]]=4,
@@ -786,7 +786,7 @@ body : |
   gnuplot&#62  p "tbs_4o_DS4_EXC_MDF" u 1:3 w l
   </pre>
   
-  <p align="center"><img src=./lesson_bse/tbs4.png></p>
+  <p align="center"><img src=../documents/lesson_bse/tbs4.png></p>
   
   The spectrum is found to converge quickly in [[ecuteps]].
   The curves obtained with [[ecuteps]]=3 and 4 Ha 
@@ -847,7 +847,7 @@ body : |
   6x6x6 is likely the most dense sampling you can afford on a single-CPU machine.
   For you convenience, we have collected the results of the convergence test in the figure below.
   
-  <p align="center"><img src=./lesson_bse/tbs5.png></p>
+  <p align="center"><img src=../documents/lesson_bse/tbs5.png></p>
   
   <p>
   As anticipated, the spectrum converges slowly with the number of k-points
@@ -951,7 +951,7 @@ body : |
   A similar distribution scheme is also employed for the conjugate-gradient minimization.
   For a balanced  distribution of computational work, the number of processors should divide the total number of resonant transitions. 
   
-  <p align="center"><img src=./lesson_paral_mbt/MPI_mv.png></p>
+  <p align="center"><img src=../documents/lesson_paral_mbt/MPI_mv.png></p>
   
   <!--
   <hr>

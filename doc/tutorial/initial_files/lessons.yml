@@ -38,7 +38,7 @@
     subtitle : Parallelism in ABINIT, generalities and environments.
 - !section
     name : bse
-    keyword : Lesson on Bethe-Salpeter calculations.
+    keyword : Lesson on Bethe-Salpeter calculations
     authors : MG,MS
     subtitle : Absorption spectra including excitonic effects.
 - !section

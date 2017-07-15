@@ -1210,11 +1210,6 @@ for i, lesson_info in enumerate(lessons_future):
         string_old='href="welcome'
         string_new='href="../welcome'
         line=line.replace(string_old,string_new)
-        string_old='src="lesson'
-        string_new='src="../documents/lesson'
-        line=line.replace(string_old,string_new)
-        string_old='src="./lesson'
-        line=line.replace(string_old,string_new)
         # Create automatically the new links for the input variables
         if "html_automatically_generated" in line:
           # See whether one variable appear
@@ -1238,6 +1233,14 @@ for i, lesson_info in enumerate(lessons_future):
           string_old='href="../users/'
           string_new='href="../../users/'
           line=line.replace(string_old,string_new)
+      string_old='src="lesson'
+      string_new='src="../documents/lesson'
+      line=line.replace(string_old,string_new)
+      string_old='src="./lesson'
+      line=line.replace(string_old,string_new)
+      string_old='src=./lesson'
+      string_new='src=../documents/lesson'
+      line=line.replace(string_old,string_new)
 
       lesson_yml+="  "+line
 

@@ -358,7 +358,7 @@ body : |
   a curve similar to this one:</p>
   
   <center>
-    <img src="lesson_basepar/lesson_basepar_speedup.png"/>
+    <img src="../documents/lesson_basepar/lesson_basepar_speedup.png"/>
   </center>
   
   <p>The red curve materializes the speed-up achieved, while the green one

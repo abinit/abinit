@@ -171,14 +171,14 @@ xmgrace tdmft_1o_DS2_FATBANDS_at0001_V_is1_l0002
 </pre> </font> 
 The band structure is given in eV.
 <br>
-<img style="width: 634px" alt="FatbandV" src="lesson_dmft/fatbandV.jpg">
+<img style="width: 634px" alt="FatbandV" src="../documents/lesson_dmft/fatbandV.jpg">
 <br>
 <p>and the fatbands for Oxygen and l=1 with </p> <font color="gray"> <pre> 
 xmgrace tdmft_1o_DS2_FATBANDS_at0003_O_is1_l0001.
 </pre> </font> 
 
 <br>
-<img style="width: 634px" alt="FatbandV" src="lesson_dmft/fatbandO.jpg">
+<img style="width: 634px" alt="FatbandV" src="../documents/lesson_dmft/fatbandO.jpg">
 <br>
 
 In these plots, you recover the band structure of SrVO<SUB>3</SUB> (see for comparison 
@@ -423,7 +423,7 @@ xmgrace -block self.dat -bxy 1:3
 </pre> </font>
 Then using xmgrace, you click on  <i>Data</i>, then  on <i> Transformations </i> and then on <i> Regression </i> and you can do a 4th order fit as:
 <br>
-<img style="width: 634px" alt="self" src="lesson_dmft/self.jpg">
+<img style="width: 634px" alt="self" src="../documents/lesson_dmft/self.jpg">
 <br>
 
 The slope at zero
@@ -442,7 +442,7 @@ You can plot this Green's function for the six <i>t<SUB>2g</SUB></i> orbitals us
 xmgrace -nxy Gtau.dat 
 </pre> </font>
 <br>
-<img style="width: 634px" alt="Gtau" src="lesson_dmft/Gtau.jpg">
+<img style="width: 634px" alt="Gtau" src="../documents/lesson_dmft/Gtau.jpg">
 <br>
 
 As the six <i> t<SUB>2g</SUB> </i> orbitals are degenerated, the six Green's function must
@@ -475,7 +475,7 @@ xmgrace -nxy Gtau.dat_save -nxy Gtau.dat
 </pre> </font>
 one obtains:
 <br>
-<img style="width: 634px" alt="Gtau2" src="lesson_dmft/Gtau2.jpg">
+<img style="width: 634px" alt="Gtau2" src="../documents/lesson_dmft/Gtau2.jpg">
 <br>
 
 One naturally sees that the stochastic noise is much larger in this case. This stochastic noise
@@ -527,7 +527,7 @@ xmgrace OmegaMaxEnt_final_result/optimal_spectral_function_*.dat
 </pre> </font>
 Change the unit from Hartree to eV, and then, you have the spectral function:
 <br>
-<img style="width: 634px" alt="spectralfunction" src="lesson_dmft/spectralfunction.jpg">
+<img style="width: 634px" alt="spectralfunction" src="../documents/lesson_dmft/spectralfunction.jpg">
 <br>
 
 Even if the calculation is not well converged, you recognize in the spectral functions
@@ -612,7 +612,7 @@ Similarly to the previous calculation, the spectral function can be plotted usin
 we find a spectral function with an hybridation peak at -5 eV, as described
 in  Fig.5 of <a href="#Amadon2008">[2]</a>.
 <br>
-<img style="width: 634px" alt="spectralfunction" src="lesson_dmft/spectralfunction2.jpg">
+<img style="width: 634px" alt="spectralfunction" src="../documents/lesson_dmft/spectralfunction2.jpg">
 <br>
 Resolving the lower Hubbard bands would require a more converged calculation.
 
@@ -647,7 +647,7 @@ So after gathering the data:
 </pre> 
 You can plot the evolution of the internal energy as a function of the iteration.
 <br>
-<img style="width: 634px" alt="internal" src="lesson_dmft/internal.jpg">
+<img style="width: 634px" alt="internal" src="../documents/lesson_dmft/internal.jpg">
 <br>
 You notice that the internal energy (in a DFT+DMFT calculations) does
 not converge as a function of iterations, because there is a finite statistical noise. So, as a function of iterations, first, the internal
