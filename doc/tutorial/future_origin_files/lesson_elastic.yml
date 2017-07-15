@@ -21,8 +21,8 @@ intro : |
   tensor   </li>
   
   </ul>
-            You should complete lessons <a href="../lesson_rf1.html">RF1</a>
-          and <a href="../lesson_rf2.html">RF2</a>
+            You should complete lessons <a href="lesson_rf1.html">RF1</a>
+          and <a href="lesson_rf2.html">RF2</a>
            to introduce the response-function    features     of ABINIT before
     starting  this lesson.  You will learn    to   use   additional     response-function
      features of ABINIT, and to use   relevant     parts of the  associated
@@ -122,7 +122,7 @@ body : |
      for   <a href="../../input_variables/generated_files/varbas.html#rprim" target="kwimg">
         rprim</a>
                                     .  The definition of the atom types and
-  atoms    follows   <a href="../lesson_rf1.html">lesson RF1</a>
+  atoms    follows   <a href="lesson_rf1.html">lesson RF1</a>
          .   The    reduced atomic positions <a href="../../input_variables/generated_files/varbas.html#xred" target="kwimg">
                             xred</a>
                                      are a starting approximation, and will
@@ -135,7 +135,7 @@ body : |
                                     ecut</a>
                                      (=6 Ha), but introduce <a href="../../input_variables/generated_files/varrlx.html#ecutsm" target="kwimg">
                                   ecutsm</a>
-                                     (=0.5 Ha)as in <a href="../lesson_base3.html">
+                                     (=0.5 Ha)as in <a href="lesson_base3.html">
    lesson    3</a>
           to smear the cutoff, which    produces     smoothly     varying
   stresses    as the lattice parameters are    optimized.    We will keep
@@ -150,13 +150,13 @@ body : |
     shifted     so  as  to  break    hexagonal    symmetry.  The RF strain
   calculations     check   this,   and  will  exit  with  an   error message
   if the grid does    not have   the proper   symmetry.   The  self-consistency
-    procedures  follow   <a href="../lesson_rf1.html">lesson RF1</a>
+    procedures  follow   <a href="lesson_rf1.html">lesson RF1</a>
          .</p>
   
   <p>Dataset 1 optimizes the atomic positions keeping the lattice parameters
                    fixed, setting <a href="../../input_variables/generated_files/varrlx.html#ionmov" target="kwimg">
               ionmov</a>
-                                    =2 as in <a href="../lesson_base1.html">lesson
+                                    =2 as in <a href="lesson_base1.html">lesson
   1</a>
          .  The optimization steps proceed   until    the   maximum      force
     component  on any atom is less than <a href="../../input_variables/generated_files/varrlx.html#tolmxf" target="kwimg">
@@ -165,7 +165,7 @@ body : |
     before    beginning      the   lattice     parameter optimization.  Dataset
     2 optimizes    the lattice      parameters    with   <a href="../../input_variables/generated_files/varrlx.html#optcell" target="kwimg">
                 optcell</a>
-                                    =2 as in <a href="../lesson_base3.html">lesson
+                                    =2 as in <a href="lesson_base3.html">lesson
   3</a>
          .  However, lesson 3 treated cubic    Si,   and   the   atom    positions
      in reduced coordinates remained fixed.     In  the present,     more  general
@@ -337,7 +337,7 @@ body : |
   <p>Dataset 2 involves the calculation of the derivatives of the wave functions
                  with respect to the Brillouin-zone wave vector, the so-called
      ddk    wave     functions.    Recall that these are auxiliary quantities
-    needed   to compute     the response   to the<a href="../lesson_rf1.html#5">
+    needed   to compute     the response   to the<a href="lesson_rf1.html#5">
          electric  field perturbation</a>
           and introduced in lesson RF1                  .  It   would be a
    good   idea to review the relevant parts  of  <a href="../../users/respfn_help.html#1" target="helpsimg">
@@ -853,7 +853,7 @@ body : |
     expressions constructed    from neighboring points in the   <b>k</b> mesh.
    These   are closely related    to the ddk wave functions used   in RF calculations
   in  <a href="#2">   2</a>
-                            and introduced in <a href="../lesson_rf1.html#5" target="kwimg">
+                            and introduced in <a href="lesson_rf1.html#5" target="kwimg">
                lesson RF1, section 5</a>
                            .  We will use <a href="../../input_variables/generated_files/varff.html#berryopt" target="kwimg">
                  berryopt</a>
@@ -1037,9 +1037,9 @@ body : |
   <h3><b>6. Response-function calculation of the elastic constants of Al metal.</b></h3>
                    For metals, the existence of partially occupied bands is
   a  complicating       feature for RF as well as GS calculations. &nbsp;Now
-  would  be a good  time     to review <a href="../lesson_base4.html">lesson 4</a> which dealt in detail with
+  would  be a good  time     to review <a href="lesson_base4.html">lesson 4</a> which dealt in detail with
   the interplay between   <b>       k</b>-sample convergence and Fermi-surface
-  broadening, especially   section    <a href="../lesson_base4.html#43">  4.3</a>
+  broadening, especially   section    <a href="lesson_base4.html#43">  4.3</a>
                    . &nbsp;You should copy telast_6.in and telast_6.files into
     Work_elast,  and begin   your   run while you read on, since it involves
    a convergence  study with  multiple   datasets and may take about two minutes.<br>

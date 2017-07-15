@@ -33,9 +33,9 @@ intro : |
   <br>
   
   <p>
-  The user should be familiarized with the four basic lessons of ABINIT, see the <a href="../lesson_welcome.html">tutorial home page</a>.
+  The user should be familiarized with the four basic lessons of ABINIT, see the <a href="lesson_welcome.html">tutorial home page</a>.
   <p>
-  After this first tutorial on GW, you should read the <a href="../lesson_gw2.html">second tutorial on GW</a>.
+  After this first tutorial on GW, you should read the <a href="lesson_gw2.html">second tutorial on GW</a>.
   
   <p>
   This lesson should take about 2 hours.
@@ -61,7 +61,7 @@ body : |
     as for the other lessons. Why not "Work_gw1" ?</i>
   
   <p>
-  At the end of <a href="../lesson_base3.html#35">lesson 3</a>, we computed the Kohn-Sham band structure of silicon. 
+  At the end of <a href="lesson_base3.html#35">lesson 3</a>, we computed the Kohn-Sham band structure of silicon. 
   In this approximation, the band dispersion as well as the band widths are reasonable, 
   but the band gaps are qualitatively wrong. 
   Now, we will compute the band gaps much more accurately, using the so-called GW approximation.
@@ -1118,7 +1118,7 @@ body : |
   
   <h3><b><a name="10">10</a> Advanced features in the GW code  </b></h3>
   
-  The user might switch to the <a href="../lesson_gw2.html">second GW tutorial</a>
+  The user might switch to the <a href="lesson_gw2.html">second GW tutorial</a>
   before coming back to the present section.
   
   <h4><b> Calculations without using the Plasmon-Pole model  </b></h4>

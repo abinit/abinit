@@ -106,7 +106,7 @@ def make_links(text,cur_key,variables,characteristics,specials,backlinks,backlin
     elif key[:3] == "VAR":
       return '<a href="../../input_variables/generated_files/'+key+".html\">"+key+"</a>"
     elif key[:7] == "lesson_":
-      return '<a href="../../tutorial/'+key+".html\">"+key+"</a>"
+      return '<a href="../../tutorial/generated_files/'+key+".html\">"+key+"</a>"
     elif key[-5:] == "_help":
       return '<a href="../../users/'+key+".html\">"+key+"</a>"
     else:
@@ -1208,11 +1208,11 @@ for i, lesson_info in enumerate(lessons_future):
         string_new='href="'
         line=line.replace(string_old,string_new)
         # Correct the references to the other files in the tutorial directory (transient measure in case of the "lesson_" files)
-        string_old='href="lesson_'
-        string_new='href="../lesson_'
-        line=line.replace(string_old,string_new)
-        string_old='href="./lesson_'
-        line=line.replace(string_old,string_new)
+        #string_old='href="lesson_'
+        #string_new='href="../lesson_'
+        #line=line.replace(string_old,string_new)
+        #string_old='href="./lesson_'
+        #line=line.replace(string_old,string_new)
         string_old='href="theory_'
         string_new='href="../theory_'
         line=line.replace(string_old,string_new)

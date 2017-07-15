@@ -14,8 +14,8 @@ intro : |
   <p>This lesson should take about 1.5 hour and requires
   to have at least a 200 CPU cores parallel computer. </p>
   <p>You are supposed to know already some basics of parallelism in ABINIT, explained in the tutorial
-  <a href="../lesson_basepar.html">A first introduction to ABINIT in parallel</a>, and 
-  <a href="../lesson_paral_gspw.html">ground state with plane waves</a>.
+  <a href="lesson_basepar.html">A first introduction to ABINIT in parallel</a>, and 
+  <a href="lesson_paral_gspw.html">ground state with plane waves</a>.
 # This is the body, including the table of content ...
 body : |
   <ul>
@@ -368,7 +368,7 @@ body : |
   at the end of this calculation, from (i) to (f) and then from (f) to
   (i). It allows to visualize the MEP.<br>
   <br>
-  <div style="text-align: center;"><a href="../lesson_paral_string/stringvideo.gif" target="_blank"><img style="border: 0px solid ; width: 308px; height: 320px;" alt="image" src="../documents/lesson_paral_string/start.gif"></a><br></div>
+  <div style="text-align: center;"><a href="lesson_paral_string/stringvideo.gif" target="_blank"><img style="border: 0px solid ; width: 308px; height: 320px;" alt="image" src="../documents/lesson_paral_string/start.gif"></a><br></div>
   <br><div style="text-align: center;"><small><span style="font-style: italic;">Click on the above image to visualize the animation (that should open in another window).</span></small><br></div><br>
   2) <a href="../../input_variables/generated_files/varrlx.html#tolimg" target="_blank">tolimg</a><br>Come back to <a href="../../input_variables/generated_files/varrlx.html#nimage" target="_blank">nimage</a>=12.
   First you can increase <a href="../../input_variables/generated_files/varrlx.html#tolimg" target="_blank">tolimg</a>

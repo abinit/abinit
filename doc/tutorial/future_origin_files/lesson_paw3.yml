@@ -62,7 +62,7 @@ body : |
   
   <hr><a name="2">&#160;</a>
   <h3><b>2. Prerequisites, code components and scripts</b></h3>
-  <p>It is assumed that you are already familiar with the contents and procedures in tutorials <a href="../lesson_paw1.html">PAW1</a> and <a href="../lesson_paw2.html">PAW2</a>, and so have some familiarity with input files for <span style="font-weight: bold; font-style: italic;">atompaw</span>, and the issues in creating PAW datasets. To exactly reproduce the results in this tutorial, you will need:
+  <p>It is assumed that you are already familiar with the contents and procedures in tutorials <a href="./lesson_paw1.html">PAW1</a> and <a href="./lesson_paw2.html">PAW2</a>, and so have some familiarity with input files for <span style="font-weight: bold; font-style: italic;">atompaw</span>, and the issues in creating PAW datasets. To exactly reproduce the results in this tutorial, you will need:
   <br>
   <ul><li>The <span style="font-weight: bold; font-style: italic;">atompaw</span> code for 
   generating PAW datasets. This code is bundled as a plugin in abinit, and it is assumed 
@@ -100,7 +100,7 @@ body : |
   <h4><b>3.1 Carbon - a simple datatset</b></h4>
   <p>Make a working directory for the atompaw generation (you could call it 
   <span style="font-family: monospace;">C_atompaw</span>) 
-  and copy the file: <a href="../lesson_paw3/inputs/C_simple.input">
+  and copy the file: <a href="./lesson_paw3/inputs/C_simple.input">
   <span style="font-family: monospace;">C_simple.input</span>
   </a> to it. Then go there and run atompaw by typing (assuming that you have set things 
   up so that you can run atompaw by just typing <span style="font-family: monospace;">atompaw</span>):
@@ -118,7 +118,7 @@ body : |
    C.LDA-PW-paw.abinit     density         fthatpot.2  logderiv.0  potential   wfn1     wfn5
   </pre>
   There is a lot of output, so it is useful to work with a graphical overview. Copy the gnuplot 
-  script <a href="../lesson_paw3/scripts/plot_C_all.p"><span style="font-family: monospace;">plot_C_all.p</span></a> to your folder. Open a new terminal window by typing<span style="margin-left: 10px; font-family: monospace;">xterm &</span>, and run gnuplot in the new terminal window. At the gnuplot command prompt type:<br />
+  script <a href="./lesson_paw3/scripts/plot_C_all.p"><span style="font-family: monospace;">plot_C_all.p</span></a> to your folder. Open a new terminal window by typing<span style="margin-left: 10px; font-family: monospace;">xterm &</span>, and run gnuplot in the new terminal window. At the gnuplot command prompt type:<br />
   <pre>
   gnuplot&#62 load 'plot_C_all.p'
   </pre>
@@ -169,8 +169,8 @@ body : |
   <span style="font-family: monospace;">C.LDA-PW-paw.abinit</span> file in the current
   directory). Make a new subdirectory for the test in the current directory (you could call it 
   <span style="font-family: monospace;">abinit_test</span> for instance), go there 
-  and copy the files: <a href="../lesson_paw3/inputs/ab_C_test.in"><span style="font-family: monospace;">
-  ab_C_test.in</span></a> and <a href="../lesson_paw3/inputs/input_C_test.files">
+  and copy the files: <a href="./lesson_paw3/inputs/ab_C_test.in"><span style="font-family: monospace;">
+  ab_C_test.in</span></a> and <a href="./lesson_paw3/inputs/input_C_test.files">
   <span style="font-family: monospace;">input_C_test.files</span></a> into it. 
   This <span style="font-weight: bold; font-style: italic;">abinit</span> input file 
   contains several datasets which increment the ecut input variable, and perform 
@@ -249,7 +249,7 @@ body : |
   b)</span> that other parameters apart from ecut dominate convergence beyond this point.
   </p>
   <p> If we turn to the band structure, we can use the script 
-  <a href="../lesson_paw3/scripts/comp_bands_abinit2abinit.py">
+  <a href="./lesson_paw3/scripts/comp_bands_abinit2abinit.py">
   <span style="font-family: monospace;">comp_bands_abinit2abinit.py</span></a> to check the 
   convergence of the band structure. Copy the script to the directory where the abinit 
   input file is and issue:
@@ -321,8 +321,8 @@ body : |
   First, we will need to calculate the total energy of diamond in abinit for a number of 
   lattice parameters around the minimum of the total energy. There are example input 
   and ".files" files for doing this at:
-  <a href="../lesson_paw3/inputs/ab_C_equi.in"><span style="font-family: monospace;">ab_C_equi.in</span></a>
-  and <a href="../lesson_paw3/inputs/input_C_equi.files"><span style="font-family: monospace;">input_C_equi.files</span></a>. 
+  <a href="./lesson_paw3/inputs/ab_C_equi.in"><span style="font-family: monospace;">ab_C_equi.in</span></a>
+  and <a href="./lesson_paw3/inputs/input_C_equi.files"><span style="font-family: monospace;">input_C_equi.files</span></a>. 
   The new input file has ten datasets which increment the lattice parameter, 
   <span style="font-family: monospace;">alatt</span>, from 6.1 to 7.0 Bohr in 
   steps of 0.1 Bohr. A look in the input file will tell you that <span style="font-family: monospace;">ecut</span> is set to 25 Hartrees. Copy these to your abinit_test directory and run:
@@ -425,7 +425,7 @@ body : |
   <p>In order to estimate whether these values are good or not, we need independent 
   verification, and this will be provided by the all-electron elk code. There is an 
   elk input file matching our abinit diamond calculation at 
-  <a href="../lesson_paw3/inputs/elk_C_diamond.in">
+  <a href="./lesson_paw3/inputs/elk_C_diamond.in">
   <span style="font-family: monospace;">elk_C_diamond.in</span></a>.
   You need to copy this file to a directory set up for the elk run (why not call 
   it "C_elk"), and it needs to be renamed to 
@@ -604,7 +604,7 @@ body : |
   When the Elk run has finished, there will be a 
   <span style="font-family: monospace;">BAND.OUT</span> file in your run directory.
   We can now do an analogous band structure comparison to before, by using the python 
-  script <a href="../lesson_paw3/scripts/comp_bands_abinit2elk.py">
+  script <a href="./lesson_paw3/scripts/comp_bands_abinit2elk.py">
   <span style="font-family: monospace;">comp_bands_abinit2elk.py</span></a> (you
   should copy this to your current directory). If your previous abinit calculation 
   is in the subdirectory "<span style="font-family: monospace;">../C_abinit/abinit_test
@@ -786,7 +786,7 @@ body : |
   <h4><b>3.4 Carbon - improving the dataset</b></h4>
   <p>Now that you know the target values, is up to you to experiment and see 
   if you can improve this dataset. The techniques are well documented in 
-  tutorial <a href="../lesson_paw2.html">PAW2</a>. Here's a brief 
+  tutorial <a href="./lesson_paw2.html">PAW2</a>. Here's a brief 
   summary of main points to be concerned about:</p>
   <br>
   <ul><li>Use the keyword series "<span style="font-family: monospace;">custom 
@@ -840,7 +840,7 @@ body : |
   want to try and modify the gnuplot scripts so that they work correctly for this 
   dataset. (The "<span style="font-family: monospace;">wfn*</span>" files are 
   ordered just like the core radius list at the end, so now their meaning and the numbering of some other files have changed.) There is an example of the modifications in the plot 
-  script <a href="../lesson_paw3/scripts/plot_C_all_II.p">
+  script <a href="./lesson_paw3/scripts/plot_C_all_II.p">
   <span style="font-family: monospace;">plot_C_all_II.p</span></a>, which you can 
   download and run in gnuplot. You should get a plot like this:</p>
   <p style="margin-top: 0.08in; margin-bottom: 0in; margin-left: 0.103in; text-align: center;"><img style="width: 640px; height: 480px;" alt="Plot info for second Carbon dataset" src="../documents/lesson_paw3/images/plot_C_all_II.png" /></p>
@@ -977,7 +977,7 @@ body : |
   <hr><a name="4.1">&#160;</a>
   <h4><b>4.1 Magnesium - The all-electron calculation</b></h4>
   <p>
-  There is an elk input file prepared at: <a href="../lesson_paw3/inputs/elk_Mg_band.in">
+  There is an elk input file prepared at: <a href="./lesson_paw3/inputs/elk_Mg_band.in">
   <span style="font-family: monospace;">elk_Mg_band.in
   </span></a>, we suggest you copy it into a subdirectory dedicated to the Mg elk 
   calculation (why not "Mg_elk"?), rename it to "elk.in"  and take a look inside 
@@ -1045,7 +1045,7 @@ body : |
   </p>
   <p>
   Now it's time to calculate the equilibrium lattice parameters. There is a 
-  prepared file at: <a href="../lesson_paw3/inputs/elk_Mg_equi.in">
+  prepared file at: <a href="./lesson_paw3/inputs/elk_Mg_equi.in">
   <span style="font-family: monospace;">elk_Mg_equi.in
   </span></a>. As before copy this to your directory rename it to 
   "<span style="font-family: monospace;">elk.in</span>". The layout of this 
@@ -1192,13 +1192,13 @@ body : |
   Generate the abinit dataset file, and make sure it's given as: 
   "<span style="font-family: monospace;">./Mg_atompaw/Mg_LDA.pawps</span>", then go to
   the subdirectory for the abinit test, and copy these files to it: 
-  <a href="../lesson_paw3/inputs/ab_Mg_test.in">
+  <a href="./lesson_paw3/inputs/ab_Mg_test.in">
   <span style="font-family: monospace;">ab_Mg_test.in</span></a>, 
-  <a href="../lesson_paw3/inputs/input_Mg_test.files">
+  <a href="./lesson_paw3/inputs/input_Mg_test.files">
   <span style="font-family: monospace;">input_Mg_test.files</span></a>, 
-  <a href="../lesson_paw3/inputs/ab_Mg_equi.in">
+  <a href="./lesson_paw3/inputs/ab_Mg_equi.in">
   <span style="font-family: monospace;">ab_Mg_equi.in</span></a> and  
-  <a href="../lesson_paw3/inputs/input_Mg_equi.files">
+  <a href="./lesson_paw3/inputs/input_Mg_equi.files">
   <span style="font-family: monospace;">input_Mg_equi.files</span></a>. 
   The file for testing the convergence has already been set up so that the smearing 
   strategy is equivalent to the elk one, as evidenced by the lines:
@@ -1330,7 +1330,7 @@ body : |
   state, if not more.</li>
   <li>A particularly sensitive thing is the quality of the expansion of the pseudised 
   plane-wave part in terms of the on-site basis. This can be checked by using the density 
-  of states (DOS), as described in the first PAW <a href="../lesson_paw1.html#5">tutorial</a>.</li>
+  of states (DOS), as described in the first PAW <a href="lesson_paw1.html#5">tutorial</a>.</li>
   </ul>
   </br>
   

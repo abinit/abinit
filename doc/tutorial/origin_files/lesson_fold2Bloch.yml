@@ -280,7 +280,7 @@ body : |
   <h3><b> 
   4. Plotting unfolded band structure.
   </b></h3>
-  Lets visualize the unfolded band structure. It is different from a regular band structure plot, though. Now we have one additional dimension -- the Bloch spectral weight. There are several alternative visualization strategies. Here we use the scatter plot with the point size proportional to the spectral weight. The following MatLab script will help you build a graph for any fold2Bloch output:  <a href="../lesson_fold2Bloch/ubs_dots.m" target="helpsimg">ubs_dots.m</a>
+  Lets visualize the unfolded band structure. It is different from a regular band structure plot, though. Now we have one additional dimension -- the Bloch spectral weight. There are several alternative visualization strategies. Here we use the scatter plot with the point size proportional to the spectral weight. The following MatLab script will help you build a graph for any fold2Bloch output:  <a href="lesson_fold2Bloch/ubs_dots.m" target="helpsimg">ubs_dots.m</a>
   </p>
   
   <p>Make sure the following parameters in ubs_dots.m are set as follows: 

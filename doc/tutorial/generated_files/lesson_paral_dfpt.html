@@ -26,7 +26,7 @@ on the basis of the linear-response part of ABINIT, i.e. :
    which activates <a href="../../input_variables/generated_files/vargs.html#optdriver">optdriver</a>=1.
   You are supposed to be well-familiarized with such calculations before starting the present tutorial.
   See the input variables described  in the file <A href="../input_variables/html_automatically_generated/varrf.html">VARRF</a>
-  and the tutorial <a href="../lesson_rf1.html">Response-Function 1</a> and subsequent tutorials.
+  and the tutorial <a href="lesson_rf1.html">Response-Function 1</a> and subsequent tutorials.
 <p>
   You will learn about the basic implementation of parallelism for linear-response calculations,
   then will execute a very simple, quick calculation for one dynamical matrix for FCC aluminum, whose
@@ -39,8 +39,9 @@ on the basis of the linear-response part of ABINIT, i.e. :
   in order to perform the scalability measurements.
 <p>This lesson should take less than two hours to be done if a powerful parallel computer is available. </p>
 <p>You are supposed to know already some basics of parallelism in ABINIT, explained in the tutorial
-<a href="../lesson_basepar.html">A first introduction to ABINIT in parallel</a>.
+<a href="lesson_basepar.html">A first introduction to ABINIT in parallel</a>.
 
+<hr>
 <h5>Copyright (C) 2000-2017 ABINIT group (XG,RC)
 <script type="text/javascript" src="../../js_files/copyright.js"> </script>
 </h5> 
@@ -69,7 +70,7 @@ The parallelisation of this step is examined in a separate lesson.
 <p>
 The step 2 and step 3 are the time-consuming linear-response steps, to which the present tutorial is dedicated,
 and for which the implementation of the parallelism will be explained. They generate different files, and in particular,
-one (or several) DDB file(s). As explained in related tutorials (see e.g. <a href="../lesson_rf1.html">Response-Function 1</a>), 
+one (or several) DDB file(s). As explained in related tutorials (see e.g. <a href="lesson_rf1.html">Response-Function 1</a>), 
 several perturbations are usually treated in one dataset (hence the "Do for each perturbation"-loop in step 2 of this Schema). For example, 
 in one dataset, although one considers only one phonon wavevector, all the primitive atomic displacements for this wavevector 
 (as determined by the symmetries) can be treated in turn.

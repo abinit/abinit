@@ -18,10 +18,11 @@ Crystalline silicon is used as test case.
 A brief description of the formalism can be found in the <a href="../theory_bse.html">BS_notes</a>.
 <p>
 The user should be familiarized with the four basic lessons of ABINIT
-and the first lesson of the GW tutorial, see the <a href="../lesson_welcome.html">tutorial home page</a>.
+and the first lesson of the GW tutorial, see the <a href="lesson_welcome.html">tutorial home page</a>.
 
 <p>This lesson should take about one hour to be completed.
 
+<hr>
 <h5>Copyright (C) 2000-2017 ABINIT group (MG,MS)
 <script type="text/javascript" src="../../js_files/copyright.js"> </script>
 </h5> 
@@ -120,7 +121,7 @@ The SCR file is calculated in dataset 4 using
 <a href="../../input_variables/generated_files/varbas.html#nband">nband</a>=100
 and
 <a href="../../input_variables/generated_files/vargw.html#ecuteps">ecuteps</a> 6.0 Ha.
-In the <a href="../lesson_gw1.html">first lesson</a> of the GW tutorial,
+In the <a href="lesson_gw1.html">first lesson</a> of the GW tutorial,
 these values were found to give QP energies converged within 0.01 eV, 
 so we are confident that our SCR file is well converged and it can be safely used for performing 
 convergence tests in the Bethe-Salpeter part. 
@@ -341,7 +342,7 @@ inclvkb 2                 # The Commutator for the optical limit is correctly ev
 </pre>
 
 specifies the parameters used to calculate the kernel matrix elements and the matrix elements of the dipole operator.
-We have already encountered these variables in the <a href="../lesson_gw1.html">first lesson</a> of the
+We have already encountered these variables in the <a href="lesson_gw1.html">first lesson</a> of the
 GW tutorial so their meaning is (hopefully) familiar to you.
 A more detailed discussion of the role played by these variables in the BS code can be found in the <a href="../theory_bse.html">BS_notes</a>.
 
@@ -809,7 +810,7 @@ are almost indistinguishable from each other.
 Our final estimate for <a href="../../input_variables/generated_files/vargw.html#ecuteps">ecuteps</a> is therefore 3 Ha.
 <p>
 Note that this value is smaller than the one required to converge the QP corrections within 0.01 eV
-(in the  <a href="../lesson_gw1.html">first lesson</a> of the GW tutorial we obtained 6.0 Ha).
+(in the  <a href="lesson_gw1.html">first lesson</a> of the GW tutorial we obtained 6.0 Ha).
 This is a general behavior, in the sense that Bethe-Salpeter spectra, unlike GW corrections, 
 are not usually very sensitive to truncations in the planewave expansion of W. 
 Reasonable BS spectra are obtained even when W is treated within the diagonal approximation or, alternatively, 
@@ -917,7 +918,7 @@ Additional exercises (optional)
   You might have to decrease some input parameters to have results in reasonable time.)
   <li>
   <p>
-  Calculate the one-shot GW corrections for silicon following the <a href="../lesson_gw1.html">first lesson</a>
+  Calculate the one-shot GW corrections for silicon following the <a href="lesson_gw1.html">first lesson</a>
   of the GW tutorial. Then use the _GW file produced by the code to calculate the absorption spectrum.
 </ul>
 

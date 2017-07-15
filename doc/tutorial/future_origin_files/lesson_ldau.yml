@@ -11,8 +11,8 @@ intro : |
   <p>It is supposed that you already know how to
   do PAW calculations using ABINIT. Please follow the two lessons
   on PAW in ABINIT
-  (<a href="../lesson_paw1.html">PAW1</a>,
-  <a href="../lesson_paw2.html">PAW2</a>),
+  (<a href="lesson_paw1.html">PAW1</a>,
+  <a href="lesson_paw2.html">PAW2</a>),
   if this is not the case.</p>
   
   <p>This lesson should take about 1 hour to
@@ -109,8 +109,8 @@ body : |
   <p>If you take a look at the output file
   (tldau_1.out), you can see the integrated total density in the PAW spheres
   (see the
-  <a href="../lesson_paw1.html">PAW1</a> and
-  <a href="../lesson_paw2.html">PAW2</a>
+  <a href="lesson_paw1.html">PAW1</a> and
+  <a href="lesson_paw2.html">PAW2</a>
   tutorials on PAW formalism). This value roughly estimate the magnetic moment of
   NiO :</p>
   
@@ -363,6 +363,6 @@ body : |
   <p>
   Using prtdos 3, you can now compute the projected d and f density of states.
   For more information about projected density of states, for more details see the
-  <a href="../lesson_paw1.html">PAW1</a> tutorial.
+  <a href="lesson_paw1.html">PAW1</a> tutorial.
   </p>
   </div>

@@ -201,14 +201,14 @@ body : |
   and for which a tutorial is available, 
   include:</p>
   <ul>
-  <li><a href="../lesson_paral_gspw.html">ground state with plane waves</a>,</li>
-  <li><a href="../lesson_paral_gswvl.html">ground state with wavelets</a>,</li>
-  <li><a href="../lesson_paral_moldyn.html">molecular dynamics</a>,</li>
-  <li><a href="../lesson_paral_string.html">parallelism on "images"</a>,</li>
-  <li><a href="../lesson_paral_dfpt.html">response functions</a>,</li>
-  <li><a href="../lesson_paral_mbt.html">Many-Body Perturbation Theory</a>.</li>
+  <li><a href="lesson_paral_gspw.html">ground state with plane waves</a>,</li>
+  <li><a href="lesson_paral_gswvl.html">ground state with wavelets</a>,</li>
+  <li><a href="lesson_paral_moldyn.html">molecular dynamics</a>,</li>
+  <li><a href="lesson_paral_string.html">parallelism on "images"</a>,</li>
+  <li><a href="lesson_paral_dfpt.html">response functions</a>,</li>
+  <li><a href="lesson_paral_mbt.html">Many-Body Perturbation Theory</a>.</li>
   </ul>
-  <p>Note that the tutorial on <a href="../lesson_paral_gspw.html">ground state
+  <p>Note that the tutorial on <a href="lesson_paral_gspw.html">ground state
   with plane waves</a> presents a complete overview of this parallelism,
   including up to four levels of parallelisation and, as such, is rather
   complex. Of course, it is also quite powerful, and allows to use several

@@ -224,7 +224,7 @@ body : |
   <h4><a name="2"></a></h4>
   <h3><b>2. A PAW case</b></h3>
   Before starting it is assumed that you have already completed the
-  tutorials <a href="../lesson_paw1.html">PAW1</a> and <a
+  tutorials <a href="lesson_paw1.html">PAW1</a> and <a
   href="lesson_paw1.html">PAW2</a>.
   <p> The PAW method is implemented in such a way that it is very easy
   to use. For the silicon case we just have to add the variable

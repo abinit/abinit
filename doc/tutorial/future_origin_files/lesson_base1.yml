@@ -53,7 +53,7 @@ body : |
   related to this tutorial.
   Take a few seconds to read the names of the files already
   present in ~abinit/tests/tutorial/Input. Compare with the lessons mentioned in
-  the index of the <a href="../lesson_welcome.html"><B>Tutorial home page</B></A>.
+  the index of the <a href="lesson_welcome.html"><B>Tutorial home page</B></A>.
   You will find other input files,
   specific for the Density Functional Perturbation Theory
   ("Response functions") capabilities of ABINIT
@@ -403,7 +403,7 @@ body : |
       etotal20 -1.0899835224E+00
       etotal21 -1.0867972868E+00
   </pre>
-  <p> You might try to <a href="../lesson_base1/Plot1.jpg" target="helpsimg">plot</a>
+  <p> You might try to <a href="lesson_base1/Plot1.jpg" target="helpsimg">plot</a>
     these data. The minimum of energy in the above list is clearly between dataset
     11 and 12, that is: </p>
   <pre>
@@ -554,7 +554,7 @@ body : |
       the variables [[nsppol]] and [[spinat]] ;
     <li>the highest occupied level might be degenerate with the lowest unoccupied
       level of the same spin, in which case the techniques usually appropriate for metals
-      are to be used (see <a href="../lesson_base4.html">lesson_base4</a>)
+      are to be used (see <a href="lesson_base4.html">lesson_base4</a>)
     <li>also often, the symmetry of the ground-state charge density will NOT be
       spherical, so that the automatic determination of symmetries by the code,
       based on the atomic coordinates, should be disabled, see the input variable
@@ -669,7 +669,7 @@ body : |
   approximation (as well as the local-spin-density approximation) in the Teter parametrization,
   and a pseudopotential from the Goedecker-Hutter-Teter table (<cite>Phys. Rev.
   B 54, 1703 (1996)</cite>).
-  <p>We will see in the <a href="../lesson_base2.html">next lesson</a> how to address the
+  <p>We will see in the <a href="lesson_base2.html">next lesson</a> how to address the
     choice of these parameters (except the pseudopotential).
   <p>
   <hr>
@@ -711,7 +711,7 @@ body : |
   <p>Side note: in most of the tutorial examples, [[nstep]]
   will be enough to reach the
   target tolerance, defined by one of the "tolXXX" input variables. However, this is not always the case
-  (e.g. the test case 1 of the <a href="../lesson_rf1.html">lesson response-function 1</a>),
+  (e.g. the test case 1 of the <a href="lesson_rf1.html">lesson response-function 1</a>),
   because of some portability problems, that could only be solved by stopping the SCF cycles
   before the required tolerance.
   

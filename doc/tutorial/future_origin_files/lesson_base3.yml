@@ -367,7 +367,7 @@ body : |
   This underestimation of the band gap is well-known (the famous DFT band-gap problem).
   In order to obtain correct band gaps, you need to go beyond the
   Kohn-Sham Density Functional Theory: use the GW approximation.
-  This is described in <a href="../lesson_gw1.html">the first lesson on the GW approximation</a>.
+  This is described in <a href="lesson_gw1.html">the first lesson on the GW approximation</a>.
   
   <p>For experimental data and band structure representation, see
   <br>M.L. Cohen and J.R. Chelikowski

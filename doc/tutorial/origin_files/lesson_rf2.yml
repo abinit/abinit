@@ -46,7 +46,7 @@ body : |
   you should first have some theoretical background.
   <br>
   Let us assume that you have read the litterature relative to the
-  <a href="../lesson_rf1.html">first lesson on response functions</a>.
+  <a href="lesson_rf1.html">first lesson on response functions</a>.
   You might find additional material, related to the present section,
   in the following references:
   <br>
@@ -334,7 +334,7 @@ body : |
   <br>
   This is due to the lack of LO-TO splitting for the ANADDB treatment of the first list of vector.
   The correct phonon band structure is presented
-  <a href="../lesson_rf2/trf2_6.out.eps">here</a>.
+  <a href="lesson_rf2/trf2_6.out.eps">here</a>.
   You can correct the LO-TO splitting by the following little hack.
   <p>
   Edit the file trf2_5_B2EPS.freq, and note that the value of the frequency, in the sixth column,

@@ -10,14 +10,14 @@ intro : |
       <p>This lesson should take about 90 minutes and requires
         you have several CPU cores (up to 64). </p>
       <p>You are supposed to know already some basics of parallelism in ABINIT, explained in the tutorial
-        <a href="../lesson_basepar.html">A first introduction to ABINIT in parallel</a>.
+        <a href="lesson_basepar.html">A first introduction to ABINIT in parallel</a>.
 # This is the body, including the table of content ...
 body : |
   <ol>
   <li><a href="#0">Wavelets variables</a> and parallelism</li>
   <li><a href="#1">Speed-up</a> calculation for a boron cluster</li>
   <li><a href="#2">Time partition</a></li>
-  <li><a href="#3">Orbital</a> parallelism and <a href="../lesson_paral_string.html#2">array</a> parallelism</li>
+  <li><a href="#3">Orbital</a> parallelism and <a href="lesson_paral_string.html#2">array</a> parallelism</li>
   <li><a href="#4">Speed-up</a> calculation on a 65-atom alkane</li>
   <li><a href="#5">Conclusion</a></li>
   </ol>

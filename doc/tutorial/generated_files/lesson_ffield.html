@@ -24,8 +24,8 @@
 <p>
 The case of the linear responses (Born effective charge, dielectric constant, piezoelectric tensor)
 is treated independently in other tutorials
-(<a href="../lesson_rf1.html">lesson Response-Function 1</a>,
- <a href="../lesson_elastic.html">lesson on Elastic properties</a>),
+(<a href="lesson_rf1.html">lesson Response-Function 1</a>,
+ <a href="lesson_elastic.html">lesson on Elastic properties</a>),
 using Density-Functional Perturbation Theory.
 You will learn here how to get these quantities using
 the finite difference techniques within ABINIT.
@@ -54,6 +54,7 @@ a calculation with a finite electric field, you should consider reading the foll
 Gonze <i>et al.,</i> <i>Comp. Phys. Commun.</i> <b> 180</b>, 2582 (2009) and
 Zwanziger <i>et al.,</i> <i>Comp. Mater. Sci.</i> <b> 58</b>, 113 (2012).
 
+<hr>
 <h5>Copyright (C) 2000-2017 ABINIT group (PhG, MVeithen, XG)
 <script type="text/javascript" src="../../js_files/copyright.js"> </script>
 </h5> 
@@ -301,8 +302,8 @@ Born effective charges, but also the computation of the piezoelectric constants 
 
 <p>
 You can review how to use DFPT thanks to the
-<a href="../lesson_rf1.html">lesson Response-function 1</a> and
-<a href="../lesson_rf2.html">lesson Response-function 2</a> tutorials.
+<a href="lesson_rf1.html">lesson Response-function 1</a> and
+<a href="lesson_rf2.html">lesson Response-function 2</a> tutorials.
 For now, go ahead and run the input file, and have a look at the output file,
 to identify the place where the Born effective charge is written (search for
 the phrase "Effective charges" in the output file).
@@ -513,7 +514,7 @@ fitting them with the general expression of the force above (including the E^2 t
 the dchi/dtau term.  At
 <a href="../../input_variables/generated_files/varbas.html#ecut">ecut</a>=5 you should get dchi/dtau for Al = -0.06169.
 This will be useful later for the
-<a href="../lesson_nlo.html">lesson on static Non-linear properties</a>.
+<a href="lesson_nlo.html">lesson on static Non-linear properties</a>.
 
 <p>
 Going back to the output file, you can also look at the evolution of the polarization with the field.
@@ -582,7 +583,7 @@ you can find the non-linear optical susceptibilities \chi(2).
 At
 <a href="../../input_variables/generated_files/varbas.html#ecut">ecut</a>=5 you should get \chi(2) = 29.769 pm/V.
 This result will be also be useful for the
-<a href="../lesson_nlo.html">lesson on static Non-linear properties</a>.
+<a href="lesson_nlo.html">lesson on static Non-linear properties</a>.
 <p>
 Looking at the evolution of the stress (see graphic below),
 you should also be able to extract the piezoelectric constants.

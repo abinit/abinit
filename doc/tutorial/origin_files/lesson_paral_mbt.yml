@@ -20,7 +20,7 @@ intro : |
   <p>
   This lesson should take about 1.5 hour and requires to have at least a 200 CPU core parallel computer.
   <p>You are supposed to know already some basics of parallelism in ABINIT, explained in the tutorial
-  <a href="../lesson_basepar.html">A first introduction to ABINIT in parallel</a>.
+  <a href="lesson_basepar.html">A first introduction to ABINIT in parallel</a>.
   <p>
   In the following, when "run ABINIT over nn CPU cores" appears, you have to use a specific command line according 
   to the operating system and architecture of the computer you are using. 
@@ -56,7 +56,7 @@ body : |
   <h3><b>1 Generating the WFK file in parallel.</b> </h3>
   
   <p>
-  In the <a href="../lesson_gw1.html">first lesson</a> of the GW tutorial, we have learned how to 
+  In the <a href="lesson_gw1.html">first lesson</a> of the GW tutorial, we have learned how to 
   generate the WFK file  with the sequential version of the code.
   Now we will perform a similar calculation taking advantage of the k-point parallelism
   implemented in the ground-state part.
@@ -94,7 +94,7 @@ body : |
   </pre>
   
   <p>
-  We have already encountered these variables in the <a href="../lesson_gw1.html">first lesson</a>
+  We have already encountered these variables in the <a href="lesson_gw1.html">first lesson</a>
   of the GW tutorial so their meaning should be familiar to you.
   <p>
   The only thing worth stressing is that this calculation solves the NSCF cycle
@@ -173,7 +173,7 @@ body : |
   </pre>
   
   <p>
-  Most of the variables have been already discussed in the <a href="../lesson_gw1.html">first</a> lesson
+  Most of the variables have been already discussed in the <a href="lesson_gw1.html">first</a> lesson
   of the GW tutorial. The only variables that deserve some additional explanation are
   [[gwpara]] and 
   [[awtr]].
@@ -322,7 +322,7 @@ body : |
   Most of the parameters used in the input files are already close to converge, only the k-point sampling 
   and the number of empty states should be increased.
   You might modify the input files to perform the standard converge tests
-  following the procedure described in the <a href="../lesson_gw1.html">first lesson</a> of the GW tutorial.
+  following the procedure described in the <a href="lesson_gw1.html">first lesson</a> of the GW tutorial.
   <!--
   calculate different SCR files with different values 
   of [[nband]].
@@ -464,7 +464,7 @@ body : |
   [[freqremax]],
   while the sampling along the imaginary axis is specified by
   [[nfreqim]]
-  (a more detailed discussion can be found in the <a href="../lesson_gw2.html">second lesson</a> of the GW tutorial).
+  (a more detailed discussion can be found in the <a href="lesson_gw2.html">second lesson</a> of the GW tutorial).
   -->
   <p>
   The input file is similar to the one we used for the Adler-Wiser calculation.
@@ -627,7 +627,7 @@ body : |
   
   For our purposes, it suffices to say that this input file defines a standard one-shot calculation 
   with the plasmon-pole model approximation.
-  We refer to the  documentation and to the <a href="../lesson_gw1.html">first lesson</a>
+  We refer to the  documentation and to the <a href="lesson_gw1.html">first lesson</a>
   of the GW tutorial for a more complete description of the meaning of these variables.
   <!--
   <p>

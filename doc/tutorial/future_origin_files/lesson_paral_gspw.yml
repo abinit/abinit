@@ -11,7 +11,7 @@ intro : |
   <br>This lesson should take about 1.5 hour and requires
         access to at least a 200 CPU core parallel computer.<i> </i> </p>
   <p>You are supposed to know already some basics of parallelism in ABINIT, explained in the tutorial 
-  <a href="../lesson_basepar.html">A first introduction to ABINIT in parallel</a>.
+  <a href="lesson_basepar.html">A first introduction to ABINIT in parallel</a>.
   </p><p>On the contrary, the present tutorial is not a prerequisite for other tutorials about parallelism in ABINIT.</p><p>
 # This is the body, including the table of content ...
 body : |
@@ -68,7 +68,7 @@ body : |
   a large number of processors, and (ii) to parallelize the routines
   responsible for the increase of the computation time.&nbsp;</p>
   <p>In this tutorial, we will go beyond the simple k-point and spin
-  parallelism explained in the tutorial "<a href="../lesson_basepar.html">A first introduction to ABINIT in parallel</a>" 
+  parallelism explained in the tutorial "<a href="lesson_basepar.html">A first introduction to ABINIT in parallel</a>" 
   and show: <br>
   </p>
   <ul>

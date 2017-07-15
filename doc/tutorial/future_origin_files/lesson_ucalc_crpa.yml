@@ -13,13 +13,13 @@ intro : |
   <p>It might be useful that you already know how to
   do PAW calculations using ABINIT but it is not mandatory  (you can follow the two lessons
   on PAW in ABINIT
-  (<a href="../lesson_paw1.html">PAW1</a>,
-  <a href="../lesson_paw2.html">PAW2</a>)).
+  (<a href="lesson_paw1.html">PAW1</a>,
+  <a href="lesson_paw2.html">PAW2</a>)).
   The DFT+U tutorial in ABINIT
-  (<a href="../lesson_ldau.html">DFT+U</a>) might be useful to know some basic variables
+  (<a href="lesson_ldau.html">DFT+U</a>) might be useful to know some basic variables
   about correlated orbitals.</p>
   The first GW tutorial in ABINIT
-  (<a href="../lesson_gw1.html">GW</a>) is useful to learn how
+  (<a href="lesson_gw1.html">GW</a>) is useful to learn how
   to compute the screening, and how to converge the relevant parameters
   (energy cutoffs and number of bands for the polarizability). </p>
   
@@ -59,8 +59,8 @@ body : |
   are presented in <a href="#Amadon2008">[Amadon2008]</a> ). 
    The discussion about
   the localization of Wannier orbitals has some similarities with the beginning
-  on the DMFT tutorial (see <a href="../lesson_dmft.html#1">here</a>
-  and <a href="../lesson_dmft.html#2">there</a>)
+  on the DMFT tutorial (see <a href="lesson_dmft.html#1">here</a>
+  and <a href="lesson_dmft.html#2">there</a>)
   </p>
   
   <p> Several parameters (both physical and technical) are important for the cRPA calculation:
@@ -242,7 +242,7 @@ body : |
   <p> In this section, we will present the input variables and discuss how to extract useful information in the log file
   in the case of the <i>d-d</i> model.
   The input file for a typical cRPA calculation (tucrpa_1.in) contains four datasets (as usual GW calculations,
-  see the <a href="../lesson_gw1.html#1a">GW tutorial</a>):
+  see the <a href="lesson_gw1.html#1a">GW tutorial</a>):
   the first one is a well converged LDA calculation,  the second is non self-consistent calculation to
   compute accurately full and empty states, the third computes the constrained non interacting polarizability,
   and the fourth computes effective interaction parameters <i>U</i> and <i>J</i>.

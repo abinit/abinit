@@ -175,8 +175,8 @@ body : |
   can extract the values for use in a plotting software.<br>
   Traditionally, in order to enhance visibility, one affects with a
   negative sign the DOS of&nbsp; minority&nbsp; electrons. If we compare
-  the <a href="../lesson_spin/bccfe_mag_dos2.jpg" target="img">DOS of
-  the magnetized</a> system and the <a href="../lesson_spin/bccfe_nonmag_dos2.jpg" target="img">non
+  the <a href="lesson_spin/bccfe_mag_dos2.jpg" target="img">DOS of
+  the magnetized</a> system and the <a href="lesson_spin/bccfe_nonmag_dos2.jpg" target="img">non
   magnetized</a> system, we observe that the up and down DOS have
   been&nbsp;
   "shifted" with respect each other.<br>
@@ -423,7 +423,7 @@ body : |
   is different only for the d-channel. The difference between up and down
   is <span style="font-weight: bold;">0.68</span>, in rough agreement (regarding our very rude methods of
   integration) with the previous calculation. Using a calculation with
-  the same number of k points for the projected DOS, we can <a href="../lesson_spin/energy_diff_fccfe.jpg" target="img">plot</a> the
+  the same number of k points for the projected DOS, we can <a href="lesson_spin/energy_diff_fccfe.jpg" target="img">plot</a> the
   up-down integrated dos difference for the <span style="font-style: italic;">d</span>-channel. Note that there is some scatter
   in this graph, due to the finite number of digits (2 decimal places) of the
   integrated dos given in the file <span style="color: rgb(51, 102, 255);">tspin_3o_DS3_DOS_AT0002</span>.<br>

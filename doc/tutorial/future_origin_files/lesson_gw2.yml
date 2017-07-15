@@ -25,7 +25,7 @@ intro : |
   A brief description of the equations implemented in the code can be found in the <a href="../theory_mbt.html">GW_notes</a>.
   <p>
   Also, it is suggested to
-  <a href="../../users/acknowledgments.html">acknowledge<a> the efforts of developers of the GW part of ABINIT,
+  <a href="../../bibliography/generated_files/acknowledgments.html">acknowledge<a> the efforts of developers of the GW part of ABINIT,
   by citing
   <ul><li>
   <cite>
@@ -38,8 +38,8 @@ intro : |
   
   
   <p>
-  The user should be familiarized with the four basic lessons of ABINIT, see the <a href="../lesson_welcome.html">tutorial home page</a>,
-  as well as the <a href="../lesson_gw1.html">first lesson on GW</a>.
+  The user should be familiarized with the four basic lessons of ABINIT, see the <a href="lesson_welcome.html">tutorial home page</a>,
+  as well as the <a href="lesson_gw1.html">first lesson on GW</a>.
   
   <p>This lesson should take about one hour to be completed (also including the reading of Bruneval[2006] and Lebegue[2003]).
 # This is the body, including the table of content ...
@@ -58,7 +58,7 @@ body : |
     as for the other lessons. Why not "Work_gw2" ?</i>
   
   <p>
-  During <a href="../lesson_base4.html">lesson 4</a>, you computed different properties of Aluminum within the LDA.
+  During <a href="lesson_base4.html">lesson 4</a>, you computed different properties of Aluminum within the LDA.
   Unlike for silicon, in this approximation, there is no outstanding problem in the computed band structure.
   Nevertheless, as you will see, the agreement of the band structure with experiment
   can be improved significantly if one relies on the GW approximation.

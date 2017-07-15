@@ -5,9 +5,9 @@ intro : |
   <p>This lesson aims to show how you can determine U for further DFT+U calculations consistently 
   and in a fast an easy way. You will learn to prepare the input files for the determination and to use
   the main parameters implemented for this aim. <br> 
-  It is supposed that you already know how to run ABINIT in the PAW mode (lesson <a href="../lesson_paw1.html">PAW1</a>). 
-  Obviously, you should also read the lesson <a href="../lesson_ldau.html">DFT+U</a>, 
-  and likely the lesson <a href="../lesson_paw2.html">PAW2</a>, to generate PAW atomic data.<br> 
+  It is supposed that you already know how to run ABINIT in the PAW mode (lesson <a href="lesson_paw1.html">PAW1</a>). 
+  Obviously, you should also read the lesson <a href="lesson_ldau.html">DFT+U</a>, 
+  and likely the lesson <a href="lesson_paw2.html">PAW2</a>, to generate PAW atomic data.<br> 
   <p>This lesson should take about 1/2 hour. </p>
 # This is the body, including the table of content ...
 body : |

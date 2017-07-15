@@ -22,11 +22,11 @@ intro : |
   <p>
   The user should have already passed through several advanced lessons
   of the tutorial :
-  the <a href="../lesson_rf1.html">lesson Response-Function 1</a>,
-  the <a href="../lesson_rf2.html">lesson Response-Function 2</a>,
-  the <a href="../lesson_ffield.html">lesson on Polarization and finite electric field</a>,
+  the <a href="lesson_rf1.html">lesson Response-Function 1</a>,
+  the <a href="lesson_rf2.html">lesson Response-Function 2</a>,
+  the <a href="lesson_ffield.html">lesson on Polarization and finite electric field</a>,
   and the
-  <a href="../lesson_elastic.html">lesson on Elastic properties</a>
+  <a href="lesson_elastic.html">lesson on Elastic properties</a>
   
   
   <p>This lesson should take about 1 hour and 30 minutes. </p>
@@ -66,7 +66,7 @@ body : |
   
   <p>
   We will adopt the following set of generic parameters (the same than in the
-  <a href="../lesson_ffield.html">lesson on Polarization and finite electric field</a>):
+  <a href="lesson_ffield.html">lesson on Polarization and finite electric field</a>):
   
   <pre>
      acell               10.53

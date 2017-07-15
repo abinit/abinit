@@ -141,7 +141,7 @@ body : |
   <p class="MsoNormal" style="">In any case, in the following, we name <span style="color: rgb(51, 102, 255); font-style: italic;">atompaw</span>
   the <span style="font-weight: bold;">ATOMPAW</span> executable<span style="font-style: italic; color: rgb(51, 102, 255);"></span>.</p><br><big><small><span style="text-decoration: underline;">How to use
   Atompaw ?</span></small></big><br><ul><li>Edit
-  an input file in a text editor (content of input explained <a href="../lesson_paw2/atompaw-usersguide.pdf">here</a>)</li></ul><ul><li>Run:&nbsp;<span style="font-weight: bold; font-style: italic;">atompaw
+  an input file in a text editor (content of input explained <a href="lesson_paw2/atompaw-usersguide.pdf">here</a>)</li></ul><ul><li>Run:&nbsp;<span style="font-weight: bold; font-style: italic;">atompaw
   &lt; inputfile</span></li></ul><div style="margin-left: 80px;">Partial
   waves &phi;<sub>i</sub>, PS partial waves<span style="position: relative; top: -5pt; left: 6pt;">~</span>&phi;<sub>i</sub>
   and projectors<span style="position: relative; top: -5pt; left: 6pt;">~</span>p<sub>i</sub>
@@ -386,7 +386,7 @@ body : |
   file) change with the
   grid; just because <span style="font-style: italic;">r</span><sub style="font-style: italic;">PAW</sub> is adjusted in
   order to belong exactly
-  to the radial grid. By looking in <span style="font-weight: bold;">ATOMPAW</span> <a href="../lesson_paw2/atompaw-usersguide.pdf" target="_blank">user's
+  to the radial grid. By looking in <span style="font-weight: bold;">ATOMPAW</span> <a href="lesson_paw2/atompaw-usersguide.pdf" target="_blank">user's
   guide</a>, you
   can choose to keep it constant.</p><p style="margin-bottom: 0in; margin-left: 0.8634in;" align="justify" lang="en-US">- Also note that, if the
   results are difficult to
@@ -568,7 +568,7 @@ body : |
   one has to detail the line containing all radii (<span style="font-style: italic;">r</span><sub style="font-style: italic;">PAW</sub><span style="font-style: italic;"></span>, <span style="font-style: italic;">r</span><sub style="font-style: italic;">shape</sub><span style="font-style: italic;"></span>,
   <span style="font-style: italic;">r</span><sub style="font-style: italic;">Vloc</sub>
   and <span style="font-style: italic;">r</span><sub style="font-style: italic;">core</sub><span style="font-style: italic;"></span>);
-  see&nbsp;<a href="../lesson_paw2/atompaw-usersguide.pdf" target="_blank">user's
+  see&nbsp;<a href="lesson_paw2/atompaw-usersguide.pdf" target="_blank">user's
   guide</a>.</div></div><div style="margin-left: 40px;">* Change
   the matching radius <span style="font-style: italic;">r</span><sub style="font-style: italic;">c</sub> for one (or both) <span style="font-style: italic;">l</span> partial-wave(s).
   In some
@@ -804,7 +804,7 @@ body : |
   remark</span>:&nbsp;<p style="margin-left: 0.24in; margin-top: 0.08in; margin-bottom: 0in;" align="justify" lang="en-US">It can be useful to test
   the sensitivity of results to some <span style="font-weight: bold;">ATOMPAW</span>
   input
-  parameters (see <a href="../lesson_paw2/atompaw-usersguide.pdf" target="_blank">user's
+  parameters (see <a href="lesson_paw2/atompaw-usersguide.pdf" target="_blank">user's
   guide</a> for details on keywords):</p>
   <ul><li>The
   analytical form and the cut-off radius <span style="font-style: italic; font-weight: bold;">r</span><sub style="font-style: italic; font-weight: bold;">shape</sub> of the <span style="font-weight: bold;">shape function</span>

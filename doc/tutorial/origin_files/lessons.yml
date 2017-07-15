@@ -204,6 +204,7 @@
     subtitle : |
       Default subtitle ... this is an error
     copyright : |
+      <hr>
       <h5>Copyright (C) 2000-2017 ABINIT group (__AUTHORS__)
       <script type="text/javascript" src="__JS_PATH__copyright.js"> </script>
       </h5> 

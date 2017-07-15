@@ -90,7 +90,7 @@ body : |
       xcart1  -7.6091015760E-01  0.0000000000E+00  0.0000000000E+00
                7.6091015760E-01  0.0000000000E+00  0.0000000000E+00
   </pre>
-  <p>These are similar to those determined in <a href="../lesson_base1.html">lesson 1</a>,
+  <p>These are similar to those determined in <a href="lesson_base1.html">lesson 1</a>,
     although they have been obtained in one run. You can also check that the residual
     forces are lower than <code>5.0d-4</code>.
     Convergence issues are discussed in
