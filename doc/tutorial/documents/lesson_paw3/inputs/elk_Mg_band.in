@@ -1,0 +1,168 @@
+! Carbon, diamond structure (FCC)
+
+! The tasks define what will be done by the code:
+! 0 - Perform ground-state calculation from scratch
+! 1 - Restart GS calc. from STATE.OUT file
+! 20 - Calculate band structure as defined by plot1d
+tasks
+1
+20
+
+!species
+! 12 : atomic number
+! 'Mg'
+! 'magnesium'
+! 44305.30461        : atomic mass
+! 1.899259351   37.6052   : muffin-tin radius
+!   5                : number of occ. states
+!   1   0   1   2    : 1s
+!   2   0   1   2    : 2s
+!   2   1   1   2    : 2p m=0
+!   2   1   2   4    : 2p m=1
+!   3   0   1   2    : 3s
+!  -6.0              : core-valence cutoff energy
+
+! Tolerance on convegence of band energies (absolute)
+epsband
+ 1.e-8
+
+! Tolerance on conv. of potential (relative)
+epspot
+ 1.e-7
+
+! Tolerance on conv. of total energy (absolute)
+epsengy
+ 1.e-6
+
+! Use adaptive linear mixing of densities
+! 1 - Adaptive linear
+! 2 - Pulay mixing
+mixtype
+ 2
+
+! Exchange-correlation functional to use
+! LDA (PW92) is 3 (default) (equiv. Abinit ixc 7)
+! GGA-PBE    is 20          (equiv. Abinit ixc 11)
+! (see Elk manual for other options)
+xctype
+ 3
+
+! Define lattice vectors
+! Magnesium has a hexagonal native structure
+! with a=b=3.20927 Å c=5.21033 Å  alpha=90 beta=90 gamma=60
+
+! Scale factor to be applied to all lattice vectors
+scale
+ 1.00
+
+avec
+     6.0646414   0.0000000   0.0000000
+     3.0323207   5.2521335   0.0000000
+     0.0000000   0.0000000   9.8460968
+
+! Define atomic species
+atoms
+   1   : nspecies - Number of species
+'Mg.in' : spfname - Name of species file
+   2   : natoms; atposl, bfcmt below - Atoms in cell, reduced coord. and moments
+    0.33333333    0.33333333    0.2500000    0.00000000  0.00000000  0.00000000
+    0.66666666    0.66666666    0.7500000    0.00000000  0.00000000  0.00000000
+
+! Don't set muffin-tin radius automatically
+autormt
+ .false.
+
+! Freeze core states (in abinit PAW, they are frozen)
+frozencr
+ .true.
+
+! Path to atomic data files
+sppath
+  './'
+
+! Monkhorst-pack k-point grid
+ngridk
+ 10  10  10
+
+! Shift of MP grid
+vkloff
+0.0 0.0 0.5
+
+! Metallic options
+stype
+ 0          : Smearing type 0 - Gaussian
+autoswidth
+ .true.     : Automatic determination of swidth
+
+! Set upper limit of |G+k|, the number below is
+! (MT radius)*max(|G+k|)
+rgkmax
+9.0
+
+! A value of 0.0 makes this being set automatically
+gmaxvr
+0.0
+
+! k-points in band plot
+plot1d
+47 47  : nvp1d, npp1d
+                     0.00000000E+00  0.00000000E+00  5.00000000E-01
+                     8.33333333E-02  0.00000000E+00  5.00000000E-01
+                     1.66666667E-01  0.00000000E+00  5.00000000E-01
+                     2.50000000E-01  0.00000000E+00  5.00000000E-01
+                     3.33333333E-01  0.00000000E+00  5.00000000E-01
+                     4.16666667E-01  0.00000000E+00  5.00000000E-01
+                     5.00000000E-01  0.00000000E+00  5.00000000E-01
+                     4.72222222E-01  5.55555556E-02  5.00000000E-01
+                     4.44444444E-01  1.11111111E-01  5.00000000E-01
+                     4.16666667E-01  1.66666667E-01  5.00000000E-01
+                     3.88888889E-01  2.22222222E-01  5.00000000E-01
+                     3.61111111E-01  2.77777778E-01  5.00000000E-01
+                     3.33333333E-01  3.33333333E-01  5.00000000E-01
+                     2.77777778E-01  2.77777778E-01  5.00000000E-01
+                     2.22222222E-01  2.22222222E-01  5.00000000E-01
+                     1.66666667E-01  1.66666667E-01  5.00000000E-01
+                     1.11111111E-01  1.11111111E-01  5.00000000E-01
+                     5.55555556E-02  5.55555556E-02  5.00000000E-01
+                     0.00000000E+00  0.00000000E+00  5.00000000E-01
+                     0.00000000E+00  0.00000000E+00  4.50000000E-01
+                     0.00000000E+00  0.00000000E+00  4.00000000E-01
+                     0.00000000E+00  0.00000000E+00  3.50000000E-01
+                     0.00000000E+00  0.00000000E+00  3.00000000E-01
+                     0.00000000E+00  0.00000000E+00  2.50000000E-01
+                     0.00000000E+00  0.00000000E+00  2.00000000E-01
+                     0.00000000E+00  0.00000000E+00  1.50000000E-01
+                     0.00000000E+00  0.00000000E+00  1.00000000E-01
+                     0.00000000E+00  0.00000000E+00  5.00000000E-02
+                     0.00000000E+00  0.00000000E+00  0.00000000E+00
+                     8.33333333E-02  0.00000000E+00  0.00000000E+00
+                     1.66666667E-01  0.00000000E+00  0.00000000E+00
+                     2.50000000E-01  0.00000000E+00  0.00000000E+00
+                     3.33333333E-01  0.00000000E+00  0.00000000E+00
+                     4.16666667E-01  0.00000000E+00  0.00000000E+00
+                     5.00000000E-01  0.00000000E+00  0.00000000E+00
+                     4.72222222E-01  5.55555556E-02  0.00000000E+00
+                     4.44444444E-01  1.11111111E-01  0.00000000E+00
+                     4.16666667E-01  1.66666667E-01  0.00000000E+00
+                     3.88888889E-01  2.22222222E-01  0.00000000E+00
+                     3.61111111E-01  2.77777778E-01  0.00000000E+00
+                     3.33333333E-01  3.33333333E-01  0.00000000E+00
+                     2.77777778E-01  2.77777778E-01  0.00000000E+00
+                     2.22222222E-01  2.22222222E-01  0.00000000E+00
+                     1.66666667E-01  1.66666667E-01  0.00000000E+00
+                     1.11111111E-01  1.11111111E-01  0.00000000E+00
+                     5.55555556E-02  5.55555556E-02  0.00000000E+00
+                     0.00000000E+00  0.00000000E+00  0.00000000E+00
+
+! Number of empty bands to include
+nempty
+10
+
+! Ratio betwen fine and coarse radial grid
+! (the coarse grid is used for the calcualation
+!  of densities). This needs to be set to one
+! so that the grid specified in the .in file
+! of the atomic species is used everywhere
+lradstp
+ 1       : coarse/fine radial grid ratio
+

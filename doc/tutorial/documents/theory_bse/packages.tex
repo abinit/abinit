@@ -1,0 +1,74 @@
+% Page Settings
+\oddsidemargin 1.96cm
+\evensidemargin 1.96cm
+\topmargin 0.95cm
+\textheight 20cm
+\textwidth 12cm
+%%%%%%%%%%%%%%%%%%%%
+%Standard Packages
+%%%%%%%%%%%%%%%%%%%%
+\usepackage[T1]{fontenc}
+\usepackage[latin1]{inputenc}
+\usepackage[american]{babel}
+\usepackage[dvips]{graphicx,hyperref}
+%\usepackage[pdftex,linkbordercolor=myblue]{hyperref} % for pdf with links
+\setcounter{secnumdepth}{3}
+\setcounter{tocdepth}{3}
+\usepackage{amsfonts}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{geometry}
+\geometry{a4paper}
+\makeatletter
+\makeatother
+\usepackage{fancyhdr}
+%\pagestyle{plain} % Just a plain page number.
+%\pagestyle{fancy}
+%\pagestyle{headings}
+%\pagenumbering{arabic}
+%\pagenumbering{roman}
+\fancyhf{}
+\fancyhead[LE,RO]{\thepage}
+\fancyhead[LO]{\rightmark}
+\fancyhead[RE]{\leftmark}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%Non standard Packages!
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\usepackage{makeidx}
+\usepackage{mathtools} % useful tools for AMSTEX
+\usepackage{eucal}    % Euler Script
+\usepackage{color}     % use colors
+\usepackage{empheq}    % emphasize equations
+%\usepackage[margin=10pt,font=small,labelfont=bf]{caption} % to customize captions
+\usepackage{leftidx}
+\usepackage{longtable}
+\usepackage{float}
+
+\usepackage{epsfig}
+\usepackage[showboxes]{textpos}
+\usepackage[]{textpos}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%Nomenclature
+%%\usepackage{nomencl}
+%\makeglossary
+%Acronyms
+%\usepackage[printonlyused]{acronym}
+
+%%%%%%%%%
+%Options
+%%%%%%%%%
+% See the hyperref documentation for details on available options.
+% final PDF : linkcolor=blue, citecolor=darkgreen
+%\usepackage[dvips]{hyperref}
+%\usepackage[ps2pdf, breaklinks=true,bookmarks=true,
+%\usepackage[dvips, breaklinks=false,bookmarks=true,
+%bookmarksnumbered=true, linkcolor=blue, citecolor=darkgreen,
+%colorlinks=true, linktocpage=true]{hyperref}
+%
+%\usepackage{minitoc}
+%\setcounter{tocdepth}{2}
+%\setcounter{minitocdepth}{3}
+%\setcounter{secnumdepth}{4}

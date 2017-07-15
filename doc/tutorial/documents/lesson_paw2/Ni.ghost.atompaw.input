@@ -1,0 +1,37 @@
+Ni  28
+GGA-PBE scalarrelativistic loggrid 1500
+4 4 3 0 0 0
+4 0 1
+4 1 0
+3 2 9
+0 0 0
+c
+c
+c
+v
+c
+c
+v
+v
+2
+2.0 2.0 2.0 2.0
+y
+4.
+n
+y
+4.
+n
+y
+1.
+n
+vanderbilt
+3 0. troulliermartins
+2.0
+2.0
+2.0
+2.0
+2.0
+2.0
+2
+default
+0

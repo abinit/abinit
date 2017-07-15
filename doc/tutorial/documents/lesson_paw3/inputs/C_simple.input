@@ -1,0 +1,19 @@
+C 6                                         ! Atomic name and number
+LDA-PW scalarrelativistic loggrid 801 logderivrange -10 40 1000 ! XC approx., SE type, gridtype, # pts, logderiv
+2 2 0 0 0 0                                 ! maximum n for each l: 2s,2p,0d,0f..
+2 1 2                                       ! Partially filled shell: 2p^2
+0 0 0                                       ! Stop marker
+c                                           ! 1s - core
+v                                           ! 2s - valence
+v                                           ! 2p - valence
+1                                           ! l_max treated = 1
+1.3                                         ! core radius r_c
+n                                           ! no more unoccupied s-states
+n                                           ! no more unoccupied p-states
+vanderbilt                                  ! vanderbilt scheme for finding projectors
+2 0                                         ! localisation scheme
+1.3                                         ! Core radius for occ. 2s state
+1.3                                         ! Core radius for occ. 2p state
+2                                           ! Run atompaw2abinit converter
+prtcorewf noxcnhat nospline noptim          ! Abinit conversion options
+0                                           ! Exit

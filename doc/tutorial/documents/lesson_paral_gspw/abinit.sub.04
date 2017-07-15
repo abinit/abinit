@@ -1,0 +1,58 @@
+#!/bin/bash
+#MSUB -r paral-gspw_04   # Job name
+#MSUB -T 1000            # Elapsed time of the job
+#MSUB -A tgcc0002        # Project number
+#MSUB -n 108             # Number of processors
+#MSUB -o paral-gspw_04.o # Standard output
+#MSUB -e paral-gspw_04.e # Error output
+
+set -x
+
+ABINIT=/ccc/work/cont005/pa0397/bottinf/6.10.1-public/curie/src/98_main/abinit
+TMPDIR=$SCRATCHDIR/paral-gspw_04
+mkdir $TMPDIR
+cd $TMPDIR
+
+rm -rf *log *.out *.in *.files
+cp $BRIDGE_MSUB_PWD/tgspw_04.in     $TMPDIR/
+cp $BRIDGE_MSUB_PWD/tgspw_04.files  $TMPDIR/
+cp $BRIDGE_MSUB_PWD/79au.pspnc      $TMPDIR/
+echo "bandpp 1"                  >> $TMPDIR/tgspw_04.in
+
+ccc_mprun $ABINIT < tgspw_04.files > tgspw_04.log
+
+cp $TMPDIR/tgspw_04.out $BRIDGE_MSUB_PWD/tgspw_04.bandpp1.out
+cp $TMPDIR/tgspw_04.log $BRIDGE_MSUB_PWD/tgspw_04.bandpp1.log
+
+rm -rf *log *.out *.in *.files
+cp $BRIDGE_MSUB_PWD/tgspw_04.in     $TMPDIR/
+cp $BRIDGE_MSUB_PWD/tgspw_04.files  $TMPDIR/
+cp $BRIDGE_MSUB_PWD/79au.pspnc      $TMPDIR/
+echo "bandpp 2"                  >> $TMPDIR/tgspw_04.in
+
+ccc_mprun $ABINIT < tgspw_04.files > tgspw_04.log
+
+cp $TMPDIR/tgspw_04.out $BRIDGE_MSUB_PWD/tgspw_04.bandpp2.out
+cp $TMPDIR/tgspw_04.log $BRIDGE_MSUB_PWD/tgspw_04.bandpp2.log
+
+rm -rf *log *.out *.in *.files
+cp $BRIDGE_MSUB_PWD/tgspw_04.in     $TMPDIR/
+cp $BRIDGE_MSUB_PWD/tgspw_04.files  $TMPDIR/
+cp $BRIDGE_MSUB_PWD/79au.pspnc      $TMPDIR/
+echo "bandpp 4"                  >> $TMPDIR/tgspw_04.in
+
+ccc_mprun $ABINIT < tgspw_04.files > tgspw_04.log
+
+cp $TMPDIR/tgspw_04.out $BRIDGE_MSUB_PWD/tgspw_04.bandpp4.out
+cp $TMPDIR/tgspw_04.log $BRIDGE_MSUB_PWD/tgspw_04.bandpp4.log
+
+rm -rf *log *.out *.in *.files
+cp $BRIDGE_MSUB_PWD/tgspw_04.in     $TMPDIR/
+cp $BRIDGE_MSUB_PWD/tgspw_04.files  $TMPDIR/
+cp $BRIDGE_MSUB_PWD/79au.pspnc      $TMPDIR/
+echo "bandpp 6"                  >> $TMPDIR/tgspw_04.in
+
+ccc_mprun $ABINIT < tgspw_04.files > tgspw_04.log
+
+cp $TMPDIR/tgspw_04.out $BRIDGE_MSUB_PWD/tgspw_04.bandpp6.out
+cp $TMPDIR/tgspw_04.log $BRIDGE_MSUB_PWD/tgspw_04.bandpp6.log

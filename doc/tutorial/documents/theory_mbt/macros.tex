@@ -1,0 +1,331 @@
+%%%%%%%%
+%Colors
+%%%%%%%%
+\definecolor{myblue}{rgb}{.8, .8, 1}
+
+%%%%%%%%%%%%%%
+%New commands
+%%%%%%%%%%%%%%
+\newcommand{\minf}{{-\infty}}
+\newcommand{\pinf}{{+\infty}}
+\newcommand{\rarr}{{\rightarrow}}
+\newcommand{\HF}{{\text{HF}}}
+\newcommand{\RPA}{{\text{RPA}}}
+\newcommand{\Wan}{{(\text{W})}}
+\newcommand{\Win}{{\text{win}}}
+\newcommand{\Ham}{{(\text{H})}}
+\newcommand{\Uopt}{\mathcal{U}}
+\newcommand{\Opt}{{(\text{opt})}}
+\newcommand{\Ueff}{{U_{\text{eff}}}}
+\newcommand{\Atm}{{\bf A}}
+\newcommand{\Go}{{G_0}}
+\newcommand{\Wo}{{W_0}}
+\newcommand{\Ao}{{A_0}}
+\newcommand{\ie}{{\emph{i.e.}}\;}
+\newcommand{\eg}{{\emph{e.g.}}\,\;}
+\newcommand{\oA}{{\hat A}}
+\newcommand{\oSigma}{{\hat\Sigma}}
+\newcommand{\oT}{{\hat T}}
+\newcommand{\oO}{{\hat O}}
+\newcommand{\wh}{\widehat}
+\newcommand{\vc}{{v}}
+\newcommand{\tv}{{\tilde{v}}}
+\newcommand{\tvc}{{\tv}}
+\newcommand{\la}{\langle}
+\newcommand{\ra}{\rangle}
+\newcommand{\mcC}{\mathcal{C}}
+\newcommand{\mcF}{\mathcal{F}}
+\newcommand{\mcH}{\mathcal{H}}
+\newcommand{\mcS}{\mathcal{S}}
+\newcommand{\UT}{\mathcal{U}}
+\renewcommand{\SS}{s} %{\mathcal {S}}
+\newcommand{\SSm}{\SS^{-1}} %{\mathcal {S}}
+\newcommand{\mcA}{{\mathcal{A}}}
+\newcommand{\mcB}{{\mathcal{B}}}
+\newcommand{\omcA}{{\hat\mcA}}
+\newcommand{\mcW}{{\mathcal{W}}}
+\newcommand{\mcE}{{\mathcal{E}}}
+\newcommand{\mcI}{{\mathcal{I}}}
+\newcommand{\mcJ}{{\mathcal{J}}}
+\newcommand{\mcO}{{\mathcal{O}}}
+\newcommand{\mcP}{{\mathcal{P}}}
+\newcommand{\mcR}{{\mathcal{R}}}
+\newcommand{\omcR}{{\hat\mcR}}
+\newcommand{\AFMomcR}{{\underline{\omcR}}}
+\newcommand{\AFMmcR}{{\underline{\mcR}}}
+\newcommand{\mcRi}{{{\mcR}^{-1}}}
+%\newcommand{\OmcR}{{\hat\mcR}}
+\newcommand{\RRm}{\mcR^{-1}} 
+\newcommand{\mcT}{{\hat{\mathcal {T}}}}
+\newcommand{\mcRm}{\mcR^{-1}} 
+\newcommand{\mcU}{{\mathcal{U}}} 
+\newcommand{\tpsi}{{\tilde\psi}}
+\newcommand{\tPsi}{{\tilde\Psi}}
+\newcommand{\tPhi}{{\tilde\Phi}}
+\newcommand{\tphi}{{\tilde\phi}}
+\newcommand{\nlm}{{nlm}}
+\newcommand{\tprj}{{\tilde p}}
+\newcommand{\tu}{{\tilde u}}
+\renewcommand{\ij}{{ij}}
+\newcommand{\mn}{{mn}}
+\newcommand{\nm}{{nm}}
+\newcommand{\mQ}{{m\qq}}
+\newcommand{\nQ}{{n\qq}}
+\newcommand{\st}{{st}}
+\newcommand{\uv}{{uv}}
+\newcommand{\Si}{{\mcS^{-1}}}
+\newcommand{\Sit}{{\Si^\tau}}
+\newcommand{\Ri}{\mcR^{-1}}
+\newcommand{\Rit}{\mcR^{-1\tau}}
+\newcommand{\rr}{{\bf r}}
+\newcommand{\rrhat}{{\widehat\rr}}
+\newcommand{\rrphat}{{{\widehat\rr}'}}
+\newcommand{\thhat}{{\widehat{\theta}}}
+\newcommand{\phihat}{{\widehat{\phi}}}
+\newcommand{\xhat}{{\widehat{\bf x}}}
+\newcommand{\yhat}{{\widehat{\bf y}}}
+\newcommand{\zhat}{{\widehat{\bf z}}}
+\newcommand{\rrp}{{\bf r'}}
+\newcommand{\RR}{{\bf R}}
+\newcommand{\rmR}{{\rr-\RR}}
+\newcommand{\rmRhat}{{\widehat\rmR}}
+\newcommand{\rmRa}{{\rr-\RR_a}}
+\newcommand{\LL}{{\bf L}}
+\newcommand{\GG}{{\bf G}}
+\newcommand{\GGp}{{\bf G}}
+\newcommand{\GGo}{{\GG_0}}
+\newcommand{\RL}{{\bf R}}
+\newcommand{\qq}{{\bf q}}
+\newcommand{\qqt}{\tilde{\bf q}}
+\newcommand{\qG}{{\bf q+G}}
+\newcommand{\kk}{{\bf k}}
+\newcommand{\kkt}{\tilde\kk}
+\newcommand{\KK}{{\bf K}}
+\newcommand{\KKhat}{\widehat \KK}
+\newcommand{\KKp}{{\bf{K'}}}
+\newcommand{\KKphat}{\widehat{\KK}'}
+\newcommand{\Qhat}{\widehat Q}
+\newcommand{\Ghat}{\widehat \GG}
+\newcommand{\qGhat}{\widehat\qG}
+\newcommand{\kmq}{{\kk-\qq}}
+\newcommand{\kpq}{{\kk+\qq}}
+\newcommand{\qpG}{\qq+\GG}
+\newcommand{\qpGhat}{\widehat{\qpG}}
+\newcommand{\rc}{{r_c}}
+\newcommand{\rca}{{r_c^a}}
+\newcommand{\IBZq}{{IBZ_\qq}}
+\newcommand{\IBZk}{{IBZ_\kk}}
+\newcommand{\BZ}{{{\text{BZ}}}}
+\newcommand{\Lq}{\mathcal{L}_\qq}
+\newcommand{\Lqp}{{\mathcal{L}^+_\qq}}
+\newcommand{\Lqm}{{\mathcal{L}^-_\qq}}
+\newcommand{\nk}{{n\kk}}
+\newcommand{\mk}{{m\kk}}
+\newcommand{\nSk}{{n\SS\kk}}
+\newcommand{\nRk}{{n\mcR\kk}}
+\newcommand{\kpG}{{\kk+\GG}}
+\newcommand{\kpGhat}{\widehat{\kpG}}
+\newcommand{\SkpG}{{\SS\kk+\GG}}
+\newcommand{\nkpG}{{\dfrac{|\kpG\ra}{\sqrt{\Omega}}}}
+\newcommand{\invomegasq}{{\dfrac{1}{\sqrt{\Omega}}}}
+\newcommand{\lm}{{lm}}
+\newcommand{\lp}{{l'}}
+\renewcommand{\mp}{{m'}}
+\newcommand{\LM}{{LM}}
+\newcommand{\Lp}{{L'}}
+\newcommand{\Mp}{{M'}}
+\newcommand{\LpMp}{{\Lp\Mp}}
+\newcommand{\Lpp}{{L''}}
+\newcommand{\Mpp}{{M''}}
+\newcommand{\LppMpp}{{\Lpp\Mpp}}
+\newcommand{\bb}{\beta}
+\newcommand{\vb}{{\bf b}}
+\newcommand{\va}{{\bf a}}
+\newcommand{\zz}{\zeta}
+\newcommand{\ee}{\epsilon}
+\newcommand{\eem}{\epsilon^{-1}}
+\newcommand{\tee}{\tilde\epsilon}
+\newcommand{\eet}{\tee}
+\newcommand{\Wc}{{W}^\text{c}}
+\newcommand{\tWc}{{\tilde W}^\text{c}}
+\newcommand{\tac}{{\tilde \aa}^\text{c}}
+\newcommand{\twopi}{{2\pi}}
+\newcommand{\fourpi}{{4\pi}}
+\newcommand{\tw}{{\tilde{w}}}
+\newcommand{\ww}{\omega}
+\newcommand{\wwt}{\tilde\omega}
+\newcommand{\wwtGGq}{\wwt_{\GG_1 \GG_2}(\qq)}
+\newcommand{\wplasma}{{\omega_{\text{P}}}}
+\newcommand{\half}{{\dfrac{1}{2}}}
+\newcommand{\halfs}{{\frac{1}{2}}}
+\newcommand{\thalf}{{\tfrac{1}{2}}}
+\newcommand{\D}{\partial}
+\newcommand{\HH}{{\hat H}}
+%\newcommand{\HPAW}{{\hat{\tild H}}
+\newcommand{\Kin}{{\hat T}}
+\newcommand{\ho}{{{\hat h}_0}}
+\newcommand{\QP}{\text{QP}}
+\newcommand{\qp}{\text{qp}}
+\newcommand{\QPSCGW}{\text{QPSCGW}}
+\newcommand{\SCGW}{\text{SCGW}}
+\newcommand{\GW}{\text{GW}}
+\newcommand{\KS}{\text{KS}}
+\newcommand{\NLF}{\text{NLF}}
+\newcommand{\LF}{\text{LF}}
+\newcommand{\KB}{\text{KB}}
+\newcommand{\PS}{\text{PS}}
+\newcommand{\tn}{{\tilde n}}
+\newcommand{\nhat}{{\hat n}}
+\newcommand{\nT}{n_T}
+\newcommand{\tnT}{{\tn_T}}
+\newcommand{\no}{{n_0}}
+\newcommand{\nc}{{n_c}}
+\newcommand{\nv}{{n_v}}
+\newcommand{\tnc}{{\tn_c}}
+\newcommand{\nZ}{{n_Z}}
+\newcommand{\nZc}{{n_{Zc}}}
+\newcommand{\tnZc}{{\tn_{Zc}}}
+\newcommand{\vH}{{v_H}}
+\newcommand{\VH}{{V_H}}
+\newcommand{\EH}{{E_H}}
+\newcommand{\veff}{v_{\text{eff}}}
+\newcommand{\tveff}{{{\tilde v}_{\text{eff}}}}
+\newcommand{\Vext}{{V_{\text{ext}}}}
+\newcommand{\vext}{{v_{\text{ext}}}}
+\newcommand{\vtot}{v_{\text{tot}}}
+\newcommand{\tot}{{\text{tot}}}
+\newcommand{\xc}{{\text{xc}}}
+\newcommand{\val}{{\text{val}}}
+\newcommand{\FFT}{{\text{FFT}}}
+\newcommand{\loc}{{\text{loc}}}
+\newcommand{\core}{{\text{core}}}
+\newcommand{\vxc}{{v_\xc}}
+\newcommand{\tP}{{{\tilde P}}}
+\newcommand{\tchi}{{{\tilde\chi}}}
+\newcommand{\matchi}{{\underline{\tchi}}}
+\newcommand{\chio}{{\chi^0}}
+%\newcommand{\tchio}{{{\tilde\chi^0}}}
+\newcommand{\tchio}{{{\chio}}}
+\newcommand{\occ}{{\text{occ}}}
+\newcommand{\Exc}{{E_\xc}}
+\newcommand{\Vnl}{V_{\text{nl}}}
+\newcommand{\Vloc}{V_{\text{loc}}}
+\newcommand{\vv}{\hat v}
+\newcommand{\vloc}{{\vv_{\text{loc}}}}
+\newcommand{\Ylm}{{Y_m^l}}
+\newcommand{\rY}{{\mathcal Y}}
+\newcommand{\rYlm}{{\mathcal Y}_m^l}
+\newcommand{\rYLM}{{\mathcal Y}_M^L}
+\newcommand{\VLM}{V_M^L}
+\newcommand{\Dhat}{{\hat D}}
+\newcommand{\tD}{{\tilde D}}
+\newcommand{\jl}{j_l}
+\newcommand{\sqrttwo}{{\sqrt{2}}}
+%\newcommand{\wfn}[1][{}]{\psi_#1(\rr_1)}
+\newcommand{\sign}{{\text{sign}}}
+\newcommand{\ff}[2][]{f(\ee_#1^#2)}
+%\newcommand{\df}{\coloneqq} %this required mathtools :=  
+\newcommand{\df}{\equiv} %this required mathtools :=  
+\newcommand{\Vee}{V_\text{ee}} 
+\newcommand{\Eee}{E_\text{ee}} 
+\newcommand{\Edc}{E_\text{dc}} 
+\newcommand{\LDA}{\text{LDA}} 
+\newcommand{\HEG}{\text{HEG}} 
+\newcommand{\GGA}{\text{GGA}} 
+\newcommand{\LDApU}{\text{LDA+U}} 
+\newcommand{\lU}{{l_\text{U}}}
+\newcommand{\trace}[1]{\text{Tr}(#1)}
+\newcommand{\up}{\uparrow} 
+\newcommand{\down}{\downarrow} 
+\newcommand{\costh}{\cos\theta} 
+\newcommand{\sinth}{\sin\theta} 
+\newcommand{\cosphi}{\cos\phi} 
+\newcommand{\sinphi}{\sin\phi} 
+\newcommand{\omegahat}{{\widehat\omega}}
+\newcommand{\Proj}{\mathcal{P}}
+\newcommand{\PDER}[2]{\dfrac{\partial #1}{\partial #2}}
+\newcommand{\DER}[2]{\dfrac{d #1}{d #2}}
+\newcommand{\FDER}[2]{\dfrac{\delta #1}{\delta #2}}
+\newcommand{\dd}{{\,\text{d}}}
+\newcommand{\ddr}{{\dd r}}
+\newcommand{\ddrr}{{\dd\rr}}
+\newcommand{\ddkk}{{\dd\kk}}
+\newcommand{\ddrrp}{{\dd\rr'}}
+\newcommand{\dx}[2]{{\dd#1\text{d}#2}}
+\newcommand{\ul}[1]{{\underline{#1}}}
+\newcommand{\ddO}{{\dd\Omega}}
+
+\newcommand*\mybluebox[1]{\colorbox{myblue}{\hspace{1em}#1\hspace{1em}}}
+\newcommand*\widefbox[1]{\fbox{\hspace{1em}#1\hspace{1em}}}
+%This is for empheq. Example
+%\begin{empheq}[box=\widefbox]{align}
+%a&=b\\
+%E&=mc^2 + \int_a^a x\, dx
+%\end{empheq}
+\newcommand{\Eq}[1]{Eq.~\ref{#1}}
+\newcommand{\myEquation}[1]{Equation~\ref{#1}}
+\newcommand{\myequation}[1]{equation~\ref{#1}}
+\newcommand{\Fig}[1]{Fig.~\ref{#1}}
+\newcommand{\Figure}[1]{Figure~\ref{#1}}
+\newcommand{\myfigure}[1]{figure~\ref{#1}}
+\newcommand{\myFigure}[1]{Figure~\ref{#1}}
+\newcommand{\Sect}[1]{Sect.~\ref{#1}}
+\newcommand{\sect}[1]{sect.~\ref{#1}}
+\newcommand{\Section}[1]{Section~\ref{#1}}
+\newcommand{\mysection}[1]{section~\ref{#1}}
+
+\providecommand{\abs}[1]{{\lvert#1\rvert}}
+\providecommand{\norm}[1]{{\lVert#1\rVert}}
+
+\newcommand{\mcG}{{\mathcal G}}
+\providecommand{\Gaunt}[2]{{\mcG_{#1}^{#2}}}
+\renewcommand{\ni}{{n_i}}
+\newcommand{\li}{{l_i}}
+\newcommand{\mi}{{m_i}}
+\newcommand{\nj}{{n_j}}
+\newcommand{\lj}{{l_j}}
+\newcommand{\mj}{{m_j}}
+\newcommand{\ns}{{n_s}}
+\newcommand{\ls}{{l_s}}
+\newcommand{\ms}{{m_s}}
+\newcommand{\nt}{{n_t}}
+\newcommand{\lt}{{l_t}}
+\newcommand{\mt}{{m_t}}
+\newcommand{\LdotS}{{{\bf L}\cdot{\bf S}}}
+
+\newcommand{\etal}{{\emph et al.}}
+
+%%%%%%%%%%%%%%%%
+%Renew Commands
+%%%%%%%%%%%%%%%%
+\newcommand{\<}{\la}
+\renewcommand{\>}{\ra}
+\renewcommand{\aa}{\alpha}
+\renewcommand{\ss}{\sigma}
+\newcommand{\spin}{\sigma}
+\newcommand{\tSigma}{{\tilde\Sigma}}
+\renewcommand{\*}{\dagger}
+\renewcommand{\tt}{{\bf t}}
+\newcommand{\AFMtt}{{\underline{\tt}}}
+\newcommand{\rmt}{{\rr-\tt}}
+\renewcommand{\Re}{\text{Re}}
+\renewcommand{\Im}{\text{Im}}
+
+\newcommand{\destroy}[1]{{\hat\psi(#1)}}
+\newcommand{\make}[1]{{{\hat\psi}^\*(#1)}}
+
+%\begin{empheq}[box=\mybluebox]{align}
+%a&=b\\
+%E&=mc^2 + \int_a^a x\, dx
+%\end{empheq}
+
+\newcommand{\InsertBlankPage}{
+  \clearpage % to prevent floats interfering with blank page
+  \thispagestyle{empty}% prevents headers and footers
+  \hbox{}% something on page
+  \newpage
+}
+
+\newcommand{\ClearChapterEnd}{
+  \clearpage{\pagestyle{empty}\cleardoublepage}
+}
