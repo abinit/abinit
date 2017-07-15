@@ -1,14 +1,16 @@
 <html>
-<head>
-<title>Tutorial "Fold2Bloch"</title>
+<head><title>Lesson on fold2Bloch</title>
+<link rel=stylesheet type="text/css" href="../formabinit.css">
 </head>
 <body bgcolor="#ffffff">
-<hr>
-<h1>Fold2Bloch tutorial, lesson 1:</h1>
-<h2>Lattice of Hydrogen atoms </h2>
-<hr>
 
-<!-- begin intro -->
+<hr>
+<a name="top"></a>
+
+<h1>ABINIT tutorial. Lesson on fold2Bloch :</h1>
+
+<h2>Unfolding the electronic structur of a lattice of Hydrogen atoms.</h2> 
+ <hr>
 <p>
 
 Supercells are often used in electronic structure calculations in order to model compound alloys, defects, etc. The band structure obtained directly from these calculations is hard to interpret due to the Brillouin zone folding as a result of its reduced size for the supercell as compared to that for the unperturbed host unit cell. This set of tutorials aims at demonstrating how to unfold the band structure of a supercell and present it in the basis of conventional Bloch wave vectors inherent to the unperturbed unit cell.
@@ -34,18 +36,19 @@ In this tutorial we will construct a supercell of 6 hydrogen atoms, perform self
 </p>
 
 <p>This lesson should take about 1 hour. </p>
-<!-- end intro -->
 
-<script type="text/javascript" src="list_internal_links.js"> </script>
+<h5>Copyright (C) 2000-2017 ABINIT group (SS,XG)
+<script type="text/javascript" src="../../js_files/copyright.js"> </script>
+</h5> 
 
-<h3><b>Contents of lesson 1 :</b></h3>
+<script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
 
-<!-- begin body -->
+
 <ul>
-  <li><a href="lesson_fold2Bloch.html#1">1.</a> Creating the structure.
-  <li><a href="lesson_fold2Bloch.html#2">2.</a> Plotting the supercell band structure.
-  <li><a href="lesson_fold2Bloch.html#3">3.</a> Running fol2Bloch.
-  <li><a href="lesson_fold2Bloch.html#4">4.</a> Plotting the unfolded band structure using a MatLab script (provided).
+  <li><a href="#1">1.</a> Creating the structure.
+  <li><a href="#2">2.</a> Plotting the supercell band structure.
+  <li><a href="#3">3.</a> Running fol2Bloch.
+  <li><a href="#4">4.</a> Plotting the unfolded band structure using a MatLab script (provided).
 </ul>
 
 <hr>
@@ -57,7 +60,7 @@ In this tutorial we will construct a supercell of 6 hydrogen atoms, perform self
 Our model structure is a cubic lattice of hydrogen atoms spaced 3 Bohr apart. The primitive cell contains only one atom. Here we chose to represent the same structure with a 6 atom supercell. Such a large cell is redundant in this case, since there is nothing that disturbs the original symmetry. However, we made this choice on purpose in order to observe the zone folding.
 </p>
 <center>
-<p><img src="lesson_fold2Bloch/Fig1.PNG" width=auto height="40%" alt=""></p>
+<p><img src="../documents/lesson_fold2Bloch/Fig1.PNG" width=auto height="40%" alt=""></p>
 </center>
 <p align="center">
 Fig. 1: Primitive unit cell (a) and 1x2x3 supercell (b) that represent a cubic lattice of hydrogen atoms.
@@ -66,7 +69,7 @@ Fig. 1: Primitive unit cell (a) and 1x2x3 supercell (b) that represent a cubic l
 Since we are interested in the band structure, we need to select a path in the reciprocal space which will be used for plotting. The supercell was expanded in Y and Z directions. Accordingly, the reciprocal space shrinks along the same directions. We select those directions for the band structure plot as they will be affected by the zone folding.
 </p>
 <center>
-	<p><img src="lesson_fold2Bloch/Fig2.PNG" width=auto height="30%" alt=""></p>
+	<p><img src="../documents/lesson_fold2Bloch/Fig2.PNG" width=auto height="30%" alt=""></p>
 </center>
 <p align="center">
 Fig. 2: Brillouin zone of the supercell.
@@ -198,7 +201,7 @@ This will generate an output file: H6o_DS2_EIG.dat
 </p>
 <p>Lastly, compare the image obtained to the band structure image below.
 <center>
-	<img src="lesson_fold2Bloch/Fig3.PNG" width=auto height="50%" alt="">
+	<img src="../documents/lesson_fold2Bloch/Fig3.PNG" width=auto height="50%" alt="">
 </center>
 <p align='center'> Fig. 3: 6 atom hydrogen supercell band structure plot
 </p>
@@ -221,10 +224,10 @@ Next step is to execute fold2Bloch using the wave function file from the 2nd dat
 <p>You should see the following:</p>
 <pre>
 <p style="padding:6px; color: black; background-color: lightsteelblue">
-           ***********************
+           <b>*******************</b>
            ** Fold2Bloch V 1.0  **
            **Build  Oct 16, 2014**
-           ***********************
+           <b>*******************</b>
          2% Processing K point:    0.000000   -0.500000    0.000000
          4% Processing K point:    0.000000   -0.450000    0.000000
          6% Processing K point:    0.000000   -0.400000    0.000000
@@ -292,7 +295,7 @@ Note: the whole output is much bigger than the sample provided above. For the ba
 <h3><b> 
 4. Plotting unfolded band structure.
 </b></h3>
-Lets visualize the unfolded band structure. It is different from a regular band structure plot, though. Now we have one additional dimension -- the Bloch spectral weight. There are several alternative visualization strategies. Here we use the scatter plot with the point size proportional to the spectral weight. The following MatLab script will help you build a graph for any fold2Bloch output:  <a href="lesson_fold2Bloch/ubs_dots.m" target="helpsimg">ubs_dots.m</a>
+Lets visualize the unfolded band structure. It is different from a regular band structure plot, though. Now we have one additional dimension -- the Bloch spectral weight. There are several alternative visualization strategies. Here we use the scatter plot with the point size proportional to the spectral weight. The following MatLab script will help you build a graph for any fold2Bloch output:  <a href="../lesson_fold2Bloch/ubs_dots.m" target="helpsimg">ubs_dots.m</a>
 </p>
 
 <p>Make sure the following parameters in ubs_dots.m are set as follows: 
@@ -324,24 +327,17 @@ finpt='H6o.f2b';
 
 <p>After running the script you should see the following graph:
 <center>
-<p><img src="lesson_fold2Bloch/H6.PNG" alt=""></p>
+<p><img src="../documents/lesson_fold2Bloch/H6.PNG" alt=""></p>
 </center>
 <p>
 As you can see the unfolded band structure perfectly reproduces the anticipated dispersion relation <I><font size="4">E(k) = E<font size=2>0 </font>- 2A cos(k b)</font></I>. We can even estimate the magnitude of the hopping matrix element between adjacent atoms Vss<font size=1>G</font> = -A. The band width is 4A = (-1) - (-12) = 11 eV which results in Vss<font size=1>G</font> = -2.75 eV.
 </p>
 
 <p>You reached the end of Lesson 1 on how to unfold a simplest band structure. In the next lesson we are going to consider a more practical example of a semiconductor alloy.  
-<!-- end body -->
 
-<h5>Copyright (C) 2005-2017 ABINIT group (SS,XG)
-<br> This file is distributed under the terms of the GNU General Public License, see
-~abinit/COPYING or <a href="http://www.gnu.org/copyleft/gpl.txt">
-http://www.gnu.org/copyleft/gpl.txt </a>.
-<br> For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
-</h5>
-
-<script type="text/javascript" src="list_internal_links.js"> </script>
+<script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
 
 </body>
 </html>
+
 

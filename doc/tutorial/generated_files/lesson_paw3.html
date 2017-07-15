@@ -1,18 +1,16 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
-<html
- lang="en"><head><title>Tutorial PAW3</title>
-<meta http-equiv="CONTENT-TYPE" content="text/html; charset=utf-8"><meta
- name="CREATED" content="20100407;16500000"><meta name="CHANGEDBY"
- content="Martin Stankovski"><meta name="CHANGED" content="20100407;17391100"><style>
-<!--
-@page { size: 8.5in 11in; margin: 0.79in }
-P { margin-bottom: 0.08in }
--->
-</style></head><body style="background-color: rgb(255, 255, 255);">
-<hr><h1>ABINIT tutorial, lesson PAW3:</h1>
-<h2>Testing PAW datasets against an all-electron code</h2>
+<html>
+<head><title>Third lesson on the projector-augmented wave (PAW) technique</title>
+<link rel=stylesheet type="text/css" href="../formabinit.css">
+</head>
+<body bgcolor="#ffffff">
+
 <hr>
-<!-- begin intro -->
+<a name="top"></a>
+
+<h1>ABINIT tutorial. Third lesson on the projector-augmented wave (PAW) technique :</h1>
+
+<h2>Testing PAW datasets against an all-electron code</h2> 
+ <hr>
 <p>This tutorial will demonstrate how to test a generated
 PAW dataset against an all-electron code. We will be comparing results with
 the open <span style="font-weight: bold; font-style: italic;">Elk</span>
@@ -26,20 +24,21 @@ in the PAW case. The tutorial assumes no previous experience with the Elk code, 
 it is strongly advised that the users familiarise themselves a bit with this code
 before attempting to do similar comparisons with their own datasets.<br>
 <br>This lesson should take about 3h-4h. </p>
-<!-- end intro -->
 
-<script type="text/javascript" src="list_internal_links.js"> </script>
+<h5>Copyright (C) 2000-2017 ABINIT group (MS,MT)
+<script type="text/javascript" src="../../js_files/copyright.js"> </script>
+</h5> 
 
-<h3><b>Contents of lesson
-PAW3 :</b></h3>
-<!-- begin body -->
+<script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
+
+
 <ul>
 <li><a href="#1">1.</a> Introduction - the quantities to be compared</li>
-<li><a href="lesson_paw3.html#2">2.</a> Prerequisites, code components and scripts</li>
-<li><a href="lesson_paw3.html#3">3.</a> Carbon (diamond) - a first dataset</li>
-<li><a href="lesson_paw3.html#4">4.</a> Magnesium - issues for metals</li>
-<li><a href="lesson_paw3.html#5">5.</a> PAW datasets for GW calculations</li>
-<li><a href="lesson_paw3.html#6">6.</a> Submitting PAW datasets to the ABINIT database</li>
+<li><a href="#2">2.</a> Prerequisites, code components and scripts</li>
+<li><a href="#3">3.</a> Carbon (diamond) - a first dataset</li>
+<li><a href="#4">4.</a> Magnesium - issues for metals</li>
+<li><a href="#5">5.</a> PAW datasets for GW calculations</li>
+<li><a href="#6">6.</a> Submitting PAW datasets to the ABINIT database</li>
 </ul>
 <hr><a name="1">&#160;</a>
 <h3><b>1. The quantities to be compared</b></h3>
@@ -78,7 +77,7 @@ prerequisites for this tutorial.</p>
 
 <hr><a name="2">&#160;</a>
 <h3><b>2. Prerequisites, code components and scripts</b></h3>
-<p>It is assumed that you are already familiar with the contents and procedures in tutorials <a href="./lesson_paw1.html">PAW1</a> and <a href="./lesson_paw2.html">PAW2</a>, and so have some familiarity with input files for <span style="font-weight: bold; font-style: italic;">atompaw</span>, and the issues in creating PAW datasets. To exactly reproduce the results in this tutorial, you will need:
+<p>It is assumed that you are already familiar with the contents and procedures in tutorials <a href="../lesson_paw1.html">PAW1</a> and <a href="../lesson_paw2.html">PAW2</a>, and so have some familiarity with input files for <span style="font-weight: bold; font-style: italic;">atompaw</span>, and the issues in creating PAW datasets. To exactly reproduce the results in this tutorial, you will need:
 <br>
 <ul><li>The <span style="font-weight: bold; font-style: italic;">atompaw</span> code for 
 generating PAW datasets. This code is bundled as a plugin in abinit, and it is assumed 
@@ -116,7 +115,7 @@ numerical results can be reproduced if necessary.</span></p>
 <h4><b>3.1 Carbon - a simple datatset</b></h4>
 <p>Make a working directory for the atompaw generation (you could call it 
 <span style="font-family: monospace;">C_atompaw</span>) 
-and copy the file: <a href="./lesson_paw3/inputs/C_simple.input">
+and copy the file: <a href="../lesson_paw3/inputs/C_simple.input">
 <span style="font-family: monospace;">C_simple.input</span>
 </a> to it. Then go there and run atompaw by typing (assuming that you have set things 
 up so that you can run atompaw by just typing <span style="font-family: monospace;">atompaw</span>):
@@ -134,12 +133,12 @@ the contents of the directory will be something like:<br />
  C.LDA-PW-paw.abinit     density         fthatpot.2  logderiv.0  potential   wfn1     wfn5
 </pre>
 There is a lot of output, so it is useful to work with a graphical overview. Copy the gnuplot 
-script <a href="./lesson_paw3/scripts/plot_C_all.p"><span style="font-family: monospace;">plot_C_all.p</span></a> to your folder. Open a new terminal window by typing<span style="margin-left: 10px; font-family: monospace;">xterm &</span>, and run gnuplot in the new terminal window. At the gnuplot command prompt type:<br />
+script <a href="../lesson_paw3/scripts/plot_C_all.p"><span style="font-family: monospace;">plot_C_all.p</span></a> to your folder. Open a new terminal window by typing<span style="margin-left: 10px; font-family: monospace;">xterm &</span>, and run gnuplot in the new terminal window. At the gnuplot command prompt type:<br />
 <pre>
 gnuplot&#62 load 'plot_C_all.p'
 </pre>
 You should get a plot that looks like this:</p>
-<p style="margin-top: 0.08in; margin-bottom: 0in; margin-left: 0.103in; text-align: center;"><img style="width: 640px; height: 480px;" alt="Plot of atompaw outputs" src="lesson_paw3/images/plot_C_all_1.png" /> </p>
+<p style="margin-top: 0.08in; margin-bottom: 0in; margin-left: 0.103in; text-align: center;"><img style="width: 640px; height: 480px;" alt="Plot of atompaw outputs" src="../documents/lesson_paw3/images/plot_C_all_1.png" /> </p>
 <p>You can now keep the gnuplot terminal and plot window open as you work, and if 
 you change the atompaw input file and re-run it, you can update the plot by 
 retyping the "load.." command. The gnuplot window plots the essential information from 
@@ -185,8 +184,8 @@ dataset file for abinit has already been generated (it is the
 <span style="font-family: monospace;">C.LDA-PW-paw.abinit</span> file in the current
 directory). Make a new subdirectory for the test in the current directory (you could call it 
 <span style="font-family: monospace;">abinit_test</span> for instance), go there 
-and copy the files: <a href="./lesson_paw3/inputs/ab_C_test.in"><span style="font-family: monospace;">
-ab_C_test.in</span></a> and <a href="./lesson_paw3/inputs/input_C_test.files">
+and copy the files: <a href="../lesson_paw3/inputs/ab_C_test.in"><span style="font-family: monospace;">
+ab_C_test.in</span></a> and <a href="../lesson_paw3/inputs/input_C_test.files">
 <span style="font-family: monospace;">input_C_test.files</span></a> into it. 
 This <span style="font-weight: bold; font-style: italic;">abinit</span> input file 
 contains several datasets which increment the ecut input variable, and perform 
@@ -265,7 +264,7 @@ of projectors per angular momentum channel is low, and <span style="font-weight:
 b)</span> that other parameters apart from ecut dominate convergence beyond this point.
 </p>
 <p> If we turn to the band structure, we can use the script 
-<a href="./lesson_paw3/scripts/comp_bands_abinit2abinit.py">
+<a href="../lesson_paw3/scripts/comp_bands_abinit2abinit.py">
 <span style="font-family: monospace;">comp_bands_abinit2abinit.py</span></a> to check the 
 convergence of the band structure. Copy the script to the directory where the abinit 
 input file is and issue:
@@ -300,7 +299,7 @@ you can plot the two band structures in gnuplot directly, by entering:
  gnuplot&#62 plot 'bands_5Ha_vs_45Ha.dat' u 1:2 w lp title '5 Ha', 'bands_5Ha_vs_45Ha.dat' u 1:3 w lp title '45 Ha'
 </pre>
 This should furnish you with a graph that looks something like this:
-<p style="margin-top: 0.08in; margin-bottom: 0in; margin-left: 0.103in; text-align: center;"><img style="width: 640px; height: 480px;" alt="Comparison of bands 5 vs. 45 Ha" src="lesson_paw3/images/plot_C_band_1.png" /></p>
+<p style="margin-top: 0.08in; margin-bottom: 0in; margin-left: 0.103in; text-align: center;"><img style="width: 640px; height: 480px;" alt="Comparison of bands 5 vs. 45 Ha" src="../documents/lesson_paw3/images/plot_C_band_1.png" /></p>
 Not surprisingly, the band structures are very different. However, a search through
 the datasets of increasing index (i.e. DS22, DS32, DS42, ...) yields that for dataset 
 42, i.e with an <span style="font-family: monospace;">ecut</span> of 20 Ha, we are 
@@ -313,7 +312,7 @@ and plotting this with:
  gnuplot&#62 plot 'bands_20Ha_vs_45Ha.dat' u 1:2 w lp title '5 Ha', 'bands_20Ha_vs_45Ha.dat' u 1:3 w lp title '45 Ha'
 </pre>
 Should give you a plot similar to this:
-<p style="margin-top: 0.08in; margin-bottom: 0in; margin-left: 0.103in; text-align: center;"><img style="width: 640px; height: 480px;" alt="Comparison of bands 20 vs. 45 Ha" src="lesson_paw3/images/plot_C_band_2.png" /></p>
+<p style="margin-top: 0.08in; margin-bottom: 0in; margin-left: 0.103in; text-align: center;"><img style="width: 640px; height: 480px;" alt="Comparison of bands 20 vs. 45 Ha" src="../documents/lesson_paw3/images/plot_C_band_2.png" /></p>
 You can convince yourself by zooming in that the band structures are very similar.
 The statistics at the end of the <span style="font-family: monospace;">bands_20Ha_vs_45Ha.dat
 </span> file shows that we are converged within abinit:
@@ -337,8 +336,8 @@ lattice parameter (and the bulk modulus) and compare this and the band structure
 First, we will need to calculate the total energy of diamond in abinit for a number of 
 lattice parameters around the minimum of the total energy. There are example input 
 and ".files" files for doing this at:
-<a href="./lesson_paw3/inputs/ab_C_equi.in"><span style="font-family: monospace;">ab_C_equi.in</span></a>
-and <a href="./lesson_paw3/inputs/input_C_equi.files"><span style="font-family: monospace;">input_C_equi.files</span></a>. 
+<a href="../lesson_paw3/inputs/ab_C_equi.in"><span style="font-family: monospace;">ab_C_equi.in</span></a>
+and <a href="../lesson_paw3/inputs/input_C_equi.files"><span style="font-family: monospace;">input_C_equi.files</span></a>. 
 The new input file has ten datasets which increment the lattice parameter, 
 <span style="font-family: monospace;">alatt</span>, from 6.1 to 7.0 Bohr in 
 steps of 0.1 Bohr. A look in the input file will tell you that <span style="font-family: monospace;">ecut</span> is set to 25 Hartrees. Copy these to your abinit_test directory and run:
@@ -441,7 +440,7 @@ at equilibrium for this dataset.</p>
 <p>In order to estimate whether these values are good or not, we need independent 
 verification, and this will be provided by the all-electron elk code. There is an 
 elk input file matching our abinit diamond calculation at 
-<a href="./lesson_paw3/inputs/elk_C_diamond.in">
+<a href="../lesson_paw3/inputs/elk_C_diamond.in">
 <span style="font-family: monospace;">elk_C_diamond.in</span></a>.
 You need to copy this file to a directory set up for the elk run (why not call 
 it "C_elk"), and it needs to be renamed to 
@@ -620,7 +619,7 @@ different input blocks in the <span style="font-family: monospace;">elk.in</span
 When the Elk run has finished, there will be a 
 <span style="font-family: monospace;">BAND.OUT</span> file in your run directory.
 We can now do an analogous band structure comparison to before, by using the python 
-script <a href="./lesson_paw3/scripts/comp_bands_abinit2elk.py">
+script <a href="../lesson_paw3/scripts/comp_bands_abinit2elk.py">
 <span style="font-family: monospace;">comp_bands_abinit2elk.py</span></a> (you
 should copy this to your current directory). If your previous abinit calculation 
 is in the subdirectory "<span style="font-family: monospace;">../C_abinit/abinit_test
@@ -648,7 +647,7 @@ and plot it in gnuplot with:
 gnuplot&#62 plot 'bands.dat' u 1:2 w lp title 'ABINIT', 'bands.dat' u 1:3 w lp title 'Elk'
 </pre>
 You should get a graph like this:</p>
-<p style="margin-top: 0.08in; margin-bottom: 0in; margin-left: 0.103in; text-align: center;"><img style="width: 640px; height: 480px;" alt="Comparison of abinit and elk bands without shift" src="lesson_paw3/images/band_abinit_elk_I.png" /></p>
+<p style="margin-top: 0.08in; margin-bottom: 0in; margin-left: 0.103in; text-align: center;"><img style="width: 640px; height: 480px;" alt="Comparison of abinit and elk bands without shift" src="../documents/lesson_paw3/images/band_abinit_elk_I.png" /></p>
 <p>As you can see, the band structures look alike but differ by an absolute shift, 
 which is normal, because in a periodic system there is no unique vacuum energy, 
 and band energies are always defined up to an arbitrary constant shift. This shift 
@@ -693,7 +692,7 @@ occupied states, and about 0.05 eV difference for unoccupied states. If you plot
 the ouput as before, by piping the above to a 
 <span style="font-family: monospace;">bands.dat</span>
 file and executing the same gnuplot command, you should get the plot below.</p>
-<p style="margin-top: 0.08in; margin-bottom: 0in; margin-left: 0.103in; text-align: center;"><img style="width: 640px; height: 480px;" alt="Comparison of abinit and elk bands with shift" src="lesson_paw3/images/band_abinit_elk_II.png" /></p>
+<p style="margin-top: 0.08in; margin-bottom: 0in; margin-left: 0.103in; text-align: center;"><img style="width: 640px; height: 480px;" alt="Comparison of abinit and elk bands with shift" src="../documents/lesson_paw3/images/band_abinit_elk_II.png" /></p>
 <p>On the scale of the band plot there is a small - but visible - difference 
 between the two. Note that the deviations are usually larger away from the 
 high-symmetry points, which is why it's important to choose some points away 
@@ -802,7 +801,7 @@ be about an order of magnitude better, so let us see if we can make it so.
 <h4><b>3.4 Carbon - improving the dataset</b></h4>
 <p>Now that you know the target values, is up to you to experiment and see 
 if you can improve this dataset. The techniques are well documented in 
-tutorial <a href="./lesson_paw2.html">PAW2</a>. Here's a brief 
+tutorial <a href="../lesson_paw2.html">PAW2</a>. Here's a brief 
 summary of main points to be concerned about:</p>
 <br>
 <ul><li>Use the keyword series "<span style="font-family: monospace;">custom 
@@ -856,10 +855,10 @@ old input file if you want, or make a new directory for this study). You might
 want to try and modify the gnuplot scripts so that they work correctly for this 
 dataset. (The "<span style="font-family: monospace;">wfn*</span>" files are 
 ordered just like the core radius list at the end, so now their meaning and the numbering of some other files have changed.) There is an example of the modifications in the plot 
-script <a href="./lesson_paw3/scripts/plot_C_all_II.p">
+script <a href="../lesson_paw3/scripts/plot_C_all_II.p">
 <span style="font-family: monospace;">plot_C_all_II.p</span></a>, which you can 
 download and run in gnuplot. You should get a plot like this:</p>
-<p style="margin-top: 0.08in; margin-bottom: 0in; margin-left: 0.103in; text-align: center;"><img style="width: 640px; height: 480px;" alt="Plot info for second Carbon dataset" src="lesson_paw3/images/plot_C_all_II.png" /></p>
+<p style="margin-top: 0.08in; margin-bottom: 0in; margin-left: 0.103in; text-align: center;"><img style="width: 640px; height: 480px;" alt="Plot info for second Carbon dataset" src="../documents/lesson_paw3/images/plot_C_all_II.png" /></p>
 <p>
 Note the much better fit of the logarithmic derivatives, and the change in the shape 
 of the projector functions (in blue in the wfn plots), due to the more complicated 
@@ -993,7 +992,7 @@ the elk and the abinit calculation.
 <hr><a name="4.1">&#160;</a>
 <h4><b>4.1 Magnesium - The all-electron calculation</b></h4>
 <p>
-There is an elk input file prepared at: <a href="./lesson_paw3/inputs/elk_Mg_band.in">
+There is an elk input file prepared at: <a href="../lesson_paw3/inputs/elk_Mg_band.in">
 <span style="font-family: monospace;">elk_Mg_band.in
 </span></a>, we suggest you copy it into a subdirectory dedicated to the Mg elk 
 calculation (why not "Mg_elk"?), rename it to "elk.in"  and take a look inside 
@@ -1061,7 +1060,7 @@ we compare band structures to align the band plots at the Fermi energy.
 </p>
 <p>
 Now it's time to calculate the equilibrium lattice parameters. There is a 
-prepared file at: <a href="./lesson_paw3/inputs/elk_Mg_equi.in">
+prepared file at: <a href="../lesson_paw3/inputs/elk_Mg_equi.in">
 <span style="font-family: monospace;">elk_Mg_equi.in
 </span></a>. As before copy this to your directory rename it to 
 "<span style="font-family: monospace;">elk.in</span>". The layout of this 
@@ -1208,13 +1207,13 @@ it to get a feel for the quality of this dataset.
 Generate the abinit dataset file, and make sure it's given as: 
 "<span style="font-family: monospace;">./Mg_atompaw/Mg_LDA.pawps</span>", then go to
 the subdirectory for the abinit test, and copy these files to it: 
-<a href="./lesson_paw3/inputs/ab_Mg_test.in">
+<a href="../lesson_paw3/inputs/ab_Mg_test.in">
 <span style="font-family: monospace;">ab_Mg_test.in</span></a>, 
-<a href="./lesson_paw3/inputs/input_Mg_test.files">
+<a href="../lesson_paw3/inputs/input_Mg_test.files">
 <span style="font-family: monospace;">input_Mg_test.files</span></a>, 
-<a href="./lesson_paw3/inputs/ab_Mg_equi.in">
+<a href="../lesson_paw3/inputs/ab_Mg_equi.in">
 <span style="font-family: monospace;">ab_Mg_equi.in</span></a> and  
-<a href="./lesson_paw3/inputs/input_Mg_equi.files">
+<a href="../lesson_paw3/inputs/input_Mg_equi.files">
 <span style="font-family: monospace;">input_Mg_equi.files</span></a>. 
 The file for testing the convergence has already been set up so that the smearing 
 strategy is equivalent to the elk one, as evidenced by the lines:
@@ -1287,7 +1286,7 @@ gnuplot and issue these commands:
 </pre>
 You should get a plot that looks something like this:
 </p>
-<p style="margin-top: 0.08in; margin-bottom: 0in; margin-left: 0.103in; text-align: center;"><img style="width: 640px; height: 480px;" alt="Comparison of Mg (metallic) abinit and elk bands alignet at Fermi level" src="lesson_paw3/images/band_abinit_elk_III.png" /></p>
+<p style="margin-top: 0.08in; margin-bottom: 0in; margin-left: 0.103in; text-align: center;"><img style="width: 640px; height: 480px;" alt="Comparison of Mg (metallic) abinit and elk bands alignet at Fermi level" src="../documents/lesson_paw3/images/band_abinit_elk_III.png" /></p>
 <p>
 As we can see, the bands should fit quite well. Finally, for the structural, 
 a run of the "<span style="font-family: monospace;">ab_Mg_equi.in</span>" file gives us
@@ -1346,7 +1345,7 @@ projectors per angular momentum channel.
 state, if not more.</li>
 <li>A particularly sensitive thing is the quality of the expansion of the pseudised 
 plane-wave part in terms of the on-site basis. This can be checked by using the density 
-of states (DOS), as described in the first PAW <a href="lesson_paw1.html#5">tutorial</a>.</li>
+of states (DOS), as described in the first PAW <a href="../lesson_paw1.html#5">tutorial</a>.</li>
 </ul>
 </br>
 
@@ -1354,17 +1353,10 @@ of states (DOS), as described in the first PAW <a href="lesson_paw1.html#5">tuto
 <h3><b>6. Submitting your datasets to the ABINIT database</b></h3>
 
 <p><span style="font-weight: bold; font-style: italic;"><span style="color: red">TODO:</span> Comments/Discussion with Marc Torrent and Alain Jacques</span></p>
-<!-- end body -->
 
-<h5>Copyright (C) 2005-2017 ABINIT group (MT)
-<br>This file is distributed under the terms of the GNU General
-Public
-License, see
-~abinit/COPYING or <a href="http://www.gnu.org/copyleft/gpl.txt">
-http://www.gnu.org/copyleft/gpl.txt </a>.
-<br>For the initials of contributors, see
-~abinit/doc/developers/contributors.txt .
-</h5>
-<script type="text/javascript" src="list_internal_links.js"> </script>
+<script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
 
-</body></html>
+</body>
+</html>
+
+

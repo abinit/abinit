@@ -1,32 +1,20 @@
 <html>
-<head>
-<title>Tutorial : Calculation of effective interactions U and J using constrained Random Phase Approximation (cRPA) for DFT+DMFT calculations</title>
-<style type="text/css">
-pre
-{
-font-family:courier, "courier new", monospace;
-font-size:1em;
-color:rgb(25,25,25);
-background-color:#fff;
-}
-</style>
-<style>
-table  {
-    border: 0.3px solid black;
-}
-</style>
+<head><title>Calculation of U and J using cRPA</title>
+<link rel=stylesheet type="text/css" href="../formabinit.css">
 </head>
 <body bgcolor="#ffffff">
-<hr>
-<h1>ABINIT tutorial, lesson on calculation of <i>U</i> and <i>J</i> with constrained Random Phase Approximation (cRPA) :</h1>
-<h2> the case of SrVO<SUB>3</SUB> </h2>
-<hr>
 
-<!-- begin intro -->
+<hr>
+<a name="top"></a>
+
+<h1>ABINIT tutorial. Calculation of U and J using cRPA :</h1>
+
+<h2>Using the constrained RPA to compute the U and J in the case of SrVO<sub>3</sub>.</h2> 
+ <hr>
 <p>This lesson aims at showing how to perform
 a calculation of <i>U</i> and <i>J</i> in Abinit using cRPA.
 This method is well adapted in particular to determine <i>U</i> and <i>J</i>  as they can be used in DFT+DMFT.
-The paper describing the implementation is <a href="lesson_ucalc_crpa.html#Amadon2014">[Amadon2014]</a>.
+The paper describing the implementation is <a href="#Amadon2014">[Amadon2014]</a>.
 </p>
 
 </p>
@@ -34,31 +22,26 @@ The paper describing the implementation is <a href="lesson_ucalc_crpa.html#Amado
 <p>It might be useful that you already know how to
 do PAW calculations using ABINIT but it is not mandatory  (you can follow the two lessons
 on PAW in ABINIT
-(<a href="lesson_paw1.html">PAW1</a>,
-<a href="lesson_paw2.html">PAW2</a>)).
+(<a href="../lesson_paw1.html">PAW1</a>,
+<a href="../lesson_paw2.html">PAW2</a>)).
 The DFT+U tutorial in ABINIT
-(<a href="lesson_ldau.html">DFT+U</a>) might be useful to know some basic variables
+(<a href="../lesson_ldau.html">DFT+U</a>) might be useful to know some basic variables
 about correlated orbitals.</p>
 The first GW tutorial in ABINIT
-(<a href="lesson_gw1.html">GW</a>) is useful to learn how
+(<a href="../lesson_gw1.html">GW</a>) is useful to learn how
 to compute the screening, and how to converge the relevant parameters
 (energy cutoffs and number of bands for the polarizability). </p>
 
 <p>This lesson should take two hours to
 complete (you should have access to more than 8 processors).</p>
-<!-- end intro -->
 
-<h5>Copyright (C) 2008-2017 ABINIT group (BAmadon)
-<br> This file is distributed under the terms of the GNU General Public License, see
-~abinit/COPYING or <a href="http://www.gnu.org/copyleft/gpl.txt">
-http://www.gnu.org/copyleft/gpl.txt </a>.
-<br> For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
-</h5>
+<h5>Copyright (C) 2000-2017 ABINIT group (BAmadon)
+<script type="text/javascript" src="../../js_files/copyright.js"> </script>
+</h5> 
 
-<script type="text/javascript" src="list_internal_links.js"> </script>
+<script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
 
-<h3><b>Content of the cRPA lesson</b></h3>
-<!-- begin body -->
+
 <ul>
   <li><a href="#1">1.</a> The cRPA method: summary and key parameters.
   <li><a href="#2">2.</a> Electronic structure calculation of SrVO<SUB>3</SUB> in LDA.
@@ -80,19 +63,19 @@ cRPA relies on the fact that screening processes can be decomposed
 in two steps: Firstly, the bare Coulomb interaction is screened by
 non correlated electrons to produce the effective interaction <i>W<SUB>r</SUB></i>. Secondly,
 correlated electrons screened this interaction to produce the fully screening interaction <i>W</i>.
-(see <a href="lesson_ucalc_crpa.html#Aryasetiawan2004">[Aryasetiawan2004]</a>). However, the second screening process
+(see <a href="#Aryasetiawan2004">[Aryasetiawan2004]</a>). However, the second screening process
 is taken into account when one uses a method which describes accurately the interaction among
 correlated electrons (such as Quantum Monte Carlo within the DFT+DMFT method). So, to avoid
 a double counting of screening by correlated electrons, the DFT+DMFT methods needs as an input
 the effective interaction <i>W<SUB>r</SUB></i>.
 The goal of this tutorial is to present the implementation
 of this method using Projected Local Orbitals Wannier orbitals in ABINIT (The implementation of cRPA in ABINIT is described in 
-<a href="lesson_ucalc_crpa.html#Amadon2014">[Amadon2014]</a> and projected local orbitals Wannier functions 
-are presented in <a href="lesson_ucalc_crpa.html#Amadon2008">[Amadon2008]</a> ). 
+<a href="#Amadon2014">[Amadon2014]</a> and projected local orbitals Wannier functions 
+are presented in <a href="#Amadon2008">[Amadon2008]</a> ). 
  The discussion about
 the localization of Wannier orbitals has some similarities with the beginning
-on the DMFT tutorial (see <a href="lesson_dmft.html#1">here</a>
-and <a href="lesson_dmft.html#2">there</a>)
+on the DMFT tutorial (see <a href="../lesson_dmft.html#1">here</a>
+and <a href="../lesson_dmft.html#2">there</a>)
 </p>
 
 <p> Several parameters (both physical and technical) are important for the cRPA calculation:
@@ -103,60 +86,60 @@ and <a href="lesson_dmft.html#2">there</a>)
 The first part of the tutorial is similar to the DMFT tutorial and explains the electronic structure
 of SrVO<SUB>3</SUB> and will be used to understand the definition of Wannier orbitals with various extensions.
 Wannier functions are unitarily related to a selected set of Kohn Sham (KS) wavefunctions, specified in ABINIT by band index 
-<a href="../input_variables/html_automatically_generated/vardmft.html#dmftbandi" target="dmftbandi">dmftbandi</a>, and
-<a href="../input_variables/html_automatically_generated/vardmft.html#dmftbandf" target="dmftbandf">dmftbandf</a>.
+<a href="../../input_variables/generated_files/vardmft.html#dmftbandi" target="dmftbandi">dmftbandi</a>, and
+<a href="../../input_variables/generated_files/vardmft.html#dmftbandf" target="dmftbandf">dmftbandf</a>.
 	Thus, as empty bands are necessary to build Wannier functions, it is required in DMFT or cRPA calculations
 	that the KS Hamiltonian is correctly diagonalized: use high values for  
-<a href="../input_variables/html_automatically_generated/vardev.html#nnsclo" target="nnsclo">nnsclo</a>, 
+<a href="../../input_variables/generated_files/vardev.html#nnsclo" target="nnsclo">nnsclo</a>, 
 	and 
-<a href="../input_variables/html_automatically_generated/vargs.html#nline" target="nline">nline</a> for cRPA and DMFT calculations and preceding DFT calculations.
+<a href="../../input_variables/generated_files/vargs.html#nline" target="nline">nline</a> for cRPA and DMFT calculations and preceding DFT calculations.
 Another solution used in the present tutorial is to use a specific non self-consistent calculation to diagonalize the hamiltonian, as in GW calculations.
 Concerning the localization or correlated orbitals, 
 generally, the larger dmftbandf-dmftbandi is, the more localized is the radial part of the Wannier orbital.
 Finally, note that Wannier orbitals are used in DMFT and cRPA implementations but this
 is not the most usual choice of correlated orbitals in
 the DFT+U implementation in particular in ABINIT
-(see Ref. <a href="lesson_ucalc_crpa.html#Amadon2008a">[Amadon2008a]</a>).
+(see Ref. <a href="#Amadon2008a">[Amadon2008a]</a>).
 The relation between the two expressions is briefly discussed in
-Ref. <a href="lesson_ucalc_crpa.html#Geneste2016">[Geneste2016]</a>.
+Ref. <a href="#Geneste2016">[Geneste2016]</a>.
 
 
 <LI> <B> The constrained polarization calculation.</B> As we will discuss in
-section <a href="lesson_ucalc_crpa.html#2"> 2</a>, there are different ways
+section <a href="#2"> 2</a>, there are different ways
 to define the constrained polarizability, by suppressing in the polarization, some
 electronic transitions:
-As discussed in section I of <a href="lesson_ucalc_crpa.html#Amadon2014">[Amadon2014]</a>, one
+As discussed in section I of <a href="#Amadon2014">[Amadon2014]</a>, one
 can either suppress electronic transition inside a given subset of Kohn-Sham bands.
 In this case, one can use
-<a href="../input_variables/html_automatically_generated/vargw.html#ucrpa" target="ucrpa">ucrpa</a>=1,
+<a href="../../input_variables/generated_files/vargw.html#ucrpa" target="ucrpa">ucrpa</a>=1,
 and choose the first and last bands defining the subset of bands
 by using variable
-<a href="../input_variables/html_automatically_generated/vargw.html#ucrpa_bands" target="ucrpa_bands">ucrpa_bands</a>.
+<a href="../../input_variables/generated_files/vargw.html#ucrpa_bands" target="ucrpa_bands">ucrpa_bands</a>.
 One can also use an energy windows instead of a number of bands by using
-<a href="../input_variables/html_automatically_generated/vargw.html#ucrpa_window" target="ucrpa_window">ucrpa_window</a>.
+<a href="../../input_variables/generated_files/vargw.html#ucrpa_window" target="ucrpa_window">ucrpa_window</a>.
 
 
 Another solution is to use
 a weighting scheme which lowers the contribution of a given transition, as a function
 of the weight of correlated orbitals on the bands involved in the transition
-(see Eq. (5) and (7) in Ref.  <a href="lesson_ucalc_crpa.html#Amadon2014">[Amadon2014]</a> ).
+(see Eq. (5) and (7) in Ref.  <a href="#Amadon2014">[Amadon2014]</a> ).
 In this case, on still use the variable
-<a href="../input_variables/html_automatically_generated/vargw.html#ucrpa_bands" target="ucrpa_bands">ucrpa_bands</a>.
+<a href="../../input_variables/generated_files/vargw.html#ucrpa_bands" target="ucrpa_bands">ucrpa_bands</a>.
 The variable will in this case be used to define Projected Local Orbitals Wannier functions
 that will then be used to define
 the weighting function in the polarizability.
-(see Eq. (5) and (7) in Ref.  <a href="lesson_ucalc_crpa.html#Amadon2014">[Amadon2014]</a>).
+(see Eq. (5) and (7) in Ref.  <a href="#Amadon2014">[Amadon2014]</a>).
 
 <LI> <B> Convergence parameters </B> are the same as for a polarizability calculation for the screening calculation
-(<a href="../input_variables/html_automatically_generated/vargw.html#ecuteps" target="ecuteps">ecuteps</a>,
-<a href="../input_variables/html_automatically_generated/vargw.html#ecutwfn" target="ecutwfn">ecutwfn</a>,
-<a href="../input_variables/html_automatically_generated/varbas.html#nband" target="nband">nband</a>)
+(<a href="../../input_variables/generated_files/vargw.html#ecuteps" target="ecuteps">ecuteps</a>,
+<a href="../../input_variables/generated_files/vargw.html#ecutwfn" target="ecutwfn">ecutwfn</a>,
+<a href="../../input_variables/generated_files/varbas.html#nband" target="nband">nband</a>)
 and the same as for the exchange part of GW for the effective interaction, ie
-<a href="../input_variables/html_automatically_generated/vargw.html#ecutsigx" target="ecutsigx">ecutsigx</a>,
-<a href="../input_variables/html_automatically_generated/vargw.html#ecutwfn" target="ecutwfn">ecutwfn</a>.
-It is recommended, as discussed in appendix A of <a href="lesson_ucalc_crpa.html#Amadon2014">[Amadon2014]</a>,
-to use <a href="../input_variables/html_automatically_generated/varpaw.html#pawoptosc" target="pawoptosc">pawoptosc</a>=1.
-If the calculation is carried out with several atoms, use <a href="../input_variables/html_automatically_generated/varbas.html#nsym" target="nsym">nsym</a>=1, the calculation is not symmetrized over atoms
+<a href="../../input_variables/generated_files/vargw.html#ecutsigx" target="ecutsigx">ecutsigx</a>,
+<a href="../../input_variables/generated_files/vargw.html#ecutwfn" target="ecutwfn">ecutwfn</a>.
+It is recommended, as discussed in appendix A of <a href="#Amadon2014">[Amadon2014]</a>,
+to use <a href="../../input_variables/generated_files/varpaw.html#pawoptosc" target="pawoptosc">pawoptosc</a>=1.
+If the calculation is carried out with several atoms, use <a href="../../input_variables/generated_files/varbas.html#nsym" target="nsym">nsym</a>=1, the calculation is not symmetrized over atoms
 in this case.
 
 </UL>
@@ -178,7 +161,7 @@ abinit < tucrpa_1.files > log_1
 <p>This run should take some time. It is recommended that you use at least 10 processors (and 32 should be fast).
 It calculates the LDA ground state of SrVO<SUB>3</SUB> and compute the band structure in a second step.
 The variable 
-<a href="../input_variables/html_automatically_generated/varpaw.html#pawfatbnd" target="pawfatbnd">pawfatbnd</a>
+<a href="../../input_variables/generated_files/varpaw.html#pawfatbnd" target="pawfatbnd">pawfatbnd</a>
 allows to create files with "fatbands" (see description of the variable
 in the list of variables): the width of the line along each k-point path and for each band is proportional to the contribution
 of a given atomic orbital on this particular Kohn Sham Wavefunction.
@@ -187,30 +170,30 @@ A low cutoff and a small number of k-points are used in order to speed up the
 calculation.
 During this time you can take a look at the input file. There are two datasets. The first one is a ground
 state calculations with 
-<a href="../input_variables/html_automatically_generated/vardev.html#nnsclo" target="nnsclo">nnsclo</a>=3 and
-<a href="../input_variables/html_automatically_generated/vargs.html#nline" target="nline">nline</a>=3 in order
+<a href="../../input_variables/generated_files/vardev.html#nnsclo" target="nnsclo">nnsclo</a>=3 and
+<a href="../../input_variables/generated_files/vargs.html#nline" target="nline">nline</a>=3 in order
 to have well diagonalized eigenfunctions even for empty states. In practice, you have however to check
 that the residue of wavefunctions is small at the end of the calculation. In this calculation, we find 1.E-06,
 which is large (1.E-10 would be better, so 
-<a href="../input_variables/html_automatically_generated/vargs.html#nline" target="nline">nline</a>  and
-<a href="../input_variables/html_automatically_generated/vardev.html#nnsclo" target="nnsclo">nnsclo</a> 
+<a href="../../input_variables/generated_files/vargs.html#nline" target="nline">nline</a>  and
+<a href="../../input_variables/generated_files/vardev.html#nnsclo" target="nnsclo">nnsclo</a> 
 should be increased, but it would take more time).
 
 When the calculation is finished, you can plot the fatbands for Vanadium and l=2 with <pre>
 xmgrace tucrpa_O_DS2_FATBANDS_at0001_V_is1_l0002
 </pre> 
 The band structure is given in eV.
-<p align="center"> <img style="width: 634px" alt="FatbandV" src="lesson_ucalc_crpa/fatbandsV.jpeg">
+<p align="center"> <img style="width: 634px" alt="FatbandV" src="../documents/lesson_ucalc_crpa/fatbandsV.jpeg">
 </p>
 <p>and the fatbands for one oxygen atom and l=1 with  <pre> 
 xmgrace tucrpa_O_DS2_FATBANDS_at0003_O_is1_l0001.
 </pre> 
 <p align="center">
-<img style="width: 634px" alt="FatbandV" src="lesson_ucalc_crpa/fatbandsO.jpeg">
+<img style="width: 634px" alt="FatbandV" src="../documents/lesson_ucalc_crpa/fatbandsO.jpeg">
 </p>
 
 In these plots, you recover the band structure of SrVO<SUB>3</SUB> (see for comparison 
-the band structure of Fig.3 of <a href="lesson_ucalc_crpa.html#Amadon2008">[Amadon2008]</a>), and the main character of the bands.
+the band structure of Fig.3 of <a href="#Amadon2008">[Amadon2008]</a>), and the main character of the bands.
 Bands 21 to 25 are mainly <i>d</i> and bands 12 to 20 are  mainly
 oxygen <i>p</i>. However, we clearly see an important hybridization.
 The Fermi level (at 0 eV) is in the middle of bands 21-23.
@@ -237,9 +220,9 @@ for these orbitals.
 Definition of screening and orbitals, input and log file  </b></h3>
 
 <h4><a name="3.1">3.1.  The constrained polarization calculation. </h4>
-As discussed briefly in Appendix A of <a href="lesson_ucalc_crpa.html#Amadon2014">[Amadon2014]</a>
-as well as in section III B <a href="lesson_ucalc_crpa.html#Vaugier2012">[Vaugier2012]</a> and Section II B of
-<a href="lesson_ucalc_crpa.html#Sakuma2013">[Sakuma2013]</a>,  one
+As discussed briefly in Appendix A of <a href="#Amadon2014">[Amadon2014]</a>
+as well as in section III B <a href="#Vaugier2012">[Vaugier2012]</a> and Section II B of
+<a href="#Sakuma2013">[Sakuma2013]</a>,  one
 can use different schemes for the cRPA calculations. Let us discuss these different models namely the (<i>d-d</i>), (<i>dp-dp</i>), (<i>d-dp</i>(a)), and (<i>d-dp</i>(b)) models. In the notation (A-B), A and B refers respectively to some bands of A-like and B-like character.
 Moreover, A refers to the definition of screening and B refers to the definition of correlated orbitals. 
 To clarify this definition, we give below some examples:
@@ -248,8 +231,8 @@ To clarify this definition, we give below some examples:
 <i>t<SUB>2g</SUB></i>-like bands (bands 21, 22 and 23). The screening inside these bands is not taken into account to built
 the constrained polarizability.
 Note that if this case (and in the (<i>d-d</i>) and (<i>dp-dp</i>) models), using ucrpa=1 or 2 give the same results,
-provided one uses ucrpa_bands equal to (<a href="../input_variables/html_automatically_generated/vardmft.html#dmftbandi" target="dmftbandi">dmftbandi</a> 
-<a href="../input_variables/html_automatically_generated/vardmft.html#dmftbandf" target="dmftbandf">dmftbandf</a> ).
+provided one uses ucrpa_bands equal to (<a href="../../input_variables/generated_files/vardmft.html#dmftbandi" target="dmftbandi">dmftbandi</a> 
+<a href="../../input_variables/generated_files/vardmft.html#dmftbandf" target="dmftbandf">dmftbandf</a> ).
 <li> <span style="color:rgb(200, 100, 000); font-style: italic">(<i>d-d</i>) model (or d model) </span>: The correlated orbitals are defined with only
 <i>d</i>-like bands (bands 21 to 25). The screening inside these bands is not taken into account.
 <li> <span style="color:rgb(200, 100, 000); font-style: italic">(<i>dp-dp</i>) model (or dp model)</span>: The correlated orbitals are defined with only
@@ -257,24 +240,24 @@ provided one uses ucrpa_bands equal to (<a href="../input_variables/html_automat
 <li> <span style="color:rgb(200, 100, 000); font-style: italic">(<i>d-dp</i>(a)) model</span>: 
 In this scheme the Wannier orbitals are constructed as in the (<i>dp-dp</i>) model. However,
 in this scheme, one only supresses the screening inside <i>d</i>-like bands 
-(<a href="../input_variables/html_automatically_generated/vargw.html#ucrpa" target="ucrpa">ucrpa</a>=1).
+(<a href="../../input_variables/generated_files/vargw.html#ucrpa" target="ucrpa">ucrpa</a>=1).
 It is coherent with the fact that the DMFT will
 only be applied to the d orbitals: so the screening for Op-like bands need to be taken into account.
-<li> <span style="color:rgb(200, 100, 000); font-style: italic">(<i>d-dp</i>(b)) model</span>: It is the same model as the (<i>d-dp</i>(a)), nevertheless, in this case, only the weighting scheme is used (<a href="../input_variables/html_automatically_generated/vargw.html#ucrpa" target="ucrpa">ucrpa</a>=2 in ABINIT).
+<li> <span style="color:rgb(200, 100, 000); font-style: italic">(<i>d-dp</i>(b)) model</span>: It is the same model as the (<i>d-dp</i>(a)), nevertheless, in this case, only the weighting scheme is used (<a href="../../input_variables/generated_files/vargw.html#ucrpa" target="ucrpa">ucrpa</a>=2 in ABINIT).
 </ul>
 
 Which way of computing interactions is the most relevant depends on
 the way the interactions will be used. Some aspects of it are discussed in Ref.
- <a href="lesson_ucalc_crpa.html#Vaugier2012">[Vaugier2012]</a>.
+ <a href="#Vaugier2012">[Vaugier2012]</a>.
 Also, for Mott insulators, and if self-consistency over interactions is carried out, the choice
-of models is discussed in  <a href="lesson_ucalc_crpa.html#Amadon2014">[Amadon2014]</a>.
+of models is discussed in  <a href="#Amadon2014">[Amadon2014]</a>.
 
 
 <h4>3.2. The input file for cRPA calculation: correlated orbitals, Wannier functions </h4>
 <p> In this section, we will present the input variables and discuss how to extract useful information in the log file
 in the case of the <i>d-d</i> model.
 The input file for a typical cRPA calculation (tucrpa_1.in) contains four datasets (as usual GW calculations,
-see the <a href="lesson_gw1.html#1a">GW tutorial</a>):
+see the <a href="../lesson_gw1.html#1a">GW tutorial</a>):
 the first one is a well converged LDA calculation,  the second is non self-consistent calculation to
 compute accurately full and empty states, the third computes the constrained non interacting polarizability,
 and the fourth computes effective interaction parameters <i>U</i> and <i>J</i>.
@@ -293,8 +276,8 @@ abinit < tucrpa_2.files > log_2
 <h5>3.2.1. The first DATASET: A converged LDA calculation  </h5>
 
 The first dataset is a simple calculation of the density using LDA using 50 bands.
-We do not use symmetry in this calculation, so <a href="../input_variables/html_automatically_generated/varbas.html#nsym" target="nsym">nsym</a>=1.
-If symmetry is used (<a href="../input_variables/html_automatically_generated/varbas.html#nsym" target="nsym">nsym</a>=0), then the calculation of <i>U</i> and <i>J</i> will
+We do not use symmetry in this calculation, so <a href="../../input_variables/generated_files/varbas.html#nsym" target="nsym">nsym</a>=1.
+If symmetry is used (<a href="../../input_variables/generated_files/varbas.html#nsym" target="nsym">nsym</a>=0), then the calculation of <i>U</i> and <i>J</i> will
 be valid, but the full interaction matrix described in
 section 3.2.4 will not be correct. 
 
@@ -311,19 +294,19 @@ relevant to this dataset.
 Kohn Sham eigenstates are precisely determined , including
 the empty states. Indeed these empty states are necessary both to build Wannier functions and to compute the 
 polarizability.  For this reason we choose a very low value of
-<a href="../input_variables/html_automatically_generated/varbas.html#tolwfr" target="tolwfr">tolwfr</a>  
+<a href="../../input_variables/generated_files/varbas.html#tolwfr" target="tolwfr">tolwfr</a>  
 in the input file tucrpa_1.in.
 
 <li> <span style="color: #101010; font-style: italic; font-weight: 500"> Wannier functions </span>: Once the calculation is converged, we compute Wannier functions, as in a DFT+DMFT calculation. To
 do this, we only precise that we are using the DFT+DMFT implementation (usedmft=0), but only with the Wannier keywords 
-(<a href="../input_variables/html_automatically_generated/vardmft.html#dmftbandi" target="dmftbandi">dmftbandi</a> 
-and <a href="../input_variables/html_automatically_generated/vardmft.html#dmftbandf" target="dmftbandf">dmftbandf</a>). 
+(<a href="../../input_variables/generated_files/vardmft.html#dmftbandi" target="dmftbandi">dmftbandi</a> 
+and <a href="../../input_variables/generated_files/vardmft.html#dmftbandf" target="dmftbandf">dmftbandf</a>). 
 We emphasize that with respect to the discussion on models on section <a href="#3.1">3.1</a>, 
-<a href="../input_variables/html_automatically_generated/vardmft.html#dmftbandi" target="dmftbandi">dmftbandi</a> 
-and <a href="../input_variables/html_automatically_generated/vardmft.html#dmftbandf" target="dmftbandf">dmftbandf</a>  are used to define the so called A bands. We will see in dataset 2 how B bands are defined.
+<a href="../../input_variables/generated_files/vardmft.html#dmftbandi" target="dmftbandi">dmftbandi</a> 
+and <a href="../../input_variables/generated_files/vardmft.html#dmftbandf" target="dmftbandf">dmftbandf</a>  are used to define the so called A bands. We will see in dataset 2 how B bands are defined.
 In our case, as we are in the  <i>d-d</i> model, we choose only the <i>d</i>-like bands as a starting point 
-and <a href="../input_variables/html_automatically_generated/vardmft.html#dmftbandi" target="dmftbandi">dmftbandi</a>  
-and <a href="../input_variables/html_automatically_generated/vardmft.html#dmftbandf" target="dmftbandf">dmftbandf</a>  are thus equal to the first and last  <i>d</i>-like bands, namely 21 and 25.
+and <a href="../../input_variables/generated_files/vardmft.html#dmftbandi" target="dmftbandi">dmftbandi</a>  
+and <a href="../../input_variables/generated_files/vardmft.html#dmftbandf" target="dmftbandf">dmftbandf</a>  are thus equal to the first and last  <i>d</i>-like bands, namely 21 and 25.
 </ul>
 <!--
 <div style="background: #ffffff; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;">
@@ -353,21 +336,21 @@ We add some comments here on three most important topics
 <ul> 
 <li> <span style="color: #101010; font-style: italic; font-weight: 500">Definition of constrained polarizability</span>: 
 As in the discussion on models on section <a href="#3.1">3.1</a>,  the constrained polarizability is defined
-thanks to B-like bands. The keywords related to this definition is <a href="../input_variables/html_automatically_generated/vargw.html#ucrpa_bands" target="ucrpa_bands">ucrpa_bands</a>. According
-to the value of ucrpa, <a href="../input_variables/html_automatically_generated/vargw.html#ucrpa_bands" target="ucrpa_bands">ucrpa_bands</a> defined the bands for which the transitions are neglected, or (if ucrpa=2), it
+thanks to B-like bands. The keywords related to this definition is <a href="../../input_variables/generated_files/vargw.html#ucrpa_bands" target="ucrpa_bands">ucrpa_bands</a>. According
+to the value of ucrpa, <a href="../../input_variables/generated_files/vargw.html#ucrpa_bands" target="ucrpa_bands">ucrpa_bands</a> defined the bands for which the transitions are neglected, or (if ucrpa=2), it
 defined Wannier functions that are used in the weighting scheme (see Eq. (5) and (7) of section II of 
-<a href="lesson_ucalc_crpa.html#Amadon2014">[Amadon2014]</a> ). Alternatively
-and only if ucrpa=1, an energy windows can be defined (with variable <a href="../input_variables/html_automatically_generated/vargw.html#ucrpa_window" target="ucrpa_window">ucrpa_window</a>) to exclude the transition.
+<a href="#Amadon2014">[Amadon2014]</a> ). Alternatively
+and only if ucrpa=1, an energy windows can be defined (with variable <a href="../../input_variables/generated_files/vargw.html#ucrpa_window" target="ucrpa_window">ucrpa_window</a>) to exclude the transition.
 In our case, as we are in the  <i>d-d</i> model, we neglect transitions
-inside the <i>d</i>-like bands, so we choose <a href="../input_variables/html_automatically_generated/vargw.html#ucrpa_bands" target="ucrpa_bands">ucrpa_bands</a>= 21 25.
+inside the <i>d</i>-like bands, so we choose <a href="../../input_variables/generated_files/vargw.html#ucrpa_bands" target="ucrpa_bands">ucrpa_bands</a>= 21 25.
 
 
-<li> <span style="color: #101010; font-style: italic; font-weight: 500">Convergence of the polarizability </span>: <a href="../input_variables/html_automatically_generated/varbas.html#nband" target="nband">nband</a> and  <a href="../input_variables/html_automatically_generated/vargw.html#ecuteps" target="ecuteps">ecuteps</a>  are the two main variables that should
+<li> <span style="color: #101010; font-style: italic; font-weight: 500">Convergence of the polarizability </span>: <a href="../../input_variables/generated_files/varbas.html#nband" target="nband">nband</a> and  <a href="../../input_variables/generated_files/vargw.html#ecuteps" target="ecuteps">ecuteps</a>  are the two main variables that should
 be converged. Note that one must study the role of these variables directly on the effective interaction parameters to
 determine their relevant values.
 
 <li> <span style="color: #101010; font-style: italic; font-weight: 500">Frequency mesh </span> of the polarizability: Can be useful if one wants to plot
-the frequency dependence of the effective interactions (as in e.g <a href="lesson_ucalc_crpa.html#Amadon2014">[Amadon2014]</a>).
+the frequency dependence of the effective interactions (as in e.g <a href="#Amadon2014">[Amadon2014]</a>).
 </ul>
 <div style="background: #ffffff; overflow:auto;width:auto;border:dotted gray;border-width:.1em .1em .1em .1em;padding:.1em .1em;">
 <pre>
@@ -399,14 +382,14 @@ We add some comments on convergence properties
 <p> 
 <ul> 
 <li><span style="color: #101010; font-style: italic; font-weight: 500">  Convergence as the number of plane waves: </span>
-Eq. (A1) and (A2) in Appendix A of <a href="lesson_ucalc_crpa.html#Amadon2014">[Amadon2014]</a> show
-the summation over plane waves which is performed. The cutoff on plane wave which is used in this summation is <a href="../input_variables/html_automatically_generated/vargw.html#ecutsigx" target="ecutsigx">ecutsigx</a>
+Eq. (A1) and (A2) in Appendix A of <a href="#Amadon2014">[Amadon2014]</a> show
+the summation over plane waves which is performed. The cutoff on plane wave which is used in this summation is <a href="../../input_variables/generated_files/vargw.html#ecutsigx" target="ecutsigx">ecutsigx</a>
 because of the similarity of Eq. A2 with the Fock exchange
-(see <a href="theory_mbt.html#evaluation_gw_sigma">GW notes</a>)
+(see <a href="../theory_mbt.html#evaluation_gw_sigma">GW notes</a>)
 when one computes the bare interaction.
-<a href="../input_variables/html_automatically_generated/vargw.html#ecutsigx" target="ecutsigx">ecutsigx</a> is thus the main convergence parameter for this dataset.
-Note that as discussed in Appendix A of <a href="lesson_ucalc_crpa.html#Amadon2014">[Amadon2014]</a>, high values
-of <a href="../input_variables/html_automatically_generated/vargw.html#ecutsigx" target="ecutsigx">ecutsigx</a> can be necessary because
+<a href="../../input_variables/generated_files/vargw.html#ecutsigx" target="ecutsigx">ecutsigx</a> is thus the main convergence parameter for this dataset.
+Note that as discussed in Appendix A of <a href="#Amadon2014">[Amadon2014]</a>, high values
+of <a href="../../input_variables/generated_files/vargw.html#ecutsigx" target="ecutsigx">ecutsigx</a> can be necessary because
 oscillator matrix elements in PAW contains the Fourier transform of (a product of) atomic orbitals.
 
 <li> <span style="color: #101010; font-style: italic; font-weight: 500">The frequency mesh </span> must be the same as in the DATASET 2.
@@ -442,8 +425,8 @@ oscillator matrix elements in PAW contains the Fourier transform of (a product o
 
 <p> First, at the beginning of the log file,  you will find the calculation
 of the bare interaction for the atomic wavefunction corresponding the
-angular momentum specified by <a href="../input_variables/html_automatically_generated/varpaw.html#lpawu" target="lpawu">lpawu</a>, 
-in the input file (here <a href="../input_variables/html_automatically_generated/varpaw.html#lpawu" target="lpawu">lpawu</a>
+angular momentum specified by <a href="../../input_variables/generated_files/varpaw.html#lpawu" target="lpawu">lpawu</a>, 
+in the input file (here <a href="../../input_variables/generated_files/varpaw.html#lpawu" target="lpawu">lpawu</a>
 =2).
 It is a simple fast direct integration.
 Note that this information is complete only if you use XML PAW atomic data
@@ -496,11 +479,11 @@ In the third dataset, the code writes the Coulomb interaction matrix as:
 electron interaction is larger if electrons are located in the same orbital.
 <li>We recover in these interaction matrix the degeneracy of <i>d</i> orbitals in the cubic symmetry
 (we remind, as listed in this 
-<a href="../input_variables/html_automatically_generated/varpaw.html#dmatpawu" target="dmatpawu">page</a>, 
+<a href="../../input_variables/generated_files/varpaw.html#dmatpawu" target="dmatpawu">page</a>, 
 that the order of orbitals in ABINIT are xy, yz, z2, xy, x2-y2). 
 <li> We note also
 that the interaction for <i>t<SUB>2g</SUB></i> and <i>e<SUB>g</SUB></i> orbitals are not the same. This effect is 
-compared in e.g. Appendix C.1 of <a href="lesson_ucalc_crpa.html#Vaugier2012">[Vaugier2012]</a> to
+compared in e.g. Appendix C.1 of <a href="#Vaugier2012">[Vaugier2012]</a> to
 the usual Slater parametrization of interaction matrices.
 <li> Diagonal bare interactions are smaller to the bare interaction on atomic orbitals (17.8 eV, as discussed above).
 It shows that the Wannier functions (obtained within the <i>d-d</i> model) are less localized than atomic orbitals. 
@@ -508,7 +491,7 @@ It is logical because these Wannier functions contain indeed a weight on O-<i>p<
 
 <li> From this interaction matrix, one can compute the average of all elements (the famous <i>U</i>), as well
 as the average of diagonal elements, which is sometimes used as another definition
-of <i>U</i> (see Eq. (8) and (9) of <a href="lesson_ucalc_crpa.html#Amadon2014">[Amadon2014]</a>). The two quantities are written
+of <i>U</i> (see Eq. (8) and (9) of <a href="#Amadon2014">[Amadon2014]</a>). The two quantities are written
 in the log file:
 </ul>
 <pre>
@@ -517,11 +500,11 @@ in the log file:
  (Hubbard bare interaction U=1/(2l+1) \sum U(m1,m1,m1,m1)=   16.2514    0.0000)
 </pre>
 [To speed up the calculation and if one needs only these average values of <i>U</i> and <i>J</i>, one can use 
-<a href="../input_variables/html_automatically_generated/varbas.html#nsym" target="nsym">nsym</a>=0
+<a href="../../input_variables/generated_files/varbas.html#nsym" target="nsym">nsym</a>=0
 in the input file, but in this case, the interaction matrix
 does not anymore reproduce the correct symmetry. For several correlated atoms, the implementation is under test
 and it is mandatory to use 
-<a href="../input_variables/html_automatically_generated/varbas.html#nsym" target="nsym">nsym</a>=1.]
+<a href="../../input_variables/generated_files/varbas.html#nsym" target="nsym">nsym</a>=1.]
 <p>
 <li> Bare exchange interaction.
 The exchange interaction matrix is also written as well as the average of off-diagonal elements, which is <i>J</i>.
@@ -586,9 +569,9 @@ is recommanded to use at least 32 processors. Input files are provided in tucrpa
 
 <h4><a name="4.1">4.1</a> ecuteps </h4>
 The number of plane waves used in the calculation of the cRPA polarizability is
-determined by <a href="../input_variables/html_automatically_generated/vargw.html#ecuteps" target="ecuteps">ecuteps</a>
-(see <a href="theory_mbt.html#RPA_Fourier_space">Notes on RPA calculations</a>).
-The convergence can be studied simply by increasing the values of <a href="../input_variables/html_automatically_generated/vargw.html#ecuteps" target="ecuteps">ecuteps</a> and gives:
+determined by <a href="../../input_variables/generated_files/vargw.html#ecuteps" target="ecuteps">ecuteps</a>
+(see <a href="../theory_mbt.html#RPA_Fourier_space">Notes on RPA calculations</a>).
+The convergence can be studied simply by increasing the values of <a href="../../input_variables/generated_files/vargw.html#ecuteps" target="ecuteps">ecuteps</a> and gives:
 
 <pre>
    ecuteps (Ha)   U (eV)     J (eV)
@@ -597,12 +580,12 @@ The convergence can be studied simply by increasing the values of <a href="../in
       7            2.99       0.40
       9            2.99       0.40
 </pre>
-So, for <a href="../input_variables/html_automatically_generated/varbas.html#nband" target="nband">nband</a>=30, <a href="../input_variables/html_automatically_generated/vargw.html#ecutsigx" target="ecutsigx">ecutsigx</a>=30 and a 4x4x4 k-point grid,
-the effective interactions are converged with a precision of 0.02 eV for <a href="../input_variables/html_automatically_generated/vargw.html#ecuteps" target="ecuteps">ecuteps</a>=5.
+So, for <a href="../../input_variables/generated_files/varbas.html#nband" target="nband">nband</a>=30, <a href="../../input_variables/generated_files/vargw.html#ecutsigx" target="ecutsigx">ecutsigx</a>=30 and a 4x4x4 k-point grid,
+the effective interactions are converged with a precision of 0.02 eV for <a href="../../input_variables/generated_files/vargw.html#ecuteps" target="ecuteps">ecuteps</a>=5.
 
 <h4><a name="4.2">4.2</a> nband </h4>
 The RPA polarizability depends also of the number of Kohn-Sham bands as
-also discussed in the <a href="theory_mbt.html#RPA_Fourier_space">Notes on RPA calculations</a>.
+also discussed in the <a href="../theory_mbt.html#RPA_Fourier_space">Notes on RPA calculations</a>.
 <pre>
    nband          U (eV)     J (eV)
     30             3.01       0.42
@@ -611,11 +594,11 @@ also discussed in the <a href="theory_mbt.html#RPA_Fourier_space">Notes on RPA c
     90             2.70       0.40
 </pre>
 
-So, for <a href="../input_variables/html_automatically_generated/vargw.html#ecuteps" target="ecuteps">ecuteps</a>=5, <a href="../input_variables/html_automatically_generated/vargw.html#ecutsigx" target="ecutsigx">ecutsigx</a>=30 and a 4x4x4 k-point grid,
-the effective interactions are converged with a precision of 0.05 eV for <a href="../input_variables/html_automatically_generated/varbas.html#nband" target="nband">nband</a>=50.
+So, for <a href="../../input_variables/generated_files/vargw.html#ecuteps" target="ecuteps">ecuteps</a>=5, <a href="../../input_variables/generated_files/vargw.html#ecutsigx" target="ecutsigx">ecutsigx</a>=30 and a 4x4x4 k-point grid,
+the effective interactions are converged with a precision of 0.05 eV for <a href="../../input_variables/generated_files/varbas.html#nband" target="nband">nband</a>=50.
 
 <h4><a name="4.3">4.3</a> ecutsigx  </h4>
-<a href="../input_variables/html_automatically_generated/vargw.html#ecutsigx" target="ecutsigx">ecutsigx</a> is
+<a href="../../input_variables/generated_files/vargw.html#ecutsigx" target="ecutsigx">ecutsigx</a> is
 the input variable determining the number of plane waves used in the calculation of
 the exchange part of the self-energy. The same variable is used here to determine the number
 of plane waves used in the calculation of the effective interaction. The study
@@ -627,8 +610,8 @@ of the convergence gives:
          50                    15.38          0.46            3.22         0.44
          70                    15.38          0.47            3.22         0.45
 </pre>
-For <a href="../input_variables/html_automatically_generated/vargw.html#ecuteps" target="ecuteps">ecuteps</a>=3, <a href="../input_variables/html_automatically_generated/varbas.html#nband" target="nband">nband</a>=30 and a 4 4 4 k-point grid, effective interactions are converged
-with a precision of 0.02 eV for <a href="../input_variables/html_automatically_generated/vargw.html#ecutsigx" target="ecutsigx">ecutsigx</a>=30 Ha.
+For <a href="../../input_variables/generated_files/vargw.html#ecuteps" target="ecuteps">ecuteps</a>=3, <a href="../../input_variables/generated_files/varbas.html#nband" target="nband">nband</a>=30 and a 4 4 4 k-point grid, effective interactions are converged
+with a precision of 0.02 eV for <a href="../../input_variables/generated_files/vargw.html#ecutsigx" target="ecutsigx">ecutsigx</a>=30 Ha.
 
 <h4><a name="4.4">4.4</a> k-point  </h4>
 The dependence of effective interactions with the k-point grid  is also
@@ -641,21 +624,21 @@ important to check.
       7 7 7          15.35          0.44           3.19         0.43
 </pre>
 
-For <a href="../input_variables/html_automatically_generated/vargw.html#ecuteps" target="ecuteps">ecuteps</a>=3, <a href="../input_variables/html_automatically_generated/varbas.html#nband" target="nband">nband</a>=30 and <a href="../input_variables/html_automatically_generated/vargw.html#ecutsigx" target="ecutsigx">ecutsigx</a>=30, effective interactions are converged to 0.01 eV for a
+For <a href="../../input_variables/generated_files/vargw.html#ecuteps" target="ecuteps">ecuteps</a>=3, <a href="../../input_variables/generated_files/varbas.html#nband" target="nband">nband</a>=30 and <a href="../../input_variables/generated_files/vargw.html#ecutsigx" target="ecutsigx">ecutsigx</a>=30, effective interactions are converged to 0.01 eV for a
 k-point grid of 6 6 6.
 
-The converged parameters are thus <a href="../input_variables/html_automatically_generated/vargw.html#ecuteps" target="ecuteps">ecuteps</a>=5,<a href="../input_variables/html_automatically_generated/vargw.html#ecutsigx" target="ecutsigx">ecutsigx</a>=30,ngkpt=6 6 6, <a href="../input_variables/html_automatically_generated/varbas.html#nband" target="nband">nband</a>=50 with
+The converged parameters are thus <a href="../../input_variables/generated_files/vargw.html#ecuteps" target="ecuteps">ecuteps</a>=5,<a href="../../input_variables/generated_files/vargw.html#ecutsigx" target="ecutsigx">ecutsigx</a>=30,ngkpt=6 6 6, <a href="../../input_variables/generated_files/varbas.html#nband" target="nband">nband</a>=50 with
 an expected precision of 0.1 eV.
-We will use instead <a href="../input_variables/html_automatically_generated/vargw.html#ecuteps" target="ecuteps">ecuteps</a>=5,<a href="../input_variables/html_automatically_generated/vargw.html#ecutsigx" target="ecutsigx">ecutsigx</a>=30,ngkpt=4 4 4, <a href="../input_variables/html_automatically_generated/varbas.html#nband" target="nband">nband</a>=50 to lower the computational cost.
+We will use instead <a href="../../input_variables/generated_files/vargw.html#ecuteps" target="ecuteps">ecuteps</a>=5,<a href="../../input_variables/generated_files/vargw.html#ecutsigx" target="ecutsigx">ecutsigx</a>=30,ngkpt=4 4 4, <a href="../../input_variables/generated_files/varbas.html#nband" target="nband">nband</a>=50 to lower the computational cost.
 In this case, we find values of <i>U</i> and <i>J</i> of  2.75 eV and 0.41 eV and <i>U</i> is probably underestimated by 0.1 eV.
 
 <h3><b><a name="5">5.</a> Effective interactions for different models </b></h3>
 
 In this section, we compute, using the converged values of parameters, the
 value of effective interactions for the models discussed in section
-and <a href="lesson_ucalc_crpa.html#3.1">3.1</a>. The table
+and <a href="#3.1">3.1</a>. The table
 below gives for each model, the values
-of <a href="../input_variables/html_automatically_generated/vardmft.html#dmftbandi" target="dmftbandi">dmftbandi</a>, <a href="../input_variables/html_automatically_generated/vardmft.html#dmftbandf" target="dmftbandf">dmftbandf</a>  and <a href="../input_variables/html_automatically_generated/vargw.html#ucrpa_bands" target="ucrpa_bands">ucrpa_bands</a>  that must be used, and it sums up
+of <a href="../../input_variables/generated_files/vardmft.html#dmftbandi" target="dmftbandi">dmftbandi</a>, <a href="../../input_variables/generated_files/vardmft.html#dmftbandf" target="dmftbandf">dmftbandf</a>  and <a href="../../input_variables/generated_files/vargw.html#ucrpa_bands" target="ucrpa_bands">ucrpa_bands</a>  that must be used, and it sums up
 the value of bare and effective interactions.
 
 <pre><span style="color: #000000">
@@ -673,7 +656,7 @@ the value of bare and effective interactions.
 Even if our calculation is not perfectly converged with respect to k-points,
 the results obtained for the
 <i>d-d</i>, <i>dp-dp</i>, and <i>d-dp (a)</i> models are  in agreement (within 0.1 or 0.2 eV) with results obtained
-in Table V of <a href="lesson_ucalc_crpa.html#Amadon2014">[Amadon2014]</a> and references cited
+in Table V of <a href="#Amadon2014">[Amadon2014]</a> and references cited
 in this table.
 <p>
 To obtain the results with only the <i>t<SUB>2g</SUB></i>  orbitals, one must use a specific input file, which is tucrpa_4.in, which
@@ -693,19 +676,19 @@ to the <i>dp-dp</i> model, because the screening is more efficient.
 <li> Lastly, when one uses the  weighting scheme to compute the polarizability,<i> U</i> is very small. Indeed, in this case,
 one can show that there are some residual transitions  near the Fermi level (due to the hybridization between <i>d</i> orbitals and O<i>p</i> orbitals)
 which are very efficient to screen the interaction (A similar effect is discussed in
- <a href="lesson_ucalc_crpa.html#Amadon2014">[Amadon2014]</a> for UO<SUB>2</SUB> or  
- <a href="lesson_ucalc_crpa.html#Sakuma2013">[Sakuma2013]</a> for transition metal oxydes).
+ <a href="#Amadon2014">[Amadon2014]</a> for UO<SUB>2</SUB> or  
+ <a href="#Sakuma2013">[Sakuma2013]</a> for transition metal oxydes).
 </ul>
 </ul>
 Finally, fully screened interactions (not discussed here) could also be computed for each definition
-correlated orbitals by using the default values of <a href="../input_variables/html_automatically_generated/vargw.html#ucrpa_bands" target="ucrpa_bands">ucrpa_bands</a> .
+correlated orbitals by using the default values of <a href="../../input_variables/generated_files/vargw.html#ucrpa_bands" target="ucrpa_bands">ucrpa_bands</a> .
 
 
 <h3><b><a name="6">6.</a> Frequency dependent interactions </b></h3>
 
 In this section, we are going to compute frequency dependent effective interactions.
 Just change the following input variables in order to compute effective interaction between 0 and 30 eV.
-We use <a href="../input_variables/html_automatically_generated/varbas.html#nsym" target="nsym">nsym</a>=0
+We use <a href="../../input_variables/generated_files/varbas.html#nsym" target="nsym">nsym</a>=0
 in order to decrease the computational cost.
 <div style="background: #ffffff; overflow:auto;width:auto;border:dotted gray;border-width:.1em .1em .1em .1em;padding:.1em .1em;">  <pre> <span style="color: #008800; font-style: italic"># -- Frequencies for effective interactions</span>
  nsym        0
@@ -730,11 +713,11 @@ Extract the value of <i>U</i> for the 60 frequencies using:
 grep "U(omega)" -A 60 tucrpa_5.out > Ufreq.dat
 </pre>
 Remove the first line, and plot the data:
-<p align="center"> <img style="width: 634px" alt="dynamical" src="lesson_ucalc_crpa/dynamical.jpeg">
+<p align="center"> <img style="width: 634px" alt="dynamical" src="../documents/lesson_ucalc_crpa/dynamical.jpeg">
 </p>
 
 We recover in the picture the main results found in the Fig. 3 of
- <a href="lesson_ucalc_crpa.html#Aryasetiawan2006">[Aryasetiawan2006]</a> . Indeed, the frequency
+ <a href="#Aryasetiawan2006">[Aryasetiawan2006]</a> . Indeed, the frequency
  dependent effective interactions exhibits a plasmon excitation.
 
 
@@ -754,11 +737,10 @@ F. Aryasetiawan, M. Imada, A. Georges, G. Kotliar, S. Biermann, and A. I. Lichte
 <br><font id="title"><a name="Amadon2014"> [Amadon2014] </a></font> Bernard Amadon, Thomas Applencourt, and Fabien Bruneval <a href="https://journals.aps.org/prb/abstract/10.1103/PhysRevB.89.125110">Phys. Rev. B 89, 125110 (2014)</a>.
 <br><font id="title"><a name="Geneste2016"> [Geneste2016] </a></font> G. Geneste, B. Amadon, M. Torrent and G. Dezanneau (unpublished)
 <br><font id="title"><a name="Aryasetiawan2006"> [Aryasetiawan2006] </a></font> F. Aryasetiawan, K. Karlsson, O. Jepsen, and U. Sch&ouml;nberger, <a href="https://journals.aps.org/prb/abstract/10.1103/PhysRevB.74.125106">Phys. Rev. B 74, 125106 (2006)</a>.
-<!-- end body -->
 
+<script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
 
-
-<script type="text/javascript" src="list_internal_links.js"> </script>
-
-           
+</body>
 </html>
+
+

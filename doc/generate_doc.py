@@ -1023,6 +1023,13 @@ for i, lesson_info in enumerate(lessons):
   #Write the finalized html file.
   file_cur = tuto_gen+'/lesson_'+lesson+'.html'
   f_cur = open(file_cur,'w')
+  #DEBUG
+  print("")
+  position=10200
+  print(" lessonhtml[%s:%s]:"%(position,position+100))
+  print(lessonhtml[position:position+100])
+  print("")
+  #ENDDEBUG
   f_cur.write(lessonhtml)
   f_cur.write("\n")
   f_cur.close()
@@ -1144,6 +1151,8 @@ for i, bibhtml_info in enumerate(bibhtml):
 
 ################################################################################
 
+#sys.exit()
+
 tuto_future = "tutorial/future_initial_files"
 lessons_future=read_yaml_file(tuto_future+"/lessons.yml")
 
@@ -1177,7 +1186,7 @@ for i, lesson_info in enumerate(lessons_future):
     if "<!--" in line and "-->" in line:
       if "begin" in line :
         if intro==1 or body==1:
-          raise
+          raise ValueError("(intro,body)=(%s,%s)"%(intro,body))
         if "intro" in line :
           intro=1
           continue
@@ -1187,11 +1196,11 @@ for i, lesson_info in enumerate(lessons_future):
           continue
       if "end" in line and "intro" in line:
         if intro==0 or body==1:
-          raise
+          raise ValueError("(intro,body)=(%s,%s)"%(intro,body))
         intro=0
       if "end" in line and "body" in line:
         if intro==1 or body==0:
-          raise
+          raise ValueError("(intro,body)=(%s,%s)"%(intro,body))
         body=0
 
     if intro+body==1 :
