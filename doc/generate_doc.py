@@ -1139,12 +1139,12 @@ for i, bibhtml_info in enumerate(bibhtml):
 ################################################################################
 ################################################################################
 
-# (Not yet completed) Development of an automatic translation 
+# Automatic translation 
 # of the lesson_*html files to lesson_*yml files
 
 ################################################################################
 
-#sys.exit()
+sys.exit()
 
 tuto_future = "tutorial/future_origin_files"
 lessons_future=read_yaml_file(tuto_future+"/lessons.yml")
