@@ -1003,6 +1003,8 @@ for i, lesson_info in enumerate(lessons):
   for j in ["header","title","subtitle","intro","copyright","links","menu","body","links","end"]:
     if j in ["intro","body"] :
       lessonhtml += lesson_yml[j]
+    elif j=="subtitle" :
+      lessonhtml += "<h2>"+lesson_info.subtitle+"</h2> \n <hr>"
     else:
       extract_j=getattr(lesson_info,j)
       if extract_j.strip() == "":
