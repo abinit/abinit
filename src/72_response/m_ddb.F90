@@ -1196,72 +1196,72 @@ subroutine rdddb9(acell,atifc,amu,ddb,&
  vrsddb=DDB_VERSION
 
 !The checking of pseudopotentials is not done presently so that dimensions are fake
- ABI_MALLOC(ekb,(dimekb,ntypat))
- ABI_MALLOC(indlmn,(6,lmnmax,ntypat))
- ABI_MALLOC(pspso,(ntypat))
- ABI_DATATYPE_ALLOCATE(pawtab,(ntypat*usepaw))
- call pawtab_nullify(pawtab)
+!ABI_MALLOC(ekb,(dimekb,ntypat))
+!ABI_MALLOC(indlmn,(6,lmnmax,ntypat))
+!ABI_MALLOC(pspso,(ntypat))
+!ABI_DATATYPE_ALLOCATE(pawtab,(ntypat*usepaw))
+!call pawtab_nullify(pawtab)
 
- ABI_MALLOC(kpt,(3,nkpt))
- ABI_MALLOC(nband,(nkpt))
- ABI_MALLOC(occ,(nkpt*mband*msppol))
- ABI_MALLOC(spinat,(3,natom))
- ABI_MALLOC(wtk,(nkpt))
+!ABI_MALLOC(kpt,(3,nkpt))
+!ABI_MALLOC(nband,(nkpt))
+!ABI_MALLOC(occ,(nkpt*mband*msppol))
+!ABI_MALLOC(spinat,(3,natom))
+!ABI_MALLOC(wtk,(nkpt))
 
 !Open the input derivative database file and read the preliminary information
-!Note that in this call, mkpt has been replaced by nkpt, mtypat by ntypat, and matom by natom.
- nunit=ddbun
-
-! To avoid aliasing
- matom = natom
- mkpt = nkpt
- mtypat = ntypat
-
- call ioddb8_in(filnam,matom,mband,mkpt,msym,mtypat,nunit,vrsddb,&
-& acell,amu,dilatmx,ecut,ecutsm,intxc,iscf,ixc,kpt,kptnrm,&
-& natom,nband,ngfft,nkpt,nspden,nspinor,nsppol,nsym,ntypat,occ,occopt,&
-& pawecutdg,rprim,dfpt_sciss,spinat,symafm,symrel,tnons,tolwfr,tphysel,tsmear,&
-& typat,usepaw,wtk,xred,zion,znucl)
-
-!Read the psp information of the input DDB
- useylm=usepaw;choice=1
- call psddb8 (choice,dimekb,ekb,fullinit,indlmn,lmnmax,&
-& ddb%nblok,ntypat,nunit,pawtab,pspso,usepaw,useylm,vrsddb)
-
-
-
-! call ddb_hdr_open_read(ddb_hdr, filnam, ddbun, vrsddb, &
-!&                       msym=msym, mband=mband)
-
- !nkpt = ddb_hdr%nkpt
-! !ntypat = ddb_hdr%ntypat
-! nsym = ddb_hdr%nsym
-! acell = ddb_hdr%acell
-! rprim = ddb_hdr%rprim
+!!Note that in this call, mkpt has been replaced by nkpt, mtypat by ntypat, and matom by natom.
+! nunit=ddbun
 !
-! amu(:) = ddb_hdr%amu(1:ntypat)
-! typat(:) = ddb_hdr%typat(1:natom)
-! zion(:) = ddb_hdr%zion(1:ntypat)
-! znucl(:) = ddb_hdr%znucl(1:ntypat)
+!! To avoid aliasing
+! matom = natom
+! mkpt = nkpt
+! mtypat = ntypat
+!
+! call ioddb8_in(filnam,matom,mband,mkpt,msym,mtypat,nunit,vrsddb,&
+!& acell,amu,dilatmx,ecut,ecutsm,intxc,iscf,ixc,kpt,kptnrm,&
+!& natom,nband,ngfft,nkpt,nspden,nspinor,nsppol,nsym,ntypat,occ,occopt,&
+!& pawecutdg,rprim,dfpt_sciss,spinat,symafm,symrel,tnons,tolwfr,tphysel,tsmear,&
+!& typat,usepaw,wtk,xred,zion,znucl)
+!
+!!Read the psp information of the input DDB
+! useylm=usepaw;choice=1
+! call psddb8 (choice,dimekb,ekb,fullinit,indlmn,lmnmax,&
+!& ddb%nblok,ntypat,nunit,pawtab,pspso,usepaw,useylm,vrsddb)
 
 
-! do isym = 1,msym
-!   symafm(isym) = ddb_hdr%symafm(isym)
-!   do jj = 1,3
-!     tnons(jj,isym) = ddb_hdr%tnons(jj,isym)
-!     do ii = 1,3
-!       symrel(ii,jj,isym) = ddb_hdr%symrel(ii,jj,isym)
-!     end do
-!   end do
-! end do
 
- !symafm(:) = ddb_hdr%symafm(:)
- !symrel(:,:,:) = ddb_hdr%symrel(:,:,:)
- !tnons(:,:) = ddb_hdr%tnons(:,:)
+ call ddb_hdr_open_read(ddb_hdr, filnam, ddbun, vrsddb, &
+&                       msym=msym, mband=mband)
 
-! xred(:,:) = ddb_hdr%xred(:,:)
+!nkpt = ddb_hdr%nkpt
+ !ntypat = ddb_hdr%ntypat
+ nsym = ddb_hdr%nsym
+ acell = ddb_hdr%acell
+ rprim = ddb_hdr%rprim
 
-! call ddb_hdr_free(ddb_hdr)
+ amu(:) = ddb_hdr%amu(1:ntypat)
+ typat(:) = ddb_hdr%typat(1:natom)
+ zion(:) = ddb_hdr%zion(1:ntypat)
+ znucl(:) = ddb_hdr%znucl(1:ntypat)
+
+
+ do isym = 1,msym
+   symafm(isym) = ddb_hdr%symafm(isym)
+   do jj = 1,3
+     tnons(jj,isym) = ddb_hdr%tnons(jj,isym)
+     do ii = 1,3
+       symrel(ii,jj,isym) = ddb_hdr%symrel(ii,jj,isym)
+     end do
+   end do
+ end do
+
+!symafm(:) = ddb_hdr%symafm(:)
+!symrel(:,:,:) = ddb_hdr%symrel(:,:,:)
+!tnons(:,:) = ddb_hdr%tnons(:,:)
+
+ xred(:,:) = ddb_hdr%xred(:,:)
+
+ call ddb_hdr_free(ddb_hdr)
 
 !Compute different matrices in real and reciprocal space, also
 !checks whether ucvol is positive.
@@ -1393,17 +1393,17 @@ subroutine rdddb9(acell,atifc,amu,ddb,&
  call wrtout(std_out,message,'COLL')
  call wrtout(iout,message,'COLL')
 
- ABI_FREE(ekb)
- ABI_FREE(indlmn)
- ABI_FREE(kpt)
- ABI_FREE(nband)
- ABI_FREE(occ)
- ABI_FREE(pspso)
- ABI_FREE(spinat)
- ABI_FREE(wtk)
+!ABI_FREE(ekb)
+!ABI_FREE(indlmn)
+!ABI_FREE(kpt)
+!ABI_FREE(nband)
+!ABI_FREE(occ)
+!ABI_FREE(pspso)
+!ABI_FREE(spinat)
+!ABI_FREE(wtk)
 
- call pawtab_free(pawtab)
- ABI_DATATYPE_DEALLOCATE(pawtab)
+!call pawtab_free(pawtab)
+!ABI_DATATYPE_DEALLOCATE(pawtab)
 
  DBG_EXIT("COLL")
 
