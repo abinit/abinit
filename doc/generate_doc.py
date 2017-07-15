@@ -1204,6 +1204,9 @@ for i, lesson_info in enumerate(lessons_future):
         string_old='href="lesson_'
         string_new='href="../lesson_'
         line=line.replace(string_old,string_new)
+        string_old='href="theory_'
+        string_new='href="../theory_'
+        line=line.replace(string_old,string_new)
         string_old='href="welcome'
         string_new='href="../welcome'
         line=line.replace(string_old,string_new)

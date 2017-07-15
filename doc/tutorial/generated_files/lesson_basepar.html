@@ -1,16 +1,15 @@
 <html>
-<head>
-<title>Tutorial "Basic parallelism"</title>
+<head><title>Lesson on basic parallelism.</title>
+<link rel=stylesheet type="text/css" href="../formabinit.css">
 </head>
 <body bgcolor="#ffffff">
-<hr>
-
-<h1>"ABINIT in Parallel" basic tutorial: Parallelism inside ABINIT </h1>
 
 <hr>
-<h2>What is this tutorial about ?</h2>
+<a name="top"></a>
 
-<--- begin intro --->
+<h1>ABINIT tutorial. Lesson on basic parallelism. :</h1>
+
+Parallelism in ABINIT, generalities and environments.
 <p>There are many situations where a sequential code is not enough, often
 because it would take too much time to get a result. There are also cases where
 you just want things to go as fast as your computational resources allow
@@ -33,16 +32,17 @@ href="https://en.wikipedia.org/wiki/Amdahl%27s_law"> Almdalh's law</a>,
 that rationalizes the fact that, beyond some number of processors, the
 inherently sequential parts will dominate parallel parts, and give a
 limitation to the maximal speed-up that can be achieved.</p>
-<--- end intro --->
 
-<script type="text/javascript" src="list_internal_links.js"> </script>
+<h5>Copyright (C) 2000-2017 ABINIT group (YP,XG)
+<script type="text/javascript" src="../../js_files/copyright.js"> </script>
+</h5> 
 
-<h3><b>Table of contents</b></h3>
+<script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
 
-<--- begin body --->
+
 <ul>
-<li><a href="lesson_basepar.html#1">1.</a> Generalities</li>
-<li><a href="lesson_basepar.html#2">2.</a> Parallel environments
+<li><a href="#1">1.</a> Generalities</li>
+<li><a href="#2">2.</a> Parallel environments
 
 <ul>
 <li>Generalities</li>
@@ -51,8 +51,8 @@ limitation to the maximal speed-up that can be achieved.</p>
 <li>Scalapack</li>
 <li>Fast/slow communications</li>
 </ul></li>
-<li><a href="lesson_basepar.html#3">3.</a> What parts of ABINIT are parallel?</li>
-<li><a href="lesson_basepar.html#4">4.</a> A simple example of parallelism in ABINIT
+<li><a href="#3">3.</a> What parts of ABINIT are parallel?</li>
+<li><a href="#4">4.</a> A simple example of parallelism in ABINIT
 <ul>
 <li>Running a job</li>
 <li>Parallelism over the k-points</li>
@@ -61,7 +61,7 @@ limitation to the maximal speed-up that can be achieved.</p>
 <li>Evidencing overhead</li>
 </ul></li>
 
-<li><a href="lesson_basepar.html#5">5.</a> Details of the implementation
+<li><a href="#5">5.</a> Details of the implementation
 
 <ul>
 <li>The MPI toolbox in ABINIT</li>
@@ -215,14 +215,14 @@ At the present time, the parts of ABINIT that have been parallelized,
 and for which a tutorial is available, 
 include:</p>
 <ul>
-<li><a href="lesson_paral_gspw.html">ground state with plane waves</a>,</li>
-<li><a href="lesson_paral_gswvl.html">ground state with wavelets</a>,</li>
-<li><a href="lesson_paral_moldyn.html">molecular dynamics</a>,</li>
-<li><a href="lesson_paral_string.html">parallelism on "images"</a>,</li>
-<li><a href="lesson_paral_dfpt.html">response functions</a>,</li>
-<li><a href="lesson_paral_mbt.html">Many-Body Perturbation Theory</a>.</li>
+<li><a href="../lesson_paral_gspw.html">ground state with plane waves</a>,</li>
+<li><a href="../lesson_paral_gswvl.html">ground state with wavelets</a>,</li>
+<li><a href="../lesson_paral_moldyn.html">molecular dynamics</a>,</li>
+<li><a href="../lesson_paral_string.html">parallelism on "images"</a>,</li>
+<li><a href="../lesson_paral_dfpt.html">response functions</a>,</li>
+<li><a href="../lesson_paral_mbt.html">Many-Body Perturbation Theory</a>.</li>
 </ul>
-<p>Note that the tutorial on <a href="lesson_paral_gspw.html">ground state
+<p>Note that the tutorial on <a href="../lesson_paral_gspw.html">ground state
 with plane waves</a> presents a complete overview of this parallelism,
 including up to four levels of parallelisation and, as such, is rather
 complex. Of course, it is also quite powerful, and allows to use several
@@ -231,7 +231,7 @@ hundreds of processors.</p>
 <ul>
 <li>the treatment of k-points in reciprocal space;</li>
 <li>the treatment of spins, for spin-polarized collinear situations
-    (when <a href="../input_variables/html_automatically_generated/varbas.html#nsppol"
+    (when <a href="../../input_variables/generated_files/varbas.html#nsppol"
     target="kwimg">nsppol</a>=2);</li>
 </ul>
 <p>are, on the contrary, quite easy to use. An example of such parallelism
@@ -285,7 +285,7 @@ wants to get an accurate description of the ground state. Examine this
 file. Note that the cut-off is realistic, as well as the grid of
 k-points (giving 60 k points in the irreducible Brillouin zone).
 However, the number of SCF steps,
-<a href="../input_variables/html_automatically_generated/varbas.html#nstep" target="kwimg">nstep</a>,
+<a href="../../input_variables/generated_files/varbas.html#nstep">nstep</a>,
 has been set to 3 only. This is to keep the CPU time reasonable for this
 tutorial, without affecting the way parallelism on the k points will be
 able to increase the speed.  Once done, your output files have likely
@@ -430,7 +430,7 @@ The timing analysis is very similar to the k-point parallelism case.
 </p>
 
 <p>If you have more than 2 processors at hand, you might increase the
-value of <a href="../input_variables/html_automatically_generated/varbas.html#ngkpt"
+value of <a href="../../input_variables/generated_files/varbas.html#ngkpt"
 target="kwimg">ngkpt</a>, so that more than one k-point is available,
 and see that the k-point and spin parallelism indeed work
 concurrently.</p>
@@ -441,9 +441,9 @@ concurrently.</p>
 straightforward.  When using k-point- and spin-parallelism, the ideal
 numbers of processors to use are those that divide the product of <a
 href="../input_variables/html_automatically_generated/varbas.html#nsppol" target="kwimg">nsppol</a>
-by <a href="../input_variables/html_automatically_generated/varbas.html#nkpt" target="kwimg">nkpt</a>
-(e.g. for <a href="../input_variables/html_automatically_generated/varbas.html#nsppol"
-target="kwimg">nsppol</a>*<a href="../input_variables/html_automatically_generated/varbas.html#nkpt"
+by <a href="../../input_variables/generated_files/varbas.html#nkpt">nkpt</a>
+(e.g. for <a href="../../input_variables/generated_files/varbas.html#nsppol"
+target="kwimg">nsppol</a>*<a href="../../input_variables/generated_files/varbas.html#nkpt"
 target="kwimg">nkpt</a>=12, it is quite efficient to use 2, 3, 4, 6 or
 12 processors). ABINIT will nevertheless handle correctly other numbers
 of processors, albeit slightly less efficiently, as the final time will
@@ -537,16 +537,10 @@ in all cases, and have their own pre-processed sections. The cleaning and closin
 stuff is done in a central part of abinit at the end of the run.</p>
 
 &nbsp;<br />
-<--- end body --->
 
-<h5>Copyright (C) 2005-2017 ABINIT group (YP,XG)
-<br/> This file is distributed under the terms of the GNU General Public License, see
-~abinit/COPYING or <a href="http://www.gnu.org/copyleft/gpl.txt">
-http://www.gnu.org/copyleft/gpl.txt </a>.
-<br/> For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
-</h5>
-
-<script type="text/javascript" src="list_internal_links.js"> </script>
+<script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
 
 </body>
 </html>
+
+

@@ -1,12 +1,15 @@
-<html><head><title>Tutorial "eph"</title></head>
+<html>
+<head><title>Electron-phonon lesson</title>
+<link rel=stylesheet type="text/css" href="../formabinit.css">
+</head>
 <body bgcolor="#ffffff">
 
 <hr>
-<h1>ABINIT tutorial, eph lesson: </h1>
-<h2>Electron-Phonon interaction and superconducting properties of Al.
-</h2>
-<hr>
-<--- begin intro --->
+<a name="top"></a>
+
+<h1>ABINIT tutorial. Electron-phonon lesson :</h1>
+
+Electron-Phonon interaction and superconducting properties of Al.
 <p>This lesson demonstrates how to obtain
 the following physical properties, for a metal :
 </p><ul>
@@ -22,21 +25,21 @@ elements and phonon frequencies and eigenvectors, from a standard ABINIT
 phonon calculation, which will be reviewed succinctly.
 
 <p>This lesson should take about 1 hour.
-<--- end intro --->
 
-<script type="text/javascript" src="list_internal_links.js"> </script>
+<h5>Copyright (C) 2000-2017 ABINIT group (MVer)
+<script type="text/javascript" src="../../js_files/copyright.js"> </script>
+</h5> 
 
-<br>&nbsp;
-<h3><b>Content of lesson Elphon</b></h3>
+<script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
 
-<--- begin body --->
+
 <ul>
-	<li><a href="lesson_eph.html#E1">1</a> Calculation of the ground state and phonon structure of fcc Al.</li>
-	<li><a href="lesson_eph.html#E2">2</a> Merging of the 2DTE DDB files using MRGDDB.</li>
-	<li><a href="lesson_eph.html#E3">3</a> Merging of the electron-phonon matrix elements using MRGGKK.</li>
-	<li><a href="lesson_eph.html#E4">4</a> Basic ANADDB calculation of electron-phonon quantities.</li>
-	<li><a href="lesson_eph.html#E5">5</a> Convergence tests of the integration techniques.</li>
-	<li><a href="lesson_eph.html#E6">6</a> Transport quantities within Boltzmann theory.</li>
+	<li><a href="#E1">1</a> Calculation of the ground state and phonon structure of fcc Al.</li>
+	<li><a href="#E2">2</a> Merging of the 2DTE DDB files using MRGDDB.</li>
+	<li><a href="#E3">3</a> Merging of the electron-phonon matrix elements using MRGGKK.</li>
+	<li><a href="#E4">4</a> Basic ANADDB calculation of electron-phonon quantities.</li>
+	<li><a href="#E5">5</a> Convergence tests of the integration techniques.</li>
+	<li><a href="#E6">6</a> Transport quantities within Boltzmann theory.</li>
 </ul>
 
 <hr>
@@ -52,8 +55,8 @@ Why not create "Work_eph" in ~abinit/tests/tutorespfn/Input ?
 </i> <br> </p>
 
 <p> It is presumed that the user has already followed the Tutorials
-      <a href="lesson_rf1.html" target="kwimg">RF1</a>
-and <a href="lesson_rf2.html" target="kwimg">RF2</a>, and understands the calculation of
+      <a href="../lesson_rf1.html" target="kwimg">RF1</a>
+and <a href="../lesson_rf2.html" target="kwimg">RF2</a>, and understands the calculation of
 ground state and response function (phonon) properties with ABINIT.</p>
 
 <p> The file ~abinit/tests/tutorespfn/Input/teph_1.files lists the file names and root names for the first run
@@ -77,11 +80,11 @@ The teph_1.in file contains a number of datasets (DS). These will perform the
 ground state (DS 1), then the phonon perturbations (DS 2-4), for a cell of FCC
 aluminium. The DDK perturbation (DS 5) is also calculated, and will be used
 to obtain the Fermi velocities for the transport calculations in 
-<a href="lesson_eph.html#E6">Section 6</a>.
+<a href="#E6">Section 6</a>.
 </p>
 <p>
 Once these are done, abinit calculates the wave functions on the full grid of
-k-points (using <a href="../input_variables/html_automatically_generated/varbas.html#kptopt">kptopt 3</a>)
+k-points (using <a href="../../input_variables/generated_files/varbas.html#kptopt">kptopt 3</a>)
 in DS 6: these will be used to calculate the electron-phonon matrix elements.
 In a full calculation the density of k-points should be increased significantly
 here and for the following datasets.  For DS 1-5 only the normal convergence of
@@ -123,13 +126,13 @@ Edit the file teph_1.in. We now examine several variables.
 The kinetic energy cutoff <a
 	href="../input_variables/html_automatically_generated/varbas.html#ecut"
 	target="kwimg">ecut</a> is a bit low, and the number of k-points
-(determined by <a href="../input_variables/html_automatically_generated/varbas.html#ngkpt"
+(determined by <a href="../../input_variables/generated_files/varbas.html#ngkpt"
 	target="kwimg">ngkpt</a>) is much too low. Electron-phonon calculations
 require a very precise determination of the Fermi surface of the metal. This
 implies a very dense k-point mesh, and the convergence of the grid must be
 checked. In our case, for Al, we will use a (non-shifted) 4x4x4 k-point grid,
 but a converged calculation needs more than 16x16x16 points. This will be
-re-considered in section <a href="lesson_eph.html#E5">5</a>. The q-point grid
+re-considered in section <a href="#E5">5</a>. The q-point grid
 will be 2x2x2.  It must be a sub-grid of the full k-point grid, and must
 contain the &Gamma; point.
 </p>
@@ -213,14 +216,14 @@ teph_1o_DS3_DDB
 teph_1o_DS4_DDB
 </pre>
 <p> This is your input
-file for the <a href="../users/mrgddb_help.html"
+file for the <a href="../../users/mrgddb_help.html"
 	target="kwimg">MRGDDB</a> utility, which will take the different _DDB
 files and merge them into a single one which ANADDB will use to determine the
 phonon frequencies and eigenvectors. teph_2.in contains the name of the final
 file, a comment line, then the number of _DDB files to be merged and their
 names.</p>
 
-</p><a href="../users/mrgddb_help.html"
+</p><a href="../../users/mrgddb_help.html"
 target="kwimg">MRGDDB</a> is run with the command <pre> mrgddb < teph_2.in </pre>
 It runs in a few seconds.<p>
 
@@ -311,12 +314,12 @@ the phonon linewidths along a path in reciprocal space (exactly like the band
 structure in <a
 	href="lesson_base3.html#35"
 	target="kwimg">Lesson 3.5</a>). The path is specified by the variable
-<a href="../users/anaddb_help.html#qpath"
+<a href="../../users/anaddb_help.html#qpath"
 	target="kwimg">qpath</a> giving the apexes of the path in reciprocal
 space, which are usually special points of high symmetry. The number of points
-is given by <a href="../users/anaddb_help.html#nqpath"
+is given by <a href="../../users/anaddb_help.html#nqpath"
 	target="kwimg">nqpath</a>. Note that qpath can be used in normal phonon
-band structure calculations as well, provided that <a href="../users/anaddb_help.html#qpath"
+band structure calculations as well, provided that <a href="../../users/anaddb_help.html#qpath"
         target="kwimg">q1phl</a> is omitted from the
 input file (the latter overrides qpath). The phonon linewidths are printed to a file
 suffixed _LWD.</p>
@@ -366,7 +369,7 @@ easily because its Fermi surface is isotropic and the coupling is weak.</p>
 </p><h3><b>5. Convergence tests of the integration techniques.</b> </h3>
 <h3>&nbsp;</h3>
 
-<p> In section <a href="lesson_eph.html#E4">4</a>, we used the default
+<p> In section <a href="#E4">4</a>, we used the default
 method for integration on the Fermi surface, which employs a smearing of the
 DOS and attributes Gaussian weights to each k-point as a function of its
 distance from the Fermi surface. Another efficient method of integration in
@@ -379,7 +382,7 @@ specified explicitly in the input, repeating the variable <a
 	target="kwimg">kptrlatt</a> from the ABINIT output, so that ANADDB can
 re-construct the different tetrahedra which fill the reciprocal unit cell. In
 the Gaussian case, the width of the smearing can be controlled using the input
-variable <a href="../users/anaddb_help.html#elphsmear"
+variable <a href="../../users/anaddb_help.html#elphsmear"
 	target="kwimg">elphsmear</a>. </p>
 
 <p> To test our calculations, they should be re-done with a denser k-point grid
@@ -501,14 +504,9 @@ an estimate of the numerical error.
 <br>
 <br>
 
-<--- end body --->
-</p><h5>Copyright (C) 2005-2017 ABINIT group (MVer)
-<br> This file is distributed under the terms of the GNU General Public License, see
-~abinit/COPYING or <a href="http://www.gnu.org/copyleft/gpl.txt">
-http://www.gnu.org/copyleft/gpl.txt </a>.
-<br> For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
-</h5>
+<script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
 
-<script type="text/javascript" src="list_internal_links.js"> </script>
+</body>
+</html>
 
-</body></html>
+

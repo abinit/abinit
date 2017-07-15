@@ -1,17 +1,66 @@
-# This file provides the information needed to generate the documentation files that describes the input variables,
-# the "var*.html files (each being a "section"), as well as related parameters ("special"), and the list of all input variables. 
+# This file provides the information needed to generate the documentation files that describes the lessons of the tutorial.
 # Each paragraph of such documentation file has a mix of formatting html information and real content.
 
-# The present file contains the html information.
+# The present file contains the formatting html information.
 # The "default" html information is presented in the section "default", at the bottom of the file. 
 # For most of the lesson*.html files, the default html formatting is hardly changed, so only minimal information
 # is needed to generate them. 
 
 - !section
+    name : analysis_tools
+    keyword : Lesson on analysis tools.
+    authors : MC,SP
+    subtitle : How to use the program <em>cut3d</em>.
+- !section
     name : base1
     keyword : First (basic) lesson 
     authors : XG,RC
     subtitle : The H<sub>2</sub> molecule, without convergence studies.
+- !section
+    name : base2
+    keyword : Second (basic) lesson
+    authors : XG,RC
+    subtitle : The H<sub>2</sub> molecule, with convergence studies.
+- !section
+    name : base3
+    keyword : Third (basic) lesson
+    authors : XG,RC
+    subtitle : Crystalline silicon.
+- !section
+    name : base4
+    keyword : Fourth (basic) lesson
+    authors : XG,RC
+    subtitle : Aluminum, the bulk and the surface.
+- !section
+    name : basepar
+    keyword : Lesson on basic parallelism.
+    authors : YP,XG
+    subtitle : Parallelism in ABINIT, generalities and environments.
+- !section
+    name : bse
+    keyword : Lesson on Bethe-Salpeter calculations.
+    authors : MG,MS
+    subtitle : Absorption spectra including excitonic effects.
+- !section
+    name : dmft
+    keyword : Lesson on DFT+DMFT
+    authors : BAmadon
+    subtitle : A DFT+DMFT calculation on SrVO3.
+- !section
+    name : eph
+    keyword : Electron-phonon lesson
+    authors : MVer
+    subtitle : Electron-Phonon interaction and superconducting properties of Al.
+- !section
+    name : elastic
+    keyword : Lesson on elastic properties
+    authors : DRH
+    subtitle : Elastic and piezoelectric properties.
+- !section
+    name : ffield
+    keyword : Lesson on polarization and finite electric fields
+    authors : PhG, MVeithen, XG
+    subtitle : Polarization, and responses to finite electric fields for AlAs.
 
 - !section
     name : default

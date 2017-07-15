@@ -1,14 +1,15 @@
 <html>
-<head>
-<title>Tutorial #3</title>
+<head><title>Third (basic) lesson</title>
+<link rel=stylesheet type="text/css" href="../formabinit.css">
 </head>
 <body bgcolor="#ffffff">
 
 <hr>
-<h1>ABINIT tutorial, third lesson: </h1>
-<h2>Crystalline silicon. </h2>
-<hr>
-<--- begin intro --->
+<a name="top"></a>
+
+<h1>ABINIT tutorial. Third (basic) lesson :</h1>
+
+Crystalline silicon.
 <p>This lesson aims at showing you how to get
 the following physical properties, for an insulator:
 <ul>
@@ -20,23 +21,23 @@ You will learn about the use of k-points, as well
 as the smearing of the plane-wave kinetic energy cut-off.
 
 <p>This lesson should take about 1 hour.
-<--- end intro --->
 
-<script type="text/javascript" src="list_internal_links.js"> </script>
+<h5>Copyright (C) 2000-2017 ABINIT group (XG,RC)
+<script type="text/javascript" src="../../js_files/copyright.js"> </script>
+</h5> 
 
-<br>&nbsp;
-<h3><b>Content of lesson 3</b></h3>
+<script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
 
-<--- begin body --->
+
 <ul>
-  <li><a href="lesson_base3.html#31">3.1</a> Computing the total energy of silicon at
+  <li><a href="#31">3.1</a> Computing the total energy of silicon at
     fixed number of k points.</li>
-  <li><a href="lesson_base3.html#32">3.2</a> Starting the convergence study with respect
+  <li><a href="#32">3.2</a> Starting the convergence study with respect
     to k points</li>
-  <li><a href="lesson_base3.html#33">3.3</a> Actually performing the convergence study
+  <li><a href="#33">3.3</a> Actually performing the convergence study
     with respect to k points</li>
-  <li><a href="lesson_base3.html#34">3.4</a> Determination of the lattice parameters</li>
-  <li><a href="lesson_base3.html#35">3.5</a> Computing the band structure</li>
+  <li><a href="#34">3.4</a> Determination of the lattice parameters</li>
+  <li><a href="#35">3.5</a> Computing the band structure</li>
 </ul>
 
 <br>
@@ -58,25 +59,25 @@ Computing the total energy of silicon at fixed number of k points.
   input file. You should edit it, read it carefully, have a look at the following
   "new" input variables, and their explanation :
 <ul>
-  <li><a href="../input_variables/html_automatically_generated/varbas.html#rprim" target="kwimg">rprim</a>
-  <li><a href="../input_variables/html_automatically_generated/varbas.html#xred" target="kwimg">xred</a> (used instead of xcart)
-  <li><a href="../input_variables/html_automatically_generated/varbas.html#kptopt" target="kwimg">kptopt</a>,
-    <a href="../input_variables/html_automatically_generated/varbas.html#ngkpt" target="kwimg">ngkpt</a>,
-    <a href="../input_variables/html_automatically_generated/varbas.html#nshiftk" target="kwimg">nshiftk</a>,
-    <a href="../input_variables/html_automatically_generated/varbas.html#shiftk" target="kwimg">shiftk</a>,
-    <a href="../input_variables/html_automatically_generated/vargs.html#kptrlatt" target="kwimg">kptrlatt</a>,
+  <li><a href="../../input_variables/generated_files/varbas.html#rprim">rprim</a>
+  <li><a href="../../input_variables/generated_files/varbas.html#xred">xred</a> (used instead of xcart)
+  <li><a href="../../input_variables/generated_files/varbas.html#kptopt">kptopt</a>,
+    <a href="../../input_variables/generated_files/varbas.html#ngkpt">ngkpt</a>,
+    <a href="../../input_variables/generated_files/varbas.html#nshiftk">nshiftk</a>,
+    <a href="../../input_variables/generated_files/varbas.html#shiftk">shiftk</a>,
+    <a href="../../input_variables/generated_files/vargs.html#kptrlatt">kptrlatt</a>,
     (not easy ... take your time !)
-  <li><a href="../input_variables/html_automatically_generated/vargs.html#diemac" target="kwimg">diemac</a> (compared to isolated
-    molecules, another value is used, while <a href="../input_variables/html_automatically_generated/vargs.html#diemix" target="kwimg">diemix</a>
+  <li><a href="../../input_variables/generated_files/vargs.html#diemac">diemac</a> (compared to isolated
+    molecules, another value is used, while <a href="../../input_variables/generated_files/vargs.html#diemix">diemix</a>
     has been suppressed).
 </ul>
 <p>Note also the following:
-  you will work at fixed <a href="../input_variables/html_automatically_generated/varbas.html#ecut" target="kwimg">ecut</a>
+  you will work at fixed <a href="../../input_variables/generated_files/varbas.html#ecut">ecut</a>
     (=8Ha). It is implicit that in "real life",
   you should do a convergence test with respect to
-  <a href="../input_variables/html_automatically_generated/varbas.html#ecut" target="kwimg">ecut</a> ...
+  <a href="../../input_variables/generated_files/varbas.html#ecut">ecut</a> ...
 <br>
-Here, a suitable <a href="../input_variables/html_automatically_generated/varbas.html#ecut" target="kwimg">ecut</a> is given
+Here, a suitable <a href="../../input_variables/generated_files/varbas.html#ecut">ecut</a> is given
 to you. It will allow to obtain 0.2% relative accuracy on lattice parameters.
 <p>When you have read the input file, you can run the code, as usual
  (it will run for a few seconds).
@@ -140,11 +141,11 @@ src_line: 415
 <p>This is a typical ABINIT error message. It states what is the problem that causes the stop of ABINIT,
   then suggests that it might be due to an error in the input file, namely, an erroneous value of nkpt.
   The expected value, 
-  <a href="../input_variables/html_automatically_generated/varbas.html#nkpt" target="kwimg">nkpt</a> 10. 
+  <a href="../../input_variables/generated_files/varbas.html#nkpt">nkpt</a> 10. 
   is mentioned before the notice that the input file might be erroneous.
   Then, the file at which the problem occured is mentioned, as well as the number of the line in that file. </p>
 
-<p>As the computation of <a href="../input_variables/html_automatically_generated/varbas.html#nkpt" target="kwimg">nkpt</a>
+<p>As the computation of <a href="../../input_variables/generated_files/varbas.html#nkpt">nkpt</a>
 for specific grids of k points is not an easy task, while the even more
 important selection of specific economical grids (the best ratio
 between the accuracy of the integration in the Brillouin zone
@@ -152,9 +153,9 @@ and the number of k-points) is more difficult, some help to the
 user is provided by ABINIT. ABINIT is able to examine automatically
 different k point grids, and to propose the best grids for integration.
 This is described in the abinit_help file, see the input
-variable <a href="../input_variables/html_automatically_generated/varfil.html#prtkpt" target="kwimg">prtkpt</a>,
+variable <a href="../../input_variables/generated_files/varfil.html#prtkpt">prtkpt</a>,
 and the associated characterisation of the integral accuracy, described
-in <a href="../input_variables/html_automatically_generated/vargs.html#kptrlen" target="kwimg">kptrlen</a>.
+in <a href="../../input_variables/generated_files/vargs.html#kptrlen">kptrlen</a>.
 The generation of lists of k-point sets is done in different test cases,
 in the directory ~abinit/tests/v2 . You can directly have a look at the output
 files in ~abinit/tests/v2/Refs , the output files for the tests 61 to 73.
@@ -166,7 +167,7 @@ Do not forget that the CPU time will be linearly proportional to the
 number of k points to be treated: using 10 k points will take five
 more time than using 2 k points. Even for a similar accuracy of the
 Brillouin zone integration (about the same value of
-<a href="../input_variables/html_automatically_generated/vargs.html#kptrlen" target="kwimg">kptrlen</a>),
+<a href="../../input_variables/generated_files/vargs.html#kptrlen">kptrlen</a>),
 it might be easy to generate a grid
 that will fold to 10 k points in the irreducible Brillouin zone, as well as
 one that will fold to 2 k points in the irreducible Brillouin zone.
@@ -186,12 +187,12 @@ Actually performing the convergence study with respect to k points
 <p>The input file ~abinit/tests/tutorial/Input/tbase3_3.in is an example,
   while ~abinit/tests/tutorial/Refs/tbase3_3.out is a reference output
   file. In this output file, you should have a look at the echo of input variables.
-  As you know, these are preprocessed, and, in particular, <a href="../input_variables/html_automatically_generated/varbas.html#ngkpt" target="kwimg">ngkpt</a>
-  and <a href="../input_variables/html_automatically_generated/varbas.html#shiftk" target="kwimg">shiftk</a> are used to generate
-  the list of k points (<a href="../input_variables/html_automatically_generated/varbas.html#kpt" target="kwimg">kpt</a>) and
-  their weights (<a href="../input_variables/html_automatically_generated/varbas.html#wtk" target="kwimg">wtk</a>). You should
-  read the information about <a href="../input_variables/html_automatically_generated/varbas.html#kpt" target="kwimg">kpt</a>
-  and <a href="../input_variables/html_automatically_generated/varbas.html#wtk" target="kwimg">wtk</a>.
+  As you know, these are preprocessed, and, in particular, <a href="../../input_variables/generated_files/varbas.html#ngkpt">ngkpt</a>
+  and <a href="../../input_variables/generated_files/varbas.html#shiftk">shiftk</a> are used to generate
+  the list of k points (<a href="../../input_variables/generated_files/varbas.html#kpt">kpt</a>) and
+  their weights (<a href="../../input_variables/generated_files/varbas.html#wtk">wtk</a>). You should
+  read the information about <a href="../../input_variables/generated_files/varbas.html#kpt">kpt</a>
+  and <a href="../../input_variables/generated_files/varbas.html#wtk">wtk</a>.
 <p>From the output file, here is the evolution of total energy per unit cell:
 
 <pre>
@@ -202,8 +203,8 @@ Actually performing the convergence study with respect to k points
 </pre>
 <p>The difference between dataset 3 and dataset 4 is rather small. Even the dataset
   2 gives an accuracy of about 0.0001 Ha <br>
-  So, our converged value for the total energy, at fixed <a href="../input_variables/html_automatically_generated/varbas.html#acell" target="kwimg">acell</a>,
-  fixed <a href="../input_variables/html_automatically_generated/varbas.html#ecut" target="kwimg">ecut</a>, is -8.8726 Ha .
+  So, our converged value for the total energy, at fixed <a href="../../input_variables/generated_files/varbas.html#acell">acell</a>,
+  fixed <a href="../../input_variables/generated_files/varbas.html#ecut">ecut</a>, is -8.8726 Ha .
 
 <p>
 <hr>
@@ -216,7 +217,7 @@ Actually performing the convergence study with respect to k points
 Determination of the lattice parameters.
 </b></h3>
 
-<p>The input variable "<a href="../input_variables/html_automatically_generated/varrlx.html#optcell" target="kwimg">optcell</a>"
+<p>The input variable <a href="../../input_variables/generated_files/varrlx.html#optcell">optcell</a>
   governs the automatic optimisation of cell shape and volume. <br>
   For the automatic optimisation of cell volume, use:
 <pre>
@@ -226,8 +227,8 @@ ntime 10
 dilatmx 1.05
 ecutsm 0.5
 </pre>
-<p>You should read the indications about <a href="../input_variables/html_automatically_generated/varrlx.html#dilatmx" target="kwimg">dilatmx</a>
-  and <a href="../input_variables/html_automatically_generated/varrlx.html#ecutsm" target="kwimg">ecutsm</a>. <br>
+<p>You should read the indications about <a href="../../input_variables/generated_files/varrlx.html#dilatmx">dilatmx</a>
+  and <a href="../../input_variables/generated_files/varrlx.html#ecutsm">ecutsm</a>. <br>
   Do not test all the k point grids, only those with nkpt 2 and 10.
 
 <p>The input file ~abinit/tests/tutorial/Input/tbase3_4.in is an example,
@@ -253,8 +254,8 @@ of the components is
                         11  22  33
                         23  13  12
 </pre>
-<p>There is only a 0.13% relative difference between <a href="../input_variables/html_automatically_generated/varbas.html#acell" target="kwimg">acell</a>1
-  and <a href="../input_variables/html_automatically_generated/varbas.html#acell" target="kwimg">acell</a>2 . <br>
+<p>There is only a 0.13% relative difference between <a href="../../input_variables/generated_files/varbas.html#acell">acell</a>1
+  and <a href="../../input_variables/generated_files/varbas.html#acell">acell</a>2 . <br>
   So, our converged LDA value for Silicon, with the 14si.pspnc pseudopotential
   (see the tbase3_x.files file) is 10.216
   Bohr (actually 10.21644...), that is 5.406 Angstrom. The experimental value is <code>5.431 Angstrom
@@ -266,7 +267,7 @@ of the components is
 <h3><b>3.5.
 Computing the band structure</b></h3>
 
-<p>We fix the parameters <a href="../input_variables/html_automatically_generated/varbas.html#acell" target="kwimg">acell</a>
+<p>We fix the parameters <a href="../../input_variables/generated_files/varbas.html#acell">acell</a>
   to the theoretical value of 3*10.216, and we fix also the grid of k points (the
   4x4x4 FCC grid, equivalent to a 8x8x8 Monkhorst-pack grid) <br>
   We will ask for 8 bands (4 valence and 4 conduction).
@@ -304,31 +305,31 @@ Gamma (1 1 1)
 </i>
 <p>So, you should set up in your input file, for the first dataset, a usual SCF
   calculation in which you output the density
-  (<a href="../input_variables/html_automatically_generated/varfil.html#prtden" target="kwimg">prtden</a>
+  (<a href="../../input_variables/generated_files/varfil.html#prtden">prtden</a>
   1), and, for the second dataset:
 <ul>
-  <li>fix <a href="../input_variables/html_automatically_generated/varbas.html#iscf" target="kwimg">iscf</a> to -2, to make a
+  <li>fix <a href="../../input_variables/generated_files/varbas.html#iscf">iscf</a> to -2, to make a
     non-self-consistent calculation ;
-  <li>define <a href="../input_variables/html_automatically_generated/varfil.html#getden" target="kwimg">getden</a> -1, to take
+  <li>define <a href="../../input_variables/generated_files/varfil.html#getden">getden</a> -1, to take
     the output density of dataset 1 ;
-  <li>set <a href="../input_variables/html_automatically_generated/varbas.html#nband" target="kwimg">nband</a> to 8 ;
-  <li>set <a href="../input_variables/html_automatically_generated/varbas.html#kptopt" target="kwimg">kptopt</a> to -3, to define
+  <li>set <a href="../../input_variables/generated_files/varbas.html#nband">nband</a> to 8 ;
+  <li>set <a href="../../input_variables/generated_files/varbas.html#kptopt">kptopt</a> to -3, to define
     three segments in the brillouin Zone ;
-  <li>set <a href="../input_variables/html_automatically_generated/vargs.html#ndivk" target="kwimg">ndivk</a> to 10 12 17
+  <li>set <a href="../../input_variables/generated_files/vargs.html#ndivk">ndivk</a> to 10 12 17
     (this means a circuit defined by 4 points, with 10 divisions of the first
     segment, 12 divisions of the second, 17 divisions of the third)
-  <li>set <a href="../input_variables/html_automatically_generated/vargs.html#kptbounds" target="kwimg">kptbounds</a> to
+  <li>set <a href="../../input_variables/generated_files/vargs.html#kptbounds">kptbounds</a> to
     <pre>
                 0.5  0.0  0.0 # L point
                 0.0  0.0  0.0 # Gamma point
                 0.0  0.5  0.5 # X point
                 1.0  1.0  1.0 # Gamma point in another cell.
 </pre>
-  <li>set <a href="../input_variables/html_automatically_generated/vargs.html#enunit" target="kwimg">enunit</a> to 1, in order
+  <li>set <a href="../../input_variables/generated_files/vargs.html#enunit">enunit</a> to 1, in order
     to have eigenenergies in eV
   <li>the only tolerance criterion admitted for non-self-consistent calculations
-    is <a href="../input_variables/html_automatically_generated/varbas.html#tolwfr" target="kwimg">tolwfr</a>. You should set
-    it to 1.0d-10 (or so), and suppress <a href="../input_variables/html_automatically_generated/varbas.html#toldfe" target="kwimg">toldfe</a>.
+    is <a href="../../input_variables/generated_files/varbas.html#tolwfr">tolwfr</a>. You should set
+    it to 1.0d-10 (or so), and suppress <a href="../../input_variables/generated_files/varbas.html#toldfe">toldfe</a>.
 </ul>
 <p>The input file ~abinit/tests/tutorial/Input/tbase3_5.in is an example,
   while ~abinit/tests/tutorial/Refs/tbase3_5.out is a reference output
@@ -349,7 +350,7 @@ Gamma (1 1 1)
 <p>One needs a graphical tool to represent all these data ...
 (For the MAPR 2451 lecture: try with MATLAB).
 In a separate file (_EIG), you will find the list of k-points and eigenenergies
-(the input variable <a href="../input_variables/html_automatically_generated/varfil.html#prteig" target="kwimg">prteig</a> is set by default to 1).
+(the input variable <a href="../../input_variables/generated_files/varfil.html#prteig">prteig</a> is set by default to 1).
 
 <p>Even without a graphical tool we will have a quick look
 at the values at L, Gamma, X and Gamma again:
@@ -380,7 +381,7 @@ band is even slightly displaced with respect to X, see kpt # 21 .
 This underestimation of the band gap is well-known (the famous DFT band-gap problem).
 In order to obtain correct band gaps, you need to go beyond the
 Kohn-Sham Density Functional Theory: use the GW approximation.
-This is described in <a href="lesson_gw1.html">the first lesson on the GW approximation</a>.
+This is described in <a href="../lesson_gw1.html">the first lesson on the GW approximation</a>.
 
 <p>For experimental data and band structure representation, see
 <br>M.L. Cohen and J.R. Chelikowski
@@ -389,33 +390,27 @@ This is described in <a href="lesson_gw1.html">the first lesson on the GW approx
 
 <p>There is a subtlety that is worth to comment about. In non-self-consistent
 calculations, like those performed in the present band structure calculation,
-with <a href="../input_variables/html_automatically_generated/varbas.html#iscf" target="kwimg">iscf</a>=-2, not all bands
-are converged within the tolerance <a href="../input_variables/html_automatically_generated/varbas.html#tolwfr" target="kwimg">tolwfr</a>.
+with <a href="../../input_variables/generated_files/varbas.html#iscf">iscf</a>=-2, not all bands
+are converged within the tolerance <a href="../../input_variables/generated_files/varbas.html#tolwfr">tolwfr</a>.
 Indeed, the two upper bands (by default) have not been taken into account
 to apply this convergence criterion: they constitute a "buffer".
 The number of such
 "buffer" bands is governed by the input variable
-<a href="../input_variables/html_automatically_generated/vargs.html#nbdbuf" target="kwimg">nbdbuf</a>.
+<a href="../../input_variables/generated_files/vargs.html#nbdbuf">nbdbuf</a>.
 
 <p> It can happen that the highest (or two highest) band(s), if not separated by a gap from
 non-treated bands, can exhibit a very slow convergence rate. This buffer
 allows to achieve convergence of "important", non-buffer bands.
 In the present case, 6 bands have been converged with a residual better
-than <a href="../input_variables/html_automatically_generated/varbas.html#tolwfr" target="kwimg">tolwfr</a>, while the
+than <a href="../../input_variables/generated_files/varbas.html#tolwfr">tolwfr</a>, while the
 two upper bands are less converged (still sufficiently for graphical representation
 of the band structure). In order to achieve the same convergence
 for all 8 bands, it is advised to use
-<a href="../input_variables/html_automatically_generated/varbas.html#nband" target="kwimg">nband</a>=10 (that is, 8 + 2).
-<--- end body --->
+<a href="../../input_variables/generated_files/varbas.html#nband">nband</a>=10 (that is, 8 + 2).
 
-<h5>Copyright (C) 2000-2017 ABINIT group (XG,RC)
-<br> This file is distributed under the terms of the GNU General Public License, see
-~abinit/COPYING or <a href="http://www.gnu.org/copyleft/gpl.txt">
-http://www.gnu.org/copyleft/gpl.txt </a>.
-<br> For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
-</h5>
-
-<script type="text/javascript" src="list_internal_links.js"> </script>
+<script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
 
 </body>
 </html>
+
+

@@ -1,13 +1,15 @@
 <html>
-<head>
-<title>Tutorial #2</title>
+<head><title>Second (basic) lesson</title>
+<link rel=stylesheet type="text/css" href="../formabinit.css">
 </head>
 <body bgcolor="#ffffff">
+
 <hr>
-<h1>ABINIT tutorial, second lesson:</h1>
-<h2>The H2 molecule, with convergence studies. </h2>
-<hr>
-<--- begin intro --->
+<a name="top"></a>
+
+<h1>ABINIT tutorial. Second (basic) lesson :</h1>
+
+The H<sub>2</sub> molecule, with convergence studies.
 <p>This lesson aims at showing how to get converged values
 for the following physical properties:
 <ul>
@@ -25,20 +27,22 @@ pseudopotential are not examined.
 <p>You will also finish to read the abinit_help file.
 
 <p>This lesson should take about 1 hour.
-<--- end intro --->
 
-<script type="text/javascript" src="list_internal_links.js"> </script>
+<h5>Copyright (C) 2000-2017 ABINIT group (XG,RC)
+<script type="text/javascript" src="../../js_files/copyright.js"> </script>
+</h5> 
 
-<h3><b>Content of lesson 2</b></h3>
-<--- begin body --->
+<script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
+
+
 <ul>
-  <li><a href="lesson_base2.html#20">2.0</a> Summary of the previous lesson</li>
-  <li><a href="lesson_base2.html#21">2.1</a> The convergence in <a href="../input_variables/html_automatically_generated/varbas.html#ecut" target="kwimg">ecut</a></li>
-  <li><a href="lesson_base2.html#22">2.2</a> The convergence in <a href="../input_variables/html_automatically_generated/varbas.html#ecut" target="kwimg">ecut</a></li>
-  <li><a href="lesson_base2.html#23">2.3</a> The convergence in <a href="../input_variables/html_automatically_generated/varbas.html#acell" target="kwimg">acell</a></li>
-  <li><a href="lesson_base2.html#24">2.4</a> The final calculation in Local (Spin)
+  <li><a href="#20">2.0</a> Summary of the previous lesson</li>
+  <li><a href="#21">2.1</a> The convergence in <a href="../../input_variables/generated_files/varbas.html#ecut">ecut</a></li>
+  <li><a href="#22">2.2</a> The convergence in <a href="../../input_variables/generated_files/varbas.html#ecut">ecut</a></li>
+  <li><a href="#23">2.3</a> The convergence in <a href="../../input_variables/generated_files/varbas.html#acell">acell</a></li>
+  <li><a href="#24">2.4</a> The final calculation in Local (Spin)
     Density Approximation.</li>
-  <li><a href="lesson_base2.html#25">2.5</a> The use of the Generalized Gradient Approximation.</li>
+  <li><a href="#25">2.5</a> The use of the Generalized Gradient Approximation.</li>
 </ul>
 <hr>
 <h4><a name="20"></a></h4>
@@ -47,7 +51,7 @@ pseudopotential are not examined.
 <p>We studied the H2 molecule in a big box.
   We used 10 Ha as cut-off energy, a 10x10x10 Bohr^3 supercell, the local-density
   approximation (as well as the local-spin-density approximation) in the Teter
-  parametrization (<a href="../input_variables/html_automatically_generated/varbas.html#ixc" target="kwimg">ixc</a>=1, the default),
+  parametrization (<a href="../../input_variables/generated_files/varbas.html#ixc">ixc</a>=1, the default),
   and a pseudopotential from the Goedecker-Hutter-Teter table.
 <p>At this stage, we compared our results:
 <ul>
@@ -100,45 +104,45 @@ and
     xcart1  -7.6091015760E-01  0.0000000000E+00  0.0000000000E+00
              7.6091015760E-01  0.0000000000E+00  0.0000000000E+00
 </pre>
-<p>These are similar to those determined in <a href="lesson_base1.html">lesson 1</a>,
+<p>These are similar to those determined in <a href="../lesson_base1.html">lesson 1</a>,
   although they have been obtained in one run. You can also check that the residual
   forces are lower than <code>5.0d-4</code>.
   Convergence issues are discussed in
-  <a href="../users/abinit_help.html#7" target="helpsimg">section 7</a>
+  <a href="../../users/abinit_help.html#7" target="helpsimg">section 7</a>
   of the abinit_help file.<a name="ref11"></a><br>
   You should read it. By the way, you have read many parts of the abinit_help
   file! You are missing the sections
-  <a href="../users/abinit_help.html#2" target="helpsimg">2</a>,
-  <a href="../users/abinit_help.html#5" target="helpsimg">5</a>,
-  <a href="../users/abinit_help.html#8" target="helpsimg">8</a>. You are also missing the
+  <a href="../../users/abinit_help.html#2" target="helpsimg">2</a>,
+  <a href="../../users/abinit_help.html#5" target="helpsimg">5</a>,
+  <a href="../../users/abinit_help.html#8" target="helpsimg">8</a>. You are also missing the
   description of many input variables. We suggest that you finish reading
   entirely the abinit_help file now, while the knowledge of the input variables will
   come in the long run. </p>
 <p><b>2.1.b</b> Many convergence parameters have already been identified. We will
-  focus only on <a href="../input_variables/html_automatically_generated/varbas.html#ecut" target="kwimg">ecut</a> and <a href="../input_variables/html_automatically_generated/varbas.html#acell" target="kwimg">acell</a>.
+  focus only on <a href="../../input_variables/generated_files/varbas.html#ecut">ecut</a> and <a href="../../input_variables/generated_files/varbas.html#acell">acell</a>.
   This is because
 <ul>
   <li> the convergence of the SCF cycle and geometry determination are well under
-    control thanks to <a href="../input_variables/html_automatically_generated/varbas.html#toldfe" target="kwimg">toldfe</a>,
-    <a href="../input_variables/html_automatically_generated/varbas.html#toldff" target="kwimg">toldff</a> and <a href="../input_variables/html_automatically_generated/varrlx.html#tolmxf" target="kwimg">tolmxf</a>
+    control thanks to <a href="../../input_variables/generated_files/varbas.html#toldfe">toldfe</a>,
+    <a href="../../input_variables/generated_files/varbas.html#toldff">toldff</a> and <a href="../../input_variables/generated_files/varrlx.html#tolmxf">tolmxf</a>
     (this might not be the case for other physical properties)</li>
   <li> there is no k point convergence study to be done for an isolated system
     in a big box: no additional information is gained by adding a k-point beyond one</li>
   <li> the boxcut value is automatically chosen larger than 2 by ABINIT, see the
-    determination of the input variable "<a href="../input_variables/html_automatically_generated/vargs.html#ngfft" target="kwimg">ngfft</a>"
+    determination of the input variable <a href="../../input_variables/generated_files/vargs.html#ngfft">ngfft</a>
     by preprocessing</li>
-  <li> we are using <a href="../input_variables/html_automatically_generated/varrlx.html#ionmov" target="kwimg">ionmov</a>=2
+  <li> we are using <a href="../../input_variables/generated_files/varrlx.html#ionmov">ionmov</a>=2
     for the determination of the geometry.</li>
 </ul>
 
-For the check of convergence with respect to <a href="../input_variables/html_automatically_generated/varbas.html#ecut" target="kwimg">ecut</a>,
+For the check of convergence with respect to <a href="../../input_variables/generated_files/varbas.html#ecut">ecut</a>,
 you have the choice between doing different runs of the tbase2_1.in
-file with different values of <a href="../input_variables/html_automatically_generated/varbas.html#ecut" target="kwimg">ecut</a>, or doing
+file with different values of <a href="../../input_variables/generated_files/varbas.html#ecut">ecut</a>, or doing
 a double loop of datasets, as proposed in ~abinit/tests/tutorial/Input/tbase2_2.in .
-The values of <a href="../input_variables/html_automatically_generated/varbas.html#ecut" target="kwimg">ecut</a> have been
+The values of <a href="../../input_variables/generated_files/varbas.html#ecut">ecut</a> have been
 chosen between 10Ha and 35Ha, by step of 5 Ha. If you want to make a double loop,
 you might benefit of reading again the
-<a href="../users/abinit_help.html#loop" target="helpsimg">double-loop section</a>
+<a href="../../users/abinit_help.html#loop" target="helpsimg">double-loop section</a>
 of the abinit_help file.
 
 <p><b>2.2.a</b>
@@ -205,14 +209,14 @@ that we are using for Hydrogen is rather "hard" ...
 <h3><p><b><a name="23">2.3</a>
 The convergence in acell</b></h3>
 
-<p>The same technique as for <a href="../input_variables/html_automatically_generated/varbas.html#ecut" target="kwimg">ecut</a>
-  should be now used for the convergence in <a href="../input_variables/html_automatically_generated/varbas.html#acell" target="kwimg">acell</a>.
-  We will explore <a href="../input_variables/html_automatically_generated/varbas.html#acell" target="kwimg">acell</a> starting
+<p>The same technique as for <a href="../../input_variables/generated_files/varbas.html#ecut">ecut</a>
+  should be now used for the convergence in <a href="../../input_variables/generated_files/varbas.html#acell">acell</a>.
+  We will explore <a href="../../input_variables/generated_files/varbas.html#acell">acell</a> starting
   from <code>8 8 8</code> to <code>18 18 18</code>, by step of <code>2 2 2</code>.
-  We keep <a href="../input_variables/html_automatically_generated/varbas.html#ecut" target="kwimg">ecut</a> 10 for this study.
+  We keep <a href="../../input_variables/generated_files/varbas.html#ecut">ecut</a> 10 for this study.
   Indeed, it is a rather general rule that there is little cross-influence between
-  the convergence of <a href="../input_variables/html_automatically_generated/varbas.html#ecut" target="kwimg">ecut</a> and the
-  convergence of <a href="../input_variables/html_automatically_generated/varbas.html#acell" target="kwimg">acell</a>. The file
+  the convergence of <a href="../../input_variables/generated_files/varbas.html#ecut">ecut</a> and the
+  convergence of <a href="../../input_variables/generated_files/varbas.html#acell">acell</a>. The file
   ~abinit/tests/tutorial/Input/tbase2_3.in can be used as an example. 
   The output data (~abinit/tests/tutorial/Refs/tbase2_3.out) are as follows:
 <pre>
@@ -350,19 +354,19 @@ minimal! This allows to have reasonable CPU time still.
 <p><h3><b><a name="24">2.4</a>
 The final calculation in Local (Spin) Density Approximation.</b></h3>
 
-<p>We now use the correct values of both <a href="../input_variables/html_automatically_generated/varbas.html#ecut" target="kwimg">ecut</a>
-  and <a href="../input_variables/html_automatically_generated/varbas.html#acell" target="kwimg">acell</a>. Well, you should
+<p>We now use the correct values of both <a href="../../input_variables/generated_files/varbas.html#ecut">ecut</a>
+  and <a href="../../input_variables/generated_files/varbas.html#acell">acell</a>. Well, you should
   modify the tbase2_3.in file to make a calculation
   with <code>acell 12 12 12</code>
   and <code>ecut 30</code>.
   You can still use the double loop feature with
-  <code><a href="../input_variables/html_automatically_generated/varbas.html#udtset" target="kwimg">udtset</a>
+  <code><a href="../../input_variables/generated_files/varbas.html#udtset">udtset</a>
   1 2</code> (which reduces to a single loop), to minimize the modifications to
   the file. The file ~abinit/tests/tutorial/Input/tbase2_4.in can be taken as an example of input
   file, and ~abinit/tests/tutorial/Refs/tbase2_4.out as an example of output file.
 <p>Since we are doing the calculation at a single
-  (<a href="../input_variables/html_automatically_generated/varbas.html#ecut" target="kwimg">ecut</a>,
-  <a href="../input_variables/html_automatically_generated/varbas.html#acell" target="kwimg">acell</a>) pair, the total CPU time
+  (<a href="../../input_variables/generated_files/varbas.html#ecut">ecut</a>,
+  <a href="../../input_variables/generated_files/varbas.html#acell">acell</a>) pair, the total CPU time
   is not as much as for the previous determinations of optimal values through
   series calculations. However, the memory needs have still increased a bit.
 <p>The output data are:
@@ -381,12 +385,12 @@ The final calculation in Local (Spin) Density Approximation.</b></h3>
 <li>These are our final data for the local (spin) density approximation.
 </ul>
 
-We have used <code><a href="../input_variables/html_automatically_generated/varbas.html#ixc" target="kwimg">ixc</a>=1</code>
-. Other expressions for the local (spin) density approximation <code><a href="../input_variables/html_automatically_generated/varbas.html#ixc" target="kwimg">ixc</a>=2,
+We have used <code><a href="../../input_variables/generated_files/varbas.html#ixc">ixc</a>=1</code>
+. Other expressions for the local (spin) density approximation <code><a href="../../input_variables/generated_files/varbas.html#ixc">ixc</a>=2,
 3 .. 7</code> are possible. The values 1, 2, 3 and 7 should give about the same
 results, since they all start from the XC energy of the homogeneous electron gas,
 as determined by Quantum Monte Carlo calculations. <br>
-Other possibilities <code><a href="../input_variables/html_automatically_generated/varbas.html#ixc" target="kwimg">ixc</a>=4,
+Other possibilities <code><a href="../../input_variables/generated_files/varbas.html#ixc">ixc</a>=4,
 5, 6</code> are older local density functionals, that could not rely on these
 data.
 
@@ -406,13 +410,13 @@ with a very small core (including only the 1s orbital), pseudopotentials
 issued from the LDA and from the GGA are very similar.
 
 <p>So, we will not change our pseudopotential. This will save us lot of time,
-  as we should not redo an <a href="../input_variables/html_automatically_generated/varbas.html#ecut" target="kwimg">ecut</a>
+  as we should not redo an <a href="../../input_variables/generated_files/varbas.html#ecut">ecut</a>
   convergence test (ecut is often characteristic of the pseudopotentials that
   are used in a calculation).
-<p>Independently of the pseudopotential, an <a href="../input_variables/html_automatically_generated/varbas.html#acell" target="kwimg">acell</a>
+<p>Independently of the pseudopotential, an <a href="../../input_variables/generated_files/varbas.html#acell">acell</a>
   convergence test should not be done again, since the vacuum is treated similarly
   in LDA or GGA.
-<p>So, our final values within GGA will be easily obtained, by setting <a href="../input_variables/html_automatically_generated/varbas.html#ixc" target="kwimg">ixc</a>
+<p>So, our final values within GGA will be easily obtained, by setting <a href="../../input_variables/generated_files/varbas.html#ixc">ixc</a>
   to 11 in the input file tbase2_4.in. See ~abinit/tests/tutorial/Input/tbase2_5.in
   for an example.
 <pre>
@@ -440,17 +444,10 @@ within 4% of the experimental bond length, and within
 
 <p><i>Do not forget that the typical accuracy of LDA and GGA varies
 with the class of materials studied...</i>
-<--- end body --->
 
-<h5>Copyright (C) 2000-2017 ABINIT group (XG,RC)
-<br> This file is distributed under the terms of the GNU General Public License, see
-~abinit/COPYING or <a href="http://www.gnu.org/copyleft/gpl.txt">
-http://www.gnu.org/copyleft/gpl.txt </a>.
-<br> For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
-</h5>
-
-<script type="text/javascript" src="list_internal_links.js"> </script>
+<script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
 
 </body>
 </html>
+
 
