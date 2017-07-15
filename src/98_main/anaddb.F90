@@ -179,6 +179,7 @@ program anaddb
 &                       dimonly=1)
 
  natom = ddb_hdr%natom
+ ntypat = ddb_hdr%ntypat
  mtyp = ddb_hdr%mblktyp
  usepaw = ddb_hdr%usepaw
 
