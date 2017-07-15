@@ -33,9 +33,10 @@ invars_ori = "input_variables/origin_files"
 invars_gen = "input_variables/generated_files"
 topics_ori = "topics/origin_files"
 topics_gen = "topics/generated_files"
+theory_ori = "theory/origin_files"
+theory_gen = "theory/generated_files"
 tuto_ori = "tutorial/origin_files"
 tuto_gen = "tutorial/generated_files"
-tuto_future = "tutorial/future_origin_files"
 
 ################################################################################
 ###############################################################################
@@ -138,8 +139,8 @@ def read_yaml_file(ymlfile):
     print("Use "+ymlfile+" as database input file for the list of sections ...")
   elif ymlfile== tuto_ori+"/lessons.yml":
     print("Use "+ymlfile+" as database input file for the list of lessons ...")
-  elif ymlfile== tuto_future+"/lessons.yml":
-    print("Use "+ymlfile+" as database input file for the list of future lessons ...")
+  elif ymlfile== theory_ori+"/theorydocs.yml":
+    print("Use "+ymlfile+" as database input file for the list of theory documents ...")
   elif ymlfile== topics_ori+"/tests_dirs.yml":
     print("Use "+ymlfile+" as database input file for the list of directories in which automatic test input files are present ...")
   elif ymlfile== topics_gen+"/topics_in_tests.yml":
@@ -1031,6 +1032,134 @@ for i, lesson_info in enumerate(lessons):
 ################################################################################
 ################################################################################
 
+# Automatic translation
+# of the theory_*html files to theory_*yml files
+
+################################################################################
+
+activate_translation=0
+if activate_translation==1:
+
+  docs=read_yaml_file(theory_ori+"/theorydocs.yml")
+
+  for i, doc_info in enumerate(docs):
+
+    # Skip the default section
+    name = doc_info.name
+    if name=="default":
+      break
+  
+    path_doc_html="theory/theory_"+name+".html"
+    path_doc_yml=theory_ori+"/theory_"+name+".yml"
+    print("Will use file "+path_doc_html+" to build the file "+path_doc_yml+" ... ",end="")
+
+    f_doc_html=open(path_doc_html,"r")
+    doc_html=f_doc_html.readlines()
+
+    doc_yml=""
+    doc_yml+="# This YAML file contains the introduction as well as the body (including the table of content) of the html theory document.\n"
+    doc_yml+="# In order to modify the other parts, modify the file theorydocs.yml .\n"
+    doc_yml+="# This is the introduction ...\n"
+    doc_yml+="intro : |\n"
+
+    body_header=""
+    body_header+="# This is the body, including the table of content ...\n"
+    body_header+="body : |\n"
+
+    intro=0
+    body=0
+    for line in doc_html:
+      if "<!--" in line and "-->" in line:
+        if "begin" in line :
+          if intro==1 or body==1:
+            raise ValueError("(intro,body)=(%s,%s)"%(intro,body))
+          if "intro" in line :
+            intro=1
+            continue
+          if "body" in line:
+            body=1
+            doc_yml+=body_header
+            continue
+        if "end" in line and "intro" in line:
+          if intro==0 or body==1:
+            raise ValueError("(intro,body)=(%s,%s)"%(intro,body))
+          intro=0
+        if "end" in line and "body" in line:
+          if intro==1 or body==0:
+            raise ValueError("(intro,body)=(%s,%s)"%(intro,body))
+          body=0
+
+      if intro+body==1 :
+        #The line must be written, but must possibly perform changes:
+  
+        if "<a href=" in line:
+          # Stabilize the own reference
+          string_old='href="theory_'+name+'.html'
+          string_new='href="'
+          line=line.replace(string_old,string_new)
+          string_old='href="./theory_'+name+'.html'
+          string_new='href="'
+          line=line.replace(string_old,string_new)
+          # Correct the references to the other files in the tutorial directory (transient measure in case of the "lesson_" files)
+          #string_old='href="lesson_'
+          #string_new='href="../lesson_'
+          #line=line.replace(string_old,string_new)
+          #string_old='href="./lesson_'
+          #line=line.replace(string_old,string_new)
+          #string_old='href="theory_'
+          #string_new='href="../theory_'
+          #line=line.replace(string_old,string_new)
+          #string_old='href="./theory_'
+          #line=line.replace(string_old,string_new)
+          #string_old='href="welcome'
+          #string_new='href="../welcome'
+          #line=line.replace(string_old,string_new)
+          #string_old='href="./welcome'
+          #line=line.replace(string_old,string_new)
+          # Create automatically the new links for the input variables
+          if "html_automatically_generated" in line:
+            # See whether one variable appear
+            for i, var in enumerate(variables):
+              if var.abivarname in line:
+                name = var.abivarname
+                section = var.section
+                string_old='<a href="../input_variables/html_automatically_generated/%s.html#%s" target="kwimg">%s</a>'%(section,name,name)
+                string_new="[["+name+"]]"
+                line=line.replace('"'+string_old+'"',string_new)
+                line=line.replace(string_old,string_new)
+                # Slight variation
+                string_old='<a href="../input_variables/html_automatically_generated/%s.html#%s" target="kwimg">%s</a>'%(section,name,name)
+                line=line.replace('"'+string_old+'"',string_new)
+                line=line.replace(string_old,string_new)
+            # Otherwise, correct the path
+            string_old='href="../input_variables/html_automatically_generated'
+            string_new='href="../../input_variables/generated_files'
+            line=line.replace(string_old,string_new)
+          if "users" in line:
+            string_old='href="../users/'
+            string_new='href="../../users/'
+            line=line.replace(string_old,string_new)
+
+        #string_old='src="lesson'
+        #string_new='src="../documents/lesson'
+        #line=line.replace(string_old,string_new)
+        #string_old='src="./lesson'
+        #line=line.replace(string_old,string_new)
+        #string_old='src=./lesson'
+        #string_new='src=../documents/lesson'
+        #line=line.replace(string_old,string_new)
+
+        lesson_yml+="  "+line
+
+    # Write the finalized html file
+    f_doc_yml=open(path_doc_yml,"w")
+    f_doc_yml.write(doc_yml)
+    f_doc_yml.close()
+    print("File %s written ..."%path_doc_yml )
+
+################################################################################
+################################################################################
+
 # Come back to the bibliography
 
 ################################################################################
@@ -1135,133 +1264,6 @@ for i, bibhtml_info in enumerate(bibhtml):
   f_cur.write("\n")
   f_cur.close()
   print("File %s written ..."%file_cur )
-
-################################################################################
-################################################################################
-
-# Automatic translation 
-# of the lesson_*html files to lesson_*yml files
-
-################################################################################
-
-sys.exit()
-
-tuto_future = "tutorial/future_origin_files"
-lessons_future=read_yaml_file(tuto_future+"/lessons.yml")
-
-for i, lesson_info in enumerate(lessons_future):
-
-  # Skip the default section
-  lesson = lesson_info.name
-  if lesson=="default":
-    break
-
-  path_lesson_html="tutorial/lesson_"+lesson+".html"
-  path_lesson_yml=tuto_future+"/lesson_"+lesson+".yml"
-  print("Will use file "+path_lesson_html+" to build the file "+path_lesson_yml+" ... ",end="")
-  
-  f_lesson_html=open(path_lesson_html,"r")
-  lesson_html=f_lesson_html.readlines()
-
-  lesson_yml=""
-  lesson_yml+="# This YAML file contains the introduction as well as the body (including the table of content) of the html lesson.\n"
-  lesson_yml+="# In order to modify the other parts, modify the file lessons.html .\n"
-  lesson_yml+="# This is the introduction ...\n"
-  lesson_yml+="intro : |\n"
-
-  body_header=""
-  body_header+="# This is the body, including the table of content ...\n"
-  body_header+="body : |\n"
-
-  intro=0
-  body=0
-  for line in lesson_html:
-    if "<!--" in line and "-->" in line:
-      if "begin" in line :
-        if intro==1 or body==1:
-          raise ValueError("(intro,body)=(%s,%s)"%(intro,body))
-        if "intro" in line :
-          intro=1
-          continue
-        if "body" in line:
-          body=1
-          lesson_yml+=body_header
-          continue
-      if "end" in line and "intro" in line:
-        if intro==0 or body==1:
-          raise ValueError("(intro,body)=(%s,%s)"%(intro,body))
-        intro=0
-      if "end" in line and "body" in line:
-        if intro==1 or body==0:
-          raise ValueError("(intro,body)=(%s,%s)"%(intro,body))
-        body=0
-
-    if intro+body==1 :
-      #The line must be written, but must possibly perform changes:
-
-      if "<a href=" in line:
-        # Stabilize the own reference
-        string_old='href="lesson_'+lesson+'.html'
-        string_new='href="'
-        line=line.replace(string_old,string_new)
-        string_old='href="./lesson_'+lesson+'.html'
-        string_new='href="'
-        line=line.replace(string_old,string_new)
-        # Correct the references to the other files in the tutorial directory (transient measure in case of the "lesson_" files)
-        #string_old='href="lesson_'
-        #string_new='href="../lesson_'
-        #line=line.replace(string_old,string_new)
-        #string_old='href="./lesson_'
-        #line=line.replace(string_old,string_new)
-        string_old='href="theory_'
-        string_new='href="../theory_'
-        line=line.replace(string_old,string_new)
-        string_old='href="./theory_'
-        line=line.replace(string_old,string_new)
-        string_old='href="welcome'
-        string_new='href="../welcome'
-        line=line.replace(string_old,string_new)
-        string_old='href="./welcome'
-        line=line.replace(string_old,string_new)
-        # Create automatically the new links for the input variables
-        if "html_automatically_generated" in line:
-          # See whether one variable appear
-          for i, var in enumerate(variables):
-            if var.abivarname in line:
-              name = var.abivarname
-              section = var.section
-              string_old='<a href="../input_variables/html_automatically_generated/%s.html#%s" target="kwimg">%s</a>'%(section,name,name)
-              string_new="[["+name+"]]"
-              line=line.replace('"'+string_old+'"',string_new)
-              line=line.replace(string_old,string_new)
-              # Slight variation
-              string_old='<a href="../input_variables/html_automatically_generated/%s.html#%s" target="kwimg">%s</a>'%(section,name,name)
-              line=line.replace('"'+string_old+'"',string_new)
-              line=line.replace(string_old,string_new)
-          # Otherwise, correct the path
-          string_old='href="../input_variables/html_automatically_generated'
-          string_new='href="../../input_variables/generated_files'
-          line=line.replace(string_old,string_new)
-        if "users" in line:
-          string_old='href="../users/'
-          string_new='href="../../users/'
-          line=line.replace(string_old,string_new)
-      string_old='src="lesson'
-      string_new='src="../documents/lesson'
-      line=line.replace(string_old,string_new)
-      string_old='src="./lesson'
-      line=line.replace(string_old,string_new)
-      string_old='src=./lesson'
-      string_new='src=../documents/lesson'
-      line=line.replace(string_old,string_new)
-
-      lesson_yml+="  "+line
-
-  # Write the finalized html file
-  f_lesson_yml=open(path_lesson_yml,"w")
-  f_lesson_yml.write(lesson_yml)
-  f_lesson_yml.close()
-  print("File %s written ..."%path_lesson_yml )
 
 ################################################################################
 
