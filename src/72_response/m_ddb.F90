@@ -1739,22 +1739,22 @@ subroutine ddb_from_file(ddb,filename,brav,natom,natifc,atifc,crystal,comm,prtvo
  DBG_ENTER("COLL")
 
 ! Must read natom from the DDB before being able to allocate some arrays needed for invars9
- call ddb_getdims(dimekb,filename,lmnmax,mband,mtyp,msym,ddb_natom,nblok,nkpt,ntypat,get_unit(),usepaw,DDB_VERSION,comm)
-! call ddb_hdr_open_read(ddb_hdr,filename,ddbun,DDB_VERSION, &
-!&                       dimonly=1)
-!
-! nblok = ddb_hdr%nblok
-! mtyp = ddb_hdr%mblktyp
-! msym = ddb_hdr%msym
-! ddb_natom = ddb_hdr%natom
-! ntypat = ddb_hdr%ntypat
-! mband = ddb_hdr%mband
-! nkpt = ddb_hdr%nkpt
-! usepaw = ddb_hdr%usepaw
-! dimekb = ddb_hdr%psps%dimekb
-! lmnmax = ddb_hdr%psps%lmnmax
-!
-! call ddb_hdr_free(ddb_hdr)
+! call ddb_getdims(dimekb,filename,lmnmax,mband,mtyp,msym,ddb_natom,nblok,nkpt,ntypat,get_unit(),usepaw,DDB_VERSION,comm)
+ call ddb_hdr_open_read(ddb_hdr,filename,ddbun,DDB_VERSION, comm=comm,&
+&                       dimonly=1)
+
+ nblok = ddb_hdr%nblok
+ mtyp = ddb_hdr%mblktyp
+ msym = ddb_hdr%msym
+ ddb_natom = ddb_hdr%natom
+ ntypat = ddb_hdr%ntypat
+ mband = ddb_hdr%mband
+ nkpt = ddb_hdr%nkpt
+ usepaw = ddb_hdr%usepaw
+ dimekb = ddb_hdr%psps%dimekb
+ lmnmax = ddb_hdr%psps%lmnmax
+
+ call ddb_hdr_free(ddb_hdr)
 
  if (ddb_natom /= natom) then
    MSG_ERROR(sjoin("input natom:",itoa(natom),"does not agree with DDB value:",itoa(natom)))
@@ -1878,54 +1878,54 @@ subroutine ddb_from_file(ddb,filename,brav,natom,natifc,atifc,crystal,comm,prtvo
  !    above upper bound of -1360580392
  !
  !
- ABI_ALLOCATE(symrel_red, (3,3,nsym))
- ABI_ALLOCATE(tnons_red, (3,nsym))
- ABI_ALLOCATE(symafm_red, (nsym))
- ABI_ALLOCATE(amu, (ntypat))
+ !ABI_ALLOCATE(symrel_red, (3,3,nsym))
+ !ABI_ALLOCATE(tnons_red, (3,nsym))
+ !ABI_ALLOCATE(symafm_red, (nsym))
+ !ABI_ALLOCATE(amu, (ntypat))
 
- do ii = 1,ntypat
-   amu(ii) = ddb%amu(ii)
- end do
+ !do ii = 1,ntypat
+ !  amu(ii) = ddb%amu(ii)
+ !end do
 
- !symrel_red(:,:,:) = symrel(:,:,1:nsym)
- !tnons_red(:,:,:) = tnons(:,1:nsym)
- !symafm_red(:,:,:) = symafm(1:nsym)
- do isym = 1,nsym
-   symafm_red(isym) = symafm(isym)
-   do jj = 1,3
-     tnons_red(jj,isym) = tnons(jj,isym)
-     do ii = 1,3
-       symrel_red(ii,jj,isym) = symrel(ii,jj,isym)
-     end do
-   end do
- end do
+ !!symrel_red(:,:,:) = symrel(:,:,1:nsym)
+ !!tnons_red(:,:,:) = tnons(:,1:nsym)
+ !!symafm_red(:,:,:) = symafm(1:nsym)
+ !do isym = 1,nsym
+ !  symafm_red(isym) = symafm(isym)
+ !  do jj = 1,3
+ !    tnons_red(jj,isym) = tnons(jj,isym)
+ !    do ii = 1,3
+ !      symrel_red(ii,jj,isym) = symrel(ii,jj,isym)
+ !    end do
+ !  end do
+ !end do
 
- ABI_FREE(symrel)
- ABI_FREE(tnons)
- ABI_FREE(symafm)
+ !ABI_FREE(symrel)
+ !ABI_FREE(tnons)
+ !ABI_FREE(symafm)
 
- ABI_ALLOCATE(symrel, (3,3,nsym))
- ABI_ALLOCATE(tnons, (3,nsym))
- ABI_ALLOCATE(symafm, (nsym))
+ !ABI_ALLOCATE(symrel, (3,3,nsym))
+ !ABI_ALLOCATE(tnons, (3,nsym))
+ !ABI_ALLOCATE(symafm, (nsym))
 
- !symrel = symrel_red
- !tnons = tnons_red
- !symafm = symafm_red
+ !!symrel = symrel_red
+ !!tnons = tnons_red
+ !!symafm = symafm_red
 
- do isym = 1,nsym
-   symafm(isym) = symafm_red(isym)
-   do jj = 1,3
-     tnons(jj,isym) = tnons_red(jj,isym)
-     do ii = 1,3
-       symrel(ii,jj,isym) = symrel_red(ii,jj,isym)
-     end do
-   end do
- end do
+ !do isym = 1,nsym
+ !  symafm(isym) = symafm_red(isym)
+ !  do jj = 1,3
+ !    tnons(jj,isym) = tnons_red(jj,isym)
+ !    do ii = 1,3
+ !      symrel(ii,jj,isym) = symrel_red(ii,jj,isym)
+ !    end do
+ !  end do
+ !end do
 
- ABI_FREE(amu)
- ABI_FREE(symrel_red)
- ABI_FREE(tnons_red)
- ABI_FREE(symafm_red)
+ !ABI_FREE(amu)
+ !ABI_FREE(symrel_red)
+ !ABI_FREE(tnons_red)
+ !ABI_FREE(symafm_red)
  !
  ! END DEBUG ================================================================ !
 
