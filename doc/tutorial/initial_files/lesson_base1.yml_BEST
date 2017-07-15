@@ -1,6 +1,6 @@
 # This YAML file contains the introduction as well as the body (including the table of content) of the html lesson.
 # In order to modify the other parts, modify the file lessons.html .
-# This is the introduction ...
+# This is the introduction ... 
 intro : |
   <p>This lesson aims at showing how to get the following physical properties:
     <ul>
@@ -14,12 +14,13 @@ intro : |
     feature. You will also learn about the two output files as well as the density
     file. <p></p>
   <p>This first lesson covers the sections 1, 3, 4 and 6 of the
-    <a href="../../users/abinit_help.html" target="helpsimg">abinit_help</a> file.</p>
+    [[abinit_help]] file.</p>
   <p>The very first step is a detailed tour of the input and output files: you
     are like a tourist, and you discover a town in a coach. You will have a bit
     more freedom after that first step ... <br>
     It is supposed that you have some good knowledge of UNIX/Linux. </p>
   <p>This lesson should take about 2 hours. </p>
+  
 # This is the body, including the table of content ...
 body : |
   <ul>
@@ -42,22 +43,22 @@ body : |
   Note that the present tutorial will use four different windows:
   one to visualize the text of the tutorial (the present window),
   a second to run the code, a third to visualize
-  sections of the abinit_help file (that will open automatically),
+  sections of the [[abinit_help]] file (that will open automatically),
   and a fourth one for the description of input variables (that will also open automatically).
   Try to manage adequately these four windows ...
   
   <p><b>1.1.a</b> In addition to the present window,
-  open the second window. Go to the Tutorial directory (that we refer as ~abinit/tests/tutorial/Input).
+  open the second window. Go to the Tutorial directory (that we refer as <a href="../../tests/tutorial/Input">~abinit/tests/tutorial/Input</a>).
   <li> <i>cd ~abinit/tests/tutorial/Input</i></li><br>
   In that directory, you will find the necessary input files to run the examples
   related to this tutorial.
   Take a few seconds to read the names of the files already
-  present in ~abinit/tests/tutorial/Input. Compare with the lessons mentioned in
+  present in <a href="../../tests/tutorial/Input">~abinit/tests/tutorial/Input</a>. Compare with the lessons mentioned in
   the index of the <a href="../welcome.html"><B>Tutorial home page</B></A>.
   You will find other input files,
   specific for the Density Functional Perturbation Theory
   ("Response functions") capabilities of ABINIT
-  in the directory <i>~abinit/tests/tutorespfn/Input</i>.<br>
+  in the directory <a href="../../tests/tutorespfn/Input">~abinit/tests/tutorespfn/Input</a>.<br>
   
   <p><b>1.1.b </b>You also need a working directory.
   So, you should create a subdirectory
@@ -82,7 +83,8 @@ body : |
    Later, you will again modify these lines, to treat more cases. Make sure that the last line,
    gives the correct location of the pseudopotential. Close the tbase1_x.files file.
    Then, copy the file
-   ~abinit/tests/tutorial/Input/tbase1_1.in</a> in "Work":<br>
+   <a href="../../tests/tutorial/Input/tbase1_1.in">~abinit/tests/tutorial/Input/tbase1_1.in</a>
+   in "Work":<br>
   <li><i> cp ../tbase1_1.in . </i></li>
   
   <p>
@@ -113,7 +115,9 @@ body : |
     Different output files have been created, including a "log" file and the
     output file "tbase1_1.out".
     To check that everything is correct, you
-    can make a diff of tbase1_1.out with a reference file contained in the
+    can make a diff of tbase1_1.out with a reference file 
+    <a href="../../tests/tutorial/Refs/tbase1_1.out">tbase1_1.out</a>
+    contained in the
     ~abinit/tests/tutorial/Refs directory:
    <li><i>diff tbase1_1.out ../../Refs/tbase1_1.out | more</i></li>
   <p>(Perhaps you will need to ignore the blanks, with the command "diff -b" instead of "diff")
@@ -190,12 +194,12 @@ body : |
     alphabetically ordered <a href="../../input_variables/generated_files/allvariables.html" target="kwimg">index of all variables</a> is
     provided, and their description is found in different files (non-exhaustive list):
   <ul>
-  <li> Basic variables, <a href="../../input_variables/generated_files/varbas.html">VARBAS</a></li>
-  <li> Files handling variables, <a href="../../input_variables/generated_files/varfil.html">VARFIL</a></li>
-  <li> Ground-state calculation variables, <a href="../../input_variables/generated_files/vargs.html">VARGS</a></li>
-  <li> GW variables, <a href="../../input_variables/generated_files/vargw.html">VARGW</a></li>
-  <li> Parallelisation variables, <a href="../../input_variables/generated_files/varpar.html">VARPAR</a></li>
-  <li> Response Function variables, <a href="../../input_variables/generated_files/varrf.html">VARRF</a></li>
+  <li> Basic variables, [[VARBAS]]</li>
+  <li> Files handling variables, [[VARFIL]]</li>
+  <li> Ground-state calculation variables, [[VARGS]]</li>
+  <li> GW variables, [[VARGW]]</li>
+  <li> Parallelisation variables, [[VARPAR]]</li>
+  <li> Response Function variables, [[VARRF]]</li>
   </ul>
     However, the number of such variables is rather large! Note that
     a dozen of input variables were needed to run the first test case. This is possible
@@ -219,7 +223,7 @@ body : |
     <li>[[nkpt]]</li>
     <li>[[nstep]]</li>
     <li>[[toldfe]]</li>
-    <li>[[diemac]]</li>
+    <li>[[diemac]].</li>
     </ul>
     Have also a look at [[kpt]]
     and [[iscf]].
@@ -236,12 +240,14 @@ body : |
     <a href="../../users/abinit_help.html#logfile" target="helpsimg">section 6.1</a>
     of the abinit_help file.<a name="ref4"></a></p>
   
-  <p><b>1.1.i</b> Then, open the "tbase1_1.out" file.
+  <p><b>1.1.i</b> Then, open the 
+    <a href="../../tests/tutorial/Refs/tbase1_1.out">~abinit/tests/tutorial/Refs/tbase1_1.out</a>
+    file.
     You find some general information about the output file
     in <a href="../../users/abinit_help.html#outputfile" target="helpsimg"> section 6.2</a>
     of the abinit_help file. You should also:
   <ul>
-      <li> examine the header of "tbase1_1.out"
+      <li> examine the header of <a href="../../tests/tutorial/Refs/tbase1_1.out">~abinit/tests/tutorial/Refs/tbase1_1.out</a>
       <li> examine the report on memory needs (do not read each value of parameters)
       <li> examine the echo of preprocessed input data,
     </ul>
@@ -255,8 +261,8 @@ body : |
     details, and read the meaning of each of its variables in the
     corresponding input variables
     file, if it has not yet been done. Then, you should examine some variables
-    that were NOT defined in the input file, but that appear in the echo written
-    in "tbase1_1.out": <br>
+    that were NOT defined in the input file, but that appear in the echo written in 
+     <a href="../../tests/tutorial/Refs/tbase1_1.out">~abinit/tests/tutorial/Refs/tbase1_1.out</a>: <br>
     <br>
     - [[nband]]: its value is 2.
     <br>
@@ -278,7 +284,8 @@ body : |
     Well, this is not completely right, as the code took advantage of the time-reversal
     symmetry, valid for the k-point (0 0 0), to decrease the number of planewave
     by about a factor of two. <br>
-    The full set of plane waves is <b>1503</b> (see later in the "tbase1_1.out" file). <br>
+    The full set of plane waves is <b>1503</b> (see later in 
+     <a href="../../tests/tutorial/Refs/tbase1_1.out">~abinit/tests/tutorial/Refs/tbase1_1.out</a>). <br>
     The code indicates the time-reversal symmetry by a value of [[istwfk]]=2
     , instead of the usual [[istwfk]]=1
     default. <br>
@@ -295,10 +302,11 @@ body : |
     are alternative ways to [[xcart]]
     to specify the positions of atoms within the primitive cell. </p>
     <p>Now, you can start reading the description of the remaining
-    of the tbase1_1.out file, in the <a href="../../users/abinit_help.html#6.3" target="helpsimg"> section 6.3
+    of  <a href="../../tests/tutorial/Refs/tbase1_1.out">~abinit/tests/tutorial/Refs/tbase1_1.out</a>, 
+    in the <a href="../../users/abinit_help.html#6.3" target="helpsimg"> section 6.3
     </a> of the abinit_help file.
-    <a name="ref6"></a>Look at the tbase1_1.out
-    file at the same time. </p>
+    <a name="ref6"></a>Look at <a href="../../tests/tutorial/Refs/tbase1_1.out">~abinit/tests/tutorial/Refs/tbase1_1.out</a> 
+    at the same time. </p>
   
   <p><b><a name=1.1.j> 1.1.j </a> </b> You have read completely an output file! </p>
   <p>Could you answer the following questions? </p>
@@ -372,10 +380,14 @@ body : |
     in particular, look at the meaning of <i><b>getwfk -1</b></i> </p>
   <p>Also, define explicitly the number of states (or supercell "bands") to be
     one, using the input variable [[nband]].
-    The input file ~abinit/tests/tutorial/Input/tbase1_2.in is an example of
-    file that will do the job, while ~abinit/tests/tutorial/Refs/tbase1_2.out
-    is an example of output file. If you decide to use the ~abinit/tests/tutorial/Input/tbase1_2.in file,
-    do not forget to change the file names in the "tbase1_x.files" file ... </p>
+    The input file 
+    <a href="../../tests/tutorial/Input/tbase1_2.in">~abinit/tests/tutorial/Input/tbase1_2.in</a>    
+    is an example of
+    file that will do the job, while 
+     <a href="../../tests/tutorial/Refs/tbase1_2.out">~abinit/tests/tutorial/Refs/tbase1_2.out</a>
+    is an example of output file. If you decide to use the 
+    <a href="../../tests/tutorial/Input/tbase1_2.in">~abinit/tests/tutorial/Input/tbase1_2.in</a>
+    file do not forget to change the file names in the tbase1_x.files file ... </p>
   <p>So, you run the code with your input file (this might take fifteen seconds or so on a PC at 3 GHz),
     examine the output file quickly
     (there are many repetition of sections, for the different datasets), and get
@@ -453,13 +465,15 @@ body : |
     the accurate computation of other properties.
     So, change [[toldfe]] in [[toldff]], and set the latter
     input variable to ten times smaller than [[tolmxf]].
-    The input file ~abinit/tests/tutorial/Input/tbase1_3.in is an example of
-    file that will do the job, while ~abinit/tests/tutorial/Refs/tbase1_3.out
+    The input file 
+    <a href="../../tests/tutorial/Input/tbase1_3.in">~abinit/tests/tutorial/Input/tbase1_3.in</a>
+    is an example of file that will do the job, while 
+     <a href="../../tests/tutorial/Refs/tbase1_3.out">~abinit/tests/tutorial/Refs/tbase1_3.out</a>
     is an example of output file. If you decide to use these files, do not forget
     to change the file names in the "tbase1_x.files"
     file ... So, you run the code with your input file (a few seconds),
     examine quietly this file (which
-    is much smaller than the tbase1_2.out file), and get some significant output data gathered in the
+    is much smaller than  <a href="../../tests/tutorial/Refs/tbase1_2.out">~abinit/tests/tutorial/Refs/tbase1_2.out</a>), and get some significant output data gathered in the
     final echo of variables: </p>
   <pre>
       etotal   -1.1058360644E+00
@@ -472,7 +486,7 @@ body : |
   
   <p> According to these data (see [[xcart]]),
     the optimal interatomic distance is about 1.522 Bohr, in good agreement
-    with the estimation of tbase1_2.out .
+    with the estimation of  <a href="../../tests/tutorial/Refs/tbase1_2.out">~abinit/tests/tutorial/Refs/tbase1_2.out</a>.
     If you have time (this is to be done at home), you might try to change the
     stopping criteria, and redo the calculation, to see the level of convergence
     of the interatomic distance. </p>
@@ -501,8 +515,9 @@ body : |
     in <a href="../../users/abinit_help.html#4" target="helpsimg">section 4 </a> of the abinit_help file.
     <a name="ref9"></a></p>
   
-  <p><b>1.4.b</b> The input file ~abinit/tests/tutorial/Input/tbase1_4.in is
-    an example of input file for a run that will print a density.
+  <p><b>1.4.b</b> The input file 
+    <a href="../../tests/tutorial/Input/tbase1_4.in">~abinit/tests/tutorial/Input/tbase1_4.in</a>
+    is an example of input file for a run that will print a density.
     If you decide to use this file,
     do not forget to change the file names in tbase1_x.files.
     The run will take a few seconds. </p>
@@ -534,7 +549,7 @@ body : |
     Then, edit this file, to have an idea of the content of the _DEN files.
   <br>For further treatment, you might choose to select another option than 6. In particular,
    if you have access to MATLAB, choose option 5. With minor modifications (set ngx=ngy=ngz to 30)
-   you will be able to use the file dim.m present in ~abinit/doc/tutorial/lesson_base1 to visualize the
+   you will be able to use the file <a href="../../tutorial/lesson_base1/dim.m>dim.m</a> present in ~abinit/doc/tutorial/lesson_base1 to visualize the
    3-Dimensional isosurfaces. Another option might be to use the XCrysDen software,
    for which you need to use option 9.
   
@@ -554,7 +569,7 @@ body : |
       the variables [[nsppol]] and [[spinat]] ;
     <li>the highest occupied level might be degenerate with the lowest unoccupied
       level of the same spin, in which case the techniques usually appropriate for metals
-      are to be used (see <a href="../lesson_base4.html">lesson_base4</a>)
+      are to be used (see [[lesson_base4]])
     <li>also often, the symmetry of the ground-state charge density will NOT be
       spherical, so that the automatic determination of symmetries by the code,
       based on the atomic coordinates, should be disabled, see the input variable
@@ -571,8 +586,11 @@ body : |
   cut-off, and even for a location in the box that is similar to the
   molecule case (although the latter might not be so important).
   
-  <p>The input file ~abinit/tests/tutorial/Input/tbase1_5.in is an example
-    of file that will do the job, while ~abinit/tests/tutorial/Refs/tbase1_5.out
+  <p>The input file 
+    <a href="../../tests/tutorial/Input/tbase1_5.in">~abinit/tests/tutorial/Input/tbase1_5.in</a>
+    is an example
+    of file that will do the job, while 
+     <a href="../../tests/tutorial/Refs/tbase1_5.out">~abinit/tests/tutorial/Refs/tbase1_5.out</a>
     is an example of output file. If you decide to use the tbase1_5.in file, do not forget
     to change the file names in the tbase1_x.files file. The run lasts a few seconds.
   
@@ -647,7 +665,7 @@ body : |
   
   with the experimental data as well as theoretical data using
   a much more accurate technique
-  (see <cite>Kolos and Roothaan, Rev. Mod. Phys. 32, 219 (1960)</cite>, especially p.225)
+  (see [[Kolos1960]], especially p.225)
   <ul>
   <li>bond length: 1.401 Bohr
   <li>atomisation energy: 4.747 eV
@@ -667,9 +685,8 @@ body : |
   <br>
   We used 10 Ha as cut-off energy, a 10x10x10 Bohr^3 supercell, the local-density
   approximation (as well as the local-spin-density approximation) in the Teter parametrization,
-  and a pseudopotential from the Goedecker-Hutter-Teter table (<cite>Phys. Rev.
-  B 54, 1703 (1996)</cite>).
-  <p>We will see in the <a href="../lesson_base2.html">next lesson</a> how to address the
+  and a pseudopotential from the Goedecker-Teter-Hutter table ([[Goedecker1996]]).
+  <p>We will see in the next lesson ([[lesson_base2]]) how to address the
     choice of these parameters (except the pseudopotential).
   <p>
   <hr>
@@ -711,7 +728,7 @@ body : |
   <p>Side note: in most of the tutorial examples, [[nstep]]
   will be enough to reach the
   target tolerance, defined by one of the "tolXXX" input variables. However, this is not always the case
-  (e.g. the test case 1 of the <a href="../lesson_rf1.html">lesson response-function 1</a>),
+  (e.g. the test case 1 of the lesson response-function 1 [[lesson_rf1]]),
   because of some portability problems, that could only be solved by stopping the SCF cycles
   before the required tolerance.
   
