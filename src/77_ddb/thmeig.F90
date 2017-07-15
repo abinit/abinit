@@ -34,13 +34,20 @@
 
 #include "abi_common.h"
 
-subroutine thmeig(g2fsmear,acell,amu,anaddb_dtset,d2asr,&
+subroutine thmeig(mpert, msize, inp, ddb, crystal, &
+&                 elph_base_name, eig2_filnam, ddbun, iout, comm)
+ 
+
+& g2fsmear,acell,amu,anaddb_dtset,d2asr,&
 & filnam,mband,mpert,msize,natom,nkpt,ntemper,&
 & ntypat,rprim,telphint,temperinc,&
 & tempermin,thmflag,typat,xred,&
 & ddb,ddbun,filnam5,iout,&
-& msym,nblok2,nsym,occopt,symrel,tnons,usepaw,zion,&
-& symrec,natifc,gmet,gprim,indsym,rmet,atifc,ucvol,xcart,comm)
+& msym,nblok2, %
+& crystal, inp, comm)
+!nsym,occopt,symrel,tnons,usepaw,zion,&
+!& symrec,natifc,gmet,gprim,indsym,rmet,atifc,ucvol,xcart,
+!comm)
 
  use defs_basis
  use m_profiling_abi
@@ -70,6 +77,8 @@ subroutine thmeig(g2fsmear,acell,amu,anaddb_dtset,d2asr,&
 
 !Arguments ------------------------------------
 !scalars
+ type(crystal_t), intent(inout) :: crystal
+
  integer,intent(in) :: mband,mpert,msize,ntemper,telphint,thmflag,comm
  real(dp),intent(in) :: g2fsmear,temperinc,tempermin
  character(len=*),intent(in) :: filnam
@@ -142,6 +151,57 @@ subroutine thmeig(g2fsmear,acell,amu,anaddb_dtset,d2asr,&
  character(len=80) :: errstr
 
 ! *********************************************************************
+
+anaddb_dtset = inp
+g2fsmear = inp%a2fsmear
+acell = ddb%acell
+amu = ddb%amu
+d2asr = asrq0%d2asr
+filnam = elph_base_name
+filnam5 = eig2_filnam
+
+
+telphint = inp%telphint
+temperinc = inp%temperinc
+tempermin = inp%tempermin
+thmflag = inp%thmflag
+
+mband = ddb_hdr%mband
+natom = ddb_hdr%natom  
+nkpt = ddb_hdr%nkpt  
+ntemper = inp%ntemper
+ntypat = ddb_hdr%ntypat 
+usepaw = ddb_hdr%usepaw   
+atifc = ddb_hdr%atifc
+
+rprim = ddb%rprim
+gprim = ddb%gprim
+
+! Initially, most of these quantities were intent out
+typat = crystal%typat
+xred = crystal%xred
+zion = crystal%zion
+natifc = crystal%natifc
+gmet = crystal%gmet
+indsym = crystal%indsym
+rmet = crystal%rmet
+
+msym = ddb_hdr%msym
+nblok2 = ddb_hdr%nblok
+nsym = ddb_hdr%nsym
+occopt = ddb%occopt
+symrel = ddb_hdr%symrel
+tnons = ddb_hdr%tnons
+usepaw = ddb_hdr%usepaw
+symrec = ddb_hdr%symrec
+ucvol = crystal%ucvol
+xcart = crystal%xcart
+
+! ============================== Coding Line ================================ !
+
+
+
+
 
 !DEBUG
  write(std_out,*)'-thmeig : enter '

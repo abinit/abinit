@@ -578,8 +578,11 @@ program anaddb
 &   ntypat,ddb%rprim,inp%telphint,inp%temperinc,&
 &   inp%tempermin,inp%thmflag,Crystal%typat,Crystal%xred,&
 &   ddb,ddbun,filnam(5),ab_out,&
-&   msym,nblok2,Crystal%nsym,ddb%occopt,Crystal%symrel,Crystal%tnons,usepaw,Crystal%zion,& !new
-&   Crystal%symrec,inp%natifc,Crystal%gmet,ddb%gprim,Crystal%indsym,Crystal%rmet,inp%atifc,& !new
+&   msym,nblok2,
+Crystal%nsym,ddb%occopt,Crystal%symrel,
+Crystal%tnons,usepaw,Crystal%zion,& !new
+&   Crystal%symrec,inp%natifc,Crystal%gmet,
+ddb%gprim,Crystal%indsym,Crystal%rmet,inp%atifc,& !new
 &   Crystal%ucvol,Crystal%xcart,comm)
  end if
 
