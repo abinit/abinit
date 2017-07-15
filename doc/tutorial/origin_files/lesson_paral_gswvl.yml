@@ -14,12 +14,12 @@ intro : |
 # This is the body, including the table of content ...
 body : |
   <ol>
-    <li><a href="#0">Wavelets variables</a> and parallelism</li>
-    <li><a href="#1">Speed-up</a> calculation for a boron cluster</li>
-    <li><a href="#2">Time partition</a></li>
-    <li><a href="#3">Orbital</a> parallelism and <a href="../lesson_paral_string.html#2">array</a> parallelism</li>
-    <li><a href="#4">Speed-up</a> calculation on a 65-atom alkane</li>
-    <li><a href="#5">Conclusion</a></li>
+  <li><a href="#0">Wavelets variables</a> and parallelism</li>
+  <li><a href="#1">Speed-up</a> calculation for a boron cluster</li>
+  <li><a href="#2">Time partition</a></li>
+  <li><a href="#3">Orbital</a> parallelism and <a href="../lesson_paral_string.html#2">array</a> parallelism</li>
+  <li><a href="#4">Speed-up</a> calculation on a 65-atom alkane</li>
+  <li><a href="#5">Conclusion</a></li>
   </ol>
   <hr>
   

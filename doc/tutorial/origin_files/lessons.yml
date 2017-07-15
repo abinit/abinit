@@ -178,9 +178,14 @@
     subtitle : How to determine U for DFT+U in ABINIT ? Cococcioni's approach.
 - !section
     name : wannier90
-    keyword : Lesson on the use of Wannier90 library.
+    keyword : Lesson on the use of Wannier90 library 
     authors : TRangel
     subtitle : The Wannier90 interface tutorial.
+- !section
+    name : welcome
+    keyword : Welcome
+    authors : XG
+    subtitle : Overview of the ABINIT tutorial.
 - !section
     name : default
     keyword : Default keyword ... this is an error

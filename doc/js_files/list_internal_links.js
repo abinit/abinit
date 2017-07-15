@@ -11,7 +11,7 @@ document.write(' <A href="'+docpath+'topics/what_ABINIT_does.html"><B>What ABINI
 document.write(' <B> | </B> ');
 document.write(' <A href="'+docpath+'topics/generated_files/all_topics.html"><B>"How to" list</B></A> ');
 document.write(' <B> | </B> ');
-document.write(' <A href="'+docpath+'tutorial/welcome.html"><B>Tutorial</B></A> ');
+document.write(' <A href="'+docpath+'tutorial/generated_files/lesson_welcome.html"><B>Tutorial</B></A> ');
 document.write(' <B> | </B> ');
 document.write(' <A href="'+docpath+'bibliography/generated_files/bibliography.html"><B>Bibliography</B></A> ');
 document.write(' <HR ALIGN=left> ');
