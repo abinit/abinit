@@ -8,6 +8,7 @@ Tutorial on Many-Body calculations in parallel</title>
 <h1>ABINIT tutorial, lesson on Many-Body calculations in parallel:</h1>
 <h2>G<sub>0</sub>W<sub>0</sub> corrections in &alpha;-quartz SiO<sub>2</sub>. </h2>
 <hr>
+<!-- begin intro -->
 <p>This lesson aims at showing how to perform parallel calculations with the GW part of ABINIT. 
    We will discuss the approaches used to parallelize the different steps of a typical 
    G<sub>0</sub>W<sub>0</sub> calculation, and how to setup the parameters of the run in order to achieve good speedup.
@@ -37,6 +38,7 @@ mpirun -n nn abinit < abinit.files
 </pre>
 
 or the use of a specific submission file.
+<!-- end intro -->
 
 <!--
 <a href="../input_variables/html_automatically_generated/vargs.html#optdriver" target="kwimg">optdriver</a>,
@@ -54,6 +56,7 @@ or the use of a specific submission file.
 
 <h3><b>Contents of the lesson:</b></h3>
 
+<!-- begin body -->
 <ul>
   <li><a href="lesson_paral_mbt.html#WFK_gen"      >1</a> Generating the WFK file in parallel.
   <li><a href="lesson_paral_mbt.html#SCR_AW"       >2</a> Computing the screening in parallel using the Adler-Wiser expression
@@ -873,6 +876,7 @@ Having an estimate of the computing resources is very helpful when one has to la
 calculation with converged parameters.
 </li>
 </ol>
+<!-- end body -->
 
 <h5>Copyright (C) 2000-2017 ABINIT group (MG,MS)
 <br> This file is distributed under the terms of the GNU General Public License, see
