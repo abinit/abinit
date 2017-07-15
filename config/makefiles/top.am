@@ -129,9 +129,13 @@ infos_html:
 	cp -fr tests/psml/Input tmp-infos-$(VERSION)/tests/psml/Input
 	cp -fr tests/seq/Input tmp-infos-$(VERSION)/tests/seq/Input
 	cp -fr tests/tutoparal/Input tmp-infos-$(VERSION)/tests/tutoparal/Input
+	cp -fr tests/tutoparal/Refs tmp-infos-$(VERSION)/tests/tutoparal/Refs 
 	cp -fr tests/tutoplugs/Input tmp-infos-$(VERSION)/tests/tutoplugs/Input
+	cp -fr tests/tutoplugs/Refs tmp-infos-$(VERSION)/tests/tutoplugs/Refs
 	cp -fr tests/tutorespfn/Input tmp-infos-$(VERSION)/tests/tutorespfn/Input
+	cp -fr tests/tutorespfn/Refs tmp-infos-$(VERSION)/tests/tutorespfn/Refs
 	cp -fr tests/tutorial/Input tmp-infos-$(VERSION)/tests/tutorial/Input
+	cp -fr tests/tutorial/Refs tmp-infos-$(VERSION)/tests/tutorial/Refs
 	cp -fr tests/unitary/Input tmp-infos-$(VERSION)/tests/unitary/Input
 	cp -fr tests/v1/Input tmp-infos-$(VERSION)/tests/v1/Input
 	cp -fr tests/v2/Input tmp-infos-$(VERSION)/tests/v2/Input
