@@ -1174,7 +1174,7 @@ for i, lesson_info in enumerate(lessons_future):
   intro=0
   body=0
   for line in lesson_html:
-    if "<---" in line and "--->" in line:
+    if "<!--" in line and "-->" in line:
       if "begin" in line :
         if intro==1 or body==1:
           raise
@@ -1202,15 +1202,24 @@ for i, lesson_info in enumerate(lessons_future):
         string_old='href="lesson_'+lesson+'.html'
         string_new='href="'
         line=line.replace(string_old,string_new)
+        string_old='href="./lesson_'+lesson+'.html'
+        string_new='href="'
+        line=line.replace(string_old,string_new)
         # Correct the references to the other files in the tutorial directory (transient measure in case of the "lesson_" files)
         string_old='href="lesson_'
         string_new='href="../lesson_'
         line=line.replace(string_old,string_new)
+        string_old='href="./lesson_'
+        line=line.replace(string_old,string_new)
         string_old='href="theory_'
         string_new='href="../theory_'
         line=line.replace(string_old,string_new)
+        string_old='href="./theory_'
+        line=line.replace(string_old,string_new)
         string_old='href="welcome'
         string_new='href="../welcome'
+        line=line.replace(string_old,string_new)
+        string_old='href="./welcome'
         line=line.replace(string_old,string_new)
         # Create automatically the new links for the input variables
         if "html_automatically_generated" in line:
