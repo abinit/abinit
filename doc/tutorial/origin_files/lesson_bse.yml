@@ -6,7 +6,7 @@ intro : |
   This lesson discusses how to calculate the macroscopic dielectric function including excitonic effects 
   within the Bethe-Salpeter (BS) approach.
   Crystalline silicon is used as test case.
-  A brief description of the formalism can be found in the <a href="../theory_bse.html">BS_notes</a>.
+  A brief description of the formalism can be found in the <a href="../../theory/generated_files/theory_bse.html">BS_notes</a>.
   <p>
   The user should be familiarized with the four basic lessons of ABINIT
   and the first lesson of the GW tutorial, see the <a href="lesson_welcome.html">tutorial home page</a>.
@@ -235,7 +235,7 @@ body : |
   The variable [[bs_coulomb_term]] 
   is used to select among different options that are available for the Coulomb term
   (please take some time to read the description of the variable and the relevant equations in 
-  the <a href="../theory_bse.html">BS_notes</a>).
+  the <a href="../../theory/generated_files/theory_bse.html">BS_notes</a>).
   Finally [[bs_coupling]]=0
   specifies that the off-diagonal coupling blocks should be neglected (Tamm-Dancoff approximation).
   This particular combination of parameters thus corresponds to a Bethe-Salpeter calculation within 

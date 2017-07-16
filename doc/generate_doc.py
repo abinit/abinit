@@ -1011,7 +1011,7 @@ def assemble_html(origin_yml_files,dir_root,name_root):
     #Write a first version of the html file, in the order "header" ... up to the "end"
     #Take the info from the section "default" if there is no information on the specific section provided in the yml file.
     doc_html=""
-    for j in ["header","title","subtitle","intro","copyright","links","menu","body","links","end"]:
+    for j in ["header","title","subtitle","intro","copyright","links","menu","tofcontent_header","body","links","end"]:
       if j in ["intro","body"] :
         doc_html += doc_yml[j]
       elif j=="subtitle" and origin_yml.subtitle != None:
@@ -1114,16 +1114,16 @@ if activate_translation==1:
           string_new='href="'
           line=line.replace(string_old,string_new)
           # Correct the references to the other files in the tutorial directory (transient measure in case of the "lesson_" files)
-          #string_old='href="lesson_'
-          #string_new='href="../lesson_'
-          #line=line.replace(string_old,string_new)
-          #string_old='href="./lesson_'
-          #line=line.replace(string_old,string_new)
-          #string_old='href="theory_'
-          #string_new='href="../theory_'
-          #line=line.replace(string_old,string_new)
-          #string_old='href="./theory_'
-          #line=line.replace(string_old,string_new)
+          string_old='href="lesson_'
+          string_new='href="../../tutorial/lesson_'
+          line=line.replace(string_old,string_new)
+          string_old='href="./lesson_'
+          line=line.replace(string_old,string_new)
+          string_old='href="theory_'
+          string_new='href="../theory_'
+          line=line.replace(string_old,string_new)
+          string_old='href="./theory_'
+          line=line.replace(string_old,string_new)
           #string_old='href="welcome'
           #string_new='href="../welcome'
           #line=line.replace(string_old,string_new)
@@ -1153,14 +1153,14 @@ if activate_translation==1:
             string_new='href="../../users/'
             line=line.replace(string_old,string_new)
 
-        #string_old='src="lesson'
-        #string_new='src="../documents/lesson'
-        #line=line.replace(string_old,string_new)
-        #string_old='src="./lesson'
-        #line=line.replace(string_old,string_new)
-        #string_old='src=./lesson'
-        #string_new='src=../documents/lesson'
-        #line=line.replace(string_old,string_new)
+        string_old='src="theory'
+        string_new='src="../documents/theory'
+        line=line.replace(string_old,string_new)
+        string_old='src="./theory'
+        line=line.replace(string_old,string_new)
+        string_old='src=./theory'
+        string_new='src=../documents/theory'
+        line=line.replace(string_old,string_new)
 
         doc_yml+="  "+line
 

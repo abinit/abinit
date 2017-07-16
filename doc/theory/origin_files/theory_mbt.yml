@@ -45,7 +45,7 @@ body : |
   </p>
   <p align="center">
   
-      <img src="./theory_mbt/G_def.png">
+      <img src="../documents/theory_mbt/G_def.png">
       
   </p>
   
@@ -67,7 +67,7 @@ body : |
   </p>
   <p align="center">
   
-      <img src="./theory_mbt/charged_exc_ene.png">
+      <img src="../documents/theory_mbt/charged_exc_ene.png">
       
   </p>
   
@@ -80,7 +80,7 @@ body : |
   
   <p align="center">
   
-      <img src="./theory_mbt/lehmann_ampl.png">
+      <img src="../documents/theory_mbt/lehmann_ampl.png">
       
   </p>
   
@@ -89,7 +89,7 @@ body : |
   
   <p align="center">
   
-      <img src="./theory_mbt/Lehmann.png">
+      <img src="../documents/theory_mbt/Lehmann.png">
       
   
   </p>
@@ -105,7 +105,7 @@ body : |
   time-ordered Green's function.
   <p align="center">
   
-      <img src="./theory_mbt/poles_G.png">
+      <img src="../documents/theory_mbt/poles_G.png">
       
   </p>
   
@@ -134,7 +134,7 @@ body : |
   </p>
   <p align="center">
   
-      <img src="./theory_mbt/G_Dyson.png">
+      <img src="../documents/theory_mbt/G_Dyson.png">
       
   </p>
   
@@ -154,7 +154,7 @@ body : |
   </p>
   <p align="center">
   
-      <img src="./theory_mbt/qp_equation.png">
+      <img src="../documents/theory_mbt/qp_equation.png">
       
   </p>
   
@@ -200,7 +200,7 @@ body : |
   </p>
   <p align="center">
   
-      <img src="./theory_mbt/tchi_def.png">
+      <img src="../documents/theory_mbt/tchi_def.png">
       
   </p>
   
@@ -212,7 +212,7 @@ body : |
   
   <p align="center">
   
-      <img src="./theory_mbt/W_def.png">
+      <img src="../documents/theory_mbt/W_def.png">
       
   
   </p>
@@ -222,7 +222,7 @@ body : |
   
   <p align="center">
   
-      <img src="./theory_mbt/e_from_tchi.png">
+      <img src="../documents/theory_mbt/e_from_tchi.png">
       
   </p>
   
@@ -234,7 +234,7 @@ body : |
   <p align="center">
   
   
-      <img src="./theory_mbt/hedin_pentagon.png">
+      <img src="../documents/theory_mbt/hedin_pentagon.png">
        
   </p>
   
@@ -270,7 +270,7 @@ body : |
   </p>
   <p align="center">
   
-      <img src="./theory_mbt/gamma_GW.png">
+      <img src="../documents/theory_mbt/gamma_GW.png">
   
   </p>
   
@@ -280,7 +280,7 @@ body : |
   
   <p align="center">
   
-      <img src="./theory_mbt/gw_pentagon.png">
+      <img src="../documents/theory_mbt/gw_pentagon.png">
        
   </p>
   
@@ -293,7 +293,7 @@ body : |
   </p>
   <p align="center">
   
-      <img src="./theory_mbt/RPA_chi.png">
+      <img src="../documents/theory_mbt/RPA_chi.png">
        
   </p>
   
@@ -306,7 +306,7 @@ body : |
   </p>
   <p align="center">
   
-      <img src="./theory_mbt/gwsigma_rt_domain.png">
+      <img src="../documents/theory_mbt/gwsigma_rt_domain.png">
        
   </p>
   
@@ -315,7 +315,7 @@ body : |
   
   <p align="center">
   
-      <img src="./theory_mbt/self_def.png">
+      <img src="../documents/theory_mbt/self_def.png">
        
   
   </p>
@@ -361,7 +361,7 @@ body : |
   </p>
   <p align="center">
   
-      <img src="./theory_mbt/G0W0.png">
+      <img src="../documents/theory_mbt/G0W0.png">
        
   </p>
   
@@ -371,7 +371,7 @@ body : |
   
   <p align="center">
   
-      <img src="./theory_mbt/G0G0.png">
+      <img src="../documents/theory_mbt/G0G0.png">
        
   </p>
   
@@ -412,7 +412,7 @@ body : |
   </p>
   <p align="center">
   
-      <img src="./theory_mbt/qpene_perturbative.png">
+      <img src="../documents/theory_mbt/qpene_perturbative.png">
       
   
   </p>
@@ -422,7 +422,7 @@ body : |
   
   <p align="center">
   
-      <img src="./theory_mbt/Z_def.png">
+      <img src="../documents/theory_mbt/Z_def.png">
       
   </p>
   is the so-called renormalization factor. This corresponds to making a
@@ -431,7 +431,7 @@ body : |
   
   <p align="center">
   
-      <img src="./theory_mbt/self_energy_taylor.png">
+      <img src="../documents/theory_mbt/self_energy_taylor.png">
   
       
   </p>
@@ -455,7 +455,7 @@ body : |
   
   <p align="center">
   
-      <img src="./theory_mbt/chi0_sc_tr.png">
+      <img src="../documents/theory_mbt/chi0_sc_tr.png">
   
   
   </p>
@@ -488,7 +488,7 @@ body : |
   determined by [[ecuteps]].
   The oscillators are ubiquitous in the Many-Body part of ABINIT and their 
   calculation represents one of the most CPU intensive part of the execution.
-  For this reason we devote section <a href="theory_mbt.html#oscillator_notes">6</a> 
+  For this reason we devote section <a href="../theory_mbt.html#oscillator_notes">6</a> 
   to the discussion of some important technical details concerning their computation.
   </p>
   <p>
@@ -499,7 +499,7 @@ body : |
   the action of any symmetry operation of the crystalline space group:
   
   </p>
-  <p align="center"><img src="./theory_mbt/chi0_symmetry.png">
+  <p align="center"><img src="../documents/theory_mbt/chi0_symmetry.png">
   
       <br>
   </p>
@@ -518,7 +518,7 @@ body : |
   </p>
   <p align="center">
   
-      <img src="./theory_mbt/epsilon_vs_tchi.png">
+      <img src="../documents/theory_mbt/epsilon_vs_tchi.png">
   
   
   </p>
@@ -531,7 +531,7 @@ body : |
   
   <p align="center">
   
-      <img src="./theory_mbt/emacro_lfe.png">
+      <img src="../documents/theory_mbt/emacro_lfe.png">
   
   </p>
   
@@ -544,7 +544,7 @@ body : |
   </p>
   <p align="center">
   
-      <img src="./theory_mbt/emacro_nlfe.png">
+      <img src="../documents/theory_mbt/emacro_nlfe.png">
       
   </p>
   
@@ -569,7 +569,7 @@ body : |
   
   <p align="center">
   
-      <img src="./theory_mbt/oscillator_longv.png">
+      <img src="../documents/theory_mbt/oscillator_longv.png">
       
   </p>
   
@@ -656,7 +656,7 @@ body : |
   </p>
   <p>
   This linear scaling represents a serious problem, especially when many frequencies are wanted, for
-  example when computing QP corrections within the contour deformation technique described in the <a href="lesson_gw2.html">second lesson</a> of the GW tutorial.
+  example when computing QP corrections within the contour deformation technique described in the <a href="../../tutorial/lesson_gw2.html">second lesson</a> of the GW tutorial.
   
   </p>
   <p>
@@ -666,7 +666,7 @@ body : |
   </p>
   <p align="center">
   
-      <img src="./theory_mbt/sf_chi0.png">
+      <img src="../documents/theory_mbt/sf_chi0.png">
       
   </p>
   
@@ -696,7 +696,7 @@ body : |
   </p>
   <p align="center">
   
-      <img src="./theory_mbt/hilbert_transform.png">
+      <img src="../documents/theory_mbt/hilbert_transform.png">
       
   </p>
   
@@ -732,7 +732,7 @@ body : |
   </p>
   <p align="center">
   
-      <img src="./theory_mbt/W_partition_simple.png">
+      <img src="../documents/theory_mbt/W_partition_simple.png">
   
       
   </p>
@@ -747,7 +747,7 @@ body : |
   </p>
   <p align="center">
   
-      <img src="./theory_mbt/self_energy.png">
+      <img src="../documents/theory_mbt/self_energy.png">
       
   
   </p>
@@ -761,7 +761,7 @@ body : |
   </p>
   <p align="center">
   
-      <img src="./theory_mbt/self_x.png">
+      <img src="../documents/theory_mbt/self_x.png">
       
   </p>
   
@@ -780,7 +780,7 @@ body : |
   </p>
   <p align="center">
   
-      <img src="./theory_mbt/self_x_mel.png">
+      <img src="../documents/theory_mbt/self_x_mel.png">
       
   
   </p>
@@ -816,7 +816,7 @@ body : |
   </p>
   <p align="center">
   
-      <img src="./theory_mbt/self_c_mel.png">
+      <img src="../documents/theory_mbt/self_c_mel.png">
       
   </p>
   
@@ -888,7 +888,7 @@ body : |
   </p>
   <p align="center">
   
-      <img src="./theory_mbt/ppmodel_imag.png">
+      <img src="../documents/theory_mbt/ppmodel_imag.png">
       
   </p>
   
@@ -896,7 +896,7 @@ body : |
   
   <p align="center">
   
-      <img src="./theory_mbt/ppmodel_real.png">
+      <img src="../documents/theory_mbt/ppmodel_real.png">
       
   </p>
   
@@ -936,14 +936,14 @@ body : |
   
   <p align="center">
   
-      <img src="./theory_mbt/contour.png">
+      <img src="../documents/theory_mbt/contour.png">
   
   </p>
   
   
   <p align="center">
   
-      <img src="./theory_mbt/GW_CD.png">
+      <img src="../documents/theory_mbt/GW_CD.png">
       
   </p>
   
@@ -957,7 +957,7 @@ body : |
   
   <p align="center">
   
-      <img src="./theory_mbt/Wc.png">
+      <img src="../documents/theory_mbt/Wc.png">
   
   </p>
   
@@ -982,7 +982,7 @@ body : |
   
   <p align="center">
   
-      <img src="./theory_mbt/notation_1.png">
+      <img src="../documents/theory_mbt/notation_1.png">
       
   </p>
   
@@ -996,7 +996,7 @@ body : |
   </p>
   <p align="center">
   
-      <img src="./theory_mbt/notation_2.png">
+      <img src="../documents/theory_mbt/notation_2.png">
       
   </p>
   

@@ -370,7 +370,7 @@ body : |
   Eq. (A1) and (A2) in Appendix A of <a href="#Amadon2014">[Amadon2014]</a> show
   the summation over plane waves which is performed. The cutoff on plane wave which is used in this summation is <a href="../../input_variables/generated_files/vargw.html#ecutsigx" target="ecutsigx">ecutsigx</a>
   because of the similarity of Eq. A2 with the Fock exchange
-  (see <a href="../theory_mbt.html#evaluation_gw_sigma">GW notes</a>)
+  (see <a href="../../theory/generated_files/theory_mbt.html#evaluation_gw_sigma">GW notes</a>)
   when one computes the bare interaction.
   <a href="../../input_variables/generated_files/vargw.html#ecutsigx" target="ecutsigx">ecutsigx</a> is thus the main convergence parameter for this dataset.
   Note that as discussed in Appendix A of <a href="#Amadon2014">[Amadon2014]</a>, high values
@@ -555,7 +555,7 @@ body : |
   <h4><a name="4.1">4.1</a> ecuteps </h4>
   The number of plane waves used in the calculation of the cRPA polarizability is
   determined by <a href="../../input_variables/generated_files/vargw.html#ecuteps" target="ecuteps">ecuteps</a>
-  (see <a href="../theory_mbt.html#RPA_Fourier_space">Notes on RPA calculations</a>).
+  (see <a href="../../theory/generated_files/theory_mbt.html#RPA_Fourier_space">Notes on RPA calculations</a>).
   The convergence can be studied simply by increasing the values of <a href="../../input_variables/generated_files/vargw.html#ecuteps" target="ecuteps">ecuteps</a> and gives:
   
   <pre>
@@ -570,7 +570,7 @@ body : |
   
   <h4><a name="4.2">4.2</a> nband </h4>
   The RPA polarizability depends also of the number of Kohn-Sham bands as
-  also discussed in the <a href="../theory_mbt.html#RPA_Fourier_space">Notes on RPA calculations</a>.
+  also discussed in the <a href="../../theory/generated_files/theory_mbt.html#RPA_Fourier_space">Notes on RPA calculations</a>.
   <pre>
      nband          U (eV)     J (eV)
       30             3.01       0.42

@@ -43,6 +43,9 @@ complete (you should have access to more than 8 processors).</p>
 <script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
 
 
+<a name="list"></a>
+<h3><b> Calculation of U and J using cRPA table of content:</b></h3>
+
 <ul>
   <li><a href="#1">1.</a> The cRPA method: summary and key parameters.
   <li><a href="#2">2.</a> Electronic structure calculation of SrVO<SUB>3</SUB> in LDA.
@@ -386,7 +389,7 @@ We add some comments on convergence properties
 Eq. (A1) and (A2) in Appendix A of <a href="#Amadon2014">[Amadon2014]</a> show
 the summation over plane waves which is performed. The cutoff on plane wave which is used in this summation is <a href="../../input_variables/generated_files/vargw.html#ecutsigx" target="ecutsigx">ecutsigx</a>
 because of the similarity of Eq. A2 with the Fock exchange
-(see <a href="../theory_mbt.html#evaluation_gw_sigma">GW notes</a>)
+(see <a href="../../theory/generated_files/theory_mbt.html#evaluation_gw_sigma">GW notes</a>)
 when one computes the bare interaction.
 <a href="../../input_variables/generated_files/vargw.html#ecutsigx" target="ecutsigx">ecutsigx</a> is thus the main convergence parameter for this dataset.
 Note that as discussed in Appendix A of <a href="#Amadon2014">[Amadon2014]</a>, high values
@@ -571,7 +574,7 @@ is recommanded to use at least 32 processors. Input files are provided in tucrpa
 <h4><a name="4.1">4.1</a> ecuteps </h4>
 The number of plane waves used in the calculation of the cRPA polarizability is
 determined by <a href="../../input_variables/generated_files/vargw.html#ecuteps" target="ecuteps">ecuteps</a>
-(see <a href="../theory_mbt.html#RPA_Fourier_space">Notes on RPA calculations</a>).
+(see <a href="../../theory/generated_files/theory_mbt.html#RPA_Fourier_space">Notes on RPA calculations</a>).
 The convergence can be studied simply by increasing the values of <a href="../../input_variables/generated_files/vargw.html#ecuteps" target="ecuteps">ecuteps</a> and gives:
 
 <pre>
@@ -586,7 +589,7 @@ the effective interactions are converged with a precision of 0.02 eV for <a href
 
 <h4><a name="4.2">4.2</a> nband </h4>
 The RPA polarizability depends also of the number of Kohn-Sham bands as
-also discussed in the <a href="../theory_mbt.html#RPA_Fourier_space">Notes on RPA calculations</a>.
+also discussed in the <a href="../../theory/generated_files/theory_mbt.html#RPA_Fourier_space">Notes on RPA calculations</a>.
 <pre>
    nband          U (eV)     J (eV)
     30             3.01       0.42

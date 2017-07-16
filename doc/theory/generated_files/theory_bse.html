@@ -1,5 +1,5 @@
 <html>
-<head><title>Bethe-Salpeter equation in ABINIT.</title>
+<head><title>Bethe-Salpeter equation in ABINIT</title>
 <link rel=stylesheet type="text/css" href="../formabinit.css">
 </head>
 <body bgcolor="#ffffff">
@@ -7,7 +7,7 @@
 <hr>
 <a name="top"></a>
 
-<h1>ABINIT theory documents. Bethe-Salpeter equation in ABINIT. :</h1>
+<h1>ABINIT theory documents. Bethe-Salpeter equation in ABINIT.</h1>
 
 <h2></h2> 
  <hr>
@@ -18,17 +18,20 @@ The approach used to compute the BS kernel and the macroscopic dielectric in an 
 on planewaves and norm-conserving pseudopotentials is also discussed.
 </p>
 <p>
-The conventions used in the equations are explained in the <a href="theory_mbt.html#notations">MBT_notes</a>.
+The conventions used in the equations are explained in the <a href="../generated_files/theory_mbt.html#notations">MBT_notes</a>.
 A much more consistent discussion of the theoretical aspects of the Bethe-Salpeter 
 equation can be found in [1].
 
 <hr>
-<h5>Copyright (C) 2000-2017 ABINIT group (XG,RC)
+<h5>Copyright (C) 2000-2017 ABINIT group (MG,MS)
 <script type="text/javascript" src="../../js_files/copyright.js"> </script>
 </h5> 
 
 <script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
 
+
+<a name="list"></a>
+<h3><b> Bethe-Salpeter equation in ABINIT. Table of content:</b></h3>
 
 <p>
 </p>
@@ -40,6 +43,7 @@ equation can be found in [1].
 
 </li>
 </ul>
+<hr>
 
 
 
@@ -57,7 +61,7 @@ by the following relation
 
 </p>
 <p align="center">
-        <img src="./theory_mbt/epsilon_vs_tchi.png">
+        <img src="../documents/theory_mbt/epsilon_vs_tchi.png">
 
 
 </p>
@@ -72,7 +76,7 @@ of the <i><b>microscopic</b></i> dielectric matrix by means of:
 
 </p>
 <p align="center">
-        <img src="./theory_mbt/emacro_lfe.png">
+        <img src="../documents/theory_mbt/emacro_lfe.png">
 </p>
 
 
@@ -89,7 +93,7 @@ Note that above equation differs from
 
 </p>
 <p align="center">
-        <img src="./theory_mbt/emacro_nlfe.png">
+        <img src="../documents/theory_mbt/emacro_nlfe.png">
 </p>
 
 
@@ -102,7 +106,7 @@ on the <i>entire</i> matrix and cannot simply be calculated by taking the invers
 the first element of the non-inverted matrix.
 
 <p>
-In the <a href="theory_mbt.html#RPA_Fourier_space">GW_notes</a>, we have discussed 
+In the <a href="../theory_mbt.html#RPA_Fourier_space">GW_notes</a>, we have discussed 
 how to calculate the irreducible polarizability and thus the absorption spectrum within the random phase approximation (RPA).
 
 It turns out, however, that the RPA dielectric function evaluated with Kohn-Sham orbitals and eigenvalues 
@@ -141,7 +145,7 @@ A schematic picture of the different levels of the description of optical
 spectra available in ABINIT is given below.
 </p>
 <p style="text-align: center;">
-        <img style="width: 742px; height: 433px;" src="./theory_bse/schematic_dft_gw_bse.png">
+        <img style="width: 742px; height: 433px;" src="../documents/theory_bse/schematic_dft_gw_bse.png">
 </p>
 
 
@@ -157,7 +161,7 @@ gives the reducible independent-particle polarizability according to
 
 </p>
 <p align="center">
-        <img src="./theory_bse/chi0_L0.png">
+        <img src="../documents/theory_bse/chi0_L0.png">
 
 </p>
 
@@ -165,14 +169,14 @@ gives the reducible independent-particle polarizability according to
 while the two-point contraction of <i>L</i> gives the reducible many-body polarizability.
 
 <p align="center">
-        <img src="./theory_bse/chi_L.png">
+        <img src="../documents/theory_bse/chi_L.png">
 </p>
 
 
 that should not be confused with the <i>irreducible</i> polarizability of the 
 many-body system (denoted with a tilde in the formulas in the 
 
-<a href="theory_mbt.html#RPA_Fourier_space">GW_notes</a>). 
+<a href="../theory_mbt.html#RPA_Fourier_space">GW_notes</a>). 
 The utility of working in terms of the reducible quantities is that the macroscopic 
 dielectric function <i><b>with</b></i> local field effects is obtained directly from the 
 reducible polarizability using
@@ -183,7 +187,7 @@ chi by taking the two-point contraction and the limit of vanishing momentum tran
 
 <p align="center">
 
-        <img src="./theory_bse/em_hatchi.png">
+        <img src="../documents/theory_bse/em_hatchi.png">
 </p>
 
 
@@ -217,7 +221,7 @@ One can show that <i>L</i> satisfies the Dyson-like equation:
 
 </p>
 <p align="center">
-        <img style="width: 473px; height: 33px;" src="./theory_bse/dyson_eq_4L.png">
+        <img style="width: 473px; height: 33px;" src="../documents/theory_bse/dyson_eq_4L.png">
 </p>
 
 
@@ -226,7 +230,7 @@ that involves the Bethe-Salpeter kernel <i>K</i>:
 
 <p align="center">
     
-    <img style="width: 547px; height: 66px;" src="./theory_bse/bs_kernel.png">
+    <img style="width: 547px; height: 66px;" src="../documents/theory_bse/bs_kernel.png">
     
 </p>
 
@@ -235,7 +239,7 @@ where the bar symbol signifies that the Coulomb interaction has to be taken with
 component at <b>G</b>=0:
 
 <p align="center">
-        <img style="width: 310px; height: 128px;" src="./theory_bse/barv.png">
+        <img style="width: 310px; height: 128px;" src="../documents/theory_bse/barv.png">
 </p>
 
 
@@ -256,12 +260,12 @@ in the so-called <i>transition</i> space (i.e. as products of single-particle or
 </p>
 <p align="center">
 
-        <img style="width: 661px; height: 88px;" src="./theory_bse/eh_expansion1.png">
+        <img style="width: 661px; height: 88px;" src="../documents/theory_bse/eh_expansion1.png">
 </p>
 
 
 <p align="center">
-        <img style="width: 645px; height: 55px;" src="./theory_bse/eh_expansion2.png">
+        <img style="width: 645px; height: 55px;" src="../documents/theory_bse/eh_expansion2.png">
 
 </p>
 
@@ -275,7 +279,7 @@ polarizability is diagonal in this representation
 
 </p>
 <p align="center">
-        <img style="width: 551px; height: 67px;" src="./theory_bse/L0ehbasis.png">
+        <img style="width: 551px; height: 67px;" src="../documents/theory_bse/L0ehbasis.png">
 
 </p>
 
@@ -290,7 +294,7 @@ in terms of an effective two-particle Hamiltonian, <i>H</i>, according to
 </p>
 <p align="center">
     
-    <img src="./theory_bse/L_for_semiconductors.png">
+    <img src="../documents/theory_bse/L_for_semiconductors.png">
 
 </p>
 
@@ -299,7 +303,7 @@ in terms of an effective two-particle Hamiltonian, <i>H</i>, according to
 The explicit form for <i>H</i> and <i>F</i> in the transition space is given by
 
 <p align="center">
-        <img style="width: 465px; height: 120px;" src="./theory_bse/Hexc_full.png">
+        <img style="width: 465px; height: 120px;" src="../documents/theory_bse/Hexc_full.png">
 
 
 </p>
@@ -308,7 +312,7 @@ The explicit form for <i>H</i> and <i>F</i> in the transition space is given by
 <br>
 
 <p align="center">
-        <img style="width: 477px; height: 124px;" src="./theory_bse/F_matrix.png">
+        <img style="width: 477px; height: 124px;" src="../documents/theory_bse/F_matrix.png">
 </p>
 
 
@@ -326,7 +330,7 @@ In this particular case, the matrix elements of the resonant block are given by
 
 </p>
 <p align="center">
-        <img style="width: 836px; height: 34px;" src="./theory_bse/reso_mel.png">
+        <img style="width: 836px; height: 34px;" src="../documents/theory_bse/reso_mel.png">
 </p>
 
 
@@ -345,12 +349,12 @@ The matrix elements of v and <i>W</i> are defined as:
 
 </p>
 <p align="center">
-        <img style="width: 900px; height: 65px;" src="./theory_bse/exchange_rspace.png">
+        <img style="width: 900px; height: 65px;" src="../documents/theory_bse/exchange_rspace.png">
 </p>
 
 
 <p align="center">
-    <img style="width: 864px; height: 55px;" src="./theory_bse/coulomb_rspace.png">
+    <img style="width: 864px; height: 55px;" src="../documents/theory_bse/coulomb_rspace.png">
 
 </p>
 
@@ -379,7 +383,7 @@ Under this assumption the excitonic Hamiltonian is given by a Hermitian operator
 <p align="center">
 
 
-    <img style="width: 981px; height: 264px;" src="./theory_bse/TDA.png">
+    <img style="width: 981px; height: 264px;" src="../documents/theory_bse/TDA.png">
 
 </p>
 
@@ -398,7 +402,7 @@ The final result reads:
 <p align="center">
 
 
-    <img style="width: 613px; height: 54px;" src="./theory_bse/exc_mdf.png">
+    <img style="width: 613px; height: 54px;" src="../documents/theory_bse/exc_mdf.png">
 
 </p>
 
@@ -407,7 +411,7 @@ where
 
 <p align="center">
 
-    <img style="width: 786px; height: 52px;" src="./theory_bse/oscillator_q0.png">
+    <img style="width: 786px; height: 52px;" src="../documents/theory_bse/oscillator_q0.png">
 
 
 </p>
@@ -456,7 +460,7 @@ The flowchart of a typical Bethe-Salpeter run is schematically depicted in the d
 </p>
 <p align="center">
 
-    <img src="./theory_bse/bse_flowchart.png">
+    <img src="../documents/theory_bse/bse_flowchart.png">
 
 </p>
 
@@ -465,7 +469,7 @@ The flowchart of a typical Bethe-Salpeter run is schematically depicted in the d
 The KSS file is represented with an ellipsis. 
 The path on the left indicated with blue arrows represents the RPA calculation 
 (<a href="../../input_variables/generated_files/vargs.html#optdriver">optdriver</a>=3)
-that produces the SCR file (see also the <a href="lesson_gw1.html">first lesson</a> of the GW tutorial).
+that produces the SCR file (see also the <a href="../../tutorial/lesson_gw1.html">first lesson</a> of the GW tutorial).
 Once the KSS and the SCR file are available, we can finally contruct the Hamiltonian and solve the
 Bethe-Salpeter problem (the rectangle at the bottom of the flowchart).
 </p>
@@ -498,12 +502,12 @@ employs standard (Sca)LAPACK routines to obtain the spectral representation of <
 in terms of eigenvalues and right eigenvectors of <i>H</i>:
 
 </p>
-<p align="center"><img style="width: 337px; height: 218px;" src="./theory_bse/spectral_repr.png"></p>
+<p align="center"><img style="width: 337px; height: 218px;" src="../documents/theory_bse/spectral_repr.png"></p>
 
 
 Then, as discussed in [2], the inverse of [<i>H</i>-&#969;] is obtained according to 
 
-<p align="center"><img style="width: 412px; height: 80px;" src="./theory_bse/resolvent.png"></p>
+<p align="center"><img style="width: 412px; height: 80px;" src="../documents/theory_bse/resolvent.png"></p>
 
 
 We do not elaborate this point further since the direct diagonalization is advantageous only in particular circumstances, 
@@ -516,13 +520,13 @@ Without entering into detail, one can schematically represent the Haydock techni
 that transforms a dense (hermitian) matrix into a sparse (tridiagonal) one:
 
 </p>
-<p align="center"><img style="width: 739px; height: 181px;" src="./theory_bse/Haydock_sketch.png"></p>
+<p align="center"><img style="width: 739px; height: 181px;" src="../documents/theory_bse/Haydock_sketch.png"></p>
 
 
 Once the coefficient of the tridiagonal form are know, the macroscopic dielectric function is
 evaluated in terms of the continued fraction: 
 
-<p align="center"><img style="width: 380px; height: 147px;" src="./theory_bse/cfact.png"></p>
+<p align="center"><img style="width: 380px; height: 147px;" src="../documents/theory_bse/cfact.png"></p>
 
 
 where a small complex shift, defined by <a href="../../input_variables/generated_files/vargw.html#zcut">zcut</a>,
@@ -562,20 +566,20 @@ At present, this method is still under testing and does not support calculations
 
 Our implementation employs planewaves to expand the periodic part of the Bloch states, <i>u</i>,
 and the two-point function <i>W(r,r')</i> that becomes a <b>q</b>-dependent matrix in reciprocal-space.
-The conventions used for the transforms are documented in <a href="theory_mbt.html#notations">this
+The conventions used for the transforms are documented in <a href="../theory_mbt.html#notations">this
 section</a> of the <i>GW</i> notes.
 
 <p>
 The matrix elements of the exchange term are evaluated in reciprocal space using:
 
 </p>
-<p align="center"><img style="width: 654px; height: 70px;" src="./theory_bse/exchange_term.png"></p>
+<p align="center"><img style="width: 654px; height: 70px;" src="../documents/theory_bse/exchange_term.png"></p>
 
 
 
 while the Coulomb term is calculated according to
 
-<p align="center"><img style="width: 1025px; height: 73px;" src="./theory_bse/direct_term.png"></p>
+<p align="center"><img style="width: 1025px; height: 73px;" src="../documents/theory_bse/direct_term.png"></p>
 
 
 The number of <b>G</b>-vectors in W and in the modified Coulomb interaction is specified through 
@@ -584,7 +588,7 @@ while the wavefuctions entering the oscillator matrix elements are expanded on a
 <a href="../../input_variables/generated_files/vargw.html#ecutwfn">ecutwfn</a>.
 The computation of the oscillator matrix elements is discussed in 
 
-<a href="theory_mbt.html#oscillator_notes">this section</a> of the <i>GW</i> Notes.
+<a href="../theory_mbt.html#oscillator_notes">this section</a> of the <i>GW</i> Notes.
 
 <p>
 The input variable <a href="../../input_variables/generated_files/varbse.html#bs_exchange_term">bs_exchange_term</a>
@@ -623,7 +627,7 @@ due to the presence of a fully nonlocal term in the Kohn-Sham Hamiltonian.
 A linear expansion up to the first order in <b>q</b> of the oscillator matrix element results in:
 
 </p>
-<p align="center"><img style="width: 655px; height: 46px;" src="./theory_bse/q0_expansion.png"></p>
+<p align="center"><img style="width: 655px; height: 46px;" src="../documents/theory_bse/q0_expansion.png"></p>
 
 
 where we have assumed <i>b<sub>1</sub> &#8800; b<sub>2</sub> </i>and the difference between the two wave functions at <b>k</b>-<b>q</b>  
@@ -639,7 +643,7 @@ For this reason, the first order contribution has to be evaluated using the equi
 <p>
 
 </p>
-<p align="center"><img style="width: 844px; height: 79px;" src="./theory_bse/dipole_mel.png"></p>
+<p align="center"><img style="width: 844px; height: 79px;" src="../documents/theory_bse/dipole_mel.png"></p>
 
 
 The term involving the momentum operator is efficiently evaluated in reciprocal space with linear

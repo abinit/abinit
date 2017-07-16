@@ -12,8 +12,8 @@
     authors : MG,MS
 - !section
     name : bse
-    keyword : Bethe-Salpeter equation in ABINIT.
-    authors : XG,RC
+    keyword : Bethe-Salpeter equation in ABINIT
+    authors : MG,MS
 - !section
     name : default
     keyword : Default keyword ... this is an error
@@ -28,7 +28,7 @@
       <hr>
       <a name="top"></a>
     title : |
-      <h1>ABINIT theory documents. __KEYWORD__ :</h1>
+      <h1>ABINIT theory documents. __KEYWORD__.</h1>
     copyright : |
       <hr>
       <h5>Copyright (C) 2000-2017 ABINIT group (__AUTHORS__)
@@ -36,6 +36,9 @@
       </h5> 
     links : |
       <script type="text/javascript" src="__JS_PATH__list_internal_links_for_generated_files.js"> </script>
+    tofcontent_header : |
+      <a name="list"></a>
+      <h3><b> __KEYWORD__. Table of content:</b></h3>
     end : |
       </body>
       </html>
