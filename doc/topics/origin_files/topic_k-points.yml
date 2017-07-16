@@ -1,6 +1,7 @@
 - !components 
     name      : k-points 
     keyword   : k-points 
+    authors   : FJ
     howto     : set parameters related to the k-points
     header    : default
     title     : <h1>k-points</h1>

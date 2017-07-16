@@ -1,6 +1,7 @@
 - !components 
     name      : spinpolarisation 
     keyword   : spinpolarisation 
+    authors   : FJ
     howto     : set parameters for a spin-polarized calculation
     header    : default
     title     : <h1>Spin-polarised systems and spin-orbit coupling</h1>

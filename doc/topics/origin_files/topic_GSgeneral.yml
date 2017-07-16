@@ -1,6 +1,7 @@
 - !components
     name      : GSgeneral
     keyword   : GSgeneral
+    authors   : FJ
     howto     : to build an input file for a ground state calculation
     header    : default
     title     : <h1>General settings</h1>

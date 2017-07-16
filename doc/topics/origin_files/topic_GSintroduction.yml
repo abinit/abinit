@@ -1,6 +1,7 @@
 - !components
     name      : GSintroduction
     keyword   : GSintroduction
+    authors   : FJ
     howto     : build an input file for a ground state calculation
     header    : default
     title     : <h1>Building an input file</h1>

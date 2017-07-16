@@ -8,6 +8,7 @@
 - !components
     name : all_topics
     keyword : All_topics
+    authors : FJ,XG
     howto : Default howto ... this is an error
     header : |
       <html>
@@ -24,7 +25,7 @@
       <h3>This file gives hints on how to __HOWTO__ with the ABINIT package.
       <hr>
     copyright : |
-      <h5>Copyright (C) 1998-2017 ABINIT group (FJ,XG,BA)
+      <h5>Copyright (C) 2016-2017 ABINIT group (__AUTHORS__)
       <script type="text/javascript" src="__JS_PATH__copyright.js"> </script>
       </h5>
     links : |

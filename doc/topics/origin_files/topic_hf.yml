@@ -1,6 +1,7 @@
 - !components
     name      : hf
     keyword   : hf
+    authors   : FJ
     howto     : use hybrid functionals
     header    : default
     title     : <h1>Hybrid functionals</h1>

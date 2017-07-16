@@ -1,6 +1,7 @@
  - !components 
     name      : Wavelets 
     keyword   : Wavelets 
+    authors   : FJ
     howto     : perform calculations on a wavelet basis
     header    : default
     title     : <h1>Wavelets</h1>

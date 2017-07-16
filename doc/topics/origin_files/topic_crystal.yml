@@ -1,6 +1,7 @@
 - !components 
     name      : crystal 
     keyword   : crystal 
+    authors   : FJ
     howto     : specify a crystal
     header    : default
     title     : <h1>Crystalline structure and symmetries</h1>

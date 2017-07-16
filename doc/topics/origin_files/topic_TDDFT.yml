@@ -1,6 +1,7 @@
 - !components 
     name      : TDDFT 
     keyword   : TDDFT 
+    authors   : FJ
     howto     : perform TDDFT calculations
     header    : default
     title     : <h1>TDDFT</h1>

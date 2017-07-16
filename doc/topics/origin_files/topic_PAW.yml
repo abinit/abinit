@@ -1,6 +1,7 @@
 - !components 
     name      : PAW 
     keyword   : PAW
+    authors   : FJ
     howto     : set parameters for a PAW calculation
     header    : default
     title     : <h1>PAW settings</h1>

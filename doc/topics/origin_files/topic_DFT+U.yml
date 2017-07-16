@@ -1,6 +1,7 @@
 - !components 
     name      : DFT+U 
     keyword   : DFT+U 
+    authors   : BAmadon
     howto     : perform a DFT+U calculation
     header    : default
     title     : <h1>The DFT+U approximation</h1>
