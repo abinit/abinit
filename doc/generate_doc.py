@@ -710,21 +710,25 @@ for topic_name in list_of_topics:
         topic_html += extract_j
     topic_html += "\n"
 
-  #Global operations on the tentative html file.
-  topic_html=topic_html.replace("__JS_PATH__",js_path)
-  topic_html=topic_html.replace("__HOWTO__",topic.howto)
-  topic_html=topic_html.replace("__KEYWORD__",topic.keyword)
-  topic_html=topic_html.replace("__AUTHORS__",topic.authors)
-  backlink=' &nbsp; <a href="../../%s/topic_%s.html">%s</a> &nbsp; ' %(topics_gen,topic_name,topic_name)
+  dir_root="topics"
+  name_root="topic"
+  rc=finalize_html(topic_html,topic,dir_root,name_root,list_all_vars,list_chars,cur_specials,backlinks)
 
-  topic_html = doku2html(make_links(topic_html,None,list_all_vars,list_chars,cur_specials,backlinks,backlink))
+  #Global operations on the tentative html file.
+  #topic_html=topic_html.replace("__JS_PATH__",js_path)
+  #topic_html=topic_html.replace("__HOWTO__",topic.howto)
+  #topic_html=topic_html.replace("__KEYWORD__",topic.keyword)
+  #topic_html=topic_html.replace("__AUTHORS__",topic.authors)
+  #backlink=' &nbsp; <a href="../../%s/topic_%s.html">%s</a> &nbsp; ' %(topics_gen,topic_name,topic_name)
+
+  #topic_html = doku2html(make_links(topic_html,None,list_all_vars,list_chars,cur_specials,backlinks,backlink))
 
   # Open, write and close the file
-  file_topic = topics_gen+'/topic_'+topic_name+'.html'
-  f_topic = open(file_topic,'w')
-  f_topic.write(topic_html)
-  f_topic.close()
-  print("File %s written ..."%file_topic )
+  #file_topic = topics_gen+'/topic_'+topic_name+'.html'
+  #f_topic = open(file_topic,'w')
+  #f_topic.write(topic_html)
+  #f_topic.close()
+  #print("File %s written ..."%file_topic )
 
 ################################################################################
 # Generate the file with the list of names of different "topic" files

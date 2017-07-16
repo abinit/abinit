@@ -1,7 +1,7 @@
 - !components 
     name      : PIMD 
     keyword   : PIMD 
-    author    : GG
+    authors   : GG
     howto     : perform a PIMD calculation
     header    : default
     title     : <h1>The Path Integral molecular Dynamics (PIMD)</h1>
