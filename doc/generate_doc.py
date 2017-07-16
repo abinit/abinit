@@ -1037,7 +1037,7 @@ for i, lesson_info in enumerate(lessons):
 
 ################################################################################
 
-activate_translation=0
+activate_translation=1
 if activate_translation==1:
 
   docs=read_yaml_file(theory_ori+"/theorydocs.yml")
@@ -1149,7 +1149,7 @@ if activate_translation==1:
         #string_new='src=../documents/lesson'
         #line=line.replace(string_old,string_new)
 
-        lesson_yml+="  "+line
+        doc_yml+="  "+line
 
     # Write the finalized html file
     f_doc_yml=open(path_doc_yml,"w")

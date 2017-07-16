@@ -1,0 +1,41 @@
+# This file provides the information needed to generate the documentation files that describes the lessons of the tutorial.
+# Each paragraph of such documentation file has a mix of formatting html information and real content.
+
+# The present file contains the formatting html information.
+# The "default" html information is presented in the section "default", at the bottom of the file. 
+# For most of the lesson*.html files, the default html formatting is hardly changed, so only minimal information
+# is needed to generate them. 
+
+- !section
+    name : mbt
+    keyword : Many-Body Theory in ABINIT
+    authors : MG,MS
+- !section
+    name : bse
+    keyword : Bethe-Salpeter equation in ABINIT.
+    authors : XG,RC
+- !section
+    name : default
+    keyword : Default keyword ... this is an error
+    authors : Default authors ... this is an error
+    header : |
+      <html>
+      <head><title>__KEYWORD__</title>
+      <link rel=stylesheet type="text/css" href="../formabinit.css">
+      </head>
+      <body bgcolor="#ffffff">
+
+      <hr>
+      <a name="top"></a>
+    title : |
+      <h1>ABINIT theory documents. __KEYWORD__ :</h1>
+    copyright : |
+      <hr>
+      <h5>Copyright (C) 2000-2017 ABINIT group (__AUTHORS__)
+      <script type="text/javascript" src="__JS_PATH__copyright.js"> </script>
+      </h5> 
+    links : |
+      <script type="text/javascript" src="__JS_PATH__list_internal_links_for_generated_files.js"> </script>
+    end : |
+      </body>
+      </html>
