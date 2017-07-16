@@ -47,7 +47,7 @@ tuto_gen = "tutorial/generated_files"
 ################################################################################
  
 
-bibhtml=read_yaml_file(bib_ori+"/bibhtml.yml")
+bibyml=read_yaml_file(bib_ori+"/bibhtml.yml")
 lessons=read_yaml_file(tuto_ori+"/lessons.yml")
 list_of_topics=read_yaml_file(topics_ori+"/list_of_topics.yml")
 sections=read_yaml_file(invars_ori+"/sections.yml")
@@ -912,10 +912,10 @@ returncode=assemble_html(theorydocs,"theory","theory",list_all_vars,list_chars,c
 ################################################################################
 # Treat the links within the "introduction" of the acknowledgment section first.
 backlink= ' &nbsp; <a href="../../%s/acknowledgments.html">acknowledgments.html</a> &nbsp; ' %(bib_gen)
-for i, bibhtml_info in enumerate(bibhtml):
-  if bibhtml_info.name.strip()=="acknowledgments":
-    bibhtml_intro=bibhtml_info.introduction
-    bibhtml_ack_intro = doku2html(make_links(bibhtml_intro,None,list_all_vars,list_chars,cur_specials,backlinks,backlink))
+for i, bibyml_info in enumerate(bibyml):
+  if bibyml_info.name.strip()=="acknowledgments":
+    bibyml_intro=bibyml_info.introduction
+    bibyml_ack_intro = doku2html(make_links(bibyml_intro,None,list_all_vars,list_chars,cur_specials,backlinks,backlink))
 
 ################################################################################
 # Write an ordered bib file, that allows to update the original one.
@@ -972,13 +972,13 @@ bib_content['bibliography']=bibtex2html(bib_content['bibliography'])
 # Generate the html files in the bibliography directory
 
 # Store the default informations
-for i, bibhtml_info in enumerate(bibhtml):
-  if bibhtml_info.name.strip()=="default":
-    bibhtml_info_default=bibhtml_info
+for i, bibyml_info in enumerate(bibyml):
+  if bibyml_info.name.strip()=="default":
+    bibyml_info_default=bibyml_info
 
 # Generate each bibhtml file : build the missing information (table of content), assemble the content, apply global transformations, then write.
-for i, bibhtml_info in enumerate(bibhtml):
-  bibname = bibhtml_info.name
+for i, bibyml_info in enumerate(bibyml):
+  bibname = bibyml_info.name
   if bibname =="default":
     continue
 
@@ -989,19 +989,19 @@ for i, bibhtml_info in enumerate(bibhtml):
     if j == "content":
       bibhtml += bib_content[bibname]
     elif j == "introduction" and bibname =="acknowledgments" :
-      bibhtml += bibhtml_ack_intro
+      bibhtml += bibyml_ack_intro
     else:
-      extract_j=getattr(bibhtml_info,j)
+      extract_j=getattr(bibyml_info,j)
       if extract_j.strip() == "":
-        bibhtml += getattr(bibhtml_info_default,j)
+        bibhtml += getattr(bibyml_info_default,j)
       else:
         bibhtml += extract_j
     bibhtml += "\n"
 
   #Global operations on the tentative html file.
   bibhtml=bibhtml.replace("__JS_PATH__",js_path)
-  bibhtml=bibhtml.replace("__KEYWORD__",bibhtml_info.keyword)
-  bibhtml=bibhtml.replace("__AUTHORS__",bibhtml_info.authors)
+  bibhtml=bibhtml.replace("__KEYWORD__",bibyml_info.keyword)
+  bibhtml=bibhtml.replace("__AUTHORS__",bibyml_info.authors)
   backlink= ' &nbsp; <a href="../../%s/specials.html#%s">%s</a> &nbsp; ' %(bib_gen,bibname,bibname)
   bibhtml = doku2html(make_links(bibhtml,None,list_all_vars,list_chars,cur_specials,backlinks,backlink))
 
