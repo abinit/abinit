@@ -289,15 +289,18 @@ def assemble_html(origin_yml_files,dir_root,name_root,list_all_vars,list_chars,c
     if name=="default":
       continue
 
+    # Try to complete the information by reading a yml file
     path_yml="%s/origin_files/%s_%s.yml" %(dir_root,name_root,name)
-    print("Will use file "+path_yml+" to build the "+dir_root+" html document "+name_root+"_"+name+" ... ",end="")
-    doc_yml=read_yaml_file(path_yml)
+    if os.path.isfile(path_yml):
+      print("Will use file "+path_yml+" to build the "+dir_root+" html document "+name_root+"_"+name+" ... ",end="")
+      doc_yml=read_yaml_file(path_yml)
 
     #Write a first version of the html file, in the order "header" ... up to the "end"
     #Take the info from the section "default" if there is no information on the specific section provided in the yml file.
+    #Also, format specifically selected sections.
     doc_html=""
     for j in ["header","title","subtitle","intro","copyright","links","menu","tofcontent_header","body","links","end"]:
-      if j in ["intro","body"] :
+      if j in doc_yml.keys() :
         doc_html += doc_yml[j]
       elif j=="subtitle" and origin_yml.subtitle != None:
         doc_html += "<h2>"+origin_yml.subtitle+"</h2> \n <hr>"
