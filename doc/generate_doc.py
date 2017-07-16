@@ -274,12 +274,14 @@ def bibtex2html(str_input):
 
 ################################################################################
  
-variables=read_yaml_file(invars_ori+"/abinit_vars.yml")
+
+bibhtml=read_yaml_file(bib_ori+"/bibhtml.yml")
 lessons=read_yaml_file(tuto_ori+"/lessons.yml")
 list_of_topics=read_yaml_file(topics_ori+"/list_of_topics.yml")
 sections=read_yaml_file(invars_ori+"/sections.yml")
 tests_dirs=read_yaml_file(topics_ori+"/tests_dirs.yml")
-bibhtml=read_yaml_file(bib_ori+"/bibhtml.yml")
+theorydocs=read_yaml_file(theory_ori+"/theorydocs.yml")
+variables=read_yaml_file(invars_ori+"/abinit_vars.yml")
 
 with open(bib_ori+'/abiref.bib')  as bibtex_file:
   bibtex_str = bibtex_file.read()
@@ -1161,6 +1163,15 @@ if activate_translation==1:
         #line=line.replace(string_old,string_new)
 
         doc_yml+="  "+line
+
+    #DEBUG
+    #print("")
+    #print(" doc_yml :",path_doc_yml)
+    #index=36700
+    #print(" doc_yml[%s,%s] :"%(index,index+100))
+    #print(doc_yml[index:index+100])
+    #print("")
+    #ENDDEBUG
 
     # Write the finalized html file
     f_doc_yml=open(path_doc_yml,"w")

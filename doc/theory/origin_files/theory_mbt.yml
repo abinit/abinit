@@ -73,10 +73,10 @@ body : |
   
   
   where <i>E<sub>0</sub><sup>N</sup></i> is the ground state energy of the electron system with <i>N</i>
-  electrons, and <i>i</i> is the set of quantum numbers labeling the excited states with <i>N±</i>1 electrons. 
+  electrons, and <i>i</i> is the set of quantum numbers labeling the excited states with <i>N&plusmn;</i>1 electrons. 
   Finally, <i>&#956;</i> is the chemical potential of the system.
   Other important quantities that will be used in the following are
-  the so-called Lehmann amplitudes defined, in the Schrödinger representation, by
+  the so-called Lehmann amplitudes defined, in the Schr&ouml;dinger representation, by
   
   <p align="center">
   
@@ -123,7 +123,7 @@ body : |
   <!--
   The equation of motion technique tries to solve the problem by differentiating the Green's function a number of times.
   This approach leads to a series of coupled differential equations involving functions with a progressively increasing number of particles
-  whose solution has the same complexity as the original Schr\"odinger problem.
+  whose solution has the same complexity as the original Schr&ouml;odinger problem.
   The calculation of the fully interacting Green's function can be thus reduced 
   to the problem of finding the self-energy of the system.
   However, at this stage, the question of how G can be calculated remains.
@@ -621,12 +621,12 @@ body : |
   <p>
   The third term in the equation defining the oscillators makes it clear that the product 
   of the periodic part of the orbitals has non-zero Fourier components in a sphere 
-  whose radius is 2×<i>R<sub>wfn</sub></i> where <i>R<sub>wfn</sub></i> is the radius of 
+  whose radius is 2&times;<i>R<sub>wfn</sub></i> where <i>R<sub>wfn</sub></i> is the radius of 
   the <b>G</b>-sphere used for the wavefunctions (set by
   
   [[ecutwfn]]). To avoid 
   aliasing errors in the FFT one should therefore use an FFT box that encloses the 
-  sphere with radius 2×<i>R<sub>wfn</sub></i>, 
+  sphere with radius 2&times;<i>R<sub>wfn</sub></i>, 
   but this leads to a significant increase in the computing effort as well as in the 
   memory requirements. The input variable 
   [[fftgw]] specifies
@@ -1030,7 +1030,7 @@ body : |
   
   </a> </li><li><a name="Aulbur2000">
     W. G. Aulbur, 
-    L. Jönsson 
+    L. J&ouml;nsson 
     and J. W. Wilkins, 
     Solid State Physics <b>54</b>, 1 (2000)
   </a></li><li><a name="Onida1995">
