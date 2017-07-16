@@ -1002,7 +1002,7 @@ def assemble_html(origin_yml_files,dir_root,name_root):
     if name=="default":
       continue
 
-    path_yml="%s_ori/%s_%s.yml" %(dir_root,name_root,name)
+    path_yml="%s/origin_files/%s_%s.yml" %(dir_root,name_root,name)
     print("Will use file "+path_yml+" to build the "+dir_root+" html document "+name_root+"_"+name+" ... ",end="")
     doc_yml=read_yaml_file(path_yml)
 
@@ -1030,7 +1030,7 @@ def assemble_html(origin_yml_files,dir_root,name_root):
     doc_html = doku2html(make_links(doc_html,None,list_all_vars,list_chars,cur_specials,backlinks,backlink))
 
     #Write the finalized html file.
-    path_html = "%s_gen/%s_%s.html" %(dir_root,name_root,name) 
+    path_html = "%s/generated_files/%s_%s.html" %(dir_root,name_root,name) 
     file_html = open(path_html,'w')
     file_html.write(doc_html)
     file_html.close()
