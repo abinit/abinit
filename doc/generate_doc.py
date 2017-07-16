@@ -714,22 +714,6 @@ for topic_name in list_of_topics:
   name_root="topic"
   rc=finalize_html(topic_html,topic,dir_root,name_root,list_all_vars,list_chars,cur_specials,backlinks)
 
-  #Global operations on the tentative html file.
-  #topic_html=topic_html.replace("__JS_PATH__",js_path)
-  #topic_html=topic_html.replace("__HOWTO__",topic.howto)
-  #topic_html=topic_html.replace("__KEYWORD__",topic.keyword)
-  #topic_html=topic_html.replace("__AUTHORS__",topic.authors)
-  #backlink=' &nbsp; <a href="../../%s/topic_%s.html">%s</a> &nbsp; ' %(topics_gen,topic_name,topic_name)
-
-  #topic_html = doku2html(make_links(topic_html,None,list_all_vars,list_chars,cur_specials,backlinks,backlink))
-
-  # Open, write and close the file
-  #file_topic = topics_gen+'/topic_'+topic_name+'.html'
-  #f_topic = open(file_topic,'w')
-  #f_topic.write(topic_html)
-  #f_topic.close()
-  #print("File %s written ..."%file_topic )
-
 ################################################################################
 # Generate the file with the list of names of different "topic" files
 
@@ -746,18 +730,22 @@ for j in ["header","title","subtitle","copyright","links","toc_all","links","end
   else:
     all_topics_html += getattr(default_topic,j)
 
+dir_root="topics"
+name_root=""
+rc=finalize_html(all_topics_html,default_topic,dir_root,name_root,list_all_vars,list_chars,cur_specials,backlinks)
+
 #Global operations on the tentative html file.
-all_topics_html=all_topics_html.replace("__JS_PATH__",js_path)
-all_topics_html=all_topics_html.replace("__KEYWORD__",default_topic.keyword)
-backlink=' &nbsp; <a href="../../%s/all_topics.html">all_topics.html</a> &nbsp; ' %(topics_gen)
-all_topics_html = doku2html(make_links(all_topics_html,None,list_all_vars,list_chars,cur_specials,backlinks,backlink))
+#all_topics_html=all_topics_html.replace("__JS_PATH__",js_path)
+#all_topics_html=all_topics_html.replace("__KEYWORD__",default_topic.keyword)
+#backlink=' &nbsp; <a href="../../%s/all_topics.html">all_topics.html</a> &nbsp; ' %(topics_gen)
+#all_topics_html = doku2html(make_links(all_topics_html,None,list_all_vars,list_chars,cur_specials,backlinks,backlink))
 
 # Open, write and close the file
-file_html = topics_gen+'/all_topics.html'
-f_html = open(file_html,'w')
-f_html.write(all_topics_html)
-f_html.close()
-print("File %s written ..."%file_html )
+#file_html = topics_gen+'/all_topics.html'
+#f_html = open(file_html,'w')
+#f_html.write(all_topics_html)
+#f_html.close()
+#print("File %s written ..."%file_html )
 
 ################################################################################
 ################################################################################
@@ -980,7 +968,7 @@ suppl_components['bibtex']=suppl
 suppl={"content":bibliography_content}
 suppl_components['bibliography']=suppl
 
-returncode=assemble_html(bibyml,suppl_components,"bibliography","",list_all_vars,list_chars,cur_specials,backlinks)
+rc=assemble_html(bibyml,suppl_components,"bibliography","",list_all_vars,list_chars,cur_specials,backlinks)
 
 ################################################################################
 
