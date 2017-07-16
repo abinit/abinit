@@ -9,7 +9,7 @@
     name : all_topics
     keyword : All_topics
     authors : FJ,XG
-    howto : Default howto ... this is an error
+    howto : default
     header : |
       <html>
       <head><title>__KEYWORD__ </title>

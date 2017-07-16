@@ -504,20 +504,9 @@ for i, section_info in enumerate(sections):
         sectionhtml += extract_j
     sectionhtml += "\n"
 
-  #Global operations on the tentative html file.
-  sectionhtml=sectionhtml.replace("__JS_PATH__",js_path)
-  sectionhtml=sectionhtml.replace("__KEYWORD__",section_info.keyword)
-  sectionhtml=sectionhtml.replace("__AUTHORS__",section_info.authors)
-  backlink=' &nbsp; <a href="../../%s/%s.html#%s">%s<\a> &nbsp; ' %(invars_gen,section,var.abivarname,var.abivarname)
-  sectionhtml = doku2html(make_links(sectionhtml,None,list_all_vars,list_chars,cur_specials,backlinks,backlink))
-
-  #Write the finalized html file.
-  file_cur = invars_gen+'/'+section+'.html'
-  f_cur = open(file_cur,'w')
-  f_cur.write(sectionhtml)
-  f_cur.write("\n")
-  f_cur.close()
-  print("File %s written ..."%file_cur )
+  dir_root="input_variables"
+  name_root=""
+  rc=finalize_html(sectionhtml,section_info,dir_root,name_root,list_all_vars,list_chars,cur_specials,backlinks)
 
 ################################################################################
 ################################################################################
@@ -733,19 +722,6 @@ for j in ["header","title","subtitle","copyright","links","toc_all","links","end
 dir_root="topics"
 name_root=""
 rc=finalize_html(all_topics_html,default_topic,dir_root,name_root,list_all_vars,list_chars,cur_specials,backlinks)
-
-#Global operations on the tentative html file.
-#all_topics_html=all_topics_html.replace("__JS_PATH__",js_path)
-#all_topics_html=all_topics_html.replace("__KEYWORD__",default_topic.keyword)
-#backlink=' &nbsp; <a href="../../%s/all_topics.html">all_topics.html</a> &nbsp; ' %(topics_gen)
-#all_topics_html = doku2html(make_links(all_topics_html,None,list_all_vars,list_chars,cur_specials,backlinks,backlink))
-
-# Open, write and close the file
-#file_html = topics_gen+'/all_topics.html'
-#f_html = open(file_html,'w')
-#f_html.write(all_topics_html)
-#f_html.close()
-#print("File %s written ..."%file_html )
 
 ################################################################################
 ################################################################################
