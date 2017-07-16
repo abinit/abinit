@@ -448,6 +448,8 @@ for i, var in enumerate(variables):
 ################################################################################
 # Generate the files that document all the variables (all such files : var* as well as all and special).
 
+suppl_components={}
+
 # Store the default informations
 for i, section_info in enumerate(sections):
   if section_info.name.strip()=="default":
@@ -488,25 +490,30 @@ for i, section_info in enumerate(sections):
       toc_body += curlink
   toc_body += "\n"
 
+  suppl={"toc":toc_body , "content":all_contents[section]}
+  suppl_components[section]=suppl
+
+rc=assemble_html(sections,suppl_components,"input_variables","",list_all_vars,list_chars,cur_specials,backlinks)
+
   #Write a first version of the html file, in the order "header" ... up to the "end"
   #Take the info from the section "default" if there is no information on the specific section provided in the yml file.
-  sectionhtml=""
-  for j in ["header","title","subtitle","purpose","advice","copyright","links","menu","tofcontent_header","tofcontent_body","content","links","end"]:
-    if j == "tofcontent_body":
-      sectionhtml += toc_body
-    elif j == "content":
-      sectionhtml += all_contents[section]
-    else:
-      extract_j=getattr(section_info,j) 
-      if extract_j.strip() == "":
-        sectionhtml += getattr(section_info_default,j) 
-      else:
-        sectionhtml += extract_j
-    sectionhtml += "\n"
-
-  dir_root="input_variables"
-  name_root=""
-  rc=finalize_html(sectionhtml,section_info,dir_root,name_root,list_all_vars,list_chars,cur_specials,backlinks)
+  #sectionhtml=""
+  #for j in ["header","title","subtitle","purpose","advice","copyright","links","menu","tofcontent_header","tofcontent_body","content","links","end"]:
+  #  if j == "tofcontent_body":
+  #    sectionhtml += toc_body
+  #  elif j == "content":
+  #    sectionhtml += all_contents[section]
+  #  else:
+  #    extract_j=getattr(section_info,j) 
+  #    if extract_j.strip() == "":
+  #      sectionhtml += getattr(section_info_default,j) 
+  #    else:
+  #      sectionhtml += extract_j
+  #  sectionhtml += "\n"
+ 
+  #dir_root="input_variables"
+  #name_root=""
+  #rc=finalize_html(sectionhtml,section_info,dir_root,name_root,list_all_vars,list_chars,cur_specials,backlinks)
 
 ################################################################################
 ################################################################################

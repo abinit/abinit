@@ -312,7 +312,7 @@ def assemble_html(origin_yml_files,suppl_components,dir_root,name_root,list_all_
     #Also, format specifically selected sections.
 
     doc_html=""
-    for j in ["header","title","subtitle","intro","copyright","links","menu",
+    for j in ["header","title","subtitle","purpose","advice","intro","copyright","links","menu",
               "tofcontent_header","toc",
               "introduction","examples","tutorials","input_variables","input_files","references",
               "content","body",
@@ -342,12 +342,12 @@ def assemble_html(origin_yml_files,suppl_components,dir_root,name_root,list_all_
       
       # Possibly apply format to selected sections
       if j =="subtitle":
-        item = "<h2>"+item+"</h2> \n <hr>"
+        item = "<h2>"+item+"</h2>\n<hr>"
 
       # Accumulate
       doc_html += item+"\n"
 
-    returncode=finalize_html(doc_html,origin_yml,dir_root,name_root,list_all_vars,list_chars,cur_specials,backlinks) 
+    rc=finalize_html(doc_html,origin_yml,dir_root,name_root,list_all_vars,list_chars,cur_specials,backlinks) 
 
   return "Exit assemble_html"
 

@@ -45,8 +45,7 @@
     title : |
       <h1>Main ABINIT code, input variables:</h1>
     subtitle : |
-      <h2>Complete list.</h2>
-      <hr>
+      Complete list.
     purpose : |
       This document lists the names of all input variables to be used in the main input file of the abinit code.
     tofcontent_header : |
@@ -136,8 +135,7 @@
     title : |
       <h1>ABINIT, __KEYWORD__ input variables:</h1>
     subtitle : |
-      <h2>List and description.</h2>
-      <hr>
+      List and description.
     purpose : |
       <p>This document lists and provides the description
       of the name (keywords) of the "__KEYWORD__" input
