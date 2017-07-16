@@ -312,7 +312,11 @@ def assemble_html(origin_yml_files,suppl_components,dir_root,name_root,list_all_
     #Also, format specifically selected sections.
 
     doc_html=""
-    for j in ["header","title","subtitle","intro","copyright","links","menu","introduction","tofcontent_header","content","body","links","end"]:
+    for j in ["header","title","subtitle","intro","copyright","links","menu",
+              "tofcontent_header","toc",
+              "introduction","examples","tutorials","input_variables","input_files","references",
+              "content","body",
+              "links","end"]:
 
       item=""
       # Try to get the item from different sources
@@ -326,14 +330,14 @@ def assemble_html(origin_yml_files,suppl_components,dir_root,name_root,list_all_
         except:
           pass
       item=item.strip()
-      if item=="":
+      if item=="" or item=="default":
         try:
           item=getattr(origin_yml_default,j)
         except:
           pass
 
       # If there is nothing in the section, continue
-      if item=="":
+      if item=="" or item=="default" :
         continue
       
       # Possibly apply format to selected sections
@@ -343,20 +347,46 @@ def assemble_html(origin_yml_files,suppl_components,dir_root,name_root,list_all_
       # Accumulate
       doc_html += item+"\n"
 
-    #Global operations on the tentative html file.
-    doc_html=doc_html.replace("__JS_PATH__",js_path)
-    doc_html=doc_html.replace("__KEYWORD__",origin_yml.keyword)
-    doc_html=doc_html.replace("__AUTHORS__",origin_yml.authors)
-    backlink=' &nbsp; <a href="../../%s/generated_files/%s.html">%s</a> &nbsp; ' %(dir_root,full_name,full_name)
-    doc_html = doku2html(make_links(doc_html,None,list_all_vars,list_chars,cur_specials,backlinks,backlink))
-
-    #Write the finalized html file.
-    path_html = "%s/generated_files/%s.html" %(dir_root,full_name)
-    file_html = open(path_html,'w')
-    file_html.write(doc_html)
-    file_html.close()
-    print("File %s written ..."%path_html)
+    returncode=finalize_html(doc_html,origin_yml,dir_root,name_root,list_all_vars,list_chars,cur_specials,backlinks) 
 
   return "Exit assemble_html"
+
+################################################################################
+
+def finalize_html(doc_html,origin_yml,dir_root,name_root,list_all_vars,list_chars,cur_specials,backlinks):
+  """ Final steps of the preparation of a html file : global operations and write
+      The draft text of the file to be written is contained in doc_html
+      Some substitutions must be done using information in origin_yml (.name, .howto, .keyword, .authors)
+      The links are build using list_all_vars,list_chars,cur_specials
+      The backlinks are given back.
+  """
+
+  if name_root != "":
+    full_name=name_root+"_"+origin_yml.name
+  else:
+    full_name=origin_yml.name
+  backlink=' &nbsp; <a href="../../%s/generated_files/%s.html">%s</a> &nbsp; ' %(dir_root,full_name,full_name)
+
+  doc_html=doc_html.replace("__JS_PATH__",js_path)
+
+  if origin_yml.howto != "":
+    doc_html=doc_html.replace("__HOWTO__",origin_yml.howto)
+
+  if origin_yml.keyword != "":
+    doc_html=doc_html.replace("__KEYWORD__",origin_yml.keyword)
+
+  if origin_yml.authors != "":
+    doc_html=doc_html.replace("__AUTHORS__",origin_yml.authors)
+
+  doc_html = doku2html(make_links(doc_html,None,list_all_vars,list_chars,cur_specials,backlinks,backlink))
+
+  #Write the finalized html file.
+  path_html = "%s/generated_files/%s.html" %(dir_root,full_name)
+  file_html = open(path_html,'w')
+  file_html.write(doc_html)
+  file_html.close()
+  print("File %s written ..."%path_html)
+
+  return "Exit finalize_html"
 
 ################################################################################

@@ -624,9 +624,9 @@ default_topic=default_topic_yml[0]
 
 # For each "topic" file
 for topic_name in list_of_topics:
-  f_topic="yml_files/topic_"+topic_name+".yml"
-  print("Will use file "+f_topic+" to initiate the topic "+topic_name+" ... ",end="")
-  topic_yml=read_yaml_file(topics_ori+"/topic_"+topic_name+".yml")
+  path_yml=topics_ori+"/topic_"+topic_name+".yml"
+  print("Will use file "+path_yml+" to initiate the topic "+topic_name+" ... ",end="")
+  topic_yml=read_yaml_file(path_yml)
   topic=topic_yml[0]
 
   #Mention it in the table of content of the file all_topics.html
@@ -910,6 +910,7 @@ returncode=assemble_html(theorydocs,suppl_components,"theory","theory",list_all_
 
 ################################################################################
 # Treat the links within the "introduction" of the acknowledgment section first.
+
 backlink= ' &nbsp; <a href="../../%s/acknowledgments.html">acknowledgments.html</a> &nbsp; ' %(bib_gen)
 for i, bibyml_info in enumerate(bibyml):
   if bibyml_info.name.strip()=="acknowledgments":
@@ -974,6 +975,7 @@ suppl={"content":bibtex_content}
 suppl_components['bibtex']=suppl
 suppl={"content":bibliography_content}
 suppl_components['bibliography']=suppl
+
 returncode=assemble_html(bibyml,suppl_components,"bibliography","",list_all_vars,list_chars,cur_specials,backlinks)
 
 ################################################################################
