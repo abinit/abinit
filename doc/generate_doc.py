@@ -901,8 +901,9 @@ if activate_translation==1:
  
 ################################################################################
 
-returncode=assemble_html(lessons,"tutorial","lesson",list_all_vars,list_chars,cur_specials,backlinks)
-returncode=assemble_html(theorydocs,"theory","theory",list_all_vars,list_chars,cur_specials,backlinks)
+suppl_components={}
+returncode=assemble_html(lessons,suppl_components,"tutorial","lesson",list_all_vars,list_chars,cur_specials,backlinks)
+returncode=assemble_html(theorydocs,suppl_components,"theory","theory",list_all_vars,list_chars,cur_specials,backlinks)
 
 ################################################################################
 ################################################################################

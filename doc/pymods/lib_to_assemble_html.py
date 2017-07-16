@@ -268,8 +268,9 @@ def bibtex2html(str_input):
 
 ################################################################################
 
-def assemble_html(origin_yml_files,dir_root,name_root,list_all_vars,list_chars,cur_specials,backlinks):
-  """ Use the list of dictionaries "origin_yml_files" to produce html files,
+def assemble_html(origin_yml_files,suppl_components,dir_root,name_root,list_all_vars,list_chars,cur_specials,backlinks):
+  """ Use the list of dictionaries "origin_yml_files" as well as the
+      supplementary components "suppl_components", to produce html files,
       situated in dir_root directories dir_root+"/generated_files".
       The root name of the files is "name_root".
       The complementary yml information (intro, body) for each file
@@ -294,23 +295,41 @@ def assemble_html(origin_yml_files,dir_root,name_root,list_all_vars,list_chars,c
     if os.path.isfile(path_yml):
       print("Will use file "+path_yml+" to build the "+dir_root+" html document "+name_root+"_"+name+" ... ",end="")
       doc_yml=read_yaml_file(path_yml)
+ 
+    # Try to complete the information from suppl_components
+    suppl={}
+    if name in suppl_components.keys():
+      suppl=suppl_components[name]
 
     #Write a first version of the html file, in the order "header" ... up to the "end"
     #Take the info from the section "default" if there is no information on the specific section provided in the yml file.
     #Also, format specifically selected sections.
+
     doc_html=""
     for j in ["header","title","subtitle","intro","copyright","links","menu","tofcontent_header","body","links","end"]:
+
+      item=""
+      # Try to get the item from different sources
       if j in doc_yml.keys() :
-        doc_html += doc_yml[j]
-      elif j=="subtitle" and origin_yml.subtitle != None:
-        doc_html += "<h2>"+origin_yml.subtitle+"</h2> \n <hr>"
-      else:
-        extract_j=getattr(origin_yml,j)
-        if extract_j.strip() == "":
-          doc_html += getattr(origin_yml_default,j)
-        else:
-          doc_html += extract_j
-      doc_html += "\n"
+        item+=doc_yml[j]
+      elif j in suppl.keys() :
+        item+=suppl[j]
+      else :
+        item+=getattr(origin_yml,j)
+      item=item.strip()
+      if item=="":
+        item=getattr(origin_yml_default,j)
+
+      # If there is nothing in the section, continue
+      if item=="":
+        continue
+      
+      # Possibly apply format to selected sections
+      if j =="subtitle":
+        item = "<h2>"+item+"</h2> \n <hr>"
+
+      # Accumulate
+      doc_html += item+"\n"
 
     #Global operations on the tentative html file.
     doc_html=doc_html.replace("__JS_PATH__",js_path)
