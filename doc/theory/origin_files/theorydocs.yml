@@ -6,15 +6,15 @@
 # For most of the lesson*.html files, the default html formatting is hardly changed, so only minimal information
 # is needed to generate them. 
 
-- !section
+- !components
     name : mbt
     keyword : Many-Body Theory in ABINIT
     authors : MG,MS
-- !section
+- !components
     name : bse
     keyword : Bethe-Salpeter equation in ABINIT
     authors : MG,MS
-- !section
+- !components
     name : default
     keyword : Default keyword ... this is an error
     authors : Default authors ... this is an error

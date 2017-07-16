@@ -7,20 +7,20 @@
 # is needed to generate them. For the "special" parameters and for the list of all input variables,
 # some minor adjustments are needed, so that the default list # is less adequate.
 
-- !topic
+- !components
     name : bibliography
     keyword : bibliography
     subtitle : |
       <p>This document lists all the bibliographical references mentioned in the ABINIT documentation, 
       with link(s) to the Web pages where such references are mentioned, as well as the bibtex formatted reference.
 
-- !topic
+- !components
     name : bibtex
     keyword : bibtex
     subtitle : |
       This document gives the bibtex data for all the bibliographical references mentioned in the ABINIT documentation.
 
-- !topic
+- !components
     name : acknowledgments
     keyword : acknowledgments
     subtitle : |
@@ -126,7 +126,7 @@
             on the electronic structure are computed, cite [[Ponce2014]] and [[Ponce2015]].
       </ul>
 
-- !topic
+- !components
     name : default
     keyword : Default keyword ... this is an error
     header : |

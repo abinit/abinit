@@ -8,7 +8,7 @@
 # is needed to generate them. For the "special" parameters and for the list of all input variables,
 # some minor adjustments are needed, so that the default list # is less adequate.
 
-- !section
+- !components
     name : specials
     keyword : special
     header : |
@@ -30,7 +30,7 @@
       <a name="list"></a>
       <h3><b> Content of the file : alphabetical list of special parameters.</b></h3>
 
-- !section
+- !components
     name : allvariables
     keyword : allvariable
     header : |
@@ -53,75 +53,75 @@
       <a name="list"></a>
       <h3><b> Alphabetical list of all input variables of the main ABINIT code.</b></h3>
 
-- !section 
+- !components 
     name : varbas
     keyword : basic
 
-- !section
+- !components
     name : varbse
     keyword : BSE
 
-- !section
+- !components
     name : vardev
     keyword : developer
 
-- !section
+- !components
     name : vardmft
     keyword : DMFT
 
-- !section
+- !components
     name : vareph
     keyword : electron-phonon calculation
 
-- !section
+- !components
     name : varff
     keyword : applied finite field calculation
 
-- !section
+- !components
     name : varfil
     keyword : file handling
 
-- !section
+- !components
     name : vargeo
     keyword : geometry builder and symmetry related
 
-- !section
+- !components
     name : vargs
     keyword : ground state calculations
 
-- !section
+- !components
     name : vargw
     keyword : GW
 
-- !section
+- !components
     name : varint
     keyword : internal
 
-- !section
+- !components
     name : varpar
     keyword : parallelisation
 
-- !section
+- !components
     name : varpaw
     keyword : PAW
 
-- !section
+- !components
     name : varrf
     keyword : response function
 
-- !section
+- !components
     name : varrlx
     keyword : structural optimization
 
-- !section
+- !components
     name : varvdw
     keyword : Van der Waals
 
-- !section
+- !components
     name : varw90
     keyword : Wannier90 interface
 
-- !section
+- !components
     name : default
     keyword : Default keyword ... this is an error
     header : |

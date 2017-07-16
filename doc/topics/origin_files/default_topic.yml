@@ -5,7 +5,7 @@
 # The present file contains the default html information, also used for the list of all variables.
 # For each of the topics file, there is a corresponding yml file, that specifies usually the list of paragraphs.
 
-- !topic
+- !components
     name : all_topics
     keyword : All_topics
     howto : Default howto ... this is an error

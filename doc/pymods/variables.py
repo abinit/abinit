@@ -84,76 +84,50 @@ class Variable(yaml.YAMLObject):
 
 ####################################################################################################
 
-class Section(yaml.YAMLObject):
+class Components(yaml.YAMLObject):
     name = None  # String containing section name
     keyword = '' # String containing the short description of the topics, to be echoed in the title of the section file.
     authors = '' # String containing the list of authors.
+    howto  = ''  # For the 'topics' Should complete the sentence beginning with "How to" 
     header = ''  # Header of the file, possibly the 'default' one
     title  = ''  # Title  of the file, possibly the 'default' one
     subtitle  = ''  # Subtitle  of the file, possibly the 'default' one
     purpose   = ''  # Purpose  of the file, possibly the 'default' one
     advice    = ''  # Advice  of the file, possibly the 'default' one
     copyright = ''  # Copyright of the file, possibly the 'default' one
+    introduction = ''  # Introduction
     links     = ''  # Links of the file, possibly the 'default' one
     menu      = ''  # Menu of the file, possibly the 'default' one
     tofcontent_header      = ''  # Header of the table of content of the file, possibly the 'default' one
+    tutorials    = '' # List of relevant tutorials
+    examples     = '' # Relevant examples
     end       = ''  # End of the file, possibly the 'default' one
 
-    yaml_tag = u'!section'
+    yaml_tag = u'!components'
 
     def attrs(self):
-        return ['name', 'keyword', 'authors', 'header', 'title', 'subtitle', 'purpose', 'advice', 'copyright', 'links', 'menu', 'tofcontent_header', 'end']
+        return ['name', 'keyword', 'authors', 'howto', 'header', 'title', 'subtitle', 'purpose', 'advice', 
+                'copyright', 'introduction', 'links', 'menu', 'tofcontent_header', 'tutorials', 'examples', 'end']
 
     #Note that the default values are actually not initialized here, but in the data file, in order to ease the maintenance.
-    def __init__(self, name=None, keyword=None, authors=None, header=None, title=None, subtitle=None, purpose=None, advice=None, copyright=None, links=None, menu=None, tofcontent_header=None, end=None):
+    def __init__(self, name=None, keyword=None, authors=None, howto=None, header=None, title=None, subtitle=None, purpose=None, advice=None, 
+                 copyright=None, links=None, menu=None, tofcontent_header=None, tutorials=None, examples=None, end=None):
         self.name = name
         self.keyword = keyword
         self.authors = authors
+        self.howto = howto
         self.header = header
         self.title  = title
         self.subtitle = subtitle
         self.purpose  = purpose
         self.advice   = advice
         self.copyright= copyright
+        self.introduction= introduction
         self.links    = links
         self.menu     = menu
         self.tofcontent_header = tofcontent_header
-        self.end      = end
-
-####################################################################################################
-
-class Topic(yaml.YAMLObject):
-    name = None  # String containing section name
-    keyword = '' # String containing the short description of the topics, to be echoed in the title of the section file.
-    howto  = ''  # Should complete the sentence beginning with "How to" 
-    header = ''  # Header of the file, possibly the 'default' one
-    title  = ''  # Title  of the file, possibly the 'default' one
-    subtitle  = ''  # Subtitle  of the file, possibly the 'default' one
-    copyright = ''  # Copyright of the file, possibly the 'default' one
-    links     = ''  # Links of the file, possibly the 'default' one
-    introduction = '' # Introduction to the topic
-    tutorials    = '' # List of relevant tutorials
-    examples     = '' # Relevant examples
-    end       = ''  # End of the file, possibly the 'default' one
-
-    yaml_tag = u'!topic'
-
-    def attrs(self):
-        return ['name', 'keyword', 'howto', 'header', 'title', 'subtitle', 'copyright', 'links', 'introduction', 'tutorials', 'examples', 'end']
-
-    #Note that the default values are actually not initialized here, but in the data file, in order to ease the maintenance.
-    def __init__(self, name=None, keyword=None, howto=None, header=None, title=None, subtitle=None, copyright=None, links=None, introduction=None, tutorials=None, examples=None, end=None):
-        self.name = name
-        self.keyword = keyword
-        self.header = header
-        self.howto  = howto 
-        self.title  = title
-        self.subtitle = subtitle
-        self.copyright= copyright
-        self.links    = links
-        self.introduction = introduction
         self.tutorials = tutorials
-        self.examples = examples 
+        self.examples = examples
         self.end      = end
 
 ####################################################################################################
