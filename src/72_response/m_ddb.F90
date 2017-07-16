@@ -1192,48 +1192,11 @@ subroutine rdddb9(acell,atifc,amu,ddb,&
 
  DBG_ENTER("COLL")
 
-!Read the DDB information
- vrsddb=DDB_VERSION
-
-!The checking of pseudopotentials is not done presently so that dimensions are fake
-!ABI_MALLOC(ekb,(dimekb,ntypat))
-!ABI_MALLOC(indlmn,(6,lmnmax,ntypat))
-!ABI_MALLOC(pspso,(ntypat))
-!ABI_DATATYPE_ALLOCATE(pawtab,(ntypat*usepaw))
-!call pawtab_nullify(pawtab)
-
-!ABI_MALLOC(kpt,(3,nkpt))
-!ABI_MALLOC(nband,(nkpt))
-!ABI_MALLOC(occ,(nkpt*mband*msppol))
-!ABI_MALLOC(spinat,(3,natom))
-!ABI_MALLOC(wtk,(nkpt))
-
-!Open the input derivative database file and read the preliminary information
-!!Note that in this call, mkpt has been replaced by nkpt, mtypat by ntypat, and matom by natom.
-! nunit=ddbun
-!
-!! To avoid aliasing
-! matom = natom
-! mkpt = nkpt
-! mtypat = ntypat
-!
-! call ioddb8_in(filnam,matom,mband,mkpt,msym,mtypat,nunit,vrsddb,&
-!& acell,amu,dilatmx,ecut,ecutsm,intxc,iscf,ixc,kpt,kptnrm,&
-!& natom,nband,ngfft,nkpt,nspden,nspinor,nsppol,nsym,ntypat,occ,occopt,&
-!& pawecutdg,rprim,dfpt_sciss,spinat,symafm,symrel,tnons,tolwfr,tphysel,tsmear,&
-!& typat,usepaw,wtk,xred,zion,znucl)
-!
-!!Read the psp information of the input DDB
-! useylm=usepaw;choice=1
-! call psddb8 (choice,dimekb,ekb,fullinit,indlmn,lmnmax,&
-!& ddb%nblok,ntypat,nunit,pawtab,pspso,usepaw,useylm,vrsddb)
-
-
-
- call ddb_hdr_open_read(ddb_hdr, filnam, ddbun, vrsddb, &
+!Open the input derivative database file and read the header
+ call ddb_hdr_open_read(ddb_hdr, filnam, ddbun, DDB_VERSION, &
 &                       msym=msym, mband=mband)
 
-!nkpt = ddb_hdr%nkpt
+ !nkpt = ddb_hdr%nkpt
  !ntypat = ddb_hdr%ntypat
  nsym = ddb_hdr%nsym
  acell = ddb_hdr%acell
@@ -1244,20 +1207,9 @@ subroutine rdddb9(acell,atifc,amu,ddb,&
  zion(:) = ddb_hdr%zion(1:ntypat)
  znucl(:) = ddb_hdr%znucl(1:ntypat)
 
-
- do isym = 1,msym
-   symafm(isym) = ddb_hdr%symafm(isym)
-   do jj = 1,3
-     tnons(jj,isym) = ddb_hdr%tnons(jj,isym)
-     do ii = 1,3
-       symrel(ii,jj,isym) = ddb_hdr%symrel(ii,jj,isym)
-     end do
-   end do
- end do
-
-!symafm(:) = ddb_hdr%symafm(:)
-!symrel(:,:,:) = ddb_hdr%symrel(:,:,:)
-!tnons(:,:) = ddb_hdr%tnons(:,:)
+ symafm(:) = ddb_hdr%symafm(:)
+ symrel(:,:,:) = ddb_hdr%symrel(:,:,:)
+ tnons(:,:) = ddb_hdr%tnons(:,:)
 
  xred(:,:) = ddb_hdr%xred(:,:)
 
@@ -1392,18 +1344,6 @@ subroutine rdddb9(acell,atifc,amu,ddb,&
  write(message,'(a)' )' Now the whole DDB is in central memory '
  call wrtout(std_out,message,'COLL')
  call wrtout(iout,message,'COLL')
-
-!ABI_FREE(ekb)
-!ABI_FREE(indlmn)
-!ABI_FREE(kpt)
-!ABI_FREE(nband)
-!ABI_FREE(occ)
-!ABI_FREE(pspso)
-!ABI_FREE(spinat)
-!ABI_FREE(wtk)
-
-!call pawtab_free(pawtab)
-!ABI_DATATYPE_DEALLOCATE(pawtab)
 
  DBG_EXIT("COLL")
 
@@ -1739,7 +1679,6 @@ subroutine ddb_from_file(ddb,filename,brav,natom,natifc,atifc,crystal,comm,prtvo
  DBG_ENTER("COLL")
 
 ! Must read natom from the DDB before being able to allocate some arrays needed for invars9
-! call ddb_getdims(dimekb,filename,lmnmax,mband,mtyp,msym,ddb_natom,nblok,nkpt,ntypat,get_unit(),usepaw,DDB_VERSION,comm)
  ddbun = get_unit()
  call ddb_hdr_open_read(ddb_hdr,filename,ddbun,DDB_VERSION, comm=comm,&
 &                       dimonly=1)
@@ -1868,68 +1807,6 @@ subroutine ddb_from_file(ddb,filename,brav,natom,natifc,atifc,crystal,comm,prtvo
  do ii=1,ntypat
    write(title(ii),'(a,i0)')"No title for typat ",ii
  end do
-
- ! BEGIN DEBUG ============================================================== !
- !
- ! On abiref_gnu_5.3_openmpi
- ! These lines make the test v2[13] fail with the error:
- !
- !    At line 5633 of file m_dynmat.F90
- !    Fortran runtime error: Index '1' of dimension 1 of array 'amu'
- !    above upper bound of -1360580392
- !
- !
- !ABI_ALLOCATE(symrel_red, (3,3,nsym))
- !ABI_ALLOCATE(tnons_red, (3,nsym))
- !ABI_ALLOCATE(symafm_red, (nsym))
- !ABI_ALLOCATE(amu, (ntypat))
-
- !do ii = 1,ntypat
- !  amu(ii) = ddb%amu(ii)
- !end do
-
- !!symrel_red(:,:,:) = symrel(:,:,1:nsym)
- !!tnons_red(:,:,:) = tnons(:,1:nsym)
- !!symafm_red(:,:,:) = symafm(1:nsym)
- !do isym = 1,nsym
- !  symafm_red(isym) = symafm(isym)
- !  do jj = 1,3
- !    tnons_red(jj,isym) = tnons(jj,isym)
- !    do ii = 1,3
- !      symrel_red(ii,jj,isym) = symrel(ii,jj,isym)
- !    end do
- !  end do
- !end do
-
- !ABI_FREE(symrel)
- !ABI_FREE(tnons)
- !ABI_FREE(symafm)
-
- !ABI_ALLOCATE(symrel, (3,3,nsym))
- !ABI_ALLOCATE(tnons, (3,nsym))
- !ABI_ALLOCATE(symafm, (nsym))
-
- !!symrel = symrel_red
- !!tnons = tnons_red
- !!symafm = symafm_red
-
- !do isym = 1,nsym
- !  symafm(isym) = symafm_red(isym)
- !  do jj = 1,3
- !    tnons(jj,isym) = tnons_red(jj,isym)
- !    do ii = 1,3
- !      symrel(ii,jj,isym) = symrel_red(ii,jj,isym)
- !    end do
- !  end do
- !end do
-
- !ABI_FREE(amu)
- !ABI_FREE(symrel_red)
- !ABI_FREE(tnons_red)
- !ABI_FREE(symafm_red)
- !
- ! END DEBUG ================================================================ !
-
 
 !Warning znucl is dimension with ntypat = nspsp hence alchemy is not supported here
  call crystal_init(ddb%amu,Crystal,space_group,natom,npsp,ntypat,nsym,rprimd,typat,xred,&
