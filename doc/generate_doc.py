@@ -981,53 +981,64 @@ print("File %s written ..."%file_html )
 
 ################################################################################
 ################################################################################
-# Assemble the "lesson" files
+# Assemble the html files to be generate from the yml information.
 
-# Store the default informations
-for i, lesson_info in enumerate(lessons):
-  if lesson_info.name.strip()=="default":
-    lesson_info_default=lesson_info
+def assemble_html(origin_yml_files,dir_root,name_root):
+  """ Use the list of dictionaries "origin_yml_files" to produce html files,
+      situated in dir_root directories dir_root+"/generated_files".
+      The root name of the files is "name_root". 
+      The complementary yml information (intro, body) for each file
+      is situated in dir_root+"/origin_files".
+  """
 
-# Generate each "normal" lesson file : assemble the content, apply global transformations, then write.
-for i, lesson_info in enumerate(lessons):
-  lesson = lesson_info.name
-  if lesson=="default":
-    continue
+  # Store the default informations
+  for i, origin_yml in enumerate(origin_yml_files):
+    if origin_yml.name.strip()=="default":
+      origin_yml_default=origin_yml
 
-  f_lesson=tuto_ori+"/lesson_"+lesson+".yml"
-  print("Will use file "+f_lesson+" to build the lesson "+lesson+" ... ",end="")
-  lesson_yml=read_yaml_file(f_lesson)
+  # Generate each "normal" file : assemble the content, apply global transformations, then write.
+  for i, origin_yml in enumerate(origin_yml_files):
+    name = origin_yml.name
+    if name=="default":
+      continue
 
-  #Write a first version of the html file, in the order "header" ... up to the "end"
-  #Take the info from the section "default" if there is no information on the specific section provided in the yml file.
-  lessonhtml=""
-  for j in ["header","title","subtitle","intro","copyright","links","menu","body","links","end"]:
-    if j in ["intro","body"] :
-      lessonhtml += lesson_yml[j]
-    elif j=="subtitle" :
-      lessonhtml += "<h2>"+lesson_info.subtitle+"</h2> \n <hr>"
-    else:
-      extract_j=getattr(lesson_info,j)
-      if extract_j.strip() == "":
-        lessonhtml += getattr(lesson_info_default,j)
+    path_yml="%s_ori/%s_%s.yml" %(dir_root,name_root,name)
+    print("Will use file "+path_yml+" to build the "+dir_root+" html document "+name_root+"_"+name+" ... ",end="")
+    doc_yml=read_yaml_file(path_yml)
+
+    #Write a first version of the html file, in the order "header" ... up to the "end"
+    #Take the info from the section "default" if there is no information on the specific section provided in the yml file.
+    doc_html=""
+    for j in ["header","title","subtitle","intro","copyright","links","menu","body","links","end"]:
+      if j in ["intro","body"] :
+        doc_html += doc_yml[j]
+      elif j=="subtitle" :
+        doc_html += "<h2>"+origin_yml.subtitle+"</h2> \n <hr>"
       else:
-        lessonhtml += extract_j
-    lessonhtml += "\n"
+        extract_j=getattr(origin_yml,j)
+        if extract_j.strip() == "":
+          doc_html += getattr(origin_yml_default,j)
+        else:
+          doc_html += extract_j
+      doc_html += "\n"
 
-  #Global operations on the tentative html file.
-  lessonhtml=lessonhtml.replace("__JS_PATH__",js_path)
-  lessonhtml=lessonhtml.replace("__KEYWORD__",lesson_info.keyword)
-  lessonhtml=lessonhtml.replace("__AUTHORS__",lesson_info.authors)
-  backlink=' &nbsp; <a href="../../%s/lesson_%s.html">lesson_%s</a> &nbsp; ' %(tuto_gen,lesson,lesson)
-  lessonhtml = doku2html(make_links(lessonhtml,None,list_all_vars,list_chars,cur_specials,backlinks,backlink))
+    #Global operations on the tentative html file.
+    doc_html=doc_html.replace("__JS_PATH__",js_path)
+    doc_html=doc_html.replace("__KEYWORD__",origin_yml.keyword)
+    doc_html=doc_html.replace("__AUTHORS__",origin_yml.authors)
+    backlink=' &nbsp; <a href="../../%s_gen/%s_%s.html">%s_%s</a> &nbsp; ' %(dir_root,name_root,name,name_root,name)
+    doc_html = doku2html(make_links(doc_html,None,list_all_vars,list_chars,cur_specials,backlinks,backlink))
 
-  #Write the finalized html file.
-  file_cur = tuto_gen+'/lesson_'+lesson+'.html'
-  f_cur = open(file_cur,'w')
-  f_cur.write(lessonhtml)
-  f_cur.write("\n")
-  f_cur.close()
-  print("File %s written ..."%file_cur )
+    #Write the finalized html file.
+    path_html = "%s_gen/%s_%s.html" %(dir_root,name_root,name) 
+    file_html = open(path_html,'w')
+    file_html.write(doc_html)
+    file_html.close()
+    print("File %s written ..."%path_html)
+ 
+  return "Exit assemble_html"
+
+returncode=assemble_html(lessons,"tutorial","lesson")
 
 ################################################################################
 ################################################################################
