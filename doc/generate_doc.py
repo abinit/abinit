@@ -877,14 +877,12 @@ if activate_translation==1:
 
         doc_yml+="  "+line
 
-    #DEBUG
     #print("")
     #print(" doc_yml :",path_doc_yml)
     #index=36700
     #print(" doc_yml[%s,%s] :"%(index,index+100))
     #print(doc_yml[index:index+100])
     #print("")
-    #ENDDEBUG
 
     # Write the finalized html file
     f_doc_yml=open(path_doc_yml,"w")
@@ -922,17 +920,15 @@ for i, bibyml_info in enumerate(bibyml):
 # Write an ordered bib file, that allows to update the original one.
 # Constitute also the content of the ABINIT bibtex and bibliography files.
 
-bib_content=dict()
-bib_content['bibtex']=""
-bib_content['bibliography']=""
-bib_content['acknowledgments']=""
+bibtex_content=""
+bibliography_content=""
 lines_txt=""
 cur_let = 'A'
 alphalinks="\n \n <hr> Go to "
 for i in string.ascii_uppercase:
   alphalinks+=('<a href=#%s>%s</a> ')%(i,i)
 alphalinks+="\n \n"
-bib_content['bibliography']+=('<a id="%s"></a>')%(cur_let)+alphalinks+('<hr><hr><h2>%s</h2> \n \n')%(cur_let)
+bibliography_content+=('<a id="%s"></a>')%(cur_let)+alphalinks+('<hr><hr><h2>%s</h2> \n \n')%(cur_let)
 for ref in bibtex_dics:
   entrytype=ref["ENTRYTYPE"]
   ID=ref["ID"]
@@ -942,19 +938,19 @@ for ref in bibtex_dics:
   backlinksID=set(list_backlinksID)
   line=("@%s{%s,%s") %(entrytype,ID,ref['body'])
   lines_txt+= line
-  bib_content['bibtex']+= ('<hr><a id="%s">%s</a> \n <pre>' ) %(ID,ID)
-  bib_content['bibtex']+= line+'</pre> \n'
+  bibtex_content+= ('<hr><a id="%s">%s</a> \n <pre>' ) %(ID,ID)
+  bibtex_content+= line+'</pre> \n'
   if ID[0]>cur_let:
     cur_let=ID[0]
-    bib_content['bibliography']+=('<a id="%s"></a>')%(cur_let)+alphalinks+('<hr><hr><h2>%s</h2> \n \n')%(cur_let)
-  bib_content['bibliography']+= ('<hr><a id="%s">[%s]</a> (<a href="./bibtex.html#%s">bibtex</a>)\n <br> %s \n') %(ID,ID,ID,reference_dic[ID])
+    bibliography_content+=('<a id="%s"></a>')%(cur_let)+alphalinks+('<hr><hr><h2>%s</h2> \n \n')%(cur_let)
+  bibliography_content+= ('<hr><a id="%s">[%s]</a> (<a href="./bibtex.html#%s">bibtex</a>)\n <br> %s \n') %(ID,ID,ID,reference_dic[ID])
   nlink=0
   for link in backlinksID:
     if len(link)!=0:
       if nlink==0: 
-        bib_content['bibliography']+= "<br> Referred to in " 
+        bibliography_content+= "<br> Referred to in " 
         nlink=1
-      bib_content['bibliography']+= link
+      bibliography_content+= link
 
 # Open, write and close the txt file
 file_txt = bib_gen+'/ordered_abiref.bib'
@@ -967,52 +963,18 @@ print("File %s has been written ..." %file_txt)
 #Global operation on the bibliography html file : conversion from bibtex notation to html notation.
 #This should cover most of the cases. 
  
-bib_content['bibliography']=bibtex2html(bib_content['bibliography'])
+bibliography_content=bibtex2html(bibliography_content)
 
 ################################################################################
-# Generate the html files in the bibliography directory
+# Assemble the html files in the bibliography directory
 
-# Store the default informations
-for i, bibyml_info in enumerate(bibyml):
-  if bibyml_info.name.strip()=="default":
-    bibyml_info_default=bibyml_info
-
-# Generate each bibhtml file : build the missing information (table of content), assemble the content, apply global transformations, then write.
-for i, bibyml_info in enumerate(bibyml):
-  bibname = bibyml_info.name
-  if bibname =="default":
-    continue
-
- #Write a first version of the html file, in the order "header" ... up to the "end"
-  #Take the info from the section "default" if there is no information on the specific section provided in the yml file.
-  bibhtml=""
-  for j in ["header","title","subtitle","copyright","links","introduction","content","links","end"]:
-    if j == "content":
-      bibhtml += bib_content[bibname]
-    elif j == "introduction" and bibname =="acknowledgments" :
-      bibhtml += bibyml_ack_intro
-    else:
-      extract_j=getattr(bibyml_info,j)
-      if extract_j.strip() == "":
-        bibhtml += getattr(bibyml_info_default,j)
-      else:
-        bibhtml += extract_j
-    bibhtml += "\n"
-
-  #Global operations on the tentative html file.
-  bibhtml=bibhtml.replace("__JS_PATH__",js_path)
-  bibhtml=bibhtml.replace("__KEYWORD__",bibyml_info.keyword)
-  bibhtml=bibhtml.replace("__AUTHORS__",bibyml_info.authors)
-  backlink= ' &nbsp; <a href="../../%s/specials.html#%s">%s</a> &nbsp; ' %(bib_gen,bibname,bibname)
-  bibhtml = doku2html(make_links(bibhtml,None,list_all_vars,list_chars,cur_specials,backlinks,backlink))
-
-  #Write the finalized html file.
-  file_cur = bib_gen+'/'+bibname+'.html'
-  f_cur = open(file_cur,'w')
-  f_cur.write(bibhtml)
-  f_cur.write("\n")
-  f_cur.close()
-  print("File %s written ..."%file_cur )
+suppl={"introduction":bibyml_ack_intro}
+suppl_components={"acknowledgments":suppl}
+suppl={"content":bibtex_content}
+suppl_components['bibtex']=suppl
+suppl={"content":bibliography_content}
+suppl_components['bibliography']=suppl
+returncode=assemble_html(bibyml,suppl_components,"bibliography","",list_all_vars,list_chars,cur_specials,backlinks)
 
 ################################################################################
 

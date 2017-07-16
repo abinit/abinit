@@ -289,11 +289,17 @@ def assemble_html(origin_yml_files,suppl_components,dir_root,name_root,list_all_
     name = origin_yml.name
     if name=="default":
       continue
+  
+    if name_root != "":
+      full_name=name_root+"_"+name
+    else:
+      full_name=name
 
     # Try to complete the information by reading a yml file
-    path_yml="%s/origin_files/%s_%s.yml" %(dir_root,name_root,name)
+    path_yml="%s/origin_files/%s.yml" %(dir_root,full_name)
+    doc_yml={}
     if os.path.isfile(path_yml):
-      print("Will use file "+path_yml+" to build the "+dir_root+" html document "+name_root+"_"+name+" ... ",end="")
+      print("Will use file "+path_yml+" to build the "+dir_root+" html document "+full_name+" ... ",end="")
       doc_yml=read_yaml_file(path_yml)
  
     # Try to complete the information from suppl_components
@@ -306,7 +312,7 @@ def assemble_html(origin_yml_files,suppl_components,dir_root,name_root,list_all_
     #Also, format specifically selected sections.
 
     doc_html=""
-    for j in ["header","title","subtitle","intro","copyright","links","menu","tofcontent_header","body","links","end"]:
+    for j in ["header","title","subtitle","intro","copyright","links","menu","introduction","tofcontent_header","content","body","links","end"]:
 
       item=""
       # Try to get the item from different sources
@@ -314,11 +320,17 @@ def assemble_html(origin_yml_files,suppl_components,dir_root,name_root,list_all_
         item+=doc_yml[j]
       elif j in suppl.keys() :
         item+=suppl[j]
-      else :
-        item+=getattr(origin_yml,j)
+      else:
+        try:
+          item+=getattr(origin_yml,j)
+        except:
+          pass
       item=item.strip()
       if item=="":
-        item=getattr(origin_yml_default,j)
+        try:
+          item=getattr(origin_yml_default,j)
+        except:
+          pass
 
       # If there is nothing in the section, continue
       if item=="":
@@ -335,11 +347,11 @@ def assemble_html(origin_yml_files,suppl_components,dir_root,name_root,list_all_
     doc_html=doc_html.replace("__JS_PATH__",js_path)
     doc_html=doc_html.replace("__KEYWORD__",origin_yml.keyword)
     doc_html=doc_html.replace("__AUTHORS__",origin_yml.authors)
-    backlink=' &nbsp; <a href="../../%s_gen/%s_%s.html">%s_%s</a> &nbsp; ' %(dir_root,name_root,name,name_root,name)
+    backlink=' &nbsp; <a href="../../%s/generated_files/%s.html">%s</a> &nbsp; ' %(dir_root,full_name,full_name)
     doc_html = doku2html(make_links(doc_html,None,list_all_vars,list_chars,cur_specials,backlinks,backlink))
 
     #Write the finalized html file.
-    path_html = "%s/generated_files/%s_%s.html" %(dir_root,name_root,name)
+    path_html = "%s/generated_files/%s.html" %(dir_root,full_name)
     file_html = open(path_html,'w')
     file_html.write(doc_html)
     file_html.close()
