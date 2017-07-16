@@ -981,7 +981,7 @@ print("File %s written ..."%file_html )
 
 ################################################################################
 ################################################################################
-# Assemble the html files to be generate from the yml information.
+# Assemble the html files to be generated from the yml information.
 
 def assemble_html(origin_yml_files,dir_root,name_root):
   """ Use the list of dictionaries "origin_yml_files" to produce html files,
@@ -1012,7 +1012,7 @@ def assemble_html(origin_yml_files,dir_root,name_root):
     for j in ["header","title","subtitle","intro","copyright","links","menu","body","links","end"]:
       if j in ["intro","body"] :
         doc_html += doc_yml[j]
-      elif j=="subtitle" :
+      elif j=="subtitle" and origin_yml.subtitle != None:
         doc_html += "<h2>"+origin_yml.subtitle+"</h2> \n <hr>"
       else:
         extract_j=getattr(origin_yml,j)
@@ -1167,6 +1167,18 @@ if activate_translation==1:
     f_doc_yml.write(doc_yml)
     f_doc_yml.close()
     print("File %s written ..."%path_doc_yml )
+
+################################################################################
+################################################################################
+
+# Assemble the html files to be generated from the yml information.
+# In order : tutorial/lessons_*
+#            theory/theory_*
+ 
+################################################################################
+
+returncode=assemble_html(lessons,"tutorial","lesson")
+returncode=assemble_html(theorydocs,"theory","theory")
 
 ################################################################################
 ################################################################################
