@@ -8,15 +8,15 @@
 !! The output is this quantity for the input k point.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2017 ABINIT group (PB, XG)
+!! Copyright (C) 1999-2017 ABINIT group (PB, XG, GA)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !! For the initials of contributors, see ~abinit/doc/developers/contributors .
 !!
 !! INPUTS
-!!  filnam = root filename for outputs
-!!  filnam5 = name of the eig2 database file
+!!  elph_base_name = root filename for outputs
+!!  eig2_filnam = name of the eig2 database file
 !!  comm=MPI communicator
 !!
 !! OUTPUT
@@ -34,20 +34,10 @@
 
 #include "abi_common.h"
 
-subroutine thmeig(mpert, msize, inp, ddb, crystal, &
-&                 elph_base_name, eig2_filnam, ddbun, iout, comm)
- 
-
-& g2fsmear,acell,amu,anaddb_dtset,d2asr,&
-& filnam,mband,mpert,msize,natom,nkpt,ntemper,&
-& ntypat,rprim,telphint,temperinc,&
-& tempermin,thmflag,typat,xred,&
-& ddb,ddbun,filnam5,iout,&
-& msym,nblok2, %
-& crystal, inp, comm)
-!nsym,occopt,symrel,tnons,usepaw,zion,&
-!& symrec,natifc,gmet,gprim,indsym,rmet,atifc,ucvol,xcart,
-!comm)
+subroutine thmeig(inp, ddb, crystal, &
+&                 elph_base_name, eig2_filnam, ddbun, iout, &
+&                 natom, mpert, msize, d2asr, &
+&                 comm)
 
  use defs_basis
  use m_profiling_abi
@@ -58,6 +48,7 @@ subroutine thmeig(mpert, msize, inp, ddb, crystal, &
  use m_xmpi
  use m_sort
 
+ use m_crystal,        only : crystal_t
  use m_io_tools,       only : open_file
  use m_dynmat,         only : asria_corr, dfpt_phfrq
  use m_anaddb_dataset, only : anaddb_dataset_type
@@ -77,30 +68,26 @@ subroutine thmeig(mpert, msize, inp, ddb, crystal, &
 
 !Arguments ------------------------------------
 !scalars
+ integer,intent(inout) :: natom
+ integer,intent(in) :: mpert,msize
+ integer,intent(in) :: comm
+ character(len=*),intent(in) :: elph_base_name, eig2_filnam
+ integer,intent(in) :: ddbun,iout
  type(crystal_t), intent(inout) :: crystal
-
- integer,intent(in) :: mband,mpert,msize,ntemper,telphint,thmflag,comm
- real(dp),intent(in) :: g2fsmear,temperinc,tempermin
- character(len=*),intent(in) :: filnam
- real(dp),intent(out) :: ucvol
- integer,intent(in) :: ddbun,iout,msym
- integer,intent(in) :: usepaw,natifc
- character(len=*),intent(in) :: filnam5
- integer,intent(inout) :: natom,nkpt,nsym,ntypat,occopt,nblok2
- type(anaddb_dataset_type),intent(in) :: anaddb_dtset
- type(ddb_type),intent(in) :: ddb
+ type(anaddb_dataset_type),intent(inout) :: inp
+ type(ddb_type),intent(inout) :: ddb
 !arrays
  real(dp),intent(inout) :: d2asr(2,3,natom,3,natom)
- integer,intent(out) :: symrel(3,3,nsym)
- integer,intent(out) :: indsym(4,nsym,natom),symrec(3,3,nsym)
- integer,intent(inout) :: typat(natom),atifc(natom)
- real(dp),intent(out) :: zion(ntypat),tnons(3,nsym),gmet(3,3)
- real(dp),intent(out) :: gprim(3,3),rmet(3,3),xcart(3,natom)
- real(dp),intent(inout) :: acell(3),amu(ntypat),rprim(3,3),xred(3,natom)
+
 
 !Local variables-------------------------------
 !scalars
  integer,parameter :: msppol=2,master=0,bcorr0=0
+ integer :: msym
+ integer :: nkpt,mband,ntypat
+ integer :: usepaw,natifc
+ integer :: nsym,occopt,nblok2
+ integer :: ntemper,telphint,thmflag
  integer :: brav,chksymbreak,found,gqpt,iatom1,iatom2,iband,iblok,iblok2,idir1,idir2,ii,jj,ikpt,ilatt,imod,index
  integer :: iomega,iqpt,iqpt1,iqpt2,iqpt2_previous,iqpt3,iscf_fake,itemper
  integer :: mpert_eig2,msize2,nene,ng2f,nqshft,nsym_new,unit_g2f,nqpt,nqpt_computed,qptopt,rftyp
@@ -109,6 +96,8 @@ subroutine thmeig(mpert, msize, inp, ddb, crystal, &
  integer :: intxc,iscf,isym,ixc,natom_,nkpt_,ntypat_
  integer :: nspden,nspinor,nsppol,nptsym,use_inversion,useylm
  integer :: ierr
+ real(dp) :: ucvol
+ real(dp) :: g2fsmear,temperinc,tempermin
  real(dp) :: bosein,deltaene,det,domega,enemax,enemin,fact2i,fact2r,factr
  real(dp) :: gaussfactor,gaussprefactor,gaussval,invdet,omega,omega_max,omega_min,qnrm,qptrlen
  real(dp) :: rcvol,tmp,tol,vec1i,vec1r,vec2i,vec2r,veci,vecr,xx
@@ -119,20 +108,30 @@ subroutine thmeig(mpert, msize, inp, ddb, crystal, &
  type(ddb_type) :: ddb_eig2
  type(ddb_hdr_type) :: ddb_hdr
 !arrays
+ ! FIXME now these must be allocated
  integer :: ngqpt(9),qptrlatt(3,3),rfelfd(4),rfphon(4),rfstrs(4),vacuum(3)
  integer :: bravais(11)
+ integer,allocatable :: typat(:),atifc(:)
+ integer,allocatable :: symrel(:,:,:),symrec(:,:,:)
+ integer,allocatable :: indsym(:,:,:)
  integer,allocatable :: indqpt(:)
  integer,allocatable :: symafm(:),symafm_new(:)
- integer, allocatable :: carflg_eig2(:,:,:,:)
- integer, allocatable :: ptsymrel(:,:,:),symrel_new(:,:,:)
-!integer, allocatable :: symrec_new(:,:,:)
- real(dp) :: deigi(mband,nkpt)
- real(dp) :: deigr(mband,nkpt),diff_qpt(3),dwtermi(mband,nkpt),dwtermr(mband,nkpt)
- real(dp) :: gprimd(3,3),mesh(3,3),multi(mband,nkpt),multr(mband,nkpt)
+ integer,allocatable :: carflg_eig2(:,:,:,:)
+ integer,allocatable :: ptsymrel(:,:,:),symrel_new(:,:,:)
+!integer,allocatable :: symrec_new(:,:,:)
+ real(dp) :: rprim(3,3),gprim(3,3),rmet(3,3),gmet(3,3)
+ real(dp) :: acell(3)
+ real(dp) :: diff_qpt(3)
+ real(dp) :: gprimd(3,3),mesh(3,3)
  real(dp) :: qlatt(3,3),qphnrm(3),qpt_search(3,3)
- real(dp) :: rprimd(3,3),shiftq(3,210),slope(2,mband,nkpt),tempqlatt(3),thmeigen(2,mband,nkpt)
- real(dp) :: zeropoint(2,mband,nkpt)!new
+ real(dp) :: rprimd(3,3),shiftq(3,210),tempqlatt(3)
  real(dp) :: dummy(0),dummy2(0,0)
+ real(dp),allocatable :: xcart(:,:),xred(:,:)
+ real(dp),allocatable :: amu(:),zion(:)
+ real(dp),allocatable :: tnons(:,:)
+ real(dp),allocatable :: deigi(:,:), deigr(:,:), multi(:,:), multr(:,:)
+ real(dp),allocatable :: dwtermi(:,:), dwtermr(:,:)
+ real(dp),allocatable :: slope(:,:,:),thmeigen(:,:,:),zeropoint(:,:,:)
  real(dp),allocatable :: displ(:)
  real(dp),allocatable :: dos_phon(:),dtweightde(:,:),d2cart(:,:)
  real(dp),allocatable :: eigvec(:,:,:,:),eigval(:,:),g2f(:,:,:),intweight(:,:,:)
@@ -152,59 +151,8 @@ subroutine thmeig(mpert, msize, inp, ddb, crystal, &
 
 ! *********************************************************************
 
-anaddb_dtset = inp
-g2fsmear = inp%a2fsmear
-acell = ddb%acell
-amu = ddb%amu
-d2asr = asrq0%d2asr
-filnam = elph_base_name
-filnam5 = eig2_filnam
-
-
-telphint = inp%telphint
-temperinc = inp%temperinc
-tempermin = inp%tempermin
-thmflag = inp%thmflag
-
-mband = ddb_hdr%mband
-natom = ddb_hdr%natom  
-nkpt = ddb_hdr%nkpt  
-ntemper = inp%ntemper
-ntypat = ddb_hdr%ntypat 
-usepaw = ddb_hdr%usepaw   
-atifc = ddb_hdr%atifc
-
-rprim = ddb%rprim
-gprim = ddb%gprim
-
-! Initially, most of these quantities were intent out
-typat = crystal%typat
-xred = crystal%xred
-zion = crystal%zion
-natifc = crystal%natifc
-gmet = crystal%gmet
-indsym = crystal%indsym
-rmet = crystal%rmet
-
-msym = ddb_hdr%msym
-nblok2 = ddb_hdr%nblok
-nsym = ddb_hdr%nsym
-occopt = ddb%occopt
-symrel = ddb_hdr%symrel
-tnons = ddb_hdr%tnons
-usepaw = ddb_hdr%usepaw
-symrec = ddb_hdr%symrec
-ucvol = crystal%ucvol
-xcart = crystal%xcart
-
-! ============================== Coding Line ================================ !
-
-
-
-
-
 !DEBUG
- write(std_out,*)'-thmeig : enter '
+! write(std_out,*)'-thmeig : enter '
 !call flush(6)
 !ENDDEBUG
 
@@ -216,12 +164,64 @@ xcart = crystal%xcart
  call wrtout(ab_out,message,'COLL')
  call wrtout(std_out,message,'COLL')
 
+
 !=========================================================================
 !0) Initializations
 !=========================================================================
 
+ 
+ g2fsmear = inp%a2fsmear
+ 
+ telphint = inp%telphint
+ temperinc = inp%temperinc
+ tempermin = inp%tempermin
+ thmflag = inp%thmflag
+ 
+ ntemper = inp%ntemper
+ natifc = inp%natifc
+
+!Open Derivative DataBase then r/w Derivative DataBase preliminary information.
+
+ write(std_out, '(a)' )  '- thmeig: Initialize the second-order electron-phonon file with name :'
+ write(std_out, '(a,a)' )'-         ',trim(eig2_filnam)
+
+ call ddb_hdr_open_read(ddb_hdr, eig2_filnam, ddbun, DDB_VERSION)
+
+ mband = ddb_hdr%mband
+ nkpt = ddb_hdr%nkpt  
+ ntypat = ddb_hdr%ntypat  
+ 
+ msym = ddb_hdr%msym
+ nblok2 = ddb_hdr%nblok
+ nsym = ddb_hdr%nsym
+ occopt = ddb%occopt
+ usepaw = ddb_hdr%usepaw
+
+ ABI_ALLOCATE(typat, (natom))
+ ABI_ALLOCATE(atifc, (natom))
+ ABI_ALLOCATE(zion, (ntypat))
+ ABI_ALLOCATE(amu, (ntypat))
+
+ ABI_ALLOCATE(xcart,(3,natom))
+ ABI_ALLOCATE(xred,(3,natom))
+
  ABI_ALLOCATE(symafm, (nsym))
  ABI_ALLOCATE(spinat,(3,natom))
+
+ ABI_ALLOCATE(symrel, (3,3,nsym))
+ ABI_ALLOCATE(symrec, (3,3,nsym))
+ ABI_ALLOCATE(tnons, (3,nsym))
+ ABI_ALLOCATE(indsym, (4,nsym,natom))
+
+ ABI_ALLOCATE(deigi, (mband,nkpt))
+ ABI_ALLOCATE(deigr, (mband,nkpt))
+ ABI_ALLOCATE(dwtermi, (mband,nkpt))
+ ABI_ALLOCATE(dwtermr, (mband,nkpt))
+ ABI_ALLOCATE(multi, (mband,nkpt))
+ ABI_ALLOCATE(multr, (mband,nkpt))
+ ABI_ALLOCATE(slope, (2,mband,nkpt))
+ ABI_ALLOCATE(thmeigen, (2,mband,nkpt))
+ ABI_ALLOCATE(zeropoint, (2,mband,nkpt))
 
 !At present, only atom-type perturbations are allowed for eig2 type matrix elements.
  mpert_eig2=natom
@@ -235,21 +235,9 @@ xcart = crystal%xcart
  ABI_ALLOCATE(eigvec,(2,3,natom,3*natom))
  ABI_ALLOCATE(phfreq,(3*natom,ddb%nblok))
 
-!Open Derivative DataBase then r/w Derivative DataBase preliminary information.
+ atifc = inp%atifc
 
- write(std_out, '(a)' )  '- thmeig: Initialize the second-order electron-phonon file with name :'
- write(std_out, '(a,a)' )'-         ',trim(filnam5)
-
- ! Temporarily commented
- call ddb_hdr_open_read(ddb_hdr, filnam5, ddbun, DDB_VERSION, &
-&                       msym=msym)
-
- !nkpt = ddb_hdr%nkpt
- !ntypat = ddb_hdr%ntypat
- !nsym = ddb_hdr%nsym
- acell = ddb_hdr%acell
- rprim = ddb_hdr%rprim
-
+ !amu = ddb%amu
  amu(:) = ddb_hdr%amu(1:ntypat)
  typat(:) = ddb_hdr%typat(1:natom)
  zion(:) = ddb_hdr%zion(1:ntypat)
@@ -261,14 +249,21 @@ xcart = crystal%xcart
  symafm(:) = ddb_hdr%symafm(1:nsym)
  spinat(:,:) = ddb_hdr%spinat(:,1:natom)
 
+ !symrel = ddb_hdr%symrel  ! out
+ !tnons = ddb_hdr%tnons  ! out
+
+ !acell = ddb%acell
+ !natom = ddb_hdr%natom  
+ acell = ddb_hdr%acell
+ rprim = ddb_hdr%rprim
+
 !Compute different matrices in real and reciprocal space, also
 !checks whether ucvol is positive.
  call mkrdim(acell,rprim,rprimd)
  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
 
 !Obtain reciprocal space primitive transl g from inverse trans of r
-!(Unlike in abinit, gprim is used throughout ifc; should be changed, later)
- call matr3inv(rprim,gprim)
+ !call matr3inv(rprim,gprim)
 
 !Generate atom positions in cartesian coordinates
  call xred2xcart(natom,rprimd,xcart,xred)
@@ -284,7 +279,6 @@ xcart = crystal%xcart
 !back this atom to the referenced unit cell
  tolsym8=tol8
  call symatm(indsym,natom,nsym,symrec(:,:,1:nsym),tnons(:,1:nsym),tolsym8,typat,xred)
-
 
 !Check the correctness of some input parameters,
 !and perform small treatment if needed.
@@ -343,10 +337,10 @@ xcart = crystal%xcart
 
 
 !  Use the first list of q wavevectors
-   nqpt=anaddb_dtset%nph1l
+   nqpt=inp%nph1l
    ABI_ALLOCATE(spqpt,(3,nqpt))
-   do iqpt=1,anaddb_dtset%nph1l
-     spqpt(:,iqpt)=anaddb_dtset%qph1l(:,iqpt)/anaddb_dtset%qnrml1(iqpt)
+   do iqpt=1,inp%nph1l
+     spqpt(:,iqpt)=inp%qph1l(:,iqpt)/inp%qnrml1(iqpt)
    end do
    ABI_ALLOCATE(wghtq,(nqpt))
    wghtq(:)=one/nqpt
@@ -354,8 +348,8 @@ xcart = crystal%xcart
  else if(thmflag>=5 .and. thmflag<=8)then
 
 !  Generates the q point grid
-   ngqpt(1:3)=anaddb_dtset%ngqpt(1:3)
-   nqshft=anaddb_dtset%nqshft
+   ngqpt(1:3)=inp%ngqpt(1:3)
+   nqshft=inp%nqshft
    qptrlatt(:,:)=0
    qptrlatt(1,1)=ngqpt(1)
    qptrlatt(2,2)=ngqpt(2)
@@ -382,7 +376,7 @@ xcart = crystal%xcart
      qptopt=3
    end if
 
-   brav=anaddb_dtset%brav
+   brav=inp%brav
 
    if(brav/=1)then
      message = ' The possibility to have brav/=1 for thmeig was disabled.'
@@ -393,7 +387,7 @@ xcart = crystal%xcart
    iscf_fake=5 ! Need the weights
    chksymbreak=0
    vacuum=0
-   shiftq(:,1:nqshft)=anaddb_dtset%q1shft(:,1:nqshft)
+   shiftq(:,1:nqshft)=inp%q1shft(:,1:nqshft)
 !  Compute the final number of q points
    call getkgrid(chksymbreak,0,iscf_fake,dummy2,qptopt,qptrlatt,qptrlen,&
 &   nsym_new,0,nqpt,nqshft,nsym_new,rprimd,&
@@ -436,7 +430,7 @@ xcart = crystal%xcart
  dedni(:,:,:,:) = zero
 
 !!Prepare the reading of the EIG2 files
- call ddb_hdr_open_read(ddb_hdr, filnam5, ddbun, DDB_VERSION, msym=msym)
+ call ddb_hdr_open_read(ddb_hdr, eig2_filnam, ddbun, DDB_VERSION, msym=msym)
 
  call ddb_hdr_free(ddb_hdr)
 
@@ -473,8 +467,8 @@ xcart = crystal%xcart
 
 !  Eventually impose the acoustic sum rule based on previously calculated d2asr
    !call asrq0_apply(asrq0, natom, mpert, msize, crystal%xcart, d2cart)
-   if (anaddb_dtset%asr==1 .or. anaddb_dtset%asr==2 .or. anaddb_dtset%asr==5) then
-     call asria_corr(anaddb_dtset%asr,d2asr,d2cart,mpert,natom)
+   if (inp%asr==1 .or. inp%asr==2 .or. inp%asr==5) then
+     call asria_corr(inp%asr,d2asr,d2cart,mpert,natom)
    end if
 
 !  Calculation of the eigenvectors and eigenvalues
@@ -482,7 +476,7 @@ xcart = crystal%xcart
    ABI_ALLOCATE(displ,(2*3*natom*3*natom))
    ABI_ALLOCATE(eigval,(3,natom))
    call dfpt_phfrq(amu,displ,d2cart,eigval,eigvec,indsym,&
-&   mpert,msym,natom,nsym,ntypat,phfreq(:,iqpt),qphnrm(1),spqpt(:,iqpt),rprimd,anaddb_dtset%symdynmat,&
+&   mpert,msym,natom,nsym,ntypat,phfreq(:,iqpt),qphnrm(1),spqpt(:,iqpt),rprimd,inp%symdynmat,&
 &   symrel,symafm,typat,ucvol)
    ABI_DEALLOCATE(displ)
    ABI_DEALLOCATE(eigval)
@@ -511,7 +505,7 @@ xcart = crystal%xcart
 !    from the beginning of the file
      close(ddbun)
 
-     call ddb_hdr_open_read(ddb_hdr, filnam5, ddbun, DDB_VERSION, msym=msym)
+     call ddb_hdr_open_read(ddb_hdr, eig2_filnam, ddbun, DDB_VERSION, msym=msym)
      call ddb_hdr_free(ddb_hdr)
 
 !    And examine again the EIG2 file. Still, not beyond the previously examined value.
@@ -677,11 +671,11 @@ xcart = crystal%xcart
 
 !  output the g2f
    unit_g2f = 108
-   call outg2f(domega,omega_min,omega_max,filnam,g2f,g2fsmear,kpnt,mband,ng2f,nkpt,nqpt,1,telphint,unit_g2f)
+   call outg2f(domega,omega_min,omega_max,elph_base_name,g2f,g2fsmear,kpnt,mband,ng2f,nkpt,nqpt,1,telphint,unit_g2f)
 
 !  output the phonon DOS
    unit_phdos = 108
-   call outphdos(domega,dos_phon,omega_min,omega_max,filnam,g2fsmear,ng2f,nqpt,1,telphint,unit_g2f)
+   call outphdos(domega,dos_phon,omega_min,omega_max,elph_base_name,g2fsmear,ng2f,nqpt,1,telphint,unit_g2f)
 
 
    ABI_DEALLOCATE(dos_phon)
@@ -827,11 +821,11 @@ xcart = crystal%xcart
 
 !  output the g2f
    unit_g2f = 108
-   call outg2f(deltaene,enemin,enemax,filnam,g2f,g2fsmear,kpnt,mband,nene,nkpt,nqpt,tetrahedra%ntetra,telphint,unit_g2f)
+   call outg2f(deltaene,enemin,enemax,elph_base_name,g2f,g2fsmear,kpnt,mband,nene,nkpt,nqpt,tetrahedra%ntetra,telphint,unit_g2f)
 
 !  output the phonon DOS
    unit_phdos = 108
-   call outphdos(deltaene,total_dos,enemin,enemax,filnam,g2fsmear,nene,nqpt,tetrahedra%ntetra,telphint,unit_g2f)
+   call outphdos(deltaene,total_dos,enemin,enemax,elph_base_name,g2fsmear,nene,nqpt,tetrahedra%ntetra,telphint,unit_g2f)
 
    ABI_DEALLOCATE(tweight)
    ABI_DEALLOCATE(dtweightde)
@@ -846,7 +840,7 @@ xcart = crystal%xcart
 !=======================================================================
 
 !open TBS file
- outfile = trim(filnam)//"_TBS"
+ outfile = trim(elph_base_name)//"_TBS"
  if (open_file(outfile,message,newunit=unitout,form='formatted',status='unknown') /= 0) then
    MSG_ERROR(message)
  end if
@@ -931,8 +925,27 @@ xcart = crystal%xcart
    end do
  end do
 
+ ABI_DEALLOCATE(typat)
+ ABI_DEALLOCATE(atifc)
+ ABI_DEALLOCATE(zion)
+ ABI_DEALLOCATE(amu)
+ ABI_DEALLOCATE(xcart)
+ ABI_DEALLOCATE(xred)
  ABI_DEALLOCATE(symafm)
  ABI_DEALLOCATE(spinat)
+ ABI_DEALLOCATE(symrel)
+ ABI_DEALLOCATE(symrec)
+ ABI_DEALLOCATE(indsym)
+ ABI_DEALLOCATE(tnons)
+ ABI_DEALLOCATE(deigi)
+ ABI_DEALLOCATE(deigr)
+ ABI_DEALLOCATE(dwtermi)
+ ABI_DEALLOCATE(dwtermr)
+ ABI_DEALLOCATE(multi)
+ ABI_DEALLOCATE(multr)
+ ABI_DEALLOCATE(slope)
+ ABI_DEALLOCATE(thmeigen)
+ ABI_DEALLOCATE(zeropoint)
 
  ABI_DEALLOCATE(dedni)
  ABI_DEALLOCATE(dednr)
@@ -951,6 +964,8 @@ xcart = crystal%xcart
  ABI_DEALLOCATE(blkval2gqpt)
  ABI_DEALLOCATE(kpnt)
  ABI_DEALLOCATE(carflg_eig2)
+
+
 
  call ddb_free(ddb_eig2)
 

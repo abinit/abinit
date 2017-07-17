@@ -7,7 +7,7 @@
 !! Main routine for analysis of the interatomic force constants and associated properties.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2017 ABINIT group (XG,DCA,JCC,CL,XW)
+!! Copyright (C) 1999-2017 ABINIT group (XG,DCA,JCC,CL,XW,GA)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -542,48 +542,14 @@ program anaddb
 
 !***********************************************************************
 
-!Test thmeig
-! MG: FIXME
-! =====================================================================================================
-! COULD SOMEONE PLEASE CLEAN THE INTERFACE OF THMEIG? WHY DO WE HAVE SO MANY VARIABLES WITH INTENT(OUT)
-! =====================================================================================================
-! real(dp),intent(out) :: ucvol !new
-! integer,intent(inout) :: natom,nkpt,nsym,ntypat,occopt,nblok2 !new in ==> inout
-! integer,intent(out) :: symrel(3,3,msym)
-! integer,intent(out) :: indsym(4,nsym,natom),symrec(3,3,msym) !new
-! integer,intent(inout) :: typat(natom),atifc(natom)! new in ==> inout
-! real(dp),intent(out) :: zion(ntypat),tnons(3,msym),gmet(3,3) !new
-! real(dp),intent(out) :: gprim(3,3),rmet(3,3),xcart(3,natom) !new
-! real(dp),intent(inout) :: acell(3),amu(ntypat),rprim(3,3),xred(3,natom)! new in ==> inout
  if (inp%thmflag>=3 .and. inp%thmflag<=8) then
-
-!  Obtain the number of bloks contained in this file.
-   call ddb_hdr_open_read(ddb_hdr,filnam(5),ddbun,DDB_VERSION,&
-&                         dimonly=1)
-
-   mband = ddb_hdr%mband
-   msym = ddb_hdr%msym
-   natom = ddb_hdr%natom
-   nblok2 = ddb_hdr%nblok
-   nkpt = ddb_hdr%nkpt
-   ntypat = ddb_hdr%ntypat
-   usepaw = ddb_hdr%usepaw
-
-   call ddb_hdr_free(ddb_hdr)
 
    !write(std_out,*)'Entering thmeig: '
    elph_base_name=trim(filnam(2))//"_ep"
-   call thmeig(inp%a2fsmear,ddb%acell,ddb%amu,inp,asrq0%d2asr,&
-&   elph_base_name,mband,mpert,msize,natom,nkpt,inp%ntemper,&
-&   ntypat,ddb%rprim,inp%telphint,inp%temperinc,&
-&   inp%tempermin,inp%thmflag,Crystal%typat,Crystal%xred,&
-&   ddb,ddbun,filnam(5),ab_out,&
-&   msym,nblok2,
-Crystal%nsym,ddb%occopt,Crystal%symrel,
-Crystal%tnons,usepaw,Crystal%zion,& !new
-&   Crystal%symrec,inp%natifc,Crystal%gmet,
-ddb%gprim,Crystal%indsym,Crystal%rmet,inp%atifc,& !new
-&   Crystal%ucvol,Crystal%xcart,comm)
+
+   call thmeig(inp,ddb,Crystal,elph_base_name,filnam(5),&
+&  ddbun,ab_out,natom,mpert,msize,asrq0%d2asr,comm)
+
  end if
 
 !**********************************************************************
