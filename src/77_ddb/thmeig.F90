@@ -290,6 +290,7 @@ subroutine thmeig(inp, ddb, crystal, &
  ABI_ALLOCATE(kpnt,(3,nkpt,1))
 
  ! Copy a bunch of stuff back into crystal (to retain old behavior)
+ ! TODO comment these: doesnt make a difference
  crystal%xcart = xcart
  crystal%ucvol = ucvol
  crystal%zion = zion
