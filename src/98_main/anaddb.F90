@@ -172,8 +172,6 @@ program anaddb
 
  ! Must read natom from the DDB before being able to allocate some arrays needed for invars9
 
- ! BEGIN DEBUG
-
  call ddb_hdr_open_read(ddb_hdr,filnam(3),ddbun,DDB_VERSION,comm=comm, &
 &                       dimonly=1)
 
@@ -183,7 +181,6 @@ program anaddb
  usepaw = ddb_hdr%usepaw
 
  call ddb_hdr_free(ddb_hdr)
- ! END DEBUG
 
  mpert=natom+6
  msize=3*mpert*3*mpert; if (mtyp==3) msize=msize*3*mpert

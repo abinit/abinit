@@ -263,7 +263,7 @@ subroutine thmeig(inp, ddb, crystal, &
  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
 
 !Obtain reciprocal space primitive transl g from inverse trans of r
- !call matr3inv(rprim,gprim)
+ call matr3inv(rprim,gprim)
 
 !Generate atom positions in cartesian coordinates
  call xred2xcart(natom,rprimd,xcart,xred)
@@ -288,6 +288,18 @@ subroutine thmeig(inp, ddb, crystal, &
 
  ABI_ALLOCATE(carflg_eig2,(3,mpert_eig2,3,mpert_eig2))
  ABI_ALLOCATE(kpnt,(3,nkpt,1))
+
+ ! Copy a bunch of stuff back into crystal (to retain old behavior)
+ crystal%xcart = xcart
+ crystal%ucvol = ucvol
+ crystal%zion = zion
+ crystal%gmet = gmet
+ crystal%rmet = rmet
+ crystal%nsym = nsym
+ crystal%symrel = symrel
+ crystal%symrec = symrec
+ crystal%tnons = tnons
+ crystal%indsym = indsym
 
 
 !=========================================================================
