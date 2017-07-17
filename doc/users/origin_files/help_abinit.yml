@@ -602,11 +602,11 @@ body : |
       for all outer loop index values). If it is found in the second of the two
       positions, the series does not care about the inner loop index. The other
       sign can be a colon, a plus or a times, as in the case of the series defined
-      in <a href="abinit_help.html#ref8_2a">(2a)</a>, with the same meaning. </p>
-    <p>Rule (<a href="abinit_help.html#ref8_1">1</a>) has precedence over them,
-      they have precedence over rules (<a href="abinit_help.html#ref8_3">3</a>) or
-      (<a href="abinit_help.html#ref8_4">4</a>), rule (<a href="abinit_help.html#ref8_2a">2a</a>)
-      has precedence over rules <a href="abinit_help.html#ref8_2b">(2b)</a> or <a href="abinit_help.html#ref8_2c">(2c)</a>
+      in <a href="#ref8_2a">(2a)</a>, with the same meaning. </p>
+    <p>Rule (<a href="#ref8_1">1</a>) has precedence over them,
+      they have precedence over rules (<a href="#ref8_3">3</a>) or
+      (<a href="#ref8_4">4</a>), rule (<a href="#ref8_2a">2a</a>)
+      has precedence over rules <a href="#ref8_2b">(2b)</a> or <a href="#ref8_2c">(2c)</a>
       and the two latter cannot be used simultaneously for the same variable. </p>
   
   
@@ -638,7 +638,7 @@ body : |
   
     <p>The root names for input and output files (potential, density, wavefunctions
       and so on) will receive an appendix : '<b>_DS</b>' followed by the index of
-      the dataset. See <a href="abinit_help.html#4">section 4</a>. </p>
+      the dataset. See <a href="#4">section 4</a>. </p>
     <p><a name="get">The '<b>get</b>' variables</a> can be used to chain the calculations. </p>
     <p>Until now, there are eight of them : [[getwfk]],
       [[getwfq]], [[getddk]],
@@ -1400,17 +1400,17 @@ body : |
       and the numerical quality of calculations.
     <p>The list of these input parameters is
     <ul>
-      <li><a href="abinit_help.html#ref11_1">(1)</a> [[ecut]]
-      <li><a href="abinit_help.html#ref11_2">(2)</a> [[toldfe]],
+      <li><a href="#ref11_1">(1)</a> [[ecut]]
+      <li><a href="#ref11_2">(2)</a> [[toldfe]],
         [[toldff]], [[tolwfr]],
         and [[tolvrs]], as well as
         [[nstep]]
-      <li><a href="abinit_help.html#ref11_3">(3)</a> [[nkpt]]
-      <li><a href="abinit_help.html#ref11_4">(4)</a> [[ngfft]]
-      <li><a href="abinit_help.html#ref11_5">(5)</a> [[tolmxf]],
+      <li><a href="#ref11_3">(3)</a> [[nkpt]]
+      <li><a href="#ref11_4">(4)</a> [[ngfft]]
+      <li><a href="#ref11_5">(5)</a> [[tolmxf]],
         as well as [[amu]], [[dtion]],
         [[vis]], [[ntime]]
-      <li><a href="abinit_help.html#ref11_6">(6)</a> [[acell]]
+      <li><a href="#ref11_6">(6)</a> [[acell]]
         and [[rprim]]
     </ul>
     <br>

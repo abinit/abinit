@@ -23,15 +23,15 @@ material is described by the DDB he/she wants to use.
 <br>
 If he/she is interested in the generation of DDB, and wants to know more about this
 topic, he/she will read different help files of the ABINIT package, related to the
-<A href="abinit_help.html"><B>main code</B></A>, to the
-<A href="respfn_help.html"><B>response-function features of the main code</B></A>,
-to the <A href="mrgddb_help.html"><B>merging code</B></A>.
+<A href="help_abinit.html"><B>main code</B></A>, to the
+<A href="help_respfn.html"><B>response-function features of the main code</B></A>,
+to the <A href="help_mrgddb.html"><B>merging code</B></A>.
 </h3>
 
 <p> 
 It will be easier to discover the
-present file with the help of the <a href="../tutorial/welcome.html">tutorial</a>, especially
-the <a href="../tutorial/lesson_rf2.html">second lesson on response functions</a>.
+present file with the help of the tutorial (<a href="../../tutorial/generated_files/lesson_welcome.html">lesson_welcome</a>), especially
+the lesson on response functions (<a href="../../tutorial/generated_files/lesson_rf2.html">lesson_rf2</a>).
 <br>It is worthwhile to print this help file, for ease of reading.
 <hr>
 <h5>Copyright (C) 1998-2017 ABINIT group (XG,DCA)
@@ -70,13 +70,15 @@ the name of the DDB, and some other file names optionally used for selected capa
 </p>
 <pre>  anaddb.in<br>  anaddb.out<br>  ddb<br>  band_eps<br>  gkk<br>  anaddb.ep<br>  ddk<br> </pre>
 <p>In this example:<br>
-  - the main input file is called "anaddb.in", <br>
-  - the main output will be put into the file called "anaddb.out", <br>
-  - the input DDB file is called "ddb", <br>
-  - information to draw phonon band structures will go to band_eps<br>
-  - the input GKK file is called "gkk" (used only for electron-phonon interactions)<br>
-  - the base filename for electron-phonon output "anaddb.ep" (used only for electron-phonon interactions)<br>
-  - the file name for ddk reference files: these are the GKK files generated in k-point derivative runs, using the <a href="../../input_variables/generated_files/varfil.html#prtgkk"><b>prtgkk</b></a> abinit input variable (used only for electron-phonon transport calculations)
+  <ul>
+  <li> the main input file is called "anaddb.in", <br></li>
+  <li> the main output will be put into the file called "anaddb.out", <br></li>
+  <li> the input DDB file is called "ddb", <br></li>
+  <li> information to draw phonon band structures will go to band_eps<br></li>
+  <li> the input GKK file is called "gkk" (used only for electron-phonon interactions)<br></li>
+  <li> the base filename for electron-phonon output "anaddb.ep" (used only for electron-phonon interactions)<br></li>
+  <li> the file name for ddk reference files: these are the GKK files generated in k-point derivative runs, using the <a href="../../input_variables/generated_files/varfil.html#prtgkk"><b>prtgkk</b></a> abinit input variable (used only for electron-phonon transport calculations)</li>
+  </ul>
   Other examples are given in the ~abinit/test/v2 directory. The latter three filename information
   is often not used by anaddb.
   The maximal length of names for the main input or output files is presently 264 characters.
@@ -109,10 +111,10 @@ comments are also identified. However, the multidataset mode is not available.
 </p>
 <p>We now list the input variables for the anaddb input file. In order
 to discover them, it is easier to use the different lessons of the tutorial:
-start with the <a href="../tutorial/lesson_rf2.html">second lesson on response functions</a>,
-then follow the <a href="../tutorial/lesson_elastic.html">lesson on elasticity and piezoelectricity</a>,
-the <a href="../tutorial/lesson_eph.html">lesson on electron-phonon interaction</a>, and
-the <a href="../tutorial/lesson_nlo.html">lesson on non-linear properties</a>.
+start with the second lesson on response functions (<a href="../../tutorial/generated_files/lesson_rf2.html">lesson_rf2</a>),
+then follow the lesson on elasticity and piezoelectricity (<a href="../../tutorial/generated_files/lesson_elastic.html">lesson_elastic</a>),
+the lesson on electron-phonon interaction (<a href="../../tutorial/generated_files/lesson_eph.html">lesson_eph</a>), and
+the lesson on non-linear properties (<a href="../../tutorial/generated_files/lesson_nlo.html">lesson_nlo</a>).
 
 <p>
 <i>If you are discovering this file with the help of the tutorial,
@@ -125,128 +127,128 @@ you can go back to the tutorial window.</i>
 <b> Alphabetical list of input variables for ANADDB.</b>
 <br>
  <br>A.
- <a href="anaddb_help.html#alphon">alphon</a>&nbsp;&nbsp;
- <a href="anaddb_help.html#asr">asr</a>&nbsp;&nbsp;
- <a href="anaddb_help.html#atftol">atftol</a>&nbsp;&nbsp;
- <a href="anaddb_help.html#atifc">atifc</a>&nbsp;&nbsp;
- <a href="anaddb_help.html#a2fsmear">a2fsmear</a>&nbsp;&nbsp;
+ <a href="#alphon">alphon</a>&nbsp;&nbsp;
+ <a href="#asr">asr</a>&nbsp;&nbsp;
+ <a href="#atftol">atftol</a>&nbsp;&nbsp;
+ <a href="#atifc">atifc</a>&nbsp;&nbsp;
+ <a href="#a2fsmear">a2fsmear</a>&nbsp;&nbsp;
  <br>B.
- <a href="anaddb_help.html#band_gap">band_gap</a>&nbsp;&nbsp;
- <a href="anaddb_help.html#brav">brav</a>&nbsp;&nbsp;
+ <a href="#band_gap">band_gap</a>&nbsp;&nbsp;
+ <a href="#brav">brav</a>&nbsp;&nbsp;
  <br>C.
- <a href="anaddb_help.html#chneut">chneut</a>&nbsp;&nbsp;
+ <a href="#chneut">chneut</a>&nbsp;&nbsp;
  <br>D.
- <a href="anaddb_help.html#dieflag">dieflag</a>&nbsp;&nbsp;
- <a href="anaddb_help.html#dipdip">dipdip</a>&nbsp;&nbsp;
- <a href="anaddb_help.html#dosdeltae">dosdeltae</a>&nbsp;&nbsp;
- <a href="anaddb_help.html#dossmear">dossmear</a>&nbsp;&nbsp;
- <a href="anaddb_help.html#dostol">dostol</a>&nbsp;&nbsp;
- <a href="anaddb_help.html#dossum">dossum</a>&nbsp;&nbsp;
+ <a href="#dieflag">dieflag</a>&nbsp;&nbsp;
+ <a href="#dipdip">dipdip</a>&nbsp;&nbsp;
+ <a href="#dosdeltae">dosdeltae</a>&nbsp;&nbsp;
+ <a href="#dossmear">dossmear</a>&nbsp;&nbsp;
+ <a href="#dostol">dostol</a>&nbsp;&nbsp;
+ <a href="#dossum">dossum</a>&nbsp;&nbsp;
  <br>E.
- <a href="anaddb_help.html#eivec">eivec</a>&nbsp;&nbsp;
- <a href="anaddb_help.html#elaflag">elaflag</a>&nbsp;&nbsp;
- <a href="anaddb_help.html#elphflag">elphflag</a>&nbsp;&nbsp;
- <a href="anaddb_help.html#elphsmear">elphsmear</a>&nbsp;&nbsp;
- <a href="anaddb_help.html#elph_fermie">elph_fermie</a>&nbsp;&nbsp;
- <a href="anaddb_help.html#enunit">enunit</a>&nbsp;&nbsp;
- <a href="anaddb_help.html#ep_keepbands">ep_keepbands</a>&nbsp;&nbsp;
- <a href="anaddb_help.html#ep_int_gkk">ep_int_gkk</a>&nbsp;&nbsp;
- <a href="anaddb_help.html#ep_b_max">ep_b_max</a>&nbsp;&nbsp;
- <a href="anaddb_help.html#ep_b_min">ep_b_min</a>&nbsp;&nbsp;
- <a href="anaddb_help.html#ep_extrael">ep_extrael</a>&nbsp;&nbsp;
- <a href="anaddb_help.html#ep_nqpt">ep_nqpt</a>&nbsp;&nbsp;
- <a href="anaddb_help.html#ep_prt_yambo">ep_prt_yambo</a>&nbsp;&nbsp;
- <a href="anaddb_help.html#ep_qptlist">ep_qptlist</a>&nbsp;&nbsp;
- <a href="anaddb_help.html#ep_scalprod">ep_scalprod</a>&nbsp;&nbsp;
- <a href="anaddb_help.html#ep_nspline">ep_nspline</a>&nbsp;&nbsp;
+ <a href="#eivec">eivec</a>&nbsp;&nbsp;
+ <a href="#elaflag">elaflag</a>&nbsp;&nbsp;
+ <a href="#elphflag">elphflag</a>&nbsp;&nbsp;
+ <a href="#elphsmear">elphsmear</a>&nbsp;&nbsp;
+ <a href="#elph_fermie">elph_fermie</a>&nbsp;&nbsp;
+ <a href="#enunit">enunit</a>&nbsp;&nbsp;
+ <a href="#ep_keepbands">ep_keepbands</a>&nbsp;&nbsp;
+ <a href="#ep_int_gkk">ep_int_gkk</a>&nbsp;&nbsp;
+ <a href="#ep_b_max">ep_b_max</a>&nbsp;&nbsp;
+ <a href="#ep_b_min">ep_b_min</a>&nbsp;&nbsp;
+ <a href="#ep_extrael">ep_extrael</a>&nbsp;&nbsp;
+ <a href="#ep_nqpt">ep_nqpt</a>&nbsp;&nbsp;
+ <a href="#ep_prt_yambo">ep_prt_yambo</a>&nbsp;&nbsp;
+ <a href="#ep_qptlist">ep_qptlist</a>&nbsp;&nbsp;
+ <a href="#ep_scalprod">ep_scalprod</a>&nbsp;&nbsp;
+ <a href="#ep_nspline">ep_nspline</a>&nbsp;&nbsp;
  <br>F.
- <a href="anaddb_help.html#freeze_displ">freeze_displ</a>&nbsp;&nbsp;
- <a href="anaddb_help.html#frmax">frmax</a>&nbsp;&nbsp;
- <a href="anaddb_help.html#frmin">frmin</a>&nbsp;&nbsp;
+ <a href="#freeze_displ">freeze_displ</a>&nbsp;&nbsp;
+ <a href="#frmax">frmax</a>&nbsp;&nbsp;
+ <a href="#frmin">frmin</a>&nbsp;&nbsp;
  <br>G.
- <a href="anaddb_help.html#gkqwrite">gkqwrite</a>&nbsp;&nbsp;
- <a href="anaddb_help.html#gruns_ddbs">gruns_ddbs</a>&nbsp;&nbsp;
- <a href="anaddb_help.html#gruns_nddbs">gruns_nddbs</a>&nbsp;&nbsp;
+ <a href="#gkqwrite">gkqwrite</a>&nbsp;&nbsp;
+ <a href="#gruns_ddbs">gruns_ddbs</a>&nbsp;&nbsp;
+ <a href="#gruns_nddbs">gruns_nddbs</a>&nbsp;&nbsp;
  <br>H.
  <br>I.
- <a href="anaddb_help.html#iatfix">iatfix</a>&nbsp;&nbsp;
- <a href="anaddb_help.html#iatprj_bs">iatprj_bs</a>&nbsp;&nbsp;
- <a href="anaddb_help.html#ifcana">ifcana</a>&nbsp;&nbsp;
- <a href="anaddb_help.html#ifcflag">ifcflag</a>&nbsp;&nbsp;
- <a href="anaddb_help.html#ifltransport">ifltransport</a>&nbsp;&nbsp;
- <a href="anaddb_help.html#ifcout">ifcout</a>&nbsp;&nbsp;
- <a href="anaddb_help.html#instrflag">instrflag</a>&nbsp;&nbsp;
- <a href="anaddb_help.html#istrfix">istrfix</a>&nbsp;&nbsp;
+ <a href="#iatfix">iatfix</a>&nbsp;&nbsp;
+ <a href="#iatprj_bs">iatprj_bs</a>&nbsp;&nbsp;
+ <a href="#ifcana">ifcana</a>&nbsp;&nbsp;
+ <a href="#ifcflag">ifcflag</a>&nbsp;&nbsp;
+ <a href="#ifltransport">ifltransport</a>&nbsp;&nbsp;
+ <a href="#ifcout">ifcout</a>&nbsp;&nbsp;
+ <a href="#instrflag">instrflag</a>&nbsp;&nbsp;
+ <a href="#istrfix">istrfix</a>&nbsp;&nbsp;
  <br>J.
  <br>K.
- <a href="anaddb_help.html#kptrlatt">kptrlatt</a>&nbsp;&nbsp;
- <a href="anaddb_help.html#kptrlatt_fine">kptrlatt_fine</a>&nbsp;&nbsp;
+ <a href="#kptrlatt">kptrlatt</a>&nbsp;&nbsp;
+ <a href="#kptrlatt_fine">kptrlatt_fine</a>&nbsp;&nbsp;
  <br>L.
  <br>M.
- <a href="anaddb_help.html#mustar">mustar</a>&nbsp;&nbsp;
+ <a href="#mustar">mustar</a>&nbsp;&nbsp;
  <br>N.
- <a href="anaddb_help.html#natfix">natfix</a>&nbsp;&nbsp;
- <a href="anaddb_help.html#natifc">natifc</a>&nbsp;&nbsp;
- <a href="anaddb_help.html#natprj_bs">natprj_bs</a>&nbsp;&nbsp;
- <a href="anaddb_help.html#nchan">nchan</a>&nbsp;&nbsp;
- <a href="anaddb_help.html#ndivsm">ndivsm</a>&nbsp;&nbsp;
- <a href="anaddb_help.html#nfreq">nfreq</a>&nbsp;&nbsp;
- <a href="anaddb_help.html#ngqpt">ngqpt</a>&nbsp;&nbsp;
- <a href="anaddb_help.html#ng2qpt">ng2qpt</a>&nbsp;&nbsp;
- <a href="anaddb_help.html#ngrids">ngrids</a>&nbsp;&nbsp;
- <a href="anaddb_help.html#nlflag">nlflag</a>&nbsp;&nbsp;
- <a href="anaddb_help.html#nph1l">nph1l</a>&nbsp;&nbsp;
- <a href="anaddb_help.html#nph2l">nph2l</a>&nbsp;&nbsp;
- <a href="anaddb_help.html#nqpath">nqpath</a>&nbsp;&nbsp;
- <a href="anaddb_help.html#nqshft">nqshft</a>&nbsp;&nbsp;
- <a href="anaddb_help.html#nsphere">nsphere</a>&nbsp;&nbsp;
- <a href="anaddb_help.html#nstrfix">nstrfix</a>&nbsp;&nbsp;
- <a href="anaddb_help.html#ntemper">ntemper</a>&nbsp;&nbsp;
- <a href="anaddb_help.html#nwchan">nwchan</a>&nbsp;&nbsp;
+ <a href="#natfix">natfix</a>&nbsp;&nbsp;
+ <a href="#natifc">natifc</a>&nbsp;&nbsp;
+ <a href="#natprj_bs">natprj_bs</a>&nbsp;&nbsp;
+ <a href="#nchan">nchan</a>&nbsp;&nbsp;
+ <a href="#ndivsm">ndivsm</a>&nbsp;&nbsp;
+ <a href="#nfreq">nfreq</a>&nbsp;&nbsp;
+ <a href="#ngqpt">ngqpt</a>&nbsp;&nbsp;
+ <a href="#ng2qpt">ng2qpt</a>&nbsp;&nbsp;
+ <a href="#ngrids">ngrids</a>&nbsp;&nbsp;
+ <a href="#nlflag">nlflag</a>&nbsp;&nbsp;
+ <a href="#nph1l">nph1l</a>&nbsp;&nbsp;
+ <a href="#nph2l">nph2l</a>&nbsp;&nbsp;
+ <a href="#nqpath">nqpath</a>&nbsp;&nbsp;
+ <a href="#nqshft">nqshft</a>&nbsp;&nbsp;
+ <a href="#nsphere">nsphere</a>&nbsp;&nbsp;
+ <a href="#nstrfix">nstrfix</a>&nbsp;&nbsp;
+ <a href="#ntemper">ntemper</a>&nbsp;&nbsp;
+ <a href="#nwchan">nwchan</a>&nbsp;&nbsp;
  <br>O.
- <a href="anaddb_help.html#outscphon">outscphon</a>&nbsp;&nbsp;
- <a href="anaddb_help.html#outboltztrap">outboltztrap</a>&nbsp;&nbsp;
+ <a href="#outscphon">outscphon</a>&nbsp;&nbsp;
+ <a href="#outboltztrap">outboltztrap</a>&nbsp;&nbsp;
  <br>P.
- <a href="anaddb_help.html#piezoflag">piezoflag</a>&nbsp;&nbsp;
- <a href="anaddb_help.html#polflag">polflag</a>&nbsp;&nbsp;
- <a href="anaddb_help.html#prtbltztrp">prtbltztrp</a>&nbsp;&nbsp;
- <a href="anaddb_help.html#prtfsurf">prtfsurf</a>&nbsp;&nbsp;
- <a href="anaddb_help.html#prt_ifc">prt_ifc</a>&nbsp;&nbsp;
- <a href="anaddb_help.html#prtsrlr">prtsrlr</a>&nbsp;&nbsp;
- <a href="anaddb_help.html#prtmbm">prtmbm</a>&nbsp;&nbsp;
- <a href="anaddb_help.html#prtdos">prtdos</a>&nbsp;&nbsp;
- <a href="anaddb_help.html#prtnest">prtnest</a>&nbsp;&nbsp;
- <a href="anaddb_help.html#prtphbands">prtphbands</a>&nbsp;&nbsp;
- <a href="anaddb_help.html#prtvol">prtvol</a>&nbsp;&nbsp;
+ <a href="#piezoflag">piezoflag</a>&nbsp;&nbsp;
+ <a href="#polflag">polflag</a>&nbsp;&nbsp;
+ <a href="#prtbltztrp">prtbltztrp</a>&nbsp;&nbsp;
+ <a href="#prtfsurf">prtfsurf</a>&nbsp;&nbsp;
+ <a href="#prt_ifc">prt_ifc</a>&nbsp;&nbsp;
+ <a href="#prtsrlr">prtsrlr</a>&nbsp;&nbsp;
+ <a href="#prtmbm">prtmbm</a>&nbsp;&nbsp;
+ <a href="#prtdos">prtdos</a>&nbsp;&nbsp;
+ <a href="#prtnest">prtnest</a>&nbsp;&nbsp;
+ <a href="#prtphbands">prtphbands</a>&nbsp;&nbsp;
+ <a href="#prtvol">prtvol</a>&nbsp;&nbsp;
  <br>Q.
- <a href="anaddb_help.html#qgrid_type">qgrid_type</a>&nbsp;&nbsp;
- <a href="anaddb_help.html#qpath">qpath</a>&nbsp;&nbsp;
- <a href="anaddb_help.html#qph1l">qph1l</a>&nbsp;&nbsp;
- <a href="anaddb_help.html#qph2l">qph2l</a>&nbsp;&nbsp;
- <a href="anaddb_help.html#qrefine">qrefine</a>&nbsp;&nbsp;
- <a href="anaddb_help.html#q1shft">q1shft</a>&nbsp;&nbsp;
- <a href="anaddb_help.html#q2shft">q2shft</a>&nbsp;&nbsp;
+ <a href="#qgrid_type">qgrid_type</a>&nbsp;&nbsp;
+ <a href="#qpath">qpath</a>&nbsp;&nbsp;
+ <a href="#qph1l">qph1l</a>&nbsp;&nbsp;
+ <a href="#qph2l">qph2l</a>&nbsp;&nbsp;
+ <a href="#qrefine">qrefine</a>&nbsp;&nbsp;
+ <a href="#q1shft">q1shft</a>&nbsp;&nbsp;
+ <a href="#q2shft">q2shft</a>&nbsp;&nbsp;
  <br>R.
- <a href="anaddb_help.html#ramansr">ramansr</a>&nbsp;&nbsp;
- <a href="anaddb_help.html#relaxat">relaxat</a>&nbsp;&nbsp;
- <a href="anaddb_help.html#relaxstr">relaxstr</a>&nbsp;&nbsp;
- <a href="anaddb_help.html#rfmeth">rfmeth</a>&nbsp;&nbsp;
- <a href="anaddb_help.html#rifcsph">rifcsph</a>&nbsp;&nbsp;
+ <a href="#ramansr">ramansr</a>&nbsp;&nbsp;
+ <a href="#relaxat">relaxat</a>&nbsp;&nbsp;
+ <a href="#relaxstr">relaxstr</a>&nbsp;&nbsp;
+ <a href="#rfmeth">rfmeth</a>&nbsp;&nbsp;
+ <a href="#rifcsph">rifcsph</a>&nbsp;&nbsp;
  <br>S.
- <a href="anaddb_help.html#selectz">selectz</a>&nbsp;&nbsp;
- <a href="anaddb_help.html#symdynmat">symdynmat</a>&nbsp;&nbsp;
- <a href="anaddb_help.html#symgkq">symgkq</a>&nbsp;&nbsp;
+ <a href="#selectz">selectz</a>&nbsp;&nbsp;
+ <a href="#symdynmat">symdynmat</a>&nbsp;&nbsp;
+ <a href="#symgkq">symgkq</a>&nbsp;&nbsp;
  <br>T.
- <a href="anaddb_help.html#targetpol">targetpol</a>&nbsp;&nbsp;
- <a href="anaddb_help.html#telphint">telphint</a>&nbsp;&nbsp;
- <a href="anaddb_help.html#temperinc">temperinc</a>&nbsp;&nbsp;
- <a href="anaddb_help.html#tempermin">tempermin</a>&nbsp;&nbsp;
- <a href="anaddb_help.html#thmflag">thmflag</a>&nbsp;&nbsp;
- <a href="anaddb_help.html#thmtol">thmtol</a>&nbsp;&nbsp;
+ <a href="#targetpol">targetpol</a>&nbsp;&nbsp;
+ <a href="#telphint">telphint</a>&nbsp;&nbsp;
+ <a href="#temperinc">temperinc</a>&nbsp;&nbsp;
+ <a href="#tempermin">tempermin</a>&nbsp;&nbsp;
+ <a href="#thmflag">thmflag</a>&nbsp;&nbsp;
+ <a href="#thmtol">thmtol</a>&nbsp;&nbsp;
  <br>U.
- <a href="anaddb_help.html#use_k_fine">use_k_fine</a>&nbsp;&nbsp;
+ <a href="#use_k_fine">use_k_fine</a>&nbsp;&nbsp;
  <br>V.
- <a href="anaddb_help.html#vs_qrad_tolkms">vs_qrad_tolkms</a>&nbsp;&nbsp;
+ <a href="#vs_qrad_tolkms">vs_qrad_tolkms</a>&nbsp;&nbsp;
  <br>W.
  <br>X.
  <br>Y.
@@ -269,7 +271,7 @@ In case of uniaxial crystals, the z-axis should be chosen along the optical axis
 </font>
 
 <br><br><br><br><a href=#top>Go to the top</a>
-<B> | </B><a href="anaddb_help.html#list">List of ANADDB input variables</a>
+<B> | </B><a href="#list">List of ANADDB input variables</a>
 <hr>
 
 <font id="title"><a name="asr">asr</a></font>
@@ -301,7 +303,7 @@ Well, in some pathological cases, the breaking can be rather important.
 (or dynamical matrices), and the effective charges.
 The ASR for the effective charges is called the charge
 neutrality sum rule, and will be dealt with by the variable
-<a href="anaddb_help.html#chneut">chneut</a>.
+<a href="#chneut">chneut</a>.
 The ASR for the interatomic forces can be restored,
 by modifying the interatomic force of the atom on itself,
 (called self-IFC), as soon as the dynamical matrix at Gamma is known. 
@@ -312,14 +314,14 @@ which is determined by the dynamical matrix at Gamma.
 So, if <b>asr</b> is non-zero, the correction to the self-force
 will be determined, and the self-force will be imposed to be consistent with the ASR.
 This correction will work if IFCs are computed
-(<a href="anaddb_help.html#ifcflag">ifcflag</a>/=0),
+(<a href="#ifcflag">ifcflag</a>/=0),
 as well as if the IFCs are not computed
-(<a href="anaddb_help.html#ifcflag">ifcflag</a>==0).
+(<a href="#ifcflag">ifcflag</a>==0).
 In both cases, the phonon frequencies will not be the same
 as the ones determined by the output of abinit, RF case.
 If you want to check that the DDB is correct, by comparing
 phonon frequencies from abinit and anaddb, you should turn off both <b>asr</b> and
-<a href="anaddb_help.html#chneut">chneut</a>.
+<a href="#chneut">chneut</a>.
 </font></p>
 <p><font id="text">Until now, we have not explained the difference between
 <b>asr</b>=1 and <b>asr</b>=2. 
@@ -350,7 +352,7 @@ understanding, one should always use the <b>asr</b>=2 option ).
 <br>
 <br>
 <a href="#top">Go to the top</a>
-<b> | </b><a href="anaddb_help.html#list">List of ANADDB input
+<b> | </b><a href="#list">List of ANADDB input
 variables</a>
 </p>
 <hr><font id="title"><a name="atftol">atftol</a></font>
@@ -372,13 +374,13 @@ to the next bigger is smaller than <b>wtol2</b>.
 </font>
 
 <br><br><br><br><a href="#top">Go to the top</a>
-<b> | </b><a href="anaddb_help.html#list">List of ANADDB input variables</a>
+<b> | </b><a href="#list">List of ANADDB input variables</a>
 <hr>
 
 <font id="title"><a name="atifc">atifc</a></font>
 <br><font id="definition">Mnemonics: AToms for IFC analysis</font>
 <br><font id="category">Characteristic: </font>
-<br><font id="vartype">Variable type: integer array <b>atifc</b>(<a href="anaddb_help.html#natifc">natifc</a>) </font>
+<br><font id="vartype">Variable type: integer array <b>atifc</b>(<a href="#natifc">natifc</a>) </font>
 <br><font id="default">Default: 0 </font>
 <br><br><font id="text">
 The actual numbers of the atoms for which the interatomic
@@ -390,7 +392,7 @@ confusing, and should be taken away in one future version - sorry for this).
 
 <br>
 <br><br><br><a href=#top>Go to the top</a>
-<B> | </B><a href="anaddb_help.html#list">List of ANADDB input variables</a>
+<B> | </B><a href="#list">List of ANADDB input variables</a>
 <hr>
 
 <font id="title"><a name="band_gap">band_gap</a></font>
@@ -400,14 +402,14 @@ confusing, and should be taken away in one future version - sorry for this).
 <br><font id="default">Default: 999.0</font>
 <br><br><font id="text">
 	Allow setting the target band gap, in eV.
-	(<a href="anaddb_help.html#elphflag">elphflag</a>=1).
+	(<a href="#elphflag">elphflag</a>=1).
 </font><br>
 <br>
 <br>
 <br>
 
 <a href="#top">Go to the top</a>
-<b> | </b><a href="anaddb_help.html#list">List of ANADDB input
+<b> | </b><a href="#list">List of ANADDB input
 variables</a>
 <hr><font id="title"><a name="a2fsmear">a2fsmear</a></font>
 <br>
@@ -431,7 +433,7 @@ functions in energy are replaced by Gaussians of width a2fsmear
 <br>
 <br>
 <a href="#top">Go to the top</a>
-<b> | </b><a href="anaddb_help.html#list">List of ANADDB input
+<b> | </b><a href="#list">List of ANADDB input
 variables</a>
 <hr><font id="title"><a name="brav">brav</a></font>
 <br>
@@ -465,7 +467,7 @@ in order for the code to work properly.
 </font>
 
 <br><br><br><br><a href=#top>Go to the top</a>
-<B> | </B><a href="anaddb_help.html#list">List of ANADDB input variables</a>
+<B> | </B><a href="#list">List of ANADDB input variables</a>
 <hr>
 
 
@@ -496,7 +498,7 @@ In particular, this will make the lowest frequencies at Gamma
 non-zero. There is no "best" way of imposing the ASR on effective charges. 
 </font>
 <br><br><br><br><a href=#top>Go to the top</a>
-<B> | </B><a href="anaddb_help.html#list">List of ANADDB input variables</a>
+<B> | </B><a href="#list">List of ANADDB input variables</a>
 <hr>
 
 
@@ -518,14 +520,14 @@ Integer. Frequency-dependent dielectric tensor flag.
            <a href="../../input_variables/generated_files/varrf.html#rfdir">rfdir</a> to do a full calculation of
              phonons at Q=0.
   The frequencies are defined by the
-<a href="anaddb_help.html#nfreq">nfreq</a>,
-<a href="anaddb_help.html#frmin">frmin</a>,
-<a href="anaddb_help.html#frmax">frmax</a>
+<a href="#nfreq">nfreq</a>,
+<a href="#frmin">frmin</a>,
+<a href="#frmax">frmax</a>
   variables. Also, the generalized Lyddane-Sachs-Teller
   relation will be used as an independent check of the
   dielectric tensor at zero frequency (this for the
   directions defined in the phonon list 2.
-See <a href="anaddb_help.html#nph2l">nph2l</a>).</li>
+See <a href="#nph2l">nph2l</a>).</li>
  <li> 2 => Only the electronic dielectric tensor is calculated.
   It corresponds to a zero-frequency homogeneous field,
   with quenched atomic positions. For large band gap materials,
@@ -545,10 +547,10 @@ See <a href="anaddb_help.html#nph2l">nph2l</a>).</li>
            <a href="../../input_variables/generated_files/varrf.html#rfdir">rfdir</a> to do a full calculation of
              phonons at Q=0 (needed because the inverse of
              force-constant tensor is required). Furthermore, in the anaddb input file the variable
-             <a href="anaddb_help.html#nph2l">nph2l</a> must be nonzero in order to initiate
+             <a href="#nph2l">nph2l</a> must be nonzero in order to initiate
              computation of atomic displacements. If only the dielectric response is needed it
-             is sufficient to set <a href="anaddb_help.html#nph2l">nph2l</a> to 1 and leave 
-             <a href="anaddb_help.html#qph2l">qph2l</a> at its default value (the Gamma point).
+             is sufficient to set <a href="#nph2l">nph2l</a> to 1 and leave 
+             <a href="#qph2l">qph2l</a> at its default value (the Gamma point).
         Note that the relaxed-ion dielectric tensor computed here can
         also be obtained as the zero-frequency limit of the
         frequency-dependent dielectric tensor using input variables
@@ -562,13 +564,13 @@ See <a href="anaddb_help.html#nph2l">nph2l</a>).</li>
                     free stress.
         We need information of internal strain and elastic tensor (relaxed ion)
         in this computation. So please set:
-        <a href="anaddb_help.html#elaflag">elaflag</a>=2,3,4 or 5  and
-        <a href="anaddb_help.html#instrflag">instrflag</a>=1
+        <a href="#elaflag">elaflag</a>=2,3,4 or 5  and
+        <a href="#instrflag">instrflag</a>=1
 </ul>
 </font>
 
 <br><br><br><br><a href=#top>Go to the top</a>
-<B> | </B><a href="anaddb_help.html#list">List of ANADDB input variables</a>
+<B> | </B><a href="#list">List of ANADDB input variables</a>
 <hr>
 
 
@@ -595,7 +597,7 @@ See <a href="anaddb_help.html#nph2l">nph2l</a>).</li>
 </font>
 
 <br><br><br><br><a href=#top>Go to the top</a>
-<B> | </B><a href="anaddb_help.html#list">List of ANADDB input variables</a>
+<B> | </B><a href="#list">List of ANADDB input variables</a>
 <hr>
 <font id="title"><a name="dosdeltae">dosdeltae</a></font>
 <br><font id="definition">Mnemonics: DOS DELTA in Energy</font>
@@ -604,11 +606,11 @@ See <a href="anaddb_help.html#nph2l">nph2l</a>).</li>
 <br><font id="default">Default: 4.5E-06 Hartree = 1 cm<sup>-1</sup> </font>
 <br><br><font id="text">
 The input variable <b>dosdeltae</b> is used to define the step of the frequency grid used to
-calculate the phonon density of states when <a href="anaddb_help.html#prtdos">prtdos</a>=1.
+calculate the phonon density of states when <a href="#prtdos">prtdos</a>=1.
 </font>
 
 <br><br><br><br><a href=#top>Go to the top</a>
-<B> | </B><a href="anaddb_help.html#list">List of ANADDB input variables</a>
+<B> | </B><a href="#list">List of ANADDB input variables</a>
 <hr>
 <font id="title"><a name="dossmear">dossmear</a></font>
 <br><font id="definition">Mnemonics: DOS SMEARing value </font>
@@ -617,10 +619,10 @@ calculate the phonon density of states when <a href="anaddb_help.html#prtdos">pr
 <br><font id="default">Default: 4.5E-05 Hartree = 10 cm<sup>-1</sup></font>
 <br><br><font id="text">
 <b>dossmear</b> defines the gaussian broadening used to calculate the phonon density
-of states when <a href="anaddb_help.html#prtdos">prtdos</a>=1.
+of states when <a href="#prtdos">prtdos</a>=1.
 </font>
 <br><br><br><br><a href=#top>Go to the top</a>
-<B> | </B><a href="anaddb_help.html#list">List of ANADDB input variables</a>
+<B> | </B><a href="#list">List of ANADDB input variables</a>
 <hr>
 
 <font id="title"><a name="dostol">dostol</a></font>
@@ -636,7 +638,7 @@ the mean of the relative change going from one grid
 to the next bigger is smaller than <b>dostol</b>.
 </font>
 <br><br><br><br><a href=#top>Go to the top</a>
-<B> | </B><a href="anaddb_help.html#list">List of ANADDB input variables</a>
+<B> | </B><a href="#list">List of ANADDB input variables</a>
 <hr>
 
 <font id="title"><a name="dossum">dossum</a></font>
@@ -650,7 +652,7 @@ the Gamma point. The DOS is converged and based on that, the sum and different i
 reported in the output file <b>dossum</b>.
 </font>
 <br><br><br><br><a href=#top>Go to the top</a>
-<B> | </B><a href="anaddb_help.html#list">List of ANADDB input variables</a>
+<B> | </B><a href="#list">List of ANADDB input variables</a>
 <hr>
 
 
@@ -668,7 +670,7 @@ reported in the output file <b>dossum</b>.
 </font>
 
 <br><br><br><br><a href=#top>Go to the top</a>
-<B> | </B><a href="anaddb_help.html#list">List of ANADDB input variables</a>
+<B> | </B><a href="#list">List of ANADDB input variables</a>
 <hr>
 
 
@@ -692,7 +694,7 @@ Flag for calculation of elastic and compliance tensors
  <li>2 => Both relaxed- and clamped-ion elastic and compliance tensor
            will be calculated, but only the relaxed-ion quantities
            will be printed.
-          The input variable <a href="anaddb_help.html#instrflag">instrflag</a>
+          The input variable <a href="#instrflag">instrflag</a>
            should also be set to 1, because
            the internal-strain tensor is needed to compute the relaxed-ion
            corrections.  Requirements for preceding response-function DDB
@@ -705,7 +707,7 @@ Flag for calculation of elastic and compliance tensors
    </li>
  <li>3 =>  Both relaxed and clamped-ion elastic and compliance tensors
            will be printed out.
-           The input variable <a href="anaddb_help.html#instrflag">instrflag</a>
+           The input variable <a href="#instrflag">instrflag</a>
             should also be set to 1.
            Requirements for preceding response-function DDB generation
            run:  Same as for <b>elaflag</b>=2.
@@ -715,8 +717,8 @@ Flag for calculation of elastic and compliance tensors
          electric field will be printed out too, for comparison.
          When <b>elaflag</b>=4, we need the information of internal strain and
         relaxed-ion dielectric tensor to build the whole tensor, so
-        we need set <a href="anaddb_help.html#instrflag">instrflag</a>=1 and
-        <a href="anaddb_help.html#dieflag">dieflag</a>=3 or 4 .
+        we need set <a href="#instrflag">instrflag</a>=1 and
+        <a href="#dieflag">dieflag</a>=3 or 4 .
    </li>
  <li>5 => Calculate the relaxed ion elastic and compliance tensors, considering
         the stress left inside cell. At the same time, bare relaxed ion tensors
@@ -731,7 +733,7 @@ Flag for calculation of elastic and compliance tensors
 
 
 <br><br><br><br><a href=#top>Go to the top</a>
-<B> | </B><a href="anaddb_help.html#list">List of ANADDB input variables</a>
+<B> | </B><a href="#list">List of ANADDB input variables</a>
 <hr>
 
 <font id="title"><a name="elphflag">elphflag</a></font>
@@ -745,7 +747,7 @@ If <b>elphflag</b> is 1, anaddb performs an analysis of the electron-phonon coup
 
 
 <br><br><br><br><a href=#top>Go to the top</a>
-<B> | </B><a href="anaddb_help.html#list">List of ANADDB input variables</a>
+<B> | </B><a href="#list">List of ANADDB input variables</a>
 <hr>
 
 
@@ -760,7 +762,7 @@ Smearing width for the Fermi surface integration (in Hartree by default).
 
 
 <br><br><br><br><a href=#top>Go to the top</a>
-<B> | </B><a href="anaddb_help.html#list">List of ANADDB input variables</a>
+<B> | </B><a href="#list">List of ANADDB input variables</a>
 <hr>
 
 
@@ -773,12 +775,12 @@ Smearing width for the Fermi surface integration (in Hartree by default).
 If non-zero, will fix artificially the value of the Fermi energy
 (e.g. for semiconductors), in the electron-phonon case. Note that elph_fermie and <a href="#ep_extrael">ep_extrael</a> 
 should not be used at the same time.
-(<a href="anaddb_help.html#elphflag">elphflag</a>=1).
+(<a href="#elphflag">elphflag</a>=1).
 </font>
 
 
 <br><br><br><br><a href=#top>Go to the top</a>
-<B> | </B><a href="anaddb_help.html#list">List of ANADDB input variables</a>
+<B> | </B><a href="#list">List of ANADDB input variables</a>
 <hr>
 
 
@@ -800,7 +802,7 @@ Give the energy for the phonon frequency output
 </font>
 
 <br><br><br><br><a href=#top>Go to the top</a>
-<B> | </B><a href="anaddb_help.html#list">List of ANADDB input variables</a>
+<B> | </B><a href="#list">List of ANADDB input variables</a>
 <hr>
 
 <font id="title"><a name="ep_b_max">ep_b_max</a></font>
@@ -813,7 +815,7 @@ Give the energy for the phonon frequency output
 </font>
 
 <br><br><br><br><a href=#top>Go to the top</a>
-<B> | </B><a href="anaddb_help.html#list">List of ANADDB input variables</a>
+<B> | </B><a href="#list">List of ANADDB input variables</a>
 <hr>
 
 <font id="title"><a name="ep_b_min">ep_b_min</a></font>
@@ -826,7 +828,7 @@ Give the energy for the phonon frequency output
 </font>
 
 <br><br><br><br><a href=#top>Go to the top</a>
-<B> | </B><a href="anaddb_help.html#list">List of ANADDB input variables</a>
+<B> | </B><a href="#list">List of ANADDB input variables</a>
 <hr>
 
 <font id="title"><a name="ep_extrael">ep_extrael</a></font>
@@ -837,12 +839,12 @@ Give the energy for the phonon frequency output
 <br><br><font id="text">
 	If non-zero, will fix artificially the number of extra electrons per unit cell (positive for electron doping), according to a doped case.
 	(e.g. for semiconductors), in the electron-phonon case. This field can also be filled with doping concentration, in the units of cm-3 (negative for electron doping). Note that ep_extrael and <a href="#elph_fermie">elph_fermie</a> should not be used at the same time.
-	(<a href="anaddb_help.html#elphflag">elphflag</a>=1).
+	(<a href="#elphflag">elphflag</a>=1).
 </font>
 
 
 <br><br><br><br><a href=#top>Go to the top</a>
-<B> | </B><a href="anaddb_help.html#list">List of ANADDB input variables</a>
+<B> | </B><a href="#list">List of ANADDB input variables</a>
 <hr>
 
 <font id="title"><a name="ep_int_gkk">ep_int_gkk</a></font>
@@ -858,7 +860,7 @@ are treated symmetrically.
 </font><br>
 
 <br><br><br><br><a href=#top>Go to the top</a>
-<B> | </B><a href="anaddb_help.html#list">List of ANADDB input variables</a>
+<B> | </B><a href="#list">List of ANADDB input variables</a>
 <hr>
 
 <font id="title"><a name="ep_keepbands">ep_keepbands</a></font>
@@ -874,7 +876,7 @@ transport calculations <b>ep_keepbands</b> must be set to 1.
 </font><br>
 
 <br><br><br><br><a href=#top>Go to the top</a>
-<B> | </B><a href="anaddb_help.html#list">List of ANADDB input variables</a>
+<B> | </B><a href="#list">List of ANADDB input variables</a>
 <hr>
 
 <font id="title"><a name="ep_nqpt">ep_nqpt</a></font>
@@ -890,7 +892,7 @@ anaddb input (ngqpt)
 </font>
 
 <br><br><br><br><a href=#top>Go to the top</a>
-<B> | </B><a href="anaddb_help.html#list">List of ANADDB input variables</a>
+<B> | </B><a href="#list">List of ANADDB input variables</a>
 <hr>
 
 <font id="title"><a name="ep_nspline">ep_nspline</a></font>
@@ -903,7 +905,7 @@ anaddb input (ngqpt)
 </font>
 
 <br><br><br><br><a href=#top>Go to the top</a>
-<B> | </B><a href="anaddb_help.html#list">List of ANADDB input variables</a>
+<B> | </B><a href="#list">List of ANADDB input variables</a>
 <hr>
 
 <font id="title"><a name="ep_prt_yambo">ep_prt_yambo</a></font>
@@ -916,7 +918,7 @@ For electron-phonon calculations, print out matrix elements for use by the yambo
 </font>
 
 <br><br><br><br><a href=#top>Go to the top</a>
-<B> | </B><a href="anaddb_help.html#list">List of ANADDB input variables</a>
+<B> | </B><a href="#list">List of ANADDB input variables</a>
 <hr>
 
 <font id="title"><a name="ep_qptlist">ep_qptlist</a></font>
@@ -932,7 +934,7 @@ anaddb input (ngqpt), in reduced coordinates of the reciprocal space lattice.
 </font>
 
 <br><br><br><br><a href=#top>Go to the top</a>
-<B> | </B><a href="anaddb_help.html#list">List of ANADDB input variables</a>
+<B> | </B><a href="#list">List of ANADDB input variables</a>
 <hr>
 <font id="title"><a name="ep_scalprod">ep_scalprod</a></font>
 <br><font id="definition">Mnemonics: DO SCALar PRODuct for gkk matrix elements</font>
@@ -951,7 +953,7 @@ or high symmetry points. I do not know why...
 </font>
 
 <br><br><br><br><a href=#top>Go to the top</a>
-<B> | </B><a href="anaddb_help.html#list">List of ANADDB input variables</a>
+<B> | </B><a href="#list">List of ANADDB input variables</a>
 <hr>
 
 <font id="title"><a name="freeze_displ">freeze_displ</a></font>
@@ -961,7 +963,7 @@ or high symmetry points. I do not know why...
 <br><font id="default">Default: 0.0</font>
 <br><br><font id="text">
 If different from zero, <b>freeze_displ</b> will be used as the amplitude of a phonon displacement.
-For each q-point and mode in the <a href="anaddb_help.html#qph1l">qph1l</a> list,
+For each q-point and mode in the <a href="#qph1l">qph1l</a> list,
 a file will be created containing a supercell
 of atoms with the corresponding phonon displacements frozen in.
 This is typically useful to freeze a soft phonon mode, then let it relax in abinit
@@ -975,11 +977,11 @@ Typical values are 50-200 for a frequency of a few hundred cm-1 and room tempera
 is to break the symmetry in the right direction, any reasonable value (10-50) should be ok.
 <br>
 <b>WARNING</b>: this will create a <i>lot</i> of files (3*natom*nph1l), so it should be used with a small number
-<a href="anaddb_help.html#nph1l">nph1l</a> of q-points for interpolation.
+<a href="#nph1l">nph1l</a> of q-points for interpolation.
 </font>
 
 <br><br><br><br><a href=#top>Go to the top</a>
-<B> | </B><a href="anaddb_help.html#list">List of ANADDB input variables</a>
+<B> | </B><a href="#list">List of ANADDB input variables</a>
 <hr>
 
 
@@ -994,7 +996,7 @@ frequency-dependent dielectric tensor, in Hartree.
 </font>
 
 <br><br><br><br><a href=#top>Go to the top</a>
-<B> | </B><a href="anaddb_help.html#list">List of ANADDB input variables</a>
+<B> | </B><a href="#list">List of ANADDB input variables</a>
 <hr>
 
 
@@ -1009,7 +1011,7 @@ frequency-dependent dielectric tensor, in Hartree.
 </font>
 
 <br><br><br><br><a href=#top>Go to the top</a>
-<B> | </B><a href="anaddb_help.html#list">List of ANADDB input variables</a>
+<B> | </B><a href="#list">List of ANADDB input variables</a>
 <hr>
 
 
@@ -1024,7 +1026,7 @@ gkqfile. This reduces strongly the memory needed for an electron-phonon run.
 </font>
 
 <br><br><br><br><a href=#top>Go to the top</a>
-<B> | </B><a href="anaddb_help.html#list">List of ANADDB input variables</a>
+<B> | </B><a href="#list">List of ANADDB input variables</a>
 <hr>
 
 <font id="title"><a name="gruns_ddbs">gruns_ddbs</a></font>
@@ -1035,7 +1037,7 @@ gkqfile. This reduces strongly the memory needed for an electron-phonon run.
 <br><br><font id="text">
 List of strings with the paths of the DDB files used for the calculation of the Gruneisen parameters.
 Each string must be enclosed by quotation marks. The number of DDB files is defined by
-<a href="anaddb_help.html#gruns_nddbs">gruns_nddbs</a> (possible values are: 3,5,7,9)
+<a href="#gruns_nddbs">gruns_nddbs</a> (possible values are: 3,5,7,9)
 The DDB files correspond to phonon calculations performed at different volumes (usually &plusmn; 1% 
 of the equilibrium volume). The DDB files must be ordered according to the volume of the unit cell 
 (the DDB with smallest volume comes first) and the volume increment must be constant.
@@ -1043,7 +1045,7 @@ The code computes the derivative of the dynamical matrix wrt the volume using ce
 </font>
 
 <br><br><br><br><a href=#top>Go to the top</a>
-<B> | </B><a href="anaddb_help.html#list">List of ANADDB input variables</a>
+<B> | </B><a href="#list">List of ANADDB input variables</a>
 <hr>
 
 <font id="title"><a name="gruns_nddbs">gruns_nddbs</a></font>
@@ -1052,39 +1054,39 @@ The code computes the derivative of the dynamical matrix wrt the volume using ce
 <br><font id="vartype">Variable type: integer </font>
 <br><font id="default">Default: 0</font>
 <br><br><font id="text">
-This variable defines the number of DDB files (read from <a href="anaddb_help.html#gruns_ddbs">gruns_ddbs</a>)
+This variable defines the number of DDB files (read from <a href="#gruns_ddbs">gruns_ddbs</a>)
 used for the calculation of the Gruneisen parameters.
 </font>
 
 <br><br><br><br><a href=#top>Go to the top</a>
-<B> | </B><a href="anaddb_help.html#list">List of ANADDB input variables</a>
+<B> | </B><a href="#list">List of ANADDB input variables</a>
 <hr>
 
 <font id="title"><a name="iatfix">iatfix</a></font>
 <br><font id="definition">Mnemonics: Indices of the AToms that are FIXed</font>
 <br><font id="category">Characteristic:  </font>
-<br><font id="vartype">Variable type: integer array (1:<a href="anaddb_help.html#natfix">natfix</a>) </font>
+<br><font id="vartype">Variable type: integer array (1:<a href="#natfix">natfix</a>) </font>
 <br><font id="default">Default: 0</font>
 <br><br><font id="text">
 Indices of the atoms that are fixed during a structural relaxation at constrained polarization.
-See <a href="anaddb_help.html#polflag">polflag</a>.
+See <a href="#polflag">polflag</a>.
 </font>
 
 <br><br><br><br><a href=#top>Go to the top</a>
-<B> | </B><a href="anaddb_help.html#list">List of ANADDB input variables</a>
+<B> | </B><a href="#list">List of ANADDB input variables</a>
 <hr>
 
 <font id="title"><a name="iatprj_bs">iatprj_bs</a></font>
 <br><font id="definition">Mnemonics: Indices of the AToms for the PRoJection of the phonon Band Structure</font>
 <br><font id="category">Characteristic:  </font>
-<br><font id="vartype">Variable type: integer array (1:<a href="anaddb_help.html#natprj_bs">natprj_bs</a>) </font>
+<br><font id="vartype">Variable type: integer array (1:<a href="#natprj_bs">natprj_bs</a>) </font>
 <br><font id="default">Default: 0</font>
 <br><br><font id="text">
 Indices of the atoms that are chosen for projection of the phonon eigenvectors, giving a weighted phonon band structure file.
 </font>
 
 <br><br><br><br><a href=#top>Go to the top</a>
-<B> | </B><a href="anaddb_help.html#list">List of ANADDB input variables</a>
+<B> | </B><a href="#list">List of ANADDB input variables</a>
 <hr>
 
 
@@ -1101,7 +1103,7 @@ Indices of the atoms that are chosen for projection of the phonon eigenvectors, 
 
 <p> If the analysis is activated, one get the
 trace of the matrices between pairs of atoms,
-if <a href="anaddb_help.html#dipdip">dipdip</a> is 1,
+if <a href="#dipdip">dipdip</a> is 1,
 get also the trace of the short-range
 and electrostatic part, and
 calculate the ratio with the full matrix;
@@ -1119,7 +1121,7 @@ longitudinal force constant ( the (1,1) element of
 the matrix in local coordinates).
 </font>
 <br><br><br><br><a href=#top>Go to the top</a>
-<B> | </B><a href="anaddb_help.html#list">List of ANADDB input variables</a>
+<B> | </B><a href="#list">List of ANADDB input variables</a>
 <hr>
 
 
@@ -1137,13 +1139,13 @@ the matrix in local coordinates).
                matrices at every q wavevector, and eventually analyse
                the interatomic force constants, according to the
                informations given by
-<a href="anaddb_help.html#atifc">atifc</a>,
-<a href="anaddb_help.html#dipdip">dipdip</a>,
-<a href="anaddb_help.html#ifcana">ifcana</a>,
-<a href="anaddb_help.html#ifcout">ifcout</a>,
-<a href="anaddb_help.html#natifc">natifc</a>,
-<a href="anaddb_help.html#nsphere">nsphere</a>,
-<a href="anaddb_help.html#rifcsph">rifcsph</a>.</li>
+<a href="#atifc">atifc</a>,
+<a href="#dipdip">dipdip</a>,
+<a href="#ifcana">ifcana</a>,
+<a href="#ifcout">ifcout</a>,
+<a href="#natifc">natifc</a>,
+<a href="#nsphere">nsphere</a>,
+<a href="#rifcsph">rifcsph</a>.</li>
 </ul>
           More detailed explanations: if the dynamical matrices
           are known on a regular set of wavevectors, they
@@ -1151,7 +1153,7 @@ the matrix in local coordinates).
           their Fourier transform. When non-analyticities
           can been removed by the use of effective charge at Gamma
           (option offered by putting
-<a href="anaddb_help.html#dipdip">dipdip</a> to 1),
+<a href="#dipdip">dipdip</a> to 1),
           the interatomic forces are known to decay rather fast (in real space).
           The interatomic forces generated from a small set of
           dynamical matrices
@@ -1168,7 +1170,7 @@ in the DDB.
 </font>
 
 <br><br><br><br><a href=#top>Go to the top</a>
-<B> | </B><a href="anaddb_help.html#list">List of ANADDB input variables</a>
+<B> | </B><a href="#list">List of ANADDB input variables</a>
 <hr>
 
 
@@ -1179,7 +1181,7 @@ in the DDB.
 <br><font id="default">Default: 0</font>
 <br><br><font id="text">
 For each atom in the list
-<a href="anaddb_help.html#atifc">atifc</a> (generic atoms),
+<a href="#atifc">atifc</a> (generic atoms),
 <b>ifcout</b> give the number
 of neighbouring atoms for which the ifc's will be
 output (written) and eventually analysed. The
@@ -1188,7 +1190,7 @@ the generic atom.
 </font>
 
 <br><br><br><br><a href=#top>Go to the top</a>
-<B> | </B><a href="anaddb_help.html#list">List of ANADDB input variables</a>
+<B> | </B><a href="#list">List of ANADDB input variables</a>
 <hr>
 
 <font id="title"><a name="ifltransport">ifltransport</a></font>
@@ -1204,8 +1206,8 @@ k-dependent relaxation time. (needs</font><font id="text"> <a
  href="anaddb_help.html#elphflag">elphflag</a> = 1)
  </font>
 
-<br><br><br><br><a href="anaddb_help.html#top">Go to the top</a>
-<B> | </B><a href="anaddb_help.html#list">List of ANADDB input variables</a>
+<br><br><br><br><a href="#top">Go to the top</a>
+<B> | </B><a href="#list">List of ANADDB input variables</a>
 <hr>
 
 <font id="title"><a name="instrflag">instrflag</a></font>
@@ -1231,14 +1233,14 @@ Internal strain tensor flag.
 </font>
 
 <br><br><br><br><a href=#top>Go to the top</a>
-<B> | </B><a href="anaddb_help.html#list">List of ANADDB input variables</a>
+<B> | </B><a href="#list">List of ANADDB input variables</a>
 <hr>
 
 
 <font id="title"><a name="istrfix">istrfix</a></font>
 <br><font id="definition">Mnemonics: Index of STRain FIXed</font>
 <br><font id="category">Characteristic:  </font>
-<br><font id="vartype">Variable type: integer array istrfix(1:<a href="anaddb_help.html#nstrfix">nstrfix</a>)</font>
+<br><font id="vartype">Variable type: integer array istrfix(1:<a href="#nstrfix">nstrfix</a>)</font>
 <br><font id="default">Default: 0</font>
 <br><br><font id="text">
 Indices of the elements of the strain tensor that are fixed during a structural relaxation
@@ -1255,7 +1257,7 @@ is recommended so that responses to both uniaxial and shear strains
 will be computed. </li>
   <li>2 =&gt; Both relaxed- and clamped-ion elastic and compliance
 tensor will be calculated, but only the relaxed-ion quantities will be
-printed. The input variable <a href="anaddb_help.html#instrflag">instrflag</a>
+printed. The input variable <a href="#instrflag">instrflag</a>
 should also be set to 1, because the internal-strain tensor is needed
 to compute the relaxed-ion corrections. Requirements for preceding
 response-function DDB generation run: Strain and atomic-displacement
@@ -1286,13 +1288,13 @@ with the second order derivative data base (DDB file) into a new DDB
 file, which can contain both information. And the program will also
 check for the users. </li>
 </ul>
-See <a href="anaddb_help.html#polflag">polflag</a>.
+See <a href="#polflag">polflag</a>.
 </font>
 <br>
 <br>
 <br>
 <a href="#top">Go to the top</a>
-<b> | </b><a href="anaddb_help.html#list">List of ANADDB input
+<b> | </b><a href="#list">List of ANADDB input
 variables</a>
 <hr><font id="title"><a name="kptrlatt">kptrlatt</a></font>
 <br>
@@ -1314,7 +1316,7 @@ using nesting functions or tetrahedron integration.
 <br>
 <br>
 <a href="#top">Go to the top</a>
-<b> | </b><a href="anaddb_help.html#list">List of ANADDB input
+<b> | </b><a href="#list">List of ANADDB input
 variables</a>
 <hr><font id="title"><a name="kptrlatt_fine">kptrlatt_fine</a></font>
 <br>
@@ -1335,7 +1337,7 @@ work yet, as of June 2010.
 <br>
 
 <a href="#top">Go to the top</a>
-<b> | </b><a href="anaddb_help.html#list">List of ANADDB input
+<b> | </b><a href="#list">List of ANADDB input
 variables</a>
 <hr><font id="title"><a name="mustar">mustar</a></font>
 <br>
@@ -1355,7 +1357,7 @@ computation of the superconducting Tc using Mc-Millan's formula.
 <br>
 <br>
 <a href="#top">Go to the top</a>
-<b> | </b><a href="anaddb_help.html#list">List of ANADDB input
+<b> | </b><a href="#list">List of ANADDB input
 variables</a>
 <hr><font id="title"><a name="natfix">natfix</a></font>
 <br>
@@ -1370,13 +1372,13 @@ variables</a>
 <br>
 <font id="text">Number of atoms that are fixed during a structural
 optimisation at constrained polarization.
-See <a href="anaddb_help.html#polflag">polflag</a>.
+See <a href="#polflag">polflag</a>.
 </font><br>
 <br>
 <br>
 <br>
 <a href="#top">Go to the top</a>
-<b> | </b><a href="anaddb_help.html#list">List of ANADDB input variables</a>
+<b> | </b><a href="#list">List of ANADDB input variables</a>
 
 <hr><font id="title"><a name="natifc">natifc</a></font>
 <br>
@@ -1392,10 +1394,10 @@ See <a href="anaddb_help.html#polflag">polflag</a>.
 <font id="text">Give the number of atoms for which IFCs are written
 and
 eventually analysed. The list of these atoms is provided
-by <a href="anaddb_help.html#atifc">atifc</a>
+by <a href="#atifc">atifc</a>
 </font>
 <br><br><br><br><a href=#top>Go to the top</a>
-<B> | </B><a href="anaddb_help.html#list">List of ANADDB input variables</a>
+<B> | </B><a href="#list">List of ANADDB input variables</a>
 <hr>
 
 <font id="title"><a name="natprj_bs">natprj_bs</a></font>
@@ -1411,10 +1413,10 @@ by <a href="anaddb_help.html#atifc">atifc</a>
 <br>
 <font id="text">Give the number of atoms for which atomic-projected phonon
 band structures will be output. The list of these atoms is provided
-by <a href="anaddb_help.html#iatprj_bs">iatprj_bs</a>
+by <a href="#iatprj_bs">iatprj_bs</a>
 </font>
 <br><br><br><br><a href=#top>Go to the top</a>
-<B> | </B><a href="anaddb_help.html#list">List of ANADDB input variables</a>
+<B> | </B><a href="#list">List of ANADDB input variables</a>
 <hr>
 
 <font id="title"><a name="nchan">nchan</a></font>
@@ -1432,7 +1434,7 @@ The first channel begins at 0.
 </font>
 
 <br><br><br><br><a href=#top>Go to the top</a>
-<B> | </B><a href="anaddb_help.html#list">List of ANADDB input variables</a>
+<B> | </B><a href="#list">List of ANADDB input variables</a>
 <hr>
 
 <font id="title"><a name="ndivsm">ndivsm</a></font>
@@ -1445,11 +1447,11 @@ The first channel begins at 0.
 This variable defines the number of divisions used to sample the smallest segment of the q-path used 
 for the phonon band structure.
 If ndivsm is specified in the input file, the code will automatically generate the points along the path 
-using the coordinates given in the array <a href="anaddb_help.html#qpath">qpath</a>.
+using the coordinates given in the array <a href="#qpath">qpath</a>.
 </font>
 
 <br><br><br><br><a href=#top>Go to the top</a>
-<B> | </B><a href="anaddb_help.html#list">List of ANADDB input variables</a>
+<B> | </B><a href="#list">List of ANADDB input variables</a>
 <hr>
 
 
@@ -1461,15 +1463,15 @@ using the coordinates given in the array <a href="anaddb_help.html#qpath">qpath<
 <br><br><font id="text">
 Number of frequencies wanted for the
 frequency-dependent dielectric tensor. Should be positive.
-See <a href="anaddb_help.html#dieflag">dieflag</a>.
+See <a href="#dieflag">dieflag</a>.
 
 The code will take <b>nfreq</b> equidistant values from
-<a href="anaddb_help.html#frmin">frmin</a> to
-<a href="anaddb_help.html#frmax">frmax</a>.
+<a href="#frmin">frmin</a> to
+<a href="#frmax">frmax</a>.
 </font>
 
 <br><br><br><br><a href=#top>Go to the top</a>
-<B> | </B><a href="anaddb_help.html#list">List of ANADDB input variables</a>
+<B> | </B><a href="#list">List of ANADDB input variables</a>
 <hr>
 
 
@@ -1483,7 +1485,7 @@ The Monkhorst-Pack grid linear dimensions, for the DDB (coarse grid).
 </font>
 
 <br><br><br><br><a href=#top>Go to the top</a>
-<B> | </B><a href="anaddb_help.html#list">List of ANADDB input variables</a>
+<B> | </B><a href="#list">List of ANADDB input variables</a>
 <hr>
 
 
@@ -1502,7 +1504,7 @@ or for the DOS.
 <br>
 <br>
 <a href="#top">Go to the top</a>
-<b> | </b><a href="anaddb_help.html#list">List of ANADDB input
+<b> | </b><a href="#list">List of ANADDB input
 variables</a>
 <hr><font id="title"><a name="ngrids">ngrids</a></font>
 <br>
@@ -1519,13 +1521,13 @@ variables</a>
 used
 for the estimation of the phonon DOS. The coarsest will be
 tried first, then the next, ... then the one described by
-<a href="anaddb_help.html#ng2qpt">ng2qpt</a>.
+<a href="#ng2qpt">ng2qpt</a>.
 The intermediate grids are defined
 for igrid=1... <b>ngrids</b>,
 by the numbers ngqpt_igrid(ii)=(ng2qpt(ii)*igrid)/<b>ngrids</b>
 </font>
 <br><br><br><br><a href=#top>Go to the top</a>
-<B> | </B><a href="anaddb_help.html#list">List of ANADDB input variables</a>
+<B> | </B><a href="#list">List of ANADDB input variables</a>
 <hr>
 
 
@@ -1548,7 +1550,7 @@ Non-linear properties flag.
 
 
 <br><br><br><br><a href=#top>Go to the top</a>
-<B> | </B><a href="anaddb_help.html#list">List of ANADDB input variables</a>
+<B> | </B><a href="#list">List of ANADDB input variables</a>
 <hr>
 
 
@@ -1560,18 +1562,18 @@ Non-linear properties flag.
 <br><br><font id="text">
 The number of wavevectors in phonon list 1, used for interpolation of the phonon frequencies. The 
 values of these wavevectors will be specified by
-<a href="anaddb_help.html#qph1l">qph1l</a>
+<a href="#qph1l">qph1l</a>
 The dynamical matrix for these wavevectors, obtained
 either directly from the DDB - if
-<a href="anaddb_help.html#ifcflag">ifcflag</a>=0 - or through
+<a href="#ifcflag">ifcflag</a>=0 - or through
 the interatomic forces interpolation - if
-<a href="anaddb_help.html#ifcflag">ifcflag</a>=1 -),
+<a href="#ifcflag">ifcflag</a>=1 -),
 will be diagonalized, and the corresponding eigenfrequencies
 will be printed.
 </font>
 
 <br><br><br><br><a href=#top>Go to the top</a>
-<B> | </B><a href="anaddb_help.html#list">List of ANADDB input variables</a>
+<B> | </B><a href="#list">List of ANADDB input variables</a>
 <hr>
 
 
@@ -1608,7 +1610,7 @@ The wavevectors in list 2 will be used to:
 </font>
 
 <br><br><br><br><a href=#top>Go to the top</a>
-<B> | </B><a href="anaddb_help.html#list">List of ANADDB input variables</a>
+<B> | </B><a href="#list">List of ANADDB input variables</a>
 <hr>
 
 
@@ -1619,14 +1621,14 @@ The wavevectors in list 2 will be used to:
 <br><font id="default">Default: 0</font>
 <br><br><font id="text">
 
-Number of q-points in the array <a href="anaddb_help.html#qpath">qpath</a>
+Number of q-points in the array <a href="#qpath">qpath</a>
 defining the path along which the phonon band structure and phonon linewidths
 are interpolated.
 </font>
 
 
 <br><br><br><br><a href=#top>Go to the top</a>
-<B> | </B><a href="anaddb_help.html#list">List of ANADDB input variables</a>
+<B> | </B><a href="#list">List of ANADDB input variables</a>
 <hr>
 
 
@@ -1647,7 +1649,7 @@ and 4 for FCC sampling (Warning: not FCC lattice, FCC *sampling*).
 <br>
 <br>
 <a href="#top">Go to the top</a>
-<b> | </b><a href="anaddb_help.html#list">List of ANADDB input
+<b> | </b><a href="#list">List of ANADDB input
 variables</a>
 <hr><font id="title"><a name="nsphere">nsphere</a></font>
 <br>
@@ -1661,7 +1663,7 @@ variables</a>
 <br>
 <br>
 <font id="text">Number of atoms included in the cut-off sphere for
-interatomic force constant, see also the alternative <a href="anaddb_help.html#rifcsph">rifcsph</a>.
+interatomic force constant, see also the alternative <a href="#rifcsph">rifcsph</a>.
 If <b>nsphere</b>= 0: maximum extent allowed by the grid.
 If <b>nsphere</b>= -1: the code analyzes different values of nsphere and
 find the value that does not lead to unstable frequencies in a small sphere around Gamma.
@@ -1684,7 +1686,7 @@ included in the inverse Fourier Transform.
 <br>
 <br>
 <a href="#top">Go to the top</a>
-<b> | </b><a href="anaddb_help.html#list">List of ANADDB input
+<b> | </b><a href="#list">List of ANADDB input
 variables</a>
 </p>
 <hr><font id="title"><a name="nstrfix">nstrfix</a></font>
@@ -1700,13 +1702,13 @@ variables</a>
 <br>
 <font id="text">Number of strain component that are fixed during a
 structural optimisation at constrained polarization.
-See <a href="anaddb_help.html#polflag">polflag</a>.
+See <a href="#polflag">polflag</a>.
 </font><br>
 <br>
 <br>
 <br>
 <a href="#top">Go to the top</a>
-<b> | </b><a href="anaddb_help.html#list">List of ANADDB input
+<b> | </b><a href="#list">List of ANADDB input
 variables</a>
 <hr><font id="title"><a name="ntemper">ntemper</a></font>
 <br>
@@ -1722,14 +1724,14 @@ variables</a>
 <font id="text">Number of temperatures at which the thermodynamical
 quantities have to be evaluated. Now also used for the output of transport
 quantities in electron-phonon calculations. The full grid is specified
-with the <a href="anaddb_help.html#tempermin">tempermin</a> and 
-<a href="anaddb_help.html#temperinc">temperinc</a> variables.
+with the <a href="#tempermin">tempermin</a> and 
+<a href="#temperinc">temperinc</a> variables.
 The default temperature grid goes from 100K to 1000K by step of 100K. For the largest temperatures, for most solids, anharmonic effects not accounted in the harmonic approximation implemented in anaddb will be important. For weakly bounded systems (e.g. Van der Waals solids), such anharmonic effects might be important already at room temperature.
 
 </font>
 
 <br><br><br><br><a href=#top>Go to the top</a>
-<B> | </B><a href="anaddb_help.html#list">List of ANADDB input variables</a>
+<B> | </B><a href="#list">List of ANADDB input variables</a>
 <hr>
 
 
@@ -1745,8 +1747,8 @@ The code will generate different sets of channels,
 with decreasing widths (by step of 1 cm-1), from
 this channel width to 1, eventually. It considers to
 have converged when the convergence criterion based on
-<a href="anaddb_help.html#dostol">dostol</a> and
-<a href="anaddb_help.html#thmtol">thmtol</a> have been fulfilled.
+<a href="#dostol">dostol</a> and
+<a href="#thmtol">thmtol</a> have been fulfilled.
 </font><br>
 <br>
 <br>
@@ -1764,7 +1766,7 @@ The third file needed is appended _PCINFO for Primitive Cell INFOrmation.
 </font><br>
 <br><br><br>
 <a href="#top">Go to the top</a>
-<b> | </b><a href="anaddb_help.html#list">List of ANADDB input variables</a>
+<b> | </b><a href="#list">List of ANADDB input variables</a>
 <hr>
 
 <font id="title"><a name="outboltztrap">outboltztrap</a></font>
@@ -1778,11 +1780,11 @@ which does band interpolation and gets group velocities. The output file will be
 </font><br>
 <br><br><br>
 <a href="#top">Go to the top</a>
-<b> | </b><a href="anaddb_help.html#list">List of ANADDB input variables</a>
+<b> | </b><a href="#list">List of ANADDB input variables</a>
 <hr>
 
 
-<hr><font id="title"><a name="piezoflag">piezoflag</a></font>
+<font id="title"><a name="piezoflag">piezoflag</a></font>
 <br>
 <font id="definition">Mnemonics: PIEZOelectric tensor FLAG</font>
 <br>
@@ -1811,7 +1813,7 @@ d/dk set is incomplete. Thus: Set <a
 (preferably 3) </li>
   <li>2 =&gt; Both relaxed- and clamped-ion elastic and compliance
 tensor will be calculated, but only the relaxed-ion quantities will be
-printed. The input variable <a href="anaddb_help.html#instrflag">instrflag</a>
+printed. The input variable <a href="#instrflag">instrflag</a>
 should also be set to 1, because the internal-strain tensor is needed
 to compute the relaxed-ion corrections. Requirements for preceding
 response-function DDB generation run: Strain, electric-field and full
@@ -1823,7 +1825,7 @@ and <a href="../../input_variables/generated_files/varrf.html#rfdir">rfdir</a> t
 full calculation of phonons at Q=0 (needed because the inverse of
 force-constant tensor is required). </li>
   <li>3 =&gt; Both relaxed and clamped-ion piezoelectric tensors will
-be printed out. The input variable <a href="anaddb_help.html#instrflag">instrflag</a>
+be printed out. The input variable <a href="#instrflag">instrflag</a>
 should also be set to 1. Requirements for preceding response-function
 DDB generation run: Same as for <b>piezoflag</b>=2. </li>
   <li>4 =&gt; Calculate the piezoelectric d tensor (relaxed ion). In
@@ -1836,7 +1838,7 @@ even if flags were not correctly set. </li>
   <li>5 =&gt; Calculate the piezoelectric g tensor (relaxed ion). In
 this computation, we need information of internal strain, elastic
 tensor (relaxed ion) and dielectric tensor (relaxed ion). So we should
-set: <a href="anaddb_help.html#instrflag">instrflag</a>=1, <a
+set: <a href="#instrflag">instrflag</a>=1, <a
  href="anaddb_help.html#elaflag">elaflag</a>=2,3,4 or 5, <a
  href="anaddb_help.html#dieflag">dieflag</a>=3 or 4. The subroutine
 will also do a check for you, and print warning message without
@@ -1855,7 +1857,7 @@ should be set to satisfy the above rules from 1 to 6.</li>
 </font>
 
 <br><br><br><br><a href=#top>Go to the top</a>
-<B> | </B><a href="anaddb_help.html#list">List of ANADDB input variables</a>
+<B> | </B><a href="#list">List of ANADDB input variables</a>
 <hr>
 
 <font id="title"><a name="polflag">polflag</a></font>
@@ -1871,7 +1873,7 @@ optimization at constrained polarization.
 More detailed explanation: ANADDB can use the formalism described in
 Na Sai et al, PRB 66, 104108 (2002), to perform structural relaxations
 under the constraint that the polarization is equal to a value specified by the
-input variable <a href="anaddb_help.html#targetpol">targetpol</a>.
+input variable <a href="#targetpol">targetpol</a>.
 The user starts from a given configuration of a crystal and performs
 a ground-state calculation of the Hellman-Feynman forces and stresses
 and the Berry phase polarization as
@@ -1883,17 +1885,17 @@ In case <b>polflag</b>=1, ANADDB solves the linear system of equations
 (13)
 of the Na Sai paper, and computes new atomic positions (if <a
  href="anaddb_help.html#relaxat">relaxat</a>=1) and
-lattice constant (if <a href="anaddb_help.html#relaxstr">relaxstr</a>=1).
+lattice constant (if <a href="#relaxstr">relaxstr</a>=1).
 Then, the user uses these parameters to perform a new ground-state
 and linear-response calculation. This must be repeated until convergence is
 reached. The user can also fix some atomic positions, or strains, thanks to the input variables
-<a href="anaddb_help.html#natfix">natfix</a>,
-<a href="anaddb_help.html#nstrfix">nstrfix</a>,
-<a href="anaddb_help.html#iatfix">iatfix</a>,
-<a href="anaddb_help.html#istrfix">istrfix</a>.
+<a href="#natfix">natfix</a>,
+<a href="#nstrfix">nstrfix</a>,
+<a href="#iatfix">iatfix</a>,
+<a href="#istrfix">istrfix</a>.
 <br>
-In case both <a href="anaddb_help.html#relaxat">relaxat</a>
-and <a href="anaddb_help.html#relaxstr">relaxstr</a> are 0, while
+In case both <a href="#relaxat">relaxat</a>
+and <a href="#relaxstr">relaxstr</a> are 0, while
 <b>polflag</b>=1, ANADDB only computes the polarization in cartesian coordinates.
 </font></p>
 <p><font id="text">As described in the Na Sai's paper, it is important to use the
@@ -1906,7 +1908,7 @@ in the linear response calculation of the effective charges and the piezoelectri
 <br>
 
 <a href="#top">Go to the top</a>
-<b> | </b><a href="anaddb_help.html#list">List of ANADDB input
+<b> | </b><a href="#list">List of ANADDB input
 variables</a>
 <hr><font id="title"><a name="prtdos">prtdos</a></font>
 <br>
@@ -1922,8 +1924,8 @@ variables</a>
 <p>
 <font id="text"> The <b>prtdos</b> variable is used to calculate
 the phonon density of states, PHDOS, by Fourier interpolating the interatomic force
-constants on the (dense) q-mesh defined by <a href="anaddb_help.html#ng2qpt">ng2qpt</a>.
-Note that the variable <a href="anaddb_help.html#ifcflag">ifcflag</a> must be set to 1
+constants on the (dense) q-mesh defined by <a href="#ng2qpt">ng2qpt</a>.
+Note that the variable <a href="#ifcflag">ifcflag</a> must be set to 1
 since the interatomic force constants are supposed to be known.
 <p>
 The available options are:</font>
@@ -1931,13 +1933,13 @@ The available options are:</font>
 <font id="text">
  <li>0 =&gt; no output of PHDOS (default);</li>
  <li>1 =&gt; calculate PHDOS using the gaussian method and the broadening defined
- by <a href="anaddb_help.html#dossmear">dossmear</a>. </li>
+ by <a href="#dossmear">dossmear</a>. </li>
  <!--<li>2 =&gt; use tetrahedron method. </li>-->
 </font>
 </ul>
 
 The step of the frequency grid employed to calculate the DOS
-can be defined through the input variable <a href="anaddb_help.html#dosdeltae">dosdeltae</a>.
+can be defined through the input variable <a href="#dosdeltae">dosdeltae</a>.
 </font>
 <br>
 <br>
@@ -1945,7 +1947,7 @@ can be defined through the input variable <a href="anaddb_help.html#dosdeltae">d
 <br>
 
 <a href="#top">Go to the top</a>
-<b> | </b><a href="anaddb_help.html#list">List of ANADDB input
+<b> | </b><a href="#list">List of ANADDB input
 variables</a>
 <hr><font id="title"><a name="prtbltztrp">prtbltztrp</a></font>
 <br>
@@ -1970,7 +1972,7 @@ variables</a>
 <br>
 
 <a href="#top">Go to the top</a>
-<b> | </b><a href="anaddb_help.html#list">List of ANADDB input
+<b> | </b><a href="#list">List of ANADDB input
 variables</a>
 <hr><font id="title"><a name="prtfsurf">prtfsurf</a></font>
 <br>
@@ -2011,7 +2013,7 @@ array must be zero.</font></p>
 <br>
 <br>
 <a href="#top">Go to the top</a>
-<b> | </b><a href="anaddb_help.html#list">List of ANADDB input
+<b> | </b><a href="#list">List of ANADDB input
 variables</a>
 <hr><font id="title"><a name="prt_ifc">prt_ifc</a></font>
 <br>
@@ -2037,7 +2039,7 @@ options are:
 <br>
 <br>
 <a href="#top">Go to the top</a>
-<b> | </b><a href="anaddb_help.html#list">List of ANADDB input
+<b> | </b><a href="#list">List of ANADDB input
 variables</a>
 <hr><font id="title"><a name="prtmbm">prtmbm</a></font>
 <br>
@@ -2061,7 +2063,7 @@ phonon modes to the electrooptic tensor.</li>
 </font>
 
 <br><br><br><br><a href=#top>Go to the top</a>
-<B> | </B><a href="anaddb_help.html#list">List of ANADDB input variables</a>
+<B> | </B><a href="#list">List of ANADDB input variables</a>
 <hr>
 
 
@@ -2078,7 +2080,7 @@ This input variable is used to calculate the nesting function defined as:
 The nesting factor is calculated for every point of the k-grid
 employed during the previous GS calculation.
 The values are subsequently interpolated along the trajectory in q space
-defined by <a href="anaddb_help.html#qpath">qpath</a>, and written in the _NEST
+defined by <a href="#qpath">qpath</a>, and written in the _NEST
 file using the X-Y format (<b>prtnest</b>=1).
 It is also possible to analyze the behavior of the function
 in the reciprocal unit cell saving the values in the NEST_XSF file that can be read
@@ -2101,7 +2103,7 @@ kprtlatt = 1 0 0 0 1 1 0 -1 1 will not work.
 </font>
 
 <br> <br> <br> <br> <a href="#top">Go to the top</a>
-<b> | </b><a href="anaddb_help.html#list">List of ANADDB input variables</a>
+<b> | </b><a href="#list">List of ANADDB input variables</a>
 <hr>
 
 <font id="title"><a name="prtvol">prtvol</a></font>
@@ -2115,7 +2117,7 @@ Control the volume of printed output.
 </font>
 
 <br> <br> <br> <br> <a href="#top">Go to the top</a>
-<b> | </b><a href="anaddb_help.html#list">List of ANADDB input variables</a>
+<b> | </b><a href="#list">List of ANADDB input variables</a>
 <hr>
 
 <font id="title"><a name="prtphbands">prtphbands</a></font>
@@ -2125,7 +2127,7 @@ Control the volume of printed output.
 <br><font id="default">Default: 1</font>
 <br><br><font id="text"> 
 
-Only if <a href="anaddb_help.html#ifcflag">ifcflag</a>=1. 
+Only if <a href="#ifcflag">ifcflag</a>=1. 
 
 This option specifies the file format for the phonon band structure.
 Possible values:
@@ -2145,7 +2147,7 @@ Use `gnuplot file_PHBANDS.gnuplot` to visualize the phonon band structure.</li>
 </font>
 
 <br><br><br><br><a href="#top">Go to the top</a>
-<B> | </B><a href="anaddb_help.html#list">List of ANADDB input variables</a>
+<B> | </B><a href="#list">List of ANADDB input variables</a>
 <hr>
 
 <font id="title"><a name="prtsrlr">prtsrlr</a></font>
@@ -2154,23 +2156,23 @@ Use `gnuplot file_PHBANDS.gnuplot` to visualize the phonon band structure.</li>
 <br><font id="vartype">Variable type: integer </font>
 <br><font id="default">Default: 0</font>
 <br><br><font id="text"> 
-Only if <a href="anaddb_help.html#ifcflag">ifcflag</a>=1. 
+Only if <a href="#ifcflag">ifcflag</a>=1. 
 The available options are:
 </font>
 <ul>
   <font id="text"> <li>0 =&gt; do not write the SR/LR decomposition of phonon frequencies;</li>
   <li>1 =&gt; write out the SR/LR decomposition of the square of phonon frequencies at each q-point specified 
-  in <a href="anaddb_help.html#qph1l">qph1l</a>.</li>
+  in <a href="#qph1l">qph1l</a>.</li>
   </font>
 </ul>
 <font id="text"> For details see <I>Europhys. Lett., 33 (9), pp. 713-718 (1996)</I>.
-See also <a href="anaddb_help.html#ifcflag">ifcflag</a>, 
-<a href="anaddb_help.html#ifcflag">ifcflag</a> and
-<a href="anaddb_help.html#dipdip">dipdip</a>.
+See also <a href="#ifcflag">ifcflag</a>, 
+<a href="#ifcflag">ifcflag</a> and
+<a href="#dipdip">dipdip</a>.
  </font>
 
 <br> <br> <br> <br> <a href="#top">Go to the top</a>
-<B> | </B><a href="anaddb_help.html#list">List of ANADDB input variables</a>
+<B> | </B><a href="#list">List of ANADDB input variables</a>
 <hr>
 
 <font id="title"><a name="qgrid_type">qgrid_type</a></font>
@@ -2180,37 +2182,37 @@ See also <a href="anaddb_help.html#ifcflag">ifcflag</a>,
 <br><font id="default">Default: 0</font>
 <br><br><font id="text">
 If <b>qgrid_type</b> is set to 1, the electron-phonon part of anaddb will use
-the <a href="anaddb_help.html#ep_nqpt"><b>ep_nqpt</b></a> and <a
-href="anaddb_help.html#ep_qptlist"><b>ep_qptlist</b></a> variables to determine
+the <a href="#ep_nqpt"><b>ep_nqpt</b></a> and 
+<a href="#ep_qptlist"><b>ep_qptlist</b></a> variables to determine
 which q-points to calculate the electron-phonon coupling for. This is an alternative
-to a regular grid as in the rest of anaddb (using <a href="anaddb_help.html#ngqpt">ngqpt</a>).
+to a regular grid as in the rest of anaddb (using <a href="#ngqpt">ngqpt</a>).
 </font>
 
 <br> <br> <br> <br> <a href="#top">Go to the top</a>
 
-<B> | </B><a href="anaddb_help.html#list">List of ANADDB input variables</a>
+<B> | </B><a href="#list">List of ANADDB input variables</a>
 <hr>
 
 <font id="title"><a name="qpath">qpath</a></font>
 <br><font id="definition">Mnemonics: Q wavevectors defining a PATH</font>
 <br><font id="category">Characteristic:  </font>
-<br><font id="vartype">Variable type: real array <b>qpath</b>(3,<a href="anaddb_help.html#nqpath">nqpath</a>) </font>
+<br><font id="vartype">Variable type: real array <b>qpath</b>(3,<a href="#nqpath">nqpath</a>) </font>
 <br><font id="default">Default: <b>qpath</b>(:,:)=0.0</font>
 <br><br><font id="text">
 
 It is used to generate the path along which the phonon band structure and
 phonon linewidths are interpolated.
-There are <a href="anaddb_help.html#nqpath">nqpath</a>-1 segments to be
+There are <a href="#nqpath">nqpath</a>-1 segments to be
 defined, each of which starts from the end point of the previous one.
 The number of divisions in each segment is automatically calculated
 inside the code to respect the proportion between the segments.
 The same circuit is used for the output of the nesting function if
-<a href="anaddb_help.html#prtnest">prtnest</a>=1.
+<a href="#prtnest">prtnest</a>=1.
 </font>
 
 
 <br><br><br><br><a href=#top>Go to the top</a>
-<B> | </B><a href="anaddb_help.html#list">List of ANADDB input variables</a>
+<B> | </B><a href="#list">List of ANADDB input variables</a>
 <hr>
 
 
@@ -2219,12 +2221,12 @@ The same circuit is used for the output of the nesting function if
 <br><font id="definition">Mnemonics: Q for PHonon List 1</font>
 <br><font id="category">Characteristic:  </font>
 <br><font id="vartype">Variable type:
-real array <b>qph1l</b>(4,<a href="anaddb_help.html#nph1l">nph1l</a>) </font>
+real array <b>qph1l</b>(4,<a href="#nph1l">nph1l</a>) </font>
 <br>
 <font id="default">Default: 0</font>
 <br>
 <br>
-<font id="text">List of <a href="anaddb_help.html#nph1l">nph1l</a>
+<font id="text">List of <a href="#nph1l">nph1l</a>
 wavevectors, at which the phonon frequencies will be interpolated.
 Defined by 4 numbers:
 the wavevector is made by the three first numbers
@@ -2243,7 +2245,7 @@ in the array qnrml1(nph1l).
 </font>
 
 <br><br><br><br><a href=#top>Go to the top</a>
-<B> | </B><a href="anaddb_help.html#list">List of ANADDB input variables</a>
+<B> | </B><a href="#list">List of ANADDB input variables</a>
 <hr>
 
 
@@ -2251,13 +2253,13 @@ in the array qnrml1(nph1l).
 <br><font id="definition">Mnemonics: PHonon List 2</font>
 <br><font id="category">Characteristic:  </font>
 <br><font id="vartype">Variable type:
-real array qph2l(4,<a href="anaddb_help.html#nph2l">nph2l</a>) </font>
+real array qph2l(4,<a href="#nph2l">nph2l</a>) </font>
 <br><font id="default">Default: all 0</font>
 <br><br><font id="text">
 List of phonon wavevector <i>directions</i> along which the
 non-analytical correction to the Gamma-point phonon frequencies
 will be calculated (for insulators).
-Four numbers, as for <a href="anaddb_help.html#qph1l">qph1l</a>, 
+Four numbers, as for <a href="#qph1l">qph1l</a>, 
 but where the last one, that correspond to the normalisation factor, is 0.0
 For the anaddb code, this has the meaning that the three previous
 values define a direction. The direction is in CARTESIAN
@@ -2281,7 +2283,7 @@ in the array qnrml2(nph2l).
 <br>
 <br>
 <a href="#top">Go to the top</a>
-<b> | </b><a href="anaddb_help.html#list">List of ANADDB input
+<b> | </b><a href="#list">List of ANADDB input
 variables</a>
 </p>
 <hr>
@@ -2292,9 +2294,9 @@ variables</a>
 <br><font id="default">Default: 0</font>
 <br><br><font id="text">
 If <b>qrefine</b> is superior to 1, attempts to initialize a first set of dynamical matrices
-from the DDB file, with a q-point grid which is <a href="anaddb_help.html#ngqpt">ngqpt</a>
+from the DDB file, with a q-point grid which is <a href="#ngqpt">ngqpt</a>
 divided by <b>qrefine</b> (e.g. ngqpt 4 4 2 qrefine 2 2 1 starts with a 2x2x2 grid).
-The dynamical matrices are interpolated onto the full <a href="anaddb_help.html#ngqpt">ngqpt</a>
+The dynamical matrices are interpolated onto the full <a href="#ngqpt">ngqpt</a>
 grid and any additional information found in the DDB file is imposed, before proceeding
 to normal band structure and other interpolations. Should implement Gaal-Nagy's algorithm in
 PRB <b>73</b> 014117.
@@ -2303,7 +2305,7 @@ PRB <b>73</b> 014117.
 <br>
 <br>
 <a href="#top">Go to the top</a>
-<b> | </b><a href="anaddb_help.html#list">List of ANADDB input
+<b> | </b><a href="#list">List of ANADDB input
 variables</a>
 </p>
 <hr>
@@ -2311,7 +2313,7 @@ variables</a>
 <br><font id="definition">Mnemonics: Q shifts for the grid number 1</font>
 <br><font id="category">Characteristic:  </font>
 <br><font id="vartype">Variable type:
-real array <b>q1shft</b>(3,<a href="anaddb_help.html#nqshft">nqshft</a>) </font>
+real array <b>q1shft</b>(3,<a href="#nqshft">nqshft</a>) </font>
 <br><font id="default">Default: all 0.0</font>
 <br><br><font id="text">
 This vector gives the shifts needed to define the coarse q-point grid.
@@ -2366,7 +2368,7 @@ This vector gives the shifts needed to define the coarse q-point grid.
 </font>
 
 <br><br><br><br><a href=#top>Go to the top</a>
-<B> | </B><a href="anaddb_help.html#list">List of ANADDB input variables</a>
+<B> | </B><a href="#list">List of ANADDB input variables</a>
 <hr>
 
 
@@ -2376,14 +2378,14 @@ This vector gives the shifts needed to define the coarse q-point grid.
 <br><font id="vartype">Variable type: real array q2shft(3) </font>
 <br><font id="default">Default: all 0</font>
 <br><br><font id="text">
-Similar to <a href="anaddb_help.html#q1shft">q1shft</a>,
+Similar to <a href="#q1shft">q1shft</a>,
 but for the series of fine grids.
-Note that <a href="anaddb_help.html#nqshft">nqshft</a>
+Note that <a href="#nqshft">nqshft</a>
 for this series of grids corresponds to 1.
 </font>
 
 <br><br><br><br><a href=#top>Go to the top</a>
-<B> | </B><a href="anaddb_help.html#list">List of ANADDB input variables</a>
+<B> | </B><a href="#list">List of ANADDB input variables</a>
 <hr>
 
 
@@ -2414,7 +2416,7 @@ For the time being, <b>ramansr</b>=1 is the preferred choice.
 <br>
 <br>
 <a href="#top">Go to the top</a>
-<b> | </b><a href="anaddb_help.html#list">List of ANADDB input
+<b> | </b><a href="#list">List of ANADDB input
 variables</a>
 <hr><font id="title"><a name="relaxat">relaxat</a></font>
 <br>
@@ -2430,13 +2432,13 @@ variables</a>
 <font id="text">If <b>relaxat</b>=1, relax atomic positions during a
 structural relaxation
 at constrained polarization.
-See <a href="anaddb_help.html#polflag">polflag</a>.
+See <a href="#polflag">polflag</a>.
 </font><br>
 <br>
 <br>
 <br>
 <a href="#top">Go to the top</a>
-<b> | </b><a href="anaddb_help.html#list">List of ANADDB input
+<b> | </b><a href="#list">List of ANADDB input
 variables</a>
 <hr><font id="title"><a name="relaxstr">relaxstr</a></font>
 <br>
@@ -2451,10 +2453,10 @@ variables</a>
 <br>
 <font id="text">If <b>relaxat</b>=1, relax lattice constants
 (lengths/angles) during a structural relaxation
-at constrained polarization. See <a href="anaddb_help.html#polflag">polflag</a>.
+at constrained polarization. See <a href="#polflag">polflag</a>.
 </font>
 <br><br><br><br><a href=#top>Go to the top</a>
-<B> | </B><a href="anaddb_help.html#list">List of ANADDB input variables</a>
+<B> | </B><a href="#list">List of ANADDB input variables</a>
 <hr>
 
 
@@ -2467,11 +2469,11 @@ at constrained polarization. See <a href="anaddb_help.html#polflag">polflag</a>.
 <br><br><font id="text">
 If <b>relaxat</b>=1, relax lattice constants (lengths/angles) during a structural relaxation
 at constrained polarization.
-See <a href="anaddb_help.html#polflag">polflag</a>.
+See <a href="#polflag">polflag</a>.
 </font>
 
 <br><br><br><br><a href=#top>Go to the top</a>
-<B> | </B><a href="anaddb_help.html#list">List of ANADDB input variables</a>
+<B> | </B><a href="#list">List of ANADDB input variables</a>
 <hr>
 
 
@@ -2498,7 +2500,7 @@ accurate.
 </font>
 
 <br><br><br><br><a href=#top>Go to the top</a>
-<B> | </B><a href="anaddb_help.html#list">List of ANADDB input variables</a>
+<B> | </B><a href="#list">List of ANADDB input variables</a>
 <hr>
 
 
@@ -2510,7 +2512,7 @@ accurate.
 <br><br><font id="text">
 
 Cut-off radius for the sphere for
-interatomic force constant, see also the alternative <a href="anaddb_help.html#nsphere">nsphere</a>.
+interatomic force constant, see also the alternative <a href="#nsphere">nsphere</a>.
 If <b>rifcsph</b>= 0: maximum extent allowed by the grid .
 </font>
 <p><font id="text">This number defines the atoms for which the
@@ -2521,7 +2523,7 @@ imposition of the acoustic sum rule, will not be put to zero.
 <br>
 <br>
 <a href="#top">Go to the top</a>
-<b> | </b><a href="anaddb_help.html#list">List of ANADDB input
+<b> | </b><a href="#list">List of ANADDB input
 variables</a>
 </p>
 <hr><font id="title"><a name="selectz">selectz</a></font>
@@ -2542,7 +2544,7 @@ all the subsequent calculations. <br>
 </font>
 
 <br><br><br><br><a href=#top>Go to the top</a>
-<B> | </B><a href="anaddb_help.html#list">List of ANADDB input variables</a>
+<B> | </B><a href="#list">List of ANADDB input variables</a>
 <hr>
 
 
@@ -2576,7 +2578,7 @@ are unphysical.</p>
 
 <br>
 <a href="#top">Go to the top</a>
-<b> | </b><a href="anaddb_help.html#list">List of ANADDB input
+<b> | </b><a href="#list">List of ANADDB input
 variables</a>
 </p>
 <hr><font id="title"><a name="symdynmat">symdynmat</a></font>
@@ -2595,7 +2597,7 @@ cell
 and their opposite do not reflect the symmetries of the Bravais lattice
 (typical case: body-centered tetragonal lattices ; FCC and BCC lattices
 might be treated with the proper setting of the
-<a href="anaddb_help.html#brav">brav</a>
+<a href="#brav">brav</a>
 variable),
 and the interpolation
 procedure based on interatomic force constant is used: there are some
@@ -2604,7 +2606,7 @@ additional symmetrization.
 </font><br>
 <br>
 <a href="#top">Go to the top</a>
-<b> | </b><a href="anaddb_help.html#list">List of ANADDB input
+<b> | </b><a href="#list">List of ANADDB input
 variables</a>
 </p>
 <hr><font id="title"><a name="symgkq">symgkq</a></font>
@@ -2622,7 +2624,7 @@ except for debugging or test purposes.
 
 <br>
 <a href="#top">Go to the top</a>
-<b> | </b><a href="anaddb_help.html#list">List of ANADDB input
+<b> | </b><a href="#list">List of ANADDB input
 variables</a>
 <hr><font id="title"><a name="targetpol">targetpol</a></font>
 <br>
@@ -2637,13 +2639,13 @@ variables</a>
 <br>
 <font id="text">Target value of the polarization in cartesian
 coordinates and in C/m^2.
-See <a href="anaddb_help.html#polflag">polflag</a>.
+See <a href="#polflag">polflag</a>.
 </font><br>
 <br>
 <br>
 <br>
 <a href="#top">Go to the top</a>
-<b> | </b><a href="anaddb_help.html#list">List of ANADDB input
+<b> | </b><a href="#list">List of ANADDB input
 variables</a>
 <hr><font id="title"><a name="telphint">telphint</a></font>
 <br>
@@ -2661,13 +2663,13 @@ INTegration</font>
 technique used for electron-phonon quantities.
 <ul>
   <li>0 = tetrahedron method (no adjustable parameter)</li>
-  <li>1 = Gaussian smearing (see <a href="anaddb_help.html#elphsmear">elphsmear</a>)</li>
+  <li>1 = Gaussian smearing (see <a href="#elphsmear">elphsmear</a>)</li>
   <li>2 = uniformly weighted band window between <a href="#ep_b_min">ep_b_min</a> and <a href="#ep_b_max">ep_b_max</a>, for all k-points</li>
 </ul>
 </font>
 
 <br><br><br><br><a href=#top>Go to the top</a>
-<B> | </B><a href="anaddb_help.html#list">List of ANADDB input variables</a>
+<B> | </B><a href="#list">List of ANADDB input variables</a>
 <hr>
 
 <font id="title"><a name="temperinc">temperinc</a></font>
@@ -2678,13 +2680,13 @@ technique used for electron-phonon quantities.
 <br><br><font id="text">
 Increment of the temperature in Kelvin, for thermodynamical and el-phon
 transport properties. See the associated
-<a href="anaddb_help.html#tempermin">tempermin</a>
-and <a href="anaddb_help.html#ntemper">ntemper</a> variables.
+<a href="#tempermin">tempermin</a>
+and <a href="#ntemper">ntemper</a> variables.
 The default temperature grid goes from 100K to 1000K by step of 100K. For the largest temperatures, for most solids, anharmonic effects not accounted in the harmonic approximation implemented in anaddb will be important. For weakly bounded systems (e.g. Van der Waals solids), such anharmonic effects might be important already at room temperature.
 </font>
 
 <br><br><br><br><a href=#top>Go to the top</a>
-<B> | </B><a href="anaddb_help.html#list">List of ANADDB input variables</a>
+<B> | </B><a href="#list">List of ANADDB input variables</a>
 <hr>
 
 
@@ -2695,16 +2697,16 @@ The default temperature grid goes from 100K to 1000K by step of 100K. For the la
 <br><font id="default">Default: 100.0</font>
 <br><br><font id="text">
 Lowest temperature (Kelvin) at which the thermodynamical quantities
-have to be evaluated. Cannot be zero when <a href="anaddb_help.html#thmflag">thmflag</a>
+have to be evaluated. Cannot be zero when <a href="#thmflag">thmflag</a>
 <p>The highest temperature is defined using
-<a href="anaddb_help.html#temperinc">temperinc</a>
-and <a href="anaddb_help.html#ntemper">ntemper</a>.
+<a href="#temperinc">temperinc</a>
+and <a href="#ntemper">ntemper</a>.
 The default temperature grid goes from 100K to 1000K by step of 100K. For the largest temperatures, for most solids, anharmonic effects not accounted in the harmonic approximation implemented in anaddb will be important. For weakly bounded systems (e.g. Van der Waals solids), 
 such anharmonic effects might be important already at room temperature.
 </font>
 
 <br><br><br><br><a href=#top>Go to the top</a>
-<B> | </B><a href="anaddb_help.html#list">List of ANADDB input variables</a>
+<B> | </B><a href="#list">List of ANADDB input variables</a>
 <hr>
 
 
@@ -2750,19 +2752,19 @@ degenerate states.
 
 <p>
 <font id="text">Input variables that may be needed if this flag is activated:
-<a href="anaddb_help.html#dostol">dostol</a>,
-<a href="anaddb_help.html#nchan">nchan</a>,
-<a href="anaddb_help.html#ntemper">ntemper</a>,
-<a href="anaddb_help.html#temperinc">temperinc</a>,
-<a href="anaddb_help.html#tempermin">tempermin</a>,
+<a href="#dostol">dostol</a>,
+<a href="#nchan">nchan</a>,
+<a href="#ntemper">ntemper</a>,
+<a href="#temperinc">temperinc</a>,
+<a href="#tempermin">tempermin</a>,
 as well as the wavevector grid number 2 definition,
-<a href="anaddb_help.html#ng2qpt">ng2qpt</a>,
-<a href="anaddb_help.html#ngrids">ngrids</a>,
-<a href="anaddb_help.html#q2shft">q2shft</a>.
+<a href="#ng2qpt">ng2qpt</a>,
+<a href="#ngrids">ngrids</a>,
+<a href="#q2shft">q2shft</a>.
 </font>
 
 <br><br><br><br><a href=#top>Go to the top</a>
-<B> | </B><a href="anaddb_help.html#list">List of ANADDB input variables</a>
+<B> | </B><a href="#list">List of ANADDB input variables</a>
 <hr>
 
 
@@ -2780,7 +2782,7 @@ to the next bigger is smaller than <b>thmtol</b>.
 </font>
 
 <br><br><br><br><a href=#top>Go to the top</a>
-<b> | </b><a href="anaddb_help.html#list">List of ANADDB input variables</a>
+<b> | </b><a href="#list">List of ANADDB input variables</a>
 <hr>
 
 <font id="title"><a name="use_k_fine">use_k_fine</a></font>
@@ -2791,7 +2793,7 @@ to the next bigger is smaller than <b>thmtol</b>.
 </font>
 
 <br><br><br><br><a href=#top>Go to the top</a>
-<B> | </B><a href="anaddb_help.html#list">List of ANADDB input variables</a>
+<B> | </B><a href="#list">List of ANADDB input variables</a>
 <hr>
 
 <font id="title"><a name="vs_qrad_tolkms">vs_qrad_tolkms</a></font>
@@ -2801,7 +2803,7 @@ to the next bigger is smaller than <b>thmtol</b>.
 <br><font id="default">Default: [0,0] (will not work)</font>
 <br><br><font id="text">
 This variable activates the calculation of the speed of sound 
-(requires <a href="anaddb_help.html#ifcflag">ifcflag</a> = 1).
+(requires <a href="#ifcflag">ifcflag</a> = 1).
 The first entry of the array defines the radius of the small sphere around the Gamma point (Bohr-1).
 The second entry gives the absolute tolerance in kilometer/second.
 The speed of sound is evaluated be performing and a spherical average on the small sphere using
@@ -2811,7 +2813,7 @@ specified by the user (typical values for tolkms: 0.05 km/s).
 </font>
 
 <br><br><br><br><a href=#top>Go to the top</a>
-<B> | </B><a href="anaddb_help.html#list">List of ANADDB input variables</a>
+<B> | </B><a href="#list">List of ANADDB input variables</a>
 <hr>
 <script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
 

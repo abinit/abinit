@@ -3,7 +3,7 @@
 # This is the introduction ...
 intro : |
   <br>The user is advised to be familiar with
-  the main <A href="abinit_help.html"><B>help file</B></A>
+  the main <A href="help_abinit.html"><B>help file</B></A>
   before reading the present file. </h3>
   
   <p> It will be easier to discover the
@@ -83,9 +83,9 @@ body : |
   a file that contains the set of all 2DTEs and 3DTEs calculated by the
   code. This DDB can be manipulated by the MRGDDB code, and fully analyzed
   by the Anaddb code. See the corresponding help files
-  (<A href="mrgddb_help.html">Mrgddb help file</A>,
+  (<A href="help_mrgddb.html">Mrgddb help file</A>,
   and
-  <A href="anaddb_help.html">Anaddb help file</A>).
+  <A href="help_anaddb.html">Anaddb help file</A>).
   
   <h3>&nbsp;</h3>
   <hr>
@@ -189,7 +189,7 @@ body : |
   We also define the index of the perturbation, called
   "pertcase", equal to idir + 3*ipert. Accordingly, pertcase runs from 1 to 3*(natom+4),
   and will be needed to identify output and input files,
-  see <a href="respfn_help.html#6">section 6</a> .
+  see <a href="#6">section 6</a> .
   
   <p>
   To summarize, the perturbations are characterized by two numbers,
@@ -255,7 +255,7 @@ body : |
   The file names of the ground-state wavefunction file
   follow the same convention as for the ground-state case. Thus, the
   corresponding section
-  of the <a href="abinit_help.html#4">abinit_help</a> file can be read,
+  of the <a href="help_abinit.html#4">abinit help</a> file can be read,
   if needed.
   
   <p>
@@ -272,7 +272,7 @@ body : |
   
   <p>
   The nomenclature of first-order wavefunction files is also given
-  in the <a href="abinit_help.html#4">abinit_help</a> file, but it is worth
+  in the <a href="help_abinit.html#4">abinit help</a> file, but it is worth
   to specify it in more detail here.
   The root name is formed from the string of character in the
   third line of the 'files' file (for an input file) or
@@ -322,7 +322,7 @@ body : |
   In any case, unlike for the ground-state, the input k-point set
   for response function should NOT have been decreased by using
   spatial symmetries, prior to the loop over perturbations
-  (see section <a href="respfn_help.html#4">4</a>).
+  (see section <a href="#4">4</a>).
   Only the time-reversal symmetry, retained by calculations
   at q=0, ought to be used to decrease this input k-point set.
   Considering each perturbation in turn, ABINIT
@@ -567,9 +567,9 @@ body : |
   <p>
   The initialisation part is the same as for the GS.
   So, the reader is advised to read the section
-  <a href="abinit_help.html#outputfile">6.2</a> the abinit_help file,
+  <a href="help_abinit.html#outputfile">6.2</a> the abinit help file,
   as well as the first paragraph of the section
-  <a href="abinit_help.html#6.3">6.3</a> of this file.
+  <a href="help_abinit.html#6.3">6.3</a> of this file.
   Afterwards, the content of the main output file differs a bit...
   
   <p>
@@ -644,8 +644,8 @@ body : |
   These are unformatted data
       files containing the planewaves coefficients of all the
       wavefunctions, written in the following format.
-  First, the header (see section <a href="abinit_help.html#header">6.4</a>
-  of the abinit_help), followed by
+  First, the header (see section <a href="help_abinit.html#header">6.4</a>
+  of the abinit help file), followed by
   <pre>
    bantot=0                                    <-- counts over all bands
    index=0                                     <-- index for the wavefunctions
@@ -831,7 +831,7 @@ body : |
   <p>
   The convergence tests with respect to
   <a href="../../input_variables/generated_files/varbas.html#ecut">ecut</a>, and the k-point grid should
-  be done carefully. This was already emphasized in the abinit_help
+  be done carefully. This was already emphasized in the abinit help
   file and is re-emphasized here.
   The user should test the convergence DIRECTLY on the property
   he or she is interested in. For example, if the user wants a phonon frequency

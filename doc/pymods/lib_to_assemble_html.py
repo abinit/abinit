@@ -104,6 +104,8 @@ def make_links(text,cur_key,variables,characteristics,specials,backlinks,backlin
       return '<a href="specials.html#'+key+'">'+key+'</a>'
     elif key[:3] == "VAR":
       return '<a href="../../input_variables/generated_files/'+key+".html\">"+key+"</a>"
+    elif key[:12] == "allvariables":
+      return '<a href="../../input_variables/generated_files/allvariables.html">list of all variables</a>'
     elif key[:7] == "lesson_":
       return '<a href="../../tutorial/generated_files/'+key+".html\">"+key+"</a>"
     elif key[:5] == "help_":

@@ -125,24 +125,21 @@ In addition to the main ABINIT code, different utility programs are provided.
   With these items a job can be run.
 
  <p> The full list of input variables, all of which are provided in the
-single input file, is given in the <a href="../input_variables/html_automatically_generated/allvariables.html">ABINIT input variables file</a>.
-<br>The detailed description of input variables is given in:
+single input file, is given in the ABINIT [[allvariables]].
+<br>The detailed description of input variables is given in many "VAR*" files, including:
 <ul>
-<li> Basic variables, <A href="../input_variables/html_automatically_generated/varbas.html">VARBAS</a></li>
-<li> Development variables, <A href="../input_variables/html_automatically_generated/vardev.html">VARDEV</a></li>
-<li> Geometry builder + symmetry related variables, <A href="../input_variables/html_automatically_generated/vargeo.html">VARGEO</a></li>
-<li> Ground-state calculation variables, <A href="../input_variables/html_automatically_generated/vargs.html">VARGS</a></li>
-<li> GW variables, <A href="../input_variables/html_automatically_generated/vargw.html">VARGW</a></li>
-<li> Files handling variables, <A href="../input_variables/html_automatically_generated/varfil.html">VARFIL</a></li>
-<li> Parallelisation variables, <A href="../input_variables/html_automatically_generated/varpar.html">VARPAR</a></li>
-<li> Projector-Augmented Wave variables, <A href="../input_variables/html_automatically_generated/varpaw.html">VARPAW</a></li>
-<li> Response Function variables, <A href="../input_variables/html_automatically_generated/varrf.html">VARRF</a></li>
-<li> Structure optimization variables, <A href="../input_variables/html_automatically_generated/varrlx.html">VARRLX</a></li>
+<li> Basic variables, [[VARBAS]]</li>
+<li> Ground-state calculation variables, [[VARGS]]</li>
+<li> GW variables, [[VARGW]]</li>
+<li> Files handling variables, [[VARFIL]]</li>
+<li> Parallelisation variables, [[VARPAR]]</li>
+<li> Response Function variables, [[VARRF]]</li>
+<li>  ... </li>
 </ul>
 
 <p>
 A set of examples aimed at guiding the beginner is available in 
-<a href="../tutorial/welcome.html">the tutorial</a>.
+the tutorial ([[lesson_welcome]]).
 <p>Other test cases (more than 800 input files) can be found
 in the ~abinit/test subdirectories, e.g. "fast", the "vX" series (v1, v2, ... v67mbpt, v7, v8),
 "libxc", "paral", the "tutoX" series ...
@@ -156,7 +153,7 @@ in the ~abinit/test subdirectories, e.g. "fast", the "vX" series (v1, v2, ... v6
   A subset of existing pseudopotentials are used for test cases, and are
   located in the ~abinit/tests/Psps_for_tests directory, but they are not recommended for production. 
   Information on pseudopotential
-  files can be found in the <a href="abinit_help.html#5">ABINIT help file</a> and
+  files can be found in the <a href="help_abinit.html#5">ABINIT help file</a> and
   the ~abinit/doc/psp_infos directory.
 <p>&nbsp;
 <HR ALIGN=left>
@@ -240,17 +237,17 @@ Of course, you might get more by browsing the Web...
 As an overview, the most important input variables, to be provided in the input file, are listed below:
 <pre>
 Specification of the geometry of the problem, and types of atoms :
-<a href="../input_variables/html_automatically_generated/varbas.html#natom" target="kwimg">natom</a>           total number of atoms in unit cell
-<a href="../input_variables/html_automatically_generated/varbas.html#ntypat" target="kwimg">ntypat</a>          number of types of atoms
-<a href="../input_variables/html_automatically_generated/varbas.html#typat" target="kwimg">typat</a>(<a href="../input_variables/html_automatically_generated/varbas.html#natom" target="kwimg">natom</a>)    sequence of integers, specifying the type of each atom.
-                NOTE: the atomic coordinates (<a href="../input_variables/html_automatically_generated/varbas.html#xangst" target="kwimg">xangst</a>, <a href="../input_variables/html_automatically_generated/varbas.html#xcart" target="kwimg">xcart</a> or <a href="../input_variables/html_automatically_generated/varbas.html#xred" target="kwimg">xred</a>)
+[[natom]]           total number of atoms in unit cell
+[[ntypat]]          number of types of atoms
+[[typat]]([[natom]])    sequence of integers, specifying the type of each atom.
+                NOTE: the atomic coordinates ([[xangst]], [[xcart]] or [[xred]])
                 must be specified in the same order
-<a href="../input_variables/html_automatically_generated/varbas.html#rprim" target="kwimg">rprim</a>(3,3)      unscaled primitive translations of periodic cell;
+[[rprim]](3,3)      unscaled primitive translations of periodic cell;
                 each COLUMN of this array is one primitive translation
-<a href="../input_variables/html_automatically_generated/varbas.html#xangst" target="kwimg">xangst</a>(3,<a href="../input_variables/html_automatically_generated/varbas.html#natom" target="kwimg">natom</a>)  cartesian coordinates (Angstrom) of atoms in unit cell
-                NOTE: only used when "<a href="../input_variables/html_automatically_generated/varbas.html#xred" target="kwimg">xred</a>" and "<a href="../input_variables/html_automatically_generated/varbas.html#xcart" target="kwimg">xcart</a>" are absent
-<a href="../input_variables/html_automatically_generated/varbas.html#xcart" target="kwimg">xcart</a>(3,<a href="../input_variables/html_automatically_generated/varbas.html#natom" target="kwimg">natom</a>)  cartesian coordinates (Bohr) of atoms in unit cell
-                NOTE: only used when "<a href="../input_variables/html_automatically_generated/varbas.html#xred" target="kwimg">xred</a>" and "<a href="../input_variables/html_automatically_generated/varbas.html#xangst" target="kwimg">xangst</a>" are absent
+[[xangst]](3,[[natom]])  cartesian coordinates (Angstrom) of atoms in unit cell
+                NOTE: only used when [[xred]] and [[xcart]] are absent
+[[xcart]](3,[[natom]])  cartesian coordinates (Bohr) of atoms in unit cell
+                NOTE: only used when [[xred]] and [[xangst]] are absent
 <a href="../input_variables/html_automatically_generated/varbas.html#xred" target="kwimg">xred</a>(3,<a href="../input_variables/html_automatically_generated/varbas.html#natom" target="kwimg">natom</a>)   fractional coordinates for atomic locations;
                 NOTE: leave out if <a href="../input_variables/html_automatically_generated/varbas.html#xangst" target="kwimg">xangst</a> or <a href="../input_variables/html_automatically_generated/varbas.html#xcart" target="kwimg">xcart</a> is used
 <a href="../input_variables/html_automatically_generated/varbas.html#znucl" target="kwimg">znucl</a>(<a href="../input_variables/html_automatically_generated/varbas.html#ntypat" target="kwimg">ntypat</a>)   Nuclear charge of each type of element; must agree with
@@ -260,7 +257,7 @@ Specification of the planewave basis set, Brillouin zone wavevector sampling, an
 <a href="../input_variables/html_automatically_generated/varbas.html#ecut" target="kwimg">ecut</a>            planewave kinetic energy cutoff in Hartree
 <a href="../input_variables/html_automatically_generated/varbas.html#kptopt" target="kwimg">kptopt</a>          option for specifying the k-point grid
                 if <a href="../input_variables/html_automatically_generated/varbas.html#kptopt" target="kwimg">kptopt</a>=1, automatic generation, using ngkpt and shiftk.
-                (for the latter, see the <a href="abinit_help.html">abinit_help</a> file)
+                (for the latter, see the <a href="help_abinit.html">help_abinit</a> file)
 <a href="../input_variables/html_automatically_generated/varbas.html#ngkpt" target="kwimg">ngkpt</a>(3)        dimensions of the three-dimensional grid of k-points
 <a href="../input_variables/html_automatically_generated/varbas.html#occopt" target="kwimg">occopt</a>          set the occupation of electronic levels :
                  =1 for semiconductors
@@ -315,7 +312,7 @@ DOS for the density of states ...
 should be provided by the user, from which the code generates
 a full name. Amongst these files, there is a "status" file,
 summarizing the current status of advancement of the code,
-in long jobs. The <a href="abinit_help.html">ABINIT help file</a> contains more details.
+in long jobs. The <a href="help_abinit.html">ABINIT help file</a> contains more details.
 
 <p>&nbsp;
 
@@ -371,7 +368,7 @@ version 8.4.1 is more debugged than 8.4.0, but no new features has been added (s
 
 <p>&nbsp;
 <HR ALIGN=left>
-<p> In order to start using ABINIT, please follow the <a href="../tutorial/welcome.html">Tutorial</a>
+<p> In order to start using ABINIT, please follow the tutorial ([[lesson_welcome]])</a>
 <!-- end body -->
 
 <script type="text/javascript" src="list_internal_links.js"> </script>

@@ -109,24 +109,21 @@ body : |
     With these items a job can be run.
   
    <p> The full list of input variables, all of which are provided in the
-  single input file, is given in the <a href="../../input_variables/generated_files/allvariables.html">ABINIT input variables file</a>.
-  <br>The detailed description of input variables is given in:
+  single input file, is given in the ABINIT [[allvariables]].
+  <br>The detailed description of input variables is given in many "VAR*" files, including:
   <ul>
-  <li> Basic variables, <A href="../input_variables/html_automatically_generated/varbas.html">VARBAS</a></li>
-  <li> Development variables, <A href="../input_variables/html_automatically_generated/vardev.html">VARDEV</a></li>
-  <li> Geometry builder + symmetry related variables, <A href="../input_variables/html_automatically_generated/vargeo.html">VARGEO</a></li>
-  <li> Ground-state calculation variables, <A href="../input_variables/html_automatically_generated/vargs.html">VARGS</a></li>
-  <li> GW variables, <A href="../input_variables/html_automatically_generated/vargw.html">VARGW</a></li>
-  <li> Files handling variables, <A href="../input_variables/html_automatically_generated/varfil.html">VARFIL</a></li>
-  <li> Parallelisation variables, <A href="../input_variables/html_automatically_generated/varpar.html">VARPAR</a></li>
-  <li> Projector-Augmented Wave variables, <A href="../input_variables/html_automatically_generated/varpaw.html">VARPAW</a></li>
-  <li> Response Function variables, <A href="../input_variables/html_automatically_generated/varrf.html">VARRF</a></li>
-  <li> Structure optimization variables, <A href="../input_variables/html_automatically_generated/varrlx.html">VARRLX</a></li>
+  <li> Basic variables, [[VARBAS]]</li>
+  <li> Ground-state calculation variables, [[VARGS]]</li>
+  <li> GW variables, [[VARGW]]</li>
+  <li> Files handling variables, [[VARFIL]]</li>
+  <li> Parallelisation variables, [[VARPAR]]</li>
+  <li> Response Function variables, [[VARRF]]</li>
+  <li>  ... </li>
   </ul>
   
   <p>
   A set of examples aimed at guiding the beginner is available in 
-  <a href="../tutorial/welcome.html">the tutorial</a>.
+  the tutorial ([[lesson_welcome]]).
   <p>Other test cases (more than 800 input files) can be found
   in the ~abinit/test subdirectories, e.g. "fast", the "vX" series (v1, v2, ... v67mbpt, v7, v8),
   "libxc", "paral", the "tutoX" series ...
@@ -140,7 +137,7 @@ body : |
     A subset of existing pseudopotentials are used for test cases, and are
     located in the ~abinit/tests/Psps_for_tests directory, but they are not recommended for production. 
     Information on pseudopotential
-    files can be found in the <a href="abinit_help.html#5">ABINIT help file</a> and
+    files can be found in the <a href="help_abinit.html#5">ABINIT help file</a> and
     the ~abinit/doc/psp_infos directory.
   <p>&nbsp;
   <HR ALIGN=left>
@@ -244,7 +241,7 @@ body : |
   [[ecut]]            planewave kinetic energy cutoff in Hartree
   [[kptopt]]          option for specifying the k-point grid
                   if [[kptopt]]=1, automatic generation, using ngkpt and shiftk.
-                  (for the latter, see the <a href="abinit_help.html">abinit_help</a> file)
+                  (for the latter, see the <a href="help_abinit.html">help_abinit</a> file)
   [[ngkpt]](3)        dimensions of the three-dimensional grid of k-points
   [[occopt]]          set the occupation of electronic levels :
                    =1 for semiconductors
@@ -299,7 +296,7 @@ body : |
   should be provided by the user, from which the code generates
   a full name. Amongst these files, there is a "status" file,
   summarizing the current status of advancement of the code,
-  in long jobs. The <a href="abinit_help.html">ABINIT help file</a> contains more details.
+  in long jobs. The <a href="help_abinit.html">ABINIT help file</a> contains more details.
   
   <p>&nbsp;
   
@@ -355,4 +352,4 @@ body : |
   
   <p>&nbsp;
   <HR ALIGN=left>
-  <p> In order to start using ABINIT, please follow the <a href="../tutorial/welcome.html">Tutorial</a>
+  <p> In order to start using ABINIT, please follow the tutorial ([[lesson_welcome]])</a>

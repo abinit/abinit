@@ -12,11 +12,11 @@ the derivative database (DDB) merging code (MRGDDB).
 <hr>
 <!-- begin intro -->
 <br>The user is advised to be familiar with the
-<A href="abinit_help.html"><B>main ABINIT help file</B></A>
-as well as the <A href="respfn_help.html"><B>response function help file</B></A>
+<A href="help_abinit.html"><B>main ABINIT help file</B></A>
+as well as the <A href="help_respfn.html"><B>response function help file</B></A>
 before reading the present file.
 It is important to read also the
-<A href="anaddb_help.html"><B>Analysis of Derivative DataBase code (Anaddb) help file</B></A>
+<A href="help_anaddb.html"><B>Analysis of Derivative DataBase code (Anaddb) help file</B></A>
 to complement the present reading.</h3>
 
 <p> It will be easier to discover the
@@ -70,17 +70,17 @@ and the second part lists the 2DTEs and 3DTEs.
 
 The merging code will check if the following variables are exactly
 the same in the different input DDB : natom,
-ntypat, nband, acell, amu, ecut, ixc, lloc, ngfft, occ, rprim,
-typat, xred, zion.
+[[ntypat]], [[nband]], [[acell]], [[amu]], [[ecut]], [[ixc]], lloc, [[ngfft]], [[occ]], [[rprim]],
+[[typat]], [[xred]], zion.
 
-For nband and occ, the value of occopt is taken into account
-(see abinit_help). If possible, MRGDDB will produce
+For [[nband]] and [[occ]], the value of [[occopt]] is taken into account
+(see abinit help file). If possible, MRGDDB will produce
 a DDB with occopt=0.
 
 In case of two different data sets, the code will print an error message and stop.
 The code cannot merge two DDB that have been generated
 using two different geometries
-or convergence (ecut, ...) parameters.
+or convergence ([[ecut]], ...) parameters.
 
 The only exception is connected to the possibility to use Time-reversal
 symmetry to decrease the number of special k points when the

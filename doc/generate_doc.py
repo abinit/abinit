@@ -731,7 +731,6 @@ if activate_translation==1:
     name = doc_info.name
     if name=="default":
       break
-  
     path_doc_html="users/"+name+"_help.html"
     path_doc_yml=help_ori+"/help_"+name+".yml"
     print("Will use file "+path_doc_html+" to build the file "+path_doc_yml+" ... ",end="")
@@ -774,7 +773,6 @@ if activate_translation==1:
 
       if intro+body==1 :
         #The line must be written, but must possibly perform changes:
-  
         if "<a href=" in line:
           # Stabilize the own reference
           string_old='href="'+name+'_help.html'
@@ -804,14 +802,14 @@ if activate_translation==1:
             # See whether one variable appear
             for i, var in enumerate(variables):
               if var.abivarname in line:
-                name = var.abivarname
+                varname = var.abivarname
                 varfile = var.varfile
-                string_old='<a href="../input_variables/html_automatically_generated/%s.html#%s" target="kwimg">%s</a>'%(varfile,name,name)
-                string_new="[["+name+"]]"
+                string_old='<a href="../input_variables/html_automatically_generated/%s.html#%s" target="kwimg">%s</a>'%(varfile,varname,varname)
+                string_new="[["+varname+"]]"
                 line=line.replace('"'+string_old+'"',string_new)
                 line=line.replace(string_old,string_new)
                 # Slight variation
-                string_old='<a href="../input_variables/html_automatically_generated/%s.html#%s" target="kwimg">%s</a>'%(varfile,name,name)
+                string_old='<a href="../input_variables/html_automatically_generated/%s.html#%s" target="kwimg">%s</a>'%(varfile,varname,varname)
                 line=line.replace('"'+string_old+'"',string_new)
                 line=line.replace(string_old,string_new)
             # Otherwise, correct the path

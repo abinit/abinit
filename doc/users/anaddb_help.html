@@ -24,15 +24,15 @@ material is described by the DDB he/she wants to use.
 <br>
 If he/she is interested in the generation of DDB, and wants to know more about this
 topic, he/she will read different help files of the ABINIT package, related to the
-<A href="abinit_help.html"><B>main code</B></A>, to the
-<A href="respfn_help.html"><B>response-function features of the main code</B></A>,
-to the <A href="mrgddb_help.html"><B>merging code</B></A>.
+<A href="help_abinit.html"><B>main code</B></A>, to the
+<A href="help_respfn.html"><B>response-function features of the main code</B></A>,
+to the <A href="help_mrgddb.html"><B>merging code</B></A>.
 </h3>
 
 <p> 
 It will be easier to discover the
-present file with the help of the <a href="../tutorial/welcome.html">tutorial</a>, especially
-the <a href="../tutorial/lesson_rf2.html">second lesson on response functions</a>.
+present file with the help of the tutorial ([[lesson_welcome]]), especially
+the lesson on response functions ([[lesson_rf2]]).
 <br>It is worthwhile to print this help file, for ease of reading.
 <!-- end intro -->
 
@@ -51,8 +51,8 @@ For the initials of contributors, see
 <h3><b> Content of the help file.</b></h3>
 <!-- begin body -->
 <ul>
-  <li><a href="anaddb_help.html#1">1. Introduction</a> </li>
-  <li><a href="anaddb_help.html#list">2. List of input variables</a>
+  <li><a href="#1">1. Introduction</a> </li>
+  <li><a href="#list">2. List of input variables</a>
   </li>
 </ul>
 <hr>
@@ -77,13 +77,15 @@ the name of the DDB, and some other file names optionally used for selected capa
 </p>
 <pre>  anaddb.in<br>  anaddb.out<br>  ddb<br>  band_eps<br>  gkk<br>  anaddb.ep<br>  ddk<br> </pre>
 <p>In this example:<br>
-  - the main input file is called "anaddb.in", <br>
-  - the main output will be put into the file called "anaddb.out", <br>
-  - the input DDB file is called "ddb", <br>
-  - information to draw phonon band structures will go to band_eps<br>
-  - the input GKK file is called "gkk" (used only for electron-phonon interactions)<br>
-  - the base filename for electron-phonon output "anaddb.ep" (used only for electron-phonon interactions)<br>
-  - the file name for ddk reference files: these are the GKK files generated in k-point derivative runs, using the <a href="../input_variables/html_automatically_generated/varfil.html#prtgkk"><b>prtgkk</b></a> abinit input variable (used only for electron-phonon transport calculations)
+  <ul>
+  <li> the main input file is called "anaddb.in", <br></li>
+  <li> the main output will be put into the file called "anaddb.out", <br></li>
+  <li> the input DDB file is called "ddb", <br></li>
+  <li> information to draw phonon band structures will go to band_eps<br></li>
+  <li> the input GKK file is called "gkk" (used only for electron-phonon interactions)<br></li>
+  <li> the base filename for electron-phonon output "anaddb.ep" (used only for electron-phonon interactions)<br></li>
+  <li> the file name for ddk reference files: these are the GKK files generated in k-point derivative runs, using the <a href="../input_variables/html_automatically_generated/varfil.html#prtgkk"><b>prtgkk</b></a> abinit input variable (used only for electron-phonon transport calculations)</li>
+  </ul>
   Other examples are given in the ~abinit/test/v2 directory. The latter three filename information
   is often not used by anaddb.
   The maximal length of names for the main input or output files is presently 264 characters.
@@ -116,10 +118,10 @@ comments are also identified. However, the multidataset mode is not available.
 </p>
 <p>We now list the input variables for the anaddb input file. In order
 to discover them, it is easier to use the different lessons of the tutorial:
-start with the <a href="../tutorial/lesson_rf2.html">second lesson on response functions</a>,
-then follow the <a href="../tutorial/lesson_elastic.html">lesson on elasticity and piezoelectricity</a>,
-the <a href="../tutorial/lesson_eph.html">lesson on electron-phonon interaction</a>, and
-the <a href="../tutorial/lesson_nlo.html">lesson on non-linear properties</a>.
+start with the second lesson on response functions ([[lesson_rf2]]),
+then follow the lesson on elasticity and piezoelectricity ([[lesson_elastic]]),
+the lesson on electron-phonon interaction ([[lesson_eph]]), and
+the lesson on non-linear properties ([[lesson_nlo]]).
 
 <p>
 <i>If you are discovering this file with the help of the tutorial,
@@ -132,44 +134,44 @@ you can go back to the tutorial window.</i>
 <b> Alphabetical list of input variables for ANADDB.</b>
 <br>
  <br>A.
- <a href="anaddb_help.html#alphon">alphon</a>&nbsp;&nbsp;
- <a href="anaddb_help.html#asr">asr</a>&nbsp;&nbsp;
- <a href="anaddb_help.html#atftol">atftol</a>&nbsp;&nbsp;
- <a href="anaddb_help.html#atifc">atifc</a>&nbsp;&nbsp;
- <a href="anaddb_help.html#a2fsmear">a2fsmear</a>&nbsp;&nbsp;
+ <a href="#alphon">alphon</a>&nbsp;&nbsp;
+ <a href="#asr">asr</a>&nbsp;&nbsp;
+ <a href="#atftol">atftol</a>&nbsp;&nbsp;
+ <a href="#atifc">atifc</a>&nbsp;&nbsp;
+ <a href="#a2fsmear">a2fsmear</a>&nbsp;&nbsp;
  <br>B.
- <a href="anaddb_help.html#band_gap">band_gap</a>&nbsp;&nbsp;
- <a href="anaddb_help.html#brav">brav</a>&nbsp;&nbsp;
+ <a href="#band_gap">band_gap</a>&nbsp;&nbsp;
+ <a href="#brav">brav</a>&nbsp;&nbsp;
  <br>C.
- <a href="anaddb_help.html#chneut">chneut</a>&nbsp;&nbsp;
+ <a href="#chneut">chneut</a>&nbsp;&nbsp;
  <br>D.
- <a href="anaddb_help.html#dieflag">dieflag</a>&nbsp;&nbsp;
- <a href="anaddb_help.html#dipdip">dipdip</a>&nbsp;&nbsp;
- <a href="anaddb_help.html#dosdeltae">dosdeltae</a>&nbsp;&nbsp;
- <a href="anaddb_help.html#dossmear">dossmear</a>&nbsp;&nbsp;
- <a href="anaddb_help.html#dostol">dostol</a>&nbsp;&nbsp;
- <a href="anaddb_help.html#dossum">dossum</a>&nbsp;&nbsp;
+ <a href="#dieflag">dieflag</a>&nbsp;&nbsp;
+ <a href="#dipdip">dipdip</a>&nbsp;&nbsp;
+ <a href="#dosdeltae">dosdeltae</a>&nbsp;&nbsp;
+ <a href="#dossmear">dossmear</a>&nbsp;&nbsp;
+ <a href="#dostol">dostol</a>&nbsp;&nbsp;
+ <a href="#dossum">dossum</a>&nbsp;&nbsp;
  <br>E.
- <a href="anaddb_help.html#eivec">eivec</a>&nbsp;&nbsp;
- <a href="anaddb_help.html#elaflag">elaflag</a>&nbsp;&nbsp;
- <a href="anaddb_help.html#elphflag">elphflag</a>&nbsp;&nbsp;
- <a href="anaddb_help.html#elphsmear">elphsmear</a>&nbsp;&nbsp;
- <a href="anaddb_help.html#elph_fermie">elph_fermie</a>&nbsp;&nbsp;
- <a href="anaddb_help.html#enunit">enunit</a>&nbsp;&nbsp;
- <a href="anaddb_help.html#ep_keepbands">ep_keepbands</a>&nbsp;&nbsp;
- <a href="anaddb_help.html#ep_int_gkk">ep_int_gkk</a>&nbsp;&nbsp;
- <a href="anaddb_help.html#ep_b_max">ep_b_max</a>&nbsp;&nbsp;
- <a href="anaddb_help.html#ep_b_min">ep_b_min</a>&nbsp;&nbsp;
- <a href="anaddb_help.html#ep_extrael">ep_extrael</a>&nbsp;&nbsp;
- <a href="anaddb_help.html#ep_nqpt">ep_nqpt</a>&nbsp;&nbsp;
- <a href="anaddb_help.html#ep_prt_yambo">ep_prt_yambo</a>&nbsp;&nbsp;
- <a href="anaddb_help.html#ep_qptlist">ep_qptlist</a>&nbsp;&nbsp;
- <a href="anaddb_help.html#ep_scalprod">ep_scalprod</a>&nbsp;&nbsp;
- <a href="anaddb_help.html#ep_nspline">ep_nspline</a>&nbsp;&nbsp;
+ <a href="#eivec">eivec</a>&nbsp;&nbsp;
+ <a href="#elaflag">elaflag</a>&nbsp;&nbsp;
+ <a href="#elphflag">elphflag</a>&nbsp;&nbsp;
+ <a href="#elphsmear">elphsmear</a>&nbsp;&nbsp;
+ <a href="#elph_fermie">elph_fermie</a>&nbsp;&nbsp;
+ <a href="#enunit">enunit</a>&nbsp;&nbsp;
+ <a href="#ep_keepbands">ep_keepbands</a>&nbsp;&nbsp;
+ <a href="#ep_int_gkk">ep_int_gkk</a>&nbsp;&nbsp;
+ <a href="#ep_b_max">ep_b_max</a>&nbsp;&nbsp;
+ <a href="#ep_b_min">ep_b_min</a>&nbsp;&nbsp;
+ <a href="#ep_extrael">ep_extrael</a>&nbsp;&nbsp;
+ <a href="#ep_nqpt">ep_nqpt</a>&nbsp;&nbsp;
+ <a href="#ep_prt_yambo">ep_prt_yambo</a>&nbsp;&nbsp;
+ <a href="#ep_qptlist">ep_qptlist</a>&nbsp;&nbsp;
+ <a href="#ep_scalprod">ep_scalprod</a>&nbsp;&nbsp;
+ <a href="#ep_nspline">ep_nspline</a>&nbsp;&nbsp;
  <br>F.
- <a href="anaddb_help.html#freeze_displ">freeze_displ</a>&nbsp;&nbsp;
- <a href="anaddb_help.html#frmax">frmax</a>&nbsp;&nbsp;
- <a href="anaddb_help.html#frmin">frmin</a>&nbsp;&nbsp;
+ <a href="#freeze_displ">freeze_displ</a>&nbsp;&nbsp;
+ <a href="#frmax">frmax</a>&nbsp;&nbsp;
+ <a href="#frmin">frmin</a>&nbsp;&nbsp;
  <br>G.
  <a href="anaddb_help.html#gkqwrite">gkqwrite</a>&nbsp;&nbsp;
  <a href="anaddb_help.html#gruns_ddbs">gruns_ddbs</a>&nbsp;&nbsp;
@@ -1789,7 +1791,7 @@ which does band interpolation and gets group velocities. The output file will be
 <hr>
 
 
-<hr><font id="title"><a name="piezoflag">piezoflag</a></font>
+<font id="title"><a name="piezoflag">piezoflag</a></font>
 <br>
 <font id="definition">Mnemonics: PIEZOelectric tensor FLAG</font>
 <br>
@@ -2187,8 +2189,8 @@ See also <a href="anaddb_help.html#ifcflag">ifcflag</a>,
 <br><font id="default">Default: 0</font>
 <br><br><font id="text">
 If <b>qgrid_type</b> is set to 1, the electron-phonon part of anaddb will use
-the <a href="anaddb_help.html#ep_nqpt"><b>ep_nqpt</b></a> and <a
-href="anaddb_help.html#ep_qptlist"><b>ep_qptlist</b></a> variables to determine
+the <a href="anaddb_help.html#ep_nqpt"><b>ep_nqpt</b></a> and 
+<a href="anaddb_help.html#ep_qptlist"><b>ep_qptlist</b></a> variables to determine
 which q-points to calculate the electron-phonon coupling for. This is an alternative
 to a regular grid as in the rest of anaddb (using <a href="anaddb_help.html#ngqpt">ngqpt</a>).
 </font>
