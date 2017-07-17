@@ -1,19 +1,16 @@
 <html>
-<head>
-<title>AIM help</title>
-<link rel=stylesheet type="text/css" href="formabinit.css">
+<head><title>the AIM utility</title>
+<link rel=stylesheet type="text/css" href="../formabinit.css">
 </head>
 <body bgcolor="#ffffff">
 
 <hr>
+<a name="top"></a>
+
 <h1>Help file for the AIM utility of the ABINIT package.</h1>
 
-<h3>This file explains the use and i/o parameters needed for
-the Atom-In-Molecule (AIM - Bader analysis) utility of the ABINIT package.
-</h3>
+<h2>This file explains the use and i/o parameters needed for the Atom-In-Molecule (AIM - Bader analysis) utility of the ABINIT package.</h2>
 <hr>
-<a name="top"></a>
-<!-- begin intro -->
 <p>
 The AIM utility allows to analyse charge densities
 produced by the ABINIT code. The AIM analysis (Atom-In-Molecule)
@@ -28,24 +25,21 @@ corresponding nucleus, hence the concept of Atom-In-Molecule.
   present file with the help of the <a href="../tutorial/welcome.html">tutorial</a>.
 (Sorry, not yet available).
 <br>It is worthwhile to print this help file, for ease of reading.
-<!-- end intro -->
+<hr>
+<h5>Copyright (C) 1998-2017 ABINIT group (PCasek,FF,XG)
+<script type="text/javascript" src="../../js_files/copyright.js"> </script>
+</h5> 
 
-<h5>Copyright (C) 2002-2017 ABINIT group (PCasek,FF,XG)
-<br> This file is distributed under the terms of the GNU General Public License, see
-~abinit/COPYING or <a href="http://www.gnu.org/copyleft/gpl.txt">
-http://www.gnu.org/copyleft/gpl.txt </a>.
-<br> For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
-</h5>
+<script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
 
-<script type="text/javascript" src="list_internal_links.js"> </script>
+<a name="list"></a>
+<h3><b> Content of the help file:</b></h3>
 
-<h3><b> Content of the help file.</b></h3>
-<!-- begin body -->
 <ul>
-  <li><a href="aim_help.html#1">1. Introduction</a>
-  <li><a href="aim_help.html#2">2. Input and output files</a>
-  <li><a href="aim_help.html#3">3. Typical use of input variables</a>
-  <li><a href="aim_help.html#4">4. List of input variables</a>
+  <li><a href="#1">1. Introduction</a>
+  <li><a href="#2">2. Input and output files</a>
+  <li><a href="#3">3. Typical use of input variables</a>
+  <li><a href="#4">4. List of input variables</a>
 </ul>
 
 <hr>
@@ -99,7 +93,7 @@ In case of the search for critical points, one start from the
 middle of the segment with a neighbouring atom (all neighbouring
 atoms are examined in turn), and
 evolves towards a nearby point with zero gradient.
-Then, in case <a href="aim_help.html#crit">crit</a> equals 2,
+Then, in case <a href="#crit">crit</a> equals 2,
 one checks that the CP that has been found belongs to the
 attraction region of the desired atom. This last step
 is by no means trivial. In the present implementation, the
@@ -315,38 +309,38 @@ that define the behaviour of the driver and those
 related to the numerics (all the others).
 Here is the list of the driver variables :
 <ul>
- <li> <a href="aim_help.html#crit">crit</a>&nbsp;&nbsp;
- <li> <a href="aim_help.html#denout">denout</a>&nbsp;&nbsp;
- <li> <a href="aim_help.html#dltyp">dltyp</a>&nbsp;&nbsp;
- <li> <a href="aim_help.html#follow">follow</a>&nbsp;&nbsp;
- <li> <a href="aim_help.html#gpsurf">gpsurf</a>&nbsp;&nbsp;
- <li> <a href="aim_help.html#irho">irho</a>&nbsp;&nbsp;
- <li> <a href="aim_help.html#ivol">ivol</a>&nbsp;&nbsp;
- <li> <a href="aim_help.html#lapout">lapout</a>&nbsp;&nbsp;
- <li> <a href="aim_help.html#rsurf">rsurf</a>&nbsp;&nbsp;
- <li> <a href="aim_help.html#surf">surf</a>&nbsp;&nbsp;
+ <li> <a href="#crit">crit</a>&nbsp;&nbsp;
+ <li> <a href="#denout">denout</a>&nbsp;&nbsp;
+ <li> <a href="#dltyp">dltyp</a>&nbsp;&nbsp;
+ <li> <a href="#follow">follow</a>&nbsp;&nbsp;
+ <li> <a href="#gpsurf">gpsurf</a>&nbsp;&nbsp;
+ <li> <a href="#irho">irho</a>&nbsp;&nbsp;
+ <li> <a href="#ivol">ivol</a>&nbsp;&nbsp;
+ <li> <a href="#lapout">lapout</a>&nbsp;&nbsp;
+ <li> <a href="#rsurf">rsurf</a>&nbsp;&nbsp;
+ <li> <a href="#surf">surf</a>&nbsp;&nbsp;
 </ul>
 A standard determination of the electronic charge
 around one atom will use :
 <ul>
- <li><a href="aim_help.html#crit">crit</a>=2
- <li><a href="aim_help.html#surf">surf</a>=1
- <li><a href="aim_help.html#irho">irho</a>=1
+ <li><a href="#crit">crit</a>=2
+ <li><a href="#surf">surf</a>=1
+ <li><a href="#irho">irho</a>=1
 </ul>
 Then, the user will have to specify the atom,
-thanks to <a href="aim_help.html#atom">atom</a>,
+thanks to <a href="#atom">atom</a>,
 and the angular integration, typically with
- <a href="aim_help.html#phimax">phimax</a>,
- <a href="aim_help.html#thetamax">thetamax</a>,
- <a href="aim_help.html#nphi">nphi</a>,
- <a href="aim_help.html#ntheta">ntheta</a>.
+ <a href="#phimax">phimax</a>,
+ <a href="#thetamax">thetamax</a>,
+ <a href="#nphi">nphi</a>,
+ <a href="#ntheta">ntheta</a>.
 <br>
 Finally, the following input variables might often need some tuning :
- <a href="aim_help.html#lgrad2">lgrad2</a>,
- <a href="aim_help.html#lstep2">lstep2</a>,
- <a href="aim_help.html#dpclim">dpclim</a>,
- <a href="aim_help.html#maxatd">maxatd</a>,
- <a href="aim_help.html#maxcpd">maxcpd</a>.
+ <a href="#lgrad2">lgrad2</a>,
+ <a href="#lstep2">lstep2</a>,
+ <a href="#dpclim">dpclim</a>,
+ <a href="#maxatd">maxatd</a>,
+ <a href="#maxcpd">maxcpd</a>.
 <br>
 In most cases, the other input variables will not have to be
 modified.
@@ -365,66 +359,66 @@ parameters.
 <b> Alphabetical list of AIM input variables.</b>
 <br>
  <br>A.
- <a href="aim_help.html#atom">atom</a>&nbsp;&nbsp;
- <a href="aim_help.html#atrad">atrad</a>&nbsp;&nbsp;
+ <a href="#atom">atom</a>&nbsp;&nbsp;
+ <a href="#atrad">atrad</a>&nbsp;&nbsp;
  <br>B.
  <br>C.
- <a href="aim_help.html#coff1">coff1</a>&nbsp;&nbsp;
- <a href="aim_help.html#coff2">coff2</a>&nbsp;&nbsp;
- <a href="aim_help.html#crit">crit</a>&nbsp;&nbsp;
+ <a href="#coff1">coff1</a>&nbsp;&nbsp;
+ <a href="#coff2">coff2</a>&nbsp;&nbsp;
+ <a href="#crit">crit</a>&nbsp;&nbsp;
  <br>D.
- <a href="aim_help.html#denout">denout</a>&nbsp;&nbsp;
- <a href="aim_help.html#dltyp">dltyp</a>&nbsp;&nbsp;
- <a href="aim_help.html#dpclim">dpclim</a>&nbsp;&nbsp;
+ <a href="#denout">denout</a>&nbsp;&nbsp;
+ <a href="#dltyp">dltyp</a>&nbsp;&nbsp;
+ <a href="#dpclim">dpclim</a>&nbsp;&nbsp;
  <br>E.
  <br>F.
- <a href="aim_help.html#foldep">foldep</a>&nbsp;&nbsp;
- <a href="aim_help.html#follow">follow</a>&nbsp;&nbsp;
- <a href="aim_help.html#folstp">folstp</a>&nbsp;&nbsp;
+ <a href="#foldep">foldep</a>&nbsp;&nbsp;
+ <a href="#follow">follow</a>&nbsp;&nbsp;
+ <a href="#folstp">folstp</a>&nbsp;&nbsp;
  <br>G.
- <a href="aim_help.html#gpsurf">gpsurf</a>&nbsp;&nbsp;
+ <a href="#gpsurf">gpsurf</a>&nbsp;&nbsp;
  <br>H.
  <br>I.
- <a href="aim_help.html#inpt">inpt</a>&nbsp;&nbsp;
- <a href="aim_help.html#irho">irho</a>&nbsp;&nbsp;
- <a href="aim_help.html#ivol">ivol</a>&nbsp;&nbsp;
+ <a href="#inpt">inpt</a>&nbsp;&nbsp;
+ <a href="#irho">irho</a>&nbsp;&nbsp;
+ <a href="#ivol">ivol</a>&nbsp;&nbsp;
  <br>J.
  <br>K.
  <br>L.
- <a href="aim_help.html#lapout">lapout</a>&nbsp;&nbsp;
- <a href="aim_help.html#lgrad">lgrad</a>&nbsp;&nbsp;
- <a href="aim_help.html#lgrad2">lgrad2</a>&nbsp;&nbsp;
- <a href="aim_help.html#lstep">lstep</a>&nbsp;&nbsp;
- <a href="aim_help.html#lstep2">lstep2</a>&nbsp;&nbsp;
+ <a href="#lapout">lapout</a>&nbsp;&nbsp;
+ <a href="#lgrad">lgrad</a>&nbsp;&nbsp;
+ <a href="#lgrad2">lgrad2</a>&nbsp;&nbsp;
+ <a href="#lstep">lstep</a>&nbsp;&nbsp;
+ <a href="#lstep2">lstep2</a>&nbsp;&nbsp;
  <br>M.
- <a href="aim_help.html#maxatd">maxatd</a>&nbsp;&nbsp;
- <a href="aim_help.html#maxcpd">maxcpd</a>&nbsp;&nbsp;
+ <a href="#maxatd">maxatd</a>&nbsp;&nbsp;
+ <a href="#maxcpd">maxcpd</a>&nbsp;&nbsp;
  <br>N.
- <a href="aim_help.html#ngrid">ngrid</a>&nbsp;&nbsp;
- <a href="aim_help.html#nphi">nphi</a>&nbsp;&nbsp;
- <a href="aim_help.html#nsa">nsa</a>&nbsp;&nbsp;
- <a href="aim_help.html#nsb">nsb</a>&nbsp;&nbsp;
- <a href="aim_help.html#nsc">nsc</a>&nbsp;&nbsp;
- <a href="aim_help.html#ntheta">ntheta</a>&nbsp;&nbsp;
+ <a href="#ngrid">ngrid</a>&nbsp;&nbsp;
+ <a href="#nphi">nphi</a>&nbsp;&nbsp;
+ <a href="#nsa">nsa</a>&nbsp;&nbsp;
+ <a href="#nsb">nsb</a>&nbsp;&nbsp;
+ <a href="#nsc">nsc</a>&nbsp;&nbsp;
+ <a href="#ntheta">ntheta</a>&nbsp;&nbsp;
  <br>O.
  <br>P.
- <a href="aim_help.html#phimax">phimax</a>&nbsp;&nbsp;
- <a href="aim_help.html#phimin">phimin</a>&nbsp;&nbsp;
+ <a href="#phimax">phimax</a>&nbsp;&nbsp;
+ <a href="#phimin">phimin</a>&nbsp;&nbsp;
  <br>Q.
  <br>R.
- <a href="aim_help.html#radstp">radstp</a>&nbsp;&nbsp;
- <a href="aim_help.html#ratmin">ratmin</a>&nbsp;&nbsp;
- <a href="aim_help.html#rsurf">rsurf</a>&nbsp;&nbsp;
- <a href="aim_help.html#rsurdir">rsurdir</a>&nbsp;&nbsp;
+ <a href="#radstp">radstp</a>&nbsp;&nbsp;
+ <a href="#ratmin">ratmin</a>&nbsp;&nbsp;
+ <a href="#rsurf">rsurf</a>&nbsp;&nbsp;
+ <a href="#rsurdir">rsurdir</a>&nbsp;&nbsp;
  <br>S.
- <a href="aim_help.html#scal">scal</a>&nbsp;&nbsp;
- <a href="aim_help.html#surf">surf</a>&nbsp;&nbsp;
+ <a href="#scal">scal</a>&nbsp;&nbsp;
+ <a href="#surf">surf</a>&nbsp;&nbsp;
  <br>T.
- <a href="aim_help.html#thetamax">thetamax</a>&nbsp;&nbsp;
- <a href="aim_help.html#thetamin">thetamin</a>&nbsp;&nbsp;
+ <a href="#thetamax">thetamax</a>&nbsp;&nbsp;
+ <a href="#thetamin">thetamin</a>&nbsp;&nbsp;
  <br>U.
  <br>V.
- <a href="aim_help.html#vpts">vpts</a>&nbsp;&nbsp;
+ <a href="#vpts">vpts</a>&nbsp;&nbsp;
  <br>W.
  <br>X.
  <br>Y.
@@ -457,7 +451,7 @@ important - it is used only two times)
 <br><font id="vartype">Variable type: real </font>
 <br><font id="default">Default: 0.98</font>
 <br><br><font id="text">
-See the input variable <a href="aim_help.html#ratmin">ratmin</a>.
+See the input variable <a href="#ratmin">ratmin</a>.
 </font>
 
 <br><br><br><br><a href=#top>Go to the top</a>
@@ -467,7 +461,7 @@ See the input variable <a href="aim_help.html#ratmin">ratmin</a>.
 <br><font id="vartype">Variable type: real </font>
 <br><font id="default">Default: 0.95</font>
 <br><br><font id="text">
-See the input variable <a href="aim_help.html#ratmin">ratmin</a>.
+See the input variable <a href="#ratmin">ratmin</a>.
 </font>
 
 <br><br><br><br><a href=#top>Go to the top</a>
@@ -500,7 +494,7 @@ Drives the computation of critical points.
   the simplified version does this only for CP(3,-1). When CP analysis is
   rather fast (with respect to surface determination), 2 is recommended.
   In all cases the number of neighbors considered is limited by
-  distance cutoff (variable  <a href="aim_help.html#maxatd">maxatd</a>)
+  distance cutoff (variable  <a href="#maxatd">maxatd</a>)
 </font>
 
 <br><br><br><br><a href=#top>Go to the top</a>
@@ -513,10 +507,10 @@ Drives the computation of critical points.
 Output of the electronic density.
 The specification of the
 line (plane) in the real space must be given in the input variable
-<a href="aim_help.html#vpts">vpts</a> and grid in
-<a href="aim_help.html#ngrid">ngrid</a>.
+<a href="#vpts">vpts</a> and grid in
+<a href="#ngrid">ngrid</a>.
 It is also possible to get only the
-valence density or the core density (see <a href="aim_help.html#dltyp">dltyp</a>).
+valence density or the core density (see <a href="#dltyp">dltyp</a>).
 <ul>
  <li>0, no output
  <li>1, 1D distribution
@@ -533,8 +527,8 @@ valence density or the core density (see <a href="aim_help.html#dltyp">dltyp</a>
 <br><br><font id="text">
 Specification of the contribution of the electronic
 density corresponding to the density and/or laplacian output
-(see <a href="aim_help.html#denout">denout</a> and
-     <a href="aim_help.html#lapout">lapout</a>)
+(see <a href="#denout">denout</a> and
+     <a href="#lapout">lapout</a>)
 <ul>
  <li>0, total electronic density
  <li>1, only the valence density
@@ -567,7 +561,7 @@ to 5.d-2, let's say.
 <br><font id="vartype">Variable type: real foldep(3) </font>
 <br><font id="default">Default: 0.0, 0.0, 0.0</font>
 <br><br><font id="text">
-Needed in the case <a href="aim_help.html#follow">follow</a>=1 only.
+Needed in the case <a href="#follow">follow</a>=1 only.
 Defines the starting point.
 </font>
 
@@ -580,7 +574,7 @@ Defines the starting point.
 <br><br><font id="text">
 Follow the gradient path to the corresponding atom
 starting from the position specified in the input variable
-<a href="aim_help.html#foldep">foldep</a>.
+<a href="#foldep">foldep</a>.
 <ul>
  <li>0, not calculated
  <li>1, calculated
@@ -661,10 +655,10 @@ Drives the integration of the volume of the Bader atom.
 Output of
 the laplacian of electronic density. The specification of the
 line (plane) in the real space must be given in the input variable
-<a href="aim_help.html#vpts">vpts</a> and grid in
-<a href="aim_help.html#ngrid">ngrid</a>.
+<a href="#vpts">vpts</a> and grid in
+<a href="#ngrid">ngrid</a>.
 It is also possible to get only the
-valence density or the core density (see <a href="aim_help.html#dltyp">dltyp</a>).
+valence density or the core density (see <a href="#dltyp">dltyp</a>).
 <ul>
  <li>0, no output
  <li>1, 1D distribution
@@ -682,13 +676,13 @@ valence density or the core density (see <a href="aim_help.html#dltyp">dltyp</a>
 The search for one particular CP is decided to be successful when either
 the norm of the gradient of the electron density is smaller
 than <b>lgrad</b> or when the length of the planned search step
-is smaller than <a href="aim_help.html#lstep">lstep</a>. If
+is smaller than <a href="#lstep">lstep</a>. If
 the number of search step becomes larger than an internal limit
 (presently set to 100), one will allow a weaker criteria for
-satisfaction, based on <a href="aim_help.html#lgrad2">lgrad2</a>
-and <a href="aim_help.html#lstep2">lstep2</a>. If the internal limit
-is reached, and the criteria on <a href="aim_help.html#lgrad2">lgrad2</a>
-and <a href="aim_help.html#lstep2">lstep2</a> are not satisfied, then
+satisfaction, based on <a href="#lgrad2">lgrad2</a>
+and <a href="#lstep2">lstep2</a>. If the internal limit
+is reached, and the criteria on <a href="#lgrad2">lgrad2</a>
+and <a href="#lstep2">lstep2</a> are not satisfied, then
 the searching procedure continues with the next seed.
 </font>
 
@@ -700,7 +694,7 @@ the searching procedure continues with the next seed.
 <br><font id="default">Default: 1.d-5</font>
 <br><br><font id="text">
 Determines the criterion for deciding that a CP has been found. See
-<a href="aim_help.html#lgrad">lgrad</a> for more details.
+<a href="#lgrad">lgrad</a> for more details.
 </font>
 
 <br><br><br><br><a href=#top>Go to the top</a>
@@ -711,7 +705,7 @@ Determines the criterion for deciding that a CP has been found. See
 <br><font id="default">Default: 1.d-10</font>
 <br><br><font id="text">
 Determines the criterion for deciding a CP has been found. See
-<a href="aim_help.html#lgrad">lgrad</a> for more details.
+<a href="#lgrad">lgrad</a> for more details.
 </font>
 
 <br><br><br><br><a href=#top>Go to the top</a>
@@ -722,7 +716,7 @@ Determines the criterion for deciding a CP has been found. See
 <br><font id="default">Default: 1.d-5</font>
 <br><br><font id="text">
 Determines the criterion for deciding that a CP has been found. See
-<a href="aim_help.html#lgrad">lgrad</a> for more details.
+<a href="#lgrad">lgrad</a> for more details.
 </font>
 
 <br><br><br><br><a href=#top>Go to the top</a>
@@ -736,9 +730,9 @@ Atoms within this maximal distance are considered in order
 to start the search of a CP.
 <p>Note that the supercell,
 determined by
-<a href="aim_help.html#nsa">nsa</a>,
-<a href="aim_help.html#nsb">nsb</a>, and
-<a href="aim_help.html#nsc">nsc</a> might
+<a href="#nsa">nsa</a>,
+<a href="#nsb">nsb</a>, and
+<a href="#nsc">nsc</a> might
 be too small to actually lead to the consideration of all the
 desired atoms.
 </font>
@@ -753,9 +747,9 @@ desired atoms.
 The CPs are searched for within this maximal distance.
 <p>Note that the supercell,
 determined by
-<a href="aim_help.html#nsa">nsa</a>,
-<a href="aim_help.html#nsb">nsb</a>, and
-<a href="aim_help.html#nsc">nsc</a> might
+<a href="#nsa">nsa</a>,
+<a href="#nsb">nsb</a>, and
+<a href="#nsc">nsc</a> might
 be too small to actually lead to the consideration of all the
 critical points.
 </font>
@@ -769,8 +763,8 @@ critical points.
 <br><br><font id="text">
 Defines the grid in real space, for the density
 and laplacian outputs, governed by
-<a href="aim_help.html#denout">denout</a> and
-<a href="aim_help.html#lapout">lapout</a>.
+<a href="#denout">denout</a> and
+<a href="#lapout">lapout</a>.
 </font>
 
 <br><br><br><br><a href=#top>Go to the top</a>
@@ -780,12 +774,12 @@ and laplacian outputs, governed by
 <br><font id="vartype">Variable type: integer </font>
 <br><font id="default">Default: 48</font>
 <br><br><font id="text">
-With <a href="aim_help.html#ntheta">ntheta</a>, this
+With <a href="#ntheta">ntheta</a>, this
 variable defines the angular grid for the integration
 within the Bader volume, in particular, the number
 of phi angles, to be used between
-<a href="aim_help.html#phimin">phimin</a> and
-<a href="aim_help.html#phimax">phimax</a>.
+<a href="#phimin">phimin</a> and
+<a href="#phimax">phimax</a>.
 When the difference between these two variables
 is 2 pi, the recommended value of <b>nphi</b> is 48.
 When it is pi (for symmetry reasons), the recommended
@@ -825,12 +819,12 @@ enddo
 <br><font id="vartype">Variable type: integer </font>
 <br><font id="default">Default: 32</font>
 <br><br><font id="text">
-With <a href="aim_help.html#nphi">nphi</a>, this
+With <a href="#nphi">nphi</a>, this
 variable defines the angular grid for the integration
 within the Bader volume, in particular, the number
 of theta angles, to be used between
-<a href="aim_help.html#thetamin">thetamin</a> and
-<a href="aim_help.html#thetamax">thetamax</a>.
+<a href="#thetamin">thetamin</a> and
+<a href="#thetamax">thetamax</a>.
 When the difference between these two variables
 is pi, the recommended value of <b>ntheta</b> is 32.
 When it is pi/2 (for symmetry reasons),
@@ -849,7 +843,7 @@ the recommended value is 20.
 Angular limits of integration of the Bader volume
 for the phi variables. The number
 of integration points is given by
-<a href="aim_help.html#nphi">nphi</a>.
+<a href="#nphi">nphi</a>.
 The range of integration can be decreased if there are
 symmetry reasons for doing this.
 </font>
@@ -880,9 +874,9 @@ calculation, but this first estimation is not usually used because
 the program
 makes a new one based on the knowledge of CPs. In fact after
 the CP analysis, the new estimation is done by the product of the ad hoc
-parameter  <a href="aim_help.html#coff1">coff1</a> (default 0.98) by the distance of the nearest
+parameter  <a href="#coff1">coff1</a> (default 0.98) by the distance of the nearest
 bonding CP.
-If there is a problem later, <a href="aim_help.html#coff2">coff2</a> (default 0.95) is used instead.
+If there is a problem later, <a href="#coff2">coff2</a> (default 0.95) is used instead.
 </font>
 
 <br><br><br><br><a href=#top>Go to the top</a>
@@ -892,7 +886,7 @@ If there is a problem later, <a href="aim_help.html#coff2">coff2</a> (default 0.
 <br><font id="vartype">Variable type: real rsurdir(2) </font>
 <br><font id="default">Default: 0.0, 0.0</font>
 <br><br><font id="text">
-In the case <a href="aim_help.html#rsurf">rsurf</a>=1,
+In the case <a href="#rsurf">rsurf</a>=1,
 gives the direction (angular coordinates theta,phi)
 along which the radius of the Bader
 surface is to be determined.
@@ -907,7 +901,7 @@ surface is to be determined.
 <br><br><font id="text">
 Drive the computation of the radius of the Bader surface for
 the angles specified in the input variable
-<a href="aim_help.html#rsurdir">rsurdir</a>
+<a href="#rsurdir">rsurdir</a>
 <ul>
  <li>0, not calculated
  <li>1, calculated
@@ -950,7 +944,7 @@ Drive the computation of the full Bader surface.
 Angular limits of integration of the Bader volume
 for the theta variables. The number
 of integration points is given by
-<a href="aim_help.html#ntheta">ntheta</a>.
+<a href="#ntheta">ntheta</a>.
 The range of integration can be decreased if there are
 symmetry reasons for doing this.
 </font>
@@ -965,16 +959,15 @@ symmetry reasons for doing this.
 Basic vectors of the line or rectangle in real space,
 defining the points for which the density or
 laplacian will be computed, thanks to
-<a href="aim_help.html#denout">denout</a>
+<a href="#denout">denout</a>
 or
-<a href="aim_help.html#lapout">lapout</a>
+<a href="#lapout">lapout</a>
 </font>
 
 <br><br><br><br><a href=#top>Go to the top</a>
 <B> | </B> <a href=#4>Go to the AIM input variable list</a>
-<!-- end body -->
-
-<script type="text/javascript" src="list_internal_links.js"> </script>
+<script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
 
 </body>
 </html>
+

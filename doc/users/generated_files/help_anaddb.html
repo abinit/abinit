@@ -1,17 +1,16 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html>
-<head>
-  <title>Anaddb help</title>
-  <link rel="stylesheet" type="text/css" href="formabinit.css">
+<head><title>the Anaddb utility</title>
+<link rel=stylesheet type="text/css" href="../formabinit.css">
 </head>
 <body bgcolor="#ffffff">
+
 <hr>
+<a name="top"></a>
+
 <h1>Help file for the Anaddb utility of the ABINIT package.</h1>
-<h3>This file explains the use and i/o parameters needed for
-the "Analysis of Derivative DataBase" code of the ABINIT package.
-</h3>
+
+<h2>This file explains the use and i/o parameters needed for the "Analysis of Derivative DataBase" code of the ABINIT package.</h2>
 <hr>
-<!-- begin intro -->
 <a name="top"></a>
 <p>This code is able to compute interatomic force constants,
 but also, more generally, many different physical properties
@@ -34,25 +33,19 @@ It will be easier to discover the
 present file with the help of the <a href="../tutorial/welcome.html">tutorial</a>, especially
 the <a href="../tutorial/lesson_rf2.html">second lesson on response functions</a>.
 <br>It is worthwhile to print this help file, for ease of reading.
-<!-- end intro -->
-
+<hr>
 <h5>Copyright (C) 1998-2017 ABINIT group (XG,DCA)
-<br>
-This file is distributed under the terms of the GNU General Public
-License, see
-~abinit/COPYING or <a href="http://www.gnu.org/copyleft/gpl.txt">http://www.gnu.org/copyleft/gpl.txt </a>.
-<br>
-For the initials of contributors, see
-~abinit/doc/developers/contributors.txt .
-</h5>
+<script type="text/javascript" src="../../js_files/copyright.js"> </script>
+</h5> 
 
-<script type="text/javascript" src="list_internal_links.js"> </script>
+<script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
 
-<h3><b> Content of the help file.</b></h3>
-<!-- begin body -->
+<a name="list"></a>
+<h3><b> Content of the help file:</b></h3>
+
 <ul>
-  <li><a href="anaddb_help.html#1">1. Introduction</a> </li>
-  <li><a href="anaddb_help.html#list">2. List of input variables</a>
+  <li><a href="#1">1. Introduction</a> </li>
+  <li><a href="#list">2. List of input variables</a>
   </li>
 </ul>
 <hr>
@@ -83,7 +76,7 @@ the name of the DDB, and some other file names optionally used for selected capa
   - information to draw phonon band structures will go to band_eps<br>
   - the input GKK file is called "gkk" (used only for electron-phonon interactions)<br>
   - the base filename for electron-phonon output "anaddb.ep" (used only for electron-phonon interactions)<br>
-  - the file name for ddk reference files: these are the GKK files generated in k-point derivative runs, using the <a href="../input_variables/html_automatically_generated/varfil.html#prtgkk"><b>prtgkk</b></a> abinit input variable (used only for electron-phonon transport calculations)
+  - the file name for ddk reference files: these are the GKK files generated in k-point derivative runs, using the <a href="../../input_variables/generated_files/varfil.html#prtgkk"><b>prtgkk</b></a> abinit input variable (used only for electron-phonon transport calculations)
   Other examples are given in the ~abinit/test/v2 directory. The latter three filename information
   is often not used by anaddb.
   The maximal length of names for the main input or output files is presently 264 characters.
@@ -520,9 +513,9 @@ Integer. Frequency-dependent dielectric tensor flag.
  <li> 1 => The frequency-dependent dielectric tensor is calculated.
            Requirements for preceding response-function DDB generation
            run:  electric-field and full atomic-displacement responses.
-           Set <a href="../input_variables/html_automatically_generated/varrf.html#rfstrs">rfstrs</a> = 1, 2, or 3 (preferably 3).
-           Set <a href="../input_variables/html_automatically_generated/varrf.html#rfatpol">rfatpol</a> and
-           <a href="../input_variables/html_automatically_generated/varrf.html#rfdir">rfdir</a> to do a full calculation of
+           Set <a href="../../input_variables/generated_files/varrf.html#rfstrs">rfstrs</a> = 1, 2, or 3 (preferably 3).
+           Set <a href="../../input_variables/generated_files/varrf.html#rfatpol">rfatpol</a> and
+           <a href="../../input_variables/generated_files/varrf.html#rfdir">rfdir</a> to do a full calculation of
              phonons at Q=0.
   The frequencies are defined by the
 <a href="anaddb_help.html#nfreq">nfreq</a>,
@@ -540,16 +533,16 @@ See <a href="anaddb_help.html#nph2l">nph2l</a>).</li>
   frequency is on the order of a few tenths of eV, and the
   band gap is larger than 5eV. Requirements for preceding response-function
   DDB generation: electric-field response.
-  Set <a href="../input_variables/html_automatically_generated/varrf.html#rfelfd">rfelfd</a> = 1 or 3 (preferably 3).
+  Set <a href="../../input_variables/generated_files/varrf.html#rfelfd">rfelfd</a> = 1 or 3 (preferably 3).
   Note that the same information on the electronic dielectric tensor will be printed in the
-  .out file of the <a href="../input_variables/html_automatically_generated/varrf.html#rfelfd">rfelfd</a> run.
+  .out file of the <a href="../../input_variables/generated_files/varrf.html#rfelfd">rfelfd</a> run.
 </li>
  <li> 3 => Compute and print the relaxed-ion dielectric tensor.
            Requirements for preceding response-function DDB generation
            run:  electric-field and full atomic-displacement responses.
-           Set <a href="../input_variables/html_automatically_generated/varrf.html#rfstrs">rfstrs</a> = 1, 2, or 3 (preferably 3).
-           Set <a href="../input_variables/html_automatically_generated/varrf.html#rfatpol">rfatpol</a> and
-           <a href="../input_variables/html_automatically_generated/varrf.html#rfdir">rfdir</a> to do a full calculation of
+           Set <a href="../../input_variables/generated_files/varrf.html#rfstrs">rfstrs</a> = 1, 2, or 3 (preferably 3).
+           Set <a href="../../input_variables/generated_files/varrf.html#rfatpol">rfatpol</a> and
+           <a href="../../input_variables/generated_files/varrf.html#rfdir">rfdir</a> to do a full calculation of
              phonons at Q=0 (needed because the inverse of
              force-constant tensor is required). Furthermore, in the anaddb input file the variable
              <a href="anaddb_help.html#nph2l">nph2l</a> must be nonzero in order to initiate
@@ -692,8 +685,8 @@ Flag for calculation of elastic and compliance tensors
            calculated.
            Requirements for preceding response-function DDB generation
            run:  Strain perturbation.
-           Set <a href="../input_variables/html_automatically_generated/varrf.html#rfstrs">rfstrs</a> to 1, 2, or 3.
-           Note that <a href="../input_variables/html_automatically_generated/varrf.html#rfstrs">rfstrs</a>=3 is recommended so that responses to
+           Set <a href="../../input_variables/generated_files/varrf.html#rfstrs">rfstrs</a> to 1, 2, or 3.
+           Note that <a href="../../input_variables/generated_files/varrf.html#rfstrs">rfstrs</a>=3 is recommended so that responses to
            both uniaxial and shear strains will be computed.
    </li>
  <li>2 => Both relaxed- and clamped-ion elastic and compliance tensor
@@ -704,9 +697,9 @@ Flag for calculation of elastic and compliance tensors
            the internal-strain tensor is needed to compute the relaxed-ion
            corrections.  Requirements for preceding response-function DDB
            generation run:  Strain and atomic-displacement responses at Q=0.
-           Set <a href="../input_variables/html_automatically_generated/varrf.html#rfstrs">rfstrs</a> = 1, 2, or 3 (preferably 3).
-           Set <a href="../input_variables/html_automatically_generated/varrf.html#rfatpol">rfatpol</a> and
-           <a href="../input_variables/html_automatically_generated/varrf.html#rfdir">rfdir</a> to do a full calculation of
+           Set <a href="../../input_variables/generated_files/varrf.html#rfstrs">rfstrs</a> = 1, 2, or 3 (preferably 3).
+           Set <a href="../../input_variables/generated_files/varrf.html#rfatpol">rfatpol</a> and
+           <a href="../../input_variables/generated_files/varrf.html#rfdir">rfdir</a> to do a full calculation of
              phonons at Q=0 (needed because the inverse of
              force-constant tensor is required).
    </li>
@@ -1229,9 +1222,9 @@ Internal strain tensor flag.
            internal-strain tensor.
            Requirements for preceding response-function DDB generation
            run:  Strain and full atomic-displacement responses.
-           Set <a href="../input_variables/html_automatically_generated/varrf.html#rfstrs">rfstrs</a> = 1, 2, or 3 (preferably 3).
-           Set <a href="../input_variables/html_automatically_generated/varrf.html#rfatpol">rfatpol</a> and
-           <a href="../input_variables/html_automatically_generated/varrf.html#rfdir">rfdir</a> to do a full calculation of
+           Set <a href="../../input_variables/generated_files/varrf.html#rfstrs">rfstrs</a> = 1, 2, or 3 (preferably 3).
+           Set <a href="../../input_variables/generated_files/varrf.html#rfatpol">rfatpol</a> and
+           <a href="../../input_variables/generated_files/varrf.html#rfdir">rfdir</a> to do a full calculation of
              phonons at Q=0.
   </li>
 </ul>
@@ -1257,7 +1250,7 @@ at constrained polarisation:
 calculated. Requirements for preceding response-function DDB generation
 run: Strain perturbation. Set <a
  href="../input_variables/html_automatically_generated/varrf.html#rfstrs">rfstrs</a> to 1, 2, or 3.
-Note that <a href="../input_variables/html_automatically_generated/varrf.html#rfstrs">rfstrs</a>=3
+Note that <a href="../../input_variables/generated_files/varrf.html#rfstrs">rfstrs</a>=3
 is recommended so that responses to both uniaxial and shear strains
 will be computed. </li>
   <li>2 =&gt; Both relaxed- and clamped-ion elastic and compliance
@@ -1266,7 +1259,7 @@ printed. The input variable <a href="anaddb_help.html#instrflag">instrflag</a>
 should also be set to 1, because the internal-strain tensor is needed
 to compute the relaxed-ion corrections. Requirements for preceding
 response-function DDB generation run: Strain and atomic-displacement
-responses at Q=0. Set <a href="../input_variables/html_automatically_generated/varrf.html#rfstrs">rfstrs</a>
+responses at Q=0. Set <a href="../../input_variables/generated_files/varrf.html#rfstrs">rfstrs</a>
 = 1, 2, or 3 (preferably 3). Set <a
  href="../input_variables/html_automatically_generated/varrf.html#rfatpol">rfatpol</a>rfatpol and <a
  href="../input_variables/html_automatically_generated/varrf.html#rfdir">rfdir</a> to do a full
@@ -1313,7 +1306,7 @@ variables</a>
 <br>
 <br>
 <font id="text">Un normalized lattice vectors for the k-point grid in reciprocal space
-(see <a href="../input_variables/html_automatically_generated/vargs.html#kptrlatt">abinit variable definition</a>as well).
+(see <a href="../../input_variables/generated_files/vargs.html#kptrlatt">abinit variable definition</a>as well).
 Input needed in electron-phonon calculations
 using nesting functions or tetrahedron integration. 
 </font><br>
@@ -1824,9 +1817,9 @@ to compute the relaxed-ion corrections. Requirements for preceding
 response-function DDB generation run: Strain, electric-field and full
 atomic-displacement responses at Q=0. Set <a
  href="../input_variables/html_automatically_generated/varrf.html#rfstrs">rfstrs</a> = 1, 2, or 3
-(preferably 3). Set <a href="../input_variables/html_automatically_generated/varrf.html#rfelfd">rfelfd</a>
-= 3. Set <a href="../input_variables/html_automatically_generated/varrf.html#rfatpol">rfatpol</a>
-and <a href="../input_variables/html_automatically_generated/varrf.html#rfdir">rfdir</a> to do a
+(preferably 3). Set <a href="../../input_variables/generated_files/varrf.html#rfelfd">rfelfd</a>
+= 3. Set <a href="../../input_variables/generated_files/varrf.html#rfatpol">rfatpol</a>
+and <a href="../../input_variables/generated_files/varrf.html#rfdir">rfdir</a> to do a
 full calculation of phonons at Q=0 (needed because the inverse of
 force-constant tensor is required). </li>
   <li>3 =&gt; Both relaxed and clamped-ion piezoelectric tensors will
@@ -2001,16 +1994,16 @@ variables</a>
 <font id="text">Further comments: </font>
 <p><font id="text"> a) Only the eigenvalues for k-points inside the
 Irreducible Brillouin zone are required. As a consequence it is
-possible to use <a href="../input_variables/html_automatically_generated/varbas.html#kptopt">kptopt</a>
+possible to use <a href="../../input_variables/generated_files/varbas.html#kptopt">kptopt</a>
 =1 during the GS calculation to reduce
 the computational effort.</font></p>
 <font id="text"> </font>
 <p><font id="text"> b) Only unshifted k-grids that are orthogonal in
 reduced space are supported by <a href="http://www.xcrysden.org">XCrySDen</a>.
-This implies that <a href="../input_variables/html_automatically_generated/varbas.html#shiftk">shiftk</a>
+This implies that <a href="../../input_variables/generated_files/varbas.html#shiftk">shiftk</a>
 must be set to (0,0,0) during the GS calculation
-with <a href="../input_variables/html_automatically_generated/varbas.html#nshiftk">nshiftk</a>=1.
-Furthermore if <a href="../input_variables/html_automatically_generated/vargs.html#kptrlatt">kptrlatt</a>
+with <a href="../../input_variables/generated_files/varbas.html#nshiftk">nshiftk</a>=1.
+Furthermore if <a href="../../input_variables/generated_files/vargs.html#kptrlatt">kptrlatt</a>
 is used to generate the k-grid, all the off-diagonal elements of this
 array must be zero.</font></p>
 <br>
@@ -2093,7 +2086,7 @@ using <a href="http://www.xcrysden.org">XCrySDen</a> (<b>prtnest</b>=2).
 Note that in the present implementation what is really printed to file is
 the "total nesting" defined as \sum_{nm} \chi_{nm}(q).
 Limitations: the k-grid defined by
-<a href="../input_variables/html_automatically_generated/vargs.html#kptrlatt">kptrlatt</a>
+<a href="../../input_variables/generated_files/vargs.html#kptrlatt">kptrlatt</a>
 must be orthogonal in reciprocal space,
 moreover off-diagonal elements are not allowed, i.e
 kptrlatt 4 0 0  0 4 0  0 0 4 is fine while
@@ -2820,9 +2813,8 @@ specified by the user (typical values for tolkms: 0.05 km/s).
 <br><br><br><br><a href=#top>Go to the top</a>
 <B> | </B><a href="anaddb_help.html#list">List of ANADDB input variables</a>
 <hr>
-<!-- end body -->
-
-<script type="text/javascript" src="list_internal_links.js"> </script>
+<script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
 
 </body>
 </html>
+
