@@ -29,6 +29,8 @@ users_path = "../../users/"
 # Path for yml and html files
 bib_ori = "bibliography/origin_files"
 bib_gen = "bibliography/generated_files"
+help_ori = "users/origin_files"
+help_gen = "users/generated_files"
 invars_ori = "input_variables/origin_files"
 invars_gen = "input_variables/generated_files"
 topics_ori = "topics/origin_files"
@@ -713,14 +715,14 @@ rc=finalize_html(all_topics_html,default_topic,dir_root,name_root,list_all_vars,
 ################################################################################
 
 # Automatic translation
-# of the theory_*html files to theory_*yml files
+# of the *_help.html files to *_help.yml files
 
 ################################################################################
 
 activate_translation=1
 if activate_translation==1:
 
-  docs=read_yaml_file(theory_ori+"/theorydocs.yml")
+  docs=read_yaml_file(help_ori+"/helps.yml")
 
   for i, doc_info in enumerate(docs):
 
@@ -729,16 +731,16 @@ if activate_translation==1:
     if name=="default":
       break
   
-    path_doc_html="theory/theory_"+name+".html"
-    path_doc_yml=theory_ori+"/theory_"+name+".yml"
+    path_doc_html="users/"+name+"_help.html"
+    path_doc_yml=help_ori+"/"+name+"_help.yml"
     print("Will use file "+path_doc_html+" to build the file "+path_doc_yml+" ... ",end="")
 
     f_doc_html=open(path_doc_html,"r")
     doc_html=f_doc_html.readlines()
 
     doc_yml=""
-    doc_yml+="# This YAML file contains the introduction as well as the body (including the table of content) of the html theory document.\n"
-    doc_yml+="# In order to modify the other parts, modify the file theorydocs.yml .\n"
+    doc_yml+="# This YAML file contains the introduction as well as the body (including the table of content) of the html help document.\n"
+    doc_yml+="# In order to modify the other parts, modify the file helps.yml .\n"
     doc_yml+="# This is the introduction ...\n"
     doc_yml+="intro : |\n"
 
@@ -774,10 +776,10 @@ if activate_translation==1:
   
         if "<a href=" in line:
           # Stabilize the own reference
-          string_old='href="theory_'+name+'.html'
+          string_old='href="'+name+'_help.html'
           string_new='href="'
           line=line.replace(string_old,string_new)
-          string_old='href="./theory_'+name+'.html'
+          string_old='href="./'+name+'_help.html'
           string_new='href="'
           line=line.replace(string_old,string_new)
           # Correct the references to the other files in the tutorial directory (transient measure in case of the "lesson_" files)
@@ -786,11 +788,11 @@ if activate_translation==1:
           line=line.replace(string_old,string_new)
           string_old='href="./lesson_'
           line=line.replace(string_old,string_new)
-          string_old='href="theory_'
-          string_new='href="../theory_'
-          line=line.replace(string_old,string_new)
-          string_old='href="./theory_'
-          line=line.replace(string_old,string_new)
+          #string_old='href="theory_'
+          #string_new='href="../theory_'
+          #line=line.replace(string_old,string_new)
+          #string_old='href="./theory_'
+          #line=line.replace(string_old,string_new)
           #string_old='href="welcome'
           #string_new='href="../welcome'
           #line=line.replace(string_old,string_new)
@@ -820,14 +822,14 @@ if activate_translation==1:
             string_new='href="../../users/'
             line=line.replace(string_old,string_new)
 
-        string_old='src="theory'
-        string_new='src="../documents/theory'
-        line=line.replace(string_old,string_new)
-        string_old='src="./theory'
-        line=line.replace(string_old,string_new)
-        string_old='src=./theory'
-        string_new='src=../documents/theory'
-        line=line.replace(string_old,string_new)
+        #string_old='src="theory'
+        #string_new='src="../documents/theory'
+        #line=line.replace(string_old,string_new)
+        #string_old='src="./theory'
+        #line=line.replace(string_old,string_new)
+        #string_old='src=./theory'
+        #string_new='src=../documents/theory'
+        #line=line.replace(string_old,string_new)
 
         doc_yml+="  "+line
 
