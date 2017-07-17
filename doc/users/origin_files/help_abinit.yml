@@ -5,7 +5,7 @@ intro : |
   <p>The new user is advised to read first the
     <a href="new_user_guide.html">new user's guide</a>,
     before reading the present file. It will be easier to discover the
-    present file with the help of the <a href="../tutorial/welcome.html">tutorial</a>.
+    present file with the help of the [[lesson_welcome]] file.
   <p>It is worthwhile to print this help file, for ease of reading.
   
   <p>When the user will be sufficiently familiarized with ABINIT, reading the

@@ -106,7 +106,7 @@ def make_links(text,cur_key,variables,characteristics,specials,backlinks,backlin
       return '<a href="../../input_variables/generated_files/'+key+".html\">"+key+"</a>"
     elif key[:7] == "lesson_":
       return '<a href="../../tutorial/generated_files/'+key+".html\">"+key+"</a>"
-    elif key[-5:] == "_help":
+    elif key[:5] == "help_":
       return '<a href="../../users/'+key+".html\">"+key+"</a>"
     else:
       result=get_year(key)

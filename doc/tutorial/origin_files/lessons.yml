@@ -200,7 +200,7 @@
       <hr>
       <a name="top"></a>
     title : |
-      <h1>ABINIT tutorial. __KEYWORD__ :</h1>
+      <h1>ABINIT tutorial. __KEYWORD__...</h1>
     subtitle : |
       Default subtitle ... this is an error
     copyright : |

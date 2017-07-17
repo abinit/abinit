@@ -5,15 +5,15 @@ intro : |
 # This is the body, including the table of content ...
 body : |
   <ul>
-  <li><a href="new_user_guide.html#0">0.</a> Foreword
-  <li><a href="new_user_guide.html#1">1.</a> Introduction
-  <li><a href="new_user_guide.html#2">2.</a> The ABINIT executable : abinit
-  <li><a href="new_user_guide.html#3">3.</a> Other programs in the ABINIT package.
-  <li><a href="new_user_guide.html#4">4.</a> Other resources outside the ABINIT package.
-  <li><a href="new_user_guide.html#5">5.</a> Input variables to abinit.
-  <li><a href="new_user_guide.html#6">6.</a> Output files.
-  <li><a href="new_user_guide.html#7">7.</a> What does the code do?
-  <li><a href="new_user_guide.html#8">8.</a> Versioning logic.
+  <li><a href="#0">0.</a> Foreword
+  <li><a href="#1">1.</a> Introduction
+  <li><a href="#2">2.</a> The ABINIT executable : abinit
+  <li><a href="#3">3.</a> Other programs in the ABINIT package.
+  <li><a href="#4">4.</a> Other resources outside the ABINIT package.
+  <li><a href="#5">5.</a> Input variables to abinit.
+  <li><a href="#6">6.</a> Output files.
+  <li><a href="#7">7.</a> What does the code do?
+  <li><a href="#8">8.</a> Versioning logic.
   </ul>
   
   <HR ALIGN=left>
@@ -47,7 +47,7 @@ body : |
   Cambridge University Press (2004) ISBN 0 521 78285 6.</cite>
   
   <p>After having gone through the present New User's Guide, you should
-  follow the <a href="../tutorial/welcome.html">ABINIT tutorial</a>.
+  follow the ABINIT tutorial ([[lesson_welcome]]).
   
   <p>&nbsp;</p>
   <HR ALIGN=left>
@@ -85,7 +85,7 @@ body : |
     package after download. In practice, a version number is appended to this name, to give for
     example : abinit-8.4.0 . 
     The ABINIT package versioning scheme is explained 
-    <a href="new_user_guide.html#8">later in this file</a>.
+    <a href="#8">later in this file</a>.
   
   <p>
     ~abinit contains different subdirectories. For example,
