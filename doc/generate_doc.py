@@ -24,7 +24,6 @@ from doc.pymods.lib_to_assemble_html import *
 debug = 0
 
 # Relative path from HTML files
-js_path = "../../js_files/"
 users_path = "../../users/"
 
 # Path for yml and html files
@@ -50,7 +49,7 @@ tuto_gen = "tutorial/generated_files"
 bibyml=read_yaml_file(bib_ori+"/bibhtml.yml")
 lessons=read_yaml_file(tuto_ori+"/lessons.yml")
 list_of_topics=read_yaml_file(topics_ori+"/list_of_topics.yml")
-sections=read_yaml_file(invars_ori+"/sections.yml")
+varfiles=read_yaml_file(invars_ori+"/varfiles.yml")
 tests_dirs=read_yaml_file(topics_ori+"/tests_dirs.yml")
 theorydocs=read_yaml_file(theory_ori+"/theorydocs.yml")
 variables=read_yaml_file(invars_ori+"/abinit_vars.yml")
@@ -342,25 +341,25 @@ print("File %s has been written ..." %file_txt)
 ################################################################################
 ################################################################################
 
-# Generate the different "section" files (var*.html, specials.html, allvariables.html)
+# Generate the different varfile files (var*.html, specials.html, allvariables.html)
 
 ################################################################################
 # Initialization to constitute the body of the specials and var*.html files
 
 all_vars = dict()
 all_contents = dict()
-for i, section_info in enumerate(sections):
-  section = section_info.name
-  all_vars[section] = []
-  all_contents[section]= "<br><br><br><br><hr>\n"
+for i, varfile_info in enumerate(varfiles):
+  varfile = varfile_info.name
+  all_vars[varfile] = []
+  all_contents[varfile]= "<br><br><br><br><hr>\n"
 
-# Create a dictionary that gives the section for each abivarname
+# Create a dictionary that gives the varfile for each abivarname
 list_all_vars = dict()
 for var in variables:
-  list_all_vars[var.abivarname] = var.section
+  list_all_vars[var.abivarname] = var.varfile
 
 ################################################################################
-# Constitute the body of information for the special parameters, stored for the appropriate section in all_contents[section]
+# Constitute the body of information for the special parameters, stored for the appropriate varfile in all_contents[varfile]
 
 cur_specials = []
 for (specialkey,specialval) in list_specials:
@@ -378,14 +377,14 @@ for (speckey, specval) in list_specials:
   all_contents["specials"] = all_contents["specials"] + cur_content + "\n\n"
 
 ################################################################################
-# Constitute the body of information for all variables, stored for the appropriate section in all_contents[section]
+# Constitute the body of information for all variables, stored for the appropriate varfile in all_contents[varfile]
 
 for i, var in enumerate(variables):
   # Constitute the body of information related to one input variable
-  section = var.section
-  all_vars[section].append([var.abivarname,var.mnemonics])
+  varfile = var.varfile
+  all_vars[varfile].append([var.abivarname,var.mnemonics])
   cur_content = ""
-  backlink=' &nbsp; <a href="../../%s/%s.html#%s">%s</a> &nbsp; ' %(invars_gen,section,var.abivarname,var.abivarname)
+  backlink=' &nbsp; <a href="../../%s/%s.html#%s">%s</a> &nbsp; ' %(invars_gen,varfile,var.abivarname,var.abivarname)
 
   try:
     # Title
@@ -440,7 +439,7 @@ for i, var in enumerate(variables):
     cur_content += "<br><br><a href=#top>Go to the top</a>\n"
     cur_content += "<B> | </B><a href=\"allvariables.html#top\">Complete list of input variables</a><hr>\n"
     #
-    all_contents[section] = all_contents[section] + cur_content + "\n\n"
+    all_contents[varfile] = all_contents[varfile] + cur_content + "\n\n"
   except AttributeError as e:
     print(e)
     print('For variable : ',abivarname)
@@ -451,20 +450,20 @@ for i, var in enumerate(variables):
 suppl_components={}
 
 # Store the default informations
-for i, section_info in enumerate(sections):
-  if section_info.name.strip()=="default":
-    section_info_default=section_info
+for i, varfile_info in enumerate(varfiles):
+  if varfile_info.name.strip()=="default":
+    varfile_info_default=varfile_info
 
-# Generate each "normal" section file : build the missing information (table of content), assemble the content, apply global transformations, then write.
-for i, section_info in enumerate(sections):
-  section = section_info.name
-  if section=="default":
+# Generate each "normal" varfile file : build the missing information (table of content), assemble the content, apply global transformations, then write.
+for i, varfile_info in enumerate(varfiles):
+  varfile = varfile_info.name
+  if varfile=="default":
     continue
 
   #Generate the body of the table of content 
   cur_let = 'A'
   toc_body = " <br>"+cur_let+".\n"
-  if section=="allvariables":
+  if varfile=="allvariables":
     for i, var in enumerate(variables):
       while not var.abivarname.startswith(cur_let.lower()):
         cur_let = chr(ord(cur_let)+1)
@@ -472,9 +471,9 @@ for i, section_info in enumerate(sections):
       abivarname=var.abivarname
       if var.characteristics is not None and '[[INTERNAL_ONLY]]' in var.characteristics:
         abivarname = '%'+abivarname
-      curlink = " <a href=\""+var.section+".html#"+var.abivarname+"\">"+abivarname+"</a>&nbsp;&nbsp;\n"
+      curlink = " <a href=\""+var.varfile+".html#"+var.abivarname+"\">"+abivarname+"</a>&nbsp;&nbsp;\n"
       toc_body += curlink
-  elif section == "specials":
+  elif varfile == "specials":
     for (speckey, specval) in list_specials:
       while not speckey.lower().startswith(cur_let.lower()):
         cur_let = chr(ord(cur_let)+1)
@@ -482,7 +481,7 @@ for i, section_info in enumerate(sections):
       curlink = " <a href=\"#"+speckey+"\">"+speckey+"</a>&nbsp;&nbsp;\n"
       toc_body += curlink
   else:
-    for abivarname,defi in all_vars[section]:
+    for abivarname,defi in all_vars[varfile]:
       while not abivarname.startswith(cur_let.lower()):
         cur_let = chr(ord(cur_let)+1)
         toc_body += " <br>"+cur_let+".\n"
@@ -490,30 +489,10 @@ for i, section_info in enumerate(sections):
       toc_body += curlink
   toc_body += "\n"
 
-  suppl={"toc":toc_body , "content":all_contents[section]}
-  suppl_components[section]=suppl
+  suppl={"toc":toc_body , "content":all_contents[varfile]}
+  suppl_components[varfile]=suppl
 
-rc=assemble_html(sections,suppl_components,"input_variables","",list_all_vars,list_chars,cur_specials,backlinks)
-
-  #Write a first version of the html file, in the order "header" ... up to the "end"
-  #Take the info from the section "default" if there is no information on the specific section provided in the yml file.
-  #sectionhtml=""
-  #for j in ["header","title","subtitle","purpose","advice","copyright","links","menu","tofcontent_header","tofcontent_body","content","links","end"]:
-  #  if j == "tofcontent_body":
-  #    sectionhtml += toc_body
-  #  elif j == "content":
-  #    sectionhtml += all_contents[section]
-  #  else:
-  #    extract_j=getattr(section_info,j) 
-  #    if extract_j.strip() == "":
-  #      sectionhtml += getattr(section_info_default,j) 
-  #    else:
-  #      sectionhtml += extract_j
-  #  sectionhtml += "\n"
- 
-  #dir_root="input_variables"
-  #name_root=""
-  #rc=finalize_html(sectionhtml,section_info,dir_root,name_root,list_all_vars,list_chars,cur_specials,backlinks)
+rc=assemble_html(varfiles,suppl_components,"input_variables","",list_all_vars,list_chars,cur_specials,backlinks)
 
 ################################################################################
 ################################################################################
@@ -521,8 +500,8 @@ rc=assemble_html(sections,suppl_components,"input_variables","",list_all_vars,li
 # Generate the different "topic" files
 
 ################################################################################
-# Constitute the section "Related input variables" for all topic files. 
-# This section in input variables is stored, for each topic_name, in topic_invars[topic_name]
+# Constitute the component "Related input variables" for all topic files. 
+# This component in input variables is stored, for each topic_name, in topic_invars[topic_name]
 
 topic_invars = dict()
 found = dict()
@@ -552,15 +531,15 @@ for (tclasskey, tclassval) in list_topics_class:
             abivarname=var.abivarname
             if var.characteristics is not None and '[[INTERNAL_ONLY]]' in var.characteristics:
               abivarname = '%'+abivarname
-            topic_invars[topic_name] += '... <a href="../../'+invars_gen+'/'+var.section+'.html#'+var.abivarname+'">'+abivarname+'</a>   '
+            topic_invars[topic_name] += '... <a href="../../'+invars_gen+'/'+var.varfile+'.html#'+var.abivarname+'">'+abivarname+'</a>   '
             topic_invars[topic_name] += "["+var.mnemonics+"]<br>\n"
     except:
       if debug==1 :
        print(" No topics for abivarname "+var.abivarname) 
 
 ################################################################################
-# Constitute the section "Selected input files" for all topic files.
-# This section on input files in topics  is stored, for each topic_name, in topic_infiles[topic_name]
+# Constitute the component "Selected input files" for all topic files.
+# This component on input files in topics  is stored, for each topic_name, in topic_infiles[topic_name]
 
 topic_infiles = dict()
 
@@ -675,7 +654,7 @@ for topic_name in list_of_topics:
   toc+= "</ul>"
 
   #Generate a first version of the html file, in the order "header" ... up to the "end"
-  #Take the info from the section "default" if there is no information on the specific section provided in the yml file.
+  #Take the info from the component "default" if there is no information on the specific component provided in the yml file.
   topic_html=""
   for j in ["header","title","subtitle","copyright","links","toc","introduction","examples","tutorials","input_variables","input_files","references","links","end"]:
     if j == "toc":
@@ -714,7 +693,7 @@ for topic_name in list_of_topics:
 # Generate the file with the list of names of different "topic" files
 
 #Generate a first version of the html file, in the order "header" ... up to the "end"
-#Take the info from the section "default" if there is no information on the specific section provided in the yml file.
+#Take the info from the component "default" if there is no information on the specific component provided in the yml file.
 all_topics_html=""
 for j in ["header","title","subtitle","copyright","links","toc_all","links","end"]:
   if j == "toc_all":
@@ -745,7 +724,7 @@ if activate_translation==1:
 
   for i, doc_info in enumerate(docs):
 
-    # Skip the default section
+    # Skip the default component
     name = doc_info.name
     if name=="default":
       break
@@ -823,13 +802,13 @@ if activate_translation==1:
             for i, var in enumerate(variables):
               if var.abivarname in line:
                 name = var.abivarname
-                section = var.section
-                string_old='<a href="../input_variables/html_automatically_generated/%s.html#%s" target="kwimg">%s</a>'%(section,name,name)
+                varfile = var.varfile
+                string_old='<a href="../input_variables/html_automatically_generated/%s.html#%s" target="kwimg">%s</a>'%(varfile,name,name)
                 string_new="[["+name+"]]"
                 line=line.replace('"'+string_old+'"',string_new)
                 line=line.replace(string_old,string_new)
                 # Slight variation
-                string_old='<a href="../input_variables/html_automatically_generated/%s.html#%s" target="kwimg">%s</a>'%(section,name,name)
+                string_old='<a href="../input_variables/html_automatically_generated/%s.html#%s" target="kwimg">%s</a>'%(varfile,name,name)
                 line=line.replace('"'+string_old+'"',string_new)
                 line=line.replace(string_old,string_new)
             # Otherwise, correct the path
@@ -884,7 +863,7 @@ returncode=assemble_html(theorydocs,suppl_components,"theory","theory",list_all_
 # Come back to the bibliography
 
 ################################################################################
-# Treat the links within the "introduction" of the acknowledgment section first.
+# Treat the links within the "introduction" of the acknowledgment component first.
 
 backlink= ' &nbsp; <a href="../../%s/acknowledgments.html">acknowledgments.html</a> &nbsp; ' %(bib_gen)
 for i, bibyml_info in enumerate(bibyml):

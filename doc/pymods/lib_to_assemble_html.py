@@ -96,8 +96,8 @@ def make_links(text,cur_key,variables,characteristics,specials,backlinks,backlin
     if key == cur_key:
       return "<b>"+cur_key+"</b>"
     elif key in variables.keys():
-      section = variables[key]
-      return '<a href="../../input_variables/generated_files/'+section+".html#"+key+"\">"+key+"</a>"
+      varfile = variables[key]
+      return '<a href="../../input_variables/generated_files/'+varfile+".html#"+key+"\">"+key+"</a>"
     elif key in characteristics:
       return '<a href="'+users_path+'abinit_help.html#'+str.replace(key.lower()," ","_")+"\">"+key+"</a>"
     elif key in specials:
@@ -179,8 +179,8 @@ def read_yaml_file(ymlfile):
     print("Use "+ymlfile+" as database input file for the input variables and their characteristics ...")
   elif ymlfile== topics_ori+"list_of_topics.yml":
     print("Use "+ymlfile+" as database input file for the list of topics ...")
-  elif ymlfile== invars_ori+"/sections.yml":
-    print("Use "+ymlfile+" as database input file for the list of sections ...")
+  elif ymlfile== invars_ori+"/varfiles.yml":
+    print("Use "+ymlfile+" as database input file for the list of varfiles ...")
   elif ymlfile== tuto_ori+"/lessons.yml":
     print("Use "+ymlfile+" as database input file for the list of lessons ...")
   elif ymlfile== theory_ori+"/theorydocs.yml":
@@ -308,8 +308,8 @@ def assemble_html(origin_yml_files,suppl_components,dir_root,name_root,list_all_
       suppl=suppl_components[name]
 
     #Write a first version of the html file, in the order "header" ... up to the "end"
-    #Take the info from the section "default" if there is no information on the specific section provided in the yml file.
-    #Also, format specifically selected sections.
+    #Take the info from the components "default" if there is no information on the specific document provided in the yml file.
+    #Also, format specifically selected components.
 
     doc_html=""
     for j in ["header","title","subtitle","purpose","advice","intro","copyright","links","menu",
@@ -336,11 +336,11 @@ def assemble_html(origin_yml_files,suppl_components,dir_root,name_root,list_all_
         except:
           pass
 
-      # If there is nothing in the section, continue
+      # If there is nothing in the component, continue
       if item=="" or item=="default" :
         continue
       
-      # Possibly apply format to selected sections
+      # Possibly apply format to selected components
       if j =="subtitle":
         item = "<h2>"+item+"</h2>\n<hr>"
 

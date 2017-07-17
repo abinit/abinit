@@ -1,9 +1,9 @@
 # This file provides the information needed to generate the documentation files that describes the input variables,
-# the "var*.html files (each being a "section"), as well as related parameters ("special"), and the list of all input variables. 
+# the "var*.html files, as well as related parameters ("special"), and the list of all input variables. 
 # Each paragraph of such documentation file has a mix of formatting html information and real content.
 
 # The present file contains the html information.
-# The "default" html information is presented in the section "default", at the bottom of the file. 
+# The "default" html information is presented in the varfile "default", at the bottom of the file. 
 # For most of the var*.html files, the default html formatting is hardly changed, so only minimal information
 # is needed to generate them. For the "special" parameters and for the list of all input variables,
 # some minor adjustments are needed, so that the default list # is less adequate.
