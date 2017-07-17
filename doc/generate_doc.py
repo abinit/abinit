@@ -49,6 +49,7 @@ tuto_gen = "tutorial/generated_files"
  
 
 bibyml=read_yaml_file(bib_ori+"/bibhtml.yml")
+helps=read_yaml_file(help_ori+"/helps.yml")
 lessons=read_yaml_file(tuto_ori+"/lessons.yml")
 list_of_topics=read_yaml_file(topics_ori+"/list_of_topics.yml")
 varfiles=read_yaml_file(invars_ori+"/varfiles.yml")
@@ -715,7 +716,7 @@ rc=finalize_html(all_topics_html,default_topic,dir_root,name_root,list_all_vars,
 ################################################################################
 
 # Automatic translation
-# of the *_help.html files to *_help.yml files
+# of the *_help.html files to help_*.yml files
 
 ################################################################################
 
@@ -732,7 +733,7 @@ if activate_translation==1:
       break
   
     path_doc_html="users/"+name+"_help.html"
-    path_doc_yml=help_ori+"/"+name+"_help.yml"
+    path_doc_yml=help_ori+"/help_"+name+".yml"
     print("Will use file "+path_doc_html+" to build the file "+path_doc_yml+" ... ",end="")
 
     f_doc_html=open(path_doc_html,"r")
@@ -850,14 +851,16 @@ if activate_translation==1:
 ################################################################################
 
 # Assemble the html files to be generated from the yml information.
-# In order : tutorial/lessons_*
-#            theory/theory_*
+# In order : tutorial, files lessons_*
+#            theory, files theory_*
+#            users,  files *_help
  
 ################################################################################
 
 suppl_components={}
 returncode=assemble_html(lessons,suppl_components,"tutorial","lesson",list_all_vars,list_chars,cur_specials,backlinks)
 returncode=assemble_html(theorydocs,suppl_components,"theory","theory",list_all_vars,list_chars,cur_specials,backlinks)
+returncode=assemble_html(helps,suppl_components,"users","help",list_all_vars,list_chars,cur_specials,backlinks)
 
 ################################################################################
 ################################################################################
