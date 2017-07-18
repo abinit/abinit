@@ -94,7 +94,7 @@ def make_links(text,cur_key,allowed_link_seeds,backlinks,backlink):
   def replace_link(mymatch):
     key = mymatch.group()[2:-2]
     if key == cur_key:
-      return "<b>"+cur_key+"</b>"
+      return "<b>"+key+"</b>"
     if key in allowed_link_seeds.keys():
       value=allowed_link_seeds[key]
       if "input_variable in " in value:
@@ -111,6 +111,8 @@ def make_links(text,cur_key,allowed_link_seeds,backlinks,backlink):
         return '<a href="../../theory/generated_files/'+key+'.html">'+key+'</a>'
       elif value=="helpfile":
         return '<a href="../../users/generated_files/'+key+'.html">'+key+'</a>'
+      elif value=="in_tests":
+        return '<a href="../../'+key+'">~abinit/'+key+'</a>'
       elif value=="allvariables":
         return '<a href="../../input_variables/generated_files/allvariables.html">'+key+'</a>'
       elif value=="bibID":
@@ -118,8 +120,8 @@ def make_links(text,cur_key,allowed_link_seeds,backlinks,backlink):
         if result != -9999 :
           backlinks[key]+=backlink+";;"
           return '[<a href="../../bibliography/generated_files/bibliography.html#'+key+'">'+key+'</a>]'
-    else:
-      return '<a href="#">[[FAKE LINK:'+key+']]</a>'
+
+    return '<a href="#">[[FAKE LINK:'+key+']]</a>'
 
   p=re.compile("\\[\\[([a-zA-Z0-9_ */<>]*)\\]\\]")
   if text is None:

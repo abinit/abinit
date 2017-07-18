@@ -62,6 +62,7 @@ with open(bib_ori+'/abiref.bib')  as bibtex_file:
 
 ################################################################################
 # Parse the ABINIT input files, in order to find the possible topics to which they are linked -> topics_in_tests
+# Also constitute the list of allowed links to tests files.
 
 try :
   rm_cmd = "rm "+topics_gen+"/topics_in_tests.yml"
@@ -71,12 +72,24 @@ except :
     print("rm "+topics_gen+"/topics_in_tests.yml failed")
     print("the file was likely non existent")
 
+allowed_links_in_tests=[]
 for tests_dir in tests_dirs :
   grep_cmd = "grep topics tests/%s/Input/*.in > %s/topics_in_tests.txt"%(tests_dir,topics_gen)
   retcode = os.system(grep_cmd)
   if retcode == 0 :
     sed_cmd = "sed -e 's/^/- /' %s/topics_in_tests.txt >> %s/topics_in_tests.yml"%(topics_gen,topics_gen)
     retcode = os.system(sed_cmd)
+
+  # Allowed links
+  path_dir_input="tests/%s/Input"%(tests_dir)
+  list_files=os.listdir(path_dir_input)
+  for file in list_files:
+    allowed_links_in_tests.append(path_dir_input+'/'+file)
+  if tests_dir[:4] == 'tuto':
+    path_dir_refs="tests/%s/Refs"%(tests_dir)
+    list_files=os.listdir(path_dir_refs)
+    for file in list_files:
+      allowed_links_in_tests.append(path_dir_refs+'/'+file)
 
 topics_in_tests=read_yaml_file(topics_gen+"/topics_in_tests.yml")
 if debug==1 :
@@ -368,6 +381,8 @@ for i, help_info in enumerate(helps):
 for ref in bibtex_dics:
   ID=ref["ID"]
   allowed_link_seeds[ID]="bibID"
+for file in allowed_links_in_tests:
+  allowed_link_seeds[file]="in_tests"
 
 # Specific allowed seeds
 allowed_link_seeds["allvariables"]="allvariables"
