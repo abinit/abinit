@@ -1235,15 +1235,16 @@ subroutine ifc_speedofsound(ifc, crystal, qrad_tolkms, ncid, comm)
    write(std_out,'(2(a,i6),a,3es12.4,a,es12.4)') &
      " Lebedev-Laikov grid: ",igrid,", npts: ", npts, " vs_sphavg(ac_modes): ",quad, " <vs>: ",sum(quad)/3
 
-   prev_quad = quad ! GA: These two assignments used to be after the check
-   vs(7, :) = quad  !     on the convergence.
    if (igrid > 1) then
      if (abs(sum(quad - prev_quad)/3) < tolkms) then
-        converged = converged + 1; if (converged == 2) exit
+        converged = converged + 1; !if (converged == 2) exit
      else
         converged = 0
      end if
    end if
+   prev_quad = quad
+   vs(7, :) = quad
+   if (converged == 2) exit
  end do ! igrid
 
  if (my_rank == master) then
