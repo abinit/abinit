@@ -47,11 +47,7 @@
     name : optic
     keyword : the Optic utility
     authors : SS,XG,YG
-    subtitle : |
-      This file explains the i/o parameters needed for the calculation of the
-      frequency dependent linear optical dielectric function and second order
-      nonlinear optical susceptibility, thanks to the Optic utility
-      of the ABINIT package.
+    subtitle : Frequency dependent linear optical dielectric function and second order nonlinear optical susceptibility.
 - !components
     name : respfn
     keyword : response functions
@@ -60,6 +56,17 @@
       <h1>Auxiliary help file for the main code of the ABINIT package : response functions.</h1>
     subtitle : |
       This file complements the main [[help_abinit]], for matters related to response functions.
+- !components
+    name : what_ABINIT_does
+    keyword : what_ABINIT_does
+    authors : FJ
+    title : |
+      <h1> What ABINIT does ...</h1>
+    subtitle : |
+      A beginner's overview.
+    tofcontent_header : |
+      <a name="list"></a>
+      <h3><b> Table of contents:</b></h3>
 - !components
     name : default
     keyword : Default keyword ... this is an error

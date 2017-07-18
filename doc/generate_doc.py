@@ -387,14 +387,6 @@ for file in allowed_links_in_tests:
 # Specific allowed seeds
 allowed_link_seeds["allvariables"]="allvariables"
 
-#DEBUG
-print("")
-for key in allowed_link_seeds.keys():
-  if "tutorespfn" in key and "nlo" in key:
-    print(" allowed_link_seeds (key,value):",key,allowed_link_seeds[key])
-print("")
-#ENDDEBUG
-
 ################################################################################
 ################################################################################
 
