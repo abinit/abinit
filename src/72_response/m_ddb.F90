@@ -1680,7 +1680,7 @@ subroutine ddb_from_file(ddb,filename,brav,natom,natifc,atifc,crystal,comm,prtvo
 
 ! Must read natom from the DDB before being able to allocate some arrays needed for invars9
  ddbun = get_unit()
- call ddb_hdr_open_read(ddb_hdr,filename,ddbun,DDB_VERSION,comm=comm,&
+ call ddb_hdr_open_read(ddb_hdr,filename,ddbun,DDB_VERSION, comm=comm,&
 &                       dimonly=1)
 
  nblok = ddb_hdr%nblok
