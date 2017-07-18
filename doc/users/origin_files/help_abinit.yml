@@ -3,7 +3,7 @@
 # This is the introduction ...
 intro : |
   <p>The new user is advised to read first the
-    <a href="new_user_guide.html">new user's guide</a>,
+    [[help_new_user]],
     before reading the present file. It will be easier to discover the
     present file with the help of the [[lesson_welcome]] file.
   <p>It is worthwhile to print this help file, for ease of reading.
@@ -12,8 +12,7 @@ intro : |
     ~abinit/doc/users/tuning.txt file might be useful (this file, as many additional
     documentation files, is not available on the Web, but is available in the package).
     For response-function calculations using
-    abinit, the complementary respfn help file
-    <a href="respfn_help.html">~abinit/doc/users/respfn_help.html</a>
+    abinit, the complementary [[help_respfn]]
     is needed.
 # This is the body, including the table of content ...
 body : |
