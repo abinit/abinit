@@ -172,6 +172,9 @@ program anaddb
 
  ! Must read natom from the DDB before being able to allocate some arrays needed for invars9
 
+ ! BEGIN DEBUG
+ !call ddb_getdims(dimekb,filnam(3),lmnmax,mband,mtyp,msym,natom,nblok,nkpt,ntypat,ddbun,usepaw,DDB_VERSION,comm)
+
  call ddb_hdr_open_read(ddb_hdr,filnam(3),ddbun,DDB_VERSION,comm=comm, &
 &                       dimonly=1)
 
@@ -181,6 +184,7 @@ program anaddb
  usepaw = ddb_hdr%usepaw
 
  call ddb_hdr_free(ddb_hdr)
+ ! END DEBUG
 
  mpert=natom+6
  msize=3*mpert*3*mpert; if (mtyp==3) msize=msize*3*mpert
@@ -227,8 +231,16 @@ program anaddb
  call wrtout(std_out,message,'COLL')
  call wrtout(ab_out,message,'COLL')
 
+ ! DEBUG
+ !write(*,*) 'anaddb: natom=', natom
+ ! END DEBUG
  call ddb_from_file(ddb,filnam(3),inp%brav,natom,inp%natifc,inp%atifc,Crystal,comm, prtvol=inp%prtvol)
  nsym = Crystal%nsym
+ ! DEBUG
+ !do ii=1,Crystal%ntypat
+ !  write(*,*)'anaddb: amu=', crystal%amu(ii)
+ !end do
+ ! END DEBUG
 
  ! Acoustic Sum Rule
  ! In case the interatomic forces are not calculated, the
