@@ -1126,7 +1126,7 @@ subroutine ifc_speedofsound(ifc, crystal, qrad_tolkms, ncid, comm)
  integer :: ii,nu,igrid,my_rank,nprocs,ierr,converged,npts,num_negw,vs_ierr,ncerr
  integer :: iatom,iatref,num_acoustic,isacoustic
  real(dp) :: min_negw,cpu,wall,gflops
- real(dp) :: qrad,tolkms
+ real(dp) :: qrad,tolkms,diff
  character(len=500) :: msg
  type(lebedev_t) :: lgrid
 !arrays
@@ -1236,7 +1236,12 @@ subroutine ifc_speedofsound(ifc, crystal, qrad_tolkms, ncid, comm)
      " Lebedev-Laikov grid: ",igrid,", npts: ", npts, " vs_sphavg(ac_modes): ",quad, " <vs>: ",sum(quad)/3
 
    if (igrid > 1) then
-     if (abs(sum(quad - prev_quad)/3) < tolkms) then
+     diff = zero
+     do nu=1,3
+       diff = diff + abs(quad(nu) - prev_quad(nu)) / 3
+     end do
+     !if (abs(sum(quad - prev_quad)/3) < tolkms) then
+     if (diff < tolkms) then
         converged = converged + 1
      else
         converged = 0
