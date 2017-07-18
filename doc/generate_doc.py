@@ -371,13 +371,13 @@ for i, varfile_info in enumerate(varfiles):
   allowed_link_seeds[varfile]="varfile"
 for i, lesson_info in enumerate(lessons):
   lesson = lesson_info.name
-  allowed_link_seeds[lesson]="lesson"
+  allowed_link_seeds["lesson_"+lesson]="lesson"
 for i, theory_info in enumerate(theorydocs):
   theorydoc = theory_info.name
-  allowed_link_seeds[theorydoc]="theorydoc"
+  allowed_link_seeds["theory_"+theorydoc]="theorydoc"
 for i, help_info in enumerate(helps):
   helpfile = help_info.name
-  allowed_link_seeds[helpfile]="helpfile"
+  allowed_link_seeds["help_"+helpfile]="helpfile"
 for ref in bibtex_dics:
   ID=ref["ID"]
   allowed_link_seeds[ID]="bibID"
@@ -386,6 +386,14 @@ for file in allowed_links_in_tests:
 
 # Specific allowed seeds
 allowed_link_seeds["allvariables"]="allvariables"
+
+#DEBUG
+print("")
+for key in allowed_link_seeds.keys():
+  if "tutorespfn" in key and "nlo" in key:
+    print(" allowed_link_seeds (key,value):",key,allowed_link_seeds[key])
+print("")
+#ENDDEBUG
 
 ################################################################################
 ################################################################################

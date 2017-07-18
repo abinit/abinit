@@ -59,8 +59,7 @@
     title : | 
       <h1>Auxiliary help file for the main code of the ABINIT package : response functions.</h1>
     subtitle : |
-      This file complements the main <a href="abinit_help.html"><b>help file</b></a> of the ABINIT
-      code, for matters related to response functions.
+      This file complements the main [[help_abinit]], for matters related to response functions.
 - !components
     name : default
     keyword : Default keyword ... this is an error

@@ -195,20 +195,14 @@ body : |
     <p>The names of all the parameters can be found in the
       <A href="../input_variables/html_automatically_generated/allvariables.html">input variables</a> file.
       The list of input variables present in the latter file links them to their definitions,
-      contained in different files, e.g. :
+      contained in different files, of which some are listed here:
   <ul>
-  <li> Basic variables, <A href="../input_variables/html_automatically_generated/varbas.html">VARBAS</a></li>
-  <li> Development variables, <A href="../input_variables/html_automatically_generated/vardev.html">VARDEV</a></li>
-  <li> Files handling variables, <A href="../input_variables/html_automatically_generated/varfil.html">VARFIL</a></li>
-  <li> Geometry builder + symmetry related variables, <A href="../input_variables/html_automatically_generated/vargeo.html">VARGEO</a></li>
-  <li> Ground-state calculation variables, <A href="../input_variables/html_automatically_generated/vargs.html">VARGS</a></li>
-  <li> GW variables, <A href="../input_variables/html_automatically_generated/vargw.html">VARGW</a></li>
-  <li> Internal variables, <A href="../input_variables/html_automatically_generated/varint.html">VARINT</a></li>
-  <li> Parallelisation variables, <A href="../input_variables/html_automatically_generated/varpar.html">VARPAR</a></li>
-  <li> Projector-Augmented Wave variables, <A href="../input_variables/html_automatically_generated/varpaw.html">VARPAW</a></li>
-  <li> Response Function variables, <A href="../input_variables/html_automatically_generated/varrf.html">VARRF</a></li>
-  <li> Structure optimization variables, <A href="../input_variables/html_automatically_generated/varrlx.html">VARRLX</a></li>
-  <li> Wannier functions variables, <A href="../input_variables/html_automatically_generated/varw90.html">VARWAN</a></li>
+  <li> Basic variables, [[varbas]]</li>
+  <li> Files handling variables, [[varfil]]</li>
+  <li> Ground-state calculation variables, [[vargs]]</li>
+  <li> GW variables, [[vargw]]</li>
+  <li> Parallelisation variables, [[varpar]]</li>
+  <li> Response Function variables, [[varrf]]</li>
   </ul>
       In the actual input file, these parameters may be given in any desired order,
       and more than one may be given per line. Spaces are used to separate values

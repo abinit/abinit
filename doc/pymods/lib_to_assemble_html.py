@@ -71,7 +71,7 @@ def doku2html(text):
     abivarname = mymatch.group()[2:-2]
     return "<b>"+abivarname+"</b>"
 
-  p = re.compile("\*\*([a-zA-Z0-9_ */<>]*)\*\*")
+  p = re.compile("\*\*([a-zA-Z0-9_ */<>.]*)\*\*")
   text2 = p.sub(replace_link,text)
 
   return text2
@@ -105,14 +105,16 @@ def make_links(text,cur_key,allowed_link_seeds,backlinks,backlink):
         return '<a href="'+users_path+'help_abinit.html#'+str.replace(key.lower()," ","_")+'">'+key+'</a>'
       elif value=="special":
         return '<a href="../../input_variables/generated_files/specials.html#'+key+'">'+key+'</a>'
+      elif value=="varfile":
+        return '<a href="../../input_variables/generated_files/'+key+'.html">'+key+'</a>'
       elif value=="lesson":
         return '<a href="../../tutorial/generated_files/'+key+'.html">'+key+'</a>'
       elif value=="theorydoc":
         return '<a href="../../theory/generated_files/'+key+'.html">'+key+'</a>'
       elif value=="helpfile":
-        return '<a href="../../users/generated_files/'+key+'.html">'+key+'</a>'
+        return '<a href="../../users/generated_files/'+key+'.html">'+key[5:]+' help file</a>'
       elif value=="in_tests":
-        return '<a href="../../'+key+'">~abinit/'+key+'</a>'
+        return '<a href="../../'+key+'">&#126;abinit/'+key+'</a>'
       elif value=="allvariables":
         return '<a href="../../input_variables/generated_files/allvariables.html">'+key+'</a>'
       elif value=="bibID":
@@ -123,7 +125,7 @@ def make_links(text,cur_key,allowed_link_seeds,backlinks,backlink):
 
     return '<a href="#">[[FAKE LINK:'+key+']]</a>'
 
-  p=re.compile("\\[\\[([a-zA-Z0-9_ */<>]*)\\]\\]")
+  p=re.compile("\\[\\[([a-zA-Z0-9_ */<>.]*)\\]\\]")
   if text is None:
     return ""
   new_text=p.sub(replace_link,text)

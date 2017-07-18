@@ -99,7 +99,7 @@ body : |
   For comparison, results with [[ecut]]=5 are also reported and, in that case,
   were obtained at the optimized lattice constant of 10.64 bohr.
   For those who would like to try later,
-  convergence tests and structural optimizations can be done using the file ~abinit/tests/tutorespfn/Input/tnlo_1.in.
+  convergence tests and structural optimizations can be done using the file [[tests/tutorespfn/Input/tnlo_1.in]].
   Before going further, you might refresh your memory concerning the other variables :
   [[ixc]],
   [[ecutsm]],
@@ -118,8 +118,8 @@ body : |
   Born effective charges from finite difference of the polarization (under
   finite atomic displacements), for AlAs.
   
-  <p> You can now copy the file ~abinit/tests/tutorespfn/Input/tffield_1.in
-  and ~abinit/tests/tutorespfn/Input/tffield_x.files in Work-ffield, and
+  <p> You can now copy the file [[tests/tutorespfn/Input/tffield_1.in]]
+  and [[tests/tutorespfn/Input/tffield_x.files]] in Work-ffield, and
   modify the latter as usual (for example, edit it so that the various file names it
   contains refer to tffield_1 rather than tffield_x). 
   <p>
