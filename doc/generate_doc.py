@@ -102,6 +102,7 @@ if debug==1 :
 bibtex_dics=[]
 bibtex_items=bibtex_str.split('@')
 empty=bibtex_items.pop(0)
+listIDs=[]
 
 for item in bibtex_items:
 
@@ -132,6 +133,7 @@ for item in bibtex_items:
     print("The entry %s does not have the proper format, i.e. the year should be a four-digit number starting with 1 or 2" % id_upper_lower)
     raise
   item_dic['ID']=id_upper_lower
+  listIDs.append(id_upper_lower)
 
   #Store the remaining, for later possible reordering, without any of the later treatments.
   item_dic['body']=item[1]
@@ -291,7 +293,17 @@ for (i,ref) in enumerate(bibtex_dics):
   reference_dic[ID]=formatted
 
 ################################################################################
-# Order the references
+# Check that there is no conflict of references, then order the references
+listIDs_sorted=sorted(listIDs)
+for (i,item) in enumerate(listIDs):
+  if i==0:
+    continue
+  if listIDs[i]==listIDs[i-1]:
+    print(" Detected two bibtex items with the same ID:")
+    print(" Item 1 has ID:",listIDs[i-1])
+    print(" Item 2 has ID:",listIDs[i])
+    print(" Please fix this issue ...")
+    sys.exit()
 
 bibtex_dics=sorted( bibtex_dics, key= lambda item: item['ID'])
 
