@@ -342,9 +342,40 @@ f_yml.close()
 print("File %s has been written ..." %file_txt)
 
 ################################################################################
+# Collect the link seeds
+
+allowed_link_seeds={}
+
+# Groups of seeds
+for var in variables:
+  allowed_link_seeds[var.abivarname]="input_variable in "+var.varfile
+for item in list_chars:
+  allowed_link_seeds[item]="characteristic"
+for (specialkey,specialval) in list_specials:
+  allowed_link_seeds[specialkey]="special"
+for i, varfile_info in enumerate(varfiles):
+  varfile = varfile_info.name
+  allowed_link_seeds[varfile]="varfile"
+for i, lesson_info in enumerate(lessons):
+  lesson = lesson_info.name
+  allowed_link_seeds[lesson]="lesson"
+for i, theory_info in enumerate(theorydocs):
+  theorydoc = theory_info.name
+  allowed_link_seeds[theorydoc]="theorydoc"
+for i, help_info in enumerate(helps):
+  helpfile = help_info.name
+  allowed_link_seeds[helpfile]="helpfile"
+for ref in bibtex_dics:
+  ID=ref["ID"]
+  allowed_link_seeds[ID]="bibID"
+
+# Specific allowed seeds
+allowed_link_seeds["allvariables"]="allvariables"
+
+################################################################################
 ################################################################################
 
-# Generate the different varfile files (var*.html, specials.html, allvariables.html)
+# The information needed to create automatically the links has been collected
 
 ################################################################################
 # Initialization to constitute the body of the specials and var*.html files
@@ -355,11 +386,6 @@ for i, varfile_info in enumerate(varfiles):
   varfile = varfile_info.name
   all_vars[varfile] = []
   all_contents[varfile]= "<br><br><br><br><hr>\n"
-
-# Create a dictionary that gives the varfile for each abivarname
-list_all_vars = dict()
-for var in variables:
-  list_all_vars[var.abivarname] = var.varfile
 
 ################################################################################
 # Constitute the body of information for the special parameters, stored for the appropriate varfile in all_contents[varfile]
@@ -372,7 +398,7 @@ for (speckey, specval) in list_specials:
   backlink= ' &nbsp; <a href="../../%s/specials.html#%s">%s</a> &nbsp; ' %(invars_gen,speckey,speckey)
   cur_content = "<br><font id=\"title\"><a name=\""+speckey+"\">"+speckey+"</a></font>\n"
   cur_content += "<br><font id=\"text\">\n"
-  cur_content += "<p>\n"+doku2html(make_links(specval,speckey,list_all_vars,list_chars,cur_specials,backlinks,backlink))+"\n"
+  cur_content += "<p>\n"+doku2html(make_links(specval,speckey,allowed_link_seeds,backlinks,backlink))+"\n"
   cur_content += "</font>"
   cur_content += "<br><br><a href=#top>Go to the top</a>\n"
   cur_content += "<B> | </B><a href=\"allvariables.html#top\">Complete list of input variables</a><hr>\n"
@@ -400,7 +426,7 @@ for i, var in enumerate(variables):
       for chs in var.characteristics:
         chars += chs+", "
       chars = chars[:-2]
-      cur_content += "<br><font id=\"characteristic\">Characteristic: "+make_links(chars,var.abivarname,list_all_vars,list_chars,cur_specials,backlinks,backlink)+"</font>\n"
+      cur_content += "<br><font id=\"characteristic\">Characteristic: "+make_links(chars,var.abivarname,allowed_link_seeds,backlinks,backlink)+"</font>\n"
     else:
       cur_content += "<br><font id=\"characteristic\">Characteristic: </font>\n"
     # Topics
@@ -419,24 +445,24 @@ for i, var in enumerate(variables):
     # Variable type, including dimensions
     cur_content += "<br><font id=\"vartype\">Variable type: "+var.vartype
     if var.dimensions is not None:
-      cur_content += make_links(format_dimensions(var.dimensions),var.abivarname,list_all_vars,list_chars,cur_specials,backlinks,backlink)
+      cur_content += make_links(format_dimensions(var.dimensions),var.abivarname,allowed_link_seeds,backlinks,backlink)
     if var.commentdims is not None and var.commentdims != "":
-      cur_content += " (Comment: "+make_links(var.commentdims,var.abivarname,list_all_vars,list_chars,cur_specials,backlinks,backlink)+")"
+      cur_content += " (Comment: "+make_links(var.commentdims,var.abivarname,allowed_link_seeds,backlinks,backlink)+")"
     cur_content += "</font>\n" 
     # Default
-    cur_content += "<br><font id=\"default\">"+make_links(format_default(var.defaultval),var.abivarname,list_all_vars,list_chars,cur_specials,backlinks,backlink)
+    cur_content += "<br><font id=\"default\">"+make_links(format_default(var.defaultval),var.abivarname,allowed_link_seeds,backlinks,backlink)
     if var.commentdefault is not None and var.commentdefault != "":
-      cur_content += " (Comment: "+make_links(var.commentdefault,var.abivarname,list_all_vars,list_chars,cur_specials,backlinks,backlink)+")"
+      cur_content += " (Comment: "+make_links(var.commentdefault,var.abivarname,allowed_link_seeds,backlinks,backlink)+")"
     cur_content += "</font>\n" 
     # Requires
     if var.requires is not None and var.requires != "":
-      cur_content += "<br><br><font id=\"requires\">\nOnly relevant if "+doku2html(make_links(var.requires,var.abivarname,list_all_vars,list_chars,cur_specials,backlinks,backlink))+"\n</font>\n"
+      cur_content += "<br><br><font id=\"requires\">\nOnly relevant if "+doku2html(make_links(var.requires,var.abivarname,allowed_link_seeds,backlinks,backlink))+"\n</font>\n"
     # Excludes
     if var.excludes is not None and var.excludes != "":
-      cur_content += "<br><br><font id=\"excludes\">\nThe use of this variable forbids the use of "+doku2html(make_links(var.excludes,var.abivarname,list_all_vars,list_chars,cur_specials,backlinks,backlink))+"\n</font>\n"
+      cur_content += "<br><br><font id=\"excludes\">\nThe use of this variable forbids the use of "+doku2html(make_links(var.excludes,var.abivarname,allowed_link_seeds,backlinks,backlink))+"\n</font>\n"
     # Text
     cur_content += "<br><font id=\"text\">\n"
-    cur_content += "<p>\n"+doku2html(make_links(var.text,var.abivarname,list_all_vars,list_chars,cur_specials,backlinks,backlink))+"\n"
+    cur_content += "<p>\n"+doku2html(make_links(var.text,var.abivarname,allowed_link_seeds,backlinks,backlink))+"\n"
     # End the section for one variable
     cur_content += "</font>\n\n"
     cur_content += "<br><br><a href=#top>Go to the top</a>\n"
@@ -495,7 +521,7 @@ for i, varfile_info in enumerate(varfiles):
   suppl={"toc":toc_body , "content":all_contents[varfile]}
   suppl_components[varfile]=suppl
 
-rc=assemble_html(varfiles,suppl_components,"input_variables","",list_all_vars,list_chars,cur_specials,backlinks)
+rc=assemble_html(varfiles,suppl_components,"input_variables","",allowed_link_seeds,backlinks)
 
 ################################################################################
 ################################################################################
@@ -690,7 +716,7 @@ for topic_name in list_of_topics:
 
   dir_root="topics"
   name_root="topic"
-  rc=finalize_html(topic_html,topic,dir_root,name_root,list_all_vars,list_chars,cur_specials,backlinks)
+  rc=finalize_html(topic_html,topic,dir_root,name_root,allowed_link_seeds,backlinks)
 
 ################################################################################
 # Generate the file with the list of names of different "topic" files
@@ -710,7 +736,7 @@ for j in ["header","title","subtitle","copyright","links","toc_all","links","end
 
 dir_root="topics"
 name_root=""
-rc=finalize_html(all_topics_html,default_topic,dir_root,name_root,list_all_vars,list_chars,cur_specials,backlinks)
+rc=finalize_html(all_topics_html,default_topic,dir_root,name_root,allowed_link_seeds,backlinks)
 
 ################################################################################
 ################################################################################
@@ -856,9 +882,9 @@ if activate_translation==1:
 ################################################################################
 
 suppl_components={}
-returncode=assemble_html(lessons,suppl_components,"tutorial","lesson",list_all_vars,list_chars,cur_specials,backlinks)
-returncode=assemble_html(theorydocs,suppl_components,"theory","theory",list_all_vars,list_chars,cur_specials,backlinks)
-returncode=assemble_html(helps,suppl_components,"users","help",list_all_vars,list_chars,cur_specials,backlinks)
+returncode=assemble_html(lessons,suppl_components,"tutorial","lesson",allowed_link_seeds,backlinks)
+returncode=assemble_html(theorydocs,suppl_components,"theory","theory",allowed_link_seeds,backlinks)
+returncode=assemble_html(helps,suppl_components,"users","help",allowed_link_seeds,backlinks)
 
 ################################################################################
 ################################################################################
@@ -872,7 +898,7 @@ backlink= ' &nbsp; <a href="../../%s/acknowledgments.html">acknowledgments.html<
 for i, bibyml_info in enumerate(bibyml):
   if bibyml_info.name.strip()=="acknowledgments":
     bibyml_intro=bibyml_info.introduction
-    bibyml_ack_intro = doku2html(make_links(bibyml_intro,None,list_all_vars,list_chars,cur_specials,backlinks,backlink))
+    bibyml_ack_intro = doku2html(make_links(bibyml_intro,None,allowed_link_seeds,backlinks,backlink))
 
 ################################################################################
 # Write an ordered bib file, that allows to update the original one.
@@ -933,7 +959,7 @@ suppl_components['bibtex']=suppl
 suppl={"content":bibliography_content}
 suppl_components['bibliography']=suppl
 
-rc=assemble_html(bibyml,suppl_components,"bibliography","",list_all_vars,list_chars,cur_specials,backlinks)
+rc=assemble_html(bibyml,suppl_components,"bibliography","",allowed_link_seeds,backlinks)
 
 ################################################################################
 

@@ -1,4 +1,4 @@
-# List of test directories, to be examined by abi_yml2html.py
+# List of test directories, to be examined by generate_doc.py
 - atompaw
 - bigdft
 - bigdft_paral

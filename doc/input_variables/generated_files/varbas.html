@@ -684,7 +684,7 @@ Allows to tune the accuracy of a calculation by setting automatically the variab
 
 <br><font id="title"><a name="acell">acell</a></font>
 <br><font id="mnemonics">Mnemonics: CELL lattice vector scaling</font>
-<br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#evolving">EVOLVING</a>, <a href="../../users/abinit_help.html#length">LENGTH</a></font>
+<br><font id="characteristic">Characteristic: <a href="../../users/help_abinit.html#evolving">EVOLVING</a>, <a href="../../users/help_abinit.html#length">LENGTH</a></font>
 <br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_crystal.html">crystal</a> </font>
 <br><font id="vartype">Variable type: real(3) (Comment: represented internally as acell(3,<a href="../../input_variables/generated_files/varrlx.html#nimage">nimage</a>))</font>
 <br><font id="default">Default is 3*1</font>
@@ -696,7 +696,7 @@ dimensionless primitive translations (in <a href="../../input_variables/generate
 to be multiplied.  By default, given in Bohr atomic units
 (1 Bohr=0.5291772108 Angstroms), although Angstrom can be specified,
 if preferred, since <b>acell</b> has the
-'<a href="../../users/abinit_help.html#length">LENGTH</a>' characteristics.
+'<a href="../../users/help_abinit.html#length">LENGTH</a>' characteristics.
 See further description of <b>acell</b> related to the
 <a href="../../input_variables/generated_files/varbas.html#rprim">rprim</a> input variable,
 the <a href="../../input_variables/generated_files/varbas.html#scalecart">scalecart</a> input variable,
@@ -714,7 +714,7 @@ Use <a href="../../input_variables/generated_files/varbas.html#scalecart">scalec
 
 <br><font id="title"><a name="angdeg">angdeg</a></font>
 <br><font id="mnemonics">Mnemonics: ANGles in DEGrees</font>
-<br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#input_only">INPUT_ONLY</a></font>
+<br><font id="characteristic">Characteristic: <a href="../../users/help_abinit.html#input_only">INPUT_ONLY</a></font>
 <br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_crystal.html">crystal</a> </font>
 <br><font id="vartype">Variable type: real(3)</font>
 <br><font id="default">No default (Comment: deduced from '<a href="../../input_variables/generated_files/varbas.html#rprim">rprim</a>')</font>
@@ -781,7 +781,7 @@ and form the desired angles with the others.
 
 <br><font id="title"><a name="ecut">ecut</a></font>
 <br><font id="mnemonics">Mnemonics: Energy CUToff</font>
-<br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#energy">ENERGY</a></font>
+<br><font id="characteristic">Characteristic: <a href="../../users/help_abinit.html#energy">ENERGY</a></font>
 <br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_convergency.html">convergency</a> </font>
 <br><font id="vartype">Variable type: real</font>
 <br><font id="default">No default</font>
@@ -804,7 +804,7 @@ is defined).
  <br />
  Can be specified in Ha (the default), Ry, eV or Kelvin, since
 <b>ecut</b> has the
-'<a href="../../users/abinit_help.html#energy">ENERGY</a>' characteristics.
+'<a href="../../users/help_abinit.html#energy">ENERGY</a>' characteristics.
 (1 Ha=27.2113845 eV)
  <br />
  This is the single parameter which can have an enormous
@@ -910,7 +910,7 @@ The choice between different algorithms for SCF is possible :
   <li>
    =1 =&gt; get the largest eigenvalue of the SCF cycle
    <br />
-   (<a href="../../users/abinit_help.html#develop">DEVELOP</a> option, used with
+   (<a href="../../users/help_abinit.html#develop">DEVELOP</a> option, used with
 <a href="../../input_variables/generated_files/varfil.html#irdwfk">irdwfk</a>=1 or
    <a href="../../input_variables/generated_files/varfil.html#irdwfq">irdwfq</a>=1)
   </li>
@@ -1042,13 +1042,13 @@ or to produce STM charge density map (thanks to <a href="../../input_variables/g
   <li>
    = -1 =&gt; like -2, but the non-self-consistent calculation
 is followed by the determination of excited states
-within <a href="../../users/abinit_help.html#tddft">TDDFT</a>. This is only possible for <a href="../../input_variables/generated_files/varbas.html#nkpt">nkpt</a>=1,
+within <a href="../../users/help_abinit.html#tddft">TDDFT</a>. This is only possible for <a href="../../input_variables/generated_files/varbas.html#nkpt">nkpt</a>=1,
 with <a href="../../input_variables/generated_files/varbas.html#kpt">kpt</a>=0 0 0.
 Note that the oscillator strength needs to be defined with respect to
 an origin of coordinate, thanks to the input variable
 <a href="../../input_variables/generated_files/vargs.html#boxcenter">boxcenter</a>. The maximal
 number of Kohn-Sham excitations to be used to build the
-excited state <a href="../../users/abinit_help.html#tddft">TDDFT</a> matrix can be defined by <a href="../../input_variables/generated_files/varrf.html#td_mexcit">td_mexcit</a>,
+excited state <a href="../../users/help_abinit.html#tddft">TDDFT</a> matrix can be defined by <a href="../../input_variables/generated_files/varrf.html#td_mexcit">td_mexcit</a>,
 or indirectly by the maximum Kohn-Sham excitation energy
 <a href="../../input_variables/generated_files/varrf.html#td_maxene">td_maxene</a>.
   </li>
@@ -1188,16 +1188,16 @@ available from the
   <li>
    20=&gt; Fermi-Amaldi xc ( -1/N Hartree energy, where N is the
 number of electrons per cell ; G=0 is not taken
-into account however), for <a href="../../users/abinit_help.html#tddft">TDDFT</a> tests.
+into account however), for <a href="../../users/help_abinit.html#tddft">TDDFT</a> tests.
 No spin-pol. Does not work for RF.
   </li>
   <li>
    21=&gt; same as 20, except that the xc-kernel is the LDA (<b>ixc</b>=1) one,
-for <a href="../../users/abinit_help.html#tddft">TDDFT</a> tests.
+for <a href="../../users/help_abinit.html#tddft">TDDFT</a> tests.
   </li>
   <li>
    22=&gt; same as 20, except that the xc-kernel is the Burke-Petersilka-Gross
-hybrid, for <a href="../../users/abinit_help.html#tddft">TDDFT</a> tests.
+hybrid, for <a href="../../users/help_abinit.html#tddft">TDDFT</a> tests.
   </li>
   <li>
    23=&gt; GGA of Z. Wu and R.E. Cohen, Phys. Rev. 73, 235116 (2006).
@@ -2075,7 +2075,7 @@ Y Zhao and DG Truhlar, Theor. Chem. Account 120, 215 (2008)
 
 <br><font id="title"><a name="jdtset">jdtset</a></font>
 <br><font id="mnemonics">Mnemonics: index -J- for DaTaSETs</font>
-<br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#no_multi">NO_MULTI</a></font>
+<br><font id="characteristic">Characteristic: <a href="../../users/help_abinit.html#no_multi">NO_MULTI</a></font>
 <br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_multidtset.html">multidtset</a> </font>
 <br><font id="vartype">Variable type: integer(<a href="../../input_variables/generated_files/varbas.html#ndtset">ndtset</a>)</font>
 <br><font id="default">Default is [1 .. <a href="../../input_variables/generated_files/varbas.html#ndtset">ndtset</a>]</font>
@@ -2372,7 +2372,7 @@ will not be used.
 each k point.
 </p>
 <p>
- In the case of a <a href="../../users/abinit_help.html#gw">GW</a> calculation (<a href="../../input_variables/generated_files/vargs.html#optdriver">optdriver</a>=3 or 4),
+ In the case of a <a href="../../users/help_abinit.html#gw">GW</a> calculation (<a href="../../input_variables/generated_files/vargs.html#optdriver">optdriver</a>=3 or 4),
 <b>nband</b> gives the number of bands to be treated to generate the screening (susceptibility
 and dielectric matrix), as well as the self-energy. However, to generate the _KSS
 file (see <a href="../../input_variables/generated_files/varfil.html#kssform">kssform</a>)
@@ -2403,7 +2403,7 @@ the relevant number of bands is given by <a href="../../input_variables/generate
 
 <br><font id="title"><a name="ndtset">ndtset</a></font>
 <br><font id="mnemonics">Mnemonics: Number of DaTaSETs</font>
-<br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#no_multi">NO_MULTI</a></font>
+<br><font id="characteristic">Characteristic: <a href="../../users/help_abinit.html#no_multi">NO_MULTI</a></font>
 <br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_multidtset.html">multidtset</a> </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
@@ -2428,7 +2428,7 @@ Otherwise, <b>ndtset</b>=0 is equivalent to <b>ndtset</b>=1.
 
 <br><font id="title"><a name="ngkpt">ngkpt</a></font>
 <br><font id="mnemonics">Mnemonics: Number of Grid points for K PoinTs generation</font>
-<br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#input_only">INPUT_ONLY</a></font>
+<br><font id="characteristic">Characteristic: <a href="../../users/help_abinit.html#input_only">INPUT_ONLY</a></font>
 <br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_k-points.html">k-points</a> </font>
 <br><font id="vartype">Variable type: integer(3)</font>
 <br><font id="default">Default is [0, 0, 0]</font>
@@ -2722,7 +2722,7 @@ the previous run only if the latter is done with <a href="../../input_variables/
 
 <br><font id="title"><a name="nsym">nsym</a></font>
 <br><font id="mnemonics">Mnemonics: Number of SYMmetry operations</font>
-<br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#symmetry_finder">SYMMETRY_FINDER</a></font>
+<br><font id="characteristic">Characteristic: <a href="../../users/help_abinit.html#symmetry_finder">SYMMETRY_FINDER</a></font>
 <br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_crystal.html">crystal</a> </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
@@ -2747,7 +2747,7 @@ possible elements of the 2DTE from those already
 computed.
 </p>
 <p>
- <a href="../../users/abinit_help.html#symmetry_finder">SYMMETRY_FINDER</a> mode (Default mode).
+ <a href="../../users/help_abinit.html#symmetry_finder">SYMMETRY_FINDER</a> mode (Default mode).
 If <b>nsym</b> is 0, all the atomic coordinates must be
 explicitely given (one cannot use the geometry builder
 and the symmetrizer): the code will then find automatically
@@ -2778,7 +2778,7 @@ change the initialization of "msym" in the abinit.F90 main routine,
 then recompile the code.
 </p>
 <p>
- For <a href="../../users/abinit_help.html#gw">GW</a> calculation, the user might want to select only the symmetry operations whose
+ For <a href="../../users/help_abinit.html#gw">GW</a> calculation, the user might want to select only the symmetry operations whose
 non-symmorphic translation vector <a href="../../input_variables/generated_files/varbas.html#tnons">tnons</a>
 is zero. This can be done with the help of the input variable
 <a href="../../input_variables/generated_files/vardev.html#symmorphi">symmorphi</a>
@@ -2791,7 +2791,7 @@ is zero. This can be done with the help of the input variable
 
 <br><font id="title"><a name="ntypat">ntypat</a></font>
 <br><font id="mnemonics">Mnemonics: Number of TYPes of AToms</font>
-<br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#no_multi">NO_MULTI</a></font>
+<br><font id="characteristic">Characteristic: <a href="../../users/help_abinit.html#no_multi">NO_MULTI</a></font>
 <br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_GSgeneral.html">GSgeneral</a> </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 1</font>
@@ -2954,7 +2954,7 @@ bissection algorithm find one or the other.
 
 <br><font id="title"><a name="rprim">rprim</a></font>
 <br><font id="mnemonics">Mnemonics: Real space PRIMitive translations</font>
-<br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#evolving">EVOLVING</a></font>
+<br><font id="characteristic">Characteristic: <a href="../../users/help_abinit.html#evolving">EVOLVING</a></font>
 <br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_crystal.html">crystal</a> </font>
 <br><font id="vartype">Variable type: real(3,3) (Comment: Internally, it is represented as rprim(3,3,<a href="../../input_variables/generated_files/varrlx.html#nimage">nimage</a>))</font>
 <br><font id="default">Default is [[1, 0, 0], [0, 1, 0], [0, 0, 1]]</font>
@@ -2965,7 +2965,7 @@ bissection algorithm find one or the other.
 the three dimensionless primitive translations in real space, to be rescaled by
 <a href="../../input_variables/generated_files/varbas.html#acell">acell</a> and <a href="../../input_variables/generated_files/varbas.html#scalecart">scalecart</a>.
 <br />
-It is <a href="../../users/abinit_help.html#evolving">EVOLVING</a> only if <a href="../../input_variables/generated_files/varrlx.html#ionmov">ionmov</a>==2 and <a href="../../input_variables/generated_files/varrlx.html#optcell">optcell</a>/=0, otherwise it is fixed.
+It is <a href="../../users/help_abinit.html#evolving">EVOLVING</a> only if <a href="../../input_variables/generated_files/varrlx.html#ionmov">ionmov</a>==2 and <a href="../../input_variables/generated_files/varrlx.html#optcell">optcell</a>/=0, otherwise it is fixed.
 <br />
  If the Default is used, that is, <b>rprim</b> is the unity matrix,
 the three dimensionless primitive vectors are three
@@ -3074,7 +3074,7 @@ acell 3*1     scalecart 3*1    !  ( These are default values)
 are defined by the scaling factor "a".
  <br />
  As another difference between <a href="../../input_variables/generated_files/varbas.html#scalecart">scalecart</a> or <a href="../../input_variables/generated_files/varbas.html#acell">acell</a>,
-note that <a href="../../input_variables/generated_files/varbas.html#scalecart">scalecart</a> is <a href="../../users/abinit_help.html#input_only">INPUT_ONLY</a> :
+note that <a href="../../input_variables/generated_files/varbas.html#scalecart">scalecart</a> is <a href="../../users/help_abinit.html#input_only">INPUT_ONLY</a> :
 its content will be immediately applied to rprim, at parsing time,
 and then scalecart will be set to the default values (3*1). So, in case <a href="../../input_variables/generated_files/varbas.html#scalecart">scalecart</a> is used,
 the echo of <b>rprim</b> in the output file is not the value contained in the input file,
@@ -3088,7 +3088,7 @@ but the value rescaled by <a href="../../input_variables/generated_files/varbas.
 
 <br><font id="title"><a name="rprimd">rprimd</a></font>
 <br><font id="mnemonics">Mnemonics: Real space PRIMitive translations, Dimensional</font>
-<br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#internal_only">INTERNAL_ONLY</a>, <a href="../../users/abinit_help.html#evolving">EVOLVING</a></font>
+<br><font id="characteristic">Characteristic: <a href="../../users/help_abinit.html#internal_only">INTERNAL_ONLY</a>, <a href="../../users/help_abinit.html#evolving">EVOLVING</a></font>
 <br><font id="vartype">Variable type: real(3,3) (Comment: Internally, it is represented as rprimd(3,3,<a href="../../input_variables/generated_files/varrlx.html#nimage">nimage</a>).)</font>
 <br><font id="default">No default</font>
 <br><font id="text">
@@ -3110,7 +3110,7 @@ and <a href="../../input_variables/generated_files/varbas.html#rprim">rprim</a>.
   </li>
  </ul>
 </p>
-It is <a href="../../users/abinit_help.html#evolving">EVOLVING</a> only if <a href="../../input_variables/generated_files/varrlx.html#ionmov">ionmov</a>==2 and <a href="../../input_variables/generated_files/varrlx.html#optcell">optcell</a>/=0, otherwise it is fixed.
+It is <a href="../../users/help_abinit.html#evolving">EVOLVING</a> only if <a href="../../input_variables/generated_files/varrlx.html#ionmov">ionmov</a>==2 and <a href="../../input_variables/generated_files/varrlx.html#optcell">optcell</a>/=0, otherwise it is fixed.
 <br />
 </font>
 
@@ -3120,7 +3120,7 @@ It is <a href="../../users/abinit_help.html#evolving">EVOLVING</a> only if <a hr
 
 <br><font id="title"><a name="scalecart">scalecart</a></font>
 <br><font id="mnemonics">Mnemonics: SCALE CARTesian coordinates</font>
-<br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#input_only">INPUT_ONLY</a></font>
+<br><font id="characteristic">Characteristic: <a href="../../users/help_abinit.html#input_only">INPUT_ONLY</a></font>
 <br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_crystal.html">crystal</a> </font>
 <br><font id="vartype">Variable type: real(3)</font>
 <br><font id="default">Default is 3*1</font>
@@ -3137,7 +3137,7 @@ and the associated internal <a href="../../input_variables/generated_files/varba
  Especially useful for body-centered and face-centered tetragonal lattices, as well as
 body-centered and face-centered orthorhombic lattices, see <a href="../../input_variables/generated_files/varbas.html#rprimd">rprimd</a>.
  <br />
- Note that this input variable is <a href="../../users/abinit_help.html#input_only">INPUT_ONLY</a> : its content will be immediately applied to rprim, at parsing time,
+ Note that this input variable is <a href="../../users/help_abinit.html#input_only">INPUT_ONLY</a> : its content will be immediately applied to rprim, at parsing time,
 and then scalecart will be set to the default values. So, it will not be echoed.
 </p>
 </font>
@@ -3333,7 +3333,7 @@ is computed automatically.
 
 <br><font id="title"><a name="toldfe">toldfe</a></font>
 <br><font id="mnemonics">Mnemonics: TOLerance on the DiFference of total Energy</font>
-<br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#energy">ENERGY</a></font>
+<br><font id="characteristic">Characteristic: <a href="../../users/help_abinit.html#energy">ENERGY</a></font>
 <br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_convergency.html">convergency</a> </font>
 <br><font id="vartype">Variable type: real</font>
 <br><font id="default">Default is 0.0 (Comment: The default value implies that this stopping condition is ignored. For the SCF case, one and only one of the input tolerance criteria <a href="../../input_variables/generated_files/varbas.html#tolwfr">tolwfr</a>, <a href="../../input_variables/generated_files/varbas.html#toldff">toldff</a>, <a href="../../input_variables/generated_files/varbas.html#tolrff">tolrff</a>, <b>toldfe</b> or <a href="../../input_variables/generated_files/varbas.html#tolvrs">tolvrs</a> must differ from zero.)</font>
@@ -3349,7 +3349,7 @@ will cause one SCF cycle to stop (and ions to be moved).
  <br />
  Can be specified in Ha (the default), Ry, eV or Kelvin, since
 <b>toldfe</b> has the
-'<a href="../../users/abinit_help.html#energy">ENERGY</a>' characteristics.
+'<a href="../../users/help_abinit.html#energy">ENERGY</a>' characteristics.
 (1 Ha=27.2113845 eV)
  <br />
  If set to zero, this stopping condition is ignored.
@@ -3782,7 +3782,7 @@ except if <a href="../../input_variables/generated_files/varbas.html#iscf">iscf<
 
 <br><font id="title"><a name="wvl_hgrid">wvl_hgrid</a></font>
 <br><font id="mnemonics">Mnemonics: WaVeLet H step GRID</font>
-<br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#length">LENGTH</a></font>
+<br><font id="characteristic">Characteristic: <a href="../../users/help_abinit.html#length">LENGTH</a></font>
 <br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_Wavelets.html">Wavelets</a> </font>
 <br><font id="vartype">Variable type: real</font>
 <br><font id="default">Default is 0.5</font>
@@ -3802,7 +3802,7 @@ computation. The value is a length in atomic units.
 
 <br><font id="title"><a name="xangst">xangst</a></font>
 <br><font id="mnemonics">Mnemonics: vectors (X) of atom positions in cartesian coordinates -length in ANGSTrom-</font>
-<br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#input_only">INPUT_ONLY</a></font>
+<br><font id="characteristic">Characteristic: <a href="../../users/help_abinit.html#input_only">INPUT_ONLY</a></font>
 <br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_crystal.html">crystal</a> </font>
 <br><font id="vartype">Variable type: real(3,min(<a href="../../input_variables/generated_files/varbas.html#natom">natom</a>,<a href="../../input_variables/generated_files/vargeo.html#natrd">natrd</a>))</font>
 <br><font id="default">No default</font>
@@ -3841,7 +3841,7 @@ In constrast with <a href="../../input_variables/generated_files/varbas.html#xre
 
 <br><font id="title"><a name="xcart">xcart</a></font>
 <br><font id="mnemonics">Mnemonics: vectors (X) of atom positions in CARTesian coordinates</font>
-<br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#evolving">EVOLVING</a>, <a href="../../users/abinit_help.html#length">LENGTH</a></font>
+<br><font id="characteristic">Characteristic: <a href="../../users/help_abinit.html#evolving">EVOLVING</a>, <a href="../../users/help_abinit.html#length">LENGTH</a></font>
 <br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_crystal.html">crystal</a> </font>
 <br><font id="vartype">Variable type: real(3,min(<a href="../../input_variables/generated_files/varbas.html#natom">natom</a>,<a href="../../input_variables/generated_files/vargeo.html#natrd">natrd</a>))</font>
 <br><font id="default">No default</font>
@@ -3854,7 +3854,7 @@ redundant with that supplied by array <a href="../../input_variables/generated_f
 By default, <b>xcart</b> is given in Bohr atomic units
 (1 Bohr=0.5291772108 Angstroms), although Angstrom can be specified,
 if preferred, since <b>xcart</b> has the
-'<a href="../../users/abinit_help.html#length">LENGTH</a>' characteristics.
+'<a href="../../users/help_abinit.html#length">LENGTH</a>' characteristics.
  <br />
  If <a href="../../input_variables/generated_files/varbas.html#xred">xred</a> and <a href="../../input_variables/generated_files/varbas.html#xangst">xangst</a> are
 ABSENT from the input file and <b>xcart</b> is
@@ -3879,7 +3879,7 @@ and
 
 <br><font id="title"><a name="xred">xred</a></font>
 <br><font id="mnemonics">Mnemonics: vectors (X) of atom positions in REDuced coordinates</font>
-<br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#evolving">EVOLVING</a></font>
+<br><font id="characteristic">Characteristic: <a href="../../users/help_abinit.html#evolving">EVOLVING</a></font>
 <br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_crystal.html">crystal</a> </font>
 <br><font id="vartype">Variable type: real(3,min(<a href="../../input_variables/generated_files/varbas.html#natom">natom</a>,<a href="../../input_variables/generated_files/vargeo.html#natrd">natrd</a>)) (Comment: represented internally as xred(3,<a href="../../input_variables/generated_files/varbas.html#natom">natom</a>,<a href="../../input_variables/generated_files/varrlx.html#nimage">nimage</a>))</font>
 <br><font id="default">Default is *0.0</font>
@@ -3918,7 +3918,7 @@ which case <b>xred</b> must be absent from the input file.
 
 <br><font id="title"><a name="znucl">znucl</a></font>
 <br><font id="mnemonics">Mnemonics: charge -Z- of the NUCLeus</font>
-<br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#no_multi">NO_MULTI</a></font>
+<br><font id="characteristic">Characteristic: <a href="../../users/help_abinit.html#no_multi">NO_MULTI</a></font>
 <br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_GSgeneral.html">GSgeneral</a> </font>
 <br><font id="vartype">Variable type: real(<a href="../../input_variables/generated_files/vargs.html#npsp">npsp</a>)</font>
 <br><font id="default">No default</font>

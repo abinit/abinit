@@ -89,35 +89,37 @@ def format_default(defaultval):
 
 ################################################################################
 
-def make_links(text,cur_key,variables,characteristics,specials,backlinks,backlink):
+def make_links(text,cur_key,allowed_link_seeds,backlinks,backlink):
 
   def replace_link(mymatch):
     key = mymatch.group()[2:-2]
     if key == cur_key:
       return "<b>"+cur_key+"</b>"
-    elif key in variables.keys():
-      varfile = variables[key]
-      return '<a href="../../input_variables/generated_files/'+varfile+".html#"+key+"\">"+key+"</a>"
-    elif key in characteristics:
-      return '<a href="'+users_path+'abinit_help.html#'+str.replace(key.lower()," ","_")+"\">"+key+"</a>"
-    elif key in specials:
-      return '<a href="specials.html#'+key+'">'+key+'</a>'
-    elif key[:3] == "VAR":
-      return '<a href="../../input_variables/generated_files/'+key+".html\">"+key+"</a>"
-    elif key[:12] == "allvariables":
-      return '<a href="../../input_variables/generated_files/allvariables.html">list of all variables</a>'
-    elif key[:7] == "lesson_":
-      return '<a href="../../tutorial/generated_files/'+key+".html\">"+key+"</a>"
-    elif key[:5] == "help_":
-      return '<a href="../../users/generated_files/'+key+'.html">'+key[5:]+" help file</a>"
+    if key in allowed_link_seeds.keys():
+      value=allowed_link_seeds[key]
+      if "input_variable in " in value:
+        # This is a link to an input variable
+        varfile=value[18:]
+        return '<a href="../../input_variables/generated_files/'+varfile+".html#"+key+'">'+key+'</a>'
+      elif value=="characteristic":
+        return '<a href="'+users_path+'help_abinit.html#'+str.replace(key.lower()," ","_")+'">'+key+'</a>'
+      elif value=="special":
+        return '<a href="../../input_variables/generated_files/specials.html#'+key+'">'+key+'</a>'
+      elif value=="lesson":
+        return '<a href="../../tutorial/generated_files/'+key+'.html">'+key+'</a>'
+      elif value=="theorydoc":
+        return '<a href="../../theory/generated_files/'+key+'.html">'+key+'</a>'
+      elif value=="helpfile":
+        return '<a href="../../users/generated_files/'+key+'.html">'+key+'</a>'
+      elif value=="allvariables":
+        return '<a href="../../input_variables/generated_files/allvariables.html">'+key+'</a>'
+      elif value=="bibID":
+        result=get_year(key)
+        if result != -9999 :
+          backlinks[key]+=backlink+";;"
+          return '[<a href="../../bibliography/generated_files/bibliography.html#'+key+'">'+key+'</a>]'
     else:
-      result=get_year(key)
-      if result != -9999 :
-        backlinks[key]+=backlink+";;"
-        return '[<a href="../../'+bib_gen+'/bibliography.html#'+key+'">'+key+'</a>]'
-      else:
-        return '<a href="#">[[FAKE LINK:'+key+']]</a>'
-    return mymatch.group()
+      return '<a href="#">[[FAKE LINK:'+key+']]</a>'
 
   p=re.compile("\\[\\[([a-zA-Z0-9_ */<>]*)\\]\\]")
   if text is None:
@@ -270,14 +272,14 @@ def bibtex2html(str_input):
 
 ################################################################################
 
-def assemble_html(origin_yml_files,suppl_components,dir_root,name_root,list_all_vars,list_chars,cur_specials,backlinks):
+def assemble_html(origin_yml_files,suppl_components,dir_root,name_root,allowed_link_seeds,backlinks):
   """ Use the list of dictionaries "origin_yml_files" as well as the
       supplementary components "suppl_components", to produce html files,
       situated in dir_root directories dir_root+"/generated_files".
       The root name of the files is "name_root".
       The complementary yml information (intro, body) for each file
       is situated in dir_root+"/origin_files".
-      Different lists (list_all_vars, list_chars, cur_specials) allows one to set up the links to relevant keywords.
+      The dictionary allowed_link_seeds allows one to set up the links to relevant keywords.
       The backlinks are accumulated, to be mentioned in the bibliography.html file.
   """
 
@@ -349,17 +351,17 @@ def assemble_html(origin_yml_files,suppl_components,dir_root,name_root,list_all_
       # Accumulate
       doc_html += item+"\n"
 
-    rc=finalize_html(doc_html,origin_yml,dir_root,name_root,list_all_vars,list_chars,cur_specials,backlinks) 
+    rc=finalize_html(doc_html,origin_yml,dir_root,name_root,allowed_link_seeds,backlinks) 
 
   return "Exit assemble_html"
 
 ################################################################################
 
-def finalize_html(doc_html,origin_yml,dir_root,name_root,list_all_vars,list_chars,cur_specials,backlinks):
+def finalize_html(doc_html,origin_yml,dir_root,name_root,allowed_link_seeds,backlinks):
   """ Final steps of the preparation of a html file : global operations and write
       The draft text of the file to be written is contained in doc_html
       Some substitutions must be done using information in origin_yml (.name, .howto, .keyword, .authors)
-      The links are build using list_all_vars,list_chars,cur_specials
+      The links are build using allowed_link_seeds.
       The backlinks are given back.
   """
 
@@ -380,7 +382,7 @@ def finalize_html(doc_html,origin_yml,dir_root,name_root,list_all_vars,list_char
   if origin_yml.authors != "":
     doc_html=doc_html.replace("__AUTHORS__",origin_yml.authors)
 
-  doc_html = doku2html(make_links(doc_html,None,list_all_vars,list_chars,cur_specials,backlinks,backlink))
+  doc_html = doku2html(make_links(doc_html,None,allowed_link_seeds,backlinks,backlink))
 
   #Write the finalized html file.
   path_html = "%s/generated_files/%s.html" %(dir_root,full_name)
