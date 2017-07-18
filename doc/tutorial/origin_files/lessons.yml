@@ -188,8 +188,8 @@
     subtitle : Overview of the ABINIT tutorial.
 - !components
     name : default
-    keyword : Default keyword ... this is an error
-    authors : Default authors ... this is an error
+    keyword : All files
+    authors : XG
     header : |
       <html>
       <head><title>__KEYWORD__</title>

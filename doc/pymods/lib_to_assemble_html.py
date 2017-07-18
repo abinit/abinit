@@ -293,10 +293,14 @@ def assemble_html(origin_yml_files,suppl_components,dir_root,name_root,allowed_l
       origin_yml_default=origin_yml
 
   # Generate each "normal" file : assemble the content, apply global transformations, then write.
+  list_names=[]
+  list_titles=[]
   for i, origin_yml in enumerate(origin_yml_files):
     name = origin_yml.name
     if name=="default":
       continue
+    list_names.append(name)
+    list_titles.append(origin_yml.keyword+' - '+origin_yml.subtitle)
   
     if name_root != "":
       full_name=name_root+"_"+name
@@ -357,6 +361,38 @@ def assemble_html(origin_yml_files,suppl_components,dir_root,name_root,allowed_l
 
     rc=finalize_html(doc_html,origin_yml,dir_root,name_root,allowed_link_seeds,backlinks) 
 
+  list_names.sort()
+  toc_all = '<a name="list"></a>'
+  toc_all += '<h3><b> Alphabetical list of all files.</b></h3>'
+  cur_let_all = 'A'
+  toc_all += "<p>"+cur_let_all+".&nbsp;\n"
+
+  for (ii,name) in enumerate(list_names):
+    while not (name.startswith(cur_let_all.lower()) or name.startswith(cur_let_all.upper())):
+      cur_let_all = chr(ord(cur_let_all)+1)
+      toc_all = toc_all + "<p>"+cur_let_all+".\n"
+    if name_root != "":
+      full_name=name_root+"_"+name
+    else:
+      full_name=name
+    path_html="%s/generated_files/%s.html" %(dir_root,full_name)
+    toc_all = toc_all + '<br><a href="%s"/>%s</a> [%s] &nbsp;&nbsp;\n' %(path_html,full_name,list_titles[ii])
+
+  all_files_html=""
+  spec={'users':'help files','tutorial':'lessons of the tutorial',
+        'theory':'theory documents','input_variables':'varfiles','bibliography':'generated files in the bibliography directory'}
+  for j in ["header","title","subtitle","copyright","links","toc_all","links","end"]:
+    if j == "toc_all":
+      all_files_html += toc_all
+    elif j == "subtitle":
+      all_files_html += 'This document lists the %s of the ABINIT package.' %(spec[dir_root])
+      all_files_html += '<script type="text/javascript" src="../generic_advice.js"> </script>'
+    else:
+      all_files_html += getattr(origin_yml_default,j)
+
+  name_root_all="all_files"
+  rc=finalize_html(all_files_html,origin_yml_default,dir_root,name_root_all,allowed_link_seeds,backlinks)
+
   return "Exit assemble_html"
 
 ################################################################################
@@ -369,7 +405,9 @@ def finalize_html(doc_html,origin_yml,dir_root,name_root,allowed_link_seeds,back
       The backlinks are given back.
   """
 
-  if name_root != "":
+  if name_root == "all_files":
+    full_name=name_root
+  elif name_root != "":
     full_name=name_root+"_"+origin_yml.name
   else:
     full_name=origin_yml.name
