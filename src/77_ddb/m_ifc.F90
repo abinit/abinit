@@ -1237,7 +1237,7 @@ subroutine ifc_speedofsound(ifc, crystal, qrad_tolkms, ncid, comm)
 
    if (igrid > 1) then
      if (abs(sum(quad - prev_quad)/3) < tolkms) then
-        converged = converged + 1; !if (converged == 2) exit
+        converged = converged + 1
      else
         converged = 0
      end if

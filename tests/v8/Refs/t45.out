@@ -15,7 +15,7 @@
  For more information, see http://www.abinit.org .
 
 .Starting date : Tue 18 Jul 2017.
-- ( at 14h23 )
+- ( at 15h28 )
   
 
 ================================================================================
@@ -37,7 +37,7 @@
       nqshft         1
       q1shft
                      0.00000000E+00  0.00000000E+00  0.00000000E+00
-vs_qrad_tolkms  1.00000000E-03  3.00000000E-01
+vs_qrad_tolkms  1.00000000E-03  3.00000000E-02
 Will compute Gruneisen parameters with finite difference method. DDB files:
     t45_Mg2Si_k666_q888_-0.01_DDB
     t45_Mg2Si_k666_q888_DDB
@@ -254,13 +254,13 @@ Computation of Gruneisen parameter with central finite difference:
  Speed of sound:  1.7626E+00  1.7628E+00  9.9437E+00 [km/s] along reduced direction: 1
  Speed of sound:  1.7625E+00  1.7629E+00  9.9437E+00 [km/s] along reduced direction: 2
  Speed of sound:  1.7625E+00  1.7629E+00  9.9437E+00 [km/s] along reduced direction: 3
- Lebedev-Laikov integration with qradius:   1.0000E-03 tolkms:   3.0000E-01 [km/s], npts: 38
- Spherical average:  5.7312E+00  4.8842E+00  8.8964E+00 [km/s],   6.5039E+00
+ Lebedev-Laikov integration with qradius:   1.0000E-03 tolkms:   3.0000E-02 [km/s], npts: 86
+ Spherical average:  5.5456E+00  5.2986E+00  9.0983E+00 [km/s],   6.6475E+00
 -
-- Proc.   0 individual time (sec): cpu=        189.9  wall=        190.2
+- Proc.   0 individual time (sec): cpu=         98.7  wall=         99.0
 
 ================================================================================
 
-+Total cpu time    189.929  and wall time    190.204 sec
++Total cpu time    394.978  and wall time    395.837 sec
 
  anaddb : the run completed succesfully.
