@@ -50,35 +50,27 @@ MODULE m_ddb_hdr
 
    integer :: ddb_version   ! Version of the DDB file
 
-   integer :: mband         ! Maximum number of band at each k-point
-
-
-   ! Difference between e.g. nsym and msym:
-   !    nsym is the actual number of symmetries
-   !        (should be the same for all physical objects and files)
-   !    msym dictate the size of the arrays relating to nsym in the object
-
-   integer :: natom     ! Number of atoms
    integer :: matom
-   integer :: nkpt      ! Number of k-points
+   integer :: mband
    integer :: mkpt
-   integer :: nsym      ! Number of symmetries
    integer :: msym
-   integer :: ntypat    ! Number of atom species
    integer :: mtypat
 
    integer :: intxc
    integer :: iscf
    integer :: ixc
+   integer :: natom
+   integer :: nkpt
    integer :: nspden
    integer :: nspinor
    integer :: nsppol
+   integer :: nsym
+   integer :: ntypat
    integer :: occopt
    integer :: usepaw
 
    integer :: nblok         ! Number of blocks in the ddb
    integer :: mblktyp       ! Max block type
-
    integer :: fullinit      ! Whether the full info on the pseudo is present
                             ! TODO rename this variable
 
