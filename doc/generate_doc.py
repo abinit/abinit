@@ -773,7 +773,7 @@ rc=finalize_html(all_topics_html,default_topic,dir_root,name_root,allowed_link_s
 
 ################################################################################
 
-activate_translation=1
+activate_translation=0
 if activate_translation==1:
 
   docs=read_yaml_file(help_ori+"/helps.yml")
