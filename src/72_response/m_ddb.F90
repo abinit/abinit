@@ -41,9 +41,6 @@ MODULE m_ddb
  use m_crystal,        only : crystal_t, crystal_init
  use m_dynmat,         only : cart29, d2sym3, cart39, d3sym, chneu9, asria_calc, asria_corr, asrprs, &
 &                             dfpt_phfrq, sytens
-! DEBUG
- use m_pawtab,         only : pawtab_type,pawtab_nullify,pawtab_free
-! END DEBUG
 
  implicit none
 
@@ -1184,9 +1181,6 @@ subroutine rdddb9(acell,atifc,amu,ddb,&
  real(dp),allocatable :: d2cart(:,:,:,:,:),d3cart(:,:,:,:,:,:,:),ekb(:,:)
  real(dp),allocatable :: kpt(:,:),occ(:),spinat(:,:),tmpval(:,:,:,:,:,:,:)
  real(dp),allocatable :: wtk(:)
-! DEBUG
- type(pawtab_type),allocatable :: pawtab(:)
-! END DEBUG
 
 ! *********************************************************************
 
@@ -1680,7 +1674,7 @@ subroutine ddb_from_file(ddb,filename,brav,natom,natifc,atifc,crystal,comm,prtvo
 
 ! Must read natom from the DDB before being able to allocate some arrays needed for invars9
  ddbun = get_unit()
- call ddb_hdr_open_read(ddb_hdr,filename,ddbun,DDB_VERSION, comm=comm,&
+ call ddb_hdr_open_read(ddb_hdr,filename,ddbun,DDB_VERSION,comm=comm,&
 &                       dimonly=1)
 
  nblok = ddb_hdr%nblok
@@ -1765,10 +1759,7 @@ subroutine ddb_from_file(ddb,filename,brav,natom,natifc,atifc,crystal,comm,prtvo
    ! 2 is to preserve the old behaviour
    ddb%prtvol = 2; if (present(prtvol)) ddb%prtvol = prtvol
    ddb%occopt = occopt
-   !ddb%amu = amu
-   ! DEBUG
-   ddb%amu(1:ntypat) = amu(1:ntypat)
-   ! END DEBUG
+   ddb%amu = amu
    ABI_FREE(amu)
 
    ! Now the whole DDB is in central memory, contained in the array ddb%val(2,msize,nblok).
@@ -2353,26 +2344,6 @@ subroutine dtchi(blkval,dchide,dchidt,mpert,natom,ramansr,nlflag)
      end do
    end if
  end if
-
-!DEBUG
-!sumrule(:,:,:) = 0._dp
-!do elfd2 = 1,3
-!do elfd1 = 1,3
-!do depl = 1,3
-!do iatom = 1, natom
-!sumrule(depl,elfd1,elfd2) = sumrule(depl,elfd1,elfd2) + &
-!&     dchidt(iatom,depl,elfd1,elfd2)
-!end do
-!end do
-!end do
-!end do
-!do depl = 1,3
-!write(ab_out,'(6x,i2,3(3x,f16.9))') depl,sumrule(depl,1,1:3)
-!write(ab_out,'(8x,3(3x,f16.9))') sumrule(depl,2,1:3)
-!write(ab_out,'(8x,3(3x,f16.9))') sumrule(depl,3,1:3)
-!write(ab_out,*)
-!end do
-!ENDEBUG
 
 end subroutine dtchi
 !!***
