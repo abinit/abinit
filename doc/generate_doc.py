@@ -840,6 +840,10 @@ if activate_translation==1:
           line=line.replace(string_old,string_new)
           string_old='href="./lesson_'
           line=line.replace(string_old,string_new)
+          # Correct the references to the other files in the topic directory (transient measure in case of the "what_ABINIT_does" file)
+          string_old='href="generated_files/topic'
+          string_new='href="../../topics/generated_files/topic'
+          line=line.replace(string_old,string_new)
           #string_old='href="theory_'
           #string_new='href="../theory_'
           #line=line.replace(string_old,string_new)
