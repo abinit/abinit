@@ -67,4 +67,5 @@
 #%%   Low cut-offs, few k-points.
 #%%   Computes the positron lifetime and well as the electron-positron
 #%%   pairs momentum distributions, after the SCF iterations.
+#%% topics = positron
 #%%<END TEST_INFO>

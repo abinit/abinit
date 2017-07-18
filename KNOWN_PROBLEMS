@@ -1,4 +1,3 @@
-
 Known problems
 
 This file contains the list of known problems
@@ -14,7 +13,7 @@ The present release ABINITv8.5.1 is for development
 ================================================================
 0. Platforms
 
-For ABINITv8.5.1, list closed on 2017 06 30
+For ABINITv8.5.1, list closed on 2017 07 02
 after installation and successful tests for the standard set of platforms,
 as mentioned on 
 https://bbportal.abinit.org/#/status

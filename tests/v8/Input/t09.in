@@ -1,7 +1,7 @@
 ##############################################################################
 #Test for multibinit, read DDB and generate the effective potential into XML file
 ##############################################################################
-prt_effpot = -1
+prt_model = 1
 energy_reference = -1.7145176622E+01
 
 dipdip = 1
@@ -34,7 +34,7 @@ ntime  = 50
 #%% [files]
 #%% files_to_test = 
 #%%   t09.out, tolnlines = 0, tolabs = 0, tolrel = 0, fld_options = -easy;
-#%%   t09_sys.xml, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -easy
+#%%   t09_model.xml, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -easy
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]
