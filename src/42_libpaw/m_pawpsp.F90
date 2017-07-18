@@ -2505,9 +2505,7 @@ subroutine pawpsp_calc(core_mesh,epsatm,ffspl,imainmesh,ixc,lnmax,&
 !==================================================
 !Compute atomic contribution to Dij (Dij0)
 !if not already in memory
-write(80,*) "coucou0"
  if ((.not.has_dij0).and.(pawtab%has_kij==2.or.pawtab%has_kij==-1)) then
-write(80,*) "coucou1"
    LIBPAW_ALLOCATE(pawtab%dij0,(pawtab%lmn2_size))
    if (reduced_vloc) then
      call atompaw_dij0(pawtab%indlmn,pawtab%kij,pawtab%lmn_size,ncore,0,pawtab,pawrad,core_mesh,&
@@ -2517,8 +2515,6 @@ write(80,*) "coucou1"
 &                      vloc_mesh,vlocr,znucl)
    end if
    has_dij0=.true.
- end if
-write(80,*) "coucou2"
 !==================================================
 !Compute kinetic operator contribution to Dij
 

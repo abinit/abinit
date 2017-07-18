@@ -428,7 +428,6 @@ end subroutine atompaw_shapebes
      if (jlm==ilm) then
        ff(1:meshsz)=pawtab%phi(1:meshsz,iln)*pawtab%phi(1:meshsz,jln)*vhnzc(1:meshsz)
        call simp_gen(intg,ff,radmesh)
-write(80,*)jlmn,ilmn,jlm, intg
        pawtab%dij0(klmn)=pawtab%dij0(klmn)+intg
      end if
    end do
@@ -437,10 +436,8 @@ write(80,*)jlmn,ilmn,jlm, intg
 
 !Computation of <phi_i|vminushalf|phi_j>  (if any)
 !=================================================
-write(80,*) "coucou0"
  if(present(vminushalf).and.(size(vminushalf)>=1)) then
    meshsz1=radmesh%mesh_size
-write(80,*) "coucou1",meshsz1
    LIBPAW_ALLOCATE(ff1,(meshsz1))
    do jlmn=1,pawtab%lmn_size
      j0lmn=jlmn*(jlmn-1)/2
@@ -451,7 +448,6 @@ write(80,*) "coucou1",meshsz1
        if (jlm==ilm) then
          ff1(1:meshsz1)=pawtab%phi(1:meshsz1,iln)*pawtab%phi(1:meshsz1,jln)*vminushalf(1:meshsz1)
          call simp_gen(intg,ff1,radmesh)
-write(80,*)jlmn,ilmn,jlm, intg
          pawtab%dij0(klmn)=pawtab%dij0(klmn)+intg
        end if
      end do
