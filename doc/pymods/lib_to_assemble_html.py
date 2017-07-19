@@ -325,12 +325,12 @@ def assemble_html(origin_yml_files,suppl_components,dir_name,root_filname,allowe
   toc_all = '<a name="list"></a>'
   toc_all += '<h3><b> Alphabetical list of all files.</b></h3>'
   cur_let_all = 'A'
-  toc_all += "<p>"+cur_let_all+".&nbsp;\n"
+  toc_all += "<p>"+cur_let_all+".</p>&nbsp;\n"
 
   for (ii,name) in enumerate(list_names):
     while not (name.startswith(cur_let_all.lower()) or name.startswith(cur_let_all.upper())):
       cur_let_all = chr(ord(cur_let_all)+1)
-      toc_all = toc_all + "<p>"+cur_let_all+".\n"
+      toc_all = toc_all + "<p>"+cur_let_all+".</p>\n"
 
     if root_filname != "":
       full_filname=root_filname+"_"+name
