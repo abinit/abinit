@@ -516,14 +516,22 @@ for i, varfile_info in enumerate(varfiles):
   if varfile=="default":
     continue
 
+  alphalinks="\n \n <hr> Go to "
+  for i in string.ascii_uppercase:
+    alphalinks+=('<a href=#%s>%s</a> ')%(i,i)
+  alphalinks+="\n \n"
+
   #Generate the body of the table of content 
   cur_let = 'A'
-  toc_body = " <br>"+cur_let+".\n"
+  toc_body=""
+  if varfile=="allvariables":
+    toc_body+=alphalinks+"<hr>"
+  toc_body += " <br><a id='%s'></a>"%(cur_let)+cur_let+".\n"
   if varfile=="allvariables":
     for i, var in enumerate(variables):
       while not var.abivarname.startswith(cur_let.lower()):
         cur_let = chr(ord(cur_let)+1)
-        toc_body += " <p>"+cur_let+".\n"
+        toc_body += " <p><a id='%s'></a>"%(cur_let)+cur_let+".\n"
       abivarname=var.abivarname
       if var.characteristics is not None and '[[INTERNAL_ONLY]]' in var.characteristics:
         abivarname = '%'+abivarname
@@ -533,14 +541,14 @@ for i, varfile_info in enumerate(varfiles):
     for (speckey, specval) in list_specials:
       while not speckey.lower().startswith(cur_let.lower()):
         cur_let = chr(ord(cur_let)+1)
-        toc_body += " <br>"+cur_let+".\n"
+        toc_body += " <br><a id='%s'></a>"%(cur_let)+cur_let+".\n"
       curlink = " <a href=\"#"+speckey+"\">"+speckey+"</a>&nbsp;&nbsp;\n"
       toc_body += curlink
   else:
     for abivarname,defi in all_vars[varfile]:
       while not abivarname.startswith(cur_let.lower()):
         cur_let = chr(ord(cur_let)+1)
-        toc_body += " <br>"+cur_let+".\n"
+        toc_body += " <br><a id='%s'></a>"%(cur_let)+cur_let+".\n"
       curlink = " <a href=\"#"+abivarname+"\">"+abivarname+"</a>&nbsp;&nbsp;\n"
       toc_body += curlink
   toc_body += "\n"
