@@ -56,7 +56,7 @@ with open(bib_ori+'/abiref.bib')  as bibtex_file:
   print("Read "+bib_ori+"/abiref.bib as database input file for the input variables and their characteristics ...")
   bibtex_str = bibtex_file.read()
 
-bibyml=read_yaml_file(bib_ori+"/bibfiles.yml")
+bibfiles=read_yaml_file(bib_ori+"/bibfiles.yml")
 helps=read_yaml_file(help_ori+"/helps.yml")
 lessons=read_yaml_file(tuto_ori+"/lessons.yml")
 characteristics=read_yaml_file(invars_ori+"/characteristics.yml")
@@ -66,7 +66,7 @@ tests_dirs=read_yaml_file(topics_ori+"/tests_dirs.yml")
 theorydocs=read_yaml_file(theory_ori+"/theorydocs.yml")
 list_topics_tribe=read_yaml_file(topics_ori+"/list_topics_tribe.yml")
 varfiles=read_yaml_file(invars_ori+"/varfiles.yml")
-variables=read_yaml_file(invars_ori+"/abinit_vars.yml")
+abinit_vars=read_yaml_file(invars_ori+"/abinit_vars.yml")
 
 ################################################################################
 # Parse the ABINIT input files, in order to find the possible topics to which they are linked -> topics_in_tests
@@ -380,7 +380,7 @@ print("File %s has been written ..." %file_txt)
 allowed_link_seeds={}
 
 # Groups of seeds
-for var in variables:
+for var in abinit_vars:
   allowed_link_seeds[var.abivarname]="input_variable in "+var.varfile
 for item in characteristics:
   allowed_link_seeds[item]="characteristic"
@@ -443,7 +443,7 @@ for (speckey, specval) in list_specials:
 ################################################################################
 # Constitute the body of information for all variables, stored for the appropriate varfile in all_contents[varfile]
 
-for i, var in enumerate(variables):
+for i, var in enumerate(abinit_vars):
   # Constitute the body of information related to one input variable
   varfile = var.varfile
   all_vars[varfile].append([var.abivarname,var.mnemonics])
@@ -536,7 +536,7 @@ for i, varfile_info in enumerate(varfiles):
     toc_body+=alphalinks+"<hr>"
   toc_body += " <br><a id='%s'></a>"%(cur_let)+cur_let+".\n"
   if varfile=="allvariables":
-    for i, var in enumerate(variables):
+    for i, var in enumerate(abinit_vars):
       while not var.abivarname.startswith(cur_let.lower()):
         cur_let = chr(ord(cur_let)+1)
         toc_body += " <p><a id='%s'></a>"%(cur_let)+cur_let+".\n"
@@ -589,7 +589,7 @@ for (tribekey, tribeval) in list_topics_tribe:
   for topic_name in list_of_topics:
     found[topic_name] = 0
 
-  for i, var in enumerate(variables):
+  for i, var in enumerate(abinit_vars):
     try:
       if var.topics is not None:
         topics_name_tribe = var.topics.split(',')
@@ -872,7 +872,7 @@ if activate_translation==1:
           # Create automatically the new links for the input variables
           if "html_automatically_generated" in line:
             # See whether one variable appear
-            for i, var in enumerate(variables):
+            for i, var in enumerate(abinit_vars):
               if var.abivarname in line:
                 varname = var.abivarname
                 varfile = var.varfile
@@ -941,10 +941,10 @@ returncode=assemble_html(helps,suppl_components,"users","help",allowed_link_seed
 # Treat the links within the "introduction" of the acknowledgment component first.
 
 backlink= ' &nbsp; <a href="../../%s/acknowledgments.html">acknowledgments.html</a> &nbsp; ' %(bib_gen)
-for i, bibyml_info in enumerate(bibyml):
-  if bibyml_info.name.strip()=="acknowledgments":
-    bibyml_intro=bibyml_info.introduction
-    bibyml_ack_intro = doku2html(make_links(bibyml_intro,None,allowed_link_seeds,backlinks,backlink))
+for i, bibfile_info in enumerate(bibfiles):
+  if bibfile_info.name.strip()=="acknowledgments":
+    bibfile_intro=bibfile_info.introduction
+    bibfile_ack_intro = doku2html(make_links(bibfile_intro,None,allowed_link_seeds,backlinks,backlink))
 
 ################################################################################
 # Write an ordered bib file, that allows to update the original one.
@@ -998,14 +998,14 @@ bibliography_content=bibtex2html(bibliography_content)
 ################################################################################
 # Assemble the html files in the bibliography directory
 
-suppl={"introduction":bibyml_ack_intro}
+suppl={"introduction":bibfile_ack_intro}
 suppl_components={"acknowledgments":suppl}
 suppl={"content":bibtex_content}
 suppl_components['bibtex']=suppl
 suppl={"content":bibliography_content}
 suppl_components['bibliography']=suppl
 
-rc=assemble_html(bibyml,suppl_components,"bibliography","",allowed_link_seeds,backlinks)
+rc=assemble_html(bibfiles,suppl_components,"bibliography","",allowed_link_seeds,backlinks)
 
 ################################################################################
 
