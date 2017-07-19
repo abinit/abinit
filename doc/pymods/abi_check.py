@@ -16,7 +16,7 @@ def main():
   with open(path+'abinit_vars.yml', 'r') as f:
     variables = yaml.load(f)
   with open(path+'characteristics.yml', 'r') as f:
-    list_chars = yaml.load(f)
+    characteristics = yaml.load(f)
   with open(path+'varfiles.yml', 'r') as f:
     list_varfiles = yaml.load(f)
     varfile_names=[]
@@ -43,7 +43,7 @@ def main():
         retcode += 1
       else:
         for cat in var.characteristics:
-          if cat.replace("[[", "").replace("]]", "") not in list_chars:
+          if cat.replace("[[", "").replace("]]", "") not in characteristics:
             print('FAIL: the characteristics ', cat, ' of ', abivarname, ' is not valid')
             retcode += 1
 

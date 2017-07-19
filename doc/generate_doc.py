@@ -24,7 +24,7 @@ from doc.pymods.lib_to_assemble_html import *
 debug = 0
 
 list_infos_dir=[]
-list_infos_dir.append({"dirname":"bibliography","yml_files":["bibhtml"]})
+list_infos_dir.append({"dirname":"bibliography","yml_files":["bibfiles"]})
 list_infos_dir.append({"dirname":"input_variables","yml_files":["abinit_vars","characteristics","list_specials","varfiles"]})
 list_infos_dir.append({"dirname":"theory","rootname":"theorydoc","yml_files":["theorydocs"]})
 list_infos_dir.append({"dirname":"topics","rootname":"topic","yml_files":["default_topic","list_of_topics","list_topics_tribe","tests_dirs"]})
@@ -56,10 +56,10 @@ with open(bib_ori+'/abiref.bib')  as bibtex_file:
   print("Read "+bib_ori+"/abiref.bib as database input file for the input variables and their characteristics ...")
   bibtex_str = bibtex_file.read()
 
-bibyml=read_yaml_file(bib_ori+"/bibhtml.yml")
+bibyml=read_yaml_file(bib_ori+"/bibfiles.yml")
 helps=read_yaml_file(help_ori+"/helps.yml")
 lessons=read_yaml_file(tuto_ori+"/lessons.yml")
-list_chars=read_yaml_file(invars_ori+"/characteristics.yml")
+characteristics=read_yaml_file(invars_ori+"/characteristics.yml")
 list_of_topics=read_yaml_file(topics_ori+"/list_of_topics.yml")
 list_specials=read_yaml_file(invars_ori+"/list_specials.yml")
 tests_dirs=read_yaml_file(topics_ori+"/tests_dirs.yml")
@@ -382,7 +382,7 @@ allowed_link_seeds={}
 # Groups of seeds
 for var in variables:
   allowed_link_seeds[var.abivarname]="input_variable in "+var.varfile
-for item in list_chars:
+for item in characteristics:
   allowed_link_seeds[item]="characteristic"
 for (specialkey,specialval) in list_specials:
   allowed_link_seeds[specialkey]="special"

@@ -187,7 +187,7 @@ def read_yaml_file(ymlfile):
   # Add echo for selected files
   if ymlfile== invars_ori+"/abinit_vars.yml":
     print("Read "+ymlfile+" as database input file for the input variables and their characteristics ...")
-  elif ymlfile== bib_ori+"/bibhtml.yml":
+  elif ymlfile== bib_ori+"/bibfiles.yml":
     print("Read "+ymlfile+" as database input file for the list of generated files in the bibliography directory ...")
   elif ymlfile== topics_ori+"/default_topic.yml":
     print("Read "+ymlfile+" as database input file for the default components of the topic files ...")
