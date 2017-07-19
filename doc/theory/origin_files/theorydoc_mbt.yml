@@ -488,7 +488,7 @@ body : |
   determined by [[ecuteps]].
   The oscillators are ubiquitous in the Many-Body part of ABINIT and their 
   calculation represents one of the most CPU intensive part of the execution.
-  For this reason we devote section <a href="../theory_mbt.html#oscillator_notes">6</a> 
+  For this reason we devote section <a href="theorydoc_mbt.html#oscillator_notes">6</a> 
   to the discussion of some important technical details concerning their computation.
   </p>
   <p>

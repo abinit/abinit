@@ -26,7 +26,7 @@ debug = 0
 list_infos_dir=[]
 list_infos_dir.append({"dirname":"bibliography","yml_files":["bibhtml"]})
 list_infos_dir.append({"dirname":"input_variables","yml_files":["abinit_vars","characteristics","list_specials","varfiles"]})
-list_infos_dir.append({"dirname":"theory","rootname":"theory","yml_files":["theorydocs"]})
+list_infos_dir.append({"dirname":"theory","rootname":"theorydoc","yml_files":["theorydocs"]})
 list_infos_dir.append({"dirname":"topics","rootname":"topic","yml_files":["default_topic","list_of_topics","list_topics_tribe","tests_dirs"]})
 list_infos_dir.append({"dirname":"tutorial","rootname":"lesson","yml_files":["lessons"]})
 list_infos_dir.append({"dirname":"users","rootname":"help","yml_files":["helps"]})
@@ -394,7 +394,7 @@ for i, lesson_info in enumerate(lessons):
   allowed_link_seeds["lesson_"+lesson]="lesson"
 for i, theory_info in enumerate(theorydocs):
   theorydoc = theory_info.name
-  allowed_link_seeds["theory_"+theorydoc]="theorydoc"
+  allowed_link_seeds["theorydoc_"+theorydoc]="theorydoc"
 for i, help_info in enumerate(helps):
   helpfile = help_info.name
   allowed_link_seeds["help_"+helpfile]="helpfile"
@@ -922,14 +922,14 @@ if activate_translation==1:
 
 # Assemble the html files to be generated from the yml information.
 # In order : tutorial, files lessons_*
-#            theory, files theory_*
+#            theory, files theorydoc_*
 #            users,  files *_help
  
 ################################################################################
 
 suppl_components={}
 returncode=assemble_html(lessons,suppl_components,"tutorial","lesson",allowed_link_seeds,backlinks)
-returncode=assemble_html(theorydocs,suppl_components,"theory","theory",allowed_link_seeds,backlinks)
+returncode=assemble_html(theorydocs,suppl_components,"theory","theorydoc",allowed_link_seeds,backlinks)
 returncode=assemble_html(helps,suppl_components,"users","help",allowed_link_seeds,backlinks)
 
 ################################################################################

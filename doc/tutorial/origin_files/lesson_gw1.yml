@@ -6,7 +6,7 @@ intro : |
   This lesson aims at showing how to calculate self-energy corrections to the DFT Kohn-Sham eigenvalues in the GW approximation.
   <p> 
   A brief description of the formalism and of the equations implemented in the code 
-  can be found in the <a href="../../theory/generated_files/theory_mbt.html">GW_notes</a>.
+  can be found in the <a href="../../theory/generated_files/theorydoc_mbt.html">GW_notes</a>.
   <p>
   The different formulas of the GW formalism have been written in a pdf
   document by Valerio Olevano (who also wrote the first version of this tutorial), see ~abinit/doc/theory/gwa.pdf .
@@ -35,7 +35,7 @@ intro : |
   <p>
   The user should be familiarized with the four basic lessons of ABINIT, see the <a href="lesson_welcome.html">tutorial home page</a>.
   <p>
-  After this first tutorial on GW, you should read the <a href="lesson_gw2.html">second tutorial on GW</a>.
+  After this first tutorial on GW, you should read the <a href="lesson_gw2.html">second lesson on GW</a>.
   
   <p>
   This lesson should take about 2 hours.

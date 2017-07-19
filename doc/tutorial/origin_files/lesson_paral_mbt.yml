@@ -144,7 +144,7 @@ body : |
   
   <p>
   In this part of the tutorial, we will compute the RPA polarizability with the Adler-Wiser approach.
-  The basic equations are discussed in this <a href="../../theory/generated_files/theory_mbt.html#RPA_Fourier_space">section</a> of the GW notes.
+  The basic equations are discussed in this <a href="../../theory/generated_files/theorydoc_mbt.html#RPA_Fourier_space">section</a> of the GW notes.
   <p>
   First copy the files file tmbt_2.file in the working directory, 
   then create a symbolic link pointing to the WFK file we have generated in the previous step:
@@ -370,7 +370,7 @@ body : |
             total number of points  =    26244
   </pre>
   
-  As discussed in this <a href="../../theory/generated_files/theory_mbt.html#oscillator_notes">section</a> of the GW notes,
+  As discussed in this <a href="../../theory/generated_files/theorydoc_mbt.html#oscillator_notes">section</a> of the GW notes,
   the Fast Fourier Transform represents one of the most CPU intensive part of the execution.
   For this reason the code provides 
   the input variable [[fftgw]] that 
@@ -400,7 +400,7 @@ body : |
   
   <p>
   The computational effort required by the screening computation scales linearly with the number of q-points.
-  As explained in this <a href="../../theory/generated_files/theory_mbt.html#RPA_Fourier_space">section</a> of the GW notes,
+  As explained in this <a href="../../theory/generated_files/theorydoc_mbt.html#RPA_Fourier_space">section</a> of the GW notes,
   the code exploits the symmetries of the screening function so that only the irreducible Brillouin
   zone (IBZ) has to be calculated explicitly.
   On the other hand, a large number of q-points might be needed to achieve converged results.
@@ -425,11 +425,11 @@ body : |
   <h3>3. Computing the screening in parallel using the Hilbert transform method</b> </h3>
   
   
-  As discussed in the <a href="../../theory/generated_files/theory_mbt.html#RPA_Fourier_space">GW_notes</a>,
+  As discussed in the <a href="../../theory/generated_files/theorydoc_mbt.html#RPA_Fourier_space">GW_notes</a>,
   the algorithm based on the Adler-Wiser expression is not optimal when many frequencies are wanted. 
   In this paragraph, we therefore discuss how to use the Hilbert transform method
   to calculate the RPA polarizability on a dense frequency mesh.
-  The equations implemented in the code are documented in  <a href="../../theory/generated_files/theory_mbt.html#hilbert_transform">this section</a> of the GW notes.
+  The equations implemented in the code are documented in  <a href="../../theory/generated_files/theorydoc_mbt.html#hilbert_transform">this section</a> of the GW notes.
   <p>
   As usual, we have to copy the files file tmbt_3.file in the working directory, and
   then create a symbolic link pointing to the WFK file.
@@ -472,7 +472,7 @@ body : |
   [[nomegasf]] 
   defines the number of &omega;&prime;  points in the linear mesh used for the spectral function i.e. the number 
   of &omega;&prime; in the 
-  <a href="../../theory_generated_files/theory_mbt.html#hilbert_transform">equation</a> for the spectral function.
+  <a href="../../theory/generated_files/theorydoc_mbt.html#hilbert_transform">equation</a> for the spectral function.
   <!--
   The mesh is automatically calculated inside the code so that the entire set of resonant transitions is covered.
   
@@ -481,7 +481,7 @@ body : |
   accurate representation of the delta function appearing in the expression for the spectral function.
   -->
   <p>
-  As discussed in the <a href="../../theory/generated_files/theory_mbt.html#hilbert_transform">GW notes</a>,
+  As discussed in the <a href="../../theory/generated_files/theorydoc_mbt.html#hilbert_transform">GW notes</a>,
   the Hilbert transform method is much more memory demanding that the Adler-Wiser approach,
   mainly because of the large value of 
   [[nomegasf]] that is usually needed to converge the results.
@@ -597,7 +597,7 @@ body : |
   In this last paragraph, we discuss how to calculate G<sub>0</sub>W<sub>0</sub> corrections in parallel with 
   [[gwpara]]=2.
   The basic equations used to compute the self-energy matrix elements are discussed in 
-  <a href="../../theory_generated_files/theory_mbt.html#evaluation_gw_sigma">this part</a> of the GW notes.
+  <a href="../../theory/generated_files/theorydoc_mbt.html#evaluation_gw_sigma">this part</a> of the GW notes.
   <p>
   Before running the calculation, copy the files file tmbt_4.file in the working directory.
   Then create two symbolic links for the SCR and the WFK file:

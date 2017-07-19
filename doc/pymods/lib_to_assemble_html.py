@@ -290,13 +290,13 @@ def bibtex2html(str_input):
 
 ################################################################################
 
-def assemble_html(origin_yml_files,suppl_components,dir_root,name_root,allowed_link_seeds,backlinks):
+def assemble_html(origin_yml_files,suppl_components,dir_name,root_filname,allowed_link_seeds,backlinks):
   """ Use the list of dictionaries "origin_yml_files" as well as the
       supplementary components "suppl_components", to produce html files,
-      situated in dir_root directories dir_root+"/generated_files".
-      The root name of the files is "name_root".
+      situated in dir_name (e.g. "tutorial") directories dir_name+"/generated_files".
+      The root name of the files is "root_filname" (e.g. "lesson").
       The complementary yml information (intro, body) for each file
-      is situated in dir_root+"/origin_files".
+      is situated in dir_name+"/origin_files".
       The dictionary allowed_link_seeds allows one to set up the links to relevant keywords.
       The backlinks are accumulated, to be mentioned in the bibliography.html file.
   """
@@ -316,16 +316,16 @@ def assemble_html(origin_yml_files,suppl_components,dir_root,name_root,allowed_l
     list_names.append(name)
     list_titles.append(origin_yml.keyword+' - '+origin_yml.subtitle)
   
-    if name_root != "":
-      full_name=name_root+"_"+name
+    if root_filname != "":
+      full_filname=root_filname+"_"+name
     else:
-      full_name=name
+      full_filname=name
 
     # Try to complete the information by reading a yml file
-    path_yml="%s/origin_files/%s.yml" %(dir_root,full_name)
+    path_yml="%s/origin_files/%s.yml" %(dir_name,full_filname)
     doc_yml={}
     if os.path.isfile(path_yml):
-      print("Read "+path_yml+" to build "+full_name+".html ... ",end="")
+      print("Read "+path_yml+" to build "+full_filname+".html ... ",end="")
       doc_yml=read_yaml_file(path_yml)
  
     # Try to complete the information from suppl_components
@@ -373,8 +373,9 @@ def assemble_html(origin_yml_files,suppl_components,dir_root,name_root,allowed_l
       # Accumulate
       doc_html += item+"\n"
 
-    rc=finalize_html(doc_html,origin_yml,dir_root,name_root,allowed_link_seeds,backlinks) 
+    rc=finalize_html(doc_html,origin_yml,dir_name,root_filname,allowed_link_seeds,backlinks) 
 
+  # Generate a html list of files.
   list_names.sort()
   toc_all = '<a name="list"></a>'
   toc_all += '<h3><b> Alphabetical list of all files.</b></h3>'
@@ -385,12 +386,13 @@ def assemble_html(origin_yml_files,suppl_components,dir_root,name_root,allowed_l
     while not (name.startswith(cur_let_all.lower()) or name.startswith(cur_let_all.upper())):
       cur_let_all = chr(ord(cur_let_all)+1)
       toc_all = toc_all + "<p>"+cur_let_all+".\n"
-    if name_root != "":
-      full_name=name_root+"_"+name
+
+    if root_filname != "":
+      full_filname=root_filname+"_"+name
     else:
-      full_name=name
-    path_html="%s/generated_files/%s.html" %(dir_root,full_name)
-    toc_all = toc_all + '<br><a href="%s"/>%s</a> [%s] &nbsp;&nbsp;\n' %(path_html,full_name,list_titles[ii])
+      full_filname=name
+
+    toc_all = toc_all + '<br><a href="%s.html"/>%s</a> [%s] &nbsp;&nbsp;\n' %(full_filname,full_filname,list_titles[ii])
 
   all_files_html=""
   spec={'users':'help files','tutorial':'lessons of the tutorial',
@@ -399,19 +401,19 @@ def assemble_html(origin_yml_files,suppl_components,dir_root,name_root,allowed_l
     if j == "toc_all":
       all_files_html += toc_all
     elif j == "subtitle":
-      all_files_html += 'This document lists the %s of the ABINIT package.' %(spec[dir_root])
+      all_files_html += 'This document lists the %s of the ABINIT package.' %(spec[dir_name])
       all_files_html += '<script type="text/javascript" src="../generic_advice.js"> </script>'
     else:
       all_files_html += getattr(origin_yml_default,j)
 
-  name_root_all="all_files"
-  rc=finalize_html(all_files_html,origin_yml_default,dir_root,name_root_all,allowed_link_seeds,backlinks)
+  root_filname_all="all_files"
+  rc=finalize_html(all_files_html,origin_yml_default,dir_name,root_filname_all,allowed_link_seeds,backlinks)
 
   return "Exit assemble_html"
 
 ################################################################################
 
-def finalize_html(doc_html,origin_yml,dir_root,name_root,allowed_link_seeds,backlinks):
+def finalize_html(doc_html,origin_yml,dir_name,root_filname,allowed_link_seeds,backlinks):
   """ Final steps of the preparation of a html file : global operations and write
       The draft text of the file to be written is contained in doc_html
       Some substitutions must be done using information in origin_yml (.name, .howto, .keyword, .authors)
@@ -419,13 +421,13 @@ def finalize_html(doc_html,origin_yml,dir_root,name_root,allowed_link_seeds,back
       The backlinks are given back.
   """
 
-  if name_root == "all_files":
-    full_name=name_root
-  elif name_root != "":
-    full_name=name_root+"_"+origin_yml.name
+  if root_filname == "all_files":
+    full_filname=root_filname
+  elif root_filname != "":
+    full_filname=root_filname+"_"+origin_yml.name
   else:
-    full_name=origin_yml.name
-  backlink=' &nbsp; <a href="../../%s/generated_files/%s.html">%s</a> &nbsp; ' %(dir_root,full_name,full_name)
+    full_filname=origin_yml.name
+  backlink=' &nbsp; <a href="../../%s/generated_files/%s.html">%s</a> &nbsp; ' %(dir_name,full_filname,full_filname)
 
   doc_html=doc_html.replace("__JS_PATH__",js_path)
 
@@ -441,7 +443,7 @@ def finalize_html(doc_html,origin_yml,dir_root,name_root,allowed_link_seeds,back
   doc_html = doku2html(make_links(doc_html,None,allowed_link_seeds,backlinks,backlink))
 
   #Write the finalized html file.
-  path_html = "%s/generated_files/%s.html" %(dir_root,full_name)
+  path_html = "%s/generated_files/%s.html" %(dir_name,full_filname)
   file_html = open(path_html,'w')
   file_html.write(doc_html)
   file_html.close()
