@@ -47,18 +47,18 @@ tuto_gen = "tutorial/generated_files"
 
 ################################################################################
  
+with open(bib_ori+'/abiref.bib')  as bibtex_file:
+  print("Read "+bib_ori+"/abiref.bib as database input file for the input variables and their characteristics ...")
+  bibtex_str = bibtex_file.read()
 
 bibyml=read_yaml_file(bib_ori+"/bibhtml.yml")
 helps=read_yaml_file(help_ori+"/helps.yml")
 lessons=read_yaml_file(tuto_ori+"/lessons.yml")
 list_of_topics=read_yaml_file(topics_ori+"/list_of_topics.yml")
-varfiles=read_yaml_file(invars_ori+"/varfiles.yml")
 tests_dirs=read_yaml_file(topics_ori+"/tests_dirs.yml")
 theorydocs=read_yaml_file(theory_ori+"/theorydocs.yml")
+varfiles=read_yaml_file(invars_ori+"/varfiles.yml")
 variables=read_yaml_file(invars_ori+"/abinit_vars.yml")
-
-with open(bib_ori+'/abiref.bib')  as bibtex_file:
-  bibtex_str = bibtex_file.read()
 
 ################################################################################
 # Parse the ABINIT input files, in order to find the possible topics to which they are linked -> topics_in_tests
@@ -649,14 +649,13 @@ toc_all += "<p>"+cur_let_all+".&nbsp;\n"
 ################################################################################
 # Assemble the "topic" files 
 
-print("Will use file yml_files/default_topic.yml as default for all topic files ... ")
 default_topic_yml=read_yaml_file(topics_ori+"/default_topic.yml")
 default_topic=default_topic_yml[0]
 
 # For each "topic" file
 for topic_name in list_of_topics:
   path_yml=topics_ori+"/topic_"+topic_name+".yml"
-  print("Will use file "+path_yml+" to initiate the topic "+topic_name+" ... ",end="")
+  print("Read "+path_yml+" to initiate the topic '"+topic_name+"' ... ",end="")
   topic_yml=read_yaml_file(path_yml)
   topic=topic_yml[0]
 
@@ -786,7 +785,7 @@ if activate_translation==1:
       break
     path_doc_html="users/"+name+"_help.html"
     path_doc_yml=help_ori+"/help_"+name+".yml"
-    print("Will use file "+path_doc_html+" to build the file "+path_doc_yml+" ... ",end="")
+    print("Read "+path_doc_html+" to build '"+path_doc_yml+"'... ",end="")
 
     f_doc_html=open(path_doc_html,"r")
     doc_html=f_doc_html.readlines()
