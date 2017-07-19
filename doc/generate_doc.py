@@ -37,20 +37,6 @@ list_infos_dir.append({"dir_name":"tutorial","root_filname":"lesson",
 list_infos_dir.append({"dir_name":"users","root_filname":"help",
                                                     "yml_files":["helps"]})
 
-# Path for yml and html files
-bib_ori = "bibliography/origin_files"
-bib_gen = "bibliography/generated_files"
-help_ori = "users/origin_files"
-help_gen = "users/generated_files"
-invars_ori = "input_variables/origin_files"
-invars_gen = "input_variables/generated_files"
-topics_ori = "topics/origin_files"
-topics_gen = "topics/generated_files"
-theory_ori = "theory/origin_files"
-theory_gen = "theory/generated_files"
-tuto_ori = "tutorial/origin_files"
-tuto_gen = "tutorial/generated_files"
-
 ################################################################################
 ################################################################################
 
@@ -71,9 +57,10 @@ msgs={"bibfiles"       :"as database input file for the list of generated files 
       "lessons"        :"as database input file for the list of lessons ...",
       "helps"          :"as database input file for the list of help files in the users directory ..."}
       
-with open(bib_ori+'/abiref.bib')  as bibtex_file:
-  print("Read "+bib_ori+"/abiref.bib as database input file for the input variables and their characteristics ...")
-  bibtex_str = bibtex_file.read()
+path_file='bibliography/origin_files/abiref.bib'
+with open(path_file) as f:
+  print("Read "+path_file+" as database input file for the input variables and their characteristics ...")
+  bibtex_str = f.read()
 
 yml_in={}
 for infos_dir in list_infos_dir:
@@ -95,19 +82,20 @@ list_of_topics=yml_in["list_of_topics"]
 # Also constitute the list of allowed links to tests files.
 
 try :
-  rm_cmd = "rm "+topics_gen+"/topics_in_tests.yml"
+  rm_cmd = "rm topics/generated_files/topics_in_tests.yml"
   retcode = os.system(rm_cmd)
 except :
   if debug==1 :
-    print("rm "+topics_gen+"/topics_in_tests.yml failed")
+    print(rm_cmd+"failed")
     print("the file was likely non existent")
 
 allowed_links_in_tests=[]
 for tests_dir in yml_in["tests_dirs"] :
-  grep_cmd = "grep topics tests/%s/Input/*.in > %s/topics_in_tests.txt"%(tests_dir,topics_gen)
+
+  grep_cmd = "grep topics tests/%s/Input/*.in > topics/generated_files/topics_in_tests.txt"%(tests_dir)
   retcode = os.system(grep_cmd)
   if retcode == 0 :
-    sed_cmd = "sed -e 's/^/- /' %s/topics_in_tests.txt >> %s/topics_in_tests.yml"%(topics_gen,topics_gen)
+    sed_cmd = "sed -e 's/^/- /' topics/generated_files/topics_in_tests.txt >> topics/generated_files/topics_in_tests.yml"
     retcode = os.system(sed_cmd)
 
   # Allowed links
@@ -122,7 +110,7 @@ for tests_dir in yml_in["tests_dirs"] :
       allowed_links_in_tests.append(path_dir_refs+'/'+file)
 
 path_ymlfile="topics/generated_files/topics_in_tests.yml"
-print("Generate "+path_ymlfile+", to contain the list of automatic test input files relevant for each topic ...")
+print("Generated "+path_ymlfile+", to contain the list of automatic test input files relevant for each topic ...")
 with open(path_ymlfile, 'r') as f:
   topics_in_tests = yaml.load(f)
 
@@ -358,7 +346,7 @@ for ref in bibtex_dics:
   lines_txt+= ("[%s] %s \n") %(ID,reference_dic[ID])
 
 # Open, write and close the txt file
-file_txt = bib_gen+'/abiref.txt'
+file_txt = 'bibliography/generated_files/abiref.txt'
 f_txt = open(file_txt,'w')
 f_txt.write(lines_txt)
 f_txt.close()
@@ -394,7 +382,7 @@ for ref in bibtex_dics:
   lines_yml+=lines
 
 # Open, write and close the yml file
-file_yml = bib_gen+'/abiref.yml'
+file_yml = 'bibliography/generated_files/abiref.yml'
 f_yml = open(file_yml,'w')
 f_yml.write(lines_yml)
 f_yml.close()
@@ -456,7 +444,7 @@ for (specialkey,specialval) in list_specials:
   cur_specials.append(specialkey)
 
 for (speckey, specval) in list_specials:
-  backlink= ' &nbsp; <a href="../../%s/specials.html#%s">%s</a> &nbsp; ' %(invars_gen,speckey,speckey)
+  backlink= ' &nbsp; <a href="../../input_variables/generated_files/specials.html#%s">%s</a> &nbsp; ' %(speckey,speckey)
   cur_content = "<br><font id=\"title\"><a name=\""+speckey+"\">"+speckey+"</a></font>\n"
   cur_content += "<br><font id=\"text\">\n"
   cur_content += "<p>\n"+doku2html(make_links(specval,speckey,allowed_link_seeds,backlinks,backlink))+"\n"
@@ -474,7 +462,7 @@ for i, var in enumerate(abinit_vars):
   varfile = var.varfile
   all_vars[varfile].append([var.abivarname,var.mnemonics])
   cur_content = ""
-  backlink=' &nbsp; <a href="../../%s/%s.html#%s">%s</a> &nbsp; ' %(invars_gen,varfile,var.abivarname,var.abivarname)
+  backlink=' &nbsp; <a href="../../input_variables/generated_files/%s.html#%s">%s</a> &nbsp; ' %(varfile,var.abivarname,var.abivarname)
 
   try:
     # Title
@@ -498,7 +486,7 @@ for i, var in enumerate(abinit_vars):
         topics_name_tribe = vartopics.split(',')
         for i, topic_name_tribe in enumerate(topics_name_tribe):
           name_tribe = topic_name_tribe.split('_')
-          cur_content += '<a href="../../'+topics_gen+'/topic_'+name_tribe[0].strip()+'.html">'+name_tribe[0].strip()+'</a> '
+          cur_content += '<a href="../../topics/generated_files/topic_'+name_tribe[0].strip()+'.html">'+name_tribe[0].strip()+'</a> '
         cur_content += "</font>\n"
     except:
       if debug==1 :
@@ -629,7 +617,7 @@ for (tribekey, tribeval) in yml_in["list_tribes"]:
             abivarname=var.abivarname
             if var.characteristics is not None and '[[INTERNAL_ONLY]]' in var.characteristics:
               abivarname = '%'+abivarname
-            topic_invars[topic_name] += '... <a href="../../'+invars_gen+'/'+var.varfile+'.html#'+var.abivarname+'">'+abivarname+'</a>   '
+            topic_invars[topic_name] += '... <a href="../../input_variables/generated_files/'+var.varfile+'.html#'+var.abivarname+'">'+abivarname+'</a>   '
             topic_invars[topic_name] += "["+var.mnemonics+"]<br>\n"
     except:
       if debug==1 :
@@ -695,7 +683,7 @@ default_topic=yml_in["default_topic"][0]
 
 # For each "topic" file
 for topic_name in list_of_topics:
-  path_ymlfile=topics_ori+"/topic_"+topic_name+".yml"
+  path_ymlfile="topics/origin_files/topic_"+topic_name+".yml"
   print("Read "+path_ymlfile+" to initiate the topic '"+topic_name+"' ... ",end="")
   with open(path_ymlfile, 'r') as f:
     topic_yml = yaml.load(f)
@@ -826,7 +814,7 @@ if activate_translation==1:
     if name=="default":
       break
     path_doc_html="users/"+name+"_help.html"
-    path_doc_yml=help_ori+"/help_"+name+".yml"
+    path_doc_yml="users/origin_files/help_"+name+".yml"
     print("Read "+path_doc_html+" to build '"+path_doc_yml+"'... ",end="")
 
     f_doc_html=open(path_doc_html,"r")
@@ -968,7 +956,7 @@ for list_infos in list_infos_dir:
 ################################################################################
 # Treat the links within the "introduction" of the acknowledgment component first.
 
-backlink= ' &nbsp; <a href="../../%s/acknowledgments.html">acknowledgments.html</a> &nbsp; ' %(bib_gen)
+backlink= ' &nbsp; <a href="../../bibliography/generated_files/acknowledgments.html">acknowledgments.html</a> &nbsp; ' 
 for i, bibfile_info in enumerate(yml_in["bibfiles"]):
   if bibfile_info.name.strip()=="acknowledgments":
     bibfile_intro=bibfile_info.introduction
@@ -1011,7 +999,7 @@ for ref in bibtex_dics:
       bibliography_content+= link
 
 # Open, write and close the txt file
-file_txt = bib_gen+'/ordered_abiref.bib'
+file_txt = 'bibliography/generated_files/ordered_abiref.bib'
 f_txt = open(file_txt,'w')
 f_txt.write(lines_txt)
 f_txt.close()
