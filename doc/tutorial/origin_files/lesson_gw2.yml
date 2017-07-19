@@ -22,7 +22,7 @@ intro : |
   with the relevant formulas.
   We will refer to these papers as the Bruneval[2006] and the Lebegue[2003] papers.
   <p>
-  A brief description of the equations implemented in the code can be found in the <a href="../../theory/generated_files/theory_mbt.html">GW_notes</a>.
+  A brief description of the equations implemented in the code can be found in the <a href="../../theory/generated_files/theorydoc_mbt.html">GW_notes</a>.
   <p>
   Also, it is suggested to
   <a href="../../bibliography/generated_files/acknowledgments.html">acknowledge<a> the efforts of developers of the GW part of ABINIT,

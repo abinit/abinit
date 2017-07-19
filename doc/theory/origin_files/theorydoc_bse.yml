@@ -9,7 +9,7 @@ intro : |
   on planewaves and norm-conserving pseudopotentials is also discussed.
   </p>
   <p>
-  The conventions used in the equations are explained in the <a href="../generated_files/theory_mbt.html#notations">MBT_notes</a>.
+  The conventions used in the equations are explained in the Many-body theory notes ([[theorydoc_mbt]]).
   A much more consistent discussion of the theoretical aspects of the Bethe-Salpeter 
   equation can be found in [1].
 # This is the body, including the table of content ...
@@ -87,7 +87,7 @@ body : |
   the first element of the non-inverted matrix.
   
   <p>
-  In the <a href="../theory_mbt.html#RPA_Fourier_space">GW_notes</a>, we have discussed 
+  In the <a href="../theorydoc_mbt.html#RPA_Fourier_space">GW_notes</a>, we have discussed 
   how to calculate the irreducible polarizability and thus the absorption spectrum within the random phase approximation (RPA).
   
   It turns out, however, that the RPA dielectric function evaluated with Kohn-Sham orbitals and eigenvalues 
@@ -157,7 +157,7 @@ body : |
   that should not be confused with the <i>irreducible</i> polarizability of the 
   many-body system (denoted with a tilde in the formulas in the 
   
-  <a href="../theory_mbt.html#RPA_Fourier_space">GW_notes</a>). 
+  <a href="../theorydoc_mbt.html#RPA_Fourier_space">GW_notes</a>). 
   The utility of working in terms of the reducible quantities is that the macroscopic 
   dielectric function <i><b>with</b></i> local field effects is obtained directly from the 
   reducible polarizability using
@@ -547,7 +547,7 @@ body : |
   
   Our implementation employs planewaves to expand the periodic part of the Bloch states, <i>u</i>,
   and the two-point function <i>W(r,r')</i> that becomes a <b>q</b>-dependent matrix in reciprocal-space.
-  The conventions used for the transforms are documented in <a href="../theory_mbt.html#notations">this
+  The conventions used for the transforms are documented in <a href="../theorydoc_mbt.html#notations">this
   section</a> of the <i>GW</i> notes.
   
   <p>
@@ -569,7 +569,7 @@ body : |
   [[ecutwfn]].
   The computation of the oscillator matrix elements is discussed in 
   
-  <a href="../theory_mbt.html#oscillator_notes">this section</a> of the <i>GW</i> Notes.
+  <a href="../theorydoc_mbt.html#oscillator_notes">this section</a> of the <i>GW</i> Notes.
   
   <p>
   The input variable [[bs_exchange_term]]
