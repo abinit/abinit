@@ -27,6 +27,8 @@ users_path = "../../users/"
 # Path for yml and html files
 bib_ori = "bibliography/origin_files"
 bib_gen = "bibliography/generated_files"
+help_ori = "users/origin_files"
+help_gen = "users/generated_files"
 invars_ori = "input_variables/origin_files"
 invars_gen = "input_variables/generated_files"
 topics_ori = "topics/origin_files"
@@ -102,7 +104,7 @@ def make_links(text,cur_key,allowed_link_seeds,backlinks,backlink):
         varfile=value[18:]
         return '<a href="../../input_variables/generated_files/'+varfile+".html#"+key+'">'+key+'</a>'
       elif value=="characteristic":
-        return '<a href="'+users_path+'help_abinit.html#'+str.replace(key.lower()," ","_")+'">'+key+'</a>'
+        return '<a href="../../users/generated_files/help_abinit.html#'+str.replace(key.lower()," ","_")+'">'+key+'</a>'
       elif value=="special":
         return '<a href="../../input_variables/generated_files/specials.html#'+key+'">'+key+'</a>'
       elif value=="varfile":
@@ -180,23 +182,35 @@ def get_year(name):
 ################################################################################
 
 def read_yaml_file(ymlfile):
-  """ Read the file 'ymlfile', containing yml data, and store all such data in the returned object"""
+  """ Print reading message, read the file 'ymlfile' containing yml data, and store all such data in the returned object"""
 
   # Add echo for selected files
   if ymlfile== invars_ori+"/abinit_vars.yml":
-    print("Use "+ymlfile+" as database input file for the input variables and their characteristics ...")
-  elif ymlfile== topics_ori+"list_of_topics.yml":
-    print("Use "+ymlfile+" as database input file for the list of topics ...")
-  elif ymlfile== invars_ori+"/varfiles.yml":
-    print("Use "+ymlfile+" as database input file for the list of varfiles ...")
+    print("Read "+ymlfile+" as database input file for the input variables and their characteristics ...")
+  elif ymlfile== bib_ori+"/bibhtml.yml":
+    print("Read "+ymlfile+" as database input file for the list of generated files in the bibliography directory ...")
+  elif ymlfile== topics_ori+"/default_topic.yml":
+    print("Read "+ymlfile+" as database input file for the default components of the topic files ...")
+  elif ymlfile== help_ori+"/helps.yml":
+    print("Read "+ymlfile+" as database input file for the list of help files in the users directory ...")
   elif ymlfile== tuto_ori+"/lessons.yml":
-    print("Use "+ymlfile+" as database input file for the list of lessons ...")
-  elif ymlfile== theory_ori+"/theorydocs.yml":
-    print("Use "+ymlfile+" as database input file for the list of theory documents ...")
+    print("Read "+ymlfile+" as database input file for the list of lessons ...")
+  elif ymlfile== topics_ori+"/list_of_topics.yml":
+    print("Read "+ymlfile+" as database input file for the list of topics ...")
   elif ymlfile== topics_ori+"/tests_dirs.yml":
-    print("Use "+ymlfile+" as database input file for the list of directories in which automatic test input files are present ...")
+    print("Read "+ymlfile+" as database input file for the list of directories in which automatic test input files are present ...")
+  elif ymlfile== theory_ori+"/theorydocs.yml":
+    print("Read "+ymlfile+" as database input file for the list of theory documents ...")
+  # This is a generated file, unlike the others
   elif ymlfile== topics_gen+"/topics_in_tests.yml":
-    print("Generated file "+ymlfile+", to contain the list of automatic test input files relevant for each topic ...")
+    print("Generate file "+ymlfile+", to contain the list of automatic test input files relevant for each topic ...")
+  elif ymlfile== invars_ori+"/varfiles.yml":
+    print("Read "+ymlfile+" as database input file for the list of varfiles ...")
+  elif "yml" in ymlfile[-3:]:
+    if "topic_" in ymlfile or "lesson_" in ymlfile :
+      pass
+  else:
+    raise KeyError("Please provide a message to be printed for the unknown file %s",ymlfile)
 
   with open(ymlfile, 'r') as f:
     ymlstructure = yaml.load(f);
@@ -311,7 +325,7 @@ def assemble_html(origin_yml_files,suppl_components,dir_root,name_root,allowed_l
     path_yml="%s/origin_files/%s.yml" %(dir_root,full_name)
     doc_yml={}
     if os.path.isfile(path_yml):
-      print("Will use file "+path_yml+" to build the "+dir_root+" html document "+full_name+" ... ",end="")
+      print("Read "+path_yml+" to build "+full_name+".html ... ",end="")
       doc_yml=read_yaml_file(path_yml)
  
     # Try to complete the information from suppl_components

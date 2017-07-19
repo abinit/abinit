@@ -23,8 +23,8 @@
     title : |
       <h1>ABINIT, special parameters:</h1>
     purpose : |
-      <p>This document lists and provides the description of the name (keywords) of some parameters
-      that are used in the documentation of other variables.
+      <p>This document lists and provides the description of the name (keywords) of special parameters
+      that are not input variables, but that are used in the documentation of other variables, typically compilation parameters.
       <p> You can change these parameters at compile time usually.
     tofcontent_header : |
       <a name="list"></a>
@@ -48,6 +48,8 @@
       Complete list.
     purpose : |
       This document lists the names of all input variables to be used in the main input file of the abinit code.
+      <p>
+      The internal variables (see the [[varint]] web page) are prepended with the sign %.
     tofcontent_header : |
       <a name="list"></a>
       <h3><b> Alphabetical list of all input variables of the main ABINIT code.</b></h3>
@@ -95,6 +97,13 @@
 - !components
     name : varint
     keyword : internal
+    purpose : |
+      <p>This document lists and provides the description
+      of the name (keywords) of the "__KEYWORD__" variables 
+      that are not controlled by the user directly, but are derived from input variables.
+      They are mentioned in the documentation because it is easier to understand the 
+      behaviour of some input variables thanks to the explanation of such internal variables.
+      In the [[allvariables]] web page, they are prepended with the sign %.
 
 - !components
     name : varpar

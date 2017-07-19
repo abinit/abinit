@@ -1,6 +1,6 @@
 # This file provides the information needed to generate the documentation files that describes the topics files,
-# and the list of all input variables. 
-# Each paragraph of such documentation file has a mix of formatting html information and real content.
+# and the list of all topics. 
+# Each component of such documentation file has a mix of formatting html information and real content.
 
 # The present file contains the default html information, also used for the list of all variables.
 # For each of the topics file, there is a corresponding yml file, that specifies usually the list of paragraphs.

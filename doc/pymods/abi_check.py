@@ -12,7 +12,7 @@ except ImportError:
 
 
 def main():
-    path = 'yml_files/abinit_vars.yml'
+    path = '../input_variables/origin_files/abinit_vars.yml'
     with open(path, 'r') as f:
         variables = yaml.load(f)
 
@@ -47,12 +47,12 @@ def main():
                     print('FAIL: the field dimensions of ', abivarname, ' is not a list neither a valuewithconditions')
                     retcode += 1
 
-        if var.section is None:
-            print('FAIL: ', abivarname, ' does not have a section')
+        if var.varfile is None:
+            print('FAIL: ', abivarname, ' does not have a varfile')
             retcode += 1
         else:
-            if not isinstance(var.section, str) or var.section not in list_sections:
-                print('FAIL: the field section of ', abivarname, ' should be one of the valid sections')
+            if not isinstance(var.section, str) or var.varfile not in list_varfiles:
+                print('FAIL: the field varfile of ', abivarname, ' should be one of the valid varfiles')
                 retcode += 1
 
     return retcode

@@ -47,18 +47,18 @@ tuto_gen = "tutorial/generated_files"
 
 ################################################################################
  
+with open(bib_ori+'/abiref.bib')  as bibtex_file:
+  print("Read "+bib_ori+"/abiref.bib as database input file for the input variables and their characteristics ...")
+  bibtex_str = bibtex_file.read()
 
 bibyml=read_yaml_file(bib_ori+"/bibhtml.yml")
 helps=read_yaml_file(help_ori+"/helps.yml")
 lessons=read_yaml_file(tuto_ori+"/lessons.yml")
 list_of_topics=read_yaml_file(topics_ori+"/list_of_topics.yml")
-varfiles=read_yaml_file(invars_ori+"/varfiles.yml")
 tests_dirs=read_yaml_file(topics_ori+"/tests_dirs.yml")
 theorydocs=read_yaml_file(theory_ori+"/theorydocs.yml")
+varfiles=read_yaml_file(invars_ori+"/varfiles.yml")
 variables=read_yaml_file(invars_ori+"/abinit_vars.yml")
-
-with open(bib_ori+'/abiref.bib')  as bibtex_file:
-  bibtex_str = bibtex_file.read()
 
 ################################################################################
 # Parse the ABINIT input files, in order to find the possible topics to which they are linked -> topics_in_tests
@@ -461,14 +461,14 @@ for i, var in enumerate(variables):
       if var.topics is not None :
         cur_content += "<br><font id=\"characteristic\">Mentioned in \"How to\": "
         vartopics=var.topics
-        topics_name_class = vartopics.split(',')
-        for i, topic_name_class in enumerate(topics_name_class):
-          name_class = topic_name_class.split('_')
-          cur_content += '<a href="../../'+topics_gen+'/topic_'+name_class[0].strip()+'.html">'+name_class[0].strip()+'</a> '
+        topics_name_tribe = vartopics.split(',')
+        for i, topic_name_tribe in enumerate(topics_name_tribe):
+          name_tribe = topic_name_tribe.split('_')
+          cur_content += '<a href="../../'+topics_gen+'/topic_'+name_tribe[0].strip()+'.html">'+name_tribe[0].strip()+'</a> '
         cur_content += "</font>\n"
     except:
       if debug==1 :
-        print(" No topic_class for abivarname "+var.abivarname)
+        print(" No topic_tribe for abivarname "+var.abivarname)
     # Variable type, including dimensions
     cur_content += "<br><font id=\"vartype\">Variable type: "+var.vartype
     if var.dimensions is not None:
@@ -516,14 +516,22 @@ for i, varfile_info in enumerate(varfiles):
   if varfile=="default":
     continue
 
+  alphalinks="\n \n <hr> Go to "
+  for i in string.ascii_uppercase:
+    alphalinks+=('<a href=#%s>%s</a> ')%(i,i)
+  alphalinks+="\n \n"
+
   #Generate the body of the table of content 
   cur_let = 'A'
-  toc_body = " <br>"+cur_let+".\n"
+  toc_body=""
+  if varfile=="allvariables":
+    toc_body+=alphalinks+"<hr>"
+  toc_body += " <br><a id='%s'></a>"%(cur_let)+cur_let+".\n"
   if varfile=="allvariables":
     for i, var in enumerate(variables):
       while not var.abivarname.startswith(cur_let.lower()):
         cur_let = chr(ord(cur_let)+1)
-        toc_body += " <p>"+cur_let+".\n"
+        toc_body += " <p><a id='%s'></a>"%(cur_let)+cur_let+".\n"
       abivarname=var.abivarname
       if var.characteristics is not None and '[[INTERNAL_ONLY]]' in var.characteristics:
         abivarname = '%'+abivarname
@@ -533,14 +541,14 @@ for i, varfile_info in enumerate(varfiles):
     for (speckey, specval) in list_specials:
       while not speckey.lower().startswith(cur_let.lower()):
         cur_let = chr(ord(cur_let)+1)
-        toc_body += " <br>"+cur_let+".\n"
+        toc_body += " <br><a id='%s'></a>"%(cur_let)+cur_let+".\n"
       curlink = " <a href=\"#"+speckey+"\">"+speckey+"</a>&nbsp;&nbsp;\n"
       toc_body += curlink
   else:
     for abivarname,defi in all_vars[varfile]:
       while not abivarname.startswith(cur_let.lower()):
         cur_let = chr(ord(cur_let)+1)
-        toc_body += " <br>"+cur_let+".\n"
+        toc_body += " <br><a id='%s'></a>"%(cur_let)+cur_let+".\n"
       curlink = " <a href=\"#"+abivarname+"\">"+abivarname+"</a>&nbsp;&nbsp;\n"
       toc_body += curlink
   toc_body += "\n"
@@ -565,10 +573,10 @@ found = dict()
 for topic_name in list_of_topics:
   topic_invars[topic_name] = ""
 
-for (tclasskey, tclassval) in list_topics_class:
+for (tribekey, tribeval) in list_topics_tribe:
 
   if debug == 1:
-    print("\nWork on "+tclasskey+"\n")
+    print("\nWork on "+tribekey+"\n")
 
   for topic_name in list_of_topics:
     found[topic_name] = 0
@@ -576,13 +584,13 @@ for (tclasskey, tclassval) in list_topics_class:
   for i, var in enumerate(variables):
     try:
       if var.topics is not None:
-        topics_name_class = var.topics.split(',')
-        for i, topic_name_class in enumerate(topics_name_class):
-          name_class = topic_name_class.split('_')
-          if tclasskey==name_class[1].strip() :
-            topic_name=name_class[0].strip()
+        topics_name_tribe = var.topics.split(',')
+        for i, topic_name_tribe in enumerate(topics_name_tribe):
+          name_tribe = topic_name_tribe.split('_')
+          if tribekey==name_tribe[1].strip() :
+            topic_name=name_tribe[0].strip()
             if found[topic_name]==0 :
-              topic_invars[topic_name] += "<p>"+tclassval+":<p>"
+              topic_invars[topic_name] += "<p>"+tribeval+":<p>"
               found[topic_name] = 1
             abivarname=var.abivarname
             if var.characteristics is not None and '[[INTERNAL_ONLY]]' in var.characteristics:
@@ -649,14 +657,13 @@ toc_all += "<p>"+cur_let_all+".&nbsp;\n"
 ################################################################################
 # Assemble the "topic" files 
 
-print("Will use file yml_files/default_topic.yml as default for all topic files ... ")
 default_topic_yml=read_yaml_file(topics_ori+"/default_topic.yml")
 default_topic=default_topic_yml[0]
 
 # For each "topic" file
 for topic_name in list_of_topics:
   path_yml=topics_ori+"/topic_"+topic_name+".yml"
-  print("Will use file "+path_yml+" to initiate the topic "+topic_name+" ... ",end="")
+  print("Read "+path_yml+" to initiate the topic '"+topic_name+"' ... ",end="")
   topic_yml=read_yaml_file(path_yml)
   topic=topic_yml[0]
 
@@ -786,7 +793,7 @@ if activate_translation==1:
       break
     path_doc_html="users/"+name+"_help.html"
     path_doc_yml=help_ori+"/help_"+name+".yml"
-    print("Will use file "+path_doc_html+" to build the file "+path_doc_yml+" ... ",end="")
+    print("Read "+path_doc_html+" to build '"+path_doc_yml+"'... ",end="")
 
     f_doc_html=open(path_doc_html,"r")
     doc_html=f_doc_html.readlines()

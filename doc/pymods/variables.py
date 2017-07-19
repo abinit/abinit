@@ -11,8 +11,8 @@ with open('input_variables/origin_files/characteristics.yml', 'r') as f:
 with open('input_variables/origin_files/list_specials.yml', 'r') as f:
     list_specials = yaml.load(f)
 
-with open('topics/origin_files/list_topics_class.yml', 'r') as f:
-    list_topics_class = yaml.load(f)
+with open('topics/origin_files/list_topics_tribe.yml', 'r') as f:
+    list_topics_tribe = yaml.load(f)
 
 class literal(str): pass
 

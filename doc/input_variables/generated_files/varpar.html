@@ -30,27 +30,27 @@ variables to be used in the main input file of the abinit code.
 <a name="list"></a>
 <h3><b> Content of the file : alphabetical list of "parallelisation" variables.</b></h3>
 
-<br>A.
+<br><a id='A'></a>A.
  <a href="#autoparal">autoparal</a>&nbsp;&nbsp;
- <br>B.
+ <br><a id='B'></a>B.
  <a href="#bandpp">bandpp</a>&nbsp;&nbsp;
- <br>C.
- <br>D.
- <br>E.
- <br>F.
- <br>G.
+ <br><a id='C'></a>C.
+ <br><a id='D'></a>D.
+ <br><a id='E'></a>E.
+ <br><a id='F'></a>F.
+ <br><a id='G'></a>G.
  <a href="#gpu_devices">gpu_devices</a>&nbsp;&nbsp;
  <a href="#gpu_linalg_limit">gpu_linalg_limit</a>&nbsp;&nbsp;
  <a href="#gwpara">gwpara</a>&nbsp;&nbsp;
- <br>H.
- <br>I.
- <br>J.
- <br>K.
- <br>L.
+ <br><a id='H'></a>H.
+ <br><a id='I'></a>I.
+ <br><a id='J'></a>J.
+ <br><a id='K'></a>K.
+ <br><a id='L'></a>L.
  <a href="#localrdwf">localrdwf</a>&nbsp;&nbsp;
- <br>M.
+ <br><a id='M'></a>M.
  <a href="#max_ncpus">max_ncpus</a>&nbsp;&nbsp;
- <br>N.
+ <br><a id='N'></a>N.
  <a href="#np_slk">np_slk</a>&nbsp;&nbsp;
  <a href="#npband">npband</a>&nbsp;&nbsp;
  <a href="#npfft">npfft</a>&nbsp;&nbsp;
@@ -59,23 +59,23 @@ variables to be used in the main input file of the abinit code.
  <a href="#npkpt">npkpt</a>&nbsp;&nbsp;
  <a href="#nppert">nppert</a>&nbsp;&nbsp;
  <a href="#npspinor">npspinor</a>&nbsp;&nbsp;
- <br>O.
- <br>P.
+ <br><a id='O'></a>O.
+ <br><a id='P'></a>P.
  <a href="#paral_atom">paral_atom</a>&nbsp;&nbsp;
  <a href="#paral_kgb">paral_kgb</a>&nbsp;&nbsp;
  <a href="#paral_rf">paral_rf</a>&nbsp;&nbsp;
  <a href="#pw_unbal_thresh">pw_unbal_thresh</a>&nbsp;&nbsp;
- <br>Q.
- <br>R.
- <br>S.
- <br>T.
- <br>U.
+ <br><a id='Q'></a>Q.
+ <br><a id='R'></a>R.
+ <br><a id='S'></a>S.
+ <br><a id='T'></a>T.
+ <br><a id='U'></a>U.
  <a href="#use_gpu_cuda">use_gpu_cuda</a>&nbsp;&nbsp;
  <a href="#use_slk">use_slk</a>&nbsp;&nbsp;
 <br><br><br><br><hr>
 <br><font id="title"><a name="autoparal">autoparal</a></font>
 <br><font id="mnemonics">Mnemonics: AUTOmatisation of the PARALlelism</font>
-<br><font id="characteristic">Characteristic: <a href="../../users/help_abinit.html#develop">DEVELOP</a></font>
+<br><font id="characteristic">Characteristic: <a href="../../users/generated_files/help_abinit.html#develop">DEVELOP</a></font>
 <br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_parallelism.html">parallelism</a> </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
@@ -162,7 +162,7 @@ After having printed out the weights, the code stops.
 
 <br><font id="title"><a name="bandpp">bandpp</a></font>
 <br><font id="mnemonics">Mnemonics: BAND Per Processor</font>
-<br><font id="characteristic">Characteristic: <a href="../../users/help_abinit.html#develop">DEVELOP</a></font>
+<br><font id="characteristic">Characteristic: <a href="../../users/generated_files/help_abinit.html#develop">DEVELOP</a></font>
 <br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_parallelism.html">parallelism</a> </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 1</font>
@@ -276,7 +276,7 @@ automatically set to 14 which corresponds to the use of LOBPCG algorithm for the
 
 <br><font id="title"><a name="gwpara">gwpara</a></font>
 <br><font id="mnemonics">Mnemonics: GW PARAllelization level</font>
-<br><font id="characteristic">Characteristic: <a href="../../users/help_abinit.html#gw">GW</a></font>
+<br><font id="characteristic">Characteristic: <a href="../../users/generated_files/help_abinit.html#gw">GW</a></font>
 <br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_parallelism.html">parallelism</a> </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 2 (Comment: The default value has been changed in v8. From 1 to 2 )</font>
@@ -287,7 +287,7 @@ Only relevant if <a href="../../input_variables/generated_files/vargs.html#optdr
 <p>
 <p>
  <b>gwpara</b> is used to choose between the two different parallelization levels
-available in the <a href="../../users/help_abinit.html#gw">GW</a> code. The available options are:
+available in the <a href="../../users/generated_files/help_abinit.html#gw">GW</a> code. The available options are:
  <ul>
   <li>
    =1 =&gt; parallelisation on k points
@@ -314,7 +314,7 @@ irrespectively of the number of CPUs used.
 
 <br><font id="title"><a name="localrdwf">localrdwf</a></font>
 <br><font id="mnemonics">Mnemonics: LOCAL ReaD WaveFunctions</font>
-<br><font id="characteristic">Characteristic: <a href="../../users/help_abinit.html#develop">DEVELOP</a></font>
+<br><font id="characteristic">Characteristic: <a href="../../users/generated_files/help_abinit.html#develop">DEVELOP</a></font>
 <br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_parallelism.html">parallelism</a> </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 1</font>
@@ -322,7 +322,7 @@ irrespectively of the number of CPUs used.
 <p>
 <p>
  This input variable is used only when running abinit in parallel.
-If <b>localrdwf</b>=1, the input wavefunction disk file or the KSS/SCR file in case of <a href="../../users/help_abinit.html#gw">GW</a>
+If <b>localrdwf</b>=1, the input wavefunction disk file or the KSS/SCR file in case of <a href="../../users/generated_files/help_abinit.html#gw">GW</a>
 calculations, is read locally by each processor, while
 if <b>localrdwf</b>=0, only one processor reads it, and
 broadcast the data to the other processors.
@@ -373,7 +373,7 @@ After having printed out the efficiency, the code stops.
 
 <br><font id="title"><a name="np_slk">np_slk</a></font>
 <br><font id="mnemonics">Mnemonics: Number of mpi Processors used for ScaLapacK calls</font>
-<br><font id="characteristic">Characteristic: <a href="../../users/help_abinit.html#develop">DEVELOP</a></font>
+<br><font id="characteristic">Characteristic: <a href="../../users/generated_files/help_abinit.html#develop">DEVELOP</a></font>
 <br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_parallelism.html">parallelism</a> </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 1000000</font>
@@ -829,7 +829,7 @@ can be poor.
 
 <br><font id="title"><a name="use_slk">use_slk</a></font>
 <br><font id="mnemonics">Mnemonics: USE ScaLapacK</font>
-<br><font id="characteristic">Characteristic: <a href="../../users/help_abinit.html#develop">DEVELOP</a></font>
+<br><font id="characteristic">Characteristic: <a href="../../users/generated_files/help_abinit.html#develop">DEVELOP</a></font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
 <br><font id="text">
