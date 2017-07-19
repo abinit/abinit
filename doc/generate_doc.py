@@ -461,14 +461,14 @@ for i, var in enumerate(variables):
       if var.topics is not None :
         cur_content += "<br><font id=\"characteristic\">Mentioned in \"How to\": "
         vartopics=var.topics
-        topics_name_class = vartopics.split(',')
-        for i, topic_name_class in enumerate(topics_name_class):
-          name_class = topic_name_class.split('_')
-          cur_content += '<a href="../../'+topics_gen+'/topic_'+name_class[0].strip()+'.html">'+name_class[0].strip()+'</a> '
+        topics_name_tribe = vartopics.split(',')
+        for i, topic_name_tribe in enumerate(topics_name_tribe):
+          name_tribe = topic_name_tribe.split('_')
+          cur_content += '<a href="../../'+topics_gen+'/topic_'+name_tribe[0].strip()+'.html">'+name_tribe[0].strip()+'</a> '
         cur_content += "</font>\n"
     except:
       if debug==1 :
-        print(" No topic_class for abivarname "+var.abivarname)
+        print(" No topic_tribe for abivarname "+var.abivarname)
     # Variable type, including dimensions
     cur_content += "<br><font id=\"vartype\">Variable type: "+var.vartype
     if var.dimensions is not None:
@@ -565,10 +565,10 @@ found = dict()
 for topic_name in list_of_topics:
   topic_invars[topic_name] = ""
 
-for (tclasskey, tclassval) in list_topics_class:
+for (tribekey, tribeval) in list_topics_tribe:
 
   if debug == 1:
-    print("\nWork on "+tclasskey+"\n")
+    print("\nWork on "+tribekey+"\n")
 
   for topic_name in list_of_topics:
     found[topic_name] = 0
@@ -576,13 +576,13 @@ for (tclasskey, tclassval) in list_topics_class:
   for i, var in enumerate(variables):
     try:
       if var.topics is not None:
-        topics_name_class = var.topics.split(',')
-        for i, topic_name_class in enumerate(topics_name_class):
-          name_class = topic_name_class.split('_')
-          if tclasskey==name_class[1].strip() :
-            topic_name=name_class[0].strip()
+        topics_name_tribe = var.topics.split(',')
+        for i, topic_name_tribe in enumerate(topics_name_tribe):
+          name_tribe = topic_name_tribe.split('_')
+          if tribekey==name_tribe[1].strip() :
+            topic_name=name_tribe[0].strip()
             if found[topic_name]==0 :
-              topic_invars[topic_name] += "<p>"+tclassval+":<p>"
+              topic_invars[topic_name] += "<p>"+tribeval+":<p>"
               found[topic_name] = 1
             abivarname=var.abivarname
             if var.characteristics is not None and '[[INTERNAL_ONLY]]' in var.characteristics:
