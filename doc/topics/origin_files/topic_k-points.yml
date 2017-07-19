@@ -49,7 +49,7 @@
           including a measure of their accuracy in term of integration
           within the Brillouin Zone.
     tutorials  : |-
-          <li><a href="../../tutorial/lesson_base3.html">The lesson 3</a> deals with crystalline
+          <li><a href="../../tutorial/generated_files/lesson_base3.html">The lesson 3</a> deals with crystalline
           silicon (an insulator): the definition of a k-point grid, the smearing
           of the cut-off energy, the computation of a band structure, and again,
           convergence studies ...</li>
