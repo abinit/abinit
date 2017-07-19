@@ -23,8 +23,13 @@ from doc.pymods.lib_to_assemble_html import *
 
 debug = 0
 
-# Relative path from HTML files
-users_path = "../../users/"
+list_infos_dir=[]
+list_infos_dir.append({"dirname":"bibliography","yml_files":["bibhtml"]})
+list_infos_dir.append({"dirname":"input_variables","yml_files":["abinit_vars","characteristics","list_specials","varfiles"]})
+list_infos_dir.append({"dirname":"theory","rootname":"theory","yml_files":["theorydocs"]})
+list_infos_dir.append({"dirname":"topics","rootname":"topic","yml_files":["default_topic","list_of_topics","list_topics_tribe","tests_dirs"]})
+list_infos_dir.append({"dirname":"tutorial","rootname":"lesson","yml_files":["lessons"]})
+list_infos_dir.append({"dirname":"users","rootname":"help","yml_files":["helps"]})
 
 # Path for yml and html files
 bib_ori = "bibliography/origin_files"
@@ -54,9 +59,12 @@ with open(bib_ori+'/abiref.bib')  as bibtex_file:
 bibyml=read_yaml_file(bib_ori+"/bibhtml.yml")
 helps=read_yaml_file(help_ori+"/helps.yml")
 lessons=read_yaml_file(tuto_ori+"/lessons.yml")
+list_chars=read_yaml_file(invars_ori+"/characteristics.yml")
 list_of_topics=read_yaml_file(topics_ori+"/list_of_topics.yml")
+list_specials=read_yaml_file(invars_ori+"/list_specials.yml")
 tests_dirs=read_yaml_file(topics_ori+"/tests_dirs.yml")
 theorydocs=read_yaml_file(theory_ori+"/theorydocs.yml")
+list_topics_tribe=read_yaml_file(topics_ori+"/list_topics_tribe.yml")
 varfiles=read_yaml_file(invars_ori+"/varfiles.yml")
 variables=read_yaml_file(invars_ori+"/abinit_vars.yml")
 
@@ -783,7 +791,7 @@ rc=finalize_html(all_topics_html,default_topic,dir_root,name_root,allowed_link_s
 activate_translation=0
 if activate_translation==1:
 
-  docs=read_yaml_file(help_ori+"/helps.yml")
+  docs=helps
 
   for i, doc_info in enumerate(docs):
 
