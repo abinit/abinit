@@ -20,13 +20,13 @@
          Preconditioning of this algorithm is achieved through a model
          dielectric function, or through an approximate dielectric matrix.
     tutorials  : |-
-         <li><a href="../../tutorial/lesson_base2.html">The lesson 2</a> deals again with the H2
+         <li><a href="../../tutorial/generated_files/lesson_base2.html">The lesson 2</a> deals again with the H2
          molecule: convergence studies, LDA versus GGA </li>
-         <li><a href="../../tutorial/lesson_base3.html">The lesson 3</a> deals with crystalline
+         <li><a href="../../tutorial/generated_files/lesson_base3.html">The lesson 3</a> deals with crystalline
          silicon (an insulator): the definition of a k-point grid, the smearing
          of the cut-off energy, the computation of a band structure, and again,
          convergence studies ...</li>
-         <li><a href="../../tutorial/lesson_ldau.html">The lesson on DFT+U</a> shows
+         <li><a href="../../tutorial/generated_files/lesson_ldau.html">The lesson on DFT+U</a> shows
          how to perform a DFT+U calculation using ABINIT, and will lead to
          compute the projected DOS of NiO. Prerequisite : PAW1.</li>
     end : default 

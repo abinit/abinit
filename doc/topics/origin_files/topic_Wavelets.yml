@@ -17,7 +17,7 @@
          relaxation using BFGS. Molecular dynamic is also available for
          test purposes.
     tutorials  : |-
-          <li><a href="../../tutorial/lesson_paral_gswvl.html">Parallelism for ground-state
+          <li><a href="../../tutorial/generated_files/lesson_paral_gswvl.html">Parallelism for ground-state
           calculations, with wavelets</a> presents the parallelism of ABINIT,
           when wavelets are used as a basis function instead of planewaves, for
           the computation of total energy, density, and ground state properties</li>

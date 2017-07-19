@@ -20,14 +20,14 @@
          [1] M. Torrent, F. Jollet, F. Bottin, G. Zerah, X. Gonze, Computational Material Science, 42, 337-351 (2008)
          <br/>[2] F. Jollet, M. Torrent, N. Holzwarth, Computer Physics Communications, 185, 1246-1254 (2014)
     tutorials  : |-
-            <li><a href="../../tutorial/lesson_paw1.html">The lesson on the use of PAW (PAW1)</a>
+            <li><a href="../../tutorial/generated_files/lesson_paw1.html">The lesson on the use of PAW (PAW1)</a>
             presents the Projector-Augmented Wave method, implemented in ABINIT as
             an alternative to norm-conserving pseudopotentials, with a sizeable
             accuracy and CPU time advantage.</li>
-            <li><a href="../../tutorial/lesson_paw2.html">The lesson on the generation of PAW
+            <li><a href="../../tutorial/generated_files/lesson_paw2.html">The lesson on the generation of PAW
             atomic data files (PAW2)</a> presents the generation of atomic data
             for use with the PAW method. Prerequisite : PAW1.</li>
-            <li><a href="../../tutorial/lesson_paw3.html">The lesson on the validation of a PAW
+            <li><a href="../../tutorial/generated_files/lesson_paw3.html">The lesson on the validation of a PAW
             atomic datafile (PAW3)</a> demonstrates how to test a generated PAW
             dataset using ABINIT, against the ELK all-electron code, for diamond
             and magnesium. Prerequisite : PAW1 and PAW2.</li>  
