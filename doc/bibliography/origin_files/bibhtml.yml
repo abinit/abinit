@@ -10,20 +10,20 @@
 - !components
     name : bibliography
     keyword : bibliography
-    subtitle : |
+    purpose : |
       <p>This document lists all the bibliographical references mentioned in the ABINIT documentation, 
       with link(s) to the Web pages where such references are mentioned, as well as the bibtex formatted reference.
 
 - !components
     name : bibtex
     keyword : bibtex
-    subtitle : |
+    purpose : |
       This document gives the bibtex data for all the bibliographical references mentioned in the ABINIT documentation.
 
 - !components
     name : acknowledgments
     keyword : acknowledgments
-    subtitle : |
+    purpose : |
       This file provides a description of suggested acknowledgments and references to be inserted in scientific papers 
       whose results have been obtained thanks to ABINIT. It discusses also briefly the problem of co-authorship.
     introduction : |
@@ -139,7 +139,7 @@
       <hr>
       <a name="top"></a>
     title : |
-      <h1>ABINIT, __KEYWORD__.</h1>
+      <h1>ABINIT, __KEYWORD__.</h1><hr>
     copyright : |
       <hr>
       <h5>Copyright (C) 1998-2017 ABINIT group (XG,DCA, RC)
