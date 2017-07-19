@@ -11,14 +11,13 @@
     introduction : |- 
          <p> The computation of the ground state energy of an assembly of nuclei and electrons
          placed in a repeated cell can be done using so-called
-         "Projector-Augmented Waves" (PAW method), with appropriate pseudoatomic data. The way the PAW method is implemented in ABINIT is described in [1].
-         <br/> The use of PAW atomic data (equivalent to pseudopotential file for the norm-conserving case) automatically launch a PAW calculation. ABINIT is provided with the JTH [2] PAW atomic data table on the ABINIT web site.
+         "Projector-Augmented Waves" (PAW method), with appropriate pseudoatomic data. The way the PAW method is implemented in ABINIT is described in [[Torrent2008]].
+         <br/> The use of PAW atomic data (equivalent to pseudopotential file for the norm-conserving case) automatically launch a PAW calculation. ABINIT is provided with the JTH [[Jollet2014]] PAW atomic data table on the ABINIT web site.
          <br/> To perform a standard PAW calculation, the input file is the same than for a norm-conserving one, except that the variable [[pawecutdg]] must be specified (see below). In the case the input variable [[accuracy]] is used, the input variable [[pawecutdg]] is automatically used.
          <br/> Some physical functionalities are available only in the PAW framework: DFT+U, DMFT, local exact exchange,...
 
          <p>
-         [1] M. Torrent, F. Jollet, F. Bottin, G. Zerah, X. Gonze, Computational Material Science, 42, 337-351 (2008)
-         <br/>[2] F. Jollet, M. Torrent, N. Holzwarth, Computer Physics Communications, 185, 1246-1254 (2014)
+
     tutorials  : |-
             <li><a href="../../tutorial/generated_files/lesson_paw1.html">The lesson on the use of PAW (PAW1)</a>
             presents the Projector-Augmented Wave method, implemented in ABINIT as
