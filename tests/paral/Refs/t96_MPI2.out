@@ -31,7 +31,7 @@
 
  Flags :
      ifcflag         1
-   prt_effpo        -1
+   prt_model         3
      strcpli        -1
  Molecular Dynamics :
         temp    1000.0
@@ -126,7 +126,10 @@
 
  Extraction of the stress tensor (unit: GPa) and forces (unit: Ha/bohr)
 
- Warning : Stress Tensor and forces are set to zero (not available in the DDB)
+ --- !WARNING
+     Stress Tensor and forces are set to zero (not available in the DDB)
+ ---
+
 
 ================================================================================
 
@@ -297,7 +300,7 @@
 
 ================================================================================
 
- Generation of the xml file for the reference structure in t96_MPI2_sys.xml
+ Generation of the xml file for the model in t96_MPI2_sys.xml
 
 ================================================================================
 
