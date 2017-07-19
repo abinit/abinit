@@ -466,9 +466,7 @@ implicit none
        
        ncoeff_max = ncoeff+ncoeff_bound
 
-       print*,"tata",ncoeff+ncoeff_bound
        do ii=1,ncoeff+ncoeff_bound
-
 !        Reset the simulation
          call effective_potential_setCoeffs(coeffs_tmp,effective_potential,ncoeff+ncoeff_bound)
          call xcart2xred(dtset%natom,effective_potential%supercell%rprimd_supercell,&

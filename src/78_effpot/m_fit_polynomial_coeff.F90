@@ -1749,7 +1749,6 @@ subroutine fit_polynomial_coeff_fit(eff_pot,fixcoeff,hist,powers,ncycle_in,nfixc
      call fit_polynomial_coeff_solve(coeff_values(1:icycle),fcart_coeffs_tmp,fcart_diff,&
 &                                    info,list_coeffs_tmp(1:icycle),natom_sc,icycle,&
 &                                    ncycle_max,ntime,strten_coeffs_tmp,strten_diff,sqomega,ucvol)
-     print*,"tata1",info,icycle,icoeff,my_coeffindexes(icoeff)
 
      if(info==0)then
        if (need_positive.and.any(coeff_values(nfixcoeff+1:icycle) < zero))then
@@ -1762,7 +1761,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,fixcoeff,hist,powers,ncycle_in,nfixc
 &                                         gf_values(:,icoeff),list_coeffs_tmp(1:icycle),natom_sc,&
 &                                         icycle,ncycle_max,ntime,&
 &                                         strten_coeffs_tmp,strten_diff,sqomega,ucvol)
-         print*,"tata2",icycle,icoeff,my_coeffindexes(icoeff)
+
          write (j_char, '(i5)') my_coeffindexes(icoeff)
          write(message, '(6x,a,3x,4ES18.10)') adjustl(j_char),&
 &                                   gf_values(4,icoeff)* 1000*Ha_ev / ncell,&
