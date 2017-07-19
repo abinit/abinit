@@ -436,23 +436,25 @@ end subroutine atompaw_shapebes
 
 !Computation of <phi_i|vminushalf|phi_j>  (if any)
 !=================================================
- if(present(vminushalf).and.(size(vminushalf)>=1)) then
-   meshsz1=radmesh%mesh_size
-   LIBPAW_ALLOCATE(ff1,(meshsz1))
-   do jlmn=1,pawtab%lmn_size
-     j0lmn=jlmn*(jlmn-1)/2
-     jlm=indlmn(4,jlmn);jln=indlmn(5,jlmn)
-     do ilmn=1,jlmn
-       klmn=j0lmn+ilmn
-       ilm=indlmn(4,ilmn);iln=indlmn(5,ilmn)
-       if (jlm==ilm) then
-         ff1(1:meshsz1)=pawtab%phi(1:meshsz1,iln)*pawtab%phi(1:meshsz1,jln)*vminushalf(1:meshsz1)
-         call simp_gen(intg,ff1,radmesh)
-         pawtab%dij0(klmn)=pawtab%dij0(klmn)+intg
-       end if
+ if(present(vminushalf)) then
+   if(size(vminushalf)>=1) then
+     meshsz1=radmesh%mesh_size
+     LIBPAW_ALLOCATE(ff1,(meshsz1))
+     do jlmn=1,pawtab%lmn_size
+       j0lmn=jlmn*(jlmn-1)/2
+       jlm=indlmn(4,jlmn);jln=indlmn(5,jlmn)
+       do ilmn=1,jlmn
+         klmn=j0lmn+ilmn
+         ilm=indlmn(4,ilmn);iln=indlmn(5,ilmn)
+         if (jlm==ilm) then
+           ff1(1:meshsz1)=pawtab%phi(1:meshsz1,iln)*pawtab%phi(1:meshsz1,jln)*vminushalf(1:meshsz1)
+           call simp_gen(intg,ff1,radmesh)
+           pawtab%dij0(klmn)=pawtab%dij0(klmn)+intg
+         end if
+       end do
      end do
-   end do
-   LIBPAW_DEALLOCATE(ff1)
+     LIBPAW_DEALLOCATE(ff1)
+   end if
  end if
 !Computation of -<tphi_i|vh(tnZc)|tphi_j> on the PAW sphere
 !==========================================================
