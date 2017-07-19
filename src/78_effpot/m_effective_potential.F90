@@ -313,7 +313,7 @@ subroutine effective_potential_init(crystal,eff_pot,energy,ifcs,ncoeff,nqpt,comm
 !Allocation of phonon strain coupling array (3rd order)
  if(present(phonon_strain).and.has_anharmonicsTerms) then
    call anharmonics_terms_setStrainPhononCoupling(eff_pot%anharmonics_terms,crystal%natom,&
-&                                                phonon_strain)
+&                                                 phonon_strain)
  end if
 
 !Set the 3rd order elastic tensor
@@ -485,6 +485,7 @@ subroutine effective_potential_free(eff_pot)
   eff_pot%energy = zero
   eff_pot%strten = zero
   eff_pot%has_anharmonicsTerms = .FALSE.
+  eff_pot%anharmonics_terms%bounded = .FALSE.
 
    if(allocated(eff_pot%fcart)) then
      eff_pot%fcart=zero
@@ -1052,6 +1053,7 @@ end subroutine effective_potential_generateDipDip
 
 subroutine effective_potential_setCoeffs(coeffs,eff_pot,ncoeff)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -1133,6 +1135,7 @@ end subroutine effective_potential_setCoeffs
 
 subroutine effective_potential_setElastic3rd(eff_pot,elastics)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -1177,6 +1180,7 @@ end subroutine effective_potential_setElastic3rd
 !! SOURCE
 
 subroutine effective_potential_setElastic4rd(eff_pot,elastics)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -1224,6 +1228,7 @@ end subroutine effective_potential_setElastic4rd
 !! SOURCE
 
 subroutine effective_potential_setStrainPhononCoupling(eff_pot,natom,phonon_strain)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -1583,7 +1588,7 @@ end subroutine effective_potential_print
 !! effective_potential_printSupercell
 !!
 !! FUNCTION
-!! Print the supercell of the effective_potential,
+!! Print the supercell of the effective_potential
 !! or if present the supercell as input
 !! WARNING: need to be consistent with eff_pot
 !!
@@ -2344,7 +2349,6 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
   integer :: alpha,ii,ia,ib,mu,ncell
   real(dp):: epsilon,energy_part,fx,fy,fz,fpr
   real(dp):: dx,dy,dz,dist,fr6,fr2,r2,rcut,sigma,ucvol
-  character(len=500) :: msg
   logical :: has_strain = .FALSE.,need_verbose
   logical :: iam_master,need_anharmonic
   integer, parameter:: master = 0
@@ -2357,6 +2361,8 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
   real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3)
   real(dp) :: strain_tmp(6),strten_part(6),strain_mat(3,3),strain_mat_inv(3,3)
   real(dp),allocatable :: xcart(:,:),work(:),work2(:,:)
+  character(len=500) :: msg
+
 ! *************************************************************************
 
 ! Set MPI local varibaless

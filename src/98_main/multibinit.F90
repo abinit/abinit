@@ -327,10 +327,11 @@ program multibinit
          call fit_polynomial_printSystemFiles(reference_effective_potential,hist)
        end if
      case (1)
-!    option = 1
+!      option = 1
        call fit_polynomial_coeff_fit(reference_effective_potential,&
 &                                    inp%fit_fixcoeff,hist,inp%fit_rangePower,inp%fit_ncycle,&
-&                                    inp%fit_nfixcoeff,comm,cutoff_in=inp%fit_cutoff)
+&                                    inp%fit_nfixcoeff,comm,cutoff_in=inp%fit_cutoff,&
+&                                    verbose=.true.,positive=.false.,anharmstr=.false.)
      end select
    else
      write(message, '(3a)' )&
@@ -339,6 +340,12 @@ program multibinit
      MSG_ERROR(message)
    end if
  end if
+
+!TEST_AM
+!try to bound the model with mover_effpot
+!we need to use the molecular dynamics
+! call mover_effpot(inp,filnam,reference_effective_potential,-1,comm,hist=hist)
+!TEST_AM
 
 !****************************************************************************************
 
@@ -388,7 +395,7 @@ program multibinit
 ! Compute the monte carlo, molecular dynamics of compute specific energy 
 !****************************************************************************************
  if(inp%dynamics>=1) then
-   call mover_effpot(inp,filnam,reference_effective_potential,comm)
+   call mover_effpot(inp,filnam,reference_effective_potential,inp%dynamics,comm)
  end if
 !****************************************************************************************    
 

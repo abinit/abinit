@@ -416,7 +416,8 @@ subroutine polynomial_coeff_getName(name,natom,polynomial_coeff,symbols,recomput
 !arrays
  integer :: cell_atm1(3),cell_atm2(3)
  character(len=1) :: mutodir(9) = (/"x","y","z","1","2","3","4","5","6"/)
- character(len=1) :: dir,power,powerchar
+ character(len=1) :: dir
+ character(len=2) :: power,powerchar
  character(len=5) :: atm1,atm2
  character(len=100):: atm1_tmp,atm2_tmp
  character(len=200):: text

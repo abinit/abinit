@@ -761,7 +761,7 @@ subroutine harmonics_terms_evaluateElastic(elastic_constants,disp,energy,fcart,n
    end do
  end do
  
-!2-Part due to the internat strain
+!2-Part due to the internal strain coupling parameters
  ii = 1
  do ia = 1,natom
    do mu = 1,3

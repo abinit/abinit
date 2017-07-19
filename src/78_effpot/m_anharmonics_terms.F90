@@ -72,6 +72,9 @@ module m_anharmonics_terms
    logical ::  has_elastic_displ
 !   Flag to know if the 3rd derivatives with respect to 2 strain and 3 atom disp is present
 
+   logical :: bounded
+!   True : the model is bounded
+
    type(polynomial_coeff_type),dimension(:),allocatable :: coefficients
 !    array with all the coefficients from  polynomial coefficients
 
@@ -107,6 +110,7 @@ CONTAINS  !=====================================================================
 !! INPUTS
 !! natom  = number of atoms in primitive cell
 !! ncoeff = number of coefficient for the fited polynome 
+!! bounded = optional, flag to now if the model in bounded
 !! elastic3rd(6,6,6) = optional,3rd order of the elastic constants
 !! elastic4th(6,6,6,6) = optional,4st order of the elastic constants
 !! elastic_displacement(6,6,3,natom) = optional,elastic constant - force coupling
@@ -124,7 +128,7 @@ CONTAINS  !=====================================================================
 !! SOURCE
 
 subroutine anharmonics_terms_init(anharmonics_terms,natom,ncoeff,&
-&                                 elastic3rd,elastic4rd,elastic_displacement,&
+&                                 bounded,elastic3rd,elastic4rd,elastic_displacement,&
 &                                 phonon_strain,coeffs)
 
 
@@ -144,6 +148,7 @@ subroutine anharmonics_terms_init(anharmonics_terms,natom,ncoeff,&
  real(dp),optional,intent(in) :: elastic3rd(6,6,6),elastic4rd(6,6,6,6)
  type(polynomial_coeff_type),optional :: coeffs(ncoeff)
  type(ifc_type),optional,intent(in) :: phonon_strain(6)
+ logical,optional,intent(in) :: bounded
 !arrays
 !Local variables-------------------------------
 !scalar
@@ -196,9 +201,15 @@ subroutine anharmonics_terms_init(anharmonics_terms,natom,ncoeff,&
    call anharmonics_terms_setCoeffs(coeffs,anharmonics_terms,ncoeff)
  end if
 
+!Set the flag bounded
+ if(present(bounded))then
+   anharmonics_terms%bounded = bounded
+ else
+   anharmonics_terms%bounded = .FALSE.
+ end if
+
 end subroutine anharmonics_terms_init 
 !!***
-
 
 !****f* m_anharmonics_terms/anharmonics_terms_free
 !!
@@ -247,6 +258,7 @@ subroutine anharmonics_terms_free(anharmonics_terms)
    anharmonics_terms%has_elastic3rd = .FALSE.
    anharmonics_terms%has_strain_coupling  = .FALSE.
    anharmonics_terms%has_elastic_displ = .FALSE.
+   anharmonics_terms%bounded = .FALSE.
 
   if(allocated(anharmonics_terms%elastic_displacement)) then
     anharmonics_terms%elastic_displacement=zero

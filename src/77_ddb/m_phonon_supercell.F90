@@ -535,6 +535,7 @@ end subroutine getPBCIndexes_supercell
 
 subroutine findBound_supercell(min,max,n_cell)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -547,13 +548,15 @@ subroutine findBound_supercell(min,max,n_cell)
   integer, intent(inout) :: min,max
   integer, intent(in) :: n_cell
 !Local variables ---------------------------------------
+  character(len=500) :: msg
+! *********************************************************************
+
   if(abs(max)>abs(min)) then
     max=(n_cell)/2; min=-max;  if(mod(n_cell,2)==0) max = max -1
   else
     min=-(n_cell)/2; max=-min; if(mod(n_cell,2)==0)  min= min +1
   end if
 
-! *********************************************************************
 end subroutine findBound_supercell
 !!***
 

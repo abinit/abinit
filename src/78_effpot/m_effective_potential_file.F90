@@ -989,7 +989,6 @@ subroutine effective_potential_file_getDimMD(filename,natom,nstep)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'effective_potential_file_getDimMD'
- use interfaces_41_geometry
 !End of the abilint section
 
  implicit none

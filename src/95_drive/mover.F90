@@ -173,7 +173,7 @@ type(scfcv_t),intent(inout) :: scfcv_args
 type(datafiles_type),intent(inout),target :: dtfil
 type(electronpositron_type),pointer :: electronpositron
 type(ab_xfh_type),intent(inout) :: ab_xfh
-type(effective_potential_type),optional,intent(in) :: effective_potential
+type(effective_potential_type),optional,intent(inout) :: effective_potential
 logical,optional,intent(in) :: verbose
 logical,optional,intent(in) :: writeHIST
 !arrays
@@ -609,6 +609,8 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
 
 !          Check if the simulation does not diverged...
            if(ABS(scfcv_args%results_gs%etotal - hist%etot(1)) > 1E6)then
+!            We set to false the flag corresponding to the bound 
+             effective_potential%anharmonics_terms%bounded = .FALSE.
              if(need_verbose.and.me==master)then
                message = "The simulation is diverging, please check your effective potential"
                MSG_WARNING(message)
@@ -616,6 +618,9 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
 !            Set the flag to finish the simulation
              iexit=1
              stat4xml="Failed"
+           else
+!            We set to true the flag corresponding to the bound 
+             effective_potential%anharmonics_terms%bounded = .TRUE.
            end if
          end if
 #if defined HAVE_LOTF
