@@ -5,21 +5,10 @@ try:
 except ImportError:
     raise ImportError("pyyaml package is not installed. Install it with `pip install pyyaml`")
 
-with open('input_variables/origin_files/characteristics.yml', 'r') as f:
-    list_chars = yaml.load(f)
-
-with open('input_variables/origin_files/list_specials.yml', 'r') as f:
-    list_specials = yaml.load(f)
-
-with open('topics/origin_files/list_topics_tribe.yml', 'r') as f:
-    list_topics_tribe = yaml.load(f)
-
 class literal(str): pass
-
 
 def literal_unicode_representer(dumper, data):
     return dumper.represent_scalar('tag:yaml.org,2002:str', data, style='|')
-
 
 yaml.add_representer(literal, literal_unicode_representer)
 
