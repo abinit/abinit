@@ -38,10 +38,10 @@
     subtitle : This file explains the i/o parameters needed for the screening files (SCR) merging code (MRGSCR).
 - !components
     name : new_user
-    keyword : new user guide
+    keyword : new user help file
     authors : DCA,XG,RC
     title : |
-      <h1>ABINIT new user guide.</h1>
+      <h1>ABINIT new user help file.</h1>
     subtitle : This file gives a beginner's introduction to the ABINIT resources, the ABINIT package, and the main ABINIT application.
 - !components
     name : optic

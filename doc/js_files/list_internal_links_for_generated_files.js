@@ -16,7 +16,7 @@ document.write(' <HR ALIGN=left> ');
 document.write(' Global help files : ');
 document.write(' <A href="'+docpath+'users/generated_files/help_new_user.html"><B>Guide for new users</B></A> ');
 document.write(' <B> | </B> ');
-document.write(' <A href="'+docpath+'topics/what_ABINIT_does.html"><B>What ABINIT does</B></A> ');
+document.write(' <A href="'+docpath+'users/generated_files/help_what_ABINIT_does.html"><B>What ABINIT does</B></A> ');
 document.write(' <B> | </B> ');
 document.write(' <A href="'+docpath+'tutorial/generated_files/lesson_welcome.html"><B>Tutorial</B></A> ');
 document.write(' <HR ALIGN=left> ');
