@@ -2515,6 +2515,7 @@ subroutine pawpsp_calc(core_mesh,epsatm,ffspl,imainmesh,ixc,lnmax,&
 &                      vloc_mesh,vlocr,znucl)
    end if
    has_dij0=.true.
+ end if
 !==================================================
 !Compute kinetic operator contribution to Dij
 
