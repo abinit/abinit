@@ -1,6 +1,6 @@
 
 .Version 8.5.2 of ANADDB 
-.(MPI version, prepared for a x86_64_darwin16.6.0_gnu7.1 computer) 
+.(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
 
 .Copyright (C) 1998-2017 ABINIT group . 
  ANADDB comes with ABSOLUTELY NO WARRANTY.
@@ -252,15 +252,15 @@ Computation of Gruneisen parameter with central finite difference:
  The interatomic forces have been obtained
  Average Gruneisen parameter: 1.38600
  Speed of sound:  1.7626E+00  1.7628E+00  9.9437E+00 [km/s] along reduced direction: 1
- Speed of sound:  1.7625E+00  1.7629E+00  9.9437E+00 [km/s] along reduced direction: 2
- Speed of sound:  1.7625E+00  1.7629E+00  9.9437E+00 [km/s] along reduced direction: 3
+ Speed of sound:  1.7628E+00  1.7626E+00  9.9437E+00 [km/s] along reduced direction: 2
+ Speed of sound:  1.7629E+00  1.7625E+00  9.9437E+00 [km/s] along reduced direction: 3
  Lebedev-Laikov integration with qradius:   1.0000E-03 tolkms:   2.0000E-01 [km/s], npts: 434
- Spherical average:  4.5772E+00  6.3517E+00  9.1616E+00 [km/s],   6.6968E+00
+ Spherical average:  4.5722E+00  6.3565E+00  9.1616E+00 [km/s],   6.6968E+00
 -
 - Proc.   0 individual time (sec): cpu=        289.2  wall=        301.4
 
 ================================================================================
 
-+Total cpu time   2325.410  and wall time   2411.507 sec
++Total cpu time    399.973  and wall time    399.975 sec
 
  anaddb : the run completed succesfully.
