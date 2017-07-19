@@ -104,7 +104,7 @@ def make_links(text,cur_key,allowed_link_seeds,backlinks,backlink):
         varfile=value[18:]
         return '<a href="../../input_variables/generated_files/'+varfile+".html#"+key+'">'+key+'</a>'
       elif value=="characteristic":
-        return '<a href="'+users_path+'help_abinit.html#'+str.replace(key.lower()," ","_")+'">'+key+'</a>'
+        return '<a href="../../users/generated_files/help_abinit.html#'+str.replace(key.lower()," ","_")+'">'+key+'</a>'
       elif value=="special":
         return '<a href="../../input_variables/generated_files/specials.html#'+key+'">'+key+'</a>'
       elif value=="varfile":
