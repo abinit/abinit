@@ -13,7 +13,7 @@
       placed in a repeated cell can be done using (1) plane waves and norm-conserving
       pseudopotentials, or, (2) so-called
       "Projector-Augmented Waves" (PAW method), with appropriate pseudoatomic data,
-      or (3) wavelets. The wavelet framework is described <a href="Wavelets.html#here">here</a>.
+      or (3) wavelets. The wavelet framework is described <a href="topic_Wavelets.html#here">here</a>.
 
       <br/>In the plane wave framework, the program admits many different types of pseudopotentials.
       There are several complete sets of norm-conserving pseudopotentials available for
