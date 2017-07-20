@@ -123,7 +123,7 @@
   volume : 24
   pages : 075604
   issn : 0953-8984
-  url : http://iopscience.iop.org/0953-8984/24/7/075604
+  url : http://iopscience.iop.org/article.10.10880953-8984/24/7/075604
   timestamp : 2012.08.08
   number : 7
   file : :/media/disk_iomega/BIBLIO/DMFT/0953-8984_24_7_075604.pdf:PDF
@@ -660,7 +660,7 @@
   year : 2009
   volume : 21
   pages : 395502
-  url : http://iopscience.iop.org/0953-8984/21/39/395502
+  url : http://iopscience.iop.org/article/10.1088/0953-8984/21/39/395502
   number : 39
 -
   ENTRYTYPE : article
@@ -1649,7 +1649,7 @@
   year : 2004
   volume : 2004
   pages : 128
-  url : http://iopscience.iop.org/1402-4896/2004/T109/013
+  url : http://iopscience.iop.org/article/10.1238/Physica.Topical.109a00128
 -
   ENTRYTYPE : article
   ID : Shih2012
@@ -1815,7 +1815,7 @@
   title : Electronic polarization in the ultrasoft pseudopotential formalism
   journal : arXiv/cond-mat
   year : 1998
-  url : http://arxiv.org/abs/cond-mat/9801177
+  url : https://arxiv.org/abs/cond-mat/9801177
   eprint : 9801177
 -
   ENTRYTYPE : article
