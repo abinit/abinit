@@ -986,9 +986,11 @@ for ref in bibtex_dics:
   lines_txt+= line
   bibtex_content+= ('<hr><a id="%s">%s</a> \n <pre>' ) %(ID,ID)
   bibtex_content+= line+'</pre> \n'
-  if ID[0]>cur_let:
-    cur_let=ID[0]
-    bibliography_content+=('<a id="%s"></a>')%(cur_let)+alphalinks+('<hr><hr><h2>%s</h2> \n \n')%(cur_let)
+  while ID[0]>cur_let:
+    cur_let = chr(ord(cur_let)+1)
+    bibliography_content+=('<a id="%s"></a>')%(cur_let)
+    if cur_let==ID[0]:
+      bibliography_content+=alphalinks+('<hr><hr><h2>%s</h2> \n \n')%(cur_let)
   bibliography_content+= ('<hr><a id="%s">[%s]</a> (<a href="./bibtex.html#%s">bibtex</a>)\n <br> %s \n') %(ID,ID,ID,reference_dic[ID])
   nlink=0
   for link in backlinksID:

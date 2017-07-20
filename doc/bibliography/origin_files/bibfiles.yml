@@ -12,7 +12,7 @@
     keyword : bibliography
     purpose : |
       <p>This document lists all the bibliographical references mentioned in the ABINIT documentation, 
-      with link(s) to the Web pages where such references are mentioned, as well as the bibtex formatted reference.
+      with link(s) to the Web pages where such references are mentioned, as well as to the bibtex formatted reference.
 
 - !components
     name : bibtex
