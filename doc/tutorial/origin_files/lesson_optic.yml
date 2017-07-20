@@ -31,9 +31,9 @@ body : |
   
   <p>In order to use the Optic utility, you should first have some theoretical
   background. Could you read the
-  <a href="../../users/help_optic.html#1" target="helpsimg">introduction of the optic help file</a>,
+  <a href="../../users/generated_files/help_optic.html#1" target="helpsimg">introduction of the optic help file</a>,
   then the
-  <a href="../../users/help_optic.html#2" target="helpsimg">section 2</a> of this help file ?
+  <a href="../../users/generated_files/help_optic.html#2" target="helpsimg">section 2</a> of this help file ?
   
   <p>Now, you are ready to run ABINIT and prepare the needed file.
   <p>Copy the files ~abinit/tests/tutorespfn/Input/toptic_1.files and ~abinit/tests/tutorespfn/Input/toptic_1.in in "Work_optic".
@@ -89,7 +89,7 @@ body : |
   
   <p>
   First, read the
-  <a href="../../users/help_optic.html#3" target="helpsimg">section 3</a> of the Optic help file.
+  <a href="../../users/generated_files/help_optic.html#3" target="helpsimg">section 3</a> of the Optic help file.
   
   <p>Copy the files ~abinit/tests/tutorespfn/Input/toptic_2.files and ~abinit/tests/tutorespfn/Input/toptic_2.in in "Work_optic".
   <p>
@@ -107,7 +107,7 @@ body : |
   It will take a few seconds to run. You have produced numerous
   output files. Now, you can examine some of these output files. The header
   contains the information about the calculation. See the
-  <a href="../../users/help_optic.html#4" target="helpsimg">section 4</a> of the Optic help file.
+  <a href="../../users/generated_files/help_optic.html#4" target="helpsimg">section 4</a> of the Optic help file.
   These files can be plotted in
   xmgrace, please do so using the following command and look at the results.
   (If you do not have xmgrace installed on your computer, please get it from the Web,
@@ -141,7 +141,7 @@ body : |
   
   <p>
   It might be the perfect time to finish the [[help_optic]], with
-  <a href="../../users/help_optic.html#5" target="helpsimg">section 5</a>.
+  <a href="../../users/generated_files/help_optic.html#5" target="helpsimg">section 5</a>.
   <p>
   For comparison, we have included in the tutorial, three files that have been obtained
   with a much better k point sampling (still with a low cut-off energy and a number

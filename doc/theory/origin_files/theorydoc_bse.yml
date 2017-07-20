@@ -450,7 +450,7 @@ body : |
   The KSS file is represented with an ellipsis. 
   The path on the left indicated with blue arrows represents the RPA calculation 
   ([[optdriver]]=3)
-  that produces the SCR file (see also the <a href="../../tutorial/lesson_gw1.html">first lesson</a> of the GW tutorial).
+  that produces the SCR file (see also the <a href="../../tutorial/generated_files/lesson_gw1.html">first lesson</a> of the GW tutorial).
   Once the KSS and the SCR file are available, we can finally contruct the Hamiltonian and solve the
   Bethe-Salpeter problem (the rectangle at the bottom of the flowchart).
   </p>

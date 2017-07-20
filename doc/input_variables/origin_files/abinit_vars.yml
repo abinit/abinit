@@ -2766,7 +2766,7 @@
         will check whether the user wants to interrupt the run (using the keyword
         "exit" on the top of the input file or creating a file
         named "abinit.exit": see the
-         <a href="../../users/help_abinit.html#chkexit">
+         <a href="../../users/generated_files/help_abinit.html#chkexit">
           end of section 3.2
          </a>
          of the [[help_abinit]]).
@@ -7695,7 +7695,7 @@
           if [[getwfkfine]] = 1 : read ground state k -wavefunctions
         from a disk file appended with _WFK , produced in a
         previous ground state calculation (see the
-          <a href="../../users/help_abinit.html#4">
+          <a href="../../users/generated_files/help_abinit.html#4">
            section 4
           </a>
           of the [[help_abinit]]).
@@ -7714,7 +7714,7 @@
           if [[getwfkfine]] = 1 : read ground state k -wavefunctions
         from a disk file appended with _WFK , produced in a
         previous ground state calculation (see the
-          <a href="../../users/help_abinit.html#4">
+          <a href="../../users/generated_files/help_abinit.html#4">
            section 4
           </a>
           of the [[help_abinit]]).
@@ -10396,7 +10396,7 @@
          is treated in the same way
         as other "ird" variables,
         see the
-         <a href="../../users/help_abinit.html#4">
+         <a href="../../users/generated_files/help_abinit.html#4">
           section 4
          </a>
          of the [[help_abinit]].
@@ -10457,7 +10457,7 @@
            = 1 : read ground state wavefunctions
         from a disk file appended with _WFK , produced in a
         previous ground state calculation (see the
-           <a href="../../users/help_abinit.html#4">
+           <a href="../../users/generated_files/help_abinit.html#4">
             section 4
            </a>
            of the [[help_abinit]]).
@@ -10480,7 +10480,7 @@
            = 1 : read ground state k -wavefunctions
         from a disk file appended with _WFK , produced in a
         previous ground state calculation (see the
-           <a href="../../users/help_abinit.html#4">
+           <a href="../../users/generated_files/help_abinit.html#4">
             section 4
            </a>
            of the [[help_abinit]]).
@@ -10506,7 +10506,7 @@
            = 1 : read ground state k+q -wavefunctions
         from a disk file appended with _WFQ , produced in a
         previous ground state calculation (see the
-           <a href="../../users/help_abinit.html#4">
+           <a href="../../users/generated_files/help_abinit.html#4">
             section 4
            </a>
            of the [[help_abinit]]).
@@ -10521,7 +10521,7 @@
            if [[ird1wf]] = 1 : read first-order wavefunctions
         from a disk file appended with _1WFx , produced in a
         previous response function calculation (see the
-           <a href="../../users/heop_abinit.html#4">
+           <a href="../../users/generated_files/help_abinit.html#4">
             section 4
            </a>
            of the [[help_abinit]]).
@@ -10547,7 +10547,7 @@
            = 1 : read first-order ddk wavefunctions
         from a disk file appended with _1WFx , produced in a
         previous response function calculation (see the
-           <a href="../../users/help_abinit.html#4">
+           <a href="../../users/generated_files/help_abinit.html#4">
             section 4
            </a>
            of the [[help_abinit]]).
@@ -10641,7 +10641,7 @@
          A non-zero value of [[irdddb]] is treated in the same way
         as other "ird" variables,
         see the
-         <a href="../../users/help_abinit.html#4">
+         <a href="../../users/generated_files/help_abinit.html#4">
           section 4
          </a>
          of the [[help_abinit]].
@@ -10703,7 +10703,7 @@
            = 1 : read ground state wavefunctions
         from a disk file appended with _WFK , produced in a
         previous ground state calculation (see the
-           <a href="../../users/help_abinit.html#4">
+           <a href="../../users/generated_files/help_abinit.html#4">
             section 4
            </a>
            of the [[help_abinit]]).
@@ -10726,7 +10726,7 @@
            = 1 : read ground state k -wavefunctions
         from a disk file appended with _WFK , produced in a
         previous ground state calculation (see the
-           <a href="../../users/help_abinit.html#4">
+           <a href="../../users/generated_files/help_abinit.html#4">
             section 4
            </a>
            of the [[help_abinit]]).
@@ -10752,7 +10752,7 @@
            = 1 : read ground state k+q -wavefunctions
         from a disk file appended with _WFQ , produced in a
         previous ground state calculation (see the
-           <a href="../../users/help_abinit.html#4">
+           <a href="../../users/generated_files/help_abinit.html#4">
             section 4
            </a>
            of the [[help_abinit]]).
@@ -10776,7 +10776,7 @@
            = 1 : read first-order wavefunctions
         from a disk file appended with _1WFx , produced in a
         previous response function calculation (see the
-           <a href="../../users/help_abinit.html#4">
+           <a href="../../users/generated_files/help_abinit.html#4">
             section 4
            </a>
            of the [[help_abinit]]).
@@ -10794,7 +10794,7 @@
            if [[irdddk]] = 1 : read first-order ddk wavefunctions
         from a disk file appended with _1WFx , produced in a
         previous response function calculation (see the
-           <a href="../../users/help_abinit.html#4">
+           <a href="../../users/generated_files/help_abinit.html#4">
             section 4
            </a>
            of the [[help_abinit]]).
@@ -10825,7 +10825,7 @@
          A non-zero value of [[irdden]] is treated in the same way
         as other "ird" variables,
         see the
-         <a href="../../users/help_abinit.html#4">
+         <a href="../../users/generated_files/help_abinit.html#4">
           section 4
          </a>
          of the [[help_abinit]].
@@ -10899,7 +10899,7 @@
         <p>
          A non-zero value of [[irdscr]] is treated in the same way as other "ird" variables,
         see the
-         <a href="../../users/help_abinit.html#4">
+         <a href="../../users/generated_files/help_abinit.html#4">
           section 4
          </a>
          of the [[help_abinit]].
@@ -10933,7 +10933,7 @@
         <p>
          A non-zero value of [[irdsuscep]] is treated in the same way as other "ird" variables,
         see the
-         <a href="../../users/help_abinit.html#4">
+         <a href="../../users/generated_files/help_abinit.html#4">
           section 4
          </a>
          of the [[help_abinit]].
@@ -11004,7 +11004,7 @@
            if [[irdwfk]] = 1 : read ground state wavefunctions
         from a disk file appended with _WFK , produced in a
         previous ground state calculation (see the
-           <a href="../../users/help_abinit.html#4">
+           <a href="../../users/generated_files/help_abinit.html#4">
             section 4
            </a>
            of the [[help_abinit]]).
@@ -11019,7 +11019,7 @@
            if [[irdwfk]] = 1 : read ground state k -wavefunctions
         from a disk file appended with _WFK , produced in a
         previous ground state calculation (see the
-           <a href="../../users/help_abinit.html#4">
+           <a href="../../users/generated_files/help_abinit.html#4">
             section 4
            </a>
            of the [[help_abinit]]).
@@ -11042,7 +11042,7 @@
            = 1 : read ground state k+q -wavefunctions
         from a disk file appended with _WFQ , produced in a
         previous ground state calculation (see the
-           <a href="../../users/help_abinit.html#4">
+           <a href="../../users/generated_files/help_abinit.html#4">
             section 4
            </a>
            of the [[help_abinit]]).
@@ -11066,7 +11066,7 @@
            = 1 : read first-order wavefunctions
         from a disk file appended with _1WFx , produced in a
         previous response function calculation (see the
-           <a href="../../users/help_abinit.html#4">
+           <a href="../../users/generated_files/help_abinit.html#4">
             section 4
            </a>
            of the [[help_abinit]]).
@@ -11092,7 +11092,7 @@
            = 1 : read first-order ddk wavefunctions
         from a disk file appended with _1WFx , produced in a
         previous response function calculation (see the
-           <a href="../../users/help_abinit.html#4">
+           <a href="../../users/generated_files/help_abinit.html#4">
             section 4
            </a>
            of the [[help_abinit]]).
@@ -11130,7 +11130,7 @@
           if [[irdwfkfine]] = 1 : read ground state wavefunctions
         from a disk file appended with _WFK , produced in a
         previous ground state fine grid calculation (see the
-          <a href="../../users/help_abinit.html#4">
+          <a href="../../users/generated_files/help_abinit.html#4">
            section 4
           </a>
           of the [[help_abinit]]).
@@ -11145,7 +11145,7 @@
           if [[irdwfkfine]] = 1 : read ground state k -wavefunctions
         from a disk file appended with _WFK , produced in a
         previous ground state calculation (see the
-          <a href="../../users/help_abinit.html#4">
+          <a href="../../users/generated_files/help_abinit.html#4">
            section 4
           </a>
           of the [[help_abinit]]).
@@ -11164,7 +11164,7 @@
           if [[irdwfkfine]] = 1 : read ground state k -wavefunctions
         from a disk file appended with _WFK , produced in a
         previous ground state calculation (see the
-          <a href="../../users/help_abinit.html#4">
+          <a href="../../users/generated_files/help_abinit.html#4">
            section 4
           </a>
           of the [[help_abinit]]).
@@ -11231,7 +11231,7 @@
            = 1 : read ground state wavefunctions
         from a disk file appended with _WFK , produced in a
         previous ground state calculation (see the
-           <a href="../../users/help_abinit.html#4">
+           <a href="../../users/generated_files/help_abinit.html#4">
             section 4
            </a>
            of the [[help_abinit]]).
@@ -11254,7 +11254,7 @@
            = 1 : read ground state k -wavefunctions
         from a disk file appended with _WFK , produced in a
         previous ground state calculation (see the
-           <a href="../../users/help_abinit.html#4">
+           <a href="../../users/generated_files/help_abinit.html#4">
             section 4
            </a>
            of the [[help_abinit]]).
@@ -11272,7 +11272,7 @@
            if [[irdwfq]] = 1 : read ground state k+q -wavefunctions
         from a disk file appended with _WFQ , produced in a
         previous ground state calculation (see the
-           <a href="../../users/help_abinit.html#4">
+           <a href="../../users/generated_files/help_abinit.html#4">
             section 4
            </a>
            of the [[help_abinit]]).
@@ -11296,7 +11296,7 @@
            = 1 : read first-order wavefunctions
         from a disk file appended with _1WFx , produced in a
         previous response function calculation (see the
-           <a href="../../users/help_abinit.html#4">
+           <a href="../../users/generated_files/help_abinit.html#4">
             section 4
            </a>
            of the [[help_abinit]]).
@@ -11322,7 +11322,7 @@
            = 1 : read first-order ddk wavefunctions
         from a disk file appended with _1WFx , produced in a
         previous response function calculation (see the
-           <a href="../../users/help_abinit.html#4">
+           <a href="../../users/generated_files/help_abinit.html#4">
             section 4
            </a>
            of the [[help_abinit]]).
@@ -11448,7 +11448,7 @@
            <br />
            The name of the density file must be given as indicated
         in the
-           <a href="../../users/help_abinit.html#4">
+           <a href="../../users/generated_files/help_abinit.html#4">
             section 4
            </a>
            of [[help_abinit]].
@@ -16877,7 +16877,7 @@
         calculation at k+q.
         In this case, the output wavefunction will be appended
         by _WFQ instead of _WFK (see the
-         <a href="../../users/help_abinit.html">
+         <a href="../../users/generated_files/help_abinit.html">
           section 4
          </a>
          of the [[help_abinit]])
@@ -20668,7 +20668,7 @@
          Please note that in the case of PAW ([[usepaw]]=1) calculations, the _DEN density output
         is not the full physical electron density. If what is wanted is the full physical electron density, say
         for post-processing with
-         <a href="../../users/help_aim.html">
+         <a href="../../users/generated_files/help_aim.html">
           AIM
          </a>
          or visualization, prtden &gt; 1 will produce physical electron
@@ -21244,7 +21244,7 @@
          The name of the kinetic energy density file will be the root output name, followed by _KDEN.
          <br />
          Like a _DEN file, it can be analyzed by cut3d. The file structure of the unformatted output file is
-        described below (see  <a href="../../users/help_abinit.html#6">
+        described below (see  <a href="../../users/generated_files/help_abinit.html#6">
           section 6
          </a>).
          <br />
@@ -21337,7 +21337,7 @@
         followed by _LDEN.
          <br />
          Like a _DEN file, it can be analyzed by cut3d. The file structure of the unformatted output file is
-        described below (see  <a href="../../users/help_abinit.html#6">
+        described below (see  <a href="../../users/generated_files/help_abinit.html#6">
           section 6
          </a>).
         </p>
@@ -21499,7 +21499,7 @@
          </ul>
          The file structure of this unformatted output file is
         described in
-         <a href="../../users/help_abinit.html#localpotfile">
+         <a href="../../users/generated_files/help_abinit.html#localpotfile">
           section 6.6
          </a>
          of the [[help_abinit]].
@@ -21572,7 +21572,7 @@
         Like a _DEN file, it can be analyzed by cut3d.
         The file structure of this unformatted output file is
         described in
-         <a href="../../users/help_abinit.html#densoutputfile">
+         <a href="../../users/generated_files/help_abinit.html#densoutputfile">
           section 6.5
          </a>
          of the [[help_abinit]].
@@ -21708,7 +21708,7 @@
          </ul>
          The file structure of this unformatted output file is
         described in
-         <a href="../../users/help_abinit.html#localpotfile">
+         <a href="../../users/generated_files/help_abinit.html#localpotfile">
           section 6.6
          </a>
          of the [[help_abinit]].
@@ -21751,7 +21751,7 @@
          </ul>
          The file structure of this unformatted output file is
         described in
-         <a href="../../users/help_abinit.html#localpotfile">
+         <a href="../../users/generated_files/help_abinit.html#localpotfile">
           section 6.6
          </a>
          of the [[help_abinit]].
@@ -21901,7 +21901,7 @@
          </ul>
          The file structure of this unformatted output file is
         described in
-         <a href="../../users/help_abinit.html#localpotfile">
+         <a href="../../users/generated_files/help_abinit.html#localpotfile">
           section 6.6
          </a>
          of the [[help_abinit]].
@@ -21944,7 +21944,7 @@
          </ul>
          The file structure of this unformatted output file is
         described in
-         <a href="../../users/help_abinit.html#localpotfile">
+         <a href="../../users/generated_files/help_abinit.html#localpotfile">
           section 6.6
          </a>
          of the [[help_abinit]].
@@ -22140,7 +22140,7 @@
         <p>
          If [[prtwf]]=1 , provide output of wavefunction
         and eigenvalue file, as described in
-         <a href="../../users/help_abinit.html#wavefctfile">
+         <a href="../../users/generated_files/help_abinit.html#wavefctfile">
           section 6.7
          </a>
          of the main [[help_abinit]].
@@ -23306,11 +23306,11 @@
          </ul>
          The treatment of the acoustic sum rule and charge neutrality sum rule is finer at the level of the ANADDB utility,
         with the two independent input variables
-         <a href="../../users/help_anaddb.html#asr">
+         <a href="../../users/generated_files/help_anaddb.html#asr">
           asr
          </a>
          and
-         <a href="../../users/help_anaddb.html#chneut">
+         <a href="../../users/generated_files/help_anaddb.html#chneut">
           chneut
          </a>
          .
@@ -23358,7 +23358,7 @@
         internal variable ipert can also assume values larger
         than [[natom]],
         denoting perturbations of electric field or stress type (see
-         <a href="../../users/help_respfn.html">
+         <a href="../../users/generated_files/help_respfn.html">
           the response function help file
          </a>
          ).
@@ -23583,7 +23583,7 @@
           </li>
          </ul>
          See the possible restrictions on the use of strain perturbations, in the
-         <a href="../../users/help_respfn.html#1">
+         <a href="../../users/generated_files/help_respfn.html#1">
           respfn help file
          </a>
          .

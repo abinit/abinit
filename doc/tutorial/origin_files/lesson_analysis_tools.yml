@@ -3,7 +3,7 @@
 # This is the introduction ...
 intro : |
   <p>This lesson covers some of the features available in the program <em>cut3d</em>.
-  The help file on this program can be view at <a href="../../users/cut3d_help.html" target="helpsimg">cut3d_help</a>.
+  The help file of this program can be view at [[help_cut3d]].
   <p>The <em>cut3d</em> program can produce output that can be read by several other programs. At present, at least
   XCrySDen (<a href="http://www.xcrysden.org/">www.xcrysden.org</a>, freely available) is known to support this output.
   <p>The <i>cut3d</i> program can be used to treat data in a density file (_DEN),
