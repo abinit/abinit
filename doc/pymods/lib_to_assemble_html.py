@@ -347,7 +347,6 @@ def assemble_html(origin_yml_files,suppl_components,dir_name,root_filname,allowe
       all_files_html += toc_all
     elif j == "subtitle":
       all_files_html += 'This document lists the %s of the ABINIT package.' %(spec[dir_name])
-      all_files_html += '<script type="text/javascript" src="../generic_advice.js"> </script>'
     else:
       all_files_html += getattr(origin_yml_default,j)
 
