@@ -734,7 +734,7 @@ for topic_name in list_of_topics:
   #Generate the table of content
   item_toc=0
   item_list=[]
-  title={ "introduction":"Introduction." , "examples":"Example(s)", "tutorials":"Related tutorials." , 
+  title={ "introduction":"Introduction." , "examples":"Example(s)", "tutorials":"Related lessons of the tutorial." , 
           "input_variables":"Related input variables." , "input_files":"Selected input files." , "references":"References."}
   sec_number={}
   toc=" <h3><b>Table of content: </b></h3> \n <ul> "
