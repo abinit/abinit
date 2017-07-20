@@ -4,6 +4,8 @@ document.write(' <A href="http://www.abinit.org"><B>ABINIT home Page</B></A>    
 document.write(' <B> | </B> ');
 document.write(' <A href="../users/acknowledgments.html"><B>Suggested acknowledgments</B></A> ');
 document.write(' <B> | </B> ');
+document.write(' <A href="../input-web/what_ABINIT_does.html"><B>what ABINIT does</B></A> ');
+document.write(' <B> | </B> ');
 document.write(' <A href="../input_variables/html_automatically_generated/allvariables.html"><B>List of input variables</B></A> ');
 document.write(' <B> | </B> ');
 document.write(' <A href="../tutorial/welcome.html"><B>Tutorial home page</B></A> ');

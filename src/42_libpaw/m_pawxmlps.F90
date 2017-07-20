@@ -2080,7 +2080,7 @@ end subroutine paw_setup_copy
      cycle
    end if
 !  --Read external potential
-   if (line(1:15)=='<LDA_minus_half_potential') then
+   if (line(1:25)=='<LDA_minus_half_potential') then
      paw_setup%LDA_minus_half_potential%tread=.true.
      call paw_rdfromline(" grid",line,strg,ierr)
      if (strg == "" ) strg = "unknown"
