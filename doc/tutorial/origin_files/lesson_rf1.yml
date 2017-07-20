@@ -132,7 +132,7 @@ body : |
   We will now aim at computing the second derivative of the total energy
   with respect to an atomic displacement by different means.
   For that purpose, you must first read
-  <a href="../../users/respfn_help.html#0" target="helpsimg">sections 0 and
+  <a href="../../users/generated_files/help_respfn.html#0" target="helpsimg">sections 0 and
   the first paragraph of section 1</a>
   of the respfn_help file (the auxiliary help file,
   that deals specifically with the response function features).
@@ -304,7 +304,7 @@ body : |
   <p>
   Then, we need to analyze the different output files. For that purpose,
   you should read the content of the
-  <a href="../../users/respfn_help.html#6" target="helpsimg"> section 6</a> of the respfn_help
+  <a href="../../users/generated_files/help_respfn.html#6" target="helpsimg"> section 6</a> of the respfn_help
   file. Read it quickly, as we will come back to the most important
   points hereafter.
   
@@ -317,7 +317,7 @@ body : |
   </ul>
   
   <p> Let us have a look at the output file. You can follow the description
-  provided in the <a href="../../users/respfn_help.html#6.2" target="helpsimg"> section 6.2</a>
+  provided in the <a href="../../users/generated_files/help_respfn.html#6.2" target="helpsimg"> section 6.2</a>
   of the respfn_help
   file. You should be able to find the place where the iterations for the
   minimisation (with respect to the unique perturbation) take place :
@@ -340,16 +340,16 @@ body : |
   and 5.007852 hartree from the force differences.
   
   <p> Now, you can read the remaining of
-  the <a href="../../users/respfn_help.html#6.2" target="helpsimg"> section 6.2</a>
+  the <a href="../../users/generated_files/help_respfn.html#6.2" target="helpsimg"> section 6.2</a>
   of the respfn_help file. Then, you should also edit the
   trf1_3o_DDB file, and read the corresponding
-  <a href="../../users/respfn_help.html#6.5" target="helpsimg"> section 6.5</a>
+  <a href="../../users/generated_files/help_respfn.html#6.5" target="helpsimg"> section 6.5</a>
   of the respfn_help file.
   
   <p> Finally, the excellent agreement between the finite-difference
   formula and the response-function approach calls for
   some accuracy considerations. These can be found
-  in <a href="../../users/respfn_help.html#7" target="helpsimg"> section 7</a>
+  in <a href="../../users/generated_files/help_respfn.html#7" target="helpsimg"> section 7</a>
   of the respfn_help file.
   
   <p>
@@ -377,7 +377,7 @@ body : |
   So, one might think that the CPU time will raise accordingly.
   This is not true, as ABINIT is able to determine
   which perturbations are the symmetric of another perturbation,
-  see <a href="../../users/respfn_help.html#3" target="helpsimg"> section 3</a>
+  see <a href="../../users/generated_files/help_respfn.html#3" target="helpsimg"> section 3</a>
   of the respfn_help file.
   
   <p>
@@ -473,11 +473,11 @@ body : |
   non-zero q wavevector, which will be the subject of the next section
   of the present tutorial. The sections to be read are :
   <ul>
-   <li>the part of <a href="../../users/respfn_help.html#1" target="helpsimg">section 1</a> that
+   <li>the part of <a href="../../users/generated_files/help_respfn.html#1" target="helpsimg">section 1</a> that
        had not yet been read
-   <li><a href="../../users/respfn_help.html#2" target="helpsimg">section 2</a>
-   <li><a href="../../users/respfn_help.html#4" target="helpsimg">section 4</a>
-   <li>and, for completeness,<a href="../../users/respfn_help.html#5" target="helpsimg">section 5</a>
+   <li><a href="../../users/generated_files/help_respfn.html#2" target="helpsimg">section 2</a>
+   <li><a href="../../users/generated_files/help_respfn.html#4" target="helpsimg">section 4</a>
+   <li>and, for completeness,<a href="../../users/generated_files/help_respfn.html#5" target="helpsimg">section 5</a>
   </ul>
   
   
@@ -695,8 +695,8 @@ body : |
   So, you would better leave your computer running, and either
   read more of the ABINIT documentation
   (why not the
-  <a href="../../users/mrgddb_help.html" target="helpsimg">mrgddb_help</a>
-   and the <a href="../../users/anaddb_help.html" target="helpsimg">anaddb_help</a>),
+  <a href="../../users/generated_files/help_mrgddb.html" target="helpsimg">mrgddb_help</a>
+   and the <a href="../../users/generated_files/help_anaddb.html" target="helpsimg">anaddb_help</a>),
   or make a walk.
   
   <p>The results of this simulation
