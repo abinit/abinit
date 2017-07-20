@@ -38,9 +38,8 @@
 
          <h4><b>Local exact exchange:</b></h4>
          <p>
-         When useexexch=1, the hybrid functional PBE0 is used in PAW, inside PAW spheres only, and only for correlated orbitals given by lexexch. To change the ratio of exact exchange, see also exchmix. The implementation of local exact exchange in ABINIT is provided in [1]. See useful input variables exchmix, lexexch and useexexch.
+         When useexexch=1, the hybrid functional PBE0 is used in PAW, inside PAW spheres only, and only for correlated orbitals given by lexexch. To change the ratio of exact exchange, see also exchmix. The implementation of local exact exchange in ABINIT is provided in [[Jollet2009]]. See useful input variables exchmix, lexexch and useexexch.
          <br/>
-         [1]F. Jollet, G. Jomard, B. Amadon, J.P. Crocombette, D. Torumba, Hybrid functional for correlated electrons in the projector augmented-wave formalism: Study of multiple minima for actinide oxides, Phys. Rev. B 80, 235109 (2009)
 
          <br/>
          <h4><b>Van der Waals functionals:</b></h4>

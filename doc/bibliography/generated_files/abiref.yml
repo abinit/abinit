@@ -1036,6 +1036,15 @@
   number : 12
 -
   ENTRYTYPE : article
+  ID : Jollet2009
+  author : F. Jollet and G. Jomard and B. Amadon and J.P. Crocombette and D. Torumba
+  title : Hybrid functional for correlated electrons in the projector augmented-wave formalism: Study of multiple minima for actinide oxides
+  journal : Phys. Rev. B
+  year : 2009
+  volume : 80
+  pages : 235109
+-
+  ENTRYTYPE : article
   ID : Jollet2014
   author : F. Jollet and M. Torrent and N. Holzwarth
   title : Generation of Projector Augmented-Wave atomic data: a 71 element validated table in the {XML} format

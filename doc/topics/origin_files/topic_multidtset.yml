@@ -127,7 +127,7 @@
         is equivalent to
         <pre>    ndtset 6 ecut: 10 ecut+ 5
         </pre>
-        <p>In both cases, there are six datasets, with increasing values of <a href="varbas.html#ecut" target="kwimg">ecut</a>.
+        <p>In both cases, there are six datasets, with increasing values of [[ecut]].
         </p>
         <h4>&nbsp; </h4>
 
@@ -149,13 +149,13 @@
         23, and 24</code>.
         <p> Independently of the use of [[udtset]],
         rules (2a) and (2c) will be used to define the value of an input variable: </p>
-        <p><a name="topic_multidtset.html#ref8_2a"></a>(2a) The question mark "<b>?</b>" can be used as a
+        <p><a name="ref8_2a"></a>(2a) The question mark "<b>?</b>" can be used as a
         metacharacter, replacing any digit from 1 to 9, to define an index of a dataset.
         <br>
         For example, <b>ecut?</b>1 means that the input value that follows it can
         be used for [[ecut]] for the datasets
         <code>01, 11, 21, 31, 41, 51, 61, 71, 81, and 91</code>. </p>
-        <p><a name="topic_multidtset.html#ref8_2c"></a>(2c) If the variable name appended with the index of
+        <p><a name="ref8_2c"></a>(2c) If the variable name appended with the index of
         the dataset does not exist, the code looks whether a double-loop series has
         been defined for this keyword. Series can be defined for the inner loop index
         or the outer loop index. Two signs will be appended to the variable name (instead

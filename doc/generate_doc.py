@@ -786,7 +786,7 @@ for j in ["header","title","subtitle","copyright","links","toc_all","links","end
   elif j == "subtitle":
     all_topics_html += "<h2>Complete list.</h2><hr>"
     all_topics_html += 'This document lists the names of all "How to ?" documentation topics for the abinit package.'
-    all_topics_html += '<script type="text/javascript" src="../generic_advice.js"> </script>'
+    all_topics_html += '<script type="text/javascript" src="../../js_files/generic_advice.js"> </script>'
   else:
     all_topics_html += getattr(default_topic,j)
 
