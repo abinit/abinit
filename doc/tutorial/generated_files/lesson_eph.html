@@ -214,14 +214,14 @@ teph_1o_DS3_DDB
 teph_1o_DS4_DDB
 </pre>
 <p> This is your input
-file for the <a href="../../users/mrgddb_help.html"
+file for the <a href="../../users/generated_files/help_mrgddb.html"
 	target="kwimg">MRGDDB</a> utility, which will take the different _DDB
 files and merge them into a single one which ANADDB will use to determine the
 phonon frequencies and eigenvectors. teph_2.in contains the name of the final
 file, a comment line, then the number of _DDB files to be merged and their
 names.</p>
 
-</p><a href="../../users/mrgddb_help.html"
+</p><a href="../../users/generated_files/help_mrgddb.html"
 target="kwimg">MRGDDB</a> is run with the command <pre> mrgddb < teph_2.in </pre>
 It runs in a few seconds.<p>
 
@@ -254,7 +254,7 @@ fourth line contains 3 integers, which give the number of _1WF files
 (which can also be used to salvage the GKK), the
 number of _GKK files, and the number of perturbations in the _GKK files. Thus,
 MRGGKK functions very much like <a
-	href="../users/mrgddb_help.html"
+	href="../../users/generated_files/help_mrgddb.html"
 	target="kwimg">MRGDDB</a>, and can merge _GKK files
 which already contain several perturbations (q-points or atomic displacements).
 Finally, the names of the different _1WF and _GKK files are listed.</p>
@@ -305,19 +305,19 @@ qpath
 
 # Coulomb pseudopotential parameter
 mustar 0.136</pre> <a
-href="../users/anaddb_help.html#elphflag"
+href="../../users/generated_files/help_anaddb.html#elphflag"
 target="kwimg"> elphflag</a> is a flag to turn on the calculation of the
 electron-phonon quantities. The first quantities which will be calculated are
 the phonon linewidths along a path in reciprocal space (exactly like the band
 structure in <a
 	href="lesson_base3.html#35"
 	target="kwimg">Lesson 3.5</a>). The path is specified by the variable
-<a href="../../users/anaddb_help.html#qpath"
+<a href="../../users/generated_files/help_anaddb.html#qpath"
 	target="kwimg">qpath</a> giving the apexes of the path in reciprocal
 space, which are usually special points of high symmetry. The number of points
-is given by <a href="../../users/anaddb_help.html#nqpath"
+is given by <a href="../../users/generated_files/help_anaddb.html#nqpath"
 	target="kwimg">nqpath</a>. Note that qpath can be used in normal phonon
-band structure calculations as well, provided that <a href="../../users/anaddb_help.html#qpath"
+band structure calculations as well, provided that <a href="../../users/generated_files/help_anaddb.html#qpath"
         target="kwimg">q1phl</a> is omitted from the
 input file (the latter overrides qpath). The phonon linewidths are printed to a file
 suffixed _LWD.</p>
@@ -339,7 +339,7 @@ global coupling strength, or mass renormalization factor, &lambda;. From
 (1975)</i>), ANADDB calculates the critical temperature for superconductivity.
 The formula contains an adjustable parameter &mu;* which approximates the effect
 of Coulomb interactions, and is given by the input variable <a
-	href="../users/anaddb_help.html#mustar"
+	href="../../users/generated_files/help_anaddb.html#mustar"
 	target="kwimg">mustar</a>. For Al with the k-point grid given and a
 value of &mu;=0.136 the ANADDB output file shows the following values
 <pre>
@@ -373,23 +373,23 @@ DOS and attributes Gaussian weights to each k-point as a function of its
 distance from the Fermi surface. Another efficient method of integration in
 k-space is the tetrahedron method, which is also implemented in ANADDB, and can
 be used by setting <a
-	href="../users/anaddb_help.html#telphint"
+	href="../../users/generated_files/help_anaddb.html#telphint"
 	target="kwimg">telphint</a> = 0. In this case the k-point grid must be
 specified explicitly in the input, repeating the variable <a
-	href="../users/anaddb_help.html#kptrlatt"
+	href="../../users/generated_files/help_anaddb.html#kptrlatt"
 	target="kwimg">kptrlatt</a> from the ABINIT output, so that ANADDB can
 re-construct the different tetrahedra which fill the reciprocal unit cell. In
 the Gaussian case, the width of the smearing can be controlled using the input
-variable <a href="../../users/anaddb_help.html#elphsmear"
+variable <a href="../../users/generated_files/help_anaddb.html#elphsmear"
 	target="kwimg">elphsmear</a>. </p>
 
 <p> To test our calculations, they should be re-done with a denser k-point grid
 and a denser q-point grid, until the results (&alpha;&#178;F or &lambda;) are
 converged. The value of <a
-	href="../users/anaddb_help.html#elphsmear"
+	href="../../users/generated_files/help_anaddb.html#elphsmear"
 	target="kwimg">elphsmear</a> should also be checked, to make sure that
 it does not affect results. Normally, the limit for a very small <a
-	href="../users/anaddb_help.html#elphsmear"
+	href="../../users/generated_files/help_anaddb.html#elphsmear"
 	target="kwimg">elphsmear</a> and a very dense k-point grid is
 the same as the value obtained with the tetrahedron method (which usually converges
 with a sparser k-point grid). </p>
