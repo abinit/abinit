@@ -149,7 +149,7 @@ body : |
   There is only one <span style="font-weight: bold;">HIST.nc file</span> and it contains the history of the two
   calculations.</span></span></p>
   <p style="text-align: justify;"><span style="color: red;"><span style="color: black;">Now we can calculate and plot several quantities. We need
-  for that the <span style="font-style: italic; font-weight: bold;">diag_moldyn.py</span> python script. You can find it in the </span></span><i><span style="color: rgb(0, 102, 0);">~abinit/doc/tutorial/lesson_paral_moldyn</span></i><span style="color: red;"><span style="color: black;"> directory (link <a href="./lesson_paral_moldyn/diag_moldyn.py">here</a>).<br>
+  for that the <span style="font-style: italic; font-weight: bold;">diag_moldyn.py</span> python script. You can find it in the </span></span><i><span style="color: rgb(0, 102, 0);">~abinit/doc/tutorial/documents/lesson_paral_moldyn</span></i><span style="color: red;"><span style="color: black;"> directory (link <a href="../documents/lesson_paral_moldyn/diag_moldyn.py">here</a>).<br>
   Run the diag_modyn.py script (type: "python diag_moldyn.py").<br>
   </span></span></p>
   <p style="text-align: justify;"><span style="color: red;"><span style="color: black;">You can read (on standard output) the average value and the standard

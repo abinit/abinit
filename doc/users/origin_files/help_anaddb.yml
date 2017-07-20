@@ -1186,7 +1186,7 @@ body : |
   properties: electrical and thermal resistivities from electron-phonon
   interactions in the variational approach. If ifltransport=3, anaddb calculates the 
   k-dependent relaxation time. (needs</font><font id="text"> <a
-   href="anaddb_help.html#elphflag">elphflag</a> = 1)
+   href="#elphflag">elphflag</a> = 1)
    </font>
   
   <br><br><br><br><a href="#top">Go to the top</a>
@@ -1233,9 +1233,8 @@ body : |
     <li>0 =&gt; No elastic or compliance tensor will be calculated.</li>
     <li>1 =&gt; Only clamped-ion elastic and compliance tensors will be
   calculated. Requirements for preceding response-function DDB generation
-  run: Strain perturbation. Set <a
-   href="../input_variables/html_automatically_generated/varrf.html#rfstrs">rfstrs</a> to 1, 2, or 3.
-  Note that <a href="../../input_variables/generated_files/varrf.html#rfstrs">rfstrs</a>=3
+  run: Strain perturbation. Set [[rfstrs]] to 1, 2, or 3.
+  Note that [[rfstrs]]>=3
   is recommended so that responses to both uniaxial and shear strains
   will be computed. </li>
     <li>2 =&gt; Both relaxed- and clamped-ion elastic and compliance
@@ -1244,15 +1243,13 @@ body : |
   should also be set to 1, because the internal-strain tensor is needed
   to compute the relaxed-ion corrections. Requirements for preceding
   response-function DDB generation run: Strain and atomic-displacement
-  responses at Q=0. Set <a href="../../input_variables/generated_files/varrf.html#rfstrs">rfstrs</a>
-  = 1, 2, or 3 (preferably 3). Set <a
-   href="../input_variables/html_automatically_generated/varrf.html#rfatpol">rfatpol</a>rfatpol and <a
-   href="../input_variables/html_automatically_generated/varrf.html#rfdir">rfdir</a> to do a full
+  responses at Q=0. Set [[rfstrs]] = 1, 2, or 3 (preferably 3). Set 
+   [[rfatpol]] and [[rfdir]] to do a full
   calculation of phonons at Q=0 (needed because the inverse of
   force-constant tensor is required). </li>
     <li>3 =&gt; Both relaxed and clamped-ion elastic and compliance
   tensors will be printed out. The input variable <a
-   href="anaddb_help.html#instrflag">instrflag</a> should also be set to
+   href="#instrflag">instrflag</a> should also be set to
   1. Requirements for preceding response-function DDB generation run:
   Same as for <b>elaflag</b>=2'. </li>
     <li>4 =&gt; Calculate the elastic and compliance tensors (relaxed
@@ -1260,8 +1257,8 @@ body : |
   electric field will be printed out too, for comparison. When <b>elaflag</b>=4,
   we need the information of internal strain and relaxed-ion dielectric
   tensor to build the whole tensor, so we need set <a
-   href="anaddb_help.html#instrflag">instrflag</a>=1 and <a
-   href="anaddb_help.html#dieflag">dieflag</a>=3 or 4 . </li>
+   href="#instrflag">instrflag</a>=1 and <a
+   href="#dieflag">dieflag</a>=3 or 4 . </li>
     <li>5 =&gt; Calculate the relaxed ion elastic and compliance tensors,
   considering the stress left inside cell. At the same time, bare relaxed
   ion tensors will still be printed out for comparison. In this
@@ -1570,7 +1567,7 @@ body : |
   along which the non-analytical splitting of phonon frequencies
   at Gamma will be calculated. The actual
   values of the wavevector directions will be specified
-  by <href="anaddb_help.html#qph2l">qph2l</a>.
+  by <href="#qph2l">qph2l</a>.
   These are actually all wavectors at Gamma, but obtained
   by a limit along a different direction in the Brillouin-zone.
   It is important to note that non-analyticities in the
@@ -1791,8 +1788,7 @@ body : |
   obvious exception to this requirement is cases in which the primitive
   lattice vectors are all aligned with the cartesian axes. The code will
   omit terms in the output piezoelectric tensor for which the available
-  d/dk set is incomplete. Thus: Set <a
-   href="../input_variables/html_automatically_generated/varrf.html#rfstrs">rfstrs</a> to 1, 2, or 3i
+  d/dk set is incomplete. Thus: Set [[rfstrs]] to 1, 2, or 3i
   (preferably 3) </li>
     <li>2 =&gt; Both relaxed- and clamped-ion elastic and compliance
   tensor will be calculated, but only the relaxed-ion quantities will be
@@ -1800,8 +1796,7 @@ body : |
   should also be set to 1, because the internal-strain tensor is needed
   to compute the relaxed-ion corrections. Requirements for preceding
   response-function DDB generation run: Strain, electric-field and full
-  atomic-displacement responses at Q=0. Set <a
-   href="../input_variables/html_automatically_generated/varrf.html#rfstrs">rfstrs</a> = 1, 2, or 3
+  atomic-displacement responses at Q=0. Set [[rfstrs]] = 1, 2, or 3
   (preferably 3). Set <a href="../../input_variables/generated_files/varrf.html#rfelfd">rfelfd</a>
   = 3. Set <a href="../../input_variables/generated_files/varrf.html#rfatpol">rfatpol</a>
   and <a href="../../input_variables/generated_files/varrf.html#rfdir">rfdir</a> to do a
@@ -1814,23 +1809,23 @@ body : |
     <li>4 =&gt; Calculate the piezoelectric d tensor (relaxed ion). In
   order to calculate the piezoelectric d tensor, we need information of
   internal strain and elastic tensor (relaxed ion). So we should set <a
-   href="anaddb_help.html#elaflag">elaflag</a>= 2,3,4, or 5 and <a
-   href="anaddb_help.html#instrflag">instrflag</a>=1. The subroutine will
+   href="#elaflag">elaflag</a>= 2,3,4, or 5 and <a
+   href="#instrflag">instrflag</a>=1. The subroutine will
   also do a check for you, and print warning message without stopping
   even if flags were not correctly set. </li>
     <li>5 =&gt; Calculate the piezoelectric g tensor (relaxed ion). In
   this computation, we need information of internal strain, elastic
   tensor (relaxed ion) and dielectric tensor (relaxed ion). So we should
   set: <a href="#instrflag">instrflag</a>=1, <a
-   href="anaddb_help.html#elaflag">elaflag</a>=2,3,4 or 5, <a
-   href="anaddb_help.html#dieflag">dieflag</a>=3 or 4. The subroutine
+   href="#elaflag">elaflag</a>=2,3,4 or 5, <a
+   href="#dieflag">dieflag</a>=3 or 4. The subroutine
   will also do a check for you, and print warning message without
   stopping even if flags were not correctly set. </li>
     <li>6 =&gt; Calculate the piezoelectric h tensor (relaxed ion). In
   this calculation, we need information of internal strain and dielectric
   tensor (relaxed ion). So we need set: <a
-   href="anaddb_help.html#instrflag">instrflag</a>=1 and <a
-   href="anaddb_help.html#dieflag">dieflag</a>=3 or 4. The subroutine
+   href="#instrflag">instrflag</a>=1 and <a
+   href="#dieflag">dieflag</a>=3 or 4. The subroutine
   will also do a check for you, and print warning message without
   stopping even if flags were not correctly set. </li>
     <li>7 =&gt; calculate all the possible piezoelectric tensors,
@@ -1867,7 +1862,7 @@ body : |
   In case <b>polflag</b>=1, ANADDB solves the linear system of equations
   (13)
   of the Na Sai paper, and computes new atomic positions (if <a
-   href="anaddb_help.html#relaxat">relaxat</a>=1) and
+   href="#relaxat">relaxat</a>=1) and
   lattice constant (if <a href="#relaxstr">relaxstr</a>=1).
   Then, the user uses these parameters to perform a new ground-state
   and linear-response calculation. This must be repeated until convergence is
@@ -1882,8 +1877,7 @@ body : |
   <b>polflag</b>=1, ANADDB only computes the polarization in cartesian coordinates.
   </font></p>
   <p><font id="text">As described in the Na Sai's paper, it is important to use the
-  finite difference expression of the ddk (<a
-   href="../input_variables/html_automatically_generated/varff.html#berryopt">berryopt</a>=2 or -2)
+  finite difference expression of the ddk ([[berryopt]]=2 or -2)
   in the linear response calculation of the effective charges and the piezoelectric tensor.
   </font><br>
   <br>
@@ -2475,7 +2469,7 @@ body : |
     <li> 1 =&gt; Blocks obtained by a non-stationary formulation.</li>
     <li> 2 =&gt; Blocks obtained by a stationary formulation.</li>
   </ul>
-  For more detailed explanations, see abinit_help
+  For more detailed explanations, see [[help_abinit]]
   If the information in the DDB is available, always use
   the option 2. If not, you can try option 1, which is less
   accurate.
