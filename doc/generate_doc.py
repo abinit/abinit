@@ -82,6 +82,13 @@ list_of_topics=yml_in["list_of_topics"]
 # Also constitute the list of allowed links to tests files.
 
 try :
+  rm_cmd = "rm topics/generated_files/topics_in_tests.txt"
+  retcode = os.system(rm_cmd)
+except :
+  if debug==1 :
+    print(rm_cmd+"failed")
+    print("the file was likely non existent")
+try :
   rm_cmd = "rm topics/generated_files/topics_in_tests.yml"
   retcode = os.system(rm_cmd)
 except :
@@ -113,6 +120,13 @@ path_ymlfile="topics/generated_files/topics_in_tests.yml"
 print("Generated "+path_ymlfile+", to contain the list of automatic test input files relevant for each topic ...")
 with open(path_ymlfile, 'r') as f:
   topics_in_tests = yaml.load(f)
+try :
+  rm_cmd = "rm topics/generated_files/topics_in_tests.txt"
+  retcode = os.system(rm_cmd)
+except :
+  if debug==1 :
+    print(rm_cmd+"failed")
+    print("the file was likely non existent")
 
 if debug==1 :
   print(" topics_in_tests :")
