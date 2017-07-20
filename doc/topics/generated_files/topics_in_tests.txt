@@ -1,0 +1,3 @@
+tests/wannier90/Input/t11.in:#%% topics = vdw
+tests/wannier90/Input/t12.in:#%% topics = vdw
+tests/wannier90/Input/t13.in:#%% topics = vdw

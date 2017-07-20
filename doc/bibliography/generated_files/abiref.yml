@@ -1376,6 +1376,15 @@
   pages : 5048
 -
   ENTRYTYPE : article
+  ID : Perrot1979
+  author : F. Perrot
+  title : Gradient correction to the statistical electronic free energy at non-zero temperatures: Application to equation-of-state calculations
+  journal : Phys. Rev. A
+  year : 1979
+  volume : 20
+  pages : 586-594
+-
+  ENTRYTYPE : article
   ID : Pickett1988
   author : Warren E. Pickett, Henry Krakauer, and Philip B. Allen
   title : Smooth Fourier interpolation of periodic functions
@@ -1465,11 +1474,11 @@
   ENTRYTYPE : article
   ID : Rangel2016
   author : Rangel, T. and Caliste, D. and Genovese, L. and Torrent,M.
-  title : A wavelet-based Projector Augmented-Wave ({PAW}) method: the {PAW} library
-  journal : to be published
-  year : 2015
-  volume : 
-  pages : 
+  title : A wavelet-based Projector Augmented-Wave ({PAW}) method: {R}eaching frozen-core all-electron precision with a systematic, adaptive and localized wavelet basis set
+  journal : Computer Physics Communication
+  year : 2016
+  volume : 208
+  pages : 1-8
   number : 
 -
   ENTRYTYPE : article

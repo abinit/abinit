@@ -137,3 +137,10 @@
 - tests/v7/Input/t44.in:#%% topics = DFT+U
 - tests/v7/Input/t65.in:#%% topics = hf
 - tests/v7/Input/t66.in:#%% topics = hf
+- tests/v7/Input/t97.in:#%% topics = vdw
+- tests/v7/Input/t98.in:#%% topics = vdw
+- tests/v7/Input/t99.in:#%% topics = vdw
+- tests/vdwxc/Input/t10.in:#%% topics = vdw
+- tests/wannier90/Input/t11.in:#%% topics = vdw
+- tests/wannier90/Input/t12.in:#%% topics = vdw
+- tests/wannier90/Input/t13.in:#%% topics = vdw

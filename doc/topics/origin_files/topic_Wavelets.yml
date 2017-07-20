@@ -11,7 +11,7 @@
     introduction : |- 
          <p> The use of wavelets (instead of plane waves) is available in ABINIT.
          At present, it works for the SCF cycles : one can get density, total energy
-         and forces, in some basic cases (HGH or GTH pseudopotentials only, or PAW - in v7.2).
+         and forces, in some basic cases (HGH or GTH pseudopotentials only [[Genovese2008]], or PAW [[Rangel2016]]- in v7.2).
          Available also : the finite size corrections to the
          total energy, restart on wavefunctions following the ETSF norm and geometry
          relaxation using BFGS. Molecular dynamic is also available for

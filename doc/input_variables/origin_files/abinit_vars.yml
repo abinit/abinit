@@ -10965,7 +10965,7 @@
           1 =&gt; read vdW-DF variables
          </li>
         </ul>
-    topics: null
+    topics: vdw_useful
     varfile: varvdw
     vartype: integer
 - !variable
@@ -22235,7 +22235,7 @@
         incorrectly normalized orbitals or non-integer occupation numbers there is
         probably something set wrong in the input file.
         </p>
-    topics: printing_prden
+    topics: printing_prden, vdw_useful
     varfile: varfil
     vartype: integer
 - !variable
@@ -27083,7 +27083,7 @@
         Used when [[vdw_xc]]&gt;0,
         to build angular meshes for the vdW-DF kernel.
         <br />
-    topics: null
+    topics: vdw_expert
     varfile: varvdw
     vartype: real
 - !variable
@@ -27103,7 +27103,7 @@
         Used when [[vdw_xc]]&gt;0,
         to build angular meshes for the vdW-DF kernel.
         <br />
-    topics: null
+    topics: vdw_expert
     varfile: varvdw
     vartype: real
 - !variable
@@ -27121,7 +27121,7 @@
         Used when [[vdw_xc]]&gt;0,
         to build angular meshes for the vdW-DF kernel.
         <br />
-    topics: null
+    topics: vdw_expert
     varfile: varvdw
     vartype: real
 - !variable
@@ -27139,7 +27139,7 @@
         Used when [[vdw_xc]]&gt;0,
         to build angular meshes for the vdW-DF kernel.
         <br />
-    topics: null
+    topics: vdw_expert
     varfile: varvdw
     vartype: real
 - !variable
@@ -27157,7 +27157,7 @@
         Used when [[vdw_xc]]&gt;0,
         to build the vdW-DF kernel.
         <br />
-    topics: null
+    topics: vdw_expert
     varfile: varvdw
     vartype: real
 - !variable
@@ -27177,7 +27177,7 @@
         Used when [[vdw_xc]]&gt;0,
         to build the vdW-DF kernel.
         <br />
-    topics: null
+    topics: vdw_expert
     varfile: varvdw
     vartype: real
 - !variable
@@ -27195,7 +27195,7 @@
         Used when [[vdw_xc]]&gt;0,
         to build the vdW-DF kernel.
         <br />
-    topics: null
+    topics: vdw_expert
     varfile: varvdw
     vartype: real
 - !variable
@@ -27213,7 +27213,7 @@
         Used when [[vdw_xc]]&gt;0,
         to filter the vdW-DF kernel in reciprocal space.
         <br />
-    topics: null
+    topics: vdw_expert
     varfile: varvdw
     vartype: real
 - !variable
@@ -27231,7 +27231,7 @@
         Used when [[vdw_xc]]&gt;0,
         to build the vdW-DF kernel.
         <br />
-    topics: null
+    topics: vdw_expert
     varfile: varvdw
     vartype: integer
 - !variable
@@ -27249,7 +27249,7 @@
         Used when [[vdw_xc]]&gt;0,
         to build the vdW-DF kernel.
         <br />
-    topics: null
+    topics: vdw_expert
     varfile: varvdw
     vartype: integer
 - !variable
@@ -27267,7 +27267,7 @@
         Used when [[vdw_xc]]&gt;0,
         to build the vdW-DF kernel.
         <br />
-    topics: null
+    topics: vdw_expert
     varfile: varvdw
     vartype: integer
 - !variable
@@ -27285,7 +27285,7 @@
         Used when [[vdw_xc]]&gt;0,
         to define the sampling of the vdW-DF-kernel in real-space.
         <br />
-    topics: null
+    topics: vdw_expert
     varfile: varvdw
     vartype: integer
 - !variable
@@ -27303,7 +27303,7 @@
         Used when [[vdw_xc]]&gt;0,
         to exponentially smoothen q near q0.
         <br />
-    topics: null
+    topics: vdw_expert
     varfile: varvdw
     vartype: integer
 - !variable
@@ -27321,7 +27321,7 @@
         Used when [[vdw_xc]]&gt;0,
         to build the vdW-DF kernel.
         <br />
-    topics: null
+    topics: vdw_expert
     varfile: varvdw
     vartype: real
 - !variable
@@ -27339,7 +27339,7 @@
         Used when [[vdw_xc]]&gt;0,
         to build the vdW-DF kernel.
         <br />
-    topics: null
+    topics: vdw_expert
     varfile: varvdw
     vartype: real
 - !variable
@@ -27357,7 +27357,7 @@
         Used when [[vdw_xc]]&gt;0,
         .
         <br />
-    topics: null
+    topics: vdw_expert
     varfile: varvdw
     vartype: real
 - !variable
@@ -27375,7 +27375,7 @@
         Used when [[vdw_xc]]&gt;0,
         to define the vdW-DF kernel cut-off radius.
         <br />
-    topics: null
+    topics: vdw_expert
     varfile: varvdw
     vartype: real
 - !variable
@@ -27393,7 +27393,7 @@
         Used when [[vdw_xc]]&gt;0,
         to build the vdW-DF kernel.
         <br />
-    topics: null
+    topics: vdw_expert
     varfile: varvdw
     vartype: real
 - !variable
@@ -27416,7 +27416,7 @@
         calculation. Too small values, as well as negative values, will result
         in the vdW-DF energy contributions never being calculated.
         </p>
-    topics: null
+    topics: vdw_expert
     varfile: varvdw
     vartype: real
 - !variable
@@ -27434,7 +27434,7 @@
         Used when [[vdw_xc]]&gt;0,
         to build the vdW-DF kernel.
         <br />
-    topics: null
+    topics: vdw_expert
     varfile: varvdw
     vartype: real
 - !variable
@@ -27458,7 +27458,7 @@
          </i>
         </b>
         <br />
-    topics: null
+    topics: vdw_expert
     varfile: varvdw
     vartype: integer
 - !variable
@@ -27480,7 +27480,7 @@
         </a>
         .
         <br />
-    topics: null
+    topics: vdw_expert
     varfile: varvdw
     vartype: real
 - !variable
@@ -27504,7 +27504,7 @@
         later is usually correct if some atoms are located at the corners or at limiting
         faces of the unit cell.
         </p>
-    topics: null
+    topics: vdw_basic
     varfile: varvdw
     vartype: integer
 - !variable
@@ -27534,7 +27534,7 @@
         is normal to the layers.
 
         </p>
-    topics: null
+    topics: vdw_basic
     varfile: varvdw
     vartype: integer
 - !variable
@@ -27554,7 +27554,7 @@
         The number of pairs of atoms contributing to the potential is necessarily limited. To be included
         in the potential a pair of atom must have contribution to the energy larger than [[vdw_tol]].
         </p>
-    topics: null
+    topics: vdw_compulsory
     varfile: varvdw
     vartype: real
 - !variable
@@ -27587,7 +27587,7 @@
         </li>
         </ul>
         The last term has been predicted to have an important effect for large molecules (see for e.g. <i> Grimme S.,  J. Chem. Phys. 132, 154104 (2010) </i>). It is however quite costly in computational time for periodic systems and seems to lead to an overestimation of lattice parameters for weakly bound systems (see for e.g. <i> Reckien W., J. Chem. Phys. 132, 154104(2010) </i>). Still, its contribution to energy, to forces and to stress is available (not planned for elastic constants, dynamical matrix and internal strains)
-    topics: null
+    topics: vdw_basic
     varfile: varvdw
     vartype: real
 - !variable
@@ -27617,7 +27617,7 @@
         the same fragment as their nearest atom. The resulting set of MLWFs in each interacting fragment
         can be found in the output file in xyz format for easy visualization.
         </p>
-    topics: null
+    topics: vdw_basic
     varfile: varvdw
     vartype: integer
 - !variable
@@ -27746,7 +27746,7 @@
         in the article of Rom&aacute;n-P&eacute;rez and Soler
         (<a href="https://dx.doi.org/10.1103/PhysRevLett.103.096102">doi:10.1103/PhysRevLett.103.096102</a>)
         </p>
-    topics: null
+    topics: vdw_compulsory
     varfile: varvdw
     vartype: integer
 - !variable
