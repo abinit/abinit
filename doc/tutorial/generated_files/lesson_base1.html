@@ -22,8 +22,7 @@
   of defaults, the actions of the parser, and the use of the multi-dataset
   feature. You will also learn about the two output files as well as the density
   file. <p></p>
-<p>This first lesson covers the sections 1, 3, 4 and 6 of the
-  <a href="../../users/abinit_help.html" target="helpsimg">abinit_help</a> file.</p>
+<p>This first lesson covers the sections 1, 3, 4 and 6 of the <a href="../../users/generated_files/help_abinit.html">abinit help file</a>.</p>
 <p>The very first step is a detailed tour of the input and output files: you
   are like a tourist, and you discover a town in a coach. You will have a bit
   more freedom after that first step ... <br>
@@ -59,7 +58,7 @@
 Note that the present tutorial will use four different windows:
 one to visualize the text of the tutorial (the present window),
 a second to run the code, a third to visualize
-sections of the abinit_help file (that will open automatically),
+sections of the <a href="../../users/generated_files/help_abinit.html">abinit help file</a> (that will open automatically),
 and a fourth one for the description of input variables (that will also open automatically).
 Try to manage adequately these four windows ...
 
@@ -89,7 +88,7 @@ Change the working directory of windows 2 to "Work":
 <p><b>1.1.c</b> Edit the tbase1_x.files.
   It is not very long (only 6 lines). It gives the information needed for the
   code to build other file names ... You will discover more about this file in
-  the <a href="../../users/abinit_help.html#intro1" target="helpsimg">section 1.1</a>
+  the <a href="../../users/generated_files/help_abinit.html#intro1" target="helpsimg">section 1.1</a>
   of the abinit_help file. Please, read it now (it will take one minute or so).
   <a name="ref1"></a></p>
 
@@ -98,8 +97,7 @@ Change the working directory of windows 2 to "Work":
  tbase1_1.out<br>
  Later, you will again modify these lines, to treat more cases. Make sure that the last line,
  gives the correct location of the pseudopotential. Close the tbase1_x.files file.
- Then, copy the file
- ~abinit/tests/tutorial/Input/tbase1_1.in</a> in "Work":<br>
+ Then, copy the file <a href="../../tests/tutorial/Input/tbase1_1.in">&#126;abinit/tests/tutorial/Input/tbase1_1.in</a> in "Work":<br>
 <li><i> cp ../tbase1_1.in . </i></li>
 
 <p>
@@ -130,7 +128,7 @@ Change the working directory of windows 2 to "Work":
   Different output files have been created, including a "log" file and the
   output file "tbase1_1.out".
   To check that everything is correct, you
-  can make a diff of tbase1_1.out with a reference file contained in the
+  can make a diff of tbase1_1.out with a reference file <a href="../../tests/tutorial/Refs/tbase1_1.out">&#126;abinit/tests/tutorial/Refs/tbase1_1.out</a> contained in the
   ~abinit/tests/tutorial/Refs directory:
  <li><i>diff tbase1_1.out ../../Refs/tbase1_1.out | more</i></li>
 <p>(Perhaps you will need to ignore the blanks, with the command "diff -b" instead of "diff")
@@ -192,7 +190,7 @@ in the first column of the ABINIT output file.
   and "log" output files.</p>
 
 <p><b>1.1.e</b> Running the code is described in the
-  <a href="../../users/abinit_help.html#exec" target="helpsimg">section 1.2</a>
+  <a href="../../users/generated_files/help_abinit.html#exec" target="helpsimg">section 1.2</a>
   of the abinit_help file. Please, read it now (it will take 30 seconds or less).<a name="ref2"></a></p>
 
 <p><b>1.1.f</b> It is now time to edit the tbase1_1.in file.
@@ -200,7 +198,7 @@ in the first column of the ABINIT output file.
   comments. Do not try to understand everything immediately. After having gone
   through it, you should read general explanation about its content, and
   the format of such input files in the
-  <a href="../../users/abinit_help.html#intro3" target="helpsimg">section 3.1</a> of the abinit_help file.
+  <a href="../../users/generated_files/help_abinit.html#intro3" target="helpsimg">section 3.1</a> of the abinit_help file.
   <a name="ref3"></a></p>
 
 <p><b>1.1.g</b> You might now examine in more details some input variables. An
@@ -250,12 +248,12 @@ in the first column of the ABINIT output file.
   (localize the keywords "WARNING" or "COMMENT" in this file). Some of them
   are for the experienced user. For the present time, we will ignore them. You
   can find more information about messages in the log file in the
-  <a href="../../users/abinit_help.html#logfile" target="helpsimg">section 6.1</a>
+  <a href="../../users/generated_files/help_abinit.html#logfile" target="helpsimg">section 6.1</a>
   of the abinit_help file.<a name="ref4"></a></p>
 
-<p><b>1.1.i</b> Then, open the "tbase1_1.out" file.
+<p><b>1.1.i</b> Then, open the <a href="../../tests/tutorial/Refs/tbase1_1.out">&#126;abinit/tests/tutorial/Refs/tbase1_1.out</a> file.
   You find some general information about the output file
-  in <a href="../../users/abinit_help.html#outputfile" target="helpsimg"> section 6.2</a>
+  in <a href="../../users/generated_files/help_abinit.html#outputfile" target="helpsimg"> section 6.2</a>
   of the abinit_help file. You should also:
 <ul>
     <li> examine the header of "tbase1_1.out"
@@ -312,7 +310,7 @@ in the first column of the ABINIT output file.
   are alternative ways to <a href="../../input_variables/generated_files/varbas.html#xcart">xcart</a>
   to specify the positions of atoms within the primitive cell. </p>
   <p>Now, you can start reading the description of the remaining
-  of the tbase1_1.out file, in the <a href="../../users/abinit_help.html#6.3" target="helpsimg"> section 6.3
+  of the tbase1_1.out file, in the <a href="../../users/generated_files/help_abinit.html#6.3" target="helpsimg"> section 6.3
   </a> of the abinit_help file.
   <a name="ref6"></a>Look at the tbase1_1.out
   file at the same time. </p>
@@ -347,7 +345,7 @@ in the first column of the ABINIT output file.
   still a few indications that you should be aware of, even if you will not use
   them in the tutorial. These might appear in the description of some input variables
   ...
-  For this, you should read the <a href="../../users/abinit_help.html#parameters" target="helpsimg">
+  For this, you should read the <a href="../../users/generated_files/help_abinit.html#parameters" target="helpsimg">
   section 3.2</a> of the abinit_help file.<a name="ref7"></a></p>
 <p><b>1.2.b</b> There are three methodologies to compute the optimal distance
   between the two Hydrogen atoms:
@@ -373,10 +371,10 @@ in the first column of the ABINIT output file.
   plotted. <br>
   Well, are you a UNIX guru? If not, there is an easier path, all within ABINIT! </p>
 <p>This is the multi-dataset mode. Detailed explanations about it can be found in
-  sections <a href="../../users/abinit_help.html#multidataset" target="helpsimg">3.3</a>,
-  <a href="../../users/abinit_help.html#series" target="helpsimg">3.4</a>,
-  <a href="../../users/abinit_help.html#loop" target="helpsimg">3.5</a>
-  and <a href="../../users/abinit_help.html#3.6" target="helpsimg">3.6</a>,
+  sections <a href="../../users/generated_files/help_abinit.html#multidataset" target="helpsimg">3.3</a>,
+  <a href="../../users/generated_files/help_abinit.html#series" target="helpsimg">3.4</a>,
+  <a href="../../users/generated_files/help_abinit.html#loop" target="helpsimg">3.5</a>
+  and <a href="../../users/generated_files/help_abinit.html#3.6" target="helpsimg">3.6</a>,
   of the abinit_help file.<a name="ref8"></a></p>
 <p><b>1.2.c</b> Now, can you write an input file that will do the computation
   described above (interatomic distances from 1.0 Bohr to 2.0 Bohr, by steps of
@@ -389,8 +387,8 @@ in the first column of the ABINIT output file.
   in particular, look at the meaning of <i><b>getwfk -1</b></i> </p>
 <p>Also, define explicitly the number of states (or supercell "bands") to be
   one, using the input variable <a href="../../input_variables/generated_files/varbas.html#nband">nband</a>.
-  The input file ~abinit/tests/tutorial/Input/tbase1_2.in is an example of
-  file that will do the job, while ~abinit/tests/tutorial/Refs/tbase1_2.out
+  The input file <a href="../../tests/tutorial/Input/tbase1_2.in">&#126;abinit/tests/tutorial/Input/tbase1_2.in</a> is an example of
+  file that will do the job, while <a href="../../tests/tutorial/Refs/tbase1_2.out">&#126;abinit/tests/tutorial/Refs/tbase1_2.out</a>
   is an example of output file. If you decide to use the ~abinit/tests/tutorial/Input/tbase1_2.in file,
   do not forget to change the file names in the "tbase1_x.files" file ... </p>
 <p>So, you run the code with your input file (this might take fifteen seconds or so on a PC at 3 GHz),
@@ -470,8 +468,8 @@ The forces vanish also between 1.5 Bohr and
   the accurate computation of other properties.
   So, change <a href="../../input_variables/generated_files/varbas.html#toldfe">toldfe</a> in <a href="../../input_variables/generated_files/varbas.html#toldff">toldff</a>, and set the latter
   input variable to ten times smaller than <a href="../../input_variables/generated_files/varrlx.html#tolmxf">tolmxf</a>.
-  The input file ~abinit/tests/tutorial/Input/tbase1_3.in is an example of
-  file that will do the job, while ~abinit/tests/tutorial/Refs/tbase1_3.out
+  The input file <a href="../../tests/tutorial/Input/tbase1_3.in">&#126;abinit/tests/tutorial/Input/tbase1_3.in</a> is an example of
+  file that will do the job, while <a href="../../tests/tutorial/Refs/tbase1_3.out">&#126;abinit/tests/tutorial/Refs/tbase1_3.out</a>
   is an example of output file. If you decide to use these files, do not forget
   to change the file names in the "tbase1_x.files"
   file ... So, you run the code with your input file (a few seconds),
@@ -515,10 +513,10 @@ Here, we will print this quantity.
   must be set to 1.
   To understand correctly the content of the <a href="../../input_variables/generated_files/varfil.html#prtden">prtden</a>
   description, it is worth to read a much more detailed description of the "files" file,
-  in <a href="../../users/abinit_help.html#4" target="helpsimg">section 4 </a> of the abinit_help file.
+  in <a href="../../users/generated_files/help_abinit.html#4" target="helpsimg">section 4 </a> of the abinit_help file.
   <a name="ref9"></a></p>
 
-<p><b>1.4.b</b> The input file ~abinit/tests/tutorial/Input/tbase1_4.in is
+<p><b>1.4.b</b> The input file <a href="../../tests/tutorial/Input/tbase1_4.in">&#126;abinit/tests/tutorial/Input/tbase1_4.in</a> is
   an example of input file for a run that will print a density.
   If you decide to use this file,
   do not forget to change the file names in tbase1_x.files.
@@ -527,15 +525,15 @@ Here, we will print this quantity.
   No luck ! This file is unformatted, not written using the ASCII code. Even if
   you cannot read it, its description is provided in the abinit_help. It contains
   first a header, then the density numbers. The description of the header
-  is presented in <a href="../../users/abinit_help.html#header" target="helpsimg">section 6.4</a>
+  is presented in <a href="../../users/generated_files/help_abinit.html#header" target="helpsimg">section 6.4</a>
   of the abinit_help file, while the body of the _DEN file is presented
-  in <a href="../../users/abinit_help.html#densoutputfile" target="helpsimg">section 6.5</a>.
+  in <a href="../../users/generated_files/help_abinit.html#densoutputfile" target="helpsimg">section 6.5</a>.
   It is the appropriate time to read also the description of the potential
   files and wavefunctions files, as these files contain the same header as the
   density file, see sections
-  <a href="../../users/abinit_help.html#localpotfile" target="helpsimg">6.6</a>
+  <a href="../../users/generated_files/help_abinit.html#localpotfile" target="helpsimg">6.6</a>
   and
-  <a href="../../users/abinit_help.html#wavefctfile" target="helpsimg">6.7</a>
+  <a href="../../users/generated_files/help_abinit.html#wavefctfile" target="helpsimg">6.7</a>
   <a name="ref10"></a></p>
 
 <p><b>1.4.c</b> Such a density file can be read by ABINIT, to restart a calculation
@@ -588,8 +586,8 @@ to compute the above-mentioned difference in the same box, for the same
 cut-off, and even for a location in the box that is similar to the
 molecule case (although the latter might not be so important).
 
-<p>The input file ~abinit/tests/tutorial/Input/tbase1_5.in is an example
-  of file that will do the job, while ~abinit/tests/tutorial/Refs/tbase1_5.out
+<p>The input file <a href="../../tests/tutorial/Input/tbase1_5.in">&#126;abinit/tests/tutorial/Input/tbase1_5.in</a> is an example
+  of file that will do the job, while <a href="../../tests/tutorial/Refs/tbase1_5.out">&#126;abinit/tests/tutorial/Refs/tbase1_5.out</a>
   is an example of output file. If you decide to use the tbase1_5.in file, do not forget
   to change the file names in the tbase1_x.files file. The run lasts a few seconds.
 
@@ -764,7 +762,7 @@ before the required tolerance.
   -0.36525  -0.01379
 </pre>
 <p><br>
-  As mentioned in the <a href="../../users/abinit_help.html#averagepot">abinit_help</a> file, the
+  As mentioned in the <a href="../../users/generated_files/help_abinit.html#averagepot">abinit_help</a> file, the
   absolute value of eigenenergies is not meaningful. Only differences of eigenenergies,
   as well as differences with the potential. <br>
   The difference is 0.35147 Hartree, that is 9.564 eV . <br>

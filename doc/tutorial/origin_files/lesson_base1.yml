@@ -234,7 +234,7 @@ body : |
     <a href="../../users/generated_files/help_abinit.html#logfile" target="helpsimg">section 6.1</a>
     of the abinit_help file.<a name="ref4"></a></p>
   
-  <p><b>1.1.i</b> Then, open the [[test/tutorial/Refs/tbase1_1.out]] file.
+  <p><b>1.1.i</b> Then, open the [[tests/tutorial/Refs/tbase1_1.out]] file.
     You find some general information about the output file
     in <a href="../../users/generated_files/help_abinit.html#outputfile" target="helpsimg"> section 6.2</a>
     of the abinit_help file. You should also:
