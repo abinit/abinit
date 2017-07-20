@@ -62,7 +62,7 @@ In this tutorial we will construct a supercell of 6 hydrogen atoms, perform self
 Our model structure is a cubic lattice of hydrogen atoms spaced 3 Bohr apart. The primitive cell contains only one atom. Here we chose to represent the same structure with a 6 atom supercell. Such a large cell is redundant in this case, since there is nothing that disturbs the original symmetry. However, we made this choice on purpose in order to observe the zone folding.
 </p>
 <center>
-<p><img src="../documents/lesson_fold2Bloch/Fig1.PNG" width=auto height="40%" alt=""></p>
+<p><img src="../documents/lesson_fold2Bloch/Fig1.png" width=auto height="40%" alt=""></p>
 </center>
 <p align="center">
 Fig. 1: Primitive unit cell (a) and 1x2x3 supercell (b) that represent a cubic lattice of hydrogen atoms.
@@ -71,7 +71,7 @@ Fig. 1: Primitive unit cell (a) and 1x2x3 supercell (b) that represent a cubic l
 Since we are interested in the band structure, we need to select a path in the reciprocal space which will be used for plotting. The supercell was expanded in Y and Z directions. Accordingly, the reciprocal space shrinks along the same directions. We select those directions for the band structure plot as they will be affected by the zone folding.
 </p>
 <center>
-	<p><img src="../documents/lesson_fold2Bloch/Fig2.PNG" width=auto height="30%" alt=""></p>
+	<p><img src="../documents/lesson_fold2Bloch/Fig2.png" width=auto height="30%" alt=""></p>
 </center>
 <p align="center">
 Fig. 2: Brillouin zone of the supercell.
@@ -203,7 +203,7 @@ This will generate an output file: H6o_DS2_EIG.dat
 </p>
 <p>Lastly, compare the image obtained to the band structure image below.
 <center>
-	<img src="../documents/lesson_fold2Bloch/Fig3.PNG" width=auto height="50%" alt="">
+	<img src="../documents/lesson_fold2Bloch/Fig3.png" width=auto height="50%" alt="">
 </center>
 <p align='center'> Fig. 3: 6 atom hydrogen supercell band structure plot
 </p>
@@ -329,7 +329,7 @@ finpt='H6o.f2b';
 
 <p>After running the script you should see the following graph:
 <center>
-<p><img src="../documents/lesson_fold2Bloch/H6.PNG" alt=""></p>
+<p><img src="../documents/lesson_fold2Bloch/H6.png alt=""></p>
 </center>
 <p>
 As you can see the unfolded band structure perfectly reproduces the anticipated dispersion relation <I><font size="4">E(k) = E<font size=2>0 </font>- 2A cos(k b)</font></I>. We can even estimate the magnitude of the hopping matrix element between adjacent atoms Vss<font size=1>G</font> = -A. The band width is 4A = (-1) - (-12) = 11 eV which results in Vss<font size=1>G</font> = -2.75 eV.

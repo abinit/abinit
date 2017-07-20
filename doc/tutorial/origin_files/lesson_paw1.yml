@@ -616,7 +616,7 @@ body : |
   is mainly contained in the sphere defined by [[ratsph]].
   </span></div>
 
-<br><hr><h3><p><b><a name="5"><br>5.</a> Testing the
+  <br><hr><h3><p><b><a name="5"><br>5.</a> Testing the
   completeness of the PAW
   partial wave basis</b></p>
   </h3>Note that, in the previous section, we used a "standard" PAW

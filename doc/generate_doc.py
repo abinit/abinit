@@ -59,7 +59,7 @@ msgs={"bibfiles"       :"as database input file for the list of generated files 
       
 path_file='bibliography/origin_files/abiref.bib'
 with open(path_file) as f:
-  print("Read "+path_file+" as database input file for the input variables and their characteristics ...")
+  print("Read "+path_file+" as database input file for the bibliography references ...")
   bibtex_str = f.read()
 
 yml_in={}
@@ -350,7 +350,7 @@ file_txt = 'bibliography/generated_files/abiref.txt'
 f_txt = open(file_txt,'w')
 f_txt.write(lines_txt)
 f_txt.close()
-print("File %s has been written ..." %file_txt)
+print("File %s written ..." %file_txt)
 
 ################################################################################
 # Write a yml file, for checking purposes
@@ -386,7 +386,7 @@ file_yml = 'bibliography/generated_files/abiref.yml'
 f_yml = open(file_yml,'w')
 f_yml.write(lines_yml)
 f_yml.close()
-print("File %s has been written ..." %file_txt)
+print("File %s written ..." %file_yml)
 
 ################################################################################
 # Collect the link seeds

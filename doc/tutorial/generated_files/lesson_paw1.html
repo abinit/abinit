@@ -168,7 +168,7 @@ and run ABINIT again.<br>
 Now ABINIT runs to the end.<span style="font-style: italic;"></span></p><p><span style="font-style: italic;">Note
 that the time needed for the PAW run is greater than the time needed
 for the norm-conserving pseudopotential run; indeed, at constant value
-of plane wave cut-off energy </span><a style="font-style: italic;" href="../input_variables/html_automatically_generated/varbas.html#ecut" target="kwimg" onclick="return (false);">ecut</a><span style="font-style: italic;">,
+of plane wave cut-off energy <a href="../../input_variables/generated_files/varbas.html#ecut">ecut</a> 
 PAW requires more computational
 resources:</span><span style="font-style: italic;">&nbsp;&nbsp;&nbsp; -
 the "on-site"
@@ -342,7 +342,7 @@ in general you should be able to compare numbers for (valence)<i> energies</i>
 between different PAW potentials or
 different codes.</p>
 <h3><hr> <a name="2"></a>&nbsp;<b><b><br>
-2.&nbsp; The convergence on plane-wave cut-off (<a target="kwimg" href="../input_variables/html_automatically_generated/varbas.html#ecut">ecut</a>)</b></b></h3>
+2.&nbsp; The convergence on plane-wave cut-off (<a href="../../input_variables/generated_files/varbas.html#ecut">ecut</a>)</b></b></h3>
 As in the usual case, the critical convergence parameter is the cut-off
 defining the size of the plane-wave basis...
 <p><b>1.a</b><b> Computing the convergence in
@@ -630,8 +630,10 @@ the DOS (it is instantaneously computed).<br>
 the next section, this approximation is only valid when:</span>
 <div style="margin-left: 40px;"><span style="font-weight: bold;"> (1) the</span><span style="position: relative; top: -8pt; left: 8pt; font-weight: bold;"></span><span style="font-weight: bold;"></span><span style="position: relative; top: -5pt; left: 6pt; font-weight: bold;">~</span><span style="font-weight: bold;">&#966;</span><sub style="font-weight: bold;">i</sub><span style="font-weight: bold;"> basis is complete enough <br></span>
 <span style="font-weight: bold;">(2) the electronic density
-is mainly contained in the sphere defined by </span><a style="font-weight: bold;" href="../input_variables/html_automatically_generated/vargs.html#ratsph" target="kwimg">ratsph</a><span style="font-weight: bold;">.
-</span></div><br><hr><h3><p><b><a name="5"><br>5.</a> Testing the
+is mainly contained in the sphere defined by <a href="../../input_variables/generated_files/vargs.html#ratsph">ratsph</a>.
+</span></div>
+
+<br><hr><h3><p><b><a name="5"><br>5.</a> Testing the
 completeness of the PAW
 partial wave basis</b></p>
 </h3>Note that, in the previous section, we used a "standard" PAW
@@ -863,8 +865,8 @@ symmetry. </div>
 
 <br> Variables that can be used to save memory (in
 ascending order of importance):<br>
-<div style="margin-left: 40px;"><a target="kwimg" href="../input_variables/html_automatically_generated/varpaw.html#pawstgylm">pawstgylm</a>: control the storage of
-spherical harmonics computed around atoms. </div><div style="margin-left: 40px;"><a target="kwimg" href="../input_variables/html_automatically_generated/varpaw.html#pawmixdg">pawmixdg</a>: control on which grid the
+<div style="margin-left: 40px;"><a href="../../input_variables/generated_files/varpaw.html#pawstgylm">pawstgylm</a>: control the storage of
+spherical harmonics computed around atoms. </div><div style="margin-left: 40px;"><a href="../../input_variables/generated_files/varpaw.html#pawmixdg">pawmixdg</a>: control on which grid the
 potential/density is mixed during SCF cycles.<br> <a href="../../input_variables/generated_files/varpaw.html#pawlcutd">pawlcutd</a>: control the number of angular
 momenta to take into account in on-site densities.<br> <a href="../../input_variables/generated_files/varpaw.html#pawlmix">pawlmix</a>: control the number of <span style="font-style: italic;">&#961;</span><sub style="font-style: italic;">ij</sub> to be mixed during SCF cycle.
 </div>
@@ -872,9 +874,9 @@ momenta to take into account in on-site densities.<br> <a href="../../input_vari
 <br> Variables that can be used to save
 CPU time (in ascending order of importance):
 <div style="margin-left: 40px;">
- <a target="kwimg" href="../input_variables/html_automatically_generated/varpaw.html#pawnhatxc">pawnhatxc</a>: control the numerical
+ <a href="../../input_variables/generated_files/varpaw.html#pawnhatxc">pawnhatxc</a>: control the numerical
 treatment of gradients of compensation charge density in case of GGA<br>
-<a target="kwimg" href="../input_variables/html_automatically_generated/varpaw.html#pawstgylm">pawstgylm</a>: control the storage of
+<a href="../../input_variables/generated_files/varpaw.html#pawstgylm">pawstgylm</a>: control the storage of
 spherical harmonics computed around atoms.<br><a href="../../input_variables/generated_files/varpaw.html#pawlcutd">pawlcutd</a>: control the number of angular
 momenta to take into account in on-site densities.<br> <a href="../../input_variables/generated_files/varpaw.html#pawlmix">pawlmix</a>: control the number of <span style="font-style: italic;">&#961;</span><sub style="font-style: italic;">ij</sub> to be mixed during SCF cycle.<br>
 <a href="../../input_variables/generated_files/varpaw.html#bxctmindg">bxctmindg</a>: can be used to decrease the

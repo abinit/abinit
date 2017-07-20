@@ -442,12 +442,9 @@ concurrently.</p>
 
 <p>Balancing efficiently the load on the processors is not always
 straightforward.  When using k-point- and spin-parallelism, the ideal
-numbers of processors to use are those that divide the product of <a
-href="../input_variables/html_automatically_generated/varbas.html#nsppol" target="kwimg">nsppol</a>
-by <a href="../../input_variables/generated_files/varbas.html#nkpt">nkpt</a>
-(e.g. for <a href="../../input_variables/generated_files/varbas.html#nsppol"
-target="kwimg">nsppol</a>*<a href="../../input_variables/generated_files/varbas.html#nkpt"
-target="kwimg">nkpt</a>=12, it is quite efficient to use 2, 3, 4, 6 or
+numbers of processors to use are those that divide the product of 
+<a href="../../input_variables/generated_files/varbas.html#nsppol">nsppol</a> by <a href="../../input_variables/generated_files/varbas.html#nkpt">nkpt</a>
+(e.g. for <a href="../../input_variables/generated_files/varbas.html#nsppol">nsppol</a>*<a href="../../input_variables/generated_files/varbas.html#nkpt">nkpt</a>, it is quite efficient to use 2, 3, 4, 6 or
 12 processors). ABINIT will nevertheless handle correctly other numbers
 of processors, albeit slightly less efficiently, as the final time will
 be determined by the processor that will have the biggest share of the
