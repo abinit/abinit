@@ -2,15 +2,9 @@
 # In order to modify the other parts, modify the file helps.yml .
 # This is the introduction ...
 intro : |
-  <br>The user is advised to be familiar with the 
-  <A href="help_abinit.html"><B>main ABINIT help file</B></A>
-  especially the GW part
-  before reading the present file. 
+  <br>The user is advised to be familiar with the main [[help_abinit]]
+  especially the GW part before reading the present file. 
   
-  <p> It will be easier to discover the
-    present file with the help of the <a href="../tutorial/welcome.html">tutorial</a>
-   (Sorry, not yet available for mrgscr). 
-  <br>It is worthwhile to print this help file, for ease of reading.
 # This is the body, including the table of content ...
 body : |
   

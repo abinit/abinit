@@ -2,18 +2,11 @@
 # In order to modify the other parts, modify the file helps.yml .
 # This is the introduction ...
 intro : |
-  <br>The user is advised to be familiar with the
-  <A href="help_abinit.html"><B>main ABINIT help file</B></A>
-  as well as the <A href="help_respfn.html"><B>response function help file</B></A>
+  <br>The user is advised to be familiar with the main [[help_file]]
   before reading the present file.
-  It is important to read also the
+  It is important to read also the 
   <A href="help_anaddb.html"><B>Analysis of Derivative DataBase code (Anaddb) help file</B></A>
   to complement the present reading.</h3>
-  
-  <p> It will be easier to discover the
-    present file with the help of the <a href="../tutorial/welcome.html">tutorial</a>
-   (Sorry, not yet available for mrgddb).
-  <br>It is worthwhile to print this help file, for ease of reading.
 # This is the body, including the table of content ...
 body : |
   
