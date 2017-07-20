@@ -127,7 +127,7 @@
         is equivalent to
         <pre>    ndtset 6 ecut: 10 ecut+ 5
         </pre>
-        <p>In both cases, there are six datasets, with increasing values of <a href="varbas.html#ecut" target="kwimg">ecut</a>.
+        <p>In both cases, there are six datasets, with increasing values of [[ecut]].
         </p>
         <h4>&nbsp; </h4>
 
