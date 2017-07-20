@@ -1,5 +1,43 @@
 #! /usr/bin/env python 
-"""This script generates part of the ABINIT documentation in html for the Web site"""
+"""
+   This script generates most of the ABINIT documentation for the ABINIT Web site, in HTML.
+
+   Usage : python generate_doc.py [-h|--help]
+   (No options are allowed at present, except the help ones)
+
+   This script :
+   (1) reads information from (i) a set of YAML files, (ii) a bibtex file, 
+        (iii) input files contained in tests/*/Input 
+       (files (i) and (ii) are contained in subdirectories */origin_files);
+   (2) performs some checks; 
+   (3) establishes intermediate dictionaries and databases;
+   (4) expands special strings, of the form "[[tag]]", to create HTML links;
+   (5) creates the needed HMTL files (all contained in subdirectories */generated_files).
+
+   The result of the expansion of "[[tag]]" will depend on the tag. If valid, the URL will of course
+   point to the correct location. The string that will be seen on screen will usually
+   be the string stripped from the pairs of square brackets, but there is an exception, see later.
+   Also, only selected classes of tags can be expanded. Other strings will be declared "FAKE_LINK" on the screen.
+   
+   A. If tag is an ABINIT input variable, mentioned in the database ~abinit/doc/input_variables/origin_files/abinit_vars.yml,
+      or equivalently in the list http://www.abinit.org/inpvars,
+      "[[tag]]" will appear on screen as "tag" without the two pairs of squarebrackets.
+      Example: "[[acell]]" will apear on screen as "acell".
+
+   B. If tag is a bibliographical reference, mentioned in the database ~abinit/doc/bibliography/origin_files/abiref.bib,
+      "[[tag]]" will appear on screen as "tag" without the two pairs of squarebrackets.
+      Note that such tag must have the form of the name of the first authors, with the first letter uppercase and the other lower case,
+      followed by the year of publication (four digits) and possibly a letter if more than one article would have the same tag.
+      Example: "[[Kohn1965]]" will appear on screen as "Kohn1965".
+               "[[Amadon2008b]]" will appear on screen as "Amadon2008b".
+
+   C. The tags that starts with "lesson_", "topic_", "theorydoc_", "var", "allvar", "help_" and corresponds to one of the existing
+      lessons of the tutorial, topic, theorydoc, or help files, are allowed tags. 
+      Most of them will appear on screen as "tag" without the two pairs of squarebrackets, EXCEPT the
+      "help_XYZ" ones, that will appear as "XYZ help file".
+      Examples: "[[lesson_base1]]" will appear on screen as "lesson_base1"
+                "[[help_new_user]]" will appear on screen as "new_user help file"
+"""
 
 from __future__ import print_function
 
@@ -23,6 +61,29 @@ from doc.pymods.lib_to_assemble_html import *
 
 debug = 0
 
+################################################################################
+################################################################################
+
+# Generic information
+
+
+################################################################################
+
+cmdline_params = sys.argv[1:]
+if cmdline_params != [] :
+  if cmdline_params[0] == "-h" or cmdline_params[0] == "--help" :
+    print(__doc__)
+  else :
+    print (" Unrecognized option. Abort.")
+  sys.exit()
+
+################################################################################
+################################################################################
+
+# Parsing section, also preliminary treatment of list of topics in tests and bibliography 
+
+################################################################################
+
 list_infos_dir=[]
 list_infos_dir.append({"dir_name":"bibliography","root_filname":"",
                                                     "yml_files":["bibfiles"]})
@@ -36,14 +97,6 @@ list_infos_dir.append({"dir_name":"tutorial","root_filname":"lesson",
                                                     "yml_files":["lessons"]})
 list_infos_dir.append({"dir_name":"users","root_filname":"help",
                                                     "yml_files":["helps"]})
-
-################################################################################
-################################################################################
-
-# Parsing section, also preliminary treatment of list of topics in tests and bibliography 
-
-################################################################################
-
 msgs={"bibfiles"       :"as database input file for the list of generated files in the bibliography directory ...",
       "abinit_vars"    :"as database input file for the input variables and their characteristics ...",
       "characteristics":"as database input file for the list of allowed characteristics ...",
@@ -951,7 +1004,7 @@ if activate_translation==1:
 # Assemble the html files to be generated from the yml information.
 # In order : tutorial, files lessons_*
 #            theory, files theorydoc_*
-#            users,  files *_help
+#            users,  files help_*
  
 ################################################################################
 
