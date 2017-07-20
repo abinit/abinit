@@ -1,0 +1,15 @@
+- !components 
+    name      : vdw 
+    keyword   : vdw 
+    authors   : BAmadon
+    howto     : use Van der Waals functionals
+    header    : default
+    title     : <h1>Van der Waals functionals</h1>
+    subtitle  : default
+    copyright : default
+    links     : default
+    introduction : |- 
+
+    tutorials  : |-
+
+    end : default
