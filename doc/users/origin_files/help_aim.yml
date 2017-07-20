@@ -11,11 +11,6 @@ intro : |
   The charge density of each region is attributed to the
   corresponding nucleus, hence the concept of Atom-In-Molecule.
   </h3>
-  
-  <p> It will be easier to discover the
-    present file with the help of the <a href="../tutorial/welcome.html">tutorial</a>.
-  (Sorry, not yet available).
-  <br>It is worthwhile to print this help file, for ease of reading.
 # This is the body, including the table of content ...
 body : |
   <ul>

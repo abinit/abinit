@@ -87,7 +87,7 @@ body : |
   the first element of the non-inverted matrix.
   
   <p>
-  In the <a href="../theorydoc_mbt.html#RPA_Fourier_space">GW_notes</a>, we have discussed 
+  In the <a href="theorydoc_mbt.html#RPA_Fourier_space">GW_notes</a>, we have discussed 
   how to calculate the irreducible polarizability and thus the absorption spectrum within the random phase approximation (RPA).
   
   It turns out, however, that the RPA dielectric function evaluated with Kohn-Sham orbitals and eigenvalues 
@@ -157,7 +157,7 @@ body : |
   that should not be confused with the <i>irreducible</i> polarizability of the 
   many-body system (denoted with a tilde in the formulas in the 
   
-  <a href="../theorydoc_mbt.html#RPA_Fourier_space">GW_notes</a>). 
+  <a href="theorydoc_mbt.html#RPA_Fourier_space">GW_notes</a>). 
   The utility of working in terms of the reducible quantities is that the macroscopic 
   dielectric function <i><b>with</b></i> local field effects is obtained directly from the 
   reducible polarizability using
@@ -450,7 +450,7 @@ body : |
   The KSS file is represented with an ellipsis. 
   The path on the left indicated with blue arrows represents the RPA calculation 
   ([[optdriver]]=3)
-  that produces the SCR file (see also the <a href="../../tutorial/lesson_gw1.html">first lesson</a> of the GW tutorial).
+  that produces the SCR file (see also the <a href="../../tutorial/generated_files/lesson_gw1.html">first lesson</a> of the GW tutorial).
   Once the KSS and the SCR file are available, we can finally contruct the Hamiltonian and solve the
   Bethe-Salpeter problem (the rectangle at the bottom of the flowchart).
   </p>
@@ -547,7 +547,7 @@ body : |
   
   Our implementation employs planewaves to expand the periodic part of the Bloch states, <i>u</i>,
   and the two-point function <i>W(r,r')</i> that becomes a <b>q</b>-dependent matrix in reciprocal-space.
-  The conventions used for the transforms are documented in <a href="../theorydoc_mbt.html#notations">this
+  The conventions used for the transforms are documented in <a href="theorydoc_mbt.html#notations">this
   section</a> of the <i>GW</i> notes.
   
   <p>
@@ -569,7 +569,7 @@ body : |
   [[ecutwfn]].
   The computation of the oscillator matrix elements is discussed in 
   
-  <a href="../theorydoc_mbt.html#oscillator_notes">this section</a> of the <i>GW</i> Notes.
+  <a href="theorydoc_mbt.html#oscillator_notes">this section</a> of the <i>GW</i> Notes.
   
   <p>
   The input variable [[bs_exchange_term]]

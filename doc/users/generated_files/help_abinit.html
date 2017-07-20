@@ -145,7 +145,7 @@
  <p><a name="2">&nbsp;</a></p>
  <h3><b>2. The underlying theoretical framework and algorithms</b> </h3>
 
-  <p>See the "<a href="bibliography.html">bibliography</a>" file.
+  <p>See the "<a href="../../bibliography/generated_files/bibliography.html">bibliography</a>" file.
   <p>The methods employed in this computer code to solve the electronic structure
     problem are described in part in different review papers as well as research
     papers. The code is an implementation of the Local Density Approximation to
@@ -171,7 +171,8 @@
     D. C. Allan, T. A. Arias, and J. D. Joannopoulos, Rev. Mod. Phys. 64, 1045-1097
     (1992)</cite>. <br>
     This paper does NOT reflect the present status of the code. ABINIT is closer
-    in spirit to the paper of of Kresse and Furthmuller, see the <a href="bibliography.html">bibliography</a> list.
+    in spirit to the paper of of Kresse and Furthmuller, see the 
+   <a href="../../bibliography/generated_files/bibliography.html">bibliography</a> list.
   <p> If you have never used another electronic structure code
     or a Quantum Chemistry package, you should browse through the Chaps. 1 to 13 , and appendices L and M
     of the book <cite>Electronic Structure. Basic Theory and Practical Methods. R. M. Martin.
@@ -209,8 +210,7 @@
       only the first 132 characters of each line of the input file will be read
       and parsed for input variables and their values. </li>
   </ul>
-  <p>The names of all the parameters can be found in the
-    <A href="../input_variables/html_automatically_generated/allvariables.html">input variables</a> file.
+  <p>The names of all the parameters can be found in the <a href="../../input_variables/generated_files/allvariables.html">allvariables</a>.
     The list of input variables present in the latter file links them to their definitions,
     contained in different files, of which some are listed here:
 <ul>
@@ -309,8 +309,7 @@
   <a name="nonlinear"></a>
   <p>Some input variables are related to response function features, or non-linear features, and are indicated
     '<b>RESPFN</b>' and '<b>NONLINEAR</b>'. Detailed explanations related to response function  and non linear features
-    are to be found in the complementary respfn help file
-    <a href="respfn_help.html">~abinit/doc/users/respfn_help.html</a>.
+    are to be found in the complementary <a href="../../users/generated_files/help_respfn.html">respfn help file</a>.
     The initials RF are used for 'response
     function', and non-response-function are often referred to as GS (for ground-state),
     although this latter designation is not really satisfactory. </p>
@@ -320,8 +319,7 @@
   <p>Some input variables are related to excited state calculations, and are indicated
     '<b>GW</b>', '<b>BETHE_SALPETER</b>', or '<b>TDDFT</b>'. 
     No complementary help file is yet provided for such calculations. Please refer to the tutorial 
-    (lessons <a href="../tutorial/lesson_gw1.html">GW1</a>, <a href="../tutorial/lesson_gw2.html">GW2</a>, 
-     <a href="../tutorial/lesson_tddft.html">tddft</a>, and <a href="../tutorial/lesson_bse.html">bse</a>).
+    (<a href="../../tutorial/generated_files/lesson_gw1.html">lesson_gw1</a>, <a href="../../tutorial/generated_files/lesson_gw2.html">lesson_gw2</a>, <a href="../../tutorial/generated_files/lesson_tddft.html">lesson_tddft</a>, and <a href="../../tutorial/generated_files/lesson_bse.html">lesson_bse</a>).
   <a name="geometry_builder"></a>
   <p>There are also parameters related to the geometry builder, a preprocessor
     of the input file, aimed at easing the work of the user when there are molecules
@@ -344,7 +342,7 @@
     '<b>SYMMETRISER</b>' is given for the variables related to its use. Look at
     the variable '<a href="../../input_variables/generated_files/vargeo.html#spgroup">spgroup</a>'.
     <br>
-    You may find in the space group <a href="spacegrouphelpfile.html">help file</a>
+    You may find in the space group <a href="../spacegrouphelpfile.html">help file</a>
     the crystallographic equivalence of the parameters belonging to the symmetriser.
     The related input variables being used for preprocessing of the input file, they are not echoed
     in the output file.</p>
@@ -771,13 +769,13 @@ keyword.
     <li>
       <p><b>abo_1WFxx</b> <br>
         Same as <b>abo_WFK</b>, but for first-order wavefunctions, xx is the index
-        of the perturbation, see the section <a href="respfn_help.html#6.3">6.3</a>
-        of the respfn_help.html file. </p>
+        of the perturbation, see the section <a href="help_respfn.html#6.3">6.3</a>
+        of the <a href="../../users/generated_files/help_respfn.html">respfn help file</a>. </p>
     <li>
       <p><b>abo_DDB</b> <br>
         The derivative database, produced by a response-function dataset,
-        see the section <a href="respfn_help.html#6.5">6.5</a> of the
-        respfn_help.html file.</p>
+        see the section <a href="help_respfn.html#6.5">6.5</a> of the
+        <a href="../../users/generated_files/help_respfn.html">respfn help file</a>
     <li>
       <p><b>abo_DEN</b> <br>
         filename of file containing density, in the case <a href="../../input_variables/generated_files/varrlx.html#ionmov">ionmov</a>=0.
@@ -981,8 +979,8 @@ keyword.
   </ul>
   Until here, the output of a ground-state computation is identical
   to the one of a response-function calculation.
-  See the <a href="respfn_help.html">respfn_help</a> document for the latter,
-  especially section <a href="respfn_help.html#6.2">6.2</a>.
+  See the <a href="../../users/generated_files/help_respfn.html">respfn help file</a> for the latter,
+  especially section <a href="help_respfn.html#6.2">6.2</a>.
   <p>
   Next the code reports information for each SCF iteration:
   <ul>
@@ -1058,7 +1056,7 @@ keyword.
       The stress tensor is given in cartesian coordinates in Hartree/Bohr<sup>3</sup> and GPa.
       <br>
       The basics of the stress tensor are described in O. H. Nielsen and Richard
-      M. Martin, see the <a href="bibliography.html" target="filesimg">bibliography</a>
+      M. Martin, see the <a href="../../bibliography/generated_files/bibliography.html" target="filesimg">bibliography</a>
       file.
   </ul>
   <p>Having finished all the calculations for the different datasets, the code
@@ -1130,7 +1128,7 @@ keyword.
     unformatted disk file, echoing a header to a formatted disk file, cleaning
     a header datastructure.
     <p>
-    The header is made of 4+<a href="../../input_variables/generated_files/varbas.html#ntypat" target="kwimg">npsp</a> unformatted records,
+    The header is made of 4+<a href="../../input_variables/generated_files/varbas.html#ntypat">ntypat</a> unformatted records,
     obtained by the following Fortran90 instructions (format 5.7):
   <pre>
  write(unit=header) codvsn,headform,fform

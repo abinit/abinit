@@ -59,7 +59,7 @@ msgs={"bibfiles"       :"as database input file for the list of generated files 
       
 path_file='bibliography/origin_files/abiref.bib'
 with open(path_file) as f:
-  print("Read "+path_file+" as database input file for the input variables and their characteristics ...")
+  print("Read "+path_file+" as database input file for the bibliography references ...")
   bibtex_str = f.read()
 
 yml_in={}
@@ -81,6 +81,13 @@ list_of_topics=yml_in["list_of_topics"]
 # Parse the ABINIT input files, in order to find the possible topics to which they are linked -> topics_in_tests
 # Also constitute the list of allowed links to tests files.
 
+try :
+  rm_cmd = "rm topics/generated_files/topics_in_tests.txt"
+  retcode = os.system(rm_cmd)
+except :
+  if debug==1 :
+    print(rm_cmd+"failed")
+    print("the file was likely non existent")
 try :
   rm_cmd = "rm topics/generated_files/topics_in_tests.yml"
   retcode = os.system(rm_cmd)
@@ -113,6 +120,13 @@ path_ymlfile="topics/generated_files/topics_in_tests.yml"
 print("Generated "+path_ymlfile+", to contain the list of automatic test input files relevant for each topic ...")
 with open(path_ymlfile, 'r') as f:
   topics_in_tests = yaml.load(f)
+try :
+  rm_cmd = "rm topics/generated_files/topics_in_tests.txt"
+  retcode = os.system(rm_cmd)
+except :
+  if debug==1 :
+    print(rm_cmd+"failed")
+    print("the file was likely non existent")
 
 if debug==1 :
   print(" topics_in_tests :")
@@ -350,7 +364,7 @@ file_txt = 'bibliography/generated_files/abiref.txt'
 f_txt = open(file_txt,'w')
 f_txt.write(lines_txt)
 f_txt.close()
-print("File %s has been written ..." %file_txt)
+print("File %s written ..." %file_txt)
 
 ################################################################################
 # Write a yml file, for checking purposes
@@ -386,7 +400,7 @@ file_yml = 'bibliography/generated_files/abiref.yml'
 f_yml = open(file_yml,'w')
 f_yml.write(lines_yml)
 f_yml.close()
-print("File %s has been written ..." %file_txt)
+print("File %s written ..." %file_yml)
 
 ################################################################################
 # Collect the link seeds
@@ -720,7 +734,7 @@ for topic_name in list_of_topics:
   #Generate the table of content
   item_toc=0
   item_list=[]
-  title={ "introduction":"Introduction." , "examples":"Example(s)", "tutorials":"Related tutorials." , 
+  title={ "introduction":"Introduction." , "examples":"Example(s)", "tutorials":"Related lessons of the tutorial." , 
           "input_variables":"Related input variables." , "input_files":"Selected input files." , "references":"References."}
   sec_number={}
   toc=" <h3><b>Table of content: </b></h3> \n <ul> "
@@ -986,9 +1000,11 @@ for ref in bibtex_dics:
   lines_txt+= line
   bibtex_content+= ('<hr><a id="%s">%s</a> \n <pre>' ) %(ID,ID)
   bibtex_content+= line+'</pre> \n'
-  if ID[0]>cur_let:
-    cur_let=ID[0]
-    bibliography_content+=('<a id="%s"></a>')%(cur_let)+alphalinks+('<hr><hr><h2>%s</h2> \n \n')%(cur_let)
+  while ID[0]>cur_let:
+    cur_let = chr(ord(cur_let)+1)
+    bibliography_content+=('<a id="%s"></a>')%(cur_let)
+    if cur_let==ID[0]:
+      bibliography_content+=alphalinks+('<hr><hr><h2>%s</h2> \n \n')%(cur_let)
   bibliography_content+= ('<hr><a id="%s">[%s]</a> (<a href="./bibtex.html#%s">bibtex</a>)\n <br> %s \n') %(ID,ID,ID,reference_dic[ID])
   nlink=0
   for link in backlinksID:

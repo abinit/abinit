@@ -123,7 +123,7 @@
   volume : 24
   pages : 075604
   issn : 0953-8984
-  url : http://stacks.iop.org/0953-8984/24/i=7/a=075604
+  url : http://iopscience.iop.org/0953-8984/24/7/075604
   timestamp : 2012.08.08
   number : 7
   file : :/media/disk_iomega/BIBLIO/DMFT/0953-8984_24_7_075604.pdf:PDF
@@ -660,7 +660,7 @@
   year : 2009
   volume : 21
   pages : 395502
-  url : http://stacks.iop.org/0953-8984/21/i=39/a=395502
+  url : http://iopscience.iop.org/0953-8984/21/39/395502
   number : 39
 -
   ENTRYTYPE : article
@@ -1301,7 +1301,7 @@
   title : Quantum mechanical modeling of nano magnetism
   year : 2007
   school : SISSA
-  url : http://hdl.handle.net/1963/2511
+  url : http://hdl.handle.net/20.500.11767/3935
   address : Trieste Italy
 -
   ENTRYTYPE : article
@@ -1567,7 +1567,7 @@
   title : Exact exchange in density functional calculations
   year : 2006
   school : Technical University of Denmark
-  url : https://wiki.fysik.dtu.dk/gpaw/_static/rostgaard_master.pdf
+  url : https://wiki.fysik.dtu.dk/gpaw/_downloads/rostgaard_master.pdf
   address : Lyngby
 -
   ENTRYTYPE : article

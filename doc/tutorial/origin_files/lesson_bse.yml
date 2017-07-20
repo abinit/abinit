@@ -208,7 +208,7 @@ body : |
   
   The code expects to find an input WFK file and an input SCR file whose name is constructed 
   according to prefix specified in the files file tbs_2.files
-  (see <a href="../../users/abinit_help.html#intro1" target="helpsimg">section 1.1</a> of the abinit_help file).
+  (see <a href="../../users/generated_files/help_abinit.html#intro1" target="helpsimg">section 1.1</a> of the abinit_help file).
   This is the reason why we had to create the two symbolic links before running the code.
   
   <p>

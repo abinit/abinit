@@ -151,9 +151,8 @@ body : |
   polarization output in Cartesian directions much simpler to understand.
   
   <p> There are two implementations of the Berry phase
-  within ABINIT.  One corresponds to positive values of <a
-  href="../input_variables/html_automatically_generated/varff.html#berryopt" target="kwimg">berryopt</a> and
-  was implemented by Na Sai.  The other one corresponds to negative values of
+  within ABINIT.  One corresponds to positive values of [[berryopt]]
+  and was implemented by Na Sai.  The other one corresponds to negative values of
   [[berryopt]]
   was implemented by Marek Veithen.  Both are suitable to compute the
   polarization.  Here we will focus on the implementation of Marek Veithen
