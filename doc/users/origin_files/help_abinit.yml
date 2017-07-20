@@ -1111,7 +1111,7 @@ body : |
       unformatted disk file, echoing a header to a formatted disk file, cleaning
       a header datastructure.
       <p>
-      The header is made of 4+<a href="../../input_variables/generated_files/varbas.html#ntypat" target="kwimg">npsp</a> unformatted records,
+      The header is made of 4+[[ntypat]] unformatted records,
       obtained by the following Fortran90 instructions (format 5.7):
     <pre>
    write(unit=header) codvsn,headform,fform
