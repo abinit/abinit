@@ -51,6 +51,7 @@ module m_fit_polynomial_coeff
  public :: fit_polynomial_coeff_mapHistToRef
  public :: fit_polynomial_coeff_solve
  public :: fit_polynomial_printSystemFiles
+ public :: genereList
  private :: computeNorder
 !!***
 
@@ -675,7 +676,7 @@ subroutine fit_polynomial_coeff_getNorder(cutoff,coefficients,eff_pot,ncoeff,pow
  ncell(2) = 2*lim2+1
  ncell(3) = 2*lim3+1
 
-!Build the rpt point 
+ !Build the rpt point
  ABI_ALLOCATE(rpt,(3,nrpt))
  ABI_ALLOCATE(cell,(3,nrpt))
  
@@ -760,6 +761,16 @@ subroutine fit_polynomial_coeff_getNorder(cutoff,coefficients,eff_pot,ncoeff,pow
      end if
    end do
  end do
+
+! call  fit_polynomial_coeff_getOrder1(cell,coeffs_tmp,cutoff,list_symcoeff,list_symstr,&
+!&                                         natom,ncoeff,ncoeff_sym,nrpt,nsym,&
+!&                                         rprimd,symbols,xcart)
+! do icoeff=1,ncoeff
+!   call polynomial_coeff_free(coeffs_tmp(icoeff))
+! end do
+! if(allocated(coeffs_tmp)) then
+!   ABI_DEALLOCATE(coeffs_tmp)
+! end if
 
 !first call to this routine in order to count the number of maximum coefficients
  ABI_ALLOCATE(list_coeff,(0))
@@ -1361,7 +1372,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,fixcoeff,hist,powers,ncycle_in,nfixc
  end if
 
 !Check if ncycle_in is not zero or superior to ncoeff_tot
- if(need_verbose.and.(ncycle_in > ncoeff_tot).or.(ncycle_in<=0.and.nfixcoeff /= -1)) then
+ if(need_verbose.and.(ncycle_in > ncoeff_tot).or.(ncycle_in<0.and.nfixcoeff /= -1)) then
    write(message, '(6a,I0,3a)' )ch10,&
 &        ' --- !WARNING',ch10,&
 &        '     The number of cycle requested in the input is not correct.',ch10,&
@@ -3464,6 +3475,49 @@ subroutine fit_polynomial_coeff_getOrder1(cell,coeffs_out,cutoff_in,list_symcoef
 
 end subroutine fit_polynomial_coeff_getOrder1
 !!***
+
+
+recursive subroutine genereList(i,m,m_max,n_max,list,list_out,size)
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'genereList'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ---------------------------------------------
+!scalar
+ integer, intent(in) :: m_max,n_max,m,size
+ integer, intent(inout) :: i
+!arrays
+ integer, intent(out) :: list(m_max),list_out(size,m_max)
+!Local variables ---------------------------------------
+!scalar
+ integer n
+!arrays
+ 
+! *************************************************************************
+ if (m > m_max) then
+   list_out(i,:) = list(:)
+   i = i + 1
+ else
+   do n = 1, n_max
+     if (m == 1)then
+       list(m) = n
+       call genereList (i, m + 1,m_max,n_max,list,list_out,size)
+     else if (n > list(m - 1)) then
+       list(m) = n
+       call genereList (i, m + 1,m_max,n_max,list,list_out,size)
+     end if
+   end do
+ end if
+  
+ 
+end subroutine genereList
+!!***
+
 
 end module m_fit_polynomial_coeff
 !!***

@@ -2524,7 +2524,7 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
 !------------------------------------
 
   energy = eff_pot%energy * ncell
-  strten = eff_pot%strten
+  strten = eff_pot%strten / ucvol
 
   if(need_verbose)then
     write(msg, '(a,a,1ES24.16,a)' ) ch10,' Energy of the reference strucure          :',&
