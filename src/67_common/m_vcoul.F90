@@ -219,11 +219,11 @@ subroutine vcoul_init(Vcp,Gsph,Cryst,Qmesh,Kmesh,rcut,icutcoul,vcutgeo,ecut,ng,n
 !scalars
  integer,parameter :: master=0,ncell=3
  integer :: nmc_max=2500000 
- integer :: nmc
+ integer :: nmci,nseed
  integer :: i1,i2,i3,ig,imc
  integer :: ii,iqlwl,iq_bz,iq_ibz,npar,npt
  integer :: opt_cylinder,opt_surface,test,rank,nprocs
- integer :: seed(42)=0
+ integer, allocatable :: seed(:)
  real(dp),parameter :: tolq0=1.d-3
  real(dp) :: b1b1,b2b2,b3b3,b1b2,b2b3,b3b1
  real(dp) :: bz_geometry_factor,bz_plane,check,dx,integ,q0_vol,q0_volsph
@@ -344,8 +344,10 @@ subroutine vcoul_init(Vcp,Gsph,Cryst,Qmesh,Kmesh,rcut,icutcoul,vcutgeo,ecut,ng,n
    ! at q=0
    ABI_MALLOC(qran,(3,nmc_max))
 
-   if(seed(1)==0) then
-     do i1=1,42
+   if(.not. allocated(seed)) then
+     call random_seed(size=nseed)
+     allocate(seed(nseed))
+     do i1=1,nseed
        seed(i1) = NINT(SQRT(DBLE(i1)*103731))
      end do
    end if
