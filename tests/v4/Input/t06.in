@@ -72,4 +72,5 @@
 #%%   6 datasets are performed with ecut varying from 8 Ha to 18 Ha
 #%%   Cut-off for the fine grid (used to transfer data from spherical
 #%%   meshes to FFt meshes) remain constant.
+#%% topics = PAW
 #%%<END TEST_INFO>

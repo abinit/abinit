@@ -94,4 +94,5 @@
 #%%   -2.079732 Ha, -2.080470 Ha, and -2.080626 Ha.
 #%%   For information, with a 12 12 12 4 grid (182 k points) 
 #%%   and occopt=4, one gets -2.080648 Ha.
+#%% topics = convergency
 #%%<END TEST_INFO>

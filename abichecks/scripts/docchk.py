@@ -51,17 +51,18 @@ def main(home_dir, verbose=False):
   print( " ============================================================= ")
   print( " ABINIT Input variables: Regenerate html from abinit_vars.yml  ")
   print( " ============================================================= ")
-  pathdocinputdir = os.path.join(home_dir, "doc/input_variables")
-  cmd = "cd " + pathdocinputdir + " ; rm -f html_automatically_generated/allvariables.html ; python abi_yml2html.py > abi_yml2html.log"
+  pathdocdir = os.path.join(home_dir, "doc")
+  cmd = "cd " + pathdocdir + " ; rm -f input_variables/generated_files/allvariables.html ; python generate_doc.py > generate_doc.log"
   os.system(cmd)
-  cmd = "cd " + pathdocinputdir + " ; python abi_check.py > abi_check.log"
+  pathlogfile = os.path.join(home_dir, "doc/generate_doc.log")
+  pathpymodsdir = os.path.join(home_dir, "doc/pymods")
+  cmd = "cd " + pathpymodsdir + " ; python abi_check.py > abi_check.log"
   os.system(cmd)
-  pathlogfile = os.path.join(home_dir, "doc/input_variables/abi_yml2html.log")
 
   with open(pathlogfile) as logfile:
     for line in logfile:
         print(line)
-  pathcheckfile = os.path.join(home_dir, "doc/input_variables/abi_check.log")
+  pathcheckfile = os.path.join(home_dir, "doc/pymods/abi_check.log")
 
   with open(pathcheckfile) as checkfile:
     for line in checkfile:
@@ -70,8 +71,8 @@ def main(home_dir, verbose=False):
   print( " ============================================================= ")
   print( " ABINIT Input variables: Check in documentation                ")
   print( " ============================================================= ")
-  varhtml = glob.glob(os.path.join(home_dir, "doc/input_variables/html_automatically_generated/var*html"))
-  varallvars = glob.glob(os.path.join(home_dir, "doc/input_variables/html_automatically_generated/allvariables.html"))
+  varhtml = glob.glob(os.path.join(home_dir, "doc/input_variables/generated_files/var*html"))
+  varallvars = glob.glob(os.path.join(home_dir, "doc/input_variables/generated_files/allvariables.html"))
   ret_code = 0
   for iwords in range(len(words)):
       deffiles = []
@@ -164,7 +165,7 @@ def main(home_dir, verbose=False):
   print(" ============================================================= ")
   print(" ANADDB Input variables: Check in documentation                ")
   print(" ============================================================= ")
-  varhtml = os.path.join(home_dir, "doc/users/anaddb_help.html")
+  varhtml = os.path.join(home_dir, "doc/users/generated_files/help_anaddb.html")
   for iwords in range(len(words)):
       with open(varhtml) as fh: varhtmldata = fh.read()
       if words[iwords] in varhtmldata:

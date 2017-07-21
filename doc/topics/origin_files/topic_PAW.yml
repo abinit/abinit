@@ -1,0 +1,33 @@
+- !components 
+    name      : PAW 
+    keyword   : PAW
+    authors   : FJ
+    howto     : set parameters for a PAW calculation
+    header    : default
+    title     : <h1>PAW settings</h1>
+    subtitle  : default
+    copyright : default
+    links     : default
+    introduction : |- 
+         <p> The computation of the ground state energy of an assembly of nuclei and electrons
+         placed in a repeated cell can be done using so-called
+         "Projector-Augmented Waves" (PAW method), with appropriate pseudoatomic data. The way the PAW method is implemented in ABINIT is described in [[Torrent2008]].
+         <br/> The use of PAW atomic data (equivalent to pseudopotential file for the norm-conserving case) automatically launch a PAW calculation. ABINIT is provided with the JTH [[Jollet2014]] PAW atomic data table on the ABINIT web site.
+         <br/> To perform a standard PAW calculation, the input file is the same than for a norm-conserving one, except that the variable [[pawecutdg]] must be specified (see below). In the case the input variable [[accuracy]] is used, the input variable [[pawecutdg]] is automatically used.
+         <br/> Some physical functionalities are available only in the PAW framework: DFT+U, DMFT, local exact exchange,...
+
+         <p>
+
+    tutorials  : |-
+            <li><a href="../../tutorial/generated_files/lesson_paw1.html">The lesson on the use of PAW (PAW1)</a>
+            presents the Projector-Augmented Wave method, implemented in ABINIT as
+            an alternative to norm-conserving pseudopotentials, with a sizeable
+            accuracy and CPU time advantage.</li>
+            <li><a href="../../tutorial/generated_files/lesson_paw2.html">The lesson on the generation of PAW
+            atomic data files (PAW2)</a> presents the generation of atomic data
+            for use with the PAW method. Prerequisite : PAW1.</li>
+            <li><a href="../../tutorial/generated_files/lesson_paw3.html">The lesson on the validation of a PAW
+            atomic datafile (PAW3)</a> demonstrates how to test a generated PAW
+            dataset using ABINIT, against the ELK all-electron code, for diamond
+            and magnesium. Prerequisite : PAW1 and PAW2.</li>  
+    end : default 

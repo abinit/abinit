@@ -1,0 +1,303 @@
+\documentclass[a4paper,reqno,11pt,twoside]{book}
+
+\input{packages.tex}
+\input{macros.tex}
+
+\begin{document}
+
+$\bar v(13)$
+
+$$ \chi^0(12) = L^0(11, 22) $$
+
+$$ \hat\chi(12) = L(11, 22) $$
+
+Dyson for L
+
+\begin{equation}\nonumber
+L = L^0 + L^0 K L 
+\Longrightarrow
+L = \bigl [ 1 - L^0  K]^{-1} L^0 
+\end{equation}
+
+Kernel
+
+\begin{equation}\label{eq:BSE_kernel_LF}\nonumber
+K(1234) = 
+\underbrace{\delta(12)\delta(34)\bar v(13)}_{Exchange} 
+- 
+\underbrace{\delta(13)\delta(24)W(12)}_{Coulomb}
+\end{equation}
+
+
+\begin{equation}\nonumber
+ \begin{cases}
+   {\bar v(\qq)} = v(\qq) \quad {\text{if}}\; \qq \neq 0
+   \\
+   \\
+   {\bar v(\qq=0)} = 0
+ \end{cases}
+\end{equation}
+
+
+\begin{equation}\nonumber
+\ee_M^{\LF}(\ww) = 1 - \lim_{\qq  \rightarrow 0}
+ \vc(\qq)\,\hat\chi_{00}(\qq;\ww)
+\end{equation}
+
+
+Electron-hole expansion
+
+\begin{equation}
+F(1234) = 
+\sum_{ \substack{(n_1 n_2) \\ (n_3 n_4)} }
+\psi_{n_1}^\*(1) \psi_{n_2}(2)\,
+F_{ (n_1 n_2) (n_3 n_4) }\,
+\psi_{n_3}(3) \psi_{n_4}^\*(4) 
+\end{equation}
+%
+\begin{equation}
+F_{ (n_1 n_2) (n_3 n_4) } = 
+\int 
+F(1234)
+\psi_{n_1}(1) \psi_{n_2}^\*(2) 
+\psi_{n_3}^\*(3) \psi_{n_4}(4) 
+\dd (1234)
+\end{equation}
+
+
+\begin{equation}
+\chio_{ (n_1 n_2) (n_3 n_4) } (\ww) = 
+\dfrac{ (f_{n_2} - f_{n_1}) } { (\ee_{n_2} - \ee_{n_1} - \ww)}
+\delta_{n_1 n_3} \delta_{n_2 n_4} 
+\end{equation}
+
+\begin{equation}
+\bar \chi_{ (n_1 n_2) (n_3 n_4) } (\ww) = 
+\bigl [ H - \ww \bigr]^{-1}_{ (n_1 n_2) (n_3 n_4) } (f_{n_4} - f_{n_3}) 
+\end{equation}
+
+ L in terms of the Excitonic Hamilotian
+
+\begin{equation}
+L = \bigl [ H-\ww \bigr]^{-1}\,F
+\end{equation}
+
+$$ 
+H =
+\left( 
+\begin{array}{c|cc} 
+  &   |v'c'\kk'\> & |c'v'\kk'\>     \\ \hline 
+\<vc\kk|  & R  &  C  \\ %\hline 
+\<cv\kk|  &  -C^* & -R^*   \\
+\end{array}
+\right) 
+$$
+
+$$ 
+F =
+\left( 
+\begin{array}{c|cc} 
+  &   |v'c'\kk'\> & |c'v'\kk'\>     \\ \hline 
+\<vc\kk|  & 1  &  0   \\ %\hline 
+\<cv\kk|  & 0  & -1   \\
+\end{array}
+\right) 
+$$
+
+Resonant block
+
+\begin{equation}
+R_{vc\kk,v'c'\kk'} = 
+( \ee_{c\kk} - \ee_{v\kk} )\delta_{vv'}\delta_{cc'}\delta_{\kk\kk'} + 
+2 \bar v_{(vc\kk)(v'c'\kk')} - W_{(vc\kk)(v'c'\kk')}
+\end{equation}
+
+Matrix elements in real space
+
+
+\begin{equation}
+{\bar v}_{(n_1 n_2) (n_3 n_4)} =
+\delta_{\sigma_1 \sigma_2}\, \delta_{\sigma_3 \sigma_4}
+\iint \psi_{n_1}(\rr) \psi^*_{n_2}(\rr) {\bar v(\rr-\rr')} \psi_{n_3}^*(\rr') \psi_{n_4}(\rr') \dd \rr \dd \rr'
+\end{equation}
+
+\begin{equation}
+W_{(n_1 n_2) (n_3 n_4)} =
+\delta_{\sigma_1 \sigma_3}\, \delta_{\sigma_2 \sigma_4}
+\iint \psi_{n_1}(\rr) \psi^*_{n_3}(\rr) {W(\rr,\rr',\ww=0)} \psi^*_{n_2}(\rr') \psi_{n_4}(\rr') \dd \rr \dd \rr'
+\end{equation}
+
+
+TDA approximation
+
+\begin{equation}\nonumber
+H^{\text{TDA}} =
+\left( 
+\begin{array}{c|cc} 
+  &   |v'c'\kk'\> & |c'v'\kk'\>     \\ \hline 
+\<vc\kk|  & R  &  0  \\ %\hline 
+\<cv\kk|  &  0 & -R^*   \\
+\end{array}
+\right) 
+\end{equation}
+
+
+\begin{equation}\nonumber
+\ee_M(\ww) = 1 - \lim_{\qq  \rightarrow 0}
+ \vc(\qq)\,\tchi_{00}(\qq;\ww)
+\end{equation}
+
+Dipole operator
+
+\begin{equation}\nonumber
+P(\qq)_{n_1 n_2} = 
+\<n_2|e^{i\qq\cdot\rr}|n_1\> 
+\underset{\qq \rarr 0}{ \approx}
+\delta_{n_1 n_2}  +
+i \qq \cdot \<n_2|\rr|n_1\>
++ O(q^2)
+\end{equation}
+
+\begin{equation}\nonumber
+\ee_M(\ww) = 
+1 -  \lim_{\qq  \rightarrow 0}
+v(\qq)\,\<P(\qq)|\bigl[ H - \ww \bigr]^{-1}\,F |P(\qq)\>
+\end{equation}
+
+
+%independent particle without local fields effects
+%\begin{equation}\nonumber
+%\Im\, \ee_M(\ww) \propto 
+%| \<\psi_{c \kk+\qq} | e^{i\qq\cdot\rr}|\psi_{v\kk}\>|^2 \,
+%\delta(\ww-\ee_{c\kk+\qq} + \ee_{v\kk})
+%\end{equation}
+
+
+It is possible to avoid the inversion of $\bigl[ H - \ww \bigr]$ by using the spectral representation
+
+\begin{equation}\nonumber
+\begin{cases}
+H  |\lambda\> = \ee_\lambda |\lambda\>
+\\
+\\
+O_{\lambda\lambda'} = \<\lambda|\lambda'\>
+\\
+\\ 
+H = \sum_{\lambda \lambda'} \ee_\lambda |\lambda\> O_{\lambda \lambda'} \<\lambda'|
+\end{cases}
+\end{equation}
+
+\begin{equation}
+\bigl[ H -\ww \bigr]^{-1} = 
+\sum_{\lambda \lambda'} |\lambda\> \dfrac{O_{\lambda \lambda'}^{-1}}{(\ee_\lambda - \ww)} \<\lambda'|
+\end{equation}
+
+Haydock
+
+
+\begin{equation}
+%\[
+ R = R^\* =
+\begin{pmatrix}
+*  & *  & * & *  & * \\
+*  & *  & * & *  & * \\
+*  & *  & * & *  & * \\
+*  & *  & * & *  & * \\
+*  & *  & * & *  & *
+\end{pmatrix}
+%\]
+\end{equation}
+
+
+\begin{equation}\nonumber
+%\[
+\begin{pmatrix}
+a_1 & b_2 &     &   &  \\
+b_2 & a_2 & b_3 &   &  \\
+    & b_3 & *   & * &  \\
+    &     & *   & * & * \\
+    &     &     & * & * 
+\end{pmatrix}
+%\]
+\end{equation}
+
+
+
+\begin{equation}
+ R = R^\* =
+\begin{pmatrix}
+*  & *  & * & *  & * \\
+*  & *  & * & *  & * \\
+*  & *  & * & *  & * \\
+*  & *  & * & *  & * \\
+*  & *  & * & *  & *
+\end{pmatrix}
+\Longrightarrow
+\begin{pmatrix}
+a_1 & b_2 &     &   &  \\
+b_2 & a_2 & b_3 &   &  \\
+    & b_3 & *   & * &  \\
+    &     & *   & * & * \\
+    &     &     & * & * 
+\end{pmatrix}
+%\]
+\end{equation}
+
+Continued fraction
+
+\begin{equation}
+\ee_M(\ww) = 
+1 - 
+%\< u_0| (\ww-H)^{-1}|u_0\> =
+% \cfrac{\norm{u_0}^2}
+ \cfrac{F}
+ {\ww - a_1 - \cfrac{b_2^2}{\ww - a_2 - \cfrac{b_3^2}{\cdots}}}
+\end{equation}
+
+Matrix elements in G-space
+
+
+\begin{equation}
+{\bar v}_{(vc\kk) (v'c'\kk')} = 
+\dfrac{1}{V} \sum_{\GG \neq 0} {\bar v}(\GG) \;
+\<c\kk  |e^{i\GG\cdot\rr} |v\kk\>
+\<v'\kk'|e^{-i\GG\cdot\rr}|c'\kk'\>
+\end{equation}
+
+\begin{equation}
+W_{(vc\kk) (v'c'\kk')} = 
+\dfrac{1}{V} \sum_{\GG_1\GG_2} W_{\GG_1\GG_2}(\kk'-\kk,\ww=0)
+\<v'\kk'|e^{i(\qq +\GG_1)\cdot \rr}|v\kk \> 
+\<c \kk |e^{-i(\qq+\GG_2)\cdot\rr} |c'\kk'\> 
+\end{equation}
+
+equations for inclvkb 
+
+\begin{equation}
+\<b_1,\kmq|e^{-i\qq\cdot\rr}|b_2,\kk\> \underset{\qq \rarr 0}{\approx}
+-i\,\qq\cdot \<b_1,\kk|\rr|b_2,\kk\> + \mcO(q^2)
+\end{equation}
+
+%\begin{equation}
+%\label{eq:commutator_trick}
+%\<\Psi_{\kk b_1}|\rr|\Psi_{\kk b_2}\> = 
+% \dfrac {\<\Psi_{\kpq b_1}|\bigl[ \HH,\rr \bigr]|\Psi_{\kk b_2}\>}
+%        {\ee_{\kk b_1} -\ee_{\kk b_2}}.
+%\end{equation}
+
+
+\begin{equation}
+\<b_1,\kmq|e^{-i\qq\cdot\rr}|b_2,\kk\> \underset{\qq \rarr 0}{\approx}
+\dfrac{
+\<b_1,\kk|-i\qq\cdot\nabla + i\qq\cdot \bigl[\Vnl,\rr\bigr]|b_2,\kk\>
+}
+{
+\varepsilon_{b_2\kk} - \varepsilon_{b_1\kk}
+}
+\end{equation}
+
+
+
+
+
+\end{document}

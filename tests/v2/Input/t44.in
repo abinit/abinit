@@ -78,4 +78,5 @@
 #%%   one gets acell 3*7.633  angdeg 3*54.95 and xred 0.2296, while
 #%%   the experimental values are
 #%%   acell 3*7.751   angdeg 3*54.554 and xred 0.2276 
+#%% topics = k-points
 #%%<END TEST_INFO>
