@@ -79,7 +79,7 @@ body : |
   <h3><b>3. Molecular dynamics, geometry optimization, transition paths.</b></h3>
   <li><a href="#1">1.</a> Molecular dynamics calculations.
    <li><a href="#1">2.</a> Geometry optimization calculations.
-   <li><a href="#1">3.</a> Transition path calculations: NEB and string method.
+   <li><a href="../../topics/generated_files/topic_TransPath.html">3.</a> Transition path calculations: NEB and string method.
    <li><a href="../../topics/generated_files/topic_PIMD.html">4.</a> PIMD calculations.
   
   <p>&nbsp;
@@ -89,8 +89,9 @@ body : |
   
    <p> When correlated electrons are to be considered, it is necessary to go beyond the DFT framework. ABINIT enables the following possibilities:
    <li><a href="../../topics/generated_files/topic_hf.html">1.</a> The use of hybrid functionals.
-   <li><a href="../../topics/generated_files/topic_DFT+U.html">2.</a> The use of the DFT+U approximation.
-   <li><a href="#1">3.</a> The use of the DMFT framework.
+   <li><a href="../../topics/generated_files/topic_CRPA.html">2.</a> Calculation of the effective Coulomb interaction.
+   <li><a href="../../topics/generated_files/topic_DFT+U.html">3.</a> The use of the DFT+U approximation.
+   <li><a href="../../topics/generated_files/topic_DMFT.html">4.</a> The use of the DMFT framework.
   <p>&nbsp;
   <HR ALIGN=left>
   <a name="5">&nbsp;</a>

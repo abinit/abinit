@@ -1,6 +1,8 @@
 - convergency
+- CRPA
 - crystal
 - DFT+U
+- DMFT
 - GSgeneral 
 - GSintroduction
 - hf
@@ -15,6 +17,7 @@
 - recursion
 - spinpolarisation
 - TDDFT
+- TransPath
 - vdw
 - Wavelets
 - xc
