@@ -219,7 +219,7 @@ subroutine vcoul_init(Vcp,Gsph,Cryst,Qmesh,Kmesh,rcut,icutcoul,vcutgeo,ecut,ng,n
 !scalars
  integer,parameter :: master=0,ncell=3
  integer :: nmc_max=2500000 
- integer :: nmci,nseed
+ integer :: nmc,nseed
  integer :: i1,i2,i3,ig,imc
  integer :: ii,iqlwl,iq_bz,iq_ibz,npar,npt
  integer :: opt_cylinder,opt_surface,test,rank,nprocs
