@@ -4185,7 +4185,7 @@
          <br />
          Value of double counting used for DMFT. Only value 1 is activated for the moment and is the FLL double counting.
         </p>
-    topics: null
+    topics: DMFT_useful
     varfile: vardmft
     vartype: integer
 - !variable
@@ -4202,7 +4202,7 @@
         If 1, enable the calculation of the entropy  within the DMFT framework and so allows the calculation of the total energy (free energy).
         In the current implementation, this is only possible with [[dmft_solv]]=5 (Continuous Time Quantum Monte Carlo).
         See also the input variable [[dmft_nlambda]].
-    topics: null
+    topics: DMFT_expert
     varfile: vardmft
     vartype: integer
 - !variable
@@ -4221,7 +4221,7 @@
          <br />
          Number of iterations for the DMFT inner loop.
         </p>
-    topics: null
+    topics: DMFT_compulsory
     varfile: vardmft
     vartype: integer
 - !variable
@@ -4241,7 +4241,7 @@
          <br />
          Mixing parameter for the simple mixing of the self-energy.
         </p>
-    topics: null
+    topics: DMFT_useful
     varfile: vardmft
     vartype: real
 - !variable
@@ -4258,7 +4258,7 @@
     text: |-
         [[dmft_nlambda]] gives the number of integration points for the thermodynamical integration in case of free energy calculation within DMFT.
         Its value must be greater or equal to 3.
-    topics: null
+    topics: DMFT_expert
     varfile: vardmft
     vartype: integer
 - !variable
@@ -4278,7 +4278,7 @@
          <br />
          Number of Matsubara frequencies (linear  mesh)
         </p>
-    topics: null
+    topics: DMFT_compulsory
     varfile: vardmft
     vartype: integer
 - !variable
@@ -4298,7 +4298,7 @@
          <br />
          Number of frequencies in the log mesh.
         </p>
-    topics: null
+    topics: DMFT_compulsory
     varfile: vardmft
     vartype: integer
 - !variable
@@ -4334,7 +4334,7 @@
          An alternative and more simple way to restart a DFT+DMFT calculation is to use the density file (obtained with [[prtden]]=1
         or [[prtden]]=-1) and the self-energy (see [[dmft_rslf]]).
         </p>
-    topics: null
+    topics: DMFT_expert
     varfile: vardev
     vartype: integer
 - !variable
@@ -4352,7 +4352,7 @@
         <p>
          Flag to read/write Self-Energy. If put to one, self-energy is written and read at each DFT iteration.
         </p>
-    topics: null
+    topics: DMFT_basic
     varfile: vardmft
     vartype: integer
 - !variable
@@ -4431,7 +4431,7 @@
         [[dmftqmc_seed]],
         [[dmftqmc_therm]]
         </p>
-    topics: null
+    topics: DMFT_basic
     varfile: vardmft
     vartype: real
 - !variable
@@ -4450,7 +4450,7 @@
          <br />
          Can be set to 1 only if in cubic symmetry. It enables one to carry a DFT+DMFT calculations only on t2g orbitals.
         </p>
-    topics: null
+    topics: DMFT_expert
     varfile: vardmft
     vartype: integer
 - !variable
@@ -4472,7 +4472,7 @@
          a projection over correlated orbitals.
          Because the Matsubara grid is finite, the two quantities differ. If this difference is larger than dmft_tolfreq, then the code stops and an error message is given.
         </p>
-    topics: null
+    topics: DMFT_expert
     varfile: vardmft
     vartype: real
 - !variable
@@ -4495,7 +4495,7 @@
          The default value is good for fast calculations. However, to obtain good convergence of the DFT Loop,
         the DMFT Loop needs a better convergence criterion.
         </p>
-    topics: null
+    topics: DMFT_useful
     varfile: vardmft
     vartype: real
 - !variable
@@ -4515,7 +4515,7 @@
         Orbitals scheme of DFT+DMFT. With [[dmftbandi]], they define the energy window used to define Wannier Functions.
         (see  Amadon, B., Lechermann, F., Georges, A., Jollet, F., Wehling, T. O., and Lichtenstein, A. I. Phys. Rev. B 77(20), (2008).)
         </p>
-    topics: null
+    topics: DMFT_compulsory
     varfile: vardmft
     vartype: integer
 - !variable
@@ -4535,7 +4535,7 @@
         Orbitals scheme of LDA+DMFT. With [[dmftbandf]], they define the energy window used to define Wannier Functions.
         (see  Amadon, B., Lechermann, F., Georges, A., Jollet, F., Wehling, T. O., and Lichtenstein, A. I. Phys. Rev. B 77(20), (2008).)
         </p>
-    topics: null
+    topics: DMFT_compulsory
     varfile: vardmft
     vartype: integer
 - !variable
@@ -4555,7 +4555,7 @@
         Only for developer purposes.
          (Introduced by B. Amadon, v6.1.0)
         </p>
-    topics: null
+    topics: DMFT_useful
     varfile: vardmft
     vartype: integer
 - !variable
@@ -4588,7 +4588,7 @@
           </li>
          </ul>
         </p>
-    topics: null
+    topics: DMFT_expert
     varfile: vardev
     vartype: integer
 - !variable
@@ -4623,7 +4623,7 @@
           </li>
          </ul>
         </p>
-    topics: null
+    topics: DMFT_useful
     varfile: vardmft
     vartype: integer
 - !variable
@@ -4652,7 +4652,7 @@
           </li>
          </ul>
         </p>
-    topics: null
+    topics: DMFT_expert
     varfile: vardmft
     vartype: integer
 - !variable
@@ -4674,7 +4674,7 @@
         The value of this variable is the modulo used to try a global move.
         A value of 5000 means that a global move is tried every 5000 Monte Carlo sweep.
         </p>
-    topics: null
+    topics: DMFT_useful
     varfile: vardmft
     vartype: integer
 - !variable
@@ -4703,7 +4703,7 @@
           </li>
          </ul>
         </p>
-    topics: null
+    topics: DMFT_expert
     varfile: vardmft
     vartype: integer
 - !variable
@@ -4724,7 +4724,7 @@
          The modulo used to measure the interaction energy and the number of electrons.
         Example : 2 means the measure is perform every two sweeps.
         </p>
-    topics: null
+    topics: DMFT_expert
     varfile: vardmft
     vartype: integer
 - !variable
@@ -4753,7 +4753,7 @@
           </li>
          </ul>
         </p>
-    topics: null
+    topics: DMFT_expert
     varfile: vardmft
     vartype: integer
 - !variable
@@ -4782,7 +4782,7 @@
           </li>
          </ul>
         </p>
-    topics: null
+    topics: DMFT_expert
     varfile: vardmft
     vartype: integer
 - !variable
@@ -4804,7 +4804,7 @@
         The maximal order taken into account [[dmftctqmc_order]] : 50 means that we have the statistic distribution from 0 to 50 segments.
         The result is written in the "Perturbation.dat" file.
         </p>
-    topics: null
+    topics: DMFT_useful
     varfile: vardmft
     vartype: integer
 - !variable
@@ -4827,7 +4827,7 @@
          (see also <a href="https://journals.aps.org/prb/abstract/10.1103/PhysRevB.84.075145"> Phys. Rev. B 84, 075145 (2010))
          </a>
         </p>
-    topics: null
+    topics: DMFT_expert
     varfile: vardmft
     vartype: integer
 - !variable
@@ -4847,7 +4847,7 @@
          Number of time slices used to represent the time green function.
         This value should be carefully chosen according to Niquist frequency and the [[tsmear]] value.
         </p>
-    topics: null
+    topics: DMFT_compulsory
     varfile: vardmft
     vartype: integer
 - !variable
@@ -4867,7 +4867,7 @@
          <br />
          Number of Monte Carlo sweeps. Should be at least 10^6.
         </p>
-    topics: null
+    topics: DMFT_compulsory
     varfile: vardmft
     vartype: real
 - !variable
@@ -4890,7 +4890,7 @@
          <br />
          NOTE : If the CT-QMC ([[dmft_solv]]=5) is used on many CPUs, each CPU initializes its random number generator with dmftqmc_seed+rank where rank is the rank of the cpu in the MPI communicator.
         </p>
-    topics: null
+    topics: DMFT_useful
     varfile: vardmft
     vartype: integer
 - !variable
@@ -4909,7 +4909,7 @@
          <br />
          Number of Monte Carlo sweeps for the thermalization
         </p>
-    topics: null
+    topics: DMFT_compulsory
     varfile: vardmft
     vartype: integer
 - !variable
@@ -5011,7 +5011,7 @@
          <br />
          In order to save CPU time, the computation of properties of static images ([[dynimage]](iimage)=0)
         can be avoided: see [[istatimg]] keyword.
-    topics: PIMD_expert
+    topics: PIMD_expert, TransPath_expert
     varfile: varrlx
     vartype: integer
 - !variable
@@ -6571,7 +6571,7 @@
         [[tolmxf]] relates to these scaled
         stresses.
         </p>
-    topics: null
+    topics: TransPath_expert
     varfile: varrlx
     vartype: real
 - !variable
@@ -9707,7 +9707,7 @@
           </ul>
           No meaning for RF calculations.
         </p>
-    topics: PIMD_compulsory
+    topics: PIMD_compulsory, TransPath_compulsory
     varfile: varrlx
     vartype: integer
 - !variable
@@ -15353,7 +15353,7 @@
         [[neb_spring]], keeping it constant or allowing it
         to vary between 2 values (to have higher resolution close to the saddle point).
         </p>
-    topics: null
+    topics: TransPath_useful
     varfile: varrlx
     vartype: integer
 - !variable
@@ -15385,7 +15385,7 @@
           See: J. Chem. Phys. 113, 9901 (2000).
          </i>
         </p>
-    topics: null
+    topics: TransPath_useful
     varfile: varrlx
     vartype: real
 - !variable
@@ -15885,7 +15885,7 @@
         symmetry. By contrast, there is no problem if some other image has more symmetries
         than those of the second image.
         </p>
-    topics: PIMD_compulsory
+    topics: PIMD_compulsory, TransPath_compulsory
     varfile: varrlx
     vartype: integer
 - !variable
@@ -16563,7 +16563,7 @@
         and [[npspinor]] for the additional information on the use of k-point/band/FFT parallelisation.
          </i>
         </p>
-    topics: parallelism_useful, PIMD_useful
+    topics: parallelism_useful, PIMD_useful, TransPath_useful
     varfile: varpar
     vartype: integer
 - !variable
@@ -17288,7 +17288,7 @@
         input variables, and then the next positions and velocities for each image
         are determined from the set of results obtained for all images.
         </p>
-    topics: PIMD_compulsory
+    topics: PIMD_compulsory, TransPath_compulsory
     varfile: varrlx
     vartype: integer
 - !variable
@@ -24851,7 +24851,7 @@
           </li>
          </ul>
         </p>
-    topics: null
+    topics: TransPath_useful
     varfile: varrlx
     vartype: integer
 - !variable
@@ -25511,7 +25511,7 @@
          <br />
          No meaning for RF calculations.
         </p>
-    topics: null
+    topics: TransPath_basic
     varfile: varrlx
     vartype: real
 - !variable
@@ -25992,7 +25992,7 @@
         </p>
         <p>
         </p>
-    topics: null
+    topics: CRPA_compulsory
     varfile: vargw
     vartype: integer
 - !variable
@@ -26015,7 +26015,7 @@
         </p>
         <p>
         </p>
-    topics: null
+    topics: CRPA_basic
     varfile: vargw
     vartype: integer
 - !variable
@@ -26040,7 +26040,7 @@
         The lower bound and the upper bound energies must be specified (two real numbers) with respect to the position of the Fermi level.
         <p>
         </p>
-    topics: null
+    topics: CRPA_basic
     varfile: vargw
     vartype: real
 - !variable
@@ -26329,7 +26329,7 @@
         If [[usedmft]]=1 and [[nbandkss]]/=0, then, the DFT+DMFT calculation is not done and only projections are computed at the end
         of the calculation. They can be used by an external code or used to compute the screened interaction (see variable [[ucrpa]]).
         </p>
-    topics: null
+    topics: DMFT_compulsory
     varfile: vardev
     vartype: integer
 - !variable
