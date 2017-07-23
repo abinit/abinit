@@ -343,14 +343,11 @@ subroutine vcoul_init(Vcp,Gsph,Cryst,Qmesh,Kmesh,rcut,icutcoul,vcutgeo,ecut,ng,n
    ! Setup the random vectors for the Monte Carlo sampling of the miniBZ
    ! at q=0
    ABI_MALLOC(qran,(3,nmc_max))
-
-   if(.not. allocated(seed)) then
-     call random_seed(size=nseed)
-     allocate(seed(nseed))
-     do i1=1,nseed
-       seed(i1) = NINT(SQRT(DBLE(i1)*103731))
-     end do
-   end if
+   call random_seed(size=nseed)
+   ABI_MALLOC(seed,(nseed))
+   do i1=1,nseed
+     seed(i1) = NINT(SQRT(DBLE(i1)*103731))
+   end do
    call random_seed(put=seed)
    call random_number(qran)
 
@@ -531,6 +528,7 @@ subroutine vcoul_init(Vcp,Gsph,Cryst,Qmesh,Kmesh,rcut,icutcoul,vcutgeo,ecut,ng,n
    Vcp%i_sz = vcoul(1,1)
 
    ABI_FREE(qran)
+   ABI_FREE(seed)
 
  CASE ('SPHERE')
    ! TODO check that L-d > R_c > d
