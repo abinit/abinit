@@ -104,7 +104,7 @@
  thmeig : list of q wavevectors, with integration weights
      1    0.000000E+00    0.000000E+00    0.000000E+00        1.000000E+00
 
- Will write phonon DOS in file temp_2.out_ep_PDS
+ Will write phonon DOS in file tdepes_2.out_ep_PDS
 
  For checking purposes, write ten values in the present file.
        Index    Energy (in Ha)      DOS

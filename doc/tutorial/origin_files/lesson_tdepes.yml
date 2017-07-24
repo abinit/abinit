@@ -1,0 +1,48 @@
+# This YAML file contains the introduction as well as the body (including the table of content) of the html lesson.
+# In order to modify the other parts, modify the file lessons.html .
+# This is the introduction ...
+intro : |
+  <p>This lesson aims at showing how to get the following physical
+  properties:
+  </p>
+  <ul>
+    <li>The zero-point-motion renormalization (ZPR) of eigenenergies<br> </li>
+    <li>The temperature-dependence of eigenenergies<br> </li>
+    <li>The lifetime/broadening of eigenenergies<br> </li>
+  </ul>
+  </p>
+  <p>
+  For the theory related to the temperature-dependent calculations, you can read the following papers:  
+  [[Ponce2015]], [[Ponce2014]] and [[Ponce2014a]].
+  <p>
+  There are two ways to compute the temperature dependence with Abinit:
+  <ul>
+    <li><b>Using Anaddb</b>: historically the first coded way. This option does not require the use of Netcdf.</li>
+    <li><b>Using post-processing python scripts</b>:
+      this is the recommended way as it provide more options and is more optimal (take less disk space and is less memory demanding). 
+      This option REQUIRES the use of Netcdf (both for Abinit and for python). 
+  </ul>
+
+# This is the body, including the table of content ...
+body : |
+  <ul>
+    <li><a href="#1">1</a> Calculation of the ZPR of eigenenergies at q=&Gamma; </li>
+    <li><a href="#2">2</a> Converging the calculation with the q-point grid</li>
+    <li><a href="#3">3</a> Calculation of the eigenenergies correction along high-symmetry lines </li>
+  </ul>
+  <hr>
+
+  <a name="1"></a>
+  <h3><b>1. Calculation of the ZPR of eigenenergies at q=&Gamma; </b> </h3>
+  <h3>&nbsp;</h3>
+  <hr>
+
+  <a name="2"></a>
+  <h3><b>2. Converging the calculation with the q-point grid</b> </h3>
+  <h3>&nbsp;</h3>
+  <hr>
+
+  <a name="3"></a>
+  <h3><b>3. Calculation of the eigenenergies correction along high-symmetry lines</b> </h3>
+  <h3>&nbsp;</h3>
+  <hr>

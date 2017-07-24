@@ -17,10 +17,10 @@
 .Starting date : Mon  4 Apr 2016.
 - ( at 11h52 )
   
-- input  file    -> temp_1.in
-- output file    -> temp_1.out
-- root for input  files -> temp_1i
-- root for output files -> temp_1o
+- input  file    -> tdepes_1.in
+- output file    -> tdepes_1.out
+- root for input  files -> tdepes_1i
+- root for output files -> tdepes_1o
 
 
  DATASET    1 : space group P1 (#  1); Bravais aP (primitive triclinic)
@@ -268,7 +268,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.375      41.233
  frms,max,avg= 2.0263983E-06 2.9547857E-06  -1.964E-06 -4.198E-07 -2.079E-06 e/A
  length scales=  6.675000000000  6.675000000000  6.675000000000 bohr
               =  3.532257867338  3.532257867338  3.532257867338 angstroms
- prteigrs : about to open file temp_1o_DS1_EIG
+ prteigrs : about to open file tdepes_1o_DS1_EIG
  Fermi (or HOMO) energy (hartree) =   0.65134   Average Vxc (hartree)=  -0.51113
  Eigenvalues (hartree) for nkpt=   8  k points:
  kpt#   1, nband= 12, wtk=  0.12500, kpt=  0.0000  0.0000  0.0000 (reduced coord)
@@ -334,7 +334,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.375      41.233
 
 
 ================================================================================
- prteigrs : about to open file temp_1o_DS2_EIG
+ prteigrs : about to open file tdepes_1o_DS2_EIG
  Non-SCF case, kpt    1 (  0.00000  0.00000  0.00000), residuals and eigenvalues=
   7.92E-09  1.01E-09  8.57E-10  4.21E-10  4.89E-10  2.22E-09  2.43E-09  1.74E-09
   8.01E-10  7.04E-09  4.02E-07  3.51E-10
@@ -364,7 +364,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.375      41.233
     2      0.88306446683456     0.88306446683456     0.88306446683456
  length scales=  6.675000000000  6.675000000000  6.675000000000 bohr
               =  3.532257867338  3.532257867338  3.532257867338 angstroms
- prteigrs : about to open file temp_1o_DS2_EIG
+ prteigrs : about to open file tdepes_1o_DS2_EIG
  Eigenvalues (hartree) for nkpt=   8  k points:
  kpt#   1, nband= 12, wtk=  0.12500, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -0.32654    0.65134    0.65134    0.65134    0.79438    0.79438    0.79438    0.97907
@@ -403,7 +403,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.375      41.233
          ecut(hartree)=      5.000   => boxcut(ratio)=   2.12576
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file temp_1o_DS1_WFK
+-inwffil : will read wavefunctions from disk file tdepes_1o_DS1_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -425,10 +425,10 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.375      41.233
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file temp_1o_DS1_WFK
+-inwffil : will read wavefunctions from disk file tdepes_1o_DS1_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file temp_1o_DS2_WFQ
+-inwffil : will read wavefunctions from disk file tdepes_1o_DS2_WFQ
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
@@ -475,10 +475,10 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.375      41.233
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file temp_1o_DS1_WFK
+-inwffil : will read wavefunctions from disk file tdepes_1o_DS1_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file temp_1o_DS2_WFQ
+-inwffil : will read wavefunctions from disk file tdepes_1o_DS2_WFQ
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
@@ -524,10 +524,10 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.375      41.233
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file temp_1o_DS1_WFK
+-inwffil : will read wavefunctions from disk file tdepes_1o_DS1_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file temp_1o_DS2_WFQ
+-inwffil : will read wavefunctions from disk file tdepes_1o_DS2_WFQ
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
@@ -574,10 +574,10 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.375      41.233
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file temp_1o_DS1_WFK
+-inwffil : will read wavefunctions from disk file tdepes_1o_DS1_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file temp_1o_DS2_WFQ
+-inwffil : will read wavefunctions from disk file tdepes_1o_DS2_WFQ
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
@@ -624,10 +624,10 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.375      41.233
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file temp_1o_DS1_WFK
+-inwffil : will read wavefunctions from disk file tdepes_1o_DS1_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file temp_1o_DS2_WFQ
+-inwffil : will read wavefunctions from disk file tdepes_1o_DS2_WFQ
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
@@ -673,10 +673,10 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.375      41.233
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file temp_1o_DS1_WFK
+-inwffil : will read wavefunctions from disk file tdepes_1o_DS1_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file temp_1o_DS2_WFQ
+-inwffil : will read wavefunctions from disk file tdepes_1o_DS2_WFQ
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 

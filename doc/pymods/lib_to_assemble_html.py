@@ -325,7 +325,7 @@ def assemble_html(origin_yml_files,suppl_components,dir_name,root_filname,allowe
   toc_all = '<a name="list"></a>'
   toc_all += '<h3><b> Alphabetical list of all files.</b></h3>'
   cur_let_all = 'A'
-  toc_all += "<p>"+cur_let_all+".</p>&nbsp;\n"
+  toc_all += "<p>"+cur_let_all+".</p>\n"
 
   for (ii,name) in enumerate(list_names):
     while not (name.startswith(cur_let_all.lower()) or name.startswith(cur_let_all.upper())):
@@ -337,7 +337,7 @@ def assemble_html(origin_yml_files,suppl_components,dir_name,root_filname,allowe
     else:
       full_filname=name
 
-    toc_all = toc_all + '<br><a href="%s.html"/>%s</a> [%s] &nbsp;&nbsp;\n' %(full_filname,full_filname,list_titles[ii])
+    toc_all = toc_all + '<a href="%s.html"/>%s</a> [%s] <br>\n' %(full_filname,full_filname,list_titles[ii])
 
   all_files_html=""
   spec={'users':'help files','tutorial':'lessons of the tutorial',
