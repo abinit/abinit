@@ -1423,7 +1423,7 @@
          bmass is the mass of the barostat when
         [[ionmov]]=13 (constant pressure molecular dynamics)
         </p>
-    topics: null
+    topics: MolecularDynamics_expert
     varfile: varrlx
     vartype: real
 - !variable
@@ -2915,7 +2915,7 @@
           See: J. Chem. Phys. 113, 9901 (2000).
          </i>
         </p>
-    topics: null
+    topics: TransPath_expert
     varfile: varrlx
     vartype: integer
 - !variable
@@ -3019,7 +3019,7 @@
         <b>d3e_pert1_atpol</b>(1)&lt;=<b>d3e_pert1_atpol</b>(2).<br />
         See [[rfatpol]] for additional details.
         </p>
-    topics: null
+    topics: nonlinear_basic
     varfile: varrf
     vartype: integer
 - !variable
@@ -3046,7 +3046,7 @@
         or in reciprocal space (electric field perturbation).<br />
         See [[rfdir]] for additional details.
         </p>
-    topics: null
+    topics: nonlinear_basic
     varfile: varrf
     vartype: integer
 - !variable
@@ -3067,7 +3067,7 @@
         of derivatives with respect to k, independently of the electric field perturbation itself.<br />
         See [[rfelfd]] for additional details.
         </p>
-    topics: null
+    topics: nonlinear_basic
     varfile: varrf
     vartype: integer
 - !variable
@@ -3086,7 +3086,7 @@
         Turns on atomic displacement perturbation in non-linear computation, as 1st perturbation.<br />
         See [[rfphon]] for additional details.
         </p>
-    topics: null
+    topics: nonlinear_basic
     varfile: varrf
     vartype: integer
 - !variable
@@ -3112,7 +3112,7 @@
         <b>d3e_pert2_atpol</b>(1)&lt;=<b>d3e_pert2_atpol</b>(2).<br />
         See [[rfatpol]] for additional details.
         </p>
-    topics: null
+    topics: nonlinear_basic
     varfile: varrf
     vartype: integer
 - !variable
@@ -3139,7 +3139,7 @@
         or in reciprocal space (electric field perturbation).<br />
         See [[rfdir]] for additional details.
         </p>
-    topics: null
+    topics: nonlinear_basic
     varfile: varrf
     vartype: integer
 - !variable
@@ -3160,7 +3160,7 @@
         of derivatives with respect to k, independently of the electric field perturbation itself.<br />
         See [[rfelfd]] for additional details.
         </p>
-    topics: null
+    topics: nonlinear_basic
     varfile: varrf
     vartype: integer
 - !variable
@@ -3179,7 +3179,7 @@
         Turns on atomic displacement perturbation in non-linear computation, as 2nd perturbation.<br />
         See [[rfphon]] for additional details.
         </p>
-    topics: null
+    topics: nonlinear_basic
     varfile: varrf
     vartype: integer
 - !variable
@@ -3205,7 +3205,7 @@
         <b>d3e_pert3_atpol</b>(1)&lt;=<b>d3e_pert3_atpol</b>(2).<br />
         See [[rfatpol]] for additional details.
         </p>
-    topics: null
+    topics: nonlinear_basic
     varfile: varrf
     vartype: integer
 - !variable
@@ -3232,7 +3232,7 @@
         or in reciprocal space (electric field perturbation).<br />
         See [[rfdir]] for additional details.
         </p>
-    topics: null
+    topics: nonlinear_basic
     varfile: varrf
     vartype: integer
 - !variable
@@ -3253,7 +3253,7 @@
         of derivatives with respect to k, independently of the electric field perturbation itself.<br />
         See [[rfelfd]] for additional details.
         </p>
-    topics: null
+    topics: nonlinear_basic
     varfile: varrf
     vartype: integer
 - !variable
@@ -3272,7 +3272,7 @@
         Turns on atomic displacement perturbation in non-linear computation, as 3rd perturbation.<br />
         See [[rfphon]] for additional details.
         </p>
-    topics: null
+    topics: nonlinear_basic
     varfile: varrf
     vartype: integer
 - !variable
@@ -3363,7 +3363,7 @@
         routine moldyn.F90. See also [[signperm]].
         When [[delayperm]] is zero, there is not permutation trials.
         </p>
-    topics: null
+    topics: MolecularDynamics_expert
     varfile: varrlx
     vartype: integer
 - !variable
@@ -3876,7 +3876,7 @@
         DIIS algorithm ([[ionmov]]=20)
         to find zero-force and stress configurations.
         </p>
-    topics: null
+    topics: MolecularDynamics_expert
     varfile: varrlx
     vartype: integer
 - !variable
@@ -3929,7 +3929,7 @@
         [[optcell]] =0, but
         a value larger than 1.0 will be a waste.
         </p>
-    topics: null
+    topics: GeoOpt_basic
     varfile: varrlx
     vartype: real
 - !variable
@@ -4984,7 +4984,7 @@
          <br />
          No meaning for RF calculations.
         </p>
-    topics: PIMD_compulsory
+    topics: PIMD_compulsory, MolecularDynamics_compulsory
     varfile: varrlx
     vartype: real
 - !variable
@@ -5364,7 +5364,7 @@
         (i.e. spin-orbit (SO) calculations) is supported. NC SO calculations are NOT currently
         supported. Also, for both NC and PAW, [[nspden]]/=1 and [[nsppol]]/=1 are NOT supported.
         </p>
-    topics: null
+    topics: EffMass_compulsory
     varfile: varrf
     vartype: integer
 - !variable
@@ -5386,7 +5386,7 @@
         If a band is degenerate, all other bands of the degenerate group will automatically be treated,
         even if they were not part of the user specified range.
         </p>
-    topics: null
+    topics: EffMass_useful
     varfile: varrf
     vartype: integer
 - !variable
@@ -5419,7 +5419,7 @@
         cartesian, reduced or angular (theta,phi) coordinates, respectively. In the case [[efmas_calc_dirs]]==3,
         2 real values per directions are read, whereas 3 real values are read in the two other cases.
         </p>
-    topics: null
+    topics: EffMass_useful
     varfile: varrf
     vartype: integer
 - !variable
@@ -5439,7 +5439,7 @@
         using the transport equivalent effective mass idea
         (see <a href="https://doi.org/10.1103/PhysRevB.89.155131">PRB 89 155131 (2014)</a>).
         </p>
-    topics: null
+    topics: EffMass_useful
     varfile: varrf
     vartype: integer
 - !variable
@@ -5459,7 +5459,7 @@
         (and treated using the formalism activated with [[efmas_deg]]==1).
         [[efmas_deg_tol]] has the '[[ENERGY]]' characteristics.
         </p>
-    topics: null
+    topics: EffMass_useful
     varfile: varrf
     vartype: real
 - !variable
@@ -5492,7 +5492,7 @@
         once determined from the 'transport equivatlent' effective mass tensor is output separately on
         the line immediately after the effective mass.
         </p>
-    topics: null
+    topics: EffMass_useful
     varfile: varrf
     vartype: integer
 - !variable
@@ -5514,7 +5514,7 @@
         The directions are specified by 3 real values if [[efmas_calc_dirs]]==1 or 2 and by
         2 real values if [[efmas_calc_dirs]]==3.
         </p>
-    topics: null
+    topics: EffMass_basic
     varfile: varrf
     vartype: real
 - !variable
@@ -5532,7 +5532,7 @@
         <p>
         Number of directions in [[efmas_dirs]], to be considered according to [[efmas_calc_dirs]].
         </p>
-    topics: null
+    topics: EffMass_basic
     varfile: varrf
     vartype: integer
 - !variable
@@ -5554,7 +5554,7 @@
         To obtain this tensor, an integration over the solid sphere is required.
         The default value gives a tensor accurate to the 4th decimal in Ge.
         </p>
-    topics: null
+    topics: EffMass_basic
     varfile: varrf
     vartype: integer
 - !variable
@@ -6521,7 +6521,7 @@
          . See J.
         Chelikowsky, J. Phys. D : Appl Phys. 33(2000)R33.
         </p>
-    topics: null
+    topics: MolecularDynamics_useful
     varfile: varrlx
     vartype: real
 - !variable
@@ -6571,7 +6571,7 @@
         [[tolmxf]] relates to these scaled
         stresses.
         </p>
-    topics: TransPath_expert
+    topics: TransPath_expert, GeoOpt_expert
     varfile: varrlx
     vartype: real
 - !variable
@@ -6590,7 +6590,7 @@
         plan to include, energy, electronic band gap and alchemical potentials. Right now only value of 1 (enthalpy)
         works.
         </p>
-    topics: null
+    topics: TransPath_expert
     varfile: varrlx
     vartype: integer
 - !variable
@@ -6615,7 +6615,7 @@
          <br />
          3. F = (1/n_i) / Sum (1/n_i). Where n_i is the position in the ordered list of enthalpies
         </p>
-    topics: null
+    topics: TransPath_expert
     varfile: varrlx
     vartype: integer
 - !variable
@@ -6634,7 +6634,7 @@
         Right now we have 4 rules. See
         [[ga_rules]]
         </p>
-    topics: null
+    topics: TransPath_expert
     varfile: varrlx
     vartype: integer
 - !variable
@@ -6652,7 +6652,7 @@
          Percentage of the population that according to the fitness function passes
         to the following iteration.
         </p>
-    topics: null
+    topics: TransPath_expert
     varfile: varrlx
     vartype: real
 - !variable
@@ -6686,7 +6686,7 @@
          4) Coordinates mutation of 1/4 of the whole coordinates.
          <br />
         </p>
-    topics: null
+    topics: TransPath_expert
     varfile: varrlx
     vartype: integer
 - !variable
@@ -7997,7 +7997,7 @@
          </ul>
          <br />
         </p>
-    topics: null
+    topics: GeoOpt_expert
     varfile: varrlx
     vartype: integer
 - !variable
@@ -8018,7 +8018,7 @@
          <br />
          (Note : Under development now (2011.06.06))
         </p>
-    topics: null
+    topics: GeoOpt_expert
     varfile: varrlx
     vartype: real
 - !variable
@@ -9299,7 +9299,7 @@
          (Note : combined with wtatcon to give internal representation of the
         latter - this should be described)
         </p>
-    topics: PIMD_useful
+    topics: PIMD_useful, MolecularDynamics_useful, GeoOpt_useful
     varfile: varrlx
     vartype: integer
 - !variable
@@ -9364,7 +9364,7 @@
         geometry builder. The user must thus foresee the effect
         of this geometry builder (see [[objarf]]).
         </p>
-    topics: null
+    topics: MolecularDynamics_useful, GeoOpt_useful
     varfile: varrlx
     vartype: integer
 - !variable
@@ -9390,7 +9390,7 @@
         x, y or z directions, or a combination of these.
         See the variable [[iatfix]] for more information.
         </p>
-    topics: null
+    topics: MolecularDynamics_useful, GeoOpt_useful
     varfile: varrlx
     vartype: integer
 - !variable
@@ -9416,7 +9416,7 @@
         x, y or z directions, or a combination of these.
         See the variable [[iatfix]] for more information.
         </p>
-    topics: null
+    topics: MolecularDynamics_useful, GeoOpt_useful
     varfile: varrlx
     vartype: integer
 - !variable
@@ -9442,7 +9442,7 @@
         x, y or z directions, or a combination of these.
         See the variable [[iatfix]] for more information.
         </p>
-    topics: null
+    topics: MolecularDynamics_useful, GeoOpt_useful
     varfile: varrlx
     vartype: integer
 - !variable
@@ -10126,7 +10126,7 @@
          <br />
          No meaning for RF calculations.
         </p>
-    topics: null
+    topics: MolecularDynamics_compulsory, GeoOpt_compulsory
     varfile: varrlx
     vartype: integer
 - !variable
@@ -14126,7 +14126,7 @@
          at the end of the
         [[ntime]] timesteps.
         </p>
-    topics: PIMD_compulsory
+    topics: PIMD_compulsory, MolecularDynamics_compulsory
     varfile: varrlx
     vartype: real
 - !variable
@@ -14155,7 +14155,7 @@
         '[[LENGTH]]'
         characteristics.
         </p>
-    topics: null
+    topics: MolecularDynamics_expert
     varfile: varrlx
     vartype: real
 - !variable
@@ -14224,7 +14224,7 @@
          are the positions of
         the atoms in the cell.
         </p>
-    topics: null
+    topics: TransPath_useful
     varfile: varrlx
     vartype: real
 - !variable
@@ -14332,7 +14332,7 @@
          </ul>
          All of the optimizers can be constrained with a maximum allowed step size for each image; see [[mep_mxstep]]. This is by default the case of the Nudged Elastic Band ([[imgmov]]=5).
         </p>
-    topics: null
+    topics: TransPath_basic
     varfile: varrlx
     vartype: integer
 - !variable
@@ -14545,7 +14545,7 @@
          , [[iatcon]],
         and [[wtatcon]]).
         </p>
-    topics: PIMD_useful
+    topics: PIMD_useful, MolecularDynamics_useful, GeoOpt_useful
     varfile: varrlx
     vartype: integer
 - !variable
@@ -14574,7 +14574,7 @@
         [[iatfix]]
          .
         </p>
-    topics: null
+    topics: MolecularDynamics_useful, GeoOpt_useful
     varfile: varrlx
     vartype: integer
 - !variable
@@ -14598,7 +14598,7 @@
          When [[natfixx]] &gt; 0, [[natfixx]] entries should be provided
         in array [[iatfixx]].
         </p>
-    topics: null
+    topics: MolecularDynamics_useful, GeoOpt_useful
     varfile: varrlx
     vartype: integer
 - !variable
@@ -14644,7 +14644,7 @@
          <br />
          When [[natfixz]] &gt; 0, [[natfixz]] entries should be provided in array [[iatfixz]].
         </p>
-    topics: null
+    topics: MolecularDynamics_useful, GeoOpt_useful
     varfile: varrlx
     vartype: integer
 - !variable
@@ -14718,7 +14718,7 @@
          <br />
          Despite possible vacancies, cannot be bigger than [[natom]].
         </p>
-    topics: null
+    topics: crystal_expert
     varfile: vargeo
     vartype: integer
 - !variable
@@ -15101,7 +15101,7 @@
          , [[iatcon]],
         and [[wtatcon]]).
         </p>
-    topics: PIMD_useful
+    topics: PIMD_useful, MolecularDynamics_useful, GeoOpt_useful
     varfile: varrlx
     vartype: integer
 - !variable
@@ -15147,7 +15147,7 @@
         }
          </pre>
         </p>
-    topics: null
+    topics: MolecularDynamics_useful
     varfile: vardev
     vartype: integer
 - !variable
@@ -16151,7 +16151,7 @@
          The thermostat chains can be used either to perform Molecular Dynamics (MD) ([[ionmov]]=13) or to perform Path Integral Molecular Dynamics (PIMD) ([[imgmov]]=13). <br />
          The mass of these thermostats is given by [[qmass]].  <br />
         </p>
-    topics: PIMD_basic
+    topics: PIMD_basic, MolecularDynamics_basic
     varfile: varrlx
     vartype: integer
 - !variable
@@ -16293,7 +16293,7 @@
         Go to [[objan]], for example.
          <br />
         </p>
-    topics: null
+    topics: crystal_expert
     varfile: vargeo
     vartype: integer
 - !variable
@@ -17265,7 +17265,7 @@
          <br />
          [[ntime]] is ignored if [[ionmov]]=0.
         </p>
-    topics: null
+    topics: MolecularDynamics_basic, GeoOpt_basic
     varfile: varrlx
     vartype: integer
 - !variable
@@ -17467,7 +17467,7 @@
          Look at [[objarf]] for further explanations.
         <br />
         </p>
-    topics: null
+    topics: crystal_expert
     varfile: vargeo
     vartype: integer
 - !variable
@@ -17507,7 +17507,7 @@
         toward point 2 (coordinates 4:6).
          <br />
         </p>
-    topics: null
+    topics: crystal_expert
     varfile: vargeo
     vartype: real
 - !variable
@@ -17530,7 +17530,7 @@
         variables [[objaat]].
          <br />
         </p>
-    topics: null
+    topics: crystal_expert
     varfile: vargeo
     vartype: integer
 - !variable
@@ -17584,7 +17584,7 @@
         simply use 1 1 1, which is also the Default value.
          <br />
         </p>
-    topics: null
+    topics: crystal_expert
     varfile: vargeo
     vartype: integer
 - !variable
@@ -17625,7 +17625,7 @@
         different rotation angles.
          <br />
         </p>
-    topics: null
+    topics: crystal_expert
     varfile: vargeo
     vartype: real
 - !variable
@@ -17671,7 +17671,7 @@
          <br />
          Not present in the dtset array (no internal).
         </p>
-    topics: null
+    topics: crystal_expert
     varfile: vargeo
     vartype: real
 - !variable
@@ -17701,7 +17701,7 @@
          Look at [[objbrf]] for further explanations.
          <br />
         </p>
-    topics: null
+    topics: crystal_expert
     varfile: vargeo
     vartype: integer
 - !variable
@@ -17741,7 +17741,7 @@
         toward point 2 (coordinates 4:6).
          <br />
         </p>
-    topics: null
+    topics: crystal_expert
     varfile: vargeo
     vartype: real
 - !variable
@@ -17763,7 +17763,7 @@
         variables [[objbat]].
          <br />
         </p>
-    topics: null
+    topics: crystal_expert
     varfile: vargeo
     vartype: integer
 - !variable
@@ -17816,7 +17816,7 @@
         simply use 1 1 1, which is also the Default value.
          <br />
         </p>
-    topics: null
+    topics: crystal_expert
     varfile: vargeo
     vartype: integer
 - !variable
@@ -17857,7 +17857,7 @@
         different rotation angles.
          <br />
         </p>
-    topics: null
+    topics: crystal_expert
     varfile: vargeo
     vartype: real
 - !variable
@@ -17902,7 +17902,7 @@
         which case, only rotations are needed.
          <br />
         </p>
-    topics: null
+    topics: crystal_expert
     varfile: vargeo
     vartype: real
 - !variable
@@ -18186,7 +18186,7 @@
         (x,f) history of another run with a different non-zero [[optcell]]
         value. There
         are still a few problems at that level.
-    topics: PIMD_basic
+    topics: PIMD_basic, GeoOpt_compulsory
     varfile: varrlx
     vartype: integer
 - !variable
@@ -18241,7 +18241,7 @@
         and [[rfstrs]]) must be
         zero if [[optdriver]] is not set to 1.
         </p>
-    topics: null
+    topics: nonlinear_compulsory
     varfile: vargs
     vartype: integer
 - !variable
@@ -19751,7 +19751,7 @@
          <br />
          Gives the upper band to include in the calculation of Wannier functions
         </p>
-    topics: null
+    topics: Wannier_compulsory
     varfile: vardev
     vartype: integer
 - !variable
@@ -19770,7 +19770,7 @@
          <br />
          Gives the lower band to include in the calculation of Wannier functions
         </p>
-    topics: null
+    topics: Wannier_compulsory
     varfile: vardev
     vartype: integer
 - !variable
@@ -19821,7 +19821,7 @@
          </a>
          )
         </p>
-    topics: null
+    topics: Wannier_compulsory
     varfile: vardev
     vartype: integer
 - !variable
@@ -19840,7 +19840,7 @@
          <br />
          Gives the indices of the [[plowan_natom]] atoms on which the projections will be done.
         </p>
-    topics: null
+    topics: Wannier_compulsory
     varfile: vardev
     vartype: integer
 - !variable
@@ -19865,7 +19865,7 @@
         These atoms are used to define Wannier functions in real space. These real space
         Wannier functions are used as a basis to compute the Hamiltonian.
         </p>
-    topics: null
+    topics: Wannier_useful
     varfile: vardev
     vartype: integer
 - !variable
@@ -19886,7 +19886,7 @@
          Gives the [[plowan_nbl]] values of angular momenta for each atom, in the order of the atoms
         as given in [[plowan_iatom]].
         </p>
-    topics: null
+    topics: Wannier_compulsory
     varfile: vardev
     vartype: integer
 - !variable
@@ -19905,7 +19905,7 @@
          <br />
          Gives the number of atoms on which the projection will be done
         </p>
-    topics: null
+    topics: Wannier_compulsory
     varfile: vardev
     vartype: integer
 - !variable
@@ -19925,7 +19925,7 @@
          <br />
          Gives the total number of angular momenta (over all atoms) to compute the projections.
         </p>
-    topics: null
+    topics: Wannier_compulsory
     varfile: vardev
     vartype: integer
 - !variable
@@ -19948,7 +19948,7 @@
         Gives a number of selected atoms. These atoms are used to define Wannier functions in real space. These real space
         Wannier functions are used as a basis to compute the Hamiltonian.
         </p>
-    topics: null
+    topics: Wannier_useful
     varfile: vardev
     vartype: integer
 - !variable
@@ -19970,7 +19970,7 @@
         as given in [[plowan_iatom]]. The index i for the projectors refers to the  ith number on line
         orbitals of the PAW atomic data file.
         </p>
-    topics: null
+    topics: Wannier_compulsory
     varfile: vardev
     vartype: integer
 - !variable
@@ -20000,7 +20000,7 @@
           </li>
          </ul>
         </p>
-    topics: null
+    topics: Wannier_useful
     varfile: vardev
     vartype: integer
 - !variable
@@ -22121,7 +22121,7 @@
           </li>
          </ul>
         </p>
-    topics: printing_prgs
+    topics: printing_prgs, Wannier_compulsory
     varfile: varfil
     vartype: integer
 - !variable
@@ -22416,7 +22416,7 @@
         [[optcell]] =0 (NVT ensemble) or 2 (fully flexible NPT ensemble).
         In that case, [[optcell]]=2 iS NOT USABLE yet.
         </p>
-    topics: PIMD_basic
+    topics: PIMD_basic, MolecularDynamics_basic
     varfile: varrlx
     vartype: real
 - !variable
@@ -23231,7 +23231,7 @@
          to get a good wave function
         to continue your job.
         </p>
-    topics: PIMD_useful
+    topics: PIMD_useful, MolecularDynamics_useful, GeoOpt_useful
     varfile: varrlx
     vartype: integer
 - !variable
@@ -23489,7 +23489,7 @@
         also, in case a scissor shift is to be used,
         it is usually not applied for the d/dk response).
         </p>
-    topics: null
+    topics: EffMass_compulsory
     varfile: varrf
     vartype: integer
 - !variable
@@ -24090,7 +24090,7 @@
     text: |-
         +1 favors alternation of species
         -1 favors segregation
-    topics: null
+    topics: MolecularDynamics_expert
     varfile: varrlx
     vartype: integer
 - !variable
@@ -24776,7 +24776,7 @@
         [[tolmxf]] relates to these scaled
         stresses.
         </p>
-    topics: null
+    topics: GeoOpt_basic
     varfile: varrlx
     vartype: real
 - !variable
@@ -24871,7 +24871,7 @@
         of the unit cell). In case there is an instability, decrease the
         default value, e.g. set it to 0.1 .
         </p>
-    topics: GSgeneral_useful
+    topics: GSgeneral_useful, GeoOpt_useful
     varfile: varrlx
     vartype: real
 - !variable
@@ -24900,7 +24900,7 @@
         between Ha/Bohr**3 and GPa is : 1 Ha/Bohr**3 = 29421.033d0 GPa.
         <br />
         Not used if [[optcell]]==0.
-    topics: GSgeneral_useful
+    topics: GSgeneral_useful, GeoOpt_useful
     varfile: varrlx
     vartype: real
 - !variable
@@ -25537,7 +25537,7 @@
          <br />
          No meaning for RF calculations.
         </p>
-    topics: null
+    topics: GeoOpt_basic
     varfile: varrlx
     vartype: real
 - !variable
@@ -25572,7 +25572,7 @@
          <br />
          No meaning for RF calculations.
         </p>
-    topics: null
+    topics: GeoOpt_basic
     varfile: varrlx
     vartype: real
 - !variable
@@ -26890,7 +26890,7 @@
          <br />
          Useful to created vacancies.
         </p>
-    topics: null
+    topics: crystal_expert
     varfile: vargeo
     vartype: integer
 - !variable
@@ -26911,7 +26911,7 @@
         and repetitions have been done. The list of these
         atoms is contained in [[vaclst]].
         </p>
-    topics: null
+    topics: crystal_expert
     varfile: vargeo
     vartype: integer
 - !variable
@@ -27776,7 +27776,7 @@
          <br />
          Velocities evolve is [[ionmov]]==1.
         </p>
-    topics: PIMD_useful
+    topics: PIMD_useful, MolecularDynamics_basic
     varfile: varrlx
     vartype: real
 - !variable
@@ -27864,7 +27864,7 @@
         <br />
         <br />
         In the case of Path-Integral Molecular Dynamics using the Langevin Thermostat ([[imgmov]]=9), [[vis]] defines the friction coefficient, in atomic units. Typical value range is 0.00001-0.001.
-    topics: PIMD_basic
+    topics: PIMD_basic,  MolecularDynamics_basic
     varfile: varrlx
     vartype: real
 - !variable
@@ -27962,7 +27962,7 @@
           </li>
          </ul>
         </p>
-    topics: null
+    topics: Wannier_basic
     varfile: varw90
     vartype: integer
 - !variable
@@ -28066,7 +28066,7 @@
         with XCrysDen will also be on the coarse grid.  When this does not produce an
         acceptable plot, prtunk can be set to 1 to output every grid point.
         (You should try spline interpolation in XCrysDen first.)
-    topics: null
+    topics: Wannier_basic
     varfile: varw90
     vartype: integer
 - !variable
@@ -28265,7 +28265,7 @@
          </sub>
          = constant.
         </p>
-    topics: PIMD_useful
+    topics: PIMD_useful, MolecularDynamics_useful, GeoOpt_useful
     varfile: varrlx
     vartype: real
 - !variable

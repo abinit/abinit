@@ -138,4 +138,5 @@ nstep 100              # Maximal number of SCF cycles
 #%% description = 
 #%%  Germanium.
 #%%  Germanium effective mass tensor at \Gamma and 0.25 0.00 0.00. 
+#%% topics = EffMass
 #%%<END TEST_INFO>

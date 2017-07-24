@@ -106,5 +106,6 @@ jdtset 1 2 3 4
 #%% description = 
 #%%  Silicon.
 #%%  Silicon effective mass tensor in PAW for multiple bands and k-points. 
+#%% topics = EffMass
 #%%<END TEST_INFO>
 
