@@ -1,0 +1,39 @@
+- !components 
+    name      : nonlinear 
+    keyword   : nonlinear 
+    authors   : RC, XG
+    howto     : perform a Raman intensities calculation
+    header    : default
+    title     : <h1>Raman intensities and electro-optic properties calculation </h1>
+    subtitle  : default
+    copyright : default
+    links     : default
+    introduction : |- 
+
+        <p>In Raman experiments, the incident light, usually a polarized or unpolarized laser, is scattered by the sample, and the energy as well as polarization of the outgoing light is measured. A Raman spectrum, presenting the energy of the outgoing photons, will consist of rather well-defined peaks, around an elastic peak.
+
+        <p>At the lowest order of the theory, the dominant mechanism is the absorption or emission of a phonon by a photon. The energy of the absorbed or emitted phonon corresponds to the energy difference between the outgoing and incident photons. Thus, even more straightforwardly than the IR spectrum, a Raman spectrum is directly related to the energy of phonons at the Brillouin-zone center: when the zero of the energy scale is set at the incident light energy, the absolute value of the energy of the peaks corresponds to the energy of the phonons.
+
+        <p>Both the derivatives of the linear electronic dielectric susceptibilities with respect to atomic displacements and the non-linear electronic dielectric susceptibilities required to evaluate the Raman intensities are non-linear responses which can be formulated as third derivatives of the energy.  In the ABINIT implementation, they are computed within the density functional perturbation theory, as described in [[Veithen2005]]. Thanks to the 2n+1 theorem, their formulation only requires the knowledge of the ground-state and first-order changes in the wave-functions.
+
+        <p>This non-linear response formalism has been successfully applied to a large variety of systems. We have so far studied the Raman spectra of ferroelectric oxides ( BaTiO<sub>3</sub> and PbTiO<sub>3</sub> [[Hermet2009]]), different minerals under pressure conditions characteristic to the interior of the Earth [[Caracas2007a]] or molecular solids under extreme conditions [[Caracas2008]]. The computation of the non-linear optical susceptibilities has also been applied to several polar dielectrics [[Caracas2007]].
+
+        <p>As a by-product of the calculation of the Raman tensor and non-linear optical coefficients, it is also possible to determine directly within ABINIT the electro-optic (EO) coefficients r<sub>ij&gamma;</sub> (Pockels effect) which describe the change of optical dielectric tensor in a (quasi-)static electric field through the following expression  [[Veithen2005]]:
+        
+        &Delta;(&epsilon;<sup>-1</sup>)<sub>ij</sub>=&sum;<sub>&gamma;=1,3</sub> r<sub>ij&gamma;</sub>&Epsilon;<sub>&gamma;</sub>
+        
+        <p>The clamped (zero strain) EO coefficients include an electronic and an ionic contribution directly accessible within ABINIT. The unclamped EO coefficients include an additional piezoelectric contribution which must be computed separately from the knowledge of the elasto-optic and piezoelectric strain coefficients. This formalism was for instance applied to different ferroelectric ABO<sub>3</sub> compounds [[Veithen2005a]].
+
+        <p>The implementation is available for norm-conserving pseudopotentials. The extension to the PAW framework is in progress. 
+
+
+    tutorials  : |-
+              <li><a href="../../tutorial/generated_files/lesson_nlo.html">The lesson on static non-linear
+              properties</a> presents the computation of responses beyond the linear
+              order, within Density-Functional Perturbation Theory (beyond the
+              simple Sum-Over-State approximation): Raman scattering efficiencies
+              (non-resonant case), non-linear electronic susceptibility,
+              electro-optic effect.  Comparison with the finite field technique
+              (combining the computation of linear response functions with finite
+              difference calculations), is also provided.</li>
+    end : default
