@@ -37,8 +37,8 @@ body : |
   <a name="1"></a>
   <h3><b>1. Calculation of the ZPR of eigenenergies at q=&Gamma; </b> </h3>
   <h3>&nbsp;</h3>
-  The reference input files are located in ~abinit/tests/tutorespfn/Input and 
-  the reference output files in ~abinit/tests/tutorespfn/Refs. The prefix is "tdepes".
+  The reference input files for this lesson are located in ~abinit/tests/tutorespfn/Input and 
+  the corresponding reference output files are in ~abinit/tests/tutorespfn/Refs. The prefix is "tdepes".
 
   First, run the calculation using the [[tests/tutorespfn/Input/tdepes_1.in]] input file.
   You can use the files file [[tests/tutorespfn/Input/tdepes_1.files]] for abinit 
