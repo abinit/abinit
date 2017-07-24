@@ -37,6 +37,8 @@
       <html>
       <head><title>Input variables</title>
       <link rel=stylesheet type="text/css" href="../formabinit.css">
+      <script type="text/javascript" src="__JS_PATH__smart_input_variables.js"></script>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
       </head>
       <body bgcolor="#ffffff">
 

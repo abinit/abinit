@@ -605,27 +605,41 @@ for i, varfile_info in enumerate(varfiles):
   if varfile=="default":
     continue
 
-  alphalinks="\n \n <hr> Go to "
+  scriptTab = "\n\
+<input type=\"text\" id=\"InputSearch\" onkeyup=\"searchInput()\" onClick=\"searchInput()\" onblur=\"defaultClick()\" placeholder=\"Search\">\n\
+"
+  alphalinks="\n \n <div class=\"TabsLetter\">"
   for i in string.ascii_uppercase:
-    alphalinks+=('<a href=#%s>%s</a> ')%(i,i)
-  alphalinks+="\n \n"
+    alphalinks+=('<a class=\"TabLetterLink" href=\"#%s\" onClick=\"openLetter(event,\'%s\')\" id="click%s">%s</a> ')%(i,i,i,i)
+  alphalinks+="</div>\n \n"
 
   #Generate the body of the table of content 
   cur_let = 'A'
   toc_body=""
   if varfile=="allvariables":
-    toc_body+=alphalinks+"<hr>"
-  toc_body += " <br><a id='%s'></a>"%(cur_let)+cur_let+".\n"
+    toc_body+=scriptTab+alphalinks
+  else :
+    toc_body += " <br><a id='%s'></a>"%(cur_let)+cur_let+".\n"
+
   if varfile=="allvariables":
+    toc_body += " <ul id=\"Letters\">\n"
+    toc_body += " <li>\n<ul id=\"%s\" class=\"TabContentLetter\">\n"%(cur_let)
+    toc_body += " <li class=\"HeaderLetter\">%s</li>\n"%(cur_let)
     for i, var in enumerate(abinit_vars):
       while not var.abivarname.startswith(cur_let.lower()):
         cur_let = chr(ord(cur_let)+1)
-        toc_body += " <p><a id='%s'></a>"%(cur_let)+cur_let+".\n"
+        toc_body += " </ul></li>\n<li>\n<ul id=\"%s\" class=\"TabContentLetter\">\n"%(cur_let)
+        toc_body += " <li class=\"HeaderLetter col-s-6 col-m-3 col-l-2 col-xl-2 col-xxl-1\">%s</li>\n"%(cur_let)
       abivarname=var.abivarname
       if var.characteristics is not None and '[[INTERNAL_ONLY]]' in var.characteristics:
         abivarname = '%'+abivarname
-      curlink = " <a href=\""+var.varfile+".html#"+var.abivarname+"\">"+abivarname+"</a>&nbsp;&nbsp;\n"
+      curlink = " <li class=\"col-s-6 col-m-3 col-l-2 col-xl-2 col-xxl-1\"><a href=\""+var.varfile+".html#"+var.abivarname+"\">"+abivarname+"</a></li>\n"
       toc_body += curlink
+    toc_body += "</ul></li></ul>\n\
+<script>\n\
+defaultClick(true);\n\
+</script>\n\
+"
   elif varfile == "specials":
     for (speckey, specval) in list_specials:
       while not speckey.lower().startswith(cur_let.lower()):
