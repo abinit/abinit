@@ -542,18 +542,18 @@ program anaddb
  if (inp%thmflag>=3 .and. inp%thmflag<=8) then
 
     ! DEBUG
-    call ddb_hdr_open_read(ddb_hdr,filnam(5),ddbun,DDB_VERSION,&
- &                         dimonly=1)
+    !call ddb_hdr_open_read(ddb_hdr,filnam(5),ddbun,DDB_VERSION,&
+    ! &                     dimonly=1)
  
-    mband = ddb_hdr%mband
-    msym = ddb_hdr%msym
-    natom = ddb_hdr%natom
-    nblok2 = ddb_hdr%nblok
-    nkpt = ddb_hdr%nkpt
-    ntypat = ddb_hdr%ntypat
-    usepaw = ddb_hdr%usepaw
+    !mband = ddb_hdr%mband
+    !msym = ddb_hdr%msym
+    !natom = ddb_hdr%natom
+    !nblok2 = ddb_hdr%nblok
+    !nkpt = ddb_hdr%nkpt
+    !ntypat = ddb_hdr%ntypat
+    !usepaw = ddb_hdr%usepaw
  
-    call ddb_hdr_free(ddb_hdr)
+    !call ddb_hdr_free(ddb_hdr)
     ! END DEBUG
 
    !write(std_out,*)'Entering thmeig: '
