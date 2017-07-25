@@ -122,4 +122,5 @@ znucl  13
 #%% keywords = NC, DFPT, EPH
 #%% description = 
 #%%    Calculation of phonon linewidths and e-ph coupling parameter lambda.
+#%% topics = ElPhon
 #%%<END TEST_INFO>

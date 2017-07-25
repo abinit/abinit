@@ -1,6 +1,6 @@
 - !components 
     name      : crystal 
-    keyword   : crystal 
+    keyword   : Crystal structure and symmetries
     authors   : FJ
     howto     : specify a crystal
     header    : default

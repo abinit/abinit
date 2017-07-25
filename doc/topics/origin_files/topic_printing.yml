@@ -1,6 +1,6 @@
 - !components 
     name      : printing 
-    keyword   : printing 
+    keyword   : Printing settings
     authors   : FJ
     howto     : set parameters to print some useful quantities
     header    : default

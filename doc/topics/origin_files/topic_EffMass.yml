@@ -1,6 +1,6 @@
 - !components 
     name      : EffMass 
-    keyword   : EffMass 
+    keyword   : Effective Mass 
     authors   : JLaflamme
     howto     : perform an effective mass calculation
     header    : default

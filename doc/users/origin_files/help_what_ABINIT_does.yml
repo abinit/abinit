@@ -96,11 +96,10 @@ body : |
   <HR ALIGN=left>
   <a name="5">&nbsp;</a>
   <h3><b> 5.Response functions. </b></h3>
-   <li><a href="#1">1.</a> First-order responses: phonons,....
-   <li><a href="#1">2.</a> Second-order responses: elastic constants, ....
-   <li><a href="../../topics/generated_files/topic_nonlinear.html">3.</a> Raman intensities and electro-optic properties.
-   <li><a href="#1">4.</a> Electron-phonon calculations.
-   <li><a href="../../topics/generated_files/topic_EffMass.html">5.</a> Effective mass calculations.
+   <li><a href="../../topics/generated_files/topic_DFPT.html">1.</a> DFPT: phonon modes, elastic tensors, effective charges, dielectric tensors,...
+   <li><a href="../../topics/generated_files/topic_nonlinear.html">2.</a> Raman intensities and electro-optic properties.
+   <li><a href="../../topics/generated_files/topic_ElPhon.html">3.</a> Electron-phonon calculations.
+   <li><a href="../../topics/generated_files/topic_EffMass.html">4.</a> Effective mass calculations.
   <p>&nbsp;
   
   <HR ALIGN=left>
@@ -108,7 +107,8 @@ body : |
   <h3><b> 6.Excited state calculations. </b></h3>
    <li><a href="#1">1.</a> GW calculations.
    <li><a href="#1">2.</a> Bethe-Salpeter calculations.
-   <li><a href="../../topics/generated_files/topic_TDDFT.html">3.</a> TDDFT calculations.
+   <li><a href="../../topics/generated_files/topic_GWls.html">3.</a> GW- Lanczos-Sternheimer method.
+   <li><a href="../../topics/generated_files/topic_TDDFT.html">4.</a> TDDFT calculations.
   <p>&nbsp;
   
   <HR ALIGN=left>

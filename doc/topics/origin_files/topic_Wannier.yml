@@ -1,6 +1,6 @@
 - !components 
     name      : Wannier 
-    keyword   : Wannier 
+    keyword   : Wannier functions
     authors   : BAmadon
     howto     : perform Wannier functions calculation
     header    : default

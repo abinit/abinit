@@ -127,4 +127,5 @@
 #%%    Note: Charge neutrality is not achieved with the present dataset for Born Effective Charges,
 #%%          but can be easily reached by increasing some parameters; for instance:
 #%%           (ngkpt 6 6 6,  ecut 40. pawecutdg 40.) gives Z(Eu)=2.5085, Z(O)=-2.4982
+#%% topics = DFPT
 #%%<END TEST_INFO>

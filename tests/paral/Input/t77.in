@@ -100,4 +100,5 @@ xcart
 #%% keywords = GW, GWLS
 #%% description = 
 #%%  Molecular SiH4 in GWLS (G0W0 with Lanczos basis and Sternheimer equations)
+#%% topics = GWls
 #%%<END TEST_INFO>

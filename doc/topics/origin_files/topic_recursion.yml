@@ -1,6 +1,6 @@
 - !components 
     name      : recursion 
-    keyword   : recursion 
+    keyword   : Recursion method
     authors   : FJ
     howto     : perform orbital-free calculations
     header    : default

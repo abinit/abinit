@@ -1,6 +1,6 @@
 - !components 
     name      : spinpolarisation 
-    keyword   : spinpolarisation 
+    keyword   : Spin polarisation 
     authors   : FJ
     howto     : set parameters for a spin-polarized calculation
     header    : default

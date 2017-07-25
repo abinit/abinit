@@ -74,4 +74,5 @@ diemac 12.0
 #%%   Si with PAW dataset generated from uspp code. Computes derivative with
 #%%   DFPT formalism, and also computes energies with displaced k+q so that
 #%%   energies can be checked by finite differences.
+#%% topics = DFPT
 #%%<END TEST_INFO>

@@ -13,7 +13,7 @@
          [[Anisimov1991]] and [[Liechtenstein1995]]. In ABINIT, the DFT+U approximation is implemented inside the PAW atomic spheres only.
          Two choices of double counting are provided: the Full Localized limit
          and the Around Mean Field approximation.
-         Our implementation is described in [[Amadon2008]].
+         Our implementation is described in [[Amadon2008a]].
          It follows the main lines of [[Bengone2000]]. See als [[Czyzyk1994]].
          Forces and stress are implemented.
          For details on keywords 

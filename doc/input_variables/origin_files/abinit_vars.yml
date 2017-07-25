@@ -869,7 +869,7 @@
     requires: null
     text: |-
         Govern the imposition of the Acoustic Sum Rule (ASR) in phonon calculations. Same meaning as the corresponding anaddb variable.
-    topics: null
+    topics: DFPT_useful
     varfile: vareph
     vartype: integer
 - !variable
@@ -2889,7 +2889,7 @@
     text: |-
         Set the treatment of the Charge Neutrality requirement for the effective charges.
         Same meaning as the corresponding anaddb variable.
-    topics: null
+    topics: DFPT_useful
     varfile: vareph
     vartype: integer
 - !variable
@@ -3320,7 +3320,7 @@
         This variable is mandatory when [[optdriver]]==7.
         It defines the number of divisions in the (homogeneous) q-mesh
         used to generate the DDB file. See also the description of the [[getddb]] input variable.
-    topics: null
+    topics: ElPhon_compulsory
     varfile: vareph
     vartype: integer
 - !variable
@@ -3342,7 +3342,7 @@
         It defines the shift in the q-mesh used to generate the DDB file,
         which is defined by the [[ddb_ngqpt]] input variable.
         See [[shiftk]] for more information on the definition.
-    topics: null
+    topics: ElPhon_useful
     varfile: vareph
     vartype: real
 - !variable
@@ -3570,7 +3570,7 @@
          Typical use is for response to electric field ([[rfelfd]]=3),
         but NOT for d/dk ([[rfelfd]]=2) and phonon responses.
         </p>
-    topics: null
+    topics: DFPT_useful
     varfile: varrf
     vartype: real
 - !variable
@@ -3945,7 +3945,7 @@
     text: |-
         This variable defines the treatment of the dipole-dipole interaction.
         Same meaning as the corresponding anaddb variable
-    topics: null
+    topics: DFPT_useful
     varfile: vareph
     vartype: integer
 - !variable
@@ -5693,7 +5693,7 @@
     mnemonics: 'Electron-PHonon: EXTRA ELectrons'
     requires: null
     text: null
-    topics: null
+    topics: ElPhon_expert
     varfile: vareph
     vartype: real
 - !variable
@@ -5712,7 +5712,7 @@
         when performing electron-phonon calculations with [[optdriver]]==7.
         This variable has effect only if set to a non-zero value.
         See also [[eph_extrael]].
-    topics: null
+    topics: ElPhon_useful
     varfile: vareph
     vartype: real
 - !variable
@@ -5735,7 +5735,7 @@
         <p>
         Related input variables: [[eph_intmeth]], [[eph_fsmear]], [[eph_extrael]] and [[eph_fermie]].
         </p>
-    topics: null
+    topics: ElPhon_useful
     varfile: vareph
     vartype: real
 - !variable
@@ -5752,7 +5752,7 @@
     text: |-
         This variable defines the gaussian broadening used for the
         integration over the Fermi surface when [[eph_intmeth]] == 1.
-    topics: null
+    topics: ElPhon_useful
     varfile: vareph
     vartype: real
 - !variable
@@ -5853,7 +5853,7 @@
         This variable can be used to turn on the calculation of transport
         quantities in the eph module of abinit. Value of 1 corresponds to
         elastic LOVA as in the PRB by Savrasov and Savrasov
-    topics: null
+    topics: ElPhon_expert
     varfile: vareph
     vartype: integer
 - !variable
@@ -6543,7 +6543,7 @@
         The input variable [[frzfermi]],
         if set to 1, allows to suppress this contribution, but this is incorrect.
         </p>
-    topics: null
+    topics: DFPT_expert
     varfile: varrf
     vartype: integer
 - !variable
@@ -6751,7 +6751,7 @@
          </pre>
          refers to dataset 2 when dataset 4 is initialized.
         </p>
-    topics: null
+    topics: nonlinear_useful, ElPhon_useful
     varfile: varfil
     vartype: integer
 - !variable
@@ -7056,7 +7056,7 @@
          </pre>
          refers to dataset 2 when dataset 4 is initialized.
         </p>
-    topics: null
+    topics: ElPhon_useful
     varfile: varfil
     vartype: integer
 - !variable
@@ -7726,7 +7726,7 @@
         <b>
          This variable is experimental. In development.
         </b>
-    topics: multidtset_useful
+    topics: multidtset_useful, DFPT_useful
     varfile: vardev
     vartype: integer
 - !variable
@@ -8792,7 +8792,7 @@
         Governs the DFT eigenstate |e> in which the self-energy will be evaluated, as shown in eq. (7) of  Phys. Rev. B 91, 125120 (2015).
         That is, it is the state to be corrected in the G0W0 scheme.
         </p>
-    topics: null
+    topics: GWls_expert
     varfile: vargw
     vartype: integer
 - !variable
@@ -8823,7 +8823,7 @@
         The default, ([[gwls_correlation]] == 3), is the most performant option and should be kept by the user.
         Option 1, 2 and 5 are deprecated and will be removed.
         </p>
-    topics: null
+    topics: GWls_expert
     varfile: vargw
     vartype: integer
 - !variable
@@ -8839,7 +8839,7 @@
     requires: '[[optdriver]]==66'
     text: |-
         Not used yet.
-    topics: null
+    topics: GWls_expert
     varfile: vargw
     vartype: integer
 - !variable
@@ -8857,7 +8857,7 @@
         <p>
         Governs whether the exact exchange for the state to be corrected ([[gwls_band_index]]) is calculated ([[gwls_exchange]]==1) or not ([[gwls_exchange]]==0).
         </p>
-    topics: null
+    topics: GWls_expert
     varfile: vargw
     vartype: integer
 - !variable
@@ -8882,7 +8882,7 @@
         The default [[gwls_first_seed]]==[[gwls_band_index]] and [[gwls_nseeds]]==1 has been touroughly tested and seems to be the most performant.
         Users should therefore keep the default value.
         </p>
-    topics: null
+    topics: GWls_expert
     varfile: vargw
     vartype: integer
 - !variable
@@ -8901,7 +8901,7 @@
         Governs the number of iterations to be done in the shift Lanczos solution of eq. (35) of Phys. Rev. B 91, 125120 (2015) to solve it at all external frequencies requested by the user ([[gw_freqsp]]).
         The default value is converged to a few 10s of meV for all molecules studied so far.
         </p>
-    topics: null
+    topics: GWls_expert
     varfile: vargw
     vartype: integer
 - !variable
@@ -8926,7 +8926,7 @@
         <p>
         For more information on the exact role of these bases and on the model dielectric operator used, see section V of  Phys. Rev. B 91, 125120 (2015).
         </p>
-    topics: null
+    topics: GWls_expert
     varfile: vargw
     vartype: integer
 - !variable
@@ -8945,7 +8945,7 @@
         Governs the number of iterations to be done in the shift Lanczos solution of eq. (30) of  Phys. Rev. B 91, 125120 (2015) to solve it simultaneously at all integration frequencies (generated automatically by the number of points [[gwls_npt_gauss_quad]] to use in the gaussian quadrature) and all external frequencies requested by the user ([[gw_freqsp]]).
         The default value is converged to a few 10s of meV for all molecules studied so far.
         </p>
-    topics: null
+    topics: GWls_expert
     varfile: vargw
     vartype: integer
 - !variable
@@ -8970,7 +8970,7 @@
         <p>
         For more information on the Lanczos basis constructed for the calculation of the residues, see section IV of Phys. Rev. B 91, 125120 (2015).
         </p>
-    topics: null
+    topics: GWls_expert
     varfile: vargw
     vartype: integer
 - !variable
@@ -8989,7 +8989,7 @@
         This variable sets the frequencies to be used to construct the basis in which the Hamiltonian is projected to accelerate the solution of the Sternheimer equations involved by the construction of the dielectric matrix at finite frequencies.
         See section VI of Phys. Rev. B 91, 125120 (2015).
         For most cases, since the frequencies \Infty and (if [[gwls_recycle]]>0) 0.0 are used at no computational cost, [[gwls_n_proj_freq]]==0 (which means no ADDITIONAL frequency is to be used) is fine and no frequencies need to be picked up.
-    topics: null
+    topics: GWls_expert
     varfile: vargw
     vartype: real
 - !variable
@@ -9017,7 +9017,7 @@
         The value of the associated parameter has thus an impact on the convergence rate of the GWLS calculation with respect to the number of frequencies of integration ([[gwls_npt_gauss_quad]]), but no impact on the converged result of the GWLS calculation.
         Typically, the default ([[gwls_model_parameter]]==1.0) is optimal.
         </p>
-    topics: null
+    topics: GWls_expert
     varfile: vargw
     vartype: real
 - !variable
@@ -9035,7 +9035,7 @@
         This variable sets the number of frequencies, on top of \Infty and (if [[gwls_recycle]]>0) 0.0, to be used for the construction of the basis in which the hamiltonian is projected to accelerate the solution of the Sternheimer equations involved in the construction of the dielectric matrix at finite frequencies.
         See section VI of  Phys. Rev. B 91, 125120 (2015).
         For most cases, the default ([[gwls_n_proj_freq]]==0) is fine.
-    topics: null
+    topics: GWls_expert
     varfile: vargw
     vartype: integer
 - !variable
@@ -9053,7 +9053,7 @@
         This variable defines the number of points used for the numerical integration of the self-energy over frequencies in GWLS computations
         (see eq. (12) of  Phys. Rev. B 91, 125120 (2015)).
         The default is fine for most cases.
-    topics: null
+    topics: GWls_expert
     varfile: vargw
     vartype: integer
 - !variable
@@ -9071,7 +9071,7 @@
         This variable sets the number of seed vectors to be used in the construction of the Lanczos basis for the (static) dielectric matrix in a GWLS calculation.
         See section IV of  Phys. Rev. B 91, 125120 (2015).
         Only [[gwls_nseeds]]==1 has been tested for now and users should keep this value.
-    topics: null
+    topics: GWls_expert
     varfile: vargw
     vartype: integer
 - !variable
@@ -9087,7 +9087,7 @@
     requires: '[[optdriver]]==66'
     text: |-
         Influences the level of verbosity for debugging purposes in a GWLS calculation. Users should keep its value at the default.
-    topics: null
+    topics: GWls_expert
     varfile: vargw
     vartype: integer
 - !variable
@@ -9119,7 +9119,7 @@
         This is when it becomes interesting to store them on disk.
         It is particularly efficient to choose the path of the file to be on disk space local to the processor in large MPI calculations, since each processor need only his own solutions in the construction of the basis.
         </p>
-    topics: null
+    topics: GWls_expert
     varfile: vargw
     vartype: integer
 - !variable
@@ -9136,7 +9136,7 @@
     requires: '[[optdriver]]==66'
     text: |-
         Not used yet.
-    topics: null
+    topics: GWls_expert
     varfile: vargw
     vartype: real
 - !variable
@@ -9153,7 +9153,7 @@
     text: |-
         This variable sets the dimension of the dielectric matrix used in a GWLS calculation (see section IV of  Phys. Rev. B 91, 125120 (2015)).
         Typically converged at a value of a few hundreds to a few thousands for a convergence criterion of 50meV on the  eigenenergies.
-    topics: null
+    topics: GWls_expert
     varfile: vargw
     vartype: integer
 - !variable
@@ -9586,7 +9586,7 @@
         In the latter case, use a negative value for the cutoff radius of the sphere ([[rcut]]&lt;0),
         which is automatically calculated so that the volume enclosed in the sphere is equal to the volume of the solid.
         </p>
-    topics: null
+    topics: GWls_compulsory
     varfile: vargw
     vartype: integer
 - !variable
@@ -10327,7 +10327,7 @@
          </b>
          ).
         </p>
-    topics: null
+    topics: DFPT_useful
     varfile: vargs
     vartype: integer
 - !variable
@@ -10402,7 +10402,7 @@
          of the [[help_abinit]].
          <br />
         </p>
-    topics: null
+    topics: nonlinear_useful
     varfile: varfil
     vartype: integer
 - !variable
@@ -10554,7 +10554,7 @@
           </li>
          </ul>
         </p>
-    topics: null
+    topics: DFPT_useful
     varfile: varfil
     vartype: integer
 - !variable
@@ -10648,7 +10648,7 @@
          <br />
          <br />
         </p>
-    topics: null
+    topics: ElPhon_useful
     varfile: varfil
     vartype: integer
 - !variable
@@ -10801,7 +10801,7 @@
           </li>
          </ul>
         </p>
-    topics: null
+    topics: DFPT_useful
     varfile: varfil
     vartype: integer
 - !variable
@@ -11329,7 +11329,7 @@
           </li>
          </ul>
         </p>
-    topics: null
+    topics: DFPT_useful
     varfile: varfil
     vartype: integer
 - !variable
@@ -15773,7 +15773,7 @@
         <p>
          For more information on Monkhorst-Pack grids, see [[ngkpt]].
         </p>
-    topics: null
+    topics: DFPT_compulsory
     varfile: vargs
     vartype: integer
 - !variable
@@ -16884,7 +16884,7 @@
         Also, if 1 and a RF calculation is done, defines the
         wavevector of the perturbation.
         </p>
-    topics: null
+    topics: DFPT_compulsory
     varfile: vargs
     vartype: integer
 - !variable
@@ -16979,7 +16979,7 @@
         The maximum allowed value of [[nshiftq]] is 8.
         The values of the shifts are given by [[shiftq]].
         </p>
-    topics: null
+    topics: DFPT_useful
     varfile: vargs
     vartype: integer
 - !variable
@@ -18241,7 +18241,7 @@
         and [[rfstrs]]) must be
         zero if [[optdriver]] is not set to 1.
         </p>
-    topics: nonlinear_compulsory
+    topics: nonlinear_compulsory, GWls_compulsory, ElPhon_compulsory
     varfile: vargs
     vartype: integer
 - !variable
@@ -18628,7 +18628,7 @@
          , the overlap between the plane-wave part of one band and the on-site part of an other
         is taken into account in the computation of the oscillator strengths. Hence, the completeness of the on-site basis is no longer assumed.
         </p>
-    topics: null
+    topics: DFPT_expert
     varfile: varpaw
     vartype: integer
 - !variable
@@ -19507,7 +19507,7 @@
         2 for tetrahedron method (no other input is needed but requires at least 4 q-points in the BZ)
         </br>
         </p>
-    topics: null
+    topics: DFPT_useful
     varfile: vareph
     vartype: integer
 - !variable
@@ -19523,7 +19523,7 @@
     requires: null
     text: |-
         This variable is used in conjunction with [[ph_nqpath]] and [[ph_qpath]] to define the q-path used for phonon band structures and phonon linewidths. It gives the number of points used to sample the smallest segment in the q-path specified by [[ph_qpath]].
-    topics: null
+    topics: DFPT_useful
     varfile: vareph
     vartype: integer
 - !variable
@@ -19543,7 +19543,7 @@
     text: |-
         This variable defines the q-mesh used to compute the phonon DOS and the Eliashberg function via Fourier interpolation.
         Related input variables: [[ph_qshift]] and [[ph_nqshift]].
-    topics: null
+    topics: DFPT_useful
     varfile: varrf
     vartype: integer
 - !variable
@@ -19558,7 +19558,7 @@
     requires: null
     text: |-
         This integer defines the number of points in the [[ph_qpath]] array.
-    topics: null
+    topics: DFPT_useful
     varfile: vareph
     vartype: integer
 - !variable
@@ -19576,7 +19576,7 @@
         for the phonon DOS and for the Eliashberg functions (see [[ph_ngqpt]]).
         If not given, the code assumes a Gamma-centered mesh. The shifts
         are specified by [[ph_qshift]].
-    topics: null
+    topics: DFPT_useful
     varfile: vareph
     vartype: integer
 - !variable
@@ -19594,7 +19594,7 @@
     text: |-
         This array contains the list of special q-points used to construct the q-path for phonon band structures and phonon linewidths.
         See also [[ph_nqpath]] and [[[ph_ndivsm]].
-    topics: null
+    topics: DFPT_useful
     varfile: varrf
     vartype: real
 - !variable
@@ -19615,7 +19615,7 @@
     text: |-
         This array gives the shifts to be used to construct the q-mesh for
         computing the phonon DOS and the Eliashberg functions (see also [[ph_nqshift]]. If not given, a Gamma-centered mesh is used.
-    topics: null
+    topics: DFPT_useful
     varfile: vareph
     vartype: real
 - !variable
@@ -19632,7 +19632,7 @@
     text: |-
         The gaussian broadening used for the integration of the phonon
         DOS and the Eliashberg function. See also [[ph_intmeth]] and [[ph_ngqpt]].
-    topics: null
+    topics: DFPT_useful
     varfile: vareph
     vartype: real
 - !variable
@@ -19649,7 +19649,7 @@
     text: |-
         The step used to generate the (linear) frequency mesh for the phonon DOS and the Eliashberg function.
         The extrema of the mesh are automatically computed by the code.
-    topics: null
+    topics: DFPT_useful
     varfile: vareph
     vartype: real
 - !variable
@@ -20023,7 +20023,7 @@
         this non-zero polarization should be specified as [[polcen]] (in REDUCED coordinates, in atomic units) in the input file.
         See Eq.(24) in the Suppl. of Nat. Phys. (M. Stengel, N.A. Spaldin and D. Vanderbilt, Nat. Phys. 5,304 (2009))
         </p>
-    topics: null
+    topics: DFPT_useful
     varfile: varff
     vartype: real
 - !variable
@@ -20452,7 +20452,7 @@
         to force ABINIT (i) to compute the electric field perturbation
         along the three directions explicitly, and (ii) to keep the full number of k-points.
         </p>
-    topics: null
+    topics: nonlinear_basic
     varfile: varrf
     vartype: integer
 - !variable
@@ -20474,7 +20474,7 @@
         symmetry to reduce the number of perturbations, set [[prepgkk]] to 1.
         Use in conjunction with [[prtgkk]].
         </p>
-    topics: null
+    topics: ElPhon_compulsory
     varfile: varrf
     vartype: integer
 - !variable
@@ -21202,7 +21202,7 @@
         information on electron-phonon treatment in ABINIT is given in the tutorial
         ~abinit/doc/tutorial/lesson_eph.html and in ~abinit/doc/users/elphon_manual.ps
         </p>
-    topics: printing_prngs
+    topics: printing_prngs, ElPhon_compulsory
     varfile: varfil
     vartype: integer
 - !variable
@@ -21425,7 +21425,7 @@
         Print the phonon density of states.
         It is activated by default when [[optdriver]]==7.
         </p>
-    topics: printing_prngs
+    topics: printing_prngs, DFPT_useful, ElPhon_useful
     varfile: vareph
     vartype: integer
 - !variable
@@ -21443,7 +21443,7 @@
         phonon frequencies computed of the q-mesh determined by [[ph_ngqpt]]. The file can be use to visualize isosurfaces with Xcrysden or other similar tools supporting the bxsf format.
         Note that the (dense) q-mesh must be Gamma-centered, shifted meshs are not supported by Xcrysden.
         This variable requires [[optdriver]]==7.
-    topics: printing_prngs
+    topics: printing_prngs, ElPhon_useful
     varfile: vareph
     vartype: integer
 - !variable
@@ -22306,7 +22306,7 @@
           </li>
          </ul>
         </p>
-    topics: null
+    topics: DFPT_useful
     varfile: varpaw
     vartype: real
 - !variable
@@ -22441,7 +22441,7 @@
         of a perturbing potential of strength [[vprtrb]].  See [[vprtrb]]
         for more explanation.
         </p>
-    topics: null
+    topics: DFPT_expert
     varfile: varff
     vartype: integer
 - !variable
@@ -22473,7 +22473,7 @@
         instead), but is used to echo the value of [[qptn]](1:3),
         with renormalisation factor one.
         </p>
-    topics: null
+    topics: ' DFPT_useful'
     varfile: vargs
     vartype: real
 - !variable
@@ -22554,7 +22554,7 @@
         other q points might be allowed (perhaps with some
         modification of the code).
         </p>
-    topics: null
+    topics: ' DFPT_internal'
     varfile: varint
     vartype: real
 - !variable
@@ -22580,7 +22580,7 @@
         [[qptn]](1:3)=
         [[qpt]](1:3)/[[qptnrm]].
         </p>
-    topics: null
+    topics: DFPT_useful
     varfile: vargs
     vartype: real
 - !variable
@@ -22665,7 +22665,7 @@
         [[prtkpt]] might help
         you to select the optimal grid, similarly to the case of the K point grid.
         </p>
-    topics: null
+    topics: DFPT_compulsory
     varfile: vargs
     vartype: integer
 - !variable
@@ -22708,7 +22708,7 @@
         See this latter variable for a complete description of this
         procedure.
         </p>
-    topics: null
+    topics: DFPT_useful
     varfile: vargs
     vartype: integer
 - !variable
@@ -22736,7 +22736,7 @@
           </li>
          </ul>
         </p>
-    topics: null
+    topics: DFPT_useful
     varfile: varpaw
     vartype: real
 - !variable
@@ -22862,7 +22862,7 @@
         <p>
          If [[rcut]] is negative, the cutoff is automatically calculated so to enclose the same volume inside the cutoff as the volume of the primitive cell.
         </p>
-    topics: null
+    topics: GWls_compulsory
     varfile: vargw
     vartype: real
 - !variable
@@ -23270,7 +23270,7 @@
           </li>
          </ul>
         </p>
-    topics: null
+    topics: DFPT_expert
     varfile: varrf
     vartype: integer
 - !variable
@@ -23315,7 +23315,7 @@
          </a>
          .
         </p>
-    topics: null
+    topics: DFPT_basic
     varfile: varrf
     vartype: integer
 - !variable
@@ -23363,7 +23363,7 @@
          </a>
          ).
         </p>
-    topics: null
+    topics: DFPT_basic
     varfile: varrf
     vartype: integer
 - !variable
@@ -23395,7 +23395,7 @@
           </li>
          </ul>
         </p>
-    topics: null
+    topics: DFPT_basic
     varfile: varrf
     vartype: integer
 - !variable
@@ -23436,7 +23436,7 @@
         for the corresponding direction. If 0, this direction
         should not be considered.
         </p>
-    topics: null
+    topics: DFPT_compulsory
     varfile: varrf
     vartype: integer
 - !variable
@@ -23489,7 +23489,7 @@
         also, in case a scissor shift is to be used,
         it is usually not applied for the d/dk response).
         </p>
-    topics: EffMass_compulsory
+    topics: EffMass_compulsory, DFPT_compulsory
     varfile: varrf
     vartype: integer
 - !variable
@@ -23510,7 +23510,7 @@
          Currently, orbital magnetism is not taken into account and the perturbing potential
          has Zeeman form.
         </p>
-    topics: null
+    topics: DFPT_compulsory
     varfile: varrf
     vartype: integer
 - !variable
@@ -23530,7 +23530,7 @@
         response function calculations. Presently, only 1
         is allowed.
         </p>
-    topics: null
+    topics: DFPT_expert
     varfile: varrf
     vartype: integer
 - !variable
@@ -23549,7 +23549,7 @@
          It must be equal to 1
         to run phonon response function calculations.
         </p>
-    topics: null
+    topics: DFPT_compulsory
     varfile: varrf
     vartype: integer
 - !variable
@@ -23588,7 +23588,7 @@
          </a>
          .
         </p>
-    topics: null
+    topics: DFPT_compulsory
     varfile: varrf
     vartype: integer
 - !variable
@@ -23635,7 +23635,7 @@
         attention to the rfpert array, defined in the routine respfn.F90 ,
         as well as to the ipert local variable.
         </p>
-    topics: null
+    topics: DFPT_expert
     varfile: varrf
     vartype: integer
 - !variable
@@ -23898,7 +23898,7 @@
 
         TO BE IMPROVED : should contain a tutorial on how to do self-consistent phonon calculations, David Waroquiers 090831
         </p>
-    topics: null
+    topics: DFPT_expert
     varfile: vargs
     vartype: integer
 - !variable
@@ -23922,7 +23922,7 @@
          , 095901. Determines the extent of the finite displacements
         used, and consequent anharmonic effects. Experimental.
         </p>
-    topics: null
+    topics: DFPT_expert
     varfile: vargs
     vartype: real
 - !variable
@@ -24074,7 +24074,7 @@
          See [[shiftk]] for more information on the definition,
         use, and suitable values for these shifts.
         </p>
-    topics: null
+    topics: DFPT_useful
     varfile: vargs
     vartype: real
 - !variable
@@ -24206,7 +24206,7 @@
           </li>
          </ul>
         </p>
-    topics: null
+    topics: DFPT_useful
     varfile: varrf
     vartype: integer
 - !variable
@@ -24993,7 +24993,7 @@
     text: |-
         If symdynmat is equal to 1, the dynamical matrix is symmetrized before the diagonalization (same meaning as the corresponding anaddb variable).
         Note that symdynmat==1 will automatically enable the symmetrization of the electron-phonon linewidths.
-    topics: null
+    topics: DFPT_useful
     varfile: vareph
     vartype: integer
 - !variable
@@ -26205,7 +26205,7 @@
         <p>
          Caveat: Note that very tight convergence of ground state and phonon calculations is necessary to get good GKK matrix elements! [[tolwfr]] = 1.e-24 or so is recommended everywhere. There may be problems using use_nonscf_gkk = 1 with non-symmorphic symmetries - please check (at least) that lifetimes for phonons go to 0 for acoustic modes at Gamma.
         </p>
-    topics: null
+    topics: ElPhon_expert
     varfile: vardev
     vartype: integer
 - !variable
@@ -27903,7 +27903,7 @@
           </li>
          </ul>
         </p>
-    topics: null
+    topics: DFPT_expert
     varfile: varff
     vartype: real
 - !variable
@@ -28314,7 +28314,7 @@
         <p>
          Gives the current q-point weight.
         </p>
-    topics: null
+    topics: DFPT_useful
     varfile: vargs
     vartype: real
 - !variable
