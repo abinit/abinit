@@ -76,4 +76,5 @@
 #%%   This test is for testing a large number of atoms (63 atoms), with a large
 #%%   number of plane waves (unlike test42).
 #%%   Small number of line minimisations, of course.
+#%% topics = crystal
 #%%<END TEST_INFO>

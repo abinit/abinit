@@ -83,5 +83,5 @@
 #%%    C-diamond, Bulk, 2 atoms, paral_kgb, with PAW.
 #%%    Test of ground state with different occs(7 and 0),
 #%%    and also ionmov 2. Only with 0 and 4 procs.
-#%% topics = parallelism
+#%% topics = parallelism, MolecularDynamics
 #%%<END TEST_INFO>

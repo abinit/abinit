@@ -54,4 +54,5 @@ vel
 #%% keywords = 
 #%% description = 
 #%%   uses ionmov 14 : a 14-step time integration by Blanes and Moan.
+#%% topics = MolecularDynamics
 #%%<END TEST_INFO>

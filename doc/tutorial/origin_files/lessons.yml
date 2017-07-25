@@ -167,6 +167,11 @@
     authors : XG
     subtitle : Time-Dependent Density Functional Theory, Casida's approach.
 - !components
+    name : tdepes
+    keyword : Lesson TDepES
+    authors : SP
+    subtitle : Temperature-DEPendence of the Electronic Structure.
+- !components
     name : ucalc_crpa
     keyword : Calculation of U and J using cRPA
     authors : BAmadon

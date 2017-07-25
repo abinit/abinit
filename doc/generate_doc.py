@@ -749,18 +749,12 @@ for i, topic_name in enumerate(inputs_for_topic):
     topic_infiles[topic_name] += "<br>\n"
 
 ################################################################################
-# Initiate the table of content of the file all_topics.html
-
-toc_all = '<a name="list"></a>'
-toc_all += '<h3><b> Alphabetical list of all "How to ?" documentation topics.</b></h3>'
-
-cur_let_all = 'A'
-toc_all += "<p>"+cur_let_all+".&nbsp;\n"
-
-################################################################################
 # Assemble the "topic" files 
+# Also collect the keywords and howto 
 
 default_topic=yml_in["default_topic"][0]
+dic_keyword_name={}
+dic_keyword_howto={}
 
 # For each "topic" file
 for topic_name in list_of_topics:
@@ -769,12 +763,8 @@ for topic_name in list_of_topics:
   with open(path_ymlfile, 'r') as f:
     topic_yml = yaml.load(f)
   topic=topic_yml[0]
-
-  #Mention it in the table of content of the file all_topics.html
-  while not (topic_name.startswith(cur_let_all.lower()) or topic_name.startswith(cur_let_all.upper())):
-    cur_let_all = chr(ord(cur_let_all)+1)
-    toc_all = toc_all + "<p>"+cur_let_all+".\n"
-  toc_all = toc_all + "<br><a href=\"topic_"+ topic_name + ".html\">" + topic_name + "</a> [How to "+topic.howto+"] &nbsp;&nbsp;\n"
+  dic_keyword_name[topic.keyword]=topic_name
+  dic_keyword_howto[topic.keyword]=topic.howto
 
   #Find the bibliographical references
   reflist=[]
@@ -857,6 +847,30 @@ for topic_name in list_of_topics:
 
 ################################################################################
 # Generate the file with the list of names of different "topic" files
+# Note : they are ordered according to the keyword list
+
+list_keywords=sorted(dic_keyword_name.keys(), key= lambda item: item.upper())
+
+#DEBUG
+print("")
+print(" list_keywords:",list_keywords)
+print("")
+#ENDDEBUG
+
+toc_all = '<a name="list"></a>'
+toc_all += '<h3><b> Alphabetical list of all "How to ?" documentation topics.</b></h3>'
+
+cur_let_all = 'A'
+toc_all += "<p>"+cur_let_all+".&nbsp;\n"
+
+# For each "topic" file
+for keyword in list_keywords:
+  topic_name=dic_keyword_name[keyword]
+  topic_howto=dic_keyword_howto[keyword]
+  while not (keyword.startswith(cur_let_all.lower()) or keyword.startswith(cur_let_all.upper())):
+    cur_let_all = chr(ord(cur_let_all)+1)
+    toc_all = toc_all + "<p>"+cur_let_all+".\n"
+  toc_all = toc_all + "<br><a href=\"topic_"+ topic_name + ".html\">" + keyword + "</a> [How to "+topic_howto+"] &nbsp;&nbsp;\n"
 
 #Generate a first version of the html file, in the order "header" ... up to the "end"
 #Take the info from the component "default" if there is no information on the specific component provided in the yml file.

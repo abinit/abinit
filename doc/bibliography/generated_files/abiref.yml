@@ -482,6 +482,42 @@
   issue : 15
 -
   ENTRYTYPE : article
+  ID : Caracas2007
+  author : Caracas, R. and Cohen, R.E. 
+  title : Prediction of polar ordered oxynitride perovskites
+  journal : J. Appl. Phys. Lett.
+  year : 2007
+  volume : 91
+  pages : 092902
+  publisher : 
+  doi : 10.1063/1.2776370
+  number : 
+-
+  ENTRYTYPE : article
+  ID : Caracas2007a
+  author : Caracas, R. and Cohen, R.E. 
+  title : Post-perovskite phase in selected sesquioxides from density-functional calculations
+  journal : Phys. Rev. B
+  year : 2007
+  volume : 76
+  pages : 184101
+  publisher : 
+  doi : 
+  number : 
+-
+  ENTRYTYPE : article
+  ID : Caracas2008
+  author : Caracas, R. 
+  title : Dynamical Instabilities of Ice X
+  journal : Phys. Rev. Lett.
+  year : 2008
+  volume : 101
+  pages : 085502
+  publisher : 
+  doi : 10.1103/PhysRevLett.101.085502
+  number : 
+-
+  ENTRYTYPE : article
   ID : Cococcioni2005
   author : Cococcioni, M. and de Gironcoli, S.
   title : Linear response approach to the calculation of the effective interaction parameters in the {LDA}+{U} method
@@ -988,6 +1024,18 @@
   pages : 9978--9985
   publisher : AIP Publishing
   number : 22
+-
+  ENTRYTYPE : article
+  ID : Hermet2009
+  author : Hermet, P. and Veithen, M. and Ghosez, P.
+  title : Raman scattering intensities in BaTiO(3) and PbTiO(3) prototypical ferroelectrics from density functional theory.
+  journal : J. Phys. : Condens. Matter
+  year : 2009
+  volume : 21
+  pages : 215901
+  publisher : 
+  doi : 10.1088/0953-8984/21/21/215901
+  number : 
 -
   ENTRYTYPE : article
   ID : Hohenberg1964
@@ -1833,6 +1881,17 @@
   year : 2005
   volume : 71
   pages : 125107
+  doi : 10.1103/PhysRevB.71.125107
+-
+  ENTRYTYPE : article
+  ID : Veithen2005a
+  author : M. Veithen and  Ph. Ghosez
+  title : Temperature dependence of the electro-optic tensor and refractive indices of Ba Ti O 3 from first principles
+  journal : Phys. Rev. B
+  year : 2005
+  volume : 71
+  pages : 132101
+  doi : 10.1103/PhysRevB.71.132101
 -
   ENTRYTYPE : article
   ID : Wang1998

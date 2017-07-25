@@ -161,4 +161,5 @@
 #%%   wannier90 library are wannier90.win, w90.win, abo_DSn_w90.win (ndtset
 #%%   >0) and abo_w90.win (ndtset=0), where abo is the 4th line of the .files
 #%%   file and n is the wannier dataset.
+#%% topics = Wannier
 #%%<END TEST_INFO>

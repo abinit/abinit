@@ -9,7 +9,7 @@ for file in "$@"
 do
  echo "working on $file"
  rm -f tmp.file1 
- sed -e 's/section:/varfile:/' $file > tmp.file1
+ sed -e 's/temp_/tdepes_/' $file > tmp.file1
  echo "changes done "
  # put the modified file at the correct place
  mv tmp.file1 $file

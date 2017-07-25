@@ -3,11 +3,15 @@
 - crystal
 - DFT+U
 - DMFT
+- EffMass
+- GeoOpt
 - GSgeneral 
 - GSintroduction
-- hf
+- Hybrids
 - k-points
+- MolecularDynamics
 - multidtset
+- nonlinear
 - otherGS
 - parallelism
 - PAW
@@ -19,5 +23,6 @@
 - TDDFT
 - TransPath
 - vdw
+- Wannier
 - Wavelets
 - xc
