@@ -211,12 +211,12 @@ The calculation of the electronic eigenvalue correction
 due to electron-phonon coupling along high-symmetry lines requires the use of 6 datasets per q-point. 
 Different datasets are required to compute the following quantites:
 <ol>
-<li><img src=../documents/lesson_tdepes/Eq2.png>$\Psi_{\mathbf{k}_{HS}}^{(0)}$ the ground-state wavefunction on the Homogeneous $\mathbf{k}$-point sampling.
-<li><img src=../documents/lesson_tdepes/Eq3.png>$\Psi_{\mathbf{k}_{BS}}^{(0)}$ the ground-state wavefunction computed along the bandstructure $\mathbf{k}$-point sampling.
-<li><img src=../documents/lesson_tdepes/Eq4.png>$\Psi_{\mathbf{k}_{HS}+\mathbf{q}}^{(0)}$ the ground-state wavefunction on the shifted Homogeneous $\mathbf{k+q}$-point sampling.
-<li>n<sup>(1)</sup><img src=../documents/lesson_tdepes/Eq5.png>$n^{(1)}$ The perturbed density integrated over the HS+q grid.
-<li><img src=../documents/lesson_tdepes/Eq6.png>$\Psi_{\mathbf{k}_{BS}+\mathbf{q}}^{(0)}$ the ground-state wavefunction obtained from reading the perturbed density of the previous dataset
-<li>Reading the previous quantity we obtain the el-ph matrix elements along the BS with all physical quantities integrated over a HS grid. 
+<li>&Psi;<sup>(0)</sup><sub>kHom</sub>, the ground-state wavefunctions on the Homogeneous k-point sampling.
+<li>&Psi;<sup>(0)</sup><sub>kBS</sub>, the ground-state wavefunctions computed along the bandstructure k-point sampling.
+<li>&Psi;<sup>(0)</sup><sub>kHom+q</sub>, the ground-state wavefunctions on the shifted Homogeneous k+q-point sampling.
+<li>n<sup>(1)</sup>, the perturbed density integrated over the homogeneous k+q grid.
+<li>&Psi;<sup>(0)</sup><sub>kBS+q</sub>, the ground-state wavefunctions obtained from reading the perturbed density of the previous dataset.
+<li>Reading the previous quantity we obtain the el-ph matrix elements along the BS with all physical quantities integrated over a homogeneous grid. 
 </ol>
 <p> Run the calculation using the <a href="../../tests/tutorespfn/Input/tdepes_4.in">&#126;abinit/tests/tutorespfn/Input/tdepes_4.in</a> input file, then the files file 
 <a href="../../tests/tutorespfn/Input/tdepes_4.files">&#126;abinit/tests/tutorespfn/Input/tdepes_4.files</a>

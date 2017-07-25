@@ -243,6 +243,7 @@ def assemble_html(origin_yml_files,suppl_components,dir_name,root_filname,allowe
       is situated in dir_name+"/origin_files".
       The dictionary allowed_link_seeds allows one to set up the links to relevant keywords.
       The backlinks are accumulated, to be mentioned in the bibliography.html file.
+      WARNING : not all files are assembled using this function ! In particular, the "topics" files are assembled in the main code ...
   """
 
   # Store the default informations
@@ -320,7 +321,7 @@ def assemble_html(origin_yml_files,suppl_components,dir_name,root_filname,allowe
 
     rc=finalize_html(doc_html,origin_yml,dir_name,root_filname,allowed_link_seeds,backlinks) 
 
-  # Generate a html list of files.
+  # Generate a html list of files. WARNING : the "topics" list of files is NOT generated here ...
   list_names.sort()
   toc_all = '<a name="list"></a>'
   toc_all += '<h3><b> Alphabetical list of all files.</b></h3>'
