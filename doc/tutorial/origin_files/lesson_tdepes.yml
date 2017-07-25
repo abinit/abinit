@@ -93,12 +93,20 @@ body : |
 
   We can for example visualize the temperature dependence at k=&Gamma; of the HOMO bands with the contribution 
   of only the q=&Gamma; from the <b>temperature.txt</b> file.
+  <br>
 
+  <img style="height: 450px; width: 600px;" src=../documents/lesson_tdepes/plot1.png>
+
+  <p>
   Here you can see that the HOMO correction goes down with temperature. 
   This is due to the underconvergence of the calculation. 
   If you increase [[ecut]] from 5 to 10, you get the following plot.
- 
-  Now, the HOMO eigenenergies correction goes up with temperature. 
+  <br>
+
+  <img style="height: 450px; width: 600px;" src=../documents/lesson_tdepes/plot2.png>
+
+  <p>
+  Now, the HOMO eigenenergies correction goes up with temperature... 
   You can also plot the LUMO eigenenergies corrections and see that they go down. 
   The ZPR correction as well as their temperature dependence usually closes the gap in semiconductors.
 
@@ -115,8 +123,8 @@ body : |
   <ul>
   <li> <b>tdepes_2.out_ep_G2F</b>:
     This g<sup>2</sup>F spectral function represents the contribution 
-    of the phononic modes of energy E to the change of electronic eigenenergies according to the equation
-    $g^2F(n\mathbf{k},E)=\sum_{\mathbf{q}m}\frac{\partial \varepsilon_{n\mathbf{k}}}{\partial n_m(\mathbf{q})}\delta(E-\hbar\omega_m(\mathbf{q}))$.
+    of the phononic modes of energy E to the change of electronic eigenenergies according to the equation<br>
+    <img src=../documents/lesson_tdepes/Eq1.png>
   <li> <b>tdepes_2.out_ep_PDS</b>: 
     This file contains the phonon density of states
   <li> <b>tdepes_2.out_ep_TBS</b>: 
@@ -170,7 +178,11 @@ body : |
  
   The plotting of the same HOMO band at k=&Gamma; for a 4x4x4 q-point grid gives a very different result than previously 
   (this graph has been obtained with [[ecut]] = 10).
+  <br>
 
+  <img style="height: 450px; width: 600px;" src=../documents/lesson_tdepes/plot3.png>
+
+  <p>
   As a matter of fact, diamond needs an extremely dense q-point grid (40x40x40) to be converged. 
   On the bright side each q-point calculation is independent and thus the parallel scaling is ideal...
 
@@ -183,11 +195,11 @@ body : |
   due to electron-phonon coupling along high-symmetry lines requires the use of 6 datasets per q-point. 
   Different datasets are required to compute the following quantites:
   <ol>
-  <li>$\Psi_{\mathbf{k}_{HS}}^{(0)}$ the ground-state wavefunction on the Homogeneous $\mathbf{k}$-point sampling.
-  <li>$\Psi_{\mathbf{k}_{BS}}^{(0)}$ the ground-state wavefunction computed along the bandstructure $\mathbf{k}$-point sampling.
-  <li>$\Psi_{\mathbf{k}_{HS}+\mathbf{q}}^{(0)}$ the ground-state wavefunction on the shifted Homogeneous $\mathbf{k+q}$-point sampling.
-  <li>$n^{(1)}$ The perturbed density integrated over the HS+q grid.
-  <li>$\Psi_{\mathbf{k}_{BS}+\mathbf{q}}^{(0)}$ the ground-state wavefunction obtained from reading the perturbed density of the previous dataset
+  <li><img src=../documents/lesson_tdepes/Eq2.png>$\Psi_{\mathbf{k}_{HS}}^{(0)}$ the ground-state wavefunction on the Homogeneous $\mathbf{k}$-point sampling.
+  <li><img src=../documents/lesson_tdepes/Eq3.png>$\Psi_{\mathbf{k}_{BS}}^{(0)}$ the ground-state wavefunction computed along the bandstructure $\mathbf{k}$-point sampling.
+  <li><img src=../documents/lesson_tdepes/Eq4.png>$\Psi_{\mathbf{k}_{HS}+\mathbf{q}}^{(0)}$ the ground-state wavefunction on the shifted Homogeneous $\mathbf{k+q}$-point sampling.
+  <li>n<sup>(1)</sup><img src=../documents/lesson_tdepes/Eq5.png>$n^{(1)}$ The perturbed density integrated over the HS+q grid.
+  <li><img src=../documents/lesson_tdepes/Eq6.png>$\Psi_{\mathbf{k}_{BS}+\mathbf{q}}^{(0)}$ the ground-state wavefunction obtained from reading the perturbed density of the previous dataset
   <li>Reading the previous quantity we obtain the el-ph matrix elements along the BS with all physical quantities integrated over a HS grid. 
   </ol>
   <p> Run the calculation using the [[tests/tutorespfn/Input/tdepes_4.in]] input file, then the files file 
@@ -215,8 +227,11 @@ body : |
   </pre>
 
   This should give you the bandstructure
- 
   <br>
+
+  <img style="height: 600px; width: 400px;" src=../documents/lesson_tdepes/plot4.png>
+
+  <p>
   where the solid black lines are the traditional electronic bandstructure, 
   the dashed lines are the electronic eigenenergies with electron-phonon renormalization 
   at a defined temperature (here 0K). Finally the area around the dashed line is the lifetime of the electronic eigenstates.
@@ -248,9 +263,10 @@ body : |
   meaning that this state will decay quickly into another state. 
 
   <p>
-  Using the relatively dense q-grid of 43x43x43 we can obtain the following converged bandstructure:
+  Using the relatively dense q-grid of 43x43x43 we can obtain the following converged bandstructure, at a high temperature (1900K):
+  <br>
 
-  {{ tutorials:2024q-1900k.jpg |}}
+  <img style="height: 600px; width: 400px;" src=../documents/lesson_tdepes/plot5.png>
 
   <p>
   Here we show the renormalization at a very high temperature of 1900K in order to highlight 

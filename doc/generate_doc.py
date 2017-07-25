@@ -760,7 +760,7 @@ for topic_name in list_of_topics:
   while not (topic_name.startswith(cur_let_all.lower()) or topic_name.startswith(cur_let_all.upper())):
     cur_let_all = chr(ord(cur_let_all)+1)
     toc_all = toc_all + "<p>"+cur_let_all+".\n"
-  toc_all = toc_all + "<br><a href=\"topic_"+ topic_name + ".html\">" + topic_name + "</a> [How to "+topic.howto+"] &nbsp;&nbsp;\n"
+  toc_all = toc_all + "<br><a href=\"topic_"+ topic_name + ".html\">" + topic.keyword + "</a> [How to "+topic.howto+"] &nbsp;&nbsp;\n"
 
   #Find the bibliographical references
   reflist=[]
