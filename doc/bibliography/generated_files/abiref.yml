@@ -534,6 +534,13 @@
   keywords : DFTU interaction, cRPA
   refid : 10.1103/PhysRevB.71.035105
 -
+  ENTRYTYPE : book
+  ID : Coleman2015
+  author : Piers Coleman
+  title : Introduction to Many-Body Physics
+  year : 2015
+  publisher : Cambridge University Press
+-
   ENTRYTYPE : article
   ID : Czyzyk1994
   author : M. T. Czyzyk and G. A. Sawatzky

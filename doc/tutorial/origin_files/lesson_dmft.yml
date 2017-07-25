@@ -39,8 +39,7 @@ body : |
   strongly correlated systems.  Generally, these highly correlated
   materials contain rare-earth metals or transition metals, which have partially
   filled <i>d</i> or <i>f</i> bands and thus localized electrons.
-  For further information on this method and many body physics, please refer to Refs.
-  <a href="#reviewsDMFT">[1]</a>.
+  For further information on this method and many body physics, please refer to [[Georges1996]] and [[Kotliar2006]].
   </p>
   
   <p> Several parameters (both physical and technical) needs to be discussed for a DFT+DMFT calculation.

@@ -44,6 +44,7 @@
 [Caracas2007a]  R. Caracas and R.E. Cohen, "Post-perovskite phase in selected sesquioxides from density-functional calculations", Phys. Rev. B 76, 184101 (2007). 
 [Caracas2008]  R. Caracas, "Dynamical Instabilities of Ice X", Phys. Rev. Lett. 101, 085502 (2008). <br> DOI: <a href="https://doi.org/10.1103/PhysRevLett.101.085502">10.1103/PhysRevLett.101.085502</a>. 
 [Cococcioni2005]  M. Cococcioni and S. de Gironcoli, "Linear response approach to the calculation of the effective interaction parameters in the {LDA}+{U} method", Phys. Rev. B 71, 035105 (2005). <br> DOI: <a href="https://doi.org/10.1103/PhysRevB.71.035105">10.1103/PhysRevB.71.035105</a>. 
+[Coleman2015]  Piers Coleman, "Introduction to Many-Body Physics" (Cambridge University Press, , 2015). 
 [Czyzyk1994]  M. T. Czyzyk and G. A. Sawatzky, "Local-density functional and on-site correlations: {T}he electronic structure of {L}a$_2${C}u{O}$_4$ and {L}a{C}u{O}$_3$", Phys. Rev. B 49, 14211 (1994). 
 [Daubechies1992]  I. Daubechies, "10 Lectures on Wavelets" (Society for Industrial and Applied Mathematics ({SIAM}, 3600 {M}arket {S}treet, {F}loor 6, {P}hiladelphia, {PA} 19104), , 1992). 
 [Dion2004]  M. Dion, H. Rydberg, E. Schr\"oder, D. C. Langreth and B. I. Lundqvist, "Van der Waals Density Functional for General Geometries", Phys. Rev. Lett. 92, 246401 (2004). <br> DOI: <a href="https://doi.org/10.1103/PhysRevLett.92.246401">10.1103/PhysRevLett.92.246401</a>. 
