@@ -1,6 +1,6 @@
 - !components 
     name      : xc 
-    keyword   : Exchange and correlation 
+    keyword   : Exchange-correlation
     authors   : FJ
     howto     : set parameters related to the exchange and correlation functionals
     header    : default
