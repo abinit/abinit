@@ -53,8 +53,8 @@ There are two ways to compute the temperature dependence with Abinit:
 <a name="1"></a>
 <h3><b>1. Calculation of the ZPR of eigenenergies at q=&Gamma; </b> </h3>
 <h3>&nbsp;</h3>
-The reference input files are located in ~abinit/tests/tutorespfn/Input and 
-the reference output files in ~abinit/tests/tutorespfn/Refs. The prefix is "tdepes".
+The reference input files for this lesson are located in ~abinit/tests/tutorespfn/Input and 
+the corresponding reference output files are in ~abinit/tests/tutorespfn/Refs. The prefix is "tdepes".
 
 First, run the calculation using the <a href="../../tests/tutorespfn/Input/tdepes_1.in">&#126;abinit/tests/tutorespfn/Input/tdepes_1.in</a> input file.
 You can use the files file <a href="../../tests/tutorespfn/Input/tdepes_1.files">&#126;abinit/tests/tutorespfn/Input/tdepes_1.files</a> for abinit 
@@ -257,8 +257,8 @@ This is because we did a completely under-converged calculation.
 </pre>
 
 <p>
-As you can see the limiting factor for the convergence study is the convergence of the LUMO band at &Gamma; 
-This band is not the lowest in energy (the lowest in on the line between &Gamma; and X) 
+As you can see the limiting factor for the convergence study is the convergence of the LUMO band at &Gamma;.
+This band is not the lowest in energy (the lowest is on the line between &Gamma; and X) 
 and therefore this band is rather unstable. 
 This can also be seen by the fact that it has a large electronic broadening, 
 meaning that this state will decay quickly into another state. 
