@@ -1117,7 +1117,7 @@
         in case of a Berry phase calculation with [[berryopt]] = 1, 2, or 3: the above-mentioned
         default will cause an early exit.
         </p>
-    topics: null
+    topics: Berry_basic
     varfile: varff
     vartype: integer
 - !variable
@@ -1141,7 +1141,7 @@
          <br />
          If [[bdeigrf]] is set to -1, the code will automatically set [[bdeigrf]] equal to nband.
         </p>
-    topics: null
+    topics: TDep_basic
     varfile: varrf
     vartype: integer
 - !variable
@@ -1334,7 +1334,7 @@
         [[red_dfield]], [[red_efield]],
         [[ddamp]]
         </p>
-    topics: null
+    topics: Berry_compulsory
     varfile: varff
     vartype: integer
 - !variable
@@ -1359,7 +1359,7 @@
           </li>
          </ul>
         </p>
-    topics: null
+    topics: Berry_useful
     varfile: varff
     vartype: integer
 - !variable
@@ -1385,7 +1385,7 @@
         [[berrystep]]-step, and use the large-step values of berry phase to correct the single-step berry phase.
         Use with care: while experience is still to be gained with this procedure, the outlook is promising.
         </p>
-    topics: null
+    topics: Berry_expert
     varfile: varff
     vartype: integer
 - !variable
@@ -1405,7 +1405,7 @@
         <p>
          Perform finite magnetic field calculation. <br><b>THIS CODE IS UNDER DEVELOPMENT AND IS NOT READY FOR USE.</b>
         </p>
-    topics: null
+    topics: spinpolarisation_expert
     varfile: varff
     vartype: real
 - !variable
@@ -3299,7 +3299,7 @@
          If you have difficulty getting convergence, try to reduce this value or reduce maxestep.
         This parameter is used in finite electric displacement field calculations (berryopt=6,16,17).
         </p>
-    topics: null
+    topics: Berry_useful
     varfile: varff
     vartype: real
 - !variable
@@ -3538,7 +3538,7 @@
          In case [[berryopt]]=6,
         [[dfield]] specifies the (unreduced) finite electric displacement field vector, in atomic units, that is to be imposed as a constraint during the calculation.
         </p>
-    topics: null
+    topics: Berry_basic
     varfile: varff
     vartype: real
 - !variable
@@ -5327,7 +5327,7 @@
         eps0 is the electric constant (8.854187817d-12 F/m), and a0 is the Bohr radius
         in meter (0.5291772108e-10).
         </p>
-    topics: null
+    topics: Berry_basic
     varfile: varff
     vartype: real
 - !variable
@@ -5638,7 +5638,7 @@
         '[[ENERGY]]' characteristics.
         (1 Ha=27.2113845 eV)
         </p>
-    topics: null
+    topics: TDep_basic
     varfile: varrf
     vartype: real
 - !variable
@@ -5914,7 +5914,7 @@
         '[[ENERGY]]' characteristics.
         (1 Ha=27.2113845 eV)
         </p>
-    topics: null
+    topics: TDep_useful
     varfile: varrf
     vartype: real
 - !variable
@@ -7056,7 +7056,7 @@
          </pre>
          refers to dataset 2 when dataset 4 is initialized.
         </p>
-    topics: ElPhon_useful
+    topics: ElPhon_useful, TDep_useful
     varfile: varfil
     vartype: integer
 - !variable
@@ -7257,7 +7257,7 @@
         eigenvalues for q=Gamma from the dataset where the calculation at Gamma was done, to the datasets
         for other wavevectors.
         </p>
-    topics: multidtset_useful
+    topics: multidtset_usefull, TDep_useful
     varfile: vardev
     vartype: integer
 - !variable
@@ -7726,7 +7726,7 @@
         <b>
          This variable is experimental. In development.
         </b>
-    topics: multidtset_useful, DFPT_useful
+    topics: multidtset_useful, DFPT_useful, TDep_useful
     varfile: vardev
     vartype: integer
 - !variable
@@ -9625,7 +9625,7 @@
          Related variables : [[bdeigrf]],[[elph2_imagden]],[[getgam_eig2nkq]],[[smdelta]]
          Related variables : [[bdeigrf]],[[elph2_imagden]],[[getgam_eig2nkq]],[[smdelta]]
         </p>
-    topics: null
+    topics: TDep_compulsory
     varfile: varrf
     vartype: integer
 - !variable
@@ -11176,7 +11176,7 @@
         <b>
          This variable is experimental. In development.
         </b>
-    topics: GSgeneral_useful
+    topics: GSgeneral_useful, TDep_useful
     varfile: vardev
     vartype: integer
 - !variable
@@ -12962,7 +12962,7 @@
         Then do another single run for fixed ebar calculation ([[red_efieldbar]]=(0 0 0)),
         from the final results you will have d_1,d_2, these are good guesses for b, c.
         </p>
-    topics: null
+    topics: Berry_basic
     varfile: varff
     vartype: integer
 - !variable
@@ -13041,7 +13041,7 @@
         in the entire Brillouin zone, by reading them to initialize
         the [[kptopt]]=3 computation.
         </p>
-    topics: null
+    topics: Berry_basic
     varfile: varff
     vartype: integer
 - !variable
@@ -14009,7 +14009,7 @@
         When the calculation is difficult to converge, try reducing this value or reducing [[ddamp]].
         This variable is used in finite electric displacement field calculations ([[berryopt]]=6,16,17).
         </p>
-    topics: null
+    topics: Berry_useful
     varfile: varff
     vartype: real
 - !variable
@@ -15052,7 +15052,7 @@
         <p>
          For the [[berryopt]] = 1, 2, and 3 cases, spinor wavefunctions are not allowed, nor are parallel computations.
         </p>
-    topics: null
+    topics: Berry_basic
     varfile: varff
     vartype: integer
 - !variable
@@ -16410,7 +16410,7 @@
         WT d2X/dt2= Sum(I) MI (dRI/dt)2 - 3NkBT
         where I represent each nucleus, MI is the mass of each nucleus (see [[amu]]), RI is the coordinate of each nucleus (see [[xcart]]), dX/dt is a dynamical friction coefficient, and T is the temperature of the thermostat (see [[mdtemp]]).
         </p>
-    topics: null
+    topics: MolecularDynamics_useful
     varfile: varrlx
     vartype: real
 - !variable
@@ -23069,7 +23069,7 @@
         <p>
          [[red_dfield]] is defined via Eq.(26) in the Supplement of M. Stengel, N.A. Spaldin and D. Vanderbilt, Nat. Phys. 5,304 (2009).
         </p>
-    topics: null
+    topics: Berry_useful
     varfile: varff
     vartype: real
 - !variable
@@ -23094,7 +23094,7 @@
         <p>
          [[red_efield]] is defined via Eq.(25) in the Supplement of M. Stengel, N.A. Spaldin and D. Vanderbilt, Nat. Phys. 5,304 (2009).
         </p>
-    topics: null
+    topics: Berry_useful
     varfile: varff
     vartype: real
 - !variable
@@ -23119,7 +23119,7 @@
         <p>
          [[red_efieldbar]] is defined via Eq.(28) in the Supplement of M. Stengel, N.A. Spaldin and D. Vanderbilt, Nat. Phys. 5,304 (2009).
         </p>
-    topics: null
+    topics: Berry_useful
     varfile: varff
     vartype: real
 - !variable
@@ -24206,7 +24206,7 @@
           </li>
          </ul>
         </p>
-    topics: DFPT_useful
+    topics: TDep_compulsory
     varfile: varrf
     vartype: integer
 - !variable
@@ -28777,7 +28777,7 @@
         Note that Tesla are admitted. This sets the magnitude of mu_0*H, in Tesla,
         with H in Amperes/metre.
         </p>
-    topics: null
+    topics: spinpolarisation_expert
     varfile: varff
     vartype: real
 - !variable
