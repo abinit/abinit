@@ -1,6 +1,6 @@
 - !components 
     name      : parallelism 
-    keyword   : parallelism 
+    keyword   : Parallelism 
     authors   : FJ
     howto     : set parameters for a parallel calculation
     header    : default

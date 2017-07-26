@@ -1,6 +1,6 @@
 - !components 
     name      : convergency 
-    keyword   : convergency 
+    keyword   : Convergency 
     authors   : FJ
     howto     : set parameters to tune the convergency of a calculation
     header    : default

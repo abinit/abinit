@@ -1,6 +1,6 @@
 - !components 
     name      : multidtset 
-    keyword   : multidtset 
+    keyword   : Multi datsets 
     authors   : FJ
     howto     : set parameters for a multi dataset calculation
     header    : default

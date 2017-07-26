@@ -1,6 +1,6 @@
 - !components 
     name      : MolecularDynamics 
-    keyword   : MolecularDynamics 
+    keyword   : Molecular Dynamics 
     authors   : BAmadon
     howto     : perform a molecular dynamics calculation
     header    : default

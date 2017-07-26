@@ -1,6 +1,6 @@
 - !components 
     name      : nonlinear 
-    keyword   : nonlinear 
+    keyword   : Non Linear calculations
     authors   : RC, XG
     howto     : perform a Raman intensities calculation
     header    : default

@@ -151,4 +151,5 @@ znucl 3
 #%% keywords = NC, DFPT 
 #%% description = 
 #%%   Ground state and phonons of bcc Li
+#%% topics = DFPT, ElPhon
 #%%<END TEST_INFO>

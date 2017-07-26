@@ -1,6 +1,6 @@
 - !components 
     name      : CRPA 
-    keyword   : CRPA 
+    keyword   : Constrained RPA 
     authors   : BAmadon
     howto     : calculate the effective Coulomb interaction
     header    : default

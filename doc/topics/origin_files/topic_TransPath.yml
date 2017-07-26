@@ -1,6 +1,6 @@
 - !components 
     name      : TransPath 
-    keyword   : TransPath  
+    keyword   : Transition Paths  
     authors   : GG
     howto     : calculate transition paths
     header    : default

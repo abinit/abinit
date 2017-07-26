@@ -1,6 +1,6 @@
 - !components 
     name      : otherGS 
-    keyword   : otherGS 
+    keyword   : Ground State- other settings 
     authors   : FJ
     howto     : set other parameters for ground state calculations
     header    : default

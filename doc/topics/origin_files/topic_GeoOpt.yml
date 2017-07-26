@@ -1,6 +1,6 @@
 - !components 
     name      : GeoOpt 
-    keyword   : GeoOpt 
+    keyword   : Geometry Optimization 
     authors   : GG
     howto     : perform a geometry optimization
     header    : default

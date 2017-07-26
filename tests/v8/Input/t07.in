@@ -100,4 +100,5 @@ ndtset 3 jdtset 1 2 3
 #%%   Computation of elastic tensor and internal strain in DFPT+PAW
 #%%   Ground state is computed.
 #%%   DFPT is computed
+#%% topics = DFPT
 #%%<END TEST_INFO>

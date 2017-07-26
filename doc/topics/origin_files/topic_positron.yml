@@ -1,6 +1,6 @@
 - !components 
     name      : positron 
-    keyword   : positron 
+    keyword   : Positron 
     authors   : FJ
     howto     : set parameters for a calculation with a positron in the system.
     header    : default
