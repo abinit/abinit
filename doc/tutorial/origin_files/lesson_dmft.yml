@@ -24,12 +24,12 @@ intro : |
 body : |
   <ul>
     <li><a href="#1">1.</a> The DFT+DMFT method: summary and key parameters.
-    <li><a href="#2">2.</a> Electronic structure calculation of SrVO3 in LDA.
-    <li><a href="#3">3.</a> Electronic Structure of SrVO3: DFT+DMFT calculation.
-    <li><a href="#4">4.</a> Electronic Structure of SrVO3: Choice of correlated orbitals 
-    <li><a href="#5">5.</a> Electronic Structure of SrVO3: the Internal energy
-    <li><a href="#6">6.</a> Electronic Structure of SrVO3 in DFT+DMFT: Equilibrium volume
-    <li><a href="#7">7.</a> Electronic Structure of SrVO3: Conclusion
+    <li><a href="#2">2.</a> Electronic structure calculation of SrVO<sub>3</sub> in LDA.
+    <li><a href="#3">3.</a> Electronic Structure of SrVO<sub>3</sub>: DFT+DMFT calculation.
+    <li><a href="#4">4.</a> Electronic Structure of SrVO<sub>3</sub>: Choice of correlated orbitals 
+    <li><a href="#5">5.</a> Electronic Structure of SrVO<sub>3</sub>: the Internal energy
+    <li><a href="#6">6.</a> Electronic Structure of SrVO<sub>3</sub> in DFT+DMFT: Equilibrium volume
+    <li><a href="#7">7.</a> Electronic Structure of SrVO<sub>3</sub>: Conclusion
   </ul>
   <hr>
   

@@ -1616,7 +1616,7 @@
   pages : 096102
   doi : 10.1103/PhysRevLett.103.096102
 -
-  ENTRYTYPE : masterthesis
+  ENTRYTYPE : mastersthesis
   ID : Rostgaard2006
   author : C. Rostgaard
   title : Exact exchange in density functional calculations
@@ -1821,6 +1821,15 @@
   url : http://link.aps.org/doi/10.1103/PhysRevLett.102.226401
   publisher : American Physical Society
   issue : 22
+-
+  ENTRYTYPE : misc
+  ID : Tremblay2017
+  author : Andr\'e-Marie Tremblay
+  title : Probl\`eme \`a N-corps
+  year : 2017
+  url : https://www.physique.usherbrooke.ca/pages/en/node/3436
+  note : Notes de cours
+  howpublished : available <a href="https://www.physique.usherbrooke.ca/pages/en/node/3436">here</a>
 -
   ENTRYTYPE : article
   ID : Troullier1991

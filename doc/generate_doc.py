@@ -205,7 +205,7 @@ for item in bibtex_items:
   item_dic={}
   item=item.split('{',1)
   entrytype=item[0].strip().lower()
-  if not entrytype in ["article","book","incollection","phdthesis","masterthesis"]:
+  if not entrytype in ["article","book","incollection","phdthesis","mastersthesis","misc"]:
     print(" Not able to treat the following entrytype:",entrytype)
     raise
 
@@ -231,7 +231,6 @@ for item in bibtex_items:
   item[1]=item[1].replace('opturl','url')
   item[1]=item[1].replace('optURI','url')
   item[1]=item[1].replace('adsurl','url')
-  item[1]=item[1].replace('href','url')
 
   #Take care of other fields : split the different lines to be examined.
   lines=item[1].splitlines()
@@ -309,7 +308,10 @@ for (i,ref) in enumerate(bibtex_dics):
   publisher=""
   school=""
   address=""
+  note=""
+  howpublished=""
   for key in ref.keys():
+
     if key=='ENTRYTYPE':
       ENTRYTYPE=ref.values()[position].strip()
     elif key=='ID':
@@ -341,13 +343,16 @@ for (i,ref) in enumerate(bibtex_dics):
       school=ref.values()[position].strip()
     elif key=='address':
       address=ref.values()[position].strip()
+    elif key=='note':
+      note=ref.values()[position].strip()
+    elif key=='howpublished':
+      howpublished=ref.values()[position].strip()
     position+=1
 
   # Reformat the list of authors, starting with the initials.
   author=reformat_namelist(author)
   editor=reformat_namelist(editor)
 
-  #At present, treat normal journals, eprints, articles in collection, books.
   #For normal journal articles, needs both volume and pages.
   formatted=""
   if ENTRYTYPE=="article" and flag_pages==2:
@@ -358,13 +363,15 @@ for (i,ref) in enumerate(bibtex_dics):
     formatted=' %s "%s", in "%s", Eds. %s (%s, %s, %s), pp. %s.' % (author,title,booktitle,editor,publisher,address,year,pages)
   elif ENTRYTYPE=="phdthesis":
     formatted=' %s "%s", PhD thesis (%s, %s, %s).' % (author,title,school,address,year)
-  elif ENTRYTYPE=="masterthesis":
-    formatted=' %s "%s", Master thesis (%s, %s, %s).' % (author,title,school,address,year)
+  elif ENTRYTYPE=="mastersthesis":
+    formatted=' %s "%s", Masters thesis (%s, %s, %s).' % (author,title,school,address,year)
   elif ENTRYTYPE=="book":
     if volume!="":
       formatted=' %s "%s", vol.%s (%s, %s, %s).' % (author,title,volume,publisher,address,year)
     else:
       formatted=' %s "%s" (%s, %s, %s).' % (author,title,publisher,address,year)
+  elif ENTRYTYPE=="misc":
+    formatted=' %s "%s", %s, %s (%s).' % (author,title,note,howpublished,year)
 
   #DOI or URL is added at the end. Note that this is optional. Also, only one is mentioned, preferentially the DOI.
   try:
