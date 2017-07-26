@@ -88,15 +88,28 @@ def make_links(text,cur_key,allowed_link_seeds,backlinks,backlink):
     if cur_key != None:
       if dokukey == cur_key.strip():
         return "<b>"+dokukey+"</b>"
-    if '|' in dokukey:
-      key_text=dokukey.split('|') 
-      key=key_text[0].strip()
-      text=key_text[1].strip()
+    #Extract the three parts of a dokukey, with separators : and |
+    if ':' in dokukey:
+      p123=dokukey.split(':',1)
+      namespace=p123[0].strip()
+      p23=p123[1].strip()
     else:
-      key=dokukey
-      text=dokukey
-    if key in allowed_link_seeds.keys():
-      value=allowed_link_seeds[key]
+      namespace=""
+      p23=dokukey
+    if '|' in p23:
+      p23_split=p23.split('|',1) 
+      key=p23_split[0].strip()
+      text=p23_split[1].strip()
+    else:
+      key=p23
+      text=p23
+    if namespace=="":
+      linkseed=key
+    else:
+      linkseed=namespace+'_'+key
+
+    if linkseed in allowed_link_seeds.keys():
+      value=allowed_link_seeds[linkseed]
       if "input_variable in " in value:
         # This is a link to an input variable
         varfile=value[18:]
@@ -125,7 +138,7 @@ def make_links(text,cur_key,allowed_link_seeds,backlinks,backlink):
 
     return '<a href="#">[[FAKE LINK:'+key+']]</a>'
 
-  p=re.compile("\\[\\[([a-zA-Z0-9_ */<>.|:+]*)\\]\\]")
+  p=re.compile("\\[\\[([a-zA-Z0-9_ */<>.|:+#]*)\\]\\]")
   if text is None:
     return ""
   new_text=p.sub(replace_link,text)
