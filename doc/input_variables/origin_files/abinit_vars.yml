@@ -12923,7 +12923,7 @@
         while the position of the slab edges along z is defined through
         the input variables [[slabzbeg]] and [[slabzend]].
         </p>
-    topics: otherGS_sla
+    topics: otherGS_slab
     varfile: vargs
     vartype: integer
 - !variable
