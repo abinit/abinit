@@ -124,9 +124,11 @@ for infos_dir in list_infos_dir:
     with open(path_ymlfile, 'r') as f:
       try:
         yml_in[yml_file] = yaml.load(f)
-      except ScannerError as error:
-        print(" [Complement of information from generate_doc.py] Likely a forbidden ':' sign in the line and file mentioned below.")
-        print (error)
+      except:
+        print("\n\n... ERROR ...\n[Complement of information from generate_doc.py]")
+        print("Look for ... a forbidden ':' sign in the line and file mentioned below,")
+        print("      or ... an incorrect indentation in the line and file mentioned below.\n")
+        raise
 
 # These ones are quite often used, so copy them ...
 abinit_vars=yml_in["abinit_vars"]
@@ -178,9 +180,11 @@ print("Generated "+path_ymlfile+", to contain the list of automatic test input f
 with open(path_ymlfile, 'r') as f:
   try:
     topics_in_tests = yaml.load(f)
-  except ScannerError as error:
-    print(" [Complement of information from generate_doc.py] Likely a forbidden ':' sign in the line and file mentioned below.")
-    print (error)
+  except:
+    print("\n\n... ERROR ...\n[Complement of information from generate_doc.py]")
+    print("Look for ... a forbidden ':' sign in the line and file mentioned below,")
+    print("      or ... an incorrect indentation in the line and file mentioned below.\n")
+    raise
 try :
   rm_cmd = "rm topics/generated_files/topics_in_tests.txt"
   retcode = os.system(rm_cmd)
@@ -776,7 +780,13 @@ for topic_name in list_of_topics:
   path_ymlfile="topics/origin_files/topic_"+topic_name+".yml"
   print("Read "+path_ymlfile+" to initiate the topic '"+topic_name+"' ... ",end="")
   with open(path_ymlfile, 'r') as f:
-    topic_yml = yaml.load(f)
+    try:
+      topic_yml = yaml.load(f)
+    except:
+      print("\n\n... ERROR ...\n[Complement of information from generate_doc.py]")
+      print("Look for ... a forbidden ':' sign in the line and file mentioned below,")
+      print("      or ... an incorrect indentation in the line and file mentioned below.\n")
+      raise
   topic=topic_yml[0]
   dic_keyword_name[topic.keyword]=topic_name
   dic_keyword_howto[topic.keyword]=topic.howto
