@@ -333,6 +333,15 @@
   archiveprefix : arXiv:cond-mat.str-el
 -
   ENTRYTYPE : article
+  ID : Bergeron2016
+  author : D. Bergeron and A.-M.S. Tremblay
+  title : Algorithms for optimized maximum entropy and diagnostic tools for analytic continuation
+  journal : Phys. Rev. E
+  year : 2016
+  volume : 94
+  pages : 023303
+-
+  ENTRYTYPE : article
   ID : Bieder2014
   author : Bieder, J. and Amadon, B.
   title : Thermodynamics of the $\alpha$-$\gamma$ transition in cerium from first principles
@@ -590,6 +599,15 @@
   pages : 054201
   publisher : APS
   number : 5
+-
+  ENTRYTYPE : article
+  ID : Fresard1997
+  author : Raymond Fr\'esard and Gabriel Kotliar
+  title : Interplay of Mott transition and ferromagnetism in the orbitally degenerate Hubbard model
+  journal : Phys. Rev. B
+  year : 1997
+  volume : 56
+  pages : 12909
 -
   ENTRYTYPE : article
   ID : Freund1995
@@ -1183,6 +1201,15 @@
   year : 2010
   volume : 105
   pages : 196401
+-
+  ENTRYTYPE : article
+  ID : Lechermann2006
+  author : F. Lechermann, A. Georges, A. Poteryaev, S. Biermann, M. Posternak, A. Yamasaki, and O. K. Andersen
+  title : Dynamical mean-field theory using Wannier functions: A flexible route to electronic structure calculations of strongly correlated materials
+  journal : Phys. Rev. B
+  year : 2006
+  volume : 74
+  pages : 125120
 -
   ENTRYTYPE : article
   ID : Lee1995
