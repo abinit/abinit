@@ -134,10 +134,10 @@
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% test_chain =  temp_1.in, temp_2.in,  temp_3.in, temp_4.in
+#%% test_chain =  tdepes_1.in, tdepes_2.in,  tdepes_3.in, tdepes_4.in
 #%% [files]
 #%% files_to_test = 
-#%%   temp_4.out,  tolnlines= 600, tolabs=  1.000e-02, tolrel=  1.000e-02, fld_options=-medium
+#%%   tdepes_4.out,  tolnlines= 600, tolabs=  1.000e-02, tolrel=  1.000e-02, fld_options=-medium
 #%% psp_files =  6c.pspnc
 #%% [paral_info]
 #%% max_nprocs = 2

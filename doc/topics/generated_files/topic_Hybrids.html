@@ -18,7 +18,7 @@
 <script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
 
  <h3><b>Table of content: </b></h3> 
- <ul> <li><a href="topic_Hybrids.html#1">1</a>. Introduction.</ul>
+ <ul> <li><a href="topic_Hybrids.html#1">1</a>. Introduction.<li><a href="topic_Hybrids.html#2">2</a>. Related input variables.<li><a href="topic_Hybrids.html#3">3</a>. Selected input files.</ul>
 
 &nbsp; 
 <HR ALIGN=left> 
@@ -27,7 +27,7 @@
 
 
 The Fock exchange term has been implemented in ABINIT, both in the norm-conserving pseudopotential framework and in the PAW one. 
-Some details about the implementation in ABINIT can be found <a href="../documents/hf-2017.pdf">here</a>.
+Some details about the implementation in ABINIT can be found <a href="../documents/hybrids-2017.pdf">here</a>.
 <br/> For an ABINIT user, to make a calculation of Fock exchange:
 <br/>- do a first GGA dataset for the ground state
 <br/>- do a second dataset for the Fock calculation choosing <a href="../../input_variables/generated_files/varbas.html#ixc">ixc</a>=40-42 (HF, PBE0, PBE0-1/3), -406 (PBE0-Libxc), -456 (PBE0-1/3 Libxc), or -427, -428 (HSE03, HSE06).
@@ -41,6 +41,33 @@ Some details about the implementation in ABINIT can be found <a href="../documen
 
 
 
+&nbsp; 
+<HR ALIGN=left> 
+<a name="2">&nbsp;</a>
+<h3><b>2. Related input variables.</b></h3>
+
+
+<p>Compulsory input variables:<p>... <a href="../../input_variables/generated_files/varbas.html#ixc">ixc</a>   [Integer for eXchange-Correlation choice]<br>
+<p>Useful input variables:<p>... <a href="../../input_variables/generated_files/varbas.html#nbandhf">nbandhf</a>   [Number of BANDs for (Hartree)-Fock exact exchange]<br>
+... <a href="../../input_variables/generated_files/varpar.html#nphf">nphf</a>   [Number of Processors for (Hartree)-Fock exact exchange]<br>
+<p>Relevant internal variables:<p>... <a href="../../input_variables/generated_files/varint.html#usefock">%usefock</a>   [USE FOCK exact exchange]<br>
+<p>Input variables for experts:<p>... <a href="../../input_variables/generated_files/vardev.html#cgtyphf">cgtyphf</a>   [Conjugate Gradient TYPe used for Hartree Fock exact exchange]<br>
+... <a href="../../input_variables/generated_files/varbas.html#nkpthf">nkpthf</a>   [Number of K - Points for (Hartree) Fock exact exchange]<br>
+... <a href="../../input_variables/generated_files/vardev.html#nnsclohf">nnsclohf</a>   [Number of Non-Self Consistent LOops for (Hartree)-Fock exact exchange]<br>
+
+
+&nbsp; 
+<HR ALIGN=left> 
+<a name="3">&nbsp;</a>
+<h3><b>3. Selected input files.</b></h3>
+
+
+The user can find some related example input files in the ABINIT package in the directory /tests, or on the Web:
+<p> tests/v7/Input: <a href="../../tests/v7/Input/t65.in">t65.in</a> 
+<a href="../../tests/v7/Input/t66.in">t66.in</a> 
+<p> tests/paral/Input: <a href="../../tests/paral/Input/t93.in">t93.in</a> 
+<a href="../../tests/paral/Input/t94.in">t94.in</a> 
+<br>
 
 
 <script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
