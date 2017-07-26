@@ -181,7 +181,6 @@ with open(path_ymlfile, 'r') as f:
   except ScannerError as error:
     print(" [Complement of information from generate_doc.py] Likely a forbidden ':' sign in the line and file mentioned below.")
     print (error)
-
 try :
   rm_cmd = "rm topics/generated_files/topics_in_tests.txt"
   retcode = os.system(rm_cmd)
@@ -530,7 +529,7 @@ for (speckey, specval) in list_specials:
   backlink= ' &nbsp; <a href="../../input_variables/generated_files/specials.html#%s">%s</a> &nbsp; ' %(speckey,speckey)
   cur_content = "<br><font id=\"title\"><a name=\""+speckey+"\">"+speckey+"</a></font>\n"
   cur_content += "<br><font id=\"text\">\n"
-  cur_content += "<p>\n"+doku2html(make_links(specval,speckey,allowed_link_seeds,backlinks,backlink))+"\n"
+  cur_content += "<p>\n"+make_links(specval,speckey,allowed_link_seeds,backlinks,backlink)+"\n"
   cur_content += "</font>"
   cur_content += "<br><br><a href=#top>Go to the top</a>\n"
   cur_content += "<B> | </B><a href=\"allvariables.html#top\">Complete list of input variables</a><hr>\n"
@@ -588,13 +587,13 @@ for i, var in enumerate(abinit_vars):
     cur_content += "</font>\n" 
     # Requires
     if var.requires is not None and var.requires != "":
-      cur_content += "<br><br><font id=\"requires\">\nOnly relevant if "+doku2html(make_links(var.requires,var.abivarname,allowed_link_seeds,backlinks,backlink))+"\n</font>\n"
+      cur_content += "<br><br><font id=\"requires\">\nOnly relevant if "+make_links(var.requires,var.abivarname,allowed_link_seeds,backlinks,backlink)+"\n</font>\n"
     # Excludes
     if var.excludes is not None and var.excludes != "":
-      cur_content += "<br><br><font id=\"excludes\">\nThe use of this variable forbids the use of "+doku2html(make_links(var.excludes,var.abivarname,allowed_link_seeds,backlinks,backlink))+"\n</font>\n"
+      cur_content += "<br><br><font id=\"excludes\">\nThe use of this variable forbids the use of "+make_links(var.excludes,var.abivarname,allowed_link_seeds,backlinks,backlink)+"\n</font>\n"
     # Text
     cur_content += "<br><font id=\"text\">\n"
-    cur_content += "<p>\n"+doku2html(make_links(var.text,var.abivarname,allowed_link_seeds,backlinks,backlink))+"\n"
+    cur_content += "<p>\n"+make_links(var.text,var.abivarname,allowed_link_seeds,backlinks,backlink)+"\n"
     # End the section for one variable
     cur_content += "</font>\n\n"
     cur_content += "<br><br><a href=#top>Go to the top</a>\n"
@@ -777,14 +776,7 @@ for topic_name in list_of_topics:
   path_ymlfile="topics/origin_files/topic_"+topic_name+".yml"
   print("Read "+path_ymlfile+" to initiate the topic '"+topic_name+"' ... ",end="")
   with open(path_ymlfile, 'r') as f:
-    try:
-      topic_yml = yaml.load(f)
-    except:
-      print("\n\n... ERROR ...\n[Complement of information from generate_doc.py]")
-      print("Look for ... a forbidden ':' sign in the line and file mentioned below,")
-      print("      or ... an incorrect indentation in the line and file mentioned below.\n")
-      raise
-
+    topic_yml = yaml.load(f)
   topic=topic_yml[0]
   dic_keyword_name[topic.keyword]=topic_name
   dic_keyword_howto[topic.keyword]=topic.howto
@@ -1072,7 +1064,7 @@ backlink= ' &nbsp; <a href="../../bibliography/generated_files/acknowledgments.h
 for i, bibfile_info in enumerate(yml_in["bibfiles"]):
   if bibfile_info.name.strip()=="acknowledgments":
     bibfile_intro=bibfile_info.introduction
-    bibfile_ack_intro = doku2html(make_links(bibfile_intro,None,allowed_link_seeds,backlinks,backlink))
+    bibfile_ack_intro = make_links(bibfile_intro,None,allowed_link_seeds,backlinks,backlink)
 
 ################################################################################
 # Write an ordered bib file, that allows to update the original one.

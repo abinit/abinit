@@ -49,18 +49,6 @@ def format_dimensions(dimensions):
 
 ################################################################################
 
-def doku2html(text):
-
-  def replace_link(mymatch):
-    abivarname = mymatch.group()[2:-2]
-    return "<b>"+abivarname+"</b>"
-
-  p = re.compile("\*\*([a-zA-Z0-9_ */<>.]*)\*\*")
-  text2 = p.sub(replace_link,text)
-
-  return text2
-
-################################################################################
 
 def format_default(defaultval):
 
@@ -385,7 +373,7 @@ def finalize_html(doc_html,origin_yml,dir_name,root_filname,allowed_link_seeds,b
   if origin_yml.authors != "":
     doc_html=doc_html.replace("__AUTHORS__",origin_yml.authors)
 
-  doc_html = doku2html(make_links(doc_html,None,allowed_link_seeds,backlinks,backlink))
+  doc_html = make_links(doc_html,None,allowed_link_seeds,backlinks,backlink)
 
   #Write the finalized html file.
   path_html = "%s/generated_files/%s.html" %(dir_name,full_filname)
