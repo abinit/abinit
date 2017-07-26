@@ -74,5 +74,5 @@ nphf2  2           # Number of processors for occupied states parallelization
 #%%   Test of HF in parallel. 
 #%%   NB: HF does not support MPI-IO. gmatteo will add support for HDF5 when this test
 #%%   will succeed with MPI-IO. For the time being, this test is disabled when we are in netcdf mode.
-#%% topics = hf
+#%% topics = Hybrids
 #%%<END TEST_INFO>

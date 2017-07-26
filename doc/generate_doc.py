@@ -25,14 +25,14 @@
       Example: "[[acell]]" will apear on screen as "acell".
 
    B. If tag is a bibliographical reference, mentioned in the database ~abinit/doc/bibliography/origin_files/abiref.bib,
-      "[[tag]]" will appear on screen as "tag" without the two pairs of squarebrackets.
+      "[[tag]]" will appear on screen as "[tag]" with onoly one of the two pairs of squarebrackets.
       Note that such tag must have the form of the name of the first authors, with the first letter uppercase and the other lower case,
       followed by the year of publication (four digits) and possibly a letter if more than one article would have the same tag.
-      Example: "[[Kohn1965]]" will appear on screen as "Kohn1965".
-               "[[Amadon2008b]]" will appear on screen as "Amadon2008b".
+      Example: "[[Kohn1965]]" will appear on screen as "[Kohn1965]".
+               "[[Amadon2008b]]" will appear on screen as "[Amadon2008b]".
 
    C. The tags that starts with "lesson_", "topic_", "theorydoc_", "var", "allvar", "help_" and corresponds to one of the existing
-      lessons of the tutorial, topic, theorydoc, or help files, are allowed tags. 
+      lessons of the tutorial, or one of the topics, theorydocs, input variables files, or help files, are allowed tags. 
       Most of them will appear on screen as "tag" without the two pairs of squarebrackets, EXCEPT the
       "help_XYZ" ones, that will appear as "XYZ help file".
       Examples: "[[lesson_base1]]" will appear on screen as "lesson_base1"
@@ -605,27 +605,41 @@ for i, varfile_info in enumerate(varfiles):
   if varfile=="default":
     continue
 
-  alphalinks="\n \n <hr> Go to "
+  scriptTab = "\n\
+<input type=\"text\" id=\"InputSearch\" onkeyup=\"searchInput()\" onClick=\"searchInput()\" onblur=\"defaultClick()\" placeholder=\"Search\">\n\
+"
+  alphalinks="\n \n <div class=\"TabsLetter\">"
   for i in string.ascii_uppercase:
-    alphalinks+=('<a href=#%s>%s</a> ')%(i,i)
-  alphalinks+="\n \n"
+    alphalinks+=('<a class=\"TabLetterLink" href=\"#%s\" onClick=\"openLetter(event,\'%s\')\" id="click%s">%s</a> ')%(i,i,i,i)
+  alphalinks+="</div>\n \n"
 
   #Generate the body of the table of content 
   cur_let = 'A'
   toc_body=""
   if varfile=="allvariables":
-    toc_body+=alphalinks+"<hr>"
-  toc_body += " <br><a id='%s'></a>"%(cur_let)+cur_let+".\n"
+    toc_body+=scriptTab+alphalinks
+  else :
+    toc_body += " <br><a id='%s'></a>"%(cur_let)+cur_let+".\n"
+
   if varfile=="allvariables":
+    toc_body += " <ul id=\"Letters\">\n"
+    toc_body += " <li>\n<ul id=\"%s\" class=\"TabContentLetter\">\n"%(cur_let)
+    toc_body += " <li class=\"HeaderLetter\">%s</li>\n"%(cur_let)
     for i, var in enumerate(abinit_vars):
       while not var.abivarname.startswith(cur_let.lower()):
         cur_let = chr(ord(cur_let)+1)
-        toc_body += " <p><a id='%s'></a>"%(cur_let)+cur_let+".\n"
+        toc_body += " </ul></li>\n<li>\n<ul id=\"%s\" class=\"TabContentLetter\">\n"%(cur_let)
+        toc_body += " <li class=\"HeaderLetter col-s-6 col-m-3 col-l-2 col-xl-2 col-xxl-1\">%s</li>\n"%(cur_let)
       abivarname=var.abivarname
       if var.characteristics is not None and '[[INTERNAL_ONLY]]' in var.characteristics:
         abivarname = '%'+abivarname
-      curlink = " <a href=\""+var.varfile+".html#"+var.abivarname+"\">"+abivarname+"</a>&nbsp;&nbsp;\n"
+      curlink = " <li class=\"col-s-6 col-m-3 col-l-2 col-xl-2 col-xxl-1\"><a href=\""+var.varfile+".html#"+var.abivarname+"\">"+abivarname+"</a></li>\n"
       toc_body += curlink
+    toc_body += "</ul></li></ul>\n\
+<script>\n\
+defaultClick(true);\n\
+</script>\n\
+"
   elif varfile == "specials":
     for (speckey, specval) in list_specials:
       while not speckey.lower().startswith(cur_let.lower()):
@@ -792,7 +806,7 @@ for topic_name in list_of_topics:
       item_num="%d" % item_toc
       sec_number[j]=item_num
       toc += '<li><a href="topic_'+topic_name+'.html#'+item_num+'">'+item_num+'</a>. '+title[j]
-      
+
   toc+= "</ul>"
 
   #Generate a first version of the html file, in the order "header" ... up to the "end"
@@ -836,12 +850,6 @@ for topic_name in list_of_topics:
 # Note : they are ordered according to the keyword list
 
 list_keywords=sorted(dic_keyword_name.keys(), key= lambda item: item.upper())
-
-#DEBUG
-print("")
-print(" list_keywords:",list_keywords)
-print("")
-#ENDDEBUG
 
 toc_all = '<a name="list"></a>'
 toc_all += '<h3><b> Alphabetical list of all "How to ?" documentation topics.</b></h3>'

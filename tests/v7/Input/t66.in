@@ -75,5 +75,5 @@ nbandhf2 4         # number of occupied states
 #%% authors = C. Martins
 #%% keywords = HF, PBE0, FAILS_IFMPI
 #%% description = Test of PBE0 in sequential case
-#%% topics = hf
+#%% topics = Hybrids
 #%%<END TEST_INFO>
