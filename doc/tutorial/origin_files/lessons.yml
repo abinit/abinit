@@ -65,7 +65,7 @@
     name : fold2Bloch
     keyword : Lesson on fold2Bloch
     authors : SS,XG
-    subtitle : Unfolding the electronic structur of a lattice of Hydrogen atoms.
+    subtitle : Unfolding the electronic structure of a lattice of Hydrogen atoms.
 - !components
     name : gw1
     keyword : First lesson on GW

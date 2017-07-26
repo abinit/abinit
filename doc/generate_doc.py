@@ -25,14 +25,14 @@
       Example: "[[acell]]" will apear on screen as "acell".
 
    B. If tag is a bibliographical reference, mentioned in the database ~abinit/doc/bibliography/origin_files/abiref.bib,
-      "[[tag]]" will appear on screen as "tag" without the two pairs of squarebrackets.
+      "[[tag]]" will appear on screen as "[tag]" with onoly one of the two pairs of squarebrackets.
       Note that such tag must have the form of the name of the first authors, with the first letter uppercase and the other lower case,
       followed by the year of publication (four digits) and possibly a letter if more than one article would have the same tag.
-      Example: "[[Kohn1965]]" will appear on screen as "Kohn1965".
-               "[[Amadon2008b]]" will appear on screen as "Amadon2008b".
+      Example: "[[Kohn1965]]" will appear on screen as "[Kohn1965]".
+               "[[Amadon2008b]]" will appear on screen as "[Amadon2008b]".
 
    C. The tags that starts with "lesson_", "topic_", "theorydoc_", "var", "allvar", "help_" and corresponds to one of the existing
-      lessons of the tutorial, topic, theorydoc, or help files, are allowed tags. 
+      lessons of the tutorial, or one of the topics, theorydocs, input variables files, or help files, are allowed tags. 
       Most of them will appear on screen as "tag" without the two pairs of squarebrackets, EXCEPT the
       "help_XYZ" ones, that will appear as "XYZ help file".
       Examples: "[[lesson_base1]]" will appear on screen as "lesson_base1"
@@ -122,7 +122,11 @@ for infos_dir in list_infos_dir:
     path_ymlfile="%s/origin_files/%s.yml"%(infos_dir["dir_name"],yml_file)
     print("Read "+path_ymlfile+" "+msgs[yml_file])
     with open(path_ymlfile, 'r') as f:
-      yml_in[yml_file] = yaml.load(f)
+      try:
+        yml_in[yml_file] = yaml.load(f)
+      except ScannerError as error:
+        print(" [Complement of information from generate_doc.py] Likely a forbidden ':' sign in the line and file mentioned below.")
+        print (error)
 
 # These ones are quite often used, so copy them ...
 abinit_vars=yml_in["abinit_vars"]
@@ -172,7 +176,12 @@ for tests_dir in yml_in["tests_dirs"] :
 path_ymlfile="topics/generated_files/topics_in_tests.yml"
 print("Generated "+path_ymlfile+", to contain the list of automatic test input files relevant for each topic ...")
 with open(path_ymlfile, 'r') as f:
-  topics_in_tests = yaml.load(f)
+  try:
+    topics_in_tests = yaml.load(f)
+  except ScannerError as error:
+    print(" [Complement of information from generate_doc.py] Likely a forbidden ':' sign in the line and file mentioned below.")
+    print (error)
+
 try :
   rm_cmd = "rm topics/generated_files/topics_in_tests.txt"
   retcode = os.system(rm_cmd)
@@ -205,7 +214,7 @@ for item in bibtex_items:
   item_dic={}
   item=item.split('{',1)
   entrytype=item[0].strip().lower()
-  if not entrytype in ["article","book","incollection","phdthesis","masterthesis"]:
+  if not entrytype in ["article","book","incollection","phdthesis","mastersthesis","misc"]:
     print(" Not able to treat the following entrytype:",entrytype)
     raise
 
@@ -231,7 +240,6 @@ for item in bibtex_items:
   item[1]=item[1].replace('opturl','url')
   item[1]=item[1].replace('optURI','url')
   item[1]=item[1].replace('adsurl','url')
-  item[1]=item[1].replace('href','url')
 
   #Take care of other fields : split the different lines to be examined.
   lines=item[1].splitlines()
@@ -309,7 +317,10 @@ for (i,ref) in enumerate(bibtex_dics):
   publisher=""
   school=""
   address=""
+  note=""
+  howpublished=""
   for key in ref.keys():
+
     if key=='ENTRYTYPE':
       ENTRYTYPE=ref.values()[position].strip()
     elif key=='ID':
@@ -341,13 +352,16 @@ for (i,ref) in enumerate(bibtex_dics):
       school=ref.values()[position].strip()
     elif key=='address':
       address=ref.values()[position].strip()
+    elif key=='note':
+      note=ref.values()[position].strip()
+    elif key=='howpublished':
+      howpublished=ref.values()[position].strip()
     position+=1
 
   # Reformat the list of authors, starting with the initials.
   author=reformat_namelist(author)
   editor=reformat_namelist(editor)
 
-  #At present, treat normal journals, eprints, articles in collection, books.
   #For normal journal articles, needs both volume and pages.
   formatted=""
   if ENTRYTYPE=="article" and flag_pages==2:
@@ -358,13 +372,15 @@ for (i,ref) in enumerate(bibtex_dics):
     formatted=' %s "%s", in "%s", Eds. %s (%s, %s, %s), pp. %s.' % (author,title,booktitle,editor,publisher,address,year,pages)
   elif ENTRYTYPE=="phdthesis":
     formatted=' %s "%s", PhD thesis (%s, %s, %s).' % (author,title,school,address,year)
-  elif ENTRYTYPE=="masterthesis":
-    formatted=' %s "%s", Master thesis (%s, %s, %s).' % (author,title,school,address,year)
+  elif ENTRYTYPE=="mastersthesis":
+    formatted=' %s "%s", Masters thesis (%s, %s, %s).' % (author,title,school,address,year)
   elif ENTRYTYPE=="book":
     if volume!="":
       formatted=' %s "%s", vol.%s (%s, %s, %s).' % (author,title,volume,publisher,address,year)
     else:
       formatted=' %s "%s" (%s, %s, %s).' % (author,title,publisher,address,year)
+  elif ENTRYTYPE=="misc":
+    formatted=' %s "%s", %s, %s (%s).' % (author,title,note,howpublished,year)
 
   #DOI or URL is added at the end. Note that this is optional. Also, only one is mentioned, preferentially the DOI.
   try:
@@ -605,27 +621,41 @@ for i, varfile_info in enumerate(varfiles):
   if varfile=="default":
     continue
 
-  alphalinks="\n \n <hr> Go to "
+  scriptTab = "\n\
+<input type=\"text\" id=\"InputSearch\" onkeyup=\"searchInput()\" onClick=\"searchInput()\" onblur=\"defaultClick()\" placeholder=\"Search\">\n\
+"
+  alphalinks="\n \n <div class=\"TabsLetter\">"
   for i in string.ascii_uppercase:
-    alphalinks+=('<a href=#%s>%s</a> ')%(i,i)
-  alphalinks+="\n \n"
+    alphalinks+=('<a class=\"TabLetterLink" href=\"#%s\" onClick=\"openLetter(event,\'%s\')\" id="click%s">%s</a> ')%(i,i,i,i)
+  alphalinks+="</div>\n \n"
 
   #Generate the body of the table of content 
   cur_let = 'A'
   toc_body=""
   if varfile=="allvariables":
-    toc_body+=alphalinks+"<hr>"
-  toc_body += " <br><a id='%s'></a>"%(cur_let)+cur_let+".\n"
+    toc_body+=scriptTab+alphalinks
+  else :
+    toc_body += " <br><a id='%s'></a>"%(cur_let)+cur_let+".\n"
+
   if varfile=="allvariables":
+    toc_body += " <ul id=\"Letters\">\n"
+    toc_body += " <li>\n<ul id=\"%s\" class=\"TabContentLetter\">\n"%(cur_let)
+    toc_body += " <li class=\"HeaderLetter\">%s</li>\n"%(cur_let)
     for i, var in enumerate(abinit_vars):
       while not var.abivarname.startswith(cur_let.lower()):
         cur_let = chr(ord(cur_let)+1)
-        toc_body += " <p><a id='%s'></a>"%(cur_let)+cur_let+".\n"
+        toc_body += " </ul></li>\n<li>\n<ul id=\"%s\" class=\"TabContentLetter\">\n"%(cur_let)
+        toc_body += " <li class=\"HeaderLetter col-s-6 col-m-3 col-l-2 col-xl-2 col-xxl-1\">%s</li>\n"%(cur_let)
       abivarname=var.abivarname
       if var.characteristics is not None and '[[INTERNAL_ONLY]]' in var.characteristics:
         abivarname = '%'+abivarname
-      curlink = " <a href=\""+var.varfile+".html#"+var.abivarname+"\">"+abivarname+"</a>&nbsp;&nbsp;\n"
+      curlink = " <li class=\"col-s-6 col-m-3 col-l-2 col-xl-2 col-xxl-1\"><a href=\""+var.varfile+".html#"+var.abivarname+"\">"+abivarname+"</a></li>\n"
       toc_body += curlink
+    toc_body += "</ul></li></ul>\n\
+<script>\n\
+defaultClick(true);\n\
+</script>\n\
+"
   elif varfile == "specials":
     for (speckey, specval) in list_specials:
       while not speckey.lower().startswith(cur_let.lower()):
@@ -747,7 +777,14 @@ for topic_name in list_of_topics:
   path_ymlfile="topics/origin_files/topic_"+topic_name+".yml"
   print("Read "+path_ymlfile+" to initiate the topic '"+topic_name+"' ... ",end="")
   with open(path_ymlfile, 'r') as f:
-    topic_yml = yaml.load(f)
+    try:
+      topic_yml = yaml.load(f)
+    except:
+      print("\n\n... ERROR ...\n[Complement of information from generate_doc.py]")
+      print("Look for ... a forbidden ':' sign in the line and file mentioned below,")
+      print("      or ... an incorrect indentation in the line and file mentioned below.\n")
+      raise
+
   topic=topic_yml[0]
   dic_keyword_name[topic.keyword]=topic_name
   dic_keyword_howto[topic.keyword]=topic.howto
@@ -792,7 +829,7 @@ for topic_name in list_of_topics:
       item_num="%d" % item_toc
       sec_number[j]=item_num
       toc += '<li><a href="topic_'+topic_name+'.html#'+item_num+'">'+item_num+'</a>. '+title[j]
-      
+
   toc+= "</ul>"
 
   #Generate a first version of the html file, in the order "header" ... up to the "end"
@@ -836,12 +873,6 @@ for topic_name in list_of_topics:
 # Note : they are ordered according to the keyword list
 
 list_keywords=sorted(dic_keyword_name.keys(), key= lambda item: item.upper())
-
-#DEBUG
-print("")
-print(" list_keywords:",list_keywords)
-print("")
-#ENDDEBUG
 
 toc_all = '<a name="list"></a>'
 toc_all += '<h3><b> Alphabetical list of all "How to ?" documentation topics.</b></h3>'
@@ -1054,7 +1085,7 @@ cur_let = 'A'
 alphalinks="\n \n <hr> Go to "
 for i in string.ascii_uppercase:
   alphalinks+=('<a href=#%s>%s</a> ')%(i,i)
-alphalinks+="\n \n"
+alphalinks+=" or <a href=#>top</a> \n \n"
 bibliography_content+=('<a id="%s"></a>')%(cur_let)+alphalinks+('<hr><hr><h2>%s</h2> \n \n')%(cur_let)
 for ref in bibtex_dics:
   entrytype=ref["ENTRYTYPE"]

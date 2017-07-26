@@ -253,13 +253,13 @@ def assemble_html(origin_yml_files,suppl_components,dir_name,root_filname,allowe
 
   # Generate each "normal" file : assemble the content, apply global transformations, then write.
   list_names=[]
-  list_subtitles=[]
+  dic_subtitles={}
   for i, origin_yml in enumerate(origin_yml_files):
     name = origin_yml.name
     if name=="default":
       continue
     list_names.append(name)
-    list_subtitles.append(origin_yml.keyword+' - '+origin_yml.subtitle)
+    dic_subtitles[name]=origin_yml.keyword+' - '+origin_yml.subtitle 
   
     if root_filname != "":
       full_filname=root_filname+"_"+name
@@ -338,7 +338,7 @@ def assemble_html(origin_yml_files,suppl_components,dir_name,root_filname,allowe
     else:
       full_filname=name
 
-    toc_all = toc_all + '<br><a href="%s.html"/>%s</a> [%s] \n' %(full_filname,name,list_subtitles[ii])
+    toc_all = toc_all + '<br><a href="%s.html"/>%s</a> [%s] \n' %(full_filname,name,dic_subtitles[name])
 
   all_files_html=""
   spec={'users':'help files','tutorial':'lessons of the tutorial',

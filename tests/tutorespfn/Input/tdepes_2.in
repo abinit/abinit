@@ -29,12 +29,12 @@
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = anaddb
-#%% test_chain =  temp_1.in, temp_2.in, temp_3.in,  temp_4.in
-#%% input_ddb = temp_1o_DS3_DDB
-#%% input_gkk = temp_1o_DS3_EIGR2D
+#%% test_chain =  tdepes_1.in, tdepes_2.in, tdepes_3.in,  tdepes_4.in
+#%% input_ddb = tdepes_1o_DS3_DDB
+#%% input_gkk = tdepes_1o_DS3_EIGR2D
 #%% [files]
 #%% files_to_test =
-#%%   temp_2.out , tolnlines=  0, tolabs=  0.000e+00, tolrel=  0.000e+00, fld_options=-easy
+#%%   tdepes_2.out , tolnlines=  0, tolabs=  0.000e+00, tolrel=  0.000e+00, fld_options=-easy
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]

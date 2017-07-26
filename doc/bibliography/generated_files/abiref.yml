@@ -333,6 +333,15 @@
   archiveprefix : arXiv:cond-mat.str-el
 -
   ENTRYTYPE : article
+  ID : Bergeron2016
+  author : D. Bergeron and A.-M.S. Tremblay
+  title : Algorithms for optimized maximum entropy and diagnostic tools for analytic continuation
+  journal : Phys. Rev. E
+  year : 2016
+  volume : 94
+  pages : 023303
+-
+  ENTRYTYPE : article
   ID : Bieder2014
   author : Bieder, J. and Amadon, B.
   title : Thermodynamics of the $\alpha$-$\gamma$ transition in cerium from first principles
@@ -534,6 +543,13 @@
   keywords : DFTU interaction, cRPA
   refid : 10.1103/PhysRevB.71.035105
 -
+  ENTRYTYPE : book
+  ID : Coleman2015
+  author : Piers Coleman
+  title : Introduction to Many-Body Physics
+  year : 2015
+  publisher : Cambridge University Press
+-
   ENTRYTYPE : article
   ID : Czyzyk1994
   author : M. T. Czyzyk and G. A. Sawatzky
@@ -583,6 +599,15 @@
   pages : 054201
   publisher : APS
   number : 5
+-
+  ENTRYTYPE : article
+  ID : Fresard1997
+  author : Raymond Fr\'esard and Gabriel Kotliar
+  title : Interplay of Mott transition and ferromagnetism in the orbitally degenerate Hubbard model
+  journal : Phys. Rev. B
+  year : 1997
+  volume : 56
+  pages : 12909
 -
   ENTRYTYPE : article
   ID : Freund1995
@@ -1178,6 +1203,15 @@
   pages : 196401
 -
   ENTRYTYPE : article
+  ID : Lechermann2006
+  author : F. Lechermann, A. Georges, A. Poteryaev, S. Biermann, M. Posternak, A. Yamasaki, and O. K. Andersen
+  title : Dynamical mean-field theory using Wannier functions: A flexible route to electronic structure calculations of strongly correlated materials
+  journal : Phys. Rev. B
+  year : 2006
+  volume : 74
+  pages : 125120
+-
+  ENTRYTYPE : article
   ID : Lee1995
   author : C. Lee and X. Gonze
   title : Ab-initio calculation of the thermodynamic properties and atomic temperature factors of SiO$_2$ $\alpha$-quartz and stishovite
@@ -1609,7 +1643,7 @@
   pages : 096102
   doi : 10.1103/PhysRevLett.103.096102
 -
-  ENTRYTYPE : masterthesis
+  ENTRYTYPE : mastersthesis
   ID : Rostgaard2006
   author : C. Rostgaard
   title : Exact exchange in density functional calculations
@@ -1663,10 +1697,8 @@
   year : 1992
   volume : 31
   pages : 187--188
-  publisher : Hüthig & Wepf Verlag
-  issn : 1521-3773
-  number : 2
   doi : 10.1002/anie.199201871
+  number : 2
 -
   ENTRYTYPE : article
   ID : Savrasov1996
@@ -1816,6 +1848,15 @@
   url : http://link.aps.org/doi/10.1103/PhysRevLett.102.226401
   publisher : American Physical Society
   issue : 22
+-
+  ENTRYTYPE : misc
+  ID : Tremblay2017
+  author : Andr\'e-Marie Tremblay
+  title : Probl\`eme \`a N-corps
+  year : 2017
+  url : https://www.physique.usherbrooke.ca/pages/en/node/3436
+  note : Notes de cours
+  howpublished : available <a href="https://www.physique.usherbrooke.ca/pages/en/node/3436">here</a>
 -
   ENTRYTYPE : article
   ID : Troullier1991

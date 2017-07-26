@@ -13,6 +13,7 @@ except ImportError:
 
 def main():
   path = '../input_variables/origin_files/'
+  path_topics = '../topics/origin_files/'
   with open(path+'abinit_vars.yml', 'r') as f:
     variables = yaml.load(f)
   with open(path+'characteristics.yml', 'r') as f:
@@ -22,6 +23,15 @@ def main():
     varfile_names=[]
     for varfile in list_varfiles:
       varfile_names.append(varfile.name)
+  with open(path_topics+'list_of_topics.yml', 'r') as f:
+    topics = yaml.load(f)
+    for i,item in enumerate(topics) :
+       topics[i]=item.strip()
+  with open(path_topics+'list_tribes.yml', 'r') as f:
+    tribes = yaml.load(f)
+    tribe_names=[]
+    for item in tribes:
+      tribe_names.append(item[0].strip())
 
   retcode = 0
   for var in variables:
@@ -36,6 +46,22 @@ def main():
     if var.vartype is None:
       print('FAIL: ', abivarname, ' does not have a vartype')
       retcode += 1
+
+    if var.topics is None:
+      print('FAIL: ', abivarname, ' does not have at least one topic and the associated tribe')
+      retcode += 1
+    else:
+      topics_name_tribe = var.topics.split(',')
+      for topic_name_tribe in topics_name_tribe:
+        name_tribe = topic_name_tribe.split('_')
+        if not name_tribe[0].strip() in topics:
+          print('FAIL: ', abivarname, ' delivers topicname_tribe ',name_tribe,
+                ' with topicname ',name_tribe[0].strip(),' that does not belong to the allowed list')
+          retcode += 1
+        if not name_tribe[1].strip() in tribe_names:
+          print('FAIL: ', abivarname, ' delivers topicname_tribe ',name_tribe,
+                ' with tribe ',name_tribe[1].strip(),' that does not belong to the allowed list')
+          retcode += 1
 
     if var.characteristics is not None:
       if not isinstance(var.characteristics, list):
@@ -61,6 +87,10 @@ def main():
       if not isinstance(var.varfile, str) or var.varfile not in varfile_names:
         print('FAIL: the field varfile of ', abivarname, ' should be one of the valid varfiles')
         retcode += 1
+ 
+  if retcode != 0:
+    print('Found ',retcode,' FAIL.')
+    print('Number of variables in ABINIT :',len(variables))
 
   return retcode
 

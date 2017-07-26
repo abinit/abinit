@@ -39,8 +39,8 @@
 - tests/paral/Input/t51.in:#%% topics = parallelism
 - tests/paral/Input/t54.in:#%% topics = nonlinear
 - tests/paral/Input/t77.in:#%% topics = GWls
-- tests/paral/Input/t93.in:#%% topics = hf
-- tests/paral/Input/t94.in:#%% topics = hf
+- tests/paral/Input/t93.in:#%% topics = Hybrids
+- tests/paral/Input/t94.in:#%% topics = Hybrids
 - tests/v1/Input/t02.in:#%% topics = GSgeneral
 - tests/v1/Input/t04.in:#%% topics = GSgeneral
 - tests/v1/Input/t10.in:#%% topics = xc
@@ -217,8 +217,8 @@
 - tests/v7/Input/t57.in:#%% topics = TDep
 - tests/v7/Input/t58.in:#%% topics = TDep
 - tests/v7/Input/t59.in:#%% topics = TDep
-- tests/v7/Input/t65.in:#%% topics = hf
-- tests/v7/Input/t66.in:#%% topics = hf
+- tests/v7/Input/t65.in:#%% topics = Hybrids
+- tests/v7/Input/t66.in:#%% topics = Hybrids
 - tests/v7/Input/t71.in:#%% topics = Wannier
 - tests/v7/Input/t72.in:#%% topics = Wannier
 - tests/v7/Input/t78.in:#%% topics = CRPA
