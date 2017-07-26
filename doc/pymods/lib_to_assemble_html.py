@@ -108,9 +108,23 @@ def make_links(text,cur_key,allowed_link_seeds,backlinks,backlink):
     else:
       linkseed=namespace+'_'+key
 
+    #The allowed namespaces are :
+    dic_namespaces={"lesson":"tutorial/generated_files",
+                    "theorydoc":"theory/generated_files",
+                    "help":"users/generated_files",
+                    "topic":"topics/generated_files"}
+
     if linkseed in allowed_link_seeds.keys():
       value=allowed_link_seeds[linkseed]
-      if "input_variable in " in value:
+      #Treat first the allowed namespaces
+      if value in dic_namespaces.keys():
+        dir=dic_namespaces[value]
+        #This is an exception ...
+        if value=="help" and namespace=="":
+          text=key[5:]+' help file'
+        return '<a href="../../%s/%s.html">%s</a>' %(dir,linkseed,text)
+      #Treat everything else
+      elif "input_variable in " in value:
         # This is a link to an input variable
         varfile=value[18:]
         return '<a href="../../input_variables/generated_files/'+varfile+".html#"+key+'">'+text+'</a>'
@@ -120,12 +134,6 @@ def make_links(text,cur_key,allowed_link_seeds,backlinks,backlink):
         return '<a href="../../input_variables/generated_files/specials.html#'+key+'">'+text+'</a>'
       elif value=="varfile":
         return '<a href="../../input_variables/generated_files/'+key+'.html">'+text+'</a>'
-      elif value=="lesson":
-        return '<a href="../../tutorial/generated_files/'+key+'.html">'+text+'</a>'
-      elif value=="theorydoc":
-        return '<a href="../../theory/generated_files/'+key+'.html">'+text+'</a>'
-      elif value=="helpfile":
-        return '<a href="../../users/generated_files/'+key+'.html">'+key[5:]+' help file</a>'
       elif value=="in_tests":
         return '<a href="../../'+key+'">&#126;abinit/'+key+'</a>'
       elif value=="allvariables":

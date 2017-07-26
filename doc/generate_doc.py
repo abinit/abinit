@@ -482,8 +482,8 @@ for i, theory_info in enumerate(yml_in["theorydocs"]):
   theorydoc = theory_info.name
   allowed_link_seeds["theorydoc_"+theorydoc]="theorydoc"
 for i, help_info in enumerate(yml_in["helps"]):
-  helpfile = help_info.name
-  allowed_link_seeds["help_"+helpfile]="helpfile"
+  help = help_info.name
+  allowed_link_seeds["help_"+help]="help"
 for ref in bibtex_dics:
   ID=ref["ID"]
   allowed_link_seeds[ID]="bibID"
