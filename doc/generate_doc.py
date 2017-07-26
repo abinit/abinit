@@ -1069,7 +1069,7 @@ cur_let = 'A'
 alphalinks="\n \n <hr> Go to "
 for i in string.ascii_uppercase:
   alphalinks+=('<a href=#%s>%s</a> ')%(i,i)
-alphalinks+="\n \n"
+alphalinks+=" or <a href=#>top</a> \n \n"
 bibliography_content+=('<a id="%s"></a>')%(cur_let)+alphalinks+('<hr><hr><h2>%s</h2> \n \n')%(cur_let)
 for ref in bibtex_dics:
   entrytype=ref["ENTRYTYPE"]
