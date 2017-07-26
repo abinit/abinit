@@ -27,6 +27,20 @@ from doc.pymods.variables import *
 
 ###############################################################################
 
+def read_yaml(path_ymlfile):
+
+  with open(path_ymlfile, 'r') as f:
+    try:
+      yml_content = yaml.load(f)
+    except:
+      print("\n\n... ERROR ...\n[Complement of information from generate_doc.py]")
+      print("Look for ... a forbidden ':' sign in the line and file mentioned below,")
+      print("      or ... an incorrect indentation in the line and file mentioned below.\n")
+      raise
+    return yml_content
+
+###############################################################################
+
 def format_dimensions(dimensions):
 
   if dimensions is None:
@@ -259,8 +273,7 @@ def assemble_html(origin_yml_files,suppl_components,dir_name,root_filname,allowe
     doc_yml={}
     if os.path.isfile(path_ymlfile):
       print("Read "+path_ymlfile+" to build "+full_filname+".html ... ",end="")
-      with open(path_ymlfile, 'r') as f:
-        doc_yml = yaml.load(f)
+      doc_yml=read_yaml(path_ymlfile)
  
     # Try to complete the information from suppl_components
     suppl={}

@@ -121,14 +121,7 @@ for infos_dir in list_infos_dir:
   for yml_file in yml_files:
     path_ymlfile="%s/origin_files/%s.yml"%(infos_dir["dir_name"],yml_file)
     print("Read "+path_ymlfile+" "+msgs[yml_file])
-    with open(path_ymlfile, 'r') as f:
-      try:
-        yml_in[yml_file] = yaml.load(f)
-      except:
-        print("\n\n... ERROR ...\n[Complement of information from generate_doc.py]")
-        print("Look for ... a forbidden ':' sign in the line and file mentioned below,")
-        print("      or ... an incorrect indentation in the line and file mentioned below.\n")
-        raise
+    yml_in[yml_file] =read_yaml(path_ymlfile)
 
 # These ones are quite often used, so copy them ...
 abinit_vars=yml_in["abinit_vars"]
@@ -177,14 +170,7 @@ for tests_dir in yml_in["tests_dirs"] :
 
 path_ymlfile="topics/generated_files/topics_in_tests.yml"
 print("Generated "+path_ymlfile+", to contain the list of automatic test input files relevant for each topic ...")
-with open(path_ymlfile, 'r') as f:
-  try:
-    topics_in_tests = yaml.load(f)
-  except:
-    print("\n\n... ERROR ...\n[Complement of information from generate_doc.py]")
-    print("Look for ... a forbidden ':' sign in the line and file mentioned below,")
-    print("      or ... an incorrect indentation in the line and file mentioned below.\n")
-    raise
+topics_in_tests=read_yaml(path_ymlfile)
 try :
   rm_cmd = "rm topics/generated_files/topics_in_tests.txt"
   retcode = os.system(rm_cmd)
@@ -779,14 +765,7 @@ dic_keyword_howto={}
 for topic_name in list_of_topics:
   path_ymlfile="topics/origin_files/topic_"+topic_name+".yml"
   print("Read "+path_ymlfile+" to initiate the topic '"+topic_name+"' ... ",end="")
-  with open(path_ymlfile, 'r') as f:
-    try:
-      topic_yml = yaml.load(f)
-    except:
-      print("\n\n... ERROR ...\n[Complement of information from generate_doc.py]")
-      print("Look for ... a forbidden ':' sign in the line and file mentioned below,")
-      print("      or ... an incorrect indentation in the line and file mentioned below.\n")
-      raise
+  topic_yml=read_yaml(path_ymlfile) 
   topic=topic_yml[0]
   dic_keyword_name[topic.keyword]=topic_name
   dic_keyword_howto[topic.keyword]=topic.howto
