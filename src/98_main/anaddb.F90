@@ -539,6 +539,20 @@ program anaddb
 
 !***********************************************************************
 
+ ! Interpolate the DDB onto the first list of vectors and write the file.
+
+ if (inp%prtddb==1 .and. inp%ifcflag==1) then
+
+   call ddb_hdr_open_read(ddb_hdr,filnam(3),ddbun,DDB_VERSION)
+
+   call ddb_interpolate(Ifc,Crystal,inp,ddb,ddb_hdr,asrq0,filnam(2),comm)
+
+   call ddb_hdr_free(ddb_hdr)
+
+ end if 
+
+!***********************************************************************
+
  if (inp%thmflag>=3 .and. inp%thmflag<=8) then
 
     ! DEBUG

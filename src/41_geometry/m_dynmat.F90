@@ -54,6 +54,8 @@ module m_dynmat
  public :: cart39               ! Transform a vector from reduced coordinates to cartesian coordinates,
                                 !   taking into account the perturbation from which it was derived,
                                 !   and also check the existence of the new values.
+ public :: d2cart_to_red        ! Transform a second-derivative matrix
+                                ! from cartesian to reduced coordinate.
  public :: chkph3               ! Check the completeness of the dynamical matrix
  public :: chneu9               ! Imposition of the Acoustic sum rule on the Effective charges
  public :: d2sym3               ! Build (nearly) all the other matrix elements that can be build using symmetries.
@@ -813,8 +815,6 @@ subroutine cart29(blkflg,blkval,carflg,d2cart,&
          call cart39(flg1,flg2,gprimd,ipert1,natom,rprimd,vec1,vec2)
          do idir1=1,3
            d2cart(ii,idir1,ipert1,idir2,ipert2)=vec2(idir1)
-!          And here carflg again
-           carflg(idir1,ipert1,idir2,ipert2)=flg2(idir1)
          end do
        end do
      end do
@@ -971,6 +971,167 @@ subroutine cart39(flg1,flg2,gprimd,ipert,natom,rprimd,vec1,vec2)
  end if
 
 end subroutine cart39
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_dynmat/d2cart_to_red
+!! NAME
+!! d2cart_to_red
+!!
+!!
+!! FUNCTION
+!! Transform a second-derivative matrix from cartesian
+!! coordinates to reduced coordinate. Also,
+!! 1) remove the ionic part of the effective charges,
+!! 2) remove the vacuum polarisation from the dielectric tensor
+!!    and scale it with the unit cell volume
+!! In short, does the inverse operation of cart29.
+!!
+!! INPUTS
+!!  d2cart(2,3,mpert,3,mpert)=
+!!    second-derivative matrix in cartesian coordinates
+!!  gprimd(3,3)=basis vector in the reciprocal space
+!!  rprimd(3,3)=basis vector in the real space
+!!  mpert =maximum number of ipert
+!!  natom=number of atom
+!!
+!! OUTPUT
+!!  d2red(2,3,mpert,3,mpert)=
+!!    second-derivative matrix in reduced coordinates
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine d2cart_to_red(d2cart, d2red, gprimd, rprimd, mpert, natom, &
+&                        ntypat,typat,ucvol,zion)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'd2cart_to_red'
+!End of the abilint section
+
+ implicit none
+
+!Arguments -------------------------------
+!scalars
+ integer,intent(in) :: mpert,natom,ntypat
+ real(dp),intent(in) :: ucvol
+!arrays
+ integer,intent(in) :: typat(natom)
+ real(dp),intent(in) :: d2cart(2,3,mpert,3,mpert)
+ real(dp),intent(out) :: d2red(2,3,mpert,3,mpert)
+ real(dp),intent(in) :: gprimd(3,3),rprimd(3,3)
+ real(dp),intent(in) :: zion(ntypat)
+
+!Local variables -------------------------
+!scalars
+ integer :: idir1,idir2,ii,ipert1,ipert2
+ real(dp) :: fac
+!arrays
+ integer :: flg1(3),flg2(3)
+ real(dp) :: vec1(3),vec2(3)
+
+! *********************************************************************
+
+ flg1 = one
+ flg2 = one
+
+ d2red = d2cart
+
+!Remove the ionic charges to z to get the change in effective charges
+ do ipert1=1,natom
+   do idir1=1,3
+     d2red(1,idir1,ipert1,idir1,natom+2)=&
+&     d2red(1,idir1,ipert1,idir1,natom+2) - zion(typat(ipert1))
+   end do
+ end do
+ do ipert2=1,natom
+   do idir2=1,3
+     d2red(1,idir2,natom+2,idir2,ipert2)=&
+&     d2red(1,idir2,natom+2,idir2,ipert2) - zion(typat(ipert2))
+   end do
+ end do
+
+ ! Remove the vacuum polarizability from the dielectric tensor
+ do idir1=1,3
+   d2red(1,idir1,natom+2,idir1,natom+2)=&
+&   d2red(1,idir1,natom+2,idir1,natom+2) - 1.0_dp
+ end do
+
+! Scale the dielectric tensor with the volue of the unit cell
+ do idir1=1,3
+   do idir2=1,3
+     do ii=1,2
+       d2red(ii,idir1,natom+2,idir2,natom+2)=&
+&       - (ucvol / four_pi) * d2red(ii,idir1,natom+2,idir2,natom+2)
+     end do
+   end do
+ end do
+
+!For the piezoelectric tensor, takes into account the volume of the unit cell
+ do ipert2=natom+3,natom+4
+   do idir1=1,3
+     do idir2=1,3
+       do ii=1,2
+         d2red(ii,idir1,natom+2,idir2,ipert2)=&
+&         (ucvol)*d2red(ii,idir1,natom+2,idir2,ipert2)
+         d2red(ii,idir2,ipert2,idir1,natom+2)=&
+&         (ucvol)*d2red(ii,idir2,ipert2,idir1,natom+2)
+       end do
+     end do
+   end do
+ end do
+
+! Reduced coordinates transformation (in two steps)
+! Note that rprimd and gprimd are swapped, compared to what cart39 expects
+! A factor of (2pi) ** 2 is added to transform the electric field perturbations
+
+!First step
+ do ipert1=1,mpert
+   do ipert2=1,mpert
+     fac = one; if (ipert2==natom+2) fac = two_pi ** 2
+
+     do ii=1,2
+       do idir1=1,3
+         do idir2=1,3
+           vec1(idir2)=d2red(ii,idir1,ipert1,idir2,ipert2)
+         end do
+         call cart39(flg1,flg2,rprimd,ipert2,natom,gprimd,vec1,vec2)
+         do idir2=1,3
+           d2red(ii,idir1,ipert1,idir2,ipert2)=vec2(idir2) * fac
+         end do
+       end do
+     end do
+   end do
+ end do
+
+!Second step
+ do ipert1=1,mpert
+   fac = one; if (ipert1==natom+2) fac = two_pi ** 2
+
+   do ipert2=1,mpert
+     do ii=1,2
+       do idir2=1,3
+         do idir1=1,3
+           vec1(idir1)=d2red(ii,idir1,ipert1,idir2,ipert2)
+         end do
+         call cart39(flg1,flg2,rprimd,ipert1,natom,gprimd,vec1,vec2)
+         do idir1=1,3
+           d2red(ii,idir1,ipert1,idir2,ipert2)=vec2(idir1) * fac
+         end do
+       end do
+     end do
+   end do
+ end do
+
+
+end subroutine d2cart_to_red
 !!***
 
 !----------------------------------------------------------------------
