@@ -3,9 +3,9 @@
 # This is the introduction ...
 intro : |
   <p>The new user is advised to read first the
-    [[help_new_user]],
+    [[help:new_user|new user helpfile]],
     before reading the present file. It will be easier to discover the
-    present file with the help of the [[lesson_welcome]] file.
+    present file with the help of the [[lesson:welcome|tutorial]].
   <p>It is worthwhile to print this help file, for ease of reading.
   
   <p>When the user will be sufficiently familiarized with ABINIT, reading the
