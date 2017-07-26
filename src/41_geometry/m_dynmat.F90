@@ -815,6 +815,8 @@ subroutine cart29(blkflg,blkval,carflg,d2cart,&
          call cart39(flg1,flg2,gprimd,ipert1,natom,rprimd,vec1,vec2)
          do idir1=1,3
            d2cart(ii,idir1,ipert1,idir2,ipert2)=vec2(idir1)
+!          And here carflg again
+           carflg(idir1,ipert1,idir2,ipert2)=flg2(idir1)
          end do
        end do
      end do
