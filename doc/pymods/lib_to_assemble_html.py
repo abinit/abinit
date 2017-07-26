@@ -76,42 +76,56 @@ def format_default(defaultval):
 ################################################################################
 
 def make_links(text,cur_key,allowed_link_seeds,backlinks,backlink):
+  """ Interpreter for the address contained in [[...]], following dokuwiki conventions,
+      with translation to HTML links. The allowed link seeds are given.
+      Exceptions to doku conventions : 
+      - the cur_key matching yields simple bold emphasis of the text ;
+      - bibliographical references keep one pair of square brackets.
+  """
 
   def replace_link(mymatch):
-    key = mymatch.group()[2:-2]
-    if key == cur_key:
-      return "<b>"+key+"</b>"
+    dokukey = mymatch.group()[2:-2].strip()
+    if cur_key != None:
+      if dokukey == cur_key.strip():
+        return "<b>"+dokukey+"</b>"
+    if '|' in dokukey:
+      key_text=dokukey.split('|') 
+      key=key_text[0].strip()
+      text=key_text[1].strip()
+    else:
+      key=dokukey
+      text=dokukey
     if key in allowed_link_seeds.keys():
       value=allowed_link_seeds[key]
       if "input_variable in " in value:
         # This is a link to an input variable
         varfile=value[18:]
-        return '<a href="../../input_variables/generated_files/'+varfile+".html#"+key+'">'+key+'</a>'
+        return '<a href="../../input_variables/generated_files/'+varfile+".html#"+key+'">'+text+'</a>'
       elif value=="characteristic":
-        return '<a href="../../users/generated_files/help_abinit.html#'+str.replace(key.lower()," ","_")+'">'+key+'</a>'
+        return '<a href="../../users/generated_files/help_abinit.html#'+str.replace(key.lower()," ","_")+'">'+text+'</a>'
       elif value=="special":
-        return '<a href="../../input_variables/generated_files/specials.html#'+key+'">'+key+'</a>'
+        return '<a href="../../input_variables/generated_files/specials.html#'+key+'">'+text+'</a>'
       elif value=="varfile":
-        return '<a href="../../input_variables/generated_files/'+key+'.html">'+key+'</a>'
+        return '<a href="../../input_variables/generated_files/'+key+'.html">'+text+'</a>'
       elif value=="lesson":
-        return '<a href="../../tutorial/generated_files/'+key+'.html">'+key+'</a>'
+        return '<a href="../../tutorial/generated_files/'+key+'.html">'+text+'</a>'
       elif value=="theorydoc":
-        return '<a href="../../theory/generated_files/'+key+'.html">'+key+'</a>'
+        return '<a href="../../theory/generated_files/'+key+'.html">'+text+'</a>'
       elif value=="helpfile":
         return '<a href="../../users/generated_files/'+key+'.html">'+key[5:]+' help file</a>'
       elif value=="in_tests":
         return '<a href="../../'+key+'">&#126;abinit/'+key+'</a>'
       elif value=="allvariables":
-        return '<a href="../../input_variables/generated_files/allvariables.html">'+key+'</a>'
+        return '<a href="../../input_variables/generated_files/allvariables.html">'+text+'</a>'
       elif value=="bibID":
         result=get_year(key)
         if result != -9999 :
           backlinks[key]+=backlink+";;"
-          return '[<a href="../../bibliography/generated_files/bibliography.html#'+key+'">'+key+'</a>]'
+          return '[<a href="../../bibliography/generated_files/bibliography.html#'+key+'">'+text+'</a>]'
 
     return '<a href="#">[[FAKE LINK:'+key+']]</a>'
 
-  p=re.compile("\\[\\[([a-zA-Z0-9_ */<>.]*)\\]\\]")
+  p=re.compile("\\[\\[([a-zA-Z0-9_ */<>.|:+]*)\\]\\]")
   if text is None:
     return ""
   new_text=p.sub(replace_link,text)
