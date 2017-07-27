@@ -115,4 +115,5 @@ icutcoul3   3            # old deprecated value of icutcoul, only used for legac
 #%%   In dataset 2, ABINIT computes the eps^-1 matrix (optdriver 3)
 #%%   nband 10) for the GW calculation and stores it in _SCR.
 #%%   In dataset 3-6, ABINIT computes the GW correction for bands 4 and 5 with different plasmon-pole models.
+#%% topics = GW
 #%%<END TEST_INFO>
