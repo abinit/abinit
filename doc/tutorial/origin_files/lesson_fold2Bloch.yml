@@ -32,7 +32,7 @@ body : |
   <ul>
     <li><a href="#1">1.</a> Creating the structure.
     <li><a href="#2">2.</a> Plotting the supercell band structure.
-    <li><a href="#3">3.</a> Running fol2Bloch.
+    <li><a href="#3">3.</a> Running fold2Bloch.
     <li><a href="#4">4.</a> Plotting the unfolded band structure using a MatLab script (provided).
   </ul>
   

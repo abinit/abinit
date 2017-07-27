@@ -88,7 +88,7 @@ list_infos_dir=[]
 list_infos_dir.append({"dir_name":"bibliography","root_filname":"",
                                                     "yml_files":["bibfiles"]})
 list_infos_dir.append({"dir_name":"input_variables","root_filname":"",
-                                                    "yml_files":["abinit_vars","characteristics","list_specials","varfiles"]})
+                                                    "yml_files":["abinit_vars","characteristics","list_external","varfiles"]})
 list_infos_dir.append({"dir_name":"theory","root_filname":"theorydoc",
                                                     "yml_files":["theorydocs"]})
 list_infos_dir.append({"dir_name":"topics","root_filname":"topic",
@@ -100,7 +100,7 @@ list_infos_dir.append({"dir_name":"users","root_filname":"help",
 msgs={"bibfiles"       :"as database input file for the list of generated files in the bibliography directory ...",
       "abinit_vars"    :"as database input file for the input variables and their characteristics ...",
       "characteristics":"as database input file for the list of allowed characteristics ...",
-      "list_specials"  :"as database input file for the list of allowed special keywords ...",
+      "list_external"  :"as database input file for the list of external parameters (known at compile or run time) ...",
       "varfiles"       :"as database input file for the list of varfiles ...",
       "theorydocs"     :"as database input file for the list of theory documents ...",
       "default_topic"  :"to initialize the topic html files with default values ...",
@@ -121,16 +121,11 @@ for infos_dir in list_infos_dir:
   for yml_file in yml_files:
     path_ymlfile="%s/origin_files/%s.yml"%(infos_dir["dir_name"],yml_file)
     print("Read "+path_ymlfile+" "+msgs[yml_file])
-    with open(path_ymlfile, 'r') as f:
-      try:
-        yml_in[yml_file] = yaml.load(f)
-      except ScannerError as error:
-        print(" [Complement of information from generate_doc.py] Likely a forbidden ':' sign in the line and file mentioned below.")
-        print (error)
+    yml_in[yml_file] =read_yaml(path_ymlfile)
 
 # These ones are quite often used, so copy them ...
 abinit_vars=yml_in["abinit_vars"]
-list_specials=yml_in["list_specials"]
+list_external=yml_in["list_external"]
 varfiles=yml_in["varfiles"]
 list_of_topics=yml_in["list_of_topics"]
   
@@ -175,13 +170,7 @@ for tests_dir in yml_in["tests_dirs"] :
 
 path_ymlfile="topics/generated_files/topics_in_tests.yml"
 print("Generated "+path_ymlfile+", to contain the list of automatic test input files relevant for each topic ...")
-with open(path_ymlfile, 'r') as f:
-  try:
-    topics_in_tests = yaml.load(f)
-  except ScannerError as error:
-    print(" [Complement of information from generate_doc.py] Likely a forbidden ':' sign in the line and file mentioned below.")
-    print (error)
-
+topics_in_tests=read_yaml(path_ymlfile)
 try :
   rm_cmd = "rm topics/generated_files/topics_in_tests.txt"
   retcode = os.system(rm_cmd)
@@ -214,7 +203,7 @@ for item in bibtex_items:
   item_dic={}
   item=item.split('{',1)
   entrytype=item[0].strip().lower()
-  if not entrytype in ["article","book","incollection","phdthesis","mastersthesis","misc"]:
+  if not entrytype in ["article","book","incollection","phdthesis","mastersthesis","misc","unpublished"]:
     print(" Not able to treat the following entrytype:",entrytype)
     raise
 
@@ -381,6 +370,8 @@ for (i,ref) in enumerate(bibtex_dics):
       formatted=' %s "%s" (%s, %s, %s).' % (author,title,publisher,address,year)
   elif ENTRYTYPE=="misc":
     formatted=' %s "%s", %s, %s (%s).' % (author,title,note,howpublished,year)
+  elif ENTRYTYPE=="unpublished":
+    formatted=' %s unpublished (%s).' % (author,year)
 
   #DOI or URL is added at the end. Note that this is optional. Also, only one is mentioned, preferentially the DOI.
   try:
@@ -477,32 +468,39 @@ print("File %s written ..." %file_yml)
 allowed_link_seeds={}
 
 # Groups of seeds
+
 for var in abinit_vars:
   allowed_link_seeds[var.abivarname]="input_variable in "+var.varfile
+
 for item in yml_in["characteristics"]:
   allowed_link_seeds[item]="characteristic"
-for (specialkey,specialval) in list_specials:
-  allowed_link_seeds[specialkey]="special"
+
+for item in list_external:
+  allowed_link_seeds[item[0]]="input_variable in varset_external"
+
 for i, varfile_info in enumerate(varfiles):
   varfile = varfile_info.name
   allowed_link_seeds[varfile]="varfile"
+  allowed_link_seeds["varset_"+varfile]="varset"
+
 for i, lesson_info in enumerate(yml_in["lessons"]):
   lesson = lesson_info.name
   allowed_link_seeds["lesson_"+lesson]="lesson"
+
 for i, theory_info in enumerate(yml_in["theorydocs"]):
   theorydoc = theory_info.name
   allowed_link_seeds["theorydoc_"+theorydoc]="theorydoc"
+
 for i, help_info in enumerate(yml_in["helps"]):
-  helpfile = help_info.name
-  allowed_link_seeds["help_"+helpfile]="helpfile"
+  help = help_info.name
+  allowed_link_seeds["help_"+help]="help"
+
 for ref in bibtex_dics:
   ID=ref["ID"]
   allowed_link_seeds[ID]="bibID"
+
 for file in allowed_links_in_tests:
   allowed_link_seeds[file]="in_tests"
-
-# Specific allowed seeds
-allowed_link_seeds["allvariables"]="allvariables"
 
 ################################################################################
 ################################################################################
@@ -510,7 +508,7 @@ allowed_link_seeds["allvariables"]="allvariables"
 # The information needed to create automatically the links has been collected
 
 ################################################################################
-# Initialization to constitute the body of the specials and var*.html files
+# Initialization to constitute the body of the varset_* and var*.html files
 
 all_vars = dict()
 all_contents = dict()
@@ -520,22 +518,22 @@ for i, varfile_info in enumerate(varfiles):
   all_contents[varfile]= "<br><br><br><br><hr>\n"
 
 ################################################################################
-# Constitute the body of information for the special parameters, stored for the appropriate varfile in all_contents[varfile]
+# Constitute the body of information for the external parameters, stored for the appropriate varfile in all_contents[varfile]
 
-cur_specials = []
-for (specialkey,specialval) in list_specials:
-  cur_specials.append(specialkey)
+cur_external = []
+for (key,value) in list_external:
+  cur_external.append(key)
 
-for (speckey, specval) in list_specials:
-  backlink= ' &nbsp; <a href="../../input_variables/generated_files/specials.html#%s">%s</a> &nbsp; ' %(speckey,speckey)
-  cur_content = "<br><font id=\"title\"><a name=\""+speckey+"\">"+speckey+"</a></font>\n"
+for (key, value) in list_external:
+  backlink= ' &nbsp; <a href="../../input_variables/generated_files/varset_external.html#%s">%s</a> &nbsp; ' %(key,key)
+  cur_content = "<br><font id=\"title\"><a name=\""+key+"\">"+key+"</a></font>\n"
   cur_content += "<br><font id=\"text\">\n"
-  cur_content += "<p>\n"+doku2html(make_links(specval,speckey,allowed_link_seeds,backlinks,backlink))+"\n"
+  cur_content += "<p>\n"+make_links(value,key,allowed_link_seeds,backlinks,backlink)+"\n"
   cur_content += "</font>"
   cur_content += "<br><br><a href=#top>Go to the top</a>\n"
-  cur_content += "<B> | </B><a href=\"allvariables.html#top\">Complete list of input variables</a><hr>\n"
+  cur_content += "<B> | </B><a href=\"varset_allvars.html#top\">Complete list of input variables</a><hr>\n"
   #
-  all_contents["specials"] = all_contents["specials"] + cur_content + "\n\n"
+  all_contents["external"] = all_contents["external"] + cur_content + "\n\n"
 
 ################################################################################
 # Constitute the body of information for all variables, stored for the appropriate varfile in all_contents[varfile]
@@ -588,17 +586,17 @@ for i, var in enumerate(abinit_vars):
     cur_content += "</font>\n" 
     # Requires
     if var.requires is not None and var.requires != "":
-      cur_content += "<br><br><font id=\"requires\">\nOnly relevant if "+doku2html(make_links(var.requires,var.abivarname,allowed_link_seeds,backlinks,backlink))+"\n</font>\n"
+      cur_content += "<br><br><font id=\"requires\">\nOnly relevant if "+make_links(var.requires,var.abivarname,allowed_link_seeds,backlinks,backlink)+"\n</font>\n"
     # Excludes
     if var.excludes is not None and var.excludes != "":
-      cur_content += "<br><br><font id=\"excludes\">\nThe use of this variable forbids the use of "+doku2html(make_links(var.excludes,var.abivarname,allowed_link_seeds,backlinks,backlink))+"\n</font>\n"
+      cur_content += "<br><br><font id=\"excludes\">\nThe use of this variable forbids the use of "+make_links(var.excludes,var.abivarname,allowed_link_seeds,backlinks,backlink)+"\n</font>\n"
     # Text
     cur_content += "<br><font id=\"text\">\n"
-    cur_content += "<p>\n"+doku2html(make_links(var.text,var.abivarname,allowed_link_seeds,backlinks,backlink))+"\n"
+    cur_content += "<p>\n"+make_links(var.text,var.abivarname,allowed_link_seeds,backlinks,backlink)+"\n"
     # End the section for one variable
     cur_content += "</font>\n\n"
     cur_content += "<br><br><a href=#top>Go to the top</a>\n"
-    cur_content += "<B> | </B><a href=\"allvariables.html#top\">Complete list of input variables</a><hr>\n"
+    cur_content += "<B> | </B><a href=\"varset_allvars.html#top\">Complete list of input variables</a><hr>\n"
     #
     all_contents[varfile] = all_contents[varfile] + cur_content + "\n\n"
   except AttributeError as e:
@@ -606,7 +604,7 @@ for i, var in enumerate(abinit_vars):
     print('For variable : ',abivarname)
 
 ################################################################################
-# Generate the files that document all the variables (all such files : var* as well as all and special).
+# Generate the files that document all the variables (all such files : var* as well as allvars and external).
 
 suppl_components={}
 
@@ -632,12 +630,12 @@ for i, varfile_info in enumerate(varfiles):
   #Generate the body of the table of content 
   cur_let = 'A'
   toc_body=""
-  if varfile=="allvariables":
+  if varfile=="allvars":
     toc_body+=scriptTab+alphalinks
   else :
     toc_body += " <br><a id='%s'></a>"%(cur_let)+cur_let+".\n"
 
-  if varfile=="allvariables":
+  if varfile=="allvars":
     toc_body += " <ul id=\"Letters\">\n"
     toc_body += " <li>\n<ul id=\"%s\" class=\"TabContentLetter\">\n"%(cur_let)
     toc_body += " <li class=\"HeaderLetter\">%s</li>\n"%(cur_let)
@@ -656,12 +654,12 @@ for i, varfile_info in enumerate(varfiles):
 defaultClick(true);\n\
 </script>\n\
 "
-  elif varfile == "specials":
-    for (speckey, specval) in list_specials:
-      while not speckey.lower().startswith(cur_let.lower()):
+  elif varfile == "external":
+    for (key, value) in list_external:
+      while not key.lower().startswith(cur_let.lower()):
         cur_let = chr(ord(cur_let)+1)
         toc_body += " <br><a id='%s'></a>"%(cur_let)+cur_let+".\n"
-      curlink = " <a href=\"#"+speckey+"\">"+speckey+"</a>&nbsp;&nbsp;\n"
+      curlink = " <a href=\"#"+key+"\">"+key+"</a>&nbsp;&nbsp;\n"
       toc_body += curlink
   else:
     for abivarname,defi in all_vars[varfile]:
@@ -776,15 +774,7 @@ dic_keyword_howto={}
 for topic_name in list_of_topics:
   path_ymlfile="topics/origin_files/topic_"+topic_name+".yml"
   print("Read "+path_ymlfile+" to initiate the topic '"+topic_name+"' ... ",end="")
-  with open(path_ymlfile, 'r') as f:
-    try:
-      topic_yml = yaml.load(f)
-    except:
-      print("\n\n... ERROR ...\n[Complement of information from generate_doc.py]")
-      print("Look for ... a forbidden ':' sign in the line and file mentioned below,")
-      print("      or ... an incorrect indentation in the line and file mentioned below.\n")
-      raise
-
+  topic_yml=read_yaml(path_ymlfile) 
   topic=topic_yml[0]
   dic_keyword_name[topic.keyword]=topic_name
   dic_keyword_howto[topic.keyword]=topic.howto
@@ -1072,7 +1062,7 @@ backlink= ' &nbsp; <a href="../../bibliography/generated_files/acknowledgments.h
 for i, bibfile_info in enumerate(yml_in["bibfiles"]):
   if bibfile_info.name.strip()=="acknowledgments":
     bibfile_intro=bibfile_info.introduction
-    bibfile_ack_intro = doku2html(make_links(bibfile_intro,None,allowed_link_seeds,backlinks,backlink))
+    bibfile_ack_intro = make_links(bibfile_intro,None,allowed_link_seeds,backlinks,backlink)
 
 ################################################################################
 # Write an ordered bib file, that allows to update the original one.
@@ -1090,10 +1080,22 @@ bibliography_content+=('<a id="%s"></a>')%(cur_let)+alphalinks+('<hr><hr><h2>%s<
 for ref in bibtex_dics:
   entrytype=ref["ENTRYTYPE"]
   ID=ref["ID"]
-  list_backlinksID=backlinks[ID].split(";;")
-  for (i,link) in enumerate(list_backlinksID):
-     list_backlinksID[i]=link.strip()
-  backlinksID=set(list_backlinksID)
+  backlinksID=backlinks[ID].split(";;")
+  if len(backlinksID)!=0:
+    list_stripped=[]
+    for (i,link) in enumerate(backlinksID):
+      stripped=link.strip()
+      if stripped!="":
+        list_stripped.append(stripped)
+    if len(list_stripped)!=0:
+      set_stripped=set(list_stripped)
+      if len(set_stripped)!=0:
+        backlinksID=list(set_stripped)
+        backlinksID.sort()
+      else:
+        backlinksID=[]
+    else:
+      backlinksID=[]
   line=("@%s{%s,%s") %(entrytype,ID,ref['body'])
   lines_txt+= line
   bibtex_content+= ('<hr><a id="%s">%s</a> \n <pre>' ) %(ID,ID)
@@ -1104,12 +1106,9 @@ for ref in bibtex_dics:
     if cur_let==ID[0]:
       bibliography_content+=alphalinks+('<hr><hr><h2>%s</h2> \n \n')%(cur_let)
   bibliography_content+= ('<hr><a id="%s">[%s]</a> (<a href="./bibtex.html#%s">bibtex</a>)\n <br> %s \n') %(ID,ID,ID,reference_dic[ID])
-  nlink=0
-  for link in backlinksID:
-    if len(link)!=0:
-      if nlink==0: 
-        bibliography_content+= "<br> Referred to in " 
-        nlink=1
+  if len(backlinksID)!=0:
+    bibliography_content+= "<br> Referred to in " 
+    for link in backlinksID:
       bibliography_content+= link
 
 # Open, write and close the txt file

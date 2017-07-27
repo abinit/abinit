@@ -29,15 +29,15 @@
 <p>DFT performs reasonably well for the determination of structural properties,
 but fails to predict accurate band gaps.
 A more rigorous framework for the description of excited states
-is provided by many-body perturbation theory (MBPT)  [<a href="../../bibliography/generated_files/bibliography.html#Fetter1971">Fetter1971</a>],[<a href="../../bibliography/generated_files/bibliography.html#Abrikosov1975">Abrikosov1975</a>], 
+is provided by many-body perturbation theory (MBPT)  <a href="../../bibliography/generated_files/bibliography.html#Fetter1971">[Fetter1971]</a>,<a href="../../bibliography/generated_files/bibliography.html#Abrikosov1975">[Abrikosov1975]</a>, 
 based on the Green's functions
-formalism and the concept of quasi-particles [<a href="../../bibliography/generated_files/bibliography.html#Onida2002">Onida2002</a>].
+formalism and the concept of quasi-particles <a href="../../bibliography/generated_files/bibliography.html#Onida2002">[Onida2002]</a>.
 <p>Within MBPT, one can calculate the quasi-particle (QP) energies, E, and amplitudes, &Psi;, 
 by solving a nonlinear equation involving the non-Hermitian, nonlocal and frequency dependent self-energy operator &Sigma;.
 <p>This equation goes beyond the mean-field approximation of independent KS particles as
 it accounts for the dynamic many-body effects in the electron-electron interaction.
 <p>In principle, the exact self-energy can be obtained by solving self-consistently the set of coupled integro-differential equations
-proposed by Hedin [<a href="../../bibliography/generated_files/bibliography.html#Hedin1965">Hedin1965</a>]. The fundamental building blocks of Hedin's equations are, besides &Sigma;(1,2), 
+proposed by Hedin <a href="../../bibliography/generated_files/bibliography.html#Hedin1965">[Hedin1965]</a>. The fundamental building blocks of Hedin's equations are, besides &Sigma;(1,2), 
 the Green's function of the interacting many-body system, G(1,2), the Green's function of an appropriate noninteracting system, G<sub>0</sub>(1,2),
 and the irreducible polarizability, &chi;(1,2), which, through the inverse dielectric matrix &epsilon;<sup>-1</sup>(1,2),
 re-normalizes the static Coulomb potential, resulting in the dynamical screened interaction W(1,2). 
@@ -55,8 +55,8 @@ plane in order have a smoother integrand.
 <p>Four different plasmon pole models (PPMs) are available in ABINIT.
 The choice of the particular PPM to be used is controlled by the variable <a href="../../input_variables/generated_files/vargw.html#ppmodel">ppmodel</a>.
 The first two options (<a href="../../input_variables/generated_files/vargw.html#ppmodel">ppmodel</a>=1,2) refer to approximations employed in the pioneering implementations 
-of the GW formalism: the plasmon-pole models of Godby-Needs [<a href="../../bibliography/generated_files/bibliography.html#Godby1989">Godby1989</a>] (GN) 
-and Hybertsen and Louie [<a href="../../bibliography/generated_files/bibliography.html#Hybertsen1986">Hybertsen1986</a>] (HL).
+of the GW formalism: the plasmon-pole models of Godby-Needs <a href="../../bibliography/generated_files/bibliography.html#Godby1989">[Godby1989]</a> (GN) 
+and Hybertsen and Louie <a href="../../bibliography/generated_files/bibliography.html#Hybertsen1986">[Hybertsen1986]</a> (HL).
 <p>The contour deformation technique is activated by setting the input variable <a href="../../input_variables/generated_files/vargw.html#gwcalctyp">gwcalctyp</a> to 2.
 The integration along the imaginary axis requires the calculation of &epsilon;<sup>-1</sup>(&omega;) for purely imaginary frequencies.
 The frequency mesh for the quadrature is governed by the input variable <a href="../../input_variables/generated_files/vargw.html#nfreqim">nfreqim</a>, and can be very coarse 
@@ -196,12 +196,12 @@ The user can find some related example input files in the ABINIT package in the 
 <h3><b>5. References.</b></h3>
 
 
-<br> [<a href="../../bibliography/generated_files/bibliography.html#Abrikosov1975">Abrikosov1975</a>]  A.A. Abrikosov, L.P. Gorkov and E. Dzyaloshinskii, "Methods of quantum field theory in statistical physics", Dover, New-York ,  (1975).<br> 
-<br> [<a href="../../bibliography/generated_files/bibliography.html#Fetter1971">Fetter1971</a>]  A.L. Fetter and J.D. Walecka, "Quantum Theory of Many-Particle Systems", McGraw-Hill, New York ,  (1971).<br> 
-<br> [<a href="../../bibliography/generated_files/bibliography.html#Godby1989">Godby1989</a>]  R. W. Godby and R. J. Needs, "Metal-insulator transition in Kohn-Sham theory and quasiparticle theory", Phys. Rev. Lett. 62, 1169 (1989). <br> DOI: <a href="https://doi.org/10.1103/PhysRevLett.62.1169">10.1103/PhysRevLett.62.1169</a>.<br> 
-<br> [<a href="../../bibliography/generated_files/bibliography.html#Hedin1965">Hedin1965</a>]  L. Hedin, "New Method for Calculating the One-Particle Green's Function with Application to the Electron-Gas Problem", Phys. Rev. A 139, 796 (1965).<br> 
-<br> [<a href="../../bibliography/generated_files/bibliography.html#Hybertsen1986">Hybertsen1986</a>]  M. S. Hybertsen and S. G. Louie, "Electron correlation in semiconductors and insulators: Band gaps and quasiparticle energies", Phys. Rev. B 34, 5390 (1986). <br> DOI: <a href="https://doi.org/10.1103/PhysRevB.34.5390">10.1103/PhysRevB.34.5390</a>.<br> 
-<br> [<a href="../../bibliography/generated_files/bibliography.html#Onida2002">Onida2002</a>]  G. Onida, L. Reining and A. Rubio, "Electronic excitations: density-functional versus many-body Green's-function approaches", Rev. Mod. Phys. 74, 601&ndash;659 (2002). <br> DOI: <a href="https://doi.org/10.1103/RevModPhys.74.601">10.1103/RevModPhys.74.601</a>.<br> 
+<br> <a href="../../bibliography/generated_files/bibliography.html#Abrikosov1975">[Abrikosov1975]</a>  A.A. Abrikosov, L.P. Gorkov and E. Dzyaloshinskii, "Methods of quantum field theory in statistical physics", Dover, New-York ,  (1975).<br> 
+<br> <a href="../../bibliography/generated_files/bibliography.html#Fetter1971">[Fetter1971]</a>  A.L. Fetter and J.D. Walecka, "Quantum Theory of Many-Particle Systems", McGraw-Hill, New York ,  (1971).<br> 
+<br> <a href="../../bibliography/generated_files/bibliography.html#Godby1989">[Godby1989]</a>  R. W. Godby and R. J. Needs, "Metal-insulator transition in Kohn-Sham theory and quasiparticle theory", Phys. Rev. Lett. 62, 1169 (1989). <br> DOI: <a href="https://doi.org/10.1103/PhysRevLett.62.1169">10.1103/PhysRevLett.62.1169</a>.<br> 
+<br> <a href="../../bibliography/generated_files/bibliography.html#Hedin1965">[Hedin1965]</a>  L. Hedin, "New Method for Calculating the One-Particle Green's Function with Application to the Electron-Gas Problem", Phys. Rev. A 139, 796 (1965).<br> 
+<br> <a href="../../bibliography/generated_files/bibliography.html#Hybertsen1986">[Hybertsen1986]</a>  M. S. Hybertsen and S. G. Louie, "Electron correlation in semiconductors and insulators: Band gaps and quasiparticle energies", Phys. Rev. B 34, 5390 (1986). <br> DOI: <a href="https://doi.org/10.1103/PhysRevB.34.5390">10.1103/PhysRevB.34.5390</a>.<br> 
+<br> <a href="../../bibliography/generated_files/bibliography.html#Onida2002">[Onida2002]</a>  G. Onida, L. Reining and A. Rubio, "Electronic excitations: density-functional versus many-body Green's-function approaches", Rev. Mod. Phys. 74, 601&ndash;659 (2002). <br> DOI: <a href="https://doi.org/10.1103/RevModPhys.74.601">10.1103/RevModPhys.74.601</a>.<br> 
 <p>
 <script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
 

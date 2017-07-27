@@ -26123,10 +26123,10 @@
          Explicitly, in order to do a calculation of a material with a DFT U value of 7.5 eV, followed by a [[GW]] calculation where there is a residual
         U value of 2 eV, one has to define :
          <pre>
-          uldau1   7.5 eV   ! This is for the DFT calculation
+          upawu1   7.5 eV   ! This is for the DFT calculation
         ...
         optdriver4  4
-        uldau4   5.5 eV   ! This is for the screening calculation
+        upawu4   5.5 eV   ! This is for the screening calculation
          </pre>
         </p>
     topics: DFT+U_compulsory

@@ -52,7 +52,7 @@ def main(home_dir, verbose=False):
   print( " ABINIT Input variables: Regenerate html from abinit_vars.yml  ")
   print( " ============================================================= ")
   pathdocdir = os.path.join(home_dir, "doc")
-  cmd = "cd " + pathdocdir + " ; rm -f input_variables/generated_files/allvariables.html ; python generate_doc.py > generate_doc.log"
+  cmd = "cd " + pathdocdir + " ; rm -f input_variables/generated_files/varset_allvars.html ; python generate_doc.py > generate_doc.log"
   os.system(cmd)
   pathlogfile = os.path.join(home_dir, "doc/generate_doc.log")
   pathpymodsdir = os.path.join(home_dir, "doc/pymods")
@@ -72,7 +72,7 @@ def main(home_dir, verbose=False):
   print( " ABINIT Input variables: Check in documentation                ")
   print( " ============================================================= ")
   varhtml = glob.glob(os.path.join(home_dir, "doc/input_variables/generated_files/var*html"))
-  varallvars = glob.glob(os.path.join(home_dir, "doc/input_variables/generated_files/allvariables.html"))
+  varallvars = glob.glob(os.path.join(home_dir, "doc/input_variables/generated_files/varset_allvars.html"))
   ret_code = 0
   for iwords in range(len(words)):
       deffiles = []
@@ -94,9 +94,9 @@ def main(home_dir, verbose=False):
               deffiles.append(varallvars[ivarallvars])
 
       if len(deffiles) > 0:
-          if verbose: print("SUCCESS: ",words[iwords]," appears in ",len(deffiles)," allvariables.html file as well")
+          if verbose: print("SUCCESS: ",words[iwords]," appears in ",len(deffiles)," varset_allvars.html file as well")
       else:
-          print("FAIL: ",words[iwords]," does not appear in the central allvariables.html file ")
+          print("FAIL: ",words[iwords]," does not appear in the central varset_allvars.html file ")
           ret_code += 1
 
   print( " ============================================================= ")

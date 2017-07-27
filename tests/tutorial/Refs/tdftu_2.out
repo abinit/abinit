@@ -17,10 +17,10 @@
 .Starting date : Mon  4 Apr 2016.
 - ( at 09h41 )
   
-- input  file    -> tldau_2.in
-- output file    -> tldau_2.out
-- root for input  files -> tldau_2i
-- root for output files -> tldau_2o
+- input  file    -> tdftu_2.in
+- output file    -> tdftu_2.out
+- root for input  files -> tdftu_2i
+- root for output files -> tdftu_2o
 
 
  Magnetic group, Shubnikov type IV
@@ -520,7 +520,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     686.250     686.229
  frms,max,avg= 1.8481795E-30 3.2011407E-30   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales=  7.920000000000  7.920000000000  7.920000000000 bohr
               =  4.191083492033  4.191083492033  4.191083492033 angstroms
- prteigrs : about to open file tldau_2o_EIG
+ prteigrs : about to open file tdftu_2o_EIG
  Fermi (or HOMO) energy (hartree) =   0.25309   Average Vxc (hartree)=  -0.52525
  Eigenvalues (hartree) for nkpt=   3  k points:
  kpt#   1, nband= 40, wtk=  0.25000, kpt=  0.2500  0.2500  0.2500 (reduced coord)

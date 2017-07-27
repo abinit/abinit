@@ -64,7 +64,7 @@ dmatpawu
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   tldau_3.out, tolnlines=  8, tolabs=  7.001e-02, tolrel=  5.000e-03, fld_options = -easy  
+#%%   tdftu_3.out, tolnlines=  8, tolabs=  7.001e-02, tolrel=  5.000e-03, fld_options = -easy  
 #%% psp_files = 28ni.paw, 8o.2.paw 
 #%% [paral_info]
 #%% max_nprocs = 1

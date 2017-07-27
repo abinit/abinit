@@ -236,6 +236,15 @@
   refid : 10.1103/PhysRevB.70.195104
 -
   ENTRYTYPE : article
+  ID : Aryasetiawan2006
+  author : F. Aryasetiawan, K. Karlsson, O. Jepsen, and U. Sch\"onberger
+  title : Calculations of Hubbard U from first-principles
+  journal : Phys. Rev. B
+  year : 2006
+  volume : 74
+  pages : 125106
+-
+  ENTRYTYPE : article
   ID : Audouze2006
   author : Audouze,C. and Jollet,F. and Torrent,M. and Gonze,X.
   title : Projector augmented-wave approach to density-functional perturbation theory
@@ -687,6 +696,11 @@
   year : 2015
   volume : 17
   pages : 19104
+-
+  ENTRYTYPE : unpublished
+  ID : Geneste2016
+  author : G. Geneste and B. Amadon and M. Torrent and G. Dezanneau
+  year : 2016
 -
   ENTRYTYPE : article
   ID : Genovese2008
@@ -1768,14 +1782,8 @@
   year : 2013
   volume : 87
   pages : 165118
-  publisher : American Physical Society
   doi : 10.1103/PhysRevB.87.165118
-  timestamp : 2013.06.04
   number : 16
-  owner : amadonb
-  file : :/media/disk_iomega/BIBLIO/Interaction/PhysRevB.87.165118.pdf:PDF
-  keywords : cRPA
-  refid : 10.1103/PhysRevB.87.165118
 -
   ENTRYTYPE : article
   ID : Savin1992
@@ -2003,6 +2011,15 @@
   year : 2016
   volume : 93
   pages : 144304
+-
+  ENTRYTYPE : article
+  ID : Vaugier2012
+  author : L. Vaugier and H. Jiang and S. Biermann
+  title : Hubbard {U} and Hund exchange {J} in transition metal oxides: Screening versus localization trends from constrained random phase approximation
+  journal : Phys. Rev. B
+  year : 2012
+  volume : 86
+  pages : 165105
 -
   ENTRYTYPE : article
   ID : Veithen2005
