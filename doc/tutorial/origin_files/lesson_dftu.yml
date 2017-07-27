@@ -80,8 +80,8 @@ body : |
   ~abinit/tests/tutorial directory, and use it for the tutorial. In what follows,
   the names of files will be mentioned as if you were in this subdirectory</p>
   
-  <p><i>Copy the files ../Input/tldau_1.in and
-  ../Input/tldau_1.files in your Work directory and run</i></p>
+  <p><i>Copy the files ../Input/tdftu_1.in and
+  ../Input/tdftu_1.files in your Work directory and run</i></p>
   
   <p>This run should take less than 30 seconds on a PC 3 GHz.
   It calculates the LDA ground state of the NiO crystal.
@@ -107,7 +107,7 @@ body : |
   </p>
   
   <p>If you take a look at the output file
-  (tldau_1.out), you can see the integrated total density in the PAW spheres
+  (tdftu_1.out), you can see the integrated total density in the PAW spheres
   (see the
   <a href="lesson_paw1.html">PAW1</a> and
   <a href="lesson_paw2.html">PAW2</a>
@@ -175,7 +175,7 @@ body : |
   in Abinit, you must employ PAW pseudopotentials. </p>
   
   <p><i>You should run abinit on the input file
-  tldau_2.in. This calculation takes less than 30 seconds on a PC 3.0 GHz </i></p>
+  tdftu_2.in. This calculation takes less than 30 seconds on a PC 3.0 GHz </i></p>
   
   <p>During the calculation, you can take a look
   at the input file. Some variable describing the LDA+U parameters have been
@@ -245,7 +245,7 @@ body : |
   Initialization of the density matrix in LDA+U for the NiO crystal</b></h3>
   
   <p><i>You should begin by running the
-  tldau_3.in file before continuing.</i></p>
+  tdftu_3.in file before continuing.</i></p>
   
   <p>In order to help the LDA+U find the ground state,
   you can define the initial density matrix for correlated orbitals with
@@ -253,7 +253,7 @@ body : |
   To enable this feature, [[usedmatu]]
   must be set to a non-zero value (default is 0). When positive, the density
   matrix is kept to the [[dmatpawu]]
-  value for the [[usedmatpu]] value steps. For our calculation(tldau_3.in) , [[usedmatpu]]
+  value for the [[usedmatpu]] value steps. For our calculation(tdftu_3.in) , [[usedmatpu]]
   is 5, thus the spin-density matrix is kept constant for 5 SCF steps.</p>
   
   <p>In the log file (not the usual output file), you might find
@@ -314,11 +314,11 @@ body : |
   the complete interactions U(m1,m2,m3,m4) and J(m1,m2,m3,m4). </p>
   
   <p>As in the preceding run, we will start with
-  a fixed density matrix for d orbitals. You might now start your calculation, with the tldau_4.in
-  and tldau_4.files, or skip the calculation, and rely
+  a fixed density matrix for d orbitals. You might now start your calculation, with the tdftu_4.in
+  and tdftu_4.files, or skip the calculation, and rely
   on the reference file provided in the ~abinit/tests/tutorial/Refs directory.
-  Examine the tldau_4.in file. The only difference in the input file
-  compared to tldau_3.in is the value of [[usepawu]]
+  Examine the tdftu_4.in file. The only difference in the input file
+  compared to tdftu_3.in is the value of [[usepawu]]
   = 2. We obtain a band gap of 4.3 eV. The value of the band gap with AMF and FLL is different. However,
   we have to remember that these results are not well converged. By contrast, the magnetization,</p>
   

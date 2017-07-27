@@ -16,7 +16,7 @@ intro : |
   (<a href="lesson_paw1.html">PAW1</a>,
   <a href="lesson_paw2.html">PAW2</a>)).
   The DFT+U tutorial in ABINIT
-  (<a href="lesson_ldau.html">DFT+U</a>) might be useful to know some basic variables
+  (<a href="lesson_dftu.html">DFT+U</a>) might be useful to know some basic variables
   about correlated orbitals.</p>
   The first GW tutorial in ABINIT
   (<a href="lesson_gw1.html">GW</a>) is useful to learn how

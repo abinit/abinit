@@ -77,7 +77,7 @@
     authors : FBruneval,XG
     subtitle : Treatment of metals.
 - !components
-    name : ldau
+    name : dftu
     keyword : Lesson on DFT+U
     authors : SPesant,MCote,XG,BAmadon
     subtitle : The projected density of states of NiO.

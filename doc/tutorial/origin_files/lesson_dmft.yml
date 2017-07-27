@@ -13,7 +13,7 @@ intro : |
   <p>It might be useful that you already know how to
   do PAW calculations using ABINIT but it is not mandatory  (you can follow the two lessons
   on PAW in ABINIT, [[lesson_paw1|PAW1]] and [[lesson_paw2|PAW2]]).
-  Also the [[lesson_ldau|DFT+U lesson]] in ABINIT
+  Also the [[lesson_dftu|DFT+U lesson]] in ABINIT
   might be useful to know some basic variables common to DFT+U and DFT+DMFT.</p>
   
   <p>This lesson should take one hour to

@@ -1740,23 +1740,8 @@
   year : 2013
   volume : 87
   pages : 165118
-  publisher : American Physical Society
   doi : 10.1103/PhysRevB.87.165118
-  timestamp : 2013.06.04
   number : 16
-  owner : amadonb
-  file : :/media/disk_iomega/BIBLIO/Interaction/PhysRevB.87.165118.pdf:PDF
-  keywords : cRPA
-  refid : 10.1103/PhysRevB.87.165118
--
-  ENTRYTYPE : article
-  ID : Sakuma2013
-  author : R. Sakuma and F. Aryasetiawan
-  title : First-principles calculations of dynamical screened interactions for the transition metal oxides {MO} ({M}={M}n, {F}e, {C}o, {N}i)
-  journal : Phys. Rev. B
-  year : 2013
-  volume : 87
-  pages : 165118
 -
   ENTRYTYPE : article
   ID : Savin1992
