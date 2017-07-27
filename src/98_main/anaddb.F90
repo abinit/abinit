@@ -545,6 +545,8 @@ program anaddb
 
    call ddb_hdr_open_read(ddb_hdr,filnam(3),ddbun,DDB_VERSION)
 
+   close(ddbun)
+
    call ddb_interpolate(Ifc,Crystal,inp,ddb,ddb_hdr,asrq0,filnam(2),comm)
 
    call ddb_hdr_free(ddb_hdr)
