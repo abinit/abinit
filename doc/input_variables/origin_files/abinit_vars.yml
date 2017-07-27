@@ -9270,7 +9270,7 @@
         </p>
         <p>
         </p>
-    topics: GW_expert
+    topics: GW_expert, RPACorrEn_compulsory
     varfile: vargw
     vartype: integer
 - !variable
@@ -13953,7 +13953,7 @@
         <p>
          This variable gives the amplitude of the constraint imposed on the magnetization vectors on each atom (turned on with flag variable [[magconon]]). Typical values for lambda are 10 to a few hundred. The energy will vary strongly and convergence will be difficult if lambda is too large. The constraint will be weak and the magnetization will not be close to [[spinat]] if lambda is too small. See variable [[magconon]] for more details.
         </p>
-    topics: spinpolarisation_useful
+    topics: spinpolarisation_useful, MagMom_basic
     varfile: vargs
     vartype: real
 - !variable
@@ -13970,7 +13970,7 @@
         <p>
          Turns on the imposition of a Lagrangian constraint on the magnetization. For each atom, the magnetization is calculated in a sphere (radius [[ratsph]]) and a constraint is applied to bring it closer to the input values of [[spinat]]. The constraint can be either on the direction only (magconon 1) or on the full vector (magconon 2). The Lagrangian constraint has an amplitude [[magcon_lambda]] which should be neither too big (bad or impossible convergence) nor too small (no effect).
         </p>
-    topics: spinpolarisation_useful
+    topics: spinpolarisation_useful, MagMom_compulsory
     varfile: vargs
     vartype: integer
 - !variable
@@ -20994,7 +20994,7 @@
           </li>
          </ul>
         </p>
-    topics: printing_prngs
+    topics: printing_prngs, EFG_compulsory
     varfile: varpaw
     vartype: integer
 - !variable
@@ -21077,7 +21077,7 @@
           </li>
          </ul>
         </p>
-    topics: printing_prfermi
+    topics: printing_prfermi, EFG_basic
     varfile: varpaw
     vartype: integer
 - !variable
@@ -22306,7 +22306,7 @@
           </li>
          </ul>
         </p>
-    topics: DFPT_useful
+    topics: EFG_basic
     varfile: varpaw
     vartype: real
 - !variable
@@ -22736,7 +22736,7 @@
           </li>
          </ul>
         </p>
-    topics: DFPT_useful
+    topics: EFG_compulsory
     varfile: varpaw
     vartype: real
 - !variable
@@ -24591,7 +24591,7 @@
         also used to determine the direction of the integrated magnetization matrix.
          </li>
         </p>
-    topics: spinpolarisation_basic
+    topics: spinpolarisation_basic, MagMom_basic
     varfile: vargs
     vartype: real
 - !variable
@@ -26533,7 +26533,7 @@
           </li>
          </ul>
         </p>
-    topics: otherGS_expert
+    topics: otherGS_expert, ChargedCell_basic
     varfile: varpaw
     vartype: integer
 - !variable
@@ -28777,7 +28777,7 @@
         Note that Tesla are admitted. This sets the magnitude of mu_0*H, in Tesla,
         with H in Amperes/metre.
         </p>
-    topics: spinpolarisation_expert
+    topics: spinpolarisation_expert, MagField_compulsory
     varfile: varff
     vartype: real
 - !variable

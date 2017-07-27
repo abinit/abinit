@@ -1,5 +1,6 @@
 - Berry
 - BSE
+- ChargedCell
 - convergency
 - CRPA
 - crystal
@@ -7,6 +8,7 @@
 - DFPT
 - DMFT
 - EffMass
+- EFG
 - ElPhon
 - GeoOpt
 - GSgeneral 
@@ -15,6 +17,8 @@
 - GWls
 - Hybrids
 - k-points
+- MagField
+- MagMom
 - MolecularDynamics
 - multidtset
 - nonlinear
@@ -26,10 +30,12 @@
 - printing
 - RandStopPow
 - recursion
+- RPACorrEn
 - spinpolarisation
 - TDDFT
 - TDep
 - TransPath
+- Unfolding
 - vdw
 - Wannier
 - Wavelets
