@@ -199,6 +199,7 @@ body : |
    <a href="#prt_ifc">prt_ifc</a>&nbsp;&nbsp;
    <a href="#prtsrlr">prtsrlr</a>&nbsp;&nbsp;
    <a href="#prtmbm">prtmbm</a>&nbsp;&nbsp;
+   <a href="#prtddb">prtddb</a>&nbsp;&nbsp;
    <a href="#prtdos">prtdos</a>&nbsp;&nbsp;
    <a href="#prtnest">prtnest</a>&nbsp;&nbsp;
    <a href="#prtphbands">prtphbands</a>&nbsp;&nbsp;
@@ -1880,6 +1881,36 @@ body : |
   finite difference expression of the ddk ([[berryopt]]=2 or -2)
   in the linear response calculation of the effective charges and the piezoelectric tensor.
   </font><br>
+  <br>
+  <br>
+  <br>
+  
+  <a href="#top">Go to the top</a>
+  <b> | </b><a href="#list">List of ANADDB input
+  variables</a>
+  <hr><font id="title"><a name="prtddb">prtddb</a></font>
+  <br>
+  <font id="definition">Mnemonics: PRinT the Derivative DataBase files</font>
+  <br>
+  <font id="category">Characteristic: </font>
+  <br>
+  <font id="vartype">Variable type: integer </font>
+  <br>
+  <font id="default">Default: 0</font>
+  <br>
+  <br>
+  <p>
+  <font id="text"> Flag to print out the DDB file interpolated
+  with the Interatomic Force Constants.
+  <p>
+  The available options are:</font>
+  <ul>
+  <font id="text">
+   <li>0 =&gt; no output of DDB (default);</li>
+   <li>1 =&gt; Interpolate the DDB and write out the DDB and DDB.nc files. </li>
+  </font>
+  </ul>
+  <br>
   <br>
   <br>
   <br>
