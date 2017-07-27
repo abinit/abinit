@@ -8,7 +8,7 @@
 
 - !components
     name : abinit
-    keyword : the main code
+    keyword : ABINIT, the main code
     authors : DCA, XG
     subtitle : This document explains the i/o parameters and format needed for the main code (abinit) in the ABINIT package.
 - !components
