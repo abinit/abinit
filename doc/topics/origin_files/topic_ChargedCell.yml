@@ -1,0 +1,29 @@
+- !components 
+    name      : ChargedCell 
+    keyword   : Charged cell 
+    authors   : FB
+    howto     : perform a calculation on a charged cell
+    header    : default
+    title     : <h1>Charged cells</h1>
+    subtitle  : default
+    copyright : default
+    links     : default
+    introduction : |- 
+        <p>It is well known that the electrostatic potential (arising from ion-ion, ion-electron, and electron-electron interactions) is ill-defined within periodic boundary conditions.
+        However, it is less well known that the total energy of a charged cell is also ill-defined.
+        In fact, after a careful derivation in [[Bruneval2014]], it was shown that the above two statements are tightly linked:
+        when the number of electrons differs from the number of protons in a cell, the necessary compensating background that enforces the overall charge neutrality
+        is sensitive to the arbitrary average electrostatic potential.
+
+        <p>ABINIT offers the possibility to choose which convention to use for the average electrostatic potential with the keyword [[usepotzero]].
+        <p>In PAW, one can choose among 3 options:
+        <li>the average of smooth electrostatic potential is set to zero;</li>
+        <li>the average of all-electron electrostatic potential is set to zero;</li>
+        <li>the average of smooth electrostatic potential is set to a finite value, which follows the Quantum Espresso implementation (see [[Giannozzi2009]] for more details).</li>
+
+        <p>Only options 1 and 3 are valid for the NCPP case.
+
+        <p>None of these conventions is intrinsically more correct than the other ones. This is just an arbitrary choice, but ABINIT now permits a straight comparison to the other codes.
+    tutorials  : |-
+
+    end : default

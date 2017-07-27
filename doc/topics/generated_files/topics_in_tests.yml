@@ -161,7 +161,12 @@
 - tests/v5/Input/t20.in:#%% topics = DFT+U
 - tests/v5/Input/t23.in:#%% topics = Berry
 - tests/v5/Input/t30.in:#%% topics = DFPT
-- tests/v5/Input/t33.in:#%% topics = DFT+U
+- tests/v5/Input/t31.in:#%% topics = EFG
+- tests/v5/Input/t32.in:#%% topics = EFG
+- tests/v5/Input/t33.in:#%% topics = DFT+U, EFG
+- tests/v5/Input/t34.in:#%% topics = EFG
+- tests/v5/Input/t35.in:#%% topics = EFG
+- tests/v5/Input/t36.in:#%% topics = EFG
 - tests/v5/Input/t37.in:#%% topics = DFT+U
 - tests/v5/Input/t38.in:#%% topics = DFT+U
 - tests/v5/Input/t39.in:#%% topics = DFT+U
@@ -182,12 +187,15 @@
 - tests/v6/Input/t124.in:#%% topics = Berry
 - tests/v6/Input/t125.in:#%% topics = Berry
 - tests/v6/Input/t126.in:#%% topics = Berry
+- tests/v6/Input/t17.in:#%% topics = MagField
 - tests/v6/Input/t24.in:#%% topics = TransPath
 - tests/v6/Input/t25.in:#%% topics = TransPath
 - tests/v6/Input/t27.in:#%% topics = TransPath
 - tests/v6/Input/t37.in:#%% topics = TDep
 - tests/v6/Input/t43.in:#%% topics = Berry
+- tests/v6/Input/t44.in:#%% topics = EFG
 - tests/v6/Input/t47.in:#%% topics = DMFT
+- tests/v6/Input/t49.in:#%% topics = EFG
 - tests/v6/Input/t50.in:#%% topics = TDep
 - tests/v6/Input/t62.in:#%% topics = DFPT
 - tests/v6/Input/t63.in:#%% topics = nonlinear, DFPT
@@ -200,6 +208,7 @@
 - tests/v67mbpt/Input/t14.in:#%% topics = BSE
 - tests/v67mbpt/Input/t15.in:#%% topics = GWls, BSE
 - tests/v67mbpt/Input/t16.in:#%% topics = BSE
+- tests/v67mbpt/Input/t19.in:#%% topics = RPACorrEn
 - tests/v67mbpt/Input/t29.in:#%% topics = BSE
 - tests/v67mbpt/Input/t31.in:#%% topics = BSE
 - tests/v67mbpt/Input/t32.in:#%% topics = BSE
@@ -207,7 +216,7 @@
 - tests/v67mbpt/Input/t34.in:#%% topics = BSE
 - tests/v67mbpt/Input/t35.in:#%% topics = BSE
 - tests/v7/Input/t03.in:#%% topics = Berry
-- tests/v7/Input/t05.in:#%% topics = spinpolarisation
+- tests/v7/Input/t05.in:#%% topics = spinpolarisation, MagMom
 - tests/v7/Input/t06.in:#%% topics = spinpolarisation
 - tests/v7/Input/t07.in:#%% topics = spinpolarisation
 - tests/v7/Input/t08.in:#%% topics = PIMD
