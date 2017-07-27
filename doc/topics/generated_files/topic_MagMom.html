@@ -18,7 +18,7 @@
 <script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
 
  <h3><b>Table of content: </b></h3> 
- <ul> <li><a href="topic_MagMom.html#1">1</a>. Introduction.<li><a href="topic_MagMom.html#2">2</a>. Related input variables.<li><a href="topic_MagMom.html#3">3</a>. Selected input files.<li><a href="topic_MagMom.html#4">4</a>. References.</ul>
+ <ul> <li><a href="topic_MagMom.html#1">1</a>. Introduction.<li><a href="topic_MagMom.html#2">2</a>. Selected input files.<li><a href="topic_MagMom.html#3">3</a>. References.</ul>
 
 &nbsp; 
 <HR ALIGN=left> 
@@ -26,7 +26,7 @@
 <h3><b>1. Introduction.</b></h3>
 
 
-<p>A complementary magnetic constraint method has been implemented in the ABINIT code, wherein the magnetization around each atom is pushed to a desired (vectorial) value. The constraint can either be on the full vector quantity, $\vec{m}$, or only on the direction <b>m</b>.  This is mainly useful for non collinear systems, where the direction and amplitude of the magnetic moment can change. The method follows that used in the Quantum Espresso [<a href="../../bibliography/generated_files/bibliography.html#Moscaconte2007">Moscaconte2007</a>] and VASP [<a href="../../bibliography/generated_files/bibliography.html#Ma2015">Ma2015</a>] codes: a Lagrangian constraint is applied to the energy, and works through a resulting term in the potential, which acts on the different spin components. The magnetization in a sphere &Omega;<sub>i</sub> around atom i at position <b>R</b><sub>i</sub> is calculated as:
+<p>A complementary magnetic constraint method has been implemented in the ABINIT code, wherein the magnetization around each atom is pushed to a desired (vectorial) value. The constraint can either be on the full vector quantity, $\vec{m}$, or only on the direction <b>m</b>.  This is mainly useful for non collinear systems, where the direction and amplitude of the magnetic moment can change. The method follows that used in the Quantum Espresso <a href="../../bibliography/generated_files/bibliography.html#Moscaconte2007">[Moscaconte2007]</a> and VASP <a href="../../bibliography/generated_files/bibliography.html#Ma2015">[Ma2015]</a> codes: a Lagrangian constraint is applied to the energy, and works through a resulting term in the potential, which acts on the different spin components. The magnetization in a sphere &Omega;<sub>i</sub> around atom i at position <b>R</b><sub>i</sub> is calculated as:
 <p><b>m</b> =&int;<sub>&Omega;<sub>i</sub></sub> <b>m</b>(<b>r</b>) d<b>r</b>
 
 <p>and the corresponding potential for spin component &alpha; is written as:
@@ -41,21 +41,11 @@
 
 
 
+
 &nbsp; 
 <HR ALIGN=left> 
 <a name="2">&nbsp;</a>
-<h3><b>2. Related input variables.</b></h3>
-
-
-<p>Compulsory input variables:<p>... <a href="../../input_variables/generated_files/vargs.html#magconon">magconon</a>   [turn MAGnetization CONstraint ON]<br>
-<p>Basic input variables:<p>... <a href="../../input_variables/generated_files/vargs.html#magcon_lambda">magcon_lambda</a>   [MAGnetization CONstraint LAMBDA parameter]<br>
-... <a href="../../input_variables/generated_files/vargs.html#spinat">spinat</a>   [SPIN for AToms]<br>
-
-
-&nbsp; 
-<HR ALIGN=left> 
-<a name="3">&nbsp;</a>
-<h3><b>3. Selected input files.</b></h3>
+<h3><b>2. Selected input files.</b></h3>
 
 
 The user can find some related example input files in the ABINIT package in the directory /tests, or on the Web:
@@ -65,12 +55,12 @@ The user can find some related example input files in the ABINIT package in the 
 
 &nbsp; 
 <HR ALIGN=left> 
-<a name="4">&nbsp;</a>
-<h3><b>4. References.</b></h3>
+<a name="3">&nbsp;</a>
+<h3><b>3. References.</b></h3>
 
 
-<br> [<a href="../../bibliography/generated_files/bibliography.html#Ma2015">Ma2015</a>]  Pui-Wai Ma and S. L. Dudarev, "Constrained density functional for noncollinear magnetism", Phys. Rev. B 91, 054420 (2015).<br> 
-<br> [<a href="../../bibliography/generated_files/bibliography.html#Moscaconte2007">Moscaconte2007</a>]  A. Mosca Conte, "Quantum mechanical modeling of nano magnetism", PhD thesis (SISSA, Trieste Italy, 2007). <br> URL: <a href="http://hdl.handle.net/20.500.11767/3935"> http://hdl.handle.net/20.500.11767/3935</a>.<br> 
+<br> <a href="../../bibliography/generated_files/bibliography.html#Ma2015">[Ma2015]</a>  Pui-Wai Ma and S. L. Dudarev, "Constrained density functional for noncollinear magnetism", Phys. Rev. B 91, 054420 (2015).<br> 
+<br> <a href="../../bibliography/generated_files/bibliography.html#Moscaconte2007">[Moscaconte2007]</a>  A. Mosca Conte, "Quantum mechanical modeling of nano magnetism", PhD thesis (SISSA, Trieste Italy, 2007). <br> URL: <a href="http://hdl.handle.net/20.500.11767/3935"> http://hdl.handle.net/20.500.11767/3935</a>.<br> 
 <p>
 <script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
 

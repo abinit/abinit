@@ -18,7 +18,7 @@
 <script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
 
  <h3><b>Table of content: </b></h3> 
- <ul> <li><a href="topic_MagField.html#1">1</a>. Introduction.<li><a href="topic_MagField.html#2">2</a>. Related input variables.<li><a href="topic_MagField.html#3">3</a>. Selected input files.<li><a href="topic_MagField.html#4">4</a>. References.</ul>
+ <ul> <li><a href="topic_MagField.html#1">1</a>. Introduction.<li><a href="topic_MagField.html#2">2</a>. Selected input files.<li><a href="topic_MagField.html#3">3</a>. References.</ul>
 
 &nbsp; 
 <HR ALIGN=left> 
@@ -27,7 +27,7 @@
 
 
 <p>An applied external magnetic field has been implemented in ABINIT by considering the Zeeman spin response only (i.e., neglecting the orbital contribution).
-<p>Following the procedure of Bousquet et al.,[<a href="../../bibliography/generated_files/bibliography.html#Bousquet2011">Bousquet2011</a>] the applied <b>B</b> field is introduced by adding the "Zeeman term" term in the non-collinear Kohn-Sham potential:
+<p>Following the procedure of Bousquet et al.,<a href="../../bibliography/generated_files/bibliography.html#Bousquet2011">[Bousquet2011]</a> the applied <b>B</b> field is introduced by adding the "Zeeman term" term in the non-collinear Kohn-Sham potential:
 <p>This contribution is trivial to implement, and also dominant in amplitude, but has historically been neglected with respect to the orbital responses, which are rich in more complex physics. 
 <p>Unlike an applied electric field, such a Zeeman term in the potential is compatible with periodic boundary conditions. It is also compatible with collinear calculations by reducing its application on ``up'' and ``down'' spin channels with <b>B</b>=B<b>e</b><sub>z</sub>.
 <p>In ABINIT, the finite Zeeman field is controlled by the keyword <a href="../../input_variables/generated_files/varff.html#zeemanfield">zeemanfield</a> which allows to control the amplitude of the applied <b>B</b>-field (in Tesla) along the three cartesian directions.
@@ -35,19 +35,11 @@
 
 
 
+
 &nbsp; 
 <HR ALIGN=left> 
 <a name="2">&nbsp;</a>
-<h3><b>2. Related input variables.</b></h3>
-
-
-<p>Compulsory input variables:<p>... <a href="../../input_variables/generated_files/varff.html#zeemanfield">zeemanfield</a>   [ZEEMAN FIELD]<br>
-
-
-&nbsp; 
-<HR ALIGN=left> 
-<a name="3">&nbsp;</a>
-<h3><b>3. Selected input files.</b></h3>
+<h3><b>2. Selected input files.</b></h3>
 
 
 The user can find some related example input files in the ABINIT package in the directory /tests, or on the Web:
@@ -57,11 +49,11 @@ The user can find some related example input files in the ABINIT package in the 
 
 &nbsp; 
 <HR ALIGN=left> 
-<a name="4">&nbsp;</a>
-<h3><b>4. References.</b></h3>
+<a name="3">&nbsp;</a>
+<h3><b>3. References.</b></h3>
 
 
-<br> [<a href="../../bibliography/generated_files/bibliography.html#Bousquet2011">Bousquet2011</a>]  E. Bousquet, N. A. Spaldin and K. T. Delaney, "Unexpectedly Large Electronic Contribution to Linear Magnetoelectricity", Phys. Rev. Lett. 106, 107202 (2011). <br> DOI: <a href="https://doi.org/10.1103/PhysRevLett.106.107202">10.1103/PhysRevLett.106.107202</a>.<br> 
+<br> <a href="../../bibliography/generated_files/bibliography.html#Bousquet2011">[Bousquet2011]</a>  E. Bousquet, N. A. Spaldin and K. T. Delaney, "Unexpectedly Large Electronic Contribution to Linear Magnetoelectricity", Phys. Rev. Lett. 106, 107202 (2011). <br> DOI: <a href="https://doi.org/10.1103/PhysRevLett.106.107202">10.1103/PhysRevLett.106.107202</a>.<br> 
 <p>
 <script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
 
