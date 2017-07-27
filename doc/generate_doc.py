@@ -88,7 +88,7 @@ list_infos_dir=[]
 list_infos_dir.append({"dir_name":"bibliography","root_filname":"",
                                                     "yml_files":["bibfiles"]})
 list_infos_dir.append({"dir_name":"input_variables","root_filname":"",
-                                                    "yml_files":["abinit_vars","characteristics","list_specials","varfiles"]})
+                                                    "yml_files":["abinit_vars","characteristics","list_external","varfiles"]})
 list_infos_dir.append({"dir_name":"theory","root_filname":"theorydoc",
                                                     "yml_files":["theorydocs"]})
 list_infos_dir.append({"dir_name":"topics","root_filname":"topic",
@@ -100,7 +100,7 @@ list_infos_dir.append({"dir_name":"users","root_filname":"help",
 msgs={"bibfiles"       :"as database input file for the list of generated files in the bibliography directory ...",
       "abinit_vars"    :"as database input file for the input variables and their characteristics ...",
       "characteristics":"as database input file for the list of allowed characteristics ...",
-      "list_specials"  :"as database input file for the list of allowed special keywords ...",
+      "list_external"  :"as database input file for the list of external parameters (known at compile or run time) ...",
       "varfiles"       :"as database input file for the list of varfiles ...",
       "theorydocs"     :"as database input file for the list of theory documents ...",
       "default_topic"  :"to initialize the topic html files with default values ...",
@@ -125,7 +125,7 @@ for infos_dir in list_infos_dir:
 
 # These ones are quite often used, so copy them ...
 abinit_vars=yml_in["abinit_vars"]
-list_specials=yml_in["list_specials"]
+list_external=yml_in["list_external"]
 varfiles=yml_in["varfiles"]
 list_of_topics=yml_in["list_of_topics"]
   
@@ -473,8 +473,8 @@ for var in abinit_vars:
 for item in yml_in["characteristics"]:
   allowed_link_seeds[item]="characteristic"
 
-for (specialkey,specialval) in list_specials:
-  allowed_link_seeds[specialkey]="special"
+for item in list_external:
+  allowed_link_seeds[item[0]]="input_variable in varset_external"
 
 for i, varfile_info in enumerate(varfiles):
   varfile = varfile_info.name
@@ -506,7 +506,7 @@ for file in allowed_links_in_tests:
 # The information needed to create automatically the links has been collected
 
 ################################################################################
-# Initialization to constitute the body of the specials and var*.html files
+# Initialization to constitute the body of the varset_* and var*.html files
 
 all_vars = dict()
 all_contents = dict()
@@ -516,22 +516,22 @@ for i, varfile_info in enumerate(varfiles):
   all_contents[varfile]= "<br><br><br><br><hr>\n"
 
 ################################################################################
-# Constitute the body of information for the special parameters, stored for the appropriate varfile in all_contents[varfile]
+# Constitute the body of information for the external parameters, stored for the appropriate varfile in all_contents[varfile]
 
-cur_specials = []
-for (specialkey,specialval) in list_specials:
-  cur_specials.append(specialkey)
+cur_external = []
+for (key,value) in list_external:
+  cur_external.append(key)
 
-for (speckey, specval) in list_specials:
-  backlink= ' &nbsp; <a href="../../input_variables/generated_files/specials.html#%s">%s</a> &nbsp; ' %(speckey,speckey)
-  cur_content = "<br><font id=\"title\"><a name=\""+speckey+"\">"+speckey+"</a></font>\n"
+for (key, value) in list_external:
+  backlink= ' &nbsp; <a href="../../input_variables/generated_files/varset_external.html#%s">%s</a> &nbsp; ' %(key,key)
+  cur_content = "<br><font id=\"title\"><a name=\""+key+"\">"+key+"</a></font>\n"
   cur_content += "<br><font id=\"text\">\n"
-  cur_content += "<p>\n"+make_links(specval,speckey,allowed_link_seeds,backlinks,backlink)+"\n"
+  cur_content += "<p>\n"+make_links(value,key,allowed_link_seeds,backlinks,backlink)+"\n"
   cur_content += "</font>"
   cur_content += "<br><br><a href=#top>Go to the top</a>\n"
   cur_content += "<B> | </B><a href=\"varset_allvars.html#top\">Complete list of input variables</a><hr>\n"
   #
-  all_contents["specials"] = all_contents["specials"] + cur_content + "\n\n"
+  all_contents["external"] = all_contents["external"] + cur_content + "\n\n"
 
 ################################################################################
 # Constitute the body of information for all variables, stored for the appropriate varfile in all_contents[varfile]
@@ -602,7 +602,7 @@ for i, var in enumerate(abinit_vars):
     print('For variable : ',abivarname)
 
 ################################################################################
-# Generate the files that document all the variables (all such files : var* as well as all and special).
+# Generate the files that document all the variables (all such files : var* as well as allvars and external).
 
 suppl_components={}
 
@@ -628,12 +628,12 @@ for i, varfile_info in enumerate(varfiles):
   #Generate the body of the table of content 
   cur_let = 'A'
   toc_body=""
-  if varfile=="varset_allvars":
+  if varfile=="allvars":
     toc_body+=scriptTab+alphalinks
   else :
     toc_body += " <br><a id='%s'></a>"%(cur_let)+cur_let+".\n"
 
-  if varfile=="varset_allvars":
+  if varfile=="allvars":
     toc_body += " <ul id=\"Letters\">\n"
     toc_body += " <li>\n<ul id=\"%s\" class=\"TabContentLetter\">\n"%(cur_let)
     toc_body += " <li class=\"HeaderLetter\">%s</li>\n"%(cur_let)
@@ -652,12 +652,12 @@ for i, varfile_info in enumerate(varfiles):
 defaultClick(true);\n\
 </script>\n\
 "
-  elif varfile == "specials":
-    for (speckey, specval) in list_specials:
-      while not speckey.lower().startswith(cur_let.lower()):
+  elif varfile == "external":
+    for (key, value) in list_external:
+      while not key.lower().startswith(cur_let.lower()):
         cur_let = chr(ord(cur_let)+1)
         toc_body += " <br><a id='%s'></a>"%(cur_let)+cur_let+".\n"
-      curlink = " <a href=\"#"+speckey+"\">"+speckey+"</a>&nbsp;&nbsp;\n"
+      curlink = " <a href=\"#"+key+"\">"+key+"</a>&nbsp;&nbsp;\n"
       toc_body += curlink
   else:
     for abivarname,defi in all_vars[varfile]:

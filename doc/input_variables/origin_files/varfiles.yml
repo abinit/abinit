@@ -9,11 +9,11 @@
 # some minor adjustments are needed, so that the default list # is less adequate.
 
 - !components
-    name : specials
-    keyword : special
+    name : external
+    keyword : External parameters
     header : |
       <html>
-      <head><title>Description of special parameters.</title>
+      <head><title>Description of external parameters.</title>
       <link rel=stylesheet type="text/css" href="../formabinit.css">
       </head>
       <body bgcolor="#ffffff">
@@ -21,14 +21,15 @@
       <hr>
       <a name="top"></a>
     title : |
-      <h1>ABINIT, special parameters:</h1>
+      <h1>ABINIT, external parameters:</h1>
     purpose : |
-      <p>This document lists and provides the description of the name (keywords) of special parameters
-      that are not input variables, but that are used in the documentation of other variables, typically compilation parameters.
-      <p> You can change these parameters at compile time usually.
+      <p>This document lists and provides the description of the name (keywords) of external parameters
+      that are not input variables, but that are used in the documentation of other variables, typically compilation parameters,
+      available libraries, or number of processors.
+      <p> You can change these parameters at compile or run time usually.
     tofcontent_header : |
       <a name="list"></a>
-      <h3><b> Content of the file : alphabetical list of special parameters.</b></h3>
+      <h3><b> Content of the file : alphabetical list of external parameters.</b></h3>
 
 - !components
     name : allvars

@@ -134,8 +134,6 @@ def make_links(text,cur_key,allowed_link_seeds,backlinks,backlink):
         return '<a href="../../input_variables/generated_files/'+varfile+".html#"+key+'">'+text+'</a>'
       elif value=="characteristic":
         return '<a href="../../users/generated_files/help_abinit.html#%s">%s</a>' %(key,text)
-      elif value=="special":
-        return '<a href="../../input_variables/generated_files/specials.html#'+key+'">'+text+'</a>'
       elif value=="varfile":
         return '<a href="../../input_variables/generated_files/'+key+'.html">'+text+'</a>'
       elif value=="in_tests":
@@ -428,6 +426,8 @@ def finalize_html(doc_html,origin_yml,dir_name,root_filname,allowed_link_seeds,b
   #This must be temporary !
   if full_filname=='allvars':
     full_filname='varset_allvars'
+  if full_filname=='external':
+    full_filname='varset_external'
 
   #Write the finalized html file.
   path_html = "%s/generated_files/%s.html" %(dir_name,full_filname)
