@@ -1,0 +1,39 @@
+- !components 
+    name      : RandStopPow 
+    keyword   : Random stopping power 
+    authors   : FB
+    howto     : perform random stopping power calculation
+    header    : default
+    title     : <h1>Random electronic stopping power</h1>
+    subtitle  : default
+    copyright : default
+    links     : default
+    introduction : |- 
+
+       <p>The slowing down of a swift charged particle inside condensed matter has been a subject of intense interest
+       since the advent of quantum-mechanics.
+       The Lindhard formula [[Lindhard1954]] that gives the polarizability of the free electron gas has been developed specifically for this purpose.
+       The kinetic energy lost by the impinging particle by unit of path length is named the stopping power.
+       For large velocities, the stopping power is dominated by its electronic contribution: the arriving particle induces electronic excitations in the target.
+       These electronic excitations in the target can be related to the inverse dielectric function &epsilon;<sup>-1</sup>(<b>q</b>,&omega;)
+       provided that linear response theory is valid.
+       <p>As a consequence, the electronic stopping power randomized over all the possible impact parameters reads
+
+       <p>S(<b>v</b>) = (4&pi; Z<sup>2</sup>/N<sub><b>q</b></sub> &Omega;|<b>v</b>|)&sum;<sub><b>q</b></sub>&sum;<sub><b>G</b></sub>
+       Im{-&epsilon;<sup>-1</sup>[<b>q</b>,<b>v.</b>(<b>q</b>+<b>G</b>)]} (<b>v.</b>(<b>q</b>+<b>G</b>)/|<b>q</b>+<b>G</b>|<sup>2</sup>),
+       <p>where Z and <b>v</b> are respectively the charge and the velocity of the impinging particle,
+       &Omega; is the unit cell volume, N<sub><b>q</b></sub> is the number of <b>q</b>-points in the first Brillouin zone,
+       and <b>G</b> are reciprocal lattice vectors.
+       <p>Apart from an overall factor of 2, this equation is identical to the formula published [[Campillo1998]].
+
+       <p>The GW module of ABINIT gives access to the full inverse dielectric function for a grid of frequencies &omega;.
+       Then, the implementation of the above equation is a post-processing employing a spline interpolation of the inverse dielectric function in order to evaluate
+       it at &omega;=<b>v.</b>(<b>q</b>+<b>G</b>).
+       The energy cutoff on <b>G</b> is governed by the [[ecuteps]], as in the GW module.
+       The integer [[npvel]] and the cartesian vector [[pvelmax]] control the discretization of the particle velocity.
+       <p>Note that the absolute convergence of the random electronic stopping power is a delicate matter that generally requires thousands of empty states together with large values of the energy cutoff.
+
+
+    tutorials  : |-
+ 
+    end : default

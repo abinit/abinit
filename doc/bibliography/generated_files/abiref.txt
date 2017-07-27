@@ -1,3 +1,4 @@
+[Abrikosov1975]  A.A. Abrikosov, L.P. Gorkov and E. Dzyaloshinskii, "Methods of quantum field theory in statistical physics", Dover, New-York ,  (1975). 
 [Albrecht1998]  S. Albrecht, L. Reining, R. Del Sole and G. Onida, "Ab Initio Calculation of Excitonic Effects in the Optical Spectra of Semiconductors", Phys. Rev. Lett. 80, 4510--4513 (1998). <br> DOI: <a href="https://doi.org/10.1103/PhysRevLett.80.4510">10.1103/PhysRevLett.80.4510</a>. 
 [Allen1976]  P. B. Allen and V. Heine, "Theory of the temperature dependence of electronic band structures", J. of Phys. C: Solid State Physics 9, 2305 (1976). 
 [Allen1978]  P. B. Allen, "New method for solving Boltzmann's equation for electrons in metals", Phys. Rev. B 17, 3725--3734 (1978). <br> DOI: <a href="https://doi.org/10.1103/PhysRevB.17.3725">10.1103/PhysRevB.17.3725</a>. 
@@ -51,6 +52,7 @@
 [Daubechies1992]  I. Daubechies, "10 Lectures on Wavelets" (Society for Industrial and Applied Mathematics ({SIAM}, 3600 {M}arket {S}treet, {F}loor 6, {P}hiladelphia, {PA} 19104), , 1992). 
 [Dion2004]  M. Dion, H. Rydberg, E. Schr\"oder, D. C. Langreth and B. I. Lundqvist, "Van der Waals Density Functional for General Geometries", Phys. Rev. Lett. 92, 246401 (2004). <br> DOI: <a href="https://doi.org/10.1103/PhysRevLett.92.246401">10.1103/PhysRevLett.92.246401</a>. 
 [Espejo2012]  C. Espejo, T. Rangel, Y. Pouillon, A. H. Romero and X. Gonze, "Wannier functions approach to van der {W}aals} interactions in {ABINIT}", Comp. Phys. Comm. 183, 480 (2012). 
+[Fetter1971]  A.L. Fetter and J.D. Walecka, "Quantum Theory of Many-Particle Systems", McGraw-Hill, New York ,  (1971). 
 [Folegati2007]  P. Folegati, I. Makkonen, R. Ferragut and M.J. Puska, "Analysis of electron-positron momentum spectra of metallic alloys as supported by first-principles calculations", Phys. Rev. B 75, 054201 (2007). 
 [Fresard1997]  Raymond Fr\'esard and Gabriel Kotliar, "Interplay of Mott transition and ferromagnetism in the orbitally degenerate Hubbard model", Phys. Rev. B 56, 12909 (1997). 
 [Freund1995]  R. W. Freund and N. M. Nachtigal, "Software for simplified {L}anczos and {QMR} algorithms", Applied Numerical Mathematics 19, 319 (1995). <br> DOI: <a href="https://doi.org/10.1016/0168-9274(95)00089-5">10.1016/0168-9274(95)00089-5</a>. 
@@ -67,6 +69,7 @@
 [Giantomassi2011]  M. Giantomassi, M. Stankovski, R. Shaltaf, M. Gruning, F. Bruneval, P. Rinke and G.M. Rignanese, "{Electronic properties of interfaces and defects from many-body perturbation theory: Recent developments and applications}", Physica Status Solidi B 248, 275--289 (2011). <br> DOI: <a href="https://doi.org/10.1002/pssb.201046094">10.1002/pssb.201046094</a>. 
 [Gillet2013]  Y. Gillet, M. Giantomassi and X. Gonze, "First-principles study of excitonic effects in Raman intensities", Phys. Rev. B 88, 094305 (2013). <br> DOI: <a href="https://doi.org/10.1103/PhysRevB.88.094305">10.1103/PhysRevB.88.094305</a>. 
 [Gillet2015]  Y. Gillet, M. Giantomassi and X. Gonze, "Efficient Interpolation Technique for {B}ethe-{S}alpeter Calculation of Optical Spectra", Comput. Phys. Comm. 203C, 83-93 (2016). <br> DOI: <a href="https://doi.org/10.1016/j.cpc.2016.02.008">10.1016/j.cpc.2016.02.008</a>. 
+[Godby1989]  R. W. Godby and R. J. Needs, "Metal-insulator transition in Kohn-Sham theory and quasiparticle theory", Phys. Rev. Lett. 62, 1169 (1989). <br> DOI: <a href="https://doi.org/10.1103/PhysRevLett.62.1169">10.1103/PhysRevLett.62.1169</a>. 
 [Goedecker1996]  S. Goedecker, M. Teter and J. H\"utter, "Separable dual-space Gaussian pseudopotentials", Phys. Rev. B 54, 1703--1710 (1996). 
 [Gonze1991]  X. Gonze, R. Stumpf and M. Scheffler, "Analysis of separable potentials", Phys. Rev. B 44, 8503--8513 (1991). <br> DOI: <a href="https://doi.org/10.1103/PhysRevB.44.8503">10.1103/PhysRevB.44.8503</a>. 
 [Gonze1995]  X. Gonze, "Adiabatic density-functional perturbation theory", Phys. Rev. A 52, 1096--1114 (1995). <br> DOI: <a href="https://doi.org/10.1103/PhysRevA.52.1096">10.1103/PhysRevA.52.1096</a>. 
@@ -98,6 +101,7 @@
 [Hohenberg1964]  P. Hohenberg and W. Kohn, "Inhomogeneous Electron Gas", Phys. Rev. 136, B864--B871 (1964). <br> DOI: <a href="https://doi.org/10.1103/PhysRev.136.B864">10.1103/PhysRev.136.B864</a>. 
 [Holzwarth2001]  N.A.W. Holzwarth, A.R. Tackett and G.E. Matthews, "A Projector Augmented Wave ({PAW}) code for electronic structure calculations, Part {I}: {ATOMPAW} for generating atom-centered functions", Comp. Phys. Comm. 135, 329 (2001). 
 [Hughes1996]  J. L. P. Hughes and J. E. Sipe, "Calculation of second-order optical response in semiconductors", Phys. Rev. B 53, 10751--10763 (1996). <br> DOI: <a href="https://doi.org/10.1103/PhysRevB.53.10751">10.1103/PhysRevB.53.10751</a>. 
+[Hybertsen1986]  M. S. Hybertsen and S. G. Louie, "Electron correlation in semiconductors and insulators: Band gaps and quasiparticle energies", Phys. Rev. B 34, 5390 (1986). <br> DOI: <a href="https://doi.org/10.1103/PhysRevB.34.5390">10.1103/PhysRevB.34.5390</a>. 
 [Janssen2015]  J. Laflamme Janssen, B. Rousseau and M. C{\^o}t{\'e}, "Efficient dielectric matrix calculations using the {L}anczos algorithm for fast many-body {G}$_0${W}$_0$ implementations", Phys. Rev. B 91, 125120 (2015). <br> DOI: <a href="https://doi.org/10.1103/PhysRevB.91.125120">10.1103/PhysRevB.91.125120</a>. 
 [Jollet2009]  F. Jollet, G. Jomard, B. Amadon, J.P. Crocombette and D. Torumba, "Hybrid functional for correlated electrons in the projector augmented-wave formalism: Study of multiple minima for actinide oxides", Phys. Rev. B 80, 235109 (2009). 
 [Jollet2014]  F. Jollet, M. Torrent and N. Holzwarth, "Generation of Projector Augmented-Wave atomic data: a 71 element validated table in the {XML} format", Comp. Phys. Comm. 185, 1246-1254 (2014). 

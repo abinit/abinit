@@ -106,10 +106,11 @@ body : |
   <HR ALIGN=left>
   <a name="6">&nbsp;</a>
   <h3><b> 6.Excited state calculations. </b></h3>
-   <li><a href="#1">1.</a> GW calculations.
-   <li><a href="#1">2.</a> Bethe-Salpeter calculations.
+   <li><a href="../../topics/generated_files/topic_GW.html">1.</a> GW calculations.
+   <li><a href="../../topics/generated_files/topic_BSE.html">2.</a> Bethe-Salpeter calculations.
    <li><a href="../../topics/generated_files/topic_GWls.html">3.</a> GW- Lanczos-Sternheimer method.
-   <li><a href="../../topics/generated_files/topic_TDDFT.html">4.</a> TDDFT calculations.
+   <li><a href="../../topics/generated_files/topic_RandStopPow.html">4.</a> Random electronic stopping power.
+   <li><a href="../../topics/generated_files/topic_TDDFT.html">5.</a> TDDFT calculations.
   <p>&nbsp;
   
   <HR ALIGN=left>

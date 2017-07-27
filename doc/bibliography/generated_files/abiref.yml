@@ -1,5 +1,17 @@
 -
   ENTRYTYPE : article
+  ID : Abrikosov1975
+  author : A.A. Abrikosov and L.P. Gorkov and E. Dzyaloshinskii
+  title :  Methods of quantum field theory in statistical physics
+  journal : Dover, New-York
+  year : 1975
+  volume : 
+  pages : 
+  numpages : 
+  doi : 
+  publisher : Dover, New-York
+-
+  ENTRYTYPE : article
   ID : Albrecht1998
   author : Albrecht, S. and Reining, L. and Del Sole, R. and Onida, G.
   title : Ab Initio Calculation of Excitonic Effects in the Optical Spectra of Semiconductors
@@ -599,6 +611,16 @@
   pages : 480
 -
   ENTRYTYPE : article
+  ID : Fetter1971
+  author : A.L. Fetter and J.D. Walecka
+  title : Quantum Theory of Many-Particle Systems
+  journal : McGraw-Hill, New York
+  year : 1971
+  volume : 
+  pages : 
+  publisher : McGraw-Hill, New York
+-
+  ENTRYTYPE : article
   ID : Folegati2007
   author : Folegati, P. and Makkonen, I. and Ferragut, R. and Puska, M.J.
   title : Analysis of electron-positron momentum spectra of metallic alloys as supported by first-principles calculations
@@ -775,6 +797,19 @@
   doi : 10.1016/j.cpc.2016.02.008
   timestamp : 2015.08.27
   owner : yannick
+-
+  ENTRYTYPE : article
+  ID : Godby1989
+  author : R. W. Godby and R. J. Needs
+  title : Metal-insulator transition in Kohn-Sham theory and quasiparticle theory
+  journal : Phys. Rev. Lett.
+  year : 1989
+  volume : 62
+  pages : 1169
+  numpages : 0
+  doi : 10.1103/PhysRevLett.62.1169
+  publisher : American Physical Society
+  issue : 
 -
   ENTRYTYPE : article
   ID : Goedecker1996
@@ -1110,6 +1145,17 @@
   timestamp : 2015.11.12
   owner : yannick
   issue : 16
+-
+  ENTRYTYPE : article
+  ID : Hybertsen1986
+  author : M. S. Hybertsen and S. G. Louie
+  title : Electron correlation in semiconductors and insulators: Band gaps and quasiparticle energies
+  journal : Phys. Rev. B
+  year : 1986
+  volume : 34
+  pages : 5390
+  doi : 10.1103/PhysRevB.34.5390
+  number : 
 -
   ENTRYTYPE : article
   ID : Janssen2015

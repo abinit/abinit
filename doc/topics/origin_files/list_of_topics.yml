@@ -1,4 +1,5 @@
 - Berry
+- BSE
 - convergency
 - CRPA
 - crystal
@@ -10,6 +11,7 @@
 - GeoOpt
 - GSgeneral 
 - GSintroduction
+- GW
 - GWls
 - Hybrids
 - k-points
@@ -22,6 +24,7 @@
 - PIMD
 - positron
 - printing
+- RandStopPow
 - recursion
 - spinpolarisation
 - TDDFT

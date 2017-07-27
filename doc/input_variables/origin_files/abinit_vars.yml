@@ -1033,7 +1033,7 @@
          Note that the parallel algorithm [[gwpara]]=2 is not compatible with
         the choice [[awtr]]=0.
         </p>
-    topics: null
+    topics: GW_useful
     varfile: vargw
     vartype: integer
 - !variable
@@ -1203,7 +1203,7 @@
         wavefunctions should include all the degenerate states belonging to the same irreducible
         representation. Only in this case, indeed, the initial symmetries and energy degenerations are preserved.
         </p>
-    topics: null
+    topics: GW_basic
     varfile: vargw
     vartype: integer
 - !variable
@@ -1611,7 +1611,7 @@
           </li>
          </ul>
         </p>
-    topics: null
+    topics: BSE_basic
     varfile: varbse
     vartype: integer
 - !variable
@@ -1644,7 +1644,7 @@
           </li>
          </ul>
         </p>
-    topics: null
+    topics: BSE_expert
     varfile: varbse
     vartype: integer
 - !variable
@@ -1695,7 +1695,7 @@
           </li>
          </ul>
         </p>
-    topics: null
+    topics: BSE_expert
     varfile: varbse
     vartype: integer
 - !variable
@@ -1727,7 +1727,7 @@
           </li>
          </ul>
         </p>
-    topics: null
+    topics: BSE_useful
     varfile: varbse
     vartype: integer
 - !variable
@@ -1750,7 +1750,7 @@
         energy is between bs_eh_window(1) and bs_eh_window(2) will be considered during
         the construction of the e-h Hamiltonian.
         </p>
-    topics: null
+    topics: BSE_expert
     varfile: varbse
     vartype: integer
 - !variable
@@ -1770,7 +1770,7 @@
         in the macroscopic dielectric function.</li>
         <li>1 =&gt;The exchange term is calculated and added to the excitonic Hamiltonian.
          </li></ul></p>
-    topics: null
+    topics: BSE_expert
     varfile: varbse
     vartype: integer
 - !variable
@@ -1798,7 +1798,7 @@
         <p>
         <b>bs_freq_mesh(3)</b> gives the step of the linear mesh used for evaluating the macroscopic dielectric function.
         </p>
-    topics: null
+    topics: BSE_basic
     varfile: varbse
     vartype: real
 - !variable
@@ -1831,7 +1831,7 @@
           </li>
          </ul>
         </p>
-    topics: null
+    topics: BSE_expert
     varfile: varbse
     vartype: integer
 - !variable
@@ -1851,7 +1851,7 @@
         The iterative algorithm stops when the difference between two consecutive evaluations of the optical
         spectra is less than [[bs_haydock_tol]].
         </p>
-    topics: null
+    topics: BSE_expert
     varfile: varbse
     vartype: integer
 - !variable
@@ -1900,7 +1900,7 @@
           </li>
          </ul>
         </p>
-    topics: null
+    topics: BSE_expert
     varfile: varbse
     vartype: real
 - !variable
@@ -1927,7 +1927,7 @@
          </b>
          * [[ngkpt]] of the coarse mesh.
         </p>
-    topics: null
+    topics: BSE_useful
     varfile: varbse
     vartype: integer
 - !variable
@@ -1943,7 +1943,7 @@
     requires: '[[bs_interp_mode]]==3 and [[bs_algorithm]]==2 and [[bs_coupling]]==0'
     text: |-
         Defines the width of the region where divergence treatment is applied for BSE interpolation
-    topics: null
+    topics: BSE_useful
     varfile: varbse
     vartype: real
 - !variable
@@ -1969,7 +1969,7 @@
           </li>
          </ul>
         </p>
-    topics: null
+    topics: BSE_useful
     varfile: varbse
     vartype: integer
 - !variable
@@ -2001,7 +2001,7 @@
           </li>
          </ul>
         </p>
-    topics: null
+    topics: BSE_basic
     varfile: varbse
     vartype: integer
 - !variable
@@ -2020,7 +2020,7 @@
          [[bs_interp_prep]] allows to trigger the preparation of the interpolation with method 2 or method 3.
         It generates the decomposition of BSR in a,b,c coefficients used for the interpolation.
         </p>
-    topics: null
+    topics: BSE_useful
     varfile: varbse
     vartype: integer
 - !variable
@@ -2037,7 +2037,7 @@
         == 1 and [[bs_coupling]]==0'
     text: |-
         Gives the index of the neighbour that is used for Rohlfing & Louie method
-    topics: null
+    topics: BSE_useful
     varfile: varbse
     vartype: integer
 - !variable
@@ -2058,7 +2058,7 @@
         For spin polarized calculations, one must provide two separated indices for spin up and spin down.
         An additional cutoff energy can be applied by means of the bs_eh_window input variable.
         </p>
-    topics: null
+    topics: BSE_compulsory
     varfile: varbse
     vartype: integer
 - !variable
@@ -2079,7 +2079,7 @@
         The number of states should be sufficiently large
         for a correct description of the optical properties in the frequency range of interest.
         </p>
-    topics: null
+    topics: BSE_basic
     varfile: varbse
     vartype: integer
 - !variable
@@ -2153,7 +2153,7 @@
          [[cd_customnimfrqs]] lets the user define the grid points along the imaginary axis by hand. Set this
         to the number of frequencies you want. The frequencies are specified with [[cd_imfrqs]].
         </p>
-    topics: null
+    topics: GW_expert
     varfile: vargw
     vartype: integer
 - !variable
@@ -2489,7 +2489,7 @@
          on the dense mesh for a given convergence study. One can also use the utility to
         merge independent screening calculations over q-points and frequency sections.
         </p>
-    topics: null
+    topics: GW_expert
     varfile: vargw
     vartype: integer
 - !variable
@@ -2526,7 +2526,7 @@
          </b>
          utility.
         </p>
-    topics: null
+    topics: GW_expert
     varfile: vargw
     vartype: integer
 - !variable
@@ -2549,7 +2549,7 @@
         [[nfreqre]] are used up. The tangent transformed grid is approximately
         linear up to this point. To be used in conjunction with [[gw_frqre_tangrid]].
         </p>
-    topics: null
+    topics: GW_expert
     varfile: vargw
     vartype: real
 - !variable
@@ -2594,7 +2594,7 @@
         </p>
         <p>
         </p>
-    topics: null
+    topics: GW_expert
     varfile: vargw
     vartype: real
 - !variable
@@ -2617,7 +2617,7 @@
         [[nfreqre]] are used up. To be used in conjunction with
         [[gw_frqre_tangrid]].
         </p>
-    topics: null
+    topics: GW_expert
     varfile: vargw
     vartype: real
 - !variable
@@ -2653,7 +2653,7 @@
          </b>
          utility.
         </p>
-    topics: null
+    topics: GW_expert
     varfile: vargw
     vartype: integer
 - !variable
@@ -2747,7 +2747,7 @@
         When the spatial chemical potential is defined only for one type of atom (and no chemical potential is present for the other atoms), simply set the related values to *0.0 in the [[chempot]] array.
 
         In the present input array, reduced positions, energies and derivatives of energies are mixed. Hence, although the chemical potential is an energy, one cannot use the usual energy definitions (i.e. the chemical potential is always to be input in Hartree atomic units).
-    topics: null
+    topics: otherGS_expert
     varfile: vargeo
     vartype: real
 - !variable
@@ -2784,7 +2784,7 @@
         <p>
          In all cases, the check is performed at most every 2 seconds of CPU time.
         </p>
-    topics: null
+    topics: otherGS_expert
     varfile: vargs
     vartype: integer
 - !variable
@@ -5099,7 +5099,7 @@
         between 5 and 10 Hartree often (but not always) leads to converged results (at the level of 0.01 eV for the energy gap).
         In any case, a convergence study is worth.
         </p>
-    topics: null
+    topics: GW_compulsory, RandStopPow_compulsory
     varfile: vargw
     vartype: real
 - !variable
@@ -5124,7 +5124,7 @@
         values. If you want to spare some CPU time, you might try to use a value between [[ecut]] and these
         upper limits.
         </p>
-    topics: null
+    topics: GW_compulsory
     varfile: vargw
     vartype: real
 - !variable
@@ -5256,7 +5256,7 @@
         <p>
          The size of this set of planewaves is [[npwwfn]].
         </p>
-    topics: null
+    topics: GW_compulsory
     varfile: vargw
     vartype: real
 - !variable
@@ -5604,7 +5604,7 @@
         For B-spline interpolation:
 
         einterp(2:4): Order of B-spline for the three reduced directions. Cubic spline (3) is the recomended value.
-    topics: null
+    topics: otherGS_expert, GW_expert
     varfile: varbas
     vartype: real
 - !variable
@@ -5773,7 +5773,7 @@
         </p>
 
         See also [[eph_fsewin]], [[eph_extrael]] and [[eph_fermie]].
-    topics: null
+    topics: ElPhon_useful
     varfile: vareph
     vartype: integer
 - !variable
@@ -5788,7 +5788,7 @@
     requires: null
     text: |-
         Average electron-electron interaction strength, for the computation of the superconducting Tc using Mc-Millan's formula.
-    topics: null
+    topics: ElPhon_useful
     varfile: vareph
     vartype: real
 - !variable
@@ -5812,7 +5812,7 @@
         the DDB file. This approach is similar to the one used
         to interpolate the interatomic force constants in q-space.
         If eph_ngqpt_fine is not given, the EPH code uses the list of irreducible q-points reported in the DDB file (default behavior).
-    topics: null
+    topics: ElPhon_useful
     varfile: vareph
     vartype: integer
 - !variable
@@ -5835,7 +5835,7 @@
          <br />
          [[eph_task]]=2 : electron-phonon coupling elements
         </p>
-    topics: null
+    topics: ElPhon_basic
     varfile: varrf
     vartype: integer
 - !variable
@@ -6294,7 +6294,7 @@
          </ul>
          The behaviour of ABINIT before v5.5 corresponds to the default value 11.
         </p>
-    topics: null
+    topics: GW_expert
     varfile: vargw
     vartype: integer
 - !variable
@@ -6340,7 +6340,7 @@
          is the plasma frequency
         determined by the average density of the system (this can be set by hand by using the variable [[ppmfrq]]). See the section on grids in the descriptive text for [[cd_frqim_method]] for a detailed description of the formula.
         </p>
-    topics: null
+    topics: GW_expert
     varfile: vargw
     vartype: real
 - !variable
@@ -6365,7 +6365,7 @@
         [[freqremax]], [[freqremin]] and [[nfreqre]]
         define the spacing of the frequency mesh along the real axis.
         </p>
-    topics: null
+    topics: GW_basic
     varfile: vargw
     vartype: real
 - !variable
@@ -6399,7 +6399,7 @@
         Note that [[freqremax]], [[freqremin]]
         and [[nfreqre]] define the spacing of the frequency mesh along the real axis.
         </p>
-    topics: null
+    topics: GW_basic
     varfile: vargw
     vartype: real
 - !variable
@@ -6422,7 +6422,7 @@
         the real axis. Alternatively, the variables [[gw_customnfreqsp]] and
         [[gw_freqsp]] can be used to make a user-defined grid.
         </p>
-    topics: null
+    topics: GW_basic
     varfile: vargw
     vartype: real
 - !variable
@@ -6446,7 +6446,7 @@
         the real axis. Alternatively, the variables [[gw_customnfreqsp]] and
         [[gw_freqsp]] can be used to make a user-defined grid.
         </p>
-    topics: null
+    topics: GW_basic
     varfile: vargw
     vartype: real
 - !variable
@@ -7257,7 +7257,7 @@
         eigenvalues for q=Gamma from the dataset where the calculation at Gamma was done, to the datasets
         for other wavevectors.
         </p>
-    topics: multidtset_usefull, TDep_useful
+    topics: multidtset_useful, TDep_useful
     varfile: vardev
     vartype: integer
 - !variable
@@ -8101,7 +8101,7 @@
         for the calculation of the self-energy along the real axis. Set this to the number of frequencies
         you want. The frequencies are specified with [[gw_freqsp]].
         </p>
-    topics: null
+    topics: GW_expert
     varfile: vargw
     vartype: integer
 - !variable
@@ -8133,7 +8133,7 @@
          If [[nfreqsp]] is not equal to
         [[gw_customnfreqsp]] a warning will be issued.
         </p>
-    topics: null
+    topics: GW_expert
     varfile: vargw
     vartype: real
 - !variable
@@ -8180,7 +8180,7 @@
         The equidistant grid in z is determined uniquely by [[nfreqim]]) and
         the points are distributed so that half of them lie below the plasma frequency.
         </p>
-    topics: null
+    topics: GW_expert
     varfile: vargw
     vartype: integer
 - !variable
@@ -8253,7 +8253,7 @@
         origin is required. The maximum value needed along the real frequency axis is output in the
         logfile during Contour Deformation sigma calculations.
         </p>
-    topics: null
+    topics: GW_expert
     varfile: vargw
     vartype: integer
 - !variable
@@ -8276,7 +8276,7 @@
         [[cd_max_freq]] and [[cd_halfway_freq]]
          which determine the parameters of the transformed grid.
         </p>
-    topics: null
+    topics: GW_expert
     varfile: vargw
     vartype: integer
 - !variable
@@ -8305,7 +8305,7 @@
             </li>
           </ul>
         </p>
-    topics: null
+    topics: GW_expert
     varfile: vargw
     vartype: integer
 - !variable
@@ -8361,7 +8361,7 @@
         By default the [[BETHE_SALPETER]] code calculates the macroscopic dielectric function using six different
         directions in q-space (the three basis vectors of the reciprocal lattice and the three Cartesian axis).
         </p>
-    topics: null
+    topics: GW_expert, BSE_expert
     varfile: vargw
     vartype: integer
 - !variable
@@ -8383,7 +8383,7 @@
         [[gwcalctyp]] and [[gw_sctype]] are
         used to define the type of self-consistency.
         </p>
-    topics: null
+    topics: GW_basic
     varfile: vargw
     vartype: integer
 - !variable
@@ -8411,7 +8411,7 @@
         </p>
         <p>
         </p>
-    topics: null
+    topics: GW_expert
     varfile: vargw
     vartype: real
 - !variable
@@ -8462,7 +8462,7 @@
         If you want to select manually the list of k-points and bands, you have
         to provide the three variables [[nkptgw]], [[kptgw]], and [[bdgw]].
         </p>
-    topics: null
+    topics: GW_useful
     varfile: vargw
     vartype: integer
 - !variable
@@ -8511,7 +8511,7 @@
         [[getqps]] can be used to read a previous QPS file thus initializing
         the Green functions to be used in the first self-consistent iteration.
         </p>
-    topics: null
+    topics: GW_basic
     varfile: vargw
     vartype: integer
 - !variable
@@ -8555,7 +8555,7 @@
         </p>
         <p>
         </p>
-    topics: null
+    topics: GW_expert
     varfile: vargw
     vartype: integer
 - !variable
@@ -8583,7 +8583,7 @@
          has the '[[ENERGY]]' characteristics (1 Ha=27.2113845 eV)
          <br />
         </p>
-    topics: null
+    topics: GW_basic
     varfile: vargw
     vartype: real
 - !variable
@@ -8682,7 +8682,7 @@
           </li>
          </ul>
         </p>
-    topics: null
+    topics: GW_basic
     varfile: vargw
     vartype: integer
 - !variable
@@ -8705,7 +8705,7 @@
         needed in the extrapolar approximation is set by [[gwencomp]].
         See F. Bruneval, X. Gonze, Phys. Rev. B 78, 085125 (2008) for a description of the methodology.
         </p>
-    topics: null
+    topics: GW_useful
     varfile: vargw
     vartype: integer
 - !variable
@@ -8727,7 +8727,7 @@
         <p>
          See F. Bruneval, X. Gonze, Phys. Rev. B 78, 085125 (2008) for a description of the methodology.
         </p>
-    topics: null
+    topics: GW_useful
     varfile: vargw
     vartype: real
 - !variable
@@ -8743,7 +8743,7 @@
     requires: '[[optdriver]]=4, [[gwcalctyp]] = 1x5 (HSE) or 2x5 (PBE0).'
     text: |-
         Mixing parameter of Fock exchange for PBE0 and HSE hybrid-functional calculations via the GW self-energy subroutine. [[gwfockmix]] ranges from 0 (essentially PBE) to 1.
-    topics: null
+    topics: GW_useful
     varfile: vargw
     vartype: real
 - !variable
@@ -8773,7 +8773,7 @@
         [[gwgamma]]=-8 uses the RPA bootstrap-like kernel (one-shot) [Phys. Rev.  Lett. 115, 137402 (2015), ibid. 114, 146402 (2015)].
         </p>
         </p>
-    topics: null
+    topics: GW_expert
     varfile: vargw
     vartype: integer
 - !variable
@@ -9191,7 +9191,7 @@
         </p>
         <p>
         </p>
-    topics: null
+    topics: GW_expert
     varfile: vargw
     vartype: integer
 - !variable
@@ -9227,7 +9227,7 @@
          Using [[gwpara]]=1, indeed, requires the same amount of memory as a sequential run,
         irrespectively of the number of CPUs used.
         </p>
-    topics: parallelism_useful
+    topics: parallelism_useful, GW_basic
     varfile: varpar
     vartype: integer
 - !variable
@@ -9270,7 +9270,7 @@
         </p>
         <p>
         </p>
-    topics: null
+    topics: GW_expert
     varfile: vargw
     vartype: integer
 - !variable
@@ -9586,7 +9586,7 @@
         In the latter case, use a negative value for the cutoff radius of the sphere ([[rcut]]&lt;0),
         which is automatically calculated so that the volume enclosed in the sphere is equal to the volume of the solid.
         </p>
-    topics: GWls_compulsory
+    topics: GWls_compulsory, GW_basic
     varfile: vargw
     vartype: integer
 - !variable
@@ -9737,7 +9737,7 @@
         <p>
         The use of [[inclvkb]]=2 is strongly recommended for the calculation of optical properties.
         </p>
-    topics: null
+    topics: GW_expert
     varfile: vargw
     vartype: integer
 - !variable
@@ -10571,7 +10571,7 @@
         <p>
          Start the Bethe-Salpeter calculation from the BSC file containing the coupling block produced in a previous run.
         </p>
-    topics: null
+    topics: BSE_useful
     varfile: varfil
     vartype: integer
 - !variable
@@ -10588,7 +10588,7 @@
         <p>
          Start the Bethe-Salpeter calculation from the BS_EIG contining the exciton eigenvectors produced in a previous run.
         </p>
-    topics: null
+    topics: BSE_useful
     varfile: varfil
     vartype: integer
 - !variable
@@ -10605,7 +10605,7 @@
         <p>
          Start the Bethe-Salpeter calculation from the BSR file containing the resonat block produced in a previous run.
         </p>
-    topics: null
+    topics: BSE_useful
     varfile: varfil
     vartype: integer
 - !variable
@@ -10849,7 +10849,7 @@
         <p>
          Used to re-start the Haydock iterative technique from the HAYDR_SAVE file produced in a previous run.
         </p>
-    topics: null
+    topics: BSE_useful
     varfile: varfil
     vartype: integer
 - !variable
@@ -10870,7 +10870,7 @@
         in order to achieve a self-consistent quasiparticle calculations.
         See also [[getqps]]
         </p>
-    topics: null
+    topics: GW_useful
     varfile: varfil
     vartype: integer
 - !variable
@@ -10904,7 +10904,7 @@
          </a>
          of the [[help_abinit]].
         </p>
-    topics: null
+    topics: GW_useful
     varfile: varfil
     vartype: integer
 - !variable
@@ -10938,7 +10938,7 @@
          </a>
          of the [[help_abinit]].
         </p>
-    topics: null
+    topics: GW_useful
     varfile: varfil
     vartype: integer
 - !variable
@@ -13404,7 +13404,7 @@
         [[kptrlatt]], or [[ngkpt]]
          ) than the GS one, but WITHOUT any shift, are allowed.
         </p>
-    topics: null
+    topics: GW_basic
     varfile: vargw
     vartype: real
 - !variable
@@ -13728,7 +13728,7 @@
          Very important : for the time being, [[istwfk]]
         must be 1 for all the k-points.
         </p>
-    topics: null
+    topics: GW_expert
     varfile: varfil
     vartype: integer
 - !variable
@@ -14070,7 +14070,7 @@
          The Scissors operator energy added to the conductions states.
         In some cases, it mimics a second iteration self-consistent [[GW]] calculation.
         </p>
-    topics: null
+    topics: GW_useful
     varfile: vargw
     vartype: real
 - !variable
@@ -14092,7 +14092,7 @@
         The proper spatial symmetry of the screening W(r,r_prime) is enforced using Eq. (7) of Phys. Rev. B <b>37</b>, (1988)
          <br />
         </p>
-    topics: null
+    topics: BSE_useful
     varfile: vargw
     vartype: real
 - !variable
@@ -14621,7 +14621,7 @@
          <br />
          When [[natfixy]] &gt; 0, [[natfixy]] entries should be provided in array [[iatfixy]]
         </p>
-    topics: null
+    topics: MolecularDynamics_useful, GeoOpt_useful
     varfile: varrlx
     vartype: integer
 - !variable
@@ -14913,7 +14913,7 @@
          Very important : for the time being, [[istwfk]] must be 1 for all the k-points
         in order to generate a _KSS file.
         </p>
-    topics: null
+    topics: GW_useful
     varfile: vargw
     vartype: integer
 - !variable
@@ -15483,7 +15483,7 @@
          [[nfreqim]] sets the number of pure imaginary frequencies used to calculate
         the dielectric matrix in order to perform the numerical integration of the [[GW]] self-energy.
         </p>
-    topics: null
+    topics: GW_basic
     varfile: vargw
     vartype: integer
 - !variable
@@ -15510,7 +15510,7 @@
 
         see M. Taut, J. Phys. C: Solid State Phys. 18 (1985) 2677-2690.
         </p>
-    topics: null
+    topics: GW_basic
     varfile: vargw
     vartype: integer
 - !variable
@@ -15546,7 +15546,7 @@
         to use this input variable.
         Using the default values, one must be able to get a screening file that can be used with any ppmodel.
         </p>
-    topics: null
+    topics: GW_basic
     varfile: vargw
     vartype: integer
 - !variable
@@ -15564,7 +15564,7 @@
          [[nfreqsp]] defines the number of real frequencies used to calculate the spectral function
         of the [[GW]] Green's function.
         </p>
-    topics: null
+    topics: GW_basic
     varfile: vargw
     vartype: integer
 - !variable
@@ -15911,7 +15911,7 @@
         also [[einterp]])
         In a nutshell, nkpath replaces [[kptopt]] when we are not performing a NSCF calculation.
         Note that, unlike [[kptopt]], nkpath represents the total number of points in the [[kptbounds]] array.
-    topics: null
+    topics: k-points_expert
     varfile: varbas
     vartype: integer
 - !variable
@@ -15995,7 +15995,7 @@
          [[nkptgw]] gives the number of k-points for which the [[GW]] calculation must be done.
         It is used to dimension [[kptgw]]
         </p>
-    topics: null
+    topics: GW_basic
     varfile: vargw
     vartype: integer
 - !variable
@@ -16322,7 +16322,7 @@
         requires an extremely dense frequency mesh. It should be kept in mind, however, that the memory required
         grows fast with the value of [[nomegasf]].
         </p>
-    topics: null
+    topics: GW_basic
     varfile: vargw
     vartype: integer
 - !variable
@@ -16342,7 +16342,7 @@
         imaginary axis. The frequency mesh is linear and covers the interval between OMEGASIMIN=0.01 Hartree and
         [[omegasimax]].
         </p>
-    topics: null
+    topics: GW_basic
     varfile: vargw
     vartype: integer
 - !variable
@@ -16361,7 +16361,7 @@
          The number of real frequencies around the KS energy where the self-energy Sigma is evaluated.
         From these values, the derivative of Sigma at the KS energy is numerically estimated through linear interpolation.
         </p>
-    topics: null
+    topics: GW_useful
     varfile: vargw
     vartype: integer
 - !variable
@@ -16389,7 +16389,7 @@
           </li>
          </ul>
         </p>
-    topics: null
+    topics: DFT+U_expert
     varfile: vardev
     vartype: integer
 - !variable
@@ -16752,7 +16752,7 @@
          The direction and the velocity maximum are set with the input variable [[pvelmax]].
         Note that the results are output for a Z=1 impinging ion, i.e. a proton.
         </p>
-    topics: null
+    topics: RandStopPow_compulsory
     varfile: vargw
     vartype: integer
 - !variable
@@ -16774,7 +16774,7 @@
          <br />
         It is an internal variable, determined from [[ecuteps]].
         </p>
-    topics: null
+    topics: GW_internal
     varfile: varint
     vartype: integer
 - !variable
@@ -16809,7 +16809,7 @@
         <p>
          Very important : for the time being, [[istwfk]] must be 1 for all the k-points.
         </p>
-    topics: null
+    topics: GW_useful
     varfile: vargw
     vartype: integer
 - !variable
@@ -16831,7 +16831,7 @@
          <br />
         It is an internal variable, determed from [[ecutsigx]].
         </p>
-    topics: null
+    topics: GW_internal
     varfile: varint
     vartype: integer
 - !variable
@@ -16852,7 +16852,7 @@
         in the formula that generates the independent-particle susceptibility $\chi^{(0)}_{KS}$.
         It is an internal variable, determined from [[ecutwfn]].
         </p>
-    topics: null
+    topics: GW_internal
     varfile: varint
     vartype: integer
 - !variable
@@ -16911,7 +16911,7 @@
          utility.
         If [[nqptdm]] is equal to -1, the code reports the list of q-points in the log file (YAML format) and then stops.
         </p>
-    topics: null
+    topics: GW_useful
     varfile: vargw
     vartype: integer
 - !variable
@@ -17439,7 +17439,7 @@
     requires: null
     text: |-
         Defines the number of z reduced coordinates that defines the spatially varying chemical potential. See the input variable [[chempot]], of which [[nzchempot]] is the second dimension.
-    topics: null
+    topics: otherGS_expert
     varfile: vargeo
     vartype: integer
 - !variable
@@ -18117,7 +18117,7 @@
         In conjunction with [[nomegasi]],
         [[omegasimax]] uniquely defines the linear mesh employed to sample the self-energy along the imaginary axis.
         </p>
-    topics: null
+    topics: GW_basic
     varfile: vargw
     vartype: real
 - !variable
@@ -18140,7 +18140,7 @@
          The maximum distance from the KS energy where to evaluate Sigma. Sigma is evaluated at
         [KS_energy - [[omegasrdmax]], KS_energy + [[omegasrdmax]]] sampled [[nomegasrd]] times.
         </p>
-    topics: null
+    topics: GW_basic
     varfile: vargw
     vartype: real
 - !variable
@@ -18241,7 +18241,7 @@
         and [[rfstrs]]) must be
         zero if [[optdriver]] is not set to 1.
         </p>
-    topics: nonlinear_compulsory, GWls_compulsory, ElPhon_compulsory
+    topics: nonlinear_compulsory, GWls_compulsory, ElPhon_compulsory, GW_compulsory, BSE_compulsory
     varfile: vargs
     vartype: integer
 - !variable
@@ -18989,7 +18989,7 @@
          If [[pawoptosc]]=2  the matrix elements are computed with the approximated expression proposed by Shishkin and
         Kresse in PRB 74. 035101
         </p>
-    topics: null
+    topics: GW_expert, BSE_expert
     varfile: varpaw
     vartype: integer
 - !variable
@@ -20364,7 +20364,7 @@
         real frequency axes. See
         [[cd_frqim_method]], [[gw_frqim_inzgrid]] and [[gw_frqre_inzgrid]] for more details.
         </p>
-    topics: null
+    topics: GW_basic
     varfile: vargw
     vartype: real
 - !variable
@@ -20416,7 +20416,7 @@
         Thus the calculated plasmon band structure (plasmon energy vs q vector) is reported in the output file for the
         lowest 10 bands.
         </p>
-    topics: null
+    topics: GW_basic
     varfile: vargw
     vartype: integer
 - !variable
@@ -22367,7 +22367,7 @@
          The vector [[pvelmax]] defines both the direction and the maximum velocity.
         [[pvelmax]] is input in Cartesian coordinates.
         </p>
-    topics: null
+    topics: RandStopPow_basic
     varfile: vargw
     vartype: real
 - !variable
@@ -22498,7 +22498,7 @@
         These q points are given in terms of reciprocal space primitive translations (NOT in cartesian coordinates!).
         For further explanation, see the input variable [[nqptdm]].
         </p>
-    topics: null
+    topics: GW_useful
     varfile: vargw
     vartype: real
 - !variable
@@ -22862,7 +22862,7 @@
         <p>
          If [[rcut]] is negative, the cutoff is automatically calculated so to enclose the same volume inside the cutoff as the volume of the primitive cell.
         </p>
-    topics: GWls_compulsory
+    topics: GWls_compulsory, GW_basic
     varfile: vargw
     vartype: real
 - !variable
@@ -23657,7 +23657,7 @@
         [[rhoqpmix]] is meaningful only when doing self-consistency on the wavefunctions with
         [[gwcalctyp]] &#62;&#61; 20.
         </p>
-    topics: null
+    topics: GW_useful
     varfile: vargw
     vartype: real
 - !variable
@@ -23840,7 +23840,7 @@
         </p>
         It is [[EVOLVING]] only if [[ionmov]]==2 and [[optcell]]/=0, otherwise it is fixed.
         <br />
-    topics: null
+    topics: crystal_internal
     varfile: varbas
     vartype: real
 - !variable
@@ -24275,7 +24275,7 @@
         When a screening calculation ([[optdriver]]==3) uses a spectral representation of the irreducible polarizability in which
         the delta function is replaced by the gaussian approximant ([[spmeth]]==2), the standard deviation of the gaussian
         is given by [[spbroad]].
-    topics: null
+    topics: GW_useful
     varfile: vargw
     vartype: real
 - !variable
@@ -24696,7 +24696,7 @@
           </li>
          </ul>
         </p>
-    topics: null
+    topics: GW_useful
     varfile: vargw
     vartype: integer
 - !variable
@@ -24977,7 +24977,7 @@
           </li>
          </ul>
         </p>
-    topics: null
+    topics: GW_expert
     varfile: vargw
     vartype: integer
 - !variable
@@ -25116,7 +25116,7 @@
         since [[GW]] calculations performed with [[symsigma]]=1 will not be able to remove
         the initial accidental degeneracy.
         </p>
-    topics: null
+    topics: GW_expert
     varfile: vargw
     vartype: integer
 - !variable
@@ -25671,7 +25671,7 @@
         If [[tolsym]] is set to a larger value than 1.e-8, then the input atomic coordinates
         will be automatically symmetrized by the symmetry operations that will have been found.
         </p>
-    topics: null
+    topics: crystal_useful
     varfile: vargeo
     vartype: real
 - !variable
@@ -26223,7 +26223,7 @@
         <p>
          If set to 1, enable the use of ScaLapack within LOBPCG.
         </p>
-    topics: null
+    topics: parallelism_expert
     varfile: varpar
     vartype: integer
 - !variable
@@ -27059,7 +27059,7 @@
 
         defines ....
         </p>
-    topics: null
+    topics: GWls_compulsory, GW_basic
     varfile: vargw
     vartype: real
 - !variable
@@ -28632,7 +28632,7 @@
           </li>
          </ul>
         </p>
-    topics: null
+    topics: xc_internal
     varfile: varint
     vartype: integer
 - !variable
@@ -28756,7 +28756,7 @@
          <br />
          Ideally, one should make a convergence study decreasing the value of [[zcut]] for increasing number of k-points.
         </p>
-    topics: null
+    topics: GW_expert, BSE_expert
     varfile: vargw
     vartype: real
 - !variable

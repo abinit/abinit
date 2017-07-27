@@ -38,6 +38,7 @@
 - tests/paral/Input/t42.in:#%% topics = recursion
 - tests/paral/Input/t51.in:#%% topics = parallelism
 - tests/paral/Input/t54.in:#%% topics = nonlinear
+- tests/paral/Input/t76.in:#%% topics = BSE
 - tests/paral/Input/t77.in:#%% topics = GWls
 - tests/paral/Input/t93.in:#%% topics = Hybrids
 - tests/paral/Input/t94.in:#%% topics = Hybrids
@@ -105,6 +106,8 @@
 - tests/v3/Input/t27.in:#%% topics = crystal
 - tests/v3/Input/t28.in:#%% topics = crystal
 - tests/v3/Input/t29.in:#%% topics = crystal
+- tests/v3/Input/t30.in:#%% topics = GW
+- tests/v3/Input/t31.in:#%% topics = GW
 - tests/v3/Input/t32.in:#%% topics = crystal, spinpolarisation
 - tests/v3/Input/t33.in:#%% topics = crystal, spinpolarisation
 - tests/v3/Input/t34.in:#%% topics = crystal, spinpolarisation
@@ -131,6 +134,8 @@
 - tests/v4/Input/t75.in:#%% topics = Berry
 - tests/v4/Input/t78.in:#%% topics = Berry
 - tests/v4/Input/t80.in:#%% topics = Berry
+- tests/v4/Input/t84.in:#%% topics = GW
+- tests/v4/Input/t85.in:#%% topics = GW
 - tests/v4/Input/t94.in:#%% topics = PAW
 - tests/v4/Input/t95.in:#%% topics = positron
 - tests/v4/Input/t96.in:#%% topics = positron
@@ -164,6 +169,9 @@
 - tests/v5/Input/t51.in:#%% topics = spinpolarisation
 - tests/v5/Input/t61.in:#%% topics = TDDFT
 - tests/v5/Input/t62.in:#%% topics = TDDFT
+- tests/v5/Input/t65.in:#%% topics = GW
+- tests/v5/Input/t66.in:#%% topics = GW
+- tests/v5/Input/t69.in:#%% topics = GW
 - tests/v5/Input/t75.in:#%% topics = recursion
 - tests/v5/Input/t76.in:#%% topics = recursion
 - tests/v5/Input/t77.in:#%% topics = GeoOpt
@@ -188,7 +196,16 @@
 - tests/v6/Input/t66.in:#%% topics = nonlinear
 - tests/v6/Input/t67.in:#%% topics = nonlinear
 - tests/v6/Input/t89.in:#%% topics = DFPT
-- tests/v67mbpt/Input/t15.in:#%% topics = GWls
+- tests/v67mbpt/Input/t11.in:#%% topics = BSE
+- tests/v67mbpt/Input/t14.in:#%% topics = BSE
+- tests/v67mbpt/Input/t15.in:#%% topics = GWls, BSE
+- tests/v67mbpt/Input/t16.in:#%% topics = BSE
+- tests/v67mbpt/Input/t29.in:#%% topics = BSE
+- tests/v67mbpt/Input/t31.in:#%% topics = BSE
+- tests/v67mbpt/Input/t32.in:#%% topics = BSE
+- tests/v67mbpt/Input/t33.in:#%% topics = BSE
+- tests/v67mbpt/Input/t34.in:#%% topics = BSE
+- tests/v67mbpt/Input/t35.in:#%% topics = BSE
 - tests/v7/Input/t03.in:#%% topics = Berry
 - tests/v7/Input/t05.in:#%% topics = spinpolarisation
 - tests/v7/Input/t06.in:#%% topics = spinpolarisation
@@ -196,6 +213,7 @@
 - tests/v7/Input/t08.in:#%% topics = PIMD
 - tests/v7/Input/t10.in:#%% topics = GeoOpt
 - tests/v7/Input/t11.in:#%% topics = recursion
+- tests/v7/Input/t16.in:#%% topics = RandStopPow
 - tests/v7/Input/t21.in:#%% topics = DFT+U, DMFT
 - tests/v7/Input/t22.in:#%% topics = DFT+U
 - tests/v7/Input/t23.in:#%% topics = CRPA
