@@ -112,17 +112,21 @@ def make_links(text,cur_key,allowed_link_seeds,backlinks,backlink):
     dic_namespaces={"lesson":"tutorial/generated_files",
                     "theorydoc":"theory/generated_files",
                     "help":"users/generated_files",
-                    "topic":"topics/generated_files"}
+                    "topic":"topics/generated_files",
+                    "varset":"input_variables/generated_files"}
 
     if linkseed in allowed_link_seeds.keys():
       value=allowed_link_seeds[linkseed]
+
       #Treat first the allowed namespaces
       if value in dic_namespaces.keys():
         dir=dic_namespaces[value]
-        #This is an exception ...
+
+        #Specific formatting treatment
         if value=="help" and namespace=="":
           text=key[5:]+' help file'
         return '<a href="../../%s/%s.html">%s</a>' %(dir,linkseed,text)
+
       #Treat everything else
       elif "input_variable in " in value:
         # This is a link to an input variable
@@ -136,8 +140,6 @@ def make_links(text,cur_key,allowed_link_seeds,backlinks,backlink):
         return '<a href="../../input_variables/generated_files/'+key+'.html">'+text+'</a>'
       elif value=="in_tests":
         return '<a href="../../'+key+'">&#126;abinit/'+key+'</a>'
-      elif value=="varset_allvars":
-        return '<a href="../../input_variables/generated_files/varset_allvars.html">'+text+'</a>'
       elif value=="bibID":
         result=get_year(key)
         if result != -9999 :

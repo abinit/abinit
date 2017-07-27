@@ -466,32 +466,39 @@ print("File %s written ..." %file_yml)
 allowed_link_seeds={}
 
 # Groups of seeds
+
 for var in abinit_vars:
   allowed_link_seeds[var.abivarname]="input_variable in "+var.varfile
+
 for item in yml_in["characteristics"]:
   allowed_link_seeds[item]="characteristic"
+
 for (specialkey,specialval) in list_specials:
   allowed_link_seeds[specialkey]="special"
+
 for i, varfile_info in enumerate(varfiles):
   varfile = varfile_info.name
   allowed_link_seeds[varfile]="varfile"
+  allowed_link_seeds["varset_"+varfile]="varset"
+
 for i, lesson_info in enumerate(yml_in["lessons"]):
   lesson = lesson_info.name
   allowed_link_seeds["lesson_"+lesson]="lesson"
+
 for i, theory_info in enumerate(yml_in["theorydocs"]):
   theorydoc = theory_info.name
   allowed_link_seeds["theorydoc_"+theorydoc]="theorydoc"
+
 for i, help_info in enumerate(yml_in["helps"]):
   help = help_info.name
   allowed_link_seeds["help_"+help]="help"
+
 for ref in bibtex_dics:
   ID=ref["ID"]
   allowed_link_seeds[ID]="bibID"
+
 for file in allowed_links_in_tests:
   allowed_link_seeds[file]="in_tests"
-
-# Specific allowed seeds
-allowed_link_seeds["varset_allvars"]="varset_allvars"
 
 ################################################################################
 ################################################################################
