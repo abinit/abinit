@@ -88,33 +88,46 @@ def make_links(text,cur_key,allowed_link_seeds,backlinks,backlink):
     if cur_key != None:
       if dokukey == cur_key.strip():
         return "<b>"+dokukey+"</b>"
-    #Extract the three parts of a dokukey, with separators : and |
+    #Extract the four possible parts of a dokukey, with separators :, # and |
+    #First, the namespace
     if ':' in dokukey:
-      p123=dokukey.split(':',1)
-      namespace=p123[0].strip()
-      p23=p123[1].strip()
+      p1234=dokukey.split(':',1)
+      namespace=p1234[0].strip()
+      p234=p1234[1].strip()
     else:
       namespace=""
-      p23=dokukey
-    if '|' in p23:
-      p23_split=p23.split('|',1) 
+      p234=dokukey
+    #Then, the text
+    if '|' in p234:
+      p234_split=p234.split('|',1) 
+      p23=p234_split[0].strip()
+      text=p234_split[1].strip()
+    else:
+      p23=p234
+      text=p234
+    #Finally, the key (often a filename, but not for input variables) and section
+    if '#' in p23:
+      p23_split=p23.split('#',1)
       key=p23_split[0].strip()
-      text=p23_split[1].strip()
+      section=p23_split[1].strip()
     else:
       key=p23
-      text=p23
+      section=""
+
     if namespace=="":
       linkseed=key
     else:
       linkseed=namespace+'_'+key
 
-    #The allowed namespaces are :
+    #The allowed namespaces are (varfile is an exception, see later):
     dic_namespaces={"lesson":"tutorial/generated_files",
                     "theorydoc":"theory/generated_files",
                     "help":"users/generated_files",
                     "topic":"topics/generated_files",
-                    "varset":"input_variables/generated_files"}
+                    "varset":"input_variables/generated_files",
+                    "varfile":"input_variables/generated_files"}
 
+    #Actually make the selection on the linkseed at present ... which allows the varfile , which is not really a namespace ...
     if linkseed in allowed_link_seeds.keys():
       value=allowed_link_seeds[linkseed]
 
@@ -125,24 +138,23 @@ def make_links(text,cur_key,allowed_link_seeds,backlinks,backlink):
         #Specific formatting treatment
         if value=="help" and namespace=="":
           text=key[5:]+' help file'
-        return '<a href="../../%s/%s.html">%s</a>' %(dir,linkseed,text)
+
+        return '<a href="../../%s/%s.html#%s">%s</a>' %(dir,linkseed,section,text)
 
       #Treat everything else
       elif "input_variable in " in value:
         # This is a link to an input variable
-        varfile=value[18:]
-        return '<a href="../../input_variables/generated_files/'+varfile+".html#"+key+'">'+text+'</a>'
+        filename=value[18:]
+        return '<a href="../../input_variables/generated_files/%s.html#%s">%s</a>' %(filename,key,text)
       elif value=="characteristic":
         return '<a href="../../users/generated_files/help_abinit.html#%s">%s</a>' %(key,text)
-      elif value=="varfile":
-        return '<a href="../../input_variables/generated_files/'+key+'.html">'+text+'</a>'
       elif value=="in_tests":
-        return '<a href="../../'+key+'">&#126;abinit/'+key+'</a>'
+        return '<a href="../../%s">&#126;abinit/%s</a>' %(key,key)
       elif value=="bibID":
         result=get_year(key)
         if result != -9999 :
           backlinks[key]+=backlink+";;"
-          return '[<a href="../../bibliography/generated_files/bibliography.html#'+key+'">'+text+'</a>]'
+          return '<a href="../../bibliography/generated_files/bibliography.html#%s">[%s]</a>' %(key,text)
 
     return '<a href="#">[[FAKE LINK:'+key+']]</a>'
 
