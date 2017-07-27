@@ -1,0 +1,35 @@
+- !components 
+    name      : Berry 
+    keyword   : Finite electric field 
+    authors   : JZ
+    howto     : take into account a finite electric field in a calculation
+    header    : default
+    title     : <h1>Finite electric field</h1>
+    subtitle  : default
+    copyright : default
+    links     : default
+    introduction : |- 
+
+       <p>The effect of an homogeneous static electric field on an insulator may be treated in ABINIT from two perspectives. One is perturbative, and yields the susceptibility in the form of the second derivative of the total energy with respect to the electric field, at zero field strength (see <a href="../topics/generated_files/topic_DFPT.html">DFPT</a> ).
+       <p> ABINIT can also be used to compute the effect of an electric field of finite amplitude, using techniques from the
+       Modern Theory of Polarization [[Resta1994]],[[Nunes2001]],[[Souza2002]]. In this approach, the total energy to minimize includes the contribution due to the interaction of the external electric field with the material polarization <b>P</b><sub>Tot</sub>, as follows:
+
+       <p>E = E<sub>0</sub> - &Omega;<b>P</b><sub>Tot</sub><b>.E</b>,
+       where E<sub>0</sub> is the usual ground state energy obtained from Kohn-Sham DFT in the absence of the external field <b>E</b>, <b>P</b><sub>Tot</sub> is the polarization, made up of an ionic contribution and an electronic contribution, and &Omega; the volume of the unit cell.
+       <p>Some details of the implementation of The Modern Theory of Polarization in ABINIT are given in [[Gonze2016]].
+
+       <p>In the NCPP case, the electric field has no additional contribution to the Hellmann-Feynman forces, because the electronic
+       states do not depend explicitly on ionic position [[Souza2002]].  In the PAW case however, as the projectors do depend on ion location, an additional force and additional stresses terms arise [[Zwanziger2012]]. 
+
+       <p>The polarization and finite electric field calculation in ABINIT is accessed through the variables [[berryopt]] and [[efield]]. In addition, 
+       displacement fields and mixed boundary conditions (a mix of electric field and displacement field) can be computed as well. 
+
+    tutorials  : |-
+       <li><a href="../../tutorial/generated_files/lesson_ffield.html">The lesson on polarization and finite
+       electric field</a> deals with the computation of the polarization of
+       an insulator (e.g. ferroelectric, or dielectric material) thanks to
+       the Berry phase approach, and also presents the computation of
+       materials properties in the presence of a finite electric field (also
+       thanks to the Berry phase approach).</li>
+
+    end : default

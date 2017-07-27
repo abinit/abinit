@@ -1,0 +1,126 @@
+<html>
+<head><title>Finite electric field </title>
+<link rel=stylesheet type="text/css" href="../formabinit.css">
+</head>
+<body bgcolor="#ffffff">
+
+<hr>
+<a name="top"></a>
+
+<h1>Finite electric field</h1>
+<h3>This file gives hints on how to take into account a finite electric field in a calculation with the ABINIT package.
+<hr>
+
+<h5>Copyright (C) 2016-2017 ABINIT group (JZ)
+<script type="text/javascript" src="../../js_files/copyright.js"> </script>
+</h5>
+
+<script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
+
+ <h3><b>Table of content: </b></h3> 
+ <ul> <li><a href="topic_Berry.html#1">1</a>. Introduction.<li><a href="topic_Berry.html#2">2</a>. Related lesson(s) of the tutorial.<li><a href="topic_Berry.html#3">3</a>. Related input variables.<li><a href="topic_Berry.html#4">4</a>. Selected input files.<li><a href="topic_Berry.html#5">5</a>. References.</ul>
+
+&nbsp; 
+<HR ALIGN=left> 
+<a name="1">&nbsp;</a>
+<h3><b>1. Introduction.</b></h3>
+
+
+<p>The effect of an homogeneous static electric field on an insulator may be treated in ABINIT from two perspectives. One is perturbative, and yields the susceptibility in the form of the second derivative of the total energy with respect to the electric field, at zero field strength (see <a href="../topics/generated_files/topic_DFPT.html">DFPT</a> ).
+<p> ABINIT can also be used to compute the effect of an electric field of finite amplitude, using techniques from the
+Modern Theory of Polarization <a href="../../bibliography/generated_files/bibliography.html#Resta1994">[Resta1994]</a>,<a href="../../bibliography/generated_files/bibliography.html#Nunes2001">[Nunes2001]</a>,<a href="../../bibliography/generated_files/bibliography.html#Souza2002">[Souza2002]</a>. In this approach, the total energy to minimize includes the contribution due to the interaction of the external electric field with the material polarization <b>P</b><sub>Tot</sub>, as follows:
+
+<p>E = E<sub>0</sub> - &Omega;<b>P</b><sub>Tot</sub><b>.E</b>,
+where E<sub>0</sub> is the usual ground state energy obtained from Kohn-Sham DFT in the absence of the external field <b>E</b>, <b>P</b><sub>Tot</sub> is the polarization, made up of an ionic contribution and an electronic contribution, and &Omega; the volume of the unit cell.
+<p>Some details of the implementation of The Modern Theory of Polarization in ABINIT are given in <a href="../../bibliography/generated_files/bibliography.html#Gonze2016">[Gonze2016]</a>.
+
+<p>In the NCPP case, the electric field has no additional contribution to the Hellmann-Feynman forces, because the electronic
+states do not depend explicitly on ionic position <a href="../../bibliography/generated_files/bibliography.html#Souza2002">[Souza2002]</a>.  In the PAW case however, as the projectors do depend on ion location, an additional force and additional stresses terms arise <a href="../../bibliography/generated_files/bibliography.html#Zwanziger2012">[Zwanziger2012]</a>. 
+
+<p>The polarization and finite electric field calculation in ABINIT is accessed through the variables <a href="../../input_variables/generated_files/varff.html#berryopt">berryopt</a> and <a href="../../input_variables/generated_files/varff.html#efield">efield</a>. In addition, 
+displacement fields and mixed boundary conditions (a mix of electric field and displacement field) can be computed as well.
+
+
+&nbsp; 
+<HR ALIGN=left> 
+<a name="2">&nbsp;</a>
+<h3><b>2. Related lesson(s) of the tutorial.</b></h3>
+
+
+<li><a href="../../tutorial/generated_files/lesson_ffield.html">The lesson on polarization and finite
+electric field</a> deals with the computation of the polarization of
+an insulator (e.g. ferroelectric, or dielectric material) thanks to
+the Berry phase approach, and also presents the computation of
+materials properties in the presence of a finite electric field (also
+thanks to the Berry phase approach).</li>
+
+&nbsp; 
+<HR ALIGN=left> 
+<a name="3">&nbsp;</a>
+<h3><b>3. Related input variables.</b></h3>
+
+
+<p>Compulsory input variables:<p>... <a href="../../input_variables/generated_files/varff.html#berryopt">berryopt</a>   [BERRY phase OPTions]<br>
+<p>Basic input variables:<p>... <a href="../../input_variables/generated_files/varff.html#bdberry">bdberry</a>   [BanD limits for BERRY phase]<br>
+... <a href="../../input_variables/generated_files/varff.html#dfield">dfield</a>   [Displacement FIELD]<br>
+... <a href="../../input_variables/generated_files/varff.html#efield">efield</a>   [Electric FIELD]<br>
+... <a href="../../input_variables/generated_files/varff.html#jfielddir">jfielddir</a>   [electric/displacement FIELD DIRection]<br>
+... <a href="../../input_variables/generated_files/varff.html#kberry">kberry</a>   [K wavevectors for BERRY phase computation]<br>
+... <a href="../../input_variables/generated_files/varff.html#nberry">nberry</a>   [Number of BERRY phase computations]<br>
+<p>Useful input variables:<p>... <a href="../../input_variables/generated_files/varff.html#berrysav">berrysav</a>   [BERRY SAVe]<br>
+... <a href="../../input_variables/generated_files/varff.html#ddamp">ddamp</a>   [electric Displacement field DAMPing parameter]<br>
+... <a href="../../input_variables/generated_files/varff.html#maxestep">maxestep</a>   [MAXimum Electric field STEP]<br>
+... <a href="../../input_variables/generated_files/varff.html#red_dfield">red_dfield</a>   [REDuced Displacement FIELD]<br>
+... <a href="../../input_variables/generated_files/varff.html#red_efield">red_efield</a>   [REDuced Electric FIELD]<br>
+... <a href="../../input_variables/generated_files/varff.html#red_efieldbar">red_efieldbar</a>   [REDuced Electric FIELD BAR]<br>
+<p>Input variables for experts:<p>... <a href="../../input_variables/generated_files/varff.html#berrystep">berrystep</a>   [BERRY phase : multiple STEP]<br>
+
+
+&nbsp; 
+<HR ALIGN=left> 
+<a name="4">&nbsp;</a>
+<h3><b>4. Selected input files.</b></h3>
+
+
+The user can find some related example input files in the ABINIT package in the directory /tests, or on the Web:
+<p> tests/paral/Input: <a href="../../tests/paral/Input/t07.in">t07.in</a> 
+<p> tests/v2/Input: <a href="../../tests/v2/Input/t81.in">t81.in</a> 
+<p> tests/v3/Input: <a href="../../tests/v3/Input/t03.in">t03.in</a> 
+<a href="../../tests/v3/Input/t05.in">t05.in</a> 
+<p> tests/v4/Input: <a href="../../tests/v4/Input/t55.in">t55.in</a> 
+<a href="../../tests/v4/Input/t66.in">t66.in</a> 
+<a href="../../tests/v4/Input/t72.in">t72.in</a> 
+<a href="../../tests/v4/Input/t75.in">t75.in</a> 
+<a href="../../tests/v4/Input/t78.in">t78.in</a> 
+<a href="../../tests/v4/Input/t80.in">t80.in</a> 
+<p> tests/v5/Input: <a href="../../tests/v5/Input/t112.in">t112.in</a> 
+<a href="../../tests/v5/Input/t113.in">t113.in</a> 
+<a href="../../tests/v5/Input/t23.in">t23.in</a> 
+<p> tests/v6/Input: <a href="../../tests/v6/Input/t121.in">t121.in</a> 
+<a href="../../tests/v6/Input/t122.in">t122.in</a> 
+<a href="../../tests/v6/Input/t123.in">t123.in</a> 
+<a href="../../tests/v6/Input/t124.in">t124.in</a> 
+<a href="../../tests/v6/Input/t125.in">t125.in</a> 
+<a href="../../tests/v6/Input/t126.in">t126.in</a> 
+<a href="../../tests/v6/Input/t43.in">t43.in</a> 
+<p> tests/v7/Input: <a href="../../tests/v7/Input/t03.in">t03.in</a> 
+<br>
+
+
+&nbsp; 
+<HR ALIGN=left> 
+<a name="5">&nbsp;</a>
+<h3><b>5. References.</b></h3>
+
+
+<br> <a href="../../bibliography/generated_files/bibliography.html#Gonze2016">[Gonze2016]</a>  X. Gonze, F. Jollet, F. Abreu Araujo, D. Adams, B. Amadon, T. Applencourt, C. Audouze, J.-M. Beuken, J. Bieder, A. Bokhanchuk, E. Bousquet, F. Bruneval, D. Caliste, M. C&ocirc;t&eacute;, F. Dahm, F. Da Pieve, M. Delaveau, M. Di Gennaro, B. Dorado, C. Espejo, G. Geneste, L. Genovese, A. Gerossier, M. Giantomassi, Y. Gillet, D.R. Hamann, L. He, G. Jomard, J. Laflamme Janssen, S. Le Roux, A. Levitt, A. Lherbier, F. Liu, I. Lukacevic, A. Martin, C. Martins, M.J.T. Oliveira, S. Ponc&eacute;, Y. Pouillon, T. Rangel, G.-M. Rignanese, A.H. Romero, B. Rousseau, O. Rubel, A.A. Shukri, M. Stankovski, M. Torrent, M.J. Van Setten, B. Van troeye, M.J. Verstraete, D. Waroquier, J. Wiktor, B. Xue, A. Zhou and J.W. Zwanziger, "Recent developments in the ABINIT software package", Computer Physics Communications 205, 106 (2016). <br> DOI: <a href="https://doi.org/10.1016/j.cpc.2016.04.003">10.1016/j.cpc.2016.04.003</a>.<br> 
+<br> <a href="../../bibliography/generated_files/bibliography.html#Nunes2001">[Nunes2001]</a>  R. W. Nunes and X. Gonze, "Berry-phase treatment of the homogeneous electric field perturbation in insulators", Phys. Rev. B 63, 155107 (2001).<br> 
+<br> <a href="../../bibliography/generated_files/bibliography.html#Resta1994">[Resta1994]</a>  R. Resta, "Macroscopic polarization in crystalline dielectrics: the geometric phase approach", Rev. Mod. Phys. 66, 899&ndash;915 (1994).<br> 
+<br> <a href="../../bibliography/generated_files/bibliography.html#Souza2002">[Souza2002]</a>  I. Souza, J. &Iacute;&ntilde;iguez and D. Vanderbilt, "First-Principles Approach to Insulators in Finite Electric Fields", Phys. Rev. Lett. 89, 117602 (2002).<br> 
+<br> <a href="../../bibliography/generated_files/bibliography.html#Zwanziger2012">[Zwanziger2012]</a>  J.W. Zwanziger, J. Galbraith, Y. Kipouros, M. Torrent, M. Giantomassi and X. Gonze, "Finite homogeneous electric fields in the projector augmented wave formalism: Applications to linear and nonlinear response", Comput. Mater. Sci. 58, 113&ndash;118 (2012).<br> 
+<p>
+<script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
+
+</body>
+</html>
+
