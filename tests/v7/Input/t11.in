@@ -104,4 +104,5 @@
 #%% Test the temperature-dependent XC functional (ixc=50)
 #%% (Ichimaru et al Phys. Rep. 149, 91-205 (1987)
 #%% Test the von Weizsacker gradient correction (tfkinfunc=11 or 12)
+#%% topics = recursion
 #%%<END TEST_INFO>

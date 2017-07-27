@@ -135,4 +135,5 @@ nbdbuf 0
 #%%     Code abinit (gstate+respfn+nonlinear)
 #%%     Generate the linear and non-linear coefficients, in two DDBs,
 #%%     to be merged and analysed in the tests 53 and 54.
+#%% topics = nonlinear
 #%%<END TEST_INFO>

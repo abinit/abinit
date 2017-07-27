@@ -100,4 +100,5 @@ toldfe 1.0d-6
 #%%   H based fake crystals : magnetic groups, Shubnikov type IV
 #%%   Test the generation and recognition of the
 #%%   Iorthorhombic space groups (part III)
+#%% topics = crystal, spinpolarisation
 #%%<END TEST_INFO>

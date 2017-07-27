@@ -59,4 +59,5 @@
 #%%   Same as test 69, but with another xc functional (ixc=7, PW92 LSD)
 #%%   With the values acell 18, ecut 3.5, nband2 10, the present
 #%%   test generates KS diff=3.46eV, TDLDA(1S1P)=4.45eV, TDLDA(1S3P)=2.84eV
+#%% topics = TDDFT
 #%%<END TEST_INFO>

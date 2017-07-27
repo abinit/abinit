@@ -1,0 +1,11 @@
+- !components 
+    name      : otherGS 
+    keyword   : otherGS 
+    authors   : FJ
+    howto     : set other parameters for ground state calculations
+    header    : default
+    title     : <h1>Other general settings</h1>
+    subtitle  : default
+    copyright : default
+    links     : default
+    end : default 

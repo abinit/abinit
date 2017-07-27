@@ -132,4 +132,5 @@ nbdbuf 0
 #%%   Over 1200 WARNINGS.
 #%%   This test must give the same results of the test 64
 #%%   non-linear response with nsppol=1 does not support MPI with nprocs > 1
+#%% topics = nonlinear
 #%%<END TEST_INFO>

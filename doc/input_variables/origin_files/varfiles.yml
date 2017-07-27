@@ -1,0 +1,170 @@
+# This file provides the information needed to generate the documentation files that describes the input variables,
+# the "var*.html files, as well as related parameters ("special"), and the list of all input variables. 
+# Each paragraph of such documentation file has a mix of formatting html information and real content.
+
+# The present file contains the html information.
+# The "default" html information is presented in the varfile "default", at the bottom of the file. 
+# For most of the var*.html files, the default html formatting is hardly changed, so only minimal information
+# is needed to generate them. For the "special" parameters and for the list of all input variables,
+# some minor adjustments are needed, so that the default list # is less adequate.
+
+- !components
+    name : specials
+    keyword : special
+    header : |
+      <html>
+      <head><title>Description of special parameters.</title>
+      <link rel=stylesheet type="text/css" href="../formabinit.css">
+      </head>
+      <body bgcolor="#ffffff">
+
+      <hr>
+      <a name="top"></a>
+    title : |
+      <h1>ABINIT, special parameters:</h1>
+    purpose : |
+      <p>This document lists and provides the description of the name (keywords) of special parameters
+      that are not input variables, but that are used in the documentation of other variables, typically compilation parameters.
+      <p> You can change these parameters at compile time usually.
+    tofcontent_header : |
+      <a name="list"></a>
+      <h3><b> Content of the file : alphabetical list of special parameters.</b></h3>
+
+- !components
+    name : allvariables
+    keyword : allvariable
+    header : |
+      <html>
+      <head><title>Input variables</title>
+      <link rel=stylesheet type="text/css" href="../formabinit.css">
+      <script type="text/javascript" src="__JS_PATH__smart_input_variables.js"></script>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      </head>
+      <body bgcolor="#ffffff">
+
+      <hr>
+      <a name="top"></a>
+    title : |
+      <h1>Main ABINIT code, input variables:</h1>
+    subtitle : |
+      Complete list.
+    purpose : |
+      This document lists the names of all input variables to be used in the main input file of the abinit code.
+      <p>
+      The internal variables (see the [[varint]] web page) are prepended with the sign %.
+    tofcontent_header : |
+      <a name="list"></a>
+      <h3><b> Alphabetical list of all input variables of the main ABINIT code.</b></h3>
+
+- !components 
+    name : varbas
+    keyword : basic
+
+- !components
+    name : varbse
+    keyword : BSE
+
+- !components
+    name : vardev
+    keyword : developer
+
+- !components
+    name : vardmft
+    keyword : DMFT
+
+- !components
+    name : vareph
+    keyword : electron-phonon calculation
+
+- !components
+    name : varff
+    keyword : applied finite field calculation
+
+- !components
+    name : varfil
+    keyword : file handling
+
+- !components
+    name : vargeo
+    keyword : geometry builder and symmetry related
+
+- !components
+    name : vargs
+    keyword : ground state calculations
+
+- !components
+    name : vargw
+    keyword : GW
+
+- !components
+    name : varint
+    keyword : internal
+    purpose : |
+      <p>This document lists and provides the description
+      of the name (keywords) of the "__KEYWORD__" variables 
+      that are not controlled by the user directly, but are derived from input variables.
+      They are mentioned in the documentation because it is easier to understand the 
+      behaviour of some input variables thanks to the explanation of such internal variables.
+      In the [[allvariables]] web page, they are prepended with the sign %.
+
+- !components
+    name : varpar
+    keyword : parallelisation
+
+- !components
+    name : varpaw
+    keyword : PAW
+
+- !components
+    name : varrf
+    keyword : response function
+
+- !components
+    name : varrlx
+    keyword : structural optimization
+
+- !components
+    name : varvdw
+    keyword : Van der Waals
+
+- !components
+    name : varw90
+    keyword : Wannier90 interface
+
+- !components
+    name : default
+    keyword : Default keyword ... this is an error
+    header : |
+      <html>
+      <head><title>Description of __KEYWORD__ variables.</title>
+      <link rel=stylesheet type="text/css" href="../formabinit.css">
+      </head>
+      <body bgcolor="#ffffff">
+
+      <hr>
+      <a name="top"></a>
+    title : |
+      <h1>ABINIT, __KEYWORD__ input variables:</h1>
+    subtitle : |
+      List and description.
+    purpose : |
+      <p>This document lists and provides the description
+      of the name (keywords) of the "__KEYWORD__" input
+      variables to be used in the main input file of the abinit code.
+    advice : |
+      <script type="text/javascript" src="__JS_PATH__generic_advice.js"> </script>
+      <hr>
+    copyright : |
+      <h5>Copyright (C) 1998-2017 ABINIT group (DCA,XG,RC,YG,FJ)
+      <script type="text/javascript" src="__JS_PATH__copyright.js"> </script>
+      </h5> 
+    links : |
+      <script type="text/javascript" src="__JS_PATH__list_internal_links_for_generated_files.js"> </script>
+    menu : |
+      <script type="text/javascript" src="__JS_PATH__list_htmlfiles_input_variables.js"> </script>
+    tofcontent_header : |
+      <a name="list"></a>
+      <h3><b> Content of the file : alphabetical list of "__KEYWORD__" variables.</b></h3>
+    end : |
+      </body>
+      </html>

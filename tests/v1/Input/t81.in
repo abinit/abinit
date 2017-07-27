@@ -71,4 +71,5 @@
 #%% description = 
 #%%   Mg crystal, 1 atom per unit cell. Start with deformed FCC lattice,
 #%%   optimize the lattice towards FCC, with conservation of volume (optcell=3).
+#%% topics = GeoOpt
 #%%<END TEST_INFO>
