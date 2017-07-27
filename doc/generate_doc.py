@@ -203,7 +203,7 @@ for item in bibtex_items:
   item_dic={}
   item=item.split('{',1)
   entrytype=item[0].strip().lower()
-  if not entrytype in ["article","book","incollection","phdthesis","mastersthesis","misc"]:
+  if not entrytype in ["article","book","incollection","phdthesis","mastersthesis","misc","unpublished"]:
     print(" Not able to treat the following entrytype:",entrytype)
     raise
 
@@ -370,6 +370,8 @@ for (i,ref) in enumerate(bibtex_dics):
       formatted=' %s "%s" (%s, %s, %s).' % (author,title,publisher,address,year)
   elif ENTRYTYPE=="misc":
     formatted=' %s "%s", %s, %s (%s).' % (author,title,note,howpublished,year)
+  elif ENTRYTYPE=="unpublished":
+    formatted=' %s unpublished (%s).' % (author,year)
 
   #DOI or URL is added at the end. Note that this is optional. Also, only one is mentioned, preferentially the DOI.
   try:
