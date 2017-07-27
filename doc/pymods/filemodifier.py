@@ -5,7 +5,7 @@
    Modify at your will !
 
    Feed it with a list of files (at least one file is needed)
-   filemodifier file1 file2 file3 ...
+   python filemodifier file1 file2 file3 ...
 """
 
 from __future__ import print_function
@@ -17,9 +17,6 @@ import re
 import string
 import argparse
 
-from variables import *
-from lib_to_assemble_html import *
-
 ################################################################################
 
 # Generic checks
@@ -28,7 +25,7 @@ from lib_to_assemble_html import *
 
 filelist = sys.argv[1:]
 if filelist != [] :
-  if cmdline_params[0] == "-h" or cmdline_params[0] == "--help" :
+  if filelist[0] == "-h" or filelist[0] == "--help" :
     print(__doc__)
     sys.exit()
 else:
@@ -45,11 +42,15 @@ for path in filelist:
 
 ################################################################################
 
+    #####################################################
     #The file transformations can be made in this section
+
     for line in file_old:
-      f_new.print(line)
+      f_new.write(line)
       if "excludes" in line:
-        f_new.print("    executables: abinit")
+        f_new.write("    executables: abinit\n")
+
+    #####################################################
 
 ################################################################################
 
