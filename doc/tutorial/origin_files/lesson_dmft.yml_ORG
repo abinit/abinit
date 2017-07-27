@@ -1,6 +1,5 @@
-# This YAML file contains the introduction as well as the body of the html lesson.
+# This YAML file contains the introduction as well as the body (including the table of content) of the html lesson.
 # In order to modify the other parts, modify the file lessons.html .
-
 # This is the introduction ...
 intro : |
   <p>This lesson aims at showing how to perform
@@ -18,14 +17,21 @@ intro : |
   
   <p>This lesson should take one hour to
   complete (especially if you have access to several processors).</p>
-
-# Now comes the different sections, numbered. 
-
-# Each section must have a title, that will form the table of content.
-# Note the small (one space) indentation for the title and body keys.
-sec1:
- title: "The DFT+DMFT method: summary and key parameters"
- body: |
+# This is the body, including the table of content ...
+body : |
+  <ul>
+    <li><a href="#1">1.</a> The DFT+DMFT method: summary and key parameters.
+    <li><a href="#2">2.</a> Electronic structure calculation of SrVO<sub>3</sub> in LDA.
+    <li><a href="#3">3.</a> Electronic Structure of SrVO<sub>3</sub>: DFT+DMFT calculation.
+    <li><a href="#4">4.</a> Electronic Structure of SrVO<sub>3</sub>: Choice of correlated orbitals 
+    <li><a href="#5">5.</a> Electronic Structure of SrVO<sub>3</sub>: the Internal energy
+    <li><a href="#6">6.</a> Electronic Structure of SrVO<sub>3</sub> in DFT+DMFT: Equilibrium volume
+    <li><a href="#7">7.</a> Electronic Structure of SrVO<sub>3</sub>: Conclusion
+  </ul>
+  <hr>
+  
+  <h3><b><a name="1">1.</a> The DFT+DMFT method: summary and key parameters</b></h3>
+  
   <p> The DFT+DMFT method aims at improving the description of
   strongly correlated systems.  Generally, these highly correlated
   materials contain rare-earth metals or transition metals, which have partially
@@ -108,12 +114,10 @@ sec1:
   <a href="../../input_variables/generated_files/varpaw.html#pawprtvol" target="pawprtvol">pawprtvol</a>=3.
   </UL>
   <hr>
-
-# Each section must have a title, that will form the table of content.
-# Note the small (one space) indentation for the title and body keys.
-sec2:
- title: "Electronic Structure of SrVO<sub>3</sub> in LDA"
- body: |
+  
+  <h3><b><a name="2">2.</a>
+  Electronic Structure of SrVO<sub>3</sub> in LDA </b></h3>
+  
   <p>You might create a subdirectory of the
   ~abinit/tests/tutoparal directory, and use it for the tutorial. In what follows,
   the names of files will be mentioned as if you were in this subdirectory</p>
@@ -184,12 +188,10 @@ sec2:
   
   <hr>
   
-# Each section must have a title, that will form the table of content.
-# Note the small (one space) indentation for the title and body keys.
-sec3:
- title: "Electronic Structure of SrVO<sub>3</sub>: DFT+DMFT calculation"
- body: |
-  <h4>3.1. The input file for DMFT calculation: correlated orbitals, screened Coulomb interaction and  frequency mesh </h4>
+  <h3><b><a name="3">3.</a>
+  Electronic Structure of SrVO<sub>3</sub>: DFT+DMFT calculation </b></h3>
+  
+  <h4>2.1. The input file for DMFT calculation: correlated orbitals, screened Coulomb interaction and  frequency mesh </h4>
   
   <p> In ABINIT, correlated orbitals are defined using the projected local orbitals Wannier functions as outlined above.
   The definition requires to define a given energy window from which projected Wannier functions are constructed.
@@ -258,7 +260,7 @@ sec3:
   mpirun -n 32 ../../../tmp/src/98_main/abinit < tdmft_x.files > log_2
   </pre> </font>
   
-  <h4>3.2. The DFT+DMFT calculation: the log file </h4>
+  <h4>2.2. The DFT+DMFT calculation: the log file </h4>
   
   <p> We are now going to browse quickly the log file (log_2) for this calculation.
   
@@ -388,7 +390,7 @@ sec3:
   and the Green's function is file Gtau.dat.
   
   
-  <h4>3.3.  The self energy </h4>
+  <h4>2.3.  The self energy </h4>
   <p>
   You can use the self-energy to compute the quasiparticle renormalization weight. 
   We first extract the first six Matsubara frequencies:</p>
@@ -409,7 +411,7 @@ sec3:
   using Z=1/(1+0.82)=0.55.
   
   
-  <h4>3.4. The Green's function for correlated orbitals </h4>
+  <h4>2.4. The Green's function for correlated orbitals </h4>
   <p>
   The impurity (or local) Green's function for correlated orbitals is written in the file Gtau.dat.
   It is plotted as a function of the imaginary time in the interval [0,&beta;] where
@@ -466,7 +468,7 @@ sec3:
   </pre> </font>
   
   
-  <h4>3.5. The local spectral function </h4>
+  <h4>2.5. The local spectral function </h4>
   <p>
   You can now use the imaginary time Green's function (contained in file Gtau.dat) to compute the spectral function  in real frequency.
   Such analytical continuation can be done on quantum Monte Carlo data using the Maximum Entropy method.
@@ -514,11 +516,9 @@ sec3:
   
   <hr>
   
-# Each section must have a title, that will form the table of content.
-# Note the small (one space) indentation for the title and body keys.
-sec4:
- title: "Electronic Structure of SrVO<sub>3</sub>: Choice of correlated orbitals"
- body: |
+  <h3><b><a name="4">4.</a>
+  Electronic Structure of SrVO<sub>3</sub>: Choice of correlated orbitals </b></h3>
+  
   Previously, only the  <i>t<SUB>2g</SUB></i>-like bands were used in the
   definition of Wannier functions. 
   If there were no hybridization between <i>t<SUB>2g</SUB></i> orbitals and oxygen <i>p</i> orbitals, the Wannier functions
@@ -603,12 +603,9 @@ sec4:
   
   <hr>
   
-# Each section must have a title, that will form the table of content.
-# Note the small (one space) indentation for the title and body keys.
-sec5:
- title: "Electronic Structure of SrVO<sub>3</sub>: The internal energy"
- body: |
-  <p>  The internal energy can be obtained with </p>
+  <h3><b><a name="5">5.</a>
+  Electronic Structure of SrVO<sub>3</sub>: the internal energy </b></h3>
+   <p>  The internal energy can be obtained with </p>
    
   <font color="gray"> <pre>
   grep -e ITER -e Internal log_3
@@ -647,11 +644,8 @@ sec5:
   
   <hr>
   
-# Each section must have a title, that will form the table of content.
-# Note the small (one space) indentation for the title and body keys.
-sec6:
- title: "Electronic Structure of SrVO<sub>3</sub> in DFT+DMFT: Equilibrium volume"
- body: |
+  <h3><b><a name="6">6.</a>
+  Electronic Structure of SrVO<sub>3</sub> in DFT+DMFT: Equilibrium volume </b></h3>
   We focus now on the total energy.
   
   Create a new input file, tdmft_4.in:
@@ -675,11 +669,9 @@ sec6:
   
   <hr>
   
-# Each section must have a title, that will form the table of content.
-# Note the small (one space) indentation for the title and body keys.
-sec7:
- title: "Electronic Structure of SrVO<sub>3</sub>: Conclusion"
- body: |
+  <h3><b><a name="7">7.</a>
+  Electronic Structure of SrVO<sub>3</sub>: Conclusion </b></h3>
+  
   To sum up, the important physical parameters for DFT+DMFT are the definition
   of correlated orbitals, the choice of U and J (and double counting). The important technical parameters are 
   the frequency and time grids as well as the number of steps for Monte Carlo, the DMFT loop and the DFT loop.

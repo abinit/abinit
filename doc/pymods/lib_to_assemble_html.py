@@ -154,6 +154,11 @@ def make_links(text,cur_key,allowed_link_seeds,backlinks,backlink):
         result=get_year(key)
         if result != -9999 :
           backlinks[key]+=backlink+";;"
+
+          #DEBUG
+          if key=="Amadon2008a":
+            print(" Found key Amadon2008a, backlink:",backlink)
+          #ENDDEBUG
           return '<a href="../../bibliography/generated_files/bibliography.html#%s">[%s]</a>' %(key,text)
 
     return '<a href="#">[[FAKE LINK:'+key+']]</a>'
@@ -288,8 +293,9 @@ def assemble_html(origin_yml_files,suppl_components,dir_name,root_filname,allowe
       supplementary components "suppl_components", to produce html files,
       situated in dir_name (e.g. "tutorial") directories dir_name+"/generated_files".
       The root name of the files is "root_filname" (e.g. "lesson").
-      The complementary yml information (intro, body) for each file
+      The complementary yml information (intro, body, and possibly secX) for each file
       is situated in dir_name+"/origin_files".
+      When there is a list of sections, a table of content is constituted automatically.
       The dictionary allowed_link_seeds allows one to set up the links to relevant keywords.
       The backlinks are accumulated, to be mentioned in the bibliography.html file.
       WARNING : not all files are assembled using this function ! In particular, the "topics" files are assembled in the main code ...
@@ -322,6 +328,34 @@ def assemble_html(origin_yml_files,suppl_components,dir_name,root_filname,allowe
       print("Read "+path_ymlfile+" to build "+full_filname+".html ... ",end="")
       doc_yml=read_yaml(path_ymlfile)
  
+    # If there are some sections in this yml file, constitute the body of the file using these sections,
+    # and also make a table of content
+    labels=[]
+    for j in doc_yml.keys(): 
+      if "sec" in j[:3]:
+        labels.append(j[3:])
+    secs_html=""
+    if len(labels)!=0:
+      labels.sort() 
+      secs_html="\n <ul> \n"
+      # Table of content
+      for label in labels:
+         secj="sec"+label
+         secs_html+='  <li><a href="#%s">%s.</a> %s</li>\n' %(label,label,doc_yml[secj]["title"])
+      secs_html+="\n </ul> \n <hr>"
+      # Body
+      for label in labels:
+         secj="sec"+label
+         sec_html='<p><a name="%s"> </a><br>' %(label)
+         sec_html+='<h3><b>%s. %s</b></h3>\n <p>' %(label,doc_yml[secj]["title"])
+         sec_html+=doc_yml[secj]["body"]
+         full_filname=origin_yml.name
+         if root_filname != "":
+           full_filname=root_filname+"_"+origin_yml.name
+         backlink=' &nbsp; <a href="../../%s/generated_files/%s.html#%s">%s#%s</a> &nbsp; ' %(dir_name,full_filname,label,full_filname,label)
+         sec_html = make_links(sec_html,None,allowed_link_seeds,backlinks,backlink)
+         secs_html+=sec_html
+ 
     # Try to complete the information from suppl_components
     suppl={}
     if name in suppl_components.keys():
@@ -335,20 +369,23 @@ def assemble_html(origin_yml_files,suppl_components,dir_name,root_filname,allowe
     for j in ["header","title","subtitle","purpose","advice","intro","copyright","links","menu",
               "tofcontent_header","toc",
               "introduction","examples","tutorials","input_variables","input_files","references",
-              "content","body",
+              "content","body","sections",
               "links","end"]:
 
       item=""
       # Try to get the item from different sources
-      if j in doc_yml.keys() :
+      if j in doc_yml.keys() and (not "sec" in j or j=="sections"):
         item+=doc_yml[j]
       elif j in suppl.keys() :
         item+=suppl[j]
+      elif j =="sections":
+        item+=secs_html
       else:
         try:
           item+=getattr(origin_yml,j)
         except:
           pass
+
       item=item.strip()
       if item=="" or item=="default":
         try:
@@ -400,6 +437,7 @@ def assemble_html(origin_yml_files,suppl_components,dir_name,root_filname,allowe
       all_files_html += getattr(origin_yml_default,j)
 
   root_filname_all="all_files"
+  html_section=""
   rc=finalize_html(all_files_html,origin_yml_default,dir_name,root_filname_all,allowed_link_seeds,backlinks)
 
   return "Exit assemble_html"

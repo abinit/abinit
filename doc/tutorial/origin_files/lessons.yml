@@ -8,7 +8,7 @@
 
 - !components
     name : analysis_tools
-    keyword : Lesson on analysis tools.
+    keyword : Lesson on analysis tools
     authors : MC,SP
     subtitle : How to use the program <em>cut3d</em>.
 - !components
@@ -45,7 +45,7 @@
     name : dmft
     keyword : Lesson on DFT+DMFT
     authors : BAmadon
-    subtitle : A DFT+DMFT calculation on SrVO3.
+    subtitle : A DFT+DMFT calculation for SrVO<sub>3</sub>.
 - !components
     name : eph
     keyword : Electron-phonon lesson
@@ -98,7 +98,7 @@
     subtitle : Frequency-dependent linear and second order nonlinear optical response.
 - !components
     name : paral_dfpt
-    keyword : Parallelism in the linear-response case.
+    keyword : Parallelism in the linear-response case
     authors : XG,RC
     subtitle : Atomic displacements, homogeneous electric fields, strain.
 - !components
@@ -217,7 +217,7 @@
       <script type="text/javascript" src="__JS_PATH__list_internal_links_for_generated_files.js"> </script>
     tofcontent_header : |
       <a name="list"></a>
-      <h3><b> __KEYWORD__ table of content:</b></h3>
+      <h3><b> __KEYWORD__, table of content:</b></h3>
     end : |
       </body>
       </html>

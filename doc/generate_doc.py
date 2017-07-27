@@ -1078,10 +1078,22 @@ bibliography_content+=('<a id="%s"></a>')%(cur_let)+alphalinks+('<hr><hr><h2>%s<
 for ref in bibtex_dics:
   entrytype=ref["ENTRYTYPE"]
   ID=ref["ID"]
-  list_backlinksID=backlinks[ID].split(";;")
-  for (i,link) in enumerate(list_backlinksID):
-     list_backlinksID[i]=link.strip()
-  backlinksID=set(list_backlinksID)
+  backlinksID=backlinks[ID].split(";;")
+  if len(backlinksID)!=0:
+    list_stripped=[]
+    for (i,link) in enumerate(backlinksID):
+      stripped=link.strip()
+      if stripped!="":
+        list_stripped.append(stripped)
+    if len(list_stripped)!=0:
+      set_stripped=set(list_stripped)
+      if len(set_stripped)!=0:
+        backlinksID=list(set_stripped)
+        backlinksID.sort()
+      else:
+        backlinksID=[]
+    else:
+      backlinksID=[]
   line=("@%s{%s,%s") %(entrytype,ID,ref['body'])
   lines_txt+= line
   bibtex_content+= ('<hr><a id="%s">%s</a> \n <pre>' ) %(ID,ID)
@@ -1092,12 +1104,9 @@ for ref in bibtex_dics:
     if cur_let==ID[0]:
       bibliography_content+=alphalinks+('<hr><hr><h2>%s</h2> \n \n')%(cur_let)
   bibliography_content+= ('<hr><a id="%s">[%s]</a> (<a href="./bibtex.html#%s">bibtex</a>)\n <br> %s \n') %(ID,ID,ID,reference_dic[ID])
-  nlink=0
-  for link in backlinksID:
-    if len(link)!=0:
-      if nlink==0: 
-        bibliography_content+= "<br> Referred to in " 
-        nlink=1
+  if len(backlinksID)!=0:
+    bibliography_content+= "<br> Referred to in " 
+    for link in backlinksID:
       bibliography_content+= link
 
 # Open, write and close the txt file
