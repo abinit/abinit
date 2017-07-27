@@ -491,7 +491,7 @@ for file in allowed_links_in_tests:
   allowed_link_seeds[file]="in_tests"
 
 # Specific allowed seeds
-allowed_link_seeds["allvariables"]="allvariables"
+allowed_link_seeds["varset_allvars"]="varset_allvars"
 
 ################################################################################
 ################################################################################
@@ -522,7 +522,7 @@ for (speckey, specval) in list_specials:
   cur_content += "<p>\n"+make_links(specval,speckey,allowed_link_seeds,backlinks,backlink)+"\n"
   cur_content += "</font>"
   cur_content += "<br><br><a href=#top>Go to the top</a>\n"
-  cur_content += "<B> | </B><a href=\"allvariables.html#top\">Complete list of input variables</a><hr>\n"
+  cur_content += "<B> | </B><a href=\"varset_allvars.html#top\">Complete list of input variables</a><hr>\n"
   #
   all_contents["specials"] = all_contents["specials"] + cur_content + "\n\n"
 
@@ -587,7 +587,7 @@ for i, var in enumerate(abinit_vars):
     # End the section for one variable
     cur_content += "</font>\n\n"
     cur_content += "<br><br><a href=#top>Go to the top</a>\n"
-    cur_content += "<B> | </B><a href=\"allvariables.html#top\">Complete list of input variables</a><hr>\n"
+    cur_content += "<B> | </B><a href=\"varset_allvars.html#top\">Complete list of input variables</a><hr>\n"
     #
     all_contents[varfile] = all_contents[varfile] + cur_content + "\n\n"
   except AttributeError as e:
@@ -621,12 +621,12 @@ for i, varfile_info in enumerate(varfiles):
   #Generate the body of the table of content 
   cur_let = 'A'
   toc_body=""
-  if varfile=="allvariables":
+  if varfile=="varset_allvars":
     toc_body+=scriptTab+alphalinks
   else :
     toc_body += " <br><a id='%s'></a>"%(cur_let)+cur_let+".\n"
 
-  if varfile=="allvariables":
+  if varfile=="varset_allvars":
     toc_body += " <ul id=\"Letters\">\n"
     toc_body += " <li>\n<ul id=\"%s\" class=\"TabContentLetter\">\n"%(cur_let)
     toc_body += " <li class=\"HeaderLetter\">%s</li>\n"%(cur_let)

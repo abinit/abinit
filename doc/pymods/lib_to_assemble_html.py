@@ -136,8 +136,8 @@ def make_links(text,cur_key,allowed_link_seeds,backlinks,backlink):
         return '<a href="../../input_variables/generated_files/'+key+'.html">'+text+'</a>'
       elif value=="in_tests":
         return '<a href="../../'+key+'">&#126;abinit/'+key+'</a>'
-      elif value=="allvariables":
-        return '<a href="../../input_variables/generated_files/allvariables.html">'+text+'</a>'
+      elif value=="varset_allvars":
+        return '<a href="../../input_variables/generated_files/varset_allvars.html">'+text+'</a>'
       elif value=="bibID":
         result=get_year(key)
         if result != -9999 :
@@ -422,6 +422,10 @@ def finalize_html(doc_html,origin_yml,dir_name,root_filname,allowed_link_seeds,b
     doc_html=doc_html.replace("__AUTHORS__",origin_yml.authors)
 
   doc_html = make_links(doc_html,None,allowed_link_seeds,backlinks,backlink)
+
+  #This must be temporary !
+  if full_filname=='allvars':
+    full_filname='varset_allvars'
 
   #Write the finalized html file.
   path_html = "%s/generated_files/%s.html" %(dir_name,full_filname)

@@ -8,10 +8,10 @@
 for file in "$@"
 do
  echo "working on $file"
- rm -f tmp.file1 
- sed -e 's/temp_/tdepes_/' $file > tmp.file1
+ rm -f tmp.file 
+ sed -e 's!allvariables!varset_allvars!' $file > tmp.file
  echo "changes done "
  # put the modified file at the correct place
- mv tmp.file1 $file
+ mv tmp.file $file
  echo "file $file written "
 done

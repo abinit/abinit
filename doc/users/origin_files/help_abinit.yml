@@ -193,7 +193,7 @@ body : |
         only the first 132 characters of each line of the input file will be read
         and parsed for input variables and their values. </li>
     </ul>
-    <p>The names of all the parameters can be found in the [[allvariables]].
+    <p>The names of all the parameters can be found [[invars:all|here]].
       The list of input variables present in the latter file links them to their definitions,
       contained in different files, of which some are listed here:
   <ul>

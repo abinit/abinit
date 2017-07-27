@@ -35,7 +35,7 @@ File bibliography/generated_files/abiref.yml written ...
 
 File input_variables/generated_files/specials.html written ...
 
-File input_variables/generated_files/allvariables.html written ...
+File input_variables/generated_files/varset_allvars.html written ...
 
 File input_variables/generated_files/varbas.html written ...
 
@@ -251,45 +251,45 @@ Work done !
  ABINIT Input variables: Check in documentation                
  ============================================================= 
 FAIL:  getdelfd  does not appear in any var*html files 
-FAIL:  getdelfd  does not appear in the central allvariables.html file 
+FAIL:  getdelfd  does not appear in the central varset_allvars.html file
 FAIL:  getdkdk  does not appear in any var*html files 
-FAIL:  getdkdk  does not appear in the central allvariables.html file 
+FAIL:  getdkdk  does not appear in the central varset_allvars.html file
 FAIL:  getdkde  does not appear in any var*html files 
-FAIL:  getdkde  does not appear in the central allvariables.html file 
+FAIL:  getdkde  does not appear in the central varset_allvars.html file
 FAIL:  getpawden  does not appear in any var*html files 
-FAIL:  getpawden  does not appear in the central allvariables.html file 
+FAIL:  getpawden  does not appear in the central varset_allvars.html file
 FAIL:  irdpawden  does not appear in any var*html files 
-FAIL:  irdpawden  does not appear in the central allvariables.html file 
+FAIL:  irdpawden  does not appear in the central varset_allvars.html file
 FAIL:  rf2_dkde  does not appear in any var*html files 
-FAIL:  rf2_dkde  does not appear in the central allvariables.html file 
+FAIL:  rf2_dkde  does not appear in the central varset_allvars.html file
 FAIL:  rf2_pert1_dir  does not appear in any var*html files 
-FAIL:  rf2_pert1_dir  does not appear in the central allvariables.html file 
+FAIL:  rf2_pert1_dir  does not appear in the central varset_allvars.html file
 FAIL:  rf2_pert2_dir  does not appear in any var*html files 
-FAIL:  rf2_pert2_dir  does not appear in the central allvariables.html file 
+FAIL:  rf2_pert2_dir  does not appear in the central varset_allvars.html file
 FAIL:  rf1atpol  does not appear in any var*html files 
-FAIL:  rf1atpol  does not appear in the central allvariables.html file 
+FAIL:  rf1atpol  does not appear in the central varset_allvars.html file
 FAIL:  rf1dir  does not appear in any var*html files 
-FAIL:  rf1dir  does not appear in the central allvariables.html file 
+FAIL:  rf1dir  does not appear in the central varset_allvars.html file
 FAIL:  rf1elfd  does not appear in any var*html files 
-FAIL:  rf1elfd  does not appear in the central allvariables.html file 
+FAIL:  rf1elfd  does not appear in the central varset_allvars.html file
 FAIL:  rf1phon  does not appear in any var*html files 
-FAIL:  rf1phon  does not appear in the central allvariables.html file 
+FAIL:  rf1phon  does not appear in the central varset_allvars.html file
 FAIL:  rf2atpol  does not appear in any var*html files 
-FAIL:  rf2atpol  does not appear in the central allvariables.html file 
+FAIL:  rf2atpol  does not appear in the central varset_allvars.html file
 FAIL:  rf2dir  does not appear in any var*html files 
-FAIL:  rf2dir  does not appear in the central allvariables.html file 
+FAIL:  rf2dir  does not appear in the central varset_allvars.html file
 FAIL:  rf2elfd  does not appear in any var*html files 
-FAIL:  rf2elfd  does not appear in the central allvariables.html file 
+FAIL:  rf2elfd  does not appear in the central varset_allvars.html file
 FAIL:  rf2phon  does not appear in any var*html files 
-FAIL:  rf2phon  does not appear in the central allvariables.html file 
+FAIL:  rf2phon  does not appear in the central varset_allvars.html file
 FAIL:  rf3atpol  does not appear in any var*html files 
-FAIL:  rf3atpol  does not appear in the central allvariables.html file 
+FAIL:  rf3atpol  does not appear in the central varset_allvars.html file
 FAIL:  rf3dir  does not appear in any var*html files 
-FAIL:  rf3dir  does not appear in the central allvariables.html file 
+FAIL:  rf3dir  does not appear in the central varset_allvars.html file
 FAIL:  rf3elfd  does not appear in any var*html files 
-FAIL:  rf3elfd  does not appear in the central allvariables.html file 
+FAIL:  rf3elfd  does not appear in the central varset_allvars.html file
 FAIL:  rf3phon  does not appear in any var*html files 
-FAIL:  rf3phon  does not appear in the central allvariables.html file 
+FAIL:  rf3phon  does not appear in the central varset_allvars.html file
  ============================================================= 
  ABINIT Input variables: Check in test suite                   
  ============================================================= 
