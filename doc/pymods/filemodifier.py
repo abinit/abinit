@@ -17,12 +17,7 @@ import re
 import string
 import argparse
 
-################################################################################
-
 # Generic checks
-
-################################################################################
-
 filelist = sys.argv[1:]
 if filelist != [] :
   if filelist[0] == "-h" or filelist[0] == "--help" :
@@ -32,31 +27,42 @@ else:
   print(__doc__)
   sys.exit()
 
-################################################################################
-
+# Loop on files
 for path in filelist:
   print(" Working on file '%s'."%path)
+
+  # Transfer the content of the "old" file to a list of lines, file_old
   with open(path,'r') as f_old:
     file_old=f_old.readlines()
-    f_new=open(path+"_new","w")
-
-################################################################################
 
     #####################################################
-    #The file transformations can be made in this section
+    #The file transformations can be made in this section, working directly
+    #on the list of lines ...
 
-    for line in file_old:
-      f_new.write(line)
-      if "excludes" in line:
-        f_new.write("    executables: abinit\n")
-
+    i_new=0
+    for i_old,line in enumerate(file_old):
+      file_new.append(line)
+      i_new+=1
+      if "intro : |" in line:
+        file_new.append(line)
+        i_new+=1
+        file_new[0]="# This YAML file contains the introduction as well as the body of the html lesson."
+        file_new[1]="# In order to modify the other parts, modify the file lessons.html ."
+        file_new[2]=""
+        file_new[3]="# This is the introduction ..."
     #####################################################
 
-################################################################################
+  #Open the new file, and write the content of file_new
+  f_new=open(path+"_new","w")
+  for line in file_new:
+     f_new.write(line)
 
-  #Finishes by moving the new file at the new place
+  #Finishes by possibly moving the new file at the new place
   print(" Changes done")
-  os.system("mv %s %s_old"%(path,path))
-  os.system("mv %s_new %s"%(path,path))
-  os.system("rm %s_old"%(path))
-  print(" New file %s written"%path)
+  if 1:
+    os.system("mv %s %s_old"%(path,path))
+    os.system("mv %s_new %s"%(path,path))
+    os.system("rm %s_old"%(path))
+    print(" New file %s written"%path)
+  else:
+    print(" New file %s_new written"%path)
