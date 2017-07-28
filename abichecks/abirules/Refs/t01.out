@@ -9,9 +9,9 @@ Read input_variables/origin_files/abinit_vars.yml as database input file for the
 
 Read input_variables/origin_files/characteristics.yml as database input file for the list of allowed characteristics ...
 
-Read input_variables/origin_files/list_specials.yml as database input file for the list of allowed special keywords ...
+Read input_variables/origin_files/list_external.yml as database input file for the list of external parameters (known at compile or run time) ...
 
-Read input_variables/origin_files/varfiles.yml as database input file for the list of varfiles ...
+Read input_variables/origin_files/varsets.yml as database input file for the list of varsets ...
 
 Read theory/origin_files/theorydocs.yml as database input file for the list of theory documents ...
 
@@ -33,9 +33,11 @@ File bibliography/generated_files/abiref.txt written ...
 
 File bibliography/generated_files/abiref.yml written ...
 
-File input_variables/generated_files/specials.html written ...
+File input_variables/generated_files/varset_external.html written ...
 
 File input_variables/generated_files/varset_allvars.html written ...
+
+File input_variables/generated_files/varanaddb.html written ...
 
 File input_variables/generated_files/varbas.html written ...
 
@@ -73,6 +75,12 @@ File input_variables/generated_files/varw90.html written ...
 
 File input_variables/generated_files/all_files.html written ...
 
+Read topics/origin_files/topic_Berry.yml to initiate the topic 'Berry' ... File topics/generated_files/topic_Berry.html written ...
+
+Read topics/origin_files/topic_BSE.yml to initiate the topic 'BSE' ... File topics/generated_files/topic_BSE.html written ...
+
+Read topics/origin_files/topic_ChargedCell.yml to initiate the topic 'ChargedCell' ... File topics/generated_files/topic_ChargedCell.html written ...
+
 Read topics/origin_files/topic_convergency.yml to initiate the topic 'convergency' ... File topics/generated_files/topic_convergency.html written ...
 
 Read topics/origin_files/topic_CRPA.yml to initiate the topic 'CRPA' ... File topics/generated_files/topic_CRPA.html written ...
@@ -81,9 +89,15 @@ Read topics/origin_files/topic_crystal.yml to initiate the topic 'crystal' ... F
 
 Read topics/origin_files/topic_DFT+U.yml to initiate the topic 'DFT+U' ... File topics/generated_files/topic_DFT+U.html written ...
 
+Read topics/origin_files/topic_DFPT.yml to initiate the topic 'DFPT' ... File topics/generated_files/topic_DFPT.html written ...
+
 Read topics/origin_files/topic_DMFT.yml to initiate the topic 'DMFT' ... File topics/generated_files/topic_DMFT.html written ...
 
 Read topics/origin_files/topic_EffMass.yml to initiate the topic 'EffMass' ... File topics/generated_files/topic_EffMass.html written ...
+
+Read topics/origin_files/topic_EFG.yml to initiate the topic 'EFG' ... File topics/generated_files/topic_EFG.html written ...
+
+Read topics/origin_files/topic_ElPhon.yml to initiate the topic 'ElPhon' ... File topics/generated_files/topic_ElPhon.html written ...
 
 Read topics/origin_files/topic_GeoOpt.yml to initiate the topic 'GeoOpt' ... File topics/generated_files/topic_GeoOpt.html written ...
 
@@ -91,9 +105,17 @@ Read topics/origin_files/topic_GSgeneral.yml to initiate the topic 'GSgeneral' .
 
 Read topics/origin_files/topic_GSintroduction.yml to initiate the topic 'GSintroduction' ... File topics/generated_files/topic_GSintroduction.html written ...
 
+Read topics/origin_files/topic_GW.yml to initiate the topic 'GW' ... File topics/generated_files/topic_GW.html written ...
+
+Read topics/origin_files/topic_GWls.yml to initiate the topic 'GWls' ... File topics/generated_files/topic_GWls.html written ...
+
 Read topics/origin_files/topic_Hybrids.yml to initiate the topic 'Hybrids' ... File topics/generated_files/topic_Hybrids.html written ...
 
 Read topics/origin_files/topic_k-points.yml to initiate the topic 'k-points' ... File topics/generated_files/topic_k-points.html written ...
+
+Read topics/origin_files/topic_MagField.yml to initiate the topic 'MagField' ... File topics/generated_files/topic_MagField.html written ...
+
+Read topics/origin_files/topic_MagMom.yml to initiate the topic 'MagMom' ... File topics/generated_files/topic_MagMom.html written ...
 
 Read topics/origin_files/topic_MolecularDynamics.yml to initiate the topic 'MolecularDynamics' ... File topics/generated_files/topic_MolecularDynamics.html written ...
 
@@ -113,13 +135,21 @@ Read topics/origin_files/topic_positron.yml to initiate the topic 'positron' ...
 
 Read topics/origin_files/topic_printing.yml to initiate the topic 'printing' ... File topics/generated_files/topic_printing.html written ...
 
+Read topics/origin_files/topic_RandStopPow.yml to initiate the topic 'RandStopPow' ... File topics/generated_files/topic_RandStopPow.html written ...
+
 Read topics/origin_files/topic_recursion.yml to initiate the topic 'recursion' ... File topics/generated_files/topic_recursion.html written ...
+
+Read topics/origin_files/topic_RPACorrEn.yml to initiate the topic 'RPACorrEn' ... File topics/generated_files/topic_RPACorrEn.html written ...
 
 Read topics/origin_files/topic_spinpolarisation.yml to initiate the topic 'spinpolarisation' ... File topics/generated_files/topic_spinpolarisation.html written ...
 
 Read topics/origin_files/topic_TDDFT.yml to initiate the topic 'TDDFT' ... File topics/generated_files/topic_TDDFT.html written ...
 
+Read topics/origin_files/topic_TDep.yml to initiate the topic 'TDep' ... File topics/generated_files/topic_TDep.html written ...
+
 Read topics/origin_files/topic_TransPath.yml to initiate the topic 'TransPath' ... File topics/generated_files/topic_TransPath.html written ...
+
+Read topics/origin_files/topic_Unfolding.yml to initiate the topic 'Unfolding' ... File topics/generated_files/topic_Unfolding.html written ...
 
 Read topics/origin_files/topic_vdw.yml to initiate the topic 'vdw' ... File topics/generated_files/topic_vdw.html written ...
 
@@ -165,7 +195,7 @@ Read tutorial/origin_files/lesson_gw1.yml to build lesson_gw1.html ... File tuto
 
 Read tutorial/origin_files/lesson_gw2.yml to build lesson_gw2.html ... File tutorial/generated_files/lesson_gw2.html written ...
 
-Read tutorial/origin_files/lesson_ldau.yml to build lesson_ldau.html ... File tutorial/generated_files/lesson_ldau.html written ...
+Read tutorial/origin_files/lesson_dftu.yml to build lesson_dftu.html ... File tutorial/generated_files/lesson_dftu.html written ...
 
 Read tutorial/origin_files/lesson_nlo.yml to build lesson_nlo.html ... File tutorial/generated_files/lesson_nlo.html written ...
 
@@ -251,45 +281,45 @@ Work done !
  ABINIT Input variables: Check in documentation                
  ============================================================= 
 FAIL:  getdelfd  does not appear in any var*html files 
-FAIL:  getdelfd  does not appear in the central varset_allvars.html file
+FAIL:  getdelfd  does not appear in the central varset_allvars.html file 
 FAIL:  getdkdk  does not appear in any var*html files 
-FAIL:  getdkdk  does not appear in the central varset_allvars.html file
+FAIL:  getdkdk  does not appear in the central varset_allvars.html file 
 FAIL:  getdkde  does not appear in any var*html files 
-FAIL:  getdkde  does not appear in the central varset_allvars.html file
+FAIL:  getdkde  does not appear in the central varset_allvars.html file 
 FAIL:  getpawden  does not appear in any var*html files 
-FAIL:  getpawden  does not appear in the central varset_allvars.html file
+FAIL:  getpawden  does not appear in the central varset_allvars.html file 
 FAIL:  irdpawden  does not appear in any var*html files 
-FAIL:  irdpawden  does not appear in the central varset_allvars.html file
+FAIL:  irdpawden  does not appear in the central varset_allvars.html file 
 FAIL:  rf2_dkde  does not appear in any var*html files 
-FAIL:  rf2_dkde  does not appear in the central varset_allvars.html file
+FAIL:  rf2_dkde  does not appear in the central varset_allvars.html file 
 FAIL:  rf2_pert1_dir  does not appear in any var*html files 
-FAIL:  rf2_pert1_dir  does not appear in the central varset_allvars.html file
+FAIL:  rf2_pert1_dir  does not appear in the central varset_allvars.html file 
 FAIL:  rf2_pert2_dir  does not appear in any var*html files 
-FAIL:  rf2_pert2_dir  does not appear in the central varset_allvars.html file
+FAIL:  rf2_pert2_dir  does not appear in the central varset_allvars.html file 
 FAIL:  rf1atpol  does not appear in any var*html files 
-FAIL:  rf1atpol  does not appear in the central varset_allvars.html file
+FAIL:  rf1atpol  does not appear in the central varset_allvars.html file 
 FAIL:  rf1dir  does not appear in any var*html files 
-FAIL:  rf1dir  does not appear in the central varset_allvars.html file
+FAIL:  rf1dir  does not appear in the central varset_allvars.html file 
 FAIL:  rf1elfd  does not appear in any var*html files 
-FAIL:  rf1elfd  does not appear in the central varset_allvars.html file
+FAIL:  rf1elfd  does not appear in the central varset_allvars.html file 
 FAIL:  rf1phon  does not appear in any var*html files 
-FAIL:  rf1phon  does not appear in the central varset_allvars.html file
+FAIL:  rf1phon  does not appear in the central varset_allvars.html file 
 FAIL:  rf2atpol  does not appear in any var*html files 
-FAIL:  rf2atpol  does not appear in the central varset_allvars.html file
+FAIL:  rf2atpol  does not appear in the central varset_allvars.html file 
 FAIL:  rf2dir  does not appear in any var*html files 
-FAIL:  rf2dir  does not appear in the central varset_allvars.html file
+FAIL:  rf2dir  does not appear in the central varset_allvars.html file 
 FAIL:  rf2elfd  does not appear in any var*html files 
-FAIL:  rf2elfd  does not appear in the central varset_allvars.html file
+FAIL:  rf2elfd  does not appear in the central varset_allvars.html file 
 FAIL:  rf2phon  does not appear in any var*html files 
-FAIL:  rf2phon  does not appear in the central varset_allvars.html file
+FAIL:  rf2phon  does not appear in the central varset_allvars.html file 
 FAIL:  rf3atpol  does not appear in any var*html files 
-FAIL:  rf3atpol  does not appear in the central varset_allvars.html file
+FAIL:  rf3atpol  does not appear in the central varset_allvars.html file 
 FAIL:  rf3dir  does not appear in any var*html files 
-FAIL:  rf3dir  does not appear in the central varset_allvars.html file
+FAIL:  rf3dir  does not appear in the central varset_allvars.html file 
 FAIL:  rf3elfd  does not appear in any var*html files 
-FAIL:  rf3elfd  does not appear in the central varset_allvars.html file
+FAIL:  rf3elfd  does not appear in the central varset_allvars.html file 
 FAIL:  rf3phon  does not appear in any var*html files 
-FAIL:  rf3phon  does not appear in the central varset_allvars.html file
+FAIL:  rf3phon  does not appear in the central varset_allvars.html file 
  ============================================================= 
  ABINIT Input variables: Check in test suite                   
  ============================================================= 
