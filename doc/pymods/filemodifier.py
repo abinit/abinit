@@ -39,17 +39,30 @@ for path in filelist:
     #The file transformations can be made in this section, working directly
     #on the list of lines ...
 
+    file_new=[]
     i_new=0
     for i_old,line in enumerate(file_old):
-      file_new.append(line)
-      i_new+=1
       if "intro : |" in line:
+        file_new[0]="# This YAML file contains the introduction as well as the body of the html lesson.\n"
+        file_new[1]="# In order to modify the other parts, modify the file lessons.html .\n"
+        file_new[2]="\n# This is the introduction ...\n"
         file_new.append(line)
         i_new+=1
-        file_new[0]="# This YAML file contains the introduction as well as the body of the html lesson."
-        file_new[1]="# In order to modify the other parts, modify the file lessons.html ."
-        file_new[2]=""
-        file_new[3]="# This is the introduction ..."
+      elif "This is the body" in line:
+        line="\n# Now comes the different sections, numbered.\n\n# Each section must have a title, that will form the table of content.\n# Note the small (one space) indentation for the title and body keys.\n"
+        file_new.append(line)
+        i_new+=1
+      elif "body : |" in line:
+        line='sec1:\n title: "To be filled"\n body: |\n'
+        file_new.append(line)
+        i_new+=1
+      elif "name=" in line:
+        line='\n# Each section must have a title, that will form the table of content.\n# Note the small (one space) indentation for the title and body keys.\nsecX:\n title: "To be filled"\n body: |\n'+line
+        file_new.append(line)
+        i_new+=1
+      else:
+        file_new.append(line)
+        i_new+=1
     #####################################################
 
   #Open the new file, and write the content of file_new
@@ -59,7 +72,7 @@ for path in filelist:
 
   #Finishes by possibly moving the new file at the new place
   print(" Changes done")
-  if 1:
+  if 0:
     os.system("mv %s %s_old"%(path,path))
     os.system("mv %s_new %s"%(path,path))
     os.system("rm %s_old"%(path))
