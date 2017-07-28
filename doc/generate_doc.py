@@ -88,7 +88,7 @@ list_infos_dir=[]
 list_infos_dir.append({"dir_name":"bibliography","root_filname":"",
                                                     "yml_files":["bibfiles"]})
 list_infos_dir.append({"dir_name":"input_variables","root_filname":"",
-                                                    "yml_files":["abinit_vars","characteristics","list_external","varfiles"]})
+                                                    "yml_files":["abinit_vars","characteristics","list_external","varsets"]})
 list_infos_dir.append({"dir_name":"theory","root_filname":"theorydoc",
                                                     "yml_files":["theorydocs"]})
 list_infos_dir.append({"dir_name":"topics","root_filname":"topic",
@@ -101,7 +101,7 @@ msgs={"bibfiles"       :"as database input file for the list of generated files 
       "abinit_vars"    :"as database input file for the input variables and their characteristics ...",
       "characteristics":"as database input file for the list of allowed characteristics ...",
       "list_external"  :"as database input file for the list of external parameters (known at compile or run time) ...",
-      "varfiles"       :"as database input file for the list of varfiles ...",
+      "varsets"        :"as database input file for the list of varsets ...",
       "theorydocs"     :"as database input file for the list of theory documents ...",
       "default_topic"  :"to initialize the topic html files with default values ...",
       "list_of_topics" :"as database input file for the list of topics ...",
@@ -126,7 +126,7 @@ for infos_dir in list_infos_dir:
 # These ones are quite often used, so copy them ...
 abinit_vars=yml_in["abinit_vars"]
 list_external=yml_in["list_external"]
-varfiles=yml_in["varfiles"]
+varfiles=yml_in["varsets"]
 list_of_topics=yml_in["list_of_topics"]
   
 ################################################################################

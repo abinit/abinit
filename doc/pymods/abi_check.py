@@ -18,11 +18,11 @@ def main():
     variables = yaml.load(f)
   with open(path+'characteristics.yml', 'r') as f:
     characteristics = yaml.load(f)
-  with open(path+'varfiles.yml', 'r') as f:
-    list_varfiles = yaml.load(f)
-    varfile_names=[]
-    for varfile in list_varfiles:
-      varfile_names.append(varfile.name)
+  with open(path+'varsets.yml', 'r') as f:
+    list_varsets = yaml.load(f)
+    varset_names=[]
+    for varset in list_varsets:
+      varset_names.append(varset.name)
   with open(path_topics+'list_of_topics.yml', 'r') as f:
     topics = yaml.load(f)
     for i,item in enumerate(topics) :
@@ -80,12 +80,12 @@ def main():
           print('FAIL: the field dimensions of ', abivarname, ' is not a list neither a valuewithconditions')
           retcode += 1
 
-    if var.varfile is None:
-      print('FAIL: ', abivarname, ' does not have a varfile')
+    if var.varset is None:
+      print('FAIL: ', abivarname, ' does not have a varset')
       retcode += 1
     else:
-      if not isinstance(var.varfile, str) or var.varfile not in varfile_names:
-        print('FAIL: the field varfile of ', abivarname, ' should be one of the valid varfiles')
+      if not isinstance(var.varset, str) or var.varset not in varset_names:
+        print('FAIL: the field varset of ', abivarname, ' should be one of the valid varsets')
         retcode += 1
  
   if retcode != 0:
