@@ -282,6 +282,9 @@ def bibtex2html(str_input):
   str=str.replace(r"\c c","&ccedil;")
   str=str.replace(r"\c{c}","&ccedil;")
 
+  converted_str=convert_textit(str)
+  cleaned_str=suppress_parentheses(converted_str)
+
   #Get rid of uneeded parentheses. One is however left with the {XYZ..} case, that should be handled with a regular expression. (TO BE DONE)
   for i in string.letters:
     string_old='{'+i+'}'
@@ -294,14 +297,45 @@ def bibtex2html(str_input):
     string_new=i
     str=str.replace(string_old,string_new)
 
+  #str=cleaned_str
+
   str=str.replace("--","&ndash;")
 
-  #Suppose all remaining parenthesis are present to avoid BibTex to switch automatically from uppercase to lowercase,
+  #Suppose remaining parentheses are present to avoid BibTex to switch automatically from uppercase to lowercase,
   #which will not happen in HTML...
   str=str.replace('"{','"')
   str=str.replace('}"','"')
 
   return str
+
+################################################################################
+
+def suppress_parentheses(text):
+  def strip_text(mymatch):
+    stripped_text = mymatch.group()[1:-1].strip()
+    return stripped_text
+
+  p=re.compile("\\{([a-zA-Z0-9_ */<>.|:+#]*)\\}")
+  if text is None:
+    return ""
+  stripped_text=p.sub(strip_text,text)
+
+  return stripped_text
+
+################################################################################
+
+def convert_textit(text):
+  def convert_text(mymatch):
+    converted_text = "<i>"+mymatch.group()[8:-1].strip()+"</i>"
+    return converted_text
+
+  #Look for \textit{...}
+  p=re.compile("\\\\textit\\{([a-zA-Z0-9_ */<>.|:+#]*)\\}")
+  if text is None:
+    return ""
+  converted_text=p.sub(convert_text,text)
+
+  return converted_text
 
 ################################################################################
 
