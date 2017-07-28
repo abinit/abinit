@@ -57,6 +57,10 @@
       <a name="list"></a>
       <h3><b> Alphabetical list of all input variables of the main ABINIT code.</b></h3>
 
+- !components
+    name : varanaddb
+    keyword : anaddb
+
 - !components 
     name : varbas
     keyword : basic

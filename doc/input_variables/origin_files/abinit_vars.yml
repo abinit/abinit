@@ -577,7 +577,7 @@
 
         <p>
     topics: convergency_basic
-    varfile: varbas
+    varset: varbas
     vartype: integer
 - !variable
     abivarname: acell
@@ -613,7 +613,7 @@
         Use [[scalecart]] to scale the cartesian coordinates.
         </p>
     topics: crystal_compulsory
-    varfile: varbas
+    varset: varbas
     vartype: real
 - !variable
     abivarname: adpimd
@@ -649,7 +649,7 @@
          NOT YET USABLE
         </p>
     topics: PIMD_expert
-    varfile: varrlx
+    varset: varrlx
     vartype: integer
 - !variable
     abivarname: adpimd_gamma
@@ -669,7 +669,7 @@
          NOT YET USABLE
         </p>
     topics: PIMD_expert
-    varfile: varrlx
+    varset: varrlx
     vartype: real
 - !variable
     abivarname: algalch
@@ -729,7 +729,7 @@
          Note that alchemical mixing cannot be used with PAW.
         </p>
     topics: otherGS_alch
-    varfile: vargs
+    varset: vargs
     vartype: integer
 - !variable
     abivarname: amu
@@ -792,7 +792,7 @@
         and can be made to evolve, e.g. with a genetic algorithm (not coded in v7.0.0 though).
         </p>
     topics: GSgeneral_useful, PIMD_useful
-    varfile: varrlx
+    varset: varrlx
     vartype: real
 - !variable
     abivarname: angdeg
@@ -862,7 +862,7 @@
         and form the desired angles with the others.
         </p>
     topics: crystal_useful
-    varfile: varbas
+    varset: varbas
     vartype: real
 - !variable
     abivarname: asr
@@ -878,7 +878,7 @@
     text: |-
         Govern the imposition of the Acoustic Sum Rule (ASR) in phonon calculations. Same meaning as the corresponding anaddb variable.
     topics: DFPT_useful
-    varfile: vareph
+    varset: vareph
     vartype: integer
 - !variable
     abivarname: atvshift
@@ -920,7 +920,7 @@
         [[lpawu]] should be 2 or 3.
         </p>
     topics: DFT+U_expert
-    varfile: varff
+    varset: varff
     vartype: real
 - !variable
     abivarname: autoparal
@@ -1009,7 +1009,7 @@
         After having printed out the weights, the code stops.
         </p>
     topics: parallelism_basic
-    varfile: varpar
+    varset: varpar
     vartype: integer
 - !variable
     abivarname: awtr
@@ -1045,7 +1045,7 @@
         the choice [[awtr]]=0.
         </p>
     topics: GW_useful
-    varfile: vargw
+    varset: vargw
     vartype: integer
 - !variable
     abivarname: bandpp
@@ -1095,7 +1095,7 @@
         Put [[bandpp]]=2 when [[istwfk]]=2 (the time spent in FFTs is divided by two).
         </p>
     topics: parallelism_useful
-    varfile: varpar
+    varset: varpar
     vartype: integer
 - !variable
     abivarname: bdberry
@@ -1131,7 +1131,7 @@
         default will cause an early exit.
         </p>
     topics: Berry_basic
-    varfile: varff
+    varset: varff
     vartype: integer
 - !variable
     abivarname: bdeigrf
@@ -1156,7 +1156,7 @@
          If [[bdeigrf]] is set to -1, the code will automatically set [[bdeigrf]] equal to nband.
         </p>
     topics: TDep_basic
-    varfile: varrf
+    varset: varrf
     vartype: integer
 - !variable
     abivarname: bdgw
@@ -1219,7 +1219,7 @@
         representation. Only in this case, indeed, the initial symmetries and energy degenerations are preserved.
         </p>
     topics: GW_basic
-    varfile: vargw
+    varset: vargw
     vartype: integer
 - !variable
     abivarname: berryopt
@@ -1351,7 +1351,7 @@
         [[ddamp]]
         </p>
     topics: Berry_compulsory
-    varfile: varff
+    varset: varff
     vartype: integer
 - !variable
     abivarname: berrysav
@@ -1377,7 +1377,7 @@
          </ul>
         </p>
     topics: Berry_useful
-    varfile: varff
+    varset: varff
     vartype: integer
 - !variable
     abivarname: berrystep
@@ -1404,7 +1404,7 @@
         Use with care: while experience is still to be gained with this procedure, the outlook is promising.
         </p>
     topics: Berry_expert
-    varfile: varff
+    varset: varff
     vartype: integer
 - !variable
     abivarname: bfield
@@ -1425,7 +1425,7 @@
          Perform finite magnetic field calculation. <br><b>THIS CODE IS UNDER DEVELOPMENT AND IS NOT READY FOR USE.</b>
         </p>
     topics: spinpolarisation_expert
-    varfile: varff
+    varset: varff
     vartype: real
 - !variable
     abivarname: bmass
@@ -1444,7 +1444,7 @@
         [[ionmov]]=13 (constant pressure molecular dynamics)
         </p>
     topics: MolecularDynamics_expert
-    varfile: varrlx
+    varset: varrlx
     vartype: real
 - !variable
     abivarname: boxcenter
@@ -1473,7 +1473,7 @@
         the origin, it is better to take [[boxcenter]]=(0 0 0).
         </p>
     topics: TDDFT_basic
-    varfile: vargs
+    varset: vargs
     vartype: real
 - !variable
     abivarname: boxcutmin
@@ -1499,7 +1499,7 @@
         calculation.
         </p>
     topics: convergency_expert
-    varfile: vargs
+    varset: vargs
     vartype: real
 - !variable
     abivarname: brvltt
@@ -1589,7 +1589,7 @@
          .
         </p>
     topics: crystal_expert
-    varfile: vargeo
+    varset: vargeo
     vartype: integer
 - !variable
     abivarname: bs_algorithm
@@ -1636,7 +1636,7 @@
          </ul>
         </p>
     topics: BSE_basic
-    varfile: varbse
+    varset: varbse
     vartype: integer
 - !variable
     abivarname: bs_calctype
@@ -1670,7 +1670,7 @@
          </ul>
         </p>
     topics: BSE_expert
-    varfile: varbse
+    varset: varbse
     vartype: integer
 - !variable
     abivarname: bs_coulomb_term
@@ -1722,7 +1722,7 @@
          </ul>
         </p>
     topics: BSE_expert
-    varfile: varbse
+    varset: varbse
     vartype: integer
 - !variable
     abivarname: bs_coupling
@@ -1755,7 +1755,7 @@
          </ul>
         </p>
     topics: BSE_useful
-    varfile: varbse
+    varset: varbse
     vartype: integer
 - !variable
     abivarname: bs_eh_cutoff
@@ -1779,7 +1779,7 @@
         the construction of the e-h Hamiltonian.
         </p>
     topics: BSE_expert
-    varfile: varbse
+    varset: varbse
     vartype: integer
 - !variable
     abivarname: bs_exchange_term
@@ -1800,7 +1800,7 @@
         <li>1 =&gt;The exchange term is calculated and added to the excitonic Hamiltonian.
          </li></ul></p>
     topics: BSE_expert
-    varfile: varbse
+    varset: varbse
     vartype: integer
 - !variable
     abivarname: bs_freq_mesh
@@ -1829,7 +1829,7 @@
         <b>bs_freq_mesh(3)</b> gives the step of the linear mesh used for evaluating the macroscopic dielectric function.
         </p>
     topics: BSE_basic
-    varfile: varbse
+    varset: varbse
     vartype: real
 - !variable
     abivarname: bs_hayd_term
@@ -1863,7 +1863,7 @@
          </ul>
         </p>
     topics: BSE_expert
-    varfile: varbse
+    varset: varbse
     vartype: integer
 - !variable
     abivarname: bs_haydock_niter
@@ -1884,7 +1884,7 @@
         spectra is less than [[bs_haydock_tol]].
         </p>
     topics: BSE_expert
-    varfile: varbse
+    varset: varbse
     vartype: integer
 - !variable
     abivarname: bs_haydock_tol
@@ -1934,7 +1934,7 @@
          </ul>
         </p>
     topics: BSE_expert
-    varfile: varbse
+    varset: varbse
     vartype: real
 - !variable
     abivarname: bs_interp_kmult
@@ -1962,7 +1962,7 @@
          * [[ngkpt]] of the coarse mesh.
         </p>
     topics: BSE_useful
-    varfile: varbse
+    varset: varbse
     vartype: integer
 - !variable
     abivarname: bs_interp_m3_width
@@ -1979,7 +1979,7 @@
     text: |-
         Defines the width of the region where divergence treatment is applied for BSE interpolation
     topics: BSE_useful
-    varfile: varbse
+    varset: varbse
     vartype: real
 - !variable
     abivarname: bs_interp_method
@@ -2006,7 +2006,7 @@
          </ul>
         </p>
     topics: BSE_useful
-    varfile: varbse
+    varset: varbse
     vartype: integer
 - !variable
     abivarname: bs_interp_mode
@@ -2039,7 +2039,7 @@
          </ul>
         </p>
     topics: BSE_basic
-    varfile: varbse
+    varset: varbse
     vartype: integer
 - !variable
     abivarname: bs_interp_prep
@@ -2059,7 +2059,7 @@
         It generates the decomposition of BSR in a,b,c coefficients used for the interpolation.
         </p>
     topics: BSE_useful
-    varfile: varbse
+    varset: varbse
     vartype: integer
 - !variable
     abivarname: bs_interp_rl_nb
@@ -2077,7 +2077,7 @@
     text: |-
         Gives the index of the neighbour that is used for Rohlfing & Louie method
     topics: BSE_useful
-    varfile: varbse
+    varset: varbse
     vartype: integer
 - !variable
     abivarname: bs_loband
@@ -2099,7 +2099,7 @@
         An additional cutoff energy can be applied by means of the bs_eh_window input variable.
         </p>
     topics: BSE_compulsory
-    varfile: varbse
+    varset: varbse
     vartype: integer
 - !variable
     abivarname: bs_nstates
@@ -2121,7 +2121,7 @@
         for a correct description of the optical properties in the frequency range of interest.
         </p>
     topics: BSE_basic
-    varfile: varbse
+    varset: varbse
     vartype: integer
 - !variable
     abivarname: builtintest
@@ -2146,7 +2146,7 @@
         At present, [[builtintest]]=1 ... 7 are allowed. See more information in tests/built-in/README .
         </p>
     topics: otherGS_expert
-    varfile: vardev
+    varset: vardev
     vartype: integer
 - !variable
     abivarname: bxctmindg
@@ -2178,7 +2178,7 @@
         required level of accuracy.
         </p>
     topics: PAW_expert
-    varfile: varpaw
+    varset: varpaw
     vartype: real
 - !variable
     abivarname: cd_customnimfrqs
@@ -2198,7 +2198,7 @@
         to the number of frequencies you want. The frequencies are specified with [[cd_imfrqs]].
         </p>
     topics: GW_expert
-    varfile: vargw
+    varset: vargw
     vartype: integer
 - !variable
     abivarname: cd_frqim_method
@@ -2535,7 +2535,7 @@
         merge independent screening calculations over q-points and frequency sections.
         </p>
     topics: GW_expert
-    varfile: vargw
+    varset: vargw
     vartype: integer
 - !variable
     abivarname: cd_full_grid
@@ -2573,7 +2573,7 @@
          utility.
         </p>
     topics: GW_expert
-    varfile: vargw
+    varset: vargw
     vartype: integer
 - !variable
     abivarname: cd_halfway_freq
@@ -2597,7 +2597,7 @@
         linear up to this point. To be used in conjunction with [[gw_frqre_tangrid]].
         </p>
     topics: GW_expert
-    varfile: vargw
+    varset: vargw
     vartype: real
 - !variable
     abivarname: cd_imfrqs
@@ -2643,7 +2643,7 @@
         <p>
         </p>
     topics: GW_expert
-    varfile: vargw
+    varset: vargw
     vartype: real
 - !variable
     abivarname: cd_max_freq
@@ -2667,7 +2667,7 @@
         [[gw_frqre_tangrid]].
         </p>
     topics: GW_expert
-    varfile: vargw
+    varset: vargw
     vartype: real
 - !variable
     abivarname: cd_subset_freq
@@ -2704,7 +2704,7 @@
          utility.
         </p>
     topics: GW_expert
-    varfile: vargw
+    varset: vargw
     vartype: integer
 - !variable
     abivarname: cgtyphf
@@ -2730,7 +2730,7 @@
         exact exchange contribution only for the initial guess (not for the gradient direction) in the conjugate gradient
         </p>
     topics: Hybrids_expert
-    varfile: vardev
+    varset: vardev
     vartype: integer
 - !variable
     abivarname: charge
@@ -2772,7 +2772,7 @@
         per unit cell, set [[charge]]=+1.
         </p>
     topics: GSgeneral_useful
-    varfile: vargs
+    varset: vargs
     vartype: real
 - !variable
     abivarname: chempot
@@ -2801,7 +2801,7 @@
 
         In the present input array, reduced positions, energies and derivatives of energies are mixed. Hence, although the chemical potential is an energy, one cannot use the usual energy definitions (i.e. the chemical potential is always to be input in Hartree atomic units).
     topics: otherGS_expert
-    varfile: vargeo
+    varset: vargeo
     vartype: real
 - !variable
     abivarname: chkexit
@@ -2839,7 +2839,7 @@
          In all cases, the check is performed at most every 2 seconds of CPU time.
         </p>
     topics: otherGS_expert
-    varfile: vargs
+    varset: vargs
     vartype: integer
 - !variable
     abivarname: chkprim
@@ -2868,7 +2868,7 @@
         [[brvltt]]=-1 .
         </p>
     topics: crystal_useful
-    varfile: vargs
+    varset: vargs
     vartype: integer
 - !variable
     abivarname: chksymbreak
@@ -2930,7 +2930,7 @@
         appears as the most symmetric point ; or ignore the problem, and set [[chksymbreak]]=0 .
         </p>
     topics: k-points_basic
-    varfile: vargs
+    varset: vargs
     vartype: integer
 - !variable
     abivarname: chneut
@@ -2947,7 +2947,7 @@
         Set the treatment of the Charge Neutrality requirement for the effective charges.
         Same meaning as the corresponding anaddb variable.
     topics: DFPT_useful
-    varfile: vareph
+    varset: vareph
     vartype: integer
 - !variable
     abivarname: cineb_start
@@ -2974,7 +2974,7 @@
          </i>
         </p>
     topics: TransPath_expert
-    varfile: varrlx
+    varset: varrlx
     vartype: integer
 - !variable
     abivarname: cpuh
@@ -3001,7 +3001,7 @@
         A zero value has no action of the job.
         </p>
     topics: otherGS_job
-    varfile: vargs
+    varset: vargs
     vartype: real
 - !variable
     abivarname: cpum
@@ -3028,7 +3028,7 @@
         A zero value has no action of the job.
         </p>
     topics: otherGS_job
-    varfile: vargs
+    varset: vargs
     vartype: real
 - !variable
     abivarname: cpus
@@ -3055,7 +3055,7 @@
         A zero value has no action of the job.
         </p>
     topics: otherGS_job
-    varfile: vargs
+    varset: vargs
     vartype: real
 - !variable
     abivarname: d3e_pert1_atpol
@@ -3082,7 +3082,7 @@
         See [[rfatpol]] for additional details.
         </p>
     topics: nonlinear_basic
-    varfile: varrf
+    varset: varrf
     vartype: integer
 - !variable
     abivarname: d3e_pert1_dir
@@ -3110,7 +3110,7 @@
         See [[rfdir]] for additional details.
         </p>
     topics: nonlinear_basic
-    varfile: varrf
+    varset: varrf
     vartype: integer
 - !variable
     abivarname: d3e_pert1_elfd
@@ -3132,7 +3132,7 @@
         See [[rfelfd]] for additional details.
         </p>
     topics: nonlinear_basic
-    varfile: varrf
+    varset: varrf
     vartype: integer
 - !variable
     abivarname: d3e_pert1_phon
@@ -3152,7 +3152,7 @@
         See [[rfphon]] for additional details.
         </p>
     topics: nonlinear_basic
-    varfile: varrf
+    varset: varrf
     vartype: integer
 - !variable
     abivarname: d3e_pert2_atpol
@@ -3179,7 +3179,7 @@
         See [[rfatpol]] for additional details.
         </p>
     topics: nonlinear_basic
-    varfile: varrf
+    varset: varrf
     vartype: integer
 - !variable
     abivarname: d3e_pert2_dir
@@ -3207,7 +3207,7 @@
         See [[rfdir]] for additional details.
         </p>
     topics: nonlinear_basic
-    varfile: varrf
+    varset: varrf
     vartype: integer
 - !variable
     abivarname: d3e_pert2_elfd
@@ -3229,7 +3229,7 @@
         See [[rfelfd]] for additional details.
         </p>
     topics: nonlinear_basic
-    varfile: varrf
+    varset: varrf
     vartype: integer
 - !variable
     abivarname: d3e_pert2_phon
@@ -3249,7 +3249,7 @@
         See [[rfphon]] for additional details.
         </p>
     topics: nonlinear_basic
-    varfile: varrf
+    varset: varrf
     vartype: integer
 - !variable
     abivarname: d3e_pert3_atpol
@@ -3276,7 +3276,7 @@
         See [[rfatpol]] for additional details.
         </p>
     topics: nonlinear_basic
-    varfile: varrf
+    varset: varrf
     vartype: integer
 - !variable
     abivarname: d3e_pert3_dir
@@ -3304,7 +3304,7 @@
         See [[rfdir]] for additional details.
         </p>
     topics: nonlinear_basic
-    varfile: varrf
+    varset: varrf
     vartype: integer
 - !variable
     abivarname: d3e_pert3_elfd
@@ -3326,7 +3326,7 @@
         See [[rfelfd]] for additional details.
         </p>
     topics: nonlinear_basic
-    varfile: varrf
+    varset: varrf
     vartype: integer
 - !variable
     abivarname: d3e_pert3_phon
@@ -3346,7 +3346,7 @@
         See [[rfphon]] for additional details.
         </p>
     topics: nonlinear_basic
-    varfile: varrf
+    varset: varrf
     vartype: integer
 - !variable
     abivarname: ddamp
@@ -3374,7 +3374,7 @@
         This parameter is used in finite electric displacement field calculations (berryopt=6,16,17).
         </p>
     topics: Berry_useful
-    varfile: varff
+    varset: varff
     vartype: real
 - !variable
     abivarname: ddb_ngqpt
@@ -3396,7 +3396,7 @@
         It defines the number of divisions in the (homogeneous) q-mesh
         used to generate the DDB file. See also the description of the [[getddb]] input variable.
     topics: ElPhon_compulsory
-    varfile: vareph
+    varset: vareph
     vartype: integer
 - !variable
     abivarname: ddb_shiftq
@@ -3419,7 +3419,7 @@
         which is defined by the [[ddb_ngqpt]] input variable.
         See [[shiftk]] for more information on the definition.
     topics: ElPhon_useful
-    varfile: vareph
+    varset: vareph
     vartype: real
 - !variable
     abivarname: delayperm
@@ -3441,7 +3441,7 @@
         When [[delayperm]] is zero, there is not permutation trials.
         </p>
     topics: MolecularDynamics_expert
-    varfile: varrlx
+    varset: varrlx
     vartype: integer
 - !variable
     abivarname: densfor_pred
@@ -3568,7 +3568,7 @@
          ).
         </p>
     topics: convergency_expert
-    varfile: vardev
+    varset: vardev
     vartype: integer
 - !variable
     abivarname: densty
@@ -3597,7 +3597,7 @@
          No meaning for RF calculations.
         </p>
     topics: xc_expert
-    varfile: vardev
+    varset: vardev
     vartype: real
 - !variable
     abivarname: dfield
@@ -3619,7 +3619,7 @@
         [[dfield]] specifies the (unreduced) finite electric displacement field vector, in atomic units, that is to be imposed as a constraint during the calculation.
         </p>
     topics: Berry_basic
-    varfile: varff
+    varset: varff
     vartype: real
 - !variable
     abivarname: dfpt_sciss
@@ -3652,7 +3652,7 @@
         but NOT for d/dk ([[rfelfd]]=2) and phonon responses.
         </p>
     topics: DFPT_useful
-    varfile: varrf
+    varset: varrf
     vartype: real
 - !variable
     abivarname: diecut
@@ -3698,7 +3698,7 @@
          No meaning for RF calculations yet.
         </p>
     topics: convergency_useful
-    varfile: vargs
+    varset: vargs
     vartype: real
 - !variable
     abivarname: diegap
@@ -3727,7 +3727,7 @@
          No meaning for RF calculations yet.
         </p>
     topics: convergency_useful
-    varfile: vargs
+    varset: vargs
     vartype: real
 - !variable
     abivarname: dielam
@@ -3749,7 +3749,7 @@
          No meaning for RF calculations yet.
         </p>
     topics: convergency_useful
-    varfile: vargs
+    varset: vargs
     vartype: real
 - !variable
     abivarname: dielng
@@ -3810,7 +3810,7 @@
          This works for GS and RF calculations.
         </p>
     topics: convergency_useful
-    varfile: vargs
+    varset: vargs
     vartype: real
 - !variable
     abivarname: diemac
@@ -3865,7 +3865,7 @@
         for small (but non-zero) values of the wavevector.
         </p>
     topics: convergency_useful
-    varfile: vargs
+    varset: vargs
     vartype: real
 - !variable
     abivarname: diemix
@@ -3907,7 +3907,7 @@
         (see [[diemixmag]]).
         </p>
     topics: convergency_useful
-    varfile: vargs
+    varset: vargs
     vartype: real
 - !variable
     abivarname: diemixmag
@@ -3945,7 +3945,7 @@
         (i.e. diemixmag=4, no other preconditionner on magnetization).
         </p>
     topics: spinpolarisation_useful
-    varfile: vargs
+    varset: vargs
     vartype: real
 - !variable
     abivarname: diismemory
@@ -3966,7 +3966,7 @@
         to find zero-force and stress configurations.
         </p>
     topics: MolecularDynamics_expert
-    varfile: varrlx
+    varset: varrlx
     vartype: integer
 - !variable
     abivarname: dilatmx
@@ -4020,7 +4020,7 @@
         a value larger than 1.0 will be a waste.
         </p>
     topics: GeoOpt_basic
-    varfile: varrlx
+    varset: varrlx
     vartype: real
 - !variable
     abivarname: dipdip
@@ -4037,7 +4037,7 @@
         This variable defines the treatment of the dipole-dipole interaction.
         Same meaning as the corresponding anaddb variable
     topics: DFPT_useful
-    varfile: vareph
+    varset: vareph
     vartype: integer
 - !variable
     abivarname: dmatpawu
@@ -4185,7 +4185,7 @@
          <br />
         </p>
     topics: DFT+U_useful
-    varfile: varpaw
+    varset: varpaw
     vartype: real
 - !variable
     abivarname: dmatpuopt
@@ -4226,7 +4226,7 @@
         atomic wavefunction of the correlated subspace is a normalized atomic eigenfunction.
         </p>
     topics: DFT+U_expert
-    varfile: varpaw
+    varset: varpaw
     vartype: integer
 - !variable
     abivarname: dmatudiag
@@ -4261,7 +4261,7 @@
          </ul>
         </p>
     topics: DFT+U_expert
-    varfile: varpaw
+    varset: varpaw
     vartype: integer
 - !variable
     abivarname: dmft_dc
@@ -4281,7 +4281,7 @@
          Value of double counting used for DMFT. Only value 1 is activated for the moment and is the FLL double counting.
         </p>
     topics: DMFT_useful
-    varfile: vardmft
+    varset: vardmft
     vartype: integer
 - !variable
     abivarname: dmft_entropy
@@ -4299,7 +4299,7 @@
         In the current implementation, this is only possible with [[dmft_solv]]=5 (Continuous Time Quantum Monte Carlo).
         See also the input variable [[dmft_nlambda]].
     topics: DMFT_expert
-    varfile: vardmft
+    varset: vardmft
     vartype: integer
 - !variable
     abivarname: dmft_iter
@@ -4319,7 +4319,7 @@
          Number of iterations for the DMFT inner loop.
         </p>
     topics: DMFT_compulsory
-    varfile: vardmft
+    varset: vardmft
     vartype: integer
 - !variable
     abivarname: dmft_mxsf
@@ -4340,7 +4340,7 @@
          Mixing parameter for the simple mixing of the self-energy.
         </p>
     topics: DMFT_useful
-    varfile: vardmft
+    varset: vardmft
     vartype: real
 - !variable
     abivarname: dmft_nlambda
@@ -4358,7 +4358,7 @@
         [[dmft_nlambda]] gives the number of integration points for the thermodynamical integration in case of free energy calculation within DMFT.
         Its value must be greater or equal to 3.
     topics: DMFT_expert
-    varfile: vardmft
+    varset: vardmft
     vartype: integer
 - !variable
     abivarname: dmft_nwli
@@ -4379,7 +4379,7 @@
          Number of Matsubara frequencies (linear  mesh)
         </p>
     topics: DMFT_compulsory
-    varfile: vardmft
+    varset: vardmft
     vartype: integer
 - !variable
     abivarname: dmft_nwlo
@@ -4400,7 +4400,7 @@
          Number of frequencies in the log mesh.
         </p>
     topics: DMFT_compulsory
-    varfile: vardmft
+    varset: vardmft
     vartype: integer
 - !variable
     abivarname: dmft_read_occnd
@@ -4437,7 +4437,7 @@
         or [[prtden]]=-1) and the self-energy (see [[dmft_rslf]]).
         </p>
     topics: DMFT_expert
-    varfile: vardev
+    varset: vardev
     vartype: integer
 - !variable
     abivarname: dmft_rslf
@@ -4456,7 +4456,7 @@
          Flag to read/write Self-Energy. If put to one, self-energy is written and read at each DFT iteration.
         </p>
     topics: DMFT_basic
-    varfile: vardmft
+    varset: vardmft
     vartype: integer
 - !variable
     abivarname: dmft_solv
@@ -4536,7 +4536,7 @@
         [[dmftqmc_therm]]
         </p>
     topics: DMFT_basic
-    varfile: vardmft
+    varset: vardmft
     vartype: real
 - !variable
     abivarname: dmft_t2g
@@ -4556,7 +4556,7 @@
          Can be set to 1 only if in cubic symmetry. It enables one to carry a DFT+DMFT calculations only on t2g orbitals.
         </p>
     topics: DMFT_expert
-    varfile: vardmft
+    varset: vardmft
     vartype: integer
 - !variable
     abivarname: dmft_tolfreq
@@ -4579,7 +4579,7 @@
          Because the Matsubara grid is finite, the two quantities differ. If this difference is larger than dmft_tolfreq, then the code stops and an error message is given.
         </p>
     topics: DMFT_expert
-    varfile: vardmft
+    varset: vardmft
     vartype: real
 - !variable
     abivarname: dmft_tollc
@@ -4603,7 +4603,7 @@
         the DMFT Loop needs a better convergence criterion.
         </p>
     topics: DMFT_useful
-    varfile: vardmft
+    varset: vardmft
     vartype: real
 - !variable
     abivarname: dmftbandf
@@ -4624,7 +4624,7 @@
         (see  Amadon, B., Lechermann, F., Georges, A., Jollet, F., Wehling, T. O., and Lichtenstein, A. I. Phys. Rev. B 77(20), (2008).)
         </p>
     topics: DMFT_compulsory
-    varfile: vardmft
+    varset: vardmft
     vartype: integer
 - !variable
     abivarname: dmftbandi
@@ -4645,7 +4645,7 @@
         (see  Amadon, B., Lechermann, F., Georges, A., Jollet, F., Wehling, T. O., and Lichtenstein, A. I. Phys. Rev. B 77(20), (2008).)
         </p>
     topics: DMFT_compulsory
-    varfile: vardmft
+    varset: vardmft
     vartype: integer
 - !variable
     abivarname: dmftcheck
@@ -4666,7 +4666,7 @@
          (Introduced by B. Amadon, v6.1.0)
         </p>
     topics: DMFT_useful
-    varfile: vardmft
+    varset: vardmft
     vartype: integer
 - !variable
     abivarname: dmftctqmc_basis
@@ -4700,7 +4700,7 @@
          </ul>
         </p>
     topics: DMFT_expert
-    varfile: vardev
+    varset: vardev
     vartype: integer
 - !variable
     abivarname: dmftctqmc_check
@@ -4736,7 +4736,7 @@
          </ul>
         </p>
     topics: DMFT_useful
-    varfile: vardmft
+    varset: vardmft
     vartype: integer
 - !variable
     abivarname: dmftctqmc_correl
@@ -4766,7 +4766,7 @@
          </ul>
         </p>
     topics: DMFT_expert
-    varfile: vardmft
+    varset: vardmft
     vartype: integer
 - !variable
     abivarname: dmftctqmc_gmove
@@ -4789,7 +4789,7 @@
         A value of 5000 means that a global move is tried every 5000 Monte Carlo sweep.
         </p>
     topics: DMFT_useful
-    varfile: vardmft
+    varset: vardmft
     vartype: integer
 - !variable
     abivarname: dmftctqmc_grnns
@@ -4819,7 +4819,7 @@
          </ul>
         </p>
     topics: DMFT_expert
-    varfile: vardmft
+    varset: vardmft
     vartype: integer
 - !variable
     abivarname: dmftctqmc_meas
@@ -4841,7 +4841,7 @@
         Example : 2 means the measure is perform every two sweeps.
         </p>
     topics: DMFT_expert
-    varfile: vardmft
+    varset: vardmft
     vartype: integer
 - !variable
     abivarname: dmftctqmc_mov
@@ -4871,7 +4871,7 @@
          </ul>
         </p>
     topics: DMFT_expert
-    varfile: vardmft
+    varset: vardmft
     vartype: integer
 - !variable
     abivarname: dmftctqmc_mrka
@@ -4901,7 +4901,7 @@
          </ul>
         </p>
     topics: DMFT_expert
-    varfile: vardmft
+    varset: vardmft
     vartype: integer
 - !variable
     abivarname: dmftctqmc_order
@@ -4924,7 +4924,7 @@
         The result is written in the "Perturbation.dat" file.
         </p>
     topics: DMFT_useful
-    varfile: vardmft
+    varset: vardmft
     vartype: integer
 - !variable
     abivarname: dmftctqmc_triqs_nleg
@@ -4948,7 +4948,7 @@
          </a>
         </p>
     topics: DMFT_expert
-    varfile: vardmft
+    varset: vardmft
     vartype: integer
 - !variable
     abivarname: dmftqmc_l
@@ -4969,7 +4969,7 @@
         This value should be carefully chosen according to Niquist frequency and the [[tsmear]] value.
         </p>
     topics: DMFT_compulsory
-    varfile: vardmft
+    varset: vardmft
     vartype: integer
 - !variable
     abivarname: dmftqmc_n
@@ -4990,7 +4990,7 @@
          Number of Monte Carlo sweeps. Should be at least 10^6.
         </p>
     topics: DMFT_compulsory
-    varfile: vardmft
+    varset: vardmft
     vartype: real
 - !variable
     abivarname: dmftqmc_seed
@@ -5014,7 +5014,7 @@
          NOTE : If the CT-QMC ([[dmft_solv]]=5) is used on many CPUs, each CPU initializes its random number generator with dmftqmc_seed+rank where rank is the rank of the cpu in the MPI communicator.
         </p>
     topics: DMFT_useful
-    varfile: vardmft
+    varset: vardmft
     vartype: integer
 - !variable
     abivarname: dmftqmc_therm
@@ -5034,7 +5034,7 @@
          Number of Monte Carlo sweeps for the thermalization
         </p>
     topics: DMFT_compulsory
-    varfile: vardmft
+    varset: vardmft
     vartype: integer
 - !variable
     abivarname: dosdeltae
@@ -5062,7 +5062,7 @@
         tetrahedron method, [[prtdos]]=2, is rapidly varying.
         </p>
     topics: printing_prdos
-    varfile: vargs
+    varset: vargs
     vartype: real
 - !variable
     abivarname: dtion
@@ -5111,7 +5111,7 @@
          No meaning for RF calculations.
         </p>
     topics: PIMD_compulsory, MolecularDynamics_compulsory
-    varfile: varrlx
+    varset: varrlx
     vartype: real
 - !variable
     abivarname: dynimage
@@ -5139,7 +5139,7 @@
          In order to save CPU time, the computation of properties of static images ([[dynimage]](iimage)=0)
         can be avoided: see [[istatimg]] keyword.
     topics: PIMD_expert, TransPath_expert
-    varfile: varrlx
+    varset: varrlx
     vartype: integer
 - !variable
     abivarname: ecut
@@ -5202,7 +5202,7 @@
         smoothing of the kinetic energy, needed to optimize unit cell parameters.
         </p>
     topics: convergency_compulsory
-    varfile: varbas
+    varset: varbas
     vartype: real
 - !variable
     abivarname: ecuteps
@@ -5229,7 +5229,7 @@
         In any case, a convergence study is worth.
         </p>
     topics: GW_compulsory, RandStopPow_compulsory
-    varfile: vargw
+    varset: vargw
     vartype: real
 - !variable
     abivarname: ecutsigx
@@ -5255,7 +5255,7 @@
         upper limits.
         </p>
     topics: GW_compulsory
-    varfile: vargw
+    varset: vargw
     vartype: real
 - !variable
     abivarname: ecutsm
@@ -5354,7 +5354,7 @@
         as soon as [[ecut]] is larger than 4Ha.
         </p>
     topics: convergency_basic
-    varfile: varrlx
+    varset: varrlx
     vartype: real
 - !variable
     abivarname: ecutwfn
@@ -5389,7 +5389,7 @@
          The size of this set of planewaves is [[npwwfn]].
         </p>
     topics: GW_compulsory
-    varfile: vargw
+    varset: vargw
     vartype: real
 - !variable
     abivarname: effmass
@@ -5410,7 +5410,7 @@
         experimental value.
         </p>
     topics: GSgeneral_expert
-    varfile: vardev
+    varset: vardev
     vartype: real
 - !variable
     abivarname: efield
@@ -5462,7 +5462,7 @@
         in meter (0.5291772108e-10).
         </p>
     topics: Berry_basic
-    varfile: varff
+    varset: varff
     vartype: real
 - !variable
     abivarname: efmas
@@ -5500,7 +5500,7 @@
         supported. Also, for both NC and PAW, [[nspden]]/=1 and [[nsppol]]/=1 are NOT supported.
         </p>
     topics: EffMass_compulsory
-    varfile: varrf
+    varset: varrf
     vartype: integer
 - !variable
     abivarname: efmas_bands
@@ -5523,7 +5523,7 @@
         even if they were not part of the user specified range.
         </p>
     topics: EffMass_useful
-    varfile: varrf
+    varset: varrf
     vartype: integer
 - !variable
     abivarname: efmas_calc_dirs
@@ -5557,7 +5557,7 @@
         2 real values per directions are read, whereas 3 real values are read in the two other cases.
         </p>
     topics: EffMass_useful
-    varfile: varrf
+    varset: varrf
     vartype: integer
 - !variable
     abivarname: efmas_deg
@@ -5578,7 +5578,7 @@
         (see <a href="https://doi.org/10.1103/PhysRevB.89.155131">PRB 89 155131 (2014)</a>).
         </p>
     topics: EffMass_useful
-    varfile: varrf
+    varset: varrf
     vartype: integer
 - !variable
     abivarname: efmas_deg_tol
@@ -5599,7 +5599,7 @@
         [[efmas_deg_tol]] has the '[[ENERGY]]' characteristics.
         </p>
     topics: EffMass_useful
-    varfile: varrf
+    varset: varrf
     vartype: real
 - !variable
     abivarname: efmas_dim
@@ -5633,7 +5633,7 @@
         the line immediately after the effective mass.
         </p>
     topics: EffMass_useful
-    varfile: varrf
+    varset: varrf
     vartype: integer
 - !variable
     abivarname: efmas_dirs
@@ -5656,7 +5656,7 @@
         2 real values if [[efmas_calc_dirs]]==3.
         </p>
     topics: EffMass_basic
-    varfile: varrf
+    varset: varrf
     vartype: real
 - !variable
     abivarname: efmas_n_dirs
@@ -5675,7 +5675,7 @@
         Number of directions in [[efmas_dirs]], to be considered according to [[efmas_calc_dirs]].
         </p>
     topics: EffMass_basic
-    varfile: varrf
+    varset: varrf
     vartype: integer
 - !variable
     abivarname: efmas_ntheta
@@ -5698,7 +5698,7 @@
         The default value gives a tensor accurate to the 4th decimal in Ge.
         </p>
     topics: EffMass_basic
-    varfile: varrf
+    varset: varrf
     vartype: integer
 - !variable
     abivarname: einterp
@@ -5749,7 +5749,7 @@
 
         einterp(2:4): Order of B-spline for the three reduced directions. Cubic spline (3) is the recomended value.
     topics: otherGS_expert, GW_expert
-    varfile: varbas
+    varset: varbas
     vartype: real
 - !variable
     abivarname: elph2_imagden
@@ -5784,7 +5784,7 @@
         (1 Ha=27.2113845 eV)
         </p>
     topics: TDep_basic
-    varfile: varrf
+    varset: varrf
     vartype: real
 - !variable
     abivarname: enunit
@@ -5826,7 +5826,7 @@
          </ul>
         </p>
     topics: GSgeneral_useful
-    varfile: vargs
+    varset: vargs
     vartype: integer
 - !variable
     abivarname: eph_extrael
@@ -5841,7 +5841,7 @@
     requires: null
     text: null
     topics: ElPhon_expert
-    varfile: vareph
+    varset: vareph
     vartype: real
 - !variable
     abivarname: eph_fermie
@@ -5861,7 +5861,7 @@
         This variable has effect only if set to a non-zero value.
         See also [[eph_extrael]].
     topics: ElPhon_useful
-    varfile: vareph
+    varset: vareph
     vartype: real
 - !variable
     abivarname: eph_fsewin
@@ -5885,7 +5885,7 @@
         Related input variables: [[eph_intmeth]], [[eph_fsmear]], [[eph_extrael]] and [[eph_fermie]].
         </p>
     topics: ElPhon_useful
-    varfile: vareph
+    varset: vareph
     vartype: real
 - !variable
     abivarname: eph_fsmear
@@ -5903,7 +5903,7 @@
         This variable defines the gaussian broadening used for the
         integration over the Fermi surface when [[eph_intmeth]] == 1.
     topics: ElPhon_useful
-    varfile: vareph
+    varset: vareph
     vartype: real
 - !variable
     abivarname: eph_intmeth
@@ -5925,7 +5925,7 @@
 
         See also [[eph_fsewin]], [[eph_extrael]] and [[eph_fermie]].
     topics: ElPhon_useful
-    varfile: vareph
+    varset: vareph
     vartype: integer
 - !variable
     abivarname: eph_mustar
@@ -5941,7 +5941,7 @@
     text: |-
         Average electron-electron interaction strength, for the computation of the superconducting Tc using Mc-Millan's formula.
     topics: ElPhon_useful
-    varfile: vareph
+    varset: vareph
     vartype: real
 - !variable
     abivarname: eph_ngqpt_fine
@@ -5966,7 +5966,7 @@
         to interpolate the interatomic force constants in q-space.
         If eph_ngqpt_fine is not given, the EPH code uses the list of irreducible q-points reported in the DDB file (default behavior).
     topics: ElPhon_useful
-    varfile: vareph
+    varset: vareph
     vartype: integer
 - !variable
     abivarname: eph_task
@@ -5990,7 +5990,7 @@
          [[eph_task]]=2 : electron-phonon coupling elements
         </p>
     topics: ElPhon_basic
-    varfile: varrf
+    varset: varrf
     vartype: integer
 - !variable
     abivarname: eph_transport
@@ -6009,7 +6009,7 @@
         quantities in the eph module of abinit. Value of 1 corresponds to
         elastic LOVA as in the PRB by Savrasov and Savrasov
     topics: ElPhon_expert
-    varfile: vareph
+    varset: vareph
     vartype: integer
 - !variable
     abivarname: eshift
@@ -6040,7 +6040,7 @@
         (1 Ha=27.2113845 eV)
         </p>
     topics: otherGS_expert
-    varfile: vardev
+    varset: vardev
     vartype: real
 - !variable
     abivarname: esmear
@@ -6072,7 +6072,7 @@
         (1 Ha=27.2113845 eV)
         </p>
     topics: TDep_useful
-    varfile: varrf
+    varset: varrf
     vartype: real
 - !variable
     abivarname: exchmix
@@ -6092,7 +6092,7 @@
         [[useexexch]] is used. The default value of 0.25 corresponds to PBE0.
         </p>
     topics: xc_useful
-    varfile: vardev
+    varset: vardev
     vartype: real
 - !variable
     abivarname: exchn2n3d
@@ -6114,7 +6114,7 @@
         [[exchn2n3d]]=4xx FFT treatment.
         </p>
     topics: convergency_expert
-    varfile: vardev
+    varset: vardev
     vartype: integer
 - !variable
     abivarname: extrapwf
@@ -6139,7 +6139,7 @@
         ABINIT 7.10: this option is <b>under development</b> and might give wrong results.
         </p>
     topics: convergency_expert
-    varfile: vardev
+    varset: vardev
     vartype: integer
 - !variable
     abivarname: f4of2_sla
@@ -6161,7 +6161,7 @@
         dependent screened coulomb interaction.
         </p>
     topics: DFT+U_expert
-    varfile: varpaw
+    varset: varpaw
     vartype: real
 - !variable
     abivarname: f6of2_sla
@@ -6180,7 +6180,7 @@
         It is used with [[f4of2_sla]]==3 in DFT+U or DFT+DMFT for the calculation of the orbital dependent screened coulomb interaction.
         </p>
     topics: DFT+U_expert
-    varfile: varpaw
+    varset: varpaw
     vartype: real
 - !variable
     abivarname: fband
@@ -6230,7 +6230,7 @@
         this, so a fixed default value has been chosen.
         </p>
     topics: GSgeneral_useful
-    varfile: vargs
+    varset: vargs
     vartype: real
 - !variable
     abivarname: fermie_nest
@@ -6248,7 +6248,7 @@
          This input variable is only effective when [[prtnest]]=1. The energy is relative to the calculated fermi energy.
         </p>
     topics: printing_prfermi
-    varfile: vardev
+    varset: vardev
     vartype: real
 - !variable
     abivarname: fftalg
@@ -6342,7 +6342,7 @@
          Internal representation as [[ngfft]](7).
         </p>
     topics: convergency_expert
-    varfile: vardev
+    varset: vardev
     vartype: integer
 - !variable
     abivarname: fftcache
@@ -6364,7 +6364,7 @@
          Internal representation as [[ngfft]](8).
         </p>
     topics: otherGS_expert
-    varfile: vardev
+    varset: vardev
     vartype: integer
 - !variable
     abivarname: fftgw
@@ -6462,7 +6462,7 @@
          The behaviour of ABINIT before v5.5 corresponds to the default value 11.
         </p>
     topics: GW_expert
-    varfile: vargw
+    varset: vargw
     vartype: integer
 - !variable
     abivarname: freqim_alpha
@@ -6509,7 +6509,7 @@
         determined by the average density of the system (this can be set by hand by using the variable [[ppmfrq]]). See the section on grids in the descriptive text for [[cd_frqim_method]] for a detailed description of the formula.
         </p>
     topics: GW_expert
-    varfile: vargw
+    varset: vargw
     vartype: real
 - !variable
     abivarname: freqremax
@@ -6535,7 +6535,7 @@
         define the spacing of the frequency mesh along the real axis.
         </p>
     topics: GW_basic
-    varfile: vargw
+    varset: vargw
     vartype: real
 - !variable
     abivarname: freqremin
@@ -6570,7 +6570,7 @@
         and [[nfreqre]] define the spacing of the frequency mesh along the real axis.
         </p>
     topics: GW_basic
-    varfile: vargw
+    varset: vargw
     vartype: real
 - !variable
     abivarname: freqspmax
@@ -6594,7 +6594,7 @@
         [[gw_freqsp]] can be used to make a user-defined grid.
         </p>
     topics: GW_basic
-    varfile: vargw
+    varset: vargw
     vartype: real
 - !variable
     abivarname: freqspmin
@@ -6619,7 +6619,7 @@
         [[gw_freqsp]] can be used to make a user-defined grid.
         </p>
     topics: GW_basic
-    varfile: vargw
+    varset: vargw
     vartype: real
 - !variable
     abivarname: friction
@@ -6695,7 +6695,7 @@
         Chelikowsky, J. Phys. D : Appl Phys. 33(2000)R33.
         </p>
     topics: MolecularDynamics_useful
-    varfile: varrlx
+    varset: varrlx
     vartype: real
 - !variable
     abivarname: frzfermi
@@ -6718,7 +6718,7 @@
         if set to 1, allows to suppress this contribution, but this is incorrect.
         </p>
     topics: DFPT_expert
-    varfile: varrf
+    varset: varrf
     vartype: integer
 - !variable
     abivarname: fxcartfactor
@@ -6747,7 +6747,7 @@
         stresses.
         </p>
     topics: TransPath_expert, GeoOpt_expert
-    varfile: varrlx
+    varset: varrlx
     vartype: real
 - !variable
     abivarname: ga_algor
@@ -6767,7 +6767,7 @@
         works.
         </p>
     topics: TransPath_expert
-    varfile: varrlx
+    varset: varrlx
     vartype: integer
 - !variable
     abivarname: ga_fitness
@@ -6793,7 +6793,7 @@
          3. F = (1/n_i) / Sum (1/n_i). Where n_i is the position in the ordered list of enthalpies
         </p>
     topics: TransPath_expert
-    varfile: varrlx
+    varset: varrlx
     vartype: integer
 - !variable
     abivarname: ga_n_rules
@@ -6813,7 +6813,7 @@
         [[ga_rules]]
         </p>
     topics: TransPath_expert
-    varfile: varrlx
+    varset: varrlx
     vartype: integer
 - !variable
     abivarname: ga_opt_percent
@@ -6832,7 +6832,7 @@
         to the following iteration.
         </p>
     topics: TransPath_expert
-    varfile: varrlx
+    varset: varrlx
     vartype: real
 - !variable
     abivarname: ga_rules
@@ -6867,7 +6867,7 @@
          <br />
         </p>
     topics: TransPath_expert
-    varfile: varrlx
+    varset: varrlx
     vartype: integer
 - !variable
     abivarname: genafm
@@ -6904,7 +6904,7 @@
         [[tnons]] and [[symafm]]
         </p>
     topics: spinpolarisation_useful
-    varfile: vargeo
+    varset: vargeo
     vartype: real
 - !variable
     abivarname: get1den
@@ -6934,7 +6934,7 @@
          refers to dataset 2 when dataset 4 is initialized.
         </p>
     topics: nonlinear_useful, ElPhon_useful
-    varfile: varfil
+    varset: varfil
     vartype: integer
 - !variable
     abivarname: get1wf
@@ -7049,7 +7049,7 @@
          refers to dataset 2 when dataset 4 is initialized.
         </p>
     topics: multidtset_useful
-    varfile: varfil
+    varset: varfil
     vartype: integer
 - !variable
     abivarname: getbscoup
@@ -7082,7 +7082,7 @@
         a disk file, so that it is as if [[getbscoup]]=0 for that initialisation.
         </p>
     topics: multidtset_useful
-    varfile: varfil
+    varset: varfil
     vartype: integer
 - !variable
     abivarname: getbseig
@@ -7117,7 +7117,7 @@
         a disk file, so that it is as if [[getbseig]]=0 for that initialisation.
         </p>
     topics: multidtset_useful
-    varfile: varfil
+    varset: varfil
     vartype: integer
 - !variable
     abivarname: getbsreso
@@ -7150,7 +7150,7 @@
         a disk file, so that it is as if [[getbsreso]]=0 for that initialisation.
         </p>
     topics: multidtset_useful
-    varfile: varfil
+    varset: varfil
     vartype: integer
 - !variable
     abivarname: getcell
@@ -7193,7 +7193,7 @@
         to using a null get variable).
         </p>
     topics: multidtset_useful
-    varfile: varrlx
+    varset: varrlx
     vartype: integer
 - !variable
     abivarname: getddb
@@ -7245,7 +7245,7 @@
          refers to dataset 2 when dataset 4 is initialized.
         </p>
     topics: ElPhon_useful, TDep_useful
-    varfile: varfil
+    varset: varfil
     vartype: integer
 - !variable
     abivarname: getddk
@@ -7364,7 +7364,7 @@
          refers to dataset 2 when dataset 4 is initialized.
         </p>
     topics: multidtset_useful
-    varfile: varfil
+    varset: varfil
     vartype: integer
 - !variable
     abivarname: getden
@@ -7423,7 +7423,7 @@
          refers to dataset 2 when dataset 4 is initialized.
         </p>
     topics: multidtset_useful
-    varfile: varfil
+    varset: varfil
     vartype: integer
 - !variable
     abivarname: getgam_eig2nkq
@@ -7449,7 +7449,7 @@
         for other wavevectors.
         </p>
     topics: multidtset_useful, TDep_useful
-    varfile: vardev
+    varset: vardev
     vartype: integer
 - !variable
     abivarname: gethaydock
@@ -7480,7 +7480,7 @@
         a disk file, so that it is as if [[gethaydock]]=0 for that initialisation.
         </p>
     topics: multidtset_useful
-    varfile: varfil
+    varset: varfil
     vartype: integer
 - !variable
     abivarname: getocc
@@ -7531,7 +7531,7 @@
          refers to dataset 2 when dataset 4 is initialized.
         </p>
     topics: multidtset_useful
-    varfile: varfil
+    varset: varfil
     vartype: integer
 - !variable
     abivarname: getqps
@@ -7564,7 +7564,7 @@
          refers to dataset 2 when dataset 4 is initialized.
         </p>
     topics: multidtset_useful
-    varfile: varfil
+    varset: varfil
     vartype: integer
 - !variable
     abivarname: getscr
@@ -7614,7 +7614,7 @@
          refers to dataset 2 when dataset 4 is initialized.
         </p>
     topics: multidtset_useful
-    varfile: varfil
+    varset: varfil
     vartype: integer
 - !variable
     abivarname: getsuscep
@@ -7668,7 +7668,7 @@
          refers to dataset 2 when dataset 4 is initialized.
         </p>
     topics: multidtset_useful
-    varfile: varfil
+    varset: varfil
     vartype: integer
 - !variable
     abivarname: getvel
@@ -7739,7 +7739,7 @@
         coordinate system.
         </p>
     topics: multidtset_useful
-    varfile: varrlx
+    varset: varrlx
     vartype: integer
 - !variable
     abivarname: getwfk
@@ -7830,7 +7830,7 @@
          refers to dataset 2 when dataset 4 is initialized.
         </p>
     topics: multidtset_useful
-    varfile: varfil
+    varset: varfil
     vartype: integer
 - !variable
     abivarname: getwfkfine
@@ -7926,7 +7926,7 @@
          This variable is experimental. In development.
         </b>
     topics: multidtset_useful, DFPT_useful, TDep_useful
-    varfile: vardev
+    varset: vardev
     vartype: integer
 - !variable
     abivarname: getwfq
@@ -8041,7 +8041,7 @@
          refers to dataset 2 when dataset 4 is initialized.
         </p>
     topics: multidtset_useful
-    varfile: varfil
+    varset: varfil
     vartype: integer
 - !variable
     abivarname: getxcart
@@ -8107,7 +8107,7 @@
         coordinate system.
         </p>
     topics: multidtset_useful
-    varfile: varrlx
+    varset: varrlx
     vartype: integer
 - !variable
     abivarname: getxred
@@ -8169,7 +8169,7 @@
         coordinate system.
         </p>
     topics: multidtset_useful
-    varfile: varrlx
+    varset: varrlx
     vartype: integer
 - !variable
     abivarname: goprecon
@@ -8201,7 +8201,7 @@
          <br />
         </p>
     topics: GeoOpt_expert
-    varfile: varrlx
+    varset: varrlx
     vartype: integer
 - !variable
     abivarname: goprecprm
@@ -8223,7 +8223,7 @@
          (Note : Under development now (2011.06.06))
         </p>
     topics: GeoOpt_expert
-    varfile: varrlx
+    varset: varrlx
     vartype: real
 - !variable
     abivarname: gpu_devices
@@ -8257,7 +8257,7 @@
         GPU card are numbered starting from 0; to get the GPU devices list, type "nvidia-smi" or "lspci | grep -i nvidia".
         </p>
     topics: parallelism_expert
-    varfile: varpar
+    varset: varpar
     vartype: integer
 - !variable
     abivarname: gpu_linalg_limit
@@ -8288,7 +8288,7 @@
         automatically set to 14 which corresponds to the use of LOBPCG algorithm for the calculation of the eigenstates.
         </p>
     topics: parallelism_expert
-    varfile: varpar
+    varset: varpar
     vartype: integer
 - !variable
     abivarname: gw_customnfreqsp
@@ -8309,7 +8309,7 @@
         you want. The frequencies are specified with [[gw_freqsp]].
         </p>
     topics: GW_expert
-    varfile: vargw
+    varset: vargw
     vartype: integer
 - !variable
     abivarname: gw_freqsp
@@ -8342,7 +8342,7 @@
         [[gw_customnfreqsp]] a warning will be issued.
         </p>
     topics: GW_expert
-    varfile: vargw
+    varset: vargw
     vartype: real
 - !variable
     abivarname: gw_frqim_inzgrid
@@ -8390,7 +8390,7 @@
         the points are distributed so that half of them lie below the plasma frequency.
         </p>
     topics: GW_expert
-    varfile: vargw
+    varset: vargw
     vartype: integer
 - !variable
     abivarname: gw_frqre_inzgrid
@@ -8464,7 +8464,7 @@
         logfile during Contour Deformation sigma calculations.
         </p>
     topics: GW_expert
-    varfile: vargw
+    varset: vargw
     vartype: integer
 - !variable
     abivarname: gw_frqre_tangrid
@@ -8488,7 +8488,7 @@
          which determine the parameters of the transformed grid.
         </p>
     topics: GW_expert
-    varfile: vargw
+    varset: vargw
     vartype: integer
 - !variable
     abivarname: gw_invalid_freq
@@ -8518,7 +8518,7 @@
           </ul>
         </p>
     topics: GW_expert
-    varfile: vargw
+    varset: vargw
     vartype: integer
 - !variable
     abivarname: gw_nqlwl
@@ -8575,7 +8575,7 @@
         directions in q-space (the three basis vectors of the reciprocal lattice and the three Cartesian axis).
         </p>
     topics: GW_expert, BSE_expert
-    varfile: vargw
+    varset: vargw
     vartype: integer
 - !variable
     abivarname: gw_nstep
@@ -8598,7 +8598,7 @@
         used to define the type of self-consistency.
         </p>
     topics: GW_basic
-    varfile: vargw
+    varset: vargw
     vartype: integer
 - !variable
     abivarname: gw_qlwl
@@ -8627,7 +8627,7 @@
         <p>
         </p>
     topics: GW_expert
-    varfile: vargw
+    varset: vargw
     vartype: real
 - !variable
     abivarname: gw_qprange
@@ -8679,7 +8679,7 @@
         to provide the three variables [[nkptgw]], [[kptgw]], and [[bdgw]].
         </p>
     topics: GW_useful
-    varfile: vargw
+    varset: vargw
     vartype: integer
 - !variable
     abivarname: gw_sctype
@@ -8729,7 +8729,7 @@
         the Green functions to be used in the first self-consistent iteration.
         </p>
     topics: GW_basic
-    varfile: vargw
+    varset: vargw
     vartype: integer
 - !variable
     abivarname: gw_sigxcore
@@ -8774,7 +8774,7 @@
         <p>
         </p>
     topics: GW_expert
-    varfile: vargw
+    varset: vargw
     vartype: integer
 - !variable
     abivarname: gw_toldfeig
@@ -8803,7 +8803,7 @@
          <br />
         </p>
     topics: GW_basic
-    varfile: vargw
+    varset: vargw
     vartype: real
 - !variable
     abivarname: gwcalctyp
@@ -8903,7 +8903,7 @@
          </ul>
         </p>
     topics: GW_basic
-    varfile: vargw
+    varset: vargw
     vartype: integer
 - !variable
     abivarname: gwcomp
@@ -8927,7 +8927,7 @@
         See F. Bruneval, X. Gonze, Phys. Rev. B 78, 085125 (2008) for a description of the methodology.
         </p>
     topics: GW_useful
-    varfile: vargw
+    varset: vargw
     vartype: integer
 - !variable
     abivarname: gwencomp
@@ -8950,7 +8950,7 @@
          See F. Bruneval, X. Gonze, Phys. Rev. B 78, 085125 (2008) for a description of the methodology.
         </p>
     topics: GW_useful
-    varfile: vargw
+    varset: vargw
     vartype: real
 - !variable
     abivarname: gwfockmix
@@ -8967,7 +8967,7 @@
     text: |-
         Mixing parameter of Fock exchange for PBE0 and HSE hybrid-functional calculations via the GW self-energy subroutine. [[gwfockmix]] ranges from 0 (essentially PBE) to 1.
     topics: GW_useful
-    varfile: vargw
+    varset: vargw
     vartype: real
 - !variable
     abivarname: gwgamma
@@ -8998,7 +8998,7 @@
         </p>
         </p>
     topics: GW_expert
-    varfile: vargw
+    varset: vargw
     vartype: integer
 - !variable
     abivarname: gwls_band_index
@@ -9018,7 +9018,7 @@
         That is, it is the state to be corrected in the G0W0 scheme.
         </p>
     topics: GWls_expert
-    varfile: vargw
+    varset: vargw
     vartype: integer
 - !variable
     abivarname: gwls_correlation
@@ -9050,7 +9050,7 @@
         Option 1, 2 and 5 are deprecated and will be removed.
         </p>
     topics: GWls_expert
-    varfile: vargw
+    varset: vargw
     vartype: integer
 - !variable
     abivarname: gwls_dielectric_model
@@ -9067,7 +9067,7 @@
     text: |-
         Not used yet.
     topics: GWls_expert
-    varfile: vargw
+    varset: vargw
     vartype: integer
 - !variable
     abivarname: gwls_exchange
@@ -9086,7 +9086,7 @@
         Governs whether the exact exchange for the state to be corrected ([[gwls_band_index]]) is calculated ([[gwls_exchange]]==1) or not ([[gwls_exchange]]==0).
         </p>
     topics: GWls_expert
-    varfile: vargw
+    varset: vargw
     vartype: integer
 - !variable
     abivarname: gwls_first_seed
@@ -9112,7 +9112,7 @@
         Users should therefore keep the default value.
         </p>
     topics: GWls_expert
-    varfile: vargw
+    varset: vargw
     vartype: integer
 - !variable
     abivarname: gwls_kmax_analytic
@@ -9132,7 +9132,7 @@
         The default value is converged to a few 10s of meV for all molecules studied so far.
         </p>
     topics: GWls_expert
-    varfile: vargw
+    varset: vargw
     vartype: integer
 - !variable
     abivarname: gwls_kmax_complement
@@ -9158,7 +9158,7 @@
         For more information on the exact role of these bases and on the model dielectric operator used, see section V of  Phys. Rev. B 91, 125120 (2015).
         </p>
     topics: GWls_expert
-    varfile: vargw
+    varset: vargw
     vartype: integer
 - !variable
     abivarname: gwls_kmax_numeric
@@ -9178,7 +9178,7 @@
         The default value is converged to a few 10s of meV for all molecules studied so far.
         </p>
     topics: GWls_expert
-    varfile: vargw
+    varset: vargw
     vartype: integer
 - !variable
     abivarname: gwls_kmax_poles
@@ -9204,7 +9204,7 @@
         For more information on the Lanczos basis constructed for the calculation of the residues, see section IV of Phys. Rev. B 91, 125120 (2015).
         </p>
     topics: GWls_expert
-    varfile: vargw
+    varset: vargw
     vartype: integer
 - !variable
     abivarname: gwls_list_proj_freq
@@ -9224,7 +9224,7 @@
         See section VI of Phys. Rev. B 91, 125120 (2015).
         For most cases, since the frequencies \Infty and (if [[gwls_recycle]]>0) 0.0 are used at no computational cost, [[gwls_n_proj_freq]]==0 (which means no ADDITIONAL frequency is to be used) is fine and no frequencies need to be picked up.
     topics: GWls_expert
-    varfile: vargw
+    varset: vargw
     vartype: real
 - !variable
     abivarname: gwls_model_parameter
@@ -9253,7 +9253,7 @@
         Typically, the default ([[gwls_model_parameter]]==1.0) is optimal.
         </p>
     topics: GWls_expert
-    varfile: vargw
+    varset: vargw
     vartype: real
 - !variable
     abivarname: gwls_n_proj_freq
@@ -9272,7 +9272,7 @@
         See section VI of  Phys. Rev. B 91, 125120 (2015).
         For most cases, the default ([[gwls_n_proj_freq]]==0) is fine.
     topics: GWls_expert
-    varfile: vargw
+    varset: vargw
     vartype: integer
 - !variable
     abivarname: gwls_npt_gauss_quad
@@ -9291,7 +9291,7 @@
         (see eq. (12) of  Phys. Rev. B 91, 125120 (2015)).
         The default is fine for most cases.
     topics: GWls_expert
-    varfile: vargw
+    varset: vargw
     vartype: integer
 - !variable
     abivarname: gwls_nseeds
@@ -9310,7 +9310,7 @@
         See section IV of  Phys. Rev. B 91, 125120 (2015).
         Only [[gwls_nseeds]]==1 has been tested for now and users should keep this value.
     topics: GWls_expert
-    varfile: vargw
+    varset: vargw
     vartype: integer
 - !variable
     abivarname: gwls_print_debug
@@ -9327,7 +9327,7 @@
     text: |-
         Influences the level of verbosity for debugging purposes in a GWLS calculation. Users should keep its value at the default.
     topics: GWls_expert
-    varfile: vargw
+    varset: vargw
     vartype: integer
 - !variable
     abivarname: gwls_recycle
@@ -9360,7 +9360,7 @@
         It is particularly efficient to choose the path of the file to be on disk space local to the processor in large MPI calculations, since each processor need only his own solutions in the construction of the basis.
         </p>
     topics: GWls_expert
-    varfile: vargw
+    varset: vargw
     vartype: integer
 - !variable
     abivarname: gwls_second_model_parameter
@@ -9378,7 +9378,7 @@
     text: |-
         Not used yet.
     topics: GWls_expert
-    varfile: vargw
+    varset: vargw
     vartype: real
 - !variable
     abivarname: gwls_sternheimer_kmax
@@ -9396,7 +9396,7 @@
         This variable sets the dimension of the dielectric matrix used in a GWLS calculation (see section IV of  Phys. Rev. B 91, 125120 (2015)).
         Typically converged at a value of a few hundreds to a few thousands for a convergence criterion of 50meV on the  eigenenergies.
     topics: GWls_expert
-    varfile: vargw
+    varset: vargw
     vartype: integer
 - !variable
     abivarname: gwmem
@@ -9435,7 +9435,7 @@
         <p>
         </p>
     topics: GW_expert
-    varfile: vargw
+    varset: vargw
     vartype: integer
 - !variable
     abivarname: gwpara
@@ -9472,7 +9472,7 @@
         irrespectively of the number of CPUs used.
         </p>
     topics: parallelism_useful, GW_basic
-    varfile: varpar
+    varset: varpar
     vartype: integer
 - !variable
     abivarname: gwrpacorr
@@ -9516,7 +9516,7 @@
         <p>
         </p>
     topics: GW_expert
-    varfile: vargw
+    varset: vargw
     vartype: integer
 - !variable
     abivarname: iatcon
@@ -9546,7 +9546,7 @@
         latter - this should be described)
         </p>
     topics: PIMD_useful, MolecularDynamics_useful, GeoOpt_useful
-    varfile: varrlx
+    varset: varrlx
     vartype: integer
 - !variable
     abivarname: iatfix
@@ -9612,7 +9612,7 @@
         of this geometry builder (see [[objarf]]).
         </p>
     topics: MolecularDynamics_useful, GeoOpt_useful
-    varfile: varrlx
+    varset: varrlx
     vartype: integer
 - !variable
     abivarname: iatfixx
@@ -9639,7 +9639,7 @@
         See the variable [[iatfix]] for more information.
         </p>
     topics: MolecularDynamics_useful, GeoOpt_useful
-    varfile: varrlx
+    varset: varrlx
     vartype: integer
 - !variable
     abivarname: iatfixy
@@ -9666,7 +9666,7 @@
         See the variable [[iatfix]] for more information.
         </p>
     topics: MolecularDynamics_useful, GeoOpt_useful
-    varfile: varrlx
+    varset: varrlx
     vartype: integer
 - !variable
     abivarname: iatfixz
@@ -9693,7 +9693,7 @@
         See the variable [[iatfix]] for more information.
         </p>
     topics: MolecularDynamics_useful, GeoOpt_useful
-    varfile: varrlx
+    varset: varrlx
     vartype: integer
 - !variable
     abivarname: iatsph
@@ -9719,7 +9719,7 @@
          If [[pawfatbnd]]=1 or 2, it gives the number of the [[natsph]] atoms around which atom-projected band structure will be built.
         </p>
     topics: printing_prdos
-    varfile: vargs
+    varset: vargs
     vartype: integer
 - !variable
     abivarname: iboxcut
@@ -9748,7 +9748,7 @@
          </ul>
         </p>
     topics: convergency_expert
-    varfile: varpaw
+    varset: varpaw
     vartype: integer
 - !variable
     abivarname: icoulomb
@@ -9774,7 +9774,7 @@
          </li>
         </ul>
     topics: convergency_expert
-    varfile: vargs
+    varset: vargs
     vartype: integer
 - !variable
     abivarname: icutcoul
@@ -9841,7 +9841,7 @@
         which is automatically calculated so that the volume enclosed in the sphere is equal to the volume of the solid.
         </p>
     topics: GWls_compulsory, GW_basic
-    varfile: vargw
+    varset: vargw
     vartype: integer
 - !variable
     abivarname: ieig2rf
@@ -9881,7 +9881,7 @@
          Related variables : [[bdeigrf]],[[elph2_imagden]],[[getgam_eig2nkq]],[[smdelta]]
         </p>
     topics: TDep_compulsory
-    varfile: varrf
+    varset: varrf
     vartype: integer
 - !variable
     abivarname: imgmov
@@ -9964,7 +9964,7 @@
           No meaning for RF calculations.
         </p>
     topics: PIMD_compulsory, TransPath_compulsory
-    varfile: varrlx
+    varset: varrlx
     vartype: integer
 - !variable
     abivarname: inclvkb
@@ -9995,7 +9995,7 @@
         The use of [[inclvkb]]=2 is strongly recommended for the calculation of optical properties.
         </p>
     topics: GW_expert
-    varfile: vargw
+    varset: vargw
     vartype: integer
 - !variable
     abivarname: intxc
@@ -10037,7 +10037,7 @@
         do not follow this historical choice for your production runs.
         </p>
     topics: xc_expert
-    varfile: vardev
+    varset: vardev
     vartype: integer
 - !variable
     abivarname: iomode
@@ -10124,7 +10124,7 @@
          </ul>
         </p>
     topics: parallelism_expert
-    varfile: vardev
+    varset: vardev
     vartype: integer
 - !variable
     abivarname: ionmov
@@ -10387,7 +10387,7 @@
          No meaning for RF calculations.
         </p>
     topics: MolecularDynamics_compulsory, GeoOpt_compulsory
-    varfile: varrlx
+    varset: varrlx
     vartype: integer
 - !variable
     abivarname: iprcel
@@ -10502,7 +10502,7 @@
          </ul>
         </p>
     topics: convergency_useful
-    varfile: vargs
+    varset: vargs
     vartype: integer
 - !variable
     abivarname: iprcfc
@@ -10547,7 +10547,7 @@
          No meaning for RF calculations.
         </p>
     topics: convergency_expert
-    varfile: vardev
+    varset: vardev
     vartype: integer
 - !variable
     abivarname: iqpt
@@ -10591,7 +10591,7 @@
          ).
         </p>
     topics: DFPT_useful
-    varfile: vargs
+    varset: vargs
     vartype: integer
 - !variable
     abivarname: irandom
@@ -10629,7 +10629,7 @@
          [[irandom]]=3 is strongly advised when performing Molecular Dynamics restarts (avoids bias).
         </p>
     topics: PIMD_expert
-    varfile: vardev
+    varset: vardev
     vartype: integer
 - !variable
     abivarname: ird1den
@@ -10668,7 +10668,7 @@
          <br />
         </p>
     topics: nonlinear_useful
-    varfile: varfil
+    varset: varfil
     vartype: integer
 - !variable
     abivarname: ird1wf
@@ -10821,7 +10821,7 @@
          </ul>
         </p>
     topics: DFPT_useful
-    varfile: varfil
+    varset: varfil
     vartype: integer
 - !variable
     abivarname: irdbscoup
@@ -10839,7 +10839,7 @@
          Start the Bethe-Salpeter calculation from the BSC file containing the coupling block produced in a previous run.
         </p>
     topics: BSE_useful
-    varfile: varfil
+    varset: varfil
     vartype: integer
 - !variable
     abivarname: irdbseig
@@ -10857,7 +10857,7 @@
          Start the Bethe-Salpeter calculation from the BS_EIG contining the exciton eigenvectors produced in a previous run.
         </p>
     topics: BSE_useful
-    varfile: varfil
+    varset: varfil
     vartype: integer
 - !variable
     abivarname: irdbsreso
@@ -10875,7 +10875,7 @@
          Start the Bethe-Salpeter calculation from the BSR file containing the resonat block produced in a previous run.
         </p>
     topics: BSE_useful
-    varfile: varfil
+    varset: varfil
     vartype: integer
 - !variable
     abivarname: irdddb
@@ -10919,7 +10919,7 @@
          <br />
         </p>
     topics: ElPhon_useful
-    varfile: varfil
+    varset: varfil
     vartype: integer
 - !variable
     abivarname: irdddk
@@ -11073,7 +11073,7 @@
          </ul>
         </p>
     topics: DFPT_useful
-    varfile: varfil
+    varset: varfil
     vartype: integer
 - !variable
     abivarname: irdden
@@ -11105,7 +11105,7 @@
          <br />
         </p>
     topics: GSgeneral_useful
-    varfile: varfil
+    varset: varfil
     vartype: integer
 - !variable
     abivarname: irdhaydock
@@ -11123,7 +11123,7 @@
          Used to re-start the Haydock iterative technique from the HAYDR_SAVE file produced in a previous run.
         </p>
     topics: BSE_useful
-    varfile: varfil
+    varset: varfil
     vartype: integer
 - !variable
     abivarname: irdqps
@@ -11145,7 +11145,7 @@
         See also [[getqps]]
         </p>
     topics: GW_useful
-    varfile: varfil
+    varset: varfil
     vartype: integer
 - !variable
     abivarname: irdscr
@@ -11180,7 +11180,7 @@
          of the [[help_abinit]].
         </p>
     topics: GW_useful
-    varfile: varfil
+    varset: varfil
     vartype: integer
 - !variable
     abivarname: irdsuscep
@@ -11215,7 +11215,7 @@
          of the [[help_abinit]].
         </p>
     topics: GW_useful
-    varfile: varfil
+    varset: varfil
     vartype: integer
 - !variable
     abivarname: irdvdw
@@ -11243,7 +11243,7 @@
          </li>
         </ul>
     topics: vdw_useful
-    varfile: varvdw
+    varset: varvdw
     vartype: integer
 - !variable
     abivarname: irdwfk
@@ -11378,7 +11378,7 @@
          </ul>
         </p>
     topics: GSgeneral_useful
-    varfile: varfil
+    varset: varfil
     vartype: integer
 - !variable
     abivarname: irdwfkfine
@@ -11456,7 +11456,7 @@
          This variable is experimental. In development.
         </b>
     topics: GSgeneral_useful, TDep_useful
-    varfile: vardev
+    varset: vardev
     vartype: integer
 - !variable
     abivarname: irdwfq
@@ -11610,7 +11610,7 @@
          </ul>
         </p>
     topics: DFPT_useful
-    varfile: varfil
+    varset: varfil
     vartype: integer
 - !variable
     abivarname: iscf
@@ -11787,7 +11787,7 @@
          </ul>
         </p>
     topics: convergency_useful, TDDFT_compulsory
-    varfile: varbas
+    varset: varbas
     vartype: integer
 - !variable
     abivarname: isecur
@@ -11825,7 +11825,7 @@
          No meaning for RF calculations yet.
         </p>
     topics: convergency_expert
-    varfile: vardev
+    varset: vardev
     vartype: integer
 - !variable
     abivarname: istatimg
@@ -11852,7 +11852,7 @@
          If [[istatimg]]=1, the total energy of static images is computed.
         </p>
     topics: PIMD_expert
-    varfile: varrlx
+    varset: varrlx
     vartype: integer
 - !variable
     abivarname: istatr
@@ -11880,7 +11880,7 @@
         When '[[istatr]]'=0, there is no writing of a status file (which is the default).
         </p>
     topics: otherGS_expert
-    varfile: vardev
+    varset: vardev
     vartype: integer
 - !variable
     abivarname: istatshft
@@ -11914,7 +11914,7 @@
         and the 10th call.
         </p>
     topics: otherGS_expert
-    varfile: vardev
+    varset: vardev
     vartype: integer
 - !variable
     abivarname: istwfk
@@ -11995,7 +11995,7 @@
          </ul>
         </p>
     topics: k-points_useful
-    varfile: vardev
+    varset: vardev
     vartype: integer
 - !variable
     abivarname: ixc
@@ -13009,7 +13009,7 @@
          </ul>
         </p>
     topics: xc_basic, Hybrids_compulsory
-    varfile: varbas
+    varset: varbas
     vartype: integer
 - !variable
     abivarname: ixcpositron
@@ -13129,7 +13129,7 @@
          </ul>
         </p>
     topics: positron_basic
-    varfile: vargs
+    varset: vargs
     vartype: integer
 - !variable
     abivarname: jdtset
@@ -13180,7 +13180,7 @@
         be used.
         </p>
     topics: multidtset_basic
-    varfile: varbas
+    varset: varbas
     vartype: integer
 - !variable
     abivarname: jellslab
@@ -13214,7 +13214,7 @@
         the input variables [[slabzbeg]] and [[slabzend]].
         </p>
     topics: otherGS_slab
-    varfile: vargs
+    varset: vargs
     vartype: integer
 - !variable
     abivarname: jfielddir
@@ -13254,7 +13254,7 @@
         from the final results you will have d_1,d_2, these are good guesses for b, c.
         </p>
     topics: Berry_basic
-    varfile: varff
+    varset: varff
     vartype: integer
 - !variable
     abivarname: jpawu
@@ -13281,7 +13281,7 @@
         the value is not used.
         </p>
     topics: DFT+U_compulsory
-    varfile: varpaw
+    varset: varpaw
     vartype: real
 - !variable
     abivarname: kberry
@@ -13335,7 +13335,7 @@
         the [[kptopt]]=3 computation.
         </p>
     topics: Berry_basic
-    varfile: varff
+    varset: varff
     vartype: integer
 - !variable
     abivarname: kpt
@@ -13402,7 +13402,7 @@
          Not read if [[kptopt]]/=0 .
         </p>
     topics: k-points_useful
-    varfile: varbas
+    varset: varbas
     vartype: real
 - !variable
     abivarname: kptbounds
@@ -13669,7 +13669,7 @@
         <p>
         </p>
     topics: k-points_expert
-    varfile: vargs
+    varset: vargs
     vartype: real
 - !variable
     abivarname: kptgw
@@ -13701,7 +13701,7 @@
          ) than the GS one, but WITHOUT any shift, are allowed.
         </p>
     topics: GW_basic
-    varfile: vargw
+    varset: vargw
     vartype: real
 - !variable
     abivarname: kptnrm
@@ -13731,7 +13731,7 @@
          It cannot be smaller than 1.0d0
         </p>
     topics: k-points_useful
-    varfile: varbas
+    varset: varbas
     vartype: real
 - !variable
     abivarname: kptns
@@ -13773,7 +13773,7 @@
         by [[qptn]](1:3).
         </p>
     topics: k-points_internal
-    varfile: varint
+    varset: varint
     vartype: real
 - !variable
     abivarname: kptopt
@@ -13879,7 +13879,7 @@
         you to select the optimal grid.
         </p>
     topics: k-points_basic
-    varfile: varbas
+    varset: varbas
     vartype: integer
 - !variable
     abivarname: kptrlatt
@@ -13922,7 +13922,7 @@
         procedure.
         </p>
     topics: k-points_useful
-    varfile: vargs
+    varset: vargs
     vartype: integer
 - !variable
     abivarname: kptrlen
@@ -13989,7 +13989,7 @@
         For a cluster, this procedure will only generate the Gamma point.
         </p>
     topics: k-points_useful
-    varfile: vargs
+    varset: vargs
     vartype: real
 - !variable
     abivarname: kssform
@@ -14031,7 +14031,7 @@
         must be 1 for all the k-points.
         </p>
     topics: GW_expert
-    varfile: varfil
+    varset: varfil
     vartype: integer
 - !variable
     abivarname: lexexch
@@ -14051,7 +14051,7 @@
         on which to apply the exact exchange correction.
         </p>
     topics: xc_useful
-    varfile: varpaw
+    varset: varpaw
     vartype: integer
 - !variable
     abivarname: localrdwf
@@ -14092,7 +14092,7 @@
         master node if [[localrdwf]]=0.
         </p>
     topics: parallelism_expert
-    varfile: varpar
+    varset: varpar
     vartype: integer
 - !variable
     abivarname: lotf_classic
@@ -14113,7 +14113,7 @@
          For the moment it is imposed to be 5.
         </p>
     topics: otherGS_lotf
-    varfile: vardev
+    varset: vardev
     vartype: integer
 - !variable
     abivarname: lotf_nitex
@@ -14132,7 +14132,7 @@
          Set the number of Molecular Dynamics iterations which are computed by LOTF.
         </p>
     topics: otherGS_lotf
-    varfile: vardev
+    varset: vardev
     vartype: integer
 - !variable
     abivarname: lotf_nneigx
@@ -14153,7 +14153,7 @@
          For the moment it is imposed to be 40.
         </p>
     topics: otherGS_lotf
-    varfile: vardev
+    varset: vardev
     vartype: integer
 - !variable
     abivarname: lotf_version
@@ -14174,7 +14174,7 @@
          For the moment it is imposed to be 2.
         </p>
     topics: otherGS_lotf
-    varfile: vardev
+    varset: vardev
     vartype: integer
 - !variable
     abivarname: lpawu
@@ -14207,7 +14207,7 @@
          </ul>
         </p>
     topics: DFT+U_compulsory
-    varfile: varpaw
+    varset: varpaw
     vartype: integer
 - !variable
     abivarname: macro_uj
@@ -14247,7 +14247,7 @@
          Determination of U and J can be done only if the symmetry of the atomic arrangement is reduced and the atom pawujat is not connected to any other atom by symmetry relations (either input reduced symmetries manually, define concerned atom as a separate atomic species or shift concerned atom from ideal position).
         </p>
     topics: DFT+U_expert
-    varfile: vardev
+    varset: vardev
     vartype: integer
 - !variable
     abivarname: magcon_lambda
@@ -14265,7 +14265,7 @@
          This variable gives the amplitude of the constraint imposed on the magnetization vectors on each atom (turned on with flag variable [[magconon]]). Typical values for lambda are 10 to a few hundred. The energy will vary strongly and convergence will be difficult if lambda is too large. The constraint will be weak and the magnetization will not be close to [[spinat]] if lambda is too small. See variable [[magconon]] for more details.
         </p>
     topics: spinpolarisation_useful
-    varfile: vargs
+    varset: vargs
     vartype: real
 - !variable
     abivarname: magconon
@@ -14283,7 +14283,7 @@
          Turns on the imposition of a Lagrangian constraint on the magnetization. For each atom, the magnetization is calculated in a sphere (radius [[ratsph]]) and a constraint is applied to bring it closer to the input values of [[spinat]]. The constraint can be either on the direction only (magconon 1) or on the full vector (magconon 2). The Lagrangian constraint has an amplitude [[magcon_lambda]] which should be neither too big (bad or impossible convergence) nor too small (no effect).
         </p>
     topics: spinpolarisation_useful
-    varfile: vargs
+    varset: vargs
     vartype: integer
 - !variable
     abivarname: max_ncpus
@@ -14304,7 +14304,7 @@
         After having printed out the efficiency, the code stops.
         </p>
     topics: parallelism_useful
-    varfile: varpar
+    varset: varpar
     vartype: integer
 - !variable
     abivarname: maxestep
@@ -14324,7 +14324,7 @@
         This variable is used in finite electric displacement field calculations ([[berryopt]]=6,16,17).
         </p>
     topics: Berry_useful
-    varfile: varff
+    varset: varff
     vartype: real
 - !variable
     abivarname: maxnsym
@@ -14345,7 +14345,7 @@
          The default value is sufficient for most applications; it has to be increase in the case of the use of a supercell (unit cell identically repeated).
         </p>
     topics: crystal_expert
-    varfile: vardev
+    varset: vardev
     vartype: integer
 - !variable
     abivarname: mband
@@ -14367,7 +14367,7 @@
         [[nband]](1:nkpt*nsppol).
         </p>
     topics: GSgeneral_internal
-    varfile: varint
+    varset: varint
     vartype: integer
 - !variable
     abivarname: mbpt_sciss
@@ -14388,7 +14388,7 @@
         In some cases, it mimics a second iteration self-consistent [[GW]] calculation.
         </p>
     topics: GW_useful
-    varfile: vargw
+    varset: vargw
     vartype: real
 - !variable
     abivarname: mdf_epsinf
@@ -14411,7 +14411,7 @@
          <br />
         </p>
     topics: BSE_useful
-    varfile: vargw
+    varset: vargw
     vartype: real
 - !variable
     abivarname: mdtemp
@@ -14446,7 +14446,7 @@
         [[ntime]] timesteps.
         </p>
     topics: PIMD_compulsory, MolecularDynamics_compulsory
-    varfile: varrlx
+    varset: varrlx
     vartype: real
 - !variable
     abivarname: mdwall
@@ -14476,7 +14476,7 @@
         characteristics.
         </p>
     topics: MolecularDynamics_expert
-    varfile: varrlx
+    varset: varrlx
     vartype: real
 - !variable
     abivarname: mem_test
@@ -14509,7 +14509,7 @@
          </ul>
         </p>
     topics: otherGS_expert
-    varfile: vardev
+    varset: vardev
     vartype: integer
 - !variable
     abivarname: mep_mxstep
@@ -14547,7 +14547,7 @@
         the atoms in the cell.
         </p>
     topics: TransPath_useful
-    varfile: varrlx
+    varset: varrlx
     vartype: real
 - !variable
     abivarname: mep_solver
@@ -14656,7 +14656,7 @@
          All of the optimizers can be constrained with a maximum allowed step size for each image; see [[mep_mxstep]]. This is by default the case of the Nudged Elastic Band ([[imgmov]]=5).
         </p>
     topics: TransPath_basic
-    varfile: varrlx
+    varset: varrlx
     vartype: integer
 - !variable
     abivarname: mgfft
@@ -14676,7 +14676,7 @@
         [[ngfft]](1:3).
         </p>
     topics: convergency_internal
-    varfile: varint
+    varset: varint
     vartype: integer
 - !variable
     abivarname: mgfftdg
@@ -14696,7 +14696,7 @@
         [[ngfftdg]](1:3).
         </p>
     topics: convergency_internal
-    varfile: varint
+    varset: varint
     vartype: integer
 - !variable
     abivarname: mixalch
@@ -14782,7 +14782,7 @@
         identical.
         </p>
     topics: otherGS_alch
-    varfile: vargs
+    varset: vargs
     vartype: real
 - !variable
     abivarname: mpw
@@ -14807,7 +14807,7 @@
         [[angdeg]].
         </p>
     topics: convergency_internal
-    varfile: varint
+    varset: varint
     vartype: integer
 - !variable
     abivarname: mqgrid
@@ -14828,7 +14828,7 @@
         potentials, or projector functions.
         </p>
     topics: convergency_expert
-    varfile: vardev
+    varset: vardev
     vartype: integer
 - !variable
     abivarname: mqgriddg
@@ -14849,7 +14849,7 @@
         See also [[mqgrid]]
         </p>
     topics: PAW_expert
-    varfile: varpaw
+    varset: varpaw
     vartype: integer
 - !variable
     abivarname: natcon
@@ -14876,7 +14876,7 @@
         and [[wtatcon]]).
         </p>
     topics: PIMD_useful, MolecularDynamics_useful, GeoOpt_useful
-    varfile: varrlx
+    varset: varrlx
     vartype: integer
 - !variable
     abivarname: natfix
@@ -14906,7 +14906,7 @@
          .
         </p>
     topics: MolecularDynamics_useful, GeoOpt_useful
-    varfile: varrlx
+    varset: varrlx
     vartype: integer
 - !variable
     abivarname: natfixx
@@ -14931,7 +14931,7 @@
         in array [[iatfixx]].
         </p>
     topics: MolecularDynamics_useful, GeoOpt_useful
-    varfile: varrlx
+    varset: varrlx
     vartype: integer
 - !variable
     abivarname: natfixy
@@ -14955,7 +14955,7 @@
          When [[natfixy]] &gt; 0, [[natfixy]] entries should be provided in array [[iatfixy]]
         </p>
     topics: MolecularDynamics_useful, GeoOpt_useful
-    varfile: varrlx
+    varset: varrlx
     vartype: integer
 - !variable
     abivarname: natfixz
@@ -14979,7 +14979,7 @@
          When [[natfixz]] &gt; 0, [[natfixz]] entries should be provided in array [[iatfixz]].
         </p>
     topics: MolecularDynamics_useful, GeoOpt_useful
-    varfile: varrlx
+    varset: varrlx
     vartype: integer
 - !variable
     abivarname: natom
@@ -15005,7 +15005,7 @@
         symmetriser, see the input variable [[natrd]].
         </p>
     topics: GSgeneral_basic
-    varfile: varbas
+    varset: varbas
     vartype: integer
 - !variable
     abivarname: natpawu
@@ -15025,7 +15025,7 @@
         is applied. This value is determined from [[lpawu]].
         </p>
     topics: DFT+U_internal
-    varfile: varint
+    varset: varint
     vartype: integer
 - !variable
     abivarname: natrd
@@ -15056,7 +15056,7 @@
          Despite possible vacancies, cannot be bigger than [[natom]].
         </p>
     topics: crystal_expert
-    varfile: vargeo
+    varset: vargeo
     vartype: integer
 - !variable
     abivarname: natsph
@@ -15081,7 +15081,7 @@
         built (the indices of these atoms are given by  [[iatsph]]).
         </p>
     topics: printing_prdos
-    varfile: vargs
+    varset: vargs
     vartype: integer
 - !variable
     abivarname: natsph_extra
@@ -15110,7 +15110,7 @@
          variable.
         </p>
     topics: printing_prdos
-    varfile: vargs
+    varset: vargs
     vartype: integer
 - !variable
     abivarname: natvshift
@@ -15136,7 +15136,7 @@
         [[atvshift]].
         </p>
     topics: DFT+U_expert
-    varfile: varff
+    varset: varff
     vartype: integer
 - !variable
     abivarname: nband
@@ -15183,7 +15183,7 @@
         the relevant number of bands is given by [[nbandkss]].
         </p>
     topics: GSgeneral_basic
-    varfile: varbas
+    varset: varbas
     vartype: integer
 - !variable
     abivarname: nbandhf
@@ -15202,7 +15202,7 @@
          Gives the maximum number of occupied bands with which Fock exact exchange is being computed for the wavefunctions.
         </p>
     topics: Hybrids_useful
-    varfile: varbas
+    varset: varbas
     vartype: integer
 - !variable
     abivarname: nbandkss
@@ -15257,7 +15257,7 @@
         in order to generate a _KSS file.
         </p>
     topics: GW_useful
-    varfile: vargw
+    varset: vargw
     vartype: integer
 - !variable
     abivarname: nbdblock
@@ -15285,7 +15285,7 @@
          </ul>
         </p>
     topics: convergency_expert
-    varfile: vardev
+    varset: vardev
     vartype: integer
 - !variable
     abivarname: nbdbuf
@@ -15359,7 +15359,7 @@
         to be at least 1, irrespective of the value of [[nbdbuf]].
         </p>
     topics: convergency_expert
-    varfile: vargs
+    varset: vargs
     vartype: integer
 - !variable
     abivarname: nberry
@@ -15399,7 +15399,7 @@
          For the [[berryopt]] = 1, 2, and 3 cases, spinor wavefunctions are not allowed, nor are parallel computations.
         </p>
     topics: Berry_basic
-    varfile: varff
+    varset: varff
     vartype: integer
 - !variable
     abivarname: nc_xccc_gspace
@@ -15426,7 +15426,7 @@
         G-space. Several NC pseudos available in the Abinit table are not optimized for the G-space formalism and users are strongly invited to perform
         convergence studies with respect to ecut before using this option.
     topics: convergency_expert
-    varfile: vardev
+    varset: vardev
     vartype: integer
 - !variable
     abivarname: nconeq
@@ -15450,7 +15450,7 @@
         and [[wtatcon]]).
         </p>
     topics: PIMD_useful, MolecularDynamics_useful, GeoOpt_useful
-    varfile: varrlx
+    varset: varrlx
     vartype: integer
 - !variable
     abivarname: nctime
@@ -15497,7 +15497,7 @@
          </pre>
         </p>
     topics: MolecularDynamics_useful
-    varfile: vardev
+    varset: vardev
     vartype: integer
 - !variable
     abivarname: ndivk
@@ -15553,7 +15553,7 @@
         See the related input variable [[ndivsm]].
         </p>
     topics: k-points_expert
-    varfile: vargs
+    varset: vargs
     vartype: integer
 - !variable
     abivarname: ndivsm
@@ -15584,7 +15584,7 @@
         [[kptopt]] is the number of such segments.
         </p>
     topics: k-points_expert
-    varfile: vargs
+    varset: vargs
     vartype: integer
 - !variable
     abivarname: ndtset
@@ -15611,7 +15611,7 @@
         Otherwise, [[ndtset]]=0 is equivalent to [[ndtset]]=1.
         </p>
     topics: multidtset_compulsory
-    varfile: varbas
+    varset: varbas
     vartype: integer
 - !variable
     abivarname: ndynimage
@@ -15634,7 +15634,7 @@
         e.g. the wavefunction array (cg), the density array (rho), etc .
         </p>
     topics: PIMD_internal
-    varfile: varint
+    varset: varint
     vartype: integer
 - !variable
     abivarname: neb_algo
@@ -15708,7 +15708,7 @@
         to vary between 2 values (to have higher resolution close to the saddle point).
         </p>
     topics: TransPath_useful
-    varfile: varrlx
+    varset: varrlx
     vartype: integer
 - !variable
     abivarname: neb_spring
@@ -15741,7 +15741,7 @@
          </i>
         </p>
     topics: TransPath_useful
-    varfile: varrlx
+    varset: varrlx
     vartype: real
 - !variable
     abivarname: nelect
@@ -15766,7 +15766,7 @@
          [[nelect]]=zion-[[charge]].
         </p>
     topics: GSgeneral_internal
-    varfile: varint
+    varset: varint
     vartype: real
 - !variable
     abivarname: nfft
@@ -15795,7 +15795,7 @@
         number of processors on which the space is shared.
         </p>
     topics: convergency_internal
-    varfile: varint
+    varset: varint
     vartype: integer
 - !variable
     abivarname: nfftdg
@@ -15824,7 +15824,7 @@
         number of processors on which the space is shared.
         </p>
     topics: convergency_internal
-    varfile: varint
+    varset: varint
     vartype: integer
 - !variable
     abivarname: nfreqim
@@ -15843,7 +15843,7 @@
         the dielectric matrix in order to perform the numerical integration of the [[GW]] self-energy.
         </p>
     topics: GW_basic
-    varfile: vargw
+    varset: vargw
     vartype: integer
 - !variable
     abivarname: nfreqmidm
@@ -15871,7 +15871,7 @@
         see M. Taut, J. Phys. C: Solid State Phys. 18 (1985) 2677-2690.
         </p>
     topics: GW_basic
-    varfile: vargw
+    varset: vargw
     vartype: integer
 - !variable
     abivarname: nfreqre
@@ -15908,7 +15908,7 @@
         Using the default values, one must be able to get a screening file that can be used with any ppmodel.
         </p>
     topics: GW_basic
-    varfile: vargw
+    varset: vargw
     vartype: integer
 - !variable
     abivarname: nfreqsp
@@ -15927,7 +15927,7 @@
         of the [[GW]] Green's function.
         </p>
     topics: GW_basic
-    varfile: vargw
+    varset: vargw
     vartype: integer
 - !variable
     abivarname: ngfft
@@ -16023,7 +16023,7 @@
         space, it is n1*n2proc*n3.
         </p>
     topics: convergency_basic
-    varfile: vargs
+    varset: vargs
     vartype: integer
 - !variable
     abivarname: ngfftdg
@@ -16048,7 +16048,7 @@
         grid" only used for PAW calculations.
         </p>
     topics: PAW_useful
-    varfile: varpaw
+    varset: varpaw
     vartype: integer
 - !variable
     abivarname: ngkpt
@@ -16104,7 +16104,7 @@
         [[kptrlen]].
         </p>
     topics: k-points_basic
-    varfile: varbas
+    varset: varbas
     vartype: integer
 - !variable
     abivarname: ngqpt
@@ -16140,7 +16140,7 @@
          For more information on Monkhorst-Pack grids, see [[ngkpt]].
         </p>
     topics: DFPT_compulsory
-    varfile: vargs
+    varset: vargs
     vartype: integer
 - !variable
     abivarname: nimage
@@ -16253,7 +16253,7 @@
         than those of the second image.
         </p>
     topics: PIMD_compulsory, TransPath_compulsory
-    varfile: varrlx
+    varset: varrlx
     vartype: integer
 - !variable
     abivarname: nkpath
@@ -16280,7 +16280,7 @@
         In a nutshell, nkpath replaces [[kptopt]] when we are not performing a NSCF calculation.
         Note that, unlike [[kptopt]], nkpath represents the total number of points in the [[kptbounds]] array.
     topics: k-points_expert
-    varfile: varbas
+    varset: varbas
     vartype: integer
 - !variable
     abivarname: nkpt
@@ -16346,7 +16346,7 @@
         10+12+17+1(for the final point)=40.
         </p>
     topics: k-points_useful
-    varfile: varbas
+    varset: varbas
     vartype: integer
 - !variable
     abivarname: nkptgw
@@ -16366,7 +16366,7 @@
         It is used to dimension [[kptgw]]
         </p>
     topics: GW_basic
-    varfile: vargw
+    varset: vargw
     vartype: integer
 - !variable
     abivarname: nkpthf
@@ -16385,7 +16385,7 @@
          [[nkpthf]] gives the number of k points used to sample the full Brillouin zone for the Fock exact exchange contribution.
         </p>
     topics: Hybrids_expert
-    varfile: varbas
+    varset: varbas
     vartype: integer
 - !variable
     abivarname: nline
@@ -16416,7 +16416,7 @@
         matrix in the subspace spanned by the input wavefunctions.
         </p>
     topics: convergency_expert
-    varfile: vargs
+    varset: vargs
     vartype: integer
 - !variable
     abivarname: nloc_alg
@@ -16457,7 +16457,7 @@
          . See also [[nloc_mem]] for the tuning of the memory used in the non-local operator application.
         </p>
     topics: otherGS_expert
-    varfile: vardev
+    varset: vardev
     vartype: integer
 - !variable
     abivarname: nloc_mem
@@ -16507,7 +16507,7 @@
          . See also [[nloc_alg]] for the algorithm for the non-local operator application.
         </p>
     topics: otherGS_expert
-    varfile: vardev
+    varset: vardev
     vartype: integer
 - !variable
     abivarname: nnos
@@ -16527,7 +16527,7 @@
          The mass of these thermostats is given by [[qmass]].  <br />
         </p>
     topics: PIMD_basic, MolecularDynamics_basic
-    varfile: varrlx
+    varset: varrlx
     vartype: integer
 - !variable
     abivarname: nnsclo
@@ -16559,7 +16559,7 @@
         then the next ones with 1 non-self consistent loop.
         </p>
     topics: convergency_expert
-    varfile: vardev
+    varset: vardev
     vartype: integer
 - !variable
     abivarname: nnsclohf
@@ -16585,7 +16585,7 @@
         wavefunctions at each self-consistent loop.
         </p>
     topics: Hybrids_expert
-    varfile: vardev
+    varset: vardev
     vartype: integer
 - !variable
     abivarname: nobj
@@ -16672,7 +16672,7 @@
          <br />
         </p>
     topics: crystal_expert
-    varfile: vargeo
+    varset: vargeo
     vartype: integer
 - !variable
     abivarname: nomegasf
@@ -16702,7 +16702,7 @@
         grows fast with the value of [[nomegasf]].
         </p>
     topics: GW_basic
-    varfile: vargw
+    varset: vargw
     vartype: integer
 - !variable
     abivarname: nomegasi
@@ -16723,7 +16723,7 @@
         [[omegasimax]].
         </p>
     topics: GW_basic
-    varfile: vargw
+    varset: vargw
     vartype: integer
 - !variable
     abivarname: nomegasrd
@@ -16743,7 +16743,7 @@
         From these values, the derivative of Sigma at the KS energy is numerically estimated through linear interpolation.
         </p>
     topics: GW_useful
-    varfile: vargw
+    varset: vargw
     vartype: integer
 - !variable
     abivarname: normpawu
@@ -16772,7 +16772,7 @@
          </ul>
         </p>
     topics: DFT+U_expert
-    varfile: vardev
+    varset: vardev
     vartype: integer
 - !variable
     abivarname: noseinert
@@ -16794,7 +16794,7 @@
         where I represent each nucleus, MI is the mass of each nucleus (see [[amu]]), RI is the coordinate of each nucleus (see [[xcart]]), dX/dt is a dynamical friction coefficient, and T is the temperature of the thermostat (see [[mdtemp]]).
         </p>
     topics: MolecularDynamics_useful
-    varfile: varrlx
+    varset: varrlx
     vartype: real
 - !variable
     abivarname: np_slk
@@ -16823,7 +16823,7 @@
         <br>Note: an optimal value for this parameter can be automatically found by using the [[autoparal]] input keyword.
         </p>
     topics: parallelism_expert
-    varfile: varpar
+    varset: varpar
     vartype: integer
 - !variable
     abivarname: npband
@@ -16855,7 +16855,7 @@
         <br>Note: an optimal value for this parameter can be automatically found by using the [[autoparal]] input keyword.
         </p>
     topics: parallelism_useful
-    varfile: varpar
+    varset: varpar
     vartype: integer
 - !variable
     abivarname: npfft
@@ -16892,7 +16892,7 @@
         <br>Note: an optimal value for this parameter can be automatically found by using the [[autoparal]] input keyword.
         </p>
     topics: parallelism_useful
-    varfile: varpar
+    varset: varpar
     vartype: integer
 - !variable
     abivarname: nphf
@@ -16923,7 +16923,7 @@
          <br />
         </p>
     topics: Hybrids_useful, parallelism_useful
-    varfile: varpar
+    varset: varpar
     vartype: integer
 - !variable
     abivarname: npimage
@@ -16952,7 +16952,7 @@
          </i>
         </p>
     topics: parallelism_useful, PIMD_useful, TransPath_useful
-    varfile: varpar
+    varset: varpar
     vartype: integer
 - !variable
     abivarname: npkpt
@@ -16987,7 +16987,7 @@
         <br>Note: an optimal value for this parameter can be automatically found by using the [[autoparal]] input keyword.
         </p>
     topics: parallelism_useful
-    varfile: varpar
+    varset: varpar
     vartype: integer
 - !variable
     abivarname: nppert
@@ -17008,7 +17008,7 @@
         It can even be specified separately for each dataset.
         </p>
     topics: parallelism_useful
-    varfile: varpar
+    varset: varpar
     vartype: integer
 - !variable
     abivarname: npsp
@@ -17046,7 +17046,7 @@
         to use alchemical potentials in ABINIT.
         </p>
     topics: otherGS_alch
-    varfile: vargs
+    varset: vargs
     vartype: integer
 - !variable
     abivarname: npspalch
@@ -17068,7 +17068,7 @@
          [[npspalch]]=[[npsp]]-[[ntyppure]]
         </p>
     topics: otherGS_alch
-    varfile: vargs
+    varset: vargs
     vartype: integer
 - !variable
     abivarname: npspinor
@@ -17103,7 +17103,7 @@
          <br />
         </p>
     topics: parallelism_useful
-    varfile: varpar
+    varset: varpar
     vartype: integer
 - !variable
     abivarname: npulayit
@@ -17123,7 +17123,7 @@
         during electronic SC iterations).
         </p>
     topics: convergency_useful
-    varfile: vardev
+    varset: vardev
     vartype: integer
 - !variable
     abivarname: npvel
@@ -17148,7 +17148,7 @@
         Note that the results are output for a Z=1 impinging ion, i.e. a proton.
         </p>
     topics: RandStopPow_compulsory
-    varfile: vargw
+    varset: vargw
     vartype: integer
 - !variable
     abivarname: npweps
@@ -17171,7 +17171,7 @@
         It is an internal variable, determined from [[ecuteps]].
         </p>
     topics: GW_internal
-    varfile: varint
+    varset: varint
     vartype: integer
 - !variable
     abivarname: npwkss
@@ -17207,7 +17207,7 @@
          Very important : for the time being, [[istwfk]] must be 1 for all the k-points.
         </p>
     topics: GW_useful
-    varfile: vargw
+    varset: vargw
     vartype: integer
 - !variable
     abivarname: npwsigx
@@ -17230,7 +17230,7 @@
         It is an internal variable, determed from [[ecutsigx]].
         </p>
     topics: GW_internal
-    varfile: varint
+    varset: varint
     vartype: integer
 - !variable
     abivarname: npwwfn
@@ -17252,7 +17252,7 @@
         It is an internal variable, determined from [[ecutwfn]].
         </p>
     topics: GW_internal
-    varfile: varint
+    varset: varint
     vartype: integer
 - !variable
     abivarname: nqpt
@@ -17285,7 +17285,7 @@
         wavevector of the perturbation.
         </p>
     topics: DFPT_compulsory
-    varfile: vargs
+    varset: vargs
     vartype: integer
 - !variable
     abivarname: nqptdm
@@ -17313,7 +17313,7 @@
         If [[nqptdm]] is equal to -1, the code reports the list of q-points in the log file (YAML format) and then stops.
         </p>
     topics: GW_useful
-    varfile: vargw
+    varset: vargw
     vartype: integer
 - !variable
     abivarname: nscforder
@@ -17331,7 +17331,7 @@
          This variable controls the order of used scaling functions when the Hartree potential is computed using the Poisson solver (see [[icoulomb]] imput variable). This variable is of seldom use since the default value is large enough. Nonetheless, possible values are 8, 14, 16, 20, 24, 30, 40, 50, 60, 100. Values greater than 20 are included in ABINIT for test purposes only.
         </p>
     topics: convergency_expert
-    varfile: vardev
+    varset: vardev
     vartype: integer
 - !variable
     abivarname: nshiftk
@@ -17357,7 +17357,7 @@
         The values of the shifts are given by [[shiftk]].
         </p>
     topics: k-points_useful
-    varfile: varbas
+    varset: varbas
     vartype: integer
 - !variable
     abivarname: nshiftq
@@ -17384,7 +17384,7 @@
         The values of the shifts are given by [[shiftq]].
         </p>
     topics: DFPT_useful
-    varfile: vargs
+    varset: vargs
     vartype: integer
 - !variable
     abivarname: nspden
@@ -17431,7 +17431,7 @@
         does not suit the case of vector magnetization.
         </p>
     topics: spinpolarisation_basic
-    varfile: vargs
+    varset: vargs
     vartype: integer
 - !variable
     abivarname: nspinor
@@ -17465,7 +17465,7 @@
         should be even.
         </p>
     topics: spinpolarisation_basic
-    varfile: vargs
+    varset: vargs
     vartype: integer
 - !variable
     abivarname: nsppol
@@ -17518,7 +17518,7 @@
         the spin-polarization.
         </p>
     topics: spinpolarisation_basic
-    varfile: varbas
+    varset: varbas
     vartype: integer
 - !variable
     abivarname: nstep
@@ -17573,7 +17573,7 @@
          The forces and stress tensor are computed with [[nstep]]=0.
         </p>
     topics: convergency_basic
-    varfile: varbas
+    varset: varbas
     vartype: integer
 - !variable
     abivarname: nsym
@@ -17644,7 +17644,7 @@
         [[symmorphi]]
         </p>
     topics: crystal_useful
-    varfile: varbas
+    varset: varbas
     vartype: integer
 - !variable
     abivarname: ntime
@@ -17676,7 +17676,7 @@
          [[ntime]] is ignored if [[ionmov]]=0.
         </p>
     topics: MolecularDynamics_basic, GeoOpt_basic
-    varfile: varrlx
+    varset: varrlx
     vartype: integer
 - !variable
     abivarname: ntimimage
@@ -17700,7 +17700,7 @@
         are determined from the set of results obtained for all images.
         </p>
     topics: PIMD_compulsory, TransPath_compulsory
-    varfile: varrlx
+    varset: varrlx
     vartype: integer
 - !variable
     abivarname: ntypalch
@@ -17746,7 +17746,7 @@
         to use alchemical potentials in ABINIT.
         </p>
     topics: otherGS_alch
-    varfile: vargs
+    varset: vargs
     vartype: integer
 - !variable
     abivarname: ntypat
@@ -17771,7 +17771,7 @@
         on ...
         </p>
     topics: GSgeneral_basic
-    varfile: varbas
+    varset: varbas
     vartype: integer
 - !variable
     abivarname: ntyppure
@@ -17793,7 +17793,7 @@
          [[ntyppure]]=[[ntypat]]-[[ntypalch]]
         </p>
     topics: otherGS_alch
-    varfile: vargs
+    varset: vargs
     vartype: integer
 - !variable
     abivarname: nucdipmom
@@ -17811,7 +17811,7 @@
     text: |-
         Places an array of nuclear magnetic dipole moments on the atomic positions, useful for computing the magnetization in the presence of nuclear dipoles and thus the chemical shielding by the converse method. The presence of these dipoles breaks time reversal symmetry and lowers the overall spatial symmetry.
     topics: spinpolarisation_expert
-    varfile: vargs
+    varset: vargs
     vartype: real
 - !variable
     abivarname: nwfshist
@@ -17841,7 +17841,7 @@
         are stored during the electronic minimisation.
         </p>
     topics: Wavelets_useful
-    varfile: vargs
+    varset: vargs
     vartype: integer
 - !variable
     abivarname: nzchempot
@@ -17857,7 +17857,7 @@
     text: |-
         Defines the number of z reduced coordinates that defines the spatially varying chemical potential. See the input variable [[chempot]], of which [[nzchempot]] is the second dimension.
     topics: otherGS_expert
-    varfile: vargeo
+    varset: vargeo
     vartype: integer
 - !variable
     abivarname: objaat
@@ -17886,7 +17886,7 @@
         <br />
         </p>
     topics: crystal_expert
-    varfile: vargeo
+    varset: vargeo
     vartype: integer
 - !variable
     abivarname: objaax
@@ -17927,7 +17927,7 @@
          <br />
         </p>
     topics: crystal_expert
-    varfile: vargeo
+    varset: vargeo
     vartype: real
 - !variable
     abivarname: objan
@@ -17951,7 +17951,7 @@
          <br />
         </p>
     topics: crystal_expert
-    varfile: vargeo
+    varset: vargeo
     vartype: integer
 - !variable
     abivarname: objarf
@@ -18006,7 +18006,7 @@
          <br />
         </p>
     topics: crystal_expert
-    varfile: vargeo
+    varset: vargeo
     vartype: integer
 - !variable
     abivarname: objaro
@@ -18048,7 +18048,7 @@
          <br />
         </p>
     topics: crystal_expert
-    varfile: vargeo
+    varset: vargeo
     vartype: real
 - !variable
     abivarname: objatr
@@ -18095,7 +18095,7 @@
          Not present in the dtset array (no internal).
         </p>
     topics: crystal_expert
-    varfile: vargeo
+    varset: vargeo
     vartype: real
 - !variable
     abivarname: objbat
@@ -18126,7 +18126,7 @@
          <br />
         </p>
     topics: crystal_expert
-    varfile: vargeo
+    varset: vargeo
     vartype: integer
 - !variable
     abivarname: objbax
@@ -18167,7 +18167,7 @@
          <br />
         </p>
     topics: crystal_expert
-    varfile: vargeo
+    varset: vargeo
     vartype: real
 - !variable
     abivarname: objbn
@@ -18190,7 +18190,7 @@
          <br />
         </p>
     topics: crystal_expert
-    varfile: vargeo
+    varset: vargeo
     vartype: integer
 - !variable
     abivarname: objbrf
@@ -18244,7 +18244,7 @@
          <br />
         </p>
     topics: crystal_expert
-    varfile: vargeo
+    varset: vargeo
     vartype: integer
 - !variable
     abivarname: objbro
@@ -18286,7 +18286,7 @@
          <br />
         </p>
     topics: crystal_expert
-    varfile: vargeo
+    varset: vargeo
     vartype: real
 - !variable
     abivarname: objbtr
@@ -18332,7 +18332,7 @@
          <br />
         </p>
     topics: crystal_expert
-    varfile: vargeo
+    varset: vargeo
     vartype: real
 - !variable
     abivarname: occ
@@ -18384,7 +18384,7 @@
         that is, [[occopt]] &ge; 3 .
         </p>
     topics: GSgeneral_basic
-    varfile: vargs
+    varset: vargs
     vartype: real
 - !variable
     abivarname: occopt
@@ -18525,7 +18525,7 @@
         bissection algorithm find one or the other.
         </p>
     topics: GSgeneral_basic
-    varfile: varbas
+    varset: varbas
     vartype: integer
 - !variable
     abivarname: omegasimax
@@ -18550,7 +18550,7 @@
         [[omegasimax]] uniquely defines the linear mesh employed to sample the self-energy along the imaginary axis.
         </p>
     topics: GW_basic
-    varfile: vargw
+    varset: vargw
     vartype: real
 - !variable
     abivarname: omegasrdmax
@@ -18574,7 +18574,7 @@
         [KS_energy - [[omegasrdmax]], KS_energy + [[omegasrdmax]]] sampled [[nomegasrd]] times.
         </p>
     topics: GW_basic
-    varfile: vargw
+    varset: vargw
     vartype: real
 - !variable
     abivarname: optcell
@@ -18621,7 +18621,7 @@
         value. There
         are still a few problems at that level.
     topics: PIMD_basic, GeoOpt_compulsory
-    varfile: varrlx
+    varset: varrlx
     vartype: integer
 - !variable
     abivarname: optdriver
@@ -18677,7 +18677,7 @@
         zero if [[optdriver]] is not set to 1.
         </p>
     topics: nonlinear_compulsory, GWls_compulsory, ElPhon_compulsory, GW_compulsory, BSE_compulsory
-    varfile: vargs
+    varset: vargs
     vartype: integer
 - !variable
     abivarname: optforces
@@ -18712,7 +18712,7 @@
          </ul>
         </p>
     topics: GSgeneral_basic
-    varfile: vardev
+    varset: vardev
     vartype: integer
 - !variable
     abivarname: optnlxccc
@@ -18740,7 +18740,7 @@
          </ul>
         </p>
     topics: xc_expert
-    varfile: vardev
+    varset: vardev
     vartype: integer
 - !variable
     abivarname: optstress
@@ -18767,7 +18767,7 @@
         for some PAW calculations.
         </p>
     topics: GSgeneral_basic
-    varfile: vargs
+    varset: vargs
     vartype: integer
 - !variable
     abivarname: ortalg
@@ -18813,7 +18813,7 @@
         use on the available platforms.
         </p>
     topics: convergency_expert
-    varfile: vardev
+    varset: vardev
     vartype: integer
 - !variable
     abivarname: papiopt
@@ -18851,7 +18851,7 @@
         give also access to the flops of the calculation.
         </p>
     topics: otherGS_expert
-    varfile: vardev
+    varset: vardev
     vartype: integer
 - !variable
     abivarname: paral_atom
@@ -18874,7 +18874,7 @@
          <br />
         </p>
     topics: parallelism_basic
-    varfile: varpar
+    varset: varpar
     vartype: integer
 - !variable
     abivarname: paral_kgb
@@ -18971,7 +18971,7 @@
         [[npkpt]], [[npfft]], [[npband]],[[bandpp]] and eventually [[npspinor]] in the input file.
         </p>
     topics: parallelism_basic
-    varfile: varpar
+    varset: varpar
     vartype: integer
 - !variable
     abivarname: paral_rf
@@ -19000,7 +19000,7 @@
         </p>
         <p> [[paral_rf]] can be specified separately for each dataset. </p>
     topics: parallelism_basic
-    varfile: varpar
+    varset: varpar
     vartype: integer
 - !variable
     abivarname: pawcpxocc
@@ -19051,7 +19051,7 @@
          </b>
         </p>
     topics: PAW_expert
-    varfile: varpaw
+    varset: varpaw
     vartype: integer
 - !variable
     abivarname: pawcross
@@ -19074,7 +19074,7 @@
         is taken into account in the computation of the oscillator strengths. Hence, the completeness of the on-site basis is no longer assumed.
         </p>
     topics: DFPT_expert
-    varfile: varpaw
+    varset: varpaw
     vartype: integer
 - !variable
     abivarname: pawecutdg
@@ -19109,7 +19109,7 @@
         "Compensation charge inside spheres", a quantity written in the log file.
         </p>
     topics: convergency_compulsory, PAW_compulsory
-    varfile: varpaw
+    varset: varpaw
     vartype: real
 - !variable
     abivarname: pawfatbnd
@@ -19152,7 +19152,7 @@
          </ul>
         </p>
     topics: PAW_useful
-    varfile: varpaw
+    varset: varpaw
     vartype: integer
 - !variable
     abivarname: pawlcutd
@@ -19185,7 +19185,7 @@
         "Compensation charge inside spheres", a quantity written in the log file.
         </p>
     topics: PAW_expert
-    varfile: varpaw
+    varset: varpaw
     vartype: integer
 - !variable
     abivarname: pawlmix
@@ -19211,7 +19211,7 @@
          This option is useful to save CPU time but DOES have a bearing on the numerical accuracy of the results.
         </p>
     topics: PAW_expert
-    varfile: varpaw
+    varset: varpaw
     vartype: integer
 - !variable
     abivarname: pawmixdg
@@ -19277,7 +19277,7 @@
          - Density/potential is mixed in REAL space (Here only one grid is used).
         </p>
     topics: PAW_expert
-    varfile: varpaw
+    varset: varpaw
     vartype: integer
 - !variable
     abivarname: pawnhatxc
@@ -19304,7 +19304,7 @@
         by this choice. It is recommended to test the validity of this approximation before use.
         </p>
     topics: PAW_expert
-    varfile: varpaw
+    varset: varpaw
     vartype: integer
 - !variable
     abivarname: pawnphi
@@ -19325,7 +19325,7 @@
         and [[pawntheta]].
         </p>
     topics: PAW_expert
-    varfile: varpaw
+    varset: varpaw
     vartype: integer
 - !variable
     abivarname: pawntheta
@@ -19346,7 +19346,7 @@
         and [[pawnphi]].
         </p>
     topics: PAW_expert
-    varfile: varpaw
+    varset: varpaw
     vartype: integer
 - !variable
     abivarname: pawnzlm
@@ -19372,7 +19372,7 @@
         those found to be non-zero will be computed ; thus the first iteration is more cpu intensive)
         </p>
     topics: PAW_expert
-    varfile: varpaw
+    varset: varpaw
     vartype: integer
 - !variable
     abivarname: pawoptmix
@@ -19416,7 +19416,7 @@
         the Kerker mixing: [[diemix]], [[diemac]], etc...
         </p>
     topics: PAW_expert
-    varfile: varpaw
+    varset: varpaw
     vartype: integer
 - !variable
     abivarname: pawoptosc
@@ -19446,7 +19446,7 @@
         Kresse in PRB 74. 035101
         </p>
     topics: GW_expert, BSE_expert
-    varfile: varpaw
+    varset: varpaw
     vartype: integer
 - !variable
     abivarname: pawovlp
@@ -19483,7 +19483,7 @@
          </div>
         </p>
     topics: PAW_expert
-    varfile: varpaw
+    varset: varpaw
     vartype: real
 - !variable
     abivarname: pawprt_b
@@ -19511,7 +19511,7 @@
         and goes up from there.
         </p>
     topics: PAW_useful
-    varfile: vardev
+    varset: vardev
     vartype: integer
 - !variable
     abivarname: pawprt_k
@@ -19543,7 +19543,7 @@
          in the beginning of the run.
         </p>
     topics: PAW_useful
-    varfile: vardev
+    varset: vardev
     vartype: integer
 - !variable
     abivarname: pawprtden
@@ -19564,7 +19564,7 @@
         <p>
         </p>
     topics: PAW_useful
-    varfile: varpaw
+    varset: varpaw
     vartype: integer
 - !variable
     abivarname: pawprtdos
@@ -19617,7 +19617,7 @@
          - In that case, the [[ratsph]] variable is automatically set to the PAW radius.
         </p>
     topics: PAW_useful
-    varfile: varpaw
+    varset: varpaw
     vartype: integer
 - !variable
     abivarname: pawprtvol
@@ -19652,7 +19652,7 @@
          <br />
         </p>
     topics: PAW_useful
-    varfile: varpaw
+    varset: varpaw
     vartype: integer
 - !variable
     abivarname: pawprtwf
@@ -19689,7 +19689,7 @@
         [[pawprt_b]] and [[pawprt_k]].
         </p>
     topics: PAW_useful
-    varfile: varpaw
+    varset: varpaw
     vartype: integer
 - !variable
     abivarname: pawspnorb
@@ -19752,7 +19752,7 @@
          An artificial scaling of the spin-orbit can be introduced thanks to the [[spnorbscl]] input variable.
         </p>
     topics: PAW_useful
-    varfile: varpaw
+    varset: varpaw
     vartype: integer
 - !variable
     abivarname: pawstgylm
@@ -19793,7 +19793,7 @@
          </div>
         </p>
     topics: PAW_expert
-    varfile: varpaw
+    varset: varpaw
     vartype: integer
 - !variable
     abivarname: pawsushat
@@ -19829,7 +19829,7 @@
          </div>
         </p>
     topics: PAW_expert
-    varfile: varpaw
+    varset: varpaw
     vartype: integer
 - !variable
     abivarname: pawujat
@@ -19848,7 +19848,7 @@
          Determines the atom for which U (or J) should be determined. See also [[macro_uj]].
         </p>
     topics: DFT+U_expert
-    varfile: vardev
+    varset: vardev
     vartype: integer
 - !variable
     abivarname: pawujrad
@@ -19872,7 +19872,7 @@
         20 a.u. contains &asymp;100% of the wavefunction and corresponds to r_paw &rarr; &infin;.
         </p>
     topics: DFT+U_expert
-    varfile: vardev
+    varset: vardev
     vartype: real
 - !variable
     abivarname: pawujv
@@ -19893,7 +19893,7 @@
          Amplitude of the potential shift for the determination of U (or J). See also [[macro_uj]].
         </p>
     topics: DFT+U_expert
-    varfile: vardev
+    varset: vardev
     vartype: real
 - !variable
     abivarname: pawusecp
@@ -19923,7 +19923,7 @@
          <br />
         </p>
     topics: PAW_expert
-    varfile: varpaw
+    varset: varpaw
     vartype: integer
 - !variable
     abivarname: pawxcdev
@@ -19956,7 +19956,7 @@
          Be careful: GGA requires [[pawxcdev]] &gt; 0
         </p>
     topics: PAW_expert
-    varfile: varpaw
+    varset: varpaw
     vartype: integer
 - !variable
     abivarname: ph_intmeth
@@ -19980,7 +19980,7 @@
         </br>
         </p>
     topics: DFPT_useful
-    varfile: vareph
+    varset: vareph
     vartype: integer
 - !variable
     abivarname: ph_ndivsm
@@ -19997,7 +19997,7 @@
     text: |-
         This variable is used in conjunction with [[ph_nqpath]] and [[ph_qpath]] to define the q-path used for phonon band structures and phonon linewidths. It gives the number of points used to sample the smallest segment in the q-path specified by [[ph_qpath]].
     topics: DFPT_useful
-    varfile: vareph
+    varset: vareph
     vartype: integer
 - !variable
     abivarname: ph_ngqpt
@@ -20018,7 +20018,7 @@
         This variable defines the q-mesh used to compute the phonon DOS and the Eliashberg function via Fourier interpolation.
         Related input variables: [[ph_qshift]] and [[ph_nqshift]].
     topics: DFPT_useful
-    varfile: varrf
+    varset: varrf
     vartype: integer
 - !variable
     abivarname: ph_nqpath
@@ -20034,7 +20034,7 @@
     text: |-
         This integer defines the number of points in the [[ph_qpath]] array.
     topics: DFPT_useful
-    varfile: vareph
+    varset: vareph
     vartype: integer
 - !variable
     abivarname: ph_nqshift
@@ -20053,7 +20053,7 @@
         If not given, the code assumes a Gamma-centered mesh. The shifts
         are specified by [[ph_qshift]].
     topics: DFPT_useful
-    varfile: vareph
+    varset: vareph
     vartype: integer
 - !variable
     abivarname: ph_qpath
@@ -20072,7 +20072,7 @@
         This array contains the list of special q-points used to construct the q-path for phonon band structures and phonon linewidths.
         See also [[ph_nqpath]] and [[[ph_ndivsm]].
     topics: DFPT_useful
-    varfile: varrf
+    varset: varrf
     vartype: real
 - !variable
     abivarname: ph_qshift
@@ -20094,7 +20094,7 @@
         This array gives the shifts to be used to construct the q-mesh for
         computing the phonon DOS and the Eliashberg functions (see also [[ph_nqshift]]. If not given, a Gamma-centered mesh is used.
     topics: DFPT_useful
-    varfile: vareph
+    varset: vareph
     vartype: real
 - !variable
     abivarname: ph_smear
@@ -20112,7 +20112,7 @@
         The gaussian broadening used for the integration of the phonon
         DOS and the Eliashberg function. See also [[ph_intmeth]] and [[ph_ngqpt]].
     topics: DFPT_useful
-    varfile: vareph
+    varset: vareph
     vartype: real
 - !variable
     abivarname: ph_wstep
@@ -20130,7 +20130,7 @@
         The step used to generate the (linear) frequency mesh for the phonon DOS and the Eliashberg function.
         The extrema of the mesh are automatically computed by the code.
     topics: DFPT_useful
-    varfile: vareph
+    varset: vareph
     vartype: real
 - !variable
     abivarname: pimass
@@ -20160,7 +20160,7 @@
          <br />
         </p>
     topics: PIMD_useful
-    varfile: varrlx
+    varset: varrlx
     vartype: real
 - !variable
     abivarname: pimd_constraint
@@ -20188,7 +20188,7 @@
         </li>
         </ul>
     topics: PIMD_useful
-    varfile: varrlx
+    varset: varrlx
     vartype: integer
 - !variable
     abivarname: pitransform
@@ -20216,7 +20216,7 @@
          If equal to 2, staging transformation.
         </p>
     topics: PIMD_useful
-    varfile: varrlx
+    varset: varrlx
     vartype: integer
 - !variable
     abivarname: plowan_bandf
@@ -20236,7 +20236,7 @@
          Gives the upper band to include in the calculation of Wannier functions
         </p>
     topics: Wannier_compulsory
-    varfile: vardev
+    varset: vardev
     vartype: integer
 - !variable
     abivarname: plowan_bandi
@@ -20256,7 +20256,7 @@
          Gives the lower band to include in the calculation of Wannier functions
         </p>
     topics: Wannier_compulsory
-    varfile: vardev
+    varset: vardev
     vartype: integer
 - !variable
     abivarname: plowan_compute
@@ -20308,7 +20308,7 @@
          )
         </p>
     topics: Wannier_compulsory
-    varfile: vardev
+    varset: vardev
     vartype: integer
 - !variable
     abivarname: plowan_iatom
@@ -20328,7 +20328,7 @@
          Gives the indices of the [[plowan_natom]] atoms on which the projections will be done.
         </p>
     topics: Wannier_compulsory
-    varfile: vardev
+    varset: vardev
     vartype: integer
 - !variable
     abivarname: plowan_it
@@ -20354,7 +20354,7 @@
         Wannier functions are used as a basis to compute the Hamiltonian.
         </p>
     topics: Wannier_useful
-    varfile: vardev
+    varset: vardev
     vartype: integer
 - !variable
     abivarname: plowan_lcalc
@@ -20376,7 +20376,7 @@
         as given in [[plowan_iatom]].
         </p>
     topics: Wannier_compulsory
-    varfile: vardev
+    varset: vardev
     vartype: integer
 - !variable
     abivarname: plowan_natom
@@ -20396,7 +20396,7 @@
          Gives the number of atoms on which the projection will be done
         </p>
     topics: Wannier_compulsory
-    varfile: vardev
+    varset: vardev
     vartype: integer
 - !variable
     abivarname: plowan_nbl
@@ -20417,7 +20417,7 @@
          Gives the total number of angular momenta (over all atoms) to compute the projections.
         </p>
     topics: Wannier_compulsory
-    varfile: vardev
+    varset: vardev
     vartype: integer
 - !variable
     abivarname: plowan_nt
@@ -20441,7 +20441,7 @@
         Wannier functions are used as a basis to compute the Hamiltonian.
         </p>
     topics: Wannier_useful
-    varfile: vardev
+    varset: vardev
     vartype: integer
 - !variable
     abivarname: plowan_projcalc
@@ -20464,7 +20464,7 @@
         orbitals of the PAW atomic data file.
         </p>
     topics: Wannier_compulsory
-    varfile: vardev
+    varset: vardev
     vartype: integer
 - !variable
     abivarname: plowan_realspace
@@ -20495,7 +20495,7 @@
          </ul>
         </p>
     topics: Wannier_useful
-    varfile: vardev
+    varset: vardev
     vartype: integer
 - !variable
     abivarname: polcen
@@ -20519,7 +20519,7 @@
         See Eq.(24) in the Suppl. of Nat. Phys. (M. Stengel, N.A. Spaldin and D. Vanderbilt, Nat. Phys. 5,304 (2009))
         </p>
     topics: DFPT_useful
-    varfile: varff
+    varset: varff
     vartype: real
 - !variable
     abivarname: posdoppler
@@ -20545,7 +20545,7 @@
          Core WF files can be obtained with the atompaw tool by the use of 'prtcorewf' keyword.
         </p>
     topics: positron_basic
-    varfile: vargs
+    varset: vargs
     vartype: integer
 - !variable
     abivarname: positron
@@ -20679,7 +20679,7 @@
         <b>[5]</b> B. Barbiellini, M.J. Puska, T. Torsti and R.M.Nieminen, Phys. Rev. B 51, 7341 (1994)<br>
         </ul>
     topics: positron_compulsory
-    varfile: vargs
+    varset: vargs
     vartype: integer
 - !variable
     abivarname: posnstep
@@ -20706,7 +20706,7 @@
          <br />
         </p>
     topics: positron_basic
-    varfile: vargs
+    varset: vargs
     vartype: integer
 - !variable
     abivarname: posocc
@@ -20729,7 +20729,7 @@
          <br />
         </p>
     topics: positron_basic
-    varfile: vargs
+    varset: vargs
     vartype: real
 - !variable
     abivarname: postoldfe
@@ -20768,7 +20768,7 @@
         Only one and only one of [[postoldfe]] or [[postoldff]] can be set.
         </p>
     topics: positron_basic
-    varfile: vargs
+    varset: vargs
     vartype: real
 - !variable
     abivarname: postoldff
@@ -20797,7 +20797,7 @@
          <br />
         </p>
     topics: positron_basic
-    varfile: vargs
+    varset: vargs
     vartype: real
 - !variable
     abivarname: ppmfrq
@@ -20867,7 +20867,7 @@
         [[cd_frqim_method]], [[gw_frqim_inzgrid]] and [[gw_frqre_inzgrid]] for more details.
         </p>
     topics: GW_basic
-    varfile: vargw
+    varset: vargw
     vartype: real
 - !variable
     abivarname: ppmodel
@@ -20920,7 +20920,7 @@
         lowest 10 bands.
         </p>
     topics: GW_basic
-    varfile: vargw
+    varset: vargw
     vartype: integer
 - !variable
     abivarname: prepanl
@@ -20957,7 +20957,7 @@
         along the three directions explicitly, and (ii) to keep the full number of k-points.
         </p>
     topics: nonlinear_basic
-    varfile: varrf
+    varset: varrf
     vartype: integer
 - !variable
     abivarname: prepgkk
@@ -20980,7 +20980,7 @@
         Use in conjunction with [[prtgkk]].
         </p>
     topics: ElPhon_compulsory
-    varfile: varrf
+    varset: varrf
     vartype: integer
 - !variable
     abivarname: prepscphon
@@ -21002,7 +21002,7 @@
         variable is destined to someday bypass the use of anaddb for scphon calculations.
         </p>
     topics: printing_prngs
-    varfile: vardev
+    varset: vardev
     vartype: integer
 - !variable
     abivarname: prt1dm
@@ -21023,7 +21023,7 @@
         or the density on bi-dimensional slices of the FFT grid.
         </p>
     topics: printing_prgs
-    varfile: varfil
+    varset: varfil
     vartype: integer
 - !variable
     abivarname: prtatlist
@@ -21049,7 +21049,7 @@
         all the atoms.
         </p>
     topics: printing_prgeo
-    varfile: varrlx
+    varset: varrlx
     vartype: integer
 - !variable
     abivarname: prtbbb
@@ -21070,7 +21070,7 @@
         See Ph. Ghosez and X. Gonze, J. Phys.: Condens. Matter 12, 9179 (2000).
         </p>
     topics: printing_prngs
-    varfile: varrf
+    varset: varrf
     vartype: integer
 - !variable
     abivarname: prtbltztrp
@@ -21091,7 +21091,7 @@
          by Georg Madsen.
         </p>
     topics: printing_prgs
-    varfile: vardev
+    varset: vardev
     vartype: integer
 - !variable
     abivarname: prtcif
@@ -21110,7 +21110,7 @@
          If set to 1, a CIF file is output with the crystallographic data for the present run (cell size shape and atomic positions).
         </p>
     topics: printing_prgeo
-    varfile: vardev
+    varset: vardev
     vartype: integer
 - !variable
     abivarname: prtden
@@ -21263,7 +21263,7 @@
         calculation as the input to another, use the _DEN file for that.
         </p>
     topics: printing_prden
-    varfile: varfil
+    varset: varfil
     vartype: integer
 - !variable
     abivarname: prtdensph
@@ -21296,7 +21296,7 @@
         of the density within a sphere, you should use the cut3d postprocessor.
         </p>
     topics: printing_prden
-    varfile: vargs
+    varset: vargs
     vartype: integer
 - !variable
     abivarname: prtdipole
@@ -21315,7 +21315,7 @@
          Print out dipole of unit cell, calculated in real space for the primitive cell only. Under development.
         </p>
     topics: printing_prgs
-    varfile: vardev
+    varset: vardev
     vartype: integer
 - !variable
     abivarname: prtdos
@@ -21424,7 +21424,7 @@
          [[prtdos]]=5 delivers the spin-spin DOS in the [[nspinor]]==2 case, using the tetrahedron method (as [[prtdos]]=2).
         </p>
     topics: printing_prdos
-    varfile: varfil
+    varset: varfil
     vartype: integer
 - !variable
     abivarname: prtdosm
@@ -21453,7 +21453,7 @@
         in the same basis as the LDA+U occupation matrix.
         </p>
     topics: printing_prdos
-    varfile: varfil
+    varset: varfil
     vartype: integer
 - !variable
     abivarname: prtebands
@@ -21480,7 +21480,7 @@
         Use `gnuplot file_EBANDS.gnuplot` to visualize the band energies.</li>
         </ul>
     topics: printing_prden
-    varfile: vargs
+    varset: vargs
     vartype: integer
 - !variable
     abivarname: prtefg
@@ -21513,7 +21513,7 @@
          </ul>
         </p>
     topics: printing_prngs
-    varfile: varpaw
+    varset: varpaw
     vartype: integer
 - !variable
     abivarname: prteig
@@ -21534,7 +21534,7 @@
         k-points and one-electron eigenvalues is printed.
         </p>
     topics: printing_prden
-    varfile: varfil
+    varset: varfil
     vartype: integer
 - !variable
     abivarname: prtelf
@@ -21574,7 +21574,7 @@
          yet implemented in the case of PAW ([[usepaw]]=1) calculations.
         </p>
     topics: printing_prgs
-    varfile: varfil
+    varset: varfil
     vartype: integer
 - !variable
     abivarname: prtfc
@@ -21599,7 +21599,7 @@
          </ul>
         </p>
     topics: printing_prfermi
-    varfile: varpaw
+    varset: varpaw
     vartype: integer
 - !variable
     abivarname: prtfsurf
@@ -21631,7 +21631,7 @@
         Note, however, that the mesh must be homogeneous and centered on gamma (multiple shifts are not supported by Xcrysden)
         </p>
     topics: printing_prfermi
-    varfile: varfil
+    varset: varfil
     vartype: integer
 - !variable
     abivarname: prtgden
@@ -21656,7 +21656,7 @@
         described below, see section 6).
         </p>
     topics: printing_prden
-    varfile: varfil
+    varset: varfil
     vartype: integer
 - !variable
     abivarname: prtgeo
@@ -21705,7 +21705,7 @@
          If [[prtgeo]]&gt;0, the maximum number of atoms ([[natom]]) is 9999.
         </p>
     topics: printing_prgeo
-    varfile: varfil
+    varset: varfil
     vartype: integer
 - !variable
     abivarname: prtgkk
@@ -21728,7 +21728,7 @@
         ~abinit/doc/tutorial/lesson_eph.html and in ~abinit/doc/users/elphon_manual.ps
         </p>
     topics: printing_prngs, ElPhon_compulsory
-    varfile: varfil
+    varset: varfil
     vartype: integer
 - !variable
     abivarname: prtgsr
@@ -21750,7 +21750,7 @@
         unless [[prtden]] is set to 0.
         </p>
     topics: printing_prgs
-    varfile: varfil
+    varset: varfil
     vartype: integer
 - !variable
     abivarname: prtkden
@@ -21784,7 +21784,7 @@
          yet implemented in the case of PAW ([[usepaw]]=1) calculations.
         </p>
     topics: printing_prden
-    varfile: varfil
+    varset: varfil
     vartype: integer
 - !variable
     abivarname: prtkpt
@@ -21844,7 +21844,7 @@
         a file named kpts.nc with the list of the k-points and the corresponding weights is produced
         </p>
     topics: printing_prden
-    varfile: varfil
+    varset: varfil
     vartype: integer
 - !variable
     abivarname: prtlden
@@ -21871,7 +21871,7 @@
          </a>).
         </p>
     topics: printing_prden
-    varfile: varfil
+    varset: varfil
     vartype: integer
 - !variable
     abivarname: prtnabla
@@ -21893,7 +21893,7 @@
          </ul>
         </p>
     topics: printing_prgs
-    varfile: varpaw
+    varset: varpaw
     vartype: integer
 - !variable
     abivarname: prtnest
@@ -21912,7 +21912,7 @@
          If set to 1, the nesting function for the k-point grid is printed. For the moment the path in q space for the nesting function is fixed, but will become an input as well.
         </p>
     topics: printing_prfermi
-    varfile: vardev
+    varset: vardev
     vartype: integer
 - !variable
     abivarname: prtphbands
@@ -21939,7 +21939,7 @@
         Use `gnuplot file_PHBANDS.gnuplot` to visualize the phonon band structure.</li>
         </ul>
     topics: printing_prngs
-    varfile: vareph
+    varset: vareph
     vartype: integer
 - !variable
     abivarname: prtphdos
@@ -21959,7 +21959,7 @@
         It is activated by default when [[optdriver]]==7.
         </p>
     topics: printing_prngs, DFPT_useful, ElPhon_useful
-    varfile: vareph
+    varset: vareph
     vartype: integer
 - !variable
     abivarname: prtphsurf
@@ -21978,7 +21978,7 @@
         Note that the (dense) q-mesh must be Gamma-centered, shifted meshs are not supported by Xcrysden.
         This variable requires [[optdriver]]==7.
     topics: printing_prngs, ElPhon_useful
-    varfile: vareph
+    varset: vareph
     vartype: integer
 - !variable
     abivarname: prtposcar
@@ -21999,7 +21999,7 @@
         with PHON, PHONOPY, etc...
         </p>
     topics: printing_prgeo
-    varfile: vardev
+    varset: vardev
     vartype: integer
 - !variable
     abivarname: prtpot
@@ -22042,7 +22042,7 @@
         No output is provided by a negative value of this variable.
         </p>
     topics: printing_prpot
-    varfile: varfil
+    varset: varfil
     vartype: integer
 - !variable
     abivarname: prtpsps
@@ -22059,7 +22059,7 @@
         If set to 1, the code produces a netcdf file (PSPS.nc) with the internal tables used by Abinit to apply the pseudopotential part of the KS Hamiltonian. The data can be visualized with AbiPy.
         if prtpsps is set to -1, the code will exit after the output of the PSPS.nc file.
     topics: printing_prgs
-    varfile: varfil
+    varset: varfil
     vartype: integer
 - !variable
     abivarname: prtspcur
@@ -22079,7 +22079,7 @@
          = 2. Experimental: this does not work yet.
         </p>
     topics: printing_prgs
-    varfile: varfil
+    varset: varfil
     vartype: integer
 - !variable
     abivarname: prtstm
@@ -22154,7 +22154,7 @@
          No other printing variables for density or potentials should be activated (e.g. [[prtden]] has to be set to zero).
         </p>
     topics: printing_prgs
-    varfile: varfil
+    varset: varfil
     vartype: integer
 - !variable
     abivarname: prtsuscep
@@ -22173,7 +22173,7 @@
         only the _SCR file will be output.
         </p>
     topics: printing_prngs
-    varfile: varfil
+    varset: varfil
     vartype: integer
 - !variable
     abivarname: prtvclmb
@@ -22195,7 +22195,7 @@
         If <b>prtvclmb=2</b>, only the smooth part of the Coulomb potential is output.
         <p>
     topics: printing_prpot
-    varfile: varfil
+    varset: varfil
     vartype: integer
 - !variable
     abivarname: prtvdw
@@ -22214,7 +22214,7 @@
         <!-- See the associated script in
         ~abinit/extras/post_processing/vdw_check_kernel for further details. -->
     topics: printing_prgs
-    varfile: varvdw
+    varset: varvdw
     vartype: integer
 - !variable
     abivarname: prtvha
@@ -22258,7 +22258,7 @@
         No output is provided by a negative value of this variable.
         </p>
     topics: printing_prpot
-    varfile: varfil
+    varset: varfil
     vartype: integer
 - !variable
     abivarname: prtvhxc
@@ -22302,7 +22302,7 @@
         No output is provided by a negative value of this variable.
         </p>
     topics: printing_prpot
-    varfile: varfil
+    varset: varfil
     vartype: integer
 - !variable
     abivarname: prtvol
@@ -22374,7 +22374,7 @@
         This debugging feature is not yet activated in the RF routines.
         Note that [[fftalg]] offers another option for debugging.</p>
     topics: printing_prgs
-    varfile: varfil
+    varset: varfil
     vartype: integer
 - !variable
     abivarname: prtvolimg
@@ -22411,7 +22411,7 @@
         is reduced to total energy and convergence residuals only.
         </p>
     topics: printing_prgs
-    varfile: varfil
+    varset: varfil
     vartype: integer
 - !variable
     abivarname: prtvpsp
@@ -22455,7 +22455,7 @@
         No output is provided by a negative value of this variable.
         </p>
     topics: printing_prpot
-    varfile: varfil
+    varset: varfil
     vartype: integer
 - !variable
     abivarname: prtvxc
@@ -22499,7 +22499,7 @@
         No output is provided by a negative value of this variable.
         </p>
     topics: printing_prpot
-    varfile: varfil
+    varset: varfil
     vartype: integer
 - !variable
     abivarname: prtwant
@@ -22671,7 +22671,7 @@
          </ul>
         </p>
     topics: printing_prgs, Wannier_compulsory
-    varfile: varfil
+    varset: varfil
     vartype: integer
 - !variable
     abivarname: prtwf
@@ -22786,7 +22786,7 @@
         probably something set wrong in the input file.
         </p>
     topics: printing_prden, vdw_useful
-    varfile: varfil
+    varset: varfil
     vartype: integer
 - !variable
     abivarname: prtwf_full
@@ -22806,7 +22806,7 @@
         calculation done on a homogeneous k-mesh (see [[ngkpt]] and [[shiftk]]).
         The tetrahedron table is produced only if the number of k-points in the irreducible zone ([[nkpt]]) is greater than 3.
     topics: printing_prden
-    varfile: varfil
+    varset: varfil
     vartype: integer
 - !variable
     abivarname: prtxml
@@ -22827,7 +22827,7 @@
         (and derivative such as geometry optimisation).
         </p>
     topics: printing_prgs
-    varfile: varfil
+    varset: varfil
     vartype: integer
 - !variable
     abivarname: ptcharge
@@ -22860,7 +22860,7 @@
          </ul>
         </p>
     topics: DFPT_useful
-    varfile: varpaw
+    varset: varpaw
     vartype: real
 - !variable
     abivarname: ptgroupma
@@ -22898,7 +22898,7 @@
         [[genafm]]
         </p>
     topics: spinpolarisation_useful
-    varfile: vargeo
+    varset: vargeo
     vartype: integer
 - !variable
     abivarname: pvelmax
@@ -22923,7 +22923,7 @@
         [[pvelmax]] is input in Cartesian coordinates.
         </p>
     topics: RandStopPow_basic
-    varfile: vargw
+    varset: vargw
     vartype: real
 - !variable
     abivarname: pw_unbal_thresh
@@ -22943,7 +22943,7 @@
          number of plane waves treated by a processor and the ideal one is higher than <i>pw_unbal_thresh</i> %.
         </p>
     topics: parallelism_expert
-    varfile: varpar
+    varset: varpar
     vartype: real
 - !variable
     abivarname: qmass
@@ -22974,7 +22974,7 @@
         In that case, [[optcell]]=2 iS NOT USABLE yet.
         </p>
     topics: PIMD_basic, MolecularDynamics_basic
-    varfile: varrlx
+    varset: varrlx
     vartype: real
 - !variable
     abivarname: qprtrb
@@ -23000,7 +23000,7 @@
         for more explanation.
         </p>
     topics: DFPT_expert
-    varfile: varff
+    varset: varff
     vartype: integer
 - !variable
     abivarname: qpt
@@ -23033,7 +23033,7 @@
         with renormalisation factor one.
         </p>
     topics: ' DFPT_useful'
-    varfile: vargs
+    varset: vargs
     vartype: real
 - !variable
     abivarname: qptdm
@@ -23059,7 +23059,7 @@
         For further explanation, see the input variable [[nqptdm]].
         </p>
     topics: GW_useful
-    varfile: vargw
+    varset: vargw
     vartype: real
 - !variable
     abivarname: qptn
@@ -23116,7 +23116,7 @@
         modification of the code).
         </p>
     topics: ' DFPT_internal'
-    varfile: varint
+    varset: varint
     vartype: real
 - !variable
     abivarname: qptnrm
@@ -23143,7 +23143,7 @@
         [[qpt]](1:3)/[[qptnrm]].
         </p>
     topics: DFPT_useful
-    varfile: vargs
+    varset: vargs
     vartype: real
 - !variable
     abivarname: qptopt
@@ -23229,7 +23229,7 @@
         you to select the optimal grid, similarly to the case of the K point grid.
         </p>
     topics: DFPT_compulsory
-    varfile: vargs
+    varset: vargs
     vartype: integer
 - !variable
     abivarname: qptrlatt
@@ -23273,7 +23273,7 @@
         procedure.
         </p>
     topics: DFPT_useful
-    varfile: vargs
+    varset: vargs
     vartype: integer
 - !variable
     abivarname: quadmom
@@ -23302,7 +23302,7 @@
          </ul>
         </p>
     topics: DFPT_useful
-    varfile: varpaw
+    varset: varpaw
     vartype: real
 - !variable
     abivarname: random_atpos
@@ -23329,7 +23329,7 @@
         [[ntypat]] differs from [[npsp]])
         </p>
     topics: otherGS_expert
-    varfile: varrlx
+    varset: varrlx
     vartype: integer
 - !variable
     abivarname: ratsph
@@ -23389,7 +23389,7 @@
         PAW radius of considered atom type (which is read from the PAW dataset file; see rc_sph or r_paw).
         </p>
     topics: printing_prdos
-    varfile: vargs
+    varset: vargs
     vartype: real
 - !variable
     abivarname: ratsph_extra
@@ -23410,7 +23410,7 @@
         and [[xredsph_extra]]
         for the number and positions of the spheres.
     topics: printing_prdos
-    varfile: vargs
+    varset: vargs
     vartype: real
 - !variable
     abivarname: rcut
@@ -23432,7 +23432,7 @@
          If [[rcut]] is negative, the cutoff is automatically calculated so to enclose the same volume inside the cutoff as the volume of the primitive cell.
         </p>
     topics: GWls_compulsory, GW_basic
-    varfile: vargw
+    varset: vargw
     vartype: real
 - !variable
     abivarname: recefermi
@@ -23452,7 +23452,7 @@
         In the first  SCF calculation it fixes the initial guess for the Fermi energy.
         </p>
     topics: recursion_useful
-    varfile: vardev
+    varset: vardev
     vartype: real
 - !variable
     abivarname: recgratio
@@ -23479,7 +23479,7 @@
         coarse grid has to be compatible with the parallelization parameters.
         </p>
     topics: recursion_useful
-    varfile: vardev
+    varset: vardev
     vartype: integer
 - !variable
     abivarname: recnpath
@@ -23502,7 +23502,7 @@
         cycles.
         </p>
     topics: recursion_expert
-    varfile: vardev
+    varset: vardev
     vartype: integer
 - !variable
     abivarname: recnrec
@@ -23525,7 +23525,7 @@
         automatically stops.
         </p>
     topics: recursion_expert
-    varfile: vardev
+    varset: vardev
     vartype: integer
 - !variable
     abivarname: recptrott
@@ -23554,7 +23554,7 @@
         grid.
         </p>
     topics: recursion_expert
-    varfile: vardev
+    varset: vardev
     vartype: integer
 - !variable
     abivarname: recrcut
@@ -23577,7 +23577,7 @@
         a sphere of radius [[recrcut]].
         </p>
     topics: recursion_useful
-    varfile: vardev
+    varset: vardev
     vartype: integer
 - !variable
     abivarname: rectesteg
@@ -23598,7 +23598,7 @@
         equal to zero.
         </p>
     topics: recursion_expert
-    varfile: vardev
+    varset: vardev
     vartype: integer
 - !variable
     abivarname: rectolden
@@ -23621,7 +23621,7 @@
         computed point-by-point, and then the maximum difference is computed).
         </p>
     topics: recursion_basic
-    varfile: vardev
+    varset: vardev
     vartype: real
 - !variable
     abivarname: red_dfield
@@ -23648,7 +23648,7 @@
          [[red_dfield]] is defined via Eq.(26) in the Supplement of M. Stengel, N.A. Spaldin and D. Vanderbilt, Nat. Phys. 5,304 (2009).
         </p>
     topics: Berry_useful
-    varfile: varff
+    varset: varff
     vartype: real
 - !variable
     abivarname: red_efield
@@ -23674,7 +23674,7 @@
          [[red_efield]] is defined via Eq.(25) in the Supplement of M. Stengel, N.A. Spaldin and D. Vanderbilt, Nat. Phys. 5,304 (2009).
         </p>
     topics: Berry_useful
-    varfile: varff
+    varset: varff
     vartype: real
 - !variable
     abivarname: red_efieldbar
@@ -23700,7 +23700,7 @@
          [[red_efieldbar]] is defined via Eq.(28) in the Supplement of M. Stengel, N.A. Spaldin and D. Vanderbilt, Nat. Phys. 5,304 (2009).
         </p>
     topics: Berry_useful
-    varfile: varff
+    varset: varff
     vartype: real
 - !variable
     abivarname: restartxf
@@ -23813,7 +23813,7 @@
         to continue your job.
         </p>
     topics: PIMD_useful, MolecularDynamics_useful, GeoOpt_useful
-    varfile: varrlx
+    varset: varrlx
     vartype: integer
 - !variable
     abivarname: rf2_dkdk
@@ -23853,7 +23853,7 @@
          </ul>
         </p>
     topics: DFPT_expert
-    varfile: varrf
+    varset: varrf
     vartype: integer
 - !variable
     abivarname: rfasr
@@ -23899,7 +23899,7 @@
          .
         </p>
     topics: DFPT_basic
-    varfile: varrf
+    varset: varrf
     vartype: integer
 - !variable
     abivarname: rfatpol
@@ -23948,7 +23948,7 @@
          ).
         </p>
     topics: DFPT_basic
-    varfile: varrf
+    varset: varrf
     vartype: integer
 - !variable
     abivarname: rfddk
@@ -23981,7 +23981,7 @@
          </ul>
         </p>
     topics: DFPT_basic
-    varfile: varrf
+    varset: varrf
     vartype: integer
 - !variable
     abivarname: rfdir
@@ -24023,7 +24023,7 @@
         should not be considered.
         </p>
     topics: DFPT_compulsory
-    varfile: varrf
+    varset: varrf
     vartype: integer
 - !variable
     abivarname: rfelfd
@@ -24077,7 +24077,7 @@
         it is usually not applied for the d/dk response).
         </p>
     topics: EffMass_compulsory, DFPT_compulsory
-    varfile: varrf
+    varset: varrf
     vartype: integer
 - !variable
     abivarname: rfmagn
@@ -24099,7 +24099,7 @@
          has Zeeman form.
         </p>
     topics: DFPT_compulsory
-    varfile: varrf
+    varset: varrf
     vartype: integer
 - !variable
     abivarname: rfmeth
@@ -24120,7 +24120,7 @@
         is allowed.
         </p>
     topics: DFPT_expert
-    varfile: varrf
+    varset: varrf
     vartype: integer
 - !variable
     abivarname: rfphon
@@ -24140,7 +24140,7 @@
         to run phonon response function calculations.
         </p>
     topics: DFPT_compulsory
-    varfile: varrf
+    varset: varrf
     vartype: integer
 - !variable
     abivarname: rfstrs
@@ -24180,7 +24180,7 @@
          .
         </p>
     topics: DFPT_compulsory
-    varfile: varrf
+    varset: varrf
     vartype: integer
 - !variable
     abivarname: rfuser
@@ -24228,7 +24228,7 @@
         as well as to the ipert local variable.
         </p>
     topics: DFPT_expert
-    varfile: varrf
+    varset: varrf
     vartype: integer
 - !variable
     abivarname: rhoqpmix
@@ -24251,7 +24251,7 @@
         [[gwcalctyp]] &#62;&#61; 20.
         </p>
     topics: GW_useful
-    varfile: vargw
+    varset: vargw
     vartype: real
 - !variable
     abivarname: rprim
@@ -24398,7 +24398,7 @@
         but the value rescaled by [[scalecart]].
         </p>
     topics: crystal_compulsory
-    varfile: varbas
+    varset: varbas
     vartype: real
 - !variable
     abivarname: rprimd
@@ -24436,7 +24436,7 @@
         It is [[EVOLVING]] only if [[ionmov]]==2 and [[optcell]]/=0, otherwise it is fixed.
         <br />
     topics: crystal_internal
-    varfile: varbas
+    varset: varbas
     vartype: real
 - !variable
     abivarname: scalecart
@@ -24469,7 +24469,7 @@
         and then scalecart will be set to the default values. So, it will not be echoed.
         </p>
     topics: crystal_useful
-    varfile: varbas
+    varset: varbas
     vartype: real
 - !variable
     abivarname: scphon_supercell
@@ -24496,7 +24496,7 @@
         TO BE IMPROVED : should contain a tutorial on how to do self-consistent phonon calculations, David Waroquiers 090831
         </p>
     topics: DFPT_expert
-    varfile: vargs
+    varset: vargs
     vartype: integer
 - !variable
     abivarname: scphon_temp
@@ -24521,7 +24521,7 @@
         used, and consequent anharmonic effects. Experimental.
         </p>
     topics: DFPT_expert
-    varfile: vargs
+    varset: vargs
     vartype: real
 - !variable
     abivarname: shiftk
@@ -24638,7 +24638,7 @@
         symmetry axis.
         </p>
     topics: k-points_useful
-    varfile: varbas
+    varset: varbas
     vartype: real
 - !variable
     abivarname: shiftq
@@ -24675,7 +24675,7 @@
         use, and suitable values for these shifts.
         </p>
     topics: DFPT_useful
-    varfile: vargs
+    varset: vargs
     vartype: real
 - !variable
     abivarname: signperm
@@ -24692,7 +24692,7 @@
         +1 favors alternation of species
         -1 favors segregation
     topics: MolecularDynamics_expert
-    varfile: varrlx
+    varset: varrlx
     vartype: integer
 - !variable
     abivarname: slabwsrad
@@ -24717,7 +24717,7 @@
         By default, given in Bohr atomic units (1 Bohr=0.5291772108 Angstroms).
         </p>
     topics: otherGS_slab
-    varfile: vargs
+    varset: vargs
     vartype: real
 - !variable
     abivarname: slabzbeg
@@ -24746,7 +24746,7 @@
         so the positive charge density is invariant along the xy plane as well as the electrostatic potential generated by it.
         </p>
     topics: otherGS_slab
-    varfile: vargs
+    varset: vargs
     vartype: real
 - !variable
     abivarname: slabzend
@@ -24775,7 +24775,7 @@
         so the positive charge density is invariant along the xy plane as well as the electrostatic potential generated by it.
         </p>
     topics: otherGS_slab
-    varfile: vargs
+    varset: vargs
     vartype: real
 - !variable
     abivarname: smdelta
@@ -24812,7 +24812,7 @@
          </ul>
         </p>
     topics: TDep_compulsory
-    varfile: varrf
+    varset: varrf
     vartype: integer
 - !variable
     abivarname: so_psp
@@ -24863,7 +24863,7 @@
         between [[so_psp]] and so_typat, it was dangerous to continue to allow the use of so_typat.
         </p>
     topics: spinpolarisation_basic
-    varfile: vargs
+    varset: vargs
     vartype: integer
 - !variable
     abivarname: spbroad
@@ -24883,7 +24883,7 @@
         the delta function is replaced by the gaussian approximant ([[spmeth]]==2), the standard deviation of the gaussian
         is given by [[spbroad]].
     topics: GW_useful
-    varfile: vargw
+    varset: vargw
     vartype: real
 - !variable
     abivarname: spgaxor
@@ -24986,7 +24986,7 @@
          </ol>
         </p>
     topics: crystal_expert
-    varfile: vargeo
+    varset: vargeo
     vartype: integer
 - !variable
     abivarname: spgorig
@@ -25017,7 +25017,7 @@
          .
         </p>
     topics: crystal_expert
-    varfile: vargeo
+    varset: vargeo
     vartype: integer
 - !variable
     abivarname: spgroup
@@ -25065,7 +25065,7 @@
          .
         </p>
     topics: crystal_expert
-    varfile: vargeo
+    varset: vargeo
     vartype: integer
 - !variable
     abivarname: spgroupma
@@ -25113,7 +25113,7 @@
         [[tnons]] and [[symafm]].
         </p>
     topics: spinpolarisation_useful
-    varfile: vargeo
+    varset: vargeo
     vartype: integer
 - !variable
     abivarname: spinat
@@ -25204,7 +25204,7 @@
          </li>
         </p>
     topics: spinpolarisation_basic
-    varfile: vargs
+    varset: vargs
     vartype: real
 - !variable
     abivarname: spinmagntarget
@@ -25245,7 +25245,7 @@
         spin up Fermi energy.
         </p>
     topics: spinpolarisation_useful
-    varfile: varff
+    varset: varff
     vartype: real
 - !variable
     abivarname: spmeth
@@ -25311,7 +25311,7 @@
          </ul>
         </p>
     topics: GW_useful
-    varfile: vargw
+    varset: vargw
     vartype: integer
 - !variable
     abivarname: spnorbscl
@@ -25331,7 +25331,7 @@
         but are not expected to correspond to any physical situation.
         </p>
     topics: PAW_useful
-    varfile: varpaw
+    varset: varpaw
     vartype: real
 - !variable
     abivarname: stmbias
@@ -25368,7 +25368,7 @@
         one has also to specify an independent broadening [[tsmear]].
         </p>
     topics: GSgeneral_useful
-    varfile: vargs
+    varset: vargs
     vartype: real
 - !variable
     abivarname: strfact
@@ -25394,7 +25394,7 @@
         stresses.
         </p>
     topics: GeoOpt_basic
-    varfile: varrlx
+    varset: varrlx
     vartype: real
 - !variable
     abivarname: string_algo
@@ -25470,7 +25470,7 @@
          </ul>
         </p>
     topics: TransPath_useful
-    varfile: varrlx
+    varset: varrlx
     vartype: integer
 - !variable
     abivarname: strprecon
@@ -25491,7 +25491,7 @@
         default value, e.g. set it to 0.1 .
         </p>
     topics: GSgeneral_useful, GeoOpt_useful
-    varfile: varrlx
+    varset: varrlx
     vartype: real
 - !variable
     abivarname: strtarget
@@ -25521,7 +25521,7 @@
         <br />
         Not used if [[optcell]]==0.
     topics: GSgeneral_useful, GeoOpt_useful
-    varfile: varrlx
+    varset: varrlx
     vartype: real
 - !variable
     abivarname: symafm
@@ -25567,7 +25567,7 @@
          In other cases they are not used.
         </p>
     topics: spinpolarisation_useful
-    varfile: vargs
+    varset: vargs
     vartype: integer
 - !variable
     abivarname: symchi
@@ -25600,7 +25600,7 @@
          </ul>
         </p>
     topics: GW_expert
-    varfile: vargw
+    varset: vargw
     vartype: integer
 - !variable
     abivarname: symdynmat
@@ -25617,7 +25617,7 @@
         If symdynmat is equal to 1, the dynamical matrix is symmetrized before the diagonalization (same meaning as the corresponding anaddb variable).
         Note that symdynmat==1 will automatically enable the symmetrization of the electron-phonon linewidths.
     topics: DFPT_useful
-    varfile: vareph
+    varset: vareph
     vartype: integer
 - !variable
     abivarname: symmorphi
@@ -25649,7 +25649,7 @@
         [[symmorphi]]=0 was to be used, together with [[nsym]]=0.
         </p>
     topics: crystal_expert
-    varfile: vardev
+    varset: vardev
     vartype: integer
 - !variable
     abivarname: symrel
@@ -25707,7 +25707,7 @@
         will be computed automatically.
         </p>
     topics: crystal_useful
-    varfile: varbas
+    varset: varbas
     vartype: integer
 - !variable
     abivarname: symsigma
@@ -25743,7 +25743,7 @@
         the initial accidental degeneracy.
         </p>
     topics: GW_expert
-    varfile: vargw
+    varset: vargw
     vartype: integer
 - !variable
     abivarname: td_maxene
@@ -25776,7 +25776,7 @@
         way to decrease N.
         </p>
     topics: TDDFT_useful
-    varfile: varrf
+    varset: varrf
     vartype: real
 - !variable
     abivarname: td_mexcit
@@ -25810,7 +25810,7 @@
         way to decrease N.
         </p>
     topics: TDDFT_useful
-    varfile: varrf
+    varset: varrf
     vartype: real
 - !variable
     abivarname: tfkinfunc
@@ -25871,7 +25871,7 @@
          </ul>
         </p>
     topics: recursion_compulsory
-    varfile: vardev
+    varset: vardev
     vartype: integer
 - !variable
     abivarname: tfw_toldfe
@@ -25892,7 +25892,7 @@
         initialization steps (without gradient correction) to stop and the gradient correction to be added.<br/>
         Can be specified in Ha (the default), Ry, eV or Kelvin, since it has the 'ENERGY' characteristics.
     topics: recursion_useful
-    varfile: vardev
+    varset: vardev
     vartype: real
 - !variable
     abivarname: timopt
@@ -25940,7 +25940,7 @@
         The sum of the independent parts is closer to 100% than for [[timopt]]=-3.
         </p>
     topics: GSgeneral_expert
-    varfile: vargs
+    varset: vargs
     vartype: integer
 - !variable
     abivarname: tl_nprccg
@@ -25964,7 +25964,7 @@
         TO BE IMPROVED : all tl_* and wvl_* variables should contain a link to a tutorial, David Waroquiers 090831.
         </p>
     topics: Wavelets_expert
-    varfile: vargs
+    varset: vargs
     vartype: integer
 - !variable
     abivarname: tl_radius
@@ -25990,7 +25990,7 @@
         with the exponential decay around the grid.
         </p>
     topics: Wavelets_useful
-    varfile: vargs
+    varset: vargs
     vartype: real
 - !variable
     abivarname: tnons
@@ -26022,7 +26022,7 @@
         is computed automatically.
         </p>
     topics: crystal_useful
-    varfile: varbas
+    varset: varbas
     vartype: real
 - !variable
     abivarname: toldfe
@@ -26072,7 +26072,7 @@
         input variable defined generically.
         </p>
     topics: convergency_basic
-    varfile: varbas
+    varset: varbas
     vartype: real
 - !variable
     abivarname: toldff
@@ -26119,7 +26119,7 @@
         input variable defined generically.
         </p>
     topics: GSgeneral_useful
-    varfile: varbas
+    varset: varbas
     vartype: real
 - !variable
     abivarname: tolimg
@@ -26149,7 +26149,7 @@
          No meaning for RF calculations.
         </p>
     topics: TransPath_basic
-    varfile: varrlx
+    varset: varrlx
     vartype: real
 - !variable
     abivarname: tolmxde
@@ -26176,7 +26176,7 @@
          No meaning for RF calculations.
         </p>
     topics: GeoOpt_basic
-    varfile: varrlx
+    varset: varrlx
     vartype: real
 - !variable
     abivarname: tolmxf
@@ -26212,7 +26212,7 @@
          No meaning for RF calculations.
         </p>
     topics: GeoOpt_basic
-    varfile: varrlx
+    varset: varrlx
     vartype: real
 - !variable
     abivarname: tolrde
@@ -26242,7 +26242,7 @@
         ratio, for historical reasons.
         </p>
     topics: convergency_expert
-    varfile: vardev
+    varset: vardev
     vartype: real
 - !variable
     abivarname: tolrff
@@ -26288,7 +26288,7 @@
         input variable defined generically.
         </p>
     topics: convergency_basic, GSgeneral_useful
-    varfile: varbas
+    varset: varbas
     vartype: real
 - !variable
     abivarname: tolsym
@@ -26314,7 +26314,7 @@
         will be automatically symmetrized by the symmetry operations that will have been found.
         </p>
     topics: crystal_useful
-    varfile: vargeo
+    varset: vargeo
     vartype: real
 - !variable
     abivarname: tolvrs
@@ -26365,7 +26365,7 @@
         input variable defined generically.
         </p>
     topics: convergency_basic
-    varfile: varbas
+    varset: varbas
     vartype: real
 - !variable
     abivarname: tolwfr
@@ -26460,7 +26460,7 @@
         However, a non-zero value for one such variable for one dataset will have precedence on the non-zero value for another
         input variable defined generically.
     topics: convergency_basic
-    varfile: varbas
+    varset: varbas
     vartype: real
 - !variable
     abivarname: tphysel
@@ -26496,7 +26496,7 @@
         to define the entropy contribution to the free energy.
         </p>
     topics: GSgeneral_useful
-    varfile: vargs
+    varset: vargs
     vartype: real
 - !variable
     abivarname: tsmear
@@ -26538,7 +26538,7 @@
         by M. Verstraete and X. Gonze, Phys. Rev. B (2002).
         </p>
     topics: GSgeneral_basic
-    varfile: vargs
+    varset: vargs
     vartype: real
 - !variable
     abivarname: typat
@@ -26593,7 +26593,7 @@
         user, while keeping efficiency.
         </p>
     topics: GSgeneral_basic
-    varfile: varbas
+    varset: varbas
     vartype: integer
 - !variable
     abivarname: ucrpa
@@ -26641,7 +26641,7 @@
         <p>
         </p>
     topics: CRPA_compulsory
-    varfile: vargw
+    varset: vargw
     vartype: integer
 - !variable
     abivarname: ucrpa_bands
@@ -26665,7 +26665,7 @@
         <p>
         </p>
     topics: CRPA_basic
-    varfile: vargw
+    varset: vargw
     vartype: integer
 - !variable
     abivarname: ucrpa_window
@@ -26691,7 +26691,7 @@
         <p>
         </p>
     topics: CRPA_basic
-    varfile: vargw
+    varset: vargw
     vartype: real
 - !variable
     abivarname: udtset
@@ -26729,7 +26729,7 @@
          If [[udtset]] is used, the input variable [[jdtset]] cannot be used.
         </p>
     topics: multidtset_basic
-    varfile: varbas
+    varset: varbas
     vartype: integer
 - !variable
     abivarname: upawu
@@ -26782,7 +26782,7 @@
          </pre>
         </p>
     topics: DFT+U_compulsory
-    varfile: varpaw
+    varset: varpaw
     vartype: real
 - !variable
     abivarname: use_gemm_nonlop
@@ -26807,7 +26807,7 @@
          The performance depends crucially on having a good BLAS installed. Provided the BLAS supports OpenMP, this option also yields very good scaling for the nonlocal operator.
         </p>
     topics: parallelism_expert
-    varfile: vardev
+    varset: vardev
     vartype: integer
 - !variable
     abivarname: use_gpu_cuda
@@ -26839,7 +26839,7 @@
         can be poor.
         </p>
     topics: parallelism_expert
-    varfile: varpar
+    varset: varpar
     vartype: integer
 - !variable
     abivarname: use_nonscf_gkk
@@ -26861,7 +26861,7 @@
          Caveat: Note that very tight convergence of ground state and phonon calculations is necessary to get good GKK matrix elements! [[tolwfr]] = 1.e-24 or so is recommended everywhere. There may be problems using use_nonscf_gkk = 1 with non-symmorphic symmetries - please check (at least) that lifetimes for phonons go to 0 for acoustic modes at Gamma.
         </p>
     topics: ElPhon_expert
-    varfile: vardev
+    varset: vardev
     vartype: integer
 - !variable
     abivarname: use_slk
@@ -26880,7 +26880,7 @@
          If set to 1, enable the use of ScaLapack within LOBPCG.
         </p>
     topics: parallelism_expert
-    varfile: varpar
+    varset: varpar
     vartype: integer
 - !variable
     abivarname: usedmatpu
@@ -26914,7 +26914,7 @@
          <br />
         </p>
     topics: DFT+U_useful
-    varfile: varpaw
+    varset: varpaw
     vartype: integer
 - !variable
     abivarname: usedmft
@@ -26988,7 +26988,7 @@
         of the calculation. They can be used by an external code or used to compute the screened interaction (see variable [[ucrpa]]).
         </p>
     topics: DMFT_compulsory
-    varfile: vardev
+    varset: vardev
     vartype: integer
 - !variable
     abivarname: useexexch
@@ -27008,7 +27008,7 @@
         [[lexexch]]. To change the ratio of exact exchange, see also [[exchmix]].
         </p>
     topics: xc_useful
-    varfile: varpaw
+    varset: varpaw
     vartype: integer
 - !variable
     abivarname: usefock
@@ -27035,7 +27035,7 @@
          </ul>
         </p>
     topics: Hybrids_internal
-    varfile: varint
+    varset: varint
     vartype: integer
 - !variable
     abivarname: usekden
@@ -27056,7 +27056,7 @@
         density is not computed during the self-consistency loop.
         </p>
     topics: xc_expert
-    varfile: vargs
+    varset: vargs
     vartype: integer
 - !variable
     abivarname: usepaw
@@ -27084,7 +27084,7 @@
         with either type of calculation.
         </p>
     topics: PAW_internal
-    varfile: varint
+    varset: varint
     vartype: integer
 - !variable
     abivarname: usepawu
@@ -27170,7 +27170,7 @@
          <br />
         </p>
     topics: DFT+U_compulsory
-    varfile: varpaw
+    varset: varpaw
     vartype: integer
 - !variable
     abivarname: usepotzero
@@ -27198,7 +27198,7 @@
          </ul>
         </p>
     topics: otherGS_expert
-    varfile: varpaw
+    varset: varpaw
     vartype: integer
 - !variable
     abivarname: userec
@@ -27218,7 +27218,7 @@
         activated (see [[tfkinfunc]]).
         </p>
     topics: recursion_internal
-    varfile: varint
+    varset: varint
     vartype: integer
 - !variable
     abivarname: useria
@@ -27244,7 +27244,7 @@
         e.g. dtset%useria .
         </p>
     topics: otherGS_expert
-    varfile: vardev
+    varset: vardev
     vartype: integer
 - !variable
     abivarname: userib
@@ -27270,7 +27270,7 @@
         e.g. dtset%useria .
         </p>
     topics: otherGS_expert
-    varfile: vardev
+    varset: vardev
     vartype: integer
 - !variable
     abivarname: useric
@@ -27296,7 +27296,7 @@
         e.g. dtset%useria .
         </p>
     topics: otherGS_expert
-    varfile: vardev
+    varset: vardev
     vartype: integer
 - !variable
     abivarname: userid
@@ -27322,7 +27322,7 @@
         e.g. dtset%useria .
         </p>
     topics: otherGS_expert
-    varfile: vardev
+    varset: vardev
     vartype: integer
 - !variable
     abivarname: userie
@@ -27348,7 +27348,7 @@
         e.g. dtset%useria .
         </p>
     topics: otherGS_expert
-    varfile: vardev
+    varset: vardev
     vartype: integer
 - !variable
     abivarname: userra
@@ -27366,7 +27366,7 @@
          These are user-definable with the same purpose as [[useria]] and cie.
         </p>
     topics: otherGS_expert
-    varfile: vardev
+    varset: vardev
     vartype: real
 - !variable
     abivarname: userrb
@@ -27384,7 +27384,7 @@
          These are user-definable with the same purpose as [[useria]] and cie.
         </p>
     topics: otherGS_expert
-    varfile: vardev
+    varset: vardev
     vartype: real
 - !variable
     abivarname: userrc
@@ -27402,7 +27402,7 @@
          These are user-definable with the same purpose as [[useria]] and cie.
         </p>
     topics: otherGS_expert
-    varfile: vardev
+    varset: vardev
     vartype: real
 - !variable
     abivarname: userrd
@@ -27420,7 +27420,7 @@
          These are user-definable with the same purpose as [[useria]] and cie.
         </p>
     topics: otherGS_expert
-    varfile: vardev
+    varset: vardev
     vartype: real
 - !variable
     abivarname: userre
@@ -27438,7 +27438,7 @@
          These are user-definable with the same purpose as [[useria]] and cie.
         </p>
     topics: otherGS_expert
-    varfile: vardev
+    varset: vardev
     vartype: real
 - !variable
     abivarname: usewvl
@@ -27475,7 +27475,7 @@
         metalic systems may be slow to converge.
         </p>
     topics: Wavelets_compulsory
-    varfile: varbas
+    varset: varbas
     vartype: integer
 - !variable
     abivarname: usexcnhat
@@ -27504,7 +27504,7 @@
         run, the code stops.
         </p>
     topics: PAW_useful
-    varfile: varpaw
+    varset: varpaw
     vartype: integer
 - !variable
     abivarname: useylm
@@ -27545,7 +27545,7 @@
          When [[useylm]]=0, the sum over Y_lm can be reduced to a Legendre polynomial form.
         </p>
     topics: GSgeneral_expert
-    varfile: vardev
+    varset: vardev
     vartype: integer
 - !variable
     abivarname: vaclst
@@ -27570,7 +27570,7 @@
          Useful to created vacancies.
         </p>
     topics: crystal_expert
-    varfile: vargeo
+    varset: vargeo
     vartype: integer
 - !variable
     abivarname: vacnum
@@ -27592,7 +27592,7 @@
         atoms is contained in [[vaclst]].
         </p>
     topics: crystal_expert
-    varfile: vargeo
+    varset: vargeo
     vartype: integer
 - !variable
     abivarname: vacuum
@@ -27633,7 +27633,7 @@
         presence or absence of vacuum.
         </p>
     topics: k-points_expert
-    varfile: vargs
+    varset: vargs
     vartype: integer
 - !variable
     abivarname: vacwidth
@@ -27665,7 +27665,7 @@
         investigated direction, must be empty of atoms.
         </p>
     topics: k-points_expert
-    varfile: vargs
+    varset: vargs
     vartype: real
 - !variable
     abivarname: vcutgeo
@@ -27743,7 +27743,7 @@
         defines ....
         </p>
     topics: GWls_compulsory, GW_basic
-    varfile: vargw
+    varset: vargw
     vartype: real
 - !variable
     abivarname: vdw_df_acutmin
@@ -27762,7 +27762,7 @@
         to build angular meshes for the vdW-DF kernel.
         <br />
     topics: vdw_expert
-    varfile: varvdw
+    varset: varvdw
     vartype: real
 - !variable
     abivarname: vdw_df_aratio
@@ -27783,7 +27783,7 @@
         to build angular meshes for the vdW-DF kernel.
         <br />
     topics: vdw_expert
-    varfile: varvdw
+    varset: varvdw
     vartype: real
 - !variable
     abivarname: vdw_df_damax
@@ -27802,7 +27802,7 @@
         to build angular meshes for the vdW-DF kernel.
         <br />
     topics: vdw_expert
-    varfile: varvdw
+    varset: varvdw
     vartype: real
 - !variable
     abivarname: vdw_df_damin
@@ -27821,7 +27821,7 @@
         to build angular meshes for the vdW-DF kernel.
         <br />
     topics: vdw_expert
-    varfile: varvdw
+    varset: varvdw
     vartype: real
 - !variable
     abivarname: vdw_df_dcut
@@ -27840,7 +27840,7 @@
         to build the vdW-DF kernel.
         <br />
     topics: vdw_expert
-    varfile: varvdw
+    varset: varvdw
     vartype: real
 - !variable
     abivarname: vdw_df_dratio
@@ -27861,7 +27861,7 @@
         to build the vdW-DF kernel.
         <br />
     topics: vdw_expert
-    varfile: varvdw
+    varset: varvdw
     vartype: real
 - !variable
     abivarname: vdw_df_dsoft
@@ -27880,7 +27880,7 @@
         to build the vdW-DF kernel.
         <br />
     topics: vdw_expert
-    varfile: varvdw
+    varset: varvdw
     vartype: real
 - !variable
     abivarname: vdw_df_gcut
@@ -27899,7 +27899,7 @@
         to filter the vdW-DF kernel in reciprocal space.
         <br />
     topics: vdw_expert
-    varfile: varvdw
+    varset: varvdw
     vartype: real
 - !variable
     abivarname: vdw_df_ndpts
@@ -27918,7 +27918,7 @@
         to build the vdW-DF kernel.
         <br />
     topics: vdw_expert
-    varfile: varvdw
+    varset: varvdw
     vartype: integer
 - !variable
     abivarname: vdw_df_ngpts
@@ -27937,7 +27937,7 @@
         to build the vdW-DF kernel.
         <br />
     topics: vdw_expert
-    varfile: varvdw
+    varset: varvdw
     vartype: integer
 - !variable
     abivarname: vdw_df_nqpts
@@ -27956,7 +27956,7 @@
         to build the vdW-DF kernel.
         <br />
     topics: vdw_expert
-    varfile: varvdw
+    varset: varvdw
     vartype: integer
 - !variable
     abivarname: vdw_df_nrpts
@@ -27975,7 +27975,7 @@
         to define the sampling of the vdW-DF-kernel in real-space.
         <br />
     topics: vdw_expert
-    varfile: varvdw
+    varset: varvdw
     vartype: integer
 - !variable
     abivarname: vdw_df_nsmooth
@@ -27994,7 +27994,7 @@
         to exponentially smoothen q near q0.
         <br />
     topics: vdw_expert
-    varfile: varvdw
+    varset: varvdw
     vartype: integer
 - !variable
     abivarname: vdw_df_phisoft
@@ -28013,7 +28013,7 @@
         to build the vdW-DF kernel.
         <br />
     topics: vdw_expert
-    varfile: varvdw
+    varset: varvdw
     vartype: real
 - !variable
     abivarname: vdw_df_qcut
@@ -28032,7 +28032,7 @@
         to build the vdW-DF kernel.
         <br />
     topics: vdw_expert
-    varfile: varvdw
+    varset: varvdw
     vartype: real
 - !variable
     abivarname: vdw_df_qratio
@@ -28051,7 +28051,7 @@
         .
         <br />
     topics: vdw_expert
-    varfile: varvdw
+    varset: varvdw
     vartype: real
 - !variable
     abivarname: vdw_df_rcut
@@ -28070,7 +28070,7 @@
         to define the vdW-DF kernel cut-off radius.
         <br />
     topics: vdw_expert
-    varfile: varvdw
+    varset: varvdw
     vartype: real
 - !variable
     abivarname: vdw_df_rsoft
@@ -28089,7 +28089,7 @@
         to build the vdW-DF kernel.
         <br />
     topics: vdw_expert
-    varfile: varvdw
+    varset: varvdw
     vartype: real
 - !variable
     abivarname: vdw_df_threshold
@@ -28113,7 +28113,7 @@
         in the vdW-DF energy contributions never being calculated.
         </p>
     topics: vdw_expert
-    varfile: varvdw
+    varset: varvdw
     vartype: real
 - !variable
     abivarname: vdw_df_tolerance
@@ -28132,7 +28132,7 @@
         to build the vdW-DF kernel.
         <br />
     topics: vdw_expert
-    varfile: varvdw
+    varset: varvdw
     vartype: real
 - !variable
     abivarname: vdw_df_tweaks
@@ -28157,7 +28157,7 @@
         </b>
         <br />
     topics: vdw_expert
-    varfile: varvdw
+    varset: varvdw
     vartype: integer
 - !variable
     abivarname: vdw_df_zab
@@ -28180,7 +28180,7 @@
         .
         <br />
     topics: vdw_expert
-    varfile: varvdw
+    varset: varvdw
     vartype: real
 - !variable
     abivarname: vdw_nfrag
@@ -28205,7 +28205,7 @@
         faces of the unit cell.
         </p>
     topics: vdw_basic
-    varfile: varvdw
+    varset: varvdw
     vartype: integer
 - !variable
     abivarname: vdw_supercell
@@ -28236,7 +28236,7 @@
 
         </p>
     topics: vdw_basic
-    varfile: varvdw
+    varset: varvdw
     vartype: integer
 - !variable
     abivarname: vdw_tol
@@ -28257,7 +28257,7 @@
         in the potential a pair of atom must have contribution to the energy larger than [[vdw_tol]].
         </p>
     topics: vdw_compulsory
-    varfile: varvdw
+    varset: varvdw
     vartype: real
 - !variable
     abivarname: vdw_tol_3bt
@@ -28291,7 +28291,7 @@
         </ul>
         The last term has been predicted to have an important effect for large molecules (see for e.g. <i> Grimme S.,  J. Chem. Phys. 132, 154104 (2010) </i>). It is however quite costly in computational time for periodic systems and seems to lead to an overestimation of lattice parameters for weakly bound systems (see for e.g. <i> Reckien W., J. Chem. Phys. 132, 154104(2010) </i>). Still, its contribution to energy, to forces and to stress is available (not planned for elastic constants, dynamical matrix and internal strains)
     topics: vdw_basic
-    varfile: varvdw
+    varset: varvdw
     vartype: real
 - !variable
     abivarname: vdw_typfrag
@@ -28322,7 +28322,7 @@
         can be found in the output file in xyz format for easy visualization.
         </p>
     topics: vdw_basic
-    varfile: varvdw
+    varset: varvdw
     vartype: integer
 - !variable
     abivarname: vdw_xc
@@ -28452,7 +28452,7 @@
         (<a href="https://dx.doi.org/10.1103/PhysRevLett.103.096102">doi:10.1103/PhysRevLett.103.096102</a>)
         </p>
     topics: vdw_compulsory
-    varfile: varvdw
+    varset: varvdw
     vartype: integer
 - !variable
     abivarname: vel
@@ -28489,7 +28489,7 @@
          Velocities evolve is [[ionmov]]==1.
         </p>
     topics: PIMD_useful, MolecularDynamics_basic
-    varfile: varrlx
+    varset: varrlx
     vartype: real
 - !variable
     abivarname: vel_cell
@@ -28521,7 +28521,7 @@
         is described).
         </p>
     topics: PIMD_expert
-    varfile: varrlx
+    varset: varrlx
     vartype: real
 - !variable
     abivarname: vis
@@ -28579,7 +28579,7 @@
         <br />
         In the case of Path-Integral Molecular Dynamics using the Langevin Thermostat ([[imgmov]]=9), [[vis]] defines the friction coefficient, in atomic units. Typical value range is 0.00001-0.001.
     topics: PIMD_basic,  MolecularDynamics_basic
-    varfile: varrlx
+    varset: varrlx
     vartype: real
 - !variable
     abivarname: vprtrb
@@ -28619,7 +28619,7 @@
          </ul>
         </p>
     topics: DFPT_expert
-    varfile: varff
+    varset: varff
     vartype: real
 - !variable
     abivarname: w90iniprj
@@ -28679,7 +28679,7 @@
          </ul>
         </p>
     topics: Wannier_basic
-    varfile: varw90
+    varset: varw90
     vartype: integer
 - !variable
     abivarname: w90prtunk
@@ -28784,7 +28784,7 @@
         acceptable plot, prtunk can be set to 1 to output every grid point.
         (You should try spline interpolation in XCrysDen first.)
     topics: Wannier_basic
-    varfile: varw90
+    varset: varw90
     vartype: integer
 - !variable
     abivarname: wfoptalg
@@ -28890,7 +28890,7 @@
          </ul>
         </p>
     topics: convergency_expert
-    varfile: vardev
+    varset: vardev
     vartype: integer
 - !variable
     abivarname: wtatcon
@@ -28985,7 +28985,7 @@
          = constant.
         </p>
     topics: PIMD_useful, MolecularDynamics_useful, GeoOpt_useful
-    varfile: varrlx
+    varset: varrlx
     vartype: real
 - !variable
     abivarname: wtk
@@ -29018,7 +29018,7 @@
         except if [[iscf]]=-3.
         </p>
     topics: k-points_useful
-    varfile: varbas
+    varset: varbas
     vartype: real
 - !variable
     abivarname: wtq
@@ -29036,7 +29036,7 @@
          Gives the current q-point weight.
         </p>
     topics: DFPT_useful
-    varfile: vargs
+    varset: vargs
     vartype: real
 - !variable
     abivarname: wvl_bigdft_comp
@@ -29058,7 +29058,7 @@
         When it is set to 1, ABINIT will follow the workflow as in BigDFT stand-alone.
         Therefore, the results must be exactly the same with the two codes.
     topics: Wavelets_expert
-    varfile: vargs
+    varset: vargs
     vartype: integer
 - !variable
     abivarname: wvl_crmult
@@ -29083,7 +29083,7 @@
          This factor is responsible for the amount of used memory (see also [[wvl_hgrid]]).
         </p>
     topics: Wavelets_basic
-    varfile: vargs
+    varset: vargs
     vartype: real
 - !variable
     abivarname: wvl_frmult
@@ -29112,7 +29112,7 @@
          This factor is responsible for the amount of used memory (see also [[wvl_hgrid]]).
         </p>
     topics: Wavelets_basic
-    varfile: vargs
+    varset: vargs
     vartype: real
 - !variable
     abivarname: wvl_hgrid
@@ -29134,7 +29134,7 @@
         computation. The value is a length in atomic units.
         </p>
     topics: Wavelets_basic
-    varfile: varbas
+    varset: varbas
     vartype: real
 - !variable
     abivarname: wvl_ngauss
@@ -29157,7 +29157,7 @@
         The fit is done for wvl_ngauss(1), wvl_ngauss(1)+1 ... up to wvl_ngauss(2) Gaussians.
         </p>
     topics: Wavelets_expert
-    varfile: vargs
+    varset: vargs
     vartype: integer
 - !variable
     abivarname: wvl_nprccg
@@ -29179,7 +29179,7 @@
         iterations on each wavefunction convergence step.
         </p>
     topics: Wavelets_expert
-    varfile: vargs
+    varset: vargs
     vartype: integer
 - !variable
     abivarname: xangst
@@ -29222,7 +29222,7 @@
         [[xcart]], [[xangst]] is not internal.
         </p>
     topics: crystal_compulsory
-    varfile: varbas
+    varset: varbas
     vartype: real
 - !variable
     abivarname: xc_denpos
@@ -29255,7 +29255,7 @@
         a bit with this value to avoid incorrect calculations.
         </p>
     topics: xc_expert
-    varfile: vardev
+    varset: vardev
     vartype: real
 - !variable
     abivarname: xc_tb09_c
@@ -29289,7 +29289,7 @@
         The c parameter can also be fixed to some (property-optimized or material-optimized) value by using this variable.
         </p>
     topics: xc_expert
-    varfile: vardev
+    varset: vardev
     vartype: real
 - !variable
     abivarname: xcart
@@ -29332,7 +29332,7 @@
          Atomic positions evolve if [[ionmov]]/=0 .
         </p>
     topics: crystal_compulsory
-    varfile: varbas
+    varset: varbas
     vartype: real
 - !variable
     abivarname: xclevel
@@ -29365,7 +29365,7 @@
          </ul>
         </p>
     topics: xc_internal
-    varfile: varint
+    varset: varint
     vartype: integer
 - !variable
     abivarname: xred
@@ -29410,7 +29410,7 @@
          Atomic positions evolve if [[ionmov]]/=0 .
         </p>
     topics: crystal_compulsory
-    varfile: varbas
+    varset: varbas
     vartype: real
 - !variable
     abivarname: xredsph_extra
@@ -29433,7 +29433,7 @@
         See [[natsph_extra]] for a more complete description.
         </p>
     topics: printing_prdos
-    varfile: vargs
+    varset: vargs
     vartype: real
 - !variable
     abivarname: xyzfile
@@ -29457,7 +29457,7 @@
          Notes: do not quote the file name in the abinit input file, simply leave a space after xyzfile. The xyz format is the number of atoms on the first line, a comment line, then one line per atom, with the element as a 2 letter symbol ("As" "O" or "Pu") and the three cartesian coordinates in Angstrom.
         </p>
     topics: crystal_expert
-    varfile: vargeo
+    varset: vargeo
     vartype: string
 - !variable
     abivarname: zcut
@@ -29493,7 +29493,7 @@
          Ideally, one should make a convergence study decreasing the value of [[zcut]] for increasing number of k-points.
         </p>
     topics: GW_expert, BSE_expert
-    varfile: vargw
+    varset: vargw
     vartype: real
 - !variable
     abivarname: zeemanfield
@@ -29515,7 +29515,7 @@
         with H in Amperes/metre.
         </p>
     topics: spinpolarisation_expert
-    varfile: varff
+    varset: varff
     vartype: real
 - !variable
     abivarname: ziontypat
@@ -29535,7 +29535,7 @@
         that are needed to screen exactly the pseudopotential).
         </p>
     topics: GSgeneral_internal
-    varfile: varint
+    varset: varint
     vartype: real
 - !variable
     abivarname: znucl
@@ -29567,6 +29567,6 @@
         with only a jellium surface, ABINIT sets arbitrarily the covalent radius to one.
         </p>
     topics: GSgeneral_basic
-    varfile: varbas
+    varset: varbas
     vartype: real
 
