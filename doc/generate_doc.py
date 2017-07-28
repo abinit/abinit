@@ -70,7 +70,7 @@ list_infos_dir=[]
 list_infos_dir.append({"dir_name":"bibliography","root_filname":"",
                                                     "yml_files":["bibfiles"]})
 list_infos_dir.append({"dir_name":"input_variables","root_filname":"",
-                                                    "yml_files":["abinit_vars","characteristics","list_external","varsets"]})
+                                                    "yml_files":["abinit_vars","characteristics","list_externalvars","varsets"]})
 list_infos_dir.append({"dir_name":"theory","root_filname":"theorydoc",
                                                     "yml_files":["theorydocs"]})
 list_infos_dir.append({"dir_name":"topics","root_filname":"topic",
@@ -82,7 +82,7 @@ list_infos_dir.append({"dir_name":"users","root_filname":"help",
 msgs={"bibfiles"       :"as database input file for the list of generated files in the bibliography directory ...",
       "abinit_vars"    :"as database input file for the input variables and their characteristics ...",
       "characteristics":"as database input file for the list of allowed characteristics ...",
-      "list_external"  :"as database input file for the list of external parameters (known at compile or run time) ...",
+      "list_externalvars"  :"as database input file for the list of external parameters (known at compile or run time) ...",
       "varsets"        :"as database input file for the list of varsets ...",
       "theorydocs"     :"as database input file for the list of theory documents ...",
       "default_topic"  :"to initialize the topic html files with default values ...",
@@ -107,7 +107,7 @@ for infos_dir in list_infos_dir:
 
 # These ones are quite often used, so copy them ...
 abinit_vars=yml_in["abinit_vars"]
-list_external=yml_in["list_external"]
+list_externalvars=yml_in["list_externalvars"]
 varfiles=yml_in["varsets"]
 list_of_topics=yml_in["list_of_topics"]
   
@@ -457,7 +457,7 @@ for var in abinit_vars:
 for item in yml_in["characteristics"]:
   allowed_link_seeds[item]="characteristic"
 
-for item in list_external:
+for item in list_externalvars:
   allowed_link_seeds[item[0]]="input_variable in varset_external"
 
 for i, varfile_info in enumerate(varfiles):
@@ -503,10 +503,10 @@ for i, varfile_info in enumerate(varfiles):
 # Constitute the body of information for the external parameters, stored for the appropriate varfile in all_contents[varfile]
 
 cur_external = []
-for (key,value) in list_external:
+for (key,value) in list_externalvars:
   cur_external.append(key)
 
-for (key, value) in list_external:
+for (key, value) in list_externalvars:
   backlink= ' &nbsp; <a href="../../input_variables/generated_files/varset_external.html#%s">%s</a> &nbsp; ' %(key,key)
   cur_content = "<br><font id=\"title\"><a name=\""+key+"\">"+key+"</a></font>\n"
   cur_content += "<br><font id=\"text\">\n"
@@ -637,7 +637,7 @@ defaultClick(true);\n\
 </script>\n\
 "
   elif varfile == "external":
-    for (key, value) in list_external:
+    for (key, value) in list_externalvars:
       while not key.lower().startswith(cur_let.lower()):
         cur_let = chr(ord(cur_let)+1)
         toc_body += " <br><a id='%s'></a>"%(cur_let)+cur_let+".\n"
