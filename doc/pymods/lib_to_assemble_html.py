@@ -235,7 +235,10 @@ def get_year(name):
 ################################################################################
 
 def bibtex2html(str_input):
-  """ Convert the bibtex notations to html notations inside the string str """
+  """ Convert the bibtex notations to html notations inside the string str 
+      The coding is often primitive and very specialized ... The goal is not to write a complete BibTex parser !
+      If it does not work, modify the *.bibtex entry ...
+  """
 
   str=str_input
 
@@ -243,6 +246,8 @@ def bibtex2html(str_input):
   for i in string.digits:
     string_old='$_'+i+'$'
     string_new="<sub>"+i+"</sub>"
+    str=str.replace(string_old,string_new)
+    string_old='$_{'+i+'}$'
     str=str.replace(string_old,string_new)
 
   #Greek letters
@@ -297,7 +302,7 @@ def bibtex2html(str_input):
     string_new=i
     str=str.replace(string_old,string_new)
 
-  #str=cleaned_str
+  str=cleaned_str
 
   str=str.replace("--","&ndash;")
 
