@@ -322,7 +322,7 @@
   ENTRYTYPE : article
   ID : Benedict1998
   author : Benedict, L. X. and Shirley, E. L. and Bohn, R. B.
-  title : Optical Absorption of Insulators and the Electron-Hole Interaction: An     \textit{Ab Initio}   Calculation
+  title : Optical Absorption of Insulators and the Electron-Hole Interaction: An \textit{Ab Initio} Calculation
   journal : Phys. Rev. Lett.
   year : 1998
   volume : 80
@@ -892,7 +892,7 @@
 -
   ENTRYTYPE : article
   ID : Gonze2009
-  author : X. Gonze and B. Amadon and P.-M. Anglade and  J.-M. Beuken and F. Bottin and P. Boulanger and F. Bruneval and D. Caliste and R. Caracas and M. C\^{o}t\'{e} and T. Deutsch and L. Genovese and Ph. Ghosez and M. Giantomassi and S. Goedecker and D.R. Hamann and P. Hermet and F. Jollet and G. Jomard and S. Leroux and M. Mancini and S. Mazevet and M.J.T. Oliveira and G. Onida and Y. Pouillon and T. Rangel and G.-M. Rignanese and D. Sangalli and R. Shaltaf and M. Torrent and M.J. Verstraete and G. Zerah and J.W. Zwanziger 
+  author : X. Gonze and B. Amadon and P.-M. Anglade and  J.-M. Beuken and F. Bottin and P. Boulanger and F. Bruneval and D. Caliste and R. Caracas and M. C\^{o}t\'{e} and T. Deutsch and L. Genovese and Ph. Ghosez and M. Giantomassi and S. Goedecker and D.R. Hamann and P. Hermet and F. Jollet and G. Jomard and S. Leroux and M. Mancini and S. Mazevet and M.J.T. Oliveira and G. Onida and Y. Pouillon and T. Rangel and G.-M. Rignanese and D. Sangalli and R. Shaltaf and M. Torrent and M.J. Verstraete and G. Zerah and J.W. Zwanziger
   title : {ABINIT}: First-Principle approach to material and nanosystem properties
   journal : Comp. Phys. Comm.
   year : 2009
@@ -2217,7 +2217,7 @@
   ENTRYTYPE : article
   ID : Zwanziger2009
   author : J W Zwanziger
-  title : Computation of Mössbauer isomer shifts from first principles
+  title : Computation of M\"ossbauer isomer shifts from first principles
   journal : Journal of Physics: Condensed Matter
   year : 2009
   volume : 21

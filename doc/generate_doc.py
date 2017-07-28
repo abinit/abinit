@@ -399,7 +399,7 @@ for ref in bibtex_dics:
 lines_txt=""
 for ref in bibtex_dics:
   ID=ref["ID"]
-  lines_txt+= ("[%s] %s \n") %(ID,reference_dic[ID])
+  lines_txt+= ("[%s] %s\n") %(ID,reference_dic[ID])
 
 # Open, write and close the txt file
 file_txt = 'bibliography/generated_files/abiref.txt'
@@ -779,7 +779,7 @@ for topic_name in list_of_topics:
 
   topic_refs=""
   for (i,ID) in enumerate(reflist):
-    topic_refs+="<br> [["+ID+"]] "+reference_dic[ID]+"<br> \n"
+    topic_refs+="<br> [["+ID+"]] "+reference_dic[ID]+"<br>\n"
   topic_refs+="<p>"
   topic_refs=bibtex2html(topic_refs)
 
@@ -1087,7 +1087,7 @@ for ref in bibtex_dics:
     bibliography_content+=('<a id="%s"></a>')%(cur_let)
     if cur_let==ID[0]:
       bibliography_content+=alphalinks+('<hr><hr><h2>%s</h2> \n \n')%(cur_let)
-  bibliography_content+= ('<hr><a id="%s">[%s]</a> (<a href="./bibtex.html#%s">bibtex</a>)\n <br> %s \n') %(ID,ID,ID,reference_dic[ID])
+  bibliography_content+= ('<hr><a id="%s">[%s]</a> (<a href="./bibtex.html#%s">bibtex</a>)\n <br> %s\n') %(ID,ID,ID,reference_dic[ID])
   if len(backlinksID)!=0:
     bibliography_content+= "<br> Referred to in " 
     for link in backlinksID:
