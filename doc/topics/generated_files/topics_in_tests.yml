@@ -148,9 +148,9 @@
 - tests/v5/Input/t06.in:#%% topics = PAW
 - tests/v5/Input/t07.in:#%% topics = positron
 - tests/v5/Input/t08.in:#%% topics = DFT+U
+- tests/v5/Input/t11.in:#%% topics = PAW
 - tests/v5/Input/t112.in:#%% topics = Berry
 - tests/v5/Input/t113.in:#%% topics = Berry
-- tests/v5/Input/t11.in:#%% topics = PAW
 - tests/v5/Input/t14.in:#%% topics = DFT+U, crystal
 - tests/v5/Input/t15.in:#%% topics = DFT+U
 - tests/v5/Input/t16.in:#%% topics = DFT+U, spinpolarisation
