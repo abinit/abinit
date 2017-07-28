@@ -470,7 +470,7 @@ allowed_link_seeds={}
 # Groups of seeds
 
 for var in abinit_vars:
-  allowed_link_seeds[var.abivarname]="input_variable in "+var.varfile
+  allowed_link_seeds[var.abivarname]="input_variable in "+var.varset
 
 for item in yml_in["characteristics"]:
   allowed_link_seeds[item]="characteristic"
@@ -540,7 +540,7 @@ for (key, value) in list_external:
 
 for i, var in enumerate(abinit_vars):
   # Constitute the body of information related to one input variable
-  varfile = var.varfile
+  varfile = var.varset
   all_vars[varfile].append([var.abivarname,var.mnemonics])
   cur_content = ""
   backlink=' &nbsp; <a href="../../input_variables/generated_files/%s.html#%s">%s</a> &nbsp; ' %(varfile,var.abivarname,var.abivarname)
@@ -647,7 +647,7 @@ for i, varfile_info in enumerate(varfiles):
       abivarname=var.abivarname
       if var.characteristics is not None and '[[INTERNAL_ONLY]]' in var.characteristics:
         abivarname = '%'+abivarname
-      curlink = " <li class=\"col-s-6 col-m-3 col-l-2 col-xl-2 col-xxl-1\"><a href=\""+var.varfile+".html#"+var.abivarname+"\">"+abivarname+"</a></li>\n"
+      curlink = " <li class=\"col-s-6 col-m-3 col-l-2 col-xl-2 col-xxl-1\"><a href=\""+var.varset+".html#"+var.abivarname+"\">"+abivarname+"</a></li>\n"
       toc_body += curlink
     toc_body += "</ul></li></ul>\n\
 <script>\n\
@@ -712,7 +712,7 @@ for (tribekey, tribeval) in yml_in["list_tribes"]:
             abivarname=var.abivarname
             if var.characteristics is not None and '[[INTERNAL_ONLY]]' in var.characteristics:
               abivarname = '%'+abivarname
-            topic_invars[topic_name] += '... <a href="../../input_variables/generated_files/'+var.varfile+'.html#'+var.abivarname+'">'+abivarname+'</a>   '
+            topic_invars[topic_name] += '... <a href="../../input_variables/generated_files/'+var.varset+'.html#'+var.abivarname+'">'+abivarname+'</a>   '
             topic_invars[topic_name] += "["+var.mnemonics+"]<br>\n"
     except:
       if debug==1 :
@@ -991,7 +991,7 @@ if activate_translation==1:
             for i, var in enumerate(abinit_vars):
               if var.abivarname in line:
                 varname = var.abivarname
-                varfile = var.varfile
+                varfile = var.varset
                 string_old='<a href="../input_variables/html_automatically_generated/%s.html#%s" target="kwimg">%s</a>'%(varfile,varname,varname)
                 string_new="[["+varname+"]]"
                 line=line.replace('"'+string_old+'"',string_new)
