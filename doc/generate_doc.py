@@ -16,27 +16,9 @@
 
    The result of the expansion of "[[tag]]" will depend on the tag. If valid, the URL will of course
    point to the correct location. The string that will be seen on screen will usually
-   be the string stripped from the pairs of square brackets, but there is an exception, see later.
+   be the string stripped from the pairs of square brackets, but there are exceptions.
    Also, only selected classes of tags can be expanded. Other strings will be declared "FAKE_LINK" on the screen.
-   
-   A. If tag is an ABINIT input variable, mentioned in the database ~abinit/doc/input_variables/origin_files/abinit_vars.yml,
-      or equivalently in the list http://www.abinit.org/inpvars,
-      "[[tag]]" will appear on screen as "tag" without the two pairs of squarebrackets.
-      Example: "[[acell]]" will apear on screen as "acell".
-
-   B. If tag is a bibliographical reference, mentioned in the database ~abinit/doc/bibliography/origin_files/abiref.bib,
-      "[[tag]]" will appear on screen as "[tag]" with onoly one of the two pairs of squarebrackets.
-      Note that such tag must have the form of the name of the first authors, with the first letter uppercase and the other lower case,
-      followed by the year of publication (four digits) and possibly a letter if more than one article would have the same tag.
-      Example: "[[Kohn1965]]" will appear on screen as "[Kohn1965]".
-               "[[Amadon2008b]]" will appear on screen as "[Amadon2008b]".
-
-   C. The tags that starts with "lesson_", "topic_", "theorydoc_", "var", "allvar", "help_" and corresponds to one of the existing
-      lessons of the tutorial, or one of the topics, theorydocs, input variables files, or help files, are allowed tags. 
-      Most of them will appear on screen as "tag" without the two pairs of squarebrackets, EXCEPT the
-      "help_XYZ" ones, that will appear as "XYZ help file".
-      Examples: "[[lesson_base1]]" will appear on screen as "lesson_base1"
-                "[[help_new_user]]" will appear on screen as "new_user help file"
+   More on this topics at https://wiki.abinit.org/doku.php?id=developers:link_shortcuts.
 """
 
 from __future__ import print_function
