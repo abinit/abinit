@@ -1,5 +1,5 @@
 - !variable
-    abivarname: accuracy
+    abivarname: "accuracy"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -580,7 +580,7 @@
     varset: varbas
     vartype: integer
 - !variable
-    abivarname: acell
+    abivarname: "acell"
     characteristics:
     - '[[EVOLVING]]'
     - '[[LENGTH]]'
@@ -616,7 +616,7 @@
     varset: varbas
     vartype: real
 - !variable
-    abivarname: adpimd
+    abivarname: "adpimd"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -652,7 +652,7 @@
     varset: varrlx
     vartype: integer
 - !variable
-    abivarname: adpimd_gamma
+    abivarname: "adpimd_gamma"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -672,7 +672,7 @@
     varset: varrlx
     vartype: real
 - !variable
-    abivarname: algalch
+    abivarname: "algalch"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -732,7 +732,7 @@
     varset: vargs
     vartype: integer
 - !variable
-    abivarname: amu
+    abivarname: "amu"
     characteristics:
     - '[[EVOLVING]]'
     commentdefault: provided by a database of atomic masses.
@@ -795,7 +795,7 @@
     varset: varrlx
     vartype: real
 - !variable
-    abivarname: angdeg
+    abivarname: "angdeg"
     characteristics:
     - '[[INPUT_ONLY]]'
     commentdefault: deduced from '[[rprim]]'
@@ -865,7 +865,7 @@
     varset: varbas
     vartype: real
 - !variable
-    abivarname: asr
+    abivarname: "asr"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -881,7 +881,7 @@
     varset: vareph
     vartype: integer
 - !variable
-    abivarname: atvshift
+    abivarname: "atvshift"
     characteristics:
     - '[[DEVELOP]]'
     commentdefault: null
@@ -923,7 +923,7 @@
     varset: varff
     vartype: real
 - !variable
-    abivarname: autoparal
+    abivarname: "autoparal"
     characteristics:
     - '[[DEVELOP]]'
     commentdefault: null
@@ -1012,7 +1012,7 @@
     varset: varpar
     vartype: integer
 - !variable
-    abivarname: awtr
+    abivarname: "awtr"
     characteristics:
     - '[[GW]]'
     commentdefault: null
@@ -1048,7 +1048,7 @@
     varset: vargw
     vartype: integer
 - !variable
-    abivarname: bandpp
+    abivarname: "bandpp"
     characteristics:
     - '[[DEVELOP]]'
     commentdefault: null
@@ -1098,7 +1098,7 @@
     varset: varpar
     vartype: integer
 - !variable
-    abivarname: bdberry
+    abivarname: "bdberry"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -1134,7 +1134,7 @@
     varset: varff
     vartype: integer
 - !variable
-    abivarname: bdeigrf
+    abivarname: "bdeigrf"
     characteristics:
     - '[[RESPFN]]'
     commentdefault: null
@@ -1159,7 +1159,7 @@
     varset: varrf
     vartype: integer
 - !variable
-    abivarname: bdgw
+    abivarname: "bdgw"
     characteristics:
     - '[[GW]]'
     commentdefault: null
@@ -1222,7 +1222,7 @@
     varset: vargw
     vartype: integer
 - !variable
-    abivarname: berryopt
+    abivarname: "berryopt"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -1354,7 +1354,7 @@
     varset: varff
     vartype: integer
 - !variable
-    abivarname: berrysav
+    abivarname: "berrysav"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -1380,7 +1380,7 @@
     varset: varff
     vartype: integer
 - !variable
-    abivarname: berrystep
+    abivarname: "berrystep"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -1407,7 +1407,7 @@
     varset: varff
     vartype: integer
 - !variable
-    abivarname: bfield
+    abivarname: "bfield"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -1428,7 +1428,7 @@
     varset: varff
     vartype: real
 - !variable
-    abivarname: bmass
+    abivarname: "bmass"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -1447,7 +1447,7 @@
     varset: varrlx
     vartype: real
 - !variable
-    abivarname: boxcenter
+    abivarname: "boxcenter"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -1476,7 +1476,7 @@
     varset: vargs
     vartype: real
 - !variable
-    abivarname: boxcutmin
+    abivarname: "boxcutmin"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -1502,7 +1502,7 @@
     varset: vargs
     vartype: real
 - !variable
-    abivarname: brvltt
+    abivarname: "brvltt"
     characteristics:
     - '[[SYMMETRISER]]'
     commentdefault: null
@@ -1592,7 +1592,7 @@
     varset: vargeo
     vartype: integer
 - !variable
-    abivarname: bs_algorithm
+    abivarname: "bs_algorithm"
     characteristics:
     - '[[BETHE_SALPETER]]'
     commentdefault: null
@@ -1639,7 +1639,7 @@
     varset: varbse
     vartype: integer
 - !variable
-    abivarname: bs_calctype
+    abivarname: "bs_calctype"
     characteristics:
     - '[[BETHE_SALPETER]]'
     commentdefault: null
@@ -1673,7 +1673,7 @@
     varset: varbse
     vartype: integer
 - !variable
-    abivarname: bs_coulomb_term
+    abivarname: "bs_coulomb_term"
     characteristics:
     - '[[BETHE_SALPETER]]'
     commentdefault: null
@@ -1725,7 +1725,7 @@
     varset: varbse
     vartype: integer
 - !variable
-    abivarname: bs_coupling
+    abivarname: "bs_coupling"
     characteristics:
     - '[[BETHE_SALPETER]]'
     commentdefault: null
@@ -1758,7 +1758,7 @@
     varset: varbse
     vartype: integer
 - !variable
-    abivarname: bs_eh_cutoff
+    abivarname: "bs_eh_cutoff"
     characteristics:
     - '[[BETHE_SALPETER]]'
     commentdefault: null
@@ -1782,7 +1782,7 @@
     varset: varbse
     vartype: integer
 - !variable
-    abivarname: bs_exchange_term
+    abivarname: "bs_exchange_term"
     characteristics:
     - '[[BETHE_SALPETER]]'
     commentdefault: null
@@ -1803,7 +1803,7 @@
     varset: varbse
     vartype: integer
 - !variable
-    abivarname: bs_freq_mesh
+    abivarname: "bs_freq_mesh"
     characteristics:
     - '[[BETHE_SALPETER]]'
     - '[[ENERGY]]'
@@ -1832,7 +1832,7 @@
     varset: varbse
     vartype: real
 - !variable
-    abivarname: bs_hayd_term
+    abivarname: "bs_hayd_term"
     characteristics:
     - '[[BETHE_SALPETER]]'
     commentdefault: null
@@ -1866,7 +1866,7 @@
     varset: varbse
     vartype: integer
 - !variable
-    abivarname: bs_haydock_niter
+    abivarname: "bs_haydock_niter"
     characteristics:
     - '[[BETHE_SALPETER]]'
     commentdefault: null
@@ -1887,7 +1887,7 @@
     varset: varbse
     vartype: integer
 - !variable
-    abivarname: bs_haydock_tol
+    abivarname: "bs_haydock_tol"
     characteristics:
     - '[[BETHE_SALPETER]]'
     commentdefault: null
@@ -1937,7 +1937,7 @@
     varset: varbse
     vartype: real
 - !variable
-    abivarname: bs_interp_kmult
+    abivarname: "bs_interp_kmult"
     characteristics:
     - '[[BETHE_SALPETER]]'
     commentdefault: null
@@ -1965,7 +1965,7 @@
     varset: varbse
     vartype: integer
 - !variable
-    abivarname: bs_interp_m3_width
+    abivarname: "bs_interp_m3_width"
     characteristics:
     - '[[BETHE_SALPETER]]'
     commentdefault: null
@@ -1982,7 +1982,7 @@
     varset: varbse
     vartype: real
 - !variable
-    abivarname: bs_interp_method
+    abivarname: "bs_interp_method"
     characteristics:
     - '[[BETHE_SALPETER]]'
     commentdefault: null
@@ -2009,7 +2009,7 @@
     varset: varbse
     vartype: integer
 - !variable
-    abivarname: bs_interp_mode
+    abivarname: "bs_interp_mode"
     characteristics:
     - '[[BETHE_SALPETER]]'
     commentdefault: null
@@ -2042,7 +2042,7 @@
     varset: varbse
     vartype: integer
 - !variable
-    abivarname: bs_interp_prep
+    abivarname: "bs_interp_prep"
     characteristics:
     - '[[BETHE_SALPETER]]'
     commentdefault: null
@@ -2062,7 +2062,7 @@
     varset: varbse
     vartype: integer
 - !variable
-    abivarname: bs_interp_rl_nb
+    abivarname: "bs_interp_rl_nb"
     characteristics:
     - '[[BETHE_SALPETER]]'
     commentdefault: null
@@ -2080,7 +2080,7 @@
     varset: varbse
     vartype: integer
 - !variable
-    abivarname: bs_loband
+    abivarname: "bs_loband"
     characteristics:
     - '[[BETHE_SALPETER]]'
     commentdefault: null
@@ -2102,7 +2102,7 @@
     varset: varbse
     vartype: integer
 - !variable
-    abivarname: bs_nstates
+    abivarname: "bs_nstates"
     characteristics:
     - '[[BETHE_SALPETER]]'
     commentdefault: null
@@ -2124,7 +2124,7 @@
     varset: varbse
     vartype: integer
 - !variable
-    abivarname: builtintest
+    abivarname: "builtintest"
     characteristics:
     - '[[DEVELOP]]'
     commentdefault: null
@@ -2149,7 +2149,7 @@
     varset: vardev
     vartype: integer
 - !variable
-    abivarname: bxctmindg
+    abivarname: "bxctmindg"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -2181,7 +2181,7 @@
     varset: varpaw
     vartype: real
 - !variable
-    abivarname: cd_customnimfrqs
+    abivarname: "cd_customnimfrqs"
     characteristics:
     - '[[GW]]'
     commentdefault: null
@@ -2201,7 +2201,7 @@
     varset: vargw
     vartype: integer
 - !variable
-    abivarname: cd_frqim_method
+    abivarname: "cd_frqim_method"
     characteristics:
     - '[[GW]]'
     commentdefault: null
@@ -2538,7 +2538,7 @@
     varset: vargw
     vartype: integer
 - !variable
-    abivarname: cd_full_grid
+    abivarname: "cd_full_grid"
     characteristics:
     - '[[GW]]'
     commentdefault: null
@@ -2576,7 +2576,7 @@
     varset: vargw
     vartype: integer
 - !variable
-    abivarname: cd_halfway_freq
+    abivarname: "cd_halfway_freq"
     characteristics:
     - '[[GW]]'
     - '[[ENERGY]]'
@@ -2600,7 +2600,7 @@
     varset: vargw
     vartype: real
 - !variable
-    abivarname: cd_imfrqs
+    abivarname: "cd_imfrqs"
     characteristics:
     - '[[GW]]'
     commentdefault: null
@@ -2646,7 +2646,7 @@
     varset: vargw
     vartype: real
 - !variable
-    abivarname: cd_max_freq
+    abivarname: "cd_max_freq"
     characteristics:
     - '[[GW]]'
     - '[[ENERGY]]'
@@ -2670,7 +2670,7 @@
     varset: vargw
     vartype: real
 - !variable
-    abivarname: cd_subset_freq
+    abivarname: "cd_subset_freq"
     characteristics:
     - '[[GW]]'
     commentdefault: null
@@ -2707,7 +2707,7 @@
     varset: vargw
     vartype: integer
 - !variable
-    abivarname: cgtyphf
+    abivarname: "cgtyphf"
     characteristics:
     - '[[DEVELOP]]'
     commentdefault: null
@@ -2733,7 +2733,7 @@
     varset: vardev
     vartype: integer
 - !variable
-    abivarname: charge
+    abivarname: "charge"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -2775,7 +2775,7 @@
     varset: vargs
     vartype: real
 - !variable
-    abivarname: chempot
+    abivarname: "chempot"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -2804,7 +2804,7 @@
     varset: vargeo
     vartype: real
 - !variable
-    abivarname: chkexit
+    abivarname: "chkexit"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -2842,7 +2842,7 @@
     varset: vargs
     vartype: integer
 - !variable
-    abivarname: chkprim
+    abivarname: "chkprim"
     characteristics:
     - '[[SYMMETRY_FINDER]]'
     commentdefault: null
@@ -2871,7 +2871,7 @@
     varset: vargs
     vartype: integer
 - !variable
-    abivarname: chksymbreak
+    abivarname: "chksymbreak"
     characteristics:
     - '[[INPUT_ONLY]]'
     commentdefault: null
@@ -2933,7 +2933,7 @@
     varset: vargs
     vartype: integer
 - !variable
-    abivarname: chneut
+    abivarname: "chneut"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -2950,7 +2950,7 @@
     varset: vareph
     vartype: integer
 - !variable
-    abivarname: cineb_start
+    abivarname: "cineb_start"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -2977,7 +2977,7 @@
     varset: varrlx
     vartype: integer
 - !variable
-    abivarname: cpuh
+    abivarname: "cpuh"
     characteristics:
     - '[[INPUT_ONLY]]'
     commentdefault: null
@@ -3004,7 +3004,7 @@
     varset: vargs
     vartype: real
 - !variable
-    abivarname: cpum
+    abivarname: "cpum"
     characteristics:
     - '[[INPUT_ONLY]]'
     commentdefault: null
@@ -3031,7 +3031,7 @@
     varset: vargs
     vartype: real
 - !variable
-    abivarname: cpus
+    abivarname: "cpus"
     characteristics:
     - '[[NO_MULTI]]'
     commentdefault: null
@@ -3058,7 +3058,7 @@
     varset: vargs
     vartype: real
 - !variable
-    abivarname: d3e_pert1_atpol
+    abivarname: "d3e_pert1_atpol"
     characteristics:
     - '[[NONLINEAR]]'
     commentdefault: null
@@ -3085,7 +3085,7 @@
     varset: varrf
     vartype: integer
 - !variable
-    abivarname: d3e_pert1_dir
+    abivarname: "d3e_pert1_dir"
     characteristics:
     - '[[NONLINEAR]]'
     commentdefault: null
@@ -3113,7 +3113,7 @@
     varset: varrf
     vartype: integer
 - !variable
-    abivarname: d3e_pert1_elfd
+    abivarname: "d3e_pert1_elfd"
     characteristics:
     - '[[NONLINEAR]]'
     commentdefault: null
@@ -3135,7 +3135,7 @@
     varset: varrf
     vartype: integer
 - !variable
-    abivarname: d3e_pert1_phon
+    abivarname: "d3e_pert1_phon"
     characteristics:
     - '[[NONLINEAR]]'
     commentdefault: null
@@ -3155,7 +3155,7 @@
     varset: varrf
     vartype: integer
 - !variable
-    abivarname: d3e_pert2_atpol
+    abivarname: "d3e_pert2_atpol"
     characteristics:
     - '[[NONLINEAR]]'
     commentdefault: null
@@ -3182,7 +3182,7 @@
     varset: varrf
     vartype: integer
 - !variable
-    abivarname: d3e_pert2_dir
+    abivarname: "d3e_pert2_dir"
     characteristics:
     - '[[NONLINEAR]]'
     commentdefault: null
@@ -3210,7 +3210,7 @@
     varset: varrf
     vartype: integer
 - !variable
-    abivarname: d3e_pert2_elfd
+    abivarname: "d3e_pert2_elfd"
     characteristics:
     - '[[NONLINEAR]]'
     commentdefault: null
@@ -3232,7 +3232,7 @@
     varset: varrf
     vartype: integer
 - !variable
-    abivarname: d3e_pert2_phon
+    abivarname: "d3e_pert2_phon"
     characteristics:
     - '[[NONLINEAR]]'
     commentdefault: null
@@ -3252,7 +3252,7 @@
     varset: varrf
     vartype: integer
 - !variable
-    abivarname: d3e_pert3_atpol
+    abivarname: "d3e_pert3_atpol"
     characteristics:
     - '[[NONLINEAR]]'
     commentdefault: null
@@ -3279,7 +3279,7 @@
     varset: varrf
     vartype: integer
 - !variable
-    abivarname: d3e_pert3_dir
+    abivarname: "d3e_pert3_dir"
     characteristics:
     - '[[NONLINEAR]]'
     commentdefault: null
@@ -3307,7 +3307,7 @@
     varset: varrf
     vartype: integer
 - !variable
-    abivarname: d3e_pert3_elfd
+    abivarname: "d3e_pert3_elfd"
     characteristics:
     - '[[NONLINEAR]]'
     commentdefault: null
@@ -3329,7 +3329,7 @@
     varset: varrf
     vartype: integer
 - !variable
-    abivarname: d3e_pert3_phon
+    abivarname: "d3e_pert3_phon"
     characteristics:
     - '[[NONLINEAR]]'
     commentdefault: null
@@ -3349,7 +3349,7 @@
     varset: varrf
     vartype: integer
 - !variable
-    abivarname: ddamp
+    abivarname: "ddamp"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -3377,7 +3377,7 @@
     varset: varff
     vartype: real
 - !variable
-    abivarname: ddb_ngqpt
+    abivarname: "ddb_ngqpt"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -3399,7 +3399,7 @@
     varset: vareph
     vartype: integer
 - !variable
-    abivarname: ddb_shiftq
+    abivarname: "ddb_shiftq"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -3422,7 +3422,7 @@
     varset: vareph
     vartype: real
 - !variable
-    abivarname: delayperm
+    abivarname: "delayperm"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -3444,7 +3444,7 @@
     varset: varrlx
     vartype: integer
 - !variable
-    abivarname: densfor_pred
+    abivarname: "densfor_pred"
     characteristics:
     - '[[DEVELOP]]'
     commentdefault: null
@@ -3571,7 +3571,7 @@
     varset: vardev
     vartype: integer
 - !variable
-    abivarname: densty
+    abivarname: "densty"
     characteristics:
     - '[[DEVELOP]]'
     commentdefault: null
@@ -3600,7 +3600,7 @@
     varset: vardev
     vartype: real
 - !variable
-    abivarname: dfield
+    abivarname: "dfield"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -3622,7 +3622,7 @@
     varset: varff
     vartype: real
 - !variable
-    abivarname: dfpt_sciss
+    abivarname: "dfpt_sciss"
     characteristics:
     - '[[RESPFN]]'
     - '[[ENERGY]]'
@@ -3655,7 +3655,7 @@
     varset: varrf
     vartype: real
 - !variable
-    abivarname: diecut
+    abivarname: "diecut"
     characteristics:
     - '[[ENERGY]]'
     commentdefault: null
@@ -3701,7 +3701,7 @@
     varset: vargs
     vartype: real
 - !variable
-    abivarname: diegap
+    abivarname: "diegap"
     characteristics:
     - '[[ENERGY]]'
     commentdefault: null
@@ -3730,7 +3730,7 @@
     varset: vargs
     vartype: real
 - !variable
-    abivarname: dielam
+    abivarname: "dielam"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -3752,7 +3752,7 @@
     varset: vargs
     vartype: real
 - !variable
-    abivarname: dielng
+    abivarname: "dielng"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -3813,7 +3813,7 @@
     varset: vargs
     vartype: real
 - !variable
-    abivarname: diemac
+    abivarname: "diemac"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -3868,7 +3868,7 @@
     varset: vargs
     vartype: real
 - !variable
-    abivarname: diemix
+    abivarname: "diemix"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -3910,7 +3910,7 @@
     varset: vargs
     vartype: real
 - !variable
-    abivarname: diemixmag
+    abivarname: "diemixmag"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -3948,7 +3948,7 @@
     varset: vargs
     vartype: real
 - !variable
-    abivarname: diismemory
+    abivarname: "diismemory"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -3969,7 +3969,7 @@
     varset: varrlx
     vartype: integer
 - !variable
-    abivarname: dilatmx
+    abivarname: "dilatmx"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -4023,7 +4023,7 @@
     varset: varrlx
     vartype: real
 - !variable
-    abivarname: dipdip
+    abivarname: "dipdip"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -4040,7 +4040,7 @@
     varset: vareph
     vartype: integer
 - !variable
-    abivarname: dmatpawu
+    abivarname: "dmatpawu"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -4181,7 +4181,7 @@
     varset: varpaw
     vartype: real
 - !variable
-    abivarname: dmatpuopt
+    abivarname: "dmatpuopt"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -4222,7 +4222,7 @@
     varset: varpaw
     vartype: integer
 - !variable
-    abivarname: dmatudiag
+    abivarname: "dmatudiag"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -4257,7 +4257,7 @@
     varset: varpaw
     vartype: integer
 - !variable
-    abivarname: dmft_dc
+    abivarname: "dmft_dc"
     characteristics:
     - '[[DEVELOP]]'
     commentdefault: null
@@ -4277,7 +4277,7 @@
     varset: vardmft
     vartype: integer
 - !variable
-    abivarname: dmft_entropy
+    abivarname: "dmft_entropy"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -4295,7 +4295,7 @@
     varset: vardmft
     vartype: integer
 - !variable
-    abivarname: dmft_iter
+    abivarname: "dmft_iter"
     characteristics:
     - '[[DEVELOP]]'
     commentdefault: null
@@ -4315,7 +4315,7 @@
     varset: vardmft
     vartype: integer
 - !variable
-    abivarname: dmft_mxsf
+    abivarname: "dmft_mxsf"
     characteristics:
     - '[[DEVELOP]]'
     commentdefault: null
@@ -4336,7 +4336,7 @@
     varset: vardmft
     vartype: real
 - !variable
-    abivarname: dmft_nlambda
+    abivarname: "dmft_nlambda"
     characteristics:
     - '[[DEVELOP]]'
     commentdefault: null
@@ -4354,7 +4354,7 @@
     varset: vardmft
     vartype: integer
 - !variable
-    abivarname: dmft_nwli
+    abivarname: "dmft_nwli"
     characteristics:
     - '[[DEVELOP]]'
     commentdefault: null
@@ -4375,7 +4375,7 @@
     varset: vardmft
     vartype: integer
 - !variable
-    abivarname: dmft_nwlo
+    abivarname: "dmft_nwlo"
     characteristics:
     - '[[DEVELOP]]'
     commentdefault: null
@@ -4396,7 +4396,7 @@
     varset: vardmft
     vartype: integer
 - !variable
-    abivarname: dmft_read_occnd
+    abivarname: "dmft_read_occnd"
     characteristics:
     - '[[DEVELOP]]'
     commentdefault: null
@@ -4433,7 +4433,7 @@
     varset: vardev
     vartype: integer
 - !variable
-    abivarname: dmft_rslf
+    abivarname: "dmft_rslf"
     characteristics:
     - '[[DEVELOP]]'
     commentdefault: null
@@ -4452,7 +4452,7 @@
     varset: vardmft
     vartype: integer
 - !variable
-    abivarname: dmft_solv
+    abivarname: "dmft_solv"
     characteristics:
     - '[[DEVELOP]]'
     commentdefault: null
@@ -4532,7 +4532,7 @@
     varset: vardmft
     vartype: real
 - !variable
-    abivarname: dmft_t2g
+    abivarname: "dmft_t2g"
     characteristics:
     - '[[DEVELOP]]'
     commentdefault: null
@@ -4552,7 +4552,7 @@
     varset: vardmft
     vartype: integer
 - !variable
-    abivarname: dmft_tolfreq
+    abivarname: "dmft_tolfreq"
     characteristics:
     - '[[DEVELOP]]'
     commentdefault: null
@@ -4575,7 +4575,7 @@
     varset: vardmft
     vartype: real
 - !variable
-    abivarname: dmft_tollc
+    abivarname: "dmft_tollc"
     characteristics:
     - '[[DEVELOP]]'
     commentdefault: null
@@ -4599,7 +4599,7 @@
     varset: vardmft
     vartype: real
 - !variable
-    abivarname: dmftbandf
+    abivarname: "dmftbandf"
     characteristics:
     - '[[DEVELOP]]'
     commentdefault: null
@@ -4620,7 +4620,7 @@
     varset: vardmft
     vartype: integer
 - !variable
-    abivarname: dmftbandi
+    abivarname: "dmftbandi"
     characteristics:
     - '[[DEVELOP]]'
     commentdefault: null
@@ -4641,7 +4641,7 @@
     varset: vardmft
     vartype: integer
 - !variable
-    abivarname: dmftcheck
+    abivarname: "dmftcheck"
     characteristics:
     - '[[DEVELOP]]'
     commentdefault: null
@@ -4662,7 +4662,7 @@
     varset: vardmft
     vartype: integer
 - !variable
-    abivarname: dmftctqmc_basis
+    abivarname: "dmftctqmc_basis"
     characteristics:
     - '[[DEVELOP]]'
     commentdefault: null
@@ -4696,7 +4696,7 @@
     varset: vardev
     vartype: integer
 - !variable
-    abivarname: dmftctqmc_check
+    abivarname: "dmftctqmc_check"
     characteristics:
     - '[[DEVELOP]]'
     commentdefault: null
@@ -4732,7 +4732,7 @@
     varset: vardmft
     vartype: integer
 - !variable
-    abivarname: dmftctqmc_correl
+    abivarname: "dmftctqmc_correl"
     characteristics:
     - '[[DEVELOP]]'
     commentdefault: null
@@ -4762,7 +4762,7 @@
     varset: vardmft
     vartype: integer
 - !variable
-    abivarname: dmftctqmc_gmove
+    abivarname: "dmftctqmc_gmove"
     characteristics:
     - '[[DEVELOP]]'
     commentdefault: null
@@ -4785,7 +4785,7 @@
     varset: vardmft
     vartype: integer
 - !variable
-    abivarname: dmftctqmc_grnns
+    abivarname: "dmftctqmc_grnns"
     characteristics:
     - '[[DEVELOP]]'
     commentdefault: null
@@ -4815,7 +4815,7 @@
     varset: vardmft
     vartype: integer
 - !variable
-    abivarname: dmftctqmc_meas
+    abivarname: "dmftctqmc_meas"
     characteristics:
     - '[[DEVELOP]]'
     commentdefault: null
@@ -4837,7 +4837,7 @@
     varset: vardmft
     vartype: integer
 - !variable
-    abivarname: dmftctqmc_mov
+    abivarname: "dmftctqmc_mov"
     characteristics:
     - '[[DEVELOP]]'
     commentdefault: null
@@ -4867,7 +4867,7 @@
     varset: vardmft
     vartype: integer
 - !variable
-    abivarname: dmftctqmc_mrka
+    abivarname: "dmftctqmc_mrka"
     characteristics:
     - '[[DEVELOP]]'
     commentdefault: null
@@ -4897,7 +4897,7 @@
     varset: vardmft
     vartype: integer
 - !variable
-    abivarname: dmftctqmc_order
+    abivarname: "dmftctqmc_order"
     characteristics:
     - '[[DEVELOP]]'
     commentdefault: null
@@ -4920,7 +4920,7 @@
     varset: vardmft
     vartype: integer
 - !variable
-    abivarname: dmftctqmc_triqs_nleg
+    abivarname: "dmftctqmc_triqs_nleg"
     characteristics:
     - '[[DEVELOP]]'
     commentdefault: null
@@ -4944,7 +4944,7 @@
     varset: vardmft
     vartype: integer
 - !variable
-    abivarname: dmftqmc_l
+    abivarname: "dmftqmc_l"
     characteristics:
     - '[[DEVELOP]]'
     commentdefault: null
@@ -4965,7 +4965,7 @@
     varset: vardmft
     vartype: integer
 - !variable
-    abivarname: dmftqmc_n
+    abivarname: "dmftqmc_n"
     characteristics:
     - '[[DEVELOP]]'
     commentdefault: null
@@ -4986,7 +4986,7 @@
     varset: vardmft
     vartype: real
 - !variable
-    abivarname: dmftqmc_seed
+    abivarname: "dmftqmc_seed"
     characteristics:
     - '[[DEVELOP]]'
     commentdefault: null
@@ -5010,7 +5010,7 @@
     varset: vardmft
     vartype: integer
 - !variable
-    abivarname: dmftqmc_therm
+    abivarname: "dmftqmc_therm"
     characteristics:
     - '[[DEVELOP]]'
     commentdefault: null
@@ -5030,7 +5030,7 @@
     varset: vardmft
     vartype: integer
 - !variable
-    abivarname: dosdeltae
+    abivarname: "dosdeltae"
     characteristics:
     - '[[ENERGY]]'
     commentdefault: null
@@ -5058,7 +5058,7 @@
     varset: vargs
     vartype: real
 - !variable
-    abivarname: dtion
+    abivarname: "dtion"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -5107,7 +5107,7 @@
     varset: varrlx
     vartype: real
 - !variable
-    abivarname: dynimage
+    abivarname: "dynimage"
     characteristics: null
     commentdefault: if [[imgmov]] in [2,5] (String Method, NEB), <b>dynimage(1)</b>=0 and <b>dynimage([[nimage]])</b>=0.
     commentdims: null
@@ -5135,7 +5135,7 @@
     varset: varrlx
     vartype: integer
 - !variable
-    abivarname: ecut
+    abivarname: "ecut"
     characteristics:
     - '[[ENERGY]]'
     commentdefault: null
@@ -5198,7 +5198,7 @@
     varset: varbas
     vartype: real
 - !variable
-    abivarname: ecuteps
+    abivarname: "ecuteps"
     characteristics:
     - '[[GW]]'
     - '[[ENERGY]]'
@@ -5225,7 +5225,7 @@
     varset: vargw
     vartype: real
 - !variable
-    abivarname: ecutsigx
+    abivarname: "ecutsigx"
     characteristics:
     - '[[GW]]'
     - '[[ENERGY]]'
@@ -5251,7 +5251,7 @@
     varset: vargw
     vartype: real
 - !variable
-    abivarname: ecutsm
+    abivarname: "ecutsm"
     characteristics:
     - '[[ENERGY]]'
     commentdefault: null
@@ -5350,7 +5350,7 @@
     varset: varrlx
     vartype: real
 - !variable
-    abivarname: ecutwfn
+    abivarname: "ecutwfn"
     characteristics:
     - '[[GW]]'
     - '[[ENERGY]]'
@@ -5385,7 +5385,7 @@
     varset: vargw
     vartype: real
 - !variable
-    abivarname: effmass
+    abivarname: "effmass"
     characteristics:
     - '[[DEVELOP]]'
     commentdefault: null
@@ -5406,7 +5406,7 @@
     varset: vardev
     vartype: real
 - !variable
-    abivarname: efield
+    abivarname: "efield"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -5458,7 +5458,7 @@
     varset: varff
     vartype: real
 - !variable
-    abivarname: efmas
+    abivarname: "efmas"
     characteristics:
     - '[[RESPFN]]'
     commentdefault: null
@@ -5496,7 +5496,7 @@
     varset: varrf
     vartype: integer
 - !variable
-    abivarname: efmas_bands
+    abivarname: "efmas_bands"
     characteristics:
     - '[[RESPFN]]'
     commentdefault: null
@@ -5519,7 +5519,7 @@
     varset: varrf
     vartype: integer
 - !variable
-    abivarname: efmas_calc_dirs
+    abivarname: "efmas_calc_dirs"
     characteristics:
     - '[[RESPFN]]'
     commentdefault: null
@@ -5553,7 +5553,7 @@
     varset: varrf
     vartype: integer
 - !variable
-    abivarname: efmas_deg
+    abivarname: "efmas_deg"
     characteristics:
     - '[[RESPFN]]'
     commentdefault: null
@@ -5574,7 +5574,7 @@
     varset: varrf
     vartype: integer
 - !variable
-    abivarname: efmas_deg_tol
+    abivarname: "efmas_deg_tol"
     characteristics:
     - '[[RESPFN]]'
     commentdefault: null
@@ -5595,7 +5595,7 @@
     varset: varrf
     vartype: real
 - !variable
-    abivarname: efmas_dim
+    abivarname: "efmas_dim"
     characteristics:
     - '[[RESPFN]]'
     commentdefault: null
@@ -5629,7 +5629,7 @@
     varset: varrf
     vartype: integer
 - !variable
-    abivarname: efmas_dirs
+    abivarname: "efmas_dirs"
     characteristics:
     - '[[RESPFN]]'
     commentdefault: null
@@ -5652,7 +5652,7 @@
     varset: varrf
     vartype: real
 - !variable
-    abivarname: efmas_n_dirs
+    abivarname: "efmas_n_dirs"
     characteristics:
     - '[[RESPFN]]'
     commentdefault: null
@@ -5671,7 +5671,7 @@
     varset: varrf
     vartype: integer
 - !variable
-    abivarname: efmas_ntheta
+    abivarname: "efmas_ntheta"
     characteristics:
     - '[[RESPFN]]'
     commentdefault: null
@@ -5694,7 +5694,7 @@
     varset: varrf
     vartype: integer
 - !variable
-    abivarname: einterp
+    abivarname: "einterp"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -5745,7 +5745,7 @@
     varset: varbas
     vartype: real
 - !variable
-    abivarname: elph2_imagden
+    abivarname: "elph2_imagden"
     characteristics:
     - '[[RESPFN]]'
     - '[[ENERGY]]'
@@ -5780,7 +5780,7 @@
     varset: varrf
     vartype: real
 - !variable
-    abivarname: enunit
+    abivarname: "enunit"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -5822,7 +5822,7 @@
     varset: vargs
     vartype: integer
 - !variable
-    abivarname: eph_extrael
+    abivarname: "eph_extrael"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -5837,7 +5837,7 @@
     varset: vareph
     vartype: real
 - !variable
-    abivarname: eph_fermie
+    abivarname: "eph_fermie"
     characteristics:
     - '[[ENERGY]]'
     commentdefault: null
@@ -5857,7 +5857,7 @@
     varset: vareph
     vartype: real
 - !variable
-    abivarname: eph_fsewin
+    abivarname: "eph_fsewin"
     characteristics:
     - '[[ENERGY]]'
     commentdefault: null
@@ -5881,7 +5881,7 @@
     varset: vareph
     vartype: real
 - !variable
-    abivarname: eph_fsmear
+    abivarname: "eph_fsmear"
     characteristics:
     - '[[ENERGY]]'
     commentdefault: null
@@ -5899,7 +5899,7 @@
     varset: vareph
     vartype: real
 - !variable
-    abivarname: eph_intmeth
+    abivarname: "eph_intmeth"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -5921,7 +5921,7 @@
     varset: vareph
     vartype: integer
 - !variable
-    abivarname: eph_mustar
+    abivarname: "eph_mustar"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -5937,7 +5937,7 @@
     varset: vareph
     vartype: real
 - !variable
-    abivarname: eph_ngqpt_fine
+    abivarname: "eph_ngqpt_fine"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -5962,7 +5962,7 @@
     varset: vareph
     vartype: integer
 - !variable
-    abivarname: eph_task
+    abivarname: "eph_task"
     characteristics:
     - '[[DEVELOP]]'
     commentdefault: null
@@ -5986,7 +5986,7 @@
     varset: varrf
     vartype: integer
 - !variable
-    abivarname: eph_transport
+    abivarname: "eph_transport"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -6005,7 +6005,7 @@
     varset: vareph
     vartype: integer
 - !variable
-    abivarname: eshift
+    abivarname: "eshift"
     characteristics:
     - '[[DEVELOP]]'
     - '[[ENERGY]]'
@@ -6036,7 +6036,7 @@
     varset: vardev
     vartype: real
 - !variable
-    abivarname: esmear
+    abivarname: "esmear"
     characteristics:
     - '[[RESPFN]]'
     - '[[ENERGY]]'
@@ -6068,7 +6068,7 @@
     varset: varrf
     vartype: real
 - !variable
-    abivarname: exchmix
+    abivarname: "exchmix"
     characteristics:
     - '[[DEVELOP]]'
     commentdefault: null
@@ -6088,7 +6088,7 @@
     varset: vardev
     vartype: real
 - !variable
-    abivarname: exchn2n3d
+    abivarname: "exchn2n3d"
     characteristics:
     - '[[DEVELOP]]'
     commentdefault: null
@@ -6110,7 +6110,7 @@
     varset: vardev
     vartype: integer
 - !variable
-    abivarname: extrapwf
+    abivarname: "extrapwf"
     characteristics:
     - '[[DEVELOP]]'
     commentdefault: null
@@ -6135,7 +6135,7 @@
     varset: vardev
     vartype: integer
 - !variable
-    abivarname: f4of2_sla
+    abivarname: "f4of2_sla"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -6157,7 +6157,7 @@
     varset: varpaw
     vartype: real
 - !variable
-    abivarname: f6of2_sla
+    abivarname: "f6of2_sla"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -6176,7 +6176,7 @@
     varset: varpaw
     vartype: real
 - !variable
-    abivarname: fband
+    abivarname: "fband"
     characteristics:
     - '[[INPUT_ONLY]]'
     commentdefault: null
@@ -6226,7 +6226,7 @@
     varset: vargs
     vartype: real
 - !variable
-    abivarname: fermie_nest
+    abivarname: "fermie_nest"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -6244,7 +6244,7 @@
     varset: vardev
     vartype: real
 - !variable
-    abivarname: fftalg
+    abivarname: "fftalg"
     characteristics:
     - '[[DEVELOP]]'
     commentdefault: null
@@ -6338,7 +6338,7 @@
     varset: vardev
     vartype: integer
 - !variable
-    abivarname: fftcache
+    abivarname: "fftcache"
     characteristics:
     - '[[DEVELOP]]'
     commentdefault: 'todo: Not yet machine-dependent'
@@ -6360,7 +6360,7 @@
     varset: vardev
     vartype: integer
 - !variable
-    abivarname: fftgw
+    abivarname: "fftgw"
     characteristics:
     - '[[GW]]'
     commentdefault: null
@@ -6458,7 +6458,7 @@
     varset: vargw
     vartype: integer
 - !variable
-    abivarname: freqim_alpha
+    abivarname: "freqim_alpha"
     characteristics:
     - '[[GW]]'
     commentdefault: null
@@ -6505,7 +6505,7 @@
     varset: vargw
     vartype: real
 - !variable
-    abivarname: freqremax
+    abivarname: "freqremax"
     characteristics:
     - '[[GW]]'
     - '[[ENERGY]]'
@@ -6531,7 +6531,7 @@
     varset: vargw
     vartype: real
 - !variable
-    abivarname: freqremin
+    abivarname: "freqremin"
     characteristics:
     - '[[GW]]'
     - '[[ENERGY]]'
@@ -6566,7 +6566,7 @@
     varset: vargw
     vartype: real
 - !variable
-    abivarname: freqspmax
+    abivarname: "freqspmax"
     characteristics:
     - '[[GW]]'
     - '[[ENERGY]]'
@@ -6590,7 +6590,7 @@
     varset: vargw
     vartype: real
 - !variable
-    abivarname: freqspmin
+    abivarname: "freqspmin"
     characteristics:
     - '[[GW]]'
     - '[[ENERGY]]'
@@ -6615,7 +6615,7 @@
     varset: vargw
     vartype: real
 - !variable
-    abivarname: friction
+    abivarname: "friction"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -6691,7 +6691,7 @@
     varset: varrlx
     vartype: real
 - !variable
-    abivarname: frzfermi
+    abivarname: "frzfermi"
     characteristics:
     - '[[RESPFN]]'
     commentdefault: null
@@ -6714,7 +6714,7 @@
     varset: varrf
     vartype: integer
 - !variable
-    abivarname: fxcartfactor
+    abivarname: "fxcartfactor"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -6743,7 +6743,7 @@
     varset: varrlx
     vartype: real
 - !variable
-    abivarname: ga_algor
+    abivarname: "ga_algor"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -6763,7 +6763,7 @@
     varset: varrlx
     vartype: integer
 - !variable
-    abivarname: ga_fitness
+    abivarname: "ga_fitness"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -6789,7 +6789,7 @@
     varset: varrlx
     vartype: integer
 - !variable
-    abivarname: ga_n_rules
+    abivarname: "ga_n_rules"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -6809,7 +6809,7 @@
     varset: varrlx
     vartype: integer
 - !variable
-    abivarname: ga_opt_percent
+    abivarname: "ga_opt_percent"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -6828,7 +6828,7 @@
     varset: varrlx
     vartype: real
 - !variable
-    abivarname: ga_rules
+    abivarname: "ga_rules"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -6863,7 +6863,7 @@
     varset: varrlx
     vartype: integer
 - !variable
-    abivarname: genafm
+    abivarname: "genafm"
     characteristics:
     - '[[SYMMETRISER]]'
     commentdefault: null
@@ -6900,7 +6900,7 @@
     varset: vargeo
     vartype: real
 - !variable
-    abivarname: get1den
+    abivarname: "get1den"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -6930,7 +6930,7 @@
     varset: varfil
     vartype: integer
 - !variable
-    abivarname: get1wf
+    abivarname: "get1wf"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -7045,7 +7045,7 @@
     varset: varfil
     vartype: integer
 - !variable
-    abivarname: getbscoup
+    abivarname: "getbscoup"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -7078,7 +7078,7 @@
     varset: varfil
     vartype: integer
 - !variable
-    abivarname: getbseig
+    abivarname: "getbseig"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -7113,7 +7113,7 @@
     varset: varfil
     vartype: integer
 - !variable
-    abivarname: getbsreso
+    abivarname: "getbsreso"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -7146,7 +7146,7 @@
     varset: varfil
     vartype: integer
 - !variable
-    abivarname: getcell
+    abivarname: "getcell"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -7189,7 +7189,7 @@
     varset: varrlx
     vartype: integer
 - !variable
-    abivarname: getddb
+    abivarname: "getddb"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -7241,7 +7241,7 @@
     varset: varfil
     vartype: integer
 - !variable
-    abivarname: getddk
+    abivarname: "getddk"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -7360,7 +7360,7 @@
     varset: varfil
     vartype: integer
 - !variable
-    abivarname: getden
+    abivarname: "getden"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -7419,7 +7419,7 @@
     varset: varfil
     vartype: integer
 - !variable
-    abivarname: getgam_eig2nkq
+    abivarname: "getgam_eig2nkq"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -7445,7 +7445,7 @@
     varset: vardev
     vartype: integer
 - !variable
-    abivarname: gethaydock
+    abivarname: "gethaydock"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -7476,7 +7476,7 @@
     varset: varfil
     vartype: integer
 - !variable
-    abivarname: getocc
+    abivarname: "getocc"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -7527,7 +7527,7 @@
     varset: varfil
     vartype: integer
 - !variable
-    abivarname: getqps
+    abivarname: "getqps"
     characteristics:
     - '[[GW]]'
     commentdefault: null
@@ -7560,7 +7560,7 @@
     varset: varfil
     vartype: integer
 - !variable
-    abivarname: getscr
+    abivarname: "getscr"
     characteristics:
     - '[[GW]]'
     commentdefault: null
@@ -7610,7 +7610,7 @@
     varset: varfil
     vartype: integer
 - !variable
-    abivarname: getsuscep
+    abivarname: "getsuscep"
     characteristics:
     - '[[GW]]'
     commentdefault: null
@@ -7664,7 +7664,7 @@
     varset: varfil
     vartype: integer
 - !variable
-    abivarname: getvel
+    abivarname: "getvel"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -7735,7 +7735,7 @@
     varset: varrlx
     vartype: integer
 - !variable
-    abivarname: getwfk
+    abivarname: "getwfk"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -7826,7 +7826,7 @@
     varset: varfil
     vartype: integer
 - !variable
-    abivarname: getwfkfine
+    abivarname: "getwfkfine"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -7922,7 +7922,7 @@
     varset: vardev
     vartype: integer
 - !variable
-    abivarname: getwfq
+    abivarname: "getwfq"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -8037,7 +8037,7 @@
     varset: varfil
     vartype: integer
 - !variable
-    abivarname: getxcart
+    abivarname: "getxcart"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -8103,7 +8103,7 @@
     varset: varrlx
     vartype: integer
 - !variable
-    abivarname: getxred
+    abivarname: "getxred"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -8165,7 +8165,7 @@
     varset: varrlx
     vartype: integer
 - !variable
-    abivarname: goprecon
+    abivarname: "goprecon"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -8197,7 +8197,7 @@
     varset: varrlx
     vartype: integer
 - !variable
-    abivarname: goprecprm
+    abivarname: "goprecprm"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -8219,7 +8219,7 @@
     varset: varrlx
     vartype: real
 - !variable
-    abivarname: gpu_devices
+    abivarname: "gpu_devices"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -8253,7 +8253,7 @@
     varset: varpar
     vartype: integer
 - !variable
-    abivarname: gpu_linalg_limit
+    abivarname: "gpu_linalg_limit"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -8284,7 +8284,7 @@
     varset: varpar
     vartype: integer
 - !variable
-    abivarname: gw_customnfreqsp
+    abivarname: "gw_customnfreqsp"
     characteristics:
     - '[[GW]]'
     commentdefault: null
@@ -8305,7 +8305,7 @@
     varset: vargw
     vartype: integer
 - !variable
-    abivarname: gw_freqsp
+    abivarname: "gw_freqsp"
     characteristics:
     - '[[GW]]'
     commentdefault: null
@@ -8338,7 +8338,7 @@
     varset: vargw
     vartype: real
 - !variable
-    abivarname: gw_frqim_inzgrid
+    abivarname: "gw_frqim_inzgrid"
     characteristics:
     - '[[GW]]'
     commentdefault: null
@@ -8386,7 +8386,7 @@
     varset: vargw
     vartype: integer
 - !variable
-    abivarname: gw_frqre_inzgrid
+    abivarname: "gw_frqre_inzgrid"
     characteristics:
     - '[[GW]]'
     commentdefault: null
@@ -8460,7 +8460,7 @@
     varset: vargw
     vartype: integer
 - !variable
-    abivarname: gw_frqre_tangrid
+    abivarname: "gw_frqre_tangrid"
     characteristics:
     - '[[GW]]'
     commentdefault: null
@@ -8484,7 +8484,7 @@
     varset: vargw
     vartype: integer
 - !variable
-    abivarname: gw_invalid_freq
+    abivarname: "gw_invalid_freq"
     characteristics:
     - '[[GW]]'
     commentdefault: null
@@ -8514,7 +8514,7 @@
     varset: vargw
     vartype: integer
 - !variable
-    abivarname: gw_nqlwl
+    abivarname: "gw_nqlwl"
     characteristics:
     - '[[GW]]'
     commentdefault: null
@@ -8571,7 +8571,7 @@
     varset: vargw
     vartype: integer
 - !variable
-    abivarname: gw_nstep
+    abivarname: "gw_nstep"
     characteristics:
     - '[[GW]]'
     commentdefault: null
@@ -8594,7 +8594,7 @@
     varset: vargw
     vartype: integer
 - !variable
-    abivarname: gw_qlwl
+    abivarname: "gw_qlwl"
     characteristics:
     - '[[GW]]'
     commentdefault: null
@@ -8623,7 +8623,7 @@
     varset: vargw
     vartype: real
 - !variable
-    abivarname: gw_qprange
+    abivarname: "gw_qprange"
     characteristics:
     - '[[GW]]'
     commentdefault: null
@@ -8675,7 +8675,7 @@
     varset: vargw
     vartype: integer
 - !variable
-    abivarname: gw_sctype
+    abivarname: "gw_sctype"
     characteristics:
     - '[[GW]]'
     commentdefault: null
@@ -8725,7 +8725,7 @@
     varset: vargw
     vartype: integer
 - !variable
-    abivarname: gw_sigxcore
+    abivarname: "gw_sigxcore"
     characteristics:
     - '[[GW]]'
     commentdefault: null
@@ -8770,7 +8770,7 @@
     varset: vargw
     vartype: integer
 - !variable
-    abivarname: gw_toldfeig
+    abivarname: "gw_toldfeig"
     characteristics:
     - '[[GW]]'
     - '[[ENERGY]]'
@@ -8799,7 +8799,7 @@
     varset: vargw
     vartype: real
 - !variable
-    abivarname: gwcalctyp
+    abivarname: "gwcalctyp"
     characteristics:
     - '[[GW]]'
     commentdefault: null
@@ -8899,7 +8899,7 @@
     varset: vargw
     vartype: integer
 - !variable
-    abivarname: gwcomp
+    abivarname: "gwcomp"
     characteristics:
     - '[[GW]]'
     commentdefault: null
@@ -8923,7 +8923,7 @@
     varset: vargw
     vartype: integer
 - !variable
-    abivarname: gwencomp
+    abivarname: "gwencomp"
     characteristics:
     - '[[GW]]'
     commentdefault: null
@@ -8946,7 +8946,7 @@
     varset: vargw
     vartype: real
 - !variable
-    abivarname: gwfockmix
+    abivarname: "gwfockmix"
     characteristics:
     - '[[GW]]'
     commentdefault: null
@@ -8963,7 +8963,7 @@
     varset: vargw
     vartype: real
 - !variable
-    abivarname: gwgamma
+    abivarname: "gwgamma"
     characteristics:
     - '[[GW]]'
     commentdefault: null
@@ -8994,7 +8994,7 @@
     varset: vargw
     vartype: integer
 - !variable
-    abivarname: gwls_band_index
+    abivarname: "gwls_band_index"
     characteristics:
     - '[[GW]]'
     commentdefault: null
@@ -9014,7 +9014,7 @@
     varset: vargw
     vartype: integer
 - !variable
-    abivarname: gwls_correlation
+    abivarname: "gwls_correlation"
     characteristics:
     - '[[GW]]'
     commentdefault: null
@@ -9046,7 +9046,7 @@
     varset: vargw
     vartype: integer
 - !variable
-    abivarname: gwls_dielectric_model
+    abivarname: "gwls_dielectric_model"
     characteristics:
     - '[[GW]]'
     commentdefault: null
@@ -9063,7 +9063,7 @@
     varset: vargw
     vartype: integer
 - !variable
-    abivarname: gwls_exchange
+    abivarname: "gwls_exchange"
     characteristics:
     - '[[GW]]'
     commentdefault: null
@@ -9082,7 +9082,7 @@
     varset: vargw
     vartype: integer
 - !variable
-    abivarname: gwls_first_seed
+    abivarname: "gwls_first_seed"
     characteristics:
     - '[[GW]]'
     commentdefault: null
@@ -9108,7 +9108,7 @@
     varset: vargw
     vartype: integer
 - !variable
-    abivarname: gwls_kmax_analytic
+    abivarname: "gwls_kmax_analytic"
     characteristics:
     - '[[GW]]'
     commentdefault: null
@@ -9128,7 +9128,7 @@
     varset: vargw
     vartype: integer
 - !variable
-    abivarname: gwls_kmax_complement
+    abivarname: "gwls_kmax_complement"
     characteristics:
     - '[[GW]]'
     commentdefault: null
@@ -9154,7 +9154,7 @@
     varset: vargw
     vartype: integer
 - !variable
-    abivarname: gwls_kmax_numeric
+    abivarname: "gwls_kmax_numeric"
     characteristics:
     - '[[GW]]'
     commentdefault: null
@@ -9174,7 +9174,7 @@
     varset: vargw
     vartype: integer
 - !variable
-    abivarname: gwls_kmax_poles
+    abivarname: "gwls_kmax_poles"
     characteristics:
     - '[[GW]]'
     commentdefault: null
@@ -9200,7 +9200,7 @@
     varset: vargw
     vartype: integer
 - !variable
-    abivarname: gwls_list_proj_freq
+    abivarname: "gwls_list_proj_freq"
     characteristics:
     - '[[GW]]'
     commentdefault: null
@@ -9220,7 +9220,7 @@
     varset: vargw
     vartype: real
 - !variable
-    abivarname: gwls_model_parameter
+    abivarname: "gwls_model_parameter"
     characteristics:
     - '[[GW]]'
     - '[[ENERGY]]'
@@ -9249,7 +9249,7 @@
     varset: vargw
     vartype: real
 - !variable
-    abivarname: gwls_n_proj_freq
+    abivarname: "gwls_n_proj_freq"
     characteristics:
     - '[[GW]]'
     commentdefault: null
@@ -9268,7 +9268,7 @@
     varset: vargw
     vartype: integer
 - !variable
-    abivarname: gwls_npt_gauss_quad
+    abivarname: "gwls_npt_gauss_quad"
     characteristics:
     - '[[GW]]'
     commentdefault: null
@@ -9287,7 +9287,7 @@
     varset: vargw
     vartype: integer
 - !variable
-    abivarname: gwls_nseeds
+    abivarname: "gwls_nseeds"
     characteristics:
     - '[[GW]]'
     commentdefault: null
@@ -9306,7 +9306,7 @@
     varset: vargw
     vartype: integer
 - !variable
-    abivarname: gwls_print_debug
+    abivarname: "gwls_print_debug"
     characteristics:
     - '[[GW]]'
     commentdefault: null
@@ -9323,7 +9323,7 @@
     varset: vargw
     vartype: integer
 - !variable
-    abivarname: gwls_recycle
+    abivarname: "gwls_recycle"
     characteristics:
     - '[[GW]]'
     commentdefault: null
@@ -9356,7 +9356,7 @@
     varset: vargw
     vartype: integer
 - !variable
-    abivarname: gwls_second_model_parameter
+    abivarname: "gwls_second_model_parameter"
     characteristics:
     - '[[GW]]'
     - '[[ENERGY]]'
@@ -9374,7 +9374,7 @@
     varset: vargw
     vartype: real
 - !variable
-    abivarname: gwls_sternheimer_kmax
+    abivarname: "gwls_sternheimer_kmax"
     characteristics:
     - '[[GW]]'
     commentdefault: null
@@ -9392,7 +9392,7 @@
     varset: vargw
     vartype: integer
 - !variable
-    abivarname: gwmem
+    abivarname: "gwmem"
     characteristics:
     - '[[GW]]'
     commentdefault: null
@@ -9431,7 +9431,7 @@
     varset: vargw
     vartype: integer
 - !variable
-    abivarname: gwpara
+    abivarname: "gwpara"
     characteristics:
     - '[[GW]]'
     commentdefault: 'The default value has been changed in v8. From 1 to 2 '
@@ -9468,7 +9468,7 @@
     varset: varpar
     vartype: integer
 - !variable
-    abivarname: gwrpacorr
+    abivarname: "gwrpacorr"
     characteristics:
     - '[[GW]]'
     commentdefault: null
@@ -9512,7 +9512,7 @@
     varset: vargw
     vartype: integer
 - !variable
-    abivarname: iatcon
+    abivarname: "iatcon"
     characteristics:
     - '[[NO_MULTI]]'
     - '[[INPUT_ONLY]]'
@@ -9542,7 +9542,7 @@
     varset: varrlx
     vartype: integer
 - !variable
-    abivarname: iatfix
+    abivarname: "iatfix"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -9608,7 +9608,7 @@
     varset: varrlx
     vartype: integer
 - !variable
-    abivarname: iatfixx
+    abivarname: "iatfixx"
     characteristics:
     - '[[INPUT_ONLY]]'
     commentdefault: null
@@ -9635,7 +9635,7 @@
     varset: varrlx
     vartype: integer
 - !variable
-    abivarname: iatfixy
+    abivarname: "iatfixy"
     characteristics:
     - '[[INPUT_ONLY]]'
     commentdefault: null
@@ -9662,7 +9662,7 @@
     varset: varrlx
     vartype: integer
 - !variable
-    abivarname: iatfixz
+    abivarname: "iatfixz"
     characteristics:
     - '[[INPUT_ONLY]]'
     commentdefault: null
@@ -9689,7 +9689,7 @@
     varset: varrlx
     vartype: integer
 - !variable
-    abivarname: iatsph
+    abivarname: "iatsph"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -9715,7 +9715,7 @@
     varset: vargs
     vartype: integer
 - !variable
-    abivarname: iboxcut
+    abivarname: "iboxcut"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -9744,7 +9744,7 @@
     varset: varpaw
     vartype: integer
 - !variable
-    abivarname: icoulomb
+    abivarname: "icoulomb"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -9770,7 +9770,7 @@
     varset: vargs
     vartype: integer
 - !variable
-    abivarname: icutcoul
+    abivarname: "icutcoul"
     characteristics:
     - '[[GW]]'
     commentdefault: null
@@ -9837,7 +9837,7 @@
     varset: vargw
     vartype: integer
 - !variable
-    abivarname: ieig2rf
+    abivarname: "ieig2rf"
     characteristics:
     - '[[RESPFN]]'
     commentdefault: null
@@ -9877,7 +9877,7 @@
     varset: varrf
     vartype: integer
 - !variable
-    abivarname: imgmov
+    abivarname: "imgmov"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -9960,7 +9960,7 @@
     varset: varrlx
     vartype: integer
 - !variable
-    abivarname: inclvkb
+    abivarname: "inclvkb"
     characteristics:
     - '[[GW]]'
     commentdefault: null
@@ -9991,7 +9991,7 @@
     varset: vargw
     vartype: integer
 - !variable
-    abivarname: intxc
+    abivarname: "intxc"
     characteristics:
     - '[[DEVELOP]]'
     commentdefault: null
@@ -10033,7 +10033,7 @@
     varset: vardev
     vartype: integer
 - !variable
-    abivarname: iomode
+    abivarname: "iomode"
     characteristics:
     - '[[DEVELOP]]'
     commentdefault: null
@@ -10120,7 +10120,7 @@
     varset: vardev
     vartype: integer
 - !variable
-    abivarname: ionmov
+    abivarname: "ionmov"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -10383,7 +10383,7 @@
     varset: varrlx
     vartype: integer
 - !variable
-    abivarname: iprcel
+    abivarname: "iprcel"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -10498,7 +10498,7 @@
     varset: vargs
     vartype: integer
 - !variable
-    abivarname: iprcfc
+    abivarname: "iprcfc"
     characteristics:
     - '[[DEVELOP]]'
     commentdefault: null
@@ -10543,7 +10543,7 @@
     varset: vardev
     vartype: integer
 - !variable
-    abivarname: iqpt
+    abivarname: "iqpt"
     characteristics:
     - '[[INPUT_ONLY]]'
     commentdefault: null
@@ -10587,7 +10587,7 @@
     varset: vargs
     vartype: integer
 - !variable
-    abivarname: irandom
+    abivarname: "irandom"
     characteristics:
     - '[[DEVELOP]]'
     commentdefault: null
@@ -10625,7 +10625,7 @@
     varset: vardev
     vartype: integer
 - !variable
-    abivarname: ird1den
+    abivarname: "ird1den"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -10664,7 +10664,7 @@
     varset: varfil
     vartype: integer
 - !variable
-    abivarname: ird1wf
+    abivarname: "ird1wf"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -10817,7 +10817,7 @@
     varset: varfil
     vartype: integer
 - !variable
-    abivarname: irdbscoup
+    abivarname: "irdbscoup"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -10835,7 +10835,7 @@
     varset: varfil
     vartype: integer
 - !variable
-    abivarname: irdbseig
+    abivarname: "irdbseig"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -10853,7 +10853,7 @@
     varset: varfil
     vartype: integer
 - !variable
-    abivarname: irdbsreso
+    abivarname: "irdbsreso"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -10871,7 +10871,7 @@
     varset: varfil
     vartype: integer
 - !variable
-    abivarname: irdddb
+    abivarname: "irdddb"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -10915,7 +10915,7 @@
     varset: varfil
     vartype: integer
 - !variable
-    abivarname: irdddk
+    abivarname: "irdddk"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -11069,7 +11069,7 @@
     varset: varfil
     vartype: integer
 - !variable
-    abivarname: irdden
+    abivarname: "irdden"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -11101,7 +11101,7 @@
     varset: varfil
     vartype: integer
 - !variable
-    abivarname: irdhaydock
+    abivarname: "irdhaydock"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -11119,7 +11119,7 @@
     varset: varfil
     vartype: integer
 - !variable
-    abivarname: irdqps
+    abivarname: "irdqps"
     characteristics:
     - '[[GW]]'
     commentdefault: null
@@ -11141,7 +11141,7 @@
     varset: varfil
     vartype: integer
 - !variable
-    abivarname: irdscr
+    abivarname: "irdscr"
     characteristics:
     - '[[GW]]'
     commentdefault: null
@@ -11176,7 +11176,7 @@
     varset: varfil
     vartype: integer
 - !variable
-    abivarname: irdsuscep
+    abivarname: "irdsuscep"
     characteristics:
     - '[[GW]]'
     commentdefault: null
@@ -11211,7 +11211,7 @@
     varset: varfil
     vartype: integer
 - !variable
-    abivarname: irdvdw
+    abivarname: "irdvdw"
     characteristics:
     - '[[DEVELOP]]'
     commentdefault: null
@@ -11239,7 +11239,7 @@
     varset: varvdw
     vartype: integer
 - !variable
-    abivarname: irdwfk
+    abivarname: "irdwfk"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -11374,7 +11374,7 @@
     varset: varfil
     vartype: integer
 - !variable
-    abivarname: irdwfkfine
+    abivarname: "irdwfkfine"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -11452,7 +11452,7 @@
     varset: vardev
     vartype: integer
 - !variable
-    abivarname: irdwfq
+    abivarname: "irdwfq"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -11606,7 +11606,7 @@
     varset: varfil
     vartype: integer
 - !variable
-    abivarname: iscf
+    abivarname: "iscf"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -11783,7 +11783,7 @@
     varset: varbas
     vartype: integer
 - !variable
-    abivarname: isecur
+    abivarname: "isecur"
     characteristics:
     - '[[DEVELOP]]'
     commentdefault: null
@@ -11821,7 +11821,7 @@
     varset: vardev
     vartype: integer
 - !variable
-    abivarname: istatimg
+    abivarname: "istatimg"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -11848,7 +11848,7 @@
     varset: varrlx
     vartype: integer
 - !variable
-    abivarname: istatr
+    abivarname: "istatr"
     characteristics:
     - '[[DEVELOP]]'
     - '[[NO_MULTI]]'
@@ -11876,7 +11876,7 @@
     varset: vardev
     vartype: integer
 - !variable
-    abivarname: istatshft
+    abivarname: "istatshft"
     characteristics:
     - '[[DEVELOP]]'
     - '[[NO_MULTI]]'
@@ -11910,7 +11910,7 @@
     varset: vardev
     vartype: integer
 - !variable
-    abivarname: istwfk
+    abivarname: "istwfk"
     characteristics: null
     commentdefault: 'For RF calculations, the Default is not used : <b>istwfk</b>
         is forced to be 1 deep inside the code, for all k points. For spin-orbit
@@ -11991,7 +11991,7 @@
     varset: vardev
     vartype: integer
 - !variable
-    abivarname: ixc
+    abivarname: "ixc"
     characteristics: null
     commentdefault: Default corresponds to Teter parametrization. However, if all the pseudopotentials have the same value of pspxc, the initial value of ixc will be that common value
     commentdims: null
@@ -13005,7 +13005,7 @@
     varset: varbas
     vartype: integer
 - !variable
-    abivarname: ixcpositron
+    abivarname: "ixcpositron"
     characteristics: null
     commentdefault: (Teter parameterization). However, if all the pseudopotentials have the same value of pspxc, the initial value of ixc will be that common value
     commentdims: null
@@ -13125,7 +13125,7 @@
     varset: vargs
     vartype: integer
 - !variable
-    abivarname: jdtset
+    abivarname: "jdtset"
     characteristics:
     - '[[NO_MULTI]]'
     commentdefault: null
@@ -13176,7 +13176,7 @@
     varset: varbas
     vartype: integer
 - !variable
-    abivarname: jellslab
+    abivarname: "jellslab"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -13210,7 +13210,7 @@
     varset: vargs
     vartype: integer
 - !variable
-    abivarname: jfielddir
+    abivarname: "jfielddir"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -13250,7 +13250,7 @@
     varset: varff
     vartype: integer
 - !variable
-    abivarname: jpawu
+    abivarname: "jpawu"
     characteristics:
     - '[[ENERGY]]'
     commentdefault: null
@@ -13277,7 +13277,7 @@
     varset: varpaw
     vartype: real
 - !variable
-    abivarname: kberry
+    abivarname: "kberry"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -13331,7 +13331,7 @@
     varset: varff
     vartype: integer
 - !variable
-    abivarname: kpt
+    abivarname: "kpt"
     characteristics: null
     commentdefault: Adequate for one molecule in a supercell
     commentdims: null
@@ -13398,7 +13398,7 @@
     varset: varbas
     vartype: real
 - !variable
-    abivarname: kptbounds
+    abivarname: "kptbounds"
     characteristics:
     - '[[INPUT_ONLY]]'
     commentdefault: null
@@ -13665,7 +13665,7 @@
     varset: vargs
     vartype: real
 - !variable
-    abivarname: kptgw
+    abivarname: "kptgw"
     characteristics:
     - '[[GW]]'
     commentdefault: null
@@ -13697,7 +13697,7 @@
     varset: vargw
     vartype: real
 - !variable
-    abivarname: kptnrm
+    abivarname: "kptnrm"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -13727,7 +13727,7 @@
     varset: varbas
     vartype: real
 - !variable
-    abivarname: kptns
+    abivarname: "kptns"
     characteristics:
     - '[[INTERNAL_ONLY]]'
     commentdefault: null
@@ -13769,7 +13769,7 @@
     varset: varint
     vartype: real
 - !variable
-    abivarname: kptopt
+    abivarname: "kptopt"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -13875,7 +13875,7 @@
     varset: varbas
     vartype: integer
 - !variable
-    abivarname: kptrlatt
+    abivarname: "kptrlatt"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -13918,7 +13918,7 @@
     varset: vargs
     vartype: integer
 - !variable
-    abivarname: kptrlen
+    abivarname: "kptrlen"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -13985,7 +13985,7 @@
     varset: vargs
     vartype: real
 - !variable
-    abivarname: kssform
+    abivarname: "kssform"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -14027,7 +14027,7 @@
     varset: varfil
     vartype: integer
 - !variable
-    abivarname: lexexch
+    abivarname: "lexexch"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -14047,7 +14047,7 @@
     varset: varpaw
     vartype: integer
 - !variable
-    abivarname: localrdwf
+    abivarname: "localrdwf"
     characteristics:
     - '[[DEVELOP]]'
     commentdefault: null
@@ -14088,7 +14088,7 @@
     varset: varpar
     vartype: integer
 - !variable
-    abivarname: lotf_classic
+    abivarname: "lotf_classic"
     characteristics:
     - '[[DEVELOP]]'
     commentdefault: null
@@ -14109,7 +14109,7 @@
     varset: vardev
     vartype: integer
 - !variable
-    abivarname: lotf_nitex
+    abivarname: "lotf_nitex"
     characteristics:
     - '[[DEVELOP]]'
     commentdefault: null
@@ -14128,7 +14128,7 @@
     varset: vardev
     vartype: integer
 - !variable
-    abivarname: lotf_nneigx
+    abivarname: "lotf_nneigx"
     characteristics:
     - '[[DEVELOP]]'
     commentdefault: null
@@ -14149,7 +14149,7 @@
     varset: vardev
     vartype: integer
 - !variable
-    abivarname: lotf_version
+    abivarname: "lotf_version"
     characteristics:
     - '[[DEVELOP]]'
     commentdefault: null
@@ -14170,7 +14170,7 @@
     varset: vardev
     vartype: integer
 - !variable
-    abivarname: lpawu
+    abivarname: "lpawu"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -14203,7 +14203,7 @@
     varset: varpaw
     vartype: integer
 - !variable
-    abivarname: macro_uj
+    abivarname: "macro_uj"
     characteristics:
     - '[[DEVELOP]]'
     commentdefault: null
@@ -14243,7 +14243,7 @@
     varset: vardev
     vartype: integer
 - !variable
-    abivarname: magcon_lambda
+    abivarname: "magcon_lambda"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -14261,7 +14261,7 @@
     varset: vargs
     vartype: real
 - !variable
-    abivarname: magconon
+    abivarname: "magconon"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -14279,7 +14279,7 @@
     varset: vargs
     vartype: integer
 - !variable
-    abivarname: max_ncpus
+    abivarname: "max_ncpus"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -14300,7 +14300,7 @@
     varset: varpar
     vartype: integer
 - !variable
-    abivarname: maxestep
+    abivarname: "maxestep"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -14320,7 +14320,7 @@
     varset: varff
     vartype: real
 - !variable
-    abivarname: maxnsym
+    abivarname: "maxnsym"
     characteristics:
     - '[[DEVELOP]]'
     commentdefault: null
@@ -14341,7 +14341,7 @@
     varset: vardev
     vartype: integer
 - !variable
-    abivarname: mband
+    abivarname: "mband"
     characteristics:
     - '[[INTERNAL_ONLY]]'
     commentdefault: null
@@ -14363,7 +14363,7 @@
     varset: varint
     vartype: integer
 - !variable
-    abivarname: mbpt_sciss
+    abivarname: "mbpt_sciss"
     characteristics:
     - '[[GW]]'
     - '[[ENERGY]]'
@@ -14384,7 +14384,7 @@
     varset: vargw
     vartype: real
 - !variable
-    abivarname: mdf_epsinf
+    abivarname: "mdf_epsinf"
     characteristics:
     - '[[BETHE_SALPETER]]'
     commentdefault: null
@@ -14407,7 +14407,7 @@
     varset: vargw
     vartype: real
 - !variable
-    abivarname: mdtemp
+    abivarname: "mdtemp"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -14442,7 +14442,7 @@
     varset: varrlx
     vartype: real
 - !variable
-    abivarname: mdwall
+    abivarname: "mdwall"
     characteristics: null
     commentdefault: the walls are extremely far away
     commentdims: null
@@ -14472,7 +14472,7 @@
     varset: varrlx
     vartype: real
 - !variable
-    abivarname: mem_test
+    abivarname: "mem_test"
     characteristics:
     - '[[DEVELOP]]'
     commentdefault: null
@@ -14505,7 +14505,7 @@
     varset: vardev
     vartype: integer
 - !variable
-    abivarname: mep_mxstep
+    abivarname: "mep_mxstep"
     characteristics:
     - '[[LENGTH]]'
     commentdefault: null
@@ -14543,7 +14543,7 @@
     varset: varrlx
     vartype: real
 - !variable
-    abivarname: mep_solver
+    abivarname: "mep_solver"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -14652,7 +14652,7 @@
     varset: varrlx
     vartype: integer
 - !variable
-    abivarname: mgfft
+    abivarname: "mgfft"
     characteristics:
     - '[[INTERNAL_ONLY]]'
     commentdefault: null
@@ -14672,7 +14672,7 @@
     varset: varint
     vartype: integer
 - !variable
-    abivarname: mgfftdg
+    abivarname: "mgfftdg"
     characteristics:
     - '[[INTERNAL_ONLY]]'
     commentdefault: null
@@ -14692,7 +14692,7 @@
     varset: varint
     vartype: integer
 - !variable
-    abivarname: mixalch
+    abivarname: "mixalch"
     characteristics:
     - '[[EVOLVING]]'
     commentdefault: null
@@ -14778,7 +14778,7 @@
     varset: vargs
     vartype: real
 - !variable
-    abivarname: mpw
+    abivarname: "mpw"
     characteristics:
     - '[[INTERNAL_ONLY]]'
     commentdefault: null
@@ -14803,7 +14803,7 @@
     varset: varint
     vartype: integer
 - !variable
-    abivarname: mqgrid
+    abivarname: "mqgrid"
     characteristics:
     - '[[DEVELOP]]'
     commentdefault: null
@@ -14824,7 +14824,7 @@
     varset: vardev
     vartype: integer
 - !variable
-    abivarname: mqgriddg
+    abivarname: "mqgriddg"
     characteristics:
     - '[[DEVELOP]]'
     commentdefault: null
@@ -14845,7 +14845,7 @@
     varset: varpaw
     vartype: integer
 - !variable
-    abivarname: natcon
+    abivarname: "natcon"
     characteristics:
     - '[[NO_MULTI]]'
     - '[[INPUT_ONLY]]'
@@ -14872,7 +14872,7 @@
     varset: varrlx
     vartype: integer
 - !variable
-    abivarname: natfix
+    abivarname: "natfix"
     characteristics:
     - '[[INPUT_ONLY]]'
     commentdefault: (no atoms held fixed)
@@ -14902,7 +14902,7 @@
     varset: varrlx
     vartype: integer
 - !variable
-    abivarname: natfixx
+    abivarname: "natfixx"
     characteristics:
     - '[[INPUT_ONLY]]'
     commentdefault: null
@@ -14927,7 +14927,7 @@
     varset: varrlx
     vartype: integer
 - !variable
-    abivarname: natfixy
+    abivarname: "natfixy"
     characteristics:
     - '[[INPUT_ONLY]]'
     commentdefault: null
@@ -14951,7 +14951,7 @@
     varset: varrlx
     vartype: integer
 - !variable
-    abivarname: natfixz
+    abivarname: "natfixz"
     characteristics:
     - '[[INPUT_ONLY]]'
     commentdefault: null
@@ -14975,7 +14975,7 @@
     varset: varrlx
     vartype: integer
 - !variable
-    abivarname: natom
+    abivarname: "natom"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -15001,7 +15001,7 @@
     varset: varbas
     vartype: integer
 - !variable
-    abivarname: natpawu
+    abivarname: "natpawu"
     characteristics:
     - '[[INTERNAL_ONLY]]'
     commentdefault: null
@@ -15021,7 +15021,7 @@
     varset: varint
     vartype: integer
 - !variable
-    abivarname: natrd
+    abivarname: "natrd"
     characteristics:
     - '[[GEOMETRY_BUILDER]]'
     - '[[SYMMETRISER]]'
@@ -15052,7 +15052,7 @@
     varset: vargeo
     vartype: integer
 - !variable
-    abivarname: natsph
+    abivarname: "natsph"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -15077,7 +15077,7 @@
     varset: vargs
     vartype: integer
 - !variable
-    abivarname: natsph_extra
+    abivarname: "natsph_extra"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -15106,7 +15106,7 @@
     varset: vargs
     vartype: integer
 - !variable
-    abivarname: natvshift
+    abivarname: "natvshift"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -15132,7 +15132,7 @@
     varset: varff
     vartype: integer
 - !variable
-    abivarname: nband
+    abivarname: "nband"
     characteristics: null
     commentdefault: ' the estimated number of occupied bands +1 (TODO provide
         the mathematical formulation)'
@@ -15179,7 +15179,7 @@
     varset: varbas
     vartype: integer
 - !variable
-    abivarname: nbandhf
+    abivarname: "nbandhf"
     characteristics: null
     commentdefault: 'the estimated number of occupied bands (TODO : provide
         the mathematical formulation)'
@@ -15198,7 +15198,7 @@
     varset: varbas
     vartype: integer
 - !variable
-    abivarname: nbandkss
+    abivarname: "nbandkss"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -15253,7 +15253,7 @@
     varset: vargw
     vartype: integer
 - !variable
-    abivarname: nbdblock
+    abivarname: "nbdblock"
     characteristics:
     - '[[DEVELOP]]'
     commentdefault: null
@@ -15281,7 +15281,7 @@
     varset: vardev
     vartype: integer
 - !variable
-    abivarname: nbdbuf
+    abivarname: "nbdbuf"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -15355,7 +15355,7 @@
     varset: vargs
     vartype: integer
 - !variable
-    abivarname: nberry
+    abivarname: "nberry"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -15395,7 +15395,7 @@
     varset: varff
     vartype: integer
 - !variable
-    abivarname: nc_xccc_gspace
+    abivarname: "nc_xccc_gspace"
     characteristics:
     - '[[DEVELOP]]'
     commentdefault: 0 when [[usepaw]]=0, 1 when [[usepaw]]=1
@@ -15422,7 +15422,7 @@
     varset: vardev
     vartype: integer
 - !variable
-    abivarname: nconeq
+    abivarname: "nconeq"
     characteristics:
     - '[[NO_MULTI]]'
     commentdefault: null
@@ -15446,7 +15446,7 @@
     varset: varrlx
     vartype: integer
 - !variable
-    abivarname: nctime
+    abivarname: "nctime"
     characteristics:
     - '[[DEVELOP]]'
     commentdefault: null
@@ -15493,7 +15493,7 @@
     varset: vardev
     vartype: integer
 - !variable
-    abivarname: ndivk
+    abivarname: "ndivk"
     characteristics:
     - '[[INPUT_ONLY]]'
     commentdefault: Will be generated automatically from [[ndivsm]] if the latter is defined.
@@ -15549,7 +15549,7 @@
     varset: vargs
     vartype: integer
 - !variable
-    abivarname: ndivsm
+    abivarname: "ndivsm"
     characteristics:
     - '[[INPUT_ONLY]]'
     commentdefault: null
@@ -15580,7 +15580,7 @@
     varset: vargs
     vartype: integer
 - !variable
-    abivarname: ndtset
+    abivarname: "ndtset"
     characteristics:
     - '[[NO_MULTI]]'
     commentdefault: null
@@ -15607,7 +15607,7 @@
     varset: varbas
     vartype: integer
 - !variable
-    abivarname: ndynimage
+    abivarname: "ndynimage"
     characteristics:
     - '[[INTERNAL_ONLY]]'
     commentdefault: null
@@ -15630,7 +15630,7 @@
     varset: varint
     vartype: integer
 - !variable
-    abivarname: neb_algo
+    abivarname: "neb_algo"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -15704,7 +15704,7 @@
     varset: varrlx
     vartype: integer
 - !variable
-    abivarname: neb_spring
+    abivarname: "neb_spring"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -15737,7 +15737,7 @@
     varset: varrlx
     vartype: real
 - !variable
-    abivarname: nelect
+    abivarname: "nelect"
     characteristics:
     - '[[INTERNAL_ONLY]]'
     commentdefault: null
@@ -15762,7 +15762,7 @@
     varset: varint
     vartype: real
 - !variable
-    abivarname: nfft
+    abivarname: "nfft"
     characteristics:
     - '[[INTERNAL_ONLY]]'
     commentdefault: null
@@ -15791,7 +15791,7 @@
     varset: varint
     vartype: integer
 - !variable
-    abivarname: nfftdg
+    abivarname: "nfftdg"
     characteristics:
     - '[[INTERNAL_ONLY]]'
     commentdefault: null
@@ -15820,7 +15820,7 @@
     varset: varint
     vartype: integer
 - !variable
-    abivarname: nfreqim
+    abivarname: "nfreqim"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -15839,7 +15839,7 @@
     varset: vargw
     vartype: integer
 - !variable
-    abivarname: nfreqmidm
+    abivarname: "nfreqmidm"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -15867,7 +15867,7 @@
     varset: vargw
     vartype: integer
 - !variable
-    abivarname: nfreqre
+    abivarname: "nfreqre"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -15904,7 +15904,7 @@
     varset: vargw
     vartype: integer
 - !variable
-    abivarname: nfreqsp
+    abivarname: "nfreqsp"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -15923,7 +15923,7 @@
     varset: vargw
     vartype: integer
 - !variable
-    abivarname: ngfft
+    abivarname: "ngfft"
     characteristics: null
     commentdefault: (automatic selection of optimal values)
     commentdims: null
@@ -16019,7 +16019,7 @@
     varset: vargs
     vartype: integer
 - !variable
-    abivarname: ngfftdg
+    abivarname: "ngfftdg"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -16044,7 +16044,7 @@
     varset: varpaw
     vartype: integer
 - !variable
-    abivarname: ngkpt
+    abivarname: "ngkpt"
     characteristics:
     - '[[INPUT_ONLY]]'
     commentdefault: null
@@ -16100,7 +16100,7 @@
     varset: varbas
     vartype: integer
 - !variable
-    abivarname: ngqpt
+    abivarname: "ngqpt"
     characteristics:
     - '[[INPUT_ONLY]]'
     commentdefault: null
@@ -16136,7 +16136,7 @@
     varset: vargs
     vartype: integer
 - !variable
-    abivarname: nimage
+    abivarname: "nimage"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -16249,7 +16249,7 @@
     varset: varrlx
     vartype: integer
 - !variable
-    abivarname: nkpath
+    abivarname: "nkpath"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -16276,7 +16276,7 @@
     varset: varbas
     vartype: integer
 - !variable
-    abivarname: nkpt
+    abivarname: "nkpt"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -16342,7 +16342,7 @@
     varset: varbas
     vartype: integer
 - !variable
-    abivarname: nkptgw
+    abivarname: "nkptgw"
     characteristics:
     - '[[GW]]'
     commentdefault: null
@@ -16362,7 +16362,7 @@
     varset: vargw
     vartype: integer
 - !variable
-    abivarname: nkpthf
+    abivarname: "nkpthf"
     characteristics: null
     commentdefault: ' the total number of k-point in the full Brillouin zone
         (TODO : provide the mathematical formulation)'
@@ -16381,7 +16381,7 @@
     varset: varbas
     vartype: integer
 - !variable
-    abivarname: nline
+    abivarname: "nline"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -16412,7 +16412,7 @@
     varset: vargs
     vartype: integer
 - !variable
-    abivarname: nloc_alg
+    abivarname: "nloc_alg"
     characteristics:
     - '[[DEVELOP]]'
     commentdefault: null
@@ -16453,7 +16453,7 @@
     varset: vardev
     vartype: integer
 - !variable
-    abivarname: nloc_mem
+    abivarname: "nloc_mem"
     characteristics:
     - '[[DEVELOP]]'
     commentdefault: null
@@ -16503,7 +16503,7 @@
     varset: vardev
     vartype: integer
 - !variable
-    abivarname: nnos
+    abivarname: "nnos"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -16523,7 +16523,7 @@
     varset: varrlx
     vartype: integer
 - !variable
-    abivarname: nnsclo
+    abivarname: "nnsclo"
     characteristics:
     - '[[DEVELOP]]'
     commentdefault: null
@@ -16555,7 +16555,7 @@
     varset: vardev
     vartype: integer
 - !variable
-    abivarname: nnsclohf
+    abivarname: "nnsclohf"
     characteristics:
     - '[[DEVELOP]]'
     commentdefault: null
@@ -16581,7 +16581,7 @@
     varset: vardev
     vartype: integer
 - !variable
-    abivarname: nobj
+    abivarname: "nobj"
     characteristics:
     - '[[GEOMETRY_BUILDER]]'
     - '[[INPUT_ONLY]]'
@@ -16668,7 +16668,7 @@
     varset: vargeo
     vartype: integer
 - !variable
-    abivarname: nomegasf
+    abivarname: "nomegasf"
     characteristics:
     - '[[GW]]'
     - '[[ENERGY]]'
@@ -16698,7 +16698,7 @@
     varset: vargw
     vartype: integer
 - !variable
-    abivarname: nomegasi
+    abivarname: "nomegasi"
     characteristics:
     - '[[GW]]'
     commentdefault: null
@@ -16719,7 +16719,7 @@
     varset: vargw
     vartype: integer
 - !variable
-    abivarname: nomegasrd
+    abivarname: "nomegasrd"
     characteristics:
     - '[[GW]]'
     commentdefault: null
@@ -16739,7 +16739,7 @@
     varset: vargw
     vartype: integer
 - !variable
-    abivarname: normpawu
+    abivarname: "normpawu"
     characteristics:
     - '[[DEVELOP]]'
     commentdefault: null
@@ -16768,7 +16768,7 @@
     varset: vardev
     vartype: integer
 - !variable
-    abivarname: noseinert
+    abivarname: "noseinert"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -16790,7 +16790,7 @@
     varset: varrlx
     vartype: real
 - !variable
-    abivarname: np_slk
+    abivarname: "np_slk"
     characteristics:
     - '[[DEVELOP]]'
     commentdefault: null
@@ -16819,7 +16819,7 @@
     varset: varpar
     vartype: integer
 - !variable
-    abivarname: npband
+    abivarname: "npband"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -16851,7 +16851,7 @@
     varset: varpar
     vartype: integer
 - !variable
-    abivarname: npfft
+    abivarname: "npfft"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -16888,7 +16888,7 @@
     varset: varpar
     vartype: integer
 - !variable
-    abivarname: nphf
+    abivarname: "nphf"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -16919,7 +16919,7 @@
     varset: varpar
     vartype: integer
 - !variable
-    abivarname: npimage
+    abivarname: "npimage"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -16948,7 +16948,7 @@
     varset: varpar
     vartype: integer
 - !variable
-    abivarname: npkpt
+    abivarname: "npkpt"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -16983,7 +16983,7 @@
     varset: varpar
     vartype: integer
 - !variable
-    abivarname: nppert
+    abivarname: "nppert"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -17004,7 +17004,7 @@
     varset: varpar
     vartype: integer
 - !variable
-    abivarname: npsp
+    abivarname: "npsp"
     characteristics:
     - '[[NO_MULTI]]'
     commentdefault: null
@@ -17042,7 +17042,7 @@
     varset: vargs
     vartype: integer
 - !variable
-    abivarname: npspalch
+    abivarname: "npspalch"
     characteristics:
     - '[[INTERNAL_ONLY]]'
     commentdefault: null
@@ -17064,7 +17064,7 @@
     varset: vargs
     vartype: integer
 - !variable
-    abivarname: npspinor
+    abivarname: "npspinor"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -17099,7 +17099,7 @@
     varset: varpar
     vartype: integer
 - !variable
-    abivarname: npulayit
+    abivarname: "npulayit"
     characteristics:
     - '[[DEVELOP]]'
     commentdefault: null
@@ -17119,7 +17119,7 @@
     varset: vardev
     vartype: integer
 - !variable
-    abivarname: npvel
+    abivarname: "npvel"
     characteristics:
     - '[[GW]]'
     commentdefault: null
@@ -17144,7 +17144,7 @@
     varset: vargw
     vartype: integer
 - !variable
-    abivarname: npweps
+    abivarname: "npweps"
     characteristics:
     - '[[GW]]'
     - '[[INTERNAL_ONLY]]'
@@ -17167,7 +17167,7 @@
     varset: varint
     vartype: integer
 - !variable
-    abivarname: npwkss
+    abivarname: "npwkss"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -17203,7 +17203,7 @@
     varset: vargw
     vartype: integer
 - !variable
-    abivarname: npwsigx
+    abivarname: "npwsigx"
     characteristics:
     - '[[GW]]'
     - '[[INTERNAL_ONLY]]'
@@ -17226,7 +17226,7 @@
     varset: varint
     vartype: integer
 - !variable
-    abivarname: npwwfn
+    abivarname: "npwwfn"
     characteristics:
     - '[[GW]]'
     - '[[INTERNAL_ONLY]]'
@@ -17248,7 +17248,7 @@
     varset: varint
     vartype: integer
 - !variable
-    abivarname: nqpt
+    abivarname: "nqpt"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -17281,7 +17281,7 @@
     varset: vargs
     vartype: integer
 - !variable
-    abivarname: nqptdm
+    abivarname: "nqptdm"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -17309,7 +17309,7 @@
     varset: vargw
     vartype: integer
 - !variable
-    abivarname: nscforder
+    abivarname: "nscforder"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -17327,7 +17327,7 @@
     varset: vardev
     vartype: integer
 - !variable
-    abivarname: nshiftk
+    abivarname: "nshiftk"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -17353,7 +17353,7 @@
     varset: varbas
     vartype: integer
 - !variable
-    abivarname: nshiftq
+    abivarname: "nshiftq"
     characteristics:
     - '[[INPUT_ONLY]]'
     commentdefault: null
@@ -17380,7 +17380,7 @@
     varset: vargs
     vartype: integer
 - !variable
-    abivarname: nspden
+    abivarname: "nspden"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -17427,7 +17427,7 @@
     varset: vargs
     vartype: integer
 - !variable
-    abivarname: nspinor
+    abivarname: "nspinor"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -17461,7 +17461,7 @@
     varset: vargs
     vartype: integer
 - !variable
-    abivarname: nsppol
+    abivarname: "nsppol"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -17514,7 +17514,7 @@
     varset: varbas
     vartype: integer
 - !variable
-    abivarname: nstep
+    abivarname: "nstep"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -17569,7 +17569,7 @@
     varset: varbas
     vartype: integer
 - !variable
-    abivarname: nsym
+    abivarname: "nsym"
     characteristics:
     - '[[SYMMETRY_FINDER]]'
     commentdefault: null
@@ -17640,7 +17640,7 @@
     varset: varbas
     vartype: integer
 - !variable
-    abivarname: ntime
+    abivarname: "ntime"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -17672,7 +17672,7 @@
     varset: varrlx
     vartype: integer
 - !variable
-    abivarname: ntimimage
+    abivarname: "ntimimage"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -17696,7 +17696,7 @@
     varset: varrlx
     vartype: integer
 - !variable
-    abivarname: ntypalch
+    abivarname: "ntypalch"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -17742,7 +17742,7 @@
     varset: vargs
     vartype: integer
 - !variable
-    abivarname: ntypat
+    abivarname: "ntypat"
     characteristics:
     - '[[NO_MULTI]]'
     commentdefault: null
@@ -17767,7 +17767,7 @@
     varset: varbas
     vartype: integer
 - !variable
-    abivarname: ntyppure
+    abivarname: "ntyppure"
     characteristics:
     - '[[INTERNAL_ONLY]]'
     commentdefault: null
@@ -17789,7 +17789,7 @@
     varset: vargs
     vartype: integer
 - !variable
-    abivarname: nucdipmom
+    abivarname: "nucdipmom"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -17807,7 +17807,7 @@
     varset: vargs
     vartype: real
 - !variable
-    abivarname: nwfshist
+    abivarname: "nwfshist"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -17837,7 +17837,7 @@
     varset: vargs
     vartype: integer
 - !variable
-    abivarname: nzchempot
+    abivarname: "nzchempot"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -17853,7 +17853,7 @@
     varset: vargeo
     vartype: integer
 - !variable
-    abivarname: objaat
+    abivarname: "objaat"
     characteristics:
     - '[[GEOMETRY_BUILDER]]'
     - '[[INPUT_ONLY]]'
@@ -17882,7 +17882,7 @@
     varset: vargeo
     vartype: integer
 - !variable
-    abivarname: objaax
+    abivarname: "objaax"
     characteristics:
     - '[[GEOMETRY_BUILDER]]'
     - '[[INPUT_ONLY]]'
@@ -17923,7 +17923,7 @@
     varset: vargeo
     vartype: real
 - !variable
-    abivarname: objan
+    abivarname: "objan"
     characteristics:
     - '[[GEOMETRY_BUILDER]]'
     - '[[INPUT_ONLY]]'
@@ -17947,7 +17947,7 @@
     varset: vargeo
     vartype: integer
 - !variable
-    abivarname: objarf
+    abivarname: "objarf"
     characteristics:
     - '[[GEOMETRY_BUILDER]]'
     - '[[INPUT_ONLY]]'
@@ -18002,7 +18002,7 @@
     varset: vargeo
     vartype: integer
 - !variable
-    abivarname: objaro
+    abivarname: "objaro"
     characteristics:
     - '[[GEOMETRY_BUILDER]]'
     - '[[INPUT_ONLY]]'
@@ -18044,7 +18044,7 @@
     varset: vargeo
     vartype: real
 - !variable
-    abivarname: objatr
+    abivarname: "objatr"
     characteristics:
     - '[[GEOMETRY_BUILDER]]'
     - '[[INPUT_ONLY]]'
@@ -18091,7 +18091,7 @@
     varset: vargeo
     vartype: real
 - !variable
-    abivarname: objbat
+    abivarname: "objbat"
     characteristics:
     - '[[GEOMETRY_BUILDER]]'
     - '[[INPUT_ONLY]]'
@@ -18122,7 +18122,7 @@
     varset: vargeo
     vartype: integer
 - !variable
-    abivarname: objbax
+    abivarname: "objbax"
     characteristics:
     - '[[GEOMETRY_BUILDER]]'
     - '[[INPUT_ONLY]]'
@@ -18163,7 +18163,7 @@
     varset: vargeo
     vartype: real
 - !variable
-    abivarname: objbn
+    abivarname: "objbn"
     characteristics:
     - '[[GEOMETRY_BUILDER]]'
     - '[[INPUT_ONLY]]'
@@ -18186,7 +18186,7 @@
     varset: vargeo
     vartype: integer
 - !variable
-    abivarname: objbrf
+    abivarname: "objbrf"
     characteristics:
     - '[[GEOMETRY_BUILDER]]'
     - '[[INPUT_ONLY]]'
@@ -18240,7 +18240,7 @@
     varset: vargeo
     vartype: integer
 - !variable
-    abivarname: objbro
+    abivarname: "objbro"
     characteristics:
     - '[[GEOMETRY_BUILDER]]'
     - '[[INPUT_ONLY]]'
@@ -18282,7 +18282,7 @@
     varset: vargeo
     vartype: real
 - !variable
-    abivarname: objbtr
+    abivarname: "objbtr"
     characteristics:
     - '[[GEOMETRY_BUILDER]]'
     - '[[INPUT_ONLY]]'
@@ -18328,7 +18328,7 @@
     varset: vargeo
     vartype: real
 - !variable
-    abivarname: occ
+    abivarname: "occ"
     characteristics:
     - '[[EVOLVING]]'
     commentdefault: null
@@ -18380,7 +18380,7 @@
     varset: vargs
     vartype: real
 - !variable
-    abivarname: occopt
+    abivarname: "occopt"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -18521,7 +18521,7 @@
     varset: varbas
     vartype: integer
 - !variable
-    abivarname: omegasimax
+    abivarname: "omegasimax"
     characteristics:
     - '[[GW]]'
     - '[[ENERGY]]'
@@ -18546,7 +18546,7 @@
     varset: vargw
     vartype: real
 - !variable
-    abivarname: omegasrdmax
+    abivarname: "omegasrdmax"
     characteristics:
     - '[[GW]]'
     - '[[ENERGY]]'
@@ -18570,7 +18570,7 @@
     varset: vargw
     vartype: real
 - !variable
-    abivarname: optcell
+    abivarname: "optcell"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -18617,7 +18617,7 @@
     varset: varrlx
     vartype: integer
 - !variable
-    abivarname: optdriver
+    abivarname: "optdriver"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -18673,7 +18673,7 @@
     varset: vargs
     vartype: integer
 - !variable
-    abivarname: optforces
+    abivarname: "optforces"
     characteristics:
     - '[[DEVELOP]]'
     commentdefault: null
@@ -18708,7 +18708,7 @@
     varset: vardev
     vartype: integer
 - !variable
-    abivarname: optnlxccc
+    abivarname: "optnlxccc"
     characteristics:
     - '[[DEVELOP]]'
     commentdefault: null
@@ -18736,7 +18736,7 @@
     varset: vardev
     vartype: integer
 - !variable
-    abivarname: optstress
+    abivarname: "optstress"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -18763,7 +18763,7 @@
     varset: vargs
     vartype: integer
 - !variable
-    abivarname: ortalg
+    abivarname: "ortalg"
     characteristics:
     - '[[DEVELOP]]'
     commentdefault: null
@@ -18809,7 +18809,7 @@
     varset: vardev
     vartype: integer
 - !variable
-    abivarname: papiopt
+    abivarname: "papiopt"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -18847,7 +18847,7 @@
     varset: vardev
     vartype: integer
 - !variable
-    abivarname: paral_atom
+    abivarname: "paral_atom"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -18870,7 +18870,7 @@
     varset: varpar
     vartype: integer
 - !variable
-    abivarname: paral_kgb
+    abivarname: "paral_kgb"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -18967,7 +18967,7 @@
     varset: varpar
     vartype: integer
 - !variable
-    abivarname: paral_rf
+    abivarname: "paral_rf"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -18996,7 +18996,7 @@
     varset: varpar
     vartype: integer
 - !variable
-    abivarname: pawcpxocc
+    abivarname: "pawcpxocc"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -19047,7 +19047,7 @@
     varset: varpaw
     vartype: integer
 - !variable
-    abivarname: pawcross
+    abivarname: "pawcross"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -19070,7 +19070,7 @@
     varset: varpaw
     vartype: integer
 - !variable
-    abivarname: pawecutdg
+    abivarname: "pawecutdg"
     characteristics:
     - '[[ENERGY]]'
     commentdefault: pawecutdg MUST be specified for PAW calculations.
@@ -19105,7 +19105,7 @@
     varset: varpaw
     vartype: real
 - !variable
-    abivarname: pawfatbnd
+    abivarname: "pawfatbnd"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -19148,7 +19148,7 @@
     varset: varpaw
     vartype: integer
 - !variable
-    abivarname: pawlcutd
+    abivarname: "pawlcutd"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -19181,7 +19181,7 @@
     varset: varpaw
     vartype: integer
 - !variable
-    abivarname: pawlmix
+    abivarname: "pawlmix"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -19207,7 +19207,7 @@
     varset: varpaw
     vartype: integer
 - !variable
-    abivarname: pawmixdg
+    abivarname: "pawmixdg"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -19273,7 +19273,7 @@
     varset: varpaw
     vartype: integer
 - !variable
-    abivarname: pawnhatxc
+    abivarname: "pawnhatxc"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -19300,7 +19300,7 @@
     varset: varpaw
     vartype: integer
 - !variable
-    abivarname: pawnphi
+    abivarname: "pawnphi"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -19321,7 +19321,7 @@
     varset: varpaw
     vartype: integer
 - !variable
-    abivarname: pawntheta
+    abivarname: "pawntheta"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -19342,7 +19342,7 @@
     varset: varpaw
     vartype: integer
 - !variable
-    abivarname: pawnzlm
+    abivarname: "pawnzlm"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -19368,7 +19368,7 @@
     varset: varpaw
     vartype: integer
 - !variable
-    abivarname: pawoptmix
+    abivarname: "pawoptmix"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -19412,7 +19412,7 @@
     varset: varpaw
     vartype: integer
 - !variable
-    abivarname: pawoptosc
+    abivarname: "pawoptosc"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -19442,7 +19442,7 @@
     varset: varpaw
     vartype: integer
 - !variable
-    abivarname: pawovlp
+    abivarname: "pawovlp"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -19479,7 +19479,7 @@
     varset: varpaw
     vartype: real
 - !variable
-    abivarname: pawprt_b
+    abivarname: "pawprt_b"
     characteristics:
     - '[[DEVELOP]]'
     commentdefault: null
@@ -19507,7 +19507,7 @@
     varset: vardev
     vartype: integer
 - !variable
-    abivarname: pawprt_k
+    abivarname: "pawprt_k"
     characteristics:
     - '[[DEVELOP]]'
     commentdefault: null
@@ -19539,7 +19539,7 @@
     varset: vardev
     vartype: integer
 - !variable
-    abivarname: pawprtden
+    abivarname: "pawprtden"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -19560,7 +19560,7 @@
     varset: varpaw
     vartype: integer
 - !variable
-    abivarname: pawprtdos
+    abivarname: "pawprtdos"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -19613,7 +19613,7 @@
     varset: varpaw
     vartype: integer
 - !variable
-    abivarname: pawprtvol
+    abivarname: "pawprtvol"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -19648,7 +19648,7 @@
     varset: varpaw
     vartype: integer
 - !variable
-    abivarname: pawprtwf
+    abivarname: "pawprtwf"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -19685,7 +19685,7 @@
     varset: varpaw
     vartype: integer
 - !variable
-    abivarname: pawspnorb
+    abivarname: "pawspnorb"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -19748,7 +19748,7 @@
     varset: varpaw
     vartype: integer
 - !variable
-    abivarname: pawstgylm
+    abivarname: "pawstgylm"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -19789,7 +19789,7 @@
     varset: varpaw
     vartype: integer
 - !variable
-    abivarname: pawsushat
+    abivarname: "pawsushat"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -19825,7 +19825,7 @@
     varset: varpaw
     vartype: integer
 - !variable
-    abivarname: pawujat
+    abivarname: "pawujat"
     characteristics:
     - '[[DEVELOP]]'
     commentdefault: ' i.e. the first atom treated with PAW+U.'
@@ -19844,7 +19844,7 @@
     varset: vardev
     vartype: integer
 - !variable
-    abivarname: pawujrad
+    abivarname: "pawujrad"
     characteristics:
     - '[[DEVELOP]]'
     commentdefault: null
@@ -19868,7 +19868,7 @@
     varset: vardev
     vartype: real
 - !variable
-    abivarname: pawujv
+    abivarname: "pawujv"
     characteristics:
     - '[[DEVELOP]]'
     commentdefault: null
@@ -19889,7 +19889,7 @@
     varset: vardev
     vartype: real
 - !variable
-    abivarname: pawusecp
+    abivarname: "pawusecp"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -19919,7 +19919,7 @@
     varset: varpaw
     vartype: integer
 - !variable
-    abivarname: pawxcdev
+    abivarname: "pawxcdev"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -19952,7 +19952,7 @@
     varset: varpaw
     vartype: integer
 - !variable
-    abivarname: ph_intmeth
+    abivarname: "ph_intmeth"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -19976,7 +19976,7 @@
     varset: vareph
     vartype: integer
 - !variable
-    abivarname: ph_ndivsm
+    abivarname: "ph_ndivsm"
     characteristics:
     - '[[RESPFN]]'
     commentdefault: null
@@ -19993,7 +19993,7 @@
     varset: vareph
     vartype: integer
 - !variable
-    abivarname: ph_ngqpt
+    abivarname: "ph_ngqpt"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -20014,7 +20014,7 @@
     varset: varrf
     vartype: integer
 - !variable
-    abivarname: ph_nqpath
+    abivarname: "ph_nqpath"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -20030,7 +20030,7 @@
     varset: vareph
     vartype: integer
 - !variable
-    abivarname: ph_nqshift
+    abivarname: "ph_nqshift"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -20049,7 +20049,7 @@
     varset: vareph
     vartype: integer
 - !variable
-    abivarname: ph_qpath
+    abivarname: "ph_qpath"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -20068,7 +20068,7 @@
     varset: varrf
     vartype: real
 - !variable
-    abivarname: ph_qshift
+    abivarname: "ph_qshift"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -20090,7 +20090,7 @@
     varset: vareph
     vartype: real
 - !variable
-    abivarname: ph_smear
+    abivarname: "ph_smear"
     characteristics:
     - '[[ENERGY]]'
     commentdefault: null
@@ -20108,7 +20108,7 @@
     varset: vareph
     vartype: real
 - !variable
-    abivarname: ph_wstep
+    abivarname: "ph_wstep"
     characteristics:
     - '[[ENERGY]]'
     commentdefault: null
@@ -20126,7 +20126,7 @@
     varset: vareph
     vartype: real
 - !variable
-    abivarname: pimass
+    abivarname: "pimass"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -20156,7 +20156,7 @@
     varset: varrlx
     vartype: real
 - !variable
-    abivarname: pimd_constraint
+    abivarname: "pimd_constraint"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -20184,7 +20184,7 @@
     varset: varrlx
     vartype: integer
 - !variable
-    abivarname: pitransform
+    abivarname: "pitransform"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -20212,7 +20212,7 @@
     varset: varrlx
     vartype: integer
 - !variable
-    abivarname: plowan_bandf
+    abivarname: "plowan_bandf"
     characteristics:
     - '[[DEVELOP]]'
     commentdefault: null
@@ -20232,7 +20232,7 @@
     varset: vardev
     vartype: integer
 - !variable
-    abivarname: plowan_bandi
+    abivarname: "plowan_bandi"
     characteristics:
     - '[[DEVELOP]]'
     commentdefault: null
@@ -20252,7 +20252,7 @@
     varset: vardev
     vartype: integer
 - !variable
-    abivarname: plowan_compute
+    abivarname: "plowan_compute"
     characteristics:
     - '[[DEVELOP]]'
     commentdefault: null
@@ -20304,7 +20304,7 @@
     varset: vardev
     vartype: integer
 - !variable
-    abivarname: plowan_iatom
+    abivarname: "plowan_iatom"
     characteristics:
     - '[[DEVELOP]]'
     commentdefault: null
@@ -20324,7 +20324,7 @@
     varset: vardev
     vartype: integer
 - !variable
-    abivarname: plowan_it
+    abivarname: "plowan_it"
     characteristics:
     - '[[DEVELOP]]'
     commentdefault: null
@@ -20350,7 +20350,7 @@
     varset: vardev
     vartype: integer
 - !variable
-    abivarname: plowan_lcalc
+    abivarname: "plowan_lcalc"
     characteristics:
     - '[[DEVELOP]]'
     commentdefault: null
@@ -20372,7 +20372,7 @@
     varset: vardev
     vartype: integer
 - !variable
-    abivarname: plowan_natom
+    abivarname: "plowan_natom"
     characteristics:
     - '[[DEVELOP]]'
     commentdefault: null
@@ -20392,7 +20392,7 @@
     varset: vardev
     vartype: integer
 - !variable
-    abivarname: plowan_nbl
+    abivarname: "plowan_nbl"
     characteristics:
     - '[[DEVELOP]]'
     commentdefault: null
@@ -20413,7 +20413,7 @@
     varset: vardev
     vartype: integer
 - !variable
-    abivarname: plowan_nt
+    abivarname: "plowan_nt"
     characteristics:
     - '[[DEVELOP]]'
     commentdefault: null
@@ -20437,7 +20437,7 @@
     varset: vardev
     vartype: integer
 - !variable
-    abivarname: plowan_projcalc
+    abivarname: "plowan_projcalc"
     characteristics:
     - '[[DEVELOP]]'
     commentdefault: null
@@ -20460,7 +20460,7 @@
     varset: vardev
     vartype: integer
 - !variable
-    abivarname: plowan_realspace
+    abivarname: "plowan_realspace"
     characteristics:
     - '[[DEVELOP]]'
     commentdefault: null
@@ -20491,7 +20491,7 @@
     varset: vardev
     vartype: integer
 - !variable
-    abivarname: polcen
+    abivarname: "polcen"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -20515,7 +20515,7 @@
     varset: varff
     vartype: real
 - !variable
-    abivarname: posdoppler
+    abivarname: "posdoppler"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -20541,7 +20541,7 @@
     varset: vargs
     vartype: integer
 - !variable
-    abivarname: positron
+    abivarname: "positron"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -20675,7 +20675,7 @@
     varset: vargs
     vartype: integer
 - !variable
-    abivarname: posnstep
+    abivarname: "posnstep"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -20702,7 +20702,7 @@
     varset: vargs
     vartype: integer
 - !variable
-    abivarname: posocc
+    abivarname: "posocc"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -20725,7 +20725,7 @@
     varset: vargs
     vartype: real
 - !variable
-    abivarname: postoldfe
+    abivarname: "postoldfe"
     characteristics:
     - '[[ENERGY]]'
     commentdefault: null
@@ -20764,7 +20764,7 @@
     varset: vargs
     vartype: real
 - !variable
-    abivarname: postoldff
+    abivarname: "postoldff"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -20793,7 +20793,7 @@
     varset: vargs
     vartype: real
 - !variable
-    abivarname: ppmfrq
+    abivarname: "ppmfrq"
     characteristics:
     - '[[GW]]'
     - '[[ENERGY]]'
@@ -20863,7 +20863,7 @@
     varset: vargw
     vartype: real
 - !variable
-    abivarname: ppmodel
+    abivarname: "ppmodel"
     characteristics:
     - '[[GW]]'
     commentdefault: null
@@ -20916,7 +20916,7 @@
     varset: vargw
     vartype: integer
 - !variable
-    abivarname: prepanl
+    abivarname: "prepanl"
     characteristics:
     - '[[RESPFN]]'
     commentdefault: null
@@ -20953,7 +20953,7 @@
     varset: varrf
     vartype: integer
 - !variable
-    abivarname: prepgkk
+    abivarname: "prepgkk"
     characteristics:
     - '[[RESPFN]]'
     commentdefault: null
@@ -20976,7 +20976,7 @@
     varset: varrf
     vartype: integer
 - !variable
-    abivarname: prepscphon
+    abivarname: "prepscphon"
     characteristics:
     - '[[DEVELOP]]'
     commentdefault: null
@@ -20998,7 +20998,7 @@
     varset: vardev
     vartype: integer
 - !variable
-    abivarname: prt1dm
+    abivarname: "prt1dm"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -21019,7 +21019,7 @@
     varset: varfil
     vartype: integer
 - !variable
-    abivarname: prtatlist
+    abivarname: "prtatlist"
     characteristics:
     - '[[NO_MULTI]]'
     commentdefault: null
@@ -21045,7 +21045,7 @@
     varset: varrlx
     vartype: integer
 - !variable
-    abivarname: prtbbb
+    abivarname: "prtbbb"
     characteristics:
     - '[[RESPFN]]'
     commentdefault: null
@@ -21066,7 +21066,7 @@
     varset: varrf
     vartype: integer
 - !variable
-    abivarname: prtbltztrp
+    abivarname: "prtbltztrp"
     characteristics:
     - '[[DEVELOP]]'
     commentdefault: null
@@ -21087,7 +21087,7 @@
     varset: vardev
     vartype: integer
 - !variable
-    abivarname: prtcif
+    abivarname: "prtcif"
     characteristics:
     - '[[DEVELOP]]'
     commentdefault: null
@@ -21106,7 +21106,7 @@
     varset: vardev
     vartype: integer
 - !variable
-    abivarname: prtden
+    abivarname: "prtden"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -21259,7 +21259,7 @@
     varset: varfil
     vartype: integer
 - !variable
-    abivarname: prtdensph
+    abivarname: "prtdensph"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -21292,7 +21292,7 @@
     varset: vargs
     vartype: integer
 - !variable
-    abivarname: prtdipole
+    abivarname: "prtdipole"
     characteristics:
     - '[[DEVELOP]]'
     commentdefault: null
@@ -21311,7 +21311,7 @@
     varset: vardev
     vartype: integer
 - !variable
-    abivarname: prtdos
+    abivarname: "prtdos"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -21420,7 +21420,7 @@
     varset: varfil
     vartype: integer
 - !variable
-    abivarname: prtdosm
+    abivarname: "prtdosm"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -21449,7 +21449,7 @@
     varset: varfil
     vartype: integer
 - !variable
-    abivarname: prtebands
+    abivarname: "prtebands"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -21476,7 +21476,7 @@
     varset: vargs
     vartype: integer
 - !variable
-    abivarname: prtefg
+    abivarname: "prtefg"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -21509,7 +21509,7 @@
     varset: varpaw
     vartype: integer
 - !variable
-    abivarname: prteig
+    abivarname: "prteig"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -21530,7 +21530,7 @@
     varset: varfil
     vartype: integer
 - !variable
-    abivarname: prtelf
+    abivarname: "prtelf"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -21570,7 +21570,7 @@
     varset: varfil
     vartype: integer
 - !variable
-    abivarname: prtfc
+    abivarname: "prtfc"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -21595,7 +21595,7 @@
     varset: varpaw
     vartype: integer
 - !variable
-    abivarname: prtfsurf
+    abivarname: "prtfsurf"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -21627,7 +21627,7 @@
     varset: varfil
     vartype: integer
 - !variable
-    abivarname: prtgden
+    abivarname: "prtgden"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -21652,7 +21652,7 @@
     varset: varfil
     vartype: integer
 - !variable
-    abivarname: prtgeo
+    abivarname: "prtgeo"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -21701,7 +21701,7 @@
     varset: varfil
     vartype: integer
 - !variable
-    abivarname: prtgkk
+    abivarname: "prtgkk"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -21724,7 +21724,7 @@
     varset: varfil
     vartype: integer
 - !variable
-    abivarname: prtgsr
+    abivarname: "prtgsr"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -21746,7 +21746,7 @@
     varset: varfil
     vartype: integer
 - !variable
-    abivarname: prtkden
+    abivarname: "prtkden"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -21780,7 +21780,7 @@
     varset: varfil
     vartype: integer
 - !variable
-    abivarname: prtkpt
+    abivarname: "prtkpt"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -21840,7 +21840,7 @@
     varset: varfil
     vartype: integer
 - !variable
-    abivarname: prtlden
+    abivarname: "prtlden"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -21867,7 +21867,7 @@
     varset: varfil
     vartype: integer
 - !variable
-    abivarname: prtnabla
+    abivarname: "prtnabla"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -21889,7 +21889,7 @@
     varset: varpaw
     vartype: integer
 - !variable
-    abivarname: prtnest
+    abivarname: "prtnest"
     characteristics:
     - '[[DEVELOP]]'
     commentdefault: null
@@ -21908,7 +21908,7 @@
     varset: vardev
     vartype: integer
 - !variable
-    abivarname: prtphbands
+    abivarname: "prtphbands"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -21935,7 +21935,7 @@
     varset: vareph
     vartype: integer
 - !variable
-    abivarname: prtphdos
+    abivarname: "prtphdos"
     characteristics:
     - '[[DEVELOP]]'
     commentdefault: null
@@ -21955,7 +21955,7 @@
     varset: vareph
     vartype: integer
 - !variable
-    abivarname: prtphsurf
+    abivarname: "prtphsurf"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -21974,7 +21974,7 @@
     varset: vareph
     vartype: integer
 - !variable
-    abivarname: prtposcar
+    abivarname: "prtposcar"
     characteristics:
     - '[[DEVELOP]]'
     commentdefault: null
@@ -21995,7 +21995,7 @@
     varset: vardev
     vartype: integer
 - !variable
-    abivarname: prtpot
+    abivarname: "prtpot"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -22038,7 +22038,7 @@
     varset: varfil
     vartype: integer
 - !variable
-    abivarname: prtpsps
+    abivarname: "prtpsps"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -22055,7 +22055,7 @@
     varset: varfil
     vartype: integer
 - !variable
-    abivarname: prtspcur
+    abivarname: "prtspcur"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -22075,7 +22075,7 @@
     varset: varfil
     vartype: integer
 - !variable
-    abivarname: prtstm
+    abivarname: "prtstm"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -22150,7 +22150,7 @@
     varset: varfil
     vartype: integer
 - !variable
-    abivarname: prtsuscep
+    abivarname: "prtsuscep"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -22169,7 +22169,7 @@
     varset: varfil
     vartype: integer
 - !variable
-    abivarname: prtvclmb
+    abivarname: "prtvclmb"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -22191,7 +22191,7 @@
     varset: varfil
     vartype: integer
 - !variable
-    abivarname: prtvdw
+    abivarname: "prtvdw"
     characteristics:
     - '[[DEVELOP]]'
     commentdefault: null
@@ -22210,7 +22210,7 @@
     varset: varvdw
     vartype: integer
 - !variable
-    abivarname: prtvha
+    abivarname: "prtvha"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -22254,7 +22254,7 @@
     varset: varfil
     vartype: integer
 - !variable
-    abivarname: prtvhxc
+    abivarname: "prtvhxc"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -22298,7 +22298,7 @@
     varset: varfil
     vartype: integer
 - !variable
-    abivarname: prtvol
+    abivarname: "prtvol"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -22370,7 +22370,7 @@
     varset: varfil
     vartype: integer
 - !variable
-    abivarname: prtvolimg
+    abivarname: "prtvolimg"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -22407,7 +22407,7 @@
     varset: varfil
     vartype: integer
 - !variable
-    abivarname: prtvpsp
+    abivarname: "prtvpsp"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -22451,7 +22451,7 @@
     varset: varfil
     vartype: integer
 - !variable
-    abivarname: prtvxc
+    abivarname: "prtvxc"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -22495,7 +22495,7 @@
     varset: varfil
     vartype: integer
 - !variable
-    abivarname: prtwant
+    abivarname: "prtwant"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -22667,7 +22667,7 @@
     varset: varfil
     vartype: integer
 - !variable
-    abivarname: prtwf
+    abivarname: "prtwf"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -22782,7 +22782,7 @@
     varset: varfil
     vartype: integer
 - !variable
-    abivarname: prtwf_full
+    abivarname: "prtwf_full"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -22802,7 +22802,7 @@
     varset: varfil
     vartype: integer
 - !variable
-    abivarname: prtxml
+    abivarname: "prtxml"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -22823,7 +22823,7 @@
     varset: varfil
     vartype: integer
 - !variable
-    abivarname: ptcharge
+    abivarname: "ptcharge"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -22856,7 +22856,7 @@
     varset: varpaw
     vartype: real
 - !variable
-    abivarname: ptgroupma
+    abivarname: "ptgroupma"
     characteristics:
     - '[[SYMMETRISER]]'
     - '[[INTERNAL_ONLY]]'
@@ -22894,7 +22894,7 @@
     varset: vargeo
     vartype: integer
 - !variable
-    abivarname: pvelmax
+    abivarname: "pvelmax"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -22919,7 +22919,7 @@
     varset: vargw
     vartype: real
 - !variable
-    abivarname: pw_unbal_thresh
+    abivarname: "pw_unbal_thresh"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -22939,7 +22939,7 @@
     varset: varpar
     vartype: real
 - !variable
-    abivarname: qmass
+    abivarname: "qmass"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -22970,7 +22970,7 @@
     varset: varrlx
     vartype: real
 - !variable
-    abivarname: qprtrb
+    abivarname: "qprtrb"
     characteristics:
     - '[[DEVELOP]]'
     commentdefault: null
@@ -22996,7 +22996,7 @@
     varset: varff
     vartype: integer
 - !variable
-    abivarname: qpt
+    abivarname: "qpt"
     characteristics:
     - '[[INPUT_ONLY]]'
     commentdefault: null
@@ -23029,7 +23029,7 @@
     varset: vargs
     vartype: real
 - !variable
-    abivarname: qptdm
+    abivarname: "qptdm"
     characteristics:
     - '[[GW]]'
     commentdefault: null
@@ -23055,7 +23055,7 @@
     varset: vargw
     vartype: real
 - !variable
-    abivarname: qptn
+    abivarname: "qptn"
     characteristics:
     - '[[INTERNAL_ONLY]]'
     commentdefault: null
@@ -23112,7 +23112,7 @@
     varset: varint
     vartype: real
 - !variable
-    abivarname: qptnrm
+    abivarname: "qptnrm"
     characteristics:
     - '[[INPUT_ONLY]]'
     commentdefault: null
@@ -23139,7 +23139,7 @@
     varset: vargs
     vartype: real
 - !variable
-    abivarname: qptopt
+    abivarname: "qptopt"
     characteristics:
     - '[[INPUT_ONLY]]'
     commentdefault: null
@@ -23225,7 +23225,7 @@
     varset: vargs
     vartype: integer
 - !variable
-    abivarname: qptrlatt
+    abivarname: "qptrlatt"
     characteristics:
     - '[[INPUT_ONLY]]'
     commentdefault: null
@@ -23269,7 +23269,7 @@
     varset: vargs
     vartype: integer
 - !variable
-    abivarname: quadmom
+    abivarname: "quadmom"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -23298,7 +23298,7 @@
     varset: varpaw
     vartype: real
 - !variable
-    abivarname: random_atpos
+    abivarname: "random_atpos"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -23325,7 +23325,7 @@
     varset: varrlx
     vartype: integer
 - !variable
-    abivarname: ratsph
+    abivarname: "ratsph"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -23385,7 +23385,7 @@
     varset: vargs
     vartype: real
 - !variable
-    abivarname: ratsph_extra
+    abivarname: "ratsph_extra"
     characteristics:
     - '[[LENGTH]]'
     commentdefault: null
@@ -23406,7 +23406,7 @@
     varset: vargs
     vartype: real
 - !variable
-    abivarname: rcut
+    abivarname: "rcut"
     characteristics:
     - '[[GW]]'
     commentdefault: null
@@ -23428,7 +23428,7 @@
     varset: vargw
     vartype: real
 - !variable
-    abivarname: recefermi
+    abivarname: "recefermi"
     characteristics:
     - '[[DEVELOP]]'
     commentdefault: null
@@ -23448,7 +23448,7 @@
     varset: vardev
     vartype: real
 - !variable
-    abivarname: recgratio
+    abivarname: "recgratio"
     characteristics:
     - '[[DEVELOP]]'
     commentdefault: null
@@ -23475,7 +23475,7 @@
     varset: vardev
     vartype: integer
 - !variable
-    abivarname: recnpath
+    abivarname: "recnpath"
     characteristics:
     - '[[DEVELOP]]'
     commentdefault: null
@@ -23498,7 +23498,7 @@
     varset: vardev
     vartype: integer
 - !variable
-    abivarname: recnrec
+    abivarname: "recnrec"
     characteristics:
     - '[[DEVELOP]]'
     commentdefault: null
@@ -23521,7 +23521,7 @@
     varset: vardev
     vartype: integer
 - !variable
-    abivarname: recptrott
+    abivarname: "recptrott"
     characteristics:
     - '[[DEVELOP]]'
     commentdefault: null
@@ -23550,7 +23550,7 @@
     varset: vardev
     vartype: integer
 - !variable
-    abivarname: recrcut
+    abivarname: "recrcut"
     characteristics:
     - '[[DEVELOP]]'
     commentdefault: null
@@ -23573,7 +23573,7 @@
     varset: vardev
     vartype: integer
 - !variable
-    abivarname: rectesteg
+    abivarname: "rectesteg"
     characteristics:
     - '[[DEVELOP]]'
     commentdefault: null
@@ -23594,7 +23594,7 @@
     varset: vardev
     vartype: integer
 - !variable
-    abivarname: rectolden
+    abivarname: "rectolden"
     characteristics:
     - '[[DEVELOP]]'
     commentdefault: Default value to be changed.
@@ -23617,7 +23617,7 @@
     varset: vardev
     vartype: real
 - !variable
-    abivarname: red_dfield
+    abivarname: "red_dfield"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -23644,7 +23644,7 @@
     varset: varff
     vartype: real
 - !variable
-    abivarname: red_efield
+    abivarname: "red_efield"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -23670,7 +23670,7 @@
     varset: varff
     vartype: real
 - !variable
-    abivarname: red_efieldbar
+    abivarname: "red_efieldbar"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -23696,7 +23696,7 @@
     varset: varff
     vartype: real
 - !variable
-    abivarname: restartxf
+    abivarname: "restartxf"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -23809,7 +23809,7 @@
     varset: varrlx
     vartype: integer
 - !variable
-    abivarname: rf2_dkdk
+    abivarname: "rf2_dkdk"
     characteristics:
     - '[[RESPFN]]'
     commentdefault: null
@@ -23849,7 +23849,7 @@
     varset: varrf
     vartype: integer
 - !variable
-    abivarname: rfasr
+    abivarname: "rfasr"
     characteristics:
     - '[[RESPFN]]'
     commentdefault: null
@@ -23895,7 +23895,7 @@
     varset: varrf
     vartype: integer
 - !variable
-    abivarname: rfatpol
+    abivarname: "rfatpol"
     characteristics:
     - '[[RESPFN]]'
     commentdefault: null
@@ -23944,7 +23944,7 @@
     varset: varrf
     vartype: integer
 - !variable
-    abivarname: rfddk
+    abivarname: "rfddk"
     characteristics:
     - '[[RESPFN]]'
     commentdefault: null
@@ -23977,7 +23977,7 @@
     varset: varrf
     vartype: integer
 - !variable
-    abivarname: rfdir
+    abivarname: "rfdir"
     characteristics:
     - '[[RESPFN]]'
     commentdefault: null
@@ -24019,7 +24019,7 @@
     varset: varrf
     vartype: integer
 - !variable
-    abivarname: rfelfd
+    abivarname: "rfelfd"
     characteristics:
     - '[[RESPFN]]'
     commentdefault: null
@@ -24073,7 +24073,7 @@
     varset: varrf
     vartype: integer
 - !variable
-    abivarname: rfmagn
+    abivarname: "rfmagn"
     characteristics:
     - '[[RESPFN]]'
     commentdefault: null
@@ -24095,7 +24095,7 @@
     varset: varrf
     vartype: integer
 - !variable
-    abivarname: rfmeth
+    abivarname: "rfmeth"
     characteristics:
     - '[[RESPFN]]'
     commentdefault: null
@@ -24116,7 +24116,7 @@
     varset: varrf
     vartype: integer
 - !variable
-    abivarname: rfphon
+    abivarname: "rfphon"
     characteristics:
     - '[[RESPFN]]'
     commentdefault: null
@@ -24136,7 +24136,7 @@
     varset: varrf
     vartype: integer
 - !variable
-    abivarname: rfstrs
+    abivarname: "rfstrs"
     characteristics:
     - '[[RESPFN]]'
     commentdefault: null
@@ -24176,7 +24176,7 @@
     varset: varrf
     vartype: integer
 - !variable
-    abivarname: rfuser
+    abivarname: "rfuser"
     characteristics:
     - '[[RESPFN]]'
     commentdefault: null
@@ -24224,7 +24224,7 @@
     varset: varrf
     vartype: integer
 - !variable
-    abivarname: rhoqpmix
+    abivarname: "rhoqpmix"
     characteristics:
     - '[[GW]]'
     commentdefault: null
@@ -24247,7 +24247,7 @@
     varset: vargw
     vartype: real
 - !variable
-    abivarname: rprim
+    abivarname: "rprim"
     characteristics:
     - '[[EVOLVING]]'
     commentdefault: null
@@ -24394,7 +24394,7 @@
     varset: varbas
     vartype: real
 - !variable
-    abivarname: rprimd
+    abivarname: "rprimd"
     characteristics:
     - '[[INTERNAL_ONLY]]'
     - '[[EVOLVING]]'
@@ -24432,7 +24432,7 @@
     varset: varbas
     vartype: real
 - !variable
-    abivarname: scalecart
+    abivarname: "scalecart"
     characteristics:
     - '[[INPUT_ONLY]]'
     commentdefault: null
@@ -24465,7 +24465,7 @@
     varset: varbas
     vartype: real
 - !variable
-    abivarname: scphon_supercell
+    abivarname: "scphon_supercell"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -24492,7 +24492,7 @@
     varset: vargs
     vartype: integer
 - !variable
-    abivarname: scphon_temp
+    abivarname: "scphon_temp"
     characteristics:
     - '[[ENERGY]]'
     commentdefault: null
@@ -24517,7 +24517,7 @@
     varset: vargs
     vartype: real
 - !variable
-    abivarname: shiftk
+    abivarname: "shiftk"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -24634,7 +24634,7 @@
     varset: varbas
     vartype: real
 - !variable
-    abivarname: shiftq
+    abivarname: "shiftq"
     characteristics:
     - '[[INPUT_ONLY]]'
     commentdefault: null
@@ -24671,7 +24671,7 @@
     varset: vargs
     vartype: real
 - !variable
-    abivarname: signperm
+    abivarname: "signperm"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -24688,7 +24688,7 @@
     varset: varrlx
     vartype: integer
 - !variable
-    abivarname: slabwsrad
+    abivarname: "slabwsrad"
     characteristics:
     - '[[LENGTH]]'
     commentdefault: null
@@ -24713,7 +24713,7 @@
     varset: vargs
     vartype: real
 - !variable
-    abivarname: slabzbeg
+    abivarname: "slabzbeg"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -24742,7 +24742,7 @@
     varset: vargs
     vartype: real
 - !variable
-    abivarname: slabzend
+    abivarname: "slabzend"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -24771,7 +24771,7 @@
     varset: vargs
     vartype: real
 - !variable
-    abivarname: smdelta
+    abivarname: "smdelta"
     characteristics:
     - '[[RESPFN]]'
     commentdefault: null
@@ -24808,7 +24808,7 @@
     varset: varrf
     vartype: integer
 - !variable
-    abivarname: so_psp
+    abivarname: "so_psp"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -24859,7 +24859,7 @@
     varset: vargs
     vartype: integer
 - !variable
-    abivarname: spbroad
+    abivarname: "spbroad"
     characteristics:
     - '[[GW]]'
     - '[[ENERGY]]'
@@ -24879,7 +24879,7 @@
     varset: vargw
     vartype: real
 - !variable
-    abivarname: spgaxor
+    abivarname: "spgaxor"
     characteristics:
     - '[[SYMMETRISER]]'
     commentdefault: null
@@ -24982,7 +24982,7 @@
     varset: vargeo
     vartype: integer
 - !variable
-    abivarname: spgorig
+    abivarname: "spgorig"
     characteristics:
     - '[[SYMMETRISER]]'
     commentdefault: null
@@ -25013,7 +25013,7 @@
     varset: vargeo
     vartype: integer
 - !variable
-    abivarname: spgroup
+    abivarname: "spgroup"
     characteristics:
     - '[[SYMMETRISER]]'
     commentdefault: null
@@ -25061,7 +25061,7 @@
     varset: vargeo
     vartype: integer
 - !variable
-    abivarname: spgroupma
+    abivarname: "spgroupma"
     characteristics:
     - '[[SYMMETRISER]]'
     - '[[INPUT_ONLY]]'
@@ -25109,7 +25109,7 @@
     varset: vargeo
     vartype: integer
 - !variable
-    abivarname: spinat
+    abivarname: "spinat"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -25200,7 +25200,7 @@
     varset: vargs
     vartype: real
 - !variable
-    abivarname: spinmagntarget
+    abivarname: "spinmagntarget"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -25241,7 +25241,7 @@
     varset: varff
     vartype: real
 - !variable
-    abivarname: spmeth
+    abivarname: "spmeth"
     characteristics:
     - '[[GW]]'
     commentdefault: null
@@ -25307,7 +25307,7 @@
     varset: vargw
     vartype: integer
 - !variable
-    abivarname: spnorbscl
+    abivarname: "spnorbscl"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -25327,7 +25327,7 @@
     varset: varpaw
     vartype: real
 - !variable
-    abivarname: stmbias
+    abivarname: "stmbias"
     characteristics:
     - '[[ENERGY]]'
     commentdefault: null
@@ -25364,7 +25364,7 @@
     varset: vargs
     vartype: real
 - !variable
-    abivarname: strfact
+    abivarname: "strfact"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -25390,7 +25390,7 @@
     varset: varrlx
     vartype: real
 - !variable
-    abivarname: string_algo
+    abivarname: "string_algo"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -25466,7 +25466,7 @@
     varset: varrlx
     vartype: integer
 - !variable
-    abivarname: strprecon
+    abivarname: "strprecon"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -25487,7 +25487,7 @@
     varset: varrlx
     vartype: real
 - !variable
-    abivarname: strtarget
+    abivarname: "strtarget"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -25517,7 +25517,7 @@
     varset: varrlx
     vartype: real
 - !variable
-    abivarname: symafm
+    abivarname: "symafm"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -25563,7 +25563,7 @@
     varset: vargs
     vartype: integer
 - !variable
-    abivarname: symchi
+    abivarname: "symchi"
     characteristics:
     - '[[DEVELOP]]'
     - '[[GW]]'
@@ -25596,7 +25596,7 @@
     varset: vargw
     vartype: integer
 - !variable
-    abivarname: symdynmat
+    abivarname: "symdynmat"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -25613,7 +25613,7 @@
     varset: vareph
     vartype: integer
 - !variable
-    abivarname: symmorphi
+    abivarname: "symmorphi"
     characteristics:
     - '[[DEVELOP]]'
     - '[[GW]]'
@@ -25645,7 +25645,7 @@
     varset: vardev
     vartype: integer
 - !variable
-    abivarname: symrel
+    abivarname: "symrel"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -25703,7 +25703,7 @@
     varset: varbas
     vartype: integer
 - !variable
-    abivarname: symsigma
+    abivarname: "symsigma"
     characteristics:
     - '[[GW]]'
     commentdefault: null
@@ -25739,7 +25739,7 @@
     varset: vargw
     vartype: integer
 - !variable
-    abivarname: td_maxene
+    abivarname: "td_maxene"
     characteristics:
     - '[[TDDFT]]'
     commentdefault: null
@@ -25772,7 +25772,7 @@
     varset: varrf
     vartype: real
 - !variable
-    abivarname: td_mexcit
+    abivarname: "td_mexcit"
     characteristics:
     - '[[TDDFT]]'
     commentdefault: null
@@ -25806,7 +25806,7 @@
     varset: varrf
     vartype: real
 - !variable
-    abivarname: tfkinfunc
+    abivarname: "tfkinfunc"
     characteristics:
     - '[[DEVELOP]]'
     commentdefault: null
@@ -25867,7 +25867,7 @@
     varset: vardev
     vartype: integer
 - !variable
-    abivarname: tfw_toldfe
+    abivarname: "tfw_toldfe"
     characteristics:
     - '[[ENERGY]]'
     commentdefault: null
@@ -25888,7 +25888,7 @@
     varset: vardev
     vartype: real
 - !variable
-    abivarname: timopt
+    abivarname: "timopt"
     characteristics:
     - '[[NO_MULTI]]'
     commentdefault: null
@@ -25936,7 +25936,7 @@
     varset: vargs
     vartype: integer
 - !variable
-    abivarname: tl_nprccg
+    abivarname: "tl_nprccg"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -25960,7 +25960,7 @@
     varset: vargs
     vartype: integer
 - !variable
-    abivarname: tl_radius
+    abivarname: "tl_radius"
     characteristics:
     - '[[LENGTH]]'
     commentdefault: null
@@ -25986,7 +25986,7 @@
     varset: vargs
     vartype: real
 - !variable
-    abivarname: tnons
+    abivarname: "tnons"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -26018,7 +26018,7 @@
     varset: varbas
     vartype: real
 - !variable
-    abivarname: toldfe
+    abivarname: "toldfe"
     characteristics:
     - '[[ENERGY]]'
     commentdefault: The default value implies that this stopping condition is ignored. For the SCF case, one and only one of the input tolerance criteria [[tolwfr]], [[toldff]], [[tolrff]], [[toldfe]] or [[tolvrs]] must differ from zero.
@@ -26068,7 +26068,7 @@
     varset: varbas
     vartype: real
 - !variable
-    abivarname: toldff
+    abivarname: "toldff"
     characteristics: null
     commentdefault: The default value implies that this stopping condition is ignored. For the SCF case, one and only one of the input tolerance criteria [[tolwfr]], [[toldff]], [[tolrff]], [[toldfe]] or [[tolvrs]] must differ from zero.
     commentdims: null
@@ -26115,7 +26115,7 @@
     varset: varbas
     vartype: real
 - !variable
-    abivarname: tolimg
+    abivarname: "tolimg"
     characteristics:
     - '[[ENERGY]]'
     commentdefault: null
@@ -26145,7 +26145,7 @@
     varset: varrlx
     vartype: real
 - !variable
-    abivarname: tolmxde
+    abivarname: "tolmxde"
     characteristics:
     - '[[ENERGY]]'
     commentdefault: null
@@ -26172,7 +26172,7 @@
     varset: varrlx
     vartype: real
 - !variable
-    abivarname: tolmxf
+    abivarname: "tolmxf"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -26208,7 +26208,7 @@
     varset: varrlx
     vartype: real
 - !variable
-    abivarname: tolrde
+    abivarname: "tolrde"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -26238,7 +26238,7 @@
     varset: vardev
     vartype: real
 - !variable
-    abivarname: tolrff
+    abivarname: "tolrff"
     characteristics: null
     commentdefault: The default value implies that this stopping condition is ignored. For the SCF case, one and only one of the input tolerance criteria [[tolwfr]], [[toldff]], [[tolrff]], [[toldfe]] or [[tolvrs]] must differ from zero.
     commentdims: null
@@ -26284,7 +26284,7 @@
     varset: varbas
     vartype: real
 - !variable
-    abivarname: tolsym
+    abivarname: "tolsym"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -26310,7 +26310,7 @@
     varset: vargeo
     vartype: real
 - !variable
-    abivarname: tolvrs
+    abivarname: "tolvrs"
     characteristics: null
     commentdefault: The default value implies that this stopping condition is ignored. For the SCF case, one and only one of the input tolerance criteria [[tolwfr]], [[toldff]], [[tolrff]], [[toldfe]] or [[tolvrs]] must differ from zero.
     commentdims: null
@@ -26361,7 +26361,7 @@
     varset: varbas
     vartype: real
 - !variable
-    abivarname: tolwfr
+    abivarname: "tolwfr"
     characteristics: null
     commentdefault: The default value implies that this stopping condition is ignored. For the SCF case, one and only one of the input tolerance criteria [[tolwfr]], [[toldff]], [[tolrff]], [[toldfe]] or [[tolvrs]] must differ from zero.
     commentdims: null
@@ -26456,7 +26456,7 @@
     varset: varbas
     vartype: real
 - !variable
-    abivarname: tphysel
+    abivarname: "tphysel"
     characteristics:
     - '[[ENERGY]]'
     commentdefault: null
@@ -26492,7 +26492,7 @@
     varset: vargs
     vartype: real
 - !variable
-    abivarname: tsmear
+    abivarname: "tsmear"
     characteristics:
     - '[[ENERGY]]'
     commentdefault: null
@@ -26534,7 +26534,7 @@
     varset: vargs
     vartype: real
 - !variable
-    abivarname: typat
+    abivarname: "typat"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -26589,7 +26589,7 @@
     varset: varbas
     vartype: integer
 - !variable
-    abivarname: ucrpa
+    abivarname: "ucrpa"
     characteristics:
     - '[[GW]]'
     commentdefault: null
@@ -26637,7 +26637,7 @@
     varset: vargw
     vartype: integer
 - !variable
-    abivarname: ucrpa_bands
+    abivarname: "ucrpa_bands"
     characteristics:
     - '[[GW]]'
     commentdefault: That is, the default includes no band.
@@ -26661,7 +26661,7 @@
     varset: vargw
     vartype: integer
 - !variable
-    abivarname: ucrpa_window
+    abivarname: "ucrpa_window"
     characteristics:
     - '[[GW]]'
     commentdefault: That is, the energy window is empty by default.
@@ -26687,7 +26687,7 @@
     varset: vargw
     vartype: real
 - !variable
-    abivarname: udtset
+    abivarname: "udtset"
     characteristics: null
     commentdefault: It is not used when it is not defined
     commentdims: null
@@ -26725,7 +26725,7 @@
     varset: varbas
     vartype: integer
 - !variable
-    abivarname: upawu
+    abivarname: "upawu"
     characteristics:
     - '[[ENERGY]]'
     commentdefault: null
@@ -26778,7 +26778,7 @@
     varset: varpaw
     vartype: real
 - !variable
-    abivarname: use_gemm_nonlop
+    abivarname: "use_gemm_nonlop"
     characteristics:
     - '[[DEVELOP]]'
     commentdefault: because it is not usually worth using it unless bandpp is large and it requires additional memory
@@ -26803,7 +26803,7 @@
     varset: vardev
     vartype: integer
 - !variable
-    abivarname: use_gpu_cuda
+    abivarname: "use_gpu_cuda"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -26835,7 +26835,7 @@
     varset: varpar
     vartype: integer
 - !variable
-    abivarname: use_nonscf_gkk
+    abivarname: "use_nonscf_gkk"
     characteristics:
     - '[[DEVELOP]]'
     commentdefault: Default is 0 for the moment. Do not use non-scf method.
@@ -26857,7 +26857,7 @@
     varset: vardev
     vartype: integer
 - !variable
-    abivarname: use_slk
+    abivarname: "use_slk"
     characteristics:
     - '[[DEVELOP]]'
     commentdefault: null
@@ -26876,7 +26876,7 @@
     varset: varpar
     vartype: integer
 - !variable
-    abivarname: usedmatpu
+    abivarname: "usedmatpu"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -26910,7 +26910,7 @@
     varset: varpaw
     vartype: integer
 - !variable
-    abivarname: usedmft
+    abivarname: "usedmft"
     characteristics:
     - '[[DEVELOP]]'
     commentdefault: null
@@ -26984,7 +26984,7 @@
     varset: vardev
     vartype: integer
 - !variable
-    abivarname: useexexch
+    abivarname: "useexexch"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -27004,7 +27004,7 @@
     varset: varpaw
     vartype: integer
 - !variable
-    abivarname: usefock
+    abivarname: "usefock"
     characteristics:
     - '[[INTERNAL_ONLY]]'
     commentdefault: null
@@ -27031,7 +27031,7 @@
     varset: varint
     vartype: integer
 - !variable
-    abivarname: usekden
+    abivarname: "usekden"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -27052,7 +27052,7 @@
     varset: vargs
     vartype: integer
 - !variable
-    abivarname: usepaw
+    abivarname: "usepaw"
     characteristics:
     - '[[INTERNAL_ONLY]]'
     commentdefault: null
@@ -27080,7 +27080,7 @@
     varset: varint
     vartype: integer
 - !variable
-    abivarname: usepawu
+    abivarname: "usepawu"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -27166,7 +27166,7 @@
     varset: varpaw
     vartype: integer
 - !variable
-    abivarname: usepotzero
+    abivarname: "usepotzero"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -27194,7 +27194,7 @@
     varset: varpaw
     vartype: integer
 - !variable
-    abivarname: userec
+    abivarname: "userec"
     characteristics:
     - '[[INTERNAL_ONLY]]'
     commentdefault: null
@@ -27214,7 +27214,7 @@
     varset: varint
     vartype: integer
 - !variable
-    abivarname: useria
+    abivarname: "useria"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -27240,7 +27240,7 @@
     varset: vardev
     vartype: integer
 - !variable
-    abivarname: userib
+    abivarname: "userib"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -27266,7 +27266,7 @@
     varset: vardev
     vartype: integer
 - !variable
-    abivarname: useric
+    abivarname: "useric"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -27292,7 +27292,7 @@
     varset: vardev
     vartype: integer
 - !variable
-    abivarname: userid
+    abivarname: "userid"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -27318,7 +27318,7 @@
     varset: vardev
     vartype: integer
 - !variable
-    abivarname: userie
+    abivarname: "userie"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -27344,7 +27344,7 @@
     varset: vardev
     vartype: integer
 - !variable
-    abivarname: userra
+    abivarname: "userra"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -27362,7 +27362,7 @@
     varset: vardev
     vartype: real
 - !variable
-    abivarname: userrb
+    abivarname: "userrb"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -27380,7 +27380,7 @@
     varset: vardev
     vartype: real
 - !variable
-    abivarname: userrc
+    abivarname: "userrc"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -27398,7 +27398,7 @@
     varset: vardev
     vartype: real
 - !variable
-    abivarname: userrd
+    abivarname: "userrd"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -27416,7 +27416,7 @@
     varset: vardev
     vartype: real
 - !variable
-    abivarname: userre
+    abivarname: "userre"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -27434,7 +27434,7 @@
     varset: vardev
     vartype: real
 - !variable
-    abivarname: usewvl
+    abivarname: "usewvl"
     characteristics: null
     commentdefault: use plane-wave basis set
     commentdims: null
@@ -27471,7 +27471,7 @@
     varset: varbas
     vartype: integer
 - !variable
-    abivarname: usexcnhat
+    abivarname: "usexcnhat"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -27500,7 +27500,7 @@
     varset: varpaw
     vartype: integer
 - !variable
-    abivarname: useylm
+    abivarname: "useylm"
     characteristics:
     - '[[DEVELOP]]'
     commentdefault: null
@@ -27541,7 +27541,7 @@
     varset: vardev
     vartype: integer
 - !variable
-    abivarname: vaclst
+    abivarname: "vaclst"
     characteristics:
     - '[[GEOMETRY_BUILDER]]'
     - '[[INPUT_ONLY]]'
@@ -27566,7 +27566,7 @@
     varset: vargeo
     vartype: integer
 - !variable
-    abivarname: vacnum
+    abivarname: "vacnum"
     characteristics:
     - '[[GEOMETRY_BUILDER]]'
     commentdefault: null
@@ -27588,7 +27588,7 @@
     varset: vargeo
     vartype: integer
 - !variable
-    abivarname: vacuum
+    abivarname: "vacuum"
     characteristics:
     - '[[INPUT_ONLY]]'
     commentdefault: null
@@ -27629,7 +27629,7 @@
     varset: vargs
     vartype: integer
 - !variable
-    abivarname: vacwidth
+    abivarname: "vacwidth"
     characteristics:
     - '[[INPUT_ONLY]]'
     - '[[LENGTH]]'
@@ -27661,7 +27661,7 @@
     varset: vargs
     vartype: real
 - !variable
-    abivarname: vcutgeo
+    abivarname: "vcutgeo"
     characteristics:
     - '[[GW]]'
     commentdefault: null
@@ -27739,7 +27739,7 @@
     varset: vargw
     vartype: real
 - !variable
-    abivarname: vdw_df_acutmin
+    abivarname: "vdw_df_acutmin"
     characteristics:
     - '[[DEVELOP]]'
     commentdefault: null
@@ -27758,7 +27758,7 @@
     varset: varvdw
     vartype: real
 - !variable
-    abivarname: vdw_df_aratio
+    abivarname: "vdw_df_aratio"
     characteristics:
     - '[[DEVELOP]]'
     commentdefault: null
@@ -27779,7 +27779,7 @@
     varset: varvdw
     vartype: real
 - !variable
-    abivarname: vdw_df_damax
+    abivarname: "vdw_df_damax"
     characteristics:
     - '[[DEVELOP]]'
     commentdefault: null
@@ -27798,7 +27798,7 @@
     varset: varvdw
     vartype: real
 - !variable
-    abivarname: vdw_df_damin
+    abivarname: "vdw_df_damin"
     characteristics:
     - '[[DEVELOP]]'
     commentdefault: null
@@ -27817,7 +27817,7 @@
     varset: varvdw
     vartype: real
 - !variable
-    abivarname: vdw_df_dcut
+    abivarname: "vdw_df_dcut"
     characteristics:
     - '[[DEVELOP]]'
     commentdefault: null
@@ -27836,7 +27836,7 @@
     varset: varvdw
     vartype: real
 - !variable
-    abivarname: vdw_df_dratio
+    abivarname: "vdw_df_dratio"
     characteristics:
     - '[[DEVELOP]]'
     commentdefault: null
@@ -27857,7 +27857,7 @@
     varset: varvdw
     vartype: real
 - !variable
-    abivarname: vdw_df_dsoft
+    abivarname: "vdw_df_dsoft"
     characteristics:
     - '[[DEVELOP]]'
     commentdefault: null
@@ -27876,7 +27876,7 @@
     varset: varvdw
     vartype: real
 - !variable
-    abivarname: vdw_df_gcut
+    abivarname: "vdw_df_gcut"
     characteristics:
     - '[[DEVELOP]]'
     commentdefault: null
@@ -27895,7 +27895,7 @@
     varset: varvdw
     vartype: real
 - !variable
-    abivarname: vdw_df_ndpts
+    abivarname: "vdw_df_ndpts"
     characteristics:
     - '[[DEVELOP]]'
     commentdefault: null
@@ -27914,7 +27914,7 @@
     varset: varvdw
     vartype: integer
 - !variable
-    abivarname: vdw_df_ngpts
+    abivarname: "vdw_df_ngpts"
     characteristics:
     - '[[DEVELOP]]'
     commentdefault: null
@@ -27933,7 +27933,7 @@
     varset: varvdw
     vartype: integer
 - !variable
-    abivarname: vdw_df_nqpts
+    abivarname: "vdw_df_nqpts"
     characteristics:
     - '[[DEVELOP]]'
     commentdefault: null
@@ -27952,7 +27952,7 @@
     varset: varvdw
     vartype: integer
 - !variable
-    abivarname: vdw_df_nrpts
+    abivarname: "vdw_df_nrpts"
     characteristics:
     - '[[DEVELOP]]'
     commentdefault: null
@@ -27971,7 +27971,7 @@
     varset: varvdw
     vartype: integer
 - !variable
-    abivarname: vdw_df_nsmooth
+    abivarname: "vdw_df_nsmooth"
     characteristics:
     - '[[DEVELOP]]'
     commentdefault: null
@@ -27990,7 +27990,7 @@
     varset: varvdw
     vartype: integer
 - !variable
-    abivarname: vdw_df_phisoft
+    abivarname: "vdw_df_phisoft"
     characteristics:
     - '[[DEVELOP]]'
     commentdefault: null
@@ -28009,7 +28009,7 @@
     varset: varvdw
     vartype: real
 - !variable
-    abivarname: vdw_df_qcut
+    abivarname: "vdw_df_qcut"
     characteristics:
     - '[[DEVELOP]]'
     commentdefault: null
@@ -28028,7 +28028,7 @@
     varset: varvdw
     vartype: real
 - !variable
-    abivarname: vdw_df_qratio
+    abivarname: "vdw_df_qratio"
     characteristics:
     - '[[DEVELOP]]'
     commentdefault: null
@@ -28047,7 +28047,7 @@
     varset: varvdw
     vartype: real
 - !variable
-    abivarname: vdw_df_rcut
+    abivarname: "vdw_df_rcut"
     characteristics:
     - '[[DEVELOP]]'
     commentdefault: null
@@ -28066,7 +28066,7 @@
     varset: varvdw
     vartype: real
 - !variable
-    abivarname: vdw_df_rsoft
+    abivarname: "vdw_df_rsoft"
     characteristics:
     - '[[DEVELOP]]'
     commentdefault: null
@@ -28085,7 +28085,7 @@
     varset: varvdw
     vartype: real
 - !variable
-    abivarname: vdw_df_threshold
+    abivarname: "vdw_df_threshold"
     characteristics:
     - '[[DEVELOP]]'
     commentdefault: null
@@ -28109,7 +28109,7 @@
     varset: varvdw
     vartype: real
 - !variable
-    abivarname: vdw_df_tolerance
+    abivarname: "vdw_df_tolerance"
     characteristics:
     - '[[DEVELOP]]'
     commentdefault: null
@@ -28128,7 +28128,7 @@
     varset: varvdw
     vartype: real
 - !variable
-    abivarname: vdw_df_tweaks
+    abivarname: "vdw_df_tweaks"
     characteristics:
     - '[[DEVELOP]]'
     commentdefault: null
@@ -28153,7 +28153,7 @@
     varset: varvdw
     vartype: integer
 - !variable
-    abivarname: vdw_df_zab
+    abivarname: "vdw_df_zab"
     characteristics:
     - '[[DEVELOP]]'
     commentdefault: null
@@ -28176,7 +28176,7 @@
     varset: varvdw
     vartype: real
 - !variable
-    abivarname: vdw_nfrag
+    abivarname: "vdw_nfrag"
     characteristics:
     - '[[DEVELOP]]'
     commentdefault: null
@@ -28201,7 +28201,7 @@
     varset: varvdw
     vartype: integer
 - !variable
-    abivarname: vdw_supercell
+    abivarname: "vdw_supercell"
     characteristics:
     - '[[DEVELOP]]'
     commentdefault: null
@@ -28232,7 +28232,7 @@
     varset: varvdw
     vartype: integer
 - !variable
-    abivarname: vdw_tol
+    abivarname: "vdw_tol"
     characteristics:
     - '[[DEVELOP]]'
     commentdefault: null
@@ -28253,7 +28253,7 @@
     varset: varvdw
     vartype: real
 - !variable
-    abivarname: vdw_tol_3bt
+    abivarname: "vdw_tol_3bt"
     characteristics:
     - '[[DEVELOP]]'
     commentdefault: Do include the 3-body term in the correction
@@ -28287,7 +28287,7 @@
     varset: varvdw
     vartype: real
 - !variable
-    abivarname: vdw_typfrag
+    abivarname: "vdw_typfrag"
     characteristics:
     - '[[DEVELOP]]'
     commentdefault: null
@@ -28318,7 +28318,7 @@
     varset: varvdw
     vartype: integer
 - !variable
-    abivarname: vdw_xc
+    abivarname: "vdw_xc"
     characteristics:
     - '[[DEVELOP]]'
     commentdefault: null
@@ -28448,7 +28448,7 @@
     varset: varvdw
     vartype: integer
 - !variable
-    abivarname: vel
+    abivarname: "vel"
     characteristics:
     - '[[EVOLVING]]'
     commentdefault: null
@@ -28485,7 +28485,7 @@
     varset: varrlx
     vartype: real
 - !variable
-    abivarname: vel_cell
+    abivarname: "vel_cell"
     characteristics:
     - '[[EVOLVING]]'
     commentdefault: null
@@ -28517,7 +28517,7 @@
     varset: varrlx
     vartype: real
 - !variable
-    abivarname: vis
+    abivarname: "vis"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -28575,7 +28575,7 @@
     varset: varrlx
     vartype: real
 - !variable
-    abivarname: vprtrb
+    abivarname: "vprtrb"
     characteristics:
     - '[[DEVELOP]]'
     - '[[ENERGY]]'
@@ -28615,7 +28615,7 @@
     varset: varff
     vartype: real
 - !variable
-    abivarname: w90iniprj
+    abivarname: "w90iniprj"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -28675,7 +28675,7 @@
     varset: varw90
     vartype: integer
 - !variable
-    abivarname: w90prtunk
+    abivarname: "w90prtunk"
     characteristics: null
     commentdefault: |-
         The default is set to zero because UNKp.s files occupy a lot of
@@ -28780,7 +28780,7 @@
     varset: varw90
     vartype: integer
 - !variable
-    abivarname: wfoptalg
+    abivarname: "wfoptalg"
     characteristics:
     - '[[DEVELOP]]'
     commentdefault: 0 when [[usepaw]]=0 (norm-conserving pseudopotentials), 10 when [[usepaw]]=1 (PAW) ; 114 if [[paral_kgb]]=1.
@@ -28886,7 +28886,7 @@
     varset: vardev
     vartype: integer
 - !variable
-    abivarname: wtatcon
+    abivarname: "wtatcon"
     characteristics:
     - '[[NO_MULTI]]'
     commentdefault: null
@@ -28981,7 +28981,7 @@
     varset: varrlx
     vartype: real
 - !variable
-    abivarname: wtk
+    abivarname: "wtk"
     characteristics: null
     commentdefault: Except when [[kptopt]]/=0
     commentdims: null
@@ -29014,7 +29014,7 @@
     varset: varbas
     vartype: real
 - !variable
-    abivarname: wtq
+    abivarname: "wtq"
     characteristics: null
     commentdefault: Except when [[qptopt]]/=0
     commentdims: null
@@ -29032,7 +29032,7 @@
     varset: vargs
     vartype: real
 - !variable
-    abivarname: wvl_bigdft_comp
+    abivarname: "wvl_bigdft_comp"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -29054,7 +29054,7 @@
     varset: vargs
     vartype: integer
 - !variable
-    abivarname: wvl_crmult
+    abivarname: "wvl_crmult"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -29079,7 +29079,7 @@
     varset: vargs
     vartype: real
 - !variable
-    abivarname: wvl_frmult
+    abivarname: "wvl_frmult"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -29108,7 +29108,7 @@
     varset: vargs
     vartype: real
 - !variable
-    abivarname: wvl_hgrid
+    abivarname: "wvl_hgrid"
     characteristics:
     - '[[LENGTH]]'
     commentdefault: null
@@ -29130,7 +29130,7 @@
     varset: varbas
     vartype: real
 - !variable
-    abivarname: wvl_ngauss
+    abivarname: "wvl_ngauss"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -29153,7 +29153,7 @@
     varset: vargs
     vartype: integer
 - !variable
-    abivarname: wvl_nprccg
+    abivarname: "wvl_nprccg"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -29175,7 +29175,7 @@
     varset: vargs
     vartype: integer
 - !variable
-    abivarname: xangst
+    abivarname: "xangst"
     characteristics:
     - '[[INPUT_ONLY]]'
     commentdefault: null
@@ -29218,7 +29218,7 @@
     varset: varbas
     vartype: real
 - !variable
-    abivarname: xc_denpos
+    abivarname: "xc_denpos"
     characteristics:
     - '[[DEVELOP]]'
     commentdefault: null
@@ -29251,7 +29251,7 @@
     varset: vardev
     vartype: real
 - !variable
-    abivarname: xc_tb09_c
+    abivarname: "xc_tb09_c"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -29285,7 +29285,7 @@
     varset: vardev
     vartype: real
 - !variable
-    abivarname: xcart
+    abivarname: "xcart"
     characteristics:
     - '[[EVOLVING]]'
     - '[[LENGTH]]'
@@ -29328,7 +29328,7 @@
     varset: varbas
     vartype: real
 - !variable
-    abivarname: xclevel
+    abivarname: "xclevel"
     characteristics:
     - '[[INTERNAL_ONLY]]'
     commentdefault: null
@@ -29361,7 +29361,7 @@
     varset: varint
     vartype: integer
 - !variable
-    abivarname: xred
+    abivarname: "xred"
     characteristics:
     - '[[EVOLVING]]'
     commentdefault: null
@@ -29406,7 +29406,7 @@
     varset: varbas
     vartype: real
 - !variable
-    abivarname: xredsph_extra
+    abivarname: "xredsph_extra"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -29429,7 +29429,7 @@
     varset: vargs
     vartype: real
 - !variable
-    abivarname: xyzfile
+    abivarname: "xyzfile"
     characteristics:
     - '[[INPUT_ONLY]]'
     commentdefault: null
@@ -29453,7 +29453,7 @@
     varset: vargeo
     vartype: string
 - !variable
-    abivarname: zcut
+    abivarname: "zcut"
     characteristics:
     - '[[GW]]'
     - '[[ENERGY]]'
@@ -29489,7 +29489,7 @@
     varset: vargw
     vartype: real
 - !variable
-    abivarname: zeemanfield
+    abivarname: "zeemanfield"
     characteristics:
     - '[[MAGNETIC_FIELD]]'
     commentdefault: null
@@ -29511,7 +29511,7 @@
     varset: varff
     vartype: real
 - !variable
-    abivarname: ziontypat
+    abivarname: "ziontypat"
     characteristics: null
     commentdefault: null
     commentdims: null
@@ -29531,7 +29531,7 @@
     varset: varint
     vartype: real
 - !variable
-    abivarname: znucl
+    abivarname: "znucl"
     characteristics:
     - '[[NO_MULTI]]'
     commentdefault: null
