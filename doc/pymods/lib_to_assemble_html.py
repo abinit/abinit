@@ -88,8 +88,9 @@ def make_links(text,cur_key,allowed_link_seeds,backlinks,backlink):
     if cur_key != None:
       if dokukey == cur_key.strip():
         return "<b>"+dokukey+"</b>"
+
     #Extract the four possible parts of a dokukey, with separators :, # and |
-    #Explicitly : namespace:key#section|text
+    #Explicitly : namespace:key#section|dokutext
     #First, the namespace
     if ':' in dokukey:
       p1234=dokukey.split(':',1)
@@ -98,14 +99,14 @@ def make_links(text,cur_key,allowed_link_seeds,backlinks,backlink):
     else:
       namespace=""
       p234=dokukey
-    #Then, the text
+    #Then, the dokutext
     if '|' in p234:
       p234_split=p234.split('|',1) 
       p23=p234_split[0].strip()
-      text=p234_split[1].strip()
+      dokutext=p234_split[1].strip()
     else:
       p23=p234
-      text=p234
+      dokutext=""
     #Finally, the key (often a filename, but not for input variables) and section
     if '#' in p23:
       p23_split=p23.split('#',1)
@@ -115,6 +116,25 @@ def make_links(text,cur_key,allowed_link_seeds,backlinks,backlink):
       key=p23
       section=""
 
+    #Detect cases of external namespace
+    external_namespace=0
+    if namespace!="" and namespace in ["http","https","ftp","file"]:
+      external_namespace=1
+
+    #Prepare the webtext in the simple cases, note the namespace is echoed only when it is external
+    webtext=dokutext
+    if webtext=="":
+      if external_namespace==1:
+        webtext+=namespace+":"
+      webtext+=p23
+
+    #Finalize the cases of external links
+    if external_namespace==1:
+      return '<a href="%s:%s">%s</a>' %(namespace,p23,webtext)
+    if namespace=="" and key[:4]=="www.":
+      return '<a href="http://%s">%s</a>' %(p23,webtext)
+
+    #Treat the internal links
     if namespace=="":
       linkseed=key
     else:
@@ -124,36 +144,11 @@ def make_links(text,cur_key,allowed_link_seeds,backlinks,backlink):
     dic_namespaces={"lesson":"tutorial/generated_files",
                     "theorydoc":"theory/generated_files",
                     "help":"users/generated_files",
-                    "http":"",
-                    "https":"",
-                    "ftp":"",
-                    "file":"",
                     "topic":"topics/generated_files",
                     "varset":"input_variables/generated_files",
                     "varfile":"input_variables/generated_files"}
 
-    #Here, select on the namespace or detect "www.", but this is only to treat the external namespaces
-    if namespace!="" and namespace in dic_namespaces.keys():
-      if namespace in ["http","https","ftp","file"]:
-        #Reconstruct thez URL, possibly echoing the text
-        link="%s:%s"%(namespace,key)
-        if section !="":
-          link+="#"+section
-        if text != "":
-          return '<a href="%s">%s</a>' %(link,text)
-        else:
-          return '<a href="%s">%s</a>' %(link,link)
-    if namespace=="" and key[:4]=="www.":
-      #Reconstruct the URL using http, possibly echoing the text
-      link="http://"+key
-      if section !="":
-        link+="#"+section
-      if text != "":
-        return '<a href="%s">%s</a>' %(link,text)
-      else:
-        return '<a href="%s">%s</a>' %(link,link)
-
-    #Actually for the other cases, make the selection on the linkseed at present ... which allows the varfile , which is not really a namespace ...
+    #Actually for the internal links, make the selection on the linkseed at present ... which allows the varfile , which is not really a namespace ...
     #Might be changed, later ...
     if linkseed in allowed_link_seeds.keys():
       value=allowed_link_seeds[linkseed]
@@ -164,24 +159,24 @@ def make_links(text,cur_key,allowed_link_seeds,backlinks,backlink):
 
         #Specific formatting treatment
         if value=="help" and namespace=="":
-          text=key[5:]+' help file'
+          webtext=key[5:]+' help file'
 
-        return '<a href="../../%s/%s.html#%s">%s</a>' %(dir,linkseed,section,text)
+        return '<a href="../../%s/%s.html#%s">%s</a>' %(dir,linkseed,section,webtext)
 
       #Treat everything else
       elif "input_variable in " in value:
         # This is a link to an input variable
         filename=value[18:]
-        return '<a href="../../input_variables/generated_files/%s.html#%s">%s</a>' %(filename,key,text)
+        return '<a href="../../input_variables/generated_files/%s.html#%s">%s</a>' %(filename,key,webtext)
       elif value=="characteristic":
-        return '<a href="../../users/generated_files/help_abinit.html#%s">%s</a>' %(key,text)
+        return '<a href="../../users/generated_files/help_abinit.html#%s">%s</a>' %(key,webtext)
       elif value=="in_tests":
         return '<a href="../../%s">&#126;abinit/%s</a>' %(key,key)
       elif value=="bibID":
         result=get_year(key)
         if result != -9999 :
           backlinks[key]+=backlink+";;"
-          return '<a href="../../bibliography/generated_files/bibliography.html#%s">[%s]</a>' %(key,text)
+          return '<a href="../../bibliography/generated_files/bibliography.html#%s">[%s]</a>' %(key,webtext)
 
     return '<a href="#">[[FAKE LINK:'+key+']]</a>'
 
