@@ -89,6 +89,7 @@ def make_links(text,cur_key,allowed_link_seeds,backlinks,backlink):
       if dokukey == cur_key.strip():
         return "<b>"+dokukey+"</b>"
     #Extract the four possible parts of a dokukey, with separators :, # and |
+    #Explicitly : namespace:key#section|text
     #First, the namespace
     if ':' in dokukey:
       p1234=dokukey.split(':',1)
@@ -123,11 +124,37 @@ def make_links(text,cur_key,allowed_link_seeds,backlinks,backlink):
     dic_namespaces={"lesson":"tutorial/generated_files",
                     "theorydoc":"theory/generated_files",
                     "help":"users/generated_files",
+                    "http":"",
+                    "https":"",
+                    "ftp":"",
+                    "file":"",
                     "topic":"topics/generated_files",
                     "varset":"input_variables/generated_files",
                     "varfile":"input_variables/generated_files"}
 
-    #Actually make the selection on the linkseed at present ... which allows the varfile , which is not really a namespace ...
+    #Here, select on the namespace or detect "www.", but this is only to treat the external namespaces
+    if namespace!="" and namespace in dic_namespaces.keys():
+      if namespace in ["http","https","ftp","file"]:
+        #Reconstruct thez URL, possibly echoing the text
+        link="%s:%s"%(namespace,key)
+        if section !="":
+          link+="#"+section
+        if text != "":
+          return '<a href="%s">%s</a>' %(link,text)
+        else:
+          return '<a href="%s">%s</a>' %(link,link)
+    if namespace=="" and key[:4]=="www.":
+      #Reconstruct the URL using http, possibly echoing the text
+      link="http://"+key
+      if section !="":
+        link+="#"+section
+      if text != "":
+        return '<a href="%s">%s</a>' %(link,text)
+      else:
+        return '<a href="%s">%s</a>' %(link,link)
+
+    #Actually for the other cases, make the selection on the linkseed at present ... which allows the varfile , which is not really a namespace ...
+    #Might be changed, later ...
     if linkseed in allowed_link_seeds.keys():
       value=allowed_link_seeds[linkseed]
 
@@ -154,11 +181,6 @@ def make_links(text,cur_key,allowed_link_seeds,backlinks,backlink):
         result=get_year(key)
         if result != -9999 :
           backlinks[key]+=backlink+";;"
-
-          #DEBUG
-          if key=="Amadon2008a":
-            print(" Found key Amadon2008a, backlink:",backlink)
-          #ENDDEBUG
           return '<a href="../../bibliography/generated_files/bibliography.html#%s">[%s]</a>' %(key,text)
 
     return '<a href="#">[[FAKE LINK:'+key+']]</a>'
