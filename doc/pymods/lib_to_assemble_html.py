@@ -420,6 +420,9 @@ def assemble_html(origin_yml_files,suppl_components,dir_name,root_filname,allowe
 
     if root_filname != "":
       full_filname=root_filname+"_"+name
+    #This is exceptional, should be soon removed
+    elif name=="external" or name=="allvars":
+      full_filname="varset_"+name
     else:
       full_filname=name
 
@@ -427,7 +430,7 @@ def assemble_html(origin_yml_files,suppl_components,dir_name,root_filname,allowe
 
   all_files_html=""
   spec={'users':'help files','tutorial':'lessons of the tutorial',
-        'theory':'theory documents','input_variables':'varfiles','bibliography':'generated files in the bibliography directory'}
+        'theory':'theory documents','input_variables':'varsets','bibliography':'generated files in the bibliography directory'}
   for j in ["header","title","subtitle","copyright","links","toc_all","links","end"]:
     if j == "toc_all":
       all_files_html += toc_all

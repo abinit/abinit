@@ -4070,14 +4070,7 @@
          The occupation matrix is in the basis of real spherical harmonics Slm (note that this differs from the choice made when
          [[prtdosm]]=1
          , that is in the basis of complex spherical harmonics).
-        Their are ordered by increasing m, and are defined e.g. in
-        the article
-        "Evaluation of the rotation matrices in the basis of real spherical harmonics",
-        by Miguel A. Blancoa, M. Floreza, M. Bermejo,
-        Journal of Molecular Structure (Theochem) 419, 19 (1997), that can be downloaded from
-         <a href="http://azufre.quimica.uniovi.es/articles/Theochem419-19-ov-BF97-rotation-matrices.pdf">
-          <!-- &lt;a href="http://www.unioviedo.es/qcg/art/Theochem419-19-ov-BF97-rotation-matrices.pdf"&gt; -->
-          the author Web site
+        Their are ordered by increasing m, and are defined e.g. in [[Blancoa1997]]
          </a>
          .
         For the case l=2 (d states), the five columns corresponds respectively to (the normalisation factor has been dropped)

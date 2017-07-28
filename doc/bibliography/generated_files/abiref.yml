@@ -376,6 +376,15 @@
   issue : 19
 -
   ENTRYTYPE : article
+  ID : Blancoa1997
+  author : Miguel A. Blancoa and M. Floreza and M. Bermejo
+  title : Evaluation of the rotation matrices in the basis of real spherical harmonics"
+  journal : Journal of Molecular Structure (Theochem)
+  year : 1997
+  volume : 419
+  pages : 19
+-
+  ENTRYTYPE : article
   ID : Bloechl1994
   author : Bl\"{o}chl, P.E.
   title : Projector augmented-wave method
@@ -1814,8 +1823,6 @@
   volume : 67
   pages : 165332
   doi : 10.1103/PhysRevB.67.165332
-  url : http://link.aps.org/doi/10.1103/PhysRevB.67.165332
-  issue : 16
 -
   ENTRYTYPE : article
   ID : Sharma2004
@@ -1835,14 +1842,7 @@
   year : 2012
   volume : 85
   pages : 045132
-  publisher : American Physical Society
-  url : http://link.aps.org/doi/10.1103/PhysRevB.85.045132
-  timestamp : 2012.06.19
-  number : 4
-  owner : amadonb
-  file : :/media/disk_iomega/BIBLIO/Interaction/PhysRevB.85.045132.pdf:PDF
-  keywords : cRPA pseudopotentials
-  refid : 10.1103/PhysRevB.85.045132
+  doi : 10.1103/PhysRevB.85.045132
 -
   ENTRYTYPE : article
   ID : Silvestrelli2008
@@ -2090,7 +2090,7 @@
   volume : 97
   pages : 076405
   publisher : American Physical Society
-  url : http://link.aps.org/doi/10.1103/PhysRevLett.97.076405
+  doi : 10.1103/PhysRevLett.97.076405
   timestamp : 2013.05.22
   number : 7
   owner : amadonb
@@ -2222,9 +2222,7 @@
   year : 2009
   volume : 21
   pages : 195501
-  url : http://stacks.iop.org/0953-8984/21/i=19/a=195501
-  number : 19
-  abstract : Computation of the observables of a Mössbauer spectrum, primarily the isomer shift, from a first-principles approach is described. The framework used is density functional theory using the projector augmented wave formalism (DFT PAW), which enables efficient computation even of many-electron solids such as SnCl 2 . The proper PAW version of the isomer shift is derived and shown to be correct through comparison of computed shifts and experiment in a variety of compounds based on tin, germanium and zinc. The effects of pressure are considered as well as motional effects including the Lamb?Mössbauer factor and the second-order Doppler shift.
+  url : http://stacks.iop.org/0953-8984/21/i=19/a=195501/
 -
   ENTRYTYPE : article
   ID : Zwanziger2009a
