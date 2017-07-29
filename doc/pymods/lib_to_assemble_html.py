@@ -180,7 +180,7 @@ def make_links(text,cur_key,allowed_link_seeds,backlinks,backlink):
 
     return '<a href="#">[[FAKE LINK:'+key+']]</a>'
 
-  p=re.compile("\\[\\[([a-zA-Z0-9_ */<>.|:+#]*)\\]\\]")
+  p=re.compile("\\[\\[([a-zA-Z0-9_ */<>.|:+#@]*)\\]\\]")
   if text is None:
     return ""
   new_text=p.sub(replace_link,text)
@@ -320,7 +320,7 @@ def suppress_parentheses(text):
     stripped_text = mymatch.group()[1:-1].strip()
     return stripped_text
 
-  p=re.compile("\\{([a-zA-Z0-9_ */<>.|:+#]*)\\}")
+  p=re.compile("\\{([a-zA-Z0-9_ */<>.|:+#@]*)\\}")
   if text is None:
     return ""
   stripped_text=p.sub(strip_text,text)
@@ -335,7 +335,7 @@ def convert_textit(text):
     return converted_text
 
   #Look for \textit{...}
-  p=re.compile("\\\\textit\\{([a-zA-Z0-9_ */<>.|:+#]*)\\}")
+  p=re.compile("\\\\textit\\{([a-zA-Z0-9_ */<>.|:+#@]*)\\}")
   if text is None:
     return ""
   converted_text=p.sub(convert_text,text)

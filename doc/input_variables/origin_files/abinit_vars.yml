@@ -732,6 +732,27 @@
     varset: vargs
     vartype: integer
 - !variable
+    abivarname: "alphon@anaddb"
+    characteristics: null
+    commentdefault: null
+    commentdims: null
+    defaultval: 0
+    dimensions: scalar
+    excludes: null
+    executables: anaddb
+    mnemonics:  ALign PHONon mode eigendisplacements
+    requires: null
+    text: |-
+         <p>In case <b>alphon</b> is set to 1, ANADDB will compute linear combinations of
+         the eigendisplacements of modes that are degenerate (twice or three times),
+         in order to align the mode effective charges along the cartesian axes.
+         This option is useful in the mode-by-mode decomposition of the electrooptic tensor, and to compute
+         the Raman susceptibilities of individual phonon modes.
+         In case of uniaxial crystals, the z-axis should be chosen along the optical axis.
+    topics:
+    varset: varanaddb
+    vartype: integer
+- !variable
     abivarname: "amu"
     characteristics:
     - '[[EVOLVING]]'

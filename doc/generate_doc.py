@@ -103,23 +103,6 @@ for infos_dir in list_infos_dir:
   for yml_file in yml_files:
     path_ymlfile="%s/origin_files/%s.yml"%(infos_dir["dir_name"],yml_file)
     print("Read "+path_ymlfile+" "+msgs[yml_file])
-
-    #Special treatment for abinit_vars, because of the editing with Abivars.jar, that does not preserve the quotes needed for the abivarname
-    if "abinit_vars" in path_ymlfile:
-      with open(path_ymlfile) as f:
-        file_old=f.readlines()
-        file_new=""
-        for line in file_old:
-          if "abivarname" in line:
-            line_split=line.split(':',1)
-            if not '"' in line_split[1]:
-              line=line_split[0]+': "'+line_split[1].strip()+'"\n'
-          file_new+=line
-        f.close()
-      with open(path_ymlfile,"w") as f:
-        f.write(file_new)
-        f.close()
-
     yml_in[yml_file] =read_yaml(path_ymlfile)
 
 # These ones are quite often used, so copy them ...
