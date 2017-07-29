@@ -202,7 +202,7 @@ Well, in some pathological cases, the breaking can be rather important.
 (or dynamical matrices), and the effective charges.
 The ASR for the effective charges is called the charge
 neutrality sum rule, and will be dealt with by the variable
-<a href="#"><a href="#">[[FAKE LINK:chneut]]</a></a>.
+<a href="../../input_variables/generated_files/varanaddb.html#chneut@anaddb">chneut</a>.
 The ASR for the interatomic forces can be restored,
 by modifying the interatomic force of the atom on itself,
 (called self-IFC), as soon as the dynamical matrix at Gamma is known. 
@@ -213,14 +213,14 @@ which is determined by the dynamical matrix at Gamma.
 So, if <b>asr</b> is non-zero, the correction to the self-force
 will be determined, and the self-force will be imposed to be consistent with the ASR.
 This correction will work if IFCs are computed
-(<a href="#"><a href="#">[[FAKE LINK:ifcflag]]</a></a>/=0),
+(<a href="../../input_variables/generated_files/varanaddb.html#ifcflag@anaddb">ifcflag</a>/=0),
 as well as if the IFCs are not computed
-(<a href="#"><a href="#">[[FAKE LINK:ifcflag]]</a></a>==0).
+(<a href="../../input_variables/generated_files/varanaddb.html#ifcflag@anaddb">ifcflag</a>==0).
 In both cases, the phonon frequencies will not be the same
 as the ones determined by the output of abinit, RF case.
 If you want to check that the DDB is correct, by comparing
 phonon frequencies from abinit and anaddb, you should turn off both <b>asr</b> and
-<a href="#"><a href="#">[[FAKE LINK:chneut]]</a></a>.
+<a href="../../input_variables/generated_files/varanaddb.html#chneut@anaddb">chneut</a>.
 
 <p>Until now, we have not explained the difference between
 <b>asr</b>=1 and <b>asr</b>=2. 
@@ -274,7 +274,7 @@ to the next bigger is smaller than <b>wtol2</b>.
 <br><font id="title"><a name="atifc@anaddb">atifc</a></font>
 <br><font id="mnemonics">Mnemonics: AToms for IFC analysis</font>
 <br><font id="characteristic">Characteristic: </font>
-<br><font id="vartype">Variable type: integer array <b>atifc</b>(<a href="#">[[FAKE LINK:natifc]]</a>)array</font>
+<br><font id="vartype">Variable type: integer array <b>atifc</b>(<a href="../../input_variables/generated_files/varanaddb.html#natifc@anaddb">natifc</a>)array</font>
 <br><font id="default">Default is 0</font>
 <br><font id="text">
 <p>
@@ -314,7 +314,7 @@ functions in energy are replaced by Gaussians of width a2fsmear
 <br><font id="text">
 <p>
 <p>Allow setting the target band gap, in eV.
-(<a href="#"><a href="#">[[FAKE LINK:elphflag]]</a></a>=1).
+(<a href="../../input_variables/generated_files/varanaddb.html#elphflag@anaddb">elphflag</a>=1).
 </font>
 
 <br><br><a href=#top>Go to the top</a>
@@ -401,12 +401,12 @@ non-zero. There is no "best" way of imposing the ASR on effective charges.
       <a href="../../input_variables/generated_files/varrf.html#rfdir">rfdir</a> to do a full calculation of
         phonons at Q=0.
   The frequencies are defined by the
-<a href="#"><a href="#">[[FAKE LINK:nfreq]]</a></a>,<a href="#"><a href="#">[[FAKE LINK:frmin]]</a></a>,<a href="#"><a href="#">[[FAKE LINK:frmax]]</a></a>
+<a href="../../input_variables/generated_files/varanaddb.html#nfreq@anaddb">nfreq</a>,<a href="../../input_variables/generated_files/varanaddb.html#frmin@anaddb">frmin</a>,<a href="../../input_variables/generated_files/varanaddb.html#frmax@anaddb">frmax</a>
  variables. Also, the generalized Lyddane-Sachs-Teller
 relation will be used as an independent check of the
 dielectric tensor at zero frequency (this for the
 directions defined in the phonon list 2.
-See <a href="#"><a href="#">[[FAKE LINK:nph2l]]</a></a>.</li>
+See <a href="../../input_variables/generated_files/varanaddb.html#nph2l@anaddb">nph2l</a>.</li>
 <li> 2 => Only the electronic dielectric tensor is calculated.
  It corresponds to a zero-frequency homogeneous field,
 with quenched atomic positions. For large band gap materials,
@@ -426,10 +426,10 @@ Note that the same information on the electronic dielectric tensor will be print
       <a href="../../input_variables/generated_files/varrf.html#rfdir">rfdir</a> to do a full calculation of
         phonons at Q=0 (needed because the inverse of
         force-constant tensor is required). Furthermore, in the anaddb input file the variable
-        <a href="#"><a href="#">[[FAKE LINK:nph2l]]</a></a> must be nonzero in order to initiate
+        <a href="../../input_variables/generated_files/varanaddb.html#nph2l@anaddb">nph2l</a> must be nonzero in order to initiate
         computation of atomic displacements. If only the dielectric response is needed it
-        is sufficient to set <a href="#"><a href="#">[[FAKE LINK:nph2l]]</a></a> to 1 and leave 
-        <a href="#"><a href="#">[[FAKE LINK:qph2l]]</a></a> at its default value (the Gamma point).
+        is sufficient to set <a href="../../input_variables/generated_files/varanaddb.html#nph2l@anaddb">nph2l</a> to 1 and leave 
+        <a href="../../input_variables/generated_files/varanaddb.html#qph2l@anaddb">qph2l</a> at its default value (the Gamma point).
    Note that the relaxed-ion dielectric tensor computed here can
    also be obtained as the zero-frequency limit of the
    frequency-dependent dielectric tensor using input variables
@@ -443,8 +443,8 @@ Note that the same information on the electronic dielectric tensor will be print
                free stress.
    We need information of internal strain and elastic tensor (relaxed ion)
    in this computation. So please set:
-   <a href="#"><a href="#">[[FAKE LINK:elaflag]]</a></a>=2,3,4 or 5  and
-   <a href="#"><a href="#">[[FAKE LINK:instrflag]]</a></a>=1
+   <a href="../../input_variables/generated_files/varanaddb.html#elaflag@anaddb">elaflag</a>=2,3,4 or 5  and
+   <a href="../../input_variables/generated_files/varanaddb.html#instrflag@anaddb">instrflag</a>=1
  </ul>
 </font>
 
@@ -487,7 +487,7 @@ Note that the same information on the electronic dielectric tensor will be print
 <br><font id="text">
 <p>
 <p>The input variable <b>dosdeltae</b> is used to define the step of the frequency grid used to
-calculate the phonon density of states when <a href="#"><a href="#">[[FAKE LINK:prtdos]]</a></a>=1.
+calculate the phonon density of states when <a href="../../input_variables/generated_files/varanaddb.html#prtdos@anaddb">prtdos</a>=1.
 </font>
 
 <br><br><a href=#top>Go to the top</a>
@@ -502,7 +502,7 @@ calculate the phonon density of states when <a href="#"><a href="#">[[FAKE LINK:
 <br><font id="text">
 <p>
 <p><b>dossmear</b> defines the gaussian broadening used to calculate the phonon density
-of states when <a href="#"><a href="#">[[FAKE LINK:prtdos]]</a></a>=1.
+of states when <a href="../../input_variables/generated_files/varanaddb.html#prtdos@anaddb">prtdos</a>=1.
 </font>
 
 <br><br><a href=#top>Go to the top</a>
@@ -582,7 +582,7 @@ reported in the output file <b>dossum</b>.
 <li>2 => Both relaxed- and clamped-ion elastic and compliance tensor
     will be calculated, but only the relaxed-ion quantities
     will be printed.
-   The input variable <a href="#"><a href="#">[[FAKE LINK:instrflag]]</a></a>
+   The input variable <a href="../../input_variables/generated_files/varanaddb.html#instrflag@anaddb">instrflag</a>
     should also be set to 1, because
     the internal-strain tensor is needed to compute the relaxed-ion
     corrections.  Requirements for preceding response-function DDB
@@ -595,7 +595,7 @@ reported in the output file <b>dossum</b>.
 </li>
 <li>3 =>  Both relaxed and clamped-ion elastic and compliance tensors
     will be printed out.
-    The input variable <a href="#"><a href="#">[[FAKE LINK:instrflag]]</a></a>
+    The input variable <a href="../../input_variables/generated_files/varanaddb.html#instrflag@anaddb">instrflag</a>
      should also be set to 1.
     Requirements for preceding response-function DDB generation
     run:  Same as for <b>elaflag</b>=2.
@@ -605,8 +605,8 @@ reported in the output file <b>dossum</b>.
   electric field will be printed out too, for comparison.
   When <b>elaflag</b>=4, we need the information of internal strain and
  relaxed-ion dielectric tensor to build the whole tensor, so
- we need set <a href="#"><a href="#">[[FAKE LINK:instrflag]]</a></a>=1 and
- <a href="#"><a href="#">[[FAKE LINK:dieflag]]</a></a>=3 or 4 .
+ we need set <a href="../../input_variables/generated_files/varanaddb.html#instrflag@anaddb">instrflag</a>=1 and
+ <a href="../../input_variables/generated_files/varanaddb.html#dieflag@anaddb">dieflag</a>=3 or 4 .
 </li>
 <li>5 => Calculate the relaxed ion elastic and compliance tensors, considering
  the stress left inside cell. At the same time, bare relaxed ion tensors
@@ -659,8 +659,8 @@ reported in the output file <b>dossum</b>.
 <br><font id="text">
 <p>
 <p>If non-zero, will fix artificially the value of the Fermi energy
-(e.g. for semiconductors), in the electron-phonon case. Note that elph_fermie and <a href="#"><a href="#">[[FAKE LINK:ep_extrael]]</a></a> 
-should not be used at the same time. (<a href="#"><a href="#">[[FAKE LINK:elphflag]]</a></a>=1).
+(e.g. for semiconductors), in the electron-phonon case. Note that elph_fermie and <a href="../../input_variables/generated_files/varanaddb.html#ep_extrael@anaddb">ep_extrael</a> 
+should not be used at the same time. (<a href="../../input_variables/generated_files/varanaddb.html#elphflag@anaddb">elphflag</a>=1).
 </font>
 
 <br><br><a href=#top>Go to the top</a>
@@ -696,7 +696,7 @@ should not be used at the same time. (<a href="#"><a href="#">[[FAKE LINK:elphfl
 <br><font id="default">Default is 0</font>
 <br><font id="text">
 <p>
-<p>When set, and <a href="#"><a href="#">[[FAKE LINK:telphint]]</a></a> is equal to 2, this variable determines the k-point integration weights which are used in the electron-phonon part of the code. Instead of weighting according to a distance from the Fermi surface, an equal weight is given to all k-points, for all bands between <a href="#"><a href="#">[[FAKE LINK:ep_b_min]]</a></a> and <b>ep_b_max</b>.
+<p>When set, and <a href="../../input_variables/generated_files/varanaddb.html#telphint@anaddb">telphint</a> is equal to 2, this variable determines the k-point integration weights which are used in the electron-phonon part of the code. Instead of weighting according to a distance from the Fermi surface, an equal weight is given to all k-points, for all bands between <a href="#"><a href="#">[[FAKE LINK:FAKE LINK:ep_b_min]]</a></a> and <b>ep_b_max</b>.
 </font>
 
 <br><br><a href=#top>Go to the top</a>
@@ -710,7 +710,7 @@ should not be used at the same time. (<a href="#"><a href="#">[[FAKE LINK:elphfl
 <br><font id="default">Default is 0</font>
 <br><font id="text">
 <p>
-<p>As for <a href="#"><a href="#">[[FAKE LINK:ep_b_max]]</a></a>, but <b>ep_b_min</b> is the lower bound on the band integration, instead of the upper bound. See also <a href="#"><a href="#">[[FAKE LINK:telphint]]</a></a>.
+<p>As for <a href="../../input_variables/generated_files/varanaddb.html#ep_b_max@anaddb">ep_b_max</a>, but <b>ep_b_min</b> is the lower bound on the band integration, instead of the upper bound. See also <a href="../../input_variables/generated_files/varanaddb.html#telphint@anaddb">telphint</a>.
 </font>
 
 <br><br><a href=#top>Go to the top</a>
@@ -727,8 +727,8 @@ should not be used at the same time. (<a href="#"><a href="#">[[FAKE LINK:elphfl
 <p>If non-zero, will fix artificially the number of extra electrons per unit cell (positive for electron doping), according to a doped case.
 (e.g. for semiconductors), in the electron-phonon case. 
 This field can also be filled with doping concentration, in the units of cm-3 (negative for electron doping). 
-Note that <b>ep_extrael</b> and <a href="#"><a href="#">[[FAKE LINK:elph_fermie]]</a></a> should not be used at the same time.
-(<a href="#"><a href="#">[[FAKE LINK:elphflag]]</a></a>=1).
+Note that <b>ep_extrael</b> and <a href="../../input_variables/generated_files/varanaddb.html#elph_fermie@anaddb">elph_fermie</a> should not be used at the same time.
+(<a href="../../input_variables/generated_files/varanaddb.html#elphflag@anaddb">elphflag</a>=1).
 </font>
 
 <br><br><a href=#top>Go to the top</a>
@@ -793,7 +793,7 @@ anaddb input (ngqpt)
 <br><font id="default">Default is 20</font>
 <br><font id="text">
 <p>
-<p>The scale factor for cubic spline interpolation, only used in the relaxation time approximation (<a href="#"><a href="#">[[FAKE LINK:ifltransport]]</a></a>=3).
+<p>The scale factor for cubic spline interpolation, only used in the relaxation time approximation (<a href="../../input_variables/generated_files/varanaddb.html#ifltransport@anaddb">ifltransport</a>=3).
 </font>
 
 <br><br><a href=#top>Go to the top</a>
@@ -818,7 +818,7 @@ anaddb input (ngqpt)
 <br><font id="mnemonics">Mnemonics: Electron Phonon Q PoinT LIST</font>
 <br><font id="characteristic">Characteristic: </font>
 <br><font id="vartype">Variable type: real array of 3*ep_nqpt elementsarray</font>
-<br><font id="default">Default is (3*<a href="#"><a href="#">[[FAKE LINK:ep_nqpt]]</a></a>)*0</font>
+<br><font id="default">Default is (3*<a href="../../input_variables/generated_files/varanaddb.html#ep_nqpt@anaddb">ep_nqpt</a>)*0</font>
 <br><font id="text">
 <p>
 <p>In case a non-uniform grid of q-points is being used, for direct calculation
@@ -860,7 +860,7 @@ or high symmetry points. I do not know why...
 <br><font id="text">
 <p>
 <p>If different from zero, <b>freeze_displ</b> will be used as the amplitude of a phonon displacement.
-For each q-point and mode in the <a href="#"><a href="#">[[FAKE LINK:qph1l]]</a></a> list,
+For each q-point and mode in the <a href="../../input_variables/generated_files/varanaddb.html#qph1l@anaddb">qph1l</a> list,
 a file will be created containing a supercell
 of atoms with the corresponding phonon displacements frozen in.
 This is typically useful to freeze a soft phonon mode, then let it relax in abinit
@@ -874,7 +874,7 @@ Typical values are 50-200 for a frequency of a few hundred cm-1 and room tempera
 is to break the symmetry in the right direction, any reasonable value (10-50) should be ok.
 <br>
 <b>WARNING</b>: this will create a <i>lot</i> of files (3*natom*nph1l), so it should be used with a small number
-<a href="#"><a href="#">[[FAKE LINK:nph1l]]</a></a> of q-points for interpolation.
+<a href="../../input_variables/generated_files/varanaddb.html#nph1l@anaddb">nph1l</a> of q-points for interpolation.
 </font>
 
 <br><br><a href=#top>Go to the top</a>
@@ -933,7 +933,7 @@ gkqfile. This reduces strongly the memory needed for an electron-phonon run.
 <p>
 <p>List of strings with the paths of the DDB files used for the calculation of the Gruneisen parameters.
 Each string must be enclosed by quotation marks. The number of DDB files is defined by
-<a href="#"><a href="#">[[FAKE LINK:gruns_nddbs]]</a></a> (possible values are: 3,5,7,9)
+<a href="../../input_variables/generated_files/varanaddb.html#gruns_nddbs@anaddb">gruns_nddbs</a> (possible values are: 3,5,7,9)
 The DDB files correspond to phonon calculations performed at different volumes (usually &plusmn; 1% 
 of the equilibrium volume). The DDB files must be ordered according to the volume of the unit cell 
 (the DDB with smallest volume comes first) and the volume increment must be constant.
@@ -951,7 +951,7 @@ The code computes the derivative of the dynamical matrix wrt the volume using ce
 <br><font id="default">Default is 0</font>
 <br><font id="text">
 <p>
-<p>This variable defines the number of DDB files (read from <a href="#"><a href="#">[[FAKE LINK:gruns_ddbs]]</a></a>)
+<p>This variable defines the number of DDB files (read from <a href="../../input_variables/generated_files/varanaddb.html#gruns_ddbs@anaddb">gruns_ddbs</a>)
 used for the calculation of the Gruneisen parameters.
 </font>
 
@@ -962,12 +962,12 @@ used for the calculation of the Gruneisen parameters.
 <br><font id="title"><a name="iatfix@anaddb">iatfix</a></font>
 <br><font id="mnemonics">Mnemonics: Indices of the AToms that are FIXed</font>
 <br><font id="characteristic">Characteristic: </font>
-<br><font id="vartype">Variable type: integer array (1:<a href="#">[[FAKE LINK:natfix]]</a>)array</font>
+<br><font id="vartype">Variable type: integer array (1:<a href="../../input_variables/generated_files/varanaddb.html#natfix@anaddb">natfix</a>)array</font>
 <br><font id="default">Default is 0</font>
 <br><font id="text">
 <p>
 <p>Indices of the atoms that are fixed during a structural relaxation at constrained polarization.
-See <a href="#"><a href="#">[[FAKE LINK:polflag]]</a></a>.
+See <a href="../../input_variables/generated_files/varanaddb.html#polflag@anaddb">polflag</a>.
 </font>
 
 <br><br><a href=#top>Go to the top</a>
@@ -977,7 +977,7 @@ See <a href="#"><a href="#">[[FAKE LINK:polflag]]</a></a>.
 <br><font id="title"><a name="iatprj_bs@anaddb">iatprj_bs</a></font>
 <br><font id="mnemonics">Mnemonics: Indices of the AToms for the PRoJection of the phonon Band Structure</font>
 <br><font id="characteristic">Characteristic: </font>
-<br><font id="vartype">Variable type: integer array (1:<a href="#">[[FAKE LINK:natprj_bs]]</a>)</font>
+<br><font id="vartype">Variable type: integer array (1:<a href="../../input_variables/generated_files/varanaddb.html#natprj_bs@anaddb">natprj_bs</a>)</font>
 <br><font id="default">Default is 0</font>
 <br><font id="text">
 <p>
@@ -1002,7 +1002,7 @@ See <a href="#"><a href="#">[[FAKE LINK:polflag]]</a></a>.
 
 <p> If the analysis is activated, one get the
 trace of the matrices between pairs of atoms,
-if <a href="#"><a href="#">[[FAKE LINK:dipdip]]</a></a> is 1,
+if <a href="../../input_variables/generated_files/varanaddb.html#dipdip@anaddb">dipdip</a> is 1,
 get also the trace of the short-range
 and electrostatic part, and
 calculate the ratio with the full matrix;
@@ -1039,7 +1039,7 @@ the matrix in local coordinates).
         matrices at every q wavevector, and eventually analyse
         the interatomic force constants, according to the
         informations given by
-<a href="#"><a href="#">[[FAKE LINK:atifc]]</a></a>,<a href="#"><a href="#">[[FAKE LINK:dipdip]]</a></a>,<a href="#"><a href="#">[[FAKE LINK:ifcana]]</a></a>,<a href="#"><a href="#">[[FAKE LINK:ifcout]]</a></a>,<a href="#"><a href="#">[[FAKE LINK:natifc]]</a></a>,<a href="#"><a href="#">[[FAKE LINK:nsphere]]</a></a>,<a href="#"><a href="#">[[FAKE LINK:rifcsph]]</a></a></li>
+<a href="../../input_variables/generated_files/varanaddb.html#atifc@anaddb">atifc</a>,<a href="../../input_variables/generated_files/varanaddb.html#dipdip@anaddb">dipdip</a>,<a href="../../input_variables/generated_files/varanaddb.html#ifcana@anaddb">ifcana</a>,<a href="../../input_variables/generated_files/varanaddb.html#ifcout@anaddb">ifcout</a>,<a href="../../input_variables/generated_files/varanaddb.html#natifc@anaddb">natifc</a>,<a href="../../input_variables/generated_files/varanaddb.html#nsphere@anaddb">nsphere</a>,<a href="../../input_variables/generated_files/varanaddb.html#rifcsph@anaddb">rifcsph</a></li>
 </ul>
    More detailed explanations: if the dynamical matrices
    are known on a regular set of wavevectors, they
@@ -1047,7 +1047,7 @@ the matrix in local coordinates).
    their Fourier transform. When non-analyticities
    can been removed by the use of effective charge at Gamma
    (option offered by putting
-   <a href="#"><a href="#">[[FAKE LINK:dipdip]]</a></a> to 1),
+   <a href="../../input_variables/generated_files/varanaddb.html#dipdip@anaddb">dipdip</a> to 1),
    the interatomic forces are known to decay rather fast (in real space).
    The interatomic forces generated from a small set of
    dynamical matrices
@@ -1072,7 +1072,7 @@ the matrix in local coordinates).
 <br><font id="default">Default is 0</font>
 <br><font id="text">
 <p>
-<p>For each atom in the list <a href="#"><a href="#">[[FAKE LINK:atifc]]</a></a> (generic atoms),
+<p>For each atom in the list <a href="../../input_variables/generated_files/varanaddb.html#atifc@anaddb">atifc</a> (generic atoms),
 <b>ifcout</b> give the number
 of neighbouring atoms for which the ifc's will be
 output (written) and eventually analysed. The
@@ -1094,7 +1094,7 @@ the generic atom.
 <p>if ifltransport=1 (LOVA) or ifltransport=2 (non-LOVA), anaddb calculates the transport
 properties: electrical and thermal resistivities from electron-phonon
 interactions in the variational approach. If ifltransport=3, anaddb calculates the 
-k-dependent relaxation time. (needs<a href="#"><a href="#">[[FAKE LINK:elphflag]]</a></a> = 1)
+k-dependent relaxation time. (needs<a href="../../input_variables/generated_files/varanaddb.html#elphflag@anaddb">elphflag</a> = 1)
 </font>
 
 <br><br><a href=#top>Go to the top</a>
@@ -1131,7 +1131,7 @@ k-dependent relaxation time. (needs<a href="#"><a href="#">[[FAKE LINK:elphflag]
 <br><font id="title"><a name="istrfix@anaddb">istrfix</a></font>
 <br><font id="mnemonics">Mnemonics: Index of STRain FIXed</font>
 <br><font id="characteristic">Characteristic: </font>
-<br><font id="vartype">Variable type: integer array istrfix(1:<a href="#">[[FAKE LINK:nstrfix]]</a>)</font>
+<br><font id="vartype">Variable type: integer array istrfix(1:<a href="../../input_variables/generated_files/varanaddb.html#nstrfix@anaddb">nstrfix</a>)</font>
 <br><font id="default">Default is 0</font>
 <br><font id="text">
 <p>
@@ -1147,7 +1147,7 @@ is recommended so that responses to both uniaxial and shear strains
 will be computed. </li>
   <li>2 =&gt; Both relaxed- and clamped-ion elastic and compliance
 tensor will be calculated, but only the relaxed-ion quantities will be
-printed. The input variable <a href="#"><a href="#">[[FAKE LINK:instrflag]]</a></a>
+printed. The input variable <a href="../../input_variables/generated_files/varanaddb.html#instrflag@anaddb">instrflag</a>
 should also be set to 1, because the internal-strain tensor is needed
 to compute the relaxed-ion corrections. Requirements for preceding
 response-function DDB generation run: Strain and atomic-displacement
@@ -1156,14 +1156,14 @@ responses at Q=0. Set <a href="../../input_variables/generated_files/varrf.html#
 calculation of phonons at Q=0 (needed because the inverse of
 force-constant tensor is required). </li>
   <li>3 =&gt; Both relaxed and clamped-ion elastic and compliance
-tensors will be printed out. The input variable <a href="#"><a href="#">[[FAKE LINK:instrflag]]</a></a> should also be set to
+tensors will be printed out. The input variable <a href="../../input_variables/generated_files/varanaddb.html#instrflag@anaddb">instrflag</a> should also be set to
 1. Requirements for preceding response-function DDB generation run:
-Same as for <a href="#"><a href="#">[[FAKE LINK:elaflag]]</a></a>=2'. </li>
+Same as for <a href="../../input_variables/generated_files/varanaddb.html#elaflag@anaddb">elaflag</a>=2'. </li>
   <li>4 =&gt; Calculate the elastic and compliance tensors (relaxed
 ion) at fixed displacement field, the relaxed-ion tensors at fixed
-electric field will be printed out too, for comparison. When <a href="#"><a href="#">[[FAKE LINK:elaflag]]</a></a>=4,
+electric field will be printed out too, for comparison. When <a href="../../input_variables/generated_files/varanaddb.html#elaflag@anaddb">elaflag</a>=4,
 we need the information of internal strain and relaxed-ion dielectric
-tensor to build the whole tensor, so we need set <a href="#"><a href="#">[[FAKE LINK:instrflag]]</a></a>=1 and <a href="#"><a href="#">[[FAKE LINK:dieflag]]</a></a>=3 or 4 . </li>
+tensor to build the whole tensor, so we need set <a href="../../input_variables/generated_files/varanaddb.html#instrflag@anaddb">instrflag</a>=1 and <a href="../../input_variables/generated_files/varanaddb.html#dieflag@anaddb">dieflag</a>=3 or 4 . </li>
   <li>5 =&gt; Calculate the relaxed ion elastic and compliance tensors,
 considering the stress left inside cell. At the same time, bare relaxed
 ion tensors will still be printed out for comparison. In this
@@ -1173,7 +1173,7 @@ with the second order derivative data base (DDB file) into a new DDB
 file, which can contain both information. And the program will also
 check for the users. </li>
 </ul>
-See <a href="#"><a href="#">[[FAKE LINK:polflag]]</a></a>.
+See <a href="../../input_variables/generated_files/varanaddb.html#polflag@anaddb">polflag</a>.
 </font>
 
 <br><br><a href=#top>Go to the top</a>
@@ -1233,7 +1233,7 @@ using nesting functions or tetrahedron integration.
 <br><font id="text">
 <p>
 <p>Number of atoms that are fixed during a structural optimisation at constrained polarization.
-See <a href="#"><a href="#">[[FAKE LINK:polflag]]</a></a>.
+See <a href="../../input_variables/generated_files/varanaddb.html#polflag@anaddb">polflag</a>.
 </font>
 
 <br><br><a href=#top>Go to the top</a>
@@ -1248,7 +1248,7 @@ See <a href="#"><a href="#">[[FAKE LINK:polflag]]</a></a>.
 <br><font id="text">
 <p>
 <p> Give the number of atoms for which IFCs are written and eventually analysed. The list of these atoms is provided
-by <a href="#"><a href="#">[[FAKE LINK:atifc]]</a></a>.
+by <a href="../../input_variables/generated_files/varanaddb.html#atifc@anaddb">atifc</a>.
 </font>
 
 <br><br><a href=#top>Go to the top</a>
@@ -1264,7 +1264,7 @@ by <a href="#"><a href="#">[[FAKE LINK:atifc]]</a></a>.
 <p>
 <p>Give the number of atoms for which atomic-projected phonon
 band structures will be output. The list of these atoms is provided
-by <a href="#"><a href="#">[[FAKE LINK:iatprj_bs]]</a></a>.
+by <a href="../../input_variables/generated_files/varanaddb.html#iatprj_bs@anaddb">iatprj_bs</a>.
 </font>
 
 <br><br><a href=#top>Go to the top</a>
@@ -1294,7 +1294,7 @@ or, equivalently, the largest frequency sampled. The first channel begins at 0.
 <br><font id="text">
 <p>
 <p>This variable defines the number of divisions used to sample the smallest segment of the q-path used 
-for the phonon band structure. If ndivsm is specified in the input file, the code will automatically generate the points along the path using the coordinates given in the array <a href="#"><a href="#">[[FAKE LINK:qpath]]</a></a>.
+for the phonon band structure. If ndivsm is specified in the input file, the code will automatically generate the points along the path using the coordinates given in the array <a href="../../input_variables/generated_files/varanaddb.html#qpath@anaddb">qpath</a>.
 </font>
 
 <br><br><a href=#top>Go to the top</a>
@@ -1309,9 +1309,9 @@ for the phonon band structure. If ndivsm is specified in the input file, the cod
 <br><font id="text">
 <p>
 <p>Number of frequencies wanted for the frequency-dependent dielectric tensor. Should be positive.
-See <a href="#"><a href="#">[[FAKE LINK:dieflag]]</a></a>.
+See <a href="#"><a href="#">[[FAKE LINK:FAKE LINK:abaddb:dieflag]]</a></a>.
 
-The code will take <b>nfreq</b> equidistant values from <a href="#"><a href="#">[[FAKE LINK:frmin]]</a></a> to <a href="#"><a href="#">[[FAKE LINK:frmax]]</a></a>.
+The code will take <b>nfreq</b> equidistant values from <a href="../../input_variables/generated_files/varanaddb.html#frmin@anaddb">frmin</a> to <a href="../../input_variables/generated_files/varanaddb.html#frmax@anaddb">frmax</a>.
 </font>
 
 <br><br><a href=#top>Go to the top</a>
@@ -1359,7 +1359,7 @@ or for the DOS.
 <p>This number define the series of grids that will be used
 for the estimation of the phonon DOS. The coarsest will be
 tried first, then the next, ... then the one described by
-<a href="#"><a href="#">[[FAKE LINK:ng2qpt]]</a></a>.
+<a href="../../input_variables/generated_files/varanaddb.html#ng2qpt@anaddb">ng2qpt</a>.
 The intermediate grids are defined
 for igrid=1... <b>ngrids</b>,
 by the numbers ngqpt_igrid(ii)=(ng2qpt(ii)*igrid)/<b>ngrids</b>
@@ -1399,12 +1399,12 @@ by the numbers ngqpt_igrid(ii)=(ng2qpt(ii)*igrid)/<b>ngrids</b>
 <br><font id="text">
 <p>
 <p>The number of wavevectors in phonon list 1, used for interpolation of the phonon frequencies. The 
-values of these wavevectors will be specified by <a href="#"><a href="#">[[FAKE LINK:qph1l]]</a></a>.
+values of these wavevectors will be specified by <a href="../../input_variables/generated_files/varanaddb.html#qph1l@anaddb">qph1l</a>.
 The dynamical matrix for these wavevectors, obtained
 either directly from the DDB - if
-<a href="#"><a href="#">[[FAKE LINK:ifcflag]]</a></a>=0 - or through
+<a href="../../input_variables/generated_files/varanaddb.html#ifcflag@anaddb">ifcflag</a>=0 - or through
 the interatomic forces interpolation - if
-<a href="#"><a href="#">[[FAKE LINK:ifcflag]]</a></a>=1 -),
+<a href="../../input_variables/generated_files/varanaddb.html#ifcflag@anaddb">ifcflag</a>=1 -),
 will be diagonalized, and the corresponding eigenfrequencies
 will be printed.
 </font>
@@ -1457,7 +1457,7 @@ The wavevectors in list 2 will be used to:
 <br><font id="default">Default is 0</font>
 <br><font id="text">
 <p>
-<p>Number of q-points in the array <a href="#"><a href="#">[[FAKE LINK:qpath]]</a></a>
+<p>Number of q-points in the array <a href="../../input_variables/generated_files/varanaddb.html#qpath@anaddb">qpath</a>
 defining the path along which the phonon band structure and phonon linewidths
 are interpolated.
 </font>
@@ -1493,7 +1493,7 @@ and 4 for FCC sampling (Warning: not FCC lattice, FCC *sampling*).
 <br><font id="text">
 <p>
 <p>Number of atoms included in the cut-off sphere for
-interatomic force constant, see also the alternative <a href="#"><a href="#">[[FAKE LINK:rifcsph]]</a></a>.
+interatomic force constant, see also the alternative <a href="../../input_variables/generated_files/varanaddb.html#rifcsph@anaddb">rifcsph</a>.
 If <b>nsphere</b>= 0: maximum extent allowed by the grid.
 If <b>nsphere</b>= -1: the code analyzes different values of nsphere and
 find the value that does not lead to unstable frequencies in a small sphere around Gamma.
@@ -1525,7 +1525,7 @@ included in the inverse Fourier Transform.
 <p>
 <p> Number of strain component that are fixed during a
 structural optimisation at constrained polarization.
-See <a href="#"><a href="#">[[FAKE LINK:polflag]]</a></a>.
+See <a href="../../input_variables/generated_files/varanaddb.html#polflag@anaddb">polflag</a>.
 </font>
 
 <br><br><a href=#top>Go to the top</a>
@@ -1542,8 +1542,8 @@ See <a href="#"><a href="#">[[FAKE LINK:polflag]]</a></a>.
 <p>Number of temperatures at which the thermodynamical
 quantities have to be evaluated. Now also used for the output of transport
 quantities in electron-phonon calculations. The full grid is specified
-with the <a href="#"><a href="#">[[FAKE LINK:tempermin]]</a></a> and 
-<a href="#"><a href="#">[[FAKE LINK:temperinc]]</a></a> variables.
+with the <a href="../../input_variables/generated_files/varanaddb.html#tempermin@anaddb">tempermin</a> and 
+<a href="../../input_variables/generated_files/varanaddb.html#temperinc@anaddb">temperinc</a> variables.
 The default temperature grid goes from 100K to 1000K by step of 100K. For the largest temperatures, for most solids, anharmonic effects not accounted in the harmonic approximation implemented in anaddb will be important. For weakly bounded systems (e.g. Van der Waals solids), such anharmonic effects might be important already at room temperature.
 </font>
 
@@ -1563,7 +1563,7 @@ used to sample the frequencies.
 The code will generate different sets of channels,
 with decreasing widths (by step of 1 cm-1), from
 this channel width to 1, eventually. It considers to
-have converged when the convergence criterion based on <a href="#"><a href="#">[[FAKE LINK:dostol]]</a></a> and <a href="#"><a href="#">[[FAKE LINK:thmtol]]</a></a> have been fulfilled.
+have converged when the convergence criterion based on <a href="../../input_variables/generated_files/varanaddb.html#dostol@anaddb">dostol</a> and <a href="../../input_variables/generated_files/varanaddb.html#thmtol@anaddb">thmtol</a> have been fulfilled.
 </font>
 
 <br><br><a href=#top>Go to the top</a>
@@ -1625,7 +1625,7 @@ d/dk set is incomplete. Thus: Set <a href="../../input_variables/generated_files
 (preferably 3) </li>
   <li>2 =&gt; Both relaxed- and clamped-ion elastic and compliance
 tensor will be calculated, but only the relaxed-ion quantities will be
-printed. The input variable <a href="#"><a href="#">[[FAKE LINK:instrflag]]</a></a>
+printed. The input variable <a href="../../input_variables/generated_files/varanaddb.html#instrflag@anaddb">instrflag</a>
 should also be set to 1, because the internal-strain tensor is needed
 to compute the relaxed-ion corrections. Requirements for preceding
 response-function DDB generation run: Strain, electric-field and full
@@ -1634,23 +1634,23 @@ atomic-displacement responses at Q=0. Set <a href="../../input_variables/generat
 full calculation of phonons at Q=0 (needed because the inverse of
 force-constant tensor is required). </li>
   <li>3 =&gt; Both relaxed and clamped-ion piezoelectric tensors will
-be printed out. The input variable <a href="#"><a href="#">[[FAKE LINK:instrflag]]</a></a>
+be printed out. The input variable <a href="../../input_variables/generated_files/varanaddb.html#instrflag@anaddb">instrflag</a>
 should also be set to 1. Requirements for preceding response-function
 DDB generation run: Same as for <b>piezoflag</b>=2. </li>
   <li>4 =&gt; Calculate the piezoelectric d tensor (relaxed ion). In
 order to calculate the piezoelectric d tensor, we need information of
-internal strain and elastic tensor (relaxed ion). So we should set <a href="#"><a href="#">[[FAKE LINK:elaflag]]</a></a>= 2,3,4, or 5 and <a href="#"><a href="#">[[FAKE LINK:instrflag]]</a></a>=1. The subroutine will
+internal strain and elastic tensor (relaxed ion). So we should set <a href="../../input_variables/generated_files/varanaddb.html#elaflag@anaddb">elaflag</a>= 2,3,4, or 5 and <a href="../../input_variables/generated_files/varanaddb.html#instrflag@anaddb">instrflag</a>=1. The subroutine will
 also do a check for you, and print warning message without stopping
 even if flags were not correctly set. </li>
   <li>5 =&gt; Calculate the piezoelectric g tensor (relaxed ion). In
 this computation, we need information of internal strain, elastic
 tensor (relaxed ion) and dielectric tensor (relaxed ion). So we should
-set: <a href="#"><a href="#">[[FAKE LINK:instrflag]]</a></a>=1, <a href="#"><a href="#">[[FAKE LINK:elaflag]]</a></a>=2,3,4 or 5, <a href="#"><a href="#">[[FAKE LINK:dieflag]]</a></a>=3 or 4. The subroutine
+set: <a href="../../input_variables/generated_files/varanaddb.html#instrflag@anaddb">instrflag</a>=1, <a href="../../input_variables/generated_files/varanaddb.html#elaflag@anaddb">elaflag</a>=2,3,4 or 5, <a href="../../input_variables/generated_files/varanaddb.html#dieflag@anaddb">dieflag</a>=3 or 4. The subroutine
 will also do a check for you, and print warning message without
 stopping even if flags were not correctly set. </li>
   <li>6 =&gt; Calculate the piezoelectric h tensor (relaxed ion). In
 this calculation, we need information of internal strain and dielectric
-tensor (relaxed ion). So we need set: <a href="#"><a href="#">[[FAKE LINK:instrflag]]</a></a>=1 and <a href="#"><a href="#">[[FAKE LINK:dieflag]]</a></a>=3 or 4. The subroutine
+tensor (relaxed ion). So we need set: <a href="../../input_variables/generated_files/varanaddb.html#instrflag@anaddb">instrflag</a>=1 and <a href="../../input_variables/generated_files/varanaddb.html#dieflag@anaddb">dieflag</a>=3 or 4. The subroutine
 will also do a check for you, and print warning message without
 stopping even if flags were not correctly set. </li>
   <li>7 =&gt; calculate all the possible piezoelectric tensors,
@@ -1677,7 +1677,7 @@ optimization at constrained polarization.
 More detailed explanation: ANADDB can use the formalism described in
 Na Sai et al, PRB 66, 104108 (2002), to perform structural relaxations
 under the constraint that the polarization is equal to a value specified by the
-input variable <a href="#"><a href="#">[[FAKE LINK:targetpol]]</a></a>.
+input variable <a href="../../input_variables/generated_files/varanaddb.html#targetpol@anaddb">targetpol</a>.
 The user starts from a given configuration of a crystal and performs
 a ground-state calculation of the Hellman-Feynman forces and stresses
 and the Berry phase polarization as
@@ -1687,15 +1687,15 @@ strains and electric field.
 <br>
 In case <b>polflag</b>=1, ANADDB solves the linear system of equations
 (13)
-of the Na Sai paper, and computes new atomic positions (if <a href="#"><a href="#">[[FAKE LINK:relaxat]]</a></a>=1) and
-lattice constant (if <a href="#"><a href="#">[[FAKE LINK:relaxstr]]</a></a>=1).
+of the Na Sai paper, and computes new atomic positions (if <a href="../../input_variables/generated_files/varanaddb.html#relaxat@anaddb">relaxat</a>=1) and
+lattice constant (if <a href="../../input_variables/generated_files/varanaddb.html#relaxstr@anaddb">relaxstr</a>=1).
 Then, the user uses these parameters to perform a new ground-state
 and linear-response calculation. This must be repeated until convergence is
 reached. The user can also fix some atomic positions, or strains, thanks to the input variables
-<a href="#"><a href="#">[[FAKE LINK:natfix]]</a></a>, <a href="#"><a href="#">[[FAKE LINK:nstrfix]]</a></a>,<a href="#"><a href="#">[[FAKE LINK:iatfix]]</a></a>,<a href="#"><a href="#">[[FAKE LINK:istrfix]]</a></a>.
+<a href="../../input_variables/generated_files/varanaddb.html#natfix@anaddb">natfix</a>, <a href="../../input_variables/generated_files/varanaddb.html#nstrfix@anaddb">nstrfix</a>,<a href="../../input_variables/generated_files/varanaddb.html#iatfix@anaddb">iatfix</a>,<a href="../../input_variables/generated_files/varanaddb.html#istrfix@anaddb">istrfix</a>.
 <br>
-In case both <a href="#"><a href="#">[[FAKE LINK:relaxat]]</a></a>
-and <a href="#"><a href="#">[[FAKE LINK:relaxstr]]</a></a> are 0, while
+In case both <a href="../../input_variables/generated_files/varanaddb.html#relaxat@anaddb">relaxat</a>
+and <a href="../../input_variables/generated_files/varanaddb.html#relaxstr@anaddb">relaxstr</a> are 0, while
 <b>polflag</b>=1, ANADDB only computes the polarization in cartesian coordinates.
 </p>
 <p><As described in the Na Sai's paper, it is important to use the
@@ -1716,7 +1716,7 @@ in the linear response calculation of the effective charges and the piezoelectri
 <p>
 <p>The <b>prtdos</b> variable is used to calculate
 the phonon density of states, PHDOS, by Fourier interpolating the interatomic force
-constants on the (dense) q-mesh defined by <a href="#"><a href="#">[[FAKE LINK:ng2qpt]]</a></a>.
+constants on the (dense) q-mesh defined by <a href="../../input_variables/generated_files/varanaddb.html#ng2qpt@anaddb">ng2qpt</a>.
 Note that the variable <a href="#ifcflag">ifcflag</a> must be set to 1
 since the interatomic force constants are supposed to be known.
 <p>
@@ -1724,12 +1724,12 @@ The available options are:
 <ul>
  <li>0 =&gt; no output of PHDOS (default);</li>
  <li>1 =&gt; calculate PHDOS using the gaussian method and the broadening defined
- by <a href="#"><a href="#">[[FAKE LINK:dossmear]]</a></a>. </li>
+ by <a href="../../input_variables/generated_files/varanaddb.html#dossmear@anaddb">dossmear</a>. </li>
  <!--<li>2 =&gt; use tetrahedron method. </li>-->
  </ul>
 
 The step of the frequency grid employed to calculate the DOS
-can be defined through the input variable <a href="#"><a href="#">[[FAKE LINK:dosdeltae]]</a></a>.
+can be defined through the input variable <a href="../../input_variables/generated_files/varanaddb.html#dosdeltae@anaddb">dosdeltae</a>.
 </font>
 
 <br><br><a href=#top>Go to the top</a>
@@ -1839,7 +1839,7 @@ This input variable is used to calculate the nesting function defined as:
 The nesting factor is calculated for every point of the k-grid
 employed during the previous GS calculation.
 The values are subsequently interpolated along the trajectory in q space
-defined by <a href="#"><a href="#">[[FAKE LINK:qpath]]</a></a>, and written in the _NEST
+defined by <a href="../../input_variables/generated_files/varanaddb.html#qpath@anaddb">qpath</a>, and written in the _NEST
 file using the X-Y format (<b>prtnest</b>=1).
 It is also possible to analyze the behavior of the function
 in the reciprocal unit cell saving the values in the NEST_XSF file that can be read
@@ -1886,7 +1886,7 @@ kprtlatt = 1 0 0 0 1 1 0 -1 1 will not work.
 <br><font id="default">Default is 1</font>
 <br><font id="text">
 <p>
-<p>Only if <a href="#"><a href="#">[[FAKE LINK:ifcflag]]</a></a>=1. 
+<p>Only if <a href="../../input_variables/generated_files/varanaddb.html#ifcflag@anaddb">ifcflag</a>=1. 
 
 This option specifies the file format for the phonon band structure.
 Possible values:
@@ -1916,15 +1916,15 @@ Use `gnuplot file_PHBANDS.gnuplot` to visualize the phonon band structure.</li>
 <br><font id="default">Default is 0</font>
 <br><font id="text">
 <p>
-<p>Only if <a href="#"><a href="#">[[FAKE LINK:ifcflag]]</a></a>=1. 
+<p>Only if <a href="../../input_variables/generated_files/varanaddb.html#ifcflag@anaddb">ifcflag</a>=1. 
 The available options are:
 <ul>
   <li>0 =&gt; do not write the SR/LR decomposition of phonon frequencies;</li>
   <li>1 =&gt; write out the SR/LR decomposition of the square of phonon frequencies at each q-point specified 
-  in <a href="#"><a href="#">[[FAKE LINK:qph1l]]</a></a>.</li>
+  in <a href="../../input_variables/generated_files/varanaddb.html#qph1l@anaddb">qph1l</a>.</li>
 </ul>
 <p> For details see <I>Europhys. Lett., 33 (9), pp. 713-718 (1996)</I>.
-See also <a href="#"><a href="#">[[FAKE LINK:ifcflag]]</a></a>, <a href="#"><a href="#">[[FAKE LINK:ifcflag]]</a></a> and <a href="#"><a href="#">[[FAKE LINK:dipdip]]</a></a>.
+See also <a href="../../input_variables/generated_files/varanaddb.html#ifcflag@anaddb">ifcflag</a>, <a href="../../input_variables/generated_files/varanaddb.html#ifcflag@anaddb">ifcflag</a> and <a href="../../input_variables/generated_files/varanaddb.html#dipdip@anaddb">dipdip</a>.
 </font>
 
 <br><br><a href=#top>Go to the top</a>
@@ -1939,9 +1939,9 @@ See also <a href="#"><a href="#">[[FAKE LINK:ifcflag]]</a></a>, <a href="#"><a h
 <br><font id="text">
 <p>
 <p>If <b>qgrid_type</b> is set to 1, the electron-phonon part of anaddb will use
-the <a href="#"><a href="#">[[FAKE LINK:ep_nqpt]]</a></a> and <a href="#"><a href="#">[[FAKE LINK:anaddbep_qptlist]]</a></a> variables to determine
+the <a href="../../input_variables/generated_files/varanaddb.html#ep_nqpt@anaddb">ep_nqpt</a> and <a href="#"><a href="#">[[FAKE LINK:FAKE LINK:anaddbep_qptlist]]</a></a> variables to determine
 which q-points to calculate the electron-phonon coupling for. This is an alternative
-to a regular grid as in the rest of anaddb (using <a href="#"><a href="#">[[FAKE LINK:ngqpt]]</a></a>).
+to a regular grid as in the rest of anaddb (using <a href="../../input_variables/generated_files/varanaddb.html#ngqpt@anaddb">ngqpt</a>).
 </font>
 
 <br><br><a href=#top>Go to the top</a>
@@ -1951,18 +1951,18 @@ to a regular grid as in the rest of anaddb (using <a href="#"><a href="#">[[FAKE
 <br><font id="title"><a name="qpath@anaddb">qpath</a></font>
 <br><font id="mnemonics">Mnemonics: Q wavevectors defining a PATH</font>
 <br><font id="characteristic">Characteristic: </font>
-<br><font id="vartype">Variable type: real array <b>qpath</b>(3,<a href="#">[[FAKE LINK:nqpath]]</a>)array</font>
+<br><font id="vartype">Variable type: real array <b>qpath</b>(3,<a href="../../input_variables/generated_files/varanaddb.html#nqpath@anaddb">nqpath</a>)array</font>
 <br><font id="default">Default is <b>qpath</b>(:,:)=0.0</font>
 <br><font id="text">
 <p>
 <p>It is used to generate the path along which the phonon band structure and
 phonon linewidths are interpolated.
-There are <a href="#"><a href="#">[[FAKE LINK:nqpath]]</a></a>-1 segments to be
+There are <a href="../../input_variables/generated_files/varanaddb.html#nqpath@anaddb">nqpath</a>-1 segments to be
 defined, each of which starts from the end point of the previous one.
 The number of divisions in each segment is automatically calculated
 inside the code to respect the proportion between the segments.
 The same circuit is used for the output of the nesting function if
-<a href="#"><a href="#">[[FAKE LINK:prtnest]]</a></a>=1.
+<a href="../../input_variables/generated_files/varanaddb.html#prtnest@anaddb">prtnest</a>=1.
 </font>
 
 <br><br><a href=#top>Go to the top</a>
@@ -1972,11 +1972,11 @@ The same circuit is used for the output of the nesting function if
 <br><font id="title"><a name="qph1l@anaddb">qph1l</a></font>
 <br><font id="mnemonics">Mnemonics: Q for PHonon List 1</font>
 <br><font id="characteristic">Characteristic: </font>
-<br><font id="vartype">Variable type: real array <b>qph1l</b>(4,<a href="#">[[FAKE LINK:nph1l]]</a>)array</font>
+<br><font id="vartype">Variable type: real array <b>qph1l</b>(4,<a href="../../input_variables/generated_files/varanaddb.html#nph1l@anaddb">nph1l</a>)array</font>
 <br><font id="default">Default is 0</font>
 <br><font id="text">
 <p>
-<p>List of <a href="#"><a href="#">[[FAKE LINK:nph1l]]</a></a>
+<p>List of <a href="../../input_variables/generated_files/varanaddb.html#nph1l@anaddb">nph1l</a>
 wavevectors, at which the phonon frequencies will be interpolated.
 Defined by 4 numbers:
 the wavevector is made by the three first numbers
@@ -2000,14 +2000,14 @@ in the array qnrml1(nph1l).
 <br><font id="title"><a name="qph2l@anaddb">qph2l</a></font>
 <br><font id="mnemonics">Mnemonics: PHonon List 2</font>
 <br><font id="characteristic">Characteristic: </font>
-<br><font id="vartype">Variable type: real array qph2l(4,<a href="#">[[FAKE LINK:nph2l]]</a>)array</font>
+<br><font id="vartype">Variable type: real array qph2l(4,<a href="../../input_variables/generated_files/varanaddb.html#nph2l@anaddb">nph2l</a>)array</font>
 <br><font id="default">Default is all 0</font>
 <br><font id="text">
 <p>
 <p>List of phonon wavevector <i>directions</i> along which the
 non-analytical correction to the Gamma-point phonon frequencies
 will be calculated (for insulators).
-Four numbers, as for <a href="#"><a href="#">[[FAKE LINK:qph1l]]</a></a>, 
+Four numbers, as for <a href="../../input_variables/generated_files/varanaddb.html#qph1l@anaddb">qph1l</a>, 
 but where the last one, that correspond to the normalisation factor, is 0.0
 For the anaddb code, this has the meaning that the three previous
 values define a direction. The direction is in CARTESIAN
@@ -2040,9 +2040,9 @@ in the array qnrml2(nph2l).
 <br><font id="text">
 <p>
 <p>If <b>qrefine</b> is superior to 1, attempts to initialize a first set of dynamical matrices
-from the DDB file, with a q-point grid which is <a href="#"><a href="#">[[FAKE LINK:ngqpt]]</a></a>
+from the DDB file, with a q-point grid which is <a href="../../input_variables/generated_files/varanaddb.html#ngqpt@anaddb">ngqpt</a>
 divided by <b>qrefine</b> (e.g. ngqpt 4 4 2 qrefine 2 2 1 starts with a 2x2x2 grid).
-The dynamical matrices are interpolated onto the full <a href="#"><a href="#">[[FAKE LINK:ngqpt]]</a></a>
+The dynamical matrices are interpolated onto the full <a href="../../input_variables/generated_files/varanaddb.html#ngqpt@anaddb">ngqpt</a>
 grid and any additional information found in the DDB file is imposed, before proceeding
 to normal band structure and other interpolations. Should implement Gaal-Nagy's algorithm in
 PRB <b>73</b> 014117.
@@ -2055,7 +2055,7 @@ PRB <b>73</b> 014117.
 <br><font id="title"><a name="q1shft@anaddb">q1shft</a></font>
 <br><font id="mnemonics">Mnemonics: Q shifts for the grid number 1</font>
 <br><font id="characteristic">Characteristic: </font>
-<br><font id="vartype">Variable type: real array <b>q1shft</b>(3,<a href="#">[[FAKE LINK:nqshft]]</a>)array</font>
+<br><font id="vartype">Variable type: real array <b>q1shft</b>(3,<a href="../../input_variables/generated_files/varanaddb.html#nqshft@anaddb">nqshft</a>)array</font>
 <br><font id="default">Default is 0</font>
 <br><font id="text">
 <p>
@@ -2121,9 +2121,9 @@ PRB <b>73</b> 014117.
 <br><font id="default">Default is all 0</font>
 <br><font id="text">
 <p>
-<p>Similar to <a href="#"><a href="#">[[FAKE LINK:q1shft]]</a></a>,
+<p>Similar to <a href="../../input_variables/generated_files/varanaddb.html#q1shft@anaddb">q1shft</a>,
 but for the series of fine grids.
-<p>Note that <a href="#"><a href="#">[[FAKE LINK:nqshft]]</a></a>
+<p>Note that <a href="../../input_variables/generated_files/varanaddb.html#nqshft@anaddb">nqshft</a>
 for this series of grids corresponds to 1.
 </font>
 
@@ -2169,7 +2169,7 @@ For the time being, <b>ramansr</b>=1 is the preferred choice.
 <p>
 <p>If <b>relaxat</b>=1, relax atomic positions during a
 structural relaxation at constrained polarization.
-See <a href="#"><a href="#">[[FAKE LINK:polflag]]</a></a>.
+See <a href="../../input_variables/generated_files/varanaddb.html#polflag@anaddb">polflag</a>.
 </font>
 
 <br><br><a href=#top>Go to the top</a>
@@ -2185,7 +2185,7 @@ See <a href="#"><a href="#">[[FAKE LINK:polflag]]</a></a>.
 <p>
 <p>If <b>relaxat</b>=1, relax lattice constants
 (lengths/angles) during a structural relaxation
- at constrained polarization. See <a href="#"><a href="#">[[FAKE LINK:polflag]]</a></a>.
+ at constrained polarization. See <a href="../../input_variables/generated_files/varanaddb.html#polflag@anaddb">polflag</a>.
 </font>
 
 <br><br><a href=#top>Go to the top</a>
@@ -2279,7 +2279,7 @@ This is especially useful when the set of primitive vectors of the unit cell
 and their opposite do not reflect the symmetries of the Bravais lattice
 (typical case: body-centered tetragonal lattices ; FCC and BCC lattices
 might be treated with the proper setting of the
-<a href="#"><a href="#">[[FAKE LINK:brav]]</a></a> variable), and the interpolation
+<a href="../../input_variables/generated_files/varanaddb.html#brav@anaddb">brav</a> variable), and the interpolation
 procedure based on interatomic force constant is used: there are some
 slight symmetry breaking effects. The latter can be bypassed by this
 additional symmetrization.
@@ -2314,7 +2314,7 @@ except for debugging or test purposes.
 <p>
 <p>Target value of the polarization in cartesian
 coordinates and in C/m^2.
-See <a href="#"><a href="#">[[FAKE LINK:polflag]]</a></a>.
+See <a href="../../input_variables/generated_files/varanaddb.html#polflag@anaddb">polflag</a>.
 </font>
 
 <br><br><a href=#top>Go to the top</a>
@@ -2332,8 +2332,8 @@ See <a href="#"><a href="#">[[FAKE LINK:polflag]]</a></a>.
 technique used for electron-phonon quantities.
 <ul>
   <li>0 = tetrahedron method (no adjustable parameter)</li>
-  <li>1 = Gaussian smearing (see <a href="#"><a href="#">[[FAKE LINK:elphsmear]]</a></a>)</li>
-  <li>2 = uniformly weighted band window between <a href="#"><a href="#">[[FAKE LINK:ep_b_min]]</a></a> and <a href="#"><a href="#">[[FAKE LINK:ep_b_max]]</a></a>, for all k-points</li>
+  <li>1 = Gaussian smearing (see <a href="../../input_variables/generated_files/varanaddb.html#elphsmear@anaddb">elphsmear</a>)</li>
+  <li>2 = uniformly weighted band window between <a href="../../input_variables/generated_files/varanaddb.html#ep_b_min@anaddb">ep_b_min</a> and <a href="../../input_variables/generated_files/varanaddb.html#ep_b_max@anaddb">ep_b_max</a>, for all k-points</li>
 </ul>
 </font>
 
@@ -2350,7 +2350,7 @@ technique used for electron-phonon quantities.
 <p>
 <p>Increment of the temperature in Kelvin, for thermodynamical and el-phon
 transport properties. See the associated
-<a href="#"><a href="#">[[FAKE LINK:tempermin]]</a></a> and <a href="#"><a href="#">[[FAKE LINK:ntemper]]</a></a> variables.
+<a href="../../input_variables/generated_files/varanaddb.html#tempermin@anaddb">tempermin</a> and <a href="../../input_variables/generated_files/varanaddb.html#ntemper@anaddb">ntemper</a> variables.
 The default temperature grid goes from 100K to 1000K by step of 100K. For the largest temperatures, for most solids, anharmonic effects not accounted in the harmonic approximation implemented in anaddb will be important. For weakly bounded systems (e.g. Van der Waals solids), such anharmonic effects might be important already at room temperature.
 </font>
 
@@ -2368,7 +2368,7 @@ The default temperature grid goes from 100K to 1000K by step of 100K. For the la
 <p>Lowest temperature (Kelvin) at which the thermodynamical quantities
 have to be evaluated. Cannot be zero when <a href="#thmflag">thmflag</a>
 <p>The highest temperature is defined using
-<a href="#"><a href="#">[[FAKE LINK:temperinc]]</a></a> and <a href="#"><a href="#">[[FAKE LINK:ntemper]]</a></a>.
+<a href="../../input_variables/generated_files/varanaddb.html#temperinc@anaddb">temperinc</a> and <a href="../../input_variables/generated_files/varanaddb.html#ntemper@anaddb">ntemper</a>.
 The default temperature grid goes from 100K to 1000K by step of 100K. For the largest temperatures, for most solids, anharmonic effects not accounted in the harmonic approximation implemented in anaddb will be important. For weakly bounded systems (e.g. Van der Waals solids), 
 such anharmonic effects might be important already at room temperature.
 </font>
@@ -2419,8 +2419,8 @@ degenerate states.
 
 <p>
 Input variables that may be needed if this flag is activated:
-<a href="#"><a href="#">[[FAKE LINK:dostol]]</a></a>, <a href="#"><a href="#">[[FAKE LINK:nchan]]</a></a>, <a href="#"><a href="#">[[FAKE LINK:ntemper]]</a></a>, <a href="#"><a href="#">[[FAKE LINK:temperinc]]</a></a>, <a href="#"><a href="#">[[FAKE LINK:tempermin]]</a></a>,
-as well as the wavevector grid number 2 definition,  <a href="#"><a href="#">[[FAKE LINK:ng2qpt]]</a></a>, <a href="#"><a href="#">[[FAKE LINK:ngrids]]</a></a>, <a href="#"><a href="#">[[FAKE LINK:q2shft]]</a></a>.
+<a href="../../input_variables/generated_files/varanaddb.html#dostol@anaddb">dostol</a>, <a href="../../input_variables/generated_files/varanaddb.html#nchan@anaddb">nchan</a>, <a href="../../input_variables/generated_files/varanaddb.html#ntemper@anaddb">ntemper</a>, <a href="../../input_variables/generated_files/varanaddb.html#temperinc@anaddb">temperinc</a>, <a href="../../input_variables/generated_files/varanaddb.html#tempermin@anaddb">tempermin</a>,
+as well as the wavevector grid number 2 definition,  <a href="../../input_variables/generated_files/varanaddb.html#ng2qpt@anaddb">ng2qpt</a>, <a href="../../input_variables/generated_files/varanaddb.html#ngrids@anaddb">ngrids</a>, <a href="../../input_variables/generated_files/varanaddb.html#q2shft@anaddb">q2shft</a>.
 </font>
 
 <br><br><a href=#top>Go to the top</a>
@@ -2452,7 +2452,7 @@ to the next bigger is smaller than <b>thmtol</b>.
 <br><font id="default">Default is 0</font>
 <br><font id="text">
 <p>
-<p>When set, <a href="#"><a href="#">[[FAKE LINK:kptrlatt_fine]]</a></a> is suggested to be given. For the present version, both eigenvalues (densergridGKK, obtained from mrggkk with only the GS WFK file) and electronic velocities(GKK files from DDK calculation) are needed. Note that the coarse k-grid must be a subset of the fine k-grid.
+<p>When set, <a href="../../input_variables/generated_files/varanaddb.html#kptrlatt_fine@anaddb">kptrlatt_fine</a> is suggested to be given. For the present version, both eigenvalues (densergridGKK, obtained from mrggkk with only the GS WFK file) and electronic velocities(GKK files from DDK calculation) are needed. Note that the coarse k-grid must be a subset of the fine k-grid.
 </font>
 
 <br><br><a href=#top>Go to the top</a>
@@ -2467,7 +2467,7 @@ to the next bigger is smaller than <b>thmtol</b>.
 <br><font id="text">
 <p>
 <p>This variable activates the calculation of the speed of sound 
-(requires <a href="#"><a href="#">[[FAKE LINK:ifcflag]]</a></a> = 1).
+(requires <a href="../../input_variables/generated_files/varanaddb.html#ifcflag@anaddb">ifcflag</a> = 1).
 The first entry of the array defines the radius of the small sphere around the Gamma point (Bohr-1).
 The second entry gives the absolute tolerance in kilometer/second.
 The speed of sound is evaluated by performing a spherical average on the small sphere using

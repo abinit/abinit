@@ -137,7 +137,7 @@ def make_links(text,cur_key,allowed_link_seeds,backlinks,backlink):
     #Treat the internal links
     if namespace=="":
       linkseed=key
-    else if namespace in ["aim","anaddb","optic"]:
+    elif namespace in ["aim","anaddb","optic"]:
       linkseed=key+"@"+namespace
     else:
       linkseed=namespace+'_'+key
@@ -172,7 +172,7 @@ def make_links(text,cur_key,allowed_link_seeds,backlinks,backlink):
       elif "input_variable in " in value:
         # This is a link to an input variable
         filename=value[18:]
-        return '<a href="../../input_variables/generated_files/%s.html#%s">%s</a>' %(filename,key,webtext)
+        return '<a href="../../input_variables/generated_files/%s.html#%s">%s</a>' %(filename,linkseed,webtext)
       elif value=="characteristic":
         return '<a href="../../users/generated_files/help_abinit.html#%s">%s</a>' %(key,webtext)
       elif value=="in_tests":
@@ -183,7 +183,7 @@ def make_links(text,cur_key,allowed_link_seeds,backlinks,backlink):
           backlinks[key]+=backlink+";;"
           return '<a href="../../bibliography/generated_files/bibliography.html#%s">[%s]</a>' %(key,webtext)
 
-    return '<a href="#">[[FAKE LINK:'+key+']]</a>'
+    return '<a href="#">[[FAKE LINK:'+dokukey+']]</a>'
 
   p=re.compile("\\[\\[([a-zA-Z0-9_ */<>.|:+#@]*)\\]\\]")
   if text is None:
