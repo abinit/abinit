@@ -46,6 +46,9 @@ def main():
     if var.vartype is None:
       print('FAIL: ', abivarname, ' does not have a vartype')
       retcode += 1
+    elif not var.vartype in ["integer", "real", "string"]:
+      print('FAIL: ',abivarname,' has vartype ',var.vartype,' not in the list ["integer", "real", "string"].')
+      retcode += 1
 
     if var.topics is None:
       print('FAIL: ', abivarname, ' does not have at least one topic and the associated tribe')
@@ -79,6 +82,9 @@ def main():
               and not isinstance(var.dimensions, ValueWithConditions):
           print('FAIL: the field dimensions of ', abivarname, ' is not a list neither a valuewithconditions')
           retcode += 1
+    else:
+      print('FAIL: ', abivarname, ' does not have a dimension. If it is a "scalar", it must be declared so.')
+      retcode += 1
 
     if var.varset is None:
       print('FAIL: ', abivarname, ' does not have a varset')

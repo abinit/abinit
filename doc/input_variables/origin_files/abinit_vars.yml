@@ -1030,7 +1030,8 @@
     commentdefault: null
     commentdims: null
     defaultval: 0
-    dimensions: array
+    dimensions:
+    - '[[anaddb:natifc]]'
     excludes: null
     executables: anaddb
     mnemonics: AToms for IFC analysis
@@ -2184,7 +2185,7 @@
     commentdefault: null
     commentdims: null
     defaultval: 1.0
-    dimensions: null
+    dimensions: scalar
     excludes: null
     executables: abinit
     mnemonics: Bethe-Salpeter INTERPolation Method3 WIDTH
@@ -2201,7 +2202,7 @@
     commentdefault: null
     commentdims: null
     defaultval: 1
-    dimensions: null
+    dimensions: scalar
     excludes: null
     executables: abinit
     mnemonics: Bethe-Salpeter INTERPolation METHOD
@@ -2281,7 +2282,7 @@
     commentdefault: null
     commentdims: null
     defaultval: 1
-    dimensions: null
+    dimensions: scalar
     excludes: null
     executables: abinit
     mnemonics: Bethe-Salpeter INTERPolation Rohlfing & Louie NeighBour
@@ -4630,7 +4631,7 @@
     commentdefault: null
     commentdims: null
     defaultval: 0
-    dimensions: null
+    dimensions: scalar
     excludes: null
     executables: abinit
     mnemonics: 'Dynamical Mean Fied Theory: ENTROPY'
@@ -19394,7 +19395,7 @@
     commentdefault: null
     commentdims: null
     defaultval: null
-    dimensions: null
+    dimensions: scalar
     excludes: null
     executables: abinit
     mnemonics: Number of Z reduced coordinates that define the spatial CHEMical POTential
