@@ -529,22 +529,23 @@ for i, var in enumerate(abinit_vars):
 
   try:
     # Title
-    cur_content += "<br><font id=\"title\"><a name=\""+var.abivarname+"\">"+var.abivarname+"</a></font>\n"
+    cur_content += '<br><font id="title"><a name="'+var.abivarname+'">'+var.abivarname+'</a></font>\n'
     # Mnemonics
-    cur_content += "<br><font id=\"mnemonics\">Mnemonics: "+var.mnemonics+"</font>\n"
+    print(var.mnemonics)
+    cur_content += '<br><font id="mnemonics">Mnemonics: '+var.mnemonics+'</font>\n'
     # Characteristics
     if var.characteristics is not None:
       chars = ""
       for chs in var.characteristics:
         chars += chs+", "
       chars = chars[:-2]
-      cur_content += "<br><font id=\"characteristic\">Characteristic: "+make_links(chars,var.abivarname,allowed_link_seeds,backlinks,backlink)+"</font>\n"
+      cur_content += '<br><font id="characteristic">Characteristic: '+make_links(chars,var.abivarname,allowed_link_seeds,backlinks,backlink)+'</font>\n'
     else:
-      cur_content += "<br><font id=\"characteristic\">Characteristic: </font>\n"
+      cur_content += '<br><font id="characteristic">Characteristic: </font>\n'
     # Topics
     try:
       if var.topics is not None :
-        cur_content += "<br><font id=\"characteristic\">Mentioned in \"How to\": "
+        cur_content += '<br><font id="characteristic">Mentioned in "How to": '
         vartopics=var.topics
         topics_name_tribe = vartopics.split(',')
         for i, topic_name_tribe in enumerate(topics_name_tribe):

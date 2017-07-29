@@ -28,7 +28,7 @@
     dimensions: scalar
     excludes: null
     executables: anaddb
-    mnemonics: Acoustic Sum Rule<
+    mnemonics: Acoustic Sum Rule
     requires: null
     text: |-
          <p>Govern the imposition of the Acoustic Sum Rule (ASR).
