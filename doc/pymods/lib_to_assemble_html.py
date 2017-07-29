@@ -546,6 +546,10 @@ def finalize_html(doc_html,origin_yml,dir_name,root_filname,allowed_link_seeds,b
   #Write the finalized html file.
   path_html = "%s/generated_files/%s.html" %(dir_name,full_filname)
   file_html = open(path_html,'w')
+  file_html.write("<!--                                                                                     -->\n")
+  file_html.write("<!-- This file has been produced by generate_doc.py using different .yml  or .bib files. -->\n")
+  file_html.write("<!-- It is useless to modify it. Modify the related .yml  or .bib files instead.         -->\n")
+  file_html.write("<!--                                                                                     -->\n")
   file_html.write(doc_html)
   file_html.close()
   print("File %s written ..."%path_html)
