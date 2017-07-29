@@ -37,4 +37,5 @@ inp_files = [
 "t48.in",
 "t49.in",
 "t50.in",
+"t51.in",
 ]

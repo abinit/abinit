@@ -71,6 +71,13 @@ MODULE m_ddb_hdr
 
    integer :: nblok         ! Number of blocks in the ddb
    integer :: mblktyp       ! Max block type
+                            ! 0 = Total energy 
+                            ! 1 = 2nd derivatives (non-stat.)
+                            ! 2 = 2nd derivatives (stationary)
+                            ! 3 = 3rd derivatives
+                            ! 4 = 1st derivatives 
+                            ! 5 = 2nd eigenvalue derivatives
+                            ! 
    integer :: fullinit      ! Whether the full info on the pseudo is present
                             ! TODO rename this variable
 
@@ -565,8 +572,6 @@ subroutine ddb_hdr_open_read(ddb_hdr, filnam, unddb, ddb_version, comm, &
  end if
 
  ! Read the dimensions from the DDB
- ! GA: Not sure if I should use xmpi_comm_self or xmpi_world here.
- !     A safer option would be to have comm passed as an input argumet.
  call ddb_getdims(dimekb_l,filnam,lmnmax_l,mband_l,mblktyp, &
 &       msym_l,matom_l,nblok,mkpt_l,mtypat_l,unddb,usepaw_l, &
 &       ddb_version,comm_l)
