@@ -58,8 +58,20 @@
       <h3><b> Alphabetical list of all input variables of the main ABINIT code.</b></h3>
 
 - !components
+    name : varaim
+    keyword : aim
+    purpose : |
+      <p>This document lists and provides the description
+      of the name (keywords) of the "__KEYWORD__" input
+      variables to be used in the input file for the AIM(Bader) executable of the ABINIT package.
+
+- !components
     name : varanaddb
     keyword : anaddb
+    purpose : |
+      <p>This document lists and provides the description
+      of the name (keywords) of the "__KEYWORD__" input
+      variables to be used in the input file for the ANADDB executable of the ABINIT package.
 
 - !components 
     name : varbas
@@ -111,6 +123,14 @@
       They are mentioned in the documentation because it is easier to understand the 
       behaviour of some input variables thanks to the explanation of such internal variables.
       In the [[varset:allvars|database]] of all input variables, they are prepended with the sign %.
+
+- !components
+    name : varoptic
+    keyword : optic
+    purpose : |
+      <p>This document lists and provides the description
+      of the name (keywords) of the "__KEYWORD__" input
+      variables to be used in the input file for the OPTIC executable of the ABINIT package.
 
 - !components
     name : varpar
