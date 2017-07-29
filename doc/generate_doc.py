@@ -529,9 +529,8 @@ for i, var in enumerate(abinit_vars):
 
   try:
     # Title
-    cur_content += '<br><font id="title"><a name="'+var.abivarname+'">'+var.abivarname+'</a></font>\n'
+    cur_content += '<br><font id="title"><a name="%s">%s</a></font>\n'%(var.abivarname,var.abivarname.split("@")[0])
     # Mnemonics
-    print(var.mnemonics)
     cur_content += '<br><font id="mnemonics">Mnemonics: '+var.mnemonics+'</font>\n'
     # Characteristics
     if var.characteristics is not None:
@@ -619,18 +618,18 @@ for i, varfile_info in enumerate(varfiles):
     toc_body += " <br><a id='%s'></a>"%(cur_let)+cur_let+".\n"
 
   if varfile=="allvars":
-    toc_body += " <ul id=\"Letters\">\n"
-    toc_body += " <li>\n<ul id=\"%s\" class=\"TabContentLetter\">\n"%(cur_let)
-    toc_body += " <li class=\"HeaderLetter\">%s</li>\n"%(cur_let)
+    toc_body += ' <ul id="Letters">\n'
+    toc_body += ' <li>\n<ul id="%s" class="TabContentLetter">\n'%(cur_let)
+    toc_body += ' <li class="HeaderLetter">%s</li>\n'%(cur_let)
     for i, var in enumerate(abinit_vars):
       while not var.abivarname.startswith(cur_let.lower()):
         cur_let = chr(ord(cur_let)+1)
-        toc_body += " </ul></li>\n<li>\n<ul id=\"%s\" class=\"TabContentLetter\">\n"%(cur_let)
-        toc_body += " <li class=\"HeaderLetter col-s-6 col-m-3 col-l-2 col-xl-2 col-xxl-1\">%s</li>\n"%(cur_let)
+        toc_body += ' </ul></li>\n<li>\n<ul id="%s" class="TabContentLetter">\n'%(cur_let)
+        toc_body += ' <li class="HeaderLetter col-s-6 col-m-3 col-l-2 col-xl-2 col-xxl-1">%s</li>\n'%(cur_let)
       abivarname=var.abivarname
       if var.characteristics is not None and '[[INTERNAL_ONLY]]' in var.characteristics:
         abivarname = '%'+abivarname
-      curlink = " <li class=\"col-s-6 col-m-3 col-l-2 col-xl-2 col-xxl-1\"><a href=\""+var.varset+".html#"+var.abivarname+"\">"+abivarname+"</a></li>\n"
+      curlink = ' <li class="col-s-6 col-m-3 col-l-2 col-xl-2 col-xxl-1"><a href="'+var.varset+'.html#'+var.abivarname+'">'+abivarname+'</a></li>\n'
       toc_body += curlink
     toc_body += "</ul></li></ul>\n\
 <script>\n\
@@ -642,14 +641,14 @@ defaultClick(true);\n\
       while not key.lower().startswith(cur_let.lower()):
         cur_let = chr(ord(cur_let)+1)
         toc_body += " <br><a id='%s'></a>"%(cur_let)+cur_let+".\n"
-      curlink = " <a href=\"#"+key+"\">"+key+"</a>&nbsp;&nbsp;\n"
+      curlink = ' <a href="#'+key+'">'+key+'</a>&nbsp;&nbsp;\n'
       toc_body += curlink
   else:
     for abivarname,defi in all_vars[varfile]:
       while not abivarname.startswith(cur_let.lower()):
         cur_let = chr(ord(cur_let)+1)
         toc_body += " <br><a id='%s'></a>"%(cur_let)+cur_let+".\n"
-      curlink = " <a href=\"#"+abivarname+"\">"+abivarname+"</a>&nbsp;&nbsp;\n"
+      curlink = ' <a href="#%s">%s</a>&nbsp;&nbsp;\n'%(abivarname,abivarname.split("@")[0])
       toc_body += curlink
   toc_body += "\n"
 
