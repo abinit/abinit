@@ -50,12 +50,16 @@
     subtitle : |
       Complete list.
     purpose : |
-      This document lists the names of all input variables to be used in the main input file of the abinit code.
+      This document lists the names of all input variables for ABINIT and the other executables of the ABINIT package.
       <p>
       The internal variables (see the [[varint]] web page) are prepended with the sign %.
     tofcontent_header : |
       <a name="list"></a>
-      <h3><b> Alphabetical list of all input variables of the main ABINIT code.</b></h3>
+      <h3><b> Alphabetical list of all input variables for ABINIT and the other executables of the ABINIT package.</b></h3>
+      See [[varaim]], [[varanaddb]] or [[varoptic]] for the subset of input variables for the executables AIM(Bader), ANADDB and OPTIC. Such input variables are specifically
+      labelled @aim, @anaddb, or @optic in the input variable database.
+      <p>Enter any string to search in the database. Clicking without any request will give all variables.
+      
 
 - !components
     name : varaim
