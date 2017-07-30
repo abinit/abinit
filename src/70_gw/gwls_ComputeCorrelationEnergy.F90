@@ -229,7 +229,7 @@ second_model_parameter  = zero
 
 
 ! set variables from gwls_GenerateEpsilon module
-kmax   = dtset%gwls_sternheimer_kmax
+kmax   = dtset%gwls_stern_kmax
 nseeds = dtset%gwls_nseeds
 
 kmax_model    = dtset%gwls_kmax_complement
@@ -1046,7 +1046,7 @@ e                   = dtset%gwls_band_index
 
 
 ! set variables from gwls_GenerateEpsilon module
-kmax   = dtset%gwls_sternheimer_kmax
+kmax   = dtset%gwls_stern_kmax
 nseeds = dtset%gwls_nseeds
 
 kmax_poles  = dtset%gwls_kmax_poles

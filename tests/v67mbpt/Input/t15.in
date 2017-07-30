@@ -27,7 +27,7 @@ ndtset 6
  gwls_band_index3 4        # This is the band for which the matrix element of the Self-energy is requested : <gwls_band_index|\Sigma(gw_freqsp)|gwls_band_index>
  gw_customnfreqsp3 1       # This is the number if frequencies at which the matrix element of the Self-energy is requested.
  gw_freqsp3 -0.5558150504  # These are the frequencies at which the matrix element of the Self-energy is requested.
- gwls_sternheimer_kmax3 8  # This controls the convergence with respect to the size of the dielectric matrix.
+ gwls_stern_kmax3 8  # This controls the convergence with respect to the size of the dielectric matrix.
  gwls_kmax_complement3 8   # This controls the convergence with respect to the size of the MODEL dielectric matrix.
  icutcoul3 0               # For molecules, the coulomb potential needs to be spherically truncated.
  rcut3 9.0                 # The spherical truncation has this radius. 
@@ -43,7 +43,7 @@ ndtset 6
  gwls_band_index4 4        # This is the band for which the matrix element of the Self-energy is requested : <gwls_band_index|\Sigma(gw_freqsp)|gwls_band_index>
  gw_customnfreqsp4 1       # This is the number if frequencies at which the matrix element of the Self-energy is requested.
  gw_freqsp4 -0.5558150504  # These are the frequencies at which the matrix element of the Self-energy is requested.
- gwls_sternheimer_kmax4 8  # This controls the convergence with respect to the size of the dielectric matrix.
+ gwls_stern_kmax4 8  # This controls the convergence with respect to the size of the dielectric matrix.
  #gwls_kmax_complement4 8   # This controls the convergence with respect to the size of the MODEL dielectric matrix.
  icutcoul4 0               # For molecules, the coulomb potential needs to be spherically truncated.
  rcut4 9.0                 # The spherical truncation has this radius. 
@@ -57,7 +57,7 @@ ndtset 6
  gwls_correlation5 5       # GWLS calc of dielectric matrix eigenvalues
 
  gwls_band_index5 4        # This is the band for which the matrix element of the Self-energy is requested : <gwls_band_index|\Sigma(gw_freqsp)|gwls_band_index>
- gwls_sternheimer_kmax5 8  # This controls the convergence with respect to the size of the dielectric matrix.
+ gwls_stern_kmax5 8  # This controls the convergence with respect to the size of the dielectric matrix.
  gwls_kmax_complement5 8   # This controls the convergence with respect to the size of the MODEL dielectric matrix.
  icutcoul5 0               # For molecules, the coulomb potential needs to be spherically truncated.
  rcut5 9.0                 # The spherical truncation has this radius. 
@@ -73,7 +73,7 @@ ndtset 6
  gwls_band_index6 4        # This is the band for which the matrix element of the Self-energy is requested : <gwls_band_index|\Sigma(gw_freqsp)|gwls_band_index>
  gw_customnfreqsp6 1       # This is the number if frequencies at which the matrix element of the Self-energy is requested.
  gw_freqsp6 -0.5558150504  # These are the frequencies at which the matrix element of the Self-energy is requested.
- gwls_sternheimer_kmax6 8  # This controls the convergence with respect to the size of the dielectric matrix.
+ gwls_stern_kmax6 8  # This controls the convergence with respect to the size of the dielectric matrix.
  gwls_kmax_complement6 8   # This controls the convergence with respect to the size of the MODEL dielectric matrix.
  icutcoul6 0               # For molecules, the coulomb potential needs to be spherically truncated.
  rcut6 9.0                 # The spherical truncation has this radius. 

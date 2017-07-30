@@ -274,8 +274,8 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
  if(tread==1) dtset%gw_toldfeig=dprarr(1)
 
 
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'gwls_sternheimer_kmax',tread,'INT')
- if(tread==1) dtset%gwls_sternheimer_kmax=intarr(1)
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'gwls_stern_kmax',tread,'INT')
+ if(tread==1) dtset%gwls_stern_kmax=intarr(1)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'gwls_npt_gauss_quad',tread,'INT')
  if(tread==1) dtset%gwls_npt_gauss_quad=intarr(1)

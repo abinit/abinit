@@ -276,7 +276,7 @@ type dataset_type
  integer :: gw_sigxcore
 
  ! GWLS
- integer :: gwls_sternheimer_kmax       ! number of Lanczos steps taken by the gw_sternheimer routine
+ integer :: gwls_stern_kmax       ! number of Lanczos steps taken by the gw_sternheimer routine
  integer :: gwls_npt_gauss_quad         ! number of points used in Gaussian quadrature in gw_sternheimer routine
  integer :: gwls_diel_model       ! switch to determine which dielectic model should be used in integration
  integer :: gwls_print_debug            ! switch to determine what to print out for debugging

@@ -23,7 +23,7 @@
 
         <p>To compute G<sub>0</sub>W<sub>0</sub> corrections to DFT eigenenergies, one needs to set [[optdriver]]= 66 in the input file. 
         This type of calculation requires that the ground state density and wavefunctions be available from disk (using [[getden]] and [[getwfk]]). 
-        It also requires the user to specify the state to be corrected ([[gwls_band_index]]), the maximum allowed residual when solving the Sternheimer equations ([[tolwfr]]), and the number of Lanczos vectors used to express the dielectric matrix ([[gwls_sternheimer_kmax]]). 
+        It also requires the user to specify the state to be corrected ([[gwls_band_index]]), the maximum allowed residual when solving the Sternheimer equations ([[tolwfr]]), and the number of Lanczos vectors used to express the dielectric matrix ([[gwls_stern_kmax]]). 
         Note that a convergence study on the latter value is required to check the accuracy of the results. 
         Since only molecular systems are currently supported, the calculation also requires that the Coulomb potential be spherically truncated ([[icutcoul]]= 0) with a radius [[rcut]] that should be validated with a convergence study. 
         </br>

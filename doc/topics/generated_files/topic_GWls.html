@@ -43,7 +43,7 @@ The resulting implementation exhibits a 500-fold speedup for the silane molecule
 
 <p>To compute G<sub>0</sub>W<sub>0</sub> corrections to DFT eigenenergies, one needs to set <a href="../../input_variables/generated_files/vargs.html#optdriver">optdriver</a>= 66 in the input file. 
 This type of calculation requires that the ground state density and wavefunctions be available from disk (using <a href="../../input_variables/generated_files/varfil.html#getden">getden</a> and <a href="../../input_variables/generated_files/varfil.html#getwfk">getwfk</a>). 
-It also requires the user to specify the state to be corrected (<a href="../../input_variables/generated_files/vargw.html#gwls_band_index">gwls_band_index</a>), the maximum allowed residual when solving the Sternheimer equations (<a href="../../input_variables/generated_files/varbas.html#tolwfr">tolwfr</a>), and the number of Lanczos vectors used to express the dielectric matrix (<a href="../../input_variables/generated_files/vargw.html#gwls_sternheimer_kmax">gwls_sternheimer_kmax</a>). 
+It also requires the user to specify the state to be corrected (<a href="../../input_variables/generated_files/vargw.html#gwls_band_index">gwls_band_index</a>), the maximum allowed residual when solving the Sternheimer equations (<a href="../../input_variables/generated_files/varbas.html#tolwfr">tolwfr</a>), and the number of Lanczos vectors used to express the dielectric matrix (<a href="../../input_variables/generated_files/vargw.html#gwls_stern_kmax">gwls_stern_kmax</a>). 
 Note that a convergence study on the latter value is required to check the accuracy of the results. 
 Since only molecular systems are currently supported, the calculation also requires that the Coulomb potential be spherically truncated (<a href="../../input_variables/generated_files/vargw.html#icutcoul">icutcoul</a>= 0) with a radius <a href="../../input_variables/generated_files/vargw.html#rcut">rcut</a> that should be validated with a convergence study. 
 </br>
@@ -78,7 +78,7 @@ Since only molecular systems are currently supported, the calculation also requi
 ... <a href="../../input_variables/generated_files/vargw.html#gwls_print_debug">gwls_print_debug</a>   [GWLS PRINT level for DEBUGging]<br>
 ... <a href="../../input_variables/generated_files/vargw.html#gwls_recycle">gwls_recycle</a>   [GWLS RECYCLE]<br>
 ... <a href="../../input_variables/generated_files/vargw.html#gwls_second_model_parameter">gwls_second_model_parameter</a>   [GWLS SECOND MODEL PARAMETER]<br>
-... <a href="../../input_variables/generated_files/vargw.html#gwls_sternheimer_kmax">gwls_sternheimer_kmax</a>   [GWLS Kmax]<br>
+... <a href="../../input_variables/generated_files/vargw.html#gwls_stern_kmax">gwls_stern_kmax</a>   [GWLS Kmax]<br>
 
 
 &nbsp; 

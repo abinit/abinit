@@ -145,8 +145,8 @@ def main():
         retcode += 1
 
     varname_split=abivarname.split("@",1)
-    if len(varname_split[0])>20:
-      print('WARNING: len of principal name of ',abivarname,', namely, ',len(varname_split[0]),', is longer than 20 characters.')
+    if len(varname_split[0])>18:
+      print('WARNING: len of principal name of ',abivarname,', namely, ',len(varname_split[0]),', is longer than 18 characters.')
 
   if retcode != 0:
     print('Found ',retcode,' FAIL.')

@@ -10029,7 +10029,7 @@
         of  Phys. Rev. B 91, 125120 (2015).
         Since the eigenvalues spectrum of the dielectric matrix of formed by a few large discrete eigenvalues and an integrable divergence in the density of eigenvalues around 0, it is expensive to sample accurately this divergence using the exact dielectric operator.
         It this becomes interesting to calculate the 'trace' of the 'exact - model' dielectric matrix in a small basis and add it to the 'trace' of the 'model' dielectric matrix obtained in a large bais.
-        In the context where the model dielectric matrix is used in the calculations, [[gwls_sternheimer_kmax]] determines the size of the 'small' basis and [[gwls_kmax_complement]] determines the size of the 'large' basis.
+        In the context where the model dielectric matrix is used in the calculations, [[gwls_stern_kmax]] determines the size of the 'small' basis and [[gwls_kmax_complement]] determines the size of the 'large' basis.
         </p>
         <p>
         For more information on the exact role of these bases and on the model dielectric operator used, see section V of  Phys. Rev. B 91, 125120 (2015).
@@ -10240,7 +10240,7 @@
     varset: vargw
     vartype: integer
 - !variable
-    abivarname: gwls_sternheimer_kmax
+    abivarname: gwls_stern_kmax
     characteristics:
     - '[[GW]]'
     commentdefault: null

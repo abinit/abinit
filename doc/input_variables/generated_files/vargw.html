@@ -94,7 +94,7 @@ variables to be used in the main input file of the abinit code.
  <a href="#gwls_print_debug">gwls_print_debug</a>&nbsp;&nbsp;
  <a href="#gwls_recycle">gwls_recycle</a>&nbsp;&nbsp;
  <a href="#gwls_second_model_parameter">gwls_second_model_parameter</a>&nbsp;&nbsp;
- <a href="#gwls_sternheimer_kmax">gwls_sternheimer_kmax</a>&nbsp;&nbsp;
+ <a href="#gwls_stern_kmax">gwls_stern_kmax</a>&nbsp;&nbsp;
  <a href="#gwmem">gwmem</a>&nbsp;&nbsp;
  <a href="#gwrpacorr">gwrpacorr</a>&nbsp;&nbsp;
  <br><a id='H'></a>H.
@@ -2030,7 +2030,7 @@ The G0W0 formalism involves the calculation of a summation conceptually linked t
 of  Phys. Rev. B 91, 125120 (2015).
 Since the eigenvalues spectrum of the dielectric matrix of formed by a few large discrete eigenvalues and an integrable divergence in the density of eigenvalues around 0, it is expensive to sample accurately this divergence using the exact dielectric operator.
 It this becomes interesting to calculate the 'trace' of the 'exact - model' dielectric matrix in a small basis and add it to the 'trace' of the 'model' dielectric matrix obtained in a large bais.
-In the context where the model dielectric matrix is used in the calculations, <a href="../../input_variables/generated_files/vargw.html#gwls_sternheimer_kmax">gwls_sternheimer_kmax</a> determines the size of the 'small' basis and <b>gwls_kmax_complement</b> determines the size of the 'large' basis.
+In the context where the model dielectric matrix is used in the calculations, <a href="../../input_variables/generated_files/vargw.html#gwls_stern_kmax">gwls_stern_kmax</a> determines the size of the 'small' basis and <b>gwls_kmax_complement</b> determines the size of the 'large' basis.
 </p>
 <p>
 For more information on the exact role of these bases and on the model dielectric operator used, see section V of  Phys. Rev. B 91, 125120 (2015).
@@ -2278,7 +2278,7 @@ Not used yet.
 <B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
 
 
-<br><font id="title"><a name="gwls_sternheimer_kmax">gwls_sternheimer_kmax</a></font>
+<br><font id="title"><a name="gwls_stern_kmax">gwls_stern_kmax</a></font>
 <br><font id="mnemonics">Mnemonics: GWLS Kmax</font>
 <br><font id="mnemonics">Executable: abinit</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/generated_files/help_abinit.html#GW">GW</a></font>
