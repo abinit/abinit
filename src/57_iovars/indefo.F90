@@ -338,7 +338,7 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%gwls_sternheimer_kmax=1
    dtsets(idtset)%gwls_model_parameter=1.0_dp
    dtsets(idtset)%gwls_npt_gauss_quad=10
-   dtsets(idtset)%gwls_dielectric_model=2
+   dtsets(idtset)%gwls_diel_model=2
    dtsets(idtset)%gwls_print_debug=0
    if (dtsets(idtset)%gwls_n_proj_freq/=0) dtsets(idtset)%gwls_list_proj_freq(:) = zero
    dtsets(idtset)%gwls_nseeds=1

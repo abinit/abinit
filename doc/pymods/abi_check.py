@@ -146,7 +146,7 @@ def main():
 
     varname_split=abivarname.split("@",1)
     if len(varname_split[0])>20:
-      print('WARNING: principal name of ',abivarname,' is longer than 20 characters.')
+      print('WARNING: len of principal name of ',abivarname,', namely, ',len(varname_split[0]),', is longer than 20 characters.')
 
   if retcode != 0:
     print('Found ',retcode,' FAIL.')

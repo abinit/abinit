@@ -870,9 +870,9 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
 !  gwls_npt_gauss_quad
    call chkint_ge(0,0,cond_string,cond_values,ierr,'gwls_npt_gauss_quad',dt%gwls_npt_gauss_quad,1,iout)
 
-! gwls_dielectric_model
-   call chkint_ge(0,0,cond_string,cond_values,ierr,'gwls_dielectric_model',dt%gwls_dielectric_model,1,iout)
-   call chkint_le(0,0,cond_string,cond_values,ierr,'gwls_dielectric_model',dt%gwls_dielectric_model,3,iout)
+! gwls_diel_model
+   call chkint_ge(0,0,cond_string,cond_values,ierr,'gwls_diel_model',dt%gwls_diel_model,1,iout)
+   call chkint_le(0,0,cond_string,cond_values,ierr,'gwls_diel_model',dt%gwls_diel_model,3,iout)
 
 ! gwls_model_parameter
    call chkdpr(0,0,cond_string,cond_values,ierr,'gwls_model_parameter',dt%gwls_model_parameter,1,zero,iout)

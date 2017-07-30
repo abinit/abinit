@@ -280,8 +280,8 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'gwls_npt_gauss_quad',tread,'INT')
  if(tread==1) dtset%gwls_npt_gauss_quad=intarr(1)
 
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'gwls_dielectric_model',tread,'INT')
- if(tread==1) dtset%gwls_dielectric_model=intarr(1)
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'gwls_diel_model',tread,'INT')
+ if(tread==1) dtset%gwls_diel_model=intarr(1)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'gwls_model_parameter',tread,'ENE')
  if(tread==1) dtset%gwls_model_parameter=dprarr(1)

@@ -568,7 +568,7 @@ subroutine dtset_copy(dtout, dtin)
  dtout%gw_toldfeig        = dtin%gw_toldfeig
  dtout%gwls_sternheimer_kmax= dtin%gwls_sternheimer_kmax
  dtout%gwls_npt_gauss_quad  = dtin%gwls_npt_gauss_quad
- dtout%gwls_dielectric_model= dtin%gwls_dielectric_model
+ dtout%gwls_diel_model= dtin%gwls_diel_model
  dtout%gwls_print_debug     = dtin%gwls_print_debug
  dtout%gwls_nseeds          = dtin%gwls_nseeds
  dtout%gwls_n_proj_freq     = dtin%gwls_n_proj_freq

@@ -9046,7 +9046,7 @@
     varset: vargw
     vartype: integer
 - !variable
-    abivarname: gwls_dielectric_model
+    abivarname: gwls_diel_model
     characteristics:
     - '[[GW]]'
     commentdefault: null
@@ -9355,24 +9355,6 @@
     topics: GWls_expert
     varset: vargw
     vartype: integer
-- !variable
-    abivarname: gwls_second_model_parameter
-    characteristics:
-    - '[[GW]]'
-    - '[[ENERGY]]'
-    commentdefault: null
-    commentdims: null
-    defaultval: 0.0
-    dimensions: scalar
-    excludes: null
-    executables: abinit
-    mnemonics: GWLS SECOND MODEL PARAMETER
-    requires: '[[optdriver]]==66'
-    text: |-
-        Not used yet.
-    topics: GWls_expert
-    varset: vargw
-    vartype: real
 - !variable
     abivarname: gwls_sternheimer_kmax
     characteristics:

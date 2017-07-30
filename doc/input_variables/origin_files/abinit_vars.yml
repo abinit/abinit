@@ -9930,7 +9930,7 @@
     varset: vargw
     vartype: integer
 - !variable
-    abivarname: gwls_dielectric_model
+    abivarname: gwls_diel_model
     characteristics:
     - '[[GW]]'
     commentdefault: null

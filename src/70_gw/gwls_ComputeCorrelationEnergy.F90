@@ -214,7 +214,7 @@ character(500) :: msg
 
 call cpu_time(total_time1)
 !Variable allocation and initialization
-model_number        = dtset%gwls_dielectric_model
+model_number        = dtset%gwls_diel_model
 model_parameter     = dtset%gwls_model_parameter
 npt_gauss           = dtset%gwls_npt_gauss_quad
 print_debug         = dtset%gwls_print_debug
@@ -1036,7 +1036,7 @@ logical :: use_model
 !--------------------------------------------------------------------------------
 
 !Variable allocation and initialization
-model_number        = dtset%gwls_dielectric_model
+model_number        = dtset%gwls_diel_model
 model_parameter     = dtset%gwls_model_parameter
 npt_gauss           = dtset%gwls_npt_gauss_quad
 print_debug         = dtset%gwls_print_debug
