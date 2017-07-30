@@ -10,6 +10,7 @@ try:
 except ImportError:
   raise ImportError("yaml package is not available. Install it with `pip install pyyaml`")
 
+strict=0
 
 def main():
   path = '../input_variables/origin_files/'
@@ -54,7 +55,7 @@ def main():
           "varset"==line.lstrip()[:6] or
           "vartype"==line.lstrip()[:7]):
         line_split=line.strip().split(":",1)
-        if len(line_split)>1:
+        if len(line_split)>1 and strict==1:
 
           if line_split[1] !=""  and line_split[1][0] != " ":
             print('FAIL: detected a non-blank character after the first colon in the line number %s :'%(i+1))
@@ -97,24 +98,26 @@ def main():
       print('FAIL: ', abivarname, ' does not have a vartype')
       retcode += 1
     elif not var.vartype in ["integer", "real", "string"]:
-      print('FAIL: ',abivarname,' has vartype ',var.vartype,' not in the list ["integer", "real", "string"].')
-      retcode += 1
+      if strict==1:
+        print('FAIL: ',abivarname,' has vartype ',var.vartype,' not in the list ["integer", "real", "string"].')
+        retcode += 1
 
-    if var.topics is None:
-      print('FAIL: ', abivarname, ' does not have at least one topic and the associated tribe')
-      retcode += 1
-    else:
-      topics_name_tribe = var.topics.split(',')
-      for topic_name_tribe in topics_name_tribe:
-        name_tribe = topic_name_tribe.split('_')
-        if not name_tribe[0].strip() in topics:
-          print('FAIL: ', abivarname, ' delivers topicname_tribe ',name_tribe,
-                ' with topicname ',name_tribe[0].strip(),' that does not belong to the allowed list')
-          retcode += 1
-        if not name_tribe[1].strip() in tribe_names:
-          print('FAIL: ', abivarname, ' delivers topicname_tribe ',name_tribe,
-                ' with tribe ',name_tribe[1].strip(),' that does not belong to the allowed list')
-          retcode += 1
+    if strict==1:
+      if var.topics is None:
+        print('FAIL: ', abivarname, ' does not have at least one topic and the associated tribe')
+        retcode += 1
+      else:
+        topics_name_tribe = var.topics.split(',')
+        for topic_name_tribe in topics_name_tribe:
+          name_tribe = topic_name_tribe.split('_')
+          if not name_tribe[0].strip() in topics:
+            print('FAIL: ', abivarname, ' delivers topicname_tribe ',name_tribe,
+                  ' with topicname ',name_tribe[0].strip(),' that does not belong to the allowed list')
+            retcode += 1
+          if not name_tribe[1].strip() in tribe_names:
+            print('FAIL: ', abivarname, ' delivers topicname_tribe ',name_tribe,
+                  ' with tribe ',name_tribe[1].strip(),' that does not belong to the allowed list')
+            retcode += 1
 
     if var.characteristics is not None:
       if not isinstance(var.characteristics, list):
@@ -126,15 +129,16 @@ def main():
             print('FAIL: the characteristics ', cat, ' of ', abivarname, ' is not valid')
             retcode += 1
 
-    if var.dimensions is not None:
-      if var.dimensions != "scalar":
-        if not isinstance(var.dimensions, list) \
-              and not isinstance(var.dimensions, ValueWithConditions):
-          print('FAIL: the field dimensions of ', abivarname, ' is not a list neither a valuewithconditions')
-          retcode += 1
-    else:
-      print('FAIL: ', abivarname, ' does not have a dimension. If it is a "scalar", it must be declared so.')
-      retcode += 1
+    if strict==1:
+      if var.dimensions is not None:
+        if var.dimensions != "scalar":
+          if not isinstance(var.dimensions, list) \
+                and not isinstance(var.dimensions, ValueWithConditions):
+            print('FAIL: the field dimensions of ', abivarname, ' is not a list neither a valuewithconditions')
+            retcode += 1
+      else:
+        print('FAIL: ', abivarname, ' does not have a dimension. If it is a "scalar", it must be declared so.')
+        retcode += 1
 
     if var.varset is None:
       print('FAIL: ', abivarname, ' does not have a varset')
@@ -144,13 +148,15 @@ def main():
         print('FAIL: the field varset of ', abivarname, ' should be one of the valid varsets')
         retcode += 1
 
-    varname_split=abivarname.split("@",1)
-    if len(varname_split[0])>18:
-      print('WARNING: len of principal name of ',abivarname,', namely, ',len(varname_split[0]),', is longer than 18 characters.')
+    if strict==1:
+      varname_split=abivarname.split("@",1)
+      if len(varname_split[0])>18:
+        print('WARNING: len of principal name of ',abivarname,', namely, ',len(varname_split[0]),', is longer than 18 characters.')
 
   if retcode != 0:
     print('Found ',retcode,' FAIL.')
-    print('Number of variables in ABINIT :',len(variables))
+    if strict==1:
+      print('Number of variables in ABINIT :',len(variables))
 
   return retcode
 
