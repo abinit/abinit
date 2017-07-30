@@ -10,21 +10,17 @@
 !! for a merging utility.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2017 ABINIT group (XG,MT)
+!! Copyright (C) 1999-2017 ABINIT group (XG,MT,GA)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! INPUTS
-!!  dtfil <type(datafiles_type)>=variables related to files
-!!  dtset <type(dataset_type)>=all input variables for this dataset
-!!  hdr0 <type(hdr_type)>=contains header info
-!!  psps <type(pseudopotential_type)>=variables related to pseudopotentials
+!!  filename=name of the DDB.nc file to be written.
+!!  Crystal <type(crystal_t)>=info on the crystal
 !!  natom = number of atoms in the unit cell.
 !!  mpert = maximum number of perturbations.
-!!  rprimd(3,3)=primitive vectors
-!!  xred(3,natom)=reduced dimensionless atomic coordinates
 !!  qpt(3)=curret q-point, in reduced coordinates.
 !!  d2matr(2,3,mpert,3,mpert)=second-order derivative of the total energy
 !!  blkflg(3,mpert,3,mpert)=mask telling whether each element is computed (1) or not (0).
@@ -46,7 +42,7 @@
 
 #include "abi_common.h"
 
-subroutine outddbnc (dtfil, dtset, hdr0, psps, natom, mpert, rprimd, xred, qpt, d2matr, blkflg)
+subroutine outddbnc (filename, mpert, d2matr, blkflg, qpt, Crystal)
 
  use defs_basis
  use defs_datatypes
@@ -60,7 +56,6 @@ subroutine outddbnc (dtfil, dtset, hdr0, psps, natom, mpert, rprimd, xred, qpt, 
  use netcdf
 #endif
 
- use m_fstrings,   only : strcat
  use m_crystal_io, only : crystal_ncwrite
 
 !This section has been created automatically by the script Abilint (TD).
@@ -73,37 +68,37 @@ subroutine outddbnc (dtfil, dtset, hdr0, psps, natom, mpert, rprimd, xred, qpt, 
 
 !Arguments -------------------------------
 !scalars
- integer,intent(in) :: mpert, natom
- real(dp),intent(in) :: rprimd(3,3), xred(3,natom)
- type(dataset_type),intent(in) :: dtset
- type(datafiles_type), intent(in) :: dtfil
- type(hdr_type),intent(in) :: hdr0
- type(pseudopotential_type),intent(in) :: psps
+ character(len=*),intent(in) :: filename
+ integer,intent(in) :: mpert
  integer,intent(in) :: blkflg(3,mpert,3,mpert)
  real(dp),intent(in) :: d2matr(2,3,mpert,3,mpert)
  real(dp),intent(in) :: qpt(3)
+ type(crystal_t), intent(in) :: Crystal
 
 !Local variables -------------------------
 !scalars
- character(len=fnlen) :: fname
- integer :: ntypat
+ integer :: natom
  integer :: ncid, ncerr
  integer :: cplex, cart_dir, one_dim
  integer :: ipert1, ipert2, idir1, idir2, ii
- type(crystal_t) :: Crystal
- real(dp), allocatable :: amu(:)
- real(dp) :: dynmat(2,3,natom,3,natom)
- integer :: dynmat_mask(3,natom,3,natom)
- real(dp) :: born_effective_charge_tensor(3,natom,3)
- integer :: born_effective_charge_tensor_mask(3,natom,3)
+ integer,allocatable :: dynmat_mask(:,:,:,:)
+ integer,allocatable :: born_effective_charge_tensor_mask(:,:,:)
+ real(dp),allocatable :: dynmat(:,:,:,:,:)
+ real(dp),allocatable :: born_effective_charge_tensor(:,:,:)
 
 ! *********************************************************************
 
 #ifdef HAVE_NETCDF
 
+ natom = Crystal%natom
+
+ ABI_ALLOCATE(dynmat, (2,3,natom,3,natom))
+ ABI_ALLOCATE(dynmat_mask, (3,natom,3,natom))
+ ABI_ALLOCATE(born_effective_charge_tensor, (3,natom,3))
+ ABI_ALLOCATE(born_effective_charge_tensor_mask, (3,natom,3))
+
  ! Initialize NetCDF file.
- fname = strcat(dtfil%filnam_ds(4),"_DDB.nc")
- NCF_CHECK(nctk_open_create(ncid, fname, xmpi_comm_self))
+ NCF_CHECK(nctk_open_create(ncid, filename, xmpi_comm_self))
 
  ! ------------------------------
  ! Construct local DDB
@@ -143,25 +138,13 @@ subroutine outddbnc (dtfil, dtset, hdr0, psps, natom, mpert, rprimd, xred, qpt, 
    end do
  end do 
 
- ! Retrieve atomic masses
- ntypat = psps%ntypat
- ABI_ALLOCATE(amu,(ntypat))
- do ii=1,ntypat
-   amu(ii) = dtset%amu_orig(ii,1)
- end do
-
+ ! TODO: also store the dielectric matrix
 
  ! ------------------------------
  ! Write crystal info
  ! ------------------------------
- call crystal_init(dtset%amu_orig(:,1),Crystal, dtset%spgroup, dtset%natom, dtset%npsp, psps%ntypat, &
-& dtset%nsym, rprimd, dtset%typat, xred, dtset%ziontypat, dtset%znucl, 1, &
-& dtset%nspden==2.and.dtset%nsppol==1, .false., hdr0%title, &
-& dtset%symrel, dtset%tnons, dtset%symafm)
  ncerr = crystal_ncwrite(Crystal, ncid)
  NCF_CHECK(ncerr)
-
- call crystal_free(Crystal)
 
 
  ! ------------------------------
@@ -201,7 +184,7 @@ subroutine outddbnc (dtfil, dtset, hdr0, psps, natom, mpert, rprimd, xred, qpt, 
 
 ! Write data
  NCF_CHECK(nctk_set_datamode(ncid))
- NCF_CHECK(nf90_put_var(ncid, vid('atomic_masses_amu'), amu))
+ NCF_CHECK(nf90_put_var(ncid, vid('atomic_masses_amu'), Crystal%amu))
  NCF_CHECK(nf90_put_var(ncid, vid('q_point_reduced_coord'), qpt))
  NCF_CHECK(nf90_put_var(ncid, vid('second_derivative_of_energy'), dynmat))
  NCF_CHECK(nf90_put_var(ncid, vid('second_derivative_of_energy_mask'), dynmat_mask))
@@ -212,7 +195,11 @@ subroutine outddbnc (dtfil, dtset, hdr0, psps, natom, mpert, rprimd, xred, qpt, 
  NCF_CHECK(nf90_close(ncid))
 
  ! Deallocate stuff
- ABI_DEALLOCATE(amu)
+
+ ABI_FREE(dynmat)
+ ABI_FREE(dynmat_mask)
+ ABI_FREE(born_effective_charge_tensor)
+ ABI_FREE(born_effective_charge_tensor_mask)
 
 #else
  MSG_ERROR("NETCDF support required to write DDB.nc file.")

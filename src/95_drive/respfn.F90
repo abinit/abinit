@@ -124,7 +124,9 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  use m_ebands
  use m_results_respfn
  use m_hdr
+ use m_crystal
 
+ use m_fstrings,    only : strcat
  use m_dynmat,      only : chkph3, d2sym3, q0dy3_apply, q0dy3_calc, wings3, dfpt_phfrq, sytens
  use m_ddb,         only : DDB_VERSION
  use m_ddb_hdr,     only : ddb_hdr_type, ddb_hdr_init, ddb_hdr_free, ddb_hdr_open_write
@@ -213,6 +215,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  real(dp) :: tolwfr
  real(dp) :: ucvol,vxcavg
  character(len=fnlen) :: dscrpt
+ character(len=fnlen) :: filename
  character(len=500) :: message
  type(ebands_t) :: bstruct
  type(hdr_type) :: hdr,hdr_fine,hdr0,hdr_den
@@ -221,6 +224,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  type(pawfgr_type) :: pawfgr
  type(wffile_type) :: wffgs,wfftgs
  type(wvl_data) :: wvl
+ type(crystal_t) :: Crystal
  integer :: ddkfil(3),ngfft(18),ngfftf(18),rfdir(3),rf2_dirs_from_rfpert_nl(3,3)
  integer,allocatable :: atindx(:),atindx1(:),blkflg(:,:,:,:),blkflgfrx1(:,:,:,:),blkflg1(:,:,:,:)
  integer,allocatable :: blkflg2(:,:,:,:),carflg(:,:,:,:),clflg(:,:),indsym(:,:,:)
@@ -1441,7 +1445,18 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 
 #ifdef HAVE_NETCDF
    ! Output dynamical matrix in NetCDF format.
-   call outddbnc(dtfil, dtset, hdr, psps, natom, mpert, rprimd, xred, dtset%qptn, d2matr, blkflg)
+   call crystal_init(dtset%amu_orig(:,1), Crystal, &
+   & dtset%spgroup, dtset%natom, dtset%npsp, psps%ntypat, &
+   & dtset%nsym, rprimd, dtset%typat, xred, dtset%ziontypat, dtset%znucl, 1, &
+   & dtset%nspden==2.and.dtset%nsppol==1, .false., hdr%title, &
+   & dtset%symrel, dtset%tnons, dtset%symafm)
+
+   filename = strcat(dtfil%filnam_ds(4),"_DDB.nc")
+
+   call outddbnc(filename, mpert, d2matr, blkflg, dtset%qptn, Crystal)
+
+   call crystal_free(Crystal)
+
 #endif
 
 
