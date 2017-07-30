@@ -22844,6 +22844,30 @@
     varset: vardev
     vartype: integer
 - !variable
+    abivarname: prtddb@anaddb
+    characteristics: null
+    commentdefault: null
+    commentdims: null
+    defaultval: 0
+    dimensions: scalar
+    excludes: null
+    executables: anaddb
+    mnemonics: PRinT the Derivative DataBase files
+    requires: null
+    text: |-
+        <p>
+        Flag to print out the DDB file interpolated
+        with the Interatomic Force Constants.
+        <p>
+        The available options are:
+        <ul>
+          <li>0 =&gt; no output of DDB (default);</li>
+          <li>1 =&gt; Interpolate the DDB and write out the DDB and DDB.nc files. </li>
+        </ul>
+    topics: null
+    varset: varanaddb
+    vartype: integer
+- !variable
     abivarname: prtden
     characteristics: null
     commentdefault: null

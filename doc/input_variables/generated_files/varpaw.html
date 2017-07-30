@@ -105,7 +105,7 @@ variables to be used in the main input file of the abinit code.
 <br><br><br><br><hr>
 <br><font id="title"><a name="bxctmindg">bxctmindg</a></font>
 <br><font id="mnemonics">Mnemonics: BoX CuT-off MINimum for the Double Grid (PAW)</font>
-<br><font id="characteristic">Characteristic: </font>
+<br><font id="mnemonics">Executable: abinit</font>
 <br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_PAW.html">PAW</a> </font>
 <br><font id="vartype">Variable type: real</font>
 <br><font id="default">Default is 2.0</font>
@@ -139,7 +139,7 @@ required level of accuracy.
 
 <br><font id="title"><a name="dmatpawu">dmatpawu</a></font>
 <br><font id="mnemonics">Mnemonics: initial Density MATrix for PAW+U</font>
-<br><font id="characteristic">Characteristic: </font>
+<br><font id="mnemonics">Executable: abinit</font>
 <br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_DFT+U.html">DFT+U</a> </font>
 <br><font id="vartype">Variable type: real(2*max(<a href="../../input_variables/generated_files/varpaw.html#lpawu">lpawu</a>)+1,2*max(<a href="../../input_variables/generated_files/varpaw.html#lpawu">lpawu</a>)+1,max(<a href="../../input_variables/generated_files/varbas.html#nsppol">nsppol</a>, <a href="../../input_variables/generated_files/vargs.html#nspinor">nspinor</a>),<a href="../../input_variables/generated_files/varint.html#natpawu">natpawu</a>)</font>
 <br><font id="default">Default is *-10.0</font>
@@ -276,7 +276,7 @@ must be given the same occupation matrix;
 
 <br><font id="title"><a name="dmatpuopt">dmatpuopt</a></font>
 <br><font id="mnemonics">Mnemonics: Density MATrix for PAW+U OPTion</font>
-<br><font id="characteristic">Characteristic: </font>
+<br><font id="mnemonics">Executable: abinit</font>
 <br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_DFT+U.html">DFT+U</a> </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 2</font>
@@ -319,7 +319,7 @@ atomic wavefunction of the correlated subspace is a normalized atomic eigenfunct
 
 <br><font id="title"><a name="dmatudiag">dmatudiag</a></font>
 <br><font id="mnemonics">Mnemonics: Density MATrix for paw+U, DIAGonalization</font>
-<br><font id="characteristic">Characteristic: </font>
+<br><font id="mnemonics">Executable: abinit</font>
 <br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_DFT+U.html">DFT+U</a> </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
@@ -356,7 +356,7 @@ Only relevant if <a href="../../input_variables/generated_files/varint.html#usep
 
 <br><font id="title"><a name="f4of2_sla">f4of2_sla</a></font>
 <br><font id="mnemonics">Mnemonics: F4 Over F2 ratio of Slater integrals</font>
-<br><font id="characteristic">Characteristic: </font>
+<br><font id="mnemonics">Executable: abinit</font>
 <br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_DFT+U.html">DFT+U</a> </font>
 <br><font id="vartype">Variable type: real</font>
 <br><font id="default">Default is ['0.625 for d electron', '0.6681 for f electron']</font>
@@ -378,7 +378,7 @@ dependent screened coulomb interaction.
 
 <br><font id="title"><a name="f6of2_sla">f6of2_sla</a></font>
 <br><font id="mnemonics">Mnemonics: F6 Over F2 ratio of Slater integrals</font>
-<br><font id="characteristic">Characteristic: </font>
+<br><font id="mnemonics">Executable: abinit</font>
 <br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_DFT+U.html">DFT+U</a> </font>
 <br><font id="vartype">Variable type: real</font>
 <br><font id="default">Default is 0.4943</font>
@@ -399,7 +399,7 @@ It is used with <a href="../../input_variables/generated_files/varpaw.html#f4of2
 
 <br><font id="title"><a name="iboxcut">iboxcut</a></font>
 <br><font id="mnemonics">Mnemonics: Integer governing the internal use of BOXCUT - not a very good choice of variable name</font>
-<br><font id="characteristic">Characteristic: </font>
+<br><font id="mnemonics">Executable: abinit</font>
 <br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_convergency.html">convergency</a> </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
@@ -427,6 +427,7 @@ FFT box (useful for tests).
 
 <br><font id="title"><a name="jpawu">jpawu</a></font>
 <br><font id="mnemonics">Mnemonics: value of J for PAW+U</font>
+<br><font id="mnemonics">Executable: abinit</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/generated_files/help_abinit.html#ENERGY">ENERGY</a></font>
 <br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_DFT+U.html">DFT+U</a> </font>
 <br><font id="vartype">Variable type: real(<a href="../../input_variables/generated_files/varbas.html#ntypat">ntypat</a>)</font>
@@ -452,7 +453,7 @@ the value is not used.
 
 <br><font id="title"><a name="lexexch">lexexch</a></font>
 <br><font id="mnemonics">Mnemonics: value of angular momentum L for EXact EXCHange</font>
-<br><font id="characteristic">Characteristic: </font>
+<br><font id="mnemonics">Executable: abinit</font>
 <br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_xc.html">xc</a> </font>
 <br><font id="vartype">Variable type: integer(<a href="../../input_variables/generated_files/varbas.html#ntypat">ntypat</a>)</font>
 <br><font id="default">Default is -1</font>
@@ -473,7 +474,7 @@ on which to apply the exact exchange correction.
 
 <br><font id="title"><a name="lpawu">lpawu</a></font>
 <br><font id="mnemonics">Mnemonics: value of angular momentum L for PAW+U</font>
-<br><font id="characteristic">Characteristic: </font>
+<br><font id="mnemonics">Executable: abinit</font>
 <br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_DFT+U.html">DFT+U</a> </font>
 <br><font id="vartype">Variable type: integer(<a href="../../input_variables/generated_files/varbas.html#ntypat">ntypat</a>)</font>
 <br><font id="default">Default is *-1</font>
@@ -505,6 +506,7 @@ values 2 or 3 are allowed)&nbsp; on which to apply the LDA+U correction.
 
 <br><font id="title"><a name="mqgriddg">mqgriddg</a></font>
 <br><font id="mnemonics">Mnemonics: Maximum number of Q-wavevectors for the 1-dimensional GRID  for the Double Grid in PAW</font>
+<br><font id="mnemonics">Executable: abinit</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/generated_files/help_abinit.html#DEVELOP">DEVELOP</a></font>
 <br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_PAW.html">PAW</a> </font>
 <br><font id="vartype">Variable type: integer</font>
@@ -524,7 +526,7 @@ See also <a href="../../input_variables/generated_files/vardev.html#mqgrid">mqgr
 
 <br><font id="title"><a name="ngfftdg">ngfftdg</a></font>
 <br><font id="mnemonics">Mnemonics: Number of Grid points for Fast Fourier Transform : Double Grid</font>
-<br><font id="characteristic">Characteristic: </font>
+<br><font id="mnemonics">Executable: abinit</font>
 <br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_PAW.html">PAW</a> </font>
 <br><font id="vartype">Variable type: integer(3)</font>
 <br><font id="default">Default is [0, 0, 0]</font>
@@ -546,7 +548,7 @@ grid" only used for PAW calculations.
 
 <br><font id="title"><a name="pawcpxocc">pawcpxocc</a></font>
 <br><font id="mnemonics">Mnemonics: PAW - use ComPleX rhoij OCCupancies</font>
-<br><font id="characteristic">Characteristic: </font>
+<br><font id="mnemonics">Executable: abinit</font>
 <br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_PAW.html">PAW</a> </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 2 if <a href="../../input_variables/generated_files/vargs.html#optdriver">optdriver</a>==0 and <a href="../../input_variables/generated_files/varrlx.html#ionmov">ionmov</a><6 and <a href="../../input_variables/generated_files/varpaw.html#pawspnorb">pawspnorb</a>==1 and <a href="../../input_variables/generated_files/varbas.html#iscf">iscf</a>>=10 and (<a href="../../input_variables/generated_files/varbas.html#kptopt">kptopt</a> !=1 or <a href="../../input_variables/generated_files/varbas.html#kptopt">kptopt</a>!=2) and <a href="../../input_variables/generated_files/varint.html#usepaw">usepaw</a>==1,
@@ -597,7 +599,7 @@ SCF mixing done on density (<a href="../../input_variables/generated_files/varba
 
 <br><font id="title"><a name="pawcross">pawcross</a></font>
 <br><font id="mnemonics">Mnemonics: PAW - add CROSS term in oscillator strengths</font>
-<br><font id="characteristic">Characteristic: </font>
+<br><font id="mnemonics">Executable: abinit</font>
 <br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_DFPT.html">DFPT</a> </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
@@ -622,6 +624,7 @@ is taken into account in the computation of the oscillator strengths. Hence, the
 
 <br><font id="title"><a name="pawecutdg">pawecutdg</a></font>
 <br><font id="mnemonics">Mnemonics: PAW - Energy CUToff for the Double Grid</font>
+<br><font id="mnemonics">Executable: abinit</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/generated_files/help_abinit.html#ENERGY">ENERGY</a></font>
 <br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_convergency.html">convergency</a> <a href="../../topics/generated_files/topic_PAW.html">PAW</a> </font>
 <br><font id="vartype">Variable type: real</font>
@@ -658,7 +661,7 @@ or derived quantities, like forces, but also on the two values of the
 
 <br><font id="title"><a name="pawfatbnd">pawfatbnd</a></font>
 <br><font id="mnemonics">Mnemonics: PAW: print band structure in the FAT-BaND representation</font>
-<br><font id="characteristic">Characteristic: </font>
+<br><font id="mnemonics">Executable: abinit</font>
 <br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_PAW.html">PAW</a> </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
@@ -703,7 +706,7 @@ Relevant values are:
 
 <br><font id="title"><a name="pawlcutd">pawlcutd</a></font>
 <br><font id="mnemonics">Mnemonics: PAW - L angular momentum used to CUT the development in moments of the Densitites</font>
-<br><font id="characteristic">Characteristic: </font>
+<br><font id="mnemonics">Executable: abinit</font>
 <br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_PAW.html">PAW</a> </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 10</font>
@@ -738,7 +741,7 @@ or derived quantities, like forces, but also on the two values of the
 
 <br><font id="title"><a name="pawlmix">pawlmix</a></font>
 <br><font id="mnemonics">Mnemonics: PAW - maximum L used in the spherical part MIXing</font>
-<br><font id="characteristic">Characteristic: </font>
+<br><font id="mnemonics">Executable: abinit</font>
 <br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_PAW.html">PAW</a> </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 10</font>
@@ -766,7 +769,7 @@ Other parts of augmentation occupancies are not included in the mixing process.
 
 <br><font id="title"><a name="pawmixdg">pawmixdg</a></font>
 <br><font id="mnemonics">Mnemonics: PAW - MIXing is done (or not) on the (fine) Double Grid</font>
-<br><font id="characteristic">Characteristic: </font>
+<br><font id="mnemonics">Executable: abinit</font>
 <br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_PAW.html">PAW</a> </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0 if <a href="../../input_variables/generated_files/varpar.html#npfft">npfft</a>==1,
@@ -834,7 +837,7 @@ The memory saving is particularly efficient when using the Pulay mixing
 
 <br><font id="title"><a name="pawnhatxc">pawnhatxc</a></font>
 <br><font id="mnemonics">Mnemonics: PAW - Flag for exact computation of gradients of NHAT density in eXchange-Correlation.</font>
-<br><font id="characteristic">Characteristic: </font>
+<br><font id="mnemonics">Executable: abinit</font>
 <br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_PAW.html">PAW</a> </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 1</font>
@@ -863,7 +866,7 @@ by this choice. It is recommended to test the validity of this approximation bef
 
 <br><font id="title"><a name="pawnphi">pawnphi</a></font>
 <br><font id="mnemonics">Mnemonics: PAW - Number of PHI angles used to discretize the sphere around each atom.</font>
-<br><font id="characteristic">Characteristic: </font>
+<br><font id="mnemonics">Executable: abinit</font>
 <br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_PAW.html">PAW</a> </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 13</font>
@@ -886,7 +889,7 @@ and <a href="../../input_variables/generated_files/varpaw.html#pawntheta">pawnth
 
 <br><font id="title"><a name="pawntheta">pawntheta</a></font>
 <br><font id="mnemonics">Mnemonics: PAW - Number of THETA angles used to discretize the sphere around each atom.</font>
-<br><font id="characteristic">Characteristic: </font>
+<br><font id="mnemonics">Executable: abinit</font>
 <br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_PAW.html">PAW</a> </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 12</font>
@@ -909,7 +912,7 @@ and <a href="../../input_variables/generated_files/varpaw.html#pawnphi">pawnphi<
 
 <br><font id="title"><a name="pawnzlm">pawnzlm</a></font>
 <br><font id="mnemonics">Mnemonics: PAW - only compute Non-Zero LM-moments of the contributions to the density from the spheres</font>
-<br><font id="characteristic">Characteristic: </font>
+<br><font id="mnemonics">Executable: abinit</font>
 <br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_PAW.html">PAW</a> </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 1</font>
@@ -937,7 +940,7 @@ those found to be non-zero will be computed ; thus the first iteration is more c
 
 <br><font id="title"><a name="pawoptmix">pawoptmix</a></font>
 <br><font id="mnemonics">Mnemonics: PAW - OPTion for the MIXing of the spherical part</font>
-<br><font id="characteristic">Characteristic: </font>
+<br><font id="mnemonics">Executable: abinit</font>
 <br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_PAW.html">PAW</a> </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
@@ -983,7 +986,7 @@ the Kerker mixing: <a href="../../input_variables/generated_files/vargs.html#die
 
 <br><font id="title"><a name="pawoptosc">pawoptosc</a></font>
 <br><font id="mnemonics">Mnemonics: PAW - OPTion for the computation of the OSCillator matrix elements</font>
-<br><font id="characteristic">Characteristic: </font>
+<br><font id="mnemonics">Executable: abinit</font>
 <br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_GW.html">GW</a> <a href="../../topics/generated_files/topic_BSE.html">BSE</a> </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
@@ -1012,7 +1015,7 @@ Kresse in PRB 74. 035101
 
 <br><font id="title"><a name="pawovlp">pawovlp</a></font>
 <br><font id="mnemonics">Mnemonics: PAW - spheres OVerLaP allowed (in percentage)</font>
-<br><font id="characteristic">Characteristic: </font>
+<br><font id="mnemonics">Executable: abinit</font>
 <br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_PAW.html">PAW</a> </font>
 <br><font id="vartype">Variable type: real</font>
 <br><font id="default">Default is 5.0</font>
@@ -1051,7 +1054,7 @@ the volume of the overlap of two spheres by the volume of the smallest sphere.
 
 <br><font id="title"><a name="pawprtden">pawprtden</a></font>
 <br><font id="mnemonics">Mnemonics: PAW: PRinT total physical electron DENsity</font>
-<br><font id="characteristic">Characteristic: </font>
+<br><font id="mnemonics">Executable: abinit</font>
 <br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_PAW.html">PAW</a> </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
@@ -1074,7 +1077,7 @@ See the <a href="../../input_variables/generated_files/varfil.html#prtden">prtde
 
 <br><font id="title"><a name="pawprtdos">pawprtdos</a></font>
 <br><font id="mnemonics">Mnemonics: PAW: PRinT partial DOS contributions</font>
-<br><font id="characteristic">Characteristic: </font>
+<br><font id="mnemonics">Executable: abinit</font>
 <br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_PAW.html">PAW</a> </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
@@ -1129,7 +1132,7 @@ Only relevant if <a href="../../input_variables/generated_files/varint.html#usep
 
 <br><font id="title"><a name="pawprtvol">pawprtvol</a></font>
 <br><font id="mnemonics">Mnemonics: PAW: PRinT VOLume</font>
-<br><font id="characteristic">Characteristic: </font>
+<br><font id="mnemonics">Executable: abinit</font>
 <br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_PAW.html">PAW</a> </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
@@ -1166,7 +1169,7 @@ PAW+U, rotation matrices of sphercal harmonics.
 
 <br><font id="title"><a name="pawprtwf">pawprtwf</a></font>
 <br><font id="mnemonics">Mnemonics: PAW: PRinT WaveFunctions</font>
-<br><font id="characteristic">Characteristic: </font>
+<br><font id="mnemonics">Executable: abinit</font>
 <br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_PAW.html">PAW</a> </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
@@ -1205,7 +1208,7 @@ ouput, but a single band and k-point index can be requested by using the variabl
 
 <br><font id="title"><a name="pawspnorb">pawspnorb</a></font>
 <br><font id="mnemonics">Mnemonics: PAW - option for SPiN-ORBit coupling</font>
-<br><font id="characteristic">Characteristic: </font>
+<br><font id="mnemonics">Executable: abinit</font>
 <br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_PAW.html">PAW</a> </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 1 if <a href="../../input_variables/generated_files/vargs.html#nspinor">nspinor</a>==2,
@@ -1270,7 +1273,7 @@ has to be avoided.
 
 <br><font id="title"><a name="pawstgylm">pawstgylm</a></font>
 <br><font id="mnemonics">Mnemonics: PAW - option for the STorage of G_l(r).YLM(r)</font>
-<br><font id="characteristic">Characteristic: </font>
+<br><font id="mnemonics">Executable: abinit</font>
 <br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_PAW.html">PAW</a> </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 1</font>
@@ -1313,7 +1316,7 @@ a re-computed each time they are needed and CPU time increases.
 
 <br><font id="title"><a name="pawsushat">pawsushat</a></font>
 <br><font id="mnemonics">Mnemonics: PAW - SUSceptibility, inclusion of HAT (compensation charge) contribution</font>
-<br><font id="characteristic">Characteristic: </font>
+<br><font id="mnemonics">Executable: abinit</font>
 <br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_PAW.html">PAW</a> </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
@@ -1351,7 +1354,7 @@ This approximation could be unfavourable in some cases; in the latter, we advise
 
 <br><font id="title"><a name="pawusecp">pawusecp</a></font>
 <br><font id="mnemonics">Mnemonics: PAW - option for the USE of CPrj in memory (cprj=WF projected with NL projector)</font>
-<br><font id="characteristic">Characteristic: </font>
+<br><font id="mnemonics">Executable: abinit</font>
 <br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_PAW.html">PAW</a> </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 1</font>
@@ -1383,7 +1386,7 @@ When <b>pawusecp</b>=1, then the cprj are computed once and then kept in memory.
 
 <br><font id="title"><a name="pawxcdev">pawxcdev</a></font>
 <br><font id="mnemonics">Mnemonics: PAW - choice for eXchange-Correlation DEVelopment (spherical part)</font>
-<br><font id="characteristic">Characteristic: </font>
+<br><font id="mnemonics">Executable: abinit</font>
 <br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_PAW.html">PAW</a> </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 1</font>
@@ -1418,7 +1421,7 @@ developed onto lm-moments at order 2 (can be memory/CPU consuming)
 
 <br><font id="title"><a name="prtefg">prtefg</a></font>
 <br><font id="mnemonics">Mnemonics: PRint Electric Field Gradient</font>
-<br><font id="characteristic">Characteristic: </font>
+<br><font id="mnemonics">Executable: abinit</font>
 <br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_printing.html">printing</a> </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
@@ -1453,7 +1456,7 @@ results to those of simple ion-only models. Use of prtefg=3 requires that the va
 
 <br><font id="title"><a name="prtfc">prtfc</a></font>
 <br><font id="mnemonics">Mnemonics: PRinT Fermi Contact term</font>
-<br><font id="characteristic">Characteristic: </font>
+<br><font id="mnemonics">Executable: abinit</font>
 <br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_printing.html">printing</a> </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
@@ -1480,7 +1483,7 @@ PAW on-site corrections in addition to the contribution from the valence pseudo-
 
 <br><font id="title"><a name="prtnabla">prtnabla</a></font>
 <br><font id="mnemonics">Mnemonics: PRint NABLA</font>
-<br><font id="characteristic">Characteristic: </font>
+<br><font id="mnemonics">Executable: abinit</font>
 <br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_printing.html">printing</a> </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
@@ -1504,7 +1507,7 @@ Only relevant if <a href="../../input_variables/generated_files/varint.html#usep
 
 <br><font id="title"><a name="ptcharge">ptcharge</a></font>
 <br><font id="mnemonics">Mnemonics: PoinT CHARGEs</font>
-<br><font id="characteristic">Characteristic: </font>
+<br><font id="mnemonics">Executable: abinit</font>
 <br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_DFPT.html">DFPT</a> </font>
 <br><font id="vartype">Variable type: real(<a href="../../input_variables/generated_files/varbas.html#ntypat">ntypat</a>)</font>
 <br><font id="default">Default is *0</font>
@@ -1536,7 +1539,7 @@ point charges he/she wishes for each atom type.
 
 <br><font id="title"><a name="quadmom">quadmom</a></font>
 <br><font id="mnemonics">Mnemonics: QUADrupole MOMents</font>
-<br><font id="characteristic">Characteristic: </font>
+<br><font id="mnemonics">Executable: abinit</font>
 <br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_DFPT.html">DFPT</a> </font>
 <br><font id="vartype">Variable type: real(<a href="../../input_variables/generated_files/varbas.html#ntypat">ntypat</a>)</font>
 <br><font id="default">Default is *0</font>
@@ -1564,7 +1567,7 @@ option <a href="../../input_variables/generated_files/varpaw.html#prtefg">prtefg
 
 <br><font id="title"><a name="spnorbscl">spnorbscl</a></font>
 <br><font id="mnemonics">Mnemonics: SPin-ORBit SCaLing</font>
-<br><font id="characteristic">Characteristic: </font>
+<br><font id="mnemonics">Executable: abinit</font>
 <br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_PAW.html">PAW</a> </font>
 <br><font id="vartype">Variable type: real</font>
 <br><font id="default">Default is 1.0</font>
@@ -1586,6 +1589,7 @@ but are not expected to correspond to any physical situation.
 
 <br><font id="title"><a name="upawu">upawu</a></font>
 <br><font id="mnemonics">Mnemonics: value of U for PAW+U</font>
+<br><font id="mnemonics">Executable: abinit</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/generated_files/help_abinit.html#ENERGY">ENERGY</a></font>
 <br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_DFT+U.html">DFT+U</a> </font>
 <br><font id="vartype">Variable type: real(<a href="../../input_variables/generated_files/varbas.html#ntypat">ntypat</a>)</font>
@@ -1637,7 +1641,7 @@ upawu4   5.5 eV   ! This is for the screening calculation
 
 <br><font id="title"><a name="usedmatpu">usedmatpu</a></font>
 <br><font id="mnemonics">Mnemonics: USE of an initial Density MATrix in Paw+U</font>
-<br><font id="characteristic">Characteristic: </font>
+<br><font id="mnemonics">Executable: abinit</font>
 <br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_DFT+U.html">DFT+U</a> </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
@@ -1673,7 +1677,7 @@ If the symmetry is not respected in the input, the matrix is however automatical
 
 <br><font id="title"><a name="useexexch">useexexch</a></font>
 <br><font id="mnemonics">Mnemonics: USE of EXact EXCHange</font>
-<br><font id="characteristic">Characteristic: </font>
+<br><font id="mnemonics">Executable: abinit</font>
 <br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_xc.html">xc</a> </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
@@ -1695,7 +1699,7 @@ in PAW, inside PAW spheres only, and only for correlated orbitals given by
 
 <br><font id="title"><a name="usepawu">usepawu</a></font>
 <br><font id="mnemonics">Mnemonics: USE PAW+U (spherical part)</font>
-<br><font id="characteristic">Characteristic: </font>
+<br><font id="mnemonics">Executable: abinit</font>
 <br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_DFT+U.html">DFT+U</a> </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
@@ -1783,7 +1787,7 @@ a smaller U than the one used in the DFT calculation. See the description of the
 
 <br><font id="title"><a name="usepotzero">usepotzero</a></font>
 <br><font id="mnemonics">Mnemonics: USE POTential ZERO</font>
-<br><font id="characteristic">Characteristic: </font>
+<br><font id="mnemonics">Executable: abinit</font>
 <br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_otherGS.html">otherGS</a> </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
@@ -1810,7 +1814,7 @@ a smaller U than the one used in the DFT calculation. See the description of the
 
 <br><font id="title"><a name="usexcnhat">usexcnhat</a></font>
 <br><font id="mnemonics">Mnemonics: USE eXchange-Correlation with NHAT (compensation charge density)</font>
-<br><font id="characteristic">Characteristic: </font>
+<br><font id="mnemonics">Executable: abinit</font>
 <br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_PAW.html">PAW</a> </font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is -1</font>

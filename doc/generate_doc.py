@@ -529,18 +529,23 @@ for i, var in enumerate(abinit_vars):
 
   try:
     # Title
+    varname_split=var.abivarname.split("@")
+    executable="abinit"
+    if len(varname_split)>1:
+      executable=varname_split[1].strip()
     cur_content += '<br><font id="title"><a name="%s">%s</a></font>\n'%(var.abivarname,var.abivarname.split("@")[0])
     # Mnemonics
     cur_content += '<br><font id="mnemonics">Mnemonics: '+var.mnemonics+'</font>\n'
+    # Executable
+    cur_content += '<br><font id="mnemonics">Executable: '+executable+'</font>\n'
     # Characteristics
     if var.characteristics is not None:
       chars = ""
       for chs in var.characteristics:
         chars += chs+", "
-      chars = chars[:-2]
-      cur_content += '<br><font id="characteristic">Characteristic: '+make_links(chars,var.abivarname,allowed_link_seeds,backlinks,backlink)+'</font>\n'
-    else:
-      cur_content += '<br><font id="characteristic">Characteristic: </font>\n'
+      chars = chars[:-2].strip()
+      if chars!="":
+        cur_content += '<br><font id="characteristic">Characteristic: '+make_links(chars,var.abivarname,allowed_link_seeds,backlinks,backlink)+'</font>\n'
     # Topics
     try:
       if var.topics is not None :
