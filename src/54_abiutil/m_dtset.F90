@@ -954,7 +954,6 @@ subroutine dtset_copy(dtout, dtin)
  dtout%exchmix            = dtin%exchmix
  dtout%fband              = dtin%fband
  dtout%gwls_model_parameter = dtin%gwls_model_parameter
- dtout%gwls_second_model_parameter = dtin%gwls_second_model_parameter
  dtout%spinmagntarget     = dtin%spinmagntarget
  dtout%friction           = dtin%friction
  dtout%fxcartfactor       = dtin%fxcartfactor

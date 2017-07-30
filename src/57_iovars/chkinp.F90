@@ -877,11 +877,6 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
 ! gwls_model_parameter
    call chkdpr(0,0,cond_string,cond_values,ierr,'gwls_model_parameter',dt%gwls_model_parameter,1,zero,iout)
 
-! gwls_second_model_parameter
-   call chkdpr(0,0,cond_string,cond_values,ierr,'gwls_second_model_parameter',  &
-   dt%gwls_second_model_parameter,1,-1000.0_dp,iout)
-
-
 ! gwls_print_debug
    call chkint_ge(0,0,cond_string,cond_values,ierr,'gwls_print_debug',dt%gwls_print_debug,0,iout)
 

@@ -337,7 +337,6 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%gwfockmix=0.25_dp
    dtsets(idtset)%gwls_sternheimer_kmax=1
    dtsets(idtset)%gwls_model_parameter=1.0_dp
-   dtsets(idtset)%gwls_second_model_parameter=0.0_dp
    dtsets(idtset)%gwls_npt_gauss_quad=10
    dtsets(idtset)%gwls_dielectric_model=2
    dtsets(idtset)%gwls_print_debug=0

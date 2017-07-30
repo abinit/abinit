@@ -692,7 +692,6 @@ type dataset_type
  real(dp) :: gwencomp
  real(dp) :: gwfockmix
  real(dp) :: gwls_model_parameter         ! Parameter used in modelization of dielectric function
- real(dp) :: gwls_second_model_parameter  ! another Parameter used in modelization of dielectric function
  real(dp) :: gw_toldfeig
  real(dp) :: kptnrm
  real(dp) :: kptrlen

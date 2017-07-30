@@ -286,9 +286,6 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'gwls_model_parameter',tread,'ENE')
  if(tread==1) dtset%gwls_model_parameter=dprarr(1)
 
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'gwls_second_model_parameter',tread,'ENE')
- if(tread==1) dtset%gwls_second_model_parameter=dprarr(1)
-
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'gwls_recycle',tread,'INT')
  if(tread==1) dtset%gwls_recycle=intarr(1)
 
