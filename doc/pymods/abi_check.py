@@ -14,8 +14,7 @@ except ImportError:
 def main():
   path = '../input_variables/origin_files/'
   path_topics = '../topics/origin_files/'
-  with open(path+'abinit_vars.yml', 'r') as f:
-    variables = yaml.load(f)
+  path_abinit_vars = path+'abinit_vars.yml'
   with open(path+'characteristics.yml', 'r') as f:
     characteristics = yaml.load(f)
   with open(path+'varsets.yml', 'r') as f:
@@ -34,6 +33,57 @@ def main():
       tribe_names.append(item[0].strip())
 
   retcode = 0
+
+  #Detect incorrect YAML syntax (at least, the ones not compatible with the yaml python module ...) by brute force
+  #specific means
+  with open(path_abinit_vars,'r') as f:
+    abinit_vars=f.readlines()
+    for i,line in enumerate(abinit_vars):
+      if ("abivarname"==line.lstrip()[:10] or
+          "characteristics"==line.lstrip()[:15] or
+          "commentdefault"==line.lstrip()[:14] or
+          "commentdims"==line.lstrip()[:11] or
+          "defaultval"==line.lstrip()[:10] or
+          "dimensions"==line.lstrip()[:10] or
+          "excludes"==line.lstrip()[:8] or
+          "executables"==line.lstrip()[:11] or
+          "mnemonics"==line.lstrip()[:10] or
+          "requires"==line.lstrip()[:9] or
+          "text"==line.lstrip()[:4] or
+          "topics"==line.lstrip()[:6] or
+          "varset"==line.lstrip()[:6] or
+          "vartype"==line.lstrip()[:7]):
+        line_split=line.strip().split(":",1)
+        if len(line_split)>1:
+
+          if line_split[1] !=""  and line_split[1][0] != " ":
+            print('FAIL: detected a non-blank character after the first colon in the line number %s :'%(i+1))
+            print(line)
+            print('This is not allowed by YAML syntax.')
+            retcode+=1
+
+          line1=line_split[1].strip()
+          if len(line1)>0:
+            line1_split=line1.strip().split(":",1)
+            if len(line1_split)>1:
+              if not  ( "'" in line1_split[0] or
+                        '"' in line1_split[0] or  
+                        "(" in line1_split[0] or 
+                        "[" in line1_split[0] ):
+                print('FAIL: detected a second colon in the line %s :'%(i+1))
+                print(line)
+                print(line1)
+                print("line1_split:",line1_split) 
+                print('This is not allowed by YAML syntax.')
+                retcode+=1
+
+  if retcode>0:
+    sys.exit()
+
+  #Load abinit_vars.yml using YAML syntax.
+  with open(path_abinit_vars, 'r') as f:
+    variables = yaml.load(f)
+
   for var in variables:
 
     if var.abivarname is None:
