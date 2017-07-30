@@ -13,7 +13,7 @@
     text: |-
         <p>Smearing width for the Eliashberg alpha^2F function
         (similar to a phonon DOS), which is sampled on a finite q and k grid. The Dirac delta
-        functions in energy are replaced by Gaussians of width a2fsmear
+        functions in energy are replaced by Gaussians of width <b>a2fsmear</b>
         (by default in Hartree).
     topics: null
     varset: varanaddb
@@ -938,7 +938,7 @@
         <li>  0 => no ASR for interatomic force constants is imposed.</li>
         <li>  1 or 2 => the ASR for interatomic force constants
         is imposed by modifying the on-site interatomic force constants,
-        in a symmetric way (asr=2), or in the more general case, unconstrained way (asr=1).</li>
+        in a symmetric way (<b>asr</b>=2), or in the more general case, unconstrained way (<b>asr</b>=1).</li>
         </ul>
         <p>
 
@@ -1226,7 +1226,7 @@
     requires: null
     text: |-
         <p>Allow setting the target band gap, in eV.
-        ([[anaddb:elphflag]]=1).
+        ([[elphflag@anaddb]]=1).
     topics: null
     varset: varanaddb
     vartype: real
@@ -16222,7 +16222,7 @@
     text: |-
         <p>Give the number of atoms for which atomic-projected phonon
         band structures will be output. The list of these atoms is provided
-        by [[anaddb:iatprj_bs]].
+        by [[iatprj_bs@anaddb]].
     topics: null
     varset: varanaddb
     vartype: integer

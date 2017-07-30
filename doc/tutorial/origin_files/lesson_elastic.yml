@@ -656,24 +656,10 @@ body : |
                       </p>
   
   <ul>
-  
-  
-    <li><a href="../../users/generated_files/help_anaddb.html#elaflag" target="kwimg">elaflag</a>
-                        </li>
-  
-  
-    <li><a href="../../users/generated_files/help_anaddb.html#piezoflag" target="kwimg">piezoflag</a>
-                        </li>
-  
-  
-    <li><a href="../../users/generated_files/help_anaddb.html#instrflag" target="kwimg">instrflag</a>
-                          <br>
-                        </li>
-  
-  
-    <li><a href="../../users/generated_files/help_anaddb.html#chneut" target="kwimg">chneut</a>
-                        </li>
-  
+    <li>[[anaddb:elaflag]],</li>
+    <li>[[anaddb:piezoflag]],</li>
+    <li>[[anaddb:instrflag]],</li>
+    <li>[[anaddb:chneut]].</li>
   </ul>
                                 For the theory underlying the incorporation
   of  atom-relaxation         corrections,      it is recommended you see <cite>

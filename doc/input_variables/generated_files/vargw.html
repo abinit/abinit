@@ -93,7 +93,6 @@ variables to be used in the main input file of the abinit code.
  <a href="#gwls_nseeds">gwls_nseeds</a>&nbsp;&nbsp;
  <a href="#gwls_print_debug">gwls_print_debug</a>&nbsp;&nbsp;
  <a href="#gwls_recycle">gwls_recycle</a>&nbsp;&nbsp;
- <a href="#gwls_second_model_parameter">gwls_second_model_parameter</a>&nbsp;&nbsp;
  <a href="#gwls_stern_kmax">gwls_stern_kmax</a>&nbsp;&nbsp;
  <a href="#gwmem">gwmem</a>&nbsp;&nbsp;
  <a href="#gwrpacorr">gwrpacorr</a>&nbsp;&nbsp;
@@ -2253,25 +2252,6 @@ Therefore, it is often not possible to store them in RAM in production calculati
 This is when it becomes interesting to store them on disk.
 It is particularly efficient to choose the path of the file to be on disk space local to the processor in large MPI calculations, since each processor need only his own solutions in the construction of the basis.
 </p>
-</font>
-
-<br><br><a href=#top>Go to the top</a>
-<B> | </B><a href="varset_allvars.html#top">Complete list of input variables</a><hr>
-
-
-<br><font id="title"><a name="gwls_second_model_parameter">gwls_second_model_parameter</a></font>
-<br><font id="mnemonics">Mnemonics: GWLS SECOND MODEL PARAMETER</font>
-<br><font id="mnemonics">Executable: abinit</font>
-<br><font id="characteristic">Characteristic: <a href="../../users/generated_files/help_abinit.html#GW">GW</a>, <a href="../../users/generated_files/help_abinit.html#ENERGY">ENERGY</a></font>
-<br><font id="characteristic">Mentioned in "How to": <a href="../../topics/generated_files/topic_GWls.html">GWls</a> </font>
-<br><font id="vartype">Variable type: real</font>
-<br><font id="default">Default is 0.0</font>
-<br><br><font id="requires">
-Only relevant if <a href="../../input_variables/generated_files/vargs.html#optdriver">optdriver</a>==66
-</font>
-<br><font id="text">
-<p>
-Not used yet.
 </font>
 
 <br><br><a href=#top>Go to the top</a>
