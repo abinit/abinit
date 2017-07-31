@@ -42,9 +42,10 @@ for path in filelist:
     file_new=[]
     i_new=0
     for i_old,line in enumerate(file_old):
-      if not "executables" in line:
-        file_new.append(line)
-        i_new+=1
+      if "anavarname" in line:
+        line=line.replace("anavarname","abivarname").rstrip()+"@anaddb\n"
+      file_new.append(line)
+      i_new+=1
     #####################################################
 
   #Open the new file, and write the content of file_new

@@ -7,7 +7,6 @@
     defaultval: 2.0E-5
     dimensions: scalar
     excludes: null
-    executables: anaddb
     mnemonics: Alpha2F SMEARing factor
     requires: null
     text: |-
@@ -26,7 +25,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: ACCURACY
     requires: null
     text: |-
@@ -612,7 +610,6 @@
     dimensions:
     - 3
     excludes: null
-    executables: abinit
     mnemonics: CELL lattice vector scaling
     requires: null
     text: |-
@@ -643,7 +640,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: ADiabatic Path-Integral Molecular Dynamics
     requires: '[[imgmov]]==9 or [[imgmov]]==13'
     text: |-
@@ -679,7 +675,6 @@
     defaultval: 1
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: 'ADiabatic Path-Integral Molecular Dynamics: GAMMA factor'
     requires: '[[adpimd]]==1 and [[imgmov]] in [9,13]'
     text: |-
@@ -702,7 +697,6 @@
     dimensions:
     - '[[ntypalch]]'
     excludes: null
-    executables: abinit
     mnemonics: ALGorithm for generating ALCHemical pseudopotentials
     requires: null
     text: |-
@@ -759,7 +753,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: anaddb
     mnemonics: ALign PHONon mode eigendisplacements
     requires: null
     text: |-
@@ -782,7 +775,6 @@
     dimensions:
     - '[[ntypat]]'
     excludes: null
-    executables: abinit
     mnemonics: Atomic Mass Units
     requires: null
     text: |-
@@ -845,7 +837,6 @@
     dimensions:
     - 3
     excludes: null
-    executables: abinit
     mnemonics: ANGles in DEGrees
     requires: null
     text: |-
@@ -913,7 +904,6 @@
     defaultval: 1
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Acoustic Sum Rule
     requires: null
     text: |-
@@ -929,7 +919,6 @@
     defaultval: 1
     dimensions: scalar
     excludes: null
-    executables: anaddb
     mnemonics: Acoustic Sum Rule
     requires: null
     text: |-
@@ -1012,7 +1001,6 @@
     defaultval: 0.05
     dimensions: scalar
     excludes: null
-    executables: anaddb
     mnemonics: ATomic Temperature Factor TOLerance
     requires: null
     text: |-
@@ -1033,7 +1021,6 @@
     dimensions:
     - '[[anaddb:natifc]]'
     excludes: null
-    executables: anaddb
     mnemonics: AToms for IFC analysis
     requires: null
     text: |-
@@ -1059,7 +1046,6 @@
     - '[[nsppol]]'
     - '[[natom]]'
     excludes: null
-    executables: abinit
     mnemonics: ATomic potential (V) energy SHIFTs
     requires: '[[usepawu]] /= 0 and [[natvshift]] in [5,7]'
     text: |-
@@ -1096,7 +1082,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: AUTOmatisation of the PARALlelism
     requires: null
     text: |-
@@ -1185,7 +1170,6 @@
     defaultval: 1
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: evaluate the Adler-Wiser expression of $\chi^{0}_{KS}$ assuming Time-Reversal
     requires: '[[optdriver]]==3'
     text: |-
@@ -1221,7 +1205,6 @@
     defaultval: 999.0
     dimensions: scalar
     excludes: null
-    executables: anaddb
     mnemonics: BAND GAP
     requires: null
     text: |-
@@ -1239,7 +1222,6 @@
     defaultval: 1
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: BAND Per Processor
     requires: '[[paral_kgb]]==1'
     text: |-
@@ -1291,7 +1273,6 @@
     dimensions:
     - 4
     excludes: null
-    executables: abinit
     mnemonics: BanD limits for BERRY phase
     requires: '[[berryopt]] in [1, 2, 3] and [[nberry]] > 0'
     text: |-
@@ -1325,7 +1306,6 @@
     defaultval: -1
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: BanD for second-order EIGenvalues from Response-Function
     requires: '[[ieig2rf]] in [1,2,3,4,5]'
     text: |-
@@ -1355,7 +1335,6 @@
     - '[[nkptgw]]'
     - '[[nsppol]]'
     excludes: null
-    executables: abinit
     mnemonics: BanDs for GW calculation
     requires: '[[optdriver]]==4'
     text: |-
@@ -1412,7 +1391,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: BERRY phase OPTions
     requires: null
     text: |-
@@ -1544,7 +1522,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: BERRY SAVe
     requires: null
     text: |-
@@ -1570,7 +1547,6 @@
     defaultval: 1
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: 'BERRY phase : multiple STEP'
     requires: 0 > [[berryopt]]
     text: |-
@@ -1600,7 +1576,6 @@
     dimensions:
     - 3
     excludes: null
-    executables: abinit
     mnemonics: finite B FIELD calculation
     requires: null
     text: |-
@@ -1618,7 +1593,6 @@
     defaultval: 10
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Barostat MASS
     requires: null
     text: |-
@@ -1641,7 +1615,6 @@
     dimensions:
     - 3
     excludes: null
-    executables: abinit
     mnemonics: BOX CENTER
     requires: null
     text: |-
@@ -1666,7 +1639,6 @@
     defaultval: 2.0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: BOX CUT-off MINimum
     requires: null
     text: |-
@@ -1692,7 +1664,6 @@
     defaultval: 1
     dimensions: scalar
     excludes: null
-    executables: anaddb
     mnemonics: BRAVais
     requires: null
     text: |-
@@ -1724,7 +1695,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: BRaVais LaTTice type
     requires: '[[spgroup]] != 0'
     text: |-
@@ -1814,7 +1784,6 @@
     defaultval: 2
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Bethe-Salpeter ALGORITHM
     requires: '[[optdriver]] == 99'
     text: |-
@@ -1861,7 +1830,6 @@
     defaultval: 1
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Bethe-Salpeter CALCulation TYPE
     requires: '[[optdriver]] == 99'
     text: |-
@@ -1895,7 +1863,6 @@
     defaultval: 11
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Bethe-Salpeter COULOMB TERM
     requires: '[[optdriver]] == 99'
     text: |-
@@ -1947,7 +1914,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Bethe-Salpeter COUPLING
     requires: '[[optdriver]] == 99'
     text: |-
@@ -1983,7 +1949,6 @@
     dimensions:
     - 2
     excludes: null
-    executables: abinit
     mnemonics: Bethe-Salpeter Electron-Hole CUTOFF
     requires: '[[optdriver]] == 99'
     text: |-
@@ -2004,7 +1969,6 @@
     defaultval: 1
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Bethe-Salpeter EXCHANGE TERM
     requires: '[[optdriver]] == 99'
     text: |-
@@ -2030,7 +1994,6 @@
     dimensions:
     - 3
     excludes: null
-    executables: abinit
     mnemonics: Bethe-Salpeter FREQuency MESH
     requires: '[[optdriver]] == 99'
     text: |-
@@ -2054,7 +2017,6 @@
     defaultval: 1
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Bethe-Salpeter HAYdock TERMinator
     requires: '[[optdriver]] == 99 and [[bs_algorithm]]==2'
     text: |-
@@ -2088,7 +2050,6 @@
     defaultval: 100
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Bethe-Salpeter HAYDOCK Number of ITERations
     requires: '[[optdriver]] == 99 and [[bs_algorithm]]==2'
     text: |-
@@ -2112,7 +2073,6 @@
     dimensions:
     - 2
     excludes: null
-    executables: abinit
     mnemonics: Bethe-Salpeter HAYDOCK TOLerance
     requires: '[[optdriver]] == 99 and [[bs_algorithm]]==2'
     text: |-
@@ -2163,7 +2123,6 @@
     dimensions:
     - 3
     excludes: null
-    executables: abinit
     mnemonics: Bethe-Salpeter INTERPolation K-point MULTiplication factors
     requires: '[[bs_interp_mode]] > 0 and [[bs_algorithm]]==2 and [[bs_coupling]]==0'
     text: |-
@@ -2187,7 +2146,6 @@
     defaultval: 1.0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Bethe-Salpeter INTERPolation Method3 WIDTH
     requires: '[[bs_interp_mode]]==3 and [[bs_algorithm]]==2 and [[bs_coupling]]==0'
     text: |-
@@ -2204,7 +2162,6 @@
     defaultval: 1
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Bethe-Salpeter INTERPolation METHOD
     requires: '[[bs_interp_mode]] > 0 and [[bs_algorithm]]==2 and [[bs_coupling]]==0'
     text: |-
@@ -2231,7 +2188,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Bethe-Salpeter INTERPolation MODE
     requires: '[[bs_interp_mode]] > 0 and [[bs_algorithm]]==2 and [[bs_coupling]]==0'
     text: |-
@@ -2264,7 +2220,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Bethe-Salpeter INTERPolation PREParation
     requires: '[[bs_interp_mode]] > 0 and [[bs_algorithm]]==2 and [[bs_coupling]]==0'
     text: |-
@@ -2284,7 +2239,6 @@
     defaultval: 1
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Bethe-Salpeter INTERPolation Rohlfing & Louie NeighBour
     requires: '[[bs_interp_mode]] > 0 and [[bs_algorithm]]==2 and [[bs_interp_method]]
         == 1 and [[bs_coupling]]==0'
@@ -2303,7 +2257,6 @@
     dimensions:
     - '[[nsppol]]'
     excludes: null
-    executables: abinit
     mnemonics: Bethe-Salpeter Lowest Occupied BAND
     requires: '[[optdriver]] == 99'
     text: |-
@@ -2324,7 +2277,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Bethe-Salpeter Number of STATES
     requires: '[[optdriver]] == 99 and [[bs_algorithm]] in [2,3]'
     text: |-
@@ -2346,7 +2298,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: BUIT-IN TEST number
     requires: null
     text: |-
@@ -2370,7 +2321,6 @@
     defaultval: 2.0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: BoX CuT-off MINimum for the Double Grid (PAW)
     requires: '[[usepaw]]==1'
     text: |-
@@ -2403,7 +2353,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Contour Deformation CUSTOM IMaginary FReQuencieS
     requires: ([[optdriver]]==3 or [[optdriver]]==4) and [[gwcalctyp]] in [2,9,12,19,22,29]
     text: |-
@@ -2423,7 +2372,6 @@
     defaultval: 1
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Contour Deformation FReQuency integration on IMaginary axis Method
     requires: '[[optdriver]]==4  and [[gwcalctyp]] in [2,9,12,19,22,29]'
     text: |-
@@ -2760,7 +2708,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Contour Deformation FULL GRID in complex plane
     requires: '[[optdriver]]==3 and [[gwcalctyp]] in [2,9,12,19,22,29]'
     text: |-
@@ -2801,7 +2748,6 @@
         value: 100.0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Contour Deformation tangent grid HALFWAY FREQuency
     requires: ([[optdriver]]==3 or [[optdriver]]==4) and [[gwcalctyp]] in [2,9,12,19,22,29]
     text: |-
@@ -2823,7 +2769,6 @@
     dimensions:
     - '[[cd_customnimfrqs]]'
     excludes: null
-    executables: abinit
     mnemonics: Contour Deformation IMaginary FReQuencieS
     requires: '[[optdriver]]==3 and [[gwcalctyp]] in [2,9,12,19,22,29] and
         [[cd_customnimfrqs]] != 0'
@@ -2871,7 +2816,6 @@
         value: 1000.0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Contour Deformation grid MAXimum FREQuency
     requires: ([[optdriver]]==3 or [[optdriver]]==4) and [[gwcalctyp]] in [2,9,12,19,22,29]
     text: |-
@@ -2895,7 +2839,6 @@
     dimensions:
     - 2
     excludes: null
-    executables: abinit
     mnemonics: Contour Deformation grid calculate SUBSET of FREQuencies
     requires: '[[optdriver]]==3 and [[gwcalctyp]] in [2,9,12,19,22,29] and  [[gw_frqre_tangrid]]==0'
     text: |-
@@ -2931,7 +2874,6 @@
         defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Conjugate Gradient TYPe used for Hartree Fock exact exchange
     requires: null
     text: |-
@@ -2954,7 +2896,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: CHARGE
     requires: null
     text: |-
@@ -2999,7 +2940,6 @@
     -   -   - nzchempot
     -   -   - ntype
     excludes: null
-    executables: abinit
     mnemonics: spatially varying CHEMical POTential
     requires: '[[nzchempot]]/=0'
     text: |-
@@ -3025,7 +2965,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: CHecK whether the user want to EXIT
     requires: null
     text: |-
@@ -3064,7 +3003,6 @@
     defaultval: 1
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: CHecK whether the cell is PRIMitive
     requires: null
     text: |-
@@ -3093,7 +3031,6 @@
     defaultval: 1
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: CHecK SYMmetry BREAKing
     requires: null
     text: |-
@@ -3154,7 +3091,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: 'CHarge NEUTrality treatment '
     requires: null
     text: |-
@@ -3171,7 +3107,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: anaddb
     mnemonics: Integer for CHarge NEUTrality treatment
     requires: null
     text: |-
@@ -3205,7 +3140,6 @@
     defaultval: 7
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: 'Climbing-Image Nudged Elastic Band: STARTing iteration'
     requires: '[[imgmov]]== 5 and [[neb_algo]]==2'
     text: |-
@@ -3233,7 +3167,6 @@
     defaultval: 0.0
     dimensions: scalar
     excludes: specified([[cpum]]) or specified([[cpus]])
-    executables: abinit
     mnemonics: CPU time limit in Hours
     requires: null
     text: |-
@@ -3260,7 +3193,6 @@
     defaultval: 0.0
     dimensions: scalar
     excludes: specified([[cpum]]) or specified([[cpus]])
-    executables: abinit
     mnemonics: CPU time limit in Minutes
     requires: null
     text: |-
@@ -3287,7 +3219,6 @@
     defaultval: 0.0
     dimensions: scalar
     excludes: specified([[cpum]]) or specified([[cpus]])
-    executables: abinit
     mnemonics: CPU time limit in seconds
     requires: null
     text: |-
@@ -3317,7 +3248,6 @@
     dimensions:
     - 2
     excludes: null
-    executables: abinit
     mnemonics: '3rd Derivative of Energy, mixed PERTurbation 1: limits of
         ATomic POLarisations'
     requires: '[[optdriver]]==5 (non-linear response computations)'
@@ -3345,7 +3275,6 @@
     dimensions:
     - 3
     excludes: null
-    executables: abinit
     mnemonics: '3rd Derivative of Energy, mixed PERTurbation 1: DIRections'
     requires: '[[optdriver]]==5 (non-linear response computations)'
     text: |-
@@ -3369,7 +3298,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: '3rd Derivative of Energy, mixed PERTurbation 1: ELectric FielD'
     requires: '[[optdriver]]==5 (non-linear response computations)'
     text: |-
@@ -3391,7 +3319,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: '3rd Derivative of Energy, mixed PERTurbation 1: PHONons'
     requires: '[[optdriver]]==5 (non-linear response computations)'
     text: |-
@@ -3414,7 +3341,6 @@
     dimensions:
     - 2
     excludes: null
-    executables: abinit
     mnemonics: '3rd Derivative of Energy, mixed PERTurbation 2: limits of
         ATomic POLarisations'
     requires: '[[optdriver]]==5 (non-linear response computations)'
@@ -3442,7 +3368,6 @@
     dimensions:
     - 3
     excludes: null
-    executables: abinit
     mnemonics: '3rd Derivative of Energy, mixed PERTurbation 2: DIRections'
     requires: '[[optdriver]]==5 (non-linear response computations)'
     text: |-
@@ -3466,7 +3391,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: '3rd Derivative of Energy, mixed PERTurbation 2: ELectric FielD'
     requires: '[[optdriver]]==5 (non-linear response computations)'
     text: |-
@@ -3488,7 +3412,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: '3rd Derivative of Energy, mixed PERTurbation 2: PHONons'
     requires: '[[optdriver]]==5 (non-linear response computations)'
     text: |-
@@ -3511,7 +3434,6 @@
     dimensions:
     - 2
     excludes: null
-    executables: abinit
     mnemonics: '3rd Derivative of Energy, mixed PERTurbation 3: limits of
         ATomic POLarisations'
     requires: '[[optdriver]]==5 (non-linear response computations)'
@@ -3539,7 +3461,6 @@
     dimensions:
     - 3
     excludes: null
-    executables: abinit
     mnemonics: '3rd Derivative of Energy, mixed PERTurbation 3: DIRections'
     requires: '[[optdriver]]==5 (non-linear response computations)'
     text: |-
@@ -3563,7 +3484,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: '3rd Derivative of Energy, mixed PERTurbation 3: ELectric FielD'
     requires: '[[optdriver]]==5 (non-linear response computations)'
     text: |-
@@ -3585,7 +3505,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: '3rd Derivative of Energy, mixed PERTurbation 3: PHONons'
     requires: '[[optdriver]]==5 (non-linear response computations)'
     text: |-
@@ -3604,7 +3523,6 @@
     defaultval: 0.1
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: electric Displacement field DAMPing parameter
     requires: '[[berryopt]] = 6 or 16'
     text: |-
@@ -3636,7 +3554,6 @@
     dimensions:
     - 3
     excludes: null
-    executables: abinit
     mnemonics: 'Derivative DatabBase: Number of Grid points for Q-PoinTs'
     requires: null
     text: |-
@@ -3658,7 +3575,6 @@
     dimensions:
     - 3
     excludes: null
-    executables: abinit
     mnemonics: 'Derivative DataBase: SHIFT of the Q-points '
     requires: null
     text: |-
@@ -3677,7 +3593,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: DELAY between trials to PERMUTE atoms
     requires: null
     text: |-
@@ -3702,7 +3617,6 @@
         defaultval: 2
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: DENSity and FORces PREDictor
     requires: '[[iscf]] >0'
     text: |-
@@ -3828,7 +3742,6 @@
     dimensions:
     - '[[ntypat]]'
     excludes: null
-    executables: abinit
     mnemonics: initial DENSity for each TYpe of atom
     requires: null
     text: |-
@@ -3858,7 +3771,6 @@
     dimensions:
     - 3
     excludes: null
-    executables: abinit
     mnemonics: Displacement FIELD
     requires: '[[berryopt]] = 6, [[efield]]'
     text: |-
@@ -3879,7 +3791,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: DFPT SCISSor operator
     requires: null
     text: |-
@@ -3911,7 +3822,6 @@
     defaultval: 2.2
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: DIElectric matrix energy CUToff
     requires: null
     text: |-
@@ -3956,7 +3866,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: anaddb
     mnemonics: DIElectric FLAG
     requires: null
     text: |-
@@ -4029,7 +3938,6 @@
     defaultval: 0.1
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: DIElectric matrix GAP
     requires: null
     text: |-
@@ -4057,7 +3965,6 @@
     defaultval: 0.5
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: DIElectric matrix LAMbda
     requires: '[[iprcel]] >= 21'
     text: |-
@@ -4079,7 +3986,6 @@
     defaultval: 1.0774841d0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: model DIElectric screening LeNGth
     requires: null
     text: |-
@@ -4140,7 +4046,6 @@
     defaultval: 1000000.0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: model DIElectric MACroscopic constant
     requires: null
     text: |-
@@ -4198,7 +4103,6 @@
         defaultval: null
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: model DIElectric MIXing factor
     requires: '[[diemix]] &gt;= 0.0 and [[diemix]] &lt;=  1.0'
     text: |-
@@ -4241,7 +4145,6 @@
         defaultval: -[[diemix]]
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: model DIElectric MIXing factor for the MAGgnetization
     requires: null
     text: |-
@@ -4275,7 +4178,6 @@
     defaultval: 8
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Direct Inversion in the Iterative Subspace MEMORY
     requires: null
     text: |-
@@ -4296,7 +4198,6 @@
     defaultval: 1.0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: 'lattice DILATation : MaXimal value'
     requires: null
     text: |-
@@ -4350,7 +4251,6 @@
     defaultval: 1
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: 'DIPole-DIPole interaction '
     requires: null
     text: |-
@@ -4367,7 +4267,6 @@
     defaultval: 1
     dimensions: scalar
     excludes: null
-    executables: anaddb
     mnemonics: DIPole-DIPole interaction
     requires: null
     text: |-
@@ -4402,7 +4301,6 @@
     - max([[nsppol]], [[nspinor]])
     - '[[natpawu]]'
     excludes: null
-    executables: abinit
     mnemonics: initial Density MATrix for PAW+U
     requires: '[[usepaw]]==1 and [[usepawu]]==1 and [[usedmatpu]]!=0'
     text: |-
@@ -4537,7 +4435,6 @@
     defaultval: 2
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Density MATrix for PAW+U OPTion
     requires: '[[usepaw]]==1 and [[usepawu]]==1'
     text: |-
@@ -4578,7 +4475,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Density MATrix for paw+U, DIAGonalization
     requires: '[[usepaw]]==1 and [[usepawu]]==1 and [[nspden]] != 4'
     text: |-
@@ -4614,7 +4510,6 @@
     defaultval: 1
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: 'Dynamical Mean Fied Theory: Double Counting'
     requires: null
     text: |-
@@ -4633,7 +4528,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: 'Dynamical Mean Fied Theory: ENTROPY'
     requires: '[[usedmft]]==1 and [[dmft_solv]]==5'
     text: |-
@@ -4652,7 +4546,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: 'Dynamical Mean Fied Theory: number of ITERation'
     requires: null
     text: |-
@@ -4672,7 +4565,6 @@
     defaultval: 0.3
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: 'Dynamical Mean Fied Theory: MiXing parameter for the SelF
         energy'
     requires: null
@@ -4693,7 +4585,6 @@
     defaultval: 6
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: 'Dynamical Mean Fied Theory: Number of LAMBDA points'
     requires: '[[usedmft]]==1 and [[dmft_entropy]]==1'
     text: |-
@@ -4711,7 +4602,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: 'Dynamical Mean Fied Theory: Number of frequency omega (W)
         in the LInear mesh'
     requires: null
@@ -4732,7 +4622,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: 'Dynamical Mean Fied Theory: Number of frequency omega (W)
         in the LOg mesh'
     requires: null
@@ -4753,7 +4642,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: 'Dynamical Mean Fied Theory: READ OCCupations (Non Diagonal)'
     requires: null
     text: |-
@@ -4790,7 +4678,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: 'Dynamical Mean Fied Theory: Read SeLF energy'
     requires: null
     text: |-
@@ -4809,7 +4696,6 @@
     defaultval: 5
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: 'Dynamical Mean Fied Theory: choice of SOLVer'
     requires: null
     text: |-
@@ -4889,7 +4775,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: 'Dynamical Mean Fied Theory: t2g orbitals'
     requires: null
     text: |-
@@ -4909,7 +4794,6 @@
     defaultval: 1.0E-4
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: 'Dynamical Mean Fied Theory: TOLerance on DFT correlated electron
         occupation matrix for the definition of the FREQuency grid'
     requires: null
@@ -4932,7 +4816,6 @@
     defaultval: 1.0E-5
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: 'Dynamical Mean Fied Theory: TOLerance on Local Charge for
         convergence of the DMFT loop'
     requires: null
@@ -4956,7 +4839,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: 'Dynamical Mean Field Theory: BAND: Final'
     requires: null
     text: |-
@@ -4977,7 +4859,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: 'Dynamical Mean Field Theory: BAND: Initial'
     requires: null
     text: |-
@@ -4998,7 +4879,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: 'Dynamical Mean Fied Theory: CHECKs'
     requires: null
     text: |-
@@ -5019,7 +4899,6 @@
     defaultval: 1
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: 'Dynamical Mean Fied Theory: Continuous Time Quantum Monte
         Carlo BASIS'
     requires: '[[dmft_solv]]==5'
@@ -5053,7 +4932,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: 'Dynamical Mean Fied Theory: Continuous Time Quantum Monte
         Carlo CHECK'
     requires: '[[dmft_solv]]==5'
@@ -5089,7 +4967,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: 'Dynamical Mean Fied Theory: Continuous Time Quantum Monte
         Carlo CORRELations'
     requires: '[[dmft_solv]]==5'
@@ -5119,7 +4996,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: 'Dynamical Mean Fied Theory: Continuous Time Quantum Monte
         Carlo Global MOVEs'
     requires: '[[dmft_solv]]==5'
@@ -5142,7 +5018,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: 'Dynamical Mean Fied Theory: Continuous Time Quantum Monte
         Carlo GReeNs NoiSe'
     requires: '[[dmft_solv]]==5'
@@ -5172,7 +5047,6 @@
     defaultval: 1
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: 'Dynamical Mean Fied Theory: Continuous Time Quantum Monte
         Carlo MEASurements'
     requires: '[[dmft_solv]]==5'
@@ -5194,7 +5068,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: 'Dynamical Mean Fied Theory: Continuous Time Quantum Monte
         Carlo MOVie'
     requires: '[[dmft_solv]]==5'
@@ -5224,7 +5097,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: 'Dynamical Mean Fied Theory: Continuous Time Quantum Monte
         Carlo MARKov Analysis'
     requires: '[[dmft_solv]]==5'
@@ -5254,7 +5126,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: 'Dynamical Mean Fied Theory: Continuous Time Quantum Monte
         Carlo perturbation ORDER'
     requires: '[[dmft_solv]]==5'
@@ -5277,7 +5148,6 @@
     defaultval: 30
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: 'Dynamical Mean Fied Theory: Continuous Time Quantum Monte
         Carlo perturbation of TRIQS, Number of LEGendre polynomials'
     requires: '[[dmft_solv]]==6 or 7'
@@ -5301,7 +5171,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: 'Dynamical Mean Fied Theory: Quantum Monte Carlo time sLices'
     requires: '[[dmft_solv]]>=4'
     text: |-
@@ -5322,7 +5191,6 @@
     defaultval: 0.0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: 'Dynamical Mean Fied Theory: Quantum Monte Carlo Number of
         sweeps'
     requires: '[[dmft_solv]]>=4'
@@ -5343,7 +5211,6 @@
     defaultval: '[[jdtset]]'
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: 'Dynamical Mean Fied Theory: Quantum Monte Carlo SEED'
     requires: '[[dmft_solv]]>=4'
     text: |-
@@ -5367,7 +5234,6 @@
     defaultval: 1000
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: 'Dynamical Mean Fied Theory: Quantum Monte Carlo THERMalization'
     requires: '[[dmft_solv]]==5'
     text: |-
@@ -5387,7 +5253,6 @@
     defaultval: 0.0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: DOS DELTA in Energy
     requires: null
     text: |-
@@ -5414,7 +5279,6 @@
     defaultval: 4.5E-06 Hartree = 1 cm<sup>-1</sup>
     dimensions: scalar
     excludes: null
-    executables: anaddb
     mnemonics: DOS DELTA in Energy
     requires: null
     text: |-
@@ -5432,7 +5296,6 @@
     defaultval: 4.5E-05 Hartree = 10 cm<sup>-1</sup>
     dimensions: scalar
     excludes: null
-    executables: anaddb
     mnemonics: DOS SMEARing value
     requires: null
     text: |-
@@ -5449,7 +5312,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: anaddb
     mnemonics: DOS SUM
     requires: null
     text: |-
@@ -5467,7 +5329,6 @@
     defaultval: 0.25
     dimensions: scalar
     excludes: null
-    executables: anaddb
     mnemonics: DOS TOLerance
     requires: null
     text: |-
@@ -5487,7 +5348,6 @@
     defaultval: 100
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Delta Time for IONs
     requires: null
     text: |-
@@ -5539,7 +5399,6 @@
     dimensions:
     - '[[nimage]]'
     excludes: null
-    executables: abinit
     mnemonics: DYNamics of the IMAGE
     requires: null
     text: |-
@@ -5565,7 +5424,6 @@
     defaultval: null
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Energy CUToff
     requires: null
     text: |-
@@ -5629,7 +5487,6 @@
     defaultval: 0.0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Energy CUT-off for EPSilon (the dielectric matrix)
     requires: '[[optdriver]]==3 or [[optdriver]]==4'
     text: |-
@@ -5656,7 +5513,6 @@
     defaultval: 0.0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Energy CUT-off for SIGma eXchange
     requires: '[[optdriver]]==4'
     text: |-
@@ -5681,7 +5537,6 @@
     defaultval: 0.0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Energy CUToff SMearing
     requires: null
     text: |-
@@ -5783,7 +5638,6 @@
         defaultval: 0.0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Energy CUT-off for WaveFunctioNs
     requires: ' [[optdriver]]==3 or [[optdriver]]==4'
     text: |-
@@ -5815,7 +5669,6 @@
     defaultval: 1
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: EFFective MASS
     requires: null
     text: |-
@@ -5838,7 +5691,6 @@
     dimensions:
     - 3
     excludes: null
-    executables: abinit
     mnemonics: Electric FIELD
     requires: '[[berryopt]] = 4 or 6'
     text: |-
@@ -5888,7 +5740,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: EFfective MASs
     requires: null
     text: |-
@@ -5928,7 +5779,6 @@
     - 2
     - '[[nkpt]]'
     excludes: null
-    executables: abinit
     mnemonics: EFfective MASs, BANDS to be treated.
     requires: '[[efmas]]==1'
     text: |-
@@ -5949,7 +5799,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: EFfective MASs, CALCulate along DIRectionS
     requires: '[[efmas]]==1'
     text: |-
@@ -5983,7 +5832,6 @@
     defaultval: 1
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: EFfective MASs, activate DEGenerate formalism
     requires: '[[efmas]]>0'
     text: |-
@@ -6004,7 +5852,6 @@
     defaultval: 1.0E-5
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: EFfective MASs, DEGeneracy TOLerance
     requires: '[[efmas_deg]]==1'
     text: |-
@@ -6025,7 +5872,6 @@
     defaultval: 3
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: EFfective MASs, DIMension of the effective mass tensor
     requires: '[[efmas]]==1'
     text: |-
@@ -6061,7 +5907,6 @@
     - 3 or 2
     - '[[efmas_n_dirs]]'
     excludes: null
-    executables: abinit
     mnemonics: EFfective MASs, DIRectionS to be calculated
     requires: '[[efmas_calc_dirs]]>0'
     text: |-
@@ -6082,7 +5927,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: EFfective MASs, Number of DIRectionS
     requires: '[[efmas_calc_dirs]]>0'
     text: |-
@@ -6101,7 +5945,6 @@
     defaultval: 1000
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: EFfective MASs, Number of points for integration w/r to THETA
     requires: '[[efmas]]==1 and [[efmas_bands]]==(degenerate band index)'
     text: |-
@@ -6128,7 +5971,6 @@
     dimensions:
     - 4
     excludes: null
-    executables: abinit
     mnemonics: Electron bands INTERPolation
     requires: null
     text: |-
@@ -6174,7 +6016,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: anaddb
     mnemonics: EIgenVECtors
     requires: null
     text: |-
@@ -6194,7 +6035,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: anaddb
     mnemonics: ELAstic tensor FLAG
     requires: null
     text: |-
@@ -6260,7 +6100,6 @@
     defaultval: 0.0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: 'ELectron-PHonon interaction at 2nd order : IMAGinary shift
         of the DENominator'
     requires: '[[ieig2rf]] != 0'
@@ -6294,7 +6133,6 @@
     defaultval: 0.0
     dimensions: scalar
     excludes: null
-    executables: anaddb
     mnemonics: ELectron-PHonon FERMI Energy
     requires: null
     text: |-
@@ -6312,7 +6150,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: anaddb
     mnemonics: ELectron-PHonon FLAG
     requires: null
     text: |-
@@ -6329,7 +6166,6 @@
     defaultval: 0.01 Hartree
     dimensions: scalar
     excludes: null
-    executables: anaddb
     mnemonics: ELectron-PHonon SMEARing factor
     requires: null
     text: |-
@@ -6345,7 +6181,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: ENergy UNITs
     requires: null
     text: |-
@@ -6387,7 +6222,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: anaddb
     mnemonics: ENergy UNITs
     requires: null
     text: |-
@@ -6411,7 +6245,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: anaddb
     mnemonics: Electron Phonon integration Band MAXimum
     requires: null
     text: |-
@@ -6427,7 +6260,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: anaddb
     mnemonics: Electron Phonon integration Band MINimum
     requires: null
     text: |-
@@ -6443,7 +6275,6 @@
     defaultval: 0.0
     dimensions: scalar
     excludes: null
-    executables: anaddb
     mnemonics: Electron-Phonon EXTRA ELectrons
     requires: null
     text: |-
@@ -6463,7 +6294,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: anaddb
     mnemonics: Electron-Phonon INTerpolation of GKK
     requires: null
     text: |-
@@ -6482,7 +6312,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: anaddb
     mnemonics: Electron-Phonon KEEP dependence on electron BANDS
     requires: null
     text: |-
@@ -6501,7 +6330,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: anaddb
     mnemonics: Electron Phonon Number of Q PoinTs
     requires: null
     text: |-
@@ -6520,7 +6348,6 @@
     defaultval: 20
     dimensions: scalar
     excludes: null
-    executables: anaddb
     mnemonics: Electron Phonon Number for SPLINE interpolation
     requires: null
     text: |-
@@ -6536,7 +6363,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: anaddb
     mnemonics: Electron Phonon PRinTout YAMBO data
     requires: null
     text: |-
@@ -6552,7 +6378,6 @@
     defaultval: (3*[[anaddb:ep_nqpt]])*0
     dimensions: array
     excludes: null
-    executables: anaddb
     mnemonics: Electron Phonon Q PoinT LIST
     requires: null
     text: |-
@@ -6571,7 +6396,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: anaddb
     mnemonics: DO SCALar PRODuct for gkk matrix elements
     requires: null
     text: |-
@@ -6594,7 +6418,6 @@
     defaultval: 0.0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: 'Electron-PHonon: EXTRA ELectrons'
     requires: null
     text: null
@@ -6610,7 +6433,6 @@
     defaultval: 0.0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: 'Electron-PHonon: FERMI Energy'
     requires: null
     text: |-
@@ -6630,7 +6452,6 @@
     defaultval: 0.01 Hartree
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: 'Electron-Phonon: Fermi Surface Energy WINdow'
     requires: null
     text: |-
@@ -6654,7 +6475,6 @@
     defaultval: 0.01 Hartree
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: 'Electron-PHonon: Fermi surface SMEARing'
     requires: '[[eph_intmeth]] == 1'
     text: |-
@@ -6671,7 +6491,6 @@
     defaultval: 2
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: 'Electron-Phonon: INTegration METHod'
     requires: null
     text: |-
@@ -6693,7 +6512,6 @@
     defaultval: 0.1
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: 'Electron-PHonon : MU STAR (electron-electron interaction strength)'
     requires: null
     text: |-
@@ -6713,7 +6531,6 @@
     dimensions:
     - 3
     excludes: null
-    executables: abinit
     mnemonics: 'Electron-PHonon : Number of Grid Q-PoinTs in FINE grid.'
     requires: null
     text: |-
@@ -6735,7 +6552,6 @@
     defaultval: 1
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: 'Electron-PHonon: Task'
     requires: null
     text: |-
@@ -6758,7 +6574,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: 'Electron-PHonon: TRANSPORT flag'
     requires: null
     text: |-
@@ -6779,7 +6594,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Energy SHIFT
     requires: '[[wfoptalg]]==3'
     text: |-
@@ -6810,7 +6624,6 @@
     defaultval: 0.01
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Eigenvalue SMEARing
     requires: '[[smdelta]] != 0'
     text: |-
@@ -6841,7 +6654,6 @@
     defaultval: 0.25
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: EXCHange MIXing
     requires: '[[useexexch]] == 1'
     text: |-
@@ -6861,7 +6673,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: EXCHange N2 and N3 Dimensions
     requires: null
     text: |-
@@ -6883,7 +6694,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: flag - EXTRAPolation of the Wave-Functions
     requires: '[[densfor_pred]]==5 or [[densfor_pred]]==6'
     text: |-
@@ -6909,7 +6719,6 @@
     - 0.6681 for f electron
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: F4 Over F2 ratio of Slater integrals
     requires: '[[usepaw]]==1 and ([[usepawu]]==1 or [[usedmft]]==1)'
     text: |-
@@ -6929,7 +6738,6 @@
     defaultval: 0.4943
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: F6 Over F2 ratio of Slater integrals
     requires: ([[usepawu]]==1 or [[usedmft]]==1) and [[lpawu]]=3
     text: |-
@@ -6953,7 +6761,6 @@
         defaultval: 0.0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Factor for the number of BANDs
     requires: null
     text: |-
@@ -6998,7 +6805,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: FERMI Energy for printing the NESTing function
     requires: null
     text: |-
@@ -7020,7 +6826,6 @@
         defaultval: 112
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Fast Fourier Transform ALGorithm
     requires: null
     text: |-
@@ -7111,7 +6916,6 @@
     defaultval: 16
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Fast Fourier Transform CACHE size
     requires: null
     text: |-
@@ -7133,7 +6937,6 @@
     defaultval: 21
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: FFT for GW calculation
     requires: ' [[optdriver]]==3 or [[optdriver]]==4'
     text: |-
@@ -7230,7 +7033,6 @@
     defaultval: 0.0
     dimensions: scalar
     excludes: null
-    executables: anaddb
     mnemonics: FREEZE DISPLacement of phonons into supercells
     requires: null
     text: |-
@@ -7262,7 +7064,6 @@
     defaultval: 5.0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: FREQuencies along the IMaginary axis ALPHA parameter
     requires: '[[optdriver]]==4'
     text: |-
@@ -7310,7 +7111,6 @@
     defaultval: 0.0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: FREQuencies along the Real axis MAXimum
     requires: '[[optdriver]]==3'
     text: |-
@@ -7336,7 +7136,6 @@
     defaultval: 0.0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: FREQuencies along the Real axis MINimum
     requires: '[[optdriver]]==3'
     text: |-
@@ -7371,7 +7170,6 @@
     defaultval: 0.0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: FREQuencies for the SPectral function MAXimum
     requires: '[[optdriver]]==4'
     text: |-
@@ -7395,7 +7193,6 @@
     defaultval: -[[freqspmax]]
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: FREQuencies for the SPectral function MINimum
     requires: '[[optdriver]]==4'
     text: |-
@@ -7418,7 +7215,6 @@
     defaultval: 0.001
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: internal FRICTION coefficient
     requires: null
     text: |-
@@ -7494,7 +7290,6 @@
     defaultval: 10.0
     dimensions: scalar
     excludes: null
-    executables: anaddb
     mnemonics: FRequency MAXimum
     requires: null
     text: |-
@@ -7510,7 +7305,6 @@
     defaultval: 0.0
     dimensions: scalar
     excludes: null
-    executables: anaddb
     mnemonics: FRequency MINimum
     requires: null
     text: |-
@@ -7527,7 +7321,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: FReeZe FERMI energy
     requires: null
     text: |-
@@ -7551,7 +7344,6 @@
         value: 1
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Forces to (X) CARTesian coordinates FACTOR
     requires: null
     text: |-
@@ -7578,7 +7370,6 @@
     defaultval: 1
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Genetic Algorithm - ALGOrithm selection
     requires: null
     text: |-
@@ -7598,7 +7389,6 @@
     defaultval: 1
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Genetic Algorithm FITNESS function selection
     requires: null
     text: |-
@@ -7624,7 +7414,6 @@
     defaultval: 1
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Genetic Algorithm Number of RULES
     requires: null
     text: |-
@@ -7644,7 +7433,6 @@
     defaultval: 0.2
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Genetic Algorithm OPTimal PERCENT
     requires: null
     text: |-
@@ -7663,7 +7451,6 @@
     defaultval: 1
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Genetic Algorithm RULES
     requires: null
     text: |-
@@ -7702,7 +7489,6 @@
     dimensions:
     - 3
     excludes: null
-    executables: abinit
     mnemonics: GENerator of the translation for Anti-FerroMagnetic space group
     requires: null
     text: |-
@@ -7735,7 +7521,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: GET the first-order density from _1DEN file
     requires: null
     text: |-
@@ -7765,7 +7550,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: 'GET the first-order wavefunctions from _1WF file '
     requires: null
     text: |-
@@ -7880,7 +7664,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: GET the Bethe-Salpeter COUPling block from ...
     requires: null
     text: |-
@@ -7913,7 +7696,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: GET the Bethe-Salpeter EIGenstates from ...
     requires: null
     text: |-
@@ -7948,7 +7730,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: GET the Bethe-Salpeter RESOnant block from ...
     requires: null
     text: |-
@@ -7981,7 +7762,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: GET CELL parameters from ...
     requires: null
     text: |-
@@ -8024,7 +7804,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: GET the DDB from ...
     requires: null
     text: |-
@@ -8076,7 +7855,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: GET the DDK wavefunctions from _1WF file
     requires: null
     text: |-
@@ -8195,7 +7973,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: GET the DENsity from ...
     requires: null
     text: |-
@@ -8254,7 +8031,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: GET the GAMma phonon data EIG2NKQ from dataset
     requires: '[[ieig2rf]] != 0 and [[qpt]] != (0.0,0.0,0.0)'
     text: |-
@@ -8280,7 +8056,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: GET the HAYDOCK restart file from ...
     requires: null
     text: |-
@@ -8311,7 +8086,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: GET OCC parameters from ...
     requires: null
     text: |-
@@ -8363,7 +8137,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: GET QuasiParticle Structure
     requires: null
     text: |-
@@ -8396,7 +8169,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: GET SCReening (the inverse dielectric matrix) from ...
     requires: null
     text: |-
@@ -8446,7 +8218,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: GET SUSCEPtibility (the irreducible polarizability) from ...
     requires: null
     text: |-
@@ -8499,7 +8270,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: GET VEL from ...
     requires: null
     text: |-
@@ -8570,7 +8340,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: 'GET the wavefunctions from _WFK file '
     requires: null
     text: |-
@@ -8661,7 +8430,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: GET the fine grid wavefunctions from _WFK file
     requires: null
     text: |-
@@ -8757,7 +8525,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: 'GET the wavefunctions from _WFQ file '
     requires: null
     text: |-
@@ -8872,7 +8639,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: GET XCART from ...
     requires: null
     text: |-
@@ -8938,7 +8704,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: GET XRED from ...
     requires: null
     text: |-
@@ -9000,7 +8765,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: anaddb
     mnemonics: GKk for input Q grid to be WRITtEn to disk
     requires: null
     text: |-
@@ -9017,7 +8781,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Geometry Optimization PRECONditioner equations
     requires: null
     text: |-
@@ -9050,7 +8813,6 @@
     dimensions:
     - 3
     excludes: null
-    executables: abinit
     mnemonics: Geometry Optimization PREconditioner PaRaMeters equations
     requires: null
     text: |-
@@ -9077,7 +8839,6 @@
     dimensions:
     - 5
     excludes: null
-    executables: abinit
     mnemonics: 'GPU: choice of DEVICES on one node'
     requires: '[[use_gpu_cuda]]==1 (CUDA functionality)'
     text: |-
@@ -9105,7 +8866,6 @@
     defaultval: 2000000
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: 'GPU (Cuda): LINear ALGebra LIMIT'
     requires: '[[use_gpu_cuda]]==1 (CUDA functionality)'
     text: |-
@@ -9136,7 +8896,6 @@
     defaultval: Empty
     dimensions: array
     excludes: null
-    executables: anaddb
     mnemonics: GRUNeiSen DDBS
     requires: null
     text: |-
@@ -9158,7 +8917,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: anaddb
     mnemonics: GRUNeiSen Number of DDB files
     requires: null
     text: |-
@@ -9176,7 +8934,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: GW CUSTOM FREQuencies for SPectral function
     requires: '[[optdriver]]==4 and [[gwcalctyp]] in [2,9,12,19,22,29]'
     text: |-
@@ -9200,7 +8957,6 @@
     dimensions:
     - '[[gw_customnfreqsp]]'
     excludes: null
-    executables: abinit
     mnemonics: GW SPectral FREQuencies
     requires: '[[optdriver]]==4 and [[gw_customnfreqsp]] > 0 '
     text: |-
@@ -9230,7 +8986,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: GW Contour Deformation FReQuencies on IMaginary axis Inverse Z Grid
     requires: '[[optdriver]] in [3,4] and [[gwcalctyp]] in [2,9,12,19,22,29]'
     text: |-
@@ -9278,7 +9033,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: GW Contour Deformation FReQuencies on REal axis Inverse Z Grid
     requires: '[[optdriver]] in [3,4] and [[gwcalctyp]] in [2,9,12,19,22,29]'
     text: |-
@@ -9352,7 +9106,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: GW Contour Deformation FReQencies on REal axis - Use Tangent Grid
     requires: '[[optdriver]] in [3,4] and [[gwcalctyp]] in [2,9,12,19,22,29]'
     text: |-
@@ -9376,7 +9129,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: GW treatment of INVALID FREQuency for Hybertsen-Louie PPM
     requires: '[[optdriver]] in [3,4] and [[ppmodel]] in [2]'
     text: |-
@@ -9406,7 +9158,6 @@
     defaultval: 1
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: GW, Number of Q-points for the Long Wave-Length Limit
     requires: '[[optdriver]] in [3,4,99]'
     text: |-
@@ -9463,7 +9214,6 @@
     defaultval: 30
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: GW Number of self-consistent STEPs
     requires: '[[optdriver]]==8'
     text: |-
@@ -9491,7 +9241,6 @@
     - 3
     - '[[gw_nqlwl]]'
     excludes: null
-    executables: abinit
     mnemonics: GW, Q-points for the Long Wave-Length limit
     requires: '[[optdriver]]==3'
     text: |-
@@ -9515,7 +9264,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: GW QuasiParticle RANGE policy
     requires: '[[optdriver]]==4'
     text: |-
@@ -9567,7 +9315,6 @@
     defaultval: 1
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: GW, Self-Consistency TYPE
     requires: '[[optdriver]] in [3,4]'
     text: |-
@@ -9617,7 +9364,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: GW, SIGma (self-energy) for the CORE contribution
     requires: '[[optdriver]]==4 and [[usepaw]]==1'
     text: |-
@@ -9665,7 +9411,6 @@
         value: 0.1
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: GW TOLerance on the DiFference of the EIGenvalues
     requires: '[[optdriver]]==8'
     text: |-
@@ -9691,7 +9436,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: GW CALCulation TYPe
     requires: '[[optdriver]] in [3,4]'
     text: |-
@@ -9791,7 +9535,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: GW COMPleteness
     requires: '[[optdriver]] in [3,4]'
     text: |-
@@ -9815,7 +9558,6 @@
     defaultval: 2.0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: GW ENergy for COMPleteness
     requires: '[[optdriver]] in [3,4] and [[gwcomp]]==1'
     text: |-
@@ -9838,7 +9580,6 @@
     defaultval: 0.25
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: GW FOCK exchange MIXing parameter
     requires: '[[optdriver]]=4, [[gwcalctyp]] = 1x5 (HSE) or 2x5 (PBE0).'
     text: |-
@@ -9855,7 +9596,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: GW GAMMA
     requires: '[[optdriver]]=3 or 4 (Sigma calculations)'
     text: |-
@@ -9886,7 +9626,6 @@
     defaultval: 1
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: GWLS BAND INDEX
     requires: '[[optdriver]]==66'
     text: |-
@@ -9906,7 +9645,6 @@
     defaultval: 3
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: GWLS CORRELATION
     requires: '[[optdriver]]==66'
     text: |-
@@ -9938,7 +9676,6 @@
     defaultval: 2
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: GWLS dielectric model
     requires: '[[optdriver]]==66'
     text: |-
@@ -9955,7 +9692,6 @@
     defaultval: 1
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: GWLS exact EXCHANGE
     requires: '[[optdriver]]==66'
     text: |-
@@ -9974,7 +9710,6 @@
     defaultval: '[[gwls_band_index]]'
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: GWLS FIRST SEED vector
     requires: '[[optdriver]]==66'
     text: |-
@@ -10000,7 +9735,6 @@
     defaultval: 8
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: GWLS KMAX for the ANALYTIC term
     requires: '[[optdriver]]==66'
     text: |-
@@ -10020,7 +9754,6 @@
     defaultval: 1
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: GWLS KMAX for the COMPLEMENT space.
     requires: '[[optdriver]]==66'
     text: |-
@@ -10046,7 +9779,6 @@
     defaultval: 16
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: GWLS KMAX for the NUMERIC term
     requires: '[[optdriver]]==66'
     text: |-
@@ -10066,7 +9798,6 @@
     defaultval: 4
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: GWLS KMAX for the calculation of the POLES residue
     requires: '[[optdriver]]==66'
     text: |-
@@ -10093,7 +9824,6 @@
     dimensions:
     - '[[gwls_n_proj_freq]]'
     excludes: null
-    executables: abinit
     mnemonics: GWLS LIST of the PROJection FREQuencies
     requires: '[[optdriver]]==66'
     text: |-
@@ -10113,7 +9843,6 @@
     defaultval: 1.0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: GWLS MODEL PARAMETER
     requires: '[[optdriver]]==66'
     text: |-
@@ -10141,7 +9870,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: ''
-    executables: abinit
     mnemonics: GWLS Number of PROJection FREQuencies
     requires: '[[optdriver]]==66'
     text: |-
@@ -10160,7 +9888,6 @@
     defaultval: 10
     dimensions: scalar
     excludes: ''
-    executables: abinit
     mnemonics: 'GWLS Number of PoinTs to use for the GAUSSian QUADrature '
     requires: '[[optdriver]]==66'
     text: |-
@@ -10179,7 +9906,6 @@
     defaultval: 1
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: GWLS Number of SEED vectorS
     requires: '[[optdriver]]==66'
     text: |-
@@ -10198,7 +9924,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: GWLS PRINT level for DEBUGging
     requires: '[[optdriver]]==66'
     text: |-
@@ -10215,7 +9940,6 @@
     defaultval: 2
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: GWLS RECYCLE
     requires: '[[optdriver]]==66'
     text: |-
@@ -10248,7 +9972,6 @@
     defaultval: 1
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: GWLS Kmax
     requires: '[[optdriver]]==66'
     text: |-
@@ -10266,7 +9989,6 @@
     defaultval: 11
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: GW MEMory
     requires: '[[optdriver]] in [3,4]'
     text: |-
@@ -10305,7 +10027,6 @@
     defaultval: 2
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: GW PARAllelization level
     requires: '[[optdriver]] in [3,4]'
     text: |-
@@ -10342,7 +10063,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: GW RPA CORRelation energy
     requires: '[[optdriver]]==3 and [[gwcalctyp]] in [1,11,21]'
     text: |-
@@ -10389,7 +10109,6 @@
     - '[[natcon]]'
     - '[[nconeq]]'
     excludes: null
-    executables: abinit
     mnemonics: Indices of AToms in CONstraint equations
     requires: null
     text: |-
@@ -10416,7 +10135,6 @@
     dimensions:
     - '[[natfix]]'
     excludes: null
-    executables: abinit
     mnemonics: 'Indices of AToms that are FIXed '
     requires: '[[natfix]] > 0'
     text: |-
@@ -10481,7 +10199,6 @@
     defaultval: 0
     dimensions: array
     excludes: null
-    executables: anaddb
     mnemonics: Indices of the AToms that are FIXed
     requires: null
     text: |-
@@ -10500,7 +10217,6 @@
     dimensions:
     - '[[natfixx]]'
     excludes: null
-    executables: abinit
     mnemonics: Indices of AToms that are FIXed along the X direction
     requires: '[[natfixx]] > 0'
     text: |-
@@ -10527,7 +10243,6 @@
     dimensions:
     - '[[natfixy]]'
     excludes: null
-    executables: abinit
     mnemonics: Indices of AToms that are FIXed along the Y direction
     requires: '[[natfixy]] > 0'
     text: |-
@@ -10554,7 +10269,6 @@
     dimensions:
     - '[[natfixz]]'
     excludes: null
-    executables: abinit
     mnemonics: Indices of AToms that are FIXed along the Z direction
     requires: '[[natfixz]] > 0'
     text: |-
@@ -10579,7 +10293,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: anaddb
     mnemonics: Indices of the AToms for the PRoJection of the phonon Band Structure
     requires: null
     text: |-
@@ -10598,7 +10311,6 @@
     dimensions:
     - '[[natsph]]'
     excludes: null
-    executables: abinit
     mnemonics: Index for the ATomic SPHeres of the atom-projected density-of-states
     requires: '[[prtdos]] == 3 or [[pawfatbnd]] in [1,2]'
     text: |-
@@ -10621,7 +10333,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Integer governing the internal use of BOXCUT - not a very good choice of variable name
     requires: null
     text: |-
@@ -10650,7 +10361,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Index for the Coulomb TReaTMenT
     requires: null
     text: |-
@@ -10677,7 +10387,6 @@
     defaultval: 6
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Integer that governs the CUT-off for COULomb interaction
     requires: '[[optdriver]] in [3,4]'
     text: |-
@@ -10744,7 +10453,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Integer for second-order EIGenvalues from Response-Function
     requires: null
     text: |-
@@ -10783,7 +10491,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: anaddb
     mnemonics: IFC ANAlysis
     requires: null
     text: |-
@@ -10821,7 +10528,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: anaddb
     mnemonics: Interatomic Force Constants FLAG
     requires: null
     text: |-
@@ -10864,7 +10570,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: anaddb
     mnemonics: IFC OUTput
     requires: null
     text: |-
@@ -10885,7 +10590,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: anaddb
     mnemonics: IFLag for TRANSPORT
     requires: null
     text: |-
@@ -10904,7 +10608,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: IMaGe MOVEs
     requires: null
     text: |-
@@ -10988,7 +10691,6 @@
     defaultval: 2
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: INCLude VKB
     requires: '[[optdriver]] in [3,99]'
     text: |-
@@ -11018,7 +10720,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: anaddb
     mnemonics: INternal STRain FLAG
     requires: null
     text: |-
@@ -11048,7 +10749,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: INTerpolation for eXchange-Correlation
     requires: null
     text: |-
@@ -11092,7 +10792,6 @@
         defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Input-Output MODE
     requires: null
     text: |-
@@ -11176,7 +10875,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: IONic MOVEs
     requires: null
     text: |-
@@ -11439,7 +11137,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Integer for PReConditioning of ELectron response
     requires: null
     text: |-
@@ -11555,7 +11252,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Integer for PReConditioner of Force Constants
     requires: null
     text: |-
@@ -11600,7 +11296,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Index for QPoinT generation
     requires: null
     text: |-
@@ -11644,7 +11339,6 @@
     defaultval: 3
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Integer for the choice of the RANDOM number generator
     requires: null
     text: |-
@@ -11683,7 +11377,6 @@
         defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Integer that governs the ReaDing of 1st-order DEN file
     requires: null
     text: |-
@@ -11720,7 +11413,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: 'Integer that governs the ReaDing of _1WF files '
     requires: null
     text: |-
@@ -11873,7 +11565,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Integer that governs the ReaDing of COUPling block
     requires: null
     text: |-
@@ -11891,7 +11582,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Integer that governs the ReaDing of BS_EIG file
     requires: null
     text: |-
@@ -11909,7 +11599,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Integer that governs the ReaDing of RESOnant block
     requires: null
     text: |-
@@ -11929,7 +11618,6 @@
         defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Integer that governs the ReaDing of DDB file
     requires: null
     text: |-
@@ -11971,7 +11659,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Integer that governs the ReaDing of DDK wavefunctions, in _1WF files
     requires: null
     text: |-
@@ -12127,7 +11814,6 @@
         defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Integer that governs the ReaDing of DEN file
     requires: null
     text: |-
@@ -12157,7 +11843,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Integer that governs the ReaDing of the HAYDOCK restart file
     requires: null
     text: |-
@@ -12176,7 +11861,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Integer that governs the ReaDing of QuasiParticle Structure
     requires: null
     text: |-
@@ -12198,7 +11882,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Integer that governs the ReaDing of the SCReening
     requires: null
     text: |-
@@ -12233,7 +11916,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Integer that governs the ReaDing of the SUSCEPtibility
     requires: null
     text: |-
@@ -12268,7 +11950,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Integer that governs the ReaDing of _VDW files
     requires: null
     text: |-
@@ -12295,7 +11976,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Integer that governs the ReaDing of _WFK files
     requires: null
     text: |-
@@ -12430,7 +12110,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Integer that governs the ReaDing of the grid _WFK file on the FINE grid
     requires: null
     text: |-
@@ -12508,7 +12187,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Integer that governs the ReaDing of _WFQ files
     requires: null
     text: |-
@@ -12665,7 +12343,6 @@
         defaultval: 7
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Integer for Self-Consistent-Field cycles
     requires: null
     text: |-
@@ -12840,7 +12517,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Integer for level of SECURity choice
     requires: null
     text: |-
@@ -12877,7 +12553,6 @@
     defaultval: 1
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Integer governing the computation of STATic IMaGes
     requires: null
     text: |-
@@ -12906,7 +12581,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Integer for STATus file rate
     requires: null
     text: |-
@@ -12934,7 +12608,6 @@
     defaultval: 1
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Integer for STATus file SHiFT
     requires: null
     text: |-
@@ -12966,7 +12639,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: anaddb
     mnemonics: Index of STRain FIXed
     requires: null
     text: |-
@@ -13026,7 +12698,6 @@
     dimensions:
     - '[[nkpt]]'
     excludes: null
-    executables: abinit
     mnemonics: Integer for choice of STorage of WaveFunction at each k point
     requires: null
     text: |-
@@ -13101,7 +12772,6 @@
     defaultval: 1
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Integer for eXchange-Correlation choice
     requires: null
     text: |-
@@ -14115,7 +13785,6 @@
     defaultval: 1
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Integer for the eXchange-Correlation applied to the electron-POSITRON interaction
     requires: null
     text: |-
@@ -14239,7 +13908,6 @@
     dimensions:
     - '[[ndtset]]'
     excludes: null
-    executables: abinit
     mnemonics: index -J- for DaTaSETs
     requires: null
     text: |-
@@ -14286,7 +13954,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: include a JELLium SLAB in the cell
     requires: null
     text: |-
@@ -14323,7 +13990,6 @@
     dimensions:
     - 3
     excludes: null
-    executables: abinit
     mnemonics: electric/displacement FIELD DIRection
     requires: '[[berryopt]] = 17'
     text: |-
@@ -14364,7 +14030,6 @@
     dimensions:
     - '[[ntypat]]'
     excludes: null
-    executables: abinit
     mnemonics: value of J for PAW+U
     requires: '[[usepaw]]==1 and [[usepawu]]==1'
     text: |-
@@ -14391,7 +14056,6 @@
     - 3
     - '[[nberry]]'
     excludes: null
-    executables: abinit
     mnemonics: K wavevectors for BERRY phase computation
     requires: '[[berryopt]] = 1, 2, or 3'
     text: |-
@@ -14446,7 +14110,6 @@
     - 3
     - '[[nkpt]]'
     excludes: null
-    executables: abinit
     mnemonics: K - PoinTs
     requires: null
     text: |-
@@ -14511,7 +14174,6 @@
     - 3
     - abs([[kptopt]])+1)
     excludes: null
-    executables: abinit
     mnemonics: K PoinT BOUNDarieS
     requires: null
     text: |-
@@ -14780,7 +14442,6 @@
     - 3
     - '[[nkptgw]]'
     excludes: null
-    executables: abinit
     mnemonics: K-PoinTs for GW calculations
     requires: '[[optdriver]]==4'
     text: |-
@@ -14807,7 +14468,6 @@
     defaultval: 1
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: K - PoinTs NoRMalization
     requires: null
     text: |-
@@ -14840,7 +14500,6 @@
     - 3
     - '[[nkpt]]'
     excludes: null
-    executables: abinit
     mnemonics: K-PoinTs re-Normalized and Shifted
     requires: null
     text: |-
@@ -14881,7 +14540,6 @@
         defaultval: 1
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: KPoinTs OPTion
     requires: null
     text: |-
@@ -14989,7 +14647,6 @@
     - 3
     - 3
     excludes: specified([[ngkpt]])
-    executables: abinit
     mnemonics: 'K - PoinTs grid : Real space LATTice'
     requires: null
     text: |-
@@ -15028,7 +14685,6 @@
     defaultval: 9*0
     dimensions: array
     excludes: null
-    executables: anaddb
     mnemonics: K PoinT Reciprocal LATTice
     requires: null
     text: |-
@@ -15047,7 +14703,6 @@
     defaultval: 9*0
     dimensions: array
     excludes: null
-    executables: anaddb
     mnemonics: K PoinT Reciprocal LATTice for FINE grid
     requires: null
     text: |-
@@ -15063,7 +14718,6 @@
     defaultval: 30.0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: 'K - PoinTs grid : Real space LENgth'
     requires: null
     text: |-
@@ -15130,7 +14784,6 @@
     defaultval: 1
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Kohn Sham Structure file FORMat
     requires: null
     text: |-
@@ -15173,7 +14826,6 @@
     dimensions:
     - '[[ntypat]]'
     excludes: null
-    executables: abinit
     mnemonics: value of angular momentum L for EXact EXCHange
     requires: '[[useexexch]]==1'
     text: |-
@@ -15193,7 +14845,6 @@
     defaultval: 1
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: LOCAL ReaD WaveFunctions
     requires: null
     text: |-
@@ -15234,7 +14885,6 @@
     defaultval: 5
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: LOTF CLASSIC model for glue model
     requires: null
     text: |-
@@ -15255,7 +14905,6 @@
     defaultval: 10
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: LOTF Number of ITerations
     requires: null
     text: |-
@@ -15274,7 +14923,6 @@
     defaultval: 5
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: LOTF max Number of NEIGhbours
     requires: null
     text: |-
@@ -15295,7 +14943,6 @@
     defaultval: 2
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: LOTF VERSION of MD algorithm
     requires: null
     text: |-
@@ -15318,7 +14965,6 @@
     dimensions:
     - '[[ntypat]]'
     excludes: null
-    executables: abinit
     mnemonics: value of angular momentum L for PAW+U
     requires: '[[usepawu]]==1 or [[usepawu]]== 2'
     text: |-
@@ -15349,7 +14995,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: MACRO variable that activates the determination of the U and J parameter (for the PAW+U calculations)
     requires: null
     text: |-
@@ -15388,7 +15033,6 @@
     defaultval: 10.0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: MAGnetization CONstraint LAMBDA parameter
     requires: null
     text: |-
@@ -15406,7 +15050,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: turn MAGnetization CONstraint ON
     requires: null
     text: |-
@@ -15424,7 +15067,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: MAXimum Number of CPUS
     requires: null
     text: |-
@@ -15445,7 +15087,6 @@
     defaultval: 0.005
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: MAXimum Electric field STEP
     requires: '[[berryopt]] = 6, 16, or 17'
     text: |-
@@ -15466,7 +15107,6 @@
     defaultval: 384
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: MAXimum Number of SYMetries
     requires: null
     text: |-
@@ -15487,7 +15127,6 @@
     defaultval: null
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Maximum number of BANDs
     requires: null
     text: |-
@@ -15510,7 +15149,6 @@
     defaultval: 0.0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Many Body Perturbation Theory SCISSor operator
     requires: '[[optdriver]] in [3,4,99]'
     text: |-
@@ -15530,7 +15168,6 @@
     defaultval: 0.0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Model Dielectric Function, EPSilon INFinity
     requires: '[[optdriver]]==99 and [[bs_coulomb_term]] in [20,21] (Bethe-Salpeter
         calculas with a model dielectric function'
@@ -15555,7 +15192,6 @@
     dimensions:
     - 2
     excludes: null
-    executables: abinit
     mnemonics: Molecular Dynamics TEMPeratures
     requires: null
     text: |-
@@ -15587,7 +15223,6 @@
     defaultval: 10000.0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Molecular Dynamics WALL location
     requires: null
     text: |-
@@ -15618,7 +15253,6 @@
     defaultval: 1
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: MEMory TEST
     requires: null
     text: |-
@@ -15653,7 +15287,6 @@
         defaultval: 100.0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: 'Minimal Energy Path search: MaXimum allowed STEP size'
     requires: null
     text: |-
@@ -15688,7 +15321,6 @@
     defaultval: null
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Minimal Energy Path ordinary differential equation SOLVER
     requires: null
     text: |-
@@ -15798,7 +15430,6 @@
     defaultval: null
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Maximum of nGFFT
     requires: null
     text: |-
@@ -15818,7 +15449,6 @@
     defaultval: null
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Maximum of nGFFT for the Double Grid
     requires: null
     text: |-
@@ -15840,7 +15470,6 @@
     - '[[npspalch]]'
     - '[[ntypalch]]'
     excludes: null
-    executables: abinit
     mnemonics: MIXing coefficients for ALCHemical potentials
     requires: null
     text: |-
@@ -15924,7 +15553,6 @@
     defaultval: null
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Maximum number of Plane Waves
     requires: null
     text: |-
@@ -15949,7 +15577,6 @@
     defaultval: 3001
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Maximum number of Q-space GRID points for pseudopotentials
     requires: null
     text: |-
@@ -15970,7 +15597,6 @@
     defaultval: 3001
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Maximum number of Q-wavevectors for the 1-dimensional GRID  for the Double Grid in PAW
     requires: null
     text: |-
@@ -15990,7 +15616,6 @@
     defaultval: 0.1
     dimensions: scalar
     excludes: null
-    executables: anaddb
     mnemonics: MU STAR
     requires: null
     text: |-
@@ -16009,7 +15634,6 @@
     dimensions:
     - '[[nconeq]]'
     excludes: null
-    executables: abinit
     mnemonics: Number of AToms in CONstraint equations
     requires: null
     text: |-
@@ -16034,7 +15658,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Number of Atoms that are FIXed
     requires: null
     text: |-
@@ -16063,7 +15686,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: anaddb
     mnemonics: Number of AToms FIXed
     requires: null
     text: |-
@@ -16081,7 +15703,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Number of Atoms that are FIXed along the X direction
     requires: null
     text: |-
@@ -16106,7 +15727,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Number of Atoms that are FIXed along the Y direction
     requires: null
     text: |-
@@ -16130,7 +15750,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Number of Atoms that are FIXed along the Z direction
     requires: null
     text: |-
@@ -16153,7 +15772,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: anaddb
     mnemonics: Number of AToms for IFC analysis
     requires: null
     text: |-
@@ -16170,7 +15788,6 @@
     defaultval: 1
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Number of ATOMs
     requires: null
     text: |-
@@ -16197,7 +15814,6 @@
     defaultval: null
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Number of AToms on which PAW+U is applied
     requires: '[[usepawu]]==1'
     text: |-
@@ -16216,7 +15832,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: anaddb
     mnemonics: Number of AToms for PRoJection of the Band Structure
     requires: null
     text: |-
@@ -16236,7 +15851,6 @@
     defaultval: '[[natom]]'
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Number of AToms ReaD
     requires: null
     text: |-
@@ -16265,7 +15879,6 @@
     defaultval: '[[natom]]'
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Number of ATomic SPHeres for the atom-projected density-of-states
     requires: '[[prtdos]] == 3 or [[pawfatbnd]] in [1,2]'
     text: |-
@@ -16290,7 +15903,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Number of ATomic SPHeres for the l-projected density-of-states in EXTRA set
     requires: '[[prtdos]] == 3 or [[pawfatbnd]] in [1,2]'
     text: |-
@@ -16319,7 +15931,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Number of ATomic potential (V) energy SHIFTs (per atom)
     requires: '[[usepawu]] /= 0, [[atvshift]]'
     text: |-
@@ -16346,7 +15957,6 @@
     defaultval: null
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Number of BANDs
     requires: null
     text: |-
@@ -16393,7 +16003,6 @@
     defaultval: null
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Number of BANDs for (Hartree)-Fock exact exchange
     requires: null
     text: |-
@@ -16411,7 +16020,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Number of BANDs in the KSS file
     requires: null
     text: |-
@@ -16467,7 +16075,6 @@
     defaultval: 1
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Number of BanDs in a BLOCK
     requires: null
     text: |-
@@ -16497,7 +16104,6 @@
         defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Number of BanDs for the BUFfer
     requires: null
     text: |-
@@ -16568,7 +16174,6 @@
     defaultval: 1
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Number of BERRY phase computations
     requires: '[[berryopt]] = 1, 2, or 3'
     text: |-
@@ -16612,7 +16217,6 @@
         defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Norm-Conserving pseudopotentials - use XC Core-Correction in G-SPACE
     requires: null
     text: |-
@@ -16635,7 +16239,6 @@
     defaultval: 800
     dimensions: scalar
     excludes: null
-    executables: anaddb
     mnemonics: Number of CHANnels
     requires: null
     text: |-
@@ -16653,7 +16256,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Number of CONstraint EQuations
     requires: null
     text: |-
@@ -16677,7 +16279,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: NetCdf TIME between output of molecular dynamics informations
     requires: null
     text: |-
@@ -16725,7 +16326,6 @@
     dimensions:
     - abs([[kptopt]])
     excludes: specified([[ndivsm]])
-    executables: abinit
     mnemonics: Number of DIVisions of K lines
     requires: '[[kptopt]] < 0'
     text: |-
@@ -16780,7 +16380,6 @@
     defaultval: null
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Number of DIVisions for the SMallest segment
     requires: null
     text: |-
@@ -16810,7 +16409,6 @@
     defaultval: 20
     dimensions: scalar
     excludes: null
-    executables: anaddb
     mnemonics: Number of DIVisions for the SMallest segment
     requires: null
     text: |-
@@ -16828,7 +16426,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Number of DaTaSETs
     requires: null
     text: |-
@@ -16855,7 +16452,6 @@
     defaultval: null
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Number of DYNamical IMAGEs
     requires: null
     text: |-
@@ -16877,7 +16473,6 @@
     defaultval: 1
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Nudged Elastic Band ALGOrithm
     requires: '[[imgmov]]==5'
     text: |-
@@ -16958,7 +16553,6 @@
     dimensions:
     - 2
     excludes: null
-    executables: abinit
     mnemonics: 'Nudged Elastic Band: SPRING constant'
     requires: '[[imgmov]]==5'
     text: |-
@@ -16985,7 +16579,6 @@
     defaultval: '[[AUTO_FROM_PSP]]'
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Number of ELECTrons
     requires: null
     text: |-
@@ -17010,7 +16603,6 @@
     defaultval: null
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Number of FFT points
     requires: null
     text: |-
@@ -17039,7 +16631,6 @@
     defaultval: null
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Number of FFT points for the Double Grid
     requires: null
     text: |-
@@ -17067,7 +16658,6 @@
     defaultval: 1
     dimensions: scalar
     excludes: null
-    executables: anaddb
     mnemonics: Number of FREQuencies
     requires: null
     text: |-
@@ -17086,7 +16676,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Number of FREQuencies along the IMaginary axis
     requires: '[[optdriver]]==3 and [[gwcalctyp]] in [2,12,22,9,19,29]'
     text: |-
@@ -17105,7 +16694,6 @@
     defaultval: null
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Nth FREQuency Moment of the Imaginary part of the Dielectric Matrix
     requires: '[[optdriver]]==4'
     text: |-
@@ -17133,7 +16721,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Number of FREQuencies along the REal axis
     requires: '[[optdriver]]==3 and [[gwcalctyp]] in [2,12,22,9,19,29]'
     text: |-
@@ -17170,7 +16757,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Number of FREQuencies for the SPectral function
     requires: '[[optdriver]]==4'
     text: |-
@@ -17189,7 +16775,6 @@
     defaultval: 3*0 (will not work)
     dimensions: array
     excludes: null
-    executables: anaddb
     mnemonics: Number of Grids points for Q PoinTs (grid 2)
     requires: null
     text: |-
@@ -17212,7 +16797,6 @@
     dimensions:
     - 3
     excludes: null
-    executables: abinit
     mnemonics: Number of Grid points for Fast Fourier Transform
     requires: null
     text: |-
@@ -17308,7 +16892,6 @@
     dimensions:
     - 3
     excludes: null
-    executables: abinit
     mnemonics: 'Number of Grid points for Fast Fourier Transform : Double
         Grid'
     requires: '[[usepaw]]==1'
@@ -17334,7 +16917,6 @@
     dimensions:
     - 3
     excludes: specified([[kptrlatt]])
-    executables: abinit
     mnemonics: Number of Grid points for K PoinTs generation
     requires: '[[kptopt]] >=0, '
     text: |-
@@ -17390,7 +16972,6 @@
     dimensions:
     - 3
     excludes: specified([[qptrlatt]])
-    executables: abinit
     mnemonics: Number of Grid pointsfor Q PoinTs generation
     requires: '[[nqpt]]==1 and [[kptopt]]>=0'
     text: |-
@@ -17421,7 +17002,6 @@
     defaultval: 3*0 (will not work)
     dimensions: array
     excludes: null
-    executables: anaddb
     mnemonics: Number of Grids points for Q PoinTs
     requires: null
     text: |-
@@ -17437,7 +17017,6 @@
     defaultval: 4
     dimensions: scalar
     excludes: null
-    executables: anaddb
     mnemonics: Number of GRIDS
     requires: null
     text: |-
@@ -17459,7 +17038,6 @@
     defaultval: 1
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Number of IMAGEs
     requires: null
     text: |-
@@ -17572,7 +17150,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Number of K-points defining the PATH
     requires: null
     text: |-
@@ -17601,7 +17178,6 @@
         defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Number of K - Points
     requires: null
     text: |-
@@ -17666,7 +17242,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Number of K-PoinTs for GW corrections
     requires: '[[optdriver]]==4'
     text: |-
@@ -17686,7 +17261,6 @@
     defaultval: null
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Number of K - Points for (Hartree) Fock exact exchange
     requires: null
     text: |-
@@ -17704,7 +17278,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: anaddb
     mnemonics: Non-Linear FLAG
     requires: null
     text: |-
@@ -17728,7 +17301,6 @@
     defaultval: 4
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Number of LINE minimisations
     requires: null
     text: |-
@@ -17760,7 +17332,6 @@
     defaultval: 4
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Non LOCal ALGorithm
     requires: null
     text: |-
@@ -17803,7 +17374,6 @@
         defaultval: 1
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Non LOCal MEMOry
     requires: null
     text: |-
@@ -17850,7 +17420,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Number of NOSe masses
     requires: null
     text: |-
@@ -17871,7 +17440,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Number of Non-Self Consistent LOops
     requires: null
     text: |-
@@ -17905,7 +17473,6 @@
         defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Number of Non-Self Consistent LOops for (Hartree)-Fock exact exchange
     requires: null
     text: |-
@@ -17930,7 +17497,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Number of OBJects
     requires: null
     text: |-
@@ -18017,7 +17583,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Number of OMEGA to evaluate the Spectral Function
     requires: '[[optdriver]]==3 and [[spmeth]]!=0'
     text: |-
@@ -18046,7 +17611,6 @@
     defaultval: 12
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Number of OMEGA(S) along the Imaginary axis
     requires: '[[optdriver]]==4 and [[gwcalctyp]]==1'
     text: |-
@@ -18067,7 +17631,6 @@
     defaultval: 9
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Number of OMEGA to evaluate the Sigma Real axis Derivative
     requires: '[[optdriver]]==4'
     text: |-
@@ -18088,7 +17651,6 @@
     dimensions:
     - '[[ntypat]]'
     excludes: null
-    executables: abinit
     mnemonics: NORMalize atomic PAW+U projector
     requires: null
     text: |-
@@ -18115,7 +17677,6 @@
     defaultval: 100000
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: NOSE thermostat INERTia factor
     requires: '[[ionmov]]==8'
     text: |-
@@ -18138,7 +17699,6 @@
     defaultval: 1000000
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Number of mpi Processors used for ScaLapacK calls
     requires: '[[optdriver]]==1 and [[paral_kgb]]==1 (Ground-state calculations
         with LOBPCG algorithm)'
@@ -18166,7 +17726,6 @@
     defaultval: 1
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Number of Processors at the BAND level
     requires: '[[paral_kgb]]==1'
     text: |-
@@ -18198,7 +17757,6 @@
     defaultval: 1
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Number of Processors at the FFT level
     requires: '[[paral_kgb]]==1'
     text: |-
@@ -18235,7 +17793,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: anaddb
     mnemonics: Number of PHonons in List 1
     requires: null
     text: |-
@@ -18259,7 +17816,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: anaddb
     mnemonics: Number of PHonons in List 2
     requires: null
     text: |-
@@ -18298,7 +17854,6 @@
     defaultval: 1
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Number of Processors for (Hartree)-Fock exact exchange
     requires: null
     text: |-
@@ -18329,7 +17884,6 @@
     defaultval: 1
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Number of Processors at the IMAGE level
     requires: null
     text: |-
@@ -18358,7 +17912,6 @@
     defaultval: 1
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Number of Processors at the K-Point Level
     requires: '[[paral_kgb]]==1'
     text: |-
@@ -18393,7 +17946,6 @@
     defaultval: 1
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Number of Processors at the PERTurbation level
     requires: '[[paral_rf]]==1'
     text: |-
@@ -18415,7 +17967,6 @@
     defaultval: '[[ntypat]]'
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Number of PSeudoPotentials
     requires: null
     text: |-
@@ -18453,7 +18004,6 @@
     defaultval: '[[npsp]]-[[ntyppure]]'
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Number of PSeudoPotentials that are "ALCHemical"
     requires: '[[ntypalch]]/=0'
     text: |-
@@ -18474,7 +18024,6 @@
     defaultval: 1
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Number of Processors at the SPINOR level
     requires: '[[paral_kgb]]==1'
     text: |-
@@ -18510,7 +18059,6 @@
     defaultval: 7
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Number of PULAY ITerations for SC mixing
     requires: '[[iscf]] in [7,17]'
     text: |-
@@ -18530,7 +18078,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Number of Particle VELocities
     requires: '[[optdriver]]==3'
     text: |-
@@ -18556,7 +18103,6 @@
     defaultval: null
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Number of PlaneWaves for EPSilon (the dielectric matrix)
     requires: null
     text: |-
@@ -18577,7 +18123,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Number of PlaneWaves in the KSS file
     requires: null
     text: |-
@@ -18615,7 +18160,6 @@
     defaultval: null
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Number of PlaneWaves for SIGma eXchange
     requires: null
     text: |-
@@ -18638,7 +18182,6 @@
     defaultval: null
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Number of PlaneWaves for WaveFunctioNs
     requires: null
     text: |-
@@ -18658,7 +18201,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: anaddb
     mnemonics: Number of Q wavevectors defining a PATH
     requires: null
     text: |-
@@ -18676,7 +18218,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Number of Q - POINTs
     requires: null
     text: |-
@@ -18709,7 +18250,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Number of Q-PoinTs for the Dielectric Matrix
     requires: '[[optdriver]]==3'
     text: |-
@@ -18737,7 +18277,6 @@
     defaultval: 1
     dimensions: scalar
     excludes: null
-    executables: anaddb
     mnemonics: Number of Q SHiFTs
     requires: null
     text: |-
@@ -18758,7 +18297,6 @@
     defaultval: 16
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Nth - SCaling Function ORDER
     requires: null
     text: |-
@@ -18776,7 +18314,6 @@
     defaultval: 1
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Number of SHIFTs for K point grids
     requires: null
     text: |-
@@ -18803,7 +18340,6 @@
     defaultval: 1
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Number of SHIFTs for Q point grids
     requires: null
     text: |-
@@ -18829,7 +18365,6 @@
     defaultval: '[[nsppol]]'
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Number of SPin-DENsity components
     requires: null
     text: |-
@@ -18876,7 +18411,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: anaddb
     mnemonics: Number of atoms in SPHERe
     requires: null
     text: |-
@@ -18911,7 +18445,6 @@
         defaultval: 1
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Number of SPINORial components of the wavefunctions
     requires: null
     text: |-
@@ -18943,7 +18476,6 @@
     defaultval: 1
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Number of SPin POLarization
     requires: null
     text: |-
@@ -18996,7 +18528,6 @@
     defaultval: 30
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Number of (non-)self-consistent field STEPS
     requires: null
     text: |-
@@ -19051,7 +18582,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: anaddb
     mnemonics: Number of STRain components FIXed
     requires: null
     text: |-
@@ -19070,7 +18600,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Number of SYMmetry operations
     requires: null
     text: |-
@@ -19140,7 +18669,6 @@
     defaultval: 10
     dimensions: scalar
     excludes: null
-    executables: anaddb
     mnemonics: Number of TEMPERatures
     requires: null
     text: |-
@@ -19161,7 +18689,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Number of TIME steps
     requires: null
     text: |-
@@ -19193,7 +18720,6 @@
     defaultval: 1
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Number of TIME steps for IMAGE propagation
     requires: null
     text: |-
@@ -19217,7 +18743,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Number of TYPe of atoms that are "ALCHemical"
     requires: null
     text: |-
@@ -19264,7 +18789,6 @@
     defaultval: 1
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Number of TYPes of AToms
     requires: null
     text: |-
@@ -19289,7 +18813,6 @@
     defaultval: '[[ntypat]]-[[ntypalch]]'
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Number of TYPe of atoms that are "PURe"
     requires: null
     text: |-
@@ -19312,7 +18835,6 @@
     - 3
     - '[[natom]]'
     excludes: null
-    executables: abinit
     mnemonics: NUClear DIPole MOMents
     requires: '[[usepaw]] = 1; [[pawcpxocc]] = 2; [[kptopt]] > 2'
     text: |-
@@ -19328,7 +18850,6 @@
     defaultval: 10
     dimensions: scalar
     excludes: null
-    executables: anaddb
     mnemonics: Number of Widths of CHANnels
     requires: null
     text: |-
@@ -19349,7 +18870,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Number of WaveFunctionS HISTory
     requires: null
     text: |-
@@ -19379,7 +18899,6 @@
     defaultval: null
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Number of Z reduced coordinates that define the spatial CHEMical POTential
     requires: null
     text: |-
@@ -19398,7 +18917,6 @@
     dimensions:
     - '[[objan]]'
     excludes: null
-    executables: abinit
     mnemonics: 'OBJect A : list of AToms'
     requires: |
         '[[nobj]]==1'
@@ -19429,7 +18947,6 @@
     defaultval: null
     dimensions: null
     excludes: null
-    executables: abinit
     mnemonics: 'OBJect A : AXis'
     requires: null
     text: |-
@@ -19469,7 +18986,6 @@
     defaultval: null
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: 'OBJect A : Number of atoms'
     requires: null
     text: |-
@@ -19494,7 +19010,6 @@
     - 1
     dimensions: null
     excludes: null
-    executables: abinit
     mnemonics: 'OBJect A : Repetition Factors'
     requires: null
     text: |-
@@ -19548,7 +19063,6 @@
         value: 0.0d0
     dimensions: null
     excludes: null
-    executables: abinit
     mnemonics: 'OBJect A : ROtations'
     requires: null
     text: |-
@@ -19591,7 +19105,6 @@
         value: 0.0d0
     dimensions: null
     excludes: null
-    executables: abinit
     mnemonics: 'OBJect A : TRanslations'
     requires: null
     text: |-
@@ -19635,7 +19148,6 @@
     defaultval: null
     dimensions: null
     excludes: null
-    executables: abinit
     mnemonics: 'OBJect B : list of AToms'
     requires: '[[nobj]]==2'
     text: |-
@@ -19669,7 +19181,6 @@
     defaultval: null
     dimensions: null
     excludes: null
-    executables: abinit
     mnemonics: 'OBJect B : AXis'
     requires: null
     text: |-
@@ -19707,7 +19218,6 @@
     defaultval: null
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: 'OBJect B : Number of atoms'
     requires: null
     text: |-
@@ -19733,7 +19243,6 @@
     - 1
     dimensions: null
     excludes: null
-    executables: abinit
     mnemonics: 'OBJect B : Repetition Factors'
     requires: null
     text: |-
@@ -19786,7 +19295,6 @@
         value: 0.0d0
     dimensions: null
     excludes: null
-    executables: abinit
     mnemonics: 'OBJect B : ROtations'
     requires: null
     text: |-
@@ -19829,7 +19337,6 @@
         value: 0.0d0
     dimensions: null
     excludes: null
-    executables: abinit
     mnemonics: 'OBJect B : TRanslations'
     requires: null
     text: |-
@@ -19874,7 +19381,6 @@
     dimensions:
     - '[[nband]]'
     excludes: null
-    executables: abinit
     mnemonics: OCCupation numbers
     requires: null
     text: |-
@@ -19922,7 +19428,6 @@
     defaultval: 1
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: OCCupation OPTion
     requires: null
     text: |-
@@ -20067,7 +19572,6 @@
         value: 50
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: 'OMEGA to evaluate Sigma along the Imaginary axis D: MAXimal
         value'
     requires: '[[optdriver]]==4 and [[gwcalctyp]]==1'
@@ -20092,7 +19596,6 @@
         value: 1.0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: 'OMEGA to evaluate the Sigma Real axis Derivative : MAXimal
         value'
     requires: '[[optdriver]]==4'
@@ -20112,7 +19615,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: OPTimize the CELL shape and dimensions
     requires: null
     text: |-
@@ -20159,7 +19661,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: OPTions for the DRIVER
     requires: null
     text: |-
@@ -20218,7 +19719,6 @@
         defaultval: 2
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: OPTions for the calculation of FORCES
     requires: null
     text: |-
@@ -20251,7 +19751,6 @@
     defaultval: 1
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: OPTion for the calculation of Non-Linear eXchange-Correlation Core Correction
     requires: null
     text: |-
@@ -20278,7 +19777,6 @@
     defaultval: 1
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: OPTion for the computation of STRESS
     requires: null
     text: |-
@@ -20308,7 +19806,6 @@
         defaultval: 2
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: ORThogonalisation ALGorithm
     requires: null
     text: |-
@@ -20351,7 +19848,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: anaddb
     mnemonics: OUTput files for BOLTZTRAP code
     requires: null
     text: |-
@@ -20368,7 +19864,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: anaddb
     mnemonics: OUTput files for Self Consistent PHONons
     requires: null
     text: |-
@@ -20386,7 +19881,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: PAPI OPTion
     requires: null
     text: |-
@@ -20424,7 +19918,6 @@
     defaultval: 1
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: activate PARALelization over (paw) ATOMic sites
     requires: null
     text: |-
@@ -20447,7 +19940,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: activate PARALelization over K-point, G-vectors and Bands
     requires: null
     text: |-
@@ -20544,7 +20036,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: activate PARALlelization over Response Function perturbations
     requires: null
     text: |-
@@ -20577,7 +20068,6 @@
         defaultval: 1
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: PAW - use ComPleX rhoij OCCupancies
     requires: '[[usepaw]]==1'
     text: |-
@@ -20624,7 +20114,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: PAW - add CROSS term in oscillator strengths
     requires: ([[optdriver]]==3 or [[optdriver]]==4) and [[usepaw]]==1
     text: |-
@@ -20648,7 +20137,6 @@
     defaultval: -1
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: PAW - Energy CUToff for the Double Grid
     requires: '[[usepaw]]==1'
     text: |-
@@ -20682,7 +20170,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: 'PAW: print band structure in the FAT-BaND representation'
     requires: '[[usepaw]]==1 '
     text: |-
@@ -20725,7 +20212,6 @@
     defaultval: 10
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: PAW - L angular momentum used to CUT the development in moments of the Densitites
     requires: '[[usepaw]]==1'
     text: |-
@@ -20758,7 +20244,6 @@
     defaultval: 10
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: PAW - maximum L used in the spherical part MIXing
     requires: '[[usepaw]]==1'
     text: |-
@@ -20786,7 +20271,6 @@
         defaultval: 1
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: PAW - MIXing is done (or not) on the (fine) Double Grid
     requires: '[[usepaw]]==1'
     text: |-
@@ -20850,7 +20334,6 @@
     defaultval: 1
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: PAW - Flag for exact computation of gradients of NHAT density in eXchange-Correlation.
     requires: '[[usepaw]]==1'
     text: |-
@@ -20877,7 +20360,6 @@
     defaultval: 13
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: PAW - Number of PHI angles used to discretize the sphere around each atom.
     requires: '[[usepaw]]==1'
     text: |-
@@ -20898,7 +20380,6 @@
     defaultval: 12
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: PAW - Number of THETA angles used to discretize the sphere around each atom.
     requires: '[[usepaw]]==1'
     text: |-
@@ -20919,7 +20400,6 @@
     defaultval: 1
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: PAW - only compute Non-Zero LM-moments of the contributions to the density from the spheres
     requires: '[[usepaw]]==1'
     text: |-
@@ -20945,7 +20425,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: PAW - OPTion for the MIXing of the spherical part
     requires: '[[usepaw]]==1'
     text: |-
@@ -20989,7 +20468,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: PAW - OPTion for the computation of the OSCillator matrix elements
     requires: null
     text: |-
@@ -21019,7 +20497,6 @@
     defaultval: 5.0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: PAW - spheres OVerLaP allowed (in percentage)
     requires: '[[usepaw]]==1'
     text: |-
@@ -21057,7 +20534,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: PAW PRinT band
     requires: null
     text: |-
@@ -21085,7 +20561,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: PAW PRinT K-point
     requires: null
     text: |-
@@ -21116,7 +20591,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: 'PAW: PRinT total physical electron DENsity'
     requires: '[[usepaw]]==1'
     text: |-
@@ -21137,7 +20611,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: 'PAW: PRinT partial DOS contributions'
     requires: '[[usepaw]]==1 and [[prtdos]]==3'
     text: |-
@@ -21190,7 +20663,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: 'PAW: PRinT VOLume'
     requires: '[[usepaw]]==1'
     text: |-
@@ -21225,7 +20697,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: 'PAW: PRinT WaveFunctions'
     requires: '[[usepaw]]==1'
     text: |-
@@ -21264,7 +20735,6 @@
         defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: PAW - option for SPiN-ORBit coupling
     requires: '[[usepaw]]==1'
     text: |-
@@ -21325,7 +20795,6 @@
     defaultval: 1
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: PAW - option for the STorage of G_l(r).YLM(r)
     requires: '[[usepaw]]=1'
     text: |-
@@ -21366,7 +20835,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: PAW - SUSceptibility, inclusion of HAT (compensation charge) contribution
     requires: '[[usepaw]]==1 and [[optdriver]]==0 '
     text: |-
@@ -21403,7 +20871,6 @@
     defaultval: 1
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: PAW+macro_UJ, ATom number
     requires: null
     text: |-
@@ -21424,7 +20891,6 @@
         value: 20
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: PAW+macro_UJ, sphere RADius
     requires: null
     text: |-
@@ -21448,7 +20914,6 @@
         value: 0.1
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: PAW+macro_UJ, potential shift (V)
     requires: null
     text: |-
@@ -21466,7 +20931,6 @@
     defaultval: 1
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: PAW - option for the USE of CPrj in memory (cprj=WF projected with NL projector)
     requires: '[[usepaw]]==1'
     text: |-
@@ -21496,7 +20960,6 @@
     defaultval: 1
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: PAW - choice for eXchange-Correlation DEVelopment (spherical part)
     requires: '[[usepaw]]==1'
     text: |-
@@ -21529,7 +20992,6 @@
     defaultval: 2
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: 'PHonons: INTegration METHod'
     requires: null
     text: |-
@@ -21554,7 +21016,6 @@
     defaultval: 20
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: 'PHonons: Number of DIVisions for sampling the SMallest segment'
     requires: null
     text: |-
@@ -21574,7 +21035,6 @@
     dimensions:
     - 3
     excludes: null
-    executables: abinit
     mnemonics: 'PHonons: Number of Grid points for Q-PoinT mesh.'
     requires: null
     text: |-
@@ -21591,7 +21051,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: 'PHonons: Number of Q-points defining the PATH'
     requires: null
     text: |-
@@ -21607,7 +21066,6 @@
     defaultval: 1
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: 'PHonons: Number of Q-SHIFTs'
     requires: null
     text: |-
@@ -21628,7 +21086,6 @@
     - 3
     - ph_nqpath
     excludes: null
-    executables: abinit
     mnemonics: 'Phonons: Q-PATH'
     requires: specified([[ph_nqpath]])
     text: |-
@@ -21650,7 +21107,6 @@
     - 3
     - ph_nqshift
     excludes: null
-    executables: abinit
     mnemonics: 'PHonons: Q-SHIFTs for mesh.'
     requires: '[[ph_nqshift]]'
     text: |-
@@ -21668,7 +21124,6 @@
     defaultval: 0.00002 Hartree
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: 'PHonons: SMEARing factor'
     requires: '[[ph_intmeth]]==1'
     text: |-
@@ -21686,7 +21141,6 @@
     defaultval: 0.1 meV
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: 'PHonons: frequency(W)  STEP.'
     requires: null
     text: |-
@@ -21703,7 +21157,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: anaddb
     mnemonics: PIEZOelectric tensor FLAG
     requires: null
     text: |-
@@ -21768,7 +21221,6 @@
     dimensions:
     - '[[ntypat]]'
     excludes: null
-    executables: abinit
     mnemonics: Path Integral fictitious MASSes
     requires: '[[imgmov]]=9 or 13'
     text: |-
@@ -21797,7 +21249,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: 'Path-Integral Molecular Dynamics: CONSTRAINT to be applied
         on a reaction coordinate'
     requires: '[[imgmov]]=9 or 13'
@@ -21825,7 +21276,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Path Integral coordinate TRANSFORMation
     requires: null
     text: |-
@@ -21854,7 +21304,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Projected Local Orbital WANnier functions BAND Final
     requires: null
     text: |-
@@ -21874,7 +21323,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Projected Local Orbital WANnier functions BAND Initial
     requires: null
     text: |-
@@ -21894,7 +21342,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Projected Local Orbital WANnier functions COMPUTATION
     requires: null
     text: |-
@@ -21946,7 +21393,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Projected Local Orbital WANnier functions, Index of ATOM
     requires: null
     text: |-
@@ -21968,7 +21414,6 @@
     - 3
     - '[[plowan_nt]]'
     excludes: null
-    executables: abinit
     mnemonics: Projected Local Orbital WANnier functions,  Index of Translation.
     requires: null
     text: |-
@@ -21993,7 +21438,6 @@
     dimensions:
     - sum([[plowan_nbl]])
     excludes: null
-    executables: abinit
     mnemonics: Projected Local Orbital WANnier functions,  L values to use for CALCulation
     requires: null
     text: |-
@@ -22014,7 +21458,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Projected Local Orbital WANnier functions, Number of ATOMs
     requires: null
     text: |-
@@ -22035,7 +21478,6 @@
     dimensions:
     - '[[plowan_natom]]'
     excludes: null
-    executables: abinit
     mnemonics: Projected Local Orbital WANnier functions,  NumBer of L values
     requires: null
     text: |-
@@ -22055,7 +21497,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: |-
         Projected Local Orbital WANnier functions,  Number of Translation on which the real space values of
         energy are computed
@@ -22080,7 +21521,6 @@
     dimensions:
     - sum([[plowan_nbl]])
     excludes: null
-    executables: abinit
     mnemonics: Projected Local Orbital WANnier functions,  PROJectors values to use for CALCulation
     requires: null
     text: |-
@@ -22102,7 +21542,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Projected Local Orbital WANnier functions,  activate REAL SPACE calculation.
     requires: null
     text: |-
@@ -22135,7 +21574,6 @@
     dimensions:
     - 3
     excludes: null
-    executables: abinit
     mnemonics: POLarization for CENtrosymmetric geometry
     requires: null
     text: |-
@@ -22156,7 +21594,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: anaddb
     mnemonics: POLarization FLAG
     requires: null
     text: |-
@@ -22202,7 +21639,6 @@
     defaultval: 0
     dimensions: null
     excludes: null
-    executables: abinit
     mnemonics: POSitron computation of DOPPLER broadening
     requires: null
     text: |-
@@ -22228,7 +21664,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: POSITRON calculation
     requires: null
     text: |-
@@ -22362,7 +21797,6 @@
     defaultval: 50
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: 'POSitron calculation: max. Number of STEPs for the two-component
         DFT'
     requires: null
@@ -22389,7 +21823,6 @@
     defaultval: 1
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: 'POSitron calculation: OCCupation number for the positron'
     requires: null
     text: |-
@@ -22415,7 +21848,6 @@
         defaultval: 0.0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: 'POSitron calculation: TOLerance on the DiFference of total
         Energy'
     requires: null
@@ -22451,7 +21883,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: 'POSitron calculation: TOLerance on the DiFference of Forces'
     requires: null
     text: |-
@@ -22484,7 +21915,6 @@
         value: 0.0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Plasmon Pole Model FReQuency
     requires: '[[optdriver]] in [3,4]'
     text: |-
@@ -22551,7 +21981,6 @@
     defaultval: 1
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Plasmon Pole MODEL
     requires: '[[optdriver]] in [3,4]'
     text: |-
@@ -22604,7 +22033,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: PREPAre Non-Linear response calculation
     requires: null
     text: |-
@@ -22641,7 +22069,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: PREPAre GKK calculation
     requires: null
     text: |-
@@ -22664,7 +22091,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: PREPare Self-Consistent PHONon calculation
     requires: null
     text: |-
@@ -22685,7 +22111,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: PRinT 1-DiMensional potential and density
     requires: null
     text: |-
@@ -22706,7 +22131,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: anaddb
     mnemonics: PRinT the Interatomic Force Constants
     requires: null
     text: |-
@@ -22728,7 +22152,6 @@
     defaultval: 0
     dimensions: null
     excludes: null
-    executables: abinit
     mnemonics: PRinT by ATom LIST of ATom
     requires: null
     text: |-
@@ -22754,7 +22177,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: PRinT Band-By-Band decomposition
     requires: null
     text: |-
@@ -22775,7 +22197,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: PRinT output for BoLTZTRaP code
     requires: null
     text: |-
@@ -22795,7 +22216,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: anaddb
     mnemonics: PRinT input files for BoLTZTRaP code.
     requires: null
     text: |-
@@ -22815,7 +22235,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: PRinT Crystallographic Information File
     requires: null
     text: |-
@@ -22833,7 +22252,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: anaddb
     mnemonics: PRinT the Derivative DataBase files
     requires: null
     text: |-
@@ -22859,7 +22277,6 @@
         defaultval: 1
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: PRinT the DENsity
     requires: null
     text: |-
@@ -23011,7 +22428,6 @@
         defaultval: 1
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: PRinT integral of DENsity inside atomic SPHeres
     requires: null
     text: |-
@@ -23044,7 +22460,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: PRinT DIPOLE
     requires: null
     text: |-
@@ -23062,7 +22477,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: PRinT the Density Of States
     requires: null
     text: |-
@@ -23171,7 +22585,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: anaddb
     mnemonics: PRinT the phonon Density Of States
     requires: null
     text: |-
@@ -23202,7 +22615,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: PRinT the Density Of States with M decomposition
     requires: null
     text: |-
@@ -23233,7 +22645,6 @@
         defaultval: 1
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: PRinT Electron BANDS
     requires: null
     text: |-
@@ -23258,7 +22669,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: PRint Electric Field Gradient
     requires: '[[usepaw]]==1, [[quadmom]]'
     text: |-
@@ -23293,7 +22703,6 @@
         defaultval: 1
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: PRinT EIGenenergies
     requires: null
     text: |-
@@ -23312,7 +22721,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: PRinT Electron Localization Function (ELF)
     requires: null
     text: |-
@@ -23352,7 +22760,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: PRinT Fermi Contact term
     requires: '[[usepaw]]==1'
     text: |-
@@ -23377,7 +22784,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: PRinT Fermi SURFace file
     requires: null
     text: |-
@@ -23409,7 +22815,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: anaddb
     mnemonics: PRinT the Fermi SURFace
     requires: null
     text: |-
@@ -23446,7 +22851,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: PRinT the Gradient of electron DENsity
     requires: null
     text: |-
@@ -23471,7 +22875,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: PRinT the GEOmetry analysis
     requires: null
     text: |-
@@ -23520,7 +22923,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: PRinT the GKK matrix elements file
     requires: null
     text: |-
@@ -23543,7 +22945,6 @@
     defaultval: prtgsr = 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: PRinT the GSR file
     requires: null
     text: |-
@@ -23565,7 +22966,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: PRinT the Kinetic energy DENsity
     requires: null
     text: |-
@@ -23599,7 +22999,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: PRinT the K-PoinTs sets
     requires: null
     text: |-
@@ -23659,7 +23058,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: PRinT the Laplacian of electron DENsity
     requires: null
     text: |-
@@ -23686,7 +23084,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: anaddb
     mnemonics: PRinT Mode-By-Mode decomposition of the electrooptic tensor
     requires: null
     text: |-
@@ -23707,7 +23104,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: PRint NABLA
     requires: '[[usepaw]]==1'
     text: |-
@@ -23730,7 +23126,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: PRinT NESTing function
     requires: null
     text: |-
@@ -23748,7 +23143,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: anaddb
     mnemonics: PRinT the NESTing function
     requires: null
     text: |-
@@ -23789,7 +23183,6 @@
     defaultval: 1
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: PRinT PHonon BANDS
     requires: null
     text: |-
@@ -23816,7 +23209,6 @@
     defaultval: 1
     dimensions: scalar
     excludes: null
-    executables: anaddb
     mnemonics: PRinT PHonon BANDS
     requires: null
     text: |-
@@ -23849,7 +23241,6 @@
     defaultval: 1
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: PRinT the PHonon Density Of States
     requires: null
     text: |-
@@ -23868,7 +23259,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: PRinT PHonon iso-SURFace
     requires: null
     text: |-
@@ -23888,7 +23278,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: PRinT POSCAR file
     requires: null
     text: |-
@@ -23908,7 +23297,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: PRinT total POTential
     requires: null
     text: |-
@@ -23951,7 +23339,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: PRint the PSPS file
     requires: null
     text: |-
@@ -23968,7 +23355,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: PRinT the SPin CURrent density
     requires: null
     text: |-
@@ -23988,7 +23374,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: anaddb
     mnemonics: PRinT the Short-Range/Long-Range decomposition of phonon FREQuencies
     requires: null
     text: |-
@@ -24012,7 +23397,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: PRinT the STM density
     requires: null
     text: |-
@@ -24087,7 +23471,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: PRinT the SUSCEPtibility file (the irreducible polarizability)
     requires: null
     text: |-
@@ -24106,7 +23489,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: PRinT V CouLoMB
     requires: null
     text: |-
@@ -24129,7 +23511,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: PRinT Van Der Waals file
     requires: null
     text: |-
@@ -24147,7 +23528,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: PRinT V_HArtree
     requires: null
     text: |-
@@ -24191,7 +23571,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: PRinT V_HXC
     requires: null
     text: |-
@@ -24235,7 +23614,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: PRinT VOLume
     requires: null
     text: |-
@@ -24307,7 +23685,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: anaddb
     mnemonics: PRinT VOLume
     requires: null
     text: |-
@@ -24323,7 +23700,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: PRinT VOLume for IMaGes
     requires: null
     text: |-
@@ -24360,7 +23736,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: PRinT V_PSeudoPotential
     requires: null
     text: |-
@@ -24404,7 +23779,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: PRinT V_XC
     requires: null
     text: |-
@@ -24448,7 +23822,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: PRinT WANT file
     requires: null
     text: |-
@@ -24622,7 +23995,6 @@
         defaultval: 1
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: PRinT the WaveFunction
     requires: null
     text: |-
@@ -24735,7 +24107,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: PRinT Wavefunction file on the FULL mesh
     requires: '[[prtwf]] == 1'
     text: |-
@@ -24755,7 +24126,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: PRinT an XML output
     requires: null
     text: |-
@@ -24779,7 +24149,6 @@
     dimensions:
     - '[[ntypat]]'
     excludes: null
-    executables: abinit
     mnemonics: PoinT CHARGEs
     requires: '[[usepaw]]==1 and [[prtefg]]>=3 '
     text: |-
@@ -24811,7 +24180,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: PoinT GROUP number for the MAgnetic space group
     requires: null
     text: |-
@@ -24850,7 +24218,6 @@
     dimensions:
     - 3
     excludes: null
-    executables: abinit
     mnemonics: Particle VELocity MAXimum
     requires: '[[optdriver]]==3'
     text: |-
@@ -24872,7 +24239,6 @@
     defaultval: 40%
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: 'Plane Wave UNBALancing: THRESHold for balancing procedure'
     requires: '[[paral_kgb]]==1'
     text: |-
@@ -24892,7 +24258,6 @@
     defaultval: 0
     dimensions: array
     excludes: null
-    executables: anaddb
     mnemonics: Q shifts for the grid number 1
     requires: null
     text: |-
@@ -24956,7 +24321,6 @@
     defaultval: all 0
     dimensions: scalar
     excludes: null
-    executables: anaddb
     mnemonics: Q points SHiFTs for the grids 2
     requires: null
     text: |-
@@ -24975,7 +24339,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: anaddb
     mnemonics: Q wavevectors defining a PATH
     requires: null
     text: |-
@@ -24997,7 +24360,6 @@
     dimensions:
     - '[[nnos]]'
     excludes: null
-    executables: abinit
     mnemonics: Q thermostat MASS
     requires: null
     text: |-
@@ -25025,7 +24387,6 @@
     defaultval: <b>qpath</b>(:,:)=0.0
     dimensions: array
     excludes: null
-    executables: anaddb
     mnemonics: Q wavevectors defining a PATH
     requires: null
     text: |-
@@ -25048,7 +24409,6 @@
     defaultval: 0
     dimensions: array
     excludes: null
-    executables: anaddb
     mnemonics: Q for PHonon List 1
     requires: null
     text: |-
@@ -25078,7 +24438,6 @@
     defaultval: all 0
     dimensions: array
     excludes: null
-    executables: anaddb
     mnemonics: PHonon List 2
     requires: null
     text: |-
@@ -25120,7 +24479,6 @@
     dimensions:
     - 3
     excludes: null
-    executables: abinit
     mnemonics: Q-wavevector of the PERTurbation
     requires: '[[vprtrb]]'
     text: |-
@@ -25146,7 +24504,6 @@
     dimensions:
     - 3
     excludes: null
-    executables: abinit
     mnemonics: Q PoinT
     requires: null
     text: |-
@@ -25179,7 +24536,6 @@
     - 3
     - '[[nqptdm]]'
     excludes: null
-    executables: abinit
     mnemonics: Q-PoinTs for the Dielectric Matrix
     requires: '[[optdriver]]==3 and [[nqptdm]]!=0'
     text: |-
@@ -25204,7 +24560,6 @@
     dimensions:
     - 3
     excludes: null
-    executables: abinit
     mnemonics: Q-PoinT re-Normalized
     requires: '[[nqpt]]==1'
     text: |-
@@ -25258,7 +24613,6 @@
     defaultval: 1.0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Q PoinTs NoRMalization
     requires: null
     text: |-
@@ -25285,7 +24639,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: QPoinTs OPTion
     requires: null
     text: |-
@@ -25375,7 +24728,6 @@
     - 3
     - 3
     excludes: specified([[ngqpt]])
-    executables: abinit
     mnemonics: 'Q - PoinTs grid : Real space LATTice'
     requires: null
     text: |-
@@ -25414,7 +24766,6 @@
     defaultval: 0
     dimensions: array
     excludes: null
-    executables: anaddb
     mnemonics: Q-point REFINEment order (experimental)
     requires: null
     text: |-
@@ -25439,7 +24790,6 @@
     dimensions:
     - '[[ntypat]]'
     excludes: null
-    executables: abinit
     mnemonics: QUADrupole MOMents
     requires: '[[usepaw]]==1 and [[prtefg]]>=1 '
     text: |-
@@ -25465,7 +24815,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: anaddb
     mnemonics: RAMAN Sum-Rule
     requires: null
     text: |-
@@ -25496,7 +24845,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: RANDOM ATomic POSitions
     requires: null
     text: |-
@@ -25527,7 +24875,6 @@
     dimensions:
     - '[[ntypat]]'
     excludes: null
-    executables: abinit
     mnemonics: Radii of the ATomic SPHere(s)
     requires: null
     text: |-
@@ -25586,7 +24933,6 @@
         value: 2.0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Radii of the ATomic SPHere(s) in the EXTRA set
     requires: null
     text: |-
@@ -25605,7 +24951,6 @@
     defaultval: 0.0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Radius of the CUT-off for coulomb interaction
     requires: null
     text: |-
@@ -25627,7 +24972,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: RECursion - initial guess  of the FERMI Energy
     requires: null
     text: |-
@@ -25647,7 +24991,6 @@
     defaultval: 1
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: RECursion - Grid RATIO
     requires: null
     text: |-
@@ -25674,7 +25017,6 @@
     defaultval: 500
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: RECursion - Number of point for PATH integral calculations
     requires: null
     text: |-
@@ -25697,7 +25039,6 @@
     defaultval: 10
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: RECursion - Number of RECursions
     requires: null
     text: |-
@@ -25720,7 +25061,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: RECursion - TROTTer parameter
     requires: null
     text: |-
@@ -25749,7 +25089,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: RECursion - CUTing Radius
     requires: null
     text: |-
@@ -25772,7 +25111,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: RECursion - TEST on Electron Gas
     requires: null
     text: |-
@@ -25793,7 +25131,6 @@
     defaultval: 0.0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: RECursion - TOLerance on the difference of electronic DENsity
     requires: null
     text: |-
@@ -25818,7 +25155,6 @@
     dimensions:
     - 3
     excludes: null
-    executables: abinit
     mnemonics: REDuced Displacement FIELD
     requires: '[[berryopt]] = 16, [[red_efield]]'
     text: |-
@@ -25845,7 +25181,6 @@
     dimensions:
     - 3
     excludes: null
-    executables: abinit
     mnemonics: REDuced Electric FIELD
     requires: '[[berryopt]] = 16'
     text: |-
@@ -25871,7 +25206,6 @@
     dimensions:
     - 3
     excludes: null
-    executables: abinit
     mnemonics: REDuced Electric FIELD BAR
     requires: '[[berryopt]] = 14'
     text: |-
@@ -25894,7 +25228,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: anaddb
     mnemonics: RELAXation of AToms
     requires: null
     text: |-
@@ -25912,7 +25245,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: anaddb
     mnemonics: RELAXation of STRain
     requires: null
     text: |-
@@ -25930,7 +25262,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: RESTART from (X,F) history
     requires: null
     text: |-
@@ -26044,7 +25375,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: 'Response Function : 2nd Derivative of wavefunctions with respect
         to K'
     requires: null
@@ -26084,7 +25414,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: 'Response Function : Acoustic Sum Rule'
     requires: null
     text: |-
@@ -26133,7 +25462,6 @@
     dimensions:
     - 2
     excludes: null
-    executables: abinit
     mnemonics: 'Response Function : ATomic POLarisation'
     requires: null
     text: |-
@@ -26179,7 +25507,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Response Function with respect to Derivative with respect to K
     requires: null
     text: |-
@@ -26216,7 +25543,6 @@
     dimensions:
     - 3
     excludes: null
-    executables: abinit
     mnemonics: 'Response Function : DIRections'
     requires: null
     text: |-
@@ -26254,7 +25580,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Response Function with respect to the ELectric FielD
     requires: null
     text: |-
@@ -26308,7 +25633,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Response Function with respect to MAGNetic B-field perturbation
     requires: null
     text: |-
@@ -26330,7 +25654,6 @@
     defaultval: 1
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Response Function METHod
     requires: null
     text: |-
@@ -26350,7 +25673,6 @@
     defaultval: 1
     dimensions: scalar
     excludes: null
-    executables: anaddb
     mnemonics: Response-Function METHod
     requires: null
     text: |-
@@ -26376,7 +25698,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Response Function with respect to PHONons
     requires: null
     text: |-
@@ -26396,7 +25717,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Response Function with respect to STRainS
     requires: null
     text: |-
@@ -26436,7 +25756,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Response Function, USER-defined
     requires: null
     text: |-
@@ -26484,7 +25803,6 @@
     defaultval: 1.0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: RHO QuasiParticle MIXing
     requires: null
     text: |-
@@ -26506,7 +25824,6 @@
     defaultval: zero
     dimensions: scalar
     excludes: null
-    executables: anaddb
     mnemonics: Radius of the Interatomic Force Constant SPHere
     requires: null
     text: |-
@@ -26540,7 +25857,6 @@
     - 3
     - 3
     excludes: null
-    executables: abinit
     mnemonics: Real space PRIMitive translations
     requires: null
     text: |-
@@ -26679,7 +25995,6 @@
     - 3
     - 3
     excludes: null
-    executables: abinit
     mnemonics: Real space PRIMitive translations, Dimensional
     requires: null
     text: |-
@@ -26717,7 +26032,6 @@
     dimensions:
     - 3
     excludes: null
-    executables: abinit
     mnemonics: SCALE CARTesian coordinates
     requires: null
     text: |-
@@ -26750,7 +26064,6 @@
     dimensions:
     - 3
     excludes: null
-    executables: abinit
     mnemonics: Self Consistent PHONon SUPERCELL
     requires: null
     text: |-
@@ -26774,7 +26087,6 @@
     defaultval: 0.0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Self Consistent PHONon TEMPerature
     requires: null
     text: |-
@@ -26798,7 +26110,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: anaddb
     mnemonics: SeLECT Z
     requires: null
     text: |-
@@ -26837,7 +26148,6 @@
     - 3
     - '[[nshiftk]]'
     excludes: null
-    executables: abinit
     mnemonics: SHIFT for K points
     requires: null
     text: |-
@@ -26955,7 +26265,6 @@
     - 3
     - '[[nshiftq]]'
     excludes: null
-    executables: abinit
     mnemonics: SHIFT for Q points
     requires: null
     text: |-
@@ -26984,7 +26293,6 @@
     defaultval: 1
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: SIGN of PERMutation potential
     requires: null
     text: |-
@@ -27002,7 +26310,6 @@
     defaultval: 0.0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: jellium SLAB Wigner-Seitz RADius
     requires: null
     text: |-
@@ -27028,7 +26335,6 @@
     - 0.0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: jellium SLAB BEGinning edge along the Z direction
     requires: null
     text: |-
@@ -27057,7 +26363,6 @@
     - 0.0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: jellium SLAB ENDing edge along the Z direction
     requires: null
     text: |-
@@ -27085,7 +26390,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: SMeared DELTA function
     requires: null
     text: |-
@@ -27124,7 +26428,6 @@
     dimensions:
     - '[[npsp]]'
     excludes: null
-    executables: abinit
     mnemonics: Spin-Orbit treatment for each PSeudoPotential
     requires: '[[nspinor]]==2 and [[usepaw]]==0'
     text: |-
@@ -27174,7 +26477,6 @@
     defaultval: 0.0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: SPectral BROADening
     requires: '[[optdriver]]==3 and [[spmeth]]==2'
     text: |-
@@ -27193,7 +26495,6 @@
     defaultval: 1
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: 'SPace Group : AXes ORientation'
     requires: null
     text: |-
@@ -27296,7 +26597,6 @@
     defaultval: 1
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: 'SPace Group : ORIGin'
     requires: '[[spgroup]]!=0'
     text: |-
@@ -27327,7 +26627,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: SPace GROUP number
     requires: null
     text: |-
@@ -27376,7 +26675,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: SPace GROUP number defining a MAgnetic space group
     requires: null
     text: |-
@@ -27428,7 +26726,6 @@
         - 3
         - '[[natom]]'
     excludes: null
-    executables: abinit
     mnemonics: SPIN for AToms
     requires: null
     text: |-
@@ -27513,7 +26810,6 @@
     defaultval: -99.99
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: SPIN-MAGNetization TARGET
     requires: null
     text: |-
@@ -27555,7 +26851,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: SPectral METHod
     requires: '[[optdriver]]==4'
     text: |-
@@ -27620,7 +26915,6 @@
     defaultval: 1.0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: SPin-ORBit SCaLing
     requires: '[[usepaw]]==1 and [[pawspnorb]]>= 1 '
     text: |-
@@ -27641,7 +26935,6 @@
     defaultval: 0.0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Scanning Tunneling Microscopy BIAS voltage
     requires: null
     text: |-
@@ -27677,7 +26970,6 @@
     defaultval: 100
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: STRess FACTor
     requires: null
     text: |-
@@ -27703,7 +26995,6 @@
     defaultval: 1
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: STRING method ALGOrithm
     requires: null
     text: |-
@@ -27779,7 +27070,6 @@
     defaultval: 1.0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: STRess PRECONditioner
     requires: null
     text: |-
@@ -27807,7 +27097,6 @@
     dimensions:
     - 6
     excludes: null
-    executables: abinit
     mnemonics: STRess TARGET
     requires: null
     text: |-
@@ -27833,7 +27122,6 @@
     dimensions:
     - '[[nsym]]'
     excludes: null
-    executables: abinit
     mnemonics: SYMmetries, Anti-FerroMagnetic characteristics
     requires: null
     text: |-
@@ -27878,7 +27166,6 @@
     defaultval: 1
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: SYMmetryze \chi_o
     requires: '[[optdriver]]==3'
     text: |-
@@ -27909,7 +27196,6 @@
     defaultval: 1
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: SYMmetrize the DYNamical MATrix
     requires: null
     text: |-
@@ -27926,7 +27212,6 @@
     defaultval: 1 (was 0 before v5.3)
     dimensions: scalar
     excludes: null
-    executables: anaddb
     mnemonics: SYMmetrize the DYNamical MATrix
     requires: null
     text: |-
@@ -27952,7 +27237,6 @@
     defaultval: 1
     dimensions: scalar
     excludes: null
-    executables: anaddb
     mnemonics: SYMmetrize the GKk matrix elements for each Q
     requires: null
     text: |-
@@ -27972,7 +27256,6 @@
     defaultval: 1
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: SYMMORPHIc symmetry operation selection
     requires: null
     text: |-
@@ -28016,7 +27299,6 @@
     - 3
     - '[[nsym]]'
     excludes: null
-    executables: abinit
     mnemonics: SYMmetry in REaL space
     requires: null
     text: |-
@@ -28061,7 +27343,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: SYMmetrization of SIGMA matrix elements
     requires: '[[optdriver]]==4'
     text: |-
@@ -28096,7 +27377,6 @@
     defaultval: 0.0
     dimensions: array
     excludes: null
-    executables: anaddb
     mnemonics: TARGET POLarization
     requires: null
     text: |-
@@ -28115,7 +27395,6 @@
     defaultval: 0.0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: 'Time-Dependent dft : MAXimal kohn-sham ENErgy difference'
     requires: null
     text: |-
@@ -28148,7 +27427,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: 'Time-Dependent dft : Maximal number of EXCITations'
     requires: null
     text: |-
@@ -28181,7 +27459,6 @@
     defaultval: 1
     dimensions: scalar
     excludes: null
-    executables: anaddb
     mnemonics: Technique for ELectron-PHonon INTegration
     requires: null
     text: |-
@@ -28203,7 +27480,6 @@
     defaultval: 100.0
     dimensions: scalar
     excludes: null
-    executables: anaddb
     mnemonics: TEMPERature INCrease
     requires: null
     text: |-
@@ -28222,7 +27498,6 @@
     defaultval: 100.0
     dimensions: scalar
     excludes: null
-    executables: anaddb
     mnemonics: TEMPERature MINimum
     requires: null
     text: |-
@@ -28244,7 +27519,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Thomas-Fermi KINetic energy FUNCtional
     requires: null
     text: |-
@@ -28305,7 +27579,6 @@
     defaultval: 1.0E-6 or [[toldfe]] is present
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: 'Thomas-Fermi-Weizsacker: TOLerance on the DiFference of total
         Energy, for initialization steps'
     requires: '[[tfkinfunc]]=11'
@@ -28325,7 +27598,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: anaddb
     mnemonics: THerMal FLAG
     requires: null
     text: |-
@@ -28377,7 +27649,6 @@
     defaultval: 0.05
     dimensions: scalar
     excludes: null
-    executables: anaddb
     mnemonics: THerModynamic TOLerance
     requires: null
     text: |-
@@ -28400,7 +27671,6 @@
         defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: TIMing OPTion
     requires: null
     text: |-
@@ -28445,7 +27715,6 @@
     defaultval: 30
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: TaiL maximum Number of PReConditionner Conjugate Gradient iterations
     requires: null
     text: |-
@@ -28470,7 +27739,6 @@
     defaultval: 0.0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: TaiL expansion RADIUS
     requires: null
     text: |-
@@ -28497,7 +27765,6 @@
     - 3
     - '[[nsym]]'
     excludes: null
-    executables: abinit
     mnemonics: Translation NON-Symmorphic vectors
     requires: null
     text: |-
@@ -28528,7 +27795,6 @@
     defaultval: 0.0
     dimensions: scalar
     excludes: specified([[tolwfr]]) or specified([[toldff]]) or specified([[tolrff]]) or specified([[tolvrs]])
-    executables: abinit
     mnemonics: TOLerance on the DiFference of total Energy
     requires: null
     text: |-
@@ -28577,7 +27843,6 @@
     defaultval: 0.0
     dimensions: scalar
     excludes: specified([[tolwfr]]) or specified([[toldfe]]) or specified([[tolrff]]) or specified([[tolvrs]])
-    executables: abinit
     mnemonics: TOLerance on the DiFference of Forces
     requires: null
     text: |-
@@ -28625,7 +27890,6 @@
     defaultval: 5.0E-5
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: TOLerance on the mean total energy for IMaGes
     requires: null
     text: |-
@@ -28655,7 +27919,6 @@
     defaultval: 0.0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: TOLerance on the MaXimal Difference in Energy
     requires: null
     text: |-
@@ -28681,7 +27944,6 @@
     defaultval: 5.0E-5
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: TOLerance on the MaXimal Force
     requires: null
     text: |-
@@ -28717,7 +27979,6 @@
     defaultval: 0.005
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: TOLerance on the Relative Difference of Eigenenergies
     requires: null
     text: |-
@@ -28747,7 +28008,6 @@
     defaultval: 0.0
     dimensions: scalar
     excludes: specified([[tolwfr]]) or specified([[toldfe]]) or specified([[toldff]]) or specified([[tolvrs]])'
-    executables: abinit
     mnemonics: TOLerance on the Relative diFference of Forces
     requires: null
     text: |-
@@ -28793,7 +28053,6 @@
     defaultval: 1.0E-8
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: TOLERANCE for SYMmetries
     requires: null
     text: |-
@@ -28819,7 +28078,6 @@
     defaultval: 0.0
     dimensions: scalar
     excludes: specified([[tolwfr]]) or specified([[toldfe]]) or specified([[toldff]]) or specified([[tolrff]])'
-    executables: abinit
     mnemonics: TOLerance on the potential V(r) ReSidual
     requires: null
     text: |-
@@ -28870,7 +28128,6 @@
     defaultval: 0.0
     dimensions: scalar
     excludes: specified([[toldfe]]) or specified([[toldff]]) or specified([[tolrff]]) or specified([[tolvrs]])
-    executables: abinit
     mnemonics: TOLerance on WaveFunction squared Residual
     requires: null
     text: |-
@@ -28966,7 +28223,6 @@
     defaultval: 0.0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Temperature (PHYSical) of the ELectrons
     requires: null
     text: |-
@@ -29002,7 +28258,6 @@
     defaultval: 0.01
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Temperature of SMEARing
     requires: null
     text: |-
@@ -29051,7 +28306,6 @@
         - 3
         - '[[natom]]'
     excludes: null
-    executables: abinit
     mnemonics: TYPe of AToms
     requires: null
     text: |-
@@ -29099,7 +28353,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: calculation of the screened interaction U with the Constrained RPA method
     requires: '[[nspinor]] == 1'
     text: |-
@@ -29150,7 +28403,6 @@
     dimensions:
     - 2
     excludes: null
-    executables: abinit
     mnemonics: For the calculation of U with the Constrained RPA method, gives correlated BANDS
     requires: null
     text: |-
@@ -29174,7 +28426,6 @@
     dimensions:
     - 2
     excludes: null
-    executables: abinit
     mnemonics: For the calculation of U with the Constrained RPA method, gives energy WINDOW
     requires: null
     text: |-
@@ -29197,7 +28448,6 @@
     dimensions:
     - 2
     excludes: null
-    executables: abinit
     mnemonics: Upper limit on DaTa SETs
     requires: null
     text: |-
@@ -29238,7 +28488,6 @@
     dimensions:
     - '[[ntypat]]'
     excludes: null
-    executables: abinit
     mnemonics: value of U for PAW+U
     requires: '[[usepaw]]==1 and [[usepawu]]==1'
     text: |-
@@ -29288,7 +28537,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: USE the GEMM routine for the application of the NON-Local OPerator
     requires: null
     text: |-
@@ -29314,7 +28562,6 @@
         defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: activate USE of GPU accelerators with CUDA (nvidia)
     requires: null
     text: |-
@@ -29344,7 +28591,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: anaddb
     mnemonics: USE K-grid FINEr than the coarse k-grid
     requires: null
     text: |-
@@ -29361,7 +28607,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: USE NON-SCF calculation of GKK matrix elements (electron phonon)
     requires: null
     text: |-
@@ -29383,7 +28628,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: USE ScaLapacK
     requires: null
     text: |-
@@ -29401,7 +28645,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: USE of an initial Density MATrix in Paw+U
     requires: '[[usepaw]]==1 and [[usepawu]]==1'
     text: |-
@@ -29436,7 +28679,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: USE Dynamical Mean Field Theory
     requires: null
     text: |-
@@ -29509,7 +28751,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: USE of EXact EXCHange
     requires: '[[usepaw]]==1'
     text: |-
@@ -29530,7 +28771,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: USE FOCK exact exchange
     requires: null
     text: |-
@@ -29556,7 +28796,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: USE Kinetic energy DENsity
     requires: null
     text: |-
@@ -29578,7 +28817,6 @@
     defaultval: '[[AUTO_FROM_PSP]]'
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: USE Projector Augmented Waves method
     requires: null
     text: |-
@@ -29605,7 +28843,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: USE PAW+U (spherical part)
     requires: '[[usepaw]]==1'
     text: |-
@@ -29691,7 +28928,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: USE POTential ZERO
     requires: null
     text: |-
@@ -29720,7 +28956,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: USE RECursion
     requires: null
     text: |-
@@ -29739,7 +28974,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: USER Integer variable A
     requires: null
     text: |-
@@ -29765,7 +28999,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: USER Integer variable B
     requires: null
     text: |-
@@ -29791,7 +29024,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: USER Integer variable C
     requires: null
     text: |-
@@ -29817,7 +29049,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: USER Integer variable D
     requires: null
     text: |-
@@ -29843,7 +29074,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: USER Integer variable E
     requires: null
     text: |-
@@ -29869,7 +29099,6 @@
     defaultval: 0.0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: USER Real variable A
     requires: null
     text: |-
@@ -29887,7 +29116,6 @@
     defaultval: 0.0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: USER Real variable B
     requires: null
     text: |-
@@ -29905,7 +29133,6 @@
     defaultval: 0.0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: USER Real variable C
     requires: null
     text: |-
@@ -29923,7 +29150,6 @@
     defaultval: 0.0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: USER Real variable D
     requires: null
     text: |-
@@ -29941,7 +29167,6 @@
     defaultval: 0.0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: USER Real variable E
     requires: null
     text: |-
@@ -29959,7 +29184,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Use WaVeLet basis set
     requires: null
     text: |-
@@ -29996,7 +29220,6 @@
     defaultval: -1
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: USE eXchange-Correlation with NHAT (compensation charge density)
     requires: '[[usepaw]]==1'
     text: |-
@@ -30029,7 +29252,6 @@
         defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: USE YLM (the spherical harmonics)
     requires: null
     text: |-
@@ -30069,7 +29291,6 @@
     dimensions:
     - '[[vacnum]]'
     excludes: null
-    executables: abinit
     mnemonics: VACancies LiST
     requires: null
     text: |-
@@ -30092,7 +29313,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: VACancies NUMber
     requires: null
     text: |-
@@ -30115,7 +29335,6 @@
     dimensions:
     - 3
     excludes: null
-    executables: abinit
     mnemonics: VACUUM identification
     requires: null
     text: |-
@@ -30156,7 +29375,6 @@
     defaultval: 10.0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: VACuum WIDTH
     requires: null
     text: |-
@@ -30190,7 +29408,6 @@
     dimensions:
     - 3
     excludes: null
-    executables: abinit
     mnemonics: V (potential) CUT-off GEOmetry
     requires: '[[icutcoul]] in [1,2]'
     text: |-
@@ -30265,7 +29482,6 @@
     defaultval: 10
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: vdW-DF MINimum Angular CUT-off
     requires: '[[vdw_xc]]>0'
     text: |-
@@ -30284,7 +29500,6 @@
     defaultval: 30
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: |-
         vdW-DF Angle RATIO between the highest and
         lowest angles.
@@ -30305,7 +29520,6 @@
     defaultval: 0.5
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: 'vdW-DF Delta for Angles, MAXimum '
     requires: '[[vdw_xc]]>0'
     text: |-
@@ -30324,7 +29538,6 @@
     defaultval: 0.01
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: vdW-DF Delta for Angles, MINimum
     requires: '[[vdw_xc]]>0'
     text: |-
@@ -30343,7 +29556,6 @@
     defaultval: 30
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: vdW-DF D-mesh CUT-off
     requires: '[[vdw_xc]]>0'
     text: |-
@@ -30362,7 +29574,6 @@
     defaultval: 20
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: |-
         vdW-DF, between the highest and
         lowest D, RATIO.
@@ -30383,7 +29594,6 @@
     defaultval: 1.0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: vdW-DF Distance for SOFTening.
     requires: '[[vdw_xc]]>0'
     text: |-
@@ -30402,7 +29612,6 @@
     defaultval: 5
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: vdW-DF G-space CUT-off
     requires: '[[vdw_xc]]>0'
     text: |-
@@ -30421,7 +29630,6 @@
     defaultval: 20
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: vdW-DF Number of D-mesh PoinTS
     requires: '[[vdw_xc]]>0'
     text: |-
@@ -30440,7 +29648,6 @@
     defaultval: -1
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: vdW-DF Number of G-mesh PoinTS
     requires: '[[vdw_xc]]>0'
     text: |-
@@ -30459,7 +29666,6 @@
     defaultval: 30
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: vdW-DF Number of Q-mesh PoinTS
     requires: '[[vdw_xc]]>0'
     text: |-
@@ -30478,7 +29684,6 @@
     defaultval: 2048
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: vdW-DF Number of R-PoinTS
     requires: '[[vdw_xc]]>0'
     text: |-
@@ -30497,7 +29702,6 @@
     defaultval: 12
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: vdW-DF Number of SMOOTHening iterations
     requires: '[[vdw_xc]]>0'
     text: |-
@@ -30516,7 +29720,6 @@
     defaultval: -1.0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: vdW-DF PHI value SOFTening.
     requires: '[[vdw_xc]]>0'
     text: |-
@@ -30535,7 +29738,6 @@
     defaultval: 5
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: vdW-DF Q-mesh CUT-off
     requires: '[[vdw_xc]]>0'
     text: |-
@@ -30554,7 +29756,6 @@
     defaultval: 20
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: vdW-DF, between highest and lowest Q, RATIO .
     requires: '[[vdw_xc]]>0'
     text: |-
@@ -30573,7 +29774,6 @@
     defaultval: 100
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: vdW-DF Real-space CUT-off
     requires: '[[vdw_xc]]>0'
     text: |-
@@ -30592,7 +29792,6 @@
     defaultval: 0.0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: vdW-DF radius SOFTening.
     requires: '[[vdw_xc]]>0'
     text: |-
@@ -30611,7 +29810,6 @@
     defaultval: 0.01
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: vdW-DF energy calculation THRESHOLD
     requires: '[[vdw_xc]]>0'
     text: |-
@@ -30635,7 +29833,6 @@
     defaultval: 1.0E-13
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: vdW-DF global TOLERANCE.
     requires: '[[vdw_xc]]>0'
     text: |-
@@ -30654,7 +29851,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: vdW-DF TWEAKS.
     requires: '[[vdw_xc]]>0'
     text: |-
@@ -30679,7 +29875,6 @@
     defaultval: -0.8491
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: vdW-DF ZAB parameter
     requires: '[[vdw_xc]]>0'
     text: |-
@@ -30702,7 +29897,6 @@
     defaultval: 1
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Van Der Waals Number of interacting FRAGments
     requires: '[[vdw_xc]] in [10,11]'
     text: |-
@@ -30731,7 +29925,6 @@
     dimensions:
     - 3
     excludes: null
-    executables: abinit
     mnemonics: Van Der Waals correction from Wannier functions in SUPERCELL
     requires: '[[vdw_xc]] in [10,11]'
     text: |-
@@ -30758,7 +29951,6 @@
     defaultval: 1.0E-10
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Van Der Waals TOLerance
     requires: '[[vdw_xc]]==5'
     text: |-
@@ -30779,7 +29971,6 @@
     defaultval: -1
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Van Der Waals TOLerance for 3-Body Term
     requires: '[[vdw_xc]] == 6'
     text: |-
@@ -30816,7 +30007,6 @@
     dimensions:
     - '[[natom]]'
     excludes: null
-    executables: abinit
     mnemonics: Van Der Waals TYPe of FRAGment
     requires: '[[vdw_xc]] in [10,11]'
     text: |-
@@ -30844,7 +30034,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Van Der Waals eXchange-Correlation functional
     requires: null
     text: |-
@@ -30978,7 +30167,6 @@
     - 3
     - '[[natom]]'
     excludes: null
-    executables: abinit
     mnemonics: VELocity
     requires: '[[ionmov]] > 0'
     text: |-
@@ -31015,7 +30203,6 @@
     - 3
     - 3
     excludes: null
-    executables: abinit
     mnemonics: VELocity of the CELL parameters
     requires: |-
         [[imgmov]] in [9,13] and [[optcell]] > 0
@@ -31042,7 +30229,6 @@
     defaultval: 100
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: VIScosity
     requires: null
     text: |-
@@ -31105,7 +30291,6 @@
     dimensions:
     - 2
     excludes: null
-    executables: abinit
     mnemonics: potential -V- for the PeRTuRBation
     requires: '[[qprtrb]]'
     text: |-
@@ -31140,7 +30325,6 @@
     defaultval: 2*0.0d0
     dimensions: scalar
     excludes: null
-    executables: anaddb
     mnemonics: Speed of Sound Q-radius, TOLerance KiloMeter/Second
     requires: null
     text: |-
@@ -31164,7 +30348,6 @@
     defaultval: 1
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Wannier90- INItial PROJections
     requires: '[[prtwant]]==2 or [[prtwant]]==3'
     text: |-
@@ -31226,7 +30409,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Wannier90- PRINT UNKp.s file
     requires: '[[prtwant]]==2 or [[prtwant]]==3'
     text: |-
@@ -31330,7 +30512,6 @@
     defaultval: '[[AUTO_FROM_PSP]]'
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: WaveFunction OPTimisation ALGorithm
     requires: null
     text: |-
@@ -31439,7 +30620,6 @@
     - '[[natcon]]'
     - '[[nconeq]]'
     excludes: null
-    executables: abinit
     mnemonics: WeighTs for AToms in CONstraint equations
     requires: null
     text: |-
@@ -31533,7 +30713,6 @@
     dimensions:
     - '[[nkpt]]'
     excludes: null
-    executables: abinit
     mnemonics: WeighTs for K points
     requires: null
     text: |-
@@ -31563,7 +30742,6 @@
     defaultval: 1
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: WeighTs for the current Q-points
     requires: null
     text: |-
@@ -31581,7 +30759,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: WaVeLet BigDFT Comparison
     requires: null
     text: |-
@@ -31603,7 +30780,6 @@
     defaultval: 6.0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: WaVeLet Coarse grid Radius MULTiplier
     requires: null
     text: |-
@@ -31628,7 +30804,6 @@
     defaultval: 10.0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: WaVeLet Fine grid Radius MULTiplier
     requires: null
     text: |-
@@ -31658,7 +30833,6 @@
     defaultval: 0.5
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: WaVeLet H step GRID
     requires: null
     text: |-
@@ -31682,7 +30856,6 @@
     dimensions:
     - 2
     excludes: null
-    executables: abinit
     mnemonics: WaVeLet Number of GAUSSians
     requires: null
     text: |-
@@ -31702,7 +30875,6 @@
     defaultval: 5
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: WaVeLet maximum Number of PReConditionner Conjugate Gradient iterations
     requires: null
     text: |-
@@ -31727,7 +30899,6 @@
     - 3
     - min([[natom]],[[natrd]])
     excludes: null
-    executables: abinit
     mnemonics: vectors (X) of atom positions in cartesian coordinates -length in ANGSTrom-
     requires: null
     text: |-
@@ -31768,7 +30939,6 @@
     defaultval: 1.0E-14
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: eXchange-Correlation - DENsity POSitivity value
     requires: null
     text: |-
@@ -31800,7 +30970,6 @@
     defaultval: 99.99
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Value of the c parameter in the eXchange-Correlation TB09 functional
     requires: null
     text: |-
@@ -31838,7 +31007,6 @@
     - 3
     - min([[natom]],[[natrd]])
     excludes: null
-    executables: abinit
     mnemonics: vectors (X) of atom positions in CARTesian coordinates
     requires: null
     text: |-
@@ -31878,7 +31046,6 @@
     defaultval: 0
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: eXchange Correlation functional LEVEL
     requires: null
     text: |-
@@ -31915,7 +31082,6 @@
     - 3
     - min([[natom]],[[natrd]])
     excludes: null
-    executables: abinit
     mnemonics: vectors (X) of atom positions in REDuced coordinates
     requires: null
     text: |-
@@ -31959,7 +31125,6 @@
     - 3
     - '[[natsph_extra]]'
     excludes: null
-    executables: abinit
     mnemonics: X(position) in REDuced coordinates of the SPHeres for dos projection in the EXTRA set
     requires: '[[natsph_extra]] > 0'
     text: |-
@@ -31979,7 +31144,6 @@
     defaultval: null
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: XYZ FILE input for geometry
     requires: null
     text: |-
@@ -32004,7 +31168,6 @@
     defaultval: 0.0036749326
     dimensions: scalar
     excludes: null
-    executables: abinit
     mnemonics: Z-CUT
     requires: '[[optdriver]] in [3,4,99]'
     text: |-
@@ -32040,7 +31203,6 @@
     dimensions:
     - 3
     excludes: null
-    executables: abinit
     mnemonics: ZEEMAN FIELD
     requires: null
     text: |-
@@ -32061,7 +31223,6 @@
     dimensions:
     - '[[ntypat]]'
     excludes: null
-    executables: abinit
     mnemonics: Z (charge) of the IONs for the different TYPes of AToms
     requires: null
     text: |-
@@ -32082,7 +31243,6 @@
     dimensions:
     - '[[npsp]]'
     excludes: null
-    executables: abinit
     mnemonics: charge -Z- of the NUCLeus
     requires: null
     text: |-
