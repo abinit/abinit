@@ -297,7 +297,7 @@ to the next bigger is smaller than <b>wtol2</b>.
 <br><font id="title"><a name="atifc@anaddb">atifc</a></font>
 <br><font id="mnemonics">Mnemonics: AToms for IFC analysis</font>
 <br><font id="mnemonics">Executable: anaddb</font>
-<br><font id="vartype">Variable type: integer array <b>atifc</b>(<a href="../../input_variables/generated_files/varanaddb.html#natifc@anaddb">natifc</a>)(<a href="../../input_variables/generated_files/varanaddb.html#natifc@anaddb">natifc</a>)</font>
+<br><font id="vartype">Variable type: integer(array '<a href="../../input_variables/generated_files/varanaddb.html#natifc@anaddb">natifc</a>')</font>
 <br><font id="default">Default is 0</font>
 <br><font id="text">
 <p>
@@ -360,7 +360,7 @@ old-fashioned, and should be replaced by routines used by the main abinit code.
 <br><font id="title"><a name="chneut@anaddb">chneut</a></font>
 <br><font id="mnemonics">Mnemonics: Integer for CHarge NEUTrality treatment</font>
 <br><font id="mnemonics">Executable: anaddb</font>
-<br><font id="vartype">Variable type: integer parameter</font>
+<br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
 <br><font id="text">
 <p>
@@ -828,7 +828,7 @@ anaddb input (ngqpt)
 <br><font id="title"><a name="ep_qptlist@anaddb">ep_qptlist</a></font>
 <br><font id="mnemonics">Mnemonics: Electron Phonon Q PoinT LIST</font>
 <br><font id="mnemonics">Executable: anaddb</font>
-<br><font id="vartype">Variable type: real array of 3*ep_nqpt elementsarray</font>
+<br><font id="vartype">Variable type: real(3,<a href="../../input_variables/generated_files/varanaddb.html#ep_nqpt@anaddb">ep_nqpt</a>)</font>
 <br><font id="default">Default is (3*<a href="../../input_variables/generated_files/varanaddb.html#ep_nqpt@anaddb">ep_nqpt</a>)*0</font>
 <br><font id="text">
 <p>
@@ -866,7 +866,7 @@ or high symmetry points. I do not know why...
 <br><font id="title"><a name="freeze_displ@anaddb">freeze_displ</a></font>
 <br><font id="mnemonics">Mnemonics: FREEZE DISPLacement of phonons into supercells</font>
 <br><font id="mnemonics">Executable: anaddb</font>
-<br><font id="vartype">Variable type: real number</font>
+<br><font id="vartype">Variable type: real</font>
 <br><font id="default">Default is 0.0</font>
 <br><font id="text">
 <p>
@@ -895,7 +895,7 @@ is to break the symmetry in the right direction, any reasonable value (10-50) sh
 <br><font id="title"><a name="frmax@anaddb">frmax</a></font>
 <br><font id="mnemonics">Mnemonics: FRequency MAXimum</font>
 <br><font id="mnemonics">Executable: anaddb</font>
-<br><font id="vartype">Variable type: real number</font>
+<br><font id="vartype">Variable type: real</font>
 <br><font id="default">Default is 10.0</font>
 <br><font id="text">
 <p>
@@ -909,7 +909,7 @@ is to break the symmetry in the right direction, any reasonable value (10-50) sh
 <br><font id="title"><a name="frmin@anaddb">frmin</a></font>
 <br><font id="mnemonics">Mnemonics: FRequency MINimum</font>
 <br><font id="mnemonics">Executable: anaddb</font>
-<br><font id="vartype">Variable type: real number</font>
+<br><font id="vartype">Variable type: real</font>
 <br><font id="default">Default is 0.0</font>
 <br><font id="text">
 <p>
@@ -938,7 +938,7 @@ gkqfile. This reduces strongly the memory needed for an electron-phonon run.
 <br><font id="title"><a name="gruns_ddbs@anaddb">gruns_ddbs</a></font>
 <br><font id="mnemonics">Mnemonics: GRUNeiSen DDBS</font>
 <br><font id="mnemonics">Executable: anaddb</font>
-<br><font id="vartype">Variable type: list of stringsarray</font>
+<br><font id="vartype">Variable type: string(<a href="../../input_variables/generated_files/varanaddb.html#gruns_nddbs@anaddb">gruns_nddbs</a>)</font>
 <br><font id="default">Default is Empty</font>
 <br><font id="text">
 <p>
@@ -973,7 +973,7 @@ used for the calculation of the Gruneisen parameters.
 <br><font id="title"><a name="iatfix@anaddb">iatfix</a></font>
 <br><font id="mnemonics">Mnemonics: Indices of the AToms that are FIXed</font>
 <br><font id="mnemonics">Executable: anaddb</font>
-<br><font id="vartype">Variable type: integer array (1:<a href="../../input_variables/generated_files/varanaddb.html#natfix@anaddb">natfix</a>)array</font>
+<br><font id="vartype">Variable type: integer(<a href="../../input_variables/generated_files/varanaddb.html#natfix@anaddb">natfix</a>)</font>
 <br><font id="default">Default is 0</font>
 <br><font id="text">
 <p>
@@ -988,8 +988,8 @@ See <a href="../../input_variables/generated_files/varanaddb.html#polflag@anaddb
 <br><font id="title"><a name="iatprj_bs@anaddb">iatprj_bs</a></font>
 <br><font id="mnemonics">Mnemonics: Indices of the AToms for the PRoJection of the phonon Band Structure</font>
 <br><font id="mnemonics">Executable: anaddb</font>
-<br><font id="vartype">Variable type: integer array (1:<a href="../../input_variables/generated_files/varanaddb.html#natprj_bs@anaddb">natprj_bs</a>)</font>
-<br><font id="default">Default is 0</font>
+<br><font id="vartype">Variable type: integer(<a href="../../input_variables/generated_files/varanaddb.html#natprj_bs@anaddb">natprj_bs</a>)</font>
+<br><font id="default">Default is 0*'<a href="../../input_variables/generated_files/varanaddb.html#natprj_bs@anaddb">natprj_bs</a>'</font>
 <br><font id="text">
 <p>
 <p>Indices of the atoms that are chosen for projection of the phonon eigenvectors, giving a weighted phonon band structure file.
@@ -1142,7 +1142,7 @@ k-dependent relaxation time. (needs<a href="../../input_variables/generated_file
 <br><font id="title"><a name="istrfix@anaddb">istrfix</a></font>
 <br><font id="mnemonics">Mnemonics: Index of STRain FIXed</font>
 <br><font id="mnemonics">Executable: anaddb</font>
-<br><font id="vartype">Variable type: integer array istrfix(1:<a href="../../input_variables/generated_files/varanaddb.html#nstrfix@anaddb">nstrfix</a>)</font>
+<br><font id="vartype">Variable type: integer(<a href="../../input_variables/generated_files/varanaddb.html#nstrfix@anaddb">nstrfix</a>)</font>
 <br><font id="default">Default is 0</font>
 <br><font id="text">
 <p>
@@ -1194,7 +1194,7 @@ See <a href="../../input_variables/generated_files/varanaddb.html#polflag@anaddb
 <br><font id="title"><a name="kptrlatt@anaddb">kptrlatt</a></font>
 <br><font id="mnemonics">Mnemonics: K PoinT Reciprocal LATTice</font>
 <br><font id="mnemonics">Executable: anaddb</font>
-<br><font id="vartype">Variable type: integerarray</font>
+<br><font id="vartype">Variable type: integer(3,3)</font>
 <br><font id="default">Default is 9*0</font>
 <br><font id="text">
 <p>
@@ -1211,7 +1211,7 @@ using nesting functions or tetrahedron integration.
 <br><font id="title"><a name="kptrlatt_fine@anaddb">kptrlatt_fine</a></font>
 <br><font id="mnemonics">Mnemonics: K PoinT Reciprocal LATTice for FINE grid</font>
 <br><font id="mnemonics">Executable: anaddb</font>
-<br><font id="vartype">Variable type: integerarray</font>
+<br><font id="vartype">Variable type: integer(3,3)</font>
 <br><font id="default">Default is 9*0</font>
 <br><font id="text">
 <p>
@@ -1332,8 +1332,8 @@ The code will take <b>nfreq</b> equidistant values from <a href="../../input_var
 <br><font id="title"><a name="ng2qpt@anaddb">ng2qpt</a></font>
 <br><font id="mnemonics">Mnemonics: Number of Grids points for Q PoinTs (grid 2)</font>
 <br><font id="mnemonics">Executable: anaddb</font>
-<br><font id="vartype">Variable type: integer array <b>ng2qpt</b>(3)array</font>
-<br><font id="default">Default is 3*0 (will not work)</font>
+<br><font id="vartype">Variable type: integer(3)</font>
+<br><font id="default">Default is 3*0 (Comment: (will not work))</font>
 <br><font id="text">
 <p>
 <p>The Monkhorst-Pack grid linear dimensions, for the finer of the
@@ -1349,8 +1349,8 @@ or for the DOS.
 <br><font id="title"><a name="ngqpt@anaddb">ngqpt</a></font>
 <br><font id="mnemonics">Mnemonics: Number of Grids points for Q PoinTs</font>
 <br><font id="mnemonics">Executable: anaddb</font>
-<br><font id="vartype">Variable type: integer array <b>ngqpt</b>(3)array</font>
-<br><font id="default">Default is 3*0 (will not work)</font>
+<br><font id="vartype">Variable type: integer(3)</font>
+<br><font id="default">Default is 3*0 (Comment: (will not work))</font>
 <br><font id="text">
 <p>
 <p>The Monkhorst-Pack grid linear dimensions, for the DDB (coarse grid).
@@ -1967,7 +1967,7 @@ See also <a href="../../input_variables/generated_files/varanaddb.html#ifcflag@a
 <br><font id="title"><a name="q1shft@anaddb">q1shft</a></font>
 <br><font id="mnemonics">Mnemonics: Q shifts for the grid number 1</font>
 <br><font id="mnemonics">Executable: anaddb</font>
-<br><font id="vartype">Variable type: real array <b>q1shft</b>(3,<a href="../../input_variables/generated_files/varanaddb.html#nqshft@anaddb">nqshft</a>)array</font>
+<br><font id="vartype">Variable type: real(<a href="../../input_variables/generated_files/varanaddb.html#nqshft@anaddb">nqshft</a>)</font>
 <br><font id="default">Default is 0</font>
 <br><font id="text">
 <p>
@@ -2029,8 +2029,8 @@ See also <a href="../../input_variables/generated_files/varanaddb.html#ifcflag@a
 <br><font id="title"><a name="q2shft@anaddb">q2shft</a></font>
 <br><font id="mnemonics">Mnemonics: Q points SHiFTs for the grids 2</font>
 <br><font id="mnemonics">Executable: anaddb</font>
-<br><font id="vartype">Variable type: real array q2shft(3)</font>
-<br><font id="default">Default is all 0</font>
+<br><font id="vartype">Variable type: real(3)</font>
+<br><font id="default">Default is 3* 0</font>
 <br><font id="text">
 <p>
 <p>Similar to <a href="../../input_variables/generated_files/varanaddb.html#q1shft@anaddb">q1shft</a>,
@@ -2063,8 +2063,8 @@ to a regular grid as in the rest of anaddb (using <a href="../../input_variables
 <br><font id="title"><a name="qpath@anaddb">qpath</a></font>
 <br><font id="mnemonics">Mnemonics: Q wavevectors defining a PATH</font>
 <br><font id="mnemonics">Executable: anaddb</font>
-<br><font id="vartype">Variable type: real array <b>qpath</b>(3,<a href="../../input_variables/generated_files/varanaddb.html#nqpath@anaddb">nqpath</a>)array</font>
-<br><font id="default">Default is <b>qpath</b>(:,:)=0.0</font>
+<br><font id="vartype">Variable type: real(3,<a href="../../input_variables/generated_files/varanaddb.html#nqpath@anaddb">nqpath</a>)</font>
+<br><font id="default">Default is 0.0</font>
 <br><font id="text">
 <p>
 <p>It is used to generate the path along which the phonon band structure and
@@ -2084,7 +2084,7 @@ The same circuit is used for the output of the nesting function if
 <br><font id="title"><a name="qph1l@anaddb">qph1l</a></font>
 <br><font id="mnemonics">Mnemonics: Q for PHonon List 1</font>
 <br><font id="mnemonics">Executable: anaddb</font>
-<br><font id="vartype">Variable type: real array <b>qph1l</b>(4,<a href="../../input_variables/generated_files/varanaddb.html#nph1l@anaddb">nph1l</a>)array</font>
+<br><font id="vartype">Variable type: real(4,<a href="../../input_variables/generated_files/varanaddb.html#nph1l@anaddb">nph1l</a>)</font>
 <br><font id="default">Default is 0</font>
 <br><font id="text">
 <p>
@@ -2112,8 +2112,8 @@ in the array qnrml1(nph1l).
 <br><font id="title"><a name="qph2l@anaddb">qph2l</a></font>
 <br><font id="mnemonics">Mnemonics: PHonon List 2</font>
 <br><font id="mnemonics">Executable: anaddb</font>
-<br><font id="vartype">Variable type: real array qph2l(4,<a href="../../input_variables/generated_files/varanaddb.html#nph2l@anaddb">nph2l</a>)array</font>
-<br><font id="default">Default is all 0</font>
+<br><font id="vartype">Variable type: real(4,<a href="../../input_variables/generated_files/varanaddb.html#nph2l@anaddb">nph2l</a>)</font>
+<br><font id="default">Default is 0</font>
 <br><font id="text">
 <p>
 <p>List of phonon wavevector <i>directions</i> along which the
@@ -2147,7 +2147,7 @@ in the array qnrml2(nph2l).
 <br><font id="title"><a name="qrefine@anaddb">qrefine</a></font>
 <br><font id="mnemonics">Mnemonics: Q-point REFINEment order (experimental)</font>
 <br><font id="mnemonics">Executable: anaddb</font>
-<br><font id="vartype">Variable type: integer array <b>qrefine</b>(3)array</font>
+<br><font id="vartype">Variable type: integer(3)</font>
 <br><font id="default">Default is 0</font>
 <br><font id="text">
 <p>
@@ -2302,7 +2302,7 @@ are unphysical.</p>
 <br><font id="mnemonics">Mnemonics: SYMmetrize the DYNamical MATrix</font>
 <br><font id="mnemonics">Executable: anaddb</font>
 <br><font id="vartype">Variable type: integer</font>
-<br><font id="default">Default is 1 (was 0 before v5.3)</font>
+<br><font id="default">Default is 1 (Comment: (was 0 before v5.3))</font>
 <br><font id="text">
 <p>
 <p>If <b>symdynmat</b> is equal to 1, the dynamical matrix
@@ -2341,7 +2341,7 @@ except for debugging or test purposes.
 <br><font id="title"><a name="targetpol@anaddb">targetpol</a></font>
 <br><font id="mnemonics">Mnemonics: TARGET POLarization</font>
 <br><font id="mnemonics">Executable: anaddb</font>
-<br><font id="vartype">Variable type: real targetpol(1:3)array</font>
+<br><font id="vartype">Variable type: real(3)</font>
 <br><font id="default">Default is 0.0</font>
 <br><font id="text">
 <p>
@@ -2495,7 +2495,7 @@ to the next bigger is smaller than <b>thmtol</b>.
 <br><font id="title"><a name="vs_qrad_tolkms@anaddb">vs_qrad_tolkms</a></font>
 <br><font id="mnemonics">Mnemonics: Speed of Sound Q-radius, TOLerance KiloMeter/Second</font>
 <br><font id="mnemonics">Executable: anaddb</font>
-<br><font id="vartype">Variable type: real array(2)</font>
+<br><font id="vartype">Variable type: real(2)</font>
 <br><font id="default">Default is 2*0.0d0</font>
 <br><font id="text">
 <p>

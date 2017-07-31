@@ -1,3 +1,4 @@
+- Bader
 - Berry
 - BSE
 - ChargedCell
@@ -22,6 +23,7 @@
 - MolecularDynamics
 - multidtset
 - nonlinear
+- Optic
 - otherGS
 - parallelism
 - PAW

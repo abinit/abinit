@@ -118,6 +118,8 @@
 - tests/v3/Input/t43.in:#%% topics = convergency
 - tests/v3/Input/t51.in:#%% topics = spinpolarisation
 - tests/v3/Input/t55.in:#%% topics = TDDFT
+- tests/v3/Input/t56.in:#%% topics = Bader
+- tests/v3/Input/t57.in:#%% topics = Bader
 - tests/v3/Input/t83.in:#%% topics = nonlinear
 - tests/v3/Input/t92.in:#%% topics = otherGS
 - tests/v3/Input/t93.in:#%% topics = otherGS
@@ -126,8 +128,15 @@
 - tests/v4/Input/t06.in:#%% topics = PAW
 - tests/v4/Input/t08.in:#%% topics = PAW
 - tests/v4/Input/t17.in:#%% topics = PAW
+- tests/v4/Input/t30.in:#%% topics = Bader
+- tests/v4/Input/t31.in:#%% topics = Bader
+- tests/v4/Input/t32.in:#%% topics = Bader
+- tests/v4/Input/t33.in:#%% topics = Bader
+- tests/v4/Input/t34.in:#%% topics = Bader
 - tests/v4/Input/t52.in:#%% topics = nonlinear
 - tests/v4/Input/t55.in:#%% topics = Berry
+- tests/v4/Input/t56.in:#%% topics = Optic
+- tests/v4/Input/t57.in:#%% topics = Optic
 - tests/v4/Input/t63.in:#%% topics = DFPT
 - tests/v4/Input/t66.in:#%% topics = Berry, DFPT
 - tests/v4/Input/t72.in:#%% topics = Berry
@@ -148,9 +157,9 @@
 - tests/v5/Input/t06.in:#%% topics = PAW
 - tests/v5/Input/t07.in:#%% topics = positron
 - tests/v5/Input/t08.in:#%% topics = DFT+U
-- tests/v5/Input/t11.in:#%% topics = PAW
 - tests/v5/Input/t112.in:#%% topics = Berry
 - tests/v5/Input/t113.in:#%% topics = Berry
+- tests/v5/Input/t11.in:#%% topics = PAW
 - tests/v5/Input/t14.in:#%% topics = DFT+U, crystal
 - tests/v5/Input/t15.in:#%% topics = DFT+U
 - tests/v5/Input/t16.in:#%% topics = DFT+U, spinpolarisation
@@ -188,6 +197,8 @@
 - tests/v6/Input/t125.in:#%% topics = Berry
 - tests/v6/Input/t126.in:#%% topics = Berry
 - tests/v6/Input/t17.in:#%% topics = MagField
+- tests/v6/Input/t18.in:#%% topics = Bader
+- tests/v6/Input/t19.in:#%% topics = Bader
 - tests/v6/Input/t24.in:#%% topics = TransPath
 - tests/v6/Input/t25.in:#%% topics = TransPath
 - tests/v6/Input/t27.in:#%% topics = TransPath
@@ -215,6 +226,8 @@
 - tests/v67mbpt/Input/t33.in:#%% topics = BSE
 - tests/v67mbpt/Input/t34.in:#%% topics = BSE
 - tests/v67mbpt/Input/t35.in:#%% topics = BSE
+- tests/v67mbpt/Input/t52.in:#%% topics = Optic
+- tests/v67mbpt/Input/t53.in:#%% topics = Optic
 - tests/v7/Input/t03.in:#%% topics = Berry
 - tests/v7/Input/t05.in:#%% topics = spinpolarisation, MagMom
 - tests/v7/Input/t06.in:#%% topics = spinpolarisation
@@ -231,9 +244,13 @@
 - tests/v7/Input/t27.in:#%% topics = DMFT
 - tests/v7/Input/t28.in:#%% topics = DMFT
 - tests/v7/Input/t35.in:#%% topics = positron
+- tests/v7/Input/t41.in:#%% topics = Optic
+- tests/v7/Input/t42.in:#%% topics = Optic
 - tests/v7/Input/t43.in:#%% topics = DFPT
 - tests/v7/Input/t44.in:#%% topics = DFT+U, DFPT
 - tests/v7/Input/t45.in:#%% topics = DFPT
+- tests/v7/Input/t47.in:#%% topics = Optic
+- tests/v7/Input/t48.in:#%% topics = Optic
 - tests/v7/Input/t50.in:#%% topics = TDep
 - tests/v7/Input/t51.in:#%% topics = TDep
 - tests/v7/Input/t52.in:#%% topics = TDep

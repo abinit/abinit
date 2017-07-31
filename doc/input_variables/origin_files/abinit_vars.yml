@@ -174,7 +174,7 @@
                 </td>
 
                 <td style="border-style: none solid solid none;  border-width: medium 2.25pt 2.25pt medium; padding: 0cm 3.5pt; width: 163.15pt; height: 33.3pt;">
-                <p style="margin: 0cm 0cm 0.0001pt; text-align: center;" class="MsoBodyTextIndent" align="center"><small>1.8</small></p>
+                <p style="margin: 0cm 0cm 0.0001pt; text-align: center;" class="MsoBodyTextIndent" align="center"><small3*>1.8</small></p>
                 </td>
 
                 <td style="border-style: none solid solid none;  border-width: medium 2.25pt 2.25pt medium; padding: 0cm 3.5pt; width: 163.15pt; height: 33.3pt;">
@@ -1019,7 +1019,7 @@
     commentdims: null
     defaultval: 0
     dimensions:
-    - '[[anaddb:natifc]]'
+    - array '[[anaddb:natifc]]'
     excludes: null
     mnemonics: AToms for IFC analysis
     requires: null
@@ -1031,7 +1031,38 @@
         confusing, and should be taken away in one future version - sorry for this).
     topics: null
     varset: varanaddb
-    vartype: integer array <b>atifc</b>([[anaddb:natifc]])
+    vartype: integer
+- !variable
+    abivarname: atom@aim
+    characteristics: null
+    commentdefault: null
+    commentdims: null
+    defaultval: 1
+    dimensions: scalar
+    excludes: null
+    mnemonics: index of ATOM
+    requires: null
+    text: |-
+        Index of the investigated atom.
+    topics: Bader_basic
+    varset: varaim
+    vartype: integer
+- !variable
+    abivarname: atrad@aim
+    characteristics: null
+    commentdefault: null
+    commentdims: null
+    defaultval: 1.0
+    dimensions: scalar
+    excludes: null
+    mnemonics: bader ATomic RADius
+    requires: null
+    text: |-
+        A first estimation of the Bader radius (not too
+          important - it is used only two times)
+    topics: Bader_expert
+    varset: varaim
+    vartype: real
 - !variable
     abivarname: atvshift
     characteristics:
@@ -1686,6 +1717,29 @@
     topics: null
     varset: varanaddb
     vartype: integer
+- !variable
+    abivarname: broadening@optic
+    characteristics: null
+    commentdefault: null
+    commentdims: null
+    defaultval: 1.d-3 Ha
+    dimensions: scalar
+    excludes: null
+    mnemonics: BROADENING
+    requires: null
+    text: |-
+        In Eq. 46 of <a href="../../users/generated_files/help_optic.html#Ref1">Ref. 1</a>, it is clear that when ever wnm(k) is equal to w,
+          there is a resonance. Numerically this would lead to an infinity. In order to
+          avoid this one could do two things. You could change the sum over k-points to
+          integration and then use linear tetrahedron method (see <a href="../../users/generated_files/help_optic.html#Ref2">Ref. 2</a> for
+          details). Another way to get around the problem is, like we do in the present
+          case, avoid this singularity by adding a small complex number to the denominator.
+          This prevents the denominator from ever going to 0 and acts as a broadening to
+          the spectrum. The broadening should not be too large as this would wash out the
+          features in the spectrum.
+    topics: Optic_basic
+    varset: varoptic
+    vartype: real
 - !variable
     abivarname: brvltt
     characteristics:
@@ -3131,7 +3185,7 @@
         non-zero. There is no "best" way of imposing the ASR on effective charges.
     topics: null
     varset: varanaddb
-    vartype: integer parameter
+    vartype: integer
 - !variable
     abivarname: cineb_start
     characteristics: null
@@ -3158,6 +3212,36 @@
     topics: TransPath_expert
     varset: varrlx
     vartype: integer
+- !variable
+    abivarname: coff1@aim
+    characteristics: null
+    commentdefault: null
+    commentdims: null
+    defaultval: 0.98
+    dimensions: scalar
+    excludes: null
+    mnemonics: COeFFicient 1
+    requires: null
+    text: |-
+        See the input variable [[ratmin]].
+    topics: Bader_expert
+    varset: varaim
+    vartype: real
+- !variable
+    abivarname: coff2@aim
+    characteristics: null
+    commentdefault: null
+    commentdims: null
+    defaultval: 0.95
+    dimensions: scalar
+    excludes: null
+    mnemonics: COeFFicient 2
+    requires: null
+    text: |-
+        See the input variable [[ratmin]].
+    topics: Bader_expert
+    varset: varaim
+    vartype: real
 - !variable
     abivarname: cpuh
     characteristics:
@@ -3236,6 +3320,44 @@
     topics: otherGS_job
     varset: vargs
     vartype: real
+- !variable
+    abivarname: crit@aim
+    characteristics: null
+    commentdefault: null
+    commentdims: null
+    defaultval: 0
+    dimensions: scalar
+    excludes: null
+    mnemonics: computation of CRITical points
+    requires: null
+    text: |-
+        Drives the computation of critical points.
+          <ul>
+           <li> [0] not
+           <li> [-1] reading from the file ``root''.crit
+           <li> [1] calculated (simplified version)
+           <li> [2] calculated (standard version - recommended)
+           <li> [3] calculated (the original version)
+          </ul>
+            <p> The original version searches all critical points (CPs)
+            starting from the center between
+            two and three atoms (atom - neighbor(s)) by
+            Newton-Raphson algorithm - without tests (not recommended) - don't
+            use together with surface analysis !
+           <p> The simplified and standard versions search CP(3,-1) starting
+            from the center of the pairs~atom-neighbor; then CP(3,1) from the
+            center between two CP(3,-1) and finally CP(3,3) from the center
+            between two CP(3,1). The robust Popeliers's algorithm is used.
+            The difference between the two is based in the fact
+            that the standard version makes the test if the CP is really
+            on the Bader surface of the calculated atom for each CP, while
+            the simplified version does this only for CP(3,-1). When CP analysis is
+            rather fast (with respect to surface determination), 2 is recommended.
+            In all cases the number of neighbors considered is limited by
+            distance cutoff (variable  [[maxatd]])
+    topics: Bader_compulsory
+    varset: varaim
+    vartype: integer
 - !variable
     abivarname: d3e_pert1_atpol
     characteristics:
@@ -3586,6 +3708,26 @@
     varset: vareph
     vartype: real
 - !variable
+    abivarname: ddkfile@optic
+    characteristics: null
+    commentdefault: no default
+    commentdims: null
+    defaultval: null
+    dimensions: scalar
+    excludes: null
+    mnemonics: DDK FILE
+    requires: null
+    text: |-
+        Specify the filename that has been produced by the preparatory Abinit run.
+          This file must contain the matrix elements of the d/dk operator along direction X.
+          It must not contain the first-order wavefunctions and may be generated using [[prtwf]] 3.<br />
+          You should make sure that the number of bands, of spin channels and of k-points are the same in all the files.
+
+        <p>use as string with the filename: ddkfile_X, where X is the file number.
+    topics: Optic_basic
+    varset: varoptic
+    vartype: string
+- !variable
     abivarname: delayperm
     characteristics: null
     commentdefault: null
@@ -3605,6 +3747,32 @@
         </p>
     topics: MolecularDynamics_expert
     varset: varrlx
+    vartype: integer
+- !variable
+    abivarname: denout@aim
+    characteristics: null
+    commentdefault: null
+    commentdims: null
+    defaultval: 0
+    dimensions: scalar
+    excludes: null
+    mnemonics: electronic DENsity OUTput
+    requires: null
+    text: |-
+        Output of the electronic density.
+          The specification of the
+          line (plane) in the real space must be given in the input variable
+          [[vpts]] and grid in
+          [[ngrid]].
+          It is also possible to get only the
+          valence density or the core density (see [[dltyp]]).
+          <ul>
+           <li>0, no output
+           <li>1, 1D distribution
+           <li>2, 2D distribution
+          </ul>
+    topics: Bader_compulsory
+    varset: varaim
     vartype: integer
 - !variable
     abivarname: densfor_pred
@@ -4287,6 +4455,29 @@
         The abinit input variable [[dipdip]] has a similar meaning.
     topics: null
     varset: varanaddb
+    vartype: integer
+- !variable
+    abivarname: dltyp@aim
+    characteristics: null
+    commentdefault: null
+    commentdims: null
+    defaultval: 0
+    dimensions: scalar
+    excludes: null
+    mnemonics: Density or Laplacian TYP output
+    requires: null
+    text: |-
+        Specification of the contribution of the electronic
+          density corresponding to the density and/or laplacian output
+          (see [[denout]] and
+               [[lapout]])
+          <ul>
+           <li>0, total electronic density
+           <li>1, only the valence density
+           <li>2, only the core density
+          </ul>
+    topics: Bader_compulsory
+    varset: varaim
     vartype: integer
 - !variable
     abivarname: dmatpawu
@@ -5246,6 +5437,24 @@
     varset: vardmft
     vartype: integer
 - !variable
+    abivarname: domega@optic
+    characteristics: null
+    commentdefault: null
+    commentdims: null
+    defaultval: 1.d-3 Ha
+    dimensions: scalar
+    excludes: null
+    mnemonics: Delta OMEGA
+    requires: null
+    text: |-
+        The step and maximum sets your energy grid for the calculation using the formula
+          number of energy mesh points=maximum/step (zero excluded). So  in order to capture more
+          features you can decrease the step size to get a finer energy grid. In order
+          to go to higher frequency, increase the maximum.
+    topics: Optic_basic
+    varset: varoptic
+    vartype: real
+- !variable
     abivarname: dosdeltae
     characteristics:
     - '[[ENERGY]]'
@@ -5340,6 +5549,28 @@
         to the next bigger is smaller than <b>dostol</b>.
     topics: null
     varset: varanaddb
+    vartype: real
+- !variable
+    abivarname: dpclim@aim
+    characteristics: null
+    commentdefault: null
+    commentdims: null
+    defaultval: 1.d-2
+    dimensions: scalar
+    excludes: null
+    mnemonics: DPCLIM
+    requires: null
+    text: |-
+        If two "numerically different" critical points are separated by
+          less than <b>dpclim</b>, they are considered to be the same
+          critical point. This often happens because of numerical
+          inaccuracies : one CP might be "seen" by
+          two different finite elements. The default should be OK when
+          the ecut is quite large, on the order of 60 Hartree. For less
+          accurate calculations of the density, increase the default value
+          to 5.d-2, let's say.
+    topics: Bader_useful
+    varset: varaim
     vartype: real
 - !variable
     abivarname: dtion
@@ -6377,7 +6608,9 @@
     commentdefault: null
     commentdims: null
     defaultval: (3*[[anaddb:ep_nqpt]])*0
-    dimensions: array
+    dimensions:
+    - 3
+    - '[[anaddb:ep_nqpt]]'
     excludes: null
     mnemonics: Electron Phonon Q PoinT LIST
     requires: null
@@ -6388,7 +6621,7 @@
         anaddb input (ngqpt), in reduced coordinates of the reciprocal space lattice.
     topics: null
     varset: varanaddb
-    vartype: real array of 3*ep_nqpt elements
+    vartype: real
 - !variable
     abivarname: ep_scalprod@anaddb
     characteristics: null
@@ -7027,6 +7260,57 @@
     varset: vargw
     vartype: integer
 - !variable
+    abivarname: foldep@aim
+    characteristics: null
+    commentdefault: null
+    commentdims: null
+    defaultval: !multiplevalue
+        number: 3
+        value: 0.0
+    dimensions:
+    - 3
+    excludes: null
+    mnemonics: FOLlow DEParture
+    requires: null
+    text: |-
+        Needed in the case [[follow]]=1 only.
+          Defines the starting point.
+    topics: Bader_expert
+    varset: varaim
+    vartype: real
+- !variable
+    abivarname: follow@aim
+    characteristics: null
+    commentdefault: null
+    commentdims: null
+    defaultval: 0
+    dimensions: scalar
+    excludes: null
+    mnemonics: FOLLOW the gradient path
+    requires: null
+    text: |-
+        Follow the gradient path to the corresponding atom
+          starting from the position specified in the input variable
+          [[foldep]].
+    topics: Bader_compulsory
+    varset: varaim
+    vartype: integer
+- !variable
+    abivarname: folstp@aim
+    characteristics: null
+    commentdefault: null
+    commentdims: null
+    defaultval: 0.5
+    dimensions: scalar
+    excludes: null
+    mnemonics: FOLlow STeP
+    requires: null
+    text: |-
+        The first step for following the gradient path.
+    topics: Bader_expert
+    varset: varaim
+    vartype: real
+- !variable
     abivarname: freeze_displ@anaddb
     characteristics: null
     commentdefault: null
@@ -7055,7 +7339,7 @@
         [[anaddb:nph1l]] of q-points for interpolation.
     topics: null
     varset: varanaddb
-    vartype: real number
+    vartype: real
 - !variable
     abivarname: freqim_alpha
     characteristics:
@@ -7297,7 +7581,7 @@
         <p>Value of the largest frequency for the frequency-dependent dielectric tensor, in Hartree.
     topics: null
     varset: varanaddb
-    vartype: real number
+    vartype: real
 - !variable
     abivarname: frmin@anaddb
     characteristics: null
@@ -7312,7 +7596,7 @@
         <p>Value of the lowest frequency for the frequency-dependent dielectric tensor, in Hartree.
     topics: null
     varset: varanaddb
-    vartype: real number
+    vartype: real
 - !variable
     abivarname: frzfermi
     characteristics:
@@ -8827,6 +9111,26 @@
     varset: varrlx
     vartype: real
 - !variable
+    abivarname: gpsurf@aim
+    characteristics: null
+    commentdefault: null
+    commentdims: null
+    defaultval: 0
+    dimensions: scalar
+    excludes: null
+    mnemonics: GraPhic output for the bader SURFace
+    requires: null
+    text: |-
+        Drives the graphic output (gnuplot script) of the
+          irreducible part of the calculated Bader surface.
+          <ul>
+           <li>0, not output
+           <li>1, output
+          </ul>
+    topics: Bader_compulsory
+    varset: varaim
+    vartype: integer
+- !variable
     abivarname: gpu_devices
     characteristics: null
     commentdefault: null
@@ -8895,7 +9199,8 @@
     commentdefault: null
     commentdims: null
     defaultval: Empty
-    dimensions: array
+    dimensions:
+    - '[[anaddb:gruns_nddbs]]'
     excludes: null
     mnemonics: GRUNeiSen DDBS
     requires: null
@@ -8909,7 +9214,7 @@
         The code computes the derivative of the dynamical matrix wrt the volume using central finite difference.
     topics: null
     varset: varanaddb
-    vartype: list of strings
+    vartype: string
 - !variable
     abivarname: gruns_nddbs@anaddb
     characteristics: null
@@ -10198,7 +10503,8 @@
     commentdefault: null
     commentdims: null
     defaultval: 0
-    dimensions: array
+    dimensions:
+    - '[[anaddb:natfix]]'
     excludes: null
     mnemonics: Indices of the AToms that are FIXed
     requires: null
@@ -10207,7 +10513,7 @@
         See [[anaddb:polflag]].
     topics: null
     varset: varanaddb
-    vartype: integer array (1:[[anaddb:natfix]])
+    vartype: integer
 - !variable
     abivarname: iatfixx
     characteristics:
@@ -10291,8 +10597,9 @@
     characteristics: null
     commentdefault: null
     commentdims: null
-    defaultval: 0
-    dimensions: scalar
+    defaultval: 0*'[[anaddb:natprj_bs]]'
+    dimensions:
+    - '[[anaddb:natprj_bs]]'
     excludes: null
     mnemonics: Indices of the AToms for the PRoJection of the phonon Band Structure
     requires: null
@@ -10300,7 +10607,7 @@
         <p>Indices of the atoms that are chosen for projection of the phonon eigenvectors, giving a weighted phonon band structure file.
     topics: null
     varset: varanaddb
-    vartype: integer array (1:[[anaddb:natprj_bs]])
+    vartype: integer
 - !variable
     abivarname: iatsph
     characteristics: null
@@ -10712,6 +11019,22 @@
         </p>
     topics: GW_expert
     varset: vargw
+    vartype: integer
+- !variable
+    abivarname: inpt@aim
+    characteristics: null
+    commentdefault: null
+    commentdims: null
+    defaultval: 100
+    dimensions: scalar
+    excludes: null
+    mnemonics: numer of INtegration PoinTs
+    requires: null
+    text: |-
+        Number of radial points used for integration of the
+          Bader charge (not too sensitive).
+    topics: Bader_expert
+    varset: varaim
     vartype: integer
 - !variable
     abivarname: instrflag@anaddb
@@ -12334,6 +12657,25 @@
     varset: varfil
     vartype: integer
 - !variable
+    abivarname: irho@aim
+    characteristics: null
+    commentdefault: null
+    commentdims: null
+    defaultval: 0
+    dimensions: scalar
+    excludes: null
+    mnemonics: Integration of the charge density RHO
+    requires: null
+    text: |-
+        Drives the integration of the charge of the Bader atom.
+          <ul>
+           <li>0, not calculated
+           <li>1, calculated (usual mode)
+          </ul>
+    topics: Bader_compulsory
+    varset: varaim
+    vartype: integer
+- !variable
     abivarname: iscf
     characteristics: null
     commentdefault: null
@@ -12638,7 +12980,8 @@
     commentdefault: null
     commentdims: null
     defaultval: 0
-    dimensions: scalar
+    dimensions:
+    - '[[anaddb:nstrfix]]'
     excludes: null
     mnemonics: Index of STRain FIXed
     requires: null
@@ -12684,7 +13027,7 @@
         See [[anaddb:polflag]].
     topics: null
     varset: varanaddb
-    vartype: integer array istrfix(1:[[anaddb:nstrfix]])
+    vartype: integer
 - !variable
     abivarname: istwfk
     characteristics: null
@@ -12764,6 +13107,25 @@
         </p>
     topics: k-points_useful
     varset: vardev
+    vartype: integer
+- !variable
+    abivarname: ivol@aim
+    characteristics: null
+    commentdefault: null
+    commentdims: null
+    defaultval: 0
+    dimensions: scalar
+    excludes: null
+    mnemonics: Integration of the VOLume
+    requires: null
+    text: |-
+        Drives the integration of the volume of the Bader atom.
+          <ul>
+           <li>0, not calculated
+           <li>1, calculated
+          </ul>
+    topics: Bader_compulsory
+    varset: varaim
     vartype: integer
 - !variable
     abivarname: ixc
@@ -14684,7 +15046,9 @@
     commentdefault: null
     commentdims: null
     defaultval: 9*0
-    dimensions: array
+    dimensions:
+    - 3
+    - 3
     excludes: null
     mnemonics: K PoinT Reciprocal LATTice
     requires: null
@@ -14702,7 +15066,9 @@
     commentdefault: null
     commentdims: null
     defaultval: 9*0
-    dimensions: array
+    dimensions:
+    - 3
+    - 3
     excludes: null
     mnemonics: K PoinT Reciprocal LATTice for FINE grid
     requires: null
@@ -14819,6 +15185,32 @@
     varset: varfil
     vartype: integer
 - !variable
+    abivarname: lapout@aim
+    characteristics: null
+    commentdefault: null
+    commentdims: null
+    defaultval: 0
+    dimensions: scalar
+    excludes: null
+    mnemonics: electronic density LAPlacian OUTput
+    requires: null
+    text: |-
+        Output of
+          the laplacian of electronic density. The specification of the
+          line (plane) in the real space must be given in the input variable
+         [[vpts]] and grid in
+          [[ngrid]].
+          It is also possible to get only the
+          valence density or the core density (see [[dltyp]]).
+          <ul>
+           <li>0, no output
+           <li>1, 1D distribution
+           <li>2, 2D distribution
+          </ul>
+    topics: Bader_compulsory
+    varset: varaim
+    vartype: integer
+- !variable
     abivarname: lexexch
     characteristics: null
     commentdefault: null
@@ -14836,6 +15228,65 @@
         </p>
     topics: xc_useful
     varset: varpaw
+    vartype: integer
+- !variable
+    abivarname: lgrad2@aim
+    characteristics: null
+    commentdefault: null
+    commentdims: null
+    defaultval: 1.d-5
+    dimensions: scalar
+    excludes: null
+    mnemonics: Low GRADient criterion 2
+    requires: null
+    text: |-
+        Determines the criterion for deciding that a CP has been found. See
+          [[lgrad]] for more details.
+    topics: Bader_useful
+    varset: varaim
+    vartype: real
+- !variable
+    abivarname: lgrad@aim
+    characteristics: null
+    commentdefault: null
+    commentdims: null
+    defaultval: 1.d-12
+    dimensions: scalar
+    excludes: null
+    mnemonics: Low GRADient criterion
+    requires: null
+    text: |-
+        The search for one particular CP is decided to be successful when either
+          the norm of the gradient of the electron density is smaller
+          than <b>lgrad</b> or when the length of the planned search step
+          is smaller than [[lstep]]. If
+          the number of search step becomes larger than an internal limit
+          (presently set to 100), one will allow a weaker criteria for
+          satisfaction, based on [[lgrad2]]
+          and [[lstep2]]. If the internal limit
+          is reached, and the criteria on [[lgrad2]]
+          and [[lstep2]] are not satisfied, then
+          the searching procedure continues with the next seed.
+    topics: Bader_useful
+    varset: varaim
+    vartype: real
+- !variable
+    abivarname: lin_comp@optic
+    characteristics: null
+    commentdefault: null
+    commentdims: null
+    defaultval: 0
+    dimensions:
+    -   - num_lin_comp
+    excludes: null
+    mnemonics: LINear COMPonents
+    requires: null
+    text: |-
+        This tells which component of the dielectric tensor you want to calculate.
+          These numbers are called a and b Eqs. 46 in <a href="../../users/generated_files/help_optic.html#Ref1">Ref. 1</a>. 1 2 3 represent x y
+          and z respectively. For example 11 would be xx and 32 would mean zy.
+    topics: Optic_basic
+    varset: varoptic
     vartype: integer
 - !variable
     abivarname: localrdwf
@@ -14988,6 +15439,38 @@
     varset: varpaw
     vartype: integer
 - !variable
+    abivarname: lstep2@aim
+    characteristics: null
+    commentdefault: null
+    commentdims: null
+    defaultval: 1.d-5
+    dimensions: scalar
+    excludes: null
+    mnemonics: Length of the planned search STEP 2
+    requires: null
+    text: |-
+        Determines the criterion for deciding that a CP has been found. See
+          [[lgrad]] for more details.
+    topics: Bader_useful
+    varset: varaim
+    vartype: real
+- !variable
+    abivarname: lstep@aim
+    characteristics: null
+    commentdefault: null
+    commentdims: null
+    defaultval: 1.d-10
+    dimensions: scalar
+    excludes: null
+    mnemonics: Length of the planned search STEP
+    requires: null
+    text: |-
+        Determines the criterion for deciding a CP has been found. See
+          [[lgrad]] for more details.
+    topics: Bader_useful
+    varset: varaim
+    vartype: real
+- !variable
     abivarname: macro_uj
     characteristics:
     - '[[DEVELOP]]'
@@ -15081,6 +15564,51 @@
     varset: varpar
     vartype: integer
 - !variable
+    abivarname: maxatd@aim
+    characteristics: null
+    commentdefault: null
+    commentdims: null
+    defaultval: 10.0
+    dimensions: scalar
+    excludes: null
+    mnemonics: MAXimal ATomic Distance
+    requires: null
+    text: |-
+        Atoms within this maximal distance are considered in order
+          to start the search of a CP.
+          <p>Note that the supercell,
+          determined by
+          [[nsa]],
+          [[nsb]], and
+         [[nsc]] might
+          be too small to actually lead to the consideration of all the
+          desired atoms.
+    topics: Bader_useful
+    varset: varaim
+    vartype: real
+- !variable
+    abivarname: maxcpd@aim
+    characteristics: null
+    commentdefault: null
+    commentdims: null
+    defaultval: 5.0
+    dimensions: scalar
+    excludes: null
+    mnemonics: MAXimal CP Distance
+    requires: null
+    text: |-
+        The CPs are searched for within this maximal distance.
+          <p>Note that the supercell,
+          determined by
+          [[nsa]],
+          [[nsb]], and
+          [[nsc]] might
+          be too small to actually lead to the consideration of all the
+          critical points.
+    topics: Bader_useful
+    varset: varaim
+    vartype: real
+- !variable
     abivarname: maxestep
     characteristics: null
     commentdefault: null
@@ -15119,6 +15647,24 @@
     topics: crystal_expert
     varset: vardev
     vartype: integer
+- !variable
+    abivarname: maxomega@optic
+    characteristics: null
+    commentdefault: null
+    commentdims: null
+    defaultval: 1 Ha
+    dimensions: scalar
+    excludes: null
+    mnemonics: MAXimum valur of OMEGA
+    requires: null
+    text: |-
+        The step and maximum sets your energy grid for the calculation using the formula
+          number of energy mesh points=maximum/step (zero excluded). So  in order to capture more
+          features you can decrease the step size to get a finer energy grid. In order
+          to go to higher frequency, increase the maximum.
+    topics: Optic_basic
+    varset: varoptic
+    vartype: real
 - !variable
     abivarname: mband
     characteristics:
@@ -16771,10 +17317,11 @@
 - !variable
     abivarname: ng2qpt@anaddb
     characteristics: null
-    commentdefault: null
+    commentdefault: (will not work)
     commentdims: null
-    defaultval: 3*0 (will not work)
-    dimensions: array
+    defaultval: 3*0
+    dimensions:
+    - 3
     excludes: null
     mnemonics: Number of Grids points for Q PoinTs (grid 2)
     requires: null
@@ -16785,7 +17332,7 @@
         or for the DOS.
     topics: null
     varset: varanaddb
-    vartype: integer array <b>ng2qpt</b>(3)
+    vartype: integer
 - !variable
     abivarname: ngfft
     characteristics: null
@@ -16998,10 +17545,11 @@
 - !variable
     abivarname: ngqpt@anaddb
     characteristics: null
-    commentdefault: null
+    commentdefault: (will not work)
     commentdims: null
-    defaultval: 3*0 (will not work)
-    dimensions: array
+    defaultval: 3*0
+    dimensions:
+    - 3
     excludes: null
     mnemonics: Number of Grids points for Q PoinTs
     requires: null
@@ -17009,7 +17557,28 @@
         <p>The Monkhorst-Pack grid linear dimensions, for the DDB (coarse grid).
     topics: null
     varset: varanaddb
-    vartype: integer array <b>ngqpt</b>(3)
+    vartype: integer
+- !variable
+    abivarname: ngrid@aim
+    characteristics: null
+    commentdefault: null
+    commentdims: null
+    defaultval: !multiplevalue
+        number: 2
+        value: 30
+    dimensions:
+    - 2
+    excludes: null
+    mnemonics: Number of GRID points
+    requires: null
+    text: |-
+        Defines the grid in real space, for the density
+          and laplacian outputs, governed by
+          [[denout]] and
+          [[lapout]].
+    topics: Bader_expert
+    varset: varaim
+    vartype: integer
 - !variable
     abivarname: ngrids@anaddb
     characteristics: null
@@ -17643,6 +18212,24 @@
     varset: vargw
     vartype: integer
 - !variable
+    abivarname: nonlin_comp@optic
+    characteristics: null
+    commentdefault: null
+    commentdims: null
+    defaultval: 0
+    dimensions:
+    -   - num_nonlin_comp
+    excludes: null
+    mnemonics: NON-LINear COMPonents
+    requires: null
+    text: |-
+        This tells which component of the dielectric tensor you want to calculate.
+          These numbers are called a, b and c in <a href="../../users/generated_files/help_optic.html#Ref1">Ref. 1</a>. 1 2 3 represent x y
+          and z respectively. For example 111 would be xxx and 321 would mean zyx.
+    topics: Optic_basic
+    varset: varoptic
+    vartype: integer
+- !variable
     abivarname: normpawu
     characteristics:
     - '[[DEVELOP]]'
@@ -17876,6 +18463,31 @@
         </p>
     topics: Hybrids_useful, parallelism_useful
     varset: varpar
+    vartype: integer
+- !variable
+    abivarname: nphi@aim
+    characteristics: null
+    commentdefault: null
+    commentdims: null
+    defaultval: 48
+    dimensions: scalar
+    excludes: null
+    mnemonics: Number of PHI angle
+    requires: null
+    text: |-
+        With [[ntheta]], this
+          variable defines the angular grid for the integration
+          within the Bader volume, in particular, the number
+          of phi angles, to be used between
+          [[phimin]] and
+          [[phimax]].
+          When the difference between these two variables
+          is 2 pi, the recommended value of <b>nphi</b> is 48.
+          When it is pi (for symmetry reasons), the recommended
+          value is 32. When it is pi/2 (for symmetry reasons),
+          the recommended value is 20.
+    topics: Bader_basic
+    varset: varaim
     vartype: integer
 - !variable
     abivarname: npimage
@@ -18291,6 +18903,89 @@
     varset: varanaddb
     vartype: integer
 - !variable
+    abivarname: nsa@aim
+    characteristics: null
+    commentdefault: null
+    commentdims: null
+    defaultval: 3
+    dimensions: scalar
+    excludes: null
+    mnemonics: Number of Supercell points in direction A
+    requires: null
+    text: |-
+        These variables define a "supercell", from the primitive
+          cell repeated along each primitive direction. This
+          supercell is build as follows :
+          <pre>
+          do isa=-nsa,nsa
+           do isb=-nsb,nsb
+            do isc=-nsc,nsc
+              -> here, the cell is translated by the vector
+              -> (isa,isb,isc) in crystallographic coordinates
+              -> and accumulated, to give the supercell
+            enddo
+           enddo
+          enddo
+          </pre>
+    topics: Bader_expert
+    varset: varaim
+    vartype: integer
+- !variable
+    abivarname: nsb@aim
+    characteristics: null
+    commentdefault: null
+    commentdims: null
+    defaultval: 3
+    dimensions: scalar
+    excludes: null
+    mnemonics: Number of Supercell points in direction B
+    requires: null
+    text: |-
+        These variables define a "supercell", from the primitive
+          cell repeated along each primitive direction. This
+          supercell is build as follows :
+          <pre>
+          do isa=-nsa,nsa
+           do isb=-nsb,nsb
+            do isc=-nsc,nsc
+              -> here, the cell is translated by the vector
+              -> (isa,isb,isc) in crystallographic coordinates
+              -> and accumulated, to give the supercell
+            enddo
+           enddo
+          enddo
+    topics: Bader_expert
+    varset: varaim
+    vartype: integer
+- !variable
+    abivarname: nsc@aim
+    characteristics: null
+    commentdefault: null
+    commentdims: null
+    defaultval: 3
+    dimensions: scalar
+    excludes: null
+    mnemonics: Number of Supercell points in direction C
+    requires: null
+    text: |-
+        These variables define a "supercell", from the primitive
+          cell repeated along each primitive direction. This
+          supercell is build as follows :
+          <pre>
+          do isa=-nsa,nsa
+           do isb=-nsb,nsb
+            do isc=-nsc,nsc
+              -> here, the cell is translated by the vector
+              -> (isa,isb,isc) in crystallographic coordinates
+              -> and accumulated, to give the supercell
+            enddo
+           enddo
+          enddo
+          </pre>
+    topics: Bader_expert
+    varset: varaim
+    vartype: integer
+- !variable
     abivarname: nscforder
     characteristics: null
     commentdefault: null
@@ -18683,6 +19378,30 @@
     varset: varanaddb
     vartype: integer
 - !variable
+    abivarname: ntheta@aim
+    characteristics: null
+    commentdefault: null
+    commentdims: null
+    defaultval: 32
+    dimensions: scalar
+    excludes: null
+    mnemonics: Number of THETA angles
+    requires: null
+    text: |-
+        With [[nphi]], this
+          variable defines the angular grid for the integration
+          within the Bader volume, in particular, the number
+          of theta angles, to be used between
+          [[thetamin]] and
+          [[thetamax]].
+          When the difference between these two variables
+          is pi, the recommended value of <b>ntheta</b> is 32.
+          When it is pi/2 (for symmetry reasons),
+          the recommended value is 20.
+    topics: Bader_basic
+    varset: varaim
+    vartype: integer
+- !variable
     abivarname: ntime
     characteristics: null
     commentdefault: null
@@ -18844,6 +19563,42 @@
     varset: vargs
     vartype: real
 - !variable
+    abivarname: num_lin_comp@optic
+    characteristics: null
+    commentdefault: null
+    commentdims: null
+    defaultval: 0
+    dimensions: scalar
+    excludes: null
+    mnemonics: NUMber of LINear COMPonents
+    requires: null
+    text: |-
+        How many components out of 9 of the linear optical dielectric tensor do you
+          want to calculate. Most of these are either equal or zero depending upon the
+          symmetry of the material (for detail see <a href="../../users/generated_files/help_optic.html#Ref3">Ref. 3</a>).
+          <br>Note that the directions are along the Cartesian axis.
+    topics: Optic_basic
+    varset: varoptic
+    vartype: integer
+- !variable
+    abivarname: num_nonlin_comp@optic
+    characteristics: null
+    commentdefault: null
+    commentdims: null
+    defaultval: 0
+    dimensions: scalar
+    excludes: null
+    mnemonics: NUMber of NON-LINear COMPonents
+    requires: null
+    text: |-
+        How many components out of 27 of the non-linear optical dielectric tensor do you
+          want to calculate. Most of these are either equal or zero depending upon the
+          symmetry of the material (for detail see <a href="../../users/generated_files/help_optic.html#Ref3">Ref. 3</a>).
+          <br>Note that the directions are along the Cartesian axis.
+    topics: Optic_basic
+    varset: varoptic
+    vartype: integer
+- !variable
     abivarname: nwchan@anaddb
     characteristics: null
     commentdefault: null
@@ -18946,7 +19701,8 @@
         [[objaax]] AND [[objbax]] must be provided if ( [[nobj]] == 2 and one component of [[objbro]] != 0 ).
     commentdims: null
     defaultval: null
-    dimensions: null
+    dimensions:
+    - 6
     excludes: null
     mnemonics: 'OBJect A : AXis'
     requires: null
@@ -19009,7 +19765,8 @@
     - 1
     - 1
     - 1
-    dimensions: null
+    dimensions:
+    - 3
     excludes: null
     mnemonics: 'OBJect A : Repetition Factors'
     requires: null
@@ -19062,7 +19819,8 @@
     defaultval: !multiplevalue
         number: 4
         value: 0.0d0
-    dimensions: null
+    dimensions:
+    - 4
     excludes: null
     mnemonics: 'OBJect A : ROtations'
     requires: null
@@ -19104,7 +19862,8 @@
     defaultval: !multiplevalue
         number: 12
         value: 0.0d0
-    dimensions: null
+    dimensions:
+    - 12
     excludes: null
     mnemonics: 'OBJect A : TRanslations'
     requires: null
@@ -19147,7 +19906,8 @@
     commentdefault: null
     commentdims: null
     defaultval: null
-    dimensions: null
+    dimensions:
+    - '[[objbn]]'
     excludes: null
     mnemonics: 'OBJect B : list of AToms'
     requires: '[[nobj]]==2'
@@ -19180,7 +19940,8 @@
         [[objaax]] AND [[objbax]] must be provided if ( [[nobj]] == 2 and one component of [[objbro]] != 0 ).
     commentdims: null
     defaultval: null
-    dimensions: null
+    dimensions:
+    - 6
     excludes: null
     mnemonics: 'OBJect B : AXis'
     requires: null
@@ -19242,7 +20003,8 @@
     - 1
     - 1
     - 1
-    dimensions: null
+    dimensions:
+    - 3
     excludes: null
     mnemonics: 'OBJect B : Repetition Factors'
     requires: null
@@ -19294,7 +20056,8 @@
     defaultval: !multiplevalue
         number: 4
         value: 0.0d0
-    dimensions: null
+    dimensions:
+    - 4
     excludes: null
     mnemonics: 'OBJect B : ROtations'
     requires: null
@@ -19336,7 +20099,8 @@
     defaultval: !multiplevalue
         number: 12
         value: 0.0d0
-    dimensions: null
+    dimensions:
+    - 12
     excludes: null
     mnemonics: 'OBJect B : TRanslations'
     requires: null
@@ -21151,6 +21915,46 @@
     varset: vareph
     vartype: real
 - !variable
+    abivarname: phimax@aim
+    characteristics: null
+    commentdefault: null
+    commentdims: null
+    defaultval: 2.0
+    dimensions: scalar
+    excludes: null
+    mnemonics: PHI MAXimal angle
+    requires: null
+    text: |-
+        Angular limits of integration of the Bader volume
+          for the phi variables. The number
+          of integration points is given by
+          [[nphi]].
+          The range of integration can be decreased if there are
+          symmetry reasons for doing this.
+    topics: Bader_basic
+    varset: varaim
+    vartype: real
+- !variable
+    abivarname: phimin@aim
+    characteristics: null
+    commentdefault: null
+    commentdims: null
+    defaultval: 0.0
+    dimensions: scalar
+    excludes: null
+    mnemonics: PHI MINimal angle
+    requires: null
+    text: |-
+        Angular limits of integration of the Bader volume
+          for the phi variables. The number
+          of integration points is given by
+          [[nphi]].
+          The range of integration can be decreased if there are
+          symmetry reasons for doing this.
+    topics: Bader_expert
+    varset: varaim
+    vartype: real
+- !variable
     abivarname: piezoflag@anaddb
     characteristics: null
     commentdefault: null
@@ -21638,7 +22442,7 @@
     commentdefault: null
     commentdims: null
     defaultval: 0
-    dimensions: null
+    dimensions: scalar
     excludes: null
     mnemonics: POSitron computation of DOPPLER broadening
     requires: null
@@ -22151,7 +22955,8 @@
     commentdefault: null
     commentdims: null
     defaultval: 0
-    dimensions: null
+    dimensions:
+    - '[[natom]]'
     excludes: null
     mnemonics: PRinT by ATom LIST of ATom
     requires: null
@@ -24257,7 +25062,8 @@
     commentdefault: null
     commentdims: null
     defaultval: 0
-    dimensions: array
+    dimensions:
+    - '[[anaddb:nqshft]]'
     excludes: null
     mnemonics: Q shifts for the grid number 1
     requires: null
@@ -24313,14 +25119,15 @@
         <p>
     topics: null
     varset: varanaddb
-    vartype: real array <b>q1shft</b>(3,[[anaddb:nqshft]])
+    vartype: real
 - !variable
     abivarname: q2shft@anaddb
     characteristics: null
     commentdefault: null
     commentdims: null
-    defaultval: all 0
-    dimensions: scalar
+    defaultval: 3* 0
+    dimensions:
+    - 3
     excludes: null
     mnemonics: Q points SHiFTs for the grids 2
     requires: null
@@ -24331,7 +25138,7 @@
         for this series of grids corresponds to 1.
     topics: null
     varset: varanaddb
-    vartype: real array q2shft(3)
+    vartype: real
 - !variable
     abivarname: qgrid_type@anaddb
     characteristics: null
@@ -24385,8 +25192,10 @@
     characteristics: null
     commentdefault: null
     commentdims: null
-    defaultval: <b>qpath</b>(:,:)=0.0
-    dimensions: array
+    defaultval: 0.0
+    dimensions:
+    - 3
+    - '[[anaddb:nqpath]]'
     excludes: null
     mnemonics: Q wavevectors defining a PATH
     requires: null
@@ -24401,14 +25210,16 @@
         [[anaddb:prtnest]]=1.
     topics: null
     varset: varanaddb
-    vartype: real array <b>qpath</b>(3,[[anaddb:nqpath]])
+    vartype: real
 - !variable
     abivarname: qph1l@anaddb
     characteristics: null
     commentdefault: null
     commentdims: null
     defaultval: 0
-    dimensions: array
+    dimensions:
+    - 4
+    - '[[anaddb:nph1l]]'
     excludes: null
     mnemonics: Q for PHonon List 1
     requires: null
@@ -24430,14 +25241,16 @@
         in the array qnrml1(nph1l).
     topics: null
     varset: varanaddb
-    vartype: real array <b>qph1l</b>(4,[[anaddb:nph1l]])
+    vartype: real
 - !variable
     abivarname: qph2l@anaddb
     characteristics: null
     commentdefault: null
     commentdims: null
-    defaultval: all 0
-    dimensions: array
+    defaultval: 0
+    dimensions:
+    - 4
+    - '[[anaddb:nph2l]]'
     excludes: null
     mnemonics: PHonon List 2
     requires: null
@@ -24466,7 +25279,7 @@
         in the array qnrml2(nph2l).
     topics: null
     varset: varanaddb
-    vartype: real array qph2l(4,[[anaddb:nph2l]])
+    vartype: real
 - !variable
     abivarname: qprtrb
     characteristics:
@@ -24765,7 +25578,8 @@
     commentdefault: null
     commentdims: null
     defaultval: 0
-    dimensions: array
+    dimensions:
+    - 3
     excludes: null
     mnemonics: Q-point REFINEment order (experimental)
     requires: null
@@ -24779,7 +25593,7 @@
         PRB <b>73</b> 014117.
     topics: null
     varset: varanaddb
-    vartype: integer array <b>qrefine</b>(3)
+    vartype: integer
 - !variable
     abivarname: quadmom
     characteristics: null
@@ -24807,6 +25621,22 @@
         </p>
     topics: DFPT_useful
     varset: varpaw
+    vartype: real
+- !variable
+    abivarname: radstp@aim
+    characteristics: null
+    commentdefault: null
+    commentdims: null
+    defaultval: 0.05
+    dimensions: scalar
+    excludes: null
+    mnemonics: RADial STeP
+    requires: null
+    text: |-
+        The length of the first step in the search of the
+          exact Bader radius.
+    topics: Bader_expert
+    varset: varaim
     vartype: real
 - !variable
     abivarname: ramansr@anaddb
@@ -24864,6 +25694,31 @@
     topics: otherGS_expert
     varset: varrlx
     vartype: integer
+- !variable
+    abivarname: ratmin@aim
+    characteristics: null
+    commentdefault: null
+    commentdims: null
+    defaultval: 1.0
+    dimensions: scalar
+    excludes: null
+    mnemonics: Radius Atomic MINimal
+    requires: null
+    text: |-
+        The first estimation of the smallest radius of the basin of the
+          atom (the distance at which the procedure that follows the gradient path
+          announces that the gradient path finishes in the corresponding atom)
+          This parameter is very important for the speed of the
+          calculation, but this first estimation is not usually used because
+          the program
+          makes a new one based on the knowledge of CPs. In fact after
+          the CP analysis, the new estimation is done by the product of the ad hoc
+          parameter  [[coff1]] (default 0.98) by the distance of the nearest
+          bonding CP.
+          If there is a problem later, [[coff2]] (default 0.95) is used instead.
+    topics: Bader_expert
+    varset: varaim
+    vartype: real
 - !variable
     abivarname: ratsph
     characteristics: null
@@ -26014,6 +26869,63 @@
     varset: varbas
     vartype: real
 - !variable
+    abivarname: rsurdir@aim
+    characteristics: null
+    commentdefault: null
+    commentdims: null
+    defaultval: !multiplevalue
+        number: 2
+        value: 0.0
+    dimensions:
+    - 2
+    excludes: null
+    mnemonics: Radius SURface DIRection
+    requires: null
+    text: |-
+        In the case [[rsurf]]=1,
+          gives the direction (angular coordinates theta,phi)
+          along which the radius of the Bader
+          surface is to be determined.
+    topics: Bader_expert
+    varset: varaim
+    vartype: real
+- !variable
+    abivarname: rsurf@aim
+    characteristics: null
+    commentdefault: null
+    commentdims: null
+    defaultval: 0
+    dimensions: scalar
+    excludes: null
+    mnemonics: computation of the Radius bader SURFace
+    requires: null
+    text: |-
+        Drive the computation of the radius of the Bader surface for
+          the angles specified in the input variable
+          [[rsurdir]]
+          <ul>
+           <li>0, not calculated
+           <li>1, calculated
+          </ul>
+    topics: Bader_compulsory
+    varset: varaim
+    vartype: integer
+- !variable
+    abivarname: scal@aim
+    characteristics: null
+    commentdefault: null
+    commentdims: null
+    defaultval: 1.0 1.0 1.0
+    dimensions:
+    - 3
+    excludes: null
+    mnemonics: SCALing of the cartesian coordinates
+    requires: null
+    text: null
+    topics: Bader_expert
+    varset: varaim
+    vartype: real
+- !variable
     abivarname: scalecart
     characteristics:
     - '[[INPUT_ONLY]]'
@@ -26044,6 +26956,29 @@
         </p>
     topics: crystal_useful
     varset: varbas
+    vartype: real
+- !variable
+    abivarname: scissor@optic
+    characteristics: null
+    commentdefault: in Ha
+    commentdims: null
+    defaultval: 0.0
+    dimensions: scalar
+    excludes: null
+    mnemonics: SCISSOR operator
+    requires: null
+    text: |-
+        LDA/GGA are well known to underestimate the band-gap by up to 100%. In order
+          to get the optical spectrum and make a realistic comparison with experiments
+          one needs to correct for this. This can be achieved in two ways. The scissors
+          shift is normally chosen to be the difference between the experimental and
+          theoretical band-gap and is used to shift the conduction bands only. Another
+          way in which you do not have to rely on experimental data is to determine the
+          self energy using the <a href="../../tutorial/generated_files/lesson_gw1.html">GW approach</a>.
+          In this case the opening of the gap due to the GW correction can be used as
+          scissor shift.
+    topics: Optic_basic
+    varset: varoptic
     vartype: real
 - !variable
     abivarname: scphon_supercell
@@ -27105,6 +28040,25 @@
     varset: varrlx
     vartype: real
 - !variable
+    abivarname: surf@aim
+    characteristics: null
+    commentdefault: null
+    commentdims: null
+    defaultval: 0
+    dimensions: scalar
+    excludes: null
+    mnemonics: computation of the bader SURFace
+    requires: null
+    text: |-
+        Drive the computation of the full Bader surface.
+          <ul>
+           <li>0, not calculated
+           <li>1, calculated
+          </ul>
+    topics: Bader_compulsory
+    varset: varaim
+    vartype: integer
+- !variable
     abivarname: symafm
     characteristics: null
     commentdefault: null
@@ -27200,9 +28154,9 @@
 - !variable
     abivarname: symdynmat@anaddb
     characteristics: null
-    commentdefault: null
+    commentdefault: (was 0 before v5.3)
     commentdims: null
-    defaultval: 1 (was 0 before v5.3)
+    defaultval: 1
     dimensions: scalar
     excludes: null
     mnemonics: SYMmetrize the DYNamical MATrix
@@ -27368,7 +28322,8 @@
     commentdefault: null
     commentdims: null
     defaultval: 0.0
-    dimensions: array
+    dimensions:
+    - 3
     excludes: null
     mnemonics: TARGET POLarization
     requires: null
@@ -27378,7 +28333,7 @@
         See [[anaddb:polflag]].
     topics: null
     varset: varanaddb
-    vartype: real targetpol(1:3)
+    vartype: real
 - !variable
     abivarname: td_maxene
     characteristics:
@@ -27582,6 +28537,46 @@
         Can be specified in Ha (the default), Ry, eV or Kelvin, since it has the 'ENERGY' characteristics.
     topics: recursion_useful
     varset: vardev
+    vartype: real
+- !variable
+    abivarname: thetamax@aim
+    characteristics: null
+    commentdefault: null
+    commentdims: null
+    defaultval: pi
+    dimensions: scalar
+    excludes: null
+    mnemonics: THETA MAXimal angle
+    requires: null
+    text: |-
+        Angular limits of integration of the Bader volume
+          for the theta variables. The number
+          of integration points is given by
+          [[ntheta]].
+          The range of integration can be decreased if there are
+          symmetry reasons for doing this.
+    topics: Bader_basic
+    varset: varaim
+    vartype: real
+- !variable
+    abivarname: thetamin@aim
+    characteristics: null
+    commentdefault: null
+    commentdims: null
+    defaultval: 0.0
+    dimensions: scalar
+    excludes: null
+    mnemonics: THETA MINimal angle
+    requires: null
+    text: |-
+        Angular limits of integration of the Bader volume
+          for the theta variables. The number
+          of integration points is given by
+          [[ntheta]].
+          The range of integration can be decreased if there are
+          symmetry reasons for doing this.
+    topics: Bader_expert
+    varset: varaim
     vartype: real
 - !variable
     abivarname: thmflag@anaddb
@@ -27873,6 +28868,22 @@
         </p>
     topics: GSgeneral_useful
     varset: varbas
+    vartype: real
+- !variable
+    abivarname: tolerance@optic
+    characteristics: null
+    commentdefault: null
+    commentdims: null
+    defaultval: 1.d-3 Ha
+    dimensions: scalar
+    excludes: null
+    mnemonics: TOLERANCE
+    requires: null
+    text: |-
+        When energy denominators are smaller than <b>tolerance</b>, the term
+          is discarded from the sum.
+    topics: Optic_basic
+    varset: varoptic
     vartype: real
 - !variable
     abivarname: tolimg
@@ -30311,12 +31322,36 @@
     varset: varff
     vartype: real
 - !variable
+    abivarname: vpts@aim
+    characteristics: null
+    commentdefault: null
+    commentdims: 6 for 1D, 9 for 2D
+    defaultval: !multiplevalue
+        number: 6
+        value: 0.0
+    dimensions:
+    - 6
+    excludes: null
+    mnemonics: Vectors defining the PoinTS of the surface
+    requires: null
+    text: |-
+        Basic vectors of the line or rectangle in real space,
+          defining the points for which the density or
+          laplacian will be computed, thanks to
+         [[denout]]
+          or
+          [[lapout]]
+    topics: Bader_useful
+    varset: varaim
+    vartype: real
+- !variable
     abivarname: vs_qrad_tolkms@anaddb
     characteristics: null
     commentdefault: null
     commentdims: null
     defaultval: 2*0.0d0
-    dimensions: scalar
+    dimensions:
+    - 2
     excludes: null
     mnemonics: Speed of Sound Q-radius, TOLerance KiloMeter/Second
     requires: null
@@ -30332,7 +31367,7 @@
         <p>The default values will not work.
     topics: null
     varset: varanaddb
-    vartype: real array(2)
+    vartype: real
 - !variable
     abivarname: w90iniprj
     characteristics: null
@@ -30496,6 +31531,24 @@
     topics: Wannier_basic
     varset: varw90
     vartype: integer
+- !variable
+    abivarname: wfkfile@optic
+    characteristics: null
+    commentdefault: no default
+    commentdims: null
+    defaultval: null
+    dimensions: scalar
+    excludes: null
+    mnemonics: WaveFunction K FILE
+    requires: null
+    text: |-
+        Specify the filename that has been produced by the preparatory Abinit run.
+          This file must contain the matrix elements of the d/dk operator along direction X.
+          It must not contain the first-order wavefunctions and may be generated using [[prtwf]] 3.<br />
+          You should make sure that the number of bands, of spin channels and of k-points are the same in all the files.
+    topics: Optic_basic
+    varset: varoptic
+    vartype: string
 - !variable
     abivarname: wfoptalg
     characteristics:
