@@ -1,0 +1,21 @@
+- !components 
+    name      : Optic 
+    keyword   : Optic utility 
+    authors   : SS,XG,YG
+    howto     : use the optic utility
+    header    : default
+    title     : <h1>Optic utility</h1>
+    subtitle  : default
+    copyright : default
+    links     : default
+    introduction : |- 
+
+    tutorials  : |-
+
+       <li><b>The additional information given by lesson RF1 opens the door to</b>
+       <a href="../../tutorial/generated_files/lesson_optic.html">The lesson on Optic</a>, the utility that
+       allows to obtain the frequency dependent linear optical dielectric
+       function and the frequency dependent second order nonlinear optical
+       susceptibility, in the simple "Sum-Over-State" approximation.</li>
+          
+    end : default

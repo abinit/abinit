@@ -1,0 +1,15 @@
+- !components 
+    name      : Bader 
+    keyword   : Bader analysis 
+    authors   : PCasek,FF,XG
+    howto     : perform a Bader analysis
+    header    : default
+    title     : <h1>Bader analysis</h1>
+    subtitle  : default
+    copyright : default
+    links     : default
+    introduction : |- 
+ 
+    tutorials  : |-
+ 
+    end : default

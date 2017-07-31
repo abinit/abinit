@@ -1,0 +1,100 @@
+<!--                                                                                     -->
+<!-- This file has been produced by generate_doc.py using different .yml  or .bib files. -->
+<!-- It is useless to modify it. Modify the related .yml  or .bib files instead.         -->
+<!--                                                                                     -->
+<html>
+<head><title>Bader analysis </title>
+<link rel=stylesheet type="text/css" href="../formabinit.css">
+</head>
+<body bgcolor="#ffffff">
+
+<hr>
+<a name="top"></a>
+
+<h1>Bader analysis</h1>
+<h3>This file gives hints on how to perform a Bader analysis with the ABINIT package.
+<hr>
+
+<h5>Copyright (C) 2016-2017 ABINIT group (PCasek,FF,XG)
+<script type="text/javascript" src="../../js_files/copyright.js"> </script>
+</h5>
+
+<script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
+
+ <h3><b>Table of content: </b></h3> 
+ <ul> <li><a href="topic_Bader.html#1">1</a>. Related input variables.<li><a href="topic_Bader.html#2">2</a>. Selected input files.</ul>
+
+
+
+
+&nbsp; 
+<HR ALIGN=left> 
+<a name="1">&nbsp;</a>
+<h3><b>1. Related input variables.</b></h3>
+
+
+<p>Compulsory input variables:<p>... <a href="../../input_variables/generated_files/varaim.html#crit@aim">crit@aim</a>   [computation of CRITical points]<br>
+... <a href="../../input_variables/generated_files/varaim.html#denout@aim">denout@aim</a>   [electronic DENsity OUTput]<br>
+... <a href="../../input_variables/generated_files/varaim.html#dltyp@aim">dltyp@aim</a>   [Density or Laplacian TYP output]<br>
+... <a href="../../input_variables/generated_files/varaim.html#follow@aim">follow@aim</a>   [FOLLOW the gradient path]<br>
+... <a href="../../input_variables/generated_files/varaim.html#gpsurf@aim">gpsurf@aim</a>   [GraPhic output for the bader SURFace]<br>
+... <a href="../../input_variables/generated_files/varaim.html#irho@aim">irho@aim</a>   [Integration of the charge density RHO]<br>
+... <a href="../../input_variables/generated_files/varaim.html#ivol@aim">ivol@aim</a>   [Integration of the VOLume]<br>
+... <a href="../../input_variables/generated_files/varaim.html#lapout@aim">lapout@aim</a>   [electronic density LAPlacian OUTput]<br>
+... <a href="../../input_variables/generated_files/varaim.html#rsurf@aim">rsurf@aim</a>   [computation of the Radius bader SURFace]<br>
+... <a href="../../input_variables/generated_files/varaim.html#surf@aim">surf@aim</a>   [computation of the bader SURFace]<br>
+<p>Basic input variables:<p>... <a href="../../input_variables/generated_files/varaim.html#atom@aim">atom@aim</a>   [index of ATOM]<br>
+... <a href="../../input_variables/generated_files/varaim.html#nphi@aim">nphi@aim</a>   [Number of PHI angle]<br>
+... <a href="../../input_variables/generated_files/varaim.html#ntheta@aim">ntheta@aim</a>   [Number of THETA angles]<br>
+... <a href="../../input_variables/generated_files/varaim.html#phimax@aim">phimax@aim</a>   [PHI MAXimal angle]<br>
+... <a href="../../input_variables/generated_files/varaim.html#thetamax@aim">thetamax@aim</a>   [THETA MAXimal angle]<br>
+<p>Useful input variables:<p>... <a href="../../input_variables/generated_files/varaim.html#dpclim@aim">dpclim@aim</a>   [DPCLIM]<br>
+... <a href="../../input_variables/generated_files/varaim.html#lgrad2@aim">lgrad2@aim</a>   [Low GRADient criterion 2]<br>
+... <a href="../../input_variables/generated_files/varaim.html#lgrad@aim">lgrad@aim</a>   [Low GRADient criterion]<br>
+... <a href="../../input_variables/generated_files/varaim.html#lstep2@aim">lstep2@aim</a>   [Length of the planned search STEP 2]<br>
+... <a href="../../input_variables/generated_files/varaim.html#lstep@aim">lstep@aim</a>   [Length of the planned search STEP]<br>
+... <a href="../../input_variables/generated_files/varaim.html#maxatd@aim">maxatd@aim</a>   [MAXimal ATomic Distance]<br>
+... <a href="../../input_variables/generated_files/varaim.html#maxcpd@aim">maxcpd@aim</a>   [MAXimal CP Distance]<br>
+... <a href="../../input_variables/generated_files/varaim.html#vpts@aim">vpts@aim</a>   [Vectors defining the PoinTS of the surface]<br>
+<p>Input variables for experts:<p>... <a href="../../input_variables/generated_files/varaim.html#atrad@aim">atrad@aim</a>   [bader ATomic RADius]<br>
+... <a href="../../input_variables/generated_files/varaim.html#coff1@aim">coff1@aim</a>   [COeFFicient 1]<br>
+... <a href="../../input_variables/generated_files/varaim.html#coff2@aim">coff2@aim</a>   [COeFFicient 2]<br>
+... <a href="../../input_variables/generated_files/varaim.html#foldep@aim">foldep@aim</a>   [FOLlow DEParture]<br>
+... <a href="../../input_variables/generated_files/varaim.html#folstp@aim">folstp@aim</a>   [FOLlow STeP]<br>
+... <a href="../../input_variables/generated_files/varaim.html#inpt@aim">inpt@aim</a>   [numer of INtegration PoinTs]<br>
+... <a href="../../input_variables/generated_files/varaim.html#ngrid@aim">ngrid@aim</a>   [Number of GRID points]<br>
+... <a href="../../input_variables/generated_files/varaim.html#nsa@aim">nsa@aim</a>   [Number of Supercell points in direction A]<br>
+... <a href="../../input_variables/generated_files/varaim.html#nsb@aim">nsb@aim</a>   [Number of Supercell points in direction B]<br>
+... <a href="../../input_variables/generated_files/varaim.html#nsc@aim">nsc@aim</a>   [Number of Supercell points in direction C]<br>
+... <a href="../../input_variables/generated_files/varaim.html#phimin@aim">phimin@aim</a>   [PHI MINimal angle]<br>
+... <a href="../../input_variables/generated_files/varaim.html#radstp@aim">radstp@aim</a>   [RADial STeP]<br>
+... <a href="../../input_variables/generated_files/varaim.html#ratmin@aim">ratmin@aim</a>   [Radius Atomic MINimal]<br>
+... <a href="../../input_variables/generated_files/varaim.html#rsurdir@aim">rsurdir@aim</a>   [Radius SURface DIRection]<br>
+... <a href="../../input_variables/generated_files/varaim.html#scal@aim">scal@aim</a>   [SCALing of the cartesian coordinates]<br>
+... <a href="../../input_variables/generated_files/varaim.html#thetamin@aim">thetamin@aim</a>   [THETA MINimal angle]<br>
+
+
+&nbsp; 
+<HR ALIGN=left> 
+<a name="2">&nbsp;</a>
+<h3><b>2. Selected input files.</b></h3>
+
+
+The user can find some related example input files in the ABINIT package in the directory /tests, or on the Web:
+<p> tests/v3/Input: <a href="../../tests/v3/Input/t56.in">t56.in</a> 
+<a href="../../tests/v3/Input/t57.in">t57.in</a> 
+<p> tests/v4/Input: <a href="../../tests/v4/Input/t30.in">t30.in</a> 
+<a href="../../tests/v4/Input/t31.in">t31.in</a> 
+<a href="../../tests/v4/Input/t32.in">t32.in</a> 
+<a href="../../tests/v4/Input/t33.in">t33.in</a> 
+<a href="../../tests/v4/Input/t34.in">t34.in</a> 
+<p> tests/v6/Input: <a href="../../tests/v6/Input/t18.in">t18.in</a> 
+<a href="../../tests/v6/Input/t19.in">t19.in</a> 
+<br>
+
+
+<script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
+
+</body>
+</html>
+
