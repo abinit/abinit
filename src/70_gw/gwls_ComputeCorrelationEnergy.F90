@@ -223,7 +223,7 @@ first_seed          = dtset%gwls_first_seed
 e                   = dtset%gwls_band_index
 
 
-#second_model_parameter  = dtset%gwls_second_model_parameter
+!second_model_parameter  = dtset%gwls_second_model_parameter
 second_model_parameter  = zero
 
 
