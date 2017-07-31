@@ -10,7 +10,7 @@ try:
 except ImportError:
   raise ImportError("yaml package is not available. Install it with `pip install pyyaml`")
 
-strict=0
+strict=1
 
 def main():
   path = '../input_variables/origin_files/'
