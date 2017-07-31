@@ -25438,7 +25438,7 @@
           </li>
          </ul>
          The treatment of the acoustic sum rule and charge neutrality sum rule is finer at the level of the ANADDB utility,
-        with the two independent input variables [[anaddb:asr]] and [[anaddb.html:chneut]].
+        with the two independent input variables [[anaddb:asr]] and [[anaddb:chneut]].
         </p>
     topics: DFPT_basic
     varset: varrf
