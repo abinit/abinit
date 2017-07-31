@@ -22592,7 +22592,7 @@
         <p>The <b>prtdos</b> variable is used to calculate
         the phonon density of states, PHDOS, by Fourier interpolating the interatomic force
         constants on the (dense) q-mesh defined by [[anaddb:ng2qpt]].
-        Note that the variable <a href="#ifcflag">ifcflag</a> must be set to 1
+        Note that the variable [[anaddb:ifcflag]] must be set to 1
         since the interatomic force constants are supposed to be known.
         <p>
         The available options are:
@@ -25438,15 +25438,7 @@
           </li>
          </ul>
          The treatment of the acoustic sum rule and charge neutrality sum rule is finer at the level of the ANADDB utility,
-        with the two independent input variables
-         <a href="../../users/generated_files/help_anaddb.html#asr">
-          asr
-         </a>
-         and
-         <a href="../../users/generated_files/help_anaddb.html#chneut">
-          chneut
-         </a>
-         .
+        with the two independent input variables [[anaddb:asr]] and [[anaddb.html:chneut]].
         </p>
     topics: DFPT_basic
     varset: varrf
@@ -25829,7 +25821,7 @@
     requires: null
     text: |-
         <p>Cut-off radius for the sphere for
-        interatomic force constant, see also the alternative <a href="#nsphere">nsphere</a>.
+        interatomic force constant, see also the alternative [[anaddb:nsphere]].
         If <b>rifcsph</b>= 0: maximum extent allowed by the grid .
 
         <p>This number defines the atoms for which the
@@ -27503,7 +27495,7 @@
     requires: null
     text: |-
         <p>Lowest temperature (Kelvin) at which the thermodynamical quantities
-        have to be evaluated. Cannot be zero when <a href="#thmflag">thmflag</a>
+        have to be evaluated. Cannot be zero when [[anaddb:thmflag]] is 1.
         <p>The highest temperature is defined using
         [[anaddb:temperinc]] and [[anaddb:ntemper]].
         The default temperature grid goes from 100K to 1000K by step of 100K. For the largest temperatures, for most solids, anharmonic effects not accounted in the harmonic approximation implemented in anaddb will be important. For weakly bounded systems (e.g. Van der Waals solids),
