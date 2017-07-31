@@ -4255,7 +4255,7 @@
     requires: null
     text: |-
         This variable defines the treatment of the dipole-dipole interaction.
-        Same meaning as the corresponding anaddb variable
+        Same meaning as the corresponding anaddb variable [[dipdip@anaddb]]
     topics: DFPT_useful
     varset: vareph
     vartype: integer
@@ -4284,6 +4284,7 @@
          analytically when the phonon spectrum is interpolated, or if
          the interatomic force constants have to be analysed in real space.</li>
          </ul>
+        The abinit input variable [[dipdip]] has a similar meaning.
     topics: null
     varset: varanaddb
     vartype: integer
