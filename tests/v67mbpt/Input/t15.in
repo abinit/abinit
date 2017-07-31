@@ -89,7 +89,6 @@ ndtset 6
  gwls_recycle 2
  gwls_first_seed 4
  gwls_model_parameter 1.0
- gwls_second_model_parameter 0.0
  gwls_npt_gauss_quad 10
  gwls_diel_model 2
  gwls_print_debug 0
