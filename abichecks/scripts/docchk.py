@@ -1,4 +1,6 @@
 #!/usr/bin/env python
+#Should be rewritten, to take advantage of the database of input variables (abivars.yml).
+#Would be much faster...
 "Check documentation and input variables"
 from __future__ import division, print_function, absolute_import #unicode_literals, 
 
@@ -133,6 +135,8 @@ def main(home_dir, verbose=False):
           ret_code += 1
 
   varfile.close()
+
+###################################################################################################
                   
   # construct list of key words appearing in anaddb input
   invars9f90 = os.path.join(home_dir, "src/77_ddb/m_anaddb_dataset.F90")
@@ -165,14 +169,14 @@ def main(home_dir, verbose=False):
   print(" ============================================================= ")
   print(" ANADDB Input variables: Check in documentation                ")
   print(" ============================================================= ")
-  varhtml = os.path.join(home_dir, "doc/users/generated_files/help_anaddb.html")
+  varhtml = os.path.join(home_dir, "doc/input_variables/generated_files/varset_allvars.html")
   for iwords in range(len(words)):
       with open(varhtml) as fh: varhtmldata = fh.read()
-      if words[iwords] in varhtmldata:
-          if verbose: print ("SUCCESS: ",words[iwords]," appears in ",varhtml)
+      if words[iwords]+"@anaddb" in varhtmldata:
+          if verbose: print ("SUCCESS: "+words[iwords].strip()+"@anaddb appears in "+varhtml)
       else:
-          print ("FAIL: ",words[iwords]," does not appear ",varhtml)
-          ret_code += 1
+          print ("FAIL: "+words[iwords].strip()+"@anaddb does not appear in "+varhtml)
+          
 
   print( " ============================================================= ")
   print( " ANADDB Input variables: Check in test suite                   ")
