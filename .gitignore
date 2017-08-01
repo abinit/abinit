@@ -72,6 +72,7 @@ tests/TestBot_MPI*/*
 /config.sh
 /config.status
 /directories.dot
+/dump_fb_version.py
 /stamp-h1
 /abinit-*.tar.gz
 /confstat.*
