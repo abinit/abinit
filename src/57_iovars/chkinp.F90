@@ -55,6 +55,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
  use m_profiling_abi
  use m_errors
  use m_xmpi
+ use m_xomp
  use libxc_functionals
 
  use m_numeric_tools,  only : iseven
@@ -273,7 +274,9 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
    end if
 !  Non-zero berryopt and usepaw==1 and kptopt/=3 cannot be done unless symmorphi=0
 !  (that is, nonsymmorphic symmetries do not work yet
+!  Update MT 2017-05-31: nonsymmorphic symmetries seem also to be an issue for NCPP
    if (usepaw==1.and.dt%berryopt/=0.and.dt%kptopt/=3) then
+  !if (dt%berryopt/=0.and.dt%kptopt/=3) then
      cond_string(1)='usepaw'; cond_values(1)=1
      cond_string(2)='berryopt'; cond_values(2)=dt%berryopt
      cond_string(3)='kptopt'; cond_values(3)=dt%kptopt
@@ -408,6 +411,18 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
          end if
        end do
      end do
+   end if
+
+!  densfor_pred
+   if(dt%iscf>0)then
+     cond_string(1)='iscf';cond_values(1)=dt%iscf
+     call chkint_le(0,1,cond_string,cond_values,ierr,'densfor_pred',dt%densfor_pred,6,iout)
+     call chkint_ge(0,1,cond_string,cond_values,ierr,'densfor_pred',dt%densfor_pred,-6,iout)
+     if (dt%densfor_pred<0.and.mod(dt%iprcel,100)>=61.and.(dt%iprcel<71.or.dt%iprcel>79)) then
+       cond_string(1)='iscf';cond_values(1)=dt%iscf
+       cond_string(2)='iprcel';cond_values(2)=dt%iprcel
+       call chkint_ge(1,2,cond_string,cond_values,ierr,'densfor_pred',dt%densfor_pred,0,iout)
+     end if
    end if
 
 !  diecut
@@ -631,6 +646,12 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
 !    Check for GW calculations that are not implemented.
      !cond_string(1)='optdriver' ; cond_values(1)=optdriver
      !call chkint_eq(1,1,cond_string,cond_values,ierr,'nspinor',dt%nspinor,1,(/1/),iout)
+
+     if (maxval(abs(dt%istwfk(1:nkpt))) > 1 .and. mod(dt%gwcalctyp, 100) >= 20) then
+       write(msg, "(3a)")"Self-consistent GW with istwfk > 1 not supported.",ch10, &
+         "Please regenerate your WFK file with istwfk *1"
+       MSG_ERROR_NOSTOP(msg, ierr)
+     end if
 !
 !    Avoid wasting CPUs if nsppol==2.
      if (dt%nsppol==2.and..not.iseven(nproc).and.nproc>1) then
@@ -967,21 +988,6 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
      cond_string(1)='ionmov' ; cond_values(1)=dt%ionmov
 !    Make sure that nnos is not null
      call chkint_ge(1,1,cond_string,cond_values,ierr,'nnos',dt%nnos,1,iout)
-   end if
-
-!  densfor_pred
-!  if (abs(dt%densfor_pred)>=1.and.dt%iscf>=10.and.nspden==4) then
-!  write(message,'(8a)')ch10,&
-!  &   ' chkinp : ERROR -',ch10,&
-!  &   '  When non-collinear magnetism is activated (nspden=4),',ch10,&
-!  &   '  densfor_pred/=0 is not compatible with SCF mixing on density (iscf>=10) !',ch10,&
-!  &   '  Action : choose SCF mixing on potential (iscf<10) or change densfor_pred value.'
-!  call wrtout(std_out,message,'COLL')
-!  ierr=ierr+1
-!  end if
-   if (dt%densfor_pred<0.and.mod(dt%iprcel,100)>=61.and.(dt%iprcel<71.or.dt%iprcel>79)) then
-     cond_string(1)='iprcel';cond_values(1)=dt%iprcel
-     call chkint_ge(0,2,cond_string,cond_values,ierr,'densfor_pred',dt%densfor_pred,0,iout)
    end if
 
 !  iprcel
@@ -1539,6 +1545,14 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
      cond_string(2)='pawmixdg' ; cond_values(2)=dt%pawmixdg
      call chkint_eq(1,2,cond_string,cond_values,ierr,'npfft',dt%npfft,1,(/1/),iout)
    end if
+#ifdef HAVE_OPENMP
+   if ( xomp_get_num_threads(.true.) > 1 .and. dt%npfft > 1 ) then
+     write(message,'(4a,i4,a,i4,a)') "When compilied with OpenMP, the FFT parallelization is not ",& 
+       & "compatible with multiple threads.",ch10,"Please set npfft to 1 (currently npfft=",&
+       & dt%npfft, ") or export OMP_NUM_THREADS=1 (currently ",xomp_get_num_threads(.true.),")"
+     MSG_ERROR(message)
+   end if
+#endif
 
 !  npimage
 !  Must be greater or equal to 1
@@ -1569,6 +1583,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
 !    nprojmax(ilang)=maxval(pspheads(1:npsp)%nproj(ilang)) ! Likely problems with HP compiler
      nprojmax(ilang)=pspheads(1)%nproj(ilang)
      if(npsp>=2)then
+
        do ii=2,npsp
          nprojmax(ilang)=max(pspheads(ii)%nproj(ilang),nprojmax(ilang))
        end do
@@ -1649,7 +1664,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
 !  When ionmov=4 and iscf>10, nspden must be 1 or 2
    if(dt%ionmov==4.and.dt%iscf>10)then
      cond_string(1)='ionmov' ; cond_values(1)=dt%ionmov
-     cond_string(1)='iscf' ; cond_values(1)=dt%densfor_pred
+     cond_string(1)='iscf' ; cond_values(1)=dt%iscf
      call chkint_eq(1,2,cond_string,cond_values,ierr,'nspden',nspden,2,(/1,2/),iout)
    end if
 !  When iprcel>49, nspden must be 1 or 2
@@ -3008,8 +3023,9 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
        if(dt%ixc/=11.and.dt%ixc/=-101130.and.dt%ixc/=-130101.and. &
 &       dt%ixc/=18.and.dt%ixc/=-106131.and.dt%ixc/=-131106.and. &
 &       dt%ixc/=19.and.dt%ixc/=-106132.and.dt%ixc/=-132106.and. &
-&       dt%ixc/=-202231.and.dt%ixc/=-231202.and.dt%ixc/=-170.and.&
-&       dt%ixc/=41) then
+&       dt%ixc/=-202231.and.dt%ixc/=-231202.and.&
+&       dt%ixc/=14.and.dt%ixc/=-102130.and.dt%ixc/=-130102.and. &
+&       dt%ixc/=-170.and.dt%ixc/=41.and.dt%ixc/=-406) then
          write(message,'(4a,i2,5a)') ch10,&
 &         ' chkinp : ERROR -',ch10,&
 &         '  Van der Waals DFT-D correction (vdw_xc=',dt%vdw_xc,') only available for the following XC functionals:',ch10,&

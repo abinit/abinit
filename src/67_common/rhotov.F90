@@ -31,7 +31,7 @@
 !!  nhat(nfft,nspden*usepaw)= -PAW only- compensation density
 !!  nhatgr(nfft,nspden,3*nhatgrdim)= -PAW only- cartesian gradients of compensation density
 !!  nhatgrdim= -PAW only- 0 if nhatgr array is not used ; 1 otherwise
-!!  nkxc=second dimension of the array kxc, see rhohxc.f for a description
+!!  nkxc=second dimension of the array kxc, see rhohxc.F90 for a description
 !!  n3xccc=dimension of the xccc3d array (0 or nfft).
 !!  optene=option for the computation of additional energies
 !!  optres=0: the trial potential residual is computed ; the input potential value is kept

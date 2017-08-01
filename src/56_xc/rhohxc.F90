@@ -36,8 +36,10 @@
 !!  option=0 for xc only (exc, vxc, strsxc),
 !!         1 for Hxc (idem + vhartr) ,
 !!         2 for Hxc and kxc (no paramagnetic part if nspden=1)
-!!        10 for xc  and kxc with only LDA part (d2Exc/drho^2)
-!!        12 for Hxc and kxc with only LDA part (d2Exc/drho^2)
+!!        10 for xc  and kxc with only partial derivatives wrt density part (d2Exc/drho^2)
+!!        12 for Hxc and kxc with only partial derivatives wrt density part (d2Exc/drho^2)
+!!              and, in the case of hybrid functionals, substitution of the hybrid functional
+!!              by the related fallback GGA functional for the computation of the xc kernel (not for other quantities)
 !!         3 for Hxc, kxc and k3xc
 !!        -2 for Hxc and kxc (with paramagnetic part if nspden=1)
 !!  rhog(2,nfft)=electron density in G space
@@ -69,11 +71,12 @@
 !!    (v^11, v^22, Re[V^12], Im[V^12] if nspden=4)
 !!  vxcavg=<Vxc>=unit cell average of Vxc = (1/ucvol) Int [Vxc(r) d^3 r].
 !!
-!!  === Only if abs(option)=2, -2, 3, 10, 12 ===
+!!  === Only if abs(option)=2, -2, 3, 10, 12 (in case 12, for hybrids, substitution of the related GGA) ===
 !!  kxc(nfft,nkxc)=exchange and correlation kernel (returned only if nkxc/=0)
 !!    Content of Kxc array:
 !!   ===== if LDA
 !!    if nspden==1: kxc(:,1)= d2Exc/drho2
+!!       that is 1/2 ( d2Exc/drho_up drho_up + d2Exc/drho_up drho_dn )
 !!                 (kxc(:,2)= d2Exc/drho_up drho_dn)
 !!    if nspden>=2: kxc(:,1)= d2Exc/drho_up drho_up
 !!                  kxc(:,2)= d2Exc/drho_up drho_dn
@@ -130,7 +133,7 @@
 !!
 !! NOTES
 !! Start from the density, and compute Hartree (if option>=1) and xc correlation potential and energies.
-!! Eventually compute xc kernel (if option=-2, 2, 3, 10 or 12).
+!! Eventually compute xc kernel (if option=-2, 2, 3, 10 or 12 - in the latter case, substitution by the related GGA kernel).
 !! Allows a variety of exchange-correlation functionals
 !! according to ixc. Here is a list of allowed values.
 !!                                                    subroutine name
@@ -263,7 +266,7 @@ subroutine rhohxc(dtset,enxc,gsqcut,izero,kxc,mpi_enreg,nfft,ngfft, &
 
 !Local variables-------------------------------
 !scalars
- integer :: cplex,ierr,ifft,ii,indx,ipositron,ipts,ishift,ispden,iwarn,iwarnp
+ integer :: cplex,ierr,ifft,ii,ixc_fallbackkxc_hyb,indx,ipositron,ipts,ishift,ispden,iwarn,iwarnp
  integer :: jj,mpts,ndvxc,nd2vxc,nfftot,ngr,ngr2,ngrad,ngrad_apn,nkxc_eff,npts
  integer :: nspden_apn,nspden_eff,nspden_updn,nspgrad,nvxcgrho,order,mgga,usefxc
  integer :: nproc_fft,comm_fft
@@ -275,6 +278,7 @@ subroutine rhohxc(dtset,enxc,gsqcut,izero,kxc,mpi_enreg,nfft,ngfft, &
  logical :: allow3,test_nhat,with_vxctau
  character(len=500) :: message
 !arrays
+ integer :: gga_id(2)
  real(dp) :: gm_norm(3),grho(3),gmet(3,3),gprimd(3,3),qphon(3),rmet(3,3)
  real(dp) :: tsec(2),vxcmean(4)
  real(dp),allocatable :: d2vxc_b(:,:),depsxc(:,:),depsxc_apn(:,:),dvxc_apn(:),dvxc_b(:,:)
@@ -414,8 +418,20 @@ subroutine rhohxc(dtset,enxc,gsqcut,izero,kxc,mpi_enreg,nfft,ngfft, &
 !  2 for collinear polarized system or LDA (can be reduced to a collinear system)
 !  4 for non-collinear polarized system and GGA
    nspden_eff=nspden_updn;if (nspden==4.and.ngrad==2) nspden_eff=4
-!  Number of kcxc components depends on option (force LDA if option==10 or 12)
+
+!  Number of kcxc components depends on option (force LDA type if option==10 or 12)
    nkxc_eff=nkxc;if (option==10.or.option==12) nkxc_eff=min(nkxc,3)
+
+!  Define the fallback GGA xc kernel in case of hybrid functionals
+   ixc_fallbackkxc_hyb=dtset%ixc
+   if (option==12) then
+     if(dtset%ixc==41 .or. dtset%ixc==42)ixc_fallbackkxc_hyb=11
+     if(dtset%ixc==-406 .or. dtset%ixc==-427 .or. dtset%ixc==-428 .or. dtset%ixc==-456)then
+       if (libxc_functionals_gga_from_hybrid(gga_id=gga_id)) then
+         ixc_fallbackkxc_hyb=-gga_id(1)*1000-gga_id(2)
+       endif
+     endif
+   endif
 
 !  The different components of depsxc will be
 !  for nspden=1,   depsxc(:,1)=d(rho.exc)/d(rho) == (depsxcdrho) == (vxcrho)
@@ -704,6 +720,30 @@ subroutine rhohxc(dtset,enxc,gsqcut,izero,kxc,mpi_enreg,nfft,ngfft, &
          end if
        end do
 
+!      In case of a hybrid functional, if one needs to compute the fallback GGA Kxc, a separate call to drivexc_main
+!      is first needed to compute Kxc using such fallback GGA, 
+!      before calling again drivexc_main using the correct functional for Exc and Vxc
+       if(ixc_fallbackkxc_hyb/=dtset%ixc)then
+         call libxc_functionals_end()
+         call libxc_functionals_init(ixc_fallbackkxc_hyb,dtset%nspden)
+         call drivexc_main(exc_b,ixc_fallbackkxc_hyb,mgga,ndvxc,nd2vxc,ngr2,npts,nspden_updn,nvxcgrho,order,&
+&          rho_b_updn,vxcrho_b_updn,dtset%xclevel, &
+&          dvxc=dvxc_b,d2vxc=d2vxc_b,grho2=grho2_b_updn,vxcgrho=vxcgrho_b, &
+&          lrho=lrho_b_updn,tau=tau_b_updn,vxclrho=vxclrho_b_updn,vxctau=vxctau_b_updn, &
+&          fxcT=fxc_b,el_temp=dtset%tsmear, &
+&          xc_tb09_c=dtset%xc_tb09_c)
+!        Transfer the xc kernel
+         if (nkxc_eff==1.and.ndvxc==15) then
+           kxc(ifft:ifft+npts-1,1)=half*(dvxc_b(1:npts,1)+dvxc_b(1:npts,9)+dvxc_b(1:npts,10))
+         else if (nkxc_eff==3.and.ndvxc==15) then
+           kxc(ifft:ifft+npts-1,1)=dvxc_b(1:npts,1)+dvxc_b(1:npts,9)
+           kxc(ifft:ifft+npts-1,2)=dvxc_b(1:npts,10)
+           kxc(ifft:ifft+npts-1,3)=dvxc_b(1:npts,2)+dvxc_b(1:npts,11)
+         end if
+         call libxc_functionals_end()
+         call libxc_functionals_init(dtset%ixc,dtset%nspden)
+       endif
+
 !      Call to main XC driver
        call drivexc_main(exc_b,dtset%ixc,mgga,ndvxc,nd2vxc,ngr2,npts,nspden_updn,nvxcgrho,order,&
 &       rho_b_updn,vxcrho_b_updn,dtset%xclevel, &
@@ -901,8 +941,8 @@ subroutine rhohxc(dtset,enxc,gsqcut,izero,kxc,mpi_enreg,nfft,ngfft, &
          end if
        end if
 
-!      Transfer the xc kernel
-       if (nkxc_eff>0.and.ndvxc>0) then
+!      Transfer the xc kernel (if this must be done, and has not yet been done)
+       if (nkxc_eff>0.and.ndvxc>0 .and. ixc_fallbackkxc_hyb==dtset%ixc) then
          if (nkxc_eff==1.and.ndvxc==15) then
            kxc(ifft:ifft+npts-1,1)=half*(dvxc_b(1:npts,1)+dvxc_b(1:npts,9)+dvxc_b(1:npts,10))
          else if (nkxc_eff==3.and.ndvxc==15) then

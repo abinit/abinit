@@ -52,8 +52,8 @@ P This job should need less than                      31.324 Mbytes of memory.
         accesswff           1
             acell      2.3010000000E+01  2.3010000000E+01  2.3010000000E+01 Bohr
               amu      1.96966540E+02
+     densfor_pred           6
              ecut      5.00000000E+00 Hartree
-           densfor_pred           6
               kpt      1.25000000E-01  1.25000000E-01  1.25000000E-01
                        3.75000000E-01  1.25000000E-01  1.25000000E-01
                        3.75000000E-01  3.75000000E-01  1.25000000E-01
@@ -2523,6 +2523,7 @@ P newkpt: treating    648 bands with npw=      59 for ikpt=   4 by node    3
         accesswff           1
             acell      2.3010000000E+01  2.3010000000E+01  2.3010000000E+01 Bohr
               amu      1.96966540E+02
+     densfor_pred           6
              ecut      5.00000000E+00 Hartree
            etotal     -3.7560341637E+03
             fcart      9.2410502926E-19 -7.0868302613E-02 -7.0868302613E-02
@@ -2632,7 +2633,6 @@ P newkpt: treating    648 bands with npw=      59 for ikpt=   4 by node    3
                        1.9474497044E-02  2.5585168542E-02  1.9474497044E-02
                        1.9474497044E-02  1.9474497044E-02  2.5585168542E-02
                        8.3464780389E-03  8.3464780389E-03  8.3464780389E-03
-           densfor_pred           6
               kpt      1.25000000E-01  1.25000000E-01  1.25000000E-01
                        3.75000000E-01  1.25000000E-01  1.25000000E-01
                        3.75000000E-01  3.75000000E-01  1.25000000E-01
