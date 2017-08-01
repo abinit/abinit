@@ -114,6 +114,7 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass,eigen,electronpositron,fock,&
  use m_paw_ij,           only : paw_ij_type
  use m_pawcprj,          only : pawcprj_type,pawcprj_alloc,pawcprj_free,pawcprj_get,pawcprj_reorder
 use m_cgtools
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -178,8 +179,6 @@ use m_cgtools
  type(bandfft_kpt_type),pointer :: my_bandfft_kpt => null()
  type(pawcprj_type),target,allocatable :: cwaveprj(:,:)
  type(pawcprj_type),pointer :: cwaveprj_idat(:,:)
-
-
 
 !*************************************************************************
 
@@ -621,8 +620,6 @@ use m_cgtools
      end if
      if ((stress_needed==1).and.(usefock_loc).and.(psps%usepaw==1))then
        ABI_DEALLOCATE(fock%ffnl_str)
-     end if
-       end if
      end if
 
    end do ! End k point loop

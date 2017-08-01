@@ -210,7 +210,7 @@ subroutine nonlop_test(cg,eigen,istwfk,kg,kpt,mband,mcg,mgfft,mkmem,mpi_enreg,mp
    end if
    if(choice==54)then
      ider_ffnl=2 ; cplex=2
-     nnlout=18*natom ; inlout=2*idir-1
+     nnlout=18*natom ; inlout=18*(iatom-1)+2*idir-1
    end if
    if(choice==55)then
      ider_ffnl=2 ; cplex=2

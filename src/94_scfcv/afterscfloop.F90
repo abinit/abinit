@@ -257,6 +257,7 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
  use interfaces_56_xc
  use interfaces_62_wvl_wfs
  use interfaces_65_paw
+ use interfaces_66_nonlocal
  use interfaces_67_common
  use interfaces_94_scfcv, except_this_one => afterscfloop
 !End of the abilint section
