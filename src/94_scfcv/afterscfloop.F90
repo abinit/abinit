@@ -251,6 +251,7 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
  use interfaces_56_xc
  use interfaces_62_wvl_wfs
  use interfaces_65_paw
+ use interfaces_66_nonlocal
  use interfaces_67_common
  use interfaces_94_scfcv, except_this_one => afterscfloop
 !End of the abilint section
@@ -963,6 +964,15 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
  if (ngrvdw>0) results_gs%grvdw(1:3,1:ngrvdw)=grvdw(1:3,1:ngrvdw)
  if (dtset%nstep == 0 .and. dtset%occopt>=3.and.dtset%occopt<=8) then
    results_gs%etotal = results_gs%etotal - dtset%tsmear * results_gs%entropy
+ end if
+
+!This call is only for testing purpose:
+!test of the nonlop routine (DFPT vs Finite Differences)
+ if (dtset%useria==112233) then
+   call nonlop_test(cg,eigen,dtset%istwfk,kg,dtset%kptns,dtset%mband,mcg,dtset%mgfft,dtset%mkmem,&
+&       mpi_enreg,dtset%mpw,my_natom,dtset%natom,dtset%nband,dtset%nfft,dtset%ngfft,dtset%nkpt,&
+&       dtset%nloalg,npwarr,dtset%nspden,dtset%nspinor,dtset%nsppol,dtset%ntypat,paw_ij,pawtab,&
+&       ph1d,psps,rprimd,dtset%typat,xred)
  end if
 
  DBG_EXIT("COLL")

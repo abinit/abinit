@@ -45,6 +45,7 @@ sources = [
  "nonlop.F90",
  "nonlop_gpu.F90",
  "nonlop_pl.F90",
+ "nonlop_test.F90",
  "nonlop_ylm.F90",
  "opernl2.F90",
  "opernl3.F90",
