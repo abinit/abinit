@@ -61,4 +61,5 @@
 #%%   provided in TABLE III-V of the Ghosez et al paper.
 #%%   Note the decomposition between dipole-dipole contribution
 #%%   and short-ranged contribution.
+#%% topics = anaddbSpec, anaddbCommon
 #%%<END TEST_INFO>

@@ -28,12 +28,10 @@ intro : |
 body : |
   <ul>
     <li><a href="#1">1. Introduction</a> </li>
-    <li><a href="#2">2. Input variables</a> </li>
   </ul>
   <hr>
   <h3>&nbsp;</h3>
   <h3><b><a name="1"></a>1. Introduction </b></h3>
-
   <p>
   
   In short, a Derivative DataBase contains a list of derivatives
@@ -92,27 +90,14 @@ body : |
   the main abinit input files: the file is parsed, keywords are identified,
   comments are also identified. However, the multidataset mode is not available.
   </p>
-  <h3>&nbsp;</h3>
-  <h3><b><a name="2"></a>2. Input variables </b></h3>
-
-
-
-  <p>
-  This ANADDB utility is able to perform many different tasks, each governed by a
-  selected set of input variables, with also some input variables common to many of the
-  different tasks. 
-  <li> <a href="../../topics/generated_files/topic_anaddbCommon.html"> anaddb common input variables</a></li>
-  <li> <a href="../../topics/generated_files/topic_anaddbSpec.html"> anaddb tasks</a></li>
-  <li> <a href="../../topics/generated_files/topic_anaddbEPC.html"> anaddb electron-phonon input variables</a> </li>
-
-
-  <p>
   <p>The list of input variables for the anaddb input file are presented in [[varanaddb]]. In order
   to discover them, it is easier to use the different lessons of the tutorial:
   start with the second lesson on response functions ([[lesson_rf2]]),
   then follow the lesson on elasticity and piezoelectricity ([[lesson_elastic]]),
   the lesson on electron-phonon interaction ([[lesson_eph]]), and
   the lesson on non-linear properties ([[lesson_nlo]]).
+  
+  <p>
   <i>If you are discovering this file with the help of the tutorial,
   you can go back to the tutorial window.</i>
   </p>

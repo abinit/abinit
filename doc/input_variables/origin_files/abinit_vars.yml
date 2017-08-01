@@ -14,7 +14,7 @@
         (similar to a phonon DOS), which is sampled on a finite q and k grid. The Dirac delta
         functions in energy are replaced by Gaussians of width <b>a2fsmear</b>
         (by default in Hartree).
-    topics: null
+    topics: anaddbEPC_expert
     varset: varanaddb
     vartype: real
 - !variable
@@ -762,7 +762,7 @@
         This option is useful in the mode-by-mode decomposition of the electrooptic tensor, and to compute
         the Raman susceptibilities of individual phonon modes.
         In case of uniaxial crystals, the z-axis should be chosen along the optical axis.
-    topics: null
+    topics: anaddbSpec_basic
     varset: varanaddb
     vartype: integer
 - !variable
@@ -990,7 +990,7 @@
         routine for non-hermitian matrices. So, at the present status of
         understanding, one should always use the <b>asr</b>=2 option ).
         <br>
-    topics: null
+    topics: anaddbCommon_basic
     varset: varanaddb
     vartype: integer
 - !variable
@@ -1009,7 +1009,7 @@
         with which the DOS is calculated can be stopped, i.e.
         the mean of the relative change going from one grid
         to the next bigger is smaller than <b>wtol2</b>.
-    topics: null
+    topics: anaddbCommon_expert
     varset: varanaddb
     vartype: real
 - !variable
@@ -1029,7 +1029,7 @@
         <br>
         <p>WARNING: there will be an in-place change of meaning of atifc (this is
         confusing, and should be taken away in one future version - sorry for this).
-    topics: null
+    topics: anaddbSpec_basic
     varset: varanaddb
     vartype: integer
 - !variable
@@ -1241,7 +1241,7 @@
     text: |-
         <p>Allow setting the target band gap, in eV.
         ([[elphflag@anaddb]]=1).
-    topics: null
+    topics: anaddbEPC_expert
     varset: varanaddb
     vartype: real
 - !variable
@@ -1714,7 +1714,7 @@
         in order for the code to work properly.
         <p> Warning: the generation of q-points in anaddb is rather
         old-fashioned, and should be replaced by routines used by the main abinit code.
-    topics: null
+    topics: anaddbCommon_basic
     varset: varanaddb
     vartype: integer
 - !variable
@@ -3183,7 +3183,7 @@
         in the DDB, and this sum rule is sometimes strongly violated.
         In particular, this will make the lowest frequencies at Gamma
         non-zero. There is no "best" way of imposing the ASR on effective charges.
-    topics: null
+    topics: anaddbCommon_useful
     varset: varanaddb
     vartype: integer
 - !variable
@@ -4094,7 +4094,7 @@
            [[anaddb:elaflag]]=2,3,4 or 5  and
            [[anaddb:instrflag]]=1
          </ul>
-    topics: null
+    topics: anaddbSpec_compulsory
     varset: varanaddb
     vartype: integer
 - !variable
@@ -4453,7 +4453,7 @@
          the interatomic force constants have to be analysed in real space.</li>
          </ul>
         The abinit input variable [[dipdip]] has a similar meaning.
-    topics: null
+    topics: anaddbSpec_useful
     varset: varanaddb
     vartype: integer
 - !variable
@@ -5494,7 +5494,7 @@
     text: |-
         <p>The input variable <b>dosdeltae</b> is used to define the step of the frequency grid used to
         calculate the phonon density of states when [[anaddb:prtdos]]=1.
-    topics: null
+    topics: anaddbCommon_useful
     varset: varanaddb
     vartype: real
 - !variable
@@ -5511,7 +5511,7 @@
     text: |-
         <p><b>dossmear</b> defines the gaussian broadening used to calculate the phonon density
         of states when [[anaddb:prtdos]]=1.
-    topics: null
+    topics: anaddbCommon_useful
     varset: varanaddb
     vartype: real
 - !variable
@@ -5528,7 +5528,7 @@
         <p>Set the flag to calculate the two phonon dos density of states. Sum and Difference for
         the Gamma point. The DOS is converged and based on that, the sum and different is
         reported in the output file <b>dossum</b>.
-    topics: null
+    topics: anaddbCommon_basic
     varset: varanaddb
     vartype: integer
 - !variable
@@ -5547,7 +5547,7 @@
         with which the DOS is calculated can be stopped, i.e.
         the mean of the relative change going from one grid
         to the next bigger is smaller than <b>dostol</b>.
-    topics: null
+    topics: anaddbCommon_useful
     varset: varanaddb
     vartype: real
 - !variable
@@ -6256,7 +6256,7 @@
         <li> 1 or 2 => write the phonon eigenvectors;</li>
         <li> 4 => generate output files for band2eps (drawing tool for the phonon band structure);</li>
         </ul>
-    topics: null
+    topics: anaddbCommon_useful
     varset: varanaddb
     vartype: integer
 - !variable
@@ -6319,7 +6319,7 @@
          can contain both information. And the program will also check for the users.
         </li>
         </ul>
-    topics: null
+    topics: anaddbSpec_compulsory
     varset: varanaddb
     vartype: integer
 - !variable
@@ -6371,7 +6371,7 @@
         <p>If non-zero, will fix artificially the value of the Fermi energy
         (e.g. for semiconductors), in the electron-phonon case. Note that elph_fermie and [[anaddb:ep_extrael]]
         should not be used at the same time. ([[anaddb:elphflag]]=1).
-    topics: null
+    topics: anaddbEPC_useful
     varset: varanaddb
     vartype: real
 - !variable
@@ -6386,7 +6386,7 @@
     requires: null
     text: |-
         <p>If <b>elphflag</b> is 1, anaddb performs an analysis of the electron-phonon coupling.
-    topics: null
+    topics: anaddbEPC_compulsory
     varset: varanaddb
     vartype: integer
 - !variable
@@ -6402,7 +6402,7 @@
     requires: null
     text: |-
         <p>Smearing width for the Fermi surface integration (in Hartree by default).
-    topics: null
+    topics: anaddbEPC_expert
     varset: varanaddb
     vartype: real
 - !variable
@@ -6466,7 +6466,7 @@
          <li> 1 => meV and Thz;</li>
          <li> 2 => Hartree, cm-1, meV, Thz, and Kelvin.</li>
         </ul>
-    topics: null
+    topics: anaddbCommon_useful
     varset: varanaddb
     vartype: integer
 - !variable
@@ -6481,7 +6481,7 @@
     requires: null
     text: |-
         <p>When set, and [[anaddb:telphint]] is equal to 2, this variable determines the k-point integration weights which are used in the electron-phonon part of the code. Instead of weighting according to a distance from the Fermi surface, an equal weight is given to all k-points, for all bands between [[ep_b_min]] and <b>ep_b_max</b>.
-    topics: null
+    topics: anaddbEPC_useful
     varset: varanaddb
     vartype: integer
 - !variable
@@ -6496,7 +6496,7 @@
     requires: null
     text: |-
         <p>As for [[anaddb:ep_b_max]], but <b>ep_b_min</b> is the lower bound on the band integration, instead of the upper bound. See also [[anaddb:telphint]].
-    topics: null
+    topics: anaddbEPC_useful
     varset: varanaddb
     vartype: integer
 - !variable
@@ -6515,7 +6515,7 @@
         This field can also be filled with doping concentration, in the units of cm-3 (negative for electron doping).
         Note that <b>ep_extrael</b> and [[anaddb:elph_fermie]] should not be used at the same time.
         ([[anaddb:elphflag]]=1).
-    topics: null
+    topics: anaddbEPC_useful
     varset: varanaddb
     vartype: real
 - !variable
@@ -6533,7 +6533,7 @@
         elements over the coarse k-grid is done (<b>ep_int_gkk</b> 1) before summing
         with appropriate Fermi Surface weights. In this way, the two integration weights
         are treated symmetrically.
-    topics: null
+    topics: anaddbEPC_expert
     varset: varanaddb
     vartype: integer
 - !variable
@@ -6551,7 +6551,7 @@
         elements on the electron band index is kept (<b>ep_keepbands</b> 1), or whether
         it is summed over immediately with appropriate Fermi Surface weights. For
         transport calculations <b>ep_keepbands</b> must be set to 1.
-    topics: null
+    topics: anaddbEPC_basic
     varset: varanaddb
     vartype: integer
 - !variable
@@ -6569,7 +6569,7 @@
         of the electron-phonon quantities without interpolation, this specifies the
         number of q-points to be found in the GKK file, independently of the normal
         anaddb input (ngqpt)
-    topics: null
+    topics: anaddbEPC_expert
     varset: varanaddb
     vartype: integer
 - !variable
@@ -6584,7 +6584,7 @@
     requires: null
     text: |-
         <p>The scale factor for cubic spline interpolation, only used in the relaxation time approximation ([[anaddb:ifltransport]]=3).
-    topics: null
+    topics: anaddbEPC_useful
     varset: varanaddb
     vartype: integer
 - !variable
@@ -6599,7 +6599,7 @@
     requires: null
     text: |-
         <p>For electron-phonon calculations, print out matrix elements for use by the yambo code.
-    topics: null
+    topics: anaddbEPC_expert
     varset: varanaddb
     vartype: integer
 - !variable
@@ -6619,7 +6619,7 @@
         of the electron-phonon quantities without interpolation, this specifies the
         q-points to be found in the GKK file, independently of the normal
         anaddb input (ngqpt), in reduced coordinates of the reciprocal space lattice.
-    topics: null
+    topics: anaddbEPC_expert
     varset: varanaddb
     vartype: real
 - !variable
@@ -6641,7 +6641,7 @@
         Doing so afterwards (<b>ep_scalprod</b> 0) eliminates the diagonalization error,
         but sometimes gives small spikes in the phonon linewidths near band crossings
         or high symmetry points. I do not know why...
-    topics: null
+    topics: anaddbEPC_expert
     varset: varanaddb
     vartype: integer
 - !variable
@@ -7337,7 +7337,7 @@
         <br>
         <b>WARNING</b>: this will create a <i>lot</i> of files (3*natom*nph1l), so it should be used with a small number
         [[anaddb:nph1l]] of q-points for interpolation.
-    topics: null
+    topics: anaddbCommon_expert
     varset: varanaddb
     vartype: real
 - !variable
@@ -7579,7 +7579,7 @@
     requires: null
     text: |-
         <p>Value of the largest frequency for the frequency-dependent dielectric tensor, in Hartree.
-    topics: null
+    topics: anaddbSpec_basic
     varset: varanaddb
     vartype: real
 - !variable
@@ -7594,7 +7594,7 @@
     requires: null
     text: |-
         <p>Value of the lowest frequency for the frequency-dependent dielectric tensor, in Hartree.
-    topics: null
+    topics: anaddbSpec_basic
     varset: varanaddb
     vartype: real
 - !variable
@@ -9055,7 +9055,7 @@
     text: |-
         <p>Flag to write out the reciprocal space matrix elements to a disk file named
         gkqfile. This reduces strongly the memory needed for an electron-phonon run.
-    topics: null
+    topics: anaddbEPC_useful
     varset: varanaddb
     vartype: integer
 - !variable
@@ -9212,7 +9212,7 @@
         of the equilibrium volume). The DDB files must be ordered according to the volume of the unit cell
         (the DDB with smallest volume comes first) and the volume increment must be constant.
         The code computes the derivative of the dynamical matrix wrt the volume using central finite difference.
-    topics: null
+    topics: anaddbSpec_basic
     varset: varanaddb
     vartype: string
 - !variable
@@ -9228,7 +9228,7 @@
     text: |-
         <p>This variable defines the number of DDB files (read from [[anaddb:gruns_ddbs]])
         used for the calculation of the Gruneisen parameters.
-    topics: null
+    topics: anaddbSpec_basic
     varset: varanaddb
     vartype: integer
 - !variable
@@ -10511,7 +10511,7 @@
     text: |-
         <p>Indices of the atoms that are fixed during a structural relaxation at constrained polarization.
         See [[anaddb:polflag]].
-    topics: null
+    topics: anaddbSpec_basic
     varset: varanaddb
     vartype: integer
 - !variable
@@ -10605,7 +10605,7 @@
     requires: null
     text: |-
         <p>Indices of the atoms that are chosen for projection of the phonon eigenvectors, giving a weighted phonon band structure file.
-    topics: null
+    topics: anaddbEPC_useful
     varset: varanaddb
     vartype: integer
 - !variable
@@ -10825,7 +10825,7 @@
         also calculate ratios with respect to the
         longitudinal force constant ( the (1,1) element of
         the matrix in local coordinates).
-    topics: null
+    topics: anaddbSpec_basic
     varset: varanaddb
     vartype: integer
 - !variable
@@ -10867,7 +10867,7 @@
            set of interatomic force constants. It is suggested to
            always use <b>ifcflag</b>=1. The <b>ifcflag</b>=0 option
            is available for checking purpose, and if there is not enough information in the DDB.
-    topics: null
+    topics: anaddbSpec_compulsory
     varset: varanaddb
     vartype: integer
 - !variable
@@ -10887,7 +10887,7 @@
         output (written) and eventually analysed. The
         neighbouring atoms are selected by decreasing distance with respect to
         the generic atom.
-    topics: null
+    topics: anaddbSpec_basic
     varset: varanaddb
     vartype: integer
 - !variable
@@ -10905,7 +10905,7 @@
         properties: electrical and thermal resistivities from electron-phonon
         interactions in the variational approach. If ifltransport=3, anaddb calculates the
         k-dependent relaxation time. (needs[[anaddb:elphflag]] = 1)
-    topics: null
+    topics: anaddbEPC_basic
     varset: varanaddb
     vartype: integer
 - !variable
@@ -11061,7 +11061,7 @@
               phonons at Q=0.
           </li>
         </ul>
-    topics: null
+    topics: anaddbSpec_compulsory
     varset: varanaddb
     vartype: integer
 - !variable
@@ -13025,7 +13025,7 @@
         check for the users. </li>
         </ul>
         See [[anaddb:polflag]].
-    topics: null
+    topics: anaddbSpec_basic
     varset: varanaddb
     vartype: integer
 - !variable
@@ -15057,7 +15057,7 @@
         (see [[kptrlatt]] abinit variable definitionas well).
         Input needed in electron-phonon calculations
         using nesting functions or tetrahedron integration.
-    topics: null
+    topics: anaddbEPC_basic
     varset: varanaddb
     vartype: integer
 - !variable
@@ -15074,7 +15074,7 @@
     requires: null
     text: |-
         <p>As kptrlatt above, but for a finer grid of k-points. Under development. Does not work yet, as of June 2010.
-    topics: null
+    topics: anaddbEPC_expert
     varset: varanaddb
     vartype: integer
 - !variable
@@ -15655,7 +15655,7 @@
     defaultval: 1 Ha
     dimensions: scalar
     excludes: null
-    mnemonics: MAXimum valur of OMEGA
+    mnemonics: MAXimum value of OMEGA
     requires: null
     text: |-
         The step and maximum sets your energy grid for the calculation using the formula
@@ -16167,7 +16167,7 @@
     requires: null
     text: |-
         <p>Average electron-electron interaction strength, for the computation of the superconducting Tc using Mc-Millan's formula.
-    topics: null
+    topics: anaddbEPC_useful
     varset: varanaddb
     vartype: real
 - !variable
@@ -16238,7 +16238,7 @@
     text: |-
         <p>Number of atoms that are fixed during a structural optimisation at constrained polarization.
         See [[anaddb:polflag]].
-    topics: null
+    topics: anaddbSpec_basic
     varset: varanaddb
     vartype: integer
 - !variable
@@ -16324,7 +16324,7 @@
     text: |-
         <p> Give the number of atoms for which IFCs are written and eventually analysed. The list of these atoms is provided
         by [[anaddb:atifc]].
-    topics: null
+    topics: anaddbSpec_basic
     varset: varanaddb
     vartype: integer
 - !variable
@@ -16385,7 +16385,7 @@
         <p>Give the number of atoms for which atomic-projected phonon
         band structures will be output. The list of these atoms is provided
         by [[iatprj_bs@anaddb]].
-    topics: null
+    topics: anaddbEPC_useful
     varset: varanaddb
     vartype: integer
 - !variable
@@ -16791,7 +16791,7 @@
     text: |-
         <p>The number of channels of width 1 cm-1 used in calculating the phonon density of states through the histogram method,
         or, equivalently, the largest frequency sampled. The first channel begins at 0.
-    topics: null
+    topics: anaddbCommon_expert
     varset: varanaddb
     vartype: integer
 - !variable
@@ -16961,7 +16961,7 @@
     text: |-
         <p>This variable defines the number of divisions used to sample the smallest segment of the q-path used
         for the phonon band structure. If ndivsm is specified in the input file, the code will automatically generate the points along the path using the coordinates given in the array [[anaddb:qpath]].
-    topics: null
+    topics: anaddbCommon_basic
     varset: varanaddb
     vartype: integer
 - !variable
@@ -17212,7 +17212,7 @@
         See [[abaddb:dieflag]].
 
         The code will take <b>nfreq</b> equidistant values from [[anaddb:frmin]] to [[anaddb:frmax]].
-    topics: null
+    topics: anaddbSpec_basic
     varset: varanaddb
     vartype: integer
 - !variable
@@ -17330,7 +17330,7 @@
         series of fine grids. Used for the integration
         of thermodynamical functions (Bose-Einstein distribution)
         or for the DOS.
-    topics: null
+    topics: anaddbCommon_useful
     varset: varanaddb
     vartype: integer
 - !variable
@@ -17555,7 +17555,7 @@
     requires: null
     text: |-
         <p>The Monkhorst-Pack grid linear dimensions, for the DDB (coarse grid).
-    topics: null
+    topics: anaddbCommon_basic
     varset: varanaddb
     vartype: integer
 - !variable
@@ -17597,7 +17597,7 @@
         The intermediate grids are defined
         for igrid=1... <b>ngrids</b>,
         by the numbers ngqpt_igrid(ii)=(ng2qpt(ii)*igrid)/<b>ngrids</b>
-    topics: null
+    topics: anaddbCommon_expert
     varset: varanaddb
     vartype: integer
 - !variable
@@ -17860,7 +17860,7 @@
             changes of the dielectric tensor induced by an atomic displacement are calculated;</li>
           <li>3 => only the non-linear optical susceptibility is calculated.</li>
         </ul>
-    topics: null
+    topics: anaddbSpec_compulsory
     varset: varanaddb
     vartype: integer
 - !variable
@@ -18393,7 +18393,7 @@
         [[anaddb:ifcflag]]=1 -),
         will be diagonalized, and the corresponding eigenfrequencies
         will be printed.
-    topics: null
+    topics: anaddbCommon_basic
     varset: varanaddb
     vartype: integer
 - !variable
@@ -18411,7 +18411,7 @@
         along which the non-analytical splitting of phonon frequencies
         at Gamma will be calculated. The actual
         values of the wavevector directions will be specified
-        by [[anaddb:qph2l].
+        by [[anaddb:qph2l]].
         These are actually all wavectors at Gamma, but obtained
         by a limit along a different direction in the Brillouin-zone.
         It is important to note that non-analyticities in the
@@ -18431,7 +18431,7 @@
            Note that if the three first numbers are zero, then
            the code will do a calculation at Gamma without
            non-analyticities.
-    topics: null
+    topics: anaddbCommon_basic
     varset: varanaddb
     vartype: integer
 - !variable
@@ -18820,7 +18820,7 @@
         <p>Number of q-points in the array [[anaddb:qpath]]
         defining the path along which the phonon band structure and phonon linewidths
         are interpolated.
-    topics: null
+    topics: anaddbCommon_basic
     varset: varanaddb
     vartype: integer
 - !variable
@@ -18899,7 +18899,7 @@
         Usually, put it to 1.
         Use 2 if BCC sampling (Warning: not BCC lattice, BCC *sampling*),
         and 4 for FCC sampling (Warning: not FCC lattice, FCC *sampling*).
-    topics: null
+    topics: anaddbCommon_useful
     varset: varanaddb
     vartype: integer
 - !variable
@@ -19128,7 +19128,7 @@
         (evaluate the range of the interatomic force constants), because
         the acoustic sum rule will be violated if some atoms are no more
         included in the inverse Fourier Transform.
-    topics: null
+    topics: anaddbSpec_useful
     varset: varanaddb
     vartype: integer
 - !variable
@@ -19284,7 +19284,7 @@
         <p> Number of strain component that are fixed during a
         structural optimisation at constrained polarization.
         See [[anaddb:polflag]].
-    topics: null
+    topics: anaddbSpec_basic
     varset: varanaddb
     vartype: integer
 - !variable
@@ -19374,7 +19374,7 @@
         with the [[anaddb:tempermin]] and
         [[anaddb:temperinc]] variables.
         The default temperature grid goes from 100K to 1000K by step of 100K. For the largest temperatures, for most solids, anharmonic effects not accounted in the harmonic approximation implemented in anaddb will be important. For weakly bounded systems (e.g. Van der Waals solids), such anharmonic effects might be important already at room temperature.
-    topics: null
+    topics: anaddbSpec_basic
     varset: varanaddb
     vartype: integer
 - !variable
@@ -19615,7 +19615,7 @@
         with decreasing widths (by step of 1 cm-1), from
         this channel width to 1, eventually. It considers to
         have converged when the convergence criterion based on [[anaddb:dostol]] and [[anaddb:thmtol]] have been fulfilled.
-    topics: null
+    topics: anaddbCommon_expert
     varset: varanaddb
     vartype: integer
 - !variable
@@ -20618,7 +20618,7 @@
     text: |-
         <p> If set to 1, the phonon frequencies on the ngqpt grid are output in a format legible by the BoltzTrap code,
         which does band interpolation and gets group velocities. The output file will be appended _BTRAP
-    topics: null
+    topics: anaddbCommon_expert
     varset: varanaddb
     vartype: integer
 - !variable
@@ -20635,7 +20635,7 @@
         <p>If set to 1, the phonon frequency and eigenvector files needed for a Self Consistent
         phonon run (as in Souvatzis PRL <b>100</b> 095901) will be output to files appended _PHFRQ and _PHVEC.
         The third file needed is appended _PCINFO for Primitive Cell INFOrmation.
-    topics: null
+    topics: anaddbCommon_expert
     varset: varanaddb
     vartype: integer
 - !variable
@@ -22014,7 +22014,7 @@
         including e (clamped and relaxed ion), d, g and h tensors. The flags
         should be set to satisfy the above rules from 1 to 6.</li>
         </ul>
-    topics: null
+    topics: anaddbSpec_compulsory
     varset: varanaddb
     vartype: integer
 - !variable
@@ -22433,7 +22433,7 @@
         <p><As described in the Na Sai's paper, it is important to use the
         finite difference expression of the ddk ([[berryopt]]=2 or -2)
         in the linear response calculation of the effective charges and the piezoelectric tensor.
-    topics: null
+    topics: anaddbSpec_compulsory
     varset: varanaddb
     vartype: integer
 - !variable
@@ -22945,7 +22945,7 @@
          <li>0 =&gt; do nothing (IFC are printed to the log file);</li>
          <li>1 =&gt; write out the IFC in file ifcinfo.out (the name is fixed) to be used by AI2PS from John Rehr's group</li>
         </ul>
-    topics: null
+    topics: anaddbSpec_basic
     varset: varanaddb
     vartype: integer
 - !variable
@@ -23029,7 +23029,7 @@
           <li>0 =&gt; do not write the BoltzTraP input files;</li>
           <li>1 =&gt; write out the input files for BoLTZTRaP code.</li>
         </ul>
-    topics: null
+    topics: anaddbCommon_expert
     varset: varanaddb
     vartype: integer
 - !variable
@@ -23070,7 +23070,7 @@
           <li>0 =&gt; no output of DDB (default);</li>
           <li>1 =&gt; Interpolate the DDB and write out the DDB and DDB.nc files. </li>
         </ul>
-    topics: null
+    topics: anaddbCommon_useful
     varset: varanaddb
     vartype: integer
 - !variable
@@ -23410,7 +23410,7 @@
 
         The step of the frequency grid employed to calculate the DOS
         can be defined through the input variable [[anaddb:dosdeltae]].
-    topics: null
+    topics: anaddbCommon_basic
     varset: varanaddb
     vartype: integer
 - !variable
@@ -23646,7 +23646,7 @@
         with [[nshiftk]]=1. Furthermore if [[kptrlatt]]
         is used to generate the k-grid, all the off-diagonal elements of this
         array must be zero.</p>
-    topics: null
+    topics: anaddbEPC_useful
     varset: varanaddb
     vartype: integer
 - !variable
@@ -23899,7 +23899,7 @@
         <li>1 =&gt; write out the contribution of the individual zone-center
         phonon modes to the electrooptic tensor.</li>
         </ul>
-    topics: null
+    topics: anaddbSpec_basic
     varset: varanaddb
     vartype: integer
 - !variable
@@ -23978,7 +23978,7 @@
           <li>1 =&gt; write only the nesting function along the q-path in the X-Y format;</li>
           <li>2 =&gt; write out the nesting function both in the X-Y and in the XSF format.</li>
         </ul>
-    topics: null
+    topics: anaddbEPC_useful
     varset: varanaddb
     vartype: integer
 - !variable
@@ -24035,7 +24035,7 @@
         The code produces a `PHBANDS.dat` file with the eigenvalues and a `PHBANDS.gnuplot` script.
         Use `gnuplot file_PHBANDS.gnuplot` to visualize the phonon band structure.</li>
         </ul>
-    topics: null
+    topics: anaddbCommon_useful
     varset: varanaddb
     vartype: integer
 - !variable
@@ -24192,7 +24192,7 @@
         </ul>
         <p> For details see <I>Europhys. Lett., 33 (9), pp. 713-718 (1996)</I>.
         See also [[anaddb:ifcflag]], [[anaddb:ifcflag]] and [[anaddb:dipdip]].
-    topics: null
+    topics: anaddbCommon_useful
     varset: varanaddb
     vartype: integer
 - !variable
@@ -24495,7 +24495,7 @@
     requires: null
     text: |-
         <p>Control the volume of printed output.
-    topics: null
+    topics: anaddbCommon_useful
     varset: varanaddb
     vartype: integer
 - !variable
@@ -25117,7 +25117,7 @@
            For a FCC lattice, it is possible to sample only the Gamma point
            by using a 1x1x1 BCC sampling (nqshft=2).
         <p>
-    topics: null
+    topics: anaddbCommon_useful
     varset: varanaddb
     vartype: real
 - !variable
@@ -25136,7 +25136,7 @@
         but for the series of fine grids.
         <p>Note that [[anaddb:nqshft]]
         for this series of grids corresponds to 1.
-    topics: null
+    topics: anaddbCommon_useful
     varset: varanaddb
     vartype: real
 - !variable
@@ -25154,7 +25154,7 @@
         the [[anaddb:ep_nqpt]] and [[anaddbep_qptlist]] variables to determine
         which q-points to calculate the electron-phonon coupling for. This is an alternative
         to a regular grid as in the rest of anaddb (using [[anaddb:ngqpt]]).
-    topics: null
+    topics: anaddbEPC_expert
     varset: varanaddb
     vartype: integer
 - !variable
@@ -25208,7 +25208,7 @@
         inside the code to respect the proportion between the segments.
         The same circuit is used for the output of the nesting function if
         [[anaddb:prtnest]]=1.
-    topics: null
+    topics: anaddbCommon_basic
     varset: varanaddb
     vartype: real
 - !variable
@@ -25239,7 +25239,7 @@
         for each wavevector, the three first numbers are stored
         in the array qph1l(3,nph1l), while the fourth is stored
         in the array qnrml1(nph1l).
-    topics: null
+    topics: anaddbCommon_basic
     varset: varanaddb
     vartype: real
 - !variable
@@ -25277,7 +25277,7 @@
         for each wavevector, the three first numbers are stored
         in the array qph2l(3,nph2l), while the fourth is stored
         in the array qnrml2(nph2l).
-    topics: null
+    topics: anaddbCommon_basic
     varset: varanaddb
     vartype: real
 - !variable
@@ -25591,7 +25591,7 @@
         grid and any additional information found in the DDB file is imposed, before proceeding
         to normal band structure and other interpolations. Should implement Gaal-Nagy's algorithm in
         PRB <b>73</b> 014117.
-    topics: null
+    topics: anaddbCommon_expert
     varset: varanaddb
     vartype: integer
 - !variable
@@ -25665,7 +25665,7 @@
         contribution to the Raman tensor.</li>
         </ul>
         For the time being, <b>ramansr</b>=1 is the preferred choice.
-    topics: null
+    topics: anaddbSpec_basic
     varset: varanaddb
     vartype: integer
 - !variable
@@ -26090,7 +26090,7 @@
         <p>If <b>relaxat</b>=1, relax atomic positions during a
         structural relaxation at constrained polarization.
         See [[anaddb:polflag]].
-    topics: null
+    topics: anaddbSpec_basic
     varset: varanaddb
     vartype: integer
 - !variable
@@ -26107,7 +26107,7 @@
         <p>If <b>relaxat</b>=1, relax lattice constants
         (lengths/angles) during a structural relaxation
          at constrained polarization. See [[anaddb:polflag]].
-    topics: null
+    topics: anaddbSpec_basic
     varset: varanaddb
     vartype: integer
 - !variable
@@ -26542,7 +26542,7 @@
         For more detailed explanations, see [[help_abinit]]
         If the information in the DDB is available, always use
         the option 2. If not, you can try option 1, which is less accurate.
-    topics: null
+    topics: anaddbCommon_expert
     varset: varanaddb
     vartype: integer
 - !variable
@@ -26690,7 +26690,7 @@
         <p>This number defines the atoms for which the
         short range part of the interatomic force constants, after
         imposition of the acoustic sum rule, will not be put to zero.
-    topics: null
+    topics: anaddbSpec_basic
     varset: varanaddb
     vartype: real
 - !variable
@@ -27066,7 +27066,7 @@
         Note: this is for analysis the effect of anisotropy
         in the effective charge. The result with non-zero <b>selectz</b>
         are unphysical.</p>
-    topics: null
+    topics: anaddbCommon_expert
     varset: varanaddb
     vartype: integer
 - !variable
@@ -28181,7 +28181,7 @@
         procedure based on interatomic force constant is used: there are some
         slight symmetry breaking effects. The latter can be bypassed by this
         additional symmetrization.
-    topics: null
+    topics: anaddbCommon_useful
     varset: varanaddb
     vartype: integer
 - !variable
@@ -28198,7 +28198,7 @@
         <p>If <b>symgkq</b> is equal to 1, the electron-phonon matrix elements are symmetrized
         over the small group of the q-point they correspond to. This should always be used,
         except for debugging or test purposes.
-    topics: null
+    topics: anaddbEPC_expert
     varset: varanaddb
     vartype: integer
 - !variable
@@ -28339,7 +28339,7 @@
         <p>Target value of the polarization in cartesian
         coordinates and in C/m^2.
         See [[anaddb:polflag]].
-    topics: null
+    topics: anaddbSpec_basic
     varset: varanaddb
     vartype: real
 - !variable
@@ -28425,7 +28425,7 @@
           <li>1 = Gaussian smearing (see [[anaddb:elphsmear]])</li>
           <li>2 = uniformly weighted band window between [[anaddb:ep_b_min]] and [[anaddb:ep_b_max]], for all k-points</li>
         </ul>
-    topics: null
+    topics: anaddbEPC_basic
     varset: varanaddb
     vartype: integer
 - !variable
@@ -28443,7 +28443,7 @@
         transport properties. See the associated
         [[anaddb:tempermin]] and [[anaddb:ntemper]] variables.
         The default temperature grid goes from 100K to 1000K by step of 100K. For the largest temperatures, for most solids, anharmonic effects not accounted in the harmonic approximation implemented in anaddb will be important. For weakly bounded systems (e.g. Van der Waals solids), such anharmonic effects might be important already at room temperature.
-    topics: null
+    topics: anaddbSpec_basic
     varset: varanaddb
     vartype: real
 - !variable
@@ -28463,7 +28463,7 @@
         [[anaddb:temperinc]] and [[anaddb:ntemper]].
         The default temperature grid goes from 100K to 1000K by step of 100K. For the largest temperatures, for most solids, anharmonic effects not accounted in the harmonic approximation implemented in anaddb will be important. For weakly bounded systems (e.g. Van der Waals solids),
         such anharmonic effects might be important already at room temperature.
-    topics: null
+    topics: anaddbSpec_basic
     varset: varanaddb
     vartype: real
 - !variable
@@ -28634,7 +28634,7 @@
         Input variables that may be needed if this flag is activated:
         [[anaddb:dostol]], [[anaddb:nchan]], [[anaddb:ntemper]], [[anaddb:temperinc]], [[anaddb:tempermin]],
         as well as the wavevector grid number 2 definition,  [[anaddb:ng2qpt]], [[anaddb:ngrids]], [[anaddb:q2shft]].
-    topics: null
+    topics: anaddbSpec_compulsory
     varset: varanaddb
     vartype: integer
 - !variable
@@ -28653,7 +28653,7 @@
         with which the DOS is calculated can be stopped, i.e.
         the mean of the relative change going from one grid
         to the next bigger is smaller than <b>thmtol</b>.
-    topics: null
+    topics: anaddbSpec_basic
     varset: varanaddb
     vartype: real
 - !variable
@@ -29607,7 +29607,7 @@
     requires: null
     text: |-
         <p>When set, [[anaddb:kptrlatt_fine]] is suggested to be given. For the present version, both eigenvalues (densergridGKK, obtained from mrggkk with only the GS WFK file) and electronic velocities(GKK files from DDK calculation) are needed. Note that the coarse k-grid must be a subset of the fine k-grid.
-    topics: null
+    topics: anaddbEPC_expert
     varset: varanaddb
     vartype: integer
 - !variable
@@ -31373,7 +31373,7 @@
         The number of radial points is increased until the integration converges twice withing the tolerance
         specified by the user (typical values for tolkms: 0.05 km/s).
         <p>The default values will not work.
-    topics: null
+    topics: anaddbSpec_useful
     varset: varanaddb
     vartype: real
 - !variable

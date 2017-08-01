@@ -81,4 +81,5 @@ qph1l
 #%% authors = Unknown
 #%% keywords = 
 #%% description = anaddb electron-phonon run: change Fermi energy reference to probe e-p coupling of unocc states
+#%% topics = anaddbEPC
 #%%<END TEST_INFO>

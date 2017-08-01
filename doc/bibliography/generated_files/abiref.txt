@@ -33,6 +33,7 @@
 [Bieder2014]  J. Bieder and B. Amadon, "Thermodynamics of the $\alpha$-$\gamma$ transition in cerium from first principles", Phys. Rev. B 89, 195132 (2014). <br> DOI: <a href="https://doi.org/10.1103/PhysRevB.89.195132">10.1103/PhysRevB.89.195132</a>.
 [Blancoa1997]  Miguel A. Blancoa, M. Floreza and M. Bermejo, "Evaluation of the rotation matrices in the basis of real spherical harmonics"", Journal of Molecular Structure (Theochem) 419, 19 (1997).
 [Bloechl1994]  P.E. Bl\"{o}chl, "Projector augmented-wave method", Phys. Rev. B 50, 17953-17979 (1994). <br> DOI: <a href="https://doi.org/10.1103/PhysRevB.50.17953">10.1103/PhysRevB.50.17953</a>.
+[Bloechl1994a]  Peter E. Bl\"ochl, O. Jepsen and O. K. Andersen, "Improved tetrahedron method for Brillouin-zone integrations", Phys. Rev. B 49, 16223--16233 (1994). <br> DOI: <a href="https://doi.org/10.1103/PhysRevB.49.16223">10.1103/PhysRevB.49.16223</a>.
 [Bockstedte1997]  M. Bockstedte, A. Kley, J. Neugebauer and M. Scheffler, "Density-functional theory calculations for poly-atomic systems: electronic structure, static and elastic properties and ab initio molecular dynamics", Comp. Phys. Comm. 107, 187 (1997).
 [Boronski1986]  E. Boro\'nski and R. M. Nieminen, "Electron-positron density-functional theory", Phys. Rev. B 34, 3820 (1986). <br> DOI: <a href="https://doi.org/10.1103/PhysRevB.34.3820">10.1103/PhysRevB.34.3820</a>.
 [Bottin2008]  F. Bottin, S. Leroux, A. Knyazev and G. Z{\'e}rah, "Large-scale ab initio calculations based on three levels of parallelization", Comp. Mat. Sci. 42, 329--336 (2008).

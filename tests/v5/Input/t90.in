@@ -80,4 +80,5 @@ qph1l
 #%% authors = Unknown
 #%% keywords = 
 #%% description = anaddb electron-phonon run: no symmetrization of e-p matrix elements
+#%% topics = anaddbEPC
 #%%<END TEST_INFO>

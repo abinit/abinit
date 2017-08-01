@@ -87,4 +87,5 @@ iatprj_bs 1 2
 #%% authors = B. Xu
 #%% keywords = EPH
 #%% description = anaddb test electron phonon coupling with shifted fermi level of hcp Ti
+#%% topics = anaddbEPC
 #%%<END TEST_INFO>

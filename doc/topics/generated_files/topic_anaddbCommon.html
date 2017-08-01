@@ -1,0 +1,131 @@
+<!--                                                                                     -->
+<!-- This file has been produced by generate_doc.py using different .yml  or .bib files. -->
+<!-- It is useless to modify it. Modify the related .yml  or .bib files instead.         -->
+<!--                                                                                     -->
+<html>
+<head><title>Common anaddb input variables </title>
+<link rel=stylesheet type="text/css" href="../formabinit.css">
+</head>
+<body bgcolor="#ffffff">
+
+<hr>
+<a name="top"></a>
+
+<h1>Common anaddb input variables</h1>
+<h3>This file gives hints on how to set common anaddb input variables with the ABINIT package.
+<hr>
+
+<h5>Copyright (C) 2016-2017 ABINIT group (FJ)
+<script type="text/javascript" src="../../js_files/copyright.js"> </script>
+</h5>
+
+<script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
+
+ <h3><b>Table of content: </b></h3> 
+ <ul> <li><a href="topic_anaddbCommon.html#1">1</a>. Introduction.<li><a href="topic_anaddbCommon.html#2">2</a>. Related lesson(s) of the tutorial.<li><a href="topic_anaddbCommon.html#3">3</a>. Related input variables.<li><a href="topic_anaddbCommon.html#4">4</a>. Selected input files.</ul>
+
+&nbsp; 
+<HR ALIGN=left> 
+<a name="1">&nbsp;</a>
+<h3><b>1. Introduction.</b></h3>
+
+
+<p>The input variables related to the acoustic sum rule are: <a href="../../input_variables/generated_files/varanaddb.html#asr@anaddb">asr</a> <a href="../../input_variables/generated_files/varanaddb.html#chneut@anaddb">chneut</a> <a href="../../input_variables/generated_files/varanaddb.html#selectz@anaddb">selectz</a>
+<p>The input variables related to the crystal structure are: <a href="../../input_variables/generated_files/varanaddb.html#brav@anaddb">brav</a> <a href="../../input_variables/generated_files/varanaddb.html#symdynmat@anaddb">symdynmat</a>
+<p>The input variables related to the q-vectors are: <a href="../../input_variables/generated_files/varanaddb.html#ndivsm@anaddb">ndivsm</a> <a href="../../input_variables/generated_files/varanaddb.html#ngqpt@anaddb">ngqpt</a> <a href="../../input_variables/generated_files/varanaddb.html#ng2qpt@anaddb">ng2qpt</a> <a href="../../input_variables/generated_files/varanaddb.html#nph1l@anaddb">nph1l</a> <a href="../../input_variables/generated_files/varanaddb.html#nph2l@anaddb">nph2l</a> <a href="../../input_variables/generated_files/varanaddb.html#nqpath@anaddb">nqpath</a> <a href="../../input_variables/generated_files/varanaddb.html#nqshft@anaddb">nqshft</a> <a href="../../input_variables/generated_files/varanaddb.html#q1shft@anaddb">q1shft</a> <a href="../../input_variables/generated_files/varanaddb.html#q2shft@anaddb">q2shft</a> <a href="../../input_variables/generated_files/varanaddb.html#qpath@anaddb">qpath</a> <a href="../../input_variables/generated_files/varanaddb.html#qph1l@anaddb">qph1l</a> <a href="../../input_variables/generated_files/varanaddb.html#qph2l@anaddb">qph2l</a> <a href="../../input_variables/generated_files/varanaddb.html#qrefine@anaddb">qrefine</a>
+
+
+<p>The input variables related to the phonon DOS are: <a href="../../input_variables/generated_files/varanaddb.html#atftol@anaddb">atftol</a> <a href="../../input_variables/generated_files/varanaddb.html#dosdeltae@anaddb">dosdeltae</a>  <a href="../../input_variables/generated_files/varanaddb.html#dossmear@anaddb">dossmear</a> <a href="../../input_variables/generated_files/varanaddb.html#dossum@anaddb">dossum</a> <a href="../../input_variables/generated_files/varanaddb.html#dostol@anaddb">dostol</a> <a href="../../input_variables/generated_files/varanaddb.html#nchan@anaddb">nchan</a> <a href="../../input_variables/generated_files/varanaddb.html#ngrids@anaddb">ngrids</a> <a href="../../input_variables/generated_files/varanaddb.html#nwchan@anaddb">nwchan</a> <a href="../../input_variables/generated_files/varanaddb.html#prtdos@anaddb">prtdos</a>
+
+
+&nbsp; 
+<HR ALIGN=left> 
+<a name="2">&nbsp;</a>
+<h3><b>2. Related lesson(s) of the tutorial.</b></h3>
+
+
+<li><a href="../../tutorial/generated_files/lesson_rf2.html">The lesson Response-Function 2 (RF2)</a>
+presents the analysis of the DDBs that have been introduced in the
+preceeding lesson RF1.  The computation of the interatomic forces and
+the computation of thermodynamical properties is an outcome of this
+lesson.</li>
+
+&nbsp; 
+<HR ALIGN=left> 
+<a name="3">&nbsp;</a>
+<h3><b>3. Related input variables.</b></h3>
+
+
+<p>Basic input variables:<p>... <a href="../../input_variables/generated_files/varanaddb.html#asr@anaddb">asr@anaddb</a>   [Acoustic Sum Rule]<br>
+... <a href="../../input_variables/generated_files/varanaddb.html#brav@anaddb">brav@anaddb</a>   [BRAVais]<br>
+... <a href="../../input_variables/generated_files/varanaddb.html#dossum@anaddb">dossum@anaddb</a>   [DOS SUM]<br>
+... <a href="../../input_variables/generated_files/varanaddb.html#ndivsm@anaddb">ndivsm@anaddb</a>   [Number of DIVisions for the SMallest segment]<br>
+... <a href="../../input_variables/generated_files/varanaddb.html#ngqpt@anaddb">ngqpt@anaddb</a>   [Number of Grids points for Q PoinTs]<br>
+... <a href="../../input_variables/generated_files/varanaddb.html#nph1l@anaddb">nph1l@anaddb</a>   [Number of PHonons in List 1]<br>
+... <a href="../../input_variables/generated_files/varanaddb.html#nph2l@anaddb">nph2l@anaddb</a>   [Number of PHonons in List 2]<br>
+... <a href="../../input_variables/generated_files/varanaddb.html#nqpath@anaddb">nqpath@anaddb</a>   [Number of Q wavevectors defining a PATH]<br>
+... <a href="../../input_variables/generated_files/varanaddb.html#prtdos@anaddb">prtdos@anaddb</a>   [PRinT the phonon Density Of States]<br>
+... <a href="../../input_variables/generated_files/varanaddb.html#qpath@anaddb">qpath@anaddb</a>   [Q wavevectors defining a PATH]<br>
+... <a href="../../input_variables/generated_files/varanaddb.html#qph1l@anaddb">qph1l@anaddb</a>   [Q for PHonon List 1]<br>
+... <a href="../../input_variables/generated_files/varanaddb.html#qph2l@anaddb">qph2l@anaddb</a>   [PHonon List 2]<br>
+<p>Useful input variables:<p>... <a href="../../input_variables/generated_files/varanaddb.html#chneut@anaddb">chneut@anaddb</a>   [Integer for CHarge NEUTrality treatment]<br>
+... <a href="../../input_variables/generated_files/varanaddb.html#dosdeltae@anaddb">dosdeltae@anaddb</a>   [DOS DELTA in Energy]<br>
+... <a href="../../input_variables/generated_files/varanaddb.html#dossmear@anaddb">dossmear@anaddb</a>   [DOS SMEARing value]<br>
+... <a href="../../input_variables/generated_files/varanaddb.html#dostol@anaddb">dostol@anaddb</a>   [DOS TOLerance]<br>
+... <a href="../../input_variables/generated_files/varanaddb.html#eivec@anaddb">eivec@anaddb</a>   [EIgenVECtors]<br>
+... <a href="../../input_variables/generated_files/varanaddb.html#enunit@anaddb">enunit@anaddb</a>   [ENergy UNITs]<br>
+... <a href="../../input_variables/generated_files/varanaddb.html#ng2qpt@anaddb">ng2qpt@anaddb</a>   [Number of Grids points for Q PoinTs (grid 2)]<br>
+... <a href="../../input_variables/generated_files/varanaddb.html#nqshft@anaddb">nqshft@anaddb</a>   [Number of Q SHiFTs]<br>
+... <a href="../../input_variables/generated_files/varanaddb.html#prtddb@anaddb">prtddb@anaddb</a>   [PRinT the Derivative DataBase files]<br>
+... <a href="../../input_variables/generated_files/varanaddb.html#prtphbands@anaddb">prtphbands@anaddb</a>   [PRinT PHonon BANDS]<br>
+... <a href="../../input_variables/generated_files/varanaddb.html#prtsrlr@anaddb">prtsrlr@anaddb</a>   [PRinT the Short-Range/Long-Range decomposition of phonon FREQuencies]<br>
+... <a href="../../input_variables/generated_files/varanaddb.html#prtvol@anaddb">prtvol@anaddb</a>   [PRinT VOLume]<br>
+... <a href="../../input_variables/generated_files/varanaddb.html#q1shft@anaddb">q1shft@anaddb</a>   [Q shifts for the grid number 1]<br>
+... <a href="../../input_variables/generated_files/varanaddb.html#q2shft@anaddb">q2shft@anaddb</a>   [Q points SHiFTs for the grids 2]<br>
+... <a href="../../input_variables/generated_files/varanaddb.html#symdynmat@anaddb">symdynmat@anaddb</a>   [SYMmetrize the DYNamical MATrix]<br>
+<p>Input variables for experts:<p>... <a href="../../input_variables/generated_files/varanaddb.html#atftol@anaddb">atftol@anaddb</a>   [ATomic Temperature Factor TOLerance]<br>
+... <a href="../../input_variables/generated_files/varanaddb.html#freeze_displ@anaddb">freeze_displ@anaddb</a>   [FREEZE DISPLacement of phonons into supercells]<br>
+... <a href="../../input_variables/generated_files/varanaddb.html#nchan@anaddb">nchan@anaddb</a>   [Number of CHANnels]<br>
+... <a href="../../input_variables/generated_files/varanaddb.html#ngrids@anaddb">ngrids@anaddb</a>   [Number of GRIDS]<br>
+... <a href="../../input_variables/generated_files/varanaddb.html#nwchan@anaddb">nwchan@anaddb</a>   [Number of Widths of CHANnels]<br>
+... <a href="../../input_variables/generated_files/varanaddb.html#outboltztrap@anaddb">outboltztrap@anaddb</a>   [OUTput files for BOLTZTRAP code]<br>
+... <a href="../../input_variables/generated_files/varanaddb.html#outscphon@anaddb">outscphon@anaddb</a>   [OUTput files for Self Consistent PHONons]<br>
+... <a href="../../input_variables/generated_files/varanaddb.html#prtbltztrp@anaddb">prtbltztrp@anaddb</a>   [PRinT input files for BoLTZTRaP code.]<br>
+... <a href="../../input_variables/generated_files/varanaddb.html#qrefine@anaddb">qrefine@anaddb</a>   [Q-point REFINEment order (experimental)]<br>
+... <a href="../../input_variables/generated_files/varanaddb.html#rfmeth@anaddb">rfmeth@anaddb</a>   [Response-Function METHod]<br>
+... <a href="../../input_variables/generated_files/varanaddb.html#selectz@anaddb">selectz@anaddb</a>   [SeLECT Z]<br>
+
+
+&nbsp; 
+<HR ALIGN=left> 
+<a name="4">&nbsp;</a>
+<h3><b>4. Selected input files.</b></h3>
+
+
+The user can find some related example input files in the ABINIT package in the directory /tests, or on the Web:
+<p> tests/v2/Input: <a href="../../tests/v2/Input/t13.in">t13.in</a> 
+<a href="../../tests/v2/Input/t15.in">t15.in</a> 
+<a href="../../tests/v2/Input/t20.in">t20.in</a> 
+<a href="../../tests/v2/Input/t22.in">t22.in</a> 
+<a href="../../tests/v2/Input/t28.in">t28.in</a> 
+<a href="../../tests/v2/Input/t29.in">t29.in</a> 
+<p> tests/v4/Input: <a href="../../tests/v4/Input/t54.in">t54.in</a> 
+<a href="../../tests/v4/Input/t68.in">t68.in</a> 
+<a href="../../tests/v4/Input/t70.in">t70.in</a> 
+<a href="../../tests/v4/Input/t71.in">t71.in</a> 
+<p> tests/v5/Input: <a href="../../tests/v5/Input/t28.in">t28.in</a> 
+<p> tests/v6/Input: <a href="../../tests/v6/Input/t40.in">t40.in</a> 
+<a href="../../tests/v6/Input/t53.in">t53.in</a> 
+<a href="../../tests/v6/Input/t57.in">t57.in</a> 
+<a href="../../tests/v6/Input/t59.in">t59.in</a> 
+<a href="../../tests/v6/Input/t69.in">t69.in</a> 
+<p> tests/v7/Input: <a href="../../tests/v7/Input/t54.in">t54.in</a> 
+<p> tests/v8/Input: <a href="../../tests/v8/Input/t49.in">t49.in</a> 
+<br>
+
+
+<script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
+
+</body>
+</html>
+

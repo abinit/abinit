@@ -87,4 +87,5 @@ qph1l
 #%% authors = Unknown
 #%% keywords = 
 #%% description = anaddb electron-phonon run: output auxiliary files and change default smearings
+#%% topics = anaddbEPC
 #%%<END TEST_INFO>

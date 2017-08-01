@@ -23,4 +23,5 @@ instrflag 1
 #%%   constant (relaxed ion) considering the correction from remaining
 #%%   stresses in the unit cell. Voigt symmetry will be broken.
 #%%   Please refer to: Infos/Theory/elasticity-oganov.pdf.
+#%% topics = anaddbSpec
 #%%<END TEST_INFO>

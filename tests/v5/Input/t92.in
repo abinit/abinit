@@ -82,4 +82,5 @@ qph1l
 #%% authors = Unknown
 #%% keywords = 
 #%% description = anaddb electron-phonon run: integrate over window of bands instead of energies
+#%% topics = anaddbEPC
 #%%<END TEST_INFO>

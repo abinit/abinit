@@ -86,4 +86,5 @@
 #%%   AlAs, zinc-blende structure. Code anaddb
 #%%   Analyse the DDB from test 53, for the generation of
 #%%   the electro-optic tensor, and Raman susceptibility coefficients.
+#%% topics = anaddbSpec, anaddbCommon
 #%%<END TEST_INFO>

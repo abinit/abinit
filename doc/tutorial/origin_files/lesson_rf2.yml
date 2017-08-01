@@ -207,7 +207,7 @@ body : |
   The first group of variables define the grid of q wavevectors :
   <ul>
   <li>[[anaddb:brav]]</li>
-  <li>[[anaddb:nqgpt]]</li>
+  <li>[[anaddb:ngqpt]]</li>
   <li>[[anaddb:nqshft]]</li>
   <li>[[anaddb:q1shft]]</li>
   </ul>
