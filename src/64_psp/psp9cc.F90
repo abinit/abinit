@@ -159,7 +159,7 @@ subroutine psp9cc(psxml,mmax,n1xccc,rad,rchrg,xccc1d)
  end do
 
 !Renormalize core charge
- ff(:,:) = ff(:,:) * pi4i
+! ff(:,:) = ff(:,:) * pi4i
 
 !determine xcccrc where the pseudocore becomes 0
 !This is a difference with respect the Hamann's treatment of the core
