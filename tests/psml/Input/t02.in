@@ -24,7 +24,7 @@ rprim
  0.5 -0.5  0.5
  0.5  0.5 -0.5
 toldfe1 1.0d-8
-toldfe2 1.0d-7
+toldfe2 1.0d-5
 nband 12
 ixc -101130
 
