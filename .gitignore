@@ -343,6 +343,7 @@ tests/TestBot_MPI*/*
 /tests/*/*/*~
 /tests/Tmp
 /tests/test_suite.cpkl
+/tests/test_suite.cpkl.lock
 /tests/aclocal.m4
 /tests/autom4te.cache
 /tests/config.log
