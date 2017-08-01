@@ -70,7 +70,7 @@ body : |
   middle of the segment with a neighbouring atom (all neighbouring
   atoms are examined in turn), and
   evolves towards a nearby point with zero gradient.
-  Then, in case <a href="#crit">crit</a> equals 2,
+  Then, in case [[aim:crit]] equals 2,
   one checks that the CP that has been found belongs to the
   attraction region of the desired atom. This last step
   is by no means trivial. In the present implementation, the
