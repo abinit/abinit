@@ -1,8 +1,8 @@
 
-.Version 8.3.1 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu5.4 computer) 
+.Version 8.5.2 of ABINIT 
+.(sequential version, prepared for a x86_64_linux_gnu5.4 computer) 
 
-.Copyright (C) 1998-2016 ABINIT group . 
+.Copyright (C) 1998-2017 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see http://www.abinit.org .
 
-.Starting date : Wed  8 Mar 2017.
-- ( at 17h09 )
+.Starting date : Tue  1 Aug 2017.
+- ( at 15h35 )
   
 - input  file    -> t05.in
 - output file    -> t05.out
@@ -187,20 +187,20 @@ _setup2: Arith. and geom. avg. npw (full set) are     144.641     144.601
  ETOT  3  -8.4191421211744    -1.344E-05 1.359E-05 8.985E-05
  ETOT  4  -8.4191421714220    -5.025E-08 1.194E-05 1.108E-06
  ETOT  5  -8.4191421719474    -5.255E-10 1.248E-06 2.413E-08
- ETOT  6  -8.4191421719608    -1.336E-11 1.060E-06 7.182E-10
- ETOT  7  -8.4191421719609    -7.283E-14 1.124E-07 8.781E-12
- ETOT  8  -8.4191421719609    -3.908E-14 9.498E-08 8.364E-13
- ETOT  9  -8.4191421719609    -1.599E-14 1.009E-08 3.311E-13
- ETOT 10  -8.4191421719610    -3.375E-14 8.515E-09 4.749E-14
- ETOT 11  -8.4191421719609     3.553E-14 9.068E-10 4.479E-15
- ETOT 12  -8.4191421719609     2.132E-14 7.640E-10 5.626E-18
- ETOT 13  -8.4191421719610    -5.684E-14 8.154E-11 1.994E-19
- ETOT 14  -8.4191421719610     5.329E-15 6.857E-11 3.062E-22
- ETOT 15  -8.4191421719609     3.553E-14 7.334E-12 5.107E-25
- ETOT 16  -8.4191421719609    -3.553E-15 6.157E-12 1.689E-27
- ETOT 17  -8.4191421719609     0.000E+00 6.600E-13 7.417E-28
- ETOT 18  -8.4191421719609     0.000E+00 5.531E-13 6.574E-28
- ETOT 19  -8.4191421719609     1.776E-15 9.554E-14 6.597E-28
+ ETOT  6  -8.4191421719608    -1.337E-11 1.060E-06 7.182E-10
+ ETOT  7  -8.4191421719609    -6.040E-14 1.124E-07 8.781E-12
+ ETOT  8  -8.4191421719609    -3.553E-14 9.498E-08 8.364E-13
+ ETOT  9  -8.4191421719609    -3.375E-14 1.009E-08 3.311E-13
+ ETOT 10  -8.4191421719610    -1.599E-14 8.515E-09 4.749E-14
+ ETOT 11  -8.4191421719609     2.309E-14 9.068E-10 4.479E-15
+ ETOT 12  -8.4191421719609     1.599E-14 7.640E-10 5.626E-18
+ ETOT 13  -8.4191421719610    -5.151E-14 8.154E-11 1.994E-19
+ ETOT 14  -8.4191421719610     7.105E-15 6.857E-11 3.067E-22
+ ETOT 15  -8.4191421719609     1.954E-14 7.334E-12 5.085E-25
+ ETOT 16  -8.4191421719609     7.105E-15 6.157E-12 1.880E-27
+ ETOT 17  -8.4191421719609    -1.776E-15 6.600E-13 9.106E-28
+ ETOT 18  -8.4191421719609     1.776E-15 5.531E-13 8.120E-28
+ ETOT 19  -8.4191421719609     0.000E+00 9.554E-14 6.691E-28
 
  At SCF step   19   max residual=  9.55E-14 < tolwfr=  1.00E-13 =>converged.
 
@@ -222,23 +222,23 @@ _setup2: Arith. and geom. avg. npw (full set) are     144.641     144.601
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.250000000000      0.250000000000      0.250000000000
- rms dE/dt=  6.7480E-26; max dE/dt=  1.0340E-25; dE/dt below (all hartree)
-    1       0.000000000000      0.000000000000      0.000000000000
-    2       0.000000000000     -0.000000000000     -0.000000000000
+ rms dE/dt=  5.8015E-26; max dE/dt=  1.7233E-26; dE/dt below (all hartree)
+    1      -0.000000000000     -0.000000000000     -0.000000000000
+    2      -0.000000000000     -0.000000000000      0.000000000000
 
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
     2      1.35775097531303     1.35775097531303     1.35775097531303
 
  cartesian forces (hartree/bohr) at end:
-    1     -0.00000000000000     0.00000000000000    -0.00000000000000
-    2      0.00000000000000    -0.00000000000000     0.00000000000000
- frms,max,avg= 1.0396051E-26 1.5112024E-26   0.000E+00  0.000E+00  0.000E+00 h/b
+    1      0.00000000000000     0.00000000000000    -0.00000000000000
+    2     -0.00000000000000    -0.00000000000000     0.00000000000000
+ frms,max,avg= 6.9231635E-27 8.3955689E-27   0.000E+00  0.000E+00  0.000E+00 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1     -0.00000000000000     0.00000000000000    -0.00000000000000
-    2      0.00000000000000    -0.00000000000000     0.00000000000000
- frms,max,avg= 5.3458641E-25 7.7709145E-25   0.000E+00  0.000E+00  0.000E+00 e/A
+    1      0.00000000000000     0.00000000000000    -0.00000000000000
+    2     -0.00000000000000    -0.00000000000000     0.00000000000000
+ frms,max,avg= 3.5600335E-25 4.3171747E-25   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales= 10.263110000000 10.263110000000 10.263110000000 bohr
               =  5.431003901252  5.431003901252  5.431003901252 angstroms
  prteigrs : about to open file t05o_EIG
@@ -254,7 +254,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     144.641     144.601
 
     Kinetic energy  =  3.05130001939393E+00
     Hartree energy  =  5.45418736262333E-01
-    XC energy       = -3.09169622884162E+00
+    XC energy       = -3.09169622884163E+00
     Ewald energy    = -8.39791921808003E+00
     PspCore energy  =  5.53051277078219E-01
     Loc. psp. energy= -2.23883913241390E+00
@@ -284,8 +284,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     144.641     144.601
            diemac      1.00000000E+01
              ecut      5.00000000E+00 Hartree
            etotal     -8.4191421720E+00
-            fcart     -1.5112024021E-26  8.3955689007E-27 -5.0373413404E-27
-                       1.5112024021E-26 -8.3955689007E-27  5.0373413404E-27
+            fcart      1.6791137801E-27  8.3955689007E-27 -8.3955689007E-27
+                      -1.6791137801E-27 -8.3955689007E-27  8.3955689007E-27
 -          fftalg         112
            istwfk        2    0    3    0    0    0    7    0
               ixc     -101130
@@ -376,10 +376,55 @@ P           mkmem           8
 
 ================================================================================
 
+- Total cpu        time (s,m,h):         11.1        0.19      0.003
+- Total wall clock time (s,m,h):          7.4        0.12      0.002
+-
+- For major independent code sections, cpu and wall times (sec),
+-  as well as % of the time and number of calls for node 0-
+-<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = 0>
+- cpu_time =           11.1, wall_time =            7.4
+-
+- routine                        cpu     %       wall     %      number of calls  Gflops    Speedup Efficacity
+-                                                                  (-1=no count)
+- fourwf%(pot)                   4.286  38.5      2.651  36.0           2540      -1.00        1.62       1.62
+- vtowfk(ssdiag)                 2.022  18.2      1.424  19.4             -1      -1.00        1.42       1.42
+- nonlop(apply)                  1.121  10.1      0.692   9.4           2540      -1.00        1.62       1.62
+- fourdp                         0.800   7.2      0.430   5.8            256      -1.00        1.86       1.86
+- pspini                         0.794   7.1      0.794  10.8              1      -1.00        1.00       1.00
+- fourwf%(den)                   0.498   4.5      0.210   2.9            608      -1.00        2.37       2.37
+- xc:pot/=fourdp                 0.391   3.5      0.236   3.2             20      -1.00        1.66       1.66
+- getghc-other                   0.254   2.3      0.146   2.0             -1      -1.00        1.74       1.74
+- timing timab                   0.128   1.2      0.208   2.8              9      -1.00        0.62       0.62
+- projbd                         0.117   1.0      0.083   1.1           3064      -1.00        1.41       1.41
+- invars2                        0.072   0.6      0.082   1.1              1      -1.00        0.87       0.87
+- others (102)                   0.140   1.3      0.082   1.1             -1      -1.00        1.71       1.71
+-<END_TIMER>
+-
+- subtotal                      10.623  95.4      7.038  95.7                                  1.51       1.51
 
-- Timing analysis has been suppressed with timopt=0
+- For major independent code sections, cpu and wall times (sec),
+- as well as % of the total time and number of calls 
 
+-<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = world>
+- cpu_time =          11.1, wall_time =           7.4
+-
+- routine                         cpu     %       wall     %      number of calls Gflops    Speedup Efficacity
+-                                                                  (-1=no count)
+- fourwf%(pot)                   4.286  38.5      2.651  36.0           2540      -1.00        1.62       1.62
+- vtowfk(ssdiag)                 2.022  18.2      1.424  19.4             -1      -1.00        1.42       1.42
+- nonlop(apply)                  1.121  10.1      0.692   9.4           2540      -1.00        1.62       1.62
+- fourdp                         0.800   7.2      0.430   5.8            256      -1.00        1.86       1.86
+- pspini                         0.794   7.1      0.794  10.8              1      -1.00        1.00       1.00
+- fourwf%(den)                   0.498   4.5      0.210   2.9            608      -1.00        2.37       2.37
+- xc:pot/=fourdp                 0.391   3.5      0.236   3.2             20      -1.00        1.66       1.66
+- getghc-other                   0.254   2.3      0.146   2.0             -1      -1.00        1.74       1.74
+- timing timab                   0.128   1.2      0.208   2.8              9      -1.00        0.62       0.62
+- projbd                         0.117   1.0      0.083   1.1           3064      -1.00        1.41       1.41
+- invars2                        0.072   0.6      0.082   1.1              1      -1.00        0.87       0.87
+- others (102)                   0.140   1.3      0.082   1.1             -1      -1.00        1.71       1.71
+-<END_TIMER>
 
+- subtotal                      10.623  95.4      7.038  95.7                                  1.51       1.51
 
 ================================================================================
 
@@ -446,10 +491,10 @@ P           mkmem           8
 - Note that it should not redistributed (Copyright by Oldenburg Wissenshaftverlag,
 - the licence allows the authors to put it on the Web).
 -
-- Proc.   0 individual time (sec): cpu=          1.6  wall=          0.6
+- Proc.   0 individual time (sec): cpu=         11.1  wall=          7.4
 
 ================================================================================
 
  Calculation completed.
 .Delivered   1 WARNINGs and   0 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          1.6  wall=          0.6
++Overall time at end (sec) : cpu=         11.1  wall=          7.4

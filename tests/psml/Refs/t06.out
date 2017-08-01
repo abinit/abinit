@@ -1,8 +1,8 @@
 
-.Version 8.3.1 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu5.4 computer) 
+.Version 8.5.2 of ABINIT 
+.(sequential version, prepared for a x86_64_linux_gnu5.4 computer) 
 
-.Copyright (C) 1998-2016 ABINIT group . 
+.Copyright (C) 1998-2017 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see http://www.abinit.org .
 
-.Starting date : Tue 21 Feb 2017.
-- ( at 18h34 )
+.Starting date : Tue  1 Aug 2017.
+- ( at 15h35 )
   
 - input  file    -> t06.in
 - output file    -> t06.out
@@ -223,7 +223,7 @@ P           mkmem          14
                        0  1  0  -1 -1 -1   1  0  0       0 -1  0   1  1  1  -1  0  0
                        0  0  1   1  0  0  -1 -1 -1       0  0 -1  -1  0  0   1  1  1
            toldfe1     1.00000000E-08 Hartree
-           toldfe2     1.00000000E-07 Hartree
+           toldfe2     1.00000000E-05 Hartree
            tsmear      1.00000000E-03 Hartree
             typat      1
               wtk        0.03704    0.11111    0.05556    0.02778    0.11111    0.11111
@@ -259,7 +259,7 @@ P           mkmem          14
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
     5.99000000000000    3.00000000000000    0.00000000000000   rchrg,fchrg,qchrg
      nproj     2     2     2
-extension_switch     1
+     extension_switch     1
  pspatm: epsatm=   14.28216657
          --- l  ekb(1:nproj) -->
              0   11.774826    1.347909
@@ -281,11 +281,11 @@ _setup2: Arith. and geom. avg. npw (full set) are     120.037     119.993
  ETOT  4  -117.47857701129    -8.006E-04 6.486E-05 1.100E-02
  ETOT  5  -117.47858776750    -1.076E-05 1.725E-06 6.327E-05
  ETOT  6  -117.47858769439     7.311E-08 2.434E-06 2.116E-07
- ETOT  7  -117.47858768930     5.088E-09 1.174E-06 2.808E-09
- ETOT  8  -117.47858768707     2.234E-09 3.377E-07 3.654E-11
+ ETOT  7  -117.47858768930     5.089E-09 1.174E-06 2.808E-09
+ ETOT  8  -117.47858768707     2.233E-09 3.377E-07 3.654E-11
 
  At SCF step    8, etot is converged : 
-  for the second time, diff in etot=  2.234E-09 < toldfe=  1.000E-08
+  for the second time, diff in etot=  2.233E-09 < toldfe=  1.000E-08
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  1.21457776E-01  sigma(3 2)=  0.00000000E+00
@@ -333,20 +333,20 @@ _setup2: Arith. and geom. avg. npw (full set) are     120.037     119.993
 --------------------------------------------------------------------------------
  Components of total free energy (in Hartree) :
 
-    Kinetic energy  =  3.85220543695328E+01
-    Hartree energy  =  1.70790568360523E+01
-    XC energy       = -1.54531959535356E+01
+    Kinetic energy  =  3.85220543695307E+01
+    Hartree energy  =  1.70790568360512E+01
+    XC energy       = -1.54531959535351E+01
     Ewald energy    = -8.58893111400492E+01
     PspCore energy  =  2.86484925799196E+00
-    Loc. psp. energy= -7.64099384790125E+01
-    NL   psp  energy=  1.80791207333157E+00
+    Loc. psp. energy= -7.64099384790105E+01
+    NL   psp  energy=  1.80791207333171E+00
     >>>>> Internal E= -1.17478573035689E+02
 
-    -kT*entropy     = -1.46513814513789E-05
-    >>>>>>>>> Etotal= -1.17478587687070E+02
+    -kT*entropy     = -1.46513814512106E-05
+    >>>>>>>>> Etotal= -1.17478587687071E+02
 
  Other information on the energy :
-    Total energy(eV)= -3.19675494488353E+03 ; Band energy (Ha)=  -1.6716172539E+01
+    Total energy(eV)= -3.19675494488355E+03 ; Band energy (Ha)=  -1.6716172539E+01
 --------------------------------------------------------------------------------
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -389,61 +389,29 @@ _setup2: Arith. and geom. avg. npw (full set) are     120.037     119.993
  ETOT  8  -117.48227825193     1.41E-05 9.34E-07 2.14E-03 1.167
  ETOT  9  -117.48227713056     1.12E-06 2.63E-07 5.79E-03 1.167
  ETOT 10  -117.48227759363    -4.63E-07 4.21E-07 4.87E-03 1.167
- ETOT 11  -117.48228755103    -9.96E-06 3.43E-07 2.00E-03 1.178
- ETOT 12  -117.48232599081    -3.84E-05 4.32E-07 6.39E-03 1.215
- ETOT 13  -117.48227906393     4.69E-05 2.28E-07 1.80E-03 1.168
- ETOT 14  -117.48227769574     1.37E-06 5.22E-07 4.56E-03 1.167
- ETOT 15  -117.48227279108     4.90E-06 3.59E-07 1.49E-02 1.167
- ETOT 16  -117.48227731422    -4.52E-06 4.04E-07 5.36E-03 1.167
- ETOT 17  -117.48227930288    -1.99E-06 2.92E-07 1.76E-03 1.168
- ETOT 18  -117.48234606286    -6.68E-05 5.75E-07 9.09E-03 1.229
- ETOT 19  -117.48227791788     6.81E-05 2.83E-07 3.03E-03 1.167
- ETOT 20  -117.48227698464     9.33E-07 3.97E-07 5.94E-03 1.167
- ETOT 21  -117.48227194730     5.04E-06 3.58E-07 1.71E-02 1.167
- ETOT 22  -117.48227601890    -4.07E-06 4.18E-07 7.58E-03 1.167
- ETOT 23  -117.48227567689     3.42E-07 3.01E-07 8.21E-03 1.167
- ETOT 24  -117.48227552299     1.54E-07 3.91E-07 8.51E-03 1.167
- ETOT 25  -117.48226873958     6.78E-06 3.99E-07 2.53E-02 1.167
- ETOT 26  -117.48227653710    -7.80E-06 5.23E-07 6.68E-03 1.167
- ETOT 27  -117.48235828145    -8.17E-05 6.35E-07 1.08E-02 1.237
- ETOT 28  -117.48238447389    -2.62E-05 2.73E-07 1.47E-02 1.252
- ETOT 29  -117.48238540000    -9.26E-07 5.43E-07 1.48E-02 1.252
- ETOT 30  -117.48245925181    -7.39E-05 3.00E-07 2.60E-02 1.287
- ETOT 31  -117.48239322410     6.60E-05 5.10E-07 1.60E-02 1.256
- ETOT 32  -117.48232362008     6.96E-05 2.84E-07 6.10E-03 1.213
- ETOT 33  -117.48246595273    -1.42E-04 5.76E-07 2.70E-02 1.290
- ETOT 34  -117.48226701022     1.99E-04 2.67E-06 2.96E-02 1.167
- ETOT 35  -117.48272472767    -4.58E-04 2.92E-05 2.35E-02 1.370
- ETOT 36  -117.48265751428     6.72E-05 2.80E-06 1.20E-01 1.374
- ETOT 37  -117.48273445666    -7.69E-05 1.12E-05 2.35E-03 1.370
- ETOT 38  -117.48094356050     1.79E-03 6.36E-05 3.91E-01 1.592
- ETOT 39  -117.48220619653    -1.26E-03 1.81E-04 1.82E-01 1.167
- ETOT 40  -117.48226065232    -5.45E-05 3.33E-06 4.53E-02 1.167
+
+ At SCF step   10, etot is converged : 
+  for the second time, diff in etot=  4.631E-07 < toldfe=  1.000E-05
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  1.21098641E-01  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)=  1.21098641E-01  sigma(3 1)=  0.00000000E+00
-  sigma(3 3)=  1.21098641E-01  sigma(2 1)=  0.00000000E+00
-
-
- scprqt:  WARNING -
-  nstep=   40 was not enough SCF cycles to converge;
-  maximum energy difference=  5.446E-05 exceeds toldfe=  1.000E-07
+  sigma(1 1)=  1.21129587E-01  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)=  1.21129587E-01  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)=  1.21129587E-01  sigma(2 1)=  0.00000000E+00
 
  Integrated electronic and magnetization densities in atomic spheres:
  ---------------------------------------------------------------------
  Note: Diff(up-dn) is a rough approximation of local magnetic moment
  Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
-    1   2.00000     7.062086     6.022881     13.084967     1.039205
+    1   2.00000     7.063438     6.019401     13.082840     1.044037
  ---------------------------------------------------------------------
-  Sum:              7.062086     6.022881     13.084967     1.039205
- Total magnetization (from the atomic spheres):             1.039205
- Total magnetization (exact up - dn):                       1.166667
+  Sum:              7.063438     6.019401     13.082840     1.044037
+ Total magnetization (from the atomic spheres):             1.044037
+ Total magnetization (exact up - dn):                       1.167250
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   4.3707E-07; max=  3.3279E-06
+ Mean square residual over all n,k,spin=   4.1455E-09; max=  4.2053E-07
  reduced coordinates (array xred) for    1 atoms
        0.000000000000      0.000000000000      0.000000000000
  rms dE/dt=  0.0000E+00; max dE/dt=  0.0000E+00; dE/dt below (all hartree)
@@ -462,13 +430,13 @@ _setup2: Arith. and geom. avg. npw (full set) are     120.037     119.993
  length scales=  5.423514001382  5.423514001382  5.423514001382 bohr
               =  2.870000000000  2.870000000000  2.870000000000 angstroms
  prteigrs : about to open file t06o_DS2_EIG
- Fermi (or HOMO) energy (hartree) =   0.76471   Average Vxc (hartree)=  -0.54982
- Magnetization (Bohr magneton)=  1.16666667E+00
- Total spin up =  8.58333333E+00   Total spin down =  7.41666667E+00
+ Fermi (or HOMO) energy (hartree) =   0.76690   Average Vxc (hartree)=  -0.54987
+ Magnetization (Bohr magneton)=  1.16725017E+00
+ Total spin up =  8.58362508E+00   Total spin down =  7.41637492E+00
  Eigenvalues (hartree) for nkpt=  14  k points, SPIN UP:
  kpt#   1, nband= 12, wtk=  0.03704, kpt=  0.0833  0.0833  0.0833 (reduced coord)
-  -4.27300   -2.22481   -2.22481   -2.08260    0.21476    0.57729    0.57729    0.70279
-   0.72193    0.72193    1.37250    1.42095
+  -4.27296   -2.22523   -2.22523   -2.08311    0.21373    0.57633    0.57633    0.70182
+   0.71995    0.71995    1.37128    1.41982
       occupation numbers for kpt#   1
    1.00000    1.00000    1.00000    1.00000    1.00000    1.00000    1.00000    1.00000
    1.00000    1.00000    0.00000    0.00000
@@ -476,8 +444,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     120.037     119.993
 
  Eigenvalues (hartree) for nkpt=  14  k points, SPIN DOWN:
  kpt#   1, nband= 12, wtk=  0.03704, kpt=  0.0833  0.0833  0.0833 (reduced coord)
-  -4.25810   -2.19943   -2.19943   -2.05556    0.23178    0.60362    0.60362    0.73050
-   0.77320    0.77320    1.39819    1.44160
+  -4.25675   -2.19763   -2.19763   -2.05371    0.23247    0.60487    0.60487    0.73186
+   0.77618    0.77618    1.39947    1.44260
       occupation numbers for kpt#   1
    1.00000    1.00000    1.00000    1.00000    1.00000    1.00000    1.00000    1.00000
    0.00000    0.00000    0.00000    0.00000
@@ -487,31 +455,31 @@ _setup2: Arith. and geom. avg. npw (full set) are     120.037     119.993
 --------------------------------------------------------------------------------
  Components of total free energy (in Hartree) :
 
-    Kinetic energy  =  3.86512452670724E+01
-    Hartree energy  =  1.71703941522707E+01
-    XC energy       = -1.54841185532960E+01
+    Kinetic energy  =  3.86426423994547E+01
+    Hartree energy  =  1.71629214606950E+01
+    XC energy       = -1.54831405482421E+01
     Ewald energy    = -8.58893111400492E+01
     PspCore energy  =  2.86484925799196E+00
-    Loc. psp. energy= -7.65865860019685E+01
-    NL   psp  energy=  1.79127758220563E+00
-    >>>>> Internal E= -1.17482249435773E+02
+    Loc. psp. energy= -7.65724103622424E+01
+    NL   psp  energy=  1.79217833846822E+00
+    >>>>> Internal E= -1.17482270593924E+02
 
-    -kT*entropy     = -1.12165480583431E-05
-    >>>>>>>>> Etotal= -1.17482260652321E+02
+    -kT*entropy     = -6.99970639242111E-06
+    >>>>>>>>> Etotal= -1.17482277593630E+02
 
  Other information on the energy :
-    Total energy(eV)= -3.19685489135088E+03 ; Band energy (Ha)=  -1.6654046237E+01
+    Total energy(eV)= -3.19685535234735E+03 ; Band energy (Ha)=  -1.6650379256E+01
 --------------------------------------------------------------------------------
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  1.21098641E-01  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)=  1.21098641E-01  sigma(3 1)=  0.00000000E+00
-  sigma(3 3)=  1.21098641E-01  sigma(2 1)=  0.00000000E+00
+  sigma(1 1)=  1.21129587E-01  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)=  1.21129587E-01  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)=  1.21129587E-01  sigma(2 1)=  0.00000000E+00
 
--Cartesian components of stress tensor (GPa)         [Pressure= -3.5628E+03 GPa]
-- sigma(1 1)=  3.56284443E+03  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)=  3.56284443E+03  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)=  3.56284443E+03  sigma(2 1)=  0.00000000E+00
+-Cartesian components of stress tensor (GPa)         [Pressure= -3.5638E+03 GPa]
+- sigma(1 1)=  3.56375490E+03  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)=  3.56375490E+03  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)=  3.56375490E+03  sigma(2 1)=  0.00000000E+00
 
 == END DATASET(S) ==============================================================
 ================================================================================
@@ -523,7 +491,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     120.037     119.993
         bs_loband2          0       0
              ecut      1.00000000E+01 Hartree
            etotal1    -1.1747858769E+02
-           etotal2    -1.1748226065E+02
+           etotal2    -1.1748227759E+02
             fcart1    -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
             fcart2    -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
 -          fftalg         112
@@ -591,7 +559,7 @@ P           mkmem          14
               occ2     1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
                        1.000000  1.000000  1.000000  1.000000  0.000000  0.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
-                       1.000000  1.000000  0.000000  0.000000  0.000000  0.000000
+                       1.000000  1.000000  0.002626  0.000000  0.000000  0.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
                        1.000000  1.000000  1.000000  0.000000  0.000000  0.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
@@ -629,15 +597,15 @@ P           mkmem          14
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
                        1.000000  1.000000  0.000000  0.000000  0.000000  0.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
-                       1.000000  0.078163  0.000000  0.000000  0.000000  0.000000
+                       1.000000  0.037179  0.000000  0.000000  0.000000  0.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
                        1.000000  0.000000  0.000000  0.000000  0.000000  0.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
-                       1.000000  0.837887  0.000000  0.000000  0.000000  0.000000
+                       1.000000  0.874877  0.000000  0.000000  0.000000  0.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
                        1.000000  1.000000  1.000000  1.000000  0.000000  0.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
-                       1.000000  1.000000  0.002469  0.000000  0.000000  0.000000
+                       1.000000  1.000000  0.007939  0.000000  0.000000  0.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
                        1.000000  1.000000  0.000000  0.000000  0.000000  0.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
@@ -654,7 +622,7 @@ P           mkmem          14
            spinat2     0.0000000000E+00  0.0000000000E+00  5.0000000000E+00
            strten1     1.2145777559E-01  1.2145777559E-01  1.2145777559E-01
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-           strten2     1.2109864128E-01  1.2109864128E-01  1.2109864128E-01
+           strten2     1.2112958729E-01  1.2112958729E-01  1.2112958729E-01
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
            symrel      1  0  0   0  1  0   0  0  1      -1  0  0   0 -1  0   0  0 -1
                       -1 -1 -1   0  0  1   0  1  0       1  1  1   0  0 -1   0 -1  0
@@ -681,7 +649,7 @@ P           mkmem          14
                        0  1  0  -1 -1 -1   1  0  0       0 -1  0   1  1  1  -1  0  0
                        0  0  1   1  0  0  -1 -1 -1       0  0 -1  -1  0  0   1  1  1
            toldfe1     1.00000000E-08 Hartree
-           toldfe2     1.00000000E-07 Hartree
+           toldfe2     1.00000000E-05 Hartree
            tsmear      1.00000000E-03 Hartree
             typat      1
               wtk        0.03704    0.11111    0.05556    0.02778    0.11111    0.11111
@@ -691,10 +659,49 @@ P           mkmem          14
 
 ================================================================================
 
+- Total cpu        time (s,m,h):         65.3        1.09      0.018
+- Total wall clock time (s,m,h):         50.5        0.84      0.014
+-
+- For major independent code sections, cpu and wall times (sec),
+-  as well as % of the time and number of calls for node 0-
+-<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = 0>
+- cpu_time =           65.3, wall_time =           50.5
+-
+- routine                        cpu     %       wall     %      number of calls  Gflops    Speedup Efficacity
+-                                                                  (-1=no count)
+- fourwf%(pot)                  39.460  60.4     28.314  56.1          25864      -1.00        1.39       1.39
+- vtowfk(ssdiag)                 7.676  11.8      6.029  11.9             -1      -1.00        1.27       1.27
+- nonlop(apply)                  6.749  10.3      5.006   9.9          25864      -1.00        1.35       1.35
+- getghc-other                   2.186   3.3      1.610   3.2             -1      -1.00        1.36       1.36
+- projbd                         1.281   2.0      1.023   2.0          40304      -1.00        1.25       1.25
+- fourwf%(den)                   1.030   1.6      1.814   3.6           3228      -1.00        0.57       0.57
+- pspini                         0.563   0.9      0.563   1.1              2      -1.00        1.00       1.00
+- fourdp                         0.332   0.5      0.705   1.4            379      -1.00        0.47       0.47
+- others (105)                   0.732   1.1      1.153   2.3             -1      -1.00        0.63       0.63
+-<END_TIMER>
+-
+- subtotal                      60.008  91.9     46.217  91.5                                  1.30       1.30
 
-- Timing analysis has been suppressed with timopt=0
+- For major independent code sections, cpu and wall times (sec),
+- as well as % of the total time and number of calls 
 
+-<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = world>
+- cpu_time =          65.3, wall_time =          50.5
+-
+- routine                         cpu     %       wall     %      number of calls Gflops    Speedup Efficacity
+-                                                                  (-1=no count)
+- fourwf%(pot)                  39.460  60.4     28.314  56.1          25864      -1.00        1.39       1.39
+- vtowfk(ssdiag)                 7.676  11.8      6.029  11.9             -1      -1.00        1.27       1.27
+- nonlop(apply)                  6.749  10.3      5.006   9.9          25864      -1.00        1.35       1.35
+- getghc-other                   2.186   3.3      1.610   3.2             -1      -1.00        1.36       1.36
+- projbd                         1.281   2.0      1.023   2.0          40304      -1.00        1.25       1.25
+- fourwf%(den)                   1.030   1.6      1.814   3.6           3228      -1.00        0.57       0.57
+- pspini                         0.563   0.9      0.563   1.1              2      -1.00        1.00       1.00
+- fourdp                         0.332   0.5      0.705   1.4            379      -1.00        0.47       0.47
+- others (105)                   0.732   1.1      1.153   2.3             -1      -1.00        0.63       0.63
+-<END_TIMER>
 
+- subtotal                      60.008  91.9     46.217  91.5                                  1.30       1.30
 
 ================================================================================
 
@@ -761,10 +768,10 @@ P           mkmem          14
 - Note that it should not redistributed (Copyright by Oldenburg Wissenshaftverlag,
 - the licence allows the authors to put it on the Web).
 -
-- Proc.   0 individual time (sec): cpu=         41.8  wall=         11.4
+- Proc.   0 individual time (sec): cpu=         65.3  wall=         50.5
 
 ================================================================================
 
  Calculation completed.
-.Delivered   2 WARNINGs and   0 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         41.8  wall=         11.4
+.Delivered   1 WARNINGs and   0 COMMENTs to log file.
++Overall time at end (sec) : cpu=         65.3  wall=         50.5
