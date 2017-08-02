@@ -15,7 +15,7 @@
         <p>The formulae for the resistivity and electrical thermal conductivity are well summarized in the book by Grimvall [[Grimvall1981]]. Their implementation in an ab-initio/LMTO framework by Savrasov is the standard reference within DFT [[Savrasov1996]], yielding the Eliashberg spectral function &alpha;<sup>2</sup>F(&omega;) (with the related EPC coupling strength and phonon linewidths), and its ``transport'' versions &alpha;<sup>2</sup>F<sub>tr</sub>(&omega;) coined by Allen.
 
         <p>Basic calculations of electron-phonon interaction in ABINIT: One performs a normal ground state, then phonon calculations, with an added keyword [[prtgkk]] which saves the matrix elements to files suffixed GKK. The main change in this respect is that [[prtgkk]] now disables the use of symmetry in reducing k-points and perturbations. This avoids ambiguities in wave function phases due to band degeneracies. The resulting GKK files are merged using the mrggkk utility, and processed by anaddb. With the implementation of phonons in PAW DFPT, the electron phonon coupling is also available in PAW, though this has not yet been tested extensively. The input variables for electron-phonon coupling in anaddb are described in [[Gonze2009]] and [[Gonze2016]].
-
+        <p>Some details about the calculation of electron-phonon quantities in ABINIT and ANADDB can be found <a href="../documents/elphon_manual.pdf">here</a>.
 
     tutorials  : |-
        <li> <a href="../../tutorial/generated_files/lesson_eph.html">The lesson on the

@@ -46,7 +46,7 @@
         conductivity (in file _WTH).
 
         <p>It is also possible to consider the temperature dependence of the Fermi energy: cubic spline interpolation ([[anaddb:ep_nspline]]) enables to linearly interpolate the transport arrays and reduce the memory usage. Besides setting the Fermi level with [[anaddb:elph_fermie]] (in Hartree), it is also possible to specify the extra electrons per unit cell, (i.e., the doping concentration often expressed in cm<sup>-3</sup>)  with [[anaddb:ep_extrael]].
-
+        <p>Some details about the calculation of electron-phonon quantities in ABINIT and ANADDB can be found <a href="../documents/elphon_manual.pdf">here</a>.
          <p>
     tutorials  : |-
         <li> <a href="../../tutorial/generated_files/lesson_eph.html">The lesson on the
