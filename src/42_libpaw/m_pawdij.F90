@@ -884,7 +884,7 @@ subroutine pawdij(cplex,enunit,gprimd,ipert,my_natom,natom,nfft,nfftot,nspden,nt
          LIBPAW_ALLOCATE(lmselect,(lm_size))
          lmselect(:)=paw_an(iatom)%lmselect(:)
          if (ipositron/=0) lmselect(:)=(lmselect(:).or.electronpositron_lmselect(:,iatom))
-         call pawdijexxc(cplex,cplex_dij,dijexxc,lmselect,ndij,nsppol,&
+         call pawdijexxc(cplex,cplex_dij,dijexxc,lmselect,ndij,nspden,nsppol,&
 &             pawang,pawrad(itypat),pawtab(itypat),vpawx,paw_an(iatom)%vxc_ex)
          LIBPAW_DEALLOCATE(lmselect)
          if (paw_ij(iatom)%has_exexch_pot/=2) then
@@ -2942,7 +2942,7 @@ end subroutine pawdiju
 !!  pawtab <type(pawtab_type)>=paw tabulated starting data, for current atom
 !!  vpawx(1,lmn2_size,ndij)=moments of exact exchange potential
 !!                    for current atom and for correlated electrons
-!!  vxc_ex(mesh_size,lm_size,ndij)=all-electron on-site XC potential for current atom
+!!  vxc_ex(mesh_size,lm_size,nspden)=all-electron on-site XC potential for current atom
 !!                    taken into account only valence correlated electrons
 !!
 !! OUTPUT
@@ -2959,7 +2959,7 @@ end subroutine pawdiju
 !!
 !! SOURCE
 
-subroutine pawdijexxc(cplex,cplex_dij,dijexxc,lmselect,ndij,nsppol,&
+subroutine pawdijexxc(cplex,cplex_dij,dijexxc,lmselect,ndij,nspden,nsppol,&
 &                      pawang,pawrad,pawtab,vpawx,vxc_ex)
 
 
@@ -2973,7 +2973,7 @@ subroutine pawdijexxc(cplex,cplex_dij,dijexxc,lmselect,ndij,nsppol,&
 
 !Arguments ---------------------------------------------
 !scalars
- integer,intent(in) :: cplex,cplex_dij,ndij,nsppol
+ integer,intent(in) :: cplex,cplex_dij,ndij,nspden,nsppol
  type(pawang_type),intent(in) :: pawang
 !arrays
  logical :: lmselect(:)
@@ -2984,7 +2984,7 @@ subroutine pawdijexxc(cplex,cplex_dij,dijexxc,lmselect,ndij,nsppol,&
 
 !Local variables ---------------------------------------
 !scalars
- integer :: icount,idij,idijend,ij_size,iln,in1,in2,ir,ir1,isel,ispden
+ integer :: icount,idij,idijend,ij_size,iln,in1,in2,ir,ir1,isel,ispden,ivxc
  integer :: jln,j0ln,klm,klm1,klmn,klmn1,kln,lexexch,ln_min,ln_max,lmax,lmin
  integer :: lm_size,lmn2_size,mesh_size,nsploop
  character(len=500) :: msg
@@ -3012,7 +3012,7 @@ subroutine pawdijexxc(cplex,cplex_dij,dijexxc,lmselect,ndij,nsppol,&
    MSG_BUG(msg)
  end if
  if (size(vxc_ex,1)/=cplex*mesh_size.or.size(vxc_ex,2)/=lm_size.or.&
-&    size(vxc_ex,3)/=ndij) then
+&    size(vxc_ex,3)/=nspden) then
    msg='invalid sizes for vxc_ex !'
    MSG_BUG(msg)
  end if
@@ -3046,6 +3046,11 @@ subroutine pawdijexxc(cplex,cplex_dij,dijexxc,lmselect,ndij,nsppol,&
 
        dijexxc_idij=zero
 
+       ivxc=ispden
+       !Take into account nspden=1/nspinor=2 case
+       if (ndij/=nspden.and.ispden==2) ivxc=1
+       if (ndij/=nspden.and.ispden> 2) cycle
+
 !      ----------------------------------------------------------
 !      Summing over (l,m) moments
 !      ----------------------------------------------------------
@@ -3060,7 +3065,7 @@ subroutine pawdijexxc(cplex,cplex_dij,dijexxc,lmselect,ndij,nsppol,&
                do iln=ln_min,jln
                  kln=j0ln+iln
                  ff(1:mesh_size)= &
-&                  vxc_ex(1:mesh_size,klm,idij)*pawtab%phiphj(1:mesh_size,kln)
+&                  vxc_ex(1:mesh_size,klm,ivxc)*pawtab%phiphj(1:mesh_size,kln)
                  call simp_gen(vxcij1(kln),ff,pawrad)
                end do
              end do
@@ -3072,9 +3077,9 @@ subroutine pawdijexxc(cplex,cplex_dij,dijexxc,lmselect,ndij,nsppol,&
                  do ir=1,mesh_size
                    ir1=2*ir
                    ff(ir)= &
-&                   vxc_ex(ir1-1,klm,ispden)*pawtab%phiphj(ir,kln)
+&                   vxc_ex(ir1-1,klm,ivxc)*pawtab%phiphj(ir,kln)
                    gg(ir)= &
-&                   vxc_ex(ir1,klm,ispden)*pawtab%phiphj(ir,kln)
+&                   vxc_ex(ir1,klm,ivxc)*pawtab%phiphj(ir,kln)
                  end do
                  call simp_gen(vxcij1(2*kln-1),ff,pawrad)
                  call simp_gen(vxcij1(2*kln  ),gg,pawrad)

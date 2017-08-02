@@ -885,7 +885,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
    nkxc1=0
    ABI_DT_MALLOC(KS_paw_an,(Cryst%natom))
    call paw_an_nullify(KS_paw_an)
-   call paw_an_init(KS_paw_an,Cryst%natom,Cryst%ntypat,nkxc1,Dtset%nspden,Dtset%nspinor,Dtset%nsppol,&
+   call paw_an_init(KS_paw_an,Cryst%natom,Cryst%ntypat,nkxc1,Dtset%nspden,&
 &   cplex,Dtset%pawxcdev,Cryst%typat,Pawang,Pawtab,has_vxc=1,has_vxcval=1)
 !
 !  Calculate onsite vxc with and without core charge.

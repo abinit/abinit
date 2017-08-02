@@ -834,7 +834,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
    nkxc1=0
    ABI_DT_MALLOC(Paw_an,(Cryst%natom))
    call paw_an_nullify(Paw_an)
-   call paw_an_init(Paw_an,Cryst%natom,Cryst%ntypat,nkxc1,Dtset%nspden,Dtset%nspinor,Dtset%nsppol,&
+   call paw_an_init(Paw_an,Cryst%natom,Cryst%ntypat,nkxc1,Dtset%nspden,&
 &   cplex,Dtset%pawxcdev,Cryst%typat,Pawang,Pawtab,has_vxc=1,has_vxcval=0)
 
    nzlmopt=-1; option=0; compch_sph=greatest_real

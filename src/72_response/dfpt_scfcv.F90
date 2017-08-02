@@ -475,7 +475,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
    call paw_ij_nullify(paw_ij1)
 
    has_dijfr=0;if (ipert/=dtset%natom+1.and.ipert/=dtset%natom+10) has_dijfr=1
-   call paw_an_init(paw_an1,dtset%natom,dtset%ntypat,0,dtset%nspden,dtset%nspinor,dtset%nsppol,&
+   call paw_an_init(paw_an1,dtset%natom,dtset%ntypat,0,dtset%nspden,&
 &   cplex,dtset%pawxcdev,dtset%typat,pawang,pawtab,has_vxc=1,&
 &   comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
 

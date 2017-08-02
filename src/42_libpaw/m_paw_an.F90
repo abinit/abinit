@@ -205,7 +205,7 @@ CONTAINS
 !!
 !! SOURCE
 
-subroutine paw_an_init(Paw_an,natom,ntypat,nkxc1,nspden,nspinor,nsppol,cplex,pawxcdev,typat,Pawang,Pawtab,&
+subroutine paw_an_init(Paw_an,natom,ntypat,nkxc1,nspden,cplex,pawxcdev,typat,Pawang,Pawtab,&
 &          has_vhartree,has_vxc,has_vxcval,has_kxc,has_vxc_ex, & ! optional arguments
 &          mpi_atmtab,comm_atom) ! optional arguments (parallelism)
 
@@ -220,7 +220,7 @@ subroutine paw_an_init(Paw_an,natom,ntypat,nkxc1,nspden,nspinor,nsppol,cplex,paw
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: natom,nkxc1,ntypat,cplex,nspden,nspinor,nsppol,pawxcdev
+ integer,intent(in) :: natom,nkxc1,ntypat,cplex,nspden,pawxcdev
  integer,optional,intent(in) :: has_vhartree,has_vxc,has_vxcval,has_kxc,has_vxc_ex
  integer,optional,intent(in) :: comm_atom
 !arrays
@@ -232,7 +232,7 @@ subroutine paw_an_init(Paw_an,natom,ntypat,nkxc1,nspden,nspinor,nsppol,cplex,paw
 
 !Local variables-------------------------------
 !scalars
- integer :: iat,iat1,itypat,lm_size,my_comm_atom,my_natom,v_size,vxc_ex_size
+ integer :: iat,iat1,itypat,lm_size,my_comm_atom,my_natom,v_size
  logical :: my_atmtab_allocated,paral_atom
 !arrays
  integer,pointer :: my_atmtab(:)
@@ -324,8 +324,7 @@ subroutine paw_an_init(Paw_an,natom,ntypat,nkxc1,nspden,nspinor,nsppol,cplex,paw
   if (PRESENT(has_vxc_ex)) then
    if (has_vxc_ex>0.and.Pawtab(itypat)%useexexch>0) then
     Paw_an(iat)%has_vxc_ex=1
-    vxc_ex_size=max(nspinor**2,nsppol)
-    LIBPAW_ALLOCATE(Paw_an(iat)%vxc_ex,(cplex*Paw_an(iat)%mesh_size,v_size,vxc_ex_size))
+    LIBPAW_ALLOCATE(Paw_an(iat)%vxc_ex,(cplex*Paw_an(iat)%mesh_size,v_size,nspden))
     Paw_an(iat)%vxc_ex=zero
    end if
   end if
