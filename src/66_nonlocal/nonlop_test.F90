@@ -244,6 +244,7 @@ subroutine nonlop_test(cg,eigen,istwfk,kg,kpt,mband,mcg,mgfft,mkmem,mpi_enreg,mp
      ider_ffnl=1 ; idir_ffnl=4 ; cplex=2
    end if
    if(choice==54)then
+     iatom_only=iatom
      ider_ffnl=2 ; idir_ffnl=4 ; cplex=2
    end if
    if(choice==8)then
