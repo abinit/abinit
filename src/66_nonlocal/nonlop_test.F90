@@ -371,7 +371,8 @@ subroutine nonlop_test(cg,eigen,istwfk,kg,kpt,mband,mcg,mgfft,mkmem,mpi_enreg,mp
 &              iatom_only=iatom_only,enl=enl)
        else
          call nonlop(choice,cpopt,cwaveprj,enlout,gs_hamk,idir_nonlop,lambda,&
-&              mpi_enreg,1,nnlout,paw_opt,signs,scwavef_out,tim_nonlop,cwavef,cwavef_out)
+&              mpi_enreg,1,nnlout,paw_opt,signs,scwavef_out,tim_nonlop,cwavef,cwavef_out,&
+&              iatom_only=iatom_only)
        end if
 
 !      Post-processing if nonlop is called with specific options
