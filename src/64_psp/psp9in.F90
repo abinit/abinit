@@ -160,19 +160,22 @@ subroutine psp9in(filpsp,ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
 ! SIESTA's ATOM uses spherical harmonics, while ONCVPSP uses Legendre
 ! polynomials, which means we have to check the consistency of input variables
 ! wrt the pseudos
- if ( oncvpsp ) then
-   if ( useylm /= 0 ) then
-     write(message,'(3a)') "ONCVPSP pseudos use Legendre polynomials but we use spherical harmonics", &
-&      ch10, "ACTION: set useylm to 0 in your input file"
-     MSG_ERROR(message)
-   endif
- else
-   if ( useylm == 0 ) then
-     write(message,'(3a)') "ATOM pseudos use spherical harmonics but we use Legendre polynomials", &
-&      ch10, "ACTION: set useylm to 1 in your input file"
-     MSG_ERROR(message)
-   endif
- endif
+!
+! Note: commented because NC pseudos do not have non-diagonal terms
+!
+! if ( oncvpsp ) then
+!   if ( useylm /= 0 ) then
+!     write(message,'(3a)') "ONCVPSP pseudos use Legendre polynomials but we use spherical harmonics", &
+!&      ch10, "ACTION: set useylm to 0 in your input file"
+!     MSG_ERROR(message)
+!   endif
+! else
+!   if ( useylm == 0 ) then
+!     write(message,'(3a)') "ATOM pseudos use spherical harmonics but we use Legendre polynomials", &
+!&      ch10, "ACTION: set useylm to 1 in your input file"
+!     MSG_ERROR(message)
+!   endif
+! endif
 
 ! The atomic number is a real number instead of a simple integer
 ! z (in Abinit), atomic-number in the header of the PSML file.
