@@ -171,8 +171,8 @@ subroutine paw_qpscgw(Wfd,nscf,nfftf,ngfftf,Dtset,Cryst,Kmesh,Psps,QP_BSt,&
 &  has_dijso=has_dijso,has_dijU=has_dijU,has_exexch_pot=1,has_pawu_occ=1)
 
  call paw_an_nullify(QP_paw_an); nkxc1=0 ! No kernel
- call paw_an_init(QP_paw_an,Cryst%natom,Cryst%ntypat,nkxc1,Dtset%nspden,cplex,&
-&     Dtset%pawxcdev,Cryst%typat,Pawang,Pawtab,has_vxc=1,has_vxcval=1)
+ call paw_an_init(QP_paw_an,Cryst%natom,Cryst%ntypat,nkxc1,Dtset%nspden,Dtset%nspinor,Dtset%nsppol,&
+&     cplex,Dtset%pawxcdev,Cryst%typat,Pawang,Pawtab,has_vxc=1,has_vxcval=1)
 
  ! =====================================================
  ! ==== Optional mixing of the PAW onsite densities ====

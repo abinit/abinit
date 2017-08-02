@@ -666,8 +666,8 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
      if(dtset%xclevel==2.and.dtset%nspden==1) nkxc1=7   ! GGA non-polarized
      if(dtset%xclevel==2.and.dtset%nspden==2) nkxc1=19  ! GGA polarized
    end if
-   call paw_an_init(paw_an,dtset%natom,dtset%ntypat,nkxc1,dtset%nspden,cplex,dtset%pawxcdev,&
-&   dtset%typat,pawang,pawtab,has_vxc=1,has_vxc_ex=1,has_kxc=has_kxc,&
+   call paw_an_init(paw_an,dtset%natom,dtset%ntypat,nkxc1,dtset%nspden,dtset%nspinor,dtset%nsppol,&
+&   cplex,dtset%pawxcdev,dtset%typat,pawang,pawtab,has_vxc=1,has_vxc_ex=1,has_kxc=has_kxc,&
 &   mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom)
    call paw_ij_init(paw_ij,cplex,dtset%nspinor,dtset%nsppol,dtset%nspden,dtset%pawspnorb,&
 &   natom,dtset%ntypat,dtset%typat,pawtab,has_dij=1,has_dijhartree=1,has_dijnd=has_dijnd,&
