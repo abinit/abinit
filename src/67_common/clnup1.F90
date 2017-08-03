@@ -7,7 +7,7 @@
 !! Perform "cleanup" at end of execution of gstate routine.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (DCA, XG, GMR)
+!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -159,7 +159,7 @@ subroutine clnup1(acell,dtset,eigen,fermie,&
        grmax=max(grmax,fred(ii,iatom))
        grsum=grsum+fred(ii,iatom)**2
      end do
-  end do
+   end do
    grsum=sqrt(grsum/dble(3*dtset%natom))
 
    write(message, '(1x,a,1p,e12.4,a,e12.4,a)' )'rms dE/dt=',grsum,'; max dE/dt=',grmax,'; dE/dt below (all hartree)'

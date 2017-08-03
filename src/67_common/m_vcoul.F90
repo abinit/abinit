@@ -10,7 +10,7 @@
 !!  Procedures to deal with the singularity for q-->0 are also provided.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2016 ABINIT group (MG, FB)
+!! Copyright (C) 1999-2017 ABINIT group (MG, FB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -223,7 +223,7 @@ subroutine vcoul_init(Vcp,Gsph,Cryst,Qmesh,Kmesh,rcut,icutcoul,vcutgeo,ecut,ng,n
  integer :: i1,i2,i3,ig,imc
  integer :: ii,iqlwl,iq_bz,iq_ibz,npar,npt
  integer :: opt_cylinder,opt_surface,test,rank,nprocs
- integer :: seed(12)=0
+ integer :: seed(42)=0
  real(dp),parameter :: tolq0=1.d-3
  real(dp) :: b1b1,b2b2,b3b3,b1b2,b2b3,b3b1
  real(dp) :: bz_geometry_factor,bz_plane,check,dx,integ,q0_vol,q0_volsph
@@ -345,7 +345,7 @@ subroutine vcoul_init(Vcp,Gsph,Cryst,Qmesh,Kmesh,rcut,icutcoul,vcutgeo,ecut,ng,n
    ABI_MALLOC(qran,(3,nmc_max))
 
    if(seed(1)==0) then
-     do i1=1,12
+     do i1=1,42
        seed(i1) = NINT(SQRT(DBLE(i1)*103731))
      end do
    end if

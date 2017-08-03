@@ -10,7 +10,7 @@
 !! See the "notes" section
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (DCA, XG, GMR).
+!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR).
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -99,8 +99,8 @@
 !!
 !! PARENTS
 !!      ingeo,ingeobld,inkpts,inqpt,invacuum,invars0,invars1,invars2
-!!      m_ab7_invars_f90,m_anaddb_dataset,m_ingeo_img,macroin,mpi_setup
-!!      parsefile,ujdet
+!!      m_ab7_invars_f90,m_anaddb_dataset,m_band2eps_dataset,m_ingeo_img
+!!      m_multibinit_dataset,macroin,mpi_setup,parsefile,ujdet
 !!
 !! CHILDREN
 !!      appdig,inarray,inupper,wrtout
@@ -118,6 +118,8 @@ subroutine intagm(dprarr,intarr,jdtset,marr,narr,string,token,tread,typevarphys,
  use defs_basis
  use m_profiling_abi
  use m_errors
+
+ use m_fstrings,        only : sjoin, itoa
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -163,6 +165,8 @@ subroutine intagm(dprarr,intarr,jdtset,marr,narr,string,token,tread,typevarphys,
  real(dp),allocatable :: dpr1(:),dpr2(:)
 
 ! *************************************************************************
+
+ ABI_CHECK(marr >= narr, sjoin("marr", itoa(marr)," < narr ", itoa(narr)))
 
  ds_input_ = -1
 
@@ -310,14 +314,14 @@ subroutine intagm(dprarr,intarr,jdtset,marr,narr,string,token,tread,typevarphys,
      cs2times=blank//token(1:toklen)//'*'//'?'//blank
 
 !    Map token to all upper case (make case-insensitive):
-     call inupper(cscolon) 
-     call inupper(csplus) 
+     call inupper(cscolon)
+     call inupper(csplus)
      call inupper(cstimes)
-     call inupper(cs1colon) 
-     call inupper(cs1plus) 
+     call inupper(cs1colon)
+     call inupper(cs1plus)
      call inupper(cs1times)
-     call inupper(cs2colon) 
-     call inupper(cs2plus) 
+     call inupper(cs2colon)
+     call inupper(cs2plus)
      call inupper(cs2times)
 
 !    Absolute index of tokens in string:
@@ -584,10 +588,8 @@ subroutine intagm(dprarr,intarr,jdtset,marr,narr,string,token,tread,typevarphys,
      MSG_ERROR(message)
    end if
    typevar='KEY'
-!  DEBUG
 !  write(std_out,*)' intagm : will read cs=',trim(cs)
 !  stop
-!  ENDDEBUG
  end if
 
 !There is something to be read if opttoken>=1
@@ -618,10 +620,7 @@ subroutine intagm(dprarr,intarr,jdtset,marr,narr,string,token,tread,typevarphys,
 
  else if(opttoken>=2)then
 
-!  DEBUG
 !  write(std_out,*)' intagm : opttoken>=2 , token has been found, will read '
-!  ENDDEBUG
-
    ABI_ALLOCATE(dpr1,(narr))
    ABI_ALLOCATE(dpr2,(narr))
    ABI_ALLOCATE(int1,(narr))

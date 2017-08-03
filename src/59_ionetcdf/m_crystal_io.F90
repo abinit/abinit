@@ -4,10 +4,10 @@
 !! m_crystal_io
 !!
 !! FUNCTION
-!! Module containing the methods used to do IO on crystal objects. 
+!! Module containing the methods used to do IO on crystal objects.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2016 ABINIT group (MG, YP, DC)
+!!  Copyright (C) 2008-2017 ABINIT group (MG, YP, DC)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -44,7 +44,7 @@ MODULE m_crystal_io
 
  implicit none
 
- private 
+ private
 !!***
 
  public :: crystal_from_hdr      ! Initialize the object from the abinit header.
@@ -55,7 +55,7 @@ MODULE m_crystal_io
 
 CONTAINS
 
-!!****f* m_crystal_io/crystal_from_hdr 
+!!****f* m_crystal_io/crystal_from_hdr
 !! NAME
 !!  crystal_from_hdr
 !!
@@ -65,12 +65,12 @@ CONTAINS
 !! INPUTS
 !!  hdr<hdr_type>=the abinit header
 !!  timrev ==2 => take advantage of time-reversal symmetry
-!!         ==1 ==> do not use time-reversal symmetry 
+!!         ==1 ==> do not use time-reversal symmetry
 !!  remove_inv [optional]= if .TRUE. the inversion symmetry is removed from the set of operations
 !!  even if it is present in the header
 !!
 !! OUTPUT
-!!  cryst<crystal_t>= the data type filled with data reported in the abinit header 
+!!  cryst<crystal_t>= the data type filled with data reported in the abinit header
 !!
 !! TODO
 !!  Add information on the use of time-reversal in the Abinit header.
@@ -97,7 +97,7 @@ subroutine crystal_from_hdr(cryst,hdr,timrev,remove_inv)
 
 !Arguments ------------------------------------
  type(hdr_type),intent(in) :: hdr
- type(crystal_t),intent(out) :: cryst 
+ type(crystal_t),intent(out) :: cryst
  integer,intent(in) :: timrev
  logical,optional,intent(in) :: remove_inv
 
@@ -202,7 +202,7 @@ integer function crystal_ncwrite(cryst, ncid) result(ncerr)
    nctkdim_t("number_of_atoms", cryst%natom), nctkdim_t("number_of_atom_species", cryst%ntypat),&
    nctkdim_t("number_of_symmetry_operations", cryst%nsym)], defmode=.True.)
  NCF_CHECK(ncerr)
- 
+
  ! Define ETSF variables
  NCF_CHECK(nctk_def_iscalars(ncid, [character(len=nctk_slen) :: "space_group"]))
 
@@ -210,13 +210,14 @@ integer function crystal_ncwrite(cryst, ncid) result(ncerr)
   ! Atomic structure and symmetry operations
   nctkarr_t("primitive_vectors", "dp", "number_of_cartesian_directions, number_of_vectors"), &
   nctkarr_t("reduced_symmetry_matrices", "int", &
-    "number_of_reduced_dimensions, number_of_reduced_dimensions, number_of_symmetry_operations"), &  
-  nctkarr_t("reduced_symmetry_translations", "dp", "number_of_reduced_dimensions, number_of_symmetry_operations"), & 
-  nctkarr_t("atom_species", "int", "number_of_atoms"), & 
+    "number_of_reduced_dimensions, number_of_reduced_dimensions, number_of_symmetry_operations"), &
+  nctkarr_t("reduced_symmetry_translations", "dp", "number_of_reduced_dimensions, number_of_symmetry_operations"), &
+  nctkarr_t("atom_species", "int", "number_of_atoms"), &
   nctkarr_t("reduced_atom_positions", "dp", "number_of_reduced_dimensions, number_of_atoms"), &
   nctkarr_t("atomic_numbers", "dp", "number_of_atom_species"), &
   nctkarr_t("atom_species_names", "char", "character_string_length, number_of_atom_species"), &
   nctkarr_t("chemical_symbols", "char", "symbol_length, number_of_atom_species"), &
+  nctkarr_t('atomic_mass_units', "dp", "number_of_atom_species"), &
   ! Atomic information.
   nctkarr_t("valence_charges", "dp", "number_of_atom_species"), &  ! NB: This variable is not written if alchemical
   nctkarr_t("pseudopotential_types", "char", "character_string_length, number_of_atom_species") &
@@ -233,8 +234,8 @@ integer function crystal_ncwrite(cryst, ncid) result(ncerr)
  NCF_CHECK(ncerr)
 
  ! Set-up atomic symbols.
- do itypat=1,cryst%ntypat  
-   call atomdata_from_znucl(atom,cryst%znucl(itypat)) 
+ do itypat=1,cryst%ntypat
+   call atomdata_from_znucl(atom,cryst%znucl(itypat))
    symbols(itypat) = atom%symbol
    write(symbols_long(itypat),'(a2,a78)') symbols(itypat),REPEAT(CHAR(0),78)
    write(psp_desc(itypat),'(2a)') &
@@ -252,6 +253,7 @@ integer function crystal_ncwrite(cryst, ncid) result(ncerr)
  NCF_CHECK(nf90_put_var(ncid, vid("atomic_numbers"), cryst%znucl(1:cryst%ntypat)))
  NCF_CHECK(nf90_put_var(ncid, vid("atom_species_names"), symbols_long))
  NCF_CHECK(nf90_put_var(ncid, vid("chemical_symbols"), symbols))
+ NCF_CHECK(nf90_put_var(ncid, vid('atomic_mass_units'), cryst%amu))
  NCF_CHECK(nf90_put_var(ncid, vid("pseudopotential_types"), psp_desc))
  if (cryst%npsp == cryst%ntypat) then
    NCF_CHECK(nf90_put_var(ncid, vid("valence_charges"), cryst%zion))
@@ -264,7 +266,7 @@ integer function crystal_ncwrite(cryst, ncid) result(ncerr)
 #endif
 
 contains
- integer function vid(vname) 
+ integer function vid(vname)
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

@@ -2,7 +2,7 @@
 .Version 8.0.4 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_intel15.0 computer) 
 
-.Copyright (C) 1998-2016 ABINIT group . 
+.Copyright (C) 1998-2017 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -54,9 +54,9 @@ _ WF disk file :     17.009 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
             acell      2.3010000000E+01  2.3010000000E+01  2.3010000000E+01 Bohr
               amu      1.96966540E+02
            bandpp           2
+     densfor_pred           6
              ecut      5.00000000E+00 Hartree
 -          fftalg         401
-     densfor_pred           6
               kpt      2.50000000E-01  2.50000000E-01  2.50000000E-01
          kptrlatt        2    0    0      0    2    0      0    0    2
           kptrlen      4.60200000E+01
@@ -217,7 +217,7 @@ P           mkmem           1
                        1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1
                        1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1
                        1  1  1  1  1  1  1
-         wfoptalg          14
+         wfoptalg         114
            xangst      0.0000000000E+00  1.9879254564E+00  1.9879254564E+00
                        1.9879254564E+00  0.0000000000E+00  1.9879254564E+00
                        1.9879254564E+00  1.9879254564E+00  0.0000000000E+00
@@ -1488,6 +1488,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     215.000     215.000
             acell      2.3010000000E+01  2.3010000000E+01  2.3010000000E+01 Bohr
               amu      1.96966540E+02
            bandpp           2
+     densfor_pred           6
              ecut      5.00000000E+00 Hartree
            etotal     -3.7544465600E+03
             fcart     -1.3780513594E-18 -8.6857610330E-02 -8.6857610330E-02
@@ -1598,7 +1599,6 @@ _setup2: Arith. and geom. avg. npw (full set) are     215.000     215.000
                        2.3482103070E-02  2.3482103070E-02  3.7970355644E-02
                        1.4056916566E-02  1.4056916566E-02  1.4056916566E-02
 -          fftalg         401
-     densfor_pred           6
               kpt      2.50000000E-01  2.50000000E-01  2.50000000E-01
          kptrlatt        2    0    0      0    2    0      0    0    2
           kptrlen      4.60200000E+01
@@ -1761,7 +1761,7 @@ P           mkmem           1
                        1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1
                        1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1
                        1  1  1  1  1  1  1
-         wfoptalg          14
+         wfoptalg         114
            xangst      0.0000000000E+00  1.9879254564E+00  1.9879254564E+00
                        1.9879254564E+00  0.0000000000E+00  1.9879254564E+00
                        1.9879254564E+00  1.9879254564E+00  0.0000000000E+00

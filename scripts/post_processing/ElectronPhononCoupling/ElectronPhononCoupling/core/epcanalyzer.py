@@ -12,7 +12,7 @@ from .util import create_directory, formatted_array_lines
 
 from .qptanalyzer import QptAnalyzer
 
-from .mpi import comm, size, rank, master_only, mpi_watch, i_am_master
+from .mpi import MPI, comm, size, rank, master_only, mpi_watch, i_am_master
 
 # =========================================================================== #
 
@@ -21,12 +21,13 @@ __all__ = ['EpcAnalyzer']
 
 class EpcAnalyzer(object):
     """
-    Main class for analysing electron-phonon coupling related quantities.
+    Main class for analyzing electron-phonon coupling related quantities.
 
-    It is intented to analyse the files produced by ABINIT
+    It is intented to analyze the files produced by ABINIT
     in a phonon response-function calculation, with one q-point per dataset,
     the first q-point being Gamma.
 
+    For documentation, see `ElectronPhononCoupling.compute`
     """
     verbose = False
     wtq = None
@@ -34,6 +35,7 @@ class EpcAnalyzer(object):
     temperatures = []
     omegase = []
     smearing = None
+    mu = None
 
     qred = None
     omega = None
@@ -45,41 +47,59 @@ class EpcAnalyzer(object):
     zero_point_renormalization_modes = None
 
 
+    split_fan_ddw = False
     renormalization_is_dynamical = False
     broadening_is_dynamical = False
 
     self_energy = None
     spectral_function = None
+    self_energy_T = None
+    spectral_function_T = None
 
     my_iqpts = [0]
 
     def __init__(self,
+
+                 # Options
+                 asr=True,
+                 verbose=False,
+
+                 # Parameters
                  nqpt=1,
                  wtq=[1.0],
-                 eig0_fname='',
-                 eigq_fnames=list(),
-                 DDB_fnames=list(),
-                 EIGR2D_fnames=list(),
-                 EIGI2D_fnames=list(),
-                 FAN_fnames=list(),
-                 GKK_fnames=list(),
-                 output='epc.out',
                  temp_range=[0,0,1],
                  omega_range=[0,0,1],
                  smearing=0.00367,
-                 asr=True,
-                 verbose=False,
+                 fermi_level = None,
+
+                 # File names
+                 rootname='epc.out',
+                 eigk_fname='',
+                 eigq_fnames=list(),
+                 ddb_fnames=list(),
+                 eigr2d_fnames=list(),
+                 eigi2d_fnames=list(),
+                 fan_fnames=list(),
+                 gkk_fnames=list(),
+
+                 # Double grid
+                 nqpt_fine=1,
+                 wtq_fine=[1.0],
+                 eigq_fine_fnames=list(),
+                 gkk_fine_fnames=list(),
+                 ddb_fine_fnames=list(),
+
                  **kwargs):
 
         # Check that the minimum number of files is present
-        if not eig0_fname:
-            raise Exception('Must provide a file for eig0_fname')
+        if not eigk_fname:
+            raise Exception('Must provide a file for eigk_fname')
 
-        if not EIGR2D_fnames:
-            raise Exception('Must provide at least one file for EIGR2D_fnames')
+        if not eigr2d_fnames:
+            raise Exception('Must provide at least one file for eigr2d_fnames')
 
-        if not DDB_fnames:
-            raise Exception('Must provide at least one file for DDB_fnames')
+        if not ddb_fnames:
+            raise Exception('Must provide at least one file for ddb_fnames')
 
         if len(wtq) != nqpt:
             raise Exception("Must provide nqpt weights in the 'wtq' list.")
@@ -88,23 +108,44 @@ class EpcAnalyzer(object):
         self.nqpt = nqpt
         self.set_weights(wtq)
 
-        # Set file names
-        self.eig0_fname = eig0_fname
-        self.eigq_fnames = eigq_fnames
-        self.DDB_fnames = DDB_fnames
-        self.EIGR2D_fnames = EIGR2D_fnames
-        self.EIGI2D_fnames = EIGI2D_fnames
-        self.FAN_fnames = FAN_fnames
-        self.GKK_fnames = GKK_fnames
+        self.nqpt_fine = nqpt_fine
+        self.set_weights_fine(wtq_fine)
 
-        # Initialize a single QptAnalyzer
+        # Set file names
+        self.eig0_fname = eigk_fname
+        self.eigq_fnames = eigq_fnames
+        self.ddb_fnames = ddb_fnames
+        self.eigr2d_fnames = eigr2d_fnames
+        self.eigi2d_fnames = eigi2d_fnames
+        self.fan_fnames = fan_fnames
+        self.gkk_fnames = gkk_fnames
+
+        self.eigq_fine_fnames = eigq_fine_fnames
+        self.ddb_fine_fnames = ddb_fine_fnames
+        self.gkk_fine_fnames = gkk_fine_fnames
+
+
+        # Initialize a single QptAnalyzer for q=0
+
+        if self.gkk_fnames:
+            gkk0 = self.gkk_fnames[0]
+        elif self.gkk_fine_fnames:
+            gkk0 = self.gkk_fine_fnames[0]
+        else:
+            gkk0 = None
+
+        if self.fan_fnames:
+            fan0 = self.fan_fnames[0]
+        else:
+            fan0 = None
+
         self.qptanalyzer = QptAnalyzer(
             wtq=self.wtq[0],
-            eig0_fname=self.eig0_fname,
-            DDB_fname=self.DDB_fnames[0],
-            EIGR2D0_fname=self.EIGR2D_fnames[0],
-            FAN0_fname=self.FAN_fnames[0] if self.FAN_fnames else None,
-            GKK0_fname=self.GKK_fnames[0] if self.GKK_fnames else None,
+            eigk_fname=self.eig0_fname,
+            ddb_fname=self.ddb_fnames[0],
+            eigr2d0_fname=self.eigr2d_fnames[0],
+            fan0_fname=fan0,
+            gkk0_fname=gkk0,
             asr=asr,
             )
 
@@ -113,9 +154,6 @@ class EpcAnalyzer(object):
 
         # Read other files at q=0 and broadcast the data
         self.read_zero_files()
-
-        # Split the workload between workers
-        self.distribute_workload()
 
         # Get arrays dimensions
         self.nkpt = self.qptanalyzer.eigr2d0.nkpt
@@ -127,9 +165,31 @@ class EpcAnalyzer(object):
         self.set_temp_range(temp_range)
         self.set_omega_range(omega_range)
         self.set_smearing(smearing)
-        self.set_output(output)
+        self.set_output(rootname)
+
+        # Split the workload between workers
+        # (needed to find the fermi level)
+        self.distribute_workload()
+
+        # Set the fermi level
+        if fermi_level is None:
+            self.find_fermi_level()
+        else:
+            self.set_fermi_level(fermi_level)
 
         self.verbose = verbose
+
+    @property
+    def nc_output(self):
+        return str(self.output) + '_EP.nc'
+
+    @property
+    def ren_dat(self):
+        return str(self.output) + '_REN.dat'
+
+    @property
+    def BRD_dat(self):
+        return str(self.output) + '_BRD.dat'
 
     @master_only
     def check_gamma(self):
@@ -149,8 +209,15 @@ class EpcAnalyzer(object):
         self.qptanalyzer.broadcast_zero_files()
 
     def set_temp_range(self, temp_range=(0, 0, 1)):
-        """Set the minimum, makimum and step temperature."""
-        self.temperatures = np.arange(*temp_range, dtype=float)
+        """Set the minimum, maximum and step temperature."""
+        args = list(temp_range)
+        assert len(args) == 3
+        minimum, maximum, step = args
+        if all([isinstance(i, int) for i in args]):
+            if (maximum - minimum) % step == 0:
+                maximum += 1
+        self.temperatures = np.arange(minimum, maximum, step, dtype=float)
+        self.ntemp = len(self.temperatures)
         self.qptanalyzer.temperatures = self.temperatures
 
     def check_temperatures(self):
@@ -181,29 +248,82 @@ class EpcAnalyzer(object):
         else:
             self.wtq = np.array(wtq)
 
-    def set_iqpt(self, iqpt):
+    def set_weights_fine(self, wtq, normalize=True):
+        """Set the q-points weights."""
+        if normalize:
+            self.wtq_fine = np.array(wtq) / sum(wtq)
+        else:
+            self.wtq_fine = np.array(wtq)
+
+    def set_fermi_level(self, mu):
+        """Set the Fermi level, in Hartree."""
+        self.mu = mu
+        self.qptanalyzer.mu = mu
+
+    @mpi_watch
+    def find_fermi_level(self):
+        """
+        Find the Fermi level by gathering information from all workers
+        and broadcast the result.
+        """
+        all_max_val = self.gather_qpt_function('get_max_val')
+        all_min_cond = self.gather_qpt_function('get_min_cond')
+        if i_am_master:
+            max_val = np.max(all_max_val)
+            min_cond = np.min(all_min_cond)
+            mu = (max_val + min_cond) / 2.0
+            mu = np.array(mu, dtype=np.float64)
+        else:
+            mu = np.empty(1, dtype=np.float64)
+
+        comm.Bcast([mu, MPI.DOUBLE])
+
+        self.set_fermi_level(mu)
+
+    def set_iqpt(self, iqpt, fine=False):
+        """
+        Give the qptanalyzer the weight and files corresponding
+        to one particular qpoint and read the files. 
+        """
+        if fine:
+            self.set_iqpt_fine(iqpt)
+        else:
+            self.set_iqpt_coarse(iqpt)
+
+    def set_iqpt_coarse(self, iqpt):
         """
         Give the qptanalyzer the weight and files corresponding
         to one particular qpoint and read the files. 
         """
         self.qptanalyzer.wtq = self.wtq[iqpt]
-        self.qptanalyzer.ddb.fname = self.DDB_fnames[iqpt]
+        self.qptanalyzer.ddb.fname = self.ddb_fnames[iqpt]
 
-        if self.EIGR2D_fnames:
-            self.qptanalyzer.eigr2d.fname = self.EIGR2D_fnames[iqpt]
+        if self.eigr2d_fnames:
+            self.qptanalyzer.eigr2d.fname = self.eigr2d_fnames[iqpt]
 
         if self.eigq_fnames:
             self.qptanalyzer.eigq.fname = self.eigq_fnames[iqpt]
 
-        if self.FAN_fnames:
-            self.qptanalyzer.fan.fname = self.FAN_fnames[iqpt]
+        if self.fan_fnames:
+            self.qptanalyzer.fan.fname = self.fan_fnames[iqpt]
 
-        if self.GKK_fnames:
-            self.qptanalyzer.gkk.fname = self.GKK_fnames[iqpt]
+        if self.gkk_fnames:
+            self.qptanalyzer.gkk.fname = self.gkk_fnames[iqpt]
 
-        if self.EIGI2D_fnames:
-            self.qptanalyzer.eigi2d.fname = self.EIGI2D_fnames[iqpt]
+        if self.eigi2d_fnames:
+            self.qptanalyzer.eigi2d.fname = self.eigi2d_fnames[iqpt]
 
+        self.qptanalyzer.read_nonzero_files()
+
+    def set_iqpt_fine(self, iqpt):
+        """
+        Give the qptanalyzer the weight and files corresponding
+        to one particular qpoint and read the files. 
+        """
+        self.qptanalyzer.wtq = self.wtq_fine[iqpt]
+        self.qptanalyzer.ddb.fname = self.ddb_fine_fnames[iqpt]
+        self.qptanalyzer.eigq.fname = self.eigq_fine_fnames[iqpt]
+        self.qptanalyzer.gkk.fname = self.gkk_fine_fnames[iqpt]
         self.qptanalyzer.read_nonzero_files()
 
     def set_ddb(self, iqpt):
@@ -212,26 +332,38 @@ class EpcAnalyzer(object):
         to one particular qpoint, then read and diagonalize the dynamical matrix.
         """
         self.qptanalyzer.wtq = self.wtq[iqpt]
-        self.qptanalyzer.ddb.fname = self.DDB_fnames[iqpt]
+        self.qptanalyzer.ddb.fname = self.ddb_fnames[iqpt]
         self.qptanalyzer.read_ddb()
 
     @mpi_watch
-    def distribute_workload(self):
+    def distribute_workload(self, fine=False):
+        """Distribute the q-points indicies to be treated by each worker."""
+        if fine:
+            self.my_iqpts = self.get_iqpts(self.nqpt_fine)
+        else:
+            self.my_iqpts = self.get_iqpts(self.nqpt)
+
+    def get_iqpts(self, nqpt):
         """Distribute the q-points indicies to be treated by each worker."""
 
-        max_nqpt_per_worker = self.nqpt // size + min(self.nqpt % size, 1)
-        n_active_workers = self.nqpt // max_nqpt_per_worker + min(self.nqpt % max_nqpt_per_worker, 1)
+        max_nqpt_per_worker = (
+            nqpt // size + min(nqpt % size, 1))
+        n_active_workers = (
+            nqpt // max_nqpt_per_worker
+            + min(nqpt % max_nqpt_per_worker, 1))
 
-        self.my_iqpts = list()
+        my_iqpts = list()
 
         for i in range(max_nqpt_per_worker):
 
             iqpt = rank * max_nqpt_per_worker + i
 
-            if iqpt >= self.nqpt:
+            if iqpt >= nqpt:
                 break
 
-            self.my_iqpts.append(iqpt)
+            my_iqpts.append(iqpt)
+
+        return my_iqpts
 
     @property
     def active_worker(self):
@@ -239,15 +371,18 @@ class EpcAnalyzer(object):
 
     def get_active_ranks(self):
         """Get the ranks of all active workers."""
-        max_nqpt_per_worker = self.nqpt // size + min(self.nqpt % size, 1)
-        n_active_workers = self.nqpt // max_nqpt_per_worker + min(self.nqpt % max_nqpt_per_worker, 1)
+        max_nqpt_per_worker = (self.nqpt // size
+                               + min(self.nqpt % size, 1))
+        n_active_workers = (self.nqpt // max_nqpt_per_worker
+                            + min(self.nqpt % max_nqpt_per_worker, 1))
         return np.arange(n_active_workers)
 
     @mpi_watch
-    def sum_qpt_function(self, func_name, *args, **kwargs):
+    def sum_qpt_function(self, func_name, fine=False, *args, **kwargs):
         """Call a certain function or each q-points and sum the result."""
 
-        partial_sum = self.sum_qpt_function_me(func_name, *args, **kwargs)
+        partial_sum = self.sum_qpt_function_me(func_name, fine=fine,
+                                               *args, **kwargs)
 
         if i_am_master:
             total = partial_sum
@@ -269,13 +404,16 @@ class EpcAnalyzer(object):
 
         return total
 
-    def sum_qpt_function_me(self, func_name, *args, **kwargs):
-        """Call a certain function or each q-points of this worker and sum the result."""
+    def sum_qpt_function_me(self, func_name, fine=False, *args, **kwargs):
+        """
+        Call a certain function or each q-points of this worker
+        and sum the result.
+        """
         if not self.active_worker:
             return None
 
         iqpt = self.my_iqpts[0]
-        self.set_iqpt(iqpt)
+        self.set_iqpt(iqpt, fine=fine)
 
         if self.verbose:
             print("Q-point: {} with wtq = {} and reduced coord. {}".format(
@@ -289,12 +427,11 @@ class EpcAnalyzer(object):
 
         for iqpt in self.my_iqpts[1:]:
 
-            self.set_iqpt(iqpt)
+            self.set_iqpt(iqpt, fine=fine)
 
             if self.verbose:
                 print("Q-point: {} with wtq = {} and reduced coord. {}".format(
                       iqpt, self.qptanalyzer.wtq, self.qptanalyzer.qred))
-
 
             qpt = getattr(self.qptanalyzer, func_name)(*args, **kwargs)
             total += qpt
@@ -308,7 +445,12 @@ class EpcAnalyzer(object):
         partial = self.gather_qpt_function_me(func_name, *args, **kwargs)
 
         if i_am_master:
-            total = np.zeros([self.nqpt] + list(partial.shape[1:]), dtype=partial.dtype)
+
+            # Contruct an array with the shape of partial,
+            # adding a dimension of length nqpt.
+            total = np.zeros([self.nqpt] + list(partial.shape[1:]),
+                             dtype=partial.dtype)
+
             for i, arr in enumerate(partial):
                 total[i,...] = arr[...]
 
@@ -333,7 +475,10 @@ class EpcAnalyzer(object):
         return total
 
     def gather_qpt_function_me(self, func_name, *args, **kwargs):
-        """Call a certain function or each q-points of this worker and gather all results."""
+        """
+        Call a certain function or each q-points of this worker
+        and gather all results.
+        """
         if not self.active_worker:
             return None
 
@@ -348,6 +493,8 @@ class EpcAnalyzer(object):
 
         q0 = np.array(getattr(self.qptanalyzer, func_name)(*args, **kwargs))
         total = np.zeros([nqpt_me] + list(q0.shape), dtype=q0.dtype)
+
+        total[0,...] = q0[...]
 
         if len(self.my_iqpts) == 1:
             return total
@@ -421,296 +568,563 @@ class EpcAnalyzer(object):
 
         return qred, omega
 
-    def compute_static_zp_renormalization(self):
+    @mpi_watch
+    def sum_qpt_functions_double_grid(self, func_coarse, func_fine,
+                                      *args, **kwargs):
+        """
+        Sum a certain function on the coarse grid,
+        and another one on the fine grid.
+        Only master sums the result.
+        """
+        self.distribute_workload(fine=False)
+        sum_coarse = self.sum_qpt_function(func_coarse, fine=False)
+
+        self.distribute_workload(fine=True)
+        self.read_zero_files()
+        sum_fine = self.sum_qpt_function(func_fine, fine=True)
+
+        if i_am_master:
+            result = sum_coarse + sum_fine
+        else:
+            result = None
+
+        return result
+
+    def compute_static_zp_renormalization_nosplit(self):
         """Compute the zero-point renormalization in a static scheme."""
-        self.zero_point_renormalization = self.sum_qpt_function('get_zpr_static')
+        self.distribute_workload()
+        self.zero_point_renormalization = self.sum_qpt_function('get_zpr_static_sternheimer')
         self.renormalization_is_dynamical = False
 
-    def compute_static_td_renormalization(self):
+    def compute_static_td_renormalization_nosplit(self):
         """
         Compute the temperature-dependent renormalization in a static scheme.
         """
         self.check_temperatures()
-        self.temperature_dependent_renormalization = self.sum_qpt_function('get_tdr_static')
+        self.distribute_workload()
+        self.temperature_dependent_renormalization = self.sum_qpt_function(
+            'get_tdr_static_nosplit')
         self.renormalization_is_dynamical = False
 
     def compute_dynamical_td_renormalization(self):
         """
-        Compute the temperature-dependent renormalization in a dynamical scheme.
+        Compute the temperature-dependent renormalization
+        in a dynamical scheme.
         """
         self.check_temperatures()
-        self.temperature_dependent_renormalization = self.sum_qpt_function('get_tdr_dynamical')
+        self.distribute_workload()
+        self.temperature_dependent_renormalization = self.sum_qpt_function(
+            'get_tdr_dynamical')
+        self.renormalization_is_dynamical = True
+
+    def compute_dynamical_td_renormalization_double_grid(self):
+        """
+        Compute the temperature-dependent renormalization
+        in a dynamical scheme.
+        """
+        self.check_temperatures()
+        self.temperature_dependent_renormalization = (
+            self.sum_qpt_functions_double_grid('get_tdr_static_nosplit',
+                                               'get_tdr_dynamical_active'))
+        self.renormalization_is_dynamical = True
+
+    def compute_dynamical_zp_renormalization_double_grid(self):
+        """
+        Compute the temperature-dependent renormalization
+        in a dynamical scheme.
+        """
+        self.check_temperatures()
+        self.zero_point_renormalization = (
+            self.sum_qpt_functions_double_grid('get_zpr_static_sternheimer',
+                                               'get_zpr_dynamical_active'))
         self.renormalization_is_dynamical = True
 
     def compute_dynamical_zp_renormalization(self):
         """Compute the zero-point renormalization in a dynamical scheme."""
-        self.zero_point_renormalization = self.sum_qpt_function('get_zpr_dynamical')
+        self.distribute_workload()
+        self.zero_point_renormalization = (
+            self.sum_qpt_function('get_zpr_dynamical'))
         self.renormalization_is_dynamical = True
 
-    def compute_static_control_td_renormalization(self):
+    def compute_static_td_renormalization(self):
         """
         Compute the temperature-dependent renormalization in a static scheme
         with the transitions split between active and sternheimer.
         """
         self.check_temperatures()
-        self.temperature_dependent_renormalization = self.sum_qpt_function('get_tdr_static_active')
+        self.distribute_workload()
+        self.temperature_dependent_renormalization = (
+            self.sum_qpt_function('get_tdr_static'))
         self.renormalization_is_dynamical = False
 
-    def compute_static_control_zp_renormalization(self):
+    def compute_static_zp_renormalization(self):
         """
         Compute the zero-point renormalization in a static scheme
         with the transitions split between active and sternheimer.
         """
-        self.zero_point_renormalization = self.sum_qpt_function('get_zpr_static_active')
+        self.zero_point_renormalization = (
+            self.sum_qpt_function('get_zpr_static'))
         self.renormalization_is_dynamical = False
+
+    def compute_dynamical_td_broadening(self):
+        """
+        Compute the temperature-dependent broadening in a static scheme
+        from the GKK files.
+        """
+        self.check_temperatures()
+        self.distribute_workload()
+        self.temperature_dependent_broadening = (
+            self.sum_qpt_function('get_tdb_dynamical'))
+        self.broadening_is_dynamical = True
+
+    def compute_dynamical_zp_broadening(self):
+        """
+        Compute the zero-point broadening in a static scheme
+        from the GKK files.
+        """
+        self.distribute_workload()
+        self.zero_point_broadening = (
+            self.sum_qpt_function('get_zpb_dynamical'))
+        self.broadening_is_dynamical = True
 
     def compute_static_td_broadening(self):
         """
         Compute the temperature-dependent broadening in a static scheme
-        from the EIGI2D files.
+        from the GKK files.
         """
         self.check_temperatures()
-        self.temperature_dependent_broadening = self.sum_qpt_function('get_tdb_static')
+        self.distribute_workload()
+        self.temperature_dependent_broadening = (
+            self.sum_qpt_function('get_tdb_static'))
         self.broadening_is_dynamical = False
 
     def compute_static_zp_broadening(self):
         """
         Compute the zero-point broadening in a static scheme
-        from the EIGI2D files.
+        from the GKK files.
         """
-        self.zero_point_broadening = self.sum_qpt_function('get_zpb_static')
+        self.distribute_workload()
+        self.zero_point_broadening = (
+            self.sum_qpt_function('get_zpb_static'))
         self.broadening_is_dynamical = False
 
-    def compute_dynamical_td_broadening(self):
-        self.check_temperatures()
-        warnings.warn("Dynamical lifetime at finite temperature is not yet implemented...proceed with static lifetime")
-        return self.compute_static_td_broadening()
-
-    def compute_dynamical_zp_broadening(self):
+    def compute_static_td_broadening_nosplit(self):
         """
-        Compute the zero-point broadening in a dynamical scheme.
+        Compute the temperature-dependent broadening in a static scheme
+        from the EIGI2D files.
         """
-        self.zero_point_broadening = self.sum_qpt_function('get_zpb_dynamical')
-        self.broadening_is_dynamical = True
-
-    def compute_static_control_td_broadening(self):
         self.check_temperatures()
-        warnings.warn("Static lifetime at finite temperature with control over smearing is not yet implemented...proceed with static lifetime")
-        return self.compute_static_td_broadening()
+        self.distribute_workload()
+        self.temperature_dependent_broadening = (
+            self.sum_qpt_function('get_tdb_static_nosplit'))
+        self.broadening_is_dynamical = False
 
-    def compute_static_control_zp_broadening(self):
+    def compute_static_zp_broadening_nosplit(self):
+        """
+        Compute the zero-point broadening in a static scheme
+        from the EIGI2D files.
+        """
+        self.distribute_workload()
+        self.zero_point_broadening = (
+            self.sum_qpt_function('get_zpb_static_nosplit'))
+        self.broadening_is_dynamical = False
+
+    def compute_ddw_active_zpr(self):
+        """
+        Compute the zero-point renormalization in a static scheme
+        with the transitions split between active and sternheimer.
+        """
+        self.zero_point_renormalization = (
+            self.sum_qpt_function('get_zpr_ddw_active'))
+        self.renormalization_is_dynamical = False
+
+    def compute_static_zp_broadening(self):
         """
         Compute the zero-point broadening in a static scheme
         from the FAN files.
         """
-        self.zero_point_broadening = self.sum_qpt_function('get_zpb_static_active')
+        self.distribute_workload()
+        self.zero_point_broadening = self.sum_qpt_function('get_zpb_static')
         self.broadening_is_dynamical = False
 
-    def compute_static_control_zp_renormalization_modes(self):
+    def compute_static_zp_renormalization_modes(self):
         """
         Compute the zero-point renormalization in a static scheme
         with the transitions split between active and sternheimer.
         Retain the mode decomposition of the zpr.
         """
-
-        self.zero_point_renormalization_modes = self.sum_qpt_function('get_zpr_static_active_modes')
+        self.distribute_workload()
+        self.zero_point_renormalization_modes = (
+            self.sum_qpt_function('get_zpr_static_modes'))
         self.renormalization_is_dynamical = False
 
-    def compute_self_energy(self):
+    def compute_zp_self_energy(self):
         """
         Compute the zp frequency-dependent self-energy from one q-point.
     
-        The self-energy is evaluated on a frequency mesh 'omegase' that is shifted by the bare energies,
-        such that, what is retured is
+        The self-energy is evaluated on a frequency mesh 'omegase'
+        that is shifted by the bare energies, such that, what is retured is
     
             Simga'_kn(omega) = Sigma_kn(omega + E^0_kn)
     
         """
+        self.distribute_workload()
         self.self_energy = self.sum_qpt_function('get_zp_self_energy')
 
+    def compute_td_self_energy(self):
+        """
+        Compute the td frequency-dependent self-energy from one q-point.
+    
+        The self-energy is evaluated on a frequency mesh 'omegase'
+        that is shifted by the bare energies, such that, what is retured is
+    
+            Simga'_kn(omega,T) = Sigma_kn(omega + E^0_kn,T)
+    
+        """
+        self.distribute_workload()
+        self.self_energy_T = self.sum_qpt_function('get_td_self_energy')
 
     @master_only
-    def compute_spectral_function(self):
+    def compute_zp_spectral_function(self):
         """
-        Compute the spectral function of all quasiparticles in the semi-static approximation,
-        that is, the 'upper bands' contribution to the self-energy is evaluated at the bare energy.
+        Compute the spectral function of all quasiparticles in the
+        semi-static approximation, that is, the 'upper bands' contribution
+        to the self-energy is evaluated at the bare energy.
 
-        The spectral function is evaluated on a frequency mesh 'omegase' that is shifted by the bare energies,
-        such that, what is retured is
+        The spectral function is evaluated on a frequency mesh 'omegase'
+        that is shifted by the bare energies, such that, what is retured is
 
             A'_kn(omega) = A_kn(omega + E^0_kn)
 
         """
-        self.spectral_function = np.zeros((self.nomegase, self.nkpt, self.nband), dtype=float)
-        omega = np.einsum('ij,m->ijm', np.ones((self.nkpt, self.nband)), self.omegase)
-        self.spectral_function = (1 / np.pi) * np.abs(self.self_energy.imag) / (
-                                (omega - self.self_energy.real) ** 2 + self.self_energy.imag ** 2)
+        nomegase = self.nomegase
+        nkpt = self.nkpt
+        nband = self.nband
 
+        self.spectral_function = np.zeros((nomegase, nkpt, nband), dtype=float)
+
+        omega = np.einsum('kn,l->knl', np.ones((nkpt, nband)), self.omegase)
+
+        self.spectral_function = (
+            (1 / np.pi) * np.abs(self.self_energy.imag) /
+            ((omega - self.self_energy.real) ** 2 + self.self_energy.imag ** 2)
+            )
+
+    @master_only
+    def compute_td_spectral_function(self):
+        """
+        Compute the spectral function of all quasiparticles in the
+        semi-static approximation, that is, the 'upper bands' contribution
+        to the self-energy is evaluated at the bare energy.
+
+        The spectral function is evaluated on a frequency mesh 'omegase'
+        that is shifted by the bare energies, such that, what is retured is
+
+            A'_kn(omega) = A_kn(omega + E^0_kn)
+
+        """
+        nomegase = self.nomegase
+        nkpt = self.nkpt
+        nband = self.nband
+        ntemp = self.ntemp
+
+        self.spectral_function_T = np.zeros((nomegase, ntemp, nkpt, nband),
+                                            dtype=float)
+
+        omega = np.einsum('ijt,l->ijlt',
+                          np.ones((nkpt, nband, ntemp)), self.omegase)
+
+        self.spectral_function_T = (
+            (1 / np.pi) * np.abs(self.self_energy_T.imag) /
+            ((omega - self.self_energy_T.real) ** 2
+             + self.self_energy_T.imag ** 2)
+            )
+
+    def compute_zp_self_energy_double_grid(self):
+        """
+        Compute the temperature-dependent renormalization
+        in a dynamical scheme.
+        """
+        self.check_temperatures()
+        self.self_energy = (
+          self.sum_qpt_functions_double_grid('get_zp_self_energy_sternheimer',
+                                             'get_zp_self_energy_active'))
+
+    def compute_td_self_energy_double_grid(self):
+        """
+        Compute the temperature-dependent renormalization
+        in a dynamical scheme.
+        """
+        self.check_temperatures()
+        self.self_energy_T = (
+          self.sum_qpt_functions_double_grid('get_td_self_energy_sternheimer',
+                                             'get_td_self_energy_active'))
 
     @master_only
     def write_netcdf(self):
         """Write all data to a netCDF file."""
-        fname = str(self.output) + '_EP.nc'
-        create_directory(fname)
+        create_directory(self.nc_output)
 
         # Write on a NC files with etsf-io name convention
-        ncfile = nc.Dataset(fname, 'w')
+        with nc.Dataset(self.nc_output, 'w') as ds:
 
-        # Read dim from first EIGR2D file
-        root = nc.Dataset(self.EIGR2D_fnames[0], 'r')
+            # Read dim from first EIGR2D file
+            dim = nc.Dataset(self.eigr2d_fnames[0], 'r')
 
-        # Determine nsppol from reading occ
-        nsppol = len(root.variables['occupations'][:,0,0])
-        if nsppol > 1:
-          warnings.warn("nsppol > 1 has not been tested.")
-        mband = len(root.dimensions['product_mband_nsppol']) / nsppol
+            # Determine nsppol from reading occ
+            nsppol = len(dim.variables['occupations'][:,0,0])
+            if nsppol > 1:
+              warnings.warn("nsppol > 1 has not been tested.")
+            mband = len(dim.dimensions['product_mband_nsppol']) / nsppol
 
-        # Create dimension
-        ncfile.createDimension('number_of_atoms',len(root.dimensions['number_of_atoms']))
-        ncfile.createDimension('number_of_kpoints',len(root.dimensions['number_of_kpoints']))
-        ncfile.createDimension('product_mband_nsppol',len(root.dimensions['product_mband_nsppol']))
-        ncfile.createDimension('cartesian',3)
-        ncfile.createDimension('cplex',2)
-        ncfile.createDimension('number_of_qpoints', self.nqpt)
-        ncfile.createDimension('number_of_spins',len(root.dimensions['number_of_spins']))
-        ncfile.createDimension('max_number_of_states',mband)
-        ncfile.createDimension('number_of_modes', 3 * len(root.dimensions['number_of_atoms']))
+            # Create dimension
+            ds.createDimension('number_of_atoms',
+                               len(dim.dimensions['number_of_atoms']))
+            ds.createDimension('number_of_kpoints',
+                               len(dim.dimensions['number_of_kpoints']))
+            ds.createDimension('product_mband_nsppol',
+                               len(dim.dimensions['product_mband_nsppol']))
 
-        ncfile.createDimension('number_of_temperature',len(self.temperatures))
-        ncfile.createDimension('number_of_frequencies',len(self.omegase))
+            ds.createDimension('cartesian', 3)
+            ds.createDimension('cplex', 2)
+            ds.createDimension('number_of_qpoints', self.nqpt)
+            ds.createDimension('number_of_spins',
+                               len(dim.dimensions['number_of_spins']))
+            ds.createDimension('max_number_of_states',mband)
+            ds.createDimension('number_of_modes',
+                               3*len(dim.dimensions['number_of_atoms']))
 
-        # Create variable
-        data = ncfile.createVariable('reduced_coordinates_of_kpoints','d',('number_of_kpoints','cartesian'))
-        data[:,:] = root.variables['reduced_coordinates_of_kpoints'][:,:]
-        data = ncfile.createVariable('eigenvalues','d',('number_of_spins','number_of_kpoints','max_number_of_states'))
-        data[:,:,:] = root.variables['eigenvalues'][:,:,:]
-        data = ncfile.createVariable('occupations','i',('number_of_spins','number_of_kpoints','max_number_of_states'))
-        data[:,:,:] = root.variables['occupations'][:,:,:]
-        data = ncfile.createVariable('primitive_vectors','d',('cartesian','cartesian'))
-        data[:,:] = root.variables['primitive_vectors'][:,:]
+            ds.createDimension('number_of_temperature', len(self.temperatures))
+            ds.createDimension('number_of_frequencies', len(self.omegase))
 
-        root.close()
+            # Write data on the eigenvalues
+            data = ds.createVariable('reduced_coordinates_of_kpoints', 'd',
+                                     ('number_of_kpoints','cartesian'))
+            data[:,:] = dim.variables['reduced_coordinates_of_kpoints'][:,:]
 
-        data = ncfile.createVariable('renormalization_is_dynamical', 'i1')
-        data[:] = self.renormalization_is_dynamical
+            data = ds.createVariable(
+                'eigenvalues','d',
+                ('number_of_spins','number_of_kpoints','max_number_of_states'))
+            data[:,:,:] = dim.variables['eigenvalues'][:,:,:]
 
-        data = ncfile.createVariable('broadening_is_dynamical', 'i1')
-        data[:] = self.broadening_is_dynamical
+            data = ds.createVariable(
+                'occupations','i',
+                ('number_of_spins','number_of_kpoints','max_number_of_states'))
+            data[:,:,:] = dim.variables['occupations'][:,:,:]
 
-        data = ncfile.createVariable('temperatures','d',('number_of_temperature'))
-        data[:] = self.temperatures[:]
+            data = ds.createVariable(
+                'primitive_vectors', 'd',
+                ('cartesian','cartesian'))
 
-        data = ncfile.createVariable('smearing', 'd')
-        data[:] = self.smearing
+            data[:,:] = dim.variables['primitive_vectors'][:,:]
 
-        data = ncfile.createVariable('omegase','d',('number_of_frequencies'))
-        data[:] = self.omegase[:]
+            dim.close()
 
-        zpr = ncfile.createVariable('zero_point_renormalization','d',
-            ('number_of_spins', 'number_of_kpoints', 'max_number_of_states'))
+            # Write epc data
+            data = ds.createVariable('renormalization_is_dynamical', 'i1')
+            data[:] = self.renormalization_is_dynamical
 
-        #fan = ncfile.createVariable('fan_zero_point_renormalization','d',
-        #    ('number_of_spins', 'number_of_kpoints', 'max_number_of_states'))
+            data = ds.createVariable('broadening_is_dynamical', 'i1')
+            data[:] = self.broadening_is_dynamical
 
-        #ddw = ncfile.createVariable('ddw_zero_point_renormalization','d',
-        #    ('number_of_spins', 'number_of_kpoints', 'max_number_of_states'))
+            data = ds.createVariable('temperatures','d',
+                                     ('number_of_temperature'))
+            data[:] = self.temperatures[:]
 
-        if self.zero_point_renormalization is not None:
-            zpr[0,:,:] = self.zero_point_renormalization[:,:].real  # FIXME number of spin
-            #fan[0,:,:] = self.fan_zero_point_renormalization[:,:].real
-            #ddw[0,:,:] = self.ddw_zero_point_renormalization[:,:].real
+            data = ds.createVariable('smearing', 'd')
+            data[:] = self.smearing
 
-        data = ncfile.createVariable('temperature_dependent_renormalization','d',
-            ('number_of_spins','number_of_kpoints', 'max_number_of_states','number_of_temperature'))
+            data = ds.createVariable('omegase', 'd',
+                                     ('number_of_frequencies'))
+            data[:] = self.omegase[:]
 
-        if self.temperature_dependent_renormalization is not None:
-            data[0,:,:,:] = self.temperature_dependent_renormalization[:,:,:].real  # FIXME number of spin
+            # qpt
+            data = ds.createVariable(
+                'reduced_coordinates_of_qpoints','d',
+                ('number_of_qpoints', 'cartesian'))
+            if self.qred is not None:
+                data[...] = self.qred[...]
 
-        data = ncfile.createVariable('zero_point_broadening','d',
-            ('number_of_spins', 'number_of_kpoints', 'max_number_of_states'))
+            # omega
+            data = ds.createVariable(
+                'phonon_mode_frequencies','d',
+                ('number_of_qpoints', 'number_of_modes'))
+            if self.omega is not None:
+                data[...] = self.omega[...]
 
-        if self.zero_point_broadening is not None:
-            data[0,:,:] = self.zero_point_broadening[:,:].real  # FIXME number of spin
 
-        data = ncfile.createVariable('temperature_dependent_broadening','d',
-            ('number_of_spins','number_of_kpoints', 'max_number_of_states','number_of_temperature'))
+            # ZPR
+            zpr = ds.createVariable(
+                'zero_point_renormalization','d',
+                ('number_of_spins', 'number_of_kpoints',
+                 'max_number_of_states'))
 
-        if self.temperature_dependent_broadening is not None:
-            data[0,:,:,:] = self.temperature_dependent_broadening[:,:,:].real  # FIXME number of spin
+            #fan = ds.createVariable(
+            #   'fan_zero_point_renormalization','d',
+            #   ('number_of_spins', 'number_of_kpoints',
+            #    'max_number_of_states'))
 
-        self_energy = ncfile.createVariable('self_energy','d',
-            ('number_of_spins', 'number_of_kpoints', 'max_number_of_states', 'number_of_frequencies', 'cplex'))
+            #ddw = ds.createVariable(
+            #   'ddw_zero_point_renormalization','d',
+            #   ('number_of_spins', 'number_of_kpoints',
+            #    'max_number_of_states'))
 
-        if self.self_energy is not None:
-            self_energy[0,:,:,:,0] = self.self_energy[:,:,:].real  # FIXME number of spin
-            self_energy[0,:,:,:,1] = self.self_energy[:,:,:].imag  # FIXME number of spin
+            if self.zero_point_renormalization is not None:
+                # FIXME number of spin
+                zpr[0,:,:] = self.zero_point_renormalization[:,:].real
+                #fan[0,:,:] = self.fan_zero_point_renormalization[:,:].real
+                #ddw[0,:,:] = self.ddw_zero_point_renormalization[:,:].real
 
-        spectral_function = ncfile.createVariable('spectral_function','d',
-            ('number_of_spins', 'number_of_kpoints', 'max_number_of_states', 'number_of_frequencies'))
+            # TDR
+            data = ds.createVariable(
+                'temperature_dependent_renormalization','d',
+                ('number_of_spins','number_of_kpoints',
+                 'max_number_of_states','number_of_temperature'))
 
-        if self.spectral_function is not None:
-            spectral_function[0,:,:,:] = self.spectral_function[:,:,:]  # FIXME number of spin
+            if self.temperature_dependent_renormalization is not None:
+                # FIXME number of spin
+                data[0,:,:,:] = (
+                    self.temperature_dependent_renormalization[:,:,:].real)
 
-        zpr_modes = ncfile.createVariable('zero_point_renormalization_by_modes','d',
-            ('number_of_modes', 'number_of_spins', 'number_of_kpoints', 'max_number_of_states'))
-        if self.zero_point_renormalization_modes is not None:
-            zpr_modes[:,0,:,:] = self.zero_point_renormalization_modes[:,:,:]
+            # ZPR
+            data = ds.createVariable(
+                'zero_point_broadening','d',
+                ('number_of_spins', 'number_of_kpoints',
+                 'max_number_of_states'))
 
-        data = ncfile.createVariable('reduced_coordinates_of_qpoints','d', ('number_of_qpoints', 'cartesian'))
-        if self.qred is not None:
-            data[...] = self.qred[...]
+            if self.zero_point_broadening is not None:
+                # FIXME number of spin
+                data[0,:,:] = self.zero_point_broadening[:,:].real
 
-        data = ncfile.createVariable('phonon_mode_frequencies','d', ('number_of_qpoints', 'number_of_modes'))
-        if self.omega is not None:
-            data[...] = self.omega[...]
+            zpr_modes = ds.createVariable(
+                'zero_point_renormalization_by_modes','d',
+                ('number_of_modes', 'number_of_spins', 'number_of_kpoints',
+                 'max_number_of_states'))
 
-        ncfile.close()
+            if self.zero_point_renormalization_modes is not None:
+                zpr_modes[:,0,:,:] = (
+                self.zero_point_renormalization_modes[:,:,:])
+
+            # TDB
+            data = ds.createVariable(
+                'temperature_dependent_broadening','d',
+                ('number_of_spins','number_of_kpoints',
+                 'max_number_of_states','number_of_temperature'))
+
+            if self.temperature_dependent_broadening is not None:
+                # FIXME number of spin
+                data[0,:,:,:] = (
+                    self.temperature_dependent_broadening[:,:,:].real)
+
+            # ZSE
+            self_energy = ds.createVariable('self_energy','d',
+                ('number_of_spins', 'number_of_kpoints',
+                 'max_number_of_states', 'number_of_frequencies', 'cplex'))
+
+            if self.self_energy is not None:
+
+                # FIXME number of spin
+                self_energy[0,:,:,:,0] = self.self_energy[:,:,:].real
+                self_energy[0,:,:,:,1] = self.self_energy[:,:,:].imag
+
+            # TSE
+            self_energy_T = ds.createVariable(
+                'self_energy_temperature_dependent','d',
+                ('number_of_spins', 'number_of_kpoints',
+                 'max_number_of_states', 'number_of_frequencies',
+                 'number_of_temperature', 'cplex'))
+
+            if self.self_energy_T is not None:
+                # FIXME number of spin
+                self_energy_T[0,:,:,:,:,0] = self.self_energy_T[:,:,:,:].real
+                self_energy_T[0,:,:,:,:,1] = self.self_energy_T[:,:,:,:].imag
+
+            # ZSF
+            spectral_function = ds.createVariable(
+                'spectral_function','d',
+                ('number_of_spins', 'number_of_kpoints',
+                 'max_number_of_states', 'number_of_frequencies'))
+
+            if self.spectral_function is not None:
+                # FIXME number of spin
+                spectral_function[0,:,:,:] = self.spectral_function[:,:,:]
+
+            spectral_function_T = ds.createVariable(
+                'spectral_function_temperature_dependent','d',
+                ('number_of_spins', 'number_of_kpoints',
+                 'max_number_of_states', 'number_of_frequencies',
+                 'number_of_temperature'))
+
+            # TSF
+            if self.spectral_function_T is not None:
+                # FIXME number of spin
+                spectral_function_T[0,:,:,:,:] = (
+                    self.spectral_function_T[:,:,:,:])
+        return
 
 
     @master_only
     def write_renormalization(self):
         """Write the computed renormalization in a text file."""
-        fname = str(self.output) + "_REN.txt"
-        create_directory(fname)
+        create_directory(self.ren_dat)
 
-        with open(fname, "w") as O:
+        with open(self.ren_dat, "w") as f:
 
             if self.zero_point_renormalization is not None:
-                O.write("Total zero point renormalization (eV) for {} Q points\n".format(self.nqpt))
+
+                f.write("Total zero point renormalization (eV) for "
+                        "{} Q points\n".format(self.nqpt))
+
                 for ikpt, kpt in enumerate(self.kpts):
-                    O.write('Kpt: {0[0]} {0[1]} {0[2]}\n'.format(kpt))
-                    for line in formatted_array_lines(self.zero_point_renormalization[ikpt,:].real*Ha2eV):
-                        O.write(line)
+                    f.write('Kpt: {0[0]} {0[1]} {0[2]}\n'.format(kpt))
+
+                    for line in formatted_array_lines(
+                        self.zero_point_renormalization[ikpt,:].real*Ha2eV):
+
+                        f.write(line)
 
             if self.temperature_dependent_renormalization is not None:
-                O.write("Temperature dependence at Gamma (eV)\n")
-                for iband in range(self.nband):
-                  O.write('Band: {}\n'.format(iband))
-                  for tt, T in enumerate(self.temperatures):
-                    ren = self.temperature_dependent_renormalization[0,iband,tt].real * Ha2eV
-                    O.write("{:>8.1f}  {:>12.8f}\n".format(T, ren))
+                f.write("Temperature dependence at Gamma (eV)\n")
 
+                for iband in range(self.nband):
+                  f.write('Band: {}\n'.format(iband))
+
+                  for tt, T in enumerate(self.temperatures):
+
+                    ren = (
+                    self.temperature_dependent_renormalization[0,iband,tt]
+                    .real * Ha2eV)
+                    f.write("{:>8.1f}  {:>12.8f}\n".format(T, ren))
 
     @master_only
     def write_broadening(self):
         """Write the computed broadening in a text file."""
-        fname = str(self.output) + "_BRD.txt"
-        create_directory(fname)
+        create_directory(self.ren_dat)
 
-        with open(fname, "w") as O:
+        with open(self.ren_dat, "w") as f:
 
             if self.zero_point_broadening is not None:
-                O.write("Total zero point broadening (eV) for {} Q points\n".format(self.nqpt))
+
+                f.write("Total zero point broadening (eV) for "
+                        "{} Q points\n".format(self.nqpt))
+
                 for ikpt, kpt in enumerate(self.kpts):
-                    O.write('Kpt: {0[0]} {0[1]} {0[2]}\n'.format(kpt))
-                    for line in formatted_array_lines(self.zero_point_broadening[ikpt,:].real*Ha2eV):
-                        O.write(line)
+                    f.write('Kpt: {0[0]} {0[1]} {0[2]}\n'.format(kpt))
+                    for line in formatted_array_lines(
+                        self.zero_point_broadening[ikpt,:].real*Ha2eV):
+
+                        f.write(line)
 
             if self.temperature_dependent_broadening is not None:
-                O.write("Temperature dependence at Gamma\n")
+
+                f.write("Temperature dependence at Gamma\n")
+
                 for iband in range(self.nband):
-                  O.write('Band: {}\n'.format(iband))
+                  f.write('Band: {}\n'.format(iband))
+
                   for tt, T in enumerate(self.temperatures):
-                    brd = self.temperature_dependent_broadening[0,iband,tt].real * Ha2eV
-                    O.write("{:>8.1f}  {:>12.8f}\n".format(T, brd))
+
+                    brd = (self.temperature_dependent_broadening[0,iband,tt]    
+                           .real * Ha2eV)
+                    f.write("{:>8.1f}  {:>12.8f}\n".format(T, brd))
 

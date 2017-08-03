@@ -8,7 +8,7 @@
 !! the trial (local) potential and the residual potential.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (XG, GMR, MT, EB)
+!! Copyright (C) 1998-2017 ABINIT group (XG, GMR, MT, EB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -31,7 +31,7 @@
 !!  nhat(nfft,nspden*usepaw)= -PAW only- compensation density
 !!  nhatgr(nfft,nspden,3*nhatgrdim)= -PAW only- cartesian gradients of compensation density
 !!  nhatgrdim= -PAW only- 0 if nhatgr array is not used ; 1 otherwise
-!!  nkxc=second dimension of the array kxc, see rhohxc.f for a description
+!!  nkxc=second dimension of the array kxc, see rhohxc.F90 for a description
 !!  n3xccc=dimension of the xccc3d array (0 or nfft).
 !!  optene=option for the computation of additional energies
 !!  optres=0: the trial potential residual is computed ; the input potential value is kept
@@ -39,6 +39,13 @@
 !!  optxc=option to be used for the call to rhohxc
 !!  rhog(2,nfft)=array for Fourier transform of electron density
 !!  rhor(nfft,nspden)=array for electron density in electrons/bohr**3.
+!!   | definition for spin components:
+!!   | case of nspden = 2
+!!   |      rhor(:,1) => rho_up + rho_dwn
+!!   |      rhor(:,2) => rho_up
+!!   | case of nspden = 4
+!!   |      rhor(:,1)   => rho_upup + rho_dwndwn
+!!   |      rhor(:,2:4) => {m_x,m_y,m_z}
 !!  rprimd(3,3)=dimensional primitive translations in real space (bohr)
 !!  [taug(2,nfftf*dtset%usekden)]=array for Fourier transform of kinetic energy density
 !!  [taur(nfftf,nspden*dtset%usekden)]=array for kinetic energy density
@@ -188,7 +195,7 @@ subroutine rhotov(dtset,energies,gprimd,gsqcut,istep,kxc,mpi_enreg,nfft,ngfft,&
 & (dtset%ixc==41.or.dtset%ixc==42.or.libxc_functionals_is_hybrid()))
 
 !If usewvl: wvlbigdft indicates that the BigDFT workflow will be followed
- if(dtset%usewvl==1 .and. dtset%wvl_bigdft_comp==1) wvlbigdft=.true.
+ wvlbigdft=(dtset%usewvl==1.and.dtset%wvl_bigdft_comp==1)
 
 !mpi communicator for spherical grid
  mpi_comm_sphgrid=mpi_enreg%comm_fft
@@ -202,7 +209,7 @@ subroutine rhotov(dtset,energies,gprimd,gsqcut,istep,kxc,mpi_enreg,nfft,ngfft,&
 
 !------Compute Hartree and xc potentials----------------------------------
 
-!allocate vnew here. 
+!allocate vnew here.
 !In wvl: vnew is used at call to wvl_psitohpsi
  if (optres==0) then
    ABI_ALLOCATE(vnew,(nfft,dtset%nspden))
@@ -214,6 +221,8 @@ subroutine rhotov(dtset,energies,gprimd,gsqcut,istep,kxc,mpi_enreg,nfft,ngfft,&
    if (dtset%icoulomb == 0 .and. dtset%usewvl == 0) then
 !    Use the periodic solver to compute Hxc.
      nk3xc=1
+!write(80,*) "rhotov"
+!xccc3d=zero
      call timab(941,1,tsec)
      if (ipositron==0) then
        call rhohxc(dtset,energies%e_xc,gsqcut,usepaw,kxc,mpi_enreg,nfft,ngfft,&
@@ -227,9 +236,10 @@ subroutine rhotov(dtset,energies,gprimd,gsqcut,istep,kxc,mpi_enreg,nfft,ngfft,&
 &       taug=taug,taur=taur,vxctau=vxctau,add_tfw=add_tfw_,&
 &       electronpositron=electronpositron)
      end if
+!write(80,*) vxc
      if (is_hybrid_ncpp) then
        call xchybrid_ncpp_cc(dtset,energies%e_xc,mpi_enreg,nfft,ngfft,n3xccc,rhor,rprimd,&
-&       strsxc,vxc,vxcavg,xccc3d)
+&       strsxc,vxcavg,xccc3d,vxc=vxc)
      end if
      call timab(941,2,tsec)
 
@@ -247,7 +257,7 @@ subroutine rhotov(dtset,energies,gprimd,gsqcut,istep,kxc,mpi_enreg,nfft,ngfft,&
      call timab(943,2,tsec)
    end if
 !  For icoulomb==0 and usewvl Ehartree is calculated in psolver_rhohxc().
-!  For PAW we recalculate this since nhat was not taken into account 
+!  For PAW we recalculate this since nhat was not taken into account
 !  in psolver_rhohxc: E_H= int v_H (n+nhat) dr
    if(.not. wvlbigdft .and. (dtset%icoulomb==0 .or. dtset%usepaw==1 ) ) then
      call timab(942,1,tsec)
@@ -280,7 +290,7 @@ subroutine rhotov(dtset,energies,gprimd,gsqcut,istep,kxc,mpi_enreg,nfft,ngfft,&
 
  calc_xcdc=.false.
  if (optene==1.or.optene==2) calc_xcdc=.true.
- if (dtset%usewvl==1 .and. dtset%nnsclo>0) calc_xcdc=.true.
+ if (dtset%usewvl==1.and.dtset%nnsclo>0) calc_xcdc=.true.
  if (wvlbigdft) calc_xcdc=.false.
  if (dtset%usefock==1) calc_xcdc=.true.
 
@@ -317,17 +327,26 @@ subroutine rhotov(dtset,energies,gprimd,gsqcut,istep,kxc,mpi_enreg,nfft,ngfft,&
 !EB vzeeman(:) = factor*( Hz, Hx+iHy; Hx-iHy, -Hz)
 !EB factor = -g/2 * mu_B * mu_0 = -1/2*B in a.u.
 !EB <-- vzeeman might have to be allocated correctly --> to be checked
+! vzeeman = 1/2 ( -B_z, -B_x + iB_y ; -B_x - iB_y , B_z)
  vzeeman(:) = zero
  if (any(abs(dtset%zeemanfield(:))>tol8)) then
    if(dtset%nspden==2)then
-!    EB The collinear case has to be checked : 
+!    EB The collinear case has to be checked :
 !    EB Is it vzeeman(1) or (2) that has to be added here? to be checked in setvtr and energy as well
-     vzeeman(1) =-half*dtset%zeemanfield(3)  ! For collinear ispden=2 is rho_up only
+!    SPr: the density components are: rhor(1) => n_upup + n_dwndwn
+!                                     rhor(2) => n_upup
+!         the convention for the potential spin components is a bit different:
+!                                     v(1)    => v_dwndwn
+!                                     v(2)    => v_upup
+!         verified by comparing collinear and non-collinear calculations
+     
+     vzeeman(1) = -half*dtset%zeemanfield(3)  ! v_dwndwn
+     vzeeman(2) =  half*dtset%zeemanfield(3)  ! v_upup
    else if(dtset%nspden==4)then
-     vzeeman(1)=-half*dtset%zeemanfield(3)
-     vzeeman(2)= half*dtset%zeemanfield(3)
-     vzeeman(3)=-half*dtset%zeemanfield(1)
-     vzeeman(4)= half*dtset%zeemanfield(2)
+     vzeeman(1)=-half*dtset%zeemanfield(3)    ! v_dwndwn
+     vzeeman(2)= half*dtset%zeemanfield(3)    ! v_upup
+     vzeeman(3)=-half*dtset%zeemanfield(1)    ! Re(v_dwnup) = Re(v_updwn)
+     vzeeman(4)= half*dtset%zeemanfield(2)    ! Im(v_dwnup) =-Im(v_updwn)
    end if
  end if
 
@@ -372,22 +391,25 @@ subroutine rhotov(dtset,energies,gprimd,gsqcut,istep,kxc,mpi_enreg,nfft,ngfft,&
      end if
      offset   = 0
 
+     if (dtset%iscf==0) vtrial=vnew
+
 !    Pass vtrial to BigDFT object
      if(dtset%usewvl==1) then
-       call wvl_vtrial_abi2big(1,vtrial,wvl%den)
+       call wvl_vtrial_abi2big(1,vnew,wvl%den)
+!      call wvl_vtrial_abi2big(1,vtrial,wvl%den)
      end if
 
    else
 !    Compute with covering comms the different part of the potential.
-!    only forwvlbigdft
+!    only for wvlbigdft
      ABI_ALLOCATE(xcart,(3, dtset%natom))
      call xred2xcart(dtset%natom, rprimd, xcart, xred)
      call wvl_psitohpsi(dtset%diemix,energies%e_exactX, energies%e_xc, energies%e_hartree, &
 &     energies%e_kinetic, energies%e_localpsp, energies%e_nonlocalpsp, energies%e_sicdc, &
-&     istep + 1, istep, dtset%iscf, mpi_enreg%me_wvl, dtset%natom, dtset%nfft,&
+&     istep + 1, 1, dtset%iscf, mpi_enreg%me_wvl, dtset%natom, dtset%nfft,&
 &     mpi_enreg%nproc_wvl, dtset%nspden, &
 &     vres2, .true., energies%e_xcdc, wvl,&
-&     wvlbigdft, xcart, strsxc,vnew, vxc)
+&     wvlbigdft, xcart, strsxc,vtrial=vnew,vxc=vxc)
      ABI_DEALLOCATE(xcart)
 
      vresidnew = vnew - vtrial
@@ -454,7 +476,7 @@ subroutine rhotov(dtset,energies,gprimd,gsqcut,istep,kxc,mpi_enreg,nfft,ngfft,&
      call xred2xcart(dtset%natom, rprimd, xcart, xred)
      call wvl_psitohpsi(dtset%diemix,energies%e_exactX, energies%e_xc, energies%e_hartree, &
 &     energies%e_kinetic, energies%e_localpsp, energies%e_nonlocalpsp, energies%e_sicdc, &
-&     istep + 1, istep, dtset%iscf, mpi_enreg%me_wvl, &
+&     istep + 1, 1, dtset%iscf, mpi_enreg%me_wvl, &
 &     dtset%natom, dtset%nfft, mpi_enreg%nproc_wvl,&
 &     dtset%nspden,vres2, .true.,energies%e_xcdc,  wvl,&
 &     wvlbigdft, xcart, strsxc, vtrial, vxc)

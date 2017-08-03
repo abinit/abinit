@@ -8,7 +8,7 @@
 !! and the fixed contribution to the 1st-order Fermi energy (nonlocal and kinetic)
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2016 ABINIT group (DRH, XG, MT)
+!! Copyright (C) 1999-2017 ABINIT group (DRH, XG, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -127,7 +127,7 @@ subroutine dfpt_wfkfermi(cg,cgq,cplex,cprj,cprjq,&
 !arrays
  real(dp),intent(in) :: cg(2,mpw*nspinor*mband*mkmem*nsppol),cgq(2,mcgq)
  real(dp),intent(in) :: eig0_k(nband_k),occ_k(nband_k),rocceig(nband_k,nband_k)
- real(dp),intent(inout) :: rhoaug(cplex*gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6)
+ real(dp),intent(inout) :: rhoaug(cplex*gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,gs_hamkq%nvloc)
  real(dp),intent(inout) :: eig1_k(2*nband_k**2)
  real(dp),intent(out) :: fe1fixed_k(nband_k)
  real(dp),intent(out) :: fe1norm_k(nband_k)
@@ -153,7 +153,7 @@ subroutine dfpt_wfkfermi(cg,cgq,cplex,cprj,cprjq,&
  DBG_ENTER('COLL')
 
 !Check arguments validity
- if (ipert>gs_hamkq%natom.and.ipert/=gs_hamkq%natom+3.and.ipert/=gs_hamkq%natom+4) then
+ if (ipert>gs_hamkq%natom.and.ipert/=gs_hamkq%natom+3.and.ipert/=gs_hamkq%natom+4.and.ipert/=gs_hamkq%natom+5) then !SPr rfmagn deb
    msg='  wrong ipert argument !'
    MSG_BUG(msg)
  end if
@@ -195,6 +195,7 @@ subroutine dfpt_wfkfermi(cg,cgq,cplex,cprj,cprjq,&
 !Arguments of getgh1c routine (want only (NL+kin) frozen H(1))
  berryopt=0;usevnl=0;sij_opt=-gs_hamkq%usepaw;tim_getgh1c=3
  optlocal=0;optnl=1;opt_gvnl1=0
+ if(ipert==gs_hamkq%natom+5) optnl=0; ! no 1st order NL in H(1), also no kin, but this will be taken into account later
 !Arguments of the dfpt_accrho routine
  tim_fourwf=5 ; opt_accrho=1 ; opt_corr=0
 !Null potentially unassigned output variables
@@ -248,22 +249,21 @@ subroutine dfpt_wfkfermi(cg,cgq,cplex,cprj,cprjq,&
        call status(0,dtfil%filstat,iexit,level,'after wf read ')
      end if
 
+
 !    Apply H^(1)-Esp.S^(1) to Psi^(0) (H(^1)=only (NL+kin) frozen part)
      lambda=eig0_k(iband)
      call getgh1c(berryopt,cwave0,cwaveprj0,gh1,dum_grad_berry,dum_gs1,gs_hamkq,dum_gvnl1,&
 &     idir,ipert,lambda,mpi_enreg,optlocal,optnl,opt_gvnl1,rf_hamkq,sij_opt,&
 &     tim_getgh1c,usevnl)
-
 !    Compute Eig1=<Psi^(0)|H^(1)-Eps.S^(1)|Psi(0)>
      call dotprod_g(dotr,lambda,gs_hamkq%istwf_k,npw_k*nspinor,1,cwave0,gh1,mpi_enreg%me_g0, &
 &     mpi_enreg%comm_spinorfft)
      indx=2*iband-1+(iband-1)*2*nband_k
      eig1_k(indx)=dotr
-
 !    Compute the fixed contribution to the 1st-order Fermi energy
      fe1fixed_k(iband)=two*wtband*eig1_k(indx)
      fe1norm_k(iband) =two*wtband
-
+     
 !    Accumulate contribution to density and PAW occupation matrix
      call dfpt_accrho(counter,cplex,cwave0,cwaveq,cwaveq,cwaveprj0,cwaveprjq,dotr,&
 &     dtfil%filstat,gs_hamkq,iband,0,0,isppol,kptopt,mpi_enreg,gs_hamkq%natom,nband_k,ncpgr,&

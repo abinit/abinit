@@ -19,7 +19,7 @@
 !!   optdyfr=1: computes contribution of atomic pot./dens. to frozen part of dyn. matrix
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (FJ, MT)
+!! Copyright (C) 1998-2017 ABINIT group (FJ, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -194,11 +194,11 @@ subroutine atm2fft(atindx1,atmrho,atmvloc,dyfrn,dyfrv,eltfrn,gauss,gmet,gprimd,&
  real(dp),intent(in) :: vg(2,nfft*optn*max(optgr,optstr,optdyfr,opteltfr))
  real(dp),intent(in) :: vg1(2,nfft*optn*opteltfr),vg1_core(2,nfft*optn*opteltfr)
  real(dp),intent(in) :: vprtrb(2),vspl(mqgrid,2,ntypat*optv)
- real(dp),intent(out) :: atmrho(nfft*optn)  !vz_i
- real(dp),intent(inout) :: atmvloc(nfft*optv) !vz_i
+ real(dp),intent(out) :: atmrho(nfft*optn)
+ real(dp),intent(inout) :: atmvloc(nfft*optv)
  real(dp),intent(out) :: dyfrn(3,3,natom*optn*optdyfr),dyfrv(3,3,natom*optv*optdyfr)
  real(dp),intent(out) :: eltfrn(6+3*natom,6)
- real(dp),intent(inout) :: grn(3,natom*optn*optgr) !vz_i
+ real(dp),intent(inout) :: grn(3,natom*optn*optgr)
  real(dp),intent(out) :: grv(3,natom*optv*optgr),strn(6*optn*optstr)
  real(dp),intent(out) :: strv(6*optv*optstr)
  type(pawtab_type),target,intent(in) :: pawtab(ntypat*usepaw)
@@ -863,7 +863,7 @@ subroutine atm2fft(atindx1,atmrho,atmvloc,dyfrn,dyfrv,eltfrn,gauss,gmet,gprimd,&
 &   +two*(dble(i1*i2)*gmet(1,2)+dble(i2*i3)*gmet(2,3)+dble(i3*i1)*gmet(3,1))
  end function gsq_atm
 
- function dgsqds_atm(i1,i2,i3,is)
+   function dgsqds_atm(i1,i2,i3,is)
 !Define dG^2/ds based on G space metric derivative
 
 !This section has been created automatically by the script Abilint (TD).
@@ -881,7 +881,7 @@ subroutine atm2fft(atindx1,atmrho,atmvloc,dyfrn,dyfrv,eltfrn,gauss,gmet,gprimd,&
 &   dble(i2*i3)*(dgm(2,3,is)+dgm(3,2,is))
  end function dgsqds_atm
 
- function d2gsqds_atm(i1,i2,i3,is1,is2)
+   function d2gsqds_atm(i1,i2,i3,is1,is2)
 !  Define 2dG^2/ds1ds2  based on G space metric derivative
 
 !This section has been created automatically by the script Abilint (TD).

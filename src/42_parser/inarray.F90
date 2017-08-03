@@ -10,7 +10,7 @@
 !! Takes care of multipliers.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2016 ABINIT group (DCA, XG).
+!! Copyright (C) 1999-2017 ABINIT group (DCA, XG).
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -180,13 +180,13 @@ subroutine inarray(b1,cs,dprarr,intarr,marr,narr,string,typevarphys)
 &   ' inarray : ',ch10,&
 &   '  An error occurred reading data for keyword "',trim(cs),'",',ch10,&
 &   '  looking for ',narr,' array elements.'
-   call wrtout(std_out,message,'COLL')
+   call wrtout(std_out,message,do_flush=.true.)
 
-   write(message,'(7a)')&
+   write(message,'(8a)')&
 &   'There is a problem with the input file : maybe  ',ch10,&
 &   'a disagreement between the declared dimension of the array,',ch10,&
 &   'and the number of data actually provided. ',ch10,&
-&   'Action: correct your input file ! '
+&   'Action: correct your input file, and especially the keywork', trim(cs)
    MSG_ERROR(message)
  end if
 

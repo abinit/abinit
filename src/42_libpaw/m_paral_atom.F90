@@ -8,7 +8,7 @@
 !!  of PAW data over atomic sites
 !!
 !! COPYRIGHT
-!! Copyright (C) 2012-2016 ABINIT group (MT, MD)
+!! Copyright (C) 2012-2017 ABINIT group (MT, MD)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -131,8 +131,8 @@ end subroutine get_my_natom
 !!      calc_efg,calc_fc,denfgr,dfpt_accrho,dfpt_ewald,elt_ewald,eltxccore
 !!      initmpi_atom,initrhoij,m_hamiltonian,m_paw_an,m_paw_ij,m_paw_pwaves_lmn
 !!      m_pawdij,m_pawfgrtab,m_pawrhoij,make_efg_onsite,make_fc_paw,newfermie1
-!!      nhatgrid,paw_mknewh0,pawaccrhoij,pawdenpot,pawdfptenergy,pawgrnl
-!!      pawmkaewf,pawmknhat,pawmknhat_psipsi,pawnhatfr,pawprt,pawsushat
+!!      nhatgrid,outscfcv,paw_mknewh0,pawaccrhoij,pawdenpot,pawdfptenergy
+!!      pawgrnl,pawmkaewf,pawmknhat,pawmknhat_psipsi,pawnhatfr,pawprt,pawsushat
 !!      pawuj_red,setnoccmmp,setrhoijpbe0
 !!
 !! CHILDREN
@@ -236,10 +236,10 @@ end subroutine get_my_atmtab
 !! PARENTS
 !!      calc_efg,calc_fc,denfgr,dfpt_ewald,elt_ewald,eltxccore,initrhoij
 !!      m_hamiltonian,m_paw_an,m_paw_ij,m_paw_pwaves_lmn,m_pawdij,m_pawfgrtab
-!!      m_pawrhoij,make_efg_onsite,make_fc_paw,newfermie1,nhatgrid,paw_mknewh0
-!!      pawaccrhoij,pawdenpot,pawdfptenergy,pawgrnl,pawmkaewf,pawmknhat
-!!      pawmknhat_psipsi,pawnhatfr,pawprt,pawsushat,pawuj_red,setnoccmmp
-!!      setrhoijpbe0
+!!      m_pawrhoij,make_efg_onsite,make_fc_paw,newfermie1,nhatgrid,outscfcv
+!!      paw_mknewh0,pawaccrhoij,pawdenpot,pawdfptenergy,pawgrnl,pawmkaewf
+!!      pawmknhat,pawmknhat_psipsi,pawnhatfr,pawprt,pawsushat,pawuj_red
+!!      setnoccmmp,setrhoijpbe0
 !!
 !! CHILDREN
 !!
@@ -369,7 +369,7 @@ end subroutine get_proc_atmtab
 !!  containing the corresponding processor indexes.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2012-2016 ABINIT group (MD)
+!! Copyright (C) 2012-2017 ABINIT group (MD)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

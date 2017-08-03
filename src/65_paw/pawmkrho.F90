@@ -10,7 +10,7 @@
 !! Build occupation matrix (packed storage)
 !!
 !! COPYRIGHT
-!! Copyright (C) 2010-2016 ABINIT group (MT)
+!! Copyright (C) 2010-2017 ABINIT group (MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -72,7 +72,7 @@
 !!  (in that case pawrhoij_unsym should not be distributed over atomic sites).
 !!
 !! PARENTS
-!!      dfpt_nstpaw,dfpt_rhofermi,dfpt_vtorho,vtorho
+!!      afterscfloop,dfpt_nstpaw,dfpt_rhofermi,dfpt_vtorho,vtorho
 !!
 !! CHILDREN
 !!      fourdp,pawmknhat,pawrhoij_copy,pawrhoij_free,pawrhoij_free_unpacked

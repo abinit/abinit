@@ -7,7 +7,7 @@
 !!  Tools for the computiation of electronic PJDOSes
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2016 ABINIT group (MVer, XG, SM, MT, BAmadon, MG)
+!!  Copyright (C) 2008-2017 ABINIT group (MVer, XG, SM, MT, BAmadon, MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -48,7 +48,7 @@ module m_epjdos
  use m_numeric_tools,  only : simpson, simpson_int
  use m_fstrings,       only : int2char4, strcat
  use m_pawtab,         only : pawtab_type
- use m_bz_mesh,        only : tetra_from_kptrlatt
+ use m_kpts,           only : tetra_from_kptrlatt
 
  implicit none
 
@@ -267,6 +267,10 @@ end function epjdos_new
 !!  deallocate memory
 !!
 !! PARENTS
+!!      outscfcv
+!!
+!! CHILDREN
+!!      cwtime,wrtout
 !!
 !! SOURCE
 
@@ -345,9 +349,7 @@ end subroutine epjdos_free
 !!      outscfcv
 !!
 !! CHILDREN
-!!      destroy_tetra,dos_hdr_write,acc_dos_1band
-!!      get_full_kgrid,get_tetra_weight,init_tetra,int2char4,matr3inv,metric
-!!      wrtout
+!!      cwtime,wrtout
 !!
 !! SOURCE
 
@@ -389,7 +391,6 @@ subroutine dos_calcnwrite(dos,dtset,crystal,ebands,fildata,comm)
 !arrays
  integer,allocatable :: unt_atsph(:)
  real(dp) :: list_dp(3)
- real(dp),allocatable :: dtweightde(:,:),tweight(:,:)
  real(dp),allocatable :: tmp_eigen(:),total_dos(:,:,:),eig_dos(:,:)
  real(dp),allocatable :: dos_m(:,:,:),dos_paw1(:,:,:),dos_pawt1(:,:,:)
  real(dp),allocatable :: wdt(:,:)
@@ -515,8 +516,6 @@ subroutine dos_calcnwrite(dos,dtset,crystal,ebands,fildata,comm)
  end if
 
  ! Tetra weights
- ABI_MALLOC(tweight,(nene, nkpt))
- ABI_MALLOC(dtweightde,(nene, nkpt))
  ABI_MALLOC(wdt, (nene, 2))
 
  ! Allocate arrays to store DOSes and fill with zeros.
@@ -727,8 +726,6 @@ subroutine dos_calcnwrite(dos,dtset,crystal,ebands,fildata,comm)
 
  ABI_FREE(tmp_eigen)
  ABI_FREE(total_dos)
- ABI_FREE(tweight)
- ABI_FREE(dtweightde)
  ABI_FREE(wdt)
  ABI_FREE(eig_dos)
 
@@ -919,7 +916,7 @@ end subroutine dos_calcnwrite
 !!      m_cut3d,partial_dos_fractions
 !!
 !! CHILDREN
-!!      atomdata_from_znucl,dotprod_g
+!!      cwtime,wrtout
 !!
 !! SOURCE
 
@@ -1222,8 +1219,7 @@ end subroutine recip_ylm
 !!      m_cut3d
 !!
 !! CHILDREN
-!!      dotprod_v,fftpac,fourdp,fourwf,ph1d3d,sphereboundary,sphericaldens
-!!      sqnorm_g
+!!      cwtime,wrtout
 !!
 !! SOURCE
 
@@ -1427,9 +1423,10 @@ end subroutine dens_in_sph
 !!  sphfofg(2,nfft)=convoluted function, in reciprocal space
 !!
 !! PARENTS
-!!      dens_in_sph
+!!      m_epjdos
 !!
 !! CHILDREN
+!!      cwtime,wrtout
 !!
 !! SOURCE
 
@@ -1506,7 +1503,7 @@ end subroutine sphericaldens
 !!      outscfcv
 !!
 !! CHILDREN
-!!      atomdata_from_znucl,int2char4,wrtout
+!!      cwtime,wrtout
 !!
 !! SOURCE
 
@@ -1747,8 +1744,10 @@ end subroutine prtfatbands
 !!  Only writing
 !!
 !! PARENTS
+!!      outscfcv
 !!
 !! CHILDREN
+!!      cwtime,wrtout
 !!
 !! SOURCE
 

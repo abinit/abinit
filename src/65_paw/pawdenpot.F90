@@ -9,7 +9,7 @@
 !! Can also compute first-order densities potentials and second-order energies (RF calculations).
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (FJ, MT)
+!! Copyright (C) 1998-2017 ABINIT group (FJ, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -313,6 +313,7 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
    lmn2_size=paw_ij(iatom)%lmn2_size
    lm_size=paw_an(iatom)%lm_size
    mesh_size=pawtab(itypat)%mesh_size
+
    usecore=1;usetcore =pawtab(itypat)%usetcore
    if (ipert/=0) usecore=0  ! This is true for phonons and Efield pert.
    if (ipert/=0) usetcore=0 ! This is true for phonons and Efield pert.
@@ -673,7 +674,7 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
 !  Electron-positron calculation: compute Dij due to fixed particles (elec. or pos. depending on calctype)
    if (ipositron/=0) then
      ABI_ALLOCATE(dij_ep,(cplex*lmn2_size))
-     call pawdijhartree(cplex,dij_ep,nspden,electronpositron%pawrhoij_ep(iatom),pawtab(itypat))
+     call pawdijhartree(paw_ij(iatom)%cplex,dij_ep,nspden,electronpositron%pawrhoij_ep(iatom),pawtab(itypat))
      if (option/=1) then
        do ispden=1,nspdiag
          jrhoij=1
@@ -691,7 +692,7 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
 
 !  Hartree Dij computation
    if (ipositron/=1) then
-     call pawdijhartree(cplex,paw_ij(iatom)%dijhartree,nspden,pawrhoij(iatom),pawtab(itypat))
+     call pawdijhartree(paw_ij(iatom)%cplex,paw_ij(iatom)%dijhartree,nspden,pawrhoij(iatom),pawtab(itypat))
    else
      paw_ij(iatom)%dijhartree(:)=zero
    end if
@@ -868,6 +869,7 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
        paw_ij(iatom)%dijfock(:,:)=dijfock_vv(:,:)+dijfock_cv(:,:)
 
 !      Fock contribution to energy
+
        if (option/=1) then
          if ((cplex==1).or.(ipert==0)) then
            do ispden=1,pawrhoij(iatom)%nspden
@@ -894,6 +896,7 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
            end do
          end if
        end if
+
        ABI_DEALLOCATE(dijfock_vv)
        ABI_DEALLOCATE(dijfock_cv)
 

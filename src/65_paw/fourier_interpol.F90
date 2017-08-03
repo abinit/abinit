@@ -10,7 +10,7 @@
 !!  case of NC calculations since it does not require Pawfgr.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2007-2016 ABINIT group (MG)
+!!  Copyright (C) 2007-2017 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -38,7 +38,7 @@
 !!   rhog_out(2,nfftc)=Fourier transform of output density/potential on the coarse grid
 !!
 !! PARENTS
-!!      m_ioarr,m_qparticles
+!!      m_dvdb,m_ioarr,m_qparticles
 !!
 !! CHILDREN
 !!      indgrid,pawfgr_destroy,transgrid

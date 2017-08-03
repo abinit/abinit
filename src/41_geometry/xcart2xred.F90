@@ -13,7 +13,7 @@
 !! Note that the reverse operation is deon by xred2xcart
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (DCA, XG, GMR)
+!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -30,12 +30,14 @@
 !! SIDE EFFECTS
 !!
 !! PARENTS
-!!      driver,evdw_wannier,ingeo,m_cut3d,m_mep,m_paw_pwaves_lmn,m_pred_lotf
-!!      mkcore_paw,mkcore_wvl,pawmkaewf,pimd_langevin_npt,pimd_langevin_nvt
-!!      pimd_nosehoover_npt,pimd_nosehoover_nvt,prcref,prcref_PMA,pred_delocint
-!!      pred_diisrelax,pred_isokinetic,pred_isothermal,pred_langevin
-!!      pred_moldyn,pred_nose,pred_srkna14,pred_steepdesc,pred_verlet,relaxpol
-!!      wrt_moldyn_netcdf,wvl_setboxgeometry
+!!      driver,evdw_wannier,ingeo,m_cut3d,m_dens,m_effective_potential
+!!      m_effective_potential_file,m_mep,m_paw_pwaves_lmn,m_pred_lotf
+!!      mkcore_paw,mkcore_wvl,mover_effpot,pawmkaewf,pimd_langevin_npt
+!!      pimd_langevin_nvt,pimd_nosehoover_npt,pimd_nosehoover_nvt,prcref
+!!      prcref_PMA,pred_delocint,pred_diisrelax,pred_isokinetic,pred_isothermal
+!!      pred_langevin,pred_moldyn,pred_nose,pred_srkna14,pred_steepdesc
+!!      pred_velverlet,pred_verlet,relaxpol,wrt_moldyn_netcdf
+!!      wvl_setboxgeometry
 !!
 !! CHILDREN
 !!      matr3inv

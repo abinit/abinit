@@ -16,7 +16,7 @@ A much more consistent discussion of the theoretical aspects of the Bethe-Salpet
 equation can be found in [1].
 
 </p>
-<h5>Copyright (C) 2006-2016 ABINIT group (MG,MS)
+<h5>Copyright (C) 2006-2017 ABINIT group (MG,MS)
 <br> This file is distributed under the terms of the GNU General Public License, see
 ~abinit/COPYING or <a href="http://www.gnu.org/copyleft/gpl.txt">
 http://www.gnu.org/copyleft/gpl.txt </a>.
@@ -382,7 +382,7 @@ Under this assumption the excitonic Hamiltonian is given by a Hermitian operator
 </p>
 
 
-The variable <a href="../input_variables/html_automatically_generated/vargw.html#bs_coupling" target="kwimg">bs_coupling</a> defines
+The variable <a href="../input_variables/html_automatically_generated/varbse.html#bs_coupling" target="kwimg">bs_coupling</a> defines
 whether the coupling block should be included in the calculation.
 
 <p>
@@ -487,11 +487,11 @@ numerical difficulties since an expensive matrix inversion should be performed f
 </p>
 <p>
 The code implements different methods proposed in the literature to avoid the matrix inversion for each frequency.
-The variable <a href="../input_variables/html_automatically_generated/vargw.html#bs_algorithm" target="kwimg">bs_algorithm</a> is used to select 
+The variable <a href="../input_variables/html_automatically_generated/varbse.html#bs_algorithm" target="kwimg">bs_algorithm</a> is used to select 
 among the different possibilities.
 </p>
 <p>
-<a href="../input_variables/html_automatically_generated/vargw.html#bs_algorithm" target="kwimg">bs_algorithm</a>=1
+<a href="../input_variables/html_automatically_generated/varbse.html#bs_algorithm" target="kwimg">bs_algorithm</a>=1
 employs standard (Sca)LAPACK routines to obtain the spectral representation of <i>H</i> 
 in terms of eigenvalues and right eigenvectors of <i>H</i>:
 
@@ -507,7 +507,7 @@ Then, as discussed in [2], the inverse of [<i>H</i>-&#969;] is obtained accordin
 We do not elaborate this point further since the direct diagonalization is advantageous only in particular circumstances, 
 as explained in the documentation.
 <p>
-<a href="../input_variables/html_automatically_generated/vargw.html#bs_algorithm" target="kwimg">bs_algorithm</a>=2
+<a href="../input_variables/html_automatically_generated/varbse.html#bs_algorithm" target="kwimg">bs_algorithm</a>=2
 avoids the diagonalization using an iterative algorithm that constructs a basis
 set in which <i>H</i> is represented by a real symmetric tridiagonal matrix [3].
 Without entering into detail, one can schematically represent the Haydock technique as an algorithmic procedure 
@@ -542,11 +542,11 @@ The main drawback of the method is that it does not give direct access
 to the excitonic spectrum
 hence it cannot be used to calculate binding energies or to plot the
 excitonic wavefunctions.
-Moreover, for the time being, <a href="../input_variables/html_automatically_generated/vargw.html#bs_algorithm" target="kwimg">bs_algorithm</a>=2
+Moreover, for the time being, <a href="../input_variables/html_automatically_generated/varbse.html#bs_algorithm" target="kwimg">bs_algorithm</a>=2
 cannot be used for calculations in which the coupling term is included.
 </p>
 <p>
-<a href="../input_variables/html_automatically_generated/vargw.html#bs_algorithm" target="kwimg">bs_algorithm</a>=3 employs the conjugate-gradient method
+<a href="../input_variables/html_automatically_generated/varbse.html#bs_algorithm" target="kwimg">bs_algorithm</a>=3 employs the conjugate-gradient method
 to calculate the lowest eigenstates of the Hamiltonian. 
 At present, this method is still under testing and does not support calculations with the coupling term.
 
@@ -585,11 +585,11 @@ The computation of the oscillator matrix elements is discussed in
 <a href="theory_mbt.html#oscillator_notes">this section</a> of the <i>GW</i> Notes.
 
 <p>
-The input variable <a href="../input_variables/html_automatically_generated/vargw.html#bs_exchange_term" target="kwimg">bs_exchange_term</a>
+The input variable <a href="../input_variables/html_automatically_generated/varbse.html#bs_exchange_term" target="kwimg">bs_exchange_term</a>
 can be used to disable the computation of the exchange term, this
 option is mainly used for performing optical calculations without local
 field effects.
-The variable <a href="../input_variables/html_automatically_generated/vargw.html#bs_coulomb_term" target="kwimg">bs_coulomb_term</a> governs 
+The variable <a href="../input_variables/html_automatically_generated/varbse.html#bs_coulomb_term" target="kwimg">bs_coulomb_term</a> governs 
 the computation of the Coulomb term, the most CPU-demanding part due to the presence of the double sum over <b>G</b>-vectors.
 </p>
 <p>

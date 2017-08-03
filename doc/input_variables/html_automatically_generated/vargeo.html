@@ -27,6 +27,7 @@ variables to be used in the main input file of the abinit code.
  <br>B.
  <a href="#brvltt">brvltt</a>&nbsp;&nbsp;
  <br>C.
+ <a href="#chempot">chempot</a>&nbsp;&nbsp;
  <br>D.
  <br>E.
  <br>F.
@@ -41,6 +42,7 @@ variables to be used in the main input file of the abinit code.
  <br>N.
  <a href="#natrd">natrd</a>&nbsp;&nbsp;
  <a href="#nobj">nobj</a>&nbsp;&nbsp;
+ <a href="#nzchempot">nzchempot</a>&nbsp;&nbsp;
  <br>O.
  <a href="#objaat">objaat</a>&nbsp;&nbsp;
  <a href="#objaax">objaax</a>&nbsp;&nbsp;
@@ -75,7 +77,7 @@ variables to be used in the main input file of the abinit code.
 
 <br><br><br><br><hr>
 <br><font id="title"><a name="brvltt">brvltt</a></font>
-<br><font id="definition">Mnemonics: BRaVais LaTTice type</font>
+<br><font id="mnemonics">Mnemonics: BRaVais LaTTice type</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#symmetriser">SYMMETRISER</a></font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
@@ -164,8 +166,35 @@ and two associated translations: (2/3, 1/3, 1/3) and
 <B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
 
 
+<br><font id="title"><a name="chempot">chempot</a></font>
+<br><font id="mnemonics">Mnemonics: spatially varying CHEMical POTential</font>
+<br><font id="characteristic">Characteristic: </font>
+<br><font id="vartype">Variable type: real(3,[['nzchempot']],[['ntype']])</font>
+<br><font id="default">Default is 0.0</font>
+<br><br><font id="requires">
+Only relevant if <a href="vargeo.html#nzchempot">nzchempot</a>/=0
+</font>
+<br><font id="text">
+<p>
+For each type of atoms, from 1 to <a href="varbas.html#ntypat">ntypat</a>, specifies the spatially varying chemical potential, through the specification of <a href="vargeo.html#nzchempot">nzchempot</a> triplets of real numbers. They give data for <a href="vargeo.html#nzchempot">nzchempot</a> delimiting planes, all parallel to each other, each determined by its z reduced coordinate.
+
+The first real number is the z reduced coordinate of the delimiting plane. The second real number is the value of the chemical potential for this type of atom on this plane. The third real number is the derivative of the chemical potential fior this type of atom with respect to the z reduced coordinate, evaluated on this plane.
+
+In the space between delimiting planes, a piecewise cubic polynomial interpolation is determined : the cubic polynomial between two delimiting planes will have the imposed chemical potentials and derivatives on the two delimiting planes.
+
+The z reduced coordinates must be ordered in increasing values, and cannot span more than 1.0 . There is an automatic periodic boundary condition imposed. Specifying two identical z reduced coordinates is allowed, and means that the first one applies to the adjacent space with lower values of z, while the second applies to the adjacent space with higher values of z.
+
+When the spatial chemical potential is defined only for one type of atom (and no chemical potential is present for the other atoms), simply set the related values to *0.0 in the <b>chempot</b> array.
+
+In the present input array, reduced positions, energies and derivatives of energies are mixed. Hence, although the chemical potential is an energy, one cannot use the usual energy definitions (i.e. the chemical potential is always to be input in Hartree atomic units).
+</font>
+
+<br><br><br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
+
+
 <br><font id="title"><a name="genafm">genafm</a></font>
-<br><font id="definition">Mnemonics: GENerator of the translation for Anti-FerroMagnetic space group</font>
+<br><font id="mnemonics">Mnemonics: GENerator of the translation for Anti-FerroMagnetic space group</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#symmetriser">SYMMETRISER</a></font>
 <br><font id="vartype">Variable type: real(3)</font>
 <br><font id="default">Default is 3*0</font>
@@ -196,7 +225,7 @@ or define by hand the set of symmetries, using <a href="varbas.html#symrel">symr
 
 
 <br><font id="title"><a name="natrd">natrd</a></font>
-<br><font id="definition">Mnemonics: Number of AToms ReaD</font>
+<br><font id="mnemonics">Mnemonics: Number of AToms ReaD</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#geometry_builder">GEOMETRY_BUILDER</a>, <a href="../../users/abinit_help.html#symmetriser">SYMMETRISER</a></font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is <a href="varbas.html#natom">natom</a></font>
@@ -223,7 +252,7 @@ and the arrays <a href="varbas.html#xred">xred</a>,
 
 
 <br><font id="title"><a name="nobj">nobj</a></font>
-<br><font id="definition">Mnemonics: Number of OBJects</font>
+<br><font id="mnemonics">Mnemonics: Number of OBJects</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#geometry_builder">GEOMETRY_BUILDER</a>, <a href="../../users/abinit_help.html#input_only">INPUT_ONLY</a></font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0 (Comment: (no use of the geometry builder))</font>
@@ -305,8 +334,22 @@ Go to <a href="vargeo.html#objan">objan</a>, for example.
 <B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
 
 
+<br><font id="title"><a name="nzchempot">nzchempot</a></font>
+<br><font id="mnemonics">Mnemonics: Number of Z reduced coordinates that define the spatial CHEMical POTential</font>
+<br><font id="characteristic">Characteristic: </font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">No default</font>
+<br><font id="text">
+<p>
+Defines the number of z reduced coordinates that defines the spatially varying chemical potential. See the input variable <a href="vargeo.html#chempot">chempot</a>, of which <b>nzchempot</b> is the second dimension.
+</font>
+
+<br><br><br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
+
+
 <br><font id="title"><a name="objaat">objaat</a></font>
-<br><font id="definition">Mnemonics: OBJect A : list of AToms, OBJect B : list of AToms</font>
+<br><font id="mnemonics">Mnemonics: OBJect A : list of AToms</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#geometry_builder">GEOMETRY_BUILDER</a>, <a href="../../users/abinit_help.html#input_only">INPUT_ONLY</a></font>
 <br><font id="vartype">Variable type: integer(<a href="vargeo.html#objan">objan</a>)</font>
 <br><font id="default">No default</font>
@@ -326,7 +369,6 @@ of atoms.
  Look at <a href="vargeo.html#objarf">objarf</a> for further explanations.
 <br />
 </p>
-
 </font>
 
 <br><br><br><br><a href=#top>Go to the top</a>
@@ -334,7 +376,7 @@ of atoms.
 
 
 <br><font id="title"><a name="objaax">objaax</a></font>
-<br><font id="definition">Mnemonics: OBJect A : AXis, OBJect B : AXis</font>
+<br><font id="mnemonics">Mnemonics: OBJect A : AXis</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#geometry_builder">GEOMETRY_BUILDER</a>, <a href="../../users/abinit_help.html#input_only">INPUT_ONLY</a>, <a href="../../users/abinit_help.html#length">LENGTH</a></font>
 <br><font id="vartype">Variable type: real</font>
 <br><font id="default">No default (Comment: <b>objaax</b> must be provided if (<a href="vargeo.html#nobj">nobj</a>==1 and one component of <a href="vargeo.html#objaro">objaro</a> != 0). Moreover,
@@ -369,7 +411,7 @@ toward point 2 (coordinates 4:6).
 
 
 <br><font id="title"><a name="objan">objan</a></font>
-<br><font id="definition">Mnemonics: OBJect A : Number of atoms, OBJect B : Number of atoms</font>
+<br><font id="mnemonics">Mnemonics: OBJect A : Number of atoms</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#geometry_builder">GEOMETRY_BUILDER</a>, <a href="../../users/abinit_help.html#input_only">INPUT_ONLY</a></font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">No default (Comment:  <b>objan</b> MUST be provided if <a href="vargeo.html#nobj">nobj</a>==1.
@@ -388,7 +430,7 @@ variables <a href="vargeo.html#objaat">objaat</a>.
 
 
 <br><font id="title"><a name="objarf">objarf</a></font>
-<br><font id="definition">Mnemonics: OBJect A : Repetition Factors, OBJect B : Repetition Factors</font>
+<br><font id="mnemonics">Mnemonics: OBJect A : Repetition Factors</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#geometry_builder">GEOMETRY_BUILDER</a>, <a href="../../users/abinit_help.html#input_only">INPUT_ONLY</a></font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is [1, 1, 1]</font>
@@ -436,7 +478,7 @@ simply use 1 1 1, which is also the Default value.
 
 
 <br><font id="title"><a name="objaro">objaro</a></font>
-<br><font id="definition">Mnemonics: OBJect A : ROtations, OBJect B : ROtations</font>
+<br><font id="mnemonics">Mnemonics: OBJect A : ROtations</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#geometry_builder">GEOMETRY_BUILDER</a>, <a href="../../users/abinit_help.html#input_only">INPUT_ONLY</a></font>
 <br><font id="vartype">Variable type: real</font>
 <br><font id="default">Default is 4*0.0d0 (Comment: (no rotation))</font>
@@ -472,7 +514,7 @@ different rotation angles.
 
 
 <br><font id="title"><a name="objatr">objatr</a></font>
-<br><font id="definition">Mnemonics: OBJect A : TRanslations, OBJect B : TRanslations</font>
+<br><font id="mnemonics">Mnemonics: OBJect A : TRanslations</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#geometry_builder">GEOMETRY_BUILDER</a>, <a href="../../users/abinit_help.html#input_only">INPUT_ONLY</a>, <a href="../../users/abinit_help.html#length">LENGTH</a></font>
 <br><font id="vartype">Variable type: real</font>
 <br><font id="default">Default is 12*0.0d0 (Comment: (no translation))</font>
@@ -512,7 +554,7 @@ which case, only rotations are needed.
 
 
 <br><font id="title"><a name="objbat">objbat</a></font>
-<br><font id="definition">Mnemonics: OBJect A : list of AToms, OBJect B : list of AToms</font>
+<br><font id="mnemonics">Mnemonics: OBJect B : list of AToms</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#geometry_builder">GEOMETRY_BUILDER</a>, <a href="../../users/abinit_help.html#input_only">INPUT_ONLY</a></font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">No default</font>
@@ -542,7 +584,7 @@ of atoms.
 
 
 <br><font id="title"><a name="objbax">objbax</a></font>
-<br><font id="definition">Mnemonics: OBJect A : AXis, OBJect B : AXis</font>
+<br><font id="mnemonics">Mnemonics: OBJect B : AXis</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#geometry_builder">GEOMETRY_BUILDER</a>, <a href="../../users/abinit_help.html#input_only">INPUT_ONLY</a>, <a href="../../users/abinit_help.html#length">LENGTH</a></font>
 <br><font id="vartype">Variable type: real</font>
 <br><font id="default">No default (Comment: <b>objbax</b> must be provided if (<a href="vargeo.html#nobj">nobj</a>==1 and one component of <a href="vargeo.html#objaro">objaro</a> != 0). Moreover,
@@ -577,7 +619,7 @@ toward point 2 (coordinates 4:6).
 
 
 <br><font id="title"><a name="objbn">objbn</a></font>
-<br><font id="definition">Mnemonics: OBJect A : Number of atoms, OBJect B : Number of atoms</font>
+<br><font id="mnemonics">Mnemonics: OBJect B : Number of atoms</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#geometry_builder">GEOMETRY_BUILDER</a>, <a href="../../users/abinit_help.html#input_only">INPUT_ONLY</a></font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">No default (Comment:  <a href="vargeo.html#objan">objan</a> and <b>objbn</b> MUST be provided if <a href="vargeo.html#nobj">nobj</a>==2.)</font>
@@ -596,7 +638,7 @@ variables <a href="vargeo.html#objbat">objbat</a>.
 
 
 <br><font id="title"><a name="objbrf">objbrf</a></font>
-<br><font id="definition">Mnemonics: OBJect A : Repetition Factors, OBJect B : Repetition Factors</font>
+<br><font id="mnemonics">Mnemonics: OBJect B : Repetition Factors</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#geometry_builder">GEOMETRY_BUILDER</a>, <a href="../../users/abinit_help.html#input_only">INPUT_ONLY</a></font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is [1, 1, 1]</font>
@@ -643,7 +685,7 @@ simply use 1 1 1, which is also the Default value.
 
 
 <br><font id="title"><a name="objbro">objbro</a></font>
-<br><font id="definition">Mnemonics: OBJect A : ROtations, OBJect B : ROtations</font>
+<br><font id="mnemonics">Mnemonics: OBJect B : ROtations</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#geometry_builder">GEOMETRY_BUILDER</a>, <a href="../../users/abinit_help.html#input_only">INPUT_ONLY</a></font>
 <br><font id="vartype">Variable type: real</font>
 <br><font id="default">Default is 4*0.0d0 (Comment: (no rotation))</font>
@@ -679,7 +721,7 @@ different rotation angles.
 
 
 <br><font id="title"><a name="objbtr">objbtr</a></font>
-<br><font id="definition">Mnemonics: OBJect A : TRanslations, OBJect B : TRanslations</font>
+<br><font id="mnemonics">Mnemonics: OBJect B : TRanslations</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#geometry_builder">GEOMETRY_BUILDER</a>, <a href="../../users/abinit_help.html#input_only">INPUT_ONLY</a>, <a href="../../users/abinit_help.html#length">LENGTH</a></font>
 <br><font id="vartype">Variable type: real</font>
 <br><font id="default">Default is 12*0.0d0 (Comment: (no translation))</font>
@@ -718,7 +760,7 @@ which case, only rotations are needed.
 
 
 <br><font id="title"><a name="ptgroupma">ptgroupma</a></font>
-<br><font id="definition">Mnemonics: PoinT GROUP number for the MAgnetic space group</font>
+<br><font id="mnemonics">Mnemonics: PoinT GROUP number for the MAgnetic space group</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#symmetriser">SYMMETRISER</a>, <a href="../../users/abinit_help.html#internal_only">INTERNAL_ONLY</a></font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
@@ -752,7 +794,7 @@ Magnetic point groups are numbered from 1 to 58.
 
 
 <br><font id="title"><a name="spgaxor">spgaxor</a></font>
-<br><font id="definition">Mnemonics: SPace Group : AXes ORientation</font>
+<br><font id="mnemonics">Mnemonics: SPace Group : AXes ORientation</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#symmetriser">SYMMETRISER</a></font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 1</font>
@@ -845,7 +887,6 @@ monoclinic groups is for example:
   </li>
  </ol>
 </p>
-
 </font>
 
 <br><br><br><br><a href=#top>Go to the top</a>
@@ -853,7 +894,7 @@ monoclinic groups is for example:
 
 
 <br><font id="title"><a name="spgorig">spgorig</a></font>
-<br><font id="definition">Mnemonics: SPace Group : ORIGin</font>
+<br><font id="mnemonics">Mnemonics: SPace Group : ORIGin</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#symmetriser">SYMMETRISER</a></font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 1</font>
@@ -884,7 +925,7 @@ International Tables of Crystallography.
 
 
 <br><font id="title"><a name="spgroup">spgroup</a></font>
-<br><font id="definition">Mnemonics: SPace GROUP number</font>
+<br><font id="mnemonics">Mnemonics: SPace GROUP number</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#symmetriser">SYMMETRISER</a></font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
@@ -929,7 +970,7 @@ C.J. Bradley and A.P. Cracknell, Clarendon Press, Oxford.
 
 
 <br><font id="title"><a name="spgroupma">spgroupma</a></font>
-<br><font id="definition">Mnemonics: SPace GROUP number defining a MAgnetic space group</font>
+<br><font id="mnemonics">Mnemonics: SPace GROUP number defining a MAgnetic space group</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#symmetriser">SYMMETRISER</a>, <a href="../../users/abinit_help.html#input_only">INPUT_ONLY</a></font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
@@ -973,7 +1014,7 @@ define by hand the set of symmetries, using <a href="varbas.html#symrel">symrel<
 
 
 <br><font id="title"><a name="tolsym">tolsym</a></font>
-<br><font id="definition">Mnemonics: TOLERANCE for SYMmetries</font>
+<br><font id="mnemonics">Mnemonics: TOLERANCE for SYMmetries</font>
 <br><font id="characteristic">Characteristic: </font>
 <br><font id="vartype">Variable type: real</font>
 <br><font id="default">Default is 1e-08</font>
@@ -997,7 +1038,7 @@ will be automatically symmetrized by the symmetry operations that will have been
 
 
 <br><font id="title"><a name="vaclst">vaclst</a></font>
-<br><font id="definition">Mnemonics: VACancies LiST</font>
+<br><font id="mnemonics">Mnemonics: VACancies LiST</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#geometry_builder">GEOMETRY_BUILDER</a>, <a href="../../users/abinit_help.html#input_only">INPUT_ONLY</a></font>
 <br><font id="vartype">Variable type: integer(<a href="vargeo.html#vacnum">vacnum</a>)</font>
 <br><font id="default">No default</font>
@@ -1017,7 +1058,7 @@ after having rotated, translated and repeated the objects.
 
 
 <br><font id="title"><a name="vacnum">vacnum</a></font>
-<br><font id="definition">Mnemonics: VACancies NUMber</font>
+<br><font id="mnemonics">Mnemonics: VACancies NUMber</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#geometry_builder">GEOMETRY_BUILDER</a></font>
 <br><font id="vartype">Variable type: integer</font>
 <br><font id="default">Default is 0</font>
@@ -1036,7 +1077,7 @@ atoms is contained in <a href="vargeo.html#vaclst">vaclst</a>.
 
 
 <br><font id="title"><a name="xyzfile">xyzfile</a></font>
-<br><font id="definition">Mnemonics: XYZ FILE input for geometry</font>
+<br><font id="mnemonics">Mnemonics: XYZ FILE input for geometry</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#input_only">INPUT_ONLY</a></font>
 <br><font id="vartype">Variable type: string</font>
 <br><font id="default">No default</font>
@@ -1050,7 +1091,6 @@ and <a href="varbas.html#xangst">xangst</a> from. This input can not be mixed wi
 <p>
  Notes: do not quote the file name in the abinit input file, simply leave a space after xyzfile. The xyz format is the number of atoms on the first line, a comment line, then one line per atom, with the element as a 2 letter symbol ("As" "O" or "Pu") and the three cartesian coordinates in Angstrom.
 </p>
-
 </font>
 
 <br><br><br><br><a href=#top>Go to the top</a>

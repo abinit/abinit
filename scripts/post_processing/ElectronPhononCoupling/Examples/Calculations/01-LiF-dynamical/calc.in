@@ -1,0 +1,465 @@
+# =========================================================================== #
+# Example electron-phonon coupling calculation.
+#
+# The procedure is as follow:
+# - Compute ground state density
+# - Compute wavefunctions on the k-point grid without symmetries
+# - Compute wavefunctions on the k-points for the electron-phonon coupling
+# Then, for each q-point:
+# - Compute wavefunctions on the q-shifted k-point grid
+# - Compute response density for all perturbations
+# - Compute wavefunctions on the q-shifted k-points
+#       for the electron-phonon coupling
+# - Compute electron-phonon coupling
+#
+# The electron-phonon coupling for the 3 q-points is computed
+# in datasets 7, 11 and 15. The variable ieig2rf for these dataset is set to 5.
+# This means that the EIGR2D.nc files contain only the Sternheimer
+# contributions, while the active space contribution is contained
+# in the GKK.nc files.
+#
+# You can do a purely static calculation by setting ieig2rf=1,
+# then use calc_type=1 in the post processing scripts.
+# In this case, the EIGR2D.nc files contain the full contribution
+# to the eigenvalues renormalization, and the EIGI2D.nc files will be printed.
+# It is however less flexible than ieig2rf=5 and there is no advantage
+# to this approach.
+#
+# =========================================================================== #
+
+# Procedure
+ ndtset     15
+
+# =========================================================================== #
+# Common option for response function and electron-phonon coupling
+# =========================================================================== #
+
+# Q-point grid
+ qptopt     1
+ ngqpt      2 2 2
+ nshiftq    1
+ shiftq     0 0 0
+
+# Response function
+ rfphon     1
+ rfatpol    1 2
+ rfdir      1 1 1
+ bdeigrf    -1
+ smdelta    1
+ elph2_imagden 0.01 eV
+
+
+# =========================================================================== #
+# Dataset 1
+# Ground state density
+# =========================================================================== #
+
+ # Procedure
+ iscf1      7
+ tolvrs1    1e-10
+
+ # K-point grid with symmetries
+ kptopt1    1
+ ngkpt1     4 4 4
+
+ # Files
+ getden1    0
+ getwfk1    0
+
+ # Disable response function
+ nqpt1      0
+ rfphon1    0
+ ieig2rf1   0
+
+
+# =========================================================================== #
+# Dataset 2
+# Wavefunctions on the full k-point grid
+# =========================================================================== #
+
+ # Procedure
+ iscf2      -2
+ tolwfr2    1e-14
+
+ # K-point grid without symmetries
+ kptopt2    3
+ ngkpt2     4 4 4
+
+ # Files
+ getden2    1
+
+ # Disable response function
+ nqpt2      0
+ rfphon2    0
+ ieig2rf2   0
+
+# =========================================================================== #
+# Dataset 3
+# Wavefunctions on k-points for electron-phonon coupling
+# =========================================================================== #
+
+ # Procedure
+ iscf3      -2
+ tolwfr3    1e-14
+
+ # K-point set without symmetries (does not need to be a grid)
+ kptopt3    3
+ ngkpt3     1 1 1
+ nsym3      1
+
+ getden3    1
+
+ # Disable response function
+ nqpt3      0
+ rfphon3    0
+ ieig2rf3   0
+
+
+# =========================================================================== #
+# Dataset 4
+# Q-point 1
+# Wavefunctions on the q-shifted k-point grid
+# =========================================================================== #
+
+ # Q-point
+ nqpt4      1
+ iqpt4      1
+
+ # Procedure
+ iscf4      -2
+ tolwfr4    1e-14
+
+ # K-point grid without symmetries
+ kptopt4    3
+ ngkpt4     4 4 4
+
+ # Files
+ getden4    1
+
+ # Disable response function
+ rfphon4    0
+ ieig2rf4   0
+
+# =========================================================================== #
+# Dataset 5
+# Q-point 1
+# Response-function calculation of the perturbed density
+# =========================================================================== #
+
+ # Q-point
+ nqpt5      1
+ iqpt5      1
+
+ # Procedure
+ rfphon5    1
+ iscf5      7
+ tolvrs5    1e-10
+ nsym5      1
+
+ # K-point grid without symmetries
+ kptopt5    3
+ ngkpt5     4 4 4
+
+ # Files
+ getden5    1
+ getwfk5    2
+ getwfq5    -1
+
+
+# =========================================================================== #
+# Dataset 6
+# Q-point 1
+# Wavefunctions on the q-shifted k-points for electron-phonon coupling
+# =========================================================================== #
+
+ # Q-point
+ nqpt6      1
+ iqpt6      1
+
+ # Procedure
+ iscf6      -2
+ tolwfr6    1e-14
+
+ # K-point set without symmetries (does not need to be a grid)
+ kptopt6    3
+ ngkpt6     1 1 1
+ nsym6      1
+
+ # Files
+ getden6    1
+
+ # Disable response function
+ rfphon6    0
+ ieig2rf6   0
+
+# =========================================================================== #
+# Dataset 7
+# Q-point 1
+# Electron-phonon coupling calculation
+# =========================================================================== #
+
+ # Q-point
+ nqpt7      1
+ iqpt7      1
+
+ # Procedure
+ rfphon7    1
+ ieig2rf7   5
+#ieig2rf7   1      # Use this for a purely static calculation
+ iscf7     -2
+ tolwfr7    1e-10
+
+ # K-point set without symmetries (does not need to be a grid)
+ kptopt7    3
+ ngkpt7     1 1 1
+ nsym7      1
+
+ # Files
+ getden7    1
+ getwfk7    3
+ getwfq7    -1
+ get1den7   -2
+
+
+# =========================================================================== #
+# Dataset 8
+# Q-point 2
+# Wavefunctions on the q-shifted k-point grid
+# =========================================================================== #
+
+ # Q-point
+ nqpt8      1
+ iqpt8      2
+
+ # Procedure
+ iscf8      -2
+ tolwfr8    1e-14
+
+ # K-point grid without symmetries
+ kptopt8    3
+ ngkpt8     4 4 4
+
+ # Files
+ getden8    1
+
+ # Disable response function
+ rfphon8    0
+ ieig2rf8   0
+
+# =========================================================================== #
+# Dataset 9
+# Q-point 2
+# Response-function calculation of the perturbed density
+# =========================================================================== #
+
+ # Q-point
+ nqpt9      1
+ iqpt9      2
+
+ # Procedure
+ rfphon9    1
+ iscf9      7
+ tolvrs9    1e-10
+ nsym9      1
+
+ # K-point grid without symmetries
+ kptopt9    3
+ ngkpt9     4 4 4
+
+ # Files
+ getden9    1
+ getwfk9    2
+ getwfq9    -1
+
+
+# =========================================================================== #
+# Dataset 10
+# Q-point 2
+# Wavefunctions on the q-shifted k-points for electron-phonon coupling
+# =========================================================================== #
+
+ # Q-point
+ nqpt10     1
+ iqpt10     2
+
+ # Procedure
+ iscf10     -2
+ tolwfr10   1e-14
+
+ # K-point set without symmetries (does not need to be a grid)
+ kptopt10   3
+ ngkpt10    1 1 1
+ nsym10     1
+
+ # Files
+ getden10   1
+
+ # Disable response function
+ rfphon10   0
+ ieig2rf10  0
+
+# =========================================================================== #
+# Dataset 11
+# Q-point 2
+# Electron-phonon coupling calculation
+# =========================================================================== #
+
+ # Q-point
+ nqpt11     1
+ iqpt11     2
+
+ # Procedure
+ rfphon11   1
+ ieig2rf11  5
+#ieig2rf11  1      # Use this for a purely static calculation
+ iscf11    -2
+ tolwfr11   1e-10
+
+ # K-point set without symmetries (does not need to be a grid)
+ kptopt11   3
+ ngkpt11    1 1 1
+ nsym11     1
+
+ # Files
+ getden11   1
+ getwfk11   3
+ getwfq11   -1
+ get1den11  -2
+
+
+# =========================================================================== #
+# Dataset 12
+# Q-point 3
+# Wavefunctions on the q-shifted k-point grid
+# =========================================================================== #
+
+ # Q-point
+ nqpt12     1
+ iqpt12     3
+
+ # Procedure
+ iscf12     -2
+ tolwfr12   1e-14
+
+ # K-point grid without symmetries
+ kptopt12   3
+ ngkpt12    4 4 4
+
+ # Files
+ getden12   1
+
+ # Disable response function
+ rfphon12   0
+ ieig2rf12  0
+
+# =========================================================================== #
+# Dataset 13
+# Q-point 3
+# Response-function calculation of the perturbed density
+# =========================================================================== #
+
+ # Q-point
+ nqpt13     1
+ iqpt13     3
+
+ # Procedure
+ rfphon13   1
+ iscf13     7
+ tolvrs13   1e-10
+ nsym13     1
+
+ # K-point grid without symmetries
+ kptopt13   3
+ ngkpt13    4 4 4
+
+ # Files
+ getden13   1
+ getwfk13   2
+ getwfq13   -1
+
+
+# =========================================================================== #
+# Dataset 14
+# Q-point 3
+# Wavefunctions on the q-shifted k-points for electron-phonon coupling
+# =========================================================================== #
+
+ # Q-point
+ nqpt14     1
+ iqpt14     3
+
+ # Procedure
+ iscf14     -2
+ tolwfr14   1e-14
+
+ # K-point set without symmetries (does not need to be a grid)
+ kptopt14   3
+ ngkpt14    1 1 1
+ nsym14     1
+
+ # Files
+ getden14   1
+
+ # Disable response function
+ rfphon14   0
+ ieig2rf14  0
+
+# =========================================================================== #
+# Dataset 15
+# Q-point 3
+# Electron-phonon coupling calculation
+# =========================================================================== #
+
+ # Q-point
+ nqpt15     1
+ iqpt15     3
+
+ # Procedure
+ rfphon15   1
+ ieig2rf15  5
+#ieig2rf15  1      # Use this for a purely static calculation
+ iscf15    -2
+ tolwfr15   1e-10
+
+ # K-point set without symmetries (does not need to be a grid)
+ kptopt15   3
+ ngkpt15    1 1 1
+ nsym15     1
+
+ # Files
+ getden15   1
+ getwfk15   3
+ getwfq15   -1
+ get1den15  -2
+
+
+# =========================================================================== #
+# Common parameters
+# =========================================================================== #
+
+# Basis set
+ ecut       5.0
+ nband      8
+
+# k-point grid
+ nshiftk    1
+ shiftk     0.0    0.0    0.0
+
+# Unit cell
+ acell      7.7030079150    7.7030079150    7.7030079150
+ rprim      0.0000000000    0.5000000000    0.5000000000
+            0.5000000000    0.0000000000    0.5000000000
+            0.5000000000    0.5000000000    0.0000000000
+ natom      2
+ ntypat     2
+ typat      1 2
+ znucl      3 9
+ xred       0.0000000000    0.0000000000    0.0000000000
+            0.5000000000    0.5000000000    0.5000000000
+
+# Other
+ ixc        1
+ enunit     2
+ diemac     9.0
+ npfft      1
+ istwfk     *1

@@ -137,13 +137,10 @@ subroutine nonlop_test(cg,eigen,istwfk,kg,kpt,mband,mcg,mgfft,mkmem,mpi_enreg,mp
  my_nspinor=max(1,nspinor/mpi_enreg%nproc_spinor)
 
 !Initialize Hamiltonian datastructure
- call init_hamiltonian(gs_hamk,psps,pawtab,nspinor,nspden,natom,&
+ call init_hamiltonian(gs_hamk,psps,pawtab,nspinor,nsppol,nspden,natom,&
 & typat,xred,nfft,mgfft,ngfft,rprimd,nloalg,&
-& ph1d=ph1d)
-! call init_hamiltonian(gs_hamk,psps,pawtab,nspinor,nsppol,nspden,natom,&
-!& typat,xred,nfft,mgfft,ngfft,rprimd,nloalg,&
-!& comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,&
-!& mpi_spintab=mpi_enreg%my_isppoltab,paw_ij=paw_ij,ph1d=ph1d)
+& comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,&
+& mpi_spintab=mpi_enreg%my_isppoltab,paw_ij=paw_ij,ph1d=ph1d)
  rmet = MATMUL(TRANSPOSE(rprimd),rprimd)
 
 !Check for existence of files in the current directory\
@@ -287,9 +284,7 @@ subroutine nonlop_test(cg,eigen,istwfk,kg,kpt,mband,mcg,mgfft,mkmem,mpi_enreg,mp
  bdtot_index=0 ; icg=0 ; isppol=1
 
 !Continue to initialize the Hamiltonian (PAW DIJ coefficients)
- call load_spin_hamiltonian(gs_hamk,isppol,paw_ij=paw_ij,&
-&   comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
-! call load_spin_hamiltonian(gs_hamk,isppol,with_nonlocal=.true.)
+ call load_spin_hamiltonian(gs_hamk,isppol,with_nonlocal=.true.)
 
 !No loop over k points; only do the first one
  ikg=0 ; ikpt=1
@@ -378,7 +373,7 @@ subroutine nonlop_test(cg,eigen,istwfk,kg,kpt,mband,mcg,mgfft,mkmem,mpi_enreg,mp
        else
          call nonlop(choice,cpopt,cwaveprj,enlout,gs_hamk,idir_nonlop,lambda,&
 &              mpi_enreg,1,nnlout,paw_opt,signs,scwavef_out,tim_nonlop,cwavef,cwavef_out,&
-               iatom_only=iatom_only)
+&              iatom_only=iatom_only)
        end if
 
 !      Post-processing if nonlop is called with specific options

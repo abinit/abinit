@@ -7,7 +7,7 @@
 !! Old option=3, transfer fred and strten to vout
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (XG,MJV)
+!! Copyright (C) 1998-2017 ABINIT group (XG,MJV)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -35,7 +35,8 @@
 !!   strten, depending on the value of optcell, and taking care ot strtarget
 !!
 !! PARENTS
-!!      pred_bfgs,pred_delocint,pred_verlet,xfh_recover_deloc,xfh_recover_new
+!!      pred_bfgs,pred_delocint,pred_lbfgs,pred_verlet,xfh_recover_deloc
+!!      xfh_recover_new
 !!
 !! CHILDREN
 !!

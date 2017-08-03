@@ -54,4 +54,9 @@ inp_files = [
 #"tstring_02.in",
 #"tstring_03.in",
 #"tstring_04.in",
+#"tucrpa_1.in",
+#"tucrpa_2.in",
+#"tucrpa_3.in",
+#"tucrpa_4.in",
+#"tucrpa_5.in",
 ]

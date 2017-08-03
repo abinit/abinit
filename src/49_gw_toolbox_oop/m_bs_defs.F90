@@ -7,7 +7,7 @@
 !!  This module defines basic structures used for Bethe-Salpeter calculations.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1992-2009 EXC and ABINIT group (L.Reining, V.Olevano, F.Sottile, S.Albrecht, G.Onida, MG)
+!! Copyright (C) 1992-2017 EXC and ABINIT group (L.Reining, V.Olevano, F.Sottile, S.Albrecht, G.Onida, MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -185,6 +185,9 @@ type,public :: excparam
   logical :: prep_interp       ! .TRUE. if we prepare interpolation with ABC
   logical :: sum_overlaps      ! .TRUE. if making the sum of the overlaps to 1
   logical :: prt_ncham           ! .TRUE. if we dump the hamiltonian in NetCDF
+
+  logical :: do_ep_renorm      ! .TRUE. for electron-phonon renormalization of the spectrum
+  logical :: do_lifetime       ! .TRUE. if using elphon lifetime (not yet implemented)
 
 !arrays
   integer :: mg0(3)            ! For each reduced direction gives the max G0 component

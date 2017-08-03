@@ -30,7 +30,7 @@
 !! * pspheader_type : for norm-conserving pseudopotentials, the header of the file
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2016 ABINIT group (XG)
+!! Copyright (C) 2001-2017 ABINIT group (XG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -104,6 +104,10 @@ module defs_datatypes
   real(dp),allocatable :: eig(:,:,:) 
   ! eig(mband,nkpt,nsppol)
   ! Eigenvalues of each band.
+
+  real(dp),allocatable :: lifetime(:,:,:)
+  ! lifetime(mband,nkpt,nsppol)
+  ! Lifetime of each band
 
   real(dp),allocatable :: occ(:,:,:) 
   ! occ(mband,nkpt,nsppol)

@@ -8,11 +8,12 @@ __all__ = [
     'license',
     '__author__',
     'author',
+    'author_email',
     'url',
     ]
 
 
-__version__ = '3.3.1'
+__version__ = '4.1.2'
 
 name = "ElectronPhononCoupling"
 
@@ -29,13 +30,15 @@ long_description = """"
 
 license = 'GPL'
 
-authors = {'SP': (u'Samuel Poncé', 'sponce at gmail.com'),
-           'GA': ('Gabriel Antonius', 'gabriel.antonius at gmail.com'),
-        }
+authors = {
+    'GA': ('Gabriel Antonius', 'gabriel.antonius at gmail.com'),
+    }
         
 author = 'The ABINIT group'
 
-url = 'http://abinit.org'
+author_email = authors['GA'][1]
+
+url = 'https://github.com/GkAntonius/ElectronPhononCoupling'
 
 __author__ = ''
 for auth, email in authors.itervalues():

@@ -7,7 +7,7 @@
 !!  This module contains basic tools to operate on vectors expressed in reduced coordinates.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2016 ABINIT group (MG)
+!! Copyright (C) 2008-2017 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -30,10 +30,10 @@ MODULE m_geometry
 
  private
 
- public :: normv             ! Norm of vector(s) in reduced coordinates either in real or reciprocal space.
- public :: vdotw             ! Scalar product between two reduced vectors either in real or reciprocal space.
- public :: wigner_seitz      ! Find the grid of points falling inside the Wigner-Seitz cell.
- public :: phdispl_cart2red  ! Calculate the displacement vectors for all branches in reduced coordinates.
+ public :: normv              ! Norm of vector(s) in reduced coordinates either in real or reciprocal space.
+ public :: vdotw              ! Scalar product between two reduced vectors either in real or reciprocal space.
+ public :: wigner_seitz       ! Find the grid of points falling inside the Wigner-Seitz cell.
+ public :: phdispl_cart2red   ! Calculate the displacement vectors for all branches in reduced coordinates.
 
  interface normv
   module procedure normv_rdp_vector
@@ -613,7 +613,7 @@ end subroutine wigner_seitz
 !!  displ_red(2,3*natom,3*natom)=Phonon displacement in reduded coordinates.
 !!
 !! PARENTS
-!!      get_tau_k,m_phgamma,mka2f,mkph_linwid,read_gkk
+!!      get_tau_k,m_ddb,m_ifc,mka2f,mkph_linwid,read_gkk
 !!
 !! CHILDREN
 !!

@@ -2,7 +2,7 @@
 .Version 6.10.1 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_intel12.0 computer) 
 
-.Copyright (C) 1998-2016 ABINIT group . 
+.Copyright (C) 1998-2017 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -52,8 +52,8 @@ P This job should need less than                     103.595 Mbytes of memory.
         accesswff           1
             acell      2.3010000000E+01  2.3010000000E+01  2.3010000000E+01 Bohr
               amu      1.96966540E+02
+     densfor_pred           6
              ecut      1.50000000E+01 Hartree
-           densfor_pred           6
            istwfk        2
           kptrlen      2.30100000E+01
          kptrlatt      1  0  0   0  1  0   0  0  1
@@ -213,7 +213,7 @@ P           mkmem           1
                        1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1
                        1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1
                        1  1  1  1  1  1  1
-         wfoptalg          14
+         wfoptalg         114
            xangst      0.0000000000E+00  1.9879254564E+00  1.9879254564E+00
                        1.9879254564E+00  0.0000000000E+00  1.9879254564E+00
                        1.9879254564E+00  1.9879254564E+00  0.0000000000E+00
@@ -1451,6 +1451,7 @@ P newkpt: treating    648 bands with npw=     155 for ikpt=   1 by node    0
         accesswff           1
             acell      2.3010000000E+01  2.3010000000E+01  2.3010000000E+01 Bohr
               amu      1.96966540E+02
+     densfor_pred           6
              ecut      1.50000000E+01 Hartree
            etotal     -4.2976546804E+03
             fcart      1.3425868024E-20  3.4189541210E-04  3.4189541210E-04
@@ -1560,7 +1561,6 @@ P newkpt: treating    648 bands with npw=     155 for ikpt=   1 by node    0
                        1.0303291987E-03  2.3065619198E-05  1.0303291987E-03
                        1.0303291987E-03  1.0303291987E-03  2.3065619198E-05
                        1.5832084541E-04  1.5832084541E-04  1.5832084541E-04
-           densfor_pred           6
            istwfk        2
           kptrlen      2.30100000E+01
          kptrlatt      1  0  0   0  1  0   0  0  1
@@ -1722,7 +1722,7 @@ P           mkmem           1
                        1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1
                        1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1
                        1  1  1  1  1  1  1
-         wfoptalg          14
+         wfoptalg         114
            xangst      0.0000000000E+00  1.9879254564E+00  1.9879254564E+00
                        1.9879254564E+00  0.0000000000E+00  1.9879254564E+00
                        1.9879254564E+00  1.9879254564E+00  0.0000000000E+00

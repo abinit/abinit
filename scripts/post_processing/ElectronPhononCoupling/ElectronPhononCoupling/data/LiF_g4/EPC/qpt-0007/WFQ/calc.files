@@ -1,0 +1,7 @@
+calc.in
+calc.out
+input_data/idat
+out_data/odat
+tmp_data/tmp
+../../../../Psps_for_tests/03-Li.LDA.TM.pspnc
+../../../../Psps_for_tests/09-F.LDA.TM.pspnc

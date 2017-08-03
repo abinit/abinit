@@ -9,7 +9,7 @@
 !!   Im \epsilon(\omega') = Re \epsilon(\omega)
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2016 ABINIT group (L.Reining, V.Olevano, F.Sottile, S.Albrecht, G.Onida, M.Giantomassi)
+!! Copyright (C) 2009-2017 ABINIT group (L.Reining, V.Olevano, F.Sottile, S.Albrecht, G.Onida, M.Giantomassi)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -168,7 +168,7 @@ end subroutine check_kramerskronig
 !!   calculate the integral to evaluate an omega_plasma^eff to compare with omega_plasma
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2016 ABINIT group (L.Reining, V.Olevano, F.Sottile, S.Albrecht, G.Onida, M.Giantomassi)
+!! Copyright (C) 2009-2017 ABINIT group (L.Reining, V.Olevano, F.Sottile, S.Albrecht, G.Onida, M.Giantomassi)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -269,7 +269,11 @@ subroutine check_fsumrule(n,o,e2,omegaplasma)
  end do
 
  integral = real(simpson_cplx(n,domega,intg))
- omegaplasmaeff = sqrt(integral*two/pi)
+ if(integral < 0) then
+   MSG_ERROR("The integral of the imaginary of dielectric function is negative !!!")
+ else
+   omegaplasmaeff = sqrt(integral*two/pi)
+ end if
 
  fsumrule = abs((omegaplasmaeff - omegaplasma)) / omegaplasma
 

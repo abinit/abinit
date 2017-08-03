@@ -20,7 +20,7 @@
 !!    the initial velocities, and the initial atomic spin
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (XG, RC)
+!! Copyright (C) 1998-2017 ABINIT group (XG, RC)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -39,6 +39,7 @@
 !! nspden=number of spin-density components
 !! nsppol=number of independent spin polarizations
 !! ntypat=number of type of atoms
+!! nzchempot=defines the use of a spatially-varying chemical potential along z
 !! pawspnorb=1 when spin-orbit is activated within PAW
 !! ratsph(1:ntypat)=radius of the atomic sphere
 !! string*(*)=character string containing all the input data, used
@@ -101,7 +102,8 @@
 
 subroutine ingeo (acell,amu,dtset,bravais,&  
 & genafm,iatfix,icoulomb,iimage,iout,jdtset,jellslab,lenstr,mixalch,&
-& msym,natom,nimage,npsp,npspalch,nspden,nsppol,nsym,ntypalch,ntypat,nucdipmom,pawspnorb,&
+& msym,natom,nimage,npsp,npspalch,nspden,nsppol,nsym,ntypalch,ntypat,&
+& nucdipmom,nzchempot,pawspnorb,&
 & ptgroupma,ratsph,rprim,slabzbeg,slabzend,spgroup,spinat,string,symafm,&
 & symmorphi,symrel,tnons,tolsym,typat,vel,vel_cell,xred,znucl)
 
@@ -128,7 +130,8 @@ subroutine ingeo (acell,amu,dtset,bravais,&
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: iimage,iout,jdtset,lenstr,msym
- integer,intent(in) :: nimage,npsp,npspalch,nspden,nsppol,ntypalch,ntypat,pawspnorb
+ integer,intent(in) :: nimage,npsp,npspalch,nspden,nsppol
+ integer,intent(in) :: ntypalch,ntypat,nzchempot,pawspnorb
  integer,intent(inout) :: natom,symmorphi
  integer,intent(out) :: icoulomb,jellslab,ptgroupma,spgroup !vz_i
  integer,intent(inout) :: nsym !vz_i
@@ -579,6 +582,14 @@ subroutine ingeo (acell,amu,dtset,bravais,&
        MSG_ERROR(message)
      end if
 
+     if(nzchempot/=0 .and. nsym/=1 .and. spgroup/=1)then
+       write(message, '(5a)' )&
+&       'For the time being, a spatially-varying chemical potential can only be used',ch10,&
+&       'either with the symmetry finder (nsym=0) or with the space group 1 (nsym=1)',ch10,&
+&       'Action: change one of the input variables nzchempot or nsym or spgroup in your input file.'
+       MSG_ERROR(message)
+     end if
+
      typat(1:natrd)=typat_read(1:natrd)
 
      if(spgroup/=0 .and. nsym/=0)then
@@ -778,7 +789,7 @@ subroutine ingeo (acell,amu,dtset,bravais,&
 !      Find the symmetry operations : nsym, symafm, symrel and tnons.
 !      Use nptsym and ptsymrel, as determined by symlatt
        noncoll=0;if (nspden==4) noncoll=1
-       use_inversion=1;if (nspden==4.or.pawspnorb>0) use_inversion=0
+       use_inversion=1;if (dtset%usepaw == 1 .and. (nspden==4.or.pawspnorb>0)) use_inversion=0
 
 !      Get field in reduced coordinates (reduced e/d field)
 
@@ -809,7 +820,7 @@ subroutine ingeo (acell,amu,dtset,bravais,&
 
 
        call symfind(dtset%berryopt,field_xred,gprimd,jellslab,msym,natom,noncoll,nptsym,nsym,&
-&       ptsymrel,spinat,symafm,symrel,tnons,tolsym,typat,use_inversion,xred,nucdipmom)
+&       nzchempot,ptsymrel,spinat,symafm,symrel,tnons,tolsym,typat,use_inversion,xred,nucdipmom)
 
 !      If the tolerance on symmetries is bigger than 1.e-8, symmetrize the atomic positions
        if(tolsym>1.00001e-8)then

@@ -49,7 +49,7 @@ inp_files = [
 "t59.in",
 "t60.in",
 "-t61.in", # disabled for now
-"-t62.in", # disabled for now
+"t62.in",
 "t71.in",
 "t72.in",
 "t73.in",
@@ -66,4 +66,7 @@ inp_files = [
 "t97.in",
 "t98.in",
 "t99.in",
+"t100.in",
+"t101.in",
+"t102.in"
 ]

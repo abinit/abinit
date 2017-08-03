@@ -7,7 +7,7 @@
 !!  Iterative diagonalization of the BSE Hamiltonian with band-by-band conjugate gradient method
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2016 ABINIT group (MG)
+!!  Copyright (C) 2008-2017 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -858,6 +858,7 @@ subroutine exc_write_phi_block(oeig_fname,use_mpio)
  real(dp) :: cputime,walltime,gflops
  character(len=500) :: msg,errmsg
 ! type(Hdr_type) :: hexc_Hdr
+ logical :: do_ep_lifetime
 !!arrays
  complex(dpc),allocatable :: buffer_dpc(:)
 #ifdef HAVE_MPI_IO
@@ -868,6 +869,8 @@ subroutine exc_write_phi_block(oeig_fname,use_mpio)
 #endif
 
 !************************************************************************
+ 
+ do_ep_lifetime = .FALSE.
 
  call cwtime(cputime, walltime, gflops, "start")
 
@@ -879,6 +882,7 @@ subroutine exc_write_phi_block(oeig_fname,use_mpio)
      if (open_file(oeig_fname,msg, newunit=eig_unt, form='unformatted') /= 0) then
        MSG_ERROR(msg)
      end if
+     write(eig_unt, err=10, iomsg=errmsg) do_ep_lifetime
      write(eig_unt, err=10, iomsg=errmsg) hexc_size, nstates
      write(eig_unt, err=10, iomsg=errmsg) CMPLX(exc_energy(1:nstates),kind=dpc)
    end if

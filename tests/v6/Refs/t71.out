@@ -2,7 +2,7 @@
 .Version 8.0.3 of ANADDB 
 .(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
 
-.Copyright (C) 1998-2016 ABINIT group . 
+.Copyright (C) 1998-2017 ABINIT group . 
  ANADDB comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -55,8 +55,6 @@
 
  read the DDB information and perform some checks
 
--begin at tcpu      0.027  and twall      0.027 sec
-
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  3.9400000  3.9400000  G(1)= -0.1269036  0.1269036  0.1269036
  R(2)=  3.9400000  0.0000000  3.9400000  G(2)=  0.1269036 -0.1269036  0.1269036
@@ -69,7 +67,6 @@
 
  Calculation of the interatomic forces 
 
--begin at tcpu      0.042  and twall      0.042 sec
        Homogeneous q point set in the B.Z.
  Grid q points  :      108
  greater than 80, so only write 20 of them
@@ -100,7 +97,6 @@
 
  Treat the first list of vectors 
 
--begin at tcpu      3.522  and twall      3.522 sec
  
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.00000
  Phonon energies in Hartree :
@@ -158,7 +154,6 @@
 
  Treat the second list of vectors 
 
--begin at tcpu      3.640  and twall      3.640 sec
  
   Phonon at Gamma, with non-analyticity in the
   direction (cartesian coordinates)  1.00000  0.00000  0.00000

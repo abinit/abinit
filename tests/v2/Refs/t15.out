@@ -1,8 +1,8 @@
 
-.Version 8.0.5 of ANADDB 
+.Version 8.4.2 of ANADDB 
 .(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
 
-.Copyright (C) 1998-2016 ABINIT group . 
+.Copyright (C) 1998-2017 ABINIT group . 
  ANADDB comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see http://www.abinit.org .
 
-.Starting date : Thu 12 May 2016.
-- ( at 02h18 )
+.Starting date : Mon  5 Jun 2017.
+- ( at 16h30 )
   
 
 ================================================================================
@@ -54,7 +54,6 @@
      ntemper        10
    temperinc         1.00000000E+02
    tempermin         1.00000000E+02
-       iavfr         1
  Description of grid 2 :
       ng2qpt        12        12        12
       ngrids         3
@@ -81,8 +80,6 @@
 ================================================================================
 
  read the DDB information and perform some checks
-
--begin at tcpu      0.021  and twall      0.021 sec
 
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  9.0985400  0.0000000  0.0000000  G(1)=  0.1099077  0.0634553  0.0000000
@@ -151,7 +148,7 @@
 
  Calculation of the interatomic forces 
 
--begin at tcpu      0.031  and twall      0.032 sec
+-begin at tcpu      0.023  and twall      0.023 sec
        Homogeneous q point set in the B.Z.
  Grid q points  :        8
   1)   0.00000000E+00  0.00000000E+00  2.50000000E-01
@@ -178,6 +175,8 @@
        of the generic atom along z.               
 
   NOTE: Open file ifcinfo.out, for the output of interatomic force constants. This is because prt_ifc==1. 
+
+  NOTE: Open file outfile.forceconstants_ABINIT, for the output of interatomic force constants in TDEP format. This is because prt_ifc==1. 
 
  generic atom number   1
  with cartesian coordinates  4.19798664E+00 -1.81969603E-09  1.67621667E+00
@@ -869,7 +868,6 @@
     thermodynamical properties, 
     and Debye-Waller factors.
 
--begin at tcpu      0.501  and twall      0.503 sec
        Homogeneous q point set in the B.Z.
  Grid q points  :       64
   1)   0.00000000E+00  0.00000000E+00  1.25000000E-01
@@ -1021,8 +1019,7 @@ iatom,iwchan,igqpt2(i),gij error=  10  1     4     4     4   0.01270
 
  Treat the first list of vectors 
 
--begin at tcpu      6.557  and twall      6.592 sec
- 
+
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.00000
  Phonon energies in Hartree :
   -1.164673E-05 -7.274336E-06 -7.274335E-06  6.231462E-04  6.231462E-04
@@ -1084,7 +1081,7 @@ iatom,iwchan,igqpt2(i),gij error=  10  1     4     4     4   0.01270
  Symmetry characters of vibration mode #  26
         degenerate with vibration mode #  27
   2.0 -1.0 -1.0  0.0 -0.0  0.0
- 
+
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.50000
  Phonon energies in Hartree :
    1.849739E-04  6.219095E-04  6.219095E-04  7.601772E-04  8.343047E-04
@@ -1100,7 +1097,7 @@ iatom,iwchan,igqpt2(i),gij error=  10  1     4     4     4   0.01270
 -  5.693954E+02  5.693954E+02  7.747459E+02  7.801269E+02  7.897349E+02
 -  7.897349E+02  1.039629E+03  1.056607E+03  1.056607E+03  1.084438E+03
 -  1.190903E+03  1.190903E+03
- 
+
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.45000
  Phonon energies in Hartree :
    1.872438E-04  6.098897E-04  6.169161E-04  7.474473E-04  7.707507E-04
@@ -1116,7 +1113,7 @@ iatom,iwchan,igqpt2(i),gij error=  10  1     4     4     4   0.01270
 -  5.622752E+02  5.778519E+02  7.736403E+02  7.802952E+02  7.886773E+02
 -  7.907847E+02  1.039695E+03  1.055536E+03  1.057592E+03  1.085032E+03
 -  1.185588E+03  1.195820E+03
- 
+
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.40000
  Phonon energies in Hartree :
    1.930432E-04  5.836162E-04  5.868014E-04  7.187431E-04  7.216337E-04
@@ -1132,7 +1129,7 @@ iatom,iwchan,igqpt2(i),gij error=  10  1     4     4     4   0.01270
 -  5.564719E+02  5.875766E+02  7.703960E+02  7.807639E+02  7.876797E+02
 -  7.917520E+02  1.039891E+03  1.054399E+03  1.058476E+03  1.086784E+03
 -  1.179919E+03  1.200301E+03
- 
+
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.35000
  Phonon energies in Hartree :
    1.996194E-04  5.285279E-04  5.437186E-04  6.860200E-04  6.939739E-04
@@ -1148,7 +1145,7 @@ iatom,iwchan,igqpt2(i),gij error=  10  1     4     4     4   0.01270
 -  5.518812E+02  5.984305E+02  7.651554E+02  7.814933E+02  7.867957E+02
 -  7.925625E+02  1.040214E+03  1.053217E+03  1.059247E+03  1.089605E+03
 -  1.173942E+03  1.204314E+03
- 
+
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.30000
  Phonon energies in Hartree :
    2.030905E-04  4.544383E-04  4.909270E-04  6.556059E-04  6.785416E-04
@@ -1164,7 +1161,7 @@ iatom,iwchan,igqpt2(i),gij error=  10  1     4     4     4   0.01270
 -  5.483409E+02  6.102320E+02  7.580975E+02  7.824571E+02  7.860599E+02
 -  7.931502E+02  1.040656E+03  1.052013E+03  1.059900E+03  1.093369E+03
 -  1.167707E+03  1.207832E+03
- 
+
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.25000
  Phonon energies in Hartree :
    1.991790E-04  3.746503E-04  4.265979E-04  6.313182E-04  6.675638E-04
@@ -1180,7 +1177,7 @@ iatom,iwchan,igqpt2(i),gij error=  10  1     4     4     4   0.01270
 -  5.456677E+02  6.227831E+02  7.494386E+02  7.836203E+02  7.854864E+02
 -  7.934634E+02  1.041208E+03  1.050806E+03  1.060434E+03  1.097926E+03
 -  1.161268E+03  1.210835E+03
- 
+
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.20000
  Phonon energies in Hartree :
    1.842178E-04  2.936592E-04  3.525621E-04  6.155292E-04  6.582538E-04
@@ -1196,31 +1193,28 @@ iatom,iwchan,igqpt2(i),gij error=  10  1     4     4     4   0.01270
 -  5.436913E+02  6.358871E+02  7.394145E+02  7.849365E+02  7.850696E+02
 -  7.934695E+02  1.041859E+03  1.049616E+03  1.060853E+03  1.103126E+03
 -  1.154676E+03  1.213308E+03
- Found acoustic mode      1 for |q| in red coord < 0.25 ; q =       0.0000      0.0000      0.2000
  Speed of sound for this q and mode:
    in atomic units:     0.1474358297E-02
-   in SI units m/s:           3225.44075
+   in units km/s:              3.22544
  Partial Debye temperature for this q and mode:
    in atomic units:     0.6408674567E-03
    in SI units K  :            202.36970
 
- Found acoustic mode      2 for |q| in red coord < 0.25 ; q =       0.0000      0.0000      0.2000
  Speed of sound for this q and mode:
    in atomic units:     0.2350255611E-02
-   in SI units m/s:           5141.63364
+   in units km/s:              5.14163
  Partial Debye temperature for this q and mode:
    in atomic units:     0.1021598576E-02
    in SI units K  :            322.59493
 
- Found acoustic mode      3 for |q| in red coord < 0.25 ; q =       0.0000      0.0000      0.2000
  Speed of sound for this q and mode:
    in atomic units:     0.2821676181E-02
-   in SI units m/s:           6172.95630
+   in units km/s:              6.17296
  Partial Debye temperature for this q and mode:
    in atomic units:     0.1226513556E-02
    in SI units K  :            387.30189
 
- 
+
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.15000
  Phonon energies in Hartree :
    1.562979E-04  2.137637E-04  2.708379E-04  6.087292E-04  6.495561E-04
@@ -1236,31 +1230,28 @@ iatom,iwchan,igqpt2(i),gij error=  10  1     4     4     4   0.01270
 -  5.422747E+02  6.493571E+02  7.282629E+02  7.847894E+02  7.863491E+02
 -  7.931571E+02  1.042598E+03  1.048456E+03  1.061166E+03  1.108829E+03
 -  1.147984E+03  1.215240E+03
- Found acoustic mode      1 for |q| in red coord < 0.25 ; q =       0.0000      0.0000      0.1500
  Speed of sound for this q and mode:
    in atomic units:     0.1667874348E-02
-   in SI units m/s:           3648.79412
+   in units km/s:              3.64879
  Partial Debye temperature for this q and mode:
    in atomic units:     0.7249841465E-03
    in SI units K  :            228.93162
 
- Found acoustic mode      2 for |q| in red coord < 0.25 ; q =       0.0000      0.0000      0.1500
  Speed of sound for this q and mode:
    in atomic units:     0.2281099681E-02
-   in SI units m/s:           4990.34182
+   in units km/s:              4.99034
  Partial Debye temperature for this q and mode:
    in atomic units:     0.9915381858E-03
    in SI units K  :            313.10262
 
- Found acoustic mode      3 for |q| in red coord < 0.25 ; q =       0.0000      0.0000      0.1500
  Speed of sound for this q and mode:
    in atomic units:     0.2890145152E-02
-   in SI units m/s:           6322.74527
+   in units km/s:              6.32275
  Partial Debye temperature for this q and mode:
    in atomic units:     0.1256275342E-02
    in SI units K  :            396.69991
 
- 
+
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.10000
  Phonon energies in Hartree :
    1.156585E-04  1.365233E-04  1.834190E-04  6.094186E-04  6.409106E-04
@@ -1276,31 +1267,28 @@ iatom,iwchan,igqpt2(i),gij error=  10  1     4     4     4   0.01270
 -  5.413209E+02  6.630178E+02  7.162118E+02  7.846183E+02  7.877943E+02
 -  7.925364E+02  1.043415E+03  1.047337E+03  1.061380E+03  1.114913E+03
 -  1.141243E+03  1.216624E+03
- Found acoustic mode      1 for |q| in red coord < 0.25 ; q =       0.0000      0.0000      0.1000
  Speed of sound for this q and mode:
    in atomic units:     0.1851310015E-02
-   in SI units m/s:           4050.09473
+   in units km/s:              4.05009
  Partial Debye temperature for this q and mode:
    in atomic units:     0.8047191401E-03
    in SI units K  :            254.10990
 
- Found acoustic mode      2 for |q| in red coord < 0.25 ; q =       0.0000      0.0000      0.1000
  Speed of sound for this q and mode:
    in atomic units:     0.2185286520E-02
-   in SI units m/s:           4780.73221
+   in units km/s:              4.78073
  Partial Debye temperature for this q and mode:
    in atomic units:     0.9498905504E-03
    in SI units K  :            299.95136
 
- Found acoustic mode      3 for |q| in red coord < 0.25 ; q =       0.0000      0.0000      0.1000
  Speed of sound for this q and mode:
    in atomic units:     0.2935930823E-02
-   in SI units m/s:           6422.91018
+   in units km/s:              6.42291
  Partial Debye temperature for this q and mode:
    in atomic units:     0.1276177252E-02
    in SI units K  :            402.98443
 
- 
+
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.05000
  Phonon energies in Hartree :
    6.316631E-05  6.385987E-05  9.207267E-05  6.150386E-04  6.320510E-04
@@ -1316,26 +1304,23 @@ iatom,iwchan,igqpt2(i),gij error=  10  1     4     4     4   0.01270
 -  5.407696E+02  6.767018E+02  7.034737E+02  7.845288E+02  7.892034E+02
 -  7.916373E+02  1.044303E+03  1.046269E+03  1.061505E+03  1.121275E+03
 -  1.134506E+03  1.217456E+03
- Found acoustic mode      1 for |q| in red coord < 0.25 ; q =       0.0000      0.0000      0.0500
  Speed of sound for this q and mode:
    in atomic units:     0.2022166952E-02
-   in SI units m/s:           4423.87695
+   in units km/s:              4.42388
  Partial Debye temperature for this q and mode:
    in atomic units:     0.8789864676E-03
    in SI units K  :            277.56164
 
- Found acoustic mode      2 for |q| in red coord < 0.25 ; q =       0.0000      0.0000      0.0500
  Speed of sound for this q and mode:
    in atomic units:     0.2044370271E-02
-   in SI units m/s:           4472.45096
+   in units km/s:              4.47245
  Partial Debye temperature for this q and mode:
    in atomic units:     0.8886377072E-03
    in SI units K  :            280.60926
 
- Found acoustic mode      3 for |q| in red coord < 0.25 ; q =       0.0000      0.0000      0.0500
  Speed of sound for this q and mode:
    in atomic units:     0.2947557361E-02
-   in SI units m/s:           6448.34546
+   in units km/s:              6.44835
  Partial Debye temperature for this q and mode:
    in atomic units:     0.1281231024E-02
    in SI units K  :            404.58028
@@ -1345,8 +1330,7 @@ iatom,iwchan,igqpt2(i),gij error=  10  1     4     4     4   0.01270
 
  Treat the second list of vectors 
 
--begin at tcpu      6.720  and twall      6.756 sec
- 
+
   Phonon at Gamma, with non-analyticity in the
   direction (cartesian coordinates)  0.00000  0.00000  1.00000
  Phonon energies in Hartree :
@@ -1471,13 +1455,13 @@ iatom,iwchan,igqpt2(i),gij error=  10  1     4     4     4   0.01270
       2.52675180     -0.00000000      0.00000000
      -0.00000000      2.52675180     -0.00000000
      -0.00000000     -0.00000000      2.56608423
- 
+
 
  Relaxed ion dielectric tensor
       4.76702665     -0.00000000      0.00000000
      -0.00000000      4.76702665     -0.00000000
      -0.00000000      0.00000000      4.98722521
- 
+
  Full dielectric tensor at frequency  0.0000E+00 Hartree
   4.76702665E+00 -1.55829234E-13  7.12864279E-25
  -1.55829234E-13  4.76702665E+00 -1.23471715E-24
@@ -1488,10 +1472,10 @@ iatom,iwchan,igqpt2(i),gij error=  10  1     4     4     4   0.01270
  Direction                     Dielectric constant
    0.00000   0.00000   1.00000    4.98722565E+00
 -
-- Proc.   0 individual time (sec): cpu=          6.7  wall=          6.8
+- Proc.   0 individual time (sec): cpu=          6.7  wall=          6.7
 
 ================================================================================
 
-+Total cpu time      6.733  and wall time      6.769 sec
++Total cpu time      6.670  and wall time      6.690 sec
 
  anaddb : the run completed succesfully.

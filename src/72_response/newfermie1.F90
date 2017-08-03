@@ -7,12 +7,12 @@
 !! This routine computes the derivative of the fermi energy wrt
 !! the active perturbation for use in evaluating the edocc term
 !! and active subspace contribution to the first-order wavefunctions
-!! in the case of metals.  This is presently used only for the
-!! strain perturbation, and only for Q = 0.
+!! in the case of metals. This is presently used only for the
+!! strain and magnetic field perturbations, and only for Q = 0.
 !!
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (DRH)
+!! Copyright (C) 1998-2017 ABINIT group (DRH)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

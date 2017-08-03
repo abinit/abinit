@@ -7,10 +7,10 @@
 !! Compute local part of 1st-order potential from the appropriate
 !! atomic pseudopotential with structure and derivative factor.
 !! In case of derivative with respect to k or
-!! electric field perturbation, the 1st-order local potential vanishes.
+!! electric (magnetic Zeeman) field perturbation, the 1st-order local potential vanishes.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2016 ABINIT group (XG,MM)
+!! Copyright (C) 1999-2017 ABINIT group (XG,MM)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -111,9 +111,9 @@ subroutine dfpt_vlocal(atindx,cplex,gmet,gsqcut,idir,ipert,&
 
  iatom=ipert
 
- if(iatom==natom+1 .or. iatom==natom+2 .or. iatom==natom+10  .or. iatom==natom+11)then
+ if(iatom==natom+1 .or. iatom==natom+2 .or. iatom==natom+10  .or. iatom==natom+11 .or. iatom==natom+5)then
 
-!  (In case of d/dk or an electric field)
+!  (In case of d/dk or an electric field, or magnetic (Zeeman) field->[natom+5] SPr deb )
    vpsp1(1:cplex*nfft)=zero
 
  else
@@ -225,7 +225,7 @@ subroutine dfpt_vlocal(atindx,cplex,gmet,gsqcut,idir,ipert,&
  contains
 
 !Real and imaginary parts of phase.
-  function phr_vl3(x1,y1,x2,y2,x3,y3)
+   function phr_vl3(x1,y1,x2,y2,x3,y3)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -284,7 +284,7 @@ subroutine dfpt_vlocal(atindx,cplex,gmet,gsqcut,idir,ipert,&
  end function ph2_vl3
 
 !  Warning : this function differ from similar ones for ground-state calculations : note the atindx !!
-  function ph3_vl3(nri,ig3,ia)
+   function ph3_vl3(nri,ig3,ia)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -313,7 +313,7 @@ subroutine dfpt_vlocal(atindx,cplex,gmet,gsqcut,idir,ipert,&
 &   ph2_vl3(re,ig2,ia),ph2_vl3(im,ig2,ia),ph3_vl3(re,ig3,ia),ph3_vl3(im,ig3,ia))
  end function phre_vl3
 
- function phimag_vl3(ig1,ig2,ig3,ia)
+   function phimag_vl3(ig1,ig2,ig3,ia)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -328,7 +328,7 @@ subroutine dfpt_vlocal(atindx,cplex,gmet,gsqcut,idir,ipert,&
 &   ph2_vl3(re,ig2,ia),ph2_vl3(im,ig2,ia),ph3_vl3(re,ig3,ia),ph3_vl3(im,ig3,ia))
  end function phimag_vl3
 
- function gsq_vl3(g1,g2,g3)
+   function gsq_vl3(g1,g2,g3)
 
 
 !This section has been created automatically by the script Abilint (TD).

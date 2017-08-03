@@ -6,7 +6,7 @@
 !!  Tools for the computation of phonon self-energy.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2016 ABINIT group (GKA)
+!!  Copyright (C) 2008-2017 ABINIT group (GKA)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -46,7 +46,6 @@ module m_phpi
  use m_hamiltonian
  use m_pawcprj
 
- use defs_datatypes,    only : ebands_t
  use m_time,            only : cwtime
  use m_fstrings,        only : sjoin, itoa, ftoa, ktoa, ltoa, strcat
  use m_io_tools,        only : iomode_from_fname
@@ -99,7 +98,6 @@ contains  !=====================================================================
 !! pawrad(ntypat*usepaw)<pawrad_type>=Paw radial mesh and related data.
 !! pawtab(ntypat*usepaw)<pawtab_type>=Paw tabulated starting data.
 !! psps<pseudopotential_type>=Variables related to pseudopotentials.
-!! n0(nsppol)=Electronic density at the Fermi level for each spin.
 !! comm=MPI communicator.
 !!
 !! OUTPUT
@@ -114,7 +112,7 @@ contains  !=====================================================================
 !! SOURCE
 
 subroutine eph_phpi(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,ebands_kq,dvdb,ifc,&
-                       pawfgr,pawang,pawrad,pawtab,psps,mpi_enreg,n0,comm)
+                       pawfgr,pawang,pawrad,pawtab,psps,mpi_enreg,comm)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -144,14 +142,13 @@ subroutine eph_phpi(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,e
  type(mpi_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: ngfft(18),ngfftf(18)
- real(dp),intent(in) :: n0(ebands_k%nsppol)
  type(pawrad_type),intent(in) :: pawrad(psps%ntypat*psps%usepaw)
  type(pawtab_type),intent(in) :: pawtab(psps%ntypat*psps%usepaw)
 
 !Local variables ------------------------------
 !scalars
  integer,parameter :: dummy_npw=1,nsig=1,tim_getgh1c=1,berryopt0=0,timrev1=1
- integer,parameter :: useylmgr=0,useylmgr1=0,master=0,copt0=0
+ integer,parameter :: useylmgr=0,useylmgr1=0,master=0
  integer :: my_rank,nproc,iomode,mband,mband_kq,my_minb,my_maxb,nsppol,nkpt,nkpt_kq,idir,ipert
  integer :: cplex,db_iqpt,natom,natom3,ipc,nspinor,onpw,imode
  integer :: ib1,ib2
@@ -337,12 +334,15 @@ subroutine eph_phpi(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,e
  !* Norm-conserving: Constant kleimann-Bylander energies are copied from psps to gs_hamk.
  !* PAW: Initialize the overlap coefficients and allocate the Dij coefficients.
 
- call init_hamiltonian(gs_hamkq,psps,pawtab,nspinor,nspden,natom,&
-   dtset%typat,cryst%xred,nfft,mgfft,ngfft,cryst%rprimd,dtset%nloalg,&
-   usecprj=usecprj,ph1d=ph1d,nucdipmom=dtset%nucdipmom,use_gpu_cuda=dtset%use_gpu_cuda)
+ call init_hamiltonian(gs_hamkq,psps,pawtab,nspinor,NSPPOL,nspden,natom,&
+&  dtset%typat,cryst%xred,nfft,mgfft,ngfft,cryst%rprimd,dtset%nloalg,&
+&  comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,mpi_spintab=mpi_enreg%my_isppoltab,&
+&  usecprj=usecprj,ph1d=ph1d,nucdipmom=dtset%nucdipmom,use_gpu_cuda=dtset%use_gpu_cuda)
 
-! Allocate vlocal. Note nvloc
+ ! Allocate vlocal. Note nvloc
+ ! I set vlocal to huge to trigger possible bugs (DFPT routines should not access the data)
  ABI_MALLOC(vlocal,(n4,n5,n6,gs_hamkq%nvloc))
+ vlocal = huge(one)
 
  ! Allocate work space arrays.
  ABI_MALLOC(blkflg, (natom3,natom3))
@@ -408,8 +408,7 @@ subroutine eph_phpi(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,e
    end do
 
    ! Continue to initialize the Hamiltonian
-   call load_spin_hamiltonian(gs_hamkq,spin,vlocal=vlocal, &
-&          comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
+   call load_spin_hamiltonian(gs_hamkq,spin,vlocal=vlocal,with_nonlocal=.true.)
 
    do ik=1,nkpt
 
@@ -460,12 +459,10 @@ subroutine eph_phpi(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,e
        !call wrtout(std_out, msg, "COLL", do_flush=.True.)
 
        ! Prepare application of the NL part.
-       call init_rf_hamiltonian(cplex,gs_hamkq,ipert,rf_hamkq,has_e1kbsc=1)
-       call load_spin_rf_hamiltonian(rf_hamkq,gs_hamkq,spin,vlocal1=vlocal1(:,:,:,:,ipc), &
-            comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
-!      call load_spin_rf_hamiltonian(rf_hamkq,gs_hamkq,spin,paw_ij1=paw_ij1,vlocal1=vlocal1(:,:,:,:,ipc), &
-!           comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
-
+       call init_rf_hamiltonian(cplex,gs_hamkq,ipert,rf_hamkq,has_e1kbsc=.true.)
+           !&paw_ij1=paw_ij1,comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,&
+           !&mpi_spintab=mpi_enreg%my_isppoltab)
+       call load_spin_rf_hamiltonian(rf_hamkq,gs_hamkq,spin,vlocal1=vlocal1(:,:,:,:,ipc),with_nonlocal=.true.)
 
        ! This call is not optimal because there are quantities in out that do not depend on idir,ipert
        call getgh1c_setup(gs_hamkq,rf_hamkq,dtset,psps,kk,kq,idir,ipert,&                   ! In
@@ -643,7 +640,7 @@ end subroutine eph_phpi
 !! OUTPUT
 !!
 !! PARENTS
-!!      eph_phpi
+!!      m_phpi
 !!
 !! NOTES
 !!
@@ -705,7 +702,7 @@ end subroutine out_phpi
 !! OUTPUT
 !!
 !! PARENTS
-!!      eph_phpi
+!!      m_phpi
 !!
 !! NOTES
 !!

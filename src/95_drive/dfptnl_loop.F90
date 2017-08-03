@@ -338,7 +338,9 @@ subroutine dfptnl_loop(atindx,atindx1,blkflg,cg,cgindex,dtfil,dtset,d3etot,eigen
  n3xccc=0;if(psps%n1xccc/=0)n3xccc=nfftf
 
 !Loop over the perturbations j1, j2, j3
+
  pert1case = 0 ; pert2case = 0 ; pert3case = 0
+
  do i1pert = 1, mpert
    do i1dir = 1, 3
 
@@ -419,6 +421,7 @@ subroutine dfptnl_loop(atindx,atindx1,blkflg,cg,cgindex,dtfil,dtset,d3etot,eigen
              flag3 = 0
              rho3r1(:,:) = zero
              if (dtset%get1den /= 0 .or. dtset%ird1den /= 0) then
+               rdwrpaw=0
                call appdig(pert3case,dtfil%fildens1in,fiden1i)
                call status(counter,dtfil%filstat,iexit,level,'call ioarr    ')
 
@@ -459,7 +462,27 @@ subroutine dfptnl_loop(atindx,atindx1,blkflg,cg,cgindex,dtfil,dtset,d3etot,eigen
                    if (npert_phon>1) then
                      MSG_ERROR("dfptnl_loop is available with at most one phonon perturbation. Change your input!")
                    end if
+                   if (i1pert == dtset%natom + 2) then
+                     write(message,'(a,i4)')' j1 : homogeneous electric field along direction ',i1dir
+                   end if
+                   call wrtout(std_out,message,'COLL')
+                   call wrtout(ab_out,message,'COLL')
+                   if (i3pert < natom + 1) then
+                     write(message,'(a,i3,a,i3,a)') &
+&                     ' j3 : displacement of atom ',i3pert,' along direction ', i3dir,ch10
+                   end if
+                   if (i3pert == dtset%natom + 2) then
+                     write(message,'(a,i4,a)')' j3 : homogeneous electric field along direction ',i3dir,ch10
+                   end if
+                   call wrtout(std_out,message,'COLL')
+                   call wrtout(ab_out,message,'COLL')
+                 end if
 
+               end if ! mpi_enreg%me == 0
+
+               do i2dir = 1, 3
+
+                 if (rfpert(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)==1) then
                    pert2case = i2dir + (i2pert-1)*3
                    counter = 100*pert2case + pert2case
                    call appdig(pert2case,dtfil%fnamewff1,fiwf2i)
@@ -483,6 +506,7 @@ subroutine dfptnl_loop(atindx,atindx1,blkflg,cg,cgindex,dtfil,dtset,d3etot,eigen
                    rho2r1(:,:) = zero ; rho2g1(:,:) = zero
 
                    if (dtset%get1den /= 0 .or. dtset%ird1den /= 0) then
+                     rdwrpaw=0
                      call appdig(pert2case,dtfil%fildens1in,fiden1i)
                      call status(counter,dtfil%filstat,iexit,level,'call ioarr    ')
 

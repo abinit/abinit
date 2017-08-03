@@ -8,7 +8,7 @@
 !! non linear response functions.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2002-2016 ABINIT group (MVeithen,MB,LB)
+!! Copyright (C) 2002-2017 ABINIT group (MVeithen,MB,LB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -783,9 +783,10 @@ end if
 
 !Set up hartree and xc potential. Compute kxc here.
  option=3
- nkxc=2*min(dtset%nspden,2)-1;if(dtset%xclevel==2)nkxc=23
- nk3xc=3*min(dtset%nspden,2)-2
- call check_kxc(dtset%ixc,dtset%optdriver)
+ nkxc=2*nspden-1 ! LDA
+ if(dtset%xclevel==2.and.nspden==1) nkxc=7  ! non-polarized GGA
+ if(dtset%xclevel==2.and.nspden==2) nkxc=19 ! polarized GGA
+ nk3xc=3*nspden-2
  ABI_ALLOCATE(kxc,(nfftf,nkxc))
  ABI_ALLOCATE(k3xc,(nfftf,nk3xc))
  ABI_ALLOCATE(vhartr,(nfftf))

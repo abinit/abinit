@@ -8,7 +8,7 @@
 !! on the three reduced axis.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (XG)
+!! Copyright (C) 1998-2017 ABINIT group (XG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -61,7 +61,7 @@ subroutine out1dm(fnameabo_app_1dm,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,&
 
  use m_io_tools, only : open_file
  use m_mpinfo,   only : ptabs_fourdp
- use m_xmpi,     only : xmpi_sum
+ use m_xmpi,     only : xmpi_sum, xmpi_comm_size
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -87,6 +87,7 @@ subroutine out1dm(fnameabo_app_1dm,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,&
 !Local variables-------------------------------
 !scalars
  integer :: ia,ib,idim,ierr,ifft,islice,ispden,na,nb,ndig,nslice,nu,temp_unit
+ integer :: comm_fft, nproc_fft, me_fft
  real(dp) :: global_den,global_pot
  character(len=2) :: symbol
  character(len=500) :: message
@@ -104,24 +105,28 @@ subroutine out1dm(fnameabo_app_1dm,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,&
  call wrtout(std_out,message,'COLL')
  call wrtout(ab_out,message,'COLL')
 
- if (open_file(fnameabo_app_1dm,message,newunit=temp_unit,status='unknown',form='formatted') /= 0) then
-   MSG_ERROR(message)
+ comm_fft = mpi_enreg%comm_fft; nproc_fft = xmpi_comm_size(comm_fft); me_fft = mpi_enreg%me_fft
+
+ if (me_fft == 0) then
+   if (open_file(fnameabo_app_1dm,message,newunit=temp_unit,status='unknown',form='formatted') /= 0) then
+     MSG_ERROR(message)
+   end if
+   rewind(temp_unit)
  end if
- rewind(temp_unit)
 
  write(message, '(a,a)' ) ch10,'# ABINIT package : 1DM file '
- call wrtout(temp_unit,message,'COLL')
+ if (me_fft == 0) write(temp_unit,'(a)') message  
 
  write(message, '(a,a)' )ch10,'# Primitive vectors of the periodic cell (bohr)'
- call wrtout(temp_unit,message,'COLL')
+ if (me_fft == 0) write(temp_unit,'(a)') message  
  do nu=1,3
    write(message, '(1x,a,i1,a,3f10.5)' ) '#  R(',nu,')=',rprimd(:,nu)
-   call wrtout(temp_unit,message,'COLL')
+   if (me_fft == 0) write(temp_unit,'(a)') message  
  end do
 
  write(message, '(a,a)' ) ch10,&
 & '# Atom list        Reduced coordinates          Cartesian coordinates (bohr)'
- call wrtout(temp_unit,message,'COLL')
+ if (me_fft == 0) write(temp_unit,'(a)') message  
 
 !Set up a list of character identifiers for all atoms : iden(ia)
  ABI_ALLOCATE(iden,(natom))
@@ -148,7 +153,7 @@ subroutine out1dm(fnameabo_app_1dm,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,&
  do ia=1,natom
    write(message, '(a,a,3f10.5,a,3f10.5)' ) &
 &   '#   ',iden(ia),xred(1:3,ia),'    ',xcart(1:3,ia)
-   call wrtout(temp_unit,message,'COLL')
+   if (me_fft == 0) write(temp_unit,'(a)') message  
  end do
  ABI_DEALLOCATE(iden)
  ABI_DEALLOCATE(xcart)
@@ -180,7 +185,7 @@ subroutine out1dm(fnameabo_app_1dm,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,&
      if(ispden==1)then
        write(message, '(a,a,a)' ) ch10,'#===========',&
 &       '====================================================================='
-       call wrtout(temp_unit,message,'COLL')
+       if (me_fft == 0) write(temp_unit,'(a)') message  
      end if
 
      select case(idim)
@@ -191,7 +196,7 @@ subroutine out1dm(fnameabo_app_1dm,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,&
      case(3)
        write(message, '(a)' )'# Projection along the third dimension '
      end select
-     call wrtout(temp_unit,message,'COLL')
+     if (me_fft == 0) write(temp_unit,'(a)') message  
 
      if(nspden==2)then
        select case(ispden)
@@ -200,7 +205,7 @@ subroutine out1dm(fnameabo_app_1dm,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,&
        case(2)
          write(message, '(a)' )'# Spin down '
        end select
-       call wrtout(temp_unit,message,'COLL')
+       if (me_fft == 0) write(temp_unit,'(a)') message  
      else if (nspden == 4) then
        select case(ispden)
        case(1)
@@ -212,16 +217,16 @@ subroutine out1dm(fnameabo_app_1dm,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,&
        case(4)
          write(message, '(a)' )'# Spinor down up'
        end select
-       call wrtout(temp_unit,message,'COLL')
+       if (me_fft == 0) write(temp_unit,'(a)') message  
      end if
 
      write(message, '(2a)' ) ch10,&
 &     '#     Red. coord. Mean KS potential  Linear density  '
-     call wrtout(temp_unit,message,'COLL')
+     if (me_fft == 0) write(temp_unit,'(a)') message  
 
      write(message, '(a)' ) &
 &     '#                  (Hartree unit)   (electron/red. unit)'
-     call wrtout(temp_unit,message,'COLL')
+     if (me_fft == 0) write(temp_unit,'(a)') message  
 
      global_pot=zero
      global_den=zero
@@ -283,12 +288,12 @@ subroutine out1dm(fnameabo_app_1dm,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,&
      do islice=1,ngfft(idim)
        write(message, '(f10.4,es20.6,es16.6)' )&
 &       reduced_coord(islice),mean_pot(islice),lin_den(islice)
-       call wrtout(temp_unit,message,'COLL')
+       if (me_fft == 0) write(temp_unit,'(a)') message
      end do
 
      write(message, '(a,a,es15.6,es16.6,a)' ) ch10,&
 &     '# Cell mean       :',global_pot,global_den, ch10
-     call wrtout(temp_unit,message,'COLL')
+     if (me_fft == 0) write(temp_unit,'(a)') message
 
 
 !    End of the loop on spins
@@ -301,11 +306,12 @@ subroutine out1dm(fnameabo_app_1dm,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,&
 !  End of the loops on the three dimensions
  end do
 
- write(message, '(a,a,a)' ) ch10,'#===========',&
-& '====================================================================='
- call wrtout(temp_unit,message,'COLL')
-
- close(temp_unit)
+ if (me_fft == 0) then
+   write(message, '(a,a,a)' ) ch10,'#===========',&
+&   '====================================================================='
+   call wrtout(temp_unit,message,'COLL')
+   close(temp_unit)
+ end if
 
 end subroutine out1dm
 !!***

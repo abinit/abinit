@@ -9,7 +9,7 @@
 !! cartesian strain component and one reduced-coordinate atomic displacement).
 !!
 !! COPYRIGHT
-!! Copyright (C) 2000-2016 ABINIT group (DRH, XG)
+!! Copyright (C) 2000-2017 ABINIT group (DRH, XG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

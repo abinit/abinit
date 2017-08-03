@@ -7,7 +7,7 @@
 !! create full grid of kpoints from kptrlatt and shiftk
 !!
 !! COPYRIGHT
-!! Copyright (C) 2002-2016 ABINIT group (MVer,XG)
+!! Copyright (C) 2002-2017 ABINIT group (MVer,XG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -156,7 +156,8 @@ subroutine get_kpt_fullbz(kpt_fullbz,kptrlatt,nkpt_fullbz,nshiftk,shiftk)
  nn = nn-1
 
  if (nn /= nkpt_fullbz) then
-   write (message,'(2(a,i0))')' nkpt_fullbz= ',nkpt_fullbz,' underestimated  nn=',nn
+   write (message,'(2(a,i0),a,a)')' nkpt_fullbz= ',nkpt_fullbz,' underestimated  nn=',nn,&
+&   ch10, "Perhaps your k grid or shifts do not correspond to the symmetry?"
    MSG_BUG(message)
  end if
 

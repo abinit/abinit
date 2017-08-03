@@ -10,7 +10,7 @@
 !!   <p_lmn|c>=4pi/sqrt(vol) (i)^l Sum_g[c(g).f_nl(g).Y_lm(g).exp(2pi.i.g.R)]
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (MT)
+!! Copyright (C) 1998-2017 ABINIT group (MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -140,14 +140,14 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
  integer,intent(in) :: indlmn(6,nlmn),nloalg(3)
  integer,intent(out) :: cplex_dgxdt(ndgxdt),cplex_d2gxdt(nd2gxdt)
  real(dp),intent(in) :: ffnl(npw,dimffnl,nlmn),kpg(npw,nkpg),ph3d(2,npw,matblk)
- real(dp),intent(in) :: vect(2,npw*nspinor)
+ real(dp),intent(in) :: vect(:,:)
  real(dp),intent(out) :: d2gxdt(cplex,nd2gxdt,nlmn,nincat,nspinor)
  real(dp),intent(out) :: dgxdt(cplex,ndgxdt,nlmn,nincat,nspinor),gx(cplex,nlmn,nincat,nspinor)
 
 !Local variables-------------------------------
 !scalars
  integer :: choice_,gama,gamb,gamc,gamd,ia,iaph3d
- integer :: idir1,idir2,ierr,il,ilmn,ipw,ipw0,ipwshft,ispinor,jpw,mu,mu0
+ integer :: ierr,il,ilmn,ipw,ipw0,ipwshft,ispinor,jpw,mu,mu0
  integer :: mua,mub,ndir,nthreads,nua1,nua2,nub1,nub2
  real(dp), parameter :: two_pi2=two_pi*two_pi
  real(dp) :: aux_i,aux_i2,aux_i3,aux_i4
@@ -162,6 +162,7 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
  integer,parameter :: alpha(6)=(/1,2,3,3,3,2/),beta(6)=(/1,2,3,2,1,1/)
  integer,parameter :: gamma(3,3)=reshape((/1,6,5,6,2,4,5,4,3/),(/3,3/))
  integer,parameter :: ffnl_dir_dat(6)=(/2,3,3,1,1,2/)
+ integer,parameter :: idir1(9)=(/1,1,1,2,2,2,3,3,3/),idir2(9)=(/1,2,3,1,2,3,1,2,3/)
  integer :: ffnl_dir(2)
  real(dp) :: tsec(2)
  real(dp),allocatable :: scali(:),scalr(:),scalari(:,:),scalarr(:,:)
@@ -186,7 +187,6 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
 &   choice_==6 .or.choice_==8 .or.choice_==81)
    ABI_CHECK(check,'BUG: choice not compatible (for signs=1)')
  end if
- idir1 = 0 ; idir2 = 0
  if (signs==2) then
 !  signs=2,less choices
    check=(choice_== 0.or.choice_== 1.or.choice_== 2.or.choice_==3.or.choice_==5.or.&
@@ -202,8 +202,6 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
 !  1<=idir<=9 is required when choice=8 and signs=2
    check=(idir>=1.and.idir<=9)
    ABI_CHECK(check,'BUG: choice=8/81 and signs=2 requires 1<=idir<=9')
-   idir1 = (idir-1)/3+1
-   idir2 = mod((idir-1),3)+1
  else
 !  signs=2 requires 1<=idir<=3 when choice>1
    check=(signs/=2.or.choice<=1.or.(idir>=1.and.idir<=3))
@@ -231,13 +229,13 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
 !    Loop on atoms (blocking)
      do ia=1,nincat
        iaph3d=ia;if (nloalg(2)>0) iaph3d=ia+ia3-1
-
 !      Compute c(g).exp(2pi.i.g.R)
        do ipw=ipw0,npw
          jpw=ipw+ipwshft
          scalr(ipw)=(vect(1,jpw)*ph3d(1,ipw,iaph3d)-vect(2,jpw)*ph3d(2,ipw,iaph3d))
          scali(ipw)=(vect(2,jpw)*ph3d(1,ipw,iaph3d)+vect(1,jpw)*ph3d(2,ipw,iaph3d))
        end do
+
        if (ipw0==2) then
          scalr(1)=half*vect(1,1+ipwshft)*ph3d(1,1,iaph3d)
          scali(1)=half*vect(1,1+ipwshft)*ph3d(2,1,iaph3d)
@@ -247,6 +245,7 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
 !      ALL CHOICES:
 !      Accumulate Gx
 !      --------------------------------------------------------------------
+
        if (choice>=0) then
          do ilmn=1,nlmn
            il=mod(indlmn(1,ilmn),4);parity=(mod(il,2)==0)
@@ -746,18 +745,19 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
            ndir=2
          end if
          if (choice_==54) then
-           ffnl_dir(1)=1;if(dimffnl>2) ffnl_dir(1)=idir2
+!          We compute the derivative in one direction (the second one)
+           ffnl_dir(1)=1;if(dimffnl>2) ffnl_dir(1)=idir2(idir)
            ndir=1
          end if
          if (choice_==8) then
 !          We compute the derivative in two directions
 !          depending on the input idir argument
-           ffnl_dir(1)=idir1;ffnl_dir(2)=idir2
+           ffnl_dir(1)=idir1(idir);ffnl_dir(2)=idir2(idir)
            ndir=2
          end if
          if (choice_==81) then
 !          We compute the derivative in one direction (the second one)
-           ffnl_dir(1)=idir2
+           ffnl_dir(1)=idir2(idir)
            ndir=1
          end if
          do mua=1,ndir
@@ -862,8 +862,8 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
        if ((signs==2).and.(choice_==54)) then
          mu0=1
          !idir= (xx=1, xy=2, xz=3, yx=4, yy=5, yz=6, zx=7, zy=8, zz=9)
-         mua=idir1
-         mub=1;if(dimffnl>2) mub=idir2
+         mua=idir1(idir) ! atm. pos
+         mub=1;if(dimffnl>2) mub=idir2(idir) ! k
          do ilmn=1,nlmn
            il=mod(indlmn(1,ilmn),4);parity=(mod(il,2)==0)
            scale=wt;if (il>1) scale=-scale
@@ -1236,7 +1236,7 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
        if ((signs==2).and.(choice_==8.or.choice_==81)) then
          mu0=1
          !idir= (xx=1, xy=2, xz=3, yx=4, yy=5, yz=6, zx=7, zy=8, zz=9)
-         mua=idir1;mub=idir2
+         mua=idir1(idir);mub=idir2(idir)
          !idir->(Voigt) (11->1,22->2,33->3,32->4,31->5,21->6)
          ffnl_dir(1)=gamma(mua,mub)
          do ilmn=1,nlmn
@@ -1992,18 +1992,19 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
            ndir=2
          end if
          if (choice_==54) then
-           ffnl_dir(1)=1;if(dimffnl>2) ffnl_dir(1)=idir2
+!          We compute the derivative in one direction (the second one)
+           ffnl_dir(1)=1;if(dimffnl>2) ffnl_dir(1)=idir2(idir)
            ndir=1
          end if
          if (choice_==8) then
 !          We compute the derivative in two directions
 !          depending on the input idir argument
-           ffnl_dir(1)=idir1;ffnl_dir(2)=idir2
+           ffnl_dir(1)=idir1(idir);ffnl_dir(2)=idir2(idir)
            ndir=2
          end if
          if (choice_==81) then
 !          We compute the derivative in one direction (the second one)
-           ffnl_dir(1)=idir2
+           ffnl_dir(1)=idir2(idir)
            ndir=1
          end if
          do mua=1,ndir
@@ -2153,8 +2154,8 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
        if ((signs==2).and.(choice_==54)) then
          mu0=1
          !idir= (xx=1, xy=2, xz=3, yx=4, yy=5, yz=6, zx=7, zy=8, zz=9)
-         mua=idir1
-         mub=1;if(dimffnl>2) mub=idir2
+         mua=idir1(idir) ! atm. pos
+         mub=1;if(dimffnl>2) mub=idir2(idir) ! k
          do ilmn=1,nlmn
            il=mod(indlmn(1,ilmn),4);parity=(mod(il,2)==0)
            scale=wt;if (il>1) scale=-scale
@@ -2637,7 +2638,7 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
        if ((signs==2).and.(choice_==8)) then
          mu0=1
          !idir= (xx=1, xy=2, xz=3, yx=4, yy=5, yz=6, zx=7, zy=8, zz=9)
-         mua=idir1;mub=idir2
+         mua=idir1(idir);mub=idir2(idir)
          !idir->(Voigt) (11->1,22->2,33->3,32->4,31->5,21->6)
          ffnl_dir(1)=gamma(mua,mub)
          do ilmn=1,nlmn

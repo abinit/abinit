@@ -10,7 +10,7 @@
 !!  Main entry point for client code that needs to read the DDB data.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2011-2016 ABINIT group (MJV, XG, MT, MM, MVeithen, MG, PB, JCC)
+!! Copyright (C) 2011-2017 ABINIT group (MJV, XG, MT, MM, MVeithen, MG, PB, JCC)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -39,7 +39,8 @@ MODULE m_ddb
  use m_geometry,       only : phdispl_cart2red
  use m_crystal,        only : crystal_t, crystal_init
  use m_pawtab,         only : pawtab_type,pawtab_nullify,pawtab_free
- use m_dynmat,         only : cart29, d2sym3, cart39, d3sym, chneu9, asria_calc, asria_corr, asrprs, dfpt_phfrq
+ use m_dynmat,         only : cart29, d2sym3, cart39, d3sym, chneu9, asria_calc, asria_corr, asrprs, &
+&                             dfpt_phfrq, sytens
 
  implicit none
 
@@ -75,12 +76,6 @@ MODULE m_ddb
 !! SOURCE
 
  type,public :: ddb_type
-
-  !integer :: ifcflag
-  ! 1 if IFC are calculated, 0 otherwise
-
-  !type(crystal_t) :: crystal
-  ! Crystal structure.
 
   integer :: msize
   ! Maximum size of dynamical matrices and other perturbations (ddk, dde...)
@@ -141,6 +136,7 @@ MODULE m_ddb
  public :: ddb_copy                 ! Copy the object.
  public :: ddb_get_etotal           ! Read the GS total energy.
  public :: ddb_get_dielt_zeff       ! Reads the Dielectric Tensor and the Effective Charges
+ public :: ddb_get_dielt            ! Reads the Dielectric Tensor
  public :: ddb_get_dchidet          ! Reads the non-linear optical susceptibility tensor and the
                                     ! first-order change in the linear dielectric susceptibility
  public :: ddb_diagoq               ! Compute the phonon frequencies at the specified q-point by performing
@@ -223,7 +219,8 @@ CONTAINS  !===========================================================
 !!  Clean and deallocate types for the ddb_type structure
 !!
 !! PARENTS
-!!      anaddb,dfpt_looppert,dfptnl_doutput,eph,gstate,mblktyp1,mblktyp5,thmeig
+!!      anaddb,dfpt_looppert,dfptnl_doutput,eph,gstate
+!!      m_effective_potential_file,m_gruneisen,mblktyp1,mblktyp5,thmeig
 !!
 !! CHILDREN
 !!
@@ -525,8 +522,8 @@ subroutine inprep8 (dimekb,filnam,lmnmax,mband,mblktyp,msym,natom,nblok,nkpt,&
  character(len=*),intent(in) :: filnam
 
 !Local variables -------------------------
-!Set routine version number here:
 !scalars
+!Set routine version number here:
  integer,parameter :: vrsio8=100401,vrsio8_old=010929,vrsio8_old_old=990527
  integer :: bantot,basis_size0,blktyp,ddbvrs,iband,iblok,iekb,ii,ikpt,iline,im,ios,iproj
  integer :: itypat,itypat0,jekb,lmn_size0,mproj,mpsang,nekb,nelmts,nsppol
@@ -545,15 +542,14 @@ subroutine inprep8 (dimekb,filnam,lmnmax,mband,mblktyp,msym,natom,nblok,nkpt,&
 
 !Check inprep8 version number (vrsio8) against mkddb version number (vrsddb)
  if (vrsio8/=vrsddb) then
-   write(message, '(a,i10,a,a,i10,a)' )&
-&   'The input/output DDB version number=',vrsio8,ch10,&
-&   'is not equal to the DDB version number=',vrsddb,'.'
+   write(message, '(a,i0,2a,i0)' )&
+&   'The input/output DDB version number= ',vrsio8,ch10,&
+&   'is not equal to the DDB version number= ',vrsddb
    MSG_BUG(message)
  end if
 
 !Open the input derivative database.
- write(message,'(a,a)') ' inprep8 : open file ',trim(filnam)
- call wrtout(std_out,message,'COLL')
+ call wrtout(std_out, sjoin(" Opening DDB file:", filnam), 'COLL')
  if (open_file(filnam,message,unit=unddb,form="formatted",status="old",action="read") /= 0) then
    MSG_ERROR(message)
  end if
@@ -1009,7 +1005,8 @@ end subroutine inprep8
 !! comm=MPI communicator.
 !!
 !! PARENTS
-!!      anaddb,m_ddb,mblktyp1,mblktyp5,mrgddb
+!!      anaddb,m_ddb,m_effective_potential_file,m_gruneisen,mblktyp1,mblktyp5
+!!      mrgddb
 !!
 !! CHILDREN
 !!
@@ -1108,7 +1105,7 @@ end subroutine ddb_getdims
 !! iblok= number of the block that corresponds to the specifications
 !!
 !! PARENTS
-!!      anaddb,m_ddb,m_phonons,thmeig
+!!      anaddb,m_ddb,m_effective_potential_file,m_phonons,thmeig
 !!
 !! CHILDREN
 !!
@@ -1150,10 +1147,6 @@ subroutine gtblk9(ddb,iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,rftyp)
 
  mpert = ddb%mpert
  natom = ddb%natom
-
- if (ddb%prtvol > 1) then
-   call wrtout(std_out,'gtblk9: enter gtblk9 ','COLL')
- end if
 
 !Get the number of derivative
  if(rftyp==1.or.rftyp==2)then
@@ -1349,8 +1342,8 @@ subroutine gtblk9(ddb,iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,rftyp)
    end if
  end if
 
- if(ok==1 .and. ddb%prtvol > 1)then
-   write(message,'(a,i0,a,a)')'gtblk9: found block number ',iblok,' agree with',' specifications '
+ if (ok==1 .and. ddb%prtvol > 1) then
+   write(message,'(a,i0,a,a)')' gtblk9: found block number ',iblok,' agree with',' specifications '
    call wrtout(std_out,message,'COLL')
  end if
 
@@ -2852,6 +2845,7 @@ subroutine rdddb9(acell,atifc,amu,ddb,&
  integer :: mtypat,mkpt,matom
  integer :: choice,fullinit,iblok,intxc,iscf,isym,ixc
  integer :: nsize,nspden,nspinor,nsppol,nunit,timrev,useylm,vrsddb
+ integer :: i1dir,i1pert,i2dir,i2pert,i3dir,i3pert
  real(dp),parameter :: tolsym8=tol8
  real(dp) :: dilatmx,ecut,ecutsm,kptnrm,pawecutdg,dfpt_sciss,tolwfr
  real(dp) :: tphysel,tsmear
@@ -2859,7 +2853,7 @@ subroutine rdddb9(acell,atifc,amu,ddb,&
 !arrays
  integer :: ngfft(18),symq(4,2,msym)
  integer,allocatable :: car3flg(:,:,:,:,:,:),carflg(:,:,:,:),indlmn(:,:,:)
- integer,allocatable :: nband(:),pspso(:),tmpflg(:,:,:,:,:,:)
+ integer,allocatable :: nband(:),pspso(:),tmpflg(:,:,:,:,:,:),rfpert(:,:,:,:,:,:)
  real(dp) :: gprimd(3,3),qpt(3),rprimd(3,3)
  real(dp),allocatable :: d2cart(:,:,:,:,:),d3cart(:,:,:,:,:,:,:),ekb(:,:)
  real(dp),allocatable :: kpt(:,:),occ(:),spinat(:,:),tmpval(:,:,:,:,:,:,:)
@@ -2901,11 +2895,6 @@ subroutine rdddb9(acell,atifc,amu,ddb,&
 & pawecutdg,rprim,dfpt_sciss,spinat,symafm,symrel,tnons,tolwfr,tphysel,tsmear,&
 & typat,usepaw,wtk,xred,zion,znucl)
 
- !if (nsym /= msym) then
- !  write(message,"(2(a,i0))")"mismatch: msym: ",msym,", nsym: ",nsym
- !  MSG_WARNING(message)
- !end if
-
 !Compute different matrices in real and reciprocal space, also
 !checks whether ucvol is positive.
  call mkrdim(acell,rprim,rprimd)
@@ -2937,12 +2926,9 @@ subroutine rdddb9(acell,atifc,amu,ddb,&
  call chkin9(atifc,natifc,natom)
 
 !Read the blocks from the input database, and close it.
- write(message, '(a,a,a,i5,a)' )ch10,ch10,&
-& ' rdddb9 : read ',ddb%nblok,' blocks from the input DDB '
+ write(message, '(3a,i0,a)' )ch10,ch10,' rdddb9: read ',ddb%nblok,' blocks from the input DDB '
  call wrtout(std_out,message,'COLL')
  nunit=ddbun
-
- !ddb%prtvol = prtvol
 
  do iblok=1,ddb%nblok
    call read_blok8(ddb,iblok,mband,mpert,msize,nkpt,nunit)
@@ -2988,10 +2974,37 @@ subroutine rdddb9(acell,atifc,amu,ddb,&
      nsize=3*mpert*3*mpert*3*mpert
      ABI_MALLOC(tmpflg,(3,mpert,3,mpert,3,mpert))
      ABI_MALLOC(tmpval,(2,3,mpert,3,mpert,3,mpert))
+     ABI_MALLOC(rfpert,(3,mpert,3,mpert,3,mpert))
 
      tmpflg(:,:,:,:,:,:) = reshape(ddb%flg(1:nsize,iblok), shape = (/3,mpert,3,mpert,3,mpert/))
      tmpval(1,:,:,:,:,:,:) = reshape(ddb%val(1,1:nsize,iblok), shape = (/3,mpert,3,mpert,3,mpert/))
      tmpval(2,:,:,:,:,:,:) = reshape(ddb%val(2,1:nsize,iblok), shape = (/3,mpert,3,mpert,3,mpert/))
+
+!    Set the elements that are zero by symmetry for raman and
+!    non-linear optical susceptibility tensors
+     rfpert = 0
+     rfpert(:,natom+2,:,natom+2,:,natom+2) = 1
+     rfpert(:,1:natom,:,natom+2,:,natom+2) = 1
+     rfpert(:,natom+2,:,1:natom,:,natom+2) = 1
+     rfpert(:,natom+2,:,natom+2,:,1:natom) = 1
+     call sytens(indsym,mpert,natom,nsym,rfpert,symrec,symrel)
+     do i1pert = 1,mpert
+       do i2pert = 1,mpert
+         do i3pert = 1,mpert
+           do i1dir=1,3
+             do i2dir=1,3
+               do i3dir=1,3
+                 if ((rfpert(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)==-2) .and. &
+&                  (tmpflg(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)/=1)) then
+                   tmpval(:,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert) = zero
+                   tmpflg(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)=1
+                 end if
+               end do
+             end do
+           end do
+         end do
+       end do
+     end do
 
      call d3sym(tmpflg,tmpval,indsym,mpert,natom,nsym,symrec,symrel)
 
@@ -3008,6 +3021,7 @@ subroutine rdddb9(acell,atifc,amu,ddb,&
      ABI_FREE(car3flg)
      ABI_FREE(tmpflg)
      ABI_FREE(tmpval)
+     ABI_FREE(rfpert)
    end if
  end do ! iblok
 
@@ -3313,7 +3327,7 @@ end subroutine nlopt
 !!   They are needed for legacy code!
 !!
 !! PARENTS
-!!      anaddb,dfpt_looppert,eph
+!!      anaddb,dfpt_looppert,eph,m_effective_potential_file,m_gruneisen
 !!
 !! CHILDREN
 !!
@@ -3551,6 +3565,7 @@ subroutine carttransf(blkflg,blkval2,carflg,gprimd,iqpt,mband,&
  integer,intent(out) :: carflg(3,mpert,3,mpert)
  real(dp),intent(in) :: gprimd(3,3),rprimd(3,3)
  real(dp),intent(inout) :: blkval2(2,msize,mband,nkpt)
+
 !Local variables-------------------------------
 !scalars
 integer :: iatom1,iatom2,iband,idir1,idir2,ikpt
@@ -3615,7 +3630,6 @@ end subroutine carttransf
 !!****f* m_ddb/carteig2d
 !! NAME
 !! carteig2d
-!!
 !!
 !! FUNCTION
 !! Transform a second-derivative matrix (EIG2D) from reduced
@@ -3844,7 +3858,7 @@ end subroutine dtech9
 !! ramansr= if /= 0, impose sum rule on first-order derivatives
 !!                   of the electronic susceptibility with respect
 !!                   to atomic displacements
-!!
+!! nlflag= if =3, only the non-linear optical susceptibilities is computed
 !!
 !! OUTPUT
 !! dchide(3,3,3) = non-linear optical coefficients
@@ -3858,7 +3872,7 @@ end subroutine dtech9
 !!
 !! SOURCE
 
-subroutine dtchi(blkval,dchide,dchidt,mpert,natom,ramansr)
+subroutine dtchi(blkval,dchide,dchidt,mpert,natom,ramansr,nlflag)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -3871,7 +3885,7 @@ subroutine dtchi(blkval,dchide,dchidt,mpert,natom,ramansr)
 
 !Arguments -------------------------------
 !scalars
- integer,intent(in) :: mpert,natom,ramansr
+ integer,intent(in) :: mpert,natom,ramansr,nlflag
 !arrays
  real(dp),intent(in) :: blkval(2,3*mpert*3*mpert*3*mpert)
  real(dp),intent(out) :: dchide(3,3,3),dchidt(natom,3,3,3)
@@ -3879,6 +3893,7 @@ subroutine dtchi(blkval,dchide,dchidt,mpert,natom,ramansr)
 !Local variables -------------------------
 !scalars
  integer :: depl,elfd1,elfd2,elfd3,iatom,ivoigt
+ logical :: iwrite
  real(dp) :: wttot
 !arrays
  integer :: voigtindex(6,2)
@@ -3914,23 +3929,25 @@ subroutine dtchi(blkval,dchide,dchidt,mpert,natom,ramansr)
  dvoigt(:,:) = dvoigt(:,:)*16*(pi**2)*(Bohr_Ang**2)*1.0d-8*eps0/e_Cb
 
 !Extraction of $\frac{d \chi}{d \tau}$
- do iatom = 1, natom
-   do depl = 1,3
-     do elfd1 = 1,3
-       do elfd2 = 1,3
-         dchidt(iatom,depl,elfd1,elfd2) = d3cart(1,depl,iatom,elfd1,natom+2,elfd2,natom+2)
+ if (nlflag < 3) then
+   do iatom = 1, natom
+     do depl = 1,3
+       do elfd1 = 1,3
+         do elfd2 = 1,3
+           dchidt(iatom,depl,elfd1,elfd2) = d3cart(1,depl,iatom,elfd1,natom+2,elfd2,natom+2)
+         end do
        end do
      end do
    end do
- end do
+ end if
 
- wghtat(:) = 0._dp
+ wghtat(:) = zero
  if (ramansr == 1) then
-   wghtat(:) = 1._dp/dble(natom)
+   wghtat(:) = one/dble(natom)
 
  else if (ramansr == 2) then
 
-   wttot = 0._dp
+   wttot = zero
    do iatom = 1, natom
      do depl = 1,3
        do elfd1 = 1,3
@@ -3945,20 +3962,26 @@ subroutine dtchi(blkval,dchide,dchidt,mpert,natom,ramansr)
    wghtat(:) = wghtat(:)/wttot
  end if
 
- write(ab_out,*)ch10
- write(ab_out,*)'Non-linear optical coefficients d (pm/V)'
- write(ab_out,'(6f12.6)')dvoigt(1,:)
- write(ab_out,'(6f12.6)')dvoigt(2,:)
- write(ab_out,'(6f12.6)')dvoigt(3,:)
+ iwrite = ab_out > 0
+
+ if (iwrite) then
+   write(ab_out,*)ch10
+   write(ab_out,*)'Non-linear optical coefficients d (pm/V)'
+   write(ab_out,'(6f12.6)')dvoigt(1,:)
+   write(ab_out,'(6f12.6)')dvoigt(2,:)
+   write(ab_out,'(6f12.6)')dvoigt(3,:)
+ end if
 
  if (ramansr /= 0) then
-   write(ab_out,*)ch10
-   write(ab_out,*)'The violation of the Raman sum rule'
-   write(ab_out,*)'by the first-order electronic dielectric tensors ','is as follows'
-   write(ab_out,*)'    atom'
-   write(ab_out,*)' displacement'
+   if (iwrite) then
+     write(ab_out,*)ch10
+     write(ab_out,*)'The violation of the Raman sum rule'
+     write(ab_out,*)'by the first-order electronic dielectric tensors ','is as follows'
+     write(ab_out,*)'    atom'
+     write(ab_out,*)' displacement'
+   end if
 
-   sumrule(:,:,:) = 0._dp
+   sumrule(:,:,:) = zero
    do elfd2 = 1,3
      do elfd1 = 1,3
        do depl = 1,3
@@ -3974,32 +3997,38 @@ subroutine dtchi(blkval,dchide,dchidt,mpert,natom,ramansr)
      end do
    end do
 
-   do depl = 1,3
-     write(ab_out,'(6x,i2,3(3x,f16.9))') depl,sumrule(depl,1,1:3)
-     write(ab_out,'(8x,3(3x,f16.9))') sumrule(depl,2,1:3)
-     write(ab_out,'(8x,3(3x,f16.9))') sumrule(depl,3,1:3)
-     write(ab_out,*)
-   end do
+   if (iwrite) then
+     do depl = 1,3
+       write(ab_out,'(6x,i2,3(3x,f16.9))') depl,sumrule(depl,1,1:3)
+       write(ab_out,'(8x,3(3x,f16.9))') sumrule(depl,2,1:3)
+       write(ab_out,'(8x,3(3x,f16.9))') sumrule(depl,3,1:3)
+       write(ab_out,*)
+     end do
+    end if
  end if    ! ramansr
 
- write(ab_out,*)ch10
- write(ab_out,*)' First-order change in the electronic dielectric '
- write(ab_out,*)' susceptibility tensor (Bohr^-1)'
- write(ab_out,*)' induced by an atomic displacement'
- if (ramansr /= 0) then
-   write(ab_out,*)' (after imposing the sum over all atoms to vanish)'
+ if (nlflag < 3) then
+   if (iwrite) then
+     write(ab_out,*)ch10
+     write(ab_out,*)' First-order change in the electronic dielectric '
+     write(ab_out,*)' susceptibility tensor (Bohr^-1)'
+     write(ab_out,*)' induced by an atomic displacement'
+     if (ramansr /= 0) then
+       write(ab_out,*)' (after imposing the sum over all atoms to vanish)'
+     end if
+     write(ab_out,*)'  atom  displacement'
+
+     do iatom = 1,natom
+       do depl = 1,3
+         write(ab_out,'(1x,i4,9x,i2,3(3x,f16.9))')iatom,depl,dchidt(iatom,depl,1,:)
+         write(ab_out,'(16x,3(3x,f16.9))')dchidt(iatom,depl,2,:)
+         write(ab_out,'(16x,3(3x,f16.9))')dchidt(iatom,depl,3,:)
+       end do
+
+       write(ab_out,*)
+     end do
+   end if
  end if
- write(ab_out,*)'  atom  displacement'
-
- do iatom = 1,natom
-   do depl = 1,3
-     write(ab_out,'(1x,i4,9x,i2,3(3x,f16.9))')iatom,depl,dchidt(iatom,depl,1,:)
-     write(ab_out,'(16x,3(3x,f16.9))')dchidt(iatom,depl,2,:)
-     write(ab_out,'(16x,3(3x,f16.9))')dchidt(iatom,depl,3,:)
-   end do
-
-   write(ab_out,*)
- end do
 
 !DEBUG
 !sumrule(:,:,:) = 0._dp
@@ -4199,6 +4228,100 @@ end function ddb_get_dielt_zeff
 
 !----------------------------------------------------------------------
 
+!!****f* m_ddb/ddb_get_dielt
+!!
+!! NAME
+!!  ddb_get_dielt
+!!
+!! FUNCTION
+!! Reads the Dielectric Tensor from the DDB file
+!!
+!! INPUTS
+!!  ddb<type(ddb_type)>=Derivative database.
+!!  rftyp  = 1 if non-stationary block
+!!           2 if stationary block
+!!           3 if third order derivatives
+!!
+!! OUTPUT
+!!  dielt(3,3) = Macroscopic dielectric tensor
+!!  iblok=Index of the block containing the data. 0 if block is not found.
+!!
+!! NOTES
+!!  dielt is initialized to one_3D if the derivatives are not available in the DDB file.
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+integer function ddb_get_dielt(ddb,rftyp,dielt) result(iblok)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'ddb_get_dielt'
+ use interfaces_14_hidewrite
+!End of the abilint section
+
+ implicit none
+
+!Arguments -------------------------------
+!scalars
+ integer,intent(in) :: rftyp
+ type(ddb_type),intent(in) :: ddb
+!arrays
+ real(dp),intent(out) :: dielt(3,3)
+
+!Local variables -------------------------
+!scalars
+ integer :: ii,mpert
+ character(len=1000) :: message
+!arrays
+ integer :: rfelfd(4),rfphon(4),rfstrs(4)
+ real(dp) :: qphnrm(3),qphon(3,3)
+ real(dp),allocatable :: tmpval(:,:,:,:)
+
+! *********************************************************************
+
+ ! Look for the Gamma Block in the DDB
+ qphon(:,1)=zero
+ qphnrm(1)=zero
+ rfphon(1:2)=0
+ rfelfd(1:2)=2
+ rfstrs(1:2)=0
+
+ call gtblk9(ddb,iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,rftyp)
+
+ ! Read the dielectric tensor only if the Gamma-block was found in the DDB
+ ! In case it was not found, iblok = 0
+ dielt=zero; dielt(1,1)=one; dielt(2,2)=one; dielt(3,3)=one
+
+ if (iblok/=0) then
+   !Extration of dielectric tensor
+   mpert = ddb%mpert
+
+   ABI_MALLOC(tmpval,(3,mpert,3,mpert))
+   tmpval(:,:,:,:) = reshape(ddb%val(1,:,iblok), shape = (/3,mpert,3,mpert/))
+   dielt=tmpval(1:3,ddb%natom+2,1:3,ddb%natom+2)
+
+   write(message,'(a,3es16.6,3es16.6,3es16.6)' )&
+&   ' Dielectric Tensor ',&
+&   dielt(1,1),dielt(1,2),dielt(1,3),&
+&   dielt(2,1),dielt(2,2),dielt(2,3),&
+&   dielt(3,1),dielt(3,2),dielt(3,3)
+
+   call wrtout(std_out,message,'COLL')
+   
+   ABI_FREE(tmpval)
+ end if ! iblok not found
+
+end function ddb_get_dielt
+!!***
+
+!----------------------------------------------------------------------
+
 !!****f* m_ddb/ddb_get_dchidet
 !!
 !! NAME
@@ -4213,6 +4336,8 @@ end function ddb_get_dielt_zeff
 !! ramansr= if /= 0, impose sum rule on first-order derivatives
 !!                   of the electronic susceptibility with respect
 !!                   to atomic displacements
+!! nlflag= if =3, only the non-linear optical susceptibilities is computed
+!!
 !! OUTPUT
 !! dchide(3,3,3) = non-linear optical coefficients
 !! dchidt(natom,3,3,3) = first-order change of the electronic dielectric
@@ -4226,7 +4351,7 @@ end function ddb_get_dielt_zeff
 !!
 !! SOURCE
 
-integer function ddb_get_dchidet(ddb,ramansr,dchide,dchidt) result(iblok)
+integer function ddb_get_dchidet(ddb,ramansr,nlflag,dchide,dchidt) result(iblok)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -4239,7 +4364,7 @@ integer function ddb_get_dchidet(ddb,ramansr,dchide,dchidt) result(iblok)
 
 !Arguments -------------------------------
 !scalars
- integer,intent(in) :: ramansr
+ integer,intent(in) :: ramansr, nlflag
  type(ddb_type),intent(in) :: ddb
 !arrays
  real(dp),intent(out) :: dchide(3,3,3),dchidt(ddb%natom,3,3,3)
@@ -4255,15 +4380,21 @@ integer function ddb_get_dchidet(ddb,ramansr,dchide,dchidt) result(iblok)
 
  qphon(:,:) = zero
  qphnrm(:)  = one
- rfphon(1)  = 1 ; rfphon(2:3) = 0
+! rfphon(1)  = 1 ; rfphon(2:3) = 0
  rfelfd(:)  = 2
  rfstrs(:)  = 0
  rftyp = 3
 
+ if (nlflag < 3) then
+   rfphon(1)  = 1 ; rfphon(2:3) = 0
+ else
+   rfphon(1)  = 0 ; rfphon(2:3) = 0
+ end if
+
  call gtblk9(ddb,iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,rftyp)
 
  if (iblok /= 0) then
-   call dtchi(ddb%val(:,:,iblok),dchide,dchidt,ddb%mpert,ddb%natom,ramansr)
+   call dtchi(ddb%val(:,:,iblok),dchide,dchidt,ddb%mpert,ddb%natom,ramansr,nlflag)
  else
    ! Let the caller handle the error.
    dchide = huge(one); dchidt = huge(one)
@@ -4530,6 +4661,7 @@ end subroutine ddb_diagoq
 !!   Output: Changed to enforce ASR.
 !!
 !! PARENTS
+!!      anaddb,m_ddb,m_phonons
 !!
 !! CHILDREN
 !!
@@ -4586,6 +4718,7 @@ end subroutine asrq0_apply
 !!   Free dynamic memory
 !!
 !! PARENTS
+!!      anaddb,m_effective_potential,m_effective_potential_file
 !!
 !! CHILDREN
 !!

@@ -14,7 +14,7 @@
 !!  option=2 : contribution of local ionic potential to E gradient wrt xred
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (DCA, XG, GMR,TRangel)
+!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR,TRangel)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -29,6 +29,7 @@
 !!  nspden=number of spin-density components
 !!  ntypat=number of types of atoms.
 !!  option= (see above)
+!!  pawtab(ntypat) <type(pawtab_type)>=paw tabulated starting data
 !!  psps <type(pseudopotential_type)>=variables related to pseudopotentials
 !!  rhog(2,nfft)=electron density rho(G) (electrons/$\textrm{Bohr}^3$)
 !!  rhor(nfft,nspden)=electron density in electrons/bohr**3.
@@ -50,7 +51,6 @@
 !!      mklocl
 !!
 !! CHILDREN
-!!      ind_positions_
 !!
 !! SOURCE
 
@@ -60,14 +60,14 @@
 
 #include "abi_common.h"
 
-subroutine mklocl_realspace(grtn,icoulomb,mpi_enreg, natom, nattyp, nfft, ngfft, &
-                          & nscforder,nspden,ntypat,option,paral_kgb,pawtab,psps, rhog, rhor, &
-                          & rprimd, typat,ucvol,usewvl,vpsp, xred)
+subroutine mklocl_realspace(grtn,icoulomb,mpi_enreg,natom,nattyp,nfft,ngfft,nscforder, &
+&                           nspden,ntypat,option,pawtab,psps,rhog,rhor,rprimd,typat,&
+&                           ucvol,usewvl,vpsp,xred)
 
  use defs_basis
  use defs_datatypes
  use defs_abitypes
- use m_splines, only : splint
+ use m_paw_numeric, only : paw_splint
  use m_xmpi
  use m_profiling_abi
  use m_errors
@@ -103,7 +103,7 @@ subroutine mklocl_realspace(grtn,icoulomb,mpi_enreg, natom, nattyp, nfft, ngfft,
  type(pseudopotential_type),intent(in) :: psps
  type(pawtab_type),intent(in)  :: pawtab(ntypat*psps%usepaw)
 !arrays
- integer,intent(in)  :: icoulomb,nscforder,paral_kgb,usewvl
+ integer,intent(in)  :: icoulomb,nscforder,usewvl
  integer,intent(in)  :: nattyp(ntypat),ngfft(18),typat(natom)
  real(dp),intent(in) :: rhog(2,nfft)
  real(dp),intent(in) :: rhor(nfft,nspden),rprimd(3,3)
@@ -138,35 +138,28 @@ subroutine mklocl_realspace(grtn,icoulomb,mpi_enreg, natom, nattyp, nfft, ngfft,
 
 ! *************************************************************************
 
- if (icoulomb == 1) then
-   geocode='F'
- else if (icoulomb == 2) then
-   geocode='S'
- end if
-
-!Keep track of total time spent in mklocl
- if(option==2)then
+!Keep track of total time spent here
+ if (option==2) then
    call timab(72,1,tsec)
  end if
 
- if (testing) then
-   call system_clock(count_rate = countParSeconde)
-   call system_clock(tpsStart, count_rate = countParSeconde)
- end if
-
+!Several constants (FFT sizes and parallelism)
  n1 = ngfft(1) ; n2 = ngfft(2) ; n3 = ngfft(3)
  nproc_fft = ngfft(10) ;  me_fft = ngfft(11)
- n3d = ngfft(13) !for parallel runs
- if(nproc_fft==1) n3d=n3  !for serial runs
+ n3d = ngfft(13)          !for parallel runs
+ if (nproc_fft==1) n3d=n3  !for serial runs
  comm_fft=mpi_enreg%comm_fft
-
  if(me_fft /= mpi_enreg%me_fft .or. nproc_fft /= mpi_enreg%nproc_fft) then
    MSG_BUG("mpi_enreg%x_fft not equal to the corresponding values in ngfft")
  end if
 
+!Conditions for periodicity in the three directions
+ geocode='P'
+ if (icoulomb==1) geocode='F'
+ if (icoulomb==2) geocode='S'
+
 !Get the distrib associated with this fft_grid
  call ptabs_fourdp(mpi_enreg,n2,n3,fftn2_distrib,ffti2_local,fftn3_distrib,ffti3_local)
-
 
 !Store xcart for each atom
  ABI_ALLOCATE(xcart,(3, natom))
@@ -175,29 +168,29 @@ subroutine mklocl_realspace(grtn,icoulomb,mpi_enreg, natom, nattyp, nfft, ngfft,
  ABI_ALLOCATE(gridcart,(3, nfft))
  call mkgrid_fft(ffti3_local,fftn3_distrib,gridcart,nfft,ngfft,rprimd)
 
-
-!the branch with the HGH treatment of the PSP will presumably start here
-!here we need to put the if statement for the PSP code =2,3,10 for GTH-HGH
-
-!see whether all the PSP considered are of type GTH-HGH or PAW
+!Check whether all the PSP considered are of type GTH-HGH or PAW
  doIt=.true.
-!doIt=.false.
  do ii=1,psps%npsp
    doIt=doIt .and.&
-   (psps%pspcod(ii)==2 .or.psps%pspcod(ii)==3 .or. psps%pspcod(ii)==10 .or. psps%pspcod(ii)==7)
+   (psps%pspcod(ii)==2.or.psps%pspcod(ii)==3.or.psps%pspcod(ii)==10.or.psps%pspcod(ii)==7)
  end do
 
+!HGH-GTH/PAW treatment presumably starts here
  if (doIt) then
 
-!  definition of the grid spacings as in the kernel routine
+!  Definition of the grid spacings as in the kernel routine
    hgx = rprimd(1,1)/(n1)
    hgy = rprimd(2,2)/(n2)
    hgz = rprimd(3,3)/(n3)
 
-   call psolver_kernel( (/ hgx, hgy, hgz /), 2, icoulomb, me_fft, kernel, comm_fft, (/n1,n2,n3/), &
-&   nproc_fft, nscforder)
 
+!----------------------------------------------------------------------
+! ----- Option 1: compute local ionic potential                   -----
+!----------------------------------------------------------------------
    if (option==1) then
+
+     call psolver_kernel( (/ hgx, hgy, hgz /), 2, icoulomb, me_fft, kernel, comm_fft, &
+&     (/n1,n2,n3/), nproc_fft, nscforder)
 
      call createIonicPotential_new(fftn3_distrib,ffti3_local,&
 &     geocode,me_fft, nproc_fft, natom, &
@@ -205,43 +198,47 @@ subroutine mklocl_realspace(grtn,icoulomb,mpi_enreg, natom, nattyp, nfft, ngfft,
 &     int(psps%ziontypat), xcart,gridcart, hgx,hgy,hgz, &
 &     n1,n2,n3d,n3, kernel, vpsp, comm_fft,pawtab,psps%usepaw)
 
-   else if (option ==2) then
+!----------------------------------------------------------------------
+! ----- Option 2: compute forces induced by local ionic potential -----
+!----------------------------------------------------------------------
+   else if (option == 2) then
 
-!    the local forces with this formalism are calculated differently
-
-!    Compute Hartree's potential from rhor.
+!    Compute Hartree potential from rhor
      ABI_ALLOCATE(vhartr,(nfft))
      call psolver_hartree(entmp, (/ hgx, hgy, hgz /), icoulomb, me_fft, comm_fft, nfft, &
-&     (/n1,n2,n3/), nproc_fft, nscforder, nspden, rhor, vhartr, &
-&     usewvl)
+&     (/n1,n2,n3/), nproc_fft, nscforder, nspden, rhor, vhartr, usewvl)
 
+!    Allocate temporary array for forces
      ABI_ALLOCATE(gxyz,(3, natom))
-!    calculate local part of the forces grtn (inspired from BigDFT routine)
+
+!    Calculate local part of the forces grtn (inspired from BigDFT routine)
      call local_forces_new(fftn3_distrib,ffti3_local,geocode,me_fft, ntypat, natom, &
-&     typat, xcart, gridcart, psps%gth_params%psppar, &
-&     int(psps%ziontypat), hgx,hgy,hgz, n1,n2,n3,n3d,&
-&     rhor,vhartr, gxyz)
-     ABI_DEALLOCATE(vhartr)
+&     typat, xcart, gridcart, psps%gth_params%psppar, int(psps%ziontypat), &
+&     hgx,hgy,hgz, n1,n2,n3,n3d, rhor,vhartr, gxyz, pawtab,psps%usepaw)
 
 !    Forces should be in reduced coordinates.
      do ia = 1, natom, 1
        do igeo = 1, 3, 1
-         grtn(igeo, ia) = - rprimd(1, igeo) * gxyz(1, ia) - &
-&         rprimd(2, igeo) * gxyz(2, ia) - &
-&         rprimd(3, igeo) * gxyz(3, ia)
+         grtn(igeo, ia) = - rprimd(1, igeo) * gxyz(1, ia) &
+&         - rprimd(2, igeo) * gxyz(2, ia) &
+&         - rprimd(3, igeo) * gxyz(3, ia)
        end do
      end do
 
 !    Deallocate local variables
+     ABI_DEALLOCATE(vhartr)
      ABI_DEALLOCATE(gxyz)
    end if
 
-
-   ABI_DEALLOCATE(xcart)
-   ABI_DEALLOCATE(gridcart)
-
-!  else statement for the non GTH-HGH PSP
+!----------------------------------------------------------------------
+! ----- Section for the non-HGH/GTH/PAW pseudopotentials (testing) ----
+!----------------------------------------------------------------------
  else
+
+   if (testing) then
+     call system_clock(count_rate = countParSeconde)
+     call system_clock(tpsStart, count_rate = countParSeconde)
+   end if
 
 !  dr is the r step in the sampling psps%vlspl
    dr = psps%qgrid_vl(2)
@@ -281,7 +278,7 @@ subroutine mklocl_realspace(grtn,icoulomb,mpi_enreg, natom, nattyp, nfft, ngfft,
          rhor_testing(ii) = exp(-r/4._dp)
        end do
 !      Testing only, compute rhog_testing from rhor_testing
-       call fourdp(1, rhog_testing, rhor_testing, -1, mpi_enreg, nfft, ngfft, paral_kgb,0)
+       call fourdp(1,rhog_testing,rhor_testing,-1,mpi_enreg,nfft,ngfft,mpi_enreg%paral_kgb,0)
      end if
 
 !    Compute the interpolation of rho, using a fourier transform
@@ -320,7 +317,7 @@ subroutine mklocl_realspace(grtn,icoulomb,mpi_enreg, natom, nattyp, nfft, ngfft,
      ngfft_interpol(:) = ngfft(:)
      ngfft_interpol(1:3) = (/ n1 * nStep, n2 * nStep, n3 * nStep /)
      ngfft_interpol(4:6) = (/ n1 * nStep + 1, n2 * nStep + 1, n3 * nStep /)
-     call fourdp(1, rhog_interpol, rhor_work, 1, mpi_enreg, nfft * n_interpol, ngfft_interpol, paral_kgb,0)
+     call fourdp(1,rhog_interpol,rhor_work,1,mpi_enreg,nfft*n_interpol,ngfft_interpol,mpi_enreg%paral_kgb,0)
 
 !    Reorder rhor_interpol to be able to read it linearly
      jj = 0
@@ -537,9 +534,6 @@ subroutine mklocl_realspace(grtn,icoulomb,mpi_enreg, natom, nattyp, nfft, ngfft,
    end do
 !  End loop over type of atoms
 
-   ABI_DEALLOCATE(xcart)
-   ABI_DEALLOCATE(gridcart)
-
    if(option==2)then
 !    multiply the forces by the volume of a single box mesh.
      grtn_cart_interpol(:, :) = grtn_cart_interpol(:, :) * &
@@ -569,14 +563,23 @@ subroutine mklocl_realspace(grtn,icoulomb,mpi_enreg, natom, nattyp, nfft, ngfft,
      end if
 
    end if
- end if
 
- if(option==2)then
+!-------------------------
+ end if ! GTH/HGH/PAW psps
+
+!Release temporary memory
+ ABI_DEALLOCATE(xcart)
+ ABI_DEALLOCATE(gridcart)
+
+!Close timing counters
+ if (option==2)then
    call timab(72,2,tsec)
  end if
 
 end subroutine mklocl_realspace
 !!***
+
+!----------------------------------------------------------------------
 
 !!****f* mklocl_realspace/createIonicPotential_new
 !! NAME
@@ -592,58 +595,57 @@ end subroutine mklocl_realspace
 !!      mklocl_realspace
 !!
 !! CHILDREN
-!!      ind_positions_
 !!
 !! SOURCE
 subroutine createIonicPotential_new(fftn3_distrib,ffti3_local,geocode,iproc,&
 &  nproc,nat,ntypes,iatype,psppar,nelpsp,rxyz,gridcart,&
 &  hxh,hyh,hzh,n1i,n2i,n3d,n3i,kernel,pot_ion,spaceworld,pawtab,usepaw)
 
+ use defs_basis
  use defs_datatypes
  use m_profiling_abi
  use m_errors
  use m_xmpi
- use defs_basis,    only : std_out,std_out_default
  use defs_wvltypes, only : coulomb_operator
  use m_pawtab,      only : pawtab_type
- use m_splines,     only : splint
+ use m_paw_numeric, only : paw_splint
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'createIonicPotential_new'
- use interfaces_43_wvl_wrappers
  use interfaces_67_common, except_this_one => createIonicPotential_new
 !End of the abilint section
 
 implicit none
 
 !Arguments -------------------------------
-
-character(len=1), intent(in) :: geocode
-integer, intent(in) :: iproc,nproc,ntypes,nat,n1i,n2i,n3i,n3d,spaceworld
-integer, intent(in) :: usepaw
-real(kind=8), intent(in) :: hxh,hyh,hzh
-integer, dimension(nat), intent(in) :: iatype
-integer, dimension(ntypes), intent(in) :: nelpsp
-integer, dimension(*), intent(in) ::fftn3_distrib,ffti3_local
-real(kind=8), dimension(3,n1i*n2i*n3d), intent(in) :: gridcart
-real(kind=8), dimension(0:4,0:6,ntypes), intent(in) :: psppar
-real(kind=8), dimension(3,nat), intent(in) :: rxyz
-real(kind=8), dimension(*), intent(inout) :: pot_ion
-type(pawtab_type),intent(in)  :: pawtab(ntypes*usepaw)
-type(coulomb_operator), intent(in) :: kernel
+!scalars
+ integer, intent(in) :: iproc,nproc,ntypes,nat,n1i,n2i,n3i,n3d,spaceworld,usepaw
+ real(dp), intent(in) :: hxh,hyh,hzh
+ character(len=1), intent(in) :: geocode
+ type(coulomb_operator), intent(in) :: kernel
+!arrays
+ integer, dimension(nat), intent(in) :: iatype
+ integer, dimension(ntypes), intent(in) :: nelpsp
+ integer, dimension(*), intent(in) ::fftn3_distrib,ffti3_local
+ real(dp), dimension(3,n1i*n2i*n3d), intent(in) :: gridcart
+ real(dp), dimension(0:4,0:6,ntypes), intent(in) :: psppar
+ real(dp), dimension(3,nat), intent(in) :: rxyz
+ real(dp), dimension(*), intent(inout) :: pot_ion
+ type(pawtab_type),intent(in)  :: pawtab(ntypes*usepaw)
 
 !Local variables -------------------------
 #if defined HAVE_BIGDFT
-logical :: perx,pery,perz,gox,goy,goz
-integer :: iat,i1,i2,i3,j1,j2,j3,isx,isy,isz,iex,iey,iez,ierr,ityp
-integer :: ind,nloc,iloc,i3loc
-real(kind=8) :: rholeaked,rloc,charge,cutoff,x,y,z,r2,arg,xp,tt
-real(kind=8) :: raux,raux2,rx,ry,rz,rr
-real(kind=8) :: tt_tot,rholeaked_tot
-real(kind=8) :: ehart,eexcu,vexcu!,r2paw
-real(kind=8) :: raux1(1),rr1(1)
+!scalars
+ integer :: iat,i1,i2,i3,j1,j2,j3,isx,isy,isz,iex,iey,iez,ierr,ityp
+ integer :: ind,nloc,iloc,i3loc,msz
+ logical :: gox,goy,goz,perx,pery,perz
+ real(dp) :: arg,charge,cutoff,ehart,eexcu,rholeaked,rholeaked_tot,rloc
+ real(dp) :: rx,ry,rz,rzero,r2,tt,tt_tot,vexcu,vhgh,x,xp,y,z
+!arrays
+ real(dp) :: rr(1),vpaw(1)
+ real(dp),pointer :: rad(:),vloc(:),d2vloc(:)
 #endif
 
 ! *********************************************************************
@@ -655,11 +657,11 @@ real(kind=8) :: raux1(1),rr1(1)
  end if
 
 !Ionic charge (must be calculated for the PS active processes)
- rholeaked=0.d0
+ rholeaked=0._dp
 !Ionic energy (can be calculated for all the processors)
 
 !here we should insert the calculation of the ewald energy for the periodic BC case
-!!!  eion=0.d0
+!!!  eion=0._dp
 !!!  do iat=1,nat
 !!!     ityp=iatype(iat)
 !!!     rx=rxyz(1,iat)
@@ -669,7 +671,7 @@ real(kind=8) :: raux1(1),rr1(1)
 !!!     do jat=1,iat-1
 !!!        dist=sqrt( (rx-rxyz(1,jat))**2+(ry-rxyz(2,jat))**2+(rz-rxyz(3,jat))**2 )
 !!!        jtyp=iatype(jat)
-!!!        eion=eion+real(nelpsp(jtyp)*nelpsp(ityp),kind=8)/dist
+!!!        eion=eion+real(nelpsp(jtyp)*nelpsp(ityp),kind=dp)/dist
 !!!     enddo
 !!!  end do
 !!!  if (iproc.eq.0) write(std_out,'(1x,a,1pe22.14)') 'ion-ion interaction energy',eion
@@ -696,8 +698,8 @@ real(kind=8) :: raux1(1),rr1(1)
    rz=rxyz(3,iat)
 
    rloc=psppar(0,0,ityp)
-   charge=real(nelpsp(ityp),kind=8)/(2.d0*pi*sqrt(2.d0*pi)*rloc**3)
-   cutoff=10.d0*rloc
+   charge=real(nelpsp(ityp),kind=dp)/(2._dp*pi*sqrt(2._dp*pi)*rloc**3)
+   cutoff=10._dp*rloc
 
    isx=floor((rx-cutoff)/hxh)
    isy=floor((ry-cutoff)/hyh)
@@ -710,78 +712,38 @@ real(kind=8) :: raux1(1),rr1(1)
 !  Calculate Ionic Density
 !  using HGH parameters.
 !  Eq. 1.104, T. Deutsch and L. Genovese, JDN. 12, 2011
-   if(usepaw==0) then
+   do i3=isz,iez
+     z=real(i3,kind=dp)*hzh-rz
+     call ind_positions_mklocl(perz,i3,n3i,j3,goz)
+     if(fftn3_distrib(j3)==iproc) then
+       i3loc=ffti3_local(j3)
+       do i2=isy,iey
+         y=real(i2,kind=dp)*hyh-ry
+         call ind_positions_mklocl(pery,i2,n2i,j2,goy)
+         do i1=isx,iex
+           x=real(i1,kind=dp)*hxh-rx
+           call ind_positions_mklocl(perx,i1,n1i,j1,gox)
+           r2=x**2+y**2+z**2
+           if (goz  .and. goy  .and. gox ) then
+             ind=j1+(j2-1)*n1i+(i3loc-1)*n1i*n2i
+             r2=(gridcart(1,ind)-rx)**2+(gridcart(2,ind)-ry)**2+(gridcart(3,ind)-rz)**2
+           end if
+           arg=r2/rloc**2
+           xp=exp(-.5d0*arg)
+           if (goz  .and. goy  .and. gox ) then
+             pot_ion(ind)=pot_ion(ind)-xp*charge
+           else
+             rholeaked=rholeaked+xp*charge
+           end if
+         end do
+       end do
+     end if
+   end do
 
-     do i3=isz,iez
-       z=real(i3,kind=8)*hzh-rz
-       call ind_positions_(perz,i3,n3i,j3,goz)
-       if(fftn3_distrib(j3)==iproc) then
-         i3loc=ffti3_local(j3) 
-         do i2=isy,iey
-           y=real(i2,kind=8)*hyh-ry
-           call ind_positions_(pery,i2,n2i,j2,goy)
-           do i1=isx,iex
-             x=real(i1,kind=8)*hxh-rx
-             call ind_positions_(perx,i1,n1i,j1,gox)
-             r2=x**2+y**2+z**2
-             if (goz  .and. goy  .and. gox ) then
-               ind=j1+(j2-1)*n1i+(i3loc-1)*n1i*n2i
-               r2=(gridcart(1,ind)-rx)**2+(gridcart(2,ind)-ry)**2+(gridcart(3,ind)-rz)**2
-             end if
-             arg=r2/rloc**2
-             xp=exp(-.5d0*arg)
-             if (goz  .and. goy  .and. gox ) then
-               pot_ion(ind)=pot_ion(ind)-xp*charge
-             else
-               rholeaked=rholeaked+xp*charge
-             end if
-           end do
-         end do
-       end if
-     end do
-!    Calculate Ionic Density using splines, 
-!    PAW case
-   else
-!    r2paw=(pawtab(ityp)%rpaw)**2
-     do i3=isz,iez
-       z=real(i3,kind=8)*hzh-rz
-       call ind_positions_(perz,i3,n3i,j3,goz)
-       if(fftn3_distrib(j3)==iproc) then
-         i3loc=ffti3_local(j3) 
-         do i2=isy,iey
-           y=real(i2,kind=8)*hyh-ry
-           call ind_positions_(pery,i2,n2i,j2,goy)
-           do i1=isx,iex
-             x=real(i1,kind=8)*hxh-rx
-             call ind_positions_(perx,i1,n1i,j1,gox)
-             r2=x**2+y**2+z**2
-             if (goz  .and. goy  .and. gox ) then
-               ind=j1+(j2-1)*n1i+(i3loc-1)*n1i*n2i
-               r2=(gridcart(1,ind)-rx)**2+(gridcart(2,ind)-ry)**2+(gridcart(3,ind)-rz)**2
-             end if
-!            if(r2>r2paw) cycle
-             rr=sqrt(r2)
-!            This converges very slow with hh
-!            call splint(pawtab(ityp)%wvl%rholoc%msz,pawtab(ityp)%wvl%rholoc%rad(:),&
-!            &             pawtab(ityp)%wvl%rholoc%d(:,1),pawtab(ityp)%wvl%rholoc%d(:,2),1,rr,raux,ierr)
-!            Take the HGH form for rho_L (long range)
-             arg=r2/rloc**2
-             xp=exp(-.5d0*arg)
-             raux=-xp*charge
-             if (goz  .and. goy  .and. gox ) then
-               pot_ion(ind)=pot_ion(ind)+raux
-             else
-               rholeaked=rholeaked-raux
-             end if
-           end do
-         end do
-       end if
-     end do
-   end if !if usepaw
  end do
-!end if
+
 !Check
- tt=0.d0
+ tt=0._dp
  do j3= 1,n3d
    do i2= 1,n2i
      do i1= 1,n1i
@@ -802,17 +764,14 @@ real(kind=8) :: raux1(1),rr1(1)
 &   'total ionic charge, leaked charge ',tt_tot,rholeaked_tot
  end if
 
-!here the value of the datacode must be kept fixed
-!there can be some problems when running this stuff in parallel, if the ionic potential distribution does not agree with the
-!plane distribution which is supposed to hold for the Poisson Solver
+!Here the value of the datacode must be kept fixed
+!there can be some problems when running this stuff in parallel,
+!  if the ionic potential distribution does not agree with the
+!  plane distribution which is supposed to hold for the Poisson Solver
  call psolver(geocode,'D',iproc,nproc,n1i,n2i,n3i,0,hxh,hyh,hzh,&
-& pot_ion,kernel%kernel,pot_ion,ehart,eexcu,vexcu,0.d0,.false.,1)
+& pot_ion,kernel%kernel,pot_ion,ehart,eexcu,vexcu,0._dp,.false.,1)
 
-
-
-!The following is just for HGH/GTH pseudos
-!write(std_out,*) 'ehartree',ehart
-!if (n3i > 0) then
+!Add the remaining short-range local terms
  do iat=1,nat
    ityp=iatype(iat)
 
@@ -820,16 +779,25 @@ real(kind=8) :: raux1(1),rr1(1)
    ry=rxyz(2,iat)
    rz=rxyz(3,iat)
 
-!  if (iat==1) then
-!  write(std_out,*) rx/hxh,ry/hyh,rz/hzh
-!  write(std_out,*) rx,ry,rz
-!  write(std_out,*) hxh,hyh,hzh
-!  end if
-
-!  stop
 !  determine number of local terms
    rloc=psppar(0,0,ityp)
-   cutoff=10.d0*rloc
+   cutoff=10._dp*rloc
+   charge=real(nelpsp(ityp),kind=dp)
+
+!  determine number of local terms (HGH pot)
+   nloc=0
+   do iloc=1,4
+     if (psppar(0,iloc,ityp).ne.0._dp) nloc=iloc
+   end do
+
+!  PAW specifics
+   if (usepaw==1) then
+     msz=pawtab(ityp)%wvl%rholoc%msz
+     rad    => pawtab(ityp)%wvl%rholoc%rad(1:msz)
+     vloc   => pawtab(ityp)%wvl%rholoc%d(1:msz,3)
+     d2vloc => pawtab(ityp)%wvl%rholoc%d(1:msz,4)
+     rzero=rad(1);if (rzero<=1.d-10) rzero=rad(2)
+   end if
 
    isx=floor((rx-cutoff)/hxh)
    isy=floor((ry-cutoff)/hyh)
@@ -839,38 +807,27 @@ real(kind=8) :: raux1(1),rr1(1)
    iey=ceiling((ry+cutoff)/hyh)
    iez=ceiling((rz+cutoff)/hzh)
 
-   if (usepaw==0) then
-!    Only for HGH pseudos
-!    Add the remaining local terms of Eq. (9)
-!    in JCP 129, 014109(2008)
-     nloc=0
-     do iloc=1,4
-       if (psppar(0,iloc,ityp).ne.0.d0) nloc=iloc
-     end do
+   do i3=isz,iez
+     z=real(i3,kind=dp)*hzh-rz
+     call ind_positions_mklocl(perz,i3,n3i,j3,goz)
+     if(fftn3_distrib(j3) == iproc .and. goz) then !MPI
+       i3loc=ffti3_local(j3)
+       if (goz) then
+         do i2=isy,iey
+           y=real(i2,kind=dp)*hyh-ry
+           call ind_positions_mklocl(pery,i2,n2i,j2,goy)
+           if (goy) then
+             do i1=isx,iex
+               x=real(i1,kind=dp)*hxh-rx
+               call ind_positions_mklocl(perx,i1,n1i,j1,gox)
+               if (gox) then
+                 ind=j1+(j2-1)*n1i+(i3loc-1)*n1i*n2i
+                 r2=(gridcart(1,ind)-rx)**2+(gridcart(2,ind)-ry)**2+(gridcart(3,ind)-rz)**2
+!                r2=x**2+y**2+z**2
 
-
-
-     if (nloc /= 0) then
-
-!      write(std_out,*) 'nloc=',nloc
-
-       do i3=isz,iez
-         z=real(i3,kind=8)*hzh-rz
-         call ind_positions_(perz,i3,n3i,j3,goz)
-         if(fftn3_distrib(j3) == iproc .and. goz) then !MPI
-           i3loc=ffti3_local(j3)
-           if (goz) then
-             do i2=isy,iey
-               y=real(i2,kind=8)*hyh-ry
-               call ind_positions_(pery,i2,n2i,j2,goy)
-               if (goy) then
-                 do i1=isx,iex
-                   x=real(i1,kind=8)*hxh-rx
-                   call ind_positions_(perx,i1,n1i,j1,gox)
-                   if (gox) then
-                     ind=j1+(j2-1)*n1i+(i3loc-1)*n1i*n2i
-                     r2=(gridcart(1,ind)-rx)**2+(gridcart(2,ind)-ry)**2+(gridcart(3,ind)-rz)**2
-!                    r2=x**2+y**2+z**2
+!                HGH: V_S=gaussian potential of Eq. (9) in JCP 129, 014109(2008)
+                 if (usepaw==0) then
+                   if (nloc /= 0) then
                      arg=r2/rloc**2
                      xp=exp(-.5d0*arg)
                      tt=psppar(0,nloc,ityp)
@@ -879,59 +836,28 @@ real(kind=8) :: raux1(1),rr1(1)
                      end do
                      pot_ion(ind)=pot_ion(ind)+xp*tt
                    end if
-                 end do
-               end if
-             end do
-           end if
-         end if
-       end do
-     end if !nloc
-   else !HGH or PAW
-!    For PAW, add V^PAW-V_L^HGH
-     charge=real(nelpsp(ityp),kind=8)
-     do i3=isz,iez
-       z=real(i3,kind=8)*hzh-rz
-       call ind_positions_(perz,i3,n3i,j3,goz)
-       if(fftn3_distrib(j3) == iproc .and. goz) then !MPI
-         i3loc=ffti3_local(j3)
-         do i2=isy,iey
-           y=real(i2,kind=8)*hyh-ry
-           call ind_positions_(pery,i2,n2i,j2,goy)
-           if (goy) then
-             do i1=isx,iex
-               x=real(i1,kind=8)*hxh-rx
-               call ind_positions_(perx,i1,n1i,j1,gox)
-               if (gox) then
-                 ind=j1+(j2-1)*n1i+(i3loc-1)*n1i*n2i
-                 r2=(gridcart(1,ind)-rx)**2+(gridcart(2,ind)-ry)**2+(gridcart(3,ind)-rz)**2
-!                r2=x**2+y**2+z**2
-                 rr=sqrt(r2)
-!                1) V_L^HGH
-                 if(rr>0.01d0) then
-                   arg=rr/(sqrt(2.0)*rloc)
-                   call derf_ab(tt,arg)
-                   raux2=-charge/rr*tt
+
+!                PAW: V_PAW-V_L^HGH
                  else
-!                  In this case we deduce the values
-!                  from a quadratic interpolation (due to 1/rr factor)
-                   call interpol_vloc(rr,rloc,charge,raux2)
+                   rr(1)=sqrt(r2)
+                   if (rr(1)>=rzero) then
+                     call paw_splint(msz,rad,vloc,d2vloc,1,rr,vpaw)
+                     call calcVloc_mklocl(vhgh,rr(1),rloc,charge)
+                     pot_ion(ind)=pot_ion(ind)+vpaw(1)-vhgh
+                   else
+                     pot_ion(ind)=pot_ion(ind)+vloc_zero_mklocl(charge,rloc,msz,rad,vloc,d2vloc)
+                   end if
                  end if
-!                2) V^PAW from splines
-                 rr1(1)=rr
-                 call splint(pawtab(ityp)%wvl%rholoc%msz,pawtab(ityp)%wvl%rholoc%rad(:),&
-&                 pawtab(ityp)%wvl%rholoc%d(:,3),pawtab(ityp)%wvl%rholoc%d(:,4),&
-&                 1,rr1,raux1,ierr)
-                 raux=raux1(1)
-                 pot_ion(ind)=pot_ion(ind)+raux-raux2
+
                end if
              end do
            end if
          end do
        end if
-     end do
-   end if !usepaw
- end do  !iat
+     end if
+   end do
 
+ end do  !iat
 #else
  BIGDFT_NOTENABLED_ERROR()
  if (.false.) write(std_out,*) geocode,iproc,nproc,ntypes,nat,n1i,n2i,n3i,n3d,spaceworld,usepaw,&
@@ -939,19 +865,19 @@ real(kind=8) :: raux1(1),rr1(1)
 & rxyz(1,1),pot_ion(1),pawtab(1)%mesh_size,kernel%co
 #endif
 
- contains
+ CONTAINS
 !!***
 
-!!****f* mklocl_realspace/interpol_vloc
+!----------------------------------------------------------------------
+
+!!****f* mklocl_realspace/calcVloc_mklocl
 !! NAME
-!!  interpol_vloc
+!!  calcVloc_mklocl
 !!
 !! FUNCTION
-!! We use a quadratic interpolation to get vloc(x)
-!! useful for small values of x
 !!
 !! COPYRIGHT
-!! Copyright (C) 2013-2016 ABINIT group (TRangel)
+!! Copyright (C) 2013-2017 ABINIT group (TRangel)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -964,84 +890,16 @@ real(kind=8) :: raux1(1),rr1(1)
 !!      mklocl_realspace
 !!
 !! CHILDREN
-!!      ind_positions_
 !!
 !! SOURCE
-subroutine interpol_vloc(xx,rloc,charge,yy)
+subroutine calcVloc_mklocl(yy,xx,rloc,Z)
 
  use defs_basis
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'interpol_vloc'
-!End of the abilint section
-
-  implicit none
-
-!Arguments ------------------------------------
-!scalars
-  real(dp),intent(in)  :: xx,rloc,charge
-  real(dp),intent(out) :: yy
-
-!Local variables-------------------------------
- !scalars
-  real(dp)::l0,l1,l2,x0,x1,x2,y0,y1,y2
- 
-! *************************************************************************
-
-!  Find 3 points (x0,y0), (x1,y1), (x2,y2).
-   x0=0.01d0; x1=0.02d0; x2=0.03d0
-   call calcVloc(y0,x0,rloc,charge)
-   call calcVloc(y1,x1,rloc,charge)
-   call calcVloc(y2,x2,rloc,charge)
-
-!  Find a polynomial of the form:
-!  P(x)=y0L0(x) + y1L1(x) + y2L2(x)
-
-!  L0(x) = (x-x1)(x-x2)/((x0-x1)(x0-x2))
-   l0=(xx-x1)*(xx-x2)/((x0-x1)*(x0-x2))
-!  L1(x) = (x-x0)(x-x2)/((x1-x0)(x1-x2))
-   l1=(xx-x0)*(xx-x2)/((x1-x0)*(x1-x2))
-!  L2(x) = (x-x0)(x-x1)/((x2-x0)(x2-x1))
-   l2=(xx-x0)*(xx-x1)/((x2-x0)*(x2-x1))
-
-   yy=y0*l0+y1*l1+y2*l2
-
- end subroutine interpol_vloc
-!!***
-
-!!****f* mklocl_realspace/calcVloc
-!! NAME
-!!  calcVloc
-!!
-!! FUNCTION
-!!
-!! COPYRIGHT
-!! Copyright (C) 2013-2016 ABINIT group (TRangel)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! INPUTS
-!!
-!! OUTPUT
-!!
-!! PARENTS
-!!      mklocl_realspace
-!!
-!! CHILDREN
-!!      ind_positions_
-!!
-!! SOURCE
-subroutine calcVloc(yy,xx,rloc,Z)
-
- use defs_basis
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'calcVloc'
+#define ABI_FUNC 'calcVloc_mklocl'
  use interfaces_43_wvl_wrappers
 !End of the abilint section
 
@@ -1061,69 +919,95 @@ subroutine calcVloc(yy,xx,rloc,Z)
    call derf_ab(tt,arg)
    yy=-Z/xx*tt
 
- end subroutine calcVloc
+  end subroutine calcVloc_mklocl
 !!***
 
-end subroutine createIonicPotential_new
-!!***
+!----------------------------------------------------------------------
 
-!!****f* mklocl_realspace/ind_positions_
+!!****f* mklocl_realspace/vloc_zero_mklocl
 !! NAME
-!!  ind_positions_
+!!  vloc_zero_mklocl
 !!
 !! FUNCTION
-!! determine the index in which the potential must be inserted, following the BC
-!! determine also whether the index is inside or outside the box for free BC
+!!  Use a quadratic interpolation to get limit of Vloc(x) at x->0
+!!
+!! COPYRIGHT
+!! Copyright (C) 2013-2017 ABINIT group (TRangel,MT)
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! INPUTS
 !!
 !! OUTPUT
 !!
 !! PARENTS
-!!      mkcore_paw,mklocl_realspace
-!!
-!! CHILDREN
-!!      ind_positions_
 !!
 !! SOURCE
 
-subroutine ind_positions_(periodic,i,n,j,go)
+function vloc_zero_mklocl(charge,rloc,msz,rad,vloc,d2vloc)
 
- use m_profiling_abi
+ use defs_basis
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'ind_positions_'
+#define ABI_FUNC 'vloc_zero_mklocl'
 !End of the abilint section
 
-  implicit none
+ implicit none
 
-!Arguments -------------------------------
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: msz
+ real(dp) :: vloc_zero_mklocl
+ real(dp),intent(in)  :: charge,rloc
+!arrays
+ real(dp) :: rad(msz),vloc(msz),d2vloc(msz)
 
-  logical, intent(in) :: periodic
-  integer, intent(in) :: i,n
-  logical, intent(out) :: go
-  integer, intent(out) :: j
+!Local variables-------------------------------
+!scalars
+ real(dp) :: y1,y2,y3,zz=0._dp
+!arrays
+ real(dp) :: ll(3),xx(3),yy(3)
 
-!Local variables -------------------------
+! *************************************************************************
 
-! *********************************************************************
-
-   if (periodic) then
-     go=.true.
-     j=modulo(i-1,n)+1
+!Select 3 points x1,x2,x3 near 0
+   if (rad(1)>1.d-10) then
+     xx(1:3)=rad(1:3)
    else
-     j=i
-     if (i >= 1 .and. i <= n) then
-       go=.true.
-     else
-       go=.false.
-     end if
+     xx(1:3)=rad(2:4)
    end if
 
- end subroutine ind_positions_
+!Find the corresponding values of y=(V^PAW(x)-V^HGH(x))/x
+   call paw_splint(msz,rad,vloc,d2vloc,3,xx,yy)
+   call calcVloc_mklocl(y1,xx(1),rloc,charge)
+   call calcVloc_mklocl(y2,xx(2),rloc,charge)
+   call calcVloc_mklocl(y3,xx(3),rloc,charge)
+   yy(1)= yy(1)-y1
+   yy(2)= yy(2)-y2
+   yy(3)= yy(3)-y3
+
+!Find a polynomial of the form (z=0):
+!P(z) = y1.L1(z) + y2.L2(z) + y3.L3(z)
+
+!L1(z) = (z-x2)(z-x3)/((x1-x2)(x1-x3))
+   ll(1)=(zz-xx(2))*(zz-xx(3))/((xx(1)-xx(2))*(xx(1)-xx(3)))
+!L2(z) = (z-x1)(z-x3)/((x2-x1)(x2-x3))
+   ll(2)=(zz-xx(1))*(zz-xx(3))/((xx(2)-xx(1))*(xx(2)-xx(3)))
+!L3(z) = (z-x1)(z-x2)/((x3-x1)(x3-x2))
+   ll(3)=(zz-xx(1))*(zz-xx(2))/((xx(3)-xx(1))*(xx(3)-xx(2)))
+
+   vloc_zero_mklocl=yy(1)*ll(1)+yy(2)*ll(2)+yy(3)*ll(3)
+
+  end function vloc_zero_mklocl
 !!***
+
+end subroutine createIonicPotential_new
+!!***
+
+!----------------------------------------------------------------------
 
 !!****f* mklocl_realspace/local_forces_new
 !! NAME
@@ -1139,16 +1023,16 @@ subroutine ind_positions_(periodic,i,n,j,go)
 !!      mklocl_realspace
 !!
 !! CHILDREN
-!!      ind_positions_
 !!
 !! SOURCE
 subroutine local_forces_new(fftn3_distrib,ffti3_local,&
      geocode,iproc,ntypes,nat,iatype,rxyz,gridcart,psppar,nelpsp,hxh,hyh,hzh,&
-     n1,n2,n3,n3d,rho,pot,floc)
+     n1,n2,n3,n3d,rho,pot,floc,pawtab,usepaw)
 
+ use defs_basis
  use m_profiling_abi
-! Calculates the local forces acting on the atoms belonging to iproc
-  use defs_basis,only: std_out,std_out_default
+ use m_pawtab,      only : pawtab_type
+ use m_paw_numeric, only : paw_splint_der
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -1160,133 +1044,169 @@ subroutine local_forces_new(fftn3_distrib,ffti3_local,&
   implicit none
 
 !Arguments -------------------------------
-
-  character(len=1), intent(in) :: geocode
-  integer, intent(in) :: iproc,ntypes,nat,n1,n2,n3,n3d
-  real(kind=8), intent(in) :: hxh,hyh,hzh
-  real(kind=8), dimension(3,n1*n2*n3d), intent(in) :: gridcart
-  real(kind=8), dimension(0:4,0:6,ntypes), intent(in) :: psppar
-  real(kind=8), dimension(3,nat), intent(in) :: rxyz
-  real(kind=8), dimension(*), intent(in) :: rho,pot
-  integer, dimension(*), intent(in) ::fftn3_distrib,ffti3_local
-  integer, dimension(nat), intent(in) :: iatype
-  integer, dimension(ntypes), intent(in) :: nelpsp
-  real(kind=8), dimension(3,nat), intent(out) :: floc
+!scalars
+ integer, intent(in) :: iproc,ntypes,nat,n1,n2,n3,n3d,usepaw
+ character(len=1), intent(in) :: geocode
+ real(dp), intent(in) :: hxh,hyh,hzh
+!arrays
+ integer, dimension(*), intent(in) ::fftn3_distrib,ffti3_local
+ integer, dimension(nat), intent(in) :: iatype
+ integer, dimension(ntypes), intent(in) :: nelpsp
+ real(dp), dimension(3,n1*n2*n3d), intent(in) :: gridcart
+ real(dp), dimension(0:4,0:6,ntypes), intent(in) :: psppar
+ real(dp), dimension(3,nat), intent(in) :: rxyz
+ real(dp), dimension(*), intent(in) :: rho,pot
+ real(dp), dimension(3,nat), intent(out) :: floc
+ type(pawtab_type),intent(in)  :: pawtab(ntypes*usepaw)
 
 !Local variables -------------------------
-
-  logical :: perx,pery,perz,gox,goy,goz
-  real(kind=8) :: pi,prefactor,cutoff,rloc,Vel,rhoel
-  real(kind=8) :: fxerf,fyerf,fzerf,fxgau,fygau,fzgau,forceleaked,forceloc
-  real(kind=8) :: rx,ry,rz,x,y,z,arg,r2,xp,tt
-  integer :: isx,isy,isz,iex,iey,iez,i1,i2,i3,j1,j2,j3,ind,iat,ityp,nloc,iloc,i3loc
-  !array of coefficients of the derivative
-  real(kind=8), dimension(4) :: cprime
+!scalars
+ integer :: isx,isy,isz,iex,iey,iez,i1,i2,i3,j1,j2,j3,ind,iat,ityp,iloc,i3loc,msz,nloc
+ logical :: perx,pery,perz,gox,goy,goz
+ real(dp) :: arg,charge,cutoff,dvhgh,fxerf,fyerf,fzerf,fxgau,fygau,fzgau,forceleaked
+ real(dp) :: forceloc,prefactor,rloc,rloc2,rhoel,rx,ry,rz,rzero,r2,tt,x,xp,y,z,Vel
+ real(dp), dimension(4) :: cprime
+!arrays
+ real(dp) :: dvpawdr(1),rr(1)
+ real(dp),pointer :: rad(:),vloc(:),d2vloc(:)
 
 ! *********************************************************************
 
-   pi=4.d0*atan(1.d0)
-
    if (iproc == 0) write(std_out,'(1x,a)',advance='no')'Calculate local forces...'
-   forceleaked=0.d0
 
-!conditions for periodicity in the three directions
+!Conditions for periodicity in the three directions
    perx=(geocode /= 'F')
    pery=(geocode == 'P')
    perz=(geocode /= 'F')
 
+   forceleaked=zero
+
    do iat=1,nat
      ityp=iatype(iat)
-!  coordinates of the center
+!  Coordinates of the center
      rx=rxyz(1,iat)
      ry=rxyz(2,iat)
      rz=rxyz(3,iat)
 
-!  inizialization of the forces
+!  Initialization of the forces
 !  ion-electron term, error function part
-     fxerf=0.d0
-     fyerf=0.d0
-     fzerf=0.d0
+     fxerf=zero
+     fyerf=zero
+     fzerf=zero
 !  ion-electron term, gaussian part
-     fxgau=0.d0
-     fygau=0.d0
-     fzgau=0.d0
+     fxgau=zero
+     fygau=zero
+     fzgau=zero
 
-!  building array of coefficients of the derivative of the gaussian part
-     cprime(1)=2.d0*psppar(0,2,ityp)-psppar(0,1,ityp)
-     cprime(2)=4.d0*psppar(0,3,ityp)-psppar(0,2,ityp)
-     cprime(3)=6.d0*psppar(0,4,ityp)-psppar(0,3,ityp)
+!  Building array of coefficients of the derivative of the gaussian part
+     cprime(1)=2._dp*psppar(0,2,ityp)-psppar(0,1,ityp)
+     cprime(2)=4._dp*psppar(0,3,ityp)-psppar(0,2,ityp)
+     cprime(3)=6._dp*psppar(0,4,ityp)-psppar(0,3,ityp)
      cprime(4)=-psppar(0,4,ityp)
 
-!  determine number of local terms
+!  Determine number of local terms (HGH pot)
      nloc=0
      do iloc=1,4
-       if (psppar(0,iloc,ityp).ne.0.d0) nloc=iloc
+       if (psppar(0,iloc,ityp).ne.zero) nloc=iloc
      end do
 
-!  local part
-     rloc=psppar(0,0,ityp)
-     prefactor=real(nelpsp(ityp),kind=8)/(2.d0*pi*sqrt(2.d0*pi)*rloc**5)
-!  maximum extension of the gaussian
-     cutoff=10.d0*rloc
+!  Some constants depending on the atom type
+     rloc=psppar(0,0,ityp) ; rloc2=rloc**2
+     charge=real(nelpsp(ityp),kind=dp)
+     prefactor=charge/(2._dp*pi*sqrt(2._dp*pi)*rloc**5)
+
+!  PAW specifics
+     if (usepaw==1) then
+       msz=pawtab(ityp)%wvl%rholoc%msz
+       rad    => pawtab(ityp)%wvl%rholoc%rad(1:msz)
+       vloc   => pawtab(ityp)%wvl%rholoc%d(1:msz,3)
+       d2vloc => pawtab(ityp)%wvl%rholoc%d(1:msz,4)
+       rzero=rad(1);if (rad(1)<=1.d-10) rzero=rad(2)
+     end if
+
+!  Maximum extension of the gaussian
+     cutoff=10._dp*rloc
      isx=floor((rx-cutoff)/hxh)
      isy=floor((ry-cutoff)/hyh)
      isz=floor((rz-cutoff)/hzh)
-
      iex=ceiling((rx+cutoff)/hxh)
      iey=ceiling((ry+cutoff)/hyh)
      iez=ceiling((rz+cutoff)/hzh)
 
-!  calculate the forces near the atom due to the error function part of the potential
+!  Calculate the forces near the atom due to the gaussian
+!  and error function parts of the potential
      do i3=isz,iez
-       z=real(i3,kind=8)*hzh-rz
-       call ind_positions_(perz,i3,n3,j3,goz)
+       z=real(i3,kind=dp)*hzh-rz
+       call ind_positions_mklocl(perz,i3,n3,j3,goz)
        if(fftn3_distrib(j3)==iproc) then
          i3loc=ffti3_local(j3)
          do i2=isy,iey
-           y=real(i2,kind=8)*hyh-ry
-           call ind_positions_(pery,i2,n2,j2,goy)
+           y=real(i2,kind=dp)*hyh-ry
+           call ind_positions_mklocl(pery,i2,n2,j2,goy)
            do i1=isx,iex
-             x=real(i1,kind=8)*hxh-rx
-             call ind_positions_(perx,i1,n1,j1,gox)
-             r2=x**2+y**2+z**2
-             if (goz  .and. goy  .and. gox ) then
+             x=real(i1,kind=dp)*hxh-rx
+             call ind_positions_mklocl(perx,i1,n1,j1,gox)
+
+             if (goz.and.goy.and.gox) then
                ind=j1+(j2-1)*n1+(i3loc-1)*n1*n2
                x=(gridcart(1,ind)-rx)
                y=(gridcart(2,ind)-ry)
                z=(gridcart(3,ind)-rz)
                r2=x**2+y**2+z**2
-             end if
-             arg=r2/rloc**2
-             xp=exp(-.5d0*arg)
-             if (goz  .and. goy  .and. gox ) then
-!            gaussian part
-               if (nloc /= 0) then
-                 tt=cprime(nloc)
-                 do iloc=nloc-1,1,-1
-                   tt=arg*tt+cprime(iloc)
-                 end do
-                 rhoel=rho(ind)
-                 forceloc=xp*tt*rhoel
-                 fxgau=fxgau+forceloc*x
-                 fygau=fygau+forceloc*y
-                 fzgau=fzgau+forceloc*z
+               xp=exp(-0.5_dp*r2/rloc**2)
+
+!            Short range part
+               rhoel=rho(ind)
+!            HGH: V_S^prime=gaussian
+               if (usepaw==0) then
+                 if (nloc/=0) then
+                   arg=r2/rloc**2
+                   tt=cprime(nloc)
+                   do iloc=nloc-1,1,-1
+                     tt=arg*tt+cprime(iloc)
+                   end do
+                   forceloc=xp*tt*rhoel
+                 else
+                   forceloc=zero
+                 end if
+!            PAW: V_PAW^prime-V_L^prime
+               else
+                 rr(1)=sqrt(r2)
+                 if (rr(1)>=rzero) then
+                   call paw_splint_der(msz,rad,vloc,d2vloc,1,rr,dvpawdr)
+                   call calcdVloc_mklocl(dvhgh,rr(1),rloc,charge)
+                   forceloc=rhoel*rloc2*(dvpawdr(1)-dvhgh)/rr(1)
+                 else
+                   forceloc=rhoel*rloc2*dvloc_zero_mklocl(charge,rloc,msz,rad,vloc,d2vloc)
+                 end if
                end if
-!            error function part
+
+               fxgau=fxgau+forceloc*x
+               fygau=fygau+forceloc*y
+               fzgau=fzgau+forceloc*z
+
+!            Long range part: error function
                Vel=pot(ind)
                fxerf=fxerf+xp*Vel*x
                fyerf=fyerf+xp*Vel*y
                fzerf=fzerf+xp*Vel*z
-             else
-               forceleaked=forceleaked+xp*(1.d0+tt)
+
+             else if (nloc>0) then
+               r2=x**2+y**2+z**2
+               arg=r2/rloc**2
+               xp=exp(-0.5_dp*arg)
+               tt=cprime(nloc)
+               do iloc=nloc-1,1,-1
+                 tt=arg*tt+cprime(iloc)
+               end do
+               forceleaked=forceleaked+xp*(1._dp+tt)
              end if
            end do
          end do
        end if
      end do
 
-!  final result of the forces
-
+!  Final result of the forces
      floc(1,iat)=(hxh*hyh*hzh*prefactor)*fxerf+(hxh*hyh*hzh/rloc**2)*fxgau
      floc(2,iat)=(hxh*hyh*hzh*prefactor)*fyerf+(hxh*hyh*hzh/rloc**2)*fygau
      floc(3,iat)=(hxh*hyh*hzh*prefactor)*fzerf+(hxh*hyh*hzh/rloc**2)*fzgau
@@ -1296,6 +1216,197 @@ subroutine local_forces_new(fftn3_distrib,ffti3_local,&
    forceleaked=forceleaked*prefactor*hxh*hyh*hzh
    if (iproc.eq.0) write(std_out,'(a,1pe12.5)') 'done. Leaked force: ',forceleaked
 
- end subroutine local_forces_new
+   CONTAINS
 !!***
 
+!----------------------------------------------------------------------
+
+!!****f* mklocl_realspace/calcdVloc_mklocl
+!! NAME
+!!  calcdVloc_mklocl
+!!
+!! FUNCTION
+!!  Compute 1st-derivative of long-range HGH local ionic potential (derf)
+!!
+!! COPYRIGHT
+!! Copyright (C) 2016-2016 ABINIT group (MT)
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!      mklocl_realspace
+!!
+!! CHILDREN
+!!
+!! SOURCE
+subroutine calcdVloc_mklocl(yy,xx,rloc,Z)
+
+ use defs_basis
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'calcdVloc_mklocl'
+ use interfaces_43_wvl_wrappers
+!End of the abilint section
+
+ implicit none
+!Arguments ------------------------------------
+!scalars
+ real(dp),intent(in)  :: xx,rloc,Z
+ real(dp),intent(out) :: yy
+
+!Local variables-------------------------------
+ !scalars
+ real(dp):: arg,tt
+
+! *************************************************************************
+
+     arg=xx/(sqrt(2._dp)*rloc)
+     call derf_ab(tt,arg)
+     yy=(Z/(xx**2))* ( tt - 2._dp/sqrt(pi)*arg*exp(-arg**2) )
+
+    end subroutine calcdVloc_mklocl
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* mklocl_wavelets/dvloc_zero_mklocl
+!! NAME
+!!  dvloc_zero_mklocl
+!!
+!! FUNCTION
+!!  Use a quadratic interpolation to get limit of (1/x).dVloc(x)/dx at x->0
+!!
+!! COPYRIGHT
+!! Copyright (C) 2013-2016 ABINIT group (TRangel,MT)
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! SOURCE
+
+function dvloc_zero_mklocl(charge,rloc,msz,rad,vloc,d2vloc)
+
+ use defs_basis
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'dvloc_zero_mklocl'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: msz
+ real(dp) :: dvloc_zero_mklocl
+ real(dp),intent(in)  :: charge,rloc
+!arrays
+ real(dp) :: rad(msz),vloc(msz),d2vloc(msz)
+
+!Local variables-------------------------------
+!scalars
+ real(dp) :: y1,y2,y3,zz=0._dp
+!arrays
+ real(dp) :: ll(3),xx(3),yy(3)
+
+! *************************************************************************
+
+!Select 3 points x1,x2,x3 near 0
+     if (rad(1)>1.d-10) then
+       xx(1:3)=rad(1:3)
+     else
+       xx(1:3)=rad(2:4)
+     end if
+
+!Find the corresponding values of y=(V^PAW(x)-V^HGH(x))/x
+     call paw_splint_der(msz,rad,vloc,d2vloc,3,xx,yy)
+     call calcdVloc_mklocl(y1,xx(1),rloc,charge)
+     call calcdVloc_mklocl(y2,xx(2),rloc,charge)
+     call calcdVloc_mklocl(y3,xx(3),rloc,charge)
+     yy(1)=(yy(1)-y1)/xx(1)
+     yy(2)=(yy(2)-y2)/xx(2)
+     yy(3)=(yy(3)-y3)/xx(3)
+
+!Find a polynomial of the form (z=0):
+!P(z) = y1.L1(z) + y2.L2(z) + y3.L3(z)
+
+!L1(z) = (z-x2)(z-x3)/((x1-x2)(x1-x3))
+     ll(1)=(zz-xx(2))*(zz-xx(3))/((xx(1)-xx(2))*(xx(1)-xx(3)))
+!L2(z) = (z-x1)(z-x3)/((x2-x1)(x2-x3))
+     ll(2)=(zz-xx(1))*(zz-xx(3))/((xx(2)-xx(1))*(xx(2)-xx(3)))
+!L3(z) = (z-x1)(z-x2)/((x3-x1)(x3-x2))
+     ll(3)=(zz-xx(1))*(zz-xx(2))/((xx(3)-xx(1))*(xx(3)-xx(2)))
+
+     dvloc_zero_mklocl=yy(1)*ll(1)+yy(2)*ll(2)+yy(3)*ll(3)
+
+    end function dvloc_zero_mklocl
+!!***
+
+end subroutine local_forces_new
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* mklocl_realspace/ind_positions_mklocl
+!! NAME
+!!  ind_positions_mklocl
+!!
+!! FUNCTION
+!! determine the index in which the potential must be inserted, following the BC
+!! determine also whether the index is inside or outside the box for free BC
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!      mklocl_realspace
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine ind_positions_mklocl(periodic,i,n,j,go)
+
+ use m_profiling_abi
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'ind_positions_mklocl'
+!End of the abilint section
+
+ implicit none
+
+!Arguments -------------------------------
+ logical, intent(in) :: periodic
+ integer, intent(in) :: i,n
+ logical, intent(out) :: go
+ integer, intent(out) :: j
+
+! *********************************************************************
+
+     if (periodic) then
+       go=.true.
+       j=modulo(i-1,n)+1
+     else
+       j=i
+       go=(i >= 1 .and. i <= n)
+     end if
+
+    end subroutine ind_positions_mklocl
+!!***

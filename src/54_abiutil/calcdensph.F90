@@ -7,7 +7,7 @@
 !! Compute and print integral of total density inside spheres around atoms.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (MT,ILuk,MVer,EB,SOP)
+!! Copyright (C) 1998-2017 ABINIT group (MT,ILuk,MVer,EB,SPr)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -30,13 +30,15 @@
 !!  typat(natom)=type of each atom
 !!  ucvol=unit cell volume in bohr**3
 !!  xred(3,natom)=reduced dimensionless atomic coordinates
+!!  prtopt = if 1, the default printing is on, otherwise special printing options  
 !!
 !! OUTPUT
 !!  intgden(nspden, natom)=intgrated density (magnetization...) for each atom in a sphere of radius ratsph. Optional arg
+!!  dentot(nspden)=integrated density (magnetization...) over full u.c. vol, optional argument
 !!  Rest is printing
 !!
 !! PARENTS
-!!      mag_constr,mag_constr_e,outscfcv
+!!      dfpt_scfcv,mag_constr,mag_constr_e,outscfcv
 !!
 !! CHILDREN
 !!      timab,wrtout,xmpi_sum
@@ -50,7 +52,7 @@
 #include "abi_common.h"
 
 subroutine calcdensph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,nunit,ratsph,rhor,rprimd,typat,ucvol,xred,&
-&    intgden,atgridpts)
+&    prtopt,intgden,dentot)
 
  use defs_basis
  use defs_abitypes
@@ -79,8 +81,10 @@ subroutine calcdensph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,nunit,ratsph
  integer,intent(in) :: ngfft(18),typat(natom)
  real(dp),intent(in) :: gmet(3,3),ratsph(ntypat),rhor(nfft,nspden),rprimd(3,3)
  real(dp),intent(in) :: xred(3,natom)
- integer,intent(inout),optional :: atgridpts(nfft)
- real(dp),intent(out),optional :: intgden(nspden,natom)
+!integer,intent(out),optional :: atgridpts(nfft)
+ integer ,intent(in) :: prtopt
+ real(dp),intent(out),optional  :: intgden(nspden,natom)
+ real(dp),intent(out),optional  :: dentot(nspden)
 !Local variables ------------------------------
 !scalars
  integer,parameter :: ishift=5
@@ -92,6 +96,7 @@ subroutine calcdensph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,nunit,ratsph
  real(dp) :: fsm, ratsm, ratsm2 
  real(dp) :: mag_coll, mag_x, mag_y, mag_z ! EB
  real(dp) :: sum_mag, sum_mag_x,sum_mag_y,sum_mag_z,sum_rho_up,sum_rho_dn,sum_rho_tot ! EB
+ real(dp) :: rho_tot
 ! real(dp) :: rho_up,rho_dn,rho_tot !EB 
  logical   :: grid_found
  character(len=500) :: message
@@ -137,10 +142,10 @@ subroutine calcdensph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,nunit,ratsph
 
  do iatom=1,natom
 
-   if (present(atgridpts)) then
-     npts(iatom)=0          !SOP: initialize the number of grid points within atomic sphere around atom i
-     ii=ii+1                !SOP: initialize running index for constructing an array of grid point indexes
-   end if                    !     within atomic spheres
+   !if (present(atgridpts)) then
+   !  npts(iatom)=0           !SPr: initialize the number of grid points within atomic sphere around atom i
+   !  ii=ii+1                 !SPr: initialize running index for constructing an array of grid point indexes
+   !end if                    !     within atomic spheres
 
 !  Define a "box" around the atom
    r2atsph=1.0000001_dp*ratsph(typat(iatom))**2
@@ -182,10 +187,10 @@ subroutine calcdensph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,nunit,ratsph
 
            ifft_local=1+ix+n1*(iy+n2*izloc)
 
-           if(present(atgridpts)) then
-             ii=ii+1                     
-             atgridpts(ii)=ifft_local    !SOP: save grid point index (dbg: to check whether ifft_local is a valid "global" index )
-           end if
+           !if(present(atgridpts)) then
+           !  ii=ii+1                     
+           !  atgridpts(ii)=ifft_local    !SPr: save grid point index (dbg: to check whether ifft_local is a valid "global" index )
+           !end if
 
            if (nspden==1) then
 !            intgden_(1,iatom)= integral of total density
@@ -213,13 +218,13 @@ subroutine calcdensph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,nunit,ratsph
 
    intgden_(:,iatom)=intgden_(:,iatom)*ucvol/dble(nfftot)
 
-   if (present(atgridpts)) then
-     npts(iatom)=ii-1
-     do is=1,iatom-1,1
-       npts(iatom)=npts(iatom)-npts(is)-1
-     end do
-     atgridpts(ii-npts(iatom))=npts(iatom)    !SOP: save number of grid points around atom i
-   end if
+   !if (present(atgridpts)) then
+   !  npts(iatom)=ii-1
+   !  do is=1,iatom-1,1
+   !    npts(iatom)=npts(iatom)-npts(is)-1
+   !  end do
+   !  atgridpts(ii-npts(iatom))=npts(iatom)    !SPr: save number of grid points around atom i
+   !end if
    
 
 !  End loop over atoms
@@ -232,26 +237,30 @@ subroutine calcdensph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,nunit,ratsph
    mag_coll=0
 !  rho_up=0
 !  rho_dn=0
-!  rho_tot=0
+   rho_tot=0
    do ifft=1,nfft
 !   rho_up=rho_up+rhor(ifft,2)
 !   rho_dn=rho_dn+(rhor(ifft,2)-rhor(ifft,1))
-!   rho_tot=rho_tot+rhor(ifft,1)
+     rho_tot=rho_tot+rhor(ifft,1)
      mag_coll=mag_coll+2*rhor(ifft,2)-rhor(ifft,1)
    end do
    mag_coll=mag_coll*ucvol/dble(nfftot)
+   rho_tot =rho_tot*ucvol/dble(nfftot)
 !  rho_up=rho_up*ucvol/dble(nfftot)
 !  rho_dn=rho_dn*ucvol/dble(nfftot)
 !  rho_tot=rho_tot*ucvol/dble(nfftot) 
  else if (nspden==4) then
+   rho_tot=0
    mag_x=0
    mag_y=0
    mag_z=0
    do ifft=1,nfft
+     rho_tot=rho_tot+rhor(ifft,1)
      mag_x=mag_x+rhor(ifft,2)
      mag_y=mag_y+rhor(ifft,3)
      mag_z=mag_z+rhor(ifft,4)
    end do
+   rho_tot=rho_tot*ucvol/dble(nfftot)
    mag_x=mag_x*ucvol/dble(nfftot)
    mag_y=mag_y*ucvol/dble(nfftot)
    mag_z=mag_z*ucvol/dble(nfftot)
@@ -261,7 +270,7 @@ subroutine calcdensph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,nunit,ratsph
  if(mpi_enreg%nproc_fft>1)then
    call timab(48,1,tsec)
    call xmpi_sum(intgden_,mpi_enreg%comm_fft,ierr)
-!   call xmpi_sum(rho_tot,mpi_enreg%comm_fft,ierr) ! EB
+   call xmpi_sum(rho_tot,mpi_enreg%comm_fft,ierr)  ! EB
 !   call xmpi_sum(rho_up,mpi_enreg%comm_fft,ierr)  ! EB
 !   call xmpi_sum(rho_dn,mpi_enreg%comm_fft,ierr)  ! EB
    call xmpi_sum(mag_coll,mpi_enreg%comm_fft,ierr) ! EB
@@ -280,77 +289,121 @@ subroutine calcdensph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,nunit,ratsph
  sum_rho_dn=zero
  sum_rho_tot=zero
 
- if (nspden==1) then
-   write(message, '(4a)' ) &
-&   ' Integrated electronic density in atomic spheres:',ch10,&
-&   ' ------------------------------------------------'
-   call wrtout(nunit,message,'COLL')
-   write(message, '(a)' ) ' Atom  Sphere_radius  Integrated_density'
-   call wrtout(nunit,message,'COLL')
-   do iatom=1,natom
-     write(message, '(i5,f15.5,f20.8)' ) iatom,ratsph(typat(iatom)),intgden_(1,iatom)
+ if (prtopt==1) then
+   if (nspden==1) then
+     write(message, '(4a)' ) &
+&     ' Integrated electronic density in atomic spheres:',ch10,&
+&     ' ------------------------------------------------'
      call wrtout(nunit,message,'COLL')
-   end do
- else if(nspden==2) then
-   write(message, '(4a)' ) &
-&   ' Integrated electronic and magnetization densities in atomic spheres:',ch10,&
-&   ' ---------------------------------------------------------------------'
-   call wrtout(nunit,message,'COLL')
-   write(message, '(3a)' ) ' Note: Diff(up-dn) is a rough ',&
-&   'approximation of local magnetic moment'
-   call wrtout(nunit,message,'COLL')
-   write(message, '(a)' ) ' Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)'
-   call wrtout(nunit,message,'COLL')
-   do iatom=1,natom
-     write(message, '(i5,f10.5,2f13.6,a,f12.6,a,f12.6)' ) iatom,ratsph(typat(iatom)),intgden_(1,iatom),intgden_(2,iatom),&
-&     '  ',(intgden_(1,iatom)+intgden_(2,iatom)),' ',(intgden_(1,iatom)-intgden_(2,iatom))
+     write(message, '(a)' ) ' Atom  Sphere_radius  Integrated_density'
      call wrtout(nunit,message,'COLL')
-     ! Compute the sum of the magnetization 
-     sum_mag=sum_mag+intgden_(1,iatom)-intgden_(2,iatom)
-     sum_rho_up=sum_rho_up+intgden_(1,iatom)
-     sum_rho_dn=sum_rho_dn+intgden_(2,iatom)
-     sum_rho_tot=sum_rho_tot+intgden_(1,iatom)+intgden_(2,iatom)
-   end do
-   write(message, '(a)') ' ---------------------------------------------------------------------'
-   call wrtout(nunit,message,'COLL')
-   write(message, '(a,2f13.6,a,f12.6,a,f12.6)') '  Sum:         ', sum_rho_up,sum_rho_dn,'  ',sum_rho_tot,' ',sum_mag
-   call wrtout(nunit,message,'COLL')
-   write(message, '(a,f14.6)') ' Total magnetization (from the atomic spheres):       ', sum_mag
-   call wrtout(nunit,message,'COLL')
-   write(message, '(a,f14.6)') ' Total magnetization (exact up - dn):                 ', mag_coll
-   call wrtout(nunit,message,'COLL')
+     do iatom=1,natom
+       write(message, '(i5,f15.5,f20.8)' ) iatom,ratsph(typat(iatom)),intgden_(1,iatom)
+       call wrtout(nunit,message,'COLL')
+     end do
+   else if(nspden==2) then
+     write(message, '(4a)' ) &
+&     ' Integrated electronic and magnetization densities in atomic spheres:',ch10,&
+&     ' ---------------------------------------------------------------------'
+     call wrtout(nunit,message,'COLL')
+     write(message, '(3a)' ) ' Note: Diff(up-dn) is a rough ',&
+&     'approximation of local magnetic moment'
+     call wrtout(nunit,message,'COLL')
+     write(message, '(a)' ) ' Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)'
+     call wrtout(nunit,message,'COLL')
+     do iatom=1,natom
+       write(message, '(i5,f10.5,2f13.6,a,f12.6,a,f12.6)' ) iatom,ratsph(typat(iatom)),intgden_(1,iatom),intgden_(2,iatom),&
+&       '  ',(intgden_(1,iatom)+intgden_(2,iatom)),' ',(intgden_(1,iatom)-intgden_(2,iatom))
+       call wrtout(nunit,message,'COLL')
+       ! Compute the sum of the magnetization 
+       sum_mag=sum_mag+intgden_(1,iatom)-intgden_(2,iatom)
+       sum_rho_up=sum_rho_up+intgden_(1,iatom)
+       sum_rho_dn=sum_rho_dn+intgden_(2,iatom)
+       sum_rho_tot=sum_rho_tot+intgden_(1,iatom)+intgden_(2,iatom)
+     end do
+     write(message, '(a)') ' ---------------------------------------------------------------------'
+     call wrtout(nunit,message,'COLL')
+     write(message, '(a,2f13.6,a,f12.6,a,f12.6)') '  Sum:         ', sum_rho_up,sum_rho_dn,'  ',sum_rho_tot,' ',sum_mag
+     call wrtout(nunit,message,'COLL')
+     write(message, '(a,f14.6)') ' Total magnetization (from the atomic spheres):       ', sum_mag
+     call wrtout(nunit,message,'COLL')
+     write(message, '(a,f14.6)') ' Total magnetization (exact up - dn):                 ', mag_coll
+     call wrtout(nunit,message,'COLL')
+!  SPr for dfpt debug
+!  write(message, '(a,f14.6)') ' Total density (exact)              :                 ', rho_tot 
+!  call wrtout(nunit,message,'COLL')
    ! EB for testing purpose print rho_up, rho_dn and rho_tot
 !    write(message, '(a,3f14.4,2i8)') ' rho_up, rho_dn, rho_tot, nfftot, nfft: ', rho_up,rho_dn,rho_tot,nfft,nfft
 !   call wrtout(nunit,message,'COLL')   
- else if(nspden==4) then
-   write(message, '(4a)' ) &
-&   ' Integrated electronic and magnetization densities in atomic spheres:',ch10,&
-&   ' ---------------------------------------------------------------------'
-   call wrtout(nunit,message,'COLL')
-   write(message, '(3a)' ) ' Note:      this is a rough approximation of local magnetic moments'
-   call wrtout(nunit,message,'COLL')
-   write(message, '(a)' ) ' Atom   Radius      Total density     mag(x)      mag(y)      mag(z)  '
-   call wrtout(nunit,message,'COLL')
-   do iatom=1,natom
-     write(message, '(i5,f10.5,f16.6,a,3f12.6)' ) iatom,ratsph(typat(iatom)),intgden_(1,iatom),'  ',(intgden_(ix,iatom),ix=2,4)
+   else if(nspden==4) then
+     write(message, '(4a)' ) &
+&     ' Integrated electronic and magnetization densities in atomic spheres:',ch10,&
+&     ' ---------------------------------------------------------------------'
      call wrtout(nunit,message,'COLL')
-     ! Compute the sum of the magnetization in x, y and z directions
-     sum_mag_x=sum_mag_x+intgden_(2,iatom)
-     sum_mag_y=sum_mag_y+intgden_(3,iatom)
-     sum_mag_z=sum_mag_z+intgden_(4,iatom)
-   end do
-   write(message, '(a)') ' ---------------------------------------------------------------------'
+     write(message, '(3a)' ) ' Note:      this is a rough approximation of local magnetic moments'
+     call wrtout(nunit,message,'COLL')
+     write(message, '(a)' ) ' Atom   Radius      Total density     mag(x)      mag(y)      mag(z)  '
+     call wrtout(nunit,message,'COLL')
+     do iatom=1,natom
+       write(message, '(i5,f10.5,f16.6,a,3f12.6)' ) iatom,ratsph(typat(iatom)),intgden_(1,iatom),'  ',(intgden_(ix,iatom),ix=2,4)
+       call wrtout(nunit,message,'COLL')
+       ! Compute the sum of the magnetization in x, y and z directions
+       sum_mag_x=sum_mag_x+intgden_(2,iatom)
+       sum_mag_y=sum_mag_y+intgden_(3,iatom)
+       sum_mag_z=sum_mag_z+intgden_(4,iatom)
+     end do
+     write(message, '(a)') ' ---------------------------------------------------------------------'
+     call wrtout(nunit,message,'COLL')
+!    write(message, '(a,f12.6,f12.6,f12.6)') ' Total magnetization :           ', sum_mag_x,sum_mag_y,sum_mag_z
+     write(message, '(a,f12.6,f12.6,f12.6)') ' Total magnetization (spheres)   ', sum_mag_x,sum_mag_y,sum_mag_z
+     call wrtout(nunit,message,'COLL')
+     write(message, '(a,f12.6,f12.6,f12.6)') ' Total magnetization (exact)     ', mag_x,mag_y,mag_z
+     call wrtout(nunit,message,'COLL')
+!    SPr for dfpt debug
+!    write(message, '(a,f12.6)') ' Total density (exact)           ', rho_tot
+!   call wrtout(nunit,message,'COLL')
+   end if
+ else   ! prtopt different from 1 (either 2,3 or 4)
+   write(message, '(2a)') ch10,' ------------------------------------------------------------------------'
    call wrtout(nunit,message,'COLL')
-!   write(message, '(a,f12.6,f12.6,f12.6)') ' Total magnetization :           ', sum_mag_x,sum_mag_y,sum_mag_z
-   write(message, '(a,f12.6,f12.6,f12.6)') ' Total magnetization (spheres)   ', sum_mag_x,sum_mag_y,sum_mag_z
+   write(message, '(4a)' ) &
+&   ' Magnetic susceptibility (integrated first order magnetization density):',ch10,&
+&   ' ------------------------------------------------------------------------',ch10
    call wrtout(nunit,message,'COLL')
-   write(message, '(a,f12.6,f12.6,f12.6)') ' Total magnetization (exact)     ', mag_x,mag_y,mag_z
+   if (nspden==2) then
+     write(message, '(a,f13.8)') '           chi_33 = ', mag_coll
+     call wrtout(nunit,message,'COLL')
+   else if (nspden==4) then
+     write(message, '(a,i1,a,f13.8)') '           chi_1',prtopt-1,' = ',mag_x
+     call wrtout(nunit,message,'COLL')
+     write(message, '(a,i1,a,f13.8)') '           chi_2',prtopt-1,' = ',mag_y
+     call wrtout(nunit,message,'COLL')
+     write(message, '(a,i1,a,f13.8)') '           chi_3',prtopt-1,' = ',mag_z
+     call wrtout(nunit,message,'COLL')
+   end if
+
+   write(message, '(2a,f13.8)') ch10,'   n^(1) integral = ', rho_tot
    call wrtout(nunit,message,'COLL')
- end if
+   write(message, '(3a)') ch10,' ------------------------------------------------------------------------',ch10
+   call wrtout(nunit,message,'COLL')    
+
+ end if ! prtopt if conditions
 
  if (present(intgden)) then
    intgden = intgden_
  end if
+
+ if (present(dentot)) then
+   if (nspden==2) then
+     dentot(1)=rho_tot
+     dentot(2)=mag_coll
+   else if (nspden==4) then
+     dentot(1)=rho_tot
+     dentot(2)=mag_x
+     dentot(3)=mag_y
+     dentot(4)=mag_z
+   end if
+ end if 
 
 end subroutine calcdensph
 !!***

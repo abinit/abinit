@@ -8,7 +8,7 @@
 !! Print components of electric field, displacement field and polarization in nice format
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (DCA, XG, GMR, LBoeri, MT)
+!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR, LBoeri, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -280,14 +280,14 @@ subroutine prtefield(dtset,dtefield,iunit,rprimd)
 &   '       p:  ', (dtefield%red_ptot1(ii), ii=1,3), ch10, &
 &   '       d:  ', (dtset%red_dfield(ii),ii = 1, 3), ch10, &
 &   ' e  +  p:  ', (dtset%red_efield(ii)+dtefield%red_ptot1(ii),ii=1,3)  
-    call wrtout(iunit,message,'COLL')
+   call wrtout(iunit,message,'COLL')
 
    write(message,'(a,a,3(es16.9,2x),a,a,3(es16.9,2x),a,a,3(es16.9,2x),a,a,3(es16.9,2x))') ch10, &
 &   '    ebar:  ', (dtset%red_efieldbar(ii),ii=1,3), ch10, &   
 &   '    pbar:  ', (red_pbar(ii),ii=1,3), ch10, &
 &   '    dbar:  ', (red_dfieldbar(ii),ii=1,3), ch10, &
 &   ' eba+pba:  ', (dtset%red_efieldbar(ii)+red_pbar(ii),ii=1,3)
-    call wrtout(iunit,message,'COLL')
+   call wrtout(iunit,message,'COLL')
 
    write(message,'(a,a,3(es16.9,2x),a,a,3(es16.9,2x),a,a,3(es16.9,2x),a,a,3(es16.9,2x))') ch10, &
 &   '       E:  ', (dtset%efield(ii), ii=1,3), ch10, &

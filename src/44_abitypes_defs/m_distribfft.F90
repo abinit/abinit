@@ -8,7 +8,7 @@
 !!  used for FFT parallelization with MPI and n2 plane sharing
 !!
 !! COPYRIGHT
-!! Copyright (C) 2011-2016 ABINIT group (FD,MT)
+!! Copyright (C) 2011-2017 ABINIT group (FD,MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -264,8 +264,8 @@ end subroutine init_distribfft
 !! PARENTS
 !!      atm2fft,bethe_salpeter,calc_vhxc_me,dfpt_atm2fft,dieltcel,eph,ks_ddiago
 !!      m_cut3d,m_dvdb,m_fft_prof,m_gsphere,m_ioarr,m_kxc,m_ppmodel,m_screening
-!!      m_wfk,pawgrnl,pawmknhat,pawmknhat_psipsi,pawsushat,scfcv,screening
-!!      sigma,suscep_stat,susk,suskmm,wfk_analyze
+!!      m_wfk,multipoles_fftr,pawgrnl,pawmknhat,pawmknhat_psipsi,pawsushat
+!!      scfcv,screening,sigma,suscep_stat,susk,suskmm,wfk_analyze
 !!
 !! CHILDREN
 !!
@@ -398,8 +398,9 @@ end subroutine init_distribfft_seq
 !!  mpi_enreg=informations about MPI parallelization
 !!
 !! PARENTS
-!!      atm2fft,dfpt_atm2fft,m_cut3d,m_fft,m_mpinfo,m_qparticles,m_wfd,pawgrnl
-!!      pawmknhat,pawmknhat_psipsi,pawsushat,scfcv,vtorhorec
+!!      atm2fft,dfpt_atm2fft,m_cut3d,m_fft,m_mpinfo,m_qparticles,m_wfd
+!!      multipoles_fftr,pawgrnl,pawmknhat,pawmknhat_psipsi,pawsushat,scfcv
+!!      vtorhorec
 !!
 !! CHILDREN
 !!

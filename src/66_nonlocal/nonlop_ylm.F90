@@ -23,7 +23,7 @@
 !! * This routine uses spherical harmonics Ylm to express Vnl.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (MT)
+!! Copyright (C) 1998-2017 ABINIT group (MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -329,12 +329,12 @@
  real(dp),intent(in) :: phkxredin(2,natom),phkxredout(2,natom)
  real(dp),intent(in) :: sij(dimenl1,ntypat*((paw_opt+1)/3))
  real(dp),intent(inout) :: ph3din(2,npwin,matblk),ph3dout(2,npwout,matblk)
- real(dp),intent(inout) :: vectin(2,npwin*nspinor)
- real(dp),intent(out) :: enlout(nnlout)
- real(dp),intent(out) :: svectout(2,npwout*nspinor*(paw_opt/3))
- real(dp),intent(inout) :: vectout (2,npwout*nspinor)
- type(pawcprj_type),intent(inout) :: cprjin(natom,nspinor*((cpopt+5)/5))
- type(pawcprj_type),optional,intent(in) :: cprjin_left(natom,nspinor)
+ real(dp),intent(inout) :: vectin(:,:)
+ real(dp),intent(out) :: enlout(:)
+ real(dp),intent(out) :: svectout(:,:)
+ real(dp),intent(inout) :: vectout (:,:)
+ type(pawcprj_type),intent(inout) :: cprjin(:,:)
+ type(pawcprj_type),optional,intent(in) :: cprjin_left(:,:)
 
 !Local variables-------------------------------
 !scalars
@@ -687,10 +687,11 @@
          if (choice==5.or.choice==51.or.choice==52.or.choice==53.or. &
 &         choice==8.or.choice==81) cplex_dgxdt(:) = 2
          if (choice==54.and.signs==1) cplex_dgxdt(4:6) = 2
+         if (choice==54.and.signs==2) cplex_dgxdt(:)   = 2
          if (choice==55.and.signs==1) cplex_dgxdt(7:9) = 2
        end if
        if(nd2gxdt > 0) then
-         if (choice==54.and.signs==1) cplex_d2gxdt(1:9) = 2
+         if (choice==54) cplex_d2gxdt(:) = 2
          if (choice==55.and.signs==1) cplex_d2gxdt(1:18)= 2
        end if
 
@@ -709,11 +710,12 @@
        if (cpopt==4.and.ndgxdt>0) then
          ndgxdt_stored = cprjin(1,1)%ncpgr
          ishift=0
-         if (choice==2.and.ndgxdt_stored>ndgxdt) ishift=ndgxdt_stored-ndgxdt
+         if (((choice==2).or.(choice==3)).and.(ndgxdt_stored>ndgxdt).and.(signs==2)) ishift=idir-ndgxdt
+         if (choice==2.and.(ndgxdt_stored>ndgxdt).and.(signs==1)) ishift=ndgxdt_stored-ndgxdt
          if(cplex == 2) then
            do ispinor=1,nspinor
              do ia=1,nincat
-               if (ndgxdt_stored==ndgxdt.or.(ndgxdt_stored>ndgxdt.and.choice==2)) then
+               if (ndgxdt_stored==ndgxdt.or.(ndgxdt_stored>ndgxdt.and.((choice==2).or.(choice==3)))) then
                  dgxdt(1:2,1:ndgxdt,1:nlmn,ia,ispinor)=cprjin(iatm+ia,ispinor)%dcp(1:2,1+ishift:ndgxdt+ishift,1:nlmn)
                else if (signs==2.and.ndgxdt_stored==3) then
                  if (choice==5.or.choice==51.or.choice==52) then ! ndgxdt=1
@@ -733,7 +735,7 @@
            do ispinor=1,nspinor
              do ia=1,nincat
                do ilmn=1,nlmn
-                 if (ndgxdt_stored==ndgxdt.or.(ndgxdt_stored>ndgxdt.and.choice==2)) then
+                 if (ndgxdt_stored==ndgxdt.or.(ndgxdt_stored>ndgxdt.and.((choice==2).or.(choice==3)))) then
                    do ii=1,ndgxdt
                      ic = cplex_dgxdt(ii)
                      dgxdt(1,ii,ilmn,ia,ispinor)=cprjin(iatm+ia,ispinor)%dcp(ic,ii+ishift,ilmn)
@@ -846,7 +848,6 @@
 &             nincat,nlmn,nnlout,nspinor,paw_opt,strnlk)
              ABI_DEALLOCATE(gx_left)
            end if
-
          end if
 
 !        Operate with the non-local potential on the projected scalars,

@@ -7,7 +7,7 @@
 !!  This module contains low-level procedures to check assertions and handle errors.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2016 ABINIT group (MG,YP,NCJ,MT)
+!! Copyright (C) 2008-2017 ABINIT group (MG,YP,NCJ,MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -948,9 +948,9 @@ end subroutine msg_hndl
 !!  1 to activate show_backtrace call in msg_hndl. 0 to disable it
 !!
 !! PARENTS
-!!      m_errors
 !!
 !! CHILDREN
+!!      abimem_get_info,abimem_shutdown,show_units,wrtout
 !!
 !! SOURCE
 
@@ -1645,7 +1645,8 @@ end subroutine xlf_set_sighandler
 !!
 !! PARENTS
 !!      abinit,anaddb,conducti,cut3d,fftprof,fold2Bloch,ioprof,lapackprof
-!!      macroave,mrgddb,mrgdv,mrggkk,mrgscr,optic,ujdet,vdw_kernelgen
+!!      macroave,mrgddb,mrgdv,mrggkk,mrgscr,multibinit,optic,ujdet
+!!      vdw_kernelgen
 !!
 !! CHILDREN
 !!      abimem_get_info,abimem_shutdown,show_units,wrtout
@@ -1716,7 +1717,9 @@ subroutine abinit_doctor(prefix, print_mem_report)
 &    '- MEMORY CONSUMPTION REPORT :',ch10, &
 &    '- Memory profiling is activated but not yet usable when bigdft is used'
  end if
-
+ if (my_rank == master) then
+   call wrtout(ab_out, msg)
+ end if
  ! Test whether all logical units have been closed.
  ! If you wonder why I'm doing this, remember that there's a per-user
  ! limit on the maximum number of open file descriptors. Hence descriptors

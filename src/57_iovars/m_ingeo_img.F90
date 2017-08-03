@@ -7,14 +7,14 @@
 !! FUNCTION
 !! This module provides a generic interface that allows to
 !! initialize some of the geometry variables in the case of "images".
-!! Set up: acell, scalecart, rpim, angdeg, xred, xangst, xcart, vel
+!! Set up: acell, scalecart, rprim, angdeg, xred, xangst, xcart, vel
 !! These variables can be defined for a set of images of the cell.
 !! They also can be be defined along a path (in the configuration space).
 !! The path must be defined with its first and last points, but also
 !! with intermediate points.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2012-2016 ABINIT group (XG, MT)
+!! Copyright (C) 2012-2017 ABINIT group (XG, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

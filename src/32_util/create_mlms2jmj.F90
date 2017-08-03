@@ -7,7 +7,7 @@
 !! For a given angular momentum lcor, give the rotation matrix msml2jmj
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (BA)
+!! Copyright (C) 1998-2017 ABINIT group (BA)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

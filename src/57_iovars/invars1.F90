@@ -10,7 +10,7 @@
 !! Perform some preliminary checks and echo these dimensions.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (DCA, XG, GMR, AR, MKV)
+!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR, AR, MKV)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -35,7 +35,7 @@
 !!   The list of records of dtset initialized in the present routine is:
 !!   acell_orig,densty,iatfix,kptopt,kptrlatt,
 !!   mkmem,mkqmem,mk1mem,natsph,natvshift,nconeq,nkptgw,nkpt,
-!!   nshiftk,nqptdm,nucdipmom,optdriver,
+!!   nqptdm,nshiftk,nucdipmom,nzchempot,optdriver,
 !!   rprim_orig,rprimd_orig,shiftk,
 !!   spgroup,spinat,typat,vel_orig,vel_cell_orig,xred_orig
 !!  bravais(11)=characteristics of Bravais lattice (see symlatt.F90)
@@ -113,7 +113,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  integer :: index_typsymb,index_upper,ipsp,iscf,intimage,itypat,leave,marr
  integer :: natom,nkpt,npsp,npspalch
  integer :: nqpt,nspinor,nsppol,ntypat,ntypalch,ntyppure,occopt,response
- integer :: rfddk,rfelfd,rfphon,rfstrs,rfuser,rf2_dkdk,rf2_dkde
+ integer :: rfddk,rfelfd,rfphon,rfstrs,rfuser,rf2_dkdk,rf2_dkde,rfmagn
  integer :: tfband,tnband,tread,tread_alt
  real(dp) :: charge,fband,kptnrm,kptrlen,zelect,zval
  character(len=2) :: string2,symbol
@@ -145,11 +145,13 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
 
 !---------------------------------------------------------------------------
 
- rfddk=0; rfelfd=0 ; rfphon=0 ; rfstrs=0 ; rfuser=0 ; rf2_dkdk=0 ; rf2_dkde=0
+ rfddk=0; rfelfd=0; rfphon=0; rfmagn=0; rfstrs=0; rfuser=0; rf2_dkdk=0; rf2_dkde=0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'rfddk',tread,'INT')
  if(tread==1) rfddk=intarr(1)
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'rfelfd',tread,'INT')
  if(tread==1) rfelfd=intarr(1)
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'rfmagn',tread,'INT')
+ if(tread==1) rfmagn=intarr(1)
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'rfphon',tread,'INT')
  if(tread==1) rfphon=intarr(1)
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'rfstrs',tread,'INT')
@@ -162,7 +164,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  if(tread==1) rf2_dkde=intarr(1)
 
  response=0
- if(rfddk/=0.or.rf2_dkdk/=0.or.rf2_dkde/=0.or.rfelfd/=0.or.rfphon/=0.or.rfstrs/=0.or.rfuser/=0)response=1
+ if(rfddk/=0.or.rf2_dkdk/=0.or.rf2_dkde/=0.or.rfelfd/=0.or.rfphon/=0.or.rfstrs/=0.or.rfuser/=0.or.rfmagn/=0)response=1
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'optdriver',tread,'INT')
  if (tread==1) then
@@ -181,11 +183,9 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
 ! wvl_bigdft_comp, done here since default values of nline, nwfshist and iscf
 ! depend on its value (see indefo)
  if(dtset%usewvl==1) then
-   dtset%wvl_bigdft_comp=1  !Default
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'wvl_bigdft_comp',tread,'INT')
    if(tread==1) dtset%wvl_bigdft_comp=intarr(1)
  end if
-
 
 !---------------------------------------------------------------------------
 
@@ -390,6 +390,9 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'ntypalch',tread,'INT')
  if(tread==1) dtset%ntypalch=intarr(1)
 
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nzchempot',tread,'INT')
+ if(tread==1) dtset%nzchempot=intarr(1)
+
  ntypalch=dtset%ntypalch
  if(ntypalch>ntypat)then
    write(message, '(3a,i0,a,i0,a,a)' )&
@@ -474,7 +477,8 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
    call ingeo(acell,amu,dtset,bravais,dtset%genafm(1:3),iatfix,&
 &   dtset%icoulomb,iimage,iout,jdtset,dtset%jellslab,lenstr,mixalch,&
 &   msym,natom,dtset%nimage,dtset%npsp,npspalch,dtset%nspden,dtset%nsppol,&
-&   dtset%nsym,ntypalch,dtset%ntypat,nucdipmom,dtset%pawspnorb,dtset%ptgroupma,ratsph,&
+&   dtset%nsym,ntypalch,dtset%ntypat,nucdipmom,dtset%nzchempot,&
+&   dtset%pawspnorb,dtset%ptgroupma,ratsph,&
 &   rprim,dtset%slabzbeg,dtset%slabzend,dtset%spgroup,spinat,&
 &   string,symafm,dtset%symmorphi,symrel,tnons,dtset%tolsym,typat,vel,vel_cell,xred,znucl)
    dtset%iatfix(1:3,1:natom)=iatfix(1:3,1:natom)
@@ -632,6 +636,9 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
 &   'Action: check the input file.'
    MSG_ERROR(message)
  end if
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nzchempot',tread,'INT')
+ if(tread==1) dtset%nzchempot=intarr(1)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'cd_customnimfrqs',tread,'INT')
  if(tread==1) dtset%cd_customnimfrqs=intarr(1)
@@ -894,6 +901,20 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'usedmft',tread,'INT')
  if(tread==1) dtset%usedmft=intarr(1)
 
+!Some ucrpa keywords
+ dtset%ucrpa=0
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'ucrpa',tread,'INT')
+ if(tread==1) dtset%ucrpa=intarr(1)
+
+ if (dtset%ucrpa > 0 .and. dtset%usedmft > 0) then
+   write(message, '(7a)' )&
+&   'usedmft and ucrpa are both activated in the input file ',ch10,&
+&   'In the following, abinit assume you are doing a ucrpa calculation and ',ch10,&
+&   'you define Wannier functions as in DFT+DMFT calculation',ch10,&
+&   'If instead, you want to do a full dft+dmft calculation and not only the Wannier construction, use ucrpa=0'
+   MSG_WARNING(message)
+ end if
+ 
 !Some PAW+U keywords
  dtset%usepawu=0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'usepawu',tread,'INT')

@@ -8,7 +8,7 @@
 !! The output eig2nkq is this quantity for the input k points.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2016 ABINIT group (PB, XG)
+!! Copyright (C) 1999-2017 ABINIT group (PB, XG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -417,12 +417,12 @@ subroutine eig2stern(occ,bdeigrf,clflg,cg1_pert,dim_eig2nkq,dim_eig2rf,eigen0,ei
                    gh(:,:)     = gh1c_pert(:,1+(iband-1)*npw1_k*nspinor+icg2:iband*npw1_k*nspinor+icg2,idir2,ipert2)
                    ghc(:,:)    = gh0c1_pert(:,1+(iband-1)*npw1_k*nspinor+icg2:iband*npw1_k*nspinor+icg2,idir1,ipert1)
 
-!                  The first two dotprod corresponds to:  <Psi(1)|H(1)|Psi(0)> + cc.
+!                  The first two dotprod corresponds to:  <Psi(1)nkq|H(1)k+q,k|Psi(0)nk> and <Psi(0)nk|H(1)k,k+q|Psi(1)nkq>
 !                  They are calculated using wavefunctions <Psi(1)| that are orthogonal to the active space.
                    call dotprod_g(dotr,doti,istwf_k,npw1_k*nspinor,2,cwavef,gh1,mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
                    call dotprod_g(dot2r,dot2i,istwf_k,npw1_k*nspinor,2,gh,cwavef2,mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
 
-!                  This dotprod corresponds to : <Psi(1)|H(0)- E(0)|Psi(1)>
+!                  This dotprod corresponds to : <Psi(1)nkq|H(0)k+q- E(0)nk|Psi(1)nkq>
 !                  It is calculated using wavefunctions that are orthogonal to the active space.
 !                  Should work for metals. (But adiabatic approximation is bad in this case...)
                    call dotprod_g(dot3r,dot3i,istwf_k,npw1_k*nspinor,2,cwavef,ghc,mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)

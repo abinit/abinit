@@ -7,7 +7,7 @@
 !! Old option=2, transfer vin  to xred, acell and rprim
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (XG,MJV)
+!! Copyright (C) 1998-2017 ABINIT group (XG,MJV)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -41,7 +41,7 @@
 !! xred(3,natom)=reduced dimensionless atomic coordinates
 !!
 !! PARENTS
-!!      pred_bfgs,pred_delocint,pred_verlet
+!!      pred_bfgs,pred_delocint,pred_lbfgs,pred_verlet
 !!
 !! CHILDREN
 !!      metric,mkradim,strainsym
@@ -80,7 +80,7 @@ subroutine xfpack_vin2x(acell,acell0,natom,ndim,nsym,optcell,&
 !arrays
  integer,intent(in) :: symrel(3,3,nsym)
  real(dp),intent(in) :: acell0(3),rprimd0(3,3)
- real(dp),intent(inout) :: acell(3),rprim(3,3) !vz_i hist%histA fred mkrdim
+ real(dp),intent(inout) :: acell(3),rprim(3,3)
  real(dp),intent(in) :: vin(ndim)
  real(dp),intent(out) :: xred(3,natom)
 

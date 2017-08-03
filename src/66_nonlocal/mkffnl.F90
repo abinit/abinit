@@ -13,7 +13,7 @@
 !!   components; in this case, form factors are multiplied by Ylm(k+G).
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (DCA, XG, GMR, MT, DRH)
+!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR, MT, DRH)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -135,8 +135,8 @@
 !!
 !! PARENTS
 !!      ctocprj,d2frnl,dfpt_nsteltwf,dfpt_nstpaw,dfpt_nstwf,dfpt_rhofermi
-!!      dfptnl_resp,energy,forstrnps,getgh1c,ks_ddiago,m_commutator_vkbr
-!!      m_io_kss,m_shirley,m_wfd,vtorho
+!!      dfptnl_resp,energy,forstrnps,getgh1c,ks_ddiago,m_io_kss,m_shirley
+!!      m_vkbr,m_wfd,vtorho
 !!
 !! CHILDREN
 !!      mkkin,splfit,timab

@@ -18,13 +18,6 @@ and the first lesson of the GW tutorial, see the <a href="welcome.html">tutorial
 
 <p>This lesson should take about one hour to be completed.
 
-<h5>Copyright (C) 2006-2016 ABINIT group (MG,MS)
-<br> This file is distributed under the terms of the GNU General Public License, see
-~abinit/COPYING or <a href="http://www.gnu.org/copyleft/gpl.txt">
-http://www.gnu.org/copyleft/gpl.txt </a>.
-<br> For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
-</h5>
-
 <script type="text/javascript" src="list_internal_links.js"> </script>
 
 <h3><b>Content of the lesson</b></h3>
@@ -235,7 +228,7 @@ bs_coulomb_term  11       # Coulomb term included using the full matrix W_GG'
 bs_coupling       0       # Tamm-Dancoff approximation.
 </pre>
 
-The value <a href="../input_variables/html_automatically_generated/vargw.html#bs_calctype" target="kwimg">bs_calctype</a>=1 specifies that
+The value <a href="../input_variables/html_automatically_generated/varbse.html#bs_calctype" target="kwimg">bs_calctype</a>=1 specifies that
 the independent-particle polarizability should be costructed with the Kohn-Sham orbitals and energies read from the WFK file.
 To simulate the self-energy correction, the KS energies are corrected with a scissors operator 
 of energy <a href="../input_variables/html_automatically_generated/vargw.html#mbpt_sciss" target="kwimg">mbpt_sciss</a>= 0.8 eV.
@@ -245,13 +238,13 @@ it might fail in more complicated systems in which the GW corrections cannot be 
 rigid shift of the initial KS bands structure.
 <p>
 The remaining three variables specify how to construct the excitonic Hamiltonian.
-<a href="../input_variables/html_automatically_generated/vargw.html#bs_exchange_term" target="kwimg">bs_exchange_term</a>=1 tells
+<a href="../input_variables/html_automatically_generated/varbse.html#bs_exchange_term" target="kwimg">bs_exchange_term</a>=1 tells
 the program to calculate the exchage part of the kernel, hence this calculation includes local-field effects.
-The variable <a href="../input_variables/html_automatically_generated/vargw.html#bs_coulomb_term" target="kwimg">bs_coulomb_term</a> 
+The variable <a href="../input_variables/html_automatically_generated/varbse.html#bs_coulomb_term" target="kwimg">bs_coulomb_term</a> 
 is used to select among different options that are available for the Coulomb term
 (please take some time to read the description of the variable and the relevant equations in 
 the <a href="theory_bse.html">BS_notes</a>).
-Finally <a href="../input_variables/html_automatically_generated/vargw.html#bs_coupling" target="kwimg">bs_coupling</a>=0
+Finally <a href="../input_variables/html_automatically_generated/varbse.html#bs_coupling" target="kwimg">bs_coupling</a>=0
 specifies that the off-diagonal coupling blocks should be neglected (Tamm-Dancoff approximation).
 This particular combination of parameters thus corresponds to a Bethe-Salpeter calculation within 
 the Tamm-Dancoff approximation with local field effects included.
@@ -266,7 +259,7 @@ In this case all the bands around the gap whose index is between 2 and 8 are inc
 
 <p>
 The frequency mesh for the macroscopic dielectric function is specified through
-<a href="../input_variables/html_automatically_generated/vargw.html#bs_freq_mesh" target="kwimg">bs_freq_mesh</a>
+<a href="../input_variables/html_automatically_generated/varbse.html#bs_freq_mesh" target="kwimg">bs_freq_mesh</a>
 <pre>
 bs_freq_mesh 0 6 0.02 eV  # Frequency mesh.
 </pre>
@@ -276,7 +269,7 @@ The number of frequency points in the mesh does not have any significant effect 
 but it is important to stress that the number of bands included in the transition space defines, in
 conjunction with the number of k-points, the frequency range that can be described.
 As a consequence
-<a href="../input_variables/html_automatically_generated/vargw.html#bs_loband" target="kwimg">bs_loband</a> and
+<a href="../input_variables/html_automatically_generated/varbse.html#bs_loband" target="kwimg">bs_loband</a> and
 <a href="../input_variables/html_automatically_generated/varbas.html#nband" target="kwimg">nband</a>
 should be subject to an accurate converge study.
 <p>
@@ -289,12 +282,12 @@ bs_haydock_tol     0.05    # Tolerance for the iterative method.
 zcut               0.15 eV # Complex shift to avoid divergences in the continued fraction.
 </pre>
 
-<a href="../input_variables/html_automatically_generated/vargw.html#bs_algorithm" target="kwimg">bs_algorithm</a> specifies 
+<a href="../input_variables/html_automatically_generated/varbse.html#bs_algorithm" target="kwimg">bs_algorithm</a> specifies 
 the algorithm used to calculate the macroscopic dielectric function. 
 In this case we use the iterative Haydock technique whose maximum number of
-iterations is given by <a href="../input_variables/html_automatically_generated/vargw.html#bs_haydock_niter" target="kwimg">bs_haydock_niter</a>.
+iterations is given by <a href="../input_variables/html_automatically_generated/varbse.html#bs_haydock_niter" target="kwimg">bs_haydock_niter</a>.
 The iterative algorithm stops when the difference between two consecutive evaluations of the optical 
-spectra is less than <a href="../input_variables/html_automatically_generated/vargw.html#bs_haydock_tol">bs_haydock_tol</a>.
+spectra is less than <a href="../input_variables/html_automatically_generated/varbse.html#bs_haydock_tol">bs_haydock_tol</a>.
 The input variable <a href="../input_variables/html_automatically_generated/vargw.html#zcut" target="kwimg">zcut</a> gives the complex shift to avoid divergences 
 in the continued fraction. 
 From a physical point of view, this parameters mimics the experimental broadening of the absorption peaks.
@@ -525,8 +518,8 @@ nevertheless this unconverged calculation is already able to capture the most im
   needed to converge depend on the broadening? 
   <li>
   <p>
-  Use the appropriate values for <a href="../input_variables/html_automatically_generated/vargw.html#bs_exchange_term" target="kwimg">bs_exchange_term</a> and
-  <a href="../input_variables/html_automatically_generated/vargw.html#bs_coulomb_term" target="kwimg">bs_coulomb_term</a> 
+  Use the appropriate values for <a href="../input_variables/html_automatically_generated/varbse.html#bs_exchange_term" target="kwimg">bs_exchange_term</a> and
+  <a href="../input_variables/html_automatically_generated/varbse.html#bs_coulomb_term" target="kwimg">bs_coulomb_term</a> 
   to calculate the BS spectrum without local field effects.
   Compare the results obtained with and without local field effects.
   <li>
@@ -547,7 +540,7 @@ Preliminary discussion about convergence studies
 Converging the excitonic spectrum requires a careful analysis of many different parameters:
 
 <ul>
-<li> <a href="../input_variables/html_automatically_generated/vargw.html#bs_loband" target="kwimg">bs_loband</a>
+<li> <a href="../input_variables/html_automatically_generated/varbse.html#bs_loband" target="kwimg">bs_loband</a>
 <li> <a href="../input_variables/html_automatically_generated/varbas.html#nband" target="kwimg">nband</a>
 <li> <a href="../input_variables/html_automatically_generated/vargw.html#ecutwfn" target="kwimg">ecutwfn</a>
 <li> <a href="../input_variables/html_automatically_generated/vargw.html#ecuteps" target="kwimg">ecuteps</a>
@@ -595,7 +588,7 @@ Convergence with respect to the number of bands in the transition space
 
 In this section we take advantage of the multi-dataset capabilities of ABINIT to perform calculations 
 with different values for 
-<a href="../input_variables/html_automatically_generated/vargw.html#bs_loband" target="kwimg">bs_loband</a>
+<a href="../input_variables/html_automatically_generated/varbse.html#bs_loband" target="kwimg">bs_loband</a>
 and 
 <a href="../input_variables/html_automatically_generated/varbas.html#nband" target="kwimg">nband</a>
 
@@ -604,7 +597,7 @@ Before running the test take some time to read the input file ~abinit/tests/tuto
 <p>
 The convergence in the number of transitions is performed by defining five datasets
 with different values for <a href="../input_variables/html_automatically_generated/varbas.html#nband" target="kwimg">nband</a>
-and <a href="../input_variables/html_automatically_generated/vargw.html#bs_loband" target="kwimg">bs_loband</a>
+and <a href="../input_variables/html_automatically_generated/varbse.html#bs_loband" target="kwimg">bs_loband</a>
 
 <pre>
 ndtset     5
@@ -625,7 +618,7 @@ Also in this case we use the Haydock technique.
 -->
 <p>
 The parameters defining how to build the excitonic Hamiltonian are similar to the ones used in tbs_2.in. 
-The only difference is in the value used for <a href="../input_variables/html_automatically_generated/vargw.html#bs_coulomb_term" target="kwimg">bs_coulomb_term</a>,  i.e.
+The only difference is in the value used for <a href="../input_variables/html_automatically_generated/varbse.html#bs_coulomb_term" target="kwimg">bs_coulomb_term</a>,  i.e.
 
 <pre>
 bs_coulomb_term      10 # Coulomb term evaluated within the diagonal approximation.
@@ -681,13 +674,13 @@ You should obtain a graphic similar to this one:
 <p align="center"><img src=./lesson_bse/tbs3.png></p>
 
 <p>
-The results obtained with (<a href="../input_variables/html_automatically_generated/vargw.html#bs_loband" target="kwimg">bs_loband</a>=4,
+The results obtained with (<a href="../input_variables/html_automatically_generated/varbse.html#bs_loband" target="kwimg">bs_loband</a>=4,
 <a href="../input_variables/html_automatically_generated/varbas.html#nband" target="kwimg">nband</a>=5) are clearly unconverged 
 as the basis set contains too few transitions that are not able to describe the frequency-dependence 
 of the polarizability in the energy range under investigation. 
 For a well converged spectrum, we have to include the three higher occupied states and the first four conduction bands 
 (the blue curve corresponding to 
-<a href="../input_variables/html_automatically_generated/vargw.html#bs_loband" target="kwimg">bs_loband</a>=2, and
+<a href="../input_variables/html_automatically_generated/varbse.html#bs_loband" target="kwimg">bs_loband</a>=2, and
 <a href="../input_variables/html_automatically_generated/varbas.html#nband" target="kwimg">nband</a>=8).
 <p>
 Note that adding the first occupied band, curve (1-8), gives results that are almost on top of (2,8).
@@ -695,12 +688,12 @@ This is due to  the fact that, in silicon, the bottom of the first band
 is located at around 12 eV from the top of the conduction band therefore its inclusion does not 
 lead to any significant improvement of the transition space in the frequency range [0,8] eV.
 For completeness, we also report the results obtained in a separate calculation done with
-<a href="../input_variables/html_automatically_generated/vargw.html#bs_loband" target="kwimg">bs_loband</a>=2
+<a href="../input_variables/html_automatically_generated/varbse.html#bs_loband" target="kwimg">bs_loband</a>=2
 <a href="../input_variables/html_automatically_generated/varbas.html#nband" target="kwimg">nband</a>=9 to show that four empty
 states are enough to converge the spectrum.
 <p>
 We therefore fix the number of bands for the transition space using the converged values
-<a href="../input_variables/html_automatically_generated/vargw.html#bs_loband" target="kwimg">bs_loband</a>=2,
+<a href="../input_variables/html_automatically_generated/varbse.html#bs_loband" target="kwimg">bs_loband</a>=2,
 <a href="../input_variables/html_automatically_generated/varbas.html#nband" target="kwimg">nband</a>=8,
 and we proceed to analyse the convergence of the spectrum with respect to the number of planewaves in the screening. 
 
@@ -754,7 +747,7 @@ bs_coulomb_term 11
 that instructs the code to execute four calculations where the direct term is constructed
 using different value of <a href="../input_variables/html_automatically_generated/vargw.html#ecuteps" target="kwimg">ecuteps</a>.
 We also relax the diagonal-only approximation for the screening by setting 
-<a href="../input_variables/html_automatically_generated/vargw.html#bs_coulomb_term" target="kwimg">bs_coulomb_term</a>=11
+<a href="../input_variables/html_automatically_generated/varbse.html#bs_coulomb_term" target="kwimg">bs_coulomb_term</a>=11
 so that the non-locality of W(r,r') is correctly taken into account.
 <p>
 It is important to stress that it is not necessary to recalculate the SCR file from scratch just to modify 
@@ -835,7 +828,7 @@ The calculation is done with the converged parameters found in the previous stud
 only <a href="../input_variables/html_automatically_generated/varbas.html#ngkpt" target="kwimg">ngkpt</a> 
 has been intentionally left undefined.
 <!--
-<a href="../input_variables/html_automatically_generated/vargw.html#bs_loband" target="kwimg">bs_loband</a>,
+<a href="../input_variables/html_automatically_generated/varbse.html#bs_loband" target="kwimg">bs_loband</a>,
 <a href="../input_variables/html_automatically_generated/varbas.html#nband" target="kwimg">nband</a>,
 <a href="../input_variables/html_automatically_generated/vargw.html#ecuteps" target="kwimg">ecuteps</a>,
 -->
@@ -909,7 +902,7 @@ Additional exercises (optional)
   of the real part of the macroscopic dielectric function (EELS).
   -->
   <p>
-  Use <a href="../input_variables/html_automatically_generated/vargw.html#bs_coupling" target="kwimg">bs_coupling</a>=1 to
+  Use <a href="../input_variables/html_automatically_generated/varbse.html#bs_coupling" target="kwimg">bs_coupling</a>=1 to
   perform an excitonic calculation for silicon including the coupling term. 
   Compare the imaginary part of the macroscopic dielectric function obtained with and
   without coupling. Do you find significant differences?
@@ -956,7 +949,7 @@ In the second step, each node reads the data stored in the external files in ord
 <!--
 <p>
 The distribution of the matrix now depends on the algorithm specified by 
-<a href="../input_variables/html_automatically_generated/vargw.html#bs_algorithm" target="kwimg">bs_algorithm</a>.
+<a href="../input_variables/html_automatically_generated/varbse.html#bs_algorithm" target="kwimg">bs_algorithm</a>.
 The direct diagonalization supports the ScalaPack interface, but we prefer not to discuss this rather technical point
 in this tutorial.
 -->
@@ -985,6 +978,13 @@ and references therein</a> </li>
 <li><a name="wiser">N. Wiser, Phys. Rev. <b>129</b>, 72 (1963)</a> </li>
 </ol>
 -->
+
+<h5>Copyright (C) 2006-2017 ABINIT group (MG,MS)
+<br> This file is distributed under the terms of the GNU General Public License, see
+~abinit/COPYING or <a href="http://www.gnu.org/copyleft/gpl.txt">
+http://www.gnu.org/copyleft/gpl.txt </a>.
+<br> For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
+</h5>
 
 <script type="text/javascript" src="list_internal_links.js"> </script>
 

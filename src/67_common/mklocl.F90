@@ -16,7 +16,7 @@
 !!                second derivative of E wrt xred  (only with reciprocal space computations)
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (DCA, XG, GMR)
+!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -35,6 +35,7 @@
 !!  nspden=number of spin-density components
 !!  ntypat=number of types of atoms.
 !!  option= (see above)
+!!  pawtab(ntypat) <type(pawtab_type)>=paw tabulated starting data
 !!  ph1d(2,3*(2*mgfft+1)*natom)=1-dim structure factor phase information.
 !!  psps <type(pseudopotential_type)>=variables related to pseudopotentials
 !!  qprtrb(3)= integer wavevector of possible perturbing potential
@@ -72,7 +73,8 @@
 !!      forces,prcref,prcref_PMA,respfn,setvtr
 !!
 !! CHILDREN
-!!      mklocl_realspace,mklocl_recipspace,mklocl_wavelets,xred2xcart
+!!      mklocl_realspace,mklocl_recipspace,mklocl_wavelets,wvl_rho_abi2big
+!!      xred2xcart
 !!
 !! SOURCE
 
@@ -94,6 +96,11 @@ subroutine mklocl(dtset, dyfrlo,eei,gmet,gprimd,grtn,gsqcut,lpsstr,mgfft,&
  use m_errors
 
  use m_pawtab, only : pawtab_type
+
+#if defined HAVE_BIGDFT
+ use BigDFT_API, only : ELECTRONIC_DENSITY
+ use m_abi2big, only : wvl_rho_abi2big
+#endif
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -118,9 +125,9 @@ subroutine mklocl(dtset, dyfrlo,eei,gmet,gprimd,grtn,gsqcut,lpsstr,mgfft,&
 !arrays
  integer,intent(in) :: nattyp(ntypat),ngfft(18),qprtrb(3)
  real(dp),intent(in) :: gmet(3,3),gprimd(3,3),ph1d(2,3*(2*mgfft+1)*natom)
- real(dp),intent(in) :: rhog(2,nfft),rhor(nfft,nspden),rprimd(3,3)
- real(dp),intent(in) :: vprtrb(2)
- real(dp),intent(in) :: xred(3,natom)
+ real(dp),intent(in) :: rhog(2,nfft),rprimd(3,3)
+ real(dp),intent(in) :: vprtrb(2),xred(3,natom)
+ real(dp),intent(in),target :: rhor(nfft,nspden)
  real(dp),intent(out) :: dyfrlo(3,3,natom),grtn(3,natom),lpsstr(6)
  real(dp),intent(inout) :: vpsp(nfft)
 
@@ -129,6 +136,7 @@ subroutine mklocl(dtset, dyfrlo,eei,gmet,gprimd,grtn,gsqcut,lpsstr,mgfft,&
  character(len=500) :: message
 !arrays
  real(dp),allocatable :: xcart(:,:)
+ real(dp),pointer :: rhor_ptr(:,:)
 
 ! *************************************************************************
 
@@ -155,20 +163,26 @@ subroutine mklocl(dtset, dyfrlo,eei,gmet,gprimd,grtn,gsqcut,lpsstr,mgfft,&
  if (dtset%usewvl == 0) then
 !  Plane wave case
    if (psps%vlspl_recipSpace) then
-
      call mklocl_recipspace(dyfrlo,eei,gmet,gprimd,grtn,gsqcut,lpsstr,mgfft, &
 &     mpi_enreg,psps%mqgrid_vl,natom,nattyp,nfft,ngfft, &
 &     ntypat,option,dtset%paral_kgb,ph1d,psps%qgrid_vl,qprtrb,rhog,ucvol, &
 &     psps%vlspl,vprtrb,vpsp)
    else
-     call mklocl_realspace(grtn,dtset%icoulomb, mpi_enreg, natom, nattyp, nfft, &
-&     ngfft,dtset%nscforder,nspden,ntypat, option,dtset%paral_kgb,pawtab,psps,rhog, rhor, &
-&     rprimd, dtset%typat,ucvol, dtset%usewvl,vpsp,xred)
+     call mklocl_realspace(grtn,dtset%icoulomb,mpi_enreg,natom,nattyp,nfft, &
+&     ngfft,dtset%nscforder,nspden,ntypat,option,pawtab,psps,rhog,rhor, &
+&     rprimd,dtset%typat,ucvol,dtset%usewvl,vpsp,xred)
    end if
  else
 !  Store xcart for each atom
    ABI_ALLOCATE(xcart,(3, dtset%natom))
    call xred2xcart(dtset%natom, rprimd, xcart, xred)
+!  Eventually retrieve density
+#if defined HAVE_BIGDFT
+   if (option>1.and.wvl_den%denspot%rhov_is/=ELECTRONIC_DENSITY) then
+     rhor_ptr => rhor ! Just to bypass intent(inout)
+     call wvl_rho_abi2big(1,rhor_ptr,wvl_den)
+   end if
+#endif
 !  Wavelets case
    call mklocl_wavelets(dtset%efield, grtn, mpi_enreg, dtset%natom, &
 &   nfft, nspden, option, rprimd, vpsp, &

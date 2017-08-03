@@ -7,7 +7,7 @@
 !!   print out CIF format file, from abinit internal data
 !!
 !! COPYRIGHT
-!! Copyright (C) 2010-2016 ABINIT group (MJV)
+!! Copyright (C) 2010-2017 ABINIT group (MJV)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -170,7 +170,7 @@ subroutine prt_cif(brvltt, ciffname, natom, nsym, ntypat, rprimd, &
  write (unitcif,'(5a)') "_symmetry_space_group_name_H-M        '", brvsb, " ", trim(intsb), "'"
  write (unitcif,'(a)') ''
  write (unitcif,'(a)') 'loop_'
- write (unitcif,'(a)') '  symmetry_equiv_pos_as_xyz           '
+ write (unitcif,'(a)') '  _symmetry_equiv_pos_as_xyz           '
  do isym = 1, nsym
    call  symrel2string(symrel(:,:,isym), tnon(:,isym), tmpstring)
    write (unitcif,'(2a)') '  ', trim(tmpstring)
@@ -189,7 +189,7 @@ end subroutine prt_cif
 !!
 !!
 !! COPYRIGHT
-!! Copyright (C) 2010-2016 ABINIT group (MJV)
+!! Copyright (C) 2010-2017 ABINIT group (MJV)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

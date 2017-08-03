@@ -40,7 +40,6 @@ class Eigr2dFile(EpcFile):
             # number_of_kpoints, product_mband_nsppol, cplex
             EIG2Dtmp = root.variables['second_derivative_eigenenergies'][:,:,:,:,:,:,:]
 
-            #EIG2Dtmp2 = zeros((self.nkpt,2*self.nband,3,self.natom,3,self.natom,self.nband))
             EIG2Dtmp2 = np.einsum('ijklmno->mnlkjio', EIG2Dtmp)
 
             self.EIG2D.real[...] = EIG2Dtmp2[...,0]

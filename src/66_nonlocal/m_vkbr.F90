@@ -9,7 +9,7 @@
 !!  in the matrix elements <k-q,b1|e^{-iqr}|k,b2> when non-local pseudopotentials are used.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2016 ABINIT group (MG, FB)
+!! Copyright (C) 2008-2017 ABINIT group (MG, FB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -124,7 +124,7 @@ CONTAINS  !=====================================================================
 !!      calc_optical_mels,cchi0q0,cchi0q0_intraband
 !!
 !! CHILDREN
-!!      wrtout
+!!      ylmcd
 !!
 !! SOURCE
 
@@ -216,7 +216,7 @@ end subroutine vkbr_init
 !!      m_vkbr
 !!
 !! CHILDREN
-!!      wrtout
+!!      ylmcd
 !!
 !! SOURCE
 
@@ -260,7 +260,7 @@ end subroutine vkbr_free_0D
 !! PARENTS
 !!
 !! CHILDREN
-!!      wrtout
+!!      ylmcd
 !!
 !! SOURCE
 
@@ -331,7 +331,7 @@ end subroutine vkbr_free_1D
 !!      m_vkbr
 !!
 !! CHILDREN
-!!      wrtout
+!!      ylmcd
 !!
 !! SOURCE
 
@@ -447,7 +447,7 @@ end subroutine add_vnlr_commutator
 !!      m_vkbr
 !!
 !! CHILDREN
-!!      wrtout
+!!      ylmcd
 !!
 !! SOURCE
 
@@ -724,7 +724,7 @@ end function nc_ihr_comm
 !!      m_vkbr
 !!
 !! CHILDREN
-!!      wrtout
+!!      ylmcd
 !!
 !! SOURCE
 

@@ -10,9 +10,9 @@ nband   5
 tolwfr  1.0d-14
 
 getwfk   20      # Read GS wavefunctions from DS20_WFK
-getddb   20      # Read DDB files from DS20_DDB
+getddb   20      # Read DDB and DVDB files from DS20_DDB and _DVDB
 getddk   20      # read DDK files from DS20_DDKxx where xx is natom+1 +2 +3
-ddb_ngqpt 4 4 4  # q-mesh used to produce the DDB file (must be consisten with DDB data)
+ddb_ngqpt 4 4 4  # q-mesh used to produce the DDB file (must be consistent with DDB data)
 
 # These are the default values.
 asr        2
@@ -55,9 +55,12 @@ ph_qshift
 ###############
 ## DATASET 1 ##
 ###############
-prtfsurf1 1           # Output BXSF file with Fermi surface in Xcrysden format.
-prtnest1  1           # Output nesting factor file.
-prtbltztrp1 1         # Output data for Bolztrap code. 
+prtfsurf1    1        # Output BXSF file with Fermi surface in Xcrysden format.
+prtnest1     1        # Output nesting factor file.
+prtbltztrp1  1        # Output data for Bolztrap code. 
+prtphsurf1   1        # Output BXSF with Phonon frequencies
+prtebands1   1        # Output electron bands in Xmgrace format
+prtphbands1  1        # Output phonon bands in Xmgrace format
 
 ###############
 ## DATASET 2 ##
@@ -66,6 +69,8 @@ eph_intmeth2 1         # FS integration with Gaussians
 eph_fsmear2  0.2 eV    # Gaussian broadening
 ph_intmeth2  1         # Gaussian for phonon DOS and A2F
 ph_smear2    0.001 eV
+prtebands2   2         # Output electron bands in gnuplot format
+prtphbands2  2         # Output phonon bands in gnuplot format
 
 ###############
 ## DATASET 3 ##
@@ -95,6 +100,9 @@ znucl  13
 #%%   t88.out, tolnlines= 100, tolabs=5.000e-02, tolrel=5.0e-02, fld_options= -easy;
 #%%   t88o_DS1_EDOS, tolnlines=200, tolabs=5.0e-02, tolrel=5.0e-02, fld_options= -ridiculous;
 #%%   t88o_DS1_BXSF, tolnlines=200, tolabs=5.0e-02, tolrel=5.0e-02, fld_options= -ridiculous;
+#%%   t88o_DS1_PH.bxsf, tolnlines=20, tolabs=5.0e-02, tolrel=5.0e-02, fld_options= -ridiculous;
+#%%   t88o_DS1_EBANDS.agr, tolnlines=0, tolabs=5.0e-02, tolrel=5.0e-02, fld_options= -ridiculous;
+#%%   t88o_DS1_PHBANDS.agr, tolnlines=0, tolabs=5.0e-02, tolrel=5.0e-02, fld_options= -ridiculous;
 #%%   t88o_DS1_NEST, tolnlines=50, tolabs=5.0e-02, tolrel=5.0e-02, fld_options= -ridiculous;
 #%%   t88o_DS1_PHDOS, tolnlines=200, tolabs=5.0e-02, tolrel=5.0e-02, fld_options= -ridiculous;
 #%%   t88o_DS2_PHDOS, tolnlines=200, tolabs=5.0e-02, tolrel=5.0e-02, fld_options= -ridiculous;
@@ -102,6 +110,10 @@ znucl  13
 #%%   t88o_DS2_PHGAMMA, tolnlines=200, tolabs=5.0e-02, tolrel=5.0e-02, fld_options= -ridiculous;
 #%%   t88o_DS1_NOINTP_A2FW, tolnlines=200, tolabs=5.0e-02, tolrel=5.0e-02, fld_options= -ridiculous;
 #%%   t88o_DS1_A2FW, tolnlines=200, tolabs=5.0e-02, tolrel=5.0e-02, fld_options= -ridiculous;
+#%%   t88o_DS2_EBANDS.data, tolnlines=0, tolabs=5.0e-02, tolrel=5.0e-02, fld_options= -ridiculous;
+#%%   t88o_DS2_EBANDS.gnuplot, tolnlines=1, tolabs=5.0e-02, tolrel=5.0e-02, fld_options= -ridiculous;
+#%%   t88o_DS2_PHBANDS.data, tolnlines=0, tolabs=5.0e-02, tolrel=5.0e-02, fld_options= -ridiculous;
+#%%   t88o_DS2_PHBANDS.gnuplot, tolnlines=1, tolabs=5.0e-02, tolrel=5.0e-02, fld_options= -ridiculous;
 #%% psp_files = Al-psval.psp8
 #%% [paral_info]
 #%% max_nprocs = 8

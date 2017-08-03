@@ -9,7 +9,7 @@
 !!  2: should be able to choose certain atoms or atom types, slabs of space...
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (MVer,MB,MG)
+!! Copyright (C) 1998-2017 ABINIT group (MVer,MB,MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -56,8 +56,8 @@
 !!      outscfcv
 !!
 !! CHILDREN
-!!      getkpgnorm,getph,cg_getspin,initylmg,kpgio,metric
-!!      ph1d3d,recip_ylm,sort_dp,splint,xmpi_sum
+!!      cg_getspin,cwtime,destroy_mpi_enreg,getkpgnorm,getph,initmpi_seq
+!!      initylmg,jlspline_free,ph1d3d,recip_ylm,sort_dp,splint,wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -277,7 +277,7 @@ subroutine partial_dos_fractions(dos,crystal,dtset,npwarr,kg,cg,mcg,collect,mpi_
        ABI_MALLOC(ylm_k, (npw_k, dos%mbesslang**2))
        npwarr_tmp(1) = npw_k; nband_tmp(1) = nband_k
        call initylmg(crystal%gprimd,kg_k,kpoint,1,mpi_enreg_seq,dos%mbesslang,&
-        npw_k,nband_tmp,1,npwarr_tmp,1,0,crystal%rprimd,ylm_k,ylmgr_dum)
+       npw_k,nband_tmp,1,npwarr_tmp,1,0,crystal%rprimd,ylm_k,ylmgr_dum)
 
        ! get phases exp (2 pi i (k+G).x_tau) in ph3d
        ABI_ALLOCATE(ph3d,(2,npw_k,natsph_tot))

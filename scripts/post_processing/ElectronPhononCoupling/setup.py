@@ -21,29 +21,37 @@ with open(release_file) as f:
 # Find scripts
 #---------------------------------------------------------------------------
 
-def find_scripts():
-    """Find the scripts."""
-    scripts = []
-    pyfiles = glob(os.path.join('ElectronPhononCoupling', 'scripts', "*"))
-    scripts.extend(pyfiles)
-    return scripts
-
-
 def get_long_desc():
-    with open("README.rst") as fh:
-        return fh.read()
+    with open("README.rst") as f:
+        return f.read()
 
 def write_manifest():
-    content = """\
-include *.rst
-recursive-include ElectronPhononCoupling *.py
-recursive-include ElectronPhononCoupling/scripts *
-recursive-include ElectronPhononCoupling/data *
-prune ElectronPhononCoupling/data/inputs-for-tests/output
-"""
+    # FIXME need a more flexible formulation for data files to exclude.
+    content = """
+    include *.rst
+    recursive-include ElectronPhononCoupling *.py
+    recursive-include ElectronPhononCoupling/scripts *
+    recursive-include ElectronPhononCoupling/data *
+    prune ElectronPhononCoupling/data/LiF_g2/epc_inputs/output
+    graft Examples
+    exclude Examples/Calculations/*/odat*
+    exclude Examples/Calculations/*/*.out*
+    exclude Examples/Calculations/*/*.log*
+    exclude Examples/Calculations/*/*fort*
+    exclude Examples/Out/*
+    """
     with open('MANIFEST.in', 'write') as f:
-        f.write(content)
+        for line in content.strip().splitlines():
+            f.write(line.strip() + '\n')
 
+
+def find_package_data(dirname):
+    paths = []
+    for (path, directories, filenames) in os.walk(dirname):
+        for filename in filenames:
+            # We need the path relative to the main source directory.
+            paths.append(os.path.join('..', path, filename))
+    return paths
 
 #---------------------------------------------------------------------------
 # Setup
@@ -57,12 +65,14 @@ install_requires = [
     'netCDF4 >=1.2',
     ]
 
-my_package_data = {
-        'ElectronPhononCoupling.data' : ['data_*/*', 'inputs_for_tests/*.*', 'outputs_of_tests/*'],
+
+my_package_data = {'' :
+    find_package_data('ElectronPhononCoupling/data/Psps_for_tests')
+  + find_package_data('ElectronPhononCoupling/data/LiF_g2')
+  + find_package_data('ElectronPhononCoupling/data/LiF_g4')
     }
 
 my_exclude_package_data = {
-        'ElectronPhononCoupling.data' : ['inputs_for_tests/ouput/*'],
     }
 
 
@@ -72,10 +82,10 @@ setup_args = dict(
       description      = description,
       long_description = long_description,
       author           = author,
+      author_email     = author_email,
       url              = url,
       license          = license,
       packages         = find_packages(),
-      scripts          = find_scripts(),
       package_data     = my_package_data,
       exclude_package_data = my_exclude_package_data,
       install_requires = install_requires,

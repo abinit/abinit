@@ -2,7 +2,7 @@
 .Version 6.9.0  of ABINIT 
 .(MPI version, prepared for a x86_64_linux_intel12.0 computer) 
 
-.Copyright (C) 1998-2016 ABINIT group . 
+.Copyright (C) 1998-2017 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -55,10 +55,10 @@ P This job should need less than                      47.456 Mbytes of memory.
             acell      1.8897261329E+01  9.4486306644E+00  9.4486306644E+00 Bohr
               amu      1.59994000E+01  1.40067400E+01  1.00794000E+00
            charge      1.00000000E+00
+     densfor_pred           6
              ecut      2.00000000E+01 Hartree
            iatfix        1    4
            ionmov           3
-           densfor_pred           6
            istwfk        2
               ixc       -1009
            kptopt           0
@@ -88,7 +88,7 @@ P           mkmem           1
            toldff      5.00000000E-07
             typat      1  3  3  2  3  3  3  3
            useylm           1
-         wfoptalg          14
+         wfoptalg         114
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                       -3.7590000000E-01 -2.8590000000E-01  8.7100000000E-01
                       -3.8440000000E-01  8.6760000000E-01 -2.8540000000E-01
@@ -1081,6 +1081,7 @@ P newkpt: treating     10 bands with npw=     182 for ikpt=   1 by node    0
             acell      1.8897261329E+01  9.4486306644E+00  9.4486306644E+00 Bohr
               amu      1.59994000E+01  1.40067400E+01  1.00794000E+00
            charge      1.00000000E+00
+     densfor_pred           6
              ecut      2.00000000E+01 Hartree
            etotal     -2.9444510657E+01
             fcart      1.3843675678E-02 -1.7583359915E-04 -2.7373010104E-04
@@ -1093,7 +1094,6 @@ P newkpt: treating     10 bands with npw=     182 for ikpt=   1 by node    0
                        8.5017898113E-07 -3.3823094027E-05 -3.7607162620E-05
            iatfix        1    4
            ionmov           3
-           densfor_pred           6
            istwfk        2
               ixc       -1009
            kptopt           0
@@ -1125,7 +1125,7 @@ P           mkmem           1
            toldff      5.00000000E-07
             typat      1  3  3  2  3  3  3  3
            useylm           1
-         wfoptalg          14
+         wfoptalg         114
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                       -3.7593832509E-01 -2.8581911534E-01  8.7109635973E-01
                       -3.8439081179E-01  8.6764073738E-01 -2.8530130333E-01

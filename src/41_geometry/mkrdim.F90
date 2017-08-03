@@ -9,7 +9,7 @@
 !!  and dimensionless translations rprim(3,3).
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (DCA, XG, GMR)
+!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -24,11 +24,11 @@
 !!
 !! PARENTS
 !!      bethe_salpeter,dfpt_looppert,dfpt_symph,driver,finddistrproc
-!!      get_npert_rbz,harmonic_thermo,ingeo,invars1,invars2m,m_ddb
-!!      m_results_img,m_use_ga,memory_eval,mpi_setup,outvar_o_z,pred_bfgs
-!!      pred_delocint,pred_diisrelax,pred_isothermal,pred_steepdesc,pred_verlet
-!!      predict_pimd,randomcellpos,screening,setup1,setup_bse,setup_screening
-!!      setup_sigma,sigma,thmeig,wvl_setboxgeometry,xfpack_x2vin
+!!      get_npert_rbz,gstateimg,harmonic_thermo,ingeo,invars1,invars2m,m_ddb
+!!      m_ifc,m_results_img,m_use_ga,memory_eval,mpi_setup,outvar_o_z,pred_bfgs
+!!      pred_isothermal,pred_lbfgs,pred_steepdesc,pred_verlet,predict_pimd
+!!      randomcellpos,screening,setup1,setup_bse,setup_screening,setup_sigma
+!!      sigma,thmeig,wvl_setboxgeometry,xfpack_x2vin
 !!
 !! CHILDREN
 !!

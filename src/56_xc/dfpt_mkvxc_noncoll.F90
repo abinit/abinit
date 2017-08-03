@@ -10,7 +10,7 @@
 !! the exchange-correlation kernel.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2016 ABINIT group (FR, EB)
+!! Copyright (C) 2001-2017 ABINIT group (FR, EB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -122,7 +122,7 @@ subroutine dfpt_mkvxc_noncoll(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,nhat1,nhat1dim,
    MSG_BUG('only for nspden=4!')
  end if
 
- if(nkxc==23.or.nkxc==0) then
+ if(nkxc/=2*min(nspden,2)-1) then
    MSG_BUG('nspden=4 works only with LDA.')
  end if
 
@@ -131,7 +131,7 @@ subroutine dfpt_mkvxc_noncoll(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,nhat1,nhat1dim,
  end if
 
 !Treat first LDA
- if(nkxc/=23)then
+ if(nkxc==1.or.nkxc==3)then
 
 !FR EB If option=0 (i.e., for XC core-correction only) we apply the correction only on
 ! the diagonal elements of the potential which are vxc1(:,1:2) since XC core correction
@@ -183,7 +183,7 @@ subroutine dfpt_mkvxc_noncoll(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,nhat1,nhat1dim,
        rhor1_diag(ifft,1)=rhor1(ifft,1) !FR it is already the tr[rhor1] see symrhg.F90
        m_norm(ifft)=sqrt(rhor(ifft,2)**2+rhor(ifft,3)**2+rhor(ifft,4)**2)
        m_dot_m1=rhor(ifft,2)*rhor1(ifft,2)+rhor(ifft,3)*rhor1(ifft,3) &
-&              +rhor(ifft,4)*rhor1(ifft,4)
+&       +rhor(ifft,4)*rhor1(ifft,4)
        if (optxc /= -1) then 
          if(m_norm(ifft)>m_norm_min)then
            rhor1_diag(ifft,2)=half*(rhor1_diag(ifft,1)+m_dot_m1/m_norm(ifft)) !rhor1_upup
@@ -249,7 +249,7 @@ subroutine dfpt_mkvxc_noncoll(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,nhat1,nhat1dim,
 !    end if
 
    end if ! option==1 or 2
- end if ! nkxc=23
+ end if ! nkxc=1 or nkxc=3
 
  call timab(181,2,tsec)
 

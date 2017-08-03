@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2016 ABINIT group (MVer, FDortu,MVeithen)
+!!  Copyright (C) 2008-2017 ABINIT group (MVer, FDortu,MVeithen)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -36,9 +36,8 @@ module m_sortph
 
  public :: end_sortph
  public :: sortph
- 
+
  ! Logical units used to write data.
- ! TODO: eigvecLast and these units should be stored inside the datatype.
  integer,private,save :: udispl=-1,ufreq=-1
 !!***
 
@@ -181,13 +180,11 @@ end do
    if (open_file(file_freq,msg,newunit=ufreq,STATUS='replace',ACTION='write') /= 0) then
      MSG_ERROR(msg)
    end if
-   write(std_out,'(a,a,a)' )' sortph : file ',trim(file_freq),' opened '
    file_displ = trim(filnam)//".displ" !--------------------------------------------------
    write(std_out,'(a,a)' )' sortph : opening file ',trim(file_displ)
    if (open_file(file_displ,msg,newunit=udispl,STATUS='replace',ACTION='write') /= 0) then
      MSG_ERROR(msg)
    end if
-   write(std_out,'(a,a,a)' )' sortph : file ',trim(file_displ),' opened '
    ABI_ALLOCATE(eigvecLast,(3*natom,3*natom))
    phfrqNew(:)   =  phfrq(:)
    displNew(:,:) =  displIn(:,:)
@@ -212,12 +209,9 @@ end do
    do imode=1,3*natom
      do iatom=1,natom
        write(udispl,'(e18.10)') &
-       real(sqrt(displNew(3*(iatom-1)+1,imode)*   &
-       conjg(displNew(3*(iatom-1)+1,imode)) + &
-&      displNew(3*(iatom-1)+2,imode)*   &
-&      conjg(displNew(3*(iatom-1)+2,imode)) + &
-&      displNew(3*(iatom-1)+3,imode)*   &
-&      conjg(displNew(3*(iatom-1)+3,imode)) ))
+       real(sqrt(displNew(3*(iatom-1)+1,imode) * conjg(displNew(3*(iatom-1)+1,imode)) + &
+&      displNew(3*(iatom-1)+2,imode) * conjg(displNew(3*(iatom-1)+2,imode)) + &
+&      displNew(3*(iatom-1)+3,imode) *  conjg(displNew(3*(iatom-1)+3,imode)) ))
      end do
    end do
 

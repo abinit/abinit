@@ -25,7 +25,7 @@
 !! Debug mode, if fftalg is between 000 and 099
 !!
 !! COPYRIGHT
-!! Copyright (C) 2002-2016 ABINIT group (DCA, XG)
+!! Copyright (C) 2002-2017 ABINIT group (DCA, XG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -41,7 +41,7 @@
 !!  gbound(2*mgfft+8,2)=defined above
 !!
 !! PARENTS
-!!      dens_in_sph,dfpt_eltfrkin,dfpt_mkrho,fock_getghc,m_bandfft_kpt,m_cut3d
+!!      dfpt_eltfrkin,dfpt_mkrho,fock_getghc,m_bandfft_kpt,m_cut3d,m_epjdos
 !!      m_fft,m_fft_prof,m_fock,m_gsphere,m_hamiltonian,m_wfd,mkrho,mlwfovlp
 !!      pawmkaewf,posdoppler,scfcv,spin_current,suscep_stat,susk,tddft,wfconv
 !!

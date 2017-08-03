@@ -9,7 +9,7 @@
 !! Only for norm-conserving pseudopotentials (no PAW)
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2016 ABINIT group (XG,AR,MB,MVer,MT)
+!! Copyright (C) 1999-2017 ABINIT group (XG,AR,MB,MVer,MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -68,8 +68,7 @@
 !! CHILDREN
 !!      destroy_rf_hamiltonian,dotprod_g,gaugetransfo,getgh1c
 !!      init_rf_hamiltonian,load_k_hamiltonian,load_k_rf_hamiltonian
-!!      load_kprime_hamiltonian,mkffnl,mkkpg,timab,wffreaddatarec,wffreadnpwrec
-!!      wffreadskiprec,wfk_read_bks
+!!      load_kprime_hamiltonian,mkffnl,mkkpg,timab,wfk_read_bks
 !!
 !! SOURCE
 

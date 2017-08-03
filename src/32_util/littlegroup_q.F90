@@ -8,7 +8,7 @@
 !! modulo a primitive reciprocal lattice vector, and the time-reversal symmetry.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2016 ABINIT group (GMR)
+!! Copyright (C) 1999-2017 ABINIT group (GMR)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -20,16 +20,16 @@
 !! symrec(3,3,nsym)=3x3 matrices of the group symmetries (reciprocal space)
 !! [prtvol]=integer flag defining the verbosity of output. =0 if no output is provided.
 !! prtgkk= integer flag. If 1 provide output of electron-phonon "gkk" matrix elements, for further
-!!     treatment by mrggkk utility or anaddb utility. If 0 no output is provided. 
+!!     treatment by mrggkk utility or anaddb utility. If 0 no output is provided.
 !!
 !! OUTPUT
-!! symq(4,2,nsym)= (integer) three first numbers define the G vector ;
+!! symq(4,2,nsym)= three first numbers define the G vector;
 !!     fourth number is zero if the q-vector is not preserved, is 1 otherwise
 !!     second index is one without time-reversal symmetry, two with time-reversal symmetry
 !! timrev=1 if the time-reversal symmetry preserves the wavevector, modulo a reciprocal lattice vector (in principle, see below).
 !!
 !! NOTES
-!! The condition is :
+!! The condition is:
 !!    $q =  O  S(q) - G$
 !! with O being either the identity or the time reversal symmetry (= inversion in reciprocal space)
 !! and G being a primitive vector of the reciprocal lattice.
@@ -40,8 +40,8 @@
 !! Better handling should be provided in further version.
 !!
 !! PARENTS
-!!      get_npert_rbz,m_bz_mesh,m_ddb,m_dvdb,m_dynmat,m_esymm,m_phgamma
-!!      memory_eval,read_gkk,respfn
+!!      get_npert_rbz,m_bz_mesh,m_ddb,m_dvdb,m_dynmat,m_esymm,m_gkk,m_phgamma
+!!      m_sigmaph,memory_eval,read_gkk,respfn
 !!
 !! CHILDREN
 !!      wrap2_pmhalf,wrtout
@@ -95,7 +95,7 @@ subroutine littlegroup_q(nsym,qpt,symq,symrec,symafm,timrev,prtvol,use_sym)
  my_prtvol=0 ; if (PRESENT(prtvol)) my_prtvol=prtvol
 
 ! Initialise the array symq
- symq(:,:,:)=0
+ symq = 0
 
  isym = symafm(1) ! just to fool abirules and use symafm for the moment
 
@@ -125,17 +125,17 @@ subroutine littlegroup_q(nsym,qpt,symq,symrec,symafm,timrev,prtvol,use_sym)
 
 !    SP: When prtgkk is asked (GKK matrix element will be output), one has to
 !    disable symmetries. There is otherwise a jauge problem with the unperturbed
-!    and the perturbed wavefunctions. This leads to a +- 5% increase in computational 
+!    and the perturbed wavefunctions. This leads to a +- 5% increase in computational
 !    cost but provide the correct GKKs (i.e. the same as without the use of
-!    symmerties.)  
+!    symmerties.)
 
      if (PRESENT(use_sym)) then
-       if (use_sym == 0) then   
+       if (use_sym == 0) then
          symq(4,itirev,isym)=0
-         symq(4,itirev,1)=1 
+         symq(4,itirev,1)=1
        end if
      end if
-     
+
 !    If the operation succeded, change shift from real(dp) to integer, then exit loop
      if(symq(4,itirev,isym)/=0)then
        if (my_prtvol>0) then

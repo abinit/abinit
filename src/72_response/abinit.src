@@ -94,7 +94,6 @@ sources = [
  "rf2_init.F90",
  "rotate_rho.F90",
  "smeared_delta.F90",
- "sytens.F90",
  "vlocalstr.F90",
  "wrtloctens.F90",
 ]

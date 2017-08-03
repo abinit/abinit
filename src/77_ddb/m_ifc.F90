@@ -8,7 +8,7 @@
 !!  used to handle interatomic force constant sets
 !!
 !! COPYRIGHT
-!! Copyright (C) 2011-2016 ABINIT group (XG,MJV,EB,MG)
+!! Copyright (C) 2011-2017 ABINIT group (XG,MJV,EB,MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -30,19 +30,31 @@ MODULE m_ifc
  use defs_basis
  use m_errors
  use m_profiling_abi
+ use m_xmpi
  use m_sort
+ use m_cgtools
+ use m_bspline
+ use m_skw
+ use m_lebedev
  use m_nctk
 #ifdef HAVE_NETCDF
  use netcdf
 #endif
 
  use m_io_tools,    only : open_file
+ use m_fstrings,    only : ktoa, int2char4, sjoin, itoa, ltoa, ftoa
+ use m_special_funcs,  only : abi_derfc
+ use m_time,        only : cwtime
+ use m_numeric_tools, only : wrap2_zero_one, wrap2_pmhalf
  use m_copy,        only : alloc_copy
+ use m_pptools,     only : printbxsf
  use m_ewald,       only : ewald9
  use m_crystal,     only : crystal_t
- use m_geometry,    only : phdispl_cart2red
- use m_dynmat,      only : canct9, dist9 , ifclo9, axial9, q0dy3_apply, q0dy3_calc, asrif9, &
-&                          make_bigbox, canat9, chkrp9, ftifc_q2r, wght9, symdm9, nanal9, gtdyn9, dymfz9, dfpt_phfrq
+ use m_geometry,    only : phdispl_cart2red, normv
+ use m_kpts,        only : kpts_ibz_from_kptrlatt
+ use m_dynmat,      only : canct9, dist9 , ifclo9, axial9, q0dy3_apply, q0dy3_calc, asrif9, dynmat_dq, &
+&                          make_bigbox, canat9, chkrp9, ftifc_q2r, wght9, symdm9, nanal9, gtdyn9, dymfz9, &
+&                          massmult_and_breaksym, dfpt_phfrq
  use m_ddb,         only : ddb_type
 
  implicit none
@@ -69,9 +81,6 @@ MODULE m_ifc
    integer :: mpert
      ! Maximum number of ipert.
 
-   !integer :: ifcflag
-   ! 0 if Fourier interpolation should not be used, 1 otherwise
-
    integer :: asr
      ! Option for the treatment of the Acoustic Sum Rule.
 
@@ -87,6 +96,9 @@ MODULE m_ifc
    integer :: nqshft
      ! Number of shifts in the q-mesh (usually 1 since the mesh is gamma-centered!)
 
+   integer :: nqibz
+     ! Number of points in the IBZ
+
    integer :: nqbz
      ! Number of points in the full BZ
 
@@ -97,11 +109,17 @@ MODULE m_ifc
     ! Number of division in the Q mesh.
 
    real(dp) :: rprim(3,3),gprim(3,3),acell(3)
-     ! These values are used to call anaddb routines the don't use rprimd, gprimd
+     ! These values are used to call anaddb routines that don't use rprimd, gprimd
 
-   ! These values will be stored in ddb but then we have to pass ddb to ifc_fourq
-    real(dp) :: dielt(3,3)
-     ! Dielectric tensor
+   real(dp) :: dielt(3,3)
+     ! Dielectric tensor (Cartesian coordinates)
+
+   real(dp) :: omega_minmax(2)
+     ! Min and max frequency obtained on the initial ab-initio q-mesh (-+ 30 cmm1)
+     ! Used to generate frequency meshes for DOSes.
+
+   real(dp) :: r_inscribed_sphere
+     ! radius of biggest sphere inscribed in the WS supercell
 
    real(dp),allocatable :: amu(:)
      ! amu(ntypat)
@@ -150,30 +168,80 @@ MODULE m_ifc
    real(dp),allocatable :: zeff(:,:,:)
      ! zeff(3,3,natom)
      ! Effective charge on each atom, versus electric field and atomic displacement.
+     ! Cartesian coordinates
+
+   real(dp),allocatable :: qibz(:,:)
+     ! qibz(3,nqibz))
+     ! List of q-points in the IBZ
+
+   real(dp),allocatable :: wtq(:)
+     ! wtq(nqibz))
+     ! q-point Weights.
 
    real(dp),allocatable :: qbz(:,:)
-     ! qbz(3,nqpt))
+     ! qbz(3,nqbz))
      ! List of q-points in the full BZ
 
    real(dp),allocatable :: dynmat(:,:,:,:,:,:)
-     ! dynmat(2,3,natom,3,natom,nqpt))
+     ! dynmat(2,3,natom,3,natom,nqbz))
      ! dynamical matrices relative to the q points of the B.Z. sampling
      ! Note that the long-range dip-dip part has been removed if dipdip=1
      ! Moreover the array is multiplied by a phase shift in mkifc9.
 
    !real(dp),allocatable :: dynmat_lr(:,:,:,:,:,:)
-    ! dynmat_lr(2,3,natom,3,natom,nqpt))
+    ! dynmat_lr(2,3,natom,3,natom,nqbz))
     ! Long-range part of dynmat in q-space
+
  end type ifc_type
 
- public :: ifc_init       ! Constructor
- public :: ifc_free       ! Release memory
- public :: ifc_fourq      ! Use Fourier interpolation to compute interpolated frequencies w(q) and eigenvectors e(q)
- public :: ifc_print       ! Print the ifc (output, netcdf and text file)
- public :: ifc_outphbtrap ! Print out phonon frequencies on regular grid for BoltzTrap code.
+ public :: ifc_init          ! Constructor
+ public :: ifc_free          ! Release memory
+ public :: ifc_print         ! Print info on the object.
+ public :: ifc_fourq         ! Use Fourier interpolation to compute interpolated frequencies w(q) and eigenvectors e(q)
+ public :: ifc_speedofsound  ! Compute the speed of sound by averaging phonon group velocities.
+ public :: ifc_write         ! Print the ifc (output, netcdf and text file)
+ public :: ifc_outphbtrap    ! Print out phonon frequencies on regular grid for BoltzTrap code.
+ public :: ifc_printbxsf     ! Output phonon isosurface in Xcrysden format.
+ public :: ifc_calcnwrite_nana_terms   ! Compute phonons for q--> 0 with LO-TO
 !!***
 
 !----------------------------------------------------------------------
+
+!!****t* m_ifc/phbspl_t
+!! NAME
+!! phbspl_t
+!!
+!! FUNCTION
+!!
+!! SOURCE
+
+ type :: bcoeff_t
+   real(dp),allocatable :: vals(:,:,:)
+ end type bcoeff_t
+
+ type,public :: phbspl_t
+
+   integer :: natom3
+
+   integer :: nqx,nqy,nqz
+   ! Number of input data points
+
+   integer :: qxord,qyord,qzord
+   ! Order of the spline.
+
+   !real(dp),allocatable :: xvec(:),yvec(:),zvec(:)
+   real(dp),allocatable :: xknot(:),yknot(:),zknot(:)
+   ! Array of length ndata+korder containing the knot
+
+   type(bcoeff_t),allocatable :: coeff(:)
+   ! coeff(natom3)
+
+ end type phbspl_t
+
+ public :: ifc_build_phbspl     ! Build B-spline object.
+ public :: phbspl_evalq         ! Interpolate frequencies at arbitrary q-point.
+ public :: phbspl_free          ! Free memory.
+ public :: ifc_test_phinterp
 
 CONTAINS  !===========================================================
 !!***
@@ -188,10 +256,12 @@ CONTAINS  !===========================================================
 !!  Deallocate memory for the ifc_type structure
 !!
 !! PARENTS
-!!      anaddb,eph,m_ifc
+!!      anaddb,compute_anharmonics,eph,m_anharmonics_terms
+!!      m_effective_potential,m_effective_potential_file,m_gruneisen
+!!      m_harmonics_terms,m_ifc
 !!
 !! CHILDREN
-!!      appdig,ifc_fourq,smpbz,symkpt,wrtout
+!!      dfpt_phfrq,gtdyn9,nctk_defwrite_nonana_terms
 !!
 !! SOURCE
 
@@ -215,55 +285,48 @@ subroutine ifc_free(ifc)
  if (allocated(ifc%amu)) then
    ABI_FREE(ifc%amu)
  end if
-
  if (allocated(ifc%atmfrc)) then
    ABI_FREE(ifc%atmfrc)
  end if
-
  if (allocated(ifc%cell)) then
    ABI_FREE(ifc%cell)
  end if
-
  if (allocated(ifc%ewald_atmfrc)) then
    ABI_FREE(ifc%ewald_atmfrc)
  end if
-
  if (allocated(ifc%short_atmfrc)) then
    ABI_FREE(ifc%short_atmfrc)
  end if
-
  if (allocated(ifc%qshft)) then
    ABI_FREE(ifc%qshft)
  end if
-
  if (allocated(ifc%rpt)) then
    ABI_FREE(ifc%rpt)
  end if
-
  if (allocated(ifc%wghatm)) then
    ABI_FREE(ifc%wghatm)
  end if
-
  if (allocated(ifc%rcan)) then
    ABI_FREE(ifc%rcan)
  end if
-
  if (allocated(ifc%trans)) then
    ABI_FREE(ifc%trans)
  end if
-
  if (allocated(ifc%dyewq0)) then
    ABI_FREE(ifc%dyewq0)
  end if
-
+ if (allocated(ifc%qibz)) then
+   ABI_FREE(ifc%qibz)
+ end if
+ if (allocated(ifc%wtq)) then
+   ABI_FREE(ifc%wtq)
+ end if
  if (allocated(ifc%qbz)) then
    ABI_FREE(ifc%qbz)
  end if
-
  if (allocated(ifc%zeff))then
    ABI_FREE(ifc%zeff)
  end if
-
  if (allocated(ifc%dynmat)) then
    ABI_FREE(ifc%dynmat)
  end if
@@ -289,62 +352,51 @@ end subroutine ifc_free
 !! crystal<type(crystal_t)> = Information on the crystalline structure.
 !! ddb<type(ddb_type)> = Database with derivatives.
 !! brav=bravais lattice (1=simple lattice,2=face centered lattice, 3=centered lattice,4=hexagonal lattice)
-!! nqshft=Number of shifths in q-grid.
-!! q1shft(3,nqshft)=Shifts for q-grid
 !! asr= Option for the imposition of the ASR
 !!   0 => no ASR,
 !!   1 => modify "asymmetrically" the diagonal element
 !!   2 => modify "symmetrically" the diagonal element
 !! symdynmat=if 1, (re)symmetrize the dynamical matrix, except if Gamma wavevector with electric field added.
-!! dipdip= if 0, no dipole-dipole interaction was subtracted in atmfrc
+!! dipdip=
+!!   if 0, no dipole-dipole interaction was subtracted in atmfrc
 !!   if 1, atmfrc has been build without dipole-dipole part
-!! rfmeth = 1 if non-stationary block
-!!  2 if stationary block
-!!  3 if third order derivatives
-!! dielt(3,3)=dielectric tensor TODO: Should be computed from DDB
+!! rfmeth =
+!!   1 if non-stationary block
+!!   2 if stationary block
+!!   3 if third order derivatives
+!! dielt(3,3)=dielectric tensor.
 !! zeff(3,3,natom)=effective charge on each atom, versus electric field and atomic displacement
-!! anaddb_dtset variables TODO: TO BE REMOVED
-!!    anaddb_dtset%nsphere
-!!    anaddb_dtset%prt_ifc
-!!    anaddb_dtset%ifcana
-!!    anaddb_dtset%rifcsph
-!!    atifc(natom)
-!!    anaddb_dtset%ifcout
-!!    anaddb_dtset%prtsrlr
-!!    anaddb_dtset%enunit
-!! ddb = storage object for ddb information read in from DDB file
+!! prtsrlr: TODO: TO BE REMOVED
+!! enunit: TODO: TO BE REMOVED
 !! dielt(3,3)=dielectric tensor
 !! ngqpt_in = input values of ngqpt
-!! nsphere=number of atoms to be included in the cut-off sphere for interatomic
-!!  force constant; if = 0 : maximum extent allowed by the grid.
-!! rifcsph=radius for cutoff of IFC
+!! nqshft=Number of shifths in q-grid.
+!! q1shft(3,nqshft)=Shifts for q-grid
+!! nsphere=number of atoms to be included in the cut-off sphere for interatomic force constant.
+!!    0: maximum extent allowed by the grid.
+!!  > 0: Apply cutoff
+!!   -1: Analyze the effect of different nsphere values on the phonon spectrum, in particular the
+!!       frequencies around gamma.
+!! rifcsph=radius for cutoff of IFC.
+!! comm=MPI communicator.
 !! [Ifc_coarse]=Optional.
-!! [prtfreq]=True if phonon frequencies should be printed (default: false)
 !!
 !! OUTPUT
-!! Ifc<type(ifc_type)>=Object containing the dynamical matrix and the IFCs.
-!!   dyewq0(3,3,natom)=atomic self-interaction correction to the dynamical matrix. (only when dipdip=1)
-!!   rcan(3,natom) = Atomic position in canonical coordinates
-!!   trans(3,natom) = Atomic translations : xred = rcan + trans
-!!   Ifc%nrpt = number of vectors of the lattice in real space
-!!   Ifc%atmfrc(2,3,natom,3,natom,nrpt)= Interatomic Forces in real space
-!!   Ifc%short_atmfrc(2,3,natom,3,natom,nrpt)= Interatomic Forces in real space
-!!   Ifc%ewlad_atmfrc(2,3,natom,3,natom,nrpt)= Interatomic Forces in real space
-!!   Ifc%rpt(3,nprt) = Canonical coordinates of the R points in the unit cell
-!!   Ifc%wghatm(natom,natom,nrpt)= Weight associated to the couple of atoms and the R vector
+!! Ifc<ifc_type>=Object containing the dynamical matrix and the IFCs.
 !!
 !! PARENTS
-!!      anaddb,eph
+!!      anaddb,eph,m_effective_potential_file,m_gruneisen
 !!
 !! CHILDREN
-!!      appdig,ifc_fourq,smpbz,symkpt,wrtout
+!!      dfpt_phfrq,gtdyn9,nctk_defwrite_nonana_terms
 !!
 !! SOURCE
 
 subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
   rfmeth,ngqpt_in,nqshft,q1shft,dielt,zeff,nsphere,rifcsph,&
-  prtsrlr,enunit,& ! TO BE REMOVED
-  prtfreq,Ifc_coarse) ! Optional
+  prtsrlr,enunit, & ! TODO: TO BE REMOVED
+  comm, &
+  Ifc_coarse) ! Optional
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -352,6 +404,7 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
 #undef ABI_FUNC
 #define ABI_FUNC 'ifc_init'
  use interfaces_14_hidewrite
+ use interfaces_41_geometry
  use interfaces_56_recipspace
  use interfaces_72_response
 !End of the abilint section
@@ -359,60 +412,47 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
  implicit none
 
 !Arguments ------------------------------------
- integer,intent(in) :: asr,brav,dipdip,symdynmat,nqshft,rfmeth,nsphere
+ integer,intent(in) :: asr,brav,dipdip,symdynmat,nqshft,rfmeth,nsphere,comm
  real(dp),intent(in) :: rifcsph
  type(ifc_type),intent(inout) :: Ifc
  type(crystal_t),intent(in) :: Crystal
  type(ddb_type),intent(in) :: ddb
  type(ifc_type),optional,intent(in) :: Ifc_coarse
-
 !arrays
  integer,intent(in) :: ngqpt_in(3)
  real(dp),intent(in) :: q1shft(3,nqshft)
  real(dp),intent(in) :: dielt(3,3),zeff(3,3,Crystal%natom)
-
 !anaddb variables (TO BE REMOVED)
  integer,intent(in) :: prtsrlr,enunit
- logical,optional,intent(in) :: prtfreq
 !end anaddb variables
 
 !Local variables -------------------------
 !scalars
- integer :: mpert,iout,iqpt,mqpt,nsym,ntypat,iq_bz,ii,natom
- integer :: nqbz,option,plus,sumg0,irpt,irpt_new
+ integer,parameter :: timrev1=1,iout0=0,chksymbreak0=0
+ integer :: mpert,iout,iqpt,mqpt,nsym,ntypat,iq_ibz,iq_bz,ii,natom
+ integer :: nqbz,option,plus,sumg0,irpt,irpt_new,new_wght
+ integer :: nprocs,my_rank,ierr
  real(dp),parameter :: qphnrm=one
+ real(dp) :: xval,cpu,wall,gflops,rcut_min
+ real(dp) :: r_inscribed_sphere
  character(len=500) :: message
- logical :: do_prtfreq
  type(ifc_type) :: ifc_tmp
 !arrays
  integer :: ngqpt(9),qptrlatt(3,3)
- integer,allocatable :: qmissing(:)
+ integer,allocatable :: qmissing(:),ibz2bz(:)
  real(dp) :: gprim(3,3),rprim(3,3),qpt(3),rprimd(3,3)
  real(dp):: rcan(3,Crystal%natom),trans(3,Crystal%natom),dyewq0(3,3,Crystal%natom)
  real(dp) :: displ_cart(2*3*Crystal%natom*3*Crystal%natom)
- real(dp) :: phfrq(3*Crystal%natom) !eigval(3,Crystal%natom),
+ real(dp) :: phfrq(3*Crystal%natom)
  real(dp) :: eigvec(2,3,Crystal%natom,3,Crystal%natom)
- real(dp),allocatable :: dyew(:,:,:,:,:),spqpt(:,:)
+ real(dp),allocatable :: dyew(:,:,:,:,:),out_d2cart(:,:,:,:,:)
  real(dp),allocatable :: dynmatfull(:,:,:,:,:,:),dynmat_sr(:,:,:,:,:,:),dynmat_lr(:,:,:,:,:,:) ! for OmegaSRLR
- real(dp),allocatable :: out_d2cart(:,:,:,:,:)
+ real(dp),allocatable :: wtq(:),wtq_folded(:),qbz(:,:)
 
 !******************************************************************
 
- !brav   = anaddb_dtset%brav
- !nqshft = anaddb_dtset%nqshft
- !q1shft = anaddb_dtset%q1shft
- !asr    = anaddb_dtset%asr
- !symdynmat = anaddb_dtset%symdynmat
- !dipdip = anaddb_dtset%dipdip
- !rfmeth = anaddb_dtset%rfmeth
- !nsphere = anaddb_dtset%nsphere
- !prt_ifc = anaddb_dtset%prt_ifc
- !ifcana = anaddb_dtset%ifcana
- !rifcsph = anaddb_dtset%rifcsph
- !ifcout = anaddb_dtset%ifcout
- !prtsrlr = anaddb_dtset%prtsrlr
- !enunit = anaddb_dtset%enunit
- !atifc(:)=anaddb_dtset%atifc(:)
+ nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
+ call cwtime(cpu, wall, gflops, "start")
 
  ! This dimension should be encapsulated somewhere. We don't want to
  ! change the entire code if someone adds a new kind of perturbation.
@@ -451,23 +491,38 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
    qpt(:)=zero
    ABI_MALLOC(dyew,(2,3,natom,3,natom))
    call ewald9(ddb%acell,dielt,dyew,Crystal%gmet,gprim,natom,qpt,Crystal%rmet,rprim,sumg0,Crystal%ucvol,Crystal%xred,zeff)
-   option=Ifc%asr
-   call q0dy3_calc(natom,dyewq0,dyew,option)
+   call q0dy3_calc(natom,dyewq0,dyew,Ifc%asr)
    ABI_FREE(dyew)
  end if
 
  ! Sample the Brillouin zone
  option=1
- qptrlatt(:,:)=0
- qptrlatt(1,1)=ngqpt(1)
- qptrlatt(2,2)=ngqpt(2)
- qptrlatt(3,3)=ngqpt(3)
+ qptrlatt = 0; qptrlatt(1,1)=ngqpt(1); qptrlatt(2,2)=ngqpt(2); qptrlatt(3,3)=ngqpt(3)
  mqpt=ngqpt(1)*ngqpt(2)*ngqpt(3)*nqshft
  if (Ifc%brav==2) mqpt=mqpt/2
  if (Ifc%brav==3) mqpt=mqpt/4
 
- ABI_MALLOC(spqpt,(3,mqpt))
- call smpbz(Ifc%brav,ab_out,qptrlatt,mqpt,nqbz,nqshft,option,q1shft,spqpt)
+ ABI_MALLOC(qbz,(3,mqpt))
+ call smpbz(Ifc%brav,ab_out,qptrlatt,mqpt,nqbz,nqshft,option,q1shft,qbz)
+
+ ! Find the irreducible zone (qibz)
+ ABI_MALLOC(ibz2bz, (nqbz))
+ ABI_MALLOC(wtq_folded, (nqbz))
+ ABI_MALLOC(wtq, (nqbz))
+ wtq = one / nqbz ! Weights sum up to one
+
+ call symkpt(chksymbreak0,crystal%gmet,ibz2bz,iout0,qbz,nqbz,ifc%nqibz,crystal%nsym,&
+   crystal%symrec,timrev1,wtq,wtq_folded)
+
+ ABI_MALLOC(ifc%qibz, (3,ifc%nqibz))
+ ABI_MALLOC(ifc%wtq, (ifc%nqibz))
+ do iq_ibz=1,ifc%nqibz
+   ifc%qibz(:,iq_ibz) = qbz(:, ibz2bz(iq_ibz))
+   ifc%wtq(iq_ibz) = wtq_folded(ibz2bz(iq_ibz))
+ end do
+ ABI_FREE(ibz2bz)
+ ABI_FREE(wtq_folded)
+ ABI_FREE(wtq)
 
  ABI_MALLOC(Ifc%dynmat,(2,3,natom,3,natom,nqbz))
 
@@ -476,7 +531,7 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
 
    ! Each q-point in the BZ mush be the symmetrical of one of the qpts in the ddb file.
    call symdm9(ddb%flg,ddb%nrm,ddb%qpt,ddb%typ,ddb%val,&
-&    Ifc%dynmat,gprim,Crystal%indsym,mpert,natom,ddb%nblok,nqbz,nsym,rfmeth,rprim,spqpt,&
+&    Ifc%dynmat,gprim,Crystal%indsym,mpert,natom,ddb%nblok,nqbz,nsym,rfmeth,rprim,qbz,&
 &    Crystal%symrec,Crystal%symrel)
 
  else
@@ -492,7 +547,7 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
    call wrtout(std_out,"Will fill missing qpoints in the full BZ using the coarse q-mesh","COLL")
 
    call symdm9(ddb%flg,ddb%nrm,ddb%qpt,ddb%typ,ddb%val,&
-&    Ifc%dynmat,gprim,Crystal%indsym,mpert,natom,ddb%nblok,nqbz,nsym,rfmeth,rprim,spqpt,&
+&    Ifc%dynmat,gprim,Crystal%indsym,mpert,natom,ddb%nblok,nqbz,nsym,rfmeth,rprim,qbz,&
 &    Crystal%symrec,Crystal%symrel,qmissing=qmissing)
 
    ! Compute dynamical matrix with Fourier interpolation on the coarse q-mesh.
@@ -502,7 +557,7 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
    ABI_MALLOC(out_d2cart, (2,3,natom,3,natom))
    do ii=1,size(qmissing)
      iq_bz = qmissing(ii)
-     qpt = spqpt(:,iq_bz)
+     qpt = qbz(:,iq_bz)
      ! TODO: check dipdip option and phase, but I think this is correct!
      call ifc_fourq(Ifc_coarse,Crystal,qpt,phfrq,displ_cart,out_d2cart=out_d2cart)
      Ifc%dynmat(:,:,:,:,:,iq_bz) = out_d2cart
@@ -519,14 +574,14 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
 
  if (Ifc%dipdip==1) then
    ! Take off the dipole-dipole part of the dynamical matrix
-   write(message, '(3a)' )' mkifc9 : will extract the dipole-dipole part,',ch10,&
-&                         ' using ewald9, q0dy3 and nanal9 for every wavevector.'
-   call wrtout(std_out,message,"COLL")
-
+   call wrtout(std_out, " Will extract the dipole-dipole part for every wavevector")
    ABI_MALLOC(dyew,(2,3,natom,3,natom))
 
    do iqpt=1,nqbz
-     qpt(:)=spqpt(:,iqpt)
+     if (mod(iqpt, nprocs) /= my_rank) then ! mpi-parallelism
+       ifc%dynmat(:,:,:,:,:,iqpt) = zero; cycle
+     end if
+     qpt(:)=qbz(:,iqpt)
      sumg0=0
      call ewald9(ddb%acell,dielt,dyew,Crystal%gmet,gprim,natom,qpt,Crystal%rmet,rprim,sumg0,Crystal%ucvol,Crystal%xred,zeff)
      call q0dy3_apply(natom,dyewq0,dyew)
@@ -534,6 +589,7 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
      call nanal9(dyew,Ifc%dynmat,iqpt,natom,nqbz,plus)
    end do
 
+   call xmpi_sum(ifc%dynmat, comm, ierr)
    ABI_FREE(dyew)
  end if
 
@@ -549,7 +605,7 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
 
 ! Multiply the dynamical matrix by a phase shift
  option=1
- call dymfz9(Ifc%dynmat,natom,nqbz,gprim,option,spqpt,trans)
+ call dymfz9(Ifc%dynmat,natom,nqbz,gprim,option,qbz,trans)
 
 ! Create the Big Box of R vectors in real space and compute the number of points (cells) in real space
  call make_bigbox(Ifc%brav,ifc_tmp%cell,ngqpt,nqshft,rprim,ifc_tmp%nrpt,ifc_tmp%rpt)
@@ -557,76 +613,48 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
 ! Weights associated to these R points and to atomic pairs
 ! MG FIXME: Why ngqpt is intent(inout)?
  ABI_MALLOC(ifc_tmp%wghatm,(natom,natom,ifc_tmp%nrpt))
- call wght9(Ifc%brav,gprim,natom,ngqpt,nqbz,nqshft,ifc_tmp%nrpt,q1shft,rcan,ifc_tmp%rpt,ifc_tmp%wghatm)
+ new_wght = 0
+ call wght9(Ifc%brav,gprim,natom,ngqpt,nqbz,nqshft,ifc_tmp%nrpt,q1shft,rcan,&
+&     ifc_tmp%rpt,rprimd,r_inscribed_sphere,new_wght,ifc_tmp%wghatm)
 
-! Fourier transformation of the dynamical matrices
+! Fourier transformation of the dynamical matrices (q-->R)
  ABI_MALLOC(ifc_tmp%atmfrc,(2,3,natom,3,natom,ifc_tmp%nrpt))
-
- ifc_tmp%atmfrc = zero
-
- call ftifc_q2r(ifc_tmp%atmfrc,Ifc%dynmat,gprim,natom,nqbz,ifc_tmp%nrpt,ifc_tmp%rpt,spqpt)
+ call ftifc_q2r(ifc_tmp%atmfrc,Ifc%dynmat,gprim,natom,nqbz,ifc_tmp%nrpt,ifc_tmp%rpt,qbz)
 
 ! Eventually impose Acoustic Sum Rule to the interatomic forces
  if (Ifc%asr>0) then
    call asrif9(Ifc%asr,ifc_tmp%atmfrc,natom,ifc_tmp%nrpt,ifc_tmp%rpt,ifc_tmp%wghatm)
  end if
 
-
-
 !*** The interatomic forces have been calculated ! ***
  write(message, '(2a)')ch10,' The interatomic forces have been obtained '
  call wrtout(ab_out,message,'COLL')
  call wrtout(std_out,message,'COLL')
 
-
  ! Apply cutoff on ifc if needed
- if (nsphere/=0 .or. rifcsph>tol10) then
-   call wrtout(std_out, 'ifc_init: apply cutoff on IFCs', "COLL")
-
-   call corsifc9(ddb%acell,gprim,natom,ifc_tmp%nrpt,nsphere,rifcsph,&
-&   rcan,rprim,ifc_tmp%rpt,ifc_tmp%wghatm)
- end if
-
- !ABI_FREE(dynmat)
-
-!Eventually impose Acoustic Sum Rule to the interatomic forces
-!(Note : here, after the analysis, in which the range
-!of the short-range IFCs may have been changed
-!That is why it is asked that asr be negative)
-!FIXME: asr < 0 is not tested in abinit suite and does not appear to work
-!(I get frequencies of 10^105 Hartree...) Modifying this 12/6/2011
-!if(asr<0)then
-!asr=-asr
-
- ! Be careful here: if I move this call to anaddb, several tests will fail
- ! due to the different number of points in the big box (see code below.)
- if (Ifc%asr > 0 .and. (nsphere/=0 .or. rifcsph>tol10)) then
-   call asrif9(Ifc%asr,ifc_tmp%atmfrc,natom,ifc_tmp%nrpt,ifc_tmp%rpt,ifc_tmp%wghatm)
+ if (nsphere > 0 .or. abs(rifcsph) > tol10) then
+   call wrtout(std_out, ' Apply cutoff on IFCs.')
+   call wrtout(std_out, sjoin(" nsphere:", itoa(nsphere), ", rifcsph:", ftoa(rifcsph)))
+   call corsifc9(ddb%acell,gprim,natom,ifc_tmp%nrpt,nsphere,rifcsph,rcan,rprim,ifc_tmp%rpt,rcut_min,ifc_tmp%wghatm)
+   if (Ifc%asr > 0) then
+     call wrtout(std_out, ' Enforcing ASR on cutoffed IFCs.')
+     call asrif9(Ifc%asr,ifc_tmp%atmfrc,natom,ifc_tmp%nrpt,ifc_tmp%rpt,ifc_tmp%wghatm)
+   end if
  end if
 
  ! Only conserve the necessary points in rpt: in the FT algorithm the order of the points is unimportant
  ! In the case of effective potential, we need to keep all the points
  Ifc%nrpt = 0
  do irpt=1,ifc_tmp%nrpt
-   if (sum(ifc_tmp%wghatm(:,:,irpt)) /= 0) then
-     Ifc%nrpt = Ifc%nrpt+1
-   end if
+   if (sum(ifc_tmp%wghatm(:,:,irpt)) /= 0) Ifc%nrpt = Ifc%nrpt+1
  end do
- write(message,"(2(a,i0))")"ifc%nrpt: ",ifc%nrpt,", nqbz: ",nqbz
- call wrtout(std_out,message,"COLL")
 
- ABI_MALLOC(Ifc%atmfrc,(2,3,natom,3,natom,Ifc%nrpt))
- ABI_MALLOC(Ifc%rpt,(3,Ifc%nrpt))
- ABI_MALLOC(Ifc%cell,(3,Ifc%nrpt))
- ABI_MALLOC(Ifc%wghatm,(natom,natom,Ifc%nrpt))
- ABI_MALLOC(Ifc%short_atmfrc,(2,3,natom,3,natom,Ifc%nrpt))
- ABI_MALLOC(Ifc%ewald_atmfrc,(2,3,natom,3,natom,Ifc%nrpt))
-
- Ifc%short_atmfrc = zero
- Ifc%ewald_atmfrc = zero
- Ifc%short_atmfrc = zero
- Ifc%ewald_atmfrc = zero
- Ifc%cell = zero
+ ABI_CALLOC(Ifc%atmfrc,(2,3,natom,3,natom,Ifc%nrpt))
+ ABI_CALLOC(Ifc%rpt,(3,Ifc%nrpt))
+ ABI_CALLOC(Ifc%cell,(3,Ifc%nrpt))
+ ABI_CALLOC(Ifc%wghatm,(natom,natom,Ifc%nrpt))
+ ABI_CALLOC(Ifc%short_atmfrc,(2,3,natom,3,natom,Ifc%nrpt))
+ ABI_CALLOC(Ifc%ewald_atmfrc,(2,3,natom,3,natom,Ifc%nrpt))
 
  irpt_new = 1
  do irpt = 1, ifc_tmp%nrpt
@@ -635,6 +663,7 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
      Ifc%rpt(:,irpt_new) = ifc_tmp%rpt(:,irpt)
      Ifc%wghatm(:,:,irpt_new) = ifc_tmp%wghatm(:,:,irpt)
      Ifc%cell(:,irpt_new) = ifc_tmp%cell(:,irpt)
+     Ifc%r_inscribed_sphere = r_inscribed_sphere
      irpt_new = irpt_new + 1
    end if
  end do
@@ -646,16 +675,28 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
  call alloc_copy(rcan, Ifc%rcan)
  call alloc_copy(trans, Ifc%trans)
  call alloc_copy(dyewq0, Ifc%dyewq0)
- call alloc_copy(spqpt(:,1:nqbz), Ifc%qbz)
+ call alloc_copy(qbz(:,1:nqbz), Ifc%qbz)
  call alloc_copy(zeff, Ifc%zeff)
  call alloc_copy(ddb%amu, Ifc%amu)
 
  call ifc_free(ifc_tmp)
 
+ ! Compute min/max ph frequency with ab-initio q-mesh.
+ ifc%omega_minmax(1) = huge(one); ifc%omega_minmax(2) = -huge(one)
+ do iq_ibz=1,ifc%nqibz
+   if (mod(iq_ibz, nprocs) /= my_rank) cycle ! mpi-parallelism
+   call ifc_fourq(ifc, crystal, ifc%qibz(:,iq_ibz), phfrq, displ_cart)
+   ifc%omega_minmax(1) = min(ifc%omega_minmax(1), minval(phfrq))
+   ifc%omega_minmax(2) = max(ifc%omega_minmax(2), maxval(phfrq))
+ end do
+ xval = ifc%omega_minmax(1); call xmpi_min(xval, ifc%omega_minmax(1), comm, ierr)
+ xval = ifc%omega_minmax(2); call xmpi_max(xval, ifc%omega_minmax(2), comm, ierr)
+ ! Enlarge boundaries by 30 cm-1
+ ifc%omega_minmax(1) = ifc%omega_minmax(1) - 30.0_dp/Ha_cmm1
+ ifc%omega_minmax(2) = ifc%omega_minmax(2) + 30.0_dp/Ha_cmm1
 
  ! TODO (This is to be suppressed in a future version)
- do_prtfreq = .False.; if (present(prtfreq)) do_prtfreq = prtfreq
- if (do_prtfreq .or. prtsrlr == 1) then
+ if (prtsrlr == 1) then
    ! Check that the starting values are well reproduced.
    write(message, '(2a)' )' mkifc9 : now check that the starting values ',&
      ' are reproduced after the use of interatomic forces '
@@ -676,14 +717,106 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
    end do
  end if
 
- ABI_FREE(spqpt)
-
-!OmegaSRLR: deallocate memory used by dynmat decomposition
+ ! OmegaSRLR: deallocate memory used by dynmat decomposition
  ABI_FREE(dynmatfull)
  ABI_FREE(dynmat_sr)
  ABI_FREE(dynmat_lr)
+ ABI_FREE(qbz)
+
+ if (nsphere == -1) call ifc_autocutoff(ifc, crystal, comm)
+
+ call cwtime(cpu, wall, gflops, "stop")
+ write(message,"(2(a,f6.2))")" ifc_init: cpu: ",cpu,", wall: ",wall
+ call wrtout(std_out,message,'COLL')
 
 end subroutine ifc_init
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_ifc/ifc_print
+!! NAME
+!!  ifc_print
+!!
+!! FUNCTION
+!!  Print info on the object
+!!
+!! INPUTS
+!!  [unit]=Unit number for output. Defaults to std_out
+!!  [prtvol]=Verbosity level.
+!!  [header]=String to be printed as header for additional info.
+!!
+!! OUTPUT
+!!  Only printing
+!!
+!! PARENTS
+!!      anaddb,eph
+!!
+!! CHILDREN
+!!      dfpt_phfrq,gtdyn9,nctk_defwrite_nonana_terms
+!!
+!! SOURCE
+
+subroutine ifc_print(ifc,header,unit,prtvol)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'ifc_print'
+ use interfaces_14_hidewrite
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,optional,intent(in) :: unit,prtvol
+ character(len=*),optional,intent(in) :: header
+ type(ifc_type),intent(in) :: ifc
+
+!Local variables-------------------------------
+ integer :: unt,my_prtvol,iatom,ii
+ character(len=500) :: msg
+ real(dp) :: angdeg(3)
+! *********************************************************************
+
+ unt = std_out; if (present(unit)) unt = unit
+ my_prtvol = 0; if (present(prtvol)) my_prtvol = prtvol
+
+ msg = ' ==== Info on the ifc% object ==== '
+ if (present(header)) msg = ' ==== '//trim(adjustl(header))//' ==== '
+ call wrtout(unt, msg)
+
+ call wrtout(unt,' Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):')
+ do ii=1,3
+   write(msg,'(1x,a,i1,a,3f11.7,2x,a,i1,a,3f11.7)')&
+    'R(',ii,')=',ifc%rprim(:,ii),'G(',ii,')=',ifc%gprim(:,ii)
+   call wrtout(unt,msg)
+ end do
+ call wrtout(unt, sjoin(" acell:", ltoa(ifc%acell)))
+
+ call wrtout(unt, sjoin(" Acoustic Sum Rule option (asr):", itoa(ifc%asr)))
+ call wrtout(unt, sjoin(" Option for the sampling of the BZ (brav):", itoa(ifc%brav)))
+ call wrtout(unt, sjoin(" Symmetrization flag (symdynmat):", itoa(ifc%symdynmat)))
+ call wrtout(unt, sjoin(" Dipole-dipole interaction flag (dipdip):", itoa(ifc%dipdip)))
+ call wrtout(unt, sjoin(" Dielectric tensor: ", ltoa(reshape(ifc%dielt, [9]), fmt="f5.2")))
+ call wrtout(unt, " Effective charges:")
+ do iatom=1,ifc%natom
+   call wrtout(unt, ltoa(reshape(ifc%zeff(:,:,iatom), [3*3]), fmt="f5.2"))
+ end do
+
+ call wrtout(unt, sjoin(" Mass of the atoms (atomic mass unit): ", ltoa(ifc%amu)))
+ call wrtout(unt, sjoin(" Number of real-space points for IFC(R): ", itoa(ifc%nrpt)))
+ call wrtout(unt, " ")
+
+ call wrtout(unt, " Q-mesh:")
+ call wrtout(unt, sjoin(" ngqpt:", ltoa(ifc%ngqpt),", nqshft:", itoa(ifc%nqshft)))
+ do ii=1,ifc%nqshft
+   call wrtout(unt, sjoin("  ", ktoa(ifc%qshft(:,ii))))
+ end do
+
+end subroutine ifc_print
 !!***
 
 !----------------------------------------------------------------------
@@ -693,7 +826,7 @@ end subroutine ifc_init
 !!  ifc_fourq
 !!
 !! FUNCTION
-!!  Compute the phonon frequencies at the specified q-point by performing
+!!  Compute the phonon frequencies and the group velocities at the specified q-point by performing
 !!  a Fourier transform on the IFCs matrix in real space.
 !!
 !! INPUTS
@@ -712,19 +845,21 @@ end subroutine ifc_init
 !!  [out_d2cart(2,3,3*natom,3,3*natom)] = The (interpolated) dynamical matrix for this q-point
 !!  [out_eigvec(2*3*natom*3*natom) = The (interpolated) eigenvectors of the dynamical matrix.
 !!  [out_displ_red(2*3*natom*3*natom) = The (interpolated) displacement in reduced coordinates.
+!!  [dwdq(3,3*natom)] = Group velocities i.e. d(omega(q))/dq in Cartesian coordinates.
 !!
 !! PARENTS
-!!      get_nv_fs_en,get_tau_k,harmonic_thermo,interpolate_gkk,m_ifc,m_phgamma
-!!      m_phonons,mka2f,mka2f_tr,mka2f_tr_lova,mkph_linwid,read_gkk
+!!      get_nv_fs_en,get_tau_k,harmonic_thermo,interpolate_gkk,m_gruneisen
+!!      m_ifc,m_phgamma,m_phonons,m_phpi,m_sigmaph,mka2f,mka2f_tr,mka2f_tr_lova
+!!      mkph_linwid,read_gkk
 !!
 !! CHILDREN
-!!      appdig,ifc_fourq,smpbz,symkpt,wrtout
+!!      dfpt_phfrq,gtdyn9,nctk_defwrite_nonana_terms
 !!
 !! SOURCE
 
 
-subroutine ifc_fourq(Ifc,Crystal,qpt,phfrq,displ_cart,nanaqdir, &
-                     out_d2cart,out_eigvec,out_displ_red)   ! Optional [out]
+subroutine ifc_fourq(ifc, crystal, qpt, phfrq, displ_cart, &
+                     nanaqdir, out_d2cart, out_eigvec, out_displ_red, dwdq)   ! Optional [out]
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -747,6 +882,7 @@ subroutine ifc_fourq(Ifc,Crystal,qpt,phfrq,displ_cart,nanaqdir, &
  real(dp),optional,intent(out) :: out_d2cart(2,3,Crystal%natom,3,Crystal%natom)
  real(dp),optional,intent(out) :: out_eigvec(2,3,Crystal%natom,3*Crystal%natom)
  real(dp),optional,intent(out) :: out_displ_red(2,3,Crystal%natom,3*Crystal%natom)
+ real(dp),optional,intent(out) :: dwdq(3,3*crystal%natom)
 
 !Local variables-------------------------------
 !scalars
@@ -776,7 +912,7 @@ subroutine ifc_fourq(Ifc,Crystal,qpt,phfrq,displ_cart,nanaqdir, &
    case ("cart")
      continue
    case default
-     MSG_ERROR("Wrong value for nanaqdir: "//trim(nanaqdir))
+     MSG_ERROR(sjoin("Wrong value for nanaqdir:", nanaqdir))
    end select
  end if
 
@@ -790,9 +926,7 @@ subroutine ifc_fourq(Ifc,Crystal,qpt,phfrq,displ_cart,nanaqdir, &
 &  Crystal%rprimd,Ifc%symdynmat,Crystal%symrel,Crystal%symafm,Crystal%typat,Crystal%ucvol)
 
  ! OmegaSRLR: Perform decomposition of dynamical matrix
- !if (srlr==1)then
- !  call omega_decomp(amu,natom,ntypat,typat,dynmatfull,dynmatsr,dynmatlr,iqpt,nqpt,eigvec)
- !end if
+ !if (srlr==1) call omega_decomp(amu,natom,ntypat,typat,dynmatfull,dynmatsr,dynmatlr,iqpt,nqpt,eigvec)
 
  ! Return the interpolated dynamical matrix and the eigenvector for this q-point
  if (present(out_d2cart)) out_d2cart = d2cart(:,:,:natom,:,:natom)
@@ -804,7 +938,521 @@ subroutine ifc_fourq(Ifc,Crystal,qpt,phfrq,displ_cart,nanaqdir, &
  ! Option to get vectors in reduced coordinates?
  !call phdispl_cart2red(natom, crystal%gprimd, out_eigvec, out_eigvec_red)
 
+ ! Compute group velocities.
+ if (present(dwdq)) call ifc_get_dwdq(ifc, crystal, my_qpt, phfrq, eigvec, dwdq)
+
 end subroutine ifc_fourq
+!!***
+
+!!****f* m_ifc/ifc_get_dwdq
+!! NAME
+!!  ifc_get_dwdq
+!!
+!! FUNCTION
+!!  Compute phonon group velocities at an arbitrary q-point.
+!!
+!! INPUTS
+!!  ifc<ifc_type>=Object containing the dynamical matrix and the IFCs.
+!!  crystal<crystal_t> = Information on the crystalline structure.
+!!  qpt(3)=q-point in reduced coordinates.
+!!  eigvec(2*3*natom*3*natom) = The eigenvectors of the dynamical matrix.
+!!
+!! OUTPUT
+!!  dwdq(3,3*natom) = Group velocities e.g. d(omega(q))/dq in Cartesian coordinates.
+!!
+!! NOTES
+!!  Using:
+!!
+!!    D(q) u(q,nu) = w(q, nu)**2 and <u(q,nu) | u(q,nu')> = \delta_{nu, nu'}
+!!
+!!  one can show, using the Hellman-Feynman theorem, that:
+!!
+!!    \nabla_q w(q, nu) = 1/(2 w(q, nu))  <u(q, nu)| \nabla_q D(q) | u(q, nu)>
+!!
+!! PARENTS
+!!      m_ifc
+!!
+!! CHILDREN
+!!      dfpt_phfrq,gtdyn9,nctk_defwrite_nonana_terms
+!!
+!! SOURCE
+
+subroutine ifc_get_dwdq(ifc, cryst, qpt, phfrq, eigvec, dwdq)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'ifc_get_dwdq'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ type(ifc_type),intent(in) :: ifc
+ type(crystal_t),intent(in) :: cryst
+!arrays
+ real(dp),intent(in) :: qpt(3)
+ real(dp),intent(in) :: phfrq(3*cryst%natom)
+ real(dp),intent(in) :: eigvec(2,3*cryst%natom,3*cryst%natom)
+ real(dp),intent(out) :: dwdq(3,3*cryst%natom)
+
+!Local variables-------------------------------
+!scalars
+ !integer,save :: enough=0
+ integer,parameter :: nqpt1=1,option2=2,sumg0=0
+ integer :: ii,nu,natom3,jj
+ real(dp) :: hh
+!arrays
+ real(dp) :: dddq(2,3*cryst%natom,3*cryst%natom,3),dot(2),qfd(3)
+ real(dp) :: omat(2,3*cryst%natom,3*cryst%natom)
+ real(dp) :: dyew(2,3*cryst%natom,3*cryst%natom)
+
+! ************************************************************************
+
+ natom3 = cryst%natom * 3
+
+ ! Generate the analytical part from the interatomic forces
+ call dynmat_dq(qpt, cryst%natom, ifc%gprim, ifc%nrpt, ifc%rpt, ifc%atmfrc, ifc%wghatm, dddq)
+
+ ! The analytical dynamical matrix dq has been generated
+ ! in the normalized canonical coordinate system. Now, the
+ ! phase is modified, in order to recover the usual (xred) coordinate of atoms.
+ do ii=1,3
+   call dymfz9(dddq(:,:,:,ii), cryst%natom, nqpt1, ifc%gprim, option2, qpt, ifc%trans)
+   dddq(:,:,:,ii) = dddq(:,:,:,ii) * ifc%acell(ii)
+ end do
+
+ if (ifc%dipdip == 1) then
+   ! Add the gradient of the non-analytical part.
+   ! Note that we dddq is in cartesian cordinates.
+   ! For the time being, the gradient is computed with finite difference and step hh.
+   ! TODO: should generalize ewald9 to compute dq.
+   !enough = enough + 1
+   !if (enough <= 5)  MSG_WARNING("phonon velocities with dipdip==1 not yet tested.")
+   hh = 0.01_dp
+   do ii=1,3
+     do jj=-1,1,2
+       ! qcart --> qred
+       qfd = zero; qfd(ii) = jj
+       qfd = matmul(cryst%rprimd, qfd); qfd = qfd / normv(qfd, cryst%gmet, "G")
+       !write(std_out,*)"normv:",normv(qfd, cryst%gmet, "G")
+       qfd = qpt + hh * qfd
+
+       call ewald9(ifc%acell,ifc%dielt,dyew,cryst%gmet,ifc%gprim,cryst%natom,qfd,&
+          cryst%rmet,ifc%rprim,sumg0,cryst%ucvol,cryst%xred,ifc%zeff)
+       call q0dy3_apply(cryst%natom,ifc%dyewq0,dyew)
+       dddq(:,:,:,ii) = dddq(:,:,:,ii) + (jj * half / hh) * dyew
+     end do
+   end do
+ end if
+
+ do ii=1,3
+   call massmult_and_breaksym(cryst%natom, cryst%ntypat, cryst%typat, ifc%amu, dddq(:,:,:,ii))
+ end do
+
+ ! Compute 1/(2w(q)) <u(q)|dD(q)/dq|u(q)>
+ do ii=1,3
+   call zgemm('N','N',natom3,natom3,natom3,cone,dddq(:,:,:,ii),natom3,eigvec,natom3,czero,omat,natom3)
+   do nu=1,natom3
+     if (abs(phfrq(nu)) > tol12) then
+       dot = cg_zdotc(natom3, eigvec(1,1,nu), omat(1,1,nu))
+       ! abs(w) is needed to get the correct derivative if we have a purely imaginary solution.
+       dwdq(ii, nu) = dot(1) / (two * abs(phfrq(nu)))
+     else
+       dwdq(ii, nu) = zero
+     end if
+   end do
+ end do
+
+end subroutine ifc_get_dwdq
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_ifc/ifc_speedofsound
+!!
+!! NAME
+!! ifc_speedofsound
+!!
+!! FUNCTION
+!!  Calculate the speed of sound by averaging the phonon group velocities of the
+!!  three acoustic modes on a small sphere of radius qrad centered around Gamma.
+!!  Perform spherical integration with Lebedev-Laikov grids
+!!
+!! INPUTS
+!! ifc<ifc_type>=Object containing the dynamical matrix and the IFCs.
+!! crystal<crystal_t> = Information on the crystalline structure.
+!! qrad_tolkms(2):
+!!   qrad=Radius of the sphere in reciprocal space
+!!   atols_kms=Absolute tolerance in kilometer/second. The code generates spherical meshes
+!!     until the results are converged twice within atols_kms.
+!! ncid=the id of the open NetCDF file. Use nctk_noid to disable netcdf output.
+!! comm=MPI communicator.
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!      anaddb,m_gruneisen
+!!
+!! CHILDREN
+!!      dfpt_phfrq,gtdyn9,nctk_defwrite_nonana_terms
+!!
+!! SOURCE
+
+subroutine ifc_speedofsound(ifc, crystal, qrad_tolkms, ncid, comm)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'ifc_speedofsound'
+ use interfaces_14_hidewrite
+!End of the abilint section
+
+ implicit none
+
+!Arguments -------------------------------
+!scalars
+ integer,intent(in) :: comm,ncid
+ type(ifc_type),intent(in) :: ifc
+ type(crystal_t),intent(in) :: crystal
+!arrays
+ real(dp),intent(in) :: qrad_tolkms(2)
+
+!Local variables -------------------------
+!scalars
+ integer,parameter :: master=0
+ integer :: ii,nu,igrid,my_rank,nprocs,ierr,converged,npts,num_negw,vs_ierr,ncerr
+ integer :: iatom,iatref,num_acoustic,isacoustic
+ real(dp) :: min_negw,cpu,wall,gflops
+ real(dp) :: qrad,tolkms
+ character(len=500) :: msg
+ type(lebedev_t) :: lgrid
+!arrays
+ integer :: asnu(3)
+ real(dp) :: qred(3),qvers_cart(3),qvers_red(3),quad(3),prev_quad(3),vs(7,3)
+ real(dp) :: phfrqs(3*crystal%natom),dwdq(3,3*crystal%natom)
+ real(dp) :: displ_cart(2,3*crystal%natom,3*crystal%natom),eigvec(2,3*crystal%natom,3*crystal%natom)
+
+! *********************************************************************
+
+ my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
+
+ if (ifc%asr == 0) MSG_WARNING("Computing speed of sound with asr == 0! Use asr > 0")
+ qrad = qrad_tolkms(1); tolkms = qrad_tolkms(2)
+ ABI_CHECK(qrad > zero, "vs_qrad <= 0")
+ ABI_CHECK(tolkms > zero, "vs_tolkms <= 0")
+
+ call cwtime(cpu, wall, gflops, "start")
+
+ ! Find the index of the first acoustic modes (needed to handle systems with unstable branches at Gamma
+ ! In this case, indeed, we end up computing derivatives for the wrong branches, the integration becomes
+ ! unstable and difficult to converge.
+ qred = zero
+ call ifc_fourq(ifc, crystal, qred, phfrqs, displ_cart,out_eigvec=eigvec)
+ !write(std_out,*)"omega(q==Gamma): ",phfrqs
+
+ num_acoustic = 0
+ do nu = 1, 3*crystal%natom
+!  Check if this mode is acoustic like: scalar product of all displacement vectors are collinear
+   isacoustic = 1
+!  Find reference atom with non-zero displacement
+   do iatom=1,crystal%natom
+     if(sum(displ_cart(:,(iatom-1)*3+1:(iatom-1)*3+3,nu)**2) >tol16)iatref=iatom
+   enddo
+!  Now compute scalar product, and check they are all positive
+   do iatom = 1, crystal%natom
+     if (sum(eigvec(:,(iatom-1)*3+1:(iatom-1)*3+3, nu)*eigvec(:,(iatref-1)*3+1:(iatref-1)*3+3, nu)) < tol16 ) isacoustic = 0
+   end do
+   if (isacoustic == 1) then
+     num_acoustic=num_acoustic+1
+     asnu(num_acoustic)=nu
+     if (num_acoustic==3) exit
+   end if
+ end do
+
+ ABI_CHECK(num_acoustic == 3, sjoin("Wrong number of acoustic modes:", itoa(num_acoustic)))
+
+ write(std_out,"(a,3i2,a)") "The bands with indices ",asnu(:)," will be used to calculate the sound velocities"
+
+ ! Speed of sound along reduced directions.
+ do ii=1,6
+   qred = zero; qred(MOD(ii-1,3)+1) = one
+   if (ii >= 4 .and. ii <= 6) qred = matmul(crystal%rprimd, qred) ! Cartesian directions.
+   !if (ii >= 7 .and. ii <= 9) qred = matmul(crystal%rprimd, qred) ! Cartesian directions.
+   qvers_red = (qred / normv(qred, crystal%gmet, "G"))
+   qred = qrad * qvers_red
+   !write(std_out,*)"dir",normv(qred, crystal%gmet, "G"), qrad
+   call ifc_fourq(ifc, crystal, qred, phfrqs, displ_cart, dwdq=dwdq)
+
+   do nu=1,3
+     vs(ii, nu) = sqrt(sum(dwdq(1:3,asnu(nu)) ** 2)) * Bohr_meter * 0.001_dp / Time_Sec
+   end do
+   write(std_out,"(a,3es12.4,a)")" ||vs(nu)||:",vs(ii,:), " [km/s]"
+
+   qvers_cart = matmul(crystal%gprimd, qvers_red) * two_pi
+   do nu=1,3
+     vs(ii, nu) = dot_product(dwdq(1:3,asnu(nu)), qvers_cart) * Bohr_meter * 0.001_dp / Time_Sec
+   end do
+   write(std_out,"(a,3es12.4,a)")" <q|vs(nu)>:",vs(ii,:), " [km/s]"
+
+   !do nu=1,3
+   !  write(std_out,"(a,3es12.4,a)")" vs(nu)_vect_red:",&
+   !     matmul(crystal%gprimd, dwdq(1:3,asnu(nu))) * Bohr_meter * 0.001_dp / Time_Sec, " [km/s]"
+   !end do
+ end do
+
+ ! Spherical average with Lebedev-Laikov grids.
+ converged = 0
+ do igrid=1,lebedev_ngrids
+   lgrid = lebedev_new(igrid)
+   npts = lgrid%npts; quad = zero; num_negw = 0; min_negw = zero
+   do ii=1,npts
+     if (mod(ii, nprocs) /= my_rank) cycle ! mpi-parallelism
+
+     ! Build q-point on sphere of radius qrad. qcart --> qred
+     qred = matmul(crystal%rprimd, lgrid%versors(:, ii))
+     qred = qrad * (qred / normv(qred, crystal%gmet, "G"))
+     !write(std_out,*)"lebe",normv(qred, crystal%gmet, "G"), qrad
+     call ifc_fourq(ifc, crystal, qred, phfrqs, displ_cart, dwdq=dwdq)
+     if (any(phfrqs(asnu) < -tol8)) then
+       num_negw = num_negw + 1; min_negw = min(min_negw, minval(phfrqs(asnu)))
+     end if
+
+     do nu=1,3
+       quad(nu) = quad(nu) + lgrid%weights(ii) * sqrt(sum(dwdq(1:3,asnu(nu)) ** 2))
+       !quad(nu) = quad(nu) + lgrid%weights(ii) * abs(dot_product(lgrid%versors(:,ii), dwdq(:,asnu(nu))))
+     end do
+   end do
+
+!  Will use km/sec unit for echo purposes
+   quad = quad * Bohr_meter * 0.001_dp / Time_Sec
+   call xmpi_sum(quad, comm, ierr)
+   call xmpi_sum(num_negw, comm, ierr)
+   call lebedev_free(lgrid)
+
+   write(std_out,'(2(a,i6),a,3es12.4,a,es12.4)') &
+     " Lebedev-Laikov grid: ",igrid,", npts: ", npts, " vs_sphavg(ac_modes): ",quad, " <vs>: ",sum(quad)/3
+
+   if (igrid > 1) then
+     if (abs(sum(quad - prev_quad)/3) < tolkms) then
+        converged = converged + 1; if (converged == 2) exit
+     else
+        converged = 0
+     end if
+   end if
+   prev_quad = quad
+   vs(7, :) = quad
+ end do ! igrid
+
+ if (my_rank == master) then
+   ! vs_err: 1 if not converged, < 0 if negative freqs, == 0 if success.
+   vs_ierr = 0
+   do ii=1,3
+     write(ab_out,"(a,3es12.4,a,i1)")" Speed of sound:",vs(ii,:)," [km/s] along reduced direction: ",ii
+   end do
+   write(ab_out,'(2(a,es12.4),a,i0)') &
+     " Lebedev-Laikov integration with qradius: ", qrad, " tolkms: ",tolkms, " [km/s], npts: ", npts
+   write(ab_out,"(a,3es12.4,a,es12.4)")" Spherical average:",vs(7,:)," [km/s], ",sum(vs(7,:))/3
+   if (converged /= 2) then
+     vs_ierr = 1
+     write(msg,'(a,es12.4,a)')" WARNING: Results are not converged within: ",tolkms, " [km/s]"
+     call wrtout(ab_out, msg)
+     MSG_WARNING(msg)
+   end if
+   if (num_negw > 0) then
+     vs_ierr = -num_negw
+     write(msg,'(a,i0,a,es12.4,3a)') &
+       " WARNING: Detected ",num_negw, " negative frequencies. Minimum was: ",min_negw * Ha_meV, "[meV]",ch10,&
+       " Speed of sound could be wrong"
+     call wrtout(ab_out, msg)
+     MSG_WARNING(msg)
+   end if
+
+   ! Dump results to netcdf file.
+   if (ncid /= nctk_noid) then
+#ifdef HAVE_NETCDF
+     ncerr = nctk_def_arrays(ncid, [nctkarr_t("vsound", "dp", "seven, three")], defmode=.True.)
+     NCF_CHECK(ncerr)
+     ncerr = nctk_def_iscalars(ncid, [character(len=nctk_slen) :: "vsound_ierr"])
+     NCF_CHECK(ncerr)
+     ncerr = nctk_def_dpscalars(ncid, [character(len=nctk_slen) :: "vsound_qrad", "vsound_tolkms"])
+     NCF_CHECK(ncerr)
+     ncerr = nctk_def_arrays(ncid, [nctkarr_t("asnu", "i", "three")], defmode=.True.)
+     NCF_CHECK(ncerr)
+     ! Write data.
+     NCF_CHECK(nctk_set_datamode(ncid))
+     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "vsound_ierr"), vs_ierr))
+     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "vsound_qrad"), qrad))
+     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "vsound_tolkms"), tolkms))
+     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "vsound"), vs))
+     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "asnu"), asnu))
+#endif
+   end if
+ end if
+
+ call cwtime(cpu, wall, gflops, "stop")
+ write(std_out,"(2(a,f6.2))")"ifc_speedofsound: cpu: ",cpu,", wall: ",wall
+
+end subroutine ifc_speedofsound
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_ifc/ifc_autocutoff
+!! NAME
+!!  ifc_autocutoff
+!!
+!! FUNCTION
+!! Find the value of nsphere that gives non-negative frequencies around Gamma
+!! in a small sphere of radius qrad.
+!! Use bisection to reduce the number of attemps although there's no guarantee
+!! that the number of negative frequencies is monotonic.
+!!
+!! INPUTS
+!!  crystal<crystal_t> = Information on the crystalline structure.
+!!  comm=MPI communicator
+!!
+!! SIDE EFFECTS
+!!  ifc%wghatm(natom,natom,nrpt) = Weights associated to a pair of atoms and to a R vector
+!!    with the last cutoff found by the bisection algorithm applied.
+!!  ifc%atmfrc(2,3,natom,3,natom,nrpt)= ASR-imposed Interatomic Forces
+!!
+!! PARENTS
+!!      m_ifc
+!!
+!! CHILDREN
+!!      dfpt_phfrq,gtdyn9,nctk_defwrite_nonana_terms
+!!
+!! SOURCE
+
+subroutine ifc_autocutoff(ifc, crystal, comm)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'ifc_autocutoff'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ type(ifc_type),intent(inout) :: ifc
+ type(crystal_t),intent(in) :: crystal
+ integer,intent(in) :: comm
+
+!Local variables-------------------------------
+!scalars
+ integer,parameter :: master=0
+ integer :: iq_ibz,ierr,my_rank,nprocs,ii,nsphere,num_negw,jl,ju,jm,jj,natom,nrpt
+ real(dp),parameter :: rifcsph0=zero
+ real(dp) :: adiff,qrad,min_negw,xval,rcut_min
+ character(len=500) :: msg
+ type(lebedev_t) :: lgrid
+!arrays
+ real(dp) :: displ_cart(2*3*ifc%natom*3*ifc%natom)
+ real(dp) :: qred(3),qred_vers(3),phfrqs(3*ifc%natom) !,dwdq(3,3*ifc%natom)
+ real(dp),allocatable :: ref_phfrq(:,:),cut_phfrq(:,:)
+ real(dp),allocatable :: save_wghatm(:,:,:),save_atmfrc(:,:,:,:,:,:)
+
+! *********************************************************************
+
+ my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
+ natom = ifc%natom; nrpt = ifc%nrpt
+
+ ! Compute frequencies on the ab-initio q-mesh without cutoff.
+ ABI_CALLOC(ref_phfrq, (3*natom, ifc%nqibz))
+ do iq_ibz=1,ifc%nqibz
+   if (mod(iq_ibz, nprocs) /= my_rank) cycle ! mpi-parallelism
+   call ifc_fourq(ifc, crystal, ifc%qibz(:,iq_ibz), ref_phfrq(:,iq_ibz), displ_cart)
+ end do
+ call xmpi_sum(ref_phfrq, comm, ierr)
+
+ ABI_MALLOC(save_wghatm, (natom,natom,nrpt))
+ ABI_MALLOC(save_atmfrc, (2,3,natom,3,natom,ifc%nrpt))
+ save_wghatm = ifc%wghatm; save_atmfrc = ifc%atmfrc
+
+ ABI_MALLOC(cut_phfrq, (3*natom, ifc%nqibz))
+ qrad = 0.01; lgrid = lebedev_new(16)
+
+ if (my_rank == master) then
+   write(ab_out, "(a)")" Apply cutoff on IFCs. Using bisection algorithm to find initial guess for nsphere."
+   write(ab_out, "(a,i0)")" Maximum nuber of atom-centered spheres: ",natom * nrpt
+   write(ab_out, "(a,i0,a,f5.3)")" Using Lebedev-Laikov grid with npts: ",lgrid%npts, ", qrad: ",qrad
+   write(ab_out, "(/,a)")" <adiff>: Average difference between ab-initio frequencies and frequencies with cutoff."
+   write(ab_out, "(a)")" num_negw: Number of negative freqs detected in small sphere around Gamma."
+   write(ab_out, "(a)")" min_negw: Min negative frequency on the small sphere."
+   write(ab_out, "(a,/,/)")" rifcsph: Effective cutoff radius corresponding to nsphere."
+   write(ab_out, "(a)")" nsphere   <adiff>[meV]   num_negw   min_negw[meV]   rifcsph"
+ end if
+
+ jl = 0; ju = natom * nrpt + 1 ! Initialize lower and upper limits.
+ do
+   if (ju - jl <= 1) then
+     exit
+   end if
+   jm = (ju + jl) / 2  ! Compute a midpoint
+   nsphere = jm
+
+   ifc%wghatm = save_wghatm; ifc%atmfrc = save_atmfrc
+   call corsifc9(ifc%acell,ifc%gprim, natom, nrpt,nsphere,rifcsph0,ifc%rcan,ifc%rprim,ifc%rpt,rcut_min,ifc%wghatm)
+   if (ifc%asr > 0) call asrif9(ifc%asr,ifc%atmfrc,ifc%natom,ifc%nrpt,ifc%rpt,ifc%wghatm)
+
+   cut_phfrq = zero
+   do iq_ibz=1,ifc%nqibz
+     if (mod(iq_ibz, nprocs) /= my_rank) cycle ! mpi-parallelism
+     call ifc_fourq(ifc, crystal, ifc%qibz(:,iq_ibz), cut_phfrq(:,iq_ibz), displ_cart)
+     !write(std_out,*)cut_phfrq(1,iq_ibz),ref_phfrq(1,iq_ibz)
+   end do
+   call xmpi_sum(cut_phfrq, comm, ierr)
+
+   ! Test wether there are negative frequencies around gamma, including reciprocal lattice vectors.
+   num_negw = 0; min_negw = zero
+   do ii=1,lgrid%npts+3
+     if (mod(ii, nprocs) /= my_rank) cycle ! mpi-parallelism
+     if (ii <= 3) then
+       qred = zero; qred(ii) = one
+     else
+       qred = matmul(crystal%rprimd, lgrid%versors(:, ii-3))
+     end if
+     qred_vers = (qred / normv(qred, crystal%gmet, "G"))
+     qred = qrad * qred_vers
+     call ifc_fourq(ifc, crystal, qred, phfrqs, displ_cart) !, dwdq=dwdq)
+     if (any(phfrqs < +tol8)) then
+       num_negw = num_negw + 1; min_negw = min(min_negw, minval(phfrqs))
+     end if
+     !do jj=1,3
+     !  xval = dot_product(dwdq(:,jj), matmul(crystal%gprimd, qred_vers))
+     !  if (xval < zero) num_negw = num_negw + 1
+     !end do
+   end do
+   call xmpi_sum(num_negw, comm, ierr)
+   xval = min_negw; call xmpi_min(xval, min_negw, comm, ierr)
+
+   adiff = sum(abs(cut_phfrq - ref_phfrq)) / (ifc%nqibz * 3 * natom)
+   if (my_rank == master) then
+     write(ab_out,"(a,i7,1x,es13.4,4x,i8,1x,es13.4,2x,es13.4)") &
+       "-",nsphere, adiff * Ha_meV, num_negw, min_negw * Ha_meV, rcut_min
+   end if
+
+   if (num_negw == 0) then
+     jl = jm ! Replace lower limit
+   else
+     ju = jm ! Replace upper limit
+   end if
+ end do
+
+ ABI_FREE(ref_phfrq)
+ ABI_FREE(cut_phfrq)
+ ABI_FREE(save_wghatm)
+ ABI_FREE(save_atmfrc)
+ call lebedev_free(lgrid)
+
+end subroutine ifc_autocutoff
 !!***
 
 !----------------------------------------------------------------------
@@ -833,19 +1481,17 @@ end subroutine ifc_fourq
 !! OUTPUT
 !! wghatm(natom,natom,nrpt) = Weights associated to a pair of atoms and to a R vector
 !!  with the required cutoff applied.
-!!
-!! NOTES
-!! This routine should be executed by one processor only
+!! rcut_min=Effective cutoff. Defined by the minimum cutoff radius over the natom sites.
 !!
 !! PARENTS
 !!      m_ifc
 !!
 !! CHILDREN
-!!      appdig,ifc_fourq,smpbz,symkpt,wrtout
+!!      dfpt_phfrq,gtdyn9,nctk_defwrite_nonana_terms
 !!
 !! SOURCE
 
-subroutine corsifc9(acell,gprim,natom,nrpt,nsphere,rifcsph,rcan,rprim,rpt,wghatm)
+subroutine corsifc9(acell,gprim,natom,nrpt,nsphere,rifcsph,rcan,rprim,rpt,rcut_min,wghatm)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -860,6 +1506,7 @@ subroutine corsifc9(acell,gprim,natom,nrpt,nsphere,rifcsph,rcan,rprim,rpt,wghatm
 !scalars
  integer,intent(in) :: natom,nrpt,nsphere
  real(dp),intent(in) :: rifcsph
+ real(dp),intent(out) :: rcut_min
 !arrays
  real(dp),intent(in) :: acell(3)
  real(dp),intent(in) :: gprim(3,3),rcan(3,natom)
@@ -869,6 +1516,7 @@ subroutine corsifc9(acell,gprim,natom,nrpt,nsphere,rifcsph,rcan,rprim,rpt,wghatm
 !Local variables -------------------------
 !scalars
  integer :: ia,ib,ii,index,irpt
+ real(dp) :: rmax,rsigma,r0
 !arrays
  integer,allocatable :: list(:)
  real(dp),allocatable :: dist(:,:,:),wkdist(:)
@@ -876,30 +1524,33 @@ subroutine corsifc9(acell,gprim,natom,nrpt,nsphere,rifcsph,rcan,rprim,rpt,wghatm
 ! *********************************************************************
 
  ! Compute the distances between atoms
+ ! dist(ia,ib,irpt) contains the distance from atom ia to atom ib in unit cell irpt.
  ABI_MALLOC(dist,(natom,natom,nrpt))
  call dist9(acell,dist,gprim,natom,nrpt,rcan,rprim,rpt)
- ! Now dist(ia,ib,irpt) contains the distance from atom ia to atom ib in unit cell irpt.
 
  ABI_MALLOC(list,(natom*nrpt))
  ABI_MALLOC(wkdist,(natom*nrpt))
 
  ! loop on all generic atoms.
+ rcut_min = huge(one)
  do ia=1,natom
 
-   wkdist(:)=reshape(dist(ia,:,:),(/natom*nrpt/))
+   wkdist = reshape(dist(ia,:,:), [natom*nrpt])
    do ii=1,natom*nrpt
      list(ii)=ii
    end do
    ! This sorting algorithm is slow ...
    call sort_dp(natom*nrpt,wkdist,list,tol14)
+   rmax = wkdist(natom*nrpt)
 
-   ! zero the outside IFCs : act on wghatm
+   ! zero the outside IFCs: act on wghatm
    if(nsphere/=0.and.nsphere<natom*nrpt)then
+     rcut_min = min(rcut_min, wkdist(nsphere+1))
      do ii=nsphere+1,natom*nrpt
        index=list(ii)
        irpt=(index-1)/natom+1
        ib=index-natom*(irpt-1)
-       wghatm(ia,ib,irpt)=0._dp
+       wghatm(ia,ib,irpt)=zero
      end do
    end if
 
@@ -908,9 +1559,22 @@ subroutine corsifc9(acell,gprim,natom,nrpt,nsphere,rifcsph,rcan,rprim,rpt,wghatm
        index=list(ii)
        ! preserve weights for atoms inside sphere of radius rifcsph
        if (wkdist(ii) < rifcsph) cycle
+       rcut_min = min(rcut_min, wkdist(ii))
        irpt=(index-1)/natom+1
        ib=index-natom*(irpt-1)
-       wghatm(ia,ib,irpt)=0._dp
+       wghatm(ia,ib,irpt)=zero
+     end do
+   end if
+
+   if (rifcsph < -tol10) then
+     ! Use different filter
+     r0 = abs(rifcsph) * rmax; rsigma = one
+     rcut_min = r0 ! Set it to r0
+     do ii=nsphere+1,natom*nrpt
+       index=list(ii)
+       irpt=(index-1)/natom+1
+       ib=index-natom*(irpt-1)
+       wghatm(ia,ib,irpt) = wghatm(ia,ib,irpt) * half * abi_derfc((wkdist(ii) - r0) / rsigma)
      end do
    end if
 
@@ -925,25 +1589,25 @@ end subroutine corsifc9
 
 !----------------------------------------------------------------------
 
-!!****f* m_ifc/ifc_print
+!!****f* m_ifc/ifc_write
 !!
 !! NAME
-!! ifc_print
+!! ifc_write
 !!
 !! FUNCTION
-!! Adds the real-space interatomic force constants to the output file,
-!! the NetCDF file and, if prt_ifc==1, to the ifcinfo.out file.
+!! Adds the real-space interatomic force constants to:
+!!  the output file,
+!!  a NetCDF file which is already open on ncid
+!!  if prt_ifc==1, to the ifcinfo.out file
+!!  to a TDEP file named outfile.forceconstants_ABINIT
 !!
 !! INPUTS
 !! Ifc<type(ifc_type)>=Object containing the dynamical matrix and the IFCs.
-!! dielt(3,3)=dielectric tensor
-!! zeff(3,3,natom)=effective charge on each atom, versus electric field and atomic displacement
 !! ifcana= 0 => no analysis of ifc ; 1 => full analysis
-!! atifc(natom) =  atifc(ia) equals 1 if the analysis of ifc
-!!  has to be done for atom ia; otherwise 0.
+!! atifc(natom) =  atifc(ia) equals 1 if the analysis of ifc has to be done for atom ia; otherwise 0.
 !! ifcout= Number of interatomic force constants written in the output file
 !! prt_ifc = flag to print out ifc information for dynamical matrix (AI2PS)
-!! ncid=the unit of the open NetCDF file.
+!! ncid=the id of the open NetCDF file. Set to nctk_noid if netcdf output is not wanted.
 !!
 !! OUTPUT
 !!   written in the output file and in the NetCDF file
@@ -951,21 +1615,27 @@ end subroutine corsifc9
 !! NOTES
 !! This routine should be executed by one processor only
 !!
+!! TODO:
+!!  1) ifc_write should not have side effects
+!!
+!!  2) the code is unreadable and horrible - 3/4 different file formats for the
+!!  same stuff. We should make different subroutines, even if it duplicates some code
+!!
 !! PARENTS
 !!      anaddb
 !!
 !! CHILDREN
-!!      appdig,ifc_fourq,matr3inv,mkrdim,smpbz,symkpt,wrtout
+!!      dfpt_phfrq,gtdyn9,nctk_defwrite_nonana_terms
 !!
 !! SOURCE
 
-subroutine ifc_print(Ifc,dielt,zeff,ifcana,atifc,ifcout,prt_ifc,ncid)
+subroutine ifc_write(Ifc,ifcana,atifc,ifcout,prt_ifc,ncid)
 
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'ifc_print'
+#define ABI_FUNC 'ifc_write'
  use interfaces_32_util
  use interfaces_41_geometry
 !End of the abilint section
@@ -974,31 +1644,31 @@ subroutine ifc_print(Ifc,dielt,zeff,ifcana,atifc,ifcout,prt_ifc,ncid)
 
 !Arguments -------------------------------
 !scalars
- integer,intent(in) :: ifcout,ifcana
- integer,intent(in) :: prt_ifc
- integer,optional,intent(in) :: ncid
+ integer,intent(in) :: ifcout,ifcana,prt_ifc,ncid
  type(ifc_type),intent(inout) :: Ifc
 !arrays
  integer,intent(in) :: atifc(Ifc%natom)
- real(dp),intent(in) :: dielt(3,3)
- real(dp),intent(in) :: zeff(3,3,Ifc%natom)
+
 !Local variables -------------------------
 !scalars
- integer :: ia,ii,ncerr,iatifc,ifcout1,mu,nu,iout
-! unit number to print out ifc information for dynamical matrix (AI2PS)
- integer :: unit_ifc
+ integer :: ia,ib,ii,ncerr,iatifc,ifcout1,mu,nu,iout, irpt
+! unit number to print out ifc information for dynamical matrix (AI2PS) 
+ integer :: unit_ifc, unit_tdep
  real(dp) :: detdlt
+ real(dp) :: maxdist_tdep
  character(len=500) :: message
+ character(len=4) :: str1, str2
 !arrays
- integer,allocatable :: list(:)
- real(dp) :: invdlt(3,3),ra(3),xred(3)
+ integer,allocatable :: list(:),indngb(:)
+ real(dp) :: invdlt(3,3),ra(3),xred(3),dielt(3,3)
  real(dp),allocatable :: dist(:,:,:),wkdist(:),rsiaf(:,:,:),sriaf(:,:,:),vect(:,:,:)
+ real(dp),allocatable :: posngb(:,:)
  real(dp) :: gprimd(3,3),rprimd(3,3)
- real(dp),allocatable :: indngb(:),posngb(:,:)
 
 ! *********************************************************************
 
  iout = ab_out
+ dielt = ifc%dielt
 
  ! Compute the distances between atoms
  ABI_MALLOC(dist,(Ifc%natom,Ifc%natom,Ifc%nrpt))
@@ -1017,7 +1687,8 @@ subroutine ifc_print(Ifc,dielt,zeff,ifcana,atifc,ifcout,prt_ifc,ncid)
 & dielt(2,2)*dielt(3,1)-dielt(1,1)*dielt(2,3)*dielt(3,2)-&
 & dielt(1,2)*dielt(2,1)*dielt(3,3)
 
- write(std_out,'(a)' )' ifc_print : analysis of interatomic force constants '
+! echo to log file
+ write(std_out,'(a)' )' ifc_write: analysis of interatomic force constants '
  call mkrdim(Ifc%acell,Ifc%rprim,rprimd)
  call matr3inv(rprimd,gprimd)
 
@@ -1043,10 +1714,10 @@ subroutine ifc_print(Ifc,dielt,zeff,ifcana,atifc,ifcout,prt_ifc,ncid)
    end if
  end if
 
- if (ifcout>Ifc%natom*Ifc%nrpt) then
+ if (ifcout>Ifc%natom*Ifc%nrpt .or. ifcout == -1) then
    ifcout1=Ifc%natom*Ifc%nrpt
    write(message, '(3a,i0,a)' )&
-&   'The value of ifcout exceed the number of atoms in the big box.', ch10, &
+&   'The value of ifcout exceeds the number of atoms in the big box.', ch10, &
 &   'Output limited to ',Ifc%natom*Ifc%nrpt,' atoms.'
    MSG_WARNING(message)
  else
@@ -1061,8 +1732,25 @@ subroutine ifc_print(Ifc,dielt,zeff,ifcana,atifc,ifcout,prt_ifc,ncid)
    write(iout, '(a,a)' )ch10,&
 &   '  NOTE: Open file ifcinfo.out, for the output of interatomic force constants. This is because prt_ifc==1. '
 
+   if (open_file('outfile.forceconstants_ABINIT', message, newunit=unit_tdep, status="replace") /= 0) then
+     MSG_ERROR(message)
+   end if
+   write(iout, '(a,a,a)' )ch10,&
+&   '  NOTE: Open file outfile.forceconstants_ABINIT, for the output of interatomic force',&
+&   ' constants in TDEP format. This is because prt_ifc==1. '
+   ! Print necessary stuff for TDEP
+   write(unit_tdep,"(1X,I10,15X,'How many atoms per unit cell')") Ifc%natom
+ 
+   ! look at all pairs, find furthest one with weight 1
+!   do ia 
+!Ifc%wghatm(ia,ib,irpt)
+   maxdist_tdep = Ifc%r_inscribed_sphere !maxval(dist)*0.8_dp
+   write(unit_tdep,"(1X,F20.15,5X,'Realspace cutoff (A)')") maxdist_tdep*Bohr_Ang
+ end if
+
 #ifdef HAVE_NETCDF
-  ! initialize netcdf variables
+ if (ncid /= nctk_noid) then
+   ! initialize netcdf variables
    ncerr = nctk_def_dims(ncid, [nctkdim_t("natifc", SUM(atifc)), nctkdim_t("number_of_r_points_big_box", Ifc%nrpt), &
      nctkdim_t("number_of_atoms_big_box", Ifc%natom*Ifc%nrpt), nctkdim_t("ifcout", ifcout1)], defmode=.True.)
    NCF_CHECK(ncerr)
@@ -1088,9 +1776,9 @@ subroutine ifc_print(Ifc,dielt,zeff,ifcana,atifc,ifcout,prt_ifc,ncid)
    end if
 
    NCF_CHECK(nctk_set_datamode(ncid))
+ end if
 #endif
 
- end if
  ABI_MALLOC(rsiaf,(3,3,ifcout1))
  ABI_MALLOC(sriaf,(3,3,ifcout1))
  ABI_MALLOC(vect,(3,3,ifcout1))
@@ -1108,7 +1796,7 @@ subroutine ifc_print(Ifc,dielt,zeff,ifcana,atifc,ifcout,prt_ifc,ncid)
 
      ! First transform canonical coordinates to reduced coordinates
      do ii=1,3
-        xred(ii)=Ifc%gprim(1,ii)*Ifc%rcan(1,ia)+Ifc%gprim(2,ii)*Ifc%rcan(2,ia)+Ifc%gprim(3,ii)*Ifc%rcan(3,ia)
+       xred(ii)=Ifc%gprim(1,ii)*Ifc%rcan(1,ia)+Ifc%gprim(2,ii)*Ifc%rcan(2,ia)+Ifc%gprim(3,ii)*Ifc%rcan(3,ia)
      end do
 
      ! Then to cartesian coordinates
@@ -1130,50 +1818,111 @@ subroutine ifc_print(Ifc,dielt,zeff,ifcana,atifc,ifcout,prt_ifc,ncid)
        write(iout, '(a)' )
      end if
 
-     call ifc_getiaf(Ifc,ifcana,ifcout1,iout,zeff,ia,ra,list,dist,invdlt,&
+     call ifc_getiaf(Ifc,ifcana,ifcout1,iout,ifc%zeff,ia,ra,list,dist,invdlt,&
 &                    detdlt,rsiaf,sriaf,vect,indngb,posngb)
 
 
      if (prt_ifc == 1) then
        do ii=1,ifcout1
+         if (wkdist(ii) > maxdist_tdep) exit
+       end do
+       ii = ii - 1
+       write(unit_tdep,"(1X,I10,15X,'How many neighbours does atom ',I3,' have')") ii, ia
+
+       do ii=1,ifcout1
+         ib = indngb(ii)
+         irpt = (list(ii)-1)/Ifc%natom+1
+         ! limit printing to maximum distance for tdep
+         if (wkdist(ii) > maxdist_tdep) cycle
+
+         !TDEP
+         call int2char4(ii, str1)
+         call int2char4(ia, str2)
+         write(unit_tdep,"(1X,I10,15X,a,a,a,a)") ib, &
+&            'In the unit cell, what is the index of neighbour ', &
+&            trim(str1), " of atom ", trim(str2)
+         ! The lattice vector needs to be in reduced coordinates?
+         ! TODO: check whether this is correct for TDEP: might need just lattice
+         ! vector part and not full vector, and could be in integers instead of
+         ! cartesian vector...
+         write (unit_tdep,'(3es28.16)') matmul(Ifc%rpt(1:3,irpt),Ifc%gprim) 
+
+         !AI2PS
          write(unit_ifc,'(i6,i6)') ia,ii
          write(unit_ifc,'(3es28.16)') posngb(1:3,ii)
          do nu=1,3
-           write(unit_ifc,   '(3f28.16)'  )(rsiaf(nu,mu,ii),mu=1,3)
+           !TDEp
+           ! And the actual short ranged forceconstant: TODO: check if
+           ! a transpose is needed or a swap between the nu and the mu
+           !write(unit_tdep,'(3f28.16)') (sriaf(nu,mu,ii)*Ha_eV/amu_emass, mu=1, 3)
+           write(unit_tdep,'(3f28.16)') (Ifc%short_atmfrc(1,mu,ia,nu,ib,irpt)*Ha_eV/Bohr_Ang**2, mu=1, 3)
+           
+           !AI2PS
+           write(unit_ifc,'(3f28.16)')(rsiaf(nu,mu,ii),mu=1,3)
          end do
        end do
 
 #ifdef HAVE_NETCDF
-       NCF_CHECK(nf90_put_var(ncid, vid("ifc_atoms_indices"), ia, start=(/iatifc/)))
-       NCF_CHECK(nf90_put_var(ncid, vid("ifc_neighbours_indices"), indngb, start=(/1,iatifc/), count=(/ifcout1,1/)))
-       NCF_CHECK(nf90_put_var(ncid, vid("ifc_distances"), wkdist(:ifcout1), start=(/1,iatifc/),count=(/ifcout1,1/)))
-       ncerr = nf90_put_var(ncid, vid("ifc_matrix_cart_coord"), rsiaf, &
-         start=(/1,1,1,iatifc/), count=(/3,3,ifcout1,1/))
-       NCF_CHECK(ncerr)
-       if (Ifc%dipdip==1) then
-         ncerr = nf90_put_var(ncid, vid("ifc_matrix_cart_coord_short_range"), sriaf, &
-           start=(/1,1,1,iatifc/), count=(/3,3,ifcout1,1/))
+       if (ncid /= nctk_noid) then
+         NCF_CHECK(nf90_put_var(ncid, vid("ifc_atoms_indices"), ia, start=[iatifc]))
+         NCF_CHECK(nf90_put_var(ncid, vid("ifc_neighbours_indices"), indngb, start=[1,iatifc], count=[ifcout1,1]))
+         NCF_CHECK(nf90_put_var(ncid, vid("ifc_distances"), wkdist(:ifcout1), start=[1,iatifc],count=[ifcout1,1]))
+         ncerr = nf90_put_var(ncid, vid("ifc_matrix_cart_coord"), rsiaf, start=[1,1,1,iatifc], count=[3,3,ifcout1,1])
          NCF_CHECK(ncerr)
-       end if
-       if (ifcana==1) then
-         ncerr = nf90_put_var(ncid, vid("ifc_local_vectors"), vect, &
-           start=(/1,1,1,iatifc/), count=(/3,3,ifcout1,1/))
-         NCF_CHECK(ncerr)
+         if (Ifc%dipdip==1) then
+           ncerr = nf90_put_var(ncid, vid("ifc_matrix_cart_coord_short_range"), sriaf, &
+             start=[1,1,1,iatifc], count=[3,3,ifcout1,1])
+           NCF_CHECK(ncerr)
+         end if
+         if (ifcana==1) then
+           ncerr = nf90_put_var(ncid, vid("ifc_local_vectors"), vect, start=[1,1,1,iatifc], count=[3,3,ifcout1,1])
+           NCF_CHECK(ncerr)
+         end if
        end if
 #endif
      end if
    end if ! End the condition on atifc
+ end do ! End Big loop on atoms in the unit cell, and corresponding test
 
- end do ! End Big loop on atoms in the unit cell, and corresponding test .
+
+! NB for future use: in TDEP the following can also be provided.
+!        ! Print some auxiliary information, if it is there. Such as norm of
+!        ! forceconstant per shell, which shells there are and so on.
+!        if ( fc%npairshells .gt. 0 .and. allocated(fc%pairshell) ) then
+!            write(u,"(1X,I10,15X,'Number of irreducible coordination shells')") fc%npairshells
+!            do i=1,fc%npairshells
+!                write(u,"(1X,I10,1X,F16.10,1X,F16.10,15X,'number atoms in shell, radius, norm of forceconstant',I0)") fc%pairshell(i)%n,fc%pairshell(i)%rad,fc%pairshell(i)%norm,i
+!            enddo
+!            do i=1,fc%npairshells
+!                do j=1,fc%pairshell(i)%n
+!                    write(u,"(1X,3(1X,F18.12),2(1X,I0))") lo_chop(matmul(p%inv_latticevectors,fc%pairshell(i)%vec(:,j)),lo_sqtol),fc%pairshell(i)%atind(j),fc%pairshell(i)%pairind(j)
+!                enddo
+!            enddo
+!        endif
+
+ if (prt_ifc == 1) then
+   close(unit_ifc)
+   close(unit_tdep)
+
+   if (open_file('infile.lotosplitting_ABINIT', message, newunit=unit_tdep, status="replace") /= 0) then
+     MSG_ERROR(message)
+   end if
+   write(unit_tdep,'(3es28.16)') dielt(:,1)
+   write(unit_tdep,'(3es28.16)') dielt(:,2)
+   write(unit_tdep,'(3es28.16)') dielt(:,3)
+   do ia = 1, Ifc%natom
+     do ii = 1, 3
+       write(unit_tdep,'(3es28.16)') ifc%zeff(:,ii,ia)
+     end do
+   end do
+   close(unit_tdep)
+ end if
 
  ABI_FREE(rsiaf)
  ABI_FREE(sriaf)
  ABI_FREE(vect)
  ABI_FREE(indngb)
  ABI_FREE(posngb)
-
- if (prt_ifc == 1) close(unit_ifc)
-
  ABI_FREE(dist)
  ABI_FREE(list)
  ABI_FREE(wkdist)
@@ -1182,15 +1931,20 @@ subroutine ifc_print(Ifc,dielt,zeff,ifcana,atifc,ifcout,prt_ifc,ncid)
 contains
  integer function vid(vname)
 
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'vid'
+!End of the abilint section
+
    character(len=*),intent(in) :: vname
    vid = nctk_idname(ncid, vname)
  end function vid
 #endif
 
-end subroutine ifc_print
-
+end subroutine ifc_write
 !!***
-
 
 !----------------------------------------------------------------------
 
@@ -1232,7 +1986,7 @@ end subroutine ifc_print
 !!      m_ifc
 !!
 !! CHILDREN
-!!      appdig,ifc_fourq,smpbz,symkpt,wrtout
+!!      dfpt_phfrq,gtdyn9,nctk_defwrite_nonana_terms
 !!
 !! SOURCE
 
@@ -1258,7 +2012,8 @@ implicit none
  real(dp),intent(in) :: dist(Ifc%natom,Ifc%natom,Ifc%nrpt)
  real(dp),intent(in) :: zeff(3,3,Ifc%natom)
  integer,intent(in) :: list(Ifc%natom*Ifc%nrpt)
- real(dp),intent(out) :: rsiaf(3,3,ifcout),sriaf(3,3,ifcout),vect(3,3,ifcout),indngb(ifcout),posngb(3,ifcout)
+ integer,intent(out) :: indngb(ifcout)
+ real(dp),intent(out) :: rsiaf(3,3,ifcout),sriaf(3,3,ifcout),vect(3,3,ifcout),posngb(3,ifcout)
 
 !Local variables -------------------------
 !scalars
@@ -1270,6 +2025,8 @@ implicit none
  real(dp) :: ewiaf0(3,3),ewiaf1(3,3),ewloc(3,3),ifcloc(3,3)
  real(dp) :: rcart(3),rdiff(3),rsloc(3,3)
  real(dp) :: srloc(3,3),vect1(3),vect2(3),vect3(3),work(3),xx(3)
+
+! *********************************************************************
 
  if(ifcana==1)then
    ! Generate the local coordinate system for the atom ia
@@ -1525,8 +2282,8 @@ implicit none
      end if ! Further analysis finished
    end if ! End the condition on dipdip
  end do ! End loop over all atoms in BigBox:
- end subroutine ifc_getiaf
 
+end subroutine ifc_getiaf
 !!***
 
 !----------------------------------------------------------------------
@@ -1552,7 +2309,7 @@ implicit none
 !!      m_ifc
 !!
 !! CHILDREN
-!!      appdig,ifc_fourq,smpbz,symkpt,wrtout
+!!      dfpt_phfrq,gtdyn9,nctk_defwrite_nonana_terms
 !!
 !! SOURCE
 
@@ -1657,7 +2414,6 @@ subroutine omega_decomp(amu,natom,ntypat,typat,dynmatfl,dynmatsr,dynmatlr,iqpt,n
    end do
  end do
 
-
 !Calculation of <eigvec|Dyn_tot,Dyn_SR,Dyn_LR|eigenvec>=omega**2
 
 !write(ab_out,*)''
@@ -1672,10 +2428,7 @@ subroutine omega_decomp(amu,natom,ntypat,typat,dynmatfl,dynmatsr,dynmatlr,iqpt,n
 !write(std_out,'(a12,2x,a10,2x,a10,2x,a10,2x,a16,2x,a16,2x,a16)') 'Mode number.','tot','SR','LR','tot**2','SR**2','LR**2'
 
  do imode=1,3*natom
-
-   sumfl=0.0d0
-   sumlr=0.0d0
-   sumsr=0.0d0
+   sumfl=zero; sumlr=zero; sumsr=zero
 
    do ipert1=1,natom
      do ipert2=1,natom
@@ -1753,17 +2506,17 @@ end subroutine omega_decomp
 !!  qshft(3,nqshft)=Shifts of the q-mesh.
 !!
 !! OUTPUT
-!!  only write to file
+!!  only write to file. This routine should be called by a single processor.
 !!
 !! PARENTS
 !!      anaddb,eph
 !!
 !! CHILDREN
-!!      appdig,ifc_fourq,smpbz,symkpt,wrtout
+!!      dfpt_phfrq,gtdyn9,nctk_defwrite_nonana_terms
 !!
 !! SOURCE
 
-subroutine ifc_outphbtrap(ifc,cryst,ngqpt,nqshft,qshft,basename)
+subroutine ifc_outphbtrap(ifc, cryst, ngqpt, nqshft, qshft, basename)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -1772,8 +2525,6 @@ subroutine ifc_outphbtrap(ifc,cryst,ngqpt,nqshft,qshft,basename)
 #define ABI_FUNC 'ifc_outphbtrap'
  use interfaces_14_hidewrite
  use interfaces_32_util
- use interfaces_41_geometry
- use interfaces_56_recipspace
 !End of the abilint section
 
  implicit none
@@ -1790,43 +2541,37 @@ subroutine ifc_outphbtrap(ifc,cryst,ngqpt,nqshft,qshft,basename)
 
 !Local variables -------------------------
 !scalars
- integer,parameter :: brav1=1,chksymbreak0=0,option1=1
- integer,parameter :: timrev1=1 ! TODO timrev should be input
- integer :: natom,nsym
- integer :: facbrv,imode,iq_ibz,msym
- integer :: nqbz,nqpt_max
- integer :: nqibz, nreals,unit_btrap
- integer :: iatom, idir
- real(dp) :: bzvol
- character(len=500) :: message,format_nreals,format_line_btrap
+ integer,parameter :: qptopt1=1
+ integer :: natom,imode,iq_ibz,nqbz,nqibz, nreals,unit_btrap,iatom,idir
+ character(len=500) :: msg,format_nreals,format_line_btrap
  character(len=fnlen) :: outfile
 !arrays
  integer :: qptrlatt(3,3)
- integer,allocatable :: ibz2bz(:)
  real(dp) :: d2cart(2,3,cryst%natom,3,cryst%natom),displ(2*3*cryst%natom*3*cryst%natom)
- real(dp) :: gprimd(3,3),phfrq(3*cryst%natom),qphon(3)
- real(dp),allocatable :: qbz(:,:),qibz(:,:),wtq(:),wtq_folded(:),wtqibz(:)
+ real(dp) :: phfrq(3*cryst%natom),qphon(3)
+ real(dp),allocatable :: qbz(:,:),qibz(:,:),wtq(:)
 
 ! *********************************************************************
 
  DBG_ENTER("COLL")
 
  natom = cryst%natom
- nsym  = cryst%nsym
- msym  = nsym
+
+ ! Setup IBZ, weights and BZ. Always use q --> -q symmetry for phonons even in systems wo inversion
+ qptrlatt = 0; qptrlatt(1,1) = ngqpt(1); qptrlatt(2,2) = ngqpt(2); qptrlatt(3,3) = ngqpt(3)
+ call kpts_ibz_from_kptrlatt(cryst, qptrlatt, qptopt1, nqshft, qshft, nqibz, qibz, wtq, nqbz, qbz)
 
  outfile = trim(basename) // '_BTRAP'
- write(message, '(3a)')ch10,&
-& ' Will write phonon FREQS in BoltzTrap format to file ',trim(outfile)
- call wrtout(ab_out,message,'COLL')
- call wrtout(std_out,message,'COLL')
+ write(msg, '(3a)')ch10,' Will write phonon FREQS in BoltzTrap format to file ',trim(outfile)
+ call wrtout(ab_out,msg,'COLL')
+ call wrtout(std_out,msg,'COLL')
 
- if (open_file(outfile,message,newunit=unit_btrap,status="replace") /= 0) then
-   MSG_ERROR(message)
+ if (open_file(outfile,msg,newunit=unit_btrap,status="replace") /= 0) then
+   MSG_ERROR(msg)
  end if
 
  write (unit_btrap,'(a)') '#'
- write (unit_btrap,'(a)') '# ABINIT package : Boltztrap phonon file. Remove this header before feeding to BT'
+ write (unit_btrap,'(a)') '# ABINIT package : Boltztrap phonon file. With old BT versions remove this header before feeding to BT'
  write (unit_btrap,'(a)') '#    for compatibility with PHON output the freq are in Ry (before the square)'
  write (unit_btrap,'(a)') '#'
  write (unit_btrap,'(a)') '#    nq, nband  '
@@ -1834,55 +2579,16 @@ subroutine ifc_outphbtrap(ifc,cryst,ngqpt,nqshft,qshft,basename)
  write (unit_btrap,'(a)') '#  qpt weight   '
  write (unit_btrap,'(a)') '#  freq_1^2, dynmat column for mode 1 '
  write (unit_btrap,'(a)') '#  etc for mode 2,3,4... qpt 2,3,4... '
-
- gprimd = cryst%gprimd
- bzvol=ABS ( gprimd(1,1)*(gprimd(2,2)*gprimd(3,3)-gprimd(3,2)*gprimd(2,3)) &
-& -gprimd(2,1)*(gprimd(1,2)*gprimd(3,3)-gprimd(3,2)*gprimd(1,3)) &
-& +gprimd(3,1)*(gprimd(1,2)*gprimd(2,3)-gprimd(2,2)*gprimd(1,3)))
-!
-!Save memory during the generation of the q-mesh in the full BZ
-!Take into account the type of Bravais lattice
- facbrv=1
- if (brav1==2) facbrv=2
- if (brav1==3) facbrv=4
-
- nqpt_max=(product(ngqpt)*nqshft)/facbrv
- ABI_ALLOCATE(qibz,(3,nqpt_max))
- ABI_ALLOCATE(qbz,(3,nqpt_max))
-
- qptrlatt(:,:)=0
- qptrlatt(1,1)=ngqpt(1)
- qptrlatt(2,2)=ngqpt(2)
- qptrlatt(3,3)=ngqpt(3)
-
- call smpbz(brav1,std_out,qptrlatt,nqpt_max,nqbz,nqshft,option1,qshft,qbz)
-!
-!Reduce the number of such points by symmetrization.
- ABI_ALLOCATE(ibz2bz,(nqbz))
- ABI_ALLOCATE(wtq,(nqbz))
- ABI_ALLOCATE(wtq_folded,(nqbz))
- wtq(:)=one/nqbz         ! Weights sum up to one
-
- call symkpt(chksymbreak0,cryst%gmet,ibz2bz,std_out,qbz,nqbz,nqibz,nsym,cryst%symrec,timrev1,wtq,wtq_folded)
- write(std_out,*) 'nqibz = ', nqibz
-
- ABI_ALLOCATE(wtqibz,(nqibz))
- do iq_ibz=1,nqibz
-   wtqibz(iq_ibz)=wtq_folded(ibz2bz(iq_ibz))
-   qibz(:,iq_ibz)=qbz(:,ibz2bz(iq_ibz))
- end do
- ABI_DEALLOCATE(wtq_folded)
-
  write (unit_btrap,'(2I6)') nqibz, 3*natom
 
 ! Loop over irreducible q-points
  do iq_ibz=1,nqibz
-   qphon(:)=qibz(:,iq_ibz);
+   qphon(:)=qibz(:,iq_ibz)
 
-   call ifc_fourq(ifc,cryst,qphon,phfrq,displ,out_d2cart=d2cart)
+   call ifc_fourq(ifc, cryst, qphon, phfrq, displ, out_d2cart=d2cart)
 
    write (unit_btrap,'(3E20.10)') qphon
-   write (unit_btrap,'(E20.10)') wtqibz(iq_ibz)
+   write (unit_btrap,'(E20.10)') wtq(iq_ibz)
    nreals=1+2*3*natom
    call appdig(nreals,'(',format_nreals)
    format_line_btrap=trim(format_nreals)//'E20.10)'
@@ -1891,30 +2597,910 @@ subroutine ifc_outphbtrap(ifc,cryst,ngqpt,nqshft,qshft,basename)
        imode = idir + 3*(iatom-1)
 !      factor two for Ry output - this may change in definitive BT and abinit formats
        write (unit_btrap,trim(format_line_btrap))phfrq(imode)*two,d2cart(1:2,1:3,1:natom,idir,iatom)
-!      XG130409 : This was the old coding for the previous line, but was not portable...
-!      write (unit_btrap,'(E20.10)', ADVANCE='NO') phfrq(imode)*two
-!      do jatom = 1, natom
-!      do jdir = 1, 3
-!      write (unit_btrap,'(2E20.10)', ADVANCE='NO') d2cart(:,jdir,jatom,idir, iatom)
-!      end do
-!      end do
-!      write (unit_btrap,*)
      end do
    end do
 
  end do !irred q-points
+ close (unit_btrap)
 
- ABI_DEALLOCATE(ibz2bz)
  ABI_DEALLOCATE(qibz)
  ABI_DEALLOCATE(qbz)
  ABI_DEALLOCATE(wtq)
- ABI_DEALLOCATE(wtqibz)
-
- close (unit=unit_btrap)
 
  DBG_EXIT("COLL")
 
 end subroutine ifc_outphbtrap
 !!***
 
-END MODULE m_ifc
+!----------------------------------------------------------------------
+
+!!****f* m_ifc/ifc_printbxsf
+!! NAME
+!! ifc_printbxsf
+!!
+!! FUNCTION
+!!  Output phonon isosurface in Xcrysden format.
+!!
+!! INPUTS
+!!  ifc<ifc_type>=Stores data related to interatomic force constants.
+!!  crystal<crystal_t>=Info on the crystal structure
+!!  ngqpt(3)=Divisions of the q-mesh
+!!  nqshft=Number of shifts
+!!  qshft(3,nqshft)=Shifts of the q-mesh.
+!!  path=File name for output to disk
+!!  comm=MPI communicator.
+!!
+!! OUTPUT
+!!  Only write to file
+!!
+!! PARENTS
+!!      eph
+!!
+!! CHILDREN
+!!      dfpt_phfrq,gtdyn9,nctk_defwrite_nonana_terms
+!!
+!! SOURCE
+
+subroutine ifc_printbxsf(ifc, cryst, ngqpt, nqshft, qshft, path, comm)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'ifc_printbxsf'
+ use interfaces_14_hidewrite
+!End of the abilint section
+
+ implicit none
+
+!Arguments -------------------------------
+!scalars
+ integer,intent(in) :: nqshft,comm
+ character(len=*),intent(in) :: path
+ type(ifc_type),intent(in) :: ifc
+ type(crystal_t),intent(in) :: cryst
+!arrays
+ integer,intent(in) :: ngqpt(3)
+ real(dp),intent(in) :: qshft(3,nqshft)
+
+!Local variables -------------------------
+!scalars
+ integer,parameter :: nsppol1=1,master=0,qptopt1=1
+ integer :: my_rank,nprocs,iq_ibz,nqibz,nqbz,ierr
+ character(len=500) :: msg
+!arrays
+ integer :: qptrlatt(3,3),dummy_symafm(cryst%nsym)
+ real(dp) :: phfrq(3*cryst%natom),displ_cart(2,3*cryst%natom,3*cryst%natom)
+ real(dp),allocatable :: qibz(:,:),wtq(:),qbz(:,:),freqs_qibz(:,:)
+
+! *********************************************************************
+
+ my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
+
+ ! Setup IBZ, weights and BZ. Always use q --> -q symmetry for phonons even in systems wo inversion
+ qptrlatt = 0; qptrlatt(1,1) = ngqpt(1); qptrlatt(2,2) = ngqpt(2); qptrlatt(3,3) = ngqpt(3)
+ call kpts_ibz_from_kptrlatt(cryst, qptrlatt, qptopt1, nqshft, qshft, nqibz, qibz, wtq, nqbz, qbz)
+ ABI_FREE(qbz)
+ ABI_FREE(wtq)
+
+ ! Compute phonon frequencies in the irreducible wedge.
+ ABI_CALLOC(freqs_qibz, (3*cryst%natom, nqibz))
+
+ do iq_ibz=1,nqibz
+   if (mod(iq_ibz, nprocs) /= my_rank) cycle ! mpi parallelism.
+   call ifc_fourq(ifc, cryst, qibz(:,iq_ibz), freqs_qibz(:,iq_ibz), displ_cart)
+ end do
+ call xmpi_sum(freqs_qibz, comm, ierr)
+
+ ! Output phonon isosurface.
+ if (my_rank == master) then
+   dummy_symafm = 1
+   call printbxsf(freqs_qibz, zero, zero, cryst%gprimd, qptrlatt, 3*cryst%natom,&
+     nqibz, qibz, cryst%nsym, .False., cryst%symrec, dummy_symafm, .True., nsppol1, qshft, nqshft, path, ierr)
+   if (ierr /=0) then
+     msg = "Cannot produce BXSF file with phonon isosurface, see log file for more info"
+     MSG_WARNING(msg)
+     call wrtout(ab_out, msg, 'COLL')
+   end if
+ end if
+
+ ABI_FREE(freqs_qibz)
+ ABI_FREE(qibz)
+
+end subroutine ifc_printbxsf
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_ifc/ifc_build_phbspl
+!! NAME
+!! ifc_build_phbspl
+!!
+!! FUNCTION
+!! build the phbspl_t object to interpolate the phonon band structure.
+!!
+!! INPUTS
+!!  ifc<type(ifc_type)>=Object containing the dynamical matrix and the IFCs.
+!!  crystal<type(crystal_t)> = Information on the crystalline structure.
+!!  ngqpt(3)=Divisions of the q-mesh used to produce the B-spline.
+!!  nshiftq=Number of shifts in Q-mesh
+!!  shiftq(3,nshiftq)=Shifts of the q-mesh.
+!!  ords(3)=order of the spline for the three directions. ord(1) must be in [0, nqx] where
+!!    nqx is the number of points along the x-axis.
+!!  comm=MPI communicator
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!      m_ifc
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+type(phbspl_t) function ifc_build_phbspl(ifc, cryst, ngqpt, nshiftq, shiftq, ords, comm) result(new)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'ifc_build_phbspl'
+ use interfaces_56_recipspace
+!End of the abilint section
+
+ implicit none
+
+!arguments ------------------------------------
+!scalars
+ integer,intent(in) :: comm,nshiftq
+ type(ifc_type),intent(in) :: ifc
+ type(crystal_t),intent(in) :: cryst
+!arrays
+ integer,intent(in) :: ngqpt(3),ords(3)
+ real(dp),intent(in) :: shiftq(3,nshiftq)
+
+!local variables-------------------------------
+!scalars
+ integer,parameter :: sppoldbl1=1,timrev1=1,qptopt1=1
+ integer :: qxord,qyord,qzord,nxknot,nyknot,nzknot,nqibz,nqbz,nqfull,iqf,ierr
+ integer :: nu,iq_ibz,ix,iy,iz,nqx,nqy,nqz,my_rank,nprocs,cnt
+ real(dp) :: dksqmax
+ character(len=500) :: msg
+!arrays
+ integer :: qptrlatt(3,3)
+ integer,allocatable :: bz2ibz(:,:)
+ real(dp) :: phfrq(3*cryst%natom),qpt(3),displ_cart(2,3,cryst%natom,3*cryst%natom)
+ real(dp),allocatable :: xvec(:),yvec(:),zvec(:),xyzdata(:,:,:)
+ real(dp),allocatable :: ibz_freqs(:,:),ibzdata_qnu(:,:)
+ real(dp),allocatable :: wtq(:),qbz(:,:),qfull(:,:),qibz(:,:)
+
+! *********************************************************************
+
+ nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
+
+ ! Check input parameters
+ ierr = 0
+ if (nshiftq /= 1) then
+   MSG_WARNING('Multiple shifts not allowed')
+   ierr = ierr + 1
+ end if
+ if (ierr /= 0) then
+   MSG_WARNING("bspline interpolation cannot be performed. See warnings above. Returning")
+   return
+ end if
+
+ ! Setup IBZ, weights and BZ. Always use q --> -q symmetry for phonons even in systems wo inversion
+ qptrlatt = 0; qptrlatt(1,1) = ngqpt(1); qptrlatt(2,2) = ngqpt(2); qptrlatt(3,3) = ngqpt(3)
+ call kpts_ibz_from_kptrlatt(cryst, qptrlatt, qptopt1, nshiftq, shiftq, nqibz, qibz, wtq, nqbz, qbz)
+
+ ABI_FREE(wtq)
+ ABI_FREE(qbz)
+
+ ! Build BZ mesh Note that:
+ ! 1) q-point coordinates are in [0, 1]
+ ! 2) The mesh is closed e.g. (0,0,0) and (1,1,1) are included
+ nqx = ngqpt(1)+1; nqy = ngqpt(2)+1; nqz = ngqpt(3)+1
+
+ ABI_MALLOC(xvec, (nqx))
+ ABI_MALLOC(yvec, (nqy))
+ ABI_MALLOC(zvec, (nqz))
+
+ ! Multiple shifts are not supported here.
+ do ix=1,nqx
+   xvec(ix) = (ix-one+shiftq(1,1)) / ngqpt(1)
+ end do
+ do iy=1,nqy
+   yvec(iy) = (iy-one+shiftq(2,1)) / ngqpt(2)
+ end do
+ do iz=1,nqz
+   zvec(iz) = (iz-one+shiftq(3,1)) / ngqpt(3)
+ end do
+
+ ! Build list of q-points in full BZ (ordered as required by B-spline routines)
+ nqfull = nqx*nqy*nqz
+ ABI_MALLOC(qfull, (3,nqfull))
+ iqf = 0
+ do iz=1,nqz
+   do iy=1,nqy
+     do ix=1,nqx
+       iqf = iqf + 1
+       qfull(:,iqf) = [xvec(ix), yvec(iy), zvec(iz)]
+     end do
+   end do
+ end do
+
+ ! Build mapping qfull --> IBZ (q --> -q symmetry is always used)
+ ABI_MALLOC(bz2ibz, (nqfull*sppoldbl1,6))
+
+ call listkk(dksqmax,cryst%gmet,bz2ibz,qibz,qfull,nqibz,nqfull,cryst%nsym,&
+   sppoldbl1,cryst%symafm,cryst%symrec,timrev1,use_symrec=.True.)
+ ABI_FREE(qfull)
+
+ if (dksqmax > tol12) then
+   write(msg, '(3a,es16.6,4a)' )&
+   'At least one of the q-points could not be generated from a symmetrical one.',ch10,&
+   'dksqmax=',dksqmax,ch10,&
+   'Action: check q-point input variables',ch10,&
+   '        (e.g. kptopt or shiftk might be wrong in the present dataset or the preparatory one.'
+   MSG_ERROR(msg)
+ end if
+
+ ! Generate knots (ords is input)
+ qxord = ords(1); qyord = ords(2); qzord = ords(3)
+ nxknot = nqx + qxord
+ nyknot = nqy + qyord
+ nzknot = nqz + qzord
+
+ new%nqx = nqx; new%qxord = qxord
+ new%nqy = nqy; new%qyord = qyord
+ new%nqz = nqz; new%qzord = qzord
+
+ ABI_MALLOC(new%xknot,(nxknot))
+ ABI_MALLOC(new%yknot,(nyknot))
+ ABI_MALLOC(new%zknot,(nzknot))
+
+ call dbsnak(nqx, xvec, qxord, new%xknot)
+ call dbsnak(nqy, yvec, qyord, new%yknot)
+ call dbsnak(nqz, zvec, qzord, new%zknot)
+
+ new%natom3 = 3 * cryst%natom
+
+ ! Get phonon frequencies in IBZ
+ ABI_CALLOC(ibz_freqs, (new%natom3, nqibz))
+ cnt = 0
+ do iq_ibz=1,nqibz
+   cnt = cnt + 1; if (mod(cnt, nprocs) /= my_rank) cycle ! Mpi parallelism.
+   call ifc_fourq(ifc, cryst, qibz(:,iq_ibz), ibz_freqs(:,iq_ibz), displ_cart)
+ end do
+ call xmpi_sum(ibz_freqs, comm, ierr)
+
+ ABI_MALLOC(ibzdata_qnu, (nqibz, new%natom3))
+ ibzdata_qnu = transpose(ibz_freqs)
+ ABI_FREE(ibz_freqs)
+
+ ABI_MALLOC(xyzdata,(nqx,nqy,nqz))
+ ABI_DT_MALLOC(new%coeff, (new%natom3))
+
+ do nu=1,new%natom3
+
+   ABI_MALLOC(new%coeff(nu)%vals, (nqx,nqy,nqz))
+
+   ! Build array in full bz to prepare call to dbs3in.
+   iqf = 0
+   do iz=1,nqz
+     do iy=1,nqy
+       do ix=1,nqx
+         iqf = iqf + 1
+         iq_ibz = bz2ibz(iqf,1)
+         xyzdata(ix,iy,iz) = ibzdata_qnu(iq_ibz, nu)
+       end do
+     end do
+   end do
+
+   ! Construct 3D tensor for B-spline. Results in coeff(nu)%vals
+   call dbs3in(nqx,xvec,nqy,yvec,nqz,zvec,xyzdata,nqx,nqy,qxord,qyord,qzord,new%xknot,new%yknot,new%zknot,&
+      new%coeff(nu)%vals)
+ end do
+
+ ABI_FREE(xvec)
+ ABI_FREE(yvec)
+ ABI_FREE(zvec)
+ ABI_FREE(bz2ibz)
+ ABI_FREE(xyzdata)
+ ABI_FREE(ibzdata_qnu)
+ ABI_FREE(qibz)
+
+end function ifc_build_phbspl
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_ifc/phbspl_evalq
+!! NAME
+!! phbspl_evalq
+!!
+!! FUNCTION
+!!  Interpolate phonon frequencies at an arbitrary q-point.
+!!
+!! INPUTS
+!!  qpt(3)=Q-point in reduced coordinate (will be wrapped in the interval [0,1[
+!!
+!! OUTPUT
+!!  ofreqs(%natom3)=Interpolated phonon frequencies.
+!!    Note that ofreqs is not necessarily sorted in ascending order.
+!!    The routine does not reorder the interpolated frequencies
+!!    to be consistent with the interpolation of the derivatives.
+!!  [oder1(3,%natom3)]=First order derivatives.
+!!
+!! PARENTS
+!!      m_ifc
+!!
+!! CHILDREN
+!!      dfpt_phfrq,gtdyn9,nctk_defwrite_nonana_terms
+!!
+!! SOURCE
+
+subroutine phbspl_evalq(phbspl, qpt, ofreqs, oder1)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'phbspl_evalq'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ type(phbspl_t),intent(in) :: phbspl
+!arrays
+ real(dp),intent(in) :: qpt(3)
+ real(dp),intent(out) :: ofreqs(phbspl%natom3)
+ real(dp),optional,intent(out) :: oder1(3,phbspl%natom3)
+
+!Local variables-------------------------------
+!scalars
+ integer :: nu,ii
+!arrays
+ integer :: iders(3)!, iperm(phbspl%natom3)
+ real(dp) :: qred(3),shift(3)
+
+! *********************************************************************
+
+ ! Wrap k-point in the interval [0,1[ where 1 is not included (tol12)
+ ! This is required because the spline has been constructed in this region.
+ call wrap2_zero_one(qpt, qred, shift)
+
+ do nu=1,phbspl%natom3
+   ! B-spline interpolation.
+   ofreqs(nu) = dbs3vl(qred(1), qred(2), qred(3), phbspl%qxord, phbspl%qyord, phbspl%qzord,&
+                       phbspl%xknot, phbspl%yknot, phbspl%zknot, phbspl%nqx, phbspl%nqy, phbspl%nqz,&
+                       phbspl%coeff(nu)%vals)
+ end do
+
+ ! Sort frequencies.
+ !iperm = [(nu, nu=1, phbspl%natom3)]; call sort_dp(phbspl%natom3, ofreqs, iperm, tol14)
+
+ if (present(oder1)) then
+   ! Compute first-order derivatives.
+   do nu=1,phbspl%natom3
+     do ii=1,3
+       iders = 0; iders(ii) = 1
+       oder1(ii,nu) = dbs3dr(iders(1), iders(2), iders(3), &
+                             qred(1), qred(2), qred(3), phbspl%qxord, phbspl%qyord, phbspl%qzord,&
+                             phbspl%xknot, phbspl%yknot, phbspl%zknot, phbspl%nqx, phbspl%nqy, phbspl%nqz,&
+                             phbspl%coeff(nu)%vals)
+     end do
+   end do
+
+ end if
+
+end subroutine phbspl_evalq
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_ifc/phbspl_free
+!! NAME
+!! phbspl_free
+!!
+!! FUNCTION
+!!  Free dynamic memory.
+!!
+!! PARENTS
+!!      m_ifc
+!!
+!! CHILDREN
+!!      dfpt_phfrq,gtdyn9,nctk_defwrite_nonana_terms
+!!
+!! SOURCE
+
+subroutine phbspl_free(phbspl)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'phbspl_free'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ type(phbspl_t),intent(inout) :: phbspl
+
+!Local variables-------------------------------
+!scalars
+ integer :: ii
+
+! *********************************************************************
+
+ if (allocated(phbspl%xknot)) then
+   ABI_FREE(phbspl%xknot)
+ end if
+ if (allocated(phbspl%yknot)) then
+   ABI_FREE(phbspl%yknot)
+ end if
+ if (allocated(phbspl%zknot)) then
+   ABI_FREE(phbspl%zknot)
+ end if
+
+ ! Free B-spline coefficients.
+ if (allocated(phbspl%coeff)) then
+   do ii=1,size(phbspl%coeff, dim=1)
+     if (allocated(phbspl%coeff(ii)%vals)) then
+       ABI_FREE(phbspl%coeff(ii)%vals)
+     end if
+   end do
+   ABI_DT_FREE(phbspl%coeff)
+ end if
+
+end subroutine phbspl_free
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_ifc/ifc_build_skw
+!! NAME
+!! ifc_build_skw
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!  ifc<type(ifc_type)>=Object containing the dynamical matrix and the IFCs.
+!!  crystal<type(crystal_t)> = Information on the crystalline structure.
+!!  ngqpt(3)=Divisions of the q-mesh used to produce the B-spline.
+!!  nshiftq=Number of shifts in Q-mesh
+!!  shiftq(3,nshiftq)=Shifts of the q-mesh.
+!!  ords(3)=order of the spline for the three directions. ord(1) must be in [0, nqx] where
+!!    nqx is the number of points along the x-axis.
+!!  comm=MPI communicator
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+type(skw_t) function ifc_build_skw(ifc, cryst, ngqpt, nshiftq, shiftq, comm) result(new)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'ifc_build_skw'
+ use interfaces_56_recipspace
+!End of the abilint section
+
+ implicit none
+
+!arguments ------------------------------------
+!scalars
+ integer,intent(in) :: comm,nshiftq
+ type(ifc_type),intent(in) :: ifc
+ type(crystal_t),intent(in) :: cryst
+!arrays
+ integer,intent(in) :: ngqpt(3)
+ real(dp),intent(in) :: shiftq(3,nshiftq)
+
+!local variables-------------------------------
+!scalars
+ integer,parameter :: sppoldbl1=1,timrev1=1,master=0,qptopt1=1
+ integer :: nqibz,nqbz,iq_ibz,iq_bz,natom3,ierr,nu
+ integer :: my_rank,nprocs,cnt
+ real(dp) :: dksqmax
+ character(len=500) :: msg
+!arrays
+ integer :: qptrlatt(3,3)
+ integer,allocatable :: bz2ibz(:,:)
+ real(dp) :: params(4)
+ real(dp) :: phfrq(3*cryst%natom),displ_cart(2,3,cryst%natom,3*cryst%natom)
+ real(dp),allocatable :: ibz_freqs(:,:),wtq(:),qbz(:,:),qibz(:,:)
+
+! *********************************************************************
+
+ nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
+
+ natom3 = 3 * cryst%natom
+
+ ! Setup IBZ, weights and BZ. Always use q --> -q symmetry for phonons even in systems wo inversion
+ qptrlatt = 0; qptrlatt(1,1) = ngqpt(1); qptrlatt(2,2) = ngqpt(2); qptrlatt(3,3) = ngqpt(3)
+ call kpts_ibz_from_kptrlatt(cryst, qptrlatt, qptopt1, nshiftq, shiftq, nqibz, qibz, wtq, nqbz, qbz)
+
+ ! Get phonon frequencies in IBZ
+ ABI_CALLOC(ibz_freqs, (natom3, nqibz))
+ cnt = 0
+ do iq_ibz=1,nqibz
+   cnt = cnt + 1; if (mod(cnt, nprocs) /= my_rank) cycle ! Mpi parallelism.
+   call ifc_fourq(ifc, cryst, qibz(:,iq_ibz), ibz_freqs(:,iq_ibz), displ_cart)
+ end do
+ call xmpi_sum(ibz_freqs, comm, ierr)
+
+ params = zero; params(1) = 120
+ new = skw_new(cryst, params, 1, natom3, nqibz, 1, qibz, ibz_freqs, [0,0], comm)
+
+ if (.False. .and. my_rank == master) then
+   ! Test whether SKW preserves symmetries.
+   ! Build mapping qbz --> IBZ (q --> -q symmetry is always used)
+   ABI_MALLOC(bz2ibz, (nqbz*sppoldbl1,6))
+
+   call listkk(dksqmax,cryst%gmet,bz2ibz,qibz,qbz,nqibz,nqbz,cryst%nsym,&
+     sppoldbl1,cryst%symafm,cryst%symrec,timrev1,use_symrec=.True.)
+
+   if (dksqmax > tol12) then
+     write(msg, '(3a,es16.6,4a)' )&
+     'At least one of the q-points could not be generated from a symmetrical one.',ch10,&
+     'dksqmax=',dksqmax,ch10,&
+     'Action: check q-point input variables',ch10,&
+     '        (e.g. kptopt or shiftk might be wrong in the present dataset or the preparatory one.'
+     MSG_ERROR(msg)
+   end if
+
+   do iq_bz=1,nqbz
+     iq_ibz = bz2ibz(iq_bz,1)
+     do nu=1,natom3
+       call skw_eval_bks(new, cryst, nu, qbz(:,iq_bz), 1, phfrq(nu))
+     end do
+     write(std_out,*)"BZ-IBZ:", maxval(abs(phfrq - ibz_freqs(:, iq_ibz)))
+   end do
+   ABI_FREE(bz2ibz)
+ end if
+
+ ABI_FREE(qibz)
+ ABI_FREE(wtq)
+ ABI_FREE(qbz)
+ ABI_FREE(ibz_freqs)
+
+end function ifc_build_skw
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_ifc/ifc_test_phinterp
+!! NAME
+!! ifc_test_phinterp
+!!
+!! INPUTS
+!!  crystal<type(crystal_t)> = Information on the crystalline structure.
+!!  ngqpt(3)=Divisions of the q-mesh used to produce the B-spline.
+!!  nshiftq=Number of shifts in Q-mesh
+!!  shiftq(3,nshiftq)=Shifts of the q-mesh.
+!!  ords(3)=order of the spline for the three directions. ord(1) must be in [0, nqx] where
+!!    nqx is the number of points along the x-axis.
+!!  comm=MPI communicator
+!!
+!! OUTPUT
+!!  Only writing
+!!
+!! PARENTS
+!!      eph
+!!
+!! CHILDREN
+!!      dfpt_phfrq,gtdyn9,nctk_defwrite_nonana_terms
+!!
+!! SOURCE
+
+subroutine ifc_test_phinterp(ifc, cryst, ngqpt, nshiftq, shiftq, ords, comm, test_dwdq)
+
+ use m_bz_mesh,  only : kpath_t, kpath_new, kpath_free
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'ifc_test_phinterp'
+ use interfaces_14_hidewrite
+!End of the abilint section
+
+ implicit none
+
+!arguments ------------------------------------
+!scalars
+ integer,intent(in) :: comm,nshiftq
+ type(ifc_type),intent(in) :: ifc
+ type(crystal_t),intent(in) :: cryst
+ logical,optional,intent(in) :: test_dwdq
+!arrays
+ integer,intent(in) :: ngqpt(3),ords(3)
+ real(dp),intent(in) :: shiftq(3,nshiftq)
+
+!local variables-------------------------------
+!scalars
+ integer,parameter :: master=0
+ integer :: iq,nq,natom3,my_rank,nprocs,ierr,nu,ii
+ real(dp) :: mare_bspl,mae_bspl,mare_skw,mae_skw,dq
+ real(dp) :: cpu,wall,gflops,cpu_fourq,wall_fourq,gflops_fourq
+ real(dp) :: cpu_bspl,wall_bspl,gflops_bspl,cpu_skw,wall_skw,gflops_skw
+ logical :: do_dwdq
+ type(phbspl_t) :: phbspl
+ type(skw_t) :: skw
+ type(kpath_t) :: qpath
+!arrays
+ integer :: imax(1)
+ real(dp) :: phfrq(3*cryst%natom),ofreqs(3*cryst%natom),qpt(3),wnext(3*cryst%natom)
+ real(dp) :: adiff_mev(3*cryst%natom),rel_err(3*cryst%natom)
+ real(dp) :: displ_cart(2,3,cryst%natom,3*cryst%natom),qvers_cart(3),qvers_red(3),qstep(3)
+ real(dp) :: qred(3),shift(3),vals4(4),dwdq(3,3*cryst%natom)
+ real(dp) :: q1(3),q2(3)
+ real(dp) :: bounds(3,5)
+ real(dp),allocatable :: winterp(:,:),wdata(:,:)
+
+! *********************************************************************
+
+ bounds = reshape([zero, zero, zero, half, zero, zero, zero, half, zero, zero, zero, zero, zero, zero, half], [3,5])
+ qpath = kpath_new(bounds, cryst%gprimd, 10)
+
+ my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
+ natom3 = 3 * cryst%natom
+
+ ! Test computation of group velocities
+ do_dwdq = .False.; if (present(test_dwdq)) do_dwdq = test_dwdq
+ if (do_dwdq) then
+   call wrtout(std_out, "Testing computation of group velocities.")
+   q1 = zero; q2 = [half, zero, zero]
+   !q1 = -q2
+   !q1 = [-0.1_dp, zero, zero]; q2 = [half, zero, zero]
+   !q1 = [0.01_dp, zero, zero]; q2 = [half, half, half]
+   !q2 = [0.01_dp, zero, zero]; q1 = [half, zero, zero]
+   !q2 = [-0.1_dp, zero, zero]; q1 = [half, zero, zero]
+   nq = 50
+   dq = normv(q2 - q1, cryst%gmet, "G") / (nq - 1)
+   qvers_red = (q2 -q1) / normv(q2 - q1, cryst%gmet, "G")
+   qvers_cart = matmul(cryst%gprimd, qvers_red) * two_pi
+   ABI_MALLOC(wdata, (natom3, nq))
+   ABI_MALLOC(winterp, (natom3, nq))
+
+   do iq=1,nq
+      qpt = q1 + (iq - 1) * dq * qvers_red
+      call ifc_fourq(ifc, cryst, qpt, phfrq, displ_cart, dwdq=dwdq)
+      wdata(:,iq) = phfrq
+      if (iq == 1) winterp(:,iq) = phfrq
+      if (iq > 1) then
+        do nu=1,natom3
+          winterp(nu, iq) = winterp(nu, iq-1) + dq * dot_product(dwdq(:, nu), qvers_cart)
+        end do
+        !imax = maxloc(abs(phfrq - wnext)); ii = imax(1)
+        !write(*,*)ii, phfrq(ii), wnext(ii), (phfrq(ii) - wnext(ii)) * Ha_meV
+        !write(std_out,*)"wvel:", qpt, minval(abs(phfrq - wnext)) * Ha_meV, maxval(abs(phfrq - wnext)) * Ha_meV, imax
+        !write(std_out,*)"dwdq:",dwdq
+      end if
+      write(100,*)wdata(:,iq) * Ha_meV
+      write(101,*)winterp(:,iq) * Ha_meV
+      !do nu=1,natom3
+      !  wnext(nu) = phfrq(nu) + dq * dot_product(dwdq(:, nu), qvers_cart)
+      !end do
+   end do
+   ABI_FREE(wdata)
+   ABI_FREE(winterp)
+   MSG_COMMENT("Test phonon group velocities done")
+   return
+ end if
+
+ ! Build interpolator objects.
+ phbspl = ifc_build_phbspl(ifc, cryst, ngqpt, nshiftq, shiftq, ords, comm)
+ skw = ifc_build_skw(ifc, cryst, ngqpt, nshiftq, shiftq, comm)
+
+ cpu_fourq = zero; wall_fourq = zero; gflops_fourq = zero
+ cpu_bspl = zero; wall_bspl = zero; gflops_bspl = zero
+ cpu_skw = zero; wall_skw = zero; gflops_skw = zero
+ mae_bspl = zero; mare_bspl = zero
+ mae_skw = zero; mare_skw = zero
+
+ !nq = 100
+ nq = qpath%npts
+ do iq=1,nq
+   !if (mod(iq, nprocs) /= my_rank) cycle ! mpi parallelism
+   !call random_number(qred)
+   !qred = qred + (0.1_dp * my_rank / nprocs)
+   !call wrap2_pmhalf(qred, qpt, shift)
+
+   if (my_rank /= master) cycle
+   qpt = qpath%points(:,iq)
+
+   ! Fourier interpolation
+   call cwtime(cpu, wall, gflops, "start")
+   call ifc_fourq(ifc, cryst, qpt, phfrq, displ_cart) !, dwdq=dwdq)
+   call cwtime(cpu, wall, gflops, "stop")
+   cpu_fourq = cpu_fourq + cpu; wall_fourq = wall_fourq + wall
+
+   ! B-spline interpolation
+   call cwtime(cpu, wall, gflops, "start")
+   call phbspl_evalq(phbspl, qpt, ofreqs)
+   call cwtime(cpu, wall, gflops, "stop")
+   cpu_bspl = cpu_bspl + cpu; wall_bspl = wall_bspl + wall
+
+   adiff_meV = abs(phfrq - ofreqs); rel_err = zero
+   where (abs(phfrq) > tol16)
+     rel_err = adiff_meV / abs(phfrq)
+   end where
+   rel_err = 100 * rel_err; adiff_meV = adiff_meV * Ha_meV
+   mae_bspl = mae_bspl + sum(adiff_meV) / natom3
+   mare_bspl = mare_bspl + sum(rel_err) / natom3
+   if (my_rank == master) then
+     !write(std_out,*)maxval(adiff_meV), maxval(rel_err), trim(ktoa(qpt))
+     write(456, *)phfrq
+     write(457, *)ofreqs
+   end if
+
+   ! SKW interpolation
+   call cwtime(cpu, wall, gflops, "start")
+   do nu=1,natom3
+     call skw_eval_bks(skw, cryst, nu, qpt, 1, ofreqs(nu))
+   end do
+   call cwtime(cpu, wall, gflops, "stop")
+   cpu_skw = cpu_skw + cpu; wall_skw = wall_skw + wall
+
+   adiff_meV = abs(phfrq - ofreqs); rel_err = zero
+   where (abs(phfrq) > tol16)
+     rel_err = adiff_meV / abs(phfrq)
+   end where
+   rel_err = 100 * rel_err; adiff_meV = adiff_meV * Ha_meV
+   mae_skw = mae_skw + sum(adiff_meV) / natom3
+   mare_skw = mare_skw + sum(rel_err) / natom3
+   if (my_rank == master) then
+     !write(std_out,*)maxval(adiff_meV), maxval(rel_err), trim(ktoa(qpt))
+     write(458, *)ofreqs
+   endif
+ end do
+
+ vals4 = [mae_bspl, mare_bspl, mae_skw, mare_skw]
+ call xmpi_sum(vals4, comm, ierr)
+ mae_bspl = vals4(1); mare_bspl = vals4(2); mae_skw = vals4(3); mare_skw = vals4(4)
+
+ mae_bspl = mae_bspl / nq; mare_bspl = mare_bspl / nq
+ mae_skw = mae_skw / nq; mare_skw = mare_skw / nq
+
+ if (my_rank == master) then
+   write(std_out,"(2(a,f6.2),a,i0)")"B-spline MAE: ",mae_bspl," [meV], MARE: ",mare_bspl, "% with nqpt: ",nq
+   write(std_out,"(2(a,f6.2),a,i0)")"SKW      MAE: ",mae_skw, " [meV], MARE: ",mare_skw, "% with nqpt: ",nq
+   write(std_out,"(2(a,f6.2))")"fourq: cpu: ",cpu_fourq,", wall: ",wall_fourq
+   write(std_out,"(2(a,f6.2))")"bspl:  cpu: ",cpu_bspl,", wall: ",wall_bspl
+   write(std_out,"(2(a,f6.2))")"skw:   cpu: ",cpu_skw,", wall: ",wall_skw
+ end if
+
+ call phbspl_free(phbspl)
+ call skw_free(skw)
+ call kpath_free(qpath)
+ MSG_COMMENT("ifc_test_phinterp done")
+
+end subroutine ifc_test_phinterp
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_gruneisen/ifc_calcnwrite_nana_terms
+!! NAME
+!!  ifc_calcnwrite_nana_terms
+!!
+!! FUNCTION
+!!  Compute frequencies and phonon displacement for q-->0 in the presence of non-analytical behaviour.
+!!
+!! INPUTS
+!!  nph2l=Number of qpoints.
+!!  qph2l(3,nph2l)=List of phonon wavevector directions along which the non-analytical correction
+!!    to the Gamma-point phonon frequencies will be calculated
+!!    The direction is in CARTESIAN COORDINATES
+!!  qnrml2(nph2l)=Normalizatin factor.
+!!
+!! OUTPUT
+!!  Only writing.
+!!
+!! NOTES:
+!!  This routine should be called by master node and when ifcflag == 1.
+!!
+!! PARENTS
+!!      m_gruneisen,m_phonons
+!!
+!! CHILDREN
+!!      dfpt_phfrq,gtdyn9,nctk_defwrite_nonana_terms
+!!
+!! SOURCE
+
+subroutine ifc_calcnwrite_nana_terms(ifc, crystal, nph2l, qph2l, qnrml2, ncid)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'ifc_calcnwrite_nana_terms'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+ integer,intent(in) :: nph2l, ncid
+ type(ifc_type),intent(in) :: ifc
+ type(crystal_t),intent(in) :: crystal
+!arrays
+ real(dp),intent(in) :: qph2l(3, nph2l), qnrml2(nph2l)
+
+!Local variables-------------------------------
+!scalars
+ integer :: iphl2
+ !character(len=500) :: msg
+!arrays
+ real(dp) :: qphnrm(3),qphon(3,3)
+ real(dp),allocatable :: displ_cart(:,:,:),phfrq(:),d2cart(:,:,:),eigvec(:,:,:),eigval(:)
+
+! ************************************************************************
+
+ if (nph2l == 0) return
+
+ !Now treat the second list of vectors (only at the Gamma point, but can include non-analyticities)
+ ABI_MALLOC(phfrq, (3*crystal%natom))
+ ABI_MALLOC(displ_cart, (2, 3*crystal%natom, 3*crystal%natom))
+ ABI_MALLOC(d2cart, (2, 3*ifc%mpert, 3*ifc%mpert))
+ ABI_MALLOC(eigvec, (2, 3*crystal%natom, 3*crystal%natom))
+ ABI_MALLOC(eigval, (3*crystal%natom))
+
+ ! Before examining every direction or the dielectric tensor, generates the dynamical matrix at gamma
+ qphon(:,1)=zero; qphnrm(1)=zero
+
+ ! Generation of the dynamical matrix in cartesian coordinates
+ ! Get d2cart using the interatomic forces and the
+ ! long-range coulomb interaction through Ewald summation
+ call gtdyn9(ifc%acell,ifc%atmfrc,ifc%dielt,ifc%dipdip, &
+   ifc%dyewq0,d2cart,crystal%gmet,ifc%gprim,ifc%mpert,crystal%natom, &
+   ifc%nrpt,qphnrm(1),qphon,crystal%rmet,ifc%rprim,ifc%rpt, &
+   ifc%trans,crystal%ucvol,ifc%wghatm,crystal%xred,ifc%zeff)
+
+#ifdef HAVE_NETCDF
+ iphl2 = 0
+ call nctk_defwrite_nonana_terms(ncid, iphl2, nph2l, qph2l, crystal%natom, phfrq, displ_cart, "define")
+#endif
+
+ ! Examine every wavevector of this list
+ do iphl2=1,nph2l
+   ! Initialisation of the phonon wavevector
+   qphon(:,1) = qph2l(:,iphl2)
+   qphnrm(1) = qnrml2(iphl2)
+
+   ! Calculation of the eigenvectors and eigenvalues of the dynamical matrix
+   call dfpt_phfrq(ifc%amu,displ_cart,d2cart,eigval,eigvec,crystal%indsym, &
+      ifc%mpert,crystal%nsym,crystal%natom,crystal%nsym,crystal%ntypat,phfrq,qphnrm(1),qphon, &
+      crystal%rprimd,ifc%symdynmat,crystal%symrel,crystal%symafm,crystal%typat,crystal%ucvol)
+
+   ! Write the phonon frequencies
+   !call dfpt_prtph(displ_cart,inp%eivec,inp%enunit,ab_out,natom,phfrq,qphnrm(1),qphon)
+
+#ifdef HAVE_NETCDF
+   ! Loop is not MPI-parallelized --> no need for MPI-IO API.
+   call nctk_defwrite_nonana_terms(ncid, iphl2, nph2l, qph2l, crystal%natom, phfrq, displ_cart, "write")
+#endif
+ end do ! iphl2
+
+ ABI_FREE(phfrq)
+ ABI_FREE(displ_cart)
+ ABI_FREE(d2cart)
+ ABI_FREE(eigvec)
+ ABI_FREE(eigval)
+
+end subroutine ifc_calcnwrite_nana_terms
+!!***
+
+!----------------------------------------------------------------------
+
+end module m_ifc

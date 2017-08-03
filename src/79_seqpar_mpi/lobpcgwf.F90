@@ -11,7 +11,7 @@
 !! it will also update the matrix elements of the hamiltonian.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (FBottin,GZ,AR,MT,FDahm)
+!! Copyright (C) 1998-2017 ABINIT group (FBottin,GZ,AR,MT,FDahm)
 !! this file is distributed under the terms of the
 !! gnu general public license, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -190,6 +190,9 @@ subroutine lobpcgwf(cg,dtset,gs_hamk,gsc,icg,igsc,kinpw,mcg,mgsc,mpi_enreg,&
 !For communication
  blocksize=mpi_enreg%nproc_fft
  if(mpi_enreg%paral_kgb==1) blocksize=mpi_enreg%nproc_band*mpi_enreg%bandpp
+ !IF you want to compare with new lobpcg in sequential uncomment the following
+ !line
+ !blocksize=mpi_enreg%nproc_band*mpi_enreg%bandpp
 
 !Iniitializations/allocations of GPU parallelism
  use_linalg_gpu=0;use_lapack_gpu=0

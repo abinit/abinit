@@ -10,7 +10,7 @@
 !!   in order to reduce projected scalars
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (MT)
+!! Copyright (C) 1998-2017 ABINIT group (MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -53,6 +53,7 @@
 !!  nspinor= number of spinorial components of the wavefunctions (on current proc)
 !!  nspinortot=total number of spinorial components of the wavefunctions
 !!  optder=0=only gxfac is computed, 1=both gxfac and dgxdtfac are computed
+!!         2=gxfac, dgxdtfac and d2gxdtfac are computed
 !!  paw_opt= define the nonlocal operator concerned with:
 !!           paw_opt=0 : Norm-conserving Vnl (use of Kleinman-Bylander ener.)
 !!           paw_opt=1 : PAW nonlocal part of H (use of Dij coeffs)
@@ -183,6 +184,7 @@ subroutine opernlc_ylm(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cplex_fa
 !  === Diagonal term(s) (up-up, down-down)
 !  1-Enl is real
    if (cplex_enl==1) then
+
 !$OMP PARALLEL &
 !$OMP PRIVATE(ispinor,ispinor_index,ia,index_enl), &
 !$OMP PRIVATE(jlmn,j0lmn,jjlmn,enl_,gxj,ilmn,ijlmn,gxi)
@@ -225,10 +227,12 @@ subroutine opernlc_ylm(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cplex_fa
      end do
 !$OMP END DO 
 !$OMP END PARALLEL
+
 !    2-Enl is complex
    else
      ABI_CHECK(cplex_fac==cplex_enl,"BUG: invalid cplex_fac/=cplex_enl!")
      if (nspinortot==1) then    !===== when nspinor=1, D_ij=D_ji except in hermdij case
+
 !$OMP PARALLEL &
 !$OMP PRIVATE(ia,index_enl,jlmn,j0lmn,jjlmn,enl_,gxj,ilmn,ijlmn,gxi)
        do ia=1,nincat

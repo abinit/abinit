@@ -7,7 +7,7 @@
 !!   Atomic data
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2000-2016 ABINIT group (XG, MJV, MT, MG)
+!!  Copyright (C) 2000-2017 ABINIT group (XG, MJV, MT, MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -93,8 +93,8 @@ contains
 !!
 !! PARENTS
 !!      bonds_lgth_angles,fresid,ingeo,invars1,m_abimover,m_atomdata,m_crystal
-!!      m_crystal_io,mlwfovlp_setup,out1dm,prt_cif,prtfatbands,prtposcar
-!!      randomcellpos,recip_ylm,vdw_dftd2,vdw_dftd3
+!!      m_crystal_io,m_effective_potential_file,m_epjdos,mlwfovlp_setup,out1dm
+!!      prt_cif,prtposcar,randomcellpos,vdw_dftd2,vdw_dftd3
 !!
 !! CHILDREN
 !!

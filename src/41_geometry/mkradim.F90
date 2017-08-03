@@ -9,7 +9,7 @@
 !!  also make acell(3).
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (DCA, XG, GMR)
+!! Copyright (C) 1998-2017 ABINIT group (DCA, XG, GMR)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -23,7 +23,7 @@
 !!  rprim(3,3)=dimensionless real space primitive translations
 !!
 !! PARENTS
-!!      gstate,ingeo,m_ddk,m_dvdb,m_pimd,m_use_ga,mover,pred_steepdesc
+!!      gstate,gstateimg,ingeo,m_ddk,m_pimd,m_use_ga,pred_steepdesc
 !!      predict_pimd,wvl_memory,xfpack_vin2x
 !!
 !! CHILDREN
