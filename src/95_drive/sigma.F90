@@ -320,8 +320,8 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
    end if
    if(Dtset%gwcalctyp>=100 .AND. Dtset%gwcalctyp <200) then
      if( Dtset%rcut<tol6 ) then
-       msg='For HSE calculation, the cutoff radius rcut has to be set to 9.090909 bohr!'
-       MSG_ERROR(msg)
+       msg='The cutoff radius rcut is not specified for HSE calculations. Default values will be used!'
+       MSG_WARNING(msg)
      end if
      if( Dtset%icutcoul /=5 .AND. Dtset%icutcoul /=15 ) then
        msg='For HSE calculation, abinit requires short-range only exchange (icutcoul=5)'

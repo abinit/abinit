@@ -250,7 +250,8 @@ subroutine pred_hmc(ab_mover,hist,itime,icycle,ntime,ncycle,zDEBUG,iexit)
      end if
    end if
   !write(238,*) '  random number: ',rnd,' -de/kbtemp:',-de/kbtemp,' acceptance decision: ',iacc
-  !write(std_out,*) '  de: ',de,' estart: ',etotal_hmc_prev,' efin:', etotal
+  !write(239,*) '  de: ',de,' estart: ',etotal_hmc_prev,' efin:', etotal
+  !write(239,*) 'ekin= ',ekin,'  epot= ',epot,'  e_start= ',etotal_hmc_prev,'  e_end= ',etotal,'  iacc=',iacc, '  dekT=',-de/kbtemp
 
    call hist2var(acell,hist,ab_mover%natom,rprimd,xred,zDEBUG)
   !call xred2xcart(ab_mover%natom,rprimd,xcart,xred)

@@ -611,7 +611,7 @@ CTQMC calculations are much more time consuming that Hubbard I calculations. Nev
  </ul>
  <br />
  The CT Hyb algorithm is described in
-   <a href="http://journals.aps.org/prl/abstract/10.1103/PhysRevLett.97.076405">
+   <a href="https://journals.aps.org/prl/abstract/10.1103/PhysRevLett.97.076405">
     Phys. Rev. Lett 97, 076405, (2006) </a>.
     For a discussion  of density-density approximation with respect
     with the rotationnally invariant formulation, see e.g.
@@ -1025,7 +1025,7 @@ Only relevant if <a href="vardev.html#dmft_solv">dmft_solv</a>==6 or 7
  <br />
  Specify the number of Legendre polynomials used for the calculation of Green's function in CTQMC code from the library TRIQS.
  Default is 30. The value of coefficients are given in file whose name ending is "Legendre_coefficient.dat".
- (see also <a href="http://journals.aps.org/prb/abstract/10.1103/PhysRevB.84.075145"> Phys. Rev. B 84, 075145 (2010))
+ (see also <a href="https://journals.aps.org/prb/abstract/10.1103/PhysRevB.84.075145"> Phys. Rev. B 84, 075145 (2010))
  </a>
 </p>
 </font>
@@ -2718,7 +2718,7 @@ The implementation is not symetrized over k-point and not parallelized.
 
 (The calculation of projections is
 detailed in
- <a href="http://journals.aps.org/prb/abstract/10.1103/PhysRevB.77.205112">
+ <a href="https://journals.aps.org/prb/abstract/10.1103/PhysRevB.77.205112">
   Phys. Rev. B 77, 205112, (2008)
  </a>
  )
@@ -2914,7 +2914,7 @@ variable is destined to someday bypass the use of anaddb for scphon calculations
 <p>
 <p>
  Print out geometry (_BLZTRP_GEOM) and eigenenergy (_BLZTRP_EIGEN) files for the
- <a href="http://www.icams.de/content/research/software-development/boltztrap/"> BoltzTraP code</a>
+ <a href="https://www.imc.tuwien.ac.at/forschungsbereich_theoretische_chemie/forschungsgruppen/prof_dr_gkh_madsen_theoretical_materials_chemistry/boltztrap/"> BoltzTraP code</a>
  by Georg Madsen.
 </p>
 </font>
@@ -3365,7 +3365,7 @@ and <a href="vardev.html#dmft_iter">dmft_iter</a>.
 </p>
 <p>
  The current implementation uses Wannier functions obtained from
- <a href="http://journals.aps.org/prb/abstract/10.1103/PhysRevB.77.205112">
+ <a href="https://journals.aps.org/prb/abstract/10.1103/PhysRevB.77.205112">
   projected local orbitals
  </a>
  as correlated orbitals (see <a href="vardev.html#dmftbandi">dmftbandi</a>  and <a href="vardev.html#dmftbandf">dmftbandf</a> input variables to define them).
@@ -3400,7 +3400,7 @@ expensive, it is convenient to use prtden=-1, to write DEN file at each DFT iter
 </p>
 <p>
  For details of the implementation see,
- <a href="http://journals.aps.org/prb/abstract/10.1103/PhysRevB.77.205112">
+ <a href="https://journals.aps.org/prb/abstract/10.1103/PhysRevB.77.205112">
   B. Amadon, F. Lechermann, A. Georges, F.  Jollet, T. O.  Wehling, and A. I.  Lichtenstein, Phys. Rev. B 77(20), (2008)
  </a>
  , for Wannier functions and
@@ -4344,7 +4344,7 @@ oscillator-model with localized Wannier functions.
  </ul>
  For <b>vdw_xc</b>=1 and <b>vdw_xc</b>=2, the implementation follows the strategy devised
 in the article of Rom&aacute;n-P&eacute;rez and Soler
-(<a href="http://dx.doi.org/10.1103/PhysRevLett.103.096102">doi:10.1103/PhysRevLett.103.096102</a>)
+(<a href="https://dx.doi.org/10.1103/PhysRevLett.103.096102">doi:10.1103/PhysRevLett.103.096102</a>)
 </p>
 </font>
 
@@ -4360,8 +4360,7 @@ in the article of Rom&aacute;n-P&eacute;rez and Soler
 <br><font id="text">
 <p>
 <p>
- Allows to choose the algorithm
-for the optimisation of the wavefunctions.
+ Allows one to choose the algorithm for the optimisation of the wavefunctions.
  <br />
  The different possibilities are :
  <ul>
@@ -4393,8 +4392,7 @@ Block Preconditioned Conjugate Gradient (LOBPCG) method of Knyazev.
 Journal on Scientific Computing 23, pp517-541 (2001)
    </a>
    .
-The implementation rests
-on the
+The implementation rests on the
    <a href="http://www.mathworks.com/matlabcentral/fileexchange/48-lobpcg-m">
     matlab program by Knyazev
    </a>
@@ -4406,8 +4404,7 @@ hypre and PETSc (2007). SIAM Journal on Scientific Computing (SISC).
 25(5): 2224-2239
    </a>
    .
-For more
-information see
+For more information see
    <a href="http://dx.doi.org/10.1016/j.commatsci.2007.07.019">
     F. Bottin, S. Leroux, A. Knyazev, G. Zerah, Large scale
 ab initio calculations based on three levels of parallelization. (2008).
@@ -4431,7 +4428,7 @@ second one the efficiency.
   </li>
 <li>
    <b>wfoptalg</b>=114 :
-A new version of <b>wfoptalg</b>=14 which is more efficient for few blocks and can take advance of OpenMP if abinit is compiled with a multithreaded linear algebra library.
+A new version of <b>wfoptalg</b>=14 which is more efficient for few blocks and can take advantage of OpenMP if abinit is compiled with a multithreaded linear algebra library.
 With more than 1 thread <a href="varpar.html#npfft">npfft</a> shoud NOT be used for the time being.
   </li>
   <li>

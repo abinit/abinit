@@ -38,7 +38,6 @@
 #%% [setup]
 #%% executable = abinit
 #%% test_chain = t51.in, t52.in, t53.in
-#%% exclude_hosts = ibm@ibm6
 #%% [files]
 #%% psp_files = 13al.pspgth, 33as.SGS_mod
 #%% [paral_info]
