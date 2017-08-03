@@ -1,4 +1,4 @@
-# Test Al XML pseudopotential - PSP8 reference
+# Test Al XML pseudopotential - ONCVPSP
 
 natom   1
 ntypat  1
@@ -51,13 +51,12 @@ ixc -101130
 #%% [files]
 #%% files_to_test = 
 #%%  t08.out, tolnlines = 0, tolabs = 1.1e-06, tolrel = 0.00e+00
-#%% psp_files = 13_Al_psml.psp8
+#%% psp_files = 13_Al_oncv.psml
 #%% [paral_info]
 #%% max_nprocs = 8
 #%% [extra_info]
 #%% authors = Y. Pouillon
 #%% keywords = NC
 #%% description = 
-#%%   Total energy vs. cell size for bulk FCC aluminium, to compare with the
-#%%   PSML results of t04
+#%%   Total energy vs. cell size for bulk FCC aluminium
 #%%<END TEST_INFO>

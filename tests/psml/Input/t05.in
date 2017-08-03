@@ -1,4 +1,4 @@
-# Test Si XML pseudopotential - PSP8 reference
+# Test Si XML pseudopotential - ONCVPSP
 
 acell 3*10.26311
 diemac 10.0d0
@@ -29,13 +29,12 @@ ixc -101130
 #%% [files]
 #%% files_to_test = 
 #%%   t05.out, tolnlines = 0, tolabs = 0.00e+00, tolrel = 0.00e+00
-#%% psp_files = 14_Si_psml.psp8
+#%% psp_files = 14_Si_oncv.psml
 #%% [paral_info]
 #%% max_nprocs = 8
 #%% [extra_info]
 #%% authors = M. Verstraete, Y. Pouillon
 #%% keywords = NC
 #%% description = 
-#%%   Bulk silicon, in the diamond structure, to compare with PSML results
-#%%   from t01
+#%%   Bulk silicon, in the diamond structure 
 #%%<END TEST_INFO>

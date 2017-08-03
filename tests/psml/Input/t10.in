@@ -1,4 +1,4 @@
-# Test Fe XML pseudopotential with and without sppol
+# Test Fe XML pseudopotential with and without sppol - ATOM
 
 ndtset 2
 nsppol1 1

@@ -1,15 +1,14 @@
-# Test Al XML pseudopotential - PSP8 reference
+# Test Au XML pseudopotential - ONCVPSP
 
 natom   1
 ntypat  1
 typat   1
-znucl   13
-ndtset   4
-ecut1   7.00
-ecut2   8.00
-ecut3   9.00
-ecut4  10.00
-acell   3.97    3.97    3.97 Angstrom
+znucl   79
+ndtset  4
+acell1  4.00    4.00    4.00 Angstrom
+acell2  4.08    4.08    4.08 Angstrom
+acell3  4.16    4.16    4.16 Angstrom
+acell4  4.24    4.24    4.24 Angstrom
 rprim   0.0     0.5     0.5 
         0.5     0.0     0.5
         0.5     0.5     0.0
@@ -19,6 +18,7 @@ natfix  1
 iatfix  1
 optcell 0
 dilatmx 1.1
+ecut    8.970000
 ecutsm  0.5
 nband   10
 kptopt  1
@@ -30,10 +30,11 @@ shiftk  0.5 0.5 0.5
         0.0 0.0 0.5
 iscf    5
 nstep   30
-toldfe  1.0d-8
+toldfe  1.0d-06
+tolmxf  1.0d-05
 occopt  3
 tsmear  0.01
-ionmov     0
+ionmov  0
 ntime      0
 prtden     0
 prtpot     0
@@ -41,7 +42,7 @@ prtvha     0
 prtvhxc    0
 prtvxc     0
 prt1dm     0
-ixc -101130
+ixc -1009
 
 ## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
 #%%<BEGIN TEST_INFO>
@@ -49,14 +50,13 @@ ixc -101130
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%  t03.out, tolnlines = 0, tolabs = 1.1e-06, tolrel = 0.00e+00
-#%% psp_files = 13_Al_psml.psp8
+#%%  t14.out, tolnlines = 0, tolabs = 1.1e-06, tolrel = 0.00e+00
+#%% psp_files = 79_Au_atom.psml
 #%% [paral_info]
 #%% max_nprocs = 8
 #%% [extra_info]
-#%% authors = Y. Pouillon
+#%% authors = Y. Pouillon, J. Junquera
 #%% keywords = NC
 #%% description = 
-#%%   Partial cut-off energy convergence study of bulk FCC aluminium,
-#%%   to compare with the PSML results of t07 and t11
+#%%   Total energy vs. cell size for bulk FCC gold
 #%%<END TEST_INFO>
