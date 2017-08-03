@@ -213,7 +213,7 @@ subroutine nonlop_test(cg,eigen,istwfk,kg,kpt,mband,mcg,mgfft,mkmem,mpi_enreg,mp
    end if
    if(choice==54)then
      ider_ffnl=2 ; cplex=2
-     nnlout=18*natom ; inlout=2*idir-1
+     nnlout=18*natom ; inlout=18*(iatom-1)+2*idir-1
    end if
    if(choice==55)then
      ider_ffnl=2 ; cplex=2
@@ -247,6 +247,7 @@ subroutine nonlop_test(cg,eigen,istwfk,kg,kpt,mband,mcg,mgfft,mkmem,mpi_enreg,mp
      ider_ffnl=1 ; idir_ffnl=4 ; cplex=2
    end if
    if(choice==54)then
+     iatom_only=iatom
      ider_ffnl=2 ; idir_ffnl=4 ; cplex=2
    end if
    if(choice==8)then
@@ -376,7 +377,8 @@ subroutine nonlop_test(cg,eigen,istwfk,kg,kpt,mband,mcg,mgfft,mkmem,mpi_enreg,mp
 &              iatom_only=iatom_only,enl=enl)
        else
          call nonlop(choice,cpopt,cwaveprj,enlout,gs_hamk,idir_nonlop,lambda,&
-&              mpi_enreg,1,nnlout,paw_opt,signs,scwavef_out,tim_nonlop,cwavef,cwavef_out)
+&              mpi_enreg,1,nnlout,paw_opt,signs,scwavef_out,tim_nonlop,cwavef,cwavef_out,&
+               iatom_only=iatom_only)
        end if
 
 !      Post-processing if nonlop is called with specific options
