@@ -2,7 +2,7 @@
     name      : ElPhon 
     keyword   : Electron-phonon 
     authors   : MV
-    howto     : perform an electron-phonon calculation
+    howto     : compute electric resistivity and electronic thermal conductivity
     header    : default
     title     : <h1>Electron-phonon calculations</h1>
     subtitle  : default

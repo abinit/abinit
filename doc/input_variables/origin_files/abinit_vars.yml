@@ -3223,7 +3223,7 @@
     mnemonics: COeFFicient 1
     requires: null
     text: |-
-        See the input variable [[ratmin]].
+        See the input variable [[ratmin@aim]].
     topics: Bader_expert
     varset: varaim
     vartype: real
@@ -3238,7 +3238,7 @@
     mnemonics: COeFFicient 2
     requires: null
     text: |-
-        See the input variable [[ratmin]].
+        See the input variable [[ratmin@aim]].
     topics: Bader_expert
     varset: varaim
     vartype: real
@@ -3354,7 +3354,7 @@
             the simplified version does this only for CP(3,-1). When CP analysis is
             rather fast (with respect to surface determination), 2 is recommended.
             In all cases the number of neighbors considered is limited by
-            distance cutoff (variable  [[maxatd]])
+            distance cutoff (variable  [[maxatd@aim]])
     topics: Bader_compulsory
     varset: varaim
     vartype: integer
@@ -3762,10 +3762,10 @@
         Output of the electronic density.
           The specification of the
           line (plane) in the real space must be given in the input variable
-          [[vpts]] and grid in
-          [[ngrid]].
+          [[vpts@aim]] and grid in
+          [[ngrid@aim]].
           It is also possible to get only the
-          valence density or the core density (see [[dltyp]]).
+          valence density or the core density (see [[dltyp@aim]]).
           <ul>
            <li>0, no output
            <li>1, 1D distribution
@@ -4469,8 +4469,8 @@
     text: |-
         Specification of the contribution of the electronic
           density corresponding to the density and/or laplacian output
-          (see [[denout]] and
-               [[lapout]])
+          (see [[denout@aim]] and
+               [[lapout@aim]])
           <ul>
            <li>0, total electronic density
            <li>1, only the valence density
@@ -6480,7 +6480,7 @@
     mnemonics: Electron Phonon integration Band MAXimum
     requires: null
     text: |-
-        <p>When set, and [[anaddb:telphint]] is equal to 2, this variable determines the k-point integration weights which are used in the electron-phonon part of the code. Instead of weighting according to a distance from the Fermi surface, an equal weight is given to all k-points, for all bands between [[ep_b_min]] and <b>ep_b_max</b>.
+        <p>When set, and [[anaddb:telphint]] is equal to 2, this variable determines the k-point integration weights which are used in the electron-phonon part of the code. Instead of weighting according to a distance from the Fermi surface, an equal weight is given to all k-points, for all bands between [[anaddb:ep_b_min]] and <b>ep_b_max</b>.
     topics: anaddbEPC_useful
     varset: varanaddb
     vartype: integer
@@ -7273,7 +7273,7 @@
     mnemonics: FOLlow DEParture
     requires: null
     text: |-
-        Needed in the case [[follow]]=1 only.
+        Needed in the case [[aim:follow]]=1 only.
           Defines the starting point.
     topics: Bader_expert
     varset: varaim
@@ -7291,7 +7291,7 @@
     text: |-
         Follow the gradient path to the corresponding atom
           starting from the position specified in the input variable
-          [[foldep]].
+          [[aim:foldep]].
     topics: Bader_compulsory
     varset: varaim
     vartype: integer
@@ -13135,7 +13135,7 @@
     defaultval: 1
     dimensions: scalar
     excludes: null
-    mnemonics: Integer for eXchange-Correlation choice
+    mnemonics: Index of eXchange-Correlation functional
     requires: null
     text: |-
         <p>
@@ -15198,10 +15198,10 @@
         Output of
           the laplacian of electronic density. The specification of the
           line (plane) in the real space must be given in the input variable
-         [[vpts]] and grid in
-          [[ngrid]].
+         [[aim:vpts]] and grid in
+          [[aim:ngrid]].
           It is also possible to get only the
-          valence density or the core density (see [[dltyp]]).
+          valence density or the core density (see [[aim:dltyp]]).
           <ul>
            <li>0, no output
            <li>1, 1D distribution
@@ -15241,7 +15241,7 @@
     requires: null
     text: |-
         Determines the criterion for deciding that a CP has been found. See
-          [[lgrad]] for more details.
+          [[aim:lgrad]] for more details.
     topics: Bader_useful
     varset: varaim
     vartype: real
@@ -15259,13 +15259,13 @@
         The search for one particular CP is decided to be successful when either
           the norm of the gradient of the electron density is smaller
           than <b>lgrad</b> or when the length of the planned search step
-          is smaller than [[lstep]]. If
+          is smaller than [[aim:lstep]]. If
           the number of search step becomes larger than an internal limit
           (presently set to 100), one will allow a weaker criteria for
-          satisfaction, based on [[lgrad2]]
-          and [[lstep2]]. If the internal limit
-          is reached, and the criteria on [[lgrad2]]
-          and [[lstep2]] are not satisfied, then
+          satisfaction, based on [[aim:lgrad2]]
+          and [[aim:lstep2]]. If the internal limit
+          is reached, and the criteria on [[aim:lgrad2]]
+          and [[aim:lstep2]] are not satisfied, then
           the searching procedure continues with the next seed.
     topics: Bader_useful
     varset: varaim
@@ -15450,7 +15450,7 @@
     requires: null
     text: |-
         Determines the criterion for deciding that a CP has been found. See
-          [[lgrad]] for more details.
+          [[aim:lgrad]] for more details.
     topics: Bader_useful
     varset: varaim
     vartype: real
@@ -15466,7 +15466,7 @@
     requires: null
     text: |-
         Determines the criterion for deciding a CP has been found. See
-          [[lgrad]] for more details.
+          [[aim:lgrad]] for more details.
     topics: Bader_useful
     varset: varaim
     vartype: real
@@ -15578,9 +15578,9 @@
           to start the search of a CP.
           <p>Note that the supercell,
           determined by
-          [[nsa]],
-          [[nsb]], and
-         [[nsc]] might
+          [[aim:nsa]],
+          [[aim:nsb]], and
+         [[aim:nsc]] might
           be too small to actually lead to the consideration of all the
           desired atoms.
     topics: Bader_useful
@@ -15600,9 +15600,9 @@
         The CPs are searched for within this maximal distance.
           <p>Note that the supercell,
           determined by
-          [[nsa]],
-          [[nsb]], and
-          [[nsc]] might
+          [[aim:nsa]],
+          [[aim:nsb]], and
+          [[aim:nsc]] might
           be too small to actually lead to the consideration of all the
           critical points.
     topics: Bader_useful
@@ -17209,7 +17209,7 @@
     requires: null
     text: |-
         <p>Number of frequencies wanted for the frequency-dependent dielectric tensor. Should be positive.
-        See [[abaddb:dieflag]].
+        See [[anaddb:dieflag]].
 
         The code will take <b>nfreq</b> equidistant values from [[anaddb:frmin]] to [[anaddb:frmax]].
     topics: anaddbSpec_basic
@@ -17574,8 +17574,8 @@
     text: |-
         Defines the grid in real space, for the density
           and laplacian outputs, governed by
-          [[denout]] and
-          [[lapout]].
+          [[aim:denout]] and
+          [[aim:lapout]].
     topics: Bader_expert
     varset: varaim
     vartype: integer
@@ -18475,12 +18475,12 @@
     mnemonics: Number of PHI angle
     requires: null
     text: |-
-        With [[ntheta]], this
+        With [[aim:ntheta]], this
           variable defines the angular grid for the integration
           within the Bader volume, in particular, the number
           of phi angles, to be used between
-          [[phimin]] and
-          [[phimax]].
+          [[aim:phimin]] and
+          [[aim:phimax]].
           When the difference between these two variables
           is 2 pi, the recommended value of <b>nphi</b> is 48.
           When it is pi (for symmetry reasons), the recommended
@@ -19388,12 +19388,12 @@
     mnemonics: Number of THETA angles
     requires: null
     text: |-
-        With [[nphi]], this
+        With [[aim:nphi]], this
           variable defines the angular grid for the integration
           within the Bader volume, in particular, the number
           of theta angles, to be used between
-          [[thetamin]] and
-          [[thetamax]].
+          [[aim:thetamin]] and
+          [[aim:thetamax]].
           When the difference between these two variables
           is pi, the recommended value of <b>ntheta</b> is 32.
           When it is pi/2 (for symmetry reasons),
@@ -21928,7 +21928,7 @@
         Angular limits of integration of the Bader volume
           for the phi variables. The number
           of integration points is given by
-          [[nphi]].
+          [[aim:nphi]].
           The range of integration can be decreased if there are
           symmetry reasons for doing this.
     topics: Bader_basic
@@ -21948,7 +21948,7 @@
         Angular limits of integration of the Bader volume
           for the phi variables. The number
           of integration points is given by
-          [[nphi]].
+          [[aim:nphi]].
           The range of integration can be decreased if there are
           symmetry reasons for doing this.
     topics: Bader_expert
@@ -25151,7 +25151,7 @@
     requires: null
     text: |-
         <p>If <b>qgrid_type</b> is set to 1, the electron-phonon part of anaddb will use
-        the [[anaddb:ep_nqpt]] and [[anaddbep_qptlist]] variables to determine
+        the [[anaddb:ep_nqpt]] and [[anaddb:ep_qptlist]] variables to determine
         which q-points to calculate the electron-phonon coupling for. This is an alternative
         to a regular grid as in the rest of anaddb (using [[anaddb:ngqpt]]).
     topics: anaddbEPC_expert
@@ -25713,9 +25713,9 @@
           the program
           makes a new one based on the knowledge of CPs. In fact after
           the CP analysis, the new estimation is done by the product of the ad hoc
-          parameter  [[coff1]] (default 0.98) by the distance of the nearest
+          parameter  [[aim:coff1]] (default 0.98) by the distance of the nearest
           bonding CP.
-          If there is a problem later, [[coff2]] (default 0.95) is used instead.
+          If there is a problem later, [[aim:coff2]] (default 0.95) is used instead.
     topics: Bader_expert
     varset: varaim
     vartype: real
@@ -26882,7 +26882,7 @@
     mnemonics: Radius SURface DIRection
     requires: null
     text: |-
-        In the case [[rsurf]]=1,
+        In the case [[aim:rsurf]]=1,
           gives the direction (angular coordinates theta,phi)
           along which the radius of the Bader
           surface is to be determined.
@@ -26902,7 +26902,7 @@
     text: |-
         Drive the computation of the radius of the Bader surface for
           the angles specified in the input variable
-          [[rsurdir]]
+          [[aim:rsurdir]]
           <ul>
            <li>0, not calculated
            <li>1, calculated
@@ -28552,7 +28552,7 @@
         Angular limits of integration of the Bader volume
           for the theta variables. The number
           of integration points is given by
-          [[ntheta]].
+          [[aim:ntheta]].
           The range of integration can be decreased if there are
           symmetry reasons for doing this.
     topics: Bader_basic
@@ -28572,7 +28572,7 @@
         Angular limits of integration of the Bader volume
           for the theta variables. The number
           of integration points is given by
-          [[ntheta]].
+          [[aim:ntheta]].
           The range of integration can be decreased if there are
           symmetry reasons for doing this.
     topics: Bader_expert
@@ -31338,9 +31338,9 @@
         Basic vectors of the line or rectangle in real space,
           defining the points for which the density or
           laplacian will be computed, thanks to
-         [[denout]]
+         [[aim:denout]]
           or
-          [[lapout]]
+          [[aim:lapout]]
     topics: Bader_useful
     varset: varaim
     vartype: real

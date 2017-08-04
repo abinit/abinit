@@ -9,9 +9,17 @@
     copyright : default
     links     : default
     introduction : |- 
-         The total energy computation is done according to the Density Functional
-         Theory. 
-         <br/>Many exchange-correlation functionals are available,
+         Total energy computation in ABINIT is done according to Density Functional
+         Theory (DFT). Although formally exact, an approximate exchange-correlation (XC) functional must be chosen.
+         This is governed by the input variable [[ixc]]. 
+         <br/>However, the pseudopotentials (or PAW data sets) are
+         constructed for one specific XC functional. If [[ixc]] is not specified, ABINIT will simply
+         take the [[ixc]] of the given pseudopoential(s) - hoping they are coherent with each others.
+         One introduces an error by using a pseudopotential generated with an XC functional
+         that is not the same as the one explicitly specified by [[ixc]]. However, 
+         ABINIT will nevertheless do the calculation.
+
+         <p>Many exchange-correlation functionals are available (see the list in the description of [[ixc]]),
          through two different implementations : one is the native ABINIT implementation,
          the other is the ETSF library of XC functionals (LibXC is a plug-in to ABINIT).
          In the native ABINIT set,
@@ -38,13 +46,17 @@
 
          <h4><b>Local exact exchange:</b></h4>
          <p>
-         When useexexch=1, the hybrid functional PBE0 is used in PAW, inside PAW spheres only, and only for correlated orbitals given by lexexch. To change the ratio of exact exchange, see also exchmix. The implementation of local exact exchange in ABINIT is provided in [[Jollet2009]]. See useful input variables exchmix, lexexch and useexexch.
+         When [[useexexch]]=1, the hybrid functional PBE0 is used in PAW, 
+         inside PAW spheres only, and only for correlated orbitals given by [[lexexch]]. 
+         To change the ratio of exact exchange, see also [[exchmix]]. 
+         The implementation of local exact exchange in ABINIT is provided in [[Jollet2009]]. 
+         See useful input variables [[exchmix]], [[lexexch]] and [[useexexch]].
          <br/>
 
          <br/>
          <h4><b>Van der Waals functionals:</b></h4>
          <br/>Several <a href="topic_vdw.html">Van der Waals functionals</a> are available : Grimme (D2, D3, D3(Becke-Johnson)), Silvestrelli.
     tutorials  : |-
-          <li>The [[lesson_base2]] deals again with the H<sub>2</sub>
+          <li>The [[lesson_base2]] deals with the H<sub>2</sub>
           molecule: convergence studies, LDA versus GGA </li>
     end : default 

@@ -183,6 +183,13 @@ def make_links(text,cur_key,allowed_link_seeds,backlinks,backlink):
           backlinks[key]+=backlink+";;"
           return '<a href="../../bibliography/generated_files/bibliography.html#%s">[%s]</a>' %(key,webtext)
 
+    #DEBUG
+    print(" dokukey:",dokukey)
+    print(" linkseed:",linkseed)
+    sys.exit()
+    #ENDDEBUG
+  
+
     return '<a href="#">[[FAKE LINK:'+dokukey+']]</a>'
 
   p=re.compile("\\[\\[([a-zA-Z0-9_ */<>.|:+#@]*)\\]\\]")
