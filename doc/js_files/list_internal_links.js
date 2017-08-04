@@ -33,6 +33,8 @@ document.write(' <A href="'+docpath+'users/generated_files/help_aim.html"><B>AIM
 document.write(' <B> | </B> ');
 document.write(' <A href="'+docpath+'users/generated_files/help_cut3d.html"><B>Cut3D</B></A> ');
 document.write(' <B> | </B> ');
+document.write(' <A href="'+docpath+'users/generated_files/help_fold2bloch.html"><B>Fold2Bloch</B></A> ');
+document.write(' <B> | </B> ');
 document.write(' <A href="'+docpath+'users/generated_files/help_optic.html"><B>Optic</B></A> ');
 document.write(' <B> | </B> ');
 document.write(' <A href="'+docpath+'users/generated_files/help_mrgscr.html"><B>Mrgscr</B></A> ');

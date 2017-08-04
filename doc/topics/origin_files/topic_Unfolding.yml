@@ -1,6 +1,6 @@
 - !components 
     name      : Unfolding 
-    keyword   : Unfolding bans strutures 
+    keyword   : Unfolding band structures 
     authors   : OR
     howto     : unfold supercell band structures
     header    : default
@@ -25,5 +25,5 @@
         <p>A MATLAB script <i>ubs_dots.m</i> is designed to assist with plotting the unfolded band structure. The unfolded band structure plot is represented as a scatter plot where the size and colour of the markers  carry information about the Bloch character of energy bands. Users are asked to provide details about the k-path, name of the fold2Bloch output file abo_WFK.f2b, position of the Fermi energy, and reciprocal lattice vectors that can be found in the main output file ab_out.out. 
 
     tutorials  : |-
-          <li><a href="../../tutorial/generated_files/lesson_fold2Bloch.html">The lesson on unfolding supercell band structures</a></li>
+          <li><a href="../../tutorial/generated_files/lesson_fold2bloch.html">The lesson on unfolding supercell band structures</a></li>
     end : default
