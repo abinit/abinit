@@ -90,4 +90,5 @@ iatprj_bs 1 2
 #%% keywords = 
 #%% description = 
 #%%   anaddb test electron phonon coupling with extra number of electons of hcp Ti
+#%% topics = anaddbEPC
 #%%<END TEST_INFO>

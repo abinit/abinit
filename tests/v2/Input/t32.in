@@ -67,4 +67,5 @@
 #%%   4.067cm-1, becomes 4.05398 cm-1 and 4.05400 cm-1 . 
 #%%   Of course, this effect cannot be seen for other modes, since only
 #%%   the acoustic modes are sensitive to that level of accuracy ! 
+#%% topics = anaddbSpec
 #%%<END TEST_INFO>

@@ -395,6 +395,21 @@
   doi : 10.1103/PhysRevB.50.17953
 -
   ENTRYTYPE : article
+  ID : Bloechl1994a
+  author : Bl\"ochl, Peter E. and Jepsen, O. and Andersen, O. K.
+  title : Improved tetrahedron method for Brillouin-zone integrations
+  journal : Phys. Rev. B
+  year : 1994
+  volume : 49
+  pages : 16223--16233
+  numpages : 0
+  doi : 10.1103/PhysRevB.49.16223
+  url : https://link.aps.org/doi/10.1103/PhysRevB.49.16223
+  publisher : American Physical Society
+  month : Jun
+  issue : 23
+-
+  ENTRYTYPE : article
   ID : Bockstedte1997
   author : Bockstedte, M. and Kley,A. and Neugebauer, J.  and Scheffler, M. 
   title : Density-functional theory calculations for poly-atomic systems: electronic structure, static and elastic properties and ab initio molecular dynamics

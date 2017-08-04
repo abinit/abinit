@@ -87,4 +87,5 @@
 #%%   Analyse the DDB from test t48, for the generation of
 #%%   the nonlinear coefficients and the first order change of the
 #%%   dielectric tensor.
+#%% topics = anaddbSpec, anaddbCommon
 #%%<END TEST_INFO>

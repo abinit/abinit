@@ -64,4 +64,5 @@
 #%%   though, but the frequencies compare already rather well with those
 #%%   in Quong and Klein, PRB 46, 10734 (1992), except
 #%%   close to Gamma (still, no instability is observed, unlike in test 28).
+#%% topics = anaddbSpec, anaddbCommon
 #%%<END TEST_INFO>

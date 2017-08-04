@@ -84,4 +84,5 @@ qph1l
 #%% keywords =
 #%% description = 
 #%%   Test rifcsph cutoff radius for IFC Fourier transform. Use output from t85-87
+#%% topics = anaddbEPC
 #%%<END TEST_INFO>

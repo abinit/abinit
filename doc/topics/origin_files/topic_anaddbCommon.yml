@@ -1,0 +1,26 @@
+- !components 
+    name      : anaddbCommon 
+    keyword   : Common anaddb input variables 
+    authors   : FJ
+    howto     : set common anaddb input variables
+    header    : default
+    title     : <h1>Common anaddb input variables</h1>
+    subtitle  : default
+    copyright : default
+    links     : default
+    introduction : |- 
+         <p>The input variables related to the acoustic sum rule are: [[anaddb:asr]] [[anaddb:chneut]] [[anaddb:selectz]]
+         <p>The input variables related to the crystal structure are: [[anaddb:brav]] [[anaddb:symdynmat]]
+         <p>The input variables related to the q-vectors are: [[anaddb:ndivsm]] [[anaddb:ngqpt]] [[anaddb:ng2qpt]] [[anaddb:nph1l]] [[anaddb:nph2l]] [[anaddb:nqpath]] [[anaddb:nqshft]] [[anaddb:q1shft]] [[anaddb:q2shft]] [[anaddb:qpath]] [[anaddb:qph1l]] [[anaddb:qph2l]] [[anaddb:qrefine]]
+
+
+         <p>The input variables related to the phonon DOS are: [[anaddb:atftol]] [[anaddb:dosdeltae]]  [[anaddb:dossmear]] [[anaddb:dossum]] [[anaddb:dostol]] [[anaddb:nchan]] [[anaddb:ngrids]] [[anaddb:nwchan]] [[anaddb:prtdos]]
+
+    tutorials  : |-
+         <li><a href="../../tutorial/generated_files/lesson_rf2.html">The lesson Response-Function 2 (RF2)</a>
+         presents the analysis of the DDBs that have been introduced in the
+         preceeding lesson RF1.  The computation of the interatomic forces and
+         the computation of thermodynamical properties is an outcome of this
+         lesson.</li>
+
+    end : default

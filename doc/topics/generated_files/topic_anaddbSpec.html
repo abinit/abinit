@@ -1,0 +1,156 @@
+<!--                                                                                     -->
+<!-- This file has been produced by generate_doc.py using different .yml  or .bib files. -->
+<!-- It is useless to modify it. Modify the related .yml  or .bib files instead.         -->
+<!--                                                                                     -->
+<html>
+<head><title>anaddb special tasks </title>
+<link rel=stylesheet type="text/css" href="../formabinit.css">
+</head>
+<body bgcolor="#ffffff">
+
+<hr>
+<a name="top"></a>
+
+<h1>Special anaddb tasks</h1>
+<h3>This file gives hints on how to perform special anaddb tasks with the ABINIT package.
+<hr>
+
+<h5>Copyright (C) 2016-2017 ABINIT group (FJ)
+<script type="text/javascript" src="../../js_files/copyright.js"> </script>
+</h5>
+
+<script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
+
+ <h3><b>Table of content: </b></h3> 
+ <ul> <li><a href="topic_anaddbSpec.html#1">1</a>. Introduction.<li><a href="topic_anaddbSpec.html#2">2</a>. Related lesson(s) of the tutorial.<li><a href="topic_anaddbSpec.html#3">3</a>. Related input variables.<li><a href="topic_anaddbSpec.html#4">4</a>. Selected input files.</ul>
+
+&nbsp; 
+<HR ALIGN=left> 
+<a name="1">&nbsp;</a>
+<h3><b>1. Introduction.</b></h3>
+
+
+<p>This ANADDB utility is able to perform many different tasks, each governed by a
+selected set of input variables, with also some input variables common to many of the
+different tasks. The list of tasks to be done in one run is governed by different flags.
+Here is the list of flags :
+<ul>
+<li><a href="../../input_variables/generated_files/varanaddb.html#dieflag@anaddb">dieflag</a> Calculation of the dielectric tensor.
+    <PRE>    related input variables: <a href="../../input_variables/generated_files/varanaddb.html#nfreq@anaddb">nfreq</a> <a href="../../input_variables/generated_files/varanaddb.html#frmax@anaddb">frmax</a> <a href="../../input_variables/generated_files/varanaddb.html#frmin@anaddb">frmin</a> </PRE> </li>
+<li><a href="../../input_variables/generated_files/varanaddb.html#elaflag@anaddb">elaflag</a> Calculation of the elastic tensor</li>
+<li><a href="../../input_variables/generated_files/varanaddb.html#elphflag@anaddb">elphflag</a> Electron-phonon calculations</li>
+<li><a href="../../input_variables/generated_files/varanaddb.html#ifcflag@anaddb">ifcflag</a> Calculation of the interatomic force constants
+    <PRE>    related input variables: <a href="../../input_variables/generated_files/varanaddb.html#atifc@anaddb">atifc</a> <a href="../../input_variables/generated_files/varanaddb.html#dipdip@anaddb">dipdip</a> <a href="../../input_variables/generated_files/varanaddb.html#ifcana@anaddb">ifcana</a> <a href="../../input_variables/generated_files/varanaddb.html#ifcout@anaddb">ifcout</a> <a href="../../input_variables/generated_files/varanaddb.html#natifc@anaddb">natifc</a> <a href="../../input_variables/generated_files/varanaddb.html#nsphere@anaddb">nsphere</a> <a href="../../input_variables/generated_files/varanaddb.html#prt_ifc@anaddb">prt_ifc</a> <a href="../../input_variables/generated_files/varanaddb.html#rifcsph@anaddb">rifcsph</a> <a href="../../input_variables/generated_files/varanaddb.html#vs_qrad_tolkms@anaddb">vs_qrad_tolkms</a></PRE></li>
+<li><a href="../../input_variables/generated_files/varanaddb.html#instrflag@anaddb">instrflag</a> Calculation of the internal strain tensor</li>
+<li><a href="../../input_variables/generated_files/varanaddb.html#nlflag@anaddb">nlflag</a> Calculation of the non-linear susceptibilities
+    <PRE>    related input variables: <a href="../../input_variables/generated_files/varanaddb.html#alphon@anaddb">alphon</a>  <a href="../../input_variables/generated_files/varanaddb.html#prtmbm@anaddb">prtmbm</a> <a href="../../input_variables/generated_files/varanaddb.html#ramansr@anaddb">ramansr</a></PRE></li>
+<li><a href="../../input_variables/generated_files/varanaddb.html#piezoflag@anaddb">piezoflag</a> Calculation of piezoelectric tensors</li>
+<li><a href="../../input_variables/generated_files/varanaddb.html#polflag@anaddb">polflag</a> Compute constrained polarization
+    <PRE>    related input variables: <a href="../../input_variables/generated_files/varanaddb.html#natfix@anaddb">natfix</a>  <a href="../../input_variables/generated_files/varanaddb.html#iatfix@anaddb">iatfix</a> <a href="../../input_variables/generated_files/varanaddb.html#nstrfix@anaddb">nstrfix</a> <a href="../../input_variables/generated_files/varanaddb.html#istrfix@anaddb">istrfix</a> <a href="../../input_variables/generated_files/varanaddb.html#relaxat@anaddb">relaxat</a> <a href="../../input_variables/generated_files/varanaddb.html#relaxstr@anaddb">relaxstr</a> <a href="../../input_variables/generated_files/varanaddb.html#targetpol@anaddb">targetpol</a></PRE> </li>
+<li><a href="../../input_variables/generated_files/varanaddb.html#thmflag@anaddb">thmflag</a> Calculation of thermal quantities
+    <PRE>    related input variables: <a href="../../input_variables/generated_files/varanaddb.html#gruns_ddbs@anaddb">gruns_ddbs</a> <a href="../../input_variables/generated_files/varanaddb.html#gruns_nddbs@anaddb">gruns_nddbs</a> <a href="../../input_variables/generated_files/varanaddb.html#ntemper@anaddb">ntemper</a> <a href="../../input_variables/generated_files/varanaddb.html#temperinc@anaddb">temperinc</a> <a href="../../input_variables/generated_files/varanaddb.html#tempermin@anaddb">tempermin</a> <a href="../../input_variables/generated_files/varanaddb.html#thmtol@anaddb">thmtol</a></PRE></li>
+</ul>
+<p>
+
+
+&nbsp; 
+<HR ALIGN=left> 
+<a name="2">&nbsp;</a>
+<h3><b>2. Related lesson(s) of the tutorial.</b></h3>
+
+
+<li><a href="../../tutorial/generated_files/lesson_rf2.html">The lesson Response-Function 2 (RF2)</a>
+presents the analysis of the DDBs that have been introduced in the
+preceeding lesson RF1.  The computation of the interatomic forces and
+the computation of thermodynamical properties is an outcome of this
+lesson.</li>
+
+&nbsp; 
+<HR ALIGN=left> 
+<a name="3">&nbsp;</a>
+<h3><b>3. Related input variables.</b></h3>
+
+
+<p>Compulsory input variables:<p>... <a href="../../input_variables/generated_files/varanaddb.html#dieflag@anaddb">dieflag@anaddb</a>   [DIElectric FLAG]<br>
+... <a href="../../input_variables/generated_files/varanaddb.html#elaflag@anaddb">elaflag@anaddb</a>   [ELAstic tensor FLAG]<br>
+... <a href="../../input_variables/generated_files/varanaddb.html#ifcflag@anaddb">ifcflag@anaddb</a>   [Interatomic Force Constants FLAG]<br>
+... <a href="../../input_variables/generated_files/varanaddb.html#instrflag@anaddb">instrflag@anaddb</a>   [INternal STRain FLAG]<br>
+... <a href="../../input_variables/generated_files/varanaddb.html#nlflag@anaddb">nlflag@anaddb</a>   [Non-Linear FLAG]<br>
+... <a href="../../input_variables/generated_files/varanaddb.html#piezoflag@anaddb">piezoflag@anaddb</a>   [PIEZOelectric tensor FLAG]<br>
+... <a href="../../input_variables/generated_files/varanaddb.html#polflag@anaddb">polflag@anaddb</a>   [POLarization FLAG]<br>
+... <a href="../../input_variables/generated_files/varanaddb.html#thmflag@anaddb">thmflag@anaddb</a>   [THerMal FLAG]<br>
+<p>Basic input variables:<p>... <a href="../../input_variables/generated_files/varanaddb.html#alphon@anaddb">alphon@anaddb</a>   [ALign PHONon mode eigendisplacements]<br>
+... <a href="../../input_variables/generated_files/varanaddb.html#atifc@anaddb">atifc@anaddb</a>   [AToms for IFC analysis]<br>
+... <a href="../../input_variables/generated_files/varanaddb.html#frmax@anaddb">frmax@anaddb</a>   [FRequency MAXimum]<br>
+... <a href="../../input_variables/generated_files/varanaddb.html#frmin@anaddb">frmin@anaddb</a>   [FRequency MINimum]<br>
+... <a href="../../input_variables/generated_files/varanaddb.html#gruns_ddbs@anaddb">gruns_ddbs@anaddb</a>   [GRUNeiSen DDBS]<br>
+... <a href="../../input_variables/generated_files/varanaddb.html#gruns_nddbs@anaddb">gruns_nddbs@anaddb</a>   [GRUNeiSen Number of DDB files]<br>
+... <a href="../../input_variables/generated_files/varanaddb.html#iatfix@anaddb">iatfix@anaddb</a>   [Indices of the AToms that are FIXed]<br>
+... <a href="../../input_variables/generated_files/varanaddb.html#ifcana@anaddb">ifcana@anaddb</a>   [IFC ANAlysis]<br>
+... <a href="../../input_variables/generated_files/varanaddb.html#ifcout@anaddb">ifcout@anaddb</a>   [IFC OUTput]<br>
+... <a href="../../input_variables/generated_files/varanaddb.html#istrfix@anaddb">istrfix@anaddb</a>   [Index of STRain FIXed]<br>
+... <a href="../../input_variables/generated_files/varanaddb.html#natfix@anaddb">natfix@anaddb</a>   [Number of AToms FIXed]<br>
+... <a href="../../input_variables/generated_files/varanaddb.html#natifc@anaddb">natifc@anaddb</a>   [Number of AToms for IFC analysis]<br>
+... <a href="../../input_variables/generated_files/varanaddb.html#nfreq@anaddb">nfreq@anaddb</a>   [Number of FREQuencies]<br>
+... <a href="../../input_variables/generated_files/varanaddb.html#nstrfix@anaddb">nstrfix@anaddb</a>   [Number of STRain components FIXed]<br>
+... <a href="../../input_variables/generated_files/varanaddb.html#ntemper@anaddb">ntemper@anaddb</a>   [Number of TEMPERatures]<br>
+... <a href="../../input_variables/generated_files/varanaddb.html#prt_ifc@anaddb">prt_ifc@anaddb</a>   [PRinT the Interatomic Force Constants]<br>
+... <a href="../../input_variables/generated_files/varanaddb.html#prtmbm@anaddb">prtmbm@anaddb</a>   [PRinT Mode-By-Mode decomposition of the electrooptic tensor]<br>
+... <a href="../../input_variables/generated_files/varanaddb.html#ramansr@anaddb">ramansr@anaddb</a>   [RAMAN Sum-Rule]<br>
+... <a href="../../input_variables/generated_files/varanaddb.html#relaxat@anaddb">relaxat@anaddb</a>   [RELAXation of AToms]<br>
+... <a href="../../input_variables/generated_files/varanaddb.html#relaxstr@anaddb">relaxstr@anaddb</a>   [RELAXation of STRain]<br>
+... <a href="../../input_variables/generated_files/varanaddb.html#rifcsph@anaddb">rifcsph@anaddb</a>   [Radius of the Interatomic Force Constant SPHere]<br>
+... <a href="../../input_variables/generated_files/varanaddb.html#targetpol@anaddb">targetpol@anaddb</a>   [TARGET POLarization]<br>
+... <a href="../../input_variables/generated_files/varanaddb.html#temperinc@anaddb">temperinc@anaddb</a>   [TEMPERature INCrease]<br>
+... <a href="../../input_variables/generated_files/varanaddb.html#tempermin@anaddb">tempermin@anaddb</a>   [TEMPERature MINimum]<br>
+... <a href="../../input_variables/generated_files/varanaddb.html#thmtol@anaddb">thmtol@anaddb</a>   [THerModynamic TOLerance]<br>
+<p>Useful input variables:<p>... <a href="../../input_variables/generated_files/varanaddb.html#dipdip@anaddb">dipdip@anaddb</a>   [DIPole-DIPole interaction]<br>
+... <a href="../../input_variables/generated_files/varanaddb.html#nsphere@anaddb">nsphere@anaddb</a>   [Number of atoms in SPHERe]<br>
+... <a href="../../input_variables/generated_files/varanaddb.html#vs_qrad_tolkms@anaddb">vs_qrad_tolkms@anaddb</a>   [Speed of Sound Q-radius, TOLerance KiloMeter/Second]<br>
+
+
+&nbsp; 
+<HR ALIGN=left> 
+<a name="4">&nbsp;</a>
+<h3><b>4. Selected input files.</b></h3>
+
+
+The user can find some related example input files in the ABINIT package in the directory /tests, or on the Web:
+<p> tests/v2/Input: <a href="../../tests/v2/Input/t13.in">t13.in</a> 
+<a href="../../tests/v2/Input/t15.in">t15.in</a> 
+<a href="../../tests/v2/Input/t16.in">t16.in</a> 
+<a href="../../tests/v2/Input/t17.in">t17.in</a> 
+<a href="../../tests/v2/Input/t18.in">t18.in</a> 
+<a href="../../tests/v2/Input/t19.in">t19.in</a> 
+<a href="../../tests/v2/Input/t20.in">t20.in</a> 
+<a href="../../tests/v2/Input/t21.in">t21.in</a> 
+<a href="../../tests/v2/Input/t22.in">t22.in</a> 
+<a href="../../tests/v2/Input/t25.in">t25.in</a> 
+<a href="../../tests/v2/Input/t28.in">t28.in</a> 
+<a href="../../tests/v2/Input/t29.in">t29.in</a> 
+<a href="../../tests/v2/Input/t32.in">t32.in</a> 
+<a href="../../tests/v2/Input/t39.in">t39.in</a> 
+<p> tests/v4/Input: <a href="../../tests/v4/Input/t54.in">t54.in</a> 
+<a href="../../tests/v4/Input/t68.in">t68.in</a> 
+<a href="../../tests/v4/Input/t70.in">t70.in</a> 
+<a href="../../tests/v4/Input/t71.in">t71.in</a> 
+<a href="../../tests/v4/Input/t74.in">t74.in</a> 
+<a href="../../tests/v4/Input/t77.in">t77.in</a> 
+<a href="../../tests/v4/Input/t83.in">t83.in</a> 
+<p> tests/v5/Input: <a href="../../tests/v5/Input/t28.in">t28.in</a> 
+<p> tests/v6/Input: <a href="../../tests/v6/Input/t40.in">t40.in</a> 
+<a href="../../tests/v6/Input/t53.in">t53.in</a> 
+<a href="../../tests/v6/Input/t57.in">t57.in</a> 
+<a href="../../tests/v6/Input/t59.in">t59.in</a> 
+<a href="../../tests/v6/Input/t69.in">t69.in</a> 
+<p> tests/v7/Input: <a href="../../tests/v7/Input/t54.in">t54.in</a> 
+<p> tests/v8/Input: <a href="../../tests/v8/Input/t49.in">t49.in</a> 
+<a href="../../tests/v8/Input/t50.in">t50.in</a> 
+<br>
+
+
+<script type="text/javascript" src="../../js_files/list_internal_links_for_generated_files.js"> </script>
+
+</body>
+</html>
+

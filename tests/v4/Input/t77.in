@@ -32,4 +32,5 @@ targetpol -1.4  -1.4  -1.4
 #%%   To impose a polarization on AlAs:
 #%%   compute new values of the cell parameters and atomic positions.
 #%%   (in practical calculations, these operations must be repeated until convergence is reached)
+#%% topics = anaddbSpec
 #%%<END TEST_INFO>

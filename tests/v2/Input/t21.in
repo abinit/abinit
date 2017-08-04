@@ -43,4 +43,5 @@
 #%%   multiplied by -60.54 and rounded to the third digit, 
 #%%   gives values that appear in the first line of that TABLE II :
 #%%   ( -0.002 , -0.096 , 0.158 , 0.071 , 0.071 )
+#%% topics = anaddbSpec
 #%%<END TEST_INFO>
