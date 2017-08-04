@@ -150,6 +150,9 @@ body : |
     <li><a href="lesson_analysis_tools.html">The lesson on Analysis
     Tools</a> deals with the use of the CUT3D utility to analyse
     wavefunctions and densities.</li>
+    <li><a href="lesson_fold2Bloch.html">The lesson on the fold2Bloch
+    postprocessor</a> deals with the use of the fold2Bloch utility to 
+    unfold band structures from supercell calculations.</li>
     <li><a href="lesson_dftu.html">The lesson on DFT+U</a> shows
     how to perform a DFT+U calculation using ABINIT, and will lead to
     compute the projected DOS of NiO. Prerequisite : PAW1.</li>

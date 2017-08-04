@@ -62,8 +62,8 @@
     authors : PhG, MVeithen, XG
     subtitle : Polarization, and responses to finite electric fields for AlAs.
 - !components
-    name : fold2Bloch
-    keyword : Lesson on fold2Bloch
+    name : fold2bloch
+    keyword : Lesson on fold2bloch
     authors : SS,XG
     subtitle : Unfolding the electronic structure of a lattice of Hydrogen atoms.
 - !components
