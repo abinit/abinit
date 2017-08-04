@@ -21,277 +21,1063 @@ intro : |
 # This is the body, including the table of content ...
 body : |
   <ul>
-    <li><a href="#1">1. Introduction</a>
-    <li><a href="#2">2. How to run optic ?</a>
-    <li><a href="#3">3. Optic input file and input variables</a>
-    <li><a href="#4">4. Optic output files</a>
-    <li><a href="#5">5. Trouble shooting</a>
-    <!--  <li><a href="#6">6. Results for GaAs</a> -->
+    <li><a href="#1">1. Compiling instructions</a>
+    <li><a href="#2">2. Execution</a>
+    <li><a href="#3">3. Output sample</a>
+    <li><a href="#4">4. Subroutines and functions</a>
   </ul>
   
   <hr>
   <h3>&nbsp;</h3>
   
-  <h3><b><a name="1"></a>1. Introduction </b></h3>
-  Optic allows to compute the
-  frequency dependent linear optical dielectric function and second order
-  nonlinear optical susceptibility.
-  An introduction to such computations is given in the following paper :
+  <h3><b><a name="1"></a>1. Compiling instructions</b></h3>
+
+
+  <P ALIGN=LEFT STYLE="margin-bottom: 0.14in; line-height: 0.19in"><FONT COLOR="#00000a"><FONT FACE="Arial, serif"><FONT SIZE=3><SPAN STYLE="background: #ffffff">Compiled
+  as part of abinit package. Fold2Bloch does not differentiate between
+  parallel and serial configuration so it always compiles for serial
+  operation.</SPAN></FONT></FONT></FONT></P>
+
+  <h3><b><a name="2"></a>2. Execution</b></h3>
+
+  The program fold2Bloch is executed by invoking the following command </SPAN></FONT></FONT></FONT><FONT COLOR="#00000a"><FONT FACE="Arial, serif"><FONT SIZE=3><U><SPAN STYLE="background: #ffffff">from
+  the directory of the case file</SPAN></U></FONT></FONT></FONT><FONT COLOR="#00000a"><FONT FACE="Arial, serif"><FONT SIZE=3><SPAN STYLE="background: #ffffff">:</SPAN></FONT></FONT></FONT></P>
+  <P ALIGN=LEFT STYLE="margin-bottom: 0.14in; line-height: 0.19in"><FONT COLOR="#00000a"><FONT FACE="Arial, serif"><FONT SIZE=3><SPAN STYLE="background: #ffffff">	</SPAN></FONT></FONT></FONT><FONT COLOR="#00000a"><FONT FACE="Arial, serif"><FONT SIZE=3><B><SPAN STYLE="background: #ffffff">fold2Bloch
+  case_WFK x:y:z</SPAN></B></FONT></FONT></FONT></P>
+  <P ALIGN=LEFT STYLE="margin-bottom: 0.14in; line-height: 0.19in"><FONT COLOR="#00000a"><FONT FACE="Arial, serif"><FONT SIZE=3><SPAN STYLE="background: #ffffff">Where:</SPAN></FONT></FONT></FONT></P>
+  <P ALIGN=LEFT STYLE="margin-left: 0.44in; margin-bottom: 0.14in; line-height: 0.19in">
+  <FONT COLOR="#00000a"><FONT FACE="Arial, serif"><FONT SIZE=3><B><SPAN STYLE="background: #ffffff">case
+  </SPAN></B></FONT></FONT></FONT><FONT COLOR="#00000a"><FONT FACE="Arial, serif"><FONT SIZE=3><SPAN STYLE="background: #ffffff">is
+  the name of the file that comes before _WFK identification<BR></SPAN></FONT></FONT></FONT><FONT COLOR="#00000a"><FONT FACE="Arial, serif"><FONT SIZE=3><B><SPAN STYLE="background: #ffffff">x:y:z
+  </SPAN></B></FONT></FONT></FONT><FONT COLOR="#00000a"><FONT FACE="Arial, serif"><FONT SIZE=3><SPAN STYLE="background: #ffffff">are
+  integer values( &gt;0) that represent a multiplicity in the
+  corresponding direction used when constructing the super-cell;
+  separated by “:”</SPAN></FONT></FONT></FONT></P>
+  <P ALIGN=LEFT STYLE="margin-bottom: 0.14in; line-height: 0.19in"><FONT COLOR="#00000a"><FONT FACE="Arial, serif"><FONT SIZE=3><SPAN STYLE="background: #ffffff">Ex.</SPAN></FONT></FONT></FONT></P>
+  <P ALIGN=LEFT STYLE="margin-bottom: 0.14in; line-height: 0.19in"><FONT COLOR="#00000a"><FONT FACE="Arial, serif"><FONT SIZE=3><SPAN STYLE="background: #ffffff">	</SPAN></FONT></FONT></FONT><FONT COLOR="#00000a"><FONT FACE="Arial, serif"><FONT SIZE=3><B><SPAN STYLE="background: #ffffff">fold2Bloch
+  Ga8As7Bi1_WFK 2:2:2</SPAN></B></FONT></FONT></FONT></P>
+  <P ALIGN=LEFT STYLE="margin-bottom: 0.14in; line-height: 0.19in"><FONT COLOR="#00000a"><FONT FACE="Arial, serif"><FONT SIZE=3><SPAN STYLE="background: #ffffff">NOTE:<BR>	If
+  cell structure is spin polarized then there are two output
+  files:<BR>	</SPAN></FONT></FONT></FONT><FONT COLOR="#00000a"><FONT FACE="Arial, serif"><FONT SIZE=3><B><SPAN STYLE="background: #ffffff">fold2Block_up.out</SPAN></B></FONT></FONT></FONT><FONT COLOR="#00000a"><FONT FACE="Arial, serif"><FONT SIZE=3><SPAN STYLE="background: #ffffff">
+  and </SPAN></FONT></FONT></FONT><FONT COLOR="#00000a"><FONT FACE="Arial, serif"><FONT SIZE=3><B><SPAN STYLE="background: #ffffff">fold2Bloch_down.out
+  </SPAN></B></FONT></FONT></FONT>
+  </P>
+  <P ALIGN=LEFT STYLE="margin-bottom: 0.14in; line-height: 0.19in"><BR><BR>
+  </P>
+
+  <h3><b><a name="3"></a>3. Output sample</b></h3>
+
+  <P ALIGN=LEFT STYLE="margin-bottom: 0.14in; line-height: 0.19in"><FONT COLOR="#00000a"><FONT FACE="Arial, serif"><FONT SIZE=3><U><B><SPAN STYLE="background: #ffffff">Output
+  Sample</SPAN></B></U></FONT></FONT></FONT></P>
+  <P ALIGN=LEFT STYLE="margin-bottom: 0.14in; line-height: 0.19in"><FONT COLOR="#00000a"><FONT FACE="Arial, serif"><FONT SIZE=3><SPAN STYLE="background: #ffffff">Below
+  are three randomly selected parts from an output file. The data is
+  presented as follows (from left to right columns):</SPAN></FONT></FONT></FONT></P>
+  <P ALIGN=LEFT STYLE="margin-bottom: 0.14in; line-height: 0.19in"><FONT COLOR="#00000a"><FONT FACE="Arial, serif"><FONT SIZE=3><SPAN STYLE="background: #ffffff">New
+  K Values (x, y, z) 	      Eigenvalue(Ht)   Weight</SPAN></FONT></FONT></FONT></P>
+  <P ALIGN=LEFT STYLE="margin-bottom: 0in; line-height: 0.17in"><FONT COLOR="#00000a"><SPAN STYLE="background: #ffffff">
+   <FONT FACE="Courier New, serif"><FONT SIZE=2 STYLE="font-size: 9pt">0.000000
+    0.000000   0.000000  -0.884864   1.000000</SPAN></FONT></FONT></FONT></P>
+  <P ALIGN=LEFT STYLE="margin-bottom: 0in; line-height: 0.17in"><FONT COLOR="#00000a"><SPAN STYLE="background: #ffffff">
+   <FONT FACE="Courier New, serif"><FONT SIZE=2 STYLE="font-size: 9pt">0.000000
+    0.000000   1.000000  -0.884864   0.000000</SPAN></FONT></FONT></FONT></P>
+  <P ALIGN=LEFT STYLE="margin-bottom: 0in; line-height: 0.17in"><FONT COLOR="#00000a"><SPAN STYLE="background: #ffffff">
+   <FONT FACE="Courier New, serif"><FONT SIZE=2 STYLE="font-size: 9pt">0.000000
+    0.000000  -1.000000  -0.884864   0.000000</SPAN></FONT></FONT></FONT></P>
+  <P ALIGN=LEFT STYLE="margin-bottom: 0in; line-height: 0.17in"><FONT COLOR="#00000a"><SPAN STYLE="background: #ffffff">
+   <FONT FACE="Courier New, serif"><FONT SIZE=2 STYLE="font-size: 9pt">0.000000
+    1.000000   0.000000  -0.884864   0.000000</SPAN></FONT></FONT></FONT></P>
+  <P ALIGN=LEFT STYLE="margin-bottom: 0in; line-height: 0.17in"><FONT COLOR="#00000a"><SPAN STYLE="background: #ffffff">
+   <FONT FACE="Courier New, serif"><FONT SIZE=2 STYLE="font-size: 9pt">0.000000
+    1.000000   1.000000  -0.884864   0.000000</SPAN></FONT></FONT></FONT></P>
+  <P ALIGN=LEFT STYLE="margin-bottom: 0in; line-height: 0.17in"><FONT COLOR="#00000a"><SPAN STYLE="background: #ffffff">
+   <FONT FACE="Courier New, serif"><FONT SIZE=2 STYLE="font-size: 9pt">0.000000
+    1.000000  -1.000000  -0.884864   0.000000</SPAN></FONT></FONT></FONT></P>
+  <P ALIGN=LEFT STYLE="margin-bottom: 0in; line-height: 0.17in"><FONT COLOR="#00000a"><SPAN STYLE="background: #ffffff">
+   <FONT FACE="Courier New, serif"><FONT SIZE=2 STYLE="font-size: 9pt">0.000000
+    0.000000   0.000000  -0.432062   0.000000</SPAN></FONT></FONT></FONT></P>
+  <P ALIGN=LEFT STYLE="margin-bottom: 0in; line-height: 0.17in"><FONT COLOR="#00000a"><SPAN STYLE="background: #ffffff">
+   <FONT FACE="Courier New, serif"><FONT SIZE=2 STYLE="font-size: 9pt">0.000000
+    0.000000   1.000000  -0.432062   0.500000</SPAN></FONT></FONT></FONT></P>
+  <P ALIGN=LEFT STYLE="margin-bottom: 0in; line-height: 0.17in"><FONT COLOR="#00000a"><SPAN STYLE="background: #ffffff">
+   <FONT FACE="Courier New, serif"><FONT SIZE=2 STYLE="font-size: 9pt">0.000000
+    0.000000  -1.000000  -0.432062   0.500000</SPAN></FONT></FONT></FONT></P>
+  <P ALIGN=LEFT STYLE="margin-bottom: 0in; line-height: 0.17in"><FONT COLOR="#00000a"><SPAN STYLE="background: #ffffff">
+   <FONT FACE="Courier New, serif"><FONT SIZE=2 STYLE="font-size: 9pt">0.000000
+    1.000000   0.000000  -0.432062   0.000000</SPAN></FONT></FONT></FONT></P>
+  <P ALIGN=LEFT STYLE="margin-bottom: 0in; line-height: 0.17in"><FONT COLOR="#00000a"><SPAN STYLE="background: #ffffff">
+   <FONT FACE="Courier New, serif"><FONT SIZE=2 STYLE="font-size: 9pt">0.000000
+    1.000000   1.000000  -0.432062   0.000000</SPAN></FONT></FONT></FONT></P>
+  <P ALIGN=LEFT STYLE="margin-bottom: 0in; line-height: 0.17in"><FONT COLOR="#00000a"><SPAN STYLE="background: #ffffff">
+   <FONT FACE="Courier New, serif"><FONT SIZE=2 STYLE="font-size: 9pt">0.000000
+    1.000000  -1.000000  -0.432062   0.000000</SPAN></FONT></FONT></FONT></P>
+  <P ALIGN=LEFT STYLE="margin-bottom: 0in; line-height: 0.17in"><FONT COLOR="#00000a"><SPAN STYLE="background: #ffffff">
+   <FONT FACE="Courier New, serif"><FONT SIZE=2 STYLE="font-size: 9pt">0.000000
+    0.000000   0.000000  -0.432062   0.000000</SPAN></FONT></FONT></FONT></P>
+  <P ALIGN=LEFT STYLE="margin-bottom: 0in; line-height: 0.17in"><FONT COLOR="#00000a"><SPAN STYLE="background: #ffffff">
+   <FONT FACE="Courier New, serif"><FONT SIZE=2 STYLE="font-size: 9pt">0.000000
+    0.000000   1.000000  -0.432062   0.500000</SPAN></FONT></FONT></FONT></P>
+  <P ALIGN=LEFT STYLE="margin-bottom: 0in; line-height: 0.17in"><FONT COLOR="#00000a"><SPAN STYLE="background: #ffffff">
+   <FONT FACE="Courier New, serif"><FONT SIZE=2 STYLE="font-size: 9pt">0.000000
+    0.000000  -1.000000  -0.432062   0.500000</SPAN></FONT></FONT></FONT></P>
+  <P ALIGN=LEFT STYLE="margin-bottom: 0in; line-height: 0.17in"><FONT COLOR="#00000a"><SPAN STYLE="background: #ffffff">
+   <FONT FACE="Courier New, serif"><FONT SIZE=2 STYLE="font-size: 9pt">0.000000
+    1.000000   0.000000  -0.432062   0.000000</SPAN></FONT></FONT></FONT></P>
+  <P ALIGN=LEFT STYLE="margin-bottom: 0in; line-height: 0.17in"><FONT COLOR="#00000a"><SPAN STYLE="background: #ffffff">
+   <FONT FACE="Courier New, serif"><FONT SIZE=2 STYLE="font-size: 9pt">0.000000
+    1.000000   1.000000  -0.432062   0.000000</SPAN></FONT></FONT></FONT></P>
+  <P ALIGN=LEFT STYLE="margin-bottom: 0in; line-height: 0.17in"><FONT COLOR="#00000a"><SPAN STYLE="background: #ffffff">
+   <FONT FACE="Courier New, serif"><FONT SIZE=2 STYLE="font-size: 9pt">0.000000
+    1.000000  -1.000000  -0.432062   0.000000</SPAN></FONT></FONT></FONT></P>
+  <P ALIGN=LEFT STYLE="margin-bottom: 0in; line-height: 0.17in"><BR>
+  </P>
+  <P ALIGN=LEFT STYLE="margin-bottom: 0in; line-height: 0.17in"><FONT COLOR="#00000a"><SPAN STYLE="background: #ffffff">
+  <FONT FACE="Courier New, serif"><FONT SIZE=2 STYLE="font-size: 9pt">-0.333333
+    0.666667   0.500000   1.574788   0.499999</SPAN></FONT></FONT></FONT></P>
+  <P ALIGN=LEFT STYLE="margin-bottom: 0in; line-height: 0.17in"><FONT COLOR="#00000a"><SPAN STYLE="background: #ffffff">
+  <FONT FACE="Courier New, serif"><FONT SIZE=2 STYLE="font-size: 9pt">-0.333333
+    0.666667   1.500000   1.574788   0.000000</SPAN></FONT></FONT></FONT></P>
+  <P ALIGN=LEFT STYLE="margin-bottom: 0in; line-height: 0.17in"><FONT COLOR="#00000a"><SPAN STYLE="background: #ffffff">
+  <FONT FACE="Courier New, serif"><FONT SIZE=2 STYLE="font-size: 9pt">-0.333333
+    0.666667  -0.500000   1.574788   0.500001</SPAN></FONT></FONT></FONT></P>
+  <P ALIGN=LEFT STYLE="margin-bottom: 0in; line-height: 0.17in"><FONT COLOR="#00000a"><SPAN STYLE="background: #ffffff">
+  <FONT FACE="Courier New, serif"><FONT SIZE=2 STYLE="font-size: 9pt">-0.333333
+   -0.333333   0.500000   1.574788   0.000000</SPAN></FONT></FONT></FONT></P>
+  <P ALIGN=LEFT STYLE="margin-bottom: 0in; line-height: 0.17in"><FONT COLOR="#00000a"><SPAN STYLE="background: #ffffff">
+  <FONT FACE="Courier New, serif"><FONT SIZE=2 STYLE="font-size: 9pt">-0.333333
+   -0.333333   1.500000   1.574788   0.000000</SPAN></FONT></FONT></FONT></P>
+  <P ALIGN=LEFT STYLE="margin-bottom: 0in; line-height: 0.17in"><FONT COLOR="#00000a"><SPAN STYLE="background: #ffffff">
+  <FONT FACE="Courier New, serif"><FONT SIZE=2 STYLE="font-size: 9pt">-0.333333
+   -0.333333  -0.500000   1.574788   0.000000</SPAN></FONT></FONT></FONT></P>
+  <P ALIGN=LEFT STYLE="margin-bottom: 0in; line-height: 0.17in"><FONT COLOR="#00000a"><SPAN STYLE="background: #ffffff">
+  <FONT FACE="Courier New, serif"><FONT SIZE=2 STYLE="font-size: 9pt">-0.333333
+    0.666667   0.500000   1.574788   0.500001</SPAN></FONT></FONT></FONT></P>
+  <P ALIGN=LEFT STYLE="margin-bottom: 0in; line-height: 0.17in"><FONT COLOR="#00000a"><SPAN STYLE="background: #ffffff">
+  <FONT FACE="Courier New, serif"><FONT SIZE=2 STYLE="font-size: 9pt">-0.333333
+    0.666667   1.500000   1.574788   0.000000</SPAN></FONT></FONT></FONT></P>
+  <P ALIGN=LEFT STYLE="margin-bottom: 0in; line-height: 0.17in"><FONT COLOR="#00000a"><SPAN STYLE="background: #ffffff">
+  <FONT FACE="Courier New, serif"><FONT SIZE=2 STYLE="font-size: 9pt">-0.333333
+    0.666667  -0.500000   1.574788   0.499999</SPAN></FONT></FONT></FONT></P>
+  <P ALIGN=LEFT STYLE="margin-bottom: 0in; line-height: 0.17in"><FONT COLOR="#00000a"><SPAN STYLE="background: #ffffff">
+  <FONT FACE="Courier New, serif"><FONT SIZE=2 STYLE="font-size: 9pt">-0.333333
+   -0.333333   0.500000   1.574788   0.000000</SPAN></FONT></FONT></FONT></P>
+  <P ALIGN=LEFT STYLE="margin-bottom: 0in; line-height: 0.17in"><FONT COLOR="#00000a"><SPAN STYLE="background: #ffffff">
+  <FONT FACE="Courier New, serif"><FONT SIZE=2 STYLE="font-size: 9pt">-0.333333
+   -0.333333   1.500000   1.574788   0.000000</SPAN></FONT></FONT></FONT></P>
+  <P ALIGN=LEFT STYLE="margin-bottom: 0in; line-height: 0.17in"><FONT COLOR="#00000a"><SPAN STYLE="background: #ffffff">
+  <FONT FACE="Courier New, serif"><FONT SIZE=2 STYLE="font-size: 9pt">-0.333333
+   -0.333333  -0.500000   1.574788   0.000000</SPAN></FONT></FONT></FONT></P>
+  <P ALIGN=LEFT STYLE="margin-bottom: 0in; line-height: 0.17in"><BR>
+  </P>
+  <P ALIGN=LEFT STYLE="margin-bottom: 0in; line-height: 0.17in"><FONT COLOR="#00000a"><SPAN STYLE="background: #ffffff">
+  <FONT FACE="Courier New, serif"><FONT SIZE=2 STYLE="font-size: 9pt">-0.333333
+   -0.166667   0.000000  -0.403296   1.000000</SPAN></FONT></FONT></FONT></P>
+  <P ALIGN=LEFT STYLE="margin-bottom: 0in; line-height: 0.17in"><FONT COLOR="#00000a"><SPAN STYLE="background: #ffffff">
+  <FONT FACE="Courier New, serif"><FONT SIZE=2 STYLE="font-size: 9pt">-0.333333
+   -0.166667   1.000000  -0.403296   0.000000</SPAN></FONT></FONT></FONT></P>
+  <P ALIGN=LEFT STYLE="margin-bottom: 0in; line-height: 0.17in"><FONT COLOR="#00000a"><SPAN STYLE="background: #ffffff">
+  <FONT FACE="Courier New, serif"><FONT SIZE=2 STYLE="font-size: 9pt">-0.333333
+   -0.166667  -1.000000  -0.403296   0.000000</SPAN></FONT></FONT></FONT></P>
+  <P ALIGN=LEFT STYLE="margin-bottom: 0in; line-height: 0.17in"><FONT COLOR="#00000a"><SPAN STYLE="background: #ffffff">
+  <FONT FACE="Courier New, serif"><FONT SIZE=2 STYLE="font-size: 9pt">-0.333333
+    0.833333   0.000000   0.040617   0.000000</SPAN></FONT></FONT></FONT></P>
+  <P ALIGN=LEFT STYLE="margin-bottom: 0in; line-height: 0.17in"><FONT COLOR="#00000a"><SPAN STYLE="background: #ffffff">
+  <FONT FACE="Courier New, serif"><FONT SIZE=2 STYLE="font-size: 9pt">-0.333333
+    0.833333   1.000000   0.040617   0.000000</SPAN></FONT></FONT></FONT></P>
+  <P ALIGN=LEFT STYLE="margin-bottom: 0in; line-height: 0.17in"><FONT COLOR="#00000a"><SPAN STYLE="background: #ffffff">
+  <FONT FACE="Courier New, serif"><FONT SIZE=2 STYLE="font-size: 9pt">-0.333333
+    0.833333  -1.000000   0.040617   0.000000</SPAN></FONT></FONT></FONT></P>
+  <P ALIGN=LEFT STYLE="margin-bottom: 0in; line-height: 0.17in"><FONT COLOR="#00000a"><SPAN STYLE="background: #ffffff">
+  <FONT FACE="Courier New, serif"><FONT SIZE=2 STYLE="font-size: 9pt">-0.333333
+   -0.166667   0.000000   0.040617   0.000000</SPAN></FONT></FONT></FONT></P>
+  <P ALIGN=LEFT STYLE="margin-bottom: 0in; line-height: 0.17in"><FONT COLOR="#00000a"><SPAN STYLE="background: #ffffff">
+  <FONT FACE="Courier New, serif"><FONT SIZE=2 STYLE="font-size: 9pt">-0.333333
+   -0.166667   1.000000   0.040617   0.500003</SPAN></FONT></FONT></FONT></P>
+  <P ALIGN=LEFT STYLE="margin-bottom: 0in; line-height: 0.17in"><FONT COLOR="#00000a"><SPAN STYLE="background: #ffffff">
+  <FONT FACE="Courier New, serif"><FONT SIZE=2 STYLE="font-size: 9pt">-0.333333
+   -0.166667  -1.000000   0.040617   0.499997</SPAN></FONT></FONT></FONT></P>
+  <P ALIGN=LEFT STYLE="margin-bottom: 0in; line-height: 0.17in"><FONT COLOR="#00000a"><SPAN STYLE="background: #ffffff">
+  <FONT FACE="Courier New, serif"><FONT SIZE=2 STYLE="font-size: 9pt">-0.333333
+    0.833333   0.000000   0.040617   0.000000</SPAN></FONT></FONT></FONT></P>
+  <P ALIGN=LEFT STYLE="margin-bottom: 0in; line-height: 0.17in"><FONT COLOR="#00000a"><SPAN STYLE="background: #ffffff">
+  <FONT FACE="Courier New, serif"><FONT SIZE=2 STYLE="font-size: 9pt">-0.333333
+    0.833333   1.000000   0.040617   0.000000</SPAN></FONT></FONT></FONT></P>
+  <P ALIGN=LEFT STYLE="margin-bottom: 0in; line-height: 0.17in"><FONT COLOR="#00000a"><SPAN STYLE="background: #ffffff">
+  <FONT FACE="Courier New, serif"><FONT SIZE=2 STYLE="font-size: 9pt">-0.333333
+    0.833333  -1.000000   0.040617   0.000000</SPAN></FONT></FONT></FONT></P>
+  <P ALIGN=LEFT STYLE="margin-bottom: 0in; line-height: 0.17in"><FONT COLOR="#00000a"><SPAN STYLE="background: #ffffff">
+  <FONT FACE="Courier New, serif"><FONT SIZE=2 STYLE="font-size: 9pt">-0.333333
+   -0.166667   0.000000   0.040617   0.000000</SPAN></FONT></FONT></FONT></P>
+  <P ALIGN=LEFT STYLE="margin-bottom: 0in; line-height: 0.17in"><FONT COLOR="#00000a"><SPAN STYLE="background: #ffffff">
+  <FONT FACE="Courier New, serif"><FONT SIZE=2 STYLE="font-size: 9pt">-0.333333
+   -0.166667   1.000000   0.040617   0.499997</SPAN></FONT></FONT></FONT></P>
+  <P ALIGN=LEFT STYLE="margin-bottom: 0in; line-height: 0.17in"><FONT COLOR="#00000a"><SPAN STYLE="background: #ffffff">
+  <FONT FACE="Courier New, serif"><FONT SIZE=2 STYLE="font-size: 9pt">-0.333333
+   -0.166667  -1.000000   0.040617   0.500003</SPAN></FONT></FONT></FONT></P>
+  <P ALIGN=LEFT STYLE="margin-bottom: 0in; line-height: 0.17in"><BR>
+  </P>
+  <P ALIGN=LEFT STYLE="margin-bottom: 0.14in; line-height: 0.19in"><BR><BR>
+  </P>
+  <P ALIGN=LEFT STYLE="margin-bottom: 0.14in; line-height: 0.19in"><BR><BR>
+  </P>
+
+
+  <h3><b><a name="4"></a>4. Subroutines and functions</b></h3>
+
+  <P ALIGN=LEFT STYLE="margin-bottom: 0.14in; line-height: 0.19in"><FONT COLOR="#00000a"><FONT FACE="Arial, serif"><FONT SIZE=4><U><B><SPAN STYLE="background: #ffffff">Subroutines
+  and Functions</SPAN></B></U></FONT></FONT></FONT></P>
+  <P ALIGN=LEFT STYLE="margin-bottom: 0.14in; line-height: 0.19in"><FONT COLOR="#00000a"><FONT FACE="Arial, serif"><FONT SIZE=4><B><SPAN STYLE="background: #ffffff">Subroutine
+  Getargs (getargs.F90)</SPAN></B></FONT></FONT></FONT></P>
+  <P ALIGN=LEFT STYLE="margin-bottom: 0.14in; line-height: 0.19in"><FONT COLOR="#00000a"><FONT FACE="Arial, serif"><FONT SIZE=3><SPAN STYLE="background: #ffffff">This
+  routine read in the arguments from the command line, checks them for
+  correct format, and checks whether the input file exists. All the
+  values are assigned to their appropriate variables and are passed
+  back to </SPAN></FONT></FONT></FONT><FONT COLOR="#00000a"><FONT FACE="Arial, serif"><FONT SIZE=3><B><SPAN STYLE="background: #ffffff">fold2Bloch</SPAN></B></FONT></FONT></FONT><FONT COLOR="#00000a"><FONT FACE="Arial, serif"><FONT SIZE=3><SPAN STYLE="background: #ffffff">.</SPAN></FONT></FONT></FONT></P>
+  <P ALIGN=LEFT STYLE="margin-bottom: 0.14in; line-height: 0.19in"><FONT COLOR="#00000a"><FONT FACE="Arial, serif"><FONT SIZE=3><B><SPAN STYLE="background: #ffffff">Parameters</SPAN></B></FONT></FONT></FONT></P>
+  <P ALIGN=LEFT STYLE="margin-bottom: 0.14in; line-height: 0.19in"><FONT COLOR="#00000a"><FONT FACE="Arial, serif"><FONT SIZE=3><U><SPAN STYLE="background: #ffffff">Input:</SPAN></U></FONT></FONT></FONT></P>
+  <P ALIGN=LEFT STYLE="margin-bottom: 0.14in; line-height: 0.19in"><FONT COLOR="#00000a"><FONT FACE="Arial, serif"><FONT SIZE=3><SPAN STYLE="background: #ffffff">folds,
+  fname</SPAN></FONT></FONT></FONT></P>
+  <P ALIGN=LEFT STYLE="margin-bottom: 0.14in; line-height: 0.19in"><FONT COLOR="#00000a"><FONT FACE="Arial, serif"><FONT SIZE=3><SPAN STYLE="background: #ffffff">folds	:
+  empty array(1,3)<BR>fname : empty string</SPAN></FONT></FONT></FONT></P>
+  <P ALIGN=LEFT STYLE="margin-bottom: 0.14in; line-height: 0.19in"><FONT COLOR="#00000a"><FONT FACE="Arial, serif"><FONT SIZE=3><U><SPAN STYLE="background: #ffffff">Output:</SPAN></U></FONT></FONT></FONT></P>
+  <P ALIGN=LEFT STYLE="margin-bottom: 0.14in; line-height: 0.19in"><FONT COLOR="#00000a"><FONT FACE="Arial, serif"><FONT SIZE=3><SPAN STYLE="background: #ffffff">folds,
+  fname</SPAN></FONT></FONT></FONT></P>
+  <P ALIGN=LEFT STYLE="margin-bottom: 0.14in; line-height: 0.19in"><FONT COLOR="#00000a"><FONT FACE="Arial, serif"><FONT SIZE=3><SPAN STYLE="background: #ffffff">folds	:
+  array containing number of folds in x, y, and z directions. from
+  command   	 	  argument<BR>fname : string containing the name of the
+  input file. from the command arguments</SPAN></FONT></FONT></FONT></P>
+  <P ALIGN=LEFT STYLE="margin-bottom: 0.14in; line-height: 0.19in"><FONT COLOR="#00000a"><FONT FACE="Arial, serif"><FONT SIZE=3><U><SPAN STYLE="background: #ffffff">Local:</SPAN></U></FONT></FONT></FONT></P>
+  <P ALIGN=LEFT STYLE="margin-bottom: 0.14in; line-height: 0.19in"><FONT COLOR="#00000a"><FONT FACE="Arial, serif"><FONT SIZE=3><SPAN STYLE="background: #ffffff">num_args,
+  argcount, ii, ios, args, argfolds, dir</SPAN></FONT></FONT></FONT></P>
+  <P ALIGN=LEFT STYLE="margin-bottom: 0.14in; line-height: 0.19in"><FONT COLOR="#00000a"><FONT FACE="Arial, serif"><FONT SIZE=3><SPAN STYLE="background: #ffffff">num_args	:
+  integer containing the number of command arguments sent<BR>argcount	:
+  integer counter used to iterate through all arguments<BR>ii		: index
+  used to indicate ':' position in the folds argument<BR>ios		: integer
+  used with iostat to check if folds are digits<BR>args		: array
+  containing all the arguments<BR>argfolds	: temp string containing
+  folds argument<BR>dir		: boolean use to check if input file exists</SPAN></FONT></FONT></FONT></P>
+  <P ALIGN=LEFT STYLE="margin-bottom: 0.14in; line-height: 0.19in"><FONT COLOR="#00000a"><FONT FACE="Arial, serif"><FONT SIZE=4><B><SPAN STYLE="background: #ffffff">Subroutine
+  Progress (Progress.F90)</SPAN></B></FONT></FONT></FONT></P>
+  <P ALIGN=LEFT STYLE="margin-bottom: 0.14in; line-height: 0.19in"><FONT COLOR="#00000a"><FONT FACE="Arial, serif"><FONT SIZE=3><SPAN STYLE="background: #ffffff">Progress
+  compares K point currently being process with the total number of K
+  points and calculates percent complete. It then outputs the results
+  and the current K point that is being processed to the screen for the
+  user to know.</SPAN></FONT></FONT></FONT></P>
+  <P ALIGN=LEFT STYLE="margin-bottom: 0.14in; line-height: 0.19in"><FONT COLOR="#00000a"><FONT FACE="Arial, serif"><FONT SIZE=3><B><SPAN STYLE="background: #ffffff">Parameters</SPAN></B></FONT></FONT></FONT></P>
+  <P ALIGN=LEFT STYLE="margin-bottom: 0.14in; line-height: 0.19in"><FONT COLOR="#00000a"><FONT FACE="Arial, serif"><FONT SIZE=3><U><SPAN STYLE="background: #ffffff">Input:</SPAN></U></FONT></FONT></FONT></P>
+  <P ALIGN=LEFT STYLE="margin-bottom: 0.14in; line-height: 0.19in"><FONT COLOR="#00000a"><FONT FACE="Arial, serif"><FONT SIZE=3><SPAN STYLE="background: #ffffff">ikpt,
+  nkpt, kpt</SPAN></FONT></FONT></FONT></P>
+  <P ALIGN=LEFT STYLE="margin-bottom: 0.14in; line-height: 0.19in"><FONT COLOR="#00000a"><FONT FACE="Arial, serif"><FONT SIZE=3><SPAN STYLE="background: #ffffff">ikpt	:
+  current K point number<BR>nkpt	: total number of K points<BR>kpt	:
+  current K point being processed</SPAN></FONT></FONT></FONT></P>
+  <P ALIGN=LEFT STYLE="margin-bottom: 0.14in; line-height: 0.19in"><FONT COLOR="#00000a"><FONT FACE="Arial, serif"><FONT SIZE=3><U><SPAN STYLE="background: #ffffff">Output:</SPAN></U></FONT></FONT></FONT></P>
+  <P ALIGN=LEFT STYLE="margin-bottom: 0.14in; line-height: 0.19in"><FONT COLOR="#00000a"><FONT FACE="Arial, serif"><FONT SIZE=3><SPAN STYLE="background: #ffffff">NONE</SPAN></FONT></FONT></FONT></P>
+  <P ALIGN=LEFT STYLE="margin-bottom: 0.14in; line-height: 0.19in"><FONT COLOR="#00000a"><FONT FACE="Arial, serif"><FONT SIZE=3><U><SPAN STYLE="background: #ffffff">Local:</SPAN></U></FONT></FONT></FONT></P>
+  <P ALIGN=LEFT STYLE="margin-bottom: 0.14in; line-height: 0.19in"><FONT COLOR="#00000a"><FONT FACE="Arial, serif"><FONT SIZE=3><SPAN STYLE="background: #ffffff">NONE</SPAN></FONT></FONT></FONT></P>
+  <P ALIGN=LEFT STYLE="margin-bottom: 0.14in; line-height: 0.19in"><FONT COLOR="#00000a"><FONT FACE="Arial, serif"><FONT SIZE=4><B><SPAN STYLE="background: #ffffff">Subroutine
+  NewK (NewK.F90)</SPAN></B></FONT></FONT></FONT></P>
+  <P ALIGN=LEFT STYLE="margin-bottom: 0.14in; line-height: 0.19in"><FONT COLOR="#00000a"><FONT FACE="Arial, serif"><FONT SIZE=3><SPAN STYLE="background: #ffffff">This
+  subroutine finds new K values for the unfolded spectrum. The K values
+  are determined based on how many times and in what direction the
+  function needs to be unfolded, which gives us the shape and size of
+  the unfolded Brillouin zone.</SPAN></FONT></FONT></FONT></P>
+  <P ALIGN=LEFT STYLE="margin-bottom: 0.14in; line-height: 0.19in"><FONT COLOR="#00000a"><FONT FACE="Arial, serif"><FONT SIZE=3><B><SPAN STYLE="background: #ffffff">Parameters</SPAN></B></FONT></FONT></FONT></P>
+  <P ALIGN=LEFT STYLE="margin-bottom: 0.14in; line-height: 0.19in"><FONT COLOR="#00000a"><FONT FACE="Arial, serif"><FONT SIZE=3><U><SPAN STYLE="background: #ffffff">Input:</SPAN></U></FONT></FONT></FONT></P>
+  <P ALIGN=LEFT STYLE="margin-bottom: 0.14in; line-height: 0.19in"><FONT COLOR="#00000a"><SPAN STYLE="background: #ffffff">
+  <FONT FACE="Arial, serif"><FONT SIZE=3>XX, YY, ZZ, FX, FY, FZ</SPAN></FONT></FONT></FONT></P>
+  <P ALIGN=LEFT STYLE="margin-bottom: 0.14in; line-height: 0.19in"><FONT COLOR="#00000a"><FONT FACE="Arial, serif"><FONT SIZE=3><SPAN STYLE="background: #ffffff">XX	:
+  Original K point coordinate in the x-plane<BR>YY	: Original K point
+  coordinate in the y-plane<BR>ZZ	: Original K point coordinate in the
+  z-plane<BR>FX	: Number of folds in the X direction<BR>FY	: Number of
+  folds in the Y direction<BR>FZ	: Number of folds in the Z direction</SPAN></FONT></FONT></FONT></P>
+  <P ALIGN=LEFT STYLE="margin-bottom: 0.14in; line-height: 0.19in"><FONT COLOR="#00000a"><FONT FACE="Arial, serif"><FONT SIZE=3><U><SPAN STYLE="background: #ffffff">Output:</SPAN></U></FONT></FONT></FONT></P>
+  <P ALIGN=LEFT STYLE="margin-bottom: 0.14in; line-height: 0.19in"><FONT COLOR="#00000a"><FONT FACE="Arial, serif"><FONT SIZE=3><SPAN STYLE="background: #ffffff">NKVal</SPAN></FONT></FONT></FONT></P>
+  <P ALIGN=LEFT STYLE="margin-bottom: 0.14in; line-height: 0.19in"><FONT COLOR="#00000a"><FONT FACE="Arial, serif"><FONT SIZE=3><SPAN STYLE="background: #ffffff">NKVal	:
+  2D array containing x-y-z coordinates of new K points.</SPAN></FONT></FONT></FONT></P>
+  <P ALIGN=LEFT STYLE="margin-bottom: 0.14in; line-height: 0.19in"><FONT COLOR="#00000a"><FONT FACE="Arial, serif"><FONT SIZE=3><U><SPAN STYLE="background: #ffffff">Local:</SPAN></U></FONT></FONT></FONT></P>
+  <P ALIGN=LEFT STYLE="margin-bottom: 0.14in; line-height: 0.19in"><FONT COLOR="#00000a"><FONT FACE="Arial, serif"><FONT SIZE=3><SPAN STYLE="background: #ffffff">field_x,
+  field_y, field_z, TX, TY, TZ, loop, ii, jj, kk, size</SPAN></FONT></FONT></FONT></P>
+  <P ALIGN=LEFT STYLE="margin-bottom: 0.14in; line-height: 0.19in"><FONT COLOR="#00000a"><FONT FACE="Arial, serif"><FONT SIZE=3><SPAN STYLE="background: #ffffff">field_x	:
+  size of unfolded Brillouin zone in X direction<BR>field_y	: size of
+  unfolded Brillouin zone in Y direction<BR>field_z	: size of unfolded
+  Brillouin zone in Z direction<BR>TX	: temporary holds the X
+  coordinate of a new K point<BR>TY	: temporary holds the Y coordinate
+  of a new K point<BR>TZ	: temporary holds the Z coordinate of a new K
+  point<BR>loop	: points to a place in NKVal to store a new K point<BR>I,
+  j, k	: counters for x, y, and z directions respectively<BR>size	:
+  number of new K points, used for NKVal allocation</SPAN></FONT></FONT></FONT></P>
+  <P ALIGN=LEFT STYLE="margin-bottom: 0.14in; line-height: 0.19in"><FONT COLOR="#00000a"><FONT FACE="Arial, serif"><FONT SIZE=4><B><SPAN STYLE="background: #ffffff">Subroutine
+  SortC (SortC.F90)</SPAN></B></FONT></FONT></FONT></P>
+  <P ALIGN=LEFT STYLE="margin-bottom: 0.14in; line-height: 0.19in"><FONT COLOR="#00000a"><FONT FACE="Arial, serif"><FONT SIZE=3><SPAN STYLE="background: #ffffff">This
+  subroutine sorts energy coefficients into appropriate groups and
+  finds each group’s weight on the unfolded spectrum. Number of
+  groups corresponds to the number of new K points found in </SPAN></FONT></FONT></FONT><FONT COLOR="#00000a"><FONT FACE="Arial, serif"><FONT SIZE=3><B><SPAN STYLE="background: #ffffff">NewK</SPAN></B></FONT></FONT></FONT><FONT COLOR="#00000a"><FONT FACE="Arial, serif"><FONT SIZE=3><SPAN STYLE="background: #ffffff">.
+  The coefficients are sorted based on their relative position to the
+  Gamma point.</SPAN></FONT></FONT></FONT></P>
+  <P ALIGN=LEFT STYLE="margin-bottom: 0.14in; line-height: 0.19in"><FONT COLOR="#00000a"><FONT FACE="Arial, serif"><FONT SIZE=3><B><SPAN STYLE="background: #ffffff">Parameters</SPAN></B></FONT></FONT></FONT></P>
+  <P ALIGN=LEFT STYLE="margin-bottom: 0.14in; line-height: 0.19in"><FONT COLOR="#00000a"><FONT FACE="Arial, serif"><FONT SIZE=3><U><SPAN STYLE="background: #ffffff">Input:</SPAN></U></FONT></FONT></FONT></P>
+  <P ALIGN=LEFT STYLE="margin-bottom: 0.14in; line-height: 0.19in"><FONT COLOR="#00000a"><FONT FACE="Arial, serif"><FONT SIZE=3><SPAN STYLE="background: #ffffff">FX,
+  FY, FZ, Vector, CoefC, NV</SPAN></FONT></FONT></FONT></P>
+  <P ALIGN=LEFT STYLE="margin-bottom: 0.14in; line-height: 0.19in"><FONT COLOR="#00000a"><FONT FACE="Arial, serif"><FONT SIZE=3><SPAN STYLE="background: #ffffff">FX,
+  FY, FZ	: number of folds in each directions (see </SPAN></FONT></FONT></FONT><FONT COLOR="#00000a"><FONT FACE="Arial, serif"><FONT SIZE=3><B><SPAN STYLE="background: #ffffff">NewK</SPAN></B></FONT></FONT></FONT><FONT COLOR="#00000a"><FONT FACE="Arial, serif"><FONT SIZE=3><SPAN STYLE="background: #ffffff">)<BR>Vector		:
+  array containing x-y-z coordinates of each energy coefficient<BR>Coef		:
+  array containing energy coefficients for a specific Eigenvalue<BR>NV		:
+  number of vectors, and coefficients (one vector per coefficient)</SPAN></FONT></FONT></FONT></P>
+  <P ALIGN=LEFT STYLE="margin-bottom: 0.14in; line-height: 0.19in"><FONT COLOR="#00000a"><FONT FACE="Arial, serif"><FONT SIZE=3><U><SPAN STYLE="background: #ffffff">Output</SPAN></U></FONT></FONT></FONT></P>
+  <P ALIGN=LEFT STYLE="margin-bottom: 0.14in; line-height: 0.19in"><FONT COLOR="#00000a"><FONT FACE="Arial, serif"><FONT SIZE=3><SPAN STYLE="background: #ffffff">Weights</SPAN></FONT></FONT></FONT></P>
+  <P ALIGN=LEFT STYLE="margin-bottom: 0.14in; line-height: 0.19in"><FONT COLOR="#00000a"><FONT FACE="Arial, serif"><FONT SIZE=3><SPAN STYLE="background: #ffffff">Weights	:
+  an array containing weights of each group</SPAN></FONT></FONT></FONT></P>
+  <P ALIGN=LEFT STYLE="margin-bottom: 0.14in; line-height: 0.19in"><FONT COLOR="#00000a"><FONT FACE="Arial, serif"><FONT SIZE=3><U><SPAN STYLE="background: #ffffff">Local</SPAN></U></FONT></FONT></FONT></P>
+  <P ALIGN=LEFT STYLE="margin-bottom: 0.14in; line-height: 0.19in"><FONT COLOR="#00000a"><FONT FACE="Arial, serif"><FONT SIZE=3><SPAN STYLE="background: #ffffff">TGroupc,
+  Sums, counter, sumtot, remainder_x, remainder_y, remainder_z, jj, kk,
+  ll, pp, el</SPAN></FONT></FONT></FONT></P>
+  <P ALIGN=LEFT STYLE="margin-bottom: 0.14in; line-height: 0.19in"><FONT COLOR="#00000a"><FONT FACE="Arial, serif"><FONT SIZE=3><SPAN STYLE="background: #ffffff">TGroupC	:
+  an array containing groups of sorted coefficients<BR>Sums		: an array
+  containing sums of squared coefficients in each group<BR>counter	: an
+  array that keeps track of number of coefficients in each
+  group<BR>sumtot	: total sum of sums of each group<BR>reminader_x	:
+  relative position of each coefficient in x-axis <BR>reminader_y	:
+  relative position of each coefficient in y-axis<BR>reminader_z	:
+  relative position of each coefficient in z-axis<BR>jj, kk, ll		:
+  counters cycling through each group<BR>p		: counter for elements in
+  each group<BR>el		: points to a location in Sums to store the next
+  value</SPAN></FONT></FONT></FONT></P>
+  <P ALIGN=LEFT STYLE="margin-bottom: 0.14in; line-height: 0.19in"><FONT COLOR="#00000a"><FONT FACE="Arial, serif"><FONT SIZE=4><B><SPAN STYLE="background: #ffffff">MAIN
+  (fol2Bloch.F90)</SPAN></B></FONT></FONT></FONT></P>
+  <P ALIGN=LEFT STYLE="margin-bottom: 0.14in; line-height: 0.19in"><FONT COLOR="#00000a"><FONT FACE="Arial, serif"><FONT SIZE=4><B><SPAN STYLE="background: #ffffff">Parameters</SPAN></B></FONT></FONT></FONT></P>
+  <P ALIGN=LEFT STYLE="margin-bottom: 0.14in; line-height: 0.19in"><FONT COLOR="#00000a"><FONT FACE="Arial, serif"><FONT SIZE=4><U><SPAN STYLE="background: #ffffff">Input</SPAN></U></FONT></FONT></FONT></P>
+  <P ALIGN=LEFT STYLE="margin-bottom: 0.14in; line-height: 0.19in"><FONT COLOR="#00000a"><FONT FACE="Arial, serif"><FONT SIZE=3><SPAN STYLE="background: #ffffff">fname,
+  folds, nkval, nkpt, kpts, cg, kg, eig, weight, nsppol, nspinor,
+  npwarr, nband.</SPAN></FONT></FONT></FONT></P>
+  <P ALIGN=LEFT STYLE="margin-bottom: 0.14in; line-height: 0.19in"><FONT COLOR="#00000a"><FONT FACE="Arial, serif"><FONT SIZE=3><SPAN STYLE="background: #ffffff">fname
+  		: case name inputted as part of the initial arguments by user, from
+  			  getargs()<BR>folds		: initial argument (x:y:z), indicating
+  number and direction of folds, from 			  getargs()<BR>nkval		: array
+  of new k points after the unfolding, from newk()<BR>nkpt		: total
+  number of K points, from hdr%nkpt<BR>kpts		: K points coordinates,
+  from hdr%kptns<BR>cg		:<BR>kg		: array of vectors per K point, from
+  wfk_read_band_bloch()</SPAN></FONT></FONT></FONT><FONT COLOR="#00000a"><FONT FACE="Arial, serif"><FONT SIZE=3><B><SPAN STYLE="background: #ffffff"><BR></SPAN></B></FONT></FONT></FONT><FONT COLOR="#00000a"><FONT FACE="Arial, serif"><FONT SIZE=3><SPAN STYLE="background: #ffffff">eig		:
+  array of eigenvalues per K point, from
+  wfk_read_band_bloch()</SPAN></FONT></FONT></FONT><FONT COLOR="#00000a"><FONT FACE="Arial, serif"><FONT SIZE=3><B><SPAN STYLE="background: #ffffff"><BR></SPAN></B></FONT></FONT></FONT><FONT COLOR="#00000a"><FONT FACE="Arial, serif"><FONT SIZE=3><SPAN STYLE="background: #ffffff">weight		:
+  weights calculate by sortc()<BR>nsppol		: integer indicating up/down
+  polarization (1 if none, 2 if polarized)<BR>nspinor	: number of local
+  orbitals, from hdr%nspinor<BR>npwarr		: number of vectors in each
+  kpoint, from hdr%npwarr<BR>nband		: number of bands in K point, from
+  hdr%nband<BR></SPAN></FONT></FONT></FONT><BR><BR>
+  </P>
+  <P ALIGN=LEFT STYLE="margin-bottom: 0.14in; line-height: 0.19in"><FONT COLOR="#00000a"><FONT FACE="Arial, serif"><FONT SIZE=3><U><SPAN STYLE="background: #ffffff">Output</SPAN></U></FONT></FONT></FONT></P>
+  <P ALIGN=LEFT STYLE="margin-bottom: 0.14in; line-height: 0.19in"><FONT COLOR="#00000a"><FONT FACE="Arial, serif"><FONT SIZE=3><SPAN STYLE="background: #ffffff">nkval,
+  eig, weights <BR>(written to fold2Bloch.out or fold2Bloch_up.out and
+  fold2Bloch_down.out if spin polarized)</SPAN></FONT></FONT></FONT></P>
+  <P ALIGN=LEFT STYLE="margin-bottom: 0.14in; line-height: 0.19in"><FONT COLOR="#00000a"><FONT FACE="Arial, serif"><FONT SIZE=3><SPAN STYLE="background: #ffffff">nkval		:
+  new K points after unfolding<BR>eigval		: original
+  eigenvalues<BR>weights	: weight of each new K point for a certain
+  eigenvalue</SPAN></FONT></FONT></FONT></P>
+  <P ALIGN=LEFT STYLE="margin-bottom: 0.14in; line-height: 0.19in"><FONT COLOR="#00000a"><FONT FACE="Arial, serif"><FONT SIZE=3><U><SPAN STYLE="background: #ffffff">Local</SPAN></U></FONT></FONT></FONT></P>
+  <P ALIGN=LEFT STYLE="margin-bottom: 0.14in; line-height: 0.19in"><FONT COLOR="#00000a"><FONT FACE="Arial, serif"><FONT SIZE=3><SPAN STYLE="background: #ffffff">ikpt,
+  iband, csppol, cg_b, count, infile, outfile, coefc, mband, mcg,
+  outname</SPAN></FONT></FONT></FONT></P>
+  <P ALIGN=LEFT STYLE="margin-bottom: 0.14in; line-height: 0.19in"><FONT COLOR="#00000a"><FONT FACE="Arial, serif"><FONT SIZE=3><SPAN STYLE="background: #ffffff">ikpt		:
+  integer number of current K point being processed<BR>iband		: integer
+  current band being processed<BR>csppol		: integer current spin
+  polarization being processed<BR>infile		: integer input file
+  number<BR>outfile		: integer output file number<BR>coefc		: array
+  containing coefficient for the band being processed<BR>mband	:
+  integer maximum number of bands<BR>mcg		: integer maximum possible
+  number of coefficients to allocate them all<BR></SPAN></FONT></FONT></FONT><FONT COLOR="#00000a"><FONT FACE="Arial, serif"><FONT SIZE=3><B><SPAN STYLE="background: #ffffff"><BR></SPAN></B></FONT></FONT></FONT><BR><BR>
+# This YAML file contains the introduction as well as the body of the html lesson.
+# In order to modify the other parts, modify the file lessons.html .
+
+# This is the introduction ...
+intro : |
+  <p>This lesson aims at showing how to get the following physical
+  properties:
+  </p>
   <ul>
-   <li><a name="Ref1"></a> Ref. 1 : S. Sharma and C. Ambrosch-Draxl
-    Physica Scripta T109, 128 (2004) or online:
-    <a href="http://arxiv.org/abs/cond-mat/0305016">http://arxiv.org/abs/cond-mat/0305016</a>  </li>
+    <li>the total magnetization of a ferromagnetic material<br>
+    </li>
+    <li>the magnetization of an antiferromagnetic material<br>
+    </li>
+    <li>analyse the total density of states per spin direction&nbsp; <br>
+    </li>
+    <li>analyse the density of states per atom and per spin direction<br>
+    </li>
+    <li>look at the effect of spin-orbit coupling for a non magnetic
+  system<br>
+    </li>
+    <li>non-collinear magnetism <span style="font-style: italic;">(not yet)</span> </li>
+    <li>spin-orbit coupling and magnetocristalline anisotropy <span style="font-style: italic;">(not
+  yet)</span> </li>
   </ul>
-  The following are also very useful references :
+  You will learn to use of&nbsp; features of ABINIT which deal with spin.<br>
+  <p>This lesson should take about 1.5 hour.
+  </p>
+
+# Now comes the different sections, numbered.
+
+# Each section must have a title, that will form the table of content.
+# Note the small (one space) indentation for the title and body keys.
+sec1:
+ title: "To be filled"
+ body: |
   <ul>
-   <li><a name="Ref2"></a> Ref. 2 : James L. P. Hughes and J. E. Sipe, Phys. Rev. B 53 10751 (1996) </li>
-   <li><a name="Ref3"></a> Ref. 3 : C. Ambrosch-Draxl and J. O. Sofo,  online:
-     <a href="http://arxiv.org/abs/cond-mat/0402523">http://arxiv.org/abs/cond-mat/0402523</a> </li>
-   <li><a name="Ref4"></a> Ref. 4 : S. Sharma J. K. Dewhurst and C. Ambrosch-Draxl
-    Phys. Rev. B 67 165332 (2003) or online:
-    <a href="http://arxiv.org/abs/cond-mat/0211512">http://arxiv.org/abs/cond-mat/0211512</a> </li>
+    <li><a href="#gz1">1</a> <b>A ferromagnetic
+  material: the&nbsp; bcc Fe</b></li>
+    <li><a href="#gz2">2</a> <b>An antiferromagnetic
+  example: fcc Fe</b></li>
+    <li><a href="#gz3">3</a> <b>Another look at fcc Fe</b>
+    </li>
+    <li><a href="#gz4">4</a> <b>A ferrimagnetic example
+  (</b>Mn<sub>4</sub>N<b>)</b><small style="font-style: italic;">(not yet)</small> </li>
+    <li><a href="#gz5">5</a> <b>The spin-orbit coupling</b>
+    </li>
+    <li><a href="#gz6">6</a> <b>Rotation of the
+  magnetization and Spin-orbit </b><small style="font-style: italic;">(not yet)</small></li><span style="font-weight: bold;"><br>
+    <br>
+    </span>
   </ul>
-  Before going to the detailed explanation of the Optic utility, the user
-  is advised to get familiar to the theory behind it, explained in these
-  references. So, either you know this theory and you continue the tutorial,
-  or you should stop the tutorial here, and read at least <a href="#Ref1">Ref. 1</a>.
-  
-  <p>
-  The specific purpose of the Optic utility is to read in the position matrix elements
-  generated by ABINIT (also giving the momentum matrix elements), and then use Eq. 46 in
-  <a href="#Ref1">Ref. 1</a>
-  to determine the
-  linear and Eqs. 49, 50 and 51 in <a href="#Ref1">Ref. 1</a> to determine the nonlinear
-  optical response of the material under investigation.
-  
   <hr>
+
+# Each section must have a title, that will form the table of content.
+# Note the small (one space) indentation for the title and body keys.
+secX:
+ title: "To be filled"
+ body: |
+  <p><a name="gz1"></a><big><b>1. A ferromagnetic material: the&nbsp; <span style="font-style: italic;">bcc</span> Fe</b></big>&nbsp;</p>
   
-  <h3><b><a name="2"></a>2. How to run Optic ? </b></h3>
-  
-  <p>
-  The use of Optic is quite simple :
-  <pre>
-  optic < optic.files > optic.log
-  </pre>
-  where the optic.files file contains three information : the name
-  of the input file, the name of an output file (actually unused), and
-  the root name for all other output files. These input files
-  will be described in the next section.
   
   <p>
-  However, before being able to use Optic, you must have obtained, from the main abinit program,
-  four different files, corresponding to the physical system that you want to study:
+  <i><br>
+  </i></p>
+  <p><i>Before beginning, you might consider to work in a different
+  subdirectory as
+  for the other lessons. Why not "Work_spin" (<small>so ~abinit/tests/tutorial/Input/Work_spin</small>) ? </i> <br>
+  </p>
+  
+  <p>The file <span style="color: rgb(51, 102, 255);">~abinit/tests/tutorial/Input/tspin_x.files</span> lists the file names and root
+  names. You can copy it in the <span style="font-style: italic;">Work_spin</span> directory (and change it, when
+  needed, as
+  usual). <br>
+  You can also copy the file <span style="color: rgb(51, 102, 255);">~abinit/tests/tutorial/Input/tspin_1.in</span> in <span style="font-style: italic;">Work_spin</span>. This
+  is your input file. You can run the calculation, then you should edit
+  the input file, and read it carefully.
+  <br>Because
+  we are going to perform magnetic calculations, there a two new types of
+  variables:<br>
+  </p>
   <ul>
-   <li>The ground state wavefunction file, indexed with _WFK </li>
-   <li>Three files containing the matrix elements of the position operator (or the derivative with respect to wavevector),
-       one for each direction of space</li>
+    <li><a href="../../input_variables/generated_files/varbas.html#nsppol" target="kwimg"><span style="text-decoration: underline;">nsppol</span></a><br>
+    </li>
+    <li><a href="../../input_variables/generated_files/vargs.html#spinat" target="kwimg"><span style="text-decoration: underline;">spinat</span></a><br>
+    </li>
   </ul>
-  Supposing you have read
-  the <A href="help_abinit.html"><B>main ABINIT help file</B></A>,
-  the production of the first file should not require any additional explanation.
-  However, the way to obtain the matrix elements is worth explaining.
+  Please, read their description in the help file.
   <br>
-  The long-wave method as well as the Berry-phase treatment of electric field,
-  allow to establish the equivalence between
-  the off-diagonal matrix elements of the position operator, and the
-  off-diagonal matrix elements of the derivative with respect to the wavevector (d/dk),
-  for the periodic part of the Bloch functions, see for example
-  section VI of X. Gonze, Phys. Rev. B 55, 10337 (1997),
-  or Nunes and Gonze, Phys. Rev. B 63, 155107 (2001), and references therein.
-  Moreover, a straightforward relationship exists between these matrix elements,
-  and the matrix elements of the momentum operator.
-  <p>
-  The main abinit program has
-  the capability to compute derivatives of wavefunctions with respect to their
-  wavevector. This is explained in the
-  <A href="help_respfn.html"><B>ABINIT (respfn) help file</B></A>.
-  Such a calculation implies treating three d/dk perturbations, with numbers 3*natom+1,
-  3*natom+2 and 3*natom+3 (that is, for a unit cell with 2 atoms, perturbations
-  number 7, 8 and 9). In the 2-atom case, the associated files needed for Optic have the
-  index _1WF7 , _1WF8 , and _1WF9 .
-  <p> The formalism implemented in Optic treats explicitly
-  the eigenstates lying in the range of energy between the lowest
-  occupied wavefunction and the highest one plus the maximal excitation energy
-  (chosen by the user).
-  All the other ones are neglected. This has two important consequences for the
-  preliminary runs :
-  <ul>
-   <li>The ground calculation must produce explicitly all the eigenstates
-       and eigenvalues for that target range of energy, so it cannot be restricted to the occupied wavefunctions only</li>
-   <li>One does not need the full change of Bloch wavefunctions with respect to d/dk, but only
-       the matrix elements between the wavefunctions of this range of energy</li>
-  </ul>
-  Because of the latter, the computation of the response to d/dk perturbations is much
-  shorter than usual : indeed, the matrix elements between the explicitly ground-state
-  wavefunctions are computed at the very beginning of the abinit(respfn) run. It is not
-  worth to make a full calculation of the modification of the wavefunctions due to a change
-  of wavevector.
+  You will work at fixed [[ecut]]
+  (=18Ha) and k-point grid, defined by [[ngkpt]]
+  (the 4x4x4 Monkhorst-Pack grid). It is implicit that in "real life",
+  you should do a convergence test with
+  respect to both convergence parameters. <br>
+  This takes about 12 seconds on a modern PC (one needs a sufficiently large cut-off
+  to exhibit magnetic effects).<br>
+  We will compare the output with and without
+  magnetization. (Hence, there are two datasets in the run)<br>
+  We now look at the output file.<br>
+  In the magnetic case, the electronic density is split in two parts, the
+  "Spin-up" and the "Spin-down" parts to which correspond different
+  Kohn-Sham potentials and different sets of eigenvalues whose occupation
+  are given by the Fermi-Dirac function (without the ubiquitous factor 2)<br>
+  <br>
+  For the first k-point, we get for instance:<br>
+  (no magnetization)<br>
+  &nbsp;&nbsp;<span style="font-family: monospace;">&nbsp;&nbsp;&nbsp;&nbsp;
+  occ&nbsp;&nbsp; &nbsp; 2.00000&nbsp;&nbsp; 1.99989&nbsp;&nbsp;
+  1.99989&nbsp;&nbsp; 1.22915&nbsp;&nbsp; 1.22915&nbsp;&nbsp;
+  0.28676&nbsp;&nbsp; 0.00000&nbsp;&nbsp; 0.00000</span><br>
+  (magnetic case)<br>
+  <span style="font-family: monospace;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  occ&nbsp;&nbsp; 1.00000&nbsp;&nbsp; 0.99999&nbsp;&nbsp;
+  0.99999&nbsp;&nbsp; 0.98396&nbsp;&nbsp; 0.98396&nbsp;&nbsp;
+  0.69467&nbsp;&nbsp; 0.00000&nbsp;&nbsp; 0.00000 (spin-up)<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  1.00000&nbsp;&nbsp; 0.99730&nbsp;&nbsp; 0.99730&nbsp;&nbsp;
+  0.00898&nbsp;&nbsp; 0.00898&nbsp;&nbsp; 0.00224&nbsp;&nbsp;
+  0.00000&nbsp;&nbsp; 0.00000 (spin-down)<br>
+  <br>
+  </span>We note that the occupation are very different for up and down
+  spins, which means that the eigenvalues are shifted which is in turn
+  due to
+  a shift of the exchange-correlation potential, and therefore of the
+  effective potential. You can indeed have a look at the output file to
+  compare spin-up and down&nbsp; eigenvalues:<br><span style="font-family: monospace;"><br>
+  </span>
+  <div style="margin-left: 40px;"><span style="font-family: monospace;">-0.48411&nbsp;
+  -0.38615&nbsp; -0.38615&nbsp; -0.30587&nbsp; -0.30587&nbsp;
+  -0.27293&nbsp;&nbsp; 0.33747&nbsp;&nbsp; 0.33747 (up, kpt#1)</span><br>
+  <span style="font-family: monospace;">
+  -0.46638&nbsp; -0.32383&nbsp; -0.32383&nbsp; -0.21767&nbsp;
+  -0.21767&nbsp; -0.20371&nbsp;&nbsp; 0.36261&nbsp;&nbsp; 0.36261 (dn,
+  kpt#1)</span><br>
+  </div>
   
-  <!-- <p>
-  (XG050701)
-  HERE, I SHOULD GIVE EXPLICITLY THE SENSITIVE INPUT VARIABLES FOR ABINIT.
-  AND ALSO I SHOULD EXPLAIN SUBTLETIES RELATED TO THE USE OF SYMMETRIES.
-  -->
-  
+  <br>
+  The magnetization density (in unit of mu_B - Bohr's magneton) is the difference between
+  the up and down densities. The magnetization density, divided by the total
+  density is noted "zeta". This quantity "zeta" can vary between -1 and 1. It is
+  everywhere zero in the non-magnetic case. In the magnetic case, we can
+  read for instance its minimal and maximal values in the output file:<br>
+  <br>
+  <span style="font-family: monospace;">Min spin pol zeta= -4.8326E-02 at
+  reduced coord.&nbsp; 0.7222&nbsp; 0.5000&nbsp; 0.2222<br>
+  &nbsp;&nbsp;&nbsp; &nbsp;next min= -4.8326E-02 at reduced coord.&nbsp;
+  0.5000&nbsp; 0.7222&nbsp; 0.2222<br>
+  Max spin pol zeta=&nbsp; 5.7306E-01 at reduced coord.&nbsp;
+  0.0000&nbsp; 0.8889&nbsp; 0.8889<br>
+  &nbsp;&nbsp;&nbsp; &nbsp;next max=&nbsp; 5.7306E-01 at reduced
+  coord.&nbsp; 0.8889&nbsp; 0.0000&nbsp; 0.8889</span><br><br>
+  The total magnetization, its integral on the unit cell, is
+  now in the magnetic case:<br>
+  <br>
+  &nbsp;
+  <span style="font-family: monospace;">Magnetization (Bohr
+  magneton)=&nbsp; 1.96743463E+00<br>
+  &nbsp;Total spin up =&nbsp; 4.98371731E+00&nbsp;&nbsp; Total spin down
+  =&nbsp; 3.01628269E+00<br>
+  <br>
+  </span>We observe that the total density (up+down) yields 8.000 as
+  expected.<br>
+  <br>
+  The magnetization density is not the only changed quantity. The
+  energy is changed too, and we get:<br>
+  &nbsp;<br>
+  <span style="font-family: monospace;">&nbsp;&nbsp;&nbsp; etotal1&nbsp;
+  -2.4661707268E+01</span><span style="font-family: monospace;">&nbsp;
+  (no magnetization)</span><br>
+  <span style="font-family: monospace;">&nbsp;&nbsp;&nbsp; etotal2&nbsp;
+  -2.4670792868E+01&nbsp; </span><span style="font-family: monospace;">(with
+  magnetization)</span><br>
+  <br>
+  The energy of the magnetized system is the lowest and therefore
+  energetically favoured, as expected since <span style="font-style: italic;">bcc</span> iron is a ferromagnet.<br>
+  Finally, one notes also that the stress tensor is affected by the
+  magnetization. This would also be true for&nbsp; the forces for a less symmetric material.<br>
+  <br>
+  It is interesting to consider in more details the distribution of
+  eigenvalues for each direction of magnetization, which is best done by
+  looking at the respective densities of state.<br>
+  To this end we have set
+  [[prtdos]]= 1
+  in the input file, in order to obtain the density
+  of states corresponding to spin-up and spin-down electrons (as soon as
+  [[nsppol]]=2). <br>
+  The values of the DOS are in the files <span style="color: rgb(51, 102, 255);">tspin_1o_DS1_DOS</span> and
+  <span style="color: rgb(51, 102, 255);">tspin_1o_DS2_DOS</span> for the magnetic and non magnetic case respectively. We
+  can extract the values for use in a plotting software.<br>
+  Traditionally, in order to enhance visibility, one affects with a
+  negative sign the DOS of&nbsp; minority&nbsp; electrons. If we compare
+  the <a href="../documents/lesson_spin/bccfe_mag_dos2.jpg" target="img">DOS of
+  the magnetized</a> system and the <a href="../documents/lesson_spin/bccfe_nonmag_dos2.jpg" target="img">non
+  magnetized</a> system, we observe that the up and down DOS have
+  been&nbsp;
+  "shifted" with respect each other.<br>
+  The integrated density of states yields the number
+  of electrons for each spin direction and
+  we see the magnetization
+  which arises from the fact that there are more up than down electrons
+  at the Fermi level.<br>
+  <br>
+  That the magnetization points upwards is fortuitous,
+  and we can get it pointing downwards by changing the sign of the initial [[spinat]].
+  <br>
+  Indeed, in the absence of spin-orbit coupling, there is no relation
+  between the direction of magnetization and the cristal axes.<br>
+  If we start with a [[spinat]]
+  of 0, the magnetization
+  remains 0. [[spinat]] gives
+  indeed a way to initially break the spin symmetry.<br>
+  <br>
+  <br>
+  <br>
   <hr>
+
+# Each section must have a title, that will form the table of content.
+# Note the small (one space) indentation for the title and body keys.
+secX:
+ title: "To be filled"
+ body: |
+  <p><big><a name="gz2"></a><b>2. An antiferromagnetic example: <span style="font-style: italic;">fcc</span> Fe</b></big></p>
+  <h3> </h3>
+  <span style="font-style: italic;">
+  Well sort of.... </span><br>
+  <br>
+  Actually, <span style="font-style: italic;">fcc</span> Fe, displays many complicated structures, in particular
+  spin spirals. A spiral is characterized by a direction along an axis,
+  an angle of the magnetization with respect to this axis and a step
+  after which a rotation is complete.<br>
+  A very simple particular case is when the angle is 90&deg;, the axis is
+  &lt;100&gt; and the step is the
+  unit cell side, spin directions are alternating in every two planes
+  perpendicular to the &lt;100&gt; axis ("spiral stairway")<br>
+  For instance, if the atom at [x,y,0] possesses
+  an
+  "up" magnetization, the atom at [x,y,1/2] would possess a down
+  magnetization etc...<br>
+  To describe such a structure, we merely need two atoms, [0,0,0] and
+  [1/2,0,1/2] and a unit cell comprising those two atoms.<br>
+  Also, each atom will be given opposite magnetization with the help of
+  the variable [[spinat]].<br>
+  <br>
+  You can copy the file <span style="color: rgb(51, 102, 255);">~abinit/tests/tutorial/Input/tspin_2.in</span> in <span style="font-style: italic;">Work_spin</span>.
+  This is your input file. Modify accordingly the <span style="color: rgb(51, 102, 255);">tspin_x.files</span> file.
+  You can run the calculation, then you should edit the <span style="color: rgb(51, 102, 255);">tspin_2.in</span> file,
+  and briefly
+  look at the two changes with respect to the file
+  <span style="color: rgb(51, 102, 255);">tspin_1.in</span>: the change of unit cell basis vectors [[rprim]],
+  the new [[spinat]].
+  <br><br>
+  Note also we use now [[nsppol]]=1 and [[nspden]]=2: this combination
+  of values is only valid when performing an antiferromagnetic
+  calculation (<span style="font-style: italic;">nspden=2</span> means that we have 2 independent components for the charge density while <span style="font-style: italic;">nsppol=1</span> means that we have 1 independent component for the wave-functions).<br>
+  In that case, ABINIT uses the so-called Shubnikov symmetries, to perform calculations twice faster
+  than with [[nsppol]]=2 and [[nspden]]=2.
+  The symmetry of the
+  crystal is not the full fcc symmetry anymore since the symmetry must
+  now preserve the magnetization of each atom.&nbsp; ABINIT is
+  nevertheless able to detect such symmetry belonging to the
+  Shubnikov groups and correctly detects that the cell is
+  primitive,
+  which would not be the case if we had the same value of
+  [[spinat]] on each
+  atom.<br><br>
+  If we now run again the calculation, this total computation time is
+  approximately 30 seconds on a recent CPU.<br>
+  If we look at the eigenvalues and occupations, they are again affected
+  by a factor 2, which results from the
+  symmetry considerations alluded to above, and not from the "usual"
+  spin degeneracy : the potential for spin-up is equal to the potential
+  for spin-down, shifted by the antiferromagnetic translation vector. Eigenenergies
+  are identical for spin-up and spin-down, but wavefunctions are shifted
+  one with respect to the other.<br>
+  <br>
+  &nbsp;
   
-  
-  <h3><b><a name="3"></a>3. Optic input file and input variables </b></h3>
-  
-  A typical optic.files file is presented below :
-  <pre>
-  optic.in     ! Name of input file
-  optic.out    ! Unused
-  optic        ! Root name for all files that will be produced
-  </pre>
-  
-  Please note that the format of input files for Optic has changed from Abinit v8.0
-  Since very few input parameters are required for Optic, the optic.in file contains them with the namelist format.
-  The order of the three parts, namely FILES, PARAMETERS and COMPUTATIONS must be kept unaltered.
-  
-  <pre>
-  &amp;FILES
-   [[optic:ddkfile]]_1 = 'toptic_1o_DS4_1WF7',
-   [[optic:ddkfile]]_2 = 'toptic_1o_DS5_1WF8',
-   [[optic:ddkfile]]_3 = 'toptic_1o_DS6_1WF9',
-   [[optic:wfkfile]] = 'toptic_1o_DS3_WFK'
-  /
-  &amp;PARAMETERS
-   [[optic:broadening]] = 0.002,
-   [[optic:domega]] = 0.0003,
-   [[optic:maxomega]] = 0.3,
-   [[optic:scissor]] = 0.000,
-   [[optic:tolerance]] = 0.002
-  /
-  &amp;COMPUTATIONS
-   [[optic:num_lin_comp]] = 1,
-   [[optic:lin_comp]] = 11,
-   [[optic:num_nonlin_comp]] = 2,
-   [[optic:nonlin_comp]] = 123,222,
-  /
-  </pre>
-  
-  <p>The list of input variables for the optic input file is presented in <a href="../../topics/generated_files/topic_Optic.html">Optic input variables</a>.
-  
-  <!--
-  YG(20160421) Here I should describe the new possibilities for LEO and SHG with antiresonant approximation
-  -->
-  
-  
+  <span style="font-family: monospace;">kpt#&nbsp;&nbsp; 1, nband= 16,
+  wtk=&nbsp; 0.05556, kpt=&nbsp; 0.0833&nbsp; 0.0833&nbsp; 0.1250
+  (reduced coord)<br>
+  &nbsp; -0.60539&nbsp; -0.47491&nbsp; -0.42613&nbsp; -0.39022&nbsp;
+  -0.35974&nbsp; -0.34377&nbsp; -0.28895&nbsp; -0.28828<br>
+  &nbsp; -0.25314&nbsp; -0.24042&nbsp; -0.22943&nbsp;
+  -0.14218&nbsp;&nbsp; 0.20264&nbsp;&nbsp; 0.26203&nbsp;&nbsp;
+  0.26641&nbsp;&nbsp; 0.62158<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; occupation numbers for kpt#&nbsp;&nbsp; 1<br>
+  &nbsp;&nbsp; 2.00000&nbsp;&nbsp; 2.00000&nbsp;&nbsp;
+  2.00000&nbsp;&nbsp; 1.99997&nbsp;&nbsp; 1.99945&nbsp;&nbsp;
+  1.99728&nbsp;&nbsp; 1.50632&nbsp;&nbsp; 1.48106<br>
+  &nbsp;&nbsp; 0.15660&nbsp;&nbsp; 0.04652&nbsp;&nbsp;
+  0.01574&nbsp;&nbsp; 0.00000&nbsp;&nbsp; 0.00000&nbsp;&nbsp;
+  0.00000&nbsp;&nbsp; 0.00000&nbsp;&nbsp; 0.00000<br>
+  <br>
+  </span><span style="font-family: monospace;"><br>
+  <br>
+  </span>How do we know we have a magnetic order?<br>
+  The&nbsp; density of state used for <span style="font-style: italic;">bcc</span> Fe will not be useful
+  since the net
+  magnetization is
+  zero and we have as many up and down electrons.<br>
+  Though, the magnetization is reflected in the existence of an up
+  and down electronic density whose sum is the total density and whose
+  difference yields the net magnetization density at each
+  point in real space.<br><br>
+  In particular, the integral of the magnetization around each atom will give an
+  indication of the magnetic moment carried by this particular atom. A first
+  estimation is printed out by ABINIT. You can read:<br>
+  &nbsp;<span style="font-family: monospace;">Integrated total density in atomic spheres:</span><br style="font-family: monospace;">
+  <span style="font-family: monospace;">&nbsp;-------------------------------------------</span><br style="font-family: monospace;">
+  <span style="font-family: monospace;">&nbsp;Atom&nbsp; Sphere
+  radius&nbsp; Integrated_up_density&nbsp; Integrated_dn_density&nbsp;
+  Total(up+dn)&nbsp;&nbsp; Diff(up-dn)</span><br style="font-family: monospace;">
+  <span style="font-family: monospace;">&nbsp;&nbsp;&nbsp;
+  1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  2.00000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  3.32789225&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  2.99093607&nbsp;&nbsp;&nbsp; 6.31882832&nbsp;&nbsp;&nbsp; 0.33695617</span><br style="font-family: monospace;">
+  <span style="font-family: monospace;">&nbsp;&nbsp;&nbsp;
+  2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  2.00000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  2.98670724&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  3.32364305&nbsp;&nbsp;&nbsp; 6.31035029&nbsp;&nbsp; -0.33693581</span><br style="font-family: monospace;">
+  <span style="font-family: monospace;">&nbsp;Note: Diff(up-dn) can be considered as a rough approximation of a local magnetic moment.</span><br style="font-family: monospace;">
+  <br>
+  and obtain a rough estimation of the magnetic moment of each atom
+  (strongly dependent on the radius used to project the charge density):<br>
+  <div style="margin-left: 40px;"><span style="font-weight: bold; font-family: monospace;">
+  magnetization of atom 1= 0.33696</span><br style="font-weight: bold; font-family: monospace;">
+  <span style="font-weight: bold; font-family: monospace;">
+  magnetization of atom 2=-0.33693</span><br style="font-weight: bold; font-family: monospace;">
+  </div>
+  <br>
+  But here we want more precise results...<br>
+  To perform the integration, we will use the utility <span style="font-weight: bold;">cut3d</span> which yields
+  an interpolation of the magnetization at any point in space. <span style="font-weight: bold;">cut3d</span> is one of the executables of the ABINIT package and should be installed together with abinit.<br>
+  As of now <span style="font-weight: bold;">cut3d</span> is interactive, we will use it through a very
+  primitive script (written in <span style="font-style: italic;">Python</span>) to perform a rough estimate of the
+  magnetization on each atom.<br>
+  You can have a look at the <span style="color: rgb(51, 102, 255);">~abinit/doc/tutorial/documents/lesson_spin/magnetization.py</span> program,
+  and note (or believe) that
+  it does
+  perform an
+  integration of magnetization on a cube of side acell/2 around
+  each atom; if applicable, you might consider to adjust the value of
+  "CUT3D" string in the <span style="font-style: italic;">Python</span> script.<br>
+  <br>
+  Copy it in your <span style="font-style: italic;">Work_spin</span> directory.
+  If you run the program, by typing "<span style="color: rgb(51, 102, 255);">python</span> <span style="color: rgb(51, 102, 255);">magnetization.py</span>" , you will see the
+  result:<br>
+  <div style="margin-left: 40px;"><span style="font-weight: bold; font-family: monospace;">
+  magnetization of atom 1= 0.38212</span><br style="font-weight: bold; font-family: monospace;">
+  <span style="font-weight: bold; font-family: monospace;">
+  magnetization of atom 2=-0.38203</span><br style="font-weight: bold; font-family: monospace;">
+  </div>
+  <br>
+  which shows that the magnetization of each atom are actually opposite.
+  <br>With the next input file <span style="color: rgb(51, 102, 255);">tspin_3.in</span>, we will consider this same problem, but in a
+  different way, and note, for future record that the total energy is:
+  <span style="font-family: monospace;">Etotal=-4.92489592898935E+01</span><br>
+  <br>
+  <br>
+  <br>
   <hr>
-  
-  
-  
-  
-  <h3><b><a name="4"></a>4. Optic output files </b></h3>
-  
-  <h4><b><a name="4.1"></a>4.1. Linear optical response data files</b></h4>
-  <p>
-  Name: case_a_b-linopt.out
-  <br>
-  Contains the following 3 data sets
+
+# Each section must have a title, that will form the table of content.
+# Note the small (one space) indentation for the title and body keys.
+secX:
+ title: "To be filled"
+ body: |
+  <p><a name="gz3"></a><big><b>3. Another look at <span style="font-style: italic;">fcc</span> Fe</b></big></p>
+  <h3> </h3>
+  Instead of treating <span style="font-style: italic;">fcc</span> Fe directly as an antiferromagnetic material,
+  we will not make any hypotheses on its magnetic structure, and run the calculation like the one for <span style="font-style: italic;">fcc</span>
+  Fe, anticipating only that the two spin directions are going to be different.<br>
+  We will not even assume
+  that the initial spins are of the same magnitude.<br><br>
+  You can copy the file <span style="color: rgb(51, 102, 255);">~abinit/tests/tutorial/Input/tspin_3.in</span> in <span style="font-style: italic;">Work_spin</span>.
+  This is your input file. You can modify the file <span style="color: rgb(51, 102, 255);">tspin_x.files</span> and
+  immediately start running the calculation. Then, you should edit it.
+  Note the values of
+  [[spinat]]. In this job,
+  we wish again to characterize the magnetic structure.<br>
+  We are not going to use zeta as in the preceding calculation, but we
+  will here use another feature of abinit: atom and angular
+  momentum
+  projected densities of state.<br>
+  These are densities of state weighted by the projection of the
+  wave functions on angular momentum channels (that is spherical
+  harmonics) centered on each atom of the system. <br>
+  Note that theses DOS are computed with the tetrahedron method,
+  which is rather time consuming and produces less smooth DOS than the smearing method. The time is
+  strongly dependent on the number of kpoints and we use here only a
+  reduced set.<br>
+  (This will take about 1.5 minutes on a modern computer)<br><br>
+  To specify this calculation we need new variables, in addition to
+  [[prtdos]] set now to 3 :<br>
   <ul>
-   <li>1) Column 1 - energy(eV), column 2 - imaginary part of the ab component of the
-     frequency dependent linear dielectric tensor.</li>
-   <li>2) Column 1 - energy(eV), column 2 - real part of the ab component of the
-     frequency dependent linear dielectric   tensor.</li>
-   <li>3) Column 1 - energy(eV), column 2 - absolute value of the ab component of the
-     frequency dependent linear dielectric tensor.</li>
+    <li>[[natsph]]</li>
+    <li>[[iatsph]]</li>
+    <li><a href="../../input_variables/generated_files/vargs.html#ratsph" target="kwimg">ratsph<br>
+      </a></li>
   </ul>
-  In the header of the file you can find information about the calculation. Some
-  results for GaAs(LiF???) are presented in this document to show what can be
-  expected.
-  
-  <h4><b><a name="4.2"></a>4.2. Non-linear optical response data files</b></h4>
-  
-  <p>
-  Name: case_a_b_c-ChiKIND1.out
   <br>
-  KIND1:This can be TotIm, TotRe or TotAbs
+  This will specify the atoms around which the calculation will be
+  performed, and the radius of the sphere. <br>
+  We specifically select a new dataset for each atom, a non
+  self-consistent calculation being run to generate the projected density of states.<br>
+  First, we note that the value of the energy is:<big><span style="font-family: monospace;"> <small>Etotal=-4.92489557316370E+01</small></span></big>, which shows that we have attained
+  presumably the same state as above.<br>
   <br>
-  Contains: column 1 - energy(eV), column 2 and 3 - imaginary (KIND1=TotIm),
-  real (KIND1=TotRe) or  absolute (KIND1=TotAbs) value of the abc component of
-  the nonlinear optical susceptibility. Second column contains values in
-  electro-static units (esu) and third column  contains values in the SI units.
+  The density of states will be in the files <span style="color: rgb(51, 102, 255);">tspin_3o_DS2_DOS_AT0001</span> for
+  the first atom, and <span style="color: rgb(51, 102, 255);">tspin_3o_DS3_DOS_AT0002</span> for the second atom.<br>
+  We can extract the density of d states, which carries most of the
+  magnetic
+  moment and whose integral up to the Fermi level will yield an
+  estimate of the magnetization on each atom. We note the Fermi level (recalled in the file <span style="color: rgb(51, 102, 255);">tspin_3o_DS1_DOS</span>):<br>
+  &nbsp;<span style="font-family: monospace;"><br><span style="font-weight: bold;">
+  Fermi energy
+  :&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; -0.28270392</span></span><br><br>
+  If we have a look at the
+  integrated site projected density of states,
+  we can compute the total moment on each atom. To this end, one can 
+  open the file <span style="color: rgb(51, 102, 255);">tspin_3o_DS3_DOS_AT0002</span>, which contains information pertaining to
+  atom 2. This file is self-documented, and describes on each line, for
+  spin up and spin down:<br>
+  <span style="font-family: monospace;"># energy(Ha)&nbsp;
+  l=0&nbsp;&nbsp; l=1&nbsp;&nbsp;
+  l=2&nbsp;&nbsp; l=3&nbsp;&nbsp;
+  l=4&nbsp;&nbsp;&nbsp; (integral=&gt;)&nbsp; l=0 &nbsp;
+  l=1&nbsp;&nbsp; l=2&nbsp;&nbsp;
+  l=3&nbsp;&nbsp; l=4</span><br>
   <br>
-  
-  <p>
-  Name: case_a_b_c-ChiKIND2.out
+  If we look for the lines containing&nbsp; an energy of
+  "-0.28250",&nbsp; we find <br>
+  <span style="font-family: monospace;"><br><span style="font-weight: bold;">up</span>
+  &nbsp; -0.28250&nbsp;&nbsp; 0.8026&nbsp;&nbsp; 2.6082&nbsp;
+  23.3966&nbsp;&nbsp; 0.7727&nbsp;&nbsp;
+  0.1687&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0.30&nbsp;&nbsp;&nbsp;
+  0.34&nbsp;&nbsp;&nbsp; <span style="color: rgb(204, 0, 0);">3.42</span>&nbsp;&nbsp;&nbsp; 0.04&nbsp;&nbsp;&nbsp; 0.01<br>
+  <span style="font-weight: bold;">dn</span> &nbsp; -0.28250&nbsp;&nbsp;
+  0.3381&nbsp;&nbsp; 1.8716&nbsp; 24.0456&nbsp;&nbsp; 0.3104&nbsp;&nbsp;
+  0.1116&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0.30&nbsp;&nbsp;&nbsp;
+  0.33&nbsp;&nbsp;&nbsp; <span style="color: rgb(204, 0, 0);">2.74</span>&nbsp;&nbsp;&nbsp; 0.04&nbsp;&nbsp;&nbsp; 0.01<br>
+  </span><span style="font-family: monospace;"><br>
+  </span><br>
+  There are apparently changes in the densities of states for all the
+  channels, but besides the <span style="font-style: italic;">d</span>-channels, these are indeed fluctuations.
+  This is confirmed by looking at the integrated density of states which
+  is different only for the d-channel. The difference between up and down
+  is <span style="font-weight: bold;">0.68</span>, in rough agreement (regarding our very rude methods of
+  integration) with the previous calculation. Using a calculation with
+  the same number of k points for the projected DOS, we can <a href="../documents/lesson_spin/energy_diff_fccfe.jpg" target="img">plot</a> the
+  up-down integrated dos difference for the <span style="font-style: italic;">d</span>-channel. Note that there is some scatter
+  in this graph, due to the finite number of digits (2 decimal places) of the
+  integrated dos given in the file <span style="color: rgb(51, 102, 255);">tspin_3o_DS3_DOS_AT0002</span>.<br>
   <br>
-  KIND2:This can be Im, Re or abs
+  If we now look at the up and down DOS for each atom, we can see that
+  the corner atom and the face atom possess opposite magnetizations,
+  which roughly cancel each other. The density of states computed with
+  the tetrahedron method is not as smooth as by the smearing
+  method, and a running average allows for a better view.<br>
   <br>
-  Contains: column 1 - energy(eV), column 2, 3 inter and column 4, 5 intra band
-  contributions to the imaginary (KIND2=Im), real (KIND2=Re) or absolute
-  (KIND2=Abs) value of the abc component of the nonlinear optical susceptibility.
-  These components are labeled as inter and intra in Eqs. 49-51 in <a href="#Ref1">Ref. 1</a>.
   <br>
-  
-  <p>
-  All the values are in electro-static units (esu). In the header of all the
-  above files you can find information about the calculation.
-  
-  Some results of nonlinear optical spectrum for
-  GaAs(LiF???) are presented in this document to show what can be expected.
-  
+  <br>
   <hr>
-  
-  
-  
-  
-  <h3><b><a name="5"></a>5. Trouble shooting </b></h3>
-  
-  <p>
-  1) All I get is zeros in my *-linopt.out file. Why?
-  
-  <p>
-  There are several possibilities.
+
+# Each section must have a title, that will form the table of content.
+# Note the small (one space) indentation for the title and body keys.
+secX:
+ title: "To be filled"
+ body: |
+  <p><a name="gz4"></a><big><b>4. A ferrimagnetic example </b><span style="font-style: italic;">(not yet)</span></big></p>
+  <h3 style="font-weight: normal; font-style: italic;">
+  </h3>
+  Some materials can display a particular form of ferromagnetism, which
+  also can be viewed as non
+  compensated antiferromagnetism, called ferrimagnetism.<br>
+  Some atoms possess up spin and other possess down spin, but the
+  total spin magnetization is non zero.<br>
+  This happens generally for system with different type of atoms, and
+  sometimes in
+  rather complicated structures such as the magnetite. <br>
   <br>
-  Let us explore some of them here:
-  <ul>
-   <li>(i) The component of the dielectric tensor that you are looking at could be zero
-      due to symmetry of the crystal. Normally zz component is a good place to
-      start. It is almost never zero. So check the file case__0003_0003-linopt.out.</li>
-  
-   <li>(ii) If the components zz is zero this is more serious, if you are using the
-       default input file t57.in then please check that  on the line number 10
-       the second number is 33. If you are not using the default input file
-       please calculate the 33 (or zz) component and make sure it is not zero.</li>
-  
-   <li>(iii) If even zz component is zero then possibilities are endless maximum
-        frequency on line number 6 of t57.in is too small, or the number of bands
-        used for performing ground state calculation are too small.</li>
-  </ul>
-  <p>
-  2) All I get is zeros in my *-ChiKIND.out file. Why?
-  
-  <p>
-  Two most common mistakes are:
-  <ul>
-   <li>(i) You are calculating the second order response for material with inversion
-      symmetry in this case all the components will be correctly zero or very
-      small like 10-15.</li>
-  
-   <li>(ii) Most components out of the 27 are zero due to the symmetry of the crystal.
-       Please calculate a different component.</li>
-  </ul>
-  
-  
+  <br>
+  <br>
   <hr>
+
+# Each section must have a title, that will form the table of content.
+# Note the small (one space) indentation for the title and body keys.
+secX:
+ title: "To be filled"
+ body: |
+  <p><a name="gz5"></a><big><b>5. The spin-orbit coupling</b></big></p>
+  <h3> </h3>
+  <h3><small><span style="font-weight: normal;">For heavy atoms a
+  relativistic description of the electronic structure becomes necessary,
+  and this can be accomplished through the relativistic LDA
+  approximation.</span></small></h3><br>
   
-  <!--
-  <h3><b><a name="6"></a>6. Results for GaAs </b></h3>
+  <h3><span style="font-weight: normal; text-decoration: underline;">5.1 Norm-conserving pseudo-potentials</span><br>
+  </h3>
+  <h3><small><span style="font-weight: normal;">For atoms, the Dirac equation is solved and the <span style="font-style: italic;">2(2l+1)</span>
+  <span style="font-style: italic;">l</span>-channel degeneracy is lifted according to the eigenvalues of the <span style="font-weight: bold;">L+S </span>operator (<span style="font-style: italic;">l+1/2</span> and <span style="font-style: italic;">l-1/2</span> of
+  degeneracy <span style="font-style: italic;">2l+2</span> and <span style="font-style: italic;">2l</span>). After pseudization, the&nbsp; associated wave
+  functions can be recovered by adding to usual pseudo-potential
+  projectors a spin-orbit term of the generic form
+  <span style="font-weight: bold;">v(r).|l,s&gt;L.S&lt;l,s|</span>. Not all potentials include this additional
+  term, but it turns out that it is the case for all the HGH type
+  pseudopotentials.</span></small></h3>
+  <h3><small><span style="font-weight: normal;">In a plane wave calculation, the wavefunctions will be
+  two components spinors, that is will have a spin-up and a spin-down
+  component but these components will be coupled. This mean the size of
+  the Hamiltonian matrix is quadrupled.</span></small></h3>
+  <h3><small><span style="font-weight: normal;">We will consider here a heavier
+  atom than Iron: <span style="font-style: italic;">Tantalum</span>.<span style="font-weight: bold;"></span><br>
+  You will have to change the "<span style="font-style: italic;">files</span>" file
+  accordingly, as we here have used the potential: <span style="color: rgb(51, 102, 255);">73ta.hghsc</span>.
+  It is a HGH pseudopotential, with semicore states.
+  Replace the last line of the <span style="color: rgb(51, 102, 255);">tspin_x.files</span> by
+  </span></small></h3>
+  <h3><small><small><span style="font-weight: normal;"><pre>../../../Psps_for_tests/73ta.hghsc<br></pre></span></small></small></h3>
+  <small><span style="font-weight: normal;"><big>
+  You can copy the file <span style="color: rgb(51, 102, 255);">~abinit/tests/tutorial/Input/tspin_5.in</span> in <span style="font-style: italic;">Work_spin</span>.
+  Change accordingly the file names in <span style="color: rgb(51, 102, 255);">tspin_x.files</span>, then run the
+  calculation. It takes about 20 secs on a recent computer.
+  </big></span></small><big><br>
+  </big>
   
-  <pre>
-  SHOULD STILL BE DONE !
-  A small description of results.
-  excitonic effects!!!
+  The input file contains one new variable:<br>
+  <ul><li>[[nspinor]]</li>
+  </ul>Have a look at it. You should also look at<span style="text-decoration: underline;"> </span>[[so_psp]]; it is not used here, meaning that the SO information is directly read from the pseudopotential file.<br>
+  <br>
+  In this run, we check that we recover the splitting of the atomic
+  level by performing a calculation in a big box.
+  Two calculations are launched with and without spin-orbit. <br><br>
+  We can easily follow the symmetry of the different levels of the non
+  spin orbit calculation:<br>
+  &nbsp;
+  <span style="font-family: monospace;">kpt#&nbsp;&nbsp; 1, nband= 26,
+  wtk=&nbsp; 1.00000, kpt=&nbsp; 0.0000&nbsp; 0.0000&nbsp; 0.0000
+  (reduced coord)<br>
+  -2.44760&nbsp; <br>
+  -1.46437&nbsp; -1.46437&nbsp; -1.46437&nbsp; <br>
+  -0.17045&nbsp; <br>
+  -0.10852&nbsp; -0.10852&nbsp; -0.10852&nbsp; -0.10740&nbsp; -0.10740<br>
+  <br>
+  </span>That is, the symmetry: <span style="font-style: italic;">s, p, s, d</span><br><br>
+  After application of the spin-orbit coupling, we now have to consider
+  twice as many levels:<br>
+  &nbsp;<span style="font-family: monospace;">kpt#&nbsp;&nbsp; 1, nband=
+  26, wtk=&nbsp; 1.00000, kpt=&nbsp; 0.0000&nbsp; 0.0000&nbsp; 0.0000
+  (reduced coord)<br>
+  -2.43258&nbsp; -2.43258&nbsp; <br>
+  -1.67294&nbsp; -1.67294&nbsp; -1.35468&nbsp; -1.35468&nbsp;
+  -1.35468&nbsp; -1.35468</span><span style="font-family: monospace;"> <br>
+  -0.16788&nbsp; -0.16788&nbsp; <br>
+  -0.11629&nbsp; -0.11629&nbsp; -0.11629&nbsp; -0.11629&nbsp;
+  -0.09221&nbsp; -0.09221</span><span style="font-family: monospace;">
+  -0.09120&nbsp; -0.09120&nbsp; -0.09120&nbsp; -0.09120 <br>
+  <br>
+  </span>The levels are not
+  perfectly degenerate, due to the finite size of the simulation box. We
+  can nevetheless compute the splitting of the levels, and we obtain, for
+  e.g. the <span style="font-style: italic;">p</span>-channel: <span style="font-family: monospace;">1.67294-1.35468=<span style="font-weight: bold;">0.31826
+  Ha</span><br>
+  </span><br>
+  If we now consider the <a href="https://www.nist.gov/pml/atomic-reference-data-electronic-structure-calculations-tantalum" target="img">NIST
+  table</a> of atomic data, we obtain :<br>
+  <div style="margin-left: 40px;"><span style="font-family: monospace;">5p splitting, table:
+  1.681344-1.359740=0.321604 Ha</span><span style="font-family: monospace;"></span><br>
+  <span style="font-family: monospace;">
+  5d splitting, table:&nbsp;&nbsp; .153395-.131684=0.021711 Ha</span><br>
+  <span style="font-family: monospace;"></span></div>
+  <span style="font-family: monospace;">
+  <br>
+  </span>We obtain a reasonable agreement. <br>
+  A more converged (and more expensive calculation) would yield:<br>
+  <div style="margin-left: 40px;"><span style="font-family: monospace;">5p splitting, abinit: </span><span style="font-family: monospace;">1.64582-1.32141=0.32441 Ha</span><br>
+  <span style="font-family: monospace;">
+  </span><span style="font-family: monospace;">5d splitting,
+  abinit:&nbsp;&nbsp; </span><span style="font-family: monospace;">.09084-.11180=0.02096
+  Ha</span><br>
+  <span style="font-family: monospace;"></span></div>
+  <span style="font-family: monospace;">
+  <br>
+  <br>
+  <br style="font-family: monospace;">
+  </span>
+  <h3><span style="font-weight: normal; text-decoration: underline;">5.2 Projector Augmented-Wave</span></h3>
+  Within the Projector Augmented-Wave method, the usual (pseudo-)Hamiltonian can be expressed as:<br>
+  <br>
+  <div style="margin-left: 80px;"><span style="font-weight: bold; color: black;">H&nbsp; =&nbsp; Kin + V_eff + &#931; D_ij </span><span style="position: relative; top: -5pt; left: 6pt; font-weight: bold; color: black;"></span><span style="font-weight: bold; color: black;"> |</span><span style="position: relative; top: -5pt; left: 6pt; font-weight: bold; color: black;">~</span><span style="font-weight: bold; color: black;">p</span><sub style="font-weight: bold; color: black;">i </sub><span style="font-weight: bold; color: black;">&gt;
+  &lt;</span><span style="position: relative; top: -5pt; left: 6pt; font-weight: bold; color: black;">~</span><span style="font-weight: bold; color: black;">p</span><sub style="font-weight: bold; color: black;">j&nbsp;</sub><span style="font-weight: bold; color: black;"> |</span><span style="font-weight: bold; color: rgb(204, 0, 0);"></span>
+  </div>
+  <span style="font-style: italic;"></span><br>
   
-  Fig LO
   
-  Fig NLO
-  </pre>
+  If the two following conditions are satisfied:<span style="font-family: sans-serif;"><br>
+  </span>
+  <div style="margin-left: 40px;">(1) the<span style="position: relative; top: -8pt; left: 8pt;"></span><span style="position: relative; top: -5pt; left: 6pt;"> </span>local PAW basis is complete enough ;
+  <br>
+   (2) the electronic density is mainly
+  contained in the PAW augmentation regions,
+  <br>
+  </div>
+  <span style="font-family: sans-serif;"><br></span>
+  it can be showed that a very good approximation of the PAW Hamiltonian -- including spin-orbit coupling -- is:<br>
   
-  For details about how to identify peaks and get information from them see
-  <a href="#Ref4">Ref. 4</a>
-  -->
+  <span style="font-family: sans-serif;"><br>
+  </span>
+  <div style="margin-left: 80px;"><span style="font-weight: bold; color: black;">H&nbsp; ~&nbsp; Kin + V_eff + &#931; (D_ij+D^SO_ij) </span><span style="position: relative; top: -5pt; left: 6pt; font-weight: bold; color: black;"></span><span style="font-weight: bold; color: black;"> |</span><span style="position: relative; top: -5pt; left: 6pt; font-weight: bold; color: black;">~</span><span style="font-weight: bold; color: black;">p</span><sub style="font-weight: bold; color: black;">i </sub><span style="font-weight: bold; color: black;">&gt;
+  &lt;</span><span style="position: relative; top: -5pt; left: 6pt; font-weight: bold; color: black;">~</span><span style="font-weight: bold; color: black;">p</span><sub style="font-weight: bold; color: black;">j&nbsp;</sub><span style="font-weight: bold; color: black;"> |</span><span style="font-weight: bold; color: rgb(204, 0, 0);"></span>
+  </div>
   
+  <span style="font-style: italic;"></span><br>
+  where <span style="font-weight: bold;">D^SO_ij</span> is the projection of the <span style="font-weight: bold;">(L.S)</span> operator into the PAW augmentation regions.<br>
+  As an immediate consequence , we thus have the possibility to use the standard <span style="position: relative; top: -5pt; left: 6pt; font-weight: bold; color: black;">~</span><span style="font-weight: bold; color: black;">p</span><sub style="font-weight: bold; color: black;">i </sub><span style="font-weight: bold; color: black;"></span>&nbsp; PAW
+  projectors; in other words, it is possible to use the standard PAW
+  datasets (pseudopotentials) to perform calculations including
+  spin-orbit coupling.<br>
+  But, of course, it is still necessary to express the wave-functions as <span style="font-weight: normal;">two components spinors (spin-up and a spin-down
+  components).<br>
+  Let's have a look at the following keyword:<br>
+  </span>
+  <ul>
+  <li>[[pawspnorb]]</li>
+  </ul>
+  It automatically activates the spin-orbit coupling within PAW (forcing [[nspinor]]=2).<br>
+  <br>
+  Now the practice:<br>
+  We consider here <span style="font-style: italic;">Bismuth</span>.<br>
+  You will have to change the "<span style="font-style: italic;">files</span>" file
+  accordingly, as we here have used the potential: <span style="color: rgb(51, 102, 255);">83bi.paw</span>.
+  It is a PAW dataset with <span style="font-style: italic;">5d</span>, <span style="font-style: italic;">6s</span> and <span style="font-style: italic;">6p</span> electrons in valence.<br>
+  Replace the last line of the <span style="color: rgb(51, 102, 255);">tspin_x.files</span> by
+  <h3><small><span style="font-weight: normal;"><pre>../../../Psps_for_tests/83bi.paw<br></pre>
+  You can copy the file <span style="color: rgb(51, 102, 255);">~abinit/tests/tutorial/Input/tspin_6.in</span> in <span style="font-style: italic;">Work_spin</span> (one <span style="font-style: italic;">Bismuth</span> atom in a large cell). Change accordingly the file names in <span style="color: rgb(51, 102, 255);">tspin_x.files</span>,
+  then run the
+  calculation. It takes about 10 secs on a recent computer. Two datasets
+  are executed: the first one without spin-orbit coupling, the second
+  one using<small><span style="font-weight: bold;">&nbsp;</span> </small></span>[[pawspnorb]]<span style="font-weight: normal;">=1.</span></small><br>
+  </h3>
+  
+  The results (eigenvalues) are:<br>
+  &nbsp;<span style="font-family: monospace;">Eigenvalues (hartree) for nkpt=&nbsp;&nbsp; 1&nbsp; k points:</span><br style="font-family: monospace;">
+  <span style="font-family: monospace;">&nbsp;kpt#&nbsp;&nbsp; 1, nband= 24, wtk=&nbsp; 1.00000, kpt=&nbsp; 0.0000&nbsp; 0.0000&nbsp; 0.0000 (reduced coord)</span><span style="font-family: monospace;"><br>
+  &nbsp;<span style="font-weight: bold;">5d</span> &nbsp; -0.93353&nbsp; -0.93353&nbsp; -0.93353&nbsp; -0.93353&nbsp; -0.82304&nbsp; -0.82304&nbsp; -0.82304&nbsp; -0.82304</span><span style="font-family: monospace;"> -0.82291&nbsp; -0.82291<br>
+  &nbsp;<span style="font-weight: bold;">6s</span> &nbsp; -0.42972&nbsp; -0.42972<br>
+  &nbsp;<span style="font-weight: bold;">6p</span> &nbsp; -0.11089&nbsp; -0.11089&nbsp; -0.03810&nbsp; -0.03810&nbsp; </span><span style="font-family: monospace;">-0.03810&nbsp; -0.03810</span><br style="font-family: monospace;">
+  <br>
+  Again, the levels are not
+  perfectly degenerate, due to the finite size of the simulation box.<br>
+  We
+  can compute the splitting of the levels, and we obtain:<br style="font-style: italic;">
+  <div style="margin-left: 40px;"><span style="font-style: italic;">5d</span>-channel: <span style="font-family: monospace;">0.93353-0.82304=<span style="font-weight: bold;">0.11048
+  Ha</span></span><br style="font-style: italic;">
+  <span style="font-family: monospace;"></span><span style="font-style: italic;">6p</span>-channel: <span style="font-family: monospace;">0.11089-0.03810=<span style="font-weight: bold;">0.07289
+  Ha</span></span><br style="font-weight: bold;">
+  <span style="font-family: monospace; font-weight: bold;"></span></div>
+  <span style="font-family: monospace; font-weight: bold;">
+  </span><br>
+  
+  If we now consider the <a href="https://www.nist.gov/pml/atomic-reference-data-electronic-structure-calculations-bismuth" target="img">NIST
+  table</a> of atomic data, we obtain :<br>
+  <div style="margin-left: 40px;"><span style="font-style: italic;">5d</span>-channel: <span style="font-family: monospace;">1.063136-0.952668=0.11047
+  Ha</span><br style="font-style: italic;">
+  <span style="font-family: monospace;"></span><span style="font-style: italic;">6p</span>-channel: <span style="font-family: monospace;">0.228107-0.156444=0.07166
+  Ha</span><br>
+  <span style="font-family: monospace;"></span></div>
+  <br>
+  A perfect agreement even with a small simulation cell and very small values of plane-wave cut-offs...<br>
+  <br>
+  <br>
+  <span style="font-family: sans-serif;"><br>
+  </span>
+  <hr>
+
+# Each section must have a title, that will form the table of content.
+# Note the small (one space) indentation for the title and body keys.
+secX:
+ title: "To be filled"
+ body: |
+  <p><big><a name="gz6"></a><b>6. Rotation of the magnetization and Spin-orbit </b><span style="font-style: italic;">(not yet)</span></big></p>
+  <h3>
+  </h3>
+  The most spectacular manifestation of the spin-orbit coupling is the
+  energy associated with a rotation of the magntisation with respect with
+  the cristal axis. It is at the origin of the magneto cristalline
+  anisotropy of paramount technological importance.<br>
+  <hr>
+  <br>
+  <p>This ABINIT tutorial is now finished... <br>
+  </p>
+  <p><small><span style="font-style: italic;"><br>
+  </span></small></p>
+  <p><small><span style="font-style: italic;">
+  GZ would like to thank B. Siberchicot for useful comments.</span></small><br>
+  </p>
