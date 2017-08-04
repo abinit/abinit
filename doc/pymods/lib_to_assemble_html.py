@@ -550,7 +550,13 @@ def finalize_html(doc_html,origin_yml,dir_name,root_filname,allowed_link_seeds,b
   file_html.write("<!-- This file has been produced by generate_doc.py using different .yml  or .bib files. -->\n")
   file_html.write("<!-- It is useless to modify it. Modify the related .yml  or .bib files instead.         -->\n")
   file_html.write("<!--                                                                                     -->\n")
-  file_html.write(doc_html)
+  try:
+    file_html.write(doc_html)
+  except:
+    #print("\n\n... ERROR ...\n[Complement of information from generate_doc.py]")
+    #print(" doc_html[]:",doc_html[3800:3850],"\n")
+    raise
+
   file_html.close()
   print("File %s written ..."%path_html)
 
