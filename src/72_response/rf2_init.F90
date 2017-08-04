@@ -876,6 +876,7 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,gs_hamkq,ibg,icg,idir,
 &          rf2%lambda_mn(1,jband+(jband-1)*nband_k),',',rf2%lambda_mn(2,jband+(jband-1)*nband_k)
          call wrtout(std_out,msg)
        else
+         if (dot2r<tol9) dot2r = zero ! in order to hide the numerical noise
          write(msg,'(a,i2,a,es22.13E3,a,es7.1E2)') &
          'RF2 TEST FINAL iband = ',jband,' : OK. |test| = ',dot2r,' < ',tol_final
          call wrtout(std_out,msg)

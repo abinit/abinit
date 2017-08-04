@@ -137,6 +137,8 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
 
 ! *********************************************************************
 
+ DBG_ENTER("COLL")
+
 !Keep track of total time spent in getgh1c
  call timab(196+tim_getgh1c,1,tsec)
 
@@ -747,6 +749,8 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
  end if
 
  call timab(196+tim_getgh1c,1,tsec)
+
+ DBG_EXIT("COLL")
 
 end subroutine getgh1c
 !!***

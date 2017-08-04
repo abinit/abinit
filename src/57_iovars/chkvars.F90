@@ -407,5 +407,5 @@ subroutine chkvars_in_string(protocol, list_vars, list_logicals, list_strings, s
    index_current=index_blank+1
  end do
 
-end subroutine chkvars
+end subroutine chkvars_in_string
 !!***

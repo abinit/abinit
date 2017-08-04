@@ -29,6 +29,7 @@ MODULE m_rf2
 
  use defs_basis
  use m_profiling_abi
+ use m_errors
 
  implicit none
 
@@ -312,12 +313,14 @@ subroutine rf2_accumulate_bands(rf2,choice,gs_hamkq,mpi_enreg,iband,idir1,idir2,
 !Local variables ---------------------------------------
 !scalars
  integer :: nband_k,size_wf
- real(dp) :: dotr,doti,factor
+ real(dp) :: dotr,dot2r,doti,dot2i,factor
  character(len=500) :: msg
  character(len=15) :: bra_i,ket_j,op1,op2
  character(len=2) :: pert1,pert2
 
 ! *************************************************************************
+
+ DBG_ENTER("COLL")
 
  nband_k = rf2%nband_k
  size_wf = rf2%size_wf
@@ -359,7 +362,9 @@ subroutine rf2_accumulate_bands(rf2,choice,gs_hamkq,mpi_enreg,iband,idir1,idir2,
       write(op1,'(2a,i1,a)')      '     dH/',pert2,idir2,'    '
       write(op2,'(2a,i1,a)')      '     dS/',pert2,idir2,'    '
    end select
-   write(msg,'(3a,2(a,es17.8E3))') bra_i,op1,ket_j,' = ',dotr,',',doti
+   dot2r = dotr ; if (abs(dot2r)<tol9) dot2r = zero ! in order to hide the numerical noise
+   dot2i = doti ; if (abs(dot2i)<tol9) dot2i = zero ! in order to hide the numerical noise 
+   write(msg,'(3a,2(a,es17.8E3))') bra_i,op1,ket_j,' = ',dot2r,',',dot2i
    call wrtout(std_out,msg)
  end if
 
@@ -369,13 +374,17 @@ subroutine rf2_accumulate_bands(rf2,choice,gs_hamkq,mpi_enreg,iband,idir1,idir2,
    call dotprod_g(dotr,doti,gs_hamkq%istwf_k,size_wf,2,vi,v2j,mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
 
    if(print_info/=0) then
-     write(msg,'(3a,2(a,es17.8E3))') bra_i,op2,ket_j,' = ',dotr,',',doti
+     dot2r = dotr ; if (abs(dot2r)<tol9) dot2r = zero ! in order to hide the numerical noise 
+     dot2i = doti ; if (abs(dot2i)<tol9) dot2i = zero ! in order to hide the numerical noise
+     write(msg,'(3a,2(a,es17.8E3))') bra_i,op2,ket_j,' = ',dot2r,',',dot2i
      call wrtout(std_out,msg)
    end if
 
    rf2%amn(:,iband+(jband-1)*nband_k) = factor*(/dotr,doti/) + rf2%amn(:,iband+(jband-1)*nband_k)
 
  end if ! end choice
+
+ DBG_EXIT("COLL")
 
 end subroutine rf2_accumulate_bands
 !!***
@@ -501,6 +510,8 @@ subroutine rf2_apply_hamiltonian(cg_jband,cprj_jband,cwave,cwaveprj,h_cwave,s_cw
  type(pawcprj_type),target :: cprj_empty(0,0)
  type(pawcprj_type),pointer :: cprj_j(:,:)
 ! *********************************************************************
+
+ DBG_ENTER("COLL")
 
  compute_conjugate = .false.
  if(present(conj)) compute_conjugate = conj
@@ -632,6 +643,8 @@ subroutine rf2_apply_hamiltonian(cg_jband,cprj_jband,cwave,cwaveprj,h_cwave,s_cw
    return
 
  end if
+ 
+ DBG_EXIT("COLL")
 
 end subroutine rf2_apply_hamiltonian
 !!***

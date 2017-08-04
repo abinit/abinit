@@ -214,6 +214,8 @@ subroutine dfptnl_loop(atindx,atindx1,blkflg,cg,cgindex,dtfil,dtset,d3etot,eigen
 
 ! ***********************************************************************
 
+ DBG_ENTER("COLL")
+
  call timab(502,1,tsec)
  call status(0,dtfil%filstat,iexit,level,'enter         ')
 
@@ -248,10 +250,9 @@ subroutine dfptnl_loop(atindx,atindx1,blkflg,cg,cgindex,dtfil,dtset,d3etot,eigen
 !2) Perform the setup needed for the non-local factors:
 !* Norm-conserving: Constant kleimann-Bylander energies are copied from psps to gs_hamk.
 !* PAW: Initialize the overlap coefficients and allocate the Dij coefficients.
-
- call init_hamiltonian(gs_hamkq,psps,pawtab,dtset%nspinor,dtset%nspden,natom,&
+ call init_hamiltonian(gs_hamkq,psps,pawtab,dtset%nspinor,dtset%nsppol,dtset%nspden,natom,&
 & dtset%typat,xred,dtset%nfft,dtset%mgfft,dtset%ngfft,rprimd,dtset%nloalg,&
-& usecprj=usecprj,ph1d=ph1d,nucdipmom=dtset%nucdipmom,use_gpu_cuda=dtset%use_gpu_cuda)
+& usecprj=usecprj,ph1d=ph1d,nucdipmom=dtset%nucdipmom,use_gpu_cuda=dtset%use_gpu_cuda,paw_ij=paw_ij0)
 
  ABI_ALLOCATE(vpsp1,(cplex*nfftf))
  ABI_ALLOCATE(xccc3d1,(cplex*nfftf))
@@ -421,7 +422,7 @@ subroutine dfptnl_loop(atindx,atindx1,blkflg,cg,cgindex,dtfil,dtset,d3etot,eigen
              flag3 = 0
              rho3r1(:,:) = zero
              if (dtset%get1den /= 0 .or. dtset%ird1den /= 0) then
-               rdwrpaw=0
+
                call appdig(pert3case,dtfil%fildens1in,fiden1i)
                call status(counter,dtfil%filstat,iexit,level,'call ioarr    ')
 
@@ -448,7 +449,6 @@ subroutine dfptnl_loop(atindx,atindx1,blkflg,cg,cgindex,dtfil,dtset,d3etot,eigen
              end if ! usepaw
 
              do i2pert = 1, mpert
-
                do i2dir = 1, 3
 
                  if (rfpert(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)==1) then
@@ -462,27 +462,7 @@ subroutine dfptnl_loop(atindx,atindx1,blkflg,cg,cgindex,dtfil,dtset,d3etot,eigen
                    if (npert_phon>1) then
                      MSG_ERROR("dfptnl_loop is available with at most one phonon perturbation. Change your input!")
                    end if
-                   if (i1pert == dtset%natom + 2) then
-                     write(message,'(a,i4)')' j1 : homogeneous electric field along direction ',i1dir
-                   end if
-                   call wrtout(std_out,message,'COLL')
-                   call wrtout(ab_out,message,'COLL')
-                   if (i3pert < natom + 1) then
-                     write(message,'(a,i3,a,i3,a)') &
-&                     ' j3 : displacement of atom ',i3pert,' along direction ', i3dir,ch10
-                   end if
-                   if (i3pert == dtset%natom + 2) then
-                     write(message,'(a,i4,a)')' j3 : homogeneous electric field along direction ',i3dir,ch10
-                   end if
-                   call wrtout(std_out,message,'COLL')
-                   call wrtout(ab_out,message,'COLL')
-                 end if
 
-               end if ! mpi_enreg%me == 0
-
-               do i2dir = 1, 3
-
-                 if (rfpert(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)==1) then
                    pert2case = i2dir + (i2pert-1)*3
                    counter = 100*pert2case + pert2case
                    call appdig(pert2case,dtfil%fnamewff1,fiwf2i)
@@ -506,7 +486,7 @@ subroutine dfptnl_loop(atindx,atindx1,blkflg,cg,cgindex,dtfil,dtset,d3etot,eigen
                    rho2r1(:,:) = zero ; rho2g1(:,:) = zero
 
                    if (dtset%get1den /= 0 .or. dtset%ird1den /= 0) then
-                     rdwrpaw=0
+
                      call appdig(pert2case,dtfil%fildens1in,fiden1i)
                      call status(counter,dtfil%filstat,iexit,level,'call ioarr    ')
 
@@ -606,13 +586,13 @@ subroutine dfptnl_loop(atindx,atindx1,blkflg,cg,cgindex,dtfil,dtset,d3etot,eigen
 
                    call status(counter,dtfil%filstat,iexit,level,'get vtrial1   ')
                    option=1;optene=0
-                   call dfpt_rhotov(cplex,dummy_real,dummy_real,dummy_real,dummy_real,gmet,gprimd,&
+                   call dfpt_rhotov(cplex,dummy_real,dummy_real,dummy_real,dummy_real,dummy_real,gmet,gprimd,&
 &                   gsqcut,i2dir,i2pert,dtset%ixc,kxc,mpi_enreg,dtset%natom,nfftf,ngfftf,nhat,&
 &                   nhat1_i2pert,nhat1gr,nhat1grdim,nkxc,nspden,n3xccc,optene,option,dtset%paral_kgb,&
 &                   dtset%qptn,rhog,rho2g1,rhor,rho2r1,rprimd,ucvol,psps%usepaw,usexcnhat,vhartr1_i2pert,&
 &                   vpsp1,vresid_dum,dummy_real,vtrial1_i2pert,vxc1_i2pert,xccc3d2)
 
-                   if (usexcnhat==0) then
+                   if (psps%usepaw==1.and.usexcnhat==0) then
                      rho2r1(:,:) = rho2r1(:,:) - nhat1_i2pert(:,:)
                    end if
 
@@ -823,6 +803,8 @@ subroutine dfptnl_loop(atindx,atindx1,blkflg,cg,cgindex,dtfil,dtset,d3etot,eigen
  ABI_DATATYPE_DEALLOCATE(pawrhoij1_i3pert)
 
  call timab(502,2,tsec)
+
+ DBG_EXIT("COLL")
 
 end subroutine dfptnl_loop
 !!***

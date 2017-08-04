@@ -63,7 +63,7 @@
 !!      d3sym,ddb_io_out,dfptnl_doutput,dfptnl_loop,ebands_free,fourdp,getcut
 !!      getkgrid,getshell,hdr_free,hdr_init,hdr_update,initmv,inwffil,kpgio
 !!      mkcore,nlopt,psddb8,pspini,read_rhor,rhohxc,setsym,setup1,status
-!!      symmetrize_xred,sytens,timab,wffclose,wrtout
+!!      symmetrize_xred,timab,wffclose,wrtout
 !!
 !! SOURCE
 
@@ -87,7 +87,7 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,mpi_enreg,npwtot,occ,&
  use m_hdr
  use m_ebands
 
- use m_dynmat,      only : d3sym
+ use m_dynmat,      only : d3sym, sytens
  use m_ddb,         only : psddb8, nlopt, DDB_VERSION
  use m_ioarr,       only : read_rhor
  use m_pawfgr,      only : pawfgr_type,pawfgr_init, pawfgr_destroy
@@ -112,7 +112,6 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,mpi_enreg,npwtot,occ,&
  use interfaces_18_timing
  use interfaces_32_util
  use interfaces_41_geometry
- use interfaces_41_xc_lowlevel
  use interfaces_53_ffts
  use interfaces_56_recipspace
  use interfaces_56_xc
@@ -199,6 +198,8 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,mpi_enreg,npwtot,occ,&
  type(paw_dmft_type) :: paw_dmft
  
 ! ***********************************************************************
+
+ DBG_ENTER("COLL")
 
  call timab(501,1,tsec)
  call status(0,dtfil%filstat,iexit,level,'enter         ')
@@ -783,10 +784,10 @@ end if
 
 !Set up hartree and xc potential. Compute kxc here.
  option=3
- nkxc=2*nspden-1 ! LDA
- if(dtset%xclevel==2.and.nspden==1) nkxc=7  ! non-polarized GGA
- if(dtset%xclevel==2.and.nspden==2) nkxc=19 ! polarized GGA
- nk3xc=3*nspden-2
+ nkxc=2*dtset%nspden-1 ! LDA
+ if(dtset%xclevel==2.and.dtset%nspden==1) nkxc=7  ! non-polarized GGA
+ if(dtset%xclevel==2.and.dtset%nspden==2) nkxc=19 ! polarized GGA
+ nk3xc=3*dtset%nspden-2
  ABI_ALLOCATE(kxc,(nfftf,nkxc))
  ABI_ALLOCATE(k3xc,(nfftf,nk3xc))
  ABI_ALLOCATE(vhartr,(nfftf))
@@ -1144,6 +1145,8 @@ end if
 
  call status(0,dtfil%filstat,iexit,level,' exit         ')
  call timab(501,2,tsec)
+
+ DBG_EXIT("COLL")
 
 end subroutine nonlinear
 !!***

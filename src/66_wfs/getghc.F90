@@ -154,6 +154,8 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlc,lambda,mpi_enreg,nd
 
 ! *********************************************************************
 
+ DBG_ENTER("COLL")
+
 !Keep track of total time spent in getghc:
  call timab(200+tim_getghc,1,tsec)
 
@@ -698,6 +700,8 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlc,lambda,mpi_enreg,nd
  end if ! type_calc
 
  call timab(200+tim_getghc,2,tsec)
+
+ DBG_EXIT("COLL")
 
 end subroutine getghc
 !!***

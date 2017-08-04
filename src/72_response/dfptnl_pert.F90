@@ -202,6 +202,8 @@ subroutine dfptnl_pert(atindx,atindx1,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,ei
 
 !***********************************************************************
 
+ DBG_ENTER("COLL")
+
  me = mpi_enreg%me
  spaceComm=mpi_enreg%comm_cell
 
@@ -218,7 +220,7 @@ subroutine dfptnl_pert(atindx,atindx1,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,ei
  usepaw = psps%usepaw
  size_cprj = nspinor
 
- call init_rf_hamiltonian(cplex,gs_hamkq,i2pert,rf_hamkq_i2pert,has_e1kbsc=1)
+ call init_rf_hamiltonian(cplex,gs_hamkq,i2pert,rf_hamkq_i2pert,paw_ij1=paw_ij1_i2pert,has_e1kbsc=.true.)
 
 !Acivate computation of rho^(2:1) and related energy derivatives if needed
  compute_rho21 = .false.
@@ -273,7 +275,11 @@ subroutine dfptnl_pert(atindx,atindx1,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,ei
 &     (/zero,zero,zero/),rprimd,ucvol,dummy_array2,dummy_array2,dummy_array2,xred,&
 &     comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
    ABI_ALLOCATE(chi_ij,(gs_hamkq%dimekb1,gs_hamkq%dimekb2,dtset%nspinor**2))
-   call pawdij2e1kb(paw_ij_tmp,nsp,mpi_enreg%my_atmtab,mpi_enreg%comm_atom,e1kbfr=chi_ij)
+   if(dtset%nsppol==1) then
+     call pawdij2e1kb(paw_ij_tmp,1,mpi_enreg%comm_atom,mpi_enreg%my_atmtab,e1kbfr=chi_ij)
+   else
+     MSG_ERROR("nonlinear not implemented yet for nsppol>1...")
+   end if
    call paw_ij_free(paw_ij_tmp)
    ABI_DATATYPE_DEALLOCATE(paw_ij_tmp)
  else
@@ -347,11 +353,8 @@ subroutine dfptnl_pert(atindx,atindx1,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,ei
 &   gs_hamkq%nvloc,pawfgr,mpi_enreg,vtrial,vtrial1_i2pert,vlocal,vlocal1_i2pert)
 
 !  Continue to initialize the Hamiltonian
-   call load_spin_hamiltonian(gs_hamkq,isppol,paw_ij=paw_ij0,vlocal=vlocal, &
-&   comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
-
-   call load_spin_rf_hamiltonian(rf_hamkq_i2pert,gs_hamkq,isppol,paw_ij1=paw_ij1_i2pert,vlocal1=vlocal1_i2pert, &
-   comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
+   call load_spin_hamiltonian(gs_hamkq,isppol,vlocal=vlocal,with_nonlocal=.true.)
+   call load_spin_rf_hamiltonian(rf_hamkq_i2pert,gs_hamkq,isppol,vlocal1=vlocal1_i2pert,with_nonlocal=.true.)
 
 !  Loop over k-points
 
@@ -1112,7 +1115,7 @@ subroutine dfptnl_pert(atindx,atindx1,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,ei
    if(nspden>1) then
      v_i2pert(:,2) = vhartr1_i2pert(:)
    end if
-   write(msg,'(2(a,i6)))') ' DFPTNL_PERT : pawtab(',ipert_phon,')%usexcnhat = ',pawtab(ipert_phon)%usexcnhat
+   write(msg,'(2(a,i6))') ' DFPTNL_PERT : pawtab(',ipert_phon,')%usexcnhat = ',pawtab(ipert_phon)%usexcnhat
    call wrtout(std_out,msg,'COLL')
    if (pawtab(ipert_phon)%usexcnhat>0) then
      v_i2pert(:,:) = v_i2pert(:,:) + vxc1_i2pert(:,:)
@@ -1189,6 +1192,8 @@ subroutine dfptnl_pert(atindx,atindx1,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,ei
  ABI_DEALLOCATE(wfraug)
 
  call status(0,dtfil%filstat,iexit,level,'exit          ')
+
+ DBG_EXIT("COLL")
 
 end subroutine dfptnl_pert
 !!***
