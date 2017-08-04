@@ -158,6 +158,10 @@ def make_links(text,cur_key,allowed_link_seeds,backlinks,backlink):
     if linkseed in allowed_link_seeds.keys():
       value=allowed_link_seeds[linkseed]
 
+      #DEBUG
+      print(" value:",value)
+      #ENDDEBUG
+
       #Treat first the allowed namespaces
       if value in dic_namespaces.keys():
         dir=dic_namespaces[value]

@@ -296,7 +296,7 @@ body : |
   [[anaddb:qpath]] giving the apexes of the path in reciprocal
   space, which are usually special points of high symmetry. The number of points
   is given by [[anaddb:nqpath]]. Note that qpath can be used in normal phonon
-  band structure calculations as well, provided that [[anaddb:q1phl]] is omitted from the
+  band structure calculations as well, provided that [[anaddb:qph1l]] is omitted from the
   input file (the latter overrides qpath). The phonon linewidths are printed to a file
   suffixed _LWD.</p>
   

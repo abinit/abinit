@@ -250,7 +250,7 @@ body : |
   <p>In order to help the LDA+U find the ground state,
   you can define the initial density matrix for correlated orbitals with
   [[dmatpawu]]
-  To enable this feature, [[usedmatu]]
+  To enable this feature, [[usedmatpu]]
   must be set to a non-zero value (default is 0). When positive, the density
   matrix is kept to the [[dmatpawu]]
   value for the [[usedmatpu]] value steps. For our calculation(tdftu_3.in) , [[usedmatpu]]

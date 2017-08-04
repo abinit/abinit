@@ -473,6 +473,9 @@ for i, theory_info in enumerate(yml_in["theorydocs"]):
   theorydoc = theory_info.name
   allowed_link_seeds["theorydoc_"+theorydoc]="theorydoc"
 
+for topic in list_of_topics:
+  allowed_link_seeds["topic_"+topic]="topic"
+
 for i, help_info in enumerate(yml_in["helps"]):
   help = help_info.name
   allowed_link_seeds["help_"+help]="help"
