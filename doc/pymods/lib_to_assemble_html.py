@@ -158,10 +158,6 @@ def make_links(text,cur_key,allowed_link_seeds,backlinks,backlink):
     if linkseed in allowed_link_seeds.keys():
       value=allowed_link_seeds[linkseed]
 
-      #DEBUG
-      print(" value:",value)
-      #ENDDEBUG
-
       #Treat first the allowed namespaces
       if value in dic_namespaces.keys():
         dir=dic_namespaces[value]
@@ -186,13 +182,6 @@ def make_links(text,cur_key,allowed_link_seeds,backlinks,backlink):
         if result != -9999 :
           backlinks[key]+=backlink+";;"
           return '<a href="../../bibliography/generated_files/bibliography.html#%s">[%s]</a>' %(key,webtext)
-
-    #DEBUG
-    print(" dokukey:",dokukey)
-    print(" linkseed:",linkseed)
-    sys.exit()
-    #ENDDEBUG
-  
 
     return '<a href="#">[[FAKE LINK:'+dokukey+']]</a>'
 
