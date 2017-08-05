@@ -122,9 +122,9 @@ body : |
   <br>
   Open the <span style="color: rgb(204, 0, 0);">tstring_01.in</span>
   file and look at it carefully. The
-  unit cell is defined at the end. Note that the keywords <a href="../../input_variables/generated_files/varrlx.html#natfix" target="_blank">natfix</a>
+  unit cell is defined at the end. Note that the keywords [[natfix]]
   and
-  <a href="../../input_variables/generated_files/varrlx.html#iatfix" target="_blank">iatfix</a> are
+  [[iatfix]] are
   used to keep fixed the positions of the O and N atoms. The
   cell is tetragonal and its size is larger along <span style="font-style: italic;">x</span>
   so that the periodic images of the system are separated by 4.0 &#196; of
@@ -139,7 +139,7 @@ body : |
   library <span style="font-style: italic;">libxc</span>.
   You have to compile ABINIT using the <span style="font-style: italic;">libxc</span> plugin (if
   not, simply replace <a href="../../input_variables/generated_files/varbas.html#ixc" target="_blank">ixc
-  </a>-001009 by <a href="../../input_variables/generated_files/varbas.html#ixc" target="_blank">ixc</a>
+  </a>-001009 by [[ixc]]
   7). This input file has to be
   run in parallel using 20 CPU cores. You might use the <span style="color: rgb(204, 0, 0);">tstring.files</span>
   file.
@@ -201,33 +201,33 @@ body : |
   process, you can turn to the computation of the MEP. Let us first have
   a look at the related keywords. <br>
   <br>
-  1) <a href="../../input_variables/generated_files/varrlx.html#imgmov" target="_blank">imgmov</a>: selects an algorithm using
+  1) [[imgmov]]: selects an algorithm using
   replicas of the unit cell. For the <span style="font-style: italic;">string
   method</span>, choose <span style="font-weight: bold;">2</span>.<br>
-  2) <a href="../../input_variables/generated_files/varrlx.html#nimage" target="_blank">nimage</a>: gives the number of
+  2) [[nimage]]: gives the number of
   replicas of the unit cell including the initial and
   final ones.<br>
-  3) <a href="../../input_variables/generated_files/varrlx.html#dynimage" target="_blank">dynimage</a>([[nimage]]):
+  3) [[dynimage]]([[nimage]]):
   arrays of
   flags specifying if the image evolves or not (0: does not evolve; 1:
   evolves).<br>
-  4) <a href="../../input_variables/generated_files/varrlx.html#ntimimage" target="_blank">ntimimage</a>: gives the maximum
+  4) [[ntimimage]]: gives the maximum
   number of iterations (for the relaxation of the string).<br>
-  5) <a href="../../input_variables/generated_files/varrlx.html#tolimg" target="_blank">tolimg</a>: convergence criterion (in
+  5) [[tolimg]]: convergence criterion (in
   Hartree) on the total energy (averaged over
-  the <a href="../../input_variables/generated_files/varrlx.html#nimage" target="_blank">nimage</a> images).<br>
+  the [[nimage]] images).<br>
   6)
-  <a href="../../input_variables/generated_files/varrlx.html#fxcartfactor" target="_blank">fxcartfactor</a>: "time step" (in
+  [[fxcartfactor]]: "time step" (in
   Bohr^2/Hartree) for the evolution step of
   the string method. For the time being (ABINITv6.10), only
   steepest-descent algorithm is implemented.<br>
-  7) <a href="../../input_variables/generated_files/varpar.html#npimage" target="_blank">npimage</a>:
+  7) [[npimage]]:
   gives the
   number of processors among which the work load over the image level is
-  shared. Only dynamical images are considered (images for which <a href="../../input_variables/generated_files/varrlx.html#dynimage" target="_blank">dynimage</a>
+  shared. Only dynamical images are considered (images for which [[dynimage]]
   is 1). This input variable can be automatically set by ABINIT if the
   number of processors is large enough.<br>
-  8) <a href="../../input_variables/generated_files/varfil.html#prtvolimg" target="_blank">prtvolimg</a>:
+  8) [[prtvolimg]]:
   governs the printing volume in the output file (0: full output; 1:
   intermediate; 2: minimum output).<br>
   <br>
@@ -243,17 +243,17 @@ body : |
   <p>Open the&nbsp;<span style="color: rgb(204, 0, 0);">tstring_03.in</span>
   file
   and look at it. The initial and final configurations are specified at
-  the end through the keywords <a href="../../input_variables/generated_files/varbas.html#xangst" target="_blank">xangst</a>
+  the end through the keywords [[xangst]]
   and <a href="../../input_variables/generated_files/varrlx.html#nimage" target="_blank">xangst_lastimg</a>.
   By default,
   ABINIT generates the intermediate images by a linear interpolation
   between these two configurations. In this first calculation, we will
   sample the MEP with 12 points (2 are fixed and correspond to the
-  initial and final states, 10 are evolving). <a href="../../input_variables/generated_files/varrlx.html#nimage" target="_blank">nimage</a>
+  initial and final states, 10 are evolving). [[nimage]]
   is thus set to
-  12.&nbsp;The keyword <a href="../../input_variables/generated_files/varpar.html#npimage" target="_blank">npimage</a>
+  12.&nbsp;The keyword [[npimage]]
   is set to 1 (no parallelism over
-  images) and <a href="../../input_variables/generated_files/varrlx.html#ntimimage" target="_blank">ntimimage</a> is set to 1 (only one
+  images) and [[ntimimage]] is set to 1 (only one
   time step). <span style="text-decoration: underline;"></span></p>
   <p>You
   might use the <span style="color: rgb(204, 0, 0);">tstring.files</span>
@@ -276,8 +276,8 @@ body : |
   <br>
   Open the <span style="color: rgb(204, 0, 0);">tstring_04.in</span>
   file. The keyword
-  <a href="../../input_variables/generated_files/varpar.html#npimage" target="_blank">npimage</a> has
-  been&nbsp;set to 10, and <a href="../../input_variables/generated_files/varrlx.html#ntimimage" target="_blank">ntimimage</a>
+  [[npimage]] has
+  been&nbsp;set to 10, and [[ntimimage]]
   has been
   increased to 50. <br>
   <br>
@@ -285,12 +285,12 @@ body : |
   cores</span>. Note that the output file is very big, so that no reference file is provided in the ABINIT package.<br>
   <br>
   The convergence of the <span style="font-style: italic;">string
-  method</span> algorithm is controlled by <a href="../../input_variables/generated_files/varrlx.html#tolimg" target="_blank">tolimg</a>,
+  method</span> algorithm is controlled by [[tolimg]],
   which has
   been set to 0.0001 Ha. In order to obtain a more lisible output file,
   you can decrease
   the <span style="text-decoration: underline;">printing
-  volume</span> and set <a href="../../input_variables/generated_files/varfil.html#prtvolimg" target="_blank">prtvolimg</a>
+  volume</span> and set [[prtvolimg]]
   to 2. <span style="text-decoration: underline;"></span>Here
   again, you might use the <span style="color: rgb(204, 0, 0);">tstring.files</span>.
   Edit it and adapt it with the
@@ -327,7 +327,7 @@ body : |
   energy as a function of OH distance for the path computed with 12
   images and tolimg=0.0001 (which is very close to the x coordinate of
   the proton: first coordinate of xangst for the 8th atom in the output
-  file).</span></small><br><br>The keyword <a href="../../input_variables/generated_files/varpar.html#npimage" target="_blank">npimage</a>
+  file).</span></small><br><br>The keyword [[npimage]]
   can be automatically set by ABINIT. It takes the requested total number
   of CPU cores divided by the number of dynamical images. The remaining
   cores are, if possible, distributed over k, band and FFT. <br>
@@ -335,14 +335,14 @@ body : |
   Let us test
   this functionnality. Edit again the <span style="color: rgb(204, 0, 0);">tstring_04.in</span>
   file and comment the
-  <a href="../../input_variables/generated_files/varpar.html#npimage" target="_blank">npimage</a> line. Then run the
+  [[npimage]] line. Then run the
   calculation again over a number of cores of
   your choice (less than 200). If the code stops with an error message
   indicating that the number of kpt, band and FFT processors is not
-  correct, adapt the value of <a href="../../input_variables/generated_files/varpar.html#npband" target="_blank">npband</a>
-  and <a href="../../input_variables/generated_files/varpar.html#npfft" target="_blank">npfft</a>.<br>
+  correct, adapt the value of [[npband]]
+  and [[npfft]].<br>
   <br>
-  Open the output file and look at the <a href="../../input_variables/generated_files/varpar.html#npimage" target="_blank">npimage</a>
+  Open the output file and look at the [[npimage]]
   value ...<br>
   <br>
   <hr>
@@ -352,10 +352,10 @@ body : |
   </h3>
   Like all physical quantities, the MEP has to be converged with
   respect to some numerical parameters. The two most important are the
-  number of points along the path (<a href="../../input_variables/generated_files/varrlx.html#nimage" target="_blank">nimage</a>)
-  and the convergence criterion (<a href="../../input_variables/generated_files/varrlx.html#tolimg" target="_blank">tolimg</a>).<br>
+  number of points along the path ([[nimage]])
+  and the convergence criterion ([[tolimg]]).<br>
   <br>
-  1<span style="font-style: italic;">) </span><a href="../../input_variables/generated_files/varrlx.html#nimage" target="_blank">nimage</a><br>
+  1<span style="font-style: italic;">) </span>[[nimage]]<br>
   Increase
   the number of images to 22 (2 fixed + 20 evolving) and recompute the
   MEP. The graph below superimposes the previous MEP (black curve,
@@ -370,18 +370,18 @@ body : |
   <br>
   <div style="text-align: center;"><a href="../documents/lesson_paral_string/stringvideo.gif" target="_blank"><img style="border: 0px solid ; width: 308px; height: 320px;" alt="image" src="../documents/lesson_paral_string/start.gif"></a><br></div>
   <br><div style="text-align: center;"><small><span style="font-style: italic;">Click on the above image to visualize the animation (that should open in another window).</span></small><br></div><br>
-  2) <a href="../../input_variables/generated_files/varrlx.html#tolimg" target="_blank">tolimg</a><br>Come back to <a href="../../input_variables/generated_files/varrlx.html#nimage" target="_blank">nimage</a>=12.
-  First you can increase <a href="../../input_variables/generated_files/varrlx.html#tolimg" target="_blank">tolimg</a>
+  2) [[tolimg]]<br>Come back to [[nimage]]=12.
+  First you can increase [[tolimg]]
   to 0.001 and recompute the MEP. This will be much faster than in the
-  previous case. <br><br>Then you should decrease <a href="../../input_variables/generated_files/varrlx.html#tolimg" target="_blank">tolimg</a>
+  previous case. <br><br>Then you should decrease [[tolimg]]
   to 0.00001 and recompute the MEP. To gain CPU time, you can start your
   calculation by using the 12 images obtained at the end of the
-  calculation that used <a href="../../input_variables/generated_files/varrlx.html#tolimg" target="_blank">tolimg</a>=0.0001.
+  calculation that used [[tolimg]]=0.0001.
   In your input file, these starting images will be specified by the
-  keywords <a href="../../input_variables/generated_files/varbas.html#xangst" target="_blank">xangst</a>,
+  keywords [[xangst]],
   <a href="../../input_variables/generated_files/varrlx.html#nimage" target="_blank">xangst_2img</a>,
   <a href="../../input_variables/generated_files/varrlx.html#nimage" target="_blank">xangst_3img</a>,
   ... <a href="../../input_variables/generated_files/varrlx.html#nimage">xangst_12img</a>.
   You can copy them directly from the output file obtained at the
-  previous section. The graph below superimposes the path obtained with 12 images and <a href="../../input_variables/generated_files/varrlx.html#tolimg" target="_blank">tolimg</a>=0.001 (red curve) and the one with 12 images and <a href="../../input_variables/generated_files/varrlx.html#tolimg" target="_blank">tolimg</a>=0.0001 (black curve).<br>
+  previous section. The graph below superimposes the path obtained with 12 images and [[tolimg]]=0.001 (red curve) and the one with 12 images and [[tolimg]]=0.0001 (black curve).<br>
   <div style="text-align: center;"><img style="width: 705px; height: 545px;" alt="image" src="../documents/lesson_paral_string/curve3.png" hspace="100"><br></div><small><span style="font-style: italic;">Total energy as a function of OH distance for the path computed with 12 images and tolimg=0.0001 (black curve) and the one </span></small><small><span style="font-style: italic;">computed with 12 images and tolimg=0.001 (red curve).<br></span></small>

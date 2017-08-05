@@ -929,7 +929,7 @@ for list_infos in list_infos_dir:
             abivarname=var.abivarname
             for varset in ["bas","fil","ff","gs","rf","int","par","bse","dev","dmft","eph","geo","gw","paw","rlx","vdw","w90","optic","aim","anaddb"]:
               #string_old='<a href="../../input_variables/generated_files/var%s.html#%s" onclick="return (false);">%s</a>'%(varset,abivarname,abivarname)
-              string_old='<a href="../../input_variables/generated_files/var%s.html#%s" target="kwimg">           %s</a>'%(varset,abivarname,abivarname)
+              string_old='<a href="../../input_variables/generated_files/var%s.html#%s" target="kwimg" onclick="return (false);>%s</a>'%(varset,abivarname,abivarname)
               #string_old='<a href="../../input_variables/generated_files/var%s.html#%s">            %s</a>'%(varset,abivarname,abivarname)
               string_new="[["+abivarname+"]]"
               file_str=file_str.replace(string_old,string_new)

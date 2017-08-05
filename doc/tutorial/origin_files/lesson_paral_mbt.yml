@@ -200,7 +200,7 @@ body : |
   
   <!--
   Note that <b>awtr</b>=2 is the mandatory prerequisite for using the MPI algorithm corresponding to
-  <a href="../../input_variables/generated_files/vargw.html#gwpara" target="kwimg">gwpara</a>=2, algorithm that is
+  [[gwpara]]=2, algorithm that is
   documented
   <p>
   Here we just want to discuss some important technical details concerning

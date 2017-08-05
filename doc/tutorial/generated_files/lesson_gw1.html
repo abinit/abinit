@@ -456,12 +456,12 @@ Move tgw1o_DS2_WFK to tgw1o_DS1_WFK and tgw1o_DS3_SCR to tgw1o_DS1_SCR.
 <p>
 The next sections are intended to show you how to find the converged parameters for a GW calculation.
 In principle, the following parameters might be used to decrease the CPU time and/or the memory requirements:
-<a href="../../input_variables/generated_files/vargs.html#optdriver"target="kwimg">optdriver</a>=3
+<a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a>=3
 <a href="../../input_variables/generated_files/varset_gw.html#ecutwfn">ecutwfn</a>,
 <a href="../../input_variables/generated_files/varset_gw.html#ecuteps">ecuteps</a>,
 <a href="../../input_variables/generated_files/varset_basic.html#nband">nband</a>.
 and
-for <a href="../../input_variables/generated_files/vargs.html#optdriver"target="kwimg">optdriver</a>=4, 
+for <a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a>=4, 
 <a href="../../input_variables/generated_files/varset_gw.html#ecutwfn">ecutwfn</a>,
 <a href="../../input_variables/generated_files/varset_gw.html#ecutsigx">ecutsigx</a>,
 <a href="../../input_variables/generated_files/varset_basic.html#nband">nband</a>.
@@ -472,7 +472,7 @@ diminish the number of bands that is needed (see e.g. F. Bruneval, X. Gonze, Phy
 and the input variable <a href="../../input_variables/generated_files/varset_gw.html#gwcomp">gwcomp</a>),
 standard calculations nowadays only need the tuning of <a href="../../input_variables/generated_files/varset_basic.html#nband">nband</a>
 <a href="../../input_variables/generated_files/varset_gw.html#ecuteps">ecuteps</a>,
-simultaneously for <a href="../../input_variables/generated_files/vargs.html#optdriver"target="kwimg">optdriver</a>=3 and =4.
+simultaneously for <a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a>=3 and =4.
 Indeed, <a href="../../input_variables/generated_files/varset_gw.html#ecutwfn">ecutwfn</a> and
 can have the default value
 of <a href="../../input_variables/generated_files/varset_basic.html#ecut">ecut</a>, while
@@ -482,7 +482,7 @@ pseudopotentials, or <a href="../../input_variables/generated_files/varset_paw.h
 Actually, the present tutorial needs to be updated to account for the current practice.
 <p>
 We begin by the convergence study on the three parameters needed in the self-energy
-calculation (<a href="../../input_variables/generated_files/vargs.html#optdriver"target="kwimg">optdriver</a>=4): 
+calculation (<a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a>=4): 
 <a href="../../input_variables/generated_files/varset_gw.html#ecutwfn">ecutwfn</a>,
 <a href="../../input_variables/generated_files/varset_gw.html#ecutsigx">ecutsigx</a>,
 <a href="../../input_variables/generated_files/varset_basic.html#nband">nband</a>.

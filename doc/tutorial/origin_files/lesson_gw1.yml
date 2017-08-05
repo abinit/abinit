@@ -435,12 +435,12 @@ body : |
   <p>
   The next sections are intended to show you how to find the converged parameters for a GW calculation.
   In principle, the following parameters might be used to decrease the CPU time and/or the memory requirements:
-  <a href="../../input_variables/generated_files/vargs.html#optdriver"target="kwimg">optdriver</a>=3
+  [[optdriver]]=3
   [[ecutwfn]],
   [[ecuteps]],
   [[nband]].
   and
-  for <a href="../../input_variables/generated_files/vargs.html#optdriver"target="kwimg">optdriver</a>=4, 
+  for [[optdriver]]=4, 
   [[ecutwfn]],
   [[ecutsigx]],
   [[nband]].
@@ -451,7 +451,7 @@ body : |
   and the input variable [[gwcomp]]),
   standard calculations nowadays only need the tuning of [[nband]]
   [[ecuteps]],
-  simultaneously for <a href="../../input_variables/generated_files/vargs.html#optdriver"target="kwimg">optdriver</a>=3 and =4.
+  simultaneously for [[optdriver]]=3 and =4.
   Indeed, [[ecutwfn]] and
   can have the default value
   of [[ecut]], while
@@ -461,7 +461,7 @@ body : |
   Actually, the present tutorial needs to be updated to account for the current practice.
   <p>
   We begin by the convergence study on the three parameters needed in the self-energy
-  calculation (<a href="../../input_variables/generated_files/vargs.html#optdriver"target="kwimg">optdriver</a>=4): 
+  calculation ([[optdriver]]=4): 
   [[ecutwfn]],
   [[ecutsigx]],
   [[nband]].
