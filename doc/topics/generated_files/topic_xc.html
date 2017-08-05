@@ -32,15 +32,15 @@
 
 Total energy computation in ABINIT is done according to Density Functional
 Theory (DFT). Although formally exact, an approximate exchange-correlation (XC) functional must be chosen.
-This is governed by the input variable <a href="../../input_variables/generated_files/basic.html#ixc">ixc</a>. 
+This is governed by the input variable <a href="../../input_variables/generated_files/varset_basic.html#ixc">ixc</a>. 
 <br/>However, the pseudopotentials (or PAW data sets) are
-constructed for one specific XC functional. If <a href="../../input_variables/generated_files/basic.html#ixc">ixc</a> is not specified, ABINIT will simply
-take the <a href="../../input_variables/generated_files/basic.html#ixc">ixc</a> of the given pseudopoential(s) - hoping they are coherent with each others.
+constructed for one specific XC functional. If <a href="../../input_variables/generated_files/varset_basic.html#ixc">ixc</a> is not specified, ABINIT will simply
+take the <a href="../../input_variables/generated_files/varset_basic.html#ixc">ixc</a> of the given pseudopoential(s) - hoping they are coherent with each others.
 One introduces an error by using a pseudopotential generated with an XC functional
-that is not the same as the one explicitly specified by <a href="../../input_variables/generated_files/basic.html#ixc">ixc</a>. However, 
+that is not the same as the one explicitly specified by <a href="../../input_variables/generated_files/varset_basic.html#ixc">ixc</a>. However, 
 ABINIT will nevertheless do the calculation.
 
-<p>Many exchange-correlation functionals are available (see the list in the description of <a href="../../input_variables/generated_files/basic.html#ixc">ixc</a>),
+<p>Many exchange-correlation functionals are available (see the list in the description of <a href="../../input_variables/generated_files/varset_basic.html#ixc">ixc</a>),
 through two different implementations : one is the native ABINIT implementation,
 the other is the ETSF library of XC functionals (LibXC is a plug-in to ABINIT).
 In the native ABINIT set,
@@ -67,11 +67,11 @@ at the exception of forces with norm-conserving pseudopotentials.
 
 <h4><b>Local exact exchange:</b></h4>
 <p>
-When <a href="../../input_variables/generated_files/paw.html#useexexch">useexexch</a>=1, the hybrid functional PBE0 is used in PAW, 
-inside PAW spheres only, and only for correlated orbitals given by <a href="../../input_variables/generated_files/paw.html#lexexch">lexexch</a>. 
-To change the ratio of exact exchange, see also <a href="../../input_variables/generated_files/dev.html#exchmix">exchmix</a>. 
+When <a href="../../input_variables/generated_files/varset_paw.html#useexexch">useexexch</a>=1, the hybrid functional PBE0 is used in PAW, 
+inside PAW spheres only, and only for correlated orbitals given by <a href="../../input_variables/generated_files/varset_paw.html#lexexch">lexexch</a>. 
+To change the ratio of exact exchange, see also <a href="../../input_variables/generated_files/varset_dev.html#exchmix">exchmix</a>. 
 The implementation of local exact exchange in ABINIT is provided in <a href="../../bibliography/generated_files/bibliography.html#Jollet2009">[Jollet2009]</a>. 
-See useful input variables <a href="../../input_variables/generated_files/dev.html#exchmix">exchmix</a>, <a href="../../input_variables/generated_files/paw.html#lexexch">lexexch</a> and <a href="../../input_variables/generated_files/paw.html#useexexch">useexexch</a>.
+See useful input variables <a href="../../input_variables/generated_files/varset_dev.html#exchmix">exchmix</a>, <a href="../../input_variables/generated_files/varset_paw.html#lexexch">lexexch</a> and <a href="../../input_variables/generated_files/varset_paw.html#useexexch">useexexch</a>.
 <br/>
 
 <br/>

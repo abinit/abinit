@@ -71,13 +71,13 @@ body : |
   The first part of the tutorial is similar to the DMFT tutorial and explains the electronic structure
   of SrVO<SUB>3</SUB> and will be used to understand the definition of Wannier orbitals with various extensions.
   Wannier functions are unitarily related to a selected set of Kohn Sham (KS) wavefunctions, specified in ABINIT by band index 
-  <a href="../../input_variables/generated_files/vardmft.html#dmftbandi" target="dmftbandi">dmftbandi</a>, and
-  <a href="../../input_variables/generated_files/vardmft.html#dmftbandf" target="dmftbandf">dmftbandf</a>.
+  [[dmftbandi]], and
+  [[dmftbandf]].
   	Thus, as empty bands are necessary to build Wannier functions, it is required in DMFT or cRPA calculations
   	that the KS Hamiltonian is correctly diagonalized: use high values for  
-  <a href="../../input_variables/generated_files/vardev.html#nnsclo" target="nnsclo">nnsclo</a>, 
+  [[nnsclo]], 
   	and 
-  <a href="../../input_variables/generated_files/vargs.html#nline" target="nline">nline</a> for cRPA and DMFT calculations and preceding DFT calculations.
+  [[nline]] for cRPA and DMFT calculations and preceding DFT calculations.
   Another solution used in the present tutorial is to use a specific non self-consistent calculation to diagonalize the hamiltonian, as in GW calculations.
   Concerning the localization or correlated orbitals, 
   generally, the larger dmftbandf-dmftbandi is, the more localized is the radial part of the Wannier orbital.
@@ -95,12 +95,12 @@ body : |
   As discussed in section I of [[Amadon2014]], one
   can either suppress electronic transition inside a given subset of Kohn-Sham bands.
   In this case, one can use
-  <a href="../../input_variables/generated_files/vargw.html#ucrpa" target="ucrpa">ucrpa</a>=1,
+  [[ucrpa]]=1,
   and choose the first and last bands defining the subset of bands
   by using variable
-  <a href="../../input_variables/generated_files/vargw.html#ucrpa_bands" target="ucrpa_bands">ucrpa_bands</a>.
+  [[ucrpa_bands]].
   One can also use an energy windows instead of a number of bands by using
-  <a href="../../input_variables/generated_files/vargw.html#ucrpa_window" target="ucrpa_window">ucrpa_window</a>.
+  [[ucrpa_window]].
   
   
   Another solution is to use
@@ -108,22 +108,22 @@ body : |
   of the weight of correlated orbitals on the bands involved in the transition
   (see Eq. (5) and (7) in [[Amadon2014]]).
   In this case, on still use the variable
-  <a href="../../input_variables/generated_files/vargw.html#ucrpa_bands" target="ucrpa_bands">ucrpa_bands</a>.
+  [[ucrpa_bands]].
   The variable will in this case be used to define Projected Local Orbitals Wannier functions
   that will then be used to define
   the weighting function in the polarizability.
   (see Eq. (5) and (7) in [[Amadon2014]]).
   
   <LI> <B> Convergence parameters </B> are the same as for a polarizability calculation for the screening calculation
-  (<a href="../../input_variables/generated_files/vargw.html#ecuteps" target="ecuteps">ecuteps</a>,
-  <a href="../../input_variables/generated_files/vargw.html#ecutwfn" target="ecutwfn">ecutwfn</a>,
-  <a href="../../input_variables/generated_files/varbas.html#nband" target="nband">nband</a>)
+  ([[ecuteps]],
+  [[ecutwfn]],
+  [[nband]])
   and the same as for the exchange part of GW for the effective interaction, ie
-  <a href="../../input_variables/generated_files/vargw.html#ecutsigx" target="ecutsigx">ecutsigx</a>,
-  <a href="../../input_variables/generated_files/vargw.html#ecutwfn" target="ecutwfn">ecutwfn</a>.
+  [[ecutsigx]],
+  [[ecutwfn]].
   It is recommended, as discussed in appendix A of [[Amadon2014]],
-  to use <a href="../../input_variables/generated_files/varpaw.html#pawoptosc" target="pawoptosc">pawoptosc</a>=1.
-  If the calculation is carried out with several atoms, use <a href="../../input_variables/generated_files/varbas.html#nsym" target="nsym">nsym</a>=1, the calculation is not symmetrized over atoms
+  to use [[pawoptosc]]=1.
+  If the calculation is carried out with several atoms, use [[nsym]]=1, the calculation is not symmetrized over atoms
   in this case.
   
   </UL>
@@ -145,7 +145,7 @@ body : |
   <p>This run should take some time. It is recommended that you use at least 10 processors (and 32 should be fast).
   It calculates the LDA ground state of SrVO<SUB>3</SUB> and compute the band structure in a second step.
   The variable 
-  <a href="../../input_variables/generated_files/varpaw.html#pawfatbnd" target="pawfatbnd">pawfatbnd</a>
+  [[pawfatbnd]]
   allows to create files with "fatbands" (see description of the variable
   in the list of variables): the width of the line along each k-point path and for each band is proportional to the contribution
   of a given atomic orbital on this particular Kohn Sham Wavefunction.
@@ -154,13 +154,13 @@ body : |
   calculation.
   During this time you can take a look at the input file. There are two datasets. The first one is a ground
   state calculations with 
-  <a href="../../input_variables/generated_files/vardev.html#nnsclo" target="nnsclo">nnsclo</a>=3 and
-  <a href="../../input_variables/generated_files/vargs.html#nline" target="nline">nline</a>=3 in order
+  [[nnsclo]]=3 and
+  [[nline]]=3 in order
   to have well diagonalized eigenfunctions even for empty states. In practice, you have however to check
   that the residue of wavefunctions is small at the end of the calculation. In this calculation, we find 1.E-06,
   which is large (1.E-10 would be better, so 
-  <a href="../../input_variables/generated_files/vargs.html#nline" target="nline">nline</a>  and
-  <a href="../../input_variables/generated_files/vardev.html#nnsclo" target="nnsclo">nnsclo</a> 
+  [[nline]]  and
+  [[nnsclo]] 
   should be increased, but it would take more time).
   
   When the calculation is finished, you can plot the fatbands for Vanadium and l=2 with <pre>
@@ -214,8 +214,8 @@ body : |
   <i>t<SUB>2g</SUB></i>-like bands (bands 21, 22 and 23). The screening inside these bands is not taken into account to built
   the constrained polarizability.
   Note that if this case (and in the (<i>d-d</i>) and (<i>dp-dp</i>) models), using ucrpa=1 or 2 give the same results,
-  provided one uses ucrpa_bands equal to (<a href="../../input_variables/generated_files/vardmft.html#dmftbandi" target="dmftbandi">dmftbandi</a> 
-  <a href="../../input_variables/generated_files/vardmft.html#dmftbandf" target="dmftbandf">dmftbandf</a> ).
+  provided one uses ucrpa_bands equal to ([[dmftbandi]] 
+  [[dmftbandf]] ).
   <li> <span style="color:rgb(200, 100, 000); font-style: italic">(<i>d-d</i>) model (or d model) </span>: The correlated orbitals are defined with only
   <i>d</i>-like bands (bands 21 to 25). The screening inside these bands is not taken into account.
   <li> <span style="color:rgb(200, 100, 000); font-style: italic">(<i>dp-dp</i>) model (or dp model)</span>: The correlated orbitals are defined with only
@@ -223,10 +223,10 @@ body : |
   <li> <span style="color:rgb(200, 100, 000); font-style: italic">(<i>d-dp</i>(a)) model</span>: 
   In this scheme the Wannier orbitals are constructed as in the (<i>dp-dp</i>) model. However,
   in this scheme, one only supresses the screening inside <i>d</i>-like bands 
-  (<a href="../../input_variables/generated_files/vargw.html#ucrpa" target="ucrpa">ucrpa</a>=1).
+  ([[ucrpa]]=1).
   It is coherent with the fact that the DMFT will
   only be applied to the d orbitals: so the screening for Op-like bands need to be taken into account.
-  <li> <span style="color:rgb(200, 100, 000); font-style: italic">(<i>d-dp</i>(b)) model</span>: It is the same model as the (<i>d-dp</i>(a)), nevertheless, in this case, only the weighting scheme is used (<a href="../../input_variables/generated_files/vargw.html#ucrpa" target="ucrpa">ucrpa</a>=2 in ABINIT).
+  <li> <span style="color:rgb(200, 100, 000); font-style: italic">(<i>d-dp</i>(b)) model</span>: It is the same model as the (<i>d-dp</i>(a)), nevertheless, in this case, only the weighting scheme is used ([[ucrpa]]=2 in ABINIT).
   </ul>
   
   Which way of computing interactions is the most relevant depends on
@@ -259,8 +259,8 @@ body : |
   <h5>3.2.1. The first DATASET: A converged LDA calculation  </h5>
   
   The first dataset is a simple calculation of the density using LDA using 50 bands.
-  We do not use symmetry in this calculation, so <a href="../../input_variables/generated_files/varbas.html#nsym" target="nsym">nsym</a>=1.
-  If symmetry is used (<a href="../../input_variables/generated_files/varbas.html#nsym" target="nsym">nsym</a>=0), then the calculation of <i>U</i> and <i>J</i> will
+  We do not use symmetry in this calculation, so [[nsym]]=1.
+  If symmetry is used ([[nsym]]=0), then the calculation of <i>U</i> and <i>J</i> will
   be valid, but the full interaction matrix described in
   section 3.2.4 will not be correct. 
   
@@ -277,19 +277,19 @@ body : |
   Kohn Sham eigenstates are precisely determined , including
   the empty states. Indeed these empty states are necessary both to build Wannier functions and to compute the 
   polarizability.  For this reason we choose a very low value of
-  <a href="../../input_variables/generated_files/varbas.html#tolwfr" target="tolwfr">tolwfr</a>  
+  [[tolwfr]]  
   in the input file tucrpa_1.in.
   
   <li> <span style="color: #101010; font-style: italic; font-weight: 500"> Wannier functions </span>: Once the calculation is converged, we compute Wannier functions, as in a DFT+DMFT calculation. To
   do this, we only precise that we are using the DFT+DMFT implementation (usedmft=0), but only with the Wannier keywords 
-  (<a href="../../input_variables/generated_files/vardmft.html#dmftbandi" target="dmftbandi">dmftbandi</a> 
-  and <a href="../../input_variables/generated_files/vardmft.html#dmftbandf" target="dmftbandf">dmftbandf</a>). 
+  ([[dmftbandi]] 
+  and [[dmftbandf]]). 
   We emphasize that with respect to the discussion on models on section <a href="#3.1">3.1</a>, 
-  <a href="../../input_variables/generated_files/vardmft.html#dmftbandi" target="dmftbandi">dmftbandi</a> 
-  and <a href="../../input_variables/generated_files/vardmft.html#dmftbandf" target="dmftbandf">dmftbandf</a>  are used to define the so called A bands. We will see in dataset 2 how B bands are defined.
+  [[dmftbandi]] 
+  and [[dmftbandf]]  are used to define the so called A bands. We will see in dataset 2 how B bands are defined.
   In our case, as we are in the  <i>d-d</i> model, we choose only the <i>d</i>-like bands as a starting point 
-  and <a href="../../input_variables/generated_files/vardmft.html#dmftbandi" target="dmftbandi">dmftbandi</a>  
-  and <a href="../../input_variables/generated_files/vardmft.html#dmftbandf" target="dmftbandf">dmftbandf</a>  are thus equal to the first and last  <i>d</i>-like bands, namely 21 and 25.
+  and [[dmftbandi]]  
+  and [[dmftbandf]]  are thus equal to the first and last  <i>d</i>-like bands, namely 21 and 25.
   </ul>
   <!--
   <div style="background: #ffffff; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;">
@@ -319,16 +319,16 @@ body : |
   <ul> 
   <li> <span style="color: #101010; font-style: italic; font-weight: 500">Definition of constrained polarizability</span>: 
   As in the discussion on models on section <a href="#3.1">3.1</a>,  the constrained polarizability is defined
-  thanks to B-like bands. The keywords related to this definition is <a href="../../input_variables/generated_files/vargw.html#ucrpa_bands" target="ucrpa_bands">ucrpa_bands</a>. According
-  to the value of ucrpa, <a href="../../input_variables/generated_files/vargw.html#ucrpa_bands" target="ucrpa_bands">ucrpa_bands</a> defined the bands for which the transitions are neglected, or (if ucrpa=2), it
+  thanks to B-like bands. The keywords related to this definition is [[ucrpa_bands]]. According
+  to the value of ucrpa, [[ucrpa_bands]] defined the bands for which the transitions are neglected, or (if ucrpa=2), it
   defined Wannier functions that are used in the weighting scheme (see Eq. (5) and (7) of section II of 
   [[Amadon2014]]). Alternatively
-  and only if ucrpa=1, an energy windows can be defined (with variable <a href="../../input_variables/generated_files/vargw.html#ucrpa_window" target="ucrpa_window">ucrpa_window</a>) to exclude the transition.
+  and only if ucrpa=1, an energy windows can be defined (with variable [[ucrpa_window]]) to exclude the transition.
   In our case, as we are in the  <i>d-d</i> model, we neglect transitions
-  inside the <i>d</i>-like bands, so we choose <a href="../../input_variables/generated_files/vargw.html#ucrpa_bands" target="ucrpa_bands">ucrpa_bands</a>= 21 25.
+  inside the <i>d</i>-like bands, so we choose [[ucrpa_bands]]= 21 25.
   
   
-  <li> <span style="color: #101010; font-style: italic; font-weight: 500">Convergence of the polarizability </span>: <a href="../../input_variables/generated_files/varbas.html#nband" target="nband">nband</a> and  <a href="../../input_variables/generated_files/vargw.html#ecuteps" target="ecuteps">ecuteps</a>  are the two main variables that should
+  <li> <span style="color: #101010; font-style: italic; font-weight: 500">Convergence of the polarizability </span>: [[nband]] and  [[ecuteps]]  are the two main variables that should
   be converged. Note that one must study the role of these variables directly on the effective interaction parameters to
   determine their relevant values.
   
@@ -366,13 +366,13 @@ body : |
   <ul> 
   <li><span style="color: #101010; font-style: italic; font-weight: 500">  Convergence as the number of plane waves: </span>
   Eq. (A1) and (A2) in Appendix A of [[Amadon2014]] show
-  the summation over plane waves which is performed. The cutoff on plane wave which is used in this summation is <a href="../../input_variables/generated_files/vargw.html#ecutsigx" target="ecutsigx">ecutsigx</a>
+  the summation over plane waves which is performed. The cutoff on plane wave which is used in this summation is [[ecutsigx]]
   because of the similarity of Eq. A2 with the Fock exchange
   (see <a href="../../theory/generated_files/theorydoc_mbt.html#evaluation_gw_sigma">GW notes</a>)
   when one computes the bare interaction.
-  <a href="../../input_variables/generated_files/vargw.html#ecutsigx" target="ecutsigx">ecutsigx</a> is thus the main convergence parameter for this dataset.
+  [[ecutsigx]] is thus the main convergence parameter for this dataset.
   Note that as discussed in Appendix A of [[Amadon2014]], high values
-  of <a href="../../input_variables/generated_files/vargw.html#ecutsigx" target="ecutsigx">ecutsigx</a> can be necessary because
+  of [[ecutsigx]] can be necessary because
   oscillator matrix elements in PAW contains the Fourier transform of (a product of) atomic orbitals.
   
   <li> <span style="color: #101010; font-style: italic; font-weight: 500">The frequency mesh </span> must be the same as in the DATASET 2.
@@ -408,8 +408,8 @@ body : |
   
   <p> First, at the beginning of the log file,  you will find the calculation
   of the bare interaction for the atomic wavefunction corresponding the
-  angular momentum specified by <a href="../../input_variables/generated_files/varpaw.html#lpawu" target="lpawu">lpawu</a>, 
-  in the input file (here <a href="../../input_variables/generated_files/varpaw.html#lpawu" target="lpawu">lpawu</a>
+  angular momentum specified by [[lpawu]], 
+  in the input file (here [[lpawu]]
   =2).
   It is a simple fast direct integration.
   Note that this information is complete only if you use XML PAW atomic data
@@ -483,11 +483,11 @@ body : |
    (Hubbard bare interaction U=1/(2l+1) \sum U(m1,m1,m1,m1)=   16.2514    0.0000)
   </pre>
   [To speed up the calculation and if one needs only these average values of <i>U</i> and <i>J</i>, one can use 
-  <a href="../../input_variables/generated_files/varbas.html#nsym" target="nsym">nsym</a>=0
+  [[nsym]]=0
   in the input file, but in this case, the interaction matrix
   does not anymore reproduce the correct symmetry. For several correlated atoms, the implementation is under test
   and it is mandatory to use 
-  <a href="../../input_variables/generated_files/varbas.html#nsym" target="nsym">nsym</a>=1.]
+  [[nsym]]=1.]
   <p>
   <li> Bare exchange interaction.
   The exchange interaction matrix is also written as well as the average of off-diagonal elements, which is <i>J</i>.
@@ -552,9 +552,9 @@ body : |
   
   <h4><a name="4.1">4.1</a> ecuteps </h4>
   The number of plane waves used in the calculation of the cRPA polarizability is
-  determined by <a href="../../input_variables/generated_files/vargw.html#ecuteps" target="ecuteps">ecuteps</a>
+  determined by [[ecuteps]]
   (see <a href="../../theory/generated_files/theorydoc_mbt.html#RPA_Fourier_space">Notes on RPA calculations</a>).
-  The convergence can be studied simply by increasing the values of <a href="../../input_variables/generated_files/vargw.html#ecuteps" target="ecuteps">ecuteps</a> and gives:
+  The convergence can be studied simply by increasing the values of [[ecuteps]] and gives:
   
   <pre>
      ecuteps (Ha)   U (eV)     J (eV)
@@ -563,8 +563,8 @@ body : |
         7            2.99       0.40
         9            2.99       0.40
   </pre>
-  So, for <a href="../../input_variables/generated_files/varbas.html#nband" target="nband">nband</a>=30, <a href="../../input_variables/generated_files/vargw.html#ecutsigx" target="ecutsigx">ecutsigx</a>=30 and a 4x4x4 k-point grid,
-  the effective interactions are converged with a precision of 0.02 eV for <a href="../../input_variables/generated_files/vargw.html#ecuteps" target="ecuteps">ecuteps</a>=5.
+  So, for [[nband]]=30, [[ecutsigx]]=30 and a 4x4x4 k-point grid,
+  the effective interactions are converged with a precision of 0.02 eV for [[ecuteps]]=5.
   
   <h4><a name="4.2">4.2</a> nband </h4>
   The RPA polarizability depends also of the number of Kohn-Sham bands as
@@ -577,11 +577,11 @@ body : |
       90             2.70       0.40
   </pre>
   
-  So, for <a href="../../input_variables/generated_files/vargw.html#ecuteps" target="ecuteps">ecuteps</a>=5, <a href="../../input_variables/generated_files/vargw.html#ecutsigx" target="ecutsigx">ecutsigx</a>=30 and a 4x4x4 k-point grid,
-  the effective interactions are converged with a precision of 0.05 eV for <a href="../../input_variables/generated_files/varbas.html#nband" target="nband">nband</a>=50.
+  So, for [[ecuteps]]=5, [[ecutsigx]]=30 and a 4x4x4 k-point grid,
+  the effective interactions are converged with a precision of 0.05 eV for [[nband]]=50.
   
   <h4><a name="4.3">4.3</a> ecutsigx  </h4>
-  <a href="../../input_variables/generated_files/vargw.html#ecutsigx" target="ecutsigx">ecutsigx</a> is
+  [[ecutsigx]] is
   the input variable determining the number of plane waves used in the calculation of
   the exchange part of the self-energy. The same variable is used here to determine the number
   of plane waves used in the calculation of the effective interaction. The study
@@ -593,8 +593,8 @@ body : |
            50                    15.38          0.46            3.22         0.44
            70                    15.38          0.47            3.22         0.45
   </pre>
-  For <a href="../../input_variables/generated_files/vargw.html#ecuteps" target="ecuteps">ecuteps</a>=3, <a href="../../input_variables/generated_files/varbas.html#nband" target="nband">nband</a>=30 and a 4 4 4 k-point grid, effective interactions are converged
-  with a precision of 0.02 eV for <a href="../../input_variables/generated_files/vargw.html#ecutsigx" target="ecutsigx">ecutsigx</a>=30 Ha.
+  For [[ecuteps]]=3, [[nband]]=30 and a 4 4 4 k-point grid, effective interactions are converged
+  with a precision of 0.02 eV for [[ecutsigx]]=30 Ha.
   
   <h4><a name="4.4">4.4</a> k-point  </h4>
   The dependence of effective interactions with the k-point grid  is also
@@ -607,12 +607,12 @@ body : |
         7 7 7          15.35          0.44           3.19         0.43
   </pre>
   
-  For <a href="../../input_variables/generated_files/vargw.html#ecuteps" target="ecuteps">ecuteps</a>=3, <a href="../../input_variables/generated_files/varbas.html#nband" target="nband">nband</a>=30 and <a href="../../input_variables/generated_files/vargw.html#ecutsigx" target="ecutsigx">ecutsigx</a>=30, effective interactions are converged to 0.01 eV for a
+  For [[ecuteps]]=3, [[nband]]=30 and [[ecutsigx]]=30, effective interactions are converged to 0.01 eV for a
   k-point grid of 6 6 6.
   
-  The converged parameters are thus <a href="../../input_variables/generated_files/vargw.html#ecuteps" target="ecuteps">ecuteps</a>=5,<a href="../../input_variables/generated_files/vargw.html#ecutsigx" target="ecutsigx">ecutsigx</a>=30,ngkpt=6 6 6, <a href="../../input_variables/generated_files/varbas.html#nband" target="nband">nband</a>=50 with
+  The converged parameters are thus [[ecuteps]]=5,[[ecutsigx]]=30,ngkpt=6 6 6, [[nband]]=50 with
   an expected precision of 0.1 eV.
-  We will use instead <a href="../../input_variables/generated_files/vargw.html#ecuteps" target="ecuteps">ecuteps</a>=5,<a href="../../input_variables/generated_files/vargw.html#ecutsigx" target="ecutsigx">ecutsigx</a>=30,ngkpt=4 4 4, <a href="../../input_variables/generated_files/varbas.html#nband" target="nband">nband</a>=50 to lower the computational cost.
+  We will use instead [[ecuteps]]=5,[[ecutsigx]]=30,ngkpt=4 4 4, [[nband]]=50 to lower the computational cost.
   In this case, we find values of <i>U</i> and <i>J</i> of  2.75 eV and 0.41 eV and <i>U</i> is probably underestimated by 0.1 eV.
   
   <h3><b><a name="5">5.</a> Effective interactions for different models </b></h3>
@@ -621,7 +621,7 @@ body : |
   value of effective interactions for the models discussed in section
   and <a href="#3.1">3.1</a>. The table
   below gives for each model, the values
-  of <a href="../../input_variables/generated_files/vardmft.html#dmftbandi" target="dmftbandi">dmftbandi</a>, <a href="../../input_variables/generated_files/vardmft.html#dmftbandf" target="dmftbandf">dmftbandf</a>  and <a href="../../input_variables/generated_files/vargw.html#ucrpa_bands" target="ucrpa_bands">ucrpa_bands</a>  that must be used, and it sums up
+  of [[dmftbandi]], [[dmftbandf]]  and [[ucrpa_bands]]  that must be used, and it sums up
   the value of bare and effective interactions.
   
   <pre><span style="color: #000000">
@@ -664,14 +664,14 @@ body : |
   </ul>
   </ul>
   Finally, fully screened interactions (not discussed here) could also be computed for each definition
-  correlated orbitals by using the default values of <a href="../../input_variables/generated_files/vargw.html#ucrpa_bands" target="ucrpa_bands">ucrpa_bands</a> .
+  correlated orbitals by using the default values of [[ucrpa_bands]] .
   
   
   <h3><b><a name="6">6.</a> Frequency dependent interactions </b></h3>
   
   In this section, we are going to compute frequency dependent effective interactions.
   Just change the following input variables in order to compute effective interaction between 0 and 30 eV.
-  We use <a href="../../input_variables/generated_files/varbas.html#nsym" target="nsym">nsym</a>=0
+  We use [[nsym]]=0
   in order to decrease the computational cost.
   <div style="background: #ffffff; overflow:auto;width:auto;border:dotted gray;border-width:.1em .1em .1em .1em;padding:.1em .1em;">  <pre> <span style="color: #008800; font-style: italic"># -- Frequencies for effective interactions</span>
    nsym        0

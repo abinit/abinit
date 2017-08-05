@@ -84,16 +84,16 @@ subdirectory as for lesson 1, 2 or 3 . Why not "Work4" ?
   should edit it, read it carefully, and have a look at the following "new" input
   variables, and their explanation:
 <ul>
-  <li><a href="../../input_variables/generated_files/basic.html#occopt">occopt</a>
-  <li><a href="../../input_variables/generated_files/gstate.html#tsmear">tsmear</a>
+  <li><a href="../../input_variables/generated_files/varset_basic.html#occopt">occopt</a>
+  <li><a href="../../input_variables/generated_files/varset_gstate.html#tsmear">tsmear</a>
 </ul>
 
 Note also the following:
 <br>
-1) You will work at fixed <a href="../../input_variables/generated_files/basic.html#ecut">ecut</a>
+1) You will work at fixed <a href="../../input_variables/generated_files/varset_basic.html#ecut">ecut</a>
 (=6Ha). It is implicit that in "real life", you should do a convergence test with
-respect to <a href="../../input_variables/generated_files/basic.html#ecut">ecut</a> ... Here, a suitable
-<a href="../../input_variables/generated_files/basic.html#ecut">ecut</a> is given to you. It will allow
+respect to <a href="../../input_variables/generated_files/varset_basic.html#ecut">ecut</a> ... Here, a suitable
+<a href="../../input_variables/generated_files/varset_basic.html#ecut">ecut</a> is given to you. It will allow
 to obtain 0.2% relative accuracy on lattice parameters. Note that this is the
 softer pseudopotential of those that we have used until now: the 01h.pspgth for
 H needed 30 Ha (it was rather hard), the 14si.pspnc for Si needed 8 Ha. <br>
@@ -154,7 +154,7 @@ of grids:
   ngkpt3  6 6 6
   ngkpt4  8 8 8
 </pre>
-with the associated <a href="../../input_variables/generated_files/basic.html#nkpt">nkpt</a>:
+with the associated <a href="../../input_variables/generated_files/varset_basic.html#nkpt">nkpt</a>:
 <pre>
   nkpt1  2
   nkpt2 10
@@ -166,8 +166,8 @@ with the associated <a href="../../input_variables/generated_files/basic.html#nk
   while ~abinit/tests/tutorial/Refs/tbase4_2.out is a reference output file.
   The run might take about thirty seconds on a PC 3 GHz.
 
-<p>You will see that, FOR THE PARTICULAR VALUE OF <a href="../../input_variables/generated_files/gstate.html#tsmear">tsmear</a>=0.05
-Ha, the lattice parameter is already converged with <a href="../../input_variables/generated_files/basic.html#nkpt">nkpt</a>=10
+<p>You will see that, FOR THE PARTICULAR VALUE OF <a href="../../input_variables/generated_files/varset_gstate.html#tsmear">tsmear</a>=0.05
+Ha, the lattice parameter is already converged with <a href="../../input_variables/generated_files/varset_basic.html#nkpt">nkpt</a>=10
 :
 <pre>
             acell1     7.5588968086E+00  7.5588968086E+00  7.5588968086E+00 Bohr
@@ -176,12 +176,12 @@ Ha, the lattice parameter is already converged with <a href="../../input_variabl
             acell4     7.4992662653E+00  7.4992662653E+00  7.4992662653E+00 Bohr
 </pre>
 Note that there is usually a STRONG cross-convergence effect between the number
-of k points and the value of the broadening, <a href="../../input_variables/generated_files/gstate.html#tsmear">tsmear</a>.
+of k points and the value of the broadening, <a href="../../input_variables/generated_files/varset_gstate.html#tsmear">tsmear</a>.
 <br>
-The right procedure is: for each value of <a href="../../input_variables/generated_files/gstate.html#tsmear">tsmear</a>,
+The right procedure is: for each value of <a href="../../input_variables/generated_files/varset_gstate.html#tsmear">tsmear</a>,
 to get the convergence with respect to the number of k points, then to compare
-the k-point converged values for different values of <a href="../../input_variables/generated_files/gstate.html#tsmear">tsmear</a>.
-<p>In what follows, we will restrict ourselves to the grids with <a href="../../input_variables/generated_files/basic.html#nkpt">nkpt</a>=2,
+the k-point converged values for different values of <a href="../../input_variables/generated_files/varset_gstate.html#tsmear">tsmear</a>.
+<p>In what follows, we will restrict ourselves to the grids with <a href="../../input_variables/generated_files/varset_basic.html#nkpt">nkpt</a>=2,
   10 and 28.
 
 <p>
@@ -196,19 +196,19 @@ The convergence study with respect to both number of k points AND
 broadening factor (tsmear).
 </b></h3>
 
-<p>The theoretical convergence rate for <a href="../../input_variables/generated_files/gstate.html#tsmear">tsmear</a>
-  ending to 0, in the case of <a href="../../input_variables/generated_files/basic.html#occopt">occopt</a>=4,
+<p>The theoretical convergence rate for <a href="../../input_variables/generated_files/varset_gstate.html#tsmear">tsmear</a>
+  ending to 0, in the case of <a href="../../input_variables/generated_files/varset_basic.html#occopt">occopt</a>=4,
   is quartic. This is obtained in the hypothesis of infinitely dense k point grid.
-  We will check the evolution of <a href="../../input_variables/generated_files/basic.html#acell">acell</a>
-  as a function of <a href="../../input_variables/generated_files/gstate.html#tsmear">tsmear</a>, for
-  the following values of <a href="../../input_variables/generated_files/gstate.html#tsmear">tsmear</a>
+  We will check the evolution of <a href="../../input_variables/generated_files/varset_basic.html#acell">acell</a>
+  as a function of <a href="../../input_variables/generated_files/varset_gstate.html#tsmear">tsmear</a>, for
+  the following values of <a href="../../input_variables/generated_files/varset_gstate.html#tsmear">tsmear</a>
   : 0.01, 0.02, 0.03 and 0.04. Use the double-loop capability of the multi-dataset
-  mode, with the <a href="../../input_variables/generated_files/gstate.html#tsmear">tsmear</a> changes
+  mode, with the <a href="../../input_variables/generated_files/varset_gstate.html#tsmear">tsmear</a> changes
   in the INNER loop. This will saves CPU time, as the wavefunctions of the previous
   dataset will be excellent (no transfer to different k points).
 <p>The input file ~abinit/tests/tutorial/Input/tbase4_3.in is an example,
   while ~abinit/tests/tutorial/Refs/tbase4_3.out is a reference output file.
-<p>From the output file, here is the evolution of <a href="../../input_variables/generated_files/basic.html#acell">acell</a>
+<p>From the output file, here is the evolution of <a href="../../input_variables/generated_files/varset_basic.html#acell">acell</a>
   :
 <pre>
             acell11    7.5587661702E+00  7.5587661702E+00  7.5587661702E+00 Bohr
@@ -225,32 +225,32 @@ broadening factor (tsmear).
             acell34    7.4993529673E+00  7.4993529673E+00  7.4993529673E+00 Bohr
 </pre>
 These data should be analyzed properly.
-<p>For <a href="../../input_variables/generated_files/gstate.html#tsmear">tsmear</a>=0.01, the converged
+<p>For <a href="../../input_variables/generated_files/varset_gstate.html#tsmear">tsmear</a>=0.01, the converged
   value, contained in acell31, must be compared to acell11 and acell21:
   between acell21
   and acell31, the difference
   is below 0.2%. acell31 can be
   considered to be converged with respect to the number of k-points, at fixed
-  <a href="../../input_variables/generated_files/gstate.html#tsmear">tsmear</a>. <br>
+  <a href="../../input_variables/generated_files/varset_gstate.html#tsmear">tsmear</a>. <br>
   This tsmear being the lowest one, it is usually the most difficult to converge,
   and the values acell31,32,33
   and 34 are indeed well-converged with respect to the k-point number. <br>
-  The use of the largest <a href="../../input_variables/generated_files/gstate.html#tsmear">tsmear</a>(=0.04),
+  The use of the largest <a href="../../input_variables/generated_files/varset_gstate.html#tsmear">tsmear</a>(=0.04),
   giving acell34, induces only
   a small error in the lattice parameter.
-  For that particular value of <a href="../../input_variables/generated_files/gstate.html#tsmear">tsmear</a>,
+  For that particular value of <a href="../../input_variables/generated_files/varset_gstate.html#tsmear">tsmear</a>,
   one can use the second k-point grid,
   giving acell24.
 <p>So to <b>summarize</b>:<br>
   we can choose to work with a 10 k-point grid in the irreducible Brillouin zone,
-  and the associated <a href="../../input_variables/generated_files/gstate.html#tsmear">tsmear</a>=0.04,
+  and the associated <a href="../../input_variables/generated_files/varset_gstate.html#tsmear">tsmear</a>=0.04,
   with less than 0.1% error on the lattice parameter. <br>
   NOTE that this error due to the Brillouin zone sampling could add to the error
-  due to the choice of <a href="../../input_variables/generated_files/basic.html#ecut">ecut</a> (that
+  due to the choice of <a href="../../input_variables/generated_files/varset_basic.html#ecut">ecut</a> (that
   was mentioned previously to be on the order of 0.2%).
 <p>In what follows, we will stick to these values of
-  <a href="../../input_variables/generated_files/basic.html#ecut">ecut</a>
-  and <a href="../../input_variables/generated_files/gstate.html#tsmear">tsmear</a>, and try to use
+  <a href="../../input_variables/generated_files/varset_basic.html#ecut">ecut</a>
+  and <a href="../../input_variables/generated_files/varset_gstate.html#tsmear">tsmear</a>, and try to use
   k-point grids with a similar resolution.
 <p>Our final value for the aluminum lattice parameter, in the LDA,
 using the 13al.981214.fhi pseudopotential, is thus 7.5041 Bohr.
@@ -296,8 +296,8 @@ this doubled cell. This is not strictly needed, but it is a
 valuable intermediate step towards the study of the surface.
 
 <p>You might start from tbase4_3.in. <br>
-  You have to change <a href="../../input_variables/generated_files/basic.html#rprim">rprim</a>. Still,
-  try to keep <a href="../../input_variables/generated_files/basic.html#acell">acell</a> at the values
+  You have to change <a href="../../input_variables/generated_files/varset_basic.html#rprim">rprim</a>. Still,
+  try to keep <a href="../../input_variables/generated_files/varset_basic.html#acell">acell</a> at the values
   of bulk aluminum that were determined previously. But it is not all: the most
   difficult part in the passage to this doubled cell is the definition of the
   k-point grid. Of course, one could just take a homogeneous simple cubic grid
@@ -317,8 +317,8 @@ valuable intermediate step towards the study of the surface.
   x 4 x 1 = 256</code> . In the file tbase4_4.in,
   one has <code>4x4x4 x 2 x 2 = 256</code> . The grids of k points should not
   be too anisotropic for this rough estimation to be valid.
-<p>Note also the input variables <a href="../../input_variables/generated_files/basic.html#rprim">rprim</a>
-  and <a href="../../input_variables/generated_files/gstate.html#chkprim">chkprim</a> in this input
+<p>Note also the input variables <a href="../../input_variables/generated_files/varset_basic.html#rprim">rprim</a>
+  and <a href="../../input_variables/generated_files/varset_gstate.html#chkprim">chkprim</a> in this input
   file.
 <p>So, you run tbase4_4.in (only a few seconds, the reference file is ~abinit/tests/tutorial/Refs/tbase4_4.out),
   and you find the following total energy:
@@ -356,7 +356,7 @@ a (3 aluminum layer + 1 vacuum layer) slab calculation.
   <code>[0 0 1]</code> direction). Of course, the relaxation of the surface might
   give an important contribution to the total energy.
 <p>You should start from tbase4_4.in . <br>
-  You have to modify <a href="../../input_variables/generated_files/basic.html#rprim">rprim</a> (double
+  You have to modify <a href="../../input_variables/generated_files/varset_basic.html#rprim">rprim</a> (double
   the cell along <code>[0 0 1]</code>), the atomic positions, as well as the k
   point mesh. For the latter, it is supposed that the electrons cannot propagate
   from one slab to its image in the <code>[0 0 1]</code> direction, so that the
@@ -422,11 +422,11 @@ the WARNING:
   nstep=    6 was not enough SCF cycles to converge;
   maximum force difference=  5.493E-05 exceeds toldff=  5.000E-05
 </pre>
-The input variable <a href="../../input_variables/generated_files/basic.html#nstep">nstep</a>
+The input variable <a href="../../input_variables/generated_files/varset_basic.html#nstep">nstep</a>
 was intentionally set to the rather low value of 6,
 to warn you about possible convergence difficulties.
 The SCF convergence might indeed get more and more difficult with cell size. This is because the default
-preconditioner (see the notice of the input variable <a href="../../input_variables/generated_files/gstate.html#dielng">dielng</a>)
+preconditioner (see the notice of the input variable <a href="../../input_variables/generated_files/varset_gstate.html#dielng">dielng</a>)
 is not very good for the metal+vacuum case. <br>
 For the interpretation of the present run, this is not critical,
 as the convergence criterion was close of being fulfilled,
@@ -482,7 +482,7 @@ increasing the number of aluminum layers.
   to set up, but will also change the preconditioner. One
   could use an effective dielectric constant of about 3 or 5, with a rather small
   mixing coefficient, on the order of 0.2. However, there is also another possibility,
-  using an estimation of the dielectric matrix governed by <a href="../../input_variables/generated_files/gstate.html#iprcel">iprcel</a>=45
+  using an estimation of the dielectric matrix governed by <a href="../../input_variables/generated_files/varset_gstate.html#iprcel">iprcel</a>=45
   . For comparison with the previous treatment of SCF, one can recompute the result
   with 3 aluminum layers.
 <p>The input file ~abinit/tests/tutorial/Input/tbase4_7.in is an example,

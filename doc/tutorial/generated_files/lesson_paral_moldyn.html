@@ -101,13 +101,13 @@ choice.
 For example this value should decrease at high pressure.<br>
 <br>
 Except
-for the <span style="font-style: italic;">isothermal</span>/<span style="font-style: italic;">isenthalpic</span> (<a href="../../input_variables/generated_files/varrlx.html#ionmov" onclick="return (false);">ionmov</a> 13) ensemble the input variable "<a href="../../input_variables/generated_files/varrlx.html#optcell">optcell</a>"
+for the <span style="font-style: italic;">isothermal</span>/<span style="font-style: italic;">isenthalpic</span> (<a href="../../input_variables/generated_files/varrlx.html#ionmov" onclick="return (false);">ionmov</a> 13) ensemble the input variable "<a href="../../input_variables/generated_files/varset_rlx.html#optcell">optcell</a>"
 must be set to 0. <br>
 You have also to define the maximal number of
 timesteps of the molecular dynamics.<br>
 <br>
 Usually you can set the input
-variable <a href="../../input_variables/generated_files/rlx.html#ntime">ntime</a>
+variable <a href="../../input_variables/generated_files/varset_rlx.html#ntime">ntime</a>
 to a large value, 5000, since there is no "end" to a molecular dynamics
 simulation. You can always stop or restart the calculation at your
 convenience by using the input variable <a href="../../input_variables/generated_files/varrlx.html#restartxf" onclick="return (false);">restartxf</a>.&nbsp;
@@ -117,7 +117,7 @@ that contains data for a molecular dynamics simulation using the isokinetic ense
 
 Open the <span style="color: red;">tmoldyn_01.in</span><span style="color: rgb(204, 0, 0);"></span>
 file and look at it carefully. The
-unit cell is defined at the end. It is a <span style="font-weight: bold;">2x2x2 fcc supercell</span> containing 32 atoms of Al. <a href="../../input_variables/generated_files/varrlx.html#ionmov" target="kwimg" onclick="return (false);">ionmov</a> is&nbsp;set to 12 for the isokinetic ensemble, and since&nbsp;<a href="../../input_variables/generated_files/rlx.html#ntime">ntime</a> is set to 50, ABINIT
+unit cell is defined at the end. It is a <span style="font-weight: bold;">2x2x2 fcc supercell</span> containing 32 atoms of Al. <a href="../../input_variables/generated_files/varrlx.html#ionmov" target="kwimg" onclick="return (false);">ionmov</a> is&nbsp;set to 12 for the isokinetic ensemble, and since&nbsp;<a href="../../input_variables/generated_files/varset_rlx.html#ntime">ntime</a> is set to 50, ABINIT
 will carry on 50 time steps of molecular dynamics. The calculation will
 be performed for a temperature of 3000 K, see the key variable <a href="../../input_variables/generated_files/varrlx.html#mdtemp" onclick="return (false);">mdtemp</a>.<span style="font-weight: bold;"> </span>It
 gives the initial and final temperature in Kelvin of the

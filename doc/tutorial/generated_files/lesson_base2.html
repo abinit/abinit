@@ -44,9 +44,9 @@ pseudopotential are not examined.
 
 <ul>
   <li><a href="#20">2.0</a> Summary of the previous lesson</li>
-  <li><a href="#21">2.1</a> The convergence in <a href="../../input_variables/generated_files/basic.html#ecut">ecut</a></li>
-  <li><a href="#22">2.2</a> The convergence in <a href="../../input_variables/generated_files/basic.html#ecut">ecut</a></li>
-  <li><a href="#23">2.3</a> The convergence in <a href="../../input_variables/generated_files/basic.html#acell">acell</a></li>
+  <li><a href="#21">2.1</a> The convergence in <a href="../../input_variables/generated_files/varset_basic.html#ecut">ecut</a></li>
+  <li><a href="#22">2.2</a> The convergence in <a href="../../input_variables/generated_files/varset_basic.html#ecut">ecut</a></li>
+  <li><a href="#23">2.3</a> The convergence in <a href="../../input_variables/generated_files/varset_basic.html#acell">acell</a></li>
   <li><a href="#24">2.4</a> The final calculation in Local (Spin)
     Density Approximation.</li>
   <li><a href="#25">2.5</a> The use of the Generalized Gradient Approximation.</li>
@@ -58,7 +58,7 @@ pseudopotential are not examined.
 <p>We studied the H2 molecule in a big box.
   We used 10 Ha as cut-off energy, a 10x10x10 Bohr^3 supercell, the local-density
   approximation (as well as the local-spin-density approximation) in the Teter
-  parametrization (<a href="../../input_variables/generated_files/basic.html#ixc">ixc</a>=1, the default),
+  parametrization (<a href="../../input_variables/generated_files/varset_basic.html#ixc">ixc</a>=1, the default),
   and a pseudopotential from the Goedecker-Hutter-Teter table.
 <p>At this stage, we compared our results:
 <ul>
@@ -125,27 +125,27 @@ and
   entirely the abinit_help file now, while the knowledge of the input variables will
   come in the long run. </p>
 <p><b>2.1.b</b> Many convergence parameters have already been identified. We will
-  focus only on <a href="../../input_variables/generated_files/basic.html#ecut">ecut</a> and <a href="../../input_variables/generated_files/basic.html#acell">acell</a>.
+  focus only on <a href="../../input_variables/generated_files/varset_basic.html#ecut">ecut</a> and <a href="../../input_variables/generated_files/varset_basic.html#acell">acell</a>.
   This is because
 <ul>
   <li> the convergence of the SCF cycle and geometry determination are well under
-    control thanks to <a href="../../input_variables/generated_files/basic.html#toldfe">toldfe</a>,
-    <a href="../../input_variables/generated_files/basic.html#toldff">toldff</a> and <a href="../../input_variables/generated_files/rlx.html#tolmxf">tolmxf</a>
+    control thanks to <a href="../../input_variables/generated_files/varset_basic.html#toldfe">toldfe</a>,
+    <a href="../../input_variables/generated_files/varset_basic.html#toldff">toldff</a> and <a href="../../input_variables/generated_files/varset_rlx.html#tolmxf">tolmxf</a>
     (this might not be the case for other physical properties)</li>
   <li> there is no k point convergence study to be done for an isolated system
     in a big box: no additional information is gained by adding a k-point beyond one</li>
   <li> the boxcut value is automatically chosen larger than 2 by ABINIT, see the
-    determination of the input variable <a href="../../input_variables/generated_files/gstate.html#ngfft">ngfft</a>
+    determination of the input variable <a href="../../input_variables/generated_files/varset_gstate.html#ngfft">ngfft</a>
     by preprocessing</li>
-  <li> we are using <a href="../../input_variables/generated_files/rlx.html#ionmov">ionmov</a>=2
+  <li> we are using <a href="../../input_variables/generated_files/varset_rlx.html#ionmov">ionmov</a>=2
     for the determination of the geometry.</li>
 </ul>
 
-For the check of convergence with respect to <a href="../../input_variables/generated_files/basic.html#ecut">ecut</a>,
+For the check of convergence with respect to <a href="../../input_variables/generated_files/varset_basic.html#ecut">ecut</a>,
 you have the choice between doing different runs of the tbase2_1.in
-file with different values of <a href="../../input_variables/generated_files/basic.html#ecut">ecut</a>, or doing
+file with different values of <a href="../../input_variables/generated_files/varset_basic.html#ecut">ecut</a>, or doing
 a double loop of datasets, as proposed in ~abinit/tests/tutorial/Input/tbase2_2.in .
-The values of <a href="../../input_variables/generated_files/basic.html#ecut">ecut</a> have been
+The values of <a href="../../input_variables/generated_files/varset_basic.html#ecut">ecut</a> have been
 chosen between 10Ha and 35Ha, by step of 5 Ha. If you want to make a double loop,
 you might benefit of reading again the
 <a href="../../users/generated_files/help_abinit.html#loop" target="helpsimg">double-loop section</a>
@@ -215,14 +215,14 @@ that we are using for Hydrogen is rather "hard" ...
 <h3><p><b><a name="23">2.3</a>
 The convergence in acell</b></h3>
 
-<p>The same technique as for <a href="../../input_variables/generated_files/basic.html#ecut">ecut</a>
-  should be now used for the convergence in <a href="../../input_variables/generated_files/basic.html#acell">acell</a>.
-  We will explore <a href="../../input_variables/generated_files/basic.html#acell">acell</a> starting
+<p>The same technique as for <a href="../../input_variables/generated_files/varset_basic.html#ecut">ecut</a>
+  should be now used for the convergence in <a href="../../input_variables/generated_files/varset_basic.html#acell">acell</a>.
+  We will explore <a href="../../input_variables/generated_files/varset_basic.html#acell">acell</a> starting
   from <code>8 8 8</code> to <code>18 18 18</code>, by step of <code>2 2 2</code>.
-  We keep <a href="../../input_variables/generated_files/basic.html#ecut">ecut</a> 10 for this study.
+  We keep <a href="../../input_variables/generated_files/varset_basic.html#ecut">ecut</a> 10 for this study.
   Indeed, it is a rather general rule that there is little cross-influence between
-  the convergence of <a href="../../input_variables/generated_files/basic.html#ecut">ecut</a> and the
-  convergence of <a href="../../input_variables/generated_files/basic.html#acell">acell</a>. The file
+  the convergence of <a href="../../input_variables/generated_files/varset_basic.html#ecut">ecut</a> and the
+  convergence of <a href="../../input_variables/generated_files/varset_basic.html#acell">acell</a>. The file
   ~abinit/tests/tutorial/Input/tbase2_3.in can be used as an example. 
   The output data (~abinit/tests/tutorial/Refs/tbase2_3.out) are as follows:
 <pre>
@@ -360,19 +360,19 @@ minimal! This allows to have reasonable CPU time still.
 <p><h3><b><a name="24">2.4</a>
 The final calculation in Local (Spin) Density Approximation.</b></h3>
 
-<p>We now use the correct values of both <a href="../../input_variables/generated_files/basic.html#ecut">ecut</a>
-  and <a href="../../input_variables/generated_files/basic.html#acell">acell</a>. Well, you should
+<p>We now use the correct values of both <a href="../../input_variables/generated_files/varset_basic.html#ecut">ecut</a>
+  and <a href="../../input_variables/generated_files/varset_basic.html#acell">acell</a>. Well, you should
   modify the tbase2_3.in file to make a calculation
   with <code>acell 12 12 12</code>
   and <code>ecut 30</code>.
   You can still use the double loop feature with
-  <code><a href="../../input_variables/generated_files/basic.html#udtset">udtset</a>
+  <code><a href="../../input_variables/generated_files/varset_basic.html#udtset">udtset</a>
   1 2</code> (which reduces to a single loop), to minimize the modifications to
   the file. The file ~abinit/tests/tutorial/Input/tbase2_4.in can be taken as an example of input
   file, and ~abinit/tests/tutorial/Refs/tbase2_4.out as an example of output file.
 <p>Since we are doing the calculation at a single
-  (<a href="../../input_variables/generated_files/basic.html#ecut">ecut</a>,
-  <a href="../../input_variables/generated_files/basic.html#acell">acell</a>) pair, the total CPU time
+  (<a href="../../input_variables/generated_files/varset_basic.html#ecut">ecut</a>,
+  <a href="../../input_variables/generated_files/varset_basic.html#acell">acell</a>) pair, the total CPU time
   is not as much as for the previous determinations of optimal values through
   series calculations. However, the memory needs have still increased a bit.
 <p>The output data are:
@@ -391,12 +391,12 @@ The final calculation in Local (Spin) Density Approximation.</b></h3>
 <li>These are our final data for the local (spin) density approximation.
 </ul>
 
-We have used <code><a href="../../input_variables/generated_files/basic.html#ixc">ixc</a>=1</code>
-. Other expressions for the local (spin) density approximation <code><a href="../../input_variables/generated_files/basic.html#ixc">ixc</a>=2,
+We have used <code><a href="../../input_variables/generated_files/varset_basic.html#ixc">ixc</a>=1</code>
+. Other expressions for the local (spin) density approximation <code><a href="../../input_variables/generated_files/varset_basic.html#ixc">ixc</a>=2,
 3 .. 7</code> are possible. The values 1, 2, 3 and 7 should give about the same
 results, since they all start from the XC energy of the homogeneous electron gas,
 as determined by Quantum Monte Carlo calculations. <br>
-Other possibilities <code><a href="../../input_variables/generated_files/basic.html#ixc">ixc</a>=4,
+Other possibilities <code><a href="../../input_variables/generated_files/varset_basic.html#ixc">ixc</a>=4,
 5, 6</code> are older local density functionals, that could not rely on these
 data.
 
@@ -416,13 +416,13 @@ with a very small core (including only the 1s orbital), pseudopotentials
 issued from the LDA and from the GGA are very similar.
 
 <p>So, we will not change our pseudopotential. This will save us lot of time,
-  as we should not redo an <a href="../../input_variables/generated_files/basic.html#ecut">ecut</a>
+  as we should not redo an <a href="../../input_variables/generated_files/varset_basic.html#ecut">ecut</a>
   convergence test (ecut is often characteristic of the pseudopotentials that
   are used in a calculation).
-<p>Independently of the pseudopotential, an <a href="../../input_variables/generated_files/basic.html#acell">acell</a>
+<p>Independently of the pseudopotential, an <a href="../../input_variables/generated_files/varset_basic.html#acell">acell</a>
   convergence test should not be done again, since the vacuum is treated similarly
   in LDA or GGA.
-<p>So, our final values within GGA will be easily obtained, by setting <a href="../../input_variables/generated_files/basic.html#ixc">ixc</a>
+<p>So, our final values within GGA will be easily obtained, by setting <a href="../../input_variables/generated_files/varset_basic.html#ixc">ixc</a>
   to 11 in the input file tbase2_4.in. See ~abinit/tests/tutorial/Input/tbase2_5.in
   for an example.
 <pre>

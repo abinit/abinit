@@ -32,9 +32,9 @@
 
 <p> The direct estimation of effective masses from DFT band curvature using DFPT <a href="../../bibliography/generated_files/bibliography.html#Gonze1995">[Gonze1995]</a> has been implemented within the linear response part of ABINIT <a href="../../bibliography/generated_files/bibliography.html#Laflamme2016">[Laflamme2016]</a>.
 This method avoids the use of finite differences to estimate these masses, which eliminates the associated numerical noise and convergence study. 
-To compute the effective masses, one has to set the keyword <a href="../../input_variables/generated_files/dfpt.html#efmas">efmas</a> to 1 within a calculation of the derivative of ground-state wavefunctions with respect to wavevector (<a href="../../input_variables/generated_files/dfpt.html#rfelfd">rfelfd</a> = 1 or 2).
+To compute the effective masses, one has to set the keyword <a href="../../input_variables/generated_files/varset_dfpt.html#efmas">efmas</a> to 1 within a calculation of the derivative of ground-state wavefunctions with respect to wavevector (<a href="../../input_variables/generated_files/varset_dfpt.html#rfelfd">rfelfd</a> = 1 or 2).
 The effective masses will then be computed for all k-points and bands present in the calculation.
-One can optionally specify the range of bands to be treated for each k-point with the keyword <a href="../../input_variables/generated_files/dfpt.html#efmas_bands">efmas_bands</a>.
+One can optionally specify the range of bands to be treated for each k-point with the keyword <a href="../../input_variables/generated_files/varset_dfpt.html#efmas_bands">efmas_bands</a>.
 
 <p>An additional feature of the effective mass implementation is the correct treatment of degenerate bands. 
 Indeed, the concept of effective mass breaks down at degenerate band extrema since it is no longer possible to describe band curvature using a tensor <a href="../../bibliography/generated_files/bibliography.html#Luttinger1955">[Luttinger1955]</a>,<a href="../../bibliography/generated_files/bibliography.html#Mecholsky2014">[Mecholsky2014]</a>.
@@ -42,7 +42,7 @@ However, using the concept of ``transport equivalent effective mass'' <a href=".
 
 <p>The implementation supports both NCPP and PAW schemes. 
 
-<p>Spin-polarized systems (<a href="../../input_variables/generated_files/gstate.html#nspden">nspden</a> = 2) as well as spinors (<a href="../../input_variables/generated_files/gstate.html#nspinor">nspinor</a> = 2)can be treated, although the spin-orbit interaction can only be treated in the PAW case.
+<p>Spin-polarized systems (<a href="../../input_variables/generated_files/varset_gstate.html#nspden">nspden</a> = 2) as well as spinors (<a href="../../input_variables/generated_files/varset_gstate.html#nspinor">nspinor</a> = 2)can be treated, although the spin-orbit interaction can only be treated in the PAW case.
 <p>The treatment of degenerescences is limited to the extremal points of the band structure (which are the most relevant in any case).
 
 

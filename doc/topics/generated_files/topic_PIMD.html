@@ -39,16 +39,16 @@ At each time step, a ground state DFT calculation is performed for each image. P
 <p>
 <p>PIMD in ABINIT follows the set of numerical schemes developed by several authors in the 90's <a href="../../bibliography/generated_files/bibliography.html#Marx1996">[Marx1996]</a>,<a href="../../bibliography/generated_files/bibliography.html#Tuckerman1996">[Tuckerman1996]</a>. 
 PIMD in the canonical ensemble needs specific thermostats to ensure that the trajectories are ergodic:
-the Nose-Hoover chains are implemented, as well as the Langevin thermostat (controlled by the value of <a href="../../input_variables/generated_files/rlx.html#imgmov">imgmov</a>).
-Also, it is possible to use coordinate transformations (staging and normal mode), that are controlled by the keyword <a href="../../input_variables/generated_files/rlx.html#pitransform">pitransform</a>.
+the Nose-Hoover chains are implemented, as well as the Langevin thermostat (controlled by the value of <a href="../../input_variables/generated_files/varset_rlx.html#imgmov">imgmov</a>).
+Also, it is possible to use coordinate transformations (staging and normal mode), that are controlled by the keyword <a href="../../input_variables/generated_files/varset_rlx.html#pitransform">pitransform</a>.
 In standard equilibrium PIMD, only static observables are relevant (quantum time-correlation functions are not accessible): the
-masses associated to the motion of the beads are controlled by the keyword <a href="../../input_variables/generated_files/rlx.html#pimass">pimass</a>, whereas the true masses of the atoms
-are given by <a href="../../input_variables/generated_files/rlx.html#amu">amu</a>. The values given in <a href="../../input_variables/generated_files/rlx.html#pimass">pimass</a> are used to fix the so-called fictitious masses <a href="../../bibliography/generated_files/bibliography.html#Marx1996">[Marx1996]</a>. In the case
+masses associated to the motion of the beads are controlled by the keyword <a href="../../input_variables/generated_files/varset_rlx.html#pimass">pimass</a>, whereas the true masses of the atoms
+are given by <a href="../../input_variables/generated_files/varset_rlx.html#amu">amu</a>. The values given in <a href="../../input_variables/generated_files/varset_rlx.html#pimass">pimass</a> are used to fix the so-called fictitious masses <a href="../../bibliography/generated_files/bibliography.html#Marx1996">[Marx1996]</a>. In the case
 where a coordinate transformation is used, the fictitious masses are automatically fixed in the code to match the so-called
 staging masses or normal mode masses. 
-The number of time steps of the trajectory is controlled by <a href="../../input_variables/generated_files/rlx.html#ntimimage">ntimimage</a>, the initial and thermostat temperature by <a href="../../input_variables/generated_files/rlx.html#mdtemp">mdtemp</a>.
+The number of time steps of the trajectory is controlled by <a href="../../input_variables/generated_files/varset_rlx.html#ntimimage">ntimimage</a>, the initial and thermostat temperature by <a href="../../input_variables/generated_files/varset_rlx.html#mdtemp">mdtemp</a>.
 Except if specified, the images in the initial configuration are assumed to be at the same position, and a random distribution
-of velocities is applied (governed by <a href="../../input_variables/generated_files/rlx.html#mdtemp">mdtemp</a>) to start the dynamics.
+of velocities is applied (governed by <a href="../../input_variables/generated_files/varset_rlx.html#mdtemp">mdtemp</a>) to start the dynamics.
 
 <p>
 <p>At each time step, ABINIT delivers in the output file: 
@@ -56,7 +56,7 @@ of velocities is applied (governed by <a href="../../input_variables/generated_f
 <li>(ii) the instantaneous temperature, the instantaneous energy as given by 
 the primitive and virial estimators, and the pressure tensor as given by the primitive estimator.</li>
 <p>
-<p>The number of images (keyword <a href="../../input_variables/generated_files/rlx.html#nimage">nimage</a>) is associated to a specific parallelization level (keyword <a href="../../input_variables/generated_files/paral.html#npimage">npimage</a>).
+<p>The number of images (keyword <a href="../../input_variables/generated_files/varset_rlx.html#nimage">nimage</a>) is associated to a specific parallelization level (keyword <a href="../../input_variables/generated_files/varset_paral.html#npimage">npimage</a>).
 
 <p>
 <p>PIMD has been used with ABINIT to reproduce the large isotope effect on the phase transition between phase I and phase II of

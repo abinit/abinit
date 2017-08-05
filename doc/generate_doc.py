@@ -637,7 +637,7 @@ for i, varset_info in enumerate(varsets):
       abivarname=var.abivarname
       if var.characteristics is not None and '[[INTERNAL_ONLY]]' in var.characteristics:
         abivarname = '%'+abivarname
-      curlink = ' <li class="col-s-6 col-m-3 col-l-2 col-xl-2 col-xxl-1"><a href="'+var.varset+'.html#'+var.abivarname+'">'+abivarname+'</a></li>\n'
+      curlink = ' <li class="col-s-6 col-m-3 col-l-2 col-xl-2 col-xxl-1"><a href="varset_'+var.varset+'.html#'+var.abivarname+'">'+abivarname+'</a></li>\n'
       toc_body += curlink
     toc_body += "</ul></li></ul>\n\
 <script>\n\
@@ -927,8 +927,9 @@ for list_infos in list_infos_dir:
           file_str=f_old.read()
           for var in abinit_vars:
             abivarname=var.abivarname
-            for varset in ["varbas","varfil","varff","vargs","varrf","varint","varpar","varbse","vardev","vardmft","vareph","vargeo","vargw","varpaw","varrlx","varvdw","varw90","varoptic","varaim","varanaddb"]:
-              string_old='<a href="../../input_variables/generated_files/%s.html#%s">%s</a>'%(varset,abivarname,abivarname)
+            #for varset in ["varbas","varfil","varff","vargs","varrf","varint","varpar","varbse","vardev","vardmft","vareph","vargeo","vargw","varpaw","varrlx","varvdw","varw90","varoptic","varaim","varanaddb"]:
+            for varset in ["bas","fil","ff","gs","rf","int","par","bse","dev","dmft","eph","geo","gw","paw","rlx","vdw","w90","optic","aim","anaddb"]:
+              string_old='<a href="../../input_variables/generated_files/var%s.html#%s" onclick="return (false);">%s</a>'%(varset,abivarname,abivarname)
               string_new="[["+abivarname+"]]"
               file_str=file_str.replace(string_old,string_new)
 

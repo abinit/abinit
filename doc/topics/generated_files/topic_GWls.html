@@ -41,11 +41,11 @@ The resulting implementation exhibits a 500-fold speedup for the silane molecule
 <p>Furthermore, it does not supports PAW and spinors. 
 <p>However, it supports parallelism over bands and FFTs <a href="../../bibliography/generated_files/bibliography.html#Bottin2008">[Bottin2008]</a>. 
 
-<p>To compute G<sub>0</sub>W<sub>0</sub> corrections to DFT eigenenergies, one needs to set <a href="../../input_variables/generated_files/gstate.html#optdriver">optdriver</a>= 66 in the input file. 
-This type of calculation requires that the ground state density and wavefunctions be available from disk (using <a href="../../input_variables/generated_files/files.html#getden">getden</a> and <a href="../../input_variables/generated_files/files.html#getwfk">getwfk</a>). 
-It also requires the user to specify the state to be corrected (<a href="../../input_variables/generated_files/gw.html#gwls_band_index">gwls_band_index</a>), the maximum allowed residual when solving the Sternheimer equations (<a href="../../input_variables/generated_files/basic.html#tolwfr">tolwfr</a>), and the number of Lanczos vectors used to express the dielectric matrix (<a href="../../input_variables/generated_files/gw.html#gwls_stern_kmax">gwls_stern_kmax</a>). 
+<p>To compute G<sub>0</sub>W<sub>0</sub> corrections to DFT eigenenergies, one needs to set <a href="../../input_variables/generated_files/varset_gstate.html#optdriver">optdriver</a>= 66 in the input file. 
+This type of calculation requires that the ground state density and wavefunctions be available from disk (using <a href="../../input_variables/generated_files/varset_files.html#getden">getden</a> and <a href="../../input_variables/generated_files/varset_files.html#getwfk">getwfk</a>). 
+It also requires the user to specify the state to be corrected (<a href="../../input_variables/generated_files/varset_gw.html#gwls_band_index">gwls_band_index</a>), the maximum allowed residual when solving the Sternheimer equations (<a href="../../input_variables/generated_files/varset_basic.html#tolwfr">tolwfr</a>), and the number of Lanczos vectors used to express the dielectric matrix (<a href="../../input_variables/generated_files/varset_gw.html#gwls_stern_kmax">gwls_stern_kmax</a>). 
 Note that a convergence study on the latter value is required to check the accuracy of the results. 
-Since only molecular systems are currently supported, the calculation also requires that the Coulomb potential be spherically truncated (<a href="../../input_variables/generated_files/gw.html#icutcoul">icutcoul</a>= 0) with a radius <a href="../../input_variables/generated_files/gw.html#rcut">rcut</a> that should be validated with a convergence study. 
+Since only molecular systems are currently supported, the calculation also requires that the Coulomb potential be spherically truncated (<a href="../../input_variables/generated_files/varset_gw.html#icutcoul">icutcoul</a>= 0) with a radius <a href="../../input_variables/generated_files/varset_gw.html#rcut">rcut</a> that should be validated with a convergence study. 
 </br>
 <p><b> This functionality is under development.</b>
 

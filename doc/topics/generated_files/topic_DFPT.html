@@ -34,9 +34,9 @@
 <p>A DFPT calculation workflow is conducted as follows:
 <li> Run a Ground-State calculation in order to extract the Kohn-Sham pseudo wave-functions; these must be extremely well converged.</li>
 
-<li>If necessary, e.g., for the application of the derivative of the Hamiltonian with respect to an electric field, determine the derivatives of the wave functions with respect to the wave vector <b>k</b>, and keep them in a file. The keyword <a href="../../input_variables/generated_files/dfpt.html#rfddk">rfddk</a> is used to perform this type of calculation.</li>
+<li>If necessary, e.g., for the application of the derivative of the Hamiltonian with respect to an electric field, determine the derivatives of the wave functions with respect to the wave vector <b>k</b>, and keep them in a file. The keyword <a href="../../input_variables/generated_files/varset_dfpt.html#rfddk">rfddk</a> is used to perform this type of calculation.</li>
 
-<li>Compute the 2nd-order derivative matrix (i.e., 2nd derivatives of the energy with respect to different perturbations &lambda;). This can be done thanks to the keywords <a href="../../input_variables/generated_files/dfpt.html#rfphon">rfphon</a> (&lambda;=atomic displacement), <a href="../../input_variables/generated_files/dfpt.html#rfstrs">rfstrs</a> (&lambda;=strain), <a href="../../input_variables/generated_files/dfpt.html#rfelfd">rfelfd</a> (&lambda;=electric field) or <a href="../../input_variables/generated_files/dfpt.html#rfmagn">rfmagn</a> (&lambda;=magnetic field). </li>
+<li>Compute the 2nd-order derivative matrix (i.e., 2nd derivatives of the energy with respect to different perturbations &lambda;). This can be done thanks to the keywords <a href="../../input_variables/generated_files/varset_dfpt.html#rfphon">rfphon</a> (&lambda;=atomic displacement), <a href="../../input_variables/generated_files/varset_dfpt.html#rfstrs">rfstrs</a> (&lambda;=strain), <a href="../../input_variables/generated_files/varset_dfpt.html#rfelfd">rfelfd</a> (&lambda;=electric field) or <a href="../../input_variables/generated_files/varset_dfpt.html#rfmagn">rfmagn</a> (&lambda;=magnetic field). </li>
 
 <li>Launch the anaddb tool (distributed with ABINIT) to analyse the derivative database and compute relaxed tensors and thermodynamical properties.</li>
 

@@ -34,13 +34,13 @@ The Fock exchange term has been implemented in ABINIT, both in the norm-conservi
 Some details about the implementation in ABINIT can be found <a href="../documents/hybrids-2017.pdf">here</a>.
 <br/> For an ABINIT user, to make a calculation of Fock exchange:
 <br/>- do a first GGA dataset for the ground state
-<br/>- do a second dataset for the Fock calculation choosing <a href="../../input_variables/generated_files/basic.html#ixc">ixc</a>=40-42 (HF, PBE0, PBE0-1/3), -406 (PBE0-Libxc), -456 (PBE0-1/3 Libxc), or -427, -428 (HSE03, HSE06).
+<br/>- do a second dataset for the Fock calculation choosing <a href="../../input_variables/generated_files/varset_basic.html#ixc">ixc</a>=40-42 (HF, PBE0, PBE0-1/3), -406 (PBE0-Libxc), -456 (PBE0-1/3 Libxc), or -427, -428 (HSE03, HSE06).
 <p>
 <br/>The energy and forces are available in the norm-conserving and PAW frameworks. Stresses are available in the norm-conserving framework only for the moment.
 <p> WARNING:
 <br/> Forces and stresses cannot be calculated simultaneously for the moment.
 <br/> The spin polarised case has not been extensively tested for the moment.
-<br/> Use <a href="../../input_variables/generated_files/dev.html#istwfk">istwfk</a>=1, <a href="../../input_variables/generated_files/basic.html#iscf">iscf</a>=2, <a href="../../input_variables/generated_files/paral.html#paral_kgb">paral_kgb</a>=0, <a href="../../input_variables/generated_files/paral.html#paral_atom">paral_atom</a>=0.
+<br/> Use <a href="../../input_variables/generated_files/varset_dev.html#istwfk">istwfk</a>=1, <a href="../../input_variables/generated_files/varset_basic.html#iscf">iscf</a>=2, <a href="../../input_variables/generated_files/varset_paral.html#paral_kgb">paral_kgb</a>=0, <a href="../../input_variables/generated_files/varset_paral.html#paral_atom">paral_atom</a>=0.
 <br/> The efficiency of the calculation is not optimal. Work is in progress concerning this point.
 
 

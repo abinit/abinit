@@ -120,7 +120,7 @@ of only the q=&Gamma; from the <b>temperature.txt</b> file.
 <p>
 Here you can see that the HOMO correction goes down with temperature. 
 This is due to the underconvergence of the calculation. 
-If you increase <a href="../../input_variables/generated_files/basic.html#ecut">ecut</a> from 5 to 10, you get the following plot.
+If you increase <a href="../../input_variables/generated_files/varset_basic.html#ecut">ecut</a> from 5 to 10, you get the following plot.
 <br>
 
 <img style="height: 450px; width: 600px;" src=../documents/lesson_tdepes/plot2.png>
@@ -197,7 +197,7 @@ python temperature_para.py < tdepes_3.files
 with the file <a href="../../tests/tutorespfn/Input/tdepes_3.files">&#126;abinit/tests/tutorespfn/Input/tdepes_3.files</a>.
 
 The plotting of the same HOMO band at k=&Gamma; for a 4x4x4 q-point grid gives a very different result than previously 
-(this graph has been obtained with <a href="../../input_variables/generated_files/basic.html#ecut">ecut</a> = 10).
+(this graph has been obtained with <a href="../../input_variables/generated_files/varset_basic.html#ecut">ecut</a> = 10).
 <br>
 
 <img style="height: 450px; width: 600px;" src=../documents/lesson_tdepes/plot3.png>
@@ -261,7 +261,7 @@ You should of course notice all the spiky jumps in the renormalization.
 This is because we did a completely under-converged calculation. 
 
 <p> It is possible to converge the calculations using 
-<a href="../../input_variables/generated_files/basic.html#ecut">ecut</a>=30 Ha, a <a href="../../input_variables/generated_files/basic.html#ngkpt">ngkpt</a> grid of 6x6x6 and an increasing <a href="../../input_variables/generated_files/gstate.html#ngqpt">ngqpt</a> grid to get converged results: 
+<a href="../../input_variables/generated_files/varset_basic.html#ecut">ecut</a>=30 Ha, a <a href="../../input_variables/generated_files/varset_basic.html#ngkpt">ngkpt</a> grid of 6x6x6 and an increasing <a href="../../input_variables/generated_files/varset_gstate.html#ngqpt">ngqpt</a> grid to get converged results: 
 
 <pre>
 | Convergence study ZPR and inverse lifetime(1/&tau;) [meV] at 0K               |

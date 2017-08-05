@@ -292,7 +292,7 @@ wants to get an accurate description of the ground state. Examine this
 file. Note that the cut-off is realistic, as well as the grid of
 k-points (giving 60 k points in the irreducible Brillouin zone).
 However, the number of SCF steps,
-<a href="../../input_variables/generated_files/basic.html#nstep">nstep</a>,
+<a href="../../input_variables/generated_files/varset_basic.html#nstep">nstep</a>,
 has been set to 3 only. This is to keep the CPU time reasonable for this
 tutorial, without affecting the way parallelism on the k points will be
 able to increase the speed.  Once done, your output files have likely
@@ -447,8 +447,8 @@ concurrently.</p>
 <p>Balancing efficiently the load on the processors is not always
 straightforward.  When using k-point- and spin-parallelism, the ideal
 numbers of processors to use are those that divide the product of 
-<a href="../../input_variables/generated_files/basic.html#nsppol">nsppol</a> by <a href="../../input_variables/generated_files/basic.html#nkpt">nkpt</a>
-(e.g. for <a href="../../input_variables/generated_files/basic.html#nsppol">nsppol</a>*<a href="../../input_variables/generated_files/basic.html#nkpt">nkpt</a>, it is quite efficient to use 2, 3, 4, 6 or
+<a href="../../input_variables/generated_files/varset_basic.html#nsppol">nsppol</a> by <a href="../../input_variables/generated_files/varset_basic.html#nkpt">nkpt</a>
+(e.g. for <a href="../../input_variables/generated_files/varset_basic.html#nsppol">nsppol</a>*<a href="../../input_variables/generated_files/varset_basic.html#nkpt">nkpt</a>, it is quite efficient to use 2, 3, 4, 6 or
 12 processors). ABINIT will nevertheless handle correctly other numbers
 of processors, albeit slightly less efficiently, as the final time will
 be determined by the processor that will have the biggest share of the
