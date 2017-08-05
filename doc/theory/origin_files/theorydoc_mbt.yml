@@ -474,8 +474,8 @@ body : |
   [[nfreqim]],
   [[freqremax]], and
   [[freqremin]]
-  (a number of more exotic grid choices are available through options beginning with 
-  <a href="../../input_variables/generated_files/vargw.html#gw_frqim_inzgrid" target="kwimg">gw_... or cd_...</a>).
+  (a number of more exotic grid choices are available through input variables beginning with gw_... or cd_...,
+  e.g. [[gw_frqim_inzgrid]]).
   </p>
   <p>
   <i>M</i> is a shorthand notation to denote the matrix element of a plane wave sandwiched 

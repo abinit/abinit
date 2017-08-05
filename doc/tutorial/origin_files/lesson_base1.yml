@@ -188,12 +188,12 @@ body : |
     alphabetically ordered [[varset:allvars|index of all variables]] is
     provided, and their description is found in different files (non-exhaustive list):
   <ul>
-  <li> Basic variables, <a href="../../input_variables/generated_files/varbas.html">VARBAS</a></li>
-  <li> Files handling variables, <a href="../../input_variables/generated_files/varfil.html">VARFIL</a></li>
-  <li> Ground-state calculation variables, <a href="../../input_variables/generated_files/vargs.html">VARGS</a></li>
-  <li> GW variables, <a href="../../input_variables/generated_files/vargw.html">VARGW</a></li>
-  <li> Parallelisation variables, <a href="../../input_variables/generated_files/varpar.html">VARPAR</a></li>
-  <li> Response Function variables, <a href="../../input_variables/generated_files/varrf.html">VARRF</a></li>
+  <li> Basic variables, varset_[[varset:basic]]</li>
+  <li> Files handling variables, varset_[[varset:files]]</li>
+  <li> Ground-state calculation variables, varset_[[varset:gstate]]</li>
+  <li> GW variables, varset_[[varset:GW]]</li>
+  <li> Parallelisation variables, varset_[[varset:paral]]</li>
+  <li> Density Functional Perturbation Theory (DFPT) variables, varset_[[varset:DFPT]]</li>
   </ul>
     However, the number of such variables is rather large! Note that
     a dozen of input variables were needed to run the first test case. This is possible
