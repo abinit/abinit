@@ -43,8 +43,7 @@ sec1:
   (see [[Amadon2008]]</a>).
   The first part of the tutorial explains the importance of this choice.
   Wannier functions are unitarily related to  a selected set of Kohn Sham (KS) wavefunctions, specified in ABINIT by band index 
-  [[dmftbandi]], and
-  <a href="../../input_variables/generated_files/vardmft.html#dmftbandf" target="dmftbandf">dmftbandi</a>.
+  [[dmftbandi]], and [[dmftbandf]].
   	Thus, as empty bands are necessary to build Wannier functions, it is required in DMFT calculations
   	that the KS Hamiltonian is correctly diagonalized: use high values for  
   [[nnsclo]], 
@@ -206,8 +205,7 @@ sec3:
   or also both the <i>t<SUB>2g</SUB></i>-like  and <i>O-p</i>-like  bands.
   
   <p> The first case corresponds to the input file tdmft_2.in. In this case
-  [[dmftbandi]]=21 and
-  <a href="../../input_variables/generated_files/vardmft.html#dmftbandf" target="dmftbandf">dmftbandi</a>=23.
+  [[dmftbandi]]=21 and [[dmftbandf]]=23.
   As we only put the electron interaction on  <i>t<SUB>2g</SUB></i> orbitals, we have to use first lpawu=2, but also the keyword 
   [[dmft_t2g]]=1
   in order to restrict the application of interaction on <i>t<SUB>2g</SUB></i> orbitals.
