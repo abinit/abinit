@@ -158,11 +158,11 @@ def make_links(text,cur_key,allowed_link_seeds,backlinks,backlink):
       value=allowed_link_seeds[linkseed]
 
       #DEBUG
-      if "gwencomp" in dokukey:
-        print(" ")
-        print(" dokukey:",dokukey)
-        print(" value:",value)
-        print(" ")
+      #if "gwencomp" in dokukey:
+      #  print(" ")
+      #  print(" dokukey:",dokukey)
+      #  print(" value:",value)
+      #  print(" ")
       #ENDDEBUG
 
       #Treat first the allowed namespaces

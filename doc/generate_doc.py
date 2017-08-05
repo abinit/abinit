@@ -458,7 +458,7 @@ for item in yml_in["characteristics"]:
   allowed_link_seeds[item]="characteristic"
 
 for item in list_externalvars:
-  allowed_link_seeds[item[0]]="input_variable in varset_external"
+  allowed_link_seeds[item[0]]="input_variable in external"
 
 for i, varset_info in enumerate(varsets):
   varset = varset_info.name
@@ -702,7 +702,7 @@ for (tribekey, tribeval) in yml_in["list_tribes"]:
             abivarname=var.abivarname
             if var.characteristics is not None and '[[INTERNAL_ONLY]]' in var.characteristics:
               abivarname = '%'+abivarname
-            topic_invars[topic_name] += '... <a href="../../input_variables/generated_files/'+var.varset+'.html#'+var.abivarname+'">'+abivarname+'</a>   '
+            topic_invars[topic_name] += '... <a href="../../input_variables/generated_files/varset_'+var.varset+'.html#'+var.abivarname+'">'+abivarname+'</a>   '
             topic_invars[topic_name] += "["+var.mnemonics+"]<br>\n"
     except:
       if debug==1 :
