@@ -536,12 +536,6 @@ def finalize_html(doc_html,origin_yml,dir_name,root_filname,allowed_link_seeds,b
 
   doc_html = make_links(doc_html,None,allowed_link_seeds,backlinks,backlink)
 
-  #This must be temporary !
-  if full_filname=='allvars':
-    full_filname='varset_allvars'
-  if full_filname=='external':
-    full_filname='varset_external'
-
   #Write the finalized html file.
   path_html = "%s/generated_files/%s.html" %(dir_name,full_filname)
   file_html = open(path_html,'w')

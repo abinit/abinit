@@ -1,6 +1,5 @@
-# This YAML file contains the introduction as well as the body of the html lesson.
+# This YAML file contains the introduction as well as the body (including the table of content) of the html lesson.
 # In order to modify the other parts, modify the file lessons.html .
-
 # This is the introduction ...
 intro : |
   <p>This lesson aims at showing how to get the following physical
@@ -25,14 +24,8 @@ intro : |
   You will learn to use of&nbsp; features of ABINIT which deal with spin.<br>
   <p>This lesson should take about 1.5 hour.
   </p>
-
-# Now comes the different sections, numbered.
-
-# Each section must have a title, that will form the table of content.
-# Note the small (one space) indentation for the title and body keys.
-sec1:
- title: "To be filled"
- body: |
+# This is the body, including the table of content ...
+body : |
   <ul>
     <li><a href="#gz1">1</a> <b>A ferromagnetic
   material: the&nbsp; bcc Fe</b></li>
@@ -50,12 +43,6 @@ sec1:
     </span>
   </ul>
   <hr>
-
-# Each section must have a title, that will form the table of content.
-# Note the small (one space) indentation for the title and body keys.
-secX:
- title: "To be filled"
- body: |
   <p><a name="gz1"></a><big><b>1. A ferromagnetic material: the&nbsp; <span style="font-style: italic;">bcc</span> Fe</b></big>&nbsp;</p>
   
   
@@ -212,12 +199,6 @@ secX:
   <br>
   <br>
   <hr>
-
-# Each section must have a title, that will form the table of content.
-# Note the small (one space) indentation for the title and body keys.
-secX:
- title: "To be filled"
- body: |
   <p><big><a name="gz2"></a><b>2. An antiferromagnetic example: <span style="font-style: italic;">fcc</span> Fe</b></big></p>
   <h3> </h3>
   <span style="font-style: italic;">
@@ -360,12 +341,6 @@ secX:
   <br>
   <br>
   <hr>
-
-# Each section must have a title, that will form the table of content.
-# Note the small (one space) indentation for the title and body keys.
-secX:
- title: "To be filled"
- body: |
   <p><a name="gz3"></a><big><b>3. Another look at <span style="font-style: italic;">fcc</span> Fe</b></big></p>
   <h3> </h3>
   Instead of treating <span style="font-style: italic;">fcc</span> Fe directly as an antiferromagnetic material,
@@ -462,12 +437,6 @@ secX:
   <br>
   <br>
   <hr>
-
-# Each section must have a title, that will form the table of content.
-# Note the small (one space) indentation for the title and body keys.
-secX:
- title: "To be filled"
- body: |
   <p><a name="gz4"></a><big><b>4. A ferrimagnetic example </b><span style="font-style: italic;">(not yet)</span></big></p>
   <h3 style="font-weight: normal; font-style: italic;">
   </h3>
@@ -483,12 +452,6 @@ secX:
   <br>
   <br>
   <hr>
-
-# Each section must have a title, that will form the table of content.
-# Note the small (one space) indentation for the title and body keys.
-secX:
- title: "To be filled"
- body: |
   <p><a name="gz5"></a><big><b>5. The spin-orbit coupling</b></big></p>
   <h3> </h3>
   <h3><small><span style="font-weight: normal;">For heavy atoms a
@@ -673,12 +636,6 @@ secX:
   <span style="font-family: sans-serif;"><br>
   </span>
   <hr>
-
-# Each section must have a title, that will form the table of content.
-# Note the small (one space) indentation for the title and body keys.
-secX:
- title: "To be filled"
- body: |
   <p><big><a name="gz6"></a><b>6. Rotation of the magnetization and Spin-orbit </b><span style="font-style: italic;">(not yet)</span></big></p>
   <h3>
   </h3>

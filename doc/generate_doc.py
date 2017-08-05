@@ -663,7 +663,7 @@ defaultClick(true);\n\
   suppl={"toc":toc_body , "content":all_contents[varset]}
   suppl_components[varset]=suppl
 
-rc=assemble_html(varsets,suppl_components,"input_variables","",allowed_link_seeds,backlinks)
+rc=assemble_html(varsets,suppl_components,"input_variables","varset",allowed_link_seeds,backlinks)
 
 ################################################################################
 ################################################################################
@@ -889,143 +889,6 @@ rc=finalize_html(all_topics_html,default_topic,dir_root,name_root,allowed_link_s
 ################################################################################
 ################################################################################
 
-# Automatic translation
-# of the *_help.html files to help_*.yml files
-
-################################################################################
-
-activate_translation=0
-if activate_translation==1:
-
-  docs=yml_in["helps"]
-
-  for i, doc_info in enumerate(docs):
-
-    # Skip the default component
-    name = doc_info.name
-    if name=="default":
-      break
-    path_doc_html="users/"+name+"_help.html"
-    path_doc_yml="users/origin_files/help_"+name+".yml"
-    print("Read "+path_doc_html+" to build '"+path_doc_yml+"'... ",end="")
-
-    f_doc_html=open(path_doc_html,"r")
-    doc_html=f_doc_html.readlines()
-
-    doc_yml=""
-    doc_yml+="# This YAML file contains the introduction as well as the body (including the table of content) of the html help document.\n"
-    doc_yml+="# In order to modify the other parts, modify the file helps.yml .\n"
-    doc_yml+="# This is the introduction ...\n"
-    doc_yml+="intro : |\n"
-
-    body_header=""
-    body_header+="# This is the body, including the table of content ...\n"
-    body_header+="body : |\n"
-
-    intro=0
-    body=0
-    for line in doc_html:
-      if "<!--" in line and "-->" in line:
-        if "begin" in line :
-          if intro==1 or body==1:
-            raise ValueError("(intro,body)=(%s,%s)"%(intro,body))
-          if "intro" in line :
-            intro=1
-            continue
-          if "body" in line:
-            body=1
-            doc_yml+=body_header
-            continue
-        if "end" in line and "intro" in line:
-          if intro==0 or body==1:
-            raise ValueError("(intro,body)=(%s,%s)"%(intro,body))
-          intro=0
-        if "end" in line and "body" in line:
-          if intro==1 or body==0:
-            raise ValueError("(intro,body)=(%s,%s)"%(intro,body))
-          body=0
-
-      if intro+body==1 :
-        #The line must be written, but must possibly perform changes:
-        if "<a href=" in line:
-          # Stabilize the own reference
-          string_old='href="'+name+'_help.html'
-          string_new='href="'
-          line=line.replace(string_old,string_new)
-          string_old='href="./'+name+'_help.html'
-          string_new='href="'
-          line=line.replace(string_old,string_new)
-          # Correct the references to the other files in the tutorial directory (transient measure in case of the "lesson_" files)
-          string_old='href="lesson_'
-          string_new='href="../../tutorial/lesson_'
-          line=line.replace(string_old,string_new)
-          string_old='href="./lesson_'
-          line=line.replace(string_old,string_new)
-          # Correct the references to the other files in the topic directory (transient measure in case of the "what_ABINIT_does" file)
-          string_old='href="generated_files/topic'
-          string_new='href="../../topics/generated_files/topic'
-          line=line.replace(string_old,string_new)
-          #string_old='href="theory_'
-          #string_new='href="../theory_'
-          #line=line.replace(string_old,string_new)
-          #string_old='href="./theory_'
-          #line=line.replace(string_old,string_new)
-          #string_old='href="welcome'
-          #string_new='href="../welcome'
-          #line=line.replace(string_old,string_new)
-          #string_old='href="./welcome'
-          #line=line.replace(string_old,string_new)
-          # Create automatically the new links for the input variables
-          if "html_automatically_generated" in line:
-            # See whether one variable appear
-            for i, var in enumerate(abinit_vars):
-              if var.abivarname in line:
-                varname = var.abivarname
-                varset = var.varset
-                string_old='<a href="../input_variables/html_automatically_generated/varset_%s.html#%s" target="kwimg">%s</a>'%(varset,varname,varname)
-                string_new="[["+varname+"]]"
-                line=line.replace('"'+string_old+'"',string_new)
-                line=line.replace(string_old,string_new)
-                # Slight variation
-                string_old='<a href="../input_variables/html_automatically_generated/varset_%s.html#%s" target="kwimg">%s</a>'%(varset,varname,varname)
-                line=line.replace('"'+string_old+'"',string_new)
-                line=line.replace(string_old,string_new)
-            # Otherwise, correct the path
-            string_old='href="../input_variables/html_automatically_generated'
-            string_new='href="../../input_variables/generated_files'
-            line=line.replace(string_old,string_new)
-          if "users" in line:
-            string_old='href="../users/'
-            string_new='href="../../users/'
-            line=line.replace(string_old,string_new)
-
-        #string_old='src="theory'
-        #string_new='src="../documents/theory'
-        #line=line.replace(string_old,string_new)
-        #string_old='src="./theory'
-        #line=line.replace(string_old,string_new)
-        #string_old='src=./theory'
-        #string_new='src=../documents/theory'
-        #line=line.replace(string_old,string_new)
-
-        doc_yml+="  "+line
-
-    #print("")
-    #print(" doc_yml :",path_doc_yml)
-    #index=36700
-    #print(" doc_yml[%s,%s] :"%(index,index+100))
-    #print(doc_yml[index:index+100])
-    #print("")
-
-    # Write the finalized html file
-    f_doc_yml=open(path_doc_yml,"w")
-    f_doc_yml.write(doc_yml)
-    f_doc_yml.close()
-    print("File %s written ..."%path_doc_yml )
-
-################################################################################
-################################################################################
-
 # Assemble the html files to be generated from the yml information.
 # In order : tutorial, files lessons_*
 #            theory, files theorydoc_*
@@ -1039,6 +902,41 @@ for list_infos in list_infos_dir:
   for yml_file in yml_files:
     if yml_file in ["lessons","theorydocs","helps"]:
       rc=assemble_html(yml_in[yml_file],suppl_components,list_infos["dir_name"],yml_file[:-1],allowed_link_seeds,backlinks)
+
+################################################################################
+# Temporary coding, to translate all URL to input variables that are "old-style" ...
+# HERE
+
+for list_infos in list_infos_dir:
+  yml_files=list_infos["yml_files"]
+  for yml_file in yml_files:
+    if yml_file in ["lessons","theorydocs","helps"]:
+      for origin_yml in yml_in[yml_file]:
+        name = origin_yml.name
+        if name=="default":
+          continue
+        dir_name=list_infos["dir_name"]
+        root_filname=yml_file[:-1]
+        full_filname=root_filname+"_"+name
+        path_ymlfile="%s/origin_files/%s.yml" %(dir_name,full_filname)
+        if os.path.isfile(path_ymlfile):
+          print("Read "+path_ymlfile+" to build "+path_ymlfile+"_new ... ")
+
+        # Transfer the content of the "old" file to a list of lines, file_old
+        with open(path_ymlfile,'r') as f_old:
+          file_old_str=f_old.read()
+          for var in abinit_vars:
+            abivarname=var.abivarname
+            string_old='<a href="../../input_variables/generated_files/varbas.html#%s">%s</a>'%(abivarname,abivarname)
+            string_new="[["+abivarname+"]]"
+            file_new_str=file_old_str.replace(string_old,string_new)
+            #file_new_str=file_old_str
+
+        #Open the new file, and write the content of file_new
+        f_new=open(path_ymlfile+"_new","w")
+        f_new.write(file_new_str)
+
+sys.exit()
 
 ################################################################################
 ################################################################################
