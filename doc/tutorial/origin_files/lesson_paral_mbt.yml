@@ -358,11 +358,11 @@ body : |
   </pre>
   
   <i>ug</i> denotes the internal buffer used to store the Fourier components of the orbitals whose size
-  scales linearly with <a href="../../input_variables/generated_files/varint.html#npwwfn"  target="kwimg">npwwfn</a>.
+  scales linearly with [[npwwfn]].
   <i>ur</i> is the array storing the orbitals on the real space FFT mesh. 
   Keep in mind that the size of <i>ur</i> scales linearly with the total number of points in the FFT box,
   number that is usually much larger than the number of planewaves 
-  (<a href="../../input_variables/generated_files/varint.html#npwwfn"  target="kwimg">npwwfn</a>).
+  ([[npwwfn]]).
   The number of FFT divisions used in the GW code can be extracted from the main output file using
   <pre>
   $ grep setmesh tmbt_2.out  -A 1
