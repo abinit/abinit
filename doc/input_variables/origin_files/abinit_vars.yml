@@ -24717,11 +24717,7 @@
              </li>
              <li>
               There are some other variables related to the interface of Wannier90
-        and ABINIT. See,
-              <a href="varw90.html">
-               VARW90
-              </a>
-              .
+        and ABINIT. See [[varset:w90]].
              </li>
             </ul>
            </p>
@@ -29826,11 +29822,7 @@
     text: |-
         <p>
          This variable is determined by the pseudopotentials files.
-        PAW calculations (see
-         <a href="varpaw.html">
-          PAW variables
-         </a>
-         ) can only
+        PAW calculations (see [[lesson:paw1]]) can only
         be performed with PAW atomic data input files, while
         pseudopotential calculations are performed in ABINIT with norm-conserving
         pseudopotential input files. Most functionalities in ABINIT are available

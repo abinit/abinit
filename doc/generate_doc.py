@@ -528,7 +528,7 @@ for i, var in enumerate(abinit_vars):
   varset = var.varset
   all_vars[varset].append([var.abivarname,var.mnemonics])
   cur_content = ""
-  backlink=' &nbsp; <a href="../../input_variables/generated_files/%s.html#%s">%s</a> &nbsp; ' %(varset,var.abivarname,var.abivarname)
+  backlink=' &nbsp; <a href="../../input_variables/generated_files/varset_%s.html#%s">%s</a> &nbsp; ' %(varset,var.abivarname,var.abivarname)
 
   try:
     # Title
