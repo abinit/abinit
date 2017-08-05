@@ -112,7 +112,8 @@
         internal force-response tensors) are described in [[Hamann2005]].
         <li> <b>B.8<a name="8">.</b> If the "static" non-linear capabilities of ABINIT are used (Raman efficiencies,
         electro-optic coefficients ... ), cite [[Veithen2005]]
-        <li> <b>B.9<a name="9">.</b> If the integration over the phonon degrees of freedom is used (<a href="../../users/generated_files/help_anaddb.html">thmflag<a>), cite [[Lee1995]].
+        <li> <b>B.9<a name="9">.</b> If the integration over the phonon degrees of freedom is used 
+        ([[thmflag]]), cite [[Lee1995]].
         <li> <b>B.10<a name="10">.</b> If the self-consistent capabilities of ABINIT beyond DFT are used (GW, COHSEX, HF, etc), cite [[Bruneval2006]].
         <li> <b>B.11<a name="11">.</b> If the completeness relationship is used to speed up the
         convergence with respect to the number of bands in a GW calculation (input variables [[gwcomp]] and [[gwencomp]]), cite [[Bruneval2008]]

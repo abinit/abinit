@@ -907,7 +907,8 @@ for list_infos in list_infos_dir:
 # Temporary coding, to translate all URL to input variables that are "old-style" ...
 # HERE
 
-for list_infos in list_infos_dir:
+if 0:
+ for list_infos in list_infos_dir:
   yml_files=list_infos["yml_files"]
   for yml_file in yml_files:
     if yml_file in ["lessons","theorydocs","helps"]:
@@ -939,7 +940,7 @@ for list_infos in list_infos_dir:
         f_new=open(path_ymlfile,"w")
         f_new.write(file_str)
 
-sys.exit()
+ sys.exit()
 
 ################################################################################
 ################################################################################

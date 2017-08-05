@@ -157,6 +157,14 @@ def make_links(text,cur_key,allowed_link_seeds,backlinks,backlink):
     if linkseed in allowed_link_seeds.keys():
       value=allowed_link_seeds[linkseed]
 
+      #DEBUG
+      if "gwencomp" in dokukey:
+        print(" ")
+        print(" dokukey:",dokukey)
+        print(" value:",value)
+        print(" ")
+      #ENDDEBUG
+
       #Treat first the allowed namespaces
       if value in dic_namespaces.keys():
         dir=dic_namespaces[value]
@@ -292,22 +300,7 @@ def bibtex2html(str_input):
   str=str.replace(r"\c{c}","&ccedil;")
 
   converted_str=convert_textit(str)
-  cleaned_str=suppress_parentheses(converted_str)
-
-  #Get rid of uneeded parentheses. One is however left with the {XYZ..} case, that should be handled with a regular expression. (TO BE DONE)
-  for i in string.letters:
-    string_old='{'+i+'}'
-    string_new=i
-    str=str.replace(string_old,string_new)
-  #Here, do it on a case-by-case basis. Very unsatisfactory...
-  list_signs=["ABINIT","AIP","ATOMPAW","CPU","DFT","DMFT","ELPA","ESPRESSO","GGA","GPU","GW","III","LDA","MO","PA","PAW","QE","QMR","QUANTUM","RPA","SIAM","VESTA","XML"]
-  for i in list_signs:
-    string_old='{'+i+'}'
-    string_new=i
-    str=str.replace(string_old,string_new)
-
-  str=cleaned_str
-
+  str=suppress_parentheses(converted_str)
   str=str.replace("--","&ndash;")
 
   #Suppose remaining parentheses are present to avoid BibTex to switch automatically from uppercase to lowercase,
