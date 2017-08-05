@@ -839,8 +839,8 @@ body : |
   Split big calculations into smaller runs whenever possible. 
   For example, screening calculations can be split over q-points.
   The calculation of the self-energy can be easily split over
-  <a href="../../input_variables/generated_files/vargw.html#kptgw">kptgw</a>  and 
-  <a href="../../input_variables/generated_files/vargw.html#bdgw">bdgw</a>.
+  [[kptgw]]  and 
+  [[bdgw]].
   </li>
   <br>
   <li>

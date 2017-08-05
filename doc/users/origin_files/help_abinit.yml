@@ -1154,8 +1154,8 @@ body : |
     <p> NOTE : <i>etotal is set to its true value only for density and potential
       files. For other files, it is set to 1.0d20</i>
     <br> NOTE : <i>ecut_eff=
-        <a href="../../input_variables/generated_files/varbas.html#ecut">ecut</a>*
-        <a href="../../input_variables/generated_files/varrlx.html#dilatmx">dilatmx</a><sup>2</sup></i>
+        [[ecut]]*
+        [[dilatmx]]<sup>2</sup></i>
     <br> NOTE : <i>For all cases where
       occupation numbers are defined (that is, positive iscf, and iscf=-3), and for
       non-metallic occupation numbers, the Fermi energy is
@@ -1165,7 +1165,7 @@ body : |
   <p>The header might differ for different versions of ABINIT. One pre-v5.3 format
   is described below. Note however, that the current version
   of ABINIT should be able to read all the previous formats (not to write them),
-  with the exception of wavefunction files for which the <a href="../../input_variables/generated_files/varrlx.html#ecutsm">ecutsm</a> value was non-zero
+  with the exception of wavefunction files for which the [[ecutsm]] value was non-zero
   (there has been a change of definition of the smearing function in v4.4).
   
   <p>The format for version 4.4, 4.5, 4.6, 5.0, 5.1 and 5.2 was :
@@ -1355,10 +1355,10 @@ body : |
     Their use is usually governed by a specific input variable. Please consult the
     description of this input variable, in order to have more information on such files :
     <ul>
-      <li><a href="../../input_variables/generated_files/varfil.html#prtdos">prtdos</a> to print a file with the electronic Density-Of-States</li>
-      <li><a href="../../input_variables/generated_files/varfil.html#prteig">prteig</a> to print a file with the list of k points and eigenenergies</li>
-      <li><a href="../../input_variables/generated_files/varfil.html#prtgeo">prtgeo</a> to print a file with a geometrical analysis (bond lengths and bond angles), that also contains an XMOL section</li>
-      <li><a href="../../input_variables/generated_files/varfil.html#prt1dm">prt1dm</a> to print a one-dimensional projection of potential and density, for the three axes.</li>
+      <li>[[prtdos]] to print a file with the electronic Density-Of-States</li>
+      <li>[[prteig]] to print a file with the list of k points and eigenenergies</li>
+      <li>[[prtgeo]] to print a file with a geometrical analysis (bond lengths and bond angles), that also contains an XMOL section</li>
+      <li>[[prt1dm]] to print a one-dimensional projection of potential and density, for the three axes.</li>
     </ul>
   
   

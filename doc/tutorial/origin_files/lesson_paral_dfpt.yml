@@ -11,7 +11,7 @@ intro : |
     </ul>
     Such computations are realized when one of the input variables  [[rfphon]], [[rfelfd]] or [[rfstrs]]
       are non-zero,
-     which activates <a href="../../input_variables/generated_files/vargs.html#optdriver">optdriver</a>=1.
+     which activates [[optdriver]]=1.
     You are supposed to be well-familiarized with such calculations before starting the present tutorial.
     See the input variables described  in the file [[varrf]]
     and the tutorial <a href="lesson_rf1.html">Response-Function 1</a> and subsequent tutorials.
@@ -282,7 +282,7 @@ body : |
   (for which no symmetry is used), the self-consistent part will be done with 8 k points in the corresponding irreducible Brillouin zone.
   With the sampling 8 8 1, there will be 32 k points in the irreducible Brillouin zone for the linear-response case.
   There are 120 bands.
-  Note that the value of <a href="../../input_variables/generated_files/varbas.html#ecut">ecut</a> that is used in the present
+  Note that the value of [[ecut]] that is used in the present
   tutorial is too low to obtain physical results (it should be around 40 Hartree).
   <p>
   As in the previous case, a preparatory ground-state calculation is needed.

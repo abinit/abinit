@@ -80,7 +80,7 @@ body : |
   For example this value should decrease at high pressure.<br>
   <br>
   Except
-  for the <span style="font-style: italic;">isothermal</span>/<span style="font-style: italic;">isenthalpic</span> (<a href="../../input_variables/generated_files/varrlx.html#ionmov" onclick="return (false);">ionmov</a> 13) ensemble the input variable "<a href="../../input_variables/generated_files/varrlx.html#optcell">optcell</a>"
+  for the <span style="font-style: italic;">isothermal</span>/<span style="font-style: italic;">isenthalpic</span> (<a href="../../input_variables/generated_files/varrlx.html#ionmov" onclick="return (false);">ionmov</a> 13) ensemble the input variable "[[optcell]]"
   must be set to 0. <br>
   You have also to define the maximal number of
   timesteps of the molecular dynamics.<br>

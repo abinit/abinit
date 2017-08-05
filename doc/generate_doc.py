@@ -924,17 +924,18 @@ for list_infos in list_infos_dir:
 
         # Transfer the content of the "old" file to a list of lines, file_old
         with open(path_ymlfile,'r') as f_old:
-          file_old_str=f_old.read()
+          file_str=f_old.read()
           for var in abinit_vars:
             abivarname=var.abivarname
-            string_old='<a href="../../input_variables/generated_files/varbas.html#%s">%s</a>'%(abivarname,abivarname)
-            string_new="[["+abivarname+"]]"
-            file_new_str=file_old_str.replace(string_old,string_new)
-            #file_new_str=file_old_str
+            for varset in ["varbas","varfil","varff","vargs","varrf","varint","varpar","varbse","vardev","vardmft","vareph","vargeo","vargw","varpaw","varrlx","varvdw","varw90","varoptic","varaim","varanaddb"]:
+              string_old='<a href="../../input_variables/generated_files/%s.html#%s">%s</a>'%(varset,abivarname,abivarname)
+              string_new="[["+abivarname+"]]"
+              file_str=file_str.replace(string_old,string_new)
 
         #Open the new file, and write the content of file_new
-        f_new=open(path_ymlfile+"_new","w")
-        f_new.write(file_new_str)
+        f_old.close()
+        f_new=open(path_ymlfile,"w")
+        f_new.write(file_str)
 
 sys.exit()
 

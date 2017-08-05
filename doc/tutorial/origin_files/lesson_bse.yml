@@ -280,7 +280,7 @@ body : |
   In this case we use the iterative Haydock technique whose maximum number of
   iterations is given by [[bs_haydock_niter]].
   The iterative algorithm stops when the difference between two consecutive evaluations of the optical 
-  spectra is less than <a href="../../input_variables/generated_files/varbse.html#bs_haydock_tol">bs_haydock_tol</a>.
+  spectra is less than [[bs_haydock_tol]].
   The input variable [[zcut]] gives the complex shift to avoid divergences 
   in the continued fraction. 
   From a physical point of view, this parameters mimics the experimental broadening of the absorption peaks.
@@ -387,7 +387,7 @@ body : |
   matrix and the three vectors employed in the iterative algorithm.
   It is usually used to restart the algorithm if convergence has not been achieved
   (see the related input variables
-  <a href="../../input_variables/generated_files/varfil.html#gethaydock">gethaydock</a> and <a href="../../input_variables/generated_files/varfil.html#irdhaydock">irdhaydock</a>).
+  [[gethaydock]] and [[irdhaydock]]).
   <p> 
   <ul><li>
   tbs_2o_RPA_NLF_MDF and tbs_2o_GW_NLF_MDF 

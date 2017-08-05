@@ -98,19 +98,19 @@ body : |
   the number of the moved atom, which will be noted "ipert", and
   the number of the axis of the unit cell, which will be noted "idir".
   "ipert" for phonon perturbation can have values between 1 and
-  <a href="../../input_variables/generated_files/varbas.html#natom">natom</a>,
+  [[natom]],
   "idir" can have values between 1 and 3.
   The set of all possible phonon perturbations for one wavevector
-  has thus (3*<a href="../../input_variables/generated_files/varbas.html#natom">natom</a>) elements.
+  has thus (3*[[natom]]) elements.
   From this basis set, all phonons can be
   constructed by linear combination.
   The set of atoms to be moved in one dataset of ABINIT is determined
-  by the input variable <a href="../../input_variables/generated_files/varrf.html#rfatpol">rfatpol</a>.
+  by the input variable [[rfatpol]].
   The set of directions to be considered in one dataset of ABINIT is determined
-  by the input variable <a href="../../input_variables/generated_files/varrf.html#rfdir">rfdir</a>.
+  by the input variable [[rfdir]].
   The wavevector to be considered in one dataset of ABINIT is determined
-  by the input variables <a href="../../input_variables/generated_files/vargs.html#nqpt">nqpt</a>,
-  <a href="../../input_variables/generated_files/vargs.html#qpt">qpt</a>, and <a href="../../input_variables/generated_files/vargs.html#qptnrm">qptnrm</a>.
+  by the input variables [[nqpt]],
+  [[qpt]], and [[qptnrm]].
   
     <p> <i>If you follow the tutorial, you should go back to the tutorial window now. </i>
   
@@ -243,13 +243,13 @@ body : |
   
   <p>
   One should have a look at the input variables
-  <a href="../../input_variables/generated_files/varfil.html#irdwfk">irdwfk</a>, and
-  <a href="../../input_variables/generated_files/varfil.html#irdwfq">irdwfq</a>,
+  [[irdwfk]], and
+  [[irdwfq]],
   for a description of the ground-state wavefunction file names
   generated from the root names provided in the 'files' file.
   In the multi-dataset mode, the following input variables will be relevant :
-  <a href="../../input_variables/generated_files/varfil.html#getwfk">getwfk</a>, and
-  <a href="../../input_variables/generated_files/varfil.html#getwfq">getwfq</a>.
+  [[getwfk]], and
+  [[getwfq]].
   The file names of the ground-state wavefunction file
   follow the same convention as for the ground-state case. Thus, the
   corresponding section
@@ -259,12 +259,12 @@ body : |
   <p>
   In the case of an electric field perturbation, the output 1WF of the
   corresponding ddk perturbation is needed as input.
-  If the option <a href="../../input_variables/generated_files/varrf.html#rfelfd">rfelfd</a>=1 is used,
+  If the option [[rfelfd]]=1 is used,
   then the code will take care
   of doing first the derivative dk perturbation calculation, then write
   the 1WF at the correct place, as an output file,
   then begin the homogeneous field perturbation calculation.
-  Usually, the use of <a href="../../input_variables/generated_files/varrf.html#rfelfd">rfelfd</a>=1 is not recommended,
+  Usually, the use of [[rfelfd]]=1 is not recommended,
   as the ddk computation is the most often done with different parameters
   as the electric field perturbation.
   
@@ -288,10 +288,10 @@ body : |
   
   <p>
   The relevant input variables are :
-  <a href="../../input_variables/generated_files/varfil.html#ird1wf">ird1wf</a>, and
-  <a href="../../input_variables/generated_files/varfil.html#irdddk">irdddk</a>, as well as
-  <a href="../../input_variables/generated_files/varfil.html#get1wf">get1wf</a>, and
-  <a href="../../input_variables/generated_files/varfil.html#getddk">getddk</a>, in the multi-dataset mode.
+  [[ird1wf]], and
+  [[irdddk]], as well as
+  [[get1wf]], and
+  [[getddk]], in the multi-dataset mode.
   
   
   
@@ -330,13 +330,13 @@ body : |
   
   <p>
   Accordingly, the preferred way to generate the k-point grid is of course to
-  use the <a href="../../input_variables/generated_files/varbas.html#ngkpt">ngkpt</a> or
-  <a href="../../input_variables/generated_files/vargs.html#kptrlatt">kptrlatt</a> input variables,
-  with different values of <a href="../../input_variables/generated_files/varbas.html#kptopt">kptopt</a> :
+  use the [[ngkpt]] or
+  [[kptrlatt]] input variables,
+  with different values of [[kptopt]] :
   <ul>
-   <li> <a href="../../input_variables/generated_files/varbas.html#kptopt">kptopt</a>=1 for the ground state</li>
-   <li> <a href="../../input_variables/generated_files/varbas.html#kptopt">kptopt</a>=2 for response functions at q=0 </li>
-   <li> <a href="../../input_variables/generated_files/varbas.html#kptopt">kptopt</a>=3 for response functions at non-zero q </li>
+   <li> [[kptopt]]=1 for the ground state</li>
+   <li> [[kptopt]]=2 for response functions at q=0 </li>
+   <li> [[kptopt]]=3 for response functions at non-zero q </li>
   </ul>
   
   
@@ -354,10 +354,10 @@ body : |
   the following procedure is suggested :
   <ul>
    <li>first, a self-consistent ground-state computation with the restricted set of special points
-     in the Irreducible Brillouin Zone (with <a href="../../input_variables/generated_files/varbas.html#kptopt">kptopt</a>=1)</li>
+     in the Irreducible Brillouin Zone (with [[kptopt]]=1)</li>
    <li>second, a self-consistent response-function computation with the atomic displacement
      perturbation, with the half set of special points
-     (with <a href="../../input_variables/generated_files/varbas.html#kptopt">kptopt</a>=2)</li>
+     (with [[kptopt]]=2)</li>
   </ul>
   
   <p>
@@ -365,14 +365,14 @@ body : |
   the following procedure is suggested :
   <ul>
    <li>first, a self-consistent ground-state computation with the restricted set of special points
-     in the Irreducible Brillouin Zone (with <a href="../../input_variables/generated_files/varbas.html#kptopt">kptopt</a>=1)</li>
+     in the Irreducible Brillouin Zone (with [[kptopt]]=1)</li>
    <li>second, a non-self-consistent response-function computation of the d/dk
      perturbation, with the half set of special points
-     (with <a href="../../input_variables/generated_files/varbas.html#kptopt">kptopt</a>=2, and
-      <a href="../../input_variables/generated_files/varbas.html#iscf">iscf</a>=-3)</li>
+     (with [[kptopt]]=2, and
+      [[iscf]]=-3)</li>
    <li>third, a self-consistent response-function computation of the electric field
      perturbation, with the half set of special points
-     (with <a href="../../input_variables/generated_files/varbas.html#kptopt">kptopt</a>=2)</li>
+     (with [[kptopt]]=2)</li>
   </ul>
   
   <p>
@@ -381,10 +381,10 @@ body : |
   the following procedure is suggested :
   <ul>
    <li>first, a self-consistent ground-state computation with the restricted set of special points
-     in the Irreducible Brillouin Zone (with <a href="../../input_variables/generated_files/varbas.html#kptopt">kptopt</a>=1)</li>
+     in the Irreducible Brillouin Zone (with [[kptopt]]=1)</li>
    <li>second, a self-consistent response-function computation of the atomic displacement
      perturbation, with the full set of special points
-     (with <a href="../../input_variables/generated_files/varbas.html#kptopt">kptopt</a>=3)</li>
+     (with [[kptopt]]=3)</li>
   </ul>
   
   <p>
@@ -392,13 +392,13 @@ body : |
   the following procedure is suggested :
   <ul>
    <li>first, a self-consistent ground-state computation with the restricted set of special points
-     in the Irreducible Brillouin Zone (with <a href="../../input_variables/generated_files/varbas.html#kptopt">kptopt</a>=1)</li>
+     in the Irreducible Brillouin Zone (with [[kptopt]]=1)</li>
    <li>second, a non-self-consistent ground-state  run with the set of k+q points,
      that might be reduced thanks to symmetries
-     (with <a href="../../input_variables/generated_files/varbas.html#kptopt">kptopt</a>=1)</li>
+     (with [[kptopt]]=1)</li>
    <li>third, a self-consistent response-function computation of the atomic displacement
      perturbation, with the full set of special points
-     (with <a href="../../input_variables/generated_files/varbas.html#kptopt">kptopt</a>=3)</li>
+     (with [[kptopt]]=3)</li>
   </ul>
   
   <p> Of course, these different steps can be combined when a set of responses
@@ -407,15 +407,15 @@ body : |
   the Born effective charges are needed, can be combined as follows :
   <ul>
    <li>first, a self-consistent ground-state computation with the restricted set of special points
-     in the Irreducible Brillouin Zone (with <a href="../../input_variables/generated_files/varbas.html#kptopt">kptopt</a>=1)</li>
+     in the Irreducible Brillouin Zone (with [[kptopt]]=1)</li>
    <li>second, the three non-self-consistent response-function computations
      (one for each direction)
      of the d/dk perturbation, with the half set of special points
-     (with <a href="../../input_variables/generated_files/varbas.html#kptopt">kptopt</a>=2, and
-      <a href="../../input_variables/generated_files/varbas.html#iscf">iscf</a>=-3)</li>
+     (with [[kptopt]]=2, and
+      [[iscf]]=-3)</li>
    <li>third, all the self-consistent response-function computations of the electric field
      perturbations and of the atomic displacements, with the half set of special points
-     (with <a href="../../input_variables/generated_files/varbas.html#kptopt">kptopt</a>=2)</li>
+     (with [[kptopt]]=2)</li>
   </ul>
   Still, computations of perturbations at different q wavevectors cannot be mixed.
   But they can follow the other computations. Supposing that perturbations
@@ -423,21 +423,21 @@ body : |
   as follows :
   <ul>
    <li>first, a self-consistent ground-state computation with the restricted set of special points
-     in the Irreducible Brillouin Zone (with <a href="../../input_variables/generated_files/varbas.html#kptopt">kptopt</a>=1)</li>
+     in the Irreducible Brillouin Zone (with [[kptopt]]=1)</li>
    <li>second, the three non-self-consistent response-function computations
      (one for each direction)
      of the d/dk perturbation, with the half set of special points
-     (with <a href="../../input_variables/generated_files/varbas.html#kptopt">kptopt</a>=2, and
-      <a href="../../input_variables/generated_files/varbas.html#iscf">iscf</a>=-3)</li>
+     (with [[kptopt]]=2, and
+      [[iscf]]=-3)</li>
    <li>third, all q=0 self-consistent response-function computations of the electric field
      perturbations and of the atomic displacements, with the half set of special points
-     (with <a href="../../input_variables/generated_files/varbas.html#kptopt">kptopt</a>=2)</li>
+     (with [[kptopt]]=2)</li>
    <li>fourth, a non-self-consistent ground-state computation with the set of k+q points,
      that might be reduced thanks to symmetries
-     (with <a href="../../input_variables/generated_files/varbas.html#kptopt">kptopt</a>=1)</li>
+     (with [[kptopt]]=1)</li>
    <li>fifth, the self-consistent response-function computations of the atomic displacement
      perturbations with a q wavevector, with the full set of special points
-     (with <a href="../../input_variables/generated_files/varbas.html#kptopt">kptopt</a>=3)</li>
+     (with [[kptopt]]=3)</li>
   </ul>
   
   <p> Note that
@@ -492,39 +492,39 @@ body : |
   RF calculations. Here is the list of these input variables,
   together with the variables that applies only to RF computations.
   Note that the code will do a RF calculation
-  (<a href="../../input_variables/generated_files/vargs.html#optdriver">optdriver</a>=1)
-  when one of <a href="../../input_variables/generated_files/varrf.html#rfphon">rfphon</a>
-  or <a href="../../input_variables/generated_files/varrf.html#rfelfd">rfelfd</a> is non-zero.
+  ([[optdriver]]=1)
+  when one of [[rfphon]]
+  or [[rfelfd]] is non-zero.
   
   <ul>
-   <li><a href="../../input_variables/generated_files/varrlx.html#amu">amu</a></li>
-   <li><a href="../../input_variables/generated_files/varfil.html#getwfk">getwfk</a>,
-       <a href="../../input_variables/generated_files/varfil.html#getwfq">getwfq</a>,
-       <a href="../../input_variables/generated_files/varfil.html#get1wf">get1wf</a>,
-       <a href="../../input_variables/generated_files/varfil.html#getddk">getddk</a>
+   <li>[[amu]]</li>
+   <li>[[getwfk]],
+       [[getwfq]],
+       [[get1wf]],
+       [[getddk]]
    </li>
-   <li><a href="../../input_variables/generated_files/varfil.html#irdwfk">irdwfk</a>,
-       <a href="../../input_variables/generated_files/varfil.html#irdwfq">irdwfq</a>,
-       <a href="../../input_variables/generated_files/varfil.html#ird1wf">ird1wf</a>,
-       <a href="../../input_variables/generated_files/varfil.html#irdddk">irdddk</a>
+   <li>[[irdwfk]],
+       [[irdwfq]],
+       [[ird1wf]],
+       [[irdddk]]
    </li>
-   <li><a href="../../input_variables/generated_files/varbas.html#iscf">iscf</a></li>
+   <li>[[iscf]]</li>
    </li>
-   <li><a href="../../input_variables/generated_files/varbas.html#nkpt">nkpt</a></li>
-   <li><a href="../../input_variables/generated_files/vargs.html#nqpt">nqpt</a>,
-       <a href="../../input_variables/generated_files/vargs.html#qpt">qpt</a>,
-       <a href="../../input_variables/generated_files/vargs.html#qptnrm">qptnrm</a>
+   <li>[[nkpt]]</li>
+   <li>[[nqpt]],
+       [[qpt]],
+       [[qptnrm]]
    </li>
-   <li><a href="../../input_variables/generated_files/varbas.html#nsym">nsym</a></li>
-   <li><a href="../../input_variables/generated_files/varrf.html#rfasr">rfasr</a></li>
-   <li><a href="../../input_variables/generated_files/varrf.html#rfatpol">rfatpol</a></li>
-   <li><a href="../../input_variables/generated_files/varrf.html#rfdir">rfdir</a></li>
-   <li><a href="../../input_variables/generated_files/varrf.html#rfelfd">rfelfd</a></li>
-   <li><a href="../../input_variables/generated_files/varrf.html#rfphon">rfphon</a></li>
-   <li><a href="../../input_variables/generated_files/varrf.html#dfpt_sciss">dfpt_sciss</a></li>
-   <li><a href="../../input_variables/generated_files/varbas.html#tolwfr">tolwfr</a>,
-       <a href="../../input_variables/generated_files/varbas.html#toldfe">toldfe</a>,
-       <a href="../../input_variables/generated_files/varbas.html#tolvrs">tolvrs</a></li>
+   <li>[[nsym]]</li>
+   <li>[[rfasr]]</li>
+   <li>[[rfatpol]]</li>
+   <li>[[rfdir]]</li>
+   <li>[[rfelfd]]</li>
+   <li>[[rfphon]]</li>
+   <li>[[dfpt_sciss]]</li>
+   <li>[[tolwfr]],
+       [[toldfe]],
+       [[tolvrs]]</li>
   </ul>
   
   <p>
@@ -605,7 +605,7 @@ body : |
   is the derivative dk perturbation.
   It will give the following information :
   <ul>
-   <li>if <a href="../../input_variables/generated_files/varfil.html#prtvol">prtvol</a>=1 or bigger, 
+   <li>if [[prtvol]]=1 or bigger, 
           the full detail of every contribution to the 2DTE
           in reduced coordinates.</li>
    <li>the 2DTE in reduced coordinates.</li>
@@ -716,17 +716,17 @@ body : |
    <li>the DDB version number (that defines the
            structure of the DDB)</li>
    <li>seven parameters needed for the dimensionning of the DDB file
-           (<a href="../../input_variables/generated_files/varbas.html#natom">natom</a>,
-            <a href="../../input_variables/generated_files/varbas.html#nkpt">nkpt</a>,
-            <a href="../../input_variables/generated_files/varbas.html#nsppol">nsppol</a>,
-            <a href="../../input_variables/generated_files/varbas.html#nsym">nsym</a>,
-            <a href="../../input_variables/generated_files/varbas.html#ntypat">ntypat</a>,
-            <a href="../../input_variables/generated_files/varbas.html#occopt">occopt</a>, and
-            <a href="../../input_variables/generated_files/varbas.html#nband">nband</a> -
-            or the array <a href="../../input_variables/generated_files/varbas.html#nband">nband</a>
-            (<a href="../../input_variables/generated_files/varbas.html#nkpt">nkpt</a>*
-             <a href="../../input_variables/generated_files/varbas.html#nsppol">nsppol</a>)
-             if <a href="../../input_variables/generated_files/varbas.html#occopt">occopt</a>=2)</li>
+           ([[natom]],
+            [[nkpt]],
+            [[nsppol]],
+            [[nsym]],
+            [[ntypat]],
+            [[occopt]], and
+            [[nband]] -
+            or the array [[nband]]
+            ([[nkpt]]*
+             [[nsppol]])
+             if [[occopt]]=2)</li>
    <li>different information on the run that generated the 2DTE
            (acell,amu,ecut,iscf,ixc,kpt,kptnrm,
             ngfft,occ,rprim,sciss,symrel,xred,tnons,typat,tolwfr,wtk,zion,
@@ -789,25 +789,25 @@ body : |
   Input parameters that could influence the accuracy
   of the calculation are :
   <ul>
-   <li> <a href="../../input_variables/generated_files/varbas.html#ecut">ecut</a>
+   <li> [[ecut]]
           (the energy cut-off, that depends strongly on the pseudopotential)</li>
-   <li> <a href="../../input_variables/generated_files/varbas.html#ixc">ixc</a> (describing the exchange-correlation functional)</li>
-   <li> <a href="../../input_variables/generated_files/varbas.html#nkpt">nkpt</a>(or, more accurately,
+   <li> [[ixc]] (describing the exchange-correlation functional)</li>
+   <li> [[nkpt]](or, more accurately,
          the Brillouin zone sampling, that can be determined alternatively
-         by the inputs variables <a href="../../input_variables/generated_files/varbas.html#ngkpt">ngkpt</a>
-         or <a href="../../input_variables/generated_files/vargs.html#kptrlatt">kptrlatt</a>)</li>
+         by the inputs variables [[ngkpt]]
+         or [[kptrlatt]])</li>
    <li> one of the self-consistent convergence tolerance parameters,
-        <a href="../../input_variables/generated_files/varbas.html#toldfe">toldfe</a>,
-        <a href="../../input_variables/generated_files/varbas.html#tolvrs">tolvrs</a>, or
-        <a href="../../input_variables/generated_files/varbas.html#tolwfr">tolwfr</a>.</li>
+        [[toldfe]],
+        [[tolvrs]], or
+        [[tolwfr]].</li>
   </ul>
   
   <p>
   The input parameters
-  <a href="../../input_variables/generated_files/varbas.html#ecut">ecut</a>,
-  <a href="../../input_variables/generated_files/varrlx.html#ecutsm">ecutsm</a>,
-  <a href="../../input_variables/generated_files/varbas.html#ixc">ixc</a>,
-  <a href="../../input_variables/generated_files/vardev.html#intxc">intxc</a>,
+  [[ecut]],
+  [[ecutsm]],
+  [[ixc]],
+  [[intxc]],
   the set of k-wavevectors, as well as the related variables have to be the SAME in the
   ground-state calculations that go before a RF run and this RF run.
   
@@ -818,9 +818,9 @@ body : |
   but in other cases, it might simply produce garbage !
   
   <p>
-  If the value of <a href="../../input_variables/generated_files/vargs.html#ngfft">ngfft</a> is input by hand,
+  If the value of [[ngfft]] is input by hand,
   its value must also be equal in the
-  GS and RF cases. ALWAYS use <a href="../../input_variables/generated_files/vargs.html#ngfft">ngfft</a>
+  GS and RF cases. ALWAYS use [[ngfft]]
   large enough to have boxcut=2 or larger,
   in order to avoid any FFT filter error. In the GS case, boxcut as small as
   1.5 could be allowed in some cases. It is not allowed with RF calculations,
@@ -828,7 +828,7 @@ body : |
   
   <p>
   The convergence tests with respect to
-  <a href="../../input_variables/generated_files/varbas.html#ecut">ecut</a>, and the k-point grid should
+  [[ecut]], and the k-point grid should
   be done carefully. This was already emphasized in the abinit help
   file and is re-emphasized here.
   The user should test the convergence DIRECTLY on the property
@@ -848,13 +848,13 @@ body : |
   metallic case as well as unoccupied bands for insulators, the ground
   state run preceeding response function runs will not necessarily
   converge these wavefunctions using usual ground-state tests such
-  as <a href="../../input_variables/generated_files/varbas.html#toldfe">toldfe</a> or (better)
-  <a href="../../input_variables/generated_files/varbas.html#tolvrs">tolvrs</a>.  To be sure that inaccuracies are not
+  as [[toldfe]] or (better)
+  [[tolvrs]].  To be sure that inaccuracies are not
   introduced into the response function calculation by poorly converged
   unoccupied bands, a separate run starting from a saved charge density
-  (<a href="../../input_variables/generated_files/varfil.html#prtden">prtden</a>=1 in the self-consistent run)
-  and using <a href="../../input_variables/generated_files/varbas.html#iscf">iscf</a>=-2 and
-  <a href="../../input_variables/generated_files/varbas.html#tolwfr">tolwfr</a>
+  ([[prtden]]=1 in the self-consistent run)
+  and using [[iscf]]=-2 and
+  [[tolwfr]]
   may be needed.
   
   <p>
