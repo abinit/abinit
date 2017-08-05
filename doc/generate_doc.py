@@ -108,7 +108,7 @@ for infos_dir in list_infos_dir:
 # These ones are quite often used, so copy them ...
 abinit_vars=yml_in["abinit_vars"]
 list_externalvars=yml_in["list_externalvars"]
-varfiles=yml_in["varsets"]
+varsets=yml_in["varsets"]
 list_of_topics=yml_in["list_of_topics"]
   
 ################################################################################
@@ -460,10 +460,10 @@ for item in yml_in["characteristics"]:
 for item in list_externalvars:
   allowed_link_seeds[item[0]]="input_variable in varset_external"
 
-for i, varfile_info in enumerate(varfiles):
-  varfile = varfile_info.name
-  allowed_link_seeds[varfile]="varfile"
-  allowed_link_seeds["varset_"+varfile]="varset"
+for i, varset_info in enumerate(varsets):
+  varset = varset_info.name
+  allowed_link_seeds[varset]="varset"
+  allowed_link_seeds["varset_"+varset]="varset"
 
 for i, lesson_info in enumerate(yml_in["lessons"]):
   lesson = lesson_info.name
@@ -497,13 +497,13 @@ for file in allowed_links_in_tests:
 
 all_vars = dict()
 all_contents = dict()
-for i, varfile_info in enumerate(varfiles):
-  varfile = varfile_info.name
-  all_vars[varfile] = []
-  all_contents[varfile]= "<br><br><br><br><hr>\n"
+for i, varset_info in enumerate(varsets):
+  varset = varset_info.name
+  all_vars[varset] = []
+  all_contents[varset]= "<br><br><br><br><hr>\n"
 
 ################################################################################
-# Constitute the body of information for the external parameters, stored for the appropriate varfile in all_contents[varfile]
+# Constitute the body of information for the external parameters, stored for the appropriate varset in all_contents[varset]
 
 cur_external = []
 for (key,value) in list_externalvars:
@@ -521,14 +521,14 @@ for (key, value) in list_externalvars:
   all_contents["external"] = all_contents["external"] + cur_content + "\n\n"
 
 ################################################################################
-# Constitute the body of information for all variables, stored for the appropriate varfile in all_contents[varfile]
+# Constitute the body of information for all variables, stored for the appropriate varset in all_contents[varset]
 
 for i, var in enumerate(abinit_vars):
   # Constitute the body of information related to one input variable
-  varfile = var.varset
-  all_vars[varfile].append([var.abivarname,var.mnemonics])
+  varset = var.varset
+  all_vars[varset].append([var.abivarname,var.mnemonics])
   cur_content = ""
-  backlink=' &nbsp; <a href="../../input_variables/generated_files/%s.html#%s">%s</a> &nbsp; ' %(varfile,var.abivarname,var.abivarname)
+  backlink=' &nbsp; <a href="../../input_variables/generated_files/%s.html#%s">%s</a> &nbsp; ' %(varset,var.abivarname,var.abivarname)
 
   try:
     # Title
@@ -588,7 +588,7 @@ for i, var in enumerate(abinit_vars):
     cur_content += "<br><br><a href=#top>Go to the top</a>\n"
     cur_content += "<B> | </B><a href=\"varset_allvars.html#top\">Complete list of input variables</a><hr>\n"
     #
-    all_contents[varfile] = all_contents[varfile] + cur_content + "\n\n"
+    all_contents[varset] = all_contents[varset] + cur_content + "\n\n"
   except AttributeError as e:
     print(e)
     print('For variable : ',abivarname)
@@ -599,14 +599,14 @@ for i, var in enumerate(abinit_vars):
 suppl_components={}
 
 # Store the default informations
-for i, varfile_info in enumerate(varfiles):
-  if varfile_info.name.strip()=="default":
-    varfile_info_default=varfile_info
+for i, varset_info in enumerate(varsets):
+  if varset_info.name.strip()=="default":
+    varset_info_default=varset_info
 
-# Generate each "normal" varfile file : build the missing information (table of content), assemble the content, apply global transformations, then write.
-for i, varfile_info in enumerate(varfiles):
-  varfile = varfile_info.name
-  if varfile=="default":
+# Generate each "normal" varset file : build the missing information (table of content), assemble the content, apply global transformations, then write.
+for i, varset_info in enumerate(varsets):
+  varset = varset_info.name
+  if varset=="default":
     continue
 
   scriptTab = "\n\
@@ -620,12 +620,12 @@ for i, varfile_info in enumerate(varfiles):
   #Generate the body of the table of content 
   cur_let = 'A'
   toc_body=""
-  if varfile=="allvars":
+  if varset=="allvars":
     toc_body+=scriptTab+alphalinks
   else :
     toc_body += " <br><a id='%s'></a>"%(cur_let)+cur_let+".\n"
 
-  if varfile=="allvars":
+  if varset=="allvars":
     toc_body += ' <ul id="Letters">\n'
     toc_body += ' <li>\n<ul id="%s" class="TabContentLetter">\n'%(cur_let)
     toc_body += ' <li class="HeaderLetter">%s</li>\n'%(cur_let)
@@ -644,7 +644,7 @@ for i, varfile_info in enumerate(varfiles):
 defaultClick(true);\n\
 </script>\n\
 "
-  elif varfile == "external":
+  elif varset == "external":
     for (key, value) in list_externalvars:
       while not key.lower().startswith(cur_let.lower()):
         cur_let = chr(ord(cur_let)+1)
@@ -652,7 +652,7 @@ defaultClick(true);\n\
       curlink = ' <a href="#'+key+'">'+key+'</a>&nbsp;&nbsp;\n'
       toc_body += curlink
   else:
-    for abivarname,defi in all_vars[varfile]:
+    for abivarname,defi in all_vars[varset]:
       while not abivarname.startswith(cur_let.lower()):
         cur_let = chr(ord(cur_let)+1)
         toc_body += " <br><a id='%s'></a>"%(cur_let)+cur_let+".\n"
@@ -660,10 +660,10 @@ defaultClick(true);\n\
       toc_body += curlink
   toc_body += "\n"
 
-  suppl={"toc":toc_body , "content":all_contents[varfile]}
-  suppl_components[varfile]=suppl
+  suppl={"toc":toc_body , "content":all_contents[varset]}
+  suppl_components[varset]=suppl
 
-rc=assemble_html(varfiles,suppl_components,"input_variables","",allowed_link_seeds,backlinks)
+rc=assemble_html(varsets,suppl_components,"input_variables","",allowed_link_seeds,backlinks)
 
 ################################################################################
 ################################################################################
@@ -981,13 +981,13 @@ if activate_translation==1:
             for i, var in enumerate(abinit_vars):
               if var.abivarname in line:
                 varname = var.abivarname
-                varfile = var.varset
-                string_old='<a href="../input_variables/html_automatically_generated/%s.html#%s" target="kwimg">%s</a>'%(varfile,varname,varname)
+                varset = var.varset
+                string_old='<a href="../input_variables/html_automatically_generated/varset_%s.html#%s" target="kwimg">%s</a>'%(varset,varname,varname)
                 string_new="[["+varname+"]]"
                 line=line.replace('"'+string_old+'"',string_new)
                 line=line.replace(string_old,string_new)
                 # Slight variation
-                string_old='<a href="../input_variables/html_automatically_generated/%s.html#%s" target="kwimg">%s</a>'%(varfile,varname,varname)
+                string_old='<a href="../input_variables/html_automatically_generated/varset_%s.html#%s" target="kwimg">%s</a>'%(varset,varname,varname)
                 line=line.replace('"'+string_old+'"',string_new)
                 line=line.replace(string_old,string_new)
             # Otherwise, correct the path

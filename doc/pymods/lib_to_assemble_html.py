@@ -142,7 +142,7 @@ def make_links(text,cur_key,allowed_link_seeds,backlinks,backlink):
     else:
       linkseed=namespace+'_'+key
 
-    #The allowed namespaces are (varfile is an exception, see later):
+    #The allowed namespaces are:
     dic_namespaces={"aim":"input_variables/generated_files",
                     "anaddb":"input_variables/generated_files",
                     "help":"users/generated_files",
@@ -150,10 +150,9 @@ def make_links(text,cur_key,allowed_link_seeds,backlinks,backlink):
                     "optic":"input_variables/generated_files",
                     "theorydoc":"theory/generated_files",
                     "topic":"topics/generated_files",
-                    "varfile":"input_variables/generated_files",
                     "varset":"input_variables/generated_files"}
 
-    #Actually for the internal links, make the selection on the linkseed at present ... which allows the varfile , which is not really a namespace ...
+    #Actually for the internal links, make the selection on the linkseed at present ... this should be changed ...
     #Might be changed, later ...
     if linkseed in allowed_link_seeds.keys():
       value=allowed_link_seeds[linkseed]
